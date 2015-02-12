@@ -80,7 +80,7 @@ int EnzoRefineShock::apply
 
   precision_type precision = field.precision(id_velocity);
 
-  void * output = initialize_output_(field.field_block());
+  void * output = initialize_output_(field.field_data());
 
   switch (precision) {
   case precision_single:

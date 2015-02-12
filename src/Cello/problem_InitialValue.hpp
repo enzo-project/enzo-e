@@ -45,7 +45,7 @@ private: // functions
   
   void allocate_xyzt_(Block * block,
 		      int index_field,
-		      const FieldBlock * field_block,
+		      const FieldData * field_data,
 		      const FieldDescr * field_descr,
 		      int * mx, int * my, int * mz,
 		      double ** value, double ** vdeflt,
@@ -55,19 +55,19 @@ private: // functions
 
   void copy_values_ (
 		     const FieldDescr * field_descr,
-		     FieldBlock * field_block,
+		     FieldData * field_data,
 		     double * value, bool * mask,
 		     int index_field,
 		     int nx, int ny, int nz) throw();
 
-  void evaluate_float_ (FieldBlock * field_block, int index_field, 
+  void evaluate_float_ (FieldData * field_data, int index_field, 
 			std::string field_name,
 			int n, double * value, double * vdeflt,
 			double * x, double * y, double * z, double t) throw();
 
   void evaluate_mask_ (const Hierarchy * hierarchy,
 		       const Block * block,
-		       FieldBlock * field_block,
+		       FieldData * field_data,
 		       int index_field, int index_value,
 		       std::string field_name,
 		       const FieldDescr * field_descr,			

@@ -1,24 +1,24 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldBlock.hpp
+/// @file     field_FieldData.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
 /// @brief    [\ref Field] Fortran-style array class.
 
-#ifndef FIELD_FIELD_BLOCK_HPP
-#define FIELD_FIELD_BLOCK_HPP
+#ifndef FIELD_FIELD_DATA_HPP
+#define FIELD_FIELD_DATA_HPP
 
 class Block;
 class FieldDescr;
 
-class FieldBlock {
+class FieldData {
 
-  /// @class    FieldBlock
+  /// @class    FieldData
   /// @ingroup  Field
   /// @brief [\ref Field] Interface between field arrays and low-level
   /// (C/fortran) routines.
   /// 
-  /// A FieldBlock stores up to a 4D fortran-like array for
+  /// A FieldData stores up to a 4D fortran-like array for
   /// permanently storing 1 or more 3D arrays.  Axes can be permuted,
   /// including the index selecting the array for storing interleaved
   /// arrays.  Temporary fields can be allocated and deallocated as
@@ -31,18 +31,18 @@ class FieldBlock {
 
 public: // interface
 
-  /// Create a new uninitialized FieldBlock object
-  FieldBlock(FieldDescr * field_descr = 0,
+  /// Create a new uninitialized FieldData object
+  FieldData(FieldDescr * field_descr = 0,
 	     int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
-  ~FieldBlock() throw();
+  ~FieldData() throw();
 
   /// Copy constructor
-  FieldBlock(const FieldBlock & field_block) throw ();
+  FieldData(const FieldData & field_data) throw ();
 
   /// Assignment operator
-  FieldBlock & operator= (const FieldBlock & field_block) throw ();
+  FieldData & operator= (const FieldData & field_data) throw ();
 
   void pup(PUP::er &p) ;
 
@@ -104,7 +104,7 @@ public: // interface
   /// Allocate storage for the temporary fields
   void allocate_temporary(int id) throw (std::out_of_range);
 
-  /// Reallocate storage for the field block, e.g. when changing
+  /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
   void reallocate_permanent(bool ghosts_allocated = false) throw();
 
@@ -228,7 +228,7 @@ private: // attributes
   /// Pointer to the associated field descriptor
   FieldDescr * field_descr_;
 
-  /// Size of fields on the block, assuming centered
+  /// Size of fields, assuming centered
   int size_[3];
 
   /// Single array of permanent fields
@@ -246,4 +246,4 @@ private: // attributes
 
 };   
 
-#endif /* FIELD_FIELD_BLOCK_HPP */
+#endif /* FIELD_FIELD_DATA_HPP */

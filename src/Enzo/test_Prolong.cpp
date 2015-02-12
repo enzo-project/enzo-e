@@ -144,18 +144,18 @@ PARALLEL_MAIN_BEGIN
     const int md = mxd*myd;
     const int mv = mxv*myv;
 
-    FieldBlock field_block_f (&field_descr);
-    FieldBlock field_block_c (&field_descr);
+    FieldData field_data_f (&field_descr);
+    FieldData field_data_c (&field_descr);
 
-    field_block_f.allocate_permanent(true);
+    field_data_f.allocate_permanent(true);
 
-    double * df = (double *) field_block_f.values(i_d);
-    float  * vf = (float  *) field_block_f.values(i_v);
+    double * df = (double *) field_data_f.values(i_d);
+    float  * vf = (float  *) field_data_f.values(i_v);
 
-    field_block_c.allocate_permanent(true);
+    field_data_c.allocate_permanent(true);
 
-    double * dc = (double *) field_block_c.values(i_d);
-    float * vc  = (float *) field_block_c.values(i_v);
+    double * dc = (double *) field_data_c.values(i_d);
+    float * vc  = (float *) field_data_c.values(i_v);
 
     //--------------------------------------------------
 
@@ -191,8 +191,8 @@ PARALLEL_MAIN_BEGIN
 
     double lower[3] = { 0.0, 0.0, 0.0 };
     double upper[3] = { 1.0, 1.0, 1.0 };
-    field_block_f.print("AF-1");
-    field_block_c.print("AC");
+    field_data_f.print("AF-1");
+    field_data_c.print("AC");
 
     char buffer[80];
     for (int icx=0; icx<2; icx++) {
@@ -200,16 +200,16 @@ PARALLEL_MAIN_BEGIN
 	for (int id=0; id<md; id++) df[id]=11111.0;
 	for (int iv=0; iv<mv; iv++) vf[iv]=22222.0;
 	// prolong_linear->apply
-	// 	(&field_block_f,&field_block_c, &field_descr, icx,icy,0);
+	// 	(&field_data_f,&field_data_c, &field_descr, icx,icy,0);
 	sprintf (buffer,"ProlongLinear-%d%d0.out",icx,icy);
-	field_block_f.print(buffer);
+	field_data_f.print(buffer);
 
 	for (int id=0; id<md; id++) df[id]=11111.0;
 	for (int iv=0; iv<mv; iv++) vf[iv]=22222.0;
 	// enzo_prolong->apply
-	// 	(&field_block_f,&field_block_c,  icx,icy,0);
+	// 	(&field_data_f,&field_data_c,  icx,icy,0);
 	sprintf (buffer,"EnzoProlong-%d%d0.out",icx,icy);
-	field_block_f.print(buffer);
+	field_data_f.print(buffer);
       }
     }
 

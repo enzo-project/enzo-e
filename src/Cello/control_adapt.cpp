@@ -267,7 +267,7 @@ void Block::adapt_refine_()
   const int rank = this->rank();
   
   int nx,ny,nz;
-  data()->field_block()->size(&nx,&ny,&nz);
+  data()->field_data()->size(&nx,&ny,&nz);
 
   std::vector<int> field_list;
 
@@ -294,7 +294,7 @@ void Block::adapt_refine_()
 	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong,
 		    field_list);
 
-      int num_field_blocks = 1;
+      int num_field_data = 1;
       bool testing = false;
 
       const Factory * factory = simulation()->factory();
@@ -304,7 +304,7 @@ void Block::adapt_refine_()
       factory->create_block 
 	(&thisProxy, index_child,
 	 nx,ny,nz,
-	 num_field_blocks,
+	 num_field_data,
 	 adapt_step_,
 	 cycle_,time_,dt_,
 	 narray, array, op_array_prolong,

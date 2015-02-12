@@ -36,16 +36,16 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
 
   //----------------------------------------------------------------------
-  // FieldBlock tests from test_FieldBlock
+  // FieldData tests from test_FieldData
   //----------------------------------------------------------------------
   {
 
     int nx,ny,nz;
     nx=4; ny=5; nz=6;
     FieldDescr * field_descr = new FieldDescr;
-    FieldBlock * field_block = new FieldBlock(field_descr, nx,ny,nz);
+    FieldData * field_data = new FieldData(field_descr, nx,ny,nz);
 
-    Field * field = new Field(field_descr,field_block);
+    Field * field = new Field(field_descr,field_data);
   
     int i1 = field->insert_permanent("f1");
     int i2 = field->insert_permanent("f2");
@@ -100,7 +100,7 @@ PARALLEL_MAIN_BEGIN
 
     //----------------------------------------------------------------------
 
-    unit_class("FieldBlock");
+    unit_class("FieldData");
 
     //----------------------------------------------------------------------
 
@@ -545,7 +545,7 @@ PARALLEL_MAIN_BEGIN
 
     unit_func("delete");
     delete field->field_descr();
-    delete field->field_block();
+    delete field->field_data();
     delete field;
   }
 
@@ -560,9 +560,9 @@ PARALLEL_MAIN_BEGIN
 
     unit_func ("FieldDescr");
     FieldDescr * field_descr = new FieldDescr;
-    FieldBlock * field_block = 0;
+    FieldData * field_data = 0;
 
-    Field * field = new Field(field_descr,field_block);
+    Field * field = new Field(field_descr,field_data);
 
     unit_assert(field_descr != 0);
     printf ("sizeof(FieldDescr) = %lud\n",sizeof(FieldDescr));

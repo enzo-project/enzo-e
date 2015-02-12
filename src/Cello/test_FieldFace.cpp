@@ -154,7 +154,7 @@ bool test_field(T * values,
 void init_fields
 (
  FieldDescr * field_descr,
- FieldBlock * field_block[],
+ FieldData * field_data[],
  int nbx,int nby, int nbz,
  int mx, int my, int mz)
 {
@@ -168,17 +168,17 @@ void init_fields
     for (int iby = 0; iby < nby; iby++) {
       for (int ibx = 0; ibx < nbx; ibx++) {
 
-	int index_block = ibx + nbx * (iby + nby * ibz);
+	int index_data = ibx + nbx * (iby + nby * ibz);
 
-	// Create the FaceBlock object
+	// Create the FaceData object
 
-	field_block[index_block] = new FieldBlock (field_descr, mx, my, mz);
+	field_data[index_data] = new FieldData (field_descr, mx, my, mz);
 
-	FieldBlock * block = field_block[index_block];
+	FieldData * data = field_data[index_data];
 
-	// Allocate field blocks including ghosts
+	// Allocate field data including ghosts
 
-	block->allocate_permanent(true);
+	data->allocate_permanent(true);
 
 	// Initialize fields
 
@@ -186,17 +186,17 @@ void init_fields
 
 	// field 0
 	field_descr->ghosts(0, &gx, &gy, &gz);
-	float * v1 = (float *) (block->values(0));
+	float * v1 = (float *) (data->values(0));
 	init_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 1
 	field_descr->ghosts(1, &gx, &gy, &gz);
-	double * v2 = (double *) (block->values(1));
+	double * v2 = (double *) (data->values(1));
 	init_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 2
 	field_descr->ghosts(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (block->values(2));
+	long double * v3 = (long double *) (data->values(2));
 	init_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
  
       }
@@ -209,7 +209,7 @@ void init_fields
 bool test_fields
 (
  FieldDescr * field_descr,
- FieldBlock * field_block[],
+ FieldData * field_data[],
  int nbx,int nby, int nbz,
  int mx, int my, int mz)
 {
@@ -221,9 +221,9 @@ bool test_fields
     for (int iby = 0; iby < nby; iby++) {
       for (int ibx = 0; ibx < nbx; ibx++) {
 
-	int index_block = ibx + nbx * (iby + nby * ibz);
+	int index_data = ibx + nbx * (iby + nby * ibz);
 
-	FieldBlock * block = field_block[index_block];
+	FieldData * data = field_data[index_data];
 
 	int gx, gy, gz;
 
@@ -231,7 +231,7 @@ bool test_fields
 
 	// field 0
 	field_descr->ghosts(0, &gx, &gy, &gz);
-	float * v1 = (float *) (block->values(0));
+	float * v1 = (float *) (data->values(0));
 	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
@@ -239,14 +239,14 @@ bool test_fields
 
 	// field 1
 	field_descr->ghosts(1, &gx, &gy, &gz);
-	double * v2 = (double *) (block->values(1));
+	double * v2 = (double *) (data->values(1));
 	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
 
 	// field 2
 	field_descr->ghosts(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (block->values(2));
+	long double * v3 = (long double *) (data->values(2));
 	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
@@ -293,11 +293,11 @@ PARALLEL_MAIN_BEGIN
 
 
   int nbx=2, nby=3, nbz=4;
-  FieldBlock * field_block[nbx*nby*nbz];
+  FieldData * field_data[nbx*nby*nbz];
 
   int mx=5, my=6, mz=7;
 
-  init_fields(field_descr,field_block,nbx,nby,nbz,mx,my,mz);
+  init_fields(field_descr,field_data,nbx,nby,nbz,mx,my,mz);
 
   //----------------------------------------------------------------------
   // Refresh ghosts
@@ -311,14 +311,14 @@ PARALLEL_MAIN_BEGIN
 	  axis_enum axis = (axis_enum)(ia);
 	  
 	  int index_lower = ibx + nbx * (iby + nby * ibz);
-	  FieldBlock * block_lower = field_block[index_lower];
+	  FieldData * data_lower = field_data[index_lower];
 
 	  int index_upper = 0;
 	  if (axis==0) index_upper = ((ibx+1)%nbx) + nbx * (  iby        + nby * ibz);
 	  if (axis==1) index_upper =   ibx        + nbx * (((iby+1)%nby) + nby * ibz);
 	  if (axis==2) index_upper =   ibx        + nbx * (  iby        + nby * ((ibz+1)%nbz));
 
-	  FieldBlock * block_upper = field_block[index_upper];
+	  FieldData * data_upper = field_data[index_upper];
 
 	  int ixm=0,iym=0,izm=0;
 	  int ixp=0,iyp=0,izp=0;
@@ -327,8 +327,8 @@ PARALLEL_MAIN_BEGIN
 	  if (axis==axis_y) {iym=-1; iyp=+1; }
 	  if (axis==axis_z) {izm=-1; izp=+1; }
 
-	  FieldFace face_lower (block_lower);
-	  FieldFace face_upper (block_upper);
+	  FieldFace face_lower (data_lower);
+	  FieldFace face_upper (data_upper);
 	  face_lower.set_ghost(true,true,true);
 	  face_upper.set_ghost(true,true,true);
 
@@ -373,13 +373,13 @@ PARALLEL_MAIN_BEGIN
 	  // 3          yy << yy
 	  // 4    yy << yy
 
-	  // face.allocate   (field_descr,block_lower,ixm,iym,izm);
+	  // face.allocate   (field_descr,data_lower,ixm,iym,izm);
 
-	  // face.load       (field_descr, block_lower, ixp,iyp,izp);
-	  // face.store      (field_descr, block_upper, ixm,iym,izm);
+	  // face.load       (field_descr, data_lower, ixp,iyp,izp);
+	  // face.store      (field_descr, data_upper, ixm,iym,izm);
 
-	  // face.load       (field_descr, block_upper, ixm,iym,izm);
-	  // face.store      (field_descr, block_lower, ixp,iyp,izp);
+	  // face.load       (field_descr, data_upper, ixm,iym,izm);
+	  // face.store      (field_descr, data_lower, ixp,iyp,izp);
 
 	  // face.deallocate ();
 
@@ -389,7 +389,7 @@ PARALLEL_MAIN_BEGIN
   }
 
   unit_func("load/copy/store");
-  unit_assert(test_fields(field_descr,field_block,nbx,nby,nbz,mx,my,mz)); // @@@
+  unit_assert(test_fields(field_descr,field_data,nbx,nby,nbz,mx,my,mz)); // @@@
 
   //----------------------------------------------------------------------	
   // clean up
@@ -398,9 +398,9 @@ PARALLEL_MAIN_BEGIN
   for (int ibz = 0; ibz < nbz; ibz++) {
     for (int iby = 0; iby < nby; iby++) {
       for (int ibx = 1; ibx < nbx; ibx++) {
-	int index_block = ibx + nbx * (iby + nby * ibz);
-	delete field_block[index_block];
-	field_block[index_block] = 0;
+	int index_data = ibx + nbx * (iby + nby * ibz);
+	delete field_data[index_data];
+	field_data[index_data] = 0;
       }
     }
   }

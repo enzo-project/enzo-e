@@ -51,8 +51,8 @@ public: // virtual functions
   virtual void write_simulation ( const Simulation * simulation ) throw();
 
   /// Write local field to disk
-  virtual void write_field_block
-  ( const FieldBlock * field_block, 
+  virtual void write_field_data
+  ( const FieldData * field_data, 
     const FieldDescr * field_descr,
     int field_index) throw()
   { /* EMPTY */ }

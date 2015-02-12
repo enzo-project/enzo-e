@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_FieldBlock.cpp
+/// @file     test_FieldData.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-02-20
-/// @brief    Unit tests for the FieldBlock class
+/// @brief    Unit tests for the FieldData class
 
 #include "main.hpp" 
 #include "test.hpp"
@@ -93,10 +93,10 @@ PARALLEL_MAIN_BEGIN
   double xpp,ypp,zpp;
   xpp =  1.0;  ypp =  2.0, zpp =  3.0;
 
-  FieldBlock * field_block = new FieldBlock(field_descr, nx,ny,nz);
+  FieldData * field_data = new FieldData(field_descr, nx,ny,nz);
   //----------------------------------------------------------------------
 
-  unit_class("FieldBlock");
+  unit_class("FieldData");
 
   //----------------------------------------------------------------------
 
@@ -104,7 +104,7 @@ PARALLEL_MAIN_BEGIN
 
   int size[3];
 
-  field_block->size(size+0,size+1,size+2);
+  field_data->size(size+0,size+1,size+2);
 
   unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
 
@@ -113,56 +113,56 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
 
   unit_func("permanent_allocated");
-  unit_assert( ! field_block->permanent_allocated());
+  unit_assert( ! field_data->permanent_allocated());
 
   // Allocate
 
   unit_func("allocate_permanent");
 
-  field_block->allocate_permanent(false);
+  field_data->allocate_permanent(false);
 
-  size_t array_size_without_ghosts = field_block->permanent_size();
+  size_t array_size_without_ghosts = field_data->permanent_size();
 
-  unit_assert(field_block->permanent() != 0);
-  unit_assert(field_block->permanent_allocated());
-  unit_assert(field_block->permanent_size() > 0);
+  unit_assert(field_data->permanent() != 0);
+  unit_assert(field_data->permanent_allocated());
+  unit_assert(field_data->permanent_size() > 0);
 
   // Reallocate
 
   unit_func("reallocate_permanent");
 
-  field_block->reallocate_permanent(true);
+  field_data->reallocate_permanent(true);
 
-  size_t array_size_with_ghosts = field_block->permanent_size();
+  size_t array_size_with_ghosts = field_data->permanent_size();
 
-  unit_assert(field_block->permanent() != 0);
-  unit_assert(field_block->permanent_allocated());
-  unit_assert(field_block->permanent_size() > 0);
+  unit_assert(field_data->permanent() != 0);
+  unit_assert(field_data->permanent_allocated());
+  unit_assert(field_data->permanent_size() > 0);
   unit_assert(array_size_with_ghosts > array_size_without_ghosts);
 
   // Deallocate
 
   unit_func("deallocate_permanent");
 
-  field_block->deallocate_permanent();
+  field_data->deallocate_permanent();
 
-  unit_assert(field_block->permanent() == 0);
-  unit_assert( ! field_block->permanent_allocated());
-  unit_assert(field_block->permanent_size() == 0);
+  unit_assert(field_data->permanent() == 0);
+  unit_assert( ! field_data->permanent_allocated());
+  unit_assert(field_data->permanent_size() == 0);
 
   // Allocate
 
   unit_func("allocate_permanent");
 
-  field_block->allocate_permanent(true);
+  field_data->allocate_permanent(true);
 
-  unit_assert(field_block->permanent() != 0);
-  unit_assert(field_block->permanent_allocated());
-  unit_assert(field_block->permanent_size() == array_size_with_ghosts);
+  unit_assert(field_data->permanent() != 0);
+  unit_assert(field_data->permanent_allocated());
+  unit_assert(field_data->permanent_size() == array_size_with_ghosts);
 
   
   //----------------------------------------------------------------------
-  field_block->reallocate_permanent(false);
+  field_data->reallocate_permanent(false);
 
 
   float       *v1,*u1;
@@ -176,11 +176,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("values");  // without ghosts
   
-  v1 = (float *)       field_block->values(i1);
-  v2 = (double *)      field_block->values(i2);
-  v3 = (double *)      field_block->values(i3);
-  v4 = (double *)      field_block->values(i4);
-  v5 = (long double *) field_block->values(i5);
+  v1 = (float *)       field_data->values(i1);
+  v2 = (double *)      field_data->values(i2);
+  v3 = (double *)      field_data->values(i3);
+  v4 = (double *)      field_data->values(i4);
+  v5 = (long double *) field_data->values(i5);
 
   printf ("%s:%d v1 = %p\n",__FILE__,__LINE__,v1);
   printf ("%s:%d v2 = %p\n",__FILE__,__LINE__,v2);
@@ -190,27 +190,27 @@ PARALLEL_MAIN_BEGIN
   
   unit_func("temporary values");
 
-  vt1 = (float *)   field_block->values(it1);
-  vt2 = (double *)  field_block->values(it2);
-  vt3 = (double *)  field_block->values(it3);
+  vt1 = (float *)   field_data->values(it1);
+  vt2 = (double *)  field_data->values(it2);
+  vt3 = (double *)  field_data->values(it3);
   unit_assert (vt1 == 0);
   unit_assert (vt2 == 0);
   unit_assert (vt3 == 0);
-  field_block->allocate_temporary(it1);
-  field_block->allocate_temporary(it2);
-  field_block->allocate_temporary(it3);
-  vt1 = (float *)   field_block->values(it1);
-  vt2 = (double *)  field_block->values(it2);
-  vt3 = (double *)  field_block->values(it3);
+  field_data->allocate_temporary(it1);
+  field_data->allocate_temporary(it2);
+  field_data->allocate_temporary(it3);
+  vt1 = (float *)   field_data->values(it1);
+  vt2 = (double *)  field_data->values(it2);
+  vt3 = (double *)  field_data->values(it3);
   unit_assert (vt1 != 0);
   unit_assert (vt2 != 0);
   unit_assert (vt3 != 0);
-  field_block->deallocate_temporary(it1);
-  field_block->deallocate_temporary(it2);
-  field_block->deallocate_temporary(it3);
-  vt1 = (float *)   field_block->values(it1);
-  vt2 = (double *)  field_block->values(it2);
-  vt3 = (double *)  field_block->values(it3);
+  field_data->deallocate_temporary(it1);
+  field_data->deallocate_temporary(it2);
+  field_data->deallocate_temporary(it3);
+  vt1 = (float *)   field_data->values(it1);
+  vt2 = (double *)  field_data->values(it2);
+  vt3 = (double *)  field_data->values(it3);
   unit_assert (vt1 == 0);
   unit_assert (vt2 == 0);
   unit_assert (vt3 == 0);
@@ -246,11 +246,11 @@ PARALLEL_MAIN_BEGIN
   unit_func("unknowns");  // without ghosts
 
   typedef float type_f1;
-  u1 = (type_f1 *)      field_block->unknowns(i1);
-  u2 = (double *)       field_block->unknowns(i2);
-  u3 = (double *)       field_block->unknowns(i3);
-  u4 = (double *)       field_block->unknowns(i4);
-  u5 = (long double *)  field_block->unknowns(i5);
+  u1 = (type_f1 *)      field_data->unknowns(i1);
+  u2 = (double *)       field_data->unknowns(i2);
+  u3 = (double *)       field_data->unknowns(i3);
+  u4 = (double *)       field_data->unknowns(i4);
+  u5 = (long double *)  field_data->unknowns(i5);
 
   unit_assert(u1 != 0);
   unit_assert(u2 != 0);
@@ -269,32 +269,32 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb4 == sizeof (double)* nu4);
 
   // unknown field
-  unit_assert (field_block->unknowns (1000) == NULL);
-  unit_assert (field_block->unknowns ("not a field") == NULL);
+  unit_assert (field_data->unknowns (1000) == NULL);
+  unit_assert (field_data->unknowns ("not a field") == NULL);
 
 
   //----------------------------------------------------------------------
 
   // with ghosts
 
-  field_block->reallocate_permanent(true);
+  field_data->reallocate_permanent(true);
 
-  v1 =  (float *)      field_block->values(i1);
-  v2 = (double *)      field_block->values(i2);
-  v3 = (double *)      field_block->values(i3);
-  v4 = (double *)      field_block->values(i4);
-  v5 = (long double *) field_block->values(i5);
+  v1 =  (float *)      field_data->values(i1);
+  v2 = (double *)      field_data->values(i2);
+  v3 = (double *)      field_data->values(i3);
+  v4 = (double *)      field_data->values(i4);
+  v5 = (long double *) field_data->values(i5);
   
-  unit_assert(field_block->values(i1) == 
-	      field_block->values("f1"));
-  unit_assert(field_block->values(i2) == 
-	      field_block->values("f2"));
-  unit_assert(field_block->values(i3) == 
-	      field_block->values("f3"));
-  unit_assert(field_block->values(i4) == 
-	      field_block->values("f4"));
-  unit_assert(field_block->values(i5) == 
-	      field_block->values("f5"));
+  unit_assert(field_data->values(i1) == 
+	      field_data->values("f1"));
+  unit_assert(field_data->values(i2) == 
+	      field_data->values("f2"));
+  unit_assert(field_data->values(i3) == 
+	      field_data->values("f3"));
+  unit_assert(field_data->values(i4) == 
+	      field_data->values("f4"));
+  unit_assert(field_data->values(i5) == 
+	      field_data->values("f5"));
 
   unit_assert(v1 != 0);
   unit_assert(v2 != 0);
@@ -313,16 +313,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert (nb4 == sizeof (double) * nv4);
 
   // unknown field
-  unit_assert (field_block->values (1000) == NULL);
-  unit_assert (field_block->values ("not a field") == NULL);
+  unit_assert (field_data->values (1000) == NULL);
+  unit_assert (field_data->values ("not a field") == NULL);
 
   unit_func("unknowns");  // with ghosts
 
-  u1 = (float *)       field_block->unknowns(i1);
-  u2 = (double *)      field_block->unknowns(i2);
-  u3 = (double *)      field_block->unknowns(i3);
-  u4 = (double *)      field_block->unknowns(i4);
-  u5 = (long double *) field_block->unknowns(i5);
+  u1 = (float *)       field_data->unknowns(i1);
+  u2 = (double *)      field_data->unknowns(i2);
+  u3 = (double *)      field_data->unknowns(i3);
+  u4 = (double *)      field_data->unknowns(i4);
+  u5 = (long double *) field_data->unknowns(i5);
 
   unit_assert(u1 != 0);
   unit_assert(u2 != 0);
@@ -521,7 +521,7 @@ PARALLEL_MAIN_BEGIN
 
   double hx=0,hy=0,hz=0;
 
-  field_block->cell_width(xpm,xpp,&hx,ypm,ypp,&hy,zpm,zpp,&hz);
+  field_data->cell_width(xpm,xpp,&hx,ypm,ypp,&hy,zpm,zpp,&hz);
 
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);
@@ -531,19 +531,19 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("clear");
 
-  field_block->clear(2.0);
+  field_data->clear(2.0);
 
   unit_assert(2.0 == v1[0]);
   unit_assert(2.0 == v5[n5[0]*n5[1]*n5[2]-1]);
 
-  field_block->clear(3.0, 1 );
+  field_data->clear(3.0, 1 );
   
   unit_assert(2.0 == v1[n1[0]*n1[1]*n1[2]-1]);
   unit_assert(3.0 == v2[0] );
   unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
   unit_assert(2.0 == v3[0] );
 	
-  field_block->clear(4.0, 2, 3 );
+  field_data->clear(4.0, 2, 3 );
 
   unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
   unit_assert(4.0 == v3[0] );
@@ -555,18 +555,18 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("reallocate_ghosts");
 
-  field_block->reallocate_permanent(false);
+  field_data->reallocate_permanent(false);
 
   v1    = 
-    (float *) field_block->values(i1);
+    (float *) field_data->values(i1);
   v2 = 
-    (double *) field_block->values(i2);
+    (double *) field_data->values(i2);
   v3 = 
-    (double *) field_block->values(i3);
+    (double *) field_data->values(i3);
   v4 = 
-    (double *) field_block->values(i4);
+    (double *) field_data->values(i4);
   v5 =
-    (long double *) field_block->values(i5);
+    (long double *) field_data->values(i5);
 
   unit_assert(3.0 == v2[(nx+1)*ny*nz-1]);
   unit_assert(4.0 == v3[0] );

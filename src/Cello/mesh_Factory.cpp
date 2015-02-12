@@ -39,9 +39,9 @@ IoBlock * Factory::create_io_block () const throw()
 
 //----------------------------------------------------------------------
 
-IoFieldBlock * Factory::create_io_field_block () const throw()
+IoFieldData * Factory::create_io_field_data () const throw()
 {
-  return new IoFieldBlock;
+  return new IoFieldData;
 
 }
 
@@ -51,12 +51,12 @@ CProxy_Block Factory::create_block_array
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- int num_field_blocks,
+ int num_field_data,
  bool testing
  ) const throw()
 {
-  TRACE7("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d",
-	 nbx,nby,nbz,nx,ny,nz,num_field_blocks);
+  TRACE7("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_data %d",
+	 nbx,nby,nbz,nx,ny,nz,num_field_data);
 
   CProxy_Block proxy_block;
 
@@ -92,7 +92,7 @@ CProxy_Block Factory::create_block_array
 	proxy_block[index].insert
 	  (index,
 	   nx,ny,nz,
-	   num_field_blocks,
+	   num_field_data,
 	   count_adapt = 0,
 	   cycle,time,dt,
 	   0,NULL,op_array_copy,
@@ -117,7 +117,7 @@ Block * Factory::create_block
  CProxy_Block * block_array,
  Index index,
  int nx, int ny, int nz,
- int num_field_blocks,
+ int num_field_data,
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int op_array,
@@ -128,8 +128,8 @@ Block * Factory::create_block
 {
 
   TRACE3("Factory::create_block(%d %d %d)",nx,ny,nz);
-  TRACE2("Factory::create_block(num_field_blocks %d  count_adapt %d)",
-	 num_field_blocks,count_adapt);
+  TRACE2("Factory::create_block(num_field_data %d  count_adapt %d)",
+	 num_field_data,count_adapt);
 
   // --------------------------------------------------
   // ENTRY: #3 Factory::create_block() -> Block::Block()
@@ -139,7 +139,7 @@ Block * Factory::create_block
     (
      index,
      nx,ny,nz,
-     num_field_blocks,
+     num_field_data,
      count_adapt,
      cycle, time,dt,
      narray, array,op_array,

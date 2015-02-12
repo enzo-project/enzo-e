@@ -130,15 +130,15 @@ Block * InputData::read_block
 
 void InputData::read_field
 ( 
- FieldBlock * field_block,
+ FieldData * field_data,
  const FieldDescr * field_descr,
  int field_index) throw()
 {
-  io_field_block()->set_field_descr((FieldDescr*)field_descr);
-  io_field_block()->set_field_block(field_block);
-  io_field_block()->set_field_index(field_index);
+  io_field_data()->set_field_descr((FieldDescr*)field_descr);
+  io_field_data()->set_field_data(field_data);
+  io_field_data()->set_field_index(field_index);
 
-  for (size_t i=0; i<io_field_block()->data_count(); i++) {
+  for (size_t i=0; i<io_field_data()->data_count(); i++) {
 
     void * buffer = 0;
     std::string name;
@@ -146,16 +146,16 @@ void InputData::read_field
     int nxd,nyd,nzd;  // Array dimension
     int nx,ny,nz;     // Array size
 
-    // Read ith FieldBlock data
+    // Read ith FieldData data
 
     file_->data_open(name.c_str(),&type,&nx,&ny,&nz);
     file_->data_read(buffer);
     file_->data_close();
 
-    // Get ith FieldBlock data
-    io_field_block()->data_value(i, &buffer, &name, &type, 
-				 &nxd,&nyd,&nzd,
-				 &nx, &ny, &nz);
+    // Get ith FieldData data
+    io_field_data()->data_value(i, &buffer, &name, &type, 
+				&nxd,&nyd,&nzd,
+				&nx, &ny, &nz);
 
   }
 

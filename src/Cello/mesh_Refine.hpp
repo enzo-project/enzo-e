@@ -56,7 +56,7 @@ public: // interface
 
   virtual std::string name () const { return "unknown"; }
 
-  void * initialize_output_(FieldBlock * field_block);
+  void * initialize_output_(FieldData * field_data);
 
 protected:
 

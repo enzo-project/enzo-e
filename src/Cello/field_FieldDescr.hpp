@@ -19,7 +19,7 @@ class FieldDescr
   /// including field names, how they are centered (cell-centered,
   /// face-centered, on corners, etc), number of ghost zones, padding,
   /// alignment, and precision.  There is one FieldDescr object per
-  /// Simulation object.  Actual Field data are stored in FieldBlock
+  /// Simulation object.  Actual Field data are stored in FieldData
   /// objects, which are each associated with a unique Block of data.
 
 public: // functions

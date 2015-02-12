@@ -13,17 +13,17 @@
 
 Data::Data(FieldDescr * field_descr,
 	     int nx, int ny, int nz,
-	     int num_field_blocks,
+	     int num_field_data,
 	     double xm, double xp,
 	     double ym, double yp,
 	     double zm, double zp) throw ()
-  : num_field_blocks_(num_field_blocks),
-    field_block_()
+  : num_field_data_(num_field_data),
+    field_data_()
 {
-  // Initialize field_block_[]
-  field_block_.resize(num_field_blocks);
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (field_descr,nx,ny,nz);
+  // Initialize field_data_[]
+  field_data_.resize(num_field_data);
+  for (size_t i=0; i<field_data_.size(); i++) {
+    field_data_[i] = new FieldData (field_descr,nx,ny,nz);
   }
   lower_[0] = xm;
   lower_[1] = ym;
@@ -37,12 +37,12 @@ Data::Data(FieldDescr * field_descr,
 
 Data::~Data() throw ()
 {
-  // Deallocate field_block_[]
-  for (size_t i=0; i<field_block_.size(); i++) {
-    delete field_block_[i];
-    field_block_[i] = 0;
+  // Deallocate field_data_[]
+  for (size_t i=0; i<field_data_.size(); i++) {
+    delete field_data_[i];
+    field_data_[i] = 0;
   }
-  num_field_blocks_ = 0;
+  num_field_data_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -50,7 +50,7 @@ Data::~Data() throw ()
 Data::Data(const Data & data) throw ()
 /// @param     data  Object being copied
 :
-  num_field_blocks_(data.num_field_blocks_)
+  num_field_data_(data.num_field_data_)
 
 {
   copy_(data);
@@ -70,8 +70,8 @@ Data & Data::operator= (const Data & data) throw ()
 
 void Data::allocate (const FieldDescr * field_descr) throw()
 {
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i]->allocate_permanent(true);
+  for (size_t i=0; i<field_data_.size(); i++) {
+    field_data_[i]->allocate_permanent(true);
   }
 }
 
@@ -85,10 +85,10 @@ void Data::field_cells (double * x, double * y, double * z,
   double xp,yp,zp;
   this->upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  field_block()->cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
+  field_data()->cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
     
   int nx,ny,nz;
-  field_block()->size(&nx,&ny,&nz);
+  field_data()->size(&nx,&ny,&nz);
 
   int ixm = -gx;
   int iym = -gy;
@@ -107,9 +107,9 @@ void Data::field_cells (double * x, double * y, double * z,
 
 void Data::copy_(const Data & data) throw()
 {
-  num_field_blocks_ = data.num_field_blocks_;
-  field_block_.resize(data.field_block_.size());
-  for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (*(data.field_block_[i]));
+  num_field_data_ = data.num_field_data_;
+  field_data_.resize(data.field_data_.size());
+  for (size_t i=0; i<field_data_.size(); i++) {
+    field_data_[i] = new FieldData (*(data.field_data_[i]));
   }
 }

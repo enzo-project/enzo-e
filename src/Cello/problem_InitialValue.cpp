@@ -131,7 +131,7 @@ void InitialValue::enforce_block
   parameters_->group_set(0,"Initial");
   //--------------------------------------------------
 
-  FieldBlock *       field_block = block->data()->field_block();
+  FieldData *       field_data = block->data()->field_data();
 
   double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, t;
   bool * mask=0, *rdeflt=0;
@@ -155,7 +155,7 @@ void InitialValue::enforce_block
 
     if (parameter_type == parameter_float) {
 
-      field_block->clear(parameters_->value_float("value",0.0), 
+      field_data->clear(parameters_->value_float("value",0.0), 
 			 index_field);
 
     } else if (parameter_type == parameter_list) {
@@ -172,7 +172,7 @@ void InitialValue::enforce_block
       // Allocate arrays if needed
       if (value == NULL) {
 	allocate_xyzt_(block,index_field,
-		       field_block,
+		       field_data,
 		       field_descr,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
@@ -184,23 +184,23 @@ void InitialValue::enforce_block
 
       n = nx*ny*nz;
 
-      evaluate_float_ (field_block, list_length-1, field_name, 
+      evaluate_float_ (field_data, list_length-1, field_name, 
 			n, value,vdeflt,x,y,z,t);
 
-      copy_values_ (field_descr,field_block,value, NULL,index_field,nx,ny,nz);
+      copy_values_ (field_descr,field_data,value, NULL,index_field,nx,ny,nz);
 
       // Evaluate conditional equations in list
 
       for (int index_value=0; index_value < list_length-1; index_value+=2) {
 
-	evaluate_float_ (field_block, index_value, field_name, 
+	evaluate_float_ (field_data, index_value, field_name, 
 			  n, value,vdeflt,x,y,z,t);
 
 	evaluate_mask_ 
-	  (hierarchy,block,field_block, index_field, index_value+1,
+	  (hierarchy,block,field_data, index_field, index_value+1,
 	   field_name,   field_descr, n, mask,rdeflt,x,y,z,t);
 
-	copy_values_ (field_descr,field_block,value, mask,index_field,nx,ny,nz);
+	copy_values_ (field_descr,field_data,value, mask,index_field,nx,ny,nz);
 
       }
 
@@ -237,7 +237,7 @@ void InitialValue::allocate_xyzt_
 (
  Block * block,
  int index_field,
- const FieldBlock * field_block,
+ const FieldData * field_data,
  const FieldDescr * field_descr,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
@@ -248,7 +248,7 @@ void InitialValue::allocate_xyzt_
 
   // Get field size
 
-  field_block->size(nx,ny,nz);
+  field_data->size(nx,ny,nz);
 
   int gx,gy,gz;
   field_descr->ghosts(index_field,&gx,&gy,&gz);
@@ -274,7 +274,7 @@ void InitialValue::allocate_xyzt_
   block->data()->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
-  field_block->cell_width(xm,xp,&hx,
+  field_data->cell_width(xm,xp,&hx,
 			  ym,yp,&hy,
 			  zm,zp,&hz);
 
@@ -302,7 +302,7 @@ void InitialValue::allocate_xyzt_
 void InitialValue::copy_values_ 
 (
  const FieldDescr * field_descr,
- FieldBlock *       field_block,
+ FieldData *       field_data,
  double *           value, 
  bool *             mask,
  int                index_field,
@@ -312,7 +312,7 @@ void InitialValue::copy_values_
 
   // Copy the floating-point values to the field where mask values are true
 
-  void * field = field_block->unknowns(index_field);
+  void * field = field_data->unknowns(index_field);
 
   // Determine allocated array size
 
@@ -393,7 +393,7 @@ void InitialValue::copy_precision_
 //----------------------------------------------------------------------
 
 void InitialValue::evaluate_float_ 
-(FieldBlock * field_block, int index_value, std::string field_name, 
+(FieldData * field_data, int index_value, std::string field_name, 
  int n, double * value, double * deflt,
  double * x, double * y, double * z, double t) throw ()
 {
@@ -427,7 +427,7 @@ void InitialValue::evaluate_float_
 void InitialValue::evaluate_mask_ 
 (const Hierarchy * hierarchy,
  const Block * block,
- FieldBlock * field_block, 
+ FieldData * field_data, 
  int index_field,  int index_value,
  std::string field_name, 
  const FieldDescr * field_descr,
@@ -466,7 +466,7 @@ void InitialValue::evaluate_mask_
   case parameter_string:
 
     {
-      field_block->size(&nxb,&nyb,&nzb);
+      field_data->size(&nxb,&nyb,&nzb);
       ASSERT1("InitialValue::evaluate_logical",
 	      "mask file %s requires problem to be 2D",
 	      field_name.c_str(),
@@ -529,7 +529,7 @@ void InitialValue::evaluate_mask_png_
   // get the block's cell width
 
   double hb[3];
-  block->data()->field_block()->cell_width 
+  block->data()->field_data()->cell_width 
     (lower_b[0],upper_b[0],&hb[0],
      lower_b[1],upper_b[1],&hb[1],
      lower_b[2],upper_b[2],&hb[2]);

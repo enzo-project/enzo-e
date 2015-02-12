@@ -91,8 +91,8 @@ public: // virtual functions
     const FieldDescr * field_descr) throw();
 
   /// Write fields
-  virtual void write_field_block
-  ( const FieldBlock * Fieldblock, 
+  virtual void write_field_data
+  ( const FieldData * field_data, 
     const FieldDescr * field_descr,
     int field_index) throw();
 

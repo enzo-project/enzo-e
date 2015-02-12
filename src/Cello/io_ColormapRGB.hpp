@@ -8,7 +8,7 @@
 #ifndef IO_COLORMAP_RGB_HPP
 #define IO_COLORMAP_RGB_HPP
 
-class FieldBlock;
+// class FieldBlock;
 
 class ColormapRGB : public Colormap {
 

@@ -52,7 +52,7 @@ int RefineMass::apply
  const FieldDescr * field_descr
  ) throw ()
 {
-  FieldBlock * field_block = block->data()->field_block();
+  FieldData * field_data = block->data()->field_data();
   int level = 0;
 
   WARNING ("RefineMass::RefineMass()",
@@ -64,15 +64,15 @@ int RefineMass::apply
   double mass_max_coarsen = max_coarsen_* pow(2.0,level*level_exponent_);
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field_data->size(&nx,&ny,&nz);
 
   int gx,gy,gz;
   field_descr->ghosts(0, &gx,&gy,&gz);
 
   precision_type precision = field_descr->precision(0);
 
-  void * void_array  = field_block->values(0);
-  void * void_output = initialize_output_(field_block);
+  void * void_array  = field_data->values(0);
+  void * void_output = initialize_output_(field_data);
 
   //  int num_fields = field_descr->field_count();
 

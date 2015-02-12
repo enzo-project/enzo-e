@@ -6,7 +6,7 @@
 /// @brief    [\ref Field] Declaration of the Field class
 ///
 /// The Field class is used to unify the interface of the global FieldDescr
-/// object and a given FieldBlock object.
+/// object and a given FieldData object.
 
 #ifndef FIELD_FIELD_HPP
 #define FIELD_FIELD_HPP
@@ -21,23 +21,23 @@ public: // interface
 
   /// Constructor
   Field(FieldDescr * field_descr,
-	FieldBlock * field_block) throw()
+	FieldData * field_data) throw()
     : field_descr_ (field_descr),
-      field_block_ (field_block)
+      field_data_ (field_data)
   {}
 
   /// Copy constructor
   Field(const Field & field) throw()
   {
     field_descr_ = field.field_descr_;
-    field_block_ = field.field_block_; 
+    field_data_ = field.field_data_; 
   }
 
   /// Assignment operator
   Field & operator= (const Field & field) throw()
   { 
     field_descr_ = field.field_descr_;
-    field_block_ = field.field_block_;
+    field_data_ = field.field_data_;
     return *this;
   }
 
@@ -55,8 +55,8 @@ public: // interface
   /// Return the field descriptor for this field
   FieldDescr * field_descr() { return field_descr_; }
 
-  /// Return the field block for this field
-  FieldBlock * field_block() { return field_block_; }
+  /// Return the field data for this field
+  FieldData * field_data() { return field_data_; }
 
   //==================================================
   // FieldDescr
@@ -159,58 +159,58 @@ public: // interface
   { return field_descr_->num_permanent(); }
 
   //==================================================
-  // FieldBlock
+  // FieldData
   //==================================================
 
-  /// Return size of fields on the block, assuming centered
+  /// Return size of fields on the data, assuming centered
   void size(int * nx, int * ny = 0, int * nz = 0) const throw()
-  { field_block_->size(nx,ny,nz); }
+  { field_data_->size(nx,ny,nz); }
 
-  /// Return dimensions of fields on the block, assuming centered
+  /// Return dimensions of fields on the data, assuming centered
   void dimensions(int id_field,int * mx, int * my = 0, int * mz = 0) const throw()
-  { field_block_->dimensions(id_field, mx,my,mz); }
+  { field_data_->dimensions(id_field, mx,my,mz); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
   char * values (int id) throw (std::out_of_range)
-  { return field_block_->values(id); }
+  { return field_data_->values(id); }
 
   char * values (std::string name) throw (std::out_of_range)
-  { return field_block_->values(name); }
+  { return field_data_->values(name); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
   const char * values (int id) const throw (std::out_of_range)
-  { return field_block_->values(id); }
+  { return field_data_->values(id); }
 
   const char * values (std::string name) const throw (std::out_of_range)
-  { return field_block_->values(name); }
+  { return field_data_->values(name); }
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * unknowns ( int id) throw (std::out_of_range)
-  { return field_block_->unknowns(id); }
+  { return field_data_->unknowns(id); }
 
   char * unknowns (std::string name) throw (std::out_of_range)
-  { return field_block_->unknowns(name); }
+  { return field_data_->unknowns(name); }
 
   const char * unknowns ( int id) const throw (std::out_of_range)
-  { return field_block_->unknowns(id); }
+  { return field_data_->unknowns(id); }
 
   const char * unknowns (std::string name) const throw (std::out_of_range)
-  { return field_block_->unknowns(name); }
+  { return field_data_->unknowns(name); }
 
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
   /// padding and alignment
   const char * permanent ()  const throw () 
-  { return field_block_->permanent(); }
+  { return field_data_->permanent(); }
 
   /// Return width of cells along each dimension
   void cell_width(double xm,   double xp,   double * hx,
 		  double ym=0, double yp=0, double * hy=0,
 		  double zm=0, double zp=0, double * hz=0) const throw ()
-  { field_block_->cell_width(xm,xp,hx,
+  { field_data_->cell_width(xm,xp,hx,
 			     ym,yp,hy,
 			     zm,zp,hz); }
 
@@ -218,52 +218,52 @@ public: // interface
   void clear ( float value = 0.0, 
 	       int id_first = -1, 
 	       int id_last  = -1) throw()
-  { field_block_->clear (value,id_first,id_last); }
+  { field_data_->clear (value,id_first,id_last); }
  
   /// Return whether array is allocated or not
   bool permanent_allocated() const throw()
-  { return field_block_->permanent_allocated(); }
+  { return field_data_->permanent_allocated(); }
 
   /// Return whether array is allocated or not
   size_t permanent_size() const throw()
-  { return field_block_->permanent_size(); }
+  { return field_data_->permanent_size(); }
 
-  /// Allocate storage for the field block
+  /// Allocate storage for the field data
   void allocate_permanent(bool ghosts_allocated = false) throw()
-  { field_block_->allocate_permanent(ghosts_allocated); }
+  { field_data_->allocate_permanent(ghosts_allocated); }
 
-  /// Reallocate storage for the field block, e.g. when changing
+  /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
   void reallocate_permanent(bool ghosts_allocated = false) throw()
-  { field_block_->reallocate_permanent(ghosts_allocated); }
+  { field_data_->reallocate_permanent(ghosts_allocated); }
 
-  /// Deallocate storage for the field block
+  /// Deallocate storage for the field data
   void deallocate_permanent() throw()
-  { field_block_->deallocate_permanent(); }
+  { field_data_->deallocate_permanent(); }
 
   /// Return whether ghost cells are allocated or not.  
   bool ghosts_allocated() const throw ()
-  { return field_block_->ghosts_allocated(); }
+  { return field_data_->ghosts_allocated(); }
 
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
   int field_size (int id, int *nx=0, int *ny=0, int *nz=0) const throw()
-  { return field_block_->field_size(id,nx,ny,nz); }
+  { return field_data_->field_size(id,nx,ny,nz); }
 
   //----------------------------------------------------------------------
 
   /// Print basic field characteristics for debugging
   void print (const char * message,
 	      bool use_file = false) const throw()
-  { field_block_->print(message,use_file); }
+  { field_data_->print(message,use_file); }
 
 private: // attributes
 
   /// Field descriptor for global field data
   FieldDescr * field_descr_;
 
-  /// Field block for specific field data
-  FieldBlock * field_block_;
+  /// Field data for the specific Block
+  FieldData * field_data_;
 
   // NOTE: change pup() function whenever attributes change
 

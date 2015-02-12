@@ -127,17 +127,17 @@ void OutputData::write_block
 
 //----------------------------------------------------------------------
 
-void OutputData::write_field_block
+void OutputData::write_field_data
 ( 
-  const FieldBlock * field_block,
+  const FieldData * field_data,
   const FieldDescr * field_descr,
   int field_index) throw()
 {
-  io_field_block()->set_field_descr((FieldDescr*)field_descr);
-  io_field_block()->set_field_block((FieldBlock*)field_block);
-  io_field_block()->set_field_index(field_index);
+  io_field_data()->set_field_descr((FieldDescr*)field_descr);
+  io_field_data()->set_field_data((FieldData*)field_data);
+  io_field_data()->set_field_index(field_index);
 
-  for (size_t i=0; i<io_field_block()->data_count(); i++) {
+  for (size_t i=0; i<io_field_data()->data_count(); i++) {
 
     void * buffer;
     std::string name;
@@ -145,12 +145,12 @@ void OutputData::write_field_block
     int nxd,nyd,nzd;  // Array dimension
     int nx,ny,nz;     // Array size
 
-    // Get ith FieldBlock data
-    io_field_block()->data_value(i, &buffer, &name, &type, 
+    // Get ith FieldData data
+    io_field_data()->data_value(i, &buffer, &name, &type, 
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 
-    // Write ith FieldBlock data
+    // Write ith FieldData data
 
     file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
     file_->data_write(buffer);

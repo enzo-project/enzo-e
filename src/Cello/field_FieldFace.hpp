@@ -24,7 +24,7 @@ public: // interface
   FieldFace() throw();
 
   /// Constructor of initialized FieldFace
-  FieldFace (FieldBlock * field_block) throw();
+  FieldFace (FieldData * field_data) throw();
      
   /// Destructor
   ~FieldFace() throw();
@@ -146,8 +146,8 @@ private: // functions
 
 private: // attributes
 
-  /// field block for this face
-  FieldBlock * field_block_;
+  /// back-link to field data corresponding to this face
+  FieldData * field_data_;
 
   /// Allocated array used for storing all ghosts and face
   std::vector<char> array_;

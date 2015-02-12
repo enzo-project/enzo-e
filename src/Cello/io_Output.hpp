@@ -55,8 +55,8 @@ public: // functions
   /// Return the IoBlock object
   IoBlock * io_block () const throw() { return io_block_; }
 
-  /// Return the IoFieldBlock object
-  IoFieldBlock * io_field_block () const throw() { return io_field_block_; }
+  /// Return the IoFieldData object
+  IoFieldData * io_field_data () const throw() { return io_field_data_; }
 
   /// Return the File object pointer
   File * file() throw() 
@@ -145,8 +145,8 @@ public: // virtual functions
   { write_block_(block,field_descr); }
 
   /// Write local field to disk
-  virtual void write_field_block
-  ( const FieldBlock * field_block, 
+  virtual void write_field_data
+  ( const FieldData * field_data, 
     const FieldDescr * field_descr,
     int field_index) throw() = 0;
 
@@ -226,8 +226,8 @@ protected: // attributes
   /// I/O Block data accessor
   IoBlock * io_block_;
 
-  /// I/O FieldBlock data accessor
-  IoFieldBlock * io_field_block_;
+  /// I/O FieldData data accessor
+  IoFieldData * io_field_data_;
 
   /// Only processes with id's divisible by process_stride_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)

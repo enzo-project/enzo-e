@@ -10,7 +10,7 @@
 
 class Hierarchy;
 class IoBlock;
-class IoFieldBlock;
+class IoFieldData;
 
 class Factory : public PUP::able 
 {
@@ -47,8 +47,8 @@ public: // interface
   /// Create an Input / Output accessor object for Block
   virtual IoBlock * create_io_block ( ) const throw();
 
-  /// Create an Input / Output accessor object for a FieldBlock
-  virtual IoFieldBlock * create_io_field_block ( ) const throw();
+  /// Create an Input / Output accessor object for a FieldData
+  virtual IoFieldData * create_io_field_data ( ) const throw();
 
   /// Create a new CHARM++ Block array
   virtual CProxy_Block create_block_array
@@ -64,7 +64,7 @@ public: // interface
    CProxy_Block * block_array,
    Index index,
    int nx, int ny, int nz,
-   int num_field_blocks,
+   int num_field_data,
    int count_adapt,
    int cycle, double time, double dt,
    int narray, char * array, int op_array,

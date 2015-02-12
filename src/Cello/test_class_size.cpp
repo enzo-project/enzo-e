@@ -24,7 +24,7 @@ PARALLEL_MAIN_BEGIN
   printf ("%4ld sizeof(Boundary)\n",sizeof(Boundary));
   printf ("%4ld sizeof(EnzoBlock)\n",sizeof(EnzoBlock));
   printf ("%4ld sizeof(Factory)\n",sizeof(Factory));
-  printf ("%4ld sizeof(FieldBlock)\n",sizeof(FieldBlock));
+  printf ("%4ld sizeof(FieldData)\n",sizeof(FieldData));
   printf ("%4ld sizeof(FieldDescr)\n",sizeof(FieldDescr));
   printf ("%4ld sizeof(FieldFace)\n",sizeof(FieldFace));
   printf ("%4ld sizeof(FileHdf5)\n",sizeof(FileHdf5));

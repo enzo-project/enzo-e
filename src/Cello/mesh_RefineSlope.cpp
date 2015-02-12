@@ -38,13 +38,13 @@ int RefineSlope::apply
  ) throw ()
 {
 
-  FieldBlock * field_block = block->data()->field_block();
+  FieldData * field_data = block->data()->field_data();
 
   bool all_coarsen = true;
   bool any_refine = false;
 
   int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
+  field_data->size(&nx,&ny,&nz);
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
@@ -53,11 +53,11 @@ int RefineSlope::apply
   double xm[3],xp[3];
   data->lower(&xm[0],&xm[1],&xm[2]);
   data->upper(&xp[0],&xp[1],&xp[2]);
-  field_block->cell_width(xm[0],xp[0],&h3[0]);
-  field_block->cell_width(xm[1],xp[1],&h3[1]);
-  field_block->cell_width(xm[2],xp[2],&h3[2]);
+  field_data->cell_width(xm[0],xp[0],&h3[0]);
+  field_data->cell_width(xm[1],xp[1],&h3[1]);
+  field_data->cell_width(xm[2],xp[2],&h3[2]);
 
-  void * output = initialize_output_(field_block);
+  void * output = initialize_output_(field_data);
 
   for (size_t k=0; k<field_id_list_.size(); k++) {
 
@@ -72,7 +72,7 @@ int RefineSlope::apply
 
     precision_type precision = field_descr->precision(id_field);
 
-    void * array = field_block->values(id_field);
+    void * array = field_data->values(id_field);
    
     // count number of times slope refine and coarsen conditions are satisified
     switch (precision) {

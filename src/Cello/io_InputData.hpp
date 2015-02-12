@@ -65,7 +65,7 @@ public: // virtual functions
 
   /// Read local field from disk
   virtual void read_field
-  ( FieldBlock * field_block,
+  ( FieldData * field_data,
     const FieldDescr * field_descr,
     int field_index) throw();
 

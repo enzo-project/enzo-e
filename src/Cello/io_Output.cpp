@@ -24,15 +24,15 @@ Output::Output (int index, const Factory * factory) throw()
     file_args_(),       // set_filename()
     it_field_(0),        // set_it_field()
     io_block_(0),
-    io_field_block_(0),
+    io_field_data_(0),
     process_stride_(1) // default one file per process
 
 {
 
   process_  = CkMyPe();
 
-  io_block_       = factory->create_io_block();
-  io_field_block_ = factory->create_io_field_block();
+  io_block_      = factory->create_io_block();
+  io_field_data_ = factory->create_io_field_data();
 }
 
 //----------------------------------------------------------------------
@@ -72,8 +72,8 @@ void Output::pup (PUP::er &p)
   p | it_field_;  // PUP::able
   if (up) io_block_ = new IoBlock;
   p | *io_block_;
-  if (up) io_field_block_ = new IoFieldBlock;
-  p | *io_field_block_;
+  if (up) io_field_data_ = new IoFieldData;
+  p | *io_field_data_;
   p | process_stride_;
 
 }
@@ -255,8 +255,8 @@ void Output::write_block_
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
-    const FieldBlock * field_block = block->data()->field_block();
-    write_field_block (field_block,  field_descr, it_field_->value());
+    const FieldData * field_data = block->data()->field_data();
+    write_field_data (field_data,  field_descr, it_field_->value());
   }
 
 }

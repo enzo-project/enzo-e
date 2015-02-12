@@ -41,7 +41,7 @@ void IoBlock::meta_value
   int count = 0;
 
   if (index == count++) {
-    *buffer = (void *) & block_->data()->num_field_blocks_;
+    *buffer = (void *) & block_->data()->num_field_data_;
     *type   = scalar_type_int;
   } else if (index == count++) {
     *buffer = (void *) & block_->index_;

@@ -23,7 +23,7 @@ public: // interface
   /// Constructor
   Data(FieldDescr * field_descr,
 	int nx, int ny, int nz,
-	int num_field_blocks,
+	int num_field_data,
 	double xm, double xp,
 	double ym, double yp,
 	double zm, double zp) throw();
@@ -45,12 +45,12 @@ public: // interface
   {
     TRACEPUP;
     bool up = p.isUnpacking();
-    p | num_field_blocks_;
-    // allocate field_block_[] vector first if unpacking
-    if (up) field_block_.resize(num_field_blocks_);
-    for (int i=0; i<num_field_blocks_; i++) {
-      if (up) field_block_[i] = new FieldBlock;
-      p | *field_block_[i];
+    p | num_field_data_;
+    // allocate field_data_[] vector first if unpacking
+    if (up) field_data_.resize(num_field_data_);
+    for (int i=0; i<num_field_data_; i++) {
+      if (up) field_data_[i] = new FieldData;
+      p | *field_data_[i];
     }
     PUParray(p,lower_,3);
     PUParray(p,upper_,3);
@@ -59,26 +59,26 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Return the number of FieldBlocks
-  int num_field_blocks() const throw()
-  { return num_field_blocks_; }
+  /// Return the number of FieldData
+  int num_field_data() const throw()
+  { return num_field_data_; }
 
-  /// Return the ith Field block
-  const FieldBlock * field_block (int i=0) const throw()
-  { return field_block_.at(i); }
+  /// Return the ith Field data
+  const FieldData * field_data (int i=0) const throw()
+  { return field_data_.at(i); }
 
-  /// Return the ith Field block
-  FieldBlock * field_block (int i=0) throw()
-  { return field_block_.at(i); }
+  /// Return the ith Field data
+  FieldData * field_data (int i=0) throw()
+  { return field_data_.at(i); }
 
   /// Return the ith Field descriptor
   const FieldDescr * field_descr (int i=0) const throw()
-  { return field_block_.at(i)->field_descr(); }
+  { return field_data_.at(i)->field_descr(); }
 
   /// Return the ith Field
   Field field (int i=0) throw()
-  { return Field((FieldDescr *)(field_block_.at(i)->field_descr()),
-		 field_block_.at(i)); }
+  { return Field((FieldDescr *)(field_data_.at(i)->field_descr()),
+		 field_data_.at(i)); }
 
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
@@ -119,11 +119,11 @@ private: // functions
 
 private: // attributes
 
-  /// Number of field blocks (required by CHARM++ PUP::er)
-  int num_field_blocks_;
+  /// Number of field_data's (required by CHARM++ PUP::er)
+  int num_field_data_;
 
-  /// Array of field blocks
-  std::vector<FieldBlock *> field_block_;
+  /// Array of field data
+  std::vector<FieldData *> field_data_;
 
   /// Lower extent of the box associated with the block [computable]
   double lower_[3];

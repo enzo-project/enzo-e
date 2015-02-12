@@ -64,8 +64,8 @@ void Initial::enforce_block_
   // ItFieldRange it_field (field_descr->field_count());
 
   // for (it_field.first(); ! it_field.done(); it_field.next()  ) {
-  //   const FieldBlock * field_block = block->field_block();
-  //   enforce (field_block,  field_descr, it_field.value());
+  //   const FieldData * field_data = block->field_data();
+  //   enforce (field_data,  field_descr, it_field.value());
   // }
   ERROR("Initial::enforce_block_",
 	"This function should not be called");

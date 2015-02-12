@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldBlock.cpp
+/// @file     field_FieldData.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
-/// @brief    Implementation of the FieldBlock class
+/// @brief    Implementation of the FieldData class
 
 #include "cello.hpp"
 #include "field.hpp"
@@ -12,7 +12,7 @@
 
 //----------------------------------------------------------------------
 
-FieldBlock::FieldBlock 
+FieldData::FieldData 
 (
  FieldDescr * field_descr,
  int nx, int ny, int nz 
@@ -36,30 +36,30 @@ FieldBlock::FieldBlock
 
 //----------------------------------------------------------------------
 
-FieldBlock::~FieldBlock() throw()
+FieldData::~FieldData() throw()
 {  
   deallocate_permanent();
 }
 
 //----------------------------------------------------------------------
 
-FieldBlock::FieldBlock ( const FieldBlock & field_block ) throw ()
+FieldData::FieldData ( const FieldData & field_data ) throw ()
 {
   
-  INCOMPLETE("FieldBlock::FieldBlock"); 
+  INCOMPLETE("FieldData::FieldData"); 
 }
 
 //----------------------------------------------------------------------
 
-FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
+FieldData & FieldData::operator= ( const FieldData & field_data ) throw ()
 {  
-  INCOMPLETE("FieldBlock::operator=");
+  INCOMPLETE("FieldData::operator=");
   return *this;
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlock::pup(PUP::er &p)
+void FieldData::pup(PUP::er &p)
 {
   TRACEPUP;
 
@@ -74,7 +74,7 @@ void FieldBlock::pup(PUP::er &p)
   //  p | array_temporary_;
   static bool warn = false;
   if (! warn) {
-    WARNING("FieldBlock::pup()",
+    WARNING("FieldData::pup()",
 	    "Skipping array_temporary_");
     warn = true;
   }
@@ -85,7 +85,7 @@ void FieldBlock::pup(PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void FieldBlock::dimensions( int id_field, int * mx, int * my, int * mz ) const throw()
+void FieldData::dimensions( int id_field, int * mx, int * my, int * mz ) const throw()
 {
   int nx,ny,nz;
   int gx,gy,gz;
@@ -101,7 +101,7 @@ void FieldBlock::dimensions( int id_field, int * mx, int * my, int * mz ) const 
 
 //----------------------------------------------------------------------
 
-void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
+void FieldData::size( int * nx, int * ny, int * nz ) const throw()
 {
   if (nx) (*nx) = size_[0];
   if (ny) (*ny) = size_[1];
@@ -110,16 +110,16 @@ void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-const char * FieldBlock::values ( int id_field ) const 
+const char * FieldData::values ( int id_field ) const 
   throw (std::out_of_range)
 {
   return (const char *)
-    ((FieldBlock *)this) -> values(id_field);
+    ((FieldData *)this) -> values(id_field);
 }
 
 //----------------------------------------------------------------------
 
-char * FieldBlock::values ( int id_field ) 
+char * FieldData::values ( int id_field ) 
   throw (std::out_of_range)
 {
   char * values = 0;
@@ -145,16 +145,16 @@ char * FieldBlock::values ( int id_field )
 
 //----------------------------------------------------------------------
 
-const char * FieldBlock::unknowns ( int id_field ) const
+const char * FieldData::unknowns ( int id_field ) const
   throw (std::out_of_range)
 {
   return (const char *)
-    ((FieldBlock *)this) -> unknowns(id_field);
+    ((FieldData *)this) -> unknowns(id_field);
 }
 
 //----------------------------------------------------------------------
 
-char * FieldBlock::unknowns ( int id_field  )
+char * FieldData::unknowns ( int id_field  )
   throw (std::out_of_range)
 {
   char * unknowns = values(id_field);
@@ -177,7 +177,7 @@ char * FieldBlock::unknowns ( int id_field  )
 
 //----------------------------------------------------------------------
 
-void FieldBlock::cell_width
+void FieldData::cell_width
 (
  double xm, double xp, double * hx,
  double ym, double yp, double * hy,
@@ -191,15 +191,15 @@ void FieldBlock::cell_width
 
 //----------------------------------------------------------------------
 
-void FieldBlock::clear
+void FieldData::clear
 (
  float              value,
  int                id_field_first,
  int                id_field_last) throw()
 {
   if (field_descr_ == NULL) {
-    WARNING ("FieldBlock::clear()",
-	     "Trying to clear an unallocated FieldBlock");
+    WARNING ("FieldData::clear()",
+	     "Trying to clear an unallocated FieldData");
     return;
   }
 
@@ -237,19 +237,19 @@ void FieldBlock::clear
 	char buffer[80];
 	sprintf (buffer,"Clear called with unsupported precision %s" , 
 		 cello::precision_name[precision]);
-	ERROR("FieldBlock::clear", buffer);
+	ERROR("FieldData::clear", buffer);
       }
 
     }
   } else {
-    ERROR("FieldBlock::clear",
+    ERROR("FieldData::clear",
 	  "Called clear with unallocated arrays");
   }
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlock::allocate_permanent ( bool ghosts_allocated ) throw()
+void FieldData::allocate_permanent ( bool ghosts_allocated ) throw()
 {
 
   // Error check size
@@ -257,13 +257,13 @@ void FieldBlock::allocate_permanent ( bool ghosts_allocated ) throw()
   if (! (size_[0] > 0 &&
 	 size_[1] > 0 &&
 	 size_[2] > 0) ) {
-    ERROR ("FieldBlock::allocate_permanent",
+    ERROR ("FieldData::allocate_permanent",
 		   "Allocate called with zero field size");
   }
 
   // Warning check array already allocated
   if (permanent_allocated() ) {
-    WARNING ("FieldBlock::allocate_permanent",
+    WARNING ("FieldData::allocate_permanent",
 	     "Array already allocated: calling reallocate()");
     reallocate_permanent(ghosts_allocated);
     return;
@@ -321,7 +321,7 @@ void FieldBlock::allocate_permanent ( bool ghosts_allocated ) throw()
 
   if ( ! ( 0 <= (array_size - field_offset)
 	   &&   (array_size - field_offset) < alignment)) {
-    ERROR ("FieldBlock::allocate_permanent",
+    ERROR ("FieldData::allocate_permanent",
 	   "Code error: array size was computed incorrectly");
   };
 
@@ -329,7 +329,7 @@ void FieldBlock::allocate_permanent ( bool ghosts_allocated ) throw()
 
 //----------------------------------------------------------------------
 
-void FieldBlock::allocate_temporary (int id_field) throw (std::out_of_range)
+void FieldData::allocate_temporary (int id_field) throw (std::out_of_range)
 
 {
   int index_field = id_field - num_permanent();
@@ -350,14 +350,14 @@ void FieldBlock::allocate_temporary (int id_field) throw (std::out_of_range)
     if (precision == precision_quadruple) 
       array_temporary_[index_field] = (char*) new long double [m];
   } else {
-    WARNING("FieldBlock::allocate_temporary",
+    WARNING("FieldData::allocate_temporary",
 	    "Calling allocate_temporary() on already-allocated Field");
   }
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlock::deallocate_temporary (int id_field) throw(std::out_of_range)
+void FieldData::deallocate_temporary (int id_field) throw(std::out_of_range)
 {
   int index_field = id_field - num_permanent();
 
@@ -378,13 +378,13 @@ void FieldBlock::deallocate_temporary (int id_field) throw(std::out_of_range)
 }
 //----------------------------------------------------------------------
 
-void FieldBlock::reallocate_permanent
+void FieldData::reallocate_permanent
 (
  bool               ghosts_allocated
  ) throw()
 {
   if (! permanent_allocated() ) {
-    WARNING ("FieldBlock::reallocate_permanent",
+    WARNING ("FieldData::reallocate_permanent",
 	     "Array not allocated yet: calling allocate()");
     allocate_permanent(ghosts_allocated);
     return;
@@ -408,7 +408,7 @@ void FieldBlock::reallocate_permanent
 
 //----------------------------------------------------------------------
 
-void FieldBlock::deallocate_permanent () throw()
+void FieldData::deallocate_permanent () throw()
 {
   if ( permanent_allocated() ) {
 
@@ -424,19 +424,19 @@ void FieldBlock::deallocate_permanent () throw()
 
 //----------------------------------------------------------------------
 
-// void FieldBlock::allocate_ghosts(FieldDescr * field_descr) throw ()
+// void FieldData::allocate_ghosts(FieldDescr * field_descr) throw ()
 // {
 //   if (! ghosts_allocated() ) {
 
 //   } else {
-//     WARNING("FieldBlock::allocate_ghosts",
+//     WARNING("FieldData::allocate_ghosts",
 // 		    "Allocate called with ghosts already allocated");
 //   }
 // }
 
 // //----------------------------------------------------------------------
 
-// void FieldBlock::deallocate_ghosts(FieldDescr * field_descr) throw ()
+// void FieldData::deallocate_ghosts(FieldDescr * field_descr) throw ()
 // {
 //   if ( ghosts_allocated() ) {
 
@@ -454,14 +454,14 @@ void FieldBlock::deallocate_permanent () throw()
 //     restore_array_ (field_descr, &old_array[0], old_offsets);
 
 //   } else {
-//     WARNING("FieldBlock::deallocate_ghosts",
+//     WARNING("FieldData::deallocate_ghosts",
 // 	    "Function called with ghosts not allocated");
 //   }
 // }
 
 //======================================================================
 
-int FieldBlock::adjust_padding_
+int FieldData::adjust_padding_
 (
  int size, 
  int padding) const throw ()
@@ -471,7 +471,7 @@ int FieldBlock::adjust_padding_
 
 //----------------------------------------------------------------------
 
-int FieldBlock::adjust_alignment_
+int FieldData::adjust_alignment_
 (
  int size, 
  int alignment) const throw ()
@@ -481,7 +481,7 @@ int FieldBlock::adjust_alignment_
 
 //----------------------------------------------------------------------
 
-int FieldBlock::align_padding_ (int alignment) const throw()
+int FieldData::align_padding_ (int alignment) const throw()
 { 
   long unsigned start_long = reinterpret_cast<long unsigned>(&array_permanent_[0]);
   return ( alignment - (start_long % alignment) ) % alignment; 
@@ -489,7 +489,7 @@ int FieldBlock::align_padding_ (int alignment) const throw()
 
 //----------------------------------------------------------------------
 
-int FieldBlock::field_size
+int FieldData::field_size
 (
  int                id_field,
  int              * nx,
@@ -499,8 +499,8 @@ int FieldBlock::field_size
 {
 
   if (field_descr_ == NULL) {
-    WARNING("FieldBlock::field_size",
- 	    "Calling field_size() on unallocated FieldBlock");
+    WARNING("FieldData::field_size",
+ 	    "Calling field_size() on unallocated FieldData");
     if (nx) (*nx) = 0;
     if (ny) (*ny) = 0;
     if (nz) (*nz) = 0;
@@ -541,7 +541,7 @@ int FieldBlock::field_size
 
 //----------------------------------------------------------------------
 
-void FieldBlock::print
+void FieldData::print
 (const char * message,
  // double lower[3],
  // double upper[3],
@@ -563,8 +563,8 @@ void FieldBlock::print
 
    FILE * fp = fopen (filename,"w");
 
-   ASSERT("FieldBlock::print",
-	  "FieldBlocks not allocated",
+   ASSERT("FieldData::print",
+	  "FieldData not allocated",
 	  permanent_allocated());
 
    int field_count = field_descr_->field_count();
@@ -649,7 +649,7 @@ void FieldBlock::print
 	      nxd,nyd);
        break;
      default:
-       ERROR("FieldBlock::print", "Unsupported precision");
+       ERROR("FieldData::print", "Unsupported precision");
      }
 
      free ((void *)field_name);
@@ -659,7 +659,7 @@ void FieldBlock::print
 }
 
 template <class T>
-void FieldBlock::print_
+void FieldData::print_
 (const T * field,
  const char * field_name,
  const char * message,
@@ -707,7 +707,7 @@ void FieldBlock::print_
 
 //----------------------------------------------------------------------
 
-void FieldBlock::restore_permanent_ 
+void FieldData::restore_permanent_ 
 ( const char * array_from,
   std::vector<int> & offsets_from) throw (std::out_of_range)
 {

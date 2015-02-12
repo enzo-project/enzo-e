@@ -215,11 +215,11 @@ void OutputImage::write_block
   if (!block->is_leaf()) return;
 
   TRACE("OutputImage::write_block()");
-  const FieldBlock * field_block = block->data()->field_block();
+  const FieldData * field_data = block->data()->field_data();
 
-  // FieldBlock size
+  // FieldData size
   int nbx,nby,nbz;
-  field_block->size(&nbx,&nby,&nbz);
+  field_data->size(&nbx,&nby,&nbz);
 
   // Block forest array size
   int ix,iy,iz;
@@ -238,7 +238,7 @@ void OutputImage::write_block
   int ngx,ngy,ngz;
   field_descr->ghosts(index_field,&ngx,&ngy,&ngz);
 
-  // FieldBlock array dimensions
+  // FieldData array dimensions
   int ndx,ndy,ndz;
   ndx = nbx + 2*ngx;
   ndy = nby + 2*ngy;
@@ -247,8 +247,8 @@ void OutputImage::write_block
   // add block contribution to image
 
   const char * field = (ghost_) ? 
-    field_block->values(index_field) :
-    field_block->unknowns(index_field);
+    field_data->values(index_field) :
+    field_data->unknowns(index_field);
 
   float * field_float = (float*)field;
   double * field_double = (double*)field;
@@ -374,13 +374,13 @@ void OutputImage::write_block
 
 //----------------------------------------------------------------------
 
-void OutputImage::write_field_block
+void OutputImage::write_field_data
 (
- const FieldBlock * field_block,  
+ const FieldData * field_data,  
  const FieldDescr * field_descr,
  int field_index) throw()
 {
-  WARNING("OutputImage::write_field_block",
+  WARNING("OutputImage::write_field_data",
 	  "This function should not be called");
 }
 

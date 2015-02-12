@@ -54,8 +54,8 @@ public: // functions
   /// Return the IoBlock object
   IoBlock * io_block () const throw() { return io_block_; }
 
-  /// Return the IoFieldBlock object
-  IoFieldBlock * io_field_block () const throw() { return io_field_block_; }
+  /// Return the IoFieldData object
+  IoFieldData * io_field_data () const throw() { return io_field_data_; }
 
   /// Return the File object pointer
   File * file() throw() { return file_; };
@@ -111,7 +111,7 @@ public:
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
-  /// Read local block data from disk
+  /// Read local data data from disk
   virtual Block * read_block
   ( Block * block,
     std::string block_name,
@@ -119,7 +119,7 @@ public:
 
   /// Read local field from disk
   virtual void read_field
-  ( FieldBlock * field_block, 
+  ( FieldData * field_data, 
     const FieldDescr * field_descr,
     int field_index) throw() = 0;
 
@@ -178,8 +178,8 @@ protected: // attributes
   /// I/O Block data accessor
   IoBlock * io_block_;
 
-  /// I/O FieldBlock data accessor
-  IoFieldBlock * io_field_block_;
+  /// I/O FieldData data accessor
+  IoFieldData * io_field_data_;
 
   /// Only processes with id's divisible by process_stride_ reads
   /// (1: all processes read; 2: 0,2,4,... read; np: root process reads)

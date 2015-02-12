@@ -166,9 +166,9 @@ Block::Block
   if (narray != 0) {
     
     // copy any input data
-    FieldFace field_face (data()->field_block());
+    FieldFace field_face (data()->field_data());
 
-    //    set "face" to full FieldBlock
+    //    set "face" to full FieldData
     field_face.set_face(0,0,0);
 
     field_face.set_ghost(true,true,true);
@@ -276,7 +276,7 @@ void Block::pup(PUP::er &p)
 //----------------------------------------------------------------------
 
 const FieldDescr * Block::field_descr() throw()
-{ return data_->field_block()->field_descr(); }
+{ return data_->field_data()->field_descr(); }
 
 //----------------------------------------------------------------------
 
@@ -494,7 +494,7 @@ void Block::cell_width
   lower(&xm,&ym,&zm);
   double xp,yp,zp;
   upper(&xp,&yp,&zp);
-  data()->field_block()->cell_width(xm,xp,dx, ym,yp,dy, zm,zp,dz);
+  data()->field_data()->cell_width(xm,xp,dx, ym,yp,dy, zm,zp,dz);
 }
 
 //----------------------------------------------------------------------
@@ -540,7 +540,7 @@ void Block::determine_boundary_
   is_on_boundary (bndry);
 
   int nx,ny,nz;
-  data()->field_block()->size (&nx,&ny,&nz);
+  data()->field_data()->size (&nx,&ny,&nz);
 
   // Determine in which directions we need to communicate or update boundary
 
@@ -662,9 +662,9 @@ FieldFace * Block::create_face_
  )
 {
   Problem * problem        = simulation()->problem();
-  FieldBlock * field_block = data_->field_block();
+  FieldData * field_data = data_->field_data();
 
-  FieldFace * field_face = new FieldFace (field_block);
+  FieldFace * field_face = new FieldFace (field_data);
 
   if (op_array_type == op_array_restrict) {
 

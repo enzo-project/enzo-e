@@ -25,7 +25,7 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-class FieldBlock;
+class FieldData;
 class FieldFace;
 
 #include "field_Grouping.hpp"
@@ -33,7 +33,7 @@ class FieldFace;
 #include "field_ItFieldList.hpp"
 #include "field_ItFieldRange.hpp"
 #include "field_FieldDescr.hpp"
-#include "field_FieldBlock.hpp"
+#include "field_FieldData.hpp"
 #include "field_FieldFace.hpp"
 #include "field_Field.hpp"
 
