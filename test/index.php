@@ -583,8 +583,8 @@ test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 test_summary("Error",array(    "Error"),
 	     array("test_Error"),'test'); 
 test_summary("Field",
-	     array(     "Field",      "FieldBlock",     "FieldDescr",     "FieldFace",     "ItField",      "Grouping"),
-	     array("test_Field", "test_FieldBlock","test_FieldDescr","test_FieldFace","test_ItField", "test_Grouping"),
+	     array(     "Field",      "FieldData",     "FieldDescr",     "FieldFace",     "ItField",      "Grouping"),
+	     array("test_Field", "test_FieldData","test_FieldDescr","test_FieldFace","test_ItField", "test_Grouping"),
 	     'test'); 
 test_summary("Memory",array("Memory"),
 	     array("test_Memory"),'test'); 

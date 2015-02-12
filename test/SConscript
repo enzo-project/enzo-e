@@ -52,7 +52,7 @@ env.RunSerial('test_Error.unit',       bin_path + '/test_Error')
 #----------------------------------------------------------------------
 # FIELD COMPONENT         
 #----------------------------------------------------------------------
-env.RunSerial('test_FieldBlock.unit',bin_path + '/test_FieldBlock')
+env.RunSerial('test_FieldData.unit',bin_path + '/test_FieldData')
 env.RunSerial('test_FieldDescr.unit',bin_path + '/test_FieldDescr')
 env.RunSerial('test_Field.unit',     bin_path + '/test_Field')
 env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
