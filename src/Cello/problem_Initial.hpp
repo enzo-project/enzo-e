@@ -57,11 +57,11 @@ public: // virtual functions
     const FieldDescr * field_descr  ) throw()
   { enforce_hierarchy_(hierarchy,field_descr); }
 
-  /// Initialize a CommBlock
+  /// Initialize a Block
   virtual void enforce_block
-  ( CommBlock * block, 
+  ( Block            * block, 
     const FieldDescr * field_descr,
-    const Hierarchy * hierarchy
+    const Hierarchy  * hierarchy
     ) throw()
   { enforce_block_(block,field_descr,hierarchy); }
 
@@ -79,11 +79,11 @@ protected: // functions
   ( Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
-  /// Loop over enforcing initial conditions Field data in the CommBlock
+  /// Loop over enforcing initial conditions Field data in the Block
   void enforce_block_
-  ( CommBlock * block, 
+  ( Block            * block, 
     const FieldDescr * field_descr,  
-    const Hierarchy * hierarchy
+    const Hierarchy  * hierarchy
     ) throw();
 
 protected: // attributes

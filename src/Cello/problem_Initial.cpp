@@ -54,9 +54,9 @@ void Initial::enforce_hierarchy_
 
 void Initial::enforce_block_
 (
- CommBlock * block,
+ Block            * block,
  const FieldDescr * field_descr,
- const Hierarchy * hierarchy
+ const Hierarchy  * hierarchy
  ) throw()
 {
   // Enforce fields

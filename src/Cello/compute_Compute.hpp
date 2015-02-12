@@ -35,9 +35,9 @@ public: // interface
 
 public: // virtual functions
 
-  /// Perform the computation on the CommBlock
+  /// Perform the computation on the Block
 
-  virtual void compute ( CommBlock * comm_block) throw() = 0; 
+  virtual void compute ( Block * block) throw() = 0; 
 
 protected: // functions
 

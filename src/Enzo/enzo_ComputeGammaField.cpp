@@ -46,7 +46,7 @@ int EnzoBlock::ComputeGammaField
   else {
  
 
-    Field field = block()->field();
+    Field field = data()->field();
    
     enzo_float * species_De    = (enzo_float *) field.values("species_De");
     enzo_float * species_HI    = (enzo_float *) field.values("species_HI");

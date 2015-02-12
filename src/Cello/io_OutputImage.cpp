@@ -205,17 +205,17 @@ void OutputImage::finalize () throw()
 
 void OutputImage::write_block
 (
- const CommBlock *  comm_block,
+ const Block *  block,
  const FieldDescr * field_descr
  ) throw()
-// @param comm_block  Block to write
+// @param block  Block to write
 // @param field_descr  Field descriptor
 {
 
-  if (!comm_block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
   TRACE("OutputImage::write_block()");
-  const FieldBlock * field_block = comm_block->block()->field_block();
+  const FieldBlock * field_block = block->data()->field_block();
 
   // FieldBlock size
   int nbx,nby,nbz;
@@ -223,9 +223,9 @@ void OutputImage::write_block
 
   // Block forest array size
   int ix,iy,iz;
-  comm_block->index_forest(&ix,&iy,&iz);
+  block->index_forest(&ix,&iy,&iz);
 
-  const int level = comm_block->level();
+  const int level = block->level();
 
   // Index of (single) field to write
 
@@ -256,12 +256,12 @@ void OutputImage::write_block
   // pixel extents of box
   int ixm,iym,izm; 
   int ixp,iyp,izp;
-  extents_img_ (comm_block,&ixm,&ixp,&iym,&iyp,&izm,&izp);
+  extents_img_ (block,&ixm,&ixp,&iym,&iyp,&izm,&izp);
 
   double xm,ym,zm;
   double xp,yp,zp;
-  comm_block->lower(&xm,&ym,&zm);
-  comm_block->upper(&xp,&yp,&zp);
+  block->lower(&xm,&ym,&zm);
+  block->upper(&xp,&yp,&zp);
   double v = 1.0;
   if (nbx > 1) v *= (xp-xm);
   if (nby > 1) v *= (yp-ym);
@@ -270,7 +270,7 @@ void OutputImage::write_block
 
   const int precision = field_descr->precision(index_field);
 
-  if (type_is_data() && comm_block->is_leaf()) {
+  if (type_is_data() && block->is_leaf()) {
 
     const double factor = (nbz <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
 
@@ -304,7 +304,7 @@ void OutputImage::write_block
 
     // value for mesh
     double value = 0;
-    value = mesh_color_(level,comm_block->age());
+    value = mesh_color_(level,block->age());
 					     
     reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
     reduce_type reduce_save = op_reduce_;
@@ -312,31 +312,31 @@ void OutputImage::write_block
     reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,0.0);
     op_reduce_ = reduce_save;
 
-    if (comm_block->is_leaf()) { // ) {
+    if (block->is_leaf()) { // ) {
       int xm=(ixm+ixp)/2;
       int ym=(iym+iyp)/2;
       if (face_rank_ <= 1) {
 	{
 	  int if3[3] = {-1,0,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
 	}
 	{
 	  int if3[3] = {1,0,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
 	}
 	{
 	  int if3[3] = {0,-1,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {0,1,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
 	}
@@ -344,25 +344,25 @@ void OutputImage::write_block
       if (face_rank_ <= 0) {
 	{
 	  int if3[3] = {-1,-1,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {1,-1,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {-1,1,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
 	}
 	{
 	  int if3[3] = {1,1,0};
-	  int face_level = comm_block->face_level(if3);
+	  int face_level = block->face_level(if3);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
 	}
@@ -787,7 +787,7 @@ void OutputImage::reduce_cube_(double * data, int ixm, int ixp, int iym, int iyp
 
 //----------------------------------------------------------------------
 
-void OutputImage::extents_img_ (const CommBlock * comm_block,
+void OutputImage::extents_img_ (const Block * block,
 				int *ixm, int *ixp,
 				int *iym, int *iyp,
 				int *izm, int *izp) const
@@ -797,7 +797,7 @@ void OutputImage::extents_img_ (const CommBlock * comm_block,
 
   int ix,iy,iz;
   int nx,ny,nz;
-  comm_block->index_global(&ix,&iy,&iz,&nx,&ny,&nz);
+  block->index_global(&ix,&iy,&iz,&nx,&ny,&nz);
 
   if (image_type_ == "mesh") {
     mx = (nxi_ - 1) / nx;

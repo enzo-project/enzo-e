@@ -463,7 +463,7 @@ void Simulation::monitor_performance()
     }
   }
 
-  counters_long[n-1] = hierarchy()->num_blocks(); // number of CommBlocks
+  counters_long[n-1] = hierarchy()->num_blocks(); // number of Blocks
 
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 

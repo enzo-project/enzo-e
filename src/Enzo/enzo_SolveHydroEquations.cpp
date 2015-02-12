@@ -23,7 +23,7 @@ int EnzoBlock::SolveHydroEquations
   int dim, i,j,  size;
   enzo_float a = 1, dadt;
 
-  Field field = block()->field();
+  Field field = data()->field();
 
   //------------------------------
   // Prepare colour field parameters

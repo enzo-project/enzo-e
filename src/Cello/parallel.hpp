@@ -14,7 +14,6 @@
 
 #include "_error.hpp"
 #include "mesh_Index.hpp"
-#include "_comm.hpp"
 
 #include "_parallel.hpp"
 #endif /* PARALLEL_HPP */

@@ -8,7 +8,7 @@
 #ifndef FIELD_FIELD_BLOCK_HPP
 #define FIELD_FIELD_BLOCK_HPP
 
-class CommBlock;
+class Block;
 class FieldDescr;
 
 class FieldBlock {

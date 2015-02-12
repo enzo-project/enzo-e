@@ -58,8 +58,8 @@ public: // virtual functions
     const FieldDescr * field_descr ) throw();
 
   /// Read block data from disk
-  virtual CommBlock * read_block
-  ( CommBlock *            block,
+  virtual Block * read_block
+  ( Block *            block,
     std::string        block_name,
     const FieldDescr * field_descr) throw();
 

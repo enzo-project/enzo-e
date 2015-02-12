@@ -34,15 +34,15 @@ public: // interface
   void pup (PUP::er &p) ;
   
   /// Apply the method to advance a block one timestep 
-  virtual void compute( CommBlock * comm_block) throw();
+  virtual void compute( Block * block) throw();
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( CommBlock * comm_block) const throw();
+  virtual double timestep ( Block * block) const throw();
 
 protected: // methods
 
   template <class T>
-  void compute_ (CommBlock * comm_block, T * Unew ) const throw();
+  void compute_ (Block * block, T * Unew ) const throw();
 
 protected: // attributes
 

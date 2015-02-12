@@ -35,9 +35,9 @@ module mesh {
   PUPable ScheduleList;
   PUPable ScheduleInterval;
 
-  array[Index] CommBlock {
+  array[Index] Block {
 
-    entry CommBlock // [CB0]
+    entry Block // [CB0]
       (Index index,
        int nx, int ny, int nz,	
        int num_field_blocks,
@@ -47,7 +47,7 @@ module mesh {
        int num_face_level, int face_level[num_face_level],
        bool testing);
 
-    entry CommBlock();	 // [CB0]
+    entry Block();	 // [CB0]
 
     //--------------------------------------------------
     // *** INITIAL ***

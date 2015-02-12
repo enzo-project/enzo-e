@@ -37,9 +37,9 @@ void EnzoBoundary::pup (PUP::er &p)
 
 void EnzoBoundary::enforce 
 (
- CommBlock * comm_block,
- face_enum     face,
- axis_enum     axis 
+ Block   * block,
+ face_enum face,
+ axis_enum axis 
  ) const throw()
 {
   if ( ! applies_(axis,face)) {
@@ -47,17 +47,17 @@ void EnzoBoundary::enforce
   }
 
   if (face == face_all) {
-    enforce(comm_block,face_lower,axis);
-    enforce(comm_block,face_upper,axis);
+    enforce(block,face_lower,axis);
+    enforce(block,face_upper,axis);
   } else if (axis == axis_all) {
-    enforce(comm_block,face,axis_x);
-    enforce(comm_block,face,axis_y);
-    enforce(comm_block,face,axis_z);
+    enforce(block,face,axis_x);
+    enforce(block,face,axis_y);
+    enforce(block,face,axis_z);
   } else {
 
-    Block * block = comm_block->block();
+    Data * data = block->data();
 
-    Field field = block->field();
+    Field field = data->field();
 
     if ( ! field.ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
@@ -66,10 +66,10 @@ void EnzoBoundary::enforce
 
     switch (boundary_type_) {
     case boundary_type_reflecting:
-      enforce_reflecting_(field,comm_block,face,axis);
+      enforce_reflecting_(field,block,face,axis);
       break;
     case boundary_type_outflow:
-      enforce_outflow_   (field,comm_block,face,axis);
+      enforce_outflow_   (field,block,face,axis);
       break;
     default:
       ERROR("EnzoBoundary::enforce",
@@ -83,14 +83,14 @@ void EnzoBoundary::enforce
 
 void EnzoBoundary::enforce_reflecting_
 (
- Field              field,
- CommBlock        * comm_block,
+ Field     field,
+ Block   * block,
  face_enum face,
  axis_enum axis
  ) const throw()
 {
 
-  Block * block = comm_block->block();
+  Data * data = block->data();
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -99,14 +99,14 @@ void EnzoBoundary::enforce_reflecting_
   double * y = new double [ny];
   double * z = new double [nz];
 
-  block->field_cells(x,y,z);
+  data->field_cells(x,y,z);
 
   double xm,ym,zm;
   double xp,yp,zp;
-  block -> lower(&xm,&ym,&zm);
-  block -> upper(&xp,&yp,&zp);
+  data -> lower(&xm,&ym,&zm);
+  data -> upper(&xp,&yp,&zp);
 
-  double t = comm_block->time();
+  double t = block->time();
 
   for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
@@ -272,14 +272,14 @@ void EnzoBoundary::enforce_reflecting_precision_
 
 void EnzoBoundary::enforce_outflow_
 (
- Field              field,
- CommBlock        * comm_block,
+ Field     field,
+ Block   * block,
  face_enum face,
  axis_enum axis
  ) const throw()
 {
 
-  Block * block = comm_block->block();
+  Data * data = block->data();
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -288,14 +288,14 @@ void EnzoBoundary::enforce_outflow_
   double * y = new double [ny];
   double * z = new double [nz];
 
-  block->field_cells(x,y,z);
+  data->field_cells(x,y,z);
 
   double xm,ym,zm;
   double xp,yp,zp;
-  block -> lower(&xm,&ym,&zm);
-  block -> upper(&xp,&yp,&zp);
+  data -> lower(&xm,&ym,&zm);
+  data -> upper(&xp,&yp,&zp);
 
-  double t = comm_block->time();
+  double t = block->time();
 
   for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;

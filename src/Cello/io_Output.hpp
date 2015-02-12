@@ -140,7 +140,7 @@ public: // virtual functions
 
   /// Write local block data to disk
   virtual void write_block
-  ( const CommBlock * block, 
+  ( const Block      * block, 
     const FieldDescr * field_descr) throw()
   { write_block_(block,field_descr); }
 
@@ -179,9 +179,9 @@ private:
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr  ) throw();
 
-  /// Loop over writing Field data in the CommBlock
+  /// Loop over writing Field data in the Block
   void write_block_
-  ( const CommBlock * block, 
+  ( const Block      * block, 
     const FieldDescr * field_descr) throw();
 
   /// Implementation of write_meta() and write_meta_group()
@@ -223,7 +223,7 @@ protected: // attributes
   /// Iterator over field id's
   ItField * it_field_;
 
-  /// I/O CommBlock data accessor
+  /// I/O Block data accessor
   IoBlock * io_block_;
 
   /// I/O FieldBlock data accessor

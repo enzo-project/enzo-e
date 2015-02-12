@@ -36,7 +36,7 @@ void EnzoInitialGrackleTest::pup (PUP::er &p)
 
 void EnzoInitialGrackleTest::enforce_block 
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -51,10 +51,10 @@ void EnzoInitialGrackleTest::enforce_block
 #else /* CONFIG_USE_GRACKLE */
 
   ASSERT("EnzoInitialGrackleTest",
-	 "CommBlock does not exist",
-	 comm_block != NULL);
+	 "Block does not exist",
+	 block != NULL);
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
 
   gr_float * density 
@@ -110,10 +110,10 @@ void EnzoInitialGrackleTest::enforce_block
 
   // Cell widths
   double xm,ym;
-  comm_block->block()->lower(&xm,&ym);
+  block->data()->lower(&xm,&ym);
 
   double xp,yp;
-  comm_block->block()->upper(&xp,&yp);
+  block->data()->upper(&xp,&yp);
 
   double hx,hy;
   field.cell_width(xm,xp,&hx,ym,yp,&hy);

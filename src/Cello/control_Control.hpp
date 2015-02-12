@@ -89,7 +89,7 @@
 //   std::string sync_;
 //   std::string curr_name_;
 //   std::string next_name_;
-//   //  void (CommBlock::*next_func_)();
+//   //  void (Block::*next_func_)();
 
 // };
 

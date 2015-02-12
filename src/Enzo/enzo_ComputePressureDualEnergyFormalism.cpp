@@ -29,7 +29,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
   for (int dim = 0; dim < GridRank; dim++)
     size *= GridDimension[dim];
  
-  Field field = block()->field();
+  Field field = data()->field();
 
   enzo_float * density         = (enzo_float *) field.values("density");
   enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");

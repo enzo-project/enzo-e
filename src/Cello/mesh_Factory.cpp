@@ -47,7 +47,7 @@ IoFieldBlock * Factory::create_io_field_block () const throw()
 
 //----------------------------------------------------------------------
 
-CProxy_CommBlock Factory::create_block_array
+CProxy_Block Factory::create_block_array
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -58,7 +58,7 @@ CProxy_CommBlock Factory::create_block_array
   TRACE7("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_blocks %d",
 	 nbx,nby,nbz,nx,ny,nz,num_field_blocks);
 
-  CProxy_CommBlock proxy_block;
+  CProxy_Block proxy_block;
 
   // --------------------------------------------------
   // ENTRY: #1 Factory::create_block_array() -> ArrayMap::ArrayMap()
@@ -69,7 +69,7 @@ CProxy_CommBlock Factory::create_block_array
 
   CkArrayOptions opts;
   opts.setMap(array_map);
-  proxy_block = CProxy_CommBlock::ckNew(opts);
+  proxy_block = CProxy_Block::ckNew(opts);
 
   int count_adapt;
 
@@ -86,7 +86,7 @@ CProxy_CommBlock Factory::create_block_array
 	Index index(ix,iy,iz);
 
 	// --------------------------------------------------
-	// ENTRY: #2 Factory::create_block_array() -> CommBlock::CommBlock()
+	// ENTRY: #2 Factory::create_block_array() -> Block::Block()
 	// ENTRY: level == 0 block array insert
 	// --------------------------------------------------
 	proxy_block[index].insert
@@ -112,9 +112,9 @@ CProxy_CommBlock Factory::create_block_array
 }
 
 //----------------------------------------------------------------------
-CommBlock * Factory::create_block
+Block * Factory::create_block
 (
- CProxy_CommBlock * block_array,
+ CProxy_Block * block_array,
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,
@@ -132,7 +132,7 @@ CommBlock * Factory::create_block
 	 num_field_blocks,count_adapt);
 
   // --------------------------------------------------
-  // ENTRY: #3 Factory::create_block() -> CommBlock::CommBlock()
+  // ENTRY: #3 Factory::create_block() -> Block::Block()
   // ENTRY: level > 0 block array insert
   // --------------------------------------------------
   (*block_array)[index].insert
@@ -147,7 +147,7 @@ CommBlock * Factory::create_block
      testing);
   // --------------------------------------------------
 
-  CommBlock * block = (*block_array)[index].ckLocal();
+  Block * block = (*block_array)[index].ckLocal();
 
   ASSERT("Factory::create_block()","block is NULL",block != NULL);
 

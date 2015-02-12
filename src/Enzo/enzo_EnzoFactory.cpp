@@ -29,7 +29,7 @@ IoBlock * EnzoFactory::create_io_block () const throw()
 
 //----------------------------------------------------------------------
 
-CProxy_CommBlock EnzoFactory::create_block_array
+CProxy_Block EnzoFactory::create_block_array
 (
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -97,9 +97,9 @@ CProxy_CommBlock EnzoFactory::create_block_array
 
 //----------------------------------------------------------------------
 
-CommBlock * EnzoFactory::create_block
+Block * EnzoFactory::create_block
 (
- CProxy_CommBlock * block_array,
+ CProxy_Block * block_array,
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,

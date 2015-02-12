@@ -41,18 +41,18 @@ void IoBlock::meta_value
   int count = 0;
 
   if (index == count++) {
-    *buffer = (void *) & block_->block()->num_field_blocks_;
+    *buffer = (void *) & block_->data()->num_field_blocks_;
     *type   = scalar_type_int;
   } else if (index == count++) {
     *buffer = (void *) & block_->index_;
     *type   = scalar_type_int;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) block_->block()->lower_;
+    *buffer = (void *) block_->data()->lower_;
     *type   = scalar_type_double;
     *nxd     = 3;
   } else if (index == count++) {
-    *buffer = (void *) block_->block()->upper_;
+    *buffer = (void *) block_->data()->upper_;
     *type   = scalar_type_double;
     *nxd     = 3;
   } else if (index == count++) {

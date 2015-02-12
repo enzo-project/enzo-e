@@ -10,21 +10,21 @@
 //----------------------------------------------------------------------
 
 void BoundaryValue::enforce 
-(CommBlock * comm_block, face_enum face, axis_enum axis) const throw()
+(Block * block, face_enum face, axis_enum axis) const throw()
 {
   if ( ! applies_(axis,face)) return;
 
   if (face == face_all) {
-    enforce(comm_block,face_lower,axis);
-    enforce(comm_block,face_upper,axis);
+    enforce(block,face_lower,axis);
+    enforce(block,face_upper,axis);
   } else if (axis == axis_all) {
-    enforce(comm_block,face,axis_x);
-    enforce(comm_block,face,axis_y);
-    enforce(comm_block,face,axis_z);
+    enforce(block,face,axis_x);
+    enforce(block,face,axis_y);
+    enforce(block,face,axis_z);
   } else {
 
-    Block * block = comm_block->block();
-    Field field = block->field();
+    Data * data = block->data();
+    Field field = data->field();
 
     if ( ! field.ghosts_allocated() ) {
       ERROR("EnzoBoundary::enforce",
@@ -33,10 +33,10 @@ void BoundaryValue::enforce
 
     double xm,ym,zm;
     double xp,yp,zp;
-    block -> lower(&xm,&ym,&zm);
-    block -> upper(&xp,&yp,&zp);
+    data -> lower(&xm,&ym,&zm);
+    data -> upper(&xp,&yp,&zp);
 
-    double t = comm_block->time();
+    double t = block->time();
 
     for (size_t index = 0; index < field_list_.size(); index++) {
 
@@ -56,7 +56,7 @@ void BoundaryValue::enforce
       double * y = new double [ndy];
       double * z = new double [ndz];
 
-      block->field_cells(x,y,z,gx,gy,gz);
+      data->field_cells(x,y,z,gx,gy,gz);
 
       void * array = field.values(index_field);
 

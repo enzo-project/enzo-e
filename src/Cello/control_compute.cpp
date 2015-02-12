@@ -8,7 +8,6 @@
 
 #include "simulation.hpp"
 #include "mesh.hpp"
-#include "comm.hpp"
 #include "control.hpp"
 
 #include "charm_simulation.hpp"
@@ -16,9 +15,9 @@
 
 //======================================================================
 
-void CommBlock::compute_begin_ ()
+void Block::compute_begin_ ()
 {
-  TRACE("CommBlock::compute_begin()");
+  TRACE("Block::compute_begin()");
   simulation()->set_phase(phase_compute);
 
   refresh_phase_ = phase_compute_continue;
@@ -32,11 +31,11 @@ void CommBlock::compute_begin_ ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::compute_next_ ()
+void Block::compute_next_ ()
 {
   Method * method = simulation()->problem()->method(index_method_);
 
-  TRACE2 ("CommBlock::compute_next() method = %d %p\n",
+  TRACE2 ("Block::compute_next() method = %d %p\n",
 	  index_method_,method);
 
   if (method) {
@@ -52,7 +51,7 @@ void CommBlock::compute_next_ ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::compute_continue_ ()
+void Block::compute_continue_ ()
 {
 
 #ifdef CONFIG_USE_PROJECTIONS
@@ -61,17 +60,17 @@ void CommBlock::compute_continue_ ()
 
   Method * method = simulation()->problem()->method(index_method_);
 
-  TRACE2 ("CommBlock::compute_continue() method = %d %p\n",
+  TRACE2 ("Block::compute_continue() method = %d %p\n",
 	  index_method_,method);
     
-  // Apply the method to the CommBlock
+  // Apply the method to the Block
   method -> compute (this);
 
 }
 
 //----------------------------------------------------------------------
 
-void CommBlock::compute_stop ()
+void Block::compute_stop ()
 {
 
   index_method_++;
@@ -84,9 +83,9 @@ void CommBlock::compute_stop ()
 
 //----------------------------------------------------------------------
 
-void CommBlock::compute_end_ ()
+void Block::compute_end_ ()
 {
-  TRACE1 ("CommBlock::compute_end() method = %d\n",
+  TRACE1 ("Block::compute_end() method = %d\n",
 	  index_method_);
 
 #ifdef CONFIG_USE_PROJECTIONS

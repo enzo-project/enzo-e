@@ -61,7 +61,6 @@ thisProxy[INDEX_RECV].p_adapt_recv_level (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW
 
 #include "simulation.hpp"
 #include "mesh.hpp"
-#include "comm.hpp"
 #include "control.hpp"
 
 #include "charm_simulation.hpp"
@@ -75,7 +74,7 @@ thisProxy[INDEX_RECV].p_adapt_recv_level (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW
 /// adapt_compute_desired_level_(), after which it calls
 /// adapt_called_() with nearest-neighbor synchronization.
 
-void CommBlock::adapt_begin_()
+void Block::adapt_begin_()
 
 {
   trace("adapt_begin 1");
@@ -96,7 +95,7 @@ void CommBlock::adapt_begin_()
 /// Call adapt_send_level() to send neighbors desired
 /// levels, after which adapt_next_() is called with quiescence
 /// detection.
-void CommBlock::adapt_called_()
+void Block::adapt_called_()
 {
   trace("adapt_called 2");
 
@@ -113,9 +112,9 @@ void CommBlock::adapt_called_()
 ///
 /// Call update_levels_() to finalize face and child face levels,
 /// then, if a leaf, refine or coarsen according to desired level
-/// determined in adapt_called_().  Afterward, all CommBlocks call
+/// determined in adapt_called_().  Afterward, all Blocks call
 /// adapt_end_().
-void CommBlock::adapt_next_()
+void Block::adapt_next_()
 {
 
   debug_faces_("adapt_next");
@@ -140,15 +139,15 @@ void CommBlock::adapt_next_()
 
 //----------------------------------------------------------------------
 
-/// @brief Fourth step of the adapt phase: delete self if CommBlock has
+/// @brief Fourth step of the adapt phase: delete self if Block has
 /// been coarsened
 ///
 /// This step deletes itself if it has been coarsened in this adapt
 /// phase, then exits the adapt phase by directly calling adapt_exit_().
 /// This is a separate phase since the quiescence call of this function
-/// from the previous adapt_next_() step includes CommBlock's that have
+/// from the previous adapt_next_() step includes Block's that have
 /// been deleted.  
-void CommBlock::adapt_end_()
+void Block::adapt_end_()
 {
   trace("adapt_end 4");
 
@@ -196,7 +195,7 @@ void CommBlock::adapt_end_()
 //----------------------------------------------------------------------
 
 /// @brief Return whether the adapt phase should be called this cycle.
-bool CommBlock::do_adapt_()
+bool Block::do_adapt_()
 {
 
   int adapt_interval = simulation()->config()->mesh_adapt_interval;
@@ -207,17 +206,17 @@ bool CommBlock::do_adapt_()
 
 //----------------------------------------------------------------------
 
-/// @brief Determine whether this CommBlock should refine, coarsen, or stay the same.
+/// @brief Determine whether this Block should refine, coarsen, or stay the same.
 ///
 /// Return if not a leaf; otherwise, apply all Refine refinement
-/// criteria to the CommBlock, and set level_desired accordingly:
+/// criteria to the Block, and set level_desired accordingly:
 /// level+1 if it needs to refine, level - 1 if it can coarsen,
 /// or level.
 ///
 /// @param[in]  level_maximum   Maximum level to refine
 ///
 /// @return The desired level based on local refinement criteria.
-int CommBlock::adapt_compute_desired_level_(int level_maximum)
+int Block::adapt_compute_desired_level_(int level_maximum)
 {
 
   if (! is_leaf()) return adapt_same;
@@ -256,7 +255,7 @@ int CommBlock::adapt_compute_desired_level_(int level_maximum)
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_refine_()
+void Block::adapt_refine_()
 {
 
 #ifdef DEBUG_ADAPT
@@ -268,7 +267,7 @@ void CommBlock::adapt_refine_()
   const int rank = this->rank();
   
   int nx,ny,nz;
-  block()->field_block()->size(&nx,&ny,&nz);
+  data()->field_block()->size(&nx,&ny,&nz);
 
   std::vector<int> field_list;
 
@@ -327,7 +326,7 @@ void CommBlock::adapt_refine_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_delete_child_(Index index_child)
+void Block::adapt_delete_child_(Index index_child)
 {
 #ifdef DEBUG_ADAPT
   index_child.print("adapt_delete_child",-1,2,false,simulation());
@@ -341,7 +340,7 @@ void CommBlock::adapt_delete_child_(Index index_child)
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_send_level()
+void Block::adapt_send_level()
 {
   if (!is_leaf()) return;
 
@@ -404,7 +403,7 @@ void CommBlock::adapt_send_level()
 
     } else {
       std::string bit_str = index_.bit_string(-1,2);
-      WARNING3 ("CommBlock::notify_neighbor()",
+      WARNING3 ("Block::notify_neighbor()",
 		"%s level %d and face level %d differ by more than 1",
 		bit_str.c_str(),level,level_face);
     }
@@ -427,7 +426,7 @@ void CommBlock::adapt_send_level()
 /// level_next
 /// level_next_
 /// level
-void CommBlock::p_adapt_recv_level
+void Block::p_adapt_recv_level
 (
  Index index_send,
  int ic3[3],
@@ -490,7 +489,7 @@ void CommBlock::p_adapt_recv_level
 
     } else  {
 
-      WARNING2 ("CommBlock::notify_neighbor()",
+      WARNING2 ("Block::notify_neighbor()",
 		"level %d and face level %d differ by more than 1",
 		level,level_face_curr);
     }
@@ -549,7 +548,7 @@ void CommBlock::p_adapt_recv_level
     // notify neighbors if level_next has changed
 
     if (level_next != level_next_) {
-      ASSERT2 ("CommBlock::p_adapt_recv_level()",
+      ASSERT2 ("Block::p_adapt_recv_level()",
 	       "level_next %d level_next_ %d\n", level_next,level_next_,
 	       level_next > level_next_);
       level_next_ = level_next;
@@ -561,7 +560,7 @@ void CommBlock::p_adapt_recv_level
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_recv_same(const int of3[3],int level_face_new)
+void Block::adapt_recv_same(const int of3[3],int level_face_new)
 {
   // RECV-SAME: Face and level are received from unique
   // neighbor.  Unique face level is updated, and levels on
@@ -588,7 +587,7 @@ void CommBlock::adapt_recv_same(const int of3[3],int level_face_new)
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_face_new)
+void Block::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_face_new)
 {      // RECV-COARSE: Face and level are received from unique
   // neighbor.  Possibly multiple faces of block are updated
   // corresponding to the coarse neighbor's face.  Levels of
@@ -622,7 +621,7 @@ void CommBlock::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_recv_fine(const int of3[3], const int ic3[3],int level_face_new)
+void Block::adapt_recv_fine(const int of3[3], const int ic3[3],int level_face_new)
 {
   // RECV-FINE: Face, level, and sender child indices are received
   // from possibly non-unique neighbor for the corresponding face.
@@ -662,7 +661,7 @@ void CommBlock::adapt_recv_fine(const int of3[3], const int ic3[3],int level_fac
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_recv_recurse(const int if3[3], 
+void Block::adapt_recv_recurse(const int if3[3], 
 				   const int ic3[3], 
 				   int level_face_curr, int level_face_new,
 				   Index index_send)
@@ -676,7 +675,7 @@ void CommBlock::adapt_recv_recurse(const int if3[3],
   index_.print(buffer,-1,2,false,simulation());
 #endif    
 
-  ERROR("CommBlock::adapt_recv_recurse()",
+  ERROR("Block::adapt_recv_recurse()",
 	 "Recurse should not be called");
 
   // Forward to children if internal node
@@ -696,7 +695,7 @@ void CommBlock::adapt_recv_recurse(const int if3[3],
 
 //----------------------------------------------------------------------
 
-void CommBlock::adapt_coarsen_()
+void Block::adapt_coarsen_()
 {
 #ifdef DEBUG_ADAPT
   index_.print("COARSEN",-1,2,false,simulation());
@@ -739,7 +738,7 @@ void CommBlock::adapt_coarsen_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_adapt_recv_child
+void Block::p_adapt_recv_child
 (
  int ic3[3],
  int na, char * array,
@@ -781,7 +780,7 @@ void CommBlock::p_adapt_recv_child
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_adapt_delete()
+void Block::p_adapt_delete()
 {
 #ifdef DEBUG_ADAPT
   index_.print("DELETING",-1,2,false,simulation());
@@ -791,7 +790,7 @@ void CommBlock::p_adapt_delete()
 
 //======================================================================
 
-void CommBlock::initialize_child_face_levels_()
+void Block::initialize_child_face_levels_()
 {
   const int  rank         = this->rank();
   const int level = this->level();
@@ -833,7 +832,7 @@ void CommBlock::initialize_child_face_levels_()
 
 //----------------------------------------------------------------------
 
-bool CommBlock::parent_face_
+bool Block::parent_face_
 (int       ip3[3],
  const int if3[3],
  const int ic3[3]) const

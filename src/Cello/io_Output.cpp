@@ -236,7 +236,7 @@ void Output::write_hierarchy_
   if (CkMyPe() == 0) {
 
     // --------------------------------------------------
-    // ENTRY: #1 Output::write_hierarchy_()-> CommBlock::p_output_write()
+    // ENTRY: #1 Output::write_hierarchy_()-> Block::p_output_write()
     // ENTRY: Block array if Simulation is root
     // --------------------------------------------------
     hierarchy->block_array()->p_output_write(index_);
@@ -248,14 +248,14 @@ void Output::write_hierarchy_
 
 void Output::write_block_
 (
- const CommBlock * comm_block,
+ const Block * block,
  const FieldDescr * field_descr
  ) throw()
 {
   // Write fields
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
-    const FieldBlock * field_block = comm_block->block()->field_block();
+    const FieldBlock * field_block = block->data()->field_block();
     write_field_block (field_block,  field_descr, it_field_->value());
   }
 

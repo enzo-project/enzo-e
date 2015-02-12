@@ -36,7 +36,7 @@ public: // virtual functions
   /// Evaluate the timestep for the block
 
   virtual double evaluate 
-  ( const FieldDescr * field_descr, CommBlock * block ) throw() = 0; 
+  ( const FieldDescr * field_descr, Block * block ) throw() = 0; 
 
 };
 

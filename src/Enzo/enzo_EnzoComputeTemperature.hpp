@@ -33,12 +33,12 @@ public: // interface
   void pup (PUP::er &p);
   
   /// Perform the computation on the block
-  virtual void compute( CommBlock * comm_block) throw();
+  virtual void compute( Block * block) throw();
 
 private: // functions
 
   template <typename T>
-  void compute_(CommBlock * comm_block);
+  void compute_(Block * block);
 
 private: // attributes
 

@@ -87,7 +87,7 @@ public: // virtual functions
 
   /// Write block-related field data
   virtual void write_block
-  ( const CommBlock * block,
+  ( const Block * block,
     const FieldDescr * field_descr) throw();
 
   /// Write fields
@@ -135,7 +135,7 @@ private: // functions
   void reduce_point_ ( double * data, 
 		       double value, double alpha=1.0) throw();
 
-  void extents_img_ (const CommBlock * comm_block,
+  void extents_img_ (const Block * block,
 		     int *ixm, int *ixp,
 		     int *iym, int *iyp,
 		     int *izm, int *izp ) const;

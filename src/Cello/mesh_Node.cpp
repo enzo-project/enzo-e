@@ -32,8 +32,8 @@ void Node::pup (PUP::er &p)
   // Patch *& data_alias = (Patch *) data_;
   p | have_data_;
   if (have_data_) {
-    if (up) data_ = (void *) new CProxy_CommBlock;
-    p | *((CProxy_CommBlock *)data_);
+    if (up) data_ = (void *) new CProxy_Block;
+    p | *((CProxy_Block *)data_);
   }
   p | child_array_;
 };

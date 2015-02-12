@@ -78,7 +78,7 @@ module enzo {
 
   }
 
-  array[Index] EnzoBlock : CommBlock {
+  array[Index] EnzoBlock : Block {
 
     entry EnzoBlock // [EB0]
       (Index index,

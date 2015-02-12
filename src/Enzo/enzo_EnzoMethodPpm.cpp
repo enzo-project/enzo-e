@@ -33,14 +33,14 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpm::compute ( CommBlock * comm_block) throw()
+void EnzoMethodPpm::compute ( Block * block) throw()
 {
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  if (comm_block->is_leaf()) {
+  if (block->is_leaf()) {
 
     enzo_block->SolveHydroEquations 
-      ( comm_block->time(), comm_block->dt(), comoving_coordinates_ );
+      ( block->time(), block->dt(), comoving_coordinates_ );
 
   }
 
@@ -50,11 +50,11 @@ void EnzoMethodPpm::compute ( CommBlock * comm_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpm::timestep ( CommBlock * comm_block ) const throw()
+double EnzoMethodPpm::timestep ( Block * block ) const throw()
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
-  Field field = enzo_block->block()->field();
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  Field field = enzo_block->data()->field();
 
   enzo_float * density    = (enzo_float *)field.values("density");
   enzo_float * velocity_x = (enzo_float *)field.values("velocity_x");
@@ -84,7 +84,7 @@ double EnzoMethodPpm::timestep ( CommBlock * comm_block ) const throw()
   /* 3) Find dt from expansion. */
  
   if (comoving_coordinates_)
-    if (enzo_block->CosmologyComputeExpansionTimestep(comm_block->time(), &dtExpansion) == ENZO_FAIL) {
+    if (enzo_block->CosmologyComputeExpansionTimestep(block->time(), &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }

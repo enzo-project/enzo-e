@@ -39,17 +39,17 @@ public: // virtual functions
 
   /// Apply the method to advance a block one timestep 
 
-  virtual void compute ( CommBlock * comm_block) throw() = 0; 
+  virtual void compute ( Block * block) throw() = 0; 
 
   /// Resume computation after a reduction
-  virtual void compute_resume ( CommBlock * comm_block,
+  virtual void compute_resume ( Block * block,
 				CkReductionMsg * msg) throw()
   {
     /* This function intentionally empty */
   }
 
   /// Compute maximum timestep for this method
-  virtual double timestep (CommBlock * comm_block) const throw() 
+  virtual double timestep (Block * block) const throw() 
   { return std::numeric_limits<double>::max(); }
 
   /// Append a Refresh index to the list of indices

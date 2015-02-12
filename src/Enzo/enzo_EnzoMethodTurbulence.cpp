@@ -51,12 +51,12 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
+void EnzoMethodTurbulence::compute ( Block * block) throw()
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
     (enzo_block->simulation()->config());
@@ -105,7 +105,7 @@ void EnzoMethodTurbulence::compute ( CommBlock * comm_block) throw()
   field.dimensions (0,&mx,&my,&mz);
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
-  if (comm_block->is_leaf()) {
+  if (block->is_leaf()) {
 
     for (int iz=gz; iz<gz+nz; iz++) {
       for (int iy=gy; iy<gy+ny; iy++) {
@@ -175,35 +175,35 @@ void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
 //----------------------------------------------------------------------
 
 void EnzoMethodTurbulence::compute_resume 
-(CommBlock * comm_block,
+(Block * block,
  CkReductionMsg * msg) throw()
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   double * g = enzo_block->method_turbulence_data;
   for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
     g[i] = ((double *)msg->getData())[i];
   }
 
-  Block * block = comm_block->block();
-  Field field = block->field();
+  Data * data = block->data();
+  Field field = data->field();
   
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
   int n = nx*ny*nz;
 
-  double dt = comm_block->dt();
+  double dt = block->dt();
 
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
   double xdm,ydm,zdm;
-  block->lower(&xdm,&ydm,&zdm);
+  data->lower(&xdm,&ydm,&zdm);
   double xdp,ydp,zdp;
-  block->upper(&xdp,&ydp,&zdp);
+  data->upper(&xdp,&ydp,&zdp);
 
   // compute edot (TurbulenceSimulationInitialize.C)
 
@@ -277,9 +277,9 @@ void EnzoMethodTurbulence::compute_resume
   // norm = (dt/dt0)*norm;
 
 
-  if (comm_block->index().is_root()) {
+  if (block->index().is_root()) {
 
-    Monitor * monitor = comm_block->simulation()->monitor();
+    Monitor * monitor = block->simulation()->monitor();
 
     monitor->print ("Method","sum v*a*d   = %lg",g[INDEX_TURBULENCE_VAD]);
     monitor->print ("Method","sum a*a*d   = %lg",g[INDEX_TURBULENCE_AAD]);
@@ -318,31 +318,31 @@ void EnzoMethodTurbulence::compute_resume
 		    g[INDEX_TURBULENCE_maxD]);                  
   }
 
-  if (!comm_block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
   const int p = field.precision (0);
 
   if      (p == precision_single)    
-    compute_resume_<float> (comm_block,msg);
+    compute_resume_<float> (block,msg);
   else if (p == precision_double)    
-    compute_resume_<double> (comm_block,msg);
+    compute_resume_<double> (block,msg);
   else if (p == precision_quadruple) 
-    compute_resume_<long double> (comm_block,msg);
+    compute_resume_<long double> (block,msg);
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
 void EnzoMethodTurbulence::compute_resume_ 
-(CommBlock * comm_block,
+(Block * block,
  CkReductionMsg * msg) throw()
 {
 
   // Compute normalization
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
   int ndx,ndy,ndz;
   field.size(&ndx,&ndy,&ndz);
@@ -350,7 +350,7 @@ void EnzoMethodTurbulence::compute_resume_
 
   double * g = enzo_block->method_turbulence_data;
 
-  double dt = comm_block->dt();
+  double dt = block->dt();
 
   double norm = (edot_ != 0.0) ?
     ( sqrt(g[0]*g[0] + 2.0*nd*g[1]*dt*edot_) - g[0] ) / g[1] : 0.0;

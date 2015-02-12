@@ -33,12 +33,12 @@ RefineSlope::RefineSlope(const FieldDescr * field_descr,
 
 int RefineSlope::apply 
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr
  ) throw ()
 {
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  FieldBlock * field_block = block->data()->field_block();
 
   bool all_coarsen = true;
   bool any_refine = false;
@@ -49,10 +49,10 @@ int RefineSlope::apply
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
   double h3[3];
-  Block * block = comm_block->block();
+  Data * data = block->data();
   double xm[3],xp[3];
-  block->lower(&xm[0],&xm[1],&xm[2]);
-  block->upper(&xp[0],&xp[1],&xp[2]);
+  data->lower(&xm[0],&xm[1],&xm[2]);
+  data->upper(&xp[0],&xp[1],&xp[2]);
   field_block->cell_width(xm[0],xp[0],&h3[0]);
   field_block->cell_width(xm[1],xp[1],&h3[1]);
   field_block->cell_width(xm[2],xp[2],&h3[2]);

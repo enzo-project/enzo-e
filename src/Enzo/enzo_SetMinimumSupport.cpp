@@ -34,7 +34,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     for (dim = 0; dim < GridRank; dim++)
       size *= GridDimension[dim];
  
-    Field field = block()->field();
+    Field field = data()->field();
 
     enzo_float * density         = (enzo_float*) field.values("density");
     enzo_float * total_energy    = (enzo_float *)field.values("total_energy");

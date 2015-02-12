@@ -88,7 +88,7 @@ enum hydro_type
 
 //----------------------------------------------------------------------
 // WARNING 100 must be larger than number of phases in
-// src/Cello/_comm.hpp phase_type
+// src/Cello/_mesh.hpp phase_type
 
 enum enzo_phase_type 
   {

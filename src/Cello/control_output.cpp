@@ -16,7 +16,6 @@
 
 #include "simulation.hpp"
 #include "mesh.hpp"
-#include "comm.hpp"
 #include "control.hpp"
 
 #include "charm_simulation.hpp"
@@ -24,9 +23,9 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::output_begin_ ()
+void Block::output_begin_ ()
 {
-  TRACE_LOCAL("CommBlock::output_begin_()");
+  TRACE_LOCAL("Block::output_begin_()");
 
   // Determine if there is any output this cycle
 
@@ -65,9 +64,9 @@ void CommBlock::output_begin_ ()
 void Simulation::begin_output ()
 {
 
-  TRACE_LOCAL("CommBlock::output_begin()");
+  TRACE_LOCAL("Block::output_begin()");
 
-  // Switching from CommBlock to Simulation: wait for last CommBlock
+  // Switching from Block to Simulation: wait for last Block
 
   if (sync_output_begin_.next()) {
 
@@ -139,9 +138,9 @@ void Problem::output_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_output_write (int index_output)
+void Block::p_output_write (int index_output)
 {
-  TRACE_LOCAL("CommBlock::p_output_write()");
+  TRACE_LOCAL("Block::p_output_write()");
 
   FieldDescr * field_descr = simulation()->field_descr();
   Output * output = simulation()->problem()->output(index_output);
@@ -269,7 +268,7 @@ void Simulation::output_exit()
 
 //----------------------------------------------------------------------
 
-void CommBlock::p_output_end()
+void Block::p_output_end()
 {
   control_next();
 }

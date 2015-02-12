@@ -62,7 +62,7 @@ void Hierarchy::pup (PUP::er &p)
 
   p | num_blocks_;
   // clear if unpacking: load balancing expects num_blocks_ to be
-  // updated by CommBlock(CkMigrateMessage) and ~CommBlock(), but
+  // updated by Block(CkMigrateMessage) and ~Block(), but
   // checkpoint / restart then double-counts Blocks.
 
   if (up) num_blocks_ = 0;
@@ -71,7 +71,7 @@ void Hierarchy::pup (PUP::er &p)
   bool allocated=(block_array_ != NULL);
   p|allocated;
   if (allocated) {
-    if (up) block_array_=new CProxy_CommBlock;
+    if (up) block_array_=new CProxy_Block;
     p|*block_array_;
   } else {
     block_array_ = NULL;
@@ -215,7 +215,7 @@ void Hierarchy::create_forest
 	   (blocking_[2]*mbz == root_size_[2]))) {
 
       ERROR6("Forest::allocate_array_()",  
-	     "CommBlocks must evenly subdivide forest: "
+	     "Blocks must evenly subdivide forest: "
 	     "forest size = (%d %d %d)  block count = (%d %d %d)",
 	     root_size_[0],root_size_[1],root_size_[2],
 	     blocking_[0],blocking_[1],blocking_[2]);
@@ -228,7 +228,7 @@ void Hierarchy::create_forest
 
     TRACE("Allocating block_array_");
 
-    block_array_ = new CProxy_CommBlock;
+    block_array_ = new CProxy_Block;
 
     (*block_array_) = factory_->create_block_array
       (blocking_[0],blocking_[1],blocking_[2],

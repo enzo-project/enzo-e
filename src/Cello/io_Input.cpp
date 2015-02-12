@@ -102,7 +102,7 @@ void Input::read_hierarchy
   if (CkMyPe() == 0)
 
     // --------------------------------------------------
-    // ENTRY: #1 Input::read_hierarchy()-> CommBlock::p_output_read()
+    // ENTRY: #1 Input::read_hierarchy()-> Block::p_output_read()
     // ENTRY: Block array if Simulation is root
     // --------------------------------------------------
     hierarchy->block_array()->p_output_read (index_charm_);
@@ -112,9 +112,9 @@ void Input::read_hierarchy
 
 //----------------------------------------------------------------------
 
-CommBlock * Input::read_block
+Block * Input::read_block
 (
- CommBlock * comm_block,
+ Block * block,
  std::string block_name,
  const FieldDescr * field_descr
  ) throw()
@@ -123,9 +123,9 @@ CommBlock * Input::read_block
 
   for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
     int field_index = it_field_->value();
-    read_field (comm_block->block()->field_block(), field_descr, field_index);
+    read_field (block->data()->field_block(), field_descr, field_index);
   }
-  return comm_block;
+  return block;
 }
 
 //======================================================================

@@ -36,14 +36,14 @@ public: // interface
 
   /// Read initialization values from Initial group in parameter file
 
-  virtual void enforce_block (CommBlock * block,
+  virtual void enforce_block (Block * block,
 			      const FieldDescr * field_descr,
 			      const Hierarchy * hierarchy
 			      ) throw();
 
 private: // functions
   
-  void allocate_xyzt_(CommBlock * block,
+  void allocate_xyzt_(Block * block,
 		      int index_field,
 		      const FieldBlock * field_block,
 		      const FieldDescr * field_descr,
@@ -66,7 +66,7 @@ private: // functions
 			double * x, double * y, double * z, double t) throw();
 
   void evaluate_mask_ (const Hierarchy * hierarchy,
-		       const CommBlock * block,
+		       const Block * block,
 		       FieldBlock * field_block,
 		       int index_field, int index_value,
 		       std::string field_name,
@@ -82,7 +82,7 @@ private: // functions
   void evaluate_mask_png_ ( bool            * mask_block, int nxb, int nyb,
 			    bool            * mask_png,   int nx,  int ny,
 			    const Hierarchy * hierarchy,
-			    const CommBlock * comm_block,
+			    const Block     * block,
 			    const FieldDescr * field_descr);
 
   template<class T>

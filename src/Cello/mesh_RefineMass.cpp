@@ -48,11 +48,11 @@ RefineMass::RefineMass
 
 int RefineMass::apply 
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr
  ) throw ()
 {
-  FieldBlock * field_block = comm_block->block()->field_block();
+  FieldBlock * field_block = block->data()->field_block();
   int level = 0;
 
   WARNING ("RefineMass::RefineMass()",

@@ -36,16 +36,16 @@ public: // interface
   void pup (PUP::er &p);
   
   /// Apply the method to advance a block one timestep 
-  virtual void compute( CommBlock * comm_block) throw();
+  virtual void compute( Block * block) throw();
 
   /// Resume computation after a reduction
-  virtual void compute_resume ( CommBlock * comm_block,
+  virtual void compute_resume ( Block * block,
 				CkReductionMsg * msg) throw(); 
 
 private: // methods
 
   template <class T>
-  void compute_resume_ (CommBlock * comm_block, CkReductionMsg * msg) throw();
+  void compute_resume_ (Block * block, CkReductionMsg * msg) throw();
 
 private: // attributes
 

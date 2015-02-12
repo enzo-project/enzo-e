@@ -17,7 +17,7 @@ class Factory : public PUP::able
   /// @class    Factory
   /// @ingroup  Mesh 
   /// @brief [\ref Mesh] Abstract class for creating concrete Hierarchy,
-  /// Patch, and CommBlock objects
+  /// Patch, and Block objects
 
 public: // interface
 
@@ -44,24 +44,24 @@ public: // interface
    int rank, int refinement,
    int process_first, int process_last_plus) const throw ();
 
-  /// Create an Input / Output accessor object for CommBlock
+  /// Create an Input / Output accessor object for Block
   virtual IoBlock * create_io_block ( ) const throw();
 
   /// Create an Input / Output accessor object for a FieldBlock
   virtual IoFieldBlock * create_io_field_block ( ) const throw();
 
-  /// Create a new CHARM++ CommBlock array
-  virtual CProxy_CommBlock create_block_array
+  /// Create a new CHARM++ Block array
+  virtual CProxy_Block create_block_array
   (
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks,
    bool testing = false) const throw();
 
-  /// Create a new CommBlock
-  virtual CommBlock * create_block
+  /// Create a new Block
+  virtual Block * create_block
   (
-   CProxy_CommBlock * block_array,
+   CProxy_Block * block_array,
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,

@@ -8,7 +8,6 @@
 
 #include "simulation.hpp"
 #include "mesh.hpp"
-#include "comm.hpp"
 #include "control.hpp"
 
 #include "charm_simulation.hpp"
@@ -45,7 +44,7 @@ void Simulation::initialize() throw()
 
   // initialize_forest_() is called in charm_initialize
   // using QD to ensure that initialize_hierarchy() is called
-  // on all processors before CommBlocks are created
+  // on all processors before Blocks are created
 
   // Barrier (why?)
 
@@ -86,7 +85,7 @@ void Simulation::r_initialize_hierarchy(CkReductionMsg * msg)
   if (CkMyPe() == 0) {
     
     // --------------------------------------------------
-    // ENTRY: #3 Simulation::r_initialize_hierarchy() -> CommBlock::p_adapt_mesh()
+    // ENTRY: #3 Simulation::r_initialize_hierarchy() -> Block::p_adapt_mesh()
     // ENTRY: Block Array if Simulation is_root()
     // --------------------------------------------------
     (*hierarchy()->block_array() ).p_initial_exit();

@@ -8,15 +8,14 @@
 ///
 ///    STOPPING
 ///        
-///    CommBlock::stopping()
+///    Block::stopping()
 ///       update_boundary_()
 ///       compute dt
 ///       compute stopping
-///       contribute( >>>>> CommBlock::r_output() >>>>> )
+///       contribute( >>>>> Block::r_output() >>>>> )
 
 #include "simulation.hpp"
 #include "mesh.hpp"
-#include "comm.hpp"
 #include "control.hpp"
 
 #include "charm_simulation.hpp"
@@ -37,7 +36,7 @@
 
 //----------------------------------------------------------------------
 
-void CommBlock::stopping_begin_()
+void Block::stopping_begin_()
 {
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -83,14 +82,14 @@ void CommBlock::stopping_begin_()
 
     int stop_block = stopping->complete(cycle_,time_);
 
-    // Reduce to find CommBlock array minimum dt and stopping criteria
+    // Reduce to find Block array minimum dt and stopping criteria
 
     double min_reduce[2];
 
     min_reduce[0] = dt_block;
     min_reduce[1] = stop_block ? 1.0 : 0.0;
 
-    CkCallback callback (CkIndex_CommBlock::r_stopping_compute_timestep(NULL),
+    CkCallback callback (CkIndex_Block::r_stopping_compute_timestep(NULL),
 			 thisProxy);
 
     contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
@@ -105,7 +104,7 @@ void CommBlock::stopping_begin_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
+void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
 
   ++age_;
@@ -165,7 +164,7 @@ void CommBlock::r_stopping_compute_timestep(CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-void CommBlock::stopping_balance_()
+void Block::stopping_balance_()
 {
 
   int balance_interval =  simulation()->config()->balance_interval;
@@ -184,7 +183,7 @@ void CommBlock::stopping_balance_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::ResumeFromSync()
+void Block::ResumeFromSync()
 {
   VERBOSE("balance_exit");
 
@@ -193,7 +192,7 @@ void CommBlock::ResumeFromSync()
 
 //----------------------------------------------------------------------
 
-void CommBlock::exit_()
+void Block::exit_()
 {
   if (index_.is_root()) {
     proxy_main.p_exit(1);

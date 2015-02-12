@@ -44,39 +44,39 @@ void EnzoComputeTemperature::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoComputeTemperature::compute ( CommBlock * comm_block) throw()
+void EnzoComputeTemperature::compute ( Block * block) throw()
 {
 
-  if (!comm_block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
   if (field.precision(0) == precision_single) {
-    compute_<float>(comm_block);
+    compute_<float>(block);
   } else if (field.precision(0) == precision_double) {
-    compute_<double>(comm_block);
+    compute_<double>(block);
   }
 }
 
 //----------------------------------------------------------------------
 
 template <typename T>
-void EnzoComputeTemperature::compute_(CommBlock * comm_block)
+void EnzoComputeTemperature::compute_(Block * block)
 {
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  Field field = enzo_block->block()->field();
+  Field field = enzo_block->data()->field();
 
   EnzoComputePressure compute_pressure(EnzoBlock::Gamma,
 				       comoving_coordinates_);
 
-  compute_pressure.compute(comm_block);
+  compute_pressure.compute(block);
 
   T * t = (T*) field.values("temperature");
   T * d = (T*) field.values("density");
   T * p = (T*) field.values("pressure");
 
-  const int rank = comm_block->rank();
+  const int rank = block->rank();
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);

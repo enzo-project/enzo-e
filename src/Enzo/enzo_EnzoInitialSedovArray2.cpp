@@ -49,7 +49,7 @@ void EnzoInitialSedovArray2::pup (PUP::er &p)
 //----------------------------------------------------------------------
 void EnzoInitialSedovArray2::enforce_block
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -57,10 +57,10 @@ void EnzoInitialSedovArray2::enforce_block
 {
 
   ASSERT("EnzoInitialSedovArray2",
-	 "CommBlock does not exist",
-	 comm_block != NULL);
+	 "Block does not exist",
+	 block != NULL);
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
   ASSERT("EnzoInitialSedovArray2",
 	 "Insufficient number of fields",
@@ -78,10 +78,10 @@ void EnzoInitialSedovArray2::enforce_block
   field.size(&nx,&ny);
 
   double xbm,ybm;
-  comm_block->block()->lower(&xbm,&ybm);
+  block->data()->lower(&xbm,&ybm);
 
   double xbp,ybp;
-  comm_block->block()->upper(&xbp,&ybp);
+  block->data()->upper(&xbp,&ybp);
 
   double hx,hy;
   field.cell_width(xbm,xbp,&hx,

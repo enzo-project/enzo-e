@@ -14,7 +14,7 @@ class CProxy_EnzoBlock;
 
 #include "enzo.decl.h"
 
-class EnzoBlock : public CommBlock
+class EnzoBlock : public Block
 
 {
 
@@ -129,7 +129,7 @@ public: // interface
 
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
-    : CommBlock (m)
+    : Block (m)
   {
     TRACE("CkMigrateMessage");
     //    initialize();
@@ -148,10 +148,10 @@ public: // interface
   // Charm++ virtual 
   //--------------------------------------------------
 
-  virtual const CProxy_CommBlock proxy_array() const 
+  virtual const CProxy_Block proxy_array() const 
   { return thisProxy; }
 
-  virtual const CProxyElement_CommBlock proxy_element() const 
+  virtual const CProxyElement_Block proxy_element() const 
   { return thisProxy[thisIndex]; }
 
 

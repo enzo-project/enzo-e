@@ -40,7 +40,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
  
   /* Find fields: density, total energy, velocity1-3. */
  
-  Field field = block()->field();
+  Field field = data()->field();
   
   enzo_float * density         = (enzo_float *) field.values("density");
   enzo_float * total_energy    = (enzo_float *) field.values("total_energy");

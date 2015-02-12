@@ -55,7 +55,7 @@ PARALLEL_MAIN_BEGIN
   const double t =   7.0;
   FieldDescr * field_descr = new FieldDescr;
 
-  Block block(field_descr,nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
+  Data data(field_descr,nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
 
   double x[nx], y[ny], z[nz];
 
@@ -64,7 +64,7 @@ PARALLEL_MAIN_BEGIN
   unit_func ("Mask()");
   unit_assert (mask != NULL);
 
-  block.field_cells(x,y,z);
+  data.field_cells(x,y,z);
 
   unit_finalize();
 

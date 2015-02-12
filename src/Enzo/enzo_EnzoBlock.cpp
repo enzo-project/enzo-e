@@ -186,7 +186,7 @@ EnzoBlock::EnzoBlock
  int num_face_level, int * face_level,
  bool testing
 ) throw()
-  : CommBlock 
+  : Block 
     (
      index,
      nx,ny,nz,
@@ -232,7 +232,7 @@ void EnzoBlock::pup(PUP::er &p)
   TRACEPUP;
   TRACE ("BEGIN EnzoBlock::pup()");
 
-  CommBlock::pup(p);
+  Block::pup(p);
 
   p | dt;
   static bool warn0 = true;
@@ -393,7 +393,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 
 void EnzoBlock::set_dt (double dt_param) throw ()
 {
-  CommBlock::set_dt (dt_param);
+  Block::set_dt (dt_param);
 
   dt = dt_param;
 }
@@ -402,7 +402,7 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 void EnzoBlock::set_stop (bool stop) throw ()
 {
-  CommBlock::set_stop (stop);
+  Block::set_stop (stop);
 }
 
 //----------------------------------------------------------------------
@@ -413,7 +413,7 @@ void EnzoBlock::initialize () throw()
 
   double xm,ym,zm;
 
-  block()->lower(&xm,&ym,&zm);
+  data()->lower(&xm,&ym,&zm);
 
   GridLeftEdge[0]  = xm;
   GridLeftEdge[1]  = ym;
@@ -421,7 +421,7 @@ void EnzoBlock::initialize () throw()
 
   // Grid dimensions
 
-  Field field = block()->field();
+  Field field = data()->field();
 
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);
@@ -449,7 +449,7 @@ void EnzoBlock::initialize () throw()
   // Initialize CellWidth
 
   double xp,yp,zp;
-  block()->upper(&xp,&yp,&zp);
+  data()->upper(&xp,&yp,&zp);
   double hx,hy,hz;
   field.cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
 

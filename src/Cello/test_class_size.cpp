@@ -20,7 +20,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  printf ("%4ld sizeof(CommBlock)\n",sizeof(CommBlock));
+  printf ("%4ld sizeof(Block)\n",sizeof(Block));
   printf ("%4ld sizeof(Boundary)\n",sizeof(Boundary));
   printf ("%4ld sizeof(EnzoBlock)\n",sizeof(EnzoBlock));
   printf ("%4ld sizeof(Factory)\n",sizeof(Factory));

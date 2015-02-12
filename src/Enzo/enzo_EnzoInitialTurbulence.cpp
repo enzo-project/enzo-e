@@ -46,22 +46,22 @@ void EnzoInitialTurbulence::pup (PUP::er &p)
 
 void EnzoInitialTurbulence::enforce_block 
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
 
 {
 
-  if (!comm_block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
   //  INCOMPLETE("EnzoInitialTurbulence::enforce_block()");
 
   ASSERT("EnzoInitialTurbulence",
-	 "CommBlock does not exist",
-	 comm_block != NULL);
+	 "Block does not exist",
+	 block != NULL);
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
   enzo_float *  d = (enzo_float *) field.values("density");
   enzo_float *  p = (enzo_float *) field.values("pressure");
@@ -75,7 +75,7 @@ void EnzoInitialTurbulence::enforce_block
 
   enzo_float * te = (enzo_float *) field.values("total_energy");
 
-  int rank = comm_block->simulation()->rank();
+  int rank = block->simulation()->rank();
 
   ASSERT("EnzoInitializeTurbulence::enforce_block()",
 	 "Missing Field 'density'", d);
@@ -105,10 +105,10 @@ void EnzoInitialTurbulence::enforce_block
 	 "Missing Field 'total_energy'",  te);
 
   double xm,ym,zm;
-  comm_block->block()->lower(&xm,&ym,&zm);
+  block->data()->lower(&xm,&ym,&zm);
 
   double xp,yp,zp;
-  comm_block->block()->upper(&xp,&yp,&zp);
+  block->data()->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
   field.cell_width(xm,xp,&hx,
@@ -127,7 +127,7 @@ void EnzoInitialTurbulence::enforce_block
   // initialize driving fields using turboinit
 
   int Nx,Ny,Nz;
-  comm_block->simulation()->hierarchy()->root_size (&Nx, &Ny, &Nz);
+  block->simulation()->hierarchy()->root_size (&Nx, &Ny, &Nz);
 
   // assumes cubical domain
 
@@ -139,10 +139,10 @@ void EnzoInitialTurbulence::enforce_block
 	   (Nx == Ny && Ny == Nz));
 
   // scale by level
-  for (int i=0; i<comm_block->level(); i++) Nx  *= 2;
+  for (int i=0; i<block->level(); i++) Nx  *= 2;
 
   // compute offsets
-  Index index = comm_block->index();
+  Index index = block->index();
 
   int ix,iy,iz;
   index.array(&ix,&iy,&iz);
@@ -215,7 +215,7 @@ void EnzoInitialTurbulence::enforce_block
   } else {
     bool comoving_coordinates = false;
     EnzoComputePressure compute_pressure(gamma_,comoving_coordinates);
-    compute_pressure.compute(comm_block);
+    compute_pressure.compute(block);
   }
 
   if (temperature_defined) {

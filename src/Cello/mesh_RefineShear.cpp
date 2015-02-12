@@ -21,12 +21,12 @@ RefineShear::RefineShear(const FieldDescr * field_descr,
 
 int RefineShear::apply 
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr
  ) throw ()
 {
 
-  FieldBlock * field_block = comm_block->block()->field_block();
+  FieldBlock * field_block = block->data()->field_block();
 
   bool all_coarsen = true;
   bool any_refine = false;
@@ -36,10 +36,10 @@ int RefineShear::apply
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
-  Block * block = comm_block->block();
+  Data * data = block->data();
   double xm[3],xp[3];
-  block->lower(&xm[0],&xm[1],&xm[2]);
-  block->upper(&xp[0],&xp[1],&xp[2]);
+  data->lower(&xm[0],&xm[1],&xm[2]);
+  data->upper(&xp[0],&xp[1],&xp[2]);
 
   int id_velocity = field_descr->field_id("velocity_x");
 

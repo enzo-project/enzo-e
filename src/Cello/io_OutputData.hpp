@@ -63,7 +63,7 @@ public: // virtual functions
 
   /// Write block data to disk
   virtual void write_block
-  ( const CommBlock * block,
+  ( const Block      * block,
     const FieldDescr * field_descr) throw();
 
 

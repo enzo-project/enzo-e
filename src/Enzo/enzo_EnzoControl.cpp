@@ -19,7 +19,7 @@ void EnzoBlock::control_sync
 
   
   if (phase < phase_enzo_first) {
-    CommBlock::control_sync(phase,sync,next_phase,file,line);
+    Block::control_sync(phase,sync,next_phase,file,line);
     return;
   } 
 
@@ -64,7 +64,7 @@ void EnzoBlock::control_call_phase_ (int phase)
 {
 
   if (phase < phase_enzo_first) {
-    CommBlock::control_call_phase_(phase);
+    Block::control_call_phase_(phase);
     return;
   }
 

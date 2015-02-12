@@ -31,12 +31,12 @@ EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
 
 int EnzoRefineShock::apply 
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr
  ) throw ()
 {
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
   bool all_coarsen = true;
   bool any_refine = false;
@@ -49,12 +49,12 @@ int EnzoRefineShock::apply
   // compute pressure using the EnzoComputePressure class
   EnzoComputePressure compute_pressure (EnzoBlock::Gamma,
 					comoving_coordinates_);
-  compute_pressure.compute(comm_block);
+  compute_pressure.compute(block);
 
-  Block * block = comm_block->block();
+  Data * data = block->data();
   double xm[3],xp[3];
-  block->lower(&xm[0],&xm[1],&xm[2]);
-  block->upper(&xp[0],&xp[1],&xp[2]);
+  data->lower(&xm[0],&xm[1],&xm[2]);
+  data->upper(&xp[0],&xp[1],&xp[2]);
 
   int id_velocity = field.field_id("velocity_x");
 

@@ -282,11 +282,11 @@ void EnzoMethodGravityBiCGStab::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityBiCGStab::compute ( CommBlock * comm_block) throw()
+void EnzoMethodGravityBiCGStab::compute ( Block * block) throw()
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
-  Field field = enzo_block->block()->field();
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  Field field = enzo_block->data()->field();
 
   // density field
 
@@ -316,17 +316,17 @@ void EnzoMethodGravityBiCGStab::compute ( CommBlock * comm_block) throw()
 
   if      (p == precision_single)
     compute_
-      ( comm_block, 
+      ( block, 
 	(float*) density, md3,nd3, 
 	(float*) potential, mp3,np3);
   else if (p == precision_double)
     compute_
-      ( comm_block, 
+      ( block, 
 	(double*) density, md3,nd3, 
 	(double*) potential, mp3,np3);
   else if (p == precision_quadruple)
     compute_
-      ( comm_block, 
+      ( block, 
 	(long double*) density, md3,nd3, 
 	(long double*) potential, mp3,np3);
   else 
@@ -337,12 +337,12 @@ void EnzoMethodGravityBiCGStab::compute ( CommBlock * comm_block) throw()
 
 template <class T>
 void EnzoMethodGravityBiCGStab::compute_ 
-(CommBlock * comm_block,
+(Block * block,
  T * density,   int md3[3], int nd3[3],
  T * potential, int mp3[3], int np3[3]) const throw()
 {
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   printf ("potential size %d %d %d  dim %d %d %d\n",
 	  np3[0],np3[1],np3[2],

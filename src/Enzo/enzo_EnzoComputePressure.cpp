@@ -37,27 +37,27 @@ void EnzoComputePressure::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoComputePressure::compute ( CommBlock * comm_block) throw()
+void EnzoComputePressure::compute ( Block * block) throw()
 {
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
   if (field.precision(0) == precision_single) {
-    compute_<float>(comm_block);
+    compute_<float>(block);
   } else if (field.precision(0) == precision_double) {
-    compute_<double>(comm_block);
+    compute_<double>(block);
   }
 }
 
 //----------------------------------------------------------------------
 
 template <typename T>
-void EnzoComputePressure::compute_(CommBlock * comm_block)
+void EnzoComputePressure::compute_(Block * block)
 {
 
-  if (!comm_block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  Field field = enzo_block->block()->field();
+  Field field = enzo_block->data()->field();
 
   T * p = (T*) field.values("pressure");
   T * d = (T*) field.values("density");
@@ -73,7 +73,7 @@ void EnzoComputePressure::compute_(CommBlock * comm_block)
 
   int gx,gy,gz;
   field.ghosts (0,&gx,&gy,&gz);
-  const int rank = comm_block->rank();
+  const int rank = block->rank();
   if (rank < 1) gx = 0;
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;

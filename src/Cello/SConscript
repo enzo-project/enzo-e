@@ -58,11 +58,11 @@ libs_error       = ['error'] + libs_monitor
 libs_disk        = ['disk'] + libs_error + ['hdf5']
 libs_performance = ['performance', 'memory','parameters'] + libs_error + libs_papi
 libs_parallel    = ['parallel'] +libs_error
-libs_field       = ['field', 'mesh','comm', 'mesh', 'io'] + libs_parallel + ['cello']
+libs_field       = ['field', 'mesh', 'io'] + libs_parallel + ['cello']
 libs_particle    = ['particle']
 libs_main        = ['main']
 libs_memory      = ['memory'] +   libs_error
-libs_mesh        = ['mesh','comm','mesh','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
+libs_mesh        = ['mesh','field','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
 libs_io          = ['io'] + libs_mesh
 libs_parameters  = ['parameters'] + libs_error +  ['cello']
 
@@ -70,7 +70,7 @@ libs_simulation  = ['simulation','problem']
 libs_test        = ['test'] + libs_parallel
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
-libs_all = ['charm','control','simulation','problem','compute','mesh','comm','mesh','field','particle','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi # gtest
+libs_all = ['charm','control','simulation','problem','compute','mesh','field','particle','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi # gtest
 libs_field  = libs_all
 libs_particle = libs_all
 libs_io     = libs_all
@@ -96,7 +96,6 @@ libs_mesh   = libs_all
 includes_cello =       [Glob('cello*hpp')]
 includes_charm =       [Glob('charm*hpp')]
 includes_control =     [Glob('*control*hpp')]
-includes_comm =        [Glob('*comm*hpp')]
 includes_disk =        [Glob('*disk*hpp')]
 includes_error =       [Glob('*error*hpp')]
 includes_field =       [Glob('*field*hpp')]
@@ -115,7 +114,6 @@ includes_simulation =  [Glob('*simulation*hpp')]
 includes_test =        [Glob('*test*hpp')]
 
 sources_cello =       [Glob('cello*cpp')]
-sources_comm =        [Glob('comm*cpp')]
 sources_charm =       [Glob('charm*cpp')]
 sources_control =     [Glob('control*cpp')]
 sources_disk =        [Glob('disk*cpp')]
@@ -197,7 +195,6 @@ sources_performance.append(["main.cpp"])
 
 objs_cello = env.Object(sources_cello)
 objs_charm = env.Object(sources_charm)
-objs_comm = env.Object(sources_comm)
 objs_control = env.Object(sources_control)
 objs_disk = env.Object(sources_disk)
 objs_error = env.Object(sources_error)
@@ -244,7 +241,7 @@ test_it_field     = env.Program (['test_ItField.cpp', objs_field],
                                  LIBS=[libs_field, libs_test])
 test_it_node      = env.Program (['test_ItNode.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
-test_block        = env.Program (['test_Block.cpp', objs_mesh],
+test_data        = env.Program (['test_Data.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_it_face     = env.Program (['test_ItFace.cpp', objs_mesh],
                                  LIBS=[libs_mesh, libs_test]) 
@@ -288,7 +285,6 @@ test_papi        = env.Program('test_Papi.cpp',
                                LIBS=[libs_performance,libs_test])
 
 libraries_charm   = env.Library ('charm',   objs_charm)
-libraries_comm    = env.Library ('comm',   objs_comm)
 libraries_control = env.Library ('control', objs_control)
 libraries_disk   = env.Library ('disk',   objs_disk)
 libraries_error  = env.Library ('error',  objs_error)
@@ -324,7 +320,7 @@ binaries_particle = [test_particle]
 binaries_problem = [test_mask,test_value,test_refresh]
 binaries_io    = [test_colormap]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_block,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_schedule,test_it_face,test_it_child]
+binaries_mesh = [ test_data,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]
 binaries_parallel = [test_group_process]
 
@@ -349,9 +345,6 @@ env.Alias('install-lib',env.Install (lib_path,libraries_charm))
 
 env.Alias('install-inc',env.Install (inc_path,includes_control))
 env.Alias('install-lib',env.Install (lib_path,libraries_control))
-
-env.Alias('install-inc',env.Install (inc_path,includes_comm))
-env.Alias('install-lib',env.Install (lib_path,libraries_comm))
 
 env.Alias('install-bin',env.Install (bin_path,binaries_disk))
 env.Alias('install-inc',env.Install (inc_path,includes_disk))

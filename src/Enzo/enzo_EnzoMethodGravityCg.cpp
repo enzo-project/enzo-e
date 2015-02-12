@@ -183,14 +183,14 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityCg::compute ( CommBlock * comm_block) throw()
+void EnzoMethodGravityCg::compute ( Block * block) throw()
 {
 
-  set_leaf(comm_block);
+  set_leaf(block);
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   field.size                (&nx_,&ny_,&nz_);
   field.dimensions(idensity_,&mx_,&my_,&mz_);
@@ -221,7 +221,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 
   iter_ = 0;
 
-  Field field = enzo_block->block()->field();
+  Field field = enzo_block->data()->field();
 
   T * density = (T*) field.values(idensity_);
     
@@ -235,8 +235,8 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
     double xm,ym,zm;
     double xp,yp,zp;
     double hx,hy,hz;
-    enzo_block->block()->lower(&xm,&ym,&zm);
-    enzo_block->block()->upper(&xp,&yp,&zp);
+    enzo_block->data()->lower(&xm,&ym,&zm);
+    enzo_block->data()->upper(&xp,&yp,&zp);
     field.cell_width(xm,xp,&hx,
 		     ym,yp,&hy,
 		     zm,zp,&hz);
@@ -314,14 +314,14 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-// SEE comm_CommBlock.cpp for definition
+// SEE mesh_Block.cpp for definition
 
 void EnzoBlock::enzo_matvec_()
 {
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
-  Field field = block()->field();
+  Field field = data()->field();
   int precision = field.precision(field.field_id("density")); // assuming 
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (this);
@@ -350,7 +350,7 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 	// shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
 	// eT*e == n === zone count (bc)
 	// eT*b == sum_i=1,n B[i]
-	Field field = enzo_block->block()->field();
+	Field field = enzo_block->data()->field();
 	T * P  = (T*) field.values(ip_);
 	T * R  = (T*) field.values(ir_);
 	T * B  = (T*) field.values(ib_);
@@ -374,17 +374,17 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 
     double pap = 0.0;
 
-    Block * block = enzo_block->block();
-    Field field = block->field();
+    Data * data = enzo_block->data();
+    Field field = data->field();
 
     T * P  = (T*) field.values(ip_);
     T * AP = (T*) field.values(iap_);
 
     // compute cell widths for A coefficients 
     double xm,ym,zm;
-    block->lower(&xm,&ym,&zm);
+    data->lower(&xm,&ym,&zm);
     double xp,yp,zp;
-    block->upper(&xp,&yp,&zp);
+    data->upper(&xp,&yp,&zp);
     field.cell_width (xm,xp,&hx_,
 		      ym,yp,&hy_,
 		      zm,zp,&hz_);
@@ -437,7 +437,7 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 
   double r_rsc[3];
 
-  Field field = enzo_block->block()->field();
+  Field field = enzo_block->data()->field();
 
   T * X  = (T*) field.values(ix_);
   T * P  = (T*) field.values(ip_);
@@ -508,7 +508,7 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
   } else {
 
-    Field field = enzo_block->block()->field();
+    Field field = enzo_block->data()->field();
 
     T * P  = (T*) field.values(ip_);
     T * R  = (T*) field.values(ir_);
@@ -551,7 +551,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
   enzo_block->clear_refresh();
 
-  Field field = enzo_block->block()->field();
+  Field field = enzo_block->data()->field();
 
   T * X         = (T*) field.values(ix_);
   T * potential = (T*) field.values(ipotential_);

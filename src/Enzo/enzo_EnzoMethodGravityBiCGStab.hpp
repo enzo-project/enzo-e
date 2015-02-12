@@ -39,12 +39,12 @@ public: // interface
   void pup (PUP::er &p) ;
   
   /// Solve for the gravitational potential
-  virtual void compute( CommBlock * comm_block) throw();
+  virtual void compute( Block * block) throw();
 
 protected: // methods
 
   template <class T>
-  void compute_ (CommBlock * comm_block,
+  void compute_ (Block * block,
 		 T * density,   int md3[3], int nd3[3],
 		 T * potential, int mp3[3], int np3[3]) const throw();
 

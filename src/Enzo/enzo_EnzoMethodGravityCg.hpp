@@ -48,7 +48,7 @@ public: // interface
   void pup (PUP::er &p) ;
   
   /// Solve for the gravitational potential
-  virtual void compute( CommBlock * comm_block) throw();
+  virtual void compute( Block * block) throw();
 
   /// Continuation after global reduction
   template <class T>
@@ -126,8 +126,8 @@ protected: // methods
   void matvec_ (T * Y, const T * X) const throw();
 
   /// Set whether current Block is a leaf--if not don't touch data
-  void set_leaf(CommBlock * comm_block) throw()
-  { is_leaf_ = comm_block->is_leaf(); }
+  void set_leaf(Block * block) throw()
+  { is_leaf_ = block->is_leaf(); }
 
 protected: // attributes
 
@@ -147,7 +147,7 @@ protected: // attributes
   /// Initial residual
   double rr0_;
 
-  /// Mesh spacing for current CommBlock
+  /// Mesh spacing for current Block
   double hx_, hy_, hz_;
 
   /// Density and potential field id's

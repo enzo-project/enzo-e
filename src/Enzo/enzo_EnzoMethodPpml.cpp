@@ -33,14 +33,14 @@ void EnzoMethodPpml::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpml::compute ( CommBlock * comm_block ) throw()
+void EnzoMethodPpml::compute ( Block * block ) throw()
 {
 
-  if (!comm_block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
-  const FieldDescr * field_descr = comm_block->field_descr();
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
-  enzo_block->SolveMHDEquations ( field_descr, comm_block->dt() );
+  const FieldDescr * field_descr = block->field_descr();
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  enzo_block->SolveMHDEquations ( field_descr, block->dt() );
 
   enzo_block->compute_stop();
 
@@ -48,10 +48,10 @@ void EnzoMethodPpml::compute ( CommBlock * comm_block ) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodPpml::timestep (CommBlock * comm_block) const throw()
+double EnzoMethodPpml::timestep (Block * block) const throw()
 {
  
-  EnzoBlock * enzo_comm_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   /* initialize */
  
@@ -76,8 +76,8 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) const throw()
   enzo_float a = 1, dadt;
   
   if (comoving_coordinates_)
-    enzo_comm_block->CosmologyComputeExpansionFactor
-      (enzo_comm_block->time(), &a, &dadt);
+    enzo_block->CosmologyComputeExpansionFactor
+      (enzo_block->time(), &a, &dadt);
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
@@ -112,7 +112,7 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) const throw()
 
     /* Call fortran routine to do calculation. */
  
-    Field field = enzo_comm_block->block()->field();
+    Field field = enzo_block->data()->field();
 
     enzo_float * d  = (enzo_float *) field.values("density");
     enzo_float * vx = (enzo_float *) field.values("velox");
@@ -123,18 +123,18 @@ double EnzoMethodPpml::timestep (CommBlock * comm_block) const throw()
     enzo_float * bz = (enzo_float *) field.values("bfieldz");
 
     FORTRAN_NAME(calc_dt_ppml)
-      (enzo_comm_block->GridDimension, 
-       enzo_comm_block->GridDimension+1, 
-       enzo_comm_block->GridDimension+2,
-       enzo_comm_block->GridStartIndex, 
-       enzo_comm_block->GridEndIndex,
-       enzo_comm_block->GridStartIndex+1, 
-       enzo_comm_block->GridEndIndex+1,
-       enzo_comm_block->GridStartIndex+2, 
-       enzo_comm_block->GridEndIndex+2,
-       &enzo_comm_block->CellWidth[0], 
-       &enzo_comm_block->CellWidth[1], 
-       &enzo_comm_block->CellWidth[2],
+      (enzo_block->GridDimension, 
+       enzo_block->GridDimension+1, 
+       enzo_block->GridDimension+2,
+       enzo_block->GridStartIndex, 
+       enzo_block->GridEndIndex,
+       enzo_block->GridStartIndex+1, 
+       enzo_block->GridEndIndex+1,
+       enzo_block->GridStartIndex+2, 
+       enzo_block->GridEndIndex+2,
+       &enzo_block->CellWidth[0], 
+       &enzo_block->CellWidth[1], 
+       &enzo_block->CellWidth[2],
        d,
        vx, vy, vz,
        bx, by, bz,

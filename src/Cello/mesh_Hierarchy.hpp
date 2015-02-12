@@ -12,7 +12,7 @@
 class Factory;
 class Simulation;
 
-class CProxy_CommBlock;
+class CProxy_Block;
 
 class Hierarchy {
 
@@ -96,22 +96,22 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Return whether CommBlocks have been allocated or not
+  /// Return whether Blocks have been allocated or not
   bool blocks_allocated() const throw()
   { 
     return block_exists_;
   }
 
-  /// Return the number of CommBlocks
+  /// Return the number of Blocks
   size_t num_blocks(int * nbx, 
 		    int * nby = 0,
 		    int * nbz = 0) const throw();
 
-  /// Deallocate local CommBlocks
+  /// Deallocate local Blocks
   void deallocate_blocks() throw();
 
-  /// Return pointer to the CommBlock CHARM++ chare array
-  CProxy_CommBlock * block_array() const throw()
+  /// Return pointer to the Block CHARM++ chare array
+  CProxy_Block * block_array() const throw()
   { return block_array_;}
 
   /// Return the total number of blocks
@@ -130,7 +130,7 @@ public: // interface
 		      int process_last_plus = -1) throw();
 
 
-  /// Return the number of CommBlocks along each rank
+  /// Return the number of Blocks along each rank
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
@@ -151,10 +151,10 @@ protected: // attributes
 
   int num_blocks_; 
 
-  /// Array of CommBlocks 
-  CProxy_CommBlock * block_array_;
-  bool               block_exists_;
-  Sync               block_sync_;
+  /// Array of Blocks 
+  CProxy_Block * block_array_;
+  bool           block_exists_;
+  Sync           block_sync_;
 
   /// Size of the root grid
   int root_size_[3];
@@ -165,7 +165,7 @@ protected: // attributes
   /// Upper extent of the hierarchy
   double upper_[3];
 
-  /// How the Forest is distributed into CommBlocks
+  /// How the Forest is distributed into Blocks
   int blocking_[3];
 
   /// Periodicity of boundary conditions on faces

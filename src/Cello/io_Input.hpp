@@ -112,8 +112,8 @@ public:
     const FieldDescr * field_descr  ) throw();
 
   /// Read local block data from disk
-  virtual CommBlock * read_block
-  ( CommBlock * block,
+  virtual Block * read_block
+  ( Block * block,
     std::string block_name,
     const FieldDescr * field_descr) throw();
 
@@ -175,7 +175,7 @@ protected: // attributes
   /// Iterator over field id's
   ItField * it_field_;
 
-  /// I/O CommBlock data accessor
+  /// I/O Block data accessor
   IoBlock * io_block_;
 
   /// I/O FieldBlock data accessor

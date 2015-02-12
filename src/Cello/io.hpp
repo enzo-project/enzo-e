@@ -18,7 +18,6 @@
 #include "_parameters.hpp"
 #include "_field.hpp"
 #include "_mesh.hpp"
-#include "_comm.hpp"
 #include "_disk.hpp"
 #include "_compute.hpp"
 #include "_problem.hpp"

@@ -63,10 +63,10 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
+void EnzoMethodGrackle::compute ( Block * block) throw()
 {
 
-  if (!comm_block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
 #ifndef CONFIG_USE_GRACKLE
 
@@ -76,9 +76,9 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 
 #else /* CONFIG_USE_GRACKLE */
 
-  initialize_(comm_block);
+  initialize_(block);
 
-  Field field = comm_block->block()->field();
+  Field field = block->data()->field();
 
   // ASSUMES ALL ARRAYS ARE THE SAME SIZE
   gr_int m[3];
@@ -215,7 +215,7 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 
 #endif /* CONFIG_USE_GRACKLE */
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (comm_block);
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   enzo_block->compute_stop();
 
@@ -223,10 +223,10 @@ void EnzoMethodGrackle::compute ( CommBlock * comm_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGrackle::timestep ( CommBlock * comm_block ) const throw()
+double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 {
 #ifdef CONFIG_USE_GRACKLE
-  initialize_(comm_block);
+  initialize_(block);
   return std::numeric_limits<double>::max();
 #else
   return 0.0;

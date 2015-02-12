@@ -52,7 +52,7 @@ int EnzoBlock::SolveMHDEquations
     /* Get easy to handle pointers for each variable. */
 
 
-    Field field = block()->field();
+    Field field = data()->field();
 
     enzo_float *density    = (enzo_float *) field.values ("density");
     enzo_float *velox      = (enzo_float *) field.values ("velox");

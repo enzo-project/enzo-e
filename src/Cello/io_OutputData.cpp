@@ -99,7 +99,7 @@ void OutputData::write_hierarchy
 
 void OutputData::write_block
 ( 
-  const CommBlock * block,
+  const Block * block,
   const FieldDescr * field_descr) throw()
 {
 
@@ -113,7 +113,7 @@ void OutputData::write_block
 
   // Write block meta data
 
-  io_block()->set_block((CommBlock *)block);
+  io_block()->set_block((Block *)block);
 
   write_meta_group (io_block());
 

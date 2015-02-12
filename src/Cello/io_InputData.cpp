@@ -97,9 +97,9 @@ void InputData::read_hierarchy
 
 //----------------------------------------------------------------------
 
-CommBlock * InputData::read_block 
+Block * InputData::read_block 
 ( 
- CommBlock * block,
+ Block * block,
  std::string  block_name,
  const FieldDescr * field_descr) throw()
 {

@@ -39,7 +39,7 @@ public: // interface
   }
 
   /// Evaluate the refinement criteria, updating the refinement field
-  virtual int apply (CommBlock * comm_block,
+  virtual int apply (Block            * block,
 		     const FieldDescr * field_descr) throw();
 
   virtual std::string name () const { return "shear"; };

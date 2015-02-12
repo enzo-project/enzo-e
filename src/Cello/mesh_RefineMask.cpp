@@ -31,12 +31,12 @@ void RefineMask::pup (PUP::er &p)
 
 int RefineMask::apply 
 (
- CommBlock * comm_block,
+ Block * block,
  const FieldDescr * field_descr
  ) throw ()
 {
-  Block * block = comm_block->block();
-  FieldBlock * field_block = block->field_block();
+  Data * data = block->data();
+  FieldBlock * field_block = data->field_block();
 
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
@@ -44,9 +44,9 @@ int RefineMask::apply
   double * x = new double [nx];
   double * y = new double [ny];
   double * z = new double [nz];
-  double t = comm_block->time();
+  double t = block->time();
 
-  block->field_cells(x,y,z);
+  data->field_cells(x,y,z);
 
   double * v = new double [nx*ny*nz];
 
@@ -79,13 +79,13 @@ int RefineMask::apply
 	for (int iz=0; iz<nz; iz++) {
 	  int i=ix + nx*(iy + ny*iz);
 	  if (precision == precision_single) {
-	    if (v[i] <  comm_block->level()) output_float[i] = -1;
-	    if (v[i] == comm_block->level()) output_float[i] =  0;
-	    if (v[i] >  comm_block->level()) output_float[i] = +1;
+	    if (v[i] <  block->level()) output_float[i] = -1;
+	    if (v[i] == block->level()) output_float[i] =  0;
+	    if (v[i] >  block->level()) output_float[i] = +1;
 	  } else if (precision == precision_double) {
-	    if (v[i] <  comm_block->level()) output_double[i] = -1;
-	    if (v[i] == comm_block->level()) output_double[i] =  0;
-	    if (v[i] >  comm_block->level()) output_double[i] = +1;
+	    if (v[i] <  block->level()) output_double[i] = -1;
+	    if (v[i] == block->level()) output_double[i] =  0;
+	    if (v[i] >  block->level()) output_double[i] = +1;
 	  }
 	}
       }
@@ -98,8 +98,8 @@ int RefineMask::apply
   delete [] y;
   delete [] x;
 
-  return (level > comm_block->level()) ? adapt_refine :
-    (level < comm_block->level()) ? adapt_coarsen : adapt_same;
+  return (level > block->level()) ? adapt_refine :
+    (level < block->level()) ? adapt_coarsen : adapt_same;
 }
 
 //======================================================================

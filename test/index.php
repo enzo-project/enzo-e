@@ -593,7 +593,7 @@ test_summary("Memory",array("Memory"),
 	     array("test_Memory"),'test'); 
 test_summary("Mesh",
 	     array("Hierarchy",
-		   "Block",
+		   "Data",
 		   "Index",
 		   "Tree",
 		   "ItFace",
@@ -602,7 +602,7 @@ test_summary("Mesh",
 		   "NodeTrace",
 		   "ItNode"),
 	     array("test_Hierarchy",
-		   "test_Block",
+		   "test_Data",
 		   "test_Index",
 		   "test_Tree",
 		   "test_ItFace",
@@ -986,7 +986,7 @@ tests("Cello","test_Memory","test_Memory","","");
 test_group("Mesh");
 
 tests("Cello","test_Hierarchy","test_Hierarchy","",""); 
-tests("Cello","test_Block","test_Block","",""); 
+tests("Cello","test_Data","test_Data","",""); 
 tests("Cello","test_Index","test_Index","",""); 
 tests("Cello","test_Tree","test_Tree","",""); 
 tests("Cello","test_ItFace","test_ItFace","",""); 

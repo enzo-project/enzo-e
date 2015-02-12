@@ -116,7 +116,7 @@ void InitialValue::pup (PUP::er &p)
 
 void InitialValue::enforce_block
 (
- CommBlock        * comm_block,
+ Block        * block,
  const FieldDescr * field_descr,
  const Hierarchy  * hierarchy
  ) throw()
@@ -124,14 +124,14 @@ void InitialValue::enforce_block
   // Initialize Fields according to parameters
 
   ASSERT("InitialValue::enforce_block",
-	 "CommBlock does not exist",
-	 comm_block != NULL);
+	 "Block does not exist",
+	 block != NULL);
   
   //--------------------------------------------------
   parameters_->group_set(0,"Initial");
   //--------------------------------------------------
 
-  FieldBlock *       field_block = comm_block->block()->field_block();
+  FieldBlock *       field_block = block->data()->field_block();
 
   double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, t;
   bool * mask=0, *rdeflt=0;
@@ -171,7 +171,7 @@ void InitialValue::enforce_block
 
       // Allocate arrays if needed
       if (value == NULL) {
-	allocate_xyzt_(comm_block,index_field,
+	allocate_xyzt_(block,index_field,
 		       field_block,
 		       field_descr,
 		       &nx,&ny,&nz,
@@ -197,7 +197,7 @@ void InitialValue::enforce_block
 			  n, value,vdeflt,x,y,z,t);
 
 	evaluate_mask_ 
-	  (hierarchy,comm_block,field_block, index_field, index_value+1,
+	  (hierarchy,block,field_block, index_field, index_value+1,
 	   field_name,   field_descr, n, mask,rdeflt,x,y,z,t);
 
 	copy_values_ (field_descr,field_block,value, mask,index_field,nx,ny,nz);
@@ -235,7 +235,7 @@ void InitialValue::enforce_block
 
 void InitialValue::allocate_xyzt_
 (
- CommBlock * comm_block,
+ Block * block,
  int index_field,
  const FieldBlock * field_block,
  const FieldDescr * field_descr,
@@ -270,15 +270,15 @@ void InitialValue::allocate_xyzt_
 
   double xm, xp, ym, yp, zm, zp;
 
-  comm_block->block()->lower(&xm,&ym,&zm);
-  comm_block->block()->upper(&xp,&yp,&zp);
+  block->data()->lower(&xm,&ym,&zm);
+  block->data()->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
   field_block->cell_width(xm,xp,&hx,
 			  ym,yp,&hy,
 			  zm,zp,&hz);
 
-  *t = comm_block->time();
+  *t = block->time();
 
   // Initialize arrays
   for (int iz=0; iz<(*nz); iz++) {
@@ -426,7 +426,7 @@ void InitialValue::evaluate_float_
 
 void InitialValue::evaluate_mask_ 
 (const Hierarchy * hierarchy,
- const CommBlock * comm_block,
+ const Block * block,
  FieldBlock * field_block, 
  int index_field,  int index_value,
  std::string field_name, 
@@ -478,7 +478,7 @@ void InitialValue::evaluate_mask_
       evaluate_mask_png_
 	(mask,nxb,nyb,
 	 mask_png,nx_png, ny_png,
-	 hierarchy,comm_block,field_descr);
+	 hierarchy,block,field_descr);
     }
     break;
 
@@ -497,7 +497,7 @@ void InitialValue::evaluate_mask_png_
  bool            * mask_block, int nxb, int nyb,
  bool            * mask_png,   int nx,  int ny,
  const Hierarchy * hierarchy,
- const CommBlock * comm_block,
+ const Block * block,
  const FieldDescr * field_descr
  )
 {
@@ -521,15 +521,15 @@ void InitialValue::evaluate_mask_png_
   // Get the block's lower and upper extents
 
   double lower_b[3];
-  comm_block->block()->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
+  block->data()->lower(&lower_b[0],&lower_b[1],&lower_b[2]);
 
   double upper_b[3];
-  comm_block->block()->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
+  block->data()->upper(&upper_b[0],&upper_b[1],&upper_b[2]);
 
   // get the block's cell width
 
   double hb[3];
-  comm_block->block()->field_block()->cell_width 
+  block->data()->field_block()->cell_width 
     (lower_b[0],upper_b[0],&hb[0],
      lower_b[1],upper_b[1],&hb[1],
      lower_b[2],upper_b[2],&hb[2]);

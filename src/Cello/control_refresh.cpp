@@ -8,7 +8,6 @@
 
 #include "simulation.hpp"
 #include "mesh.hpp"
-#include "comm.hpp"
 #include "control.hpp"
 
 #include "charm_simulation.hpp"
@@ -19,7 +18,7 @@
 //----------------------------------------------------------------------
 
 
-void CommBlock::refresh_begin_() 
+void Block::refresh_begin_() 
 {
   Refresh * refresh = simulation()->problem()->refresh(index_refresh_);
 
@@ -27,7 +26,7 @@ void CommBlock::refresh_begin_()
   if ((  is_leaf() && children_.size() != 0) ||
       (! is_leaf() && children_.size() == 0)) {
     const char * logic_str[2] = {"false","true"};
-    WARNING4("CommBlock::refresh_begin_()",
+    WARNING4("Block::refresh_begin_()",
 	     "%s: is_leaf() == %s && children_.size() == %d"
 	     "setting is_leaf_ <== %s",
 	     name_.c_str(), logic_str[is_leaf()?1:0],
@@ -35,10 +34,10 @@ void CommBlock::refresh_begin_()
     is_leaf_ = ! is_leaf();
   }
 
-  // Check if CommBlock should have been deleted
+  // Check if Block should have been deleted
   if (delete_) {
     WARNING1("refresh_begin_()",
-	     "%s: refresh called on deleted CommBlock",
+	     "%s: refresh called on deleted Block",
 	     name_.c_str());
     return;
   }
@@ -49,7 +48,7 @@ void CommBlock::refresh_begin_()
 
   if (refresh && is_leaf()) {
 
-    // Level of this CommBlock
+    // Level of this Block
 
     const int level = this->level();
 
@@ -119,7 +118,7 @@ void CommBlock::refresh_begin_()
 
 	index_.print("ERROR Refresh",-1,2,false,simulation());
 	debug_faces_("refresh");
-	ERROR7("CommBlock::refresh_begin_()",
+	ERROR7("Block::refresh_begin_()",
 	       "%s: REFRESH ERROR: "
 	       "face (%d %d %d) "
 	       "level %d "
@@ -135,7 +134,7 @@ void CommBlock::refresh_begin_()
     }
   }
 
-  // WARNING("CommBlock::refresh_begin_",
+  // WARNING("Block::refresh_begin_",
   // 	  "refresh synchronization changed from contribute to neighbor"
   //      "(see bug #44)");
 
@@ -146,7 +145,7 @@ void CommBlock::refresh_begin_()
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_load_face_
+void Block::refresh_load_face_
 ( int type_refresh,
   Index index_neighbor,
   int iface[3],
@@ -180,7 +179,7 @@ void CommBlock::refresh_load_face_
 
   default:
     type_op_array = op_array_unknown;
-    ERROR1("CommBlock::refresh_face()",
+    ERROR1("Block::refresh_face()",
 	   "Unknown type_refresh %d",
 	   type_refresh);
 
@@ -207,7 +206,7 @@ void CommBlock::refresh_load_face_
 
 //----------------------------------------------------------------------
 
-void CommBlock::refresh_store_face_
+void Block::refresh_store_face_
 (int n, char * buffer, int type_refresh,
  int iface[3], int ichild[3])
 {
@@ -221,7 +220,7 @@ void CommBlock::refresh_store_face_
   case refresh_same:    op_array = op_array_copy;      break;
   case refresh_fine:    op_array = op_array_prolong;   break;
   default:
-    ERROR1("CommBlock::refresh_store_face_()",
+    ERROR1("Block::refresh_store_face_()",
 	   "Unknown type_refresh %d",  type_refresh);
     break;
   }

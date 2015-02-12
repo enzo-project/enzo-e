@@ -175,13 +175,13 @@ public: // virtual functions
   // /// Run the simulation
   // virtual void run() throw();
 
-  /// Add a new CommBlock to this local branch
+  /// Add a new Block to this local branch
   void insert_block() ;
 
-  /// Remove a CommBlock from this local branch
+  /// Remove a Block from this local branch
   void delete_block() ;
 
-  /// Wait for all Hierarchy to be initialized before creating any CommBlocks
+  /// Wait for all Hierarchy to be initialized before creating any Blocks
   void r_initialize_forest(CkReductionMsg * msg);
 
   /// Wait for all local patches to be created before calling run

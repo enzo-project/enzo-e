@@ -40,7 +40,7 @@ int EnzoBlock::ComputeTemperatureField
  
   int result;
 
-  Field field = block()->field();
+  Field field = data()->field();
 
   /* If Gadget equilibrium cooling is on, call the appropriate routine,
      then exit - don't use the rest of the routine. */

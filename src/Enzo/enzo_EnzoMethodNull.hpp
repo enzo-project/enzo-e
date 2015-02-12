@@ -34,11 +34,11 @@ public: // interface
   { TRACEPUP; Method::pup(p); p | dt_; }
   
   /// Apply the method to advance a block one timestep 
-  virtual void compute( CommBlock * comm_block) throw()
+  virtual void compute( Block * block) throw()
   { return; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( CommBlock * comm_block) const throw()
+  virtual double timestep ( Block * block) const throw()
   { return dt_; }
 
 protected: // attributes
