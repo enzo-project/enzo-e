@@ -28,7 +28,7 @@ if ($#argv >= 1) then
          rm -rf lib >& /dev/null
       end
       rm -rf include >& /dev/null
-      rm -f test/STATUS
+      rm -f test/STATUS test/START test/STOP
       rm -f input/*.in.out >& /dev/null
       rm -rf build
       rm -rf test/*.h5
@@ -81,6 +81,8 @@ set configure = $arch-$prec
 set configure_print = `printf "%s %s %s" $arch $prec`
 
 echo "Compiling" > test/STATUS
+echo "$d" > test/START
+rm -f test/STOP
 
 # make output directory for compilation and tests
 
@@ -171,6 +173,9 @@ set S1 = `date +"%S"`
 set t = `echo "( $S1 - $S0 ) + 60 * ( ( $M1 - $M0 ) + 60 * ( $H1 - $H0) )" | bc`
 
 echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time = ${t}s"
+
+set d = `date +"%Y-%m-%d %H:%M:%S"`
+echo "$d" > test/STOP
 
 
 

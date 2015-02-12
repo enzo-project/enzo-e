@@ -12,8 +12,7 @@
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
-   <h2><center><?php system ("hg branch") ?> branch: revision <?php system ("hg id -n") ?> </center> </</h2>
-
+   <h2><center><?php system ("hg branch") ?> branch: revision <?php system ("hg id -n") ?> </center> </h2>
  <?php
 
      //----------------------------------------------------------------------
@@ -203,8 +202,6 @@ function test($type,$output,$type) {
 ?>
 
 <hr>
-
-<h2>Test Summary</h2>
 
 <?php
 
@@ -627,6 +624,11 @@ test_summary("Colormap",array("Colormap"),
 	     array("test_Colormap"),'test'); 
 
 printf ("</tr></table></center></br>\n");
+
+?>
+   <code>Start: <?php system ("cat START") ?> </code><br>
+   <code>Stop:&nbsp; <?php system ("cat STOP") ?></code>
+<?php
 
 //======================================================================
 
