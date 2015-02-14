@@ -513,6 +513,11 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
     T * P  = (T*) field.values(ip_);
     T * R  = (T*) field.values(ir_);
 
+    // Shift residual to remove constant mode
+    if (is_singular_) {
+      shift_(R,T(-bs_/bc_),R);
+    }
+
     T a = rr_new_ / rr_;
     zaxpy_ (P,a,P,R);
 
