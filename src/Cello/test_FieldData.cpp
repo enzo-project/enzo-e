@@ -23,7 +23,6 @@ PARALLEL_MAIN_BEGIN
 
   FieldDescr * field_descr = new FieldDescr;
 
-
   int i1 = field_descr->insert_permanent("f1");
   int i2 = field_descr->insert_permanent("f2");
   int i3 = field_descr->insert_permanent("f3");

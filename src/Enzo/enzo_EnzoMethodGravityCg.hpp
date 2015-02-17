@@ -32,8 +32,8 @@ class EnzoMethodGravityCg : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravityCg object
-  EnzoMethodGravityCg(const FieldDescr * field_descr,
-		      int iter_max, double res_tol,
+  EnzoMethodGravityCg(FieldDescr * field_descr,
+		      int rank, int iter_max, double res_tol,
 		      bool is_singular);
 
   EnzoMethodGravityCg() {};
@@ -49,6 +49,9 @@ public: // interface
   
   /// Solve for the gravitational potential
   virtual void compute( Block * block) throw();
+
+  virtual std::string name () throw () 
+  { return "gravity_cg"; }
 
   /// Continuation after global reduction
   template <class T>
@@ -137,6 +140,9 @@ protected: // attributes
 
   /// Whether current block is a leaf
   bool is_leaf_;
+
+  /// Dimensionality of the problem
+  int rank_;
 
   /// Maximum number of Cg iterations
   int iter_max_;

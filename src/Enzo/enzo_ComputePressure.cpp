@@ -190,7 +190,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
      simulations */
   
   enzo_float Gamma1 = Gamma;
-  if ((ProblemType == 60 || ProblemType == 61) && GravityOn == TRUE)
+  if ((ProblemType == 60 || ProblemType == 61))
     for (i=0; i<size; i++) {
       Gamma1 = MIN(Gamma + (log10(density[i])-8.0)*0.3999/2.5, 1.4);
       pressure[i] *= (Gamma1 - 1.0)/(Gamma - 1.0);

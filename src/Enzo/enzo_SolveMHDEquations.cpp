@@ -310,10 +310,6 @@ int EnzoBlock::SolveMHDEquations
  
     /* Prepare Gravity. */
  
-//     int GravityOn = 0;
-//     if (SelfGravity || UniformGravity || PointSourceGravity)
-//       GravityOn = 1;
- 
     /* call a Fortran routine to actually compute the hydro equations
        on this grid.
        Notice that it is hard-wired for three dimensions, but it does

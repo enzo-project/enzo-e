@@ -23,10 +23,6 @@ enzo_float EnzoBlock::MaxExpansionRate;
 
 int EnzoBlock::MultiSpecies;
 
-// Gravity
-
-int EnzoBlock::GravityOn;
-
 // Physics
 
 int EnzoBlock::PressureFree;
@@ -101,7 +97,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   // Gravity parameters
 
-  GravityOn                       = 0;    // Whether gravity is included
   GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
 
   //Problem specific parameter
@@ -293,13 +288,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: MultiSpecies %d\n",
 	   MultiSpecies);
-
-  // Gravity
-
-  fprintf (fp,"EnzoBlock: GravityOn %d\n",
-	   GravityOn);
-  //  fprintf (fp,"EnzoBlock: *AccelerationField %g\n",
-  //           *AccelerationField[MAX_DIMENSION)];
 
   // Physics
 

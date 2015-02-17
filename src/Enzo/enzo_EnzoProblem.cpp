@@ -152,11 +152,11 @@ Refine * EnzoProblem::create_refine_
 //----------------------------------------------------------------------
 
 Method * EnzoProblem::create_method_ 
-( std::string  type,  
+( std::string  name,  
   int index,
   Config * config,
-  const FieldDescr * field_descr) throw ()
-/// @param type   Type of the method to create
+  FieldDescr * field_descr) throw ()
+/// @param name   Name of the method to create
 /// @param config Configuration parameters class
 {
 
@@ -164,46 +164,52 @@ Method * EnzoProblem::create_method_
 
   EnzoConfig * enzo_config = (EnzoConfig *) config;
 
-  TRACE1("EnzoProblem::create_method %s",type.c_str());
-  if (type == "ppm") {
+  TRACE1("EnzoProblem::create_method %s",name.c_str());
+  if (name == "ppm") {
     method = new EnzoMethodPpm (enzo_config);
-  } else if (type == "ppml") {
+  } else if (name == "ppml") {
     method = new EnzoMethodPpml(enzo_config);
-  } else if (type == "heat") {
+  } else if (name == "heat") {
     method = new EnzoMethodHeat
       (enzo_config->method_heat_alpha,
        enzo_config->field_courant);
-  } else if (type == "null") {
+  } else if (name == "null") {
     method = new EnzoMethodNull
       (enzo_config->method_null_dt);
 #ifdef CONFIG_USE_GRACKLE
-  } else if (type == "grackle") {
+  } else if (name == "grackle") {
     method = new EnzoMethodGrackle (enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
-  } else if (type == "turbulence") {
+  } else if (name == "turbulence") {
     method = new EnzoMethodTurbulence 
       (enzo_config->method_turbulence_edot,
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
-  } else if (type == "gravity_cg") {
+  } else if (name == "gravity_cg") {
     WARNING("EnzoProblem::create_method_()",
 	    "Assuming problem is singular for EnzoMethodGravityCg");
     bool is_singular = true;
+    int rank = config->mesh_root_rank;
     method = new EnzoMethodGravityCg
-      (field_descr,
+      (field_descr,rank,
        enzo_config->method_gravity_cg_iter_max,
        enzo_config->method_gravity_cg_res_tol,
        is_singular);
-  } else if (type == "gravity_bicgstab") {
+  } else if (name == "gravity_bicgstab") {
     method = new EnzoMethodGravityBiCGStab
       (field_descr,
        enzo_config->method_gravity_bicgstab_iter_max,
        enzo_config->method_gravity_bicgstab_res_tol);
   } else {
-    method = Problem::create_method_ (type,index,config, field_descr);
+    method = Problem::create_method_ (name,index,config, field_descr);
   }
+
+  ASSERT2("EnzoProblem::create_method",
+	  "Method created %s does not match method requested %s",
+	  method->name().c_str(),name.c_str(),
+	  method->name() == name);
 
   return method;
 }

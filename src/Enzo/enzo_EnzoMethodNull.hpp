@@ -37,6 +37,9 @@ public: // interface
   virtual void compute( Block * block) throw()
   { return; }
 
+  virtual std::string name () throw () 
+  { return "null"; }
+
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw()
   { return dt_; }

@@ -324,7 +324,7 @@ void Problem::initialize_output
 void Problem::initialize_method
 (
  Config * config,
- const FieldDescr * field_descr
+ FieldDescr * field_descr
  ) throw()
 {
   for (size_t index_method=0; index_method<config->method_list.size(); index_method++) {
@@ -574,7 +574,7 @@ Method * Problem::create_method_
 ( std::string  name,
   int index,
   Config * config,
-  const FieldDescr * field_descr) throw ()
+  FieldDescr * field_descr) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method

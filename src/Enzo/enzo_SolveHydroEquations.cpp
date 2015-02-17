@@ -81,6 +81,9 @@ int EnzoBlock::SolveHydroEquations
   enzo_float * velocity_x      = (enzo_float*) field.values("velocity_x");
   enzo_float * velocity_y      = (enzo_float*) field.values("velocity_y");
   enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
+  enzo_float * acceleration_x  = (enzo_float*) field.values("acceleration_x");
+  enzo_float * acceleration_y  = (enzo_float*) field.values("acceleration_y");
+  enzo_float * acceleration_z  = (enzo_float*) field.values("acceleration_z");
 
   /* velocity_x must exist, but if y & z aren't present, then create blank
      buffers for them (since the solver needs to advect something). */
@@ -238,13 +241,16 @@ int EnzoBlock::SolveHydroEquations
   //     AccelerationField[0] = density;
   //     AccelerationField[1] = density;
   //     AccelerationField[2] = density;
+  int gravity_on = (acceleration_x != NULL) ? 1 : 0;
+  
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
      internal_energy,
-     &GravityOn, AccelerationField[0],
-     AccelerationField[1],
-     AccelerationField[2],
+     &gravity_on, 
+     acceleration_x,
+     acceleration_y,
+     acceleration_z,
      &Gamma, &dt, &cycle_,
      &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
      &GridRank, &GridDimension[0], &GridDimension[1],

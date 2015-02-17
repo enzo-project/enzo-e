@@ -41,6 +41,9 @@ public: // interface
   /// Solve for the gravitational potential
   virtual void compute( Block * block) throw();
 
+  virtual std::string name () throw () 
+  { return "gravity_bicgstab"; }
+
 protected: // methods
 
   template <class T>

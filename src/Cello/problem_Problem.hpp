@@ -150,7 +150,7 @@ public: // interface
 
   /// Initialize the method objects
   void initialize_method(Config * config, 
-			 const FieldDescr * field_descr) throw();
+			 FieldDescr * field_descr) throw();
 
   /// Initialize the refresh objects
   void initialize_refresh(Config * config, 
@@ -195,7 +195,7 @@ protected: // functions
   (std::string type, 
    int index,
    Config * config, 
-   const FieldDescr * field_descr) throw ();
+   FieldDescr * field_descr) throw ();
 
   /// Create named refresh object
   virtual Refresh *   create_refresh_

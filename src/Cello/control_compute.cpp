@@ -17,6 +17,7 @@
 
 void Block::compute_begin_ ()
 {
+
   TRACE("Block::compute_begin()");
   simulation()->set_phase(phase_compute);
 
@@ -24,7 +25,6 @@ void Block::compute_begin_ ()
   refresh_sync_  = "contribute";
 
   index_method_ = 0;
-  index_refresh_ = method()->index_refresh(0);
 
   compute_next_();
 }
@@ -33,12 +33,15 @@ void Block::compute_begin_ ()
 
 void Block::compute_next_ ()
 {
-  Method * method = simulation()->problem()->method(index_method_);
 
-  TRACE2 ("Block::compute_next() method = %d %p\n",
-	  index_method_,method);
+  Method * method = this->method();
 
   if (method) {
+
+    refresh_phase_ = phase_compute_continue;
+    refresh_sync_  = "contribute";
+
+    index_refresh_ = method->index_refresh(0);
 
     control_next(phase_refresh_enter,"neighbor");
 
@@ -58,11 +61,11 @@ void Block::compute_continue_ ()
   //  double time_start = CmiWallTimer();
 #endif
 
-  Method * method = simulation()->problem()->method(index_method_);
+  Method * method = this->method();
 
   TRACE2 ("Block::compute_continue() method = %d %p\n",
 	  index_method_,method);
-    
+
   // Apply the method to the Block
   method -> compute (this);
 
@@ -85,8 +88,6 @@ void Block::compute_stop ()
 
 void Block::compute_end_ ()
 {
-  TRACE1 ("Block::compute_end() method = %d\n",
-	  index_method_);
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  traceUserBracketEvent(10,time_start, CmiWallTimer());

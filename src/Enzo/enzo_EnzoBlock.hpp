@@ -56,10 +56,6 @@ public:
 
   static int MultiSpecies;
 
-  // Gravity
-
-  static int GravityOn;
-
   // Physics
 
   static int PressureFree;

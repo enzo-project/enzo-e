@@ -38,6 +38,9 @@ public: // interface
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
 
+  virtual std::string name () throw () 
+  { return "turbulence"; }
+
   /// Resume computation after a reduction
   virtual void compute_resume ( Block * block,
 				CkReductionMsg * msg) throw(); 

@@ -60,7 +60,7 @@ private: // functions
   virtual Method * create_method_ 
   (std::string type, 
    int index,
-   Config * config, const FieldDescr *) throw ();
+   Config * config, FieldDescr *) throw ();
 
   // /// Create named timestep object
   // virtual Timestep * create_timestep_

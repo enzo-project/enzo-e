@@ -36,6 +36,9 @@ public: // interface
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
 
+  virtual std::string name () throw () 
+  { return "heat"; }
+
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 

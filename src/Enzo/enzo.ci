@@ -15,7 +15,6 @@ module enzo {
   readonly enzo_float EnzoBlock::OmegaLambdaNow;
   readonly enzo_float EnzoBlock::MaxExpansionRate;
   readonly int EnzoBlock::MultiSpecies;
-  readonly int EnzoBlock::GravityOn;
   readonly int EnzoBlock::PressureFree;
   readonly enzo_float EnzoBlock::Gamma;
   readonly enzo_float EnzoBlock::GravitationalConstant;

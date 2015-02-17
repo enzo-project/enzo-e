@@ -41,16 +41,19 @@ public: // virtual functions
 
   virtual void compute ( Block * block) throw() = 0; 
 
+  /// Return the name of this Method
+  virtual std::string name () throw () = 0;
+
+  /// Compute maximum timestep for this method
+  virtual double timestep (Block * block) const throw() 
+  { return std::numeric_limits<double>::max(); }
+
   /// Resume computation after a reduction
   virtual void compute_resume ( Block * block,
 				CkReductionMsg * msg) throw()
   {
     /* This function intentionally empty */
   }
-
-  /// Compute maximum timestep for this method
-  virtual double timestep (Block * block) const throw() 
-  { return std::numeric_limits<double>::max(); }
 
   /// Append a Refresh index to the list of indices
   void add_index_refresh (int index) {
