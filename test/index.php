@@ -754,18 +754,30 @@ echo "<h3>GRAVITY (serial) </h3>";
 tests("Enzo","enzo-p","test_method_gravity_cg-1","GRAVITY_CG 1 block","");
 
 test_table ("method_gravity_cg-1",
-	    array("rho-000000","rho-000001"), $types);
+	    array("mesh-000000","mesh-000010","mesh-000020","mesh-000030","mesh-000040","mesh-000050"), $types);
 test_table ("method_gravity_cg-1",
-	    array("phi-000000","phi-000001"), $types);
+	    array("rho-000000","rho-000010","rho-000020","rho-000030","rho-000040","rho-000050"), $types);
+test_table ("method_gravity_cg-1",
+	    array("phi-000000","phi-000010","phi-000020","phi-000030","phi-000040","phi-000050"), $types);
+test_table ("method_gravity_cg-1",
+	    array("ax-000000","ax-000010","ax-000020","ax-000030","ax-000040","ax-000050"), $types);
+test_table ("method_gravity_cg-1",
+	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
 echo "<h3>GRAVITY (parallel) </h3>";
 
 tests("Enzo","enzo-p","test_method_gravity_cg-8","GRAVITY_CG 8 block","");
 
 test_table ("method_gravity_cg-8",
-	    array("rho-000000","rho-000001"), $types);
+	    array("mesh-000000","mesh-000010","mesh-000020","mesh-000030","mesh-000040","mesh-000050"), $types);
 test_table ("method_gravity_cg-8",
-	    array("phi-000000","phi-000001"), $types);
+	    array("rho-000000","rho-000010","rho-000020","rho-000030","rho-000040","rho-000050"), $types);
+test_table ("method_gravity_cg-8",
+	    array("phi-000000","phi-000010","phi-000020","phi-000030","phi-000040","phi-000050"), $types);
+test_table ("method_gravity_cg-8",
+	    array("ax-000000","ax-000010","ax-000020","ax-000030","ax-000040","ax-000050"), $types);
+test_table ("method_gravity_cg-8",
+	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
 //======================================================================
 

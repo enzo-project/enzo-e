@@ -163,6 +163,7 @@ struct fluxes
 
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
+#include "enzo_EnzoComputeAcceleration.hpp"
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"

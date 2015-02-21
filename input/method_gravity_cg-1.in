@@ -6,10 +6,16 @@ Mesh {
    root_blocks = [1,1];
 }
 
+Adapt {
+   max_level = 4;
+}
 Output {
 
+  mesh_png { name = ["method_gravity_cg-1-mesh-%06d.png", "cycle"]; };
   phi_png { name = ["method_gravity_cg-1-phi-%06d.png", "cycle"]; };
   rho_png { name = ["method_gravity_cg-1-rho-%06d.png", "cycle"]; };
+  ax_png  { name = ["method_gravity_cg-1-ax-%06d.png", "cycle"]; };
+  ay_png  { name = ["method_gravity_cg-1-ay-%06d.png", "cycle"]; };
   phi_h5  { name = ["method_gravity_cg-1-phi-%06d.h5",  "cycle"]; };
   rho_h5  { name = ["method_gravity_cg-1-rho-%06d.h5",  "cycle"]; };
 }

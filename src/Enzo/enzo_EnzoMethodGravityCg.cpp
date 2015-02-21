@@ -97,12 +97,13 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGravityCg::EnzoMethodGravityCg 
-(FieldDescr * field_descr,
- int rank, int iter_max, double res_tol,
+(FieldDescr * field_descr, int rank,
+ double grav_const, int iter_max, double res_tol,
  bool is_singular) 
   : Method(), 
     is_leaf_(false),
     rank_(rank),
+    grav_const_(grav_const),
     iter_max_(iter_max), 
     res_tol_(res_tol),
     rr0_(0),
@@ -151,6 +152,7 @@ void EnzoMethodGravityCg::pup (PUP::er &p)
   p | is_leaf_;
 
   p | rank_;
+  p | grav_const_;
   p | iter_max_;
   p | res_tol_;
 
@@ -252,7 +254,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 	  int i = ix + mx_*(iy + my_*iz);
 	  X[i] = 0.0;
 	  P[i] = R[i] = B[i] = 
-	    - 4.0 * (cello::pi) * (cello::G_cgs) * density[i];
+	    - 4.0 * (cello::pi) * grav_const_ * density[i];
 	}
       }
     }
@@ -389,7 +391,6 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     field.cell_width (xm,xp,&hx_,
 		      ym,yp,&hy_,
 		      zm,zp,&hz_);
-
     matvec_(AP,P); // AP = A * P (assumes P ghosts refreshed)
 
     pap = dot_(P,AP);
@@ -516,7 +517,9 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
     // Shift residual to remove constant mode
     if (is_singular_) {
-      shift_(R,T(-bs_/bc_),R);
+      T shift = T(-bs_/bc_);
+      shift_(R,shift,R);
+      rr_new_ = fabs(1 - shift) * rr_new_;
     }
 
     T a = rr_new_ / rr_;
@@ -526,6 +529,11 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 		  enzo_block->proxy_array());
 
     int iter = (CkMyPe() == 0 && block_count_++ == 0) ? iter_ + 1 : 0;
+
+    // if (enzo_block->index().is_root()) {
+    //   printf ("%s:%d cg_end iter %d  rr %Lg rr0 %g\n",
+    // 	      __FILE__,__LINE__,iter_,rr_,rr0_);
+    // }
 
     enzo_block->contribute (sizeof(int), &iter, 
 			    CkReduction::sum_int, 
@@ -556,12 +564,18 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
   T * potential = (T*) field.values(ipotential_);
 
   if (enzo_block->index().is_root()) {
-    printf ("%s:%d cg_end retval %d  iter %d  rr/rr0 = %g\n",
-	    __FILE__,__LINE__,retval,iter_,rr_/rr0_);
+    printf ("%s:%d cg_end retval %d  iter %d  rr %Lg rr0 %g\n",
+	    __FILE__,__LINE__,retval,iter_,rr_,rr0_);
   }
 
   copy_(potential,X);
 
+  bool symmetric;
+  int order;
+  EnzoComputeAcceleration compute_acceleration (field.field_descr(),
+						rank_, symmetric = true,
+						order=2);
+  compute_acceleration.compute(enzo_block);
   enzo_block->compute_stop();
 }
 
@@ -579,11 +593,10 @@ void EnzoMethodGravityCg::copy_ (T * X, const T * Y) const throw()
 {
   if (! is_leaf_ ) return;
 
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-  for (int iz=0; iz<nz_; iz++) {
-    for (int iy=0; iy<ny_; iy++) {
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + ix + mx_*(iy + my_*iz);
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
 	X[i] = Y[i];
       }
     }
@@ -618,11 +631,10 @@ void EnzoMethodGravityCg::zaxpy_ (T * Z, double a, const T * X, const T * Y) con
 {
   if (! is_leaf_ ) return;
 
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-  for (int iz=0; iz<nz_; iz++) {
-    for (int iy=0; iy<ny_; iy++) {
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + ix + mx_*(iy + my_*iz);
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
 	Z[i] = a * X[i] + Y[i];
       }
     }
@@ -674,11 +686,10 @@ void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
 {
   if (! is_leaf_ ) return;
 
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-  for (int iz=0; iz<nz_; iz++) {
-    for (int iy=0; iy<ny_; iy++) {
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + ix + mx_*(iy + my_*iz);
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
 	Y[i] = a * X[i];
       }
     }
@@ -737,9 +748,9 @@ void EnzoMethodGravityCg::matvec_ (T * Y, const T * X) const throw()
       for (int iy=0; iy<ny_; iy++) {
 	for (int ix=0; ix<nx_; ix++) {
 	  int i = i0 + ix + mx_*(iy + my_*iz);
-	Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx_*hx_)
-	  +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_)
-	  +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz_*hz_);
+	  Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx_*hx_)
+	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_)
+	    +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz_*hz_);
 	}
       }
     }

@@ -32,8 +32,10 @@ class EnzoMethodGravityCg : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravityCg object
-  EnzoMethodGravityCg(FieldDescr * field_descr,
-		      int rank, int iter_max, double res_tol,
+  EnzoMethodGravityCg(FieldDescr * field_descr, int rank,
+		      double grav_const,
+		      int iter_max, 
+		      double res_tol,
 		      bool is_singular);
 
   EnzoMethodGravityCg() {};
@@ -143,6 +145,9 @@ protected: // attributes
 
   /// Dimensionality of the problem
   int rank_;
+
+  /// Gas constant, e.g. 6.67384e-8 (cgs)
+  double grav_const_;
 
   /// Maximum number of Cg iterations
   int iter_max_;

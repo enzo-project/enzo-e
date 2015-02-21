@@ -52,6 +52,7 @@ module enzo {
 
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
+  PUPable EnzoComputeAcceleration;
 
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;

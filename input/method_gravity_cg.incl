@@ -15,13 +15,24 @@
 #----------------------------------------------------------------------
 
 Domain {
-   lower = [ 0.0, 0.0 ];
-   upper = [ 1.0, 1.0 ];
+   lower = [ -1.0, -1.0 ];
+   upper = [  1.0,  1.0 ];
 }
+
+ Adapt {
+     max_level = 2;
+     list = [ "slope" ];
+     slope {
+         field_list = [ "density" ];
+         max_coarsen = 0.010000000000000;
+         min_refine = 4.0000000000000;
+         type = "slope";
+     };
+ }
 
 Mesh { 
    root_rank = 2;
-   root_size = [512,512];
+   root_size = [32,32];
 }
 
 Method {
@@ -29,8 +40,10 @@ Method {
 
     gravity_cg {
        refresh = ["refresh_null","refresh_cg"];
-       iter_max = 1000;
+       iter_max = 500;
        res_tol  = 1e-3;
+#       grav_const = 6.67384e-8;
+#       grav_const = 1.0e-1;
     };
 
     ppm {
@@ -43,16 +56,16 @@ Method {
 }
 
 Refresh {
-    list = ["refresh_null","refresh_cg","ppm_refresh"];
+    list = ["refresh_null","refresh_cg", "refresh_ppm"];
     refresh_null {
          field_face_rank = 0;
          field_list = [];
-         field_ghosts = 3;
+         field_ghosts = 4;
     };
     refresh_cg {
          field_face_rank = 0;
-         field_list = [];
-         field_ghosts = 3;
+         field_list = [ "P" ];
+         field_ghosts = 4;
     };
     ppm_refresh { 
         field_face_rank = 0;
@@ -67,9 +80,11 @@ Field {
    list = ["density", "potential",
            "acceleration_x",
            "acceleration_y",
+           "acceleration_z",
 	   "total_energy",
            "velocity_x",
            "velocity_y",
+           "velocity_z",
            "internal_energy",
 	   "pressure",
            "B","X","R","P","AP"];
@@ -80,20 +95,33 @@ Field {
 
 Initial {
    density  { 
-      value = [ 1.0, (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.05,
+      value = [ 1.0, 
+                    (x)*(x) + 
+		    (y)*(y) < 0.05,
                 0.1 ];
    };
+    # internal energy = pressure / ((gamma - 1) density)
    total_energy  { 
-      value = [ 1.0, (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.05,
-                0.1 ];
+      value = [ 10.0 / (2.0/3.0 * 1.0),
+                    (x)*(x) +
+		    (y)*(y) < 0.05,
+                1.0 / (2.0/3.0 * 0.1) ];
    };
-   acceleration_x {
-      value = [ 100.0 ];
-   };
-   acceleration_y {
-      value = [ 0.0 ];
-   };
-   pressure { value = 0.0; }
+     AP {
+         value = [ 0.0000000000000 ];
+     };
+     B {
+         value = [ 0.0000000000000 ];
+     };
+     P {
+         value = [ 0.0000000000000 ];
+     };
+     R {
+         value = [ 0.0000000000000 ];
+     };
+     X {
+         value = [ 0.0000000000000 ];
+     };
 }
 
 Boundary {
@@ -101,30 +129,66 @@ Boundary {
 } 
 
 Output {
-   list = ["phi_png", "rho_png"];
+   list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png", "az_png"];
+    mesh_png {
+	type     = "image";
+	image_type  = "mesh";
+	image_size = [257,257];
+	image_reduce_type = "max";
+        include "input/schedule_cycle_10.incl"
+	image_min = 0.0;
+	image_max = 3.0;
+        include "input/colormap_rainbow.incl"
+        axis = "x";
+   };
    phi_png {
      type = "image";
+     image_size = [256,256];
      field_list = ["potential"];
      include "input/schedule_cycle_10.incl"
      include "input/colormap_blackbody.incl"
    };
    rho_png {
      type = "image";
+     image_size = [256,256];
      field_list = ["density"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   ax_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["acceleration_x"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   ay_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["acceleration_y"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   az_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["acceleration_z"];
      include "input/schedule_cycle_10.incl"
      include "input/colormap_blackbody.incl"
    };
    phi_h5 {
      type = "data";
+     image_size = [256,256];
      field_list = ["potential"];
      include "input/schedule_cycle_10.incl"
    };
    rho_h5 {
      type = "data";
+     image_size = [256,256];
      field_list = ["density"];
      include "input/schedule_cycle_10.incl"
    }
 }
 
-Stopping { cycle = 1000; }
+Stopping { cycle = 50; }
 

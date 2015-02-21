@@ -193,7 +193,8 @@ Method * EnzoProblem::create_method_
     bool is_singular = true;
     int rank = config->mesh_root_rank;
     method = new EnzoMethodGravityCg
-      (field_descr,rank,
+      (field_descr, rank,
+       enzo_config->method_gravity_cg_grav_const,
        enzo_config->method_gravity_cg_iter_max,
        enzo_config->method_gravity_cg_res_tol,
        is_singular);
