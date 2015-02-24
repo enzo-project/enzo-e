@@ -525,13 +525,7 @@ void Config::read_adapt_ (Parameters * p) throw()
 
     //--------------------------------------------------
 
-    if (p->type(prefix + "min_refine") == parameter_float) {
-
-      mesh_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
-      mesh_max_coarsen[ia] = p->value (prefix + "max_coarsen",
-				       0.5*mesh_min_refine[ia]);
-
-    } else if (p->type(prefix + "min_refine") == parameter_list) {
+    if (p->type(prefix + "min_refine") == parameter_list) {
 
       mesh_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
       mesh_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
@@ -540,6 +534,12 @@ void Config::read_adapt_ (Parameters * p) throw()
       mesh_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
       mesh_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
 						   0.5*mesh_min_refine2[ia]);
+    } else {
+
+      mesh_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
+      mesh_max_coarsen[ia] = p->value (prefix + "max_coarsen",
+				       0.5*mesh_min_refine[ia]);
+
     }
 
     mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);

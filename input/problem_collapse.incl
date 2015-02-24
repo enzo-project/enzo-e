@@ -1,0 +1,186 @@
+### File:    problem_collapse.incl
+### Problem: 3D Molecular gas collapse problem
+### Author:  James Bordner (jobordner@ucsd.edu)
+### Author:  Michael Norman (mlnorman@ucsd.edu)
+
+### cgs units
+###
+### R = 7e16
+### T0 = 11.6K (~ 10 K)
+### rho0 = 1.39 e -18
+### T1 = 100.0*T0
+### rho1 = rho0 / 100.0
+### e0 = 8.866e7 T0?
+### e1 = 8.866e7 T1?
+### M  = 2e33
+### G = 6.67384e-8
+### R_b = sqrt(x*x + y*y + z*z)
+
+
+### Shift by 1/6 so that lies at 1/3 to reduce # blocks
+
+Domain { 
+   lower = [-2.80e17, -2.80e17, -2.80e17];
+   upper = [ 2.80e17,  2.80e17,  2.80e17];
+#   lower = [-3.73333333e17,-3.73333333e17,-3.73333333e17];
+#   upper = [ 1.86666667e17, 1.86666667e17, 1.86666667e17];
+} 
+
+Mesh { 
+   root_rank = 3;
+   root_size = [16,16,16];
+}
+
+Field {
+
+    ghosts = 4;
+    gamma = 1.4;
+      
+    list = [
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "velocity_z",
+	"potential",
+        "acceleration_x",
+        "acceleration_y",
+        "acceleration_z",
+        "total_energy",
+	"B", "P", "R", "X", "AP",
+        "internal_energy",
+	"pressure",
+	"temperature",
+	"adapt"
+      ] ;
+
+   courant   = 0.8;
+
+}
+
+Method {
+
+   list = ["gravity_cg", "ppm"];
+
+   ppm {
+      diffusion   = true;
+      flattening  = 3;
+      steepening  = true;
+      dual_energy = false;
+      refresh = "refresh_ppm";
+  };
+
+   gravity_cg {
+      refresh = ["refresh_gravity","refresh_cg"];
+      max_iter = 10000;
+      res_tol  = 1e-3;
+  }
+}
+
+Refresh {
+   list = ["refresh_ppm","refresh_gravity","refresh_cg"];
+   refresh_ppm { 
+      field_face_rank = 0;
+      field_list = [];
+      field_ghosts = 4;
+   };
+   refresh_cg { 
+      field_face_rank = 0;
+      field_list = ["P"];
+      field_ghosts = 4;
+   };
+   refresh_gravity { 
+      field_face_rank = 0;
+      field_list = [];
+      field_ghosts = 4;
+   }
+}
+
+Initial {
+
+    density { 
+       value = [ 1.39e-18, (x*x+y*y+z*z < 4.9e33),
+                 1.39e-20 ]; 
+    };
+    temperature {
+       value = [ 10.0, (x*x+y*y+z*z < 4.9e33),
+               1000.0 ];
+    };
+    total_energy {
+       value = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
+                 8.8689e7*1000.0 ]; 
+    };
+    internal_energy {
+       value = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
+                 8.8689e7*1000.0 ]; 
+    };
+}
+
+   Boundary { 
+      list = ["PERIODIC"];
+      PERIODIC { type = "periodic"; };
+      INFLOW {
+         # -G*M/|r_b|
+         #   = -6.67384e-8 * 2e33 / sqrt(x*x + y*y + z*z)
+         type = "inflow";
+	 value = -1.334e26 / sqrt(x*x + y*y + z*z);
+      }
+   }
+
+   Stopping {
+#      time  = 1.0;
+      cycle = 1000;
+   }
+
+   Output { 
+
+      list = ["d","p","ax", "mesh", "adapt"];
+
+      d {
+         field_list = ["density"];
+         type     = "image";
+         name     = ["collapse-d-%05d.png","cycle"];
+	 image_size = [1024,1024];
+         include "input/schedule_cycle_10.incl";
+         include "input/colormap_blackbody.incl";
+      };
+      p {
+         field_list = ["potential"];
+         type     = "image";
+	 image_size = [1024,1024];
+         name     = ["collapse-phi-%05d.png","cycle"];
+         include "input/schedule_cycle_10.incl";
+         include "input/colormap_blackbody.incl";
+      };
+      ax {
+         field_list = ["acceleration_x"];
+         type     = "image";
+	 image_size = [1024,1024];
+         name     = ["collapse-ax-%05d.png","cycle"];
+         include "input/schedule_cycle_10.incl";
+         include "input/colormap_blackbody.incl";
+      };
+      mesh {
+         type = "image";
+	 image_type = "mesh";
+	 image_size = [1025,1025];
+	 image_reduce_type = "max";
+	 name = ["collapse-mesh-%05d.png","cycle"];
+         include "input/colormap_rainbow.incl";
+	 include "input/schedule_cycle_10.incl";
+      };
+      data {
+         type = "data";
+	 field_list = [];
+         name = ["collapse-%05d.h5","cycle"];
+	 include "input/schedule_cycle_10.incl";
+      };
+      adapt {
+         field_list = ["adapt"];
+         type     = "image";
+	 image_size = [1024,1024];
+         name     = ["collapse-adapt-%05d.png","cycle"];
+         include "input/schedule_cycle_10.incl";
+         include "input/colormap_greyscale.incl";
+      };
+      
+   }

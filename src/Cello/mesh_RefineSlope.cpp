@@ -126,12 +126,13 @@ void RefineSlope::evaluate_block_(T * array, T * output ,
   const int d3[3] = {1,ndx,ndx*ndy};
   for (int axis=0; axis<rank; axis++) {
     int d = d3[axis];
+    const int i0 = gx + ndx*(gy + ndy*gz);
     for (int ix=0; ix<nx; ix++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int iz=0; iz<nz; iz++) {
-	  int i = (gx+ix) + (ndx)*((gy+iy) + (ndy)*(gz+iz));
-	  slope = fabs((array[i+d] - array[i-d]) / (2.0*h3[axis]*array[i]));
-	  
+	  int i = i0 + ix + ndx*(iy + ndy*iz);
+	  slope = fabs( (array[i+d] - array[i-d]) 
+		       / (2.0*h3[axis]*array[i]));
 	  if (slope > min_refine_)  *any_refine  = true;
 	  if (slope > max_coarsen_) *all_coarsen = false;
 	  if (output) {
