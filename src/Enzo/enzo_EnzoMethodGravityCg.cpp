@@ -296,6 +296,8 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
   refresh_sync_  = "contribute";
   refresh_phase_ = phase_enzo_matvec;
 
+  index_refresh_ = method->index_refresh(1);
+
   control_next(phase_refresh_enter,"neighbor");
   
 }
