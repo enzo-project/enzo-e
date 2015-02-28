@@ -64,7 +64,7 @@ Refresh {
     };
     refresh_cg {
          field_face_rank = 0;
-         field_list = [ "P" ];
+         field_list = [];
          field_ghosts = 4;
     };
     ppm_refresh { 
