@@ -1,6 +1,8 @@
 import os
 import sys
 import subprocess
+import time
+import socket
 
 #======================================================================
 # USER CONFIGURATION
@@ -432,21 +434,45 @@ env = Environment (
      LIBPATH      = libpath,
      LINKFLAGS    = linkflags )
 
-cello_def.write ("#define CELLO_ARCH \""+arch+"\"\n")
-cello_def.write ("#define CELLO_PREC \""+prec+"\"\n")
-cello_def.write ("#define CELLO_CC           \""+cc+"\"\n")	
-cello_def.write ("#define CELLO_CFLAGS       \""+cflags+"\"\n")
-cello_def.write ("#define CELLO_CPPDEFINES   \""+" ".join(map(str,defines))+"\"\n")
-cello_def.write ("#define CELLO_CPPPATH      \""+" ".join(map(str,cpppath))+"\"\n")
-cello_def.write ("#define CELLO_CXX          \""+cxx+"\"\n")	
-cello_def.write ("#define CELLO_CXXFLAGS     \""+cxxflags+"\"\n")
-cello_def.write ("#define CELLO_FORTRANFLAGS \""+fortranflags+"\"\n")
-cello_def.write ("#define CELLO_FORTRAN      \""+f90+"\"\n")
-cello_def.write ("#define CELLO_FORTRANLIBS  \""+" ".join(map(str,libs_fortran))+"\"\n")
-cello_def.write ("#define CELLO_FORTRANPATH  \""+" ".join(map(str,fortranpath))+"\"\n")
-cello_def.write ("#define CELLO_LIBPATH      \""+" ".join(map(str,libpath))+"\"\n")
-cello_def.write ("#define CELLO_LINKFLAGS    \""+linkflags+"\"\n" )
-# cello_def.write ("#define CELLO_CHANGESET    \""+subprocess.check_output(["hg", "id", "--id"]).rstrip()+"\"\n" )
+cello_def.write ("#define CELLO_ARCH "
+		"\""+arch+"\"\n")
+cello_def.write ("#define CELLO_PREC "
+		"\""+prec+"\"\n")
+cello_def.write ("#define CELLO_CC "
+		"\""+cc+"\"\n")	
+cello_def.write ("#define CELLO_CFLAGS "
+		"\""+cflags+"\"\n")
+cello_def.write ("#define CELLO_CPPDEFINES "
+		"\""+" ".join(map(str,defines))+"\"\n")
+cello_def.write ("#define CELLO_CPPPATH "
+		"\""+" ".join(map(str,cpppath))+"\"\n")
+cello_def.write ("#define CELLO_CXX "
+		"\""+cxx+"\"\n")	
+cello_def.write ("#define CELLO_CXXFLAGS "
+		"\""+cxxflags+"\"\n")
+cello_def.write ("#define CELLO_FORTRANFLAGS "
+		"\""+fortranflags+"\"\n")
+cello_def.write ("#define CELLO_FORTRAN "
+		"\""+f90+"\"\n")
+cello_def.write ("#define CELLO_FORTRANLIBS "
+		"\""+" ".join(map(str,libs_fortran))+"\"\n")
+cello_def.write ("#define CELLO_FORTRANPATH "
+		"\""+" ".join(map(str,fortranpath))+"\"\n")
+cello_def.write ("#define CELLO_LIBPATH "
+		"\""+" ".join(map(str,libpath))+"\"\n")
+cello_def.write ("#define CELLO_LINKFLAGS "
+		"\""+linkflags+"\"\n" )
+cello_def.write ("#define CELLO_HOST "
+		"\""+socket.gethostname()+"\"\n" )
+cello_def.write ("#define CELLO_DIR "
+		"\""+Dir('.').abspath+"\"\n" )
+cello_def.write ("#define CELLO_DATE "
+		"\""+time.strftime("%Y-%m-%d",time.gmtime())+"\"\n" )
+cello_def.write ("#define CELLO_TIME "
+		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
+# cello_def.write ("#define CELLO_CHANGESET "
+#		"\""+subprocess.check_output(["hg", "id", "--id"]).rstrip()+"\"\n" )
+
 env.Command ('hgid.out', [], 'hg --id > $TARGETS')
 env.AlwaysBuild('hgid.out')
 cello_def.close()

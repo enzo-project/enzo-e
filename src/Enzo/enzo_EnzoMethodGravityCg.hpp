@@ -36,7 +36,8 @@ public: // interface
 		      double grav_const,
 		      int iter_max, 
 		      double res_tol,
-		      bool is_singular);
+		      bool is_singular,
+		      bool diag_precon);
 
   EnzoMethodGravityCg() {};
 
@@ -71,8 +72,22 @@ public: // interface
   void cg_end (EnzoBlock * enzo_block, int retval) throw();
 
   /// Set rr_ by EnzoBlock after reduction
-  void set_rr(long double rr) throw()  { rr_ = rr;  }
+  void set_rr(long double rr, const char * file, int line) throw()  {
+    rr_r_ = rr; 
+    print(rr_r_,file,line);
+  }
+  void print (long double rr,const char * file, int line) {
+    //        printf ("DEBUG %s:%d  %Lg\n",file,line,rr); 
+  }
+  void print_rr (const char * file, int line) {
+    //        printf ("DEBUG %s:%d  %Lg\n",file,line,rr_); 
+  }
 
+  /// Set rr_new_ by EnzoBlock after reduction
+  void set_rr_new(long double rr_new, const char * file, int line) throw()  {
+    rr_new_ = rr_new; 
+    print(rr_new_,file,line);
+  }
   /// Set bs_ by EnzoBlock after reduction
   void set_bs(long double bs) throw()  { bs_ = bs;  }
 
@@ -84,9 +99,6 @@ public: // interface
 
   /// Set iter_ by EnzoBlock after reduction
   void set_iter(int iter) throw()  { iter_ = iter; }
-
-  /// Set rr_new_ by EnzoBlock after reduction
-  void set_rr_new(double rr_new) throw()  { rr_new_ = rr_new; }
 
 protected: // methods
 
@@ -130,6 +142,11 @@ protected: // methods
   template <class T>
   void matvec_ (T * Y, const T * X) const throw();
 
+  /// Apply diagonal preconditioner      Y <- D*X if dir == +1
+  /// or inverse diagonal preconditioner Y <- D\X if dir == -1
+  template <class T>
+  void apply_precon_ (T * Y, const T * X, int dir) const throw();
+
   /// Set whether current Block is a leaf--if not don't touch data
   void set_leaf(Block * block) throw()
   { is_leaf_ = block->is_leaf(); }
@@ -139,6 +156,9 @@ protected: // attributes
   /// Whether you need to subtract of the nullspace of A from b, e.g. fully
   /// periodic or Neumann problems
   bool is_singular_;
+
+  /// Whether to use diagonal preconditioning
+  bool diag_precon_;
 
   /// Whether current block is a leaf
   bool is_leaf_;
@@ -186,7 +206,11 @@ protected: // attributes
   /// inner product P*(A*P)
   double pap_;
 
-  /// inner product R*R
+  /// inner product R*R as produced by Charm++ contribute()
+  /// (this exists to prevent multiple shifts by multiple blocks per process)
+  long double rr_r_;
+
+  /// inner product R*R derived from rr_r_, which may include a shift
   long double rr_;
 
   /// newest inner product R*R

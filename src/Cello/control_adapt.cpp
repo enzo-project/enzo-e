@@ -355,8 +355,6 @@ void Block::adapt_send_level()
 
     int ic3[3] = {0,0,0};
 
-    Index index_neighbor = neighbor_(of3);
-
     const int level_face = face_level (of3);
 
     if (level_face == level) {
@@ -364,7 +362,7 @@ void Block::adapt_send_level()
       // SEND-SAME: Face and level are sent to unique
       // neighboring block in the same level
    
-      PUT_LEVEL (index_,index_neighbor,ic3,of3,level,level_next_,"send");
+      PUT_LEVEL (index_,neighbor_(of3),ic3,of3,level,level_next_,"send");
 
     } else if (level_face == level - 1) {
 
@@ -381,7 +379,7 @@ void Block::adapt_send_level()
 	  op3[1]==of3[1] && 
 	  op3[2]==of3[2]) {
 
-	Index index_uncle = index_neighbor.index_parent();
+	Index index_uncle = neighbor_(of3).index_parent();
 
 	PUT_LEVEL (index_,index_uncle,ic3,of3,level,level_next_,"send");
 
@@ -395,7 +393,7 @@ void Block::adapt_send_level()
       const int if3[3] = {-of3[0],-of3[1],-of3[2]};
       ItChild it_child(rank,if3);
       while (it_child.next(ic3)) {
-	Index index_nibling = index_neighbor.index_child(ic3);
+	Index index_nibling = neighbor_(of3).index_child(ic3);
 
 	PUT_LEVEL (index_,index_nibling,ic3,of3,level,level_next_,"send");
 
@@ -638,7 +636,6 @@ void Block::adapt_recv_fine(const int of3[3], const int ic3[3],int level_face_ne
 
   ItChild it_child (rank,of3);
   int jc3[3];
-  Index index_neighbor = neighbor_(of3).index_child(ic3);
   while (it_child.next(jc3)) {
 
     Index index_child = index_.index_child(jc3);
@@ -650,6 +647,8 @@ void Block::adapt_recv_fine(const int of3[3], const int ic3[3],int level_face_ne
     while (it_face.next(jf3)) {
 
       Index in = neighbor_(jf3,&index_child);
+
+      Index index_neighbor = neighbor_(of3).index_child(ic3);
 
       if (in == index_neighbor) {
 	set_child_face_level_next(jc3,jf3,level_face_new);

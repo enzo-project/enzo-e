@@ -90,6 +90,8 @@ public: // interface
     if (in_range) (*index_field) = field_list_[i];
     return in_range;
   }
+  const std::string name() const { return name_; }
+
   void print () const {
     printf ("%s:%d\n",__FILE__,__LINE__);
     printf ("name_ %s\n",name_.c_str());

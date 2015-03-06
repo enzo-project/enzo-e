@@ -9,6 +9,9 @@
 
 #include "monitor.hpp" 
 
+#include "auto_config.def"
+
+
 //----------------------------------------------------------------------
 Monitor Monitor::instance_; // singleton design pattern)
 //----------------------------------------------------------------------
@@ -94,6 +97,10 @@ void Monitor::header () const
   print ("Define","FORTRANPATH  %s",CELLO_FORTRANPATH);
   print ("Define","LIBPATH      %s",CELLO_LIBPATH);
   print ("Define","LINKFLAGS    %s",CELLO_LINKFLAGS);
+  print ("Define","HOST         %s",CELLO_HOST);
+  print ("Define","DIR          %s",CELLO_DIR);
+  print ("Define","DATE         %s",CELLO_DATE);
+  print ("Define","TIME         %s",CELLO_TIME);
   //  print ("Define","CHANGESET    %s",CELLO_CHANGESET);
 
 }

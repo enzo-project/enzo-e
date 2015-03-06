@@ -197,7 +197,8 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_cg_grav_const,
        enzo_config->method_gravity_cg_iter_max,
        enzo_config->method_gravity_cg_res_tol,
-       is_singular);
+       is_singular,
+       enzo_config->method_gravity_cg_diag_precon );
   } else if (name == "gravity_bicgstab") {
     method = new EnzoMethodGravityBiCGStab
       (field_descr,

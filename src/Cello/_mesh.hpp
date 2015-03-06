@@ -136,6 +136,7 @@ class Tree;
 #include "mesh_RefineMass.hpp"
 #include "mesh_RefineMask.hpp"
 #include "mesh_ItFace.hpp"
+#include "mesh_ItNeighbor.hpp"
 #include "mesh_ItChild.hpp"
 
 #endif /* _MESH_HPP */

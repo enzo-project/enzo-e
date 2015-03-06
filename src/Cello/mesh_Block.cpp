@@ -280,9 +280,10 @@ const FieldDescr * Block::field_descr() throw()
 
 //----------------------------------------------------------------------
 
-ItFace Block::it_face(int min_face_rank,
-			  const int * ic3,
-			  const int * if3) throw()
+ItFace Block::it_face
+(int min_face_rank,
+ const int * ic3,
+ const int * if3) throw()
 {
   int rank = this->rank();
   int n3[3];
@@ -290,6 +291,21 @@ ItFace Block::it_face(int min_face_rank,
   bool periodic[3][2];
   periodicity(periodic);
   return ItFace (rank,min_face_rank,periodic,n3,index_,ic3,if3);
+}
+
+//----------------------------------------------------------------------
+
+ItNeighbor Block::it_neighbor
+(int min_face_rank,
+ const int * ic3,
+ const int * if3) throw()
+{
+  int rank = this->rank();
+  int n3[3];
+  size_forest(&n3[0],&n3[1],&n3[2]);
+  bool periodic[3][2];
+  periodicity(periodic);
+  return ItNeighbor (rank,min_face_rank,periodic,n3,index_,ic3,if3);
 }
 
 //----------------------------------------------------------------------

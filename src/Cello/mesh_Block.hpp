@@ -23,6 +23,7 @@ class FieldDescr;
 class FieldFace;
 class Hierarchy;
 class ItFace;
+class ItNeighbor;
 class Method;
 class Refresh;
 class Simulation;
@@ -218,6 +219,12 @@ public: // interface
   ItFace it_face(int min_face_rank,
 		 const int * ic3=0,
 		 const int * if3=0) throw();
+
+  /// Return an iterator over neighbors
+
+  ItNeighbor it_neighbor(int min_face_rank,
+			 const int * ic3=0,
+			 const int * if3=0) throw();
 
   //--------------------------------------------------
   // Charm++ virtual
