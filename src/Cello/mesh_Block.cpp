@@ -663,7 +663,8 @@ void Block::store_face_
  std::vector<int> & field_list
  )
 {
-  FieldFace * field_face = create_face_ (if3,ic3,lg3, op_array_type,field_list);
+  FieldFace * field_face = create_face_ 
+    (if3,ic3,lg3, op_array_type,field_list);
 
   field_face->store(n, a);
   delete field_face;

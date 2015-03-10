@@ -50,6 +50,7 @@ module enzo {
 
   PUPable EnzoRefineShock;
 
+  PUPable EnzoMatrixPoisson;
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
@@ -103,9 +104,13 @@ module enzo {
     template <class T>
     entry void r_cg_loop_1(CkReductionMsg *msg);
     template <class T>
+    entry void r_cg_shift_1(CkReductionMsg *msg);
+    template <class T>
     entry void r_cg_loop_3(CkReductionMsg *msg);
     template <class T>
     entry void r_cg_loop_5(CkReductionMsg *msg);
+    template <class T>
+    entry void r_cg_shift_2(CkReductionMsg *msg);
 
     entry void p_enzo_matvec();
     entry void r_enzo_matvec(CkReductionMsg *);

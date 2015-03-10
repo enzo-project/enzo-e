@@ -26,6 +26,7 @@
 //----------------------------------------------------------------------
 
 #include "compute_Compute.hpp"
+#include "compute_Matrix.hpp"
 
 #endif /* _FIELD_HPP */
 

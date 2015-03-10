@@ -190,5 +190,3 @@ Output {
    }
 }
 
-Stopping { cycle = 50; }
-

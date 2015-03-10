@@ -348,10 +348,10 @@ void Block::adapt_send_level()
   const int rank         = this->rank();
 
   const int min_face_rank = 0;
-  ItFace it_face = this->it_face(min_face_rank);
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank);
   int of3[3];
 
-  while (it_face.next(of3)) {
+  while (it_neighbor.next(of3)) {
 
     int ic3[3] = {0,0,0};
 

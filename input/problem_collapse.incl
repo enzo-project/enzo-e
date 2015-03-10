@@ -84,12 +84,12 @@ Refresh {
       field_ghosts = 4;
    };
    refresh_cg { 
-      field_face_rank = 0;
+      field_face_rank = 1;
       field_list = [];
       field_ghosts = 4;
    };
    refresh_gravity { 
-      field_face_rank = 0;
+      field_face_rank = 1;
       field_list = [];
       field_ghosts = 4;
    }

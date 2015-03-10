@@ -240,6 +240,8 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 ///   - rr_ = DOT(R,R) ==> cg_loop_0
 {
 
+  set_leaf(enzo_block);
+
   long double r_rsc[3];
 
   iter_ = 0;
@@ -353,11 +355,11 @@ void EnzoBlock::enzo_matvec_()
   method->print_rr (__FILE__,__LINE__);
 
   if      (precision == precision_single)    
-    method->cg_loop_2<float>(enzo_block);
+    method->cg_shift_1<float>(enzo_block);
   else if (precision == precision_double)    
-    method->cg_loop_2<double>(enzo_block);
+    method->cg_shift_1<double>(enzo_block);
   else if (precision == precision_quadruple) 
-    method->cg_loop_2<long double>(enzo_block);
+    method->cg_shift_1<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
 }
@@ -365,13 +367,15 @@ void EnzoBlock::enzo_matvec_()
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
-/// - if (maximum iteration reached) ==> cg_end (return_error_max_iter_reached)
-///   pap = DOT(P, AP) ==> r_cg_loop_3
+void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 {
+
   set_leaf(enzo_block);
 
   if (iter_ == 0)  {
+
+    // shift
+
     T shift = 0.0;
     Data * data = enzo_block->data();
     Field field = data->field();
@@ -387,22 +391,83 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
       shift_ (B,shift,B);
       shift_ (P,shift,P);
     }
-    rr0_ = rr_r_;
-    rr_ = fabs(1 - shift) * rr_r_;
-    double xm,ym,zm;
-    data->lower(&xm,&ym,&zm);
-    double xp,yp,zp;
-    data->upper(&xp,&yp,&zp);
-    field.cell_width (xm,xp,&hx_,
-		      ym,yp,&hy_,
-		      zm,zp,&hz_);
-    apply_precon_ (P, P, -1);
-    apply_precon_ (R, R, -1);
-    apply_precon_ (B, B, -1);
+
+    long double r_rsc[3];
+
+    r_rsc[0] = dot_(R,R);
+    r_rsc[1] = 0.0;
+    r_rsc[2] = 0.0;
+
+    CkCallback cb(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
+		  enzo_block->proxy_array());
+    enzo_block->contribute (3*sizeof(long double), &r_rsc, 
+			    r_method_gravity_cg_type, 
+			    cb);
+    
 
   } else {
-    rr_ = rr_new_;
-  }
+
+    cg_loop_2<T>(enzo_block);
+
+  } 
+
+
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoBlock::r_cg_shift_1 (CkReductionMsg * msg)
+/// - EnzoBlock accumulate global contribution to DOT(R,R)
+/// --> cg_loop_2
+{
+  EnzoMethodGravityCg * method = 
+    static_cast<EnzoMethodGravityCg*> (this->method());
+
+  long double rr = ((long double*)msg->getData())[0];
+
+  method->set_rr(rr,__FILE__,__LINE__);
+
+  delete msg;
+
+  method -> cg_loop_2<T>(this);
+
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
+/// - if (maximum iteration reached) ==> cg_end (return_error_max_iter_reached)
+///   pap = DOT(P, AP) ==> r_cg_loop_3
+{
+  set_leaf(enzo_block);
+
+  rr_ = rr_r_;
+  CHECK0(rr_);
+  if (iter_==0) rr0_ = rr_;
+  CHECK0(rr0_);
+
+  // compute rr_
+
+    // precondition
+
+  Data * data = enzo_block->data();
+
+  double xm,ym,zm;
+  data->lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  data->upper(&xp,&yp,&zp);
+  Field field = data->field();
+  field.cell_width (xm,xp,&hx_,
+		    ym,yp,&hy_,
+		    zm,zp,&hz_);
+  T * P  = (T*) field.values(ip_);
+  T * R  = (T*) field.values(ir_);
+  T * B  = (T*) field.values(ib_);
+  apply_precon_ (P, P, -1);
+  apply_precon_ (R, R, -1);
+  apply_precon_ (B, B, -1);
 
   CHECK0(rr_);
   CHECK0(rr_r_);
@@ -530,6 +595,65 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 
   delete msg;
 
+  method -> cg_shift_2<T>(this);
+
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMethodGravityCg::cg_shift_2 (EnzoBlock * enzo_block) throw()
+{
+  set_leaf(enzo_block);
+  T shift = 0.0;
+  if (is_singular_) {
+    Field field = enzo_block->data()->field();
+    T * R  = (T*) field.values(ir_);
+    T * P  = (T*) field.values(ip_);
+    shift = T(-bs_/bc_);
+    shift_(R,shift,R);
+    shift_ (P,shift,P);
+    if (enzo_block->index().is_root()) {
+      printf ("%s:%d shift = %g\n",__FILE__,__LINE__,shift);
+    }
+    long double r_rsc[3];
+
+    T * X  = (T*) field.values(ix_);
+    r_rsc[0] = dot_(R,R);
+    r_rsc[1] = dot_(X,X);
+    r_rsc[2] = 0.0;
+
+    CkCallback cb(CkIndex_EnzoBlock::r_cg_shift_2<T>(NULL), 
+		  enzo_block->proxy_array());
+    enzo_block->contribute (3*sizeof(long double), &r_rsc, 
+			    r_method_gravity_cg_type, 
+			    cb);
+
+  } else {
+
+    cg_loop_6<T>(enzo_block);
+
+  } 
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoBlock::r_cg_shift_2 (CkReductionMsg * msg)
+/// - EnzoBlock accumulate global contribution to DOT(R,R)
+/// --> cg_loop_2
+{
+  EnzoMethodGravityCg * method = 
+    static_cast<EnzoMethodGravityCg*> (this->method());
+
+  long double rr = ((long double*)msg->getData())[0];
+  long double xr = ((long double*)msg->getData())[1];
+
+  method->set_rr(rr,__FILE__,__LINE__);
+  method->set_bs(xr);
+
+  delete msg;
+
   method -> cg_loop_6<T>(this);
 
 }
@@ -552,18 +676,14 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
   set_leaf(enzo_block);
 
-  T shift = 0.0;
-  if (is_singular_) {
-    Field field = enzo_block->data()->field();
-    T * R  = (T*) field.values(ir_);
-    shift = T(-bs_/bc_);
-    shift_(R,shift,R);
-    rr_new_ = (1.0 - shift) * rr_r_;
-  } else {
-    rr_new_ = rr_r_;
-  }
+  rr_new_ = rr_r_;
+
   CHECK0(rr_new_);
 
+  if (enzo_block->index().is_root()) {
+    printf ("X'*X = %Lg\n",bs_);
+  }
+  
   if (rr_new_ / rr0_ < res_tol_) {
 
     rr_ = rr_new_;

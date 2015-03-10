@@ -58,11 +58,19 @@ public: // interface
 
   /// Continuation after global reduction
   template <class T>
+  void cg_shift_1(EnzoBlock * enzo_block) throw();
+
+  /// Continuation after global reduction
+  template <class T>
   void cg_loop_2(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
   void cg_loop_4(EnzoBlock * enzo_block) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void cg_shift_2(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
