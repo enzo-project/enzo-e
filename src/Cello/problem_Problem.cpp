@@ -363,8 +363,6 @@ void Problem::initialize_refresh
  const FieldDescr * field_descr
  ) throw()
 {
-  WARNING ("Problem::initialize_refresh()",
-	   "NOT IMPLEMENTED");
 
   for (size_t index=0; index<config->refresh_list.size(); index++) {
 

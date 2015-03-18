@@ -147,7 +147,7 @@ private: // functions
   void reduce_line_y_(double * data, int ix, int iym, int iyp, 
 		      double value, double alpha=1.0);
   void reduce_box_(double * data, int ixm, int ixp, int iym, int iyp, 
-		   double value, double alpha=1.0);
+		   double value, reduce_type reduce, double alpha=1.0);
   void reduce_cube_(double * data, int ixm, int ixp, int iym, int iyp, 
 		    double value, double alpha=1.0);
 

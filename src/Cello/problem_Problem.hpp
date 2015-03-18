@@ -258,13 +258,13 @@ private: // attributes
   Restrict * restrict_;
 
   /// Index of currently active Refine object
-  size_t index_refine_;
+  int index_refine_;
 
   /// Index of currently active Output object
-  size_t index_output_;
+  int index_output_;
 
   /// Index of currently active Boundary object
-  size_t index_boundary_;
+  int index_boundary_;
 
 };
 

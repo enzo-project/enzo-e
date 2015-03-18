@@ -153,7 +153,9 @@ bool Index::is_on_boundary
 
 	tree &= ~(shift_overflow);
 
-	if ( ! ((0 <= array+if3[axis]) && (array+if3[axis] < n3[axis])) )
+	const int i = array+if3[axis];
+
+	if ( ! ( 0 <= i && i < n3[axis] ) )
 	  return true;
     
       }
@@ -190,7 +192,9 @@ Index Index::index_neighbor (const int if3[3], const int n3[3]) const
 
       tree &= ~(shift_overflow);
 
-      array = (n3[axis] + array + if3[axis]) % n3[axis];
+      const int i = array+if3[axis];
+
+      array = (n3[axis] + i) % n3[axis];
 
     }
     index.a_[axis].array = array;

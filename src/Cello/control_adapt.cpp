@@ -23,12 +23,13 @@ static char buffer [256];
   {									\
     std::string bit_str = INDEX_RECV.bit_string(-1,2);			\
     sprintf (buffer,"%s %s"						\
-	     "if3 %2d %2d %2d  ic3 %d %d %d  "				\
-	     "%d -> %d :%d",						\
+	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d  "		\
+	      "line %d",						\
 	     MSG,bit_str.c_str(),					\
+	     LEVEL_NOW,LEVEL_NEW,					\
 	     IF3[0],IF3[1],IF3[2],					\
 	     IC3[0],IC3[1],IC3[2],					\
-	     LEVEL_NOW,LEVEL_NEW,__LINE__);				\
+	     __LINE__);							\
     INDEX_SEND.print(buffer,-1,2,false,simulation());			\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
     check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
@@ -446,7 +447,7 @@ void Block::p_adapt_recv_level
 #ifdef DEBUG_ADAPT
   std::string bit_str = index_send.bit_string(-1,2);
   sprintf (buffer,"%s %s"
-	   "%d => %d if3 %2d %2d %2d  ic3 %d %d %d  "			
+	   " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d  "			
 	   "%d <- %d [%d] %s",					
 	   "recv",bit_str.c_str(),
 	   level(), level_next_,if3[0],if3[1],if3[2],				
@@ -674,8 +675,8 @@ void Block::adapt_recv_recurse(const int if3[3],
   index_.print(buffer,-1,2,false,simulation());
 #endif    
 
-  ERROR("Block::adapt_recv_recurse()",
-	 "Recurse should not be called");
+  ERROR1("Block::adapt_recv_recurse()",
+	 "%s Recurse should not be called",name().c_str());
 
   // Forward to children if internal node
     
