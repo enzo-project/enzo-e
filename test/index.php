@@ -12,7 +12,7 @@
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
-   <h2><center><?php system ("hg branch") ?> branch: revision <?php system ("hg id -n") ?> </center> </h2>
+   <h2><center><?php system ("hg branch") ?> branch revision <?php system ("hg id -n") ?> </center> </h2>
  <?php
 
      //----------------------------------------------------------------------
@@ -136,8 +136,8 @@ function tests($component,$testrun,$output,$test_name,$dir) {
     echo "   <th>Time</th>";
     echo "   <th>Duration</th>";
     echo "   <th>Failed</th>";
-    echo "   <th>Unfinished</th>";
     echo "   <th>Passed</th>";
+    echo "   <th>Unfinished</th>";
     echo "</tr>\n";
 
     //--------------------------------------------------
@@ -160,8 +160,8 @@ function tests($component,$testrun,$output,$test_name,$dir) {
       test_time       ($file);
       test_duration   ($file);
       test_failed     ($file);
-      test_unfinished ($file);
       test_passed     ($file);
+      test_unfinished ($file);
 
       echo "</tr>\n";
     }
@@ -358,9 +358,9 @@ function test_summary($component,$test_output,$executables, $dir)
   printf ("<th></th>");
   summary_failed_tests       ($test_output, $executables, $state, $dir);
   printf ("<th></th>");
-  summary_unfinished_tests   ($test_output, $executables, $state, $dir);
-  printf ("<th></th>");
   summary_passed_tests       ($test_output, $executables, $state, $dir);
+  printf ("<th class=divider></th>");
+  summary_unfinished_tests   ($test_output, $executables, $state, $dir);
 
   printf ("</tr>\n");
 }
@@ -503,9 +503,9 @@ printf ( "<th colspan=$num_types class=fail>Incomplete</br>Output</th>");
 printf ("<th></th>");
 printf ( "<th colspan=$num_types class=fail>Failed</br>Tests</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>");
-printf ("<th></th>");
 printf ( "<th colspan=$num_types class=pass>Passed</br>Tests</th>");
+printf ("<th class=divider></th>");
+printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>");
 printf ( "</tr>\n");
 
 //----------------------------------------------------------------------

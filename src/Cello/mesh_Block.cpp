@@ -282,6 +282,7 @@ const FieldDescr * Block::field_descr() throw()
 
 ItFace Block::it_face
 (int min_face_rank,
+ Index index,
  const int * ic3,
  const int * if3) throw()
 {
@@ -290,13 +291,14 @@ ItFace Block::it_face
   size_forest(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
-  return ItFace (rank,min_face_rank,periodic,n3,index_,ic3,if3);
+  return ItFace (rank,min_face_rank,periodic,n3,index,ic3,if3);
 }
 
 //----------------------------------------------------------------------
 
 ItNeighbor Block::it_neighbor
 (int min_face_rank,
+ Index index,
  const int * ic3,
  const int * if3) throw()
 {
@@ -305,7 +307,7 @@ ItNeighbor Block::it_neighbor
   size_forest(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
-  return ItNeighbor (rank,min_face_rank,periodic,n3,index_,ic3,if3);
+  return ItNeighbor (rank,min_face_rank,periodic,n3,index,ic3,if3);
 }
 
 //----------------------------------------------------------------------
@@ -756,7 +758,7 @@ void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
       is_boundary[axis][face] = 
-	index_.is_on_boundary(axis,face,n3[axis]);
+	index_.is_on_boundary(axis,2*face-1,n3[axis]);
     }
   }
 }

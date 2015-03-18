@@ -93,8 +93,6 @@ Index Index::index_child (int icx, int icy, int icz) const
 bool Index::is_on_boundary (int axis, int face, int narray) const
 {
 
-  if (face == 0) face = -1;
-
   int level = this->level();
   int array = a_[axis].array;
   int tree  = a_[axis].tree;
@@ -107,19 +105,20 @@ bool Index::is_on_boundary (int axis, int face, int narray) const
 
   int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
 
+  bool retval = false;
+
   if (tree & shift_overflow) {
 
-    if (narray == 1) return true;
+    const int i = array + face;
 
-    tree &= ~(shift_overflow);
-
-    return ! ((0 <= array+face) && (array+face < narray) );
+    retval = ! (0 <= i && i < narray);
 
   } else {
     
-    return false;
+    retval = false;
   }
 
+  return retval;
 }
 
 //----------------------------------------------------------------------
@@ -130,39 +129,9 @@ bool Index::is_on_boundary
  const int n3[3]
  ) const
 {
-
-  const int level = this->level();
-
-  for (int axis = 0; axis < 3; axis++) {
-    
-    if (n3[axis] > 1) {
-      int array = a_[axis].array;
-      int tree  = a_[axis].tree;
-
-      // update tree bits
-
-      int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
-
-      tree += if3[axis]*shift_level; 
-
-      // update array if necessary
-
-      int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
-
-      if (tree & shift_overflow) {
-
-	tree &= ~(shift_overflow);
-
-	const int i = array+if3[axis];
-
-	if ( ! ( 0 <= i && i < n3[axis] ) )
-	  return true;
-    
-      }
-    }
-  }
-
-  return false;
+  return is_on_boundary(0,if3[0],n3[0]) 
+    ||   is_on_boundary(1,if3[1],n3[1])
+    ||   is_on_boundary(2,if3[2],n3[2]);
 }
 
 //----------------------------------------------------------------------

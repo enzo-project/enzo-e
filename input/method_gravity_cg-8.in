@@ -4,6 +4,10 @@
 include "input/method_gravity_cg.incl"
 Mesh { 
    root_blocks = [4,4];
+   root_size = [32,32];
+}
+Adapt {
+   max_level = 2;
 }
 
 Output {

@@ -465,7 +465,7 @@ void Block::control_sync_neighbor_(int phase)
     const int rank = this->rank();
 
     const int min_face_rank = 0;
-    ItFace it_face = this->it_face(min_face_rank);
+    ItFace it_face = this->it_face(min_face_rank,index_);
 
     int of3[3];
 

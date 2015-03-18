@@ -217,12 +217,14 @@ public: // interface
   /// Return an iterator over faces
 
   ItFace it_face(int min_face_rank,
+		 Index index,
 		 const int * ic3=0,
 		 const int * if3=0) throw();
 
   /// Return an iterator over neighbors
 
   ItNeighbor it_neighbor(int min_face_rank,
+			 Index index,
 			 const int * ic3=0,
 			 const int * if3=0) throw();
 

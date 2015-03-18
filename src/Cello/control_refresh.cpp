@@ -60,7 +60,7 @@ void Block::refresh_begin_()
     // Get the face iterator for specified field face rank 
     // (0 corner, 1 edge, 2 facet)
 
-    ItFace it_face = this->it_face( refresh->field_face_rank() );
+    ItFace it_face = this->it_face( refresh->field_face_rank(),index_ );
 
     // Loop over specified faces
 

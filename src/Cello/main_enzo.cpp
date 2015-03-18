@@ -59,9 +59,9 @@ CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs)
 
   for (int i=0; i<n; i++) {
     long double * values = (long double *) msgs[i]->getData();
-    for (int ig=0; ig<3; ig++) {
-      accum [ig] += values[ig];
-    }
+    accum [0] += values[0];
+    accum [1] += values[1];
+    accum [2] += values[2];
   }
   return CkReductionMsg::buildNew(3*sizeof(long double),accum);
 }

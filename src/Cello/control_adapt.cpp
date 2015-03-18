@@ -349,7 +349,7 @@ void Block::adapt_send_level()
   const int rank         = this->rank();
 
   const int min_face_rank = 0;
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank);
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
   int of3[3];
 
   while (it_neighbor.next(of3)) {
@@ -402,9 +402,10 @@ void Block::adapt_send_level()
 
     } else {
       std::string bit_str = index_.bit_string(-1,2);
-      WARNING3 ("Block::notify_neighbor()",
-		"%s level %d and face level %d differ by more than 1",
-		bit_str.c_str(),level,level_face);
+      WARNING6 
+	("Block::notify_neighbor()",
+	 "%s face %d %d %d level %d and face level %d differ by more than 1",
+	 bit_str.c_str(),of3[0],of3[1],of3[2],level,level_face);
     }
 
   }
@@ -436,8 +437,9 @@ void Block::p_adapt_recv_level
 {
 
   if (index_send.level() != level_face_curr) {
-    PARALLEL_PRINTF ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
-		     __LINE__,index_send.level(), level_face_curr);
+    PARALLEL_PRINTF 
+      ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
+       __LINE__,index_send.level(), level_face_curr);
     index_.print("index_",-1,2,false,simulation());
     index_send.print("index_",-1,2,false,simulation());
   }
@@ -576,7 +578,8 @@ void Block::adapt_recv_same(const int of3[3],int level_face_new)
     int jf3[3];
 
     const int min_face_rank = 0;
-    ItFace it_face = this->it_face(min_face_rank,jc3,of3);
+    Index index_child = index_.index_child(jc3);
+    ItFace it_face = this->it_face(min_face_rank,index_child,jc3,of3);
 
     while (it_face.next(jf3)) {
       set_child_face_level_next(jc3,jf3,level_face_new);
@@ -596,7 +599,7 @@ void Block::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_face
   const int rank = this->rank();
 
   const int min_face_rank = 0;
-  ItFace it_face = this->it_face(min_face_rank,ic3,of3);
+  ItFace it_face = this->it_face(min_face_rank,index_,ic3,of3);
 
   int jf3[3];
   while (it_face.next(jf3)) {
@@ -609,9 +612,10 @@ void Block::adapt_recv_coarse(const int of3[3], const int ic3[3], int level_face
 
       int kf3[3];
 
-      ItFace it_face = this->it_face(min_face_rank,jc3,jf3);
+      Index index_child = index_.index_child(jc3);
+      ItFace it_face_child = this->it_face(min_face_rank,index_child,jc3,jf3);
 
-      while (it_face.next(kf3)) {
+      while (it_face_child.next(kf3)) {
 	set_child_face_level_next(jc3,kf3,level_face_new);
       }
     }
@@ -639,11 +643,10 @@ void Block::adapt_recv_fine(const int of3[3], const int ic3[3],int level_face_ne
   int jc3[3];
   while (it_child.next(jc3)) {
 
-    Index index_child = index_.index_child(jc3);
-
     int jf3[3];
     const int min_face_rank = 0;
-    ItFace it_face = this->it_face(min_face_rank,jc3,of3);
+    Index index_child = index_.index_child(jc3);
+    ItFace it_face = this->it_face(min_face_rank,index_child,jc3,of3);
 
     while (it_face.next(jf3)) {
 
@@ -662,17 +665,23 @@ void Block::adapt_recv_fine(const int of3[3], const int ic3[3],int level_face_ne
 //----------------------------------------------------------------------
 
 void Block::adapt_recv_recurse(const int if3[3], 
-				   const int ic3[3], 
-				   int level_face_curr, int level_face_new,
-				   Index index_send)
+			       const int ic3[3], 
+			       int level_face_curr, int level_face_new,
+			       Index index_send)
 {
   const int rank = this->rank();
 
 #ifdef DEBUG_ADAPT
-  sprintf (buffer,"Recurse called: ic3 (%d %d %d) if3 (%d %d %d) level %d -> %d",
+  printf ("Recurse called: from ");
+
+  index_send.print("",-1,2,true,simulation());
+
+  sprintf (buffer,
+	   "ic3 (%d %d %d) if3 (%d %d %d) level %d -> %d",
 	   ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2],
 	   level_face_curr,level_face_new);
   index_.print(buffer,-1,2,false,simulation());
+  printf ("%s\n",buffer);
 #endif    
 
   ERROR1("Block::adapt_recv_recurse()",
@@ -755,18 +764,23 @@ void Block::p_adapt_recv_child
 
   // copy child face level and face level
   const int min_face_rank = 0;
-  ItFace it_face = this->it_face(min_face_rank);
+  Index index_child = index_.index_child(ic3);
+  ItFace it_face_child = this->it_face(min_face_rank,index_child);
   int of3[3];
-  while (it_face.next(of3)) {
+
+  while (it_face_child.next(of3)) {
     int level_child = child_face_level_curr[IF3(of3)];
     set_child_face_level_curr(ic3,of3,level_child);
+  }
+
+  ItFace it_face = this->it_face(min_face_rank,index_);
+  while (it_face.next(of3)) {
+    int level_child = child_face_level_curr[IF3(of3)];
     int opf3[3];
     if (parent_face_(opf3,of3,ic3)) {
       set_face_level_curr(opf3,level_child);
     }
   }
-
-  Index index_child = index_.index_child(ic3);
 
   is_leaf_=true;
 #ifdef DEBUG_ADAPT
@@ -802,12 +816,11 @@ void Block::initialize_child_face_levels_()
 
   while (it_child.next(ic3)) {
 
-    Index index_child = index_.index_child(ic3);
-    const int min_face_rank = 0;
-    ItFace it_face = this->it_face(min_face_rank);
-
     // For each child face
 
+    Index index_child = index_.index_child(ic3);
+    const int min_face_rank = 0;
+    ItFace it_face = this->it_face(min_face_rank,index_child);
     int if3[3];
     while (it_face.next(if3)) {
 
@@ -818,7 +831,6 @@ void Block::initialize_child_face_levels_()
       // Determine level for the child's face
       int level_child_face = (inp == thisIndex) ? 
 	level + 1 : face_level(ip3);
-      // Set the child's face to the level
       set_child_face_level_curr(ic3,if3, level_child_face);
     }
 

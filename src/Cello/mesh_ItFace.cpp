@@ -183,13 +183,6 @@ bool ItFace::valid_() const
     if (if3_[2] == +1 && ! periodicity_[2][1]) l_periodic = false;
   }
 
-  // TEMPORARY
-  // static bool warning_displayed = false;
-  // if (! warning_displayed) {  
-  //   //    WARNING("ItFace::is_valid()", "Setting l_periodic to true for testing");
-  //   warning_displayed = true;
-  // }
-
   return (l_face && l_range && l_parent && l_periodic);
 }
 //======================================================================

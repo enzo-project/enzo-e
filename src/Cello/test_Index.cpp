@@ -32,6 +32,7 @@ PARALLEL_MAIN_BEGIN
 		     {1,0,1},
 		     {1,1,0},
 		     {1,1,1} };
+
   index->set_child(1,0,0,0);
   index->set_child(2,1,0,0);
   index->set_child(3,0,1,0);

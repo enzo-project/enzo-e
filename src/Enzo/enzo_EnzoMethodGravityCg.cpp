@@ -256,7 +256,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
   T * R = (T*) field.values(ir_);
   T * P = (T*) field.values(ip_);
 
-  if (enzo_block->is_leaf()) {
+  if (is_leaf_) {
 
     double xm,ym,zm;
     double xp,yp,zp;
@@ -372,16 +372,18 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 
   set_leaf(enzo_block);
 
+  Data * data = enzo_block->data();
+  Field field = data->field();
+
+  T * B  = (T*) field.values(ib_);
+  T * P  = (T*) field.values(ip_);
+  T * R  = (T*) field.values(ir_);
+
   if (iter_ == 0)  {
 
     // shift
 
     T shift = 0.0;
-    Data * data = enzo_block->data();
-    Field field = data->field();
-    T * P  = (T*) field.values(ip_);
-    T * R  = (T*) field.values(ir_);
-    T * B  = (T*) field.values(ib_);
     if (is_singular_) {
       // shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
       // eT*e == n === zone count (bc)
@@ -391,27 +393,38 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
       shift_ (B,shift,B);
       shift_ (P,shift,P);
     }
-
-    long double r_rsc[3];
-
-    r_rsc[0] = dot_(R,R);
-    r_rsc[1] = 0.0;
-    r_rsc[2] = 0.0;
-
-    CkCallback cb(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
-		  enzo_block->proxy_array());
-    enzo_block->contribute (3*sizeof(long double), &r_rsc, 
-			    r_method_gravity_cg_type, 
-			    cb);
-    
-
-  } else {
-
-    cg_loop_2<T>(enzo_block);
-
   } 
 
+  if (diag_precon_) {
+    // precondition
 
+    double xm,ym,zm;
+    data->lower(&xm,&ym,&zm);
+    double xp,yp,zp;
+    data->upper(&xp,&yp,&zp);
+    Field field = data->field();
+    field.cell_width (xm,xp,&hx_,
+		      ym,yp,&hy_,
+		      zm,zp,&hz_);
+    apply_precon_ (P, P, +1);
+    apply_precon_ (R, R, +1);
+    apply_precon_ (B, B, +1);
+
+  }
+
+
+  long double r_rsc[3];
+
+  r_rsc[0] = dot_(R,R);
+  r_rsc[1] = 0.0;
+  r_rsc[2] = 0.0;
+
+  CkCallback cb(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
+		enzo_block->proxy_array());
+  enzo_block->contribute (3*sizeof(long double), &r_rsc, 
+			  r_method_gravity_cg_type, 
+			  cb);
+    
 }
 
 //----------------------------------------------------------------------
@@ -448,30 +461,6 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
   if (iter_==0) rr0_ = rr_;
   CHECK0(rr0_);
 
-  // compute rr_
-
-    // precondition
-
-  Data * data = enzo_block->data();
-
-  double xm,ym,zm;
-  data->lower(&xm,&ym,&zm);
-  double xp,yp,zp;
-  data->upper(&xp,&yp,&zp);
-  Field field = data->field();
-  field.cell_width (xm,xp,&hx_,
-		    ym,yp,&hy_,
-		    zm,zp,&hz_);
-  T * P  = (T*) field.values(ip_);
-  T * R  = (T*) field.values(ir_);
-  T * B  = (T*) field.values(ib_);
-  apply_precon_ (P, P, -1);
-  apply_precon_ (R, R, -1);
-  apply_precon_ (B, B, -1);
-
-  CHECK0(rr_);
-  CHECK0(rr_r_);
-
   if (iter_ >= iter_max_)  {
 
     cg_end<T>(enzo_block,return_error_max_iter_reached);
@@ -495,12 +484,12 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 		      ym,yp,&hy_,
 		      zm,zp,&hz_);
 
-    apply_precon_(P,P,-1);
+    apply_precon_(P,P,+1);
 
     matvec_(AP,P); // AP = A * P (assumes P ghosts refreshed)
 
-    apply_precon_( P, P,+1);
-    apply_precon_(AP,AP,-1);
+    apply_precon_( P, P,-1);
+    apply_precon_(AP,AP,+1);
 
     pap = dot_(P,AP);
 
@@ -556,6 +545,7 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
   T * AP = (T*) field.values(iap_);
 
   CHECK0(rr_);
+  CHECK0(pap_);
   alpha_ = rr_ / pap_;
   CHECK((&alpha_),"alpha",0);
   zaxpy_ (X,   alpha_,P,X);
@@ -697,9 +687,8 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
     T * P  = (T*) field.values(ip_);
     T * R  = (T*) field.values(ir_);
 
-    // Shift residual to remove constant mode
-
     T a = rr_new_ / rr_;
+
     // INF
     CHECK((&a),"a",0);
     zaxpy_ (P,a,P,R);
@@ -709,7 +698,7 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
     int iter = (CkMyPe() == 0 && block_count_++ == 0) ? iter_ + 1 : 0;
 
-    if (enzo_block->index().is_root() && iter_%10 == 0) {
+    if (enzo_block->index().is_root() && iter_%1 == 0) {
       printf ("%s:%d cg_end iter %d  rr %Lg rr0 %g\n",
     	      __FILE__,__LINE__,iter_,rr_,rr0_);
       fflush(stdout);
@@ -993,10 +982,10 @@ void EnzoMethodGravityCg::apply_precon_ (T * Y, const T * X, int dir) const thro
 
     double d = 0;
 
-    if (dir == -1) {
-      d = sqrt(hx_*hx_);
-    } else if (dir == +1) {
-      d = 1.0/(sqrt(hx_*hx_));
+    if (dir == +1) {
+      d = hx_;
+    } else if (dir == -1) {
+      d = 1.0/hx_;
     } else {
       ERROR1("EnzoMethodGravityCg::apply_precon_()",
 	     "dir %d must be +1 (apply) or -1 (apply inverse)",
