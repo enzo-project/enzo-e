@@ -85,7 +85,7 @@ Field {
            "velocity_z",
            "internal_energy",
 	   "pressure",
-           "B","X","R","P","AP"];
+           "B","X","R","P","D","Y","Z"];
 
    ghosts = 4;
    prolong = "poisson";

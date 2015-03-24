@@ -249,10 +249,6 @@ public: /// entry methods
   template <class T>
   void r_cg_shift_1 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R) after shift
-  template <class T>
-  void r_cg_shift_2 (CkReductionMsg * msg) ;
-
   /// EnzoMethodGravityCg synchronization entry method: refresh P for MATVEC
   template <class T>
   void r_cg_loop_1 (CkReductionMsg * msg) ;

@@ -2,7 +2,7 @@ include "input/problem_collapse.incl"
 
 Adapt {
    list = ["slope"];
-   max_level = 2;
+   max_level = 3;
    slope {
       type = "slope";
       field_list = ["density"];

@@ -3,9 +3,7 @@
 /// @file     mesh_Data.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-03-10
-/// @brief    
-///
-/// 
+/// @brief    Implementation of Data class
 
 #include "mesh.hpp"
 
@@ -77,16 +75,30 @@ void Data::allocate (const FieldDescr * field_descr) throw()
 
 //----------------------------------------------------------------------
 
-void Data::field_cells (double * x, double * y, double * z,
-			 int gx, int gy, int gz) const
+void Data::field_cell_width 
+(double * hx, 
+ double * hy,
+ double * hz) const
 {
   double xm,ym,zm;
   this->lower(&xm,&ym,&zm);
   double xp,yp,zp;
   this->upper(&xp,&yp,&zp);
+  field_data()->cell_width(xm,xp,hx, ym,yp,hy, zm,zp,hz);
+}   
+
+//----------------------------------------------------------------------
+
+void Data::field_cells (double * x, double * y, double * z,
+			 int gx, int gy, int gz) const
+{
   double hx,hy,hz;
-  field_data()->cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
-    
+
+  field_cell_width (&hx,&hy,&hz);
+
+  double xm,ym,zm;
+  this->lower(&xm,&ym,&zm);
+
   int nx,ny,nz;
   field_data()->size(&nx,&ny,&nz);
 

@@ -68,9 +68,9 @@ public: // interface
   template <class T>
   void cg_loop_4(EnzoBlock * enzo_block) throw();
 
-  /// Continuation after global reduction
-  template <class T>
-  void cg_shift_2(EnzoBlock * enzo_block) throw();
+  // /// Continuation after global reduction
+  // template <class T>
+  // void cg_shift_2(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
@@ -79,34 +79,26 @@ public: // interface
   template <class T>
   void cg_end (EnzoBlock * enzo_block, int retval) throw();
 
+  /// Set rz_ by EnzoBlock after reduction
+  void set_rz(long double rz) throw()    {  rz_ = rz; }
+
   /// Set rr_ by EnzoBlock after reduction
-  void set_rr(long double rr, const char * file, int line) throw()  {
-    rr_r_ = rr; 
-    print(rr_r_,file,line);
-  }
-  void print (long double rr,const char * file, int line) {
-    //        printf ("DEBUG %s:%d  %Lg\n",file,line,rr); 
-  }
-  void print_rr (const char * file, int line) {
-    //        printf ("DEBUG %s:%d  %Lg\n",file,line,rr_); 
-  }
+  void set_rr(long double rr) throw()    {  rr_ = rr; }
 
   /// Set rr_new_ by EnzoBlock after reduction
-  void set_rr_new(long double rr_new, const char * file, int line) throw()  {
-    rr_new_ = rr_new; 
-    print(rr_new_,file,line);
-  }
-  /// Set bs_ by EnzoBlock after reduction
-  void set_bs(long double bs) throw()  { bs_ = bs;  }
+  void set_rz2(long double rz2) throw()  {  rz2_ = rz2; }
 
-  /// Set bc_ by EnzoBlock after reduction
-  void set_bc(long double bc) throw()  { bc_ = bc;  }
+  /// Set dy_ by EnzoBlock after reduction
+  void set_dy(long double dy) throw()         { dy_ = dy; }
 
-  /// Set pap_ by EnzoBlock after reduction
-  void set_pap(double pap) throw()  { pap_ = pap; }
+  /// Set bs_ (B sum) by EnzoBlock after reduction
+  void set_bs(long double bs) throw()    { bs_ = bs;  }
+
+  /// Set bc_ (B count) by EnzoBlock after reduction
+  void set_bc(long double bc) throw()    { bc_ = bc;  }
 
   /// Set iter_ by EnzoBlock after reduction
-  void set_iter(int iter) throw()  { iter_ = iter; }
+  void set_iter(int iter) throw()        { iter_ = iter; }
 
 protected: // methods
 
@@ -153,7 +145,7 @@ protected: // methods
   /// Apply diagonal preconditioner      Y <- D*X if dir == +1
   /// or inverse diagonal preconditioner Y <- D\X if dir == -1
   template <class T>
-  void apply_precon_ (T * Y, const T * X, int dir) const throw();
+  void apply_precon_ (T * Y, const T * X) const throw();
 
   /// Set whether current Block is a leaf--if not don't touch data
   void set_leaf(Block * block) throw()
@@ -168,9 +160,6 @@ protected: // attributes
   /// Whether to use diagonal preconditioning
   bool diag_precon_;
 
-  /// Whether current block is a leaf
-  bool is_leaf_;
-
   /// Dimensionality of the problem
   int rank_;
 
@@ -180,28 +169,38 @@ protected: // attributes
   /// Maximum number of Cg iterations
   int iter_max_;
 
-  /// Convergence tolerance on the residual reduction rr_ / rr0_
+  /// Convergence tolerance on the residual reduction rz_ / rz0_
   double res_tol_;
 
   /// Initial residual
-  double rr0_;
+  long double rr0_;
 
-  /// Mesh spacing for current Block
-  double hx_, hy_, hz_;
+  /// Minimum residual
+  long double rr_min_;
+
+  /// Maximum residual
+  long double rr_max_;
 
   /// Density and potential field id's
 
   int idensity_;
   int ipotential_;
 
-  /// CG temporary field id's
+  /// CG vector id's
   int ib_;
   int ix_;
   int ir_;
-  int ip_;
-  int iap_;
+  int id_;
+  int iy_;
+  int iz_;
 
-  /// vector attributes
+  /// Whether current block is a leaf
+  bool is_leaf_;
+
+  /// Mesh spacing for current Block
+  double hx_, hy_, hz_;
+
+  /// Block field attributes
   int nx_,ny_,nz_;
   int mx_,my_,mz_;
   int gx_,gy_,gz_;
@@ -209,20 +208,17 @@ protected: // attributes
   /// Current CG iteration
   int iter_;
 
-  double alpha_;
-
-  /// inner product P*(A*P)
-  double pap_;
-
-  /// inner product R*R as produced by Charm++ contribute()
-  /// (this exists to prevent multiple shifts by multiple blocks per process)
-  long double rr_r_;
-
-  /// inner product R*R derived from rr_r_, which may include a shift
+  /// dot (R_i,R_i)
   long double rr_;
 
-  /// newest inner product R*R
-  double rr_new_;
+  /// dot (R_i,Z_i)
+  long double rz_;
+
+  /// dot (R_i+1,Z_i+1)
+  long double rz2_;
+
+  /// dot (D,Y)
+  long double dy_;
 
   /// sum of elements B(i) for singular systems
   long double bs_;
@@ -230,10 +226,6 @@ protected: // attributes
   /// count of elements B(i) for singular systems
   long double bc_;
 
-  /// block counter for operations that must be done once per processor, 
-  /// e.g. increment iter_
-  int block_count_;
-  
 };
 
 //----------------------------------------------------------------------

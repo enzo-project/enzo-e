@@ -73,6 +73,7 @@ Method {
       iter_max = 1000;
       res_tol  = 1e-3;
       diag_precon = false;
+#      diag_precon = true;
   }
 }
 

@@ -84,6 +84,11 @@ public: // interface
   void field_cells (double * x, double * y, double * z,
 		    int gx = 0, int gy = 0, int gz = 0) const;
 
+  /// Return the cell widths of Fields
+  void field_cell_width (double * hx, 
+			 double * hy = 0,
+			 double * hz = 0) const;
+
   /// Return domain lower extent
   /// B
   inline void lower(double * x, 
