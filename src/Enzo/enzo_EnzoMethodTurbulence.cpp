@@ -403,6 +403,6 @@ void EnzoMethodTurbulence::compute_resume_
     }
   }
 
-  enzo_block->compute_stop();
+  enzo_block->compute_done();
   
 }

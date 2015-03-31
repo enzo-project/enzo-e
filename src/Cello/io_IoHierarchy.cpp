@@ -10,16 +10,11 @@
 //----------------------------------------------------------------------
 
 IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
-  : Io(2,0),
+  : Io(),
     hierarchy_((Hierarchy *)hierarchy)
 {
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
-
-  ASSERT2("IoHierarchy::IoHierarchy()",
-	 "meta_name.size() [%d] !=  meta_count_ [%d]",
-	  meta_name_.size(),meta_count(),
-	  meta_name_.size()==meta_count());
 }
 
 

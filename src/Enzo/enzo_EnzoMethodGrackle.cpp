@@ -217,7 +217,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  enzo_block->compute_stop();
+  enzo_block->compute_done();
 
 }
 

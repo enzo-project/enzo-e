@@ -44,7 +44,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
   }
 
-  enzo_block->compute_stop(); 
+  block->compute_done(); 
   
 }
 
@@ -54,12 +54,6 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 {
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  Field field = enzo_block->data()->field();
-
-  enzo_float * density    = (enzo_float *)field.values("density");
-  enzo_float * velocity_x = (enzo_float *)field.values("velocity_x");
-  enzo_float * velocity_y = (enzo_float *)field.values("velocity_y");
-  enzo_float * velocity_z = (enzo_float *)field.values("velocity_z");
 
   enzo_float a = 1, dadt;
   
@@ -76,8 +70,13 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 					comoving_coordinates_);
   compute_pressure.compute(enzo_block);
 
-  enzo_float * pressure = (enzo_float *) field.values("pressure");
+  Field field = enzo_block->data()->field();
 
+  enzo_float * density    = (enzo_float *)field.values("density");
+  enzo_float * velocity_x = (enzo_float *)field.values("velocity_x");
+  enzo_float * velocity_y = (enzo_float *)field.values("velocity_y");
+  enzo_float * velocity_z = (enzo_float *)field.values("velocity_z");
+  enzo_float * pressure = (enzo_float *) field.values("pressure");
  
   /* 2) Calculate dt from particles. */
  

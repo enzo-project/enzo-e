@@ -207,7 +207,7 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:heat:alpha",1.0);
 
   method_null_dt = p->value_float 
-    ("Method:null:dt",0.0);
+    ("Method:null:dt",std::numeric_limits<double>::max());
 
 
   method_gravity_cg_iter_max = p->value_integer

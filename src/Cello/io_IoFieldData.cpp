@@ -10,7 +10,7 @@
 //----------------------------------------------------------------------
 
 IoFieldData::IoFieldData() throw ()
-  : Io(4,1),
+  : Io(1),
     field_descr_(0),
     field_data_(0),
     field_index_(0)
@@ -20,11 +20,6 @@ IoFieldData::IoFieldData() throw ()
   meta_name_.push_back("array_size");
   meta_name_.push_back("num_fields");
   meta_name_.push_back("ghosts_allocated");
-
-  ASSERT2("IoFieldData::IoFieldData()",
-	 "meta_name.size() [%d] !=  meta_count_ [%d]",
-	  meta_name_.size(),meta_count(),
-	  meta_name_.size()==meta_count());
 }
 
 //----------------------------------------------------------------------
@@ -89,17 +84,23 @@ void IoFieldData::data_value
 
   field_descr_->ghosts(field_index_,&ngx,&ngy,&ngz);
 
-  // Exclude ghosts when writing
-
   if (field_data_->ghosts_allocated()) {
 
     if (nxd) (*nxd) = nbx + 2*ngx;
     if (nyd) (*nyd) = nby + 2*ngy;
     if (nzd) (*nzd) = nbz + 2*ngz;
 
-    if (nx) (*nx) = nbx;
-    if (ny) (*ny) = nby;
-    if (nz) (*nz) = nbz;
+    // Exclude ghosts when writing
+
+    // if (nx) (*nx) = nbx;
+    // if (ny) (*ny) = nby;
+    // if (nz) (*nz) = nbz;
+
+    // Include ghosts when writing
+
+    if (nx) (*nx) = nbx + 2*ngx;
+    if (ny) (*ny) = nby + 2*ngy;
+    if (nz) (*nz) = nbz + 2*ngz;
 
   } else {
 

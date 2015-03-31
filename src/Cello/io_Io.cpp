@@ -11,11 +11,9 @@
 
 //----------------------------------------------------------------------
 
-Io::Io(size_t meta_count, size_t data_count) throw()
-  : meta_count_(meta_count), 
-    meta_name_(), 
-    data_count_(data_count),
-    data_name_()
+Io::Io(size_t data_count) throw()
+  : meta_name_(), 
+    data_count_(data_count)
 {}
 
 //----------------------------------------------------------------------
@@ -27,7 +25,7 @@ void Io::meta_value
 {
   ASSERT1 ("Io::meta_value()",
    	   "index %d out of range", index,
-   	   0 <= index && (size_t)index < meta_count_);
+   	   0 <= index && (size_t)index < meta_name_.size());
 
   if (name) (*name) = meta_name_[index];
   if (nxd) (*nxd) = 1;

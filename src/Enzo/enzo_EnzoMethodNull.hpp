@@ -21,7 +21,7 @@ public: // interface
   /// Create a new EnzoMethodNull object
   EnzoMethodNull(double dt) : dt_(dt) {}
 
-  EnzoMethodNull() {};
+  EnzoMethodNull() : dt_ (std::numeric_limits<double>::max()) {}
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodNull);
@@ -35,7 +35,7 @@ public: // interface
   
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw()
-  { return; }
+  { block->compute_done(); }
 
   virtual std::string name () throw () 
   { return "null"; }

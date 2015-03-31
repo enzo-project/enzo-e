@@ -10,22 +10,17 @@
 //----------------------------------------------------------------------
 
 IoBlock::IoBlock() throw ()
-  : Io(8,0),
+  : Io(),
     block_(0)
 {
-  meta_name_.push_back("num_field_blocks");
+  meta_name_.push_back("num_field_data");
   meta_name_.push_back("index");
-  meta_name_.push_back("size");
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
   meta_name_.push_back("cycle");
   meta_name_.push_back("time");
   meta_name_.push_back("dt");
 
-  ASSERT2("IoBlock::IoBlock()",
-	 "meta_name.size() [%d] !=  meta_count_ [%d]",
-	  meta_name_.size(),meta_count(),
-	  meta_name_.size()==meta_count());
 }
 
 

@@ -352,6 +352,6 @@ void EnzoMethodGravityBiCGStab::compute_
 	  nd3[0],nd3[1],nd3[2],
 	  md3[0],md3[1],md3[2]);
 
-  enzo_block->compute_stop();
+  enzo_block->compute_done();
 
 }

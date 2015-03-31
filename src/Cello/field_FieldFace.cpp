@@ -473,7 +473,6 @@ void FieldFace::store_loop_limits_
 ( int im3[3],int n3[3], const int nd3[3], const int ng3[3])
 {
   // NOTES: 4:p12
-
   for (int axis=0; axis<3; axis++) {
 
     if (face_[axis] == 0) {
@@ -488,15 +487,12 @@ void FieldFace::store_loop_limits_
 	im3[axis] = ng3[axis];
 	n3[axis]  = nd3[axis] - 2*ng3[axis];
 
-	if ( prolong_ ) {
-	  //	  n3[axis] += ng3[axis]; // BUG #64
-	  //	  im3[axis] -= child_[axis]*ng3[axis];
-	}
       }
 
       if ( restrict_ ) {
 	n3[axis] /= 2;
-	im3[axis] += child_[axis] * n3[axis];
+	im3[axis] += child_[axis] * (nd3[axis]-2*ng3[axis])/2;
+	if (ghost_[axis]) im3[axis] += ng3[axis]/2;
       }
 
      
@@ -546,7 +542,8 @@ void FieldFace::check_new_( int im3[3], int n3[3], const int nd3[3], const int n
 	    nd3[0],nd3[1],nd3[2],  ND3[0],ND3[1],ND3[2]);
     printf ("MISMATCH ng %d %d %d  NG %d %d %d\n",
 	    ng3[0],ng3[1],ng3[2],  NG3[0],NG3[1],NG3[2]);
-    printf ("MISMATCH prolong %p  restrict %p\n",prolong_,restrict_);
+    if (prolong_ != NULL) printf ("MISMATCH prolong %p\n",prolong_);
+    if (restrict_ != NULL) printf ("MISMATCH restrict %p\n",restrict_);
     printf ("MISMATCH child %d %d %d\n",child_[0],child_[1],child_[2]);
     printf ("MISMATCH ghost %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
     printf ("MISMATCH  face %d %d %d\n",face_[0],face_[1],face_[2]);
@@ -576,7 +573,6 @@ void FieldFace::new_loop_limits_
 
     // child offset
     int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
-
     if (lcopy) {
       if (face_[axis] == 0 && ! ghost_[axis]) {
 	im3[axis] = ng3[axis];

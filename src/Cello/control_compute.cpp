@@ -73,7 +73,7 @@ void Block::compute_continue_ ()
 
 //----------------------------------------------------------------------
 
-void Block::compute_stop ()
+void Block::compute_done ()
 {
 
   index_method_++;

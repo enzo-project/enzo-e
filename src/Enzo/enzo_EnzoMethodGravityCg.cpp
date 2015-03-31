@@ -82,16 +82,16 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     iter_(0),
-     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
+    rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
 {
 
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
 
   ib_ = field_descr->field_id("B");
-  ix_ = field_descr->field_id("X");
-  ir_ = field_descr->field_id("R");
   id_ = field_descr->field_id("D");
+  ir_ = field_descr->field_id("R");
+  ix_ = field_descr->field_id("X");
   iy_ = field_descr->field_id("Y");
   iz_ = field_descr->field_id("Z");
 
@@ -625,7 +625,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 						rank_, symmetric = true,
 						order=2);
   compute_acceleration.compute(enzo_block);
-  enzo_block->compute_stop();
+  enzo_block->compute_done();
 }
 
 //----------------------------------------------------------------------

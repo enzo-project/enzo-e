@@ -28,7 +28,7 @@ public: // interface
     IoBlock::pup(p);
     TRACEPUP;
 
-    p | meta_count_enzo_;
+    p | index_enzo_;
 
   }
 
@@ -45,7 +45,8 @@ public: // interface
    int * nxd=0, int * nyd=0, int * nzd=0) throw();
 
 private:
-  int meta_count_enzo_;
+
+  int index_enzo_;
 
 };
 

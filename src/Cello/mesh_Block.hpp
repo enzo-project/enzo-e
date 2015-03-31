@@ -308,7 +308,7 @@ public:
 
   /// Prepare to call compute_next_() after computing (used to synchronize between methods)
   /// Must be called at end of Method
-  void compute_stop();
+  void compute_done();
 
 
   //--------------------------------------------------

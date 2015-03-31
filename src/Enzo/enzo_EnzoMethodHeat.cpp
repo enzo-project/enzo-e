@@ -53,7 +53,7 @@ void EnzoMethodHeat::compute ( Block * block) throw()
   else 
     ERROR1("EnzoMethodHeat()", "precision %d not recognized", p);
   }
-  block->compute_stop();
+  block->compute_done();
   
 }
 
