@@ -12,7 +12,7 @@
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
-   <h2><center><?php system ("hg branch") ?> branch revision <?php system ("hg id -n") ?> </center> </h2>
+   <h3><?php system ("hg branch") ?> branch </br> revision <?php system ("hg id -n") ?> </h3>
  <?php
 
      //----------------------------------------------------------------------
@@ -485,7 +485,7 @@ function swf_movie ($filename, $last_image, $image_size)
   }  
 }
 
-printf ("<center><table>\n");
+printf ("<table>\n");
 printf ("<tr>\n");
 
 if (file_exists("STATUS"))  {
@@ -623,7 +623,7 @@ test_summary("Schedule",array("Schedule"),
 test_summary("Colormap",array("Colormap"),
 	     array("test_Colormap"),'test'); 
 
-printf ("</tr></table></center></br>\n");
+printf ("</tr></table></br>\n");
 
 ?>
    <code>Start: <?php system ("cat START") ?> </code><br>

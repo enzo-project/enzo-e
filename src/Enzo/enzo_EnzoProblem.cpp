@@ -188,9 +188,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
   } else if (name == "gravity_cg") {
-    WARNING("EnzoProblem::create_method_()",
-	    "Assuming problem is singular for EnzoMethodGravityCg");
-    bool is_singular = true;
+    const bool is_singular = is_periodic();
     int rank = config->mesh_root_rank;
     method = new EnzoMethodGravityCg
       (field_descr, rank,

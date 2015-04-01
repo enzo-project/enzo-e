@@ -77,7 +77,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     idensity_(0),  ipotential_(0),
     ib_(0), ix_(0), ir_(0), id_(0), iy_(0), iz_(0),
     is_leaf_(false),
-    hx_(1.0),hy_(1.0),hz_(1.0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
@@ -94,62 +93,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
   ix_ = field_descr->field_id("X");
   iy_ = field_descr->field_id("Y");
   iz_ = field_descr->field_id("Z");
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodGravityCg::pup (PUP::er &p)
-{
-
-  // NOTE: change this function whenever attributes change
-
-  TRACEPUP;
-
-  Method::pup(p);
-
-  p | is_singular_;
-  p | diag_precon_;
-  p | rank_;
-  p | grav_const_;
-  p | iter_max_;
-  p | res_tol_;
-  p | rr0_;
-  p | rr_min_;
-  p | rr_max_;
-  p | idensity_;
-  p | ipotential_;
-  p | ib_;
-  p | ix_;
-  p | ir_;
-  p | id_;
-  p | iy_;
-  p | iz_;
-  p | is_leaf_;
-
-  p | hx_;
-  p | hy_;
-  p | hz_;
-
-  p | nx_;
-  p | ny_;
-  p | nz_;
-
-  p | mx_;
-  p | my_;
-  p | mz_;
-
-  p | gx_;
-  p | gy_;
-  p | gz_;
-
-  p | iter_;
-  
-  p | rz_;
-  p | rz2_;
-  p | dy_;
-  p | bs_;
-  p | bc_;
 
 }
 
@@ -225,10 +168,11 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
     }
   }
 
-  data->field_cell_width(&hx_,&hy_,&hz_);
+  double hx,hy,hz;
+  data->field_cell_width(&hx,&hy,&hz);
 
-  apply_precon_(D,R);
-  apply_precon_(Z,R);
+  apply_precon_(D,R,hx,hy,hz);
+  apply_precon_(Z,R,hx,hy,hz);
 
   long double reduce[3];
 
@@ -345,9 +289,11 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
     shift_ (R,shift,R);
     shift_ (B,shift,B);
 
-    data->field_cell_width(&hx_,&hy_,&hz_);
-    apply_precon_(D,R);
-    apply_precon_(Z,R);
+    double hx,hy,hz;
+    data->field_cell_width(&hx,&hy,&hz);
+
+    apply_precon_(D,R,hx,hy,hz);
+    apply_precon_(Z,R,hx,hy,hz);
   } 
 
   long double reduce;
@@ -397,6 +343,12 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     rr_max_ = std::max(rr_max_,rr_);
   }
 
+  if (enzo_block->index().is_root()) {
+    printf ("%s:%d cg_end iter %d rr0 %g rr_min %g rr_max %g rr %g\n",
+	    __FILE__,__LINE__,iter_,
+	    (double)rr0_,(double)rr_min_,(double)rr_max_,(double)rr_);
+  }
+
   if (rr_ / rr0_ < res_tol_) {
 
     cg_end<T> (enzo_block,return_converged);
@@ -415,8 +367,10 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     T * R = (T*) field.values(ir_);
     T * Z = (T*) field.values(iz_);
 
-    data->field_cell_width(&hx_,&hy_,&hz_);
-    matvec_(Y,D);
+    double hx,hy,hz;
+    data->field_cell_width(&hx,&hy,&hz);
+
+    matvec_(Y,D,hx,hy,hz);
 
     long double reduce[3];
 
@@ -489,15 +443,16 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
   zaxpy_ (X,  a ,D,X);
   zaxpy_ (R, -a, Y,R);
 
-  data->field_cell_width(&hx_,&hy_,&hz_);
+  double hx,hy,hz;
+  data->field_cell_width(&hx,&hy,&hz);
 
-  apply_precon_(Z,R);
+  apply_precon_(Z,R,hx,hy,hz);
 
   long double reduce[3];
 
-  reduce[0] = sum_(R);
-  reduce[1] = dot_(R,Z);
-  reduce[2] = dot_(D,Y);
+  reduce[0] = dot_(R,Z);
+  reduce[1] = sum_(R);
+  reduce[2] = sum_(X);
 
   CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
@@ -519,9 +474,9 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 
   long double * data = (long double *) msg->getData();
 
-  method->set_bs (data[0]);
-  method->set_rz2(data[1]);
-  method->set_dy (data[2]);
+  method->set_rz2(data[0]);
+  method->set_rs (data[1]);
+  method->set_xs (data[2]);
 
   delete msg;
 
@@ -541,9 +496,9 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
   set_leaf(enzo_block);
 
-  CHECK(bs_,"bs_");
   CHECK(rz2_,"rz2_");
-  CHECK(dy_,"dy_");
+  CHECK(rs_,"rs_");
+  CHECK(xs_,"xs_");
 
   Field field = enzo_block->data()->field();
 
@@ -553,22 +508,11 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
     // eT*e == n === zone count (bc)
     // eT*b == sum_i=1,n B[i]
 
-    T shift = -bs_ / bc_;
+    T * X  = (T*) field.values(ix_);
     T * R  = (T*) field.values(ir_);
-    T * D  = (T*) field.values(id_);
-    T * Y  = (T*) field.values(iy_);
-    T * Z  = (T*) field.values(iz_);
-    shift_ (R,shift,R);
-    shift_ (D,shift,D);
-    shift_ (Y,shift,Y);
-    shift_ (Z,shift,Z);
+    shift_ (X,T(-xs_/bc_),X);
+    shift_ (R,T(-rs_/bc_),R);
   }
-
-  // if (enzo_block->index().is_root() && iter_ % 10 == 0) {
-  //   printf ("DEBUG %s:%d cg_end iter %d  rr %Lg rr0 %g\n",
-  // 	    __FILE__,__LINE__,iter_,rr_,rr0_);
-  //   fflush(stdout);
-  // }
 
   T * D  = (T*) field.values(id_);
   T * Z  = (T*) field.values(iz_);
@@ -772,7 +716,7 @@ T EnzoMethodGravityCg::count_ (T * X) const throw()
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoMethodGravityCg::matvec_ (T * Y, const T * X) const throw()
+void EnzoMethodGravityCg::matvec_ (T * Y, const T * X, double hx, double hy, double hz) const throw()
 /// Compute y = A*x, where A is the discrete Laplacian times (- h^2)
 {
   if (! is_leaf_ ) return;
@@ -786,14 +730,14 @@ void EnzoMethodGravityCg::matvec_ (T * Y, const T * X) const throw()
   if (rank_ == 1) {
     for (int ix=0; ix<nx_; ix++) {
       int i = i0 + ix;
-      Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) / (hx_*hx_);
+      Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) / (hx*hx);
     }
   } else if (rank_ == 2) {
     for (int iy=0; iy<ny_; iy++) {
       for (int ix=0; ix<nx_; ix++) {
 	int i = i0 + ix + mx_*iy;
-	Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx_*hx_)
-	  +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_);
+	Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
+	  +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy);
       }
     }
   } else if (rank_ == 3) {
@@ -801,9 +745,9 @@ void EnzoMethodGravityCg::matvec_ (T * Y, const T * X) const throw()
       for (int iy=0; iy<ny_; iy++) {
 	for (int ix=0; ix<nx_; ix++) {
 	  int i = i0 + ix + mx_*(iy + my_*iz);
-	  Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx_*hx_)
-	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_)
-	    +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz_*hz_);
+	  Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
+	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy)
+	    +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz*hz);
 	}
       }
     }
@@ -814,12 +758,13 @@ void EnzoMethodGravityCg::matvec_ (T * Y, const T * X) const throw()
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoMethodGravityCg::apply_precon_ (T * Y, const T * X) const throw()
+void EnzoMethodGravityCg::apply_precon_ (T * Y, const T * X, 
+					 double hx, double hy, double hz) const throw()
 /// Compute y = A*x, where A is the discrete Laplacian times (- h^2)
 {
   if (! is_leaf_) return;
 
-  const double d = ( diag_precon_ ) ? hx_*hx_ : 1.0;
+  const double d = ( diag_precon_ ) ? hx*hx : 1.0;
 
   for (int iz=0; iz<mz_; iz++) {
     for (int iy=0; iy<my_; iy++) {

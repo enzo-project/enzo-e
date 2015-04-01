@@ -48,8 +48,58 @@ public: // interface
   EnzoMethodGravityCg (CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) ;
+//----------------------------------------------------------------------
+
+  void pup (PUP::er &p)
+  {
+
+    // NOTE: change this function whenever attributes change
+
+    TRACEPUP;
+
+    Method::pup(p);
+
+    p | is_singular_;
+    p | diag_precon_;
+    p | rank_;
+    p | grav_const_;
+    p | iter_max_;
+    p | res_tol_;
+    p | rr0_;
+    p | rr_min_;
+    p | rr_max_;
+    p | idensity_;
+    p | ipotential_;
+    p | ib_;
+    p | ix_;
+    p | ir_;
+    p | id_;
+    p | iy_;
+    p | iz_;
+    p | is_leaf_;
+
+    p | nx_;
+    p | ny_;
+    p | nz_;
+
+    p | mx_;
+    p | my_;
+    p | mz_;
+
+    p | gx_;
+    p | gy_;
+    p | gz_;
+
+    p | iter_;
   
+    p | rz_;
+    p | rz2_;
+    p | dy_;
+    p | bs_;
+    p | bc_;
+
+  }
+
   /// Solve for the gravitational potential
   virtual void compute( Block * block) throw();
 
@@ -93,6 +143,10 @@ public: // interface
 
   /// Set bs_ (B sum) by EnzoBlock after reduction
   void set_bs(long double bs) throw()    { bs_ = bs;  }
+  /// Set rs_ (R sum) by EnzoBlock after reduction
+  void set_rs(long double rs) throw()    { rs_ = rs;  }
+  /// Set xs_ (X sum) by EnzoBlock after reduction
+  void set_xs(long double xs) throw()    { xs_ = xs;  }
 
   /// Set bc_ (B count) by EnzoBlock after reduction
   void set_bc(long double bc) throw()    { bc_ = bc;  }
@@ -140,12 +194,14 @@ protected: // methods
 
   /// Compute local matrix-vector product Y = A*X
   template <class T>
-  void matvec_ (T * Y, const T * X) const throw();
+  void matvec_ (T * Y, const T * X,
+		double hx, double hy, double hz) const throw();
 
   /// Apply diagonal preconditioner      Y <- D*X if dir == +1
   /// or inverse diagonal preconditioner Y <- D\X if dir == -1
   template <class T>
-  void apply_precon_ (T * Y, const T * X) const throw();
+  void apply_precon_ (T * Y, const T * X, 
+		      double hx, double hy, double hz) const throw();
 
   /// Set whether current Block is a leaf--if not don't touch data
   void set_leaf(Block * block) throw()
@@ -197,9 +253,6 @@ protected: // attributes
   /// Whether current block is a leaf
   bool is_leaf_;
 
-  /// Mesh spacing for current Block
-  double hx_, hy_, hz_;
-
   /// Block field attributes
   int nx_,ny_,nz_;
   int mx_,my_,mz_;
@@ -222,6 +275,10 @@ protected: // attributes
 
   /// sum of elements B(i) for singular systems
   long double bs_;
+  /// sum of elements R(i) for singular systems
+  long double rs_;
+  /// sum of elements X(i) for singular systems
+  long double xs_;
 
   /// count of elements B(i) for singular systems
   long double bc_;

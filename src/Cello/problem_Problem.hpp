@@ -66,6 +66,10 @@ public: // interface
     return (0 <= i && i < (int)boundary_list_.size()) ? boundary_list_[i] : NULL; 
   }
 
+  /// Return whether the problem is periodic
+  bool is_periodic () const throw() 
+  { return is_periodic_; }
+
   /// Return the ith initialization object
   Initial *  initial(size_t i) const throw()
   {
@@ -229,6 +233,9 @@ private: // attributes
 
   /// Boundary conditions object for each (axis,face)
   std::vector<Boundary *> boundary_list_;
+
+  /// Whether the problem is fully periodic or not
+  bool is_periodic_;
 
   /// Initial conditions object
   std::vector<Initial *> initial_list_;

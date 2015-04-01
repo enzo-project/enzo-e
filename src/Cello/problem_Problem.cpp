@@ -11,7 +11,8 @@
 
 Problem::Problem() throw()
   : stopping_(0),
-    index_output_(0)
+    index_output_(0),
+    is_periodic_(true)
 {
   
 }
@@ -44,6 +45,8 @@ void Problem::pup (PUP::er &p)
   for (int i=0; i<n; i++) {
     p | boundary_list_[i]; // PUP::able
   }
+
+  p | is_periodic_;
 
   if (pk) n=initial_list_.size();
   p | n;
@@ -420,6 +423,8 @@ Boundary * Problem::create_boundary_
  Parameters * parameters
  ) throw ()
 {
+  if (type != "periodic") is_periodic_ = false;
+
   if (type == "inflow") {
 
     std::string param_str = 

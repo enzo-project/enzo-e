@@ -28,7 +28,7 @@ hr {
  }
 
 
-h1 { text-align: center; }
+/* h1 { text-align: center; } */
 tr {
     background-color: #aaa;
     border: solid;
@@ -41,9 +41,9 @@ td {
     border-width: 2px;
     background-color: #ccc; 
     padding: 2px 5px;   
-    text-align: center;
+/*    text-align: center; */
 }
-th {    padding: 2px 3px;       text-align: center;}
+th {    padding: 2px 3px;      text-align: left; }
 td.block {    border-width: 0px;    padding: 0px 0px;   }
 td.noexec     {  color: #000;  background-color: #fa7;}
 td.noout      {  color: #000;  background-color: #fa7;}
