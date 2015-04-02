@@ -60,7 +60,7 @@ function test_time ($output_file) {
 function test_duration ($output_file) {
   if (file_exists($output_file)) {
     echo "<td class=pass>";
-    system("awk '/END CELLO/ {print $2}' < $output_file");
+    system("awk '/UNIT TEST END/ {print \"scale=0; \" $4 \"/1\"}' < $output_file | bc"); echo "s";
     echo "</td>";
   } else {
     echo "<td></td>";
