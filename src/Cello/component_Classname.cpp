@@ -39,7 +39,8 @@ Classname::~Classname() throw ()
   INCOMPLETE("Classname::~Classname");
 }
 
-/// CHARM++ Pack / Unpack function
+//----------------------------------------------------------------------
+
 void Classname::pup (PUP::er &p)
 {
   TRACEPUP;

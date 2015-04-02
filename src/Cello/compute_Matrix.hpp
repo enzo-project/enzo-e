@@ -37,7 +37,7 @@ public: // virtual functions
 
   /// Apply the matrix to a vector Y <-- A*X
 
-  virtual void matvec (void * Y, const void * X) const throw() = 0;
+  virtual void matvec (int id_y, int id_x, Block * block) throw() = 0;
 
 protected: // functions
 

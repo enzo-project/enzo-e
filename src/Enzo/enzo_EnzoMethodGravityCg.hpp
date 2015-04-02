@@ -59,6 +59,7 @@ public: // interface
 
     Method::pup(p);
 
+    p | A_;
     p | is_singular_;
     p | diag_precon_;
     p | rank_;
@@ -192,11 +193,6 @@ protected: // methods
   template <class T>
   void shift_ (T * X, const T a, const T * Y) const throw();
 
-  /// Compute local matrix-vector product Y = A*X
-  template <class T>
-  void matvec_ (T * Y, const T * X,
-		double hx, double hy, double hz) const throw();
-
   /// Apply diagonal preconditioner Y <- D*X
   template <class T>
   void apply_precon_ (T * Y, const T * X, 
@@ -207,6 +203,9 @@ protected: // methods
   { is_leaf_ = block->is_leaf(); }
 
 protected: // attributes
+
+  /// Matrix
+  Matrix * A_;
 
   /// Whether you need to subtract of the nullspace of A from b, e.g. fully
   /// periodic or Neumann problems

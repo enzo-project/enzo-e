@@ -66,6 +66,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
  bool is_singular,
  bool diag_precon) 
   : Method(), 
+    A_(new EnzoMatrixLaplace),
     is_singular_(is_singular),
     diag_precon_(diag_precon),
     rank_(rank),
@@ -113,8 +114,8 @@ void EnzoMethodGravityCg::compute ( Block * block) throw()
 
   int precision = field.precision(idensity_);
 
-  if      (precision == precision_single)    compute_<float>(enzo_block);
-  else if (precision == precision_double)    compute_<double>(enzo_block);
+  if      (precision == precision_single)    compute_<float>      (enzo_block);
+  else if (precision == precision_double)    compute_<double>     (enzo_block);
   else if (precision == precision_quadruple) compute_<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
@@ -370,7 +371,7 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     double hx,hy,hz;
     data->field_cell_width(&hx,&hy,&hz);
 
-    matvec_(Y,D,hx,hy,hz);
+    A_->matvec(iy_,id_,enzo_block);
 
     long double reduce[3];
 
@@ -715,45 +716,45 @@ T EnzoMethodGravityCg::count_ (T * X) const throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoMethodGravityCg::matvec_ (T * Y, const T * X, double hx, double hy, double hz) const throw()
-/// Compute y = A*x, where A is the discrete Laplacian times (- h^2)
-{
-  if (! is_leaf_ ) return;
+// template <class T>
+// void EnzoMethodGravityCg::matvec_ (T * Y, const T * X, double hx, double hy, double hz) const throw()
+// /// Compute y = A*x, where A is the discrete Laplacian times (- h^2)
+// {
+//   if (! is_leaf_ ) return;
 
-  const int idx = 1;
-  const int idy = mx_;
-  const int idz = mx_*my_;
+//   const int idx = 1;
+//   const int idy = mx_;
+//   const int idz = mx_*my_;
 
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+//   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 
-  if (rank_ == 1) {
-    for (int ix=0; ix<nx_; ix++) {
-      int i = i0 + ix;
-      Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) / (hx*hx);
-    }
-  } else if (rank_ == 2) {
-    for (int iy=0; iy<ny_; iy++) {
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + ix + mx_*iy;
-	Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
-	  +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy);
-      }
-    }
-  } else if (rank_ == 3) {
-    for (int iz=0; iz<nz_; iz++) {
-      for (int iy=0; iy<ny_; iy++) {
-	for (int ix=0; ix<nx_; ix++) {
-	  int i = i0 + ix + mx_*(iy + my_*iz);
-	  Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
-	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy)
-	    +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz*hz);
-	}
-      }
-    }
-  }
+//   if (rank_ == 1) {
+//     for (int ix=0; ix<nx_; ix++) {
+//       int i = i0 + ix;
+//       Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) / (hx*hx);
+//     }
+//   } else if (rank_ == 2) {
+//     for (int iy=0; iy<ny_; iy++) {
+//       for (int ix=0; ix<nx_; ix++) {
+// 	int i = i0 + ix + mx_*iy;
+// 	Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
+// 	  +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy);
+//       }
+//     }
+//   } else if (rank_ == 3) {
+//     for (int iz=0; iz<nz_; iz++) {
+//       for (int iy=0; iy<ny_; iy++) {
+// 	for (int ix=0; ix<nx_; ix++) {
+// 	  int i = i0 + ix + mx_*(iy + my_*iz);
+// 	  Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
+// 	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy)
+// 	    +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz*hz);
+// 	}
+//       }
+//     }
+//   }
  
-}
+// }
 
 //----------------------------------------------------------------------
 

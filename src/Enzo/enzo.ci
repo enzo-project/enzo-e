@@ -50,10 +50,10 @@ module enzo {
 
   PUPable EnzoRefineShock;
 
-  PUPable EnzoMatrixPoisson;
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
+  PUPable EnzoMatrixLaplace;
 
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
