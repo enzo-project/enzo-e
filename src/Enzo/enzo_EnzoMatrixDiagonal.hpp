@@ -1,52 +1,43 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     compute_EnzoMatrixLaplace.hpp 
+/// @file     compute_EnzoMatrixDiagonal.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2015-04-02
-/// @brief    [\ref Compute] Declaration of the EnzoMatrixLaplace class
+/// @brief    [\ref Compute] Declaration of the EnzoMatrixDiagonal class
 
-#ifndef COMPUTE_MATRIX_LAPLACE_HPP
-#define COMPUTE_MATRIX_LAPLACE_HPP
+#ifndef COMPUTE_MATRIX_DIAGONAL_HPP
+#define COMPUTE_MATRIX_DIAGONAL_HPP
 
-class EnzoMatrixLaplace : public Matrix 
+class EnzoMatrixDiagonal : public Matrix 
 {
-  /// @class    EnzoMatrixLaplace
+  /// @class    EnzoMatrixDiagonal
   /// @ingroup  Compute
   /// @brief    [\ref Compute] Interface to an application compute / analysis / visualization function.
 
 public: // interface
 
-  /// Create a new EnzoMatrixLaplace
-  EnzoMatrixLaplace () throw()
+  /// Create a new EnzoMatrixDiagonal
+  EnzoMatrixDiagonal () throw()
   {}
 
   /// Destructor
-  virtual ~EnzoMatrixLaplace() throw()
+  virtual ~EnzoMatrixDiagonal() throw()
   {}
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMatrixLaplace);
+  PUPable_decl(EnzoMatrixDiagonal);
 
   /// CHARM++ migration constructor
-  EnzoMatrixLaplace(CkMigrateMessage *m) {}
+  EnzoMatrixDiagonal(CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   { TRACEPUP;
     PUP::able::pup(p);
-    p | mx_;
-    p | my_;
-    p | mz_;
-    p | nx_;
-    p | ny_;
-    p | nz_;
-    p | gx_;
-    p | gy_;
-    p | gz_;
+    p | m_;
     p | hx_;
     p | hy_;
     p | hz_;
-    p | rank_;
   }
 
 public: // virtual functions
@@ -62,12 +53,8 @@ protected: // functions
 
 protected: // attributes
 
-  int mx_, my_, mz_;
-  int nx_, ny_, nz_;
-  int gx_, gy_, gz_;
   double hx_, hy_, hz_;
-  int rank_;
-
+  int m_;
 };
 
-#endif /* COMPUTE_MATRIX_LAPLACE_HPP */
+#endif /* COMPUTE_MATRIX_DIAGONAL_HPP */

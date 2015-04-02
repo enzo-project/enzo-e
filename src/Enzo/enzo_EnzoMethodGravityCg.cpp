@@ -67,8 +67,8 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
  bool diag_precon) 
   : Method(), 
     A_(new EnzoMatrixLaplace),
+    M_(NULL),
     is_singular_(is_singular),
-    diag_precon_(diag_precon),
     rank_(rank),
     grav_const_(grav_const),
     iter_max_(iter_max), 
@@ -84,6 +84,9 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     iter_(0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
 {
+
+  M_ = (diag_precon) ? (Matrix *)(new EnzoMatrixDiagonal) 
+    :                  (Matrix *)(new EnzoMatrixIdentity);
 
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
@@ -169,11 +172,8 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
     }
   }
 
-  double hx,hy,hz;
-  data->field_cell_width(&hx,&hy,&hz);
-
-  apply_precon_(D,R,hx,hy,hz);
-  apply_precon_(Z,R,hx,hy,hz);
+  M_->matvec(id_,ir_,enzo_block);
+  M_->matvec(iz_,ir_,enzo_block);
 
   long double reduce[3];
 
@@ -290,11 +290,8 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
     shift_ (R,shift,R);
     shift_ (B,shift,B);
 
-    double hx,hy,hz;
-    data->field_cell_width(&hx,&hy,&hz);
-
-    apply_precon_(D,R,hx,hy,hz);
-    apply_precon_(Z,R,hx,hy,hz);
+    M_->matvec(id_,ir_,enzo_block);
+    M_->matvec(iz_,ir_,enzo_block);
   } 
 
   long double reduce;
@@ -444,10 +441,7 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
   zaxpy_ (X,  a ,D,X);
   zaxpy_ (R, -a, Y,R);
 
-  double hx,hy,hz;
-  data->field_cell_width(&hx,&hy,&hz);
-
-  apply_precon_(Z,R,hx,hy,hz);
+  M_->matvec(iz_,ir_,enzo_block);
 
   long double reduce[3];
 
@@ -715,64 +709,3 @@ T EnzoMethodGravityCg::count_ (T * X) const throw()
 }
 
 //----------------------------------------------------------------------
-
-// template <class T>
-// void EnzoMethodGravityCg::matvec_ (T * Y, const T * X, double hx, double hy, double hz) const throw()
-// /// Compute y = A*x, where A is the discrete Laplacian times (- h^2)
-// {
-//   if (! is_leaf_ ) return;
-
-//   const int idx = 1;
-//   const int idy = mx_;
-//   const int idz = mx_*my_;
-
-//   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-
-//   if (rank_ == 1) {
-//     for (int ix=0; ix<nx_; ix++) {
-//       int i = i0 + ix;
-//       Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) / (hx*hx);
-//     }
-//   } else if (rank_ == 2) {
-//     for (int iy=0; iy<ny_; iy++) {
-//       for (int ix=0; ix<nx_; ix++) {
-// 	int i = i0 + ix + mx_*iy;
-// 	Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
-// 	  +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy);
-//       }
-//     }
-//   } else if (rank_ == 3) {
-//     for (int iz=0; iz<nz_; iz++) {
-//       for (int iy=0; iy<ny_; iy++) {
-// 	for (int ix=0; ix<nx_; ix++) {
-// 	  int i = i0 + ix + mx_*(iy + my_*iz);
-// 	  Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx*hx)
-// 	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy*hy)
-// 	    +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz*hz);
-// 	}
-//       }
-//     }
-//   }
- 
-// }
-
-//----------------------------------------------------------------------
-
-template <class T>
-void EnzoMethodGravityCg::apply_precon_ (T * Y, const T * X, 
-					 double hx, double hy, double hz) const throw()
-/// Compute y = A*x, where A is the discrete Laplacian times (- h^2)
-{
-  if (! is_leaf_) return;
-
-  const double d = ( diag_precon_ ) ? hx*hx : 1.0;
-
-  for (int iz=0; iz<mz_; iz++) {
-    for (int iy=0; iy<my_; iy++) {
-      for (int ix=0; ix<mx_; ix++) {
-	int i = ix + mx_*(iy + my_*iz);
-	Y[i] = d * X[i];
-      }
-    }
-  }
-}

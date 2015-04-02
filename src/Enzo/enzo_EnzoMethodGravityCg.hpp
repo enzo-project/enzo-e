@@ -60,8 +60,8 @@ public: // interface
     Method::pup(p);
 
     p | A_;
+    p | M_;
     p | is_singular_;
-    p | diag_precon_;
     p | rank_;
     p | grav_const_;
     p | iter_max_;
@@ -193,11 +193,6 @@ protected: // methods
   template <class T>
   void shift_ (T * X, const T a, const T * Y) const throw();
 
-  /// Apply diagonal preconditioner Y <- D*X
-  template <class T>
-  void apply_precon_ (T * Y, const T * X, 
-		      double hx, double hy, double hz) const throw();
-
   /// Set whether current Block is a leaf--if not don't touch data
   void set_leaf(Block * block) throw()
   { is_leaf_ = block->is_leaf(); }
@@ -207,12 +202,12 @@ protected: // attributes
   /// Matrix
   Matrix * A_;
 
+  /// Preconditioner
+  Matrix * M_;
+
   /// Whether you need to subtract of the nullspace of A from b, e.g. fully
   /// periodic or Neumann problems
   bool is_singular_;
-
-  /// Whether to use diagonal preconditioning
-  bool diag_precon_;
 
   /// Dimensionality of the problem
   int rank_;

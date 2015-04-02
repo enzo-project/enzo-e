@@ -162,6 +162,9 @@ struct fluxes
 #include "enzo_EnzoMethodGravityBiCGStab.hpp"
 
 #include "enzo_EnzoMatrixLaplace.hpp"
+#include "enzo_EnzoMatrixDiagonal.hpp"
+#include "enzo_EnzoMatrixIdentity.hpp"
+
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
 #include "enzo_EnzoComputeAcceleration.hpp"
