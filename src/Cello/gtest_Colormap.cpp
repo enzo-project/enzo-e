@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     gtest_ColormapRGB.cpp
+/// @file     gtest_Colormap.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
 /// @brief    Test program for the ColormapRGB class

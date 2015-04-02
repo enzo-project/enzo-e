@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_Grouping.hpp
+/// @file     data_Grouping.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul 16 15:27:42 PDT 2014
-/// @brief    [\ref Field] Declaration of the Grouping class
+/// @brief    [\ref Data] Declaration of the Grouping class
 ///
 /// This class serves to define groups of Fields, Particles, etc. into
 /// named categories.  For example, one can define a "colour" group
@@ -16,14 +16,14 @@
 /// NOTE: This class is not named "Group" since it conflicts with a
 /// Charm++ class by the same name
 
-#ifndef FIELD_GROUPING_HPP
-#define FIELD_GROUPING_HPP
+#ifndef DATA_GROUPING_HPP
+#define DATA_GROUPING_HPP
 
 class Grouping {
 
   /// @class    Grouping
   /// @ingroup  Field
-  /// @brief    [\ref Field] 
+  /// @brief    [\ref Data] 
 
 public: // interface
 
@@ -94,5 +94,5 @@ private: // attributes
 
 };
 
-#endif /* FIELD_GROUPING_HPP */
+#endif /* DATA_GROUPING_HPP */
 

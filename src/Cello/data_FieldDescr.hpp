@@ -1,19 +1,19 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldDescr.hpp
+/// @file     data_FieldDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
-/// @brief    [\ref Field] Declaration for the FieldDescr class
+/// @brief    [\ref Data] Declaration for the FieldDescr class
 
-#ifndef FIELD_FIELD_DESCR_HPP
-#define FIELD_FIELD_DESCR_HPP
+#ifndef DATA_FIELD_DESCR_HPP
+#define DATA_FIELD_DESCR_HPP
 
 class FieldDescr 
 {
 
   /// @class    FieldDescr
   /// @ingroup  Field
-  /// @brief    [\ref Field] Interface for the FieldDescr class
+  /// @brief    [\ref Data] Interface for the FieldDescr class
   ///
   /// This class is used to store information about Fields in general,
   /// including field names, how they are centered (cell-centered,
@@ -183,5 +183,4 @@ private: // attributes
 
 };
 
-#endif /* FIELD_FIELD_DESCR_HPP */
-
+#endif /* DATA_FIELD_DESCR_HPP */

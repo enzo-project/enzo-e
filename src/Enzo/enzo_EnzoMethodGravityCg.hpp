@@ -197,8 +197,7 @@ protected: // methods
   void matvec_ (T * Y, const T * X,
 		double hx, double hy, double hz) const throw();
 
-  /// Apply diagonal preconditioner      Y <- D*X if dir == +1
-  /// or inverse diagonal preconditioner Y <- D\X if dir == -1
+  /// Apply diagonal preconditioner Y <- D*X
   template <class T>
   void apply_precon_ (T * Y, const T * X, 
 		      double hx, double hy, double hz) const throw();

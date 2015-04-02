@@ -8,7 +8,7 @@
 #include "main.hpp"
 #include "test.hpp"
 
-#include "particle.hpp"
+#include "data.hpp"
 
 PARALLEL_MAIN_BEGIN
 {

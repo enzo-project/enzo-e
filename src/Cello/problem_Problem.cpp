@@ -334,7 +334,7 @@ void Problem::initialize_method
 
     std::string name = config->method_list[index_method];
 
-    Method * method = create_method_(name, index_method, config, field_descr);
+    Method * method = create_method_(name, config, field_descr);
 
     for (int imr = 0; imr < config->method_refresh[index_method].size(); imr++) {
       std::string refresh_str = config->method_refresh[index_method][imr];
@@ -575,7 +575,6 @@ Stopping * Problem::create_stopping_
 
 Method * Problem::create_method_ 
 ( std::string  name,
-  int index,
   Config * config,
   FieldDescr * field_descr) throw ()
 {

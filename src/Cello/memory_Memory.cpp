@@ -120,7 +120,6 @@ void Memory::deallocate ( void * pointer ) throw()
 //----------------------------------------------------------------------
 
 void Memory::new_group ( std::string group_name ) throw ()
-/// @param  index_group    non-zero ID of the group
 /// @param  group_name  Name of the group
 {
 #ifdef CONFIG_USE_MEMORY

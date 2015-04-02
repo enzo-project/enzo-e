@@ -35,7 +35,7 @@ class Block : public CBase_Block
   /// @class    Block
   /// @ingroup  Comm
   ///
-  /// @brief [\ref Comm] Handles parallel communication and
+  /// @brief [\ref Mesh] Handles parallel communication and
   /// synchronization of mesh Blocks
 
   friend class IoBlock;

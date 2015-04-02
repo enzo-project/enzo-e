@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     particle_ParticleBlock.hpp
+/// @file     data_ParticleBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-08-16 14:57:21
-/// @brief    [\ref Particle] Declaration of the ParticleBlock class
+/// @brief    [\ref Data] Declaration of the ParticleBlock class
 
-#ifndef PARTICLE_PARTICLE_BLOCK_HPP
-#define PARTICLE_PARTICLE_BLOCK_HPP
+#ifndef DATA_PARTICLE_BLOCK_HPP
+#define DATA_PARTICLE_BLOCK_HPP
 
 class ParticleBlock {
 
   /// @class    ParticleBlock
-  /// @ingroup  Particle
-  /// @brief    [\ref Particle] 
+  /// @ingroup  Data
+  /// @brief    [\ref Data] 
 
 public: // interface
 
@@ -180,6 +180,5 @@ void ParticleBlock::global_positions
   }
 }
 
-
-#endif /* PARTICLE_PARTICLE_BLOCK_HPP */
+#endif /* DATA_PARTICLE_BLOCK_HPP */
 

@@ -9,7 +9,7 @@
 #include "test.hpp"
 #include <stdexcept>
 #include <string>
-#include "field_Grouping.hpp"
+#include "data_Grouping.hpp"
 
 PARALLEL_MAIN_BEGIN
 {

@@ -1,21 +1,21 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_Field.hpp
+/// @file     data_Field.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Sep  8 14:16:32 PDT 2014
-/// @brief    [\ref Field] Declaration of the Field class
+/// @brief    [\ref Data] Declaration of the Field class
 ///
 /// The Field class is used to unify the interface of the global FieldDescr
 /// object and a given FieldData object.
 
-#ifndef FIELD_FIELD_HPP
-#define FIELD_FIELD_HPP
+#ifndef DATA_FIELD_HPP
+#define DATA_FIELD_HPP
 
 class Field {
 
   /// @class    Field
   /// @ingroup  Field
-  /// @brief    [\ref Field] 
+  /// @brief    [\ref Data] 
 
 public: // interface
 
@@ -269,5 +269,4 @@ private: // attributes
 
 };
 
-#endif /* FIELD_FIELD_HPP */
-
+#endif /* DATA_FIELD_HPP */

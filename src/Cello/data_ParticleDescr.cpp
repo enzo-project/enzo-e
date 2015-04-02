@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     particle_ParticleDescr.cpp
+/// @file     data_ParticleDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Aug 15 11:48:15 PDT 2014
 /// @brief    Implementation of the ParticleDescr class
@@ -15,7 +15,7 @@
 /// types each ParticleBlock contains, and provides operations to
 /// assist in "decoding" the data stored in ParticleBlocks.
 
-#include "particle.hpp"
+#include "data.hpp"
 
 //----------------------------------------------------------------------
 

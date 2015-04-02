@@ -415,11 +415,11 @@ void Block::adapt_send_level()
 
 /// @brief Entry function for receiving desired level of a neighbor
 ///
-/// @param index_caller   mesh index of the calling neighbor
-/// @param ic3            child indices of neighbor if it's in a finer level
-/// @param if3            face (inward) shared with neighbor
-/// @param level_face     neighbor's current level
-/// @param level_face_new neighbor's desired level
+/// @param index_send      mesh index of the calling neighbor
+/// @param ic3             child indices of neighbor if it's in a finer level
+/// @param if3             face (inward) shared with neighbor
+/// @param level_face_curr neighbor's current level
+/// @param level_face_new  neighbor's desired level
 ///
 /// level_face
 /// level_face_new

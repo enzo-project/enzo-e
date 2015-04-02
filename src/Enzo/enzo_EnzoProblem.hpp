@@ -59,7 +59,6 @@ private: // functions
   /// Create named method object
   virtual Method * create_method_ 
   (std::string type, 
-   int index,
    Config * config, FieldDescr *) throw ();
 
   // /// Create named timestep object

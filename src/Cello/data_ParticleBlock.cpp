@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     particle_ParticleBlock.cpp
+/// @file     data_ParticleBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Aug 15 17:37:19 PDT 2014
 /// @brief    Implementation of the ParticleBlock class
@@ -25,5 +25,5 @@
 ///  The number of bytes used by Aj_k is given by 
 ///  ParticleDescr::attribute_size(j)
 
-#include "particle.hpp"
+#include "data.hpp"
 

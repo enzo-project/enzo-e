@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldData.cpp
+/// @file     data_FieldData.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
 /// @brief    Implementation of the FieldData class
 
 #include "cello.hpp"
-#include "field.hpp"
+#include "data.hpp"
 
 #include "charm_simulation.hpp"
 

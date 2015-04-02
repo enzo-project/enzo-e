@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldFace.hpp
+/// @file     data_FieldFace.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-04-12
-/// @brief    [\ref Field] Interface for the FieldFace class
+/// @brief    [\ref Data] Interface for the FieldFace class
 
-#ifndef FIELD_FIELD_FACE_HPP
-#define FIELD_FIELD_FACE_HPP
+#ifndef DATA_FIELD_FACE_HPP
+#define DATA_FIELD_FACE_HPP
 
 class Restrict;
 class Prolong;
@@ -15,7 +15,7 @@ class FieldFace {
 
   /// @class    FieldFace
   /// @ingroup  Field
-  /// @brief [\ref Field] Class for loading field faces and storing
+  /// @brief [\ref Data] Class for loading field faces and storing
   /// field ghosts zones
 
 public: // interface
@@ -172,4 +172,4 @@ private: // attributes
 
 };
 
-#endif /* FIELD_FIELD_FACE_HPP */
+#endif /* DATA_FIELD_FACE_HPP */

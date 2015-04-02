@@ -19,7 +19,7 @@ ColormapRGB::ColormapRGB() throw ()
 
 ColormapRGB::ColormapRGB(const ColormapRGB & colormap) throw ()
   : Colormap(colormap)
-/// @param     ColormapRGB  Object being copied
+/// @param     colormap  Object being copied
 {
   rgb_ = colormap.rgb_;
 }
@@ -27,7 +27,7 @@ ColormapRGB::ColormapRGB(const ColormapRGB & colormap) throw ()
 //----------------------------------------------------------------------
 
 ColormapRGB & ColormapRGB::operator= (const ColormapRGB & colormap) throw ()
-/// @param     ColormapRGB  Source object of the assignment
+/// @param     colormap  Source object of the assignment
 /// @return    The target assigned object
 {
   Colormap::operator= (colormap);

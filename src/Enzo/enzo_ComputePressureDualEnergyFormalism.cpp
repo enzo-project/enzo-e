@@ -1,6 +1,6 @@
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file      Grid_ComputePressureDualEnergyFormalism.cpp
+/// @file      enzo_ComputePressureDualEnergyFormalism.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
 /// @brief     (COMPUTE THE PRESSURE FIELD AT THE GIVEN TIME) - DUAL ENERGY

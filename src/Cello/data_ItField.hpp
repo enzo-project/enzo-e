@@ -1,20 +1,20 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_ItField.hpp
+/// @file     data_ItField.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief [\ref Field] Declaration of the ItField abstract iterator
+/// @brief [\ref Data] Declaration of the ItField abstract iterator
 /// base class
 
-#ifndef FIELD_IT_FIELD_HPP
-#define FIELD_IT_FIELD_HPP
+#ifndef DATA_IT_FIELD_HPP
+#define DATA_IT_FIELD_HPP
 
 class ItField : public PUP::able 
 {
 
   /// @class    ItField
   /// @ingroup  Field
-  /// @brief    [\ref Field] Abstract iterator base class for Field indices
+  /// @brief    [\ref Data] Abstract iterator base class for Field indices
 
 public: // interface
 
@@ -55,4 +55,4 @@ protected: // attributes
 
 };
 
-#endif /* FIELD_IT_FIELD_HPP */
+#endif /* DATA_IT_FIELD_HPP */

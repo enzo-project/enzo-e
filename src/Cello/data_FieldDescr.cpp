@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldDescr.cpp
+/// @file     data_FieldDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-14
 /// @brief    Implementation of the FieldDescr class
 
 #include "cello.hpp"
 
-#include "field.hpp"
+#include "data.hpp"
 
 //----------------------------------------------------------------------
 

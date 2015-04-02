@@ -1,6 +1,6 @@
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file      Grid_SolveHydroEquations.cpp
+/// @file      enzo_SolveHydroEquations.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
 /// @brief     Solve the hydro equations, saving subgrid fluxes

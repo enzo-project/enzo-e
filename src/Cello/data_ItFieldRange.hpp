@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_ItFieldRange.hpp
+/// @file     data_ItFieldRange.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief    [\ref Field] Declaration of the ItFieldRange iterator class
+/// @brief    [\ref Data] Declaration of the ItFieldRange iterator class
 
-#ifndef FIELD_IT_FIELD_RANGE_HPP
-#define FIELD_IT_FIELD_RANGE_HPP
+#ifndef DATA_IT_FIELD_RANGE_HPP
+#define DATA_IT_FIELD_RANGE_HPP
 
 class ItFieldRange : public ItField {
 
   /// @class    ItFieldRange
   /// @ingroup  Field
-  /// @brief    [\ref Field] Iterator over a range of Fields in a Block
+  /// @brief    [\ref Data] Iterator over a range of Fields in a Block
 
 public: // interface
 
@@ -71,4 +71,4 @@ private: // attributes
 
 };
 
-#endif /* FIELD_IT_FIELD_RANGE_HPP */
+#endif /* DATA_IT_FIELD_RANGE_HPP */

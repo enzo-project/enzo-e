@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     particle_ParticleDescr.hpp
+/// @file     data_ParticleDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Aug 14 17:16:28 PDT 2014
-/// @brief    [\ref Particle] Declaration of the ParticleDescr class
+/// @brief    [\ref Data] Declaration of the ParticleDescr class
 
-#ifndef PARTICLE_PARTICLE_DESCR_HPP
-#define PARTICLE_PARTICLE_DESCR_HPP
+#ifndef DATA_PARTICLE_DESCR_HPP
+#define DATA_PARTICLE_DESCR_HPP
 
 class ParticleDescr {
 
   /// @class    ParticleDescr
-  /// @ingroup  Particle
-  /// @brief    [\ref Particle] 
+  /// @ingroup  Data
+  /// @brief    [\ref Data] 
 
   //----------------------------------------------------------------------
 
@@ -115,5 +115,5 @@ private: // attributes
 
 };
 
-#endif /* PARTICLE_PARTICLE_DESCR_HPP */
+#endif /* DATA_PARTICLE_DESCR_HPP */
 

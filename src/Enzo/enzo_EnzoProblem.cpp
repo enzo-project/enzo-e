@@ -153,11 +153,11 @@ Refine * EnzoProblem::create_refine_
 
 Method * EnzoProblem::create_method_ 
 ( std::string  name,  
-  int index,
   Config * config,
   FieldDescr * field_descr) throw ()
 /// @param name   Name of the method to create
 /// @param config Configuration parameters class
+/// @param field_descr Field descriptor
 {
 
   Method * method = 0;
@@ -203,7 +203,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_bicgstab_iter_max,
        enzo_config->method_gravity_bicgstab_res_tol);
   } else {
-    method = Problem::create_method_ (name,index,config, field_descr);
+    method = Problem::create_method_ (name,config, field_descr);
   }
 
   ASSERT2("EnzoProblem::create_method",

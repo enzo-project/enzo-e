@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldData.hpp
+/// @file     data_FieldData.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
-/// @brief    [\ref Field] Fortran-style array class.
+/// @brief    [\ref Data] Fortran-style array class.
 
-#ifndef FIELD_FIELD_DATA_HPP
-#define FIELD_FIELD_DATA_HPP
+#ifndef DATA_FIELD_DATA_HPP
+#define DATA_FIELD_DATA_HPP
 
 class Block;
 class FieldDescr;
@@ -15,7 +15,7 @@ class FieldData {
 
   /// @class    FieldData
   /// @ingroup  Field
-  /// @brief [\ref Field] Interface between field arrays and low-level
+  /// @brief [\ref Data] Interface between field arrays and low-level
   /// (C/fortran) routines.
   /// 
   /// A FieldData stores up to a 4D fortran-like array for
@@ -246,4 +246,4 @@ private: // attributes
 
 };   
 
-#endif /* FIELD_FIELD_DATA_HPP */
+#endif /* DATA_FIELD_DATA_HPP */

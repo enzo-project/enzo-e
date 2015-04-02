@@ -1,12 +1,12 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldFace.cpp
+/// @file     data_FieldFace.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-04-12
 /// @brief    Implementation of the FieldFace class
 
 #include "cello.hpp"
-#include "field.hpp"
+#include "data.hpp"
 #include "problem_Prolong.hpp"
 #include "problem_Restrict.hpp"
 

@@ -1,6 +1,6 @@
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file      Grid_SetMinimumSupport.cpp
+/// @file      enzo_SetMinimumSupport.cpp
 /// @author    Greg Bryan
 /// @date      November, 1998
 /// @brief     Set the energy to provide minimal pressure support

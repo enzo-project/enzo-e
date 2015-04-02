@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_ItFieldList.hpp
+/// @file     data_ItFieldList.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief    [\ref Field] Declaration of the ItFieldList iterator class
+/// @brief    [\ref Data] Declaration of the ItFieldList iterator class
 
-#ifndef FIELD_IT_FIELD_LIST_HPP
-#define FIELD_IT_FIELD_LIST_HPP
+#ifndef DATA_IT_FIELD_LIST_HPP
+#define DATA_IT_FIELD_LIST_HPP
 
 class ItFieldList : public ItField {
 
   /// @class    ItFieldList
   /// @ingroup  Field
-  /// @brief    [\ref Field] Iterator over a list of Fields in a Block
+  /// @brief    [\ref Data] Iterator over a list of Fields in a Block
 
 public: // interface
 
@@ -64,4 +64,4 @@ private: // attributes
   std::vector <int> values_;
 };
 
-#endif /* FIELD_IT_FIELD_LIST_HPP */
+#endif /* DATA_IT_FIELD_LIST_HPP */
