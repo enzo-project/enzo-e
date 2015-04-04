@@ -408,6 +408,14 @@ public:
   /// Syncronize before continuing with next phase
   void control_next(int phase = phase_unknown, std::string sync = "");
 
+#ifdef NEW_CONTROL
+
+  /// Transition function to replace control_sync
+  void control_sync_new
+  (CkCallback cb, int phase, std::string sync, const char * name, int line);
+
+#endif /* NEW_CONTROL */
+
   /// Syncronize before continuing with next phase
   virtual void control_sync
   (int phase, std::string sync, bool next_phase, const char * name, int line);

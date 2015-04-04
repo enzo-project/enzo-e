@@ -23,11 +23,23 @@
 
      //----------------------------------------------------------------------
 
+   function test_input ($input_file) {
+     $file="$input_file.in";
+     if (file_exists($file)) {
+       $input_html = "<a href=\"$file\">$input.unit.in</a>";
+       printf ("<td class=pass><a href='$file'>input</a></td>");
+     } else {
+       echo "<td></td>";
+     }
+   }
+
+//----------------------------------------------------------------------
+
    function test_output ($output_file) {
      $file="$output_file";
      if (file_exists($file)) {
        $output_html = "<a href=\"$file\">$output.unit</a>";
-       system("cat $file | awk 'BEGIN{c=0}; /END CELLO/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$file'>complete</a></td>\"}'");
+       system("cat $file | awk 'BEGIN{c=0}; /END CELLO/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$file'>output</a></td>\"; if (c!=0) print \"<td class=pass><a href='$file'>output</a></td>\"}'");
      } else {
        echo "<td></td>";
      }
@@ -131,6 +143,7 @@ function tests($component,$testrun,$output,$test_name,$dir) {
     }
     echo "</th></tr>\n";
     echo "<tr>\n";
+    echo "   <th>Input</th>";
     echo "   <th>Output</th>";
     echo "   <th>Date</th>";
     echo "   <th>Time</th>";
@@ -155,6 +168,7 @@ function tests($component,$testrun,$output,$test_name,$dir) {
       } else {
 	$file = "$output_file";
       }
+      test_input      ($file);
       test_output     ($file);
       test_date       ($file);
       test_time       ($file);
@@ -488,6 +502,8 @@ function swf_movie ($filename, $last_image, $image_size)
 printf ("<table>\n");
 printf ("<tr>\n");
 
+// Print the top row of the summary table
+
 if (file_exists("STATUS"))  {
   printf ( "<th class=compiling><strong>Running<br>");
   system ("awk '{i=index($1,\"test_\"); print substr($1,i+5,length($1)-i-9)}' STATUS");
@@ -495,39 +511,39 @@ if (file_exists("STATUS"))  {
 } else { 
   printf ("<th></th>\n"); 
 }
-printf ( "<th colspan=$num_types class=fail>Missing</br>Executable</th>");
+printf ( "<th colspan=$num_types class=fail>Missing</br>executable</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Missing</br>Output</th>");
+printf ( "<th colspan=$num_types class=fail>Missing</br>output</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Incomplete</br>Output</th>");
+printf ( "<th colspan=$num_types class=fail>Incomplete</br>output</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Failed</br>Tests</th>");
+printf ( "<th colspan=$num_types class=fail>Failed</br>tests</th>");
 printf ("<th></th>");
-printf ( "<th colspan=$num_types class=pass>Passed</br>Tests</th>");
+printf ( "<th colspan=$num_types class=pass>Passed</br>tests</th>");
 printf ("<th class=divider></th>");
 printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>");
 printf ( "</tr>\n");
 
 //----------------------------------------------------------------------
-row_divider($num_types);
+printf ("<tr><td class=center></td><td class=center colspan=11>Enzo-P application tests</td></tr>\n");
 //----------------------------------------------------------------------
 
-test_summary("Method-ppm",
+test_summary("Method 'ppm'",
 	     array("method_ppm-1",
 		   "method_ppm-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Method-ppml",
+test_summary("Method 'ppml'",
 	     array("method_ppml-1",
 		   "method_ppml-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Method-heat",
+test_summary("Method 'heat'",
 	     array("method_heat-1",
 		   "method_heat-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Method-gravity",
+test_summary("Method 'gravity'",
 	     array("method_gravity_cg-1",
 		   "method_gravity_cg-8"),
 	     array("enzo-p",  "enzo-p"),'test');
@@ -553,17 +569,15 @@ test_summary("Balance",
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p",
 		   "enzo-p", "enzo-p", "enzo-p", "enzo-p"),'test/Balance');
 
-test_summary("Boundary-2D", 
+test_summary("Boundary", 
 	     array("boundary_reflecting-2d",
 		   "boundary_periodic-2d",
-		   "boundary_outflow-2d"),
-	     array("enzo-p", "enzo-p", "enzo-p"),'test');
-
-test_summary("Boundary-3D",
-	     array("boundary_reflecting-3d",
+		   "boundary_outflow-2d",
+		   "boundary_reflecting-3d",
 		   "boundary_periodic-3d",
 		   "boundary_outflow-3d"),
-	     array("enzo-p", "enzo-p", "enzo-p"),'test');
+	     array("enzo-p", "enzo-p", "enzo-p",
+		   "enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Initial", 
 	     array("initial_png"),
@@ -574,7 +588,8 @@ test_summary("Output",
 	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
-row_divider($num_types);
+// row_divider($num_types);
+printf ("<tr><td class=center></td><td class=center colspan=11>Cello unit tests</td></tr>\n");
 //----------------------------------------------------------------------
 
 
@@ -632,7 +647,7 @@ printf ("</tr></table></br>\n");
 
 //======================================================================
 
-test_group("Method-ppm");
+test_group("Method 'ppm'");
 
 ?>
 
@@ -670,7 +685,7 @@ test_table ("method_ppm-8",
 //======================================================================
 
 
-test_group("Method-ppml");
+test_group("Method 'ppml'");
 
 ?>
 
@@ -705,7 +720,7 @@ test_table ("method_ppml-8-z",
 
 //======================================================================
 
-test_group("Method-heat");
+test_group("Method 'heat'");
 
 ?>
 
@@ -737,7 +752,7 @@ test_table ("method_heat-mesh-8",
 
 //======================================================================
 
-test_group("Method-gravity");
+test_group("Method 'gravity'");
 
 ?>
 
@@ -890,7 +905,7 @@ test_table ("Balance/Refine/balance-de",
 
 //======================================================================
 
-test_group("Boundary-2D");
+test_group("Boundary");
 
 echo "<h3>2D Reflecting</h3>";
 
@@ -910,9 +925,7 @@ tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D","");
 test_table ("boundary_outflow-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
 
-//======================================================================
-
-test_group("Boundary-3D");
+//----------------------------------------------------------------------
 
 echo "<h3>3D Reflecting</h3>";
 

@@ -18,6 +18,10 @@ BODY {
 /* hr {background: #fff url(cello-hr.png); height: 6px} */
 
 
+a {
+ color: black;
+}
+
 hr {
     border: 0;
     height: 10px;
@@ -44,17 +48,21 @@ td {
     padding: 2px 10px;   
 /*    text-align: center; */
 }
-th {    padding: 2px 3px;      text-align: left; }
+th {    padding: 2px 2px;     
+	text-align: left; 
+	font-weight: normal;
+   }
 td.block {    border-width: 0px;    padding: 0px 0px;   }
 td.noexec     {  color: #000;  background-color: #fa7;}
 td.noout      {  color: #000;  background-color: #fa7;}
 td.incomplete {  color: #300;  background-color: #f77; }
 td.FAIL       {  color: #000;  background-color: #f77;}
+td.center     {  text-align: center;    background-color: #bbb; }
 td.unfinished {  color: #000;  background-color: #fa7; }
 td.pass       {  color: #030;  background-color: #7f7; }
 td.inverse    {  color: #fff;  background-color: #000; }
 th.block {    padding: 0px 0px;   }
-th.divider {    background-color:black;}
+th.divider {    background-color:gray;}
 th.running {    background-color:yellow;  }
 
 th.compiling { background-color: #afa; color: #000; }

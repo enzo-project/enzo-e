@@ -17,6 +17,7 @@ void EnzoBlock::control_sync
 (int phase, std::string sync, bool next_phase, const char * file, int line)
 {
 
+  //  printf ("DEBUG %s:%d OLD EnzoBlock::control_sync()\n",__FILE__,__LINE__);
   
   if (phase < phase_enzo_first) {
     Block::control_sync(phase,sync,next_phase,file,line);

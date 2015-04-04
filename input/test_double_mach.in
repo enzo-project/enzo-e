@@ -136,8 +136,8 @@
 
    Output { 
 
-#      list = ["de_png","mesh","de_hdf5"];
-      list = ["de_png","mesh"];
+      list = ["de_png","mesh","de_hdf5"];
+#      list = ["de_png","mesh"];
 
 
        mesh {

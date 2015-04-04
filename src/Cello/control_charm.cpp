@@ -161,7 +161,6 @@ void Block::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
-  // control_sync(phase_stopping_enter,"none",true,__FILE__,__LINE__);
   control_next();
 }
 
@@ -214,8 +213,49 @@ void Block::control_next(int phase, std::string sync)
 
 //----------------------------------------------------------------------
 
+#ifdef NEW_CONTROL
+
+void Block::control_sync_new(CkCallback cb, int phase, std::string sync, const char * file, int line)
+{
+  //  printf ("DEBUG %s:%d NEW Block::control_sync_new()\n",__FILE__,__LINE__);
+
+  if (sync == "contribute") {
+
+    contribute(cb);
+
+  } else if (sync == "quiescence") {
+
+    if (index_.is_root()) {
+      CkStartQD(cb);
+    }
+
+  } else if (sync == "neighbor") {
+
+    control_sync_neighbor_(phase);
+
+  } else if (sync == "array") {
+
+    if (index().is_root()) cb.send(NULL);
+
+  } else if (sync == "none") {
+
+    cb.send(NULL);
+
+  } else {
+    ERROR2 ("Block::control_sync()",  
+	    "Unknown sync type: phase %s sync type %s", 
+	    phase_name[phase],sync.c_str());    
+  }
+}
+
+#endif /* NEW_CONTROL */
+
+//----------------------------------------------------------------------
+
 void Block::control_sync(int phase, std::string sync, bool next_phase, const char * file, int line)
 {
+  //  printf ("DEBUG %s:%d OLD Block::control_sync()\n",__FILE__,__LINE__);
+
   if (next_phase) {
     phase = cycle_phase[index_cycle_phase_];
     sync  = cycle_sync[index_cycle_phase_];
@@ -265,66 +305,6 @@ void Block::control_sync(int phase, std::string sync, bool next_phase, const cha
     }
 
     contribute(cb);
-
-  // } else if (sync == "quiescence") {
-
-  //   CkCallback cb;
-
-  //   if (                     phase == phase_initial_exit) {
-  //     cb = CkCallback (CkIndex_Block::p_initial_exit(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_adapt_enter) {
-  //     cb = CkCallback (CkIndex_Block::p_adapt_enter(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_adapt_next) {
-  //     cb = CkCallback (CkIndex_Block::p_adapt_next(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_adapt_called) {
-  //     cb = CkCallback (CkIndex_Block::p_adapt_called(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_adapt_end) {
-  //     cb = CkCallback (CkIndex_Block::p_adapt_end(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_adapt_exit) {
-  //     cb = CkCallback (CkIndex_Block::p_adapt_exit(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_refresh_enter) {
-  //     cb = CkCallback (CkIndex_Block::p_control_refresh_enter(),
-  //   		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_refresh_exit) {
-  //     cb = CkCallback (CkIndex_Block::p_control_refresh_exit(),
-  //   		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_output_enter) {
-  //     cb = CkCallback (CkIndex_Block::p_output_enter(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_output_exit) {
-  //     cb = CkCallback (CkIndex_Block::p_output_exit(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_compute_enter) {
-  //     cb = CkCallback (CkIndex_Block::p_compute_enter(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_compute_continue) {
-  //     cb = CkCallback (CkIndex_Block::p_compute_continue(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_compute_exit) {
-  //     cb = CkCallback (CkIndex_Block::p_compute_exit(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_stopping_enter) {
-  //     cb = CkCallback (CkIndex_Block::p_stopping_enter(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_stopping_exit) {
-  //     cb = CkCallback (CkIndex_Block::p_stopping_exit(),
-  // 		       thisProxy[thisIndex]);
-  //   } else if (              phase == phase_exit) {
-  //     cb = CkCallback (CkIndex_Block::p_exit(),
-  // 		       thisProxy[thisIndex]);
-  //   } else {
-  //     ERROR2 ("Block::control_sync()",  
-  // 	      "Unknown phase: phase %s sync type %s", 
-  // 	      phase_name[phase],sync.c_str());    
-  //   }
-
-  //   CkStartQD (cb);
 
   } else if (sync == "quiescence") {
 
