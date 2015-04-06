@@ -150,7 +150,7 @@ function tests($component,$testrun,$output,$test_name,$dir) {
     echo "   <th>Duration</th>";
     echo "   <th>Failed</th>";
     echo "   <th>Passed</th>";
-    echo "   <th>Unfinished</th>";
+    //    echo "   <th>Unfinished</th>";
     echo "</tr>\n";
 
     //--------------------------------------------------
@@ -175,15 +175,13 @@ function tests($component,$testrun,$output,$test_name,$dir) {
       test_duration   ($file);
       test_failed     ($file);
       test_passed     ($file);
-      test_unfinished ($file);
+      //      test_unfinished ($file);
 
       echo "</tr>\n";
     }
-
     echo "</tr></table></br/>\n";
 
     echo "<table><tr>";
-
     for ($i = 0; $i<$num_types; ++$i) {
       $type = $types[$i];
       $output_file = "../test/$dir/$output.unit";
@@ -191,7 +189,6 @@ function tests($component,$testrun,$output,$test_name,$dir) {
 	test($type,$output_file,"FAIL");
       }
     }
-
     echo "</tr></table></br/>";
   }
 };
@@ -210,7 +207,6 @@ function test($type,$output,$type) {
     system ("grep '0/' $output | sort | uniq | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
     echo "</tr><tr></tr>";
   }
-     
 };
 
 ?>
@@ -365,16 +361,12 @@ function test_summary($component,$test_output,$executables, $dir)
   $state = "running";
 
   summary_missing_executable ($test_output, $executables, $state, $dir);
-  printf ("<th></th>");
   summary_missing_output     ($test_output, $executables, $state, $dir);
-  printf ("<th></th>");
   summary_incomplete_output  ($test_output, $executables, $state, $dir);
-  printf ("<th></th>");
   summary_failed_tests       ($test_output, $executables, $state, $dir);
-  printf ("<th></th>");
   summary_passed_tests       ($test_output, $executables, $state, $dir);
-  printf ("<th class=divider></th>");
-  summary_unfinished_tests   ($test_output, $executables, $state, $dir);
+  /* printf ("<th class=divider></th>"); */
+  /* summary_unfinished_tests   ($test_output, $executables, $state, $dir); */
 
   printf ("</tr>\n");
 }
@@ -429,6 +421,7 @@ function binary ($value,$count)
   }
   return $strval; 
 }
+
 function test_table_blocks ($file_root,$cycle_array, $types)
 {
   echo "<table>";
@@ -498,59 +491,52 @@ function swf_movie ($filename, $last_image, $image_size)
     printf ("      </OBJECT> \n");
   }  
 }
-
 printf ("<table>\n");
 printf ("<tr>\n");
 
 // Print the top row of the summary table
 
 if (file_exists("STATUS"))  {
-  printf ( "<th class=compiling><strong>Running<br>");
-  system ("awk '{i=index($1,\"test_\"); print substr($1,i+5,length($1)-i-9)}' STATUS");
+  printf ( "<th class=compiling ><strong>Running");
   printf ("</strong></th>");
 } else { 
   printf ("<th></th>\n"); 
 }
-printf ( "<th colspan=$num_types class=fail>Missing</br>executable</th>");
-printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Missing</br>output</th>");
-printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Incomplete</br>output</th>");
-printf ("<th></th>");
-printf ( "<th colspan=$num_types class=fail>Failed</br>tests</th>");
-printf ("<th></th>");
-printf ( "<th colspan=$num_types class=pass>Passed</br>tests</th>");
-printf ("<th class=divider></th>");
-printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>");
+printf ( "<th colspan=$num_types class=fail>No program</th>");
+printf ( "<th colspan=$num_types class=fail>No output</th>");
+printf ( "<th colspan=$num_types class=fail>Some output</th>");
+printf ( "<th colspan=$num_types class=fail>Failed </th>");
+printf ( "<th colspan=$num_types class=pass>Passed </th>");
+/* printf ("<th class=divider></th>"); */
+/* printf ( "<th colspan=$num_types class=unfinished>Unfinished</br>Tests</th>"); */
 printf ( "</tr>\n");
 
 //----------------------------------------------------------------------
-printf ("<tr><td class=center></td><td class=center colspan=11>Enzo-P application tests</td></tr>\n");
+printf ("<tr><th class=compiling>");
 //----------------------------------------------------------------------
 
+system ("awk '{i=index($1,\"test_\"); print substr($1,i+5,length($1)-i-9)}' STATUS");
+
+printf ("</th><td class=center colspan=5><em>Enzo-P application tests</em></td></tr>\n");
+
 test_summary("Method 'ppm'",
-	     array("method_ppm-1",
-		   "method_ppm-8"),
+	     array("method_ppm-1","method_ppm-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method 'ppml'",
-	     array("method_ppml-1",
-		   "method_ppml-8"),
+	     array("method_ppml-1","method_ppml-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method 'heat'",
-	     array("method_heat-1",
-		   "method_heat-8"),
+	     array("method_heat-1","method_heat-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method 'gravity'",
-	     array("method_gravity_cg-1",
-		   "method_gravity_cg-8"),
+	     array("method_gravity_cg-1","method_gravity_cg-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Checkpoint",
-	     array("checkpoint_ppm-1",
-		   "checkpoint_ppm-8"),
+	     array("checkpoint_ppm-1","checkpoint_ppm-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Mesh", 
@@ -560,9 +546,7 @@ test_summary("Mesh",
 test_summary("Balance", 
 	     array("balance_rand_cent",
 		   "balance_greedy",
-		   //		   "balance_greedy_comm",
 		   "balance_refine",
-		   //		   "balance_refine_comm",
 		   "balance_rotate",
 		   "balance_neighbor",
 		   "balance_hybrid"),
@@ -589,7 +573,7 @@ test_summary("Output",
 
 //----------------------------------------------------------------------
 // row_divider($num_types);
-printf ("<tr><td class=center></td><td class=center colspan=11>Cello unit tests</td></tr>\n");
+printf ("<tr><td class=center></td><td class=center colspan=5><em>Cello unit tests</em></td></tr>\n");
 //----------------------------------------------------------------------
 
 
