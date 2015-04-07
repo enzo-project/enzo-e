@@ -512,10 +512,14 @@ printf ( "<th colspan=$num_types class=pass>Passed </th>");
 printf ( "</tr>\n");
 
 //----------------------------------------------------------------------
-printf ("<tr><th class=compiling>");
 //----------------------------------------------------------------------
 
-system ("awk '{i=index($1,\"test_\"); print substr($1,i+5,length($1)-i-9)}' STATUS");
+if (file_exists("STATUS"))  {
+  printf ("<tr><th class=compiling>");
+  system ("awk '{i=index($1,\"test_\"); print substr($1,i+5,length($1)-i-9)}' STATUS");
+}  else {
+  printf ("<tr><th>\n");
+}
 
 printf ("</th><td class=center colspan=5><em>Enzo-P application tests</em></td></tr>\n");
 
@@ -662,6 +666,10 @@ test_table ("method_ppm-1",
 echo "<h3>PPM (parallel) </h3>";
 
 tests("Enzo","enzo-p","test_method_ppm-8","PPM 8 blocks","");
+
+?>
+See <a href="http://client64-249.sdsc.edu/cello-bug/show_bug.cgi?id=19">Bug #19</a> for "final time" discrepency between serial and parallel PPM runs. </p>
+<?php
 
 test_table ("method_ppm-8",
 	    array("000000","000200","000400"), $types);

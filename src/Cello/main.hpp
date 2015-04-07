@@ -94,8 +94,8 @@ public:
   void p_compute_exit();
   void p_output_enter ();
   void p_output_exit();
-  void p_control_refresh_enter();
-  void p_control_refresh_exit();
+  void p_refresh_enter();
+  void p_refresh_exit();
   void p_stopping_enter();
   void p_stopping_exit();
   void p_enzo_matvec();

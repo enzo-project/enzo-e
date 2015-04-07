@@ -134,12 +134,7 @@ void Block::refresh_begin_()
     }
   }
 
-  // WARNING("Block::refresh_begin_",
-  // 	  "refresh synchronization changed from contribute to neighbor"
-  //      "(see bug #44)");
-
-  control_next (phase_refresh_exit,"neighbor");
-  //  control_next (phase_refresh_exit,"contribute");
+  control_sync (phase_refresh_exit,"neighbor");
 
 }
 

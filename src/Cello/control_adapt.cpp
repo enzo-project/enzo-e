@@ -86,7 +86,7 @@ void Block::adapt_begin_()
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
-  control_sync (phase_adapt_called,"neighbor",false,__FILE__,__LINE__);
+  control_sync (phase_adapt_called,"neighbor");
 }
 
 //----------------------------------------------------------------------
@@ -102,7 +102,7 @@ void Block::adapt_called_()
 
   adapt_send_level();
 
-  control_sync (phase_adapt_next,"quiescence",false,__FILE__,__LINE__);
+  control_sync (phase_adapt_next,"quiescence");
 
 }
 
@@ -135,7 +135,7 @@ void Block::adapt_next_()
     if (level() > level_next_) adapt_coarsen_();
   }
 
-  control_sync (phase_adapt_end,"quiescence",false,__FILE__,__LINE__);
+  control_sync (phase_adapt_end,"quiescence");
 }
 
 //----------------------------------------------------------------------
@@ -183,12 +183,12 @@ void Block::adapt_end_()
 
   if (adapt_again) {
 
-    control_sync (phase_adapt_enter,"array",false,__FILE__,__LINE__);
+    control_sync (phase_adapt_enter,"array");
 
   } else {
 
-    control_sync (phase_adapt_exit,"quiescence",true,__FILE__,__LINE__);
-    //    control_next ();
+    control_sync (phase_adapt_exit,"quiescence");
+
   }
 
 }

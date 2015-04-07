@@ -7,24 +7,25 @@
 /// @date      Mon Oct  5 15:10:56 PDT 2009
 /// @brief     Cello main
 ///
-/// \mainpage <a href="http://cello-project.org">Enzo-P / Cello</a>
+/// \mainpage Enzo-P / Cello
 ///
-/// Cello is an object-oriented adaptive mesh refinement (AMR)
-/// software framework for high performance scientific applications.
-/// The framework is scalable, easy to use, and portable across
-/// systems ranging from laptops and PC's to the largest HPC systems
-/// available, including Blue Waters, the National Science
-/// Foundation's Cray petascale supercomputer at the University of
-/// Illinois at Urbana-Champaign.  Cello's mesh refinement uses the
-/// highly-scalable "forest-of-octrees" approach, and the Charm++
-/// parallel programming system enables its high parallel scalability.
+/// <a href="http://cello-project.org/">Cello</a> is an
+/// object-oriented adaptive mesh refinement (AMR) software framework
+/// for high performance scientific applications.  The framework is
+/// scalable, easy to use, and portable across systems ranging from
+/// laptops and PC's to the largest HPC systems available, including
+/// Blue Waters, the National Science Foundation's Cray petascale
+/// supercomputer at the University of Illinois at Urbana-Champaign.
+/// Cello's mesh refinement uses the highly-scalable
+/// "forest-of-octrees" approach, and the Charm++ parallel programming
+/// system enables its high parallel scalability.
 ///
-/// Development of Cello is driven by the Enzo, a parallel
-/// computational astrophysics and cosmology application The goal is
-/// to efficiently map Enzo's multi-resolution multi-physics
-/// capabilities onto large parallel computers with potentially
-/// millions of computational units. This "petascale" incarnation of
-/// Enzo being built on the Cello framework is called Enzo-P.
+/// Development of Cello is driven by Enzo, a parallel computational
+/// astrophysics and cosmology application. The goal is to efficiently
+/// map Enzo's multi-resolution multi-physics capabilities onto large
+/// parallel computers with potentially millions of computational
+/// units. This "petascale" incarnation of Enzo being built on the
+/// Cello framework is called Enzo-P.
 
 //----------------------------------------------------------------------
 
@@ -49,23 +50,22 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+  // Check parameter file
+
+  if (PARALLEL_ARGC != 2) {
+    // Print usage if wrong number of arguments
+   printf ("\nUsage: %s %s <parameter-file> [ +balancer <load-balancer> ]\n\n", 
+	     PARALLEL_RUN,PARALLEL_ARGV[0]);
+    p_exit(1);
+  }
+  const char * parameter_file = PARALLEL_ARGV[1];
+
   // Initialize unit testing
 
   const int ip = CkMyPe();
   const int np = CkNumPes();
 
   unit_init(ip,np);
-
-  // Check parameter file
-
-  if (PARALLEL_ARGC != 2) {
-    // Print usage if wrong number of arguments
-    char buffer [ERROR_LENGTH];
-    sprintf (buffer, "\nUsage: %s %s <parameter-file>\n\n", 
-	     PARALLEL_RUN,PARALLEL_ARGV[0]);
-    ERROR("Main()",buffer);
-  }
-  const char * parameter_file = PARALLEL_ARGV[1];
 
   // Initialize Monitor
 

@@ -14,11 +14,12 @@
 #include "charm_mesh.hpp"
 
 #ifdef CELLO_VERBOSE
-#   define VERBOSE(A)					\
-  fprintf (simulation()->fp_debug(),"[%s] %d TRACE %s\n",name_.c_str(),__LINE__,A); \
-  if (index_.is_root()) {				\
-    Monitor * monitor = simulation()->monitor();	\
-    monitor->print("Control", A);			\
+#   define VERBOSE(A)						\
+  fprintf (simulation()->fp_debug(),"[%s] %d TRACE %s\n",	\
+	   name_.c_str(),__LINE__,A);				\
+  if (index_.is_root()) {					\
+    Monitor * monitor = simulation()->monitor();		\
+    monitor->print("Control", A);				\
   } 
 #else
 #   define VERBOSE(A) ;
@@ -38,9 +39,9 @@ const int cycle_phase[] = {
 };
 
 const char * cycle_sync[] = {
-  "array",      // phase_adapt_enter
+  "none",      // phase_adapt_enter
   "quiescence", // phase_adapt_exit
-  "array",      // phase_output_enter
+  "none",      // phase_output_enter
   "none",       // phase_output_exit
   "contribute", // phase_stopping_enter
   "none",       // phase_stopping_exit
@@ -50,19 +51,15 @@ const char * cycle_sync[] = {
 
 #define CYCLE_PHASE_COUNT (sizeof(cycle_phase) / sizeof(cycle_phase[0]))
 
-
 //----------------------------------------------------------------------
 
 void Block::initial_exit_()
-{
-  control_next();
-}
+{  control_sync(phase_adapt_enter,"contribute"); }
 
 //----------------------------------------------------------------------
 
 void Block::adapt_enter_()
 {
-
   VERBOSE("adapt_enter");
 
   performance_switch_ (perf_adapt,__FILE__,__LINE__);
@@ -75,7 +72,7 @@ void Block::adapt_enter_()
     
   } else {
 
-    control_next();
+    control_sync(phase_output_enter,"none");
 
   }
 }
@@ -84,18 +81,16 @@ void Block::adapt_enter_()
 
 void Block::adapt_exit_()
 {
-
   VERBOSE("adapt_exit");
 
-  control_next();
-
+  control_sync(phase_output_enter,"quiescence");
 }
 
 //----------------------------------------------------------------------
 
-void Block::control_refresh_enter_() 
+void Block::refresh_enter_() 
 {
-  VERBOSE("control_refresh_enter");
+  VERBOSE("refresh_enter");
 
   performance_switch_(perf_refresh,__FILE__,__LINE__);
 
@@ -104,14 +99,13 @@ void Block::control_refresh_enter_()
 
 //----------------------------------------------------------------------
 
-void Block::control_refresh_exit_()
+void Block::refresh_exit_()
 {
-
-  VERBOSE("control_refresh_exit");
+  VERBOSE("refresh_exit");
 
   update_boundary_();
 
-  control_next(refresh_phase_, refresh_sync_);
+  control_sync(refresh_phase_, refresh_sync_);
 }
 
 //----------------------------------------------------------------------
@@ -129,23 +123,20 @@ void Block::compute_enter_ ()
 
 void Block::compute_exit_ ()
 {
-
   VERBOSE("compute_exit");
 
-  control_next();
+  control_sync(phase_adapt_enter,"none");
 }
 
 //----------------------------------------------------------------------
 
 void Block::output_enter_ ()
 {
-
   VERBOSE("output_enter");
 
   performance_switch_ (perf_output,__FILE__,__LINE__);
 
   output_begin_();
-
 }
 
 //----------------------------------------------------------------------
@@ -161,7 +152,7 @@ void Block::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
-  control_next();
+  control_sync(phase_stopping_enter,"contribute");
 }
 
 //----------------------------------------------------------------------
@@ -186,32 +177,17 @@ void Block::stopping_exit_()
 
   if (stop_) {
 
-    control_sync(phase_exit,"contribute",false,__FILE__,__LINE__);
+    control_sync(phase_exit,"contribute");
 
   } else {
 
-    control_next();
+    control_sync(phase_compute_enter,"none");
 
   }
 
 }
 
 //======================================================================
-
-void Block::control_next(int phase, std::string sync)
-{
-  if (phase == phase_unknown) {
-
-    phase = cycle_phase[index_cycle_phase_];
-    sync  = cycle_sync[index_cycle_phase_];
-
-    index_cycle_phase_ = (index_cycle_phase_ + 1) % CYCLE_PHASE_COUNT;
-  }
-
-  control_sync(phase,sync,false,__FILE__,__LINE__);
-}
-
-//----------------------------------------------------------------------
 
 #ifdef NEW_CONTROL
 
@@ -252,16 +228,8 @@ void Block::control_sync_new(CkCallback cb, int phase, std::string sync, const c
 
 //----------------------------------------------------------------------
 
-void Block::control_sync(int phase, std::string sync, bool next_phase, const char * file, int line)
+void Block::control_sync(int phase, std::string sync)
 {
-  //  printf ("DEBUG %s:%d OLD Block::control_sync()\n",__FILE__,__LINE__);
-
-  if (next_phase) {
-    phase = cycle_phase[index_cycle_phase_];
-    sync  = cycle_sync[index_cycle_phase_];
-    index_cycle_phase_ = (index_cycle_phase_ + 1) % CYCLE_PHASE_COUNT;
-  }
-  
   if (sync == "contribute") {
 
     CkCallback cb;
@@ -279,9 +247,9 @@ void Block::control_sync(int phase, std::string sync, bool next_phase, const cha
     } else if (              phase == phase_adapt_exit) {
       cb = CkCallback (CkIndex_Block::r_adapt_exit(NULL), thisProxy);
     } else if (              phase == phase_refresh_enter) {
-      cb = CkCallback (CkIndex_Block::r_control_refresh_enter(NULL), thisProxy);
+      cb = CkCallback (CkIndex_Block::r_refresh_enter(NULL), thisProxy);
     } else if (              phase == phase_refresh_exit) {
-      cb = CkCallback (CkIndex_Block::r_control_refresh_exit(NULL), thisProxy);
+      cb = CkCallback (CkIndex_Block::r_refresh_exit(NULL), thisProxy);
     } else if (              phase == phase_output_enter) {
       cb = CkCallback (CkIndex_Block::r_output_enter(NULL), thisProxy);
     } else if (              phase == phase_output_exit) {
@@ -324,9 +292,9 @@ void Block::control_sync(int phase, std::string sync, bool next_phase, const cha
       } else if (             phase == phase_adapt_exit) {
 	CkStartQD(CkCallback(CkIndex_Main::p_adapt_exit(), proxy_main));
       } else if (             phase == phase_refresh_enter) {
-      	CkStartQD(CkCallback(CkIndex_Main::p_control_refresh_enter(), proxy_main));
+      	CkStartQD(CkCallback(CkIndex_Main::p_refresh_enter(), proxy_main));
       } else if (             phase == phase_refresh_exit) {
-      	CkStartQD(CkCallback(CkIndex_Main::p_control_refresh_exit(), proxy_main));
+      	CkStartQD(CkCallback(CkIndex_Main::p_refresh_exit(), proxy_main));
       } else if (             phase == phase_output_enter) {
 	CkStartQD(CkCallback(CkIndex_Main::p_output_enter(), proxy_main));
       } else if (             phase == phase_output_exit) {
@@ -357,42 +325,28 @@ void Block::control_sync(int phase, std::string sync, bool next_phase, const cha
 
   } else if (sync == "array") {
 
-    if (                  phase == phase_initial_exit) {
-      if (index().is_root()) thisProxy.p_initial_exit();
-    } else if (           phase == phase_adapt_enter) {
-      if (index().is_root()) thisProxy.p_adapt_enter();
-    } else if (           phase == phase_adapt_next) {
-      if (index().is_root()) thisProxy.p_adapt_next();
-    } else if (           phase == phase_adapt_called) {
-      if (index().is_root()) thisProxy.p_adapt_called();
-    } else if (           phase == phase_adapt_end) {
-      if (index().is_root()) thisProxy.p_adapt_end();
-    } else if (           phase == phase_adapt_exit) {
-      if (index().is_root()) thisProxy.p_adapt_exit();
-    } else if (           phase == phase_refresh_enter) {
-      if (index().is_root()) thisProxy.p_control_refresh_enter();
-    } else if (           phase == phase_refresh_exit) {
-      if (index().is_root()) thisProxy.p_control_refresh_exit();
-    } else if (           phase == phase_output_enter) {
-      if (index().is_root()) thisProxy.p_output_enter();
-    } else if (           phase == phase_output_exit) {
-      if (index().is_root()) thisProxy.p_output_exit();
-    } else if (           phase == phase_compute_enter) {
-      if (index().is_root()) thisProxy.p_compute_enter();
-    } else if (           phase == phase_compute_continue) {
-      if (index().is_root()) thisProxy.p_compute_continue();
-    } else if (           phase == phase_compute_exit) {
-      if (index().is_root()) thisProxy.p_compute_exit();
-    } else if (           phase == phase_stopping_enter) {
-      if (index().is_root()) thisProxy.p_stopping_enter();
-    } else if (           phase == phase_stopping_exit) {
-      if (index().is_root()) thisProxy.p_stopping_exit();
-    } else if (           phase == phase_exit) {
-      if (index().is_root()) thisProxy.p_exit();
-    } else {
-      ERROR2 ("Block::control_sync()",  
-	      "Unknown phase: phase %s sync type %s", 
-	      phase_name[phase],sync.c_str());    
+    if (index().is_root()) {
+      if (phase == phase_initial_exit)          thisProxy.p_initial_exit();
+      else if (phase == phase_adapt_enter)      thisProxy.p_adapt_enter();
+      else if (phase == phase_adapt_next) 	thisProxy.p_adapt_next();
+      else if (phase == phase_adapt_called) 	thisProxy.p_adapt_called();
+      else if (phase == phase_adapt_end) 	thisProxy.p_adapt_end();
+      else if (phase == phase_adapt_exit) 	thisProxy.p_adapt_exit();
+      else if (phase == phase_refresh_enter) 	thisProxy.p_refresh_enter();
+      else if (phase == phase_refresh_exit) 	thisProxy.p_refresh_exit();
+      else if (phase == phase_output_enter) 	thisProxy.p_output_enter();
+      else if (phase == phase_output_exit) 	thisProxy.p_output_exit();
+      else if (phase == phase_compute_enter) 	thisProxy.p_compute_enter();
+      else if (phase == phase_compute_continue) thisProxy.p_compute_continue();
+      else if (phase == phase_compute_exit) 	thisProxy.p_compute_exit();
+      else if (phase == phase_stopping_enter) 	thisProxy.p_stopping_enter();
+      else if (phase == phase_stopping_exit) 	thisProxy.p_stopping_exit();
+      else if (phase == phase_exit) 	        thisProxy.p_exit();
+      else 
+	ERROR2 ("Block::control_sync()",  
+		"Unknown phase: phase %s sync type %s", 
+		phase_name[phase],sync.c_str());    
+
     }
 
   } else if (sync == "none") {
@@ -465,8 +419,10 @@ void Block::control_sync_neighbor_(int phase)
 	// neighboring block in the same level
 
 #ifdef CELLO_DEBUG
-	fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-		 __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_neighbor.bit_string(-1,2).c_str());
+	fprintf (simulation()->fp_debug(),
+		 "%d %s calling p_control_sync phase %s leaf %d block %s\n",
+		 __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
+		 index_neighbor.bit_string(-1,2).c_str());
 #endif
 	thisProxy[index_neighbor].p_control_sync_count(phase,0);
 
@@ -476,7 +432,6 @@ void Block::control_sync_neighbor_(int phase)
 
 	// SEND-COARSE: Face, level, and child indices are sent to
 	// unique neighboring block in the next-coarser level
-
 
 	index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
 
@@ -491,8 +446,10 @@ void Block::control_sync_neighbor_(int phase)
 	  Index index_uncle = index_neighbor.index_parent();
 
 #ifdef CELLO_DEBUG
-	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_uncle.bit_string(-1,2).c_str());
+	  fprintf (simulation()->fp_debug(),
+		   "%d %s calling p_control_sync phase %s leaf %d block %s\n",
+		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
+		   index_uncle.bit_string(-1,2).c_str());
 #endif
 	  thisProxy[index_uncle].p_control_sync_count(phase,0);
 
@@ -511,8 +468,10 @@ void Block::control_sync_neighbor_(int phase)
 	  Index index_nibling = index_neighbor.index_child(ic3);
 
 #ifdef CELLO_DEBUG
-	  fprintf (simulation()->fp_debug(),"%d %s calling p_control_sync phase %s leaf %d block %s\n",
-		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),index_nibling.bit_string(-1,2).c_str());
+	  fprintf (simulation()->fp_debug(),
+		   "%d %s calling p_control_sync phase %s leaf %d block %s\n",
+		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
+		   index_nibling.bit_string(-1,2).c_str());
 #endif
 	  thisProxy[index_nibling].p_control_sync_count(phase,0);
 
@@ -522,17 +481,13 @@ void Block::control_sync_neighbor_(int phase)
       } else {
 	std::string bit_str = index_.bit_string(-1,2);
 	WARNING7 ("Block::control_sync_neighbor_()",
-		  "phase %d name %s level %d and face (%d %d %d) level %d differ by more than 1",
-		  phase,
-		  name().c_str(),
-		  level,
-		  of3[0],of3[1],of3[2],
-		  level_face);
+		  "phase %d name %s level %d and face (%d %d %d) "
+		  "level %d differ by more than 1",
+		  phase, name().c_str(), level, of3[0],of3[1],of3[2], level_face);
       }
 
     }
     control_sync_count_(phase,num_neighbors + 1);
-
   }
 }
 
@@ -540,47 +495,29 @@ void Block::control_sync_neighbor_(int phase)
 
 void Block::control_call_phase_ (int phase)
 {
-
 #ifdef CELLO_DEBUG
-  fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
+  fprintf (simulation()->fp_debug(),"%d %s called %s\n",
+	   __LINE__,name_.c_str(),phase_name[phase]);
 #endif
-  if        (phase == phase_initial_exit) {
-    /**/                    initial_exit_() ;
-  } else if (phase == phase_adapt_called) {
-    /**/                    adapt_called_() ;
-  } else if (phase == phase_adapt_enter) {
-    /**/                    adapt_enter_() ;
-  } else if (phase == phase_adapt_next) {
-    /**/                    adapt_next_() ;
-  } else if (phase == phase_adapt_end) {
-    /**/                    adapt_end_() ;
-  } else if (phase == phase_adapt_exit) {
-    /**/                    adapt_exit_() ;
-  } else if (phase == phase_refresh_enter) {
-    /**/                    control_refresh_enter_() ;
-  } else if (phase == phase_refresh_exit) {
-    /**/                    control_refresh_exit_();
-  } else if (phase == phase_output_enter) {
-    /**/                    output_enter_() ;
-  } else if (phase == phase_output_exit) {
-    /**/                    output_exit_();
-  } else if (phase == phase_compute_enter) {
-    /**/                    compute_enter_() ;
-  } else if (phase == phase_compute_continue) {
-    /**/                    compute_continue_() ;
-  } else if (phase == phase_compute_exit) {
-    /**/                    compute_exit_();
-  } else if (phase == phase_stopping_enter) {
-    /**/                    stopping_enter_() ;
-  } else if (phase == phase_stopping_exit) {
-    /**/                    stopping_exit_();
-  } else if (phase == phase_exit) {
-    /**/                    exit_();
-  } else {
-    ERROR1 ("Block::control_call_phase_()",  
-	    "Unknown phase: phase %s", 
+  if      (phase == phase_initial_exit)     initial_exit_();
+  else if (phase == phase_adapt_called)     adapt_called_();
+  else if (phase == phase_adapt_enter)      adapt_enter_();      
+  else if (phase == phase_adapt_next)       adapt_next_();
+  else if (phase == phase_adapt_end)        adapt_end_();
+  else if (phase == phase_adapt_exit)       adapt_exit_();
+  else if (phase == phase_refresh_enter)    refresh_enter_();
+  else if (phase == phase_refresh_exit)     refresh_exit_();
+  else if (phase == phase_output_enter)     output_enter_();
+  else if (phase == phase_output_exit)      output_exit_();
+  else if (phase == phase_compute_enter)    compute_enter_();
+  else if (phase == phase_compute_continue) compute_continue_();
+  else if (phase == phase_compute_exit)     compute_exit_();
+  else if (phase == phase_stopping_enter)   stopping_enter_();
+  else if (phase == phase_stopping_exit)    stopping_exit_();
+  else if (phase == phase_exit)             exit_();
+  else 
+    ERROR1 ("Block::control_call_phase_()","Unknown phase: phase %s", 
 	    phase_name[phase]);    
-  }
 }
 //======================================================================
 

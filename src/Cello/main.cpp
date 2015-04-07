@@ -218,19 +218,19 @@ void Main::p_adapt_exit()
 
 //----------------------------------------------------------------------
 
-void Main::p_control_refresh_enter()
+void Main::p_refresh_enter()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_control_refresh_enter();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_refresh_enter();
 #endif
 }
 
 //----------------------------------------------------------------------
 
-void Main::p_control_refresh_exit()
+void Main::p_refresh_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_control_refresh_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_refresh_exit();
 #endif
 }
 

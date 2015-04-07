@@ -45,48 +45,40 @@ void IoEnzoBlock::meta_value
 
     int index_count = index_enzo_;
 
-    printf ("IoEnzoBlock index %d index_count %d\n",index,index_count);
     if (index == index_count++) {
 
-      printf ("TRACE IoEnzoBlock %d\n",__LINE__);
       *buffer = (void *) & enzo_block->dt;
       *type   = scalar_type_enzo_float;
 
     } else if (index == index_count++) {
 
-      printf ("TRACE IoEnzoBlock %d\n",__LINE__);
       *buffer = (void *) enzo_block->GridLeftEdge;
       *type   = scalar_type_enzo_float;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
-      printf ("TRACE IoEnzoBlock %d\n",__LINE__);
       *buffer = (void *) enzo_block->GridDimension;
       *type   = scalar_type_int;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
-      printf ("TRACE IoEnzoBlock %d\n",__LINE__);
       *buffer = (void *) enzo_block->GridStartIndex;
       *type   = scalar_type_int;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
-      printf ("TRACE IoEnzoBlock %d\n",__LINE__);
       *buffer = (void *) enzo_block->GridEndIndex;
       *type   = scalar_type_int;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
-      printf ("TRACE IoEnzoBlock %d\n",__LINE__);
       *buffer = (void *) enzo_block->CellWidth;
       *type   = scalar_type_enzo_float;
       *nxd     = 3;
-
     }
   }
 }

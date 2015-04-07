@@ -54,7 +54,7 @@ void Block::output_begin_ ()
 
     // ...otherwise continue with next phase
 
-    control_next();
+    control_sync(phase_output_exit,"none");
 
   }
 }
@@ -270,7 +270,7 @@ void Simulation::output_exit()
 
 void Block::p_output_end()
 {
-  control_next();
+  control_sync(phase_stopping_enter,"contribute");
 }
 //======================================================================
 

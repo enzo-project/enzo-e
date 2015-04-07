@@ -66,7 +66,6 @@ Block::Block
   count_coarsen_(0),
   adapt_step_(num_adapt_steps),
   adapt_(adapt_unknown),
-  index_cycle_phase_(0),
   coarsened_(false),
   delete_(false),
   is_leaf_(true),
@@ -207,9 +206,7 @@ Block::Block
 
   if (level > 0) {
     thisProxy.doneInserting();
-    index_cycle_phase_ = 1; // KEEP CONSISTENT WITH cycle_phase[] in control_charm.cpp:30
-    control_sync (phase_adapt_end,"quiescence",false,__FILE__,__LINE__);
-
+    control_sync (phase_adapt_end,"quiescence");
   }
 
   debug_faces_("Block()");
@@ -257,7 +254,6 @@ void Block::pup(PUP::er &p)
   p | count_coarsen_;
   p | adapt_step_;
   p | adapt_;
-  p | index_cycle_phase_;
   p | coarsened_;
   p | delete_;
   p | is_leaf_;
@@ -739,7 +735,6 @@ void Block::copy_(const Block & block) throw()
   stop_       = block.stop_;
   adapt_step_ = block.adapt_step_;
   adapt_      = block.adapt_;
-  index_cycle_phase_ = block.index_cycle_phase_;
   coarsened_  = block.coarsened_;
   delete_     = block.delete_;
 }

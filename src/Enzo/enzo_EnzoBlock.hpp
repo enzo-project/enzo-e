@@ -156,7 +156,7 @@ public: // interface
 
   /// Syncronize before continuing with next phase
   virtual void control_sync
-  (int phase, std::string sync, bool next_phase, const char * name, int line);
+  (int phase, std::string sync);
 
 protected:
   virtual void control_call_phase_ (int phase);

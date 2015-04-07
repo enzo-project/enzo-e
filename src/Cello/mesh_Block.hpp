@@ -405,9 +405,6 @@ public:
   // CONTROL AND SYNCHRONIZATION
   //--------------------------------------------------
 
-  /// Syncronize before continuing with next phase
-  void control_next(int phase = phase_unknown, std::string sync = "");
-
 #ifdef NEW_CONTROL
 
   /// Transition function to replace control_sync
@@ -418,7 +415,7 @@ public:
 
   /// Syncronize before continuing with next phase
   virtual void control_sync
-  (int phase, std::string sync, bool next_phase, const char * name, int line);
+  (int phase, std::string sync);
 
   /// synchronize with count other chares
   void p_control_sync_count(int phase, int count) 
@@ -435,18 +432,18 @@ public:
   //--------------------------------------------------
 
   // Refresh ghost zones and apply boundary conditions
-  void p_control_refresh_enter()  
-  {      control_refresh_enter_(); }
-  void r_control_refresh_enter(CkReductionMsg * msg)  
-  {      control_refresh_enter_(); delete msg; }
-  void control_refresh_enter_();
+  void p_refresh_enter()  
+  {      refresh_enter_(); }
+  void r_refresh_enter(CkReductionMsg * msg)  
+  {      refresh_enter_(); delete msg; }
+  void refresh_enter_();
 
   // Exit the refresh phase after QD
-  void p_control_refresh_exit () 
-  {      control_refresh_exit_(); }
-  void r_control_refresh_exit (CkReductionMsg * msg) 
-  {      control_refresh_exit_(); delete msg;  }
-  void control_refresh_exit_ ();
+  void p_refresh_exit () 
+  {      refresh_exit_(); }
+  void r_refresh_exit (CkReductionMsg * msg) 
+  {      refresh_exit_(); delete msg;  }
+  void refresh_exit_ ();
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_send_face
@@ -751,9 +748,6 @@ protected: // attributes
 
   /// Current adapt value for the block
   int adapt_;
-
-  /// Current phase of the cycle
-  int index_cycle_phase_;
 
   /// whether Block has been coarsened and should be deleted
   bool coarsened_;

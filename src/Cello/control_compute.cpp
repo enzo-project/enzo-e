@@ -43,7 +43,7 @@ void Block::compute_next_ ()
 
     index_refresh_ = method->index_refresh(0);
 
-    control_next(phase_refresh_enter,"neighbor");
+    control_sync(phase_refresh_enter,"neighbor");
 
   } else {
 
@@ -98,7 +98,7 @@ void Block::compute_end_ ()
   simulation()->set_cycle(cycle_);
   simulation()->set_time(time_);
 
-  control_next();
+  control_sync(phase_adapt_enter,"none");
   TRACE ("END   PHASE COMPUTE");
 }
 

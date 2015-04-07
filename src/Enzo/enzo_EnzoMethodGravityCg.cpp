@@ -212,7 +212,7 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 
   index_refresh_ = method->index_refresh(1);
 
-  control_next(phase_refresh_enter,"neighbor");
+  control_sync(phase_refresh_enter,"neighbor");
   
 }
 
@@ -235,7 +235,7 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   index_refresh_ = method->index_refresh(1);
 
-  control_next(phase_refresh_enter,"neighbor");
+  control_sync(phase_refresh_enter,"neighbor");
 }
 
 //----------------------------------------------------------------------
