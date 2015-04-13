@@ -25,11 +25,11 @@ void EnzoBlock::control_sync (int phase, std::string sync)
 
     if (sync == "contribute") {
 
-      CkCallback cb;
+      CkCallback callback;
 
-      cb = CkCallback (CkIndex_EnzoBlock::r_enzo_matvec(NULL), thisProxy);
+      callback = CkCallback (CkIndex_EnzoBlock::r_enzo_matvec(NULL), thisProxy);
   
-      contribute(cb);
+      contribute(callback);
 
     } else if (sync == "quiescence") {
 
@@ -44,14 +44,11 @@ void EnzoBlock::control_sync (int phase, std::string sync)
 
       control_sync_neighbor_(phase);
 
-    } else if (sync == "array") {
+    } else {
 
-      if (index().is_root()) ((CProxy_EnzoBlock)thisProxy).p_enzo_matvec();
-
-    } else if (sync == "none") {
-
-      control_call_phase_(phase);
-
+      ERROR2("EnzoBlock::control_sync()","phase %d called with unknown sync %s",
+	     phase,sync.c_str());
+      
     }
   }
 }

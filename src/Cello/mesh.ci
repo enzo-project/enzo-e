@@ -37,7 +37,7 @@ module mesh {
 
   array[Index] Block {
 
-    entry Block // [CB0]
+    entry Block
       (Index index,
        int nx, int ny, int nz,	
        int num_field_blocks,
@@ -47,14 +47,14 @@ module mesh {
        int num_face_level, int face_level[num_face_level],
        bool testing);
 
-    entry Block();	 // [CB0]
+    entry Block();
 
     //--------------------------------------------------
     // *** INITIAL ***
     //--------------------------------------------------
 
-    entry void p_initial_exit();   // [CB5]
-    entry void r_initial_exit(CkReductionMsg *);   // [CB22]
+    entry void p_initial_exit();
+    entry void r_initial_exit(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** OUTPUT ***
@@ -67,8 +67,8 @@ module mesh {
     entry void p_output_exit();
     entry void r_output_exit(CkReductionMsg *);
 
-    entry void p_output_write (int index_output); // [CB1]
-    entry void p_output_read (int index_input); // [CB3]
+    entry void p_output_write (int index_output);
+    entry void p_output_read (int index_input);
 
     //--------------------------------------------------
     // *** COMPUTE ***
@@ -87,7 +87,7 @@ module mesh {
     // *** STOPPING ***
     //--------------------------------------------------
 
-    entry void r_stopping_compute_timestep (CkReductionMsg * msg); // [CB4]
+    entry void r_stopping_compute_timestep (CkReductionMsg * msg);
 
     entry void p_stopping_enter();
     entry void r_stopping_enter(CkReductionMsg *);
@@ -102,33 +102,33 @@ module mesh {
     // *** CONTROL ***
     //--------------------------------------------------
 
-    entry [expedited] void p_control_sync_count ( int phase, int count);
+    entry [expedited] void p_control_sync_count ( int phase, int count = 0);
 
     //--------------------------------------------------
     // *** ADAPT ***
     //--------------------------------------------------
 
-    entry void p_adapt_enter();   // [CB5]
-    entry void r_adapt_enter(CkReductionMsg *);   // [CB22]
+    entry void p_adapt_enter();
+    entry void r_adapt_enter(CkReductionMsg *);
 
-    entry void p_adapt_end();    // [CB13]
+    entry void p_adapt_end();
     entry void r_adapt_end(CkReductionMsg *);
 
-    entry void p_adapt_next();    // [CB12]
+    entry void p_adapt_next();
     entry void r_adapt_next(CkReductionMsg *);
 
     entry void p_adapt_called();
     entry void r_adapt_called(CkReductionMsg *);
 
-    entry void p_adapt_exit();   // [CB5]
-    entry void r_adapt_exit(CkReductionMsg *);   // [CB22]
+    entry void p_adapt_exit();
+    entry void r_adapt_exit(CkReductionMsg *);
 
-    entry void p_adapt_delete();  // [CB11]
+    entry void p_adapt_delete();
 
-    entry void p_adapt_recv_level  // [CB7]
+    entry void p_adapt_recv_level
       (Index index,int ic3[3], int if3[3], int level_now, int level_new);
 
-    entry void p_adapt_recv_child // [CB10]
+    entry void p_adapt_recv_child
       (int ic3[3], int na, char arr[na], int nf, int child_face_level[nf]);
 
 
@@ -136,18 +136,18 @@ module mesh {
     // *** REFRESH
     //--------------------------------------------------
 
-    entry void p_refresh_enter();         // [CB14]
+    entry void p_refresh_enter();
     entry void r_refresh_enter(CkReductionMsg *);
 
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
-    entry [expedited] void x_refresh_send_face // [CB21]
+    entry [expedited] void x_refresh_send_face
       (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);
 
-    entry void x_refresh_child            // [CB19]
+    entry void x_refresh_child
       (int n, char buffer[n], int ichild[3]);
- 
+
   };
 }
 

@@ -177,7 +177,8 @@ void Block::stopping_balance_()
 
   } else {
     
-    control_sync(phase_stopping_exit,"none");
+    stopping_exit_();
+
   }
 }
 
@@ -187,7 +188,8 @@ void Block::ResumeFromSync()
 {
   VERBOSE("balance_exit");
 
-  control_sync(phase_stopping_exit,"none");
+  stopping_exit_();
+
 }
 
 //----------------------------------------------------------------------

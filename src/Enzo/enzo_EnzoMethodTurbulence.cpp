@@ -154,8 +154,9 @@ void EnzoBlock::method_turbulence_begin()
 {
   const int n = MAX_TURBULENCE_ARRAY * sizeof(double);
   double * g = method_turbulence_data;
-  CkCallback cb (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),thisProxy);
-  contribute(n,g,r_method_turbulence_type,cb);
+  CkCallback callback (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),
+		       thisProxy);
+  contribute(n,g,r_method_turbulence_type,callback);
 }
 
 //----------------------------------------------------------------------

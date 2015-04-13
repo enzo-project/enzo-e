@@ -585,16 +585,6 @@ void Config::read_method_ (Parameters * p) throw()
 	      type,refresh_str.c_str());
     }
   }
-
-  printf ("%s:%d\n",__FILE__,__LINE__);
-  printf ("METHOD num_method = %d\n",num_method);
-  for (int i=0; i<num_method; i++) {
-    printf ("METHOD method %s \n",method_list[i].c_str());
-    for (int j=0; j<method_refresh[i].size(); j++) {
-      printf ("METHOD   refresh %s \n",method_refresh[i][j].c_str());
-    }
-  }
- 
 }
 
 //----------------------------------------------------------------------
@@ -827,18 +817,6 @@ void Config::read_refresh_ (Parameters * p) throw()
     }
 
   }
-
-  printf ("%s:%d\n",__FILE__,__LINE__);
-  printf ("REFRESH num_refresh = %d\n",num_refresh);
-  for (int i=0; i<num_refresh; i++) {
-    printf ("REFRESH refresh %s \n",refresh_list[i].c_str());
-    printf ("REFRESH   field_face_rank %d\n",refresh_field_face_rank[i]);
-    printf ("REFRESH   field_ghosts %d \n",refresh_field_ghosts[i]);
-    for (int j=0; j<refresh_field_list[i].size(); j++) {
-      printf ("REFRESH   field_list %s \n",refresh_field_list[i][j].c_str());
-    }
-  }
-  
 }
 
 //----------------------------------------------------------------------

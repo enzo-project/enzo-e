@@ -54,7 +54,7 @@ void Block::output_begin_ ()
 
     // ...otherwise continue with next phase
 
-    control_sync(phase_output_exit,"none");
+    output_exit_();
 
   }
 }

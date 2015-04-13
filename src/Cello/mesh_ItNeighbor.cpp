@@ -53,7 +53,7 @@ ItNeighbor::~ItNeighbor() throw()
 bool ItNeighbor::next (int of3[3]) throw()
 {
   do {
-    increment_() ;
+    inc_face_() ;
   } while (!valid_());
 
   of3[0] = (rank_ >= 1) ? of3_[0] : 0;
@@ -81,16 +81,7 @@ bool ItNeighbor::is_reset() const
 
 //----------------------------------------------------------------------
 
-void ItNeighbor::value(int of3[3]) const throw()
-{
-  of3[0] = of3_[0];
-  of3[0] = of3_[0];
-  of3[0] = of3_[0];
-}
-
-//----------------------------------------------------------------------
-
-void ItNeighbor::increment_()
+void ItNeighbor::inc_face_()
 {
   if (is_reset()) {
     set_first_();

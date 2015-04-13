@@ -6,7 +6,7 @@
 /// @brief    [\ref Parallel] Declaration of the CHARM Sync class
 ///
 /// This class is used to simplify control flow of CHARM++ programs.
-///
+/// 
 ///    A::foo()       o        o        o      |
 ///                  /|\      /|\      /|\     |
 ///    B::p_foo()   o o o    o o o    o o o    |
@@ -41,10 +41,10 @@ class Sync {
 
  public:
    /// Create a CHARM++ "Sync" object
-   Sync (int index_stop = 0
-	) throw()
+   Sync (int index_stop = 0) throw()
     : index_stop_(index_stop),
-      index_curr_(0)
+      index_curr_(0),
+      callback_()
   {}
 
   /// CHARM++ pack / unpack
@@ -53,13 +53,14 @@ class Sync {
     TRACEPUP;
     p | index_stop_;
     p | index_curr_;
+    p | callback_;
   }
 
   /// Increment counter and return whether the CHARM++ parallel "sync" is done.
-  inline bool next (int index = 1) throw()
+  inline bool next () throw()
   {
     if (index_stop_ > 0) {
-      index_curr_ = (index_stop_ + (index_curr_-1) + index) % index_stop_ + 1;  
+      index_curr_ = (index_stop_ + (index_curr_-1) + 1) % index_stop_ + 1;  
     }
     if (index_curr_ == index_stop_) {
       index_curr_ = 0;
@@ -85,14 +86,6 @@ class Sync {
   inline void reset () throw () 
   { index_curr_ = 0; }
 
-  /// Decrement the stopping value by value
-  inline int operator -= (int value) 
-  { index_stop_ -= value; return index_stop_; }
-
-  /// Increment the stopping value by value
-  inline int operator += (int value) 
-  { index_stop_ += value; return index_stop_; }
-
   /// Decrement the stopping value by 
   inline int operator -- () 
   { --index_stop_; return index_stop_; }
@@ -108,6 +101,9 @@ private:
 
   /// Current value of the parallel sync index
   int index_curr_;
+
+  /// Callback function
+  CkCallback callback_;
 
 };
 

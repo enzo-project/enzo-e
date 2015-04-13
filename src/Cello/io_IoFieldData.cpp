@@ -92,15 +92,15 @@ void IoFieldData::data_value
 
     // Exclude ghosts when writing
 
-    // if (nx) (*nx) = nbx;
-    // if (ny) (*ny) = nby;
-    // if (nz) (*nz) = nbz;
+    //    if (nx) (*nx) = nbx;
+    //    if (ny) (*ny) = nby;
+    //    if (nz) (*nz) = nbz;
 
     // Include ghosts when writing
 
-    if (nx) (*nx) = nbx + 2*ngx;
-    if (ny) (*ny) = nby + 2*ngy;
-    if (nz) (*nz) = nbz + 2*ngz;
+     if (nx) (*nx) = nbx + 2*ngx;
+     if (ny) (*ny) = nby + 2*ngy;
+     if (nz) (*nz) = nbz + 2*ngz;
 
   } else {
 

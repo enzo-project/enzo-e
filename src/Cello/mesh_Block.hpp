@@ -405,25 +405,19 @@ public:
   // CONTROL AND SYNCHRONIZATION
   //--------------------------------------------------
 
-#ifdef NEW_CONTROL
-
-  /// Transition function to replace control_sync
-  void control_sync_new
-  (CkCallback cb, int phase, std::string sync, const char * name, int line);
-
-#endif /* NEW_CONTROL */
-
   /// Syncronize before continuing with next phase
-  virtual void control_sync
-  (int phase, std::string sync);
+  virtual void control_sync (int phase, std::string sync);
+
+  /// Syncronize before continuing with the given callback
+  virtual void control_sync (CkCallback callback, std::string sync);
 
   /// synchronize with count other chares
-  void p_control_sync_count(int phase, int count) 
+  void p_control_sync_count(int phase, int count = 0) 
   {      control_sync_count_(phase,count); }
 
 protected:
   void control_sync_neighbor_(int phase);
-  void control_sync_count_(int phase, int count);
+  void control_sync_count_(int phase, int count = 0);
   virtual void control_call_phase_ (int phase);
 public:
 

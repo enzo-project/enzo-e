@@ -55,14 +55,10 @@ public: // interface
 
   bool is_reset() const;
 
-  /// Return the current value of the reduction operator
-  void value(int of3[3]) const throw();
-
 private: // functions
 
   /// go to the next face
-  void increment_();
-
+  void inc_face_();
 
   /// go to the first face
   void set_first_();

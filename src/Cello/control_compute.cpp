@@ -80,8 +80,6 @@ void Block::compute_done ()
 
   compute_next_();
 
-  //  control_sync (phase_compute_exit,"none",true,__FILE__,__LINE__);
-
 }
 
 //----------------------------------------------------------------------
@@ -98,7 +96,8 @@ void Block::compute_end_ ()
   simulation()->set_cycle(cycle_);
   simulation()->set_time(time_);
 
-  control_sync(phase_adapt_enter,"none");
+  adapt_enter_();
+
   TRACE ("END   PHASE COMPUTE");
 }
 

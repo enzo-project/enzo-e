@@ -55,9 +55,6 @@ public: // interface
 
   bool is_reset() const;
 
-  /// Return the current value of the reduction operator
-  void value(int if3[3]) const throw();
-
 private: // functions
 
   /// go to the next face

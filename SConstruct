@@ -8,8 +8,6 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-new_control = 1
-
 #----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements
 #----------------------------------------------------------------------
@@ -200,10 +198,6 @@ define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_performance =  ['CONFIG_USE_PERFORMANCE']
 define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
-# TEMPORARY DEFINES
-
-define_new_control =   ['NEW_CONTROL']
-
 # Debugging defines
 
 define_trace =        ['CELLO_TRACE']
@@ -275,7 +269,6 @@ if (use_gprof == 1):
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 if (trace != 0):         defines = defines + define_trace
-if (new_control != 0):   defines = defines + define_new_control
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
@@ -477,8 +470,8 @@ cello_def.write ("#define CELLO_DATE "
 		"\""+time.strftime("%Y-%m-%d",time.gmtime())+"\"\n" )
 cello_def.write ("#define CELLO_TIME "
 		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
-# cello_def.write ("#define CELLO_CHANGESET "
-#		"\""+subprocess.check_output(["hg", "id", "--id"]).rstrip()+"\"\n" )
+cello_def.write ("#define CELLO_CHANGESET "
+	"\""+subprocess.check_output(["hg", "id", "-n"]).rstrip()+"\"\n" )
 
 env.Command ('hgid.out', [], 'hg --id > $TARGETS')
 env.AlwaysBuild('hgid.out')

@@ -181,12 +181,12 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
   reduce[1] = sum_(B);
   reduce[2] = count_(B);
 
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
 
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
-			  cb);
+			  callback);
 }
 
 //----------------------------------------------------------------------
@@ -298,12 +298,12 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 
   reduce = dot_(R,R);
 
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
 		enzo_block->proxy_array());
 
   enzo_block->contribute (sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
-			  cb);
+			  callback);
     
 }
 
@@ -376,12 +376,12 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     reduce[1] = dot_(R,Z);
     reduce[2] = dot_(D,Y);
 
-    CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_3<T>(NULL), 
+    CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_3<T>(NULL), 
 		  enzo_block->proxy_array());
 
     enzo_block->contribute (3*sizeof(long double), &reduce, 
 			    r_method_gravity_cg_type,
-			    cb);
+			    callback);
   }
 }
 
@@ -449,12 +449,12 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
   reduce[1] = sum_(R);
   reduce[2] = sum_(X);
 
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
 
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
-			  cb);
+			  callback);
 }
 
 //----------------------------------------------------------------------
@@ -520,11 +520,11 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
   int iter = iter_ + 1;
 
-  CkCallback cb(CkIndex_EnzoBlock::r_cg_loop_0b<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_0b<T>(NULL), 
 		enzo_block->proxy_array());
     
   enzo_block->contribute (sizeof(int), &iter, 
-			  CkReduction::max_int, cb);
+			  CkReduction::max_int, callback);
 
 }
 

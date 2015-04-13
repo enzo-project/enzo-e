@@ -171,22 +171,6 @@ void check_parameters(Parameters * parameters)
   unit_assert(parameters->value_logical("Logical:logical_1_true") == true);
   unit_assert(parameters->value_logical("Logical:logical_2_false") == false);
 
-  // bool l,ld;
-
-  // parameters->value("logical_1_true",parameter_logical,&l);
-  // unit_assert (l == true);
-
-  // parameters->value("logical_2_false",parameter_logical,&l);
-  // unit_assert (l == false);
-
-  // ld = true;
-  // parameters->value("none",parameter_logical,&l,&ld);
-  // unit_assert (l == ld);
-
-  // ld = false;
-  // parameters->value("none",parameter_logical,&l,&ld);
-  // unit_assert (l == ld);
-
   //--------------------------------------------------
   unit_func("set_logical");
   //--------------------------------------------------

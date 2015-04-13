@@ -183,7 +183,7 @@ void Block::adapt_end_()
 
   if (adapt_again) {
 
-    control_sync (phase_adapt_enter,"array");
+    control_sync (phase_adapt_enter,"quiescence");
 
   } else {
 
@@ -466,7 +466,7 @@ void Block::p_adapt_recv_level
 
   int level_next = level_next_;
 
-  const int level        = this->level();
+  const int level = this->level();
 
   const int of3[3] = {-if3[0],-if3[1],-if3[2] };
 

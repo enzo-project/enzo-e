@@ -25,32 +25,6 @@
 #   define VERBOSE(A) ;
 #endif
 
-//--------------------------------------------------
-
-const int cycle_phase[] = {
-  phase_adapt_enter,
-  phase_adapt_exit,
-  phase_output_enter,
-  phase_output_exit,
-  phase_stopping_enter,
-  phase_stopping_exit,
-  phase_compute_enter,
-  phase_compute_exit
-};
-
-const char * cycle_sync[] = {
-  "none",      // phase_adapt_enter
-  "quiescence", // phase_adapt_exit
-  "none",      // phase_output_enter
-  "none",       // phase_output_exit
-  "contribute", // phase_stopping_enter
-  "none",       // phase_stopping_exit
-  "none",       // phase_compute_enter
-  "none"        // phase_compute_exit
-};
-
-#define CYCLE_PHASE_COUNT (sizeof(cycle_phase) / sizeof(cycle_phase[0]))
-
 //----------------------------------------------------------------------
 
 void Block::initial_exit_()
@@ -72,7 +46,7 @@ void Block::adapt_enter_()
     
   } else {
 
-    control_sync(phase_output_enter,"none");
+    adapt_exit_();
 
   }
 }
@@ -83,49 +57,9 @@ void Block::adapt_exit_()
 {
   VERBOSE("adapt_exit");
 
-  control_sync(phase_output_enter,"quiescence");
-}
+  CkCallback callback = CkCallback(CkIndex_Main::p_output_enter(), proxy_main);
 
-//----------------------------------------------------------------------
-
-void Block::refresh_enter_() 
-{
-  VERBOSE("refresh_enter");
-
-  performance_switch_(perf_refresh,__FILE__,__LINE__);
-
-  refresh_begin_();
-}
-
-//----------------------------------------------------------------------
-
-void Block::refresh_exit_()
-{
-  VERBOSE("refresh_exit");
-
-  update_boundary_();
-
-  control_sync(refresh_phase_, refresh_sync_);
-}
-
-//----------------------------------------------------------------------
-
-void Block::compute_enter_ ()
-{
-  VERBOSE("compute_enter");
-
-  performance_switch_(perf_compute,__FILE__,__LINE__);
-
-  compute_begin_();
-}
-
-//----------------------------------------------------------------------
-
-void Block::compute_exit_ ()
-{
-  VERBOSE("compute_exit");
-
-  control_sync(phase_adapt_enter,"none");
+  control_sync(callback,"quiescence");
 }
 
 //----------------------------------------------------------------------
@@ -181,50 +115,78 @@ void Block::stopping_exit_()
 
   } else {
 
-    control_sync(phase_compute_enter,"none");
+    compute_enter_();
 
   }
 
+}
+
+//----------------------------------------------------------------------
+
+void Block::compute_enter_ ()
+{
+  VERBOSE("compute_enter");
+
+  performance_switch_(perf_compute,__FILE__,__LINE__);
+
+  compute_begin_();
+}
+
+//----------------------------------------------------------------------
+
+void Block::compute_exit_ ()
+{
+  VERBOSE("compute_exit");
+
+  adapt_enter_();
+}
+
+//----------------------------------------------------------------------
+
+void Block::refresh_enter_() 
+{
+  VERBOSE("refresh_enter");
+
+  performance_switch_(perf_refresh,__FILE__,__LINE__);
+
+  refresh_begin_();
+}
+
+//----------------------------------------------------------------------
+
+void Block::refresh_exit_()
+{
+  VERBOSE("refresh_exit");
+
+  update_boundary_();
+
+  control_sync(refresh_phase_, refresh_sync_);
 }
 
 //======================================================================
 
-#ifdef NEW_CONTROL
-
-void Block::control_sync_new(CkCallback cb, int phase, std::string sync, const char * file, int line)
+void Block::control_sync (CkCallback callback, std::string sync)
 {
-  //  printf ("DEBUG %s:%d NEW Block::control_sync_new()\n",__FILE__,__LINE__);
 
   if (sync == "contribute") {
 
-    contribute(cb);
+    contribute(callback);
 
   } else if (sync == "quiescence") {
 
-    if (index_.is_root()) {
-      CkStartQD(cb);
-    }
+    if (index_.is_root()) CkStartQD(callback);
 
   } else if (sync == "neighbor") {
 
-    control_sync_neighbor_(phase);
-
-  } else if (sync == "array") {
-
-    if (index().is_root()) cb.send(NULL);
-
-  } else if (sync == "none") {
-
-    cb.send(NULL);
+    ERROR("Block::control_sync (callback, sync)",
+	  "Neighbor synchronization not implemented yet");
 
   } else {
-    ERROR2 ("Block::control_sync()",  
-	    "Unknown sync type: phase %s sync type %s", 
-	    phase_name[phase],sync.c_str());    
+    ERROR1 ("Block::control_sync()",  
+	    "Unknown sync type: sync type %s", 
+	    sync.c_str());    
   }
 }
-
-#endif /* NEW_CONTROL */
 
 //----------------------------------------------------------------------
 
@@ -232,47 +194,47 @@ void Block::control_sync(int phase, std::string sync)
 {
   if (sync == "contribute") {
 
-    CkCallback cb;
+    CkCallback callback;
 
     if (                     phase == phase_initial_exit) {
-      cb = CkCallback (CkIndex_Block::r_initial_exit(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_initial_exit(NULL), thisProxy);
     } else if (              phase == phase_adapt_enter) {
-      cb = CkCallback (CkIndex_Block::r_adapt_enter(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_adapt_enter(NULL), thisProxy);
     } else if (              phase == phase_adapt_next) {
-      cb = CkCallback (CkIndex_Block::r_adapt_next(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_adapt_next(NULL), thisProxy);
     } else if (              phase == phase_adapt_called) {
-      cb = CkCallback (CkIndex_Block::r_adapt_called(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_adapt_called(NULL), thisProxy);
     } else if (              phase == phase_adapt_end) {
-      cb = CkCallback (CkIndex_Block::r_adapt_end(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_adapt_end(NULL), thisProxy);
     } else if (              phase == phase_adapt_exit) {
-      cb = CkCallback (CkIndex_Block::r_adapt_exit(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_adapt_exit(NULL), thisProxy);
     } else if (              phase == phase_refresh_enter) {
-      cb = CkCallback (CkIndex_Block::r_refresh_enter(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_refresh_enter(NULL), thisProxy);
     } else if (              phase == phase_refresh_exit) {
-      cb = CkCallback (CkIndex_Block::r_refresh_exit(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_refresh_exit(NULL), thisProxy);
     } else if (              phase == phase_output_enter) {
-      cb = CkCallback (CkIndex_Block::r_output_enter(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_output_enter(NULL), thisProxy);
     } else if (              phase == phase_output_exit) {
-      cb = CkCallback (CkIndex_Block::r_output_exit(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_output_exit(NULL), thisProxy);
     } else if (              phase == phase_compute_enter) {
-      cb = CkCallback (CkIndex_Block::r_compute_enter(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_compute_enter(NULL), thisProxy);
     } else if (              phase == phase_compute_continue) {
-      cb = CkCallback (CkIndex_Block::r_compute_continue(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_compute_continue(NULL), thisProxy);
     } else if (              phase == phase_compute_exit) {
-      cb = CkCallback (CkIndex_Block::r_compute_exit(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_compute_exit(NULL), thisProxy);
     } else if (              phase == phase_stopping_enter) {
-      cb = CkCallback (CkIndex_Block::r_stopping_enter(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_stopping_enter(NULL), thisProxy);
     } else if (              phase == phase_stopping_exit) {
-      cb = CkCallback (CkIndex_Block::r_stopping_exit(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_stopping_exit(NULL), thisProxy);
     } else if (              phase == phase_exit) {
-      cb = CkCallback (CkIndex_Block::r_exit(NULL), thisProxy);
+      callback = CkCallback (CkIndex_Block::r_exit(NULL), thisProxy);
     } else {
       ERROR2 ("Block::control_sync()",  
 	      "Unknown phase: phase %s sync type %s", 
 	      phase_name[phase],sync.c_str());    
     }
 
-    contribute(cb);
+    contribute(callback);
 
   } else if (sync == "quiescence") {
 
@@ -323,36 +285,6 @@ void Block::control_sync(int phase, std::string sync)
 
     control_sync_neighbor_(phase);
 
-  } else if (sync == "array") {
-
-    if (index().is_root()) {
-      if (phase == phase_initial_exit)          thisProxy.p_initial_exit();
-      else if (phase == phase_adapt_enter)      thisProxy.p_adapt_enter();
-      else if (phase == phase_adapt_next) 	thisProxy.p_adapt_next();
-      else if (phase == phase_adapt_called) 	thisProxy.p_adapt_called();
-      else if (phase == phase_adapt_end) 	thisProxy.p_adapt_end();
-      else if (phase == phase_adapt_exit) 	thisProxy.p_adapt_exit();
-      else if (phase == phase_refresh_enter) 	thisProxy.p_refresh_enter();
-      else if (phase == phase_refresh_exit) 	thisProxy.p_refresh_exit();
-      else if (phase == phase_output_enter) 	thisProxy.p_output_enter();
-      else if (phase == phase_output_exit) 	thisProxy.p_output_exit();
-      else if (phase == phase_compute_enter) 	thisProxy.p_compute_enter();
-      else if (phase == phase_compute_continue) thisProxy.p_compute_continue();
-      else if (phase == phase_compute_exit) 	thisProxy.p_compute_exit();
-      else if (phase == phase_stopping_enter) 	thisProxy.p_stopping_enter();
-      else if (phase == phase_stopping_exit) 	thisProxy.p_stopping_exit();
-      else if (phase == phase_exit) 	        thisProxy.p_exit();
-      else 
-	ERROR2 ("Block::control_sync()",  
-		"Unknown phase: phase %s sync type %s", 
-		phase_name[phase],sync.c_str());    
-
-    }
-
-  } else if (sync == "none") {
-
-    control_call_phase_(phase);
-
   } else {
     ERROR2 ("Block::control_sync()",  
 	    "Unknown sync type: phase %s sync type %s", 
@@ -367,17 +299,11 @@ void Block::control_sync_count_ (int phase, int count)
   if (count != 0)  max_sync_[phase] = count;
 
   ++count_sync_[phase];
-#ifdef CELLO_DEBUG
-  fprintf (simulation()->fp_debug(),"%d %s counting %d/%d leaf %d %s\n",__LINE__,name_.c_str(),
-	   count_sync_[phase],max_sync_[phase],is_leaf(),phase_name[phase]);
-#endif
 
-  if (0 < max_sync_[phase] && max_sync_[phase] <= count_sync_[phase]) {
+  // max_sync reached: continue and reset counter
+  if (max_sync_[phase] > 0 && count_sync_[phase] >= max_sync_[phase]) {
     max_sync_[phase] = 0;
     count_sync_[phase] = 0;
-#ifdef CELLO_DEBUG
-    fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
-#endif
     control_call_phase_(phase);
   }
 }
@@ -424,7 +350,7 @@ void Block::control_sync_neighbor_(int phase)
 		 __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
 		 index_neighbor.bit_string(-1,2).c_str());
 #endif
-	thisProxy[index_neighbor].p_control_sync_count(phase,0);
+	thisProxy[index_neighbor].p_control_sync_count(phase);
 
 	++num_neighbors;
 
@@ -451,7 +377,7 @@ void Block::control_sync_neighbor_(int phase)
 		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
 		   index_uncle.bit_string(-1,2).c_str());
 #endif
-	  thisProxy[index_uncle].p_control_sync_count(phase,0);
+	  thisProxy[index_uncle].p_control_sync_count(phase);
 
 	  ++num_neighbors;
 
@@ -473,7 +399,7 @@ void Block::control_sync_neighbor_(int phase)
 		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
 		   index_nibling.bit_string(-1,2).c_str());
 #endif
-	  thisProxy[index_nibling].p_control_sync_count(phase,0);
+	  thisProxy[index_nibling].p_control_sync_count(phase);
 
 	  ++num_neighbors;
 	}
@@ -499,9 +425,10 @@ void Block::control_call_phase_ (int phase)
   fprintf (simulation()->fp_debug(),"%d %s called %s\n",
 	   __LINE__,name_.c_str(),phase_name[phase]);
 #endif
+  CkCallback callback;
   if      (phase == phase_initial_exit)     initial_exit_();
   else if (phase == phase_adapt_called)     adapt_called_();
-  else if (phase == phase_adapt_enter)      adapt_enter_();      
+  else if (phase == phase_adapt_enter)      adapt_enter_();
   else if (phase == phase_adapt_next)       adapt_next_();
   else if (phase == phase_adapt_end)        adapt_end_();
   else if (phase == phase_adapt_exit)       adapt_exit_();

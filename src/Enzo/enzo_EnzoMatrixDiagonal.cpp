@@ -16,6 +16,7 @@ void EnzoMatrixDiagonal::matvec (int id_y, int id_x, Block * block) throw()
   Data * data = block->data();
   Field field = data->field();
 
+  data->field_cell_width(&hx_,&hy_,&hz_);
   int mx,my,mz;
   field.dimensions(0,&mx,&my,&mz);
   m_ = mx*my*mz;
