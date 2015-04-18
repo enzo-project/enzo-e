@@ -85,7 +85,7 @@ Output {
         include "input/schedule_time_0.02.incl"
         image_specify_bounds = true;
 	image_min = 0.0;
-	image_max = 6.0;
+	image_max = 1.0;
         include "input/colormap_rainbow.incl"
       }
 }

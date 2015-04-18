@@ -143,16 +143,16 @@ public: // interface
   const Index & index() const 
   { return index_; }
 
-  const int & face_level (const int if3[3]) const
+  int face_level (const int if3[3]) const
   { return face_level_curr_[IF3(if3)]; }
 
-  const int & face_level_next (const int if3[3]) const
+  int face_level_next (const int if3[3]) const
   { return face_level_next_[IF3(if3)]; }
 
-  const int & child_face_level (const int ic3[3], const int if3[3]) const
+  int child_face_level (const int ic3[3], const int if3[3]) const
   { return child_face_level_curr_[ICF3(ic3,if3)]; }
 
-  const int & child_face_level_next (const int ic3[3], const int if3[3]) const
+  int child_face_level_next (const int ic3[3], const int if3[3]) const
   { return child_face_level_next_[ICF3(ic3,if3)]; }
 
   void set_face_level_curr (const int if3[3], int level)
@@ -223,10 +223,7 @@ public: // interface
 
   /// Return an iterator over neighbors
 
-  ItNeighbor it_neighbor(int min_face_rank,
-			 Index index,
-			 const int * ic3=0,
-			 const int * if3=0) throw();
+  ItNeighbor it_neighbor(int min_face_rank, Index index) throw();
 
   //--------------------------------------------------
   // Charm++ virtual
@@ -377,13 +374,8 @@ public:
   void p_adapt_recv_child
   (int ic3[3],int na, char * array, int nf, int * child_face_level);
 
-  void adapt_recv_same   (const int of3[3],int level_face_new);
-  void adapt_recv_coarse (const int of3[3],const int ic3[3],int level_face_new);
-  void adapt_recv_fine   (const int of3[3],const int ic3[3],int level_face_new);
-  void adapt_recv_recurse(const int if3[3],const int ic3[3],
-			  int level_face,
-			  int level_face_new,
-			  Index index_send);
+  void adapt_recv (const int of3[3],const int ic3[3],
+		   int level_face_new, int level_relative);
 
   void adapt_send_level();
 
@@ -566,20 +558,16 @@ protected: // functions
   /// the given face
   void facing_child_(int jc3[3], const int ic3[3], const int if3[3]) const;
 
-  /// Return limits of faces of the given child corresponding to the
-  /// given face of the parent
-  // void loop_limits_faces_ 
-  // (int ifm3[3], int ifp3[3], const int if3[3], const int ic3[3]) const;
-
   /// Return whether the given face of the given child and its parent
   /// intersect
   bool child_is_on_face_(const int ic3[3],const int if3[3]) const;
 
   /// Return the face of the parent corresponding to the given face
-  /// of the given child.  Inverse of loop_limits_faces_
+  /// of the given child.
   bool parent_face_(int ipf3[3],const int if3[3], const int ic3[3]) const;
 
-  void check_child_(const int ic3[3], const char * msg, const char * file, int line) const 
+  void check_child_(const int ic3[3], const char * msg, 
+		    const char * file, int line) const 
   {
     ASSERT5 (msg, "child %d %d %d out of range in file %s line %d",
 	     ic3[0],ic3[1],ic3[2],file,line,
@@ -657,7 +645,6 @@ protected: // functions
     }
     return skip;
   }
-  void loop_limits_nibling_ (int ic3m[3], int ic3p[3], const int if3[3]) const throw();
 
   FieldFace * load_face_
   (int * n, char ** a,

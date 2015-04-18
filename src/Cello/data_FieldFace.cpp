@@ -101,7 +101,7 @@ void FieldFace::pup (PUP::er &p)
 
   TRACEPUP;
 
-  bool up = p.isUnpacking();
+  const bool up = p.isUnpacking();
 
   if (up) field_data_ = new FieldData;
   p | *field_data_;

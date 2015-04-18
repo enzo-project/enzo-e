@@ -205,8 +205,14 @@ Block::Block
   }
 
   if (level > 0) {
+
     thisProxy.doneInserting();
-    control_sync (phase_adapt_end,"quiescence");
+
+    CkCallback callback = 
+      CkCallback(CkIndex_Main::p_adapt_end(), proxy_main);
+
+    control_sync (callback,"quiescence");
+
   }
 
   debug_faces_("Block()");
@@ -292,18 +298,13 @@ ItFace Block::it_face
 
 //----------------------------------------------------------------------
 
-ItNeighbor Block::it_neighbor
-(int min_face_rank,
- Index index,
- const int * ic3,
- const int * if3) throw()
+ItNeighbor Block::it_neighbor (int min_face_rank, Index index) throw()
 {
-  int rank = this->rank();
   int n3[3];
   size_forest(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
-  return ItNeighbor (rank,min_face_rank,periodic,n3,index,ic3,if3);
+  return ItNeighbor (this,min_face_rank,periodic,n3,index);
 }
 
 //----------------------------------------------------------------------
@@ -607,32 +608,6 @@ void Block::periodicity (bool p32[3][2]) const
   while ( (boundary = problem->boundary(index_boundary++)) ) {
     boundary->periodicity(p32);
   }
-}
-
-//----------------------------------------------------------------------
-
-void Block::loop_limits_nibling_ 
-( int ic3m[3],int ic3p[3], const int if3[3]) const throw()
-{
-  const int rank = this->rank();
-
-  //           ic3m   ic3p
-  //       -1   0      0
-  // if3    0   0      1      
-  //        1   1      1
-
-  ic3m[0] = (if3[0] == 0) ? 0 : (if3[0]+1)/2;
-  ic3m[1] = (if3[1] == 0) ? 0 : (if3[1]+1)/2;
-  ic3m[2] = (if3[2] == 0) ? 0 : (if3[2]+1)/2;
-
-  ic3p[0] = (if3[0] == 0) ? 1 : (if3[0]+1)/2;
-  ic3p[1] = (if3[1] == 0) ? 1 : (if3[1]+1)/2;
-  ic3p[2] = (if3[2] == 0) ? 1 : (if3[2]+1)/2;
-
-  // Adjust for 1D and 2D
-
-  if (rank < 2) ic3m[1] = ic3p[1] = 0;
-  if (rank < 3) ic3m[2] = ic3p[2] = 0;
 }
 
 //----------------------------------------------------------------------

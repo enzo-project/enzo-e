@@ -28,7 +28,12 @@
 //----------------------------------------------------------------------
 
 void Block::initial_exit_()
-{  control_sync(phase_adapt_enter,"contribute"); }
+{
+  CkCallback callback = 
+    CkCallback (CkIndex_Block::r_adapt_enter(NULL),thisProxy);
+
+  control_sync(callback,"contribute"); 
+}
 
 //----------------------------------------------------------------------
 
@@ -57,7 +62,8 @@ void Block::adapt_exit_()
 {
   VERBOSE("adapt_exit");
 
-  CkCallback callback = CkCallback(CkIndex_Main::p_output_enter(), proxy_main);
+  CkCallback callback = 
+    CkCallback (CkIndex_Main::p_output_enter(), proxy_main);
 
   control_sync(callback,"quiescence");
 }
@@ -86,7 +92,10 @@ void Block::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
-  control_sync(phase_stopping_enter,"contribute");
+  CkCallback callback = 
+    CkCallback (CkIndex_Block::r_stopping_enter(NULL), thisProxy);
+
+  control_sync(callback,"contribute");
 }
 
 //----------------------------------------------------------------------
@@ -315,106 +324,41 @@ void Block::control_sync_neighbor_(int phase)
   if (!is_leaf()) {
 
 #ifdef CELLO_DEBUG
-    fprintf (simulation()->fp_debug(),"%d %s called %s\n",__LINE__,name_.c_str(),phase_name[phase]);
+    fprintf (simulation()->fp_debug(),"%d %s called %s\n",
+	     __LINE__,name_.c_str(),phase_name[phase]);
 #endif
+
     control_call_phase_ (phase);
-
-  } else {
-
-    const int level        = this->level();
-    const int rank = this->rank();
-
-    const int min_face_rank = 0;
-    ItFace it_face = this->it_face(min_face_rank,index_);
-
-    int of3[3];
-
-    int num_neighbors = 0;
-
-    while (it_face.next(of3)) {
-
-      int ic3[3] = {0,0,0};
-
-      Index index_neighbor = neighbor_(of3);
-
-      const int level_face = face_level (of3);
-
-      if (level_face == level) {
-
-	// SEND-SAME: Face and level are sent to unique
-	// neighboring block in the same level
-
-#ifdef CELLO_DEBUG
-	fprintf (simulation()->fp_debug(),
-		 "%d %s calling p_control_sync phase %s leaf %d block %s\n",
-		 __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
-		 index_neighbor.bit_string(-1,2).c_str());
-#endif
-	thisProxy[index_neighbor].p_control_sync_count(phase);
-
-	++num_neighbors;
-
-      } else if (level_face == level - 1) {
-
-	// SEND-COARSE: Face, level, and child indices are sent to
-	// unique neighboring block in the next-coarser level
-
-	index_.child (level,&ic3[0],&ic3[1],&ic3[2]);
-
-	int op3[3];
-	parent_face_(op3,of3,ic3);
-
-	// avoid redundant calls
-	if (op3[0]==of3[0] && 
-	    op3[1]==of3[1] && 
-	    op3[2]==of3[2]) {
-
-	  Index index_uncle = index_neighbor.index_parent();
-
-#ifdef CELLO_DEBUG
-	  fprintf (simulation()->fp_debug(),
-		   "%d %s calling p_control_sync phase %s leaf %d block %s\n",
-		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
-		   index_uncle.bit_string(-1,2).c_str());
-#endif
-	  thisProxy[index_uncle].p_control_sync_count(phase);
-
-	  ++num_neighbors;
-
-	}
-
-      } else if (level_face == level + 1) {
-
-	// SEND-FINE: Face and level are sent to all nibling
-	// blocks in the next-finer level along the face.
-
-	const int if3[3] = {-of3[0],-of3[1],-of3[2]};
-	ItChild it_child(rank,if3);
-	while (it_child.next(ic3)) {
-	  Index index_nibling = index_neighbor.index_child(ic3);
-
-#ifdef CELLO_DEBUG
-	  fprintf (simulation()->fp_debug(),
-		   "%d %s calling p_control_sync phase %s leaf %d block %s\n",
-		   __LINE__,name_.c_str(), phase_name[phase], is_leaf(),
-		   index_nibling.bit_string(-1,2).c_str());
-#endif
-	  thisProxy[index_nibling].p_control_sync_count(phase);
-
-	  ++num_neighbors;
-	}
-
-      } else {
-	std::string bit_str = index_.bit_string(-1,2);
-	WARNING7 ("Block::control_sync_neighbor_()",
-		  "phase %d name %s level %d and face (%d %d %d) "
-		  "level %d differ by more than 1",
-		  phase, name().c_str(), level, of3[0],of3[1],of3[2], level_face);
-      }
-
-    }
-    control_sync_count_(phase,num_neighbors + 1);
+    return;
   }
+
+
+  const int level = this->level();
+  const int rank  = this->rank();
+
+  const int min_face_rank = 0;
+  ItFace it_face = this->it_face(min_face_rank,index_);
+
+  int of3[3];
+
+  int num_neighbors = 0;
+
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+  while (it_neighbor.next()) {
+
+    ++num_neighbors;
+
+    Index index_neighbor = it_neighbor.index();
+    int ic3[3];
+    it_neighbor.face(of3);
+    it_neighbor.child(ic3);
+    int level_face = it_neighbor.face_level();
+
+    thisProxy[index_neighbor].p_control_sync_count(phase);
+
+  }
+  control_sync_count_(phase,num_neighbors + 1);
+
 }
 
 //----------------------------------------------------------------------

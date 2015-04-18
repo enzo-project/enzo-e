@@ -117,12 +117,12 @@ private: // functions
     if (is_reset()) return true;
 
     bool valid = true;
-    if (rank_ >= 0 && if3_[0] == -1 && ic3_[0] != 0) valid = false;
-    if (rank_ >= 0 && if3_[0] ==  1 && ic3_[0] != 1) valid = false;
-    if (rank_ >= 1 && if3_[1] == -1 && ic3_[1] != 0) valid = false;
-    if (rank_ >= 1 && if3_[1] ==  1 && ic3_[1] != 1) valid = false;
-    if (rank_ >= 2 && if3_[2] == -1 && ic3_[2] != 0) valid = false;
-    if (rank_ >= 2 && if3_[2] ==  1 && ic3_[2] != 1) valid = false;
+    if (rank_ > 0 && if3_[0] == -1 && ic3_[0] != 0) valid = false;
+    if (rank_ > 0 && if3_[0] ==  1 && ic3_[0] != 1) valid = false;
+    if (rank_ > 1 && if3_[1] == -1 && ic3_[1] != 0) valid = false;
+    if (rank_ > 1 && if3_[1] ==  1 && ic3_[1] != 1) valid = false;
+    if (rank_ > 2 && if3_[2] == -1 && ic3_[2] != 0) valid = false;
+    if (rank_ > 2 && if3_[2] ==  1 && ic3_[2] != 1) valid = false;
 
     return valid;
   }

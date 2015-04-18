@@ -125,8 +125,6 @@ class Tree;
 #include "mesh_Tree.hpp"
 
 // Iterators
-// #include "mesh_It.hpp"
-// #include "mesh_ItBlock.hpp"
 #include "mesh_ItNode.hpp"
 
 // Refinement

@@ -9,96 +9,167 @@
 
 //----------------------------------------------------------------------
 
-ItNeighbor::ItNeighbor(int rank, 
-	       int rank_limit,
-	       bool periodic[3][2],
-	       int n3[3],
-	       Index index,
-	       const int * ic3,
-	       const int * ipf3) throw()
-  : of3_(),
-    ic3_(),
-    ipf3_(),
-    rank_(rank),
-    rank_limit_(rank_limit),
-    index_(index)
+ItNeighbor::ItNeighbor
+(
+ Block * block,
+ int min_face_rank,
+ bool periodic[3][2],
+ int n3[3],
+ Index index)
+  : block_(block),
+    rank_(block->rank()),
+    min_face_rank_(min_face_rank),
+    index_(index),
+    level_(index.level())
 {
   reset();
-  if (ic3) {
-    ic3_.resize(3);
-    for (int i=0; i<rank; i++) ic3_[i] = ic3[i];
-    for (int i=rank; i<3; i++) ic3_[i] = 0;
-  }
-  if (ipf3) {
-    ipf3_.resize(3);
-    for (int i=0; i<rank; i++)  ipf3_[i] = ipf3[i];
-    for (int i=rank; i<3; i++)  ipf3_[i] = ipf3[i];
-  }
   for (int axis=0; axis<3; axis++) {
     n3_[axis] = n3[axis];
     for (int face=0; face<2; face++) {
-      periodicity_[axis][face] = periodic[axis][face];
+      periodic_[axis][face] = periodic[axis][face];
     }
   }
 }
 
 //----------------------------------------------------------------------
 
-ItNeighbor::~ItNeighbor() throw() 
+ItNeighbor::~ItNeighbor() 
 {
 }
 
 //----------------------------------------------------------------------
 
-bool ItNeighbor::next (int of3[3]) throw()
+bool ItNeighbor::next ()
 {
   do {
-    inc_face_() ;
-  } while (!valid_());
+    next_();
+  } while ( ! valid_() );
 
-  of3[0] = (rank_ >= 1) ? of3_[0] : 0;
-  of3[1] = (rank_ >= 2) ? of3_[1] : 0;
-  of3[2] = (rank_ >= 3) ? of3_[2] : 0;
-  
-  return (!is_reset());
+  return (! is_reset()) ;
 }
 
 //----------------------------------------------------------------------
 
-void ItNeighbor::reset() throw()
+Index ItNeighbor::index() const
+{
+  int face_level = block_->face_level(of3_);
+  Index index_neighbor = index_.index_neighbor(of3_,n3_);
+  if (face_level == level_) {
+    return index_neighbor;
+  } else if (face_level == level_ + 1) {
+    return index_neighbor.index_child(ic3_);
+  } else if (face_level == level_ - 1) {
+    return index_neighbor.index_parent();
+  } else {
+    ERROR2("ItNeighbor::index()",
+	   "face_level %d and block level %d differ by more than one",
+	   face_level,level_);
+    return index_neighbor;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void ItNeighbor::face(int of3[3]) const
+{
+  of3[0] = (rank_ > 0) ? of3_[0] : 0;
+  of3[1] = (rank_ > 1) ? of3_[1] : 0;
+  of3[2] = (rank_ > 2) ? of3_[2] : 0;
+} 
+
+//----------------------------------------------------------------------
+
+void ItNeighbor::child(int ic3[3]) const
+{
+  ic3[0] = (rank_ > 0) ? ic3_[0] : 0;
+  ic3[1] = (rank_ > 1) ? ic3_[1] : 0;
+  ic3[2] = (rank_ > 2) ? ic3_[2] : 0;
+  if ( ic3_[0]== -2) {
+    ic3[0] = 0;
+    ic3[1] = 0;
+    ic3[2] = 0;
+  }
+  if (face_level() < level_) {
+    index_.child (level_,&ic3[0],&ic3[1],&ic3[2]);
+  }
+} 
+
+//----------------------------------------------------------------------
+
+void ItNeighbor::reset()
 {
   of3_[0] = -2;
   of3_[1] = 0;
   of3_[2] = 0;
+  reset_child_();
 }
 
 //----------------------------------------------------------------------
 
-bool ItNeighbor::is_reset() const 
+void ItNeighbor::reset_child_()
 {
-  return of3_[0] == -2; 
+  ic3_[0] = -2;
+  ic3_[1] = 0;
+  ic3_[2] = 0;
 }
 
 //----------------------------------------------------------------------
 
-void ItNeighbor::inc_face_()
+bool ItNeighbor::is_reset() const
+{
+  return (of3_[0] == -2);
+}
+
+//----------------------------------------------------------------------
+
+bool ItNeighbor::is_reset_child_() const 
+{
+  return (ic3_[0] == -2);
+}
+
+//----------------------------------------------------------------------
+
+void ItNeighbor::next_()
 {
   if (is_reset()) {
     set_first_();
   } else {
-    if (rank_ >= 1 && of3_[0] < 1) {
-      ++of3_[0];
-    }	else {
-      of3_[0] = -1;
-      if (rank_ >= 2 && of3_[1] < 1) {
-	++of3_[1];
-      } else {
-	of3_[1] = -1;
-	if (rank_ >= 3 && of3_[2] < 1) {
-	  ++of3_[2];
-	} else {
-	  reset();
+    if ( face_level() > level_ ) {
+      if (is_reset_child_())
+	set_first_child_();
+      else 
+	next_child_();
+    } 
+    if (is_reset_child_()) {
+      if (rank_ > 0 && of3_[0] < 1) { ++of3_[0]; }
+      else {
+	of3_[0] = -1;
+	if (rank_ > 1 && of3_[1] < 1) { ++of3_[1]; }
+	else {
+	  of3_[1] = -1;
+	  if (rank_ > 2 && of3_[2] < 1) { ++of3_[2]; }
+	  else reset();
 	}
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void ItNeighbor::next_child_()
+{
+  if (is_reset_child_()) {
+    set_first_child_();
+  } else {
+    if (rank_ > 0 && ic3_[0] < 1) { ++ic3_[0]; }
+    else {
+      ic3_[0] = 0;
+      if (rank_ > 1 && ic3_[1] < 1) { ++ic3_[1]; }
+      else {
+	ic3_[1] = 0;
+	if (rank_ > 2 && ic3_[2] < 1) { ++ic3_[2]; }
+	else reset_child_();
       }
     }
   }
@@ -108,80 +179,86 @@ void ItNeighbor::inc_face_()
 
 void ItNeighbor::set_first_() 
 {
-  of3_[0] = rank_ >= 1 ? -1 : 0;
-  of3_[1] = rank_ >= 2 ? -1 : 0;
-  of3_[2] = rank_ >= 3 ? -1 : 0;
+  of3_[0] = rank_ > 0 ? -1 : 0;
+  of3_[1] = rank_ > 1 ? -1 : 0;
+  of3_[2] = rank_ > 2 ? -1 : 0;
 }
 
 //----------------------------------------------------------------------
 
-bool ItNeighbor::valid_() const
+void ItNeighbor::set_first_child_() 
 {
+  ic3_[0] = 0;
+  ic3_[1] = 0;
+  ic3_[2] = 0;
+}
+
+//----------------------------------------------------------------------
+
+bool ItNeighbor::valid_()
+{
+ 
   if (is_reset()) return true;
-  int rank_face = rank_ - 
-    (abs(of3_[0]) + abs(of3_[1]) + abs(of3_[2]));
-  bool l_range = (rank_limit_ <= rank_face && rank_face < rank_);
-  bool l_face = true;
-  bool l_parent = true;
-  if (ic3_.size() > 0) {
-    if (ipf3_.size() == 0) {
-      // Face must be adjacent to child
-      if (ic3_.size() >= 1 && rank_ >= 1) {
-	if  (of3_[0] == -1 && ic3_[0] != 0) l_face = false;
-	if  (of3_[0] ==  1 && ic3_[0] != 1) l_face = false;
-      }
-      if (ic3_.size() >= 2 && rank_ >= 2) {
-	if  (of3_[1] == -1 && ic3_[1] != 0) l_face = false;
-	if  (of3_[1] ==  1 && ic3_[1] != 1) l_face = false;
-      }
-      if (ic3_.size() >= 3 && rank_ >= 3) {
-	if  (of3_[2] == -1 && ic3_[2] != 0) l_face = false;
-	if  (of3_[2] ==  1 && ic3_[2] != 1) l_face = false;
-      }
-    } else {
 
-      // Face must be adjacent to same parent's face
-      if (ipf3_.size() >= 1) {
-	if (ipf3_[0] != 0 && (of3_[0] != ipf3_[0])) l_parent = false; 
-	if (ipf3_[0] == 0 && 
-	    ((ic3_[0] == 0 && of3_[0] == -1) ||
-	     (ic3_[0] == 1 && of3_[0] ==  1))) l_parent = false;
-      }
-      if (ipf3_.size() >= 2) {
+  // Check that face rank is in range
 
-	if (ipf3_[1] != 0 && (of3_[1] != ipf3_[1])) l_parent = false; 
-	if (ipf3_[1] == 0 && 
-	    ((ic3_[1] == 0 && of3_[1] == -1) ||
-	     (ic3_[1] == 1 && of3_[1] ==  1))) l_parent = false;
-      }
-      if (ipf3_.size() >= 3) {
-	if (ipf3_[2] != 0 && (of3_[2] != ipf3_[2]))  l_parent = false; 
-	if (ipf3_[2] == 0 && 
-	    ((ic3_[2] == 0 && of3_[2] == -1) ||
-	     (ic3_[2] == 1 && of3_[2] ==  1))) l_parent = false;
-      }
-    }
-  }
+  int face_rank = rank_;
+  for (int i=0; i<rank_; i++) face_rank -= std::abs(of3_[i]);
 
-  bool l_periodic = true;
+  const bool in_range = 
+    (min_face_rank_ <= face_rank && face_rank < rank_);
+
+  if (! in_range) return false;
+
   // Return false if on boundary and not periodic
+
   if (index_.is_on_boundary(of3_,n3_)) {
-    if (of3_[0] == -1 && ! periodicity_[0][0]) l_periodic = false;
-    if (of3_[0] == +1 && ! periodicity_[0][1]) l_periodic = false;
-    if (of3_[1] == -1 && ! periodicity_[1][0]) l_periodic = false;
-    if (of3_[1] == +1 && ! periodicity_[1][1]) l_periodic = false;
-    if (of3_[2] == -1 && ! periodicity_[2][0]) l_periodic = false;
-    if (of3_[2] == +1 && ! periodicity_[2][1]) l_periodic = false;
+
+    for (int axis=0; axis<rank_; axis++) {
+
+      const bool is_lower_face     = (of3_[axis] == -1);
+      const bool is_upper_face     = (of3_[axis] == +1);
+      const bool is_lower_periodic = periodic_[axis][0];
+      const bool is_upper_periodic = periodic_[axis][1];
+
+      if (is_lower_face && (! is_lower_periodic) ) return false;
+      if (is_upper_face && (! is_upper_periodic) ) return false;
+
+    }    
   }
 
-  // TEMPORARY
-  // static bool warning_displayed = false;
-  // if (! warning_displayed) {  
-  //   //    WARNING("ItNeighbor::is_valid()", "Setting l_periodic to true for testing");
-  //   warning_displayed = true;
-  // }
+  // Return false if fine child and not adjacent
 
-  return (l_face && l_range && l_parent && l_periodic);
+  if (face_level() > level_) {
+    if (is_reset_child_()) return false;
+
+    const int if3[3] = {-of3_[0],-of3_[1],-of3_[2]};
+    bool valid = true;
+    if (rank_ > 0 && if3[0] == -1 && ic3_[0] != 0) valid = false;
+    if (rank_ > 0 && if3[0] ==  1 && ic3_[0] != 1) valid = false;
+    if (rank_ > 1 && if3[1] == -1 && ic3_[1] != 0) valid = false;
+    if (rank_ > 1 && if3[1] ==  1 && ic3_[1] != 1) valid = false;
+    if (rank_ > 2 && if3[2] == -1 && ic3_[2] != 0) valid = false;
+    if (rank_ > 2 && if3[2] ==  1 && ic3_[2] != 1) valid = false;
+    if (valid == false) return false;
+  }
+
+  // Skip face if not same as parent
+  if (face_level() < level_) {
+    int ic3[3] = {0,0,0};
+    index_.child (level_,&ic3[0],&ic3[1],&ic3[2]);
+    if  (rank_ > 0 && 
+  	 ((of3_[0] == +1 && ic3[0] == 0) ||
+  	  (of3_[0] == -1 && ic3[0] == 1))) return false;
+    if  (rank_ > 1 && 
+  	 ((of3_[1] == +1 && ic3[1] == 0) ||
+  	  (of3_[1] == -1 && ic3[1] == 1))) return false;
+    if  (rank_ > 2 && 
+  	 ((of3_[2] == +1 && ic3[2] == 0) ||
+  	  (of3_[2] == -1 && ic3[2] == 1))) return false;
+  }
+
+  return true;
 }
 //======================================================================
 

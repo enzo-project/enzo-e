@@ -13,24 +13,21 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// static char buffer[256];
-
 //----------------------------------------------------------------------
-
 
 void Block::refresh_begin_() 
 {
   Refresh * refresh = simulation()->problem()->refresh(index_refresh_);
 
-  // Check consistency between is_leaf() and std::vector children_
+
   if ((  is_leaf() && children_.size() != 0) ||
       (! is_leaf() && children_.size() == 0)) {
     const char * logic_str[2] = {"false","true"};
     WARNING4("Block::refresh_begin_()",
-	     "%s: is_leaf() == %s && children_.size() == %d"
-	     "setting is_leaf_ <== %s",
-	     name_.c_str(), logic_str[is_leaf()?1:0],
-	     children_.size(),logic_str[is_leaf()?0:1]);
+             "%s: is_leaf() == %s && children_.size() == %d"
+             "setting is_leaf_ <== %s",
+             name_.c_str(), logic_str[is_leaf()?1:0],
+             children_.size(),logic_str[is_leaf()?0:1]);
     is_leaf_ = ! is_leaf();
   }
 
@@ -52,86 +49,27 @@ void Block::refresh_begin_()
 
     const int level = this->level();
 
-    // Get forest size required for non-periodic boundaries
-
-    int n3[3];
-    size_forest(&n3[0],&n3[1],&n3[2]);
-
-    // Get the face iterator for specified field face rank 
-    // (0 corner, 1 edge, 2 facet)
-
-    ItFace it_face = this->it_face( refresh->field_face_rank(),index_ );
-
-    // Loop over specified faces
-
+    int min_face_rank = 0;
+    ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
     int if3[3];
-    while (it_face.next(if3)) {
+    int ic3[3];
+    while (it_neighbor.next()) {
+      Index index_neighbor = it_neighbor.index();
+      it_neighbor.face(if3);
+      it_neighbor.child(ic3);
+      int level_face = it_neighbor.face_level();
 
-      Index index_neighbor = index_.index_neighbor(if3,n3);
-
-      TRACE0;
-
-      if (face_level(if3) == level-1) {
-
-	// If COARSE LEVEL neighbor, refresh neighbor's parent
-	
-	int ic3[3];
-	index_.child(level,ic3+0,ic3+1,ic3+2);
-	int ip3[3];
-	parent_face_(ip3,if3,ic3);
-
-	refresh_load_face_
-	  (refresh_coarse,index_neighbor.index_parent(),ip3,ic3);
-
-      } else if (face_level(if3) == level) {
-
-	// if SAME LEVEL neighbor, refresh neighbor
-
-	int ic3[3] = {0,0,0};
+      int refresh;
+      if (level_face == level) {
 	refresh_load_face_ (refresh_same,index_neighbor,if3,ic3);
-
-      } else if (face_level(if3) == level+1) {
-	    
-	// FINE LEVEL neighbor, refresh adjacent neighbor's children
-
-	// get lower and upper limits of MY children along face if3
-	int ic3m[3],ic3p[3];
-	loop_limits_nibling_(ic3m,ic3p,if3);
-
-	int ic3[3];
-	for (ic3[0]=ic3m[0]; ic3[0]<=ic3p[0]; ic3[0]++) {
-	  for (ic3[1]=ic3m[1]; ic3[1]<=ic3p[1]; ic3[1]++) {
-	    for (ic3[2]=ic3m[2]; ic3[2]<=ic3p[2]; ic3[2]++) {
-
-	      // get corresponding index of child in neighbor
-	      int jc3[3];
-	      facing_child_ (jc3,ic3,if3);
-
-	      Index index_nibling = 
-		index_neighbor.index_child(jc3[0],jc3[1],jc3[2]);
-		  
-	      refresh_load_face_ (refresh_fine,index_nibling, if3,ic3);
-	    }
-	  }
-	}
-      } else {
-
-	index_.print("ERROR Refresh",-1,2,false,simulation());
-	debug_faces_("refresh");
-	ERROR7("Block::refresh_begin_()",
-	       "%s: REFRESH ERROR: "
-	       "face (%d %d %d) "
-	       "level %d "
-	       "face_level %d "
-	       "is_leaf %d",
-	       name_.c_str(),
-	       if3[0],if3[1],if3[2],
-	       level,
-	       face_level(if3),
-	       is_leaf());
+      } else if (level_face == level + 1) {
+	refresh_load_face_ (refresh_fine,index_neighbor,if3,ic3);
+      } else if (level_face == level - 1) {
+	refresh_load_face_ (refresh_coarse,index_neighbor,if3,ic3);
       }
 
     }
+
   }
 
   control_sync (phase_refresh_exit,"neighbor");
@@ -215,6 +153,7 @@ void Block::refresh_store_face_
   case refresh_same:    op_array = op_array_copy;      break;
   case refresh_fine:    op_array = op_array_prolong;   break;
   default:
+    op_array = op_array_unknown;
     ERROR1("Block::refresh_store_face_()",
 	   "Unknown type_refresh %d",  type_refresh);
     break;

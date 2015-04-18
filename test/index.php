@@ -217,7 +217,7 @@ function test($type,$output,$type) {
 
  //----------------------------------------------------------------------
 
-function summary_missing_executable ($test_output, $executables, $state, $dir)
+function summary_missing_executable ($test_output, $executables, $state, $dir, $valid)
 {
   global $types;
   global $num_types;
@@ -236,17 +236,19 @@ function summary_missing_executable ($test_output, $executables, $state, $dir)
       }
     }
 
-    if ($count_missing == 0) {
+    if ($count_missing == 0 || ! $valid) { 
       printf ("<td></td>");
     } else {
       printf ("<td class=noexec>$count_missing</td>");
+      $valid = false;
     }
   }
+  return $valid;
 }
 
 //----------------------------------------------------------------------
 
-function summary_missing_output ($test_output, $executables, $state, $dir)
+function summary_missing_output ($test_output, $executables, $state, $dir,$valid)
 {
   global $types;
   global $num_types;
@@ -260,17 +262,19 @@ function summary_missing_output ($test_output, $executables, $state, $dir)
 	++ $count_missing;
       }
     }
-    if ($count_missing == 0) {
+    if ($count_missing == 0 || ! $valid) {
       printf ("<td></td>");
     } else {
       printf ("<td class=noout>$count_missing</td>");
+      $valid = false;
     }
   }
+  return $valid;
 }
 
 //----------------------------------------------------------------------
 
-function summary_incomplete_output ( $test_output, $executables, $state, $dir)
+function summary_incomplete_output ( $test_output, $executables, $state, $dir,$valid)
 {
   global $types;
   global $num_types;
@@ -285,14 +289,19 @@ function summary_incomplete_output ( $test_output, $executables, $state, $dir)
       ++$num_output_files;
     }
 
-    system("cat $output_files | awk 'BEGIN{e=0;}; /END CELLO/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=incomplete>\"$num_output_files - e\"</td>\";}}'");
+    /* if (! $valid) { */
+    /*   printf ("<td></td>"); */
+    /* } else { */
+    passthru("cat $output_files | awk 'BEGIN{e=0;}; /END CELLO/ {e=e+1};END{if ($num_output_files==e) {print \"<td></td>\"} else {print \"<td class=incomplete>\"$num_output_files - e\"</td>\";}}'");
+    /* } */
 
   }
+  return $valid;
 }
 
 //----------------------------------------------------------------------
 
-function summary_failed_tests ($test_output, $executables, $state, $dir)
+function summary_failed_tests ($test_output, $executables, $state, $dir,$valid)
 {
   global $types;
   global $num_types;
@@ -304,13 +313,18 @@ function summary_failed_tests ($test_output, $executables, $state, $dir)
       $output = "../$dir/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
-    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
+    if (! $valid) {
+      printf ("<td></td>");
+    } else {
+      system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
+    }
   }
+  return $valid;
 }
 
 //----------------------------------------------------------------------
 
-function summary_unfinished_tests ($test_output, $executables, $state, $dir)
+function summary_unfinished_tests ($test_output, $executables, $state, $dir,$valid)
 {
   global $types;
   global $num_types;
@@ -323,13 +337,18 @@ function summary_unfinished_tests ($test_output, $executables, $state, $dir)
       $output_files = "$output_files $output";
     }
 
-    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=unfinished>\",c,\"</td>\";}} '");
+    /* if (! $valid) { */
+    /*   printf ("<td></td>"); */
+    /* } else { */
+      system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=unfinished>\",c,\"</td>\";}} '");
+    /* } */
   }
+  return $valid;
 }
 
 //----------------------------------------------------------------------
 
-function summary_passed_tests ($test_output, $executables, $state, $dir)
+function summary_passed_tests ($test_output, $executables, $state, $dir,$valid)
 {
 
   global $types;
@@ -345,6 +364,7 @@ function summary_passed_tests ($test_output, $executables, $state, $dir)
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
   }
+  return $valid;
 }
 
 //----------------------------------------------------------------------
@@ -360,13 +380,21 @@ function test_summary($component,$test_output,$executables, $dir)
 
   $state = "running";
 
-  summary_missing_executable ($test_output, $executables, $state, $dir);
-  summary_missing_output     ($test_output, $executables, $state, $dir);
-  summary_incomplete_output  ($test_output, $executables, $state, $dir);
-  summary_failed_tests       ($test_output, $executables, $state, $dir);
-  summary_passed_tests       ($test_output, $executables, $state, $dir);
+  $valid = true;
+  $valid = summary_missing_executable 
+    ($test_output, $executables, $state, $dir,$valid);
+  $valid = summary_missing_output
+    ($test_output, $executables, $state, $dir,$valid);
+  $valid = summary_incomplete_output
+    ($test_output, $executables, $state, $dir,$valid);
+  $valid = summary_failed_tests
+    ($test_output, $executables, $state, $dir,$valid);
+  $valid = summary_passed_tests
+    ($test_output, $executables, $state, $dir,$valid);
+
   /* printf ("<th class=divider></th>"); */
-  /* summary_unfinished_tests   ($test_output, $executables, $state, $dir); */
+  /* $valid = summary_unfinished_tests */
+  /*   ($test_output, $executables, $state, $dir,$valid); */
 
   printf ("</tr>\n");
 }
