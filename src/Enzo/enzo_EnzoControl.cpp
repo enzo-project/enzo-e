@@ -11,8 +11,9 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-//======================================================================
 
+//======================================================================
+#ifndef NEW_NEIGHBOR
 void EnzoBlock::control_sync (int phase, std::string sync)
 {
 
@@ -36,7 +37,7 @@ void EnzoBlock::control_sync (int phase, std::string sync)
       // Quiescence detection through the Main chare
 
       if (index_.is_root()) {
-	CkStartQD(CkCallback(CkIndex_Main::p_enzo_matvec(), proxy_main));
+    	CkStartQD(CkCallback(CkIndex_Main::p_enzo_matvec(), proxy_main));
 
       }
 
@@ -72,5 +73,6 @@ void EnzoBlock::control_call_phase_ (int phase)
   }
 }
 
+#endif
 //======================================================================
 

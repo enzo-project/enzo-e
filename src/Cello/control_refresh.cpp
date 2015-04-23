@@ -72,7 +72,11 @@ void Block::refresh_begin_()
 
   }
 
+#ifdef NEW_NEIGHBOR
+  control_sync (CkIndex_Block::p_refresh_exit(),"neighbor",2);
+#else
   control_sync (phase_refresh_exit,"neighbor");
+#endif
 
 }
 

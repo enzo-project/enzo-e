@@ -397,20 +397,36 @@ public:
   // CONTROL AND SYNCHRONIZATION
   //--------------------------------------------------
 
+#ifdef NEW_NEIGHBOR
+  /// Syncronize before continuing with next callback
+  void control_sync (CkCallback callback, std::string sync, int id = 0);
+
+  /// Syncronize before continuing with next callback
+  void control_sync (int entry_point, std::string sync, int id = 0);
+
+  /// synchronize with count other chares; count only needs to be supplied once
+  void p_control_sync_count(int entry_point, int id, int count = 0) 
+  {      control_sync_count_(entry_point,id, count); }
+#else
   /// Syncronize before continuing with next phase
   virtual void control_sync (int phase, std::string sync);
-
   /// Syncronize before continuing with the given callback
   virtual void control_sync (CkCallback callback, std::string sync);
 
   /// synchronize with count other chares
   void p_control_sync_count(int phase, int count = 0) 
   {      control_sync_count_(phase,count); }
+#endif
 
 protected:
+#ifdef NEW_NEIGHBOR
+  void control_sync_neighbor_(int entry_point, int id);
+  void control_sync_count_(int entry_point, int id, int count = 0);
+#else
   void control_sync_neighbor_(int phase);
   void control_sync_count_(int phase, int count = 0);
   virtual void control_call_phase_ (int phase);
+#endif
 public:
 
   //--------------------------------------------------
@@ -422,14 +438,18 @@ public:
   {      refresh_enter_(); }
   void r_refresh_enter(CkReductionMsg * msg)  
   {      refresh_enter_(); delete msg; }
+protected:
   void refresh_enter_();
+public:
 
   // Exit the refresh phase after QD
   void p_refresh_exit () 
   {      refresh_exit_(); }
   void r_refresh_exit (CkReductionMsg * msg) 
   {      refresh_exit_(); delete msg;  }
+protected:
   void refresh_exit_ ();
+public:
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void x_refresh_send_face
@@ -446,7 +466,9 @@ public:
   void clear_refresh() throw()
   {
     refresh_sync_  = "";
+#ifndef NEW_NEIGHBOR
     refresh_phase_ = phase_unknown;
+#endif
     refresh_index_ = -1;
   }
 
@@ -756,7 +778,11 @@ protected: // attributes
   int index_refresh_;
 
   /// Phase after current refresh
+#ifdef NEW_NEIGHBOR
+  CkCallback refresh_call_;
+#else
   int refresh_phase_;
+#endif
 
   /// Synchronization after current refresh
   std::string refresh_sync_;

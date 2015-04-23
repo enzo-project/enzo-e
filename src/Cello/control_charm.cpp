@@ -15,8 +15,9 @@
 
 #ifdef CELLO_VERBOSE
 #   define VERBOSE(A)						\
-  fprintf (simulation()->fp_debug(),"[%s] %d TRACE %s\n",	\
+  printf ("[%s] %d TRACE %s\n",					\
 	   name_.c_str(),__LINE__,A);				\
+  fflush(stdout);						\
   if (index_.is_root()) {					\
     Monitor * monitor = simulation()->monitor();		\
     monitor->print("Control", A);				\
@@ -120,7 +121,11 @@ void Block::stopping_exit_()
 
   if (stop_) {
 
-    control_sync(phase_exit,"contribute");
+    CkCallback callback = 
+      CkCallback (CkIndex_Block::r_exit(NULL), thisProxy);
+
+    control_sync(callback,"contribute");
+
 
   } else {
 
@@ -169,12 +174,20 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
+#ifdef NEW_NEIGHBOR
+  control_sync(refresh_call_, refresh_sync_);
+#else
   control_sync(refresh_phase_, refresh_sync_);
+#endif
 }
 
 //======================================================================
 
+#ifdef NEW_NEIGHBOR
+void Block::control_sync (CkCallback callback, std::string sync, int id)
+#else
 void Block::control_sync (CkCallback callback, std::string sync)
+#endif
 {
 
   if (sync == "contribute") {
@@ -192,13 +205,30 @@ void Block::control_sync (CkCallback callback, std::string sync)
 
   } else {
     ERROR1 ("Block::control_sync()",  
-	    "Unknown sync type: sync type %s", 
+	    "Unknown sync type %s", 
 	    sync.c_str());    
   }
 }
 
 //----------------------------------------------------------------------
 
+#ifdef NEW_NEIGHBOR
+void Block::control_sync (int entry_point, std::string sync, int id)
+{
+  
+  if (sync == "neighbor") {
+    control_sync_neighbor_(entry_point,id);
+  } else {
+    ERROR1 ("Block::control_sync()",  
+	    "Unknown sync type %s", 
+	    sync.c_str());    
+  }
+}
+#endif
+
+//----------------------------------------------------------------------
+
+#ifndef NEW_NEIGHBOR
 void Block::control_sync(int phase, std::string sync)
 {
   if (sync == "contribute") {
@@ -300,38 +330,63 @@ void Block::control_sync(int phase, std::string sync)
 	    phase_name[phase],sync.c_str());    
   }
 }
+#endif
 
 //----------------------------------------------------------------------
 
+#ifdef NEW_NEIGHBOR
+void Block::control_sync_count_ (int entry_point, int phase, int count)
+#else
 void Block::control_sync_count_ (int phase, int count)
+#endif
 {
+  VERBOSE("control_sync_count");
+
   if (count != 0)  max_sync_[phase] = count;
 
   ++count_sync_[phase];
 
+    char buffer[100];
+    sprintf (buffer,"control_sync_count phase %d count %d/%d",
+	   phase,count_sync_[phase],max_sync_[phase]);
+    VERBOSE(buffer);
+
   // max_sync reached: continue and reset counter
+
   if (max_sync_[phase] > 0 && count_sync_[phase] >= max_sync_[phase]) {
     max_sync_[phase] = 0;
+
     count_sync_[phase] = 0;
+#ifdef NEW_NEIGHBOR
+    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
+#else
     control_call_phase_(phase);
+#endif
   }
 }
 
 //----------------------------------------------------------------------
 
+#ifdef NEW_NEIGHBOR
+void Block::control_sync_neighbor_(int entry_point, int phase)
+#else
 void Block::control_sync_neighbor_(int phase)
+#endif
 {
-  if (!is_leaf()) {
-
 #ifdef CELLO_DEBUG
-    fprintf (simulation()->fp_debug(),"%d %s called %s\n",
-	     __LINE__,name_.c_str(),phase_name[phase]);
+    printf ("%d control_sync_neighbor_(%s) phase %d\n",
+	     __LINE__,name_.c_str(),phase);
 #endif
 
+  if (!is_leaf()) {
+
+#ifdef NEW_NEIGHBOR
+    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
+#else
     control_call_phase_ (phase);
+#endif
     return;
   }
-
 
   const int level = this->level();
   const int rank  = this->rank();
@@ -354,21 +409,26 @@ void Block::control_sync_neighbor_(int phase)
     it_neighbor.child(ic3);
     int level_face = it_neighbor.face_level();
 
+#ifdef NEW_NEIGHBOR
+    thisProxy[index_neighbor].p_control_sync_count(entry_point,phase);
+#else
     thisProxy[index_neighbor].p_control_sync_count(phase);
+#endif
 
   }
+#ifdef NEW_NEIGHBOR
+  control_sync_count_(entry_point,phase,num_neighbors + 1);
+#else
   control_sync_count_(phase,num_neighbors + 1);
+#endif
 
 }
 
 //----------------------------------------------------------------------
 
+#ifndef NEW_NEIGHBOR
 void Block::control_call_phase_ (int phase)
 {
-#ifdef CELLO_DEBUG
-  fprintf (simulation()->fp_debug(),"%d %s called %s\n",
-	   __LINE__,name_.c_str(),phase_name[phase]);
-#endif
   CkCallback callback;
   if      (phase == phase_initial_exit)     initial_exit_();
   else if (phase == phase_adapt_called)     adapt_called_();
@@ -390,5 +450,6 @@ void Block::control_call_phase_ (int phase)
     ERROR1 ("Block::control_call_phase_()","Unknown phase: phase %s", 
 	    phase_name[phase]);    
 }
+#endif
 //======================================================================
 

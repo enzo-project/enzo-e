@@ -12,7 +12,7 @@
 /// adapt_begin_()
 
 //--------------------------------------------------
-/* #define DEBUG_ADAPT */
+// #define DEBUG_ADAPT
 //--------------------------------------------------
 
 #ifdef DEBUG_ADAPT
@@ -84,7 +84,12 @@ void Block::adapt_begin_()
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
+#ifdef NEW_NEIGHBOR
+  control_sync (CkIndex_Block::p_adapt_called(),"neighbor",0);
+#else
   control_sync (phase_adapt_called,"neighbor");
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -96,6 +101,7 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
+
   trace("adapt_called 2");
 
   adapt_send_level();

@@ -102,7 +102,11 @@ module mesh {
     // *** CONTROL ***
     //--------------------------------------------------
 
-    entry [expedited] void p_control_sync_count ( int phase, int count = 0);
+//// #ifdef NEW_NEIGHBOR
+    entry [expedited] void p_control_sync_count ( int entry_point, int id, int count = 0);
+////#else
+///    entry [expedited] void p_control_sync_count ( int phase, int count = 0);
+////#endif
 
     //--------------------------------------------------
     // *** ADAPT ***

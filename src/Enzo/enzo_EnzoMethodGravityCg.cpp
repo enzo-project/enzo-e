@@ -207,12 +207,32 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 
   delete msg;
 
+#ifdef NEW_NEIGHBOR
+
+  //@@@@ Want "neighbor" here: need to change refresh_call_ to int entry_point
+
+  refresh_sync_ = "contribute";
+
+  refresh_call_ = CkCallback 
+    (CkIndex_EnzoBlock::r_enzo_matvec(NULL), thisProxy);
+#else
   refresh_sync_  = "contribute";
   refresh_phase_ = phase_enzo_matvec;
+#endif
 
   index_refresh_ = method->index_refresh(1);
 
-  control_sync(phase_refresh_enter,"neighbor");
+#ifdef NEW_NEIGHBOR
+
+  //@@@@ Want "neighbor" here
+
+  CkCallback callback = 
+    CkCallback (CkIndex_Block::p_refresh_enter(), thisProxy);
+
+  control_sync(callback,"contribute",3);
+#else
+  control_sync(phase_refresh_enter,"contribute");
+#endif
   
 }
 
@@ -230,12 +250,32 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   delete msg;
 
+#ifdef NEW_NEIGHBOR
+
+  //@@@@ Want "neighbor" here
+
+  refresh_sync_ = "contribute";
+  refresh_call_ = CkCallback 
+    (CkIndex_EnzoBlock::r_enzo_matvec(NULL), thisProxy);
+#else
   refresh_sync_  = "contribute";
   refresh_phase_ = phase_enzo_matvec;
+#endif
 
   index_refresh_ = method->index_refresh(1);
 
-  control_sync(phase_refresh_enter,"neighbor");
+#ifdef NEW_NEIGHBOR
+
+  //@@@@ Want "neighbor" here
+
+  CkCallback callback = 
+    CkCallback (CkIndex_Block::p_refresh_enter(), thisProxy);
+
+  control_sync(callback,"contribute",4);
+#else
+  control_sync(phase_refresh_enter,"contribute");
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -341,11 +381,11 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     rr_max_ = std::max(rr_max_,rr_);
   }
 
-  if (enzo_block->index().is_root()) {
-    printf ("%s:%d cg_end iter %d rr0 %g rr_min %g rr_max %g rr %g\n",
-	    __FILE__,__LINE__,iter_,
-	    (double)rr0_,(double)rr_min_,(double)rr_max_,(double)rr_);
-  }
+  // if (enzo_block->index().is_root() && iter_ % 100 == 0) {
+  //   printf ("%s:%d cg_end iter %d rr0 %g rr_min %g rr_max %g rr %g\n",
+  // 	    __FILE__,__LINE__,iter_,
+  // 	    (double)rr0_,(double)rr_min_,(double)rr_max_,(double)rr_);
+  // }
 
   if (rr_ / rr0_ < res_tol_) {
 
