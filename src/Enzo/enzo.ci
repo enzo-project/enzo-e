@@ -118,17 +118,17 @@ module enzo {
 
   };
 
-  array[Index] EnzoArrayMethodGravityCg {
-    entry EnzoArrayMethodGravityCg();
-    template <class T>
-    entry void r_cg_loop_0(CkReductionMsg *msg);
-    template <class T>
-    entry void r_cg_loop_1(CkReductionMsg *msg);
-    template <class T>
-    entry void r_cg_loop_3(CkReductionMsg *msg);
-    template <class T>
-    entry void r_cg_loop_5(CkReductionMsg *msg);
-  }
+  // array[Index] EnzoArrayMethodGravityCg {
+  //   entry EnzoArrayMethodGravityCg();
+  //   template <class T>
+  //   entry void r_cg_loop_0(CkReductionMsg *msg);
+  //   template <class T>
+  //   entry void r_cg_loop_1(CkReductionMsg *msg);
+  //   template <class T>
+  //   entry void r_cg_loop_3(CkReductionMsg *msg);
+  //   template <class T>
+  //   entry void r_cg_loop_5(CkReductionMsg *msg);
+  // }
 
 };
 

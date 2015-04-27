@@ -72,11 +72,7 @@ Block::Block
   age_(0),
   face_level_last_(),
   name_(name()),
-#ifdef NEW_NEIGHBOR
   refresh_call_(),
-#else
-  refresh_phase_(phase_unknown),
-#endif
   refresh_sync_(""),
   refresh_index_(-1),
   index_method_(-1)
@@ -212,10 +208,7 @@ Block::Block
 
     thisProxy.doneInserting();
 
-    CkCallback callback = 
-      CkCallback(CkIndex_Main::p_adapt_end(), proxy_main);
-
-    control_sync (callback,"quiescence");
+    control_sync (CkIndex_Main::p_adapt_end(),"quiescence");
 
   }
 
@@ -270,11 +263,7 @@ void Block::pup(PUP::er &p)
   p | age_;
   p | face_level_last_;
   p | name_;
-#ifdef NEW_NEIGHBOR
   p | refresh_call_;
-#else
-  p | refresh_phase_;
-#endif
   p | refresh_sync_;
   p | refresh_index_;
   p | index_method_;

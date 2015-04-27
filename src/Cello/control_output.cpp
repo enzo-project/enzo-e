@@ -270,10 +270,7 @@ void Simulation::output_exit()
 
 void Block::p_output_end()
 {
-  CkCallback callback = 
-    CkCallback (CkIndex_Block::r_stopping_enter(NULL), thisProxy);
-
-  control_sync(callback,"contribute");
+  control_sync(CkIndex_Block::r_stopping_enter(NULL),"contribute");
 }
 //======================================================================
 

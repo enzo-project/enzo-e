@@ -84,11 +84,7 @@ void Block::adapt_begin_()
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
-#ifdef NEW_NEIGHBOR
   control_sync (CkIndex_Block::p_adapt_called(),"neighbor",0);
-#else
-  control_sync (phase_adapt_called,"neighbor");
-#endif
 
 }
 
@@ -106,10 +102,7 @@ void Block::adapt_called_()
 
   adapt_send_level();
 
-  CkCallback callback = 
-    CkCallback (CkIndex_Main::p_adapt_next(), proxy_main);
-
-  control_sync (callback,"quiescence");
+  control_sync (CkIndex_Main::p_adapt_next(),"quiescence");
 
 }
 
@@ -142,10 +135,7 @@ void Block::adapt_next_()
     if (level() > level_next_) adapt_coarsen_();
   }
 
-  CkCallback callback = 
-    CkCallback(CkIndex_Main::p_adapt_end(), proxy_main);
-
-  control_sync (callback,"quiescence");
+  control_sync (CkIndex_Main::p_adapt_end(),"quiescence");
 }
 
 //----------------------------------------------------------------------
@@ -187,11 +177,11 @@ void Block::adapt_end_()
 
   bool adapt_again = (is_first_cycle && (adapt_step_++ < level_maximum));
 
-  CkCallback callback = (adapt_again) ?
-    CkCallback(CkIndex_Main::p_adapt_enter(), proxy_main) :
-    CkCallback(CkIndex_Main::p_adapt_exit(),  proxy_main);
-
-  control_sync (callback,"quiescence");
+  if (adapt_again) {
+    control_sync (CkIndex_Main::p_adapt_enter(),"quiescence");
+  } else {
+    control_sync (CkIndex_Main::p_adapt_exit(),"quiescence");
+  }
 }
 
 //----------------------------------------------------------------------

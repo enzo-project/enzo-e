@@ -87,6 +87,14 @@ enum hydro_type
   };
 
 //----------------------------------------------------------------------
+
+enum return_enum {
+  return_unknown,
+  return_converged,
+  return_error_max_iter_reached
+};
+
+//----------------------------------------------------------------------
 // WARNING 100 must be larger than number of phases in
 // src/Cello/_mesh.hpp phase_type
 

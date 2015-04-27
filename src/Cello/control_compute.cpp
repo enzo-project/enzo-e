@@ -21,14 +21,8 @@ void Block::compute_begin_ ()
   TRACE("Block::compute_begin()");
   simulation()->set_phase(phase_compute);
 
-#ifdef NEW_NEIGHBOR
-  refresh_call_ = 
-    CkCallback (CkIndex_Block::r_compute_continue(NULL), thisProxy);
-#else
-  refresh_phase_ = phase_compute_continue;
-#endif
-
-  refresh_sync_  = "contribute";
+  refresh_call_ = CkIndex_Block::r_compute_continue(NULL);
+  refresh_sync_ = "contribute";
 
   index_method_ = 0;
 
@@ -44,21 +38,12 @@ void Block::compute_next_ ()
 
   if (method) {
 
-#ifdef NEW_NEIGHBOR
-    refresh_call_ =
-      CkCallback (CkIndex_Block::r_compute_continue(NULL), thisProxy);
-#else
-    refresh_phase_ = phase_compute_continue;
-#endif
-    refresh_sync_  = "contribute";
+    refresh_call_ = CkIndex_Block::r_compute_continue(NULL);
+    refresh_sync_ = "contribute";
 
     index_refresh_ = method->index_refresh(0);
 
-#ifdef NEW_NEIGHBOR
     control_sync(CkIndex_Block::p_refresh_enter(),"neighbor",1);
-#else
-    control_sync(phase_refresh_enter,"contribute");
-#endif
 
   } else {
 

@@ -1,43 +1,43 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodGravityCg.hpp
+/// @file     enzo_EnzoMethodGravityMg.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     2014-10-21 17:25:40
-/// @brief    [\ref Enzo] Declaration of EnzoMethodGravityCg
+/// @date     2015-04-24 22:32:18
+/// @brief    [\ref Enzo] Declaration of EnzoMethodGravityMg
 ///
-/// Bicongugate gradient stabalized method (Cg) for solving for
-/// self-gravity on field data.
+/// Multigrid on adaptive meshes for solving for self-gravity on field
+/// data.
 
-#ifndef ENZO_ENZO_METHOD_GRAVITY_CG_HPP
-#define ENZO_ENZO_METHOD_GRAVITY_CG_HPP
+#ifndef ENZO_ENZO_METHOD_GRAVITY_MG_HPP
+#define ENZO_ENZO_METHOD_GRAVITY_MG_HPP
 
-class EnzoMethodGravityCg : public Method {
+class EnzoMethodGravityMg : public Method {
 
-  /// @class    EnzoMethodGravityCg
+  /// @class    EnzoMethodGravityMg
   /// @ingroup  Enzo
   ///
   /// @brief [\ref Enzo] Demonstration method to solve self-gravity
-  /// using the Cg method.  This is more applicable to smaller problems
+  /// using the Mg method.  This is more applicable to smaller problems
   /// since the method doesn't scale as well as some other methods
   /// (FFT, MG, etc.) for larger problems.
 
 public: // interface
 
-  /// Create a new EnzoMethodGravityCg object
-  EnzoMethodGravityCg(FieldDescr * field_descr, int rank,
+  /// Create a new EnzoMethodGravityMg object
+  EnzoMethodGravityMg(FieldDescr * field_descr, int rank,
 		      double grav_const,
 		      int iter_max, 
 		      double res_tol,
 		      bool is_singular,
 		      bool diag_precon);
 
-  EnzoMethodGravityCg() {};
+  EnzoMethodGravityMg() {};
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodGravityCg);
+  PUPable_decl(EnzoMethodGravityMg);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodGravityCg (CkMigrateMessage *m) {}
+  EnzoMethodGravityMg (CkMigrateMessage *m) {}
 
   /// CHARM++ Pack / Unpack function
 //----------------------------------------------------------------------
@@ -97,30 +97,30 @@ public: // interface
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
-  { return "gravity_cg"; }
+  { return "gravity_mg"; }
 
   /// Continuation after global reduction
   template <class T>
-  void cg_shift_1(EnzoBlock * enzo_block) throw();
+  void mg_shift_1(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
-  void cg_loop_2(EnzoBlock * enzo_block) throw();
+  void mg_loop_2(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
-  void cg_loop_4(EnzoBlock * enzo_block) throw();
+  void mg_loop_4(EnzoBlock * enzo_block) throw();
 
   // /// Continuation after global reduction
   // template <class T>
-  // void cg_shift_2(EnzoBlock * enzo_block) throw();
+  // void mg_shift_2(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>
-  void cg_loop_6(EnzoBlock * enzo_block) throw();
+  void mg_loop_6(EnzoBlock * enzo_block) throw();
 
   template <class T>
-  void cg_end (EnzoBlock * enzo_block, int retval) throw();
+  void mg_end (EnzoBlock * enzo_block, int retval) throw();
 
   /// Set rz_ by EnzoBlock after reduction
   void set_rz(long double rz) throw()    {  rz_ = rz; }
@@ -153,9 +153,9 @@ protected: // methods
   void compute_ (EnzoBlock * enzo_block) throw();
 
   template <class T>
-  void cg_begin_1_() throw();
+  void mg_begin_1_() throw();
 
-  void cg_exit_() throw();
+  void mg_exit_() throw();
 
   /// Perform vector copy X <- Y
   template <class T>
@@ -207,7 +207,7 @@ protected: // attributes
   /// Gas constant, e.g. 6.67384e-8 (cgs)
   double grav_const_;
 
-  /// Maximum number of Cg iterations
+  /// Maximum number of Mg iterations
   int iter_max_;
 
   /// Convergence tolerance on the residual reduction rz_ / rz0_
@@ -227,7 +227,7 @@ protected: // attributes
   int idensity_;
   int ipotential_;
 
-  /// CG vector id's
+  /// MG vector id's
   int ib_;
   int ix_;
   int ir_;
@@ -243,7 +243,7 @@ protected: // attributes
   int mx_,my_,mz_;
   int gx_,gy_,gz_;
 
-  /// Current CG iteration
+  /// Current MG iteration
   int iter_;
 
   /// dot (R_i,R_i)
@@ -270,4 +270,4 @@ protected: // attributes
 
 };
 
-#endif /* ENZO_ENZO_METHOD_GRAVITY_CG_HPP */
+#endif /* ENZO_ENZO_METHOD_GRAVITY_MG_HPP */
