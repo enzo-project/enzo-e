@@ -107,6 +107,13 @@ public: // attributes
   double                     method_gravity_cg_res_tol;
   double                     method_gravity_cg_grav_const;
   bool                       method_gravity_cg_diag_precon;
+  int                        method_gravity_cg_monitor_iter;
+
+  // EnzoMethodGravityMg
+  int                        method_gravity_mg_iter_max;
+  double                     method_gravity_mg_res_tol;
+  double                     method_gravity_mg_grav_const;
+  int                        method_gravity_mg_monitor_iter;
 
   // EnzoMethodGravityBiCGStab
   int                        method_gravity_bicgstab_iter_max;

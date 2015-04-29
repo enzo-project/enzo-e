@@ -33,6 +33,20 @@
 //         rz = rz2;
 //     while (! converged())
 //
+// Required Fields:
+// 
+// B                          linear system right-hand side
+// D                          CG search direction vector: unpreconditioned
+// R                          residual vector of unpreconditioned linear system
+// X                          linear system right-hand solution
+// Y                          Krylov subspace vector
+// Z                          residual of preconditioned linear system
+// potential                  computed gravitational potential
+// density                    density field
+// acceleration_x             acceleration along X-axis
+// acceleration_y [rank >= 2] acceleration along Y-axis
+// acceleration_z [rank >= 3] acceleration along Z-axis
+
 
 #include "cello.hpp"
 
@@ -44,25 +58,11 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
-#define CHECK(VALUE,STRING)			\
-  if (std::fpclassify(VALUE) == FP_ZERO) {	\
-    printf ("ERROR: %s:%d %s zero\n",		\
-	    __FILE__,__LINE__,STRING);		\
-  }						\
-  if (std::fpclassify(VALUE) == FP_NAN) {	\
-    printf ("ERROR: %s:%d %s nan\n",		\
-	    __FILE__,__LINE__,STRING);		\
-  }						\
-  if (std::fpclassify(VALUE) == FP_INFINITE) {	\
-    printf ("ERROR: %s:%d %s inf\n",		\
-	    __FILE__,__LINE__,STRING);		\
-  }						\
-
 //----------------------------------------------------------------------
 
 EnzoMethodGravityCg::EnzoMethodGravityCg 
 (FieldDescr * field_descr, int rank,
- double grav_const, int iter_max, double res_tol,
+ double grav_const, int iter_max, double res_tol, int monitor_iter,
  bool is_singular,
  bool diag_precon) 
   : Method(), 
@@ -73,6 +73,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     grav_const_(grav_const),
     iter_max_(iter_max), 
     res_tol_(res_tol),
+    monitor_iter_(monitor_iter),
     rr0_(0),
     rr_min_(0),rr_max_(0),
     idensity_(0),  ipotential_(0),
@@ -267,9 +268,9 @@ template <class T>
 void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 {
 
-  CHECK(rr_,"rr_");
-  CHECK(bs_,"bs_");
-  CHECK(bc_,"bc_");
+  cello::check(rr_,"rr_",__FILE__,__LINE__);
+  cello::check(bs_,"bs_",__FILE__,__LINE__);
+  cello::check(bc_,"bc_",__FILE__,__LINE__);
 
   set_leaf(enzo_block);
 
@@ -331,7 +332,7 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 {
   set_leaf(enzo_block);
 
-  CHECK(rr_,"rr_");
+  cello::check(rr_,"rr_",__FILE__,__LINE__);
 
   if (iter_ == 0) {
     rr0_ = rr_;
@@ -342,11 +343,19 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     rr_max_ = std::max(rr_max_,rr_);
   }
 
-  // if (enzo_block->index().is_root() && iter_ % 100 == 0) {
-  //   printf ("%s:%d cg_end iter %d rr0 %g rr_min %g rr_max %g rr %g\n",
-  // 	    __FILE__,__LINE__,iter_,
-  // 	    (double)rr0_,(double)rr_min_,(double)rr_max_,(double)rr_);
-  // }
+  if (enzo_block->index().is_root()) {
+
+    Monitor * monitor = enzo_block->simulation()->monitor();
+
+    if (iter_ == 0) {
+      monitor->print ("Enzo", "CG iter %04d  rr0 %g",
+		      iter_,(double)(rr0_));
+    }
+
+    if (monitor_iter_ && (iter_ % monitor_iter_) == 0 ) {
+      monitor_output_ (enzo_block);
+    }
+  }
 
   if (rr_ / rr0_ < res_tol_) {
 
@@ -422,9 +431,9 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 
   set_leaf(enzo_block);
 
-  CHECK(rr_,"rr_");
-  CHECK(rz_,"rz_");
-  CHECK(dy_,"dy_");
+  cello::check(rr_,"rr_",__FILE__,__LINE__);
+  cello::check(rz_,"rz_",__FILE__,__LINE__);
+  cello::check(dy_,"dy_",__FILE__,__LINE__);
 
   Data * data = enzo_block->data();
   Field field = data->field();
@@ -437,7 +446,7 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 
   T a = rz_ / dy_;
 
-  CHECK(a,"a");
+  cello::check(a,"a",__FILE__,__LINE__);
 
   zaxpy_ (X,  a ,D,X);
   zaxpy_ (R, -a, Y,R);
@@ -492,9 +501,9 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
   set_leaf(enzo_block);
 
-  CHECK(rz2_,"rz2_");
-  CHECK(rs_,"rs_");
-  CHECK(xs_,"xs_");
+  cello::check(rz2_,"rz2_",__FILE__,__LINE__);
+  cello::check(rs_,"rs_",__FILE__,__LINE__);
+  cello::check(xs_,"xs_",__FILE__,__LINE__);
 
   Field field = enzo_block->data()->field();
 
@@ -515,7 +524,7 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
   T b = rz2_ / rz_;
 
-  CHECK(b,"b");
+  cello::check(b,"b",__FILE__,__LINE__);
 
   zaxpy_ (D,b,D,Z);
 
@@ -552,12 +561,10 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
   T * potential = (T*) field.values(ipotential_);
 
   if (enzo_block->index().is_root()) {
-    printf ("%s:%d cg_end iter %d rr0 %g rr_min %g rr_max %g rr %g\n",
-	    __FILE__,__LINE__,iter_,
-	    (double)rr0_,(double)rr_min_,(double)rr_max_,(double)rr_);
+    monitor_output_ (enzo_block);
   }
 
-  copy_(potential,X);
+  copy_(potential,X,mx_,my_,mz_,is_leaf_);
 
   bool symmetric;
   int order;
@@ -570,26 +577,23 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
 //----------------------------------------------------------------------
 
+void EnzoMethodGravityCg::monitor_output_(EnzoBlock * enzo_block) throw()
+{
+
+  Monitor * monitor = enzo_block->simulation()->monitor();
+
+  monitor->print ("Enzo", "CG iter %04d  rr %g [%g %g]",
+		  iter_,
+		  (double)(rr_    / rr0_),
+		  (double)(rr_min_/ rr0_),
+		  (double)(rr_max_/ rr0_));
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodGravityCg::cg_exit_() throw()
 /// deallocate temporary vectors
 {
-}
-
-//======================================================================
-
-template <class T>
-void EnzoMethodGravityCg::copy_ (T * X, const T * Y) const throw()
-{
-  if (! is_leaf_ ) return;
-
-  for (int iz=0; iz<mz_; iz++) {
-    for (int iy=0; iy<my_; iy++) {
-      for (int ix=0; ix<mx_; ix++) {
-	int i = ix + mx_*(iy + my_*iz);
-	X[i] = Y[i];
-      }
-    }
-  }
 }
 
 //======================================================================

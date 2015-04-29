@@ -80,6 +80,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_cg_iter_max;
   p | method_gravity_cg_res_tol;
   p | method_gravity_cg_diag_precon;
+  p | method_gravity_cg_monitor_iter;
+
+  p | method_gravity_mg_grav_const;
+  p | method_gravity_mg_iter_max;
+  p | method_gravity_mg_res_tol;
+  p | method_gravity_mg_monitor_iter;
+
   p | method_gravity_bicgstab_iter_max;
   p | method_gravity_bicgstab_res_tol;
 
@@ -221,6 +228,23 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_cg_diag_precon = p->value_logical
     ("Method:gravity_cg:diag_precon",false);
+
+  method_gravity_cg_monitor_iter = p->value_integer
+    ("Method:gravity_cg:monitor_iter",1);
+
+
+  method_gravity_mg_iter_max = p->value_integer
+    ("Method:gravity_mg:iter_max",100);
+
+  method_gravity_mg_grav_const = p->value_float
+    ("Method:gravity_mg:grav_const",6.67384e-8); // default: G (cgs)
+
+  method_gravity_mg_res_tol = p->value_float
+    ("Method:gravity_mg:res_tol",1e-6);
+
+  method_gravity_mg_monitor_iter = p->value_integer
+    ("Method:gravity_mg:monitor_iter",1);
+
 
   method_gravity_bicgstab_iter_max = p->value_integer
     ("Method:gravity_bicgstab:iter_max",100);

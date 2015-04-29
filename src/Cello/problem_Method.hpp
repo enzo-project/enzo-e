@@ -70,8 +70,20 @@ public: // virtual functions
     return index_refresh_.size();
   }
 
+protected: // functions
 
-private: // attributes (deliberately not accessible to derived classes)
+  /// Perform vector copy X <- Y
+  template <class T>
+  void copy_ (T * X, const T * Y,
+	      int mx, int my, int mz,
+	      bool is_active) const throw()
+  {
+    if (! is_active ) return;
+    const int m=mx*my*mz;
+    for (int i=0; i<mx*my*mz; i++) X[i] = Y[i];
+  }
+
+private: // attributes
 
   /// Indices of Refresh objects associated with this method
   std::vector<int> index_refresh_;

@@ -44,7 +44,7 @@ int EnzoRefineShock::apply
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
 
-  int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
+  int rank = block->rank();
 
   // compute pressure using the EnzoComputePressure class
   EnzoComputePressure compute_pressure (EnzoBlock::Gamma,
@@ -59,9 +59,10 @@ int EnzoRefineShock::apply
   int id_velocity = field.field_id("velocity_x");
 
   void * v3[3] = {
-    field.values("velocity_x"),
-    field.values("velocity_y"),
-    field.values("velocity_z") };
+    (rank >= 1) ? field.values("velocity_x") : NULL,
+    (rank >= 2) ? field.values("velocity_y") : NULL,
+    (rank >= 3) ? field.values("velocity_z") : NULL
+  };
 
   void * te = field.values("total_energy");
   void * de = field.values("density");

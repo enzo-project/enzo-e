@@ -17,9 +17,7 @@ class EnzoMethodGravityMg : public Method {
   /// @ingroup  Enzo
   ///
   /// @brief [\ref Enzo] Demonstration method to solve self-gravity
-  /// using the Mg method.  This is more applicable to smaller problems
-  /// since the method doesn't scale as well as some other methods
-  /// (FFT, MG, etc.) for larger problems.
+  /// using Multigrid.
 
 public: // interface
 
@@ -28,8 +26,8 @@ public: // interface
 		      double grav_const,
 		      int iter_max, 
 		      double res_tol,
-		      bool is_singular,
-		      bool diag_precon);
+		      int monitor_iter,
+		      bool is_singular);
 
   EnzoMethodGravityMg() {};
 
@@ -52,24 +50,25 @@ public: // interface
     Method::pup(p);
 
     p | A_;
-    p | M_;
+    p | restrict_;
+    p | prolong_;
     p | is_singular_;
     p | rank_;
     p | grav_const_;
     p | iter_max_;
     p | res_tol_;
+    p | monitor_iter_;
+    p | rr_;
     p | rr0_;
     p | rr_min_;
     p | rr_max_;
+
     p | idensity_;
     p | ipotential_;
     p | ib_;
     p | ix_;
     p | ir_;
-    p | id_;
-    p | iy_;
-    p | iz_;
-    p | is_leaf_;
+    p | ic_;
 
     p | nx_;
     p | ny_;
@@ -84,13 +83,8 @@ public: // interface
     p | gz_;
 
     p | iter_;
-  
-    p | rz_;
-    p | rz2_;
-    p | dy_;
-    p | bs_;
-    p | bc_;
-
+    p | is_active_;
+    p | level_;
   }
 
   /// Solve for the gravitational potential
@@ -99,103 +93,33 @@ public: // interface
   virtual std::string name () throw () 
   { return "gravity_mg"; }
 
-  /// Continuation after global reduction
-  template <class T>
-  void mg_shift_1(EnzoBlock * enzo_block) throw();
-
-  /// Continuation after global reduction
-  template <class T>
-  void mg_loop_2(EnzoBlock * enzo_block) throw();
-
-  /// Continuation after global reduction
-  template <class T>
-  void mg_loop_4(EnzoBlock * enzo_block) throw();
-
-  // /// Continuation after global reduction
-  // template <class T>
-  // void mg_shift_2(EnzoBlock * enzo_block) throw();
-
-  /// Continuation after global reduction
-  template <class T>
-  void mg_loop_6(EnzoBlock * enzo_block) throw();
-
-  template <class T>
-  void mg_end (EnzoBlock * enzo_block, int retval) throw();
-
-  /// Set rz_ by EnzoBlock after reduction
-  void set_rz(long double rz) throw()    {  rz_ = rz; }
-
-  /// Set rr_ by EnzoBlock after reduction
-  void set_rr(long double rr) throw()    {  rr_ = rr; }
-
-  /// Set rr_new_ by EnzoBlock after reduction
-  void set_rz2(long double rz2) throw()  {  rz2_ = rz2; }
-
-  /// Set dy_ by EnzoBlock after reduction
-  void set_dy(long double dy) throw()         { dy_ = dy; }
-
-  /// Set bs_ (B sum) by EnzoBlock after reduction
-  void set_bs(long double bs) throw()    { bs_ = bs;  }
-  /// Set rs_ (R sum) by EnzoBlock after reduction
-  void set_rs(long double rs) throw()    { rs_ = rs;  }
-  /// Set xs_ (X sum) by EnzoBlock after reduction
-  void set_xs(long double xs) throw()    { xs_ = xs;  }
-
-  /// Set bc_ (B count) by EnzoBlock after reduction
-  void set_bc(long double bc) throw()    { bc_ = bc;  }
-
-  /// Set iter_ by EnzoBlock after reduction
-  void set_iter(int iter) throw()        { iter_ = iter; }
-
 protected: // methods
+
+  void monitor_output_(EnzoBlock * enzo_block) throw();
 
   template <class T>
   void compute_ (EnzoBlock * enzo_block) throw();
 
   template <class T>
-  void mg_begin_1_() throw();
-
-  void mg_exit_() throw();
-
-  /// Perform vector copy X <- Y
-  template <class T>
-  void copy_ (T * X, const T * Y) const throw();
-
-  /// Compute local contribution to inner-product X*Y
-  template <class T>
-  long double dot_ (const T * X, const T * Y) const throw();
-
-  template <class T>
-  void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
-  
-  /// Compute local sum of vector elements X_i
-  template <class T>
-  long double sum_ (const T * X) const throw();
-
-  /// scale the vector by the given scalar Y = a*X
-  template <class T>
-  void scale_ (T * Y, T a, const T * X) const throw();
-
-  /// return the number of elements of the vector X
-  template <class T>
-  T count_ (T * X) const throw();
-  
-  /// Shift the vector X by a scalar multiple of Y
-  /// NOTE includes ghost zones since performed after ghost refresh
-  template <class T>
-  void shift_ (T * X, const T a, const T * Y) const throw();
+  void mg_end (EnzoBlock * enzo_block, int retval) throw();
 
   /// Set whether current Block is a leaf--if not don't touch data
-  void set_leaf(Block * block) throw()
-  { is_leaf_ = block->is_leaf(); }
+  void set_active(Block * block) throw()
+  { is_active_ = (level_ == block->level()); }
+
+  bool is_active () const throw()
+  { return is_active_; }
 
 protected: // attributes
 
   /// Matrix
   Matrix * A_;
 
-  /// Preconditioner
-  Matrix * M_;
+  /// Restriction
+  Restrict * restrict_;
+
+  /// Prolongation
+  Prolong * prolong_;
 
   /// Whether you need to subtract of the nullspace of A from b, e.g. fully
   /// periodic or Neumann problems
@@ -212,6 +136,12 @@ protected: // attributes
 
   /// Convergence tolerance on the residual reduction rz_ / rz0_
   double res_tol_;
+
+  /// How often to display progress
+  int monitor_iter_;
+
+  /// Current residual
+  long double rr_;
 
   /// Initial residual
   long double rr0_;
@@ -231,12 +161,7 @@ protected: // attributes
   int ib_;
   int ix_;
   int ir_;
-  int id_;
-  int iy_;
-  int iz_;
-
-  /// Whether current block is a leaf
-  bool is_leaf_;
+  int ic_;
 
   /// Block field attributes
   int nx_,ny_,nz_;
@@ -246,27 +171,11 @@ protected: // attributes
   /// Current MG iteration
   int iter_;
 
-  /// dot (R_i,R_i)
-  long double rr_;
+  /// Whether current block is active (set using set_active)
+  int is_active_;
 
-  /// dot (R_i,Z_i)
-  long double rz_;
-
-  /// dot (R_i+1,Z_i+1)
-  long double rz2_;
-
-  /// dot (D,Y)
-  long double dy_;
-
-  /// sum of elements B(i) for singular systems
-  long double bs_;
-  /// sum of elements R(i) for singular systems
-  long double rs_;
-  /// sum of elements X(i) for singular systems
-  long double xs_;
-
-  /// count of elements B(i) for singular systems
-  long double bc_;
+  /// Current active level
+  int level_;
 
 };
 

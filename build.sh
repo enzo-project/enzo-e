@@ -19,7 +19,10 @@ set target = "install-bin"
 set k_switch = "-k"
 
 if ($#argv >= 1) then
-   if ($argv[1] == "clean") then
+   if ($argv[1] == "reset") then
+       rm -f test/STATUS test/START test/STOP
+       exit
+   else if ($argv[1] == "clean") then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s cleaning..."
       foreach prec (single double)

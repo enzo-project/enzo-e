@@ -15,4 +15,4 @@ Mesh {
    root_blocks = [ 2, 2, 2];
    root_size   = [32,32,32];
 }
-Stopping { cycle = 1; }
+Stopping { cycle = 1000; }

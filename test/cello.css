@@ -33,6 +33,10 @@ hr {
 
 
 /* h1 { text-align: center; } */
+h3 {
+/*     margin-top: -5px; */
+/*    margin-bottom: -5px; */
+}
 tr {
     background-color: #aaa;
     border: solid;

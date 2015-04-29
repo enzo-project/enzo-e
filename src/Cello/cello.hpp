@@ -144,6 +144,24 @@ namespace cello {
   T err_abs (const T & a, const T & b)
   {  return fabs(a-b);  };
 
+  /// Check a number for zero, NAN, and inf
+
+  template <class T>
+  void check (T value, const char * string,
+	      const char * file, int line)
+  {
+    if (std::fpclassify(value) == FP_ZERO) {
+      printf ("WARNING: %s:%d %s zero\n", file,line,string);	
+    }					
+    if (std::fpclassify(value) == FP_NAN) {
+      printf ("WARNING: %s:%d %s nan\n", file,line,string);	
+    }					
+    if (std::fpclassify(value) == FP_INFINITE) {
+      printf ("WARNING: %s:%d %s inf\n", file,line,string);	
+    }					
+  }
+
+
 };
 
 #endif /* CELLO_HPP */

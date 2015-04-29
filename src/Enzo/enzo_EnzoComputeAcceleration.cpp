@@ -21,9 +21,9 @@ EnzoComputeAcceleration::EnzoComputeAcceleration
     symmetric_(symmetric),
     order_(order)
 {
-  i_ax_ = field_descr->field_id("acceleration_x");
-  i_ay_ = field_descr->field_id("acceleration_y");
-  i_az_ = field_descr->field_id("acceleration_z");
+  i_ax_ = (rank_ >= 1) ? field_descr->field_id("acceleration_x") : -1;
+  i_ay_ = (rank_ >= 2) ? field_descr->field_id("acceleration_y") : -1;
+  i_az_ = (rank_ >= 3) ? field_descr->field_id("acceleration_z") : -1;
 
   i_p_ =  field_descr->field_id("potential");
 

@@ -55,45 +55,38 @@ int EnzoBlock::SolveHydroEquations
 
   /* Compute size (in enzo_floats) of the current grid. */
 
+  int rank = this->rank();
+
   size = 1;
-  for (dim = 0; dim < GridRank; dim++)
+  for (dim = 0; dim < rank; dim++)
     size *= GridDimension[dim];
 
-  /* Find fields: density, total energy, velocity1-3. */
-
-  // enzo_float * species_De    = (enzo_float *) field.values("species_De");
-  // enzo_float * species_HI    = (enzo_float *) field.values("species_HI");
-  // enzo_float * species_HII   = (enzo_float *) field.values("species_HII");
-  // enzo_float * species_HeI   = (enzo_float *) field.values("species_HeI");
-  // enzo_float * species_HeII  = (enzo_float *) field.values("species_HeII");
-  // enzo_float * species_HeIII = (enzo_float *) field.values("species_HeIII");
-  // enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
-  // enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
-  // enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
-  // enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
-  // enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
-  // enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
-
-
-  enzo_float * density         = (enzo_float*) field.values("density");
-  enzo_float * total_energy    = (enzo_float *)field.values("total_energy");
-  enzo_float * internal_energy = (enzo_float *)field.values("internal_energy");
-  enzo_float * velocity_x      = (enzo_float*) field.values("velocity_x");
-  enzo_float * velocity_y      = (enzo_float*) field.values("velocity_y");
-  enzo_float * velocity_z      = (enzo_float*) field.values("velocity_z");
-  enzo_float * acceleration_x  = (enzo_float*) field.values("acceleration_x");
-  enzo_float * acceleration_y  = (enzo_float*) field.values("acceleration_y");
-  enzo_float * acceleration_z  = (enzo_float*) field.values("acceleration_z");
+  enzo_float * density         = (enzo_float *) field.values("density");
+  enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
+  enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");
+  enzo_float * velocity_x      = (rank >= 1) ? 
+    (enzo_float *) field.values("velocity_x") : new enzo_float[size];
+  enzo_float * velocity_y      = (rank >= 2) ? 
+    (enzo_float *) field.values("velocity_y") : new enzo_float[size];
+  enzo_float * velocity_z      = (rank >= 3) ?
+    (enzo_float *) field.values("velocity_z") : new enzo_float[size];
+  enzo_float * acceleration_x  = field.is_field("acceleration_x") ? 
+    (enzo_float *) field.values("acceleration_x") : NULL;
+  enzo_float * acceleration_y  = field.is_field("acceleration_y") ? 
+    (enzo_float *)field.values("acceleration_y") : NULL;
+  enzo_float * acceleration_z  = field.is_field("acceleration_z") ? 
+    (enzo_float *)field.values("acceleration_z") : NULL;
 
   /* velocity_x must exist, but if y & z aren't present, then create blank
      buffers for them (since the solver needs to advect something). */
 
-  if (GridRank < 2) {
-    velocity_y = new enzo_float[size];
+  if (rank < 1) {
+    for (int i=0; i<size; i++) velocity_x[i] = 0.0;
+  }
+  if (rank < 2) {
     for (int i=0; i<size; i++) velocity_y[i] = 0.0;
   }
-  if (GridRank < 3) {
-    velocity_z = new enzo_float[size];
+  if (rank < 3) {
     for (int i=0; i<size; i++) velocity_z[i] = 0.0;
   }
 
@@ -120,18 +113,18 @@ int EnzoBlock::SolveHydroEquations
   for (i = 0; i < NumberOfSubgrids; i++) {
     SubgridFluxes[i] = new fluxes;
       
-    for (dim = 0; dim < GridRank; dim++)  {
+    for (dim = 0; dim < rank; dim++)  {
 
       /* compute size (in enzo_floats) of flux storage */
 
       size = 1;
-      for (j = 0; j < GridRank; j++)
+      for (j = 0; j < rank; j++)
 	size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
 	  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
 
       /* set unused dims (for the solver, which is hardwired for 3d). */
 
-      for (j = GridRank; j < 3; j++) {
+      for (j = rank; j < 3; j++) {
 	SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
 	SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
 	SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
@@ -161,7 +154,7 @@ int EnzoBlock::SolveHydroEquations
 
     /* make things pretty */
 
-    for (dim = GridRank; dim < 3; dim++)
+    for (dim = rank; dim < 3; dim++)
       for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
 	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
 	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
@@ -171,7 +164,7 @@ int EnzoBlock::SolveHydroEquations
 
   /* fix grid quantities so they are defined to at least 3 dims */
 
-  for (i = GridRank; i < 3; i++) {
+  for (i = rank; i < 3; i++) {
     GridDimension[i]   = 1;
     GridStartIndex[i]  = 0;
     GridEndIndex[i]    = 0;
@@ -225,7 +218,7 @@ int EnzoBlock::SolveHydroEquations
 
   enzo_float CellWidthTemp[MAX_DIMENSION];
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
-    if (dim < GridRank)
+    if (dim < rank)
       CellWidthTemp[dim] = enzo_float(a*CellWidth[dim]);
     else
       CellWidthTemp[dim] = 1.0;
@@ -253,7 +246,7 @@ int EnzoBlock::SolveHydroEquations
      acceleration_z,
      &Gamma, &dt, &cycle_,
      &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
-     &GridRank, &GridDimension[0], &GridDimension[1],
+     &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,
      &PPMFlatteningParameter,
      &PressureFree,
@@ -270,8 +263,8 @@ int EnzoBlock::SolveHydroEquations
   /* deallocate temporary space for solver */
 
   delete [] temp;
-  if (GridRank < 2) delete [] velocity_y;
-  if (GridRank < 3) delete [] velocity_z;
+  if (rank < 2) delete [] velocity_y;
+  if (rank < 3) delete [] velocity_z;
 
   delete [] leftface;
   delete [] GammaField;

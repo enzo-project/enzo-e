@@ -28,6 +28,7 @@ public: // interface
 		      double grav_const,
 		      int iter_max, 
 		      double res_tol,
+		      int monitor_iter,
 		      bool is_singular,
 		      bool diag_precon);
 
@@ -58,6 +59,7 @@ public: // interface
     p | grav_const_;
     p | iter_max_;
     p | res_tol_;
+    p | monitor_iter_;
     p | rr0_;
     p | rr_min_;
     p | rr_max_;
@@ -149,6 +151,8 @@ public: // interface
 
 protected: // methods
 
+  void monitor_output_(EnzoBlock * enzo_block) throw();
+
   template <class T>
   void compute_ (EnzoBlock * enzo_block) throw();
 
@@ -156,10 +160,6 @@ protected: // methods
   void cg_begin_1_() throw();
 
   void cg_exit_() throw();
-
-  /// Perform vector copy X <- Y
-  template <class T>
-  void copy_ (T * X, const T * Y) const throw();
 
   /// Compute local contribution to inner-product X*Y
   template <class T>
@@ -212,6 +212,9 @@ protected: // attributes
 
   /// Convergence tolerance on the residual reduction rz_ / rz0_
   double res_tol_;
+
+  /// How often to display progress
+  int monitor_iter_;
 
   /// Initial residual
   long double rr0_;

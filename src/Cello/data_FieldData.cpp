@@ -122,7 +122,10 @@ const char * FieldData::values ( int id_field ) const
 char * FieldData::values ( int id_field ) 
   throw (std::out_of_range)
 {
+  if (id_field == -1) return NULL;
+
   char * values = 0;
+
   if (is_permanent(id_field)) {
 
     // permanent field

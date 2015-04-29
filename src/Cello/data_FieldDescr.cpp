@@ -90,7 +90,14 @@ int FieldDescr::field_id(const std::string & name) const
   //  return id_[name]; // ERROR IN PGI ON GORDON 11.9-0 64-bit
   std::map<const std::string,int>::const_iterator it;
   it=id_.find(name);
-  return (it != id_.end()) ? it->second : -1;
+  if (it != id_.end()) {
+    return it->second;
+  } else {
+    WARNING1("FieldDescr::field_id()",
+	   "Trying to access unknown Field \"%s\"",
+	   name.c_str());
+    return -1;
+  }
 }
 
 //----------------------------------------------------------------------

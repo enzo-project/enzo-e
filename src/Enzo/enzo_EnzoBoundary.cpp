@@ -108,13 +108,15 @@ void EnzoBoundary::enforce_reflecting_
 
   double t = block->time();
 
+  const int rank = block->rank();
+
   for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
     field.ghosts(index,&gx,&gy,&gz);
     void * array = field.values(index);
-    bool vx =      (field.field_name(index) == "velocity_x");
-    bool vy =      (field.field_name(index) == "velocity_y");
-    bool vz =      (field.field_name(index) == "velocity_z");
+    bool vx = (rank >= 1) && (field.field_name(index) == "velocity_x");
+    bool vy = (rank >= 2) && (field.field_name(index) == "velocity_y");
+    bool vz = (rank >= 3) && (field.field_name(index) == "velocity_z");
     precision_type precision = field.precision(index);
     switch (precision) {
     case precision_single:

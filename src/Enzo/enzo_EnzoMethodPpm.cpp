@@ -72,10 +72,15 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   Field field = enzo_block->data()->field();
 
+  int rank = block->rank();
+
   enzo_float * density    = (enzo_float *)field.values("density");
-  enzo_float * velocity_x = (enzo_float *)field.values("velocity_x");
-  enzo_float * velocity_y = (enzo_float *)field.values("velocity_y");
-  enzo_float * velocity_z = (enzo_float *)field.values("velocity_z");
+  enzo_float * velocity_x = (rank >= 1) ? 
+    (enzo_float *)field.values("velocity_x") : NULL;
+  enzo_float * velocity_y = (rank >= 2) ? 
+    (enzo_float *)field.values("velocity_y") : NULL;
+  enzo_float * velocity_z = (rank >= 3) ? 
+    (enzo_float *)field.values("velocity_z") : NULL;
   enzo_float * pressure = (enzo_float *) field.values("pressure");
  
   /* 2) Calculate dt from particles. */
@@ -92,7 +97,9 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
  
   /* 5) calculate minimum timestep */
 
-  FORTRAN_NAME(calc_dt)(&EnzoBlock::GridRank, enzo_block->GridDimension, enzo_block->GridDimension+1,
+  FORTRAN_NAME(calc_dt)(&rank, 
+			enzo_block->GridDimension, 
+			enzo_block->GridDimension+1,
 			enzo_block->GridDimension+2,
 			enzo_block->GridStartIndex, 
 			enzo_block->GridEndIndex,

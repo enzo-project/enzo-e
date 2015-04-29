@@ -61,10 +61,11 @@ void EnzoComputePressure::compute_(Block * block)
 
   T * p = (T*) field.values("pressure");
   T * d = (T*) field.values("density");
+  const int rank = enzo_block->rank();
   T * v3[3] = 
-    { (T*) field.values("velocity_x"),
-      (T*) field.values("velocity_y"),
-      (T*) field.values("velocity_z")  };
+    { (T*) ((rank >= 1) ? field.values("velocity_x") : NULL),
+      (T*) ((rank >= 2) ? field.values("velocity_y") : NULL),
+      (T*) ((rank >= 3) ? field.values("velocity_z") : NULL) };
 
   T * te = (T*) field.values("total_energy");
 
@@ -73,7 +74,6 @@ void EnzoComputePressure::compute_(Block * block)
 
   int gx,gy,gz;
   field.ghosts (0,&gx,&gy,&gz);
-  const int rank = block->rank();
   if (rank < 1) gx = 0;
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;

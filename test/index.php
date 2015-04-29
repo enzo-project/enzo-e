@@ -18,7 +18,7 @@
      //----------------------------------------------------------------------
 
    function test_group($testgroup) {
-     printf ("<hr><a name=\"$testgroup\"><h2>$testgroup Tests</h2>");
+     printf ("<hr><a name=\"$testgroup\"><h2>$testgroup</h2>");
      }
 
      //----------------------------------------------------------------------
@@ -189,7 +189,7 @@ function tests($component,$testrun,$output,$test_name,$dir) {
 	test($type,$output_file,"FAIL");
       }
     }
-    echo "</tr></table></br/>";
+    echo "</tr></table>";
   }
 };
 
@@ -399,9 +399,24 @@ function test_summary($component,$test_output,$executables, $dir)
   printf ("</tr>\n");
 }
 
+
+function begin_hidden ($id, $title)
+{  
+  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='block'; return false;\"><h3>$title</h3></a></p> ";
+  echo "<div style=\"display: none;\" id=\"$id\">";
+  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='none'; return false;\">[hide]</a></p>";
+}
+
+function end_hidden ($id)
+{
+  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='none'; return false;\">[hide]";
+  echo "</div>";
+}
+
 function test_table ($file_root,$size_array, $types)
 {
   $show_flash = 0;
+
   echo "<table>";
   echo "<tr>";
   //  echo "<th>$file_root</th>";
@@ -549,21 +564,21 @@ if (file_exists("STATUS"))  {
   printf ("<tr><th>\n");
 }
 
-printf ("</th><td class=center colspan=5><em>Enzo-P application tests</em></td></tr>\n");
+printf ("</th><td class=center colspan=5><em><a href=\"#enzop\">Enzo-P application tests</a></em></td></tr>\n");
 
-test_summary("Method 'ppm'",
+test_summary("Method: ppm",
 	     array("method_ppm-1","method_ppm-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Method 'ppml'",
+test_summary("Method: ppml",
 	     array("method_ppml-1","method_ppml-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Method 'heat'",
+test_summary("Method: heat",
 	     array("method_heat-1","method_heat-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Method 'gravity'",
+test_summary("Method: gravity",
 	     array("method_gravity_cg-1","method_gravity_cg-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
@@ -605,7 +620,7 @@ test_summary("Output",
 
 //----------------------------------------------------------------------
 // row_divider($num_types);
-printf ("<tr><td class=center></td><td class=center colspan=5><em>Cello unit tests</em></td></tr>\n");
+printf ("<tr><td class=center></td><td class=center colspan=5><em><a href=\"#cello\">Cello unit tests</a></em></td></tr>\n");
 //----------------------------------------------------------------------
 
 
@@ -656,14 +671,15 @@ test_summary("Colormap",array("Colormap"),
 
 printf ("</tr></table></br>\n");
 
-?>
-   <code>Start: <?php system ("cat START") ?> </code><br>
-   <code>Stop:&nbsp; <?php system ("cat STOP") ?></code>
-<?php
+   /* <code>Start: <?php system ("cat START") ?> </code><br> */
+   /* <code>Stop:&nbsp; <?php system ("cat STOP") ?></code> */
 
 //======================================================================
+     
+     
+     echo "<a name=\"enzop\"><h1>Enzo-P application tests</h1>";
 
-test_group("Method 'ppm'");
+test_group("Method: ppm");
 
 ?>
 
@@ -682,16 +698,21 @@ small implosion problem is run for 400 cycles, first with
   <?php
 
 
-  echo "<h3>PPM (serial) </h3>";
+
+//----------------------------------------------------------------------
+
+begin_hidden("method_ppm-1", "PPM (serial)");
 
 tests("Enzo","enzo-p","test_method_ppm-1","PPM 1 block","");
 
 test_table ("method_ppm-1",
 	    array("000000","000200","000400"), $types);
 
+end_hidden("method_ppm-1");
+
 //----------------------------------------------------------------------
 
-echo "<h3>PPM (parallel) </h3>";
+begin_hidden("method_ppm-8", "PPM (parallel)");
 
 tests("Enzo","enzo-p","test_method_ppm-8","PPM 8 blocks","");
 
@@ -702,10 +723,12 @@ See <a href="http://client64-249.sdsc.edu/cello-bug/show_bug.cgi?id=19">Bug #19<
 test_table ("method_ppm-8",
 	    array("000000","000200","000400"), $types);
 
+end_hidden("method_ppm-8");
+
 //======================================================================
 
 
-test_group("Method 'ppml'");
+test_group("Method: ppml");
 
 ?>
 
@@ -715,7 +738,7 @@ block (1,1,1) then eight blocks (2,2,2).
 
   <?php
 
-  echo "<h3>PPML (serial) </h3>";
+  begin_hidden("method_ppml-1", "PPML (serial)");
 
 tests("Enzo","enzo-p","test_method_ppml-1","PPML 1 block","");
 
@@ -726,7 +749,9 @@ test_table ("method_ppml-1-y",
 test_table ("method_ppml-1-z",
 	    array("0000","0010","0020","0030","0040"), $types);
 
-echo "<h3>PPML (parallel) </h3>";
+end_hidden ("method_ppml-1");
+
+begin_hidden("method_ppml-8", "PPML (parallel)");
 
 tests("Enzo","enzo-p","test_method_ppml-8","PPML 8 blocks","");
 
@@ -737,10 +762,11 @@ test_table ("method_ppml-8-y",
 test_table ("method_ppml-8-z",
 	    array("0000","0010","0020","0030","0040"), $types);
 
+end_hidden ("method_ppml-8");
 
 //======================================================================
 
-test_group("Method 'heat'");
+test_group("Method: heat");
 
 ?>
 
@@ -752,7 +778,7 @@ in Enzo-P.
 <?php
 
 
-echo "<h3>HEAT (serial) </h3>";
+  begin_hidden("method_heat-1", "HEAT (serial)");
 
 tests("Enzo","enzo-p","test_method_heat-1","HEAT 1 block","");
 
@@ -761,7 +787,9 @@ test_table ("method_heat-temp-1",
 test_table ("method_heat-mesh-1",
 	    array("000000","000200","000400"), $types);
 
-echo "<h3>HEAT (parallel) </h3>";
+end_hidden ("method_heat-1");
+
+  begin_hidden("method_heat-8", "HEAT (parallel)");
 
 tests("Enzo","enzo-p","test_method_heat-8","HEAT 8 block","");
 
@@ -770,9 +798,11 @@ test_table ("method_heat-temp-8",
 test_table ("method_heat-mesh-8",
 	    array("000000","000200","000400"), $types);
 
+end_hidden ("method_heat-8");
+
 //======================================================================
 
-test_group("Method 'gravity'");
+test_group("Method: gravity");
 
 ?>
 
@@ -784,7 +814,7 @@ in Enzo-P.
 <?php
 
 
-echo "<h3>GRAVITY (serial) </h3>";
+  begin_hidden("method_gravity_cg-1", "GRAVITY (serial)");
 
 tests("Enzo","enzo-p","test_method_gravity_cg-1","GRAVITY_CG 1 block","");
 
@@ -799,7 +829,9 @@ test_table ("method_gravity_cg-1",
 test_table ("method_gravity_cg-1",
 	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
-echo "<h3>GRAVITY (parallel) </h3>";
+end_hidden("method_gravity_cg-1");
+
+  begin_hidden("method_gravity_cg-8", "GRAVITY (parallel)");
 
 tests("Enzo","enzo-p","test_method_gravity_cg-8","GRAVITY_CG 8 block","");
 
@@ -814,42 +846,49 @@ test_table ("method_gravity_cg-8",
 test_table ("method_gravity_cg-8",
 	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
+end_hidden("method_gravity_cg-8");
+
 //======================================================================
 
 test_group("Checkpoint");
 
-echo "<h3>Serial checkpoint/restart </h3>";
-
+begin_hidden("checkpoint_ppm-1","Checkpoint/Restart (serial)");
 
 tests("Enzo","enzo-p","test_checkpoint_ppm-1","Checkpoint P=1","");
 tests("Enzo","enzo-p","test_restart_ppm-1","Restart P=1","");
 test_table ("checkpoint_ppm-1",  array("000010","000020"), $types);
 
+end_hidden("checkpoint_ppm-1");
+
 //----------------------------------------------------------------------
 
-echo "<h3>Parallel checkpoint/restart) </h3>";
-
+begin_hidden("checkpoint_ppm-8","Checkpoint/Restart (parallel)");
 
 
 tests("Enzo","enzo-p","test_checkpoint_ppm-8","Checkpoint P=8","");
 tests("Enzo","enzo-p","test_restart_ppm-8","Restart P=8","");
 test_table ("checkpoint_ppm-1",  array("000010","000020"), $types);
 
+end_hidden("checkpoint_ppm-8");
+
+//======================================================================
 
 test_group("Mesh");
 
-echo "<h3>2D Serial</h3>";
+begin_hidden ("mesh-balanced", "Adapt (serial)");
 
 tests("Enzo","enzo-p","test_mesh-balanced","balanced","");
 
 test_table ("mesh-balanced", array("mesh.000","de.000","te.000","vx.000","vy.000"), $types);
 test_table ("mesh-balanced", array("mesh.100","de.100","te.100","vx.100","vy.100"), $types);
 
-//======================================================================
+end_hidden ("mesh-balanced");
 
-test_group("Enzo-AMR");
+/* //====================================================================== */
 
-echo "<h3>2D Serial</h3>";
+/* test_group("Enzo-AMR"); */
+
+begin_hidden("adapt_L5", "Adapt (parallel)");
 
 tests("Enzo","enzo-p","test_adapt-L5-P1","Level 5","");
 
@@ -869,13 +908,14 @@ test_table ("adapt-L5-P1-vy",
 	    array("0.000000","0.020000","0.040000","0.060000",
 		  "0.080000","0.100000"), $types);
 
+end_hidden("adapt_L5");
 
 
 //======================================================================
 
 test_group("Balance");
 
-echo "<h3>Rotate</h3>";
+begin_hidden("balance_rotate", "RotateLB");
 
 tests("Enzo","enzo-p","test_balance_rotate","Rotate","Balance");
 test_table ("Balance/Rotate/balance-mesh",
@@ -883,7 +923,9 @@ test_table ("Balance/Rotate/balance-mesh",
 test_table ("Balance/Rotate/balance-de",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-echo "<h3>Greedy</h3>";
+end_hidden("balance_rotate");
+
+begin_hidden("balance_greedy", "GreedyLB");
 
 tests("Enzo","enzo-p","test_balance_greedy","Greedy","Balance");
 test_table ("Balance/Greedy/balance-mesh",
@@ -891,7 +933,9 @@ test_table ("Balance/Greedy/balance-mesh",
 test_table ("Balance/Greedy/balance-de",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-echo "<h3>Hybrid</h3>";
+end_hidden("balance_greedy");
+
+begin_hidden("balance_hybrid", "HybridLB");
 
 tests("Enzo","enzo-p","test_balance_hybrid","Hybrid","Balance");
 test_table ("Balance/Hybrid/balance-mesh",
@@ -899,7 +943,9 @@ test_table ("Balance/Hybrid/balance-mesh",
 test_table ("Balance/Hybrid/balance-de",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-echo "<h3>Neighbor</h3>";
+end_hidden("balance_hybrid");
+
+begin_hidden("balance_neighbor", "NeighborLB");
 
 tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","Balance");
 test_table ("Balance/Neighbor/balance-mesh",
@@ -907,7 +953,9 @@ test_table ("Balance/Neighbor/balance-mesh",
 test_table ("Balance/Neighbor/balance-de",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-echo "<h3>RandCent</h3>";
+end_hidden("balance_neighbor");
+
+begin_hidden("balance_rand_cent", "RandCentLB");
 
 tests("Enzo","enzo-p","test_balance_rand_cent","RandCent","Balance");
 test_table ("Balance/RandCent/balance-mesh",
@@ -915,7 +963,9 @@ test_table ("Balance/RandCent/balance-mesh",
 test_table ("Balance/RandCent/balance-de",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-echo "<h3>Refine</h3>";
+end_hidden("balance_rand_cent");
+
+begin_hidden("balance_refine", "RefineLB");
 
 tests("Enzo","enzo-p","test_balance_refine","Refine","Balance");
 test_table ("Balance/Refine/balance-mesh",
@@ -923,181 +973,263 @@ test_table ("Balance/Refine/balance-mesh",
 test_table ("Balance/Refine/balance-de",
 	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
+end_hidden("balance_refine");
+
 //======================================================================
 
 test_group("Boundary");
 
-echo "<h3>2D Reflecting</h3>";
+begin_hidden("boundary_reflecting_2d", "2D Reflecting");
 
 tests("Enzo","enzo-p","test_boundary_reflecting-2d","Reflecting 2D","");
 test_table ("boundary_reflecting-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
+end_hidden("boundary_reflecting_2d");
 
-echo "<h3>2D Periodic</h3>";
+begin_hidden("boundary_periodic_2d", "2D Periodic");
 
 tests("Enzo","enzo-p","test_boundary_periodic-2d","Periodic 2D","");
 test_table ("boundary_periodic-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
+end_hidden("boundary_periodic_2d");
 
-echo "<h3>2D Outflow</h3>";
+begin_hidden("boundary_outflow_2d", "2D Outflow");
 
 tests("Enzo","enzo-p","test_boundary_outflow-2d","Outflow 2D","");
 test_table ("boundary_outflow-2d",
 	    array("0000","0100","0200","0300","0400"), $types);
+end_hidden("boundary_outflow_2d");
 
 //----------------------------------------------------------------------
 
-echo "<h3>3D Reflecting</h3>";
+begin_hidden("boundary_reflecting_3d", "3D Reflecting");
 
 tests("Enzo","enzo-p","test_boundary_reflecting-3d","Reflecting 3D","");
 test_table ("boundary_reflecting-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
+end_hidden("boundary_reflecting_3d");
 
-echo "<h3>3D Periodic</h3>";
+begin_hidden("boundary_periodic_3d", "3D Periodic");
 
 tests("Enzo", "enzo-p","test_boundary_periodic-3d","Periodic 3D","");
 test_table ("boundary_periodic-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
+end_hidden("boundary_periodic_3d");
 
-echo "<h3>3D Outflow</h3>";
+begin_hidden("boundary_outflow_3d", "3D Outflow");
 
 tests("Enzo","enzo-p","test_boundary_outflow-3d","Outflow 3D","");
 test_table ("boundary_outflow-3d",
 	    array("0000","0020","0040","0060","0080"), $types);
+end_hidden("boundary_outflow_3d");
 
 //----------------------------------------------------------------------
 
 test_group("Initial");
 
-echo "<h3>png mask initial conditions</h3>";
+begin_hidden("initial_mask","png mask initial conditions");
 
 tests("Enzo","enzo-p","test_initial_png","","");
 test_table ("initial_png",
 	    array("00","10","20","30","40", "50"), $types);
+end_hidden("initial_mask");
 
 //----------------------------------------------------------------------
 
 test_group("Output");
 
-echo "<h3>Stride 1</h3>";
-
+begin_hidden("output_stride_1", "Stride 1");
 tests("Enzo","enzo-p","test_output-stride-1","","");
 test_table_blocks ("output-stride-1", array("00","10","20"),$types);
+end_hidden("output_stride_1");
 
-echo "<h3>Stride 2</h3>";
-
+begin_hidden("output_stride_2", "Stride 2");
 tests("Enzo","enzo-p","test_output-stride-2","","");
 test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
+end_hidden("output_stride_2");
 
-echo "<h3>Stride 3</h3>";
-
+begin_hidden("output_stride_3", "Stride 3");
 tests("Enzo","enzo-p","test_output-stride-4","","");
 test_table_blocks ("output-stride-4",  array("00","10","20"), $types);
+end_hidden("output_stride_3");
 
 //======================================================================
 
+     echo "<a name=\"cello\"><h1>Cello unit tests</h1>";
+
 test_group("Disk");
 
+begin_hidden("disk_hdf5", "HDF5");
 tests("Cello","test_FileHdf5", "test_FileHdf5","","");
+end_hidden("disk_hdf5");
+begin_hidden("disk_ifrit", "IFRIT");
 tests("Cello","test_FileIfrit","test_FileIfrit","","");
+end_hidden("disk_ifrit");
 
 //----------------------------------------------------------------------
 
 test_group("Error");
 
+begin_hidden("error", "Error");
 tests("Cello","test_Error","test_Error","","");
+end_hidden("error");
 
 
 //----------------------------------------------------------------------
 
 test_group("Field");
 
+begin_hidden("field", "Field");
 tests("Cello","test_Field","test_Field","","");
+end_hidden("field");
+begin_hidden("field_descr", "FieldDescr");
 tests("Cello","test_FieldDescr","test_FieldDescr","","");
-tests("Cello","test_FieldBlock","test_FieldBlock","","");
+end_hidden("field_descr");
+begin_hidden("field_data", "FieldData");
+tests("Cello","test_FieldData","test_FieldData","","");
+end_hidden("field_data");
+begin_hidden("field_face", "FieldFace");
 tests("Cello","test_FieldFace","test_FieldFace","","");
+end_hidden("field_face");
+begin_hidden("it_field", "ItField");
 tests("Cello","test_ItField","test_ItField","","");
+end_hidden("it_field");
+begin_hidden("grouping", "Grouping");
 tests("Cello","test_Grouping","test_Grouping","","");
+end_hidden("grouping");
 
 //----------------------------------------------------------------------
 
 test_group("Memory");
 
+
+begin_hidden("memory", "Memory");
 tests("Cello","test_Memory","test_Memory","","");
+end_hidden("memory");
 
 
 //----------------------------------------------------------------------
 
 test_group("Mesh");
 
+begin_hidden("hierarchy", "Hierarchy");
 tests("Cello","test_Hierarchy","test_Hierarchy","",""); 
+end_hidden("hierarchy");
+begin_hidden("data", "Data");
 tests("Cello","test_Data","test_Data","",""); 
+end_hidden("data");
+begin_hidden("index", "Index");
 tests("Cello","test_Index","test_Index","",""); 
+end_hidden("index");
+begin_hidden("tree", "Tree");
 tests("Cello","test_Tree","test_Tree","",""); 
+end_hidden("tree");
+begin_hidden("it_face", "ItFace");
 tests("Cello","test_ItFace","test_ItFace","",""); 
+end_hidden("it_face");
 
-printf ("<img width=257 src=\"test_tree_1-initial.png\"></img>\n");
+begin_hidden("tree_initial", "Tree (initial)");
+printf ("<img width=257 src=\"test_tree_1-initial.png\"></img></br>\n");
+end_hidden("tree_initial");
+begin_hidden("tree_balanced", "Tree (balanced)");
 printf ("<img width=257 src=\"test_tree_2-balanced.png\"></img>\n");
+end_hidden("tree_balanced");
+begin_hidden("tree_merged", "Tree (merged)");
 printf ("<img width=257 src=\"test_tree_3-merged.png\"></img></br>\n");
+end_hidden("tree_merged");
 
+begin_hidden("tree_density", "TreeDensity");
 tests("Cello","test_TreeDensity","test_TreeDensity","",""); 
+end_hidden("tree_density");
 
+begin_hidden("mesh_density_2d", "Density 2D");
 printf ("<img width=257 src=\"density_xy_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"density_xy_2-balanced.png\"></img>\n");
 printf ("<img width=257 src=\"density_xy_3-coalesced.png\"></img></br>\n");
+end_hidden("mesh_density_coalesced_2d");
 
+begin_hidden("mesh_density_3d", "Density 3D");
 printf ("<img width=257 src=\"density_3d_1-initial.png\"></img>\n");
 printf ("<img width=257 src=\"density_3d_2-balanced.png\"></img>\n");
 printf ("<img width=257 src=\"density_3d_3-coalesced.png\"></img></br>\n");
+end_hidden("mesh_density_coalesced_3d");
 
+begin_hidden("node", "Node");
 tests("Cello","test_Node","test_Node","",""); 
+end_hidden("node");
+begin_hidden("node_trace", "NodeTrace");
 tests("Cello","test_NodeTrace","test_NodeTrace","",""); 
+end_hidden("node_trace");
+begin_hidden("it_node", "ItNode");
 tests("Cello","test_ItNode","test_ItNode","",""); 
+end_hidden("it_node");
 
 //----------------------------------------------------------------------
 
 test_group("Monitor");
 
+begin_hidden("monitor", "Monitor");
 tests("Cello","test_Monitor","test_Monitor","","");
+end_hidden("monitor");
 
 //----------------------------------------------------------------------
 
 test_group("Parameters");
 
+begin_hidden("parameters", "Parameters");
 tests("Cello","test_Parameters","test_Parameters","","");
+end_hidden("parameters");
 
 //----------------------------------------------------------------------
 
 test_group("Particle");
 
+begin_hidden("particle", "Particle");
 tests("Cello","test_Particle","test_Particle","","");
+end_hidden("particle");
 //----------------------------------------------------------------------
 
 test_group("Performance");
 
+begin_hidden("performance", "Performance");
 tests("Cello","test_Performance","test_Performance","","");
+end_hidden("performance");
+begin_hidden("papi", "Papi");
 tests("Cello","test_Papi",       "test_Papi","","");
+end_hidden("papi");
+begin_hidden("timer", "Timer");
 tests("Cello","test_Timer",       "test_Timer","","");
+end_hidden("timer");
 
 //----------------------------------------------------------------------
 
 test_group("Problem");
 
+begin_hidden("mask", "Mask");
 tests("Cello","test_Mask",   "test_Mask","","");
+end_hidden("mask");
+begin_hidden("refresh", "Refresh");
 tests("Cello","test_Refresh","test_Refresh","","");
+end_hidden("refresh");
+begin_hidden("value", "Value");
 tests("Cello","test_Value",   "test_Value","","");
+end_hidden("value");
 
 //----------------------------------------------------------------------
 
 test_group("Schedule");
 
+begin_hidden("schedule", "Schedule");
 tests("Cello","test_Schedule","test_Schedule","","");
+end_hidden("schedule");
 
 //----------------------------------------------------------------------
 
 test_group("Colormap");
 
+begin_hidden("colormap", "Colormap");
 tests("Cello","test_Colormap","test_Colormap","","");
+end_hidden("colormap");
 
 ?>
 </br/>

@@ -40,6 +40,7 @@ Method {
        refresh = ["refresh_null","refresh_cg"];
        iter_max = 500;
        res_tol  = 1e-3;
+       monitor_iter = 0;
 #       grav_const = 6.67384e-8;
 #       grav_const = 1.0e-1;
     };
@@ -85,7 +86,7 @@ Field {
            "velocity_z",
            "internal_energy",
 	   "pressure",
-           "B","X","R","P","D","Y","Z"];
+           "B","D","R","X","Y","Z"];
 
    ghosts = 4;
    prolong = "poisson";

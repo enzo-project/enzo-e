@@ -47,17 +47,19 @@ extern void m2_
     file_str = file_str.substr(file_str.rfind("/")+1,std::string::npos);
   }
 
-  if (strlen(message) > 0) {
-    monitor->write (fp,type,"%s:%d  %s %s",file_str.c_str(),line,function,buffer);
-  } else if (strlen(function) > 0) {
-    monitor->write (fp,type,"%s:%d  %s",file_str.c_str(),line,function);
-  } else {
-    monitor->write (fp,type,"%s:%d",file_str.c_str(),line);
-  }
+  if (type == "ERROR") 
+    monitor->write(fp,"","@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+  monitor->write (fp,type,"%s:%d",file_str.c_str(),line);
+  if (strlen(function) > 0) monitor->write (fp,type,"%s",function);
+  if (strlen(message)  > 0) monitor->write (fp,type,"%s",buffer);
 
   if (fp == stderr) {
     monitor->set_active(save_active);
   }
+
+  if (type == "ERROR")
+    monitor->write(fp,"","@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
   fflush (fp);
 }

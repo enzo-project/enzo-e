@@ -12,6 +12,8 @@ Adapt {
 }
 Output {
 
+  list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png"];
+
   mesh_png { name = ["method_gravity_cg-1-mesh-%06d.png", "cycle"]; };
   phi_png { name = ["method_gravity_cg-1-phi-%06d.png", "cycle"]; };
   rho_png { name = ["method_gravity_cg-1-rho-%06d.png", "cycle"]; };

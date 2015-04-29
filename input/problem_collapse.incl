@@ -45,7 +45,7 @@ Field {
         "acceleration_y",
         "acceleration_z",
         "total_energy",
-	"B", "P", "R", "X", "AP",
+	"B", "P", "R", "X", "D", "Y", "Z",
         "internal_energy",
 	"pressure",
 	"temperature",
