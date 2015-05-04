@@ -114,6 +114,10 @@ public: // attributes
   double                     method_gravity_mg_res_tol;
   double                     method_gravity_mg_grav_const;
   int                        method_gravity_mg_monitor_iter;
+  std::string                method_gravity_mg_smooth;
+  double                     method_gravity_mg_smooth_weight;
+  std::string                method_gravity_mg_restrict;
+  std::string                method_gravity_mg_prolong;
 
   // EnzoMethodGravityBiCGStab
   int                        method_gravity_bicgstab_iter_max;

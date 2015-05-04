@@ -40,6 +40,36 @@ void EnzoMatrixLaplace::matvec (int id_y, int id_x, Block * block) throw()
 
 //----------------------------------------------------------------------
 
+void EnzoMatrixLaplace::diagonal (int id_x, Block * block) throw()
+{
+  if (! block->is_leaf()) return;
+
+  Data * data = block->data();
+  Field field = data->field();
+
+  field.dimensions (id_x,&mx_,&my_,&mz_);
+  field.size            (&nx_,&ny_,&nz_);
+  field.ghosts     (id_x,&gx_,&gy_,&gz_);
+  data->field_cell_width(&hx_,&hy_,&hz_);
+
+  rank_ = (my_ == 1) ? 1 : (mz_ == 1) ? 2 : 3;
+
+  int precision = field.precision(0);
+
+  void * X = field.values(id_x);
+
+  if      (precision == precision_single)    
+    diagonal_((float *)(X));
+  else if (precision == precision_double)    
+    diagonal_((double *)(X));
+  else if (precision == precision_quadruple) 
+    diagonal_((long double *)(X));
+  else 
+    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
+}
+
+//----------------------------------------------------------------------
+
 template <class T>
 void EnzoMatrixLaplace::matvec_ (T * Y, T * X) const throw()
 {
@@ -74,4 +104,43 @@ void EnzoMatrixLaplace::matvec_ (T * Y, T * X) const throw()
       }
     }
   }
-};
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMatrixLaplace::diagonal_ (T * X) const throw()
+{
+  const int idx = 1;
+  const int idy = mx_;
+  const int idz = mx_*my_;
+
+  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+
+  if (rank_ == 1) {
+    for (int ix=0; ix<nx_; ix++) {
+      int i = i0 + ix;
+      X[i] = - 2.0 / (hx_*hx_);
+    }
+  } else if (rank_ == 2) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = i0 + ix + mx_*iy;
+	X[i] = - 2.0 / (hx_*hx_)
+	       - 2.0 / (hy_*hy_);
+      }
+    }
+  } else if (rank_ == 3) {
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + ix + mx_*(iy + my_*iz);
+	  X[i] = - 2.0 / (hx_*hx_)
+	    +    - 2.0 / (hy_*hy_)
+	    +    - 2.0 / (hz_*hz_);
+	}
+      }
+    }
+  }
+}
+

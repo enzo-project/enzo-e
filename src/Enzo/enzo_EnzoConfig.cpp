@@ -86,6 +86,10 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_mg_iter_max;
   p | method_gravity_mg_res_tol;
   p | method_gravity_mg_monitor_iter;
+  p | method_gravity_mg_smooth;
+  p | method_gravity_mg_smooth_weight;
+  p | method_gravity_mg_restrict;
+  p | method_gravity_mg_prolong;
 
   p | method_gravity_bicgstab_iter_max;
   p | method_gravity_bicgstab_res_tol;
@@ -244,6 +248,18 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_mg_monitor_iter = p->value_integer
     ("Method:gravity_mg:monitor_iter",1);
+
+  method_gravity_mg_smooth = p->value_string
+    ("Method:gravity_mg:smooth","jacobi");
+
+  method_gravity_mg_smooth_weight = p->value_float
+    ("Method:gravity_mg:smooth_weight",1.0);
+
+  method_gravity_mg_restrict = p->value_string
+    ("Method:gravity_mg:restrict","linear");
+
+  method_gravity_mg_prolong = p->value_string
+    ("Method:gravity_mg:prolong","linear");
 
 
   method_gravity_bicgstab_iter_max = p->value_integer

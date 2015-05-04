@@ -19,9 +19,9 @@ void Block::refresh_begin_()
 {
   Refresh * refresh = simulation()->problem()->refresh(index_refresh_);
 
-
   if ((  is_leaf() && children_.size() != 0) ||
       (! is_leaf() && children_.size() == 0)) {
+
     const char * logic_str[2] = {"false","true"};
     WARNING4("Block::refresh_begin_()",
              "%s: is_leaf() == %s && children_.size() == %d"

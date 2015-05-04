@@ -43,13 +43,18 @@ public: // interface
 public: // virtual functions
 
   /// Apply the matrix to a vector Y <-- A*X
-
   virtual void matvec (int id_y, int id_x, Block * block) throw();
+
+  /// Extract the diagonal into the given field
+  virtual void diagonal (int id_x, Block * block) throw();
 
 protected: // functions
 
   template <class T>
   void matvec_ (T * Y, T * X) const throw();
+
+  template <class T>
+  void diagonal_ (T * X) const throw();
 
 protected: // attributes
 

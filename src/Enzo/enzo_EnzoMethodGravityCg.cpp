@@ -4,48 +4,48 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-10-21 17:25:09
 /// @brief    Implements the EnzoMethodGravityCg class
-//
-// Preconditioned Conjugate Gradient Method
-//
-// A*X = B, preconditioner M
-// nabla ^ 2 (potential) = 4 pi G density
-//
-//     X = initial guess
-//     B = right-hand side
-//     R = B - A*X
-//     solve(M*Z = R)
-//     D = Z
-//     shift (B)
-
-//     do
-//         Y = A*D;
-//         rz = dot(R,Z)
-//         dy = dot(D,Y)
-
-//         a = rz / dy;
-//         X = X + a*D;
-//         R = R - a*Y;
-//         solve(M*Z = R)
-//
-//         rz2 = dot(R,Z)
-//         b = rz2 / rz;
-//         D = Z + b*D;
-//         rz = rz2;
-//     while (! converged())
-//
-// Required Fields:
-// 
-// B                          linear system right-hand side
-// D                          CG search direction vector: unpreconditioned
-// R                          residual vector of unpreconditioned linear system
-// X                          linear system right-hand solution
-// Y                          Krylov subspace vector
-// Z                          residual of preconditioned linear system
-// potential                  computed gravitational potential
-// density                    density field
-// acceleration_x             acceleration along X-axis
-// acceleration_y [rank >= 2] acceleration along Y-axis
-// acceleration_z [rank >= 3] acceleration along Z-axis
+///
+/// Preconditioned Conjugate Gradient Method
+///
+/// - A*X = B, preconditioner M
+/// - nabla ^ 2 (potential) = 4 pi G density
+///
+///     - X = initial guess
+///     - B = right-hand side
+///     - R = B - A*X
+///     - solve(M*Z = R)
+///     - D = Z
+///     - shift (B)
+///
+///     - do
+///        -  Y = A*D;
+///        -  rz = dot(R,Z)
+///        -  dy = dot(D,Y)
+///
+///        -  a = rz / dy;
+///        -  X = X + a*D;
+///        -  R = R - a*Y;
+///        -  solve(M*Z = R)
+///
+///        -  rz2 = dot(R,Z)
+///        -  b = rz2 / rz;
+///        -  D = Z + b*D;
+///        -  rz = rz2;
+///     - while (! converged())
+///
+/// Required Fields
+/// 
+/// - B                          linear system right-hand side
+/// - D                          CG search direction vector: unpreconditioned
+/// - R                          residual vector of unpreconditioned linear system
+/// - X                          linear system right-hand solution
+/// - Y                          Krylov subspace vector
+/// - Z                          residual of preconditioned linear system
+/// - potential                  computed gravitational potential
+/// - density                    density field
+/// - acceleration_x             acceleration along X-axis
+/// - acceleration_y [rank >= 2] acceleration along Y-axis
+/// - acceleration_z [rank >= 3] acceleration along Z-axis
 
 
 #include "cello.hpp"

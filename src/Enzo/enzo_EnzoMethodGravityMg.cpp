@@ -4,6 +4,42 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-10-21 17:25:09
 /// @brief    Implements the EnzoMethodGravityMg class
+///
+/// Multigrid method on an adaptive mesh.  We use the MLAT (Multilevel
+/// Adaptive Technique) of Brandt '77, based on the FAS formulation of
+/// Multigrid.
+///
+/// From "Multilevel Adaptive Methods for Partial Differential Equations", McCormick, 1989, p90
+///
+///  [WARNING: Bug in doxygen gets formulas in wrong place below processed html output; latex output is good]
+/// \f$ u^{h} \leftarrow \mbox{MG}^{h} (u^{h}; f^{h}) \f$
+///
+///   - if \f$ h = h_{c} \f$
+///      -# \f$ solve L^{h} u^{h} = f^{h} \f$
+///      -# return
+///   - else
+///      -# \f$ u^{h} \leftarrow G^{h} (u^{h}; f^{h}) \f$
+///      -# \f$ \tau_{h}^{2d} \leftarrow L^{2h} (I_{h}^{2h} u^{h}) - I_{h}^{2h}(L^{h}(u^{h})) \f$ 
+///      -# \f$ f^{2h} \leftarrow I_{h}^{2h} f^{h} + \tau_{h}^{2h} \f$ 
+///      -# \f$ u^{2h} \leftarrow I_{h}^{2h}u^{h} \f$ 
+///      -# \f$ u^{2h} \leftarrow MG^{2h}(u^{2h}; f^{2h}) \f$ 
+///      -# \f$ u^{h} \leftarrow u^{h} + I^{h}_{2h}(u^{2h} - I_{h}^{2h}u^{h}) \f$ 
+///      -# \f$ u^{h} \leftarrow G^{h}(u^{h}; f^{h}) \f$ 
+///
+/// ---------------------
+/// (*) can skip second refresh if e.g. nu_pre < # ghost zones
+///
+/// Required Fields
+///
+/// - B                          linear system right-hand side
+/// - C                          correction computed as A C = R
+/// - R                          residual R = B - A*X
+/// - X                          current solution to A*X = B
+/// - potential                  computed gravitational potential
+/// - density                    density field
+/// - acceleration_x             acceleration along X-axis
+/// - acceleration_y (rank >= 2) acceleration along Y-axis
+/// - acceleration_z (rank >= 3) acceleration along Z-axis
 
 #include "cello.hpp"
 
@@ -20,9 +56,15 @@
 EnzoMethodGravityMg::EnzoMethodGravityMg 
 (FieldDescr * field_descr, int rank,
  double grav_const, int iter_max, double res_tol, int monitor_iter,
- bool is_singular) 
+ bool is_singular,
+ Compute * smooth,
+ Restrict * restrict,
+ Prolong * prolong) 
   : Method(), 
     A_(new EnzoMatrixLaplace),
+    smooth_(smooth),
+    restrict_(restrict),
+    prolong_(prolong),
     is_singular_(is_singular),
     rank_(rank),
     grav_const_(grav_const),
@@ -50,6 +92,20 @@ EnzoMethodGravityMg::EnzoMethodGravityMg
 
 //----------------------------------------------------------------------
 
+EnzoMethodGravityMg::~EnzoMethodGravityMg () throw()
+{
+  delete smooth_;
+  delete prolong_;
+  delete restrict_;
+
+  smooth_ = NULL;
+  prolong_ = NULL;
+  restrict_ = NULL;
+}
+
+
+//----------------------------------------------------------------------
+
 void EnzoMethodGravityMg::compute ( Block * block) throw()
 {
   
@@ -70,20 +126,6 @@ void EnzoMethodGravityMg::compute ( Block * block) throw()
   else if (precision == precision_quadruple) compute_<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityMg()", "precision %d not recognized", precision);
-}
-
-//======================================================================
-
-void EnzoMethodGravityMg::monitor_output_(EnzoBlock * enzo_block) throw()
-{
-
-  Monitor * monitor = enzo_block->simulation()->monitor();
-
-  monitor->print ("Enzo", "MG iter %04d  rr %g [%g %g]",
-		  iter_,
-		  (double)(rr_    / rr0_),
-		  (double)(rr_min_/ rr0_),
-		  (double)(rr_max_/ rr0_));
 }
 
 //----------------------------------------------------------------------
@@ -142,6 +184,62 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
+void EnzoMethodGravityMg::pre_smooth (EnzoBlock * enzo_block, int level)
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::compute_residual (EnzoBlock * enzo_block, int level)
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::restrict_residual (EnzoBlock * enzo_block, int level)
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::coarse_solve (EnzoBlock * enzo_block, int level)
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::prolong_correction (EnzoBlock * enzo_block, int level)
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::update_solution (EnzoBlock * enzo_block, int level)
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::post_smooth (EnzoBlock * enzo_block, int level)
+{
+}
+
+//======================================================================
+
+void EnzoMethodGravityMg::monitor_output_(EnzoBlock * enzo_block) throw()
+{
+
+  Monitor * monitor = enzo_block->simulation()->monitor();
+
+  monitor->print ("Enzo", "MG iter %04d  rr %g [%g %g]",
+		  iter_,
+		  (double)(rr_    / rr0_),
+		  (double)(rr_min_/ rr0_),
+		  (double)(rr_max_/ rr0_));
+}
+
+//----------------------------------------------------------------------
+
 // void EnzoBlock::enzo_matvec_()
 // {
 //   EnzoMethodGravityMg * method = 
@@ -167,12 +265,6 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
 
 template <class T>
 void EnzoMethodGravityMg::mg_end (EnzoBlock * enzo_block,int retval) throw ()
-///    if (return == return_converged) {
-///       potential = X
-///       ==> mg_exit()
-///    } else {
-///       ERROR (return-)
-///    }
 {
   set_active(enzo_block);
 
@@ -186,11 +278,9 @@ void EnzoMethodGravityMg::mg_end (EnzoBlock * enzo_block,int retval) throw ()
 
   copy_(potential,X,mx_,my_,mz_,is_active_);
 
-  bool symmetric;
-  int order;
-  EnzoComputeAcceleration compute_acceleration (field.field_descr(),
-						rank_, symmetric = true,
-						order=2);
+  FieldDescr * field_descr = field.field_descr();
+
+  EnzoComputeAcceleration compute_acceleration (field_descr,rank_, true,2);
 
   compute_acceleration.compute(enzo_block);
 

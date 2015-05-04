@@ -53,6 +53,7 @@ module enzo {
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
+  PUPable EnzoComputeSmoothJacobi;
 
   PUPable EnzoMatrixLaplace;
   PUPable EnzoMatrixDiagonal;

@@ -162,7 +162,7 @@ Method * EnzoProblem::create_method_
 
   Method * method = 0;
 
-  EnzoConfig * enzo_config = (EnzoConfig *) config;
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
@@ -201,13 +201,19 @@ Method * EnzoProblem::create_method_
   } else if (name == "gravity_mg") {
     const bool is_singular = is_periodic();
     int rank = config->mesh_root_rank;
+    Restrict * restrict = 
+      create_restrict_(enzo_config->method_gravity_mg_restrict,config);
+    Prolong * prolong = 
+      create_prolong_(enzo_config->method_gravity_mg_prolong,config);
+    Compute * smooth = 
+      create_compute_(enzo_config->method_gravity_mg_smooth,config,field_descr);
     method = new EnzoMethodGravityMg
       (field_descr, rank,
        enzo_config->method_gravity_mg_grav_const,
        enzo_config->method_gravity_mg_iter_max,
        enzo_config->method_gravity_mg_res_tol,
        enzo_config->method_gravity_mg_monitor_iter,
-       is_singular);
+       is_singular,  smooth, restrict,  prolong);
   } else if (name == "gravity_bicgstab") {
     method = new EnzoMethodGravityBiCGStab
       (field_descr,
@@ -227,6 +233,37 @@ Method * EnzoProblem::create_method_
 
 //----------------------------------------------------------------------
 
+Compute * EnzoProblem::create_compute_ 
+( std::string  type,
+  Config *     config,
+  FieldDescr * field_descr ) throw ()
+{
+
+  
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+
+  Compute * compute = 0;
+
+  if (type == "jacobi") {
+    
+    EnzoMatrixLaplace * A = new EnzoMatrixLaplace;
+    compute = new EnzoComputeSmoothJacobi 
+      ("X","R","D",
+       enzo_config->method_gravity_mg_smooth_weight,
+       field_descr);
+
+  } else {
+
+    compute = Problem::create_compute_(type,config);
+
+  }
+
+  return compute;
+  
+}
+
+//----------------------------------------------------------------------
+
 Prolong * EnzoProblem::create_prolong_ 
 ( std::string  type,
   Config *     config ) throw ()
@@ -234,15 +271,15 @@ Prolong * EnzoProblem::create_prolong_
 
   Prolong * prolong = 0;
 
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+
   if (type == "enzo") {
     
-    prolong = new EnzoProlong 
-      (static_cast<EnzoConfig *>(config)->interpolation_method);
+    prolong = new EnzoProlong (enzo_config->interpolation_method);
 
   } else if (type == "MC1") {
     
-    prolong = new EnzoProlongMC1
-      (static_cast<EnzoConfig *>(config)->interpolation_method);
+    prolong = new EnzoProlongMC1 (enzo_config->interpolation_method);
 
   } else if (type == "poisson") {
     

@@ -38,10 +38,48 @@ void EnzoMatrixDiagonal::matvec (int id_y, int id_x, Block * block) throw()
 
 //----------------------------------------------------------------------
 
+void EnzoMatrixDiagonal::diagonal (int id_x, Block * block) throw()
+{
+  if (! block->is_leaf()) return;
+
+  Data * data = block->data();
+  Field field = data->field();
+
+  data->field_cell_width(&hx_,&hy_,&hz_);
+  int mx,my,mz;
+  field.dimensions(id_x,&mx,&my,&mz);
+  m_ = mx*my*mz;
+
+  int precision = field.precision(0);
+
+  void * X = field.values(id_x);
+
+  if (precision == precision_single)
+    diagonal_((float *)(X));
+  else if (precision == precision_double)    
+    diagonal_((double *)(X));
+  else if (precision == precision_quadruple) 
+    diagonal_((long double *)(X));
+  else 
+    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
+}
+
+//----------------------------------------------------------------------
+
 template <class T>
 void EnzoMatrixDiagonal::matvec_ (T * Y, T * X) const throw()
 {
   const double d = hx_*hx_;
 
   for (int i=0; i<m_; i++) Y[i] = d * X[i];
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMatrixDiagonal::diagonal_ (T * X) const throw()
+{
+  const double d = hx_*hx_;
+
+  for (int i=0; i<m_; i++) X[i] = d;
 }

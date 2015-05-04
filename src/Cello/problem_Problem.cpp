@@ -699,6 +699,21 @@ Output * Problem::create_output_
 
 //----------------------------------------------------------------------
 
+Compute * Problem::create_compute_ ( std::string  name ,
+				     Config * config) throw ()
+{
+  Compute * compute = 0;
+
+  ERROR1("Problem::create_compute_",
+	 "Unrecognized compute type %s",name.c_str());
+
+
+  return compute;
+  
+}
+
+//----------------------------------------------------------------------
+
 Prolong * Problem::create_prolong_ ( std::string  name ,
 				     Config * config) throw ()
 {

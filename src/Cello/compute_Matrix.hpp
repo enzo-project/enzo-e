@@ -39,6 +39,9 @@ public: // virtual functions
 
   virtual void matvec (int id_y, int id_x, Block * block) throw() = 0;
 
+  /// Extract the diagonal into the given field
+  virtual void diagonal (int id_x, Block * block) throw() = 0;
+
 protected: // functions
 
 };

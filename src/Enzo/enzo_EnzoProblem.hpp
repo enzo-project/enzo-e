@@ -58,12 +58,11 @@ private: // functions
 
   /// Create named method object
   virtual Method * create_method_ 
-  (std::string type, 
-   Config * config, FieldDescr *) throw ();
+  (std::string type, Config * config, FieldDescr *) throw ();
 
-  // /// Create named timestep object
-  // virtual Timestep * create_timestep_
-  // (std::string type, Config * config) throw ();
+  /// Create named Compute object
+  virtual Compute * create_compute_
+  (std::string type, Config * config, FieldDescr *) throw ();
 
   /// Create named interpolation object
   virtual Prolong * create_prolong_

@@ -27,7 +27,10 @@ public: // interface
 		      int iter_max, 
 		      double res_tol,
 		      int monitor_iter,
-		      bool is_singular);
+		      bool is_singular,
+		      Compute * smooth,
+		      Restrict * restrict,
+		      Prolong * prolong);
 
   EnzoMethodGravityMg() {};
 
@@ -37,9 +40,10 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodGravityMg (CkMigrateMessage *m) {}
 
-  /// CHARM++ Pack / Unpack function
-//----------------------------------------------------------------------
+  /// Destructor
+  ~EnzoMethodGravityMg () throw();
 
+  /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
 
@@ -50,6 +54,7 @@ public: // interface
     Method::pup(p);
 
     p | A_;
+    p | smooth_;
     p | restrict_;
     p | prolong_;
     p | is_singular_;
@@ -95,6 +100,21 @@ public: // interface
 
 protected: // methods
 
+  /// Apply pre-smoothing on the current level
+  void pre_smooth (EnzoBlock * enzo_block, int level);
+  /// Compute the residual R = B - A*X on the current level
+  void compute_residual (EnzoBlock * enzo_block, int level);
+  /// Restrict the residual R to the next-coarser level
+  void restrict_residual (EnzoBlock * enzo_block, int level);
+  /// Solve the coarse-grid equation A*C = R
+  void coarse_solve (EnzoBlock * enzo_block, int level);
+  /// Prolong the correction C to the next-finer level
+  void prolong_correction (EnzoBlock * enzo_block, int level);
+  /// Update the solution X <= X + C on the current level
+  void update_solution (EnzoBlock * enzo_block, int level);
+  /// Apply post-smoothing to the current level
+  void post_smooth (EnzoBlock * enzo_block, int level);
+
   void monitor_output_(EnzoBlock * enzo_block) throw();
 
   template <class T>
@@ -114,6 +134,9 @@ protected: // attributes
 
   /// Matrix
   Matrix * A_;
+
+  /// Smoother
+  Compute * smooth_;
 
   /// Restriction
   Restrict * restrict_;
