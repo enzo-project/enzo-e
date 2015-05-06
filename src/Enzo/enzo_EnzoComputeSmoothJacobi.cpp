@@ -44,6 +44,35 @@ void EnzoComputeSmoothJacobi::compute ( Block * block) throw()
 template <typename T>
 void EnzoComputeSmoothJacobi::compute_(Block * block)
 {
-  
+  printf ("EnzoComputeSmoothJacobi::compute_()\n");
+  Field field = block->data()->field();
+
+  T * X = (T*) field.values(i_x_);
+  T * R = (T*) field.values(i_r_);
+  T * D = (T*) field.values(i_d_);
+
+  const int rank = block->rank();
+
+  int nx,ny,nz;
+  field.size(&nx,&ny,&nz);
+
+  int gx,gy,gz;
+  field.ghosts (0,&gx,&gy,&gz);
+  if (rank < 1) gx = 0;
+  if (rank < 2) gy = 0;
+  if (rank < 3) gz = 0;
+
+  int mx = (nx+2*gx);
+  int my = (ny+2*gy);
+
+  for (int ix=gx; ix<nx+gx; ix++) {
+    for (int iy=gy; iy<ny+gy; iy++) {
+      for (int iz=gz; iz<nz+gz; iz++) {
+	int i = ix + mx*(iy + my*iz);
+	X[i] += R[i] / D[i];
+      }
+    }
+  }
+
 }
 

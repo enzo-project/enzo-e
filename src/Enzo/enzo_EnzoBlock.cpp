@@ -79,7 +79,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   GridRank = 0;
   NumberOfBaryonFields = 0;
 
-  int i,j,k;
+  int i;
 
   for (i=0; i<MAX_DIMENSION; i++) {
     DomainLeftEdge [i] = 0;

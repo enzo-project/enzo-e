@@ -213,7 +213,9 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_mg_iter_max,
        enzo_config->method_gravity_mg_res_tol,
        enzo_config->method_gravity_mg_monitor_iter,
-       is_singular,  smooth, restrict,  prolong);
+       is_singular,  smooth, restrict,  prolong,
+       enzo_config->method_gravity_mg_level_min,
+       enzo_config->method_gravity_mg_level_max);
   } else if (name == "gravity_bicgstab") {
     method = new EnzoMethodGravityBiCGStab
       (field_descr,
@@ -246,7 +248,6 @@ Compute * EnzoProblem::create_compute_
 
   if (type == "jacobi") {
     
-    EnzoMatrixLaplace * A = new EnzoMatrixLaplace;
     compute = new EnzoComputeSmoothJacobi 
       ("X","R","D",
        enzo_config->method_gravity_mg_smooth_weight,

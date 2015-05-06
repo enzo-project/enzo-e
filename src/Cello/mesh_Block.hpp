@@ -446,7 +446,7 @@ public:
   void clear_refresh() throw()
   {
     refresh_sync_  = "";
-    refresh_index_ = -1;
+    index_refresh_ = -1;
   }
 
 protected:
@@ -751,9 +751,6 @@ protected: // attributes
   /// Index of currently-active Method
   int index_method_;
 
-  /// Index of currently-active Refresh
-  int index_refresh_;
-
   /// Phase after current refresh
   int refresh_call_;
 
@@ -761,7 +758,7 @@ protected: // attributes
   std::string refresh_sync_;
 
   /// Index of current refresh
-  int refresh_index_;
+  int index_refresh_;
 
 };
 

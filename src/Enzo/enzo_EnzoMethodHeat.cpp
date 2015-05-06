@@ -185,6 +185,4 @@ void EnzoMethodHeat::compute_ (Block * block,T * Unew) const throw()
 
   delete [] U;
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
 }

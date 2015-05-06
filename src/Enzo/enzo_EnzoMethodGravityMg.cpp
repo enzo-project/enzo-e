@@ -9,13 +9,15 @@
 /// Adaptive Technique) of Brandt '77, based on the FAS formulation of
 /// Multigrid.
 ///
-/// From "Multilevel Adaptive Methods for Partial Differential Equations", McCormick, 1989, p90
+/// From "Multilevel Adaptive Methods for Partial Differential Equations", McCormick, 1989, p135
 ///
-///  [WARNING: Bug in doxygen gets formulas in wrong place below processed html output; latex output is good]
+///  [WARNING: Bug in doxygen gets formulas in wrong place below
+///  processed html output; latex output is good]
+///
 /// \f$ u^{h} \leftarrow \mbox{MG}^{h} (u^{h}; f^{h}) \f$
 ///
 ///   - if \f$ h = h_{c} \f$
-///      -# \f$ solve L^{h} u^{h} = f^{h} \f$
+///      -# solve \f$ L^{h} u^{h} = f^{h} \f$
 ///      -# return
 ///   - else
 ///      -# \f$ u^{h} \leftarrow G^{h} (u^{h}; f^{h}) \f$
@@ -25,6 +27,45 @@
 ///      -# \f$ u^{2h} \leftarrow MG^{2h}(u^{2h}; f^{2h}) \f$ 
 ///      -# \f$ u^{h} \leftarrow u^{h} + I^{h}_{2h}(u^{2h} - I_{h}^{2h}u^{h}) \f$ 
 ///      -# \f$ u^{h} \leftarrow G^{h}(u^{h}; f^{h}) \f$ 
+///
+///  Asynchronous FAC (AFAC)
+///
+///  - for k=1 to l
+///    - \f$ f^{h_k} = I_{\underline{h}}^{h_k} (f^{\underline{h}} - L^{\underline{h}} u^{\underline{u}}) \f$
+///    - solve \f$ L^{h_k} u^{h_k} = f^{h_k} \f$
+///  - for k=2 to l
+///    - \f$ f_{F}^{2h_k} = I_{\underline{h}}^{2h_k} (f^{\underline{2h}} - L^{\underline{h}} u^{\underline{h}}) \f$
+///    - solve \f$ L_{F}^{2h_k} u_{F}^{2h_k} = f_{F}^{2h_k} \f$
+///  - \f$ u^{\underline{h}} = u^{\underline{h}} + I_{h_1}^{\underline{h}} + \sum_{k=2}^{l}(I_{h_k}^{\underline{h}} u^{h_k} - \overline{I}_{2h_k}^{\underline{h}} u_F^{2h_k}) \f$
+///
+/// - MG(A,X,B)
+///
+///   - iter = 0
+///   - level_active = level_max
+///   - assert (level_max > level_min)
+///
+/// - A:
+///   - if (converged()) return
+///   - refresh(X)
+///   - pre_smooth(A,X,B)
+///   - Y = A*X
+///   - restrict(B,X,Y);
+///   - level_active = level_active - 1
+///   - B = B - Y
+///   - Y = A*X
+///   - B = B + Y
+///   - if (active_level == level_min) 
+///      - coarse_solve(A,X,B)
+///   - else 
+///      - post_smooth(A,X,B)
+///   - Y = prolong (X)
+///   - level_active = level_active + 1
+///   - X = X + Y
+///   - refresh(X)
+///   - post-smooth(A,X,B)
+///   - iter = iter + 1
+///   - goto A
+/// 
 ///
 /// ---------------------
 /// (*) can skip second refresh if e.g. nu_pre < # ghost zones
@@ -59,7 +100,9 @@ EnzoMethodGravityMg::EnzoMethodGravityMg
  bool is_singular,
  Compute * smooth,
  Restrict * restrict,
- Prolong * prolong) 
+ Prolong * prolong,
+ int level_min,
+ int level_max) 
   : Method(), 
     A_(new EnzoMatrixLaplace),
     smooth_(smooth),
@@ -71,16 +114,21 @@ EnzoMethodGravityMg::EnzoMethodGravityMg
     iter_max_(iter_max), 
     res_tol_(res_tol),
     monitor_iter_(monitor_iter),
-    rr0_(0),rr_(0), rr_min_(0),rr_max_(0),
+    rr_(0),rr0_(0), rr_min_(0),rr_max_(0),
     idensity_(0),  ipotential_(0),
     ib_(0), ix_(0), ir_(0), ic_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     iter_(0),
+    is_active_(0),
     level_(0),
-    is_active_(0)
+    level_min_(level_min),
+    level_max_(level_max)
 {
+  printf ("Creating EnzoMethodGravityMg\n");
+  printf ("level_min = %d\n",level_min_);
+  printf ("level_max = %d\n",level_max_);
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
 
@@ -178,6 +226,7 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
     }
   }
 
+  pre_smooth(enzo_block,level_max_);
   mg_end<T>(enzo_block,return_unknown);
 
 }
@@ -186,6 +235,7 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
 
 void EnzoMethodGravityMg::pre_smooth (EnzoBlock * enzo_block, int level)
 {
+  smooth_->compute(enzo_block);
 }
 
 //----------------------------------------------------------------------

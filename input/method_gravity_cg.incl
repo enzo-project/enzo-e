@@ -57,17 +57,17 @@ Method {
 Refresh {
     list = ["refresh_null","refresh_cg", "refresh_ppm"];
     refresh_null {
-         field_face_rank = 0;
+         min_face_rank = 0;
          field_list = [];
          field_ghosts = 4;
     };
     refresh_cg {
-         field_face_rank = 0;
+         min_face_rank = 0;
          field_list = [];
          field_ghosts = 4;
     };
     ppm_refresh { 
-        field_face_rank = 0;
+        min_face_rank = 0;
         field_list = [];
         field_ghosts = 4;
     }

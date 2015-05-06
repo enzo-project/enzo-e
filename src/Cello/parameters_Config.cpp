@@ -132,9 +132,9 @@ void Config::pup (PUP::er &p)
 
   p | num_refresh;
   p | refresh_list;
-  PUParray(p,refresh_field_list,      MAX_REFRESH_GROUPS);
-  PUParray(p,refresh_field_face_rank, MAX_REFRESH_GROUPS);
-  PUParray(p,refresh_field_ghosts,    MAX_REFRESH_GROUPS);
+  PUParray(p,refresh_field_list,    MAX_REFRESH_GROUPS);
+  PUParray(p,refresh_min_face_rank, MAX_REFRESH_GROUPS);
+  PUParray(p,refresh_field_ghosts,  MAX_REFRESH_GROUPS);
 
   // Restart
 
@@ -784,10 +784,10 @@ void Config::read_refresh_ (Parameters * p) throw()
 
     std::string refresh_group = "Refresh:"+refresh_list[index_refresh];
 
-    // Refresh : <REFRESH_GROUP> : field_face_rank
+    // Refresh : <REFRESH_GROUP> : min_face_rank
 
-    refresh_field_face_rank[index_refresh] =
-      p->value(refresh_group + ":field_face_rank",0);
+    refresh_min_face_rank[index_refresh] =
+      p->value(refresh_group + ":min_face_rank",0);
 
   // Refresh : <REFRESH_GROUP> : field_ghosts
 

@@ -111,10 +111,6 @@ void EnzoMatrixLaplace::matvec_ (T * Y, T * X) const throw()
 template <class T>
 void EnzoMatrixLaplace::diagonal_ (T * X) const throw()
 {
-  const int idx = 1;
-  const int idy = mx_;
-  const int idz = mx_*my_;
-
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 
   if (rank_ == 1) {

@@ -595,7 +595,7 @@ test_summary("Balance",
 		   "balance_greedy",
 		   "balance_refine",
 		   "balance_rotate",
-		   "balance_neighbor",
+		   //		   "balance_neighbor",
 		   "balance_hybrid"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p",
 		   "enzo-p", "enzo-p", "enzo-p", "enzo-p"),'test/Balance');
@@ -945,15 +945,15 @@ test_table ("Balance/Hybrid/balance-de",
 
 end_hidden("balance_hybrid");
 
-begin_hidden("balance_neighbor", "NeighborLB");
+// begin_hidden("balance_neighbor", "NeighborLB");
 
-tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","Balance");
-test_table ("Balance/Neighbor/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
-test_table ("Balance/Neighbor/balance-de",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+// tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","Balance");
+// test_table ("Balance/Neighbor/balance-mesh",
+//	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+//test_table ("Balance/Neighbor/balance-de",
+//	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
 
-end_hidden("balance_neighbor");
+//end_hidden("balance_neighbor");
 
 begin_hidden("balance_rand_cent", "RandCentLB");
 

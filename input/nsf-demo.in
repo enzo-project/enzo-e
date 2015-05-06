@@ -64,7 +64,7 @@ Method {
 Refresh {
    list = ["ppm_refresh"];
    ppm_refresh { 
-      field_face_rank = 0;
+      min_face_rank = 0;
       field_list = [];
       field_ghosts = 4;
    }

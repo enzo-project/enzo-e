@@ -30,7 +30,9 @@ public: // interface
 		      bool is_singular,
 		      Compute * smooth,
 		      Restrict * restrict,
-		      Prolong * prolong);
+		      Prolong * prolong,
+		      int level_min,
+		      int level_max);
 
   EnzoMethodGravityMg() {};
 
@@ -90,6 +92,8 @@ public: // interface
     p | iter_;
     p | is_active_;
     p | level_;
+    p | level_min_;
+    p | level_max_;
   }
 
   /// Solve for the gravitational potential
@@ -199,6 +203,12 @@ protected: // attributes
 
   /// Current active level
   int level_;
+
+  /// Minimum refinement level (may be < 0)
+  int level_min_;
+
+  /// Maximum refinement level
+  int level_max_;
 
 };
 

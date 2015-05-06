@@ -23,11 +23,11 @@ public: // interface
   /// Create a Refresh object
   Refresh(std::string name,
 	  int field_ghosts,
-	  int field_face_rank) throw()
+	  int min_face_rank) throw()
     : name_(name),
       field_list_(),
       field_ghosts_(field_ghosts),
-      field_face_rank_(field_face_rank)
+      min_face_rank_(min_face_rank)
   {
   }
 
@@ -47,7 +47,7 @@ public: // interface
     p | name_;
     p | field_list_;
     p | field_ghosts_;
-    p | field_face_rank_;
+    p | min_face_rank_;
   }
 
   /// Add the given field to the list
@@ -76,8 +76,8 @@ public: // interface
 
   /// Return the current minimum rank (dimension) of faces to refresh
   /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
-  int field_face_rank() const 
-  { return field_face_rank_; }
+  int min_face_rank() const 
+  { return min_face_rank_; }
 
   /// Return the ghost zone depth
   int field_ghosts() const
@@ -101,7 +101,7 @@ public: // interface
     }
     printf ("\n");
     printf ("field_ghosts: %d\n",field_ghosts_);
-    printf ("field_face_rank: %d\n",field_face_rank_);
+    printf ("min_face_rank: %d\n",min_face_rank_);
 
   }
 
@@ -122,7 +122,7 @@ private: // attributes
   int field_ghosts_;
 
   /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
-  int field_face_rank_;
+  int min_face_rank_;
 
 };
 

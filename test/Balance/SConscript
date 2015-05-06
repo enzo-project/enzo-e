@@ -31,9 +31,9 @@ run_balance_hybrid = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $S
 env.Append(BUILDERS = { 'RunBalanceHybrid' : run_balance_hybrid } )
 env_mv_hybrid  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Hybrid; mv `ls *.png *.h5` ' + test_path + '/Balance/Hybrid')
 
-run_balance_neighbor = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS +balancer NeighborLB > $TARGET 2>&1; $CPIN; $COPY")
-env.Append(BUILDERS = { 'RunBalanceNeighbor' : run_balance_neighbor } )
-env_mv_neighbor  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Neighbor; mv `ls *.png *.h5` ' + test_path + '/Balance/Neighbor')
+# run_balance_neighbor = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS +balancer NeighborLB > $TARGET 2>&1; $CPIN; $COPY")
+# env.Append(BUILDERS = { 'RunBalanceNeighbor' : run_balance_neighbor } )
+# env_mv_neighbor  = env.Clone(COPY = 'mkdir -p ' + test_path + '/Balance/Neighbor; mv `ls *.png *.h5` ' + test_path + '/Balance/Neighbor')
 
 run_balance_rand_cent = Builder(action = "$RMIN; " + date_cmd + parallel_run + " $SOURCE $ARGS +balancer RandCentLB > $TARGET 2>&1; $CPIN; $COPY")
 env.Append(BUILDERS = { 'RunBalanceRandCent' : run_balance_rand_cent } )
@@ -91,14 +91,15 @@ Clean(balance_hybrid,
 
 # NeighborLB
 
-balance_neighbor = env_mv_neighbor.RunBalanceNeighbor (
-   'test_balance_neighbor.unit',
-   bin_path + '/enzo-p', 
-   ARGS='input/load-balance-4.in')
-
-Clean(balance_neighbor,
-      [Glob('#/' + test_path + '/Balance/balance*png'),
-       '#/input/parameters.out',])
+# DOES NOTHING?
+# balance_neighbor = env_mv_neighbor.RunBalanceNeighbor (
+#    'test_balance_neighbor.unit',
+#    bin_path + '/enzo-p', 
+#    ARGS='input/load-balance-4.in')
+# 
+# Clean(balance_neighbor,
+#       [Glob('#/' + test_path + '/Balance/balance*png'),
+#        '#/input/parameters.out',])
 
 # RandCentLB
 

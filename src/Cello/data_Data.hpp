@@ -1,13 +1,13 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_Data.hpp
+/// @file     data_Data.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-03-10
-/// @brief    [\ref Mesh] Declaration of the Data class
+/// @brief    [\ref Data] Declaration of the Data class
 ///
 
-#ifndef MESH_DATA_HPP
-#define MESH_DATA_HPP
+#ifndef DATA_DATA_HPP
+#define DATA_DATA_HPP
 
 class Data {
 
@@ -15,8 +15,8 @@ class Data {
   friend class IoBlock;
 
   /// @class    Data
-  /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] 
+  /// @ingroup  Data
+  /// @brief    [\ref Data] 
 
 public: // interface
 
@@ -140,5 +140,5 @@ private: // attributes
 
 };
 
-#endif /* MESH_DATA_HPP */
+#endif /* DATA_DATA_HPP */
 

@@ -19,13 +19,13 @@
 
 static char buffer [256];
 
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,FACE_LEVEL,LEVEL_NEW,MSG) \
+#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
   {									\
     std::string bit_str = INDEX_RECV.bit_string(-1,2);			\
     sprintf (buffer,"%s %s"						\
 	     " [%d => %d]-%d if3 %2d %2d %2d  ic3 %d %d %d",		\
 	     MSG,bit_str.c_str(),					\
-	     LEVEL_NOW,LEVEL_NEW,FACE_LEVEL,				\
+	     LEVEL_NOW,LEVEL_NEW,					\
 	     IF3[0],IF3[1],IF3[2],					\
 	     IC3[0],IC3[1],IC3[2]);					\
     INDEX_SEND.print(buffer,-1,2,false,simulation());			\
@@ -36,7 +36,7 @@ static char buffer [256];
   }
 #else /* DEBUG_ADAPT */
 
-#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,FACE_LEVEL,LEVEL_NEW,MSG) \
+#   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
   {									\
 thisProxy[INDEX_RECV].p_adapt_recv_level (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW); \
 }
@@ -338,8 +338,6 @@ void Block::adapt_send_level()
   if (!is_leaf()) return;
 
   const int level        = this->level();
-  const int rank         = this->rank();
-
   const int min_face_rank = 0;
   ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
   int of3[3];
@@ -351,7 +349,7 @@ void Block::adapt_send_level()
     it_neighbor.child(ic3);
     int level_face = it_neighbor.face_level();
     
-    PUT_LEVEL (index_,index_neighbor,ic3,of3,level,level_face,level_next_,"send");
+    PUT_LEVEL (index_,index_neighbor,ic3,of3,level,level_next_,"send");
   }
 }
 

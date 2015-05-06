@@ -288,7 +288,6 @@ public: // attributes (YIKES!)
 
   /// Data for turbulence reductions
   double method_turbulence_data [MAX_TURBULENCE_ARRAY];
-  
 
 };
 

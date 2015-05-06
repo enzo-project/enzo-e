@@ -52,8 +52,14 @@ Block::Block
  bool testing
  ) throw ()
   :
+  data_(NULL),
+  child_data_(NULL),
   index_(index),
-  stop_(0),
+  level_next_(0),
+  cycle_(cycle),
+  time_(time),
+  dt_(dt),
+  stop_(false),
   index_initial_(0),
   children_(),
   sync_coarsen_(),
@@ -72,10 +78,10 @@ Block::Block
   age_(0),
   face_level_last_(),
   name_(name()),
+  index_method_(-1),
+  index_refresh_(-1),
   refresh_call_(),
-  refresh_sync_(""),
-  refresh_index_(-1),
-  index_method_(-1)
+  refresh_sync_("")
 {
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = CmiTrue;
@@ -265,7 +271,7 @@ void Block::pup(PUP::er &p)
   p | name_;
   p | refresh_call_;
   p | refresh_sync_;
-  p | refresh_index_;
+  p | index_refresh_;
   p | index_method_;
   // SKIP method_: initialized when needed
 
@@ -572,8 +578,6 @@ void Block::update_boundary_ ()
   bool fxm=0,fxp=0,fym=0,fyp=0,fzm=0,fzp=0;
 
   determine_boundary_(is_boundary,&fxm,&fxp,&fym,&fyp,&fzm,&fzp);
-
-  const FieldDescr * field_descr = simulation()->field_descr();
 
   int index = 0;
   Problem * problem = simulation()->problem();

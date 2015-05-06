@@ -59,7 +59,6 @@ void Block::refresh_begin_()
       it_neighbor.child(ic3);
       int level_face = it_neighbor.face_level();
 
-      int refresh;
       if (level_face == level) {
 	refresh_load_face_ (refresh_same,index_neighbor,if3,ic3);
       } else if (level_face == level + 1) {

@@ -27,8 +27,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("field_ghosts()");
   unit_assert(refresh->field_ghosts() == 3);
-  unit_func ("field_face_rank()");
-  unit_assert(refresh->field_face_rank() == 2);
+  unit_func ("min_face_rank()");
+  unit_assert(refresh->min_face_rank() == 2);
 
   unit_func ("insert_field()");
   refresh->insert_field (12);

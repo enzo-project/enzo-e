@@ -134,9 +134,9 @@ int EnzoBlock::ComputeTemperatureField
     enzo_float * species_HM    = (enzo_float *) field.values("species_HM");
     enzo_float * species_H2I   = (enzo_float *) field.values("species_H2I");
     enzo_float * species_H2II  = (enzo_float *) field.values("species_H2II");
-    enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
-    enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
-    enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
+    // enzo_float * species_DI    = (enzo_float *) field.values("species_DI");
+    // enzo_float * species_DII   = (enzo_float *) field.values("species_DII");
+    // enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
  
     /* Compute temperature with mu calculated directly. */
  

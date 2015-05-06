@@ -10,9 +10,13 @@
 //----------------------------------------------------------------------
 
 Problem::Problem() throw()
-  : stopping_(0),
+  : is_periodic_(true),
+    stopping_(NULL),
+    prolong_(NULL),
+    restrict_(NULL),
+    index_refine_(0),
     index_output_(0),
-    is_periodic_(true)
+    index_boundary_(0)
 {
   
 }
@@ -330,18 +334,21 @@ void Problem::initialize_method
  FieldDescr * field_descr
  ) throw()
 {
-  for (size_t index_method=0; index_method<config->method_list.size(); index_method++) {
+
+  const int num_method = config->method_list.size();
+
+  for (size_t index_method=0; index_method < num_method ; index_method++) {
 
     std::string name = config->method_list[index_method];
 
     Method * method = create_method_(name, config, field_descr);
 
-    for (int imr = 0; imr < config->method_refresh[index_method].size(); imr++) {
+    const int num_method_refresh = config->method_refresh[index_method].size();
+
+    for (size_t imr = 0; imr < num_method_refresh; imr++) {
       std::string refresh_str = config->method_refresh[index_method][imr];
-      bool found = false;
-      for (int ir = 0; ir < config->refresh_list.size(); ir++) {
+      for (size_t ir = 0; ir < config->refresh_list.size(); ir++) {
 	if (config->refresh_list[ir] == refresh_str) {
-	  found = true;
 	  method->add_index_refresh(ir);
 	}
       }
@@ -594,21 +601,29 @@ Refresh * Problem::create_refresh_
   TRACE1("Problem::create_refresh %s",name.c_str());
   Refresh * refresh = new Refresh (name,
 				   config->refresh_field_ghosts[index],
-				   config->refresh_field_face_rank[index]);
+				   config->refresh_min_face_rank[index]);
   if (config->refresh_field_list[index].size() == 0) {
 
     refresh->all_fields (config->num_fields);
 
   } else {
 
-    for (int index_field=0; index_field<config->refresh_field_list[index].size(); index_field++) {
+    int num_field = config->refresh_field_list[index].size();
+
+    for (size_t index_field=0; index_field<num_field; index_field++) {
+
       std::string field_name = config->refresh_field_list[index][index_field];
+
       if (field_descr->is_field (field_name)) {
+
 	refresh->insert_field(field_descr->field_id(field_name));
+
       } else {
+
 	ERROR3 ("Problem::create_refresh_()",
 		"Unknown field in Refresh group %s field_list[%d] = %s",
 		name.c_str(),index_field,field_name.c_str());
+
       }
     }
 

@@ -46,7 +46,7 @@ int RefineSlope::apply
   int nx,ny,nz;
   field_data->size(&nx,&ny,&nz);
 
-  int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
+  int rank = block->rank();
 
   double h3[3];
   Data * data = block->data();
@@ -66,9 +66,9 @@ int RefineSlope::apply
     int gx,gy,gz;
     field_descr->ghosts(id_field, &gx,&gy,&gz);
 
-    int nxd = nx + 2*gx;
-    int nyd = ny + 2*gy;
-    int nzd = nz + 2*gz;
+    const int nxd = rank >= 1 ? (nx + 2*gx) : nx;
+    const int nyd = rank >= 2 ? (ny + 2*gy) : ny;
+    const int nzd = rank >= 3 ? (nz + 2*gz) : nz;
 
     precision_type precision = field_descr->precision(id_field);
 
@@ -125,13 +125,13 @@ void RefineSlope::evaluate_block_(T * array, T * output ,
   T slope;
   const int d3[3] = {1,ndx,ndx*ndy};
   for (int axis=0; axis<rank; axis++) {
-    int d = d3[axis];
+    int id = d3[axis];
     const int i0 = gx + ndx*(gy + ndy*gz);
     for (int ix=0; ix<nx; ix++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int iz=0; iz<nz; iz++) {
 	  int i = i0 + ix + ndx*(iy + ndy*iz);
-	  slope = fabs( (array[i+d] - array[i-d]) 
+	  slope = fabs( (array[i+id] - array[i-id]) 
 		       / (2.0*h3[axis]*array[i]));
 	  if (slope > min_refine_)  *any_refine  = true;
 	  if (slope > max_coarsen_) *all_coarsen = false;

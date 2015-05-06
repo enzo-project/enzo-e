@@ -109,10 +109,10 @@ private: // attributes
   int ipf3_[3];
 
   /// simulation rank
-  size_t rank_;
+  int rank_;
 
   /// face rank limit
-  size_t min_face_rank_;
+  int min_face_rank_;
 
   /// Whether domain is periodic along each face & axis
   bool periodic_[3][2];

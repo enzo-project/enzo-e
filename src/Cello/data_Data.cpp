@@ -1,11 +1,11 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_Data.cpp
+/// @file     data_Data.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-03-10
 /// @brief    Implementation of Data class
 
-#include "mesh.hpp"
+#include "data.hpp"
 
 //----------------------------------------------------------------------
 

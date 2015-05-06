@@ -51,5 +51,7 @@ class FieldFace;
 #include "data_ParticleDescr.hpp"
 #include "data_ParticleBlock.hpp"
 
+#include "data_Data.hpp"
+
 #endif /* _DATA_HPP */
 

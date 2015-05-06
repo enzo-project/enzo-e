@@ -1,0 +1,40 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/adapt.incl"
+Mesh    { 
+   root_size   = [32,32];
+}
+Adapt {  max_level   = 8;  }
+
+Initial {
+    density       { value = [ 1.0+x, "input/meshed-up.png",  0.125 ]; };
+    total_energy  { value = 
+    [ 
+       (1.0 + x)  / (0.4 * 1.0), "input/meshed-up.png", 0.14 / (0.4 * 0.1)  ]; };
+    velocity_x    { value = [0.0]; };
+    velocity_y    { value = [0.0]; };
+}
+
+
+Boundary { type = "periodic"; }
+
+Output {
+     list = ["mesh"];
+      mesh { name = ["meshed-up.png"];
+           include "input/schedule_cycle_10.incl";
+	   include "input/colormap_greyscale.incl";
+	   image_type = "mesh";
+	   image_size = [1025,1025];
+       };
+
+}
+Adapt {
+   list = ["slope"];
+   slope {
+      type = "slope";
+      max_coarsen = 5.0;
+      min_refine  = 10.0;
+   }
+}
+Stopping { cycle = 1; }

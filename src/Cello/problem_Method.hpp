@@ -79,8 +79,8 @@ protected: // functions
 	      bool is_active) const throw()
   {
     if (! is_active ) return;
-    const int m=mx*my*mz;
-    for (int i=0; i<mx*my*mz; i++) X[i] = Y[i];
+    const int m = mx*my*mz;
+    for (int i=0; i<m; i++) X[i] = Y[i];
   }
 
 private: // attributes

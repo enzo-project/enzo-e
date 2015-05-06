@@ -151,9 +151,6 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
   T * B = (T*) field.values(ib_);
   T * X = (T*) field.values(ix_);
   T * R = (T*) field.values(ir_);
-  T * D = (T*) field.values(id_);
-  T * Y = (T*) field.values(iy_);
-  T * Z = (T*) field.values(iz_);
 
   if (is_leaf_) {
 
@@ -279,8 +276,6 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 
   T * B  = (T*) field.values(ib_);
   T * R  = (T*) field.values(ir_);
-  T * D  = (T*) field.values(id_);
-  T * Z  = (T*) field.values(iz_);
 
   if (iter_ == 0 && is_singular_)  {
 
@@ -694,23 +689,9 @@ void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
 //----------------------------------------------------------------------
 
 template <class T>
-T EnzoMethodGravityCg::count_ (T * X) const throw()
+int EnzoMethodGravityCg::count_ (T * X) const throw()
 {
-  if (! is_leaf_ ) return 0.0;
-
-  T count = 0.0;
-
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-
-  for (int iz=0; iz<nz_; iz++) {
-    for (int iy=0; iy<ny_; iy++) {
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + (ix + mx_*(iy + my_*iz));
-	++count;
-      }
-    }
-  }
-  return count;
+  return is_leaf_ ? nx_*ny_*nz_ : 0;
 }
 
 //----------------------------------------------------------------------

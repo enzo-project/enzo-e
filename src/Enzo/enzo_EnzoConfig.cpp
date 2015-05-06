@@ -117,6 +117,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   
   TRACE("EnzoCharm::read calling Config::read()");
+
   ((Config*)this) -> read (p);
 
   double floor_default = 1e-6;
@@ -238,7 +239,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
 
   method_gravity_mg_iter_max = p->value_integer
-    ("Method:gravity_mg:iter_max",100);
+    ("Method:gravity_mg:iter_max",10);
 
   method_gravity_mg_grav_const = p->value_float
     ("Method:gravity_mg:grav_const",6.67384e-8); // default: G (cgs)
@@ -260,6 +261,12 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_mg_prolong = p->value_string
     ("Method:gravity_mg:prolong","linear");
+
+  method_gravity_mg_level_min = p->value_integer
+    ("Method:gravity_mg:level_min",0);
+
+  method_gravity_mg_level_max = p->value_integer
+    ("Method:gravity_mg:level_max",mesh_max_level);
 
 
   method_gravity_bicgstab_iter_max = p->value_integer

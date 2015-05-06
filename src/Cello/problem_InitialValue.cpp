@@ -587,6 +587,8 @@ void InitialValue::create_mask_png_
   (*mask) = new bool [n];
   for (int i=0; i<n; i++) (*mask)[i] = false;
 
+  const int gray = 65536*3/2;
+
   for (int iy=0; iy<(*ny); iy++) {
     for (int ix=0; ix<(*nx); ix++) {
 
@@ -596,7 +598,7 @@ void InitialValue::create_mask_png_
       int g = png.read(ix+1,iy+1,2);
       int b = png.read(ix+1,iy+1,3);
 
-      (*mask)[i] = (r+g+b > 0);
+      (*mask)[i] = (r+g+b > gray);
     }
   }
   png.close();

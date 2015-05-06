@@ -139,7 +139,7 @@ public: // attributes
   int                        num_refresh;
   std::vector<std::string>   refresh_list;
   std::vector<std::string>   refresh_field_list [MAX_REFRESH_GROUPS];
-  int                        refresh_field_face_rank [MAX_REFRESH_GROUPS];
+  int                        refresh_min_face_rank [MAX_REFRESH_GROUPS];
   int                        refresh_field_ghosts [MAX_REFRESH_GROUPS];
 
   // Output
