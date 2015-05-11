@@ -57,6 +57,7 @@ public: // interface
     // // NOTE: change this function whenever attributes change
     // p |  *timer_;
     p |  active_;
+    p |  verbose_;
     // p |  group_default_;
     // p |  group_active_;
 
@@ -95,6 +96,11 @@ public: // interface
   /// Print a message with possible format specifications to stdout
   void print (const char * component, const char * buffer, ...) const;
 
+  void set_verbose (bool verbose) 
+  { verbose_ = verbose; }
+
+  bool is_verbose () const { return verbose_; }
+
   /// Print a message without format specifications to stdout
   void print_verbatim (const char * component, const char * buffer) const;
 
@@ -110,6 +116,9 @@ private: // attributes
 
   /// Whether monitoring is activated.  Used for e.g. ip != 0.
   bool active_;
+
+  /// Whether verbose mode is active
+  bool verbose_;
 
   /// Whether default is to output all groups or output no groups
   bool group_default_;

@@ -60,3 +60,7 @@ Adapt {
       min_refine  = 20.0;
    }
 }
+
+Monitor {
+   verbose = true;
+}

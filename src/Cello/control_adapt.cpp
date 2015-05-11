@@ -249,6 +249,15 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 
 void Block::adapt_refine_()
 {
+  Monitor * monitor = simulation()->monitor();
+  if (monitor->is_verbose()) {
+    char buffer [80];
+    int v3[3];
+    index().values(v3);
+    sprintf (buffer,"Block %s (%d;%d;%d) is refining",name().c_str(),
+	     v3[0],v3[1],v3[2]);
+    monitor->print("Adapt",buffer);
+  }
 
 #ifdef DEBUG_ADAPT
   index_.print("REFINE",-1,2,false,simulation());
@@ -590,36 +599,48 @@ void Block::adapt_coarsen_()
   
   // send data to parent
 
-  if (level > 0 && is_leaf()) {
+  ASSERT2 ("adapt_coarsen_()",
+	  "Leaf = %s must be true and level = %d must be greater than 0",
+	   is_leaf()?"true":"false", level,
+	   is_leaf() && level > 0);
 
-    Index index_parent = index_.index_parent();
-    int ic3[3] = {1,1,1};
-    index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
-
-    // copy block data
-    int narray; 
-    char * array;
-    int iface[3] = {0,0,0};
-    bool lghost[3] = {false,false,false};
-    std::vector<int> field_list;
-    FieldFace * field_face = 
-      load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict,
-		 field_list);
-
-    // copy face levels
-    int nf = face_level_curr_.size();
-    int face_level_curr[nf];
-    for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
-
-    // send child data to parent
-    // --------------------------------------------------
-    thisProxy[index_parent].p_adapt_recv_child
-      (ic3, narray,array, nf,face_level_curr);
-    // --------------------------------------------------
-
-    delete field_face;
-
+  Monitor * monitor = simulation()->monitor();
+  if (monitor->is_verbose()) {
+    char buffer [80];
+    int v3[3];
+    index().values(v3);
+    sprintf (buffer,"Block %s (%d;%d;%d) is coarsening",name().c_str(),
+	     v3[0],v3[1],v3[2]);
+    monitor->print("Adapt",buffer);
   }
+
+  Index index_parent = index_.index_parent();
+  int ic3[3] = {1,1,1};
+  index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
+
+  // copy block data
+  int narray; 
+  char * array;
+  int iface[3] = {0,0,0};
+  bool lghost[3] = {false,false,false};
+  std::vector<int> field_list;
+  FieldFace * field_face = 
+    load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict,
+	       field_list);
+
+  // copy face levels
+  int nf = face_level_curr_.size();
+  int face_level_curr[nf];
+  for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
+
+  // send child data to parent
+  // --------------------------------------------------
+  thisProxy[index_parent].p_adapt_recv_child
+    (ic3, narray,array, nf,face_level_curr);
+  // --------------------------------------------------
+
+  delete field_face;
+
 }
 
 //----------------------------------------------------------------------

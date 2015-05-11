@@ -73,9 +73,9 @@ public: // interface
     p | idensity_;
     p | ipotential_;
     p | ib_;
-    p | ix_;
     p | ir_;
-    p | ic_;
+    p | ix_;
+    p | iy_;
 
     p | nx_;
     p | ny_;
@@ -186,9 +186,9 @@ protected: // attributes
 
   /// MG vector id's
   int ib_;
-  int ix_;
   int ir_;
-  int ic_;
+  int ix_;
+  int iy_;
 
   /// Block field attributes
   int nx_,ny_,nz_;

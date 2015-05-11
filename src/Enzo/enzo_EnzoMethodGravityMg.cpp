@@ -9,73 +9,153 @@
 /// Adaptive Technique) of Brandt '77, based on the FAS formulation of
 /// Multigrid.
 ///
-/// From "Multilevel Adaptive Methods for Partial Differential Equations", McCormick, 1989, p135
+///======================================================================
 ///
-///  [WARNING: Bug in doxygen gets formulas in wrong place below
-///  processed html output; latex output is good]
+///  "Coarse" view of Multigrid solver
 ///
-/// \f$ u^{h} \leftarrow \mbox{MG}^{h} (u^{h}; f^{h}) \f$
+///  MG(A,X,B)
 ///
-///   - if \f$ h = h_{c} \f$
-///      -# solve \f$ L^{h} u^{h} = f^{h} \f$
-///      -# return
-///   - else
-///      -# \f$ u^{h} \leftarrow G^{h} (u^{h}; f^{h}) \f$
-///      -# \f$ \tau_{h}^{2d} \leftarrow L^{2h} (I_{h}^{2h} u^{h}) - I_{h}^{2h}(L^{h}(u^{h})) \f$ 
-///      -# \f$ f^{2h} \leftarrow I_{h}^{2h} f^{h} + \tau_{h}^{2h} \f$ 
-///      -# \f$ u^{2h} \leftarrow I_{h}^{2h}u^{h} \f$ 
-///      -# \f$ u^{2h} \leftarrow MG^{2h}(u^{2h}; f^{2h}) \f$ 
-///      -# \f$ u^{h} \leftarrow u^{h} + I^{h}_{2h}(u^{2h} - I_{h}^{2h}u^{h}) \f$ 
-///      -# \f$ u^{h} \leftarrow G^{h}(u^{h}; f^{h}) \f$ 
+///    enter_solver()         initialize solver
+///    begin_cycle()          initialize a V-cycle
+///    send_faces()           send face data to neighbors
+///  p_receive_face()            receive face daat from neighbors
+///    pre_smooth()           apply the smoother
+///  p_restrict()             receive restricted data from parent
+///    compute_b()            compute the right-hand side B
+///    coarse_solve()         solve the coarse-grid equation
+///    p_end_coarse_solve()   callback after the coarse solver
+///  p_prolong()              receive prolonged data from children
+///    update_x()             update the solution X
+///    post_smooth()          apply the smoother
+///    end_cycle()            finalize V-cycle
+///    exit_solver()          finalize solver
 ///
-///  Asynchronous FAC (AFAC)
 ///
-///  - for k=1 to l
-///    - \f$ f^{h_k} = I_{\underline{h}}^{h_k} (f^{\underline{h}} - L^{\underline{h}} u^{\underline{u}}) \f$
-///    - solve \f$ L^{h_k} u^{h_k} = f^{h_k} \f$
-///  - for k=2 to l
-///    - \f$ f_{F}^{2h_k} = I_{\underline{h}}^{2h_k} (f^{\underline{2h}} - L^{\underline{h}} u^{\underline{h}}) \f$
-///    - solve \f$ L_{F}^{2h_k} u_{F}^{2h_k} = f_{F}^{2h_k} \f$
-///  - \f$ u^{\underline{h}} = u^{\underline{h}} + I_{h_1}^{\underline{h}} + \sum_{k=2}^{l}(I_{h_k}^{\underline{h}} u^{h_k} - \overline{I}_{2h_k}^{\underline{h}} u_F^{2h_k}) \f$
+/// ======================================================================
 ///
-/// - MG(A,X,B)
+///  "Fine" view of Multigrid algorithm
 ///
-///   - iter = 0
-///   - level_active = level_max
-///   - assert (level_max > level_min)
+///  --------------------
+///  enter_solver()
 ///
-/// - A:
-///   - if (converged()) return
-///   - refresh(X)
-///   - pre_smooth(A,X,B)
-///   - Y = A*X
-///   - restrict(B,X,Y);
-///   - level_active = level_active - 1
-///   - B = B - Y
-///   - Y = A*X
-///   - B = B + Y
-///   - if (active_level == level_min) 
-///      - coarse_solve(A,X,B)
-///   - else 
-///      - post_smooth(A,X,B)
-///   - Y = prolong (X)
-///   - level_active = level_active + 1
-///   - X = X + Y
-///   - refresh(X)
-///   - post-smooth(A,X,B)
-///   - iter = iter + 1
-///   - goto A
-/// 
+///     initialize iter_
+///     call begin_cycle()
 ///
-/// ---------------------
-/// (*) can skip second refresh if e.g. nu_pre < # ghost zones
+///  --------------------
+///  begin_cycle()
+///
+///    if converged, then return
+///    call send_faces()
+///
+///  --------------------
+///  send_faces()
+///
+///    if leaf block, then
+///       for each neighbor
+///           pack face data
+///           remote call p_receive_face() on neighbor
+///       for each face
+///           if neighbor in same level exists,
+///                and it is not a leaf
+///              pack face data
+///              remote call p_receive_face() on neighbor 
+///
+///  --------------------
+///  p_receive_face()
+///
+///     unpack ghost data
+///     if all ghost data available
+///        if coarsest level
+///            call coarse_solve()
+///        else 
+///            if not leaf block and received restrict
+///                call compute_b()
+///            else
+///                call pre_smooth()
+///
+///  --------------------
+///  pre_smooth()
+///
+///      apply the smoother to A X = B
+///      Y = A*X [ need refreshed X? ]
+///      pack B, X, Y fields
+///      remote call p_restrict() on parent
+///
+///  --------------------
+///  p_restrict(B,X,Y)
+///
+///      unpack vectors B,X,Y
+///      call send_faces()
+///      if all ghost data available
+///          if coarsest level
+///             call coarse_solve()
+///          else
+///             call compute_b()
+///
+///  --------------------
+///  compute_b()
+///
+///     Compute right hand side B:
+///         B = B - Y
+///         Y = A*X [ need refreshed X? ]
+///         B = B + Y
+///     call pre_smooth()
+///
+///  --------------------
+///  begin_coarse_solve()
+///     
+///      [ need refreshed X?]
+///      initiate the coarse solver with p_end_coarse_solve() callback
+///
+///  --------------------
+///  p_end_coarse_solve()
+///
+///      if not leaf node
+///          for each child
+///              pack correction X
+///              remote call p_prolong() on child
+///      else
+///          call update_x()
+///
+///  --------------------
+///  p_prolong()
+///
+///     unpack correction Y
+///     call update_x()
+///
+///  --------------------
+///  update_x()
+///
+///     apply correction to solution X:
+///        X = X + Y
+///     call post_smooth()  [ refresh again first? ]
+///
+///  --------------------
+///  post_smooth()
+///
+///     apply smoother to A X = B
+///     call end_cycle()
+///
+///  --------------------
+///  end_cycle()
+///
+///     increment iter_
+///     if converged exit_solver()
+///
+///  --------------------
+///  exit_solver()
+///
+///     deallocate temporaries
+///     end_compute()
+///
+///======================================================================
 ///
 /// Required Fields
 ///
 /// - B                          linear system right-hand side
-/// - C                          correction computed as A C = R
 /// - R                          residual R = B - A*X
 /// - X                          current solution to A*X = B
+/// - Y                          temporary vector for A*X on fine
 /// - potential                  computed gravitational potential
 /// - density                    density field
 /// - acceleration_x             acceleration along X-axis
@@ -83,9 +163,7 @@
 /// - acceleration_z (rank >= 3) acceleration along Z-axis
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
-
 #include "enzo.decl.h"
 
 #define CK_TEMPLATES_ONLY
@@ -116,7 +194,7 @@ EnzoMethodGravityMg::EnzoMethodGravityMg
     monitor_iter_(monitor_iter),
     rr_(0),rr0_(0), rr_min_(0),rr_max_(0),
     idensity_(0),  ipotential_(0),
-    ib_(0), ix_(0), ir_(0), ic_(0),
+    ib_(0), ir_(0), ix_(0), iy_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
@@ -126,16 +204,13 @@ EnzoMethodGravityMg::EnzoMethodGravityMg
     level_min_(level_min),
     level_max_(level_max)
 {
-  printf ("Creating EnzoMethodGravityMg\n");
-  printf ("level_min = %d\n",level_min_);
-  printf ("level_max = %d\n",level_max_);
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
 
   ib_ = field_descr->field_id("B");
-  ix_ = field_descr->field_id("X");
   ir_ = field_descr->field_id("R");
-  ic_ = field_descr->field_id("C");
+  ix_ = field_descr->field_id("X");
+  iy_ = field_descr->field_id("Y");
 }
 
 //----------------------------------------------------------------------
@@ -156,7 +231,6 @@ EnzoMethodGravityMg::~EnzoMethodGravityMg () throw()
 
 void EnzoMethodGravityMg::compute ( Block * block) throw()
 {
-  
   set_active(block);
 
   Field field = block->data()->field();
@@ -202,16 +276,16 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
   T * B = (T*) field.values(ib_);
   T * X = (T*) field.values(ix_);
   T * R = (T*) field.values(ir_);
-  T * C = (T*) field.values(ic_);
+  T * Y = (T*) field.values(iy_);
 
-  // Initialize B, X, R, C
+  // Initialize B, X, R, Y
 
   if (is_active_) {
 
     /// X = 0
     /// B = -h^2 * 4 * PI * G * density
     /// R = B ( residual with X = 0 )
-    /// C = 0
+    /// Y = 0
 
     for (int iz=0; iz<mz_; iz++) {
       for (int iy=0; iy<my_; iy++) {
@@ -220,7 +294,7 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
 	  B[i] = - 4.0 * (cello::pi) * grav_const_ * density[i];
 	  X[i] = 0.0;
 	  R[i] = B[i];
-	  C[i] = 0.0;
+	  Y[i] = 0.0;
 	}
       }
     }
@@ -230,6 +304,7 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
   mg_end<T>(enzo_block,return_unknown);
 
 }
+
 
 //----------------------------------------------------------------------
 

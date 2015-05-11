@@ -260,7 +260,8 @@ public: /// entry methods
   void r_enzo_matvec(CkReductionMsg * msg)
   {      enzo_matvec_(); delete msg; }
 
-protected:
+protected: // functions
+
   void enzo_matvec_() ;
 
 public: // attributes (YIKES!)

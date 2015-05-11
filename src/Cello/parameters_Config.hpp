@@ -134,6 +134,7 @@ public: // attributes
   // Monitor
 
   bool                       monitor_debug;
+  bool                       monitor_verbose;
 
   // Refresh
   int                        num_refresh;

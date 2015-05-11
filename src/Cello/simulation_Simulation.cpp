@@ -229,7 +229,7 @@ void Simulation::initialize_monitor_() throw()
 {
   bool debug = config_->monitor_debug;
   monitor_->set_active("DEBUG",debug);
- 
+  monitor_->set_verbose(config_->monitor_verbose);
 }
 
 //----------------------------------------------------------------------
