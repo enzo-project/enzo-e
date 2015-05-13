@@ -77,23 +77,11 @@ public: // interface
     p | ix_;
     p | iy_;
 
-    p | nx_;
-    p | ny_;
-    p | nz_;
-
-    p | mx_;
-    p | my_;
-    p | mz_;
-
-    p | gx_;
-    p | gy_;
-    p | gz_;
-
     p | iter_;
-    p | is_active_;
-    p | level_;
     p | level_min_;
     p | level_max_;
+
+    p | precision_;
   }
 
   /// Solve for the gravitational potential
@@ -104,35 +92,31 @@ public: // interface
 
 protected: // methods
 
+  template <class T>
+  void enter_solver_(EnzoBlock * enzo_block) throw();
+  template <class T>
+  void begin_cycle_(EnzoBlock * enzo_block) throw();
+  void send_faces_(EnzoBlock * enzo_block) throw();
+  int determine_count_(EnzoBlock * enzo_block) throw();
+  void p_receive_face_() throw();
+  void compute_correction_(EnzoBlock * enzo_block) throw();
   /// Apply pre-smoothing on the current level
-  void pre_smooth (EnzoBlock * enzo_block, int level);
-  /// Compute the residual R = B - A*X on the current level
-  void compute_residual (EnzoBlock * enzo_block, int level);
-  /// Restrict the residual R to the next-coarser level
-  void restrict_residual (EnzoBlock * enzo_block, int level);
+  void pre_smooth_(EnzoBlock * enzo_block) throw();
+  void p_restrict_() throw();
+  void evaluate_b_(EnzoBlock * enzo_block) throw();
   /// Solve the coarse-grid equation A*C = R
-  void coarse_solve (EnzoBlock * enzo_block, int level);
+  void solve_coarse_(EnzoBlock * enzo_block) throw();
+  void p_coarse_solved_() throw();
   /// Prolong the correction C to the next-finer level
-  void prolong_correction (EnzoBlock * enzo_block, int level);
-  /// Update the solution X <= X + C on the current level
-  void update_solution (EnzoBlock * enzo_block, int level);
+  void p_prolong_() throw();
+
   /// Apply post-smoothing to the current level
-  void post_smooth (EnzoBlock * enzo_block, int level);
-
+  void post_smooth_(EnzoBlock * enzo_block) throw();
+  void end_cycle_(EnzoBlock * enzo_block) throw();
+  template <class T>
+  void exit_solver_(EnzoBlock * enzo_block, int retval) throw();
+  
   void monitor_output_(EnzoBlock * enzo_block) throw();
-
-  template <class T>
-  void compute_ (EnzoBlock * enzo_block) throw();
-
-  template <class T>
-  void mg_end (EnzoBlock * enzo_block, int retval) throw();
-
-  /// Set whether current Block is a leaf--if not don't touch data
-  void set_active(Block * block) throw()
-  { is_active_ = (level_ == block->level()); }
-
-  bool is_active () const throw()
-  { return is_active_; }
 
 protected: // attributes
 
@@ -190,19 +174,8 @@ protected: // attributes
   int ix_;
   int iy_;
 
-  /// Block field attributes
-  int nx_,ny_,nz_;
-  int mx_,my_,mz_;
-  int gx_,gy_,gz_;
-
   /// Current MG iteration
   int iter_;
-
-  /// Whether current block is active (set using set_active)
-  int is_active_;
-
-  /// Current active level
-  int level_;
 
   /// Minimum refinement level (may be < 0)
   int level_min_;
@@ -210,6 +183,8 @@ protected: // attributes
   /// Maximum refinement level
   int level_max_;
 
+  /// Precision of fields
+  int precision_;
 };
 
 #endif /* ENZO_ENZO_METHOD_GRAVITY_MG_HPP */

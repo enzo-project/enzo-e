@@ -7,9 +7,10 @@ Balance { interval = 1; }
 
 Stopping { cycle = 20; }
 
-Testing { cycle_final = 20;
-          time_final = 0.00135473956298128;
-        }
+Testing {
+   cycle_final = 20;
+   time_final = 0.00134903668604035;
+}
 
 Mesh    { 
    root_size   = [16,16];

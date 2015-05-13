@@ -591,14 +591,14 @@ test_summary("Mesh",
 	     array("enzo-p"),'test');
 
 test_summary("Balance", 
-	     array("balance_rand_cent",
+	     array("balance_none",
+		   "balance_rand_cent",
 		   "balance_greedy",
 		   "balance_refine",
 		   "balance_rotate",
-		   //		   "balance_neighbor",
 		   "balance_hybrid"),
 	     array("enzo-p", "enzo-p", "enzo-p", "enzo-p",
-		   "enzo-p", "enzo-p", "enzo-p", "enzo-p"),'test/Balance');
+		   "enzo-p", "enzo-p"),'test/Balance');
 
 test_summary("Boundary", 
 	     array("boundary_reflecting-2d",
@@ -914,6 +914,16 @@ end_hidden("adapt_L5");
 //======================================================================
 
 test_group("Balance");
+
+begin_hidden("balance_none", "None");
+
+tests("Enzo","enzo-p","test_balance_none","None","Balance");
+test_table ("Balance/None/balance-mesh",
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+test_table ("Balance/None/balance-de",
+	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+
+end_hidden("balance_none");
 
 begin_hidden("balance_rotate", "RotateLB");
 

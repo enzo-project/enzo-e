@@ -13,140 +13,193 @@
 ///
 ///  "Coarse" view of Multigrid solver
 ///
-///  MG(A,X,B)
+///   @code
+///    MG(A,X,B)
 ///
-///    enter_solver()         initialize solver
-///    begin_cycle()          initialize a V-cycle
-///    send_faces()           send face data to neighbors
-///  p_receive_face()            receive face daat from neighbors
-///    pre_smooth()           apply the smoother
-///  p_restrict()             receive restricted data from parent
-///    compute_b()            compute the right-hand side B
-///    coarse_solve()         solve the coarse-grid equation
-///    p_end_coarse_solve()   callback after the coarse solver
-///  p_prolong()              receive prolonged data from children
-///    update_x()             update the solution X
-///    post_smooth()          apply the smoother
-///    end_cycle()            finalize V-cycle
-///    exit_solver()          finalize solver
+///    enter_solver()         // initialize solver
+///    begin_cycle()          // initialize a V-cycle
+///    send_faces()           // send face data to neighbors
+///    p_receive_face()       // receive face daat from neighbors
+///    pre_smooth()           // apply the smoother
+///    p_restrict()           // receive restricted data from parent
+///    evaluate_b()           // compute the right-hand side B
+///    coarse_solve()         // solve the coarse-grid equation
+///    p_end_coarse_solve()   // callback after the coarse solver
+///    p_prolong()            // receive prolonged data from children
+///    update_x()             // update the solution X
+///    post_smooth()          // apply the smoother
+///    end_cycle()            // finalize V-cycle
+///    exit_solver()          // finalize solver
+///  @endcode
 ///
 ///
 /// ======================================================================
 ///
 ///  "Fine" view of Multigrid algorithm
 ///
-///  --------------------
+/// @code
 ///  enter_solver()
 ///
-///     initialize iter_
-///     call begin_cycle()
+///    initialize iter_ = 0
+///    call begin_cycle()
+/// @endcode
 ///
-///  --------------------
+/// @code
 ///  begin_cycle()
 ///
-///    if converged, then return
-///    call send_faces()
+///   if converged {
+///      call exit_solver()
+///   } else {
+///      if leaf block {
+///         call send_faces()
+///      }
+///   }
+/// @endcode
 ///
-///  --------------------
+/// @code
 ///  send_faces()
 ///
-///    if leaf block, then
-///       for each neighbor
-///           pack face data
-///           remote call p_receive_face() on neighbor
-///       for each face
-///           if neighbor in same level exists,
-///                and it is not a leaf
-///              pack face data
-///              remote call p_receive_face() on neighbor 
+///    <have updated X>
 ///
-///  --------------------
+///   initialize call counter
+///
+///   if leaf block, then
+///      for each neighbor
+///          if not coarse neighbor
+///             pack face data
+///          if finer neighbor
+///             remote call p_receive_face() on neighbor
+///             remote call p_receive_face() on neighbor parent
+///          if same neighbor
+///             remote call p_receive_face() on neighbor
+///          if coarse neighbor
+///             return
+///   else
+///      for each face
+///         pack face data
+///         remote call p_receive_face() on neighbor
+///
+///   counter = determine_count ()
+///
+///   local call receive_face(counter)
+/// @endcode
+///    
+/// @code
+///  determine_count()
+///
+///   if leaf block, then
+///      for each face
+///         if non-repeated coarse face
+///            increment counter
+///   else
+///      count number neighbors in same level 
+///
+///
+///   if not leaf block, then
+///      count number of children
+///
+///   count self
+/// @endcode
+///	    
+/// @code
 ///  p_receive_face()
 ///
-///     unpack ghost data
-///     if all ghost data available
-///        if coarsest level
-///            call coarse_solve()
-///        else 
-///            if not leaf block and received restrict
-///                call compute_b()
-///            else
-///                call pre_smooth()
+///    receive_face(counter)
 ///
-///  --------------------
+///    unpack ghost data
+///    if (number of calls >= counter), then
+///       call compute_correction()
+/// @endcode
+///
+///  @code
+///  compute_correction()
+///
+///    if coarsest level, then
+///        call coarse_solve()
+///    else 
+///        if not leaf block, then
+///            call evaluate_b()
+///        call pre_smooth()
+/// @endcode
+///
+/// @code
 ///  pre_smooth()
 ///
-///      apply the smoother to A X = B
-///      Y = A*X [ need refreshed X? ]
-///      pack B, X, Y fields
-///      remote call p_restrict() on parent
+///     apply the smoother to A X = B
+///     compute Y = A*X  [ need refresh? ]
+///     pack B, X, Y fields
+///     remote call p_restrict() on parent
+/// @endcode
 ///
-///  --------------------
+/// @code
 ///  p_restrict(B,X,Y)
 ///
-///      unpack vectors B,X,Y
-///      call send_faces()
-///      if all ghost data available
-///          if coarsest level
-///             call coarse_solve()
-///          else
-///             call compute_b()
+///     unpack vectors B,X,Y
+///     call send_faces()
+///     if (number of calls >= counter), then
+///        call compute_correction()
+/// @endcode
 ///
-///  --------------------
-///  compute_b()
+/// @code
+///  evaluate_b()
 ///
-///     Compute right hand side B:
-///         B = B - Y
-///         Y = A*X [ need refreshed X? ]
-///         B = B + Y
-///     call pre_smooth()
+///     B = B - Y
+///     compute Y = A*X [ need refresh? ]
+///     B = B + Y
+/// @endcode
 ///
-///  --------------------
-///  begin_coarse_solve()
+/// @code
+///  coarse_solve()
 ///     
-///      [ need refreshed X?]
-///      initiate the coarse solver with p_end_coarse_solve() callback
+///    [need refreshed X?]
+///    initiate the coarse solver with p_coarse_solved() callback
 ///
-///  --------------------
-///  p_end_coarse_solve()
+///    [ NOTE: only coarse blocks call this ]
+/// @endcode
 ///
-///      if not leaf node
-///          for each child
-///              pack correction X
-///              remote call p_prolong() on child
-///      else
-///          call update_x()
+/// @code
+///  p_coarse_solved()
 ///
-///  --------------------
+///    if leaf, then
+///       call end_cycle()
+///    else
+///       for each child
+///           pack correction X
+///           remote call p_prolong() on child
+/// @endcode
+///   
+/// @code
 ///  p_prolong()
 ///
-///     unpack correction Y
-///     call update_x()
+///    unpack correction Y
+///    apply correction to solution X:
+///       X = X + Y
+///    call post_smooth()  [ need refresh? ]
+/// @endcode
 ///
-///  --------------------
-///  update_x()
-///
-///     apply correction to solution X:
-///        X = X + Y
-///     call post_smooth()  [ refresh again first? ]
-///
-///  --------------------
+/// @code
 ///  post_smooth()
 ///
-///     apply smoother to A X = B
-///     call end_cycle()
+///    apply smoother to A X = B
+///    if leaf node, then
+///       call end_cycle()
+///    else
+///       call prolong()
+/// @endcode
 ///
-///  --------------------
+/// @code
 ///  end_cycle()
 ///
-///     increment iter_
-///     if converged exit_solver()
+///    increment iter_
+///    call begin_cycle()
+/// @endcode
 ///
-///  --------------------
+/// @code
 ///  exit_solver()
 ///
-///     deallocate temporaries
-///     end_compute()
+///    deallocate temporaries
+///    end_compute() with quiescence
+/// @endcode
 ///
 ///======================================================================
 ///
@@ -169,6 +222,14 @@
 #define CK_TEMPLATES_ONLY
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
+
+#define VERBOSE(FUNCTION)				\
+  Monitor * monitor = enzo_block->simulation()->monitor();	\
+  monitor->verbose(stdout,"Method", "%s "FUNCTION,enzo_block->name().c_str());	      
+
+//----------------------------------------------------------------------
+
+extern CkReduction::reducerType r_method_gravity_mg_type;
 
 //----------------------------------------------------------------------
 
@@ -195,12 +256,7 @@ EnzoMethodGravityMg::EnzoMethodGravityMg
     rr_(0),rr0_(0), rr_min_(0),rr_max_(0),
     idensity_(0),  ipotential_(0),
     ib_(0), ir_(0), ix_(0), iy_(0),
-    nx_(0),ny_(0),nz_(0),
-    mx_(0),my_(0),mz_(0),
-    gx_(0),gy_(0),gz_(0),
     iter_(0),
-    is_active_(0),
-    level_(0),
     level_min_(level_min),
     level_max_(level_max)
 {
@@ -231,41 +287,34 @@ EnzoMethodGravityMg::~EnzoMethodGravityMg () throw()
 
 void EnzoMethodGravityMg::compute ( Block * block) throw()
 {
-  set_active(block);
-
   Field field = block->data()->field();
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  field.size                (&nx_,&ny_,&nz_);
-  field.dimensions(idensity_,&mx_,&my_,&mz_);
-  field.ghosts    (idensity_,&gx_,&gy_,&gz_);
+  VERBOSE("compute()");
 
-  int precision = field.precision(idensity_);
+  precision_ = field.precision(idensity_);
 
-  if      (precision == precision_single)    compute_<float>      (enzo_block);
-  else if (precision == precision_double)    compute_<double>     (enzo_block);
-  else if (precision == precision_quadruple) compute_<long double>(enzo_block);
+  if      (precision_ == precision_single)    
+    enter_solver_<float>      (enzo_block);
+  else if (precision_ == precision_double)    
+    enter_solver_<double>     (enzo_block);
+  else if (precision_ == precision_quadruple) 
+    enter_solver_<long double>(enzo_block);
   else 
-    ERROR1("EnzoMethodGravityMg()", "precision %d not recognized", precision);
+    ERROR1("EnzoMethodGravityMg()", "precision %d not recognized", precision_);
 }
 
 //----------------------------------------------------------------------
 
-extern CkReduction::reducerType r_method_gravity_mg_type;
-
 template <class T>
-void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
-//     X = initial guess
-//     B = right-hand side
-//     R = B - A*X
-//     solve(M*Z = R)
-//     D = Z
-//     shift (B)
+void EnzoMethodGravityMg::enter_solver_ (EnzoBlock * enzo_block) throw()
+//     initialize iter_
+//     call begin_cycle()
 {
 
-  set_active(enzo_block);
-
+  VERBOSE("enter_solver_()");
+  
   iter_ = 0;
 
   Data * data = enzo_block->data();
@@ -280,118 +329,225 @@ void EnzoMethodGravityMg::compute_ (EnzoBlock * enzo_block) throw()
 
   // Initialize B, X, R, Y
 
-  if (is_active_) {
+  // X = 0
+  // B = -h^2 * 4 * PI * G * density
+  // R = B ( residual with X = 0 )
+  // Y = 0
 
-    /// X = 0
-    /// B = -h^2 * 4 * PI * G * density
-    /// R = B ( residual with X = 0 )
-    /// Y = 0
+  int mx,my,mz;
+  field.dimensions(idensity_,&mx,&my,&mz);
 
-    for (int iz=0; iz<mz_; iz++) {
-      for (int iy=0; iy<my_; iy++) {
-	for (int ix=0; ix<mx_; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
-	  B[i] = - 4.0 * (cello::pi) * grav_const_ * density[i];
-	  X[i] = 0.0;
-	  R[i] = B[i];
-	  Y[i] = 0.0;
-	}
+  for (int iz=0; iz<mz; iz++) {
+    for (int iy=0; iy<my; iy++) {
+      for (int ix=0; ix<mx; ix++) {
+	int i = ix + mx*(iy + my*iz);
+	B[i] = - 4.0 * (cello::pi) * grav_const_ * density[i];
+	X[i] = 0.0;
+	R[i] = B[i];
+	Y[i] = 0.0;
       }
     }
   }
 
-  pre_smooth(enzo_block,level_max_);
-  mg_end<T>(enzo_block,return_unknown);
+
+  begin_cycle_<T>(enzo_block);
 
 }
 
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMethodGravityMg::begin_cycle_(EnzoBlock * enzo_block) throw()
+//    if converged, then
+//       call exit_solver()
+//    else 
+//       if leaf block, then
+//          call send_faces()
+{
+  VERBOSE("begin_cycle_()");
+  //    if converged, then return
+  if (iter_ >= iter_max_) {
+    exit_solver_<T>(enzo_block, return_error_max_iter_reached);
+  } else {
+    //  else call send_faces()
+    if (enzo_block->is_leaf()) {
+      // (only leaf blocks have data initially)
+      send_faces_(enzo_block);
+    }
+  }
+}
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityMg::pre_smooth (EnzoBlock * enzo_block, int level)
+void EnzoMethodGravityMg::send_faces_(EnzoBlock * enzo_block) throw()
+//    <have updated X>
+//
+//    initialize call counter
+//
+//    if leaf block, then
+//       for each neighbor
+//           if not coarse neighbor
+//              pack face data
+//           if finer neighbor
+//              remote call p_receive_face() on neighbor
+//              remote call p_receive_face() on neighbor parent
+//           if same neighbor
+//              remote call p_receive_face() on neighbor
+//           if coarse neighbor
+//              return
+//    else
+//       for each face
+//          pack face data
+//          remote call p_receive_face() on neighbor
+//
+//    counter = determine_count ()
+//
+//    local call receive_face(counter)
 {
+  VERBOSE("send_faces_()");
+  
+}
+
+//----------------------------------------------------------------------
+
+int EnzoMethodGravityMg::determine_count_(EnzoBlock * enzo_block) throw()
+//    if leaf block, then
+//       for each face
+//          if non-repeated coarse face
+//             increment counter
+//    else
+//       count number neighbors in same level 
+//
+//
+//    if not leaf block, then
+//       count number of children
+//
+//    count self
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::p_receive_face_() throw()
+//    receive_face(counter)
+//
+//     unpack ghost data
+//     if (number of calls >= counter), then
+//        call compute_correction()
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::compute_correction_(EnzoBlock * enzo_block) throw()
+//     if coarsest level, then
+//         call coarse_solve()
+//     else 
+//         if not leaf block, then
+//             call evaluate_b()
+//         call pre_smooth()
+{
+  VERBOSE("compute_correction_()");
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGravityMg::pre_smooth_(EnzoBlock * enzo_block) throw()
+{
+  VERBOSE("pre_smooth_()");
+//      apply the smoother to A X = B
+//      compute Y = A*X  [ need refresh? ]
+//      pack B, X, Y fields
+//      remote call p_restrict() on parent
   smooth_->compute(enzo_block);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityMg::compute_residual (EnzoBlock * enzo_block, int level)
+void EnzoMethodGravityMg::p_restrict_() throw()
+//      unpack vectors B,X,Y
+//      call send_faces()
+//      if (number of calls >= counter), then
+//         call compute_correction()
 {
+  //  VERBOSE("p_restrict_()");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityMg::restrict_residual (EnzoBlock * enzo_block, int level)
+void EnzoMethodGravityMg::evaluate_b_(EnzoBlock * enzo_block) throw()
+//      B = B - Y
+//      Y = A*X [ need refresh? ]
+//      B = B + Y
 {
+  VERBOSE("evaluate_b_()");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityMg::coarse_solve (EnzoBlock * enzo_block, int level)
+void EnzoMethodGravityMg::solve_coarse_(EnzoBlock * enzo_block) throw()
+//     [ need refreshed X?]
+//     initiate the coarse solver with p_coarse_solved() callback
+//
+//     [ NOTE: only coarse blocks call this ]
 {
+  VERBOSE("solve_coarse_()");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityMg::prolong_correction (EnzoBlock * enzo_block, int level)
+void EnzoMethodGravityMg::p_coarse_solved_() throw()
+//     if leaf, then
+//        call end_cycle()
+//     else
+//        for each child
+//            pack correction X
+//            remote call p_prolong() on child
 {
+  //  VERBOSE("p_coarse_solved_()");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityMg::update_solution (EnzoBlock * enzo_block, int level)
+void EnzoMethodGravityMg::p_prolong_() throw()
+//     unpack correction Y
+//     apply correction to solution X:
+//        X = X + Y
+//     call post_smooth()  [ need refresh? ]
 {
+  //  VERBOSE("p_prolong_()");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityMg::post_smooth (EnzoBlock * enzo_block, int level)
+void EnzoMethodGravityMg::post_smooth_(EnzoBlock * enzo_block) throw()
+//     apply smoother to A X = B
+//     if leaf node, then
+//        call end_cycle()
+//     else
+//        call prolong()
 {
-}
-
-//======================================================================
-
-void EnzoMethodGravityMg::monitor_output_(EnzoBlock * enzo_block) throw()
-{
-
-  Monitor * monitor = enzo_block->simulation()->monitor();
-
-  monitor->print ("Enzo", "MG iter %04d  rr %g [%g %g]",
-		  iter_,
-		  (double)(rr_    / rr0_),
-		  (double)(rr_min_/ rr0_),
-		  (double)(rr_max_/ rr0_));
+  VERBOSE("post_smooth_()");
 }
 
 //----------------------------------------------------------------------
 
-// void EnzoBlock::enzo_matvec_()
-// {
-//   EnzoMethodGravityMg * method = 
-//     static_cast<EnzoMethodGravityMg*> (this->method());
-
-//   Field field = data()->field();
-//   int precision = field.precision(field.field_id("density")); assuming 
-
-//   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (this);
-
-//   if      (precision == precision_single)    
-//     method->mg_shift_1<float>(enzo_block);
-//   else if (precision == precision_double)    
-//     method->mg_shift_1<double>(enzo_block);
-//   else if (precision == precision_quadruple) 
-//     method->mg_shift_1<long double>(enzo_block);
-//   else 
-//     ERROR1("EnzoMethodGravityMg()", "precision %d not recognized", precision);
-// }
+void EnzoMethodGravityMg::end_cycle_(EnzoBlock * enzo_block) throw()
+//     increment iter_
+//     call begin_cycle()
+{
+  VERBOSE("end_cycle_()");
+}
 
 //----------------------------------------------------------------------
-
 
 template <class T>
-void EnzoMethodGravityMg::mg_end (EnzoBlock * enzo_block,int retval) throw ()
+void EnzoMethodGravityMg::exit_solver_ 
+( EnzoBlock * enzo_block, int retval ) throw ()
+//     deallocate temporaries
+//     end_compute() with quiescence
 {
-  set_active(enzo_block);
+  VERBOSE("exit_solver_()");
 
   enzo_block->clear_refresh();
 
@@ -401,7 +557,10 @@ void EnzoMethodGravityMg::mg_end (EnzoBlock * enzo_block,int retval) throw ()
   T * X         = (T*) field.values(ix_);
   T * potential = (T*) field.values(ipotential_);
 
-  copy_(potential,X,mx_,my_,mz_,is_active_);
+  int mx,my,mz;
+  field.dimensions(idensity_,&mx,&my,&mz);
+
+  copy_(potential,X,mx,my,mz,enzo_block->is_leaf());
 
   FieldDescr * field_descr = field.field_descr();
 
@@ -409,11 +568,26 @@ void EnzoMethodGravityMg::mg_end (EnzoBlock * enzo_block,int retval) throw ()
 
   compute_acceleration.compute(enzo_block);
 
-  if (enzo_block->index().is_root()) {
-    monitor_output_ (enzo_block);
-  }
+  monitor_output_ (enzo_block);
 
   enzo_block->compute_done();
 }
 
+//======================================================================
+
+void EnzoMethodGravityMg::monitor_output_(EnzoBlock * enzo_block) throw()
+{
+  if (enzo_block->index().is_root()) {
+
+  Monitor * monitor = enzo_block->simulation()->monitor();
+
+  monitor->print ("Enzo", "MG iter %04d  rr %g [%g %g]",
+		  iter_,
+		  (double)(rr_    / rr0_),
+		  (double)(rr_min_/ rr0_),
+		  (double)(rr_max_/ rr0_));
+  }
+}
+
 //----------------------------------------------------------------------
+

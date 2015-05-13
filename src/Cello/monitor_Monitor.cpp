@@ -122,12 +122,7 @@ bool Monitor::is_active(const char * component) const throw ()
 //----------------------------------------------------------------------
 
 void Monitor::write 
-(
- FILE * fp,
- const char * component,
- const char * message,
-  ...
- ) const
+( FILE * fp, const char * component, const char * format,  ... ) const
 {
 
   if (is_active(component)) {
@@ -136,39 +131,66 @@ void Monitor::write
 
     // Process any input arguments
 
-    char buffer_message[MONITOR_LENGTH+1];
+    char message[MONITOR_LENGTH+1];
 
-    va_start(fargs,message);
-    vsnprintf (buffer_message,MONITOR_LENGTH, message,fargs);
+    va_start(fargs,format);
+    vsnprintf (message,MONITOR_LENGTH, format,fargs);
     va_end(fargs);
-    
-    // Get parallel process text
 
-    char buffer_process[MONITOR_LENGTH] = "";
-    
-    sprintf (buffer_process,"%0d",CkMyPe());
-
-    // Get time
-
-    char buffer_time[10];
-
-    snprintf (buffer_time,10,"%08.2f",timer_->value());
-
-    // Print 
-
-    if (fp == stdout) {
-      PARALLEL_PRINTF 
-	("%s %s %s %s\n",
-	 buffer_process, buffer_time, component, buffer_message);
-      fflush(stdout);
-    } else {
-      fprintf 
-	(fp,"%s %s %s %s\n",
-	 buffer_process, buffer_time, component, buffer_message);
-    }
-
+    write_ (fp, component,message);
   }
+}
 
+//----------------------------------------------------------------------
+
+void Monitor::verbose 
+( FILE * fp, const char * component, const char * format,  ... ) const
+{
+
+  if (verbose_ && is_active(component)) {
+
+    va_list fargs;
+
+    // Process any input arguments
+
+    char message[MONITOR_LENGTH+1];
+    va_start(fargs,format);
+    vsnprintf (message,MONITOR_LENGTH, format,fargs);
+    va_end(fargs);
+
+    write_ (fp, component,message);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Monitor::write_ (FILE * fp, const char * component, const char * message) const
+{
+
+  // Get parallel process text
+
+  char process[MONITOR_LENGTH] = "";
+    
+  sprintf (process,"%0d",CkMyPe());
+
+  // Get time
+
+  char time[10];
+
+  snprintf (time,10,"%08.2f",timer_->value());
+
+  // Print 
+
+  if (fp == stdout) {
+    PARALLEL_PRINTF 
+      ("%s %s %s %s\n",
+       process, time, component, message);
+    fflush(stdout);
+  } else {
+    fprintf 
+      (fp,"%s %s %s %s\n",
+       process, time, component, message);
+  }
 }
 
 //----------------------------------------------------------------------

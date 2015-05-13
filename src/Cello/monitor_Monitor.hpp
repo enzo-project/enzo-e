@@ -89,12 +89,17 @@ public: // interface
   /// Write a message to file
   void write (FILE * fp, 
 	      const char * component, const char * buffer, ...) const;
+  /// Print a message only if verbose is set
+  void verbose (FILE * fp, 
+	      const char * component, const char * buffer, ...) const;
   /// Write a message to file
   void write_verbatim (FILE * fp, 
 	      const char * component, const char * buffer) const;
 
   /// Print a message with possible format specifications to stdout
   void print (const char * component, const char * buffer, ...) const;
+
+
 
   void set_verbose (bool verbose) 
   { verbose_ = verbose; }
@@ -106,6 +111,8 @@ public: // interface
 
 
 private: // functions
+
+  void write_ (FILE * fp, const char * component, const char * buffer) const;
 
   //----------------------------------------------------------------------
 

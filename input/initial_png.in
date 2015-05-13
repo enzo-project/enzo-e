@@ -84,7 +84,7 @@ Stopping {
 
 Testing {
    cycle_final = 50;
-   time_final  = 0.0291477504083241;
+   time_final  = 0.0291794209107657;
 }
 
 # Output image dumps every 10 cycles
