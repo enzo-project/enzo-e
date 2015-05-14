@@ -1,0 +1,198 @@
+#----------------------------------------------------------------------
+# Problem: 2D include file for EnzoMethodGravityMg test
+# Author:  James Bordner (jobordner@ucsd.edu)
+#----------------------------------------------------------------------
+#
+# This file initializes all but the following parameters, which must be initialized by
+# the parameter file including this one:
+#
+#    Mesh : root_blocks
+#    Output : phi_png : name
+#    Output : rho_png   : name
+#    Output : phi_h5  : name
+#    Output : rho_h5    : name
+#
+#----------------------------------------------------------------------
+
+Domain {
+   lower = [ -1.0, -1.0 ];
+   upper = [  1.0,  1.0 ];
+}
+
+ Adapt {
+     list = [ "slope" ];
+     slope {
+         field_list = [ "density" ];
+         max_coarsen = 0.010000000000000;
+         min_refine = 4.0000000000000;
+         type = "slope";
+     };
+ }
+
+Mesh { 
+   root_rank = 2;
+}
+
+Method {
+    list = ["gravity_mg", "ppm"]; 
+
+    gravity_mg {
+       refresh = ["refresh_null","refresh_mg"];
+       iter_max = 500;
+       res_tol  = 1e-3;
+#       grav_const = 6.67384e-8;
+#       grav_const = 1.0e-1;
+    };
+
+    ppm {
+       refresh = "ppm_refresh";
+       diffusion   = true;
+       flattening  = 3;
+       steepening  = true;
+       dual_energy = false;
+   }
+}
+
+Refresh {
+    list = ["refresh_null","refresh_mg", "refresh_ppm"];
+    refresh_null {
+         min_face_rank = 0;
+         field_list = [];
+         field_ghosts = 4;
+    };
+    refresh_mg {
+         min_face_rank = 0;
+         field_list = [];
+         field_ghosts = 4;
+    };
+    ppm_refresh { 
+        min_face_rank = 0;
+        field_list = [];
+        field_ghosts = 4;
+    }
+
+}
+
+Field {
+   
+   list = ["density", "potential",
+           "acceleration_x",
+           "acceleration_y",
+           "acceleration_z",
+	   "total_energy",
+           "velocity_x",
+           "velocity_y",
+           "velocity_z",
+           "internal_energy",
+	   "pressure",
+	   "D", # required for Jacobi Smoother
+           "B","R","X","Y"];
+
+   ghosts = 4;
+   prolong = "poisson";
+}
+
+Monitor {
+   verbose = true;
+}
+
+Initial {
+   density  { 
+      value = [ 1.0, 
+                    (x)*(x) + 
+		    (y)*(y) < 0.05,
+                0.1 ];
+   };
+    # internal energy = pressure / ((gamma - 1) density)
+   total_energy  { 
+      value = [ 10.0 / (2.0/3.0 * 1.0),
+                    (x)*(x) +
+		    (y)*(y) < 0.05,
+                1.0 / (2.0/3.0 * 0.1) ];
+   };
+     AP {
+         value = [ 0.0000000000000 ];
+     };
+     B {
+         value = [ 0.0000000000000 ];
+     };
+     P {
+         value = [ 0.0000000000000 ];
+     };
+     R {
+         value = [ 0.0000000000000 ];
+     };
+     X {
+         value = [ 0.0000000000000 ];
+     };
+}
+
+Boundary {
+   type = "periodic";
+} 
+
+Output {
+   list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png", "az_png"];
+    mesh_png {
+	type     = "image";
+	image_type  = "mesh";
+	image_size = [257,257];
+	image_reduce_type = "max";
+        include "input/schedule_cycle_10.incl"
+	image_min = 0.0;
+	image_max = 3.0;
+        include "input/colormap_rainbow.incl"
+        axis = "x";
+   };
+   phi_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["potential"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   rho_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["density"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   ax_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["acceleration_x"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   ay_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["acceleration_y"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   az_png {
+     type = "image";
+     image_size = [256,256];
+     field_list = ["acceleration_z"];
+     include "input/schedule_cycle_10.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   phi_h5 {
+     type = "data";
+     image_size = [256,256];
+     field_list = ["potential"];
+     include "input/schedule_cycle_10.incl"
+   };
+   rho_h5 {
+     type = "data";
+     image_size = [256,256];
+     field_list = ["density"];
+     include "input/schedule_cycle_10.incl"
+   }
+}
+
+Stopping {
+   cycle = 50;
+}
