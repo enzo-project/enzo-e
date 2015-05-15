@@ -69,6 +69,7 @@ void Config::pup (PUP::er &p)
   p | mesh_max_level;
   p | mesh_adapt_interval;
   p | num_mesh;
+  p | adapt_min_face_rank;
   PUParray(p,mesh_list,MAX_MESH_GROUPS);
   PUParray(p,mesh_type,MAX_MESH_GROUPS);
   PUParray(p,mesh_field_list,MAX_MESH_GROUPS);

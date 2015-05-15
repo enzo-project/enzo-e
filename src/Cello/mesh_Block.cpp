@@ -79,9 +79,9 @@ Block::Block
   face_level_last_(),
   name_(name()),
   index_method_(-1),
-  index_refresh_(-1),
   refresh_call_(),
-  refresh_sync_("")
+  refresh_sync_(""),
+  index_refresh_(-1)
 {
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = CmiTrue;
@@ -373,7 +373,7 @@ Block::~Block() throw ()
     
     std::vector<int> field_list;
     FieldFace * field_face = 
-      load_face_(&n,&array,iface,ichild,lghost,op_array_restrict,field_list);
+      load_face(&n,&array,iface,ichild,lghost,op_array_restrict,field_list);
 
     const Index index_parent = index_.index_parent();
 
@@ -613,7 +613,7 @@ void Block::periodicity (bool p32[3][2]) const
 
 //----------------------------------------------------------------------
 
-FieldFace * Block::load_face_
+FieldFace * Block::load_face
 (
  int *   n, char ** a,
  int if3[3], int ic3[3], bool lg3[3],

@@ -229,36 +229,42 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
-  /// EnzoMethodGravityCg synchronization entry method
+  /// EnzoMethodGravityCg entry method: DOT ==> refresh P
   template <class T>
-  void r_cg_loop_0a (CkReductionMsg * msg) ;  // DOT ==> refresh P
+  void r_cg_loop_0a (CkReductionMsg * msg) ;  
 
+  /// EnzoMethodGravityCg entry method: ==> refresh P
   template <class T>
-  void r_cg_loop_0b (CkReductionMsg * msg) ;  // ==> refresh P
+  void r_cg_loop_0b (CkReductionMsg * msg) ;  
 
-  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R) after shift
+  /// EnzoMethodGravityCg entry method: DOT(R,R) after shift
   template <class T>
   void r_cg_shift_1 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg synchronization entry method: refresh P for MATVEC
+  /// EnzoMethodGravityCg entry method: refresh P for MATVEC
   template <class T>
   void r_cg_loop_1 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg synchronization entry method: DOT(P,AP)
+  /// EnzoMethodGravityCg entry method: DOT(P,AP)
   template <class T>
   void r_cg_loop_3 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg synchronization entry method: DOT(R,R)
+  /// EnzoMethodGravityCg entry method: DOT(R,R)
   template <class T>
   void r_cg_loop_5 (CkReductionMsg * msg) ;
 
-  /// Perform the necessary reductions for shift
+  /// EnzoMethodGravityCg entry method: 
+  /// perform the necessary reductions for shift
   CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
 
   void p_enzo_matvec()
   {      enzo_matvec_(); }
   void r_enzo_matvec(CkReductionMsg * msg)
   {      enzo_matvec_(); delete msg; }
+
+  /// EnzoMethodSolverMg entry method: receive face data for refresh
+  void p_mg_receive_face
+  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]);
 
 protected: // functions
 

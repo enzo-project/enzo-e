@@ -99,15 +99,15 @@ Monitor {
 Initial {
    density  { 
       value = [ 1.0, 
-                    (x)*(x) + 
-		    (y)*(y) < 0.05,
+                    (x - 0.125)*(x - 0.125) + 
+		    (y - 0.125)*(y - 0.125) < 0.003,
                 0.1 ];
    };
     # internal energy = pressure / ((gamma - 1) density)
    total_energy  { 
       value = [ 10.0 / (2.0/3.0 * 1.0),
-                    (x)*(x) +
-		    (y)*(y) < 0.05,
+                    (x - 0.125)*(x - 0.125) +
+		    (y - 0.125)*(y - 0.125) < 0.003,
                 1.0 / (2.0/3.0 * 0.1) ];
    };
      AP {

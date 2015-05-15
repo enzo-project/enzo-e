@@ -65,6 +65,13 @@ bool ItFace::next (int if3[3]) throw()
 
 //----------------------------------------------------------------------
 
+Index ItFace::index() const
+{
+  return index_.index_neighbor(if3_,n3_);
+}
+
+//----------------------------------------------------------------------
+
 void ItFace::reset() throw()
 {
   if3_[0] = -2;

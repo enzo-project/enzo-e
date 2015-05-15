@@ -550,6 +550,12 @@ public: // virtual functions
 
   void ResumeFromSync();
 
+  FieldFace * load_face
+  (int * n, char ** a,
+   int if3[3], int ic3[3], bool lg3[3],
+   int op_array,
+   std::vector<int> & field_list);
+
 protected: // functions
 
 
@@ -645,11 +651,6 @@ protected: // functions
     return skip;
   }
 
-  FieldFace * load_face_
-  (int * n, char ** a,
-   int if3[3], int ic3[3], bool lg3[3],
-   int op_array,
-   std::vector<int> & field_list);
   void store_face_
   (int n, char * a,
    int if3[3], int ic3[3], bool lg3[3],

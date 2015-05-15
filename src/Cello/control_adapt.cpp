@@ -292,7 +292,7 @@ void Block::adapt_refine_()
       bool lghost[3] = {true,true,true};
       
       FieldFace * field_face = 
-	load_face_ (&narray,&array, iface,ic3,lghost, op_array_prolong,
+	load_face (&narray,&array, iface,ic3,lghost, op_array_prolong,
 		    field_list);
 
       int num_field_data = 1;
@@ -346,18 +346,17 @@ void Block::adapt_send_level()
 {
   if (!is_leaf()) return;
 
-  const int level        = this->level();
-  const int min_face_rank = 0;
+  const int level = this->level();
+  const int min_face_rank = 
+    simulation()->config()->adapt_min_face_rank;
   ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
   int of3[3];
 
   while (it_neighbor.next()) {
     Index index_neighbor = it_neighbor.index();
     int ic3[3];
-    it_neighbor.face(of3);
     it_neighbor.child(ic3);
-    int level_face = it_neighbor.face_level();
-    
+    it_neighbor.face(of3);
     PUT_LEVEL (index_,index_neighbor,ic3,of3,level,level_next_,"send");
   }
 }
@@ -524,7 +523,8 @@ void Block::adapt_recv ( const int of3[3], const int ic3[3], int level_face_new,
 {
 
   const int rank = this->rank();
-  const int min_face_rank = 0;
+  const int min_face_rank = 
+    simulation()->config()->adapt_min_face_rank;
 
   if (level_relative == 0 || level_relative == +1) {
     // RECV-SAME: Face and level are received from unique
@@ -625,7 +625,7 @@ void Block::adapt_coarsen_()
   bool lghost[3] = {false,false,false};
   std::vector<int> field_list;
   FieldFace * field_face = 
-    load_face_(&narray,&array, iface, ic3, lghost, op_array_restrict,
+    load_face(&narray,&array, iface, ic3, lghost, op_array_restrict,
 	       field_list);
 
   // copy face levels
@@ -661,7 +661,8 @@ void Block::p_adapt_recv_child
 	      field_list);
 
   // copy child face level and face level
-  const int min_face_rank = 0;
+  const int min_face_rank = 
+    simulation()->config()->adapt_min_face_rank;
   Index index_child = index_.index_child(ic3);
   ItFace it_face_child = this->it_face(min_face_rank,index_child);
   int of3[3];
@@ -710,14 +711,15 @@ void Block::initialize_child_face_levels_()
   int ic3[3];
   ItChild it_child(rank);
 
-  // For each child
+  const int min_face_rank = 
+    simulation()->config()->adapt_min_face_rank;
 
+  // For each child
   while (it_child.next(ic3)) {
 
     // For each child face
 
     Index index_child = index_.index_child(ic3);
-    const int min_face_rank = 0;
     ItFace it_face = this->it_face(min_face_rank,index_child);
     int if3[3];
     while (it_face.next(if3)) {

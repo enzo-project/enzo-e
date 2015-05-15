@@ -284,8 +284,6 @@ void OutputImage::write_block
 	int jym = iym +  iy   *(iyp-iym)/my;
 	int jyp = iym + (iy+1)*(iyp-iym)/my-1;
 	for (int iz=0; iz<mz; iz++) {
-	  int jzm = izm + iz    *(izp-izm)/mz;
-	  int jzp = izm + (iz+1)*(izp-izm)/mz-1;
 	  int i=ix + ndx*(iy + ndy*iz);
 	  double value = 0.0;
 	  if (precision == precision_single) {

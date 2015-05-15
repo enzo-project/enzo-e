@@ -115,6 +115,7 @@ public: // attributes
   int                        mesh_max_level;
   int                        mesh_adapt_interval;
   int                        num_mesh;
+  int                        adapt_min_face_rank;
   std::string                mesh_list[MAX_MESH_GROUPS];
   std::string                mesh_type[MAX_MESH_GROUPS];
   std::vector<std::string>   mesh_field_list[MAX_MESH_GROUPS];

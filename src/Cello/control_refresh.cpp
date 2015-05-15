@@ -45,11 +45,11 @@ void Block::refresh_begin_()
 
   if (refresh && is_leaf()) {
 
-    // Level of this Block
+    const int min_face_rank = 
+      simulation()->config()->refresh_min_face_rank[index_refresh_];
 
     const int level = this->level();
 
-    int min_face_rank = 0;
     ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
     int if3[3];
     int ic3[3];
@@ -123,7 +123,7 @@ void Block::refresh_load_face_
 
   std::vector<int> field_list = refresh()->field_list();
 
-  field_face = load_face_ (&n, &array,
+  field_face = load_face (&n, &array,
 			   iface, ichild, lghost,
 			   type_op_array,
 			   field_list);

@@ -50,6 +50,8 @@ public: // interface
   /// Reduce another value
   bool next (int if3[3]) throw();
 
+  Index index() const ;
+
   /// Reset the Iterator to the beginning
   void reset() throw();
 
