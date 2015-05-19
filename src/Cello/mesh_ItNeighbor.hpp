@@ -40,7 +40,6 @@ public: // interface
     PUParray(p,of3_,3);
     PUParray(p,ic3_,3);
     PUParray(p,ipf3_,3);
-    p | index_;
     p | rank_;
     p | min_face_rank_;
     for (int i=0; i<3; i++) {

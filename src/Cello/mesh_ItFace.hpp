@@ -37,7 +37,6 @@ public: // interface
     PUParray(p,if3_,3);
     p | ic3_;
     p | ipf3_;
-    p | index_;
     p | rank_;
     p | rank_limit_;
     for (int i=0; i<3; i++) {
