@@ -191,6 +191,7 @@ public: // attributes
 
   int                        stopping_cycle;
   double                     stopping_time;
+  double                     stopping_seconds;
   int                        stopping_interval;
 
   // Testing

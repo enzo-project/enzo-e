@@ -478,7 +478,6 @@ void EnzoMethodGravityMg::send_faces_(EnzoBlock * enzo_block) throw()
 	enzo_block_proxy[index_neighbor].p_mg_receive_face
 	  (n,array, refresh_same, of3, ic3);
       }
-
     } 
   } else { // not a leaf
     ItFace it_face = enzo_block->it_face(min_face_rank,index);
@@ -525,18 +524,12 @@ int EnzoMethodGravityMg::determine_count_(EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::p_mg_receive_face
 (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3])
-///
-///    receive_face(counter)
-///
-///    unpack ghost data
-///    if (number of calls >= counter), then
-///       call compute_correction()
 {
+  VERBOSE("p_mg_receive_face()");
   printf ("%s p_mg_receive_face %s  face %d %d %d  child %d %d %d\n",
 	  name().c_str(),type_refresh == refresh_same ? "same" :
 	  (type_refresh == refresh_fine ? "fine" : "coarse"),
 	   if3[0],if3[1],if3[2],ic3[0],ic3[1],ic3[2]);
-  //  VERBOSE("p_mg_receive_face()");
 }
 
 //----------------------------------------------------------------------

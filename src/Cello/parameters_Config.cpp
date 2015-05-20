@@ -146,6 +146,7 @@ void Config::pup (PUP::er &p)
 
   p | stopping_cycle;
   p | stopping_time;
+  p | stopping_seconds;
   p | stopping_interval;
 
   // Testing
@@ -837,6 +838,8 @@ void Config::read_stopping_ (Parameters * p) throw()
     ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   stopping_time  = p->value_float
     ( "Stopping:time" , std::numeric_limits<double>::max() );
+  stopping_seconds  = p->value_float
+    ( "Stopping:seconds" , std::numeric_limits<double>::max() );
   stopping_interval = p->value_integer
     ( "Stopping:interval" , 1);
 }

@@ -8,7 +8,7 @@
 #ifndef PROBLEM_STOPPING_HPP
 #define PROBLEM_STOPPING_HPP
 
-class Stopping {
+class Stopping : public PUP::able  {
 
   /// @class    Stopping
   /// @ingroup  Method
@@ -17,11 +17,24 @@ class Stopping {
 public: // interface
 
   /// Constructor
-  Stopping(int    stop_cycle = std::numeric_limits<int>::max(),
-	   double stop_time  = std::numeric_limits<double>::max()) throw()
-    : stop_cycle_(stop_cycle),
-      stop_time_ (stop_time)
-  {    DEBUG2 ("cycle %d    time  %g\n",  stop_cycle_,stop_time_); }
+  Stopping(int    stop_cycle,
+	   double stop_time,
+	   double stop_seconds) throw()
+    : stop_cycle_   (stop_cycle),
+      stop_time_    (stop_time),
+      stop_seconds_ (stop_seconds)
+
+  {
+    DEBUG3 ("cycle %d  time %g  seconds %g\n",  stop_cycle_,stop_time_,stop_seconds_); 
+    timer_.start();
+  }
+
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(Stopping);
+
+  /// CHARM++ migration constructor for PUP::able
+
+  Stopping (CkMigrateMessage *m) : PUP::able(m) {}
 
   /// Destructor
   virtual ~Stopping()
@@ -31,10 +44,11 @@ public: // interface
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
+    PUP::able::pup(p);
     // NOTE: change this function whenever attributes change
     p | stop_cycle_;
     p | stop_time_;
-
+    p | stop_seconds_;
   }
 
   /// Return whether the simulation is done
@@ -42,15 +56,14 @@ public: // interface
 			 double curr_time) const throw()
   {
     if ((stop_cycle_ == std::numeric_limits<int>::max()) &&
-	(stop_time_  == std::numeric_limits<double>::max())) {
+	(stop_time_  == std::numeric_limits<double>::max()) &&
+	(stop_seconds_  == std::numeric_limits<double>::max())) {
       ERROR("Stopping::complete",
-	    "Neither Stopping::time_stop nor Stopping::cycle_stop initialized");
+	    "No stopping criteria specified");
     }
-    bool stop = ( ! ((stop_time_  == -1.0 || curr_time  < stop_time_ ) &&
-		     (stop_cycle_ == -1   || curr_cycle < stop_cycle_)));
-    //    printf ("DEBUG cycle %d %d   time %g %g  stop %d\n",
-    //	    curr_cycle,stop_cycle_,curr_time,stop_time_,stop);
-
+    bool stop = ( ! ((stop_time_    == -1.0 || curr_time      < stop_time_ ) &&
+		     (stop_seconds_ == -1.0 || timer_.value() < stop_seconds_ ) &&
+		     (stop_cycle_   == -1   || curr_cycle     < stop_cycle_)));
     
     return stop;
   }
@@ -63,6 +76,10 @@ public: // interface
   double stop_time () const throw()
   { return stop_time_; };
 
+  /// Return stopping seconds
+  double stop_seconds () const throw()
+  { return stop_seconds_; };
+
 protected:
 
   /// Stop cycle
@@ -70,6 +87,12 @@ protected:
 
   /// Stop time
   double stop_time_;
+
+  /// Stop seconds (wall-clock time)
+  double stop_seconds_;
+
+  /// Timer
+  Timer timer_;
 
 };
 

@@ -66,8 +66,7 @@ void Problem::pup (PUP::er &p)
     p | refine_list_[i]; // PUP::able
   }
 
-  if (up) stopping_ = new Stopping;
-  p | *stopping_;
+  p | stopping_;
 
   // if (pk) n=timestep_list_.size();
   // p | n;
@@ -563,20 +562,9 @@ Stopping * Problem::create_stopping_
 /// @param config  Configuration parameter class
 {
   return new Stopping(config->stopping_cycle,
-		      config->stopping_time);
+		      config->stopping_time,
+		      config->stopping_seconds);
 }
-
-//----------------------------------------------------------------------
-
-// Timestep * Problem::create_timestep_ 
-// (
-//  std::string  type,
-//  Config * config
-//  ) throw ()
-// { 
-//   // No default timestep
-//   return NULL;
-// }
 
 //----------------------------------------------------------------------
 
