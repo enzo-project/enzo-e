@@ -55,7 +55,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 xmin=10000; xmax=0
 ymin=10000; ymax=0
-colormap = ['red','orange','yellow','green','blue','magenta','cyan']
+colormap = ['red','orange','green','blue','magenta','cyan']
 lines = []
 for line in fileinput.input():
       lines.append(line)

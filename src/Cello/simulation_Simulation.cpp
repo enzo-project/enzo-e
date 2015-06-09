@@ -421,11 +421,6 @@ void Simulation::insert_block()
 
 void Simulation::delete_block() 
 {
-#ifdef CELLO_DEBUG
-  PARALLEL_PRINTF ("%d: --block_sync_ %d %d\n",
-		   CkMyPe(),sync_output_begin_.stop(),
-		   hierarchy()->num_blocks());
-#endif
   hierarchy()->increment_block_count(-1);
   --sync_output_begin_;
   --sync_output_write_;

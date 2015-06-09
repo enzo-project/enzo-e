@@ -82,8 +82,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_cg_diag_precon;
   p | method_gravity_cg_monitor_iter;
 
-  p | method_gravity_mg_grav_const;
+  p | method_gravity_mg_type;
   p | method_gravity_mg_iter_max;
+  p | method_gravity_mg_grav_const;
   p | method_gravity_mg_res_tol;
   p | method_gravity_mg_monitor_iter;
   p | method_gravity_mg_smooth;
@@ -237,6 +238,9 @@ void EnzoConfig::read(Parameters * p) throw()
   method_gravity_cg_monitor_iter = p->value_integer
     ("Method:gravity_cg:monitor_iter",1);
 
+
+  method_gravity_mg_type = p->value_string
+    ("Method:gravity_mg:type","unknown");
 
   method_gravity_mg_iter_max = p->value_integer
     ("Method:gravity_mg:iter_max",10);

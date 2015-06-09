@@ -3,12 +3,12 @@
 
 include "input/method_gravity_mg.incl"
 Mesh { 
-   root_blocks = [1,1];
+   root_blocks = [2,2];
    root_size = [32,32];
 }
 
 Adapt {
-   max_level = 4;
+   max_level = 2;
 }
 Output {
 

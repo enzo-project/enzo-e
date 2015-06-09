@@ -58,11 +58,7 @@ private: // functions
 
   /// Create named method object
   virtual Method * create_method_ 
-  (std::string type, Config * config, FieldDescr *) throw ();
-
-  /// Create named Compute object
-  virtual Compute * create_compute_
-  (std::string type, Config * config, FieldDescr *) throw ();
+  (std::string type, Config * config, const FieldDescr *) throw ();
 
   /// Create named interpolation object
   virtual Prolong * create_prolong_

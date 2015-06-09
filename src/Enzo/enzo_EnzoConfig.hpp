@@ -109,7 +109,9 @@ public: // attributes
   bool                       method_gravity_cg_diag_precon;
   int                        method_gravity_cg_monitor_iter;
 
-  // EnzoMethodGravityMg
+  // EnzoMethodGravityMlat
+  // EnzoMethodGravityMg0
+  std::string                method_gravity_mg_type;
   int                        method_gravity_mg_iter_max;
   double                     method_gravity_mg_res_tol;
   double                     method_gravity_mg_grav_const;

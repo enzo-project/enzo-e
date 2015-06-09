@@ -154,7 +154,7 @@ void EnzoInitialTurbulence::enforce_block
 
   int level = index.level();
 
-  unsigned mask = 1 << (INDEX_MAX_TREE_BITS - 1);
+  unsigned mask = 1 << (INDEX_BITS_TREE - 1);
 
   for (int i=0; i<level; i++) {
     bool mx = (mask & bx);

@@ -1,19 +1,19 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodGravityMg.hpp
+/// @file     enzo_EnzoMethodGravityMlat.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2015-04-24 22:32:18
-/// @brief    [\ref Enzo] Declaration of EnzoMethodGravityMg
+/// @brief    [\ref Enzo] Declaration of EnzoMethodGravityMlat
 ///
 /// Multigrid on adaptive meshes for solving for self-gravity on field
 /// data.
 
-#ifndef ENZO_ENZO_METHOD_GRAVITY_MG_HPP
-#define ENZO_ENZO_METHOD_GRAVITY_MG_HPP
+#ifndef ENZO_ENZO_METHOD_GRAVITY_MLAT_HPP
+#define ENZO_ENZO_METHOD_GRAVITY_MLAT_HPP
 
-class EnzoMethodGravityMg : public Method {
+class EnzoMethodGravityMlat : public Method {
 
-  /// @class    EnzoMethodGravityMg
+  /// @class    EnzoMethodGravityMlat
   /// @ingroup  Enzo
   ///
   /// @brief [\ref Enzo] Demonstration method to solve self-gravity
@@ -21,29 +21,30 @@ class EnzoMethodGravityMg : public Method {
 
 public: // interface
 
-  /// Create a new EnzoMethodGravityMg object
-  EnzoMethodGravityMg(FieldDescr * field_descr, int rank,
-		      double grav_const,
-		      int iter_max, 
-		      double res_tol,
-		      int monitor_iter,
-		      bool is_singular,
-		      Compute * smooth,
-		      Restrict * restrict,
-		      Prolong * prolong,
-		      int level_min,
-		      int level_max);
+  /// Create a new EnzoMethodGravityMlat object
+  EnzoMethodGravityMlat
+  (const FieldDescr * field_descr, int rank,
+   double grav_const,
+   int iter_max, 
+   double res_tol,
+   int monitor_iter,
+   bool is_singular,
+   Compute * smooth,
+   Restrict * restrict,
+   Prolong * prolong,
+   int level_min,
+   int level_max);
 
-  EnzoMethodGravityMg() {};
+  EnzoMethodGravityMlat() {};
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodGravityMg);
+  PUPable_decl(EnzoMethodGravityMlat);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodGravityMg (CkMigrateMessage *m) {}
+  EnzoMethodGravityMlat (CkMigrateMessage *m) {}
 
   /// Destructor
-  ~EnzoMethodGravityMg () throw();
+  ~EnzoMethodGravityMlat () throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -90,6 +91,8 @@ public: // interface
   virtual std::string name () throw () 
   { return "gravity_mg"; }
 
+  void compute_correction(EnzoBlock * enzo_block) throw();
+
 protected: // methods
 
   template <class T>
@@ -98,17 +101,16 @@ protected: // methods
   void begin_cycle_(EnzoBlock * enzo_block) throw();
   void send_faces_(EnzoBlock * enzo_block) throw();
   int determine_count_(EnzoBlock * enzo_block) throw();
-  void p_receive_face_() throw();
-  void compute_correction_(EnzoBlock * enzo_block) throw();
+  void receive_face_() throw();
   /// Apply pre-smoothing on the current level
   void pre_smooth_(EnzoBlock * enzo_block) throw();
-  void p_restrict_() throw();
+  void do_restrict_() throw();
   void evaluate_b_(EnzoBlock * enzo_block) throw();
   /// Solve the coarse-grid equation A*C = R
   void solve_coarse_(EnzoBlock * enzo_block) throw();
-  void p_coarse_solved_() throw();
+  void coarse_solved_() throw();
   /// Prolong the correction C to the next-finer level
-  void p_prolong_() throw();
+  void do_prolong_() throw();
 
   /// Apply post-smoothing to the current level
   void post_smooth_(EnzoBlock * enzo_block) throw();
@@ -142,7 +144,7 @@ protected: // attributes
   /// Gas constant, e.g. 6.67384e-8 (cgs)
   double grav_const_;
 
-  /// Maximum number of Mg iterations
+  /// Maximum number of MG iterations
   int iter_max_;
 
   /// Convergence tolerance on the residual reduction rz_ / rz0_
@@ -187,4 +189,4 @@ protected: // attributes
   int precision_;
 };
 
-#endif /* ENZO_ENZO_METHOD_GRAVITY_MG_HPP */
+#endif /* ENZO_ENZO_METHOD_GRAVITY_MLAT_HPP */

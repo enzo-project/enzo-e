@@ -24,7 +24,7 @@ class EnzoMethodGravityCg : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravityCg object
-  EnzoMethodGravityCg(FieldDescr * field_descr, int rank,
+  EnzoMethodGravityCg(const FieldDescr * field_descr, int rank,
 		      double grav_const,
 		      int iter_max, 
 		      double res_tol,

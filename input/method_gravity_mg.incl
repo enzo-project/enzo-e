@@ -37,6 +37,7 @@ Method {
     list = ["gravity_mg", "ppm"]; 
 
     gravity_mg {
+       type = "mg0";
        refresh = ["refresh_null","refresh_mg"];
        iter_max = 500;
        res_tol  = 1e-3;
@@ -86,7 +87,7 @@ Field {
            "internal_energy",
 	   "pressure",
 	   "D", # required for Jacobi Smoother
-           "B","R","X","Y"];
+           "B","R","X","C"];
 
    ghosts = 4;
    prolong = "poisson";
@@ -99,15 +100,15 @@ Monitor {
 Initial {
    density  { 
       value = [ 1.0, 
-                    (x - 0.125)*(x - 0.125) + 
-		    (y - 0.125)*(y - 0.125) < 0.003,
+                    (x - 0.825)*(x - 0.825) + 
+		    (y - 0.000)*(y - 0.000) < 0.003,
                 0.1 ];
    };
     # internal energy = pressure / ((gamma - 1) density)
    total_energy  { 
       value = [ 10.0 / (2.0/3.0 * 1.0),
-                    (x - 0.125)*(x - 0.125) +
-		    (y - 0.125)*(y - 0.125) < 0.003,
+                    (x - 0.825)*(x - 0.825) +
+		    (y - 0.000)*(y - 0.000) < 0.003,
                 1.0 / (2.0/3.0 * 0.1) ];
    };
      AP {
@@ -128,7 +129,7 @@ Initial {
 }
 
 Boundary {
-   type = "periodic";
+   type = "reflecting";
 } 
 
 Output {

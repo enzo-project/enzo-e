@@ -21,7 +21,7 @@ public: // interface
 			  std::string r_field,
 			  std::string d_field,
 			  double weight,
-			  FieldDescr * field_descr) throw();
+			  const FieldDescr * field_descr) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeSmoothJacobi);

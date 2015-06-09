@@ -63,9 +63,6 @@ private: // attributes
 
   /// Associated Input object
   Input * input_;
-
-  /// Counter for reading blocks from current patch
-  Sync block_sync_;
 };
 
 #endif /* METHOD_INITIAL_FILE_HPP */

@@ -168,7 +168,7 @@ void Block::adapt_end_()
     face_level_last_[i] = 0;
 
   const int rank = this->rank();
-  sync_coarsen_.set_stop(NC(rank));
+  sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
 
   const int initial_cycle = simulation()->config()->initial_cycle;

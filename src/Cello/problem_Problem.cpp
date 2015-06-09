@@ -330,7 +330,7 @@ void Problem::initialize_output
 void Problem::initialize_method
 (
  Config * config,
- FieldDescr * field_descr
+ const FieldDescr * field_descr
  ) throw()
 {
 
@@ -571,7 +571,7 @@ Stopping * Problem::create_stopping_
 Method * Problem::create_method_ 
 ( std::string  name,
   Config * config,
-  FieldDescr * field_descr) throw ()
+  const FieldDescr * field_descr) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
   // No default method
@@ -698,21 +698,6 @@ Output * Problem::create_output_
 
   return output;
 
-}
-
-//----------------------------------------------------------------------
-
-Compute * Problem::create_compute_ ( std::string  name ,
-				     Config * config) throw ()
-{
-  Compute * compute = 0;
-
-  ERROR1("Problem::create_compute_",
-	 "Unrecognized compute type %s",name.c_str());
-
-
-  return compute;
-  
 }
 
 //----------------------------------------------------------------------

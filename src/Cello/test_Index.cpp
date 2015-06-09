@@ -42,20 +42,20 @@ PARALLEL_MAIN_BEGIN
   index->set_child(7,1,1,0);
   index->set_child(8,1,1,1);
 
-  const int max_level = 7;
+  const int max_level = 8;
   index->set_level(max_level);
 
-  index->clean();
+  //  index->clean();
   unit_func ("set_child()");
 
-  for (int level = 1; level < max_level; level++) {
+  for (int level = 0; level < max_level; level++) {
 
     int ic3[3];
-    index->child(level,&ic3[0],&ic3[1],&ic3[2]);
+    index->child(level+1,&ic3[0],&ic3[1],&ic3[2]);
     
-    unit_assert(ic3[0] == trace[level-1][0] && 
-		ic3[1] == trace[level-1][1] && 
-		ic3[2] == trace[level-1][2]);
+    unit_assert(ic3[0] == trace[level][0] && 
+		ic3[1] == trace[level][1] && 
+		ic3[2] == trace[level][2]);
   }
 
 
@@ -69,7 +69,7 @@ PARALLEL_MAIN_BEGIN
 
     i1.set_array(1,0,2);
     i1.set_level(level);
-    i1.clean();
+    //    i1.clean();
 
     if (level > 0) {
 
@@ -83,7 +83,7 @@ PARALLEL_MAIN_BEGIN
 
       i2.set_array(1,0,2);
       i2.set_level(level-1);
-      i2.clean();
+      //      i2.clean();
 
       ic3[0] = trace[level-1][0];
       ic3[1] = trace[level-1][1];

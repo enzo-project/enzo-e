@@ -61,14 +61,19 @@ class Sync {
   {
     if (index_stop_ > 0) {
       index_curr_ = (index_stop_ + (index_curr_-1) + 1) % index_stop_ + 1;  
+    } else {
+      // stop is not known yet
+      ++ index_curr_;
     }
-    if (index_curr_ == index_stop_) {
+    if ( (index_curr_ == index_stop_) && 
+	 (index_stop_ > 0) ) {
       index_curr_ = 0;
       return true;
     } else {
       return false;
     }
   }
+
 
   /// Return whether the Sync counter has reached the stopping value
   inline bool is_done () const throw()
@@ -77,6 +82,14 @@ class Sync {
   /// Set the stopping value for the counter
   inline void set_stop (int stop) throw ()
   { index_stop_ = stop; }
+
+  /// Increment the stopping value for the counter
+  inline void inc_stop (int increment) throw ()
+  { index_stop_ += increment; }
+
+  /// Return the current counter index
+  inline int value () const
+  { return index_curr_; }
 
   /// Return the currently-set stopping value for the counter
   inline int stop () const throw ()

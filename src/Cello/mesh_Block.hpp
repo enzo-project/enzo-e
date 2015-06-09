@@ -276,11 +276,6 @@ public: // interface
   /// Return the currently-active Method
   Method * method () throw();
 
-  /// Set the currently-active Refresh.  Used to resume a Refresh's
-  /// computation after a reduction
-  void set_refresh_index (int index_refresh) throw()
-  { index_refresh_ = index_refresh; }
-
   /// Return the currently active Refresh
   int index_refresh() const throw()
   { return index_refresh_; }
@@ -447,6 +442,13 @@ public:
   {
     refresh_sync_  = "";
     index_refresh_ = -1;
+  }
+
+  void set_refresh(int refresh_call,std::string refresh_sync, int index_refresh)
+  {
+    refresh_call_ = refresh_call;
+    refresh_sync_ = refresh_sync;
+    index_refresh_ = index_refresh;
   }
 
 protected:

@@ -66,7 +66,8 @@ module enzo {
 //  PUPable EnzoMethodGrackle;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodGravityCg;
-  PUPable EnzoMethodGravityMg;
+  PUPable EnzoMethodGravityMlat;
+  PUPable EnzoMethodGravityMg0;
   PUPable EnzoMethodGravityBiCGStab;
 
   PUPable EnzoProblem;
@@ -116,7 +117,20 @@ module enzo {
     entry void r_cg_loop_5(CkReductionMsg *msg);
 
     entry void p_mg_receive_face
-    (int n, char buffer[n],  int type_refresh, int if3[3], int ic3[3]);
+    (int n, char buffer[n],
+     int type_refresh,
+     int if3[3], int ic3[3],int count = 0);
+
+    template <class T>
+    entry void p_mg0_pre_smooth(CkReductionMsg *msg);
+    template <class T>
+    entry void p_mg0_restrict_send();
+    template <class T>
+    entry void p_mg0_restrict_recv();
+    template <class T>
+    entry void p_mg0_prolong_recv();
+    template <class T>
+    entry void p_mg0_post_smooth();
 
     entry void p_enzo_matvec();
     entry void r_enzo_matvec(CkReductionMsg *);

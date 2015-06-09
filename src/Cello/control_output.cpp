@@ -74,9 +74,12 @@ void Simulation::begin_output ()
 
     // Barrier
 
+    TRACE_LOCAL("Block::output_begin() calling Simulation::r_output()");
     // --------------------------------------------------
-    CkCallback callback (CkIndex_Simulation::r_output(NULL), thisProxy);
-    contribute(0,0,CkReduction::concat,callback);
+    //    CkCallback callback (CkIndex_Simulation::r_output(NULL), thisProxy);
+    //    contribute(0,0,CkReduction::concat,callback);
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    simulation->r_output(NULL);
     // --------------------------------------------------
   }
 }
@@ -158,8 +161,9 @@ void Simulation::write_()
   if (sync_output_write_.next()) {
 
     // --------------------------------------------------
-    CkCallback callback (CkIndex_Simulation::r_write(NULL), thisProxy);
-    contribute(0,0,CkReduction::concat,callback);
+    //    CkCallback callback (CkIndex_Simulation::r_write(NULL), thisProxy);
+    //    contribute(0,0,CkReduction::concat,callback);
+    r_write(NULL);
     // --------------------------------------------------
 
   }
@@ -270,6 +274,7 @@ void Simulation::output_exit()
 
 void Block::p_output_end()
 {
+  TRACE_LOCAL("Simulation_output_end()");
   control_sync(CkIndex_Block::r_stopping_enter(NULL),"contribute");
 }
 //======================================================================

@@ -154,7 +154,6 @@ protected: // attributes
   /// Array of Blocks 
   CProxy_Block * block_array_;
   bool           block_exists_;
-  Sync           block_sync_;
 
   /// Size of the root grid
   int root_size_[3];

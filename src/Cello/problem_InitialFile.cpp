@@ -16,8 +16,7 @@ InitialFile::InitialFile
  int cycle, double time) throw ()
   : Initial (cycle,time),
     parameters_(parameters),
-    input_(0),
-    block_sync_(0)
+    input_(0)
 {
 }
 
@@ -42,8 +41,6 @@ void InitialFile::pup (PUP::er &p)
   p | *parameters_;
 
   p | input_; // PUP::able
-
-  p | block_sync_;
 
 }
 
@@ -79,7 +76,6 @@ void InitialFile::enforce_block
 
   File * file = input_->file();
   int num_blocks = file->group_count();
-  block_sync_.set_stop(num_blocks);
 
   for (int i = 0; i<num_blocks; i++) {
 

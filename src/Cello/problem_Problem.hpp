@@ -154,7 +154,7 @@ public: // interface
 
   /// Initialize the method objects
   void initialize_method(Config * config, 
-			 FieldDescr * field_descr) throw();
+			 const FieldDescr * field_descr) throw();
 
   /// Initialize the refresh objects
   void initialize_refresh(Config * config, 
@@ -198,7 +198,7 @@ protected: // functions
   virtual Method *   create_method_
   (std::string type, 
    Config * config, 
-   FieldDescr * field_descr) throw ();
+   const FieldDescr * field_descr) throw ();
 
   /// Create named refresh object
   virtual Refresh *   create_refresh_
@@ -219,10 +219,6 @@ protected: // functions
   // /// Create named timestep object
   // virtual Timestep * create_timestep_ 
   // (std::string type, Config * config) throw ();
-
-  /// Create named Compute object
-  virtual Compute * create_compute_ 
-  (std::string type, Config * config) throw ();
 
   /// Create named prolongation object
   virtual Prolong * create_prolong_ 

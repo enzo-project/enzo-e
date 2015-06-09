@@ -122,7 +122,7 @@ Block::Block
 
   const int rank = this->rank();
   
-  sync_coarsen_.set_stop(NC(rank));
+  sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
 
   for (int i=0; i<3; i++) {
@@ -137,14 +137,14 @@ Block::Block
   if (num_face_level == 0) {
 
     face_level_curr_.resize(27);
-    child_face_level_curr_.resize(NC(rank)*27);
+    child_face_level_curr_.resize(NUM_CHILDREN(rank)*27);
 
     for (int i=0; i<27; i++) face_level_curr_[i] = 0;
 
   } else {
 
     face_level_curr_.resize(num_face_level);
-    child_face_level_curr_.resize(NC(rank)*num_face_level);
+    child_face_level_curr_.resize(NUM_CHILDREN(rank)*num_face_level);
 
     for (int i=0; i<num_face_level; i++) face_level_curr_[i] = face_level[i];
 

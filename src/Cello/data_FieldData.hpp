@@ -46,7 +46,7 @@ public: // interface
 
   void pup(PUP::er &p) ;
 
-  /// Return dimensions of fields on the block, assuming centered
+  /// Return dimensions of the given field in the block
   void dimensions(int id_field,int * mx, int * my = 0, int * mz = 0) const throw();
 
   /// Return size of fields on the block, assuming centered

@@ -16,7 +16,7 @@
 #define IC3(ic3)  ( ((ic3[0]+2)%2) + 2*( ((ic3[1]+2)%2) + 2*( ((ic3[2]+2)%2) )))
 
 // number of children
-#define NC(rank) (1<<(rank))
+#define NUM_CHILDREN(rank) (1<<(rank))
 
 // index for neighbors (axis,face)
 #define IN(axis,face)  ((face) + 2*(axis))

@@ -17,7 +17,7 @@ EnzoComputeSmoothJacobi::EnzoComputeSmoothJacobi
  std::string r_field,
  std::string d_field,
  double weight,
- FieldDescr * field_descr) throw()
+ const FieldDescr * field_descr) throw()
   : i_x_ (field_descr->field_id(x_field)),
     i_r_ (field_descr->field_id(r_field)),
     i_d_ (field_descr->field_id(d_field)),

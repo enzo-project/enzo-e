@@ -262,13 +262,32 @@ public: /// entry methods
   void r_enzo_matvec(CkReductionMsg * msg)
   {      enzo_matvec_(); delete msg; }
 
-  /// EnzoMethodSolverMg entry method: receive face data for refresh
+  /// EnzoMethodSolverMlat entry method: receive face data for refresh
   void p_mg_receive_face
-  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]);
+  (int n, char buffer[],  int type_refresh, 
+   int if3[3], int ic3[3], int count = 0);
+
+  /// EnzoMethodSolverMg0
+  template <class T>
+  void p_mg0_pre_smooth(CkReductionMsg * msg);
+  template <class T>
+  void p_mg0_restrict_send();
+  template <class T>
+  void p_mg0_restrict_recv();
+  template <class T>
+  void p_mg0_prolong_recv();
+  template <class T>
+  void p_mg0_post_smooth();
 
 protected: // functions
 
   void enzo_matvec_() ;
+
+protected: // attributes
+
+  
+  // MG SOLVER
+  Sync mg_sync_refresh_;
 
 public: // attributes (YIKES!)
 

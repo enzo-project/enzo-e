@@ -154,7 +154,7 @@ Refine * EnzoProblem::create_refine_
 Method * EnzoProblem::create_method_ 
 ( std::string  name,  
   Config * config,
-  FieldDescr * field_descr) throw ()
+  const FieldDescr * field_descr) throw ()
 /// @param name   Name of the method to create
 /// @param config Configuration parameters class
 /// @param field_descr Field descriptor
@@ -205,17 +205,39 @@ Method * EnzoProblem::create_method_
       create_restrict_(enzo_config->method_gravity_mg_restrict,config);
     Prolong * prolong = 
       create_prolong_(enzo_config->method_gravity_mg_prolong,config);
-    Compute * smooth = 
-      create_compute_(enzo_config->method_gravity_mg_smooth,config,field_descr);
-    method = new EnzoMethodGravityMg
-      (field_descr, rank,
-       enzo_config->method_gravity_mg_grav_const,
-       enzo_config->method_gravity_mg_iter_max,
-       enzo_config->method_gravity_mg_res_tol,
-       enzo_config->method_gravity_mg_monitor_iter,
-       is_singular,  smooth, restrict,  prolong,
-       enzo_config->method_gravity_mg_level_min,
-       enzo_config->method_gravity_mg_level_max);
+    Compute * smooth = NULL;
+    if (enzo_config->method_gravity_mg_smooth == "jacobi") {
+      smooth = new EnzoComputeSmoothJacobi 
+	("X","R","D",
+	 enzo_config->method_gravity_mg_smooth_weight,
+	 field_descr);
+    }
+    std::string type = enzo_config->method_gravity_mg_type;
+    if (type == "mlat") {
+      method = new EnzoMethodGravityMlat
+	(field_descr, rank,
+	 enzo_config->method_gravity_mg_grav_const,
+	 enzo_config->method_gravity_mg_iter_max,
+	 enzo_config->method_gravity_mg_res_tol,
+	 enzo_config->method_gravity_mg_monitor_iter,
+	 is_singular,  smooth, restrict,  prolong,
+	 enzo_config->method_gravity_mg_level_min,
+	 enzo_config->method_gravity_mg_level_max);
+    } else if (type == "mg0") {
+      method = new EnzoMethodGravityMg0
+	(field_descr, rank,
+	 enzo_config->method_gravity_mg_grav_const,
+	 enzo_config->method_gravity_mg_iter_max,
+	 enzo_config->method_gravity_mg_monitor_iter,
+	 is_singular,  smooth, restrict,  prolong,
+	 enzo_config->method_gravity_mg_level_min,
+	 enzo_config->method_gravity_mg_level_max);
+    } else {
+      ERROR1 ("EnzoProblem::create_method",
+	       "Unknown gravity_mg type %s",
+	       type.c_str());
+	       
+    }
   } else if (name == "gravity_bicgstab") {
     method = new EnzoMethodGravityBiCGStab
       (field_descr,
@@ -231,36 +253,6 @@ Method * EnzoProblem::create_method_
 	  method->name() == name);
 
   return method;
-}
-
-//----------------------------------------------------------------------
-
-Compute * EnzoProblem::create_compute_ 
-( std::string  type,
-  Config *     config,
-  FieldDescr * field_descr ) throw ()
-{
-
-  
-  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
-
-  Compute * compute = 0;
-
-  if (type == "jacobi") {
-    
-    compute = new EnzoComputeSmoothJacobi 
-      ("X","R","D",
-       enzo_config->method_gravity_mg_smooth_weight,
-       field_descr);
-
-  } else {
-
-    compute = Problem::create_compute_(type,config);
-
-  }
-
-  return compute;
-  
 }
 
 //----------------------------------------------------------------------

@@ -25,8 +25,7 @@ Hierarchy::Hierarchy
   refinement_(refinement),
   num_blocks_(0),
   block_array_(NULL),
-  block_exists_(false),
-  block_sync_()
+  block_exists_(false)
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
@@ -78,7 +77,6 @@ void Hierarchy::pup (PUP::er &p)
   }
 
   p | block_exists_;
-  p | block_sync_;
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
@@ -237,7 +235,6 @@ void Hierarchy::create_forest
        testing);
     
     block_exists_ = allocate_data;
-    block_sync_.set_stop(blocking_[0]*blocking_[1]*blocking_[2]);
 
 }
 

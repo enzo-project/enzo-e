@@ -54,25 +54,24 @@ bool Index::operator != (const Index & index) const
 
 void Index::clear () 
 {
-  for (int axis=0; axis<3; axis++) {
-    a_[axis].array = 0;
-    a_[axis].tree = 0;
-    a_[axis].level = 0;
-  }
+  v_[0] = 0;
+  v_[1] = 0;
+  v_[2] = 0;
 }
 
 //----------------------------------------------------------------------
 
-Index Index::index_parent () const
+Index Index::index_parent (int min_level) const
 {
   Index index = *this;
   int level = index.level();
-  if (level > 0) {
+  if (level > min_level) {
     index.set_child (level,0,0,0);
     index.set_level(level - 1);
   } else {
-    WARNING("Index::index_parent()",
-	    "Attempting to access parent of root");
+    ERROR2 ("Index::index_parent",
+	    "level %d is less than min_level %d",
+	    level,min_level);
   }
   return index;
 }
@@ -94,16 +93,22 @@ bool Index::is_on_boundary (int axis, int face, int narray) const
 {
 
   int level = this->level();
-  int array = a_[axis].array;
-  int tree  = a_[axis].tree;
+
+  ASSERT2 ("Index::is_on_boundary",
+	   "%s called for sub-root block level %d",
+	   bit_string(5,2,0).c_str(),level,
+	   level >= 0);
+  
+  unsigned array = a_[axis].array;
+  unsigned tree  = a_[axis].tree;
 
   // update tree bits
 
-  int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
+  unsigned shift_level = (1 << (INDEX_BITS_TREE - level));
 
   tree += face*shift_level; 
 
-  int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
+  unsigned shift_overflow = (1 << INDEX_BITS_TREE);
 
   bool retval = false;
 
@@ -144,18 +149,18 @@ Index Index::index_neighbor (const int if3[3], const int n3[3]) const
 
   for (int axis = 0; axis < 3; axis++) {
     
-    int array = index.a_[axis].array;
-    int tree  = index.a_[axis].tree;
+    unsigned array = index.a_[axis].array;
+    unsigned tree  = index.a_[axis].tree;
 
     // update tree bits
 
-    int shift_level = (1 << (INDEX_MAX_TREE_BITS - level));
+    unsigned shift_level = (1 << (INDEX_BITS_TREE - level));
 
     tree += if3[axis]*shift_level; 
 
     // update array if necessary
 
-    int shift_overflow = (1 << INDEX_MAX_TREE_BITS);
+    unsigned shift_overflow = (1 << INDEX_BITS_TREE);
 
     if (tree & shift_overflow) {
 
@@ -174,13 +179,20 @@ Index Index::index_neighbor (const int if3[3], const int n3[3]) const
 
 //----------------------------------------------------------------------
 
-void Index::child (int level, int * icx, int * icy, int * icz) const
+void Index::child 
+(int level, int * icx, int * icy, int * icz, int min_level) const
 {
-  ASSERT ("Index::child","level must be at least 1",level>0);
-  int shift = INDEX_MAX_TREE_BITS - level;
-  if (icx) (*icx) = (a_[0].tree >> shift) & 1;
-  if (icy) (*icy) = (a_[1].tree >> shift) & 1;
-  if (icz) (*icz) = (a_[2].tree >> shift) & 1;
+  if (level > 0) {
+    unsigned shift = INDEX_BITS_TREE - level;
+    if (icx) (*icx) = (a_[0].tree >> shift) & 1;
+    if (icy) (*icy) = (a_[1].tree >> shift) & 1;
+    if (icz) (*icz) = (a_[2].tree >> shift) & 1;
+  } else if (level > min_level) {
+    unsigned shift = - level;
+    if (icx) (*icx) = (a_[0].array >> shift) & 1;
+    if (icy) (*icy) = (a_[1].array >> shift) & 1;
+    if (icz) (*icz) = (a_[2].array >> shift) & 1;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -201,30 +213,29 @@ void Index::array (int * ix, int *iy, int *iz) const
 
 int Index::level () const
 {
-  return a_[0].level + INDEX_MAX_LEVEL_AXIS_RANGE*
-    (    a_[1].level + INDEX_MAX_LEVEL_AXIS_RANGE*
-	 a_[2].level );  
+  const unsigned nb = 1 << INDEX_BITS_LEVEL;
+  int lx = a_[0].level;
+  int ly = a_[1].level;
+  int lz = a_[2].level >> 1;
+  int sign = (a_[2].level & 1);
+  int level = lx + nb*(ly + nb*lz);
+  return sign ? -level : level;
 }
 
 //----------------------------------------------------------------------
 
 void Index::set_level(int level)
 { 
-  int shift = INDEX_MAX_LEVEL_AXIS_BITS;
-  int mask  = INDEX_MAX_LEVEL_AXIS_RANGE - 1;
+  unsigned shift = INDEX_BITS_LEVEL;
+  unsigned mask  = ~(1 << shift);
+
+  // (no mask needed since level only 2 bits)
+  int sign = level < 0 ? 1 : 0;
+
   a_[0].level = (level >> (0*shift)) & mask;
   a_[1].level = (level >> (1*shift)) & mask;
-  a_[2].level = (level >> (2*shift)) & mask;
-  clean();
-}
-
-//----------------------------------------------------------------------
-
-void Index::clean ()
-{
-  for (int level = this->level()+1; level<INDEX_MAX_TREE_BITS; level++) {
-    set_child(level,0,0,0);
-  }
+  a_[2].level = (level >> (2*shift)-1) & (mask-1) | sign;
+  clean_();
 }
 
 //----------------------------------------------------------------------
@@ -234,10 +245,11 @@ void Index::set_array(int ix, int iy, int iz)
   // right-bits = array
   ASSERT4 ("Index::set_array",
 	   "Array size (%d %d %d) out of range (maximum %d)",
-	   ix,iy,iz,INDEX_MAX_ARRAY_INDEX,
-	   ((0 <= ix && ix < INDEX_MAX_ARRAY_INDEX) &&
-	    (0 <= iy && iy < INDEX_MAX_ARRAY_INDEX) &&
-	    (0 <= iz && iz < INDEX_MAX_ARRAY_INDEX)));
+	   ix,iy,iz,(1<<INDEX_BITS_ARRAY) - 1,
+	   ( (ix >> INDEX_BITS_ARRAY) == 0 && 
+	     (iy >> INDEX_BITS_ARRAY) == 0 && 
+	     (iz >> INDEX_BITS_ARRAY) == 0));
+
   a_[0].array = ix;
   a_[1].array = iy;
   a_[2].array = iz;
@@ -254,14 +266,23 @@ void Index::tree (int * bx, int * by, int *bz) const
   
 //----------------------------------------------------------------------
 
-void Index::set_child(int level, int ix, int iy, int iz)
+void Index::set_child(int level, int ix, int iy, int iz, int min_level)
 {
-  ASSERT ("Index::set_child","level must be at least 1",level>0);
-  int shift = (INDEX_MAX_TREE_BITS - level);
-  int mask  = ~(1 << shift);
-  a_[0].tree = (a_[0].tree & mask) | (ix<<shift);
-  a_[1].tree = (a_[1].tree & mask) | (iy<<shift);
-  a_[2].tree = (a_[2].tree & mask) | (iz<<shift);
+  if (level > 0) {
+    ASSERT ("Index::set_child","level must be at least 1",level>0);
+    unsigned shift = (INDEX_BITS_TREE - level);
+    unsigned mask  = ~(1 << shift);
+    a_[0].tree = (a_[0].tree & mask) | (ix<<shift);
+    a_[1].tree = (a_[1].tree & mask) | (iy<<shift);
+    a_[2].tree = (a_[2].tree & mask) | (iz<<shift);
+  } else if (level > min_level) {
+    // switch to array bits if tree bits exhausted (subroot blocks only)
+    unsigned shift = - level;
+    unsigned mask  = ~(1 << shift);
+    a_[0].array = (a_[0].array & mask) | (ix<<shift);
+    a_[1].array = (a_[1].array & mask) | (iy<<shift);
+    a_[2].array = (a_[2].array & mask) | (iz<<shift);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -383,17 +404,6 @@ void Index::write (int ip,
 
 //----------------------------------------------------------------------
 
-int Index::num_bits_(int value) const
-{
-  int nb = 32;
-  while ( --nb >= 0 && ! (value & (1 << nb))) 
-    ;
-  return (std::max(nb,0));
-
-}
-
-//----------------------------------------------------------------------
-
 std::string Index::bit_string(int max_level,int rank, int num_bits) const
 {
   const int level = this->level();
@@ -433,4 +443,23 @@ std::string Index::bit_string(int max_level,int rank, int num_bits) const
 }
 
 //======================================================================
+
+int Index::num_bits_(int value) const
+{
+  int nb = 32;
+  while ( --nb >= 0 && ! (value & (1 << nb))) 
+    ;
+  return (std::max(nb,0));
+
+}
+
+//----------------------------------------------------------------------
+
+void Index::clean_ ()
+{
+  for (int level = this->level()+1; level<INDEX_BITS_TREE; level++) {
+    set_child(level,0,0,0);
+  }
+}
+
 

@@ -61,7 +61,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGravityCg::EnzoMethodGravityCg 
-(FieldDescr * field_descr, int rank,
+(const FieldDescr * field_descr, int rank,
  double grav_const, int iter_max, double res_tol, int monitor_iter,
  bool is_singular,
  bool diag_precon) 
@@ -205,10 +205,9 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 
   delete msg;
 
-  refresh_call_ = CkIndex_EnzoBlock::r_enzo_matvec(NULL);
-  refresh_sync_ = "contribute";
-
-  index_refresh_ = method->index_refresh(1);
+  set_refresh (CkIndex_EnzoBlock::r_enzo_matvec(NULL),
+	       "contribute",
+	       method->index_refresh(1));
 
   control_sync(CkIndex_Block::p_refresh_enter(),"neighbor",3);
   
