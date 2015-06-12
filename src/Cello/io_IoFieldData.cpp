@@ -82,7 +82,7 @@ void IoFieldData::data_value
 
   int ngx=0,ngy=0,ngz=0;
 
-  field_descr_->ghosts(field_index_,&ngx,&ngy,&ngz);
+  field_descr_->ghost_depth(field_index_,&ngx,&ngy,&ngz);
 
   if (field_data_->ghosts_allocated()) {
 

@@ -69,7 +69,7 @@ int EnzoRefineShock::apply
   void * p  = field.values("pressure");
    
   int gx,gy,gz;
-  field.ghosts(id_velocity, &gx,&gy,&gz);
+  field.ghost_depth(id_velocity, &gx,&gy,&gz);
 
   int nxd = nx + 2*gx;
   int nyd = ny + 2*gy;

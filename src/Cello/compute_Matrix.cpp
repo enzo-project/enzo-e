@@ -25,7 +25,7 @@ void Matrix::residual (int ir, int ib, int ix, Block * block) throw()
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
   int gx,gy,gz;
-  field.ghosts(0,&gx,&gy,&gz);
+  field.ghost_depth(0,&gx,&gy,&gz);
 
   int precision = field.precision(0);
 

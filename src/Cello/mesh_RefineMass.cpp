@@ -67,7 +67,7 @@ int RefineMass::apply
   field_data->size(&nx,&ny,&nz);
 
   int gx,gy,gz;
-  field_descr->ghosts(0, &gx,&gy,&gz);
+  field_descr->ghost_depth(0, &gx,&gy,&gz);
 
   precision_type precision = field_descr->precision(0);
 

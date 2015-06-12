@@ -80,11 +80,11 @@ PARALLEL_MAIN_BEGIN
     int g4[3] = {0,0,0};
     int g5[3] = {3,3,3};
 
-    field->set_ghosts(i1, g1[0],g1[1],g1[2]);
-    field->set_ghosts(i2, g2[0],g2[1],g2[2]);
-    field->set_ghosts(i3, g3[0],g3[1],g3[2]);
-    field->set_ghosts(i4, g4[0],g4[1],g4[2]);
-    field->set_ghosts(i5, g5[0],g5[1],g5[2]);
+    field->set_ghost_depth(i1, g1[0],g1[1],g1[2]);
+    field->set_ghost_depth(i2, g2[0],g2[1],g2[2]);
+    field->set_ghost_depth(i3, g3[0],g3[1],g3[2]);
+    field->set_ghost_depth(i4, g4[0],g4[1],g4[2]);
+    field->set_ghost_depth(i5, g5[0],g5[1],g5[2]);
 
     // set centering
 
@@ -690,18 +690,18 @@ PARALLEL_MAIN_BEGIN
 
     unit_func("ghosts");
 
-    field->set_ghosts(info.field_density, 3, 3, 3);
-    field->set_ghosts(info.field_velocity_x, 1, 0, 0);
-    field->set_ghosts(info.field_velocity_y, 0, 1, 0);
-    field->set_ghosts(info.field_velocity_z, 0, 0, 1);
+    field->set_ghost_depth(info.field_density, 3, 3, 3);
+    field->set_ghost_depth(info.field_velocity_x, 1, 0, 0);
+    field->set_ghost_depth(info.field_velocity_y, 0, 1, 0);
+    field->set_ghost_depth(info.field_velocity_z, 0, 0, 1);
 
-    field->ghosts(info.field_density, &info.gx, &info.gy, &info.gz);
+    field->ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
-    field->ghosts(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
+    field->ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==1 && info.gy==0 && info.gz==0);
-    field->ghosts(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
+    field->ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==0 && info.gy==1 && info.gz==0);
-    field->ghosts(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
+    field->ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
 

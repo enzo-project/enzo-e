@@ -45,7 +45,7 @@ void BoundaryValue::enforce
 
       int index_field = field.field_id(field_list_[index]);
       int gx,gy,gz;
-      field.ghosts(index_field,&gx,&gy,&gz);
+      field.ghost_depth(index_field,&gx,&gy,&gz);
 
 
       int ndx=nx+2*gx;

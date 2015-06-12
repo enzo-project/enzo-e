@@ -91,7 +91,7 @@ void FieldData::dimensions( int id_field, int * mx, int * my, int * mz ) const t
   int gx,gy,gz;
   int cx,cy,cz;
   size      (&nx,&ny,&nz);
-  ghosts    (id_field,&gx,&gy,&gz);
+  ghost_depth    (id_field,&gx,&gy,&gz);
   centering (id_field,&cx,&cy,&cz);
 
   if (mx) (*mx) = (nx > 1) ? (nx + 2*gx + cx) : 1;
@@ -167,7 +167,7 @@ char * FieldData::unknowns ( int id_field  )
     int gx,gy,gz;
     int mx,my;
 
-    ghosts    (id_field,&gx,&gy,&gz);
+    ghost_depth    (id_field,&gx,&gy,&gz);
     dimensions(id_field,&mx,&my);
 
     precision_type precision = this->precision(id_field);
@@ -513,7 +513,7 @@ int FieldData::field_size
 
   int  gx,gy,gz;
   if ( ghosts_allocated_ ) {
-    field_descr_->ghosts(id_field,&gx,&gy,&gz);
+    field_descr_->ghost_depth(id_field,&gx,&gy,&gz);
   } else {
     gx = gy = gz = 0;
   }
@@ -579,7 +579,7 @@ void FieldData::print
      int nxd,nyd,nzd;
      field_size(index_field,&nxd,&nyd,&nzd);
      int gx,gy,gz;
-     field_descr_->ghosts(index_field,&gx,&gy,&gz);
+     field_descr_->ghost_depth(index_field,&gx,&gy,&gz);
 
      int ixm,iym,izm;
      int ixp,iyp,izp;

@@ -83,7 +83,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
   int gx,gy,gz;
-  field.ghosts(0,&gx,&gy,&gz);
+  field.ghost_depth(0,&gx,&gy,&gz);
   int ndx = nx + 2*gx;
   int ndy = ny + 2*gy;
 
@@ -376,7 +376,7 @@ void EnzoMethodTurbulence::compute_resume_
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
   int gx,gy,gz;
-  field.ghosts(0,&gx,&gy,&gz);
+  field.ghost_depth(0,&gx,&gy,&gz);
   int nbx = nx + 2*gx;
   int nby = ny + 2*gy;
 

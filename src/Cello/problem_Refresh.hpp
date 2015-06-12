@@ -22,11 +22,11 @@ public: // interface
 
   /// Create a Refresh object
   Refresh(std::string name,
-	  int field_ghosts,
+	  int field_ghost_depth,
 	  int min_face_rank) throw()
     : name_(name),
       field_list_(),
-      field_ghosts_(field_ghosts),
+      field_ghost_depth_(field_ghost_depth),
       min_face_rank_(min_face_rank)
   {
   }
@@ -46,12 +46,12 @@ public: // interface
 
     p | name_;
     p | field_list_;
-    p | field_ghosts_;
+    p | field_ghost_depth_;
     p | min_face_rank_;
   }
 
   /// Add the given field to the list
-  void insert_field(int id_field) {
+  void add_field(int id_field) {
     field_list_.push_back(id_field);
   }
 
@@ -80,8 +80,8 @@ public: // interface
   { return min_face_rank_; }
 
   /// Return the ghost zone depth
-  int field_ghosts() const
-  { return field_ghosts_; }
+  int field_ghost_depth() const
+  { return field_ghost_depth_; }
 
   /// Return the ith field index, or false if i is out of range
   bool get_field_index (size_t i, int * index_field)
@@ -100,7 +100,7 @@ public: // interface
       printf (" %d",field_list_[i]);
     }
     printf ("\n");
-    printf ("field_ghosts: %d\n",field_ghosts_);
+    printf ("field_ghost_depth: %d\n",field_ghost_depth_);
     printf ("min_face_rank: %d\n",min_face_rank_);
 
   }
@@ -119,7 +119,7 @@ private: // attributes
   std::vector <int> field_list_;
 
   /// Ghost zone depth
-  int field_ghosts_;
+  int field_ghost_depth_;
 
   /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
   int min_face_rank_;

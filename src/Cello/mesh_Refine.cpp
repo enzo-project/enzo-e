@@ -21,7 +21,7 @@ void * Refine::initialize_output_(FieldData * field_data)
     int nx,ny,nz;
     field_data->size(&nx,&ny,&nz);
     int gx,gy,gz;
-    field_data->ghosts(id_output, &gx,&gy,&gz);
+    field_data->ghost_depth(id_output, &gx,&gy,&gz);
     int nxd = nx + 2*gx;
     int nyd = ny + 2*gy;
     int nzd = nz + 2*gz;

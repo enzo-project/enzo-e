@@ -72,7 +72,7 @@ void EnzoInitialImplosion2::enforce_block
 
   // Ghost depths
   int gx,gy;
-  field.ghosts(0,&gx,&gy);
+  field.ghost_depth(0,&gx,&gy);
 
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");

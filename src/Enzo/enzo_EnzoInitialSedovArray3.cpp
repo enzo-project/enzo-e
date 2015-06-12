@@ -100,7 +100,7 @@ void EnzoInitialSedovArray3::enforce_block
     pressure_out_ / ((EnzoBlock::Gamma - 1.0) * density_);
 
   int gx,gy,gz;
-  field.ghosts(0,&gx,&gy,&gz);
+  field.ghost_depth(0,&gx,&gy,&gz);
 
   int ndx = nx + 2*gx;
   int ndy = ny + 2*gy;

@@ -152,7 +152,7 @@ void FieldFace::load ( int * n, char ** array) throw()
     int nd3[3],ng3[3],im3[3],n3[3];
 
     field_data_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_data_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     load_loop_limits_ (im3,n3, nd3,ng3);
 
@@ -230,7 +230,7 @@ void FieldFace::store (int n, char * array) throw()
     int nd3[3],ng3[3],im3[3],n3[3];
 
     field_data_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_data_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     store_loop_limits_ (im3,n3, nd3,ng3);
 
@@ -314,7 +314,7 @@ char * FieldFace::allocate () throw()
       (index_field, &nd3[0], &nd3[1], &nd3[2]);
 
     int ng3[3];
-    field_data_->ghosts(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     int n_old = nd3[0]*nd3[1]*nd3[2];
 

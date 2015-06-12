@@ -52,7 +52,7 @@ int RefineShear::apply
   if (rank >= 3) velocity_z = field_data->values("velocity_z");
    
   int gx,gy,gz;
-  field_descr->ghosts(id_velocity, &gx,&gy,&gz);
+  field_descr->ghost_depth(id_velocity, &gx,&gy,&gz);
 
   int nxd = nx + 2*gx;
   int nyd = ny + 2*gy;

@@ -79,10 +79,10 @@ public: // interface
     throw(std::out_of_range)
   { field_descr_->set_centering(id,cx,cy,cz); }
 
-  /// Set ghosts for a field
-  void set_ghosts(int id, int gx, int gy=0, int gz=0) 
+  /// Set ghost_depth for a field
+  void set_ghost_depth(int id, int gx, int gy=0, int gz=0) 
     throw(std::out_of_range)
-  { field_descr_->set_ghosts(id,gx,gy,gz); }
+  { field_descr_->set_ghost_depth(id,gx,gy,gz); }
 
 
   /// Set precision for a field
@@ -138,9 +138,9 @@ public: // interface
   { return field_descr_->centering(id,cx,cy,cz); }
 
   /// depth of ghost zones of given field
-  void ghosts(int id, int * gx, int * gy = 0, int * gz = 0) const 
+  void ghost_depth(int id, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range)
-  { return field_descr_->ghosts(id,gx,gy,gz); }
+  { return field_descr_->ghost_depth(id,gx,gy,gz); }
 
   /// Return precision of given field
   int precision(int id) const throw(std::out_of_range)

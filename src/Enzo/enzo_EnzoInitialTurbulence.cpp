@@ -118,7 +118,7 @@ void EnzoInitialTurbulence::enforce_block
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
   int gx,gy,gz;
-  field.ghosts(0,&gx,&gy,&gz);
+  field.ghost_depth(0,&gx,&gy,&gz);
 
   int ndx = (rank >= 1) ? nx + 2*gx : nx;
   int ndy = (rank >= 1) ? ny + 2*gy : ny;

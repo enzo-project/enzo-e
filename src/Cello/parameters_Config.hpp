@@ -90,7 +90,7 @@ public: // attributes
   std::vector<int>           field_centering [3];
   double                     field_courant;
   std::vector<std::string>   field_list;
-  int                        field_ghosts[3];
+  int                        field_ghost_depth[3];
   int                        field_padding;
   int                        field_precision;
   std::string                field_prolong_type;
@@ -142,7 +142,7 @@ public: // attributes
   std::vector<std::string>   refresh_list;
   std::vector<std::string>   refresh_field_list [MAX_REFRESH_GROUPS];
   int                        refresh_min_face_rank [MAX_REFRESH_GROUPS];
-  int                        refresh_field_ghosts [MAX_REFRESH_GROUPS];
+  int                        refresh_field_ghost_depth [MAX_REFRESH_GROUPS];
 
   // Output
 

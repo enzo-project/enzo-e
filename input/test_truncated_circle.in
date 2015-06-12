@@ -25,12 +25,12 @@ Refresh {
     refresh_null {
          min_face_rank = 0;
          field_list = [];
-         field_ghosts = 3;
+         field_ghost_depth = 3;
     };
     refresh_cg {
          min_face_rank = 0;
          field_list = [];
-         field_ghosts = 3;
+         field_ghost_depth = 3;
     }
 }
 
@@ -39,7 +39,7 @@ Field {
    list = ["density", "potential",
            "B","X","R","P","AP"];
 
-   ghosts = 4;
+   ghost_depth = 4;
 
 }
 
@@ -54,7 +54,7 @@ Adapt {
    }
 }
 
-Field { ghosts = 4; }
+Field { ghost_depth = 4; }
 Initial {
    density  { 
       value = [ 1.0 / (x*x + y*y + 0.00001), x*x + y*y < 0.1,

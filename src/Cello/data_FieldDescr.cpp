@@ -22,7 +22,7 @@ FieldDescr::FieldDescr ()
     courant_(1),
     precision_(),
     centering_(),
-    ghosts_()
+    ghost_depth_()
 {
 }
 
@@ -35,9 +35,9 @@ FieldDescr::~FieldDescr()
     delete [] centering_[i];
     centering_[i] = 0;
   }
-  for (size_t i=0; i<ghosts_.size();    i++) {
-    delete [] ghosts_[i];
-    ghosts_[i] = 0;
+  for (size_t i=0; i<ghost_depth_.size();    i++) {
+    delete [] ghost_depth_[i];
+    ghost_depth_[i] = 0;
   }
 }
 
@@ -138,7 +138,7 @@ void FieldDescr::centering
 
 //----------------------------------------------------------------------
 
-void FieldDescr::ghosts
+void FieldDescr::ghost_depth
 (
  int id_field,
  int * gx, 
@@ -146,9 +146,9 @@ void FieldDescr::ghosts
  int * gz
  ) const throw(std::out_of_range)
 {
-  if (gx) (*gx) = ghosts_.at(id_field)[0];
-  if (gy) (*gy) = ghosts_.at(id_field)[1];
-  if (gz) (*gz) = ghosts_.at(id_field)[2];
+  if (gx) (*gx) = ghost_depth_.at(id_field)[0];
+  if (gy) (*gy) = ghost_depth_.at(id_field)[1];
+  if (gz) (*gz) = ghost_depth_.at(id_field)[2];
 }
 
 //----------------------------------------------------------------------
@@ -211,16 +211,16 @@ int FieldDescr::insert_(const std::string & field_name) throw()
   centered[1] = 0;
   centered[2] = 0;
 
-  int * ghosts = new int [3];
-  ghosts[0] = 1;
-  ghosts[1] = 1;
-  ghosts[2] = 1;
+  int * ghost_depth = new int [3];
+  ghost_depth[0] = 1;
+  ghost_depth[1] = 1;
+  ghost_depth[2] = 1;
 
   // int_set_type a;
   // field_in_group_.push_back(a);
   precision_. push_back(precision);
   centering_. push_back(centered);
-  ghosts_.    push_back(ghosts);
+  ghost_depth_.    push_back(ghost_depth);
 
   return id;
 }
@@ -281,12 +281,12 @@ void FieldDescr::set_centering(int id_field, int cx, int cy, int cz)
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz) 
+void FieldDescr::set_ghost_depth(int id_field, int gx, int gy, int gz) 
   throw(std::out_of_range)
 {
-  ghosts_.at(id_field)[0] = gx;
-  ghosts_.at(id_field)[1] = gy;
-  ghosts_.at(id_field)[2] = gz;
+  ghost_depth_.at(id_field)[0] = gx;
+  ghost_depth_.at(id_field)[1] = gy;
+  ghost_depth_.at(id_field)[2] = gz;
 }
 
 //======================================================================
@@ -308,12 +308,12 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
     centering_.at(i)[1] = field_descr.centering_.at(i)[1];
     centering_.at(i)[2] = field_descr.centering_.at(i)[2];
   }
-  ghosts_.clear();
-  for (size_t i=0; i<field_descr.ghosts_.size(); i++) {
-    ghosts_.push_back(new int[3]);
-    ghosts_.at(i)[0] = field_descr.ghosts_.at(i)[0];
-    ghosts_.at(i)[1] = field_descr.ghosts_.at(i)[1];
-    ghosts_.at(i)[2] = field_descr.ghosts_.at(i)[2];
+  ghost_depth_.clear();
+  for (size_t i=0; i<field_descr.ghost_depth_.size(); i++) {
+    ghost_depth_.push_back(new int[3]);
+    ghost_depth_.at(i)[0] = field_descr.ghost_depth_.at(i)[0];
+    ghost_depth_.at(i)[1] = field_descr.ghost_depth_.at(i)[1];
+    ghost_depth_.at(i)[2] = field_descr.ghost_depth_.at(i)[2];
   }
 }
 

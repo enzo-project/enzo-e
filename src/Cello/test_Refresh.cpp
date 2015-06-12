@@ -25,15 +25,15 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func ("field_ghosts()");
-  unit_assert(refresh->field_ghosts() == 3);
+  unit_func ("field_ghost_depth()");
+  unit_assert(refresh->field_ghost_depth() == 3);
   unit_func ("min_face_rank()");
   unit_assert(refresh->min_face_rank() == 2);
 
-  unit_func ("insert_field()");
-  refresh->insert_field (12);
-  refresh->insert_field (9);
-  refresh->insert_field (-2);
+  unit_func ("add_field()");
+  refresh->add_field (12);
+  refresh->add_field (9);
+  refresh->add_field (-2);
   unit_assert (refresh->field(12));
   unit_assert (! refresh->field(-8));
   unit_assert (! refresh->field(4));

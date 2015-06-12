@@ -31,8 +31,6 @@ PARALLEL_MAIN_BEGIN
   
   // -------- 1D --------
 
-  int rank = 1;
-  int rank_limit = 0;
   bool periodic[3][2] = {{true,true},{true,true},{true,true}};
   int n3[3] = { 4, 4, 4 };
   Index index;

@@ -64,7 +64,7 @@ int RefineSlope::apply
     int id_field = field_id_list_[k];
 
     int gx,gy,gz;
-    field_descr->ghosts(id_field, &gx,&gy,&gz);
+    field_descr->ghost_depth(id_field, &gx,&gy,&gz);
 
     const int nxd = rank >= 1 ? (nx + 2*gx) : nx;
     const int nyd = rank >= 2 ? (ny + 2*gy) : ny;

@@ -127,9 +127,9 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   DualEnergyFormalismEta1   = enzo_config->ppm_dual_energy_eta_1;
   DualEnergyFormalismEta2   = enzo_config->ppm_dual_energy_eta_2;
 
-  int gx = enzo_config->field_ghosts[0];
-  int gy = enzo_config->field_ghosts[1];
-  int gz = enzo_config->field_ghosts[2];
+  int gx = enzo_config->field_ghost_depth[0];
+  int gy = enzo_config->field_ghost_depth[1];
+  int gz = enzo_config->field_ghost_depth[2];
 
   if (GridRank < 1) gx = 0;
   if (GridRank < 2) gy = 0;

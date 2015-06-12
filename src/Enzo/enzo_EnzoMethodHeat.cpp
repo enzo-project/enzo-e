@@ -100,7 +100,7 @@ void EnzoMethodHeat::compute_ (Block * block,T * Unew) const throw()
   const int id_temp_ = field.field_id ("temperature");
 
   int gx,gy,gz;
-  field.ghosts (id_temp_,&gx,&gy,&gz);
+  field.ghost_depth (id_temp_,&gx,&gy,&gz);
 
   int mx,my,mz;
   field.dimensions (id_temp_,&mx,&my,&mz);

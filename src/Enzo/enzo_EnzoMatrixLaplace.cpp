@@ -18,7 +18,7 @@ void EnzoMatrixLaplace::matvec (int id_y, int id_x, Block * block) throw()
 
   field.dimensions(0,&mx_,&my_,&mz_);
   field.size        (&nx_,&ny_,&nz_);
-  field.ghosts    (0,&gx_,&gy_,&gz_);
+  field.ghost_depth    (0,&gx_,&gy_,&gz_);
   data->field_cell_width(&hx_,&hy_,&hz_);
 
   rank_ = (my_ == 1) ? 1 : (mz_ == 1) ? 2 : 3;
@@ -49,7 +49,7 @@ void EnzoMatrixLaplace::diagonal (int id_x, Block * block) throw()
 
   field.dimensions (id_x,&mx_,&my_,&mz_);
   field.size            (&nx_,&ny_,&nz_);
-  field.ghosts     (id_x,&gx_,&gy_,&gz_);
+  field.ghost_depth     (id_x,&gx_,&gy_,&gz_);
   data->field_cell_width(&hx_,&hy_,&hz_);
 
   rank_ = (my_ == 1) ? 1 : (mz_ == 1) ? 2 : 3;

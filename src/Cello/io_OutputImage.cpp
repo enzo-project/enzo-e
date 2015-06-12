@@ -76,7 +76,7 @@ OutputImage::OutputImage(const FieldDescr * field_descr,
   if (nzi_ == 0) nzi_ = (type_is_mesh()) ? 2*nl * nzb + 1 : nl * nz0;
 
   int ngx,ngy,ngz;
-  field_descr->ghosts(0,&ngx,&ngy,&ngz);
+  field_descr->ghost_depth(0,&ngx,&ngy,&ngz);
   if (! type_is_mesh() && ghost_) {
     nxi_ += 2*nxb*ngx*nl;
     nyi_ += 2*nyb*ngy*nl;
@@ -236,7 +236,7 @@ void OutputImage::write_block
   // Get ghost depth
 
   int ngx,ngy,ngz;
-  field_descr->ghosts(index_field,&ngx,&ngy,&ngz);
+  field_descr->ghost_depth(index_field,&ngx,&ngy,&ngz);
 
   // FieldData array dimensions
   int ndx,ndy,ndz;

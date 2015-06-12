@@ -251,12 +251,12 @@ void Simulation::initialize_data_descr_() throw()
 
   // Define default ghost zone depth for all fields, default value of 1
 
-  int gx = config_->field_ghosts[0];
-  int gy = config_->field_ghosts[1];
-  int gz = config_->field_ghosts[2];
+  int gx = config_->field_ghost_depth[0];
+  int gy = config_->field_ghost_depth[1];
+  int gz = config_->field_ghost_depth[2];
 
   for (int i=0; i<field_descr_->field_count(); i++) {
-    field_descr_->set_ghosts (i,gx,gy,gz);
+    field_descr_->set_ghost_depth (i,gx,gy,gz);
   }
 
   // Default precision

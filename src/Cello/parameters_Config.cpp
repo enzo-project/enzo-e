@@ -44,7 +44,7 @@ void Config::pup (PUP::er &p)
   PUParray(p,field_centering,3);
   p | field_courant;
   p | field_list;
-  PUParray(p,field_ghosts,3);
+  PUParray(p,field_ghost_depth,3);
   p | field_padding;
   p | field_precision;
   p | field_prolong_type;
@@ -136,7 +136,7 @@ void Config::pup (PUP::er &p)
   p | refresh_list;
   PUParray(p,refresh_field_list,    MAX_REFRESH_GROUPS);
   PUParray(p,refresh_min_face_rank, MAX_REFRESH_GROUPS);
-  PUParray(p,refresh_field_ghosts,  MAX_REFRESH_GROUPS);
+  PUParray(p,refresh_field_ghost_depth,  MAX_REFRESH_GROUPS);
 
   // Restart
 
@@ -307,18 +307,18 @@ void Config::read_field_ (Parameters * p) throw()
     field_list[i] = p->list_value_string(i, "Field:list");
   }
 
-  if (p->type("Field:ghosts") == parameter_integer) {
-    field_ghosts[0] = p->value_integer("Field:ghosts",0);
-    field_ghosts[1] = p->value_integer("Field:ghosts",0);
-    field_ghosts[2] = p->value_integer("Field:ghosts",0);
-  } else if (p->type("Field:ghosts") == parameter_list) {
-    field_ghosts[0] = p->list_value_integer(0,"Field:ghosts",0);
-    field_ghosts[1] = p->list_value_integer(1,"Field:ghosts",0);
-    field_ghosts[2] = p->list_value_integer(2,"Field:ghosts",0);
+  if (p->type("Field:ghost_depth") == parameter_integer) {
+    field_ghost_depth[0] = p->value_integer("Field:ghost_depth",0);
+    field_ghost_depth[1] = p->value_integer("Field:ghost_depth",0);
+    field_ghost_depth[2] = p->value_integer("Field:ghost_depth",0);
+  } else if (p->type("Field:ghost_depth") == parameter_list) {
+    field_ghost_depth[0] = p->list_value_integer(0,"Field:ghost_depth",0);
+    field_ghost_depth[1] = p->list_value_integer(1,"Field:ghost_depth",0);
+    field_ghost_depth[2] = p->list_value_integer(2,"Field:ghost_depth",0);
   } else {
-    field_ghosts[0] = 0;
-    field_ghosts[1] = 0;
-    field_ghosts[2] = 0;
+    field_ghost_depth[0] = 0;
+    field_ghost_depth[1] = 0;
+    field_ghost_depth[2] = 0;
   }
 
   field_alignment = p->value_integer("Field:alignment",8);
@@ -460,8 +460,8 @@ void Config::read_mesh_ (Parameters * p) throw()
   TRACE("Parameters: Mesh");
   mesh_root_rank = p->value_integer("Mesh:root_rank",0);
 
-  if (mesh_root_rank < 2) field_ghosts[1] = 0;
-  if (mesh_root_rank < 3) field_ghosts[2] = 0;
+  if (mesh_root_rank < 2) field_ghost_depth[1] = 0;
+  if (mesh_root_rank < 3) field_ghost_depth[2] = 0;
   
   //--------------------------------------------------
 
@@ -795,10 +795,10 @@ void Config::read_refresh_ (Parameters * p) throw()
     refresh_min_face_rank[index_refresh] =
       p->value(refresh_group + ":min_face_rank",0);
 
-  // Refresh : <REFRESH_GROUP> : field_ghosts
+  // Refresh : <REFRESH_GROUP> : field_ghost_depth
 
-    refresh_field_ghosts[index_refresh] =
-      p->value(refresh_group + ":field_ghosts",0);
+    refresh_field_ghost_depth[index_refresh] =
+      p->value(refresh_group + ":field_ghost_depth",0);
 
   // Refresh : <REFRESH_GROUP> : field_list
 

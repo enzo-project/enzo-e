@@ -66,14 +66,14 @@ PARALLEL_MAIN_BEGIN
   int t2[3] = {2,2,2};
   int t3[3] = {1,0,2};
 
-  field_descr->set_ghosts(i1, g1[0],g1[1],g1[2]);
-  field_descr->set_ghosts(i2, g2[0],g2[1],g2[2]);
-  field_descr->set_ghosts(i3, g3[0],g3[1],g3[2]);
-  field_descr->set_ghosts(i4, g4[0],g4[1],g4[2]);
-  field_descr->set_ghosts(i5, g5[0],g5[1],g5[2]);
-  field_descr->set_ghosts(it1, g1[0],g1[1],g1[2]);
-  field_descr->set_ghosts(it2, g2[0],g2[1],g2[2]);
-  field_descr->set_ghosts(it3, g3[0],g3[1],g3[2]);
+  field_descr->set_ghost_depth(i1, g1[0],g1[1],g1[2]);
+  field_descr->set_ghost_depth(i2, g2[0],g2[1],g2[2]);
+  field_descr->set_ghost_depth(i3, g3[0],g3[1],g3[2]);
+  field_descr->set_ghost_depth(i4, g4[0],g4[1],g4[2]);
+  field_descr->set_ghost_depth(i5, g5[0],g5[1],g5[2]);
+  field_descr->set_ghost_depth(it1, g1[0],g1[1],g1[2]);
+  field_descr->set_ghost_depth(it2, g2[0],g2[1],g2[2]);
+  field_descr->set_ghost_depth(it3, g3[0],g3[1],g3[2]);
 
   // set centering
 

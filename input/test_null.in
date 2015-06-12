@@ -36,7 +36,7 @@ Adapt {
 
 Field {
    list = ["test"];  # required since ghost zones taken from first field
-   ghosts = 4;
+   ghost_depth = 4;
 }
 
 Method { list = ["null"]; null { dt = 0.01; }}

@@ -59,10 +59,10 @@ public: // functions
       if (up) centering_[i] = new int[3];
       PUParray(p,centering_[i],3);
     }
-    if (up) ghosts_.resize(num_fields);
+    if (up) ghost_depth_.resize(num_fields);
     for (int i=0; i<num_fields; i++) {
-      if (up) ghosts_[i] = new int[3];
-      PUParray(p,ghosts_[i],3);
+      if (up) ghost_depth_[i] = new int[3];
+      PUParray(p,ghost_depth_[i],3);
     }
   }
 
@@ -79,8 +79,8 @@ public: // functions
   void set_centering(int id_field, int cx, int cy=0, int cz=0) 
     throw(std::out_of_range);
 
-  /// Set ghosts for a field
-  void set_ghosts(int id_field, int gx, int gy=0, int gz=0) 
+  /// Set ghost_depth for a field
+  void set_ghost_depth(int id_field, int gx, int gy=0, int gz=0) 
     throw(std::out_of_range);
 
   /// Set precision for a field
@@ -126,7 +126,7 @@ public: // functions
     throw(std::out_of_range);
 
   /// depth of ghost zones of given field
-  void ghosts(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
+  void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range);
 
   /// Return precision of given field
@@ -179,7 +179,7 @@ private: // attributes
   std::vector<int *> centering_;
 
   /// Ghost depth of each field
-  std::vector<int *> ghosts_;
+  std::vector<int *> ghost_depth_;
 
 };
 

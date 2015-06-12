@@ -82,7 +82,7 @@ void EnzoComputeTemperature::compute_(Block * block)
   field.size(&nx,&ny,&nz);
 
   int gx,gy,gz;
-  field.ghosts (0,&gx,&gy,&gz);
+  field.ghost_depth (0,&gx,&gy,&gz);
   if (rank < 1) gx = 0;
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;

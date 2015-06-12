@@ -292,7 +292,7 @@ void EnzoMethodGravityBiCGStab::compute ( Block * block) throw()
 
   const int id = field.field_id("density");
   int gd3[3];
-  field.ghosts(id,&gd3[0],&gd3[1],&gd3[2]);
+  field.ghost_depth(id,&gd3[0],&gd3[1],&gd3[2]);
   int nd3[3];
   field.size(&nd3[0],&nd3[1],&nd3[2]);
   int md3[3] = {nd3[0] > 1 ? nd3[0]+2*gd3[0] : 1,
@@ -303,7 +303,7 @@ void EnzoMethodGravityBiCGStab::compute ( Block * block) throw()
   // gravitational potential field
   const int ip = field.field_id("potential");
   int gp3[3];
-  field.ghosts(ip,&gp3[0],&gp3[1],&gp3[2]);
+  field.ghost_depth(ip,&gp3[0],&gp3[1],&gp3[2]);
   int np3[3];
   field.size(&np3[0],&np3[1],&np3[2]);
   int mp3[3] = {np3[0] > 1 ? np3[0]+2*gp3[0] : 1,

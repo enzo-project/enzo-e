@@ -171,9 +171,9 @@ public: // interface
   { return field_descr_->centering(id_field,cx,cy,cz); }
 
   /// depth of ghost zones of given field
-  void ghosts(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
+  void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range)
-  { return field_descr_->ghosts(id_field,gx,gy,gz); }
+  { return field_descr_->ghost_depth(id_field,gx,gy,gz); }
 
   /// Return precision of given field
   precision_type precision(int id_field) const throw(std::out_of_range)

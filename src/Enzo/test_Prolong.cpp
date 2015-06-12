@@ -129,8 +129,8 @@ PARALLEL_MAIN_BEGIN
     // ghost zone depths
     const int gd = 3;
     const int gv = 2;
-    field_descr.set_ghosts(i_d,gd,gd);
-    field_descr.set_ghosts(i_v,gv,gv);
+    field_descr.set_ghost_depth(i_d,gd,gd);
+    field_descr.set_ghost_depth(i_v,gv,gv);
 
     // block size
     const int nx = 4;

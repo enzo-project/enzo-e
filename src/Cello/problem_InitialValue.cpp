@@ -251,7 +251,7 @@ void InitialValue::allocate_xyzt_
   field_data->size(nx,ny,nz);
 
   int gx,gy,gz;
-  field_descr->ghosts(index_field,&gx,&gy,&gz);
+  field_descr->ghost_depth(index_field,&gx,&gy,&gz);
   (*nx) += 2*gx;
   (*ny) += 2*gy;
   (*nz) += 2*gz;
@@ -318,7 +318,7 @@ void InitialValue::copy_values_
 
   int gx,gy,gz;
 
-  field_descr->ghosts(index_field,&gx,&gy,&gz);
+  field_descr->ghost_depth(index_field,&gx,&gy,&gz);
 
   int offset = gx + nx*(gy + ny*gz);
 
@@ -502,7 +502,7 @@ void InitialValue::evaluate_mask_png_
  )
 {
   int gx,gy,gz;
-  field_descr->ghosts(0,&gx,&gy,&gz);
+  field_descr->ghost_depth(0,&gx,&gy,&gz);
   nxb += 2*gx;
   nyb += 2*gy;
 

@@ -23,7 +23,7 @@ Mesh {
 
 Field {
 
-   ghosts  = 3;
+   ghost_depth  = 3;
    courant = 0.8;
 
    list = [ 
@@ -57,7 +57,7 @@ Refresh {
    ppm_refresh { 
       min_face_rank = 0;
       field_list = [];
-      field_ghosts = 4;
+      field_ghost_depth = 4;
    }
 }
 

@@ -11,4 +11,4 @@ Adapt {
    }
 }
 
-Field { ghosts = 4; }
+Field { ghost_depth = 4; }

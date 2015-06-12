@@ -120,7 +120,7 @@ void EnzoInitialGrackleTest::enforce_block
 
   // Ghost depths
   int gx,gy;
-  field.ghosts(0,&gx,&gy);
+  field.ghost_depth(0,&gx,&gy);
 
   // WARNING("EnzoInitialGrackleTest",
   // 		  "Assumes same ghost zone depth for all fields");

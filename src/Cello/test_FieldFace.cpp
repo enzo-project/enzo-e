@@ -185,17 +185,17 @@ void init_fields
 	int gx, gy, gz;
 
 	// field 0
-	field_descr->ghosts(0, &gx, &gy, &gz);
+	field_descr->ghost_depth(0, &gx, &gy, &gz);
 	float * v1 = (float *) (data->values(0));
 	init_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 1
-	field_descr->ghosts(1, &gx, &gy, &gz);
+	field_descr->ghost_depth(1, &gx, &gy, &gz);
 	double * v2 = (double *) (data->values(1));
 	init_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 2
-	field_descr->ghosts(2, &gx, &gy, &gz);
+	field_descr->ghost_depth(2, &gx, &gy, &gz);
 	long double * v3 = (long double *) (data->values(2));
 	init_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
  
@@ -230,7 +230,7 @@ bool test_fields
 	bool test_result;
 
 	// field 0
-	field_descr->ghosts(0, &gx, &gy, &gz);
+	field_descr->ghost_depth(0, &gx, &gy, &gz);
 	float * v1 = (float *) (data->values(0));
 	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
@@ -238,14 +238,14 @@ bool test_fields
 	printf ("gx,gy,gz = %d %d %d\n",gx,gy,gz);
 
 	// field 1
-	field_descr->ghosts(1, &gx, &gy, &gz);
+	field_descr->ghost_depth(1, &gx, &gy, &gz);
 	double * v2 = (double *) (data->values(1));
 	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
 
 	// field 2
-	field_descr->ghosts(2, &gx, &gy, &gz);
+	field_descr->ghost_depth(2, &gx, &gy, &gz);
 	long double * v3 = (long double *) (data->values(2));
 	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
@@ -287,9 +287,9 @@ PARALLEL_MAIN_BEGIN
 
   // initialize field ghost zone depths
 
-  field_descr->set_ghosts(0, 1,1,1);
-  field_descr->set_ghosts(1, 1,2,3);
-  field_descr->set_ghosts(2, 3,2,1);
+  field_descr->set_ghost_depth(0, 1,1,1);
+  field_descr->set_ghost_depth(1, 1,2,3);
+  field_descr->set_ghost_depth(2, 3,2,1);
 
 
   int nbx=2, nby=3, nbz=4;

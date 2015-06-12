@@ -88,7 +88,7 @@ void EnzoComputeAcceleration::compute_(Block * block)
   field.size(&nx,&ny,&nz);
 
   int gx,gy,gz;
-  field.ghosts (0,&gx,&gy,&gz);
+  field.ghost_depth (0,&gx,&gy,&gz);
 
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);

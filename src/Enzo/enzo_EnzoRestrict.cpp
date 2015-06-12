@@ -76,8 +76,8 @@ int EnzoRestrict::apply_
 
   //   int i3m_f[3];
   //   int i3m_c[3];
-  //   field_descr->ghosts(index,&i3m_c[0],&i3m_c[1],&i3m_c[2]);
-  //   field_descr->ghosts(index,&i3m_f[0],&i3m_f[1],&i3m_f[2]);
+  //   field_descr->ghost_depth(index,&i3m_c[0],&i3m_c[1],&i3m_c[2]);
+  //   field_descr->ghost_depth(index,&i3m_f[0],&i3m_f[1],&i3m_f[2]);
 
   //   int r3[3];
   //   int i3p_f[3];

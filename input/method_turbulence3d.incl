@@ -47,7 +47,7 @@ Mesh { root_rank = 3; }
     ppm_refresh { 
        min_face_rank = 0;
        field_list = [];
-       field_ghosts = 4;
+       field_ghost_depth = 4;
     }
  }
 
@@ -55,7 +55,7 @@ Mesh { root_rank = 3; }
      alignment = 8;
      courant = 0.5;
      gamma = 1.001;
-     ghosts = 4;
+     ghost_depth = 4;
      list = [ "density", 
               "velocity_x",
               "velocity_y", 

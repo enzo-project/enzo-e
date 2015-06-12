@@ -114,7 +114,7 @@ void EnzoMethodGravityCg::compute ( Block * block) throw()
 
   field.size                (&nx_,&ny_,&nz_);
   field.dimensions(idensity_,&mx_,&my_,&mz_);
-  field.ghosts    (idensity_,&gx_,&gy_,&gz_);
+  field.ghost_depth    (idensity_,&gx_,&gy_,&gz_);
 
   int precision = field.precision(idensity_);
 

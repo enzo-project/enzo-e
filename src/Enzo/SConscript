@@ -18,7 +18,7 @@ components = []
 
 components.append(['charm'])
 
-components.append(['enzo','simulation', 'problem',
+components.append(['enzo','simulation', 'problem', 'compute',
 	      'control', 'mesh', 'data',
 	      'io', 'disk','memory',
 	      'parameters', 

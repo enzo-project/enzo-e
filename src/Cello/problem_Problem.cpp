@@ -588,7 +588,7 @@ Refresh * Problem::create_refresh_
 {
   TRACE1("Problem::create_refresh %s",name.c_str());
   Refresh * refresh = new Refresh (name,
-				   config->refresh_field_ghosts[index],
+				   config->refresh_field_ghost_depth[index],
 				   config->refresh_min_face_rank[index]);
   if (config->refresh_field_list[index].size() == 0) {
 
@@ -604,7 +604,7 @@ Refresh * Problem::create_refresh_
 
       if (field_descr->is_field (field_name)) {
 
-	refresh->insert_field(field_descr->field_id(field_name));
+	refresh->add_field(field_descr->field_id(field_name));
 
       } else {
 
