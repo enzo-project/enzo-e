@@ -62,6 +62,39 @@ double Value::evaluate (double t, double x, double y, double z) throw ()
 
 //----------------------------------------------------------------------
 
+template <class T>
+void Value::evaluate
+(T * values, double t,
+ int ndx, int nx, double * x,
+ int ndy, int ny, double * y,
+ int ndz, int nz, double * z) throw ()
+{
+  for (int index = (int)scalar_expr_list_.size()-1; index>=0; index--) {
+    scalar_expr_list_[index]->evaluate
+      (values,t,ndx,nx,x,ndy,ny,y,ndz,nz,z,mask_list_[index], values);
+  }
+}
+
+template void Value::evaluate
+(float * values, double t,
+ int ndx, int nx, double * x,
+ int ndy, int ny, double * y,
+ int ndz, int nz, double * z) throw ();
+
+template void Value::evaluate
+(double * values, double t,
+ int ndx, int nx, double * x,
+ int ndy, int ny, double * y,
+ int ndz, int nz, double * z) throw ();
+
+template void Value::evaluate
+(long double * values, double t,
+ int ndx, int nx, double * x,
+ int ndy, int ny, double * y,
+ int ndz, int nz, double * z) throw ();
+
+//----------------------------------------------------------------------
+
 void Value::copy_(const Value & value) throw()
 {
   mask_list_.resize(value.mask_list_.size());

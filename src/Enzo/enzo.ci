@@ -173,5 +173,25 @@ module template_defs {
    extern entry void EnzoBlock r_cg_loop_5<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_5<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_5<long double>(CkReductionMsg *msg);
-   
+
+   extern entry void EnzoBlock p_mg0_pre_smooth<float>(CkReductionMsg *msg);
+   extern entry void EnzoBlock p_mg0_pre_smooth<double>(CkReductionMsg *msg);
+   extern entry void EnzoBlock p_mg0_pre_smooth<long double>(CkReductionMsg *msg);
+
+   extern entry void EnzoBlock p_mg0_restrict_send<float>();
+   extern entry void EnzoBlock p_mg0_restrict_send<double>();
+   extern entry void EnzoBlock p_mg0_restrict_send<long double>();
+
+   extern entry void EnzoBlock p_mg0_restrict_recv<float>();
+   extern entry void EnzoBlock p_mg0_restrict_recv<double>();
+   extern entry void EnzoBlock p_mg0_restrict_recv<long double>();
+
+   extern entry void EnzoBlock p_mg0_prolong_recv<float>();
+   extern entry void EnzoBlock p_mg0_prolong_recv<double>();
+   extern entry void EnzoBlock p_mg0_prolong_recv<long double>();
+
+   extern entry void EnzoBlock p_mg0_post_smooth<float>();
+   extern entry void EnzoBlock p_mg0_post_smooth<double>();
+   extern entry void EnzoBlock p_mg0_post_smooth<long double>();
+
 };

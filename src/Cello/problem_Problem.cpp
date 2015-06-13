@@ -82,12 +82,14 @@ void Problem::pup (PUP::er &p)
     p | method_list_[i]; // PUP::able
   }
 
+#ifndef TEMP_NEW_REFRESH
   if (pk) n=refresh_list_.size();
   p | n;
   if (up) refresh_list_.resize(n);
   for (int i=0; i<n; i++) {
     p | refresh_list_[i]; // PUP::able
   }
+#endif
 
   if (pk) n=output_list_.size();
   p | n;
@@ -342,6 +344,7 @@ void Problem::initialize_method
 
     Method * method = create_method_(name, config, field_descr);
 
+#ifndef TEMP_NEW_REFRESH
     const int num_method_refresh = config->method_refresh[index_method].size();
 
     for (size_t imr = 0; imr < num_method_refresh; imr++) {
@@ -352,6 +355,7 @@ void Problem::initialize_method
 	}
       }
     }
+#endif
 
     if (method) {
 
@@ -366,6 +370,7 @@ void Problem::initialize_method
 
 //----------------------------------------------------------------------
 
+#ifndef TEMP_NEW_REFRESH
 void Problem::initialize_refresh
 (
  Config * config,
@@ -389,7 +394,7 @@ void Problem::initialize_refresh
     }
   }
 }
-
+#endif
 //======================================================================
 
 void Problem::deallocate_() throw()
@@ -414,9 +419,11 @@ void Problem::deallocate_() throw()
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];    method_list_[i] = 0;
   }
+#ifndef TEMP_NEW_REFRESH
   for (size_t i=0; i<refresh_list_.size(); i++) {
     delete refresh_list_[i];    refresh_list_[i] = 0;
   }
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -580,6 +587,7 @@ Method * Problem::create_method_
 
 //----------------------------------------------------------------------
 
+#ifndef TEMP_NEW_REFRESH
 Refresh * Problem::create_refresh_ 
 ( std::string  name,
   int index,
@@ -587,12 +595,11 @@ Refresh * Problem::create_refresh_
   const FieldDescr * field_descr) throw ()
 {
   TRACE1("Problem::create_refresh %s",name.c_str());
-  Refresh * refresh = new Refresh (name,
-				   config->refresh_field_ghost_depth[index],
+  Refresh * refresh = new Refresh (config->refresh_field_ghost_depth[index],
 				   config->refresh_min_face_rank[index]);
   if (config->refresh_field_list[index].size() == 0) {
 
-    refresh->all_fields (config->num_fields);
+    refresh->add_all_fields (config->num_fields);
 
   } else {
 
@@ -618,6 +625,7 @@ Refresh * Problem::create_refresh_
   }
   return refresh;
 }
+#endif
 
 //----------------------------------------------------------------------
 

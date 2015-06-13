@@ -308,7 +308,6 @@ char * FieldFace::allocate () throw()
     precision_type precision = field_data_->precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
-
     int nd3[3];
     int field_bytes = field_data_->field_size 
       (index_field, &nd3[0], &nd3[1], &nd3[2]);
@@ -334,6 +333,7 @@ char * FieldFace::allocate () throw()
 
     face_bytes += 
       field_data_->adjust_alignment_(face_bytes,bytes_per_element);
+
 
     array_size += face_bytes;
 

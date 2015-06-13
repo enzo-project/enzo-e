@@ -17,6 +17,11 @@ EnzoMethodPpml::EnzoMethodPpml(EnzoConfig * enzo_config)
   : Method(),
     comoving_coordinates_(enzo_config->physics_cosmology)
 {
+#ifdef TEMP_NEW_REFRESH  
+  refresh_ = new Refresh (4,0);
+  refresh_->add_all_fields(enzo_config->num_fields);
+  refresh_->set_sync_type("neighbor");
+#endif
 }
 
 //----------------------------------------------------------------------

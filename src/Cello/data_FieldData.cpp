@@ -139,7 +139,7 @@ char * FieldData::values ( int id_field )
 
     int id_temporary = id_field - num_permanent();
 
-    if (0 <= id_temporary && id_temporary < array_temporary_.size()) {
+    if (0 <= id_temporary && id_temporary < int(array_temporary_.size())) {
       values = array_temporary_[id_temporary];
     }
   }

@@ -136,6 +136,15 @@ void Main::p_stopping_enter()
 
 //----------------------------------------------------------------------
 
+void Main::p_stopping_balance()
+{
+#ifdef CHARM_ENZO
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_stopping_balance();
+#endif
+}
+
+//----------------------------------------------------------------------
+
 void Main::p_stopping_exit()
 {
 #ifdef CHARM_ENZO

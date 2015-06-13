@@ -171,15 +171,22 @@ void Block::stopping_balance_()
   
   if (balance_interval && ((cycle_ % balance_interval) == 0)) {
 
-    VERBOSE("balance_enter");
-    simulation()->set_phase (phase_balance);
-    AtSync();
+    control_sync(CkIndex_Main::p_stopping_balance(),"quiescence");
 
   } else {
     
     stopping_exit_();
 
   }
+}
+
+//----------------------------------------------------------------------
+
+void Block::p_stopping_balance()
+{
+    VERBOSE("balance_enter");
+    simulation()->set_phase (phase_balance);
+    AtSync();
 }
 
 //----------------------------------------------------------------------

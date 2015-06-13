@@ -21,11 +21,7 @@ void Block::compute_begin_ ()
   TRACE("Block::compute_begin()");
   simulation()->set_phase(phase_compute);
 
-  refresh_call_ = CkIndex_Block::r_compute_continue(NULL);
-  refresh_sync_ = "contribute";
-
   index_method_ = 0;
-
   compute_next_();
 }
 
@@ -37,13 +33,21 @@ void Block::compute_next_ ()
   Method * method = this->method();
 
   if (method) {
-
+#ifdef TEMP_NEW_REFRESH
+    method->refresh()->set_sync_type("contribute");
+    // (could be "neighbor" but would need counter index)
+    refresh_enter
+      (CkIndex_Block::r_compute_continue(NULL),
+      method->refresh()
+      );
+#else
     refresh_call_ = CkIndex_Block::r_compute_continue(NULL);
     refresh_sync_ = "contribute";
 
     index_refresh_ = method->index_refresh(0);
 
     control_sync(CkIndex_Block::p_refresh_enter(),"neighbor",1);
+#endif
 
   } else {
 
@@ -64,7 +68,7 @@ void Block::compute_continue_ ()
   Method * method = this->method();
 
   TRACE2 ("Block::compute_continue() method = %d %p\n",
-	  index_method_,method);
+	  index_method_,method); fflush(stdout);
 
   // Apply the method to the Block
   method -> compute (this);

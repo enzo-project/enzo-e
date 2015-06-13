@@ -256,7 +256,7 @@ int Memory::num_delete ( std::string group_name ) throw ()
 void Memory::print () throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  for (int i=0; i< group_name_.size(); i++) {
+  for (size_t i=0; i< group_name_.size(); i++) {
     Monitor * monitor = Monitor::instance();
     if (i == 0 || group_name_[i] != "") {
       monitor->print ("Memory","Group %s",i ? group_name_[i].c_str(): "Total");
@@ -278,7 +278,7 @@ void Memory::reset() throw()
 #ifdef CONFIG_USE_MEMORY
   index_group_ = 0;
 
-  for (int i=0; i<bytes_curr_.size(); i++) {
+  for (size_t i=0; i<bytes_curr_.size(); i++) {
     bytes_curr_    [i] = 0;
     bytes_high_    [i] = 0;
     bytes_highest_ [i] = 0;
@@ -294,7 +294,7 @@ void Memory::reset_high() throw()
 {
 #ifdef CONFIG_USE_MEMORY
   TRACE("reset_high");
-  for (int i=0; i<bytes_high_.size(); i++) {
+  for (size_t i=0; i<bytes_high_.size(); i++) {
     bytes_high_ [i] = bytes_curr_[i];
   }
 #endif

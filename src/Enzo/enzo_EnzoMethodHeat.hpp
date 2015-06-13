@@ -20,7 +20,7 @@ class EnzoMethodHeat : public Method {
 public: // interface
 
   /// Create a new EnzoMethodHeat object
-  EnzoMethodHeat(double alpha, double courant);
+  EnzoMethodHeat(const FieldDescr *, double alpha, double courant);
 
   EnzoMethodHeat() {};
 

@@ -718,7 +718,9 @@ void EnzoMethodGravityMlat::exit_solver_
 {
   MG_VERBOSE("exit_solver_()");
 
+#ifndef TEMP_NEW_REFRESH
   enzo_block->clear_refresh();
+#endif
 
   Data * data = enzo_block->data();
   Field field = data->field();

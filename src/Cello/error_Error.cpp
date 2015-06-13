@@ -47,7 +47,7 @@ extern void m2_
     file_str = file_str.substr(file_str.rfind("/")+1,std::string::npos);
   }
 
-  if (type == "ERROR") 
+  if (strcmp(type,"ERROR") == 0) 
     monitor->write(fp,"","@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
   monitor->write (fp,type,"%s:%d",file_str.c_str(),line);
@@ -58,7 +58,7 @@ extern void m2_
     monitor->set_active(save_active);
   }
 
-  if (type == "ERROR")
+  if (strcmp(type,"ERROR") == 0)
     monitor->write(fp,"","@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
   fflush (fp);

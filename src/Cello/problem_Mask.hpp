@@ -9,6 +9,9 @@
 #ifndef PROBLEM_MASK_HPP
 #define PROBLEM_MASK_HPP
 
+class Param;
+class Parameters;
+
 class Mask : public PUP::able {
 
   /// @class    Mask

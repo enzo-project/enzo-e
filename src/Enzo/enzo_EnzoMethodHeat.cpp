@@ -11,11 +11,16 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant) 
+EnzoMethodHeat::EnzoMethodHeat (const FieldDescr * field_descr, double alpha, double courant) 
   : Method(),
     alpha_(alpha),
     courant_(courant)
 {
+#ifdef TEMP_NEW_REFRESH  
+  refresh_ = new Refresh (4,0);
+  refresh_->add_all_fields(field_descr->field_count());
+  refresh_->set_sync_type("neighbor");
+#endif
 }
 
 //----------------------------------------------------------------------

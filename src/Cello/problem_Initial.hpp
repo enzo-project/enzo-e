@@ -8,6 +8,8 @@
 #ifndef METHOD_INITIAL_HPP
 #define METHOD_INITIAL_HPP
 
+class Hierarchy;
+
 class Initial : public PUP::able 
 {
 

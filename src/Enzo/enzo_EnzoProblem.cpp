@@ -171,7 +171,8 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodPpml(enzo_config);
   } else if (name == "heat") {
     method = new EnzoMethodHeat
-      (enzo_config->method_heat_alpha,
+      (field_descr,
+       enzo_config->method_heat_alpha,
        enzo_config->field_courant);
   } else if (name == "null") {
     method = new EnzoMethodNull

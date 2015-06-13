@@ -358,7 +358,6 @@ void Simulation::initialize_hierarchy_() throw()
 
 void Simulation::initialize_forest_() throw()
 {
-
   bool allocate_blocks = (CkMyPe() == 0);
 
   // Don't allocate blocks if reading data from files

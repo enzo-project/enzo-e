@@ -586,7 +586,7 @@ test_summary("Checkpoint",
 	     array("checkpoint_ppm-1","checkpoint_ppm-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
-test_summary("Mesh", 
+test_summary("Adapt", 
 	     array("mesh-balanced"),
 	     array("enzo-p"),'test');
 
@@ -873,7 +873,7 @@ end_hidden("checkpoint_ppm-8");
 
 //======================================================================
 
-test_group("Mesh");
+test_group("Adapt");
 
 begin_hidden ("mesh-balanced", "Adapt (serial)");
 

@@ -276,9 +276,11 @@ public: // interface
   /// Return the currently-active Method
   Method * method () throw();
 
+#ifndef TEMP_NEW_REFRESH
   /// Return the currently active Refresh
   int index_refresh() const throw()
   { return index_refresh_; }
+#endif
 
   /// Return the currently-active Refresh
   Refresh * refresh () throw();
@@ -408,13 +410,32 @@ public:
   // REFRESH
   //--------------------------------------------------
 
+#ifdef TEMP_NEW_REFRESH
+  void refresh_enter (int call, Refresh * refresh)
+  { refresh_enter_ (call,refresh); }
+#endif
+
   // Refresh ghost zones and apply boundary conditions
   void p_refresh_enter()  
+#ifdef TEMP_NEW_REFRESH
+  { ERROR("Block::p_refresh_enter()","should not be called"); }
+#else
   {      refresh_enter_(); }
+#endif
+
   void r_refresh_enter(CkReductionMsg * msg)  
+#ifdef TEMP_NEW_REFRESH
+  { ERROR("Block::r_refresh_enter()","should not called"); }
+#else
   {      refresh_enter_(); delete msg; }
+#endif
+
 protected:
+#ifdef TEMP_NEW_REFRESH
+  void refresh_enter_(int call, Refresh * refresh);
+#else
   void refresh_enter_();
+#endif
 public:
 
   // Exit the refresh phase after QD
@@ -434,10 +455,7 @@ public:
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char buffer[],int ic3[3]);
 
-  /// Whether the given face should be refreshed 
-  /// (false if boundary and not periodic)
-  bool do_refresh(int if3[3]) const;
-
+#ifndef TEMP_NEW_REFRESH
   void clear_refresh() throw()
   {
     refresh_sync_  = "";
@@ -450,13 +468,19 @@ public:
     refresh_sync_ = refresh_sync;
     index_refresh_ = index_refresh;
   }
+#endif
 
 protected:
+#ifdef TEMP_NEW_REFRESH
+  void refresh_begin_(Refresh * refresh);
+#else
   void refresh_begin_();
+#endif
+
   void refresh_load_face_
-  (int type_refresh, Index index, int if3[3], int ic3[3]);
+  (int type_refresh, Index index, int if3[3], int ic3[3],int count=0);
   void refresh_store_face_
-  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]);
+  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3],int count=0);
 public:
 
   //--------------------------------------------------
@@ -472,7 +496,10 @@ public:
   void r_stopping_enter (CkReductionMsg * msg) 
   {      stopping_enter_(); delete msg;  }
 
-  /// Enter the stopping phase
+  /// Quiescence before load balancing
+  void p_stopping_balance();
+
+  /// Exit the stopping phase
   void p_stopping_exit () 
   {      stopping_exit_(); }
   void r_stopping_exit (CkReductionMsg * msg) 
@@ -663,6 +690,11 @@ protected: // functions
    int op_array,
    std::vector<int> & field_list);
 
+#ifdef TEMP_NEW_REFRESH
+  void set_refresh (Refresh * refresh) 
+  { refresh_ = *refresh;};
+#endif
+
 protected: // attributes
 
   /// Whether data exists
@@ -754,14 +786,21 @@ protected: // attributes
   /// Index of currently-active Method
   int index_method_;
 
+#ifdef TEMP_NEW_REFRESH
+  /// Refresh object associated with current refresh operation
+  /// (Not a pointer since must be one per Block for synchronization counters)
+  Refresh refresh_;
+#else
+  /// Index of current refresh
+  int index_refresh_;
+
   /// Phase after current refresh
   int refresh_call_;
 
   /// Synchronization after current refresh
   std::string refresh_sync_;
+#endif
 
-  /// Index of current refresh
-  int index_refresh_;
 
 };
 

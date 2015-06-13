@@ -8,6 +8,8 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
+temp_refresh = 1
+
 #----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements
 #----------------------------------------------------------------------
@@ -177,6 +179,10 @@ print
 
 define = {}
 
+# Temporary defines
+
+define_temp_refresh  = ['TEMP_NEW_REFRESH']
+
 # Global defines
 
 define_cello =        ['CONFIG_USE_CELLO']
@@ -265,7 +271,7 @@ flags_link_charm = ''
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
 
- 
+if (temp_refresh != 0):  defines = defines + define_temp_refresh
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 if (trace != 0):         defines = defines + define_trace

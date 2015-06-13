@@ -33,6 +33,7 @@ mainmodule main_mesh {
      entry void p_refresh_enter();
      entry void p_refresh_exit();
      entry void p_stopping_enter();
+     entry void p_stopping_balance();
      entry void p_stopping_exit();
      entry void p_enzo_matvec();
      entry void p_exit();

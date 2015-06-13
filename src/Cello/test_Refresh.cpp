@@ -19,14 +19,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Refresh");
 
-  Refresh * refresh = new Refresh ("refresh",3,2);
+  Refresh * refresh = new Refresh (3,2);
 
   unit_assert (refresh != NULL);
 
   //--------------------------------------------------
 
   unit_func ("field_ghost_depth()");
-  unit_assert(refresh->field_ghost_depth() == 3);
+  unit_assert(refresh->ghost_depth() == 3);
   unit_func ("min_face_rank()");
   unit_assert(refresh->min_face_rank() == 2);
 

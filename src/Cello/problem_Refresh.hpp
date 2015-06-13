@@ -18,17 +18,31 @@ class Refresh : public PUP::able {
 public: // interface
 
   /// empty constructor for charm++ pup()
-  Refresh() throw() {}
+  Refresh() throw() {
+#ifdef TEMP_NEW_REFRESH
+    // printf ("DEBUG %s:%d Refresh() ghost depth   = %d\n",__FILE__,__LINE__,ghost_depth_);
+    // printf ("DEBUG %s:%d Refresh() min face rank = %d\n",__FILE__,__LINE__,min_face_rank_);
+    // printf ("DEBUG %s:%d Refresh() is_active     = %s\n",__FILE__,__LINE__,is_active_ ? "true" : "false");
+#endif    
+  }
 
   /// Create a Refresh object
-  Refresh(std::string name,
-	  int field_ghost_depth,
+  Refresh(int ghost_depth,
 	  int min_face_rank) throw()
-    : name_(name),
-      field_list_(),
-      field_ghost_depth_(field_ghost_depth),
+    : field_list_(),
+      ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank)
+#ifdef TEMP_NEW_REFRESH
+    ,
+      sync_(),
+      is_active_(true)
+#endif
   {
+#ifdef TEMP_NEW_REFRESH
+    // printf ("DEBUG %s:%d Refresh() ghost depth   = %d\n",__FILE__,__LINE__,ghost_depth_);
+    // printf ("DEBUG %s:%d Refresh() min face rank = %d\n",__FILE__,__LINE__,min_face_rank_);
+    // printf ("DEBUG %s:%d Refresh() is_active     = %s\n",__FILE__,__LINE__,is_active ? "true" : "false");
+#endif    
   }
 
   /// CHARM++ PUP::able declaration
@@ -44,15 +58,28 @@ public: // interface
 
     PUP::able::pup(p);
 
-    p | name_;
     p | field_list_;
-    p | field_ghost_depth_;
+    p | ghost_depth_;
     p | min_face_rank_;
+#ifdef TEMP_NEW_REFRESH
+    p | sync_type_;
+    p | sync_;
+    p | is_active_;
+    p | callback_;
+#endif
   }
 
   /// Add the given field to the list
   void add_field(int id_field) {
     field_list_.push_back(id_field);
+  }
+
+  /// All fields are refreshed
+  void add_all_fields(int num_fields) {
+    field_list_.clear();
+    for (int i=0; i<num_fields; i++) {
+      field_list_.push_back(i);
+    }
   }
 
   /// Return whether specific field is included in refresh list
@@ -62,26 +89,27 @@ public: // interface
     }
     return false;
   }
-  /// Set all fields
-  void all_fields(int num_fields) {
-    field_list_.clear();
-    for (int i=0; i<num_fields; i++) {
-      field_list_.push_back(i);
-    }
-  }
-
   std::vector<int> & field_list() {
     return field_list_;
   }
 
+#ifdef TEMP_NEW_REFRESH
+  void set_active (bool active) 
+  { is_active_ = active; }
+#endif
+    
   /// Return the current minimum rank (dimension) of faces to refresh
   /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
   int min_face_rank() const 
   { return min_face_rank_; }
 
+  /// Set ghost depth
+  void set_ghost_depth(int ghost_depth)
+  { ghost_depth_ = ghost_depth; }
+
   /// Return the ghost zone depth
-  int field_ghost_depth() const
-  { return field_ghost_depth_; }
+  int ghost_depth() const
+  { return ghost_depth_; }
 
   /// Return the ith field index, or false if i is out of range
   bool get_field_index (size_t i, int * index_field)
@@ -90,20 +118,43 @@ public: // interface
     if (in_range) (*index_field) = field_list_[i];
     return in_range;
   }
-  const std::string name() const { return name_; }
 
   void print () const {
     printf ("%s:%d\n",__FILE__,__LINE__);
-    printf ("name_ %s\n",name_.c_str());
     printf ("field_list:");
     for (size_t i=0; i<field_list_.size(); i++) {
       printf (" %d",field_list_[i]);
     }
     printf ("\n");
-    printf ("field_ghost_depth: %d\n",field_ghost_depth_);
+    printf ("ghost_depth: %d\n",ghost_depth_);
     printf ("min_face_rank: %d\n",min_face_rank_);
 
   }
+
+
+#ifdef TEMP_NEW_REFRESH
+  Sync & sync() 
+  {
+#ifdef DEBUG_COMPUTE
+    printf ("DEBUG %s:%d refresh %p Sync %p %d/%d\n",
+	    __FILE__,__LINE__,this,&sync_,sync_.value(),sync_.stop());
+#endif
+    return sync_; 
+  }
+
+  void set_sync_type(std::string sync_type) 
+  { sync_type_ = sync_type; }
+
+  std::string sync_type() const 
+  { return sync_type_; }
+
+  int callback() const { return callback_; };
+
+  void set_callback(int callback) 
+  { callback_ = callback; }
+#endif
+
+
 
 private: // functions
 
@@ -112,18 +163,28 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// Name of this Refresh object
-  std::string name_;
-
   /// Indicies of fields to include
   std::vector <int> field_list_;
 
   /// Ghost zone depth
-  int field_ghost_depth_;
+  int ghost_depth_;
 
   /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
   int min_face_rank_;
 
+#ifdef TEMP_NEW_REFRESH
+  /// Synchronization type
+  std::string sync_type_;
+
+  /// Counter for synchronization
+  Sync sync_;
+
+  /// Whether the Refresh object is active for the block
+  bool is_active_;
+
+  /// Callback after the refresh operation
+  int callback_;
+#endif
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

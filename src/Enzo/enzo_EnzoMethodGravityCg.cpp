@@ -86,6 +86,12 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
 {
 
+#ifdef TEMP_NEW_REFRESH  
+  refresh_ = new Refresh (4,0);
+  refresh_->add_all_fields(field_descr->field_count());
+  refresh_->set_sync_type("neighbor");
+#endif
+
   M_ = (diag_precon) ? (Matrix *)(new EnzoMatrixDiagonal) 
     :                  (Matrix *)(new EnzoMatrixIdentity);
 
@@ -205,12 +211,18 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 
   delete msg;
 
+#ifdef TEMP_NEW_REFRESH
+  Refresh refresh;
+  refresh.set_sync_type("neighbor");
+  refresh.add_all_fields (field_descr()->field_count());
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
+#else
   set_refresh (CkIndex_EnzoBlock::r_enzo_matvec(NULL),
 	       "contribute",
 	       method->index_refresh(1));
 
   control_sync(CkIndex_Block::p_refresh_enter(),"neighbor",3);
-  
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -225,6 +237,9 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   method->set_iter ( ((int*)msg->getData())[0] );
 
+#ifdef TEMP_NEW_REFRESH
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),method->refresh());
+#else
   delete msg;
 
   refresh_call_ = CkIndex_EnzoBlock::r_enzo_matvec(NULL);
@@ -233,6 +248,7 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
   index_refresh_ = method->index_refresh(1);
 
   control_sync(CkIndex_Block::p_refresh_enter(),"neighbor",4);
+#endif
 
 }
 
@@ -546,7 +562,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 {
   set_leaf(enzo_block);
 
-  enzo_block->clear_refresh();
+  //  enzo_block->clear_refresh();
 
   Data * data = enzo_block->data();
   Field field = data->field();

@@ -15,8 +15,8 @@
 
 #ifdef CELLO_VERBOSE
 #   define VERBOSE(A)						\
-  printf ("[%s] %d TRACE %s\n",					\
-	   name_.c_str(),__LINE__,A);				\
+  printf ("%d %s:%d %s TRACE %s\n",					\
+	  CkMyPe(),__FILE__,__LINE__,name_.c_str(),A);			\
   fflush(stdout);						\
   if (index_.is_root()) {					\
     Monitor * monitor = simulation()->monitor();		\
@@ -144,13 +144,22 @@ void Block::compute_exit_ ()
 
 //----------------------------------------------------------------------
 
+#ifdef TEMP_NEW_REFRESH
+void Block::refresh_enter_(int callback, Refresh * refresh) 
+#else
 void Block::refresh_enter_() 
+#endif
 {
   VERBOSE("refresh_enter");
-
   performance_switch_(perf_refresh,__FILE__,__LINE__);
 
+#ifdef TEMP_NEW_REFRESH
+  refresh->set_callback(callback);
+  set_refresh(refresh);
+  refresh_begin_(refresh);
+#else
   refresh_begin_();
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -161,7 +170,11 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
+#ifdef TEMP_NEW_REFRESH
+  control_sync(refresh_.callback(), refresh_.sync_type());
+#else
   control_sync(refresh_call_, refresh_sync_);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -184,7 +197,7 @@ void Block::control_sync (int entry_point, std::string sync, int id)
 
   } else {
     ERROR1 ("Block::control_sync()",  
-	    "Unknown sync type %s", 
+	    "Unknown sync type '%s'", 
 	    sync.c_str());    
   }
 }

@@ -93,6 +93,8 @@ module mesh {
     entry void p_stopping_enter();
     entry void r_stopping_enter(CkReductionMsg *);
 
+    entry void p_stopping_balance();
+
     entry void p_stopping_exit();
     entry void r_stopping_exit(CkReductionMsg *);
 

@@ -31,8 +31,11 @@ public: // interface
   void pup (PUP::er &p)
   { TRACEPUP;
     PUP::able::pup(p);
-
+#ifdef TEMP_NEW_REFRESH
+    p | refresh_;
+#else
     p | index_refresh_;
+#endif
   }
 
 public: // virtual functions
@@ -56,19 +59,29 @@ public: // virtual functions
   }
 
   /// Append a Refresh index to the list of indices
+#ifndef TEMP_NEW_REFRESH
   void add_index_refresh (int index) {
     index_refresh_.push_back(index);
   }
+#endif
 
   /// Return the ith refresh index in 'index', and return whether i is in range
+#ifndef TEMP_NEW_REFRESH
   int index_refresh (size_t i) const
   { const bool in_range = (i < index_refresh_.size());
     return in_range ? index_refresh_[i] : -1;
   }
+#endif
 
+#ifndef TEMP_NEW_REFRESH
   int num_refresh() const {
     return index_refresh_.size();
   }
+#endif
+
+#ifdef TEMP_NEW_REFRESH
+  Refresh * refresh() { return refresh_; }
+#endif
 
 protected: // functions
 
@@ -83,10 +96,16 @@ protected: // functions
     for (int i=0; i<m; i++) X[i] = Y[i];
   }
 
-private: // attributes
+protected: // attributes
 
+#ifdef TEMP_NEW_REFRESH
+  ///  Refresh object
+  Refresh * refresh_;
+#else
   /// Indices of Refresh objects associated with this method
   std::vector<int> index_refresh_;
+#endif
+
 
 };
 

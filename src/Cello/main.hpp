@@ -97,6 +97,7 @@ public:
   void p_refresh_enter();
   void p_refresh_exit();
   void p_stopping_enter();
+  void p_stopping_balance();
   void p_stopping_exit();
   void p_enzo_matvec();
   void p_exit();

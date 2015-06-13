@@ -234,7 +234,7 @@ void Index::set_level(int level)
 
   a_[0].level = (level >> (0*shift)) & mask;
   a_[1].level = (level >> (1*shift)) & mask;
-  a_[2].level = (level >> (2*shift)-1) & (mask-1) | sign;
+  a_[2].level = ((level >> (2*shift-1)) & (mask-1)) | sign;
   clean_();
 }
 
