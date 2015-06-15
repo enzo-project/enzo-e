@@ -33,21 +33,12 @@ void Block::compute_next_ ()
   Method * method = this->method();
 
   if (method) {
-#ifdef TEMP_NEW_REFRESH
     method->refresh()->set_sync_type("contribute");
     // (could be "neighbor" but would need counter index)
     refresh_enter
       (CkIndex_Block::r_compute_continue(NULL),
       method->refresh()
       );
-#else
-    refresh_call_ = CkIndex_Block::r_compute_continue(NULL);
-    refresh_sync_ = "contribute";
-
-    index_refresh_ = method->index_refresh(0);
-
-    control_sync(CkIndex_Block::p_refresh_enter(),"neighbor",1);
-#endif
 
   } else {
 

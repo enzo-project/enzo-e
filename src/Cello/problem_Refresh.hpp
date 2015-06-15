@@ -18,32 +18,18 @@ class Refresh : public PUP::able {
 public: // interface
 
   /// empty constructor for charm++ pup()
-  Refresh() throw() {
-#ifdef TEMP_NEW_REFRESH
-    // printf ("DEBUG %s:%d Refresh() ghost depth   = %d\n",__FILE__,__LINE__,ghost_depth_);
-    // printf ("DEBUG %s:%d Refresh() min face rank = %d\n",__FILE__,__LINE__,min_face_rank_);
-    // printf ("DEBUG %s:%d Refresh() is_active     = %s\n",__FILE__,__LINE__,is_active_ ? "true" : "false");
-#endif    
-  }
+  Refresh() throw() { }
 
   /// Create a Refresh object
   Refresh(int ghost_depth,
 	  int min_face_rank) throw()
     : field_list_(),
       ghost_depth_(ghost_depth),
-      min_face_rank_(min_face_rank)
-#ifdef TEMP_NEW_REFRESH
-    ,
+      min_face_rank_(min_face_rank),
       sync_(),
       is_active_(true)
-#endif
-  {
-#ifdef TEMP_NEW_REFRESH
-    // printf ("DEBUG %s:%d Refresh() ghost depth   = %d\n",__FILE__,__LINE__,ghost_depth_);
-    // printf ("DEBUG %s:%d Refresh() min face rank = %d\n",__FILE__,__LINE__,min_face_rank_);
-    // printf ("DEBUG %s:%d Refresh() is_active     = %s\n",__FILE__,__LINE__,is_active ? "true" : "false");
-#endif    
-  }
+
+  {  }
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(Refresh);
@@ -61,12 +47,10 @@ public: // interface
     p | field_list_;
     p | ghost_depth_;
     p | min_face_rank_;
-#ifdef TEMP_NEW_REFRESH
     p | sync_type_;
     p | sync_;
     p | is_active_;
     p | callback_;
-#endif
   }
 
   /// Add the given field to the list
@@ -93,10 +77,8 @@ public: // interface
     return field_list_;
   }
 
-#ifdef TEMP_NEW_REFRESH
   void set_active (bool active) 
   { is_active_ = active; }
-#endif
     
   /// Return the current minimum rank (dimension) of faces to refresh
   /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
@@ -131,16 +113,8 @@ public: // interface
 
   }
 
-
-#ifdef TEMP_NEW_REFRESH
   Sync & sync() 
-  {
-#ifdef DEBUG_COMPUTE
-    printf ("DEBUG %s:%d refresh %p Sync %p %d/%d\n",
-	    __FILE__,__LINE__,this,&sync_,sync_.value(),sync_.stop());
-#endif
-    return sync_; 
-  }
+  {  return sync_; }
 
   void set_sync_type(std::string sync_type) 
   { sync_type_ = sync_type; }
@@ -152,9 +126,6 @@ public: // interface
 
   void set_callback(int callback) 
   { callback_ = callback; }
-#endif
-
-
 
 private: // functions
 
@@ -172,7 +143,6 @@ private: // attributes
   /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
   int min_face_rank_;
 
-#ifdef TEMP_NEW_REFRESH
   /// Synchronization type
   std::string sync_type_;
 
@@ -184,7 +154,6 @@ private: // attributes
 
   /// Callback after the refresh operation
   int callback_;
-#endif
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

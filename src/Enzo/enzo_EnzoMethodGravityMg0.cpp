@@ -305,17 +305,8 @@ void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 //        callback = p_pre_smooth()
 //        call refresh (X,"level")
 
-#ifdef TEMP_NEW_REFRESH
     enzo_block->refresh_enter
       (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),refresh());
-#else
-    enzo_block->set_refresh
-      (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),
-       "level",
-       index_refresh(1));
-    enzo_block->control_sync(CkIndex_Block::p_refresh_enter(),"level",3);
-#endif
-    
 
   }
 }
@@ -393,10 +384,6 @@ void EnzoMethodGravityMg0::exit_solver_
 ( EnzoBlock * enzo_block, int retval ) throw ()
 {
   MG_VERBOSE("exit_solver_()");
-
-#ifndef TEMP_NEW_REFRESH
-  enzo_block->clear_refresh();
-#endif
 
   Data * data = enzo_block->data();
   Field field = data->field();

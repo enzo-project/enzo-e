@@ -79,11 +79,6 @@ Block::Block
   face_level_last_(),
   name_(name()),
   index_method_(-1)
-#ifndef TEMP_NEW_REFRESH
-  ,refresh_call_()
-  ,refresh_sync_("")
-  ,index_refresh_(-1)
-#endif
 {
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = CmiTrue;
@@ -271,13 +266,7 @@ void Block::pup(PUP::er &p)
   p | age_;
   p | face_level_last_;
   p | name_;
-#ifdef TEMP_NEW_REFRESH
   p | refresh_;
-#else
-  p | refresh_call_;
-  p | refresh_sync_;
-  p | index_refresh_;
-#endif
   p | index_method_;
   // SKIP method_: initialized when needed
 
@@ -329,13 +318,7 @@ Method * Block::method () throw ()
 
 Refresh * Block::refresh () throw ()
 {
-#ifdef TEMP_NEW_REFRESH
   return &refresh_;
-#else
-  Problem * problem = simulation()->problem();
-  Refresh * refresh = problem->refresh(index_refresh_);
-  return refresh;
-#endif
 }
 
 //======================================================================

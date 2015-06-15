@@ -121,17 +121,7 @@
          flattening  = 3;
          steepening  = true;
          dual_energy = false;
-	 refresh = "ppm_refresh";
      }
-   }
-
-   Refresh {
-      list = ["ppm_refresh"];
-      ppm_refresh { 
-         min_face_rank = 0;
-         field_list = [];
-         field_ghost_depth = 4;
-      }
    }
 
    Output { 

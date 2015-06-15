@@ -94,12 +94,6 @@ public: // interface
   Method * method(size_t i) const throw() 
   { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
 
-#ifndef TEMP_NEW_REFRESH
-  /// Return the ith refresh object
-  Refresh * refresh(size_t i) const throw() 
-  { return (0 <= i && i < refresh_list_.size()) ? refresh_list_[i] : NULL; }
-#endif
-
   /// Return the prolong object
   Prolong * prolong() const throw()  { return prolong_; }
 
@@ -157,12 +151,6 @@ public: // interface
   void initialize_method(Config * config, 
 			 const FieldDescr * field_descr) throw();
 
-#ifndef TEMP_NEW_REFRESH
-  /// Initialize the refresh objects
-  void initialize_refresh(Config * config, 
-			 const FieldDescr * field_descr) throw();
-#endif
-
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
 
@@ -202,15 +190,6 @@ protected: // functions
   (std::string type, 
    Config * config, 
    const FieldDescr * field_descr) throw ();
-
-#ifndef TEMP_NEW_REFRESH
-  /// Create named refresh object
-  virtual Refresh *   create_refresh_
-  (std::string type, 
-   int index,
-   Config * config, 
-   const FieldDescr * field_descr) throw ();
-#endif
 
   /// Create named output object
   virtual Output *   create_output_  
@@ -255,11 +234,6 @@ private: // attributes
 
   /// List of method objects
   std::vector<Method *> method_list_;
-
-#ifndef TEMP_NEW_REFRESH
-  /// List of refresh objects
-  std::vector<Refresh *> refresh_list_;
-#endif
 
   /// Output objects
   std::vector<Output *> output_list_;

@@ -15,17 +15,8 @@
 
 //----------------------------------------------------------------------
 
-#ifdef TEMP_NEW_REFRESH
 void Block::refresh_begin_(Refresh * refresh) 
-#else
-void Block::refresh_begin_() 
-#endif
 {
-#ifdef TEMP_NEW_REFRESH
-  /* */
-#else
-  Refresh * refresh = simulation()->problem()->refresh(index_refresh_);
-#endif
 
   if ((  is_leaf() && children_.size() != 0) ||
       (! is_leaf() && children_.size() == 0)) {
@@ -46,9 +37,7 @@ void Block::refresh_begin_()
     return;
   }
 
-#ifdef TEMP_NEW_REFRESH
   refresh->sync().reset();
-#endif
 
   simulation()->set_phase(phase_refresh);
 
@@ -58,12 +47,7 @@ void Block::refresh_begin_()
   int ic3[3];
   if (refresh && is_leaf()) {
 
-#ifdef TEMP_NEW_REFRESH
     const int min_face_rank = refresh->min_face_rank();
-#else
-    const int min_face_rank = 
-      simulation()->config()->refresh_min_face_rank[index_refresh_];
-#endif
 
     const int level = this->level();
 
@@ -88,18 +72,12 @@ void Block::refresh_begin_()
 
     }
 
-#ifdef TEMP_NEW_REFRESH
     // call with self to set counter
     refresh_load_face_(refresh_same,index(),if3,ic3,count + 1);
-#endif
 
   } else {
     refresh_load_face_(refresh_same,index(),if3,ic3,1);
   }
-
-#ifndef TEMP_NEW_REFRESH
-  control_sync (CkIndex_Block::p_refresh_exit(),"neighbor",2);
-#endif
 
 }
 
@@ -112,13 +90,11 @@ void Block::refresh_load_face_
   int ichild[3],
   int count)
 {
-#ifdef TEMP_NEW_REFRESH
   if (count != 0) {
 
      refresh_.sync().set_stop(count);
 
   } else {
-#endif
 
     FieldFace * field_face;
 
@@ -171,12 +147,10 @@ void Block::refresh_load_face_
       (n,array, type_refresh, jface, ichild);
 
     delete field_face;
-#ifdef TEMP_NEW_REFRESH
   }
   if (refresh_.sync().next()) {
     control_sync (CkIndex_Block::p_refresh_exit(),"neighbor",2);
   }
-#endif
 }
 
 //----------------------------------------------------------------------

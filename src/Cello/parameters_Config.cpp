@@ -84,7 +84,6 @@ void Config::pup (PUP::er &p)
 
   p | num_method;
   p | method_list;
-  PUParray(p,method_refresh,MAX_METHOD_GROUPS);
 
   // Monitor
 
@@ -130,14 +129,6 @@ void Config::pup (PUP::er &p)
   p | performance_stride;
   p | performance_warnings;
 
-  // Refresh
-
-  p | num_refresh;
-  p | refresh_list;
-  PUParray(p,refresh_field_list,    MAX_REFRESH_GROUPS);
-  PUParray(p,refresh_min_face_rank, MAX_REFRESH_GROUPS);
-  PUParray(p,refresh_field_ghost_depth,  MAX_REFRESH_GROUPS);
-
   // Restart
 
   p | restart_file;
@@ -175,7 +166,6 @@ void Config::read(Parameters * p) throw()
   read_monitor_(p);
   read_output_(p);
   read_performance_(p);
-  read_refresh_(p);
   read_restart_(p);
   read_stopping_(p);
   read_testing_(p);
@@ -569,26 +559,8 @@ void Config::read_method_ (Parameters * p) throw()
   method_list.resize(num_method);
   for (int index_method=0; index_method<num_method; index_method++) {
 
-    method_list[index_method] = p->list_value_string(index_method,"Method:list");
-    std::string refresh_str = "Method:" + method_list[index_method] + ":refresh";
-
-    int type = p->type(refresh_str);
-    if ( type == parameter_list) {
-      const int num_refresh = p->list_length(refresh_str);
-      method_refresh[index_method].resize(num_refresh);
-      for (int index_refresh=0; index_refresh<num_refresh; index_refresh++) {
-	method_refresh[index_method][index_refresh] = p->list_value_string(index_refresh,refresh_str,"unknown");
-      }
-    } else if (type == parameter_string) {
-      method_refresh[index_method].resize(1);
-      method_refresh[index_method][0] = p->value_string(refresh_str,"unknown");
-    } else if (type == parameter_unknown) {
-      // If no Method : <method> : refresh, then set to null list
-      method_refresh[index_method].clear();
-    } else {
-      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      type,refresh_str.c_str());
-    }
+    method_list[index_method] = 
+      p->list_value_string(index_method,"Method:list");
   }
 }
 
@@ -771,58 +743,6 @@ void Config::read_performance_ (Parameters * p) throw()
   performance_stride   = p->value_integer("Performance:stride",1);
   performance_warnings = p->value_logical("Performance:warnings",true);
 
-}
-
-//----------------------------------------------------------------------
-
-void Config::read_refresh_ (Parameters * p) throw()
-{
-
-  // Refresh : list
-
-  num_refresh = p->list_length("Refresh:list");
-
-  refresh_list.resize(num_refresh);
-
-  for (int index_refresh=0; index_refresh<num_refresh; index_refresh++) {
-
-    refresh_list[index_refresh] = p->list_value_string(index_refresh,"Refresh:list");
-
-    std::string refresh_group = "Refresh:"+refresh_list[index_refresh];
-
-    // Refresh : <REFRESH_GROUP> : min_face_rank
-
-    refresh_min_face_rank[index_refresh] =
-      p->value(refresh_group + ":min_face_rank",0);
-
-  // Refresh : <REFRESH_GROUP> : field_ghost_depth
-
-    refresh_field_ghost_depth[index_refresh] =
-      p->value(refresh_group + ":field_ghost_depth",0);
-
-  // Refresh : <REFRESH_GROUP> : field_list
-
-    std::string param = refresh_group+":field_list";
-    int field_list_type = p->type(param);
-    if ( field_list_type == parameter_list) {
-      const int num_fields = p->list_length(param);
-      refresh_field_list[index_refresh].resize(num_fields);
-      for (int index_field=0; index_field<num_fields; index_field++) {
-	refresh_field_list[index_refresh][index_field] =
-	  p->value(index_field,param,"default");
-      }
-    } else if (field_list_type == parameter_string) {
-      refresh_field_list[index_refresh].resize(1);
-      refresh_field_list[index_refresh][0] = p->value(param,"default");
-    } else if (field_list_type == parameter_unknown) {
-      // default [] == all fields
-      refresh_field_list[index_refresh].clear();
-    } else {
-      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      field_list_type,param.c_str());
-    }
-
-  }
 }
 
 //----------------------------------------------------------------------

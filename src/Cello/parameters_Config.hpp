@@ -18,9 +18,6 @@
 /* Maximum number of output file groups specified in the configuration file */
 #define MAX_OUTPUT_GROUPS 10
 
-/* Maximum number of refresh file groups specified in the configuration file */
-#define MAX_REFRESH_GROUPS 10
-
 /* Maximum number of schedules */
 #define MAX_SCHEDULE 10
 
@@ -130,19 +127,11 @@ public: // attributes
 
   int                        num_method;
   std::vector<std::string>   method_list;
-  std::vector<std::string>   method_refresh [MAX_METHOD_GROUPS];
 
   // Monitor
 
   bool                       monitor_debug;
   bool                       monitor_verbose;
-
-  // Refresh
-  int                        num_refresh;
-  std::vector<std::string>   refresh_list;
-  std::vector<std::string>   refresh_field_list [MAX_REFRESH_GROUPS];
-  int                        refresh_min_face_rank [MAX_REFRESH_GROUPS];
-  int                        refresh_field_ghost_depth [MAX_REFRESH_GROUPS];
 
   // Output
 
@@ -215,7 +204,7 @@ protected: // functions
   void read_monitor_     (Parameters * parameters) throw();
   void read_output_      (Parameters * parameters) throw();
   void read_performance_ (Parameters * parameters) throw();
-  void read_refresh_     (Parameters * parameters) throw();
+  //  void read_refresh_     (Parameters * parameters) throw();
   void read_restart_     (Parameters * parameters) throw();
   void read_stopping_    (Parameters * parameters) throw();
   void read_testing_     (Parameters * parameters) throw();

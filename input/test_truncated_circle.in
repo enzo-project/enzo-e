@@ -14,23 +14,8 @@ Mesh {
 Method {
     list = ["gravity_cg"]; 
     gravity_cg {
-       refresh = ["refresh_null","refresh_cg"];
        iter_max = 1000;
        res_tol  = 1e-3;
-    }
-}
-
-Refresh {
-    list = ["refresh_null","refresh_cg"];
-    refresh_null {
-         min_face_rank = 0;
-         field_list = [];
-         field_ghost_depth = 3;
-    };
-    refresh_cg {
-         min_face_rank = 0;
-         field_list = [];
-         field_ghost_depth = 3;
     }
 }
 

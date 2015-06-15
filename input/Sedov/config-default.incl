@@ -13,9 +13,6 @@ Adapt {
 Field {
     ghosts = 4; # must be even for ProlongLinear
     prolong = "linear";
-    refresh {
-       rank = 0;
-    };
     courant   = 0.8;
     padding   = 0;
     alignment = 8;
@@ -40,19 +37,9 @@ Field {
          steepening  = true;
 
          dual_energy = false;
-         refresh = "ppm_refresh";
      }
    }
 
-   Refresh {
-      list = ["ppm_refresh"];
-      ppm_refresh { 
-         min_face_rank = 0;
-         field_list = [];
-         field_ghosts = 4;
-      }
-   }
-   
    Boundary { type = "periodic" }
  Enzo { sedov { radius_relative = 0.1; } }
 

@@ -36,9 +36,6 @@ void Simulation::initialize() throw()
   problem_->initialize_stopping(config_);
   problem_->initialize_output  (config_,field_descr_,factory());
   problem_->initialize_method  (config_,field_descr_);
-#ifndef TEMP_NEW_REFRESH
-  problem_->initialize_refresh (config_,field_descr_);
-#endif
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
 
