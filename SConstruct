@@ -192,6 +192,9 @@ define_int_size  =    ['SMALL_INTS']
 # Grackle defines
 
 define_grackle   = ['CONFIG_USE_GRACKLE']
+#  default GRACKLE path set to avoid "Export of non-existent variable
+#  ''grackle_path'" error even when use_grackle is 0
+grackle_path     = 'grackle_path_not_set'
 
 # Performance defines
 
@@ -199,6 +202,11 @@ define_memory =       ['CONFIG_USE_MEMORY']
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_performance =  ['CONFIG_USE_PERFORMANCE']
 define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
+
+#  default PAPI path set to avoid "Export of non-existent variable
+#  ''papi_path'" error even when use_papi is 0
+
+papi_path           = 'papi_path_not_set'  
 
 # Debugging defines
 
