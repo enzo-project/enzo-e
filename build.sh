@@ -39,7 +39,7 @@ if ($#argv >= 1) then
       rm -rf .sconf_temp/conftest_0.c .sconsign.dblite 
       rm -rf config.log config/*.pyc errors.org log.build out.scons.*
       rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
-      rm -rf charmrun parameters.out
+      rm -rf charmrun parameters.out checkpoint_ppm*
       rm -rf `find test -name "*.png"`
       rm -rf `find test -name "*.h5"`
       printf "done\n"
