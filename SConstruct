@@ -307,6 +307,8 @@ elif (arch == "linux_tau"):    from linux_tau    import *
 elif (arch == "ncsa_bw"):      from ncsa_bw      import *
 elif (arch == "faraday_gnu"):  from faraday_gnu  import *
 elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
+elif (arch == "mf_gnu"):       from mf_gnu       import *
+elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
