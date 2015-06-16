@@ -5,6 +5,7 @@
 /// @date     2010-04-02
 /// @brief    Test program for the Refresh class
 
+#include <algorithm> // std::find
 #include "main.hpp"
 #include "test.hpp"
 
@@ -34,12 +35,21 @@ PARALLEL_MAIN_BEGIN
   refresh->add_field (12);
   refresh->add_field (9);
   refresh->add_field (-2);
-  unit_assert (refresh->field(12));
-  unit_assert (! refresh->field(-8));
-  unit_assert (! refresh->field(4));
-  unit_assert (refresh->field(9));
-  unit_assert (! refresh->field(0));
-  unit_assert (refresh->field(-2));
+  std::vector <int> field_list = refresh->field_list();
+  std::vector<int>::iterator it;
+  
+  unit_assert (find (field_list.begin(),field_list.end(),12) 
+	       != field_list.end());
+  unit_assert (find (field_list.begin(),field_list.end(),-8) 
+	       == field_list.end());
+  unit_assert (find (field_list.begin(),field_list.end(),4) 
+	       == field_list.end());
+  unit_assert (find (field_list.begin(),field_list.end(),9) 
+	       != field_list.end());
+  unit_assert (find (field_list.begin(),field_list.end(),0) 
+	       == field_list.end());
+  unit_assert (find (field_list.begin(),field_list.end(),-2) 
+	       != field_list.end());
 
   //--------------------------------------------------
 

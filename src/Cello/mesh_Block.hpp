@@ -389,7 +389,7 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next callback
-  void control_sync (int entry_point, std::string sync, int id = 0);
+  void control_sync (int entry_point, int sync, int id = 0);
 
   /// synchronize with count other chares; count only needs to be supplied once
   void p_control_sync_count(int entry_point, int id, int count = 0) 

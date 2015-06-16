@@ -8,6 +8,8 @@
 #ifndef PROBLEM_METHOD_HPP
 #define PROBLEM_METHOD_HPP
 
+class Refresh;
+
 class Method : public PUP::able 
 {
   /// @class    Method
@@ -62,9 +64,9 @@ protected: // functions
   template <class T>
   void copy_ (T * X, const T * Y,
 	      int mx, int my, int mz,
-	      bool is_active) const throw()
+	      bool active) const throw()
   {
-    if (! is_active ) return;
+    if (! active ) return;
     const int m = mx*my*mz;
     for (int i=0; i<m; i++) X[i] = Y[i];
   }

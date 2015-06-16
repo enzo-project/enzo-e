@@ -86,9 +86,16 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
 {
 
+  // Initialize Refresh object
   refresh_ = new Refresh (4,0);
   refresh_->add_all_fields(field_descr->field_count());
-  refresh_->set_sync_type("neighbor");
+  refresh_->set_sync_type(sync_neighbor);
+  // refresh_list_.resize(1);
+
+  // refresh_list_[0].set_ghost_depth(4);
+  // refresh_list_[0].set_min_face_rank(0);
+  // refresh_list_[0].add_all_fields(field_descr->field_count());
+  // refresh_list_[0].set_sync_type(sync_neighbor);
 
   M_ = (diag_precon) ? (Matrix *)(new EnzoMatrixDiagonal) 
     :                  (Matrix *)(new EnzoMatrixIdentity);
@@ -210,7 +217,7 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
   delete msg;
 
   Refresh refresh;
-  refresh.set_sync_type("neighbor");
+  refresh.set_sync_type(sync_neighbor);
   refresh.add_all_fields (field_descr()->field_count());
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
 }

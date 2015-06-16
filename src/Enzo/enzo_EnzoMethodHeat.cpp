@@ -16,9 +16,18 @@ EnzoMethodHeat::EnzoMethodHeat (const FieldDescr * field_descr, double alpha, do
     alpha_(alpha),
     courant_(courant)
 {
+  // Initialize the Refresh object
+
   refresh_ = new Refresh (4,0);
   refresh_->add_all_fields(field_descr->field_count());
-  refresh_->set_sync_type("neighbor");
+  refresh_->set_sync_type(sync_neighbor);
+  // refresh_list_.resize(1);
+
+  // refresh_list_[0].set_ghost_depth(4);
+  // refresh_list_[0].set_min_face_rank(0);
+  // refresh_list_[0].add_all_fields(field_descr->field_count());
+  // refresh_list_[0].set_sync_type(sync_neighbor);
+
 }
 
 //----------------------------------------------------------------------

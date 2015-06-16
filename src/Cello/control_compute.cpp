@@ -33,12 +33,12 @@ void Block::compute_next_ ()
   Method * method = this->method();
 
   if (method) {
-    method->refresh()->set_sync_type("contribute");
-    // (could be "neighbor" but would need counter index)
+
+    // OVERRIDE REFRESH SYNCHRONIZATION
+    method->refresh()->set_sync_type(sync_barrier);
+
     refresh_enter
-      (CkIndex_Block::r_compute_continue(NULL),
-      method->refresh()
-      );
+      (CkIndex_Block::r_compute_continue(NULL), method->refresh() );
 
   } else {
 

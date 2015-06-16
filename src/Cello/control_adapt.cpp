@@ -84,7 +84,7 @@ void Block::adapt_begin_()
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
-  control_sync (CkIndex_Block::p_adapt_called(),"neighbor",0);
+  control_sync (CkIndex_Block::p_adapt_called(),sync_neighbor,0);
 
 }
 
@@ -102,7 +102,7 @@ void Block::adapt_called_()
 
   adapt_send_level();
 
-  control_sync (CkIndex_Main::p_adapt_next(),"quiescence");
+  control_sync (CkIndex_Main::p_adapt_next(),sync_quiescence);
 
 }
 
@@ -135,7 +135,7 @@ void Block::adapt_next_()
     if (level() > level_next_) adapt_coarsen_();
   }
 
-  control_sync (CkIndex_Main::p_adapt_end(),"quiescence");
+  control_sync (CkIndex_Main::p_adapt_end(),sync_quiescence);
 }
 
 //----------------------------------------------------------------------
@@ -178,9 +178,9 @@ void Block::adapt_end_()
   bool adapt_again = (is_first_cycle && (adapt_step_++ < level_maximum));
 
   if (adapt_again) {
-    control_sync (CkIndex_Main::p_adapt_enter(),"quiescence");
+    control_sync (CkIndex_Main::p_adapt_enter(),sync_quiescence);
   } else {
-    control_sync (CkIndex_Main::p_adapt_exit(),"quiescence");
+    control_sync (CkIndex_Main::p_adapt_exit(),sync_quiescence);
   }
 }
 

@@ -211,7 +211,7 @@ Block::Block
 
     thisProxy.doneInserting();
 
-    control_sync (CkIndex_Main::p_adapt_end(),"quiescence");
+    control_sync (CkIndex_Main::p_adapt_end(),sync_quiescence);
 
   }
 

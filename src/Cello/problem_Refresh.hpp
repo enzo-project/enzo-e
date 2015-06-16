@@ -27,7 +27,7 @@ public: // interface
       ghost_depth_(ghost_depth),
       min_face_rank_(min_face_rank),
       sync_(),
-      is_active_(true)
+      active_(true)
 
   {  }
 
@@ -49,16 +49,18 @@ public: // interface
     p | min_face_rank_;
     p | sync_type_;
     p | sync_;
-    p | is_active_;
+    p | active_;
     p | callback_;
   }
 
   /// Add the given field to the list
+
   void add_field(int id_field) {
     field_list_.push_back(id_field);
   }
 
   /// All fields are refreshed
+
   void add_all_fields(int num_fields) {
     field_list_.clear();
     for (int i=0; i<num_fields; i++) {
@@ -66,60 +68,45 @@ public: // interface
     }
   }
 
-  /// Return whether specific field is included in refresh list
-  bool field (int id_field) const {
-    for (size_t i=0; i<field_list_.size(); i++) {
-      if (field_list_.at(i) == id_field) return true;
-    }
-    return false;
-  }
+  /// Return the list of fields participating in the Refresh operation
+
   std::vector<int> & field_list() {
     return field_list_;
   }
 
+  // Whether this Block is participating in the Refresh operation
+
   void set_active (bool active) 
-  { is_active_ = active; }
+  { active_ = active; }
+
+  bool active () const 
+  { return active_; }
     
-  /// Return the current minimum rank (dimension) of faces to refresh
-  /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
+  /// Set or return the current minimum rank (dimension) of faces to
+  /// refresh e.g. 0: everything, 1: omit corners, 2: omit corners and
+  /// edges
+
+  void set_min_face_rank (int min_face_rank)
+  { min_face_rank_ = min_face_rank; }
+
   int min_face_rank() const 
   { return min_face_rank_; }
 
-  /// Set ghost depth
+  /// Set or return the data field ghost depth
+
   void set_ghost_depth(int ghost_depth)
   { ghost_depth_ = ghost_depth; }
 
-  /// Return the ghost zone depth
   int ghost_depth() const
   { return ghost_depth_; }
-
-  /// Return the ith field index, or false if i is out of range
-  bool get_field_index (size_t i, int * index_field)
-  {
-    const bool in_range = (i < field_list_.size());
-    if (in_range) (*index_field) = field_list_[i];
-    return in_range;
-  }
-
-  void print () const {
-    printf ("%s:%d\n",__FILE__,__LINE__);
-    printf ("field_list:");
-    for (size_t i=0; i<field_list_.size(); i++) {
-      printf (" %d",field_list_[i]);
-    }
-    printf ("\n");
-    printf ("ghost_depth: %d\n",ghost_depth_);
-    printf ("min_face_rank: %d\n",min_face_rank_);
-
-  }
 
   Sync & sync() 
   {  return sync_; }
 
-  void set_sync_type(std::string sync_type) 
+  void set_sync_type(int sync_type) 
   { sync_type_ = sync_type; }
 
-  std::string sync_type() const 
+  int sync_type() const 
   { return sync_type_; }
 
   int callback() const { return callback_; };
@@ -144,13 +131,13 @@ private: // attributes
   int min_face_rank_;
 
   /// Synchronization type
-  std::string sync_type_;
+  int sync_type_;
 
   /// Counter for synchronization
   Sync sync_;
 
   /// Whether the Refresh object is active for the block
-  bool is_active_;
+  bool active_;
 
   /// Callback after the refresh operation
   int callback_;

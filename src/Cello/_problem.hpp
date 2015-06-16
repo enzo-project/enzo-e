@@ -8,6 +8,18 @@
 #ifndef _PROBLEM_HPP
 #define _PROBLEM_HPP
 
+/// @enum     sync_enum
+/// @brief    synchronization type for refresh
+enum sync_enum {
+  sync_unknown,   // Unknown synchronization
+  sync_none,
+  sync_barrier,
+  sync_quiescence,
+  sync_neighbor,
+  sync_face
+};
+  
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------

@@ -275,7 +275,7 @@ void Simulation::output_exit()
 void Block::p_output_end()
 {
   TRACE_LOCAL("Simulation_output_end()");
-  control_sync(CkIndex_Block::r_stopping_enter(NULL),"contribute");
+  control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
 }
 //======================================================================
 
