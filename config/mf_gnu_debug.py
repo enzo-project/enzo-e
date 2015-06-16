@@ -16,7 +16,7 @@ libs_fortran    = ['gfortran']
 
 home = os.environ['HOME']
 
-charm_path   = home + '/sw/charm-6.6.1/gnu_debug'
+charm_path   = home + '/sw/charm-6.5.1/gnu_debug'
 #papi_path    = '/usr/local'
 hdf5_path    = home + '/sw/yt_dev'
 png_path     = home + '/sw/yt_dev'

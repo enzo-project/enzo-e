@@ -3,8 +3,6 @@ import os
 is_arch_valid = 1
 
 flags_arch = '-Wall -O3 -g'
-#flags_arch = '-Wall -pg -fprofile-arcs -ftest-coverage'
-#flags_arch = '-Wall'
 flags_link_charm = ' -rdynamic' # required for backtraces
 
 cc  = 'gcc'
@@ -18,7 +16,7 @@ libs_fortran    = ['gfortran']
 
 home = os.environ['HOME']
 
-charm_path   = '/usr/local/charm-6.6.1/gnu'
+charm_path   = '/usr/local/charm-6.5.1/gnu'
 #papi_path    = '/usr/local'
 hdf5_path    = '/usr'
 png_path     = '/lib/x86_64-linux-gnu'
