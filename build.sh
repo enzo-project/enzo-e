@@ -35,9 +35,14 @@ if ($#argv >= 1) then
       rm -f input/*.in.out >& /dev/null
       rm -rf build
       rm -rf test/*.h5
+      rm -rf template_defs.def.h template_defs.decl.h
+      rm -rf .sconf_temp/conftest_0.c .sconsign.dblite 
+      rm -rf config.log config/*.pyc errors.org log.build out.scons.*
+      rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
       rm -rf `find test -name "*.png"`
       rm -rf `find test -name "*.h5"`
       printf "done\n"
+      rm -rf test/out.scons
       exit
    else if ($argv[1] == "compile") then
       set target = install-bin
