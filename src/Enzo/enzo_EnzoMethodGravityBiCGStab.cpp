@@ -2,29 +2,22 @@
 
 /// @file     enzo_EnzoMethodGravityBiCGStab.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Daniel R. Reynolds (reynolds@smu.edu)
 /// @date     2014-10-23 16:19:06
 /// @brief    Implements the EnzoMethodGravityBiCGStab class
 //
-// The following is from http://www.netlib.org/templates/matlab/bicgstab.m:
+// The following is Matlab code for right-preconditioned BiCGStab, 
+// optimized for both memory efficiency and for reduced 'reduction' 
+// synchronization:
 //
-// % function [x, error, iter, flag] = bicgstab(A, x, b, M, max_it, tol)
+// function [x, error, iter, flag] = bcgs_opt(A, x, b, M, max_it, tol)
+// % Usage: [x, error, iter, flag] = bcgs_opt(A, x, b, M, max_it, tol)
 // %
-// %  -- Iterative template routine --
-// %     Univ. of Tennessee and Oak Ridge National Laboratory
-// %     October 1, 1993
-// %     Details of this algorithm are described in "Templates for the
-// %     Solution of Linear Systems: Building Blocks for Iterative
-// %     Methods", Barrett, Berry, Chan, Demmel, Donato, Dongarra,
-// %     Eijkhout, Pozo, Romine, and van der Vorst, SIAM Publications,
-// %     1993. (ftp netlib2.cs.utk.edu; cd linalg; get templates.ps).
-// %
-// %  [x, error, iter, flag] = bicgstab(A, x, b, M, max_it, tol)
-// %
-// % bicgstab.m solves the linear system Ax=b using the 
-// % BiConjugate Gradient Stabilized Method with preconditioning.
+// % Solves the linear system Ax=b using the BiConjugate Gradient
+// % Stabilized Method with right preconditioning.  We assume an
+// % initial guess of x=0.
 // %
 // % input   A        REAL matrix
-// %         x        REAL initial guess vector
 // %         b        REAL right hand side vector
 // %         M        REAL preconditioner matrix
 // %         max_it   INTEGER maximum number of iterations
@@ -37,71 +30,70 @@
 // %                           1 = no convergence given max_it
 // %                          -1 = breakdown: rho = 0
 // %                          -2 = breakdown: omega = 0
-// 
-//   iter = 0;                                          % initialization
+//
+//   % initialize outputs
+//   iter = 0;
 //   flag = 0;
+//
+//   % compute initial residual, initialize temporary vectors
+//   r = b - A*x;                       % pt-to-pt communication
+//   rstar = r;
+//   p = r;
+//   
+//   % inner-products at initialization: <b,b> and <r,r>
+//   rho0 = dot(b,b);                   % global reduction
+//   beta_d = dot(r,r);                 % global reduction
+//   
+//   % store ||b|| for relative error checks
+//   rho0 = sqrt(rho0);
+//   if (rho0 == 0.0), rho0 = 1.0; end
+//
+//   % check initial relative residual to see if work is finished
+//   beta_n = beta_d;
+//   error = sqrt(beta_d)/rho0;
+//   if (error < tol), return; end
+//
+//   % begin iteration
+//   for iter = 1:max_it
+//
+//      % first half of Bi-CG step
+//      y = M\p;
+//      v = A*y;                        % pt-to-pt communication
+//      alpha = beta_n / dot(v,rstar);  % global reduction
+//      q = r - alpha*v;
+//      x = x + alpha*y;
+//
+//      % stabilization portion of Bi-CG step
+//      y = M\q;
+//      u = A*y;                        % pt-to-pt communication
+//      omega_d = dot(u,u);             % global reduction
+//      omega_n = dot(u,q);             % global reduction
+//      if (omega_d == 0),  omega_d = 1; end
+//      omega = omega_n / omega_d;
+//      if (omega == 0), flag = -2; return; end
+//      x = x + omega*y;
+//      r = q - omega*u;
+//
+//      % compute remaining dot products for step
+//      rr = dot(r,r);                  % global reduction
+//      beta_n = dot(r,rstar);          % global reduction
+//      
+//      % check for failure/convergence
+//      if (beta_n == 0), flag = -1; return; end
+//      error = sqrt(rr)/rho0;
+//      if (error < tol), return; end
+//
+//      % compute new direction vector
+//      beta = (beta_n/beta_d)*(alpha/omega);
+//      beta_d = beta_n;
+//      p = r + beta*(p - omega*v);
+//
+//   end      
+//
+//   % non-convergent
+//   flag = 1;
 // 
-//   bnrm2 = norm( b );
-//   if  ( bnrm2 == 0.0 ), bnrm2 = 1.0; end
-// 
-//   r = b - A*x;
-//   error = norm( r ) / bnrm2;
-//   if ( error < tol ) return, end
-// 
-//   omega  = 1.0;
-//   r_tld = r;
-// 
-//   for iter = 1:max_it,                              % begin iteration
-// 
-//      rho   = ( r_tld'*r );                          % direction vector
-//      if ( rho == 0.0 ) break, end
-// 
-//      if ( iter > 1 ),
-//         beta  = ( rho/rho_1 )*( alpha/omega );
-//         p = r + beta*( p - omega*v );
-//      else
-//         p = r;
-//      end
-//  
-//      p_hat = M \ p;
-//      v = A*p_hat;
-//      alpha = rho / ( r_tld'*v );
-//      s = r - alpha*v;
-//      if ( norm(s) < tol ),                          % early convergence check
-//         x = x + alpha*p_hat;
-//         resid = norm( s ) / bnrm2;
-//         break;
-//      end
-// 
-//      s_hat = M \ s;                                 % stabilizer
-//      t = A*s_hat;
-//      omega = ( t'*s) / ( t'*t );
-// 
-//      x = x + alpha*p_hat + omega*s_hat;             % update approximation
-// 
-//      r = s - omega*t;
-//      error = norm( r ) / bnrm2;                     % check convergence
-//      if ( error <= tol ), break, end
-// 
-//      if ( omega == 0.0 ), break, end
-//      rho_1 = rho;
-// 
-//   end
-// 
-//   if ( error <= tol | s <= tol ),                   % converged
-//      if ( s <= tol ),
-//         error = norm(s) / bnrm2;
-//      end
-//      flag =  0;
-//   elseif ( omega == 0.0 ),                          % breakdown
-//      flag = -2;
-//   elseif ( rho == 0.0 ),
-//      flag = -1;
-//   else                                              % no convergence
-//      flag = 1;
-//   end
-// 
-// % END bicgstab.m
+// % END bcgs.m
 //
 // ======================================================================
 //
@@ -115,38 +107,33 @@
 // 
 //    B = <right-hand side>
 //    X = <initial solution X0>
-//
-//    bnorm_ = NORM( B ) ==> bicgstab_start_1
+//    R = MATVEC(A,x)  ==> bicgstab_start_1
 //
 // --------------------
 // bicgstab_start_1()
 // --------------------
 //
-//   if ( bnorm_ == 0.0 ) bnorm_ = 1.0;
-// 
-//   R = MATVEC(A,x) ==> bicgstab_start_2
+//    Rstar = R
+//    P = R
+//    rho0_   = DOT(B, B) ==> bicgstab_start_2
+//    beta_d_ = DOT(R, R) ==> bicgstab_start_2
 //
 // --------------------
 // bicgstab_start_2()
 // --------------------
 //
-//   R = B - R;
-//   rnorm_ = NORM( R ) ==> bicgstab_start_3
+//    rho0 = sqrt(rho0_)
+//    if (rho0 == 0.0)  rho0 = 1.0
+//    beta_n_ = beta_d_
+//    error = sqrt(beta_d_) / rho0;
 //
-// --------------------
-// bicgstab_start_3()
-// --------------------
-//
-//   error = rnorm_ / bnorm_;
-//   if ( error < tol ) {
+//    if (error < tol) {
 //      ==> bicgstab_loop_end(return_converged_)
-//   }
-// 
-//   R_hat = R;
-// 
-//   iter = 1
-// 
-//   ==> bicgstab_loop_begin()
+//    }
+//    
+//    iter = 1
+//    
+//    ==> bicgstab_loop_begin()
 //
 // ==================================================
 //
@@ -158,80 +145,74 @@
 //       ==> bicgstab_loop_end(return_error_not_converged_);
 //    }
 // 
-//    rho_ = DOT(R_hat, R) ==> bicgstab_loop_1
+//    Y = SOLVE (M, P) ==> bicgstab_loop_1
 // 
 // --------------------
 // bicgstab_loop_1()
 // --------------------
 //  
-//    if ( rho_ == 0.0 ) {
-//       bicgstab_loop_end(return_error_rho_eq_0)
-//    }
-// 
-//    if ( iter_ > 1 ) {
-//       beta  = ( rho_/rho_prev_ )*( alpha_/omega_ );
-//       P = R + beta*( P - omega_*v );
-//    } else {
-//       P = R;
-//    }
-//  
-//    Y = SOLVE (M, P) ==> bicgstab_loop_2
+//    V = MATVEC (A,Y) ==> bicgstab_loop_2
 // 
 // --------------------
 // bicgstab_loop_2()
 // --------------------
 //
-//    V = MATVEC (A,Y) ==> bicgstab_loop_3
+//    vrs_ = DOT(V, Rstar) ==> bicgstab_loop_3
 //
 // --------------------
 // bicgstab_loop_3()
 // --------------------
 //
-//    V = A * Y;
-//    rhdv_ = DOT (R_hat,V) ==> bicgstab_loop_4
+//    alpha_ = beta_n_ / ( vrs_ );
+//    Q = R - alpha_*V
+//    X = X + alpha_*Y
+//
+//    Y = SOLVE (M, Q) ==> bicgstab_loop_4
 //
 // --------------------
 // bicgstab_loop_4()
 // --------------------
-
-//    alpha_ = rho / ( rhdv_ );
-//    S = R - alpha_*V;
-//    Z = SOLVE(M , S) ==> bicgstab_loop_5
 //
+//    U = MATVEC (A,Y) ==> bicgstab_loop_5
+// 
 // --------------------
 // bicgstab_loop_5()
 // --------------------
 //
-//    T = MATVEC(A,Z) ==> bicgstab_loop_6
-// 
+//    omega_d_ = DOT(U, U) ==> bicgstab_loop_6
+//    omega_n_ = DOT(U, Q) ==> bicgstab_loop_6
+//
 // --------------------
 // bicgstab_loop_6()
 // --------------------
-//    tds_ = DOT(T,S), tdt_ = DOT(T,T) ==> bicgstab_loop_7
 //
-// --------------------
-// bicgstab_loop_7()
-// --------------------
-//
-//    omega_ = ( tds_) / ( tdt_ );
+//    if (omega_d_ == 0.0)  omega_d_ = 1.0
+//    omega_ = omega_n_ / omega_d_
 //    if ( omega_ == 0.0 ) {
-//       bicgstab_loop_end(return_error_omega_eq_0);
-//    }
-//    X = X + alpha_*Y + omega_*Z;             % update approximation
-//    R = S - omega_*T;
-//    rnorm_ = NORM(R) ==> bicgstab_loop_8()
-//
-// --------------------
-// bicgstab_loop_7()
-// --------------------
-//
-//    error = rnorm_ / bnorm_;                     % check convergence
-//    if ( error <= tol ) {
-//       bicgstab_loop_end(return_converged_);
+//       bicgstab_loop_end(return_error_omega_eq_0)
 //    }
 // 
-//    rho_prev = rho;
+//    X = X + omega_*Y
+//    R = Q - omega_*U
 //
+//    rr_     = DOT(R, R)     ==> bicgstab_loop_7
+//    beta_n_ = DOT(R, Rstar) ==> bicgstab_loop_7
+//
+// --------------------
+// bicgstab_loop_7()
+// --------------------
+//
+//    if ( beta_n_ == 0.0 ) {
+//       bicgstab_loop_end(return_error_beta_n_eq_0)
+//    }
+//    error = sqrt(rr_) / rho0;
+//
+//    if ( error <= tol ) {
+//       bicgstab_loop_end(return_converged_)
+//    }
+//
+//    beta = (beta_n_/beta_d_)*(alpha_/omega_)
+//    P = R + beta*( P - omega_*v )
 //    iter = iter + 1
 //
 //    ==> bicgstab_loop_begin()
