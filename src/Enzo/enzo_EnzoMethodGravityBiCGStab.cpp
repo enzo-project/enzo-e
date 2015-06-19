@@ -57,14 +57,14 @@
 //   for iter = 1:max_it
 //
 //      % first half of Bi-CG step
-//      y = M\p;
+//      y = M\p;                        % ? communication
 //      v = A*y;                        % pt-to-pt communication
 //      alpha = beta_n / dot(v,rstar);  % global reduction
 //      q = r - alpha*v;
 //      x = x + alpha*y;
 //
 //      % stabilization portion of Bi-CG step
-//      y = M\q;
+//      y = M\q;                        % ? communication
 //      u = A*y;                        % pt-to-pt communication
 //      omega_d = dot(u,u);             % global reduction
 //      omega_n = dot(u,q);             % global reduction
