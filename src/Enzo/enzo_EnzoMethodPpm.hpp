@@ -17,7 +17,8 @@ class EnzoMethodPpm : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPpm object
-  EnzoMethodPpm(EnzoConfig * enzo_config);
+  EnzoMethodPpm(const FieldDescr * field_descr,
+		EnzoConfig * enzo_config);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPpm);

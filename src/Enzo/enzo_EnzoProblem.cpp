@@ -166,9 +166,13 @@ Method * EnzoProblem::create_method_
 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   if (name == "ppm") {
-    method = new EnzoMethodPpm (enzo_config);
+    method = new EnzoMethodPpm 
+      (field_descr,
+       enzo_config);
   } else if (name == "ppml") {
-    method = new EnzoMethodPpml(enzo_config);
+    method = new EnzoMethodPpml
+      (field_descr,
+       enzo_config);
   } else if (name == "heat") {
     method = new EnzoMethodHeat
       (field_descr,
@@ -183,7 +187,8 @@ Method * EnzoProblem::create_method_
 #endif /* CONFIG_USE_GRACKLE */
   } else if (name == "turbulence") {
     method = new EnzoMethodTurbulence 
-      (enzo_config->method_turbulence_edot,
+      (field_descr,
+       enzo_config->method_turbulence_edot,
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,

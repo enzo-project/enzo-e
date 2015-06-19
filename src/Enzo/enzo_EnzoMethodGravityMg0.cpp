@@ -171,7 +171,13 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
     level_min_(level_min),
     level_max_(level_max)
 {
-  printf ("EnzoMethodGravityMg0::EnzoMethodGravityMg0()\n");
+  set_num_refresh(1);
+
+  refresh(0)->set_ghost_depth(4);
+  refresh(0)->set_min_face_rank(0);
+  refresh(0)->add_all_fields(field_descr->field_count());
+  refresh(0)->set_sync_type(sync_neighbor);
+
   irho_   = field_descr->field_id("density");
   iphi_ = field_descr->field_id("potential");
 
@@ -415,9 +421,7 @@ void EnzoMethodGravityMg0::monitor_output_(EnzoBlock * enzo_block) throw()
 
   Monitor * monitor = enzo_block->simulation()->monitor();
 
-  monitor->print ("Enzo", "Mg0 iter %04d  rr %g",
-		  iter_,
-		  (double)(rr_    / rr0_));
+  monitor->print ("Enzo", "Mg0 iter %04d  rr %g",iter_, (double)(rr_/rr0_));
   }
 }
 

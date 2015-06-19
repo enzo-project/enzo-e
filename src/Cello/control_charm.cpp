@@ -30,7 +30,7 @@
 
 void Block::initial_exit_()
 {
-  control_sync(CkIndex_Block::r_adapt_enter(NULL),"contribute"); 
+  control_sync(CkIndex_Block::r_adapt_enter(NULL),sync_barrier); 
 }
 
 //----------------------------------------------------------------------
@@ -60,7 +60,7 @@ void Block::adapt_exit_()
 {
   VERBOSE("adapt_exit");
 
-  control_sync(CkIndex_Main::p_output_enter(),"quiescence");
+  control_sync(CkIndex_Main::p_output_enter(),sync_quiescence);
 }
 
 //----------------------------------------------------------------------
@@ -87,7 +87,7 @@ void Block::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
-  control_sync(CkIndex_Block::r_stopping_enter(NULL),"contribute");
+  control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
 }
 
 //----------------------------------------------------------------------
@@ -112,7 +112,7 @@ void Block::stopping_exit_()
 
   if (stop_) {
 
-    control_sync(CkIndex_Block::r_exit(NULL),"contribute");
+    control_sync(CkIndex_Block::r_exit(NULL),sync_barrier);
 
   } else {
 
@@ -149,8 +149,12 @@ void Block::refresh_enter_(int callback, Refresh * refresh)
   VERBOSE("refresh_enter");
   performance_switch_(perf_refresh,__FILE__,__LINE__);
 
-  refresh->set_callback(callback);
   set_refresh(refresh);
+
+  // Update refresh object for the Block
+
+  refresh_.set_callback(callback);
+
   refresh_begin_(refresh);
 }
 
@@ -167,26 +171,24 @@ void Block::refresh_exit_()
 
 //----------------------------------------------------------------------
 
-void Block::control_sync (int entry_point, std::string sync, int id)
+void Block::control_sync (int entry_point, int sync, int id)
 {
   
-  if (sync == "quiescence") {
+  if (sync == sync_quiescence) {
 
     if (index_.is_root())
       CkStartQD(CkCallback (entry_point,proxy_main));
 
-  } else if (sync == "neighbor") {
+  } else if (sync == sync_neighbor) {
  
     control_sync_neighbor_(entry_point,id);
 
-  } else if (sync == "contribute") {
+  } else if (sync == sync_barrier) {
 
     contribute(CkCallback (entry_point,thisProxy));
 
   } else {
-    ERROR1 ("Block::control_sync()",  
-	    "Unknown sync type '%s'", 
-	    sync.c_str());    
+    ERROR1 ("Block::control_sync()",  "Unknown sync type %d", sync);    
   }
 }
 

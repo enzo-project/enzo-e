@@ -45,7 +45,7 @@ void Block::refresh_begin_(Refresh * refresh)
 
   int if3[3];
   int ic3[3];
-  if (refresh && is_leaf()) {
+  if ( refresh && is_leaf() ) {
 
     const int min_face_rank = refresh->min_face_rank();
 
@@ -149,7 +149,8 @@ void Block::refresh_load_face_
     delete field_face;
   }
   if (refresh_.sync().next()) {
-    control_sync (CkIndex_Block::p_refresh_exit(),"neighbor",2);
+
+    control_sync (CkIndex_Block::p_refresh_exit(),sync_neighbor,2);
   }
 }
 
@@ -161,27 +162,27 @@ void Block::refresh_store_face_
 )
 {
   if (count==0) {
-  bool lghost[3] = {false,false,false};
+    bool lghost[3] = {false,false,false};
 
-  std::vector<int> field_list = refresh()->field_list();
+    std::vector<int> field_list = refresh_.field_list();
 
-  int op_array;
-  switch (type_refresh) {
- case refresh_coarse:  op_array = op_array_restrict;  break;
- case refresh_same:    op_array = op_array_copy;      break;
- case refresh_fine:    op_array = op_array_prolong;   break;
- default:
-   op_array = op_array_unknown;
-   ERROR1("Block::refresh_store_face_()",
-    "Unknown type_refresh %d",  type_refresh);
-   break;
-}
+    int op_array;
+    switch (type_refresh) {
+    case refresh_coarse:  op_array = op_array_restrict;  break;
+    case refresh_same:    op_array = op_array_copy;      break;
+    case refresh_fine:    op_array = op_array_prolong;   break;
+    default:
+      op_array = op_array_unknown;
+      ERROR1("Block::refresh_store_face_()",
+	     "Unknown type_refresh %d",  type_refresh);
+      break;
+    }
 
-  store_face_(n,buffer,
-    iface, ichild, lghost,
-    op_array,
-    field_list);
-}
+    store_face_(n,buffer,
+		iface, ichild, lghost,
+		op_array,
+		field_list);
+  }
 }
 
 //----------------------------------------------------------------------

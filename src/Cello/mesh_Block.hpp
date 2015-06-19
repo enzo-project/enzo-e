@@ -76,7 +76,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Initialize an empty Block
-  Block()  { printf ("Block()\n"); };
+  Block()  { };
 
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m);
@@ -389,7 +389,7 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next callback
-  void control_sync (int entry_point, std::string sync, int id = 0);
+  void control_sync (int entry_point, int sync, int id = 0);
 
   /// synchronize with count other chares; count only needs to be supplied once
   void p_control_sync_count(int entry_point, int id, int count = 0) 
@@ -655,7 +655,9 @@ protected: // functions
    std::vector<int> & field_list);
 
   void set_refresh (Refresh * refresh) 
-  { refresh_ = *refresh;};
+  { 
+    refresh_ = *refresh;
+  };
 
 protected: // attributes
 

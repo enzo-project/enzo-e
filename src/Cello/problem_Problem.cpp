@@ -327,7 +327,7 @@ void Problem::initialize_method
  ) throw()
 {
 
-  const int num_method = config->method_list.size();
+  const size_t num_method = config->method_list.size();
 
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 

@@ -20,7 +20,8 @@ class EnzoMethodTurbulence : public Method {
 public: // interface
 
   /// Create a new EnzoMethodTurbulence object
-  EnzoMethodTurbulence(double edot,
+  EnzoMethodTurbulence(const FieldDescr * field_descr,
+		       double edot,
 		       double density_initial,
 		       double temperature_initial,
 		       double mach_number,

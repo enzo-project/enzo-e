@@ -86,9 +86,12 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
 {
 
-  refresh_ = new Refresh (4,0);
-  refresh_->add_all_fields(field_descr->field_count());
-  refresh_->set_sync_type("neighbor");
+  set_num_refresh(1);
+
+  refresh(0)->set_ghost_depth(4);
+  refresh(0)->set_min_face_rank(0);
+  refresh(0)->add_all_fields(field_descr->field_count());
+  refresh(0)->set_sync_type(sync_neighbor);
 
   M_ = (diag_precon) ? (Matrix *)(new EnzoMatrixDiagonal) 
     :                  (Matrix *)(new EnzoMatrixIdentity);
@@ -210,8 +213,11 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
   delete msg;
 
   Refresh refresh;
-  refresh.set_sync_type("neighbor");
+  refresh.set_ghost_depth(4);
+  refresh.set_min_face_rank(0);
+  refresh.set_sync_type(sync_neighbor);
   refresh.add_all_fields (field_descr()->field_count());
+  
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
 }
 
@@ -227,7 +233,13 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   method->set_iter ( ((int*)msg->getData())[0] );
 
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),method->refresh());
+  Refresh refresh;
+  refresh.set_ghost_depth(4);
+  refresh.set_min_face_rank(0);
+  refresh.set_sync_type(sync_neighbor);
+  refresh.add_all_fields (field_descr()->field_count());
+
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
 
 }
 
