@@ -20,7 +20,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Refresh");
 
-  Refresh * refresh = new Refresh (3,2);
+  Refresh * refresh = new Refresh ();
+  refresh->set_ghost_depth(3);
+  refresh->set_min_face_rank(2);
 
   unit_assert (refresh != NULL);
 

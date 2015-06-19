@@ -152,9 +152,8 @@ void Block::refresh_enter_(int callback, Refresh * refresh)
   set_refresh(refresh);
 
   // Update refresh object for the Block
-  refresh_.set_callback(callback);
 
-  //  refresh_.set_sync_type(sync_barrier);
+  refresh_.set_callback(callback);
 
   refresh_begin_(refresh);
 }

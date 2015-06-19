@@ -262,6 +262,15 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
  int iter_max, double res_tol) 
   : Method(), iter_max_(iter_max), res_tol_(res_tol)
 {
+  // Initialize the method's refresh objects
+
+  set_num_refresh(1);
+
+  refresh(0)->set_ghost_depth(4);
+  refresh(0)->set_min_face_rank(0);
+  refresh(0)->add_all_fields(field_descr->field_count());
+  refresh(0)->set_sync_type(sync_neighbor);
+
 }
 
 //----------------------------------------------------------------------

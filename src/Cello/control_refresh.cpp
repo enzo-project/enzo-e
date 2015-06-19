@@ -149,6 +149,7 @@ void Block::refresh_load_face_
     delete field_face;
   }
   if (refresh_.sync().next()) {
+
     control_sync (CkIndex_Block::p_refresh_exit(),sync_neighbor,2);
   }
 }

@@ -76,7 +76,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Initialize an empty Block
-  Block()  { printf ("Block()\n"); };
+  Block()  { };
 
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m);
@@ -655,7 +655,9 @@ protected: // functions
    std::vector<int> & field_list);
 
   void set_refresh (Refresh * refresh) 
-  { refresh_ = *refresh;};
+  { 
+    refresh_ = *refresh;
+  };
 
 protected: // attributes
 

@@ -21,15 +21,12 @@ EnzoMethodPpm::EnzoMethodPpm
 {
   // Initialize the Refresh object
 
-  refresh_ = new Refresh (4,0);
-  refresh_->add_all_fields(enzo_config->num_fields);
-  refresh_->set_sync_type(sync_neighbor);
-  // refresh_list_.resize(1);
+  set_num_refresh(1);
 
-  // refresh_list_[0].set_ghost_depth(4);
-  // refresh_list_[0].set_min_face_rank(0);
-  // refresh_list_[0].add_all_fields(field_descr->field_count());
-  // refresh_list_[0].set_sync_type(sync_neighbor);
+  refresh(0)->set_ghost_depth(4);
+  refresh(0)->set_min_face_rank(0);
+  refresh(0)->add_all_fields(field_descr->field_count());
+  refresh(0)->set_sync_type(sync_neighbor);
 
   // PPM parameters initialized in EnzoBlock::initialize()
 }

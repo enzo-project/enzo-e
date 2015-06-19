@@ -18,18 +18,16 @@ class Refresh : public PUP::able {
 public: // interface
 
   /// empty constructor for charm++ pup()
-  Refresh() throw() { }
-
-  /// Create a Refresh object
-  Refresh(int ghost_depth,
-	  int min_face_rank) throw()
-    : field_list_(),
-      ghost_depth_(ghost_depth),
-      min_face_rank_(min_face_rank),
-      sync_(),
-      active_(true)
-
-  {  }
+  Refresh() throw() 
+  : field_list_(),
+    ghost_depth_(0),
+    min_face_rank_(0),
+    sync_type_(sync_unknown),
+    sync_(),
+    active_(true),
+    callback_(0) 
+  {
+  }
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(Refresh);

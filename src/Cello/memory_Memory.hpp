@@ -50,13 +50,14 @@ public: // interface
   void pup(PUP::er &p)
   {
     TRACEPUP;
+#ifdef CONFIG_USE_MEMORY
     p | is_active_;
     p | fill_new_;
     p | fill_delete_;
+    p | bytes_limit_;
+#endif
     WARNING ("Memory::pup()","Skipping index_group_");
     p | group_name_;
-    p | bytes_limit_;
-
     if (p.isUnpacking()) {
       WARNING ("Memory::pup()","Calling Memory::reset()");
       reset();
@@ -187,12 +188,6 @@ private: // attributes
   /// deallocate clear value
   char fill_delete_;
 
-  /// The current group index, or 0 if none
-  int index_group_;
-
-  /// Names of groups
-  std::vector<std::string> group_name_;
-
   /// Limit on number of bytes to allocate.  Currently not checked.
   std::vector<long long> bytes_limit_;
 
@@ -212,6 +207,12 @@ private: // attributes
   std::vector<long long> delete_calls_;
 
 #endif
+
+  /// The current group index, or 0 if none
+  int index_group_;
+
+  /// Names of groups
+  std::vector<std::string> group_name_;
 
 };
 
