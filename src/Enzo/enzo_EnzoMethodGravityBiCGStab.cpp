@@ -49,7 +49,6 @@
 //   if (rho0 == 0.0), rho0 = 1.0; end
 //
 //   % check initial relative residual to see if work is finished
-//   beta_n = beta_d;
 //   error = sqrt(beta_d)/rho0;
 //   if (error < tol), return; end
 //
@@ -59,7 +58,7 @@
 //      % first half of Bi-CG step
 //      y = M\p;                        % ? communication
 //      v = A*y;                        % pt-to-pt communication
-//      alpha = beta_n / dot(v,rstar);  % global reduction
+//      alpha = beta_d / dot(v,rstar);  % global reduction
 //      q = r - alpha*v;
 //      x = x + alpha*y;
 //
@@ -124,7 +123,6 @@
 //
 //    rho0 = sqrt(rho0_)
 //    if (rho0 == 0.0)  rho0 = 1.0
-//    beta_n_ = beta_d_
 //    error = sqrt(beta_d_) / rho0;
 //
 //    if (error < tol) {
@@ -163,7 +161,7 @@
 // bicgstab_loop_3()
 // --------------------
 //
-//    alpha_ = beta_n_ / ( vrs_ );
+//    alpha_ = beta_d_ / ( vrs_ );
 //    Q = R - alpha_*V
 //    X = X + alpha_*Y
 //
