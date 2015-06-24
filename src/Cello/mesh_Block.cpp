@@ -87,6 +87,15 @@ Block::Block
   index_.print("Block()",-1,2,false,simulation());
 #endif
 
+  Monitor * monitor = simulation()->monitor();
+  if (monitor->is_verbose()) {
+    char buffer [80];
+    int v3[3];
+    this->index().values(v3);
+    sprintf (buffer,"Block() %s (%d;%d;%d) created",name().c_str(),
+	     v3[0],v3[1],v3[2]);
+    monitor->print("Adapt",buffer);
+  }
   int ibx,iby,ibz;
   index.array(&ibx,&iby,&ibz);
 
@@ -349,6 +358,16 @@ Block::~Block() throw ()
 #ifdef CELLO_DEBUG
   index_.print("~Block()",-1,2,false,simulation());
 #endif
+
+  Monitor * monitor = simulation()->monitor();
+  if (monitor->is_verbose()) {
+    char buffer [80];
+    int v3[3];
+    index().values(v3);
+    sprintf (buffer,"~Block() %s (%d;%d;%d) destroyed",name().c_str(),
+	     v3[0],v3[1],v3[2]);
+    monitor->print("Adapt",buffer);
+  }
 
   const int level = this->level();
 
@@ -766,6 +785,35 @@ void Block::performance_switch_
 (int index_region, std::string file, int line)
 {
   simulation()->performance()->switch_region(index_region,file,line);
+}
+
+//----------------------------------------------------------------------
+
+void Block::check_leaf_()
+{
+  if ((  is_leaf() && children_.size() != 0) ||
+      (! is_leaf() && children_.size() == 0)) {
+
+    WARNING4("Block::refresh_begin_()",
+	     "%s: is_leaf() == %s && children_.size() == %d"
+	     "setting is_leaf_ <== %s",
+	     name_.c_str(), is_leaf()?"true":"false",
+	     children_.size(),is_leaf()?"false":"true");
+    is_leaf_ = ! is_leaf();
+  }
+}
+
+
+//----------------------------------------------------------------------
+
+void Block::check_delete_()
+{
+  if (delete_) {
+    WARNING1("refresh_begin_()",
+	     "%s: refresh called on deleted Block",
+	     name_.c_str());
+    return;
+  }
 }
 
 //----------------------------------------------------------------------

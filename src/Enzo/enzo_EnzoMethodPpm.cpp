@@ -19,14 +19,10 @@ EnzoMethodPpm::EnzoMethodPpm
   : Method(),
     comoving_coordinates_(enzo_config->physics_cosmology)
 {
-  // Initialize the Refresh object
+  // Initialize default Refresh object
 
-  set_num_refresh(1);
-
-  refresh(0)->set_ghost_depth(4);
-  refresh(0)->set_min_face_rank(0);
-  refresh(0)->add_all_fields(field_descr->field_count());
-  refresh(0)->set_sync_type(sync_neighbor);
+  const int ir = add_refresh(4,0,sync_barrier);
+  refresh(ir)->add_all_fields(field_descr->field_count());
 
   // PPM parameters initialized in EnzoBlock::initialize()
 }

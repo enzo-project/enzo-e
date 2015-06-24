@@ -21,12 +21,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
 {
 #ifdef CONFIG_USE_GRACKLE
 
-  set_num_refresh(1);
-
-  refresh(0)->set_ghost_depth(4);
-  refresh(0)->set_min_face_rank(0);
-  refresh(0)->add_all_fields(field_descr->field_count());
-  refresh(0)->set_sync_type(sync_neighbor);
+  /// Initialize default Refresh
+  int ir = add_refresh(4,0,sync_barrier);
+  refresh(ir)->add_all_fields(field_descr->field_count());
 
   /// Initialize parameters
 

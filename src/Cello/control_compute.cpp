@@ -34,11 +34,9 @@ void Block::compute_next_ ()
 
   if (method) {
 
-    // OVERRIDE REFRESH SYNCHRONIZATION
-
     Refresh * refresh = method->refresh();
 
-    refresh->set_sync_type(sync_barrier);
+    refresh->set_active (is_leaf());
 
     refresh_enter
       (CkIndex_Block::r_compute_continue(NULL), refresh );
