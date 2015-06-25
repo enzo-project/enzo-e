@@ -2,6 +2,7 @@
 
 /// @file     enzo_EnzoMatrixDiagonal.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Daniel R. Reynolds (reynolds@smu.edu)
 /// @date     2015-04-02
 /// @brief    Implementation of the discrete Diagonal operator EnzoMatrixDiagonal
 
@@ -33,7 +34,7 @@ void EnzoMatrixDiagonal::matvec (int id_y, int id_x, Block * block) throw()
   else if (precision == precision_quadruple) 
     matvec_((long double *)(Y),(long double *)(X));
   else 
-    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
+    ERROR1("EnzoMatrixDiagonal::matvec()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
@@ -61,7 +62,7 @@ void EnzoMatrixDiagonal::diagonal (int id_x, Block * block) throw()
   else if (precision == precision_quadruple) 
     diagonal_((long double *)(X));
   else 
-    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
+    ERROR1("EnzoMatrixDiagonal::diagonal()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------

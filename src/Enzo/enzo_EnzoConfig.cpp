@@ -92,8 +92,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_mg_restrict;
   p | method_gravity_mg_prolong;
 
+  p | method_gravity_bicgstab_grav_const;
   p | method_gravity_bicgstab_iter_max;
   p | method_gravity_bicgstab_res_tol;
+  p | method_gravity_bicgstab_diag_precon;
+  p | method_gravity_bicgstab_monitor_iter;
+
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -276,8 +280,19 @@ void EnzoConfig::read(Parameters * p) throw()
   method_gravity_bicgstab_iter_max = p->value_integer
     ("Method:gravity_bicgstab:iter_max",100);
 
+  method_gravity_bicgstab_grav_const = p->value_float
+    ("Method:gravity_bicgstab:grav_const",6.67384e-8); // default: G (cgs)
+
   method_gravity_bicgstab_res_tol = p->value_float
     ("Method:gravity_bicgstab:res_tol",1e-6);
+
+  method_gravity_bicgstab_diag_precon = p->value_logical
+    ("Method:gravity_bicgstab:diag_precon",false);
+
+  method_gravity_bicgstab_monitor_iter = p->value_integer
+    ("Method:gravity_bicgstab:monitor_iter",1);
+
+
 
   //======================================================================
 

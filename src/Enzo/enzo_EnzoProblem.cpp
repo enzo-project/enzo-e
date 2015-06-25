@@ -204,6 +204,17 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_cg_monitor_iter,
        is_singular,
        enzo_config->method_gravity_cg_diag_precon );
+  } else if (name == "gravity_bicgstab") {
+    const bool is_singular = is_periodic();
+    int rank = config->mesh_root_rank;
+    method = new EnzoMethodGravityBiCGStab
+      (field_descr, rank,
+       enzo_config->method_gravity_bicgstab_grav_const,
+       enzo_config->method_gravity_bicgstab_iter_max,
+       enzo_config->method_gravity_bicgstab_res_tol,
+       enzo_config->method_gravity_bicgstab_monitor_iter,
+       is_singular,
+       enzo_config->method_gravity_bicgstab_diag_precon );
   } else if (name == "gravity_mg") {
     const bool is_singular = is_periodic();
     int rank = config->mesh_root_rank;
@@ -244,11 +255,6 @@ Method * EnzoProblem::create_method_
 	       type.c_str());
 	       
     }
-  } else if (name == "gravity_bicgstab") {
-    method = new EnzoMethodGravityBiCGStab
-      (field_descr,
-       enzo_config->method_gravity_bicgstab_iter_max,
-       enzo_config->method_gravity_bicgstab_res_tol);
   } else {
     method = Problem::create_method_ (name,config, field_descr);
   }

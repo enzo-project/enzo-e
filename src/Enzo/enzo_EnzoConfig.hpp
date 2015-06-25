@@ -126,6 +126,11 @@ public: // attributes
   // EnzoMethodGravityBiCGStab
   int                        method_gravity_bicgstab_iter_max;
   double                     method_gravity_bicgstab_res_tol;
+  double                     method_gravity_bicgstab_grav_const;
+  bool                       method_gravity_bicgstab_diag_precon;
+  int                        method_gravity_bicgstab_monitor_iter;
+
+
 
 #ifdef CONFIG_USE_GRACKLE
 

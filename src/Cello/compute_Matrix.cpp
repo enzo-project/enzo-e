@@ -2,6 +2,7 @@
 
 /// @file     compute_Matrix.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @author   Daniel R. Reynolds (reynolds@smu.edu)
 /// @date     yyyy-mm-dd
 /// @brief    
 
@@ -39,7 +40,7 @@ void Matrix::residual (int ir, int ib, int ix, Block * block) throw()
     residual_((long double *)(R), (long double *)(B),
 	      mx,my,mz,nx,ny,nz,gx,gy,gz);
   else 
-    ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
+    ERROR1("Matrix::residual()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------

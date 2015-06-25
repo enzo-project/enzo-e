@@ -257,6 +257,34 @@ public: /// entry methods
   /// perform the necessary reductions for shift
   CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
 
+  /// EnzoMethodGravityBiCGStab entry method: DOT ==> refresh P
+  template <class T>
+  void r_bicgstab_loop_0a (CkReductionMsg * msg) ;  
+
+  /// EnzoMethodGravityBiCGStab entry method: ==> refresh P
+  template <class T>
+  void r_bicgstab_loop_0b (CkReductionMsg * msg) ;  
+
+  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R) after shift
+  template <class T>
+  void r_bicgstab_shift_1 (CkReductionMsg * msg) ;
+
+  /// EnzoMethodGravityBiCGStab entry method: refresh P for MATVEC
+  template <class T>
+  void r_bicgstab_loop_1 (CkReductionMsg * msg) ;
+
+  /// EnzoMethodGravityBiCGStab entry method: DOT(P,AP)
+  template <class T>
+  void r_bicgstab_loop_3 (CkReductionMsg * msg) ;
+
+  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R)
+  template <class T>
+  void r_bicgstab_loop_5 (CkReductionMsg * msg) ;
+
+  /// EnzoMethodGravityBiCGStab entry method: 
+  /// perform the necessary reductions for shift
+  CkReductionMsg * r_method_gravity_bicgstab(int n, CkReductionMsg ** msgs);
+
   void p_enzo_matvec()
   {      enzo_matvec_(); }
   void r_enzo_matvec(CkReductionMsg * msg)

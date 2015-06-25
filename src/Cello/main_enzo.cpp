@@ -68,4 +68,33 @@ CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs)
 
 //======================================================================
 
+CkReduction::reducerType r_method_gravity_bicgstab_type;
+
+extern CkReductionMsg * r_method_gravity_bicgstab(int n, CkReductionMsg ** msgs);
+
+//--------------------------------------------------
+
+void register_method_gravity_bicgstab(void)
+{
+  r_method_gravity_bicgstab_type = CkReduction::addReducer(r_method_gravity_bicgstab); 
+}
+
+//--------------------------------------------------
+
+// SEE enzo_EnzoMethodGravityBiCGStab.cpp for context
+CkReductionMsg * r_method_gravity_bicgstab(int n, CkReductionMsg ** msgs)
+{
+  long double accum[3] = { 0.0, 0.0, 0.0 };
+
+  for (int i=0; i<n; i++) {
+    long double * values = (long double *) msgs[i]->getData();
+    accum [0] += values[0];
+    accum [1] += values[1];
+    accum [2] += values[2];
+  }
+  return CkReductionMsg::buildNew(3*sizeof(long double),accum);
+}
+
+//======================================================================
+
 #include "main.cpp"
