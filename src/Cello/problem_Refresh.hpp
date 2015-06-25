@@ -29,6 +29,22 @@ public: // interface
   {
   }
 
+  /// empty constructor for charm++ pup()
+  Refresh
+  (int ghost_depth,
+   int min_face_rank,
+   int sync_type,
+   bool active=true) throw() 
+  : field_list_(),
+    ghost_depth_(ghost_depth),
+    min_face_rank_(min_face_rank),
+    sync_type_(sync_type),
+    sync_(),
+    active_(active),
+    callback_(0) 
+  {
+  }
+
   /// CHARM++ PUP::able declaration
   PUPable_decl(Refresh);
 
@@ -72,28 +88,28 @@ public: // interface
     return field_list_;
   }
 
-  // Whether this Block is participating in the Refresh operation
+  /// Whether this Block is participating in the Refresh operation
 
   void set_active (bool active) 
   { active_ = active; }
 
   bool active () const 
   { return active_; }
-    
-  /// Set or return the current minimum rank (dimension) of faces to
+
+  /// Callback function after refresh is completed
+  int callback() const { return callback_; };
+
+  void set_callback(int callback) 
+  { callback_ = callback; }
+
+  /// Return the current minimum rank (dimension) of faces to
   /// refresh e.g. 0: everything, 1: omit corners, 2: omit corners and
   /// edges
-
-  void set_min_face_rank (int min_face_rank)
-  { min_face_rank_ = min_face_rank; }
 
   int min_face_rank() const 
   { return min_face_rank_; }
 
-  /// Set or return the data field ghost depth
-
-  void set_ghost_depth(int ghost_depth)
-  { ghost_depth_ = ghost_depth; }
+  /// Return the data field ghost depth
 
   int ghost_depth() const
   { return ghost_depth_; }
@@ -101,16 +117,8 @@ public: // interface
   Sync & sync() 
   {  return sync_; }
 
-  void set_sync_type(int sync_type) 
-  { sync_type_ = sync_type; }
-
   int sync_type() const 
   { return sync_type_; }
-
-  int callback() const { return callback_; };
-
-  void set_callback(int callback) 
-  { callback_ = callback; }
 
 private: // functions
 

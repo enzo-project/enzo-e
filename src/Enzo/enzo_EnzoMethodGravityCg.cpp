@@ -83,15 +83,9 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     iter_(0),
-    rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
+    rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0),
+    id_refresh_matvec_(-1)
 {
-
-  set_num_refresh(1);
-
-  refresh(0)->set_ghost_depth(4);
-  refresh(0)->set_min_face_rank(0);
-  refresh(0)->add_all_fields(field_descr->field_count());
-  refresh(0)->set_sync_type(sync_neighbor);
 
   M_ = (diag_precon) ? (Matrix *)(new EnzoMatrixDiagonal) 
     :                  (Matrix *)(new EnzoMatrixIdentity);
@@ -105,6 +99,16 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
   ix_ = field_descr->field_id("X");
   iy_ = field_descr->field_id("Y");
   iz_ = field_descr->field_id("Z");
+
+  /// Initialize default Refresh
+
+  const int ir = add_refresh(1,rank-1,sync_barrier);
+  refresh(ir)->add_field(idensity_);
+
+  /// Initialize matvec Refresh
+
+  id_refresh_matvec_ = add_refresh(1,rank-1,sync_barrier);
+  refresh(id_refresh_matvec_)->add_field(ir_);
 
 }
 
@@ -211,14 +215,11 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
   method->set_bc( data[2] );
 
   delete msg;
-
-  Refresh refresh;
-  refresh.set_ghost_depth(4);
-  refresh.set_min_face_rank(0);
-  refresh.set_sync_type(sync_neighbor);
-  refresh.add_all_fields (field_descr()->field_count());
   
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
+  // Refresh if Block is a leaf
+  method->refresh(1)->set_active(is_leaf());
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
+		method->refresh(1));
 }
 
 //----------------------------------------------------------------------
@@ -233,14 +234,10 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   method->set_iter ( ((int*)msg->getData())[0] );
 
-  Refresh refresh;
-  refresh.set_ghost_depth(4);
-  refresh.set_min_face_rank(0);
-  refresh.set_sync_type(sync_neighbor);
-  refresh.add_all_fields (field_descr()->field_count());
-
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
-
+  // Refresh if Block is a leaf
+  method->refresh(1)->set_active(is_leaf());
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
+		method->refresh(1));
 }
 
 //----------------------------------------------------------------------
@@ -552,8 +549,6 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 ///    }
 {
   set_leaf(enzo_block);
-
-  //  enzo_block->clear_refresh();
 
   Data * data = enzo_block->data();
   Field field = data->field();

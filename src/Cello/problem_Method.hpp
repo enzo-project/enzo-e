@@ -61,18 +61,12 @@ public: // virtual functions
     /* This function intentionally empty */
   }
 
-  void set_num_refresh(size_t n)
+  int add_refresh (int ghost_depth, int min_face_rank, int sync)
   {
-    // Reserve if needed
-    if (n > refresh_list_.size()) {
-      // if reserving, initialize only new elements
-      int i1 = refresh_list_.size();
-      int i2 = n;
-      refresh_list_.resize(n);
-      for (int i=i1; i < i2; i++) {
-	refresh_list_[i] = new Refresh;
-      }
-    }
+    int index=refresh_list_.size();
+    refresh_list_.resize(index+1);
+    refresh_list_[index] = new Refresh (ghost_depth,min_face_rank,sync,true);
+    return index;
   }
 
   Refresh * refresh(size_t index=0) 

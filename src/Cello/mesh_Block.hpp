@@ -445,12 +445,12 @@ protected:
   (int type_refresh, Index index, int if3[3], int ic3[3],int count=0);
   void refresh_store_face_
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3],int count=0);
-public:
 
   //--------------------------------------------------
   // STOPPING
   //--------------------------------------------------
 
+public:
   /// Entry method after begin_stopping() to call Simulation::r_stopping()
   void r_stopping_compute_timestep(CkReductionMsg * msg);
 
@@ -468,23 +468,22 @@ public:
   {      stopping_exit_(); }
   void r_stopping_exit (CkReductionMsg * msg) 
   {      stopping_exit_(); delete msg;  }
-
 protected:
+
   void stopping_enter_();
   void stopping_begin_();
   void stopping_balance_();
   void stopping_exit_();
-public:
 
+public:
   /// Exit the stopping phase to exit
   void p_exit () 
   {      exit_(); }
   void r_exit (CkReductionMsg * msg) 
   {      exit_(); delete msg;  }
-
 protected:
+
   void exit_();
-public:
 
   //--------------------------------------------------
   // PERFORMANCE
@@ -498,7 +497,16 @@ protected:
   (int index_region, std::string file="", int line=0);
   void performance_switch_
   (int index_region, std::string file="", int line=0);
-public:
+
+  //--------------------------------------------------
+  // TESTING
+  //--------------------------------------------------
+
+  /// Check consistency between is_leaf_ and size of children_()
+  void check_leaf_();
+
+  /// Check if Block should have been deleted
+  void check_delete_();
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

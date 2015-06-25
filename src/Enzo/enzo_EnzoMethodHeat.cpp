@@ -16,14 +16,11 @@ EnzoMethodHeat::EnzoMethodHeat (const FieldDescr * field_descr, double alpha, do
     alpha_(alpha),
     courant_(courant)
 {
-  // Initialize the Refresh object
+  // Initialize default Refresh object
 
-  set_num_refresh(1);
+  const int ir = add_refresh(4,0,sync_barrier);
 
-  refresh(0)->set_ghost_depth(4);
-  refresh(0)->set_min_face_rank(0);
-  refresh(0)->add_all_fields(field_descr->field_count());
-  refresh(0)->set_sync_type(sync_neighbor);
+  refresh(ir)->add_all_fields(field_descr->field_count());
 }
 
 //----------------------------------------------------------------------

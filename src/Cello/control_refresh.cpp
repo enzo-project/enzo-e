@@ -18,24 +18,8 @@
 void Block::refresh_begin_(Refresh * refresh) 
 {
 
-  if ((  is_leaf() && children_.size() != 0) ||
-      (! is_leaf() && children_.size() == 0)) {
-
-    WARNING4("Block::refresh_begin_()",
-             "%s: is_leaf() == %s && children_.size() == %d"
-             "setting is_leaf_ <== %s",
-             name_.c_str(), is_leaf()?"true":"false",
-             children_.size(),is_leaf()?"false":"true");
-    is_leaf_ = ! is_leaf();
-  }
-
-  // Check if Block should have been deleted
-  if (delete_) {
-    WARNING1("refresh_begin_()",
-	     "%s: refresh called on deleted Block",
-	     name_.c_str());
-    return;
-  }
+  check_leaf_();
+  check_delete_();
 
   refresh->sync().reset();
 
@@ -45,7 +29,7 @@ void Block::refresh_begin_(Refresh * refresh)
 
   int if3[3];
   int ic3[3];
-  if ( refresh && is_leaf() ) {
+  if ( refresh && refresh->active() ) {
 
     const int min_face_rank = refresh->min_face_rank();
 
