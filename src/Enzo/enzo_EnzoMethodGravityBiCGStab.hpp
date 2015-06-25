@@ -2,11 +2,12 @@
 
 /// @file     enzo_EnzoMethodGravityBiCGStab.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     2014-10-23 16:19:06
+/// @author   Daniel R. Reynolds (reynolds@smu.edu)
+/// @date     2014-10-21 17:25:40
 /// @brief    [\ref Enzo] Declaration of EnzoMethodGravityBiCGStab
 ///
-/// Bicongugate gradient stabalized method (BiCGStab) for solving for
-/// self-gravity on field data.
+/// Bicongugate gradient stabilized method (BiCGStab) for solving 
+/// for self-gravity on field data.
 
 #ifndef ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP
 #define ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP
@@ -17,9 +18,11 @@ class EnzoMethodGravityBiCGStab : public Method {
   /// @ingroup  Enzo
   ///
   /// @brief [\ref Enzo] Demonstration method to solve self-gravity
-  /// using the BiCGStab method.  This is more applicable to smaller problems
-  /// since the method doesn't scale as well as some other methods
-  /// (FFT, MG, etc.) for larger problems.
+  /// using the BiCGStab method.  Alone, this is more applicable to 
+  /// smaller problems since the method doesn't scale as well as 
+  /// some other methods (FFT, MG, etc.) for larger problems.  
+  /// Alternately, a more scalable method may be combined as a 
+  /// preconditioner for a robust and scalable overall method.
 
 public: // interface
 
