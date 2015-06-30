@@ -445,13 +445,17 @@ int Block::rank() const
 
 std::string Block::name() const throw()
 {
+
   const int rank = this->rank();
   int nb3[3] = {1,1,1};
   simulation()->hierarchy()->blocking(nb3,nb3+1,nb3+2);
   int nb  = std::max( std::max (nb3[0],nb3[1]),nb3[2]);
   int bits = 0;
   while (nb/=2) ++bits;
-  return "B" + index_.bit_string(level(),rank,bits);
+
+  std::string name = "B" + index_.bit_string(level(),rank,bits);
+
+  return name;
 }
 
 //----------------------------------------------------------------------

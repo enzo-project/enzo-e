@@ -85,23 +85,23 @@ void Monitor::header () const
   print ("Define","CELLO_ARCH %s",CELLO_ARCH);
   print ("Define","CELLO_PREC %s",CELLO_PREC);
 
-  print ("Define","CC           %s",CELLO_CC);
-  print ("Define","CFLAGS       %s",CELLO_CFLAGS);
-  print ("Define","CPPDEFINES   %s",CELLO_CPPDEFINES);
-  print ("Define","CPPPATH      %s",CELLO_CPPPATH);
-  print ("Define","CXX          %s",CELLO_CXX);
-  print ("Define","CXXFLAGS     %s",CELLO_CXXFLAGS);
-  print ("Define","FORTRANFLAGS %s",CELLO_FORTRANFLAGS);
-  print ("Define","FORTRAN      %s",CELLO_FORTRAN);
-  print ("Define","FORTRANLIBS  %s",CELLO_FORTRANLIBS);
-  print ("Define","FORTRANPATH  %s",CELLO_FORTRANPATH);
-  print ("Define","LIBPATH      %s",CELLO_LIBPATH);
-  print ("Define","LINKFLAGS    %s",CELLO_LINKFLAGS);
-  print ("Define","HOST         %s",CELLO_HOST);
-  print ("Define","DIR          %s",CELLO_DIR);
-  print ("Define","DATE         %s",CELLO_DATE);
-  print ("Define","TIME         %s",CELLO_TIME);
-  //  print ("Define","CHANGESET    %s",CELLO_CHANGESET);
+  print ("Define","CC            %s",CELLO_CC);
+  print ("Define","CFLAGS        %s",CELLO_CFLAGS);
+  print ("Define","CPPDEFINES    %s",CELLO_CPPDEFINES);
+  print ("Define","CPPPATH       %s",CELLO_CPPPATH);
+  print ("Define","CXX           %s",CELLO_CXX);
+  print ("Define","CXXFLAGS      %s",CELLO_CXXFLAGS);
+  print ("Define","FORTRANFLAGS  %s",CELLO_FORTRANFLAGS);
+  print ("Define","FORTRAN       %s",CELLO_FORTRAN);
+  print ("Define","FORTRANLIBS   %s",CELLO_FORTRANLIBS);
+  print ("Define","FORTRANPATH   %s",CELLO_FORTRANPATH);
+  print ("Define","LIBPATH       %s",CELLO_LIBPATH);
+  print ("Define","LINKFLAGS     %s",CELLO_LINKFLAGS);
+  print ("Define","BUILD HOST    %s",CELLO_HOST);
+  print ("Define","BUILD DIR     %s",CELLO_DIR);
+  print ("Define","BUILD DATE    %s",CELLO_DATE);
+  print ("Define","BUILD TIME    %s",CELLO_TIME);
+  print ("Define","CHARM_VERSION %s",CELLO_CHARM_VERSION);
 
 }
 

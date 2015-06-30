@@ -102,13 +102,17 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 
   /// Initialize default Refresh
 
+  const int num_fields = field_descr->field_count();
+
   const int ir = add_refresh(1,rank-1,sync_barrier);
-  refresh(ir)->add_field(idensity_);
+  //  refresh(ir)->add_field(idensity_);
+  refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
 
   id_refresh_matvec_ = add_refresh(1,rank-1,sync_barrier);
-  refresh(id_refresh_matvec_)->add_field(ir_);
+  refresh(id_refresh_matvec_)->add_all_fields(num_fields);
+  //  refresh(id_refresh_matvec_)->add_field(ir_);
 
 }
 
@@ -188,7 +192,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 
   reduce[0] = dot_(R,R);
   reduce[1] = sum_(B);
-  reduce[2] = count_(B);
+  reduce[2] = count_();
 
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
@@ -234,7 +238,7 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   method->set_iter ( ((int*)msg->getData())[0] );
 
-  // Refresh if Block is a leaf
+  // Refresh if Block is a leaf, then continue with enzo_matvec_()
   method->refresh(1)->set_active(is_leaf());
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
 		method->refresh(1));
@@ -689,8 +693,7 @@ void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
-int EnzoMethodGravityCg::count_ (T * X) const throw()
+int EnzoMethodGravityCg::count_ () const throw()
 {
   return is_leaf_ ? nx_*ny_*nz_ : 0;
 }

@@ -94,6 +94,8 @@ bool Index::is_on_boundary (int axis, int face, int narray) const
 
   int level = this->level();
 
+  // printf ("%s:%d level = %d\n",__FILE__,__LINE__,level);
+
   ASSERT2 ("Index::is_on_boundary",
 	   "%s called for sub-root block level %d",
 	   bit_string(5,2,0).c_str(),level,
@@ -219,6 +221,8 @@ int Index::level () const
   int lz = a_[2].level >> 1;
   int sign = (a_[2].level & 1);
   int level = lx + nb*(ly + nb*lz);
+  // printf ("%s:%d level lx %d ly %d lz %d sign %d level %d\n",
+  // 	  __FILE__,__LINE__,lx,ly,lz,sign,level);
   return sign ? -level : level;
 }
 
@@ -228,14 +232,19 @@ void Index::set_level(int level)
 { 
   unsigned shift = INDEX_BITS_LEVEL;
   unsigned mask  = ~(1 << shift);
+  unsigned sign_mask = level < 0 ? 1 : 0;
+  int      sign      = level < 0 ? -1 : 1;
+  int      abs_level = level*sign;
 
-  // (no mask needed since level only 2 bits)
-  int sign = level < 0 ? 1 : 0;
-
-  a_[0].level = (level >> (0*shift)) & mask;
-  a_[1].level = (level >> (1*shift)) & mask;
-  a_[2].level = ((level >> (2*shift-1)) & (mask-1)) | sign;
+  a_[0].level = (abs_level >> (0*shift)) & mask;
+  a_[1].level = (abs_level >> (1*shift)) & mask;
+  a_[2].level = ((abs_level >> (2*shift-1)) & (mask-1)) | sign_mask;
   clean_();
+  ASSERT3 ("Index::set_level",
+	   "%s set_level() failed: level %d != level() %d",
+	   bit_string(5,3,0).c_str(),level,this->level(),
+	   level == this->level());
+  
 }
 
 //----------------------------------------------------------------------

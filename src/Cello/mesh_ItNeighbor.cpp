@@ -61,9 +61,9 @@ Index ItNeighbor::index() const
   } else if (face_level == level_ - 1) {
     return index_neighbor.index_parent();
   } else {
-    ERROR2("ItNeighbor::index()",
-	   "face_level %d and block level %d differ by more than one",
-	   face_level,level_);
+    ERROR4("ItNeighbor::index()",
+	   "index %s level %d: face_level %d and block level %d differ by more than one",
+	   index_.bit_string(5,2,0).c_str(),index_.level(),face_level,level_);
     return index_neighbor;
   }
 }

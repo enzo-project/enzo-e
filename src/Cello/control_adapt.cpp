@@ -708,6 +708,8 @@ void Block::initialize_child_face_levels_()
   const int  rank         = this->rank();
   const int level = this->level();
 
+  if (level < 0) return;
+
   int ic3[3];
   ItChild it_child(rank);
 

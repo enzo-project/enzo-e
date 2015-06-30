@@ -28,11 +28,7 @@ public: // interface
   Hierarchy() throw() { }
   
   /// Initialize a Hierarchy object
-  Hierarchy (
-	     const Factory * factory,
-	     int rank, int refinement,
-	     int process_first, int process_last_plus
-	     ) throw ();
+  Hierarchy (const Factory * factory, int rank, int refinement) throw ();
 
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
@@ -114,6 +110,18 @@ public: // interface
   CProxy_Block * block_array() const throw()
   { return block_array_;}
 
+  /// Return pointer to the SubBlock (level < 0 ) CHARM++ chare array
+  CProxy_Block * subblock_array(int level) const throw()
+  { 
+    const int index_level = - (level+1);
+    if (0 <= index_level && index_level < subblock_size_) {
+      return &subblock_array_[level];
+    } else {
+      return NULL;
+    }
+  }
+
+
   /// Return the total number of blocks
   size_t num_blocks() const throw()
   { 
@@ -125,9 +133,12 @@ public: // interface
 
   void create_forest (FieldDescr   * field_descr,
 		      bool allocate_data,
-		      bool testing          = false,
-		      int process_first     = 0, 
-		      int process_last_plus = -1) throw();
+		      bool testing          = false) throw();
+
+  void create_subforest (FieldDescr   * field_descr,
+			 bool allocate_data,
+			 int min_level,
+			 bool testing          = false) throw();
 
 
   /// Return the number of Blocks along each rank
@@ -154,6 +165,10 @@ protected: // attributes
   /// Array of Blocks 
   CProxy_Block * block_array_;
   bool           block_exists_;
+
+  /// Arrays of Subblocks 
+  CProxy_Block * subblock_array_;
+  int            subblock_size_;
 
   /// Size of the root grid
   int root_size_[3];

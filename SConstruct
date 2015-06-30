@@ -487,6 +487,9 @@ cello_def.write ("#define CELLO_TIME "
 		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
 cello_def.write ("#define CELLO_CHANGESET "
 	"\""+subprocess.check_output(["hg", "id", "-n"]).rstrip()+"\"\n" )
+cello_def.write ("#define CELLO_CHARM_VERSION "
+	"\""+subprocess.check_output(["cat", charm_path + "/VERSION"]).rstrip()+"\"\n" )
+
 
 env.Command ('hgid.out', [], 'hg --id > $TARGETS')
 env.AlwaysBuild('hgid.out')

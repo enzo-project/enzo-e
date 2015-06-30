@@ -178,8 +178,7 @@ protected: // methods
   void scale_ (T * Y, T a, const T * X) const throw();
 
   /// return the number of elements of the vector X
-  template <class T>
-  int count_ (T * X) const throw();
+  int count_ () const throw();
   
   /// Shift the vector X by a scalar multiple of Y
   /// NOTE includes ghost zones since performed after ghost refresh

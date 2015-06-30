@@ -221,17 +221,6 @@ void EnzoMethodGravityMg0::compute ( Block * block) throw()
     ERROR1("EnzoMethodGravityMg0()", "precision %d not recognized", precision_);
 }
 
-  /// Prolong the correction C to the next-finer level
-  void prolong_send_() throw();
-  /// Prolong the correction C to the next-finer level
-  void prolong_recv_() throw();
-
-  /// Apply post-smoothing to the current level
-  void post_smooth_(EnzoBlock * enzo_block) throw();
-  void end_cycle_(EnzoBlock * enzo_block) throw();
-  template <class T>
-  void exit_solver_(EnzoBlock * enzo_block, int retval) throw();
-
 //----------------------------------------------------------------------
 
 template <class T>
@@ -276,8 +265,6 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     }
   }
 
-///     begin_cycle()
-
   begin_cycle_<T>(enzo_block);
 
 }
@@ -291,23 +278,15 @@ void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
   const int level = enzo_block->level();
 
-//     if (level == level_max)
-//        if (converged()) exit_solver()
   if (level == level_max_ && is_converged_()) {
 
     exit_solver_<T>(enzo_block, return_error_max_iter_reached);
 
-//     if (level == level_min) then
-//        coarse_solve(A,X,B)
   } else if (level == level_min_) {
 
     solve_coarse_<T>(enzo_block);
 
   } else {
-
-//     else
-//        callback = p_pre_smooth()
-//        call refresh (X,"level")
 
     enzo_block->refresh_enter
       (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),refresh());
