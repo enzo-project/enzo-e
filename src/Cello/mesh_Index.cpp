@@ -413,7 +413,8 @@ void Index::write (int ip,
 
 //----------------------------------------------------------------------
 
-std::string Index::bit_string(int max_level,int rank, int num_bits) const
+
+std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
 {
   const int level = this->level();
 
@@ -422,15 +423,9 @@ std::string Index::bit_string(int max_level,int rank, int num_bits) const
   std::string bits = "";
   const std::string separator = "_";
 
-  if (num_bits == 0) {
-    for (int axis=0; axis<rank; axis++) {
-      num_bits = std::max (num_bits,num_bits_(a_[axis].array));
-    }
-  } else --num_bits;
-
   for (int axis=0; axis<rank; axis++) {
 
-    for (int i=num_bits; i>=0; i--) {
+    for (int i=nb3[axis]-1; i>=0; i--) {
       int bit = (a_[axis].array & ( 1 << i));
       bits = bits + (bit?"1":"0");
     }

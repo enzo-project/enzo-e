@@ -23,9 +23,7 @@ Hierarchy::Hierarchy
   refinement_(refinement),
   num_blocks_(0),
   block_array_(NULL),
-  block_exists_(false),
-  subblock_size_(0),
-  subblock_array_(NULL)
+  block_exists_(false)
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
@@ -76,18 +74,6 @@ void Hierarchy::pup (PUP::er &p)
     block_array_ = NULL;
   }
   p | block_exists_;
-
-  // subblock_array_ is NULL on non-root processes
-  allocated=(subblock_array_ != NULL);
-  p|allocated;
-  p | subblock_size_;
-  if (allocated) {
-    if (up) subblock_array_=new CProxy_Block [subblock_size_];
-    p|*subblock_array_;
-  } else {
-    subblock_array_ = NULL;
-  }
-
 
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
@@ -276,8 +262,8 @@ void Hierarchy::create_subforest
 
   //  printf ("%s:%d min_level = %d\n",__FILE__,__LINE__,min_level);
 
-  subblock_array_ = factory_->create_subblock_array
-    (min_level,
+  factory_->create_subblock_array
+    (*block_array_,min_level,
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
      num_field_blocks,

@@ -47,7 +47,9 @@ public: // interface
   }
 
   /// Reduce another value
-  bool next (int if3[3]) throw();
+  bool next () throw();
+
+  void face (int of3[3]) const ;
 
   Index index() const ;
 

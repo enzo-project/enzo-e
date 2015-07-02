@@ -71,7 +71,6 @@ public: // interface
     p | id_;
     p | iy_;
     p | iz_;
-    p | is_leaf_;
 
     p | nx_;
     p | ny_;
@@ -185,10 +184,6 @@ protected: // methods
   template <class T>
   void shift_ (T * X, const T a, const T * Y) const throw();
 
-  /// Set whether current Block is a leaf--if not don't touch data
-  void set_leaf(Block * block) throw()
-  { is_leaf_ = block->is_leaf(); }
-
 protected: // attributes
 
   /// Matrix
@@ -237,9 +232,6 @@ protected: // attributes
   int id_;
   int iy_;
   int iz_;
-
-  /// Whether current block is a leaf
-  bool is_leaf_;
 
   /// Block field attributes
   int nx_,ny_,nz_;

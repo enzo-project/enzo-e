@@ -31,8 +31,8 @@ public: // interface
    Compute * smooth,
    Restrict * restrict,
    Prolong * prolong,
-   int level_min,
-   int level_max);
+   int min_level,
+   int max_level);
 
   EnzoMethodGravityMg0() {};
 
@@ -75,8 +75,8 @@ public: // interface
     p | ic_;
 
     p | iter_;
-    p | level_min_;
-    p | level_max_;
+    p | min_level_;
+    p | max_level_;
 
     p | precision_;
   }
@@ -180,10 +180,10 @@ protected: // attributes
   int iter_;
 
   /// Minimum refinement level (may be < 0)
-  int level_min_;
+  int min_level_;
 
   /// Maximum refinement level
-  int level_max_;
+  int max_level_;
 
   /// Precision of fields
   int precision_;

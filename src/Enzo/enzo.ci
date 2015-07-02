@@ -124,13 +124,13 @@ module enzo {
     template <class T>
     entry void p_mg0_pre_smooth(CkReductionMsg *msg);
     template <class T>
-    entry void p_mg0_restrict_send();
+    entry void p_mg0_restrict_send(CkReductionMsg *msg);
     template <class T>
-    entry void p_mg0_restrict_recv();
+    entry void p_mg0_restrict_recv(CkReductionMsg *msg);
     template <class T>
-    entry void p_mg0_prolong_recv();
+    entry void p_mg0_prolong_recv(CkReductionMsg *msg);
     template <class T>
-    entry void p_mg0_post_smooth();
+    entry void p_mg0_post_smooth(CkReductionMsg *msg);
 
     entry void p_enzo_matvec();
     entry void r_enzo_matvec(CkReductionMsg *);

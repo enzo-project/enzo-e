@@ -266,11 +266,11 @@ void EnzoConfig::read(Parameters * p) throw()
   method_gravity_mg_prolong = p->value_string
     ("Method:gravity_mg:prolong","linear");
 
-  method_gravity_mg_level_min = p->value_integer
-    ("Method:gravity_mg:level_min",0);
+  method_gravity_mg_min_level = p->value_integer
+    ("Method:gravity_mg:min_level",0);
 
-  method_gravity_mg_level_max = p->value_integer
-    ("Method:gravity_mg:level_max",mesh_max_level);
+  method_gravity_mg_max_level = p->value_integer
+    ("Method:gravity_mg:max_level",mesh_max_level);
 
 
   method_gravity_bicgstab_iter_max = p->value_integer

@@ -109,8 +109,8 @@ CProxy_Block Factory::create_block_array
 
 //----------------------------------------------------------------------
 
-CProxy_Block * Factory::create_subblock_array
-(
+void Factory::create_subblock_array
+(CProxy_Block block_array,
  int min_level,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -125,10 +125,8 @@ CProxy_Block * Factory::create_subblock_array
     WARNING1("Factor::create_subblock_array",
 	     "Trying to create subblock array with min_level %d >= 0",
 	     min_level);
-    return NULL;
+    return ;
   }
-
-  CProxy_Block * enzo_subblock_array = new CProxy_Block[-min_level];
 
   for (int level = -1; level >= min_level; level--) {
 
@@ -139,15 +137,6 @@ CProxy_Block * Factory::create_subblock_array
     if (nbz > 1) nbz = ceil(0.5*nbz);
 
     //    printf ("%s:%d nbx,nby,nbz = %d %d %d\n",nbx,nby,nbz);
-
-    // --------------------------------------------------
-    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
-    // --------------------------------------------------
-
-    CkArrayOptions opts;
-    opts.setMap(array_map);
-    TRACE_CHARM("ckNew(nbx,nby,nbz)");
-    enzo_subblock_array[index_level] = CProxy_Block::ckNew(opts);
 
     int count_adapt;
 
@@ -165,11 +154,7 @@ CProxy_Block * Factory::create_subblock_array
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-	  // --------------------------------------------------
-	  // ENTRY: #2 Factory::create_subblock_array() -> Block::Block()
-	  // ENTRY: level == 0 block array insert
-	  // --------------------------------------------------
-	  enzo_subblock_array[index_level][index].insert 
+	  block_array[index].insert
 	    (index,
 	     nx,ny,nz,
 	     num_field_blocks,
@@ -183,15 +168,10 @@ CProxy_Block * Factory::create_subblock_array
 	}
       }
     }
-
-    enzo_subblock_array[level].doneInserting();
-
-
-    TRACE1("Factory::create_subblock_array = %p",&enzo_block_array);
   }
 
+  block_array.doneInserting();
 
-  return enzo_subblock_array;
 }
 
 //----------------------------------------------------------------------

@@ -50,19 +50,24 @@ ItFace::~ItFace() throw()
 
 //----------------------------------------------------------------------
 
-bool ItFace::next (int if3[3]) throw()
+bool ItFace::next () throw()
 {
   do {
     increment_() ;
   } while (!valid_());
 
-  if3[0] = rank_ >= 1 ? if3_[0] : 0;
-  if3[1] = rank_ >= 2 ? if3_[1] : 0;
-  if3[2] = rank_ >= 3 ? if3_[2] : 0;
-  
   return (!is_reset());
 }
 
+//----------------------------------------------------------------------
+
+void ItFace::face (int if3[3]) const
+{
+  if3[0] = rank_ >= 1 ? if3_[0] : 0;
+  if3[1] = rank_ >= 2 ? if3_[1] : 0;
+  if3[2] = rank_ >= 3 ? if3_[2] : 0;
+}
+  
 //----------------------------------------------------------------------
 
 Index ItFace::index() const

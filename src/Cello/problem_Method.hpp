@@ -80,7 +80,7 @@ protected: // functions
   template <class T>
   void copy_ (T * X, const T * Y,
 	      int mx, int my, int mz,
-	      bool active) const throw()
+	      bool active = true) const throw()
   {
     if (! active ) return;
     const int m = mx*my*mz;

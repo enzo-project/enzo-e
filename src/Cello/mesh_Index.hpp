@@ -37,7 +37,7 @@ class Index {
   // 96 bits total
   // Array index 10x3   30 1024
   // Tree  index 20x3   60 20 levels
-  // Level index  6x1   32 + sign (2s complement) for sub-root blocks      
+  // Level index  6x1   32 + sign for sub-root blocks      
   //       [       |       |       |        )
   // a_[0] [AAAAAAAAAATTTTTTTTTTTTTTTTTTTTLL)
   // a_[1] [AAAAAAAAAATTTTTTTTTTTTTTTTTTTTLL)
@@ -135,7 +135,7 @@ public:
 	      int max_level = -1,
 	      int rank = 3) const;
 
-  std::string bit_string (int max_level,int rank, int bits = 0) const;
+  std::string bit_string (int max_level,int rank, const int nb3[3]) const;
 
   /// Comparison operator required for Charm++ pup()
   friend bool operator < (const Index & x, const Index & y) {
