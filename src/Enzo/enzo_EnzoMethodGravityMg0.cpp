@@ -217,12 +217,11 @@ EnzoMethodGravityMg0::~EnzoMethodGravityMg0 () throw()
 void EnzoMethodGravityMg0::compute ( Block * block) throw()
 // [*]
 {
+
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   MG_VERBOSE("compute()");
 
   Field field = block->data()->field();
-
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
   precision_ = field.precision(irho_);
 
   if      (precision_ == precision_single)    
