@@ -289,6 +289,10 @@ public: /// entry methods
   {      enzo_matvec_(); }
   void r_enzo_matvec(CkReductionMsg * msg)
   {      enzo_matvec_(); delete msg; }
+  void gravity_bicgstab_r_matvec_1(CkReductionMsg * msg)
+  {      gravity_bicgstab_matvec_1_(); delete msg; }
+  void gravity_bicgstab_r_matvec_2(CkReductionMsg * msg)
+  {      gravity_bicgstab_matvec_2_(); delete msg; }
 
   /// EnzoMethodSolverMlat entry method: receive face data for refresh
   void p_mg_receive_face
@@ -310,6 +314,8 @@ public: /// entry methods
 protected: // functions
 
   void enzo_matvec_() ;
+  void gravity_bicgstab_matvec_1_();
+  void gravity_bicgstab_matvec_2_();
 
 protected: // attributes
 

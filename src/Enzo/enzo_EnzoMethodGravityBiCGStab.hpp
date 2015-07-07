@@ -54,24 +54,26 @@ public: // interface
 
     p | A_;
     p | M_;
+
     p | is_singular_;
     p | rank_;
     p | grav_const_;
     p | iter_max_;
     p | res_tol_;
     p | monitor_iter_;
-    p | rr0_;
-    p | rr_min_;
-    p | rr_max_;
+    p | is_leaf_;
+
     p | idensity_;
     p | ipotential_;
     p | ib_;
     p | ix_;
     p | ir_;
-    p | id_;
+    p | ir0_;
+    p | ip_;
     p | iy_;
-    p | iz_;
-    p | is_leaf_;
+    p | iv_;
+    p | iq_;
+    p | iu_;
 
     p | nx_;
     p | ny_;
@@ -85,13 +87,24 @@ public: // interface
     p | gy_;
     p | gz_;
 
+    p | rho0_;
+    p | beta_d_;
+    p | beta_n_;
+    p | vr0_;
+    p | omega_d_;
+    p | omega_n_;
+    p | rr_;
+
     p | iter_;
-  
-    p | rz_;
-    p | rz2_;
-    p | dy_;
+    p | beta_;
+    p | err_;
+    p | err_min_;
+    p | err_max_;
+    p | alpha_;
+    p | omega_;
     p | bs_;
     p | bc_;
+
     p | id_refresh_matvec_;
 
   }
@@ -100,46 +113,53 @@ public: // interface
   /// Solve for the gravitational potential
   virtual void compute(Block* block) throw();
 
-  virtual std::string name() throw () { return "gravity_bicgstab"; }
+  /// Name for the solver
+  virtual std::string name() throw() { return "gravity_bicgstab"; }
 
   /// Continuation after global reduction
-  template<class T> void bicgstab_shift_1(EnzoBlock* enzo_block) throw();
+  template<class T> void bicgstab_start_1(EnzoBlock* enzo_block) throw();
 
   /// Continuation after global reduction
-  template<class T> void bicgstab_loop_2(EnzoBlock* enzo_block) throw();
+  template<class T> void bicgstab_start_3(EnzoBlock* enzo_block) throw();
 
   /// Continuation after global reduction
-  template<class T> void bicgstab_loop_4(EnzoBlock* enzo_block) throw();
-
-  // /// Continuation after global reduction
-  // template<class T> void bicgstab_shift_2(EnzoBlock* enzo_block) throw();
+  template<class T> void bicgstab_loop_3(EnzoBlock* enzo_block) throw();
 
   /// Continuation after global reduction
   template<class T> void bicgstab_loop_6(EnzoBlock* enzo_block) throw();
 
+  /// Continuation after global reduction
+  template<class T> void bicgstab_loop_7(EnzoBlock* enzo_block) throw();
+
+  /// End of iteration
   template<class T> void bicgstab_end(EnzoBlock* enzo_block, int retval) throw();
 
-  /// Set rz_ by EnzoBlock after reduction
-  void set_rz(long double rz) throw() { rz_ = rz; }
+  /// Set bs_ (B sum) by EnzoBlock after reduction
+  void set_bs(long double bs) throw() { bs_ = bs; }
+
+  /// Set bc_ (B count) by EnzoBlock after reduction
+  void set_bc(long double bc) throw() { bc_ = bc; }
+
+  /// Set rho0_ by EnzoBlock after reduction
+  void set_rho0(long double rho0) throw() { rho0_ = rho0; }
+
+  /// Set beta_d_ by EnzoBlock after reduction
+  void set_beta_d(long double beta_d) throw() { beta_d_ = beta_d; }
+
+  /// Set vr0_ by EnzoBlock after reduction
+  void set_vr0(long double vr0) throw() { vr0_ = vr0; }
+
+  /// Set omega_d_ by EnzoBlock after reduction
+  void set_omega_d(long double omega_d) throw() { omega_d_ = omega_d; }
+
+  /// Set omega_n_ by EnzoBlock after reduction
+  void set_omega_n(long double omega_n) throw() { omega_n_ = omega_n; }
 
   /// Set rr_ by EnzoBlock after reduction
   void set_rr(long double rr) throw() { rr_ = rr; }
 
-  /// Set rr_new_ by EnzoBlock after reduction
-  void set_rz2(long double rz2) throw() { rz2_ = rz2; }
-
-  /// Set dy_ by EnzoBlock after reduction
-  void set_dy(long double dy) throw() { dy_ = dy; }
-
-  /// Set bs_ (B sum) by EnzoBlock after reduction
-  void set_bs(long double bs) throw() { bs_ = bs; }
-  /// Set rs_ (R sum) by EnzoBlock after reduction
-  void set_rs(long double rs) throw() { rs_ = rs; }
-  /// Set xs_ (X sum) by EnzoBlock after reduction
-  void set_xs(long double xs) throw() { xs_ = xs; }
-
-  /// Set bc_ (B count) by EnzoBlock after reduction
-  void set_bc(long double bc) throw() { bc_ = bc; }
+  /// Set beta_n_ by EnzoBlock after reduction
+  void set_beta_n(long double beta_n) throw() { beta_n_ = beta_n; }
 
   /// Set iter_ by EnzoBlock after reduction
   void set_iter(int iter) throw() { iter_ = iter; }
@@ -150,8 +170,10 @@ protected: // methods
 
   template<class T> void compute_(EnzoBlock * enzo_block) throw();
 
+  /// ?????????? unused ??????????
   template<class T> void bicgstab_begin_1_() throw();
 
+  /// ?????????? unused ??????????
   void bicgstab_exit_() throw();
 
   /// Compute local contribution to inner-product X*Y
@@ -166,14 +188,14 @@ protected: // methods
   template<class T> void scale_(T* Y, T a, const T* X) const throw();
 
   /// return the number of elements of the vector X
-  template<class T> int count_(T* X) const throw();
+  template<class T> long double count_(T* X) const throw();
   
   /// Shift the vector X by a scalar multiple of Y
   /// NOTE includes ghost zones since performed after ghost refresh
   template<class T> void shift_(T* X, const T a, const T* Y) const throw();
 
   /// Set whether current Block is a leaf--if not don't touch data
-  void set_leaf(Block* block) throw() { is_leaf_ = block->is_leaf(); }
+  void check_leaf(Block* block) throw() { is_leaf_ = block->is_leaf(); }
 
 protected: // attributes
 
@@ -203,13 +225,16 @@ protected: // attributes
   int monitor_iter_;
 
   /// Initial residual
-  long double rr0_;
+  long double rho0_;
 
-  /// Minimum residual
-  long double rr_min_;
+  /// Current error
+  long double err_;
 
-  /// Maximum residual
-  long double rr_max_;
+  /// Minimum error
+  long double err_min_;
+
+  /// Maximum error
+  long double err_max_;
 
   /// Density and potential field id's
   int idensity_;
@@ -219,9 +244,12 @@ protected: // attributes
   int ib_;
   int ix_;
   int ir_;
-  int id_;
+  int ir0_;
+  int ip_;
   int iy_;
-  int iz_;
+  int iv_;
+  int iq_;
+  int iu_;
 
   /// Whether current block is a leaf
   bool is_leaf_;
@@ -234,24 +262,35 @@ protected: // attributes
   /// Current BiCGStab iteration
   int iter_;
 
-  /// dot (R_i,R_i)
+  /// dot(R_i,R_0)
+  long double beta_d_;
+
+  /// dot(R_i+1,R_0)
+  long double beta_n_;
+
+  /// dot(V_i,R_0)
+  long double vr0_;
+
+  /// dot(U_i,U_i)
+  long double omega_d_;
+
+  /// dot(U_i,Q_i)
+  long double omega_n_;
+
+  /// dot(R_i,R_i)
   long double rr_;
 
-  /// dot (R_i,Z_i)
-  long double rz_;
+  /// beta_n_ / beta_d_
+  long double beta_;
 
-  /// dot (R_i+1,Z_i+1)
-  long double rz2_;
+  /// omega_n_ / omega_d_
+  long double omega_;
 
-  /// dot (D,Y)
-  long double dy_;
+  /// beta_d_ / vr0_
+  long double alpha_;
 
   /// sum of elements B(i) for singular systems
   long double bs_;
-  /// sum of elements R(i) for singular systems
-  long double rs_;
-  /// sum of elements X(i) for singular systems
-  long double xs_;
 
   /// count of elements B(i) for singular systems
   long double bc_;
