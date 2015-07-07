@@ -13,6 +13,8 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define CELLO_VERBOSE
+
 #ifdef CELLO_VERBOSE
 #   define VERBOSE(A)						\
   printf ("%d %s:%d %s TRACE %s\n",					\
@@ -183,6 +185,10 @@ void Block::control_sync (int entry_point, int sync, int id)
  
     control_sync_neighbor_(entry_point,id);
 
+  } else if (sync == sync_face) {
+ 
+    control_sync_face_(entry_point,id);
+
   } else if (sync == sync_barrier) {
 
     contribute(CkCallback (entry_point,thisProxy));
@@ -204,7 +210,6 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
   }
 
   const int min_face_rank = 0;
-  ItFace it_face = this->it_face(min_face_rank,index_);
 
   int num_neighbors = 0;
 
@@ -220,6 +225,31 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
 
   }
   control_sync_count_(entry_point,phase,num_neighbors + 1);
+
+}
+
+//----------------------------------------------------------------------
+
+void Block::control_sync_face_(int entry_point, int phase)
+{
+
+  const int min_face_rank = 0;
+
+  ItFace it_face = this->it_face(min_face_rank,index_);
+
+  int num_faces = 0;
+  while (it_face.next()) {
+
+    ++num_faces;
+
+    Index index_face = it_face.index();
+
+    int nb3[3] = {2,2,1};
+
+    thisProxy[index_face].p_control_sync_count(entry_point,phase);
+
+  }
+  control_sync_count_(entry_point,phase,num_faces + 1);
 
 }
 

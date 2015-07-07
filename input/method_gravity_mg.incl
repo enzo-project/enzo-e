@@ -34,14 +34,13 @@ Mesh {
 }
 
 Method {
-    list = ["gravity_mg", "ppm"]; 
+    list = ["gravity_mg"]; 
 
     gravity_mg {
+       min_level = -1;
+       max_level = 0;
        type = "mg0";
-       iter_max = 500;
-       res_tol  = 1e-3;
-#       grav_const = 6.67384e-8;
-#       grav_const = 1.0e-1;
+       iter_max = 5;
     };
 
     ppm {
@@ -173,5 +172,5 @@ Output {
 }
 
 Stopping {
-   cycle = 50;
+   cycle = 1;
 }

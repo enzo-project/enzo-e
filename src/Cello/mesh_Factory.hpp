@@ -40,9 +40,7 @@ public: // interface
 
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy 
-  (
-   int rank, int refinement,
-   int process_first, int process_last_plus) const throw ();
+  ( int rank, int refinement) const throw ();
 
   /// Create an Input / Output accessor object for Block
   virtual IoBlock * create_io_block ( ) const throw();
@@ -57,6 +55,17 @@ public: // interface
    int nx, int ny, int nz,
    int num_field_blocks,
    bool testing = false) const throw();
+
+  /// Create a new coarse blocks under the Block array.  For Multigrid
+  ///  solvers.  Arguments are the same as create_block_array(), plus
+  ///  minimal level min_level < 0
+  virtual void create_subblock_array
+  (CProxy_Block block_array,
+   int min_level,
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   int num_field_blocks,
+   bool testing=false) const throw();
 
   /// Create a new Block
   virtual Block * create_block

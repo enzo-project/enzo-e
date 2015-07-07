@@ -71,7 +71,6 @@ public: // interface
     p | id_;
     p | iy_;
     p | iz_;
-    p | is_leaf_;
 
     p | nx_;
     p | ny_;
@@ -178,17 +177,12 @@ protected: // methods
   void scale_ (T * Y, T a, const T * X) const throw();
 
   /// return the number of elements of the vector X
-  template <class T>
-  int count_ (T * X) const throw();
+  int count_ () const throw();
   
   /// Shift the vector X by a scalar multiple of Y
   /// NOTE includes ghost zones since performed after ghost refresh
   template <class T>
   void shift_ (T * X, const T a, const T * Y) const throw();
-
-  /// Set whether current Block is a leaf--if not don't touch data
-  void set_leaf(Block * block) throw()
-  { is_leaf_ = block->is_leaf(); }
 
 protected: // attributes
 
@@ -238,9 +232,6 @@ protected: // attributes
   int id_;
   int iy_;
   int iz_;
-
-  /// Whether current block is a leaf
-  bool is_leaf_;
 
   /// Block field attributes
   int nx_,ny_,nz_;

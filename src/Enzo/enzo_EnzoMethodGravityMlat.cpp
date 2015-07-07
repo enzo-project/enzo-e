@@ -443,9 +443,6 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
 
     while (it_neighbor.next()) {
       Index index_neighbor = it_neighbor.index();
-      printf ("ItNeighbor %s : %s\n",
-	      index.bit_string(4,2).c_str(),
-	      index_neighbor.bit_string(4,2).c_str());
       int level_neighbor = index_neighbor.level();
 
       it_neighbor.child(ic3);
@@ -473,9 +470,6 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
       if (level_neighbor == level) {
 
 	// remote call p_mg_receive_face() on neighbor
-	printf ("%s calling p_mg_receive_face %s\n",
-		enzo_block->name().c_str(),
-		index_neighbor.bit_string(4,2).c_str());
 	enzo_block_proxy[index_neighbor].p_mg_receive_face
 	  (n,array, refresh_same, of3, ic3);
 	
@@ -483,14 +477,10 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
       //  if neighbor level finer
       else if (level_neighbor > level) {
 	// remote call p_mg_receive_face() on neighbor
-	printf ("%s calling p_mg_receive_face %s\n",
-		enzo_block->name().c_str(),index_neighbor.bit_string(4,2).c_str());
 	enzo_block_proxy[index_neighbor].p_mg_receive_face
 	  (n,array, refresh_fine, of3, ic3);
 	// remote call p_mg_receive_face() on neighbor parent
 	Index index_parent = index_neighbor.index_parent();
-	printf ("%s calling p_mg_receive_face %s\n",
-		enzo_block->name().c_str(),index_parent.bit_string(4,2).c_str());
 	enzo_block_proxy[index_neighbor].p_mg_receive_face
 	  (n,array, refresh_same, of3, ic3);
       }
@@ -499,12 +489,10 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
     ItFace it_face = enzo_block->it_face(min_face_rank,index);
     // for each face
     int if3[3];
-    while (it_face.next(if3)) {
+    while (it_face.next()) {
+      it_face.face(if3);
       Index index_face = it_face.index();
       int level_face = index_face.level();
-      printf ("ItFace %s : %s\n",
-	      index.bit_string(4,2).c_str(),
-	      index_face.bit_string(4,2).c_str());
       // UNFINISHED
       // pack face data
       // remote call p_mg_receive_face() on neighbor
@@ -547,7 +535,8 @@ int EnzoMethodGravityMlat::determine_count_(EnzoBlock * enzo_block) throw()
     ItFace it_face = enzo_block->it_face(min_face_rank,index);
     // for each face
     int if3[3];
-    while (it_face.next(if3)) {
+    while (it_face.next()) {
+      it_face.face(if3);
     //          if non-repeated coarse face
       if (enzo_block->face_level(if3) <= level) {
     //             increment counter

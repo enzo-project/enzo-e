@@ -321,8 +321,7 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
-  hierarchy_ = factory()->create_hierarchy 
-    (rank_,refinement, 0, CkNumPes());
+  hierarchy_ = factory()->create_hierarchy (rank_,refinement);
 
   // Domain extents
 
@@ -366,9 +365,19 @@ void Simulation::initialize_forest_() throw()
 			   config_->initial_type == "checkpoint" );
 
   if (allocate_blocks) {
+
+    // Create the root-level blocks for level = 0
     hierarchy_->create_forest
       (field_descr_,
        allocate_data);
+
+    // Create the "sub-root" blocks if mesh_min_level < 0
+    if (config_->mesh_min_level < 0) {
+      hierarchy_->create_subforest
+	(field_descr_,
+	 allocate_data,
+	 config_->mesh_min_level);
+    }
   }
 }
 

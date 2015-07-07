@@ -120,8 +120,8 @@ public: // attributes
   double                     method_gravity_mg_smooth_weight;
   std::string                method_gravity_mg_restrict;
   std::string                method_gravity_mg_prolong;
-  int                        method_gravity_mg_level_min;
-  int                        method_gravity_mg_level_max;
+  int                        method_gravity_mg_min_level;
+  int                        method_gravity_mg_max_level;
 
   // EnzoMethodGravityBiCGStab
   int                        method_gravity_bicgstab_iter_max;

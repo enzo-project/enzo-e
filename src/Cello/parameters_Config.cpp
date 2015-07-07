@@ -67,6 +67,7 @@ void Config::pup (PUP::er &p)
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
   p | mesh_max_level;
+  p | mesh_min_level;
   p | mesh_adapt_interval;
   p | num_mesh;
   p | adapt_min_face_rank;
@@ -487,6 +488,10 @@ void Config::read_adapt_ (Parameters * p) throw()
   //--------------------------------------------------
 
   mesh_max_level = p->value_integer("Adapt:max_level",0);
+
+  // Note mesh_min_level may be < 0 for multigrid
+
+  mesh_min_level = p->value_integer("Adapt:min_level",0);
 
   //--------------------------------------------------
 

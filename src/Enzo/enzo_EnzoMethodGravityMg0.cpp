@@ -15,23 +15,17 @@
 ///
 ///   $MG(A_h,X_h,B_h)$
 ///   
-///          if (level == level_max)
-///             if (converged()) exit()
-///          if (level == level_min) then
-///                                           [refresh X_h]
-///   [X_h]     coarse_solve()     solve $A_h X_h = B_h$
-///          else
-///                                           [refresh X_h]
-///   [X_h]     p_pre_smooth()     smooth $A_h X_h = B_h$
-///                                           [refresh X_h]
-///   [R_h]     p_residual()       $R_h = B_h - A_h * X_h$
-///                                           [restrict R_h, norm (R_h)]
-///   [B_H]     p_restrict ()      $B_H = I_h^H R_h$
-///   [X_H]     MG()               solve $A_H X_H = B_H$  (repeat for W-cycle)
-///                                           [prolong X_H]
-///   [C_h]     p_prolong ()       $X_h = X_h + I_H^h X_H$
-///                                           [refresh X_h]
-///   [X_h]     p_post_smooth()    smooth $A_h X_h = B_h$
+///    if (level == max_level)
+///       if (converged()) exit()
+///    if (level == min_level) then
+///       coarse_solve()     solve $A_h X_h = B_h$
+///    else
+///       p_pre_smooth()     smooth $A_h X_h = B_h$
+///       p_residual()       $R_h = B_h - A_h * X_h$
+///       p_restrict ()      $B_H = I_h^H R_h$
+///       MG()               solve $A_H X_H = B_H$  (repeat for W-cycle)
+///       p_prolong ()       $X_h = X_h + I_H^h X_H$
+///       p_post_smooth()    smooth $A_h X_h = B_h$
 ///
 ///  @endcode
 ///
@@ -44,14 +38,14 @@
 ///  enter_solver()
 ///
 ///     iter = 0
-///     initialize A,X,B,R,C
-///     begin_cycle()
+///     initialize X,B,R,C
+///     if (level == max_level) 
+///        begin_cycle()
 ///
 ///  begin_cycle()
 ///
-///     if (level == level_max)
-///        if (converged()) exit()
-///     if (level == level_min) then
+///     if (converged()) exit()
+///     if (level == min_level) then
 ///        coarse_solve(A,X,B)
 ///     else
 ///        callback = p_pre_smooth()
@@ -71,17 +65,18 @@
 ///  p_restrict_recv(B)
 ///
 ///      unpack B
-///      begin_cycle()
+///      if (sync.next())
+///          begin_cycle()
 ///      
 ///  coarse_solve(A,X,B)
 ///
 ///      solve A X = B
-///      prolong_send()
+///      end_cycle()
 ///
 ///  prolong_send(X)
-///      if (level < level_max)
-///         for child           
-///            child.prolong_recv(X)
+///
+///      for child           
+///         child.prolong_recv(X)
 ///
 ///  prolong_recv(C)
 ///
@@ -97,13 +92,14 @@
 ///
 ///  end_cycle()
 ///
-///      if (level < level_max)
+///      ++iter
+///      if (level < max_level)
 ///         prolong_send(X)
 ///      else
 ///         begin_cycle()
 ///
 ///  exit_solver()
-///
+///  
 ///      acceleration.compute(X)
 ///
 ///  @endcode
@@ -130,12 +126,12 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
-#define MG_VERBOSE(FUNCTION)				\
-  Monitor * monitor = enzo_block->simulation()->monitor();	\
+#define MG_VERBOSE(FUNCTION)						\
+  Monitor * monitor = enzo_block->simulation()->monitor();		\
   monitor->verbose(stdout,"Method", "%s "FUNCTION,enzo_block->name().c_str());
 
-#define VERBOSE(FUNCTION)				\
-  Monitor * monitor = simulation()->monitor();	\
+#define VERBOSE(FUNCTION)						\
+  Monitor * monitor = simulation()->monitor();				\
   monitor->verbose(stdout,"Method", "%s "FUNCTION,name().c_str());
 
 //----------------------------------------------------------------------
@@ -152,8 +148,8 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
  Compute * smooth,
  Restrict * restrict,
  Prolong * prolong,
- int level_min,
- int level_max) 
+ int min_level,
+ int max_level) 
   : Method(), 
     A_(new EnzoMatrixLaplace),
     smooth_(smooth),
@@ -168,15 +164,31 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
     irho_(0),  iphi_(0),
     ib_(0), ir_(0), ix_(0), ic_(0),
     iter_(0),
-    level_min_(level_min),
-    level_max_(level_max)
+    min_level_(min_level),
+    max_level_(max_level)
+  // [*]
 {
+
+  if (max_level_ > 0) {
+    WARNING1 ("EnzoMethodGravityMg0::EnzoMethodGravityMg0()",
+	     "Solver Mg0 is for root-level solves only: "
+	     "changing max_level_ from %d to 0",max_level_);
+    max_level_ = 0;
+  }
+  if (min_level_ >= 0) {
+    ERROR1 ("EnzoMethodGravityMg0::EnzoMethodGravityMg0()",
+	    "Solver Mg0 requires min_level = %d to be < 0",
+	    min_level_);
+  }
   /// Initialize default Refresh
 
-  int ir = add_refresh(4,0,sync_barrier);
+  int ir = add_refresh(1,0,sync_barrier);
   refresh(ir)->add_all_fields(field_descr->field_count());
 
-  irho_   = field_descr->field_id("density");
+  int il = add_refresh(1,0,sync_face);
+  refresh(il)->add_all_fields(field_descr->field_count());
+
+  irho_ = field_descr->field_id("density");
   iphi_ = field_descr->field_id("potential");
 
   ib_ = field_descr->field_id("B");
@@ -188,6 +200,7 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
 //----------------------------------------------------------------------
 
 EnzoMethodGravityMg0::~EnzoMethodGravityMg0 () throw()
+// [*]
 {
   delete smooth_;
   delete prolong_;
@@ -202,13 +215,13 @@ EnzoMethodGravityMg0::~EnzoMethodGravityMg0 () throw()
 //----------------------------------------------------------------------
 
 void EnzoMethodGravityMg0::compute ( Block * block) throw()
+// [*]
 {
-  Field field = block->data()->field();
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
   MG_VERBOSE("compute()");
 
+  Field field = block->data()->field();
   precision_ = field.precision(irho_);
 
   if      (precision_ == precision_single)    
@@ -221,26 +234,20 @@ void EnzoMethodGravityMg0::compute ( Block * block) throw()
     ERROR1("EnzoMethodGravityMg0()", "precision %d not recognized", precision_);
 }
 
-  /// Prolong the correction C to the next-finer level
-  void prolong_send_() throw();
-  /// Prolong the correction C to the next-finer level
-  void prolong_recv_() throw();
-
-  /// Apply post-smoothing to the current level
-  void post_smooth_(EnzoBlock * enzo_block) throw();
-  void end_cycle_(EnzoBlock * enzo_block) throw();
-  template <class T>
-  void exit_solver_(EnzoBlock * enzo_block, int retval) throw();
-
 //----------------------------------------------------------------------
 
 template <class T>
 void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
+/// [*]
+///
+///     iter = 0
+///     initialize X,B,R,C
+///     if (level == max_level) 
+///        begin_cycle()
 {
 
   MG_VERBOSE("enter_solver_()");
   
-///     iter = 0
   iter_ = 0;
 
   Data * data = enzo_block->data();
@@ -253,14 +260,11 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   T * R = (T*) field.values(ir_);
   T * C = (T*) field.values(ic_);
 
-  // Initialize B, X, R, C
-
   // X = 0
   // B = -h^2 * 4 * PI * G * rho
   // R = B ( residual with X = 0 )
   // C = 0
 
-  ///     initialize X,B,R,C
   int mx,my,mz;
   field.dimensions(irho_,&mx,&my,&mz);
 
@@ -276,9 +280,9 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     }
   }
 
-///     begin_cycle()
-
-  begin_cycle_<T>(enzo_block);
+  // start the MG V-cycle with the root level
+  if (enzo_block->level() == max_level_)
+    begin_cycle_<T>(enzo_block);
 
 }
 
@@ -286,31 +290,31 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
 template <class T>
 void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
+/// [*]
+///
+///     if (converged()) exit()
+///     if (level == min_level) then
+///        coarse_solve(A,X,B)
+///     else
+///        callback = p_pre_smooth()
+///        call refresh (X,"level")
 {
   MG_VERBOSE("begin_cycle_()");
 
   const int level = enzo_block->level();
 
-//     if (level == level_max)
-//        if (converged()) exit_solver()
-  if (level == level_max_ && is_converged_()) {
+  if (is_converged_()) {
 
-    exit_solver_<T>(enzo_block, return_error_max_iter_reached);
+    exit_solver_<T>(enzo_block, return_converged);
 
-//     if (level == level_min) then
-//        coarse_solve(A,X,B)
-  } else if (level == level_min_) {
+  } else if (level == min_level_) {
 
     solve_coarse_<T>(enzo_block);
 
   } else {
 
-//     else
-//        callback = p_pre_smooth()
-//        call refresh (X,"level")
-
     enzo_block->refresh_enter
-      (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),refresh());
+      (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),refresh(1));
 
   }
 }
@@ -318,25 +322,102 @@ void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 template <class T>
+void EnzoBlock::p_mg0_pre_smooth(CkReductionMsg * msg)
+/// [*]
+{
+  EnzoMethodGravityMg0 * method = 
+    static_cast<EnzoMethodGravityMg0*> (this->method());
+
+  // GET DATA
+  
+  //  delete msg;
+  delete msg;
+
+  method -> pre_smooth<T>(this);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
 void EnzoMethodGravityMg0::pre_smooth(EnzoBlock * enzo_block) throw()
+/// [*]
+///
+///      smoother.apply (A,X,B)
+///      callback = p_restrict_send()
+///      call refresh (X,level,"level")
 {
   MG_VERBOSE("pre_smooth_()");
 
   smooth_->compute(enzo_block);
+
+    enzo_block->refresh_enter
+      (CkIndex_EnzoBlock::p_mg0_restrict_send<T>(NULL),refresh(1));
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoBlock::p_mg0_restrict_send(CkReductionMsg * msg)
+/// [*]
+{
+  EnzoMethodGravityMg0 * method = 
+    static_cast<EnzoMethodGravityMg0*> (this->method());
+
+  // GET DATA
+  
+  //  delete msg;
+  delete msg;
+
+  method -> restrict_send<T>(this);
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
 void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
+/// 
+/// [ ] restrict send
+///
+///      A.residual(R,B,X)
+///      index_parent.p_restrict_recv(R)
 {
+
   MG_VERBOSE("restrict_send_()");
+
+  A_->residual(ir_, ib_, ix_, enzo_block);
+
+  Index index_parent = enzo_block->index().index_parent(min_level_);
+  
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
+void EnzoBlock::p_mg0_restrict_recv(CkReductionMsg * msg)
+/// [*]
+{
+  EnzoMethodGravityMg0 * method = 
+    static_cast<EnzoMethodGravityMg0*> (this->method());
+
+  // GET DATA
+  
+  //  delete msg;
+  delete msg;
+
+  method -> restrict_recv<T>(this);
+}
+
+
+//----------------------------------------------------------------------
+
+template <class T>
 void EnzoMethodGravityMg0::restrict_recv(EnzoBlock * enzo_block) throw()
+/// 
+/// [ ] restrict recv
+///
+///      unpack B
+///      if (sync.next())
+///          begin_cycle()
 {
   MG_VERBOSE("restrict_recv_()");
 }
@@ -345,6 +426,11 @@ void EnzoMethodGravityMg0::restrict_recv(EnzoBlock * enzo_block) throw()
 
 template <class T>
 void EnzoMethodGravityMg0::solve_coarse_(EnzoBlock * enzo_block) throw()
+/// 
+/// [ ] coarse solve
+///
+///      solve A X = B
+///      end_cycle()
 {
   MG_VERBOSE("solve_coarse_()");
 }
@@ -353,6 +439,11 @@ void EnzoMethodGravityMg0::solve_coarse_(EnzoBlock * enzo_block) throw()
 
 template <class T>
 void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
+/// 
+/// [ ] prolong send
+///
+///      for child           
+///         child.prolong_recv(X)
 {
   MG_VERBOSE("prolong_send_()");
 }
@@ -360,7 +451,31 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 template <class T>
+void EnzoBlock::p_mg0_prolong_recv(CkReductionMsg * msg)
+/// [*]
+{
+  EnzoMethodGravityMg0 * method = 
+    static_cast<EnzoMethodGravityMg0*> (this->method());
+
+  // GET DATA
+  
+  //  delete msg;
+  delete msg;
+
+  method -> prolong_recv<T>(this);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
 void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
+/// 
+/// [ ] prolong recv
+///
+///      unpack C         
+///      X = X + C
+///      callback = p_post_smooth()
+///      call refresh (X,"level")
 {
   MG_VERBOSE("prolong_recv_()");
 }
@@ -368,15 +483,49 @@ void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 template <class T>
+void EnzoBlock::p_mg0_post_smooth(CkReductionMsg * msg)
+/// [*]
+{
+  EnzoMethodGravityMg0 * method = 
+    static_cast<EnzoMethodGravityMg0*> (this->method());
+
+  // GET DATA
+  
+  //  delete msg;
+  delete msg;
+
+  method -> post_smooth<T>(this);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
 void EnzoMethodGravityMg0::post_smooth(EnzoBlock * enzo_block) throw()
+/// post smooth
+/// [*]
+///
+///      smoother.apply (A,X,B)
+///      end_cycle()
 {
   MG_VERBOSE("post_smooth_()");
+
+  smooth_->compute(enzo_block);
+
+  end_cycle_<T>(enzo_block);
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
 void EnzoMethodGravityMg0::end_cycle_(EnzoBlock * enzo_block) throw()
+/// 
+/// [ ] end cycle
+///
+///      ++iter
+///      if (level < max_level)
+///         prolong_send(X)
+///      else
+///         begin_cycle()
 {
   MG_VERBOSE("end_cycle_()");
 }
@@ -386,6 +535,10 @@ void EnzoMethodGravityMg0::end_cycle_(EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoMethodGravityMg0::exit_solver_ 
 ( EnzoBlock * enzo_block, int retval ) throw ()
+/// 
+/// [ ] exit solver
+///
+///      acceleration.compute(X)
 {
   MG_VERBOSE("exit_solver_()");
 
@@ -414,34 +567,22 @@ void EnzoMethodGravityMg0::exit_solver_
 //======================================================================
 
 void EnzoMethodGravityMg0::monitor_output_(EnzoBlock * enzo_block) throw()
+/// [*]
 {
   if (enzo_block->index().is_root()) {
 
-  Monitor * monitor = enzo_block->simulation()->monitor();
+    Monitor * monitor = enzo_block->simulation()->monitor();
 
-  monitor->print ("Enzo", "Mg0 iter %04d  rr %g",iter_, (double)(rr_/rr0_));
+    monitor->print ("Enzo", "Mg0 iter %04d  rr %g",iter_, (double)(rr_/rr0_));
   }
 }
 
 //======================================================================
 
 bool EnzoMethodGravityMg0::is_converged_() const
+/// [*]
 {
   return (iter_ >= iter_max_);
 }
 
 //======================================================================
-
-template <class T>
-void EnzoBlock::p_mg0_pre_smooth(CkReductionMsg * msg)
-{
-  EnzoMethodGravityMg0 * method = 
-    static_cast<EnzoMethodGravityMg0*> (this->method());
-
-  // GET DATA
-  
-  //  delete msg;
-
-  method -> pre_smooth<T>(this);
-}
-

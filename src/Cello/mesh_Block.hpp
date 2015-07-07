@@ -397,6 +397,7 @@ public:
 
 protected:
   void control_sync_neighbor_(int entry_point, int id);
+  void control_sync_face_(int entry_point, int id);
   void control_sync_count_(int entry_point, int id, int count = 0);
 public:
 

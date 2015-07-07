@@ -39,6 +39,17 @@ public: // interface
    int num_field_blocks,
    bool testing=false) const throw();
 
+  /// Create a new coarse blocks under the Block array.  For Multigrid
+  ///  solvers.  Arguments are the same as create_block_array(), plus
+  ///  minimal level min_level < 0
+  /// [abstract factory design pattern] 
+  virtual CProxy_Block * create_subblock_array
+  (int min_level,
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   int num_field_blocks,
+   bool testing=false) const throw();
+
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block
   (

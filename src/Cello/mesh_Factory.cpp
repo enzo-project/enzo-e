@@ -9,13 +9,9 @@
 
 //----------------------------------------------------------------------
 
-Hierarchy * Factory::create_hierarchy 
-(
- int rank, int refinement,
- int process_first, int process_last_plus) const throw ()
+Hierarchy * Factory::create_hierarchy ( int rank, int refinement) const throw ()
 {
-  return new Hierarchy 
-    (this,rank,refinement,process_first, process_last_plus); 
+  return new Hierarchy (this,rank,refinement); 
 }
 
 //----------------------------------------------------------------------
@@ -112,6 +108,74 @@ CProxy_Block Factory::create_block_array
 }
 
 //----------------------------------------------------------------------
+
+void Factory::create_subblock_array
+(CProxy_Block block_array,
+ int min_level,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ int num_field_blocks,
+ bool testing
+ ) const throw()
+{
+  TRACE8("Factory::create_subblock_array(min_level %d na(%d %d %d) n(%d %d %d) num_field_blocks %d",
+	 min_level,nbx,nby,nbz,nx,ny,nz,num_field_blocks);
+
+  if (min_level >= 0) {
+    WARNING1("Factor::create_subblock_array",
+	     "Trying to create subblock array with min_level %d >= 0",
+	     min_level);
+    return ;
+  }
+
+  for (int level = -1; level >= min_level; level--) {
+
+    const int index_level = - (1+level);
+
+    if (nbx > 1) nbx = ceil(0.5*nbx);
+    if (nby > 1) nby = ceil(0.5*nby);
+    if (nbz > 1) nbz = ceil(0.5*nbz);
+
+    //    printf ("%s:%d nbx,nby,nbz = %d %d %d\n",nbx,nby,nbz);
+
+    int count_adapt;
+
+    int    cycle = 0;
+    double time  = 0.0;
+    double dt    = 0.0;
+    int num_face_level = 0;
+    int * face_level = 0;
+
+    for (int ix=0; ix<nbx; ix++) {
+      for (int iy=0; iy<nby; iy++) {
+	for (int iz=0; iz<nbz; iz++) {
+
+	  Index index(ix,iy,iz);
+
+	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
+
+	  block_array[index].insert
+	    (index,
+	     nx,ny,nz,
+	     num_field_blocks,
+	     count_adapt = 0,
+	     cycle, time, dt,
+	     0,NULL,op_array_copy,
+	     num_face_level, face_level,
+	     testing);
+	  // --------------------------------------------------
+
+	}
+      }
+    }
+  }
+
+  block_array.doneInserting();
+
+}
+
+//----------------------------------------------------------------------
+
 Block * Factory::create_block
 (
  CProxy_Block * block_array,

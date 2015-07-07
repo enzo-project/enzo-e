@@ -109,6 +109,7 @@ public: // attributes
   int                        mesh_root_blocks[3];
   int                        mesh_root_rank;
   int                        mesh_root_size[3];
+  int                        mesh_min_level;
   int                        mesh_max_level;
   int                        mesh_adapt_interval;
   int                        num_mesh;

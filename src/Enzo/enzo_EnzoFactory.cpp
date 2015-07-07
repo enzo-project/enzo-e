@@ -97,6 +97,95 @@ CProxy_Block EnzoFactory::create_block_array
 
 //----------------------------------------------------------------------
 
+CProxy_Block * EnzoFactory::create_subblock_array
+(
+ int min_level,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ int num_field_blocks,
+ bool testing
+ ) const throw()
+{
+  TRACE8("EnzoFactory::create_subblock_array(min_level %d na(%d %d %d) n(%d %d %d) num_field_blocks %d",
+	 min_level,nbx,nby,nbz,nx,ny,nz,num_field_blocks);
+
+  if (min_level >= 0) {
+    WARNING1("EnzoFactor::create_subblock_array",
+	     "Trying to create subblock array with min_level %d >= 0",
+	     min_level);
+    return NULL;
+  }
+
+  CProxy_EnzoBlock * enzo_subblock_array = new CProxy_EnzoBlock[-min_level];
+
+  for (int level = -1; level >= min_level; level--) {
+
+    //    printf ("%s:%d level = %d\n",__FILE__,__LINE__,level);
+    const int index_level = - (1+level);
+
+    if (nbx > 1) nbx = ceil(0.5*nbx);
+    if (nby > 1) nby = ceil(0.5*nby);
+    if (nbz > 1) nbz = ceil(0.5*nbz);
+
+    //    printf ("%s:%d nbx,nby,nbz = %d %d %d\n",__FILE__,__LINE__,nbx,nby,nbz);
+
+    // --------------------------------------------------
+    CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+    // --------------------------------------------------
+
+    CkArrayOptions opts;
+    opts.setMap(array_map);
+    TRACE_CHARM("ckNew(nbx,nby,nbz)");
+    enzo_subblock_array[index_level] = CProxy_EnzoBlock::ckNew(opts);
+
+    int count_adapt;
+
+    int    cycle = 0;
+    double time  = 0.0;
+    double dt    = 0.0;
+    int num_face_level = 0;
+    int * face_level = 0;
+
+    for (int ix=0; ix<nbx; ix++) {
+      for (int iy=0; iy<nby; iy++) {
+	for (int iz=0; iz<nbz; iz++) {
+
+	  Index index(ix,iy,iz);
+
+	  index.set_level(level);
+
+	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
+
+	  enzo_subblock_array[index_level][index].insert 
+	    (index,
+	     nx,ny,nz,
+	     num_field_blocks,
+	     count_adapt = 0,
+	     cycle, time, dt,
+	     0,NULL,op_array_copy,
+	     num_face_level, face_level,
+	     testing);
+	  // --------------------------------------------------
+
+	}
+      }
+    }
+
+    //    printf ("%s:%d level subblock_array[%d] doneInserting()\n",
+    //	    __FILE__,__LINE__,index_level);
+	   
+    enzo_subblock_array[index_level].doneInserting();
+
+
+    TRACE1("EnzoFactory::create_subblock_array = %p",&enzo_block_array);
+  }
+
+
+  return enzo_subblock_array;
+}
+
+//----------------------------------------------------------------------
+
 Block * EnzoFactory::create_block
 (
  CProxy_Block * block_array,

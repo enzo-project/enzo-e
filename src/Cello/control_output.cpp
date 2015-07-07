@@ -9,7 +9,7 @@
 // #define TRACE_OUTPUT
 
 #ifdef TRACE_OUTPUT
-#  define TRACE_LOCAL(M) printf ("TRACE Output %s:%d %d" M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
+#  define TRACE_LOCAL(M) printf ("TRACE Output %s:%d %d " M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
 #else
 #  define TRACE_LOCAL(M) /*  */
 #endif
@@ -68,6 +68,8 @@ void Simulation::begin_output ()
 
   // Switching from Block to Simulation: wait for last Block
 
+  // printf ("%s:%d sync_output_begin_.value() = %d/%d\n",
+  // 	  __FILE__,__LINE__,sync_output_begin_.value(),sync_output_begin_.stop());
   if (sync_output_begin_.next()) {
 
     performance()->switch_region(perf_output,__FILE__,__LINE__);

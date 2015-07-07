@@ -92,8 +92,8 @@ Block::Block
     char buffer [80];
     int v3[3];
     this->index().values(v3);
-    sprintf (buffer,"Block() %s (%d;%d;%d) created",name().c_str(),
-	     v3[0],v3[1],v3[2]);
+    sprintf (buffer,"Block() %s %d (%d;%d;%d) created",name().c_str(),
+	     index.level(),v3[0],v3[1],v3[2]);
     monitor->print("Adapt",buffer);
   }
   int ibx,iby,ibz;
@@ -445,13 +445,25 @@ int Block::rank() const
 
 std::string Block::name() const throw()
 {
+
   const int rank = this->rank();
-  int nb3[3] = {1,1,1};
-  simulation()->hierarchy()->blocking(nb3,nb3+1,nb3+2);
-  int nb  = std::max( std::max (nb3[0],nb3[1]),nb3[2]);
-  int bits = 0;
-  while (nb/=2) ++bits;
-  return "B" + index_.bit_string(level(),rank,bits);
+  int blocking[3] = {1,1,1};
+  simulation()->hierarchy()->blocking(blocking,blocking+1,blocking+2);
+  for (int i=-1; i>=index().level(); i--) {
+    blocking[0] /= 2;
+    blocking[1] /= 2;
+    blocking[2] /= 2;
+  }
+  int bits[3] = {0,0,0};
+  while (blocking[0]/=2) ++bits[0];
+  while (blocking[1]/=2) ++bits[1];
+  while (blocking[2]/=2) ++bits[2];
+  // int bits = 0;
+  // while (nb/=2) ++bits;
+
+  std::string name = "B" + index_.bit_string(level(),rank,bits);
+
+  return name;
 }
 
 //----------------------------------------------------------------------

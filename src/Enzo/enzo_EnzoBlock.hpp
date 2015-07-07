@@ -303,13 +303,13 @@ public: /// entry methods
   template <class T>
   void p_mg0_pre_smooth(CkReductionMsg * msg);
   template <class T>
-  void p_mg0_restrict_send();
+  void p_mg0_restrict_send(CkReductionMsg * msg);
   template <class T>
-  void p_mg0_restrict_recv();
+  void p_mg0_restrict_recv(CkReductionMsg * msg);
   template <class T>
-  void p_mg0_prolong_recv();
+  void p_mg0_prolong_recv(CkReductionMsg * msg);
   template <class T>
-  void p_mg0_post_smooth();
+  void p_mg0_post_smooth(CkReductionMsg * msg);
 
 protected: // functions
 

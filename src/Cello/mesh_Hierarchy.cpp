@@ -16,9 +16,7 @@
 Hierarchy::Hierarchy 
 (
  const Factory * factory,
- int rank, int refinement,
- int process_first, int process_last_plus
- ) throw ()
+ int rank, int refinement) throw ()
   :
   factory_((Factory *)factory),
   rank_(rank),
@@ -75,8 +73,8 @@ void Hierarchy::pup (PUP::er &p)
   } else {
     block_array_ = NULL;
   }
-
   p | block_exists_;
+
   PUParray(p,root_size_,3);
   PUParray(p,lower_,3);
   PUParray(p,upper_,3);
@@ -199,42 +197,77 @@ void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
  bool allocate_data,
- bool testing,
- int process_first, int process_last_plus) throw()
+ bool testing) throw()
 {
-    // determine block size
-    int mbx = root_size_[0] / blocking_[0];
-    int mby = root_size_[1] / blocking_[1];
-    int mbz = root_size_[2] / blocking_[2];
+  // determine block size
+  const int mbx = root_size_[0] / blocking_[0];
+  const int mby = root_size_[1] / blocking_[1];
+  const int mbz = root_size_[2] / blocking_[2];
 
-    // Check that blocks evenly subdivide forest
-    if (! ((blocking_[0]*mbx == root_size_[0]) &&
-	   (blocking_[1]*mby == root_size_[1]) &&
-	   (blocking_[2]*mbz == root_size_[2]))) {
+  // Check that blocks evenly subdivide forest
+  if (! ((blocking_[0]*mbx == root_size_[0]) &&
+	 (blocking_[1]*mby == root_size_[1]) &&
+	 (blocking_[2]*mbz == root_size_[2]))) {
 
-      ERROR6("Forest::allocate_array_()",  
-	     "Blocks must evenly subdivide forest: "
-	     "forest size = (%d %d %d)  block count = (%d %d %d)",
-	     root_size_[0],root_size_[1],root_size_[2],
-	     blocking_[0],blocking_[1],blocking_[2]);
+    ERROR6("Hierarchy::create_forest()",  
+	   "Blocks must evenly subdivide forest: "
+	   "forest size = (%d %d %d)  block count = (%d %d %d)",
+	   root_size_[0],
+	   root_size_[1],
+	   root_size_[2],
+	   blocking_[0],
+	   blocking_[1],
+	   blocking_[2]);
       
-    }
+  }
 
-    // CREATE AND INITIALIZE NEW DATA BLOCKS
+  // CREATE AND INITIALIZE NEW DATA BLOCKS
 
-    int num_field_blocks = 1;
+  int num_field_blocks = 1;
 
-    TRACE("Allocating block_array_");
+  TRACE("Allocating block_array_");
 
-    block_array_ = new CProxy_Block;
+  block_array_ = new CProxy_Block;
 
-    (*block_array_) = factory_->create_block_array
-      (blocking_[0],blocking_[1],blocking_[2],
-       mbx,mby,mbz,
-       num_field_blocks,
-       testing);
+  (*block_array_) = factory_->create_block_array
+    (blocking_[0],blocking_[1],blocking_[2],
+     mbx,mby,mbz,
+     num_field_blocks,
+     testing);
     
-    block_exists_ = allocate_data;
+  block_exists_ = allocate_data;
 
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::create_subforest
+(
+ FieldDescr   * field_descr,
+ bool allocate_data,
+ int min_level,
+ bool testing) throw()
+{
+  // determine block size
+
+  const int mbx = root_size_[0] / blocking_[0];
+  const int mby = root_size_[1] / blocking_[1];
+  const int mbz = root_size_[2] / blocking_[2];
+
+  // CREATE AND INITIALIZE NEW DATA BLOCKS
+
+  int num_field_blocks = 1;
+
+  TRACE("Allocating sub-block_array_");
+
+  //  printf ("%s:%d min_level = %d\n",__FILE__,__LINE__,min_level);
+
+  factory_->create_subblock_array
+    (*block_array_,min_level,
+     blocking_[0],blocking_[1],blocking_[2],
+     mbx,mby,mbz,
+     num_field_blocks,
+     testing);
+    
 }
 

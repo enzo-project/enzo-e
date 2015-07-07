@@ -238,8 +238,8 @@ Method * EnzoProblem::create_method_
 	 enzo_config->method_gravity_mg_res_tol,
 	 enzo_config->method_gravity_mg_monitor_iter,
 	 is_singular,  smooth, restrict,  prolong,
-	 enzo_config->method_gravity_mg_level_min,
-	 enzo_config->method_gravity_mg_level_max);
+	 enzo_config->method_gravity_mg_min_level,
+	 enzo_config->method_gravity_mg_max_level);
     } else if (type == "mg0") {
       method = new EnzoMethodGravityMg0
 	(field_descr, rank,
@@ -247,8 +247,8 @@ Method * EnzoProblem::create_method_
 	 enzo_config->method_gravity_mg_iter_max,
 	 enzo_config->method_gravity_mg_monitor_iter,
 	 is_singular,  smooth, restrict,  prolong,
-	 enzo_config->method_gravity_mg_level_min,
-	 enzo_config->method_gravity_mg_level_max);
+	 enzo_config->method_gravity_mg_min_level,
+	 enzo_config->method_gravity_mg_max_level);
     } else {
       ERROR1 ("EnzoProblem::create_method",
 	       "Unknown gravity_mg type %s",

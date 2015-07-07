@@ -33,14 +33,38 @@ PARALLEL_MAIN_BEGIN
 		     {1,1,0},
 		     {1,1,1} };
 
+  int nb3[3] = {0,0,0};
+  index->set_level(0);
+  nb3[0] = 1;
+  printf ("index = %s\n",index->bit_string(0,3,nb3).c_str());
+  nb3[1] = 1;
+  printf ("index = %s\n",index->bit_string(0,3,nb3).c_str());
+  nb3[2] = 1;
+  printf ("index = %s\n",index->bit_string(0,3,nb3).c_str());
   index->set_child(1,0,0,0);
+  index->set_level(1);
+  printf ("index = %s\n",index->bit_string(1,3,nb3).c_str());
   index->set_child(2,1,0,0);
+  index->set_level(2);
+  printf ("index = %s\n",index->bit_string(2,3,nb3).c_str());
   index->set_child(3,0,1,0);
+  index->set_level(3);
+  printf ("index = %s\n",index->bit_string(3,3,nb3).c_str());
   index->set_child(4,0,0,1);
+  index->set_level(4);
+  printf ("index = %s\n",index->bit_string(4,3,nb3).c_str());
   index->set_child(5,0,1,1);
+  index->set_level(5);
+  printf ("index = %s\n",index->bit_string(5,3,nb3).c_str());
   index->set_child(6,1,0,1);
+  index->set_level(6);
+  printf ("index = %s\n",index->bit_string(6,3,nb3).c_str());
   index->set_child(7,1,1,0);
+  index->set_level(7);
+  printf ("index = %s\n",index->bit_string(7,3,nb3).c_str());
   index->set_child(8,1,1,1);
+  index->set_level(8);
+  printf ("index = %s\n",index->bit_string(8,3,nb3).c_str());
 
   const int max_level = 8;
   index->set_level(max_level);

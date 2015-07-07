@@ -28,11 +28,7 @@ public: // interface
   Hierarchy() throw() { }
   
   /// Initialize a Hierarchy object
-  Hierarchy (
-	     const Factory * factory,
-	     int rank, int refinement,
-	     int process_first, int process_last_plus
-	     ) throw ();
+  Hierarchy (const Factory * factory, int rank, int refinement) throw ();
 
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
@@ -125,9 +121,12 @@ public: // interface
 
   void create_forest (FieldDescr   * field_descr,
 		      bool allocate_data,
-		      bool testing          = false,
-		      int process_first     = 0, 
-		      int process_last_plus = -1) throw();
+		      bool testing          = false) throw();
+
+  void create_subforest (FieldDescr   * field_descr,
+			 bool allocate_data,
+			 int min_level,
+			 bool testing          = false) throw();
 
 
   /// Return the number of Blocks along each rank

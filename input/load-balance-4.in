@@ -62,6 +62,6 @@ Adapt {
    }
 }
 
-Monitor {
-   verbose = true;
-}
+# Monitor {
+#   verbose = true;
+# }

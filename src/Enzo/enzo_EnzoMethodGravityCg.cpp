@@ -78,7 +78,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     rr_min_(0),rr_max_(0),
     idensity_(0),  ipotential_(0),
     ib_(0), ix_(0), ir_(0), id_(0), iy_(0), iz_(0),
-    is_leaf_(false),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
@@ -102,13 +101,17 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 
   /// Initialize default Refresh
 
+  const int num_fields = field_descr->field_count();
+
   const int ir = add_refresh(1,rank-1,sync_barrier);
-  refresh(ir)->add_field(idensity_);
+  //  refresh(ir)->add_field(idensity_);
+  refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
 
   id_refresh_matvec_ = add_refresh(1,rank-1,sync_barrier);
-  refresh(id_refresh_matvec_)->add_field(ir_);
+  refresh(id_refresh_matvec_)->add_all_fields(num_fields);
+  //  refresh(id_refresh_matvec_)->add_field(ir_);
 
 }
 
@@ -117,8 +120,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 void EnzoMethodGravityCg::compute ( Block * block) throw()
 {
   
-  set_leaf(block);
-
   Field field = block->data()->field();
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
@@ -150,24 +151,22 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 //     shift (B)
 {
 
-  set_leaf(enzo_block);
-
   iter_ = 0;
 
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  T * density = (T*) field.values(idensity_);
-    
-  T * B = (T*) field.values(ib_);
-  T * X = (T*) field.values(ix_);
-  T * R = (T*) field.values(ir_);
-
-  if (is_leaf_) {
+  if (enzo_block->is_leaf()) {
 
     ///   - X = 0
     ///   - B = -h^2 * 4 * PI * G * density
     ///   - R = P = B ( residual with X = 0);
+
+    T * density = (T*) field.values(idensity_);
+    
+    T * B = (T*) field.values(ib_);
+    T * X = (T*) field.values(ix_);
+    T * R = (T*) field.values(ir_);
 
     for (int iz=0; iz<mz_; iz++) {
       for (int iy=0; iy<my_; iy++) {
@@ -179,16 +178,28 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 	}
       }
     }
-  }
 
-  M_->matvec(id_,ir_,enzo_block);
-  M_->matvec(iz_,ir_,enzo_block);
+    M_->matvec(id_,ir_,enzo_block);
+    M_->matvec(iz_,ir_,enzo_block);
+  }
 
   long double reduce[3];
 
-  reduce[0] = dot_(R,R);
-  reduce[1] = sum_(B);
-  reduce[2] = count_(B);
+  if (enzo_block->is_leaf()) {
+
+    T * B = (T*) field.values(ib_);
+    T * R = (T*) field.values(ir_);
+    reduce[0] = dot_(R,R);
+    reduce[1] = sum_(B);
+    reduce[2] = count_();
+    
+  } else {
+
+    reduce[0] = 0.0;
+    reduce[1] = 0.0;
+    reduce[2] = 0.0;
+
+  }
 
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
@@ -234,7 +245,7 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   method->set_iter ( ((int*)msg->getData())[0] );
 
-  // Refresh if Block is a leaf
+  // Refresh if Block is a leaf, then continue with enzo_matvec_()
   method->refresh(1)->set_active(is_leaf());
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
 		method->refresh(1));
@@ -268,35 +279,45 @@ template <class T>
 void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 {
 
-  cello::check(rr_,"rr_",__FILE__,__LINE__);
-  cello::check(bs_,"bs_",__FILE__,__LINE__);
-  cello::check(bc_,"bc_",__FILE__,__LINE__);
-
-  set_leaf(enzo_block);
-
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  T * B  = (T*) field.values(ib_);
-  T * R  = (T*) field.values(ir_);
+  if (enzo_block->is_leaf()) {
 
-  if (iter_ == 0 && is_singular_)  {
+    cello::check(rr_,"rr_",__FILE__,__LINE__);
+    cello::check(bs_,"bs_",__FILE__,__LINE__);
+    cello::check(bc_,"bc_",__FILE__,__LINE__);
 
-    // shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
-    // eT*e == n === zone count (bc)
-    // eT*b == sum_i=1,n B[i]
+    T * B  = (T*) field.values(ib_);
+    T * R  = (T*) field.values(ir_);
 
-    T shift = -bs_ / bc_;
-    shift_ (R,shift,R);
-    shift_ (B,shift,B);
+    if (iter_ == 0 && is_singular_)  {
 
-    M_->matvec(id_,ir_,enzo_block);
-    M_->matvec(iz_,ir_,enzo_block);
+      // shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
+      // eT*e == n === zone count (bc)
+      // eT*b == sum_i=1,n B[i]
+
+      T shift = -bs_ / bc_;
+      shift_ (R,shift,R);
+      shift_ (B,shift,B);
+
+      M_->matvec(id_,ir_,enzo_block);
+      M_->matvec(iz_,ir_,enzo_block);
+    } 
+  }
+
+  long double reduce ;
+
+  if (enzo_block->is_leaf()) {
+
+    T * R  = (T*) field.values(ir_);
+    reduce = dot_(R,R);
+
+  } else {
+
+    reduce = 0.0;
+
   } 
-
-  long double reduce;
-
-  reduce = dot_(R,R);
 
   CkCallback callback(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
 		enzo_block->proxy_array());
@@ -328,8 +349,6 @@ void EnzoBlock::r_cg_shift_1 (CkReductionMsg * msg)
 template <class T>
 void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 {
-  set_leaf(enzo_block);
-
   cello::check(rr_,"rr_",__FILE__,__LINE__);
 
   if (iter_ == 0) {
@@ -364,25 +383,43 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     cg_end<T>(enzo_block,return_error_max_iter_reached);
 
   } else {
-
+    
     Data * data = enzo_block->data();
     Field field = data->field();
 
-    T * D = (T*) field.values(id_);
-    T * Y = (T*) field.values(iy_);
-    T * R = (T*) field.values(ir_);
-    T * Z = (T*) field.values(iz_);
+    if (enzo_block->is_leaf()) {
 
-    double hx,hy,hz;
-    data->field_cell_width(&hx,&hy,&hz);
+      T * D = (T*) field.values(id_);
+      T * Y = (T*) field.values(iy_);
+      T * R = (T*) field.values(ir_);
+      T * Z = (T*) field.values(iz_);
 
-    A_->matvec(iy_,id_,enzo_block);
+      double hx,hy,hz;
+      data->field_cell_width(&hx,&hy,&hz);
+
+      A_->matvec(iy_,id_,enzo_block);
+
+    }
 
     long double reduce[3];
 
-    reduce[0] = dot_(R,R);
-    reduce[1] = dot_(R,Z);
-    reduce[2] = dot_(D,Y);
+    if (enzo_block->is_leaf()) {
+
+      T * D = (T*) field.values(id_);
+      T * Y = (T*) field.values(iy_);
+      T * R = (T*) field.values(ir_);
+      T * Z = (T*) field.values(iz_);
+
+      reduce[0] = dot_(R,R);
+      reduce[1] = dot_(R,Z);
+      reduce[2] = dot_(D,Y);
+
+    } else {
+
+      reduce[0] = 0.0;
+      reduce[1] = 0.0;
+      reduce[2] = 0.0;
+    }
 
     CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_3<T>(NULL), 
 		  enzo_block->proxy_array());
@@ -427,8 +464,6 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 //  rz = rz2;
 {
 
-  set_leaf(enzo_block);
-
   cello::check(rr_,"rr_",__FILE__,__LINE__);
   cello::check(rz_,"rz_",__FILE__,__LINE__);
   cello::check(dy_,"dy_",__FILE__,__LINE__);
@@ -436,26 +471,43 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  T * X = (T*) field.values(ix_);
-  T * D = (T*) field.values(id_);
-  T * R = (T*) field.values(ir_);
-  T * Y = (T*) field.values(iy_);
-  T * Z = (T*) field.values(iz_);
+  if (enzo_block->is_leaf()) {
 
-  T a = rz_ / dy_;
+    T * X = (T*) field.values(ix_);
+    T * D = (T*) field.values(id_);
+    T * R = (T*) field.values(ir_);
+    T * Y = (T*) field.values(iy_);
+    T * Z = (T*) field.values(iz_);
 
-  cello::check(a,"a",__FILE__,__LINE__);
+    T a = rz_ / dy_;
 
-  zaxpy_ (X,  a ,D,X);
-  zaxpy_ (R, -a, Y,R);
+    cello::check(a,"a",__FILE__,__LINE__);
 
-  M_->matvec(iz_,ir_,enzo_block);
+    zaxpy_ (X,  a ,D,X);
+    zaxpy_ (R, -a, Y,R);
+
+    M_->matvec(iz_,ir_,enzo_block);
+
+  }
 
   long double reduce[3];
 
-  reduce[0] = dot_(R,Z);
-  reduce[1] = sum_(R);
-  reduce[2] = sum_(X);
+  if (enzo_block->is_leaf()) {
+
+    T * X = (T*) field.values(ix_);
+    T * R = (T*) field.values(ir_);
+    T * Z = (T*) field.values(iz_);
+    reduce[0] = dot_(R,Z);
+    reduce[1] = sum_(R);
+    reduce[2] = sum_(X);
+
+  } else {
+
+    reduce[0] = 0.0;
+    reduce[1] = 0.0;
+    reduce[2] = 0.0;
+
+  }
 
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
@@ -497,34 +549,35 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 //  rz = rz2;
 {
 
-  set_leaf(enzo_block);
-
   cello::check(rz2_,"rz2_",__FILE__,__LINE__);
   cello::check(rs_,"rs_",__FILE__,__LINE__);
   cello::check(xs_,"xs_",__FILE__,__LINE__);
 
   Field field = enzo_block->data()->field();
 
-  if (is_singular_)  {
+  if (enzo_block->is_leaf()) {
 
-    // shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
-    // eT*e == n === zone count (bc)
-    // eT*b == sum_i=1,n B[i]
+    if (is_singular_)  {
 
-    T * X  = (T*) field.values(ix_);
-    T * R  = (T*) field.values(ir_);
-    shift_ (X,T(-xs_/bc_),X);
-    shift_ (R,T(-rs_/bc_),R);
+      // shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
+      // eT*e == n === zone count (bc)
+      // eT*b == sum_i=1,n B[i]
+
+      T * X  = (T*) field.values(ix_);
+      T * R  = (T*) field.values(ir_);
+      shift_ (X,T(-xs_/bc_),X);
+      shift_ (R,T(-rs_/bc_),R);
+    }
+
+    T * D  = (T*) field.values(id_);
+    T * Z  = (T*) field.values(iz_);
+
+    T b = rz2_ / rz_;
+
+    cello::check(b,"b",__FILE__,__LINE__);
+
+    zaxpy_ (D,b,D,Z);
   }
-
-  T * D  = (T*) field.values(id_);
-  T * Z  = (T*) field.values(iz_);
-
-  T b = rz2_ / rz_;
-
-  cello::check(b,"b",__FILE__,__LINE__);
-
-  zaxpy_ (D,b,D,Z);
 
   int iter = iter_ + 1;
 
@@ -548,26 +601,29 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 ///       ERROR (return-)
 ///    }
 {
-  set_leaf(enzo_block);
+  if (enzo_block->is_leaf()) {
 
-  Data * data = enzo_block->data();
-  Field field = data->field();
+    Data * data = enzo_block->data();
+    Field field = data->field();
 
-  T * X         = (T*) field.values(ix_);
-  T * potential = (T*) field.values(ipotential_);
+    T * X         = (T*) field.values(ix_);
+    T * potential = (T*) field.values(ipotential_);
 
-  if (enzo_block->index().is_root()) {
-    monitor_output_ (enzo_block);
+    if (enzo_block->index().is_root()) {
+      monitor_output_ (enzo_block);
+    }
+
+    copy_(potential,X,mx_,my_,mz_);
+
+    bool symmetric;
+    int order;
+    EnzoComputeAcceleration compute_acceleration (field.field_descr(),
+						  rank_, symmetric = true,
+						  order=2);
+    compute_acceleration.compute(enzo_block);
+
   }
 
-  copy_(potential,X,mx_,my_,mz_,is_leaf_);
-
-  bool symmetric;
-  int order;
-  EnzoComputeAcceleration compute_acceleration (field.field_descr(),
-						rank_, symmetric = true,
-						order=2);
-  compute_acceleration.compute(enzo_block);
   enzo_block->compute_done();
 }
 
@@ -597,8 +653,6 @@ void EnzoMethodGravityCg::cg_exit_() throw()
 template <class T>
 long double EnzoMethodGravityCg::dot_ (const T * X, const T * Y) const throw()
 {
-  if (! is_leaf_ ) return 0.0;
-
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 
   long double value = 0.0;
@@ -619,8 +673,6 @@ long double EnzoMethodGravityCg::dot_ (const T * X, const T * Y) const throw()
 template <class T>
 void EnzoMethodGravityCg::zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw()
 {
-  if (! is_leaf_ ) return;
-
   for (int iz=0; iz<mz_; iz++) {
     for (int iy=0; iy<my_; iy++) {
       for (int ix=0; ix<mx_; ix++) {
@@ -636,8 +688,6 @@ void EnzoMethodGravityCg::zaxpy_ (T * Z, double a, const T * X, const T * Y) con
 template <class T>
 long double EnzoMethodGravityCg::sum_ (const T * X) const throw()
 {
-  if (! is_leaf_ ) return 0.0;
-
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 
   long double value = 0.0;
@@ -658,8 +708,6 @@ long double EnzoMethodGravityCg::sum_ (const T * X) const throw()
 template <class T>
 void EnzoMethodGravityCg::shift_ (T * X, const T a, const T * Y) const throw()
 {
-  if (! is_leaf_ ) return;
-
   for (int iz=0; iz<mz_; iz++) {
     for (int iy=0; iy<my_; iy++) {
       for (int ix=0; ix<mx_; ix++) {
@@ -675,8 +723,6 @@ void EnzoMethodGravityCg::shift_ (T * X, const T a, const T * Y) const throw()
 template <class T>
 void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
 {
-  if (! is_leaf_ ) return;
-
   for (int iz=0; iz<mz_; iz++) {
     for (int iy=0; iy<my_; iy++) {
       for (int ix=0; ix<mx_; ix++) {
@@ -689,10 +735,9 @@ void EnzoMethodGravityCg::scale_ (T * Y, T a, const T * X) const throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
-int EnzoMethodGravityCg::count_ (T * X) const throw()
+int EnzoMethodGravityCg::count_ () const throw()
 {
-  return is_leaf_ ? nx_*ny_*nz_ : 0;
+  return nx_*ny_*nz_;
 }
 
 //----------------------------------------------------------------------

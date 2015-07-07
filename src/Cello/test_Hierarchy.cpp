@@ -23,8 +23,7 @@ PARALLEL_MAIN_BEGIN
   Factory * factory = new Factory;
   const int rank = 3;
   const int refinement = 2;
-  Hierarchy * hierarchy = factory->create_hierarchy
-    (rank, refinement,0,1);
+  Hierarchy * hierarchy = factory->create_hierarchy (rank, refinement);
   unit_assert(hierarchy != NULL);
 
   FieldDescr field_descr;
