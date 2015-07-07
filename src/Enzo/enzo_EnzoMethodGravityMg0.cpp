@@ -60,6 +60,7 @@
 ///  p_restrict_send(X)
 ///
 ///      A.residual(R,B,X)
+///      pack R
 ///      index_parent.p_restrict_recv(R)
 ///
 ///  p_restrict_recv(B)
@@ -76,6 +77,7 @@
 ///  prolong_send(X)
 ///
 ///      for child           
+///         pack X
 ///         child.prolong_recv(X)
 ///
 ///  prolong_recv(C)
@@ -217,11 +219,13 @@ EnzoMethodGravityMg0::~EnzoMethodGravityMg0 () throw()
 void EnzoMethodGravityMg0::compute ( Block * block) throw()
 // [*]
 {
-
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   MG_VERBOSE("compute()");
 
-  Field field = block->data()->field();
+  // Initialize child counter for restrict synchronization
+  enzo_block->mg0_set_stop(NUM_CHILDREN(enzo_block->rank()));
+
+  Field field = enzo_block->data()->field();
   precision_ = field.precision(irho_);
 
   if      (precision_ == precision_single)    
@@ -325,6 +329,7 @@ template <class T>
 void EnzoBlock::p_mg0_pre_smooth(CkReductionMsg * msg)
 /// [*]
 {
+  VERBOSE("p_mg0_pre_smooth()");
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
 
@@ -350,8 +355,8 @@ void EnzoMethodGravityMg0::pre_smooth(EnzoBlock * enzo_block) throw()
 
   smooth_->compute(enzo_block);
 
-    enzo_block->refresh_enter
-      (CkIndex_EnzoBlock::p_mg0_restrict_send<T>(NULL),refresh(1));
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_mg0_restrict_send<T>(NULL),refresh(1));
 }
 
 //----------------------------------------------------------------------
@@ -360,6 +365,7 @@ template <class T>
 void EnzoBlock::p_mg0_restrict_send(CkReductionMsg * msg)
 /// [*]
 {
+  VERBOSE("p_mg0_restrict_send()");
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
 
@@ -376,9 +382,10 @@ void EnzoBlock::p_mg0_restrict_send(CkReductionMsg * msg)
 template <class T>
 void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 /// 
-/// [ ] restrict send
+/// [*] restrict send
 ///
 ///      A.residual(R,B,X)
+///      pack R
 ///      index_parent.p_restrict_recv(R)
 {
 
@@ -386,24 +393,89 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   A_->residual(ir_, ib_, ix_, enzo_block);
 
-  Index index_parent = enzo_block->index().index_parent(min_level_);
+  Index index        = enzo_block->index();
+  Index index_parent = index.index_parent(min_level_);
+  int level          = index.level();
   
+  // copy face data to FieldFace
+  int narray; 
+  char * array;
+  // face (0,0,0) is the entire block
+  int if3[3] = {0,0,0};
+  // find which child this block is in its parent
+  int ic3[3];
+  index.child(level,&ic3[0],&ic3[1],&ic3[2],min_level_);
+  // exclude ghost zones
+  bool lg3[3] = {false,false,false};
+  // send vector "R" data only
+  std::vector<int> field_list;
+  field_list.push_back(ir_);
+
+  // copy data from EnzoBlock to FieldFace
+
+  FieldFace * field_face = 
+    enzo_block->load_face(&narray,&array, if3, ic3, lg3, 
+			  op_array_restrict, field_list);
+
+  // Create a FieldMsg for sending data to parent
+  // NOTE: don't delete on send; delete on recevie
+  FieldMsg * field_message  = new (narray) FieldMsg;
+
+  /// WARNING: double copy
+
+  // Copy FieldFace data to field_message
+
+  // array size
+  field_message->n = narray;
+  // array values
+  memcpy (field_message->a, array, narray);
+  // child index
+  field_message->ic3[0] = ic3[0];
+  field_message->ic3[1] = ic3[1];
+  field_message->ic3[2] = ic3[2];
+
+  // Send field_message to parent
+  CkCallback (CkIndex_EnzoBlock::p_mg0_restrict_recv<T>(NULL), 
+	      CkArrayIndexIndex(index_parent),
+	      enzo_block->proxy_array()).send(field_message);
+
+  delete field_face;
+
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::p_mg0_restrict_recv(CkReductionMsg * msg)
+void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
 /// [*]
 {
+
+  VERBOSE("p_mg0_restrict_recv()");
+
+  // Unpack "R" vector data from children
+
+  // Face (0,0,0) is the entire block
+  int if3[3] = {0,0,0};
+  // exclude ghost zones
+  bool lg3[3] = {false,false,false};
+  // receive in vector "B"
+  std::vector<int> field_list;
+  field_list.push_back(data()->field().field_id("B"));
+
+  // copy data from field_message to EnzoBlock
+
+  store_face_(field_message->n,
+	      field_message->a,   if3, 
+	      field_message->ic3, lg3,
+	      op_array_restrict,
+	      field_list);
+
+  delete field_message;
+
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
 
-  // GET DATA
-  
-  //  delete msg;
-  delete msg;
-
+  // continue with EnzoMethodGravityMg0
   method -> restrict_recv<T>(this);
 }
 
@@ -415,11 +487,17 @@ void EnzoMethodGravityMg0::restrict_recv(EnzoBlock * enzo_block) throw()
 /// 
 /// [ ] restrict recv
 ///
-///      unpack B
+///      unpack B [ in EnzoBlock::p_mg0_restrict_recv() ]
 ///      if (sync.next())
 ///          begin_cycle()
 {
   MG_VERBOSE("restrict_recv_()");
+
+  if (enzo_block->mg0_sync_next()) {
+        begin_cycle_<T>(enzo_block);
+  }
+  
+  
 }
 
 //----------------------------------------------------------------------
@@ -427,12 +505,18 @@ void EnzoMethodGravityMg0::restrict_recv(EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoMethodGravityMg0::solve_coarse_(EnzoBlock * enzo_block) throw()
 /// 
-/// [ ] coarse solve
+/// [*] coarse solve
 ///
 ///      solve A X = B
 ///      end_cycle()
 {
   MG_VERBOSE("solve_coarse_()");
+
+  /// Apply smoother
+  smooth_->compute(enzo_block);
+
+  end_cycle_<T>(enzo_block);
+
 }
 
 //----------------------------------------------------------------------
@@ -443,6 +527,7 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 /// [ ] prolong send
 ///
 ///      for child           
+///         pack X
 ///         child.prolong_recv(X)
 {
   MG_VERBOSE("prolong_send_()");
@@ -451,9 +536,10 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::p_mg0_prolong_recv(CkReductionMsg * msg)
+void EnzoBlock::p_mg0_prolong_recv(FieldMsg * msg)
 /// [*]
 {
+  VERBOSE("p_mg0_prolong_recv()");
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
 
@@ -486,6 +572,7 @@ template <class T>
 void EnzoBlock::p_mg0_post_smooth(CkReductionMsg * msg)
 /// [*]
 {
+  VERBOSE("p_mg0_post_smooth()");
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
 

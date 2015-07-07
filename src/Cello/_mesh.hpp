@@ -118,13 +118,16 @@ class Tree;
 #include "mesh_Hierarchy.hpp"
 #include "mesh_Factory.hpp"
 
-// Tree and components
+// Tree and components (not used in Cello)
 #include "mesh_Node.hpp"
 #include "mesh_NodeTrace.hpp"
 #include "mesh_Tree.hpp"
+#include "mesh_ItNode.hpp"
 
 // Iterators
-#include "mesh_ItNode.hpp"
+#include "mesh_ItFace.hpp"
+#include "mesh_ItNeighbor.hpp"
+#include "mesh_ItChild.hpp"
 
 // Refinement
 #include "mesh_Refine.hpp"
@@ -132,9 +135,7 @@ class Tree;
 #include "mesh_RefineShear.hpp"
 #include "mesh_RefineMass.hpp"
 #include "mesh_RefineMask.hpp"
-#include "mesh_ItFace.hpp"
-#include "mesh_ItNeighbor.hpp"
-#include "mesh_ItChild.hpp"
+#include "mesh_FieldMsg.hpp"
 
 #endif /* _MESH_HPP */
 

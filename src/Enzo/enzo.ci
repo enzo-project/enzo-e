@@ -126,9 +126,9 @@ module enzo {
     template <class T>
     entry void p_mg0_restrict_send(CkReductionMsg *msg);
     template <class T>
-    entry void p_mg0_restrict_recv(CkReductionMsg *msg);
+    entry void p_mg0_restrict_recv(FieldMsg * msg);
     template <class T>
-    entry void p_mg0_prolong_recv(CkReductionMsg *msg);
+    entry void p_mg0_prolong_recv(FieldMsg * msg);
     template <class T>
     entry void p_mg0_post_smooth(CkReductionMsg *msg);
 

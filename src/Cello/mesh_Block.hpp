@@ -443,7 +443,8 @@ protected:
   void refresh_begin_(Refresh * refresh);
 
   void refresh_load_face_
-  (int type_refresh, Index index, int if3[3], int ic3[3],int count=0);
+  (int type_refresh, Index index, 
+   int if3[3], int ic3[3],int count=0);
   void refresh_store_face_
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3],int count=0);
 

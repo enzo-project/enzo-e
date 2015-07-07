@@ -378,6 +378,9 @@ void Simulation::initialize_forest_() throw()
 	 allocate_data,
 	 config_->mesh_min_level);
     }
+    hierarchy_->block_array()->doneInserting();
+
+
   }
 }
 

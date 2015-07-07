@@ -27,6 +27,10 @@ Domain {
          min_refine = 4.0000000000000;
          type = "slope";
      };
+
+     # Adapt:min_level needed for creating subblocks
+     # Method:<gravity_mg>:min_level needed since it accesses subblocks
+     min_level = -1;
  }
 
 Mesh { 

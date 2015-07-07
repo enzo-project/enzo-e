@@ -136,8 +136,6 @@ void Factory::create_subblock_array
     if (nby > 1) nby = ceil(0.5*nby);
     if (nbz > 1) nbz = ceil(0.5*nbz);
 
-    //    printf ("%s:%d nbx,nby,nbz = %d %d %d\n",nbx,nby,nbz);
-
     int count_adapt;
 
     int    cycle = 0;

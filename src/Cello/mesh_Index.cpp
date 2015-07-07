@@ -66,7 +66,7 @@ Index Index::index_parent (int min_level) const
   Index index = *this;
   int level = index.level();
   if (level > min_level) {
-    index.set_child (level,0,0,0);
+    index.set_child (level,0,0,0,min_level);
     index.set_level(level - 1);
   } else {
     ERROR2 ("Index::index_parent",
@@ -94,13 +94,6 @@ bool Index::is_on_boundary (int axis, int face, int narray) const
 
   int level = this->level();
 
-  // printf ("%s:%d level = %d\n",__FILE__,__LINE__,level);
-
-  ASSERT2 ("Index::is_on_boundary",
-	   "%s called for sub-root block level %d",
-	   bit_string(5,2,0).c_str(),level,
-	   level >= 0);
-  
   unsigned array = a_[axis].array;
   unsigned tree  = a_[axis].tree;
 
@@ -221,8 +214,6 @@ int Index::level () const
   int lz = a_[2].level >> 1;
   int sign = (a_[2].level & 1);
   int level = lx + nb*(ly + nb*lz);
-  // printf ("%s:%d level lx %d ly %d lz %d sign %d level %d\n",
-  // 	  __FILE__,__LINE__,lx,ly,lz,sign,level);
   return sign ? -level : level;
 }
 

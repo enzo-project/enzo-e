@@ -92,7 +92,7 @@ Block::Block
     char buffer [80];
     int v3[3];
     this->index().values(v3);
-    sprintf (buffer,"Block() %s %d (%d;%d;%d) created",name().c_str(),
+    sprintf (buffer,"Block() %s %d (%x %x %x) created",name().c_str(),
 	     index.level(),v3[0],v3[1],v3[2]);
     monitor->print("Adapt",buffer);
   }

@@ -273,11 +273,17 @@ public: /// entry methods
   template <class T>
   void p_mg0_restrict_send(CkReductionMsg * msg);
   template <class T>
-  void p_mg0_restrict_recv(CkReductionMsg * msg);
+  void p_mg0_restrict_recv(FieldMsg * msg);
   template <class T>
-  void p_mg0_prolong_recv(CkReductionMsg * msg);
+  void p_mg0_prolong_recv(FieldMsg * msg);
   template <class T>
   void p_mg0_post_smooth(CkReductionMsg * msg);
+
+  void mg0_reset()             { mg_sync_.reset(); }
+  void mg0_set_stop(int value) { mg_sync_.set_stop(value); }
+  bool mg0_sync_next()         { return mg_sync_.next(); };
+  int  mg0_sync_value()        { return mg_sync_.value(); };
+  int  mg0_sync_stop()         { return mg_sync_.stop(); };
 
 protected: // functions
 
@@ -287,7 +293,7 @@ protected: // attributes
 
   
   // MG SOLVER
-  Sync mg_sync_refresh_;
+  Sync mg_sync_;
 
 public: // attributes (YIKES!)
 

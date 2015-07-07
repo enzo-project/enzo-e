@@ -156,5 +156,10 @@ module mesh {
       (int n, char buffer[n], int ichild[3]);
 
   };
+
+  message FieldMsg {
+     char a[];
+  };
+
 }
 
