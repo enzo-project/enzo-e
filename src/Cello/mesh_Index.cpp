@@ -78,12 +78,13 @@ Index Index::index_parent (int min_level) const
 
 //----------------------------------------------------------------------
 
-Index Index::index_child (int icx, int icy, int icz) const
+Index Index::index_child (int icx, int icy, int icz, int min_level) const
 {
   Index index = *this;
   int level = index.level();
   index.set_level(level+1);
-  index.set_child (level+1,icx,icy,icz);
+  index.set_child (level+1,icx,icy,icz,min_level);
+
   return index;
 }
 

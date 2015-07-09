@@ -64,10 +64,10 @@ public:
   
   Index index_parent (int min_level = 0) const;
 
-  Index index_child (const int ic3[3]) const
-  { return index_child(ic3[0],ic3[1],ic3[2]); }
+  Index index_child (const int ic3[3], int min_level=0) const
+  { return index_child(ic3[0],ic3[1],ic3[2],min_level); }
 
-  Index index_child (int icx, int icy, int icz) const;
+  Index index_child (int icx, int icy, int icz, int min_level = 0) const;
 
   /// Return the index for the given neighbor
   Index index_neighbor (const int if3[3], const int n3[3]) const;

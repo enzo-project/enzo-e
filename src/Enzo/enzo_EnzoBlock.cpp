@@ -262,6 +262,7 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,method_turbulence_data,MAX_TURBULENCE_ARRAY);
 
   p | mg_sync_;
+  p | mg_iter_;
 
   TRACE ("END EnzoBlock::pup()");
 

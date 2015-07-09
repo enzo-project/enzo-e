@@ -114,13 +114,15 @@ Boundary {
 } 
 
 Output {
-   list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png", "az_png"];
+   list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png", "az_png",
+           "R_png", "X_png", "C_png", "B_png",
+                       "h5"];
     mesh_png {
 	type     = "image";
 	image_type  = "mesh";
 	image_size = [257,257];
 	image_reduce_type = "max";
-        include "input/schedule_cycle_10.incl"
+        include "input/schedule_cycle_1.incl"
 	image_min = 0.0;
 	image_max = 3.0;
         include "input/colormap_rainbow.incl"
@@ -128,50 +130,91 @@ Output {
    };
    phi_png {
      type = "image";
+     image_reduce_type = "max";
      image_size = [256,256];
      field_list = ["potential"];
-     include "input/schedule_cycle_10.incl"
+     include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
+   };
+   X_png {
+     type = "image";
+     image_reduce_type = "max";
+     image_size = [256,256];
+     field_list = ["X"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   C_png {
+     type = "image";
+     image_reduce_type = "max";
+     image_size = [256,256];
+     field_list = ["C"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   R_png {
+     type = "image";
+     image_reduce_type = "max";
+     image_size = [256,256];
+     field_list = ["R"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   B_png {
+     type = "image";
+     image_reduce_type = "max";
+     image_size = [256,256];
+     field_list = ["B"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   h5 {
+     type = "data";
+     include "input/schedule_cycle_1.incl"
    };
    rho_png {
      type = "image";
+     image_reduce_type = "max";
      image_size = [256,256];
      field_list = ["density"];
-     include "input/schedule_cycle_10.incl"
+     include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
    };
    ax_png {
      type = "image";
+     image_reduce_type = "max";
      image_size = [256,256];
      field_list = ["acceleration_x"];
-     include "input/schedule_cycle_10.incl"
+     include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
    };
    ay_png {
      type = "image";
+     image_reduce_type = "max";
      image_size = [256,256];
      field_list = ["acceleration_y"];
-     include "input/schedule_cycle_10.incl"
+     include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
    };
    az_png {
      type = "image";
+     image_reduce_type = "max";
      image_size = [256,256];
      field_list = ["acceleration_z"];
-     include "input/schedule_cycle_10.incl"
+     include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
    };
    phi_h5 {
      type = "data";
      image_size = [256,256];
      field_list = ["potential"];
-     include "input/schedule_cycle_10.incl"
+     include "input/schedule_cycle_1.incl"
    };
    rho_h5 {
      type = "data";
      image_size = [256,256];
      field_list = ["density"];
-     include "input/schedule_cycle_10.incl"
+     include "input/schedule_cycle_1.incl"
    }
 }
 

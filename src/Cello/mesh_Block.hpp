@@ -431,7 +431,7 @@ protected:
 public:
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
-  void x_refresh_send_face
+  void x_refresh_store_face
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]) 
   {      refresh_store_face_(n,buffer,type_refresh,if3,ic3); }
 
@@ -553,6 +553,7 @@ public: // virtual functions
 
   void ResumeFromSync();
 
+  /// Create the specified FieldFace and return its array a of length n
   FieldFace * load_face
   (int * n, char ** a,
    int if3[3], int ic3[3], bool lg3[3],
@@ -584,7 +585,8 @@ protected: // functions
 	     0 <= ic3[2] && ic3[2] <= 1);
   }
 
-  void check_face_(const int if3[3], const char * msg, const char * file, int line) const 
+  void check_face_(const int if3[3], const char * msg,
+		   const char * file, int line) const 
   {
     ASSERT5 (msg, "face %d %d %d out of range in file %s line %d",
 	     if3[0],if3[1],if3[2],file,line,

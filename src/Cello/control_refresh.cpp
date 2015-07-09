@@ -19,6 +19,7 @@ void Block::refresh_begin_(Refresh * refresh)
 {
 
   check_leaf_();
+
   check_delete_();
 
   refresh->sync().reset();
@@ -29,39 +30,52 @@ void Block::refresh_begin_(Refresh * refresh)
 
   int if3[3];
   int ic3[3];
+
+  int count = 0;
+
   if ( refresh && refresh->active() ) {
 
     const int min_face_rank = refresh->min_face_rank();
 
     const int level = this->level();
 
-    int count = 0;
-    ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
-    int if3[3];
-    int ic3[3];
-    while (it_neighbor.next()) {
-      Index index_neighbor = it_neighbor.index();
-      it_neighbor.face(if3);
-      it_neighbor.child(ic3);
-      int level_face = it_neighbor.face_level();
-      ++count;
+    if (refresh->neighbor_type() == neighbor_leaf) {
+      ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+      int if3[3];
+      int ic3[3];
+      while (it_neighbor.next()) {
+	Index index_neighbor = it_neighbor.index();
+	it_neighbor.face(if3);
+	it_neighbor.child(ic3);
+	int level_face = it_neighbor.face_level();
+	++count;
 
-      if (level_face == level) {
-	refresh_load_face_ (refresh_same,index_neighbor,if3,ic3);
-      } else if (level_face == level + 1) {
-	refresh_load_face_ (refresh_fine,index_neighbor,if3,ic3);
-      } else if (level_face == level - 1) {
-	refresh_load_face_ (refresh_coarse,index_neighbor,if3,ic3);
+	if (level_face == level) {
+	  refresh_load_face_ (refresh_same,index_neighbor,if3,ic3);
+	} else if (level_face == level + 1) {
+	  refresh_load_face_ (refresh_fine,index_neighbor,if3,ic3);
+	} else if (level_face == level - 1) {
+	  refresh_load_face_ (refresh_coarse,index_neighbor,if3,ic3);
+	}
+
       }
+    } else if (refresh->neighbor_type() == neighbor_level) {
+      ItFace it_face = this->it_face(min_face_rank,index_);
+      int if3[3];
+      int ic3[3] = {0,0,0}; // not accessed since same level
+      while (it_face.next()) {
+	Index index_face = it_face.index();
+	it_face.face(if3);
+	++count;
 
+	refresh_load_face_ (refresh_same,index_face,if3,ic3);
+
+      }
     }
-
-    // call with self to set counter
-    refresh_load_face_(refresh_same,index(),if3,ic3,count + 1);
-
-  } else {
-    refresh_load_face_(refresh_same,index(),if3,ic3,1);
   }
+
+  // call with self to set counter
+  refresh_load_face_(refresh_same,index(),if3,ic3,count + 1);
 
 }
 
@@ -127,7 +141,7 @@ void Block::refresh_load_face_
 
     int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
-    thisProxy[index_neighbor].x_refresh_send_face
+    thisProxy[index_neighbor].x_refresh_store_face
       (n,array, type_refresh, jface, ichild);
 
     delete field_face;

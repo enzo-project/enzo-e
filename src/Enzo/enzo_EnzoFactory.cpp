@@ -69,10 +69,6 @@ CProxy_Block EnzoFactory::create_block_array
 
 	TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-	// --------------------------------------------------
-	// ENTRY: #2 EnzoFactory::create_block_array() -> EnzoBlock::EnzoBlock()
-	// ENTRY: level == 0 block array insert
-	// --------------------------------------------------
 	enzo_block_array[index].insert 
 	  (index,
 	   nx,ny,nz,
@@ -96,7 +92,7 @@ CProxy_Block EnzoFactory::create_block_array
 //----------------------------------------------------------------------
 
 void EnzoFactory::create_subblock_array
-(CProxy_Block block_array,
+(CProxy_Block * block_array,
  int min_level,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -112,6 +108,8 @@ void EnzoFactory::create_subblock_array
 	     "Trying to create subblock array with min_level %d >= 0",
 	     min_level);
   }
+
+  CProxy_EnzoBlock * enzo_block_array = static_cast<CProxy_EnzoBlock*> (block_array);
 
   for (int level = -1; level >= min_level; level--) {
 
@@ -147,7 +145,7 @@ void EnzoFactory::create_subblock_array
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-	  block_array[index].insert 
+	  (*enzo_block_array)[index].insert 
 	    (index,
 	     nx,ny,nz,
 	     num_field_blocks,
@@ -193,10 +191,6 @@ Block * EnzoFactory::create_block
   index.print("DEBUG insert()",-1,2,false,simulation);
 #endif
 
-  // --------------------------------------------------
-  // ENTRY: #3 EnzoFactory::create_block() -> EnzoBlock::EnzoBlock()
-  // ENTRY: level > 0 block array insert
-  // --------------------------------------------------
   (*enzo_block_array)[index].insert
     (
      index,

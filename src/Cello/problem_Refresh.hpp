@@ -22,7 +22,8 @@ public: // interface
   : field_list_(),
     ghost_depth_(0),
     min_face_rank_(0),
-    sync_type_(sync_unknown),
+    neighbor_type_(neighbor_unknown),
+    sync_type_   (sync_unknown),
     sync_(),
     active_(true),
     callback_(0) 
@@ -33,11 +34,13 @@ public: // interface
   Refresh
   (int ghost_depth,
    int min_face_rank,
+   int neighbor_type,
    int sync_type,
    bool active=true) throw() 
   : field_list_(),
     ghost_depth_(ghost_depth),
     min_face_rank_(min_face_rank),
+    neighbor_type_(neighbor_type),
     sync_type_(sync_type),
     sync_(),
     active_(active),
@@ -61,6 +64,7 @@ public: // interface
     p | field_list_;
     p | ghost_depth_;
     p | min_face_rank_;
+    p | neighbor_type_;
     p | sync_type_;
     p | sync_;
     p | active_;
@@ -114,11 +118,15 @@ public: // interface
   int ghost_depth() const
   { return ghost_depth_; }
 
-  Sync & sync() 
-  {  return sync_; }
+  int neighbor_type() const 
+  { return neighbor_type_; }
 
   int sync_type() const 
   { return sync_type_; }
+
+  Sync & sync() 
+  {  return sync_; }
+
 
 private: // functions
 
@@ -136,17 +144,21 @@ private: // attributes
   /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
   int min_face_rank_;
 
+  /// Which subset of adjacent Blocks to refresh with
+  int neighbor_type_;
+
   /// Synchronization type
   int sync_type_;
 
-  /// Counter for synchronization
+  /// Counter for synchronization if needed
   Sync sync_;
 
-  /// Whether the Refresh object is active for the block
+  /// Whether the Refresh object is active for the block (replaces is_leaf())
   bool active_;
 
   /// Callback after the refresh operation
   int callback_;
+
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

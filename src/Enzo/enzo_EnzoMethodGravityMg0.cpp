@@ -165,9 +165,10 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
     rr_(0),rr0_(0),
     irho_(0),  iphi_(0),
     ib_(0), ir_(0), ix_(0), ic_(0),
-    iter_(0),
     min_level_(min_level),
-    max_level_(max_level)
+    max_level_(max_level),
+    mx_(0),my_(0),mz_(0)
+
   // [*]
 {
 
@@ -182,12 +183,13 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
 	    "Solver Mg0 requires min_level = %d to be < 0",
 	    min_level_);
   }
+
   /// Initialize default Refresh
 
-  int ir = add_refresh(1,0,sync_barrier);
+  int ir = add_refresh(1,0,neighbor_level,sync_barrier);
   refresh(ir)->add_all_fields(field_descr->field_count());
 
-  int il = add_refresh(1,0,sync_face);
+  int il = add_refresh(1,0,neighbor_level,sync_face);
   refresh(il)->add_all_fields(field_descr->field_count());
 
   irho_ = field_descr->field_id("density");
@@ -222,20 +224,28 @@ void EnzoMethodGravityMg0::compute ( Block * block) throw()
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   MG_VERBOSE("compute()");
 
-  // Initialize child counter for restrict synchronization
-  enzo_block->mg0_set_stop(NUM_CHILDREN(enzo_block->rank()));
-
+  const int level = block->level();
+  if (level < min_level_ || level > max_level_) {
+    block->compute_done();
+  }
   Field field = enzo_block->data()->field();
-  precision_ = field.precision(irho_);
 
-  if      (precision_ == precision_single)    
+  field.dimensions(irho_,&mx_,&my_,&mz_);
+
+  // Initialize child counter for restrict synchronization
+  enzo_block->mg_sync_set_stop(NUM_CHILDREN(enzo_block->rank()));
+  enzo_block->mg_sync_reset();
+
+  int precision = field.precision(irho_);
+
+  if      (precision == precision_single)    
     enter_solver_<float>      (enzo_block);
-  else if (precision_ == precision_double)    
+  else if (precision == precision_double)    
     enter_solver_<double>     (enzo_block);
-  else if (precision_ == precision_quadruple) 
+  else if (precision == precision_quadruple) 
     enter_solver_<long double>(enzo_block);
   else 
-    ERROR1("EnzoMethodGravityMg0()", "precision %d not recognized", precision_);
+    ERROR1("EnzoMethodGravityMg0()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
@@ -252,7 +262,7 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
   MG_VERBOSE("enter_solver_()");
   
-  iter_ = 0;
+  enzo_block->mg_iter_clear();
 
   Data * data = enzo_block->data();
   Field field = data->field();
@@ -307,7 +317,7 @@ void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
   const int level = enzo_block->level();
 
-  if (is_converged_()) {
+  if (is_converged_(enzo_block)) {
 
     exit_solver_<T>(enzo_block, return_converged);
 
@@ -398,8 +408,7 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
   int level          = index.level();
   
   // copy face data to FieldFace
-  int narray; 
-  char * array;
+
   // face (0,0,0) is the entire block
   int if3[3] = {0,0,0};
   // find which child this block is in its parent
@@ -411,14 +420,16 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
   std::vector<int> field_list;
   field_list.push_back(ir_);
 
-  // copy data from EnzoBlock to FieldFace
+  // copy data from EnzoBlock to array via FieldFace
 
+  int narray; 
+  char * array;
   FieldFace * field_face = 
     enzo_block->load_face(&narray,&array, if3, ic3, lg3, 
 			  op_array_restrict, field_list);
 
   // Create a FieldMsg for sending data to parent
-  // NOTE: don't delete on send; delete on recevie
+  // (note: charm messages not deleted on send; are deleted on receive)
   FieldMsg * field_message  = new (narray) FieldMsg;
 
   /// WARNING: double copy
@@ -433,6 +444,8 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
   field_message->ic3[0] = ic3[0];
   field_message->ic3[1] = ic3[1];
   field_message->ic3[2] = ic3[2];
+
+  //  </COMMON CODE>
 
   // Send field_message to parent
   CkCallback (CkIndex_EnzoBlock::p_mg0_restrict_recv<T>(NULL), 
@@ -462,7 +475,7 @@ void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
   std::vector<int> field_list;
   field_list.push_back(data()->field().field_id("B"));
 
-  // copy data from field_message to EnzoBlock
+  // copy data from field_message to this EnzoBlock
 
   store_face_(field_message->n,
 	      field_message->a,   if3, 
@@ -485,16 +498,16 @@ void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
 template <class T>
 void EnzoMethodGravityMg0::restrict_recv(EnzoBlock * enzo_block) throw()
 /// 
-/// [ ] restrict recv
+/// [*] restrict recv
 ///
-///      unpack B [ in EnzoBlock::p_mg0_restrict_recv() ]
+///      [ unpack B ]
 ///      if (sync.next())
 ///          begin_cycle()
 {
   MG_VERBOSE("restrict_recv_()");
 
-  if (enzo_block->mg0_sync_next()) {
-        begin_cycle_<T>(enzo_block);
+  if (enzo_block->mg_sync_next()) {
+    begin_cycle_<T>(enzo_block);
   }
   
   
@@ -531,22 +544,90 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 ///         child.prolong_recv(X)
 {
   MG_VERBOSE("prolong_send_()");
+  ItChild it_child(enzo_block->rank());
+  int ic3[3];
+  while (it_child.next(ic3)) {
+
+    Index index_child = enzo_block->index().index_child(ic3,min_level_);
+
+    // face (0,0,0) is the entire block
+    int if3[3] = {0,0,0};
+    // exclude ghost zones
+    bool lg3[3] = {false,false,false};
+    // send vector "X" data only
+    std::vector<int> field_list;
+    field_list.push_back(ix_);
+
+    // copy data from EnzoBlock to array via FieldFace
+
+    // <COMMON CODE> in restrict_send_() and prolong_send_()
+
+    int narray; 
+    char * array;
+    FieldFace * field_face = 
+      enzo_block->load_face(&narray,&array, if3, ic3, lg3, 
+			    op_array_prolong, field_list);
+
+    // Create a FieldMsg for sending data to parent
+    // (note: charm messages not deleted on send; are deleted on receive)
+    FieldMsg * field_message  = new (narray) FieldMsg;
+
+    /// WARNING: double copy
+
+    // Copy FieldFace data to field_message
+
+    // array size
+    field_message->n = narray;
+    // array values
+    memcpy (field_message->a, array, narray);
+    // child index
+    field_message->ic3[0] = ic3[0];
+    field_message->ic3[1] = ic3[1];
+    field_message->ic3[2] = ic3[2];
+
+  //  </COMMON CODE>
+
+    CkCallback (CkIndex_EnzoBlock::p_mg0_prolong_recv<T>(NULL), 
+		CkArrayIndexIndex(index_child),
+		enzo_block->proxy_array()).send(field_message);
+  }
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::p_mg0_prolong_recv(FieldMsg * msg)
+void EnzoBlock::p_mg0_prolong_recv(FieldMsg * field_message)
 /// [*]
 {
   VERBOSE("p_mg0_prolong_recv()");
+
+  // Unpack "C" vector data from children
+
+  // Face (0,0,0) is the entire block
+  int if3[3] = {0,0,0};
+  // exclude ghost zones
+  bool lg3[3] = {false,false,false};
+  // receive in vector "C"
+  std::vector<int> field_list;
+  field_list.push_back(data()->field().field_id("C"));
+
+  // copy data from field_message to this EnzoBlock
+
+  store_face_(field_message->n,
+	      field_message->a,   if3, 
+	      field_message->ic3, lg3,
+	      op_array_prolong,
+	      field_list);
+
+  delete field_message;
+
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
 
   // GET DATA
   
-  //  delete msg;
-  delete msg;
+  //  delete field_message;
+  delete field_message;
 
   method -> prolong_recv<T>(this);
 }
@@ -558,12 +639,23 @@ void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 /// 
 /// [ ] prolong recv
 ///
-///      unpack C         
+///      [ unpack C ]
 ///      X = X + C
 ///      callback = p_post_smooth()
 ///      call refresh (X,"level")
 {
   MG_VERBOSE("prolong_recv_()");
+
+  Data * data = enzo_block->data();
+  Field field = data->field();
+
+  T * X = (T*) field.values(ix_);
+  T * C = (T*) field.values(ic_);
+
+  zaxpy_(X,1.0,X,C);
+
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_mg0_post_smooth<T>(NULL),refresh(1));
 }
 
 //----------------------------------------------------------------------
@@ -606,7 +698,7 @@ void EnzoMethodGravityMg0::post_smooth(EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoMethodGravityMg0::end_cycle_(EnzoBlock * enzo_block) throw()
 /// 
-/// [ ] end cycle
+/// [X] end cycle
 ///
 ///      ++iter
 ///      if (level < max_level)
@@ -615,6 +707,24 @@ void EnzoMethodGravityMg0::end_cycle_(EnzoBlock * enzo_block) throw()
 ///         begin_cycle()
 {
   MG_VERBOSE("end_cycle_()");
+
+  enzo_block->mg_iter_increment();
+
+  if (is_converged_(enzo_block)) {
+
+    exit_solver_<T>(enzo_block, return_converged);
+
+  }
+
+  if (enzo_block->level() < max_level_) {
+
+    prolong_send_<T>(enzo_block);
+
+  } else {
+
+    begin_cycle_<T>(enzo_block);
+
+  }
 }
 
 //----------------------------------------------------------------------
@@ -660,16 +770,34 @@ void EnzoMethodGravityMg0::monitor_output_(EnzoBlock * enzo_block) throw()
 
     Monitor * monitor = enzo_block->simulation()->monitor();
 
-    monitor->print ("Enzo", "Mg0 iter %04d  rr %g",iter_, (double)(rr_/rr0_));
+    monitor->print ("Enzo", "Mg0 iter %04d  rr %g",
+		    enzo_block->mg_iter(),
+		    (double)(rr_/rr0_));
   }
 }
 
 //======================================================================
 
-bool EnzoMethodGravityMg0::is_converged_() const
+bool EnzoMethodGravityMg0::is_converged_(EnzoBlock * enzo_block) const
 /// [*]
 {
-  return (iter_ >= iter_max_);
+  return (enzo_block->mg_iter() >= iter_max_);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoMethodGravityMg0::zaxpy_ 
+(T * Z, double a, const T * X, const T * Y) const throw()
+{
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
+	Z[i] = a * X[i] + Y[i];
+      }
+    }
+  }
 }
 
 //======================================================================

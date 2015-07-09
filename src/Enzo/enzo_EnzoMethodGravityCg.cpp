@@ -103,13 +103,13 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 
   const int num_fields = field_descr->field_count();
 
-  const int ir = add_refresh(1,rank-1,sync_barrier);
+  const int ir = add_refresh(1,rank-1,neighbor_leaf,sync_barrier);
   //  refresh(ir)->add_field(idensity_);
   refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
 
-  id_refresh_matvec_ = add_refresh(1,rank-1,sync_barrier);
+  id_refresh_matvec_ = add_refresh(1,rank-1,neighbor_leaf,sync_barrier);
   refresh(id_refresh_matvec_)->add_all_fields(num_fields);
   //  refresh(id_refresh_matvec_)->add_field(ir_);
 

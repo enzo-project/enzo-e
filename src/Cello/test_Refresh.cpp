@@ -20,7 +20,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Refresh");
 
-  Refresh * refresh = new Refresh (3,2,sync_neighbor);
+  Refresh * refresh = new Refresh (3,2,neighbor_leaf,sync_neighbor);
 
   unit_assert (refresh != NULL);
 

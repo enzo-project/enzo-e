@@ -44,7 +44,7 @@ public: // interface
   ///  minimal level min_level < 0
   /// [abstract factory design pattern] 
   virtual void create_subblock_array
-  (CProxy_Block block_array,
+  (CProxy_Block * block_array,
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
