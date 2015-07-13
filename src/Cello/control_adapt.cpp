@@ -255,7 +255,7 @@ void Block::adapt_refine_()
     char buffer [80];
     int v3[3];
     index().values(v3);
-    sprintf (buffer,"Block %s (%d;%d;%d) is refining",name().c_str(),
+    sprintf (buffer,"Block %s (%x %x %x) is refining",name().c_str(),
 	     v3[0],v3[1],v3[2]);
     monitor->print("Adapt",buffer);
   }
@@ -615,7 +615,7 @@ void Block::adapt_coarsen_()
     char buffer [80];
     int v3[3];
     index().values(v3);
-    sprintf (buffer,"Block %s (%d;%d;%d) is coarsening",name().c_str(),
+    sprintf (buffer,"Block %s (%x %x %x) is coarsening",name().c_str(),
 	     v3[0],v3[1],v3[2]);
     monitor->print("Adapt",buffer);
   }

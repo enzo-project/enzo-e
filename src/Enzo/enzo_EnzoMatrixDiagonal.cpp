@@ -12,8 +12,6 @@
 
 void EnzoMatrixDiagonal::matvec (int id_y, int id_x, Block * block) throw()
 {
-  if (! block->is_leaf()) return;
-
   Data * data = block->data();
   Field field = data->field();
 
@@ -41,8 +39,6 @@ void EnzoMatrixDiagonal::matvec (int id_y, int id_x, Block * block) throw()
 
 void EnzoMatrixDiagonal::diagonal (int id_x, Block * block) throw()
 {
-  if (! block->is_leaf()) return;
-
   Data * data = block->data();
   Field field = data->field();
 

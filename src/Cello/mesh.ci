@@ -149,12 +149,17 @@ module mesh {
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
-    entry [expedited] void x_refresh_send_face
+    entry [expedited] void x_refresh_store_face
       (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);
 
     entry void x_refresh_child
       (int n, char buffer[n], int ichild[3]);
 
   };
+
+  message FieldMsg {
+     char a[];
+  };
+
 }
 

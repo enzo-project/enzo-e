@@ -266,7 +266,7 @@ EnzoMethodGravityMlat::EnzoMethodGravityMlat
 
   // Initialize default Refresh
 
-  const int ir = add_refresh(4,0,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
 
   refresh(ir)->add_all_fields(field_descr->field_count());
 
@@ -574,7 +574,7 @@ void EnzoBlock::p_mg_receive_face
 
   if (count > 0) {
     printf("%s p_mg_receive_face() set count = %d\n",name().c_str(),count);
-    mg_sync_refresh_.set_stop(count);
+    mg_sync_.set_stop(count);
   }
 
   printf ("%s p_mg_receive_face %s  "
@@ -587,9 +587,9 @@ void EnzoBlock::p_mg_receive_face
 	  n,buffer,
 	  if3[0],if3[1],if3[2],
 	  ic3[0],ic3[1],ic3[2],
-	  mg_sync_refresh_.value(),mg_sync_refresh_.stop());
+	  mg_sync_.value(),mg_sync_.stop());
   
-  if (mg_sync_refresh_.next()) {
+  if (mg_sync_.next()) {
     printf("%s p_mg_receive_face() calling compute_correction()\n",
 	   name().c_str());
     EnzoMethodGravityMlat * method = 

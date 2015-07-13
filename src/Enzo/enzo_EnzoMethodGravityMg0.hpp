@@ -74,11 +74,12 @@ public: // interface
     p | ix_;
     p | ic_;
 
-    p | iter_;
     p | min_level_;
     p | max_level_;
 
-    p | precision_;
+    p | mx_;
+    p | my_;
+    p | mz_;
   }
 
   /// Solve for the gravitational potential
@@ -127,7 +128,11 @@ protected: // methods
   
   void monitor_output_(EnzoBlock * enzo_block) throw();
 
-  bool is_converged_() const;
+  bool is_converged_(EnzoBlock * enzo_block) const;
+
+  template <class T>
+  void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
+
 
 protected: // attributes
 
@@ -176,17 +181,14 @@ protected: // attributes
   int ix_;
   int ic_;
 
-  /// Current MG iteration
-  int iter_;
-
   /// Minimum refinement level (may be < 0)
   int min_level_;
 
   /// Maximum refinement level
   int max_level_;
 
-  /// Precision of fields
-  int precision_;
+  /// Block field attributes
+  int mx_,my_,mz_;
 };
 
 #endif /* ENZO_ENZO_METHOD_GRAVITY_MG0_HPP */

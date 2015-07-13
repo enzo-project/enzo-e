@@ -260,10 +260,8 @@ void Hierarchy::create_subforest
 
   TRACE("Allocating sub-block_array_");
 
-  //  printf ("%s:%d min_level = %d\n",__FILE__,__LINE__,min_level);
-
   factory_->create_subblock_array
-    (*block_array_,min_level,
+    (block_array_,min_level,
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
      num_field_blocks,

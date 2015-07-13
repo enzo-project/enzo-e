@@ -18,6 +18,14 @@ enum sync_enum {
   sync_neighbor,
   sync_face
 };
+
+/// @enum     neighbor_enum
+/// @brief    neighbor block type
+enum neighbor_enum {
+  neighbor_unknown, // Unknown neighbor type
+  neighbor_leaf,    // neighbors that are leaves, maybe different level
+  neighbor_level    // neighbors is in same level, maybe not leaves
+};
   
 
 //----------------------------------------------------------------------

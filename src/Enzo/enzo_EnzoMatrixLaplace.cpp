@@ -12,8 +12,6 @@
 
 void EnzoMatrixLaplace::matvec (int id_y, int id_x, Block * block) throw()
 {
-  if (! block->is_leaf()) return;
-
   Data * data = block->data();
   Field field = data->field();
 
@@ -43,8 +41,6 @@ void EnzoMatrixLaplace::matvec (int id_y, int id_x, Block * block) throw()
 
 void EnzoMatrixLaplace::diagonal (int id_x, Block * block) throw()
 {
-  if (! block->is_leaf()) return;
-
   Data * data = block->data();
   Field field = data->field();
 

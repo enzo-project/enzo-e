@@ -124,11 +124,10 @@ void FieldFace::load ( int * n, char ** array) throw()
 	 "array_.size() must be > 0",
 	 array_.size() > 0);
 
-  const size_t num_fields = field_data_->field_count();
-
   size_t index_array = 0;
 
   if (field_list_.size() == 0) {
+    const size_t num_fields = field_data_->field_count();
     field_list_.resize(num_fields);
     for (size_t i=0; i<num_fields; i++) field_list_[i] = i;
   }
@@ -203,6 +202,7 @@ void FieldFace::load ( int * n, char ** array) throw()
   }
 
   *n = array_.size();
+
   ASSERT("FieldFace::load()",
 	 "array size must be > 0",
 	 *n > 0);
@@ -214,12 +214,15 @@ void FieldFace::load ( int * n, char ** array) throw()
 
 void FieldFace::store (int n, char * array) throw()
 {
-
-  const size_t num_fields = field_data_->field_count();
+  if (array_.size() == 0)  allocate ();
 
   size_t index_array = 0;
 
-  for (size_t index_field=0; index_field<num_fields; index_field++) {
+  for (size_t index_field_list=0;
+       index_field_list < field_list_.size();
+       index_field_list++) {
+
+    size_t index_field = field_list_[index_field_list];
 
     precision_type precision = field_data_->precision(index_field);
 
@@ -293,15 +296,20 @@ void FieldFace::store (int n, char * array) throw()
 
 char * FieldFace::allocate () throw()
 {
-  size_t num_fields = field_data_->field_count();
-
-  ASSERT("FieldFace::allocate()",
-	 "num_fields must be > 0",
-	 num_fields > 0);
-  
   int array_size = 0;
 
-  for (size_t index_field = 0; index_field < num_fields; index_field++) {
+  // default all fields
+  if (field_list_.size() == 0) {
+    const size_t nf = field_data_->field_count();
+    field_list_.resize(nf);
+    for (size_t i=0; i<nf; i++) field_list_[i]=i;
+  }
+
+  for (size_t index_field_list=0;
+       index_field_list < field_list_.size();
+       index_field_list++) {
+
+    size_t index_field = field_list_[index_field_list];
 
     // Need element size for alignment adjust below
 
@@ -338,6 +346,10 @@ char * FieldFace::allocate () throw()
     array_size += face_bytes;
 
   }
+
+  ASSERT("FieldFace::allocate()",
+	 "array_size must be > 0, maybe field_list_.size() is 0?",
+	 array_size);
 
   array_.resize(array_size);
 

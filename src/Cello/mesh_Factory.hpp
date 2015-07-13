@@ -60,7 +60,7 @@ public: // interface
   ///  solvers.  Arguments are the same as create_block_array(), plus
   ///  minimal level min_level < 0
   virtual void create_subblock_array
-  (CProxy_Block block_array,
+  (CProxy_Block * block_array,
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,

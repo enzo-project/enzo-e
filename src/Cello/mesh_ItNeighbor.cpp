@@ -22,6 +22,11 @@ ItNeighbor::ItNeighbor
     index_(index),
     level_(index.level())
 {
+  if (!block->is_leaf()) {
+    WARNING1("ItNeighbor::ItNeighbor",
+	   "ItNeighbor assumes Blocks are leaves, but Block %s is not a leaf",
+	   block->name().c_str());
+  }
   reset();
   for (int axis=0; axis<3; axis++) {
     n3_[axis] = n3[axis];
@@ -63,7 +68,7 @@ Index ItNeighbor::index() const
   } else {
     ERROR4("ItNeighbor::index()",
 	   "index %s level %d: face_level %d and block level %d differ by more than one",
-	   index_.bit_string(5,2,0).c_str(),index_.level(),face_level,level_);
+	   block_->name().c_str(),index_.level(),face_level,level_);
     return index_neighbor;
   }
 }

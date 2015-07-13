@@ -23,7 +23,7 @@ EnzoMethodPpml::EnzoMethodPpml
 {
   // Initialize the default Refresh object
 
-  const int ir = add_refresh(4,0,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
 
   refresh(ir)->add_all_fields(field_descr->field_count());
 }

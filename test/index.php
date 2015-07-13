@@ -402,15 +402,16 @@ function test_summary($component,$test_output,$executables, $dir)
 
 function begin_hidden ($id, $title)
 {  
-  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='block'; return false;\"><h3>$title</h3></a></p> ";
-  echo "<div style=\"display: none;\" id=\"$id\">";
-  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='none'; return false;\">[hide]</a></p>";
+  
+  //  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='block'; return false;\"><h3>$title</h3></a></p> ";
+  //  echo "<div style=\"display: none;\" id=\"$id\">";
+  //  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='none'; return false;\">[hide]</a></p>";
 }
 
 function end_hidden ($id)
 {
-  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='none'; return false;\">[hide]";
-  echo "</div>";
+  //  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='none'; return false;\">[hide]";
+  //  echo "</div>";
 }
 
 function test_table ($file_root,$size_array, $types)
@@ -485,7 +486,7 @@ function test_table_blocks ($file_root,$cycle_array, $types)
       for ($index_cycle = 0; $index_cycle < sizeof($cycle_array); $index_cycle++) {
 	$cycle = $cycle_array[$index_cycle];
 	for ($col = 0; $col < $cols; $col++) {
-	  $rbin = binary($rows - $row - 1,2);
+	  $rbin = binary($rows - $row - 1,1);
 	  $cbin = binary($col,2);
 	  echo "<td class=block> <img src=${file_root}-$cycle-B${rbin}_${cbin}.png width=80></img> </td>";
 	}

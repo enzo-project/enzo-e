@@ -100,9 +100,6 @@ CProxy_Block Factory::create_block_array
     }
   }
 
-  proxy_block.doneInserting();
-
-
   TRACE1("Factory::create_block_array = %p",&proxy_block);
   return proxy_block;
 }
@@ -110,7 +107,7 @@ CProxy_Block Factory::create_block_array
 //----------------------------------------------------------------------
 
 void Factory::create_subblock_array
-(CProxy_Block block_array,
+(CProxy_Block * block_array,
  int min_level,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -136,8 +133,6 @@ void Factory::create_subblock_array
     if (nby > 1) nby = ceil(0.5*nby);
     if (nbz > 1) nbz = ceil(0.5*nbz);
 
-    //    printf ("%s:%d nbx,nby,nbz = %d %d %d\n",nbx,nby,nbz);
-
     int count_adapt;
 
     int    cycle = 0;
@@ -154,7 +149,7 @@ void Factory::create_subblock_array
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-	  block_array[index].insert
+	  (*block_array)[index].insert
 	    (index,
 	     nx,ny,nz,
 	     num_field_blocks,
@@ -169,9 +164,6 @@ void Factory::create_subblock_array
       }
     }
   }
-
-  block_array.doneInserting();
-
 }
 
 //----------------------------------------------------------------------

@@ -317,11 +317,21 @@ public: /// entry methods
   template <class T>
   void p_mg0_restrict_send(CkReductionMsg * msg);
   template <class T>
-  void p_mg0_restrict_recv(CkReductionMsg * msg);
+  void p_mg0_restrict_recv(FieldMsg * msg);
   template <class T>
-  void p_mg0_prolong_recv(CkReductionMsg * msg);
+  void p_mg0_prolong_recv(FieldMsg * msg);
   template <class T>
   void p_mg0_post_smooth(CkReductionMsg * msg);
+
+  void mg_sync_reset()             { mg_sync_.reset(); }
+  void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }
+  bool mg_sync_next()         { return mg_sync_.next(); };
+  int  mg_sync_value()        { return mg_sync_.value(); };
+  int  mg_sync_stop()         { return mg_sync_.stop(); };
+
+  void mg_iter_clear() { mg_iter_ = 0; }
+  void mg_iter_increment() { ++mg_iter_; }
+  int mg_iter() const {return mg_iter_; }
 
 protected: // functions
 
@@ -333,7 +343,10 @@ protected: // attributes
 
   
   // MG SOLVER
-  Sync mg_sync_refresh_;
+  Sync mg_sync_;
+
+  // MG iteration count
+  int mg_iter_;
 
 public: // attributes (YIKES!)
 

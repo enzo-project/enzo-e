@@ -71,11 +71,8 @@ void Block::compute_continue_ ()
 
 void Block::compute_done ()
 {
-
   index_method_++;
-
   compute_next_();
-
 }
 
 //----------------------------------------------------------------------
