@@ -257,42 +257,54 @@ public: /// entry methods
   /// perform the necessary reductions for shift
   CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
 
-  /// EnzoMethodGravityBiCGStab entry method: DOT ==> refresh P
+  /// EnzoMethodGravityBiCGStab entry method: SUM(B) and COUNT(B)
   template <class T>
-  void r_bicgstab_loop_0a (CkReductionMsg * msg) ;  
-
-  /// EnzoMethodGravityBiCGStab entry method: ==> refresh P
-  template <class T>
-  void r_bicgstab_loop_0b (CkReductionMsg * msg) ;  
-
-  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R) after shift
-  template <class T>
-  void r_bicgstab_shift_1 (CkReductionMsg * msg) ;
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh P for MATVEC
-  template <class T>
-  void r_bicgstab_loop_1 (CkReductionMsg * msg) ;
-
-  /// EnzoMethodGravityBiCGStab entry method: DOT(P,AP)
-  template <class T>
-  void r_bicgstab_loop_3 (CkReductionMsg * msg) ;
+  void r_gravity_bicgstab_start_1(CkReductionMsg* msg);  
 
   /// EnzoMethodGravityBiCGStab entry method: DOT(R,R)
   template <class T>
-  void r_bicgstab_loop_5 (CkReductionMsg * msg) ;
+  void r_gravity_bicgstab_start_3(CkReductionMsg* msg);  
+
+  /// EnzoMethodGravityBiCGStab entry method: refresh P
+  template <class T>
+  void r_gravity_bicgstab_loop_1(CkReductionMsg* msg);  
+
+  /// EnzoMethodGravityBiCGStab entry method: refresh Y
+  template <class T>
+  void r_gravity_bicgstab_loop_3(CkReductionMsg* msg);
+
+  /// EnzoMethodGravityBiCGStab entry method: DOT(V,R0)
+  template <class T>
+  void r_gravity_bicgstab_loop_5(CkReductionMsg* msg);
+
+  /// EnzoMethodGravityBiCGStab entry method: refresh Q
+  template <class T>
+  void r_gravity_bicgstab_loop_7(CkReductionMsg* msg);
+
+  /// EnzoMethodGravityBiCGStab entry method: refresh Y
+  template <class T>
+  void r_gravity_bicgstab_loop_9(CkReductionMsg* msg);
+
+  /// EnzoMethodGravityBiCGStab entry method: DOT(U,U) and DOT(U,Q)
+  template <class T>
+  void r_gravity_bicgstab_loop_11(CkReductionMsg* msg);
+
+  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R) and DOT(R,R0)
+  template <class T>
+  void r_gravity_bicgstab_loop_13(CkReductionMsg* msg);
+
+  /// EnzoMethodGravityBiCGStab entry method: ITER++
+  template <class T>
+  void r_gravity_bicgstab_loop_15(CkReductionMsg* msg);
 
   /// EnzoMethodGravityBiCGStab entry method: 
   /// perform the necessary reductions for shift
-  CkReductionMsg * r_method_gravity_bicgstab(int n, CkReductionMsg ** msgs);
+  CkReductionMsg* r_method_gravity_bicgstab(int n, CkReductionMsg** msgs);
 
   void p_enzo_matvec()
   {      enzo_matvec_(); }
   void r_enzo_matvec(CkReductionMsg * msg)
   {      enzo_matvec_(); delete msg; }
-  void gravity_bicgstab_r_matvec_1(CkReductionMsg * msg)
-  {      gravity_bicgstab_matvec_1_(); delete msg; }
-  void gravity_bicgstab_r_matvec_2(CkReductionMsg * msg)
-  {      gravity_bicgstab_matvec_2_(); delete msg; }
 
   /// EnzoMethodSolverMlat entry method: receive face data for refresh
   void p_mg_receive_face

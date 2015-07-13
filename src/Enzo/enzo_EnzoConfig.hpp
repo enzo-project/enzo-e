@@ -109,6 +109,13 @@ public: // attributes
   bool                       method_gravity_cg_diag_precon;
   int                        method_gravity_cg_monitor_iter;
 
+  // EnzoMethodGravityBiCGStab
+  int                        method_gravity_bicgstab_iter_max;
+  double                     method_gravity_bicgstab_res_tol;
+  double                     method_gravity_bicgstab_grav_const;
+  bool                       method_gravity_bicgstab_diag_precon;
+  int                        method_gravity_bicgstab_monitor_iter;
+
   // EnzoMethodGravityMlat
   // EnzoMethodGravityMg0
   std::string                method_gravity_mg_type;
@@ -122,13 +129,6 @@ public: // attributes
   std::string                method_gravity_mg_prolong;
   int                        method_gravity_mg_min_level;
   int                        method_gravity_mg_max_level;
-
-  // EnzoMethodGravityBiCGStab
-  int                        method_gravity_bicgstab_iter_max;
-  double                     method_gravity_bicgstab_res_tol;
-  double                     method_gravity_bicgstab_grav_const;
-  bool                       method_gravity_bicgstab_diag_precon;
-  int                        method_gravity_bicgstab_monitor_iter;
 
 
 

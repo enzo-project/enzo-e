@@ -61,7 +61,6 @@ public: // interface
     p | iter_max_;
     p | res_tol_;
     p | monitor_iter_;
-    p | is_leaf_;
 
     p | idensity_;
     p | ipotential_;
@@ -110,29 +109,41 @@ public: // interface
   }
 
   
-  /// Solve for the gravitational potential
+  /// Enter solver for the gravitational potential
   virtual void compute(Block* block) throw();
 
   /// Name for the solver
   virtual std::string name() throw() { return "gravity_bicgstab"; }
 
-  /// Continuation after global reduction
-  template<class T> void bicgstab_start_1(EnzoBlock* enzo_block) throw();
+  /// Shifts RHS and sets initial vectors R, R0, and P
+  template<class T> void gravity_bicgstab_start_2(EnzoBlock* enzo_block) throw();
 
-  /// Continuation after global reduction
-  template<class T> void bicgstab_start_3(EnzoBlock* enzo_block) throw();
+  /// Entry into BiCGStab iteration loop
+  template<class T> void gravity_bicgstab_loop_0(EnzoBlock* enzo_block) throw();
 
-  /// Continuation after global reduction
-  template<class T> void bicgstab_loop_3(EnzoBlock* enzo_block) throw();
+  /// First preconditioner solve, begins refresh on Y
+  template<class T> void gravity_bicgstab_loop_2(EnzoBlock* enzo_block) throw();
 
-  /// Continuation after global reduction
-  template<class T> void bicgstab_loop_6(EnzoBlock* enzo_block) throw();
+  /// First matrix-vector product, begins dot-product DOT(V,R0)
+  template<class T> void gravity_bicgstab_loop_4(EnzoBlock* enzo_block) throw();
 
-  /// Continuation after global reduction
-  template<class T> void bicgstab_loop_7(EnzoBlock* enzo_block) throw();
+  /// First vector updates, begins refresh on Q
+  template<class T> void gravity_bicgstab_loop_6(EnzoBlock* enzo_block) throw();
+
+  /// Second preconditioner solve, begins refresh on Y
+  template<class T> void gravity_bicgstab_loop_8(EnzoBlock* enzo_block) throw();
+
+  /// Second matrix-vector product, begins dot-products DOT(U,U) and DOT(U,Q)
+  template<class T> void gravity_bicgstab_loop_10(EnzoBlock* enzo_block) throw();
+
+  /// Second vector updates, begins dot-products DOT(R,R) and DOT(R,R0)
+  template<class T> void gravity_bicgstab_loop_12(EnzoBlock* enzo_block) throw();
+
+  /// Updates search direction, begins update on iteration counter
+  template<class T> void gravity_bicgstab_loop_14(EnzoBlock* enzo_block) throw();
 
   /// End of iteration
-  template<class T> void bicgstab_end(EnzoBlock* enzo_block, int retval) throw();
+  template<class T> void gravity_bicgstab_end(EnzoBlock* enzo_block, int retval) throw();
 
   /// Set bs_ (B sum) by EnzoBlock after reduction
   void set_bs(long double bs) throw() { bs_ = bs; }
@@ -170,12 +181,6 @@ protected: // methods
 
   template<class T> void compute_(EnzoBlock * enzo_block) throw();
 
-  /// ?????????? unused ??????????
-  template<class T> void bicgstab_begin_1_() throw();
-
-  /// ?????????? unused ??????????
-  void bicgstab_exit_() throw();
-
   /// Compute local contribution to inner-product X*Y
   template<class T> long double dot_(const T* X, const T* Y) const throw();
 
@@ -184,19 +189,9 @@ protected: // methods
   /// Compute local sum of vector elements X_i
   template<class T> long double sum_(const T* X) const throw();
 
-  /// scale the vector by the given scalar Y = a*X
-  template<class T> void scale_(T* Y, T a, const T* X) const throw();
-
   /// return the number of elements of the vector X
-  template<class T> long double count_(T* X) const throw();
+  long double count_() const throw();
   
-  /// Shift the vector X by a scalar multiple of Y
-  /// NOTE includes ghost zones since performed after ghost refresh
-  template<class T> void shift_(T* X, const T a, const T* Y) const throw();
-
-  /// Set whether current Block is a leaf--if not don't touch data
-  void check_leaf(Block* block) throw() { is_leaf_ = block->is_leaf(); }
-
 protected: // attributes
 
   /// Matrix
@@ -250,9 +245,6 @@ protected: // attributes
   int iv_;
   int iq_;
   int iu_;
-
-  /// Whether current block is a leaf
-  bool is_leaf_;
 
   /// Block field attributes
   int nx_, ny_, nz_;
