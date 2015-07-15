@@ -240,6 +240,10 @@ public: // interface
   void allocate_temporary(int id) throw (std::out_of_range)
   { field_data_->allocate_temporary(id); }
 
+  /// Deallocate storage for the temporary fields
+  void deallocate_temporary(int id) throw (std::out_of_range)
+  { field_data_->deallocate_temporary(id); }
+
   /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
   void reallocate_permanent(bool ghosts_allocated = false) throw()
