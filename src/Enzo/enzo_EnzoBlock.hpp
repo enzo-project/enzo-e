@@ -266,24 +266,20 @@ public: /// entry methods
   void r_gravity_bicgstab_start_3(CkReductionMsg* msg);  
 
   /// EnzoMethodGravityBiCGStab entry method: refresh P
-  template <class T>
-  void r_gravity_bicgstab_loop_1(CkReductionMsg* msg);  
+  void p_gravity_bicgstab_loop_1();  
 
   /// EnzoMethodGravityBiCGStab entry method: refresh Y
-  template <class T>
-  void r_gravity_bicgstab_loop_3(CkReductionMsg* msg);
+  void p_gravity_bicgstab_loop_3();
 
   /// EnzoMethodGravityBiCGStab entry method: DOT(V,R0)
   template <class T>
   void r_gravity_bicgstab_loop_5(CkReductionMsg* msg);
 
   /// EnzoMethodGravityBiCGStab entry method: refresh Q
-  template <class T>
-  void r_gravity_bicgstab_loop_7(CkReductionMsg* msg);
+  void p_gravity_bicgstab_loop_7();
 
   /// EnzoMethodGravityBiCGStab entry method: refresh Y
-  template <class T>
-  void r_gravity_bicgstab_loop_9(CkReductionMsg* msg);
+  void p_gravity_bicgstab_loop_9();
 
   /// EnzoMethodGravityBiCGStab entry method: DOT(U,U) and DOT(U,Q)
   template <class T>

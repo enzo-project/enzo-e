@@ -27,7 +27,7 @@ class EnzoMethodGravityBiCGStab : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravityBiCGStab object
-  EnzoMethodGravityBiCGStab(const FieldDescr* field_descr,
+  EnzoMethodGravityBiCGStab(FieldDescr* field_descr,
 			    int rank,
 			    double grav_const,
 			    int iter_max, 
@@ -260,8 +260,8 @@ protected: // attributes
   /// dot(R_i+1,R_0)
   long double beta_n_;
 
-  /// dot(V_i,R_0)
-  long double vr0_;
+  /// beta_n_ / beta_d_
+  long double beta_;
 
   /// dot(U_i,U_i)
   long double omega_d_;
@@ -269,14 +269,14 @@ protected: // attributes
   /// dot(U_i,Q_i)
   long double omega_n_;
 
-  /// dot(R_i,R_i)
-  long double rr_;
-
-  /// beta_n_ / beta_d_
-  long double beta_;
-
   /// omega_n_ / omega_d_
   long double omega_;
+
+  /// dot(V_i,R_0)
+  long double vr0_;
+
+  /// dot(R_i,R_i)
+  long double rr_;
 
   /// beta_d_ / vr0_
   long double alpha_;

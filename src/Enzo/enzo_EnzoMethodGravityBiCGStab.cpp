@@ -289,7 +289,7 @@
 // gravity_bicgstab_loop_10()
 // --------------------
 //
-//    V = MATVEC(A,Y)
+//    U = MATVEC(A,Y)
 //
 //    omega_d_ = DOT(U, U) ==> r_gravity_bicgstab_loop_11
 //    omega_n_ = DOT(U, Q) ==> r_gravity_bicgstab_loop_11
@@ -380,7 +380,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
-(const FieldDescr* field_descr, int rank,
+(FieldDescr* field_descr, int rank,
  double grav_const, int iter_max, double res_tol, 
  int monitor_iter, bool is_singular, bool diag_precon) 
   : Method(), 
@@ -413,15 +413,37 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
 
-  ib_ = field_descr->field_id("B");
-  ix_ = field_descr->field_id("X");
-  ir_ = field_descr->field_id("R");
-  ir0_ = field_descr->field_id("R0");
-  ip_ = field_descr->field_id("P");
-  iy_ = field_descr->field_id("Y");
-  iv_ = field_descr->field_id("V");
-  iq_ = field_descr->field_id("Q");
-  iu_ = field_descr->field_id("U");
+  /// access existing fields for use as temporaries
+  // ib_ = field_descr->field_id("B");
+  // ix_ = field_descr->field_id("X");
+  // ir_ = field_descr->field_id("R");
+  // ir0_ = field_descr->field_id("R0");
+  // ip_ = field_descr->field_id("P");
+  // iy_ = field_descr->field_id("Y");
+  // iv_ = field_descr->field_id("V");
+  // iq_ = field_descr->field_id("Q");
+  // iu_ = field_descr->field_id("U");
+
+  /// create temporary fields for use within solver
+  int precision = field_descr->precision(idensity_);
+  ib_ = field_descr->insert_temporary(name() + "_B");
+  field_descr->set_precision(ib_, precision);
+  ix_ = field_descr->insert_temporary(name() + "_X");
+  field_descr->set_precision(ix_, precision);
+  ir_ = field_descr->insert_temporary(name() + "_R");
+  field_descr->set_precision(ir_, precision);
+  ir0_ = field_descr->insert_temporary(name() + "_R0");
+  field_descr->set_precision(ir0_, precision);
+  ip_ = field_descr->insert_temporary(name() + "_P");
+  field_descr->set_precision(ip_, precision);
+  iy_ = field_descr->insert_temporary(name() + "_Y");
+  field_descr->set_precision(iy_, precision);
+  iv_ = field_descr->insert_temporary(name() + "_V");
+  field_descr->set_precision(iv_, precision);
+  iq_ = field_descr->insert_temporary(name() + "_Q");
+  field_descr->set_precision(iq_, precision);
+  iu_ = field_descr->insert_temporary(name() + "_U");
+  field_descr->set_precision(iu_, precision);
 
   // Initialize default Refresh
   const int num_fields = field_descr->field_count();
@@ -451,6 +473,18 @@ void EnzoMethodGravityBiCGStab::compute(Block* block) throw() {
 
   int precision = field.precision(idensity_);
 
+  /// allocate temporary vector data for use witin solve
+  field.allocate_temporary(ib_);
+  field.allocate_temporary(ix_);
+  field.allocate_temporary(ir_);
+  field.allocate_temporary(ir0_);
+  field.allocate_temporary(ip_);
+  field.allocate_temporary(iy_);
+  field.allocate_temporary(iv_);
+  field.allocate_temporary(iq_);
+  field.allocate_temporary(iu_);
+
+  /// call templated internal compute_ routine
   if      (precision == precision_single)    compute_<float>      (enzo_block);
   else if (precision == precision_double)    compute_<double>     (enzo_block);
   else if (precision == precision_quadruple) compute_<long double>(enzo_block);
@@ -460,7 +494,7 @@ void EnzoMethodGravityBiCGStab::compute(Block* block) throw() {
 
 //======================================================================
 
-extern CkReduction::reducerType r_method_gravity_bicgstab_type;
+extern CkReduction::reducerType r_method_gravity_cg_type;
 
 template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block) throw() {
 
@@ -477,7 +511,6 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
     T* density = (T*) field.values(idensity_);
     T* B       = (T*) field.values(ib_);
     T* X       = (T*) field.values(ix_);
-    T* R       = (T*) field.values(ir_);
 
     //   X = 0   [Q: is this necessary?  couldn't we reuse the solution from the previous solve?]
     //   B = -h^2 * 4 * PI * G * density
@@ -494,18 +527,22 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
 
   // set bs_ = SUM(B)   ==> r_gravity_bicgstab_start_1
   // set bc_ = COUNT(B) ==> r_gravity_bicgstab_start_1
-  long double reduce[2] = {0.0, 0.0};
+  //long double reduce[2] = {0.0, 0.0};
+  long double reduce[3] = {0.0, 0.0, 0.0};
 
   if (enzo_block->is_leaf()) {
+    T* B = (T*) field.values(ib_);
     reduce[0] = sum_(B);
-    reduce[1] = count_(B);
+    reduce[1] = count_();
   }
 
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_start_1<T>(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->contribute(2*sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  // enzo_block->contribute(2*sizeof(long double), &reduce, 
+  // 			 r_method_gravity_cg_type, callback);
+  enzo_block->contribute(3*sizeof(long double), &reduce, 
+			 r_method_gravity_cg_type, callback);
 }
 
 //----------------------------------------------------------------------
@@ -521,7 +558,7 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_start_1(CkReductionMsg* msg
   delete msg;
 
   // call gravity_bicgstab_start_2 to continue
-  method->gravity_bicgstab_start_2(this);
+  method->gravity_bicgstab_start_2<T>(this);
 
 }
 
@@ -572,15 +609,21 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_start_2(EnzoB
   }
 
   // beta_d_ = DOT(R, R) ==> r_gravity_bicgstab_start_3
-  long double reduce = 0.0;
-  if (enzo_block->is_leaf())
-    reduce = dot_(R,R);
+  //long double reduce = 0.0;
+  long double reduce[3] = {0.0, 0.0, 0.0};
+  if (enzo_block->is_leaf()) {
+    T* R = (T*) field.values(ir_);
+    // reduce = dot_(R,R);
+    reduce[0] = dot_(R,R);
+  }
   
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_start_3<T>(NULL), 
-		      this->proxy_array());
+		      enzo_block->proxy_array());
 
-  this->contribute(sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  // enzo_block->contribute(sizeof(long double), &reduce, 
+  // 			 r_method_gravity_cg_type, callback);
+  enzo_block->contribute(3*sizeof(long double), &reduce, 
+			 r_method_gravity_cg_type, callback);
 }
 
 //----------------------------------------------------------------------
@@ -607,8 +650,8 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_0(EnzoBl
 
   // initialize/update current error, store error statistics
   if (iter_ == 0) {
-    rho0_ = sqrt(beta_d_)
-    if (rho0_ == 0.0)  rho0_ = 1.0
+    rho0_ = sqrt(beta_d_);
+    if (rho0_ == 0.0)  rho0_ = 1.0;
     err_ = sqrt(beta_d_) / rho0_;
     err_min_ = err_;
     err_max_ = err_;
@@ -645,11 +688,11 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_0(EnzoBl
     gravity_bicgstab_end<T>(enzo_block, return_error_max_iter_reached);
 
 
-  // refresh P and call r_gravity_bicgstab_loop_1 to handle re-entry
+  // refresh P and call p_gravity_bicgstab_loop_1 to handle re-entry
   } else {
 
     this->refresh(1)->set_active(enzo_block->is_leaf());
-    enzo_block->refresh_enter(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_1(NULL),
+    enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_1(),
 			      this->refresh(1));
 
   }
@@ -657,7 +700,7 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_0(EnzoBl
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_gravity_bicgstab_loop_1() {
+void EnzoBlock::p_gravity_bicgstab_loop_1() {
   /// re-entry into gravity_bicgstab_loop_2
 
   EnzoMethodGravityBiCGStab* method = 
@@ -691,16 +734,16 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_2(EnzoBl
     M_->matvec(iy_, ip_, enzo_block);
   }
 
-  // refresh Y and call r_gravity_bicgstab_loop_3 to handle re-entry
+  // refresh Y and call p_gravity_bicgstab_loop_3 to handle re-entry
   this->refresh(1)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_3(NULL),
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_3(),
 			    this->refresh(1));
 
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoBlock::r_gravity_bicgstab_loop_3(CkReductionMsg* msg) {
+void EnzoBlock::p_gravity_bicgstab_loop_3() {
   /// re-entry into gravity_bicgstab_loop_4
 
   EnzoMethodGravityBiCGStab* method = 
@@ -736,17 +779,21 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_4(EnzoBl
   }
 
   // vr0_ = DOT(V, R0) ==> r_gravity_bicgstab_loop_5
-  long double reduce = 0.0;
+  //long double reduce = 0.0;
+  long double reduce[3] = {0.0, 0.0, 0.0};
   if (enzo_block->is_leaf()) {
     T* R0 = (T*) field.values(ir0_);
     T* V  = (T*) field.values(iv_);
-    reduce = dot_(V,R0);
+    // reduce = dot_(V,R0);
+    reduce[0] = dot_(V,R0);
   }
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_5<T>(NULL), 
-		enzo_block->proxy_array());
+		      enzo_block->proxy_array());
 
-  enzo_block->contribute(sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  // enzo_block->contribute(sizeof(long double), &reduce, 
+  // 			 r_method_gravity_cg_type, callback);
+  enzo_block->contribute(3*sizeof(long double), &reduce, 
+			 r_method_gravity_cg_type, callback);
   
 }
 
@@ -795,16 +842,16 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_6(EnzoBl
 
   }
 
-  // refresh Q and call r_gravity_bicgstab_loop_7 to handle re-entry
+  // refresh Q and call p_gravity_bicgstab_loop_7 to handle re-entry
   this->refresh(1)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_7(NULL),
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_7(),
 			    this->refresh(1));
 
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoBlock::r_gravity_bicgstab_loop_7(CkReductionMsg* msg) {
+void EnzoBlock::p_gravity_bicgstab_loop_7() {
   /// re-entry into gravity_bicgstab_loop_8
 
   EnzoMethodGravityBiCGStab* method = 
@@ -839,16 +886,16 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_8(EnzoBl
     M_->matvec(iy_, iq_, enzo_block);
   }
 
-  // refresh Y and call r_gravity_bicgstab_loop_9 to handle re-entry
+  // refresh Y and call p_gravity_bicgstab_loop_9 to handle re-entry
   this->refresh(1)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_9(NULL),
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_9(),
 			    this->refresh(1));
 
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoBlock::r_gravity_bicgstab_loop_9(CkReductionMsg* msg) {
+void EnzoBlock::p_gravity_bicgstab_loop_9() {
   /// re-entry into gravity_bicgstab_loop_10
 
   EnzoMethodGravityBiCGStab* method = 
@@ -877,15 +924,16 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_10(EnzoB
   Field field = data->field();
   double hx,hy,hz;
 
-  // V = MATVEC(A,Y)
+  // U = MATVEC(A,Y)
   if (enzo_block->is_leaf()) {
     data->field_cell_width(&hx,&hy,&hz);
-    A_->matvec(iv_, iy_, enzo_block);
+    A_->matvec(iu_, iy_, enzo_block);
   }
 
   // omega_d_ = DOT(U, U) ==> r_gravity_bicgstab_loop_11
   // omega_n_ = DOT(U, Q) ==> r_gravity_bicgstab_loop_11
-  long double reduce[2] = {0.0, 0.0};
+  //long double reduce[2] = {0.0, 0.0};
+  long double reduce[3] = {0.0, 0.0, 0.0};
   if (enzo_block->is_leaf()) {
     T* U  = (T*) field.values(iu_);
     T* Q  = (T*) field.values(iq_);
@@ -894,10 +942,12 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_10(EnzoB
   }
 
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_11<T>(NULL), 
-		enzo_block->proxy_array());
+		      enzo_block->proxy_array());
 
-  enzo_block->contribute(2*sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  // enzo_block->contribute(2*sizeof(long double), &reduce, 
+  // 			 r_method_gravity_cg_type, callback);
+  enzo_block->contribute(3*sizeof(long double), &reduce, 
+			 r_method_gravity_cg_type, callback);
     
 }
 
@@ -962,7 +1012,8 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_12(EnzoB
 
   // rr_     = DOT(R, R)  ==> r_gravity_bicgstab_loop_13
   // beta_n_ = DOT(R, R0) ==> r_gravity_bicgstab_loop_13
-  long double reduce[2] = {0.0, 0.0};
+  //long double reduce[2] = {0.0, 0.0};
+  long double reduce[3] = {0.0, 0.0, 0.0};
   if (enzo_block->is_leaf()) {
     T* R  = (T*) field.values(ir_);
     T* R0 = (T*) field.values(ir0_);
@@ -971,10 +1022,12 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_12(EnzoB
   }
 
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_13<T>(NULL), 
-		enzo_block->proxy_array());
+		      enzo_block->proxy_array());
   
-  enzo_block->contribute(2*sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  // enzo_block->contribute(2*sizeof(long double), &reduce, 
+  // 			 r_method_gravity_cg_type, callback);
+  enzo_block->contribute(3*sizeof(long double), &reduce, 
+			 r_method_gravity_cg_type, callback);
     
 }
 
@@ -1085,7 +1138,7 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_end(EnzoBlock
     if (enzo_block->index().is_root()) 
       monitor_output_(enzo_block);
 
-    copy_(potential, X, mx_, my_, mz_, is_leaf_);
+    copy_(potential, X, mx_, my_, mz_);
 
     bool symmetric;
     int order;
@@ -1094,6 +1147,19 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_end(EnzoBlock
 						 order=2);
     compute_acceleration.compute(enzo_block);
   }
+
+
+  /// deallocate temporary vector data
+  field.deallocate_temporary(ib_);
+  field.deallocate_temporary(ix_);
+  field.deallocate_temporary(ir_);
+  field.deallocate_temporary(ir0_);
+  field.deallocate_temporary(ip_);
+  field.deallocate_temporary(iy_);
+  field.deallocate_temporary(iv_);
+  field.deallocate_temporary(iq_);
+  field.deallocate_temporary(iu_);
+
 
   enzo_block->compute_done();
 }
@@ -1106,9 +1172,9 @@ void EnzoMethodGravityBiCGStab::monitor_output_(EnzoBlock* enzo_block) throw() {
 
   monitor->print("Enzo", "BiCGStab iter %04d  rr %g [%g %g]",
 		 iter_,
-		 (double)(rr_    / rho0_),
-		 (double)(rr_min_/ rho0_),
-		 (double)(rr_max_/ rho0_));
+		 (double)(err_),
+		 (double)(err_min_),
+		 (double)(err_max_));
 }
 
 //======================================================================

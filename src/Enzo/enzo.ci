@@ -116,27 +116,25 @@ module enzo {
     template <class T>
     entry void r_cg_loop_5(CkReductionMsg *msg);
 
-    // EnzoMethodGravityBiCGStab synchronization entry methods
+    // EnzoMethodGravityBiCGStab post-reduction entry methods
     template <class T>
     entry void r_gravity_bicgstab_start_1(CkReductionMsg *msg);
     template <class T>
     entry void r_gravity_bicgstab_start_3(CkReductionMsg *msg);
     template <class T>
-    entry void r_gravity_bicgstab_loop_1(CkReductionMsg *msg);
-    template <class T>
-    entry void r_gravity_bicgstab_loop_3(CkReductionMsg *msg);
-    template <class T>
     entry void r_gravity_bicgstab_loop_5(CkReductionMsg *msg);
-    template <class T>
-    entry void r_gravity_bicgstab_loop_7(CkReductionMsg *msg);
-    template <class T>
-    entry void r_gravity_bicgstab_loop_9(CkReductionMsg *msg);
     template <class T>
     entry void r_gravity_bicgstab_loop_11(CkReductionMsg *msg);
     template <class T>
     entry void r_gravity_bicgstab_loop_13(CkReductionMsg *msg);
     template <class T>
     entry void r_gravity_bicgstab_loop_15(CkReductionMsg *msg);
+
+    // EnzoMethodGravityBiCGStab post-refresh entry methods
+    entry void p_gravity_bicgstab_loop_1();
+    entry void p_gravity_bicgstab_loop_3();
+    entry void p_gravity_bicgstab_loop_7();
+    entry void p_gravity_bicgstab_loop_9();
 
     entry void p_mg_receive_face
     (int n, char buffer[n],

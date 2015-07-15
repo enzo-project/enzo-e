@@ -91,7 +91,9 @@ enum hydro_type
 enum return_enum {
   return_unknown,
   return_converged,
-  return_error_max_iter_reached
+  return_error_max_iter_reached,
+  return_error_omega_eq_0,
+  return_error_beta_n_eq_0
 };
 
 //----------------------------------------------------------------------

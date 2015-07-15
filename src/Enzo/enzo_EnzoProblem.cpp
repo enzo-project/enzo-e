@@ -207,8 +207,9 @@ Method * EnzoProblem::create_method_
   } else if (name == "gravity_bicgstab") {
     const bool is_singular = is_periodic();
     int rank = config->mesh_root_rank;
+    FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
     method = new EnzoMethodGravityBiCGStab
-      (field_descr, rank,
+      (field_descr_ptr, rank,
        enzo_config->method_gravity_bicgstab_grav_const,
        enzo_config->method_gravity_bicgstab_iter_max,
        enzo_config->method_gravity_bicgstab_res_tol,
