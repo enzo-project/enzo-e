@@ -389,11 +389,6 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 
     if (enzo_block->is_leaf()) {
 
-      T * D = (T*) field.values(id_);
-      T * Y = (T*) field.values(iy_);
-      T * R = (T*) field.values(ir_);
-      T * Z = (T*) field.values(iz_);
-
       double hx,hy,hz;
       data->field_cell_width(&hx,&hy,&hz);
 
@@ -477,7 +472,6 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
     T * D = (T*) field.values(id_);
     T * R = (T*) field.values(ir_);
     T * Y = (T*) field.values(iy_);
-    T * Z = (T*) field.values(iz_);
 
     T a = rz_ / dy_;
 
