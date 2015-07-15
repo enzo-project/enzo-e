@@ -94,6 +94,10 @@ public: // interface
   int insert_permanent(const std::string & name) throw()
   { return field_descr_->insert_permanent(name); }
 
+  /// Insert a new field
+  int insert_temporary(const std::string & name) throw()
+  { return field_descr_->insert_temporary(name); }
+
   /// Return the number of fields
   int field_count() const throw()
   { return field_descr_->field_count(); }
@@ -231,6 +235,10 @@ public: // interface
   /// Allocate storage for the field data
   void allocate_permanent(bool ghosts_allocated = false) throw()
   { field_data_->allocate_permanent(ghosts_allocated); }
+
+  /// Allocate storage for the temporary fields
+  void allocate_temporary(int id) throw (std::out_of_range)
+  { field_data_->allocate_temporary(id); }
 
   /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
