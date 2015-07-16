@@ -451,21 +451,22 @@ void Config::read_mesh_ (Parameters * p) throw()
   TRACE("Parameters: Mesh");
   mesh_root_rank = p->value_integer("Mesh:root_rank",0);
 
+  // Adjust ghost zones for unused ranks
   if (mesh_root_rank < 2) field_ghost_depth[1] = 0;
   if (mesh_root_rank < 3) field_ghost_depth[2] = 0;
   
   //--------------------------------------------------
 
-  int nbx = mesh_root_blocks[0] = p->list_value_integer(0,"Mesh:root_blocks",1);
-  int nby = mesh_root_blocks[1] = p->list_value_integer(1,"Mesh:root_blocks",1);
-  int nbz = mesh_root_blocks[2] = p->list_value_integer(2,"Mesh:root_blocks",1);
+  int mx = mesh_root_blocks[0] = p->list_value_integer(0,"Mesh:root_blocks",1);
+  int my = mesh_root_blocks[1] = p->list_value_integer(1,"Mesh:root_blocks",1);
+  int mz = mesh_root_blocks[2] = p->list_value_integer(2,"Mesh:root_blocks",1);
 
-  const int nb = nbx*nby*nbz;
+  const int m = mx*my*mz;
   ASSERT4 ("Config::read_mesh_()",
 	   "Number of root blocks %d x %d x %d must not be "
 	   "less than number of processes %d",
-	   nbx,nby,nbz,CkNumPes(),
-	   nb >= CkNumPes());
+	   mx,my,mz,CkNumPes(),
+	   m >= CkNumPes());
 
   //--------------------------------------------------
 

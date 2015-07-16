@@ -44,7 +44,7 @@ Method {
        min_level = -1;
        max_level = 0;
        type = "mg0";
-       iter_max = 5;
+       iter_max = 10;
     };
 
     ppm {
@@ -114,9 +114,13 @@ Boundary {
 } 
 
 Output {
-   list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png", "az_png",
-           "R_png", "X_png", "C_png", "B_png",
-                       "h5"];
+   list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png",
+           "B_png",
+           "C_png",
+           "D_png",
+           "R_png",
+           "X_png",
+            "h5"];
     mesh_png {
 	type     = "image";
 	image_type  = "mesh";
@@ -165,6 +169,22 @@ Output {
      image_reduce_type = "max";
      image_size = [256,256];
      field_list = ["B"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   C_png {
+     type = "image";
+     image_reduce_type = "max";
+     image_size = [256,256];
+     field_list = ["C"];
+     include "input/schedule_cycle_1.incl"
+     include "input/colormap_blackbody.incl"
+   };
+   D_png {
+     type = "image";
+     image_reduce_type = "max";
+     image_size = [256,256];
+     field_list = ["D"];
      include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
    };

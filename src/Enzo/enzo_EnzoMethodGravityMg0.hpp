@@ -27,8 +27,12 @@ public: // interface
    double grav_const,
    int iter_max, 
    int monitor_iter,
+   std::string smooth,
+   double      smooth_weight,
+   int         smooth_pre,
+   int         smooth_coarse,
+   int         smooth_post,
    bool is_singular,
-   Compute * smooth,
    Restrict * restrict,
    Prolong * prolong,
    int min_level,
@@ -56,7 +60,9 @@ public: // interface
     Method::pup(p);
 
     p | A_;
-    p | smooth_;
+    p | smooth_pre_;
+    p | smooth_coarse_;
+    p | smooth_post_;
     p | restrict_;
     p | prolong_;
     p | is_singular_;
@@ -70,9 +76,10 @@ public: // interface
     p | irho_;
     p | iphi_;
     p | ib_;
+    p | ic_;
+    p | id_;
     p | ir_;
     p | ix_;
-    p | ic_;
 
     p | min_level_;
     p | max_level_;
@@ -139,8 +146,14 @@ protected: // attributes
   /// Matrix
   Matrix * A_;
 
-  /// Smoother
-  Compute * smooth_;
+  /// Pre-smoother
+  Compute * smooth_pre_;
+
+  /// Coarse smoother
+  Compute * smooth_coarse_;
+
+  /// Post smoother
+  Compute * smooth_post_;
 
   /// Restriction
   Restrict * restrict_;
@@ -177,9 +190,10 @@ protected: // attributes
 
   /// MG vector id's
   int ib_;
+  int ic_;
+  int id_;
   int ir_;
   int ix_;
-  int ic_;
 
   /// Minimum refinement level (may be < 0)
   int min_level_;

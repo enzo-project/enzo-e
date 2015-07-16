@@ -53,7 +53,7 @@
 ///
 ///  p_pre_smooth()
 ///
-///      smoother.apply (A,X,B)
+///      smooth.apply (A,X,B)
 ///      callback = p_restrict_send()
 ///      call refresh (X,level,"level")
 ///
@@ -89,7 +89,7 @@
 ///
 ///  p_post_smooth(A,X,B)
 /// 
-///      smoother.apply (A,X,B)
+///      smooth.apply (A,X,B)
 ///      end_cycle()
 ///
 ///  end_cycle()
@@ -128,6 +128,12 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
+#define DEBUG_MG
+/* #define DEBUG_REFRESH_ORDER */
+
+
+
+#ifdef DEBUG_MG
 #define MG_VERBOSE(FUNCTION)						\
   Monitor * monitor = enzo_block->simulation()->monitor();		\
   monitor->verbose(stdout,"Method", "%s "FUNCTION,enzo_block->name().c_str());
@@ -135,6 +141,54 @@
 #define VERBOSE(FUNCTION)						\
   Monitor * monitor = simulation()->monitor();				\
   monitor->verbose(stdout,"Method", "%s "FUNCTION,name().c_str());
+#define DEBUG_X							\
+  {								\
+    Data * data = enzo_block->data();				\
+    Field field = data->field();				\
+								\
+    T * X = (T*) field.values(ix_);				\
+    T * B = (T*) field.values(ib_);				\
+    std::string name = enzo_block->name();			\
+    if (name == "B0_0") {					\
+      CkPrintf ("%s:%d DEBUG %s X(1,[19:21]) = [%g %g %g]\n",	\
+	      __FILE__,__LINE__,name.c_str(),			\
+	      X[43],X[44],X[45]);				\
+      CkPrintf ("%s:%d DEBUG %s B(1,[19:21]) = [%g %g %g]\n",	\
+	      __FILE__,__LINE__,name.c_str(),			\
+	      B[43],B[44],B[45]);				\
+    } else if (name == "B1_0") {				\
+      CkPrintf ("%s:%d DEBUG %s X(1,[19:21]) = [%g %g %g]\n",	\
+	      __FILE__,__LINE__,name.c_str(),			\
+	      X[43],X[44],X[45]);				\
+      CkPrintf ("%s:%d DEBUG %s B(1,[19:21]) = [%g %g %g]\n",	\
+	      __FILE__,__LINE__,name.c_str(),			\
+	      B[43],B[44],B[45]);				\
+    }								\
+  }
+#else
+#   define DEBUG_X	;
+#   define MG_VERBOSE(X) /* */ ;
+#   define VERBOSE(X) /* */ ;
+#endif
+
+#ifdef DEBUG_MG
+#   define PRINT_BDRX				\
+  for (int ix=0; ix<mx; ix++) {			\
+    for (int iy=0; iy<my; iy++) {		\
+      for (int iz=0; iz<mz; iz++) {		\
+	int i = ix + mx*(iy + my*iz);		\
+	CkPrintf ("[%d %d] %d B=%6.3g D=%6.3g R=%6.3g X=%6.3g\n",	\
+		ix,iy,i,B[i],D[i],R[i],X[i]);	\
+      }						\
+    }						\
+  }
+#else 
+#  define PRINT_BDRX ;
+#endif
+
+#define PRINT_X \
+    printf ("%s:%d DEBUG_X %s X[4,0] = %g  X[4,20]\n", \
+	    __FILE__,__LINE__,block->name().c_str(),X[4]);
 
 //----------------------------------------------------------------------
 
@@ -145,16 +199,22 @@ extern CkReduction::reducerType r_method_gravity_mg_type;
 EnzoMethodGravityMg0::EnzoMethodGravityMg0 
 (const FieldDescr * field_descr, 
  int rank,
- double grav_const, int iter_max, int monitor_iter,
+ double grav_const, int iter_max, int monitor_iter, 
+ std::string smooth,
+ double      smooth_weight,
+ int         smooth_count_pre,
+ int         smooth_count_coarse,
+ int         smooth_count_post,
  bool is_singular,
- Compute * smooth,
  Restrict * restrict,
  Prolong * prolong,
  int min_level,
  int max_level) 
   : Method(), 
     A_(new EnzoMatrixLaplace),
-    smooth_(smooth),
+    smooth_pre_(NULL),
+    smooth_coarse_(NULL),
+    smooth_post_(NULL),
     restrict_(restrict),
     prolong_(prolong),
     is_singular_(is_singular),
@@ -178,19 +238,16 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
 	     "changing max_level_ from %d to 0",max_level_);
     max_level_ = 0;
   }
-  if (min_level_ >= 0) {
+  if (min_level_ > 0) {
     ERROR1 ("EnzoMethodGravityMg0::EnzoMethodGravityMg0()",
-	    "Solver Mg0 requires min_level = %d to be < 0",
+	    "Solver Mg0 requires min_level = %d to be <= 0",
 	    min_level_);
   }
 
   /// Initialize default Refresh
 
-  int ir = add_refresh(1,0,neighbor_level,sync_barrier);
-  refresh(ir)->add_all_fields(field_descr->field_count());
-
-  int il = add_refresh(1,0,neighbor_level,sync_face);
-  refresh(il)->add_all_fields(field_descr->field_count());
+  add_refresh(4,0,neighbor_level,sync_barrier);
+  refresh(0)->add_all_fields(field_descr->field_count());
 
   irho_ = field_descr->field_id("density");
   iphi_ = field_descr->field_id("potential");
@@ -199,6 +256,16 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
   ir_ = field_descr->field_id("R");
   ix_ = field_descr->field_id("X");
   ic_ = field_descr->field_id("C");
+  id_ = field_descr->field_id("D");
+  if (smooth == "jacobi") {
+    smooth_pre_ = new EnzoComputeSmoothJacobi 
+      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_pre);
+    smooth_coarse_ = new EnzoComputeSmoothJacobi 
+      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_coarse);
+    smooth_post_ = new EnzoComputeSmoothJacobi 
+      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_post);
+
+  }
 }
 
 //----------------------------------------------------------------------
@@ -206,11 +273,15 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
 EnzoMethodGravityMg0::~EnzoMethodGravityMg0 () throw()
 // [*]
 {
-  delete smooth_;
+  delete smooth_pre_;
+  delete smooth_coarse_;
+  delete smooth_post_;
   delete prolong_;
   delete restrict_;
 
-  smooth_ = NULL;
+  smooth_pre_ = NULL;
+  smooth_coarse_ = NULL;
+  smooth_post_ = NULL;
   prolong_ = NULL;
   restrict_ = NULL;
 }
@@ -264,6 +335,8 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   
   enzo_block->mg_iter_clear();
 
+  const int level = enzo_block->level();
+
   Data * data = enzo_block->data();
   Field field = data->field();
 
@@ -279,12 +352,17 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   // R = B ( residual with X = 0 )
   // C = 0
 
+  int gx,gy,gz;
   int mx,my,mz;
-  field.dimensions(irho_,&mx,&my,&mz);
+  field.dimensions  (0,&mx,&my,&mz);
+  field.ghost_depth (0,&gx,&gy,&gz);
 
-  for (int iz=0; iz<mz; iz++) {
-    for (int iy=0; iy<my; iy++) {
-      for (int ix=0; ix<mx; ix++) {
+  const int ix0 = 0;
+  const int iy0 = 0;
+  const int iz0 = 0;
+  for (int iz=iz0; iz<mz-iz0; iz++) {
+    for (int iy=iy0; iy<my-iy0; iy++) {
+      for (int ix=ix0; ix<mx-ix0; ix++) {
 	int i = ix + mx*(iy + my*iz);
 	B[i] = - 4.0 * (cello::pi) * grav_const_ * rho[i];
 	X[i] = 0.0;
@@ -294,6 +372,7 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     }
   }
 
+  DEBUG_X;
   // start the MG V-cycle with the root level
   if (enzo_block->level() == max_level_)
     begin_cycle_<T>(enzo_block);
@@ -322,13 +401,25 @@ void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
     exit_solver_<T>(enzo_block, return_converged);
 
   } else if (level == min_level_) {
-
+    // TODO REFRESH X
     solve_coarse_<T>(enzo_block);
 
   } else {
 
+    const Data * data = enzo_block->data();
+    const FieldDescr * field_descr = data->field_descr();
+    const int num_fields = field_descr->field_count();
+
+    Refresh refresh (4,0,neighbor_level, sync_face);
+    // refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
+    refresh.add_field (ix_);
+
+    DEBUG_X;
+    
     enzo_block->refresh_enter
-      (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),refresh(1));
+      (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),&refresh);
+    // // Skip refresh
+    // pre_smooth<T>(enzo_block);
 
   }
 }
@@ -340,13 +431,10 @@ void EnzoBlock::p_mg0_pre_smooth(CkReductionMsg * msg)
 /// [*]
 {
   VERBOSE("p_mg0_pre_smooth()");
+  delete msg;
+
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
-
-  // GET DATA
-  
-  //  delete msg;
-  delete msg;
 
   method -> pre_smooth<T>(this);
 }
@@ -357,16 +445,35 @@ template <class T>
 void EnzoMethodGravityMg0::pre_smooth(EnzoBlock * enzo_block) throw()
 /// [*]
 ///
-///      smoother.apply (A,X,B)
+///      smooth.apply (A,X,B)
 ///      callback = p_restrict_send()
 ///      call refresh (X,level,"level")
 {
   MG_VERBOSE("pre_smooth_()");
 
-  smooth_->compute(enzo_block);
+  Data * data = enzo_block->data();
+  Field field = data->field();
+  T * X = (T*) field.values(ix_);
+  DEBUG_X;
+  smooth_pre_->compute(enzo_block);
+  DEBUG_X;
+
+  Refresh refresh (4,0,neighbor_level, sync_face);
+  //  refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
+    refresh.add_field (ix_);
+
+  refresh.set_active(true);
+  refresh.print();
+  DEBUG_X;
 
   enzo_block->refresh_enter
-    (CkIndex_EnzoBlock::p_mg0_restrict_send<T>(NULL),refresh(1));
+    (CkIndex_EnzoBlock::p_mg0_restrict_send<T>(NULL),&refresh);
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  // // Skip refresh
+  // restrict_send<T>(enzo_block);
+
+
 }
 
 //----------------------------------------------------------------------
@@ -381,7 +488,6 @@ void EnzoBlock::p_mg0_restrict_send(CkReductionMsg * msg)
 
   // GET DATA
   
-  //  delete msg;
   delete msg;
 
   method -> restrict_send<T>(this);
@@ -398,10 +504,16 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 ///      pack R
 ///      index_parent.p_restrict_recv(R)
 {
+  Data * data = enzo_block->data();
+  Field field = data->field();
+  T * X = (T*) field.values(ix_);
 
+  DEBUG_X;
   MG_VERBOSE("restrict_send_()");
 
   A_->residual(ir_, ib_, ix_, enzo_block);
+
+  DEBUG_X;
 
   Index index        = enzo_block->index();
   Index index_parent = index.index_parent(min_level_);
@@ -465,7 +577,7 @@ void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
 
   VERBOSE("p_mg0_restrict_recv()");
 
-  // Unpack "R" vector data from children
+  // Unpack "B" vector data from children
 
   // Face (0,0,0) is the entire block
   int if3[3] = {0,0,0};
@@ -491,7 +603,6 @@ void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
   // continue with EnzoMethodGravityMg0
   method -> restrict_recv<T>(this);
 }
-
 
 //----------------------------------------------------------------------
 
@@ -526,8 +637,13 @@ void EnzoMethodGravityMg0::solve_coarse_(EnzoBlock * enzo_block) throw()
   MG_VERBOSE("solve_coarse_()");
 
   /// Apply smoother
-  smooth_->compute(enzo_block);
+  smooth_coarse_->compute(enzo_block);
 
+  if (enzo_block->level() < max_level_) {
+
+    prolong_send_<T>(enzo_block);
+
+  } 
   end_cycle_<T>(enzo_block);
 
 }
@@ -619,8 +735,6 @@ void EnzoBlock::p_mg0_prolong_recv(FieldMsg * field_message)
 	      op_array_prolong,
 	      field_list);
 
-  delete field_message;
-
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
 
@@ -646,6 +760,8 @@ void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 {
   MG_VERBOSE("prolong_recv_()");
 
+  DEBUG_X;
+
   Data * data = enzo_block->data();
   Field field = data->field();
 
@@ -654,8 +770,14 @@ void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 
   zaxpy_(X,1.0,X,C);
 
+  DEBUG_X;
+
+  Refresh refresh (4,0,neighbor_level, sync_face);
+  // refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
+    refresh.add_field (ix_);
+
   enzo_block->refresh_enter
-    (CkIndex_EnzoBlock::p_mg0_post_smooth<T>(NULL),refresh(1));
+    (CkIndex_EnzoBlock::p_mg0_post_smooth<T>(NULL),&refresh);
 }
 
 //----------------------------------------------------------------------
@@ -665,13 +787,12 @@ void EnzoBlock::p_mg0_post_smooth(CkReductionMsg * msg)
 /// [*]
 {
   VERBOSE("p_mg0_post_smooth()");
-  EnzoMethodGravityMg0 * method = 
-    static_cast<EnzoMethodGravityMg0*> (this->method());
 
-  // GET DATA
-  
   //  delete msg;
   delete msg;
+
+  EnzoMethodGravityMg0 * method = 
+    static_cast<EnzoMethodGravityMg0*> (this->method());
 
   method -> post_smooth<T>(this);
 }
@@ -683,12 +804,18 @@ void EnzoMethodGravityMg0::post_smooth(EnzoBlock * enzo_block) throw()
 /// post smooth
 /// [*]
 ///
-///      smoother.apply (A,X,B)
+///      smooth.apply (A,X,B)
 ///      end_cycle()
 {
   MG_VERBOSE("post_smooth_()");
 
-  smooth_->compute(enzo_block);
+  smooth_post_->compute(enzo_block);
+
+  if (enzo_block->level() < max_level_) {
+
+    prolong_send_<T>(enzo_block);
+
+  } 
 
   end_cycle_<T>(enzo_block);
 }
@@ -716,11 +843,7 @@ void EnzoMethodGravityMg0::end_cycle_(EnzoBlock * enzo_block) throw()
 
   }
 
-  if (enzo_block->level() < max_level_) {
-
-    prolong_send_<T>(enzo_block);
-
-  } else {
+  if (enzo_block->level() >= max_level_) {
 
     begin_cycle_<T>(enzo_block);
 
@@ -745,10 +868,14 @@ void EnzoMethodGravityMg0::exit_solver_
   T * X         = (T*) field.values(ix_);
   T * phi = (T*) field.values(iphi_);
 
+  DEBUG_X;
+
   int mx,my,mz;
   field.dimensions(irho_,&mx,&my,&mz);
 
   copy_(phi,X,mx,my,mz,enzo_block->is_leaf());
+
+  DEBUG_X;
 
   FieldDescr * field_descr = field.field_descr();
 
@@ -758,6 +885,7 @@ void EnzoMethodGravityMg0::exit_solver_
 
   monitor_output_ (enzo_block);
 
+  DEBUG_X;
   enzo_block->compute_done();
 }
 

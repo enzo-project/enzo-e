@@ -54,10 +54,25 @@
 
 #include "enzo.decl.h"
 
+/* #define NEW_REFRESH */
+/* #define DEBUG_GRAVITY */
+
+#ifndef NEW_REFRESH
+#  define OLD_REFRESH
+#endif
+
+
 #define CK_TEMPLATES_ONLY
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
+#ifdef DEBUG_METHOD
+#   define TRACE_METHOD					\
+  CkPrintf ("%s:%d TRACE_METHOD\n",__FILE__,__LINE__);	\
+  fflush(stdout);
+#else
+#   define TRACE_METHOD /*  */ 
+#endif
 //----------------------------------------------------------------------
 
 EnzoMethodGravityCg::EnzoMethodGravityCg 
@@ -82,8 +97,10 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     iter_(0),
-    rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0),
-    id_refresh_matvec_(-1)
+    rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
+#ifdef OLD_REFRESH
+  , id_refresh_matvec_(-1)
+#endif
 {
 
   M_ = (diag_precon) ? (Matrix *)(new EnzoMatrixDiagonal) 
@@ -103,15 +120,19 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 
   const int num_fields = field_descr->field_count();
 
+  field_descr->ghost_depth    (idensity_,&gx_,&gy_,&gz_);
+
   const int ir = add_refresh(1,rank-1,neighbor_leaf,sync_barrier);
   //  refresh(ir)->add_field(idensity_);
   refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
 
+#ifdef OLD_REFRESH
   id_refresh_matvec_ = add_refresh(1,rank-1,neighbor_leaf,sync_barrier);
   refresh(id_refresh_matvec_)->add_all_fields(num_fields);
   //  refresh(id_refresh_matvec_)->add_field(ir_);
+#endif
 
 }
 
@@ -122,11 +143,10 @@ void EnzoMethodGravityCg::compute ( Block * block) throw()
   
   Field field = block->data()->field();
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
   field.size                (&nx_,&ny_,&nz_);
   field.dimensions(idensity_,&mx_,&my_,&mz_);
-  field.ghost_depth    (idensity_,&gx_,&gy_,&gz_);
+
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   int precision = field.precision(idensity_);
 
@@ -168,9 +188,13 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
     T * X = (T*) field.values(ix_);
     T * R = (T*) field.values(ir_);
 
-    for (int iz=0; iz<mz_; iz++) {
-      for (int iy=0; iy<my_; iy++) {
-	for (int ix=0; ix<mx_; ix++) {
+    const int ix0 = 0;
+    const int iy0 = 0;
+    const int iz0 = 0;
+
+    for (int iz=iz0; iz<mz_-iz0; iz++) {
+      for (int iy=iy0; iy<my_-iy0; iy++) {
+	for (int ix=ix0; ix<mx_-ix0; ix++) {
 	  int i = ix + mx_*(iy + my_*iz);
 	  X[i] = 0.0;
 	  B[i] = - 4.0 * (cello::pi) * grav_const_ * density[i];
@@ -204,6 +228,11 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
 
+#ifdef DEBUG_GRAVITY
+  printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
+	  __FILE__,__LINE__,enzo_block->name().c_str());
+#endif
+	  
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
 			  callback);
@@ -216,6 +245,8 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
+  TRACE_METHOD;
+
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
@@ -228,9 +259,19 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
   delete msg;
   
   // Refresh if Block is a leaf
+
+#ifdef OLD_REFRESH
   method->refresh(1)->set_active(is_leaf());
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
 		method->refresh(1));
+#endif
+#ifdef NEW_REFRESH
+  Refresh refresh (4,0,neighbor_level, sync_face);
+  refresh.set_active(is_leaf());
+  refresh.add_all_fields(this->data()->field().field_count());
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
+		&refresh);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -246,9 +287,20 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
   method->set_iter ( ((int*)msg->getData())[0] );
 
   // Refresh if Block is a leaf, then continue with enzo_matvec_()
+
+#ifdef OLD_REFRESH
   method->refresh(1)->set_active(is_leaf());
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
 		method->refresh(1));
+#endif
+
+#ifdef NEW_REFRESH
+  Refresh refresh (4,0,neighbor_level, sync_face);
+  refresh.set_active(is_leaf());
+  refresh.add_all_fields(this->data()->field().field_count());
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
+		&refresh);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -306,23 +358,28 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
     } 
   }
 
-  long double reduce ;
+  long double reduce[3] = {0.0, 0.0, 0.0};
 
   if (enzo_block->is_leaf()) {
 
     T * R  = (T*) field.values(ir_);
-    reduce = dot_(R,R);
+    reduce[0] = dot_(R,R);
 
   } else {
 
-    reduce = 0.0;
+    reduce[0] = 0.0;
 
   } 
 
   CkCallback callback(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
 		enzo_block->proxy_array());
 
-  enzo_block->contribute (sizeof(long double), &reduce, 
+#ifdef DEBUG_GRAVITY
+  printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
+	  __FILE__,__LINE__,enzo_block->name().c_str());
+#endif
+
+  enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
 			  callback);
     
@@ -424,6 +481,11 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_3<T>(NULL), 
 		  enzo_block->proxy_array());
 
+#ifdef DEBUG_GRAVITY
+  printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
+	  __FILE__,__LINE__,enzo_block->name().c_str());
+#endif
+
     enzo_block->contribute (3*sizeof(long double), &reduce, 
 			    r_method_gravity_cg_type,
 			    callback);
@@ -511,6 +573,11 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
+
+#ifdef DEBUG_GRAVITY
+  printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
+	  __FILE__,__LINE__,enzo_block->name().c_str());
+#endif
 
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 

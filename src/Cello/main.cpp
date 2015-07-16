@@ -227,15 +227,6 @@ void Main::p_adapt_exit()
 
 //----------------------------------------------------------------------
 
-void Main::p_refresh_enter()
-{
-#ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_refresh_enter();
-#endif
-}
-
-//----------------------------------------------------------------------
-
 void Main::p_refresh_exit()
 {
 #ifdef CHARM_ENZO

@@ -15,14 +15,16 @@
 
 //----------------------------------------------------------------------
 
-void Block::refresh_begin_(Refresh * refresh) 
+void Block::refresh_begin_() 
 {
+
+  Refresh * refresh = this->refresh();
 
   check_leaf_();
 
   check_delete_();
 
-  refresh->sync().reset();
+  refresh->sync_load().reset();
 
   simulation()->set_phase(phase_refresh);
 
@@ -88,9 +90,11 @@ void Block::refresh_load_face_
   int ichild[3],
   int count)
 {
+  Refresh * refresh = this->refresh();
+
   if (count != 0) {
 
-     refresh_.sync().set_stop(count);
+     refresh->sync_load().set_stop(count);
 
   } else {
 
@@ -132,7 +136,7 @@ void Block::refresh_load_face_
     char * array;
     bool lghost[3] = {false,false,false};
 
-    std::vector<int> field_list = refresh()->field_list();
+    std::vector<int> field_list = refresh->field_list();
 
     field_face = load_face (&n, &array,
 			    iface, ichild, lghost,
@@ -141,13 +145,13 @@ void Block::refresh_load_face_
 
     int jface[3] = {-iface[0], -iface[1], -iface[2]};
 
-    thisProxy[index_neighbor].x_refresh_store_face
+    thisProxy[index_neighbor].p_refresh_store_face
       (n,array, type_refresh, jface, ichild);
 
     delete field_face;
   }
 
-  if (refresh_.sync().next()) {
+  if (refresh->sync_load().next()) {
     
     control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
   }
@@ -160,10 +164,12 @@ void Block::refresh_store_face_
  int iface[3], int ichild[3],int count
 )
 {
+  Refresh * refresh = this->refresh();
+
   if (count==0) {
     bool lghost[3] = {false,false,false};
 
-    std::vector<int> field_list = refresh_.field_list();
+    std::vector<int> field_list = refresh->field_list();
 
     int op_array;
     switch (type_refresh) {

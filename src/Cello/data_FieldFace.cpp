@@ -10,6 +10,8 @@
 #include "problem_Prolong.hpp"
 #include "problem_Restrict.hpp"
 
+// #define DEBUG_FIELD_FACE
+
 enum enum_op {
   op_unknown,
   op_load,
@@ -477,6 +479,14 @@ void FieldFace::load_loop_limits_
   if (nd3[2] == 1) n3[2] = 1;
 
   check_new_(im3,n3,nd3,ng3,op_load);
+
+#ifdef DEBUG_FIELD_FACE
+  printf ("FieldFace::load_loop_limits()\n");
+  printf ("FieldFace nd3 %d %d %d\n",nd3[0],nd3[1],nd3[2]);
+  printf ("FieldFace ng3 %d %d %d\n",ng3[0],ng3[1],ng3[2]);
+  printf ("FieldFace  n3 %d %d %d\n", n3[0], n3[1], n3[2]);
+  printf ("FieldFace im3 %d %d %d\n",im3[0],im3[1],im3[2]);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -525,6 +535,13 @@ void FieldFace::store_loop_limits_
   n3[2] = std::max(n3[2],1);
 
   check_new_(im3,n3,nd3,ng3,op_store);
+#ifdef DEBUG_FIELD_FACE
+  printf ("FieldFace::store_loop_limits()\n");
+  printf ("FieldFace nd3 %d %d %d\n",nd3[0],nd3[1],nd3[2]);
+  printf ("FieldFace ng3 %d %d %d\n",ng3[0],ng3[1],ng3[2]);
+  printf ("FieldFace  n3 %d %d %d\n", n3[0], n3[1], n3[2]);
+  printf ("FieldFace im3 %d %d %d\n",im3[0],im3[1],im3[2]);
+#endif
 }
 
 //----------------------------------------------------------------------

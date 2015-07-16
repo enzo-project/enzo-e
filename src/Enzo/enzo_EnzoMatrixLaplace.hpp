@@ -40,9 +40,6 @@ public: // interface
     p | nx_;
     p | ny_;
     p | nz_;
-    p | gx_;
-    p | gy_;
-    p | gz_;
     p | hx_;
     p | hy_;
     p | hz_;
@@ -52,24 +49,23 @@ public: // interface
 public: // virtual functions
 
   /// Apply the matrix to a vector Y <-- A*X
-  virtual void matvec (int id_y, int id_x, Block * block) throw();
+  virtual void matvec (int id_y, int id_x, Block * block, int g0=1) throw();
 
   /// Extract the diagonal into the given field
-  virtual void diagonal (int id_x, Block * block) throw();
+  virtual void diagonal (int id_x, Block * block, int g0=1) throw();
 
 protected: // functions
 
   template <class T>
-  void matvec_ (T * Y, T * X) const throw();
+  void matvec_ (T * Y, T * X, int g0) const throw();
 
   template <class T>
-  void diagonal_ (T * X) const throw();
+  void diagonal_ (T * X, int g0) const throw();
 
 protected: // attributes
 
   int mx_, my_, mz_;
   int nx_, ny_, nz_;
-  int gx_, gy_, gz_;
   double hx_, hy_, hz_;
   int rank_;
 

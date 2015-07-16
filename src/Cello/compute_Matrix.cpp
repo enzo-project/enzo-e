@@ -7,11 +7,12 @@
 
 #include "compute.hpp"
 
+// #define DEBUG_MATRIX
+
 //----------------------------------------------------------------------
 
-void Matrix::residual (int ir, int ib, int ix, Block * block) throw()
+void Matrix::residual (int ir, int ib, int ix, Block * block, int g0) throw()
 {
-  if (! block->is_leaf()) return;
 
   matvec(ir,ix,block);
 
@@ -22,22 +23,18 @@ void Matrix::residual (int ir, int ib, int ix, Block * block) throw()
 
   int mx,my,mz;
   field.dimensions(0,&mx,&my,&mz);
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-  int gx,gy,gz;
-  field.ghost_depth(0,&gx,&gy,&gz);
 
   int precision = field.precision(0);
 
   if      (precision == precision_single)    
     residual_((float *)(R), (float *)(B),
-	      mx,my,mz,nx,ny,nz,gx,gy,gz);
+	      mx,my,mz,g0);
   else if (precision == precision_double)    
     residual_((double *)(R), (double *)(B),
-	      mx,my,mz,nx,ny,nz,gx,gy,gz);
+	      mx,my,mz,g0);
   else if (precision == precision_quadruple) 
     residual_((long double *)(R), (long double *)(B),
-	      mx,my,mz,nx,ny,nz,gx,gy,gz);
+	      mx,my,mz,g0);
   else 
     ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
 }
@@ -47,17 +44,25 @@ void Matrix::residual (int ir, int ib, int ix, Block * block) throw()
 template <class T>
 void Matrix::residual_ (T * r, T * b,
 			int mx, int my, int mz,
-			int nx, int ny, int nz,
-			int gx, int gy, int gz) throw()
+			int g0) throw()
 {
-  for (int iz=gz; iz<nz+gz; iz++) {
-    for (int iy=gy; iy<ny+gy; iy++) {
-      for (int ix=gx; ix<nx+gx; ix++) {
+
+  const int ix0 = (mx > 1) ? g0 : 0;
+  const int iy0 = (my > 1) ? g0 : 0;
+  const int iz0 = (mz > 1) ? g0 : 0;
+
+#ifdef DEBUG_MATRIX
+    printf ("%s:%d DEBUG_LOOP_LIMITS: (%d:%d) (%d:%d) (%d:%d)\n",
+	    __FILE__,__LINE__, ix0,mx-ix0,iy0,my-iy0,iz0,mz-iz0);
+#endif
+
+  for (int iz=iz0; iz<mz-iz0; iz++) {
+    for (int iy=iy0; iy<my-iy0; iy++) {
+      for (int ix=ix0; ix<mx-ix0; ix++) {
 
 	const int i=ix + mx*(iy + mz*iz);
 
 	r[i] = b[i] - r[i];
-
       }
     }
   }
