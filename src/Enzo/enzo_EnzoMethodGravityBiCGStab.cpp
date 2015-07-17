@@ -186,10 +186,10 @@
 //
 //    receive bs_ and bc_
 //
-//    call gravity_bicgstab_start_2
+//    call start_2
 //
 // --------------------
-// gravity_bicgstab_start_2()
+// start_2()
 // --------------------
 //
 //    if (is_singular_)
@@ -206,12 +206,12 @@
 //
 //    receive beta_n_
 // 
-//    call gravity_bicgstab_loop_0()
+//    call loop_0
 //
 // ==================================================
 //
 // --------------------
-// gravity_bicgstab_loop_0()
+// loop_0()
 // --------------------
 //
 //    if (iter_ == 0) {
@@ -229,10 +229,10 @@
 //    output solution progress (iteration, residual, etc)
 //
 //    if (err_ < res_tol_)
-//      ==> gravity_bicgstab_end(return_converged)
+//       ==> end(return_converged)
 //
 //    if (iter_ >= iter_max_) {
-//       ==> gravity_bicgstab_end(return_error_max_iter_reached);
+//       ==> end(return_error_max_iter_reached);
 //    }
 // 
 //    refresh(P) ==> p_gravity_bicgstab_loop_1
@@ -241,24 +241,24 @@
 // p_gravity_bicgstab_loop_1()
 // --------------------
 //
-//    call gravity_bicgstab_loop_2
+//    call loop_2
 //
 // --------------------
-// gravity_bicgstab_loop_2()
+// loop_2()
 // --------------------
 //
 //    Y = SOLVE(M,P)
 //
-//    refresh(Y) ==> p_gravity_bicgstab_loop_2
+//    refresh(Y) ==> p_gravity_bicgstab_loop_3
 //
 // --------------------
 // p_gravity_bicgstab_loop_3()
 // --------------------
 //  
-//    call gravity_bicgstab_loop_4
+//    call loop_4
 // 
 // --------------------
-// gravity_bicgstab_loop_4()
+// loop_4()
 // --------------------
 //
 //    V = MATVEC(A,Y)
@@ -267,7 +267,7 @@
 //       ys_ = SUM(Y) ==> r_gravity_bicgstab_shift_1
 //       vs_ = SUM(V) ==> r_gravity_bicgstab_shift_1
 //    } else {
-//       call gravity_bicgstab_loop_5
+//       call loop_5
 //    }  
 //
 // --------------------
@@ -276,10 +276,10 @@
 //  
 //    receive ys_ and vs_
 //
-//    call gravity_bicgstab_loop_5
+//    call loop_5
 // 
 // --------------------
-// gravity_bicgstab_loop_5()
+// loop_5()
 // --------------------
 //
 //    if (is_singular_) {
@@ -295,10 +295,10 @@
 //
 //    receive vr0_
 //
-//    call gravity_bicgstab_loop_7
+//    call loop_7
 //
 // --------------------
-// gravity_bicgstab_loop_7()
+// loop_7()
 // --------------------
 //
 //    alpha_ = beta_n_ / ( vr0_ );
@@ -311,10 +311,10 @@
 // p_gravity_bicgstab_loop_8()
 // --------------------
 //  
-//    call gravity_bicgstab_loop_9
+//    call loop_9
 //
 // --------------------
-// gravity_bicgstab_loop_9()
+// loop_9()
 // --------------------
 //  
 //    Y = SOLVE(M,Q)
@@ -325,10 +325,10 @@
 // p_gravity_bicgstab_loop_10()
 // --------------------
 //  
-//    call gravity_bicgstab_loop_11
+//    call loop_11
 // 
 // --------------------
-// gravity_bicgstab_loop_11()
+// loop_11()
 // --------------------
 //
 //    U = MATVEC(A,Y)
@@ -337,7 +337,7 @@
 //       ys_ = SUM(Y) ==> r_gravity_bicgstab_shift_2
 //       us_ = SUM(U) ==> r_gravity_bicgstab_shift_2
 //    } else {
-//       call gravity_bicgstab_loop_12
+//       call loop_12
 //    }  
 //
 // --------------------
@@ -346,10 +346,10 @@
 //  
 //    receive ys_ and us_
 //
-//    call gravity_bicgstab_loop_12
+//    call loop_12
 // 
 // --------------------
-// gravity_bicgstab_loop_12()
+// loop_12()
 // --------------------
 //
 //    if (is_singular_) {
@@ -366,15 +366,15 @@
 //
 //    receive omega_d_ and omega_n_
 //
-//    call gravity_bicgstab_loop_14
+//    call loop_14
 //
 // --------------------
-// gravity_bicgstab_loop_14()
+// loop_14()
 // --------------------
 //
 //    if (omega_d_ == 0.0)  omega_d_ = 1.0
 //    if ( omega_n_ == 0.0 ) 
-//       gravity_bicgstab_end(return_error_omega_eq_0)
+//       end(return_error_omega_eq_0)
 //
 //    omega_ = omega_n_ / omega_d_
 //    X = X + omega_*Y
@@ -391,14 +391,14 @@
 //
 //    receive rr_ and beta_n_
 //
-//    call gravity_bicgstab_loop_16
+//    call loop_16
 //
 // --------------------
-// gravity_bicgstab_loop_16()
+// loop_16()
 // --------------------
 //
 //    if ( beta_n_ == 0.0 )
-//       gravity_bicgstab_end(return_error_beta_n_eq_0)
+//       end(return_error_beta_n_eq_0)
 //
 //    beta_ = (beta_n_/beta_d_)*(alpha_/omega_)
 //    P = R + beta_*( P - omega_*V )
@@ -414,13 +414,13 @@
 //
 //    receive iter_
 //
-//    call gravity_bicgstab_loop_0
+//    call loop_0
 //
 //
 // ==================================================
 //
 // --------------------
-// gravity_bicgstab_end(return_)
+// end(return_)
 // --------------------
 //
 //    if (retval == return_converged) {
@@ -485,7 +485,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   idensity_   = field_descr->field_id("density");
   ipotential_ = field_descr->field_id("potential");
 
-  /// access existing fields for use as temporaries (must be defined in input parameter file)
+  /// access existing fields for temporary vectors (must be declared in parameter file)
   ib_ = field_descr->field_id(name() + "_B");
   ix_ = field_descr->field_id(name() + "_X");
   ir_ = field_descr->field_id(name() + "_R");
@@ -518,11 +518,10 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   // field_descr->set_precision(iu_, precision);
 
 
-  /// Initialize default Refresh
+  /// Initialize default Refresh (called before entry to compute())
   const int num_fields = field_descr->field_count();
   const int ir = add_refresh(1, rank-1, neighbor_leaf, sync_barrier);
-  //  refresh(ir)->add_field(idensity_);    /// can this be switched back yet??
-  refresh(ir)->add_all_fields(num_fields);
+  refresh(ir)->add_field(idensity_);
 
   /// Initialize specific vector Refreshes
   id_refresh_P_ = add_refresh(1, rank-1, neighbor_leaf, sync_barrier);
@@ -569,7 +568,8 @@ void EnzoMethodGravityBiCGStab::compute(Block* block) throw() {
 
 //======================================================================
 
-/// eventually replace this with more flexible reduction type (this requires an array with 3 entries)
+/// eventually replace this with a more flexible reduction type
+/// (this one requires an array with 3 entries but handles long doubles)
 extern CkReduction::reducerType r_method_gravity_cg_type;
 
 template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block) throw() {
@@ -581,7 +581,7 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
   Data* data  = enzo_block->data();
   Field field = data->field();
 
-  /// construct RHS B, initialize initial solution vector X to zero (only on leaf blocks)
+  /// construct RHS B, initialize initial solution X to zero (only on leaf blocks)
   if (enzo_block->is_leaf()) {
 
     /// access relevant fields
@@ -589,8 +589,8 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
     T* B       = (T*) field.values(ib_);
     T* X       = (T*) field.values(ix_);
 
-    //   X = 0   [Q: necessary?  couldn't we reuse the solution from the previous solve?]
-    //   B = -h^2 * 4 * PI * G * density
+    /// set X = 0 [Q: necessary?  couldn't we reuse the solution from the previous solve?]
+    /// set B = -h^2 * 4 * PI * G * density
     for (int iz=0; iz<mz_; iz++) 
       for (int iy=0; iy<my_; iy++) 
 	for (int ix=0; ix<mx_; ix++) {
@@ -600,7 +600,7 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
 	}
   }
 
-  /// for singular Poisson problems, N(A) = e, so project B to R(A)
+  /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
   if (is_singular_) {
 
     /// set bs_ = SUM(B)   ==> r_gravity_bicgstab_start_1
@@ -623,8 +623,8 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
 
   } else {
 
-    /// nonsingular system, just call gravity_bicgstab_start_2 directly
-    gravity_bicgstab_start_2<T>(enzo_block);
+    /// nonsingular system, just call start_2 directly
+    this->start_2<T>(enzo_block);
 
   }
 }
@@ -641,14 +641,14 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_start_1(CkReductionMsg* msg
   method->set_bc( data[1] );
   delete msg;
 
-  /// call gravity_bicgstab_start_2 to continue
-  method->gravity_bicgstab_start_2<T>(this);
+  /// call start_2 to continue
+  method->start_2<T>(this);
 
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_start_2(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::start_2(EnzoBlock* enzo_block) throw() {
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -713,13 +713,13 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_start_3(CkReductionMsg* msg
   method->set_beta_n( data[0] );
   delete msg;
 
-  /// call gravity_bicgstab_loop_0 to begin solver loop
-  method->gravity_bicgstab_loop_0<T>(this);
+  /// call loop_0 to begin solver loop
+  method->loop_0<T>(this);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_0(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_0(EnzoBlock* enzo_block) throw() {
 
   /// verify legal floating-point value for preceding reduction result
   cello::check(beta_n_,"beta_n_",__FILE__,__LINE__);
@@ -749,11 +749,11 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_0(EnzoBl
 
   /// check for convergence
   if (err_ < res_tol_) {
-    gravity_bicgstab_end<T>(enzo_block, return_converged);
+    this->end<T>(enzo_block, return_converged);
 
   /// otherwise check for failure
   } else if (iter_ >= iter_max_)  {
-    gravity_bicgstab_end<T>(enzo_block, return_error_max_iter_reached);
+    this->end<T>(enzo_block, return_error_max_iter_reached);
 
   /// otherwise refresh P with callback to p_gravity_bicgstab_loop_1 for re-entry
   } else {
@@ -768,25 +768,25 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_0(EnzoBl
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_1() {
-  /// re-entry into gravity_bicgstab_loop_2, using template with appropriate precision
+  /// re-entry into loop_2, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
   int precision = field.precision(field.field_id("density"));  // assumes field precisions equal
   if      (precision == precision_single)    
-    method->gravity_bicgstab_loop_2<float>(enzo_block);
+    method->loop_2<float>(enzo_block);
   else if (precision == precision_double)    
-    method->gravity_bicgstab_loop_2<double>(enzo_block);
+    method->loop_2<double>(enzo_block);
   else if (precision == precision_quadruple) 
-    method->gravity_bicgstab_loop_2<long double>(enzo_block);
+    method->loop_2<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_2(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_2(EnzoBlock* enzo_block) throw() {
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -809,25 +809,25 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_2(EnzoBl
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_3() {
-  /// re-entry into gravity_bicgstab_loop_4, using template with appropriate precision
+  /// re-entry into loop_4, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
   int precision = field.precision(field.field_id("density")); // assuming 
   if      (precision == precision_single)    
-    method->gravity_bicgstab_loop_4<float>(enzo_block);
+    method->loop_4<float>(enzo_block);
   else if (precision == precision_double)    
-    method->gravity_bicgstab_loop_4<double>(enzo_block);
+    method->loop_4<double>(enzo_block);
   else if (precision == precision_quadruple) 
-    method->gravity_bicgstab_loop_4<long double>(enzo_block);
+    method->loop_4<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_4(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_4(EnzoBlock* enzo_block) throw() {
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -864,8 +864,8 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_4(EnzoBl
 
   } else {
     
-    /// nonsingular system, just call gravity_bicgstab_loop_5 directly
-    gravity_bicgstab_loop_5<T>(enzo_block);
+    /// nonsingular system, just call loop_5 directly
+    this->loop_5<T>(enzo_block);
 
   }
 }
@@ -882,13 +882,13 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_shift_1(CkReductionMsg* msg
   method->set_vs( data[1] );
   delete msg;
 
-  /// call gravity_bicgstab_loop_5 to continue
-  method->gravity_bicgstab_loop_5<T>(this);
+  /// call loop_5 to continue
+  method->loop_5<T>(this);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_5(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_5(EnzoBlock* enzo_block) throw() {
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -940,13 +940,13 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_6(CkReductionMsg* msg)
   method->set_vr0( data[0] );
   delete msg;
 
-  // call gravity_bicgstab_loop_7 to continue
-  method->gravity_bicgstab_loop_7<T>(this);
+  // call loop_7 to continue
+  method->loop_7<T>(this);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_7(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_7(EnzoBlock* enzo_block) throw() {
 
   /// verify legal floating-point value for preceding reduction result
   cello::check(vr0_,"vr0_",__FILE__,__LINE__);
@@ -986,25 +986,25 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_7(EnzoBl
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_8() {
-  /// re-entry into gravity_bicgstab_loop_9, using template with appropriate precision
+  /// re-entry into loop_9, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
   int precision = field.precision(field.field_id("density")); // assuming 
   if      (precision == precision_single)    
-    method->gravity_bicgstab_loop_9<float>(enzo_block);
+    method->loop_9<float>(enzo_block);
   else if (precision == precision_double)    
-    method->gravity_bicgstab_loop_9<double>(enzo_block);
+    method->loop_9<double>(enzo_block);
   else if (precision == precision_quadruple) 
-    method->gravity_bicgstab_loop_9<long double>(enzo_block);
+    method->loop_9<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_9(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_9(EnzoBlock* enzo_block) throw() {
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -1027,25 +1027,25 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_9(EnzoBl
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_10() {
-  /// re-entry into gravity_bicgstab_loop_11, using template with appropriate precision
+  /// re-entry into loop_11, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
   int precision = field.precision(field.field_id("density")); // assuming 
   if      (precision == precision_single)    
-    method->gravity_bicgstab_loop_11<float>(enzo_block);
+    method->loop_11<float>(enzo_block);
   else if (precision == precision_double)    
-    method->gravity_bicgstab_loop_11<double>(enzo_block);
+    method->loop_11<double>(enzo_block);
   else if (precision == precision_quadruple) 
-    method->gravity_bicgstab_loop_11<long double>(enzo_block);
+    method->loop_11<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_11(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_11(EnzoBlock* enzo_block) throw() {
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -1082,8 +1082,8 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_11(EnzoB
 
   } else {
     
-    /// nonsingular system, just call gravity_bicgstab_loop_12 directly
-    gravity_bicgstab_loop_12<T>(enzo_block);
+    /// nonsingular system, just call loop_12 directly
+    this->loop_12<T>(enzo_block);
 
   }
 
@@ -1101,13 +1101,13 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_shift_2(CkReductionMsg* msg
   method->set_us( data[1] );
   delete msg;
 
-  /// call gravity_bicgstab_loop_12 to continue
-  method->gravity_bicgstab_loop_12<T>(this);
+  /// call loop_12 to continue
+  method->loop_12<T>(this);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_12(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_12(EnzoBlock* enzo_block) throw() {
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -1163,13 +1163,13 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_13(CkReductionMsg* msg
   method->set_omega_n( data[1] );
   delete msg;
 
-  // call gravity_bicgstab_loop_14 to continue
-  method->gravity_bicgstab_loop_14<T>(this);
+  // call loop_14 to continue
+  method->loop_14<T>(this);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_14(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_14(EnzoBlock* enzo_block) throw() {
 
   /// verify legal floating-point values for preceding reduction results
   cello::check(omega_d_,"omega_d_",__FILE__,__LINE__);
@@ -1187,7 +1187,7 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_14(EnzoB
 
   /// check for breakdown in BiCGStab
   if ( omega_ == 0.0 )
-    gravity_bicgstab_end<T>(enzo_block, return_error_omega_eq_0);
+    this->end<T>(enzo_block, return_error_omega_eq_0);
 
   /// update vectors (on leaf blocks only)
   if (enzo_block->is_leaf()) {
@@ -1244,13 +1244,13 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_15(CkReductionMsg* msg
   method->set_beta_n( data[1] );
   delete msg;
 
-  // call gravity_bicgstab_loop_16 to continue
-  method->gravity_bicgstab_loop_16<T>(this);
+  // call loop_16 to continue
+  method->loop_16<T>(this);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_16(EnzoBlock* enzo_block) throw() {
+template<class T> void EnzoMethodGravityBiCGStab::loop_16(EnzoBlock* enzo_block) throw() {
 
   /// verify legal floating-point values for preceding reduction results
   cello::check(rr_,    "rr_",    __FILE__,__LINE__);
@@ -1262,7 +1262,7 @@ template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_loop_16(EnzoB
 
   /// check for breakdown in BiCGStab
   if (beta_n_ == 0.0)
-    gravity_bicgstab_end<T>(enzo_block, return_error_beta_n_eq_0);
+    this->end<T>(enzo_block, return_error_beta_n_eq_0);
   
   /// compute beta factor in BiCGStab algorithm (all blocks)
   beta_ = (beta_n_/beta_d_)*(alpha_/omega_);
@@ -1304,13 +1304,13 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_17(CkReductionMsg* msg
   method->set_iter ( ((int*)msg->getData())[0] );
   delete msg;
 
-  // call gravity_bicgstab_loop_0 to continue to next iteration
-  method->gravity_bicgstab_loop_0<T>(this);
+  // call loop_0 to continue to next iteration
+  method->loop_0<T>(this);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoMethodGravityBiCGStab::gravity_bicgstab_end(EnzoBlock* enzo_block, int retval) throw () {
+template<class T> void EnzoMethodGravityBiCGStab::end(EnzoBlock* enzo_block, int retval) throw () {
   /// supposed to do:
   ///    if (retval == return_converged) {
   ///       potential = X
