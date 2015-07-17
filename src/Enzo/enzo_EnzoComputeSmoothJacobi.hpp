@@ -17,11 +17,13 @@ class EnzoComputeSmoothJacobi : public Compute {
 public: // interface
 
   /// Constructor
-  EnzoComputeSmoothJacobi(std::string x_field,
-			  std::string r_field,
-			  std::string d_field,
-			  double weight,
-			  const FieldDescr * field_descr) throw();
+  EnzoComputeSmoothJacobi(Matrix * A,
+			  int ix,
+			  int ib,
+			  int ir,
+			  int id,
+			  double weight=1.0,
+			  int iter_max = 1) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeSmoothJacobi);
@@ -36,11 +38,14 @@ public: // interface
     Compute::pup(p);
 
     p | A_;
-    p | i_x_;
-    p | i_r_;
-    p | i_d_;
+    p | ix_;
+    p | ib_;
+    p | ir_;
+    p | id_;
+    p | w_;
+    p | n_;
   }
-  
+
 public: // virtual functions
 
   virtual void compute ( Block * block) throw(); 
@@ -59,16 +64,23 @@ private: // attributes
   Matrix * A_;
   
   /// Field index for vector X
-  int i_x_;
+  int ix_;
+
+  /// Field index for rhs B
+  int ib_;
 
   /// Field index for residual R
-  int i_r_;
+  int ir_;
 
   /// Field index for matrix diagonal D
-  int i_d_;
+  int id_;
 
   /// Weighting
   double w_;
+
+  /// Number of iterations
+  int n_;
+
 };
 
 #endif /* ENZO_ENZO_COMPUTE_SMOOTH_JACOBI_HPP */

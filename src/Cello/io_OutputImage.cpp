@@ -318,32 +318,24 @@ void OutputImage::write_block
 	{
 	  int if3[3] = {-1,0,0};
 	  int face_level = block->face_level(if3);
-	  //	  printf ("%s face_level %d %d %d = %d\n",
-	  //		  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
 	}
 	{
 	  int if3[3] = {1,0,0};
 	  int face_level = block->face_level(if3);
-	  // printf ("%s face_level %d %d %d = %d\n",
-	  // 	  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
 	}
 	{
 	  int if3[3] = {0,-1,0};
 	  int face_level = block->face_level(if3);
-	  // printf ("%s face_level %d %d %d = %d\n",
-	  // 	  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {0,1,0};
 	  int face_level = block->face_level(if3);
-	  // printf ("%s face_level %d %d %d = %d\n",
-	  // 	  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
 	}
@@ -352,32 +344,24 @@ void OutputImage::write_block
 	{
 	  int if3[3] = {-1,-1,0};
 	  int face_level = block->face_level(if3);
-	  // printf ("%s face_level %d %d %d = %d\n",
-	  // 	  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {1,-1,0};
 	  int face_level = block->face_level(if3);
-	  // printf ("%s face_level %d %d %d = %d\n",
-	  // 	  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
 	}
 	{
 	  int if3[3] = {-1,1,0};
 	  int face_level = block->face_level(if3);
-	  // printf ("%s face_level %d %d %d = %d\n",
-	  // 	  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
 	}
 	{
 	  int if3[3] = {1,1,0};
 	  int face_level = block->face_level(if3);
-	  // printf ("%s face_level %d %d %d = %d\n",
-	  // 	  block->name().c_str(),if3[0],if3[1],if3[2],face_level);
 	  double face_color = mesh_color_(face_level,0);
 	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
 	}

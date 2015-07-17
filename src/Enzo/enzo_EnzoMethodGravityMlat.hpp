@@ -28,8 +28,8 @@ public: // interface
    int iter_max, 
    double res_tol,
    int monitor_iter,
+   std::string smoother,
    bool is_singular,
-   Compute * smooth,
    Restrict * restrict,
    Prolong * prolong,
    int level_min,
@@ -74,6 +74,7 @@ public: // interface
     p | idensity_;
     p | ipotential_;
     p | ib_;
+    p | id_;
     p | ir_;
     p | ix_;
     p | iy_;
@@ -172,6 +173,7 @@ protected: // attributes
 
   /// MG vector id's
   int ib_;
+  int id_;
   int ir_;
   int ix_;
   int iy_;

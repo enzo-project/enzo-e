@@ -13,25 +13,23 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define CELLO_VERBOSE
+// #define DEBUG_CONTROL
 
-#ifdef CELLO_VERBOSE
-#   define VERBOSE(A)						\
-  printf ("%d %s:%d %s TRACE %s\n",					\
-	  CkMyPe(),__FILE__,__LINE__,name_.c_str(),A);			\
-  fflush(stdout);						\
-  if (index_.is_root()) {					\
-    Monitor * monitor = simulation()->monitor();		\
-    monitor->print("Control", A);				\
-  } 
+#ifdef DEBUG_CONTROL
+# define TRACE_CONTROL(A)						\
+  CkPrintf ("%d %s:%d %s TRACE %s\n",					\
+	    CkMyPe(),__FILE__,__LINE__,name_.c_str(),A);		\
+  fflush(stdout);						
 #else
-#   define VERBOSE(A) ;
+# define TRACE_CONTROL(A) ;
 #endif
 
 //----------------------------------------------------------------------
 
 void Block::initial_exit_()
 {
+  TRACE_CONTROL("initial_exit");
+
   control_sync(CkIndex_Block::r_adapt_enter(NULL),sync_barrier); 
 }
 
@@ -39,13 +37,11 @@ void Block::initial_exit_()
 
 void Block::adapt_enter_()
 {
-  VERBOSE("adapt_enter");
+  TRACE_CONTROL("adapt_enter");
 
   performance_switch_ (perf_adapt,__FILE__,__LINE__);
 
   if ( do_adapt_()) {
-
-    VERBOSE("adapt_enter");
 
     adapt_begin_();
     
@@ -60,7 +56,7 @@ void Block::adapt_enter_()
 
 void Block::adapt_exit_()
 {
-  VERBOSE("adapt_exit");
+  TRACE_CONTROL("adapt_exit");
 
   control_sync(CkIndex_Main::p_output_enter(),sync_quiescence);
 }
@@ -69,7 +65,7 @@ void Block::adapt_exit_()
 
 void Block::output_enter_ ()
 {
-  VERBOSE("output_enter");
+  TRACE_CONTROL("output_enter");
 
   performance_switch_ (perf_output,__FILE__,__LINE__);
 
@@ -81,7 +77,7 @@ void Block::output_enter_ ()
 void Block::output_exit_()
 {
 
-  VERBOSE("output_exit");
+  TRACE_CONTROL("output_exit");
 
   
   if (index_.is_root()) {
@@ -97,7 +93,7 @@ void Block::output_exit_()
 void Block::stopping_enter_()
 {
 
-  VERBOSE("stopping_enter");
+  TRACE_CONTROL("stopping_enter");
 
   performance_switch_(perf_stopping,__FILE__,__LINE__);
 
@@ -110,7 +106,7 @@ void Block::stopping_enter_()
 void Block::stopping_exit_()
 {
 
-  VERBOSE("stopping_exit");
+  TRACE_CONTROL("stopping_exit");
 
   if (stop_) {
 
@@ -128,7 +124,7 @@ void Block::stopping_exit_()
 
 void Block::compute_enter_ ()
 {
-  VERBOSE("compute_enter");
+  TRACE_CONTROL("compute_enter");
 
   performance_switch_(perf_compute,__FILE__,__LINE__);
 
@@ -139,7 +135,7 @@ void Block::compute_enter_ ()
 
 void Block::compute_exit_ ()
 {
-  VERBOSE("compute_exit");
+  TRACE_CONTROL("compute_exit");
 
   adapt_enter_();
 }
@@ -148,7 +144,7 @@ void Block::compute_exit_ ()
 
 void Block::refresh_enter_(int callback, Refresh * refresh) 
 {
-  VERBOSE("refresh_enter");
+  TRACE_CONTROL("refresh_enter");
   performance_switch_(perf_refresh,__FILE__,__LINE__);
 
   set_refresh(refresh);
@@ -157,14 +153,14 @@ void Block::refresh_enter_(int callback, Refresh * refresh)
 
   refresh_.set_callback(callback);
 
-  refresh_begin_(refresh);
+  refresh_begin_();
 }
 
 //----------------------------------------------------------------------
 
 void Block::refresh_exit_()
 {
-  VERBOSE("refresh_exit");
+  TRACE_CONTROL("refresh_exit");
 
   update_boundary_();
 
@@ -244,8 +240,6 @@ void Block::control_sync_face_(int entry_point, int phase)
 
     Index index_face = it_face.index();
 
-    int nb3[3] = {2,2,1};
-
     thisProxy[index_face].p_control_sync_count(entry_point,phase);
 
   }
@@ -257,7 +251,7 @@ void Block::control_sync_face_(int entry_point, int phase)
 
 void Block::control_sync_count_ (int entry_point, int phase, int count)
 {
-  VERBOSE("control_sync_count");
+  TRACE_CONTROL("control_sync_count");
 
   if (count != 0)  max_sync_[phase] = count;
 

@@ -89,6 +89,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_mg_monitor_iter;
   p | method_gravity_mg_smooth;
   p | method_gravity_mg_smooth_weight;
+  p | method_gravity_mg_smooth_pre;
+  p | method_gravity_mg_smooth_coarse;
+  p | method_gravity_mg_smooth_post;
   p | method_gravity_mg_restrict;
   p | method_gravity_mg_prolong;
 
@@ -263,6 +266,15 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_mg_smooth_weight = p->value_float
     ("Method:gravity_mg:smooth_weight",1.0);
+
+  method_gravity_mg_smooth_pre = p->value_integer
+    ("Method:gravity_mg:smooth_pre",1);
+
+  method_gravity_mg_smooth_coarse = p->value_integer
+    ("Method:gravity_mg:smooth_coarse",1);
+
+  method_gravity_mg_smooth_post = p->value_integer
+    ("Method:gravity_mg:smooth_post",1);
 
   method_gravity_mg_restrict = p->value_string
     ("Method:gravity_mg:restrict","linear");

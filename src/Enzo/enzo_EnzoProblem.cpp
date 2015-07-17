@@ -223,13 +223,6 @@ Method * EnzoProblem::create_method_
       create_restrict_(enzo_config->method_gravity_mg_restrict,config);
     Prolong * prolong = 
       create_prolong_(enzo_config->method_gravity_mg_prolong,config);
-    Compute * smooth = NULL;
-    if (enzo_config->method_gravity_mg_smooth == "jacobi") {
-      smooth = new EnzoComputeSmoothJacobi 
-	("X","R","D",
-	 enzo_config->method_gravity_mg_smooth_weight,
-	 field_descr);
-    }
     std::string type = enzo_config->method_gravity_mg_type;
     if (type == "mlat") {
       method = new EnzoMethodGravityMlat
@@ -238,7 +231,8 @@ Method * EnzoProblem::create_method_
 	 enzo_config->method_gravity_mg_iter_max,
 	 enzo_config->method_gravity_mg_res_tol,
 	 enzo_config->method_gravity_mg_monitor_iter,
-	 is_singular,  smooth, restrict,  prolong,
+	 enzo_config->method_gravity_mg_smooth,
+	 is_singular,  restrict,  prolong,
 	 enzo_config->method_gravity_mg_min_level,
 	 enzo_config->method_gravity_mg_max_level);
     } else if (type == "mg0") {
@@ -247,7 +241,12 @@ Method * EnzoProblem::create_method_
 	 enzo_config->method_gravity_mg_grav_const,
 	 enzo_config->method_gravity_mg_iter_max,
 	 enzo_config->method_gravity_mg_monitor_iter,
-	 is_singular,  smooth, restrict,  prolong,
+	 enzo_config->method_gravity_mg_smooth,
+	 enzo_config->method_gravity_mg_smooth_weight,
+	 enzo_config->method_gravity_mg_smooth_pre,
+	 enzo_config->method_gravity_mg_smooth_coarse,
+	 enzo_config->method_gravity_mg_smooth_post,
+	 is_singular,  restrict,  prolong,
 	 enzo_config->method_gravity_mg_min_level,
 	 enzo_config->method_gravity_mg_max_level);
     } else {

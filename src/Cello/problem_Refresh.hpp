@@ -24,7 +24,8 @@ public: // interface
     min_face_rank_(0),
     neighbor_type_(neighbor_unknown),
     sync_type_   (sync_unknown),
-    sync_(),
+    sync_load_(),
+    sync_store_(),
     active_(true),
     callback_(0) 
   {
@@ -42,7 +43,8 @@ public: // interface
     min_face_rank_(min_face_rank),
     neighbor_type_(neighbor_type),
     sync_type_(sync_type),
-    sync_(),
+    sync_load_(),
+    sync_store_(),
     active_(active),
     callback_(0) 
   {
@@ -66,7 +68,8 @@ public: // interface
     p | min_face_rank_;
     p | neighbor_type_;
     p | sync_type_;
-    p | sync_;
+    p | sync_load_;
+    p | sync_store_;
     p | active_;
     p | callback_;
   }
@@ -124,10 +127,33 @@ public: // interface
   int sync_type() const 
   { return sync_type_; }
 
-  Sync & sync() 
-  {  return sync_; }
+  Sync & sync_load() 
+  {  return sync_load_; }
+
+  Sync & sync_store() 
+  {  return sync_store_; }
 
 
+  void print() const 
+  {
+    printf ("Refresh %p\n",this);
+    printf ("Refresh fields:");
+    for (size_t i=0; i<field_list_.size(); i++)
+      printf (" %d",field_list_[i]);
+    printf ("\n");
+    printf ("Refresh ghost_depth = %d\n",ghost_depth_);
+    printf ("Refresh min_face_rank: %d\n",min_face_rank_);
+    printf ("Refresh neighbor_type: %d\n",neighbor_type_);
+    printf ("Refresh sync_type: %d\n",sync_type_);
+    printf ("Refresh sync_load: %d/%d\n", 
+	    sync_load_.value(),
+	    sync_load_.stop());
+    printf ("Refresh sync_store: %d/%d\n",
+	    sync_store_.value(),
+	    sync_store_.stop());
+    printf ("Refresh active: %d\n",active_);
+    printf ("Refresh callback: %d\n",callback_);
+  }
 private: // functions
 
 
@@ -150,8 +176,11 @@ private: // attributes
   /// Synchronization type
   int sync_type_;
 
-  /// Counter for synchronization if needed
-  Sync sync_;
+  /// Counter for synchronization before loading data
+  Sync sync_load_;
+
+  /// Counter for synchronization after storing data
+  Sync sync_store_;
 
   /// Whether the Refresh object is active for the block (replaces is_leaf())
   bool active_;

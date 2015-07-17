@@ -137,7 +137,7 @@ public: // interface
 
   /// Return whether this Block is a leaf in the octree forest
   bool is_leaf() const 
-  { return is_leaf_; }
+  { return is_leaf_ && ! (index_.level() < 0); }
 
   /// Index of the Block
   const Index & index() const 
@@ -276,9 +276,6 @@ public: // interface
   /// Return the currently-active Method
   Method * method () throw();
 
-  /// Return the currently-active Refresh
-  Refresh * refresh () throw();
-
 protected:
   /// Enter control compute phase
   void compute_enter_();
@@ -408,17 +405,9 @@ public:
   void refresh_enter (int call, Refresh * refresh)
   { refresh_enter_ (call,refresh); }
 
-  // Refresh ghost zones and apply boundary conditions
-  void p_refresh_enter()  
-  { ERROR("Block::p_refresh_enter()","should not be called"); }
-
-  void r_refresh_enter(CkReductionMsg * msg)  
-  { ERROR("Block::r_refresh_enter()","should not called"); }
-
 protected:
 
   void refresh_enter_(int call, Refresh * refresh);
-
 public:
 
   // Exit the refresh phase after QD
@@ -430,8 +419,18 @@ protected:
   void refresh_exit_ ();
 public:
 
+  /// Synchronize at start of refresh so that neighboring Blocks have
+  /// all reached this point before exchanging data
+  //  void p_refresh_sync()
+  //  { refresh_sync_(0); }
+protected:
+  //  void refresh_sync_(int count);
+  void refresh_load_faces_();
+
+public:
+
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
-  void x_refresh_store_face
+  void p_refresh_store_face
   (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]) 
   {      refresh_store_face_(n,buffer,type_refresh,if3,ic3); }
 
@@ -440,13 +439,14 @@ public:
 
 protected:
 
-  void refresh_begin_(Refresh * refresh);
+  void refresh_begin_();
 
   void refresh_load_face_
   (int type_refresh, Index index, 
    int if3[3], int ic3[3],int count=0);
   void refresh_store_face_
-  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3],int count=0);
+  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3],
+   int count=0);
 
   //--------------------------------------------------
   // STOPPING
@@ -666,10 +666,14 @@ protected: // functions
    int op_array,
    std::vector<int> & field_list);
 
+  /// Set the current refresh object
   void set_refresh (Refresh * refresh) 
-  { 
-    refresh_ = *refresh;
-  };
+  {  refresh_ = *refresh; };
+
+  /// Return the currently-active Refreshobject
+  Refresh * refresh () throw()
+  {  return &refresh_;  }
+
 
 protected: // attributes
 

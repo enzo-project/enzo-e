@@ -81,7 +81,7 @@ Output {
 	image_reduce_type = "max";
         field_list = ["density"];
 #	image_block_size  = 5;
-#	image_size = [1025,1025];
+	image_size = [513,513];
         include "input/schedule_time_0.02.incl"
         image_specify_bounds = true;
 	image_min = 0.0;

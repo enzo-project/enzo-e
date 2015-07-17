@@ -16,10 +16,10 @@
 #define MAX_METHOD_GROUPS  10
 
 /* Maximum number of output file groups specified in the configuration file */
-#define MAX_OUTPUT_GROUPS 10
+#define MAX_OUTPUT_GROUPS 12
 
 /* Maximum number of schedules */
-#define MAX_SCHEDULE 10
+#define MAX_SCHEDULE 12
 
 /* Maximum number of adapt groups specified in the configuration file */
 #define MAX_MESH_GROUPS 10

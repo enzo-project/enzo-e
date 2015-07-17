@@ -323,13 +323,6 @@ Method * Block::method () throw ()
   return method;
 }
 
-//----------------------------------------------------------------------
-
-Refresh * Block::refresh () throw ()
-{
-  return &refresh_;
-}
-
 //======================================================================
 
 void Block::apply_initial_() throw ()

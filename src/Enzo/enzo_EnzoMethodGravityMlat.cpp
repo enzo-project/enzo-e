@@ -239,15 +239,15 @@ EnzoMethodGravityMlat::EnzoMethodGravityMlat
 (const FieldDescr * field_descr, 
  int rank,
  double grav_const, int iter_max, double res_tol, int monitor_iter,
+ std::string smoother,
  bool is_singular,
- Compute * smooth,
  Restrict * restrict,
  Prolong * prolong,
  int level_min,
  int level_max) 
   : Method(), 
     A_(new EnzoMatrixLaplace),
-    smooth_(smooth),
+    smooth_(NULL),
     restrict_(restrict),
     prolong_(prolong),
     is_singular_(is_singular),
@@ -277,6 +277,12 @@ EnzoMethodGravityMlat::EnzoMethodGravityMlat
   ir_ = field_descr->field_id("R");
   ix_ = field_descr->field_id("X");
   iy_ = field_descr->field_id("Y");
+  id_ = field_descr->field_id("D");
+
+
+  if (smoother == "jacobi") {
+    smooth_ = new EnzoComputeSmoothJacobi (A_,ix_,ib_,ir_,id_);
+  }
 }
 
 //----------------------------------------------------------------------

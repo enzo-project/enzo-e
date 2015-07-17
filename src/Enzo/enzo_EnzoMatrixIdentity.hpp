@@ -34,28 +34,30 @@ public: // interface
   void pup (PUP::er &p)
   { TRACEPUP;
     PUP::able::pup(p);
-    p | m_;
+    p | mx_;
+    p | my_;
+    p | mz_;
   }
 
 public: // virtual functions
 
   /// Apply the matrix to a vector Y <-- A*X
-  virtual void matvec (int id_y, int id_x, Block * block) throw();
+  virtual void matvec (int id_y, int id_x, Block * block, int g0 = 1) throw();
 
   /// Extract the diagonal into the given field
-  virtual void diagonal (int id_x, Block * block) throw();
+  virtual void diagonal (int id_x, Block * block, int g0 = 1) throw();
 
 protected: // functions
 
   template <class T>
-  void matvec_ (T * Y, T * X) const throw();
+  void matvec_ (T * Y, T * X, int g0) const throw();
 
   template <class T>
-  void diagonal_ (T * X) const throw();
+  void diagonal_ (T * X, int g0) const throw();
 
 protected: // attributes
 
-  int m_;
+  int mx_,my_,mz_;
 
 };
 

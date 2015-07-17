@@ -125,6 +125,9 @@ public: // attributes
   int                        method_gravity_mg_monitor_iter;
   std::string                method_gravity_mg_smooth;
   double                     method_gravity_mg_smooth_weight;
+  int                        method_gravity_mg_smooth_pre;
+  int                        method_gravity_mg_smooth_coarse;
+  int                        method_gravity_mg_smooth_post;
   std::string                method_gravity_mg_restrict;
   std::string                method_gravity_mg_prolong;
   int                        method_gravity_mg_min_level;

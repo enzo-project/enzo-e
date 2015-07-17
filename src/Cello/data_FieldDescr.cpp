@@ -220,7 +220,7 @@ int FieldDescr::insert_(const std::string & field_name) throw()
   // field_in_group_.push_back(a);
   precision_. push_back(precision);
   centering_. push_back(centered);
-  ghost_depth_.    push_back(ghost_depth);
+  ghost_depth_.push_back(ghost_depth);
 
   return id;
 }

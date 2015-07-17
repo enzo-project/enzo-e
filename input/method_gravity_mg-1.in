@@ -8,15 +8,21 @@ Mesh {
 }
 
 Adapt {
-   max_level = 2;
+   max_level = 0;
 }
 Output {
 
-  list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png"];
+#  list = ["mesh_png", "phi_png", "rho_png", "ax_png", "ay_png"];
 
   mesh_png { name = ["method_gravity_mg-1-mesh-%06d.png", "cycle"]; };
   phi_png { name = ["method_gravity_mg-1-phi-%06d.png", "cycle"]; };
   rho_png { name = ["method_gravity_mg-1-rho-%06d.png", "cycle"]; };
   ax_png  { name = ["method_gravity_mg-1-ax-%06d.png", "cycle"]; };
   ay_png  { name = ["method_gravity_mg-1-ay-%06d.png", "cycle"]; };
+  B_png  { name = ["method_gravity_mg-1-b-%06d.png", "cycle"]; };
+  C_png  { name = ["method_gravity_mg-1-c-%06d.png", "cycle"]; };
+  D_png  { name = ["method_gravity_mg-1-d-%06d.png", "cycle"]; };
+  R_png  { name = ["method_gravity_mg-1-r-%06d.png", "cycle"]; };
+  X_png  { name = ["method_gravity_mg-1-x-%06d.png", "cycle"]; };
+  h5  { name = ["method_gravity_mg-1-%06d.h5", "cycle"]; };
 }
