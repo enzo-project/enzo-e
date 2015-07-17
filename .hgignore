@@ -1,0 +1,21 @@
+# use glob syntax.
+syntax: glob
+Dan_test
+*.a
+*.o
+*~
+*.pyc
+gmon.out
+log.build
+*out.scons*
+template_defs.de*.h
+.scon*
+test/START
+test/STOP
+include
+build
+bin/enzo-p
+charmrun
+config.log
+errors.org
+
