@@ -84,15 +84,16 @@ void register_method_gravity_bicgstab(void)
 // SEE enzo_EnzoMethodGravityBiCGStab.cpp for context
 CkReductionMsg * r_method_gravity_bicgstab(int n, CkReductionMsg ** msgs)
 {
-  long double accum[3] = { 0.0, 0.0, 0.0 };
+  long double accum[4] = { 0.0, 0.0, 0.0, 0.0 };
 
   for (int i=0; i<n; i++) {
     long double * values = (long double *) msgs[i]->getData();
     accum [0] += values[0];
     accum [1] += values[1];
     accum [2] += values[2];
+    accum [3] += values[3];
   }
-  return CkReductionMsg::buildNew(3*sizeof(long double),accum);
+  return CkReductionMsg::buildNew(4*sizeof(long double),accum);
 }
 
 //======================================================================

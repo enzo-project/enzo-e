@@ -130,29 +130,23 @@ public: // interface
   /// First preconditioner solve, begins refresh on Y
   template<class T> void loop_2(EnzoBlock* enzo_block) throw();
 
-  /// First matrix-vector product, begins shift on Y and V
+  /// First matrix-vector product, begins DOT(V,R0) and projection of Y and V
   template<class T> void loop_4(EnzoBlock* enzo_block) throw();
 
-  /// Shifts Y and V, begins DOT(V,R0)
-  template<class T> void loop_5(EnzoBlock* enzo_block) throw();
-
-  /// First vector updates, begins refresh on Q
-  template<class T> void loop_7(EnzoBlock* enzo_block) throw();
+  /// Shifts Y and V, begins, first vector updates, begins refresh on Q
+  template<class T> void loop_6(EnzoBlock* enzo_block) throw();
 
   /// Second preconditioner solve, begins refresh on Y
-  template<class T> void loop_9(EnzoBlock* enzo_block) throw();
+  template<class T> void loop_8(EnzoBlock* enzo_block) throw();
 
-  /// Second matrix-vector product, begins shift on Y and U
-  template<class T> void loop_11(EnzoBlock* enzo_block) throw();
+  /// Second matrix-vector product, begins DOT(U,U), DOT(U,Q) and projection of Y and U
+  template<class T> void loop_10(EnzoBlock* enzo_block) throw();
 
-  /// Shifts Y and U, begins dot-products DOT(U,U) and DOT(U,Q)
+  /// Shifts Y and U, second vector updates, begins DOT(R,R) and DOT(R,R0)
   template<class T> void loop_12(EnzoBlock* enzo_block) throw();
 
-  /// Second vector updates, begins dot-products DOT(R,R) and DOT(R,R0)
-  template<class T> void loop_14(EnzoBlock* enzo_block) throw();
-
   /// Updates search direction, begins update on iteration counter
-  template<class T> void loop_16(EnzoBlock* enzo_block) throw();
+  template<class T> void loop_14(EnzoBlock* enzo_block) throw();
 
   /// End of iteration
   template<class T> void end(EnzoBlock* enzo_block, int retval) throw();
