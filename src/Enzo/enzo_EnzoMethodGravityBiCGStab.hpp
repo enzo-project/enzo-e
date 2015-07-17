@@ -103,8 +103,13 @@ public: // interface
     p | omega_;
     p | bs_;
     p | bc_;
+    p | ys_;
+    p | vs_;
+    p | us_;
 
-    p | id_refresh_matvec_;
+    p | id_refresh_P_;
+    p | id_refresh_Q_;
+    p | id_refresh_Y_;
 
   }
 
@@ -118,29 +123,35 @@ public: // interface
   /// Shifts RHS and sets initial vectors R, R0, and P
   template<class T> void gravity_bicgstab_start_2(EnzoBlock* enzo_block) throw();
 
-  /// Entry into BiCGStab iteration loop
+  /// Entry into BiCGStab iteration loop, begins refresh on P
   template<class T> void gravity_bicgstab_loop_0(EnzoBlock* enzo_block) throw();
 
   /// First preconditioner solve, begins refresh on Y
   template<class T> void gravity_bicgstab_loop_2(EnzoBlock* enzo_block) throw();
 
-  /// First matrix-vector product, begins dot-product DOT(V,R0)
+  /// First matrix-vector product, begins shift on Y and V
   template<class T> void gravity_bicgstab_loop_4(EnzoBlock* enzo_block) throw();
 
+  /// Shifts Y and V, begins DOT(V,R0)
+  template<class T> void gravity_bicgstab_loop_5(EnzoBlock* enzo_block) throw();
+
   /// First vector updates, begins refresh on Q
-  template<class T> void gravity_bicgstab_loop_6(EnzoBlock* enzo_block) throw();
+  template<class T> void gravity_bicgstab_loop_7(EnzoBlock* enzo_block) throw();
 
   /// Second preconditioner solve, begins refresh on Y
-  template<class T> void gravity_bicgstab_loop_8(EnzoBlock* enzo_block) throw();
+  template<class T> void gravity_bicgstab_loop_9(EnzoBlock* enzo_block) throw();
 
-  /// Second matrix-vector product, begins dot-products DOT(U,U) and DOT(U,Q)
-  template<class T> void gravity_bicgstab_loop_10(EnzoBlock* enzo_block) throw();
+  /// Second matrix-vector product, begins shift on Y and U
+  template<class T> void gravity_bicgstab_loop_11(EnzoBlock* enzo_block) throw();
 
-  /// Second vector updates, begins dot-products DOT(R,R) and DOT(R,R0)
+  /// Shifts Y and U, begins dot-products DOT(U,U) and DOT(U,Q)
   template<class T> void gravity_bicgstab_loop_12(EnzoBlock* enzo_block) throw();
 
-  /// Updates search direction, begins update on iteration counter
+  /// Second vector updates, begins dot-products DOT(R,R) and DOT(R,R0)
   template<class T> void gravity_bicgstab_loop_14(EnzoBlock* enzo_block) throw();
+
+  /// Updates search direction, begins update on iteration counter
+  template<class T> void gravity_bicgstab_loop_16(EnzoBlock* enzo_block) throw();
 
   /// End of iteration
   template<class T> void gravity_bicgstab_end(EnzoBlock* enzo_block, int retval) throw();
@@ -150,6 +161,15 @@ public: // interface
 
   /// Set bc_ (B count) by EnzoBlock after reduction
   void set_bc(long double bc) throw() { bc_ = bc; }
+
+  /// Set ys_ (Y sum) by EnzoBlock after reduction
+  void set_ys(long double ys) throw() { ys_ = ys; }
+
+  /// Set vs_ (V sum) by EnzoBlock after reduction
+  void set_vs(long double vs) throw() { vs_ = vs; }
+
+  /// Set us_ (U sum) by EnzoBlock after reduction
+  void set_us(long double us) throw() { us_ = us; }
 
   /// Set rho0_ by EnzoBlock after reduction
   void set_rho0(long double rho0) throw() { rho0_ = rho0; }
@@ -287,8 +307,19 @@ protected: // attributes
   /// count of elements B(i) for singular systems
   long double bc_;
 
-  /// matvec refresh index
-  int id_refresh_matvec_;
+  /// sum of elements Y(i) for singular systems
+  long double ys_;
+
+  /// sum of elements V(i) for singular systems
+  long double vs_;
+
+  /// sum of elements U(i) for singular systems
+  long double us_;
+
+  /// refresh indices
+  int id_refresh_P_;
+  int id_refresh_Q_;
+  int id_refresh_Y_;
 
 };
 
