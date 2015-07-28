@@ -127,8 +127,6 @@ void Factory::create_subblock_array
 
   for (int level = -1; level >= min_level; level--) {
 
-    const int index_level = - (1+level);
-
     if (nbx > 1) nbx = ceil(0.5*nbx);
     if (nby > 1) nby = ceil(0.5*nby);
     if (nbz > 1) nbz = ceil(0.5*nbz);

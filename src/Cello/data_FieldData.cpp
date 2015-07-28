@@ -337,7 +337,7 @@ void FieldData::allocate_temporary (int id_field) throw (std::out_of_range)
 {
   int index_field = id_field - num_permanent();
 
-  if (! (index_field < array_temporary_.size())) {
+  if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
   }
     
@@ -364,7 +364,7 @@ void FieldData::deallocate_temporary (int id_field) throw(std::out_of_range)
 {
   int index_field = id_field - num_permanent();
 
-  if (! (index_field < array_temporary_.size())) {
+  if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
   }
   if (array_temporary_[index_field] != 0) {

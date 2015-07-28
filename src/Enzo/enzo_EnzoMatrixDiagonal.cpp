@@ -68,9 +68,9 @@ void EnzoMatrixDiagonal::matvec_ (T * Y, T * X, int g0) const throw()
   const int iy0 = (my_ > 1) ? g0 : 0;
   const int iz0 = (mz_ > 1) ? g0 : 0;
 
-  for (int iz=iz0; iz<mz_-iz0; iz) {
-    for (int iy=iy0; iy<my_-iy0; iy) {
-      for (int ix=ix0; ix<mx_-ix0; ix) {
+  for (int iz=iz0; iz<mz_-iz0; iz++) {
+    for (int iy=iy0; iy<my_-iy0; iy++) {
+      for (int ix=ix0; ix<mx_-ix0; ix++) {
 	int i = ix + mx_*(iy + my_*iz);
 	Y[i] = d * X[i];
       }
@@ -89,9 +89,9 @@ void EnzoMatrixDiagonal::diagonal_ (T * X, int g0) const throw()
   const int iy0 = (my_ > 1) ? g0 : 0;
   const int iz0 = (mz_ > 1) ? g0 : 0;
 
-  for (int iz=iz0; iz<mz_-iz0; iz) {
-    for (int iy=iy0; iy<my_-iy0; iy) {
-      for (int ix=ix0; ix<mx_-ix0; ix) {
+  for (int iz=iz0; iz<mz_-iz0; iz++) {
+    for (int iy=iy0; iy<my_-iy0; iy++) {
+      for (int ix=ix0; ix<mx_-ix0; ix++) {
 	int i = ix + mx_*(iy + my_*iz);
 	X[i] = d;
       }

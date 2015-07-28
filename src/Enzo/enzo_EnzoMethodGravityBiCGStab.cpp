@@ -474,7 +474,6 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
 
 
   /// Initialize default Refresh (called before entry to compute())
-  const int num_fields = field_descr->field_count();  /// DR: NECESSARY?
   const int ir = add_refresh(1, rank-1, neighbor_leaf, sync_barrier);
   refresh(ir)->add_field(idensity_);
 

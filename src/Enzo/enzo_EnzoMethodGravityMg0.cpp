@@ -141,32 +141,7 @@
 #define VERBOSE(FUNCTION)						\
   Monitor * monitor = simulation()->monitor();				\
   monitor->verbose(stdout,"Method", "%s "FUNCTION,name().c_str());
-#define DEBUG_X							\
-  {								\
-    Data * data = enzo_block->data();				\
-    Field field = data->field();				\
-								\
-    T * X = (T*) field.values(ix_);				\
-    T * B = (T*) field.values(ib_);				\
-    std::string name = enzo_block->name();			\
-    if (name == "B0_0") {					\
-      CkPrintf ("%s:%d DEBUG %s X(1,[19:21]) = [%g %g %g]\n",	\
-	      __FILE__,__LINE__,name.c_str(),			\
-	      X[43],X[44],X[45]);				\
-      CkPrintf ("%s:%d DEBUG %s B(1,[19:21]) = [%g %g %g]\n",	\
-	      __FILE__,__LINE__,name.c_str(),			\
-	      B[43],B[44],B[45]);				\
-    } else if (name == "B1_0") {				\
-      CkPrintf ("%s:%d DEBUG %s X(1,[19:21]) = [%g %g %g]\n",	\
-	      __FILE__,__LINE__,name.c_str(),			\
-	      X[43],X[44],X[45]);				\
-      CkPrintf ("%s:%d DEBUG %s B(1,[19:21]) = [%g %g %g]\n",	\
-	      __FILE__,__LINE__,name.c_str(),			\
-	      B[43],B[44],B[45]);				\
-    }								\
-  }
 #else
-#   define DEBUG_X	;
 #   define MG_VERBOSE(X) /* */ ;
 #   define VERBOSE(X) /* */ ;
 #endif
@@ -185,10 +160,6 @@
 #else 
 #  define PRINT_BDRX ;
 #endif
-
-#define PRINT_X \
-    printf ("%s:%d DEBUG_X %s X[4,0] = %g  X[4,20]\n", \
-	    __FILE__,__LINE__,block->name().c_str(),X[4]);
 
 //----------------------------------------------------------------------
 
@@ -224,7 +195,7 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
     monitor_iter_(monitor_iter),
     rr_(0),rr0_(0),
     irho_(0),  iphi_(0),
-    ib_(0), ir_(0), ix_(0), ic_(0),
+    ib_(0), ic_(0), ir_(0), ix_(0),
     min_level_(min_level),
     max_level_(max_level),
     mx_(0),my_(0),mz_(0)
@@ -335,8 +306,6 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   
   enzo_block->mg_iter_clear();
 
-  const int level = enzo_block->level();
-
   Data * data = enzo_block->data();
   Field field = data->field();
 
@@ -372,7 +341,6 @@ void EnzoMethodGravityMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     }
   }
 
-  DEBUG_X;
   // start the MG V-cycle with the root level
   if (enzo_block->level() == max_level_)
     begin_cycle_<T>(enzo_block);
@@ -408,14 +376,11 @@ void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
     const Data * data = enzo_block->data();
     const FieldDescr * field_descr = data->field_descr();
-    const int num_fields = field_descr->field_count();
 
     Refresh refresh (4,0,neighbor_level, sync_face);
     // refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
     refresh.add_field (ix_);
 
-    DEBUG_X;
-    
     enzo_block->refresh_enter
       (CkIndex_EnzoBlock::p_mg0_pre_smooth<T>(NULL),&refresh);
     // // Skip refresh
@@ -454,9 +419,7 @@ void EnzoMethodGravityMg0::pre_smooth(EnzoBlock * enzo_block) throw()
   Data * data = enzo_block->data();
   Field field = data->field();
   T * X = (T*) field.values(ix_);
-  DEBUG_X;
   smooth_pre_->compute(enzo_block);
-  DEBUG_X;
 
   Refresh refresh (4,0,neighbor_level, sync_face);
   //  refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
@@ -464,7 +427,6 @@ void EnzoMethodGravityMg0::pre_smooth(EnzoBlock * enzo_block) throw()
 
   refresh.set_active(true);
   refresh.print();
-  DEBUG_X;
 
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_mg0_restrict_send<T>(NULL),&refresh);
@@ -508,12 +470,10 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
   Field field = data->field();
   T * X = (T*) field.values(ix_);
 
-  DEBUG_X;
   MG_VERBOSE("restrict_send_()");
 
   A_->residual(ir_, ib_, ix_, enzo_block);
 
-  DEBUG_X;
 
   Index index        = enzo_block->index();
   Index index_parent = index.index_parent(min_level_);
@@ -760,7 +720,6 @@ void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 {
   MG_VERBOSE("prolong_recv_()");
 
-  DEBUG_X;
 
   Data * data = enzo_block->data();
   Field field = data->field();
@@ -770,7 +729,6 @@ void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 
   zaxpy_(X,1.0,X,C);
 
-  DEBUG_X;
 
   Refresh refresh (4,0,neighbor_level, sync_face);
   // refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
@@ -868,14 +826,12 @@ void EnzoMethodGravityMg0::exit_solver_
   T * X         = (T*) field.values(ix_);
   T * phi = (T*) field.values(iphi_);
 
-  DEBUG_X;
 
   int mx,my,mz;
   field.dimensions(irho_,&mx,&my,&mz);
 
   copy_(phi,X,mx,my,mz,enzo_block->is_leaf());
 
-  DEBUG_X;
 
   FieldDescr * field_descr = field.field_descr();
 
@@ -885,7 +841,6 @@ void EnzoMethodGravityMg0::exit_solver_
 
   monitor_output_ (enzo_block);
 
-  DEBUG_X;
   enzo_block->compute_done();
 }
 

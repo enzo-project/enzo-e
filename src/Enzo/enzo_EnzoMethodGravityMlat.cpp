@@ -486,8 +486,8 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
 	enzo_block_proxy[index_neighbor].p_mg_receive_face
 	  (n,array, refresh_fine, of3, ic3);
 	// remote call p_mg_receive_face() on neighbor parent
-	Index index_parent = index_neighbor.index_parent();
-	enzo_block_proxy[index_neighbor].p_mg_receive_face
+	Index index_neighbor_parent = index_neighbor.index_parent();
+	enzo_block_proxy[index_neighbor_parent].p_mg_receive_face
 	  (n,array, refresh_same, of3, ic3);
       }
     } 
