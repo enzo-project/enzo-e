@@ -122,14 +122,14 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 
   field_descr->ghost_depth    (idensity_,&gx_,&gy_,&gz_);
 
-  const int ir = add_refresh(1,rank-1,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   //  refresh(ir)->add_field(idensity_);
   refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
 
 #ifdef OLD_REFRESH
-  id_refresh_matvec_ = add_refresh(1,rank-1,neighbor_leaf,sync_barrier);
+  id_refresh_matvec_ = add_refresh(4,0,neighbor_leaf,sync_barrier);
   refresh(id_refresh_matvec_)->add_all_fields(num_fields);
   //  refresh(id_refresh_matvec_)->add_field(ir_);
 #endif
@@ -417,7 +417,9 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
     rr_max_ = std::max(rr_max_,rr_);
   }
 
-  if (enzo_block->index().is_root()) {
+  const bool is_root = enzo_block->index().is_root();
+
+  if (is_root) {
 
     Monitor * monitor = enzo_block->simulation()->monitor();
 
@@ -433,6 +435,9 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 
   if (rr_ / rr0_ < res_tol_) {
 
+    if (is_root && monitor_iter_) {
+      monitor_output_ (enzo_block);
+    }
     cg_end<T> (enzo_block,return_converged);
 
   } else if (iter_ >= iter_max_)  {

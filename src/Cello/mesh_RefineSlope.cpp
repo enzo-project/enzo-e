@@ -43,9 +43,6 @@ int RefineSlope::apply
   bool all_coarsen = true;
   bool any_refine = false;
 
-  int nx,ny,nz;
-  field_data->size(&nx,&ny,&nz);
-
   int rank = block->rank();
 
   double h3[3];
@@ -65,10 +62,8 @@ int RefineSlope::apply
 
     int gx,gy,gz;
     field_descr->ghost_depth(id_field, &gx,&gy,&gz);
-
-    const int nxd = rank >= 1 ? (nx + 2*gx) : nx;
-    const int nyd = rank >= 2 ? (ny + 2*gy) : ny;
-    const int nzd = rank >= 3 ? (nz + 2*gz) : nz;
+    int mx,my,mz;
+    field_data->dimensions(id_field,&mx,&my,&mz);
 
     precision_type precision = field_descr->precision(id_field);
 
@@ -79,19 +74,19 @@ int RefineSlope::apply
     case precision_single:
       evaluate_block_((float*) array,
 		      (float*) output, 
-		      nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
+		      mx,my,mz,gx,gy,gz,
 		      &any_refine,&all_coarsen, rank,h3);
       break;
     case precision_double:
       evaluate_block_((double*) array,
 		      (double*) output,
-		      nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
+		      mx,my,mz,gx,gy,gz,
 		      &any_refine,&all_coarsen, rank,h3);
       break;
     case precision_quadruple:
       evaluate_block_((long double*) array,
 		      (long double*) output,
-		      nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
+		      mx,my,mz,gx,gy,gz,
 		      &any_refine,&all_coarsen, rank,h3);
       break;
     default:
@@ -113,24 +108,21 @@ int RefineSlope::apply
 
 template <class T>
 void RefineSlope::evaluate_block_(T * array, T * output ,
-				  int ndx, int ndy, int ndz,
-				  int nx, int ny, int nz,
+				  int mx, int my, int mz,
 				  int gx, int gy, int gz,
 				  bool *any_refine,
 				  bool * all_coarsen, 
 				  int rank, 
 				  double * h3 )
 {
-  // TEMPORARY: evaluate effect of including (some) ghost zones
   T slope;
-  const int d3[3] = {1,ndx,ndx*ndy};
+  const int d3[3] = {1,mx,mx*my};
   for (int axis=0; axis<rank; axis++) {
     int id = d3[axis];
-    const int i0 = gx + ndx*(gy + ndy*gz);
-    for (int ix=0; ix<nx; ix++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int iz=0; iz<nz; iz++) {
-	  int i = i0 + ix + ndx*(iy + ndy*iz);
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
 	  slope = fabs( (array[i+id] - array[i-id]) 
 		       / (2.0*h3[axis]*array[i]));
 	  if (slope > min_refine_)  *any_refine  = true;

@@ -441,6 +441,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   ipotential_ = field_descr->field_id("potential");
 
   /// access existing fields for temporary vectors (must be declared in parameter file)
+
   ib_ = field_descr->field_id(name() + "_B");
   ix_ = field_descr->field_id(name() + "_X");
   ir_ = field_descr->field_id(name() + "_R");
@@ -474,15 +475,15 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
 
 
   /// Initialize default Refresh (called before entry to compute())
-  const int ir = add_refresh(1, rank-1, neighbor_leaf, sync_barrier);
+  const int ir = add_refresh(4, 0, neighbor_leaf, sync_barrier);
   refresh(ir)->add_field(idensity_);
 
   /// Initialize specific vector Refreshes
-  id_refresh_P_ = add_refresh(1, rank-1, neighbor_leaf, sync_barrier);
+  id_refresh_P_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
   refresh(id_refresh_P_)->add_field(ip_);
-  id_refresh_Q_ = add_refresh(1, rank-1, neighbor_leaf, sync_barrier);
+  id_refresh_Q_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
   refresh(id_refresh_Q_)->add_field(iq_);
-  id_refresh_Y_ = add_refresh(1, rank-1, neighbor_leaf, sync_barrier);
+  id_refresh_Y_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
   refresh(id_refresh_Y_)->add_field(iy_);
 
 }
