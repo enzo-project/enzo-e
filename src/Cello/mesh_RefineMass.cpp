@@ -41,6 +41,8 @@ RefineMass::RefineMass
   TRACE("RefineSlope::RefineSlope");
   WARNING ("RefineMass::RefineMass()",
 	   "Assuming non-Cosmology problem for RefineMass");
+  ERROR ("RefineMass::RefineMass()",
+	 "Refinement by mass is not implemented yet");
 
 }
 
@@ -71,6 +73,7 @@ int RefineMass::apply
 
   precision_type precision = field_descr->precision(0);
 
+  // ERROR: using field id=0!
   void * void_array  = field_data->values(0);
   void * void_output = initialize_output_(field_data);
 

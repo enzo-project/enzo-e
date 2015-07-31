@@ -457,7 +457,14 @@ Refine * Problem::create_refine_
  ) throw ()
 { 
 
-  if (type == "slope") {
+  if (type == "density") {
+
+    return new RefineDensity
+      (config->mesh_min_refine[index],
+       config->mesh_max_coarsen[index],
+       config->mesh_refine_output[index]);
+
+  } else if (type == "slope") {
 
     return new RefineSlope 
       (field_descr,

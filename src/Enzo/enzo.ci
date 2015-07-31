@@ -135,6 +135,7 @@ module enzo {
     entry void p_gravity_bicgstab_loop_3();
     entry void p_gravity_bicgstab_loop_7();
     entry void p_gravity_bicgstab_loop_9();
+    entry void p_gravity_bicgstab_exit();
 
     entry void p_mg_receive_face
     (int n, char buffer[n],
@@ -242,10 +243,6 @@ module template_defs {
    extern entry void EnzoBlock r_gravity_bicgstab_loop_7<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_gravity_bicgstab_loop_7<long double>(CkReductionMsg *msg);
 
-   extern entry void EnzoBlock r_gravity_bicgstab_loop_9<float>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_gravity_bicgstab_loop_9<double>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_gravity_bicgstab_loop_9<long double>(CkReductionMsg *msg);
-
    extern entry void EnzoBlock r_gravity_bicgstab_loop_11<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_gravity_bicgstab_loop_11<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_gravity_bicgstab_loop_11<long double>(CkReductionMsg *msg);
@@ -257,6 +254,10 @@ module template_defs {
    extern entry void EnzoBlock r_gravity_bicgstab_loop_15<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_gravity_bicgstab_loop_15<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_gravity_bicgstab_loop_15<long double>(CkReductionMsg *msg);
+
+   extern entry void EnzoBlock p_gravity_bicgstab_exit<float>();
+   extern entry void EnzoBlock p_gravity_bicgstab_exit<double>();
+   extern entry void EnzoBlock p_gravity_bicgstab_exit<long double>();
 
    extern entry void EnzoBlock p_mg0_pre_smooth<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock p_mg0_pre_smooth<double>(CkReductionMsg *msg);

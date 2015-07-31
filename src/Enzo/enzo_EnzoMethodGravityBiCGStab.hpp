@@ -110,6 +110,7 @@ public: // interface
 
     p | id_refresh_P_;
     p | id_refresh_Q_;
+    p | id_refresh_X_;
     p | id_refresh_Y_;
 
   }
@@ -130,7 +131,8 @@ public: // interface
   /// First preconditioner solve, begins refresh on Y
   template<class T> void loop_2(EnzoBlock* enzo_block) throw();
 
-  /// First matrix-vector product, begins DOT(V,R0) and projection of Y and V
+  /// First matrix-vector product, begins DOT(V,R0) and projection of
+  /// Y and V
   template<class T> void loop_4(EnzoBlock* enzo_block) throw();
 
   /// Shifts Y and V, begins, first vector updates, begins refresh on Q
@@ -139,10 +141,12 @@ public: // interface
   /// Second preconditioner solve, begins refresh on Y
   template<class T> void loop_8(EnzoBlock* enzo_block) throw();
 
-  /// Second matrix-vector product, begins DOT(U,U), DOT(U,Q) and projection of Y and U
+  /// Second matrix-vector product, begins DOT(U,U), DOT(U,Q) and
+  /// projection of Y and U
   template<class T> void loop_10(EnzoBlock* enzo_block) throw();
 
-  /// Shifts Y and U, second vector updates, begins DOT(R,R) and DOT(R,R0)
+  /// Shifts Y and U, second vector updates, begins DOT(R,R) and
+  /// DOT(R,R0)
   template<class T> void loop_12(EnzoBlock* enzo_block) throw();
 
   /// Updates search direction, begins update on iteration counter
@@ -150,6 +154,9 @@ public: // interface
 
   /// End of iteration
   template<class T> void end(EnzoBlock* enzo_block, int retval) throw();
+
+  /// Exit the solver
+  template<class T> void exit(EnzoBlock* enzo_block) throw();
 
   /// Set routines for use by EnzoBlock after reductions
   void set_bs(long double bs) throw() { bs_ = bs; }
@@ -268,6 +275,7 @@ protected: // attributes
   /// refresh indices
   int id_refresh_P_;
   int id_refresh_Q_;
+  int id_refresh_X_;
   int id_refresh_Y_;
 
 };

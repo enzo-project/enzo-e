@@ -281,6 +281,9 @@ public: /// entry methods
   /// EnzoMethodGravityBiCGStab entry method: refresh Y
   void p_gravity_bicgstab_loop_9();
 
+  /// EnzoMethodGravityBiCGStab entry method: refresh X before exiting solver
+  void p_gravity_bicgstab_exit();
+
   /// EnzoMethodGravityBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
   template <class T>
   void r_gravity_bicgstab_loop_11(CkReductionMsg* msg);
@@ -292,6 +295,7 @@ public: /// entry methods
   /// EnzoMethodGravityBiCGStab entry method: ITER++
   template <class T>
   void r_gravity_bicgstab_loop_15(CkReductionMsg* msg);
+
 
   /// EnzoMethodGravityBiCGStab entry method: 
   /// perform the necessary reductions for shift

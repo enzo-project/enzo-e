@@ -429,6 +429,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
     ys_(0.0),vs_(0.0),us_(0.0),
     id_refresh_P_(-1),
     id_refresh_Q_(-1),
+    id_refresh_X_(-1),
     id_refresh_Y_(-1)
 {
 
@@ -483,6 +484,8 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   refresh(id_refresh_P_)->add_field(ip_);
   id_refresh_Q_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
   refresh(id_refresh_Q_)->add_field(iq_);
+  id_refresh_X_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
+  refresh(id_refresh_X_)->add_field(ix_);
   id_refresh_Y_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
   refresh(id_refresh_Y_)->add_field(iy_);
 
@@ -1181,9 +1184,59 @@ template<class T> void EnzoMethodGravityBiCGStab::end(EnzoBlock* enzo_block, int
   ///    }
   /// 
   /// actually just does
-  ///    potential = X
-  ///    compute acceleration field
-  ///    enzo_block->compute_done
+  ///    calls refresh then exit()
+
+  // /// deallocate temporary vector data
+  // field.deallocate_temporary(ib_);
+  // field.deallocate_temporary(ix_);
+  // field.deallocate_temporary(ir_);
+  // field.deallocate_temporary(ir0_);
+  // field.deallocate_temporary(ip_);
+  // field.deallocate_temporary(iy_);
+  // field.deallocate_temporary(iv_);
+  // field.deallocate_temporary(iq_);
+  // field.deallocate_temporary(iu_);
+
+  /// indicate that method is finished
+
+  /// refresh X before computing acceleration and exiting
+  this->refresh(id_refresh_X_)->set_active(enzo_block->is_leaf());
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_exit(),
+			    this->refresh(id_refresh_X_));
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_gravity_bicgstab_exit() {
+  /// re-entry into exit(), using template with appropriate precision
+
+  EnzoMethodGravityBiCGStab* method = 
+    static_cast<EnzoMethodGravityBiCGStab*> (this->method());
+
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+
+  Field field = data()->field();
+
+  int precision = field.precision(field.field_id("density")); // assuming 
+
+  if      (precision == precision_single) {
+    method->exit<float>(enzo_block);
+  } else if (precision == precision_double) {
+    method->exit<double>(enzo_block);
+  } else if (precision == precision_quadruple) {
+    method->exit<long double>(enzo_block);
+  } else {
+    ERROR1("EnzoBlock::p_gravity_bicgstab_exit()",
+	   "precision %d not recognized", precision);
+  }
+}
+
+//----------------------------------------------------------------------
+
+template<class T> 
+void EnzoMethodGravityBiCGStab::exit(EnzoBlock* enzo_block) throw() 
+{
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -1212,7 +1265,8 @@ template<class T> void EnzoMethodGravityBiCGStab::end(EnzoBlock* enzo_block, int
     compute_acceleration.compute(enzo_block);
   }
 
-  // /// deallocate temporary vector data
+  //  /// deallocate temporary vector data
+
   // field.deallocate_temporary(ib_);
   // field.deallocate_temporary(ix_);
   // field.deallocate_temporary(ir_);
@@ -1223,7 +1277,8 @@ template<class T> void EnzoMethodGravityBiCGStab::end(EnzoBlock* enzo_block, int
   // field.deallocate_temporary(iq_);
   // field.deallocate_temporary(iu_);
 
-  /// indicate that method is finished
+  // indicate that method is finished
+
   enzo_block->compute_done();
 }
 
