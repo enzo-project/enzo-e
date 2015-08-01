@@ -151,7 +151,8 @@ public: // interface
 
 protected: // methods
 
-  void monitor_output_(EnzoBlock * enzo_block) throw();
+  void monitor_output_(EnzoBlock * enzo_block,
+		       bool final = false) throw();
 
   template <class T>
   void compute_ (EnzoBlock * enzo_block) throw();

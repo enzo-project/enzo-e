@@ -475,19 +475,29 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   // field_descr->set_precision(iu_, precision);
 
 
+  const int num_fields = field_descr->field_count();
+
   /// Initialize default Refresh (called before entry to compute())
   const int ir = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(ir)->add_field(idensity_);
+  //  refresh(ir)->add_field(idensity_);
+  refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize specific vector Refreshes
   id_refresh_P_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(id_refresh_P_)->add_field(ip_);
+  refresh(id_refresh_P_)->add_all_fields(num_fields);
+  // refresh(id_refresh_P_)->add_field(ip_);
+
   id_refresh_Q_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(id_refresh_Q_)->add_field(iq_);
+  refresh(id_refresh_Q_)->add_all_fields(num_fields);
+  // refresh(id_refresh_Q_)->add_field(iq_);
+
   id_refresh_X_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(id_refresh_X_)->add_field(ix_);
+  refresh(id_refresh_X_)->add_all_fields(num_fields);
+  //  refresh(id_refresh_X_)->add_field(ix_);
+
   id_refresh_Y_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(id_refresh_Y_)->add_field(iy_);
+  refresh(id_refresh_Y_)->add_all_fields(num_fields);
+  //  refresh(id_refresh_Y_)->add_field(iy_);
 
 }
 
@@ -1251,7 +1261,7 @@ void EnzoMethodGravityBiCGStab::exit(EnzoBlock* enzo_block) throw()
 
     /// output solution progress (iteration, residual, etc)
     if (enzo_block->index().is_root()) 
-      monitor_output_(enzo_block);
+      monitor_output_(enzo_block,true);
 
     /// copy potential from solution vector X
     copy_(potential, X, mx_, my_, mz_);
@@ -1284,10 +1294,12 @@ void EnzoMethodGravityBiCGStab::exit(EnzoBlock* enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityBiCGStab::monitor_output_(EnzoBlock* enzo_block) throw() {
+void EnzoMethodGravityBiCGStab::monitor_output_(EnzoBlock* enzo_block,
+						bool final) throw() {
 
   Monitor* monitor = enzo_block->simulation()->monitor();
-  monitor->print("Enzo", "BiCGStab iter %04d  err %.16g [%g %g]",
+  monitor->print("Enzo", "BiCGStab %s iter %04d  err %.16g [%g %g]",
+		 final ? "final" : "",
 		 iter_,
 		 (double)(err_),
 		 (double)(err_min_),

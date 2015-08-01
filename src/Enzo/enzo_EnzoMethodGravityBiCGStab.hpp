@@ -173,10 +173,19 @@ public: // interface
   void set_beta_n(long double beta_n) throw() { beta_n_ = beta_n; }
   void set_iter(int iter) throw() { iter_ = iter; }
 
+  /// TEMPORARY
+  // virtual double timestep (Block * block) const throw() 
+  // {
+  //   WARNING ("EnzoMethodGravityBiCGStab::timestep()",
+  // 	     "TEMPORARY: setting timestep to 1.0 for debugging");
+  //   return 1.0;
+  // }
+
 protected: // methods
 
   /// internal routine to report solver progress to stdout
-  void monitor_output_(EnzoBlock * enzo_block) throw();
+  void monitor_output_(EnzoBlock * enzo_block,
+		       bool final = false) throw();
 
   /// internal routine to handle actual start to solver
   template<class T> void compute_(EnzoBlock * enzo_block) throw();

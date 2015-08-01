@@ -676,7 +676,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
     T * potential = (T*) field.values(ipotential_);
 
     if (enzo_block->index().is_root()) {
-      monitor_output_ (enzo_block);
+      monitor_output_ (enzo_block,true);
     }
 
     copy_(potential,X,mx_,my_,mz_);
@@ -695,16 +695,18 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGravityCg::monitor_output_(EnzoBlock * enzo_block) throw()
+void EnzoMethodGravityCg::monitor_output_(EnzoBlock * enzo_block,
+					  bool final) throw()
 {
 
   Monitor * monitor = enzo_block->simulation()->monitor();
 
-  monitor->print ("Enzo", "CG iter %04d  rr %g [%g %g]",
-		  iter_,
-		  (double)(rr_    / rr0_),
-		  (double)(rr_min_/ rr0_),
-		  (double)(rr_max_/ rr0_));
+  monitor->print("Enzo", "CG %s iter %04d  err %.16g [%g %g]",
+		 final ? "final" : "",
+		 iter_,
+		 (double)(rr_    / rr0_),
+		 (double)(rr_min_/ rr0_),
+		 (double)(rr_max_/ rr0_));
 }
 
 //----------------------------------------------------------------------

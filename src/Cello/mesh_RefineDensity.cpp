@@ -57,6 +57,7 @@ int RefineDensity::apply
     ERROR1 ("RefineDensity::apply()",
 	   "Unrecognized precision %d\n",
 	    precision);
+    return 0;
   }
 }
 
