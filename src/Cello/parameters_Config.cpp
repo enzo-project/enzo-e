@@ -80,6 +80,7 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_max_coarsen2,MAX_MESH_GROUPS);
   PUParray(p,mesh_level_exponent,MAX_MESH_GROUPS);
   PUParray(p,mesh_refine_output,MAX_MESH_GROUPS);
+  PUParray(p,mesh_include_ghosts,MAX_MESH_GROUPS);
 
   // Method
 
@@ -546,6 +547,9 @@ void Config::read_adapt_ (Parameters * p) throw()
     mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
     mesh_refine_output[ia] = p->value_string (prefix + "output","");
+
+    mesh_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
+						false);
 
   }
 }

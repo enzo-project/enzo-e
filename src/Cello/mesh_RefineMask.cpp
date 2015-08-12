@@ -11,8 +11,9 @@
 
 RefineMask::RefineMask(Parameters * parameters,
 		       const std::string parameter_name,
+		       bool include_ghosts,
 		       std::string output) throw ()
-  : Refine (0.0, 0.0, output),
+  : Refine (0.0, 0.0, include_ghosts, output),
     value_(new Value(parameters,parameter_name))
 {
 }

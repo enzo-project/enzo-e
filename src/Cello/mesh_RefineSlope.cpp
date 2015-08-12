@@ -13,8 +13,9 @@ RefineSlope::RefineSlope(const FieldDescr * field_descr,
 			 double min_refine,
 			 double max_coarsen,
 			 std::vector<std::string> field_name_list,
+			 bool include_ghosts,
 			 std::string output) throw ()
-  : Refine (min_refine, max_coarsen, output)
+  : Refine (min_refine, max_coarsen, include_ghosts,output)
 {
   if (field_name_list.size() != 0) {
     field_id_list_.resize(field_name_list.size());
@@ -61,7 +62,14 @@ int RefineSlope::apply
     int id_field = field_id_list_[k];
 
     int gx,gy,gz;
-    field_descr->ghost_depth(id_field, &gx,&gy,&gz);
+    if (include_ghosts_) {
+      gx = (rank >= 1) ? 1 : 0;
+      gy = (rank >= 2) ? 1 : 0;
+      gz = (rank >= 3) ? 1 : 0;
+    } else {
+      field_descr->ghost_depth(id_field, &gx,&gy,&gz);
+    }
+
     int mx,my,mz;
     field_data->dimensions(id_field,&mx,&my,&mz);
 

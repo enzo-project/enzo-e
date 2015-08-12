@@ -12,8 +12,9 @@
 RefineShear::RefineShear(const FieldDescr * field_descr,
 			 double min_refine,
 			 double max_coarsen,
+			 bool include_ghosts,
 			 std::string output) throw ()
-  : Refine (min_refine_, max_coarsen, output)
+  : Refine (min_refine_, max_coarsen, include_ghosts,output)
 {
 }
 

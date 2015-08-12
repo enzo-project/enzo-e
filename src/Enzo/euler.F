@@ -2,6 +2,10 @@ c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
 
+/* #define DEBUG_PPM */
+
+#define V_MAX 1.0
+
 c=======================================================================
 c//////////////////////////  SUBROUTINE EULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -237,6 +241,31 @@ c
          ub(i)    = u0(i)*frac + ubar(i,j)*(1.0 - frac)
 c
        enddo
+#ifdef DEBUG_PPM
+       do i=i1, i2
+          if (ub(i).ne.ub(i+1)) then
+             write (6,*) 'DEBUG',__LINE__,i,'ub'
+             write (6,*) 'ub(i)   = ',ub(i)
+             write (6,*) 'ub(i+1) = ',ub(i+1)
+             write (6,*) 'u0(i)   = ',u0(i)
+             write (6,*) 'u0(i+1) = ',u0(i+1)
+             write (6,*) 'ubar(i,j)   = ',ubar(i,j)
+             write (6,*) 'ubar(i+1,j) = ',ubar(i+1,j)
+             write (6,*) 'frac = ',frac
+          endif
+       enddo
+       do i=i1, i2
+          if (pb(i).ne.pb(i+1)) then
+             write (6,*) 'DEBUG',__LINE__,i,'pb'
+             write (6,*) 'pb(i)   = ',pb(i)
+             write (6,*) 'pb(i+1) = ',pb(i+1)
+             write (6,*) 'p0(i)   = ',p0(i)
+             write (6,*) 'p0(i+1) = ',p0(i+1)
+             write (6,*) 'pbar(i)   = ',pbar(i,j)
+             write (6,*) 'pbar(i+1) = ',pbar(i+1,j)
+          endif
+       enddo
+#endif
 c
 c  Cull appropriate states depending on where eulerian position is in solution
 c    (lbar >= 0 --> inside post-shock region,
@@ -359,6 +388,37 @@ c
             dub(i)  =  dub(i) + diffcoef(i,j)*
      &           (dslice(i-1,j)               - dslice(i,j)            )
          enddo
+#ifdef DEBUG_PPM
+         do i=i1, i2
+            if (duub(i).ne.duub(i+1)) then
+               write (6,*) 'DEBUG',__FILE__,__LINE__,i,'duub()'
+               write (6,*) 'duub(i)   = ',duub(i)
+               write (6,*) 'duub(i+1) = ',duub(i+1)
+               write (6,*) 'dub(i)   = ',dub(i)
+               write (6,*) 'dub(i+1) = ',dub(i+1)
+               write (6,*) 'ub(i)   = ',ub(i)
+               write (6,*) 'ub(i+1) = ',ub(i+1)
+               write (6,*) 'diffcoef(i,j)   = ',diffcoef(i,j)
+               write (6,*) 'diffcoef(i+1,j) = ',diffcoef(i+1,j)
+               write (6,*) 'dslice(i-1,j) = ',dslice(i-1,j)
+               write (6,*) 'dslice(i,  j) = ',dslice(i,j)
+               write (6,*) 'dslice(i+1,j) = ',dslice(i+1,j)
+               write (6,*) 'uslice(i-1,j) = ',uslice(i-1,j)
+               write (6,*) 'uslice(i,  j) = ',uslice(i,j)
+               write (6,*) 'uslice(i+1,j) = ',uslice(i+1,j)
+            endif
+            if (dub(i).ne.dub(i+1)) then
+               write (6,*) 'DEBUG',__FILE__,__LINE__,i,'dub()'
+               write (6,*) 'dub(i)   = ',dub(i)
+               write (6,*) 'dub(i+1) = ',dub(i+1)
+               write (6,*) 'diffcoef(i,j)   = ',diffcoef(i,j)
+               write (6,*) 'diffcoef(i+1,j) = ',diffcoef(i+1,j)
+               write (6,*) 'dslice(i-1,j) = ',dslice(i-1,j)
+               write (6,*) 'dslice(i,  j) = ',dslice(i,j)
+               write (6,*) 'dslice(i+1,j) = ',dslice(i+1,j)
+            endif
+         enddo
+#endif
 c
 c        If using dual energy formalism, compute dugeb
 c
@@ -382,6 +442,20 @@ c
             dueb(i) = dub(i)*eb(i)
          enddo
 c
+#ifdef DEBUG_PPM
+         do i=i1, i2
+            if (duub(i).ne.duub(i+1)) then
+               write(6,*) 'DEBUG duub',__FILE__,
+     *              __LINE__, i,j
+               write(6,*) 'duub(i)   = ',duub(i)
+               write(6,*) 'duub(i+1) = ',duub(i+1)
+               write(6,*) 'dub(i)   = ',dub(i)
+               write(6,*) 'dub(i+1) = ',dub(i+1)
+               write(6,*) 'ub(i)   = ',ub(i)
+               write(6,*) 'ub(i+1) = ',ub(i+1)
+           endif
+        end do
+#endif
          if (idual .eq. 1) then
             do i=i1, i2+1
                dugeb(i) = dub(i)*geb(i)
@@ -494,14 +568,31 @@ c     Reformulation to avoid overflows [BWO v1_1_6]
      &         (qc/dnu(i))*(duub(i)-duub(i+1) +  pb(i) -  pb(i+1))
           vslice(i,j) = vslice(i,j)*(dslice(i,j)/dnu(i)) +
      &         (qc/dnu(i))*(duvb(i)-duvb(i+1))
-          velold = wslice(i,j)
           wslice(i,j) = wslice(i,j)*(dslice(i,j)/dnu(i)) +
      &         (qc/dnu(i))*(duwb(i)-duwb(i+1))
 
+#ifdef DEBUG_PPM
+           if ( uslice(i,j) .gt. V_MAX .or. 
+     *          uslice(i,j) .lt. -V_MAX) then
+              
+              write(6,*) 'DEBUG us ',__FILE__,__LINE__,
+     *            i,j,uslice(i,j)
+             write(6,*) 'dslice    = ',dslice(i,j)
+             write(6,*) 'dnu(i)    = ',dnu(i)
+             write(6,*) 'qc        = ',qc
+             write(6,*) 'duub(i)   = ',duub(i)
+             write(6,*) 'duub(i+1) = ',duub(i+1)
+             write(6,*) 'pb(i)     = ',pb(i)
+             write(6,*) 'pb(i+1)   = ',pb(i+1)
+             stop
+          endif
+#endif
+
           eold = eslice(i,j)
           eslice(i,j) = max(0.1*eslice(i,j),
-     &                  (eslice(i,j)*dslice(i,j) +
+     &         (eslice(i,j)*dslice(i,j) +
      &         qc*(dueb(i)-dueb(i+1) + upb(i) - upb(i+1)))/dnu(i) )
+
        enddo
 c
 c      Colour variables (note: colf already multiplied by dt)

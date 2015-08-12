@@ -24,6 +24,7 @@ public: // interface
   /// Constructor
   RefineDensity(double min_refine,
 		double max_coarsen,
+		bool include_ghosts,
 		std::string output) throw();
 
   PUPable_decl(RefineDensity);
@@ -44,7 +45,7 @@ public: // interface
 
   virtual std::string name () const { return "density"; };
 
-private:
+private: // functions
 
   template <class T>
   int apply_ (const T * array,

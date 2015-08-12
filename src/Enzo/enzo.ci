@@ -135,6 +135,7 @@ module enzo {
     entry void p_gravity_bicgstab_loop_3();
     entry void p_gravity_bicgstab_loop_7();
     entry void p_gravity_bicgstab_loop_9();
+    entry void p_gravity_bicgstab_acc();
     entry void p_gravity_bicgstab_exit();
 
     entry void p_mg_receive_face
@@ -254,6 +255,10 @@ module template_defs {
    extern entry void EnzoBlock r_gravity_bicgstab_loop_15<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_gravity_bicgstab_loop_15<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_gravity_bicgstab_loop_15<long double>(CkReductionMsg *msg);
+
+   extern entry void EnzoBlock p_gravity_bicgstab_acc<float>();
+   extern entry void EnzoBlock p_gravity_bicgstab_acc<double>();
+   extern entry void EnzoBlock p_gravity_bicgstab_acc<long double>();
 
    extern entry void EnzoBlock p_gravity_bicgstab_exit<float>();
    extern entry void EnzoBlock p_gravity_bicgstab_exit<double>();

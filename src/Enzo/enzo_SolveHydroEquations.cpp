@@ -6,8 +6,19 @@
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
+
+// #define DEBUG_PPM
+
+#ifdef DEBUG_PPM
+#  define TRACE_PPM(MESSAGE)						\
+  CkPrintf ("%s:%d %s %s\n",						\
+	    __FILE__,__LINE__,block->name().c_str(),MESSAGE);				
+#else
+#  define TRACE_PPM(MESSAGE) /* ... */
+#endif
+
+//----------------------------------------------------------------------
 
 int EnzoBlock::SolveHydroEquations 
 (
@@ -80,9 +91,6 @@ int EnzoBlock::SolveHydroEquations
   /* velocity_x must exist, but if y & z aren't present, then create blank
      buffers for them (since the solver needs to advect something). */
 
-  if (rank < 1) {
-    for (int i=0; i<size; i++) velocity_x[i] = 0.0;
-  }
   if (rank < 2) {
     for (int i=0; i<size; i++) velocity_y[i] = 0.0;
   }
@@ -234,6 +242,7 @@ int EnzoBlock::SolveHydroEquations
   //     AccelerationField[0] = density;
   //     AccelerationField[1] = density;
   //     AccelerationField[2] = density;
+
   int gravity_on = (acceleration_x != NULL) ? 1 : 0;
   
   FORTRAN_NAME(ppm_de)

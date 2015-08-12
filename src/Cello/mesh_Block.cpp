@@ -181,7 +181,6 @@ Block::Block
 
     //    set "face" to full FieldData
     field_face.set_face(0,0,0);
-
     field_face.set_ghost(true,true,true);
 
     //    set array operation if any
@@ -191,6 +190,7 @@ Block::Block
     switch (op_array) {
 
     case op_array_restrict:
+      field_face.set_ghost(false,false,false);
       field_face.set_restrict(problem->restrict(),icx,icy,icz);  
       break;
 
@@ -374,7 +374,7 @@ Block::~Block() throw ()
     int n; 
     char * array;
     int iface[3]={0,0,0};
-    bool lghost[3]={true,true,true};
+    bool lghost[3]={false,false,false};
     
     std::vector<int> field_list;
     FieldFace * field_face = 
@@ -412,7 +412,7 @@ void Block::x_refresh_child
  )
 {
   int  iface[3]  = {0,0,0};
-  bool lghost[3] = {true,true,true};
+  bool lghost[3] = {false,false,false};
   std::vector<int> field_list;
   store_face_(n,buffer, iface, ic3, lghost, op_array_restrict,field_list);
 }

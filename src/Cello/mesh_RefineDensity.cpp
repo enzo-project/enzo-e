@@ -13,8 +13,9 @@ RefineDensity::RefineDensity
 (
  double min_refine,
  double max_coarsen,
+ bool include_ghosts,
  std::string output) throw ()
-  : Refine(min_refine,max_coarsen,output)
+  : Refine(min_refine,max_coarsen,include_ghosts,output)
 {
   TRACE("RefineDensity::RefineDensity");
   WARNING ("RefineDensity::RefineDensity()",
@@ -38,7 +39,11 @@ int RefineDensity::apply
   int mx,my,mz;
   field.dimensions(id,&mx,&my,&mz);
   int gx,gy,gz;
-  field.ghost_depth(id, &gx,&gy,&gz);
+  if (include_ghosts_) {
+    gx = gy = gz = 0;
+  } else {
+    field.ghost_depth(id, &gx,&gy,&gz);
+  }
   char * array = field.values(id);
 
   if (precision == precision_single) {
@@ -65,8 +70,8 @@ int RefineDensity::apply
 template <class T>
 int RefineDensity::apply_
 ( const T * array,
-	      int mx, int my, int mz,
-	      int gx, int gy, int gz ) const throw ()
+  int mx, int my, int mz,
+  int gx, int gy, int gz ) const throw ()
 {
 
   bool any_refine  = false;

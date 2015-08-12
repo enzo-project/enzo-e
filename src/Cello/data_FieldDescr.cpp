@@ -102,27 +102,6 @@ int FieldDescr::field_id(const std::string & name) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::alignment() const throw()
-{
-  return alignment_;
-}
-
-//----------------------------------------------------------------------
-
-int FieldDescr::padding() const throw()
-{
-  return padding_;
-}
-
-//----------------------------------------------------------------------
-
-double FieldDescr::courant() const throw()
-{
-  return courant_;
-}
-
-//----------------------------------------------------------------------
-
 void FieldDescr::centering
 (
  int id_field,
@@ -149,14 +128,6 @@ void FieldDescr::ghost_depth
   if (gx) (*gx) = ghost_depth_.at(id_field)[0];
   if (gy) (*gy) = ghost_depth_.at(id_field)[1];
   if (gz) (*gz) = ghost_depth_.at(id_field)[2];
-}
-
-//----------------------------------------------------------------------
-
-precision_type FieldDescr::precision(int id_field) const 
-  throw(std::out_of_range)
-{
-  return precision_.at(id_field);
 }
 
 //----------------------------------------------------------------------
@@ -227,27 +198,6 @@ int FieldDescr::insert_(const std::string & field_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_alignment(int alignment) throw()
-{
-  alignment_ = alignment;
-}
-
-//----------------------------------------------------------------------
-
-void FieldDescr::set_padding(int padding) throw()
-{
-  padding_ = padding;
-}
-
-//----------------------------------------------------------------------
-
-void FieldDescr::set_courant(double courant) throw()
-{
-  courant_ = courant;
-}
-
-//----------------------------------------------------------------------
-
 void FieldDescr::set_precision(int id_field, precision_type precision) 
   throw(std::out_of_range)
 {
@@ -301,19 +251,29 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
   id_        = field_descr.id_;
   groups_    = field_descr.groups_;
   precision_ = field_descr.precision_;
-  centering_.clear();
-  for (size_t i=0; i<field_descr.centering_.size(); i++) {
-    centering_.push_back(new int[3]);
-    centering_.at(i)[0] = field_descr.centering_.at(i)[0];
-    centering_.at(i)[1] = field_descr.centering_.at(i)[1];
-    centering_.at(i)[2] = field_descr.centering_.at(i)[2];
+  for (size_t i=0; i<centering_.size(); i++) {
+    delete [] centering_[i];
   }
-  ghost_depth_.clear();
-  for (size_t i=0; i<field_descr.ghost_depth_.size(); i++) {
-    ghost_depth_.push_back(new int[3]);
-    ghost_depth_.at(i)[0] = field_descr.ghost_depth_.at(i)[0];
-    ghost_depth_.at(i)[1] = field_descr.ghost_depth_.at(i)[1];
-    ghost_depth_.at(i)[2] = field_descr.ghost_depth_.at(i)[2];
+  centering_.resize(field_descr.centering_.size());
+  for (size_t i=0; i<centering_.size(); i++) {
+    centering_[i] = new int[3];
+    centering_[i][0] = field_descr.centering_[i][0];
+    centering_[i][1] = field_descr.centering_[i][1];
+    centering_[i][2] = field_descr.centering_[i][2];
+  }
+  for (size_t i=0; i<ghost_depth_.size(); i++) {
+    delete [] ghost_depth_[i];
+  }
+  ghost_depth_.resize(field_descr.ghost_depth_.size());
+  for (size_t i=0; i<ghost_depth_.size(); i++) {
+    ghost_depth_[i] = new int[3];
+    ghost_depth_[i][0] = field_descr.ghost_depth_[i][0];
+    ghost_depth_[i][1] = field_descr.ghost_depth_[i][1];
+    ghost_depth_[i][2] = field_descr.ghost_depth_[i][2];
+  }
+  conserved_.resize(field_descr.conserved_.size());
+  for (size_t i=0; i<field_descr.conserved_.size(); i++) {
+    conserved_[i] = field_descr.conserved_[i];
   }
 }
 

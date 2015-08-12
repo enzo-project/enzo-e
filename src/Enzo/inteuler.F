@@ -1,6 +1,9 @@
 c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
+
+C #define DEBUG_PPM
+
 c=======================================================================
 c///////////////////////  SUBROUTINE INTEULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -189,6 +192,16 @@ c
          if (ipresfree .eq. 1) cs(i) = tiny
          char1(i) = max(0.0, dt*(uslice(i,j)+cs(i)))/(2.0*dxi)
          char2(i) = max(0.0,-dt*(uslice(i,j)-cs(i)))/(2.0*dxi)
+#ifdef DEBUG_PPM
+         if (abs(char1(i)-1.0e-2)/1.0e-2 .gt. 1e-5) then
+            write (6,*) __FILE__
+            write (6,*) __LINE__,i,'char1(i) = ',char1(i)
+            write (6,*) 'dt = ',dt
+            write (6,*) 'uslice(i,j) = ',uslice(i,j)
+            write (6,*) 'cs(i) = ',cs(i)
+            write (6,*) 'dxi = ',dxi
+         endif
+#endif
       enddo
 c
 c Brought dt and dx terms here to avoid possible overflows [BWO v1_1_6]
@@ -290,7 +303,7 @@ c     cra(i) = sqrt(max(gamma*pra(i)*dra(i), 0.0))
          endif
          if ( (cra(i) .gt. huge) .or.
      &        (cra(i).eq.0)) then
-            write(6,*) 'inteuler: cra', i,cra(i), pra(i),dra(i)
+            write(6,*) 'inteuler: cra', i,j,cra(i), pra(i),dra(i)
             stop
          endif
       enddo
@@ -365,6 +378,21 @@ c
 c   Changed order of operations to avoid overflow in 32 bits [BWO v1_1_6]
          pls(i,j) = pla(i) + ((betalp(i)+betalm(i))*cla(i))*cla(i)
          prs(i,j) = pra(i) + ((betarp(i)+betarm(i))*cra(i))*cra(i)
+#ifdef DEBUG_PPM
+         if (pls(i,j) .ne. prs(i,j)) then
+            write (6,*) __FILE__
+            write (6,*) __LINE__,i,j,'pls',pls(i,j)
+            write (6,*) __LINE__,i,j,'prs',prs(i,j)
+            write (6,*) 'betalp(i) = ',betalp(i)
+            write (6,*) 'betalm(i) = ',betalm(i)
+            write (6,*) 'betarp(i) = ',betarp(i)
+            write (6,*) 'betarm(i) = ',betarm(i)
+            write (6,*) 'cla(i) = ',cla(i)
+            write (6,*) 'cra(i) = ',cra(i)
+            write (6,*) 'pla(i) = ',pla(i)
+            write (6,*) 'pra(i) = ',pra(i)
+         endif
+#endif         
 c
          uls(i,j) = ula(i) + (betalp(i)-betalm(i))*cla(i)
          urs(i,j) = ura(i) + (betarp(i)-betarm(i))*cra(i)

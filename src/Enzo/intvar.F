@@ -1,6 +1,9 @@
 c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
+
+C #define DEBUG_PPM
+
 c=======================================================================
 c///////////////////////  SUBROUTINE INTVAR  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -111,18 +114,49 @@ c
       enddo
 c
 c     Steepen if asked for (use precomputed steepening parameter)
-c
+c     
       if (isteep .ne. 0) then
+#ifdef DEBUG_PPM
+         do i = i1, i2+1
+            if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
+               write (6,*) __FILE__
+               write (6,*) __LINE__,i,'ql(i) = ',ql(i)
+               write (6,*) __LINE__,i,'qr(i-1)=',qr(i-1)
+               write (6,*) 'c3 = ',c3
+               write (6,*) 'c4 = ',c4
+               write (6,*) 'c5 = ',c5
+               write (6,*) 'c6 = ',c6
+               write (6,*) 'qslice(i-1) = ',qslice(i-1)
+               write (6,*) 'qslice(i) = ',qslice(i)
+               write (6,*) 'dq(i-1) = ',dq(i-1)
+               write (6,*) 'dq(i) = ',dq(i)
+            endif
+         enddo
+#endif
          do i = i1-1, i2+1
             ql(i) = (1.0-steepen(i))*ql(i) + 
-     &              steepen(i)*(qslice(i-1)+0.5*dq(i-1))
+     &           steepen(i)*(qslice(i-1)+0.5*dq(i-1))
             qr(i) = (1.0-steepen(i))*qr(i) + 
-     &              steepen(i)*(qslice(i+1)-0.5*dq(i+1))
+     &           steepen(i)*(qslice(i+1)-0.5*dq(i+1))
          enddo
+#ifdef DEBUG_PPM
+         do i = i1, i2+1
+            if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
+               write (6,*) __FILE__
+               write (6,*) __LINE__,i,'ql(i) = ',ql(i)
+               write (6,*) __LINE__,i,'qr(i-1)=',qr(i-1)
+               write (6,*) 'steepen(i) = ',steepen(i)
+               write (6,*) 'qslice(i-1) = ',qslice(i-1)
+               write (6,*) 'qslice(i+1) = ',qslice(i+1)
+               write (6,*) 'dq(i-1) = ',dq(i-1)
+               write (6,*) 'dq(i+1) = ',dq(i+1)
+            endif
+         enddo
+#endif
       endif
-c
+c     
 c     Monotonize again (eqn 1.10)
-c
+c     
       do i=i1-1,i2+1
          temp1 = (qr(i)-qslice(i))*(qslice(i)-ql(i))
          temp2 = qr(i)-ql(i)
@@ -139,6 +173,18 @@ c     Factored out temp2 [JOB v1_1_6]
             qr(i) = 3.0*qslice(i) - 2.0*ql(i)
          endif
       enddo
+#ifdef DEBUG_PPM
+      do i = i1, i2+1
+         if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
+            write (6,*) __FILE__
+            write (6,*) __LINE__,i,'ql(i)',ql(i)
+            write (6,*) __LINE__,i,'qr(i-1)',qr(i-1)
+            write (6,*) 'qslice(i) = ',qslice(i)
+            write (6,*) 'temp2 = ',temp2
+            write (6,*) 'temp3 = ',temp3
+         endif
+      enddo
+#endif
 c
 c     If requested, flatten slopes with flatteners calculated in calcdiss (4.1)
 c
@@ -147,6 +193,17 @@ c
             ql(i) = qslice(i)*flatten(i) + ql(i)*(1.0-flatten(i))
             qr(i) = qslice(i)*flatten(i) + qr(i)*(1.0-flatten(i))
          enddo
+#ifdef DEBUG_PPM
+         do i = i1, i2+1
+            if (abs(ql(i)-qr(i-1))/abs(ql(i)+qr(i-1)).gt.1e-5) then
+               write (6,*) __FILE__
+               write (6,*) __LINE__,i,'ql(i) = ',ql(i)
+               write (6,*) __LINE__,i,'qr(i-1)=',qr(i-1)
+               write (6,*) 'qslice(i) = ',qslice(i)
+               write (6,*) 'flatten(i) = ',flatten(i)
+            endif
+         end do
+#endif
       endif
 c
 c    Now construct left and right interface values (eqn 1.12 and 3.3)
@@ -163,10 +220,30 @@ c
       do i = i1, i2+1
         qla(i)= qr(i-1)-char1(i-1)*(dq(i-1)-(1.0-ft*char1(i-1))*q6(i-1))
         qra(i)= ql(i  )+char2(i  )*(dq(i  )+(1.0-ft*char2(i  ))*q6(i  ))
+#ifdef DEBUG_PPM
+        if (qla(i) .ne. qra(i)) then
+           write (6,*) __FILE__
+           write (6,*) __LINE__,i,'qla',qla(i)
+           write (6,*) __LINE__,i,'qra',qra(i)
+           write (6,*) 'ql(i) = ',ql(i)
+           write (6,*) 'qr(i-1) = ',qr(i-1)
+           write (6,*) 'char1(i-1) = ',char1(i-1)
+           write (6,*) 'char1(i) = ',char1(i)
+           write (6,*) 'char2(i-1) = ',char2(i-1)
+           write (6,*) 'char2(i) = ',char2(i)
+           write (6,*) 'dq(i-1) = ',dq(i-1)
+           write (6,*) 'dq(i) = ',dq(i)
+           write (6,*) 'q6(i-1) = ',q6(i-1)
+           write (6,*) 'q6(i) = ',q6(i)
+           write (6,*) 'ft = ',ft
+        endif
+#endif        
+#ifdef DEBUG_PPM
         if (qra(i).lt.-1e30)then
           write(6,*)  'intvar: qra0a',qra(i),ql(i),char2(i)
           write(6,*)  'intvar: qra0b',dq(i),ft,q6(i)
         endif
+#endif
       enddo
 c
       do i=i1,i2+1

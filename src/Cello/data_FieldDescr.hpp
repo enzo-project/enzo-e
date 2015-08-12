@@ -64,16 +64,26 @@ public: // functions
       if (up) ghost_depth_[i] = new int[3];
       PUParray(p,ghost_depth_[i],3);
     }
+    p | conserved_;
   }
 
   /// Set alignment
-  void set_alignment(int alignment) throw();
+  void set_alignment(int alignment) throw()
+  { alignment_ = alignment; }
+
 
   /// Set padding
-  void set_padding(int padding) throw();
+  void set_padding(int padding) throw()
+  { padding_ = padding; }
+
 
   /// Set courant
-  void set_courant(double courant) throw();
+  void set_courant(double courant) throw()
+  { courant_ = courant; }
+
+  /// Set precision for a field
+  void set_precision(int id_field, precision_type precision) 
+    throw(std::out_of_range);
 
   /// Set centering for a field
   void set_centering(int id_field, int cx, int cy=0, int cz=0) 
@@ -83,9 +93,8 @@ public: // functions
   void set_ghost_depth(int id_field, int gx, int gy=0, int gz=0) 
     throw(std::out_of_range);
 
-  /// Set precision for a field
-  void set_precision(int id_field, precision_type precision) 
-    throw(std::out_of_range);
+  /// Set whether a field is a conserved quantity
+  void set_conserved(int id_field, bool conserved) throw(std::out_of_range);
 
   /// Insert a new permanent field
   int insert_permanent(const std::string & name_field) throw();
@@ -113,13 +122,22 @@ public: // functions
   const Grouping * groups () const { return & groups_; }
 
   /// alignment in bytes of fields in memory
-  int alignment() const throw();
+  int alignment() const throw()
+  {  return alignment_;  }
 
   /// padding in bytes between fields in memory
-  int padding() const throw();
+  int padding() const throw()
+  { return padding_; }
 
   /// courant number for fields
-  double courant() const throw();
+  double courant() const throw()
+  { return courant_; }
+
+
+  /// Return precision of given field
+  int precision(int id_field) const throw(std::out_of_range)
+  {  return precision_.at(id_field); }
+
 
   /// centering of given field
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
@@ -129,9 +147,11 @@ public: // functions
   void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw(std::out_of_range);
 
-  /// Return precision of given field
-  int precision(int id_field) const throw(std::out_of_range);
-
+  /// whether the field is a conserved quantity
+  bool conserved(int id_field) const 
+    throw(std::out_of_range)
+  { return conserved_.at(id_field); }
+  
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
 
@@ -180,6 +200,12 @@ private: // attributes
 
   /// Ghost depth of each field
   std::vector<int *> ghost_depth_;
+
+  /// Whether the field is conserved or not.  If so it is multiplied
+  /// by density when interpolated or coarsened, then divided again.
+  /// (int instead of bool otherwise charmc complains at compile time:
+  /// "Error 1: taking address of temporary (-fpermissive)"
+  std::vector<int> conserved_;
 
 };
 

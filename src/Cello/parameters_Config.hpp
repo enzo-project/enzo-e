@@ -16,10 +16,10 @@
 #define MAX_METHOD_GROUPS  10
 
 /* Maximum number of output file groups specified in the configuration file */
-#define MAX_OUTPUT_GROUPS 12
+#define MAX_OUTPUT_GROUPS 20
 
 /* Maximum number of schedules */
-#define MAX_SCHEDULE 12
+#define MAX_SCHEDULE 20
 
 /* Maximum number of adapt groups specified in the configuration file */
 #define MAX_MESH_GROUPS 10
@@ -123,6 +123,7 @@ public: // attributes
   double                     mesh_max_coarsen2[MAX_MESH_GROUPS];
   double                     mesh_level_exponent[MAX_MESH_GROUPS];
   std::string                mesh_refine_output[MAX_MESH_GROUPS];
+  bool                       mesh_include_ghosts[MAX_MESH_GROUPS];
 
   // Method
 

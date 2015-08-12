@@ -2,6 +2,10 @@ c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
 
+C #define DEBUG_PPM
+C #define DEBUG_V
+
+C #define V_MAX 100000
 c=======================================================================
 c/////////////////////////  SUBROUTINE PPM_DE  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -100,6 +104,7 @@ c
       integer i, ie, is, ixyz, j, je, js, k, ke, ks,
      &        n, nxz, nyz, nzz, ms
       integer i1, i2, j1, j2, k1, k2
+
       ENZO_REAL tmp(1)
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\////////////////////////////////
@@ -204,6 +209,7 @@ c
 !      ixyz = mod(nhy,3)
 !      do n=ixyz,ixyz+2
       ixyz = mod(nhy,rank)
+
       do n=ixyz,ixyz+rank-1
 c
 c  Update in x-direction
@@ -318,3 +324,4 @@ c
 c
       return
       end
+

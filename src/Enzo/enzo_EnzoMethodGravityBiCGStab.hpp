@@ -108,6 +108,7 @@ public: // interface
     p | vs_;
     p | us_;
 
+    p | id_refresh_ACC_;
     p | id_refresh_P_;
     p | id_refresh_Q_;
     p | id_refresh_X_;
@@ -154,6 +155,9 @@ public: // interface
 
   /// End of iteration
   template<class T> void end(EnzoBlock* enzo_block, int retval) throw();
+
+  /// Compute accelerations
+  template<class T> void acc(EnzoBlock* enzo_block) throw();
 
   /// Exit the solver
   template<class T> void exit(EnzoBlock* enzo_block) throw();
@@ -282,6 +286,7 @@ protected: // attributes
   long double us_;
 
   /// refresh indices
+  int id_refresh_ACC_;
   int id_refresh_P_;
   int id_refresh_Q_;
   int id_refresh_X_;

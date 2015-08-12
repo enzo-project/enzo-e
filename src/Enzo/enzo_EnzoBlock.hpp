@@ -281,7 +281,12 @@ public: /// entry methods
   /// EnzoMethodGravityBiCGStab entry method: refresh Y
   void p_gravity_bicgstab_loop_9();
 
-  /// EnzoMethodGravityBiCGStab entry method: refresh X before exiting solver
+  /// EnzoMethodGravityBiCGStab entry method: refresh X before
+  /// computing accelerations
+  void p_gravity_bicgstab_acc();
+
+  /// EnzoMethodGravityBiCGStab entry method: refresh accelerations
+  /// before exiting
   void p_gravity_bicgstab_exit();
 
   /// EnzoMethodGravityBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)

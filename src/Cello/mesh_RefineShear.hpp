@@ -21,6 +21,7 @@ public: // interface
   RefineShear(const FieldDescr * field_descr,
 	      double shear_min_refine,
 	      double shear_max_coarsen,
+	      bool include_ghosts,
 	      std::string output) throw();
 
   /// default constructor

@@ -23,6 +23,7 @@ public: // interface
   /// Constructor
   RefineMask(Parameters * parameters,
 	     const std::string parameter_name,
+	     bool include_ghosts,
 	     std::string output) throw();
 
   /// default constructor

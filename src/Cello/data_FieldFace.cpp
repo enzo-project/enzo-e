@@ -155,7 +155,7 @@ void FieldFace::load ( int * n, char ** array) throw()
     field_data_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    load_loop_limits_ (im3,n3, nd3,ng3);
+    new_loop_limits_ (im3,n3,nd3,ng3,op_load);
 
     if (restrict_) {
 
@@ -237,7 +237,7 @@ void FieldFace::store (int n, char * array) throw()
     field_data_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    store_loop_limits_ (im3,n3, nd3,ng3);
+    new_loop_limits_ (im3,n3,nd3,ng3,op_store);
 
     if (prolong_) {
 
@@ -413,179 +413,6 @@ template<class T> size_t FieldFace::store_
 
 //----------------------------------------------------------------------
 
-void FieldFace::load_loop_limits_
-( int im3[3],int n3[3], const int nd3[3], const int ng3[3])
-{
-  // NOTES: 4:p12
-
-  for (int axis=0; axis<3; axis++) {
-
-    // starting index im3[axis]
-
-    if (face_[axis] == 0) {
-
-      if (ghost_[axis]) {
-
-	im3[axis] = 0;
-	n3[axis]  = nd3[axis];
-
-      } else {
-
-	im3[axis] = ng3[axis];
-	n3[axis]  = nd3[axis] - 2*ng3[axis];
-
-      }
-
-      if ( prolong_ ) {
-	// adjust for child offset
-	n3[axis] /= 2; 
-	im3[axis] += child_[axis] * n3[axis];
-
-	if (ghost_[axis]) {
-	  // correct centering for interpolating full coarse block to fine
-	  im3[axis] += (1-2*child_[axis]) * ng3[axis]/2 ;
-	} else  {
-	  //	  n3[axis] += ng3[axis]/2; // should be += ng3[axis]?
-	  //	  im3[axis] -= child_[axis]*ng3[axis]/2;
-	}
-
-      }
-
-    }
-
-    if (face_[axis] == -1 || face_[axis] == 1) {
-
-      if (face_[axis] == -1) im3[axis] = ng3[axis];   
-      if (face_[axis] == +1) im3[axis] = nd3[axis] - 2*ng3[axis];
-      n3[axis] = ng3[axis];
-
-      if (restrict_) { // 2*g ghost depth
-
-	if (face_[axis] == 1) im3[axis] -= ng3[axis];
-	n3[axis] = 2*ng3[axis];
-
-      }	else if (prolong_) { // g/2 ghost depth
-
-	if (face_[axis] == 1) im3[axis] += ng3[axis]/2;
-	n3[axis] = (ng3[axis]+1)/2;
-
-      }
-    }
-  }
-
-  // Adjust n3 for axes > rank
-  if (nd3[0] == 1) n3[0] = 1;
-  if (nd3[1] == 1) n3[1] = 1;
-  if (nd3[2] == 1) n3[2] = 1;
-
-  check_new_(im3,n3,nd3,ng3,op_load);
-
-#ifdef DEBUG_FIELD_FACE
-  printf ("FieldFace::load_loop_limits()\n");
-  printf ("FieldFace nd3 %d %d %d\n",nd3[0],nd3[1],nd3[2]);
-  printf ("FieldFace ng3 %d %d %d\n",ng3[0],ng3[1],ng3[2]);
-  printf ("FieldFace  n3 %d %d %d\n", n3[0], n3[1], n3[2]);
-  printf ("FieldFace im3 %d %d %d\n",im3[0],im3[1],im3[2]);
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void FieldFace::store_loop_limits_
-( int im3[3],int n3[3], const int nd3[3], const int ng3[3])
-{
-  // NOTES: 4:p12
-  for (int axis=0; axis<3; axis++) {
-
-    if (face_[axis] == 0) {
-
-      if (ghost_[axis]) {
-
-	im3[axis] =  0;
-	n3[axis] = nd3[axis];
-
-      } else {
-
-	im3[axis] = ng3[axis];
-	n3[axis]  = nd3[axis] - 2*ng3[axis];
-
-      }
-
-      if ( restrict_ ) {
-	n3[axis] /= 2;
-	im3[axis] += child_[axis] * (nd3[axis]-2*ng3[axis])/2;
-	if (ghost_[axis]) im3[axis] += ng3[axis]/2;
-      }
-
-     
-    }
-
-    if (face_[axis] == -1 || face_[axis] == 1) {
-
-      if (face_[axis] == -1) im3[axis] = 0;
-      if (face_[axis] == +1) im3[axis] = nd3[axis] - ng3[axis];
-
-      n3[axis] = ng3[axis];
-
-    }
-
-  }
-  n3[0] = std::max(n3[0],1);
-  n3[1] = std::max(n3[1],1);
-  n3[2] = std::max(n3[2],1);
-
-  check_new_(im3,n3,nd3,ng3,op_store);
-#ifdef DEBUG_FIELD_FACE
-  printf ("FieldFace::store_loop_limits()\n");
-  printf ("FieldFace nd3 %d %d %d\n",nd3[0],nd3[1],nd3[2]);
-  printf ("FieldFace ng3 %d %d %d\n",ng3[0],ng3[1],ng3[2]);
-  printf ("FieldFace  n3 %d %d %d\n", n3[0], n3[1], n3[2]);
-  printf ("FieldFace im3 %d %d %d\n",im3[0],im3[1],im3[2]);
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void FieldFace::check_new_( int im3[3], int n3[3], const int nd3[3], const int ng3[3],int op_type)
-{
-  int IM3[3]={im3[0],im3[1],im3[2]};
-  int N3[3] ={ n3[0], n3[1], n3[2]};
-  int ND3[3]={nd3[0],nd3[1],nd3[2]};
-  int NG3[3]={ng3[0],ng3[1],ng3[2]};
-  new_loop_limits_ (IM3,N3,ND3,NG3,op_type);
-
-  bool l_im = ((im3[0]==IM3[0])&&(im3[1]==IM3[1])&&(im3[2]==IM3[2]));
-  bool l_n  = (( n3[0]==N3[0] )&&( n3[1]==N3[1] )&&( n3[2]==N3[2]));
-  bool l_nd = ((nd3[0]==ND3[0])&&(nd3[1]==ND3[1])&&(nd3[2]==ND3[2]));
-  bool l_ng = ((ng3[0]==NG3[0])&&(ng3[1]==NG3[1])&&(ng3[2]==NG3[2]));
-
-  static int warning_count = 0;
-  const int warning_limit = 100;
-  if (warning_count <= warning_limit && ! (l_im && l_n && l_nd && l_ng)) {
-    printf ("MISMATCH type %s\n",op_type == op_load ? "load" : "store");
-    printf ("MISMATCH im %d %d %d  IM %d %d %d\n",
-	    im3[0],im3[1],im3[2],  IM3[0],IM3[1],IM3[2]);
-    printf ("MISMATCH  n %d %d %d   N %d %d %d\n",
-	     n3[0], n3[1], n3[2],   N3[0], N3[1], N3[2]);
-    printf ("MISMATCH nd %d %d %d  ND %d %d %d\n",
-	    nd3[0],nd3[1],nd3[2],  ND3[0],ND3[1],ND3[2]);
-    printf ("MISMATCH ng %d %d %d  NG %d %d %d\n",
-	    ng3[0],ng3[1],ng3[2],  NG3[0],NG3[1],NG3[2]);
-    if (prolong_ != NULL) printf ("MISMATCH prolong %p\n",prolong_);
-    if (restrict_ != NULL) printf ("MISMATCH restrict %p\n",restrict_);
-    printf ("MISMATCH child %d %d %d\n",child_[0],child_[1],child_[2]);
-    printf ("MISMATCH ghost %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
-    printf ("MISMATCH  face %d %d %d\n",face_[0],face_[1],face_[2]);
-    printf ("MISMATCH\n");
-    ++warning_count;
-    if (warning_count == warning_limit) {
-      printf ("MISMATCH warning count reached limit of %d\n",
-	      warning_count);
-    }
-  }
-}
-//----------------------------------------------------------------------
-
 void FieldFace::new_loop_limits_
 ( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)
 {
@@ -600,8 +427,6 @@ void FieldFace::new_loop_limits_
 
   for (int axis=0; axis<3; axis++) {
 
-    // child offset
-    int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
     if (lcopy) {
       if (face_[axis] == 0 && ! ghost_[axis]) {
 	im3[axis] = ng3[axis];
@@ -629,19 +454,51 @@ void FieldFace::new_loop_limits_
       }
     }
 
+    // adjust limits to include ghost zones for oblique edges/corners
+    // at coarse-fine level interfaces
+    
+    const bool full_block = (face_[0] == 0 && face_[1] == 0 && face_[2] == 0);
+
+    // child offset: 0 or n/2
+
+    const int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
+
     if (prolong_) {
+
       if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_load) {
 	im3[axis] = ng3[axis] + co;
 	n3[axis] = (nd3[axis]-2*ng3[axis])/2;
+
+	// Bug #70 fix: always include ghosts in finer block when
+	// face_[axis] = 0 see notes 150811
+
+	if (! full_block) {
+	  if (child_[axis] == 1) {
+	    im3[axis] -= ng3[axis]/2;
+	  }
+	  n3[axis] += ng3[axis]/2;
+	}
+
       }
-      if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_store) {
-	im3[axis] = ng3[axis];
-	n3[axis]  = nd3[axis]-2*ng3[axis];
-      }	  
       if (face_[axis] == 0 && ghost_[axis] && op_type == op_load) {
 	im3[axis] = ng3[axis]/2 + co;
 	n3[axis] = nd3[axis]/2;
       }
+      if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_store) {
+	im3[axis] = ng3[axis];
+	n3[axis]  = nd3[axis]-2*ng3[axis];
+
+	// Bug #70 fix: always include ghosts in finer block when
+	// face_[axis] = 0 see notes 150811
+
+	if (! full_block) {
+	  if (child_[axis] == 1) {
+	    im3[axis] -= ng3[axis];
+	  }
+	  n3[axis] += ng3[axis];
+	}
+
+      }	  
       if (face_[axis] == 0 && ghost_[axis] && op_type == op_store) {
 	im3[axis] = 0;
 	n3[axis]  = nd3[axis];
@@ -665,6 +522,7 @@ void FieldFace::new_loop_limits_
     }
 
     if (restrict_) {
+
       if (face_[axis] == 0 && !ghost_[axis] && op_type == op_load) {
 	im3[axis] = ng3[axis];
 	n3[axis]  = nd3[axis]-2*ng3[axis];

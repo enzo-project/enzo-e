@@ -1,6 +1,9 @@
 c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
+#define V_MAX 1.0
+
+/* #define DEBUG_PPM */
 
 c=======================================================================
 c/////////////////////  SUBROUTINE XEULER_SWEEP  \\\\\\\\\\\\\\\\\\\\\\\

@@ -232,7 +232,17 @@ bool ItNeighbor::valid_()
     }    
   }
 
-  // Return false if fine child and not adjacent
+  // Return false if fine child and not adjacent.  Note fine oblique
+  // neighbors are not counted as such.
+  // 
+  //      of3=(1,0)         ic3[]
+  //  ----------+      +-----+-----+
+  //            |      |     |     |
+  //            | ---> | true|false|   valid
+  //   self     |      +-----+-----+
+  //            | ---> |     |     |         
+  //            |      | true|false|   
+  //  ----------+      +-----+-----+
 
   if (face_level() > level_) {
     if (is_reset_child_()) return false;
@@ -245,22 +255,30 @@ bool ItNeighbor::valid_()
     if (rank_ > 1 && if3[1] ==  1 && ic3_[1] != 1) valid = false;
     if (rank_ > 2 && if3[2] == -1 && ic3_[2] != 0) valid = false;
     if (rank_ > 2 && if3[2] ==  1 && ic3_[2] != 1) valid = false;
+
     if (valid == false) return false;
+
   }
 
-  // Skip face if not same as parent
+  // Skip coarse oblique neighbors
+
   if (face_level() < level_) {
+    // Skip face if neighbor is coarsecoarser and not same as parent.
     int ic3[3] = {0,0,0};
     index_.child (level_,&ic3[0],&ic3[1],&ic3[2]);
-    if  (rank_ > 0 && 
+    bool valid = true;
+    if  (rank_ >= 1 && 
   	 ((of3_[0] == +1 && ic3[0] == 0) ||
-  	  (of3_[0] == -1 && ic3[0] == 1))) return false;
-    if  (rank_ > 1 && 
+  	  (of3_[0] == -1 && ic3[0] == 1))) valid = false;
+    if  (rank_ >= 2 && 
   	 ((of3_[1] == +1 && ic3[1] == 0) ||
-  	  (of3_[1] == -1 && ic3[1] == 1))) return false;
-    if  (rank_ > 2 && 
+  	  (of3_[1] == -1 && ic3[1] == 1))) valid = false;
+    if  (rank_ >= 3 && 
   	 ((of3_[2] == +1 && ic3[2] == 0) ||
-  	  (of3_[2] == -1 && ic3[2] == 1))) return false;
+  	  (of3_[2] == -1 && ic3[2] == 1))) valid = false;
+
+    if (valid == false) return false;
+
   }
 
   return true;

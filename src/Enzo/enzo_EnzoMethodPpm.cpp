@@ -6,8 +6,17 @@
 /// @brief    Implements the EnzoMethodPpm class
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
+
+// #define DEBUG_PPM
+
+#ifdef DEBUG_PPM
+#  define TRACE_PPM(MESSAGE)						\
+  CkPrintf ("%s:%d %s %s\n",						\
+	    __FILE__,__LINE__,block->name().c_str(),MESSAGE);				
+#else
+#  define TRACE_PPM(MESSAGE) /* ... */
+#endif
 
 //----------------------------------------------------------------------
 
@@ -44,12 +53,15 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
+  TRACE_PPM("compute()");
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   if (block->is_leaf()) {
 
+    TRACE_PPM ("BEGIN SolveHydroEquations");
     enzo_block->SolveHydroEquations 
       ( block->time(), block->dt(), comoving_coordinates_ );
+    TRACE_PPM ("END SolveHydroEquations");
 
   }
 
@@ -61,6 +73,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
 double EnzoMethodPpm::timestep ( Block * block ) const throw()
 {
+  TRACE_PPM("timestep()");
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 

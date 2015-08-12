@@ -142,6 +142,7 @@ Refine * EnzoProblem::create_refine_
        config->mesh_max_coarsen2[index],
        enzo_config->field_gamma,
        enzo_config->physics_cosmology,
+       config->mesh_include_ghosts[index],
        config->mesh_refine_output[index]);
   } else {
     return Problem::create_refine_(type,config,parameters,field_descr,index);

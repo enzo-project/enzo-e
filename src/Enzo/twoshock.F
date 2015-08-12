@@ -1,6 +1,10 @@
 c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
+
+/* #define DEBUG_PPM  */
+
+#define V_MAX 10000
 c=======================================================================
 c///////////////////////  SUBROUTINE TWOSHOCK  \\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -135,6 +139,16 @@ c
            pls(i,j)  = pmin
            prs(i,j)  = pmin
         enddo
+#ifdef DEBUG_PPM
+        do i=i1, i2
+            if (ubar(i,j).gt.V_MAX .or.
+     *          ubar(i,j).lt.-V_MAX) then
+               write (6,*) __LINE__,'DEBUG',i,j,'ubar',ubar(i,j)
+               write (6,*) 'uls(i,j) =',uls(i,j)
+               write (6,*) 'urs(i,j) =',urs(i,j)
+            endif
+         enddo
+#endif
 c
 c  Otherwise, solve Riemann problem
 c
@@ -170,7 +184,6 @@ c     Changed order of operations to avoid overflow [BWO v1_1_6]
           ps(i) = (cr(i)*pls(i,j) + cl(i)*prs(i,j)
      &          +  cr(i)*cl(i)*(uls(i,j) - urs(i,j) 
      &                                           ) )/(cr(i)+cl(i))
-
 c               ^
 c               changed to + June 2003
 
@@ -204,6 +217,23 @@ c
                 zr (i) = cr(i)*sqrt((1.0+qa*(ps(i)/prs(i,j)-1.0)))
                 ubl(i) = uls(i,j) - (ps(i)-pls(i,j))/zl(i)
                 ubr(i) = urs(i,j) + (ps(i)-prs(i,j))/zr(i)
+
+#ifdef DEBUG_PPM
+                if (ubl(i).gt.V_MAX .or. ubl(i) .lt. -V_MAX) then
+               write (6,*) __LINE__,i,j,'ubl',ubl(i)
+               write (6,*) 'uls(i,j) = ',uls(i,j)
+               write (6,*) 'pls(i,j) = ',pls(i,j)
+               write (6,*) 'ps(i) = ',ps(i)
+               write (6,*) 'zl(i) = ',zl(i)
+            endif
+            if (ubr(i).gt.V_MAX .or. ubr(i) .lt. -V_MAX) then
+               write (6,*) __LINE__,i,j,'ubr',ubr(i)
+               write (6,*) 'urs(i,j) = ',urs(i,j)
+               write (6,*) 'prs(i,j) = ',prs(i,j)
+               write (6,*) 'ps(i) = ',ps(i)
+               write (6,*) 'zr(i) = ',zr(i)
+            endif
+#endif
              end if
           enddo
 
@@ -215,6 +245,21 @@ c
                 dpdur(i) = (( 4.0*zr(i)/drs(i,j))*zr(i)**2)
      &               /      ( 4.0*zr(i)*(zr(i)/drs(i,j))
      &               -   (gamma+1.0)*(ps(i)-prs(i,j)))
+#ifdef DEBUG_PPM
+C            if (     abs(dpdul(i)+dpdur(i))/
+C     &               abs(dpdul(i)-dpdur(i)).ge.1e-5) then
+C               write (6,*) __FILE__
+C               write (6,*) __LINE__,i,j,'dpdul',dpdul(i)
+C               write (6,*) __LINE__,i,j,'dpdur',dpdur(i)
+C               write (6,*) 'zl(i) = ',zl(i)
+C               write (6,*) 'dls(i,j) = ',dls(i,j)
+C               write (6,*) 'pls(i) = ',pls(i,j)
+C               write (6,*) 'zr(i) = ',zr(i)
+C               write (6,*) 'drs(i,j) = ',drs(i,j)
+C               write (6,*) 'prs(i) = ',prs(i,j)
+C               write (6,*) 'ps(i) = ',ps(i)
+C            endif
+#endif
                 ps (i) = ps(i) + (ubr(i)-ubl(i))*(dpdur(i)*(dpdul(i)
      &               /(dpdur(i)-dpdul(i))))
 
@@ -234,7 +279,6 @@ c     if (ps(i) .lt. pmin) ps(i) = min(pls(i,j),prs(i,j))
                 end if
              end if
           enddo
-
        enddo
 
 !       itok = 0
@@ -269,6 +313,16 @@ c
           pbar(i,j) = ps(i)
           ubar(i,j) = ubl(i) + (ubr(i)-ubl(i))*dpdur(i)/
      &                         (dpdur(i)-dpdul(i))
+#ifdef DEBUG_PPM
+          if (ubar(i,j).gt.V_MAX .or.
+     *         ubar(i,j).lt.-V_MAX) then
+             write (6,*) __LINE__,i,j,'ubar',ubar(i,j)
+             write (6,*) 'ubl(i) = ',ubl(i)
+             write (6,*) 'ubr(i) = ',ubr(i)
+             write (6,*) 'dpdul(i) = ',dpdul(i)
+             write (6,*) 'dpdur(i) = ',dpdur(i)
+          endif
+#endif
         enddo
 c
 c  Dual energy formalism: if sound speed squared from pbar is less than 

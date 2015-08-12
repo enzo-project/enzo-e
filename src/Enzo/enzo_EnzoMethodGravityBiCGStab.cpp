@@ -427,6 +427,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
     vr0_(0), rr_(0), alpha_(0),
     bs_(0.0),bc_(0.0),
     ys_(0.0),vs_(0.0),us_(0.0),
+    id_refresh_ACC_(-1),
     id_refresh_P_(-1),
     id_refresh_Q_(-1),
     id_refresh_X_(-1),
@@ -479,25 +480,39 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
 
   /// Initialize default Refresh (called before entry to compute())
   const int ir = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  //  refresh(ir)->add_field(idensity_);
-  refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize specific vector Refreshes
+  id_refresh_ACC_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
   id_refresh_P_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(id_refresh_P_)->add_all_fields(num_fields);
-  // refresh(id_refresh_P_)->add_field(ip_);
-
   id_refresh_Q_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(id_refresh_Q_)->add_all_fields(num_fields);
-  // refresh(id_refresh_Q_)->add_field(iq_);
-
   id_refresh_X_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  refresh(id_refresh_X_)->add_all_fields(num_fields);
-  //  refresh(id_refresh_X_)->add_field(ix_);
-
   id_refresh_Y_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
+
+  // int ax,ay,az;
+  // refresh(ir)->add_field(idensity_);
+  // if (rank_ >= 1) {
+  //     ax = field.field_id("acceleration_x");
+  //     refresh(id_refresh_ACC)->add_field(ax);
+  // }
+  // if (rank_ >= 2) {
+  //     ay = field.field_id("acceleration_y");
+  //     refresh(id_refresh_ACC)->add_field(ay);
+  // }
+  // if (rank_ >= 3) {
+  //     az = field.field_id("acceleration_z");
+  //     refresh(id_refresh_ACC)->add_field(az);
+  // }
+  // refresh(id_refresh_P_)->add_field(ip_);
+  // refresh(id_refresh_Q_)->add_field(iq_);
+  // refresh(id_refresh_X_)->add_field(ix_);
+  // refresh(id_refresh_Y_)->add_field(iy_);
+
+  refresh(ir)->add_all_fields(num_fields);
+  refresh(id_refresh_ACC_)->add_all_fields(num_fields);
+  refresh(id_refresh_P_)->add_all_fields(num_fields);
+  refresh(id_refresh_Q_)->add_all_fields(num_fields);
+  refresh(id_refresh_X_)->add_all_fields(num_fields);
   refresh(id_refresh_Y_)->add_all_fields(num_fields);
-  //  refresh(id_refresh_Y_)->add_field(iy_);
 
 }
 
@@ -1209,17 +1224,17 @@ template<class T> void EnzoMethodGravityBiCGStab::end(EnzoBlock* enzo_block, int
 
   /// indicate that method is finished
 
-  /// refresh X before computing acceleration and exiting
+  /// refresh X before computing acceleration
   this->refresh(id_refresh_X_)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_exit(),
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_acc(),
 			    this->refresh(id_refresh_X_));
 
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_gravity_bicgstab_exit() {
-  /// re-entry into exit(), using template with appropriate precision
+void EnzoBlock::p_gravity_bicgstab_acc() {
+  /// re-entry to compute accelerations with refreshed solution
 
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -1231,13 +1246,13 @@ void EnzoBlock::p_gravity_bicgstab_exit() {
   int precision = field.precision(field.field_id("density")); // assuming 
 
   if      (precision == precision_single) {
-    method->exit<float>(enzo_block);
+    method->acc<float>(enzo_block);
   } else if (precision == precision_double) {
-    method->exit<double>(enzo_block);
+    method->acc<double>(enzo_block);
   } else if (precision == precision_quadruple) {
-    method->exit<long double>(enzo_block);
+    method->acc<long double>(enzo_block);
   } else {
-    ERROR1("EnzoBlock::p_gravity_bicgstab_exit()",
+    ERROR1("EnzoBlock::p_gravity_bicgstab_acc()",
 	   "precision %d not recognized", precision);
   }
 }
@@ -1245,7 +1260,7 @@ void EnzoBlock::p_gravity_bicgstab_exit() {
 //----------------------------------------------------------------------
 
 template<class T> 
-void EnzoMethodGravityBiCGStab::exit(EnzoBlock* enzo_block) throw() 
+void EnzoMethodGravityBiCGStab::acc(EnzoBlock* enzo_block) throw() 
 {
 
   /// access field container on this block
@@ -1275,6 +1290,16 @@ void EnzoMethodGravityBiCGStab::exit(EnzoBlock* enzo_block) throw()
     compute_acceleration.compute(enzo_block);
   }
 
+  this->refresh(id_refresh_ACC_)->set_active(enzo_block->is_leaf());
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_exit(),
+			    this->refresh(id_refresh_ACC_));
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_gravity_bicgstab_exit() {
+
   //  /// deallocate temporary vector data
 
   // field.deallocate_temporary(ib_);
@@ -1287,9 +1312,7 @@ void EnzoMethodGravityBiCGStab::exit(EnzoBlock* enzo_block) throw()
   // field.deallocate_temporary(iq_);
   // field.deallocate_temporary(iu_);
 
-  // indicate that method is finished
-
-  enzo_block->compute_done();
+  compute_done();
 }
 
 //----------------------------------------------------------------------

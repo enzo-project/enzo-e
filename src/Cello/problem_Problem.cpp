@@ -462,6 +462,7 @@ Refine * Problem::create_refine_
     return new RefineDensity
       (config->mesh_min_refine[index],
        config->mesh_max_coarsen[index],
+       config->mesh_include_ghosts[index],
        config->mesh_refine_output[index]);
 
   } else if (type == "slope") {
@@ -471,6 +472,7 @@ Refine * Problem::create_refine_
        config->mesh_min_refine[index],
        config->mesh_max_coarsen[index],
        config->mesh_field_list[index],
+       config->mesh_include_ghosts[index],
        config->mesh_refine_output[index]);
 
   } else if (type == "shear") {
@@ -479,6 +481,7 @@ Refine * Problem::create_refine_
       (field_descr,
        config->mesh_min_refine[index],
        config->mesh_max_coarsen[index],
+       config->mesh_include_ghosts[index],
        config->mesh_refine_output[index]);
 
   } else if (type == "mask") {
@@ -488,6 +491,7 @@ Refine * Problem::create_refine_
     return new RefineMask 
       (parameters,
        param_str,
+       config->mesh_include_ghosts[index],
        config->mesh_refine_output[index]);
 
   } else if (type == "mass") {
@@ -502,11 +506,13 @@ Refine * Problem::create_refine_
 
     }
 
-    return new RefineMass (config->mesh_min_refine[index],
-			   config->mesh_max_coarsen[index],
-			   config->mesh_level_exponent[index],
-			   root_cell_volume,
-			   config->mesh_refine_output[index]);
+    return new RefineMass 
+      (config->mesh_min_refine[index],
+       config->mesh_max_coarsen[index],
+       config->mesh_level_exponent[index],
+       root_cell_volume,
+       config->mesh_include_ghosts[index],
+       config->mesh_refine_output[index]);
   }
   return NULL;
 }

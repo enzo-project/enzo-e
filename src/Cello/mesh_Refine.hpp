@@ -21,9 +21,11 @@ public: // interface
   /// Constructor
   Refine(double min_refine,
 	 double max_coarsen,
+	 bool include_ghosts,
 	 std::string output) throw()
     : min_refine_(min_refine),
       max_coarsen_(max_coarsen),
+      include_ghosts_(include_ghosts),
       output_(output)
   {};
 
@@ -42,6 +44,7 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p | min_refine_;
     p | max_coarsen_;
+    p | include_ghosts_;
     p | output_;
   }
   
@@ -54,8 +57,10 @@ public: // interface
     return 0;
   };
 
+  /// Return the name of the refinement criteria
   virtual std::string name () const { return "unknown"; }
 
+  /// Clear the output field to the default coarsen (-1)
   void * initialize_output_(FieldData * field_data);
 
 protected:
@@ -65,6 +70,9 @@ protected:
 
   /// Maximum allowed value before coarsening is allowed
   double max_coarsen_;
+
+  /// Whether to include ghost zones when evaluating refinement criteria
+  bool include_ghosts_;
 
   /// Field name to write refinement field to (-1 coarsen 0 same +1 refine)
   std::string output_;

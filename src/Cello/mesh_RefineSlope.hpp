@@ -22,6 +22,7 @@ public: // interface
 	      double slope_min_refine,
 	      double slope_max_coarsen,
 	      std::vector<std::string> field_name_list,
+	      bool include_ghosts,
 	      std::string output) throw();
 
   /// default constructor
@@ -61,6 +62,8 @@ private: // attributes
 
   /// List of field id's
   std::vector <int> field_id_list_;
+
+  
 };
 
 #endif /* MESH_REFINE_SLOPE_HPP */

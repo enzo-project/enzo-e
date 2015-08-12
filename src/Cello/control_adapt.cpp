@@ -21,10 +21,9 @@ static char buffer [256];
 
 #   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
   {									\
-    std::string bit_str = INDEX_RECV.bit_string(-1,2);			\
     sprintf (buffer,"%s %s"						\
-	     " [%d => %d]-%d if3 %2d %2d %2d  ic3 %d %d %d",		\
-	     MSG,bit_str.c_str(),					\
+	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d",		\
+	     MSG,name().c_str(),					\
 	     LEVEL_NOW,LEVEL_NEW,					\
 	     IF3[0],IF3[1],IF3[2],					\
 	     IC3[0],IC3[1],IC3[2]);					\
@@ -398,14 +397,15 @@ void Block::p_adapt_recv_level
   const bool skip_face_update = ! (level_face_new > face_level_last_[ICF3(ic3,if3)]);
 
 #ifdef DEBUG_ADAPT
-  std::string bit_str = index_send.bit_string(-1,2);
   sprintf (buffer,"%s %s"
 	   " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d  "			
 	   "%d <- %d [%d] %s",					
-	   "recv",bit_str.c_str(),
-	   level(), level_next_,if3[0],if3[1],if3[2],				
+	   "recv",name().c_str(),
+	   level(), level_next_,
+	   if3[0],if3[1],if3[2],				
 	   ic3[0],ic3[1],ic3[2],				
-	   level_face_curr,level_face_new,face_level_last_[ICF3(ic3,if3)],skip_face_update ? "SKIP" : "");
+	   level_face_curr,level_face_new,face_level_last_[ICF3(ic3,if3)],
+	   skip_face_update ? "SKIP" : "");
   index_.print(buffer,-1,2,false,simulation());		
 #endif
 

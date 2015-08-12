@@ -15,8 +15,9 @@ RefineMass::RefineMass
  double max_coarsen,
  double level_exponent,
  double root_cell_volume,
+ bool include_ghosts,
  std::string output) throw ()
-  : Refine(min_refine,max_coarsen,output),
+  : Refine(min_refine,max_coarsen,include_ghosts,output),
     level_exponent_(level_exponent)
   // ENZO non-cosmology
 

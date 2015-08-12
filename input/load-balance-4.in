@@ -9,7 +9,8 @@ Stopping { cycle = 20; }
 
 Testing {
    cycle_final = 20;
-   time_final = 0.00134903668604035;
+#   time_final = 0.00134903668604035;
+    time_final = 0.00134807696987889;
 }
 
 Mesh    { 

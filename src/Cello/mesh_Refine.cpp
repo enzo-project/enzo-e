@@ -22,13 +22,13 @@ void * Refine::initialize_output_(FieldData * field_data)
     field_data->size(&nx,&ny,&nz);
     int gx,gy,gz;
     field_data->ghost_depth(id_output, &gx,&gy,&gz);
-    int nxd = nx + 2*gx;
-    int nyd = ny + 2*gy;
-    int nzd = nz + 2*gz;
+    const int nxd = nx + 2*gx;
+    const int nyd = ny + 2*gy;
+    const int nzd = nz + 2*gz;
     precision_type precision = field_data->precision(id_output);
-    if (precision == precision_single)
+    if (precision == precision_single) {
       for (int i=0; i<nxd*nyd*nzd; i++) ((float*)output)[i] = -1;
-    else if (precision == precision_double) {
+    }  else if (precision == precision_double) {
       for (int i=0; i<nxd*nyd*nzd; i++) ((double*)output)[i] = -1;
     }
   }
