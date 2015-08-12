@@ -24,6 +24,7 @@ public: // interface
   /// Constructor
   RefineDensity(double min_refine,
 		double max_coarsen,
+		int    max_level,
 		bool include_ghosts,
 		std::string output) throw();
 

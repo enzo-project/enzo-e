@@ -68,19 +68,22 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_root_size,3);
   p | mesh_max_level;
   p | mesh_min_level;
-  p | mesh_adapt_interval;
-  p | num_mesh;
+
+  p | adapt_interval;
+  p | num_adapt;
   p | adapt_min_face_rank;
-  PUParray(p,mesh_list,MAX_MESH_GROUPS);
-  PUParray(p,mesh_type,MAX_MESH_GROUPS);
-  PUParray(p,mesh_field_list,MAX_MESH_GROUPS);
-  PUParray(p,mesh_min_refine,MAX_MESH_GROUPS);
-  PUParray(p,mesh_max_coarsen,MAX_MESH_GROUPS);
-  PUParray(p,mesh_min_refine2,MAX_MESH_GROUPS);
-  PUParray(p,mesh_max_coarsen2,MAX_MESH_GROUPS);
-  PUParray(p,mesh_level_exponent,MAX_MESH_GROUPS);
-  PUParray(p,mesh_refine_output,MAX_MESH_GROUPS);
-  PUParray(p,mesh_include_ghosts,MAX_MESH_GROUPS);
+
+  PUParray(p,adapt_list,MAX_MESH_GROUPS);
+  PUParray(p,adapt_type,MAX_MESH_GROUPS);
+  PUParray(p,adapt_field_list,MAX_MESH_GROUPS);
+  PUParray(p,adapt_min_refine,MAX_MESH_GROUPS);
+  PUParray(p,adapt_max_coarsen,MAX_MESH_GROUPS);
+  PUParray(p,adapt_min_refine2,MAX_MESH_GROUPS);
+  PUParray(p,adapt_max_coarsen2,MAX_MESH_GROUPS);
+  PUParray(p,adapt_max_level,MAX_MESH_GROUPS);
+  PUParray(p,adapt_level_exponent,MAX_MESH_GROUPS);
+  PUParray(p,adapt_refine_output,MAX_MESH_GROUPS);
+  PUParray(p,adapt_include_ghosts,MAX_MESH_GROUPS);
 
   // Method
 
@@ -475,6 +478,14 @@ void Config::read_mesh_ (Parameters * p) throw()
   mesh_root_size[1] = p->list_value_integer(1,"Mesh:root_size",1);
   mesh_root_size[2] = p->list_value_integer(2,"Mesh:root_size",1);
 
+  //--------------------------------------------------
+
+  mesh_max_level = p->value_integer("Adapt:max_level",0);
+
+  // Note adapt_min_level may be < 0 for multigrid
+
+  mesh_min_level = p->value_integer("Adapt:min_level",0);
+
 }
 
 //----------------------------------------------------------------------
@@ -485,27 +496,19 @@ void Config::read_adapt_ (Parameters * p) throw()
   // Adapt
   //--------------------------------------------------
 
-  mesh_adapt_interval = p->value ("Adapt:interval",1);
+  adapt_interval = p->value ("Adapt:interval",1);
 
   //--------------------------------------------------
 
-  mesh_max_level = p->value_integer("Adapt:max_level",0);
+  num_adapt = p->list_length("Adapt:list");
 
-  // Note mesh_min_level may be < 0 for multigrid
+  for (int ia=0; ia<num_adapt; ia++) {
 
-  mesh_min_level = p->value_integer("Adapt:min_level",0);
+    adapt_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
 
-  //--------------------------------------------------
+    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
 
-  num_mesh = p->list_length("Adapt:list");
-
-  for (int ia=0; ia<num_mesh; ia++) {
-
-    mesh_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
-
-    std::string prefix = "Adapt:" + mesh_list[ia] + ":";
-
-    mesh_type[ia] = p->value_string(prefix+"type","unknown");
+    adapt_type[ia] = p->value_string(prefix+"type","unknown");
 
     std::string param_str = prefix + "field_list";
 
@@ -513,13 +516,13 @@ void Config::read_adapt_ (Parameters * p) throw()
 
     if (type == parameter_list) {
       const int n = p->list_length(param_str);
-      mesh_field_list[ia].resize(n);
+      adapt_field_list[ia].resize(n);
       for (int index=0; index<n; index++) {
-	mesh_field_list[ia][index] = p->value(index,param_str,"none");
+	adapt_field_list[ia][index] = p->value(index,param_str,"none");
       }
     } else if (type == parameter_string) {
-      mesh_field_list[ia].resize(1);
-      mesh_field_list[ia][0] = p->value(param_str,"none");
+      adapt_field_list[ia].resize(1);
+      adapt_field_list[ia][0] = p->value(param_str,"none");
     } else if (type != parameter_unknown) {
       ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
 	      type,param_str.c_str());
@@ -529,26 +532,29 @@ void Config::read_adapt_ (Parameters * p) throw()
 
     if (p->type(prefix + "min_refine") == parameter_list) {
 
-      mesh_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
-      mesh_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
-						  0.5*mesh_min_refine[ia]);
+      adapt_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      adapt_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
+						  0.5*adapt_min_refine[ia]);
 
-      mesh_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
-      mesh_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
-						   0.5*mesh_min_refine2[ia]);
+      adapt_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      adapt_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
+						   0.5*adapt_min_refine2[ia]);
     } else {
 
-      mesh_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
-      mesh_max_coarsen[ia] = p->value (prefix + "max_coarsen",
-				       0.5*mesh_min_refine[ia]);
+      adapt_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
+      adapt_max_coarsen[ia] = p->value (prefix + "max_coarsen",
+				       0.5*adapt_min_refine[ia]);
 
     }
 
-    mesh_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
+    adapt_max_level[ia] = p->value (prefix + "max_level",
+				   std::numeric_limits<int>::max());
 
-    mesh_refine_output[ia] = p->value_string (prefix + "output","");
+    adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
-    mesh_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
+    adapt_refine_output[ia] = p->value_string (prefix + "output","");
+
+    adapt_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
 						false);
 
   }

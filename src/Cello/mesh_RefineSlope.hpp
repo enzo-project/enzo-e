@@ -19,9 +19,10 @@ public: // interface
 
   /// Constructor
   RefineSlope(const FieldDescr * field_descr,
-	      double slope_min_refine,
-	      double slope_max_coarsen,
+	      double min_refine,
+	      double max_coarsen,
 	      std::vector<std::string> field_name_list,
+	      int    max_level,
 	      bool include_ghosts,
 	      std::string output) throw();
 

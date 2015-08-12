@@ -16,9 +16,10 @@ EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
 				 double energy_ratio_max_coarsen,
 				 double gamma,
 				 int comoving_coordinates,
+				 int max_level,
 				 bool include_ghosts,
 				 std::string output) throw ()
-  : Refine (0.0, 0.0, include_ghosts, output),
+  : Refine (0.0, 0.0, max_level, include_ghosts, output),
     pressure_min_refine_ (pressure_min_refine),
     pressure_max_coarsen_(pressure_max_coarsen),
     energy_ratio_min_refine_ (energy_ratio_min_refine),
@@ -110,11 +111,13 @@ int EnzoRefineShock::apply
     break;
   }
 
-  int refine_result =  any_refine ?  adapt_refine 
-    :                 (all_coarsen ? adapt_coarsen 
-		       :             adapt_same) ;
+  int adapt_result =  
+    any_refine ? adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
 
-  return refine_result;
+  // Don't refine if already at maximum level
+  adjust_for_level_ (&adapt_result,block->level());
+
+  return adapt_result;
 
 }
 

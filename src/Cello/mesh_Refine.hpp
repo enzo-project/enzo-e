@@ -21,10 +21,12 @@ public: // interface
   /// Constructor
   Refine(double min_refine,
 	 double max_coarsen,
+	 int    max_level,
 	 bool include_ghosts,
 	 std::string output) throw()
     : min_refine_(min_refine),
       max_coarsen_(max_coarsen),
+      max_level_(max_level),
       include_ghosts_(include_ghosts),
       output_(output)
   {};
@@ -44,6 +46,7 @@ public: // interface
     // NOTE: change this function whenever attributes change
     p | min_refine_;
     p | max_coarsen_;
+    p | max_level_;
     p | include_ghosts_;
     p | output_;
   }
@@ -63,6 +66,16 @@ public: // interface
   /// Clear the output field to the default coarsen (-1)
   void * initialize_output_(FieldData * field_data);
 
+protected: // functions
+
+  /// Don't refine if already at max_level_
+  void adjust_for_level_ (int * adapt_result, int level) const throw ()
+  {
+    if (level >= max_level_ && *adapt_result == adapt_refine) {
+      *adapt_result = adapt_same;
+    }
+  }
+
 protected:
 
   /// Minimum allowed value before refinement kicks in
@@ -70,6 +83,10 @@ protected:
 
   /// Maximum allowed value before coarsening is allowed
   double max_coarsen_;
+
+  /// Maximum level allowed to refine.  May be different than global
+  /// maximum for the simulation
+  int max_level_;
 
   /// Whether to include ghost zones when evaluating refinement criteria
   bool include_ghosts_;

@@ -19,9 +19,10 @@ public: // interface
 
   /// Constructor
   RefineShear(const FieldDescr * field_descr,
-	      double shear_min_refine,
-	      double shear_max_coarsen,
-	      bool include_ghosts,
+	      double min_refine,
+	      double max_coarsen,
+	      int    max_level,
+	      bool   include_ghosts,
 	      std::string output) throw();
 
   /// default constructor

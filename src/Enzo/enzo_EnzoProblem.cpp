@@ -136,14 +136,15 @@ Refine * EnzoProblem::create_refine_
 
     return new EnzoRefineShock 
       (field_descr,
-       config->mesh_min_refine[index],
-       config->mesh_max_coarsen[index],
-       config->mesh_min_refine2[index],
-       config->mesh_max_coarsen2[index],
+       config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_min_refine2[index],
+       config->adapt_max_coarsen2[index],
        enzo_config->field_gamma,
        enzo_config->physics_cosmology,
-       config->mesh_include_ghosts[index],
-       config->mesh_refine_output[index]);
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_refine_output[index]);
   } else {
     return Problem::create_refine_(type,config,parameters,field_descr,index);
   }

@@ -142,9 +142,9 @@ void Problem::initialize_refine(Config * config,
 				Parameters * parameters,
 				const FieldDescr * field_descr) throw()
 {
-  for (int i=0; i<config->num_mesh; i++) {
+  for (int i=0; i<config->num_adapt; i++) {
 
-    std::string name = config->mesh_type[i];
+    std::string name = config->adapt_type[i];
 
     Refine * refine = create_refine_ 
       (name,config,parameters,field_descr,i);
@@ -460,39 +460,43 @@ Refine * Problem::create_refine_
   if (type == "density") {
 
     return new RefineDensity
-      (config->mesh_min_refine[index],
-       config->mesh_max_coarsen[index],
-       config->mesh_include_ghosts[index],
-       config->mesh_refine_output[index]);
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_refine_output[index]);
 
   } else if (type == "slope") {
 
     return new RefineSlope 
       (field_descr,
-       config->mesh_min_refine[index],
-       config->mesh_max_coarsen[index],
-       config->mesh_field_list[index],
-       config->mesh_include_ghosts[index],
-       config->mesh_refine_output[index]);
+       config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_field_list[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_refine_output[index]);
 
   } else if (type == "shear") {
 
     return new RefineShear 
       (field_descr,
-       config->mesh_min_refine[index],
-       config->mesh_max_coarsen[index],
-       config->mesh_include_ghosts[index],
-       config->mesh_refine_output[index]);
+       config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_refine_output[index]);
 
   } else if (type == "mask") {
 
-    std::string param_str = "Adapt:" + config->mesh_list[index] + ":value";
+    std::string param_str = "Adapt:" + config->adapt_list[index] + ":value";
 
     return new RefineMask 
       (parameters,
        param_str,
-       config->mesh_include_ghosts[index],
-       config->mesh_refine_output[index]);
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_refine_output[index]);
 
   } else if (type == "mass") {
 
@@ -507,12 +511,13 @@ Refine * Problem::create_refine_
     }
 
     return new RefineMass 
-      (config->mesh_min_refine[index],
-       config->mesh_max_coarsen[index],
-       config->mesh_level_exponent[index],
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_level_exponent[index],
        root_cell_volume,
-       config->mesh_include_ghosts[index],
-       config->mesh_refine_output[index]);
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_refine_output[index]);
   }
   return NULL;
 }

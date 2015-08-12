@@ -13,9 +13,10 @@ RefineDensity::RefineDensity
 (
  double min_refine,
  double max_coarsen,
+ int max_level,
  bool include_ghosts,
  std::string output) throw ()
-  : Refine(min_refine,max_coarsen,include_ghosts,output)
+  : Refine(min_refine,max_coarsen,max_level,include_ghosts,output)
 {
   TRACE("RefineDensity::RefineDensity");
   WARNING ("RefineDensity::RefineDensity()",
@@ -46,24 +47,31 @@ int RefineDensity::apply
   }
   char * array = field.values(id);
 
+  int adapt_result;
+
   if (precision == precision_single) {
 
-    return apply_ ((const float*)      array,mx,my,mz,gx,gy,gz);
+    adapt_result = apply_ ((const float*)      array,mx,my,mz,gx,gy,gz);
 
   } else if (precision == precision_double) {
 
-    return apply_ ((const double*)     array,mx,my,mz,gx,gy,gz);
+    adapt_result = apply_ ((const double*)     array,mx,my,mz,gx,gy,gz);
 
   } else if (precision == precision_quadruple) {
 
-    return apply_ ((const long double*)array,mx,my,mz,gx,gy,gz);
+    adapt_result = apply_ ((const long double*)array,mx,my,mz,gx,gy,gz);
 
   } else {
     ERROR1 ("RefineDensity::apply()",
 	   "Unrecognized precision %d\n",
 	    precision);
-    return 0;
+    adapt_result = adapt_unknown;
   }
+
+  // Don't refine if already at maximum level
+  adjust_for_level_( &adapt_result, block->level() );
+    
+  return adapt_result;
 }
 
 //----------------------------------------------------------------------s    

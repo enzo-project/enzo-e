@@ -12,9 +12,10 @@
 RefineShear::RefineShear(const FieldDescr * field_descr,
 			 double min_refine,
 			 double max_coarsen,
-			 bool include_ghosts,
+			 int    max_level,
+			 bool   include_ghosts,
 			 std::string output) throw ()
-  : Refine (min_refine_, max_coarsen, include_ghosts,output)
+  : Refine (min_refine_, max_coarsen, max_level, include_ghosts, output)
 {
 }
 
@@ -91,10 +92,13 @@ int RefineShear::apply
     break;
   }
 
-  int refine_result =  any_refine ?  
-    adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
+  int adapt_result =  
+    any_refine ? adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same);
 
-  return refine_result;
+  // Don't refine if already at maximum level
+  adjust_for_level_( &adapt_result, block->level() );
+
+  return adapt_result;
 
 }
 

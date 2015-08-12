@@ -15,9 +15,10 @@ RefineMass::RefineMass
  double max_coarsen,
  double level_exponent,
  double root_cell_volume,
+ int    max_level,
  bool include_ghosts,
  std::string output) throw ()
-  : Refine(min_refine,max_coarsen,include_ghosts,output),
+  : Refine(min_refine,max_coarsen,max_level,include_ghosts,output),
     level_exponent_(level_exponent)
   // ENZO non-cosmology
 
@@ -142,8 +143,13 @@ int RefineMass::apply
     break;
   }
 
-  return 
+  int adapt_result = 
     any_refine ?  adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
+
+  // Don't refine if already at maximum level
+  adjust_for_level_( &adapt_result, block->level() );
+
+  return adapt_result;
 
 }
 

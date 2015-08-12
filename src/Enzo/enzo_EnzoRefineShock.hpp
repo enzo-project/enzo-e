@@ -26,6 +26,7 @@ public: // interface
    double energy_ratio_max_coarsen,
    double gamma,
    int comoving_coordinates,
+   int max_level,
    bool include_ghosts,
    std::string output) throw();
 

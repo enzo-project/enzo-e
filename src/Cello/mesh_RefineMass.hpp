@@ -22,7 +22,8 @@ public: // interface
 	     double max_coarsen,
 	     double level_exponent,
 	     double root_cell_volume,
-	     bool include_ghosts,
+	     int    max_level,
+	     bool   include_ghosts,
 	     std::string store) throw();
 
   /// default constructor

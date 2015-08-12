@@ -111,19 +111,21 @@ public: // attributes
   int                        mesh_root_size[3];
   int                        mesh_min_level;
   int                        mesh_max_level;
-  int                        mesh_adapt_interval;
-  int                        num_mesh;
+
+  int                        num_adapt;
+  int                        adapt_interval;
   int                        adapt_min_face_rank;
-  std::string                mesh_list[MAX_MESH_GROUPS];
-  std::string                mesh_type[MAX_MESH_GROUPS];
-  std::vector<std::string>   mesh_field_list[MAX_MESH_GROUPS];
-  double                     mesh_min_refine[MAX_MESH_GROUPS];
-  double                     mesh_max_coarsen[MAX_MESH_GROUPS];
-  double                     mesh_min_refine2[MAX_MESH_GROUPS];
-  double                     mesh_max_coarsen2[MAX_MESH_GROUPS];
-  double                     mesh_level_exponent[MAX_MESH_GROUPS];
-  std::string                mesh_refine_output[MAX_MESH_GROUPS];
-  bool                       mesh_include_ghosts[MAX_MESH_GROUPS];
+  std::string                adapt_list[MAX_MESH_GROUPS];
+  std::string                adapt_type[MAX_MESH_GROUPS];
+  std::vector<std::string>   adapt_field_list[MAX_MESH_GROUPS];
+  double                     adapt_min_refine[MAX_MESH_GROUPS];
+  double                     adapt_max_coarsen[MAX_MESH_GROUPS];
+  double                     adapt_min_refine2[MAX_MESH_GROUPS];
+  double                     adapt_max_coarsen2[MAX_MESH_GROUPS];
+  int                        adapt_max_level[MAX_MESH_GROUPS];
+  double                     adapt_level_exponent[MAX_MESH_GROUPS];
+  bool                       adapt_include_ghosts[MAX_MESH_GROUPS];
+  std::string                adapt_refine_output[MAX_MESH_GROUPS];
 
   // Method
 

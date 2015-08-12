@@ -13,9 +13,10 @@ RefineSlope::RefineSlope(const FieldDescr * field_descr,
 			 double min_refine,
 			 double max_coarsen,
 			 std::vector<std::string> field_name_list,
+			 int max_level,
 			 bool include_ghosts,
 			 std::string output) throw ()
-  : Refine (min_refine, max_coarsen, include_ghosts,output)
+  : Refine (min_refine, max_coarsen, max_level, include_ghosts, output)
 {
   if (field_name_list.size() != 0) {
     field_id_list_.resize(field_name_list.size());
@@ -105,10 +106,13 @@ int RefineSlope::apply
     }
   }
 
-  int refine_result =  any_refine ?  
-    adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
+  int adapt_result =
+    any_refine ? adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same);
 
-  return refine_result;
+  // Don't refine if already at maximum level
+  adjust_for_level_ (&adapt_result,block->level());
+
+  return adapt_result;
 
 }
 
