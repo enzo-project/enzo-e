@@ -110,7 +110,7 @@ void Block::compute_end_ ()
   simulation()->set_cycle(cycle_);
   simulation()->set_time(time_);
 
-  adapt_enter_();
+  compute_exit_();
 
   TRACE ("END   PHASE COMPUTE");
 }

@@ -6,12 +6,12 @@
 /// @ingroup  Control
 /// @brief    Functions implementing CHARM++ output-related functions
 
-// #define TRACE_OUTPUT
+// #define DEBUG_OUTPUT
 
-#ifdef TRACE_OUTPUT
-#  define TRACE_LOCAL(M) printf ("TRACE Output %s:%d %d " M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
+#ifdef DEBUG_OUTPUT
+#  define TRACE_OUTPUT(M) printf ("TRACE Output %s:%d %d " M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
 #else
-#  define TRACE_LOCAL(M) /*  */
+#  define TRACE_OUTPUT(M) /*  */
 #endif
 
 #include "simulation.hpp"
@@ -25,7 +25,7 @@
 
 void Block::output_begin_ ()
 {
-  TRACE_LOCAL("Block::output_begin_()");
+  TRACE_OUTPUT("Block::output_begin_()");
 
   // Determine if there is any output this cycle
 
@@ -64,7 +64,7 @@ void Block::output_begin_ ()
 void Simulation::begin_output ()
 {
 
-  TRACE_LOCAL("Block::output_begin()");
+  TRACE_OUTPUT("Simulation::begin_output()");
 
   // Switching from Block to Simulation: wait for last Block
 
@@ -76,7 +76,7 @@ void Simulation::begin_output ()
 
     // Barrier
 
-    TRACE_LOCAL("Block::output_begin() calling Simulation::r_output()");
+    TRACE_OUTPUT("Block::output_begin() calling Simulation::r_output()");
     // --------------------------------------------------
     //    CkCallback callback (CkIndex_Simulation::r_output(NULL), thisProxy);
     //    contribute(0,0,CkReduction::concat,callback);
@@ -91,7 +91,7 @@ void Simulation::begin_output ()
 void Simulation::r_output(CkReductionMsg * msg)
 {
  
-  TRACE_LOCAL("Simulation::r_output()");
+  TRACE_OUTPUT("Simulation::r_output()");
 
   delete msg;
 
@@ -106,7 +106,7 @@ void Simulation::r_output(CkReductionMsg * msg)
 void Problem::output_next(Simulation * simulation) throw()
 {
 
-  TRACE_LOCAL("Problem::output_next()");
+  TRACE_OUTPUT("Problem::output_next()");
 
   simulation->set_phase(phase_output);
 
@@ -145,7 +145,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void Block::p_output_write (int index_output)
 {
-  TRACE_LOCAL("Block::p_output_write()");
+  TRACE_OUTPUT("Block::p_output_write()");
 
   FieldDescr * field_descr = simulation()->field_descr();
   Output * output = simulation()->problem()->output(index_output);
@@ -159,7 +159,7 @@ void Block::p_output_write (int index_output)
 
 void Simulation::write_()
 {
-  TRACE_LOCAL("Simulation::write_()");
+  TRACE_OUTPUT("Simulation::write_()");
   if (sync_output_write_.next()) {
 
     // --------------------------------------------------
@@ -175,7 +175,7 @@ void Simulation::write_()
 
 void Simulation::r_write(CkReductionMsg * msg)
 {
-  TRACE_LOCAL("Simulation::r_write()");
+  TRACE_OUTPUT("Simulation::r_write()");
   delete msg;
 
   problem()->output_wait(this);
@@ -185,6 +185,7 @@ void Simulation::r_write(CkReductionMsg * msg)
 
 void Simulation::r_write_checkpoint()
 {
+  TRACE_OUTPUT("Simulation::r_write_checkpoint()");
   problem()->output_wait(this);
 }
 
@@ -192,7 +193,7 @@ void Simulation::r_write_checkpoint()
 
 void Problem::output_wait(Simulation * simulation) throw()
 {
-  TRACE_LOCAL("Problem::output_wait()");
+  TRACE_OUTPUT("Problem::output_wait()");
   
   Output * output = this->output(index_output_);
 
@@ -230,7 +231,7 @@ void Problem::output_wait(Simulation * simulation) throw()
 
 void Simulation::p_output_write (int n, char * buffer)
 {
-  TRACE_LOCAL("Simulation::p_output_write()");
+  TRACE_OUTPUT("Simulation::p_output_write()");
   problem()->output_write(this,n,buffer); 
 }
 
@@ -242,7 +243,7 @@ void Problem::output_write
  int n, char * buffer
 ) throw()
 {
-  TRACE_LOCAL("Problem::output_write()");
+  TRACE_OUTPUT("Problem::output_write()");
 
   Output * output = this->output(index_output_);
 
@@ -263,7 +264,7 @@ void Problem::output_write
 
 void Simulation::output_exit()
 {
-  TRACE_LOCAL("Simulation::output_exit()");
+  TRACE_OUTPUT("Simulation::output_exit()");
 
   // reset debug output files to limit file size
   debug_close();
@@ -276,8 +277,9 @@ void Simulation::output_exit()
 
 void Block::p_output_end()
 {
-  TRACE_LOCAL("Simulation_output_end()");
-  control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
+  TRACE_OUTPUT("Block::p_output_end()");
+  output_exit_();
+  // control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
 }
 //======================================================================
 
