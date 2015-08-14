@@ -20,7 +20,7 @@ void Config::pup (PUP::er &p)
 
   // Balance
 
-  p | balance_interval;
+  p | balance_schedule_index;
 
   // Boundary
 
@@ -120,12 +120,13 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_dir,MAX_OUTPUT_GROUPS);
 
   p | index_schedule_;
-  PUParray (p,output_schedule_type,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_schedule_var,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_schedule_start,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_schedule_stop,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_schedule_step,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_schedule_list,MAX_OUTPUT_GROUPS);
+  PUParray (p,schedule_type,MAX_OUTPUT_GROUPS);
+  PUParray (p,schedule_var,MAX_OUTPUT_GROUPS);
+  PUParray (p,schedule_start,MAX_OUTPUT_GROUPS);
+  PUParray (p,schedule_stop,MAX_OUTPUT_GROUPS);
+  PUParray (p,schedule_step,MAX_OUTPUT_GROUPS);
+  PUParray (p,schedule_list,MAX_OUTPUT_GROUPS);
+
 
   // Performance
 
@@ -183,13 +184,24 @@ void Config::read(Parameters * p) throw()
 
 void Config::read_balance_ (Parameters * p) throw()
 {
-
   //--------------------------------------------------
-  // Boundary
+  // Load balancing
   //--------------------------------------------------
 
-  balance_interval = p->value_integer("Balance:interval",0);
+  p->group_clear();
 
+  const bool balance_scheduled = 
+    (p->type("Balance:schedule:var") != parameter_unknown);
+
+  if (balance_scheduled) {
+    p->group_set(0,"Balance");
+    p->group_push("schedule");
+    balance_schedule_index = read_schedule_(p, "Balance");
+    p->group_pop();
+  } else {
+    balance_schedule_index = -1;
+  }
+  
 }  
 
 //----------------------------------------------------------------------
@@ -669,7 +681,10 @@ void Config::read_output_ (Parameters * p) throw()
     // Read schedule for the Output object
       
     p->group_push("schedule");
-    output_schedule_index[index_output] = read_schedule_(p, output_list[index_output]);
+    output_schedule_index[index_output] = 
+      read_schedule_(p, output_list[index_output]);
+    printf ("output_schedule_index[%d] = %d\n",
+	    index_output,output_schedule_index[index_output]);
     p->group_pop();
 
     // Image 
@@ -802,18 +817,18 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 
   std::string var = p->value_string("var","none");
 
-  output_schedule_var[index] = var;
+  schedule_var[index] = var;
 
   bool var_is_int = true;
 
   // Get variable associated with the schedule 
-  if      (output_schedule_var[index] == "cycle")    var_is_int = true;
-  else if (output_schedule_var[index] == "time")     var_is_int = false;
-  else if (output_schedule_var[index] == "seconds")  var_is_int = false;
+  if      (schedule_var[index] == "cycle")    var_is_int = true;
+  else if (schedule_var[index] == "time")     var_is_int = false;
+  else if (schedule_var[index] == "seconds")  var_is_int = false;
   else {
     ERROR2 ("Config::read",
 	    "Schedule variable %s is not recognized for parameter group %s",
-	    output_schedule_var[index].c_str(),group.c_str());
+	    schedule_var[index].c_str(),group.c_str());
   }
 
   // Determine the schedule type (interval or list)
@@ -837,21 +852,21 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 	      (group).c_str());
   }
 
-  if (type_is_interval) output_schedule_type[index] = "interval";
-  if (type_is_list)     output_schedule_type[index] = "list";
+  if (type_is_interval) schedule_type[index] = "interval";
+  if (type_is_list)     schedule_type[index] = "list";
 
   const int    max_int    = std::numeric_limits<int>::max();
   const double max_double = std::numeric_limits<double>::max();
 
   if (type_is_interval) {
     if (var_is_int) {
-      output_schedule_start[index] = p->value("start",0);
-      output_schedule_step[index]  = p->value("step",1);
-      output_schedule_stop[index]  = p->value("stop",max_int);
+      schedule_start[index] = p->value("start",0);
+      schedule_step[index]  = p->value("step",1);
+      schedule_stop[index]  = p->value("stop",max_int);
     } else {
-      output_schedule_start[index] = p->value("start",0.0);
-      output_schedule_step[index]  = p->value("step",1.0);
-      output_schedule_stop[index]  = p->value("stop",max_double);
+      schedule_start[index] = p->value("start",0.0);
+      schedule_step[index]  = p->value("step",1.0);
+      schedule_stop[index]  = p->value("stop",max_double);
     }
   } else if (type_is_list) {
     int n = p->list_length("value");
@@ -860,20 +875,20 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 	      "Schedule variable %s has length 0",
 	      (group + ":list").c_str());
     }
-    output_schedule_list[index].resize(n);
+    schedule_list[index].resize(n);
     if (var_is_int) {
       for (int i=0; i<n; i++) {
-	output_schedule_list[index][i] = p->value(i,"value",0);
+	schedule_list[index][i] = p->value(i,"value",0);
       }
     } else {
       for (int i=0; i<n; i++) {
-	output_schedule_list[index][i] = p->value(i,"value",0.0);
+	schedule_list[index][i] = p->value(i,"value",0.0);
       }
     }
   } else {
     ERROR2 ("Config::read_schedule_",
 	    "Schedule type %s is not recognized for parameter group %s",
-	    output_schedule_type[index].c_str(),group.c_str());
+	    schedule_type[index].c_str(),group.c_str());
   }
 
   return index_schedule_++;

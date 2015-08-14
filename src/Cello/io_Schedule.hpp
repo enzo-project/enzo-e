@@ -90,6 +90,14 @@ public: // virtual functions
   /// Return the next scheduled seconds time
   virtual double seconds_next() const throw() = 0;
 
+  /// Print the schedule for debugging
+  virtual void print () const throw() {
+    printf ("Schedule:active_ = %d\n",active_);
+    printf ("Schedule:type_   = %d\n",type_);
+    printf ("Schedule:last_   = %d\n",last_);
+    printf ("Schedule:timer   = %g\n",timer_.value());
+  }
+
 protected: // attributes
 
   /// Whether Schedule is currently active

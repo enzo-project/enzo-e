@@ -36,7 +36,8 @@ Simulation::Simulation
   // projections_tracing_(1),
   monitor_(0),
   hierarchy_(0),
-  field_descr_(0)
+  field_descr_(0),
+  schedule_balance_(0)
 {
   debug_open();
 
@@ -118,6 +119,8 @@ void Simulation::pup (PUP::er &p)
 
   if (up) sync_output_begin_.set_stop(0);
   if (up) sync_output_write_.set_stop(0);
+
+  p | schedule_balance_;
 }
 
 //----------------------------------------------------------------------
@@ -351,6 +354,21 @@ void Simulation::initialize_hierarchy_() throw()
 			   config_->mesh_root_blocks[1],
 			   config_->mesh_root_blocks[2]);
 
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_balance_() throw()
+{
+  int index = config_->balance_schedule_index;
+
+  schedule_balance_ = (index == -1) ? NULL : Schedule::create
+    ( config_->schedule_var[index],
+      config_->schedule_type[index],
+      config_->schedule_start[index],
+      config_->schedule_stop[index],
+      config_->schedule_step[index],
+      config_->schedule_list[index]);
 }
 
 //----------------------------------------------------------------------

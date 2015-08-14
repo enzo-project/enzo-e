@@ -127,6 +127,10 @@ public: // interface
   void set_phase(int phase) const throw() 
   { phase_ = phase; };
 
+  /// Return the load balancing schedule
+  Schedule * schedule_balance() const throw() 
+  { return schedule_balance_; };
+
   // /// Output Performance information to stdout (root process data only)
   // virtual void performance_output();
 
@@ -251,6 +255,9 @@ protected: // functions
   /// Initialize the data object
   void initialize_data_descr_ () throw();
 
+  /// Initialize load balancing
+  void initialize_balance_ () throw();
+
   void deallocate_() throw();
 
   Schedule * create_schedule_(std::string var,
@@ -326,6 +333,9 @@ protected: // attributes
   // bool projections_tracing_;
   // Schedule * projections_schedule_on_;
   // Schedule * projections_schedule_off_;
+
+  /// Load balancing schedule
+  Schedule * schedule_balance_;
 
   /// Monitor object
   Monitor * monitor_;

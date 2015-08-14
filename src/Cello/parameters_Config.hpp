@@ -63,7 +63,7 @@ public: // attributes
 
   // Balance (dynamic load balancing)
 
-  int                        balance_interval; // 0 for none
+  int                        balance_schedule_index;
 
   // Boundary
 
@@ -162,12 +162,12 @@ public: // attributes
   std::vector<std::string>   output_name           [MAX_OUTPUT_GROUPS];
 
   int                        index_schedule_;
-  std::string                output_schedule_type  [MAX_SCHEDULE];
-  std::string                output_schedule_var   [MAX_SCHEDULE];
-  double                     output_schedule_start [MAX_SCHEDULE];
-  double                     output_schedule_stop  [MAX_SCHEDULE];
-  double                     output_schedule_step  [MAX_SCHEDULE];
-  std::vector<double>        output_schedule_list  [MAX_SCHEDULE];
+  std::string                schedule_type  [MAX_SCHEDULE];
+  std::string                schedule_var   [MAX_SCHEDULE];
+  double                     schedule_start [MAX_SCHEDULE];
+  double                     schedule_stop  [MAX_SCHEDULE];
+  double                     schedule_step  [MAX_SCHEDULE];
+  std::vector<double>        schedule_list  [MAX_SCHEDULE];
 
   // Performance
 

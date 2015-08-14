@@ -66,6 +66,25 @@ public:  // virtual functions
   virtual double seconds_next() const throw()
   { return seconds_start_ + (last_ + 1)*seconds_step_; };
 
+  virtual void print () const throw() {
+
+    Schedule::print();
+
+    if (type_ == schedule_type_cycle) {
+      CkPrintf ("ScheduleInterval:cycle_start_ = %d\n",cycle_start_);
+      CkPrintf ("ScheduleInterval:cycle_step_  = %d\n",cycle_step_);
+      CkPrintf ("ScheduleInterval:cycle_stop_ = %d\n",cycle_stop_);
+    } else if (type_ == schedule_type_time) {
+      CkPrintf ("ScheduleInterval:time_start_ = %g\n",time_start_);
+      CkPrintf ("ScheduleInterval:time_step_  = %g\n",time_step_);
+      CkPrintf ("ScheduleInterval:time_stop_ = %g\n",time_stop_);
+    } else if (type_ == schedule_type_seconds) {
+      CkPrintf ("ScheduleInterval:seconds_start_ = %g\n",seconds_start_);
+      CkPrintf ("ScheduleInterval:seconds_step_  = %g\n",seconds_step_);
+      CkPrintf ("ScheduleInterval:seconds_stop_ = %g\n",seconds_stop_);
+    }
+  }
+
 protected: // attributes
 
   int cycle_start_;

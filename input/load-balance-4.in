@@ -3,7 +3,12 @@
 
 include "input/adapt.incl"
 
-Balance { interval = 1; }
+Balance { 
+   schedule {
+     var = "cycle";
+     step = 1;
+   }
+}
 
 Stopping { cycle = 20; }
 

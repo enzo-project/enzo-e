@@ -13,12 +13,16 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define DEBUG_COMPUTE
+
 //======================================================================
 
 void Block::compute_begin_ ()
 {
+#ifdef DEBUG_COMPUTE
+  CkPrintf ("%s DEBUG_COMPUTE Block::compute_begin_()\n", name().c_str());
+#endif
 
-  TRACE("Block::compute_begin()");
   simulation()->set_phase(phase_compute);
 
   index_method_ = 0;
@@ -29,6 +33,9 @@ void Block::compute_begin_ ()
 
 void Block::compute_next_ ()
 {
+#ifdef DEBUG_COMPUTE
+  CkPrintf ("%s DEBUG_COMPUTE Block::compute_next_()\n", name().c_str());
+#endif
 
   Method * method = this->method();
 
@@ -52,6 +59,9 @@ void Block::compute_next_ ()
 
 void Block::compute_continue_ ()
 {
+#ifdef DEBUG_COMPUTE
+  CkPrintf ("%s DEBUG_COMPUTE Block::compute_continue_()\n", name().c_str());
+#endif
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
@@ -62,6 +72,10 @@ void Block::compute_continue_ ()
   TRACE2 ("Block::compute_continue() method = %d %p\n",
 	  index_method_,method); fflush(stdout);
 
+#ifdef DEBUG_COMPUTE
+  CkPrintf ("%s DEBUG_COMPUTE applying Method %s\n",
+    name().c_str(),method->name().c_str());
+#endif
   // Apply the method to the Block
   method -> compute (this);
 
@@ -71,6 +85,9 @@ void Block::compute_continue_ ()
 
 void Block::compute_done ()
 {
+#ifdef DEBUG_COMPUTE
+  CkPrintf ("%s DEBUG_COMPUTE Block::compute_done_()\n", name().c_str());
+#endif
   index_method_++;
   compute_next_();
 }
@@ -79,6 +96,10 @@ void Block::compute_done ()
 
 void Block::compute_end_ ()
 {
+#ifdef DEBUG_COMPUTE
+  CkPrintf ("%s DEBUG_COMPUTE Block::compute_end_()\n", name().c_str());
+#endif
+
 
 #ifdef CONFIG_USE_PROJECTIONS
   //  traceUserBracketEvent(10,time_start, CmiWallTimer());

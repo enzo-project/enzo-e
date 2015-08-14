@@ -27,6 +27,7 @@ void Simulation::initialize() throw()
   initialize_memory_();
   initialize_performance_();
   initialize_simulation_();
+  initialize_balance_();
 
   initialize_data_descr_();
 

@@ -133,9 +133,9 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   bool was_off = (simulation->projections_tracing() == false);
   bool was_on  = (simulation->projections_tracing() == true);
   bool turn_on = simulation->
-    projections_schedule_on()->write_this_cycle(cycle_,time_);
+    projections_schedule_on()->write_this_schedule(cycle_,time_);
   bool turn_off = simulation->
-    projections_schedule_off()->write_this_cycle(cycle_,time_);
+    projections_schedule_off()->write_this_schedule(cycle_,time_);
 
   if (was_off && turn_on) {
 
@@ -167,11 +167,13 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 void Block::stopping_balance_()
 {
 
-  int balance_interval =  simulation()->config()->balance_interval;
-  
-  if (balance_interval && ((cycle_ % balance_interval) == 0)) {
+  Schedule * schedule = simulation()->schedule_balance();
 
-    control_sync(CkIndex_Main::p_stopping_balance(),sync_quiescence);
+  if (schedule && 
+      schedule->write_this_cycle(cycle_,time_)) {
+
+    control_sync(CkIndex_Main::p_stopping_balance(),
+		 sync_quiescence);
 
   } else {
     

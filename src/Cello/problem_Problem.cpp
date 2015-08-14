@@ -253,13 +253,15 @@ void Problem::initialize_output
     // Scheduling parameters
     //--------------------------------------------------
 
+    int index_schedule = config->output_schedule_index[index];
+
     output->set_schedule
-      (Schedule::create( config->output_schedule_var[index],
-			 config->output_schedule_type[index],
-			 config->output_schedule_start[index],
-			 config->output_schedule_stop[index],
-			 config->output_schedule_step[index],
-			 config->output_schedule_list[index]));
+      (Schedule::create( config->schedule_var[index_schedule],
+			 config->schedule_type[index_schedule],
+			 config->schedule_start[index_schedule],
+			 config->schedule_stop[index_schedule],
+			 config->schedule_step[index_schedule],
+			 config->schedule_list[index_schedule]));
 
 
     //--------------------------------------------------

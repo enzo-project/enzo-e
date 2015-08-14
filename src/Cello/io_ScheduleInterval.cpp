@@ -9,6 +9,8 @@
 
 #include "io.hpp"
 
+// #define DEBUG_SCHEDULE
+
 //----------------------------------------------------------------------
 
 ScheduleInterval::ScheduleInterval () throw()
@@ -63,7 +65,11 @@ void ScheduleInterval::set_seconds_interval
 
 bool ScheduleInterval::write_this_cycle ( int cycle, double time) throw()
 {
-
+#ifdef DEBUG_SCHEDULE
+  CkPrintf ("ScheduleInterval::write_this_cycle cycle %d time %g",
+	    cycle,time);
+  this->print();
+#endif
   double seconds = timer_.value();
 
   bool result = false;
@@ -110,6 +116,9 @@ bool ScheduleInterval::write_this_cycle ( int cycle, double time) throw()
 	    "Unknown schedule type for active ScheduleInterval object");
   }
 
+#ifdef DEBUG_SCHEDULE
+  CkPrintf ("ScheduleInterval::write_this_cycle result = %d\n",result);
+#endif
   return result;
 }
 
