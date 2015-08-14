@@ -101,7 +101,12 @@ void Monitor::header () const
   print ("Define","BUILD DIR     %s",CELLO_DIR);
   print ("Define","BUILD DATE    %s",CELLO_DATE);
   print ("Define","BUILD TIME    %s",CELLO_TIME);
+#ifndef CONFIG_PYTHON_LT_27
   print ("Define","CHARM_VERSION %s",CELLO_CHARM_VERSION);
+#ifdef CONFIG_HAVE_MERCURIAL  
+  print ("Define","CHANGESET     %s",CELLO_CHANGESET);
+#endif
+#endif
 
 }
 

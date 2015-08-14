@@ -126,6 +126,12 @@ use_projections = 0
 ip_charm = '4'
 
 #----------------------------------------------------------------------
+# Whether this is a Mercurial repository
+#----------------------------------------------------------------------
+
+have_mercurial = 1
+
+#----------------------------------------------------------------------
 # AUTO CONFIGURATION
 #----------------------------------------------------------------------
 
@@ -227,7 +233,58 @@ define_png   =        ['NO_FREETYPE']
 
 define_charm =        ['CONFIG_USE_CHARM']  # used for Grackle 
 
-# 
+# Python version defines
+
+define_python_lt_27 = ['CONFIG_PYTHON_LT_27']
+
+# Mercurial defines
+
+define_have_mercurial = ['CONFIG_HAVE_MERCURIAL']
+
+
+#======================================================================
+# ARCHITECTURE SETTINGS
+#======================================================================
+
+mpi_path = '' # this is a hack to compile on gordon with parallel HDF5
+
+is_arch_valid = 0
+
+# Assume Python is new, but may be overridden in machine configuration
+# files if needed.  For example, gordon and comet have Python 2.6
+# installed, but subprocess.check_output() used below requires 2.7, so
+# we set python_lt_27 = 1 in those configuration files to avoid
+# calling check_output()
+
+python_lt_27 = 0
+
+
+sys.path.append("./config");
+
+
+if   (arch == "gordon_gnu"):   from gordon_gnu   import *
+elif (arch == "gordon_intel"): from gordon_intel import *
+elif (arch == "gordon_pgi"):   from gordon_pgi   import *
+elif (arch == "linux_gnu"):    from linux_gnu    import *
+elif (arch == "linux_gprof"):  from linux_gprof  import *
+elif (arch == "linux_mpe"):    from linux_mpe    import *
+elif (arch == "linux_tau"):    from linux_tau    import *
+elif (arch == "ncsa_bw"):      from ncsa_bw      import *
+elif (arch == "faraday_gnu"):  from faraday_gnu  import *
+elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
+elif (arch == "mf_gnu"):       from mf_gnu       import *
+elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
+elif (arch == "davros_gnu"):   from davros_gnu   import *
+elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
+
+#======================================================================
+# END ARCHITECTURE SETTINGS
+#======================================================================
+
+if (not is_arch_valid):
+   print "Unrecognized architecture ",arch
+   sys.exit(1)
+
 #----------------------------------------------------------------------
 # ASSEMBLE DEFINES
 #----------------------------------------------------------------------
@@ -283,42 +340,11 @@ if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
+if (python_lt_27 != 0):  defines = defines + define_python_lt_27
+if (have_mercurial != 0):defines = defines + define_have_mercurial
 
 defines = defines + define_charm
 defines = defines + define_cello
-
-#======================================================================
-# ARCHITECTURE SETTINGS
-#======================================================================
-
-mpi_path = '' # this is a hack to compile on gordon with parallel HDF5
-
-is_arch_valid = 0
-sys.path.append("./config");
-
-
-if   (arch == "gordon_gnu"):   from gordon_gnu   import *
-elif (arch == "gordon_intel"): from gordon_intel import *
-elif (arch == "gordon_pgi"):   from gordon_pgi   import *
-elif (arch == "linux_gnu"):    from linux_gnu    import *
-elif (arch == "linux_gprof"):  from linux_gprof  import *
-elif (arch == "linux_mpe"):    from linux_mpe    import *
-elif (arch == "linux_tau"):    from linux_tau    import *
-elif (arch == "ncsa_bw"):      from ncsa_bw      import *
-elif (arch == "faraday_gnu"):  from faraday_gnu  import *
-elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
-elif (arch == "mf_gnu"):       from mf_gnu       import *
-elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
-elif (arch == "davros_gnu"):   from davros_gnu   import *
-elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
-
-#======================================================================
-# END ARCHITECTURE SETTINGS
-#======================================================================
-
-if (not is_arch_valid):
-   print "Unrecognized architecture ",arch
-   sys.exit(1)
 
 #======================================================================
 # FINAL CHARM SETUP
@@ -485,14 +511,30 @@ cello_def.write ("#define CELLO_DATE "
 		"\""+time.strftime("%Y-%m-%d",time.gmtime())+"\"\n" )
 cello_def.write ("#define CELLO_TIME "
 		"\""+time.strftime("%H:%M:%S",time.gmtime())+"\"\n" )
-cello_def.write ("#define CELLO_CHANGESET "
-	"\""+subprocess.check_output(["hg", "id", "-n"]).rstrip()+"\"\n" )
-cello_def.write ("#define CELLO_CHARM_VERSION "
-	"\""+subprocess.check_output(["cat", charm_path + "/VERSION"]).rstrip()+"\"\n" )
 
+#----------
+# Python version >= 2.7 is required for subprocess.check_output()
 
-env.Command ('hgid.out', [], 'hg --id > $TARGETS')
-env.AlwaysBuild('hgid.out')
+if (python_lt_27 == 0):
+     cello_def.write ("#define CELLO_CHARM_VERSION "
+                      "\""+subprocess.check_output
+                      (["cat", charm_path + "/VERSION"]).rstrip()+"\"\n" )
+else:
+     cello_def.write ("#define CELLO_CHARM_VERSION unknown\n")	
+
+#----------
+# Both Python version 2.7 is required, and Mercurial must be installed
+
+if (python_lt_27 == 0 and have_mercurial):
+
+     cello_def.write ("#define CELLO_CHANGESET "
+                      "\""+subprocess.check_output
+                      (["hg", "id", "-n"]).rstrip()+"\"\n" )
+else:
+     cello_def.write ("#define CELLO_CHANGESET unknown\n" )
+
+#----------
+
 cello_def.close()
 #======================================================================
 # BUILDERS

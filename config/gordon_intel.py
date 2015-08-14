@@ -2,6 +2,8 @@ import os
 
 is_arch_valid = 1
 
+python_lt_27 = 1
+
 #flags_arch = '-g'
 #flags_arch = '-Ofast' # ERROR: ipo linking
 flags_arch = '-O3'
