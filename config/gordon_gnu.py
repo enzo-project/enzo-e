@@ -2,6 +2,8 @@ import os
 
 is_arch_valid = 1
 
+python_lt_27 = 1
+
 flags_arch = '-O3 -Wall -g'
 flags_link  = '-rdynamic'
 
@@ -17,11 +19,12 @@ libs_fortran    = ['gfortran']
 
 home = '/home/ux452912'
 
-#hdf5_path    = os.environ['HDF5HOME']
-#mpi_path     = os.environ['MPIHOME']
-charm_path   = home + '/public/Charm/651/gnu/mvapich2/charm'
+hdf5_path    = os.environ['HDF5HOME']
+mpi_path     = os.environ['MPIHOME']
+#charm_path   = home + '/public/Charm/651/gnu/mvapich2/charm'
+charm_path   = home + '/Charm/charm/'
 papi_path    = home
-hdf5_path    = home + '/public'
-mpi_path     = home + '/public'
+#hdf5_path    = home + '/public'
+#mpi_path     = home + '/public'
 png_path     = '/usr/lib64'
 grackle_path = home + '/public/Grackle/src/clib'
