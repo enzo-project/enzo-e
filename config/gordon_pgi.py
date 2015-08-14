@@ -2,7 +2,7 @@ import os
 
 is_arch_valid = 1
 
-python_lt_27 = 1
+#python_lt_27 = 1
 
 flags_arch = '-O3'
 flags_link = '-pgf90libs'
