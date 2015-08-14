@@ -13,7 +13,7 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define DEBUG_CONTROL
+#define DEBUG_CONTROL
 
 #ifdef DEBUG_CONTROL
 # define TRACE_CONTROL(A)						\

@@ -21,16 +21,15 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-// #define CELLO_VERBOSE
+// #define DEBUG_STOPPING
 
-#ifdef CELLO_VERBOSE
-#   define VERBOSE(A)					\
-  if (index_.is_root()) {				\
-    Monitor * monitor = simulation()->monitor();	\
-    monitor->print("Control", A);			\
-  } 
+#ifdef DEBUG_STOPPING
+#   define TRACE_STOPPING(A)					\
+  CkPrintf ("%d %s:%d %s TRACE %s\n",					\
+	    CkMyPe(),__FILE__,__LINE__,name_.c_str(),A);		\
+  fflush(stdout);						
 #else
-#   define VERBOSE(A) ;
+#   define TRACE_STOPPING(A) ;
 #endif
 
 
@@ -38,6 +37,8 @@
 
 void Block::stopping_begin_()
 {
+
+  TRACE_STOPPING("Block::stopping_begin_");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -107,6 +108,8 @@ void Block::stopping_begin_()
 void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
 
+  TRACE_STOPPING("Block::r_stopping_compute_timestep");
+  
   ++age_;
 
   double * min_reduce = (double * )msg->getData();
@@ -166,6 +169,7 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
 void Block::stopping_balance_()
 {
+  TRACE_STOPPING("Block::stopping_balance_");
 
   Schedule * schedule = simulation()->schedule_balance();
 
@@ -186,7 +190,7 @@ void Block::stopping_balance_()
 
 void Block::p_stopping_balance()
 {
-    VERBOSE("balance_enter");
+    TRACE_STOPPING("Block::p_stopping_balance");
     simulation()->set_phase (phase_balance);
     AtSync();
 }
@@ -195,7 +199,7 @@ void Block::p_stopping_balance()
 
 void Block::ResumeFromSync()
 {
-  VERBOSE("balance_exit");
+  TRACE_STOPPING("Block::balance_exit");
 
   stopping_exit_();
 
@@ -205,6 +209,7 @@ void Block::ResumeFromSync()
 
 void Block::exit_()
 {
+  TRACE_STOPPING("Block::exit_");
   if (index_.is_root()) {
     proxy_main.p_exit(1);
   }
