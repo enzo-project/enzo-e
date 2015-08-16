@@ -224,6 +224,10 @@ Block::Block
 
   }
 
+  if (level == 0) {
+    setMigratable(false);
+  }
+
   debug_faces_("Block()");
 
 }

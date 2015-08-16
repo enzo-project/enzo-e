@@ -683,8 +683,6 @@ void Config::read_output_ (Parameters * p) throw()
     p->group_push("schedule");
     output_schedule_index[index_output] = 
       read_schedule_(p, output_list[index_output]);
-    printf ("output_schedule_index[%d] = %d\n",
-	    index_output,output_schedule_index[index_output]);
     p->group_pop();
 
     // Image 
