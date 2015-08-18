@@ -34,5 +34,5 @@ Output {
 }
 
 Restart {
-   file = "input/restart.in";
+   file = "input/restart.incl";
 }

@@ -33,5 +33,8 @@ Output {
 }
 
 Restart {
-   file = "input/restart.in";
+
+   # file to read on restart only
+
+   file = "input/restart.incl";
 }
