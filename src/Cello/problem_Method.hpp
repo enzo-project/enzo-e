@@ -9,6 +9,7 @@
 #define PROBLEM_METHOD_HPP
 
 class Refresh;
+class Schedule;
 
 class Method : public PUP::able 
 {
@@ -19,12 +20,12 @@ class Method : public PUP::able
 public: // interface
 
   /// Create a new Method
-  Method () throw()
-  {}
+  Method () throw() : schedule_(NULL) {}
 
   /// Destructor
   virtual ~Method() throw()
   {
+    delete schedule_;
     for (size_t i=0; i<refresh_list_.size(); i++) {
       delete refresh_list_[i];
       refresh_list_[i] = 0;
@@ -78,6 +79,17 @@ public: // virtual functions
     return (index < refresh_list_.size()) ? refresh_list_[index] : NULL;
   }
 
+  /// Return the Schedule object pointer
+  Schedule * schedule() throw() 
+  { return schedule_; };
+
+  /// Set schedule
+  void set_schedule (Schedule * schedule) throw()
+  { 
+    if (schedule_) delete schedule_;
+    schedule_ = schedule;
+  }
+
 protected: // functions
 
   /// Perform vector copy X <- Y
@@ -95,6 +107,10 @@ protected: // attributes
 
   ///  Refresh object
   std::vector<Refresh *> refresh_list_;
+
+
+  /// Schedule object, if any (default is every cycle)
+  Schedule * schedule_;
 
 };
 

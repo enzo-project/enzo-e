@@ -341,6 +341,18 @@ void Problem::initialize_method
 
       method_list_.push_back(method); 
 
+      int index_schedule = config->method_schedule_index[index_method];
+
+      if (index_schedule != -1) {
+	method->set_schedule
+	  (Schedule::create( config->schedule_var[index_schedule],
+			     config->schedule_type[index_schedule],
+			     config->schedule_start[index_schedule],
+			     config->schedule_stop[index_schedule],
+			     config->schedule_step[index_schedule],
+			     config->schedule_list[index_schedule]));
+      }
+
     } else {
       ERROR1("Problem::initialize_method",
 	     "Unknown Method %s",name.c_str());

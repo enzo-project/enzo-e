@@ -67,17 +67,36 @@ void Block::compute_continue_ ()
   //  double time_start = CmiWallTimer();
 #endif
 
-  Method * method = this->method();
+    Method * method = this->method();
+    Schedule * schedule = method->schedule();
+    bool is_scheduled = 
+      (!schedule) ||
+      schedule && schedule->write_this_cycle(cycle_,time_);
 
-  TRACE2 ("Block::compute_continue() method = %d %p\n",
-	  index_method_,method); fflush(stdout);
+    // printf ("DEBUG Method %s schedule = %p scheduled %d\n",
+    // 	    method->name().c_str(),
+    // 	    schedule,
+    // 	    is_scheduled);
+
+    if (is_scheduled) {
+
+
+    TRACE2 ("Block::compute_continue() method = %d %p\n",
+	    index_method_,method); fflush(stdout);
 
 #ifdef DEBUG_COMPUTE
-  CkPrintf ("%s DEBUG_COMPUTE applying Method %s\n",
-    name().c_str(),method->name().c_str());
+    CkPrintf ("%s DEBUG_COMPUTE applying Method %s\n",
+	      name().c_str(),method->name().c_str());
 #endif
-  // Apply the method to the Block
-  method -> compute (this);
+    // Apply the method to the Block
+
+    method -> compute (this);
+
+  } else {
+
+    compute_done();
+
+  }
 
 }
 

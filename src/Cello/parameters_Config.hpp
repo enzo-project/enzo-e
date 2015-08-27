@@ -19,7 +19,7 @@
 #define MAX_OUTPUT_GROUPS 20
 
 /* Maximum number of schedules */
-#define MAX_SCHEDULE 20
+#define MAX_SCHEDULE 30
 
 /* Maximum number of adapt groups specified in the configuration file */
 #define MAX_MESH_GROUPS 10
@@ -131,6 +131,7 @@ public: // attributes
 
   int                        num_method;
   std::vector<std::string>   method_list;
+  int                        method_schedule_index [MAX_METHOD_GROUPS];
 
   // Monitor
 

@@ -89,6 +89,7 @@ void Config::pup (PUP::er &p)
 
   p | num_method;
   p | method_list;
+  PUParray (p,method_schedule_index,MAX_METHOD_GROUPS);
 
   // Monitor
 
@@ -587,8 +588,30 @@ void Config::read_method_ (Parameters * p) throw()
   method_list.resize(num_method);
   for (int index_method=0; index_method<num_method; index_method++) {
 
-    method_list[index_method] = 
+
+    std::string method_string = 
       p->list_value_string(index_method,"Method:list");
+
+    method_list[index_method] = method_string;
+
+    // Read schedule for the Method object if any
+      
+    std::string schedule_var = 
+      std::string("Method") + ":" +
+      method_list[index_method] + ":schedule:var";
+
+    const bool method_scheduled = 
+      (p->type(schedule_var) != parameter_unknown);
+
+    if (method_scheduled) {
+      p->group_set(0,"Method");
+      p->group_push(method_string);
+      p->group_push("schedule");
+      method_schedule_index[index_method] = read_schedule_(p, method_string);
+      p->group_pop();
+    } else {
+      method_schedule_index[index_method] = -1;
+    }
   }
 }
 
