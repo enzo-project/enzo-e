@@ -28,7 +28,8 @@ public: // interface
   void pup (PUP::er &p) ;
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(EnzoConfig *);
+  EnzoMethodGrackle(EnzoConfig *,
+		    const FieldDescr * field_descr);
 
   /// Create a new EnzoMethodGrackle object
   EnzoMethodGrackle() : Method() {};

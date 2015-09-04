@@ -20,7 +20,8 @@ public: // interface
   EnzoInitialGrackleTest() throw() { }
   
   /// Constructor
-  EnzoInitialGrackleTest(const EnzoConfig * enzo_config) throw();
+  EnzoInitialGrackleTest
+  (const EnzoConfig * enzo_config) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialGrackleTest);

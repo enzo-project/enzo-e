@@ -94,6 +94,8 @@ use_gprof = 0
 
 #----------------------------------------------------------------------
 # Whether to compile with the Grackle chemistry and cooling library
+#
+# WARNING: must update grackle-related lines in src/Enzo/enzo.ci
 #----------------------------------------------------------------------
 
 use_grackle = 0

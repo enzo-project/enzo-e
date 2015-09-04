@@ -30,6 +30,13 @@ void EnzoInitialGrackleTest::pup (PUP::er &p)
   TRACEPUP;
 
   Initial::pup(p);
+
+#ifdef CONFIG_USE_GRACKLE
+  WARNING("EnzoInitialGrackleTest::pup()","Skipping units_");
+  //  const code_units      * units_;
+  WARNING("EnzoInitialGrackleTest::pup()", "Skipping chemistry_");
+  //  const chemistry_data  * chemistry_;
+#endif
 }
 
 //----------------------------------------------------------------------

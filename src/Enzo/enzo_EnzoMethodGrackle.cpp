@@ -11,7 +11,8 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle 
-(EnzoConfig * config)
+(EnzoConfig * config,
+ const FieldDescr * field_descr)
   : Method()
 #ifdef CONFIG_USE_GRACKLE
   , chemistry_(0),
@@ -80,19 +81,19 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 #else /* CONFIG_USE_GRACKLE */
 
-  initialize_(block);
+  //  initialize_(block);
 
   Field field = block->data()->field();
 
   // ASSUMES ALL ARRAYS ARE THE SAME SIZE
   gr_int m[3];
-  array_dimension (0,m,m+1,m+2);
+  field.dimensions (0,m,m+1,m+2);
 
   int gx,gy,gz;
-  ghost_depth (0,&gx,&gy,&gz);
+  field.ghost_depth (0,&gx,&gy,&gz);
 
   int nx,ny,nz;
-  block_size (&nx,&ny,&nz);
+  field.field_size (0,&nx,&ny,&nz);
 
   gr_int grid_start[3] = {gx,      gy,      gz};
   gr_int grid_end[3]   = {gx+nx-1, gy+ny-1, gz+nz-1} ;
@@ -100,7 +101,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   // ASSUMES COSMOLOGY = false
   double a_value = 1.0;
 
-  gr_int rank = this->rank();
+  gr_int rank = block->rank();
 
   gr_float * density       = (gr_float *) field.values("density");
   gr_float * energy        = (gr_float *) field.values("internal_energy");
@@ -125,7 +126,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   gr_float * pressure      = (gr_float *) field.values("pressure");
   gr_float * gamma         = (gr_float *) field.values("gamma");
 
-  double dt = time_step();
+  double dt = block->dt();
 
   if (solve_chemistry
       (*chemistry_, *units_,
@@ -230,7 +231,6 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 {
 #ifdef CONFIG_USE_GRACKLE
-  initialize_(block);
   return std::numeric_limits<double>::max();
 #else
   return 0.0;
