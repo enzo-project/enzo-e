@@ -23,14 +23,7 @@ public: // interface
   Method () throw() : schedule_(NULL) {}
 
   /// Destructor
-  virtual ~Method() throw()
-  {
-    delete schedule_;
-    for (size_t i=0; i<refresh_list_.size(); i++) {
-      delete refresh_list_[i];
-      refresh_list_[i] = 0;
-    }
-  }
+  virtual ~Method() throw();
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Method);
@@ -84,11 +77,7 @@ public: // virtual functions
   { return schedule_; };
 
   /// Set schedule
-  void set_schedule (Schedule * schedule) throw()
-  { 
-    if (schedule_) delete schedule_;
-    schedule_ = schedule;
-  }
+  void set_schedule (Schedule * schedule) throw();
 
 protected: // functions
 

@@ -135,10 +135,10 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 #ifdef CONFIG_USE_PROJECTIONS  
   bool was_off = (simulation->projections_tracing() == false);
   bool was_on  = (simulation->projections_tracing() == true);
-  bool turn_on = simulation->
-    projections_schedule_on()->write_this_schedule(cycle_,time_);
-  bool turn_off = simulation->
-    projections_schedule_off()->write_this_schedule(cycle_,time_);
+  Schedule * schedule_on = simulation->projections_schedule_on();
+  Schedule * schedule_off = simulation->projections_schedule_off();
+  bool turn_on  = schedule_on ? schedule_on->write_this_cycle(cycle_,time_) : false;
+  bool turn_off = schedule_off ? schedule_off->write_this_cycle(cycle_,time_) : false;
 
   if (was_off && turn_on) {
 

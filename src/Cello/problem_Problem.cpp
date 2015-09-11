@@ -173,11 +173,11 @@ void Problem::initialize_stopping(Config * config) throw()
 
 void Problem::initialize_prolong(Config * config) throw()
 {
-  prolong_ = create_prolong_(config->field_prolong_type,config);
+  prolong_ = create_prolong_(config->field_prolong,config);
 
   ASSERT1("Problem::initialize_prolong",
 	  "Prolong type %s not recognized",
-	  config->field_prolong_type.c_str(),
+	  config->field_prolong.c_str(),
 	  prolong_ != NULL);
 }
 
@@ -185,11 +185,11 @@ void Problem::initialize_prolong(Config * config) throw()
 
 void Problem::initialize_restrict(Config * config) throw()
 {
-  restrict_ = create_restrict_(config->field_restrict_type,config);
+  restrict_ = create_restrict_(config->field_restrict,config);
 
   ASSERT1("Problem::initialize_restrict",
 	  "Restrict type %s not recognized",
-	  config->field_restrict_type.c_str(),
+	  config->field_restrict.c_str(),
 	  restrict_ != NULL);
 }
 
@@ -274,7 +274,7 @@ void Problem::initialize_output
 
       // AXIS
 
-      std::string axis = config->output_image_axis[index];
+      std::string axis = config->output_axis[index];
 
       if (axis == "x") output_image->set_axis(axis_x);
       if (axis == "y") output_image->set_axis(axis_y);
@@ -282,7 +282,7 @@ void Problem::initialize_output
 
       // COLORMAP
 
-      int n = config->output_image_colormap[index].size() / 3;
+      int n = config->output_colormap[index].size() / 3;
 
       if (n > 0) {
 	double * r = new double [n];
@@ -295,9 +295,9 @@ void Problem::initialize_output
 	  int ig=3*i+1;
 	  int ib=3*i+2;
 
-	  r[i] = config->output_image_colormap[index][ir];
-	  g[i] = config->output_image_colormap[index][ig];
-	  b[i] = config->output_image_colormap[index][ib];
+	  r[i] = config->output_colormap[index][ir];
+	  g[i] = config->output_colormap[index][ig];
+	  b[i] = config->output_colormap[index][ib];
 
 	}
 
@@ -478,7 +478,7 @@ Refine * Problem::create_refine_
        config->adapt_max_coarsen[index],
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
-       config->adapt_refine_output[index]);
+       config->adapt_output[index]);
 
   } else if (type == "slope") {
 
@@ -489,7 +489,7 @@ Refine * Problem::create_refine_
        config->adapt_field_list[index],
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
-       config->adapt_refine_output[index]);
+       config->adapt_output[index]);
 
   } else if (type == "shear") {
 
@@ -499,7 +499,7 @@ Refine * Problem::create_refine_
        config->adapt_max_coarsen[index],
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
-       config->adapt_refine_output[index]);
+       config->adapt_output[index]);
 
   } else if (type == "mask") {
 
@@ -510,7 +510,7 @@ Refine * Problem::create_refine_
        param_str,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
-       config->adapt_refine_output[index]);
+       config->adapt_output[index]);
 
   } else if (type == "mass") {
 
@@ -531,7 +531,7 @@ Refine * Problem::create_refine_
        root_cell_volume,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
-       config->adapt_refine_output[index]);
+       config->adapt_output[index]);
   }
   return NULL;
 }

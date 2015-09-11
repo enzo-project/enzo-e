@@ -137,6 +137,21 @@ public: // interface
   /// Write performance information to disk (all process data)
   void performance_write();
 
+#ifdef CONFIG_USE_PROJECTIONS  
+  /// Set whether performance tracing with projections is enabled or not
+  void set_projections_tracing (bool value)
+  { projections_tracing_ = value; }
+
+  bool projections_tracing() const
+  { return projections_tracing_; }
+
+  Schedule * projections_schedule_on() const
+  { return projections_schedule_on_; }
+
+  Schedule * projections_schedule_off() const
+  { return projections_schedule_off_; }
+#endif
+
 public: // virtual functions
 
   /// Update Simulation state, including cycle, time, timestep, and stopping criteria
@@ -330,9 +345,11 @@ protected: // attributes
 
   // /// Schedule for projections on / off
 
-  // bool projections_tracing_;
-  // Schedule * projections_schedule_on_;
-  // Schedule * projections_schedule_off_;
+#ifdef CONFIG_USE_PROJECTIONS
+  bool projections_tracing_;
+  Schedule * projections_schedule_on_;
+  Schedule * projections_schedule_off_;
+#endif
 
   /// Load balancing schedule
   Schedule * schedule_balance_;

@@ -7,7 +7,6 @@ Mesh    {
    root_size   = [32,32];
 }
 
-# include "input/initial_star.incl"
 include "input/initial_square.incl"
 
 Adapt {  max_level = 5; }

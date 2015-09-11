@@ -48,6 +48,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | ppm_steepening;
   p | ppm_temperature_floor;
   p | ppm_use_minimum_pressure_support;
+  p | ppm_mol_weight;
 
   p | field_gamma;
 
@@ -156,6 +157,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:temperature_floor", floor_default);
   ppm_use_minimum_pressure_support = p->value_logical
     ("Method:ppm:use_minimum_pressure_support",false);
+  ppm_mol_weight = p->value_float
+    ("Method:ppm:mol_weight",0.6);
 
 
   physics_cosmology = p->value_logical ("Method:cosmology",false);
@@ -329,13 +332,13 @@ void EnzoConfig::read(Parameters * p) throw()
       = p->value_float("Method:grackle:density_units",1.67e-24);
 
     method_grackle_units.length_units              // 1 kpc
-      = p->value_float("Method:grackle:density_units",3.086e21);
+      = p->value_float("Method:grackle:length_units",3.086e21);
 
     method_grackle_units.time_units                // 1 Myr
-      = p->value_float("Method:grackle:density_units",3.15569e13);
+      = p->value_float("Method:grackle:time_units",3.15569e13);
 
     method_grackle_units.a_units   // units for the expansion factor
-      = p->value_float("Method:grackle:density_units",1.0);
+      = p->value_float("Method:grackle:a_units",1.0);
 
     // computed
     method_grackle_units.velocity_units 
@@ -355,7 +358,7 @@ void EnzoConfig::read(Parameters * p) throw()
        method_grackle_chemistry.with_radiative_cooling);
 
     method_grackle_chemistry.primordial_chemistry = p->value_logical
-      ("Method:grackle:multi_species",
+      ("Method:grackle:primordial_chemistry",
        method_grackle_chemistry.primordial_chemistry);
 
     method_grackle_chemistry.metal_cooling = p->value_logical

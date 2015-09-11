@@ -5,6 +5,7 @@
 /// @date     2012-10-02
 /// @brief    [\ref Parameters] Declaration of the Config class
 ///
+/// Last review of parameters was 2015-09-10 with revision -r 3836 
 
 #ifndef PARAMETERS_CONFIG_HPP
 #define PARAMETERS_CONFIG_HPP
@@ -57,9 +58,24 @@ public: // interface
 
 public: // attributes
 
-  // REVIEW: rev 3563 2014-06-10
-
   // NOTE: change pup() function whenever attributes change
+
+  // Adapt
+
+  int                        num_adapt;
+  std::string                adapt_list[MAX_MESH_GROUPS];
+  int                        adapt_interval;
+  int                        adapt_min_face_rank;
+  std::string                adapt_type[MAX_MESH_GROUPS];
+  std::vector<std::string>   adapt_field_list[MAX_MESH_GROUPS];
+  double                     adapt_min_refine[MAX_MESH_GROUPS];
+  double                     adapt_max_coarsen[MAX_MESH_GROUPS];
+  double                     adapt_min_refine2[MAX_MESH_GROUPS];
+  double                     adapt_max_coarsen2[MAX_MESH_GROUPS];
+  int                        adapt_max_level[MAX_MESH_GROUPS];
+  double                     adapt_level_exponent[MAX_MESH_GROUPS];
+  bool                       adapt_include_ghosts[MAX_MESH_GROUPS];
+  std::string                adapt_output[MAX_MESH_GROUPS];
 
   // Balance (dynamic load balancing)
 
@@ -83,15 +99,15 @@ public: // attributes
   // Field
 
   int                        num_fields;
+  std::vector<std::string>   field_list;
   int                        field_alignment;
   std::vector<int>           field_centering [3];
   double                     field_courant;
-  std::vector<std::string>   field_list;
   int                        field_ghost_depth[3];
   int                        field_padding;
   int                        field_precision;
-  std::string                field_prolong_type;
-  std::string                field_restrict_type;
+  std::string                field_prolong;
+  std::string                field_restrict;
   std::vector< std::vector<std::string> >  field_group_list;
 
   // Initial
@@ -112,21 +128,6 @@ public: // attributes
   int                        mesh_min_level;
   int                        mesh_max_level;
 
-  int                        num_adapt;
-  int                        adapt_interval;
-  int                        adapt_min_face_rank;
-  std::string                adapt_list[MAX_MESH_GROUPS];
-  std::string                adapt_type[MAX_MESH_GROUPS];
-  std::vector<std::string>   adapt_field_list[MAX_MESH_GROUPS];
-  double                     adapt_min_refine[MAX_MESH_GROUPS];
-  double                     adapt_max_coarsen[MAX_MESH_GROUPS];
-  double                     adapt_min_refine2[MAX_MESH_GROUPS];
-  double                     adapt_max_coarsen2[MAX_MESH_GROUPS];
-  int                        adapt_max_level[MAX_MESH_GROUPS];
-  double                     adapt_level_exponent[MAX_MESH_GROUPS];
-  bool                       adapt_include_ghosts[MAX_MESH_GROUPS];
-  std::string                adapt_refine_output[MAX_MESH_GROUPS];
-
   // Method
 
   int                        num_method;
@@ -143,9 +144,9 @@ public: // attributes
   int                        num_output;
   std::vector<std::string>   output_list;
   std::string                output_type                 [MAX_OUTPUT_GROUPS];
-  std::string                output_image_axis           [MAX_OUTPUT_GROUPS];
+  std::string                output_axis           [MAX_OUTPUT_GROUPS];
   int                        output_image_block_size     [MAX_OUTPUT_GROUPS];
-  std::vector<double>        output_image_colormap       [MAX_OUTPUT_GROUPS];
+  std::vector<double>        output_colormap       [MAX_OUTPUT_GROUPS];
   std::string                output_image_type           [MAX_OUTPUT_GROUPS];
   bool                       output_image_log            [MAX_OUTPUT_GROUPS];
   std::string                output_image_mesh_color     [MAX_OUTPUT_GROUPS];
@@ -163,12 +164,12 @@ public: // attributes
   std::vector<std::string>   output_name           [MAX_OUTPUT_GROUPS];
 
   int                        index_schedule_;
+  std::vector<double>        schedule_list  [MAX_SCHEDULE];
   std::string                schedule_type  [MAX_SCHEDULE];
   std::string                schedule_var   [MAX_SCHEDULE];
   double                     schedule_start [MAX_SCHEDULE];
   double                     schedule_stop  [MAX_SCHEDULE];
   double                     schedule_step  [MAX_SCHEDULE];
-  std::vector<double>        schedule_list  [MAX_SCHEDULE];
 
   // Performance
 
@@ -209,7 +210,6 @@ protected: // functions
   void read_monitor_     (Parameters * parameters) throw();
   void read_output_      (Parameters * parameters) throw();
   void read_performance_ (Parameters * parameters) throw();
-  //  void read_refresh_     (Parameters * parameters) throw();
   void read_restart_     (Parameters * parameters) throw();
   void read_stopping_    (Parameters * parameters) throw();
   void read_testing_     (Parameters * parameters) throw();

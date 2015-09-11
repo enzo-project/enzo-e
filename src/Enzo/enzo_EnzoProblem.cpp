@@ -144,7 +144,7 @@ Refine * EnzoProblem::create_refine_
        enzo_config->physics_cosmology,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
-       config->adapt_refine_output[index]);
+       config->adapt_output[index]);
   } else {
     return Problem::create_refine_(type,config,parameters,field_descr,index);
   }

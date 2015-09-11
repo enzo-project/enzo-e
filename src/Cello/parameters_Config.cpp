@@ -4,6 +4,8 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-10-03
 /// @brief    Implementation of the Config class 
+///
+/// Last review of parameters was 2015-09-10 with revision -r 3836 
 
 #include "cello.hpp"
 #include "parameters.hpp"
@@ -12,11 +14,29 @@
 
 void Config::pup (PUP::er &p)
 {
-  // REVIEW: rev 3505
 
   // NOTE: change this function whenever attributes change
+
   PUP::able::pup(p);
+
   TRACEPUP;
+
+  // Adapt
+
+  p | num_adapt;
+  PUParray(p,adapt_list,MAX_MESH_GROUPS);
+  p | adapt_interval;
+  p | adapt_min_face_rank;
+  PUParray(p,adapt_type,MAX_MESH_GROUPS);
+  PUParray(p,adapt_field_list,MAX_MESH_GROUPS);
+  PUParray(p,adapt_min_refine,MAX_MESH_GROUPS);
+  PUParray(p,adapt_max_coarsen,MAX_MESH_GROUPS);
+  PUParray(p,adapt_min_refine2,MAX_MESH_GROUPS);
+  PUParray(p,adapt_max_coarsen2,MAX_MESH_GROUPS);
+  PUParray(p,adapt_max_level,MAX_MESH_GROUPS);
+  PUParray(p,adapt_level_exponent,MAX_MESH_GROUPS);
+  PUParray(p,adapt_include_ghosts,MAX_MESH_GROUPS);
+  PUParray(p,adapt_output,MAX_MESH_GROUPS);
 
   // Balance
 
@@ -40,15 +60,15 @@ void Config::pup (PUP::er &p)
   // Field
 
   p | num_fields;
+  p | field_list;
   p | field_alignment;
   PUParray(p,field_centering,3);
   p | field_courant;
-  p | field_list;
   PUParray(p,field_ghost_depth,3);
   p | field_padding;
   p | field_precision;
-  p | field_prolong_type;
-  p | field_restrict_type;
+  p | field_prolong;
+  p | field_restrict;
   p | field_group_list;
 
   // Initial
@@ -66,24 +86,8 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_root_blocks,3);
   p | mesh_root_rank;
   PUParray(p,mesh_root_size,3);
-  p | mesh_max_level;
   p | mesh_min_level;
-
-  p | adapt_interval;
-  p | num_adapt;
-  p | adapt_min_face_rank;
-
-  PUParray(p,adapt_list,MAX_MESH_GROUPS);
-  PUParray(p,adapt_type,MAX_MESH_GROUPS);
-  PUParray(p,adapt_field_list,MAX_MESH_GROUPS);
-  PUParray(p,adapt_min_refine,MAX_MESH_GROUPS);
-  PUParray(p,adapt_max_coarsen,MAX_MESH_GROUPS);
-  PUParray(p,adapt_min_refine2,MAX_MESH_GROUPS);
-  PUParray(p,adapt_max_coarsen2,MAX_MESH_GROUPS);
-  PUParray(p,adapt_max_level,MAX_MESH_GROUPS);
-  PUParray(p,adapt_level_exponent,MAX_MESH_GROUPS);
-  PUParray(p,adapt_refine_output,MAX_MESH_GROUPS);
-  PUParray(p,adapt_include_ghosts,MAX_MESH_GROUPS);
+  p | mesh_max_level;
 
   // Method
 
@@ -101,9 +105,9 @@ void Config::pup (PUP::er &p)
   p | num_output;
   p | output_list;
   PUParray (p,output_type,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_axis,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_axis,MAX_OUTPUT_GROUPS);
   PUParray (p,output_image_block_size,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_colormap,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_colormap,MAX_OUTPUT_GROUPS);
   PUParray (p,output_image_type,MAX_OUTPUT_GROUPS);
   PUParray (p,output_image_log,MAX_OUTPUT_GROUPS);
   PUParray (p,output_image_mesh_color,MAX_OUTPUT_GROUPS);
@@ -115,18 +119,18 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_image_min,MAX_OUTPUT_GROUPS);
   PUParray (p,output_image_max,MAX_OUTPUT_GROUPS);
   PUParray (p,output_schedule_index,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_field_list,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_stride,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_name,MAX_OUTPUT_GROUPS);
   PUParray (p,output_dir,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_stride,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_field_list,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_name,MAX_OUTPUT_GROUPS);
 
   p | index_schedule_;
+  PUParray (p,schedule_list,MAX_OUTPUT_GROUPS);
   PUParray (p,schedule_type,MAX_OUTPUT_GROUPS);
   PUParray (p,schedule_var,MAX_OUTPUT_GROUPS);
   PUParray (p,schedule_start,MAX_OUTPUT_GROUPS);
   PUParray (p,schedule_stop,MAX_OUTPUT_GROUPS);
   PUParray (p,schedule_step,MAX_OUTPUT_GROUPS);
-  PUParray (p,schedule_list,MAX_OUTPUT_GROUPS);
 
 
   // Performance
@@ -179,6 +183,80 @@ void Config::read(Parameters * p) throw()
 
   TRACE("END   Config::read()");
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_adapt_ (Parameters * p) throw()
+{
+  //--------------------------------------------------
+  // Adapt
+  //--------------------------------------------------
+
+  adapt_interval = p->value ("Adapt:interval",1);
+
+  //--------------------------------------------------
+
+  num_adapt = p->list_length("Adapt:list");
+
+  for (int ia=0; ia<num_adapt; ia++) {
+
+    adapt_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
+
+    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
+
+    adapt_type[ia] = p->value_string(prefix+"type","unknown");
+
+    adapt_min_face_rank = p->value_integer("Adapt:min_face_rank",0);
+
+    std::string param_str = prefix + "field_list";
+
+    int type = p->type(param_str);
+
+    if (type == parameter_list) {
+      const int n = p->list_length(param_str);
+      adapt_field_list[ia].resize(n);
+      for (int index=0; index<n; index++) {
+	adapt_field_list[ia][index] = p->value(index,param_str,"none");
+      }
+    } else if (type == parameter_string) {
+      adapt_field_list[ia].resize(1);
+      adapt_field_list[ia][0] = p->value(param_str,"none");
+    } else if (type != parameter_unknown) {
+      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
+	      type,param_str.c_str());
+    }
+
+    //--------------------------------------------------
+
+    if (p->type(prefix + "min_refine") == parameter_list) {
+
+      adapt_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      adapt_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
+						  0.5*adapt_min_refine[ia]);
+
+      adapt_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
+      adapt_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
+						   0.5*adapt_min_refine2[ia]);
+    } else {
+
+      adapt_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
+      adapt_max_coarsen[ia] = p->value (prefix + "max_coarsen",
+				       0.5*adapt_min_refine[ia]);
+
+    }
+
+    adapt_max_level[ia] = p->value (prefix + "max_level",
+				   std::numeric_limits<int>::max());
+
+    adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
+
+    adapt_output[ia] = p->value_string (prefix + "output","");
+
+    adapt_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
+						false);
+
+  }
 }
 
 //----------------------------------------------------------------------
@@ -420,9 +498,9 @@ void Config::read_field_ (Parameters * p) throw()
 	    precision_str.c_str());
   }
 
-  field_prolong_type   = p->value_string ("Field:prolong","linear");
+  field_prolong   = p->value_string ("Field:prolong","linear");
 
-  field_restrict_type  = p->value_string ("Field:restrict","linear");
+  field_restrict  = p->value_string ("Field:restrict","linear");
   
 }
 
@@ -495,82 +573,10 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   mesh_max_level = p->value_integer("Adapt:max_level",0);
 
-  // Note adapt_min_level may be < 0 for multigrid
+  // Note mesh_min_level may be < 0 for multigrid
 
   mesh_min_level = p->value_integer("Adapt:min_level",0);
 
-}
-
-//----------------------------------------------------------------------
-
-void Config::read_adapt_ (Parameters * p) throw()
-{
-  //--------------------------------------------------
-  // Adapt
-  //--------------------------------------------------
-
-  adapt_interval = p->value ("Adapt:interval",1);
-
-  //--------------------------------------------------
-
-  num_adapt = p->list_length("Adapt:list");
-
-  for (int ia=0; ia<num_adapt; ia++) {
-
-    adapt_list[ia] = p->list_value_string (ia,"Adapt:list","unknown");
-
-    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
-
-    adapt_type[ia] = p->value_string(prefix+"type","unknown");
-
-    std::string param_str = prefix + "field_list";
-
-    int type = p->type(param_str);
-
-    if (type == parameter_list) {
-      const int n = p->list_length(param_str);
-      adapt_field_list[ia].resize(n);
-      for (int index=0; index<n; index++) {
-	adapt_field_list[ia][index] = p->value(index,param_str,"none");
-      }
-    } else if (type == parameter_string) {
-      adapt_field_list[ia].resize(1);
-      adapt_field_list[ia][0] = p->value(param_str,"none");
-    } else if (type != parameter_unknown) {
-      ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
-	      type,param_str.c_str());
-    }
-
-    //--------------------------------------------------
-
-    if (p->type(prefix + "min_refine") == parameter_list) {
-
-      adapt_min_refine[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
-      adapt_max_coarsen[ia] = p->list_value_float (0,prefix + "max_coarsen",
-						  0.5*adapt_min_refine[ia]);
-
-      adapt_min_refine2[ia]  = p->list_value_float (0,prefix + "min_refine",0.3);
-      adapt_max_coarsen2[ia] = p->list_value_float (1,prefix + "max_coarsen",
-						   0.5*adapt_min_refine2[ia]);
-    } else {
-
-      adapt_min_refine[ia]  = p->value (prefix + "min_refine",0.3);
-      adapt_max_coarsen[ia] = p->value (prefix + "max_coarsen",
-				       0.5*adapt_min_refine[ia]);
-
-    }
-
-    adapt_max_level[ia] = p->value (prefix + "max_level",
-				   std::numeric_limits<int>::max());
-
-    adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
-
-    adapt_refine_output[ia] = p->value_string (prefix + "output","");
-
-    adapt_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
-						false);
-
-  }
 }
 
 //----------------------------------------------------------------------
@@ -724,9 +730,9 @@ void Config::read_output_ (Parameters * p) throw()
 		axis=="x" || axis=="y" || axis=="z");
       }  else {
 	WARNING1 ("Config::read()",
-		  "output_image_axis[%d] set to z",index_output);
+		  "output_axis[%d] set to z",index_output);
 
-	output_image_axis[index_output] = "z";
+	output_axis[index_output] = "z";
       }
 
 
@@ -764,9 +770,9 @@ void Config::read_output_ (Parameters * p) throw()
 
       if (p->type("colormap") == parameter_list) {
 	int size = p->list_length("colormap");
-	output_image_colormap[index_output].resize(size);
+	output_colormap[index_output].resize(size);
 	for (int i=0; i<size; i++) {
-	  output_image_colormap[index_output][i] = 
+	  output_colormap[index_output][i] = 
 	    p->list_value_float(i,"colormap",0.0);
 	}
       }
