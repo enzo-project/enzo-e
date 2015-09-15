@@ -26,7 +26,7 @@ if ($#argv >= 1) then
       set d = `date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s cleaning..."
       foreach prec (single double)
-         python scons.py arch=$arch -c >& /dev/null
+         python2.7 scons.py arch=$arch -c >& /dev/null
          rm -rf bin >& /dev/null
          rm -rf lib >& /dev/null
       end
@@ -109,8 +109,8 @@ touch "$dir/running.$arch.$prec"
 setenv CELLO_ARCH $arch
 setenv CELLO_PREC $prec
 
-python scons.py install-inc    >&  $dir/out.scons
-python scons.py $k_switch -j $proc -Q $target |& tee $dir/out.scons
+python2.7 scons.py install-inc    >&  $dir/out.scons
+python2.7 scons.py $k_switch -j $proc -Q $target |& tee $dir/out.scons
 
 ./tools/awk/error-org.awk   < $dir/out.scons >  errors.org
 ./tools/awk/warning-org.awk < $dir/out.scons >> errors.org
