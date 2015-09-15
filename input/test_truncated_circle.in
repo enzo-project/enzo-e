@@ -22,7 +22,7 @@ Method {
 Field {
    
    list = ["density", "potential",
-           "B","X","R","P","AP"];
+           "B","D","R","X", "Y", "Z"];
 
    ghost_depth = 4;
 
@@ -99,6 +99,6 @@ Output {
   mesh    { name = ["tis2-mesh-%02d.png", "cycle"]; };
   phi_png { name = ["tis2-phi-%02d.png",  "cycle"]; };
   rho_png { name = ["tis2-rho-%02d.png",  "cycle"]; };
-  phi_h5  { name = ["tis2-phi-%02d.h5",   "cycle"]; };
-  rho_h5  { name = ["tis2-rho-%02d.h5",   "cycle"]; };
+  phi_h5  { name = ["tis2-phi-%02d-%02d.h5",   "cycle", "proc"]; };
+  rho_h5  { name = ["tis2-rho-%02d-%02d.h5",   "cycle", "proc"]; };
 }
