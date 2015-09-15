@@ -22,7 +22,9 @@ Method {
 Field {
    
    list = ["density", "potential",
-           "B","D","R","X", "Y", "Z"];
+           "B","D","R","X", "Y", "Z",
+	   "acceleration_x",
+	   "acceleration_y"];
 
    ghost_depth = 4;
 
