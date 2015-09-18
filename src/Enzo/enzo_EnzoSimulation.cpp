@@ -28,6 +28,8 @@ EnzoSimulation::EnzoSimulation
 
   problem_ = new EnzoProblem;
 
+  initialize_config_();
+
   initialize();
 }
 
@@ -55,12 +57,21 @@ void EnzoSimulation::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
+void EnzoSimulation::initialize_config_() throw()
+{
+  if (config_ == NULL) {
+    config_ = new EnzoConfig;
+  }
+
+  static_cast<EnzoConfig*>(config_)->read(parameters_);
+
+}
+
+//----------------------------------------------------------------------
+
 void EnzoSimulation::initialize() throw()
 {
 
-  // Initialize EnzoConfig parameters
-
-  initialize_config_();
 
   // Call initialize() on base Simulation class
   Simulation::initialize();
@@ -76,16 +87,6 @@ const Factory * EnzoSimulation::factory() const throw()
 { 
   if (! factory_) factory_ = new EnzoFactory;
   return factory_;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulation::initialize_config_() throw()
-{
-  if (config_ == NULL) config_ = new EnzoConfig;
-
-  static_cast<EnzoConfig*>(config_)->read(parameters_);
-
 }
 
 //======================================================================

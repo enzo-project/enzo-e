@@ -30,6 +30,7 @@ module simulation {
     entry void p_monitor_performance();
     entry void r_monitor_performance (CkReductionMsg * msg); // [SC9]
 
+    entry void r_recv_config(CkReductionMsg * msg);
   };
 
   /// Initial mapping of array elements

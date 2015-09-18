@@ -4,7 +4,6 @@ include "config-default.incl"
 
 include "config-dimension.incl"
 include "config-max-level.incl"
-include "config-refresh.incl"
 include "config-adapt-interval.incl"
 include "config-stopping-cycle.incl"
 include "config-stopping-interval.incl"

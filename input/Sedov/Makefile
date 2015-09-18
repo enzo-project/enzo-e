@@ -13,9 +13,6 @@ stopping-interval-%:
 .PHONY: adapt-interval-%
 adapt-interval-%:
 	ln -sf config/config-adapt-interval-$*.incl config-adapt-interval.incl
-.PHONY: refresh-%
-refresh-%:
-	ln -sf config/config-refresh-$*.incl config-refresh.incl
 .PHONY: output-%
 output-%:
 	ln -sf config/config-output-$*.incl config-output.incl
@@ -38,7 +35,6 @@ default:
 	-@$(MAKE) stopping-cycle-5
 	-@$(MAKE) stopping-interval-1
 	-@$(MAKE) adapt-interval-1
-	-@$(MAKE) refresh-counter
 	-@$(MAKE) output-0
 .PHONY: show-config
 show-config:
@@ -51,7 +47,6 @@ show-config:
 	-@grep FILE config-stopping-cycle.incl
 	-@grep FILE config-stopping-interval.incl
 	-@grep FILE config-adapt-interval.incl
-	-@grep FILE config-refresh.incl
 	-@grep FILE config-output.incl
 
 .PHONY: clean
@@ -65,7 +60,6 @@ clean:
 	-@rm -f config-stopping-cycle.incl
 	-@rm -f config-stopping-interval.incl
 	-@rm -f config-adapt-interval.incl
-	-@rm -f config-refresh.incl
 	-@rm -f config-output.incl
 
 

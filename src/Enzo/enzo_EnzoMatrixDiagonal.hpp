@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     compute_EnzoMatrixDiagonal.hpp 
+/// @file     enzo_EnzoMatrixDiagonal.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2015-04-02
 /// @brief    [\ref Compute] Declaration of the EnzoMatrixDiagonal class

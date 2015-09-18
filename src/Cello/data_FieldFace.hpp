@@ -14,7 +14,7 @@ class Prolong;
 class FieldFace {
 
   /// @class    FieldFace
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief [\ref Data] Class for loading field faces and storing
   /// field ghosts zones
 

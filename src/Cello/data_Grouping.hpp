@@ -22,7 +22,7 @@
 class Grouping {
 
   /// @class    Grouping
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief    [\ref Data] 
 
 public: // interface

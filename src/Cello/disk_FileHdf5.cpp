@@ -664,7 +664,6 @@ void FileHdf5::write_meta_
 {
   // error check file open
 
-
   std::string file_name = path_ + "/" + name_;
 
   ASSERT1("FileHdf5::write_meta_",

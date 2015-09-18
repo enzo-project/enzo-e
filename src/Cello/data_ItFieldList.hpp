@@ -11,7 +11,7 @@
 class ItFieldList : public ItField {
 
   /// @class    ItFieldList
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief    [\ref Data] Iterator over a list of Fields in a Block
 
 public: // interface

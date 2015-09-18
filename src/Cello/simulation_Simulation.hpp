@@ -206,6 +206,11 @@ public: // virtual functions
   /// Wait for all local patches to be created before calling run
   void r_initialize_hierarchy(CkReductionMsg * msg);
 
+  /// Send Config and Parameters from ip==0 to all other processes
+
+  void send_config();
+  void r_recv_config(CkReductionMsg * msg);
+
   /// Call output on Problem list of Output objects
   void p_begin_output()
   { begin_output(); }

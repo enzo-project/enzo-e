@@ -6,6 +6,7 @@
 Mesh { root_rank = 3; }
 
  Adapt {
+     max_level = 3;
      list = [ "shock", "shear" ];
      shock { type = "shock"; store = "refine_shock"; };
      shear { type = "shear"; store = "refine_shear";  };

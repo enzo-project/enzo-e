@@ -12,7 +12,7 @@ class FieldDescr
 {
 
   /// @class    FieldDescr
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief    [\ref Data] Interface for the FieldDescr class
   ///
   /// This class is used to store information about Fields in general,

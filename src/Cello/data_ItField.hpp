@@ -13,7 +13,7 @@ class ItField : public PUP::able
 {
 
   /// @class    ItField
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief    [\ref Data] Abstract iterator base class for Field indices
 
 public: // interface

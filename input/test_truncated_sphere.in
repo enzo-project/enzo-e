@@ -6,9 +6,21 @@ Domain {
    upper = [  1.0,  1.0,  1.0 ];
 }
 
+Adapt {
+   max_level = 3; 
+   list = ["slope"];
+   slope {
+      type = "slope";
+      field_list = ["density"];
+      min_refine =  2.0;
+      max_coarsen = 0.01;
+   }
+}
+
 Mesh { 
    root_rank = 3;
-   root_size = [8,8,8];
+   root_blocks = [4,4,4];
+   root_size = [64,64,64];
 }
 
 Method {
@@ -40,17 +52,6 @@ Field {
 
    ghost_depth = 4;
 
-}
-
-Adapt {
-   max_level = 5; 
-   list = ["slope"];
-   slope {
-      type = "slope";
-      field_list = ["density"];
-      min_refine =  2.0;
-      max_coarsen = 0.01;
-   }
 }
 
 Field { ghost_depth = 4; }
@@ -102,11 +103,6 @@ Output {
 }
 
 Stopping { cycle = 1; }
-
-
-Mesh { 
-   root_blocks = [2,2,2];
-}
 
 Output {
 

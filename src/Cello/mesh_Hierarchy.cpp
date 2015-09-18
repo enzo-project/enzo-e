@@ -16,11 +16,13 @@
 Hierarchy::Hierarchy 
 (
  const Factory * factory,
- int rank, int refinement) throw ()
+ int rank, int refinement,
+ int max_level) throw ()
   :
   factory_((Factory *)factory),
   rank_(rank),
   refinement_(refinement),
+  max_level_(max_level),
   num_blocks_(0),
   block_array_(NULL),
   block_exists_(false)
@@ -56,6 +58,7 @@ void Hierarchy::pup (PUP::er &p)
   p | *factory_;
   p | rank_;
   p | refinement_;
+  p | max_level_;
 
   p | num_blocks_;
   // clear if unpacking: load balancing expects num_blocks_ to be

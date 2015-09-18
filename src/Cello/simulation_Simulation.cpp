@@ -50,10 +50,34 @@ Simulation::Simulation
 
   // Read in parameters
 
-  parameters_ = new Parameters(parameter_file,monitor_);
-
+  //  if (CkMyPe() == 0) {
+    parameters_ = new Parameters(parameter_file,monitor_);
+    //  }
+    //  send_config();
 }
 
+//----------------------------------------------------------------------
+
+void Simulation::send_config()
+{
+  CkPrintf ("DEBUG %s:%d %d r_send_config\n",
+	    __FILE__,__LINE__,CkMyPe());
+
+  CkCallback callback (CkIndex_Simulation::r_recv_config(NULL),
+			 thisProxy);
+
+  contribute(callback);
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::r_recv_config(CkReductionMsg * msg)
+{
+  CkPrintf ("DEBUG %s:%d %d r_recv_config\n",
+	    __FILE__,__LINE__,CkMyPe());
+
+  delete msg;
+}
 //----------------------------------------------------------------------
 
 Simulation::Simulation()
@@ -324,7 +348,8 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
-  hierarchy_ = factory()->create_hierarchy (rank_,refinement);
+  hierarchy_ = factory()->create_hierarchy 
+    (rank_,refinement,config_->mesh_max_level);
 
   // Domain extents
 
@@ -536,4 +561,3 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   delete msg;
 
 }
-

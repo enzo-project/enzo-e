@@ -24,11 +24,7 @@ Field {
  
       list = ["ppm"];
 
-   }
-
-   Enzo {
-
-      gamma = 1.4;
+#      gamma = 1.4;
 
       ppm {
 
@@ -37,11 +33,10 @@ Field {
          steepening  = true;
 
          dual_energy = false;
-     }
+      }
    }
 
    Boundary { type = "periodic" }
- Enzo { sedov { radius_relative = 0.1; } }
 
    Output { 
 

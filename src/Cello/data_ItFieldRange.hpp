@@ -11,7 +11,7 @@
 class ItFieldRange : public ItField {
 
   /// @class    ItFieldRange
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief    [\ref Data] Iterator over a range of Fields in a Block
 
 public: // interface

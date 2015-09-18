@@ -15,6 +15,7 @@ IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
 {
   meta_name_.push_back("lower");
   meta_name_.push_back("upper");
+  meta_name_.push_back("max_level");
 }
 
 
@@ -27,17 +28,24 @@ void IoHierarchy::meta_value
 {
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
 
-  if (index == 0) {
+  int count = 0;
+
+  if (index == count++) {
 
     *buffer = (void *) hierarchy_->lower_;
     *type   = scalar_type_double;
     *nxd     = 3;
     
-  } else if (index == 1) {
+  } else if (index == count++) {
 
     *buffer = (void *) hierarchy_->upper_;
     *type   = scalar_type_double;
     *nxd     = 3;
+
+  } else if (index == count++) {
+
+    *buffer = (void *) & hierarchy_->max_level_;
+    *type   = scalar_type_int;
 
   }
 }

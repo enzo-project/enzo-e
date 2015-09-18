@@ -40,7 +40,7 @@ public: // interface
 
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy 
-  ( int rank, int refinement) const throw ();
+  ( int rank, int refinement, int max_level) const throw ();
 
   /// Create an Input / Output accessor object for Block
   virtual IoBlock * create_io_block ( ) const throw();

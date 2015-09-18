@@ -14,7 +14,7 @@ class FieldDescr;
 class FieldData {
 
   /// @class    FieldData
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief [\ref Data] Interface between field arrays and low-level
   /// (C/fortran) routines.
   /// 

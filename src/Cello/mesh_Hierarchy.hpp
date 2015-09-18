@@ -28,7 +28,10 @@ public: // interface
   Hierarchy() throw() { }
   
   /// Initialize a Hierarchy object
-  Hierarchy (const Factory * factory, int rank, int refinement) throw ();
+  Hierarchy (const Factory * factory, 
+	     int rank,
+	     int refinement,
+	     int max_level) throw ();
 
   /// Delete the Hierarchy object
   virtual ~Hierarchy() throw ();
@@ -110,7 +113,7 @@ public: // interface
   CProxy_Block * block_array() const throw()
   { return block_array_;}
 
-  /// Return the total number of blocks
+  /// Return the number of blocks on this process
   size_t num_blocks() const throw()
   { 
     return num_blocks_; 
@@ -129,7 +132,7 @@ public: // interface
 			 bool testing          = false) throw();
 
 
-  /// Return the number of Blocks along each rank
+  /// Return the number of root-level Blocks along each rank
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
@@ -148,6 +151,12 @@ protected: // attributes
   /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
   int refinement_;
 
+  /// Maximum mesh level
+  int max_level_;
+
+  /// Maximum number of refinement levels
+
+  /// Current number of blocks on this process
   int num_blocks_; 
 
   /// Array of Blocks 

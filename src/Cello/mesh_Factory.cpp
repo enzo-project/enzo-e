@@ -9,9 +9,9 @@
 
 //----------------------------------------------------------------------
 
-Hierarchy * Factory::create_hierarchy ( int rank, int refinement) const throw ()
+Hierarchy * Factory::create_hierarchy ( int rank, int refinement, int max_level) const throw ()
 {
-  return new Hierarchy (this,rank,refinement); 
+  return new Hierarchy (this,rank,refinement, max_level); 
 }
 
 //----------------------------------------------------------------------

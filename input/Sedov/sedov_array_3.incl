@@ -41,11 +41,10 @@
 
    Initial {
       type = "sedov_array_3d"; 
-      sedov { pressure_out = 0.5; };
+      sedov { pressure_out = 0.5;
+              radius_relative = 0.1; }
    }
+
    Boundary { type = "periodic" }
 
    Stopping {        cycle = 10;   } 
-
- Enzo { sedov { radius_relative = 0.1; } }
-

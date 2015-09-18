@@ -14,7 +14,7 @@
 class Field {
 
   /// @class    Field
-  /// @ingroup  Field
+  /// @ingroup  Data
   /// @brief    [\ref Data] 
 
 public: // interface

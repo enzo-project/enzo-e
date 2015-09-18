@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     compute_EnzoMatrixLaplace.hpp 
+/// @file     enzo_EnzoMatrixLaplace.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2015-04-02
 /// @brief    [\ref Compute] Declaration of the EnzoMatrixLaplace class
