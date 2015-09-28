@@ -21,6 +21,14 @@
 
 #include <stdio.h>
 #include <math.h>
+
+#include <map>
+#include <memory>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include "pup_stl.h"
 
 //----------------------------------------------------------------------

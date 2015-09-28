@@ -28,8 +28,6 @@ enum particle_attribute_type {
 #include <string>
 #include <vector>
 
-#include "pup_stl.h"
-
 #include "_error.hpp"
 
 //----------------------------------------------------------------------

@@ -102,8 +102,6 @@ enum refresh_type {
 #include <vector>
 #include <memory>
 
-#include "pup_stl.h"
-
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
