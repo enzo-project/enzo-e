@@ -13,9 +13,9 @@
 
 EnzoBoundary::EnzoBoundary 
 (axis_enum axis, face_enum face, Mask * mask,
- boundary_type boundary_type) throw()
+ boundary_type type) throw()
   : Boundary(axis,face,mask),
-    boundary_type_ (boundary_type)
+    boundary_type_ (type)
 {  }
 
 //----------------------------------------------------------------------
@@ -110,6 +110,9 @@ void EnzoBoundary::enforce_reflecting_
 
   const int rank = block->rank();
 
+  // @@@
+  // @@@ BUG: loops through all fields; should only use fields in field_list
+  // @@@
   for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
     field.ghost_depth(index,&gx,&gy,&gz);
@@ -299,6 +302,9 @@ void EnzoBoundary::enforce_outflow_
 
   double t = block->time();
 
+  // @@@
+  // @@@ BUG: loops through all fields; should only use fields in field_list
+  // @@@
   for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
     field.ghost_depth(index,&gx,&gy,&gz);

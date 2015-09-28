@@ -270,7 +270,7 @@ void EnzoMethodTurbulence::compute_resume
     
     double vad = g[INDEX_TURBULENCE_VAD];
 
-    const bool small_g0 = std::abs(vad < 1e-30);
+    const bool small_g0 = std::abs(vad) < 1e-30;
 
     norm = small_g0 ? 0.0001 : 1.25*dt*edot_*n/vad;
       

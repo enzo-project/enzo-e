@@ -31,7 +31,7 @@ public: // interface
 
   /// Create a new EnzoBoundary
   EnzoBoundary(axis_enum axis, face_enum face, Mask * mask, 
-	       boundary_type boundary_type) throw();
+	       boundary_type type) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoBoundary);
@@ -48,8 +48,6 @@ public: // virtual functions
   virtual void enforce ( Block * block,
 			 face_enum face = face_all,
 			 axis_enum axis = axis_all) const throw(); 
-
-  bool is_periodic() const throw() { return false; }
 
 protected: // functions
 
