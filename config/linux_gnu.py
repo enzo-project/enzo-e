@@ -26,6 +26,8 @@ if charm_path is None:
 			charm_path = home + '/Charm/charm'
 		elif os.path.isdir(home + '/charm'):
 			charm_path = home + '/charm'
+		elif os.path.isdir(home + '/local/charm'):
+			charm_path = home + '/local/charm'
 		elif os.path.isdir(home + '/src/charm'):
 			charm_path = home + '/src/charm'
 		elif os.path.isdir(home + '/source/charm'):
@@ -49,6 +51,8 @@ if grackle_path is None:
 			grackle_path = home + '/Grackle/src/clib'
 		elif os.path.isdir(home + '/grackle/src/clib'):
 			grackle_path = home + '/grackle/src/clib'
+		elif os.path.isdir(home + '/local/grackle/src/clib'):
+			charm_path = home + '/local/grackle/src/clib'
 		elif os.path.isdir(home + '/src/grackle/src/clib'):
 			grackle_path = home + '/src/grackle/src/clib'
 		elif os.path.isdir(home + '/source/grackle/src/clib'):
