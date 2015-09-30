@@ -17,11 +17,38 @@ flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
 libpath_fortran = '.'
 libs_fortran    = ['gfortran']
 
-home = os.environ['HOME']
+home = os.getenv('HOME')
 
-charm_path   = home + '/Charm/charm'
+charm_path = os.getenv('CHARM_HOME')
+if charm_path is None:
+	if home is not None:
+		if os.path.isdir(home + '/Charm/charm'):
+			charm_path = home + '/Charm/charm'
+		elif os.path.isdir(home + '/charm'):
+			charm_path = home + '/charm'
+	if charm_path is None:
+		if os.path.isdir('/usr/local/charm'):
+			charm_path = '/usr/local/charm'
+		elif os.path.isdir('/opt/charm'):
+			charm_path = '/opt/charm'
+		else:
+			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
+
 papi_path    = '/usr/local'
 hdf5_path    = '/usr'
 png_path     = '/lib/x86_64-linux-gnu'
-grackle_path = home + '/Software/Grackle/src/clib'
 
+grackle_path = os.getenv('GRACKLE_HOME')
+if grackle_path is None:
+	if home is not None:
+		if os.path.isdir(home + '/Grackle/src/clib'):
+			grackle_path = home + '/Grackle/src/clib'
+		elif os.path.isdir(home + '/grackle/src/clib'):
+			grackle_path = home + '/grackle/src/clib'
+		elif os.path.isdir(home + '/Software/Grackle/src/clib'):
+			grackle_path = home + '/Software/Grackle/src/clib'
+	if grackle_path is None:
+		if os.path.isdir('/usr/local/grackle/src/clib'):
+			grackle_path = '/usr/local/grackle/src/clib'
+		elif os.path.isdir('/opt/grackle/src/clib'):
+			grackle_path = '/opt/grackle/src/clib'
