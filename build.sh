@@ -1,4 +1,4 @@
-#!/bin/tcsh -f
+#!/bin/csh -f
     
 set arch = $CELLO_ARCH
 set prec = $CELLO_PREC
