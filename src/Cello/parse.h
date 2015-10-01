@@ -33,6 +33,7 @@ enum enum_op {
   enum_op_sub,
   enum_op_mul,
   enum_op_div,
+  enum_op_pow,
   enum_op_le,
   enum_op_lt,
   enum_op_ge,

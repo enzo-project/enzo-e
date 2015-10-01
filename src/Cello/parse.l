@@ -85,6 +85,7 @@ log10  { return LOG10; }
 log1p  { return LOG1P; }
 logb   { return LOGB; }
 log    { return LOG; }
+pi     { return PI; }
 sin    { return SIN; }
 sinh   { return SINH; }
 sqrt   { return SQRT; }
@@ -108,6 +109,7 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 "/"        { return '/'; }
 "+"        { return '+'; }
 "-"        { return '-'; }
+"^"        { return '^'; }
 
 "<"        { return '<'; }         /* = */
 ">"        { return '>'; }

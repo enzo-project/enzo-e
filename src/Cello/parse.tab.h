@@ -80,14 +80,15 @@ extern int yydebug;
     LOG1P = 290,
     LOGB = 291,
     LOG = 292,
-    SIN = 293,
-    SINH = 294,
-    SQRT = 295,
-    TAN = 296,
-    TANH = 297,
-    Y0 = 298,
-    Y1 = 299,
-    RINT = 300
+    PI = 293,
+    SIN = 294,
+    SINH = 295,
+    SQRT = 296,
+    TAN = 297,
+    TANH = 298,
+    Y0 = 299,
+    Y1 = 300,
+    RINT = 301
   };
 #endif
 
@@ -96,7 +97,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 365 "build/Cello/parse.y" /* yacc.c:1909  */
+#line 366 "build/Cello/parse.y" /* yacc.c:1909  */
  
   int logical_type;  
   int integer_type; 
@@ -106,7 +107,7 @@ union YYSTYPE
   struct node_expr * node_type;
   
 
-#line 110 "build/Cello/parse.tab.h" /* yacc.c:1909  */
+#line 111 "build/Cello/parse.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
