@@ -2689,7 +2689,7 @@ yyreduce:
 
   case 122:
 #line 611 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_float ( 3.14159 ); }
+    { (yyval.node_type) = new_node_float ( M_PI ); }
 #line 2694 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
