@@ -608,7 +608,7 @@ vse:
  | LOG1P  '(' vse ')' { $$ = new_node_function ( log1p, "log1p", $3); }
  | LOGB   '(' vse ')' { $$ = new_node_function ( logb, "logb", $3); }
  | LOG    '(' vse ')' { $$ = new_node_function ( log, "log", $3); }
- | PI     { $$ = new_node_float ( 3.14159 ); }
+ | PI     { $$ = new_node_float ( M_PI ); }
  | SIN    '(' vse ')' { $$ = new_node_function ( sin, "sin", $3); }
  | SINH   '(' vse ')' { $$ = new_node_function ( sinh, "sinh", $3); }
  | SQRT   '(' vse ')' { $$ = new_node_function ( sqrt, "sqrt", $3); }
