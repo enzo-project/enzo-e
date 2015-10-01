@@ -1,60 +1,125 @@
-# Problem: 2D Implosion problem
+# Problem: 2D Heat Equation solved with Forward Euler
 # Author:  James Bordner (jobordner@ucsd.edu)
+#
+# Cleaned up 2015-09-30
 
-include "input/adapt.incl"
-Stopping { cycle = 1000; }
-Mesh    { 
-   root_size   = [64,32];
-   root_blocks = [4,2];
-}
+#======================================================================
+# PROBLEM DEFINITION
+#======================================================================
 
-Adapt {
-   max_level   = 6; 
-}
-
-Boundary { type = "periodic"; }
-
-Output {
-     list = ["temp","mesh"];
-    temp {
-       name = ["heat-temp-%05d.png", "cycle"];
-       field_list = ["temperature"];
-#       image_log = true;
-       type     = "image";
-       include "input/schedule_cycle_100.incl"
-       include "input/colormap_blackbody.incl"
-        image_specify_bounds = true;
-	image_min = 0.0;
-	image_max = 1.0;
-         image_size = [1024,512];
-
-    };
-      mesh { name = ["heat-mesh-%05d.png", "cycle"];
-          field_list = ["temperature"];
-           include "input/schedule_cycle_100.incl"
-	   image_type = "mesh";
-           image_size = [1025,513];
-       };
-
-}
-
-Method {
-  list = ["heat"]; 
-  heat { alpha = 1.0; } 
-}
-
-Field { list = ["temperature"]; courant = 0.5; }
-Initial {
-   temperature { value = [ 1.0, "input/enzop-cello-half.png",  0.01 ]; };
+ Domain {
+     lower = [ 0.0, 0.0 ];
+     upper = [ 1.0, 1.0 ];
  }
-# File:    adapt_slope.incl
 
-Adapt {
-   list = ["slope"];
-   slope {
-      type = "slope";
-      max_coarsen = 10.0;
-      min_refine  = 20.0;
-      field_list = ["temperature"];
-   }
-}
+ Initial {
+     temperature {
+         value = [ 1.0, "input/enzop-cello-half.png", 0.010000 ];
+     };
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+ Stopping {
+     cycle = 1000;
+     time = 0.10000;
+ }
+
+#======================================================================
+# DISCRETIZATION
+#======================================================================
+
+ Mesh {
+     root_rank = 2;
+     root_size   = [ 64, 32 ];  # total number of cells in root grid
+     root_blocks = [  4,  2 ];  # number of blocks in root grid
+                                # (so block size = (64/4,32/2) = (16,16)
+ }
+
+ Adapt {
+     list = [ "slope" ];
+     max_level = 5;
+     slope {
+         field_list = [ "temperature" ];
+         max_coarsen = 10.0;
+         min_refine = 20.0;
+         type = "slope";
+     };
+ }
+
+ Field {
+     alignment = 8;
+     courant = 0.50000;
+     gamma = 1.4000;
+     ghost_depth = 4;
+     list = [ "temperature" ];
+     padding = 0;
+     prolong = "linear";
+ }
+
+#======================================================================
+# COMPUTATION
+#======================================================================
+
+ Method {
+
+     # "heat": heat equation solved with Forward Euler
+
+     list = [ "heat" ];
+
+     heat {
+         alpha = 1.0;
+     };
+ }
+
+#======================================================================
+# OUTPUT
+#======================================================================
+
+ Output {
+
+     list = [ "temp", "mesh" ];
+
+     temp {
+
+         type = "image";
+         field_list = [ "temperature" ];
+         name = [ "heat-temp-%05d.png", "cycle" ];
+
+         schedule {
+             step = 100;
+             var = "cycle";
+         };
+
+         include "input/colormap_blackbody.incl"
+
+         image_specify_bounds = true;
+         image_min = 0.0;
+         image_max = 1.0;
+
+         image_size = [ 1024, 512 ];
+
+     };
+
+     mesh {
+         type = "image";
+         field_list = [ "temperature" ];
+         name = [ "heat-mesh-%05d.png", "cycle" ];
+
+         schedule {
+             step = 100;
+             var = "cycle";
+         };
+
+         include "input/colormap_rainbow.incl"
+
+         image_type = "mesh";
+         image_specify_bounds = true;
+         image_min = 0.0;
+         image_max = 6.0;
+         image_size = [ 1025, 513 ];
+     };
+
+ }

@@ -45,6 +45,7 @@ c
       integer ky, kx, kfi, kfa
       ENZO_REAL, dimension (: , :), allocatable :: mode
       ENZO_REAL x, y, pi, km, amp, pha, vel, twopi, delta
+      ENZO_REAL  r
       parameter (pi=3.14159265)
 
 c
@@ -127,8 +128,9 @@ c use random phases "pha" uniformly sampled from [0, 2*pi)
 c and random amplitudes "amp" sampled from a normal distribution (ideally)
 c
       do m=1, nmode
-         amp = rand()
-         pha = rand()*twopi
+         call random_number(amp)
+         call random_number (r)
+         pha = r*twopi
          km  = sqrt(real(mode(1,m)**2 + mode(2,m)**2))
          if (km .gt. 0) amp = amp/km
          do j=1, jn

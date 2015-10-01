@@ -4,7 +4,8 @@
 
 
 Import('grackle_path')
-SConscript(grackle_path + '/SConscript')
+if grackle_path is not None:
+	SConscript(grackle_path + '/SConscript')
 
 #------------------------------
 # IMPORTS
