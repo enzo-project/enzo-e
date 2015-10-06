@@ -847,11 +847,11 @@ static const yytype_uint16 yyrline[] =
      522,   523,   524,   525,   526,   527,   528,   529,   530,   531,
      532,   533,   534,   535,   536,   537,   538,   539,   540,   541,
      543,   544,   545,   546,   547,   548,   549,   550,   551,   552,
-     553,   554,   555,   556,   557,   558,   562,   563,   564,   565,
-     566,   567,   568,   572,   573,   574,   575,   576,   577,   578,
+     553,   554,   555,   556,   557,   558,   559,   563,   564,   565,
+     566,   567,   568,   569,   573,   574,   575,   576,   577,   578,
      579,   580,   581,   582,   583,   584,   585,   586,   587,   588,
      589,   590,   591,   592,   593,   594,   595,   596,   597,   598,
-     599,   600,   601,   602,   603,   605,   606,   607,   608,   609,
+     599,   600,   601,   602,   603,   604,   606,   607,   608,   609,
      610,   611,   612,   613,   614,   615,   616,   617,   618,   619,
      620,   621,   626,   627,   628,   629,   630,   631,   632,   633,
      634,   635,   636,   637,   638,   639,   640,   641,   642,   643,
@@ -950,9 +950,9 @@ static const yytype_uint8 yydefact[] =
 {
        2,     0,     1,    11,     3,     0,     0,     4,    11,     9,
        0,     0,     7,     5,     0,     0,     6,    10,     8,    14,
-     131,    75,    82,    37,     0,     0,     0,     0,     0,     0,
+     131,    75,    83,    37,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,   122,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    76,     0,     0,
        0,     0,     0,     0,     0,     0,    23,     0,    13,    20,
        0,    17,    16,    15,    18,    19,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
@@ -968,18 +968,18 @@ static const yytype_uint8 yydefact[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      28,    38,    76,    83,   132,     0,    21,     0,    36,     0,
+      28,    38,    77,    84,   132,     0,    21,     0,    36,     0,
        0,   155,    35,   152,    29,   134,    30,   137,    34,   149,
-      33,   146,    31,   140,    32,   143,    39,    85,    40,    88,
-      41,    91,    42,    94,    43,    97,     0,    77,    78,    79,
-      80,    81,   133,   135,   136,   138,   148,   150,   145,   147,
-     139,   141,   142,   144,    84,    86,    87,    89,    90,    92,
-      93,    95,    96,    98,   154,   156,   151,   153,     0,     0,
-      44,    99,    45,   100,    46,   101,    47,   102,    48,   103,
-      49,   104,    50,   105,    51,   106,    52,   107,    53,   108,
-      54,   109,    55,   110,    56,   111,    57,   112,    58,   113,
-      59,   114,    60,   115,    61,   116,    62,   117,    63,   118,
-      64,   119,    65,   120,    66,   121,    67,   123,    68,   124,
+      33,   146,    31,   140,    32,   143,    39,    86,    40,    89,
+      41,    92,    42,    95,    43,    98,     0,    78,    79,    80,
+      81,    82,   133,   135,   136,   138,   148,   150,   145,   147,
+     139,   141,   142,   144,    85,    87,    88,    90,    91,    93,
+      94,    96,    97,    99,   154,   156,   151,   153,     0,     0,
+      44,   100,    45,   101,    46,   102,    47,   103,    48,   104,
+      49,   105,    50,   106,    51,   107,    52,   108,    53,   109,
+      54,   110,    55,   111,    56,   112,    57,   113,    58,   114,
+      59,   115,    60,   116,    61,   117,    62,   118,    63,   119,
+      64,   120,    65,   121,    66,   122,    67,   123,    68,   124,
       69,   125,    70,   126,    71,   127,    72,   128,    73,   129,
       74,   130,    26,    27
 };
@@ -1275,8 +1275,8 @@ static const yytype_uint8 yyr1[] =
       78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
       78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
       78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
-      78,    78,    78,    78,    78,    78,    79,    79,    79,    79,
-      79,    79,    79,    80,    80,    80,    80,    80,    80,    80,
+      78,    78,    78,    78,    78,    78,    78,    79,    79,    79,
+      79,    79,    79,    79,    80,    80,    80,    80,    80,    80,
       80,    80,    80,    80,    80,    80,    80,    80,    80,    80,
       80,    80,    80,    80,    80,    80,    80,    80,    80,    80,
       80,    80,    80,    80,    80,    80,    80,    80,    80,    80,
@@ -1296,12 +1296,12 @@ static const yytype_uint8 yyr2[] =
        3,     3,     3,     3,     4,     4,     4,     4,     4,     4,
        4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
        4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
-       4,     4,     4,     4,     4,     1,     3,     3,     3,     3,
-       3,     3,     1,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     3,     3,     3,     3,     3,     3,     4,
+       4,     4,     4,     4,     4,     1,     1,     3,     3,     3,
+       3,     3,     3,     1,     3,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
        4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
        4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
-       4,     4,     1,     4,     4,     4,     4,     4,     4,     4,
+       4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
        4,     1,     3,     3,     3,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     3,     3,     3
@@ -2424,284 +2424,284 @@ yyreduce:
     break;
 
   case 76:
-#line 562 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.integer_type) = (yyvsp[-1].integer_type); }
+#line 559 "build/Cello/parse.y" /* yacc.c:1646  */
+    { (yyval.float_type) = M_PI ; }
 #line 2430 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 77:
 #line 563 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.integer_type) = (yyvsp[-2].integer_type) + (yyvsp[0].integer_type);}
+    { (yyval.integer_type) = (yyvsp[-1].integer_type); }
 #line 2436 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 78:
 #line 564 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.integer_type) = (yyvsp[-2].integer_type) - (yyvsp[0].integer_type);}
+    { (yyval.integer_type) = (yyvsp[-2].integer_type) + (yyvsp[0].integer_type);}
 #line 2442 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 79:
 #line 565 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.integer_type) = (yyvsp[-2].integer_type) * (yyvsp[0].integer_type);}
+    { (yyval.integer_type) = (yyvsp[-2].integer_type) - (yyvsp[0].integer_type);}
 #line 2448 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 80:
 #line 566 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.integer_type) = (yyvsp[-2].integer_type) / (yyvsp[0].integer_type);}
+    { (yyval.integer_type) = (yyvsp[-2].integer_type) * (yyvsp[0].integer_type);}
 #line 2454 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 81:
 #line 567 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.integer_type) = pow((double)(yyvsp[-2].integer_type), (double)(yyvsp[0].integer_type));}
+    { (yyval.integer_type) = (yyvsp[-2].integer_type) / (yyvsp[0].integer_type);}
 #line 2460 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 82:
 #line 568 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.integer_type) = (yyvsp[0].integer_type);}
+    { (yyval.integer_type) = pow((double)(yyvsp[-2].integer_type), (double)(yyvsp[0].integer_type));}
 #line 2466 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 83:
-#line 572 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = (yyvsp[-1].node_type); }
+#line 569 "build/Cello/parse.y" /* yacc.c:1646  */
+    { (yyval.integer_type) = (yyvsp[0].integer_type);}
 #line 2472 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 84:
 #line 573 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,new_node_float((yyvsp[0].float_type))); }
+    { (yyval.node_type) = (yyvsp[-1].node_type); }
 #line 2478 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 85:
 #line 574 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_add,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,new_node_float((yyvsp[0].float_type))); }
 #line 2484 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 86:
 #line 575 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_add,(yyvsp[0].node_type)); }
 #line 2490 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 87:
 #line 576 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,new_node_float((yyvsp[0].float_type))); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,(yyvsp[0].node_type)); }
 #line 2496 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 88:
 #line 577 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_sub,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,new_node_float((yyvsp[0].float_type))); }
 #line 2502 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 89:
 #line 578 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_sub,(yyvsp[0].node_type)); }
 #line 2508 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 90:
 #line 579 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,new_node_float((yyvsp[0].float_type))); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,(yyvsp[0].node_type)); }
 #line 2514 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 91:
 #line 580 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_mul,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,new_node_float((yyvsp[0].float_type))); }
 #line 2520 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 92:
 #line 581 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_mul,(yyvsp[0].node_type)); }
 #line 2526 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 93:
 #line 582 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,new_node_float((yyvsp[0].float_type))); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,(yyvsp[0].node_type)); }
 #line 2532 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 94:
 #line 583 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_div,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,new_node_float((yyvsp[0].float_type))); }
 #line 2538 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 95:
 #line 584 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,(yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_div,(yyvsp[0].node_type)); }
 #line 2544 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 96:
 #line 585 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, new_node_float((yyvsp[0].float_type))); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,(yyvsp[0].node_type)); }
 #line 2550 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 97:
 #line 586 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_pow, (yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, new_node_float((yyvsp[0].float_type))); }
 #line 2556 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 98:
 #line 587 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, (yyvsp[0].node_type)); }
+    { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_pow, (yyvsp[0].node_type)); }
 #line 2562 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 99:
 #line 588 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( acos, "acos", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, (yyvsp[0].node_type)); }
 #line 2568 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 100:
 #line 589 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( acosh, "acosh", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( acos, "acos", (yyvsp[-1].node_type)); }
 #line 2574 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 101:
 #line 590 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( asin, "asin", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( acosh, "acosh", (yyvsp[-1].node_type)); }
 #line 2580 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 102:
 #line 591 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( asinh, "asinh", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( asin, "asin", (yyvsp[-1].node_type)); }
 #line 2586 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 103:
 #line 592 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( atan, "atan", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( asinh, "asinh", (yyvsp[-1].node_type)); }
 #line 2592 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 104:
 #line 593 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( atanh, "atanh", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( atan, "atan", (yyvsp[-1].node_type)); }
 #line 2598 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 105:
 #line 594 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( cbrt, "cbrt", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( atanh, "atanh", (yyvsp[-1].node_type)); }
 #line 2604 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 106:
 #line 595 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( ceil, "ceil", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( cbrt, "cbrt", (yyvsp[-1].node_type)); }
 #line 2610 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 107:
 #line 596 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( cos, "cos", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( ceil, "ceil", (yyvsp[-1].node_type)); }
 #line 2616 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 108:
 #line 597 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( cosh, "cosh", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( cos, "cos", (yyvsp[-1].node_type)); }
 #line 2622 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 109:
 #line 598 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( erfc, "erfc", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( cosh, "cosh", (yyvsp[-1].node_type)); }
 #line 2628 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 110:
 #line 599 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( erf, "erf", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( erfc, "erfc", (yyvsp[-1].node_type)); }
 #line 2634 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 111:
 #line 600 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( exp, "exp", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( erf, "erf", (yyvsp[-1].node_type)); }
 #line 2640 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 112:
 #line 601 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( expm1, "expm1", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( exp, "exp", (yyvsp[-1].node_type)); }
 #line 2646 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 113:
 #line 602 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( fabs, "fabs", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( expm1, "expm1", (yyvsp[-1].node_type)); }
 #line 2652 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 114:
 #line 603 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( floor, "floor", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( fabs, "fabs", (yyvsp[-1].node_type)); }
 #line 2658 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 115:
-#line 605 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( j0, "j0", (yyvsp[-1].node_type)); }
+#line 604 "build/Cello/parse.y" /* yacc.c:1646  */
+    { (yyval.node_type) = new_node_function ( floor, "floor", (yyvsp[-1].node_type)); }
 #line 2664 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 116:
 #line 606 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( j1, "j1", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( j0, "j0", (yyvsp[-1].node_type)); }
 #line 2670 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 117:
 #line 607 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( lgamma, "lgamma", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( j1, "j1", (yyvsp[-1].node_type)); }
 #line 2676 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 118:
 #line 608 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( log10, "log10", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( lgamma, "lgamma", (yyvsp[-1].node_type)); }
 #line 2682 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 119:
 #line 609 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( log1p, "log1p", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( log10, "log10", (yyvsp[-1].node_type)); }
 #line 2688 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 120:
 #line 610 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( logb, "logb", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( log1p, "log1p", (yyvsp[-1].node_type)); }
 #line 2694 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 121:
 #line 611 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_function ( log, "log", (yyvsp[-1].node_type)); }
+    { (yyval.node_type) = new_node_function ( logb, "logb", (yyvsp[-1].node_type)); }
 #line 2700 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 122:
 #line 612 "build/Cello/parse.y" /* yacc.c:1646  */
-    { (yyval.node_type) = new_node_float ( M_PI ); }
+    { (yyval.node_type) = new_node_function ( log, "log", (yyvsp[-1].node_type)); }
 #line 2706 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
