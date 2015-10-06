@@ -39,6 +39,7 @@ const char * op_name[] = {
     "-",
     "*",
     "/",
+    "^",
     "<=",
     "<",
     ">=",
@@ -426,6 +427,7 @@ const char * op_name[] = {
 %token LOG1P
 %token LOGB
 %token LOG
+%token PI
 %token SIN
 %token SINH
 %token SQRT
@@ -519,6 +521,7 @@ cse:
  | cse '-' cse { $$ = $1 - $3;}
  | cse '*' cse { $$ = $1 * $3;}
  | cse '/' cse { $$ = $1 / $3;}
+ | cse '^' cse { $$ = pow((double)$1, (double)$3); }
 | ACOS '(' cse ')' { $$ = acos($3); }
 | ACOSH '(' cse ')' { $$ = acosh($3); }
 | ASIN '(' cse ')' { $$ = asin($3); }
@@ -560,6 +563,7 @@ cie:
  | cie '-' cie { $$ = $1 - $3;}
  | cie '*' cie { $$ = $1 * $3;}
  | cie '/' cie { $$ = $1 / $3;}
+ | cie '^' cie { $$ = pow((double)$1, (double)$3);}
  | INTEGER { $$ = $1;}
  ;
 
@@ -577,6 +581,9 @@ vse:
  | vse '/' cse { $$ = new_node_operation ($1, enum_op_div,new_node_float($3)); }
  | cse '/' vse { $$ = new_node_operation (new_node_float($1), enum_op_div,$3); }
  | vse '/' vse { $$ = new_node_operation ($1, enum_op_div,$3); }
+ | vse '^' cse { $$ = new_node_operation ($1, enum_op_pow, new_node_float($3)); }
+ | cse '^' vse { $$ = new_node_operation (new_node_float($1), enum_op_pow, $3); }
+ | vse '^' vse { $$ = new_node_operation ($1, enum_op_pow, $3); }
  | ACOS   '(' vse ')' { $$ = new_node_function ( acos, "acos", $3); }
  | ACOSH  '(' vse ')' { $$ = new_node_function ( acosh, "acosh", $3); }
  | ASIN   '(' vse ')' { $$ = new_node_function ( asin, "asin", $3); }
@@ -601,6 +608,7 @@ vse:
  | LOG1P  '(' vse ')' { $$ = new_node_function ( log1p, "log1p", $3); }
  | LOGB   '(' vse ')' { $$ = new_node_function ( logb, "logb", $3); }
  | LOG    '(' vse ')' { $$ = new_node_function ( log, "log", $3); }
+ | PI     { $$ = new_node_float ( M_PI ); }
  | SIN    '(' vse ')' { $$ = new_node_function ( sin, "sin", $3); }
  | SINH   '(' vse ')' { $$ = new_node_function ( sinh, "sinh", $3); }
  | SQRT   '(' vse ')' { $$ = new_node_function ( sqrt, "sqrt", $3); }

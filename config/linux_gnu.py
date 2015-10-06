@@ -26,6 +26,8 @@ if charm_path is None:
 			charm_path = home + '/Charm/charm'
 		elif os.path.isdir(home + '/charm'):
 			charm_path = home + '/charm'
+		elif os.path.isdir(home + '/local/charm'):
+			charm_path = home + '/local/charm'
 		elif os.path.isdir(home + '/src/charm'):
 			charm_path = home + '/src/charm'
 		elif os.path.isdir(home + '/source/charm'):
@@ -39,8 +41,17 @@ if charm_path is None:
 			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
 
 papi_path    = '/usr/local'
-hdf5_path    = '/usr'
-png_path     = '/lib/x86_64-linux-gnu'
+
+hdf5_path = os.getenv('HDF5_HOME')
+if hdf5_path is None:
+	if os.path.exists('/usr/include/hdf5.h'):
+		hdf5_path    = '/usr'
+	else:
+		raise Exception('HDF5 was not found.  Try setting the HDF5_HOME environment variable such that $HDF5_HOME/include/hdf5.h exists.')
+
+png_path = os.getenv('LIBPNG_HOME')
+if png_path is None:
+	png_path     = '/lib/x86_64-linux-gnu'
 
 grackle_path = os.getenv('GRACKLE_HOME')
 if grackle_path is None:
@@ -49,6 +60,8 @@ if grackle_path is None:
 			grackle_path = home + '/Grackle/src/clib'
 		elif os.path.isdir(home + '/grackle/src/clib'):
 			grackle_path = home + '/grackle/src/clib'
+		elif os.path.isdir(home + '/local/grackle/src/clib'):
+			charm_path = home + '/local/grackle/src/clib'
 		elif os.path.isdir(home + '/src/grackle/src/clib'):
 			grackle_path = home + '/src/grackle/src/clib'
 		elif os.path.isdir(home + '/source/grackle/src/clib'):

@@ -186,6 +186,7 @@ void Param::evaluate_float
     case enum_op_sub: for (i=0; i<n; i++) result[i] = left[i] - right[i]; break;
     case enum_op_mul: for (i=0; i<n; i++) result[i] = left[i] * right[i]; break;
     case enum_op_div: for (i=0; i<n; i++) result[i] = left[i] / right[i]; break;
+    case enum_op_pow: for (i=0; i<n; i++) result[i] = pow(left[i], right[i]); break;
     default:
     case enum_op_le:
     case enum_op_lt:
