@@ -35,6 +35,8 @@ void generate_input()
   // Float:
   // Float:const_float_1
   // Float:const_float_2
+  // Float:const_float_3
+  // Float:const_float_4
   // String
   // Float_expr
   // Float_expr:var_float_1
@@ -69,7 +71,18 @@ void generate_input()
   fp << "    num1 = 24.5 + 6.125*2.0;\n";
   fp << "    num2 = 24.5*3.0 - 6.125;\n";
   fp << "    num3 = (24.5 + 6.125*2.0 - (24.5*3.0 - 6.125));\n";
-  fp << "  }\n";
+  fp << "  };\n";
+  fp << "  const_float_3 {\n";
+  fp << "    num1 = 2.0 ^ 3.0;\n";
+  fp << "    num2 = 2.0 ^ 3.0 * 4.0;\n";
+  fp << "    num3 = 2.0 ^ 3.0 + 4.0;\n";
+  fp << "    num4 = 3.0 * 2.0 ^ 3.0;\n";
+  fp << "    num5 = 3.0 + 2.0 ^ 3.0;\n";
+  fp << "    num6 = 4.0 ^ 2.0 ^ 3.0;\n";
+  fp << "  };\n";
+  fp << "  const_float_4 {\n";
+  fp << "    num1 = 4.0*pi;\n";
+  fp << "  };\n";
   fp << "}\n";
 
   fp << "String {\n";
@@ -269,6 +282,7 @@ void check_parameters(Parameters * parameters)
   //--------------------------------------------------
 
   parameters->group_set(0,"Float");
+
   parameters->group_set(1,"group_float_1");
 
   unit_assert(parameters->value_float("num1") == 24.5+6.125);
@@ -283,9 +297,22 @@ void check_parameters(Parameters * parameters)
 
   parameters->group_set(1,"const_float_2");
 
-  unit_assert(parameters->value_float("num1") == 36.750);
-  unit_assert(parameters->value_float("num2") == 67.375);
-  unit_assert(parameters->value_float("num3") == -30.625);
+  unit_assert(parameters->value_float("num1") == 24.5 + 6.125*2.0);
+  unit_assert(parameters->value_float("num2") == 24.5*3.0 - 6.125);
+  unit_assert(parameters->value_float("num3") == (24.5 + 6.125*2.0 - (24.5*3.0 - 6.125)));
+
+  parameters->group_set(1,"const_float_3");
+
+  unit_assert(parameters->value_float("num1") == pow(2.0,3.0));
+  unit_assert(parameters->value_float("num2") == pow(2.0 , 3.0) * 4.0);
+  unit_assert(parameters->value_float("num3") == pow(2.0 , 3.0) + 4.0);
+  unit_assert(parameters->value_float("num4") == 3.0 * pow(2.0 , 3.0));
+  unit_assert(parameters->value_float("num5") == 3.0 + pow(2.0 , 3.0));
+  unit_assert(parameters->value_float("num6") == pow(4.0 , pow (2.0 , 3.0)));
+  
+  parameters->group_set(1,"const_float_4");
+
+  unit_assert(CLOSE(parameters->value_float("num1"),4.0*M_PI));
 
   //--------------------------------------------------
   unit_func("value_string");
@@ -472,7 +499,7 @@ void check_parameters(Parameters * parameters)
     std::string group;
     int count;
   } child_count[NUM_GROUPS] = {
-    {"Float",       4 + 1},
+    {"Float",       4 + 3},
     {"Float_expr",  2},
     {"Integer",     2 + 2},
     {"List",        2},
