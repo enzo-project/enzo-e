@@ -367,6 +367,9 @@ env.Alias('install-bin',env.Install (bin_path,binaries_monitor))
 env.Alias('install-inc',env.Install (inc_path,includes_monitor))
 env.Alias('install-lib',env.Install (lib_path,libraries_monitor))
 
+env.Alias('install-inc',env.Install (inc_path,includes_parallel))
+env.Alias('install-lib',env.Install (lib_path,libraries_parallel))
+
 env.Alias('install-bin',env.Install (bin_path,binaries_parameters))
 env.Alias('install-inc',env.Install (inc_path,includes_parameters))
 env.Alias('install-lib',env.Install (lib_path,libraries_parameters))

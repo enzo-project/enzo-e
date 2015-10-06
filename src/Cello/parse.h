@@ -1,7 +1,7 @@
 /* ANY CHANGES HERE MUST BE REFLECTED IN parse.y parameter_name[] */
 
 #define MAX_GROUP_DEPTH 10
-#define FLOAT_FORMAT "%#.14G"
+#define FLOAT_FORMAT "%#.16g"
 
 enum enum_parameter {
   enum_parameter_unknown,
