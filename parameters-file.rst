@@ -98,7 +98,8 @@ value is one of several different basic data types:
               | <list>
 
 
-**Scalar types** are any floating point or integral numerical values.
+**Scalar types** are any floating point or integral numerical values.  
+The constant 'pi' is also recognized.
 
    *Note that floating-point and integers are not interchangable: if a
    floating point type is expected, one cannot use an integer.*
@@ -109,10 +110,10 @@ value is one of several different basic data types:
 (t).
 
 **Scalar expressions** are any "C-like" expression evaluating to a
-Scalar, and involving Scalar's, Variable's, operations + - * /,
-parenthesis, and (almost all) standard functions in math.h. Scalar
-expressions are used for specifying initial or boundary conditions,
-etc.  
+Scalar, and involving Scalar's, Variable's, operations '+' '-' '*'
+'/', '^' (for power), parenthesis, and (almost all) standard functions
+in math.h. Scalar expressions are used for specifying initial or
+boundary conditions, etc.
 
    *Note that "-" when used for subtraction must have blank space
    after it:* ``x-1.0`` *will not be parsed correctly, but* ``x -
