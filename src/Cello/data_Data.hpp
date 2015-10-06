@@ -90,7 +90,6 @@ public: // interface
 			 double * hz = 0) const;
 
   /// Return domain lower extent
-  /// B
   inline void lower(double * x, 
 		    double * y = 0,
 		    double * z = 0) const throw ()
@@ -103,7 +102,6 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Return domain upper extent
-  /// B
   inline void upper(double * x,
 		    double * y = 0,
 		    double * z = 0) const throw ()

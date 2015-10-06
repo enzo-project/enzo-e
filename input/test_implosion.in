@@ -58,7 +58,7 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 2000;
+#      cycle = 2000;
    }
 
    Output { 
@@ -76,7 +76,7 @@
          name     = ["implosion-d-%03d.png","count"];
          schedule {
             var =  "cycle";
-            step = 10;
+            step = 25;
          };
       };
 
@@ -94,7 +94,7 @@
 	 image_size = [513,513];
          schedule {
             var =  "cycle";
-            step = 10;
+            step = 25;
          };
       }
    }

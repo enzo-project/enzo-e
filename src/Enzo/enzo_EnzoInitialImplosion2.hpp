@@ -17,7 +17,7 @@ class EnzoInitialImplosion2 : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialImplosion2() throw() { }
+  EnzoInitialImplosion2() throw() : Initial() { }
   
   /// Constructor
   EnzoInitialImplosion2(int cycle, double time) throw();

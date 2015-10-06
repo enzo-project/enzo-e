@@ -49,16 +49,6 @@ public: // interface
 
 public: // virtual functions
 
-  /// Initialize an entire simulation
-  virtual void enforce_simulation ( Simulation * simulation ) throw()
-  { enforce_simulation_(simulation); }
-
-  /// Initialize a mesh Hierarchy
-  virtual void enforce_hierarchy
-  ( Hierarchy * hierarchy, 
-    const FieldDescr * field_descr  ) throw()
-  { enforce_hierarchy_(hierarchy,field_descr); }
-
   /// Initialize a Block
   virtual void enforce_block
   ( Block            * block, 
@@ -72,14 +62,6 @@ public: // virtual functions
   { return true; }
 
 protected: // functions
-
-  /// "Loop" over enforcing initial conditions on the Hierarchy
-  void enforce_simulation_ (Simulation * simulation ) throw();
-
-  /// Loop over enforcing initial conditions Patches / Blocks in the Hierarchy
-  void enforce_hierarchy_
-  ( Hierarchy * hierarchy, 
-    const FieldDescr * field_descr  ) throw();
 
   /// Loop over enforcing initial conditions Field data in the Block
   void enforce_block_

@@ -28,6 +28,10 @@ reset:
 test:
 	./build.sh test
 #----------------------------------------------------------------------
+.PHONY: compile
+compile:
+	./build.sh compile
+#----------------------------------------------------------------------
 .PHONY: diff
 diff:
 	./tools/diff-org.sh > diff.org
