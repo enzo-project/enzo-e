@@ -278,6 +278,7 @@ elif (arch == "mf_gnu"):       from mf_gnu       import *
 elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
 elif (arch == "davros_gnu"):   from davros_gnu   import *
 elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
+elif (arch == "darwin_gnu"):   from darwin_gnu   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS

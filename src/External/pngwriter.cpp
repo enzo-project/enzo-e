@@ -1,28 +1,26 @@
-#define BIT_DEPTH 8
-//**********  pngwriter.cc   **********************************************
-//  Author:                    Paul Blackburn
-//
-//  Email:                     individual61@users.sourceforge.net
-//
-//  Version:                   0.5.4   (19 / II / 2009)
-//
-//  Description:               Library that allows plotting a 48 bit
-//                             PNG image pixel by pixel, which can
-//                             then be opened with a graphics program.
-//
-//  License:                   GNU General Public License
-//                             Copyright 2002, 2003, 2004, 2005, 2006, 2007, 
-//                             2008, 2009 Paul Blackburn
-//
-//  Website: Main:             http://pngwriter.sourceforge.net/
-//           Sourceforge.net:  http://sourceforge.net/projects/pngwriter/
-//           Freshmeat.net:    http://freshmeat.net/projects/pngwriter/
-//
-//  Documentation:             The header file (pngwriter.h) is commented, but for a
-//                             quick reference document, and support,
-//                             take a look at the website.
-//
-//*************************************************************************
+/********************************* PNGwriter **********************************
+*
+*   Website: Main:             http://pngwriter.sourceforge.net/
+*            GitHub.com:       https://github.com/pngwriter/pngwriter
+*            Sourceforge.net:  http://sourceforge.net/projects/pngwriter/
+*
+*
+*    Author:                    Paul Blackburn https://github.com/individual61
+*                               Axel Huebl https://github.com/ax3l
+*
+*    Email:                     individual61@users.sourceforge.net
+*
+*    Version:                   0.5.5 (August 2015)
+*
+*    Description:               Library that allows plotting a 48 bit
+*                               PNG image pixel by pixel, which can
+*                               then be opened with a graphics program.
+*
+*    License:                   GNU General Public License
+*                               (C) 2002-2015 Paul Blackburn
+*                               (C) 2013-2015 Axel Huebl
+*
+******************************************************************************/
 
 /*
  *     This program is free software; you can redistribute it and/or modify
@@ -37,7 +35,7 @@
  *
  *     You should have received a copy of the GNU General Public License
  *     along with this program; if not, write to the Free Software
- *     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  * */
 
@@ -69,7 +67,7 @@ pngwriter::pngwriter()
 
    int kkkk;
 
-   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
+   bit_depth_ = 16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -108,7 +106,6 @@ pngwriter::pngwriter()
 	     graph_[vhhh][tempindex+5] = (char)(backgroundcolour_%256);
 	  }
      }
-
 };
 
 //Copy Constructor
@@ -221,7 +218,7 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, char * filename)
 
    int kkkk;
 
-   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
+   bit_depth_ = 16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -245,6 +242,13 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, char * filename)
 	std::cerr << " PNGwriter::pngwriter - ERROR **:  Not able to allocate memory for image." << std::endl;
      }
 
+   if(backgroundcolour_ == 0)
+     for(int vhhh = 0; vhhh<height_;vhhh++)
+       memset( graph_[vhhh],
+               (char) backgroundcolour_,
+               width_*6 );
+   else
+   {
    int tempindex;
    for(int hhh = 0; hhh<width_;hhh++)
      {
@@ -260,7 +264,7 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, char * filename)
 	     graph_[vhhh][tempindex+5] = (char)(backgroundcolour_%256);
 	  }
      }
-
+   }
 };
 
 //Constructor for double levels, char * filename
@@ -307,7 +311,7 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, char * filename)
 
    int kkkk;
 
-   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
+   bit_depth_ = 16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -331,6 +335,13 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, char * filename)
 	std::cerr << " PNGwriter::pngwriter - ERROR **:  Not able to allocate memory for image." << std::endl;
      }
 
+   if(backgroundcolour_ == 0)
+     for(int vhhh = 0; vhhh<height_;vhhh++)
+       memset( graph_[vhhh],
+               (char) backgroundcolour_,
+               width_*6 );
+   else
+   {
    int tempindex;
    for(int hhh = 0; hhh<width_;hhh++)
      {
@@ -346,21 +357,54 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, char * filename)
 	     graph_[vhhh][tempindex+5] = (char)(backgroundcolour_%256);
 	  }
      }
-
+   }
 };
+
+void pngwriter::deleteMembers()
+{
+   if( filename_ )
+   {
+     delete [] filename_;
+     filename_ = NULL;
+   }
+   if( textauthor_ )
+   {
+     delete [] textauthor_;
+     textauthor_ = NULL;
+   }
+   if( textdescription_ )
+   {
+      delete [] textdescription_;
+      textdescription_ = NULL;
+   }
+   if( texttitle_ )
+   {
+      delete [] texttitle_;
+      texttitle_ = NULL;
+   }
+   if( textsoftware_ )
+   {
+      delete [] textsoftware_;
+      textsoftware_ = NULL;
+   }
+
+   for (int jjj = 0; jjj < height_; jjj++)
+   {
+      free(graph_[jjj]);
+      graph_[jjj] = NULL;
+   }
+   if( graph_ )
+   {
+      free(graph_);
+      graph_ = NULL;
+   }
+}
 
 //Destructor
 ///////////////////////////////////////
 pngwriter::~pngwriter()
 {
-   delete [] filename_;
-   delete [] textauthor_;
-   delete [] textdescription_;
-   delete [] texttitle_;
-   delete [] textsoftware_;
-
-   for (int jjj = 0; jjj < height_; jjj++) free(graph_[jjj]);
-   free(graph_);
+   deleteMembers();
 };
 
 //Constructor for int levels, const char * filename
@@ -407,7 +451,7 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, const char * filename)
 
    int kkkk;
 
-   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
+   bit_depth_ = 16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -431,6 +475,13 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, const char * filename)
 	std::cerr << " PNGwriter::pngwriter - ERROR **:  Not able to allocate memory for image." << std::endl;
      }
 
+   if(backgroundcolour_ == 0)
+     for(int vhhh = 0; vhhh<height_;vhhh++)
+       memset( graph_[vhhh],
+               (char) backgroundcolour_,
+               width_*6 );
+   else
+   {
    int tempindex;
    for(int hhh = 0; hhh<width_;hhh++)
      {
@@ -446,7 +497,7 @@ pngwriter::pngwriter(int x, int y, int backgroundcolour, const char * filename)
 	     graph_[vhhh][tempindex+5] = (char)(backgroundcolour_%256);
 	  }
      }
-
+   }
 };
 
 //Constructor for double levels, const char * filename
@@ -493,7 +544,7 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, const char * filenam
 
    int kkkk;
 
-   bit_depth_ = BIT_DEPTH;// jb:  16; //Default bit depth for new images
+   bit_depth_ = 16; //Default bit depth for new images
    colortype_=2;
    screengamma_ = 2.2;
 
@@ -517,6 +568,13 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, const char * filenam
 	std::cerr << " PNGwriter::pngwriter - ERROR **:  Not able to allocate memory for image." << std::endl;
      }
 
+   if(backgroundcolour_ == 0)
+     for(int vhhh = 0; vhhh<height_;vhhh++)
+       memset( graph_[vhhh],
+               (char) backgroundcolour_,
+               width_*6 );
+   else
+   {
    int tempindex;
    for(int hhh = 0; hhh<width_;hhh++)
      {
@@ -532,7 +590,7 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, const char * filenam
 	     graph_[vhhh][tempindex+5] = (char)(backgroundcolour_%256);
 	  }
      }
-
+   }
 };
 
 // Overloading operator =
@@ -540,9 +598,10 @@ pngwriter::pngwriter(int x, int y, double backgroundcolour, const char * filenam
 pngwriter & pngwriter::operator = (const pngwriter & rhs)
 {
    if( this==&rhs)
-     {
-	return *this;
-     }
+      return *this;
+
+   // free old allocations from member variables
+   deleteMembers();
 
    width_ = rhs.width_;
    height_ = rhs.height_;
@@ -638,7 +697,7 @@ void pngwriter::plot(int x, int y, int red, int green, int blue)
 	blue = 0;
      }
 
-   if((bit_depth_ == 16))
+   if( bit_depth_ == 16 )
      {
 	//	if( (height_-y >-1) && (height_-y <height_) && (6*(x-1) >-1) && (6*(x-1)+5<6*width_) )
 	if( (y<=height_) && (y>0) && (x>0) && (x<=width_) )
@@ -661,16 +720,16 @@ void pngwriter::plot(int x, int y, int red, int green, int blue)
 	 */
      }
 
-   if((bit_depth_ == 8))
+   if( bit_depth_ == 8 )
      {
 	//	 if( (height_-y >-1) && (height_-y <height_) && (3*(x-1) >-1) && (3*(x-1)+5<3*width_) )
 	if( (y<height_+1) && (y>0) && (x>0) && (x<width_+1) )
 	  {
 	     //	     graph_[height_-y][3*(x-1) + i] where i goes from 0 to 2
 	     tempindex = 3*x-3;
-	     graph_[height_-y][tempindex] = (char)(floor(((double)red)/257.0));
-	     graph_[height_-y][tempindex+1] = (char)(floor(((double)green)/257.0));
-	     graph_[height_-y][tempindex+2] = (char)(floor(((double)blue)/257.0));
+	     graph_[height_-y][tempindex] = (char)(floor(((double)red)/256.0));
+	     graph_[height_-y][tempindex+1] = (char)(floor(((double)green)/256.0));
+	     graph_[height_-y][tempindex+2] = (char)(floor(((double)blue)/256.0));
 
 	  };
 
@@ -803,12 +862,18 @@ int pngwriter::read(int xxx, int yyy)
 /////////////////////////////////////////////////////
 double  pngwriter::dread(int x, int y, int colour)
 {
-   return double(this->read(x,y,colour))/65535.0;
+   if(bit_depth_ == 8)
+     return double(this->read(x,y,colour))/255.0;
+   else
+     return double(this->read(x,y,colour))/65535.0;
 }
 
 double  pngwriter::dread(int x, int y)
 {
-   return double(this->read(x,y))/65535.0;
+   if(bit_depth_ == 8)
+     return double(this->read(x,y))/255.0;
+   else
+     return double(this->read(x,y))/65535.0;
 }
 
 ///////////////////////////////////////////////////////
@@ -884,7 +949,7 @@ void pngwriter::pngwriter_rename(long unsigned int index)
 
    //   %[flags][width][.precision][modifiers]type
    //
-   if((index > 999999999)||(index < 0))
+   if( index > 999999999 )
      {
 	std::cerr << " PNGwriter::pngwriter_rename - ERROR **: Numerical name is out of 0 - 999 999 999 range (" << index <<")." << std::endl;
 	return;
@@ -986,25 +1051,45 @@ void pngwriter::close()
    time_t          gmt;
    png_time        mod_time;
    png_text        text_ptr[5];
+   int             entries = 4;
    time(&gmt);
    png_convert_from_time_t(&mod_time, gmt);
    png_set_tIME(png_ptr, info_ptr, &mod_time);
-   text_ptr[0].key = "Title";
+   /* key is a 1-79 character description of type char* */
+   char key_title[] = "Title";
+   text_ptr[0].key = key_title;
    text_ptr[0].text = texttitle_;
    text_ptr[0].compression = PNG_TEXT_COMPRESSION_NONE;
-   text_ptr[1].key = "Author";
+   char key_author[] = "Author";
+   text_ptr[1].key = key_author;
    text_ptr[1].text = textauthor_;
    text_ptr[1].compression = PNG_TEXT_COMPRESSION_NONE;
-   text_ptr[2].key = "Description";
+   char key_descr[] = "Description";
+   text_ptr[2].key = key_descr;
    text_ptr[2].text = textdescription_;
    text_ptr[2].compression = PNG_TEXT_COMPRESSION_NONE;
-   text_ptr[3].key = "Creation Time";
-   text_ptr[3].text = png_convert_to_rfc1123(png_ptr, &mod_time);
+   char key_software[] = "Software";
+   text_ptr[3].key = key_software;
+   text_ptr[3].text = textsoftware_;
    text_ptr[3].compression = PNG_TEXT_COMPRESSION_NONE;
-   text_ptr[4].key = "Software";
-   text_ptr[4].text = textsoftware_;
+#if defined(PNG_TIME_RFC1123_SUPPORTED)
+   char key_create[] = "Creation Time";
+   text_ptr[4].key = key_create;
+   char textcrtime[29] = "tIME chunk is not present...";
+#if (PNG_LIBPNG_VER < 10600)
+   textcrtime[28] = '\0';
+   memcpy(textcrtime,
+          png_convert_to_rfc1123(png_ptr, &mod_time),
+          29);
+   textcrtime[sizeof(text_ptr[4].text) - 1] = '\0';
+#else
+   png_convert_to_rfc1123_buffer(textcrtime, &mod_time);
+#endif
+   text_ptr[4].text = textcrtime;
    text_ptr[4].compression = PNG_TEXT_COMPRESSION_NONE;
-   png_set_text(png_ptr, info_ptr, text_ptr, 5);
+   entries++;
+#endif
+   png_set_text(png_ptr, info_ptr, text_ptr, entries);
 
    png_write_info(png_ptr, info_ptr);
    png_write_image(png_ptr, graph_);
@@ -1206,7 +1291,7 @@ void pngwriter::readfromfile(char * name)
    png_structp     png_ptr;
    png_infop       info_ptr;
    unsigned char   **image;
-   unsigned long   width, height;
+   png_uint_32     width, height;
    int bit_depth, color_type, interlace_type;
    //   png_uint_32     i;
    //
@@ -1312,18 +1397,7 @@ void pngwriter::readfromfile(char * name)
    if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth<8) 
      { 
 	// png_set_expand(png_ptr); 
-
-        //----------------------------------
-       //	png_set_gray_1_2_4_to_8(png_ptr);  // Just an alias of the above
-        //----------------------------------
-
-       // REPLACED ABOVE WITH BELOW FOR libpng v1.4.0
-       // James Bordner
-
-        //----------------------------------
 	png_set_expand_gray_1_2_4_to_8(png_ptr);  // Just an alias of the above.
-        //----------------------------------
-
 	transformation_ = 1; 
      } 
    
@@ -1465,19 +1539,15 @@ aliases
      }
 
    screengamma_ = 2.2;
-   double          file_gamma,screen_gamma;
-   screen_gamma = screengamma_;
-   if (png_get_gAMA(png_ptr, info_ptr, &file_gamma))
+   double          file_gamma;
+   if (!png_get_gAMA(png_ptr, info_ptr, &file_gamma))
      {
-	png_set_gamma(png_ptr,screen_gamma,file_gamma);
-     }
-   else
-     {
-	png_set_gamma(png_ptr, screen_gamma,0.45);
+        file_gamma=0.45;
      }
 
    filegamma_ = file_gamma;
 
+   png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
    fclose(fp);
 }
 
@@ -1542,7 +1612,11 @@ int pngwriter::read_png_info(FILE *fp, png_structp *png_ptr, png_infop *info_ptr
 	fclose(fp);
 	return 0;
      }
+#if (PNG_LIBPNG_VER < 10500)
    if (setjmp((*png_ptr)->jmpbuf)) /*(setjmp(png_jmpbuf(*png_ptr)) )*//////////////////////////////////////
+#else
+   if (setjmp(png_jmpbuf(*png_ptr)))
+#endif
      {
 	png_destroy_read_struct(png_ptr, info_ptr, (png_infopp)NULL);
 	std::cerr << " PNGwriter::read_png_info - ERROR **: This file may be a corrupted PNG file. (setjmp(*png_ptr)->jmpbf) failed)." << std::endl;
@@ -1742,7 +1816,7 @@ void pngwriter::RGBtoHSV( float r, float g, float b, float *h, float *s, float *
    else
      {
 
-	r = g = b = 0;                // s = 0, v is undefined
+	// s = 0, v is undefined
 	*s = 0;
 	*h = -1;
 	return;
@@ -3077,17 +3151,17 @@ double pngwriter::dreadCMYK(int x, int y, int colour)
 
    if(colour == 1)
      {
-	return ((ired-black)/(iblack));
+	return ((ired-black)/iblack);
      }
 
    if(colour == 2)
      {
-	return ((igreen-black)/(iblack));
+	return ((igreen-black)/iblack);
      }
 
    if(colour == 3)
      {
-	return ((iblue-black)/(iblack));
+	return ((iblue-black)/iblack);
      }
 
    if(colour == 4)
@@ -3355,12 +3429,6 @@ void pngwriter::scale_wh(int finalwidth, int finalheight)
      {
 	std::cerr << " PNGwriter::scale_wh - ERROR **: Negative or zero final width or height not allowed." << std::endl;
      }
-
-   double kx;
-   double ky;
-
-   kx = ((double)finalwidth)/((double)width_);
-   ky = ((double)finalheight)/((double)height_);
 
    pngwriter temp(finalwidth, finalheight, 0, "temp");
 
@@ -4325,6 +4393,11 @@ void pngwriter::laplacian(double k, double offset)
 // ( <gurkan@linuks.mine.nu>, http://www.linuks.mine.nu/ )
 void pngwriter::drawtop(long x1,long y1,long x2,long y2,long x3, int red, int green, int blue)
 {
+   // avoid division by zero
+   long dy = 1;
+   if(y2!=y1)
+     dy=y2-y1;
+
    // This swaps x2 and x3
    // if(x2>x3) x2^=x3^=x2^=x3;
    if(x2>x3)
@@ -4337,10 +4410,10 @@ void pngwriter::drawtop(long x1,long y1,long x2,long y2,long x3, int red, int gr
    long posl = x1*256;
    long posr = posl;
 
-   long cl=((x2-x1)*256)/(y2-y1);
-   long cr=((x3-x1)*256)/(y2-y1);
+   long cl=((x2-x1)*256)/dy;
+   long cr=((x3-x1)*256)/dy;
 
-   for(int y=y1; y<y2; y++)
+   for(int y=y1; y<=y2; y++)
      {
 	this->line(posl/256, y, posr/256, y, red, green, blue);
 	posl+=cl;
@@ -4367,7 +4440,7 @@ void pngwriter::drawbottom(long x1,long y1,long x2,long x3,long y3, int red, int
    long cl=((x3-x1)*256)/(y3-y1);
    long cr=((x3-x2)*256)/(y3-y1);
 
-   for(int y=y1; y<y3; y++)
+   for(int y=y1; y<=y3; y++)
      {
 	this->line(posl/256, y, posr/256, y, red, green, blue);
 
@@ -4390,7 +4463,7 @@ void pngwriter::filledtriangle(int x1,int y1,int x2,int y2,int x3,int y3, int re
 	x2^=x1;
 	// y2^=y1^=y2^=y1;
 	y2^=y1;
-	y1^=x2;
+	y1^=y2;
 	y2^=y1;
      }
 
@@ -4482,7 +4555,7 @@ void pngwriter::filledtriangle_blend(int x1,int y1,int x2,int y2,int x3,int y3, 
 	x2^=x1;
 	// y2^=y1^=y2^=y1;
 	y2^=y1;
-	y1^=x2;
+	y1^=y2;
 	y2^=y1;
      }
 
@@ -4593,15 +4666,10 @@ void pngwriter::triangle(int x1, int y1, int x2, int y2, int x3, int y3, int red
 
 void pngwriter::triangle(int x1, int y1, int x2, int y2, int x3, int y3, double red, double green, double blue)
 {
-   
-   this->line(x1, y1, x2, y2, ((int)65535*red), ((int)65535*green), ((int)65535*blue));
-   this->line(x2, y2, x3, y3, ((int)65535*red), ((int)65535*green), ((int)65535*blue));
-   this->line(x3, y3, x1, y1, ((int)65535*red), ((int)65535*green), ((int)65535*blue));
-   
+   this->line(x1, y1, x2, y2, int(65535*red), int(65535*green), int(65535*blue));
+   this->line(x2, y2, x3, y3, int(65535*red), int(65535*green), int(65535*blue));
+   this->line(x3, y3, x1, y1, int(65535*red), int(65535*green), int(65535*blue));
 }
-
-
-
 
 
 void pngwriter::arrow( int x1,int y1,int x2,int y2,int size, double head_angle, double red, double green, double blue)
@@ -4730,4 +4798,3 @@ void pngwriter::diamond( int x, int y, int width, int height, double red, double
 {
    this->diamond(  x,  y,  width,  height, int(red*65535), int(green*65535), int(blue*65535) ); 
 }
-
