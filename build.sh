@@ -3,6 +3,7 @@
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
 
+python="python2"
 # initialize time
 
 H0=`date +"%H"`
@@ -23,10 +24,13 @@ if [ "$#" -ge 1 ]; then
        rm -f test/STATUS test/START test/STOP
        exit
    elif [ "$1" == "clean" ]; then
-      d=`date +"%Y-%m-%d %H:%M:%S"`
+       TMP=`mktemp -t build.sh.XXXXXX`
+       trap "rm $TMP* 2>/dev/null" EXIT
+       
+       d=`date +"%Y-%m-%d %H:%M:%S"`
       printf "$d %-14s cleaning..."
       for prec in single double; do
-         python2 scons.py arch=$arch -c >& /dev/null
+         $python scons.py arch=$arch -c >& /dev/null
          rm -rf bin >& /dev/null
          rm -rf lib >& /dev/null
       done
@@ -46,12 +50,12 @@ if [ "$#" -ge 1 ]; then
       rm -rf test/out.scons
       exit
    elif [ "$1" == "compile" ]; then
-      set target=install-bin
+      target=install-bin
    elif [ "$1" == "test" ]; then
       ./build.sh
-      set target="test"
-      set proc=1
-      set k_switch="-k"
+      target="test"
+      proc=1
+      k_switch="-k"
    elif [ "$1" == "help" ]; then
       echo
       echo "Usage: $0 [clean|compile|test]"
@@ -109,8 +113,8 @@ touch "$dir/running.$arch.$prec"
 CELLO_ARCH=$arch; export $CELLO_ARCH
 CELLO_PREC=$prec; export $CELLO_PREC
 
-python2 scons.py install-inc    &>  $dir/out.scons
-python2 scons.py $k_switch -j $proc -Q $target | tee $dir/out.scons 2>&1 
+$python scons.py install-inc    &>  $dir/out.scons
+$python scons.py $k_switch -j $proc -Q $target | tee $dir/out.scons 2>&1 
 
 ./tools/awk/error-org.awk   < $dir/out.scons >  errors.org
 ./tools/awk/warning-org.awk < $dir/out.scons >> errors.org
