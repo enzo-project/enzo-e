@@ -38,6 +38,13 @@ trace_charm = 0
 debug = 0
 
 #----------------------------------------------------------------------
+# Do extra run-time checking.  Useful for debugging, but can potentially
+# slow calculations down
+#----------------------------------------------------------------------
+
+check = 1
+
+#----------------------------------------------------------------------
 # Whether to periodically print all field values.  See
 # src/Field/field_FieldBlock.cpp
 #----------------------------------------------------------------------
@@ -222,6 +229,7 @@ define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
+define_check =        ['CELLO_CHECK']
 
 define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
@@ -342,6 +350,7 @@ if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
+if (check != 0):         defines = defines + define_check
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
 if (python_lt_27 != 0):  defines = defines + define_python_lt_27

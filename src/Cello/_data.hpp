@@ -47,7 +47,7 @@ class FieldFace;
 #include "data_Field.hpp"
 
 #include "data_ParticleDescr.hpp"
-#include "data_ParticleBlock.hpp"
+#include "data_ParticleData.hpp"
 
 #include "data_Data.hpp"
 

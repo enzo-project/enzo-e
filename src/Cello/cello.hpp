@@ -89,9 +89,8 @@ enum reduce_enum {
 };
 typedef int reduce_type;
 
-// extern const char * component_name [];
 /// @enum precision_enum
-/// @brief list of known floating-point precision
+/// @brief list of known floating-point precision, used for Field
 enum precision_enum {
   // @@@ KEEP IN SYNCH WITH precision_name in cello.cpp
   precision_unknown,     //  unknown precision
@@ -102,6 +101,23 @@ enum precision_enum {
   precision_extended96,  //  96-bit field data
   precision_quadruple,   // 128-bit field data
 };
+
+/// @enum type_enum
+/// @brief list of known scalar types, including ints and floats, used for Particle attributes
+enum type_enum {
+  type_unknown,     // unknown type
+  type_char,        // one byte
+  type_short,       // short int
+  type_int,         // int
+  type_long_int,    // long integer
+  type_long_long_int,  // long long int
+  type_single,      //  32-bit float data
+  type_double,      //  64-bit float data
+  type_extended80,  //  80-bit float data
+  type_extended96,  //  96-bit float data
+  type_quadruple,   // 128-bit float data
+};
+
 
 typedef int precision_type;
 
