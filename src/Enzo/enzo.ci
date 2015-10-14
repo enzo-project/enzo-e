@@ -43,8 +43,10 @@ module enzo {
   // in top-level SConstruct file
   // ==================================================
 
-  // PUPable EnzoInitialGrackleTest;
-  // PUPable EnzoMethodGrackle;
+#ifdef CONFIG_USE_GRACKLE
+  PUPable EnzoInitialGrackleTest;
+  PUPable EnzoMethodGrackle;
+#endif
 
   PUPable EnzoBoundary;
   PUPable EnzoConfig;

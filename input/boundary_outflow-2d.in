@@ -1,6 +1,6 @@
 include "input/dots.incl"
 
-Boundary { type = "outflow" }
+Boundary { type = "outflow"; }
 
 Output { 
    cycle_step {  

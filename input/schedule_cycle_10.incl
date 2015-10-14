@@ -3,5 +3,5 @@
 schedule {
     var =  "cycle";
     step = 10;
-};
+}
 

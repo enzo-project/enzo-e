@@ -29,15 +29,15 @@ Boundary {
    out_x {
      type = "outflow";
      mask = (y <= 0.333);
-   };
+   }
    reflect_x {
      type = "reflecting";
      mask = (0.333 < y && y <= 0.666);
-   };
+   }
    period_x {
      type = "periodic";
      mask = (0.666 < y);
-   };
+   }
    period_y {
      type = "periodic";
    }

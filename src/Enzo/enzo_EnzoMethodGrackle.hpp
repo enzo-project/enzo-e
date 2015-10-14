@@ -22,24 +22,20 @@ class EnzoMethodGrackle : public Method {
 
 public: // interface
 
-  /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodGrackle);
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) ;
-
   /// Create a new EnzoMethodGrackle object
   EnzoMethodGrackle(EnzoConfig *,
 		    const FieldDescr * field_descr);
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoMethodGrackle);
 
-  /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle() : Method() {};
-
-  /// Destructor
-  virtual ~EnzoMethodGrackle() throw() {};
- 
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m) {}
 
+  /// CHARM++ Pack / Unpack function
+  void pup (PUP::er &p) ;
+
+  /// Destructor
+  virtual ~EnzoMethodGrackle() throw() {};
 
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
@@ -50,17 +46,19 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
+
+
 protected: // methods
 
 protected: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
 
-  /// Grackle struct defining code units
-  code_units * units_;
-
   /// Grackle struct defining chemistry data
   chemistry_data * chemistry_;
+
+  /// Grackle struct defining code units
+  code_units * units_;
 
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
 

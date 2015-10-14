@@ -106,16 +106,15 @@ enum precision_enum {
 /// @brief list of known scalar types, including ints and floats, used for Particle attributes
 enum type_enum {
   type_unknown,     // unknown type
+  type_bool,
   type_char,        // one byte
   type_short,       // short int
   type_int,         // int
-  type_long_int,    // long integer
-  type_long_long_int,  // long long int
-  type_single,      //  32-bit float data
-  type_double,      //  64-bit float data
-  type_extended80,  //  80-bit float data
-  type_extended96,  //  96-bit float data
-  type_quadruple,   // 128-bit float data
+  type_long,        // long int
+  type_long_long,   // long long int
+  type_float,
+  type_double,
+  type_long_double
 };
 
 

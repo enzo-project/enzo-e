@@ -92,7 +92,7 @@
 
    }
 
-   Boundary { type = "reflecting" }
+   Boundary { type = "reflecting"; }
 
    Stopping {        cycle = 40;   }
    Testing {   cycle_final = 40; }

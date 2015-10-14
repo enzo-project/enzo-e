@@ -71,7 +71,7 @@ void Block::compute_continue_ ()
     Schedule * schedule = method->schedule();
     bool is_scheduled = 
       (!schedule) ||
-      schedule && schedule->write_this_cycle(cycle_,time_);
+      (schedule && schedule->write_this_cycle(cycle_,time_));
 
     // printf ("DEBUG Method %s schedule = %p scheduled %d\n",
     // 	    method->name().c_str(),

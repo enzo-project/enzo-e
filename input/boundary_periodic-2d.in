@@ -1,6 +1,6 @@
 include "input/dots.incl"
 
-Boundary { type = "periodic" }
+Boundary { type = "periodic"; }
 
 Output { 
    cycle_step {  

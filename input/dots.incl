@@ -74,4 +74,4 @@
                     1.0, 0.0, 0.0];
       }
    }
-   Boundary { type = "reflecting" }
+   Boundary { type = "reflecting"; }

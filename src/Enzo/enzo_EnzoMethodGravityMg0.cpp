@@ -375,10 +375,8 @@ void EnzoMethodGravityMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
   } else {
 
     const Data * data = enzo_block->data();
-    const FieldDescr * field_descr = data->field_descr();
 
     Refresh refresh (4,0,neighbor_level, sync_face);
-    // refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
     refresh.add_field (ix_);
 
     enzo_block->refresh_enter
@@ -422,8 +420,7 @@ void EnzoMethodGravityMg0::pre_smooth(EnzoBlock * enzo_block) throw()
   smooth_pre_->compute(enzo_block);
 
   Refresh refresh (4,0,neighbor_level, sync_face);
-  //  refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
-    refresh.add_field (ix_);
+  refresh.add_field (ix_);
 
   refresh.set_active(true);
   refresh.print();
@@ -731,7 +728,7 @@ void EnzoMethodGravityMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 
 
   Refresh refresh (4,0,neighbor_level, sync_face);
-  // refresh.add_all_fields (enzo_block->data()->field_descr()->field_count());
+
     refresh.add_field (ix_);
 
   enzo_block->refresh_enter

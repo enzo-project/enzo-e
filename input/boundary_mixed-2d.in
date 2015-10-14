@@ -5,11 +5,11 @@ Boundary {
    periodic {
        type = "periodic";
        axis = "x";
-   };
+   }
    reflecting {
        type = "reflecting";
        axis = "y";
-   };
+   }
 }
 Output { 
    cycle_step {  

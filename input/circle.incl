@@ -54,7 +54,7 @@ include "input/domain-2d-01.incl"
 
    }
 
-   Boundary { type = "reflecting" }
+   Boundary { type = "reflecting"; }
 
    Stopping {
       time  = 2.5;

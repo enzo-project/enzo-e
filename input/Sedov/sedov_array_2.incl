@@ -44,6 +44,6 @@
               radius_relative = 0.1; }
    }
 
-   Boundary { type = "periodic" }
+   Boundary { type = "periodic"; }
 
    Stopping {        cycle = 10;   } 

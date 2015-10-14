@@ -5,6 +5,7 @@
 Import('env')
 Import('use_papi')
 Import('use_grackle')
+Import('grackle_path')
 
 Import('bin_path')
 Import('inc_path')
@@ -33,13 +34,13 @@ components.append(['hdf5','z'])
 
 libraries  = ['png','$FORTRANLIBS']
 
-if (use_grackle):  libraries.append('grackle')
+includes = [Glob('*enzo*hpp'),'fortran.h']
+
+if (use_grackle):   libraries.append('grackle')
 
 #------------------------------
 # SOURCE
 #------------------------------
-
-includes = [Glob('*enzo*hpp'),'fortran.h']
 
 sources  = [Glob('enzo_*cpp'),
     	    'calcdiss.F',

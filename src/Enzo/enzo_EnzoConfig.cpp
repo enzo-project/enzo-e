@@ -109,8 +109,12 @@ void EnzoConfig::pup (PUP::er &p)
 
   // Units
 
-  p | method_grackle_units;
-  p | method_grackle_chemistry;
+  //  p | method_grackle_units;
+  WARNING("EnzoConfig::pup",
+	  "p|method_grackle_units not called");
+  //  p | method_grackle_chemistry;
+  WARNING("EnzoConfig::pup",
+	  "p|method_grackle_chemistry not called");
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -348,7 +352,8 @@ void EnzoConfig::read(Parameters * p) throw()
       method_grackle_units.length_units / method_grackle_units.time_units;
 
   
-    method_grackle_chemistry.set_default_chemistry_parameters();
+    //method_grackle_chemistry.set_default_chemistry_parameters();
+    chemistry_data chemistry = set_default_chemistry_parameters();
 
     method_grackle_chemistry.Gamma = p->value_float
       ("Method:grackle:gamma",method_grackle_chemistry.Gamma);

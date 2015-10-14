@@ -455,20 +455,22 @@ parameter_group :
  | '{' parameter_list ';' '}'    { current_group[--current_group_level] = 0; }
 
 parameter_list : 
-                      parameter_assignment  {  }
- | parameter_list ';' parameter_assignment  {  }
- |                    group  {  }
- | parameter_list ';' group  {  }
+                   parameter_assignment  {  }
+ |                 group  {  }
+ |                 group  ';' {  } 
+ | parameter_list  parameter_assignment  {  }
+ | parameter_list  group  {  }
+ | parameter_list  group  ';' {  }
 
  
 group_name :
-  IDENTIFIER                    { current_group[current_group_level++] = $1; }
+  IDENTIFIER   { current_group[current_group_level++] = $1; }
 
 parameter_name :
-  IDENTIFIER                    { current_parameter = $1;} 
+  IDENTIFIER   { current_parameter = $1;} 
 
 parameter_assignment : 
-  parameter_name '=' parameter_value { new_parameter(); }
+  parameter_name '=' parameter_value ';' { new_parameter(); }
  ;
 
 parameter_value : 

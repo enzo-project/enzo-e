@@ -114,7 +114,7 @@ CELLO_ARCH=$arch; export $CELLO_ARCH
 CELLO_PREC=$prec; export $CELLO_PREC
 
 $python scons.py install-inc    &>  $dir/out.scons
-$python scons.py $k_switch -j $proc -Q $target | tee $dir/out.scons 2>&1 
+$python scons.py $k_switch -j $proc -Q $target  2>&1 | tee $dir/out.scons
 
 ./tools/awk/error-org.awk   < $dir/out.scons >  errors.org
 ./tools/awk/warning-org.awk < $dir/out.scons >> errors.org
@@ -154,7 +154,7 @@ if [ $target == "test" ]; then
    for test in $dir/*unit; do
 
       test_begin=`grep "UNIT TEST BEGIN" $test | wc -l`
-      test_end =`grep "UNIT TEST END"   $test | wc -l`
+      test_end=`grep "UNIT TEST END"   $test | wc -l`
 
       crash=$((test_begin - $test_end))
 

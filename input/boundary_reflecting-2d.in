@@ -1,6 +1,6 @@
 include "input/dots.incl"
 
-Boundary { type = "reflecting" }
+Boundary { type = "reflecting"; }
 
 Output { 
    cycle_step {  

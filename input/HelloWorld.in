@@ -76,7 +76,7 @@
        velocity_y    { value = [0.0]; }
    }
 
-   Boundary { type = "reflecting" }
+   Boundary { type = "reflecting"; }
 
    Stopping {
       time = 0.1;

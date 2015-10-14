@@ -46,7 +46,7 @@
 # Initial conditions deferred to test_implosion-code.in or
 # test_implosion.in
 
-   Boundary { type = "reflecting" }
+   Boundary { type = "reflecting"; }
 
    Stopping {
       time  = 2.5;

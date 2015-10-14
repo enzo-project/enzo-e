@@ -8,15 +8,6 @@
 #ifndef _DATA_HPP
 #define _DATA_HPP
 
-enum particle_attribute_type {
-  particle_attribute_unknown,
-  particle_attribute_position,
-  particle_attribute_velocity,
-  particle_attribute_mass,
-  particle_attribute_id,
-  num_particle_attribute
-};
-
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
@@ -38,16 +29,19 @@ class FieldData;
 class FieldFace;
 
 #include "data_Grouping.hpp"
-#include "data_ItField.hpp"
-#include "data_ItFieldList.hpp"
-#include "data_ItFieldRange.hpp"
+
 #include "data_FieldDescr.hpp"
 #include "data_FieldData.hpp"
 #include "data_FieldFace.hpp"
 #include "data_Field.hpp"
 
+#include "data_ItField.hpp"
+#include "data_ItFieldList.hpp"
+#include "data_ItFieldRange.hpp"
+
 #include "data_ParticleDescr.hpp"
 #include "data_ParticleData.hpp"
+#include "data_Particle.hpp"
 
 #include "data_Data.hpp"
 

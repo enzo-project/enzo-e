@@ -35,7 +35,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
     1. / (1. + config->physics_cosmology_initial_redshift);
 
   
-  printf ("TRACE %s:%d calling initialize_chemistry_data\n");
+  printf ("TRACE %s:%d calling initialize_chemistry_data\n",__FILE__,__LINE__);
 
   if (initialize_chemistry_data
       (*chemistry_, *units_, a_value) == 0) {
@@ -59,8 +59,12 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p | *chemistry_;
-  p | *units_;
+  // p | *chemistry_;
+  WARNING ("EnzoMethodGrackle::pup()",
+	   "p | *chemistry_ not called!");
+  //  p | *units_;
+  WARNING ("EnzoMethodGrackle::pup()",
+	   "p | *units_ not called!");
 
 #endif /* CONFIG_USE_GRACKLE */
 

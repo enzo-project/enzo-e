@@ -66,12 +66,12 @@ void generate_input()
   fp << "    num2 = 24.5 - 6.125;\n";
   fp << "    num3 = 24.5 * 6.125;\n";
   fp << "    num4 = 24.5 / 6.125;\n";
-  fp << "  };\n";
+  fp << "  }\n";
   fp << "  const_float_2 {\n";
   fp << "    num1 = 24.5 + 6.125*2.0;\n";
   fp << "    num2 = 24.5*3.0 - 6.125;\n";
   fp << "    num3 = (24.5 + 6.125*2.0 - (24.5*3.0 - 6.125));\n";
-  fp << "  };\n";
+  fp << "  }\n";
   fp << "  const_float_3 {\n";
   fp << "    num1 = 2.0 ^ 3.0;\n";
   fp << "    num2 = 2.0 ^ 3.0 * 4.0;\n";
@@ -79,10 +79,10 @@ void generate_input()
   fp << "    num4 = 3.0 * 2.0 ^ 3.0;\n";
   fp << "    num5 = 3.0 + 2.0 ^ 3.0;\n";
   fp << "    num6 = 4.0 ^ 2.0 ^ 3.0;\n";
-  fp << "  };\n";
+  fp << "  }\n";
   fp << "  const_float_4 {\n";
   fp << "    num1 = 4.0*pi;\n";
-  fp << "  };\n";
+  fp << "  }\n";
   fp << "}\n";
 
   fp << "String {\n";

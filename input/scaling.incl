@@ -68,7 +68,7 @@
        internal_energy { value = [0.0]; }
    }
 
-   Boundary { type = "reflecting" }
+   Boundary { type = "reflecting"; }
 
    Stopping {        cycle = 100;   } 
 
