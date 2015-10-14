@@ -106,26 +106,40 @@ public: // interface
   std::string attribute_name (int it, int ia) const
   { return particle_descr_->attribute_name(it,ia); }
 
-  // int attribute_bytes (it);
+  //--------------------------------------------------
+  // BYTES
+  //--------------------------------------------------
+
+  /// Return the number of bytes per particle allocated for all attributes
+
+  int attribute_bytes (int it) const
+  { return particle_descr_->attribute_bytes(it); }
 
   /// Return the number of bytes allocated for the given attribute.
 
-  // int attribute_bytes(it,ia);
+  int attribute_bytes(int it, int ia) const
+  { return particle_descr_->attribute_bytes(it,ia); }
 
-  /// Return the stride of the given attribute if interleaved, otherwise 1.
-
-  /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
-  /// Must be evenly divisible.
-
-  // int stride(it,ia);
+  //--------------------------------------------------
+  // INTERLEAVING
+  //--------------------------------------------------
 
   /// Set whether attributes are interleaved for the given type.
 
-  // void set_interleaved (it,is_interleaved)
+  void set_interleaved (int it, bool interleaved)
+  { particle_descr_->set_interleaved(it,interleaved); }
 
   /// Return whether attributes are interleaved or not
 
-  // bool interleaved (it)
+  bool interleaved (int it) const
+  { return particle_descr_->interleaved(it); }
+
+  /// Return the stride of the given attribute if interleaved, otherwise 1.
+  /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
+  /// Must be evenly divisible.
+
+  int stride(int it, int ia) const
+  { return particle_descr_->stride(it,ia); }
 
   /// Set the size of batches.  Must be set at most once.  May be
   /// defined when ParticleDescr is created.

@@ -116,13 +116,13 @@ private:
   static Unit instance_;
 
   /// Output string for passed tests
-  static const char * pass_string_;
+  static const char * pass_;
 
   /// Output string for failed tests
-  static const char * fail_string_;
+  static const char * fail_;
 
   /// Output string for incomplete tests
-  static const char * incomplete_string_;
+  static const char * incomplete_;
   
   /// Name of the current class being tested
   char class_name_ [UNIT_MAX_NAME_LEN];

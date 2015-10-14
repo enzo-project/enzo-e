@@ -25,9 +25,9 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  //----------------------------------------------------------------------
+  //--------------------------------------------------
   // TYPES
-  //----------------------------------------------------------------------
+  //--------------------------------------------------
 
   /// Create a new type and return its id
 
@@ -45,9 +45,9 @@ public: // interface
 
   std::string type_name (int index) const;
 
-  //----------------------------------------------------------------------
+  //--------------------------------------------------
   // ATTRIBUTES
-  //----------------------------------------------------------------------
+  //--------------------------------------------------
 
   /// Create a new attribute for the given type and return its id
 
@@ -65,28 +65,35 @@ public: // interface
 
   std::string attribute_name (int it, int ia) const;
 
+  //--------------------------------------------------
+  // BYTES
+  //--------------------------------------------------
+
   /// Return the number of bytes per particle allocated for all attributes
 
-  // int attribute_bytes (it);
+  int attribute_bytes (int it) const;
 
   /// Return the number of bytes allocated for the given attribute.
 
-  // int attribute_bytes(it,ia);
+  int attribute_bytes(int it,int ia) const;
 
-  /// Return the stride of the given attribute if interleaved, otherwise 1.
-
-  /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
-  /// Must be evenly divisible.
-
-  // int stride(it,ia);
+  //--------------------------------------------------
+  // INTERLEAVING
+  //--------------------------------------------------
 
   /// Set whether attributes are interleaved for the given type.
 
-  // void set_interleaved (it,is_interleaved)
+  void set_interleaved (int it, bool interleaved);
 
   /// Return whether attributes are interleaved or not
 
-  // bool interleaved (it)
+  bool interleaved (int it) const;
+
+  /// Return the stride of the given attribute if interleaved, otherwise 1.
+  /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
+  /// Must be evenly divisible.
+
+  int stride(int it, int ia) const;
 
   /// Set the size of batches.  Must be set at most once.  May be
   /// defined when ParticleDescr is created.
@@ -114,17 +121,39 @@ private: // functions
 
 private: // attributes
 
+  //--------------------------------------------------
+  // TYPES
+  //--------------------------------------------------
+
   /// List of particle types
   std::vector<std::string> type_name_;
 
   /// Index of each particle type (inverse of type_)
   std::map<std::string,int> type_index_;
 
+  //--------------------------------------------------
+  // ATTRIBUTES
+  //--------------------------------------------------
+
   /// List of particle attributes
   std::vector < std::vector<std::string> > attribute_name_;
 
   /// Index of each particle attribute (inverse of attribute_)
   std::vector < std::map<std::string,int> > attribute_index_;
+
+  //--------------------------------------------------
+  // BYTES
+  //--------------------------------------------------
+
+  /// Bytes used for each particle attribute, max 127
+  std::vector < std::vector<char> > attribute_bytes_;
+
+  //--------------------------------------------------
+  // INTERLEAVING
+  //--------------------------------------------------
+
+  /// Whether attributes are interleaved
+  std::vector < bool > attribute_interleaved_;
 
 };
 

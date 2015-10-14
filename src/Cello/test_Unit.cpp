@@ -9,11 +9,33 @@
 
 //----------------------------------------------------------------------
 
+#define USE_COLOR
+
 // Unit * Unit::instance_ = 0;
 Unit Unit::instance_;
-const char * Unit::pass_string_       = " pass ";
-const char * Unit::fail_string_       = " FAIL ";
-const char * Unit::incomplete_string_ = " incomplete ";
+
+#ifdef USE_COLOR
+
+#   define BLACK   "\033[0m"
+#   define RED     "\033[1;31m"
+#   define GREEN   "\033[1;32m"
+#   define YELLOW  "\033[1;33m"
+#   define BLUE    "\033[1;34m"
+#   define MAGENTA "\033[1;35m"
+#   define CYAN    "\033[1;36m"
+#   define WHITE   "\033[1;37m"
+
+const char * Unit::pass_       = " " GREEN  "pass"       BLACK " ";
+const char * Unit::fail_       = " " RED    "FAIL"       BLACK " ";
+const char * Unit::incomplete_ = " " YELLOW "incomplete" BLACK " ";
+
+#else
+
+const char * Unit::pass_       = " pass ";
+const char * Unit::fail_       = " FAIL ";
+const char * Unit::incomplete_ = " incomplete ";
+
+#endif
 
 //----------------------------------------------------------------------
 
@@ -93,11 +115,11 @@ bool Unit::assertion (int result, const char * file, int line, bool quiet)
     if (! (quiet && result)) {
       const char * result_string = 0;
       if (result == true) {
-	result_string = Unit::pass_string_;
+	result_string = Unit::pass_;
       } else if (result == false) {
-	result_string = Unit::fail_string_;
+	result_string = Unit::fail_;
       } else {
-	result_string = Unit::incomplete_string_;
+	result_string = Unit::incomplete_;
       }
       PARALLEL_PRINTF ("%s %d/%d %s %d %s %s\n",
 		       result_string,

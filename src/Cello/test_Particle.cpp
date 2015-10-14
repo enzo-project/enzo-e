@@ -74,31 +74,31 @@ PARALLEL_MAIN_BEGIN
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(i_dark) == 0);
   unit_func ("new_attribute");
-  const int id_x = particle.new_attribute (i_dark, "position_x", type_float);
+  const int id_x = particle.new_attribute (i_dark, "position_x", 4);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(i_dark) == 1);
   unit_func ("new_attribute");
-  const int id_y = particle.new_attribute (i_dark, "position_y", type_float);
+  const int id_y = particle.new_attribute (i_dark, "position_y", 4);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(i_dark) == 2);
   unit_func ("new_attribute");
-  const int id_z = particle.new_attribute (i_dark, "position_z", type_float);
+  const int id_z = particle.new_attribute (i_dark, "position_z", 4);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(i_dark) == 3);
   unit_func ("new_attribute");
-  const int id_vx = particle.new_attribute (i_dark, "velocity_x", type_double);
+  const int id_vx = particle.new_attribute (i_dark, "velocity_x", 8);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(i_dark) == 4);
   unit_func ("new_attribute");
-  const int id_vy = particle.new_attribute (i_dark, "velocity_y", type_double);
+  const int id_vy = particle.new_attribute (i_dark, "velocity_y", 8);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(i_dark) == 5);
   unit_func ("new_attribute");
-  const int id_vz = particle.new_attribute (i_dark, "velocity_z", type_double);
+  const int id_vz = particle.new_attribute (i_dark, "velocity_z", 8);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(i_dark) == 6);
   unit_func ("new_attribute");
-  const int id_m = particle.new_attribute (i_dark, "mass",       type_double);
+  const int id_m = particle.new_attribute (i_dark, "mass", 8);
   
   unit_func ("attribute_name()");
   unit_assert(particle.attribute_name(i_dark,id_x) == "position_x");
@@ -111,9 +111,66 @@ PARALLEL_MAIN_BEGIN
   unit_func ("attribute_index()");
   unit_assert(particle.attribute_index(i_dark,"position_x")  == id_x);
 
-  particle.new_attribute (i_trace, "position_x", type_long_double);
-  particle.new_attribute (i_trace, "position_y", type_long_double);
-  particle.new_attribute (i_trace, "position_z", type_long_double);
+  const int it_x = particle.new_attribute (i_trace, "position_x", 4);
+  const int it_y = particle.new_attribute (i_trace, "position_y", 8);
+  const int it_z = particle.new_attribute (i_trace, "position_z", 2);
+
+  //--------------------------------------------------
+  //   Bytes
+  //--------------------------------------------------
+
+
+  unit_func("attribute_bytes(it,ia)");
+  unit_assert(particle.attribute_bytes(i_dark,id_x) == 4);
+  unit_assert(particle.attribute_bytes(i_dark,id_y) == 4);
+  unit_assert(particle.attribute_bytes(i_dark,id_z) == 4);
+  unit_assert(particle.attribute_bytes(i_dark,id_vx) == 8);
+  unit_assert(particle.attribute_bytes(i_dark,id_vy) == 8);
+  unit_assert(particle.attribute_bytes(i_dark,id_vz) == 8);
+  unit_assert(particle.attribute_bytes(i_dark,id_m) == 8);
+  unit_func("attribute_bytes(it)");
+  // needs to be divisible by 8 for stride computation:
+  // 4+4+4+8+8+8+8 rounded up to closest multiple of 8
+  unit_assert(particle.attribute_bytes(i_dark) == 48);
+
+  unit_func("attribute_bytes(it,ia)");
+  unit_assert(particle.attribute_bytes(i_trace,it_x) == 4);
+  unit_assert(particle.attribute_bytes(i_trace,it_y) == 8);
+  unit_assert(particle.attribute_bytes(i_trace,it_z) == 2);
+  unit_func("attribute_bytes(it)");
+  unit_assert(particle.attribute_bytes(i_trace) == 16);
+
+  //--------------------------------------------------
+  // Interleaved
+  //--------------------------------------------------
+
+  unit_func("interleaved");
+  unit_assert(particle.interleaved(i_dark) == false);
+  unit_assert(particle.interleaved(i_trace) == false);
+
+  unit_func("set_interleaved");
+  particle.set_interleaved(i_dark,true);
+  unit_assert(particle.interleaved(i_dark) == true);
+  unit_assert(particle.interleaved(i_trace) == false);
+  particle.set_interleaved(i_trace,true);
+  unit_assert(particle.interleaved(i_dark) == true);
+  unit_assert(particle.interleaved(i_trace) == true);
+  particle.set_interleaved(i_dark,false);
+  unit_assert(particle.interleaved(i_dark) == false);
+  unit_assert(particle.interleaved(i_trace) == true);
+
+  unit_func("stride");
+  unit_assert (particle.stride(i_dark,id_x) == 1);
+  unit_assert (particle.stride(i_dark,id_y) == 1);
+  unit_assert (particle.stride(i_dark,id_z) == 1);
+  unit_assert (particle.stride(i_dark,id_vx) == 1);
+  unit_assert (particle.stride(i_dark,id_vy) == 1);
+  unit_assert (particle.stride(i_dark,id_vz) == 1);
+  unit_assert (particle.stride(i_trace,it_x) == 16/4);
+  unit_assert (particle.stride(i_trace,it_y) == 16/8);
+  unit_assert (particle.stride(i_trace,it_z) == 16/2);
+
+
 
   //--------------------------------------------------
   //   Batch

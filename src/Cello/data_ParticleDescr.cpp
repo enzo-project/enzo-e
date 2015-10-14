@@ -23,7 +23,8 @@ ParticleDescr::ParticleDescr() throw()
   : type_name_(),
     type_index_(),
     attribute_name_(),
-    attribute_index_()
+    attribute_index_(),
+    attribute_bytes_()
 {
 }
 
@@ -35,6 +36,7 @@ void ParticleDescr::pup (PUP::er &p)
   p | type_index_;
   p | attribute_name_;
   p | attribute_index_;
+  p | attribute_bytes_;
 }
 
 //----------------------------------------------------------------------
@@ -55,9 +57,13 @@ int ParticleDescr::new_type(std::string type_name)
 #endif
 
   type_name_.push_back(type_name);
+  attribute_interleaved_.push_back(false);
+
   type_index_[type_name] = nt;
-  attribute_name_.resize(attribute_name_.size()+1);
-  attribute_index_.resize(attribute_index_.size()+1);
+
+  attribute_name_. resize(nt + 1);
+  attribute_index_.resize(nt + 1);
+  attribute_bytes_.resize(nt + 1);
 
   return nt;
 }
@@ -104,16 +110,23 @@ std::string ParticleDescr::type_name (int it) const
 int ParticleDescr::new_attribute
 (int         it,
  std::string attribute_name,
- int         attribute_type)
+ int         attribute_bytes)
 {
 #ifdef CELLO_CHECK
   check_ia_(it,attribute_name,__FILE__,__LINE__);
+  int b = attribute_bytes;
+  ASSERT1("ParticleDescr::new_attribute",
+	 "attribute_bytes %d must be a power of 2",
+	 attribute_bytes,
+	 (b&&!(b&(b-1))));
+	 
 #endif
 
   const int na = num_attributes(it);
 
   attribute_name_[it].push_back(attribute_name);
   attribute_index_[it][attribute_name] = na;
+  attribute_bytes_[it].push_back(attribute_bytes);
 
   return na;
 }
@@ -158,6 +171,49 @@ std::string ParticleDescr::attribute_name (int it, int ia) const
 }
 
 //----------------------------------------------------------------------
+
+int ParticleDescr::attribute_bytes (int it) const
+{
+  int sum = 0;
+  int max = -1;
+  for (int ia=0; ia < attribute_bytes_[it].size(); ia++) {
+    sum += attribute_bytes_[it][ia];
+    max = std::max(max,int(attribute_bytes_[it][ia]));
+  }
+  //  return (sum/max)*max == sum ? sum : (sum/max+1)*max;
+  return ((sum-1)/max+1)*max;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleDescr::attribute_bytes(int it,int ia) const
+{
+  return attribute_bytes_[it][ia];
+}
+
+//----------------------------------------------------------------------
+
+int ParticleDescr::stride(int it, int ia) const
+{
+  return attribute_interleaved_[it] ? 
+    attribute_bytes(it) / attribute_bytes(it,ia) : 1;
+}
+
+//----------------------------------------------------------------------
+
+void ParticleDescr::set_interleaved (int it, bool interleaved)
+{
+  attribute_interleaved_[it] = interleaved;
+}
+
+//----------------------------------------------------------------------
+
+bool ParticleDescr::interleaved (int it) const
+{
+  return attribute_interleaved_.at(it);
+}
+
+//======================================================================
 
 void ParticleDescr::check_it_(std::string type_name,
 			      std::string file, int line)
