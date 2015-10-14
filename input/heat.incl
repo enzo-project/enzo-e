@@ -2,7 +2,7 @@
      temperature {
          type = "inflow";
          value = 0.0000000000000;
-     };
+     }
      type = "reflecting";
  }
 
@@ -23,7 +23,7 @@
  Initial {
      temperature {
          value = [ 100.00000000000, ((( x  -  0.50000000000000 ) * ( x  -  0.50000000000000 )) + (( y  -  0.50000000000000 ) * ( y  -  0.50000000000000 ))) <  0.050000000000000 , 10.000000000000 ];
-     };
+     }
  }
 
  Mesh {
@@ -48,7 +48,7 @@ Adapt {
      list = [ "heat" ];
      heat {
          alpha = 1.0000000000000;
-     };
+     }
  }
 
  Output {
@@ -60,9 +60,9 @@ Adapt {
          schedule {
              step = 10;
              var = "cycle";
-         };
+         }
          type = "image";
-     };
+     }
     mesh {
 	type     = "image";
 	image_type  = "mesh";

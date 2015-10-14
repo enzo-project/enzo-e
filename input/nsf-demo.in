@@ -64,11 +64,11 @@ Method {
 
 Initial {
    density       { value = [  1.0, "input/Cello.png", 
-                              0.1 ]; };
+                              0.1 ]; }
    total_energy  { value = [  0.14 / (0.4 * 0.1), "input/Cello.png",
-                              1.0  / (0.4 * 1.0)  ]; };
-   velocity_x    { value = [ 0.0 ]; };
-   velocity_y    { value = [ 0.0 ]; };
+                              1.0  / (0.4 * 1.0)  ]; }
+   velocity_x    { value = [ 0.0 ]; }
+   velocity_y    { value = [ 0.0 ]; }
 }
 
 # Define boundary conditions
@@ -102,7 +102,7 @@ Output {
                   1.00, 0.00, 0.00, 
                   1.00, 1.00, 0.00, 
                   1.00, 1.00, 1.00];
-   };
+   }
    mesh {
       field_list = [ "density" ];
       type       = "image";

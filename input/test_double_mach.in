@@ -141,7 +141,7 @@
            image_min = 0.0;
            image_max = 6.0;
            include "input/colormap_rainbow.incl"
-         };
+         }
 
          de_png {
            name = ["doublemach-de-%04d.png", "count"]; 
@@ -150,12 +150,12 @@
            type     = "image";
            include "input/schedule_cycle_25.incl"
            include "input/colormap_blackbody.incl";
-         };
+         }
          de_hdf5 {
            name = ["doublemach-p%02d-c%04d.h5", "proc","count"]; 
            type     = "data";
            include "input/schedule_cycle_25.incl"
-         };
+         }
       }
 
    Initial {
@@ -164,22 +164,22 @@
            value = [8.0, 
                           (x <= 0.16667 + 0.57735*y), 
                     1.4];
-      };
+      }
       velocity_x {
          value = [ 8.25*0.8660253,
                           (x <= 0.16667 + 0.57735*y),
                    0.0 ]; 
-      };
+      }
       velocity_y {
          value = [-8.25*0.5,
                           (x <= 0.16667 + 0.57735*y),
                    0.0]; 
-      };
+      }
       total_energy {
          value = [116.5 / (0.4 * 8.0) + 34.03125,
                           (x <= 0.16667 + 0.57735*y), 
                     1.0 / (0.4 * 1.4)]; 
-      };
+      }
    }
 
 Boundary {
@@ -197,13 +197,13 @@ Boundary {
       type = "outflow";
       mask = [ (x >= 4.0) || 
                (y >= 1.0 && (x >= 0.744017 + 11.547* t))];
-   };
+   }
    REFLECT {
       type = "reflecting";
       axis = "y";
       face = "lower";
       mask = (x >= 0.166667);
-   };
+   }
 
    DENSITY {
       type = "inflow";
@@ -213,7 +213,7 @@ Boundary {
                   (x <= 0.0) ||
                   ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
               ];
-    };
+    }
 
    VELOCITY_X {
       type = "inflow";
@@ -223,7 +223,7 @@ Boundary {
                   (x <= 0.0) ||
                   ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
                ];
-    };
+    }
 
    VELOCITY_Y {
       type = "inflow";
@@ -233,7 +233,7 @@ Boundary {
                   (x <= 0.0) ||
                   ((x < 0.744017 + 11.547*t) && (y >= 1.0))
                ];
-    };
+    }
 
    TOTAL_ENERGY {
       type = "inflow";
@@ -243,6 +243,6 @@ Boundary {
                    (x <= 0.0) ||
                   ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
                ];
-    };
+    }
 }
 

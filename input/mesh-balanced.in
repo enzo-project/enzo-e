@@ -37,16 +37,16 @@ Initial {
 }
   Initial {
      density       { value = [  1.0, "input/test_balance.png", 
-                                0.1 ]; };
+                                0.1 ]; }
      total_energy  { value = [  0.1 / (0.4 * 0.1), "input/test_balance.png",
-                                1.0 / (0.4 * 1.0)  ]; };
+                                1.0 / (0.4 * 1.0)  ]; }
   }
 
 # Initial {
 #     density      { value = [ 1.0,           (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.25,  
-#                              0.1 ]; };
+#                              0.1 ]; }
 #     total_energy { value = [ 1.0/(0.4*1.0), (x- 0.5)*(x- 0.5) + (y- 0.5)*(y- 0.5) < 0.25,  
-#                              0.1/(0.4*0.1) ]; };
+#                              0.1/(0.4*0.1) ]; }
 # }
 
 Stopping { cycle = 100; }
@@ -70,7 +70,7 @@ Output {
                     1.0, 1.0, 0.0, 
                     1.0, 1.0, 1.0];
         name = ["mesh-balanced-de.%03d.png","cycle"];
-      };
+      }
       te {
 	type     = "image";
 	image_type  = "data";
@@ -83,7 +83,7 @@ Output {
                     1.0, 1.0, 0.0, 
                     1.0, 1.0, 1.0];
         name = ["mesh-balanced-te.%03d.png","cycle"];
-      };
+      }
       vx {
 	type     = "image";
 	image_type  = "data";
@@ -95,7 +95,7 @@ Output {
                     0.0, 0.0, 0.0,
                     0.0, 0.0, 1.0];
         name = ["mesh-balanced-vx.%03d.png","cycle"];
-      };
+      }
       vy {
 	type     = "image";
 	image_type  = "data";
@@ -107,7 +107,7 @@ Output {
                     0.0, 0.0, 0.0,
                     0.0, 0.0, 1.0];
         name = ["mesh-balanced-vy.%03d.png","cycle"];
-      };
+      }
       mesh {
 	type     = "image";
         image_face_rank = 0;
@@ -126,7 +126,7 @@ Output {
 
         name = ["mesh-balanced-mesh.%03d.png","cycle"];
         
-      };
+      }
 }
 
 Performance { warnings = true; }

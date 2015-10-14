@@ -29,10 +29,10 @@ Output {
      list = ["mesh"];
       de   { name = ["test_adapt-mask-de-%06d.png",   "cycle"]; 
          include "input/schedule_cycle_10.incl"
-     };
+     }
       te   { name = ["test_adapt-mask-te-%06d.png",   "cycle"]; 
          include "input/schedule_cycle_10.incl"
-     };
+     }
       mesh { name = ["test_adapt-mask-mesh-%06d.png", "cycle"];
          include "input/schedule_cycle_10.incl"
       }

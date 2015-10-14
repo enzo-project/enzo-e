@@ -58,37 +58,37 @@
          value = [ 1.0, (x- 0.5)*(x- 0.5) +
                         (y- 0.5)*(y- 0.5) +
                         (z- 0.5)*(z- 0.5) < 0.05,
-                  0.1 ]; };
-       velox { value = 0.0; };
-       veloy { value = 0.0; };
-       veloz { value = 0.0; };
-       bfieldx { value = 10.0; };
-       bfieldy { value = 0.0; };
-       bfieldz { value = 0.0; };
+                  0.1 ]; }
+       velox { value = 0.0; }
+       veloy { value = 0.0; }
+       veloz { value = 0.0; }
+       bfieldx { value = 10.0; }
+       bfieldy { value = 0.0; }
+       bfieldz { value = 0.0; }
 
-       dens_rx { value = 0.0; };
-       velox_rx { value = 0.0; };
-       veloy_rx { value = 0.0; };
-       veloz_rx { value = 0.0; };
-       bfieldx_rx { value = 0.0; };
-       bfieldy_rx { value = 0.0; };
-       bfieldz_rx { value = 0.0; };
+       dens_rx { value = 0.0; }
+       velox_rx { value = 0.0; }
+       veloy_rx { value = 0.0; }
+       veloz_rx { value = 0.0; }
+       bfieldx_rx { value = 0.0; }
+       bfieldy_rx { value = 0.0; }
+       bfieldz_rx { value = 0.0; }
 
-       dens_ry { value = 0.0; };
-       velox_ry { value = 0.0; };
-       veloy_ry { value = 0.0; };
-       veloz_ry { value = 0.0; };
-       bfieldx_ry { value = 0.0; };
-       bfieldy_ry { value = 0.0; };
-       bfieldz_ry { value = 0.0; };
+       dens_ry { value = 0.0; }
+       velox_ry { value = 0.0; }
+       veloy_ry { value = 0.0; }
+       veloz_ry { value = 0.0; }
+       bfieldx_ry { value = 0.0; }
+       bfieldy_ry { value = 0.0; }
+       bfieldz_ry { value = 0.0; }
 
-       dens_rz { value = 0.0; };
-       velox_rz { value = 0.0; };
-       veloy_rz { value = 0.0; };
-       veloz_rz { value = 0.0; };
-       bfieldx_rz { value = 0.0; };
-       bfieldy_rz { value = 0.0; };
-       bfieldz_rz { value = 0.0; };
+       dens_rz { value = 0.0; }
+       velox_rz { value = 0.0; }
+       veloy_rz { value = 0.0; }
+       veloz_rz { value = 0.0; }
+       bfieldx_rz { value = 0.0; }
+       bfieldy_rz { value = 0.0; }
+       bfieldz_rz { value = 0.0; }
 
    }
 
@@ -112,9 +112,9 @@
       dump {
         field_list = ["density"];
         type = "data";
-#        schedule { var = "cycle"; type="list"; value=[0,1];};
+#        schedule { var = "cycle"; type="list"; value=[0,1];}
         include "input/schedule_cycle_2.incl"
-      };
+      }
 
       d_x {
         field_list = ["density"];
@@ -122,20 +122,20 @@
         include "input/schedule_cycle_2.incl"
         axis = "x";
         include "input/colormap_blackbody.incl";
-      };
+      }
       d_y {
         field_list = ["density"];
         type = "image";
         include "input/schedule_cycle_2.incl"
         axis = "y";
         include "input/colormap_blackbody.incl";
-      };
+      }
       d_z {
         field_list = ["density"];
         type = "image";
         include "input/schedule_cycle_2.incl"
         axis = "z";
         include "input/colormap_blackbody.incl";
-      };
+      }
    }
 

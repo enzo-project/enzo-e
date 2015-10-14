@@ -8,9 +8,9 @@ Mesh { root_blocks    = [16,16];
 
   Initial {
      density       { value = [  1.0, "input/Cello-1080.png", 
-                                0.1 ]; };
+                                0.1 ]; }
      total_energy  { value = [  0.1 / (0.4 * 0.1), "input/Cello-1080.png",
-                                1.0 / (0.4 * 1.0)  ]; };
+                                1.0 / (0.4 * 1.0)  ]; }
   }
 
 Output { list = ["density"]; }

@@ -7,5 +7,5 @@ Mesh { root_blocks    = [1,1]; }
 
 Output { 
     density { name = ["method_ppm-1-%06d.png", "cycle"]; } ;
-    data    { name = ["method_ppm-1-%02d-%06d.h5", "proc","cycle"]; };
+    data    { name = ["method_ppm-1-%02d-%06d.h5", "proc","cycle"]; }
 }

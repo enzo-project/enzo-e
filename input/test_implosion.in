@@ -77,8 +77,8 @@
          schedule {
             var =  "cycle";
             step = 25;
-         };
-      };
+         }
+      }
 
       MESH {
          type = "image";
@@ -95,18 +95,18 @@
          schedule {
             var =  "cycle";
             step = 25;
-         };
+         }
       }
    }
 
 
    Initial {
        density       { value = [ 0.125,                x + y < 0.1517, 
-                                 1.0 ]; };
+                                 1.0 ]; }
 
        total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
-                                 1.00 / (0.4 * 1.000) ]; };
+                                 1.00 / (0.4 * 1.000) ]; }
 
-       velocity_x    { value = 0.0; };
+       velocity_x    { value = 0.0; }
        velocity_y    { value = 0.0; }
    }

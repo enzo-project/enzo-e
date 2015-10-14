@@ -37,27 +37,27 @@ Output {
        field_list = ["density"];
        type     = "data";
        include "input/schedule_time_0.02.incl"
-    };
+    }
     de {
        field_list = ["density"];
        type     = "image";
        include "input/schedule_time_0.02.incl"
        include "input/colormap_blackbody.incl"
-    };
+    }
     dl {
        field_list = ["density"];
        image_log = true;
        type     = "image";
        include "input/schedule_time_0.02.incl"
        include "input/colormap_blackbody.incl"
-    };
+    }
     te {
 
        field_list = ["total_energy"];
        type     = "image";
        include "input/schedule_time_0.02.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
-    };
+    }
 
     vx {
 
@@ -65,7 +65,7 @@ Output {
        type     = "image";
        include "input/schedule_time_0.02.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
-    };
+    }
 
     vy {
 
@@ -73,7 +73,7 @@ Output {
        type     = "image";
        include "input/schedule_time_0.02.incl"
        colormap = [1.0,1.0,1.0, 1.0,0.0,0.0,  0.75,0.25,0.0,  1.0,1.0,0.0,   0.0,1.0,0.0,  0.0,0.0,1.0,  0.5,1.0,0.5];
-    };
+    }
 
     mesh {
 	type     = "image";

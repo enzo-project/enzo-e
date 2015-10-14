@@ -8,8 +8,8 @@ Mesh { root_rank = 3; }
  Adapt {
      max_level = 3;
      list = [ "shock", "shear" ];
-     shock { type = "shock"; store = "refine_shock"; };
-     shear { type = "shear"; store = "refine_shear";  };
+     shock { type = "shock"; store = "refine_shock"; }
+     shear { type = "shear"; store = "refine_shear";  }
  }
 
  Initial {
@@ -35,7 +35,7 @@ Mesh { root_rank = 3; }
          dual_energy = false;
          flattening = 3;
          steepening = true;
-     };
+     }
      turbulence {
          mach_number = 1.0;
          e_dot       = -1.0;
@@ -79,14 +79,14 @@ Mesh { root_rank = 3; }
              var =  "seconds";
              start = 600.0;
              step = 600.0;
-         };
-     };
+         }
+     }
 
      hdf5 {
          name = [ "turbulence3d-p%02d-c%04d.h5", "proc", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "data";
-     };
+     }
      de_png {
          include "input/colormap_rainbow.incl"
          field_list = [ "density" ];
@@ -94,7 +94,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-de-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      vx_png {
          include "input/colormap_rainbow.incl"
          field_list = [ "velocity_x" ];
@@ -102,7 +102,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-vx-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      vy_png {
          include "input/colormap_rainbow.incl"
          field_list = [ "velocity_y" ];
@@ -110,7 +110,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-vy-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      vz_png {
          include "input/colormap_rainbow.incl"
          field_list = [ "velocity_z" ];
@@ -118,7 +118,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-vz-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      p_png {
          include "input/colormap_rainbow.incl"
          field_list = [ "pressure" ];
@@ -126,7 +126,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-p-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      te_png {
          include "input/colormap_rainbow.incl"
          field_list = [ "total_energy" ];
@@ -134,7 +134,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-te-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      mesh {
          colormap = [ 0.0, 0.0, 0.0, 
                       0.0, 0.0, 1.0, 
@@ -151,7 +151,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-mesh-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      refine_shock {
          colormap = [0.0, 1.0, 0.0,   # green coarsen,
                      0.0, 0.0, 0.0,   # white same
@@ -161,7 +161,7 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-refine_shock-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
      refine_shear {
          colormap = [0.0, 1.0, 0.0,   # green coarsen,
                      0.0, 0.0, 0.0,   # white same
@@ -173,6 +173,6 @@ Mesh { root_rank = 3; }
          name = [ "turbulence3d-refine_shear-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"
          type = "image";
-     };
+     }
  }
 

@@ -8,8 +8,8 @@ Mesh {
 
 Output {
 
-  phi_png { name = ["method_gravity_cg-2-phi-%06d.png", "cycle"]; };
-  rho_png { name = ["method_gravity_cg-2-rho-%06d.png", "cycle"]; };
-  phi_h5  { name = ["method_gravity_cg-2-phi-%06d.h5",  "cycle"]; };
-  rho_h5  { name = ["method_gravity_cg-2-rho-%06d.h5",  "cycle"]; };
+  phi_png { name = ["method_gravity_cg-2-phi-%06d.png", "cycle"]; }
+  rho_png { name = ["method_gravity_cg-2-rho-%06d.png", "cycle"]; }
+  phi_h5  { name = ["method_gravity_cg-2-phi-%06d.h5",  "cycle"]; }
+  rho_h5  { name = ["method_gravity_cg-2-rho-%06d.h5",  "cycle"]; }
 }

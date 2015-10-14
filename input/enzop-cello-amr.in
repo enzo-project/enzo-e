@@ -9,12 +9,12 @@ Mesh    {
 Adapt {  max_level   = 7;  }
 
 Initial {
-    density       { value = [ 1.0+x, "input/enzop-cello-full.png",  0.125 ]; };
+    density       { value = [ 1.0+x, "input/enzop-cello-full.png",  0.125 ]; }
     total_energy  { value = 
     [ 
-       (1.0 + x)  / (0.4 * 1.0), "input/enzop-cello-full.png", 0.14 / (0.4 * 0.1)  ]; };
-    velocity_x    { value = [0.0]; };
-    velocity_y    { value = [0.0]; };
+       (1.0 + x)  / (0.4 * 1.0), "input/enzop-cello-full.png", 0.14 / (0.4 * 0.1)  ]; }
+    velocity_x    { value = [0.0]; }
+    velocity_y    { value = [0.0]; }
 }
 
 
@@ -28,12 +28,12 @@ Output {
            image_reduce_type = "max";
 	   image_type = "data";
            image_size = [1024,1024];
-          };
+          }
       mesh { name = ["enzo-mesh-%05d.png", "cycle"];
            include "input/schedule_cycle_10.incl"
 	   image_type = "mesh";
 	   image_size = [1025,1025];
-       };
+       }
 
 }
 Adapt {

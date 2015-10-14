@@ -15,7 +15,7 @@
  Initial {
      temperature {
          value = [ 1.0, "input/enzop-cello-half.png", 0.010000 ];
-     };
+     }
  }
 
  Boundary {
@@ -46,7 +46,7 @@
          max_coarsen = 10.0;
          min_refine = 20.0;
          type = "slope";
-     };
+     }
  }
 
  Field {
@@ -71,7 +71,7 @@
 
      heat {
          alpha = 1.0;
-     };
+     }
  }
 
 #======================================================================
@@ -91,7 +91,7 @@
          schedule {
              step = 100;
              var = "cycle";
-         };
+         }
 
          include "input/colormap_blackbody.incl"
 
@@ -101,7 +101,7 @@
 
          image_size = [ 1024, 512 ];
 
-     };
+     }
 
      mesh {
          type = "image";
@@ -111,7 +111,7 @@
          schedule {
              step = 100;
              var = "cycle";
-         };
+         }
 
          include "input/colormap_rainbow.incl"
 
@@ -120,6 +120,6 @@
          image_min = 0.0;
          image_max = 6.0;
          image_size = [ 1025, 513 ];
-     };
+     }
 
  }

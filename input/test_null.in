@@ -50,7 +50,7 @@ Output {
       schedule {
          var  = "cycle";
          step = 10;
-      };
+      }
       image_type = "mesh";
       image_reduce_type = "max";
       image_block_size = 5;

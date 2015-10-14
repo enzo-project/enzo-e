@@ -20,21 +20,21 @@ Boundary {
         type = "periodic";
 	axis = "x";
 #	mask = (0.25 < y && y < 0.75);
-     };
+     }
 #   Ox { 
 #        type = "outflow";
 #	axis = "x";
 #	mask = ! (0.25 < y && y < 0.75);
-#     };
+#     }
    Oy { 
         type = "outflow";
 	axis = "y";
 	face = "lower";
-     };
+     }
    R {
         type = "reflecting";
 	axis = "y";
 	face = "upper";
-     };
+     }
    list = ["Oy","P","R"];
 }

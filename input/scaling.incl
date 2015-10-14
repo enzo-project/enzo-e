@@ -59,12 +59,12 @@
 
    Initial {
        density       { value = [ 0.125,                x + y + z< 0.5,
-                                 1.0 ]; };
+                                 1.0 ]; }
        total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y +z < 0.5,
-	                         1.0  / (0.4 * 1.0) ]; };
-       velocity_x    { value = [0.0]; };
-       velocity_y    { value = [0.0]; };
-       velocity_z    { value = [0.0]; };
+	                         1.0  / (0.4 * 1.0) ]; }
+       velocity_x    { value = [0.0]; }
+       velocity_y    { value = [0.0]; }
+       velocity_z    { value = [0.0]; }
        internal_energy { value = [0.0]; }
    }
 
@@ -89,14 +89,14 @@
                     1.00, 1.00, 0.00, 
                     1.00, 0.00, 0.00];
         
-      };
+      }
 
       data {
         name = ["scaling-%0d.h5","cycle"];
         field_list = ["density"];
 	type     = "data";
 	include "input/schedule_cycle_100.incl"
-      };
+      }
 
    }
 

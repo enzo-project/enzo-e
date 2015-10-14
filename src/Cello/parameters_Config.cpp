@@ -646,7 +646,8 @@ void Config::read_output_ (Parameters * p) throw()
 
   num_output = p->list_length("list");
 
-  ASSERT2 ("Config::read","Number of file groups %d exceeds MAX_OUTPUT_GROUPS %d",
+  ASSERT2 ("Config::read",
+	   "Number of file groups %d exceeds MAX_OUTPUT_GROUPS %d",
 	   num_output, MAX_OUTPUT_GROUPS, num_output <= MAX_OUTPUT_GROUPS);
 
   p->group_set(0,"Output");

@@ -74,7 +74,7 @@ Method {
       flattening  = 3;
       steepening  = true;
       dual_energy = false;
-  };
+  }
 
    gravity_cg {
       iter_max = 1000;
@@ -89,24 +89,24 @@ Initial {
     density { 
        value = [ 1.39e-18, (x*x+y*y+z*z < 4.9e33),
                  1.39e-20 ]; 
-    };
+    }
     temperature {
        value = [ 10.0, (x*x+y*y+z*z < 4.9e33),
                1000.0 ];
-    };
+    }
     total_energy {
        value = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
                  8.8689e7*1000.0 ]; 
-    };
+    }
     internal_energy {
        value = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
                  8.8689e7*1000.0 ]; 
-    };
+    }
 }
 
    Boundary { 
       list = ["PERIODIC"];
-      PERIODIC { type = "periodic"; };
+      PERIODIC { type = "periodic"; }
       INFLOW {
          # -G*M/|r_b|
          #   = -6.67384e-8 * 2e33 / sqrt(x*x + y*y + z*z)
@@ -129,7 +129,7 @@ Initial {
 	 dir = ["collapse-%d","cycle"];
          include "input/schedule_cycle_100.incl";
          schedule { start = 100; }
-      };
+      }
 
       d {
          field_list = ["density"];
@@ -138,7 +138,7 @@ Initial {
 	 image_size = [1024,1024];
          include "input/schedule_cycle_10.incl";
          include "input/colormap_blackbody.incl";
-      };
+      }
       p {
          field_list = ["potential"];
          type     = "image";
@@ -146,7 +146,7 @@ Initial {
          name     = ["collapse-phi-%05d.png","cycle"];
          include "input/schedule_cycle_10.incl";
          include "input/colormap_blackbody.incl";
-      };
+      }
       ax {
          field_list = ["acceleration_x"];
          type     = "image";
@@ -154,7 +154,7 @@ Initial {
          name     = ["collapse-ax-%05d.png","cycle"];
          include "input/schedule_cycle_10.incl";
          include "input/colormap_blackbody.incl";
-      };
+      }
       mesh {
          type = "image";
 	 image_type = "mesh";
@@ -163,13 +163,13 @@ Initial {
 	 name = ["collapse-mesh-%05d.png","cycle"];
          include "input/colormap_rainbow.incl";
 	 include "input/schedule_cycle_10.incl";
-      };
+      }
       data {
          type = "data";
 	 field_list = [];
          name = ["collapse-%05d.h5","cycle"];
 	 include "input/schedule_cycle_10.incl";
-      };
+      }
       adapt {
          field_list = ["adapt"];
          type     = "image";
@@ -177,6 +177,6 @@ Initial {
          name     = ["collapse-adapt-%05d.png","cycle"];
          include "input/schedule_cycle_10.incl";
          include "input/colormap_greyscale.incl";
-      };
+      }
       
    }

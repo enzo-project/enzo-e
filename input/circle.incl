@@ -45,12 +45,12 @@ include "input/domain-2d-01.incl"
    Initial {
        density       { value = [ 0.125,
                                   (x- 0.125)*(x- 0.125)+(y- 0.125)*(y- 0.125) > 0.01,
-                                 1.0 ]; };
+                                 1.0 ]; }
        total_energy  { value = [ 0.14 / (0.4 * 0.125), 
                                   (x- 0.125)*(x- 0.125)+(y- 0.125)*(y- 0.125) > 0.01,
-	                         1.0  / (0.4 * 1.0) ]; };
-       velocity_x    { value = [0.0]; };
-       velocity_y    { value = [0.0]; };
+	                         1.0  / (0.4 * 1.0) ]; }
+       velocity_x    { value = [0.0]; }
+       velocity_y    { value = [0.0]; }
 
    }
 

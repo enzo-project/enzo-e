@@ -22,14 +22,14 @@ Output {
 
   density {
      name = ["checkpoint_ppm-8-%06d.png", "cycle"];
-  };
+  }
 
 
   checkpoint {
 
      type  = "checkpoint";
      dir   = ["checkpoint_ppm-8-%d","cycle"];
-     schedule { var = "cycle"; type ="list"; value=[10,20];};
+     schedule { var = "cycle"; type ="list"; value=[10,20];}
   }
 }
 

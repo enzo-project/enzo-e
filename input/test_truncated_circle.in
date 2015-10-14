@@ -63,25 +63,25 @@ Output {
 	image_min = 0.0;
 	image_max = 6.0;
         include "input/colormap_rainbow.incl"
-   };
+   }
    phi_png {
      type = "image";
      field_list = ["potential"];
      include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
-   };
+   }
    rho_png {
      type = "image";
      field_list = ["density"];
      image_log = true;
      include "input/schedule_cycle_1.incl"
      include "input/colormap_blackbody.incl"
-   };
+   }
    phi_h5 {
      type = "data";
      field_list = ["potential"];
      include "input/schedule_cycle_1.incl"
-   };
+   }
    rho_h5 {
      type = "data";
      field_list = ["density"];
@@ -98,9 +98,9 @@ Mesh {
 
 Output {
 
-  mesh    { name = ["tis2-mesh-%02d.png", "cycle"]; };
-  phi_png { name = ["tis2-phi-%02d.png",  "cycle"]; };
-  rho_png { name = ["tis2-rho-%02d.png",  "cycle"]; };
-  phi_h5  { name = ["tis2-phi-%02d-%02d.h5",   "cycle", "proc"]; };
-  rho_h5  { name = ["tis2-rho-%02d-%02d.h5",   "cycle", "proc"]; };
+  mesh    { name = ["tis2-mesh-%02d.png", "cycle"]; }
+  phi_png { name = ["tis2-phi-%02d.png",  "cycle"]; }
+  rho_png { name = ["tis2-rho-%02d.png",  "cycle"]; }
+  phi_h5  { name = ["tis2-phi-%02d-%02d.h5",   "cycle", "proc"]; }
+  rho_h5  { name = ["tis2-rho-%02d-%02d.h5",   "cycle", "proc"]; }
 }

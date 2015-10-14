@@ -80,7 +80,7 @@
 
      grackle {
         data_file = "input/CloudyData_UVB=HM2012.h5";
-     };
+     }
 
      ppm {
         diffusion   = true;
@@ -97,7 +97,7 @@
         type  = "checkpoint";
         dir   = ["method_grackle-1-%06d","cycle"];
         schedule { var = "cycle"; start = 1000; step = 1000; }
-     };
+     }
 
 
      data {
@@ -106,9 +106,9 @@
          schedule {
              var = "time";
              step = 0.1;
-         };
+         }
          type = "data";
-     };
+     }
      density {
          colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
          field_list = [
@@ -118,9 +118,9 @@
          schedule {
              var = "time";
              step = 0.1;
-         };
+         }
          type = "image";
-     };
+     }
  }
 
  Stopping {
