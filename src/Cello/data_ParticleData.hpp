@@ -24,18 +24,18 @@ public: // interface
 
   /// Return the attribute array for the given particle type and batch
 
-  /// char * attribute_array (it,ia,ib)
+  char * attribute_array (ParticleDescr *, int it, int ib, int ia);
 
   /// Return the number of batches of particles for the given type.
 
-  /// int num_batches (it)
+  int num_batches (int it) const;
 
   /// Return the number of particles in the given batch, of the given
   /// type, or total on the block.
 
-  /// int num_particles (it,ib)
-  /// int num_particles (it)
-  /// int num_particles ()
+  int num_particles (ParticleDescr *) const;
+  int num_particles (ParticleDescr *, int it) const;
+  int num_particles (ParticleDescr *, int it, int ib) const;
 
   /// Create the given number of particles of the given type.  Always
   /// creates them at the end instead of filling up any unused
@@ -67,6 +67,10 @@ private: /// functions
   /// long long assign_id_ ()
 
 private: /// attributes
+
+  /// Array of blocks of particle attributes array_[it][ib];
+  std::vector< std::vector< std::vector<char> > > attribute_array_;
+
 
 };
 

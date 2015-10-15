@@ -24,7 +24,8 @@ ParticleDescr::ParticleDescr() throw()
     type_index_(),
     attribute_name_(),
     attribute_index_(),
-    attribute_bytes_()
+    attribute_bytes_(),
+    batch_size_(1)
 {
 }
 
@@ -211,6 +212,28 @@ void ParticleDescr::set_interleaved (int it, bool interleaved)
 bool ParticleDescr::interleaved (int it) const
 {
   return attribute_interleaved_.at(it);
+}
+
+//----------------------------------------------------------------------
+
+void ParticleDescr::set_batch_size (int mb)
+{
+  batch_size_ = mb;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleDescr::batch_size () const
+{
+  return batch_size_;
+}
+
+//----------------------------------------------------------------------
+
+void ParticleDescr::index (int i, int * ib, int * ip) const
+{
+  *ib = i / batch_size_;
+  *ip = i % batch_size_;
 }
 
 //======================================================================

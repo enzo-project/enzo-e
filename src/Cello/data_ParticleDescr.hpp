@@ -95,21 +95,33 @@ public: // interface
 
   int stride(int it, int ia) const;
 
+  //--------------------------------------------------
+  // BATCHES
+  //--------------------------------------------------
+
   /// Set the size of batches.  Must be set at most once.  May be
   /// defined when ParticleDescr is created.
 
-  // int set_batch_size (mb)
+  void set_batch_size (int mb);
 
-  /// Return the batch and particle index given a global particle
-  /// index i.  (useful for iterating over range of particles,
-  /// e.g. initializing new particles after insert(); Basically just
-  /// div / mod.
+  /// Return the current batch size.
 
-  // int index (i, it, &ib, &ip)
+  int batch_size() const;
+
+  /// Return the batch and particle indices given a global particle
+  /// index i.  This is useful e.g. for iterating over a range of
+  /// particles, e.g. initializing new particles after insert().
+  /// Basically just div / mod.
+
+  void index (int i, int * ib, int * ip) const;
+
+  //--------------------------------------------------
+  // GROUPING
+  //--------------------------------------------------
 
   /// Return the Grouping object for the particle types
 
-  // Grouping * groups ();
+  Grouping * groups () { return & groups_; }
 
 private: // functions
 
@@ -155,6 +167,20 @@ private: // attributes
   /// Whether attributes are interleaved
   std::vector < bool > attribute_interleaved_;
 
+  //--------------------------------------------------
+  // GROUPING
+  //--------------------------------------------------
+
+  Grouping groups_;
+
+  //--------------------------------------------------
+  // BATCHES
+  //--------------------------------------------------
+
+  /// Number of particles per "batch".  Particles are allocated,
+  /// deallocated, and operated on a batch at a time
+
+  int batch_size_;
 };
 
 #endif /* DATA_PARTICLE_DESCR_HPP */

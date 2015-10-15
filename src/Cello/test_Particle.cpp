@@ -170,15 +170,36 @@ PARALLEL_MAIN_BEGIN
   unit_assert (particle.stride(i_trace,it_y) == 16/8);
   unit_assert (particle.stride(i_trace,it_z) == 16/2);
 
-
-
   //--------------------------------------------------
   //   Batch
   //--------------------------------------------------
 
+  unit_func("batch_size()");
+  unit_assert (particle.batch_size() == 1);
+  unit_func("set_batch_size()");
+  particle.set_batch_size(1024);
+  unit_assert (particle.batch_size() == 1024);
+
+  unit_func("index()");
+  int ib,ip;
+
+  particle.index(0,&ib,&ip);
+  unit_assert (ib==0 && ip==0);
+  particle.index(1023,&ib,&ip);
+  unit_assert (ib==0 && ip==1023);
+  particle.index(1024,&ib,&ip);
+  unit_assert (ib==1 && ip==0);
+  particle.index(1024*1024,&ib,&ip);
+  unit_assert (ib==1024 && ip==0);
+  
   //--------------------------------------------------
   //   Particle
   //--------------------------------------------------
+
+  unit_func("num_batches()");
+  particle.num_batches(i_dark) == 0;
+  particle.num_batches(i_trace) == 0;
+  
 
   //--------------------------------------------------
   //   Grouping

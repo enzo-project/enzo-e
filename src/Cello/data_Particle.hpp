@@ -144,18 +144,26 @@ public: // interface
   /// Set the size of batches.  Must be set at most once.  May be
   /// defined when ParticleDescr is created.
 
-  // int set_batch_size (mb)
+  void set_batch_size (int mb)
+  { particle_descr_->set_batch_size(mb); }
+
+  /// Return the current batch size.
+
+  int batch_size() const
+  { return particle_descr_->batch_size(); }
 
   /// Return the batch and particle index given a global particle
   /// index i.  (useful for iterating over range of particles,
   /// e.g. initializing new particles after insert(); Basically just
   /// div / mod.
 
-  // int index (i, it, &ib, &ip)
+  void index (int i, int * ib, int * ip) const
+  { particle_descr_->index(i,ib,ip); }
 
   /// Return the Grouping object for the particle types
 
-  // Grouping * groups ();
+  Grouping * groups ()
+  { return particle_descr_->groups(); }
 
   //==================================================
   // ParticleData
@@ -163,18 +171,24 @@ public: // interface
 
   /// Return the attribute array for the given particle type and batch
 
-  /// char * attribute_array (it,ia,ib)
+  char * attribute_array (int it,int ib,int ia)
+  { return particle_data_->attribute_array 
+      (particle_descr_, it,ib,ia); }
 
   /// Return the number of batches of particles for the given type.
 
-  /// int num_batches (it)
+  int num_batches (int it) const
+  { return particle_data_->num_batches(it); }
 
   /// Return the number of particles in the given batch, of the given
   /// type, or total on the block.
 
-  /// int num_particles (it,ib)
-  /// int num_particles (it)
-  /// int num_particles ()
+  int num_particles (int it, int ib) const
+  { return particle_data_->num_particles(particle_descr_,it,ib); }
+  int num_particles (int it) const
+  { return particle_data_->num_particles(particle_descr_,it); }
+  int num_particles () const
+  { return particle_data_->num_particles(particle_descr_); }
 
   /// Create the given number of particles of the given type.  Always
   /// creates them at the end instead of filling up any unused

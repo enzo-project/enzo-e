@@ -180,7 +180,7 @@ private: // attributes
   /// Index of each field in name_
   std::map<std::string,int> id_;
 
-  /// String identifying each group
+  /// Groupings of fields
   Grouping groups_;
 
   /// alignment of start of each field in bytes
