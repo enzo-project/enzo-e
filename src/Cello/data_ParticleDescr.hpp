@@ -65,6 +65,11 @@ public: // interface
 
   std::string attribute_name (int it, int ia) const;
 
+  /// Byte offsets of attributes into block array.  Not including
+  /// initial offset for 16-byte alignment.
+
+  int attribute_offset(int it, int ia) const;
+
   //--------------------------------------------------
   // BYTES
   //--------------------------------------------------
@@ -111,7 +116,7 @@ public: // interface
   /// Return the batch and particle indices given a global particle
   /// index i.  This is useful e.g. for iterating over a range of
   /// particles, e.g. initializing new particles after insert().
-  /// Basically just div / mod.
+  /// Basically just div / mod.  ASSUMES COMPRESSED.
 
   void index (int i, int * ib, int * ip) const;
 
@@ -166,6 +171,12 @@ private: // attributes
 
   /// Whether attributes are interleaved
   std::vector < bool > attribute_interleaved_;
+
+  /// Arrays of byte offsets within a batch for attributes for each
+  /// type.  Does not take into account byte alignment, since that's
+  /// different for different blocks.  Referenced as [it][ia]
+
+  std::vector < std::vector <int> > attribute_offset_;
 
   //--------------------------------------------------
   // GROUPING

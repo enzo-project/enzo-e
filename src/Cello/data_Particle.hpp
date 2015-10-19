@@ -65,7 +65,8 @@ public: // interface
   /// Create a new type and return its id
 
   int new_type(std::string type)
-  { return particle_descr_->new_type(type); }
+  { particle_data_->new_type();
+    return particle_descr_->new_type(type); }
 
   /// Return the number of types of particles
 
@@ -105,6 +106,12 @@ public: // interface
 
   std::string attribute_name (int it, int ia) const
   { return particle_descr_->attribute_name(it,ia); }
+
+  /// Byte offsets of attributes into block array.  Not including
+  /// initial offset for 16-byte alignment.
+
+  int attribute_offset(int it, int ia) const
+  { return particle_descr_->attribute_offset(it,ia); }
 
   //--------------------------------------------------
   // BYTES
@@ -153,9 +160,9 @@ public: // interface
   { return particle_descr_->batch_size(); }
 
   /// Return the batch and particle index given a global particle
-  /// index i.  (useful for iterating over range of particles,
-  /// e.g. initializing new particles after insert(); Basically just
-  /// div / mod.
+  /// index i.  This is useful e.g. for iterating over range of
+  /// particles, e.g. initializing new particles after insert().
+  /// Basically just div / mod.  ASSUMES COMPRESSED.
 
   void index (int i, int * ib, int * ip) const
   { particle_descr_->index(i,ib,ip); }
@@ -195,22 +202,30 @@ public: // interface
   /// particle spaces in earlier batches, to ease initialization via
   /// index()
 
-  /// void insert_particles (it,np)
+  int insert_particles (int it, int np)
+  { return particle_data_->insert_particles (particle_descr_, it, np); }
 
   /// Delete the given particles in the batch according to mask
   /// attribute.  Compresses the batch if particles deleted, so batch
   /// may have fewer than max number of particles.  Other batches
   /// remain unchanged.
 
-  /// void delete_particles (it,ib,im)
+  void delete_particles (int it, int ib, const bool * m)
+  { particle_data_->delete_particles (particle_descr_,it,ib,m); }
 
   /// Same as delete, but inserts particles into a second Particle
-  /// object.  void split_particles (it,ib,im,particle) Compress
-  /// particles in batches so that ib'th batch size equals batch_size.
-  /// May be performed periodically to recover space lost in multiple
-  /// insert/deletes
+  /// object.
 
-  /// void compress (it)
+  void split_particles (int it, int ib, const bool *m, Particle particle)
+  { particle_data_->split_particles
+      (particle_descr_, it,ib,m,particle.particle_data()); }
+
+  /// Compress particles in batches so that ib'th batch size equals
+  /// batch_size.  May be performed periodically to recover space lost
+  /// in multiple insert/deletes
+
+  void compress (int it, int ib, const bool * m)
+  { particle_data_->compress(particle_descr_,it,ib,m); }
 
 private: // functions
 

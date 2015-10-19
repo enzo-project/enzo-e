@@ -25,6 +25,7 @@ ParticleDescr::ParticleDescr() throw()
     attribute_name_(),
     attribute_index_(),
     attribute_bytes_(),
+    attribute_offset_(),
     batch_size_(1)
 {
 }
@@ -38,6 +39,7 @@ void ParticleDescr::pup (PUP::er &p)
   p | attribute_name_;
   p | attribute_index_;
   p | attribute_bytes_;
+  p | attribute_offset_;
 }
 
 //----------------------------------------------------------------------
@@ -65,6 +67,7 @@ int ParticleDescr::new_type(std::string type_name)
   attribute_name_. resize(nt + 1);
   attribute_index_.resize(nt + 1);
   attribute_bytes_.resize(nt + 1);
+  attribute_offset_.resize(nt + 1);
 
   return nt;
 }
@@ -123,13 +126,31 @@ int ParticleDescr::new_attribute
 	 
 #endif
 
-  const int na = num_attributes(it);
+  const int ia = num_attributes(it);
 
   attribute_name_[it].push_back(attribute_name);
-  attribute_index_[it][attribute_name] = na;
+  attribute_index_[it][attribute_name] = ia;
   attribute_bytes_[it].push_back(attribute_bytes);
 
-  return na;
+  // Calculate offset, ensuring type of size N bytes is aligned
+  // accordingly in memory on at least N-byte boundary.
+
+  int offset;
+  if (attribute_interleaved_[it]) {
+    offset = (ia > 0) ?
+      attribute_offset_[it][ia-1] + attribute_bytes_[it][ia-1] : 0;
+    int align = offset % attribute_bytes;
+    if (align != 0) {
+      offset += (attribute_bytes - align);
+    }
+  } else {
+    ASSERT ("ParticleDescr::new_attribute",
+	    "Non-interleaved particles not implemented",
+	    false);
+  }
+  attribute_offset_[it].push_back(offset);
+
+  return ia;
 }
 
 //----------------------------------------------------------------------
@@ -234,6 +255,13 @@ void ParticleDescr::index (int i, int * ib, int * ip) const
 {
   *ib = i / batch_size_;
   *ip = i % batch_size_;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleDescr::attribute_offset (int it, int ia) const
+{
+  return attribute_offset_[it][ia]; 
 }
 
 //======================================================================

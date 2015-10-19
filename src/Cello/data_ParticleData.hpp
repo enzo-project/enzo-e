@@ -42,22 +42,35 @@ public: // interface
   /// particle spaces in earlier batches, to ease initialization via
   /// index()
 
-  /// void insert_particles (it,np)
+  int insert_particles (ParticleDescr *, int it, int np);
 
   /// Delete the given particles in the batch according to mask
   /// attribute.  Compresses the batch if particles deleted, so batch
   /// may have fewer than max number of particles.  Other batches
   /// remain unchanged.
 
-  /// void delete_particles (it,ib,im)
+  void delete_particles (ParticleDescr *, int it, int ib, const bool * m);
 
   /// Same as delete, but inserts particles into a second Particle
-  /// object.  void split_particles (it,ib,im,particle) Compress
-  /// particles in batches so that ib'th batch size equals batch_size.
-  /// May be performed periodically to recover space lost in multiple
-  /// insert/deletes
+  /// object.
 
-  /// void compress (it)
+  void split_particles (ParticleDescr *, int it, int ib, const bool *m,
+			ParticleData * particle);
+
+  /// Compress particles in batches so that ib'th batch size equals
+  /// batch_size.  May be performed periodically to recover space lost
+  /// in multiple insert/deletes
+
+  void compress (ParticleDescr *, int it, int ib, const bool * m);
+
+  /// Add a new type to the attribute_array.  Should only be called
+  /// by Particle.
+
+  void new_type()
+  {
+    attribute_array_.resize(attribute_array_.size()+1);
+    attribute_align_.resize(attribute_align_.size()+1);
+  }
 
 private: /// functions
 
@@ -66,11 +79,19 @@ private: /// functions
 
   /// long long assign_id_ ()
 
+  /// Allocate attribute_array_ block, aligned at 16 byte boundary
+  /// with updated attribute_align_
+  void resize_array_ (ParticleDescr *, int it, int ib, int np);
+
 private: /// attributes
 
   /// Array of blocks of particle attributes array_[it][ib];
   std::vector< std::vector< std::vector<char> > > attribute_array_;
 
+  /// Alignment adjustment to correct for 16-byte alignment of
+  /// first attribute in each batch
+
+  std::vector< std::vector< char > > attribute_align_;
 
 };
 
