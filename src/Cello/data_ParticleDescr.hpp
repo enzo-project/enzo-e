@@ -17,10 +17,12 @@ class ParticleDescr {
 
   //----------------------------------------------------------------------
 
+  friend class Particle;
+
 public: // interface
 
   /// Constructor
-  ParticleDescr() throw();
+  ParticleDescr(int batch_size) throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -51,7 +53,7 @@ public: // interface
 
   /// Create a new attribute for the given type and return its id
 
-  int new_attribute(int it, std::string attribute, int attribute_type);
+  int new_attribute(int it, std::string attribute, int attribute_bytes);
 
   /// Return the number of attributes of the given type.
 
@@ -71,18 +73,6 @@ public: // interface
   int attribute_offset(int it, int ia) const;
 
   //--------------------------------------------------
-  // BYTES
-  //--------------------------------------------------
-
-  /// Return the number of bytes per particle allocated for all attributes
-
-  int attribute_bytes (int it) const;
-
-  /// Return the number of bytes allocated for the given attribute.
-
-  int attribute_bytes(int it,int ia) const;
-
-  //--------------------------------------------------
   // INTERLEAVING
   //--------------------------------------------------
 
@@ -94,6 +84,16 @@ public: // interface
 
   bool interleaved (int it) const;
 
+  //--------------------------------------------------
+  // BYTES
+  //--------------------------------------------------
+
+  /// Return the number of bytes allocated for the given attribute.
+  int attribute_bytes (int it,int ia) const;
+
+  /// Return the number of bytes use to represent a particle.
+  int particle_bytes (int it) const;
+
   /// Return the stride of the given attribute if interleaved, otherwise 1.
   /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
   /// Must be evenly divisible.
@@ -103,11 +103,6 @@ public: // interface
   //--------------------------------------------------
   // BATCHES
   //--------------------------------------------------
-
-  /// Set the size of batches.  Must be set at most once.  May be
-  /// defined when ParticleDescr is created.
-
-  void set_batch_size (int mb);
 
   /// Return the current batch size.
 
@@ -130,10 +125,12 @@ public: // interface
 
 private: // functions
 
-  void check_it_(std::string type_name, std::string file, int line);
+  /// Return true iff it and ia are in range
+  bool check_(int it, int ia) const;
+  bool check_(int it) const;
 
-  void check_ia_(int it, std::string attribute_name, std::string file, int line);
-
+  /// increment value if needed so that it is a multiple of bytes
+  int align_(int value, int bytes) const;
   //----------------------------------------------------------------------
 
 private: // attributes
@@ -162,15 +159,22 @@ private: // attributes
   // BYTES
   //--------------------------------------------------
 
-  /// Bytes used for each particle attribute, max 127
-  std::vector < std::vector<char> > attribute_bytes_;
+  /// Bytes used for each particle attribute.  Must be a
+  /// factor of 2
+  std::vector < std::vector<int> > attribute_bytes_;
+
+  /// Number of bytes used to store all attributes for each particle
+  /// type, including any extra for alignment of stride.
+  std::vector < int > particle_bytes_;
 
   //--------------------------------------------------
   // INTERLEAVING
   //--------------------------------------------------
 
-  /// Whether attributes are interleaved
-  std::vector < bool > attribute_interleaved_;
+  /// Whether attributes are interleaved.  (char since Charm++ pup
+  /// doesn't recognize bool)
+
+  std::vector < char > attribute_interleaved_;
 
   /// Arrays of byte offsets within a batch for attributes for each
   /// type.  Does not take into account byte alignment, since that's

@@ -34,10 +34,10 @@ Simulation::Simulation
   performance_name_(""),
   performance_stride_(1),
   // projections_tracing_(1),
+  schedule_balance_(0),
   monitor_(0),
   hierarchy_(0),
-  field_descr_(0),
-  schedule_balance_(0)
+  field_descr_(0)
 {
   debug_open();
 

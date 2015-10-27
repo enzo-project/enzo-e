@@ -18,12 +18,12 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   unit_class("ParticleDescr");
-  ParticleDescr particle_descr;
+  ParticleDescr * particle_descr = new ParticleDescr(1024);
 
   unit_class("ParticleData");
-  ParticleData particle_data;
+  ParticleData * particle_data = new ParticleData;
 
-  Particle particle (&particle_descr, &particle_data);
+  Particle particle (particle_descr, particle_data);
 
   //--------------------------------------------------
   //   Type
@@ -34,16 +34,16 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("num_types()");
   unit_assert (particle.num_types() == 0);
-  const int i_dark  = particle.new_type ("dark");
+  const int it_dark  = particle.new_type ("dark");
   unit_func ("new_type()");
   unit_assert (particle.num_types() == 1);
   unit_func ("num_types()");
-  unit_assert (i_dark == 0);
-  const int i_trace = particle.new_type ("trace");
+  unit_assert (it_dark == 0);
+  const int it_trace = particle.new_type ("trace");
   unit_func ("new_type()");
   unit_assert (particle.num_types() == 2);
   unit_func ("num_types()");
-  unit_assert (i_trace == 1);
+  unit_assert (it_trace == 1);
   const int i_star  = particle.new_type ("star");
   unit_func ("new_type()");
   unit_assert (particle.num_types() == 3);
@@ -56,14 +56,14 @@ PARALLEL_MAIN_BEGIN
   unit_assert (i_sink == 3);
 
   unit_func ("type_name()");
-  unit_assert(particle.type_name(i_dark) == "dark");
-  unit_assert(particle.type_name(i_trace) == "trace");
+  unit_assert(particle.type_name(it_dark) == "dark");
+  unit_assert(particle.type_name(it_trace) == "trace");
   unit_assert(particle.type_name(i_star) == "star");
   unit_assert(particle.type_name(i_sink) == "sink");
 
   unit_func ("type_index()");
-  unit_assert(particle.type_index("dark")  == i_dark);
-  unit_assert(particle.type_index("trace") == i_trace);
+  unit_assert(particle.type_index("dark")  == it_dark);
+  unit_assert(particle.type_index("trace") == it_trace);
   unit_assert(particle.type_index("star")  == i_star);
   unit_assert(particle.type_index("sink")  == i_sink);
 
@@ -73,120 +73,74 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   unit_func("interleaved");
-  unit_assert(particle.interleaved(i_dark) == false);
-  unit_assert(particle.interleaved(i_trace) == false);
+  unit_assert(particle.interleaved(it_dark) == false);
+  unit_assert(particle.interleaved(it_trace) == false);
 
   unit_func("set_interleaved");
-  particle.set_interleaved(i_dark,true);
-  unit_assert(particle.interleaved(i_dark) == true);
-  unit_assert(particle.interleaved(i_trace) == false);
-  particle.set_interleaved(i_trace,true);
-  unit_assert(particle.interleaved(i_dark) == true);
-  unit_assert(particle.interleaved(i_trace) == true);
-  particle.set_interleaved(i_dark,false);
-  unit_assert(particle.interleaved(i_dark) == false);
-  unit_assert(particle.interleaved(i_trace) == true);
+  particle.set_interleaved(it_dark,true);
+  unit_assert(particle.interleaved(it_dark) == true);
+  unit_assert(particle.interleaved(it_trace) == false);
+  particle.set_interleaved(it_trace,true);
+  unit_assert(particle.interleaved(it_dark) == true);
+  unit_assert(particle.interleaved(it_trace) == true);
+  particle.set_interleaved(it_dark,false);
+
+  unit_assert(particle.interleaved(it_dark) == false);
+
+  unit_assert(particle.interleaved(it_trace) == true);
 
   //--------------------------------------------------
   //  Attribute
   //--------------------------------------------------
 
   unit_func ("num_attributes");
-  unit_assert (particle.num_attributes(i_dark) == 0);
+  unit_assert (particle.num_attributes(it_dark) == 0);
   unit_func ("new_attribute");
-  const int id_x = particle.new_attribute (i_dark, "position_x", 4);
+  const int ia_x = particle.new_attribute (it_dark, "position_x", 4);
   unit_func ("num_attributes");
-  unit_assert (particle.num_attributes(i_dark) == 1);
+  unit_assert (particle.num_attributes(it_dark) == 1);
   unit_func ("new_attribute");
-  const int id_y = particle.new_attribute (i_dark, "position_y", 4);
+  const int ia_y = particle.new_attribute (it_dark, "position_y", 4);
   unit_func ("num_attributes");
-  unit_assert (particle.num_attributes(i_dark) == 2);
+  unit_assert (particle.num_attributes(it_dark) == 2);
   unit_func ("new_attribute");
-  const int id_z = particle.new_attribute (i_dark, "position_z", 4);
+  const int ia_z = particle.new_attribute (it_dark, "position_z", 4);
   unit_func ("num_attributes");
-  unit_assert (particle.num_attributes(i_dark) == 3);
+  unit_assert (particle.num_attributes(it_dark) == 3);
   unit_func ("new_attribute");
-  const int id_vx = particle.new_attribute (i_dark, "velocity_x", 8);
+  const int ia_vx = particle.new_attribute (it_dark, "velocity_x", 8);
   unit_func ("num_attributes");
-  unit_assert (particle.num_attributes(i_dark) == 4);
+  unit_assert (particle.num_attributes(it_dark) == 4);
   unit_func ("new_attribute");
-  const int id_vy = particle.new_attribute (i_dark, "velocity_y", 8);
+  const int ia_vy = particle.new_attribute (it_dark, "velocity_y", 8);
   unit_func ("num_attributes");
-  unit_assert (particle.num_attributes(i_dark) == 5);
+  unit_assert (particle.num_attributes(it_dark) == 5);
   unit_func ("new_attribute");
-  const int id_vz = particle.new_attribute (i_dark, "velocity_z", 8);
+  const int ia_vz = particle.new_attribute (it_dark, "velocity_z", 8);
   unit_func ("num_attributes");
-  unit_assert (particle.num_attributes(i_dark) == 6);
+  unit_assert (particle.num_attributes(it_dark) == 6);
   unit_func ("new_attribute");
-  const int id_m = particle.new_attribute (i_dark, "mass", 8);
+  const int ia_m = particle.new_attribute (it_dark, "mass", 8);
   
   unit_func ("attribute_name()");
-  unit_assert(particle.attribute_name(i_dark,id_x) == "position_x");
-  unit_assert(particle.attribute_name(i_dark,id_y) == "position_y");
-  unit_assert(particle.attribute_name(i_dark,id_z) == "position_z");
-  unit_assert(particle.attribute_name(i_dark,id_vx) == "velocity_x");
-  unit_assert(particle.attribute_name(i_dark,id_vy) == "velocity_y");
-  unit_assert(particle.attribute_name(i_dark,id_vz) == "velocity_z");
+  unit_assert(particle.attribute_name(it_dark,ia_x) == "position_x");
+  unit_assert(particle.attribute_name(it_dark,ia_y) == "position_y");
+  unit_assert(particle.attribute_name(it_dark,ia_z) == "position_z");
+  unit_assert(particle.attribute_name(it_dark,ia_vx) == "velocity_x");
+  unit_assert(particle.attribute_name(it_dark,ia_vy) == "velocity_y");
+  unit_assert(particle.attribute_name(it_dark,ia_vz) == "velocity_z");
 
   unit_func ("attribute_index()");
-  unit_assert(particle.attribute_index(i_dark,"position_x")  == id_x);
+  unit_assert(particle.attribute_index(it_dark,"position_x")  == ia_x);
 
-  const int it_x = particle.new_attribute (i_trace, "position_x", 4);
-  const int it_y = particle.new_attribute (i_trace, "position_y", 8);
-  const int it_z = particle.new_attribute (i_trace, "position_z", 2);
-
-  //--------------------------------------------------
-  //   Bytes
-  //--------------------------------------------------
-
-  unit_func("attribute_bytes(it,ia)");
-  unit_assert(particle.attribute_bytes(i_dark,id_x) == 4);
-  unit_assert(particle.attribute_bytes(i_dark,id_y) == 4);
-  unit_assert(particle.attribute_bytes(i_dark,id_z) == 4);
-  unit_assert(particle.attribute_bytes(i_dark,id_vx) == 8);
-  unit_assert(particle.attribute_bytes(i_dark,id_vy) == 8);
-  unit_assert(particle.attribute_bytes(i_dark,id_vz) == 8);
-  unit_assert(particle.attribute_bytes(i_dark,id_m) == 8);
-  unit_func("attribute_bytes(it)");
-  // needs to be divisible by 8 for stride computation:
-  // 4+4+4+8+8+8+8 rounded up to closest multiple of 8
-  unit_assert(particle.attribute_bytes(i_dark) == 48);
-
-  unit_func("attribute_offset(it,ia)");
-  unit_assert(particle.attribute_offset(i_dark,id_x) == 0);
-  unit_assert(particle.attribute_offset(i_dark,id_y) == 4);
-  unit_assert(particle.attribute_offset(i_dark,id_z) == 8);
-  unit_assert(particle.attribute_offset(i_dark,id_vx) == 16);
-  unit_assert(particle.attribute_offset(i_dark,id_vy) == 24);
-  unit_assert(particle.attribute_offset(i_dark,id_vz) == 32);
-  unit_assert(particle.attribute_offset(i_dark,id_m) == 40);
-
-  unit_func("attribute_bytes(it,ia)");
-  unit_assert(particle.attribute_bytes(i_trace,it_x) == 4);
-  unit_assert(particle.attribute_bytes(i_trace,it_y) == 8);
-  unit_assert(particle.attribute_bytes(i_trace,it_z) == 2);
-  unit_func("attribute_bytes(it)");
-  unit_assert(particle.attribute_bytes(i_trace) == 16);
-
-  unit_func("stride");
-  unit_assert (particle.stride(i_dark,id_x) == 1);
-  unit_assert (particle.stride(i_dark,id_y) == 1);
-  unit_assert (particle.stride(i_dark,id_z) == 1);
-  unit_assert (particle.stride(i_dark,id_vx) == 1);
-  unit_assert (particle.stride(i_dark,id_vy) == 1);
-  unit_assert (particle.stride(i_dark,id_vz) == 1);
-  unit_assert (particle.stride(i_trace,it_x) == 16/4);
-  unit_assert (particle.stride(i_trace,it_y) == 16/8);
-  unit_assert (particle.stride(i_trace,it_z) == 16/2);
+  const int it_x = particle.new_attribute (it_trace, "position_x", 4);
+  const int it_y = particle.new_attribute (it_trace, "position_y", 8);
+  const int it_z = particle.new_attribute (it_trace, "position_z", 2);
 
   //--------------------------------------------------
   //   Batch
   //--------------------------------------------------
 
-  unit_func("batch_size()");
-  unit_assert (particle.batch_size() == 1);
-  unit_func("set_batch_size()");
-  particle.set_batch_size(1024);
   unit_assert (particle.batch_size() == 1024);
 
   unit_func("index()");
@@ -202,36 +156,88 @@ PARALLEL_MAIN_BEGIN
   unit_assert (ib==1024 && ip==0);
   
   //--------------------------------------------------
+  //   Bytes
+  //--------------------------------------------------
+
+  unit_func("attribute_bytes()");
+
+  unit_assert(particle.attribute_bytes(it_dark,ia_x) == 4);
+  unit_assert(particle.attribute_bytes(it_dark,ia_y) == 4);
+  unit_assert(particle.attribute_bytes(it_dark,ia_z) == 4);
+  unit_assert(particle.attribute_bytes(it_dark,ia_vx) == 8);
+  unit_assert(particle.attribute_bytes(it_dark,ia_vy) == 8);
+  unit_assert(particle.attribute_bytes(it_dark,ia_vz) == 8);
+  unit_assert(particle.attribute_bytes(it_dark,ia_m) == 8);
+
+  unit_assert(particle.attribute_bytes(it_trace,it_x) == 4);
+  unit_assert(particle.attribute_bytes(it_trace,it_y) == 8);
+  unit_assert(particle.attribute_bytes(it_trace,it_z) == 2);
+
+
+  unit_func("attribute_offset()");
+
+  // not interleaved
+  
+  int mp = particle.batch_size();
+
+  unit_assert(particle.attribute_offset(it_dark,ia_x) == 0*mp);
+  unit_assert(particle.attribute_offset(it_dark,ia_y) == 4*mp);
+  unit_assert(particle.attribute_offset(it_dark,ia_z) == 8*mp);
+  unit_assert(particle.attribute_offset(it_dark,ia_vx) == 12*mp);
+  unit_assert(particle.attribute_offset(it_dark,ia_vy) == 20*mp);
+  unit_assert(particle.attribute_offset(it_dark,ia_vz) == 28*mp);
+  unit_assert(particle.attribute_offset(it_dark,ia_m) == 36*mp);
+
+  unit_assert(particle.attribute_bytes(it_trace,it_x) == 4);
+  unit_assert(particle.attribute_bytes(it_trace,it_y) == 8);
+  unit_assert(particle.attribute_bytes(it_trace,it_z) == 2);
+
+  unit_func("stride");
+
+  // not interleaved
+  unit_assert (particle.stride(it_dark,ia_x) == 1);
+  unit_assert (particle.stride(it_dark,ia_y) == 1);
+  unit_assert (particle.stride(it_dark,ia_z) == 1);
+  unit_assert (particle.stride(it_dark,ia_vx) == 1);
+  unit_assert (particle.stride(it_dark,ia_vy) == 1);
+  unit_assert (particle.stride(it_dark,ia_vz) == 1);
+
+  // interleaved
+  unit_assert (particle.stride(it_trace,it_x) == 16/4);
+  unit_assert (particle.stride(it_trace,it_y) == 16/8);
+  unit_assert (particle.stride(it_trace,it_z) == 16/2);
+
+  //--------------------------------------------------
   //   Insert
   //--------------------------------------------------
 
   unit_func("num_batches");
 
-  unit_assert(particle.num_batches(i_dark) == 0);
-  unit_assert(particle.num_batches(i_trace) == 0);
+  unit_assert(particle.num_batches(it_dark) == 0);
+  unit_assert(particle.num_batches(it_trace) == 0);
 
   unit_func("insert_particles()");
 
-  int i0 = particle.insert_particles (i_dark, 10000);
+  int i0 = particle.insert_particles (it_dark, 10000);
 
   unit_assert (i0 == 0);
   unit_func("num_particles()");
-  unit_assert (particle.num_particles(i_dark) == 10000);
+  unit_assert (particle.num_particles(it_dark) == 10000);
   unit_func("num_batches()");
-  unit_assert (particle.num_batches(i_dark) == 10000/1024 + 1);
+  unit_assert (particle.num_batches(it_dark) == 10000/1024 + 1);
 
   unit_func("index()");
   particle.index(10000,&ib,&ip);
   unit_assert (ib == 10000/1024);
   unit_assert (ip == 10000%1024);
   
-  int i1 = particle.insert_particles (i_dark, 10000);
+  int i1 = particle.insert_particles (it_dark, 10000);
 
   unit_assert (i1 == 10000);
   unit_func("num_particles()");
-  unit_assert (particle.num_particles(i_dark) == 20000);
+  unit_assert (particle.num_particles(it_dark) == 20000);
   unit_func("num_batches()");
-  unit_assert (particle.num_batches(i_dark) == 20000/1024 + 1);
+  unit_assert (particle.num_batches(it_dark) == 20000/1024 + 1);
 
   unit_func("index()");
   particle.index(20000,&ib,&ip);
@@ -242,106 +248,166 @@ PARALLEL_MAIN_BEGIN
   //   Delete
   //--------------------------------------------------
 
-  int nb = particle.num_batches(i_dark);
+  int nb = particle.num_batches(it_dark);
 
-  int count = 0;
-  int index=0;
+  int count_particles = 0;
+  int index;
   for (int ib=0; ib<nb; ib++) {
-    int np = particle.num_particles(i_dark,ib);
-    float * x = (float *) particle.attribute_array(i_dark,ib,id_x);
-    float * y = (float *) particle.attribute_array(i_dark,ib,id_y);
-    float * z = (float *) particle.attribute_array(i_dark,ib,id_z);
-    double * vx = (double *) particle.attribute_array(i_dark,ib,id_vx);
-    double * vy = (double *) particle.attribute_array(i_dark,ib,id_vy);
-    double * vz = (double *) particle.attribute_array(i_dark,ib,id_vz);
-    int dx = particle.stride(i_dark,id_x);
-    int dv = particle.stride(i_dark,id_vx);
+    int np = particle.num_particles(it_dark,ib);
+    float * x = (float *) particle.attribute_array(it_dark,ib,ia_x);
+    float * y = (float *) particle.attribute_array(it_dark,ib,ia_y);
+    float * z = (float *) particle.attribute_array(it_dark,ib,ia_z);
+    double * vx = (double *) particle.attribute_array(it_dark,ib,ia_vx);
+    double * vy = (double *) particle.attribute_array(it_dark,ib,ia_vy);
+    double * vz = (double *) particle.attribute_array(it_dark,ib,ia_vz);
+    int dx = particle.stride(it_dark,ia_x);
+    int dv = particle.stride(it_dark,ia_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
-      count ++;
+      index = ip + ib*mp;
+      count_particles ++;
       x[ix]  = 10*index;
       y[ix]  = 10*index+1;
       z[ix]  = 10*index+2;
       vx[iv] = 10*index+3;
       vy[iv] = 10*index+4;
       vz[iv] = 10*index+5;
-      index++;
     }
   }
-  unit_assert(count == 20000);
+  unit_assert(count_particles == 20000);
 
   // run through again and compare values before deleting
-  nb = particle.num_batches(i_dark);
-  index = 0;
-  printf ("nb %d\n",nb);
+  nb = particle.num_batches(it_dark);
+  int count_wrong[6];
+  for (int i=0; i<6; i++) count_wrong[i] = 0;
   for (int ib=0; ib<nb; ib++) {
-    int np = particle.num_particles(i_dark,ib);
-    printf ("ib np %d %d\n",ib,np);
-    float * x = (float *) particle.attribute_array(i_dark,ib,id_x);
-    float * y = (float *) particle.attribute_array(i_dark,ib,id_y);
-    float * z = (float *) particle.attribute_array(i_dark,ib,id_z);
-    double * vx = (double *) particle.attribute_array(i_dark,ib,id_vx);
-    double * vy = (double *) particle.attribute_array(i_dark,ib,id_vy);
-    double * vz = (double *) particle.attribute_array(i_dark,ib,id_vz);
-    int dx = particle.stride(i_dark,id_x);
-    int dv = particle.stride(i_dark,id_vx);
+    index = ib*mp;
+    int np = particle.num_particles(it_dark,ib);
+    float * x = (float *) particle.attribute_array(it_dark,ib,ia_x);
+    float * y = (float *) particle.attribute_array(it_dark,ib,ia_y);
+    float * z = (float *) particle.attribute_array(it_dark,ib,ia_z);
+    double * vx = (double *) particle.attribute_array(it_dark,ib,ia_vx);
+    double * vy = (double *) particle.attribute_array(it_dark,ib,ia_vy);
+    double * vz = (double *) particle.attribute_array(it_dark,ib,ia_vz);
+    int dx = particle.stride(it_dark,ia_x);
+    int dv = particle.stride(it_dark,ia_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
-      if (x[ix] != 10*index)    printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,x[ix],1.0*10*index);
-      if (y[ix] != 10*index+1)  printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,y[ix],1.0*10*index+1);
-      if (z[ix] != 10*index+2)  printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,z[ix],1.0*10*index+2);
-      if (vx[iv] != 10*index+3) printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,vx[ix],1.0*10*index+3);
-      if (vy[iv] != 10*index+4) printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,vy[ix],1.0*10*index+4);
-      if (vz[iv] != 10*index+5) printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,vz[ix],1.0*10*index+5);
+      index = ip + ib*mp;
+      if (x[ix]  != 10*index ) count_wrong[0]++;
+      if (y[ix]  != 10*index+1) count_wrong[1]++;
+      if (z[ix]  != 10*index+2) count_wrong[2]++;
+      if (vx[iv] != 10*index+3) count_wrong[3]++;
+      if (vy[iv] != 10*index+4) count_wrong[4]++;
+      if (vz[iv] != 10*index+5) count_wrong[5]++;
       index++;
     }
   }
-
+  unit_assert (count_wrong[0] == 0);
+  unit_assert (count_wrong[1] == 0);
+  unit_assert (count_wrong[2] == 0);
+  unit_assert (count_wrong[3] == 0);
+  unit_assert (count_wrong[4] == 0);
+  unit_assert (count_wrong[5] == 0);
   // initialize mask for particles to delete
   bool mask[1024];
-  count = 0;
+  int count_delete = 0;
+
   for (int i=0; i<1024; i++) {
     mask[i] = (i % 3 == 0);
-    if (mask[i]) count++;
   }
 
-  printf ("deleting %d particles\n",count);
   unit_func("delete_particles()");
-  particle.delete_particles(i_dark,0,mask);
-
-  printf ("num particles = %d\n",particle.num_particles(i_dark));
-
-  unit_assert(particle.num_particles(i_dark) == 20000 - count);
-
-  int count2 = 0;
-  index = 0;
-  nb = particle.num_batches(i_dark);
-  printf ("nb %d\n",nb);
   for (int ib=0; ib<nb; ib++) {
-    int np = particle.num_particles(i_dark,ib);
-    printf ("ib np %d %d\n",ib,np);
-    float * x = (float *) particle.attribute_array(i_dark,ib,id_x);
-    float * y = (float *) particle.attribute_array(i_dark,ib,id_y);
-    float * z = (float *) particle.attribute_array(i_dark,ib,id_z);
-    double * vx = (double *) particle.attribute_array(i_dark,ib,id_vx);
-    double * vy = (double *) particle.attribute_array(i_dark,ib,id_vy);
-    double * vz = (double *) particle.attribute_array(i_dark,ib,id_vz);
-    int dx = particle.stride(i_dark,id_x);
-    int dv = particle.stride(i_dark,id_vx);
+    int np = particle.num_particles(it_dark,ib);
+    for (int ip=0; ip<np; ip++) if (mask[ip]) count_delete++;
+    particle.delete_particles(it_dark,ib,mask);
+  }
+
+  unit_assert(particle.num_particles(it_dark) == 20000 - count_delete);
+
+  index = 0;
+  nb = particle.num_batches(it_dark);
+  for (int i=0; i<6; i++) count_wrong[i] = 0;
+  count_particles = 0;
+  for (int ib=0; ib<nb; ib++) {
+    index = ib*mp;
+    int np = particle.num_particles(it_dark,ib);
+    float  * x =   (float *) particle.attribute_array(it_dark,ib,ia_x);
+    float  * y =   (float *) particle.attribute_array(it_dark,ib,ia_y);
+    float  * z =   (float *) particle.attribute_array(it_dark,ib,ia_z);
+    double * vx = (double *) particle.attribute_array(it_dark,ib,ia_vx);
+    double * vy = (double *) particle.attribute_array(it_dark,ib,ia_vy);
+    double * vz = (double *) particle.attribute_array(it_dark,ib,ia_vz);
+    int dx = particle.stride(it_dark,ia_x);
+    int dv = particle.stride(it_dark,ia_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
-      count2 ++;
-      if (index % 3) index++;
-      if (x[ix] != 10*index)    printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,x[ix],1.0*10*index);
-      if (y[ix] != 10*index+1)  printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,y[ix],1.0*10*index+1);
-      if (z[ix] != 10*index+2)  printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,z[ix],1.0*10*index+2);
-      if (vx[iv] != 10*index+3) printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,vx[ix],1.0*10*index+3);
-      if (vy[iv] != 10*index+4) printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,vy[ix],1.0*10*index+4);
-      if (vz[iv] != 10*index+5) printf ("%s:%d ib %d index %d value %g expected %g\n",__FILE__,__LINE__,ib,index,vz[ix],1.0*10*index+5);
+      count_particles ++;
+      if (ip % 2 == 0) index++;
+      if (x[ix]  != 10*index ) count_wrong[0]++;
+      if (y[ix]  != 10*index+1) count_wrong[1]++;
+      if (z[ix]  != 10*index+2) count_wrong[2]++;
+      if (vx[iv] != 10*index+3) count_wrong[3]++;
+      if (vy[iv] != 10*index+4) count_wrong[4]++;
+      if (vz[iv] != 10*index+5) count_wrong[5]++;
+      
       index++;
     }
   }
+  unit_assert (count_wrong[0] == 0);
+  unit_assert (count_wrong[1] == 0);
+  unit_assert (count_wrong[2] == 0);
+  unit_assert (count_wrong[3] == 0);
+  unit_assert (count_wrong[4] == 0);
+  unit_assert (count_wrong[5] == 0);
 
-  unit_assert (count == count2);
+  unit_assert (20000 - count_delete == count_particles);
+
+  unit_func("(re)insert_particles()");
+
+  nb = particle.num_batches(it_dark);
+  int ip0 = particle.num_particles(it_dark,nb-1);
+  int i2 = particle.insert_particles (it_dark, 10000);
+  unit_assert (i2 == 1024*(nb-1) + ip0);
+
+  unit_assert (particle.num_particles() == 10000 + count_particles);
+
+  unit_func("num_particles()");
+  nb = particle.num_batches(it_dark);
+  int np=particle.num_particles(it_dark);
+  int count = 0;
+  for (int ib=0; ib<nb; ib++) {
+    count += particle.num_particles(it_dark,ib);
+  }
+  unit_assert (np==count);
+
+  //======================================================================
+
   unit_func("split_particles()");
-  unit_assert (false);
+
+
+  ParticleData * particle_data_2 = new ParticleData;
+  Particle particle_2 (particle_descr,particle_data_2);
+
+  count_particles = particle.num_particles(it_dark);
+
+  count_delete = 0;
+  for (int i=0; i<1024; i++) {
+    mask[i] = (i % 5 == 0);
+  }
+
+  unit_func("split_particles()");
+  for (int ib=0; ib<nb; ib++) {
+    int np = particle.num_particles(it_dark,ib);
+    for (int ip=0; ip<np; ip++) if (mask[ip]) count_delete++;
+    particle.split_particles(it_dark,ib,mask,particle_2);
+  }
+
+  unit_assert (count_particles - count_delete
+	       == particle.num_particles(it_dark));
+
+  unit_assert (particle_2.num_particles(it_dark) == count_delete);
+  
+
+
   unit_func("compress()");
   unit_assert (false);
   unit_func("num_particles");

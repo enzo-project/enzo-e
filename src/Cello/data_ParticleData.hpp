@@ -14,6 +14,8 @@ class ParticleData {
   /// @ingroup  Data
   /// @brief    [\ref Data] 
 
+  friend class Particle;
+
 public: // interface
 
   /// Constructor
@@ -55,7 +57,7 @@ public: // interface
   /// object.
 
   void split_particles (ParticleDescr *, int it, int ib, const bool *m,
-			ParticleData * particle);
+			ParticleData * particle_data);
 
   /// Compress particles in batches so that ib'th batch size equals
   /// batch_size.  May be performed periodically to recover space lost
@@ -70,6 +72,7 @@ public: // interface
   {
     attribute_array_.resize(attribute_array_.size()+1);
     attribute_align_.resize(attribute_align_.size()+1);
+    particle_count_.resize(particle_count_.size()+1);
   }
 
 private: /// functions
@@ -79,9 +82,27 @@ private: /// functions
 
   /// long long assign_id_ ()
 
+  /// Allocate arrays based on ParticleDescr attributes
+  void allocate_(ParticleDescr * particle_descr)
+  {
+    const size_t nt = particle_descr->num_types();
+    if (attribute_array_.size() < nt) {
+      attribute_array_.resize(nt);
+    }
+    if (attribute_align_.size() < nt) {
+      attribute_align_.resize(nt);
+    }
+    if (particle_count_.size() < nt) {
+      particle_count_.resize(nt);
+    }
+  };
+
   /// Allocate attribute_array_ block, aligned at 16 byte boundary
   /// with updated attribute_align_
   void resize_array_ (ParticleDescr *, int it, int ib, int np);
+
+  void check_arrays_ (ParticleDescr * particle_descr,
+		      std::string file, int line) const;
 
 private: /// attributes
 
@@ -92,6 +113,9 @@ private: /// attributes
   /// first attribute in each batch
 
   std::vector< std::vector< char > > attribute_align_;
+
+  /// Number of particles in the batch particle_count_[it][ib];
+  std::vector < std::vector < int > > particle_count_;
 
 };
 

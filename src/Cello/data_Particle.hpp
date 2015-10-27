@@ -24,7 +24,9 @@ public: // interface
 	   ParticleData  * particle_data) throw()
     : particle_descr_ (particle_descr),
       particle_data_ (particle_data)
-  {}
+  {
+    particle_data_->allocate_(particle_descr);
+  }
 
   /// Copy constructor
   Particle(const Particle & particle) throw()
@@ -65,8 +67,11 @@ public: // interface
   /// Create a new type and return its id
 
   int new_type(std::string type)
-  { particle_data_->new_type();
-    return particle_descr_->new_type(type); }
+  { 
+    int it = particle_descr_->new_type(type); 
+    particle_data_->allocate_(particle_descr_);
+    return it;
+  }
 
   /// Return the number of types of particles
 
@@ -117,11 +122,6 @@ public: // interface
   // BYTES
   //--------------------------------------------------
 
-  /// Return the number of bytes per particle allocated for all attributes
-
-  int attribute_bytes (int it) const
-  { return particle_descr_->attribute_bytes(it); }
-
   /// Return the number of bytes allocated for the given attribute.
 
   int attribute_bytes(int it, int ia) const
@@ -147,12 +147,6 @@ public: // interface
 
   int stride(int it, int ia) const
   { return particle_descr_->stride(it,ia); }
-
-  /// Set the size of batches.  Must be set at most once.  May be
-  /// defined when ParticleDescr is created.
-
-  void set_batch_size (int mb)
-  { particle_descr_->set_batch_size(mb); }
 
   /// Return the current batch size.
 

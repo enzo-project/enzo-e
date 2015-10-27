@@ -10,6 +10,9 @@
 //----------------------------------------------------------------------
 
 ParticleData::ParticleData()
+  : attribute_array_(),
+    attribute_align_(),
+    particle_count_()
 {
 }
 
@@ -17,6 +20,9 @@ ParticleData::ParticleData()
 
 void ParticleData::pup (PUP::er &p)
 {
+  p | attribute_array_;
+  p | attribute_align_;
+  p | particle_count_;
 }
 
 //----------------------------------------------------------------------
@@ -59,11 +65,7 @@ int ParticleData::num_particles
   if ( !(0 <= it && it < particle_descr->num_types()) ) return 0;
   if ( !(0 <= ib && ib < num_batches(it)) ) return 0;
 
-  int bytes_array = attribute_array_[it][ib].size() - 15;
-  const int mb = particle_descr->attribute_bytes(it);
-  int size = bytes_array / mb;
-
-  return size;
+  return particle_count_[it][ib];
 }
 
 //----------------------------------------------------------------------
@@ -98,33 +100,49 @@ int ParticleData::insert_particles
 (ParticleDescr * particle_descr,
  int it, int np)
 {
-  int ib0 = num_batches(it) - 1;
-  int ip0 = num_particles(particle_descr,it,ib0);
-  const int mb = particle_descr->batch_size();
-  if (ib0 < 0 || ip0 == mb) {
-    ib0++;
-    ip0 = 0;
+
+  check_arrays_(particle_descr,__FILE__,__LINE__);
+
+  // find indices of last batch and particle in batch for return value
+  int ib_last = num_batches(it) - 1;
+  int ip_last = num_particles(particle_descr,it,ib_last);
+
+  int np_left = np;
+
+  const int np_batch = particle_descr->batch_size();
+
+  if (ib_last < 0 || ip_last == np_batch) {
+    ib_last++;
+    ip_last = 0;
   }
-  int ib = ib0;
-  int ip = ip0;
-  while (np > 0) {
-    int np1 = std::min(mb,np);
-    if (ip > 0) {
-      np1 = std::min(np1,mb-ip);
+  int ib_this = ib_last;
+  int ip_start = ip_last;
+  while (np_left > 0) {
+
+    // number of particles to add in this batch
+    int np_this = std::min(np_batch,np_left) - ip_start;
+
+    // resize arrays for a new batch if needed
+    if ( ib_this > num_batches(it) - 1) {
+      attribute_array_[it].resize(ib_this+1);
+      attribute_align_[it].resize(ib_this+1);
+      particle_count_[it].resize(ib_this+1);
     }
-    if ( ib > num_batches(it) - 1) {
-      attribute_array_[it].resize(ib+1);
-      attribute_align_[it].resize(ib+1);
-    }
-    // allocate 15 extra bytes so there is enough room when aligning
-    resize_array_(particle_descr,it,ib,ip+np1);
-    np -= np1;
-    ib++;
-    ip=0;
+
+    // allocate particles
+    
+    resize_array_(particle_descr,it,ib_this,ip_start+np_this);
+    particle_count_[it][ib_this] = ip_start+np_this;
+
+    // prepare for next batch
+
+    np_left -= np_this;
+    ib_this++;
+    ip_start=0;
   }
 
   // return global index of first particle
-  return (ib0*mb+ip0);
+  return (ip_last + np_batch*ib_last);
 }
 
 //----------------------------------------------------------------------
@@ -133,32 +151,103 @@ void ParticleData::delete_particles
 (ParticleDescr * particle_descr,
  int it, int ib, const bool * mask)
 {
-  const int na = particle_descr->attribute_bytes(it);
+  check_arrays_(particle_descr,__FILE__,__LINE__);
+
+  const bool interleaved = particle_descr->interleaved(it);
+
+  int npd=0;
+
+  const int na = particle_descr->num_attributes(it);
+
   const int np = num_particles(particle_descr,it,ib);
-  int nd=0;
-  char * array = attribute_array(particle_descr,it,ib,0);
-  for (int ip=0; ip<np; ip++) {
-    if (mask[ip]) {
-      nd++;
-    } else if (nd>0) {
-      for (int ia=0; ia<na; ia++) {
-	array [(ip-nd)*na+ia] = array [ip*na+ia];
+
+  if (interleaved) {
+
+    const int nb = particle_descr->particle_bytes(it);
+
+    for (int ip=0; ip<np; ip++) {
+      if (mask[ip]) {
+	npd++;
+      } else if (npd>0) {
+	for (int ia=0; ia<na; ia++) {
+	  char * a = attribute_array(particle_descr,it,ib,ia);
+	  for (int i=0; i<nb; i++) {
+	    a [i + nb*(ip-npd)] = a [i + nb*ip];
+	  }
+	}
+      }
+    }
+  } else { // ! interleaved
+
+    for (int ip=0; ip<np; ip++) {
+      if (mask[ip]) {
+	npd++;
+      } else if (npd>0) {
+	for (int ia=0; ia<na; ia++) {
+	  const int nb = particle_descr->attribute_bytes(it,ia);
+	  char * a = attribute_array(particle_descr,it,ib,ia);
+	  for (int i=0; i<nb; i++) {
+	    a [i + nb*(ip-npd)] = a [i + nb*ip];
+	  }
+	}
       }
     }
   }
-  printf ("nd = %d\n",nd);
-  if (nd>0) {
-    resize_array_(particle_descr,it,ib,np-nd);
+
+  if (npd>0 && interleaved) {
+    resize_array_(particle_descr,it,ib,np-npd);
   }
+  particle_count_[it][ib] = np-npd;
 }
 
 //----------------------------------------------------------------------
 
 void ParticleData::split_particles 
 (ParticleDescr * particle_descr, 
- int it, int ib, const bool *m,
- ParticleData * particle_data_split)
+ int it, int ib, const bool *mask,
+ ParticleData * particle_data_dest)
 {
+  check_arrays_(particle_descr,__FILE__,__LINE__);
+  const int na = particle_descr->num_attributes(it);
+  const int np = num_particles(particle_descr,it,ib);
+
+  // Return if no particles deleted
+  int nd=0;
+  for (int ip=0; ip<np; ip++) {
+    if (mask[ip]) nd++;
+  }
+  if (nd==0) return;
+
+  // insert nd particles
+
+  int i = particle_data_dest->insert_particles(particle_descr,it,nd);
+
+  // copy particles
+
+  const bool interleaved = particle_descr->interleaved(it);
+  if (interleaved) {
+    for (int ip=0; ip<np; ip++) {
+      const int mp = particle_descr->particle_bytes(it);
+      if (mask[ip]) {
+	int ibc,ipc;
+	particle_descr->index(i,&ibc,&ipc);
+	for (int ia=0; ia<na; ia++) {
+	  char * array = this->attribute_array(particle_descr,it,ib,ia);
+	  char * array_dest = 
+	    particle_data_dest->attribute_array(particle_descr,it,ibc,ia);
+	  int ma = particle_descr->attribute_bytes(it,ia);
+	  for (int ib=0; ib<ma; ib++) {
+	    array_dest[ipc*ma+ib] = array[ip*ma+ib];
+	  }
+	}
+      }
+      i++;
+    }
+  }  else {
+  }
+
+  // delete particles
+  delete_particles(particle_descr,it,ib,mask);
 }
 
 //----------------------------------------------------------------------
@@ -175,11 +264,57 @@ void ParticleData::compress
 void ParticleData::resize_array_(ParticleDescr * particle_descr,
 				 int it, int ib, int np)
 {
-  const int mp = particle_descr->attribute_bytes(it);
-  
-  attribute_array_[it][ib].resize(mp*(np)+15);
+  const int mp = particle_descr->particle_bytes(it);
+
+  if (!particle_descr->interleaved(it)) {
+    np = particle_descr->batch_size();
+  }
+  attribute_array_[it][ib].resize(mp*(np) + (PARTICLE_ALIGN - 1) );
   char * array = &attribute_array_[it][ib][0];
   uintptr_t iarray = (uintptr_t) array;
-  int defect = (iarray % 16);
-  attribute_align_[it][ib] = (defect == 0) ? 0 : 16-defect;
+  int defect = (iarray % PARTICLE_ALIGN);
+  attribute_align_[it][ib] = (defect == 0) ? 0 : PARTICLE_ALIGN-defect;
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::check_arrays_ (ParticleDescr * particle_descr,
+		    std::string file, int line) const
+{
+  size_t nt = particle_descr->num_types();
+  ASSERT4 ("ParticleData::check_arrays_",
+	  "%s:%d attribute_array_ is size %d < %d",
+	   file.c_str(),line,
+	   attribute_array_.size(),nt,
+	   attribute_array_.size()>=nt);
+  ASSERT4 ("ParticleData::check_arrays_",
+	  "%s:%d particle_count_ is size %d < %d",
+	   file.c_str(),line,
+	   particle_count_.size(),nt,
+	   particle_count_.size()>=nt);
+  ASSERT4 ("ParticleData::check_arrays_",
+	  "%s:%d attribute_align_ is size %d < %d",
+	   file.c_str(),line,
+	   attribute_align_.size(),nt,
+	   attribute_align_.size()>=nt);
+
+  for (size_t it=0; it<nt; it++) {
+    size_t nb = num_batches(it);
+
+    ASSERT5 ("ParticleData::check_arrays_",
+	     "%s:%d attribute_array_[%d] is size %d < %d",
+	     file.c_str(),line,
+	     it,attribute_array_[it].size(),nb,
+	     attribute_array_[it].size()>=nb);
+    ASSERT5 ("ParticleData::check_arrays_",
+	     "%s:%d particle_count_[%d] is size %d < %d",
+	     file.c_str(),line,
+	     it,particle_count_[it].size(),nb,
+	     particle_count_[it].size()>=nb);
+    ASSERT5 ("ParticleData::check_arrays_",
+	     "%s:%d attribute_align_[%d] is size %d < %d",
+	     file.c_str(),line,
+	     it,attribute_align_[it].size(),nb,
+	     attribute_align_[it].size()>=nb);
+  }
 }
