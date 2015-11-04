@@ -22,7 +22,7 @@ public: // interface
   ParticleData();
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p);
+  void pup (PUP::er &p);
 
   /// Return the attribute array for the given particle type and batch
 

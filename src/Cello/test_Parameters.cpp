@@ -115,6 +115,12 @@ void generate_input()
 
   fp << " List {\n";
   fp << "  num1 = [1.0, true, -37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n";
+  fp << "  num2 = [1.0, 3.0];\n";
+  fp << "  num1 = [1.0, true, -37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n";
+  fp << "  num2 += [5.0, 7.0];\n";
+  fp << "  num2 = [9.0, 11.0];\n";
+  fp << "  num1 = [1.0, true, -37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n";
+  fp << "  num2 += [13.0, 15.0];\n";
   fp << "}\n";
 
   fp << " Duplicate {\n";
@@ -415,38 +421,22 @@ void check_parameters(Parameters * parameters)
   unit_assert (values_logical[1] == (x[1] == y[1]));
   unit_assert (values_logical[2] == (x[2] == y[2]));
 
+  //--------------------------------------------------
   // Lists
+  //--------------------------------------------------
 
   parameters->group_set(0,"List");
 
-  //--------------------------------------------------
   unit_func("list_length");
-  //--------------------------------------------------
 
   unit_assert(parameters->list_length("num1") == 6);
-
-  //--------------------------------------------------
   unit_func("list_value_float");
-  //--------------------------------------------------
-
   unit_assert(parameters->list_value_float(0,"num1") == 1.0);
-
-  //--------------------------------------------------
   unit_func("list_value_logical");
-  //--------------------------------------------------
-
   unit_assert(parameters->list_value_logical(1,"num1") == true);
-
-  //--------------------------------------------------
   unit_func("list_value_integer");
-  //--------------------------------------------------
-
   unit_assert(parameters->list_value_integer(2,"num1") == -37);
-
-  //--------------------------------------------------
   unit_func("list_value_string");
-  //--------------------------------------------------
-
   unit_assert(parameters->list_value_string(3,"num1") == "string");
 
   //--------------------------------------------------
@@ -488,6 +478,17 @@ void check_parameters(Parameters * parameters)
   unit_assert(parameters->list_value_string (4,"list") == "a string");
 
   //--------------------------------------------------
+  unit_func("append_list elements");
+
+  unit_assert(parameters->list_length("num2") == 4);
+  unit_assert(parameters->list_value_float(0,"num2") == 9.0);
+  unit_assert(parameters->list_value_float(1,"num2") == 11.0);
+  unit_assert(parameters->list_value_float(2,"num2") == 13.0);
+  unit_assert(parameters->list_value_float(3,"num2") == 15.0);
+
+  //--------------------------------------------------
+
+  //--------------------------------------------------
   unit_func("group_count");
   //--------------------------------------------------
 
@@ -502,7 +503,7 @@ void check_parameters(Parameters * parameters)
     {"Float",       4 + 3},
     {"Float_expr",  2},
     {"Integer",     2 + 2},
-    {"List",        2},
+    {"List",        3},
     {"Logical",     2 + 2},
     {"Logical_expr",1},
     {"String",      2 + 1},
@@ -515,10 +516,6 @@ void check_parameters(Parameters * parameters)
 
   for (int i=0; i<NUM_GROUPS; i++) {
     parameters->group_set(0,child_count[i].group);
-    printf ("count %s %d %d\n",
-	    child_count[i].group.c_str(),
-	    parameters->group_count(),
-	    child_count[i].count);
     unit_assert (parameters->group_count() == child_count[i].count);
   }
       

@@ -110,6 +110,7 @@ void Parameters::read ( const char * file_name )
     for (int i=0; node->group[i] != 0 && i < MAX_GROUP_DEPTH; i++) {
       full_parameter = full_parameter + node->group[i] + ":";
     }
+
     full_parameter = full_parameter + node->parameter;
 
     new_param_(full_parameter,param);

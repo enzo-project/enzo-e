@@ -202,6 +202,7 @@ function test($type,$output,$type) {
   $rowtext = "</tr><tr>";
 
   $count = exec("cat $output | grep $type | grep '0/' | wc -l");
+
   if ($count != 0) {
     echo "<th class=$type><strong>${ltype}ed</strong></th> ";
     system ("grep '0/' $output | sort | uniq | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");

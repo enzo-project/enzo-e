@@ -153,7 +153,6 @@ const char * op_name[] = {
     }
   };
 
-
   void copy_groups (char * group_dest[], char * group_src[]) {
     int i;
     for (i=0; i<MAX_GROUP_DEPTH; i++) {
@@ -161,18 +160,6 @@ const char * op_name[] = {
       group_dest[i] = (group_src[i]) ? strdup(group_src[i]) : 0;
     }
   };
-
-  /* Function to update parameter's groups once the group is known */
-
-/*   void update_group (char * group) */
-/*     { */
-/*       struct param_struct * p = param_curr; */
-/*       while (p->next->type  != enum_parameter_sentinel &&  */
-/* 	     p->next->group == NULL) { */
-/* 	p->next->group = strdup(group); */
-/*         p = p -> next; */
-/*       } */
-/*     } */
 
   /* Insert a parameter into the list */
 
@@ -247,6 +234,34 @@ const char * op_name[] = {
      return p;
   }
 
+  /* Find the parameter if it exists, for use in e.g. List append */
+
+
+  struct param_struct * find_param ()
+  {
+    int i;
+    struct param_struct * p = param_head;
+    struct param_struct * q;
+
+    int match;
+    do {
+      match = 1;
+      for (i=0; i<MAX_GROUP_DEPTH && p->group[i] && current_group[i]; i++) {
+	if (strcmp(p->group[i],current_group[i]) != 0) match=0;
+      }
+      if (p->parameter==NULL) 
+	match=0;
+      else {
+	if (strcmp(p->parameter,current_parameter) != 0) match=0;
+      }
+      q=p;
+      p = p -> next;
+    } while (!match && p->type != enum_parameter_sentinel);
+
+    return match ? q : NULL;
+  }
+
+
   /* New integer parameter assignment */
 
   void new_param_integer (int value)
@@ -294,7 +309,6 @@ const char * op_name[] = {
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
   struct param_struct * new_param_sentinel ()
   {
-
     /* MEMORY LEAK */
     struct param_struct * p = 
       (struct param_struct *) malloc (sizeof (struct param_struct));
@@ -360,6 +374,7 @@ const char * op_name[] = {
        break;
      }
   }
+
 %}
 
 
@@ -371,6 +386,9 @@ const char * op_name[] = {
   char * group_type;
   struct node_expr * node_type;
   }
+
+/* Expect shift/reduce conflicts due to LIST_BEGIN / LIST_APPEND */
+%expect 2
 
 /* %token <string_type>  GROUP_NAME */
 %token <string_type>  STRING
@@ -406,6 +424,7 @@ const char * op_name[] = {
 
 %token ACOS
 %token ACOSH
+%token APPEND
 %token ASIN
 %token ASINH
 %token ATAN
@@ -456,45 +475,83 @@ parameter_group :
 
 parameter_list : 
                    parameter_assignment  {  }
+ |                 parameter_append  {  }
  |                 group  {  }
  |                 group  ';' {  } 
  | parameter_list  parameter_assignment  {  }
+ | parameter_list  parameter_append  {  }
  | parameter_list  group  {  }
  | parameter_list  group  ';' {  }
 
  
 group_name :
-  IDENTIFIER   { current_group[current_group_level++] = $1; }
+IDENTIFIER   {
+  current_group[current_group_level++] = $1; 
+}
 
 parameter_name :
-  IDENTIFIER   { current_parameter = $1;} 
+IDENTIFIER   { current_parameter = $1;} 
 
 parameter_assignment : 
-  parameter_name '=' parameter_value ';' { new_parameter(); }
- ;
+parameter_name '=' parameter_value ';' { new_parameter(); }
+;
+
+parameter_append : 
+parameter_name APPEND existing_list ';' { new_parameter(); }
+;
 
 parameter_value : 
- STRING { current_type = enum_parameter_string;       yylval.string_type = $1; }
- | cie  { current_type = enum_parameter_integer;      yylval.integer_type = $1;}
- | cse  { current_type = enum_parameter_float;       yylval.float_type = $1;}
- | cle  { current_type = enum_parameter_logical;      yylval.logical_type = $1; }
- | vse  { current_type = enum_parameter_float_expr;  yylval.node_type = $1; }
- | vle  { current_type = enum_parameter_logical_expr; yylval.node_type = $1; }
- | list { current_type = enum_parameter_list; }
+STRING { current_type = enum_parameter_string;       yylval.string_type = $1; }
+| cie  { current_type = enum_parameter_integer;      yylval.integer_type = $1;}
+| cse  { current_type = enum_parameter_float;        yylval.float_type = $1;}
+| cle  { current_type = enum_parameter_logical;      yylval.logical_type = $1; }
+| vse  { current_type = enum_parameter_float_expr;   yylval.node_type = $1; }
+| vle  { current_type = enum_parameter_logical_expr; yylval.node_type = $1; }
+| list { current_type = enum_parameter_list; }
  ;
+
+/* existing_list : */
+/* existing_list { current_type = enum_parameter_list; } */
 
 list: LIST_BEGIN list_elements LIST_END {  }
     | LIST_BEGIN LIST_END {  }
 
+existing_list: LIST_APPEND list_elements LIST_END {  }
+    | LIST_APPEND LIST_END {  }
+
 LIST_BEGIN:
  '[' { 
    struct param_struct * p = new_param_sentinel();
-   p->list_value = param_curr;
+   p->list_value = param_curr; /* save param_curr */
    new_param_list(p);
    param_curr = p;
  }
+
+LIST_APPEND:
+ '[' { 
+  
+   struct param_struct * p = find_param();
+
+   if (p) {
+     /* s is sentinal in list corresponding to p in LIST_BEGIN */
+     struct param_struct * s = p->list_value;
+     s->list_value=param_curr;
+     param_curr = s;
+     current_type = enum_parameter_list;
+   } else {
+     /* new list */
+     p = new_param_sentinel();
+     p->list_value = param_curr; /* save param_curr */
+     new_param_list(p);
+     param_curr = p;
+   }
+ }
+
 LIST_END:
- ']' { param_curr = param_curr->list_value; }
+']' {
+  current_type = enum_parameter_list;
+  param_curr = param_curr->list_value; /* restore param_curr */ 
+}
 
 
 list_elements:
@@ -786,63 +843,70 @@ void sprintf_expression (struct node_expr * node,
   }
 }
 
+void cello_parameters_print_list(struct param_struct * head, int level);
+void cello_print_parameter(struct param_struct * p, int level)
+{
+  int i;
+  if (p->group != NULL) {
+    indent(level);
+    if (parameter_name[p->type])
+    printf ("%s ", parameter_name[p->type]);
+    for (i=0; p->group[i] != NULL && i < MAX_GROUP_DEPTH; i++) {
+      printf ("%s:",p->group[i]);
+    }
+    printf ("[%s] = \n", p->parameter);
+  } else {
+    /* list element */
+    indent(level);
+    printf ("%s %s = ", 
+	    parameter_name[p->type], p->parameter);
+  }
+  switch (p->type) {
+  case enum_parameter_float:  
+    /* '#' format character forces a decimal point */
+    printf (FLOAT_FORMAT,p->float_value);  
+    break;
+  case enum_parameter_integer: 
+    printf ("%d\n",p->integer_value); 
+    break;
+  case enum_parameter_string:  
+    printf ("%s\n",p->string_value); 
+    break;
+  case enum_parameter_group:  
+    printf ("Uh oh: GROUP %s (should be deleted)\n",p->string_value);
+    break;
+  case enum_parameter_logical:
+    printf ("%s\n",p->logical_value ? "true" : "false");
+    break;
+  case enum_parameter_list:    
+    indent(level);
+    printf ("[\n"); 
+    cello_parameters_print_list(p->list_value, level + 1);
+    indent(level);
+    printf ("]\n"); 
+    break;
+  case enum_parameter_logical_expr:
+    indent(level);
+    print_expression(p->op_value,stdout); printf ("\n");
+    break;
+  case enum_parameter_float_expr:
+    indent(level);
+    print_expression(p->op_value,stdout); printf ("\n");
+    break;
+  default: 
+    indent(level);
+    printf ("unknown type\n"); 
+    break;
+  }
+}
 void cello_parameters_print_list(struct param_struct * head, int level)
 {
   struct param_struct * p = head->next;
-  int i;
 
   while (p && p->type != enum_parameter_sentinel) {
 
-    if (p->group != NULL) {
-      indent(level);
-      printf ("%s ", parameter_name[p->type]);
-      for (i=0; p->group[i] != NULL && i < MAX_GROUP_DEPTH; i++) {
-	printf ("%s:",p->group[i]);
-      }
-      printf ("%s = ", p->parameter);
-    } else {
-      /* list element */
-      indent(level);
-      printf ("%s %s = ", 
-	      parameter_name[p->type], p->parameter);
-    }
-    switch (p->type) {
-    case enum_parameter_float:  
-      /* '#' format character forces a decimal point */
-      printf (FLOAT_FORMAT,p->float_value);  
-      break;
-    case enum_parameter_integer: 
-      printf ("%d\n",p->integer_value); 
-      break;
-    case enum_parameter_string:  
-      printf ("%s\n",p->string_value); 
-      break;
-    case enum_parameter_group:  
-      printf ("Uh oh: GROUP %s (should be deleted)\n",p->string_value);
-      break;
-    case enum_parameter_logical:
-      printf ("%s\n",p->logical_value ? "true" : "false");
-      break;
-    case enum_parameter_list:    
-      indent(level);
-      printf ("[\n"); 
-      cello_parameters_print_list(p->list_value, level + 1);
-      indent(level);
-      printf ("]\n"); 
-      break;
-    case enum_parameter_logical_expr:
-      indent(level);
-      print_expression(p->op_value,stdout); printf ("\n");
-      break;
-    case enum_parameter_float_expr:
-      indent(level);
-      print_expression(p->op_value,stdout); printf ("\n");
-      break;
-    default: 
-      indent(level);
-      printf ("unknown type\n"); 
-      break;
-    }
+    cello_print_parameter(p,level);
+
     p = p->next;
   }
 }

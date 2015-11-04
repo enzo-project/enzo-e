@@ -2,6 +2,7 @@
 
 %option noyywrap
 
+
 %x IFILE
 
 D [0-9]
@@ -103,7 +104,8 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 {LLU}{LN}* { yylval.string_type = strdup (yytext);
             return IDENTIFIER; }
 
-"="        { return '='; }         /* = */
+"="        { return '='; }         /* assignment */
+"+="        { return APPEND; }         /* append */
 
 "*"        { return '*'; }
 "/"        { return '/'; }

@@ -59,36 +59,37 @@ extern int yydebug;
     OR = 269,
     ACOS = 270,
     ACOSH = 271,
-    ASIN = 272,
-    ASINH = 273,
-    ATAN = 274,
-    ATANH = 275,
-    CBRT = 276,
-    CEIL = 277,
-    COS = 278,
-    COSH = 279,
-    ERFC = 280,
-    ERF = 281,
-    EXP = 282,
-    EXPM1 = 283,
-    FABS = 284,
-    FLOOR = 285,
-    J0 = 286,
-    J1 = 287,
-    LGAMMA = 288,
-    LOG10 = 289,
-    LOG1P = 290,
-    LOGB = 291,
-    LOG = 292,
-    PI = 293,
-    SIN = 294,
-    SINH = 295,
-    SQRT = 296,
-    TAN = 297,
-    TANH = 298,
-    Y0 = 299,
-    Y1 = 300,
-    RINT = 301
+    APPEND = 272,
+    ASIN = 273,
+    ASINH = 274,
+    ATAN = 275,
+    ATANH = 276,
+    CBRT = 277,
+    CEIL = 278,
+    COS = 279,
+    COSH = 280,
+    ERFC = 281,
+    ERF = 282,
+    EXP = 283,
+    EXPM1 = 284,
+    FABS = 285,
+    FLOOR = 286,
+    J0 = 287,
+    J1 = 288,
+    LGAMMA = 289,
+    LOG10 = 290,
+    LOG1P = 291,
+    LOGB = 292,
+    LOG = 293,
+    PI = 294,
+    SIN = 295,
+    SINH = 296,
+    SQRT = 297,
+    TAN = 298,
+    TANH = 299,
+    Y0 = 300,
+    Y1 = 301,
+    RINT = 302
   };
 #endif
 
@@ -97,7 +98,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 366 "build/Cello/parse.y" /* yacc.c:1909  */
+#line 385 "build/Cello/parse.y" /* yacc.c:1909  */
  
   int logical_type;  
   int integer_type; 
@@ -107,7 +108,7 @@ union YYSTYPE
   struct node_expr * node_type;
   
 
-#line 111 "build/Cello/parse.tab.h" /* yacc.c:1909  */
+#line 112 "build/Cello/parse.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
