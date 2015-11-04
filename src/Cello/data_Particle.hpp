@@ -214,12 +214,38 @@ public: // interface
   { particle_data_->split_particles
       (particle_descr_, it,ib,m,particle.particle_data()); }
 
-  /// Compress particles in batches so that ib'th batch size equals
-  /// batch_size.  May be performed periodically to recover space lost
-  /// in multiple insert/deletes
+  /// Compress particles in batches so that all batches except
+  /// possibly the last have batch_size() particles.  May be performed
+  /// periodically to recover unused memory from multiple insert/deletes
 
-  void compress (int it, int ib, const bool * m)
-  { particle_data_->compress(particle_descr_,it,ib,m); }
+  void compress ()
+  { particle_data_->compress(particle_descr_); }
+  void compress (int it)
+  { particle_data_->compress(particle_descr_,it); }
+
+  /// Return the storage "efficiency" for particles of the given type
+  /// and in the given batch, or average if batch or type not specified.
+  /// 1.0 means no wasted storage, 0.5 means twice as much storage
+  /// is being used.  Defined as 1 / overhead().
+
+  float efficiency ()
+  { return particle_data_->efficiency(particle_descr_); }
+  float efficiency (int it)
+  { return particle_data_->efficiency(particle_descr_,it); }
+  float efficiency (int it, int ib)
+  { return particle_data_->efficiency(particle_descr_,it,ib); }
+
+  /// Return the storage "overhead" for particles of the given type
+  /// and in the given batch, or average if batch or type not specified.
+  /// 1.0 means no wasted storage, 2.0 means twice as much storage
+  /// is being used.  Defined as 1 / overhead().
+
+  float overhead ()
+  { return particle_data_->overhead(particle_descr_); }
+  float overhead (int it)
+  { return particle_data_->overhead(particle_descr_,it); }
+  float overhead (int it, int ib)
+  { return particle_data_->overhead(particle_descr_,it,ib); }
 
 private: // functions
 

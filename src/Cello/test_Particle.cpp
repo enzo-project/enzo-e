@@ -509,7 +509,7 @@ PARALLEL_MAIN_BEGIN
   ip0 = particle.num_particles(it_dark,nb-1);
   i2 = particle.insert_particles (it_dark, 10000);
   unit_assert (i2 == 1024*(nb-1) + ip0);
-  printf ("COUNT %d %d\n",particle.num_particles() , 10000 + 2*count_particles);
+
   unit_assert (particle.num_particles() == 10000 + 2*count_particles);
 
   unit_func("num_particles()");
@@ -566,16 +566,37 @@ PARALLEL_MAIN_BEGIN
   unit_assert (particle_2.num_particles(it_dark) == count_delete);
   
 
-
   unit_func("compress()");
-  unit_assert (false);
-  unit_func("num_particles");
-  unit_assert (false);
+
+  unit_assert (particle.efficiency (it_dark,0)  < 0.55);
+  unit_assert (particle.efficiency (it_dark)    < 0.65);
+  unit_assert (particle.efficiency (it_trace,0) < 0.70);
+  unit_assert (particle.efficiency (it_trace)   < 0.80);
+  unit_assert (particle.efficiency ()           < 0.65);
+
+  particle.compress(it_dark);
+
+  unit_assert (particle.efficiency (it_dark,0)  > 0.99);
+  unit_assert (particle.efficiency (it_dark)    > 0.85);
+  unit_assert (particle.efficiency (it_trace,0) < 0.70);
+  unit_assert (particle.efficiency (it_trace)   < 0.80);
+  unit_assert (particle.efficiency ()           > 0.85);
+
+  particle.compress(it_trace);
+
+  unit_assert (particle.efficiency (it_dark,0)  > 0.99);
+  unit_assert (particle.efficiency (it_dark)    > 0.85);
+  unit_assert (particle.efficiency (it_trace,0) > 0.99);
+  unit_assert (particle.efficiency (it_trace)   > 0.99);
+  unit_assert (particle.efficiency ()           > 0.90);
 
   //--------------------------------------------------
   //   Grouping
   //--------------------------------------------------
 
+  unit_func ("grouping");
+
+  unit_assert (false);
 
   unit_finalize();
 
