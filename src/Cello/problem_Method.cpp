@@ -20,6 +20,16 @@ Method::~Method() throw()
 
 //----------------------------------------------------------------------
 
+void Method::pup (PUP::er &p)
+{ TRACEPUP;
+  PUP::able::pup(p);
+  p | refresh_list_;
+  p | schedule_; // pupable
+  p | courant_;
+}
+
+//----------------------------------------------------------------------
+
 void Method::set_schedule (Schedule * schedule) throw()
 { 
   if (schedule_) delete schedule_;

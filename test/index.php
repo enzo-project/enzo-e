@@ -585,8 +585,8 @@ test_summary("Method: gravity",
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Checkpoint",
-	     array("checkpoint_ppm-1","checkpoint_ppm-8"),
-	     array("enzo-p",  "enzo-p"),'test');
+	     array("checkpoint_ppm-1","checkpoint_ppm-8","restart_ppm-1","restart_ppm-8"),
+	     array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Adapt", 
 	     array("mesh-balanced"),

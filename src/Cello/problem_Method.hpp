@@ -20,7 +20,7 @@ class Method : public PUP::able
 public: // interface
 
   /// Create a new Method
-  Method () throw() : schedule_(NULL) {}
+  Method (double courant = 1.0) throw() : schedule_(NULL), courant_(courant) {}
 
   /// Destructor
   virtual ~Method() throw();
@@ -29,11 +29,7 @@ public: // interface
   PUPable_abstract(Method);
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  { TRACEPUP;
-    PUP::able::pup(p);
-    p | refresh_list_;
-  }
+  void pup (PUP::er &p);
 
 public: // virtual functions
 
@@ -79,6 +75,12 @@ public: // virtual functions
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
 
+  double courant() const throw ()
+  { return courant_; }
+
+  void set_courant(double courant) throw ()
+  { courant_ = courant; }
+
 protected: // functions
 
   /// Perform vector copy X <- Y
@@ -100,6 +102,9 @@ protected: // attributes
 
   /// Schedule object, if any (default is every cycle)
   Schedule * schedule_;
+
+  /// Courant condition for the Method
+  double courant_;
 
 };
 

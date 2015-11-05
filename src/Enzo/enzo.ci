@@ -29,7 +29,6 @@ module enzo {
   readonly enzo_float EnzoBlock::density_floor;
   readonly enzo_float EnzoBlock::number_density_floor;
   readonly enzo_float EnzoBlock::temperature_floor;
-  readonly enzo_float EnzoBlock::CourantSafetyNumber;
   readonly enzo_float EnzoBlock::InitialRedshift;
   readonly enzo_float EnzoBlock::InitialTimeInCodeUnits;
   readonly enzo_float EnzoBlock::DomainLeftEdge [MAX_DIMENSION];

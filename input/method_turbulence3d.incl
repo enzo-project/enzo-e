@@ -31,12 +31,14 @@ Mesh { root_rank = 3; }
  Method {
      list = [ "ppm" , "turbulence"];
      ppm {
+         courant = 0.5;
          diffusion = true;
          dual_energy = false;
          flattening = 3;
          steepening = true;
      }
      turbulence {
+         courant = 0.5;
          mach_number = 1.0;
          e_dot       = -1.0;
      }
@@ -44,7 +46,6 @@ Mesh { root_rank = 3; }
 
  Field {
      alignment = 8;
-     courant = 0.5;
      gamma = 1.001;
      ghost_depth = 4;
      list = [ "density", 

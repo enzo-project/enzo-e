@@ -36,9 +36,6 @@
          "bfieldx_rz",  "bfieldy_rz",  "bfieldz_rz"
       ] ;
 
-      # courant condition for fields
-
-      courant   = 0.8;
       gamma = 1.4;
 
       padding   = 0;
@@ -50,6 +47,9 @@
       # list of methods to apply and in what order
 
       list = ["ppml"];
+      ppml { 
+         courant   = 0.8;
+      }
 
    }
 

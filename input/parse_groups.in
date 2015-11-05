@@ -1,10 +1,10 @@
 Group_3 {
    blah_1 = 10;
    subgroup_1 { 
-     blah_2 = 10
+     blah_2 = 10;
    }
    subgroup_2 { 
-     blah_2 = 10
+     blah_2 = 10;
    }
    blah_3 = 10;
 }

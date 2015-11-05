@@ -75,11 +75,6 @@ void OutputCheckpoint::update_config_()
 
   Config * config = (Config *) simulation->config();
 
-  // Field:courant
-
-  config->field_courant = p.value_float
-    ("Field:courant",config->field_courant);
-
   // Testing:time_final
 
   config->testing_time_final = p.value_float

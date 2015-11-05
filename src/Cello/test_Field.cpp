@@ -622,25 +622,19 @@ PARALLEL_MAIN_BEGIN
 
     field->set_alignment(8);
     field->set_padding(64);
-    field->set_courant(0.5);
   
     unit_func("alignment");
     unit_assert(field->alignment() == 8);
     unit_func("padding");
     unit_assert(field->padding() == 64);
-    unit_func("courant");
-    unit_assert(field->courant() == 0.5);
 
     field->set_alignment(4);
     field->set_padding(32);
-    field->set_courant(0.75);
   
     unit_func("alignment");
     unit_assert(field->alignment() == 4);
     unit_func("padding");
     unit_assert(field->padding() == 32);
-    unit_func("courant");
-    unit_assert(field->courant() == 0.75);
   
     //----------------------------------------------------------------------
     // Field attributes

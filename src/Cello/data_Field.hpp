@@ -70,10 +70,6 @@ public: // interface
   void set_padding(int padding) throw()
   { field_descr_->set_padding(padding); }
 
-  /// Set courant
-  void set_courant(double courant) throw()
-  { field_descr_->set_courant(courant); }
-
   /// Set centering for a field
   void set_centering(int id, int cx, int cy=0, int cz=0) 
     throw(std::out_of_range)
@@ -131,10 +127,6 @@ public: // interface
   /// padding in bytes between fields in memory
   int padding() const throw()
   { return field_descr_->padding() ;}
-
-  /// courant number for fields
-  double courant() const throw()
-  { return field_descr_->courant() ;}
 
   /// centering of given field
   void centering(int id, int * cx, int * cy = 0, int * cz = 0) const 

@@ -51,7 +51,6 @@ public: // functions
     p | groups_;
     p | alignment_;
     p | padding_;
-    p | courant_;
     p | precision_;
     int num_fields = name_.size();
     if (up) centering_.resize(num_fields);
@@ -71,15 +70,9 @@ public: // functions
   void set_alignment(int alignment) throw()
   { alignment_ = alignment; }
 
-
   /// Set padding
   void set_padding(int padding) throw()
   { padding_ = padding; }
-
-
-  /// Set courant
-  void set_courant(double courant) throw()
-  { courant_ = courant; }
 
   /// Set precision for a field
   void set_precision(int id_field, precision_type precision) 
@@ -129,15 +122,9 @@ public: // functions
   int padding() const throw()
   { return padding_; }
 
-  /// courant number for fields
-  double courant() const throw()
-  { return courant_; }
-
-
   /// Return precision of given field
   int precision(int id_field) const throw(std::out_of_range)
   {  return precision_.at(id_field); }
-
 
   /// centering of given field
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
@@ -188,9 +175,6 @@ private: // attributes
 
   /// padding between fields in bytes
   int padding_;
-
-  /// Courant number for fields
-  double courant_;
 
   /// Precision of each field
   std::vector<int> precision_;

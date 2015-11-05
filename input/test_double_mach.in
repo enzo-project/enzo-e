@@ -104,9 +104,6 @@
 	"pressure"
       ] ;
 
-      # courant condition for fields
-
-      courant   = 0.8;
       gamma = 1.4;
 
       padding   = 0;
@@ -117,6 +114,7 @@
       list = ["ppm"];
 
       ppm {
+         courant   = 0.8;
          diffusion   = true;
          flattening  = 3;
          steepening  = true;

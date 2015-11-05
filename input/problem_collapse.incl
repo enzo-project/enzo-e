@@ -61,8 +61,6 @@ Field {
 	"adapt"
       ] ;
 
-   courant   = 0.8;
-
 }
 
 Method {
@@ -70,6 +68,8 @@ Method {
    list = ["gravity_bicgstab", "ppm"];
 
    ppm {
+      courant   = 0.8;
+
       diffusion   = true;
       flattening  = 3;
       steepening  = true;

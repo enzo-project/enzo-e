@@ -87,7 +87,6 @@ public:
   static enzo_float number_density_floor;
   static enzo_float temperature_floor;
 
-  static enzo_float CourantSafetyNumber;
   static enzo_float InitialRedshift;
   static enzo_float InitialTimeInCodeUnits;
 

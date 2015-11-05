@@ -31,10 +31,6 @@
 	"pressure"
       ] ;
 
-      # courant condition for fields
-
-      courant   = 0.8;
-
       padding   = 0;
       alignment = 8;    
    }

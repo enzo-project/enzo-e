@@ -123,25 +123,19 @@ PARALLEL_MAIN_BEGIN
 
   field_descr->set_alignment(8);
   field_descr->set_padding(64);
-  field_descr->set_courant(0.5);
   
   unit_func("alignment");
   unit_assert(field_descr->alignment() == 8);
   unit_func("padding");
   unit_assert(field_descr->padding() == 64);
-  unit_func("courant");
-  unit_assert(field_descr->courant() == 0.5);
 
   field_descr->set_alignment(4);
   field_descr->set_padding(32);
-  field_descr->set_courant(0.75);
   
   unit_func("alignment");
   unit_assert(field_descr->alignment() == 4);
   unit_func("padding");
   unit_assert(field_descr->padding() == 32);
-  unit_func("courant");
-  unit_assert(field_descr->courant() == 0.75);
   
   //----------------------------------------------------------------------
   // Field attributes
@@ -245,8 +239,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(field_descr_assign.alignment() == 4);
   unit_func("assign:padding");
   unit_assert(field_descr_assign.padding() == 32);
-  unit_func("assign:courant");
-  unit_assert(field_descr_assign.courant() == 0.75);
 
   unit_func("assign:precision");
 
@@ -305,8 +297,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(field_descr_copy.alignment() == 4);
   unit_func("copy:padding");
   unit_assert(field_descr_copy.padding() == 32);
-  unit_func("copy:courant");
-  unit_assert(field_descr_copy.courant() == 0.75);
 
   unit_func("copy:precision");
 

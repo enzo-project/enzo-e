@@ -63,7 +63,6 @@ void Config::pup (PUP::er &p)
   p | field_list;
   p | field_alignment;
   PUParray(p,field_centering,3);
-  p | field_courant;
   PUParray(p,field_ghost_depth,3);
   p | field_padding;
   p | field_precision;
@@ -94,6 +93,7 @@ void Config::pup (PUP::er &p)
   p | num_method;
   p | method_list;
   PUParray (p,method_schedule_index,MAX_METHOD_GROUPS);
+  p | method_courant;
 
   // Monitor
 
@@ -478,10 +478,7 @@ void Config::read_field_ (Parameters * p) throw()
 	}
       }
     }
-    
   }
-
-  field_courant = p->value_float  ("Field:courant",0.6);
 
   field_padding = p->value_integer("Field:padding",0);
 
@@ -591,33 +588,38 @@ void Config::read_method_ (Parameters * p) throw()
 
   num_method = p->list_length("Method:list");
 
-  method_list.resize(num_method);
+  method_list.   resize(num_method);
+  method_courant.resize(num_method);
+
   for (int index_method=0; index_method<num_method; index_method++) {
 
-
-    std::string method_string = 
+    std::string name = 
       p->list_value_string(index_method,"Method:list");
 
-    method_list[index_method] = method_string;
+    std::string full_name = std::string("Method:") + name;
+
+    method_list[index_method] = name;
 
     // Read schedule for the Method object if any
       
-    std::string schedule_var = 
-      std::string("Method") + ":" +
-      method_list[index_method] + ":schedule:var";
+    std::string schedule_var = full_name + ":schedule:var";
 
     const bool method_scheduled = 
       (p->type(schedule_var) != parameter_unknown);
 
     if (method_scheduled) {
       p->group_set(0,"Method");
-      p->group_push(method_string);
+      p->group_push(name);
       p->group_push("schedule");
-      method_schedule_index[index_method] = read_schedule_(p, method_string);
+      method_schedule_index[index_method] = read_schedule_(p, name);
       p->group_pop();
     } else {
       method_schedule_index[index_method] = -1;
     }
+
+    // Read courant condition if any
+    std::string courant = full_name + ":courant";
+    method_courant[index_method] = p->value_float  (courant,1.0);
   }
 }
 

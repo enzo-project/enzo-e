@@ -6,6 +6,7 @@
 /// @brief    Implementation of Data class
 
 #include "data.hpp"
+#include "charm_simulation.hpp"
 
 //----------------------------------------------------------------------
 

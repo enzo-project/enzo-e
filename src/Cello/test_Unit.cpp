@@ -9,7 +9,7 @@
 
 //----------------------------------------------------------------------
 
-#define USE_COLOR
+/* #define USE_COLOR */
 
 // Unit * Unit::instance_ = 0;
 Unit Unit::instance_;

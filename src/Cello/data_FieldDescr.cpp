@@ -19,7 +19,6 @@ FieldDescr::FieldDescr ()
     groups_(),
     alignment_(1),
     padding_(0),
-    courant_(1),
     precision_(),
     centering_(),
     ghost_depth_()
@@ -245,7 +244,6 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
 {
   alignment_ = field_descr.alignment_;
   padding_   = field_descr.padding_;
-  courant_   = field_descr.courant_;
   name_      = field_descr.name_;
   num_permanent_ = field_descr.num_permanent_;
   id_        = field_descr.id_;

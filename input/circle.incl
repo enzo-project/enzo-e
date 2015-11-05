@@ -25,7 +25,6 @@ include "input/domain-2d-01.incl"
 	"pressure"
       ] ;
 
-      courant   = 0.8;
       gamma = 1.4;
 
    }
@@ -35,6 +34,7 @@ include "input/domain-2d-01.incl"
       list = ["ppm"];
 
       ppm {
+         courant   = 0.8;
          diffusion   = true;
          flattening  = 3;
          steepening  = true;

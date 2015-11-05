@@ -141,7 +141,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   TRACE1 ("dtBaryons: %f",dtBaryons);
 
-  dtBaryons *= EnzoBlock::CourantSafetyNumber;
+  dtBaryons *= courant_;
 
   double dt = dtBaryons;
 

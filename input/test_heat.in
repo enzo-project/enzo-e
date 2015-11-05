@@ -51,7 +51,6 @@
 
  Field {
      alignment = 8;
-     courant = 0.50000;
      gamma = 1.4000;
      ghost_depth = 4;
      list = [ "temperature" ];
@@ -70,6 +69,7 @@
      list = [ "heat" ];
 
      heat {
+         courant = 0.50000;
          alpha = 1.0;
      }
  }

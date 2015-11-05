@@ -50,7 +50,6 @@ enzo_float EnzoBlock::density_floor;
 enzo_float EnzoBlock::number_density_floor;
 enzo_float EnzoBlock::temperature_floor;
 
-enzo_float EnzoBlock::CourantSafetyNumber;
 enzo_float EnzoBlock::InitialRedshift;
 enzo_float EnzoBlock::InitialTimeInCodeUnits;
 
@@ -159,8 +158,6 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
   DomainRightEdge[0] = enzo_config->domain_upper[0];
   DomainRightEdge[1] = enzo_config->domain_upper[1];
   DomainRightEdge[2] = enzo_config->domain_upper[2];
-
-  CourantSafetyNumber = enzo_config->field_courant;
 
   double time  = enzo_config->initial_time;
 
@@ -332,8 +329,6 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: temperature_floor %g\n",
 	   temperature_floor);
 
-  fprintf (fp,"EnzoBlock: CourantSafetyNumber %g\n",
-	   CourantSafetyNumber);
   fprintf (fp,"EnzoBlock: InitialRedshift %g\n",
 	   InitialRedshift);
   fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",

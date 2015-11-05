@@ -102,7 +102,6 @@ public: // attributes
   std::vector<std::string>   field_list;
   int                        field_alignment;
   std::vector<int>           field_centering [3];
-  double                     field_courant;
   int                        field_ghost_depth[3];
   int                        field_padding;
   int                        field_precision;
@@ -133,6 +132,7 @@ public: // attributes
   int                        num_method;
   std::vector<std::string>   method_list;
   int                        method_schedule_index [MAX_METHOD_GROUPS];
+  std::vector<double>        method_courant;
 
   // Monitor
 

@@ -161,10 +161,6 @@ public: // interface
   int padding() const throw()
   { return field_descr_->padding(); }
 
-  /// courant number for fields
-  double courant() const throw()
-  { return field_descr_->courant(); }
-
   /// centering of given field
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
     throw(std::out_of_range)

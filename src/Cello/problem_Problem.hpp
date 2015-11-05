@@ -189,6 +189,7 @@ protected: // functions
   virtual Method *   create_method_
   (std::string type, 
    Config * config, 
+   int index_method,
    const FieldDescr * field_descr) throw ();
 
   /// Create named output object

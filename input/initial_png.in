@@ -24,7 +24,6 @@ Mesh {
 Field {
 
    ghost_depth  = 3;
-   courant = 0.8;
 
    list = [ 
       "density",
@@ -44,6 +43,7 @@ Method {
    list = [ "ppm" ];
 
    ppm {
+      courant = 0.8;
       diffusion   = true;
       flattening  = 3;
       steepening  = true;

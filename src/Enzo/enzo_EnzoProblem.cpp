@@ -156,6 +156,7 @@ Refine * EnzoProblem::create_refine_
 Method * EnzoProblem::create_method_ 
 ( std::string  name,  
   Config * config,
+  int index_method,
   const FieldDescr * field_descr) throw ()
 /// @param name   Name of the method to create
 /// @param config Configuration parameters class
@@ -179,7 +180,7 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodHeat
       (field_descr,
        enzo_config->method_heat_alpha,
-       enzo_config->field_courant);
+       enzo_config->method_courant[index_method]);
   } else if (name == "null") {
     method = new EnzoMethodNull
       (enzo_config->method_null_dt);
@@ -258,7 +259,12 @@ Method * EnzoProblem::create_method_
 	       
     }
   } else {
-    method = Problem::create_method_ (name,config, field_descr);
+    method = Problem::create_method_ (name,config, index_method,field_descr);
+  }
+
+  // set the method's courant safety factor
+  if (method) {
+    method->set_courant(config->method_courant[index_method]);
   }
 
   ASSERT2("EnzoProblem::create_method",

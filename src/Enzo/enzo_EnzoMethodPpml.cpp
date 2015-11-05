@@ -150,7 +150,7 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
        &dtBaryons);
     /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
  
-    dtBaryons *= EnzoBlock::CourantSafetyNumber;
+    dtBaryons *= courant_;
     
   }
  

@@ -335,7 +335,7 @@ void Problem::initialize_method
 
     std::string name = config->method_list[index_method];
 
-    Method * method = create_method_(name, config, field_descr);
+    Method * method = create_method_(name, config, index_method, field_descr);
 
     if (method) {
 
@@ -556,6 +556,7 @@ Stopping * Problem::create_stopping_
 Method * Problem::create_method_ 
 ( std::string  name,
   Config * config,
+  int index_method,
   const FieldDescr * field_descr) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());

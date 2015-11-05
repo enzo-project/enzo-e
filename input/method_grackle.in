@@ -9,7 +9,6 @@
 
  Field {
      alignment = 8;
-     courant = 0.80;
      gamma = 1.400;
      ghost_depth = 3;
      list = [ "density", 
@@ -79,10 +78,12 @@
 #     list = [ "ppm" ];
 
      grackle {
+        courant = 0.80;
         data_file = "input/CloudyData_UVB=HM2012.h5";
      }
 
      ppm {
+        courant = 0.80;
         diffusion   = true;
         flattening  = 3;
         steepening  = true;
