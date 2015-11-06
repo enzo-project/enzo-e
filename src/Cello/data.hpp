@@ -9,9 +9,20 @@
 #define DATA_HPP
 
 #include "cello.hpp"
+#include "charm.hpp"
 
 #include "_error.hpp"
+#include "_memory.hpp"
+#include "_performance.hpp"
+#include "_monitor.hpp"
 #include "_parallel.hpp"
+#include "_disk.hpp"
+#include "_problem.hpp"
+#include "_mesh.hpp"
+#include "_parameters.hpp"
+#include "_io.hpp"
+#include "_compute.hpp"
+#include "_simulation.hpp"
 
 #include "_data.hpp"
 

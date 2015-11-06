@@ -12,35 +12,17 @@
 
 // #define DEBUG_FIELD_FACE
 
-enum enum_op {
-  op_unknown,
-  op_load,
-  op_store
+enum enum_op_face {
+  op_face_unknown,
+  op_face_load,
+  op_face_store
 };
 
 //----------------------------------------------------------------------
 
-FieldFace::FieldFace() throw()
-  : field_data_(0),
-    array_(),
-    restrict_(0),
-    prolong_(0),
-    field_list_()
-{
-  for (int i=0; i<3; i++) {
-    ghost_[i] = false;
-    face_[i] = 0;
-    child_[i] = 0;
-  }
-}
-
-//----------------------------------------------------------------------
-
 FieldFace::FieldFace 
-(
- FieldData * field_data
- ) throw()
-  : field_data_(field_data),
+( const Field & field ) throw()
+  : field_(field),
     array_(),
     restrict_(0),
     prolong_(0)
@@ -62,7 +44,7 @@ FieldFace::~FieldFace() throw ()
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
-  : field_data_(field_face.field_data_),
+  : field_(field_face.field_),
     array_()
 {
   copy_(field_face);
@@ -105,8 +87,7 @@ void FieldFace::pup (PUP::er &p)
 
   const bool up = p.isUnpacking();
 
-  if (up) field_data_ = new FieldData;
-  p | *field_data_;
+  p | field_;
   p | array_;
   PUParray(p,face_,3);
   PUParray(p,ghost_,3);
@@ -129,7 +110,7 @@ void FieldFace::load ( int * n, char ** array) throw()
   size_t index_array = 0;
 
   if (field_list_.size() == 0) {
-    const size_t num_fields = field_data_->field_count();
+    const size_t num_fields = field_.field_count();
     field_list_.resize(num_fields);
     for (size_t i=0; i<num_fields; i++) field_list_[i] = i;
   }
@@ -144,18 +125,18 @@ void FieldFace::load ( int * n, char ** array) throw()
 
     size_t index_field = field_list_[index_field_list];
   
-    precision_type precision = field_data_->precision(index_field);
+    precision_type precision = field_.precision(index_field);
 
-    const void * field_face = field_data_->values(index_field);
+    const void * field_face = field_.values(index_field);
 
     void * array_face  = &array_[index_array];
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_data_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    new_loop_limits_ (im3,n3,nd3,ng3,op_load);
+    new_loop_limits_ (im3,n3,nd3,ng3,op_face_load);
 
     if (restrict_) {
 
@@ -226,18 +207,18 @@ void FieldFace::store (int n, char * array) throw()
 
     size_t index_field = field_list_[index_field_list];
 
-    precision_type precision = field_data_->precision(index_field);
+    precision_type precision = field_.precision(index_field);
 
-    char * field_ghost = field_data_->values(index_field);
+    char * field_ghost = field_.values(index_field);
     
     char * array_ghost  = array + index_array;
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_data_->field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    new_loop_limits_ (im3,n3,nd3,ng3,op_store);
+    new_loop_limits_ (im3,n3,nd3,ng3,op_face_store);
 
     if (prolong_) {
 
@@ -302,7 +283,7 @@ char * FieldFace::allocate () throw()
 
   // default all fields
   if (field_list_.size() == 0) {
-    const size_t nf = field_data_->field_count();
+    const size_t nf = field_.field_count();
     field_list_.resize(nf);
     for (size_t i=0; i<nf; i++) field_list_[i]=i;
   }
@@ -315,15 +296,15 @@ char * FieldFace::allocate () throw()
 
     // Need element size for alignment adjust below
 
-    precision_type precision = field_data_->precision(index_field);
+    precision_type precision = field_.precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     int nd3[3];
-    int field_bytes = field_data_->field_size 
+    int field_bytes = field_.field_size 
       (index_field, &nd3[0], &nd3[1], &nd3[2]);
 
     int ng3[3];
-    field_data_->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     int n_old = nd3[0]*nd3[1]*nd3[2];
 
@@ -342,7 +323,7 @@ char * FieldFace::allocate () throw()
     if (face_[2]) face_bytes = (face_bytes * ng3[2]) / nd3[2];
 
     face_bytes += 
-      field_data_->adjust_alignment_(face_bytes,bytes_per_element);
+      field_.field_data()->adjust_alignment_(face_bytes,bytes_per_element);
 
 
     array_size += face_bytes;
@@ -414,7 +395,7 @@ template<class T> size_t FieldFace::store_
 //----------------------------------------------------------------------
 
 void FieldFace::new_loop_limits_
-( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)
+( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_face_type)
 {
   im3[0]=0;
   im3[1]=0;
@@ -436,19 +417,19 @@ void FieldFace::new_loop_limits_
 	im3[axis] = 0;
 	n3 [axis] = nd3[axis];
       }
-      if (face_[axis] == -1 && op_type == op_load) {
+      if (face_[axis] == -1 && op_face_type == op_face_load) {
 	im3[axis] = ng3[axis];
 	n3 [axis] = ng3[axis];
       }
-      if (face_[axis] == -1 && op_type == op_store) {
+      if (face_[axis] == -1 && op_face_type == op_face_store) {
 	im3[axis] = 0;
 	n3 [axis] = ng3[axis];
       }      
-      if (face_[axis] == +1 && op_type == op_load) {
+      if (face_[axis] == +1 && op_face_type == op_face_load) {
 	im3[axis] = nd3[axis]-2*ng3[axis];
 	n3 [axis] = ng3[axis];
       }
-      if (face_[axis] == +1 && op_type == op_store) {
+      if (face_[axis] == +1 && op_face_type == op_face_store) {
 	im3[axis] = nd3[axis]-ng3[axis];
 	n3 [axis] = ng3[axis];
       }
@@ -465,7 +446,7 @@ void FieldFace::new_loop_limits_
 
     if (prolong_) {
 
-      if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_load) {
+      if (face_[axis] == 0 && ! ghost_[axis] && op_face_type == op_face_load) {
 	im3[axis] = ng3[axis] + co;
 	n3[axis] = (nd3[axis]-2*ng3[axis])/2;
 
@@ -480,11 +461,11 @@ void FieldFace::new_loop_limits_
 	}
 
       }
-      if (face_[axis] == 0 && ghost_[axis] && op_type == op_load) {
+      if (face_[axis] == 0 && ghost_[axis] && op_face_type == op_face_load) {
 	im3[axis] = ng3[axis]/2 + co;
 	n3[axis] = nd3[axis]/2;
       }
-      if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_store) {
+      if (face_[axis] == 0 && ! ghost_[axis] && op_face_type == op_face_store) {
 	im3[axis] = ng3[axis];
 	n3[axis]  = nd3[axis]-2*ng3[axis];
 
@@ -499,23 +480,23 @@ void FieldFace::new_loop_limits_
 	}
 
       }	  
-      if (face_[axis] == 0 && ghost_[axis] && op_type == op_store) {
+      if (face_[axis] == 0 && ghost_[axis] && op_face_type == op_face_store) {
 	im3[axis] = 0;
 	n3[axis]  = nd3[axis];
       }
-      if (face_[axis] == -1 && op_type == op_load) {
+      if (face_[axis] == -1 && op_face_type == op_face_load) {
 	im3[axis] = ng3[axis];
 	n3[axis]  = ng3[axis]/2;
       }
-      if (face_[axis] == -1 && op_type == op_store) {
+      if (face_[axis] == -1 && op_face_type == op_face_store) {
 	im3[axis] = 0;
 	n3[axis]  = ng3[axis];
       }
-      if (face_[axis] == +1 && op_type == op_load) {
+      if (face_[axis] == +1 && op_face_type == op_face_load) {
 	im3[axis] = nd3[axis]-3*ng3[axis]/2;
 	n3[axis]  = ng3[axis]/2;
       }
-      if (face_[axis] == +1 && op_type == op_store) {
+      if (face_[axis] == +1 && op_face_type == op_face_store) {
 	im3[axis] = nd3[axis]-ng3[axis];
 	n3[axis]  = ng3[axis];
       }
@@ -523,35 +504,35 @@ void FieldFace::new_loop_limits_
 
     if (restrict_) {
 
-      if (face_[axis] == 0 && !ghost_[axis] && op_type == op_load) {
+      if (face_[axis] == 0 && !ghost_[axis] && op_face_type == op_face_load) {
 	im3[axis] = ng3[axis];
 	n3[axis]  = nd3[axis]-2*ng3[axis];
       }
-      if (face_[axis] == 0 && !ghost_[axis] && op_type == op_store) {
+      if (face_[axis] == 0 && !ghost_[axis] && op_face_type == op_face_store) {
 	im3[axis] = ng3[axis] + co;
 	n3[axis] = (nd3[axis]-2*ng3[axis])/2;
       }
-      if (face_[axis] == 0 && ghost_[axis] && op_type == op_load) {
+      if (face_[axis] == 0 && ghost_[axis] && op_face_type == op_face_load) {
 	im3[axis] = 0;
 	n3[axis]  = nd3[axis];
       }
-      if (face_[axis] == 0 && ghost_[axis] && op_type == op_store) {
+      if (face_[axis] == 0 && ghost_[axis] && op_face_type == op_face_store) {
 	im3[axis] = ng3[axis]/2 + co;
 	n3[axis] = nd3[axis]/2;
       }
-      if (face_[axis] == -1 && op_type == op_load) {
+      if (face_[axis] == -1 && op_face_type == op_face_load) {
 	im3[axis] = ng3[axis];
 	n3[axis]  = 2*ng3[axis];
       }
-      if (face_[axis] == -1 && op_type == op_store) {
+      if (face_[axis] == -1 && op_face_type == op_face_store) {
 	im3[axis] = 0;
 	n3[axis]  = ng3[axis];
       }
-      if (face_[axis] == +1 && op_type == op_load) {
+      if (face_[axis] == +1 && op_face_type == op_face_load) {
 	im3[axis] = nd3[axis]-3*ng3[axis];
 	n3[axis]  = 2*ng3[axis];
       }
-      if (face_[axis] == +1 && op_type == op_store) {
+      if (face_[axis] == +1 && op_face_type == op_face_store) {
 	im3[axis] = nd3[axis]-ng3[axis];
 	n3[axis]  = ng3[axis];
       }

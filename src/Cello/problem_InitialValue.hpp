@@ -8,6 +8,8 @@
 #ifndef METHOD_INITIAL_DEFAULT_HPP
 #define METHOD_INITIAL_DEFAULT_HPP
 
+class FieldData;
+
 class InitialValue : public Initial {
 
   /// @class    InitialValue

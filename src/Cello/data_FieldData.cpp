@@ -14,11 +14,10 @@
 
 FieldData::FieldData 
 (
- FieldDescr * field_descr,
+ const FieldDescr * field_descr,
  int nx, int ny, int nz 
  ) throw()
-  : field_descr_(field_descr),
-    array_permanent_(),
+  : array_permanent_(),
     array_temporary_(),
     offsets_(),
     ghosts_allocated_(true)
@@ -65,9 +64,6 @@ void FieldData::pup(PUP::er &p)
 
   bool up = p.isUnpacking();
 
-  if (up) field_descr_ = new FieldDescr;
-  p | *field_descr_;
-
   PUParray(p,size_,3);
 
   p | array_permanent_;
@@ -85,14 +81,15 @@ void FieldData::pup(PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void FieldData::dimensions( int id_field, int * mx, int * my, int * mz ) const throw()
+void FieldData::dimensions(const FieldDescr * field_descr,
+			   int id_field, int * mx, int * my, int * mz ) const throw()
 {
   int nx,ny,nz;
   int gx,gy,gz;
   int cx,cy,cz;
   size      (&nx,&ny,&nz);
-  ghost_depth    (id_field,&gx,&gy,&gz);
-  centering (id_field,&cx,&cy,&cz);
+  field_descr->ghost_depth (id_field,&gx,&gy,&gz);
+  field_descr->centering (id_field,&cx,&cy,&cz);
 
   if (mx) (*mx) = (nx > 1) ? (nx + 2*gx + cx) : 1;
   if (my) (*my) = (ny > 1) ? (ny + 2*gy + cy) : 1;
@@ -110,34 +107,36 @@ void FieldData::size( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-const char * FieldData::values ( int id_field ) const 
+const char * FieldData::values ( const FieldDescr * field_descr,
+				 int id_field ) const 
   throw (std::out_of_range)
 {
   return (const char *)
-    ((FieldData *)this) -> values(id_field);
+    ((FieldData *)this) -> values(field_descr,id_field);
 }
 
 //----------------------------------------------------------------------
 
-char * FieldData::values ( int id_field ) 
+char * FieldData::values (const FieldDescr * field_descr,
+			  int id_field ) 
   throw (std::out_of_range)
 {
   if (id_field == -1) return NULL;
 
   char * values = 0;
 
-  if (is_permanent(id_field)) {
+  if (field_descr->is_permanent(id_field)) {
 
     // permanent field
-
-    if (0 <= id_field && id_field < field_count()) {
+    const int num_fields = field_descr->field_count();
+    if (0 <= id_field && id_field < num_fields) {
       values = &array_permanent_[0] + offsets_[id_field];
     }
   } else {
 
     // temporary field
 
-    int id_temporary = id_field - num_permanent();
+    int id_temporary = id_field - field_descr->num_permanent();
 
     if (0 <= id_temporary && id_temporary < int(array_temporary_.size())) {
       values = array_temporary_[id_temporary];
@@ -148,29 +147,31 @@ char * FieldData::values ( int id_field )
 
 //----------------------------------------------------------------------
 
-const char * FieldData::unknowns ( int id_field ) const
+const char * FieldData::unknowns ( const FieldDescr * field_descr, 
+				   int id_field ) const
   throw (std::out_of_range)
 {
   return (const char *)
-    ((FieldData *)this) -> unknowns(id_field);
+    ((FieldData *)this) -> unknowns(field_descr,id_field);
 }
 
 //----------------------------------------------------------------------
 
-char * FieldData::unknowns ( int id_field  )
+char * FieldData::unknowns (const FieldDescr * field_descr,
+			    int id_field  )
   throw (std::out_of_range)
 {
-  char * unknowns = values(id_field);
+  char * unknowns = values(field_descr,id_field);
 
   if ( ghosts_allocated() && unknowns ) {
 
     int gx,gy,gz;
     int mx,my;
 
-    ghost_depth    (id_field,&gx,&gy,&gz);
-    dimensions(id_field,&mx,&my);
+    field_descr->ghost_depth    (id_field,&gx,&gy,&gz);
+    dimensions(field_descr,id_field,&mx,&my);
 
-    precision_type precision = this->precision(id_field);
+    precision_type precision = field_descr->precision(id_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     unknowns += bytes_per_element * (gx + mx*(gy + my*gz));
@@ -196,20 +197,15 @@ void FieldData::cell_width
 
 void FieldData::clear
 (
+ const FieldDescr * field_descr,
  float              value,
  int                id_field_first,
  int                id_field_last) throw()
 {
-  if (field_descr_ == NULL) {
-    WARNING ("FieldData::clear()",
-	     "Trying to clear an unallocated FieldData");
-    return;
-  }
-
   if ( permanent_allocated() ) {
     if (id_field_first == -1) {
       id_field_first = 0;
-      id_field_last  = field_count() - 1;
+      id_field_last  = field_descr->field_count() - 1;
     } else if (id_field_last == -1) {
       id_field_last  = id_field_first;
     }
@@ -217,8 +213,8 @@ void FieldData::clear
 	 id_field <= id_field_last;
 	 id_field++) {
       int nx,ny,nz;
-      field_size(id_field,&nx,&ny,&nz);
-      precision_type precision = this->precision(id_field);
+      field_size(field_descr,id_field,&nx,&ny,&nz);
+      precision_type precision = field_descr->precision(id_field);
       char * array = &array_permanent_[0] + offsets_[id_field];
       switch (precision) {
       case precision_single:
@@ -252,7 +248,9 @@ void FieldData::clear
 
 //----------------------------------------------------------------------
 
-void FieldData::allocate_permanent ( bool ghosts_allocated ) throw()
+void FieldData::allocate_permanent 
+(const FieldDescr * field_descr,
+ bool ghosts_allocated ) throw()
 {
 
   // Error check size
@@ -268,24 +266,24 @@ void FieldData::allocate_permanent ( bool ghosts_allocated ) throw()
   if (permanent_allocated() ) {
     WARNING ("FieldData::allocate_permanent",
 	     "Array already allocated: calling reallocate()");
-    reallocate_permanent(ghosts_allocated);
+    reallocate_permanent(field_descr,ghosts_allocated);
     return;
   }
 
   ghosts_allocated_ = ghosts_allocated;
 
-  int padding   = field_descr_->padding();
-  int alignment = field_descr_->alignment();
+  int padding   = field_descr->padding();
+  int alignment = field_descr->alignment();
 
   int array_size = 0;
 
-  for (int id_field=0; id_field<field_descr_->field_count(); id_field++) {
+  for (int id_field=0; id_field<field_descr->field_count(); id_field++) {
 
     // Increment array_size, including padding and alignment adjustment
 
     int nx,ny,nz;       // not needed
 
-    int size = field_size(id_field, &nx,&ny,&nz);
+    int size = field_size(field_descr,id_field, &nx,&ny,&nz);
 
     array_size += adjust_padding_   (size,padding);
     array_size += adjust_alignment_ (size,alignment);
@@ -304,9 +302,9 @@ void FieldData::allocate_permanent ( bool ghosts_allocated ) throw()
 
   int field_offset = align_padding_(alignment);
 
-  offsets_.reserve(field_descr_->field_count());
+  offsets_.reserve(field_descr->field_count());
 
-  for (int id_field=0; id_field<field_descr_->field_count(); id_field++) {
+  for (int id_field=0; id_field<field_descr->field_count(); id_field++) {
 
     offsets_.push_back(field_offset);
 
@@ -314,7 +312,7 @@ void FieldData::allocate_permanent ( bool ghosts_allocated ) throw()
 
     int nx,ny,nz;       // not needed
 
-    int size = field_size(id_field,&nx,&ny,&nz);
+    int size = field_size(field_descr,id_field,&nx,&ny,&nz);
 
     field_offset += adjust_padding_  (size,padding);
     field_offset += adjust_alignment_(size,alignment);
@@ -332,10 +330,11 @@ void FieldData::allocate_permanent ( bool ghosts_allocated ) throw()
 
 //----------------------------------------------------------------------
 
-void FieldData::allocate_temporary (int id_field) throw (std::out_of_range)
+void FieldData::allocate_temporary (const FieldDescr * field_descr,
+				    int id_field) throw (std::out_of_range)
 
 {
-  int index_field = id_field - num_permanent();
+  int index_field = id_field - field_descr->num_permanent();
 
   if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
@@ -343,9 +342,9 @@ void FieldData::allocate_temporary (int id_field) throw (std::out_of_range)
     
   if (array_temporary_[index_field] == 0) {
     int mx,my,mz;
-    dimensions(id_field,&mx,&my,&mz);
+    dimensions(field_descr,id_field,&mx,&my,&mz);
     int m = mx*my*mz;
-    precision_type precision = this->precision(id_field);
+    precision_type precision = field_descr->precision(id_field);
     if (precision == precision_single)    
       array_temporary_[index_field] = (char*) new float [m];
     if (precision == precision_double)    
@@ -360,15 +359,16 @@ void FieldData::allocate_temporary (int id_field) throw (std::out_of_range)
 
 //----------------------------------------------------------------------
 
-void FieldData::deallocate_temporary (int id_field) throw(std::out_of_range)
+void FieldData::deallocate_temporary (const FieldDescr * field_descr,
+				      int id_field) throw(std::out_of_range)
 {
-  int index_field = id_field - num_permanent();
+  int index_field = id_field - field_descr->num_permanent();
 
   if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
   }
   if (array_temporary_[index_field] != 0) {
-    precision_type precision = this->precision(id_field);
+    precision_type precision = field_descr->precision(id_field);
     if (precision == precision_single)    
       delete [] (float *)       array_temporary_[index_field];
     if (precision == precision_double)    
@@ -383,13 +383,14 @@ void FieldData::deallocate_temporary (int id_field) throw(std::out_of_range)
 
 void FieldData::reallocate_permanent
 (
+ const FieldDescr * field_descr,
  bool               ghosts_allocated
  ) throw()
 {
   if (! permanent_allocated() ) {
     WARNING ("FieldData::reallocate_permanent",
 	     "Array not allocated yet: calling allocate()");
-    allocate_permanent(ghosts_allocated);
+    allocate_permanent(field_descr,ghosts_allocated);
     return;
   }
   
@@ -404,9 +405,9 @@ void FieldData::reallocate_permanent
 
   ghosts_allocated_ = ghosts_allocated;
 
-  allocate_permanent(ghosts_allocated_);
+  allocate_permanent(field_descr,ghosts_allocated_);
 
-  restore_permanent_ (&old_array[0], old_offsets);
+  restore_permanent_ (field_descr,&old_array[0], old_offsets);
 }
 
 //----------------------------------------------------------------------
@@ -427,7 +428,7 @@ void FieldData::deallocate_permanent () throw()
 
 //----------------------------------------------------------------------
 
-// void FieldData::allocate_ghosts(FieldDescr * field_descr) throw ()
+// void FieldData::allocate_ghosts(const FieldDescr * field_descr) throw ()
 // {
 //   if (! ghosts_allocated() ) {
 
@@ -439,7 +440,7 @@ void FieldData::deallocate_permanent () throw()
 
 // //----------------------------------------------------------------------
 
-// void FieldData::deallocate_ghosts(FieldDescr * field_descr) throw ()
+// void FieldData::deallocate_ghosts(const FieldDescr * field_descr) throw ()
 // {
 //   if ( ghosts_allocated() ) {
 
@@ -494,26 +495,18 @@ int FieldData::align_padding_ (int alignment) const throw()
 
 int FieldData::field_size
 (
+ const FieldDescr * field_descr,
  int                id_field,
  int              * nx,
  int              * ny,
  int              * nz
  ) const throw()
 {
-
-  if (field_descr_ == NULL) {
-    WARNING("FieldData::field_size",
- 	    "Calling field_size() on unallocated FieldData");
-    if (nx) (*nx) = 0;
-    if (ny) (*ny) = 0;
-    if (nz) (*nz) = 0;
-  }
-
   // Adjust memory usage due to ghosts if needed
 
   int  gx,gy,gz;
   if ( ghosts_allocated_ ) {
-    field_descr_->ghost_depth(id_field,&gx,&gy,&gz);
+    field_descr->ghost_depth(id_field,&gx,&gy,&gz);
   } else {
     gx = gy = gz = 0;
   }
@@ -521,7 +514,7 @@ int FieldData::field_size
   // Adjust memory usage due to field centering if needed
 
   int cx,cy,cz;
-  field_descr_->centering(id_field,&cx,&cy,&cz);
+  field_descr->centering(id_field,&cx,&cy,&cz);
 
   // Compute array size
 
@@ -531,7 +524,7 @@ int FieldData::field_size
 
   // Return array size in bytes
 
-  precision_type precision = field_descr_->precision(id_field);
+  precision_type precision = field_descr->precision(id_field);
   int bytes_per_element = cello::sizeof_precision (precision);
   if (nz) {
     return (*nx) * (*ny) * (*nz) * bytes_per_element;
@@ -545,7 +538,9 @@ int FieldData::field_size
 //----------------------------------------------------------------------
 
 void FieldData::print
-(const char * message,
+(
+ const FieldDescr * field_descr,
+ const char * message,
  // double lower[3],
  // double upper[3],
  bool use_file) const throw()
@@ -570,16 +565,16 @@ void FieldData::print
 	  "FieldData not allocated",
 	  permanent_allocated());
 
-   int field_count = field_descr_->field_count();
+   int field_count = field_descr->field_count();
    for (int index_field=0; index_field<field_count; index_field++) {
 
      // WARNING: not copying string works on some compilers but not others
-     const char * field_name = strdup(field_descr_->field_name(index_field).c_str());
+     const char * field_name = strdup(field_descr->field_name(index_field).c_str());
 
      int nxd,nyd,nzd;
      field_size(index_field,&nxd,&nyd,&nzd);
      int gx,gy,gz;
-     field_descr_->ghost_depth(index_field,&gx,&gy,&gz);
+     field_descr->ghost_depth(index_field,&gx,&gy,&gz);
 
      int ixm,iym,izm;
      int ixp,iyp,izp;
@@ -617,7 +612,7 @@ void FieldData::print
      // hz = (upper[2]-lower[2])/(nzd-2*gz);
 
      const char * array_offset = &array_permanent_[0]+offsets_[index_field];
-     switch (field_descr_->precision(index_field)) {
+     switch (field_descr->precision(index_field)) {
      case precision_single:
        print_((const float * ) array_offset,
 	      field_name, message, // lower,
@@ -711,26 +706,28 @@ void FieldData::print_
 //----------------------------------------------------------------------
 
 void FieldData::restore_permanent_ 
-( const char * array_from,
+(
+ const FieldDescr * field_descr,
+ const char * array_from,
   std::vector<int> & offsets_from) throw (std::out_of_range)
 {
 
   // copy values
   for (int id_field=0; 
-       id_field < field_descr_->field_count();
+       id_field < field_descr->field_count();
        id_field++) {
 
     // get "to" field size
 
     int nx2,ny2,nz2;
-    field_size(id_field, &nx2,&ny2,&nz2);
+    field_size(field_descr,id_field, &nx2,&ny2,&nz2);
 
     // get "from" field size
 
     ghosts_allocated_ = ! ghosts_allocated_;
 
     int nx1,ny1,nz1;
-    field_size(id_field, &nx1,&ny1,&nz1);
+    field_size(field_descr,id_field, &nx1,&ny1,&nz1);
 
     ghosts_allocated_ = ! ghosts_allocated_;
 
@@ -750,7 +747,7 @@ void FieldData::restore_permanent_
 
     // adjust for precision
 
-    precision_type precision = field_descr_->precision(id_field);
+    precision_type precision = field_descr->precision(id_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     offset1 *= bytes_per_element;

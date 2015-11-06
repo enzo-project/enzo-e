@@ -71,13 +71,14 @@ public: // interface
   FieldData * field_data (int i=0) throw()
   { return field_data_.at(i); }
 
-  /// Return the ith Field descriptor
-  const FieldDescr * field_descr (int i=0) const throw()
-  { return field_data_.at(i)->field_descr(); }
+  // Return the ith Field descriptor
+  FieldDescr * field_descr () throw();
+  const FieldDescr * field_descr () const throw()
+  {   return (const FieldDescr *) field_descr(); }
 
   /// Return the ith Field
   Field field (int i=0) throw()
-  { return Field((FieldDescr *)(field_data_.at(i)->field_descr()),
+  { return Field(field_descr(),
 		 field_data_.at(i)); }
 
   /// Return the x,y,z,t coordinates of field cell centers
@@ -111,10 +112,9 @@ public: // interface
     if (z) *z = upper_[2];
   }
 
-
 public: // virtual functions
 
-  virtual void allocate (const FieldDescr * field_descr) throw();
+  virtual void allocate () throw();
 
 private: // functions
 

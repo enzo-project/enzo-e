@@ -36,8 +36,8 @@ class FieldFace;
 
 #include "data_FieldDescr.hpp"
 #include "data_FieldData.hpp"
-#include "data_FieldFace.hpp"
 #include "data_Field.hpp"
+#include "data_FieldFace.hpp"
 
 #include "data_ItField.hpp"
 #include "data_ItFieldList.hpp"

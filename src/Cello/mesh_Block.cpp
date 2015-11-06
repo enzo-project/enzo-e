@@ -114,7 +114,7 @@ Block::Block
 		       xm,xp, ym,yp, zm,zp);
 
 
-  data_->allocate(field_descr);
+  data_->allocate();
 
   child_data_ = NULL;
 
@@ -177,7 +177,10 @@ Block::Block
   if (narray != 0) {
     
     // copy any input data
-    FieldFace field_face (data()->field_data());
+    FieldData  * field_data  = data()      ->field_data();
+    FieldDescr * field_descr = simulation()->field_descr();
+    Field field (field_descr,field_data);
+    FieldFace field_face (field);
 
     //    set "face" to full FieldData
     field_face.set_face(0,0,0);
@@ -289,7 +292,7 @@ void Block::pup(PUP::er &p)
 //----------------------------------------------------------------------
 
 const FieldDescr * Block::field_descr() throw()
-{ return data_->field_data()->field_descr(); }
+{ return data_->field_descr(); }
 
 //----------------------------------------------------------------------
 
@@ -674,9 +677,11 @@ FieldFace * Block::create_face_
  )
 {
   Problem * problem        = simulation()->problem();
-  FieldData * field_data = data_->field_data();
 
-  FieldFace * field_face = new FieldFace (field_data);
+  FieldData  * field_data  = data()      ->field_data();
+  FieldDescr * field_descr = simulation()->field_descr();
+  Field field (field_descr,field_data);
+  FieldFace * field_face = new FieldFace(field);
 
   if (op_array_type == op_array_restrict) {
 
@@ -690,7 +695,7 @@ FieldFace * Block::create_face_
 
   field_face->set_face (if3[0],if3[1],if3[2]);
   field_face->set_ghost(lg3[0],lg3[1],lg3[2]);
-  const FieldDescr * field_descr = simulation()->field_descr();
+
   if (field_list.size() == 0) {
     int n = field_descr->field_count();
     field_list.resize(n);

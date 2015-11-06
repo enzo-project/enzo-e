@@ -178,7 +178,7 @@ void init_fields
 
 	// Allocate field data including ghosts
 
-	data->allocate_permanent(true);
+	data->allocate_permanent(field_descr,true);
 
 	// Initialize fields
 
@@ -186,17 +186,17 @@ void init_fields
 
 	// field 0
 	field_descr->ghost_depth(0, &gx, &gy, &gz);
-	float * v1 = (float *) (data->values(0));
+	float * v1 = (float *) (data->values(field_descr,0));
 	init_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 1
 	field_descr->ghost_depth(1, &gx, &gy, &gz);
-	double * v2 = (double *) (data->values(1));
+	double * v2 = (double *) (data->values(field_descr,1));
 	init_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 
 	// field 2
 	field_descr->ghost_depth(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (data->values(2));
+	long double * v3 = (long double *) (data->values(field_descr,2));
 	init_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
  
       }
@@ -231,7 +231,7 @@ bool test_fields
 
 	// field 0
 	field_descr->ghost_depth(0, &gx, &gy, &gz);
-	float * v1 = (float *) (data->values(0));
+	float * v1 = (float *) (data->values(field_descr,0));
 	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
@@ -239,14 +239,14 @@ bool test_fields
 
 	// field 1
 	field_descr->ghost_depth(1, &gx, &gy, &gz);
-	double * v2 = (double *) (data->values(1));
+	double * v2 = (double *) (data->values(field_descr,1));
 	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
 
 	// field 2
 	field_descr->ghost_depth(2, &gx, &gy, &gz);
-	long double * v3 = (long double *) (data->values(2));
+	long double * v3 = (long double *) (data->values(field_descr,2));
 	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
 	unit_assert(test_result);  // @@@@
 	result = result && test_result;
@@ -327,8 +327,10 @@ PARALLEL_MAIN_BEGIN
 	  if (axis==axis_y) {iym=-1; iyp=+1; }
 	  if (axis==axis_z) {izm=-1; izp=+1; }
 
-	  FieldFace face_lower (data_lower);
-	  FieldFace face_upper (data_upper);
+	  Field field_lower (field_descr,data_lower);
+	  Field field_upper (field_descr,data_upper);
+	  FieldFace face_lower (field_lower);
+	  FieldFace face_upper (field_upper);
 	  face_lower.set_ghost(true,true,true);
 	  face_upper.set_ghost(true,true,true);
 

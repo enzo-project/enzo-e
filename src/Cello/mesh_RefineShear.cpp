@@ -28,13 +28,13 @@ int RefineShear::apply
  ) throw ()
 {
 
-  FieldData * field_data = block->data()->field_data();
+  Field field = block->data()->field();
 
   bool all_coarsen = true;
   bool any_refine = false;
 
   int nx,ny,nz;
-  field_data->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   int rank = nz > 1 ? 3 : (ny > 1 ? 2 : 1);
 
@@ -43,18 +43,18 @@ int RefineShear::apply
   data->lower(&xm[0],&xm[1],&xm[2]);
   data->upper(&xp[0],&xp[1],&xp[2]);
 
-  int id_velocity = field_descr->field_id("velocity_x");
+  int id_velocity = field.field_id("velocity_x");
 
   void * velocity_x = 0;
   void * velocity_y = 0;
   void * velocity_z = 0;
 
-  if (rank >= 1) velocity_x = field_data->values("velocity_x");
-  if (rank >= 2) velocity_y = field_data->values("velocity_y");
-  if (rank >= 3) velocity_z = field_data->values("velocity_z");
+  if (rank >= 1) velocity_x = field.values("velocity_x");
+  if (rank >= 2) velocity_y = field.values("velocity_y");
+  if (rank >= 3) velocity_z = field.values("velocity_z");
    
   int gx,gy,gz;
-  field_descr->ghost_depth(id_velocity, &gx,&gy,&gz);
+  field.ghost_depth(id_velocity, &gx,&gy,&gz);
 
   int nxd = nx + 2*gx;
   int nyd = ny + 2*gy;
@@ -64,9 +64,9 @@ int RefineShear::apply
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;
 
-  void * output = initialize_output_(field_data);
+  void * output = initialize_output_(field.field_data());
 
-  precision_type precision = field_descr->precision(id_velocity);
+  precision_type precision = field.precision(id_velocity);
 
   switch (precision) {
   case precision_single:

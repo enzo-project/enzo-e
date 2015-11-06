@@ -72,11 +72,11 @@ int RefineSlope::apply
     }
 
     int mx,my,mz;
-    field_data->dimensions(id_field,&mx,&my,&mz);
+    field_data->dimensions(field_descr,id_field,&mx,&my,&mz);
 
     precision_type precision = field_descr->precision(id_field);
 
-    void * array = field_data->values(id_field);
+    void * array = field_data->values(field_descr,id_field);
    
     // count number of times slope refine and coarsen conditions are satisified
     switch (precision) {

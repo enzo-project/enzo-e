@@ -20,11 +20,8 @@ class FieldFace {
 
 public: // interface
 
-  /// Constructor of uninitialized FieldFace
-  FieldFace() throw();
-
   /// Constructor of initialized FieldFace
-  FieldFace (FieldData * field_data) throw();
+  FieldFace (const Field & field) throw();
      
   /// Destructor
   ~FieldFace() throw();
@@ -136,8 +133,8 @@ private: // functions
 
 private: // attributes
 
-  /// back-link to field data corresponding to this face
-  FieldData * field_data_;
+  /// Field data and descriptor
+  Field field_;
 
   /// Allocated array used for storing all ghosts and face
   std::vector<char> array_;

@@ -247,8 +247,8 @@ void OutputImage::write_block
   // add block contribution to image
 
   const char * field = (ghost_) ? 
-    field_data->values(index_field) :
-    field_data->unknowns(index_field);
+    field_data->values(field_descr,index_field) :
+    field_data->unknowns(field_descr,index_field);
 
   float * field_float = (float*)field;
   double * field_double = (double*)field;

@@ -67,26 +67,19 @@ Data & Data::operator= (const Data & data) throw ()
 
 //----------------------------------------------------------------------
 
-void Data::allocate (const FieldDescr * field_descr) throw()
+void Data::allocate () throw()
 {
   for (size_t i=0; i<field_data_.size(); i++) {
-    field_data_[i]->allocate_permanent(true);
+    field_data_[i]->allocate_permanent(field_descr(),true);
   }
 }
 
 //----------------------------------------------------------------------
 
-void Data::field_cell_width 
-(double * hx, 
- double * hy,
- double * hz) const
+FieldDescr * Data::field_descr () throw()
 {
-  double xm,ym,zm;
-  this->lower(&xm,&ym,&zm);
-  double xp,yp,zp;
-  this->upper(&xp,&yp,&zp);
-  field_data()->cell_width(xm,xp,hx, ym,yp,hy, zm,zp,hz);
-}   
+  return proxy_simulation.ckLocalBranch()->field_descr();  
+}
 
 //----------------------------------------------------------------------
 
@@ -115,6 +108,20 @@ void Data::field_cells (double * x, double * y, double * z,
   for (int iy=iym; iy<iyp; iy++) y[iy-iym] = ym + (iy+0.5)*hy;
   for (int iz=izm; iz<izp; iz++) z[iz-izm] = zm + (iz+0.5)*hz;
 }
+
+//----------------------------------------------------------------------
+
+void Data::field_cell_width 
+(double * hx, 
+ double * hy,
+ double * hz) const
+{
+  double xm,ym,zm;
+  this->lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  this->upper(&xp,&yp,&zp);
+  field_data()->cell_width(xm,xp,hx, ym,yp,hy, zm,zp,hz);
+}   
 
 //======================================================================
 

@@ -164,37 +164,37 @@ public: // interface
 
   /// Return dimensions of fields on the data, assuming centered
   void dimensions(int id_field,int * mx, int * my = 0, int * mz = 0) const throw()
-  { field_data_->dimensions(id_field, mx,my,mz); }
+  { field_data_->dimensions(field_descr_,id_field, mx,my,mz); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
   char * values (int id) throw (std::out_of_range)
-  { return field_data_->values(id); }
+  { return field_data_->values(field_descr_,id); }
 
   char * values (std::string name) throw (std::out_of_range)
-  { return field_data_->values(name); }
+  { return field_data_->values(field_descr_,name); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
   const char * values (int id) const throw (std::out_of_range)
-  { return field_data_->values(id); }
+  { return field_data_->values(field_descr_,id); }
 
   const char * values (std::string name) const throw (std::out_of_range)
-  { return field_data_->values(name); }
+  { return field_data_->values(field_descr_,name); }
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * unknowns ( int id) throw (std::out_of_range)
-  { return field_data_->unknowns(id); }
+  { return field_data_->unknowns(field_descr_,id); }
 
   char * unknowns (std::string name) throw (std::out_of_range)
-  { return field_data_->unknowns(name); }
+  { return field_data_->unknowns(field_descr_,name); }
 
   const char * unknowns ( int id) const throw (std::out_of_range)
-  { return field_data_->unknowns(id); }
+  { return field_data_->unknowns(field_descr_,id); }
 
   const char * unknowns (std::string name) const throw (std::out_of_range)
-  { return field_data_->unknowns(name); }
+  { return field_data_->unknowns(field_descr_,name); }
 
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
@@ -214,7 +214,7 @@ public: // interface
   void clear ( float value = 0.0, 
 	       int id_first = -1, 
 	       int id_last  = -1) throw()
-  { field_data_->clear (value,id_first,id_last); }
+  { field_data_->clear (field_descr_,value,id_first,id_last); }
  
   /// Return whether array is allocated or not
   bool permanent_allocated() const throw()
@@ -226,20 +226,20 @@ public: // interface
 
   /// Allocate storage for the field data
   void allocate_permanent(bool ghosts_allocated = false) throw()
-  { field_data_->allocate_permanent(ghosts_allocated); }
+  { field_data_->allocate_permanent(field_descr_,ghosts_allocated); }
 
   /// Allocate storage for the temporary fields
   void allocate_temporary(int id) throw (std::out_of_range)
-  { field_data_->allocate_temporary(id); }
+  { field_data_->allocate_temporary(field_descr_,id); }
 
   /// Deallocate storage for the temporary fields
   void deallocate_temporary(int id) throw (std::out_of_range)
-  { field_data_->deallocate_temporary(id); }
+  { field_data_->deallocate_temporary(field_descr_,id); }
 
   /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
   void reallocate_permanent(bool ghosts_allocated = false) throw()
-  { field_data_->reallocate_permanent(ghosts_allocated); }
+  { field_data_->reallocate_permanent(field_descr_,ghosts_allocated); }
 
   /// Deallocate storage for the field data
   void deallocate_permanent() throw()
@@ -252,14 +252,14 @@ public: // interface
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
   int field_size (int id, int *nx=0, int *ny=0, int *nz=0) const throw()
-  { return field_data_->field_size(id,nx,ny,nz); }
+  { return field_data_->field_size(field_descr_,id,nx,ny,nz); }
 
   //----------------------------------------------------------------------
 
   /// Print basic field characteristics for debugging
   void print (const char * message,
 	      bool use_file = false) const throw()
-  { field_data_->print(message,use_file); }
+  { field_data_->print(field_descr_,message,use_file); }
 
 private: // attributes
 

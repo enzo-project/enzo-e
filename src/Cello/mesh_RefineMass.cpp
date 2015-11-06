@@ -76,7 +76,7 @@ int RefineMass::apply
   precision_type precision = field_descr->precision(0);
 
   // ERROR: using field id=0!
-  void * void_array  = field_data->values(0);
+  void * void_array  = field_data->values(field_descr,0);
   void * void_output = initialize_output_(field_data);
 
   //  int num_fields = field_descr->field_count();

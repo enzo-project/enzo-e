@@ -155,7 +155,7 @@ void InitialValue::enforce_block
 
     if (parameter_type == parameter_float) {
 
-      field_data->clear(parameters_->value_float("value",0.0), 
+      field_data->clear(field_descr,parameters_->value_float("value",0.0), 
 			 index_field);
 
     } else if (parameter_type == parameter_list) {
@@ -312,7 +312,7 @@ void InitialValue::copy_values_
 
   // Copy the floating-point values to the field where mask values are true
 
-  void * field = field_data->unknowns(index_field);
+  void * array = field_data->unknowns(field_descr,index_field);
 
   // Determine allocated array size
 
@@ -332,16 +332,16 @@ void InitialValue::copy_values_
   precision_type precision = field_descr->precision(index_field);
   switch (precision) {
   case precision_single:
-    if (mask) copy_precision_((float *)field,mask,offset,value,nx,ny,nz);
-    else      copy_precision_((float *)field,     offset,value,nx,ny,nz);
+    if (mask) copy_precision_((float *)array,mask,offset,value,nx,ny,nz);
+    else      copy_precision_((float *)array,     offset,value,nx,ny,nz);
     break;
   case precision_double:
-    if (mask) copy_precision_((double *)field,mask,offset,value,nx,ny,nz);
-    else      copy_precision_((double *)field,     offset,value,nx,ny,nz);
+    if (mask) copy_precision_((double *)array,mask,offset,value,nx,ny,nz);
+    else      copy_precision_((double *)array,     offset,value,nx,ny,nz);
     break;
   case precision_quadruple:
-    if (mask) copy_precision_((long double *)field,mask,offset,value,nx,ny,nz);
-    else      copy_precision_((long double *)field,     offset,value,nx,ny,nz);
+    if (mask) copy_precision_((long double *)array,mask,offset,value,nx,ny,nz);
+    else      copy_precision_((long double *)array,     offset,value,nx,ny,nz);
     break;
   default:
     break;
@@ -352,7 +352,7 @@ void InitialValue::copy_values_
 
 template<class T>
 void InitialValue::copy_precision_
-(T * field,
+(T * array,
  bool * mask,
  int offset,
  double * value,
@@ -363,7 +363,7 @@ void InitialValue::copy_precision_
       for (int ix = 0; ix<nx; ix++) {
 	int i = ix + nx*(iy + ny*iz);
 	if (mask[i]) 
-	  (field - offset)[i] = (T) value[i];
+	  (array - offset)[i] = (T) value[i];
       }
     }
   }
@@ -375,7 +375,7 @@ void InitialValue::copy_precision_
 
 template<class T>
 void InitialValue::copy_precision_
-(T * field,
+(T * array,
  int offset,
  double * value,
  int nx, int ny, int nz)
@@ -384,7 +384,7 @@ void InitialValue::copy_precision_
     for (int iy = 0; iy<ny; iy++) {
       for (int ix = 0; ix<nx; ix++) {
 	int i = ix + nx*(iy + ny*iz);
-	(field - offset)[i] = (T) value[i];
+	(array - offset)[i] = (T) value[i];
       }
     }
   }

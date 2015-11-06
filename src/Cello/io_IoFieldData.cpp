@@ -61,7 +61,7 @@ void IoFieldData::data_value
  int * nx,  int * ny,  int * nz) throw()
 {
   if (buffer) (*buffer) = (void * ) 
-		field_data_->values(field_index_);
+		field_data_->values(field_descr_,field_index_);
   if (name)   (*name)   = field_descr_->field_name(field_index_);
   if (type) {
 
