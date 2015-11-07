@@ -20,7 +20,7 @@ class IoFieldData : public Io {
 public: // interface
 
   /// Constructor
-  IoFieldData() throw();
+  IoFieldData(const FieldDescr * field_descr) throw();
 
   /// Destructor
   virtual ~IoFieldData() throw()
@@ -38,7 +38,7 @@ public: // interface
   { field_data_ = field_data;};
 
   /// Set FieldDescr
-  void set_field_descr (FieldDescr * field_descr) throw()
+  void set_field_descr (const FieldDescr * field_descr) throw()
   { field_descr_ = field_descr; };
 
 
@@ -48,7 +48,7 @@ public: // interface
 protected: // functions
 
   /// FieldDescr for the FieldData
-  FieldDescr * field_descr_;
+  const FieldDescr * field_descr_;
 
   /// Current FieldData
   FieldData * field_data_;

@@ -177,7 +177,7 @@ public: // attributes
   std::vector<std::string>   particle_list;
   std::vector<char>          particle_interleaved;
   std::vector< std::vector <std::string> > particle_attribute_name;
-  std::vector< std::vector <int> >    particle_attribute_bytes;
+  std::vector< std::vector <std::string> > particle_attribute_type;
   int                        particle_batch_size;
 
   // Performance

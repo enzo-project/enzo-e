@@ -10,8 +10,9 @@
 
 class Factory;
 class FieldDescr;
+class ParticleDescr;
 class Hierarchy;
-class ItField;
+class ItIndex;
 class Simulation;
 
 class Input : public PUP::able 
@@ -29,7 +30,9 @@ public: // functions
   Input() throw() {}
 
   /// Create an uninitialized Input object
-  Input(const Factory * factory) throw();
+  Input(const Factory * factory,
+	const FieldDescr * field_descr,
+	const ParticleDescr * particle_descr) throw();
 
   /// Delete an Input object
   virtual ~Input() throw();
@@ -48,14 +51,21 @@ public: // functions
 		     std::vector<std::string> fileargs) throw();
 
   /// Set field iterator
-  void set_it_field (ItField * it_field) throw()
-  { it_field_ = it_field; }
+  void set_it_field_index (ItIndex * it_index) throw()
+  { it_field_index_ = it_index; }
+  
+  /// Set particle iterator
+  void set_it_particle_index (ItIndex * it_index) throw()
+  { it_particle_index_ = it_index; }
   
   /// Return the IoBlock object
   IoBlock * io_block () const throw() { return io_block_; }
 
   /// Return the IoFieldData object
   IoFieldData * io_field_data () const throw() { return io_field_data_; }
+
+  /// Return the IoParticleData object
+  IoParticleData * io_particle_data () const throw() { return io_particle_data_; }
 
   /// Return the File object pointer
   File * file() throw() { return file_; };
@@ -109,19 +119,27 @@ public:
   /// Read local hierarchy data from disk
   virtual void read_hierarchy
   ( Hierarchy * hierarchy, 
-    const FieldDescr * field_descr  ) throw();
+    const FieldDescr * field_descr,
+    const ParticleDescr * particle_descr) throw();
 
   /// Read local data data from disk
   virtual Block * read_block
   ( Block * block,
     std::string block_name,
-    const FieldDescr * field_descr) throw();
+    const FieldDescr * field_descr,
+    const ParticleDescr * particle_descr) throw();
 
   /// Read local field from disk
   virtual void read_field
   ( FieldData * field_data, 
     const FieldDescr * field_descr,
-    int field_index) throw() = 0;
+    int index_field) throw() = 0;
+
+  /// Read local particle from disk
+  virtual void read_particle
+  ( ParticleData * particle_data, 
+    const ParticleDescr * particle_descr,
+    int index_particle) throw() = 0;
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw()
@@ -172,14 +190,20 @@ protected: // attributes
   /// Format strings for file name, if any ("cycle", "time", etc.)
   std::vector<std::string> file_args_;
 
-  /// Iterator over field id's
-  ItField * it_field_;
-
   /// I/O Block data accessor
   IoBlock * io_block_;
 
+  /// Iterator over field indices
+  ItIndex * it_field_index_;
+
   /// I/O FieldData data accessor
   IoFieldData * io_field_data_;
+
+  /// Iterator over particle indices
+  ItIndex * it_particle_index_;
+
+  /// I/O ParticleData data accessor
+  IoParticleData * io_particle_data_;
 
   /// Only processes with id's divisible by process_stride_ reads
   /// (1: all processes read; 2: 0,2,4,... read; np: root process reads)

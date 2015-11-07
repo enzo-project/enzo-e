@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_ItField.cpp
+/// @file     test_ItIndex.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Test program for the ItField class
+/// @brief    Test program for the ItIndex class
 
 #include "main.hpp"
 #include "test.hpp"
@@ -18,12 +18,12 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   //--------------------------------------------------
-  unit_class("ItFieldRange");
+  unit_class("ItIndexRange");
   //--------------------------------------------------
 
   unit_func ("it_field_range");
 
-  ItField * it_field_count = new ItFieldRange(10);
+  ItIndex * it_field_count = new ItIndexRange(10);
 
   unit_assert (it_field_count != NULL);
 
@@ -42,7 +42,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("it_field_count");
 
-  ItField * it_field_range = new ItFieldRange (3,9);
+  ItIndex * it_field_range = new ItIndexRange (3,9);
 
   s = 0;
   for (it_field_range->first(); ! it_field_range->done(); it_field_range->next()) {
@@ -59,16 +59,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert (s == 3+4+5+6+7+8+9);
   
   //--------------------------------------------------
-  unit_class("ItFieldList");
+  unit_class("ItIndexList");
   //--------------------------------------------------
 
-  ItField * it_field_list = new ItFieldList();
+  ItIndex * it_field_list = new ItIndexList();
 
   unit_func ("it_field_list");
 
   const int values[6] = {15,12,-17,2,2,0};
 
-  ItFieldList * itcast = dynamic_cast<ItFieldList *>(it_field_list);
+  ItIndexList * itcast = dynamic_cast<ItIndexList *>(it_field_list);
   if ( itcast != NULL) {
     itcast->append(values[0]);
     itcast->append(values[1]);
@@ -94,7 +94,7 @@ PARALLEL_MAIN_BEGIN
   }
   
   //--------------------------------------------------
-  unit_class("ItFieldRange");
+  unit_class("ItIndexRange");
   //--------------------------------------------------
 
   unit_finalize();

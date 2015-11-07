@@ -87,7 +87,9 @@ enum reduce_enum {
   reduce_sum,     /// Sum of values along the axis
   reduce_set      /// Value of last processed (used for mesh plotting)
 };
+
 typedef int reduce_type;
+
 
 /// @enum precision_enum
 /// @brief list of known floating-point precision, used for Field
@@ -101,27 +103,29 @@ enum precision_enum {
   precision_extended96,  //  96-bit field data
   precision_quadruple,   // 128-bit field data
 };
+typedef int precision_type;
 
 /// @enum type_enum
-/// @brief list of known scalar types, including ints and floats, used for Particle attributes
+/// @brief list of known scalar types, including ints as well as floats, used for Field types and Particle attributes
 enum type_enum {
   type_unknown,     // unknown type
-  type_bool,
-  type_char,        // one byte
-  type_short,       // short int
-  type_int,         // int
-  type_long,        // long int
-  type_long_long,   // long long int
-  type_float,
+  type_default,    // "default" floating-point precision, e.g. enzo_float
+  type_single,
   type_double,
-  type_long_double
+  type_extended80,
+  type_extended96,
+  type_quadruple,
+  type_int8,
+  type_int16,
+  type_int32,
+  type_int64,
+  NUM_TYPES
 };
 
 
-typedef int precision_type;
-
 #ifdef CONFIG_PRECISION_SINGLE
 #   define default_precision precision_single
+#   define default_type      type_single
 #   define SCALAR_DEFINED
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
@@ -129,6 +133,7 @@ typedef int precision_type;
 #      define SCALAR_ERROR
 #   endif
 #   define default_precision precision_double
+#   define default_type      type_double
 #   define SCALAR_DEFINED
 #endif
 #ifdef CONFIG_PRECISION_QUAD
@@ -136,15 +141,16 @@ typedef int precision_type;
 #      define SCALAR_ERROR
 #   endif
 #   define default_precision precision_quad
+#   define default_type      type_quad
 #   define SCALAR_DEFINED
 #endif
 
 #ifndef SCALAR_DEFINED
-#   error Neither CONFIG_PRECISION_SINGLE nor CONFIG_PRECISION_DOUBLE defined
+#   error None of CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
 #ifdef ERROR_SCALAR
-#   error Multiple CONFIG_PRECISION_<SIZE> defined
+#   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
 /// Namespace for global constants and functions
@@ -154,12 +160,8 @@ namespace cello {
 
   const double pi = 3.14159265358979324;
 
-  // Functions
-  int sizeof_precision       (precision_type);
-  int is_precision_supported (precision_type);
-  double machine_epsilon     (precision_type);
-  extern const char * precision_name[7];
-
+  // precision functions
+  double machine_epsilon     (int);
   template <class T>
   T err_rel (const T & a, const T & b)
   {  return (a != 0.0) ? fabs((a - b) / a) : fabs(a-b);  }
@@ -168,20 +170,32 @@ namespace cello {
   T err_abs (const T & a, const T & b)
   {  return fabs(a-b);  };
 
+  // type_enum functions (prefered)
+  int sizeof_type (int);
+  int is_type_supported (int);
+  extern const char * type_name[NUM_TYPES];
+
+  // precision_enum functions (depreciated)
+
+  int sizeof_precision       (precision_type);
+  int is_precision_supported (precision_type);
+  extern const char * precision_name[7];
+
+
   /// Check a number for zero, NAN, and inf
 
   template <class T>
-  void check (T value, const char * string,
+  void check (T value, const char * message,
 	      const char * file, int line)
   {
     if (std::fpclassify(value) == FP_ZERO) {
-      printf ("WARNING: %s:%d %s zero\n", file,line,string);	
+      printf ("WARNING: %s:%d %s zero\n", file,line,message);	
     }					
     if (std::fpclassify(value) == FP_NAN) {
-      printf ("WARNING: %s:%d %s nan\n", file,line,string);	
+      printf ("WARNING: %s:%d %s nan\n", file,line,message);	
     }					
     if (std::fpclassify(value) == FP_INFINITE) {
-      printf ("WARNING: %s:%d %s inf\n", file,line,string);	
+      printf ("WARNING: %s:%d %s inf\n", file,line,message);	
     }					
   }
 

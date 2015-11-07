@@ -1,36 +1,36 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data_ItField.hpp
+/// @file     data_ItIndex.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief [\ref Data] Declaration of the ItField abstract iterator
+/// @brief [\ref Data] Declaration of the ItIndex abstract iterator
 /// base class
 
-#ifndef DATA_IT_FIELD_HPP
-#define DATA_IT_FIELD_HPP
+#ifndef DATA_IT_INDEX_HPP
+#define DATA_IT_INDEX_HPP
 
-class ItField : public PUP::able 
+class ItIndex : public PUP::able 
 {
 
-  /// @class    ItField
+  /// @class    ItIndex
   /// @ingroup  Data
-  /// @brief    [\ref Data] Abstract iterator base class for Field indices
+  /// @brief    [\ref Data] Abstract iterator base class for Index indices
 
 public: // interface
 
   /// Create an iterator over integers 0 to count-1
-  ItField () throw ()
+  ItIndex () throw ()
   { }
 
   /// Virtual destructor
-  virtual ~ItField () throw()
+  virtual ~ItIndex () throw()
   { }
 
   /// Charm++ PUP::able declarations
-  PUPable_abstract(ItField);
+  PUPable_abstract(ItIndex);
 
   /// Charm++ PUP::able migration constructor
-  ItField (CkMigrateMessage *m) : PUP::able(m) {}
+  ItIndex (CkMigrateMessage *m) : PUP::able(m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
@@ -55,4 +55,4 @@ protected: // attributes
 
 };
 
-#endif /* DATA_IT_FIELD_HPP */
+#endif /* DATA_IT_INDEX_HPP */

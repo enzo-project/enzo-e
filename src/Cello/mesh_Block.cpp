@@ -340,13 +340,15 @@ void Block::apply_initial_() throw ()
   performance_switch_(perf_initial,__FILE__,__LINE__);
 
   FieldDescr * field_descr = simulation()->field_descr();
+  ParticleDescr * particle_descr = simulation()->particle_descr();
 
   // Apply initial conditions
 
   index_initial_ = 0;
   Problem * problem = simulation()->problem();
   while (Initial * initial = problem->initial(index_initial_++)) {
-    initial->enforce_block(this,field_descr, simulation()->hierarchy());
+    initial->enforce_block(this,field_descr, particle_descr,
+			   simulation()->hierarchy());
   }
   //  performance_stop_(perf_initial);
 }

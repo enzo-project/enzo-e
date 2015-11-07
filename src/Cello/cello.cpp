@@ -4,10 +4,25 @@
 
 namespace cello {
 
-  // @@@ KEEP IN SYNCH WITH precision_enum in cello_precision.hpp
+  // @@@ KEEP IN SYNCH WITH precision_enum in cello.hpp
   const char * precision_name[7] = {
     "unknown",
     "default",
+    "single",
+    "double",
+    "extended80",
+    "extended96",
+    "quadruple"
+  };
+
+  // @@@ KEEP IN SYNCH WITH type_enum in cello.hpp
+  const char * type_name[NUM_TYPES] = {
+    "unknown",     // unknown type
+    "int8",
+    "int16",
+    "int32",
+    "int64",
+    "default",    // "default" floating-point precision, e.g. enzo_float
     "single",
     "double",
     "extended80",

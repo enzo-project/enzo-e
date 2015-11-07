@@ -10,8 +10,10 @@
 
 //----------------------------------------------------------------------
 
-InputData::InputData(const Factory * factory) throw ()
-  : Input(factory)
+InputData::InputData(const Factory * factory,
+		     const FieldDescr * field_descr,
+		     const ParticleDescr * particle_descr ) throw ()
+  : Input(factory,field_descr,particle_descr)
 {
 }
 
@@ -80,7 +82,8 @@ void InputData::finalize () throw ()
 void InputData::read_hierarchy 
 (
  Hierarchy  * hierarchy,
- const FieldDescr * field_descr
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
  ) throw()
 {
 
@@ -91,7 +94,7 @@ void InputData::read_hierarchy
   Input::read_meta (&io_hierarchy);
 
   // Calls read_blocks() on contained forest
-  Input::read_hierarchy (hierarchy, field_descr);
+  Input::read_hierarchy (hierarchy, field_descr, particle_descr);
 
 }
 
@@ -101,7 +104,8 @@ Block * InputData::read_block
 ( 
  Block * block,
  std::string  block_name,
- const FieldDescr * field_descr) throw()
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr) throw()
 {
 
   file_->group_chdir(block_name);
@@ -132,11 +136,11 @@ void InputData::read_field
 ( 
  FieldData * field_data,
  const FieldDescr * field_descr,
- int field_index) throw()
+ int index_field) throw()
 {
   io_field_data()->set_field_descr((FieldDescr*)field_descr);
   io_field_data()->set_field_data(field_data);
-  io_field_data()->set_field_index(field_index);
+  io_field_data()->set_field_index(index_field);
 
   for (size_t i=0; i<io_field_data()->data_count(); i++) {
 
@@ -158,6 +162,41 @@ void InputData::read_field
 				&nx, &ny, &nz);
 
   }
+
+}
+
+//----------------------------------------------------------------------
+
+void InputData::read_particle
+( 
+ ParticleData * particle_data,
+ const ParticleDescr * particle_descr,
+ int index_particle) throw()
+{
+  // io_particle_data()->set_particle_descr((ParticleDescr*)particle_descr);
+  // io_particle_data()->set_particle_data(particle_data);
+  // io_particle_data()->set_particle_index(index_particle);
+
+  // for (size_t i=0; i<io_particle_data()->data_count(); i++) {
+
+  //   void * buffer = 0;
+  //   std::string name;
+  //   scalar_type type;
+  //   int nxd,nyd,nzd;  // Array dimension
+  //   int nx,ny,nz;     // Array size
+
+  //   // Read ith ParticleData data
+
+  //   file_->data_open(name.c_str(),&type,&nx,&ny,&nz);
+  //   file_->data_read(buffer);
+  //   file_->data_close();
+
+  //   // Get ith ParticleData data
+  //   io_particle_data()->data_value(i, &buffer, &name, &type, 
+  // 				&nxd,&nyd,&nzd,
+  // 				&nx, &ny, &nz);
+
+  // }
 
 }
 

@@ -35,7 +35,10 @@ void Simulation::initialize() throw()
   problem_->initialize_initial (config_,parameters_,field_descr_);
   problem_->initialize_refine  (config_,parameters_,field_descr_);
   problem_->initialize_stopping(config_);
-  problem_->initialize_output  (config_,field_descr_,factory());
+  problem_->initialize_output  (config_,
+				field_descr_,
+				particle_descr_,
+				factory());
   problem_->initialize_method  (config_,field_descr_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);

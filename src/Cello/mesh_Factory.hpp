@@ -11,6 +11,7 @@
 class Hierarchy;
 class IoBlock;
 class IoFieldData;
+class IoParticleData;
 
 class Factory : public PUP::able 
 {
@@ -46,7 +47,12 @@ public: // interface
   virtual IoBlock * create_io_block ( ) const throw();
 
   /// Create an Input / Output accessor object for a FieldData
-  virtual IoFieldData * create_io_field_data ( ) const throw();
+  virtual IoFieldData * create_io_field_data 
+  ( const FieldDescr * field_descr ) const throw();
+
+  /// Create an Input / Output accessor object for a ParticleData
+  virtual IoParticleData * create_io_particle_data 
+  ( const ParticleDescr * particle_descr ) const throw();
 
   /// Create a new CHARM++ Block array
   virtual CProxy_Block create_block_array

@@ -17,8 +17,8 @@ module mesh {
   PUPable InitialTrace;
   PUPable InitialValue;
   PUPable InputData;
-  PUPable ItFieldList;
-  PUPable ItFieldRange;
+  PUPable ItIndexList;
+  PUPable ItIndexRange;
   PUPable MaskPng;
   PUPable MaskExpr;
 //  PUPable Method;

@@ -1,23 +1,24 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data_ItFieldList.cpp
+/// @file     data_ItIndexRange.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-10-16
-/// @brief    
+/// @brief    [\ref Data] Implementation of the ItIndexRange class
 
 #include "cello.hpp"
 #include "data.hpp"
 
 //----------------------------------------------------------------------
 
-void ItFieldList::pup (PUP::er &p)
+void ItIndexRange::pup (PUP::er &p)
 {
 
   TRACEPUP;
 
   // NOTE: change this function whenever attributes change
-  ItField::pup(p);
+  ItIndex::pup(p);
   p | index_;
-  p | values_;
+  p | first_;
+  p | last_;
 
 }

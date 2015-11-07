@@ -1,43 +1,43 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data_ItFieldRange.hpp
+/// @file     data_ItIndexRange.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief    [\ref Data] Declaration of the ItFieldRange iterator class
+/// @brief    [\ref Data] Declaration of the ItIndexRange iterator class
 
-#ifndef DATA_IT_FIELD_RANGE_HPP
-#define DATA_IT_FIELD_RANGE_HPP
+#ifndef DATA_IT_INDEX_RANGE_HPP
+#define DATA_IT_INDEX_RANGE_HPP
 
-class ItFieldRange : public ItField {
+class ItIndexRange : public ItIndex {
 
-  /// @class    ItFieldRange
+  /// @class    ItIndexRange
   /// @ingroup  Data
-  /// @brief    [\ref Data] Iterator over a range of Fields in a Block
+  /// @brief    [\ref Data] Iterator over a range of Indices
 
 public: // interface
 
   /// Empty constructor for Charm++ pup()
-  ItFieldRange() throw() {}
+  ItIndexRange() throw() {}
   
   /// Create an iterator over integers first to last
-  ItFieldRange ( size_t first, size_t last ) throw ()
-    : ItField(), first_(first), last_(last)
+  ItIndexRange ( size_t first, size_t last ) throw ()
+    : ItIndex(), first_(first), last_(last)
   { }
 
   /// Create an iterator over integers 0 to count - 1first to last
-  ItFieldRange ( size_t count ) throw ()
-    : ItField(), first_(0), last_(count - 1)
+  ItIndexRange ( size_t count ) throw ()
+    : ItIndex(), first_(0), last_(count - 1)
   { }
 
   /// Virtual destructor
-  virtual ~ItFieldRange () throw ()
+  virtual ~ItIndexRange () throw ()
   {}
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(ItFieldRange);
+  PUPable_decl(ItIndexRange);
 
   /// Charm++ PUP::able migration constructor
-  ItFieldRange (CkMigrateMessage *m) : ItField (m) {}
+  ItIndexRange (CkMigrateMessage *m) : ItIndex (m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -71,4 +71,4 @@ private: // attributes
 
 };
 
-#endif /* DATA_IT_FIELD_RANGE_HPP */
+#endif /* DATA_IT_INDEX_RANGE_HPP */

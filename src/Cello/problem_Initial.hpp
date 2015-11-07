@@ -53,9 +53,10 @@ public: // virtual functions
   virtual void enforce_block
   ( Block            * block, 
     const FieldDescr * field_descr,
+    const ParticleDescr * particle_descr,
     const Hierarchy  * hierarchy
     ) throw()
-  { enforce_block_(block,field_descr,hierarchy); }
+  { enforce_block_(block,field_descr,particle_descr,hierarchy); }
 
   /// Return whether enforce() expects block != NULL
   virtual bool expects_blocks_allocated() const throw()
@@ -67,6 +68,7 @@ protected: // functions
   void enforce_block_
   ( Block            * block, 
     const FieldDescr * field_descr,  
+    const ParticleDescr * particle_descr,  
     const Hierarchy  * hierarchy
     ) throw();
 

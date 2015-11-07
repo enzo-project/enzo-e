@@ -11,6 +11,7 @@
 class Factory;
 class Hierarchy;
 class FieldDescr;
+class ParticleDescr;
 
 class InputData : public Input {
 
@@ -24,7 +25,9 @@ public: // functions
   InputData() throw() {}
 
   /// Create an uninitialized InputData object
-  InputData(const Factory * factory) throw();
+  InputData(const Factory * factory,
+	    const FieldDescr * field_descr,
+	    const ParticleDescr * particle_descr) throw();
 
   /// Close the file if it is open
   virtual ~InputData() throw();
@@ -55,19 +58,27 @@ public: // virtual functions
   /// Read hierarchy data from disk
   virtual void read_hierarchy
   ( Hierarchy * hierarchy,
-    const FieldDescr * field_descr ) throw();
+    const FieldDescr * field_descr,
+    const ParticleDescr * particle_descr ) throw();
 
   /// Read block data from disk
   virtual Block * read_block
   ( Block *            block,
     std::string        block_name,
-    const FieldDescr * field_descr) throw();
+    const FieldDescr * field_descr,
+    const ParticleDescr * particle_descr ) throw();
 
   /// Read local field from disk
   virtual void read_field
   ( FieldData * field_data,
     const FieldDescr * field_descr,
-    int field_index) throw();
+    int index_field) throw();
+
+  /// Read local particle from disk
+  virtual void read_particle
+  ( ParticleData * particle_data,
+    const ParticleDescr * particle_descr,
+    int index_particle) throw();
 
 protected:
 

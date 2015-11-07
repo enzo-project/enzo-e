@@ -28,6 +28,7 @@ class Input;
 class Method;
 class Output;
 class Parameters;
+class ParticleDescr;
 class Prolong;
 class Refresh;
 class Refine;
@@ -145,6 +146,7 @@ public: // interface
   /// Initialize the output objects
   void initialize_output(Config * config,
 			 const FieldDescr * field_descr,
+			 const ParticleDescr * particle_descr,
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
@@ -195,7 +197,9 @@ protected: // functions
   /// Create named output object
   virtual Output *   create_output_  
   (std::string type, int index, Config * config,
-   const FieldDescr * field_descr, const Factory * ) throw ();
+   const FieldDescr * field_descr, 
+   const ParticleDescr * particle_descr, 
+   const Factory * ) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 

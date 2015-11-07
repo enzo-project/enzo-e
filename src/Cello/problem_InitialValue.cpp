@@ -37,6 +37,8 @@ InitialValue::InitialValue
     num_masks_[i] = 0;
   }
   
+  // Initialize fields
+
   for (int index_field = 0; index_field < num_fields_; index_field++) {
 
     std::string field_name = field_descr->field_name(index_field);
@@ -118,6 +120,7 @@ void InitialValue::enforce_block
 (
  Block        * block,
  const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr,
  const Hierarchy  * hierarchy
  ) throw()
 {

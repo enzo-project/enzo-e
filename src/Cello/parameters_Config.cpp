@@ -138,7 +138,7 @@ void Config::pup (PUP::er &p)
   p | particle_list;
   p | particle_interleaved;
   p | particle_attribute_name;
-  p | particle_attribute_bytes;
+  p | particle_attribute_type;
   p | particle_batch_size;
 
   // Performance
@@ -809,7 +809,7 @@ void Config::read_particle_ (Parameters * p) throw()
   particle_list.resize(num_particles);
   particle_interleaved.resize(num_particles);
   particle_attribute_name.resize(num_particles);
-  particle_attribute_bytes.resize(num_particles);
+  particle_attribute_type.resize(num_particles);
 
   for (int it=0; it<num_particles; it++) {
 
@@ -819,35 +819,61 @@ void Config::read_particle_ (Parameters * p) throw()
 
     std::string attrib_str = type_str + ":attributes";
     
-    const int na = p->list_length(attrib_str) / 2;
+    const int na2 = p->list_length(attrib_str);
 
     ASSERT1 ("read_particle_",
 	     "Particle type %d has no attributes",
-	     it,na>0);
+	     it,na2>0);
+
+    ASSERT2 ("read_particle_",
+	     "Particle type %d attributes list length %d must be even",
+	     it,na2,na2%2==0);
+
+    const int na = na2 / 2;
 
     particle_interleaved[it] = 
       p->value_logical(type_str+":interleaved",false);
 
     particle_attribute_name[it].resize(na);
-    particle_attribute_bytes[it].resize(na);
+    particle_attribute_type[it].resize(na);
 
     for (int ia=0; ia<na; ia++) {
 
-      std::string name = p->list_value_string (2*ia  ,attrib_str,"ERROR");
-      int        bytes = p->list_value_integer(2*ia+1,attrib_str,0);
+      std::string name = p->list_value_string (2*ia  ,attrib_str,"unknown");
+      std::string type = p->list_value_string (2*ia+1,attrib_str,"unknown");
+
+      int bytes=0;
+      if (type == "char") {
+	bytes=sizeof(char);
+      } else if (type == "int") {
+	bytes=sizeof(int);
+      } else if (type == "int8") {
+	bytes=sizeof(int8_t);
+      } else if (type == "int16") {
+	bytes=sizeof(int16_t);
+      } else if (type == "int32") {
+	bytes=sizeof(int32_t);
+      } else if (type == "int64") {
+	bytes=sizeof(int64_t);
+      } else if (type == "float") {
+	bytes=sizeof(float);
+      } else if (type == "single") {
+	bytes=sizeof(float);
+      } else if (type == "double") {
+	bytes=sizeof(double);
+      } else {
+	ERROR3 ("read_particle_",
+		 "Particle type %d attribute %d has unknown attribute type %s",
+		 it,ia,type.c_str());
+      }
 
       ASSERT3 ("read_particle_",
-	       "Particle type %d attribute %d has illegal attribute name %s",
+	       "Particle type %d attribute %d has unknown attribute name %s",
 	       it,ia,name.c_str(),
-	       name != "ERROR");
-
-      ASSERT3 ("read_particle_",
-	       "Particle type %d attribute %d has illegal attribute size %d",
-	       it,ia,bytes,
-	       bytes>0);
+	       name != "unknown");
 
       particle_attribute_name[it][ia]  = name;
-      particle_attribute_bytes[it][ia] = bytes;
+      particle_attribute_type[it][ia]  = type;
      
     }
   }

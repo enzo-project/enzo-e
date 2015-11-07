@@ -10,6 +10,7 @@
 
 class Factory;
 class FieldDescr;
+class ParticleDescr;
 
 
 enum mesh_color_type {
@@ -32,9 +33,10 @@ public: // functions
   OutputImage() throw() {}
 
   /// Create an uninitialized OutputImage object
-  OutputImage(const FieldDescr * field_descr,
-	      int index,
+  OutputImage(int index,
 	      const Factory * factory,
+	      const FieldDescr * field_descr,
+	      const ParticleDescr * particle_descr,
 	      int process_count,
 	      int nx0, int ny0, int nz0,
 	      int nxb, int nyb, int nzb,
@@ -86,16 +88,24 @@ public: // virtual functions
   /// Cleanup after output
   virtual void finalize () throw();
 
-  /// Write block-related field data
+  /// Write block-related field and particle data
   virtual void write_block
   ( const Block * block,
-    const FieldDescr * field_descr) throw();
+    const FieldDescr * field_descr,
+    const ParticleDescr * particle_descr
+    ) throw();
 
   /// Write fields
   virtual void write_field_data
   ( const FieldData * field_data, 
     const FieldDescr * field_descr,
-    int field_index) throw();
+    int index_field) throw();
+
+  /// Write particles
+  virtual void write_particle_data
+  ( const ParticleData * particle_data, 
+    const ParticleDescr * particle_descr,
+    int index_particle) throw();
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw();

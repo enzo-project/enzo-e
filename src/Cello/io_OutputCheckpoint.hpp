@@ -21,9 +21,11 @@ public: // functions
 
   /// Create an uninitialized OutputCheckpoint object
   OutputCheckpoint(int index, 
-		const Factory * factory, 
-		Config * config, 
-		int process_count) throw();
+		   const Factory * factory, 
+		   const FieldDescr * field_descr,
+		   const ParticleDescr * particle_descr,
+		   Config * config, 
+		   int process_count) throw();
 
   /// Destructor
   ~OutputCheckpoint() throw()  { }
@@ -54,7 +56,14 @@ public: // virtual functions
   virtual void write_field_data
   ( const FieldData * field_data, 
     const FieldDescr * field_descr,
-    int field_index) throw()
+    int index_field) throw()
+  { /* EMPTY */ }
+
+  /// Write local particle to disk
+  virtual void write_particle_data
+  ( const ParticleData * particle_data, 
+    const ParticleDescr * particle_descr,
+    int index_particle) throw()
   { /* EMPTY */ }
 
 private: // private functions

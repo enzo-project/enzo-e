@@ -10,9 +10,10 @@
 
 //----------------------------------------------------------------------
 
-OutputImage::OutputImage(const FieldDescr * field_descr,
-			 int index,
+OutputImage::OutputImage(int index,
 			 const Factory * factory,
+			 const FieldDescr * field_descr,
+			 const ParticleDescr * particle_descr,
 			 int process_count,
 			 int nx0, int ny0, int nz0,
 			 int nxb, int nyb, int nzb,
@@ -27,7 +28,7 @@ OutputImage::OutputImage(const FieldDescr * field_descr,
 			 bool ghost,
 			 bool specify_bounds,
 			 double min, double max) throw ()
-  : Output(index,factory),
+: Output(index,factory,field_descr,particle_descr),
     image_data_(),
     image_mesh_(),
     axis_(axis_z),
@@ -206,10 +207,12 @@ void OutputImage::finalize () throw()
 void OutputImage::write_block
 (
  const Block *  block,
- const FieldDescr * field_descr
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
  ) throw()
 // @param block  Block to write
 // @param field_descr  Field descriptor
+// @param particle_descr  Particle descriptor
 {
 
   if (!block->is_leaf()) return;
@@ -229,9 +232,9 @@ void OutputImage::write_block
 
   // Index of (single) field to write
 
-  it_field_->first();
+  it_field_index_->first();
 
-  int index_field = it_field_->value();
+  int index_field = it_field_index_->value();
 
   // Get ghost depth
 
@@ -377,9 +380,21 @@ void OutputImage::write_field_data
 (
  const FieldData * field_data,  
  const FieldDescr * field_descr,
- int field_index) throw()
+ int index_field) throw()
 {
   WARNING("OutputImage::write_field_data",
+	  "This function should not be called");
+}
+
+//----------------------------------------------------------------------
+
+void OutputImage::write_particle_data
+(
+ const ParticleData * particle_data,  
+ const ParticleDescr * particle_descr,
+ int index_particle) throw()
+{
+  WARNING("OutputImage::write_particle_data",
 	  "This function should not be called");
 }
 

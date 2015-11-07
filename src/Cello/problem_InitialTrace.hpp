@@ -10,7 +10,7 @@
 
 class Hierarchy;
 
-class InitialTrace : Initial
+class InitialTrace : public Initial
 {
 
   /// @class    InitialTrace
@@ -43,6 +43,7 @@ public: // virtual functions
   virtual void enforce_block
   ( Block            * block, 
     const FieldDescr * field_descr,
+    const ParticleDescr * particle_descr,
     const Hierarchy  * hierarchy
     ) throw();
 

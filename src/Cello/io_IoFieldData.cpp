@@ -9,9 +9,9 @@
 
 //----------------------------------------------------------------------
 
-IoFieldData::IoFieldData() throw ()
+IoFieldData::IoFieldData(const FieldDescr * field_descr) throw ()
   : Io(1),
-    field_descr_(0),
+    field_descr_(field_descr),
     field_data_(0),
     field_index_(0)
 

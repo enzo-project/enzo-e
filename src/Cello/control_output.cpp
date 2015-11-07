@@ -148,9 +148,10 @@ void Block::p_output_write (int index_output)
   TRACE_OUTPUT("Block::p_output_write()");
 
   FieldDescr * field_descr = simulation()->field_descr();
+  ParticleDescr * particle_descr = simulation()->particle_descr();
   Output * output = simulation()->problem()->output(index_output);
 
-  output->write_block(this,field_descr);
+  output->write_block(this,field_descr,particle_descr);
 
   simulation()->write_();
 }

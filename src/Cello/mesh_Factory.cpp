@@ -35,10 +35,19 @@ IoBlock * Factory::create_io_block () const throw()
 
 //----------------------------------------------------------------------
 
-IoFieldData * Factory::create_io_field_data () const throw()
+IoFieldData * Factory::create_io_field_data 
+(const FieldDescr * field_descr) const throw()
 {
-  return new IoFieldData;
+  return new IoFieldData(field_descr);
 
+}
+
+//----------------------------------------------------------------------
+
+IoParticleData * Factory::create_io_particle_data 
+(const ParticleDescr * particle_descr) const throw()
+{
+  return new IoParticleData(particle_descr);
 }
 
 //----------------------------------------------------------------------

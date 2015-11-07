@@ -230,7 +230,7 @@ test_field_face   = env.Program (['test_FieldFace.cpp', objs_data],
                                  LIBS=[libs_data, libs_test])
 test_grouping  = env.Program (['test_Grouping.cpp', objs_data], 
                                  LIBS=[libs_data, libs_test])
-test_it_field     = env.Program (['test_ItField.cpp', objs_data],    
+test_it_index     = env.Program (['test_ItIndex.cpp', objs_data],    
                                  LIBS=[libs_data, libs_test])
 test_it_node      = env.Program (['test_ItNode.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
@@ -306,7 +306,7 @@ binaries_data = [test_field_data,
                   test_field,
                   test_grouping,
                   test_field_face,
-                  test_it_field,
+                  test_it_index,
 		  test_particle]
 binaries_problem = [test_mask,test_value,test_refresh]
 binaries_io    = [test_colormap]

@@ -14,9 +14,11 @@ OutputData::OutputData
 (
  int index,
  const Factory * factory,
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr,
  Config * config
 ) throw ()
-  : Output(index,factory)
+  : Output(index,factory,field_descr,particle_descr)
 {
   // Set process stride, with default = 1
 
@@ -84,14 +86,15 @@ void OutputData::finalize () throw ()
 void OutputData::write_hierarchy
 (
  const Hierarchy  * hierarchy,
- const FieldDescr * field_descr
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
  ) throw()
 {
   IoHierarchy io_hierarchy(hierarchy);
 
   write_meta (&io_hierarchy);
 
-  Output::write_hierarchy(hierarchy, field_descr);
+  Output::write_hierarchy(hierarchy, field_descr, particle_descr);
 
 }
 
@@ -100,7 +103,8 @@ void OutputData::write_hierarchy
 void OutputData::write_block
 ( 
   const Block * block,
-  const FieldDescr * field_descr) throw()
+  const FieldDescr * field_descr,
+  const ParticleDescr * particle_descr) throw()
 {
 
   // Create file group for block
@@ -119,7 +123,7 @@ void OutputData::write_block
 
   // Call write(block) on base Output object
 
-  Output::write_block(block,field_descr);
+  Output::write_block(block,field_descr,particle_descr);
 
   file_->group_close();
 
@@ -131,11 +135,11 @@ void OutputData::write_field_data
 ( 
   const FieldData * field_data,
   const FieldDescr * field_descr,
-  int field_index) throw()
+  int index_field) throw()
 {
   io_field_data()->set_field_descr((FieldDescr*)field_descr);
   io_field_data()->set_field_data((FieldData*)field_data);
-  io_field_data()->set_field_index(field_index);
+  io_field_data()->set_field_index(index_field);
 
   for (size_t i=0; i<io_field_data()->data_count(); i++) {
 
@@ -156,6 +160,40 @@ void OutputData::write_field_data
     file_->data_write(buffer);
     file_->data_close();
   }
+
+}
+
+//----------------------------------------------------------------------
+
+void OutputData::write_particle_data
+( 
+  const ParticleData * particle_data,
+  const ParticleDescr * particle_descr,
+  int index_particle) throw()
+{
+  // io_particle_data()->set_particle_descr((ParticleDescr*)particle_descr);
+  // io_particle_data()->set_particle_data((ParticleData*)particle_data);
+  // io_particle_data()->set_particle_index(index_particle);
+
+  // for (size_t i=0; i<io_particle_data()->data_count(); i++) {
+
+  //   void * buffer;
+  //   std::string name;
+  //   scalar_type type;
+  //   int nxd,nyd,nzd;  // Array dimension
+  //   int nx,ny,nz;     // Array size
+
+  //   // Get ith ParticleData data
+  //   io_particle_data()->data_value(i, &buffer, &name, &type, 
+  // 				 &nxd,&nyd,&nzd,
+  // 				 &nx, &ny, &nz);
+
+  //   // Write ith ParticleData data
+
+  //   file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
+  //   file_->data_write(buffer);
+  //   file_->data_close();
+  // }
 
 }
 

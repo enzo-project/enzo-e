@@ -198,6 +198,7 @@ void Problem::initialize_restrict(Config * config) throw()
 void Problem::initialize_output
 (Config * config,
  const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr,
  const Factory * factory) throw()
 {
 
@@ -206,7 +207,7 @@ void Problem::initialize_output
     std::string type       = config->output_type[index];
 
     Output * output = create_output_ 
-      (type,index, config,field_descr,factory);
+      (type,index, config,field_descr,particle_descr,factory);
 
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
@@ -229,22 +230,22 @@ void Problem::initialize_output
 
     if (config->output_field_list[index].size() > 0) {
 
-	ItFieldList * it_field = new ItFieldList;
+	ItIndexList * it_field = new ItIndexList;
 	int length = config->output_field_list[index].size();
 	for (int i=0; i<length; i++) {
 	  std::string field_name = config->output_field_list[index][i];
-	  int field_index = field_descr->field_id(field_name);
-	  it_field->append(field_index);
+	  int index_field = field_descr->field_id(field_name);
+	  it_field->append(index_field);
 	}
 	
-	output->set_it_field(it_field);
+	output->set_it_field_index(it_field);
 
     } else {
 
       int field_count = field_descr->field_count();
-      ItFieldRange * it_field = new ItFieldRange(field_count);
+      ItIndexRange * it_field = new ItIndexRange(field_count);
 
-      output->set_it_field(it_field);
+      output->set_it_field_index(it_field);
 
     }
 
@@ -447,16 +448,21 @@ Initial * Problem::create_initial_
   // parameter: Initial : time
   //--------------------------------------------------
 
+  Initial * initial = NULL;
+
   if (type == "file") {
-    return new InitialFile   (parameters,
-			      config->initial_cycle,
-			      config->initial_time);;
+    initial = new InitialFile (parameters,
+			       config->initial_cycle,
+			       config->initial_time);;
   } else if (type == "value") {
-    return new InitialValue(parameters,field_descr,
-			    config->initial_cycle,
-			    config->initial_time);
+    initial = new InitialValue(parameters,field_descr,
+			       config->initial_cycle,
+			       config->initial_time);
+  } else if (type == "trace") {
+    initial = new InitialTrace;
   }
-  return NULL;
+
+  return initial;
 }
 
 //----------------------------------------------------------------------
@@ -578,12 +584,14 @@ Output * Problem::create_output_
  int index,
  Config *  config,
  const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr,
  const Factory * factory
  ) throw ()
 /// @param name           Name of Output object to create
 /// @param index          Index of output object in Object list
 /// @param config         Configuration parameter object
 /// @param field_descr    Field descriptor 
+/// @param particle_descr Particle descriptor 
 /// @param factory        Factory object for creating Io objects of correct type
 { 
 
@@ -621,8 +629,10 @@ Output * Problem::create_output_
     double      image_min = config->output_image_min[index];
     double      image_max = config->output_image_max[index];
 
-    output = new OutputImage (field_descr,
-			      index,factory,CkNumPes(),
+    output = new OutputImage (index,factory,
+			      field_descr,
+			      particle_descr,
+			      CkNumPes(),
 			      nx,ny,nz, 
 			      nbx,nby,nbz, 
 			      max_level,
@@ -639,11 +649,17 @@ Output * Problem::create_output_
 
   } else if (name == "data") {
 
-    output = new OutputData (index,factory,config);
+    output = new OutputData (index,factory,
+			     field_descr,
+			     particle_descr,
+			     config);
 
   } else if (name == "checkpoint") {
 
-    output = new OutputCheckpoint (index,factory,config,CkNumPes());
+    output = new OutputCheckpoint (index,factory,
+				   field_descr,
+				   particle_descr,
+				   config,CkNumPes());
 
   }
 

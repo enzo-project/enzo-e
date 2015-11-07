@@ -1,35 +1,35 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data_ItFieldList.hpp
+/// @file     data_ItIndexList.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-09-12
-/// @brief    [\ref Data] Declaration of the ItFieldList iterator class
+/// @brief    [\ref Data] Declaration of the ItIndexList iterator class
 
-#ifndef DATA_IT_FIELD_LIST_HPP
-#define DATA_IT_FIELD_LIST_HPP
+#ifndef DATA_IT_INDEX_LIST_HPP
+#define DATA_IT_INDEX_LIST_HPP
 
-class ItFieldList : public ItField {
+class ItIndexList : public ItIndex {
 
-  /// @class    ItFieldList
+  /// @class    ItIndexList
   /// @ingroup  Data
-  /// @brief    [\ref Data] Iterator over a list of Fields in a Block
+  /// @brief    [\ref Data] Iterator over a list of indices
 
 public: // interface
 
   /// Create an iterator over integers 0 to count-1
-  ItFieldList () throw ()
-    : ItField (), values_()
+  ItIndexList () throw ()
+    : ItIndex (), values_()
   { }
 
   /// Virtual destructor
-  virtual ~ItFieldList () throw()
+  virtual ~ItIndexList () throw()
   { }
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(ItFieldList);
+  PUPable_decl(ItIndexList);
 
   /// Charm++ PUP::able migration constructor
-  ItFieldList (CkMigrateMessage *m) : ItField (m) {}
+  ItIndexList (CkMigrateMessage *m) : ItIndex (m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -64,4 +64,4 @@ private: // attributes
   std::vector <int> values_;
 };
 
-#endif /* DATA_IT_FIELD_LIST_HPP */
+#endif /* DATA_IT_INDEX_LIST_HPP */

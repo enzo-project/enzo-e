@@ -11,7 +11,9 @@
 
 //----------------------------------------------------------------------
 
-Output::Output (int index, const Factory * factory) throw()
+Output::Output (int index, const Factory * factory,
+		const FieldDescr * field_descr,
+		const ParticleDescr * particle_descr) throw()
   : file_(0),           // Initialization deferred
     schedule_(0),
     process_(0),        // initialization below
@@ -22,17 +24,19 @@ Output::Output (int index, const Factory * factory) throw()
     time_(0),
     file_name_(""),     // set_filename()
     file_args_(),       // set_filename()
-    it_field_(0),        // set_it_field()
     io_block_(0),
+    it_field_index_(0),        // set_it_index_field()
     io_field_data_(0),
+    it_particle_index_(0),        // set_it_index_particle()
+    io_particle_data_(0),
     process_stride_(1) // default one file per process
 
 {
-
   process_  = CkMyPe();
 
-  io_block_      = factory->create_io_block();
-  io_field_data_ = factory->create_io_field_data();
+  io_block_         = factory->create_io_block();
+  io_field_data_    = factory->create_io_field_data(field_descr);
+  io_particle_data_ = factory->create_io_particle_data(particle_descr);
 }
 
 //----------------------------------------------------------------------
@@ -41,7 +45,8 @@ Output::~Output () throw()
 {
   delete schedule_;  schedule_ = 0;
   delete file_;      file_ = 0;
-  delete it_field_;  it_field_ = 0;
+  delete it_field_index_;  it_field_index_ = 0;
+  delete it_particle_index_;  it_particle_index_ = 0;
   delete io_block_;  io_block_ = 0;
 }
 
@@ -69,11 +74,16 @@ void Output::pup (PUP::er &p)
   p | time_;
   p | file_name_;
   p | file_args_;
-  p | it_field_;  // PUP::able
   if (up) io_block_ = new IoBlock;
   p | *io_block_;
-  if (up) io_field_data_ = new IoFieldData;
-  p | *io_field_data_;
+  p | it_field_index_;  // PUP::able
+  WARNING ("Output::pup","skipping io_field_data_");
+  // if (up) io_field_data_ = new IoFieldData;
+  // p | *io_field_data_;
+  p | it_particle_index_;  // PUP::able
+  WARNING ("Output::pup","skipping io_particle_data_");
+  // if (up) io_particle_data_ = new IoParticleData;
+  // p | *io_particle_data_;
   p | process_stride_;
 
 }
@@ -221,7 +231,9 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 void Output::write_simulation_
 ( const Simulation * simulation ) throw()
 {
-  write_hierarchy(simulation->hierarchy(), simulation->field_descr());
+  write_hierarchy(simulation->hierarchy(), 
+		  simulation->field_descr(),
+		  simulation->particle_descr());
 }
 
 //----------------------------------------------------------------------
@@ -229,7 +241,8 @@ void Output::write_simulation_
 void Output::write_hierarchy_
 (
  const Hierarchy * hierarchy,
- const FieldDescr * field_descr
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
  ) throw()
 {
 
@@ -249,14 +262,28 @@ void Output::write_hierarchy_
 void Output::write_block_
 (
  const Block * block,
- const FieldDescr * field_descr
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
  ) throw()
 {
   // Write fields
 
-  for (it_field_->first(); ! it_field_->done(); it_field_->next()  ) {
-    const FieldData * field_data = block->data()->field_data();
-    write_field_data (field_data,  field_descr, it_field_->value());
+  ItIndex * it_f = it_field_index_;
+  if (it_f) {
+    for (it_f->first(); ! it_f->done();  it_f->next()  ) {
+      const FieldData * field_data = block->data()->field_data();
+      write_field_data (field_data,  field_descr, it_f->value());
+    }
+  }
+
+  // Write particles
+
+  ItIndex * it_p = it_particle_index_;
+  if (it_p) {
+    for (it_p->first(); ! it_p->done();  it_p->next()  ) {
+      const ParticleData * particle_data = block->data()->particle_data();
+      write_particle_data (particle_data,  particle_descr, it_p->value());
+    }
   }
 
 }
