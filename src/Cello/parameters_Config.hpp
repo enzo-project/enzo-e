@@ -111,8 +111,9 @@ public: // attributes
 
   // Initial
 
+  int                        num_initial;
+  std::vector<std::string>   initial_list;
   int                        initial_cycle;
-  std::string                initial_type;
   double                     initial_time;
 
   // Memory

@@ -173,7 +173,9 @@ namespace cello {
   // type_enum functions (prefered)
   int sizeof_type (int);
   int is_type_supported (int);
+
   extern const char * type_name[NUM_TYPES];
+  extern const int type_bytes[NUM_TYPES];
 
   // precision_enum functions (depreciated)
 

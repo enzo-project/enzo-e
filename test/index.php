@@ -612,6 +612,7 @@ test_summary("Boundary",
 	     array("enzo-p", "enzo-p", "enzo-p",
 		   "enzo-p", "enzo-p", "enzo-p"),'test');
 
+
 test_summary("Initial", 
 	     array("initial_png"),
 	     array("enzo-p"),'test');
@@ -668,6 +669,8 @@ test_summary("Problem",array("Mask","Refresh","Value"),
 	     array("test_Mask","test_Refresh","test_Value"),'test'); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule"),'test'); 
+test_summary("Type",array("Type"),
+	     array("test_Type"),'test'); 
 test_summary("Colormap",array("Colormap"),
 	     array("test_Colormap"),'test'); 
 
@@ -1234,6 +1237,16 @@ test_group("Schedule");
 begin_hidden("schedule", "Schedule");
 tests("Cello","test_Schedule","test_Schedule","","");
 end_hidden("schedule");
+
+//----------------------------------------------------------------------
+
+test_group("Type");
+
+
+begin_hidden("type", "Type");
+tests("Cello","test_Type","test_Type","","");
+end_hidden("type");
+
 
 //----------------------------------------------------------------------
 

@@ -426,8 +426,9 @@ void Simulation::initialize_forest_() throw()
 
   // Don't allocate blocks if reading data from files
 
-  bool allocate_data = ! ( config_->initial_type == "file" || 
-			   config_->initial_type == "checkpoint" );
+  //  bool allocate_data = ! ( config_->initial_type == "file" || 
+  //			   config_->initial_type == "checkpoint" );
+  bool allocate_data = true;
 
   if (allocate_blocks) {
 

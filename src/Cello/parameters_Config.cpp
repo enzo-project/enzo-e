@@ -72,8 +72,9 @@ void Config::pup (PUP::er &p)
 
   // Initial
 
+  p | num_initial;
+  p | initial_list;
   p | initial_cycle;
-  p | initial_type;
   p | initial_time;
 
   // Memory
@@ -520,13 +521,22 @@ void Config::read_initial_ (Parameters * p) throw()
 
   TRACE("Parameters: Initial");
   initial_cycle = p->value_integer("Initial:cycle",0);
-  initial_type  = p->value_string ("Initial:type","value");
   initial_time  = p->value_float  ("Initial:time",0.0);
 
-  //  initial_name;
+  num_initial = p->list_length("Initial:list");
 
-  //  initial_value
+  initial_list.resize(num_initial);
 
+  for (int index_initial=0; index_initial<num_initial; index_initial++) {
+
+    std::string name = 
+      p->list_value_string(index_initial,"Initial:list");
+
+    std::string full_name = std::string("Initial:") + name;
+
+    initial_list[index_initial] = name;
+
+  }
 }
 
 //----------------------------------------------------------------------

@@ -258,6 +258,8 @@ test_schedule     = env.Program (['test_Schedule.cpp', objs_io],
                                  LIBS=[libs_io,    libs_test]) 
 test_refresh      = env.Program (['test_Refresh.cpp', objs_mesh],
                                  LIBS=[libs_mesh, libs_test])
+test_type         = env.Program (['test_Type.cpp', objs_mesh],
+                                 LIBS=[libs_mesh, libs_test])
 test_mask         = env.Program (['test_Mask.cpp', objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_value        = env.Program (['test_Value.cpp', objs_mesh],
@@ -296,7 +298,7 @@ libraries_simulation = env.Library ('simulation', objs_simulation)
 libraries_test  = env.Library ('test', objs_test)
 
 
-binaries_cello = [test_class_size]
+binaries_cello = [test_type, test_class_size]
 
 binaries_disk  = [test_FileHdf5,
                   test_FileIfrit]

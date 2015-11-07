@@ -18,16 +18,31 @@ namespace cello {
   // @@@ KEEP IN SYNCH WITH type_enum in cello.hpp
   const char * type_name[NUM_TYPES] = {
     "unknown",     // unknown type
-    "int8",
-    "int16",
-    "int32",
-    "int64",
     "default",    // "default" floating-point precision, e.g. enzo_float
     "single",
     "double",
     "extended80",
     "extended96",
-    "quadruple"
+    "quadruple",
+    "int8",
+    "int16",
+    "int32",
+    "int64"
+  };
+
+  // @@@ KEEP IN SYNCH WITH type_enum in cello.hpp
+  const int type_bytes[NUM_TYPES] = {
+    0,
+    0, // default
+    4, // single
+    8, // double
+    10, // extended80
+    12, // extended96
+    16, // quadruple
+    1, // int8
+    2, // int16
+    4, // int32
+    8 // int64
   };
 
   //----------------------------------------------------------------------

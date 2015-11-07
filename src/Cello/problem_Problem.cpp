@@ -124,16 +124,20 @@ void Problem::initialize_initial(Config * config,
 				 const FieldDescr * field_descr) throw()
 {
 
-  Initial * initial = create_initial_
-    (config->initial_type,config,parameters,field_descr);
+  for (int index=0; index < config->num_initial; index++) {
 
-  initial_list_.push_back( initial );
+    std::string type = config->initial_list[index];
 
-  ASSERT1("Problem::initialize_initial",
-	  "Initial type %s not recognized",
-	  config->initial_type.c_str(),
-	  initial != NULL);
+    Initial * initial = create_initial_
+      (type,config,parameters,field_descr);
 
+    ASSERT1("Problem::initialize_initial",
+	    "Initial type %s not recognized",
+	    config->initial_list[index].c_str(),
+	    initial != NULL);
+
+    initial_list_.push_back( initial );
+  }
 }
 
 //----------------------------------------------------------------------
