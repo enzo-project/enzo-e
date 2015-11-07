@@ -142,10 +142,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   // Check NumberOfBaryonFields
 
-  if (NumberOfBaryonFields == 0) {
-    ERROR ("EnzoBlock::initialize",
-	   "Field list parameter 'Field:list' must have length greater than zero");
-  } else if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
+  if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
     ERROR2 ("EnzoBlock::initialize",
 	    "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
 	    MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );

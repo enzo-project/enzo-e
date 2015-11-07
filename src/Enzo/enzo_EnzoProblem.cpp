@@ -180,7 +180,7 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodHeat
       (field_descr,
        enzo_config->method_heat_alpha,
-       enzo_config->method_courant[index_method]);
+       config->method_courant[index_method]);
   } else if (name == "null") {
     method = new EnzoMethodNull
       (enzo_config->method_null_dt);

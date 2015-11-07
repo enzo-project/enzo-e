@@ -14,12 +14,15 @@ module mesh {
   PUPable Factory;
   PUPable Initial;
   PUPable InitialFile;
+  PUPable InitialTrace;
   PUPable InitialValue;
   PUPable InputData;
   PUPable ItFieldList;
   PUPable ItFieldRange;
   PUPable MaskPng;
   PUPable MaskExpr;
+//  PUPable Method;
+  PUPable MethodTrace;
   PUPable OutputCheckpoint;
   PUPable OutputData;
   PUPable OutputImage;

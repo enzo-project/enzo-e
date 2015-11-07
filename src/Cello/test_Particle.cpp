@@ -18,7 +18,8 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   unit_class("ParticleDescr");
-  ParticleDescr * particle_descr = new ParticleDescr(1024);
+  ParticleDescr * particle_descr = new ParticleDescr;
+  particle_descr -> set_batch_size (1024);
 
   unit_class("ParticleData");
   ParticleData * particle_data = new ParticleData;

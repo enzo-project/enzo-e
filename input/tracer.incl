@@ -1,0 +1,27 @@
+Particle {
+   list += ["trace"];
+   trace {
+      attributes = ["position_x", 8,
+                    "position_y", 8,
+		    "position_z", 8];
+   }
+}
+
+Initial {
+   list += ["trace"];
+}
+
+Method {
+   list += ["trace"];
+}
+
+Output {
+   list += ["trace"];
+   trace {
+      type = "data";
+      field_list = [];
+      particle_list = ["trace"];
+      name = ["trace-p%02d-c%06d.h5", "proc","cycle"];
+      include "input/schedule_cycle_10.incl"
+   }
+}

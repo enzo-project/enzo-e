@@ -19,7 +19,7 @@
 
 //----------------------------------------------------------------------
 
-ParticleDescr::ParticleDescr(int batch_size) throw()
+ParticleDescr::ParticleDescr() throw()
   : type_name_(),
     type_index_(),
     attribute_name_(),
@@ -29,7 +29,7 @@ ParticleDescr::ParticleDescr(int batch_size) throw()
     attribute_interleaved_(),
     attribute_offset_(),
     groups_(),
-    batch_size_(batch_size)
+    batch_size_(0)
 {
 }
 

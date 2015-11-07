@@ -560,8 +560,14 @@ Method * Problem::create_method_
   const FieldDescr * field_descr) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
+
   // No default method
-  return NULL;
+  Method * method = NULL;
+
+  if (name == "trace") {
+    method = new MethodTrace(field_descr,config->method_courant[index_method]);
+  }
+  return method;
 }
 
 //----------------------------------------------------------------------

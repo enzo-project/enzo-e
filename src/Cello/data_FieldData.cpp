@@ -62,8 +62,6 @@ void FieldData::pup(PUP::er &p)
 {
   TRACEPUP;
 
-  bool up = p.isUnpacking();
-
   PUParray(p,size_,3);
 
   p | array_permanent_;

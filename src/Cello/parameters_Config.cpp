@@ -132,6 +132,14 @@ void Config::pup (PUP::er &p)
   PUParray (p,schedule_stop,MAX_OUTPUT_GROUPS);
   PUParray (p,schedule_step,MAX_OUTPUT_GROUPS);
 
+  // Particles
+
+  p | num_particles;
+  p | particle_list;
+  p | particle_interleaved;
+  p | particle_attribute_name;
+  p | particle_attribute_bytes;
+  p | particle_batch_size;
 
   // Performance
 
@@ -176,6 +184,7 @@ void Config::read(Parameters * p) throw()
   read_method_(p);
   read_monitor_(p);
   read_output_(p);
+  read_particle_(p);
   read_performance_(p);
   read_restart_(p);
   read_stopping_(p);
@@ -784,6 +793,66 @@ void Config::read_output_ (Parameters * p) throw()
   }  
 
 }
+
+//----------------------------------------------------------------------
+
+void Config::read_particle_ (Parameters * p) throw()
+{
+  //--------------------------------------------------
+  // Particle
+  //--------------------------------------------------
+
+  particle_batch_size = p->value_integer("Particle:batch_size",1024);
+
+  num_particles = p->list_length("Particle:list"); 
+
+  particle_list.resize(num_particles);
+  particle_interleaved.resize(num_particles);
+  particle_attribute_name.resize(num_particles);
+  particle_attribute_bytes.resize(num_particles);
+
+  for (int it=0; it<num_particles; it++) {
+
+    particle_list[it] = p->list_value_string(it, "Particle:list");
+
+    std::string type_str = "Particle:"+particle_list[it];
+
+    std::string attrib_str = type_str + ":attributes";
+    
+    const int na = p->list_length(attrib_str) / 2;
+
+    ASSERT1 ("read_particle_",
+	     "Particle type %d has no attributes",
+	     it,na>0);
+
+    particle_interleaved[it] = 
+      p->value_logical(type_str+":interleaved",false);
+
+    particle_attribute_name[it].resize(na);
+    particle_attribute_bytes[it].resize(na);
+
+    for (int ia=0; ia<na; ia++) {
+
+      std::string name = p->list_value_string (2*ia  ,attrib_str,"ERROR");
+      int        bytes = p->list_value_integer(2*ia+1,attrib_str,0);
+
+      ASSERT3 ("read_particle_",
+	       "Particle type %d attribute %d has illegal attribute name %s",
+	       it,ia,name.c_str(),
+	       name != "ERROR");
+
+      ASSERT3 ("read_particle_",
+	       "Particle type %d attribute %d has illegal attribute size %d",
+	       it,ia,bytes,
+	       bytes>0);
+
+      particle_attribute_name[it][ia]  = name;
+      particle_attribute_bytes[it][ia] = bytes;
+     
+    }
+  }
+}
+
 
 //----------------------------------------------------------------------
 

@@ -171,6 +171,15 @@ public: // attributes
   double                     schedule_stop  [MAX_SCHEDULE];
   double                     schedule_step  [MAX_SCHEDULE];
 
+  // Particles
+
+  int                        num_particles;  // number of particle types
+  std::vector<std::string>   particle_list;
+  std::vector<char>          particle_interleaved;
+  std::vector< std::vector <std::string> > particle_attribute_name;
+  std::vector< std::vector <int> >    particle_attribute_bytes;
+  int                        particle_batch_size;
+
   // Performance
 
   std::vector<std::string>   performance_papi_counters;
@@ -209,6 +218,7 @@ protected: // functions
   void read_method_      (Parameters * parameters) throw();
   void read_monitor_     (Parameters * parameters) throw();
   void read_output_      (Parameters * parameters) throw();
+  void read_particle_    (Parameters * parameters) throw();
   void read_performance_ (Parameters * parameters) throw();
   void read_restart_     (Parameters * parameters) throw();
   void read_stopping_    (Parameters * parameters) throw();

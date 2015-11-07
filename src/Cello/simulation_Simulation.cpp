@@ -37,7 +37,8 @@ Simulation::Simulation
   schedule_balance_(0),
   monitor_(0),
   hierarchy_(0),
-  field_descr_(0)
+  field_descr_(0),
+  particle_descr_(0)
 {
   debug_open();
 
@@ -133,6 +134,9 @@ void Simulation::pup (PUP::er &p)
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
+
+  if (up) particle_descr_ = new ParticleDescr;
+  p | *particle_descr_;
 
   if (up && (phase_ == phase_restart)) {
     monitor_->print ("Simulation","restarting");
@@ -264,11 +268,11 @@ void Simulation::initialize_monitor_() throw()
 void Simulation::initialize_data_descr_() throw()
 {
 
-  field_descr_ = new FieldDescr;
+  //--------------------------------------------------
+  // parameter: Field : list
+  //--------------------------------------------------
 
-  //--------------------------------------------------
-  // parameter: Field : fields
-  //--------------------------------------------------
+  field_descr_ = new FieldDescr;
 
   // Add data fields
 
@@ -320,7 +324,7 @@ void Simulation::initialize_data_descr_() throw()
 
   }
 
-  // groups
+  // field groups
 
   int num_fields = config_->field_group_list.size();
   for (int index_field=0; index_field<num_fields; index_field++) {
@@ -332,6 +336,24 @@ void Simulation::initialize_data_descr_() throw()
       field_descr_->groups()->add(field,group);
     }
   }
+
+  //--------------------------------------------------
+  // parameter: Particle : list
+  //--------------------------------------------------
+
+
+  particle_descr_ = new ParticleDescr;
+
+  // Set particle batch size
+  particle_descr_->set_batch_size(config_->particle_batch_size);
+
+  // Add particle types
+
+  for (size_t i=0; i<config_->particle_list.size(); i++) {
+    particle_descr_->new_type (config_->particle_list[i]);
+  }
+
+  // Add particle attributes
 
 }
 //----------------------------------------------------------------------

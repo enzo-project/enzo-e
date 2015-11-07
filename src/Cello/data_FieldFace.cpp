@@ -85,8 +85,6 @@ void FieldFace::pup (PUP::er &p)
 
   TRACEPUP;
 
-  const bool up = p.isUnpacking();
-
   p | field_;
   p | array_;
   PUParray(p,face_,3);

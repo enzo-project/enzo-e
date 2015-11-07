@@ -5,8 +5,8 @@
 /// @date     Tue Jan  4 19:26:38 PST 2011
 /// @brief    [\ref Problem] Default initialization method
 
-#ifndef METHOD_INITIAL_DEFAULT_HPP
-#define METHOD_INITIAL_DEFAULT_HPP
+#ifndef PROBLEM_INITIAL_DEFAULT_HPP
+#define PROBLEM_INITIAL_DEFAULT_HPP
 
 class FieldData;
 
@@ -119,5 +119,5 @@ private: // attributes
 
 };
 
-#endif /* METHOD_INITIAL_DEFAULT_HPP */
+#endif /* PROBLEM_INITIAL_DEFAULT_HPP */
 

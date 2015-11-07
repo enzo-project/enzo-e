@@ -22,7 +22,7 @@ class ParticleDescr {
 public: // interface
 
   /// Constructor
-  ParticleDescr(int batch_size) throw();
+  ParticleDescr() throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -103,6 +103,10 @@ public: // interface
   //--------------------------------------------------
   // BATCHES
   //--------------------------------------------------
+
+  /// Set batch size
+  void set_batch_size(int batch_size)
+  { batch_size_ = batch_size; }
 
   /// Return the current batch size.
 

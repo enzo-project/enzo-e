@@ -52,11 +52,38 @@ public: // interface
       if (up) field_data_[i] = new FieldData;
       p | *field_data_[i];
     }
+
+    if (up) particle_data_ = new ParticleData;
+    p | *particle_data_;
     PUParray(p,lower_,3);
     PUParray(p,upper_,3);
     // NOTE: change this function whenever attributes change
   }
 
+  /// Return domain lower extent
+  inline void lower(double * x, 
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = lower_[0];
+    if (y) *y = lower_[1];
+    if (z) *z = lower_[2];
+  }
+
+  //----------------------------------------------------------------------
+
+  /// Return domain upper extent
+  inline void upper(double * x,
+		    double * y = 0,
+		    double * z = 0) const throw ()
+  {
+    if (x) *x = upper_[0];
+    if (y) *y = upper_[1];
+    if (z) *z = upper_[2];
+  }
+
+  //----------------------------------------------------------------------
+  // fields
   //----------------------------------------------------------------------
 
   /// Return the number of FieldData
@@ -81,6 +108,7 @@ public: // interface
   { return Field(field_descr(),
 		 field_data_.at(i)); }
 
+
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
 		    int gx = 0, int gy = 0, int gz = 0) const;
@@ -90,27 +118,27 @@ public: // interface
 			 double * hy = 0,
 			 double * hz = 0) const;
 
-  /// Return domain lower extent
-  inline void lower(double * x, 
-		    double * y = 0,
-		    double * z = 0) const throw ()
-  {
-    if (x) *x = lower_[0];
-    if (y) *y = lower_[1];
-    if (z) *z = lower_[2];
-  }
-
+  //----------------------------------------------------------------------
+  // particles
   //----------------------------------------------------------------------
 
-  /// Return domain upper extent
-  inline void upper(double * x,
-		    double * y = 0,
-		    double * z = 0) const throw ()
-  {
-    if (x) *x = upper_[0];
-    if (y) *y = upper_[1];
-    if (z) *z = upper_[2];
-  }
+  /// Return the ith Particle data
+  const ParticleData * particle_data () const throw()
+  { return particle_data_; }
+
+  /// Return the ith Particle data
+  ParticleData * particle_data () throw()
+  { return particle_data_; }
+
+  // Return the ith Particle descriptor
+  ParticleDescr * particle_descr () throw();
+  const ParticleDescr * particle_descr () const throw()
+  {   return (const ParticleDescr *) particle_descr(); }
+
+  /// Return the ith Particle
+  Particle particle () throw()
+  { return Particle(particle_descr(),
+		 particle_data_); }
 
 public: // virtual functions
 
@@ -127,6 +155,9 @@ private: // attributes
 
   /// Array of field data
   std::vector<FieldData *> field_data_;
+
+  /// Particle data
+  ParticleData * particle_data_;
 
   /// Lower extent of the box associated with the block [computable]
   double lower_[3];

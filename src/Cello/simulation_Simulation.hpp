@@ -10,6 +10,7 @@
 
 class Factory;
 class FieldDescr;
+class ParticleDescr;
 class Hierarchy;
 class Monitor;
 class Parameters;
@@ -85,6 +86,10 @@ public: // interface
   /// Return the field descriptor
   FieldDescr * field_descr() const throw()
   { return field_descr_; }
+
+  /// Return the particle descriptor
+  ParticleDescr * particle_descr() const throw()
+  { return particle_descr_; }
 
   /// Return the performance object associated with each cycle
   Performance * performance() throw()
@@ -367,6 +372,9 @@ protected: // attributes
   
   /// Field descriptor
   FieldDescr * field_descr_;
+
+  /// Particle descriptor
+  ParticleDescr * particle_descr_;
 
   Sync sync_output_begin_;
   Sync sync_output_write_;
