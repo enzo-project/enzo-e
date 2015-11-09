@@ -36,7 +36,7 @@
    }
 
    Initial {
-      type = "sedov_array_3d"; 
+      list = ["sedov_array_3d"]; 
       sedov { pressure_out = 0.5;
               radius_relative = 0.1; }
    }

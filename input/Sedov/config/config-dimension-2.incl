@@ -24,5 +24,5 @@ Field {
       ] ;
 }
 
-Initial { type = "sedov_array_2d"; }
+Initial { list = ["sedov_array_2d"]; }
 

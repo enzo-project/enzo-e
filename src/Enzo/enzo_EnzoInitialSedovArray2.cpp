@@ -51,6 +51,7 @@ void EnzoInitialSedovArray2::enforce_block
 (
  Block * block,
  const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr,
  const Hierarchy  * hierarchy
  ) throw()
 

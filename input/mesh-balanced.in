@@ -27,13 +27,6 @@ Field {
 }
 Initial {
    max_level = 5;
-      list = [
-	"density",	
-	"velocity_x",
-	"velocity_y",
-	"total_energy",
-	"internal_energy"
-      ] ;
 }
   Initial {
      density       { value = [  1.0, "input/test_balance.png", 

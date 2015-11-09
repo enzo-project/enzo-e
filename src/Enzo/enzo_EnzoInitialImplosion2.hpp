@@ -37,6 +37,7 @@ public: // interface
   (
    Block * block,
    const FieldDescr * field_descr,
+   const ParticleDescr * particle_descr,
    const Hierarchy * hierarchy
    ) throw();
 

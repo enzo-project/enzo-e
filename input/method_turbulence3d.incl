@@ -13,7 +13,7 @@ Mesh { root_rank = 3; }
  }
 
  Initial {
-     type = "turbulence";
+     list = ["turbulence"];
      turbulence {
          density     = 1.0000000000000;
          temperature = 1.0000000000000;

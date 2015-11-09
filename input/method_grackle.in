@@ -64,7 +64,7 @@
  }
 
  Initial {
-   type = "grackle_test";
+   list = ["grackle_test"];
  }
 
  Mesh {

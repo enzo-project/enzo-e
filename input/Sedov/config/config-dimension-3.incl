@@ -26,6 +26,6 @@ Field {
 }
 
 Initial {
-   type = "sedov_array_3d"; 
+   list = ["sedov_array_3d"]; 
 }
 

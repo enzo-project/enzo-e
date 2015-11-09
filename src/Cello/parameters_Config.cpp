@@ -525,17 +525,25 @@ void Config::read_initial_ (Parameters * p) throw()
 
   num_initial = p->list_length("Initial:list");
 
-  initial_list.resize(num_initial);
+  if (num_initial == 0) {
 
-  for (int index_initial=0; index_initial<num_initial; index_initial++) {
+    num_initial = 1;
+    initial_list.resize(num_initial);
+    initial_list[0] = "value";
 
-    std::string name = 
-      p->list_value_string(index_initial,"Initial:list");
+  } else {
 
-    std::string full_name = std::string("Initial:") + name;
+    initial_list.resize(num_initial);
+    for (int index_initial=0; index_initial<num_initial; index_initial++) {
 
-    initial_list[index_initial] = name;
+      std::string name = 
+	p->list_value_string(index_initial,"Initial:list");
 
+      //      std::string full_name = std::string("Initial:") + name;
+
+      initial_list[index_initial] = name;
+
+    }
   }
 }
 

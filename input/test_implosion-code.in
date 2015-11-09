@@ -3,7 +3,7 @@
 
    include "input/problem_implosion.incl"
 
-   Initial { type = "implosion_2d"; }
+   Initial { list = ["implosion_2d"]; }
 
    Output { 
       cycle_step {
