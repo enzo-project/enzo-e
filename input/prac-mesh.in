@@ -10,18 +10,14 @@ Domain {
 
 Stopping { cycle = 1000; }
 
-  Initial {
-     max_level = 3;
-     density       { value = [  1.0, "input/Cello-1080.png", 
-                                0.1 ]; }
-     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/Cello-1080.png", 
-                                1.0 / (0.4 * 1.0)  ]; }
-  }
-  Mesh {
-     root_size   = [512,256];
-     root_blocks = [32,16];
-  }
+Initial { max_level = 3; }
 
+include "input/initial-cello-1080.incl"
+
+Mesh {
+   root_size   = [512,256];
+   root_blocks = [32,16];
+}
 
 Adapt {
    max_level = 3;

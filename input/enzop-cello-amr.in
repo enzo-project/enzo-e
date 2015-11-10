@@ -8,15 +8,7 @@ Mesh    {
 }
 Adapt {  max_level   = 7;  }
 
-Initial {
-    density       { value = [ 1.0+x, "input/enzop-cello-full.png",  0.125 ]; }
-    total_energy  { value = 
-    [ 
-       (1.0 + x)  / (0.4 * 1.0), "input/enzop-cello-full.png", 0.14 / (0.4 * 0.1)  ]; }
-    velocity_x    { value = [0.0]; }
-    velocity_y    { value = [0.0]; }
-}
-
+include "input/initial-enzop-cello.incl"
 
 Boundary { type = "periodic"; }
 

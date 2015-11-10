@@ -86,22 +86,19 @@ Method {
 
 Initial {
 
-    density { 
-       value = [ 1.39e-18, (x*x+y*y+z*z < 4.9e33),
-                 1.39e-20 ]; 
-    }
-    temperature {
-       value = [ 10.0, (x*x+y*y+z*z < 4.9e33),
-               1000.0 ];
-    }
-    total_energy {
-       value = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
-                 8.8689e7*1000.0 ]; 
-    }
-    internal_energy {
-       value = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
-                 8.8689e7*1000.0 ]; 
-    }
+    list = ["value"];
+
+    value {
+
+       density = [ 1.39e-18, (x*x+y*y+z*z < 4.9e33),
+                   1.39e-20 ]; 
+       temperature = [ 10.0, (x*x+y*y+z*z < 4.9e33),
+                     1000.0 ];
+       total_energy = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
+                        8.8689e7*1000.0 ]; 
+       internal_energy = [ 8.8689e7*10.0, (x*x+y*y+z*z < 4.9e33),
+                           8.8689e7*1000.0 ]; 
+   }
 }
 
    Boundary { 

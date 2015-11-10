@@ -21,6 +21,8 @@ MethodTrace::MethodTrace
   refresh(ir)->add_all_fields(field_descr->field_count());
 }
 
+//----------------------------------------------------------------------
+
 void MethodTrace::compute ( Block * block) throw()
 {
   printf ("%s:%d\n",__FILE__,__LINE__);

@@ -55,10 +55,13 @@ Field {
 }
 
 Field { ghost_depth = 4; }
+
 Initial {
-   density  { 
-      value = [ 1.0 / (x*x + y*y + z*z + 0.00001), x*x + y*y + z*z < 0.1,
-                10.0 ];
+   list = ["value"];	
+   value {
+      density  = [ 1.0 / (x*x + y*y + z*z + 0.00001),
+                          x*x + y*y + z*z < 0.1,
+                  10.0 ];
    }
 }
 

@@ -56,14 +56,17 @@
    }
 
    Initial {
-       density       { value = [ 0.125,                x + y < 0.5,
-                                 1.0 ]; }
-       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.5,
-	                         1.0  / (0.4 * 1.0) ]; }
-       velocity_x    { value = [0.0]; }
-       velocity_y    { value = [0.0]; }
-       internal_energy { value = [0.0]; }
-       pressure { value = 0.0; }
+      list = ["value"];
+      value {
+         density = [ 0.125, x + y < 0.5,
+                       1.0 ];
+         total_energy = [ 0.14 / (0.4 * 0.125), x + y < 0.5,
+                          1.0  / (0.4 * 1.0) ];
+         velocity_x      = 0.0;
+         velocity_y      = 0.0;
+         internal_energy = 0.0;
+         pressure = 0.0;
+      } 
    }
 
    Boundary { type = "reflecting"; }

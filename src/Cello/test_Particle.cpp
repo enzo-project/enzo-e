@@ -595,9 +595,7 @@ PARALLEL_MAIN_BEGIN
   //   Grouping
   //--------------------------------------------------
 
-  unit_func ("grouping");
-
-  unit_assert (false);
+  // See test_Grouping.cpp
 
   unit_finalize();
 

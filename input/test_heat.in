@@ -13,9 +13,11 @@
  }
 
  Initial {
-     temperature {
-         value = [ 1.0, "input/enzop-cello-half.png", 0.010000 ];
-     }
+    list = ["value"];
+
+    value {
+        temperature = [ 1.0, "input/enzop-cello-half.png", 0.010000 ];
+    }
  }
 
  Boundary {

@@ -1,0 +1,16 @@
+Domain {
+   lower = [0.0, 0.0];
+   upper = [1.0, 1.0];
+}
+
+Initial {
+   type = ["value"];
+   value {
+       density = [ 1.0, (0.2 <= x && x < 0.4),  0.125 ];
+       total_energy  = [ 1.0  / (0.4 * 1.0) ,
+                        (0.2 <= x && x < 0.4),  0.14 / (0.4 * 0.1)];
+       velocity_x    = 0.0;
+       velocity_y    = 0.0;
+       internal_energy = 0.0;
+   }
+}

@@ -1,0 +1,14 @@
+
+Initial {
+
+   list = ["value"];
+
+   value {
+      density        = [ 1.0, "input/Cello.png", 
+                         0.1 ]; 
+      total_energy   = [  0.14 / (0.4 * 0.1), "input/Cello.png",
+                          1.0  / (0.4 * 1.0)  ]; 
+      velocity_x     = 0.0; 
+      velocity_y     = 0.0; 
+   }
+}

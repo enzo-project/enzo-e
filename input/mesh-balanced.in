@@ -25,22 +25,22 @@ Adapt {
 Field {
    ghost_depth = 4;
 }
-Initial {
-   max_level = 5;
-}
-  Initial {
-     density       { value = [  1.0, "input/test_balance.png", 
-                                0.1 ]; }
-     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/test_balance.png",
-                                1.0 / (0.4 * 1.0)  ]; }
-  }
 
-# Initial {
-#     density      { value = [ 1.0,           (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.25,  
-#                              0.1 ]; }
-#     total_energy { value = [ 1.0/(0.4*1.0), (x- 0.5)*(x- 0.5) + (y- 0.5)*(y- 0.5) < 0.25,  
-#                              0.1/(0.4*0.1) ]; }
-# }
+Initial {
+
+   max_level = 5;
+
+   list = ["value"];
+
+   value {
+
+     density      = [ 1.0, "input/test_balance.png", 
+                      0.1 ];
+     total_energy = [  0.1 / (0.4 * 0.1), "input/test_balance.png",
+                       1.0 / (0.4 * 1.0)  ];
+   }
+}
+
 
 Stopping { cycle = 100; }
 Testing  { cycle_final = 100; 

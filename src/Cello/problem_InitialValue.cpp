@@ -25,6 +25,7 @@ InitialValue::InitialValue
     ny_(0)
 {
   parameters_->group_set(0,"Initial");
+  parameters_->group_set(1,"value");
 
   mask_      = new bool ** [num_fields_];
   nx_        = new int * [num_fields_];
@@ -43,10 +44,10 @@ InitialValue::InitialValue
 
     std::string field_name = field_descr->field_name(index_field);
 
-    parameters_->group_set(1,field_name);
+    //    parameters_->group_set(1,field_name);
 
-    if (parameters_->type("value") == parameter_list) {
-      int num_values = parameters_->list_length("value");
+    if (parameters_->type(field_name) == parameter_list) {
+      int num_values = parameters_->list_length(field_name);
       if (num_values > 1) {
 	num_masks_[index_field] =  num_values / 2;
 	mask_[index_field] = new bool * [num_masks_[index_field]];
@@ -57,9 +58,9 @@ InitialValue::InitialValue
 	     index_mask < num_masks_[index_field];
 	     index_mask++) {
 	  int index_value = index_mask*2+1;
-	  if (parameters_->list_type(index_value,"value") == parameter_string) {
+	  if (parameters_->list_type(index_value,field_name) == parameter_string) {
 	    std::string file 
-	      = parameters_->list_value_string(index_value,"value","default");
+	      = parameters_->list_value_string(index_value,field_name,"default");
 	    create_mask_png_ (&mask_[index_field][index_mask],
 			      &nx_[index_field][index_mask],
 			      &ny_[index_field][index_mask],
@@ -132,6 +133,7 @@ void InitialValue::enforce_block
   
   //--------------------------------------------------
   parameters_->group_set(0,"Initial");
+  parameters_->group_set(1,"value");
   //--------------------------------------------------
 
   FieldData *       field_data = block->data()->field_data();
@@ -146,26 +148,23 @@ void InitialValue::enforce_block
     
     std::string field_name = field_descr->field_name(index_field);
 
-    //--------------------------------------------------
-    parameters_->group_set(1,field_name);
-    //--------------------------------------------------
 
     // If Initial:<field_name>:value is a list, try parsing it
 
     // parameter: Initial : <field> : value
 
-    parameter_type parameter_type = parameters_->type("value");
+    parameter_type parameter_type = parameters_->type(field_name);
 
     if (parameter_type == parameter_float) {
 
-      field_data->clear(field_descr,parameters_->value_float("value",0.0), 
+      field_data->clear(field_descr,parameters_->value_float(field_name,0.0), 
 			 index_field);
 
     } else if (parameter_type == parameter_list) {
 
       // Check parameter length
 
-      int list_length = parameters_->list_length("value");
+      int list_length = parameters_->list_length(field_name);
 
       ASSERT1("InitialValue::enforce_block",
 	     "Length of list parameter Initial:%s:value must be odd",
@@ -401,10 +400,10 @@ void InitialValue::evaluate_float_
  double * x, double * y, double * z, double t) throw ()
 {
 
-  // parameter: Initial : <field> : value
+  // parameter: Initial : value : <field> 
 
   parameter_type value_type = 
-    parameters_->list_type(index_value,"value");
+    parameters_->list_type(index_value,field_name);
 
   if (value_type != parameter_float_expr &&
       value_type != parameter_float) {
@@ -417,11 +416,11 @@ void InitialValue::evaluate_float_
   // Evaluate the floating-point expression
 
   if (value_type == parameter_float) {
-    double v = parameters_->list_value_float(index_value,"value",0.0);
+    double v = parameters_->list_value_float(index_value,field_name,0.0);
     for (int i=0; i<n; i++) value[i] = v;
   } else {
     parameters_->list_evaluate_float
-      (index_value,"value",n,value,deflt,x,y,z,t);
+      (index_value,field_name,n,value,deflt,x,y,z,t);
   }
 }
 
@@ -438,12 +437,12 @@ void InitialValue::evaluate_mask_
  double * x, double * y, double * z, double t) throw ()
 {
 
-  // parameter: Initial : <field> : value
+  // parameter: Initial : value : <field> 
 
   int index_mask = index_value / 2;
 
   parameter_type value_type = 
-    parameters_->list_type(index_value,"value");
+    parameters_->list_type(index_value,field_name);
 
   bool v;
   std::string file;
@@ -454,7 +453,7 @@ void InitialValue::evaluate_mask_
 
     // logical constant
 
-    v = parameters_->list_value_logical(index_value,"value",false);
+    v = parameters_->list_value_logical(index_value,field_name,false);
     for (int i=0; i<n; i++) mask[i] = v;
     break;
 
@@ -463,7 +462,7 @@ void InitialValue::evaluate_mask_
     // logical expression
 
     parameters_->list_evaluate_logical
-      (index_value,"value",n,mask,deflt,x,y,z,t);
+      (index_value,field_name,n,mask,deflt,x,y,z,t);
     break;
 
   case parameter_string:

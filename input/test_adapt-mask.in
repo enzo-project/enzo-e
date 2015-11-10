@@ -18,7 +18,7 @@ include "input/initial_constant.incl"
 # Method { list = ["heat"];
 #         heat { courant = 0.5; } }
 
-Initial {  max_level = 5 }
+Initial {  max_level = 5; }
 
 Stopping { 
    time = 4.0*3.14159265358979323; 

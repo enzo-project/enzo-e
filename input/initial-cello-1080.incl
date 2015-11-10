@@ -1,0 +1,11 @@
+Initial {
+
+   list = ["value"];
+
+   value {   
+       density      = [  1.0, "input/Cello-1080.png", 
+                                0.1 ];
+       total_energy = [  0.1 / (0.4 * 0.1), "input/Cello-1080.png",
+                         1.0 / (0.4 * 1.0)  ];
+   }
+}

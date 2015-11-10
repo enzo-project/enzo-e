@@ -37,15 +37,7 @@ Boundary {
    }
 }
 
-Initial {
-   max_level   = 3; 
-    density       { value = [ 1.0, (0.2 <= x && x < 0.4),  0.125 ]; }
-    total_energy  { value = [ 1.0  / (0.4 * 1.0) ,
-                                   (0.2 <= x && x < 0.4),  0.14 / (0.4 * 0.1)]; }
-    velocity_x    { value = [0.0]; }
-    velocity_y    { value = [0.0]; }
-    internal_energy { value = 0.0; }
-}
+include "input/initial-box.incl"
 
 Output { 
    list = ["cycle_step","mesh"];
@@ -62,7 +54,7 @@ Output {
         field_list = ["density"];
 #	image_block_size  = 5;
 #	image_size = [1025,1025];
-        include "schedule_cycle_10.incl"
+        include "input/schedule_cycle_10.incl"
         image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 6.0;

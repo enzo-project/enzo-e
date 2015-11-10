@@ -61,6 +61,7 @@ void Config::pup (PUP::er &p)
 
   p | num_fields;
   p | field_list;
+  p | field_index;
   p | field_alignment;
   PUParray(p,field_centering,3);
   PUParray(p,field_ghost_depth,3);
@@ -137,10 +138,12 @@ void Config::pup (PUP::er &p)
 
   p | num_particles;
   p | particle_list;
+  p | particle_index;
   p | particle_interleaved;
   p | particle_attribute_name;
   p | particle_attribute_type;
   p | particle_batch_size;
+  p | particle_group_list;
 
   // Performance
 
@@ -401,6 +404,7 @@ void Config::read_field_ (Parameters * p) throw()
   field_list.resize(num_fields);
   for (int i=0; i<num_fields; i++) {
     field_list[i] = p->list_value_string(i, "Field:list");
+    field_index[field_list[i]] = i;
   }
 
   if (p->type("Field:ghost_depth") == parameter_integer) {
@@ -447,9 +451,9 @@ void Config::read_field_ (Parameters * p) throw()
 
     if (p->type(param) == parameter_list)  {
       // group_list is a list
-      int num_groups = p->list_length(param);
-      for (int index_group=0; index_group<num_groups; index_group++) {
-	std::string group = p->list_value_string(index_group,param);
+      const int n = p->list_length(param);
+      for (int i=0; i<n; i++) {
+	std::string group = p->list_value_string(i,param);
 	field_group_list[index_field].push_back(group);
       }
     } else if (p->type(param) == parameter_string) {
@@ -471,22 +475,17 @@ void Config::read_field_ (Parameters * p) throw()
 
     if (p->type(param) == parameter_list) {
       // field_list is a list
-      for (int i=0; i<num_fields; i++) {
+      const int n = p->list_length(param);
+      for (int i=0; i<n; i++) {
 	std::string field = p->list_value_string(i,param);
-	for (int index_field = 0; index_field < num_fields; index_field++) {
-	  if (field_list[index_field] == field) {
-	    field_group_list[index_field].push_back(group);
-	  }
-	}
+	const int index_field = field_index[field];
+	field_group_list[index_field].push_back(group);
       }
     } else if (p->type(param) == parameter_string) {
       // field_list is a string
       std::string field = p->value_string(param);
-      for (int index_field = 0; index_field < num_fields; index_field++) {
-	if (field_list[index_field] == field) {
-	  field_group_list[index_field].push_back(group);
-	}
-      }
+      const int index_field = field_index[field];
+      field_group_list[index_field].push_back(group);
     }
   }
 
@@ -525,25 +524,14 @@ void Config::read_initial_ (Parameters * p) throw()
 
   num_initial = p->list_length("Initial:list");
 
-  if (num_initial == 0) {
+  initial_list.resize(num_initial);
+  for (int i=0; i<num_initial; i++) {
 
-    num_initial = 1;
-    initial_list.resize(num_initial);
-    initial_list[0] = "value";
+    std::string name = 
+      p->list_value_string(i,"Initial:list");
 
-  } else {
+    initial_list[i] = name;
 
-    initial_list.resize(num_initial);
-    for (int index_initial=0; index_initial<num_initial; index_initial++) {
-
-      std::string name = 
-	p->list_value_string(index_initial,"Initial:list");
-
-      //      std::string full_name = std::string("Initial:") + name;
-
-      initial_list[index_initial] = name;
-
-    }
   }
 }
 
@@ -831,7 +819,10 @@ void Config::read_particle_ (Parameters * p) throw()
 
   for (int it=0; it<num_particles; it++) {
 
-    particle_list[it] = p->list_value_string(it, "Particle:list");
+    std::string name = p->list_value_string(it, "Particle:list");
+
+    particle_list [it]   = name;
+    particle_index[name] = it;
 
     std::string type_str = "Particle:"+particle_list[it];
 
@@ -855,35 +846,13 @@ void Config::read_particle_ (Parameters * p) throw()
     particle_attribute_name[it].resize(na);
     particle_attribute_type[it].resize(na);
 
+    // Particle:<type>:attributes list elements alternate attribute
+    // name and its type (see type_enum in cello.hpp)
+
     for (int ia=0; ia<na; ia++) {
 
       std::string name = p->list_value_string (2*ia  ,attrib_str,"unknown");
       std::string type = p->list_value_string (2*ia+1,attrib_str,"unknown");
-
-      int bytes=0;
-      if (type == "char") {
-	bytes=sizeof(char);
-      } else if (type == "int") {
-	bytes=sizeof(int);
-      } else if (type == "int8") {
-	bytes=sizeof(int8_t);
-      } else if (type == "int16") {
-	bytes=sizeof(int16_t);
-      } else if (type == "int32") {
-	bytes=sizeof(int32_t);
-      } else if (type == "int64") {
-	bytes=sizeof(int64_t);
-      } else if (type == "float") {
-	bytes=sizeof(float);
-      } else if (type == "single") {
-	bytes=sizeof(float);
-      } else if (type == "double") {
-	bytes=sizeof(double);
-      } else {
-	ERROR3 ("read_particle_",
-		 "Particle type %d attribute %d has unknown attribute type %s",
-		 it,ia,type.c_str());
-      }
 
       ASSERT3 ("read_particle_",
 	       "Particle type %d attribute %d has unknown attribute name %s",
@@ -895,6 +864,58 @@ void Config::read_particle_ (Parameters * p) throw()
      
     }
   }
+
+  // Add particles to groups (Particle : <particle_name> : group_list)
+
+  particle_group_list.resize(num_particles);
+
+  for (int index_particle=0; index_particle<num_particles; index_particle++) {
+
+    std::string particle = particle_list[index_particle];
+
+    std::string param =  std::string("Particle:") + particle + ":group_list";
+
+    if (p->type(param) == parameter_list)  {
+      // group_list is a list
+      const int n = p->list_length(param);
+      for (int i=0; i<n; i++) {
+	std::string group = p->list_value_string(i,param);
+	particle_group_list[index_particle].push_back(group);
+      }
+    } else if (p->type(param) == parameter_string) {
+      // group_list is a string
+      std::string group = p->value_string(param);
+      particle_group_list[index_particle].push_back(group);
+    }
+  }
+
+  // Add particles to groups (Group : <group_name> : particle_list)
+
+  int num_groups = p->list_length("Group:list"); 
+
+  for (int index_group = 0; index_group < num_groups; index_group++) {
+
+    std::string group = p->list_value_string(index_group, "Group:list") ;
+
+    std::string param = std::string("Group:") + group + ":particle_list";
+
+    if (p->type(param) == parameter_list) {
+      // particle_list is a list
+      const int n = p->list_length(param);
+      for (int i=0; i<n; i++) {
+	std::string particle = p->list_value_string(i,param);
+	const int index_particle = particle_index[particle];
+	particle_group_list[index_particle].push_back(group);
+      }
+    } else if (p->type(param) == parameter_string) {
+      // particle_list is a string
+      std::string particle = p->value_string(param);
+      const int index_particle = particle_index[particle];
+      particle_group_list[index_particle].push_back(group);
+    }
+  }
+
+
 }
 
 
@@ -1036,6 +1057,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 
   return index_schedule_++;
 }
+
 
 //======================================================================
 

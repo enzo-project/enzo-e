@@ -14,7 +14,8 @@ Stopping {
 }
 
 Initial {
-   test { value = 0.0; }
+   list = ["value"];
+   value {  test = 0.0; }
 }
 
 Mesh {

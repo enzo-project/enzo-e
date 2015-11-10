@@ -100,6 +100,7 @@ public: // attributes
 
   int                        num_fields;
   std::vector<std::string>   field_list;
+  std::map<std::string,int>  field_index;
   int                        field_alignment;
   std::vector<int>           field_centering [3];
   int                        field_ghost_depth[3];
@@ -176,10 +177,12 @@ public: // attributes
 
   int                        num_particles;  // number of particle types
   std::vector<std::string>   particle_list;
+  std::map<std::string,int>  particle_index;
   std::vector<char>          particle_interleaved;
   std::vector< std::vector <std::string> > particle_attribute_name;
   std::vector< std::vector <std::string> > particle_attribute_type;
   int                        particle_batch_size;
+  std::vector< std::vector<std::string> >  particle_group_list;
 
   // Performance
 
@@ -208,24 +211,24 @@ public: // attributes
 protected: // functions
 
   /// Read boundary-related values from the Parameters object
-  void read_adapt_       (Parameters * parameters) throw();
-  void read_balance_     (Parameters * parameters) throw();
-  void read_boundary_    (Parameters * parameters) throw();
-  void read_domain_      (Parameters * parameters) throw();
-  void read_field_       (Parameters * parameters) throw();
-  void read_initial_     (Parameters * parameters) throw();
-  void read_memory_      (Parameters * parameters) throw();
-  void read_mesh_        (Parameters * parameters) throw();
-  void read_method_      (Parameters * parameters) throw();
-  void read_monitor_     (Parameters * parameters) throw();
-  void read_output_      (Parameters * parameters) throw();
-  void read_particle_    (Parameters * parameters) throw();
-  void read_performance_ (Parameters * parameters) throw();
-  void read_restart_     (Parameters * parameters) throw();
-  void read_stopping_    (Parameters * parameters) throw();
-  void read_testing_     (Parameters * parameters) throw();
+  void read_adapt_       ( Parameters * ) throw();
+  void read_balance_     ( Parameters * ) throw();
+  void read_boundary_    ( Parameters * ) throw();
+  void read_domain_      ( Parameters * ) throw();
+  void read_field_       ( Parameters * ) throw();
+  void read_initial_     ( Parameters * ) throw();
+  void read_memory_      ( Parameters * ) throw();
+  void read_mesh_        ( Parameters * ) throw();
+  void read_method_      ( Parameters * ) throw();
+  void read_monitor_     ( Parameters * ) throw();
+  void read_output_      ( Parameters * ) throw();
+  void read_particle_    ( Parameters * ) throw();
+  void read_performance_ ( Parameters * ) throw();
+  void read_restart_     ( Parameters * ) throw();
+  void read_stopping_    ( Parameters * ) throw();
+  void read_testing_     ( Parameters * ) throw();
 
-  int read_schedule_(Parameters * parameters,
+  int read_schedule_( Parameters * ,
 		      const std::string group   );
 
 };

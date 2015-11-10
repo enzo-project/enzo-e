@@ -17,9 +17,6 @@ struct field_info_type {
   int field_velocity_z;
   int field_total_energy;
 
-  int group_density;
-  int group_vector;
-
   int gx, gy, gz;
   int cx, cy, cz;
 };

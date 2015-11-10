@@ -11,6 +11,7 @@ include "input/domain-2d-01.incl"
 # Define the computational domain
 
 Initial { max_level = 5; }
+
 Mesh { 
    root_rank   = 2;
    root_size   = [ 128,128 ];
@@ -62,14 +63,7 @@ Method {
 
 # Define initial conditions
 
-Initial {
-   density       { value = [  1.0, "input/Cello.png", 
-                              0.1 ]; }
-   total_energy  { value = [  0.14 / (0.4 * 0.1), "input/Cello.png",
-                              1.0  / (0.4 * 1.0)  ]; }
-   velocity_x    { value = [ 0.0 ]; }
-   velocity_y    { value = [ 0.0 ]; }
-}
+include "input/initial-cello.incl"
 
 # Define boundary conditions
 

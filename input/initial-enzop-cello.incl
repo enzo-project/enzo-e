@@ -1,0 +1,15 @@
+Initial {
+
+   list = ["value"];
+
+   value {
+
+      density        = [ 1.0+x, "input/enzop-cello-full.png",  0.125 ]; 
+      total_energy   =  [ (1.0 + x)  / (0.4 * 1.0), 
+                              "input/enzop-cello-full.png", 
+                          0.14 / (0.4 * 0.1)  ]; 
+      velocity_x     = 0.0; 
+      velocity_y     = 0.0; 
+   }
+}
+

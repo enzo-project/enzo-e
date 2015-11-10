@@ -6,12 +6,7 @@ include "input/ppm.incl"
 Mesh { root_blocks    = [16,16]; 
        root_size = [1920,1080];}
 
-  Initial {
-     density       { value = [  1.0, "input/Cello-1080.png", 
-                                0.1 ]; }
-     total_energy  { value = [  0.1 / (0.4 * 0.1), "input/Cello-1080.png",
-                                1.0 / (0.4 * 1.0)  ]; }
-  }
+include "input/initial-cello-1080.incl"
 
 Output { list = ["density"]; }
 Output {

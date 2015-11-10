@@ -1,15 +1,15 @@
 # Problem: 2D Implosion problem using Initial:code
 # Author:  James Bordner (jobordner@ucsd.edu)
 
-   include "input/problem_implosion.incl"
+include "input/problem_implosion.incl"
 
-   Initial { list = ["implosion_2d"]; }
+Initial { list = ["implosion_2d"]; }
 
-   Output { 
-      cycle_step {
-         image_specify_bounds = true;
-         image_min = 0.0;
-         image_max = 1.0;
-         include "input/colormap_blackbody.incl"
-      }
+Output { 
+   cycle_step {
+      image_specify_bounds = true;
+      image_min = 0.0;
+      image_max = 1.0;
+      include "input/colormap_blackbody.incl"
    }
+}
