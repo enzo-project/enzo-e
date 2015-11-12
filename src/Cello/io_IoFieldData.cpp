@@ -47,30 +47,32 @@ void IoFieldData::pup (PUP::er &p)
 
 void IoFieldData::meta_value
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void IoFieldData::data_value
-(int index,
- void ** buffer, std::string * name, scalar_type * type,
+void IoFieldData::field_array
+(int index, // WARNING: index ignored
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {
   if (buffer) (*buffer) = (void * ) 
 		field_data_->values(field_descr_,field_index_);
-  if (name)   (*name)   = field_descr_->field_name(field_index_);
+  if (name)   (*name) = 
+		std::string("field ") +	field_descr_->field_name(field_index_);
   if (type) {
 
     precision_type precision = field_descr_->precision(field_index_);
     if (precision == precision_default) precision = default_precision;
 
     switch (precision) {
-    case precision_single: (*type) = scalar_type_float; break;
-    case precision_double: (*type) = scalar_type_double; break;
+    case precision_single: (*type) = type_float; break;
+    case precision_double: (*type) = type_double; break;
+    case precision_quadruple: (*type) = type_quadruple; break;
     default:
       ERROR2 ("IoFieldData",
 	      "Unsupported precision type %d for field %s",
@@ -115,3 +117,13 @@ void IoFieldData::data_value
   }
 }
 //----------------------------------------------------------------------
+
+void IoFieldData::particle_array 
+(int it, int ib, int ia,
+ void ** buffer, std::string * name, int * type,
+ int * n, int * k) throw()
+{
+}
+
+//----------------------------------------------------------------------
+

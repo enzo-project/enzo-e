@@ -19,7 +19,7 @@ class ItIndex : public PUP::able
 public: // interface
 
   /// Create an iterator over integers 0 to count-1
-  ItIndex () throw ()
+  ItIndex () throw () : size_(0)
   { }
 
   /// Virtual destructor
@@ -39,6 +39,9 @@ public: // interface
     PUP::able::pup(p); 
   };
 
+  /// Number of elements contained in the list
+  int size () const throw() { return size_; }
+
   /// Go to the first value
   virtual void first () throw() = 0;
 
@@ -53,6 +56,7 @@ public: // interface
 
 protected: // attributes
 
+  int size_;
 };
 
 #endif /* DATA_IT_INDEX_HPP */

@@ -24,6 +24,7 @@ ParticleDescr::ParticleDescr() throw()
     type_index_(),
     attribute_name_(),
     attribute_index_(),
+    attribute_type_(),
     attribute_bytes_(),
     particle_bytes_(),
     attribute_interleaved_(),
@@ -41,6 +42,7 @@ void ParticleDescr::pup (PUP::er &p)
   p | type_index_;
   p | attribute_name_;
   p | attribute_index_;
+  p | attribute_type_;
   p | attribute_bytes_;
   p | particle_bytes_;
   p | attribute_interleaved_;
@@ -74,6 +76,7 @@ int ParticleDescr::new_type(std::string type_name)
 
   attribute_name_. resize(nt + 1);
   attribute_index_.resize(nt + 1);
+  attribute_type_.resize(nt + 1);
   attribute_bytes_.resize(nt + 1);
   attribute_offset_.resize(nt + 1);
   attribute_offset_[nt].push_back(0);
@@ -114,11 +117,10 @@ std::string ParticleDescr::type_name (int it) const
 // Attributes
 //----------------------------------------------------------------------
 
-int ParticleDescr::new_attribute
-(int         it,
- std::string attribute_name,
- int         attribute_bytes)
+int ParticleDescr::new_attribute (int it, std::string name, int type)
 {
+  int attribute_bytes = cello::type_bytes[type];
+
 #ifdef CELLO_CHECK
   
   ASSERT1("ParticleDescr::new_attribute",
@@ -135,8 +137,9 @@ int ParticleDescr::new_attribute
 
   const int ia = num_attributes(it);
 
-  attribute_name_[it].push_back(attribute_name);
-  attribute_index_[it][attribute_name] = ia;
+  attribute_name_[it].push_back(name);
+  attribute_index_[it][name] = ia;
+  attribute_type_[it]. push_back(type);
   attribute_bytes_[it].push_back(attribute_bytes);
 
   // compute offset of next attribute
@@ -213,6 +216,18 @@ std::string ParticleDescr::attribute_name (int it, int ia) const
 
 //----------------------------------------------------------------------
 
+int ParticleDescr::attribute_type(int it,int ia) const
+{
+  ASSERT2("ParticleDescr::attribute_type",
+	  "Trying to access unknown particle attribute %d in type %d",
+	  ia,it,
+	  check_(it,ia));
+
+  return attribute_type_[it][ia];
+}
+
+//----------------------------------------------------------------------
+
 int ParticleDescr::attribute_bytes(int it,int ia) const
 {
   ASSERT2("ParticleDescr::attribute_bytes",
@@ -227,7 +242,7 @@ int ParticleDescr::attribute_bytes(int it,int ia) const
 
 int ParticleDescr::particle_bytes(int it) const
 {
-  ASSERT1("ParticleDescr::attribute_bytes",
+  ASSERT1("ParticleDescr::particle_bytes",
 	  "Trying to access unknown particle type %d",
 	  it,
 	  check_(it));

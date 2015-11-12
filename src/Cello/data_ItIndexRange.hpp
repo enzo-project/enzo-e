@@ -22,12 +22,12 @@ public: // interface
   /// Create an iterator over integers first to last
   ItIndexRange ( size_t first, size_t last ) throw ()
     : ItIndex(), first_(first), last_(last)
-  { }
+  { size_ = last_ - first_ + 1; }
 
   /// Create an iterator over integers 0 to count - 1first to last
   ItIndexRange ( size_t count ) throw ()
     : ItIndex(), first_(0), last_(count - 1)
-  { }
+  { size_ = 0;}
 
   /// Virtual destructor
   virtual ~ItIndexRange () throw ()

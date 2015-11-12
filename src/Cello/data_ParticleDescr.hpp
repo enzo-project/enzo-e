@@ -53,7 +53,7 @@ public: // interface
 
   /// Create a new attribute for the given type and return its id
 
-  int new_attribute(int it, std::string attribute, int attribute_bytes);
+  int new_attribute(int it, std::string name, int type);
 
   /// Return the number of attributes of the given type.
 
@@ -87,6 +87,9 @@ public: // interface
   //--------------------------------------------------
   // BYTES
   //--------------------------------------------------
+
+  /// Return the data type of the given attribute.
+  int attribute_type (int it,int ia) const;
 
   /// Return the number of bytes allocated for the given attribute.
   int attribute_bytes (int it,int ia) const;
@@ -163,8 +166,11 @@ private: // attributes
   // BYTES
   //--------------------------------------------------
 
-  /// Bytes used for each particle attribute.  Must be a
-  /// factor of 2
+  /// Scalar type of each attribute of each particle type.  Valid
+  /// scalar types are in type_enum defined in cello.hpp
+  std::vector < std::vector<int> > attribute_type_;
+
+  /// Number of bytes used by the given attribute
   std::vector < std::vector<int> > attribute_bytes_;
 
   /// Number of bytes used to store all attributes for each particle

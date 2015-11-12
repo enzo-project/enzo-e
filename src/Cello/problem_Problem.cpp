@@ -231,26 +231,72 @@ void Problem::initialize_output
       output->set_filename (file_name,file_args);
     }
 
+    //--------------------------------------------------
+    // field_list
+    //--------------------------------------------------
 
-    if (config->output_field_list[index].size() > 0) {
+    const int num_fields = config->output_field_list[index].size();
 
+    if (num_fields == 0) {
+      // field_list not initialized: assuming none
+      ItIndexList * it_field = new ItIndexList;
+      output->set_it_field_index(it_field);
+    } else {
+      // if any fields are "*", default is all fields
+      bool all_fields = false;
+      for (int i=0; i<num_fields; i++) {
+	if (config->output_field_list[index][i] == "*") {
+	  all_fields = true;
+	  int field_count = field_descr->field_count();
+	  ItIndexRange * it_field = new ItIndexRange(field_count);
+	  output->set_it_field_index(it_field);
+	  break;
+	}
+      } 
+      // if no fields are "*", create field index iterator
+      if (! all_fields) {
 	ItIndexList * it_field = new ItIndexList;
-	int length = config->output_field_list[index].size();
-	for (int i=0; i<length; i++) {
+	for (int i=0; i<num_fields; i++) {
 	  std::string field_name = config->output_field_list[index][i];
 	  int index_field = field_descr->field_id(field_name);
 	  it_field->append(index_field);
 	}
-	
 	output->set_it_field_index(it_field);
+      }
+    }
 
+    //--------------------------------------------------
+    // particle_list
+    //--------------------------------------------------
+
+    const int num_particles = config->output_particle_list[index].size();
+
+    if (num_particles == 0) {
+      // particle_list not initialized: assuming none
+      ItIndexList * it_particle = new ItIndexList;
+      output->set_it_particle_index(it_particle);
     } else {
-
-      int field_count = field_descr->field_count();
-      ItIndexRange * it_field = new ItIndexRange(field_count);
-
-      output->set_it_field_index(it_field);
-
+      // if any particles are "*", default is all particles
+      bool all_particles = false;
+      for (int i=0; i<num_particles; i++) {
+	if (config->output_particle_list[index][i] == "*") {
+	  all_particles = true;
+	  int particle_count = particle_descr->num_types();
+	  ItIndexRange * it_particle = new ItIndexRange(particle_count);
+	  output->set_it_particle_index(it_particle);
+	  break;
+	}
+      } 
+      // if no particles are "*", create particle index iterator
+      if (! all_particles) {
+	ItIndexList * it_particle = new ItIndexList;
+	for (int i=0; i<num_particles; i++) {
+	  std::string particle_name = config->output_particle_list[index][i];
+	  int index_particle = particle_descr->type_index(particle_name);
+	  it_particle->append(index_particle);
+	}
+	output->set_it_particle_index(it_particle);
+      }
     }
 
 

@@ -28,7 +28,7 @@ IoBlock::IoBlock() throw ()
 
 void IoBlock::meta_value
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
@@ -37,39 +37,48 @@ void IoBlock::meta_value
 
   if (index == count++) {
     *buffer = (void *) & block_->data()->num_field_data_;
-    *type   = scalar_type_int;
+    *type   = type_int;
   } else if (index == count++) {
     *buffer = (void *) & block_->index_;
-    *type   = scalar_type_int;
+    *type   = type_int;
     *nxd     = 3;
   } else if (index == count++) {
     *buffer = (void *) block_->data()->lower_;
-    *type   = scalar_type_double;
+    *type   = type_double;
     *nxd     = 3;
   } else if (index == count++) {
     *buffer = (void *) block_->data()->upper_;
-    *type   = scalar_type_double;
+    *type   = type_double;
     *nxd     = 3;
   } else if (index == count++) {
     *buffer = (void *) & block_->cycle_;
-    *type   = scalar_type_int;
+    *type   = type_int;
   } else if (index == count++) {
     *buffer = (void *) & block_->time_;
-    *type   = scalar_type_double;
+    *type   = type_double;
   } else if (index == count++) {
     *buffer = (void *) & block_->dt_;
-    *type   = scalar_type_double;
+    *type   = type_double;
   }
 }
 
 //----------------------------------------------------------------------
 
-void IoBlock::data_value
+void IoBlock::field_array
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {
 }
 
+//----------------------------------------------------------------------
+
+void IoBlock::particle_array 
+(int it, int ib, int ia,
+ void ** buffer, std::string * name, int * type,
+ int * n, int * k) throw()
+{
+  printf ("IoBlock::particle_array\n");
+}
 //----------------------------------------------------------------------

@@ -66,13 +66,13 @@ public: // interface
   
   /// Read a metadata item associated with the file
   virtual void file_read_meta
-  ( void * buffer, std::string name,  scalar_type * s_type,
+  ( void * buffer, std::string name,  int * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the file
 
   void file_write_meta
-  ( const void * buffer, std::string name, scalar_type type,
+  ( const void * buffer, std::string name, int type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( file_id_, buffer, name, type, nx,ny,nz); }
 
@@ -80,12 +80,12 @@ public: // interface
 
   /// Open an existing dataset for reading
   virtual void data_open
-  ( std::string name,  scalar_type * type,
+  ( std::string name,  int * type,
     int * nx=0, int * ny=0, int * nz=0) throw();
 
   /// Create a new dataset for writing (and open it)
   virtual void data_create
-  ( std::string name,  scalar_type type,
+  ( std::string name,  int type,
     int nxd=1, int nyd=0, int nzd=0,
     int nx=0, int ny=0, int nz=0) throw();
 
@@ -101,12 +101,12 @@ public: // interface
 
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
-  ( void * buffer, std::string name,  scalar_type * s_type,
+  ( void * buffer, std::string name,  int * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
-  ( const void * buffer, std::string name, scalar_type type,
+  ( const void * buffer, std::string name, int type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( data_id_, buffer, name, type, nx,ny,nz); }
 
@@ -133,12 +133,12 @@ public: // interface
   
   /// Read a metadata item associated with the opened group
   void group_read_meta
-  ( void * buffer, std::string name,  scalar_type * s_type,
+  ( void * buffer, std::string name,  int * s_type,
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened group
   void group_write_meta
-  ( const void * buffer, std::string name, scalar_type type,
+  ( const void * buffer, std::string name, int type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( group_id_, buffer, name, type, nx,ny,nz ); }
 
@@ -152,16 +152,16 @@ public: // interface
 protected: // functions
 
   virtual void write_meta_
-  ( hid_t id, const void * buffer, std::string name, scalar_type type,
+  ( hid_t id, const void * buffer, std::string name, int type,
     int nx=1, int ny=0, int nz=0) throw();
 
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
-  int scalar_to_hdf5_(scalar_type type) const throw();
+  int scalar_to_hdf5_(int type) const throw();
 
   /// Convert the scalar type to an HDF5 datatype
-  scalar_type hdf5_to_scalar_(int type) const throw();
+  int hdf5_to_scalar_(int type) const throw();
 
   /// Convert a relative path to an absolute path
   std::string relative_to_absolute_
@@ -243,7 +243,7 @@ private: // attributes
   std::string data_name_;
 
   /// Type of data in the HDF5 datatype
-  scalar_type data_type_;
+  int data_type_;
 
   /// Dataset rank, 0 to 3
   int data_rank_;

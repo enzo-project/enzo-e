@@ -97,37 +97,37 @@ PARALLEL_MAIN_BEGIN
   unit_assert (particle.num_attributes(it_dark) == 0);
 
   unit_func ("new_attribute");
-  const int ia_dark_x = particle.new_attribute (it_dark, "position_x", 4);
+  const int ia_dark_x = particle.new_attribute (it_dark, "position_x", type_single);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(it_dark) == 1);
 
   unit_func ("new_attribute");
-  const int ia_dark_y = particle.new_attribute (it_dark, "position_y", 4);
+  const int ia_dark_y = particle.new_attribute (it_dark, "position_y", type_single);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(it_dark) == 2);
 
   unit_func ("new_attribute");
-  const int ia_dark_z = particle.new_attribute (it_dark, "position_z", 4);
+  const int ia_dark_z = particle.new_attribute (it_dark, "position_z", type_single);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(it_dark) == 3);
 
   unit_func ("new_attribute");
-  const int ia_dark_vx = particle.new_attribute (it_dark, "velocity_x", 8);
+  const int ia_dark_vx = particle.new_attribute (it_dark, "velocity_x", type_double);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(it_dark) == 4);
 
   unit_func ("new_attribute");
-  const int ia_dark_vy = particle.new_attribute (it_dark, "velocity_y", 8);
+  const int ia_dark_vy = particle.new_attribute (it_dark, "velocity_y", type_double);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(it_dark) == 5);
 
   unit_func ("new_attribute");
-  const int ia_dark_vz = particle.new_attribute (it_dark, "velocity_z", 8);
+  const int ia_dark_vz = particle.new_attribute (it_dark, "velocity_z", type_double);
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(it_dark) == 6);
 
   unit_func ("new_attribute");
-  const int ia_dark_m = particle.new_attribute (it_dark, "mass", 8);
+  const int ia_dark_m = particle.new_attribute (it_dark, "mass", type_double);
   
   unit_func ("attribute_name()");
   unit_assert(particle.attribute_name(it_dark,ia_dark_x) == "position_x");
@@ -140,9 +140,12 @@ PARALLEL_MAIN_BEGIN
   unit_func ("attribute_index()");
   unit_assert(particle.attribute_index(it_dark,"position_x")  == ia_dark_x);
 
-  const int ia_trace_x = particle.new_attribute (it_trace, "position_x", 4);
-  const int ia_trace_y = particle.new_attribute (it_trace, "position_y", 8);
-  const int ia_trace_z = particle.new_attribute (it_trace, "position_z", 2);
+  const int ia_trace_x = particle.new_attribute 
+    (it_trace, "position_x", type_int32);
+  const int ia_trace_y = particle.new_attribute 
+    (it_trace, "position_y", type_int64);
+  const int ia_trace_z = particle.new_attribute 
+    (it_trace, "position_z", type_int16);
 
   //--------------------------------------------------
   //   Batch
@@ -163,6 +166,22 @@ PARALLEL_MAIN_BEGIN
   unit_assert (ib==1024 && ip==0);
   
   //--------------------------------------------------
+  //   Type
+  //--------------------------------------------------
+
+  unit_assert(particle.attribute_type(it_dark,ia_dark_x) == type_single);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_y) == type_single);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_z) == type_single);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_vx) == type_double);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_vy) == type_double);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_vz) == type_double);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_m) == type_double);
+
+  unit_assert(particle.attribute_type(it_trace,ia_trace_x) == type_int32);
+  unit_assert(particle.attribute_type(it_trace,ia_trace_y) == type_int64);
+  unit_assert(particle.attribute_type(it_trace,ia_trace_z) == type_int16);
+
+  //--------------------------------------------------
   //   Bytes
   //--------------------------------------------------
 
@@ -176,10 +195,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert(particle.attribute_bytes(it_dark,ia_dark_vz) == 8);
   unit_assert(particle.attribute_bytes(it_dark,ia_dark_m) == 8);
 
+  unit_assert(particle.particle_bytes(it_dark) == 4+4+4+8+8+8+8);
+
   unit_assert(particle.attribute_bytes(it_trace,ia_trace_x) == 4);
   unit_assert(particle.attribute_bytes(it_trace,ia_trace_y) == 8);
   unit_assert(particle.attribute_bytes(it_trace,ia_trace_z) == 2);
 
+  // particles have two bytes padding so 2,4,8 all divide evenly
+  // to compute stride.  
+  
+  unit_assert(particle.particle_bytes(it_trace) == 16);
 
   unit_func("attribute_offset()");
 

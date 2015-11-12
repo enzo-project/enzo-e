@@ -53,19 +53,16 @@ void OutputData::pup (PUP::er &p)
 
 void OutputData::open () throw()
 {
-  //  if (is_writer()) {
+  std::string file_name = expand_file_name_(&file_name_,&file_args_);
 
-    std::string file_name = expand_file_name_(&file_name_,&file_args_);
+  Monitor::instance()->print 
+    ("Output","writing data file %s", file_name.c_str());
 
-    Monitor::instance()->print 
-      ("Output","writing data file %s", file_name.c_str());
+  close();
 
-    close();
+  file_ = new FileHdf5 (".",file_name);
 
-    file_ = new FileHdf5 (".",file_name);
-
-    file_->file_create();
-    //  }
+  file_->file_create();
 }
 
 //----------------------------------------------------------------------
@@ -145,12 +142,12 @@ void OutputData::write_field_data
 
     void * buffer;
     std::string name;
-    scalar_type type;
+    int type;
     int nxd,nyd,nzd;  // Array dimension
     int nx,ny,nz;     // Array size
 
     // Get ith FieldData data
-    io_field_data()->data_value(i, &buffer, &name, &type, 
+    io_field_data()->field_array(i, &buffer, &name, &type, 
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 
@@ -169,31 +166,56 @@ void OutputData::write_particle_data
 ( 
   const ParticleData * particle_data,
   const ParticleDescr * particle_descr,
-  int index_particle) throw()
+  int it) throw()
 {
-  // io_particle_data()->set_particle_descr((ParticleDescr*)particle_descr);
-  // io_particle_data()->set_particle_data((ParticleData*)particle_data);
-  // io_particle_data()->set_particle_index(index_particle);
+  const Particle particle ( (ParticleDescr*) particle_descr,
+			    (ParticleData*)  particle_data);
 
-  // for (size_t i=0; i<io_particle_data()->data_count(); i++) {
+  // Write particle data for particle type it
 
-  //   void * buffer;
-  //   std::string name;
-  //   scalar_type type;
-  //   int nxd,nyd,nzd;  // Array dimension
-  //   int nx,ny,nz;     // Array size
+  io_particle_data()->set_particle_descr ( (ParticleDescr*) particle_descr);
+  io_particle_data()->set_particle_data  ( (ParticleData*)  particle_data);
+  io_particle_data()->set_particle_index(it);
 
-  //   // Get ith ParticleData data
-  //   io_particle_data()->data_value(i, &buffer, &name, &type, 
-  // 				 &nxd,&nyd,&nzd,
-  // 				 &nx, &ny, &nz);
+  // loop through attributes 
+  // loop through blocks
+  // write particle data for [it][ib][ia]
 
-  //   // Write ith ParticleData data
+  const int nb = particle.num_batches(it);
+  const int na = particle.num_attributes(it);
 
-  //   file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
-  //   file_->data_write(buffer);
-  //   file_->data_close();
-  // }
+  for (int ia=0; ia<na; ia++) {
+    for (int ib=0; ib<nb; ib++) {
+
+      // write ith batch of particle index 
+      void * buffer;
+      std::string name;
+      int type;
+      int n,k;
+
+      // Get ith batch of Particle data for particle type it
+      io_particle_data()->particle_array(it,ib,ia,
+				      &buffer, &name, &type, 
+				      &n,&k);
+
+      // Write ith batch of attributes
+
+      int nxd,nyd,nzd;
+      int nx,ny,nz;
+
+      if (particle.interleaved(it)) {
+	nxd=k;	nyd=n;	nzd=1;
+	nx=1;	ny=n;	nz=1;
+      } else {
+	nxd=n;	nyd=1;	nzd=1;
+	nx=n;	ny=1;	nz=1;
+      }
+
+      file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
+      file_->data_write(buffer);
+      file_->data_close();
+    }
+  }
 
 }
 

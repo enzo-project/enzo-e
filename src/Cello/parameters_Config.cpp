@@ -124,6 +124,7 @@ void Config::pup (PUP::er &p)
   PUParray (p,output_dir,MAX_OUTPUT_GROUPS);
   PUParray (p,output_stride,MAX_OUTPUT_GROUPS);
   PUParray (p,output_field_list,MAX_OUTPUT_GROUPS);
+  PUParray (p,output_particle_list,MAX_OUTPUT_GROUPS);
   PUParray (p,output_name,MAX_OUTPUT_GROUPS);
 
   p | index_schedule_;
@@ -722,6 +723,14 @@ void Config::read_output_ (Parameters * p) throw()
       output_field_list[index_output].resize(length);
       for (int i=0; i<length; i++) {
 	output_field_list[index_output][i] = p->list_value_string(i,"field_list","");
+      }
+    }
+
+    if (p->type("particle_list") == parameter_list) {
+      int length = p->list_length("particle_list");
+      output_particle_list[index_output].resize(length);
+      for (int i=0; i<length; i++) {
+	output_particle_list[index_output][i] = p->list_value_string(i,"particle_list","");
       }
     }
 

@@ -15,14 +15,14 @@
 #ifdef CONFIG_PRECISION_SINGLE
 #   define ETA_TOLERANCE 1.0e-5
 #   define ENZO_HUGE_VAL HUGE_VALF
-#   define scalar_type_enzo_float scalar_type_float
+#   define type_enzo_float type_float
 #   define CONFIG_BFLOAT_4
 #   define CONFIG_PFLOAT_4
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
 #   define ETA_TOLERANCE 1.0e-10
 #   define ENZO_HUGE_VAL HUGE_VAL
-#   define scalar_type_enzo_float scalar_type_double
+#   define type_enzo_float type_double
 #   define CONFIG_BFLOAT_8
 #   define CONFIG_PFLOAT_8
 #endif

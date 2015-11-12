@@ -36,8 +36,8 @@ public: // interface
 
   /// Append a value to the list of values
   void append (int value) 
-  { values_.push_back(value); }
-
+  { values_.push_back(value); 
+    size_++;}
 
   /// Go to the first value
   virtual void first () throw()

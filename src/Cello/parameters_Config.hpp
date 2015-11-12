@@ -163,6 +163,7 @@ public: // attributes
   std::vector<std::string>   output_dir            [MAX_OUTPUT_GROUPS];
   int                        output_stride         [MAX_OUTPUT_GROUPS];
   std::vector<std::string>   output_field_list     [MAX_OUTPUT_GROUPS];
+  std::vector<std::string>   output_particle_list     [MAX_OUTPUT_GROUPS];
   std::vector<std::string>   output_name           [MAX_OUTPUT_GROUPS];
 
   int                        index_schedule_;

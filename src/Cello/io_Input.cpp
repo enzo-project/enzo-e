@@ -245,7 +245,7 @@ void Input::read_meta_ ( meta_type type_meta, Io * io ) throw ()
 
     void * buffer;
     std::string name;
-    scalar_type type_scalar;
+    int type_scalar;
     int nx,ny,nz;
 
     // Get object's ith metadata

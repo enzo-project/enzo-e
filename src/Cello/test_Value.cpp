@@ -84,7 +84,9 @@ PARALLEL_MAIN_BEGIN
   const double zp =  3.0;
   const double t =   7.0;
   FieldDescr * field_descr = new FieldDescr;
-  Data data(field_descr,nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
+  ParticleDescr * particle_descr = new ParticleDescr;
+  Data data(field_descr,particle_descr,
+	    nx,ny,nz, 1,  xm,xp,ym,yp,zm,zp);
 
   double xv[nx], yv[ny], zv[nz];
   double dvalues[n];

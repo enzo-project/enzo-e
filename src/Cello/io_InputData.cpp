@@ -146,7 +146,7 @@ void InputData::read_field
 
     void * buffer = 0;
     std::string name;
-    scalar_type type;
+    int type;
     int nxd,nyd,nzd;  // Array dimension
     int nx,ny,nz;     // Array size
 
@@ -157,9 +157,9 @@ void InputData::read_field
     file_->data_close();
 
     // Get ith FieldData data
-    io_field_data()->data_value(i, &buffer, &name, &type, 
-				&nxd,&nyd,&nzd,
-				&nx, &ny, &nz);
+    io_field_data()->field_array(i, &buffer, &name, &type, 
+				 &nxd,&nyd,&nzd,
+				 &nx, &ny, &nz);
 
   }
 
@@ -181,7 +181,7 @@ void InputData::read_particle
 
   //   void * buffer = 0;
   //   std::string name;
-  //   scalar_type type;
+  //   int type;
   //   int nxd,nyd,nzd;  // Array dimension
   //   int nx,ny,nz;     // Array size
 
@@ -192,9 +192,9 @@ void InputData::read_particle
   //   file_->data_close();
 
   //   // Get ith ParticleData data
-  //   io_particle_data()->data_value(i, &buffer, &name, &type, 
-  // 				&nxd,&nyd,&nzd,
-  // 				&nx, &ny, &nz);
+  //   io_particle_data()->field_array(i, &buffer, &name, &type, 
+  //                                   &nxd,&nyd,&nzd,
+  // 				       &nx, &ny, &nz);
 
   // }
 

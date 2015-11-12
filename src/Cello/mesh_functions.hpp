@@ -684,7 +684,7 @@ float * read_hdf5
     file.group_chdir(group_name);
     file.group_open();
   }
-  scalar_type type = scalar_type_unknown;
+  int type = type_unknown;
   if (nz) {
     file.data_open (field_name,&type,nx,ny,nz);
   } else {
@@ -894,7 +894,7 @@ void hdf5_to_png
     file.group_open();
   }
 
-  scalar_type type = scalar_type_unknown;
+  int type = type_unknown;
   int mx, my, mz;
   file.data_open (field_name,&type,&mx,&my,&mz);
 

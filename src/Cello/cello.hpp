@@ -111,17 +111,22 @@ enum type_enum {
   type_unknown,     // unknown type
   type_default,    // "default" floating-point precision, e.g. enzo_float
   type_single,
+  type_float = type_single,
   type_double,
   type_extended80,
   type_extended96,
   type_quadruple,
+  type_long_double = type_quadruple,
   type_int8,
+  type_char = type_int8,
   type_int16,
+  type_short = type_int16,
   type_int32,
+  type_int = type_int32,
   type_int64,
+  type_long_long = type_int64,
   NUM_TYPES
 };
-
 
 #ifdef CONFIG_PRECISION_SINGLE
 #   define default_precision precision_single

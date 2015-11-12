@@ -29,7 +29,7 @@ IoEnzoBlock::IoEnzoBlock() throw ()
 
 void IoEnzoBlock::meta_value
 (int index,
- void ** buffer,  std::string * name, scalar_type * type,
+ void ** buffer,  std::string * name, int * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
 
@@ -48,36 +48,36 @@ void IoEnzoBlock::meta_value
     if (index == index_count++) {
 
       *buffer = (void *) & enzo_block->dt;
-      *type   = scalar_type_enzo_float;
+      *type   = type_enzo_float;
 
     } else if (index == index_count++) {
 
       *buffer = (void *) enzo_block->GridLeftEdge;
-      *type   = scalar_type_enzo_float;
+      *type   = type_enzo_float;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
       *buffer = (void *) enzo_block->GridDimension;
-      *type   = scalar_type_int;
+      *type   = type_int;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
       *buffer = (void *) enzo_block->GridStartIndex;
-      *type   = scalar_type_int;
+      *type   = type_int;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
       *buffer = (void *) enzo_block->GridEndIndex;
-      *type   = scalar_type_int;
+      *type   = type_int;
       *nxd     = 3;
 
     } else if (index == index_count++) {
 
       *buffer = (void *) enzo_block->CellWidth;
-      *type   = scalar_type_enzo_float;
+      *type   = type_enzo_float;
       *nxd     = 3;
     }
   }
@@ -86,7 +86,7 @@ void IoEnzoBlock::meta_value
 
 void IoEnzoBlock::data_value
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
 }

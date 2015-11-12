@@ -23,7 +23,7 @@ IoHierarchy::IoHierarchy(const Hierarchy * hierarchy) throw ()
 
 void IoHierarchy::meta_value
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
   Io::meta_value(index,buffer,name,type,nxd,nyd,nzd);
@@ -33,30 +33,39 @@ void IoHierarchy::meta_value
   if (index == count++) {
 
     *buffer = (void *) hierarchy_->lower_;
-    *type   = scalar_type_double;
+    *type   = type_double;
     *nxd     = 3;
     
   } else if (index == count++) {
 
     *buffer = (void *) hierarchy_->upper_;
-    *type   = scalar_type_double;
+    *type   = type_double;
     *nxd     = 3;
 
   } else if (index == count++) {
 
     *buffer = (void *) & hierarchy_->max_level_;
-    *type   = scalar_type_int;
+    *type   = type_int;
 
   }
 }
 
 //----------------------------------------------------------------------
 
-void IoHierarchy::data_value
+void IoHierarchy::field_array
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+void IoHierarchy::particle_array 
+(int it, int ib, int ia,
+ void ** buffer, std::string * name, int * type,
+ int * n, int * k) throw()
 {
 }
 

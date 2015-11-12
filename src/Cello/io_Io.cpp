@@ -20,7 +20,7 @@ Io::Io(size_t data_count) throw()
 
 void Io::meta_value 
 (int index, 
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
   ASSERT1 ("Io::meta_value()",
@@ -34,13 +34,21 @@ void Io::meta_value
 }
 
 //----------------------------------------------------------------------
-void Io::data_value 
+void Io::field_array 
 (int index, 
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {
 }
 
+//----------------------------------------------------------------------
+
+void Io::particle_array 
+(int it, int ib, int ia,
+ void ** buffer, std::string * name, int * type,
+ int * n, int * k) throw()
+{
+}
 //======================================================================
 

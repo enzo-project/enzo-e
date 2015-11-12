@@ -87,6 +87,21 @@ public: // interface
   /// Add a new type to the attribute_array.  Should only be called
   /// by Particle.
 
+  /// Allocate arrays based on ParticleDescr attributes
+  void allocate(ParticleDescr * particle_descr)
+  {
+    const size_t nt = particle_descr->num_types();
+    if (attribute_array_.size() < nt) {
+      attribute_array_.resize(nt);
+    }
+    if (attribute_align_.size() < nt) {
+      attribute_align_.resize(nt);
+    }
+    if (particle_count_.size() < nt) {
+      particle_count_.resize(nt);
+    }
+  };
+
 private: /// functions
 
   /// Return an id (not "index"); for a particle that is guaranteed to
@@ -100,21 +115,6 @@ private: /// functions
   //   attribute_align_.resize(attribute_align_.size()+1);
   //   particle_count_.resize(particle_count_.size()+1);
   // }
-
-  /// Allocate arrays based on ParticleDescr attributes
-  void allocate_(ParticleDescr * particle_descr)
-  {
-    const size_t nt = particle_descr->num_types();
-    if (attribute_array_.size() < nt) {
-      attribute_array_.resize(nt);
-    }
-    if (attribute_align_.size() < nt) {
-      attribute_align_.resize(nt);
-    }
-    if (particle_count_.size() < nt) {
-      particle_count_.resize(nt);
-    }
-  };
 
   /// Allocate attribute_array_ block, aligned at 16 byte boundary
   /// with updated attribute_align_

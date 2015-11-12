@@ -20,9 +20,12 @@ PARALLEL_MAIN_BEGIN
   unit_class("Data");
 
   FieldDescr * field_descr = new FieldDescr;
+  ParticleDescr * particle_descr = new ParticleDescr;
 
   Data * data = new Data 
-    (field_descr,3,4,5,1,
+    (field_descr,
+     particle_descr,
+     3,4,5,1,
      -1.0, 2.0,
      -2.0, 4.0,
      -3.0, 6.0);

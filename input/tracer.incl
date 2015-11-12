@@ -20,7 +20,7 @@ Output {
    list += ["trace"];
    trace {
       type = "data";
-      field_list = [];
+      field_list = ["density"];
       particle_list = ["trace"];
       name = ["trace-p%02d-c%06d.h5", "proc","cycle"];
       include "input/schedule_cycle_10.incl"

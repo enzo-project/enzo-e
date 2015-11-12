@@ -25,7 +25,7 @@ public: // interface
     : particle_descr_ (particle_descr),
       particle_data_ (particle_data)
   {
-    particle_data_->allocate_(particle_descr);
+    particle_data_->allocate(particle_descr);
   }
 
   /// Copy constructor
@@ -69,7 +69,7 @@ public: // interface
   int new_type(std::string type)
   { 
     int it = particle_descr_->new_type(type); 
-    particle_data_->allocate_(particle_descr_);
+    particle_data_->allocate(particle_descr_);
     return it;
   }
 
@@ -122,10 +122,24 @@ public: // interface
   // BYTES
   //--------------------------------------------------
 
-  /// Return the number of bytes allocated for the given attribute.
+  /// Return the data type of the given attribute.
+  int attribute_type (int it,int ia) const
+  { return particle_descr_->attribute_type(it,ia); }
 
-  int attribute_bytes(int it, int ia) const
+  /// Return the number of bytes allocated for the given attribute.
+  int attribute_bytes (int it,int ia) const
   { return particle_descr_->attribute_bytes(it,ia); }
+
+  /// Return the number of bytes use to represent a particle.
+  int particle_bytes (int it) const
+  { return particle_descr_->particle_bytes(it); }
+
+  /// Return the stride of the given attribute if interleaved, otherwise 1.
+  /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
+  /// Must be evenly divisible.
+
+  int stride(int it, int ia) const
+  { return particle_descr_->stride(it,ia); }
 
   //--------------------------------------------------
   // INTERLEAVING
@@ -140,13 +154,6 @@ public: // interface
 
   bool interleaved (int it) const
   { return particle_descr_->interleaved(it); }
-
-  /// Return the stride of the given attribute if interleaved, otherwise 1.
-  /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
-  /// Must be evenly divisible.
-
-  int stride(int it, int ia) const
-  { return particle_descr_->stride(it,ia); }
 
   /// Return the current batch size.
 

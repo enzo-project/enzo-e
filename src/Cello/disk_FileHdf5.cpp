@@ -27,7 +27,7 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
     group_prop_(H5P_DEFAULT),
     is_group_open_(false),
     data_name_(""),
-    data_type_(scalar_type_unknown),
+    data_type_(type_unknown),
     data_rank_(0),
     data_prop_(H5P_DEFAULT),
     is_data_open_(false),
@@ -149,7 +149,7 @@ void FileHdf5::file_close () throw()
 //----------------------------------------------------------------------
 
 void FileHdf5::data_open
-( std::string name,  scalar_type * type,
+( std::string name,  int * type,
   int * nx, int * ny, int * nz) throw()
 {
 
@@ -191,7 +191,7 @@ void FileHdf5::data_open
 //----------------------------------------------------------------------
 
 void FileHdf5::data_create
-( std::string name,  scalar_type type,
+( std::string name,  int type,
   int nxd, int nyd, int nzd,
   int nx, int ny, int nz) throw()
 {
@@ -325,7 +325,7 @@ void FileHdf5::data_close() throw()
 //----------------------------------------------------------------------
 
 void FileHdf5::file_read_meta
-  ( void * buffer, std::string name,  scalar_type * type,
+  ( void * buffer, std::string name,  int * type,
     int * nx, int * ny, int * nz) throw()
 {
 
@@ -356,7 +356,7 @@ void FileHdf5::file_read_meta
 
   // set output type
 
-  scalar_type scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
+  int scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
 
   if (type) (*type) = scalar_type;
 
@@ -375,7 +375,7 @@ void FileHdf5::file_read_meta
 //----------------------------------------------------------------------
 
 void FileHdf5::data_read_meta
-  ( void * buffer, std::string name,  scalar_type * type,
+  ( void * buffer, std::string name,  int * type,
     int * nx, int * ny, int * nz) throw()
 {
   // error check file open
@@ -411,7 +411,7 @@ void FileHdf5::data_read_meta
 
   // set output parameters
 
-  scalar_type scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
+  int scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
 
   if (type) (*type) = scalar_type;
 
@@ -588,7 +588,7 @@ void FileHdf5::group_close () throw()
 //----------------------------------------------------------------------
 
 void FileHdf5::group_read_meta
-  ( void * buffer, std::string name,  scalar_type * type,
+  ( void * buffer, std::string name,  int * type,
     int * nx, int * ny, int * nz) throw()
 {
   // error check file open
@@ -624,7 +624,7 @@ void FileHdf5::group_read_meta
 
   // set output parameters
 
-  scalar_type scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
+  int scalar_type = hdf5_to_scalar_(H5Aget_type (meta_id));
 
   if (type) (*type) = scalar_type;
 
@@ -659,7 +659,7 @@ void FileHdf5::set_compress (int level) throw ()
 
 void FileHdf5::write_meta_
 ( hid_t type_id,
-  const void * buffer, std::string name, scalar_type type,
+  const void * buffer, std::string name, int type,
   int nx, int ny, int nz) throw()
 {
   // error check file open
@@ -721,7 +721,7 @@ void FileHdf5::write_meta_
 
 //----------------------------------------------------------------------
 
-int FileHdf5::scalar_to_hdf5_ (scalar_type type) const throw()
+int FileHdf5::scalar_to_hdf5_ (int type) const throw()
 {
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -
@@ -739,36 +739,52 @@ int FileHdf5::scalar_to_hdf5_ (scalar_type type) const throw()
 
   hid_t hdf5_type;
 
+  // Whether to use native encodings.  Note, setting to false doesn't
+  // work--written values are garbage when viewed using h5dump
+  bool native = true;
+
+  // Whether to use big-endian or little-endian.  Ignored if native
+  // is true
+  bool be = true; 
+
   switch (type) {
-  case scalar_type_unknown:
-    ERROR("FileHdf5::scalar_to_hdf5_",
-	  "scalar_type_unknown not implemented");
+  case type_unknown:
+  case type_extended80:
+  case type_extended96:
+    ERROR1("FileHdf5::scalar_to_hdf5_",
+	   "type_%s not implemented",cello::type_name[type]);
     hdf5_type = 0;
     break;
-  case scalar_type_float:
-    hdf5_type = H5T_NATIVE_FLOAT;
+  case type_single:
+    hdf5_type = native ? 
+      H5T_NATIVE_FLOAT : (be ? H5T_IEEE_F32BE : H5T_IEEE_F32LE);
     break;
-  case scalar_type_double:
-    hdf5_type = H5T_NATIVE_DOUBLE;
+  case type_double:
+    hdf5_type = native ?
+      H5T_NATIVE_DOUBLE : (be ? H5T_IEEE_F64BE : H5T_IEEE_F64LE);
     break;
-  case scalar_type_long_double:
-    ERROR("FileHdf5::scalar_to_hdf5_","long double not supported");
-    hdf5_type = 0;
+  case type_quadruple:
+    if (native) {
+      hdf5_type = H5T_NATIVE_LDOUBLE;
+    } else {
+      ERROR("FileHdf5::scalar_to_hdf5_",
+	    "type_quadruple not implemented unless native=true");
+    }
     break;
-  case scalar_type_char:
+  case type_char:
     hdf5_type = H5T_NATIVE_CHAR;
     break;
-  case scalar_type_int:
-    hdf5_type = H5T_NATIVE_INT;
+  case type_short:
+    hdf5_type = native ? 
+      H5T_NATIVE_SHORT : (be ? H5T_STD_I16BE : H5T_STD_I16LE);
     break;
-  case scalar_type_long:
-    // use H5T_NATIVE_INT for long if same size: so inverse exists
-    hdf5_type = (sizeof(long) == sizeof(int)) 
-      ? H5T_NATIVE_INT : H5T_NATIVE_LONG;
+  case type_int:
+    hdf5_type = native ? 
+      H5T_NATIVE_INT : (be ? H5T_STD_I32BE : H5T_STD_I32LE);
     break;
-  case scalar_type_long_long:
-    hdf5_type = (sizeof(long long) == sizeof(long)) 
-      ? H5T_NATIVE_LONG : H5T_NATIVE_LLONG;
+  case type_long_long:
+    hdf5_type = native ? 
+      H5T_NATIVE_LLONG : (be ? H5T_STD_I64BE : H5T_STD_I64LE);
     break;
   default:
     ERROR1("FileHdf5::scalar_to_hdf5_", "unsupported type %d", type);
@@ -780,32 +796,32 @@ int FileHdf5::scalar_to_hdf5_ (scalar_type type) const throw()
 
 //----------------------------------------------------------------------
 
-scalar_type FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
+int FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
 {
 
   H5T_class_t hdf5_class = H5Tget_class(hdf5_type);
   size_t      hdf5_size  = H5Tget_size (hdf5_type);
 
-  scalar_type type = scalar_type_unknown;
+  int type = type_unknown;
  
   if (hdf5_class == H5T_INTEGER) {
 
     if (hdf5_size == sizeof(char)) {
-      type = scalar_type_char;
+      type = type_char;
     } else if (hdf5_size == sizeof(int)) {
-      type = scalar_type_int;
-    } else if (hdf5_size == sizeof(long)) {
-      type = scalar_type_long;
+      type = type_int;
     } else if (hdf5_size == sizeof(long long)) {
-      type = scalar_type_long_long;
+      type = type_long_long;
     } else ASSERT("","",0);
 
   } else if (hdf5_class == H5T_FLOAT) {
 
     if (hdf5_size == sizeof(float)) {
-      type = scalar_type_float;
+      type = type_float;
     } else if (hdf5_size == sizeof(double)) {
-      type = scalar_type_double;
+      type = type_double;
+    } else if (hdf5_size == sizeof(long double)) {
+      type = type_quadruple;
     } else ASSERT("","",0);
 
   } else {

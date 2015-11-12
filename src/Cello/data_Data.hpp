@@ -22,11 +22,12 @@ public: // interface
 
   /// Constructor
   Data(FieldDescr * field_descr,
-	int nx, int ny, int nz,
-	int num_field_data,
-	double xm, double xp,
-	double ym, double yp,
-	double zm, double zp) throw();
+       ParticleDescr * particle_descr,
+       int nx, int ny, int nz,
+       int num_field_data,
+       double xm, double xp,
+       double ym, double yp,
+       double zm, double zp) throw();
 
   /// Destructor
   virtual ~Data() throw();

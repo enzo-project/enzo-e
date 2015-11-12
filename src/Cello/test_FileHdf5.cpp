@@ -8,6 +8,7 @@
 #include "main.hpp" 
 #include "test.hpp"
 
+#include "cello.hpp"
 #include "disk.hpp"
 
 PARALLEL_MAIN_BEGIN
@@ -120,17 +121,17 @@ PARALLEL_MAIN_BEGIN
   hdf5_a.set_compress(6);
   hdf5_a.file_create();
 
-  hdf5_a.file_write_meta(&mx, "mx", scalar_type_int);
-  hdf5_a.file_write_meta(&my, "my", scalar_type_int);
+  hdf5_a.file_write_meta(&mx, "mx", type_int);
+  hdf5_a.file_write_meta(&my, "my", type_int);
 
   hdf5_a.group_chdir ("/test");
   hdf5_a.group_create ();
 
-  hdf5_a.group_write_meta(&a_nx,"nx",scalar_type_int);
-  hdf5_a.group_write_meta(&a_ny,"ny",scalar_type_int);
+  hdf5_a.group_write_meta(&a_nx,"nx",type_int);
+  hdf5_a.group_write_meta(&a_ny,"ny",type_int);
 
-  hdf5_a.data_create ("char", scalar_type_char, a_nx,a_ny,a_nz);
-  hdf5_a.data_write_meta(&ma_char, "meta_char", scalar_type_char, a_mx, a_my);
+  hdf5_a.data_create ("char", type_char, a_nx,a_ny,a_nz);
+  hdf5_a.data_write_meta(&ma_char, "meta_char", type_char, a_mx, a_my);
   hdf5_a.data_write (a_char);
   hdf5_a.data_close ();
   hdf5_a.group_close ();
@@ -138,8 +139,8 @@ PARALLEL_MAIN_BEGIN
   //  hdf5_a.group_create ("/test/int");
   hdf5_a.group_chdir ("int");
   hdf5_a.group_create ();
-  hdf5_a.data_create ("int", scalar_type_int, a_nx,a_ny,a_nz);
-  hdf5_a.data_write_meta(&ma_int, "meta_int", scalar_type_int, a_mx, a_my);
+  hdf5_a.data_create ("int", type_int, a_nx,a_ny,a_nz);
+  hdf5_a.data_write_meta(&ma_int, "meta_int", type_int, a_mx, a_my);
   hdf5_a.data_write (a_int);
   hdf5_a.data_close ();
   hdf5_a.group_close();
@@ -149,9 +150,9 @@ PARALLEL_MAIN_BEGIN
   hdf5_a.group_chdir ("../../test2/long/long/type/is/long");
   hdf5_a.group_create ();
 
-  hdf5_a.data_create ("long_long", scalar_type_long_long, a_nx,a_ny,a_nz);
+  hdf5_a.data_create ("long_long", type_long_long, a_nx,a_ny,a_nz);
   hdf5_a.data_write_meta
-    (&ma_long_long, "meta_long_long", scalar_type_long_long, a_mx, a_my);
+    (&ma_long_long, "meta_long_long", type_long_long, a_mx, a_my);
   hdf5_a.data_write (a_long_long);
   hdf5_a.data_close ();
   hdf5_a.group_close();
@@ -159,19 +160,14 @@ PARALLEL_MAIN_BEGIN
   hdf5_a.group_chdir ("/test2/scalar/long/group");
   hdf5_a.group_create ();
 
-  hdf5_a.data_create ("long", scalar_type_long, a_nx,a_ny,a_nz);
-  hdf5_a.data_write_meta(&ma_long, "meta_long", scalar_type_long, a_mx, a_my);
-  hdf5_a.data_write (a_long);
-  hdf5_a.data_close ();
-
-  hdf5_a.data_create ("float", scalar_type_float, a_nx,a_ny,a_nz);
-  hdf5_a.data_write_meta(&ma_float, "meta_float", scalar_type_float, a_mx, a_my);
+  hdf5_a.data_create ("float", type_float, a_nx,a_ny,a_nz);
+  hdf5_a.data_write_meta(&ma_float, "meta_float", type_float, a_mx, a_my);
   hdf5_a.data_write (a_float);
   hdf5_a.data_close ();
   hdf5_a.group_close();
 
-  hdf5_a.data_create ("double",scalar_type_double, a_nx,a_ny,a_nz);
-  hdf5_a.data_write_meta(&ma_double, "meta_double", scalar_type_double, a_mx, a_my);
+  hdf5_a.data_create ("double",type_double, a_nx,a_ny,a_nz);
+  hdf5_a.data_write_meta(&ma_double, "meta_double", type_double, a_mx, a_my);
   hdf5_a.data_write (a_double);
   hdf5_a.data_close ();
 
@@ -188,7 +184,7 @@ PARALLEL_MAIN_BEGIN
   int b_mx;
   int b_my;
 
-  scalar_type type;
+  int type;
 
   unit_func("file_open()");
 
@@ -201,36 +197,36 @@ PARALLEL_MAIN_BEGIN
   unit_func("file_read_meta()");
   //----------------------------------------------------------------------
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.file_read_meta(&b_mx, "mx", &type);
 
   unit_assert (a_mx == b_mx);
-  unit_assert (type == scalar_type_int);
-  type = scalar_type_unknown;
+  unit_assert (type == type_int);
+  type = type_unknown;
   hdf5_b.file_read_meta(&b_my, "my", &type);
 
   unit_assert (a_my == b_my);
-  unit_assert (type == scalar_type_int);
+  unit_assert (type == type_int);
 
   //======================================================================
   unit_func("double data_open()");
   //======================================================================
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_open ("double",&type, &b_nx,&b_ny,&b_nz);
 
-  unit_assert (type == scalar_type_double);
+  unit_assert (type == type_double);
 
   //----------------------------------------------------------------------
   unit_func("double data_read_meta()");
   //----------------------------------------------------------------------
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_read_meta (&mb_double, "meta_double", &type, &b_mx, &b_my);
 
   unit_assert (a_mx == b_mx);
   unit_assert (a_my == b_my);
-  unit_assert (type == scalar_type_double);
+  unit_assert (type == type_double);
 
   //----------------------------------------------------------------------
   unit_func("double data_read()");
@@ -284,32 +280,32 @@ PARALLEL_MAIN_BEGIN
   hdf5_b.group_chdir ("/test");
   hdf5_b.group_open ();
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_open ("char",&type, &b_nx,&b_ny,&b_nz);
 
-  unit_assert (type == scalar_type_char);
+  unit_assert (type == type_char);
 
   unit_func("char group_read_meta()");
 
   int g_nx,g_ny;
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.group_read_meta(&g_nx,"nx",&type);
   hdf5_b.group_read_meta(&g_ny,"ny",&type);
   unit_assert (a_nx == g_nx);
   unit_assert (a_ny == g_ny);
-  unit_assert (type == scalar_type_int);
+  unit_assert (type == type_int);
 
   //----------------------------------------------------------------------
   unit_func("char data_read_meta()");
   //----------------------------------------------------------------------
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_read_meta (&mb_char, "meta_char", &type, &b_mx, &b_my);
 
   unit_assert (a_mx == b_mx);
   unit_assert (a_my == b_my);
-  unit_assert (type == scalar_type_char);
+  unit_assert (type == type_char);
 
   //----------------------------------------------------------------------
   unit_func("char data_read()");
@@ -365,21 +361,21 @@ PARALLEL_MAIN_BEGIN
   hdf5_b.group_chdir ("/test/int");
   hdf5_b.group_open ();
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_open ("int",&type, &b_nx,&b_ny,&b_nz);
 
-  unit_assert (type == scalar_type_int);
+  unit_assert (type == type_int);
 
   //----------------------------------------------------------------------
   unit_func("int data_read_meta()");
   //----------------------------------------------------------------------
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_read_meta (&mb_int, "meta_int", &type, &b_mx, &b_my);
 
   unit_assert (a_mx == b_mx);
   unit_assert (a_my == b_my);
-  unit_assert (type == scalar_type_int);
+  unit_assert (type == type_int);
 
   //----------------------------------------------------------------------
   unit_func("int data_read()");
@@ -434,21 +430,21 @@ PARALLEL_MAIN_BEGIN
   hdf5_b.group_chdir ("/test2/scalar/long/group");
   hdf5_b.group_open ();
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_open ("float",&type, &b_nx,&b_ny,&b_nz);
 
-  unit_assert (type == scalar_type_float);
+  unit_assert (type == type_float);
 
   //----------------------------------------------------------------------
   unit_func("float data_read_meta()");
   //----------------------------------------------------------------------
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_read_meta (&mb_float, "meta_float", &type, &b_mx, &b_my);
 
   unit_assert (a_mx == b_mx);
   unit_assert (a_my == b_my);
-  unit_assert (type == scalar_type_float);
+  unit_assert (type == type_float);
 
   //----------------------------------------------------------------------
   unit_func("float data_read()");
@@ -501,75 +497,75 @@ PARALLEL_MAIN_BEGIN
   unit_func("long data_open()");
   //======================================================================
 
-  hdf5_b.group_chdir ("/test2/scalar/long/group");
-  hdf5_b.group_open ();
+  // hdf5_b.group_chdir ("/test2/scalar/long/group");
+  // hdf5_b.group_open ();
   
-  type = scalar_type_unknown;
-  hdf5_b.data_open ("long",&type, &b_nx,&b_ny,&b_nz);
+  // type = type_unknown;
+  // hdf5_b.data_open ("long",&type, &b_nx,&b_ny,&b_nz);
 
-  unit_assert (type == 
-	       ((sizeof(int)==sizeof(long)) ? 
-		scalar_type_int : scalar_type_long));
-
-  //----------------------------------------------------------------------
-  unit_func("long data_read_meta()");
-  //----------------------------------------------------------------------
-
-  type = scalar_type_unknown;
-  hdf5_b.data_read_meta (&mb_long, "meta_long", &type, &b_mx, &b_my);
-
-  unit_assert (a_mx == b_mx);
-  unit_assert (a_my == b_my);
-  unit_assert (type == 
-	       ((sizeof(int)==sizeof(long)) ? 
-		scalar_type_int : scalar_type_long));
+  // unit_assert (type == 
+  // 	       ((sizeof(int)==sizeof(long)) ? 
+  // 		type_int : type_long));
 
   //----------------------------------------------------------------------
-  unit_func("long data_read()");
+  // unit_func("long data_read_meta()");
   //----------------------------------------------------------------------
 
-  hdf5_b.data_read (b_long);
+  // type = type_unknown;
+  // hdf5_b.data_read_meta (&mb_long, "meta_long", &type, &b_mx, &b_my);
 
-  unit_assert (a_nx == b_nx);
-  unit_assert (a_ny == b_ny);
-  unit_assert (a_nz == b_nz);
-
-  //----------------------------------------------------------------------
-  unit_func("long data match");
-  //----------------------------------------------------------------------
-
-  bool p_long = true;
-
-  for (int iy=0; iy<ny ; iy++) {
-    for (int ix=0; ix<nx ; ix++) {
-      int i = ix + nx*iy;
-      p_long = p_long && (a_long[i] == b_long[i]);
-    }
-  }
-
-  unit_assert(p_long);
-
-  hdf5_b.data_close ();
-
-  hdf5_b.group_close ();
+  // unit_assert (a_mx == b_mx);
+  // unit_assert (a_my == b_my);
+  // unit_assert (type == 
+  // 	       ((sizeof(int)==sizeof(long)) ? 
+  // 		type_int : type_long));
 
   //----------------------------------------------------------------------
-  unit_func("long meta match");
-  //----------------------------------------------------------------------
+  // unit_func("long data_read()");
+  // //----------------------------------------------------------------------
 
-  bool mp_long = true;
+  // hdf5_b.data_read (b_long);
 
-  for (int iy=0; iy<my ; iy++) {
-    for (int ix=0; ix<mx ; ix++) {
-      int i = ix + mx*iy;
-      if ( ! (ma_long[i] == mb_long[i]) ) {
-	printf ("MISMATCH long meta %d %d  %ld %ld\n",ix,iy,ma_long[i],mb_long[i]);
-      }
-      mp_long = mp_long && (ma_long[i] == mb_long[i]);
-    }
-  }
+  // unit_assert (a_nx == b_nx);
+  // unit_assert (a_ny == b_ny);
+  // unit_assert (a_nz == b_nz);
 
-  unit_assert(mp_long);
+  // //----------------------------------------------------------------------
+  // unit_func("long data match");
+  // //----------------------------------------------------------------------
+
+  // bool p_long = true;
+
+  // for (int iy=0; iy<ny ; iy++) {
+  //   for (int ix=0; ix<nx ; ix++) {
+  //     int i = ix + nx*iy;
+  //     p_long = p_long && (a_long[i] == b_long[i]);
+  //   }
+  // }
+
+  // unit_assert(p_long);
+
+  // hdf5_b.data_close ();
+
+  // hdf5_b.group_close ();
+
+  // //----------------------------------------------------------------------
+  // unit_func("long meta match");
+  // //----------------------------------------------------------------------
+
+  // bool mp_long = true;
+
+  // for (int iy=0; iy<my ; iy++) {
+  //   for (int ix=0; ix<mx ; ix++) {
+  //     int i = ix + mx*iy;
+  //     if ( ! (ma_long[i] == mb_long[i]) ) {
+  // 	printf ("MISMATCH long meta %d %d  %ld %ld\n",ix,iy,ma_long[i],mb_long[i]);
+  //     }
+  //     mp_long = mp_long && (ma_long[i] == mb_long[i]);
+  //   }
+  // }
+
+  // unit_assert(mp_long);
 
   //======================================================================
   unit_func("long long data_open()");
@@ -578,24 +574,22 @@ PARALLEL_MAIN_BEGIN
   hdf5_b.group_chdir ("/test2/long/long/type/is/long");
   hdf5_b.group_open ();
   
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_open ("long_long",&type, &b_nx,&b_ny,&b_nz);
-  scalar_type scalar_type_expected = 
-    ((sizeof(long)==sizeof(long long)) ? 
-     scalar_type_long : scalar_type_long_long);
+  int type_expected = type_long_long;
 
-  unit_assert (type == scalar_type_expected);
+  unit_assert (type == type_expected);
 
   //----------------------------------------------------------------------
   unit_func("long long data_read_meta()");
   //----------------------------------------------------------------------
 
-  type = scalar_type_unknown;
+  type = type_unknown;
   hdf5_b.data_read_meta (&mb_long_long, "meta_long_long", &type, &b_mx, &b_my);
 
   unit_assert (a_mx == b_mx);
   unit_assert (a_my == b_my);
-  unit_assert (type == ((sizeof(long)==sizeof(long long)) ? scalar_type_long : scalar_type_long_long));
+  unit_assert (type == type_long_long);
 
   //----------------------------------------------------------------------
   unit_func("long long data_read()");

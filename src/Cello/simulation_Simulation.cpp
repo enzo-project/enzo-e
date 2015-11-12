@@ -349,8 +349,20 @@ void Simulation::initialize_data_descr_() throw()
 
   // Add particle types
 
-  for (size_t i=0; i<config_->particle_list.size(); i++) {
-    particle_descr_->new_type (config_->particle_list[i]);
+  // ... first map attribute scalar type name to type_enum int
+  std::map<std::string,int> type_val;
+  for (int i=0; i<NUM_TYPES; i++) {
+    type_val[cello::type_name[i]] = i;
+  }
+
+  for (size_t it=0; it<config_->particle_list.size(); it++) {
+    particle_descr_->new_type (config_->particle_list[it]);
+    int na = config_->particle_attribute_name[it].size();
+    for (int ia=0; ia<na; ia++) {
+      std::string name = config_->particle_attribute_name[it][ia];
+      int type         = type_val[config_->particle_attribute_type[it][ia]];
+      particle_descr_->new_attribute(it,name,type);
+    }
   }
 
   // Add particle attributes

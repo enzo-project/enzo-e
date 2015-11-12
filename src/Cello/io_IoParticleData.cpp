@@ -47,71 +47,46 @@ void IoParticleData::pup (PUP::er &p)
 
 void IoParticleData::meta_value
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd) throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void IoParticleData::data_value
+void IoParticleData::field_array
 (int index,
- void ** buffer, std::string * name, scalar_type * type,
+ void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {
-  // if (buffer) (*buffer) = (void * ) 
-  // 		particle_data_->values(particle_descr_,particle_index_);
-  // if (name)   (*name)   = particle_descr_->particle_name(particle_index_);
-  // if (type) {
+}
 
-  //   precision_type precision = particle_descr_->precision(particle_index_);
-  //   if (precision == precision_default) precision = default_precision;
+//----------------------------------------------------------------------
 
-  //   switch (precision) {
-  //   case precision_single: (*type) = scalar_type_float; break;
-  //   case precision_double: (*type) = scalar_type_double; break;
-  //   default:
-  //     ERROR2 ("IoParticleData",
-  // 	      "Unsupported precision type %d for particle %s",
-  // 	      precision, particle_descr_->particle_name(particle_index_).c_str());
-  //   }
-  // }
-  // int nbx,nby,nbz;
-  // particle_data_->size(&nbx,&nby,&nbz);
+void IoParticleData::particle_array
+(int it, int ib, int ia,
+ void ** buffer, std::string * name, int * type,
+ int * n, int * k) throw()
+{
+  Particle particle (particle_descr_,particle_data_);
 
-  // int ngx=0,ngy=0,ngz=0;
+  printf ("IoParticleData::particle_array\n");
 
-  // particle_descr_->ghost_depth(particle_index_,&ngx,&ngy,&ngz);
+  if (buffer) (*buffer) = (void * ) 
+   		particle.attribute_array(it,ib,ia);
+  if (name) {
+    char buffer [80];
+    sprintf (buffer,"particle %s %s %d",
+  	     particle.type_name(it).c_str(),
+	     particle.attribute_name(it,ia).c_str(),
+	     ib);
+    *name = buffer;
+  }
 
-  // if (particle_data_->ghosts_allocated()) {
+  if (type) (*type) = particle.attribute_type(it,ia);
 
-  //   if (nxd) (*nxd) = nbx + 2*ngx;
-  //   if (nyd) (*nyd) = nby + 2*ngy;
-  //   if (nzd) (*nzd) = nbz + 2*ngz;
-
-  //   // Exclude ghosts when writing
-
-  //   //    if (nx) (*nx) = nbx;
-  //   //    if (ny) (*ny) = nby;
-  //   //    if (nz) (*nz) = nbz;
-
-  //   // Include ghosts when writing
-
-  //    if (nx) (*nx) = nbx + 2*ngx;
-  //    if (ny) (*ny) = nby + 2*ngy;
-  //    if (nz) (*nz) = nbz + 2*ngz;
-
-  // } else {
-
-  //   if (nxd) (*nxd) = nbx;
-  //   if (nyd) (*nyd) = nby;
-  //   if (nzd) (*nzd) = nbz;
-
-  //   if (nx) (*nx) = nbx;
-  //   if (ny) (*ny) = nby;
-  //   if (nz) (*nz) = nbz;
-
-  // }
+  if (n) (*n) = particle.num_particles (it,ib);
+  if (k) (*k) = particle.stride(it,ia);
 }
 //----------------------------------------------------------------------

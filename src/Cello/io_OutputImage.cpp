@@ -234,7 +234,9 @@ void OutputImage::write_block
 
   it_field_index_->first();
 
-  int index_field = it_field_index_->value();
+  // (may be size 0 for mesh output)
+  int index_field = (it_field_index_->size() > 0) 
+    ? it_field_index_->value() : 0;
 
   // Get ghost depth
 
