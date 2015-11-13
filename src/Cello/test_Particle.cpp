@@ -309,12 +309,12 @@ PARALLEL_MAIN_BEGIN
 
   for (int ib=0; ib<nb; ib++) {
     int np = particle.num_particles(it_dark,ib);
-    float * x = (float *) particle.attribute_array(it_dark,ib,ia_dark_x);
-    float * y = (float *) particle.attribute_array(it_dark,ib,ia_dark_y);
-    float * z = (float *) particle.attribute_array(it_dark,ib,ia_dark_z);
-    double * vx = (double *) particle.attribute_array(it_dark,ib,ia_dark_vx);
-    double * vy = (double *) particle.attribute_array(it_dark,ib,ia_dark_vy);
-    double * vz = (double *) particle.attribute_array(it_dark,ib,ia_dark_vz);
+    float  *  x = (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
+    float  *  y = (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
+    float  *  z = (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
+    double * vx = (double *) particle.attribute_array(it_dark,ia_dark_vx,ib);
+    double * vy = (double *) particle.attribute_array(it_dark,ia_dark_vy,ib);
+    double * vz = (double *) particle.attribute_array(it_dark,ia_dark_vz,ib);
     int dx = particle.stride(it_dark,ia_dark_x);
     int dv = particle.stride(it_dark,ia_dark_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
@@ -336,12 +336,12 @@ PARALLEL_MAIN_BEGIN
   for (int ib=0; ib<nb; ib++) {
     index = ib*mp;
     int np = particle.num_particles(it_dark,ib);
-    float * x = (float *) particle.attribute_array(it_dark,ib,ia_dark_x);
-    float * y = (float *) particle.attribute_array(it_dark,ib,ia_dark_y);
-    float * z = (float *) particle.attribute_array(it_dark,ib,ia_dark_z);
-    double * vx = (double *) particle.attribute_array(it_dark,ib,ia_dark_vx);
-    double * vy = (double *) particle.attribute_array(it_dark,ib,ia_dark_vy);
-    double * vz = (double *) particle.attribute_array(it_dark,ib,ia_dark_vz);
+    float  * x =  (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
+    float  * y =  (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
+    float  * z =  (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
+    double * vx = (double *) particle.attribute_array(it_dark,ia_dark_vx,ib);
+    double * vy = (double *) particle.attribute_array(it_dark,ia_dark_vy,ib);
+    double * vz = (double *) particle.attribute_array(it_dark,ia_dark_vz,ib);
     int dx = particle.stride(it_dark,ia_dark_x);
     int dv = particle.stride(it_dark,ia_dark_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
@@ -370,9 +370,9 @@ PARALLEL_MAIN_BEGIN
   count_particles = 0;
   for (int ib=0; ib<nb; ib++) {
     int np = particle.num_particles(it_trace,ib);
-    int32_t * x = (int32_t *) particle.attribute_array(it_trace,ib,ia_trace_x);
-    int64_t * y = (int64_t *) particle.attribute_array(it_trace,ib,ia_trace_y);
-    int16_t * z = (int16_t *) particle.attribute_array(it_trace,ib,ia_trace_z);
+    int32_t * x = (int32_t *) particle.attribute_array(it_trace,ia_trace_x,ib);
+    int64_t * y = (int64_t *) particle.attribute_array(it_trace,ia_trace_y,ib);
+    int16_t * z = (int16_t *) particle.attribute_array(it_trace,ia_trace_z,ib);
     int dx=particle.stride(it_trace,ia_trace_x);
     int dy=particle.stride(it_trace,ia_trace_y);
     int dz=particle.stride(it_trace,ia_trace_z);
@@ -391,9 +391,9 @@ PARALLEL_MAIN_BEGIN
   for (int ib=0; ib<nb; ib++) {
     index = ib*mp;
     int np = particle.num_particles(it_trace,ib);
-    int32_t * x = (int32_t *) particle.attribute_array(it_trace,ib,ia_trace_x);
-    int64_t * y = (int64_t *) particle.attribute_array(it_trace,ib,ia_trace_y);
-    int16_t * z = (int16_t *) particle.attribute_array(it_trace,ib,ia_trace_z);
+    int32_t * x = (int32_t *) particle.attribute_array(it_trace,ia_trace_x,ib);
+    int64_t * y = (int64_t *) particle.attribute_array(it_trace,ia_trace_y,ib);
+    int16_t * z = (int16_t *) particle.attribute_array(it_trace,ia_trace_z,ib);
     int dx=particle.stride(it_trace,ia_trace_x);
     int dy=particle.stride(it_trace,ia_trace_y);
     int dz=particle.stride(it_trace,ia_trace_z);
@@ -457,12 +457,12 @@ PARALLEL_MAIN_BEGIN
   for (int ib=0; ib<nb; ib++) {
     index = ib*mp;
     int np = particle.num_particles(it_dark,ib);
-    float  * x =   (float *) particle.attribute_array(it_dark,ib,ia_dark_x);
-    float  * y =   (float *) particle.attribute_array(it_dark,ib,ia_dark_y);
-    float  * z =   (float *) particle.attribute_array(it_dark,ib,ia_dark_z);
-    double * vx = (double *) particle.attribute_array(it_dark,ib,ia_dark_vx);
-    double * vy = (double *) particle.attribute_array(it_dark,ib,ia_dark_vy);
-    double * vz = (double *) particle.attribute_array(it_dark,ib,ia_dark_vz);
+    float  * x  = (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
+    float  * y  = (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
+    float  * z  = (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
+    double * vx = (double *) particle.attribute_array(it_dark,ia_dark_vx,ib);
+    double * vy = (double *) particle.attribute_array(it_dark,ia_dark_vy,ib);
+    double * vz = (double *) particle.attribute_array(it_dark,ia_dark_vz,ib);
     int dx = particle.stride(it_dark,ia_dark_x);
     int dv = particle.stride(it_dark,ia_dark_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
@@ -498,9 +498,9 @@ PARALLEL_MAIN_BEGIN
   for (int ib=0; ib<nb; ib++) {
     index = ib*mp;
     int np = particle.num_particles(it_trace,ib);
-    int32_t * x = (int32_t *) particle.attribute_array(it_trace,ib,ia_trace_x);
-    int64_t * y = (int64_t *) particle.attribute_array(it_trace,ib,ia_trace_y);
-    int16_t * z = (int16_t *) particle.attribute_array(it_trace,ib,ia_trace_z);
+    int32_t * x = (int32_t *) particle.attribute_array(it_trace,ia_trace_x,ib);
+    int64_t * y = (int64_t *) particle.attribute_array(it_trace,ia_trace_y,ib);
+    int16_t * z = (int16_t *) particle.attribute_array(it_trace,ia_trace_z,ib);
     int dx=particle.stride(it_trace,ia_trace_x);
     int dy=particle.stride(it_trace,ia_trace_y);
     int dz=particle.stride(it_trace,ia_trace_z);
@@ -615,6 +615,101 @@ PARALLEL_MAIN_BEGIN
   unit_assert (particle.efficiency (it_trace,0) > 0.99);
   unit_assert (particle.efficiency (it_trace)   > 0.99);
   unit_assert (particle.efficiency ()           > 0.90);
+
+  //--------------------------------------------------
+  //   Gather / scatter
+  //--------------------------------------------------
+
+  ParticleData pd_src,*pd_array[9],pd_dst;
+
+  Particle p_src(particle_descr,&pd_src);
+  Particle * p_array[9];
+
+  for (int i=0; i<9; i++) {
+    pd_array[i] = new ParticleData;
+    p_array[i] = new Particle(particle_descr,pd_array[i]);
+  }
+  Particle p_dst(particle_descr,&pd_dst);
+
+  // initialize particles on nx x ny
+  // send those outside ghost zone depth ng to neighbors
+  //
+  // e.g. N = 11x17
+  // 66677777777777888
+  // 66677777777777888
+  // 66677777777777888
+  // 333           555 
+  // 333           555
+  // 333           555
+  // 333           555
+  // 333           555
+  // 000 111111111 222
+  // 000 111111111 222
+  // 000 111111111 222
+
+  const int ndx = 100;
+  const int ndy = 111;
+  const int gmx = 2;
+  const int gpx = 4;
+  const int gmy = 3;
+  const int gpy = 7;
+
+  const int nx = ndx - (gmx + gpx);
+  const int ny = ndy - (gmy + gpy);
+
+  // insert uninitialized particles
+  unit_func("insert()");
+  p_src.insert_particles(it_dark,ndx*ndy);
+  unit_assert(p_src.num_particles() == ndx*ndy);
+  // set positions to (ix,iy)
+  for (int ix=0; ix<ndx; ix++) {
+    for (int iy=0; iy<ndy; iy++) {
+      int ib,ip;
+      p_src.index(ix+ndx*iy,&ib,&ip);
+      float * x = (float *) p_src.attribute_array(it_dark,ia_dark_x,ib);
+      float * y = (float *) p_src.attribute_array(it_dark,ia_dark_y,ib);
+      x[ip] = ix;
+      y[ip] = iy;
+    }
+  }
+
+  // scatter to p_array[]
+
+  int dx = particle.stride(it_dark,ia_dark_x);
+
+  nb = p_src.num_batches(it_dark);
+
+  int index_array[1024];
+  for (int ib=0; ib<nb; ib++) {
+    np = p_src.num_particles(it_dark,ib);
+    float * xa = (float *) p_src.attribute_array(it_dark,ia_dark_x,ib);
+    float * ya = (float *) p_src.attribute_array(it_dark,ia_dark_y,ib);
+    for (int ip=0; ip<np; ip++) {
+      float x = xa[ip*dx];
+      float y = ya[ip*dx];
+      // move particle only if in ghost region
+      int kx = (x < gmx) ? -1 : (x < ndx-gpx) ? 0 : 1;
+      int ky = (y < gmy) ? -1 : (y < ndy-gpy) ? 0 : 1;
+      mask[ip] = (kx || ky);
+      index_array[ip] = (kx+1) + 3*(ky+1);
+    }
+
+    p_src.scatter(it_dark,ib,mask,index_array,9,pd_array);
+  }
+
+  unit_func ("scatter()");
+
+  // as a first check, make sure number of particles moved is correct
+
+  unit_assert (p_array[0]->num_particles(it_dark) == gmx*gmy);
+  unit_assert (p_array[1]->num_particles(it_dark) ==  nx*gmy);
+  unit_assert (p_array[2]->num_particles(it_dark) == gpx*gmy);
+  unit_assert (p_array[3]->num_particles(it_dark) == gmx* ny);
+  unit_assert (p_array[4]->num_particles(it_dark) == 0);
+  unit_assert (p_array[5]->num_particles(it_dark) == gpx* ny);
+  unit_assert (p_array[6]->num_particles(it_dark) == gmx*gpy);
+  unit_assert (p_array[7]->num_particles(it_dark) ==  nx*gpy);
+  unit_assert (p_array[8]->num_particles(it_dark) == gpx*gpy);
 
   //--------------------------------------------------
   //   Grouping

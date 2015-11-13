@@ -24,20 +24,20 @@ void Config::pup (PUP::er &p)
   // Adapt
 
   p | num_adapt;
-  PUParray(p,adapt_list,MAX_MESH_GROUPS);
+  p | adapt_list;
   p | adapt_interval;
   p | adapt_min_face_rank;
-  PUParray(p,adapt_type,MAX_MESH_GROUPS);
-  PUParray(p,adapt_field_list,MAX_MESH_GROUPS);
-  PUParray(p,adapt_min_refine,MAX_MESH_GROUPS);
-  PUParray(p,adapt_max_coarsen,MAX_MESH_GROUPS);
-  PUParray(p,adapt_min_refine2,MAX_MESH_GROUPS);
-  PUParray(p,adapt_max_coarsen2,MAX_MESH_GROUPS);
-  PUParray(p,adapt_max_level,MAX_MESH_GROUPS);
-  PUParray(p,adapt_level_exponent,MAX_MESH_GROUPS);
-  PUParray(p,adapt_include_ghosts,MAX_MESH_GROUPS);
-  PUParray(p,adapt_output,MAX_MESH_GROUPS);
-
+  p | adapt_type;
+  p | adapt_field_list;
+  p | adapt_min_refine;
+  p | adapt_max_coarsen;
+  p | adapt_min_refine2;
+  p | adapt_max_coarsen2;
+  p | adapt_max_level;
+  p | adapt_level_exponent;
+  p | adapt_include_ghosts;
+  p | adapt_output;
+  
   // Balance
 
   p | balance_schedule_index;
@@ -212,6 +212,18 @@ void Config::read_adapt_ (Parameters * p) throw()
   //--------------------------------------------------
 
   num_adapt = p->list_length("Adapt:list");
+
+  adapt_list           .resize(num_adapt);
+  adapt_type           .resize(num_adapt);
+  adapt_field_list     .resize(num_adapt);
+  adapt_min_refine     .resize(num_adapt);
+  adapt_max_coarsen    .resize(num_adapt);
+  adapt_min_refine2    .resize(num_adapt);
+  adapt_max_coarsen2   .resize(num_adapt);
+  adapt_max_level      .resize(num_adapt);
+  adapt_level_exponent .resize(num_adapt);
+  adapt_include_ghosts .resize(num_adapt);
+  adapt_output         .resize(num_adapt);
 
   for (int ia=0; ia<num_adapt; ia++) {
 

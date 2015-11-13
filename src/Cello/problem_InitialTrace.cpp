@@ -63,7 +63,7 @@ void InitialTrace::enforce_block
   float * ya = 0;
   float * za = 0;
 
-  const int dx = particle.stride(it,ia_x);
+  const int dp = particle.stride(it,ia_x);
 
   for (int iz=0; iz<nz; iz++) {
     float z = (nz>1) ? (zm + (zp-zm)*iz/(nz-1)) : 0.0;
@@ -76,17 +76,17 @@ void InitialTrace::enforce_block
 
 	// ... if new batch then update position arrays
 	if (i % np == 0) {
-	  xa = (float *) particle.attribute_array (it,ib,ia_x);
-	  ya = (float *) particle.attribute_array (it,ib,ia_y);
-	  za = (float *) particle.attribute_array (it,ib,ia_z);
+	  xa = (float *) particle.attribute_array (it,ia_x,ib);
+	  ya = (float *) particle.attribute_array (it,ia_y,ib);
+	  za = (float *) particle.attribute_array (it,ia_z,ib);
 	}
 
 	xa[ip] = x;
 	ya[ip] = y;
 	za[ip] = z;
 
-	ip++;
-	if (ip == np) {
+	ip+=dp;
+	if (ip/dp == np) {
 	  ip=0;
 	  ib++;
 	}

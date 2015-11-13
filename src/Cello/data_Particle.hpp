@@ -20,6 +20,12 @@ class Particle {
 public: // interface
 
   /// Constructor
+  Particle() 
+    : particle_descr_ (NULL),
+      particle_data_ (NULL)
+  { }
+
+  /// Constructor
   Particle(ParticleDescr * particle_descr,
 	   ParticleData  * particle_data) throw()
     : particle_descr_ (particle_descr),
@@ -179,9 +185,9 @@ public: // interface
 
   /// Return the attribute array for the given particle type and batch
 
-  char * attribute_array (int it,int ib,int ia)
+  char * attribute_array (int it,int ia,int ib)
   { return particle_data_->attribute_array 
-      (particle_descr_, it,ib,ia); }
+      (particle_descr_, it,ia,ib); }
 
   /// Return the number of batches of particles for the given type.
 
@@ -221,6 +227,26 @@ public: // interface
   { particle_data_->split_particles
       (particle_descr_, it,ib,m,particle.particle_data()); }
 
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  /// Scatter particles among an array of other Particle structures.
+  /// Typically used for preparing to send particles that have gone
+  /// out of the block to neighboring blocks.
+
+  void scatter (int it, int ib,
+		const bool * m,
+		const int * index,
+		int n, ParticleData ** particle_array)
+  { particle_data_->scatter(particle_descr_,it,ib,m,index,n,particle_array);  }
+  
+  /// Gather particles from an array of other Particle structures.
+  /// Typically used after receiving particles from neighboring blocks
+  /// that have entered this block.
+
+  //  void gather (it, particle_array);
+  //  void gather (particle_array);
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   /// Compress particles in batches so that all batches except
   /// possibly the last have batch_size() particles.  May be performed
   /// periodically to recover unused memory from multiple insert/deletes

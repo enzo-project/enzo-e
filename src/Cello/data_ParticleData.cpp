@@ -28,7 +28,7 @@ void ParticleData::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 char * ParticleData::attribute_array (ParticleDescr * particle_descr,
-				      int it,int ib,int ia)
+				      int it,int ia,int ib)
 {
 
   bool in_range = true;
@@ -154,21 +154,25 @@ void ParticleData::delete_particles
 
   const bool interleaved = particle_descr->interleaved(it);
 
+  // number of particle deleted so far
   int npd=0;
 
   const int na = particle_descr->num_attributes(it);
   const int np = num_particles(particle_descr,it,ib);
   int mp = particle_descr->particle_bytes(it);
 
+  // for each particle
   for (int ip=0; ip<np; ip++) {
+    // ... move to next in source if deleting
     if (mask[ip]) {
       npd++;
     } else if (npd>0) {
+      // ... else copy the particle attributes back to first opening
       for (int ia=0; ia<na; ia++) {
 	if (!interleaved) 
 	  mp = particle_descr->attribute_bytes(it,ia);
 	int ny = particle_descr->attribute_bytes(it,ia);
-	char * a = attribute_array(particle_descr,it,ib,ia);
+	char * a = attribute_array(particle_descr,it,ia,ib);
 	for (int iy=0; iy<ny; iy++) {
 	  a [iy + mp*(ip-npd)] = a [iy + mp*ip];
 	}
@@ -189,10 +193,9 @@ void ParticleData::split_particles
  ParticleData * particle_data_dest)
 {
   check_arrays_(particle_descr,__FILE__,__LINE__);
-  const int na = particle_descr->num_attributes(it);
   const int np = num_particles(particle_descr,it,ib);
 
-  // Return if no particles deleted
+  // Count masked particles, and return if none
   int nd=0;
   for (int ip=0; ip<np; ip++) {
     if (mask[ip]) nd++;
@@ -212,14 +215,16 @@ void ParticleData::split_particles
 
   int mp = particle_descr->particle_bytes(it);
 
+  const int na = particle_descr->num_attributes(it);
+
   for (int ip=0; ip<np; ip++) {
     if (mask[ip]) {
       for (int ia=0; ia<na; ia++) {
 	if (!interleaved) 
 	  mp = particle_descr->attribute_bytes(it,ia);
 	int ny = particle_descr->attribute_bytes(it,ia);
-	char * a_src = attribute_array(particle_descr,it,ib,ia);
-	char * a_dst = attribute_array(particle_descr,it,jb,ia);
+	char * a_src = attribute_array(particle_descr,it,ia,ib);
+	char * a_dst = attribute_array(particle_descr,it,ia,jb);
 	for (int iy=0; iy<ny; iy++) {
 	  a_dst [iy + mp*jp] = a_src [iy + mp*ip];
 	}
@@ -233,6 +238,51 @@ void ParticleData::split_particles
   delete_particles(particle_descr,it,ib,mask);
 }
 
+//----------------------------------------------------------------------
+
+void ParticleData::scatter 
+(ParticleDescr * particle_descr,
+ int it, int ib,
+ const bool * mask,
+ const int * index,
+ int n, ParticleData * particle_array[])
+{
+  // count number of particles in each particle_array element
+  int np_array[n];
+  for (int i=0; i<n; i++) np_array[i]=0;
+
+  int np = num_particles(particle_descr,it,ib);
+  int debug_count = 0;
+  for (int ip=0; ip<np; ip++) {
+    if (mask[ip]) debug_count++;
+    if (mask[ip])  ++ np_array[index[ip]];
+  }
+
+  // insert uninitialized particles
+  int ip_array[n];
+  for (int i=0; i<n; i++) {
+    ip_array[i] = particle_array[i]->insert_particles
+      (particle_descr,it,np_array[i]);
+  }
+
+  // for (int ip=0; ip<np; ip++) {
+  //   if (mask[ip]) {
+  //     for (int ia=0; ia<na; ia++) {
+  // 	if (!interleaved) 
+  // 	  mp = particle_descr->attribute_bytes(it,ia);
+  // 	int ny = particle_descr->attribute_bytes(it,ia);
+  // 	char * a_src = attribute_array(particle_descr,it,ia,ib);
+  // 	char * a_dst = attribute_array(particle_descr,it,ia,jb);
+  // 	for (int iy=0; iy<ny; iy++) {
+  // 	  a_dst [iy + mp*jp] = a_src [iy + mp*ip];
+  // 	}
+  //     }
+  //     jp = (jp+1) % mb;
+  //     if (jp==0) jb++;
+  //   }
+  // }
+  
+}
 //----------------------------------------------------------------------
 
 void ParticleData::compress (ParticleDescr * particle_descr)
@@ -255,61 +305,63 @@ void ParticleData::compress (ParticleDescr * particle_descr, int it)
 
   // find first batch with space in it
 
-  int ibs, ips; // source batch and particle indices
-  int ibd, ipd; // destination batch and particle indices
+  int ib_src, ip_src; // source batch and particle indices
+  int ib_dst, ip_dst; // destination batch and particle indices
 
-  int npd; // number of particles in ibd batch
-  int nps; // number of particles in ibs batch
+  int np_dst; // number of particles in ib_dst batch
+  int np_src; // number of particles in ib_src batch
 
   // find destination: first empty spot 
 
-  ibd=0;
-  npd=(ibd<nb) ? num_particles(particle_descr,it,ibd) : 0;
-  while (ibd<nb && npd == mb) {
-    ibd++;
-  } // assert ibd == nb || npd < mb
-  ipd = npd;
+  ib_dst=0;
+  np_dst=(ib_dst<nb) ? num_particles(particle_descr,it,ib_dst) : 0;
+  while (ib_dst<nb && np_dst == mb) {
+    ib_dst++;
+  } // assert ib_dst == nb || np_dst < mb
+  ip_dst = np_dst;
 
   // first source: next non-empty spot
-  ibs = ibd + 1;
-  ips = 0;
-  nps = num_particles(particle_descr,it,ibs);
+  ib_src = ib_dst + 1;
+  ip_src = 0;
+  np_src = num_particles(particle_descr,it,ib_src);
 
-  resize_array_ (particle_descr,it,ibd,mb);
-  npd = mb;
+  resize_array_ (particle_descr,it,ib_dst,mb);
+  np_dst = mb;
 
   int mp = particle_descr->particle_bytes(it);
 
-  while (ibs < nb && ips < nps) {
+  while (ib_src < nb && ip_src < np_src) {
 
     for (int ia=0; ia<na; ia++) {
       if (!interleaved) {
 	mp = particle_descr->attribute_bytes(it,ia);
       }
       int ny = particle_descr->attribute_bytes(it,ia);
-      char * as = attribute_array(particle_descr,it,ibs,ia);
-      char * ad = attribute_array(particle_descr,it,ibd,ia);
+      char * a_src = attribute_array(particle_descr,it,ia,ib_src);
+      char * a_dst = attribute_array(particle_descr,it,ia,ib_dst);
       for (int iy=0; iy<ny; iy++) {
-	ad [iy + mp*ipd] = as [iy + mp*ips];
+	a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
       }
     }
 
-    ipd++;
-    if (ipd>=npd) {
-      ipd = 0;
-      ibd++;
-      npd = mb;
-      if (ibd < nb) resize_array_ (particle_descr,it,ibd,mb);
+    ip_dst++;
+    if (ip_dst>=np_dst) {
+      ip_dst = 0;
+      ib_dst++;
+      np_dst = mb;
+      if (ib_dst < nb) resize_array_ (particle_descr,it,ib_dst,mb);
     }
 
-    ips++;
-    if (ips>=nps) {
-      ips = 0;
-      ibs++;
-      if (ibs < nb) nps = num_particles(particle_descr,it,ibs);
+    ip_src++;
+    if (ip_src>=np_src) {
+      ip_src = 0;
+      ib_src++;
+      if (ib_src < nb) np_src = num_particles(particle_descr,it,ib_src);
     }
 
   }
+
+  // deallocate empty batches?
 }
   
 

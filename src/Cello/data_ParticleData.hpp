@@ -26,7 +26,7 @@ public: // interface
 
   /// Return the attribute array for the given particle type and batch
 
-  char * attribute_array (ParticleDescr *, int it, int ib, int ia);
+  char * attribute_array (ParticleDescr *, int it, int ia, int ib);
 
   /// Return the number of batches of particles for the given type.
 
@@ -58,6 +58,26 @@ public: // interface
 
   void split_particles (ParticleDescr *, int it, int ib, const bool *m,
 			ParticleData * particle_data);
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  /// Scatter particles among an array of other Particle structures.
+  /// Typically used for preparing to send particles that have gone
+  /// out of the block to neighboring blocks.
+
+  void scatter (ParticleDescr *, int it, int ib,
+		const bool * m,
+		const int * index,
+		int n, ParticleData * particle_array[]);
+  
+  /// Gather particles from an array of other Particle structures.
+  /// Typically used after receiving particles from neighboring blocks
+  /// that have entered this block.
+
+  //  void gather (it, particle_array);
+  //  void gather (particle_array);
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   /// Compress particles in batches so that all batches except
   /// possibly the last have batch_size() particles.  May be performed

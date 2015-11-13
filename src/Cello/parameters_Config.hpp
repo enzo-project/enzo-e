@@ -22,9 +22,6 @@
 /* Maximum number of schedules */
 #define MAX_SCHEDULE 30
 
-/* Maximum number of adapt groups specified in the configuration file */
-#define MAX_MESH_GROUPS 10
-
 /* Maximum number of Boundary groups specified in the configuration file */
 
 #define MAX_BOUNDARY 50
@@ -63,20 +60,21 @@ public: // attributes
   // Adapt
 
   int                        num_adapt;
-  std::string                adapt_list[MAX_MESH_GROUPS];
+  std::vector <std::string>  adapt_list;
   int                        adapt_interval;
   int                        adapt_min_face_rank;
-  std::string                adapt_type[MAX_MESH_GROUPS];
-  std::vector<std::string>   adapt_field_list[MAX_MESH_GROUPS];
-  double                     adapt_min_refine[MAX_MESH_GROUPS];
-  double                     adapt_max_coarsen[MAX_MESH_GROUPS];
-  double                     adapt_min_refine2[MAX_MESH_GROUPS];
-  double                     adapt_max_coarsen2[MAX_MESH_GROUPS];
-  int                        adapt_max_level[MAX_MESH_GROUPS];
-  double                     adapt_level_exponent[MAX_MESH_GROUPS];
-  bool                       adapt_include_ghosts[MAX_MESH_GROUPS];
-  std::string                adapt_output[MAX_MESH_GROUPS];
-
+  std::vector <std::string>  adapt_type;
+  std::vector 
+  < std::vector<std::string> > adapt_field_list;
+  std::vector <double>       adapt_min_refine;
+  std::vector <double>       adapt_max_coarsen;
+  std::vector <double>       adapt_min_refine2;
+  std::vector <double>       adapt_max_coarsen2;
+  std::vector <int>          adapt_max_level;
+  std::vector <double>       adapt_level_exponent;
+  std::vector <char>         adapt_include_ghosts;
+  std::vector <std::string>  adapt_output;
+  
   // Balance (dynamic load balancing)
 
   int                        balance_schedule_index;

@@ -71,10 +71,8 @@ void IoParticleData::particle_array
 {
   Particle particle (particle_descr_,particle_data_);
 
-  printf ("IoParticleData::particle_array\n");
-
   if (buffer) (*buffer) = (void * ) 
-   		particle.attribute_array(it,ib,ia);
+   		particle.attribute_array(it,ia,ib);
   if (name) {
     char buffer [80];
     sprintf (buffer,"particle %s %s %d",
