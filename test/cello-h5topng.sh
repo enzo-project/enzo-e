@@ -1,16 +1,18 @@
-#!/bin/csh -f
+#!/bin/bash
 
-set test = $1
-set cycle = $2
+test=$1
+cycle=$2
 
-set min = 0.0
-set max = 1.0
+min=0.0
+max=1.0
 
 echo "$test-*-$cycle.h5"
-set file_format = "$test-*-$cycle.h5"
-foreach file ($file_format)
-   echo $file
-   foreach block (`h5ls $file | awk '{print $1}'`)
-      h5topng -m $min -M $max -o $test-$cycle-$block.png ${file}:$block/density
-   end
-end
+file_format="$test-*-$cycle.h5"
+for file in $file_format;
+do
+    echo $file
+    for block in `h5ls $file | awk '{print $1}'`;
+    do
+	h5topng -m $min -M $max -o $test-$cycle-$block.png ${file}:"$block/field density"
+    done
+done
