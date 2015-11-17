@@ -86,8 +86,8 @@ void Block::refresh_begin_()
 void Block::refresh_load_face_
 ( int type_refresh,
   Index index_neighbor,
-  int iface[3],
-  int ichild[3],
+  int if3[3],
+  int ic3[3],
   int count)
 {
   Refresh * refresh = this->refresh();
@@ -106,7 +106,7 @@ void Block::refresh_load_face_
     switch (type_refresh) {
     case refresh_coarse:
 
-      index_.child(level,ichild,ichild+1,ichild+2);
+      index_.child(level,ic3,ic3+1,ic3+2);
 
       type_op_array = op_array_restrict;
 
@@ -139,14 +139,14 @@ void Block::refresh_load_face_
     std::vector<int> field_list = refresh->field_list();
 
     field_face = load_face (&n, &array,
-			    iface, ichild, lghost,
+			    if3, ic3, lghost,
 			    type_op_array,
 			    field_list);
 
-    int jface[3] = {-iface[0], -iface[1], -iface[2]};
+    int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
     thisProxy[index_neighbor].p_refresh_store_face
-      (n,array, type_refresh, jface, ichild);
+      (n,array, type_refresh, of3, ic3);
 
     delete field_face;
   }
@@ -161,12 +161,13 @@ void Block::refresh_load_face_
 
 void Block::refresh_store_face_
 (int n, char * buffer, int type_refresh,
- int iface[3], int ichild[3],int count
+ int if3[3], int ic3[3],int count
 )
 {
   Refresh * refresh = this->refresh();
 
   if (count==0) {
+
     bool lghost[3] = {false,false,false};
 
     std::vector<int> field_list = refresh->field_list();
@@ -183,10 +184,7 @@ void Block::refresh_store_face_
       break;
     }
 
-    store_face_(n,buffer,
-		iface, ichild, lghost,
-		op_array,
-		field_list);
+    store_face_(n,buffer, if3, ic3, lghost, op_array, field_list);
   }
 }
 

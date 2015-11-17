@@ -6,6 +6,7 @@
 /// @brief    Implementation of the ParticleData class
 
 #include "data.hpp"
+#include <algorithm>
 
 //----------------------------------------------------------------------
 
@@ -101,29 +102,41 @@ int ParticleData::insert_particles
  int it, int np)
 {
 
+  if (np==0) return 0;
+
   check_arrays_(particle_descr,__FILE__,__LINE__);
 
   // find indices of last batch and particle in batch for return value
-  int ib_last = num_batches(it) - 1;
-  int ip_last = num_particles(particle_descr,it,ib_last);
+
+  const int nb = num_batches(it);
+  const int mb = particle_descr->batch_size();
+
+  int ib_last,ip_last;
+
+  if (nb == 0) {
+    ib_last = 0;
+    ip_last = 0;
+  } else {
+    ib_last = nb - 1;
+    ip_last = num_particles(particle_descr,it,ib_last);
+    if (ip_last % mb == 0) {
+      ib_last++;
+      ip_last = 0;
+    }
+  }
+
+  int ib_this = ib_last;
+  int ip_start = ip_last;
 
   int np_left = np;
 
-  const int np_batch = particle_descr->batch_size();
-
-  if (ib_last < 0 || ip_last == np_batch) {
-    ib_last++;
-    ip_last = 0;
-  }
-  int ib_this = ib_last;
-  int ip_start = ip_last;
   while (np_left > 0) {
 
     // number of particles to add in this batch
-    int np_this = std::min(np_batch,np_left) - ip_start;
+    int np_this = std::min(mb-ip_start,np_left);
 
     // resize arrays for a new batch if needed
-    if ( ib_this > num_batches(it) - 1) {
+    if ( ip_start == 0) {
       attribute_array_[it].resize(ib_this+1);
       attribute_align_[it].resize(ib_this+1);
       particle_count_[it].resize(ib_this+1);
@@ -141,7 +154,7 @@ int ParticleData::insert_particles
   }
 
   // return global index of first particle
-  return (ip_last + np_batch*ib_last);
+  return (ip_last + mb*ib_last);
 }
 
 //----------------------------------------------------------------------
@@ -243,46 +256,133 @@ void ParticleData::split_particles
 void ParticleData::scatter 
 (ParticleDescr * particle_descr,
  int it, int ib,
- const bool * mask,
- const int * index,
+ int np, const bool * mask, const int * index,
  int n, ParticleData * particle_array[])
 {
   // count number of particles in each particle_array element
-  int np_array[n];
-  for (int i=0; i<n; i++) np_array[i]=0;
 
-  int np = num_particles(particle_descr,it,ib);
-  int debug_count = 0;
+  int np_array[n];
+  for (int k=0; k<n; k++) np_array[k]=0;
+
   for (int ip=0; ip<np; ip++) {
-    if (mask[ip]) debug_count++;
-    if (mask[ip])  ++ np_array[index[ip]];
+    int k= index[ip];
+    // find first of any duplicate elements
+    if (mask[ip]) ++np_array[k];
+  }
+
+  
+  // insert uninitialized particles
+  std::map<ParticleData *, int> i_array;
+  std::map<ParticleData *, bool> is_first;
+  for (int k=0; k<n; k++) {
+    ParticleData * pd = particle_array[k];
+    is_first[pd] = true;
+    i_array[pd] = 0;
+  }
+
+  for (int k=0; k<n; k++) {
+    ParticleData * pd = particle_array[k];
+    if (np_array[k]>0 && pd) {
+      int i0 = pd->insert_particles (particle_descr,it,np_array[k]);
+      if (is_first[pd]) i_array[pd] = i0;
+      is_first[pd] = false;
+    }
+  }
+
+  const bool interleaved = particle_descr->interleaved(it);
+  const int na = particle_descr->num_attributes(it);
+  int mp = particle_descr->particle_bytes(it);
+  const int ib_src = ib;
+
+  int count=0;
+  for (int ip_src=0; ip_src<np; ip_src++) {
+
+    if (mask[ip_src]) {
+      ++count;
+      int k = index[ip_src];
+      ParticleData * pd = particle_array[k];
+      int i_dst = i_array[pd]++;
+      int ib_dst,ip_dst;
+      particle_descr->index(i_dst,&ib_dst,&ip_dst);
+      for (int ia=0; ia<na; ia++) {
+	if (!interleaved) 
+	  mp = particle_descr->attribute_bytes(it,ia);
+	int ny = particle_descr->attribute_bytes(it,ia);
+	char * a_src = attribute_array
+	  (particle_descr,it,ia,ib_src);
+	char * a_dst = pd->attribute_array
+	  (particle_descr,it,ia,ib_dst);
+	for (int iy=0; iy<ny; iy++) {
+	  a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip_src];
+	}
+      }
+    }
+
+  }
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::gather 
+(ParticleDescr * particle_descr, int it, 
+ int n, ParticleData * particle_array[])
+{
+  // copy particle array since we sort it
+  ParticleData * particle_array_sorted[n];
+  for (int i=0; i<n; i++) particle_array_sorted[i] = particle_array[i];
+  std::sort(&particle_array_sorted[0],
+	    &particle_array_sorted[n]);
+
+  // count number of particles to insert
+  int np = 0;
+  for (int k=0; k<n; k++) {
+    // ... skipping duplicate ParticleData objects
+    if (k>0 && (particle_array_sorted[k] == 
+		particle_array_sorted[k-1])) continue;
+    ParticleData * pd = particle_array_sorted[k];
+    np += pd ? pd->num_particles(particle_descr,it) : 0;
   }
 
   // insert uninitialized particles
-  int ip_array[n];
-  for (int i=0; i<n; i++) {
-    ip_array[i] = particle_array[i]->insert_particles
-      (particle_descr,it,np_array[i]);
-  }
+  int i_dst = insert_particles(particle_descr,it,np);
 
-  // for (int ip=0; ip<np; ip++) {
-  //   if (mask[ip]) {
-  //     for (int ia=0; ia<na; ia++) {
-  // 	if (!interleaved) 
-  // 	  mp = particle_descr->attribute_bytes(it,ia);
-  // 	int ny = particle_descr->attribute_bytes(it,ia);
-  // 	char * a_src = attribute_array(particle_descr,it,ia,ib);
-  // 	char * a_dst = attribute_array(particle_descr,it,ia,jb);
-  // 	for (int iy=0; iy<ny; iy++) {
-  // 	  a_dst [iy + mp*jp] = a_src [iy + mp*ip];
-  // 	}
-  //     }
-  //     jp = (jp+1) % mb;
-  //     if (jp==0) jb++;
-  //   }
-  // }
-  
+  int ib_dst,ip_dst;
+  particle_descr->index (i_dst,&ib_dst,&ip_dst);
+
+  // initialize particles
+  const bool interleaved = particle_descr->interleaved(it);
+  const int na = particle_descr->num_attributes(it);
+  int mp = particle_descr->particle_bytes(it);
+
+  const int mb = particle_descr->batch_size();
+
+  for (int k=0; k<n; k++) {
+    // ...skip duplicate ParticleData objects
+    if (k>0 && (particle_array_sorted[k] == 
+		particle_array_sorted[k-1])) continue;
+    ParticleData * pd = particle_array_sorted[k];
+    const int nb = pd ? pd->num_batches(it) : 0;
+    for (int ib=0; ib<nb; ib++) {
+      const int np = pd->num_particles(particle_descr,it,ib);
+      for (int ip=0; ip<np; ip++) {
+	for (int ia=0; ia<na; ia++) {
+	  if (!interleaved) 
+	    mp = particle_descr->attribute_bytes(it,ia);
+	  int ny = particle_descr->attribute_bytes(it,ia);
+	  char * a_src = pd->attribute_array
+	    (particle_descr,it,ia,ib);
+	  char * a_dst = attribute_array(particle_descr,it,ia,ib_dst);
+	  for (int iy=0; iy<ny; iy++) {
+	    a_dst [iy + mp*ip_dst] = a_src [iy + mp*ip];
+	  }
+	}
+	ip_dst = (ip_dst + 1) % mb;
+	if (ip_dst == 0) ib_dst++;
+      }
+    }
+  }
 }
+
 //----------------------------------------------------------------------
 
 void ParticleData::compress (ParticleDescr * particle_descr)
@@ -416,6 +516,54 @@ float ParticleData::efficiency (ParticleDescr * particle_descr, int it, int ib)
   const long bytes_used = mb*mp;
 
   return 1.0*bytes_min/bytes_used;
+  
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::debug (ParticleDescr * particle_descr)
+{
+  const int nt = particle_descr->num_types();
+  printf ("particle %p: num_types: %d\n",this,nt);
+  for (int it=0; it<nt; it++) {
+    int nb = num_batches(it);
+    int na = particle_descr->num_attributes(it);
+    int np = num_particles(particle_descr,it);
+    std::string name = particle_descr->type_name(it);
+
+    printf ("particle %p: type name         %d %s\n",   this,it,name.c_str());
+    printf ("particle %p:    num_attributes %d %d\n",   this,it,na);
+    for (int ia=0; ia<na; ia++)
+      printf ("particle %p:       %s\n",
+	      this,particle_descr->attribute_name(it,ia).c_str());
+    printf ("particle %p:    num_particles  %d %d\n",   this,it,np);
+    printf ("particle %p:    num_batches    %d %d\n",   this,it,nb);
+    for (int ib=0; ib<nb; ib++) {
+      printf ("particle %p:      ",this);
+      for (int ip=0; ip<np; ip++) {
+	for (int ia=0; ia<na; ia++) {
+	  int d = particle_descr->stride(it,ia);
+	  char * a = attribute_array(particle_descr,it,ia,ib);
+	  int type = particle_descr->attribute_type (it,ia);
+	  if (type==type_double) {
+	    printf ("%10.5f ",((double*)a)[ip*d]);
+	  } else if (type==type_float) {
+	    printf ("%10.5f ",((float*)a)[ip*d]);
+	  } else if (type==type_int32) {
+	    printf ("%6d ",((int32_t*)a)[ip*d]);
+	  } else if (type==type_int64) {
+	    printf ("%6ld ",((int64_t*)a)[ip*d]);
+	  } else {
+	    ERROR1("ParticleData::debug()",
+		   "Unknown particle attribute type %d",
+		   type);
+	  }
+	}
+	printf ("\n");
+      }
+    }
+    
+  }
   
 }
 

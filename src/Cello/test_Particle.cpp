@@ -7,6 +7,7 @@
 
 #include "main.hpp"
 #include "test.hpp"
+#include <algorithm>
 
 #include "data.hpp"
 
@@ -527,7 +528,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("(re)insert_particles()");
 
-  int ip0,i2,np,count;
+  int ip0,i2,np;
 
   // dark (re)insert and re-test
 
@@ -541,7 +542,7 @@ PARALLEL_MAIN_BEGIN
   unit_func("num_particles()");
   nb = particle.num_batches(it_dark);
   np=particle.num_particles(it_dark);
-  count = 0;
+  int count = 0;
   for (int ib=0; ib<nb; ib++) {
     count += particle.num_particles(it_dark,ib);
   }
@@ -617,19 +618,53 @@ PARALLEL_MAIN_BEGIN
   unit_assert (particle.efficiency ()           > 0.90);
 
   //--------------------------------------------------
-  //   Gather / scatter
+  //   GATHER / SCATTER
   //--------------------------------------------------
 
-  ParticleData pd_src,*pd_array[9],pd_dst;
+  ParticleData pd_src,*pd_array[16],pd_dst;
 
   Particle p_src(particle_descr,&pd_src);
-  Particle * p_array[9];
+  Particle * p_array[16];
 
-  for (int i=0; i<9; i++) {
-    pd_array[i] = new ParticleData;
-    p_array[i] = new Particle(particle_descr,pd_array[i]);
+  // Test gather and scatter with simulated particle exchange with
+  // neighbors.  Use 4x4 array with some NULL and some duplicated
+  // (for coarse-level and same-level neighbors).  
+  //
+  //    x---x---x---x---x       x---x---x
+  //    | 4 | 5 | 6 | 7 |     4 | 5 | 6 | 7
+  //    x---x---x---x---x    ---x---x---x---
+  //    | 2 |       | 3 |       |       |
+  //    x---x       x---x     2 |       | 3
+  //    | 2 |       | 3 |       |       |
+  //    x---x---x---x---x    ---X-------X---
+  //    | 0 | 1 | 1 | 1 |     0 |   1  
+  //    x---x---X---x---x       |
+
+  pd_array [0] = new ParticleData;
+  pd_array [1] = new ParticleData;
+  pd_array [2] = pd_array[1];
+  pd_array [3] = pd_array[2];
+
+  pd_array [4] = new ParticleData;
+  pd_array [5] = NULL;
+  pd_array [6] = NULL;
+  pd_array [7] = new ParticleData;
+
+  pd_array [8] = pd_array[4];
+  pd_array [9] = NULL;
+  pd_array[10] = NULL;
+  pd_array[11] = pd_array[7];
+
+  pd_array[12] = new ParticleData;
+  pd_array[13] = new ParticleData;
+  pd_array[14] = new ParticleData;
+  pd_array[15] = new ParticleData;
+
+  for (int i=0; i<16; i++) {
+    // Note some different Particle's with same ParticleData
+    p_array[i] = (pd_array[i]) ? 
+      new Particle(particle_descr,pd_array[i]) : NULL;
   }
-  Particle p_dst(particle_descr,&pd_dst);
 
   // initialize particles on nx x ny
   // send those outside ghost zone depth ng to neighbors
@@ -647,15 +682,18 @@ PARALLEL_MAIN_BEGIN
   // 000 111111111 222
   // 000 111111111 222
 
-  const int ndx = 100;
-  const int ndy = 111;
+  const int ndx = 166;
+  const int ndy = 214;
   const int gmx = 2;
   const int gpx = 4;
   const int gmy = 3;
-  const int gpy = 7;
+  const int gpy = 5;
 
   const int nx = ndx - (gmx + gpx);
   const int ny = ndy - (gmy + gpy);
+
+  unit_assert ((nx/2)*2 == nx);
+  unit_assert ((ny/2)*2 == ny);
 
   // insert uninitialized particles
   unit_func("insert()");
@@ -668,48 +706,224 @@ PARALLEL_MAIN_BEGIN
       p_src.index(ix+ndx*iy,&ib,&ip);
       float * x = (float *) p_src.attribute_array(it_dark,ia_dark_x,ib);
       float * y = (float *) p_src.attribute_array(it_dark,ia_dark_y,ib);
-      x[ip] = ix;
-      y[ip] = iy;
+      x[ip] = (ix+1);
+      y[ip] = (iy+1);
     }
   }
 
+  //--------------------------------------------------
   // scatter to p_array[]
+  //--------------------------------------------------
 
   int dx = particle.stride(it_dark,ia_dark_x);
 
   nb = p_src.num_batches(it_dark);
 
-  int index_array[1024];
+  mp = particle.batch_size();
+  int index_array[mp];
+
   for (int ib=0; ib<nb; ib++) {
     np = p_src.num_particles(it_dark,ib);
     float * xa = (float *) p_src.attribute_array(it_dark,ia_dark_x,ib);
     float * ya = (float *) p_src.attribute_array(it_dark,ia_dark_y,ib);
+    for (int ip=0; ip<mp; ip++) mask[ip] = false;
     for (int ip=0; ip<np; ip++) {
-      float x = xa[ip*dx];
-      float y = ya[ip*dx];
+      float x = xa[ip*dx]-1;
+      float y = ya[ip*dx]-1;
       // move particle only if in ghost region
-      int kx = (x < gmx) ? -1 : (x < ndx-gpx) ? 0 : 1;
-      int ky = (y < gmy) ? -1 : (y < ndy-gpy) ? 0 : 1;
-      mask[ip] = (kx || ky);
-      index_array[ip] = (kx+1) + 3*(ky+1);
+      //
+      //   gmx-0.5*nx  
+      // < gmx+0.0*nx  0
+      // < gmx+0.5*nx  1
+      // < gmx+1.0*nx  2
+      // < gmx+1.5*nx  3
+      //
+      // +---+---+---+---+
+      //    gmx    gmx+nx
+ 
+      int kx = (x-gmx+nx/2) / (0.5*nx);
+      int ky = (y-gmy+ny/2) / (0.5*ny);
+      mask[ip] = (kx==0 || kx==3 || ky==0 || ky==3);
+      index_array[ip] = kx + 4*ky;
+
+      // mask[ip]        = (kx || ky);
     }
 
-    p_src.scatter(it_dark,ib,mask,index_array,9,pd_array);
+    p_src.scatter(it_dark,ib,np,mask,index_array,16,pd_array);
+
   }
 
   unit_func ("scatter()");
 
   // as a first check, make sure number of particles moved is correct
 
-  unit_assert (p_array[0]->num_particles(it_dark) == gmx*gmy);
-  unit_assert (p_array[1]->num_particles(it_dark) ==  nx*gmy);
-  unit_assert (p_array[2]->num_particles(it_dark) == gpx*gmy);
-  unit_assert (p_array[3]->num_particles(it_dark) == gmx* ny);
-  unit_assert (p_array[4]->num_particles(it_dark) == 0);
-  unit_assert (p_array[5]->num_particles(it_dark) == gpx* ny);
-  unit_assert (p_array[6]->num_particles(it_dark) == gmx*gpy);
-  unit_assert (p_array[7]->num_particles(it_dark) ==  nx*gpy);
-  unit_assert (p_array[8]->num_particles(it_dark) == gpx*gpy);
+  int ca00 = gmx*gmy;
+  int ca10 = nx*gmy/2;
+  int ca20 = nx*gmy/2;
+  int ca30 = gpx*gmy;
+
+  int ca01 = gmx*ny/2;
+  int ca31 = gpx*ny/2;
+
+  int ca02 = gmx*ny/2;
+  int ca32 = gpx*ny/2;
+
+  int ca03 = gmx*gpy;
+  int ca13 = nx*gpy/2;
+  int ca23 = nx*gpy/2;
+  int ca33 = gpx*gpy;
+
+  unit_assert(p_array[0]->num_particles(it_dark) == ca00);
+  unit_assert(p_array[1]->num_particles(it_dark) == ca10+ca20+ca30);
+  unit_assert(p_array[2]->num_particles(it_dark) == ca10+ca20+ca30);
+  unit_assert(p_array[3]->num_particles(it_dark) == ca10+ca20+ca30);
+  unit_assert(p_array[4]->num_particles(it_dark) == ca01+ca02);
+  unit_assert(p_array[7]->num_particles(it_dark) == ca31+ca32);
+  unit_assert(p_array[8]->num_particles(it_dark) == ca01+ca02);
+  unit_assert(p_array[11]->num_particles(it_dark)== ca31+ca32);
+  unit_assert(p_array[12]->num_particles(it_dark)== ca03);
+  unit_assert(p_array[13]->num_particles(it_dark)== ca13);
+  unit_assert(p_array[14]->num_particles(it_dark)== ca23);
+  unit_assert(p_array[15]->num_particles(it_dark)== ca33);
+
+  int count_error[16] = {0};
+  int count_total = 0;
+  bool mask_scatter[ndx*ndy] = {0};
+  int error_scatter_range=0;
+  int error_scatter_duple=0;
+  ParticleData * pd_array_sorted[16];
+  for (int k=0; k<16; k++) pd_array_sorted[k] = pd_array[k];
+  std::sort(&pd_array_sorted[0],
+	    &pd_array_sorted[16]);
+  for (int k=0; k<16; k++) {
+    if (k>=0 && pd_array_sorted[k] == pd_array_sorted[k-1]) continue;
+
+    if (pd_array_sorted[k]==NULL) continue;
+    Particle  p(particle_descr,pd_array_sorted[k]);
+
+    int nb = pd_array_sorted[k] ? p.num_batches(it_dark) : 0;
+    for (int ib=0; ib<nb; ib++) {
+      float * xa = (float *) p.attribute_array(it_dark,ia_dark_x,ib);
+      float * ya = (float *) p.attribute_array(it_dark,ia_dark_y,ib);
+      int np = p.num_particles(it_dark,ib);
+      for (int ip=0; ip<np; ip++) {
+	float x = xa[ip*dx]-1;
+	float y = ya[ip*dx]-1;
+	bool in_range = (0 <= x && x < ndx && 0 <= y && y < ndy);
+	int ix = (int)x;
+	int iy = (int)y;
+	if (! in_range) {
+	  ++error_scatter_range;
+	} else {// in_range
+	  if (mask_scatter [ix + ndx*iy]) { // duplelicate particle
+	    ++ error_scatter_duple;
+	  } else {
+	    mask_scatter [ix+ndx*iy] = true;
+	  }
+	}
+	++count_total;
+      }
+    }
+  }
+
+  unit_assert (error_scatter_range == 0);
+  unit_assert (error_scatter_duple == 0);
+  int error_scatter_int = 0;
+
+  for (int iy=0; iy<ndy; iy++) {
+    for (int ix=0; ix<ndx; ix++) {
+      bool in_range = (0 <= ix && ix < ndx && 0 <= iy && iy < ndy);
+      bool in_interior = (gmx <= ix && ix < ndx-gpx &&
+			  gmy <= iy && iy < ndy-gpy);
+      // all particles are not interior zones 
+      if (! (mask_scatter[ix+ndx*iy] == 
+	     (in_range && (! in_interior)))) {
+	error_scatter_int++;
+      }
+      //	printf ("%d",mask_scatter[ix+ndx*iy]?1:0);
+    }
+    //     printf ("\n");
+  }
+
+  unit_assert (error_scatter_int == 0);
+  // printf ("error_scatter_int %d\n",error_scatter_int);
+
+  // for (int ky=0; ky<4; ky++) {
+  //   for (int kx=0; kx<4; kx++) {
+  //     printf ("%4d ",count_error[kx+4*ky]);
+  //     unit_assert (count_error[kx+4*ky]==0);
+  //   }
+  //   printf ("\n");
+  // }
+
+  //--------------------------------------------------
+  // gather to p_dst[]
+  //--------------------------------------------------
+
+  unit_func ("gather()");
+
+  Particle p_dst(particle_descr,&pd_dst);
+
+  p_dst.gather(it_dark,16,pd_array);
+
+  
+  // printf ("%d %d\n",p_dst.num_particles(it_dark) , count_total);
+
+  // FIRST FAIL
+  unit_assert (p_dst.num_particles(it_dark) == count_total);
+
+  // ensure all ghost particles are in p_dst, and only ghost particles
+  bool mask_array[ndx*ndy] = {0};
+  nb = p_dst.num_batches(it_dark);
+  int error_gather_range = 0;
+  int error_gather_duple = 0;
+  for (int ib=0; ib<nb; ib++) {
+    int np = p_dst.num_particles(it_dark,ib);
+    float * xa = (float *) p_dst.attribute_array(it_dark,ia_dark_x,ib);
+    float * ya = (float *) p_dst.attribute_array(it_dark,ia_dark_y,ib);
+    for (int ip=0; ip<np; ip++) {
+      float x = xa[ip*dx]-1;
+      float y = ya[ip*dx]-1;
+      bool in_range = (0 <= x && x < ndx && 0 <= y && y < ndy);
+      int ix = (int)x;
+      int iy = (int)y;
+      if (! in_range) {
+	printf ("ERROR gather range %d %d\n",ix,iy);
+	++error_gather_range;
+      } else {// in_range
+	if (mask_array [ix + ndx*iy]) { // duplicate particle
+	  printf ("ERROR gather duple %d %d\n",ix,iy);
+	  ++ error_gather_duple;
+	} else {
+	  mask_array [ix+ndx*iy] = true;
+	}
+      }
+    }
+  }
+
+  // printf ("error_gather_range %d\n",error_gather_range);
+  // printf ("error_gather_duple %d\n",error_gather_duple);
+  unit_assert (error_gather_range == 0);
+  unit_assert (error_gather_duple == 0);
+  int error_gather_int = 0;
+
+  for (int iy=0; iy<ndy; iy++) {
+    for (int ix=0; ix<ndx; ix++) {
+      bool in_range = (0 <= ix && ix < ndx && 0 <= iy && iy < ndy);
+      bool in_interior = (gmx <= ix && ix < ndx-gpx &&
+			  gmy <= iy && iy < ndy-gpy);
+      // all particles are not interior zones 
+      if (! (mask_array[ix+ndx*iy] == 
+	     (in_range && (! in_interior)))) {
+	error_gather_int++;
+      }
+	// printf ("%d",mask_array[ix+ndx*iy]?1:0);
+    }
+     // printf ("\n");
+  }
+
+  unit_assert (error_gather_int == 0);
+  // printf ("error_gather_int %d\n",error_gather_int);
 
   //--------------------------------------------------
   //   Grouping
