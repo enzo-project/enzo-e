@@ -10,22 +10,6 @@
 #ifndef PARAMETERS_CONFIG_HPP
 #define PARAMETERS_CONFIG_HPP
 
-/* Maximum number of fields in any field list in the configuration file */
-#define MAX_FIELDS      30
-
-/* Maximum number of method groups in the configuration file */
-#define MAX_METHOD_GROUPS  10
-
-/* Maximum number of output file groups specified in the configuration file */
-#define MAX_OUTPUT_GROUPS 20
-
-/* Maximum number of schedules */
-#define MAX_SCHEDULE 30
-
-/* Maximum number of Boundary groups specified in the configuration file */
-
-#define MAX_BOUNDARY 50
-
 class Parameters;
 
 class Config : public PUP::able {
@@ -82,12 +66,13 @@ public: // attributes
   // Boundary
 
   int                        num_boundary;
-  std::string                boundary_list[MAX_BOUNDARY];
-  std::string                boundary_type[MAX_BOUNDARY];
-  int                        boundary_axis[MAX_BOUNDARY];
-  int                        boundary_face[MAX_BOUNDARY];
-  int                        boundary_mask[MAX_BOUNDARY];
-  std::vector<std::string>   boundary_field_list[MAX_BOUNDARY];
+  std::vector<std::string>   boundary_list;
+  std::vector<std::string>   boundary_type;
+  std::vector<int>           boundary_axis;
+  std::vector<int>           boundary_face;
+  std::vector<int>           boundary_mask;
+  std::vector<std::vector<std::string> >  
+                             boundary_field_list;
 
   // Domain
 
@@ -131,7 +116,7 @@ public: // attributes
 
   int                        num_method;
   std::vector<std::string>   method_list;
-  int                        method_schedule_index [MAX_METHOD_GROUPS];
+  std::vector<int>           method_schedule_index;
   std::vector<double>        method_courant;
 
   // Monitor
@@ -141,36 +126,36 @@ public: // attributes
 
   // Output
 
-  int                        num_output;
-  std::vector<std::string>   output_list;
-  std::string                output_type                 [MAX_OUTPUT_GROUPS];
-  std::string                output_axis           [MAX_OUTPUT_GROUPS];
-  int                        output_image_block_size     [MAX_OUTPUT_GROUPS];
-  std::vector<double>        output_colormap       [MAX_OUTPUT_GROUPS];
-  std::string                output_image_type           [MAX_OUTPUT_GROUPS];
-  bool                       output_image_log            [MAX_OUTPUT_GROUPS];
-  std::string                output_image_mesh_color     [MAX_OUTPUT_GROUPS];
-  std::vector<int>           output_image_size           [MAX_OUTPUT_GROUPS];
-  std::string                output_image_reduce_type    [MAX_OUTPUT_GROUPS];
-  bool                       output_image_ghost          [MAX_OUTPUT_GROUPS];
-  int                        output_image_face_rank      [MAX_OUTPUT_GROUPS];
-  bool                       output_image_specify_bounds [MAX_OUTPUT_GROUPS];
-  double                     output_image_min            [MAX_OUTPUT_GROUPS];
-  double                     output_image_max            [MAX_OUTPUT_GROUPS];
-  int                        output_schedule_index [MAX_OUTPUT_GROUPS];
-  std::vector<std::string>   output_dir            [MAX_OUTPUT_GROUPS];
-  int                        output_stride         [MAX_OUTPUT_GROUPS];
-  std::vector<std::string>   output_field_list     [MAX_OUTPUT_GROUPS];
-  std::vector<std::string>   output_particle_list     [MAX_OUTPUT_GROUPS];
-  std::vector<std::string>   output_name           [MAX_OUTPUT_GROUPS];
+  int                         num_output;
+  std::vector <std::string>   output_list;
+  std::vector < std::string > output_type;
+  std::vector < std::string>  output_axis;
+  std::vector < int >         output_image_block_size;
+  std::vector < std::vector <double> > output_colormap;
+  std::vector < std::string > output_image_type;
+  std::vector < char >        output_image_log;
+  std::vector < std::string > output_image_mesh_color;
+  std::vector < std::vector <int> > output_image_size;
+  std::vector < std::string>  output_image_reduce_type;
+  std::vector < char>         output_image_ghost;
+  std::vector < int >         output_image_face_rank;
+  std::vector < char>         output_image_specify_bounds;
+  std::vector < double>       output_image_min;
+  std::vector < double>       output_image_max;
+  std::vector < int >         output_schedule_index;
+  std::vector < std::vector <std::string> >  output_dir;
+  std::vector < int >         output_stride;
+  std::vector < std::vector <std::string> >  output_field_list;
+  std::vector < std::vector <std::string> > output_particle_list;
+  std::vector < std::vector <std::string> >  output_name;
 
   int                        index_schedule_;
-  std::vector<double>        schedule_list  [MAX_SCHEDULE];
-  std::string                schedule_type  [MAX_SCHEDULE];
-  std::string                schedule_var   [MAX_SCHEDULE];
-  double                     schedule_start [MAX_SCHEDULE];
-  double                     schedule_stop  [MAX_SCHEDULE];
-  double                     schedule_step  [MAX_SCHEDULE];
+  std::vector< std::vector<double> > schedule_list;
+  std::vector< std::string > schedule_type;
+  std::vector< std::string > schedule_var;
+  std::vector< double >      schedule_start;
+  std::vector< double >      schedule_stop;
+  std::vector< double >      schedule_step;
 
   // Particles
 

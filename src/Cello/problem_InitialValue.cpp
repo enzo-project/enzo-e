@@ -207,14 +207,11 @@ void InitialValue::enforce_block
       }
 
     } else if (parameter_type == parameter_unknown) {
-      static bool displayed[MAX_FIELDS] = {false};
-      if (! displayed[index_field]) {
-      WARNING1("InitialValue::enforce_block",  
-	       "Uninitialized field %s",
-	       field_name.c_str());
-      displayed[index_field] = true;
+      if (CkMyPe()==0) {
+	WARNING1("InitialValue::enforce_block",  
+		 "Uninitialized field %s",
+		 field_name.c_str());
       }
-      
     } else {
       ERROR2("InitialValue::enforce_block",
 	     "Illegal parameter type %s when initializing field %s",

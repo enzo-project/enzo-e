@@ -34,6 +34,8 @@ public: // interface
     p | name_;
   }
 
+public: // virtual functions
+
   //--------------------------------------------------
   // Files
   //--------------------------------------------------
@@ -115,7 +117,7 @@ public: // interface
   /// Read a metadata item associated with the opened group
   virtual void group_read_meta
   ( void * buffer, std::string name,  int * s_type,
-    int * nx, int * ny=0, int * nz=0) throw() = 0;
+    int * nx=0, int * ny=0, int * nz=0) throw() = 0;
   
   /// Write a metadata item associated with the opened group
   virtual void group_write_meta

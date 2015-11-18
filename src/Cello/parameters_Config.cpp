@@ -45,12 +45,12 @@ void Config::pup (PUP::er &p)
   // Boundary
 
   p | num_boundary;
-  PUParray(p,boundary_list,MAX_BOUNDARY);
-  PUParray(p,boundary_type,MAX_BOUNDARY);
-  PUParray(p,boundary_axis,MAX_BOUNDARY);
-  PUParray(p,boundary_face,MAX_BOUNDARY);
-  PUParray(p,boundary_mask,MAX_BOUNDARY);
-  PUParray(p,boundary_field_list,MAX_BOUNDARY);
+  p | boundary_list;
+  p | boundary_type;
+  p | boundary_axis;
+  p | boundary_face;
+  p | boundary_mask;
+  p | boundary_field_list;
 
   // Domain
 
@@ -94,7 +94,7 @@ void Config::pup (PUP::er &p)
 
   p | num_method;
   p | method_list;
-  PUParray (p,method_schedule_index,MAX_METHOD_GROUPS);
+  p | method_schedule_index;
   p | method_courant;
 
   // Monitor
@@ -106,34 +106,34 @@ void Config::pup (PUP::er &p)
 
   p | num_output;
   p | output_list;
-  PUParray (p,output_type,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_axis,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_block_size,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_colormap,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_type,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_log,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_mesh_color,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_size,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_reduce_type,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_ghost,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_face_rank,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_specify_bounds,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_min,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_image_max,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_schedule_index,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_dir,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_stride,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_field_list,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_particle_list,MAX_OUTPUT_GROUPS);
-  PUParray (p,output_name,MAX_OUTPUT_GROUPS);
+  p | output_type;
+  p | output_axis;
+  p | output_image_block_size;
+  p | output_colormap;
+  p | output_image_type;
+  p | output_image_log;
+  p | output_image_mesh_color;
+  p | output_image_size;
+  p | output_image_reduce_type;
+  p | output_image_ghost;
+  p | output_image_face_rank;
+  p | output_image_specify_bounds;
+  p | output_image_min;
+  p | output_image_max;
+  p | output_schedule_index;
+  p | output_dir;
+  p | output_stride;
+  p | output_field_list;
+  p | output_particle_list;
+  p | output_name;
 
   p | index_schedule_;
-  PUParray (p,schedule_list,MAX_OUTPUT_GROUPS);
-  PUParray (p,schedule_type,MAX_OUTPUT_GROUPS);
-  PUParray (p,schedule_var,MAX_OUTPUT_GROUPS);
-  PUParray (p,schedule_start,MAX_OUTPUT_GROUPS);
-  PUParray (p,schedule_stop,MAX_OUTPUT_GROUPS);
-  PUParray (p,schedule_step,MAX_OUTPUT_GROUPS);
+  p | schedule_list;
+  p | schedule_type;
+  p | schedule_var;
+  p | schedule_start;
+  p | schedule_stop;
+  p | schedule_step;
 
   // Particles
 
@@ -325,11 +325,12 @@ void Config::read_boundary_ (Parameters * p) throw()
   num_boundary = multi_boundary ? 
     p->list_length("Boundary:list") : 1;
 
-
-  ASSERT2 ("Config::read()", 
-	   "Too many boundary conditions: %d must not be more than %d",
-	   num_boundary,MAX_BOUNDARY,
-	   num_boundary <= MAX_BOUNDARY);
+  boundary_list.resize(num_boundary);
+  boundary_type.resize(num_boundary);
+  boundary_axis.resize(num_boundary);
+  boundary_face.resize(num_boundary);
+  boundary_mask.resize(num_boundary);
+  boundary_field_list.resize(num_boundary);
 
   for (int ib=0; ib<num_boundary; ib++) {
 
@@ -411,10 +412,8 @@ void Config::read_field_ (Parameters * p) throw()
 
   num_fields = p->list_length("Field:list"); 
 
-  ASSERT2 ("Config::read","Number of fields %d exceeds MAX_FIELDS %d",
-	   num_fields, MAX_FIELDS, num_fields <= MAX_FIELDS);
-
   field_list.resize(num_fields);
+
   for (int i=0; i<num_fields; i++) {
     field_list[i] = p->list_value_string(i, "Field:list");
     field_index[field_list[i]] = i;
@@ -618,6 +617,7 @@ void Config::read_method_ (Parameters * p) throw()
 
   method_list.   resize(num_method);
   method_courant.resize(num_method);
+  method_schedule_index.resize(num_method);
 
   for (int index_method=0; index_method<num_method; index_method++) {
 
@@ -676,14 +676,30 @@ void Config::read_output_ (Parameters * p) throw()
 
   num_output = p->list_length("list");
 
-  ASSERT2 ("Config::read",
-	   "Number of file groups %d exceeds MAX_OUTPUT_GROUPS %d",
-	   num_output, MAX_OUTPUT_GROUPS, num_output <= MAX_OUTPUT_GROUPS);
-
   p->group_set(0,"Output");
 
 
   output_list.resize(num_output);
+  output_type.resize(num_output);
+  output_axis.resize(num_output);
+  output_image_block_size.resize(num_output);
+  output_colormap.resize(num_output);
+  output_image_type.resize(num_output);
+  output_image_log.resize(num_output);
+  output_image_mesh_color.resize(num_output);
+  output_image_size.resize(num_output);
+  output_image_reduce_type.resize(num_output);
+  output_image_ghost.resize(num_output);
+  output_image_face_rank.resize(num_output);
+  output_image_specify_bounds.resize(num_output);
+  output_image_min.resize(num_output);
+  output_image_max.resize(num_output);
+  output_schedule_index.resize(num_output);
+  output_dir.resize(num_output);
+  output_stride.resize(num_output);
+  output_field_list.resize(num_output);
+  output_particle_list.resize(num_output);
+  output_name.resize(num_output);
 
   for (int index_output=0; index_output<num_output; index_output++) {
 
@@ -996,10 +1012,14 @@ void Config::read_testing_ (Parameters * p) throw()
 int Config::read_schedule_(Parameters * p, const std::string group)
 {
   int index = index_schedule_;
-  ASSERT ("Config::read_schedule_()",
-	  "number of schedule''s is greater than MAX_SCHEDULE",
-	  index < MAX_SCHEDULE);
 
+  schedule_list.resize(index+1);
+  schedule_type.resize(index+1);
+  schedule_var.resize(index+1);
+  schedule_start.resize(index+1);
+  schedule_stop.resize(index+1);
+  schedule_step.resize(index+1);
+  
   std::string var = p->value_string("var","none");
 
   schedule_var[index] = var;

@@ -23,7 +23,7 @@ public: // interface
   FileHdf5 (std::string path, std::string name) throw();
 
   /// Destructor
-  ~FileHdf5 () throw();
+  virtual ~FileHdf5 () throw();
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
@@ -53,6 +53,8 @@ public: // interface
     
   }
 
+public: // virtual functions
+
   // Files
 
   /// Open an existing file
@@ -70,8 +72,7 @@ public: // interface
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the file
-
-  void file_write_meta
+  virtual void file_write_meta
   ( const void * buffer, std::string name, int type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( file_id_, buffer, name, type, nx,ny,nz); }
@@ -137,10 +138,12 @@ public: // interface
     int * nx=0, int * ny=0, int * nz=0) throw();
   
   /// Write a metadata item associated with the opened group
-  void group_write_meta
+  virtual void group_write_meta
   ( const void * buffer, std::string name, int type,
     int nx=1, int ny=0, int nz=0) throw()
   { write_meta_ ( group_id_, buffer, name, type, nx,ny,nz ); }
+
+public: // functions
 
   /// Set the compression level
   void set_compress (int level) throw ();
