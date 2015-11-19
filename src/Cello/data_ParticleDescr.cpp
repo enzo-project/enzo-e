@@ -24,6 +24,8 @@ ParticleDescr::ParticleDescr() throw()
     type_index_(),
     attribute_name_(),
     attribute_index_(),
+    attribute_position_(),
+    attribute_velocity_(),
     attribute_type_(),
     attribute_bytes_(),
     particle_bytes_(),
@@ -42,6 +44,8 @@ void ParticleDescr::pup (PUP::er &p)
   p | type_index_;
   p | attribute_name_;
   p | attribute_index_;
+  p | attribute_position_;
+  p | attribute_velocity_;
   p | attribute_type_;
   p | attribute_bytes_;
   p | particle_bytes_;
@@ -76,6 +80,19 @@ int ParticleDescr::new_type(std::string type_name)
 
   attribute_name_. resize(nt + 1);
   attribute_index_.resize(nt + 1);
+
+  attribute_position_.resize(nt + 1);
+  attribute_position_[nt].resize(3);
+  attribute_position_[nt][0] = -1;
+  attribute_position_[nt][1] = -1;
+  attribute_position_[nt][2] = -1;
+
+  attribute_velocity_.resize(nt + 1);
+  attribute_velocity_[nt].resize(3);
+  attribute_velocity_[nt][0] = -1;
+  attribute_velocity_[nt][1] = -1;
+  attribute_velocity_[nt][2] = -1;
+
   attribute_type_.resize(nt + 1);
   attribute_bytes_.resize(nt + 1);
   attribute_offset_.resize(nt + 1);
@@ -224,6 +241,32 @@ int ParticleDescr::attribute_type(int it,int ia) const
 	  check_(it,ia));
 
   return attribute_type_[it][ia];
+}
+
+//----------------------------------------------------------------------
+
+void ParticleDescr::set_position (int it, int ix, int iy, int iz)
+{
+  ASSERT1("ParticleDescr::set_interleaved",
+	  "Trying to access unknown particle type %d",
+	  it,
+	  check_(it));
+  attribute_position_[it][0] = ix;
+  attribute_position_[it][1] = iy;
+  attribute_position_[it][2] = iz;
+}
+
+//----------------------------------------------------------------------
+
+void ParticleDescr::set_velocity (int it, int ix, int iy, int iz)
+{
+  ASSERT1("ParticleDescr::set_interleaved",
+	  "Trying to access unknown particle type %d",
+	  it,
+	  check_(it));
+  attribute_velocity_[it][0] = ix;
+  attribute_velocity_[it][1] = iy;
+  attribute_velocity_[it][2] = iz;
 }
 
 //----------------------------------------------------------------------

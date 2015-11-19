@@ -560,6 +560,14 @@ public: // virtual functions
    int op_array,
    std::vector<int> & field_list);
 
+  /// Inverse of load_face
+  void store_face
+  (int n, char * a,
+   int if3[3], int ic3[3], bool lg3[3],
+   int op_array,
+   std::vector<int> & field_list);
+
+
 protected: // functions
 
 
@@ -656,11 +664,6 @@ protected: // functions
     return skip;
   }
 
-  void store_face_
-  (int n, char * a,
-   int if3[3], int ic3[3], bool lg3[3],
-   int op_array,
-   std::vector<int> & field_list);
   FieldFace * create_face_
   (int if3[3], int ic3[3], bool lg3[3],
    int op_array,
@@ -670,7 +673,7 @@ protected: // functions
   void set_refresh (Refresh * refresh) 
   {  refresh_ = *refresh; };
 
-  /// Return the currently-active Refreshobject
+  /// Return the currently-active Refresh object
   Refresh * refresh () throw()
   {  return &refresh_;  }
 

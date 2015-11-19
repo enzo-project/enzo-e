@@ -134,12 +134,12 @@ void Block::refresh_load_face_
 
     int n; 
     char * array;
-    bool lghost[3] = {false,false,false};
+    bool lg3[3] = {false,false,false};
 
     std::vector<int> field_list = refresh->field_list();
 
     field_face = load_face (&n, &array,
-			    if3, ic3, lghost,
+			    if3, ic3, lg3,
 			    type_op_array,
 			    field_list);
 
@@ -168,7 +168,7 @@ void Block::refresh_store_face_
 
   if (count==0) {
 
-    bool lghost[3] = {false,false,false};
+    bool lg3[3] = {false,false,false};
 
     std::vector<int> field_list = refresh->field_list();
 
@@ -184,7 +184,7 @@ void Block::refresh_store_face_
       break;
     }
 
-    store_face_(n,buffer, if3, ic3, lghost, op_array, field_list);
+    store_face (n,buffer, if3, ic3, lg3, op_array, field_list);
   }
 }
 

@@ -546,7 +546,7 @@ void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
 
   // copy data from field_message to this EnzoBlock
 
-  store_face_(field_message->n,
+  store_face (field_message->n,
 	      field_message->a,   if3, 
 	      field_message->ic3, lg3,
 	      op_array_restrict,
@@ -686,7 +686,7 @@ void EnzoBlock::p_mg0_prolong_recv(FieldMsg * field_message)
 
   // copy data from field_message to this EnzoBlock
 
-  store_face_(field_message->n,
+  store_face (field_message->n,
 	      field_message->a,   if3, 
 	      field_message->ic3, lg3,
 	      op_array_prolong,

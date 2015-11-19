@@ -67,9 +67,14 @@ public: // interface
 
   std::string attribute_name (int it, int ia) const;
 
+  /// Define which attributes represent position coordinates (-1 if not defined)
+  void set_position (int it, int ix, int iy=-1, int iz=-1);
+
+  /// Define which attributes represent velocity coordinates (-1 if not defined)
+  void set_velocity (int it, int ix, int iy=-1, int iz=-1);
+
   /// Byte offsets of attributes into block array.  Not including
   /// initial offset for 16-byte alignment.
-
   int attribute_offset(int it, int ia) const;
 
   //--------------------------------------------------
@@ -96,6 +101,14 @@ public: // interface
 
   /// Return the number of bytes use to represent a particle.
   int particle_bytes (int it) const;
+
+  /// Return the attribute corresponding to the given position coordinate, -1 if none
+  int attribute_position (int it, int axis)
+  { return attribute_position_[it][axis]; }
+
+  /// Return the attribute corresponding to the given velocity coordinate, -1 if none
+  int attribute_velocity (int it, int axis)
+  { return attribute_velocity_[it][axis]; }
 
   /// Return the stride of the given attribute if interleaved, otherwise 1.
   /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
@@ -162,6 +175,12 @@ private: // attributes
   /// Index of each particle attribute (inverse of attribute_)
   std::vector < std::map<std::string,int> > attribute_index_;
 
+  /// Attributes that define particle positions
+  std::vector < std::vector <int> > attribute_position_;
+
+  /// Attributes that define particle velocities
+  std::vector < std::vector <int> > attribute_velocity_;
+
   //--------------------------------------------------
   // BYTES
   //--------------------------------------------------
@@ -206,6 +225,7 @@ private: // attributes
   /// deallocated, and operated on a batch at a time
 
   int batch_size_;
+  
 };
 
 #endif /* DATA_PARTICLE_DESCR_HPP */

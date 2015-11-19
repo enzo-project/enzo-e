@@ -179,6 +179,9 @@ namespace cello {
   int sizeof_type (int);
   int is_type_supported (int);
 
+  extern bool type_is_float(int type);
+  extern bool type_is_int(int type);
+
   extern const char * type_name[NUM_TYPES];
   extern const int type_bytes[NUM_TYPES];
 

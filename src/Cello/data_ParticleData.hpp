@@ -117,6 +117,16 @@ public: // interface
     }
   };
 
+  /// Fill a vector of position coordinates for the given type and batch
+  bool position (ParticleDescr * particle_descr,
+		 int it, int ib,
+		 double * x, double * y = 0, double * z = 0);
+
+  /// Fill a vector of velocity coordinates for the given type and batch
+  bool velocity (ParticleDescr * particle_descr,
+		 int it, int ib,
+		 double * vx, double * vy = 0, double * vz = 0);
+
   void debug (ParticleDescr * particle_descr);
 
 private: /// functions
@@ -139,6 +149,12 @@ private: /// functions
 
   void check_arrays_ (ParticleDescr * particle_descr,
 		      std::string file, int line) const;
+
+  /// Copy the given attribute to the given coordinate (position or velocity)
+  /// depending on the type
+  void position_float_ 
+  (ParticleDescr * particle_descr,
+   int type, int it, int ib, int ia, double * coord);
 
 private: /// attributes
 

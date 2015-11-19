@@ -422,10 +422,10 @@ void Block::x_refresh_child
  int    ic3[3]
  )
 {
-  int  iface[3]  = {0,0,0};
-  bool lghost[3] = {false,false,false};
+  int  if3[3]  = {0,0,0};
+  bool lg3[3] = {false,false,false};
   std::vector<int> field_list;
-  store_face_(n,buffer, iface, ic3, lghost, op_array_restrict,field_list);
+  store_face (n,buffer, if3, ic3, lg3, op_array_restrict,field_list);
 }
 
 //----------------------------------------------------------------------
@@ -657,7 +657,7 @@ FieldFace * Block::load_face
 
 //----------------------------------------------------------------------
 
-void Block::store_face_
+void Block::store_face
 (
  int n, char * a, 
  int if3[3], int ic3[3], bool lg3[3],

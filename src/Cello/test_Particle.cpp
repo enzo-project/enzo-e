@@ -138,6 +138,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert(particle.attribute_name(it_dark,ia_dark_vy) == "velocity_y");
   unit_assert(particle.attribute_name(it_dark,ia_dark_vz) == "velocity_z");
 
+  particle.set_position(it_dark,ia_dark_x, ia_dark_y, ia_dark_z);
+  particle.set_velocity(it_dark,ia_dark_vx,ia_dark_vy,ia_dark_vz);
+
   unit_func ("attribute_index()");
   unit_assert(particle.attribute_index(it_dark,"position_x")  == ia_dark_x);
 
@@ -147,6 +150,8 @@ PARALLEL_MAIN_BEGIN
     (it_trace, "position_y", type_int64);
   const int ia_trace_z = particle.new_attribute 
     (it_trace, "position_z", type_int16);
+
+  particle.set_position(it_trace,ia_trace_x, ia_trace_y, ia_trace_z);
 
   //--------------------------------------------------
   //   Batch
@@ -330,6 +335,33 @@ PARALLEL_MAIN_BEGIN
     }
   }
   unit_assert(count_particles == 30000);
+
+  // test position() and velocity()
+  double xp[mp], yp[mp], zp[mp];
+  double vxp[mp],vyp[mp],vzp[mp];
+  int error_position=0;
+  int error_velocity=0;
+  for (int ib=0; ib<nb; ib++) {
+    unit_func("position()");
+    unit_assert(particle.position(it_dark, ib, xp, yp, zp));
+    unit_func("velocity()");
+    unit_assert(particle.velocity(it_dark, ib, vxp,vyp,vzp));
+    const int np = particle.num_particles(it_dark,ib);
+    for (int ip=0; ip<np; ip++) {
+      index = ip + ib*mp;
+      if (xp[ip] != 10*index) error_position++;
+      if (yp[ip] != 10*index+1) error_position++;
+      if (zp[ip] != 10*index+2) error_position++;
+      if (vxp[ip] != 10*index+3) error_velocity++;
+      if (vyp[ip] != 10*index+4) error_velocity++;
+      if (vzp[ip] != 10*index+5) error_velocity++;
+    }
+  }
+  unit_func("position()");
+  unit_assert(error_position == 0);
+  unit_func("velocity()");
+  unit_assert(error_velocity == 0);
+
   // run through again and compare values before deleting
   nb = particle.num_batches(it_dark);
   int count_wrong[6];
@@ -386,6 +418,25 @@ PARALLEL_MAIN_BEGIN
     }
   }
   unit_assert(count_particles == 30000);
+
+  // test position() and velocity()
+  error_position=0;
+  for (int ib=0; ib<nb; ib++) {
+    unit_func("position()");
+    unit_assert(particle.position(it_trace, ib, xp, yp, zp));
+    unit_func("velocity()");
+    unit_assert(!particle.velocity(it_trace, ib, vxp, vyp, vzp));
+    const int np = particle.num_particles(it_trace,ib);
+    for (int ip=0; ip<np; ip++) {
+      index = ip + ib*mp;
+      if (xp[ip] != 3*index) error_position++;
+      if (yp[ip] != 4*index+1) error_position++;
+      if (zp[ip] != 1*index+2) error_position++;
+    }
+  }
+  unit_func("position()");
+  unit_assert(error_position == 0);
+
   // run through again and compare values before deleting
   nb = particle.num_batches(it_trace);
   for (int i=0; i<3; i++) count_wrong[i] = 0;
@@ -786,7 +837,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(p_array[14]->num_particles(it_dark)== ca23);
   unit_assert(p_array[15]->num_particles(it_dark)== ca33);
 
-  int count_error[16] = {0};
   int count_total = 0;
   bool mask_scatter[ndx*ndy] = {0};
   int error_scatter_range=0;
@@ -846,15 +896,6 @@ PARALLEL_MAIN_BEGIN
   }
 
   unit_assert (error_scatter_int == 0);
-  // printf ("error_scatter_int %d\n",error_scatter_int);
-
-  // for (int ky=0; ky<4; ky++) {
-  //   for (int kx=0; kx<4; kx++) {
-  //     printf ("%4d ",count_error[kx+4*ky]);
-  //     unit_assert (count_error[kx+4*ky]==0);
-  //   }
-  //   printf ("\n");
-  // }
 
   //--------------------------------------------------
   // gather to p_dst[]

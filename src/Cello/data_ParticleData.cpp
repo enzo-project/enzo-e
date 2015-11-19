@@ -521,6 +521,137 @@ float ParticleData::efficiency (ParticleDescr * particle_descr, int it, int ib)
 
 //----------------------------------------------------------------------
 
+bool ParticleData::position 
+(
+ ParticleDescr * particle_descr,
+ int it, int ib,
+ double * x, double * y, double * z)
+{
+  int ia_x = particle_descr->attribute_position(it,0);
+  int ia_y = particle_descr->attribute_position(it,1);
+  int ia_z = particle_descr->attribute_position(it,2);
+  bool l_return = false;
+  if (x && (ia_x != -1)) {
+    const int type_x = particle_descr->attribute_type(it,ia_x);
+    l_return = true;
+    if (cello::type_is_float(type_x)) {
+      position_float_ (particle_descr,type_x,it,ib,ia_x,x);
+    } else if (cello::type_is_int(type_x)) {
+      position_float_ (particle_descr,type_x,it,ib,ia_x,x);
+    }
+  }
+
+  if (y && (ia_y != -1)) {
+    const int type_y = particle_descr->attribute_type(it,ia_y);
+    l_return = true;
+    if (cello::type_is_float(type_y)) {
+      position_float_ (particle_descr,type_y,it,ib,ia_y,y);
+    } else if (cello::type_is_int(type_y)) {
+      position_float_ (particle_descr,type_y,it,ib,ia_y,y);
+    }
+  }
+
+  if (z && (ia_z != -1)) {
+    const int type_z = particle_descr->attribute_type(it,ia_z);
+    l_return = true;
+    if (cello::type_is_float(type_z)) {
+      position_float_ (particle_descr,type_z,it,ib,ia_z,z);
+    } else if (cello::type_is_int(type_z)) {
+      position_float_ (particle_descr,type_z,it,ib,ia_z,z);
+    }
+  }
+
+  return l_return;
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::position_float_ 
+(ParticleDescr * particle_descr,
+ int type, int it, int ib, int ia, double * coord)
+{
+
+  const int dx = particle_descr->stride(it,ia);
+  const char * array = attribute_array(particle_descr,it,ia,ib);
+  const int np = num_particles(particle_descr,it,ib);
+  if (type == type_float) {
+    const float * array_f = (float *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_f[ip*dx];
+  }
+  if (type == type_double) {
+    const double * array_d = (double *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_d[ip*dx];
+  }
+  if (type == type_quadruple) {
+    const long long * array_q = (long long *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_q[ip*dx];
+  }
+  if (type == type_int8) {
+    const int8_t * array_8 = (int8_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_8[ip*dx];
+  }
+  if (type == type_int16) {
+    const int16_t * array_16 = (int16_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_16[ip*dx];
+  }
+  if (type == type_int32) {
+    const int32_t * array_32 = (int32_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_32[ip*dx];
+  }
+  if (type == type_int64) {
+    const int64_t * array_64 = (int64_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_64[ip*dx];
+  }
+}
+
+//----------------------------------------------------------------------
+
+bool ParticleData::velocity 
+(
+ ParticleDescr * particle_descr,
+ int it, int ib,
+ double * vx, double * vy, double * vz)
+{
+  // If velocitys are floating-point, return the requested values directly
+  int ia_x = particle_descr->attribute_velocity(it,0);
+  int ia_y = particle_descr->attribute_velocity(it,1);
+  int ia_z = particle_descr->attribute_velocity(it,2);
+  bool l_return = false;
+  if (vx && (ia_x != -1)) {
+    const int type_x = particle_descr->attribute_type(it,ia_x);
+    l_return = true;
+    if (cello::type_is_float(type_x)) {
+      position_float_ (particle_descr,type_x,it,ib,ia_x,vx);
+    } else if (cello::type_is_int(type_x)) {
+      position_float_ (particle_descr,type_x,it,ib,ia_x,vx);
+    }
+  }
+
+  if (vy && (ia_y != -1)) {
+    const int type_y = particle_descr->attribute_type(it,ia_y);
+    l_return = true;
+    if (cello::type_is_float(type_y)) {
+      position_float_ (particle_descr,type_y,it,ib,ia_y,vy);
+    } else if (cello::type_is_int(type_y)) {
+      position_float_ (particle_descr,type_y,it,ib,ia_y,vy);
+    }
+  }
+
+  if (vz && (ia_z != -1)) {
+    const int type_z = particle_descr->attribute_type(it,ia_z);
+    l_return = true;
+    if (cello::type_is_float(type_z)) {
+      position_float_ (particle_descr,type_z,it,ib,ia_z,vz);
+    } else if (cello::type_is_int(type_z)) {
+      position_float_ (particle_descr,type_z,it,ib,ia_z,vz);
+    }
+  }
+
+  return l_return;
+}
+
+//----------------------------------------------------------------------
+
 void ParticleData::debug (ParticleDescr * particle_descr)
 {
   const int nt = particle_descr->num_types();

@@ -118,6 +118,16 @@ public: // interface
   std::string attribute_name (int it, int ia) const
   { return particle_descr_->attribute_name(it,ia); }
 
+  /// Define which attributes represent position coordinates (-1 if not defined)
+
+  void set_position (int it, int ix, int iy=-1, int iz=-1)
+  { particle_descr_->set_position (it,ix,iy,iz); }
+
+  /// Define which attributes represent velocity coordinates (-1 if not defined)
+
+  void set_velocity (int it, int ix, int iy=-1, int iz=-1)
+  { particle_descr_->set_velocity (it,ix,iy,iz); }
+
   /// Byte offsets of attributes into block array.  Not including
   /// initial offset for 16-byte alignment.
 
@@ -277,6 +287,16 @@ public: // interface
   { return particle_data_->overhead(particle_descr_,it); }
   float overhead (int it, int ib)
   { return particle_data_->overhead(particle_descr_,it,ib); }
+
+  /// Fill a vector of position coordinates for the given type and batch
+  bool position (int it, int ib,
+		 double * x, double * y = 0, double * z = 0)
+  { return particle_data_->position(particle_descr_,it,ib,x,y,z); }
+
+  /// Fill a vector of velocity coordinates for the given type and batch
+  bool velocity (int it, int ib,
+		 double * vx, double * vy = 0, double * vz = 0)
+  { return particle_data_->velocity(particle_descr_,it,ib,vx,vy,vz); }
 
   void debug () const
   { particle_data_->debug (particle_descr_); }

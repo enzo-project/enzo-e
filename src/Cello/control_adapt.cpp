@@ -663,7 +663,7 @@ void Block::p_adapt_recv_child
   bool lghost[3] = {false,false,false};
   
   std::vector<int> field_list;
-  store_face_(na,array, iface, ic3, lghost, op_array_restrict,
+  store_face (na,array, iface, ic3, lghost, op_array_restrict,
 	      field_list);
 
   // copy child face level and face level

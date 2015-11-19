@@ -45,6 +45,21 @@ namespace cello {
     8 // int64
   };
 
+  bool type_is_int(int type) {
+    return (type == type_int8 || 
+	    type == type_int16 || 
+	    type == type_int32 || 
+	    type == type_int64);
+  }
+
+  bool type_is_float(int type) {
+    return (type == type_single || 
+	    type == type_double || 
+	    type == type_quadruple ||
+	    type == type_extended80 ||
+	    type == type_extended96);
+  }
+
   //----------------------------------------------------------------------
 
   int sizeof_precision(precision_type precision)
