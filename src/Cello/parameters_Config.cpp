@@ -142,7 +142,10 @@ void Config::pup (PUP::er &p)
   p | particle_index;
   p | particle_interleaved;
   p | particle_attribute_name;
+  p | particle_attribute_index;
   p | particle_attribute_type;
+  PUParray (p,particle_attribute_position,3);
+  PUParray (p,particle_attribute_velocity,3);
   p | particle_batch_size;
   p | particle_group_list;
 
@@ -852,16 +855,23 @@ void Config::read_particle_ (Parameters * p) throw()
   particle_list.resize(num_particles);
   particle_interleaved.resize(num_particles);
   particle_attribute_name.resize(num_particles);
+  particle_attribute_index.resize(num_particles);
   particle_attribute_type.resize(num_particles);
+  particle_attribute_position[0].resize(num_particles);
+  particle_attribute_position[1].resize(num_particles);
+  particle_attribute_position[2].resize(num_particles);
+  particle_attribute_velocity[0].resize(num_particles);
+  particle_attribute_velocity[1].resize(num_particles);
+  particle_attribute_velocity[2].resize(num_particles);
 
   for (int it=0; it<num_particles; it++) {
 
-    std::string name = p->list_value_string(it, "Particle:list");
+    std::string name_type = p->list_value_string(it, "Particle:list");
 
-    particle_list [it]   = name;
-    particle_index[name] = it;
+    particle_list [it]   = name_type;
+    particle_index[name_type] = it;
 
-    std::string type_str = "Particle:"+particle_list[it];
+    std::string type_str = "Particle:" + name_type;
 
     std::string attrib_str = type_str + ":attributes";
     
@@ -888,18 +898,37 @@ void Config::read_particle_ (Parameters * p) throw()
 
     for (int ia=0; ia<na; ia++) {
 
-      std::string name = p->list_value_string (2*ia  ,attrib_str,"unknown");
+      std::string name_attrib = p->list_value_string (2*ia  ,attrib_str,"unknown");
       std::string type = p->list_value_string (2*ia+1,attrib_str,"unknown");
 
       ASSERT3 ("read_particle_",
 	       "Particle type %d attribute %d has unknown attribute name %s",
-	       it,ia,name.c_str(),
-	       name != "unknown");
+	       it,ia,name_attrib.c_str(),
+	       name_attrib != "unknown");
 
-      particle_attribute_name[it][ia]  = name;
+      particle_attribute_name[it][ia]  = name_attrib;
+      particle_attribute_index[it][name_attrib] = ia;
       particle_attribute_type[it][ia]  = type;
      
     }
+
+    // Particle:<type>:position
+    // Particle:<type>:velocity
+
+    const std::string param_position = type_str+":position";
+    const std::string param_velocity = type_str+":velocity";
+
+    for (int axis=0; axis<3; axis++) {
+
+      std::string pos = p->list_value_string (axis,param_position,"");
+      int ia_p = (pos != "") ? particle_attribute_index[it][pos] : -1;
+      particle_attribute_position[axis][it] = ia_p;
+
+      std::string vel = p->list_value_string (axis,param_velocity,"");
+      ia_v = (vel != "") ? particle_attribute_index[it][vel] : -1;
+      particle_attribute_velocity[axis][it] = ia_v;
+    }
+
   }
 
   // Add particles to groups (Particle : <particle_name> : group_list)

@@ -164,7 +164,10 @@ public: // attributes
   std::map<std::string,int>  particle_index;
   std::vector<char>          particle_interleaved;
   std::vector< std::vector <std::string> > particle_attribute_name;
+  std::vector< std::map <std::string,int> > particle_attribute_index;
   std::vector< std::vector <std::string> > particle_attribute_type;
+  std::vector <int>          particle_attribute_position[3];
+  std::vector <int>          particle_attribute_velocity[3];
   int                        particle_batch_size;
   std::vector< std::vector<std::string> >  particle_group_list;
 
