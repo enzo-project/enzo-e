@@ -925,7 +925,7 @@ void Config::read_particle_ (Parameters * p) throw()
       particle_attribute_position[axis][it] = ia_p;
 
       std::string vel = p->list_value_string (axis,param_velocity,"");
-      ia_v = (vel != "") ? particle_attribute_index[it][vel] : -1;
+      int ia_v = (vel != "") ? particle_attribute_index[it][vel] : -1;
       particle_attribute_velocity[axis][it] = ia_v;
     }
 
