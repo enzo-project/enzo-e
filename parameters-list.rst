@@ -17,6 +17,21 @@
   .. |H2| replace:: H\ :sup:`2`
   .. |He| replace:: He
   .. |e-| replace:: e\ :sup:`-`
+  .. |aij| replace:: a\ :sub:`i,j`		    
+  .. |a00| replace:: a\ :sub:`0,0`		    
+  .. |a10| replace:: a\ :sub:`1,0`		    
+  .. |am0| replace:: a\ :sub:`m,0`		    
+  .. |a01| replace:: a\ :sub:`0,1`		    
+  .. |a0n| replace:: a\ :sub:`0,n`		    
+  .. |a0j| replace:: a\ :sub:`0,j`		    
+  .. |a1j| replace:: a\ :sub:`1,j`		    
+  .. |amj| replace:: a\ :sub:`m,j`		    
+  .. |ai0| replace:: a\ :sub:`i,0`		    
+  .. |ai1| replace:: a\ :sub:`i,1`		    
+  .. |ain| replace:: a\ :sub:`i,n`		    
+  .. |amn| replace:: a\ :sub:`m,n`		    
+  .. |am1| replace:: a\ :sub:`m,1`
+  .. |a1n| replace:: a\ :sub:`1,n`
 
 ***************
 Parameters List
@@ -501,6 +516,8 @@ alignment in memory, and memory padding between fields.
 Group
 -----
 
+.. _groups:
+
 The :p:`Group` parameter group is used to differentiate between
 different types of Field's and Particles.  For example, field groups
 may include "color" and "temporary", and particle groups may include
@@ -522,7 +539,7 @@ may include "color" and "temporary", and particle groups may include
 
     }
 
-Field and Particle groups can analagously be defined in the respective
+Field and Particle groups can analogously be defined in the respective
 Field and Particle parameter groups:
 
 ::
@@ -564,6 +581,17 @@ different types of fields and particles using the ``Grouping`` class
 
 :e:`This parameter is used to assign fields to a given group.`
 
+----
+
+:Parameter:  :p:`Group` : :g:`<group>` : :p:`particle_list`
+
+:Summary: :s:`List of particle types belonging to the group`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     Cello
+
+:e:`This parameter is used to assign particle groups to a given group.`
+
 -------
 Initial
 -------
@@ -599,7 +627,7 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
           ...
        }
 
-:e:`Here, the` :p:`density` :e:`field is initialized to be 0.125 in the subregion of the domain where x + y < 0.5, and is initialized to 1.0 elsewhere.  Other valid values for` :p:`type` :e:`include` ``"implosion_2d"``, ``"sedov_array_2d"``, ``"sedov_array_3d"``, :e:`and` ``grackle_test``, :e:`which are problem-specific initializers analagous to those in the original Enzo application.`
+:e:`Here, the` :p:`density` :e:`field is initialized to be 0.125 in the subregion of the domain where x + y < 0.5, and is initialized to 1.0 elsewhere.  Other valid values for` :p:`type` :e:`include` ``"implosion_2d"``, ``"sedov_array_2d"``, ``"sedov_array_3d"``, :e:`and` ``grackle_test``, :e:`which are problem-specific initializers analogous to those in the original Enzo application.`
 
 ----
 
@@ -1803,7 +1831,17 @@ perform and on what schedule.
 :Default: :d:`[]`
 :Scope:     Cello
 
-:e:`List of fields for this output file set.  The default empty list means all fields.  For "image" field types, the field list must contain exactly one field.`
+:e:`List of fields for this output file set.  For "image" field types, the field list must contain exactly one field.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`particle_list`
+:Summary: :s:`List of particle types to output`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     Cello
+
+:e:`List of particles types for this output file set..`
 
 ----
 
@@ -1978,7 +2016,7 @@ schedule
 
 The schedule parameter subgroup defines when to do something, such as
 perform output, apply a method, or to apply the dynamic load balancer.
-Schedules can be specied as a :p:`list` of values, or as an interval of
+Schedules can be specified as a :p:`list` of values, or as an interval of
 values specified using some subset of :p:`start`, :p:`stop`, and
 :p:`step`.  The associated variable, set using :p:`var`, can be "cycle",
 "time", or "seconds".  Here "time" refers to simulation time, and
@@ -1988,7 +2026,7 @@ seconds match the list or interval of values.  If there is a match,
 the associated output or is performed; otherwise, it is skipped.
 
 Note that when simulation "time" is specified, then the simulation's
-time step may be reduced so that the correspondig output occurs
+time step may be reduced so that the corresponding output occurs
 exactly at the specified time.
 
 ::
@@ -2039,7 +2077,7 @@ exactly at the specified time.
 :Default: :d:`"none"`
 :Scope:     Cello
 
-:e:`The` :p:`var` :e:`parameter specifies what value is checked at each cycle, which may be` :t:`"cycle"`, :t:`"time"`, :e:`or` :t:`"seconds"` :e:`Here "time" refers to simulation time, and "seconds" to wall-clock time.  Note that when simulation "time" is specified, the simulation's time step may be reduced such that the correspondig output occurs exactly at the specified time.`
+:e:`The` :p:`var` :e:`parameter specifies what value is checked at each cycle, which may be` :t:`"cycle"`, :t:`"time"`, :e:`or` :t:`"seconds"` :e:`Here "time" refers to simulation time, and "seconds" to wall-clock time.  Note that when simulation "time" is specified, the simulation's time step may be reduced such that the corresponding output occurs exactly at the specified time.`
 
 ---- 
 
@@ -2077,6 +2115,218 @@ exactly at the specified time.
 :Default: :d:`1 | 1.0`
 :Scope:     Cello
 :Todo:    :o:`write`
+
+--------
+Particle
+--------
+
+Cello supports any number of particle types--e.g. `"dark"` for dark
+matter particles, or `"trace"` for tracer particles.  Each particle
+type in turn may have any number of attributes--e.g. `"x"` or
+`"position_x"` for position, `"vx"` or `"velocity_x"` for velocity,
+`"mass"`, `"id"`, etc.  Attributes can have any basic floating-point
+or integer type.
+
+All particle types must have at least attributes for position, defined
+using the `position` parameter.  This allows Cello to know whether
+particles have moved off of a Block, and if so to relocate them to
+the correct new block.
+
+Particle positions may be defined as integer types instead of
+floating-point.  When a particle position attribute is defined as an
+integer, then the coordinate value is defined relative to the enclosed
+Block instead of a global coordinate system.  This can be useful both
+to reduce memory usage, and to simultaneously improve accuracy--it
+avoids possible catastrophic cancellation errors that are especially
+large in "deep" Blocks in an AMR hierarchy whose position is far
+from 0.  When positions are defined as integers, 0 is defined to be
+the center of the block, and [ -*min-int* / 2 , *max-int* / 2) are the
+bounds of the Block, where *min-int* is the minimum value of the
+signed integer of the corresponding size.  Integer types allowed
+include `"int8"`, `"int16"`, `"int32"`, and `"int64"`.  Two byte
+integers `"int16"` should be sufficient for most simulations: it
+has a range of [ -16384, 16384 ) within the particle's containing
+Block, and ranges [-32768, 16384) and [16384, 32768) on either side
+of the associated Block.
+
+Particles are allocated and operated on in "batches".  The
+`batch_size` parameter defines how many particles are in a batch.  By
+operating on particles in batches, the frequency of memory operations
+is greatly reduced, and functions operating on particle attributes can
+be more efficient due to reduced overhead.  It should also simplify
+writing particle methods to be executed on accelerators, such as
+NVIDIA or AMD GPU's.
+
+Just as with fields, particle types can be assigned to groups_.
+
+----
+
+:Parameter:  :p:`Particle` : :p:`list`
+:Summary: :s:`List of particle types`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     Cello
+
+:e:`Cello allows arbitrary parameter types (dark matter particles, tracer particles, star particles, etc.), each with arbitrary attributes (position, velocity, etc.).  The` :p:`list` :e:`parameter defines which types of particles to use.`
+
+  ::
+
+    Particle {
+
+        list = ["dark", "trace"];
+
+    }
+
+----
+
+:Parameter:  :p:`Particle` : :p:`batch_size`
+:Summary: :s:`Number of particles in a "batch" of particles`
+:Type:    :t:`integer`
+:Default: :d:`1024`
+:Scope:     Cello
+
+:e:`Particles are allocated and operated on in` *batches*.  :e:`The number of particles in a batch is set using the` :p:`batch_size` :e:`parameter.  The default batch size is 1024.`
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`attributes`
+:Summary: :s:`List of attribute names and data types`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`none`
+:Scope:     Cello
+
+:e:`Each particle type can have multiple attributes of varying types, which are defined by the` :p:`attributes` :e:`parameter.  The` :p:`attributes` :e:`parameter is a list of strings, alternating between the name of the parameter, and its type.  Names may include` :t:`"position_x"`, :t:`"velocity_z"`, :t:`"mass"`,
+:t:`"id"`, :e:`etc.  Types may include` :t:`"single"`, :t:`"double"`, :t:`"quadruple"`, :t:`"int8"`, :t:`"int16"`, :t:`"int32"`, or :t:`"int64"`.  :e:`Ordering of attributes in memory is as in the` :p:`attributes` :e:`parameter.`
+
+   ::
+
+    Parameter {
+
+        list = ["trace", "dark"];
+
+            trace {
+
+                attributes = ["id", "int64",
+                              "x",  "single",
+                              "y",  "single",
+                              "z",  "single"];
+             }
+
+             dark {
+
+                 attributes = ["id",         "int64",
+                               "mass",       "double",
+                               "velocity_x", "single",
+                               "velocity_y", "single",
+                               "velocity_z", "single",
+                               "position_x", "int16",
+                               "position_y", "int16",
+                               "position_z", "int16"];
+           }
+      }
+
+:e:`Note that when attributes of multiple sizes are included in the same parameter type, it can be helpful to order the attributes so that larger-sized attributes are listed first, followed by smaller-sized attributes.  This can help prevent allocating more memory than necessary, since attributes may be padded with unused bytes for correct memory alignment.`
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`interleaved`
+:Summary: :s:`Format of output files`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     Cello
+
+:e:`Particle attributes within a batch of particles may be stored in memory either particle-by-particle, or "interleaved" (attribute-by-attribute).  If` |aij| :e:`represents the jth attribute of particle i, then with` :p:`interleaved = false`, :e:`attributes would be stored as` |a00| ... |am0|, |a01| ... |am1| ... |a0n| ... |amn|. :e:`If, however,` :p:`interleaved = true`, :e:`then attributes would be stored as`   |a00| ... |a0n|, |a10| ... |a1n| ... |am0| ... |amn|. :e:`Non-interleaved particle attributes have array accesses of stride 1 and minimal storage overhead, but may not utilize cache well.  Interleaved particle attributes` *may* :e:`have improved cache utilization, but will have stride > 1, and may require memory padding for correct alignment of attributes in memory.  The default is` :t:`false.`
+
+  
+
+----
+
+:Summary: :s:`Specify a list of groups that the Particle type belongs to`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[ ]`
+:Scope:     Cello
+
+
+:e:`Different Particle types may belong to any number of different "groups", which allows simulation code to loop over multiple related particle types.`
+
+  ::
+
+    Particle {
+        list = ["trace","dark","star"];
+
+        dark { group_list = ["has_mass"]; }
+        star { group_list = ["has_mass"]; }
+    }
+
+
+:e:`This example can be rewritten as follows, which is completely equivalent:`
+
+  ::
+
+
+    Particle 
+        list = ["trace","dark","star"];
+    }
+
+    Group {
+        list = ["has_mass"];
+        has_mass {
+           particle_list = ["dark","star"];
+        }
+    }
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`position`
+:Summary: :s:`Format of output files`
+:Type:    :t:`string`
+:Default: :d:`""`
+:Scope:     Cello
+
+:e:`Cello needs to know which particle attributes represent position, so that it can determine when particles migrate out of a Block and need to be moved to a neighboring Block.  This is done using the` :p:`position` :e:`parameter:`
+
+  ::
+
+    Particle {
+
+       list = ["trace"];
+
+       trace {
+
+          attributes = ["id",
+                        "x","single",
+	                "y","single",
+	                "z","single"];
+
+          position = ["x","y","z"];
+       }
+    }
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`velocity`
+:Summary: :s:`Format of output files`
+:Type:    :t:`string`
+:Default: :d:`""`
+:Scope:     Cello
+
+:e:`Enzo may need to know which particle attributes represent velocity, for example for kick() or drift() operations.  This is done using the` :p:`velocity` :e:`parameter, whose usage is analogous to the` :p:`position` :e:`parameter.  While specifying position is required, specifying velocity is optional.`
+
+  ::
+
+    Particle {
+
+       list = ["dark"];
+
+       trace {
+
+          attributes = [ "x","single",   "y","single",   "z","single",
+                        "vx","single",  "vy","single",  "vz","single",
+			"mass","single"];
+
+          velocity = ["vx","vy","vz"];
+       }
+    }
 
 -----------
 Performance

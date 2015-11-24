@@ -80,13 +80,11 @@ semi-colon ``";"``
 
     <parameter-assignment> ::= <parameter-name> '=' <value> ';'
 
-
 Data types
 **********
 
 Parameters can be assigned different *values*, depending on the
-parameter name and the group the parameter belongs to.  A parameter
-value is one of several different basic data types:
+parameter name and the group the parameter belongs to.
 
   ::
 
@@ -97,6 +95,20 @@ value is one of several different basic data types:
               | <logical-expression>
               | <list>
 
+A parameter value is one of several different basic data types:
+
+  ::
+
+    ==================	=============================
+    Type         	Example
+    ==================	=============================
+    scalar 	        6.673e-8
+    string         	"velocity_x"
+    variable 	        x, y, z, or t
+    scalar expression 	2.0*sin(x) + cos(y)
+    logical expression 	(x < y) || (y < z)
+    list 	        [ "velocity_x", 3.14, x < y ]
+    ==================	=============================
 
 **Scalar types** are any floating point or integral numerical values.  
 The constant 'pi' is also recognized.
@@ -127,16 +139,7 @@ defining subregions of the domain for initializing Field's.
 
 **Lists** represent an ordered sequence of values of mixed types, including other lists, separated by commas.
 
-    ==================	=============================
-    Type         	Example
-    ==================	=============================
-    scalar 	        6.673e-8
-    string         	"velocity_x"
-    variable 	        x, y, z, or t
-    scalar expression 	2.0*sin(x) + cos(y)
-    logical expression 	(x < y) || (y < z)
-    list 	        [ "velocity_x", 3.14, x < y ]
-    ==================	=============================
+    **NEW!** *In addition to assigning a list of values to a parameter,     as in* ``list = ["dark","star"];``, *one may also append to an existing     list.  For example,* ``list = ["dark","star"];`` *followed by* ``list += ["trace"];`` *would be equivalent to* ``list = ["dark","star","trace"]``.   *Appending to a parameter that has not been assigned to yet is acceptable, and  equivalent to assignment.*
 
 Comments
 ********
