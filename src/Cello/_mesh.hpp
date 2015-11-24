@@ -68,13 +68,6 @@ enum phase_type {
 #define PHASE_COUNT (phase_exit + 1)
 extern const char * phase_name[];
 
-enum array_type {
-  op_array_unknown,
-  op_array_copy,
-  op_array_restrict,
-  op_array_prolong
-};
-
 /// @enum     adapt_type
 /// @brief    Mesh adaptation type: refine, coarsen, or stay the same
 

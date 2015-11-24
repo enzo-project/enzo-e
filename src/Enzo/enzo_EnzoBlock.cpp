@@ -171,7 +171,7 @@ EnzoBlock::EnzoBlock
  int num_field_blocks,
  int count_adapt,
  int cycle, double time, double dt,
- int narray, char * array, int op_array,
+ int narray, char * array, int refresh_type,
  int num_face_level, int * face_level,
  bool testing
 ) throw()
@@ -182,7 +182,7 @@ EnzoBlock::EnzoBlock
      num_field_blocks,
      count_adapt,
      cycle, time, dt,
-     narray,  array, op_array,
+     narray,  array, refresh_type,
      num_face_level, face_level,
      testing),
     dt(dt),

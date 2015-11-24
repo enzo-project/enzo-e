@@ -82,7 +82,7 @@ public: // interface
    int num_field_data,
    int count_adapt,
    int cycle, double time, double dt,
-   int narray, char * array, int op_array,
+   int narray, char * array, int refresh_type,
    int num_face_level, int * face_level,
    bool testing = false,
    Simulation * simulation = 0) const throw();

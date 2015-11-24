@@ -288,12 +288,12 @@ void Block::adapt_refine_()
 
       int narray = 0;  
       char * array = 0;
-      int iface[3] = {0,0,0};
-      bool lghost[3] = {true,true,true};
+      int if3[3] = {0,0,0};
+      bool lg3[3] = {true,true,true};
       
       FieldFace * field_face = 
-	load_face (&narray,&array, iface,ic3,lghost, op_array_prolong,
-		    field_list);
+	load_field_face (&narray,&array, if3,ic3,lg3,
+			 refresh_fine,field_list);
 
       int num_field_data = 1;
       bool testing = false;
@@ -308,7 +308,7 @@ void Block::adapt_refine_()
 	 num_field_data,
 	 adapt_step_,
 	 cycle_,time_,dt_,
-	 narray, array, op_array_prolong,
+	 narray, array, refresh_fine,
 	 27,&child_face_level_curr_[27*IC3(ic3)],
 	 testing,
 	 simulation());
@@ -627,12 +627,11 @@ void Block::adapt_coarsen_()
   // copy block data
   int narray; 
   char * array;
-  int iface[3] = {0,0,0};
-  bool lghost[3] = {false,false,false};
+  int if3[3] = {0,0,0};
+  bool lg3[3] = {false,false,false};
   std::vector<int> field_list;
-  FieldFace * field_face = 
-    load_face(&narray,&array, iface, ic3, lghost, op_array_restrict,
-	       field_list);
+  FieldFace * field_face = load_field_face
+    (&narray,&array, if3, ic3, lg3, refresh_coarse, field_list);
 
   // copy face levels
   int nf = face_level_curr_.size();
@@ -659,12 +658,11 @@ void Block::p_adapt_recv_child
  )
 {
   // copy array
-  int iface[3] = {0,0,0};
-  bool lghost[3] = {false,false,false};
+  int if3[3] = {0,0,0};
+  bool lg3[3] = {false,false,false};
   
   std::vector<int> field_list;
-  store_face (na,array, iface, ic3, lghost, op_array_restrict,
-	      field_list);
+  store_field_face (na,array, if3, ic3, lg3, refresh_coarse, field_list);
 
   // copy child face level and face level
   const int min_face_rank = 

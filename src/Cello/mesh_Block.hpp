@@ -51,7 +51,7 @@ public: // interface
    int num_field_blocks,
    int num_adapt_steps,
    int cycle, double time, double dt,
-   int narray, char * array, int op_array,
+   int narray, char * array, int refresh_type,
    int num_face_level, int * face_level,
    bool testing=false
    ) throw();
@@ -358,11 +358,14 @@ public:
   /// Parent tells child to delete itself
   void p_adapt_delete();
   void p_adapt_recv_level 
-  (Index index_debug, int ic3[3], int if3[3], int level_now, int level_new);
+  (Index index_debug, 
+   int ic3[3], 
+   int if3[3],
+   int level_now, int level_new);
   void p_adapt_recv_child
   (int ic3[3],int na, char * array, int nf, int * child_face_level);
 
-  void adapt_recv (const int of3[3],const int ic3[3],
+  void adapt_recv (const int of3[3], const int ic3[3],
 		   int level_face_new, int level_relative);
 
   void adapt_send_level();
@@ -431,8 +434,8 @@ public:
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
   void p_refresh_store_face
-  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3]) 
-  {      refresh_store_face_(n,buffer,type_refresh,if3,ic3); }
+  (int n, char buffer[],  int refresh_type, int if3[3], int ic3[3]) 
+  { refresh_store_face_(n,buffer,refresh_type,if3,ic3); }
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char buffer[],int ic3[3]);
@@ -441,11 +444,24 @@ protected:
 
   void refresh_begin_();
 
-  void refresh_load_face_
-  (int type_refresh, Index index, 
-   int if3[3], int ic3[3],int count=0);
+  int refresh_load_face_
+  (int refresh_type, Index index, int if3[3], int ic3[3],
+   int count=0);
+
+  int refresh_load_field_face_
+  (int refresh_type, Index index, int if3[3], int ic3[3]);
+  int refresh_load_particle_face_
+  (int refresh_type, Index index, int if3[3], int ic3[3]);
+
   void refresh_store_face_
-  (int n, char buffer[],  int type_refresh, int if3[3], int ic3[3],
+  (int n, char buffer[], int refresh_type, int if3[3], int ic3[3],
+   int count=0);
+
+  void refresh_store_field_face_
+  (int n, char buffer[], int refresh_type, int if3[3], int ic3[3],
+   int count=0);
+  void refresh_store_particle_face_
+  (int n, char buffer[], int refresh_type, int if3[3], int ic3[3],
    int count=0);
 
   //--------------------------------------------------
@@ -554,18 +570,14 @@ public: // virtual functions
   void ResumeFromSync();
 
   /// Create the specified FieldFace and return its array a of length n
-  FieldFace * load_face
-  (int * n, char ** a,
-   int if3[3], int ic3[3], bool lg3[3],
-   int op_array,
-   std::vector<int> & field_list);
+  FieldFace * load_field_face
+  (int * n, char ** a, int if3[3], int ic3[3], bool lg3[3],
+   int refresh_type, std::vector<int> & field_list);
 
-  /// Inverse of load_face
-  void store_face
-  (int n, char * a,
-   int if3[3], int ic3[3], bool lg3[3],
-   int op_array,
-   std::vector<int> & field_list);
+  /// Inverse of load_field_face
+  void store_field_face
+  (int n, char * a, int if3[3], int ic3[3], bool lg3[3],
+   int refresh_type, std::vector<int> & field_list);
 
 
 protected: // functions
@@ -665,8 +677,7 @@ protected: // functions
   }
 
   FieldFace * create_face_
-  (int if3[3], int ic3[3], bool lg3[3],
-   int op_array,
+  (int if3[3], int ic3[3], bool lg3[3], int refresh_type,
    std::vector<int> & field_list);
 
   /// Set the current refresh object

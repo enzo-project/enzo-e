@@ -47,7 +47,7 @@ Block::Block
  int num_field_blocks,
  int num_adapt_steps,
  int cycle, double time, double dt,
- int narray, char * array, int op_array,
+ int narray, char * array, int refresh_type,
  int num_face_level, int * face_level,
  bool testing
  ) throw ()
@@ -192,15 +192,19 @@ Block::Block
 
     Problem * problem = simulation()->problem();
 
-    switch (op_array) {
+    switch (refresh_type) {
 
-    case op_array_restrict:
+    case refresh_coarse:
+
       field_face.set_ghost(false,false,false);
       field_face.set_restrict(problem->restrict(),icx,icy,icz);  
+
       break;
 
-    case op_array_prolong:
+    case refresh_fine:
+
       field_face.set_prolong(problem->prolong(),icx,icy,icz);
+
       break;
 
     default:
@@ -379,17 +383,17 @@ Block::~Block() throw ()
 
     // Send restricted data to parent 
 
-    int ichild[3];
-    index_.child(level,ichild,ichild+1,ichild+2);
+    int ic3[3];
+    index_.child(level,ic3,ic3+1,ic3+2);
 
     int n; 
     char * array;
-    int iface[3]={0,0,0};
-    bool lghost[3]={false,false,false};
+    int if3[3]={0,0,0};
+    bool lg3[3]={false,false,false};
     
     std::vector<int> field_list;
-    FieldFace * field_face = 
-      load_face(&n,&array,iface,ichild,lghost,op_array_restrict,field_list);
+    FieldFace * field_face = load_field_face
+      ( &n,&array,if3,ic3,lg3,refresh_coarse,field_list);
 
     const Index index_parent = index_.index_parent();
 
@@ -397,7 +401,7 @@ Block::~Block() throw ()
     // ENTRY: #2 Block::~Block()-> Block::x_refresh_child()
     // ENTRY: parent if level > 0
     // --------------------------------------------------
-    thisProxy[index_parent].x_refresh_child(n,array,ichild);
+    thisProxy[index_parent].x_refresh_child(n,array,ic3);
     // --------------------------------------------------
 
     delete field_face;
@@ -425,7 +429,7 @@ void Block::x_refresh_child
   int  if3[3]  = {0,0,0};
   bool lg3[3] = {false,false,false};
   std::vector<int> field_list;
-  store_face (n,buffer, if3, ic3, lg3, op_array_restrict,field_list);
+  store_field_face (n,buffer, if3, ic3, lg3, refresh_coarse,field_list);
 }
 
 //----------------------------------------------------------------------
@@ -641,32 +645,32 @@ void Block::periodicity (bool p32[3][2]) const
 
 //----------------------------------------------------------------------
 
-FieldFace * Block::load_face
+FieldFace * Block::load_field_face
 (
  int *   n, char ** a,
  int if3[3], int ic3[3], bool lg3[3],
- int op_array_type,
+ int refresh_type,
  std::vector<int> & field_list 
  )
 {
   FieldFace * field_face = create_face_ 
-    (if3,ic3,lg3, op_array_type,field_list);
+    (if3,ic3,lg3, refresh_type,field_list);
   field_face->load(n, a);
   return field_face;
 }
 
 //----------------------------------------------------------------------
 
-void Block::store_face
+void Block::store_field_face
 (
  int n, char * a, 
  int if3[3], int ic3[3], bool lg3[3],
- int op_array_type,
+ int refresh_type,
  std::vector<int> & field_list
  )
 {
   FieldFace * field_face = create_face_ 
-    (if3,ic3,lg3, op_array_type,field_list);
+    (if3,ic3,lg3, refresh_type,field_list);
 
   field_face->store(n, a);
   delete field_face;
@@ -676,7 +680,7 @@ void Block::store_face
 
 FieldFace * Block::create_face_
 (int if3[3], int ic3[3], bool lg3[3],
- int op_array_type,
+ int refresh_type,
  std::vector<int> & field_list
  )
 {
@@ -687,11 +691,11 @@ FieldFace * Block::create_face_
   Field field (field_descr,field_data);
   FieldFace * field_face = new FieldFace(field);
 
-  if (op_array_type == op_array_restrict) {
+  if (refresh_type == refresh_coarse) {
 
     field_face->set_restrict(problem->restrict(),ic3[0],ic3[1],ic3[2]);
 
-  } else if (op_array_type == op_array_prolong) {
+  } else if (refresh_type == refresh_fine) {
 
     field_face->set_prolong(problem->prolong(),  ic3[0],ic3[1],ic3[2]);
 

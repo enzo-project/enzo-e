@@ -454,22 +454,22 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
       it_neighbor.child(ic3);
       it_neighbor.face (if3);
       int of3[3] = {if3[0],if3[1],if3[2]};
-      int type_op_array = op_array_unknown;
+
+      int refresh_type = refresh_unknown;
 
       //  if neighbor level not coarser
       if (! (level_neighbor > level)) {
 	// pack face data
 
-	if (level_neighbor == level)   type_op_array = op_array_copy;
-	if (level_neighbor == level+1) type_op_array = op_array_prolong;
-	if (level_neighbor == level-1) type_op_array = op_array_restrict;
+	if (level_neighbor == level - 1) refresh_type = refresh_coarse;
+	if (level_neighbor == level)   refresh_type = refresh_same;
+	if (level_neighbor == level + 1) refresh_type = refresh_fine;
 
 	// WARNING not accessed
 	FieldFace * field_face;
-	field_face = enzo_block->load_face (&n, &array,
-				 of3, ic3, lghost,
-				 type_op_array,
-				 field_list);
+	field_face = enzo_block->load_field_face 
+	  (&n, &array, of3, ic3, lghost, refresh_type, field_list);
+
 	delete field_face;
       } 
       //  if neighbor level same

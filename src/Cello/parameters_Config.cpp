@@ -928,7 +928,6 @@ void Config::read_particle_ (Parameters * p) throw()
       int ia_v = (vel != "") ? particle_attribute_index[it][vel] : -1;
       particle_attribute_velocity[axis][it] = ia_v;
     }
-
   }
 
   // Add particles to groups (Particle : <particle_name> : group_list)

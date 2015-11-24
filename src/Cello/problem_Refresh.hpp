@@ -20,6 +20,7 @@ public: // interface
   /// empty constructor for charm++ pup()
   Refresh() throw() 
   : field_list_(),
+    particle_list_(),
     ghost_depth_(0),
     min_face_rank_(0),
     neighbor_type_(neighbor_unknown),
@@ -39,6 +40,7 @@ public: // interface
    int sync_type,
    bool active=true) throw() 
   : field_list_(),
+    particle_list_(),
     ghost_depth_(ghost_depth),
     min_face_rank_(min_face_rank),
     neighbor_type_(neighbor_type),
@@ -64,6 +66,7 @@ public: // interface
     PUP::able::pup(p);
 
     p | field_list_;
+    p | particle_list_;
     p | ghost_depth_;
     p | min_face_rank_;
     p | neighbor_type_;
@@ -74,14 +77,16 @@ public: // interface
     p | callback_;
   }
 
-  /// Add the given field to the list
+  //--------------------------------------------------
+  // FIELD METHODS
+  //--------------------------------------------------
 
+  /// Add the given field to the list
   void add_field(int id_field) {
     field_list_.push_back(id_field);
   }
 
   /// All fields are refreshed
-
   void add_all_fields(int num_fields) {
     field_list_.clear();
     for (int i=0; i<num_fields; i++) {
@@ -90,11 +95,31 @@ public: // interface
   }
 
   /// Return the list of fields participating in the Refresh operation
-
   std::vector<int> & field_list() {
     return field_list_;
   }
 
+  //--------------------------------------------------
+  // PARTICLE METHODS
+  //--------------------------------------------------
+
+  /// Add the given particle type to the list
+  void add_particle(int id_particle) {
+    particle_list_.push_back(id_particle);
+  }
+
+  /// All particles types are refreshed
+  void add_all_particles(int num_particles) {
+    particle_list_.clear();
+    for (int i=0; i<num_particles; i++) {
+      particle_list_.push_back(i);
+    }
+  }
+
+  /// Return the list of particles participating in the Refresh operation
+  std::vector<int> & particle_list() {
+    return particle_list_;
+  }
   /// Whether this Block is participating in the Refresh operation
 
   void set_active (bool active) 
@@ -141,6 +166,10 @@ public: // interface
     for (size_t i=0; i<field_list_.size(); i++)
       printf (" %d",field_list_[i]);
     printf ("\n");
+    printf ("Refresh particles:");
+    for (size_t i=0; i<particle_list_.size(); i++)
+      printf (" %d",particle_list_[i]);
+    printf ("\n");
     printf ("Refresh ghost_depth = %d\n",ghost_depth_);
     printf ("Refresh min_face_rank: %d\n",min_face_rank_);
     printf ("Refresh neighbor_type: %d\n",neighbor_type_);
@@ -164,10 +193,13 @@ private: // attributes
   /// Indicies of fields to include
   std::vector <int> field_list_;
 
+  /// Indicies of particles to include
+  std::vector <int> particle_list_;
+
   /// Ghost zone depth
   int ghost_depth_;
 
-  /// minimum face field rank to refresh (0 = corners, 1 = edges, etc.)
+  /// minimum face rank to refresh (0 = corners, 1 = edges, etc.)
   int min_face_rank_;
 
   /// Which subset of adjacent Blocks to refresh with

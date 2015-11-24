@@ -75,7 +75,7 @@ CProxy_Block EnzoFactory::create_block_array
 	   num_field_blocks,
 	   count_adapt = 0,
 	   cycle, time, dt,
-	   0,NULL,op_array_copy,
+	   0,NULL,refresh_same,
 	   num_face_level, face_level,
 	   testing);
 	// --------------------------------------------------
@@ -149,7 +149,7 @@ void EnzoFactory::create_subblock_array
 	     num_field_blocks,
 	     count_adapt = 0,
 	     cycle, time, dt,
-	     0,NULL,op_array_copy,
+	     0,NULL,refresh_same,
 	     num_face_level, face_level,
 	     testing);
 	  // --------------------------------------------------
@@ -172,7 +172,7 @@ Block * EnzoFactory::create_block
  int num_field_blocks,
  int count_adapt,
  int cycle, double time, double dt,
- int narray, char * array, int op_array,
+ int narray, char * array, int refresh_type,
  int num_face_level, int * face_level,
  bool testing,
  Simulation * simulation
@@ -196,7 +196,7 @@ Block * EnzoFactory::create_block
      num_field_blocks,
      count_adapt,
      cycle,time,dt,
-     narray, array, op_array,
+     narray, array, refresh_type,
      num_face_level, face_level,
      testing);
   // --------------------------------------------------

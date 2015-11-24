@@ -137,10 +137,11 @@ module mesh {
     entry void p_adapt_delete();
 
     entry void p_adapt_recv_level
-      (Index index,int ic3[3], int if3[3], int level_now, int level_new);
+      (Index index, int ic3[3], int if3[3], int level_now, int level_new);
 
     entry void p_adapt_recv_child
-      (int ic3[3], int na, char arr[na], int nf, int child_face_level[nf]);
+      (int ic3[3], int na, char arr[na], int nf, 
+       int child_face_level[nf]);
 
 
     //--------------------------------------------------
@@ -152,10 +153,10 @@ module mesh {
     entry void r_refresh_exit(CkReductionMsg *);
 
     entry [expedited] void p_refresh_store_face
-      (int n, char buffer[n],  char rtype, int iface[3], int ichild[3]);
+      (int n, char buffer[n],  char rtype, int if3[3], int ic3[3]);
 
     entry void x_refresh_child
-      (int n, char buffer[n], int ichild[3]);
+      (int n, char buffer[n], int ic3[3]);
 
   };
 
