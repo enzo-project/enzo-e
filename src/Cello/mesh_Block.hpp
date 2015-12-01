@@ -448,25 +448,20 @@ protected:
 
   void refresh_begin_();
 
-  int refresh_load_face_
-  (int refresh_type, Index index, int if3[3], int ic3[3],
-   int count=0);
+  /// Pack field face data into arrays and send to neighbors
+  void refresh_load_field_faces_ (Refresh * refresh);
+  /// Pack particle type data into arrays and send to neighbors
+  void refresh_load_particle_faces_ (Refresh * refresh);
 
-  int refresh_load_field_face_
+  void refresh_load_field_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
-  int refresh_load_particle_face_
+  void refresh_load_particle_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
-
-  void refresh_store_face_
-  (int n, char buffer[], int refresh_type, int if3[3], int ic3[3],
-   int count=0);
 
   void refresh_store_field_face_
-  (int n, char buffer[], int refresh_type, int if3[3], int ic3[3],
-   int count=0);
+  (int n, char buffer[], int refresh_type, int if3[3], int ic3[3]);
   void refresh_store_particle_face_
-  (int n, char buffer[], int it, int ib,  int if3[3], int ic3[3],
-   int count=0);
+  (int n, char buffer[], int it, int ib,  int if3[3], int ic3[3]);
 
   //--------------------------------------------------
   // STOPPING

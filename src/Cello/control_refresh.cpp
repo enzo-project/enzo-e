@@ -35,120 +35,119 @@ void Block::refresh_begin_()
 
   check_delete_();
 
-  refresh->sync_load().reset();
-
   simulation()->set_phase(phase_refresh);
 
   // Refresh if Refresh object exists and have data
 
-  int if3[3] = {0,0,0};
-  int ic3[3] = {0,0,0};
-
-  int count = 0;
-
   if ( refresh && refresh->active() ) {
 
-    const int min_face_rank = refresh->min_face_rank();
-    const int neighbor_type = refresh->neighbor_type();
+    refresh_load_field_faces_(refresh);
+  }
 
-    if (neighbor_type == neighbor_leaf) {
+  // // call with self to set counter
+  // int if3[3] = {0,0,0};
+  // int ic3[3] = {0,0,0};
 
-      ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+  // refresh_load_field_face_(refresh_same,index(),if3,ic3);
 
-      while (it_neighbor.next()) {
+  control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
+}
 
-	Index index_neighbor = it_neighbor.index();
+//----------------------------------------------------------------------
 
-	// (shadowing input parameters!)
-	int if3[3];
-	int ic3[3];
+void Block::refresh_load_field_faces_ (Refresh *refresh)
+{
+  const int min_face_rank = refresh->min_face_rank();
+  const int neighbor_type = refresh->neighbor_type();
 
-	it_neighbor.face (if3);
-	it_neighbor.child(ic3);
+  if (neighbor_type == neighbor_leaf) {
 
-	const int level = this->level();
-	const int level_face = it_neighbor.face_level();
-	const int refresh_type = 
-	  (level_face == level - 1) ? refresh_coarse :
-	  (level_face == level)     ? refresh_same :
-	  (level_face == level + 1) ? refresh_fine : refresh_unknown;
+    ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
 
-	count += refresh_load_face_ (refresh_type,index_neighbor,if3,ic3);
-      }
+    while (it_neighbor.next()) {
 
-    } else if (neighbor_type == neighbor_level) {
+      Index index_neighbor = it_neighbor.index();
 
-      ItFace it_face = this->it_face(min_face_rank,index_);
-      while (it_face.next()) {
-	Index index_face = it_face.index();
-	it_face.face(if3);
+      int if3[3],ic3[3];
+      it_neighbor.face (if3);
+      it_neighbor.child(ic3);
 
-	count += refresh_load_face_ (refresh_same,index_face,if3,ic3);
+      const int level = this->level();
+      const int level_face = it_neighbor.face_level();
 
-      }
+      const int refresh_type = 
+	(level_face == level - 1) ? refresh_coarse :
+	(level_face == level)     ? refresh_same :
+	(level_face == level + 1) ? refresh_fine : refresh_unknown;
+
+      refresh_load_field_face_ (refresh_type,index_neighbor,if3,ic3);
+    }
+
+  } else if (neighbor_type == neighbor_level) {
+
+    ItFace it_face = this->it_face(min_face_rank,index_);
+    while (it_face.next()) {
+
+      Index index_face = it_face.index();
+
+      int if3[3],ic3[3];
+      it_face.face(if3);
+
+      refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
+
     }
   }
-
-  // call with self to set counter
-  refresh_load_face_(refresh_same,index(),if3,ic3,count + 1);
-
 }
 
 //----------------------------------------------------------------------
 
-int Block::refresh_load_face_
-( int refresh_type,
-  Index index_neighbor,
-  int if3[3],
-  int ic3[3],
-  int count)
+void Block::refresh_load_particle_faces_ (Refresh *refresh)
 {
-  TRACE_REFRESH("refresh_load_face()");
+  const int min_face_rank = refresh->min_face_rank();
+  const int neighbor_type = refresh->neighbor_type();
 
-  Sync & sync_load = this->refresh()->sync_load();
+  if (neighbor_type == neighbor_leaf) {
 
-  int num_msg = 0;
+    ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
 
-  if (count != 0) {
+    while (it_neighbor.next()) {
 
-     sync_load.inc_stop(count);
+      Index index_neighbor = it_neighbor.index();
 
-  } else {
+      int if3[3],ic3[3];
+      it_neighbor.face (if3);
+      it_neighbor.child(ic3);
 
-    num_msg += refresh_load_field_face_   
-      (refresh_type,index_neighbor,if3,ic3);
+      const int level = this->level();
+      const int level_face = it_neighbor.face_level();
 
-    num_msg += refresh_load_particle_face_
-      (refresh_type,index_neighbor,if3,ic3);
+      const int refresh_type = 
+	(level_face == level - 1) ? refresh_coarse :
+	(level_face == level)     ? refresh_same :
+	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
+      refresh_load_particle_face_ (refresh_type,index_neighbor,if3,ic3);
+    }
+
+  } else if (neighbor_type == neighbor_level) {
+
+    ItFace it_face = this->it_face(min_face_rank,index_);
+    while (it_face.next()) {
+
+      Index index_face = it_face.index();
+
+      int if3[3],ic3[3];
+      it_face.face(if3);
+
+      refresh_load_particle_face_ (refresh_same,index_face,if3,ic3);
+
+    }
   }
-
-  // If all faces updated, exit refresh
-
-  if (sync_load.next()) {
-    control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
-  }
-
-  return num_msg;
 }
 
 //----------------------------------------------------------------------
 
-void Block::refresh_store_face_
-(int n, char * buffer, int refresh_type,
- int if3[3], int ic3[3],int count
- )
-{
-  TRACE_REFRESH("refresh_store_face()");
-  if (count==0) {
-    refresh_store_field_face_   (0,buffer,refresh_type,if3,ic3);
-    refresh_store_particle_face_(0,buffer,0,0,if3,ic3);
-  }
-}
-
-//----------------------------------------------------------------------
-
-int Block::refresh_load_field_face_
+void Block::refresh_load_field_face_
 ( int refresh_type,
   Index index_neighbor,
   int if3[3],
@@ -184,15 +183,13 @@ int Block::refresh_load_field_face_
 
   // ... delete the FieldFace created by load_face()
   delete field_face;
-
-  return 1;
 }
 
 //----------------------------------------------------------------------
 
 void Block::refresh_store_field_face_
 (int n, char * buffer, int refresh_type, 
- int if3[3], int ic3[3],int count )
+ int if3[3], int ic3[3])
 {
   TRACE_REFRESH("refresh_store_field_face()");
 
@@ -208,7 +205,7 @@ void Block::refresh_store_field_face_
 
 //----------------------------------------------------------------------
 
-int Block::refresh_load_particle_face_
+void Block::refresh_load_particle_face_
 ( int refresh_type,
   Index index_neighbor,
   int if3[3],
@@ -225,8 +222,6 @@ int Block::refresh_load_particle_face_
   const int nt = particle_list.size();
 
   // number of calls to p_refresh_store_particle_face
-
-  int count = 0;
 
   for (int it=0; it<nt; it++) {
 
@@ -246,13 +241,8 @@ int Block::refresh_load_particle_face_
 
       thisProxy[index_neighbor].p_refresh_store_particle_face
 	(n,array, it, ib, if3, ic3 );
-
-      ++ count;
-	
-				     
     }
   }
-  return count;
 }
 
 //----------------------------------------------------------------------
@@ -261,8 +251,7 @@ void Block::refresh_store_particle_face_
 (int n, char * array, 
  int it, int ib,
  int if3[3], 
- int ic3[3], 
- int count )
+ int ic3[3])
 {
   TRACE_REFRESH("refresh_store_particle_face");
 

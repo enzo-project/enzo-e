@@ -50,9 +50,9 @@ void InitialTrace::enforce_block
   block->lower(&xm,&ym,&zm);
   block->upper(&xp,&yp,&zp);
 
-  int ia_x = particle.attribute_index(it,"position_x");
-  int ia_y = particle.attribute_index(it,"position_y");
-  int ia_z = particle.attribute_index(it,"position_z");
+  int ia_x = particle.attribute_index(it,"x");
+  int ia_y = particle.attribute_index(it,"y");
+  int ia_z = particle.attribute_index(it,"z");
 
   const int np = particle.batch_size();
 

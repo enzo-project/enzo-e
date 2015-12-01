@@ -81,7 +81,7 @@ Block::Block
   index_method_(-1)
 {
   // Enable Charm++ AtSync() dynamic load balancing
-  usesAtSync = CmiTrue;
+  usesAtSync = true;
 
 #ifdef CELLO_DEBUG
   index_.print("Block()",-1,2,false,simulation());
