@@ -712,11 +712,15 @@ void ParticleData::resize_array_(ParticleDescr * particle_descr,
   if (!particle_descr->interleaved(it)) {
     np = particle_descr->batch_size();
   }
-  attribute_array_[it][ib].resize(mp*(np) + (PARTICLE_ALIGN - 1) );
-  char * array = &attribute_array_[it][ib][0];
-  uintptr_t iarray = (uintptr_t) array;
-  int defect = (iarray % PARTICLE_ALIGN);
-  attribute_align_[it][ib] = (defect == 0) ? 0 : PARTICLE_ALIGN-defect;
+  int new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
+
+  if (attribute_array_[it][ib].size() != new_size) {
+    attribute_array_[it][ib].resize(new_size);
+    char * array = &attribute_array_[it][ib][0];
+    uintptr_t iarray = (uintptr_t) array;
+    int defect = (iarray % PARTICLE_ALIGN);
+    attribute_align_[it][ib] = (defect == 0) ? 0 : PARTICLE_ALIGN-defect;
+  }
 }
 
 //----------------------------------------------------------------------

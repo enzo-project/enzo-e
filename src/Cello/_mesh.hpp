@@ -116,6 +116,7 @@ class Tree;
 #include "mesh_ItNode.hpp"
 
 // Iterators
+#include "mesh_It.hpp"
 #include "mesh_ItFace.hpp"
 #include "mesh_ItNeighbor.hpp"
 #include "mesh_ItChild.hpp"

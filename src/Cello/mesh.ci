@@ -152,8 +152,11 @@ module mesh {
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
-    entry [expedited] void p_refresh_store_face
+    entry [expedited] void p_refresh_store_field_face
       (int n, char buffer[n],  char rtype, int if3[3], int ic3[3]);
+
+    entry [expedited] void p_refresh_store_particle_face
+      (int n, char buffer[n],  int it, int ib, int if3[3], int ic3[3]);
 
     entry void x_refresh_child
       (int n, char buffer[n], int ic3[3]);

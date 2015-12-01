@@ -433,9 +433,13 @@ protected:
 public:
 
   /// Refresh a FieldFace in same, next-coarser, or next-finer level
-  void p_refresh_store_face
+  void p_refresh_store_field_face
   (int n, char buffer[],  int refresh_type, int if3[3], int ic3[3]) 
-  { refresh_store_face_(n,buffer,refresh_type,if3,ic3); }
+  { refresh_store_field_face_(n,buffer,refresh_type,if3,ic3); }
+
+  void p_refresh_store_particle_face
+  (int n, char buffer[],  int it, int ib, int if3[3], int ic3[3]) 
+  { refresh_store_particle_face_(n,buffer, it,ib, if3,ic3); }
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char buffer[],int ic3[3]);
@@ -461,7 +465,7 @@ protected:
   (int n, char buffer[], int refresh_type, int if3[3], int ic3[3],
    int count=0);
   void refresh_store_particle_face_
-  (int n, char buffer[], int refresh_type, int if3[3], int ic3[3],
+  (int n, char buffer[], int it, int ib,  int if3[3], int ic3[3],
    int count=0);
 
   //--------------------------------------------------

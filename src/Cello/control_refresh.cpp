@@ -141,8 +141,8 @@ void Block::refresh_store_face_
 {
   TRACE_REFRESH("refresh_store_face()");
   if (count==0) {
-    refresh_store_field_face_   (n,buffer,refresh_type,if3,ic3);
-    refresh_store_particle_face_(n,buffer,refresh_type,if3,ic3);
+    refresh_store_field_face_   (0,buffer,refresh_type,if3,ic3);
+    refresh_store_particle_face_(0,buffer,0,0,if3,ic3);
   }
 }
 
@@ -179,7 +179,7 @@ int Block::refresh_load_field_face_
   // ... send the face data to the neighbor
   const int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
-  thisProxy[index_neighbor].p_refresh_store_face
+  thisProxy[index_neighbor].p_refresh_store_field_face
     (n,array, refresh_type, of3, ic3);
 
   // ... delete the FieldFace created by load_face()
@@ -196,12 +196,14 @@ void Block::refresh_store_field_face_
 {
   TRACE_REFRESH("refresh_store_field_face()");
 
-  bool lg3[3] = {false,false,false};
+  if (n > 0) {
+    bool lg3[3] = {false,false,false};
 
-  Refresh * refresh = this->refresh();
-  std::vector<int> field_list = refresh->field_list();
+    Refresh * refresh = this->refresh();
+    std::vector<int> field_list = refresh->field_list();
 
-  store_field_face (n,buffer, if3, ic3, lg3, refresh_type, field_list);
+    store_field_face (n,buffer, if3, ic3, lg3, refresh_type, field_list);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -214,17 +216,88 @@ int Block::refresh_load_particle_face_
 
 {
   TRACE_REFRESH("refresh_load_particle_face()");
-  return 0;
+
+  std::vector<int> particle_list = refresh()->particle_list();
+
+  Particle particle (simulation()->particle_descr(),
+		     data()->particle_data());
+
+  const int nt = particle_list.size();
+
+  // number of calls to p_refresh_store_particle_face
+
+  int count = 0;
+
+  for (int it=0; it<nt; it++) {
+
+    const bool interleaved = particle.interleaved(it);
+    const int nb = particle.num_batches(it);
+
+    for (int ib=0; ib<nb; ib++) {
+
+      const int np = particle.num_particles(it,ib);
+      const int mb = particle.batch_size();
+      const int mp = particle.particle_bytes(it);
+
+      // if not interleaved, batch size is always full
+
+      int n = mp*(interleaved ? np : mb);
+      char * array = particle.attribute_array(it,0,ib);
+
+      thisProxy[index_neighbor].p_refresh_store_particle_face
+	(n,array, it, ib, if3, ic3 );
+
+      ++ count;
+	
+				     
+    }
+  }
+  return count;
 }
 
 //----------------------------------------------------------------------
 
 void Block::refresh_store_particle_face_
-(int n, char * buffer, 
- int refresh_type, 
+(int n, char * array, 
+ int it, int ib,
  int if3[3], 
  int ic3[3], 
  int count )
 {
   TRACE_REFRESH("refresh_store_particle_face");
+
+  Particle particle (simulation()->particle_descr(),
+		     data()->particle_data());
+
+  // determine number of particles
+
+  int mp = particle.particle_bytes(it);
+  const int mb = particle.batch_size();
+
+  const bool interleaved = particle.interleaved(it);
+  int np = (interleaved) ? n/mp : mb;
+
+  int j = particle.insert_particles(it,np);
+
+  int jb,jp;
+  particle.index(j,&jb,&jp);
+
+  // copy particles from array
+
+  const int na = particle.num_attributes(it);
+
+  for (int ip=0; ip<np; ip++) {
+    for (int ia=0; ia<na; ia++) {
+      if (!interleaved) 
+	mp = particle.attribute_bytes(it,ia);
+      int ny = particle.attribute_bytes(it,ia);
+      char * a_dst = particle.attribute_array(it,ia,jb);
+      for (int iy=0; iy<ny; iy++) {
+	a_dst [iy + mp*jp] = array [iy + mp*ip];
+      }
+    }
+    jp = (jp+1) % mb;
+    if (jp==0) jb++;
+  }
+
 }
