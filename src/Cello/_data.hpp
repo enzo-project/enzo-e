@@ -25,6 +25,27 @@
 
 #define PARTICLE_ALIGN 16
 
+// integer limits on particle position within a Block:
+//
+//  -N    -N/2   0    N/2    N
+//   *-----*-----*-----*-----*
+//  LEFT   | IN BLOCK  | RIGHT
+//        PMIN        PMAX
+//   Full integer range is [-N,N)
+//   Particles in block [-N/2,N/2)
+
+#define PMIN_8 -64
+#define PMAX_8  64
+
+#define PMIN_16 -16384
+#define PMAX_16  16384
+
+#define PMIN_32 -1073741824
+#define PMAX_32  1073741824
+
+#define PMIN_64 -4611686018427387904
+#define PMAX_64  4611686018427387904
+
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------

@@ -9,6 +9,13 @@
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
+enum refresh_type {
+  refresh_unknown,
+  refresh_coarse,
+  refresh_same,
+  refresh_fine
+};
+
 class Refresh : public PUP::able {
 
   /// @class    Refresh
@@ -183,6 +190,41 @@ public: // interface
     printf ("Refresh active: %d\n",active_);
     printf ("Refresh callback: %d\n",callback_);
   }
+
+  /// Return loop limits 0:3 for 4x4x4 particle data array indices
+  /// for the given neighbor
+  void index_limits
+  (int rank,
+   int refresh_type, 
+   int if3[3], int ic3[3],
+   int lower[3], int upper[3])
+  {
+    for (int axis=0; axis<rank; axis++) {
+      if (if3[axis] == -1) { 
+	lower[axis] = 0;
+	upper[axis] = 1;
+      } else if (if3[axis] == +1) { 
+	lower[axis] = 3;
+	upper[axis] = 4;
+      } else {
+	if (refresh_type == refresh_same) {
+	  lower[axis] = 1;
+	  upper[axis] = 3;
+	} else if (refresh_type == refresh_fine) {
+	  lower[axis] = ic3[axis] + 1;
+	  upper[axis] = ic3[axis] + 2;
+	} else if (refresh_type == refresh_coarse) {
+	  lower[axis] = 1 - ic3[axis];
+	  upper[axis] = 4 - ic3[axis];
+	} else {
+	  ERROR1 ("Refresh::loop_limits_()",
+		  "unknown refresh_type %d",
+		  refresh_type);
+	}
+      }
+    }
+  }
+
 private: // functions
 
 

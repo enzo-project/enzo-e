@@ -41,14 +41,10 @@ void Block::refresh_begin_()
 
   if ( refresh && refresh->active() ) {
 
-    refresh_load_field_faces_(refresh);
+    refresh_load_field_faces_   (refresh);
+    refresh_load_particle_faces_(refresh);
+
   }
-
-  // // call with self to set counter
-  // int if3[3] = {0,0,0};
-  // int ic3[3] = {0,0,0};
-
-  // refresh_load_field_face_(refresh_same,index(),if3,ic3);
 
   control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
 }
@@ -61,6 +57,8 @@ void Block::refresh_load_field_faces_ (Refresh *refresh)
   const int neighbor_type = refresh->neighbor_type();
 
   if (neighbor_type == neighbor_leaf) {
+
+    // Loop over neighbor leaf Blocks (not necessarily same level)
 
     ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
 
@@ -85,7 +83,10 @@ void Block::refresh_load_field_faces_ (Refresh *refresh)
 
   } else if (neighbor_type == neighbor_level) {
 
+    // Loop over neighbor Blocks in same level (not necessarily leaves)
+
     ItFace it_face = this->it_face(min_face_rank,index_);
+
     while (it_face.next()) {
 
       Index index_face = it_face.index();
@@ -94,52 +95,6 @@ void Block::refresh_load_field_faces_ (Refresh *refresh)
       it_face.face(if3);
 
       refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
-
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Block::refresh_load_particle_faces_ (Refresh *refresh)
-{
-  const int min_face_rank = refresh->min_face_rank();
-  const int neighbor_type = refresh->neighbor_type();
-
-  if (neighbor_type == neighbor_leaf) {
-
-    ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
-
-    while (it_neighbor.next()) {
-
-      Index index_neighbor = it_neighbor.index();
-
-      int if3[3],ic3[3];
-      it_neighbor.face (if3);
-      it_neighbor.child(ic3);
-
-      const int level = this->level();
-      const int level_face = it_neighbor.face_level();
-
-      const int refresh_type = 
-	(level_face == level - 1) ? refresh_coarse :
-	(level_face == level)     ? refresh_same :
-	(level_face == level + 1) ? refresh_fine : refresh_unknown;
-
-      refresh_load_particle_face_ (refresh_type,index_neighbor,if3,ic3);
-    }
-
-  } else if (neighbor_type == neighbor_level) {
-
-    ItFace it_face = this->it_face(min_face_rank,index_);
-    while (it_face.next()) {
-
-      Index index_face = it_face.index();
-
-      int if3[3],ic3[3];
-      it_face.face(if3);
-
-      refresh_load_particle_face_ (refresh_same,index_face,if3,ic3);
 
     }
   }
@@ -201,6 +156,121 @@ void Block::refresh_store_field_face_
 
     store_field_face (n,buffer, if3, ic3, lg3, refresh_type, field_list);
   }
+}
+
+//----------------------------------------------------------------------
+
+void Block::refresh_load_particle_faces_ (Refresh *refresh)
+{
+  const int min_face_rank = refresh->min_face_rank();
+  const int neighbor_type = refresh->neighbor_type();
+
+  const int rank = this->rank();
+  int np = rank == 1 ? 4 : (rank == 2 ? 4*4 : 4*4*4);
+
+  // 1. CREATE PARTICLE_DATA ARRAY
+
+  // Array elements correspond to child-sized blocks to
+  // the left, inside, and right of the main Block.  Particles
+  // are assumed to be (well) within this area.
+  //
+  //     +---+---+---+---+
+  //     | 03| 13| 23| 33|
+  //     +---+===+===+---+
+  //     | 02║   :   ║ 32|
+  //     +---+ - + - +---+
+  //     | 01║   :   ║ 31|
+  //     +---+=======+---+
+  //     | 00| 10| 20| 30|
+  //     +---+---+---+---+
+  //
+  // Actual neighbors may overlap multiple child-sized blocks.  In
+  // that case, we have one ParticleData object per neighbor, but
+  // with pointer duplicated.   So if neighbor configuration is:
+  //
+  //     +---+   5   +---+
+  //     | 4 |       | 6 |
+  // +---+---+===+===+---+
+  // |       ║   :   ║    
+  // |   2   + - + - +   3
+  // |       ║   :   ║    
+  // +-------+=======+-------+
+  //         |            
+  //     0   |            
+  //                 1   
+  //
+  // Then the particle data array will be:
+  //
+  //     +---+---+---+---+
+  //     | 4 | 5 | 5 | 6 |
+  //     +---+===+===+---+
+  //     | 2 ║   :   ║ 3 |
+  //     +---+ - + - +---+
+  //     | 2 ║   :   ║ 3 |
+  //     +---+=======+---+
+  //     | 0 | 1 | 1 | 1 |
+  //     +---+---+---+---+
+
+  const int level = this->level();
+
+  ParticleData * particle_data[np];
+
+  // 2. SCATTER PARTICLES AMONG PARTICLE_DATA ARRAY
+
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+
+  int count = 0;
+  while (it_neighbor.next()) {
+
+    Index index_neighbor = it_neighbor.index();
+
+    const int level_face = it_neighbor.face_level();
+
+    int if3[3] = {0,0,0} ,ic3[3] = {0,0,0};
+
+    it_neighbor.face(if3);
+
+    const int refresh_type = 
+      (level_face == level - 1) ? refresh_coarse :
+      (level_face == level)     ? refresh_same :
+      (level_face == level + 1) ? refresh_fine : refresh_unknown;
+
+    if (refresh_type==refresh_coarse) {
+      index_.child(index_.level(),ic3,ic3+1,ic3+2);
+    } else if (refresh_type==refresh_fine) {
+      it_neighbor.child(ic3);
+    }
+
+    int lower[3] = {0,0,0};
+    int upper[3] = {1,1,1};
+    refresh->index_limits (rank,refresh_type,if3,ic3,lower,upper);
+
+    for (int ix=lower[0]; ix<upper[0]; ix++) {
+      for (int iy=lower[1]; iy<upper[1]; iy++) {
+	for (int iz=lower[2]; iz<upper[2]; iz++) {
+	  count ++;
+	}
+      }
+    }
+    printf ("refresh %s face %d %d %d child %d %d %d lower %d %d %d upper %d %d %d\n",
+	    refresh_type == refresh_coarse ? "coarse" :
+	    ( refresh_type == refresh_same ? "same" : "fine"),
+	    if3[0],if3[1],if3[2],
+	    ic3[0],ic3[1],ic3[2],
+	    lower[0],lower[1],lower[2],
+	    upper[0],upper[1],upper[2]);
+
+  }
+
+  printf ("refresh count = %d\n",count);
+  // if (neighbor_type == neighbor_leaf) {
+
+
+  // } else if (neighbor_type == neighbor_level) {
+
+  //   ERROR ("Block::refresh_load_particle_faces_()",
+  // 	   "neighbor_level not supported (designed for MG)");
+  // }
 }
 
 //----------------------------------------------------------------------

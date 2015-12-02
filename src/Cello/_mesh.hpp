@@ -78,13 +78,6 @@ enum adapt_type {
   adapt_refine
 };
 
-enum refresh_type {
-  refresh_unknown,
-  refresh_coarse,
-  refresh_same,
-  refresh_fine
-};
-
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
