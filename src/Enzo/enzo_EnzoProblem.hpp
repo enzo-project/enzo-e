@@ -61,7 +61,8 @@ private: // functions
   (std::string type, 
    Config * config,
    int index_method,
-   const FieldDescr *) throw ();
+   const FieldDescr *,
+   const ParticleDescr *) throw ();
 
   /// Create named interpolation object
   virtual Prolong * create_prolong_

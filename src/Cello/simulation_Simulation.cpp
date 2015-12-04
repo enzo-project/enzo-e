@@ -355,7 +355,10 @@ void Simulation::initialize_data_descr_() throw()
     type_val[cello::type_name[i]] = i;
   }
 
+
   for (size_t it=0; it<config_->particle_list.size(); it++) {
+
+    // Add particle attributes
     particle_descr_->new_type (config_->particle_list[it]);
     int na = config_->particle_attribute_name[it].size();
     for (int ia=0; ia<na; ia++) {
@@ -363,9 +366,31 @@ void Simulation::initialize_data_descr_() throw()
       int type         = type_val[config_->particle_attribute_type[it][ia]];
       particle_descr_->new_attribute(it,name,type);
     }
+    // position and velocity attributes
+    particle_descr_->set_position 
+      (it,
+       config_->particle_attribute_position[0][it],
+       config_->particle_attribute_position[1][it],
+       config_->particle_attribute_position[2][it]);
+    particle_descr_->set_velocity 
+      (it,
+       config_->particle_attribute_velocity[0][it],
+       config_->particle_attribute_velocity[1][it],
+       config_->particle_attribute_velocity[2][it]);
   }
 
-  // Add particle attributes
+  // particle groups
+
+  int num_particles = config_->particle_group_list.size();
+  for (int index_particle=0; index_particle<num_particles; index_particle++) {
+    std::string particle = config_->particle_list[index_particle];
+    int num_groups = config_->particle_group_list[index_particle].size();
+   
+    for (int index_group=0; index_group<num_groups; index_group++) {
+      std::string group = config_->particle_group_list[index_particle][index_group];
+      particle_descr_->groups()->add(particle,group);
+    }
+  }
 
 }
 //----------------------------------------------------------------------

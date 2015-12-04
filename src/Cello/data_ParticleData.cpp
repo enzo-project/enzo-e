@@ -200,59 +200,6 @@ void ParticleData::delete_particles
 
 //----------------------------------------------------------------------
 
-void ParticleData::split_particles 
-(ParticleDescr * particle_descr, 
- int it, int ib, const bool *mask,
- ParticleData * particle_data_dest)
-{
-  check_arrays_(particle_descr,__FILE__,__LINE__);
-  const int np = num_particles(particle_descr,it,ib);
-
-  // Count masked particles, and return if none
-  int nd=0;
-  for (int ip=0; ip<np; ip++) {
-    if (mask[ip]) nd++;
-  }
-  if (nd==0) return;
-
-  // allocate nd particles
-
-  int j = particle_data_dest->insert_particles(particle_descr,it,nd);
-  int jb,jp;
-  particle_descr->index(j,&jb,&jp);
-
-  // copy particles to be deleted
-
-  const bool interleaved = particle_descr->interleaved(it);
-  const int mb = particle_descr->batch_size();
-
-  int mp = particle_descr->particle_bytes(it);
-
-  const int na = particle_descr->num_attributes(it);
-
-  for (int ip=0; ip<np; ip++) {
-    if (mask[ip]) {
-      for (int ia=0; ia<na; ia++) {
-	if (!interleaved) 
-	  mp = particle_descr->attribute_bytes(it,ia);
-	int ny = particle_descr->attribute_bytes(it,ia);
-	char * a_src = attribute_array(particle_descr,it,ia,ib);
-	char * a_dst = attribute_array(particle_descr,it,ia,jb);
-	for (int iy=0; iy<ny; iy++) {
-	  a_dst [iy + mp*jp] = a_src [iy + mp*ip];
-	}
-      }
-      jp = (jp+1) % mb;
-      if (jp==0) jb++;
-    }
-  }
-
-  // delete particles
-  delete_particles(particle_descr,it,ib,mask);
-}
-
-//----------------------------------------------------------------------
-
 void ParticleData::scatter 
 (ParticleDescr * particle_descr,
  int it, int ib,
@@ -530,14 +477,15 @@ bool ParticleData::position
   int ia_x = particle_descr->attribute_position(it,0);
   int ia_y = particle_descr->attribute_position(it,1);
   int ia_z = particle_descr->attribute_position(it,2);
+
   bool l_return = false;
   if (x && (ia_x != -1)) {
     const int type_x = particle_descr->attribute_type(it,ia_x);
     l_return = true;
     if (cello::type_is_float(type_x)) {
-      position_float_ (particle_descr,type_x,it,ib,ia_x,x);
+      copy_attribute_float_ (particle_descr,type_x,it,ib,ia_x,x);
     } else if (cello::type_is_int(type_x)) {
-      position_float_ (particle_descr,type_x,it,ib,ia_x,x);
+      copy_position_int_ (particle_descr,type_x,it,ib,ia_x,x);
     }
   }
 
@@ -545,9 +493,9 @@ bool ParticleData::position
     const int type_y = particle_descr->attribute_type(it,ia_y);
     l_return = true;
     if (cello::type_is_float(type_y)) {
-      position_float_ (particle_descr,type_y,it,ib,ia_y,y);
+      copy_attribute_float_ (particle_descr,type_y,it,ib,ia_y,y);
     } else if (cello::type_is_int(type_y)) {
-      position_float_ (particle_descr,type_y,it,ib,ia_y,y);
+      copy_position_int_ (particle_descr,type_y,it,ib,ia_y,y);
     }
   }
 
@@ -555,53 +503,13 @@ bool ParticleData::position
     const int type_z = particle_descr->attribute_type(it,ia_z);
     l_return = true;
     if (cello::type_is_float(type_z)) {
-      position_float_ (particle_descr,type_z,it,ib,ia_z,z);
+      copy_attribute_float_ (particle_descr,type_z,it,ib,ia_z,z);
     } else if (cello::type_is_int(type_z)) {
-      position_float_ (particle_descr,type_z,it,ib,ia_z,z);
+      copy_position_int_ (particle_descr,type_z,it,ib,ia_z,z);
     }
   }
 
   return l_return;
-}
-
-//----------------------------------------------------------------------
-
-void ParticleData::position_float_ 
-(ParticleDescr * particle_descr,
- int type, int it, int ib, int ia, double * coord)
-{
-
-  const int dx = particle_descr->stride(it,ia);
-  const char * array = attribute_array(particle_descr,it,ia,ib);
-  const int np = num_particles(particle_descr,it,ib);
-  if (type == type_float) {
-    const float * array_f = (float *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_f[ip*dx];
-  }
-  if (type == type_double) {
-    const double * array_d = (double *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_d[ip*dx];
-  }
-  if (type == type_quadruple) {
-    const long long * array_q = (long long *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_q[ip*dx];
-  }
-  if (type == type_int8) {
-    const int8_t * array_8 = (int8_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_8[ip*dx];
-  }
-  if (type == type_int16) {
-    const int16_t * array_16 = (int16_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_16[ip*dx];
-  }
-  if (type == type_int32) {
-    const int32_t * array_32 = (int32_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_32[ip*dx];
-  }
-  if (type == type_int64) {
-    const int64_t * array_64 = (int64_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_64[ip*dx];
-  }
 }
 
 //----------------------------------------------------------------------
@@ -620,31 +528,19 @@ bool ParticleData::velocity
   if (vx && (ia_x != -1)) {
     const int type_x = particle_descr->attribute_type(it,ia_x);
     l_return = true;
-    if (cello::type_is_float(type_x)) {
-      position_float_ (particle_descr,type_x,it,ib,ia_x,vx);
-    } else if (cello::type_is_int(type_x)) {
-      position_float_ (particle_descr,type_x,it,ib,ia_x,vx);
-    }
+    copy_attribute_float_ (particle_descr,type_x,it,ib,ia_x,vx);
   }
 
   if (vy && (ia_y != -1)) {
     const int type_y = particle_descr->attribute_type(it,ia_y);
     l_return = true;
-    if (cello::type_is_float(type_y)) {
-      position_float_ (particle_descr,type_y,it,ib,ia_y,vy);
-    } else if (cello::type_is_int(type_y)) {
-      position_float_ (particle_descr,type_y,it,ib,ia_y,vy);
-    }
+    copy_attribute_float_ (particle_descr,type_y,it,ib,ia_y,vy);
   }
 
   if (vz && (ia_z != -1)) {
     const int type_z = particle_descr->attribute_type(it,ia_z);
     l_return = true;
-    if (cello::type_is_float(type_z)) {
-      position_float_ (particle_descr,type_z,it,ib,ia_z,vz);
-    } else if (cello::type_is_int(type_z)) {
-      position_float_ (particle_descr,type_z,it,ib,ia_z,vz);
-    }
+    copy_attribute_float_ (particle_descr,type_z,it,ib,ia_z,vz);
   }
 
   return l_return;
@@ -652,10 +548,77 @@ bool ParticleData::velocity
 
 //----------------------------------------------------------------------
 
+void ParticleData::copy_attribute_float_ 
+(ParticleDescr * particle_descr,
+ int type, int it, int ib, int ia, double * coord)
+{
+
+  const int dx = particle_descr->stride(it,ia);
+  const char * array = attribute_array(particle_descr,it,ia,ib);
+  const int np = num_particles(particle_descr,it,ib);
+  if (type == type_float) {
+    const float * array_f = (float *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_f[ip*dx];
+  } else if (type == type_double) {
+    const double * array_d = (double *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_d[ip*dx];
+  } else if (type == type_quadruple) {
+    const long long * array_q = (long long *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_q[ip*dx];
+  } else if (type == type_int8) {
+    const int8_t * array_8 = (int8_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_8[ip*dx];
+  } else if (type == type_int16) {
+    const int16_t * array_16 = (int16_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_16[ip*dx];
+  } else if (type == type_int32) {
+    const int32_t * array_32 = (int32_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_32[ip*dx];
+  } else if (type == type_int64) {
+    const int64_t * array_64 = (int64_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = array_64[ip*dx];
+  } else {
+    ERROR1("ParticleData::copy_attribute_float_()",
+	   "Unknown particle attribute type %d",
+	   type);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::copy_position_int_ 
+(ParticleDescr * particle_descr,
+ int type, int it, int ib, int ia, double * coord)
+{
+  const int dx = particle_descr->stride(it,ia);
+  const char * array = attribute_array(particle_descr,it,ia,ib);
+  const int np = num_particles(particle_descr,it,ib);
+  if (type == type_int8) {
+    const int8_t * array_8 = (int8_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = double(1.0)*array_8[ip*dx]/PMAX_8;
+  } else if (type == type_int16) {
+    const int16_t * array_16 = (int16_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = double(1.0)*array_16[ip*dx]/PMAX_16;
+  } else if (type == type_int32) {
+    const int32_t * array_32 = (int32_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = double(1.0)*array_32[ip*dx]/PMAX_32;
+  } else if (type == type_int64) {
+    const int64_t * array_64 = (int64_t *) array;
+    for (int ip=0; ip<np; ip++) coord[ip] = double(1.0)*array_64[ip*dx]/PMAX_64;
+  } else {
+    ERROR1("ParticleData::copy_attribute_float_()",
+	   "Unknown particle attribute type %d",
+	   type);
+  }
+    
+}
+
+//----------------------------------------------------------------------
+
 void ParticleData::debug (ParticleDescr * particle_descr)
 {
   const int nt = particle_descr->num_types();
-  printf ("particle %p: num_types: %d\n",this,nt);
+
   for (int it=0; it<nt; it++) {
     int nb = num_batches(it);
     int na = particle_descr->num_attributes(it);
@@ -764,4 +727,30 @@ void ParticleData::check_arrays_ (ParticleDescr * particle_descr,
 	     it,attribute_align_[it].size(),nb,
 	     attribute_align_[it].size()>=nb);
   }
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::write_ifrite (ParticleDescr * particle_descr,
+				 int it, std::string file_name,
+				 double xm, double ym, double zm,
+				 double xp, double yp, double zp)
+{
+  FILE * fp = fopen (file_name.c_str(),"w");
+
+  fprintf (fp,"%d\n",num_particles(particle_descr,it));
+  fprintf (fp,"%f %f %f %f %f %f\n",xm,ym,zm,xp,yp,zp);
+  const int nb = num_batches(it);
+  printf ("nb = %d\n",nb);
+  const int ia_x = particle_descr->attribute_position(it,0);
+  const int d = particle_descr->stride(it,ia_x);
+  for (int ib=0; ib<nb; ib++) {
+    const int np = num_particles(particle_descr,it,ib);
+    double x[np], y[np], z[np];
+    position (particle_descr,it,ib,x,y,z);
+    for (int ip=0; ip<np; ip++) {
+      fprintf (fp,"%f %f %f\n",x[ip*d],y[ip*d],z[ip*d]);
+    }
+  }
+  fclose (fp);
 }

@@ -157,7 +157,8 @@ Method * EnzoProblem::create_method_
 ( std::string  name,  
   Config * config,
   int index_method,
-  const FieldDescr * field_descr) throw ()
+  const FieldDescr * field_descr,
+  const ParticleDescr * particle_descr) throw ()
 /// @param name   Name of the method to create
 /// @param config Configuration parameters class
 /// @param field_descr Field descriptor
@@ -259,7 +260,8 @@ Method * EnzoProblem::create_method_
 	       
     }
   } else {
-    method = Problem::create_method_ (name,config, index_method,field_descr);
+    method = Problem::create_method_ 
+      (name,config, index_method,field_descr,particle_descr);
   }
 
   // set the method's courant safety factor

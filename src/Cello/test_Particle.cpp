@@ -620,9 +620,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("split_particles()");
 
-
-  ParticleData * particle_data_2 = new ParticleData;
-  Particle particle_2 (particle_descr,particle_data_2);
+  // ParticleData * particle_data_2 = new ParticleData;
+  // Particle particle_2 (particle_descr,particle_data_2);
 
   count_particles = particle.num_particles(it_dark);
 
@@ -635,14 +634,12 @@ PARALLEL_MAIN_BEGIN
   for (int ib=0; ib<nb; ib++) {
     int np = particle.num_particles(it_dark,ib);
     for (int ip=0; ip<np; ip++) if (mask[ip]) count_delete++;
-    particle.split_particles(it_dark,ib,mask,particle_2);
+    particle.delete_particles(it_dark,ib,mask);
   }
 
   unit_assert (count_particles - count_delete
 	       == particle.num_particles(it_dark));
 
-  unit_assert (particle_2.num_particles(it_dark) == count_delete);
-  
 
   unit_func("compress()");
 

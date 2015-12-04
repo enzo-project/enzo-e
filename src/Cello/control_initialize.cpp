@@ -39,7 +39,7 @@ void Simulation::initialize() throw()
 				field_descr_,
 				particle_descr_,
 				factory());
-  problem_->initialize_method  (config_,field_descr_);
+  problem_->initialize_method  (config_,field_descr_,particle_descr_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
 

@@ -376,7 +376,8 @@ void Problem::initialize_output
 void Problem::initialize_method
 (
  Config * config,
- const FieldDescr * field_descr
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
  ) throw()
 {
 
@@ -386,7 +387,8 @@ void Problem::initialize_method
 
     std::string name = config->method_list[index_method];
 
-    Method * method = create_method_(name, config, index_method, field_descr);
+    Method * method = create_method_(name, config, index_method, 
+				     field_descr, particle_descr);
 
     if (method) {
 
@@ -613,7 +615,8 @@ Method * Problem::create_method_
 ( std::string  name,
   Config * config,
   int index_method,
-  const FieldDescr * field_descr) throw ()
+  const FieldDescr * field_descr,
+  const ParticleDescr * particle_descr) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
 
@@ -621,7 +624,8 @@ Method * Problem::create_method_
   Method * method = NULL;
 
   if (name == "trace") {
-    method = new MethodTrace(field_descr,config->method_courant[index_method]);
+    method = new MethodTrace(field_descr, particle_descr,
+			     config->method_courant[index_method]);
   }
   return method;
 }

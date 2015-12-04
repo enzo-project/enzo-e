@@ -53,15 +53,10 @@ public: // interface
 
   void delete_particles (ParticleDescr *, int it, int ib, const bool * m);
 
-  /// Same as delete, but inserts particles into a second Particle
-  /// object.
-
-  void split_particles (ParticleDescr *, int it, int ib, const bool *m,
-			ParticleData * particle_data);
-
   /// Scatter particles among an array of other Particle structures.
   /// Typically used for preparing to send particles that have gone
-  /// out of the block to neighboring blocks.
+  /// out of the block to neighboring blocks.  Particles are not deleted,
+  /// so must be done so manually, e.g. using delete_particles.
 
   void scatter (ParticleDescr *, int it, int ib,
 		int np, const bool * mask, const int * index,
@@ -150,11 +145,27 @@ private: /// functions
   void check_arrays_ (ParticleDescr * particle_descr,
 		      std::string file, int line) const;
 
-  /// Copy the given attribute to the given coordinate (position or velocity)
-  /// depending on the type
-  void position_float_ 
+  /// Copy the given floating point attribute of given type (float,
+  /// double, quad, etc.) to the given coordinate double position
+  /// array.
+  void copy_attribute_float_ 
   (ParticleDescr * particle_descr,
    int type, int it, int ib, int ia, double * coord);
+
+  /// Positions may be defined relative to the Block using integer
+  /// variables.  If so, copy the position coordinate to the given
+  /// double position array, where coordinate range in the Block is
+  /// [-1.0, 1.0).  Conversion to double may involve floating-point
+  /// errors, especially if position is defined using large ints,
+  /// e.g. int64_t
+  void copy_position_int_ 
+  (ParticleDescr * particle_descr,
+   int type, int it, int ib, int ia, double * coord);
+
+  void write_ifrite (ParticleDescr * particle_descr,
+		     int it, std::string file_name,
+		     double xm, double ym, double zm,
+		     double xp, double yp, double zp);
 
 private: /// attributes
 

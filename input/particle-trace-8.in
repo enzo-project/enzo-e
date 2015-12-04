@@ -4,3 +4,6 @@ include "input/tracer.incl"
 Stopping {
    cycle = 10;
 }
+
+Boundary {type = "periodic";}
+

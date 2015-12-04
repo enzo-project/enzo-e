@@ -150,6 +150,16 @@ public: // interface
   int particle_bytes (int it) const
   { return particle_descr_->particle_bytes(it); }
 
+  /// Return the attribute corresponding to the given position
+  /// coordinate, -1 if none
+  int attribute_position (int it, int axis)
+  { return particle_descr_->attribute_position_[it][axis]; }
+
+  /// Return the attribute corresponding to the given velocity
+  /// coordinate, -1 if none
+  int attribute_velocity (int it, int axis)
+  { return particle_descr_->attribute_velocity_[it][axis]; }
+
   /// Return the stride of the given attribute if interleaved, otherwise 1.
   /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
   /// Must be evenly divisible.
@@ -230,13 +240,6 @@ public: // interface
   void delete_particles (int it, int ib, const bool * m)
   { particle_data_->delete_particles (particle_descr_,it,ib,m); }
 
-  /// Same as delete, but inserts particles into a second Particle
-  /// object.
-
-  void split_particles (int it, int ib, const bool *m, Particle particle)
-  { particle_data_->split_particles
-      (particle_descr_, it,ib,m,particle.particle_data()); }
-
   /// Scatter particles among an array of other Particle structures.
   /// Typically used for preparing to send particles that have gone
   /// out of the block to neighboring blocks.
@@ -300,6 +303,12 @@ public: // interface
 
   void debug () const
   { particle_data_->debug (particle_descr_); }
+
+  void write_ifrite (int it, std::string file_name,
+		     double xm, double ym, double zm,
+		     double xp, double yp, double zp) 
+  { particle_data_->write_ifrite 
+      (particle_descr_,it,file_name,xm,ym,zm,xp,yp,zp);  }
 
 private: // functions
 

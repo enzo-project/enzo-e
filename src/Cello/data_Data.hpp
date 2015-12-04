@@ -21,6 +21,13 @@ class Data {
 public: // interface
 
   /// Constructor
+  Data(int nx, int ny, int nz,
+       int num_field_data,
+       double xm, double xp,
+       double ym, double yp,
+       double zm, double zp) throw();
+
+  /// Constructor
   Data(FieldDescr * field_descr,
        ParticleDescr * particle_descr,
        int nx, int ny, int nz,
@@ -139,7 +146,7 @@ public: // interface
   /// Return the ith Particle
   Particle particle () throw()
   { return Particle(particle_descr(),
-		 particle_data_); }
+		    particle_data_); }
 
 public: // virtual functions
 

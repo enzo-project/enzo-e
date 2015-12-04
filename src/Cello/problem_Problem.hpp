@@ -30,8 +30,8 @@ class Output;
 class Parameters;
 class ParticleDescr;
 class Prolong;
-class Refresh;
 class Refine;
+class Refresh;
 class Restrict;
 class Simulation;
 class Stopping;
@@ -151,7 +151,8 @@ public: // interface
 
   /// Initialize the method objects
   void initialize_method(Config * config, 
-			 const FieldDescr * field_descr) throw();
+			 const FieldDescr * field_descr,
+			 const ParticleDescr * particle_descr) throw();
 
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
@@ -192,7 +193,8 @@ protected: // functions
   (std::string type, 
    Config * config, 
    int index_method,
-   const FieldDescr * field_descr) throw ();
+   const FieldDescr * field_descr,
+   const ParticleDescr * particle_descr) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  

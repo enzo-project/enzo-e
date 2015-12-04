@@ -32,14 +32,17 @@ void InitialTrace::enforce_block
 
   // ... get number of cells
 
-  int nx,ny,nz;
-  field.field_size (0,&nx,&ny,&nz);
-  int n = nx*ny*nz;
+  int mx,my,mz;
+  field.dimensions (0,&mx,&my,&mz);
 
+  int nx,ny,nz;
+  field.size (&nx,&ny,&nz);
+  
   // ... insert uninitialized tracer particles
 
-  int it = particle.type_index("trace");
-  particle.insert_particles (it,n);
+  const int it = particle.type_index("trace");
+
+  particle.insert_particles (it,nx*ny*nz);
 
   // Initialize particle positions
 
@@ -50,9 +53,17 @@ void InitialTrace::enforce_block
   block->lower(&xm,&ym,&zm);
   block->upper(&xp,&yp,&zp);
 
-  int ia_x = particle.attribute_index(it,"x");
-  int ia_y = particle.attribute_index(it,"y");
-  int ia_z = particle.attribute_index(it,"z");
+  const double xl = xp - xm;
+  const double yl = yp - ym;
+  const double zl = zp - zm;
+
+  const double hx = xl / nx;
+  const double hy = yl / ny;
+  const double hz = zl / nz;
+
+  const int ia_x = particle.attribute_index(it,"x");
+  const int ia_y = particle.attribute_index(it,"y");
+  const int ia_z = particle.attribute_index(it,"z");
 
   const int np = particle.batch_size();
 
@@ -66,13 +77,15 @@ void InitialTrace::enforce_block
   const int dp = particle.stride(it,ia_x);
 
   for (int iz=0; iz<nz; iz++) {
-    float z = (nz>1) ? (zm + (zp-zm)*iz/(nz-1)) : 0.0;
+    float z = (mz>1) ? zm + (iz + 0.5)*hz : 0.0;
     for (int iy=0; iy<ny; iy++) {
-      float y = (ny > 1) ? (ym + (yp-ym)*iy/(ny-1)) : 0.0;
-      for (int ix=0; ix<nx; ix++) {
-	float x = xm + (xp-xm)*ix/(nx-1);
+      float y = (my>1) ? ym + (iy + 0.5)*hy : 0.0;
 
-	const int i= ix + nx*(iy + ny*iz);
+      for (int ix=0; ix<nx; ix++) {
+	float x = (mx>1) ? xm + (ix + 0.5)*hx : 0.0;
+
+
+	const int i = ix + nx*(iy + ny*iz);
 
 	// ... if new batch then update position arrays
 	if (i % np == 0) {
@@ -94,4 +107,8 @@ void InitialTrace::enforce_block
       }
     }
   }
+
+  //  char buffer[80];
+  //  sprintf (buffer,"initial-%s.txt",block->name().c_str());
+  //  particle.write_ifrite (it,buffer,xm,ym,zm,xp,yp,zp);
 }

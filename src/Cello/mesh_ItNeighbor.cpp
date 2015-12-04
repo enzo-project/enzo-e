@@ -245,16 +245,19 @@ bool ItNeighbor::valid_()
   //  ----------+      +-----+-----+
 
   if (face_level() > level_) {
+
     if (is_reset_child_()) return false;
 
     const int if3[3] = {-of3_[0],-of3_[1],-of3_[2]};
+
     bool valid = true;
-    if (rank_ > 0 && if3[0] == -1 && ic3_[0] != 0) valid = false;
-    if (rank_ > 0 && if3[0] ==  1 && ic3_[0] != 1) valid = false;
-    if (rank_ > 1 && if3[1] == -1 && ic3_[1] != 0) valid = false;
-    if (rank_ > 1 && if3[1] ==  1 && ic3_[1] != 1) valid = false;
-    if (rank_ > 2 && if3[2] == -1 && ic3_[2] != 0) valid = false;
-    if (rank_ > 2 && if3[2] ==  1 && ic3_[2] != 1) valid = false;
+
+    if (rank_ >= 1 && if3[0] == -1 && ic3_[0] != 0) valid = false;
+    if (rank_ >= 1 && if3[0] ==  1 && ic3_[0] != 1) valid = false;
+    if (rank_ >= 2 && if3[1] == -1 && ic3_[1] != 0) valid = false;
+    if (rank_ >= 2 && if3[1] ==  1 && ic3_[1] != 1) valid = false;
+    if (rank_ >= 3 && if3[2] == -1 && ic3_[2] != 0) valid = false;
+    if (rank_ >= 3 && if3[2] ==  1 && ic3_[2] != 1) valid = false;
 
     if (valid == false) return false;
 
@@ -263,19 +266,20 @@ bool ItNeighbor::valid_()
   // Skip coarse oblique neighbors
 
   if (face_level() < level_) {
-    // Skip face if neighbor is coarsecoarser and not same as parent.
+
+    // Skip face if neighbor is coarser and not same as parent.
+
     int ic3[3] = {0,0,0};
     index_.child (level_,&ic3[0],&ic3[1],&ic3[2]);
+
     bool valid = true;
-    if  (rank_ >= 1 && 
-  	 ((of3_[0] == +1 && ic3[0] == 0) ||
-  	  (of3_[0] == -1 && ic3[0] == 1))) valid = false;
-    if  (rank_ >= 2 && 
-  	 ((of3_[1] == +1 && ic3[1] == 0) ||
-  	  (of3_[1] == -1 && ic3[1] == 1))) valid = false;
-    if  (rank_ >= 3 && 
-  	 ((of3_[2] == +1 && ic3[2] == 0) ||
-  	  (of3_[2] == -1 && ic3[2] == 1))) valid = false;
+
+    if  (rank_ >= 1 && of3_[0] == +1 && ic3[0] == 0) valid = false;
+    if  (rank_ >= 1 && of3_[0] == -1 && ic3[0] == 1) valid = false;
+    if  (rank_ >= 2 && of3_[1] == +1 && ic3[1] == 0) valid = false;
+    if  (rank_ >= 2 && of3_[1] == -1 && ic3[1] == 1) valid = false;
+    if  (rank_ >= 3 && of3_[2] == +1 && ic3[2] == 0) valid = false;
+    if  (rank_ >= 3 && of3_[2] == -1 && ic3[2] == 1) valid = false;
 
     if (valid == false) return false;
 

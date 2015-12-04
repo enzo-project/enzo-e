@@ -104,17 +104,11 @@ Block::Block
   double xp,yp,zp;
   upper(&xp,&yp,&zp);
 
-  FieldDescr    * field_descr    = simulation()->field_descr();
-  ParticleDescr * particle_descr = simulation()->particle_descr();
-
   // Allocate block data
 
-  data_ = new Data  (field_descr,
-		     particle_descr,
-		     nx, ny, nz, 
+  data_ = new Data  (nx, ny, nz, 
 		     num_field_blocks,
 		     xm,xp, ym,yp, zm,zp);
-
 
   data_->allocate();
 

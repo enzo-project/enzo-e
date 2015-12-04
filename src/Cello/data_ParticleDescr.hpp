@@ -102,11 +102,13 @@ public: // interface
   /// Return the number of bytes use to represent a particle.
   int particle_bytes (int it) const;
 
-  /// Return the attribute corresponding to the given position coordinate, -1 if none
+  /// Return the attribute corresponding to the given position
+  /// coordinate, -1 if none
   int attribute_position (int it, int axis)
   { return attribute_position_[it][axis]; }
 
-  /// Return the attribute corresponding to the given velocity coordinate, -1 if none
+  /// Return the attribute corresponding to the given velocity
+  /// coordinate, -1 if none
   int attribute_velocity (int it, int axis)
   { return attribute_velocity_[it][axis]; }
 

@@ -17,7 +17,8 @@
 
 #ifdef DEBUG_REFRESH
 #  define TRACE_REFRESH(msg) \
-  printf ("%s:%d TRACE_REFRESH %s\n",__FILE__,__LINE__,msg);
+  printf ("%s:%d %p TRACE_REFRESH %s\n",__FILE__,__LINE__,this,msg);	\
+  fflush(stdout);
 #else
 #  define TRACE_REFRESH(msg) /* NOTHING */
 #endif
@@ -162,14 +163,6 @@ void Block::refresh_store_field_face_
 
 void Block::refresh_load_particle_faces_ (Refresh *refresh)
 {
-  const int min_face_rank = refresh->min_face_rank();
-  const int neighbor_type = refresh->neighbor_type();
-
-  const int rank = this->rank();
-  int np = rank == 1 ? 4 : (rank == 2 ? 4*4 : 4*4*4);
-
-  // 1. CREATE PARTICLE_DATA ARRAY
-
   // Array elements correspond to child-sized blocks to
   // the left, inside, and right of the main Block.  Particles
   // are assumed to be (well) within this area.
@@ -191,9 +184,9 @@ void Block::refresh_load_particle_faces_ (Refresh *refresh)
   //     +---+   5   +---+
   //     | 4 |       | 6 |
   // +---+---+===+===+---+
-  // |       ║   :   ║    
-  // |   2   + - + - +   3
-  // |       ║   :   ║    
+  // |       ║       ║    
+  // |   2   +       +   3
+  // |       ║       ║    
   // +-------+=======+-------+
   //         |            
   //     0   |            
@@ -211,18 +204,34 @@ void Block::refresh_load_particle_faces_ (Refresh *refresh)
   //     | 0 | 1 | 1 | 1 |
   //     +---+---+---+---+
 
+  const int min_face_rank = refresh->min_face_rank();
+
   const int level = this->level();
+  const int rank = this->rank();
 
-  ParticleData * particle_data[np];
+  // 1. CREATE PARTICLE_DATA ARRAY
 
-  // 2. SCATTER PARTICLES AMONG PARTICLE_DATA ARRAY
+  // ... size of the ParticleData array
+  const int npa = ( (rank == 1) ? 4 : ( (rank == 2) ? 4*4 : 4*4*4));
+
+  ParticleData * particle_array[npa];
+  ParticleData * particle_list[npa];
+  Index index_list[npa];
+
+  for (int i=0; i<npa; i++) {
+    particle_list[i] = NULL;
+    particle_array[i] = NULL;
+  }
+
+  // 2. INITIALIZE THE PARTICLE_DATA ARRAY
+
+  TRACE_REFRESH("initialize");
 
   ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
 
   int count = 0;
+  int nl = 0;
   while (it_neighbor.next()) {
-
-    Index index_neighbor = it_neighbor.index();
 
     const int level_face = it_neighbor.face_level();
 
@@ -236,97 +245,230 @@ void Block::refresh_load_particle_faces_ (Refresh *refresh)
       (level_face == level + 1) ? refresh_fine : refresh_unknown;
 
     if (refresh_type==refresh_coarse) {
+      // coarse neighbor: need index of self in parent
       index_.child(index_.level(),ic3,ic3+1,ic3+2);
     } else if (refresh_type==refresh_fine) {
+      // fine neighbor: need index of child in self
       it_neighbor.child(ic3);
     }
+    // (same-level neighbor: don't need child)
 
     int lower[3] = {0,0,0};
     int upper[3] = {1,1,1};
     refresh->index_limits (rank,refresh_type,if3,ic3,lower,upper);
 
+    ParticleData * pd = new ParticleData;
+    ParticleDescr * particle_descr = simulation() -> particle_descr();
+    pd->allocate(particle_descr);
+
+    particle_list[nl] = pd;
+    index_list[nl] = it_neighbor.index();
+    ++ nl;
+
     for (int ix=lower[0]; ix<upper[0]; ix++) {
       for (int iy=lower[1]; iy<upper[1]; iy++) {
 	for (int iz=lower[2]; iz<upper[2]; iz++) {
+	  int i=ix + 4*(iy + 4*iz);
+	  particle_array[i] = pd;
 	  count ++;
 	}
       }
     }
-    printf ("refresh %s face %d %d %d child %d %d %d lower %d %d %d upper %d %d %d\n",
+#ifdef DEBUG_REFRESH
+    printf ("DEBUG refresh %s face %d %d %d child %d %d %d lower %d %d %d upper %d %d %d\n",
 	    refresh_type == refresh_coarse ? "coarse" :
 	    ( refresh_type == refresh_same ? "same" : "fine"),
 	    if3[0],if3[1],if3[2],
 	    ic3[0],ic3[1],ic3[2],
 	    lower[0],lower[1],lower[2],
 	    upper[0],upper[1],upper[2]);
-
+	fflush(stdout);
+#endif
   }
 
-  printf ("refresh count = %d\n",count);
-  // if (neighbor_type == neighbor_leaf) {
+  // 3. SCATTER PARTICLES AMONG PARTICLE_DATA ARRAY
 
+  TRACE_REFRESH("scatter");
+  std::vector<int> type_list = refresh->particle_list();
 
-  // } else if (neighbor_type == neighbor_level) {
+  Particle particle (simulation() -> particle_descr(),
+		     data()       -> particle_data());
 
-  //   ERROR ("Block::refresh_load_particle_faces_()",
-  // 	   "neighbor_level not supported (designed for MG)");
-  // }
-}
+  // get Block bounds 
+  double xm,ym,zm;
+  lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  upper(&xp,&yp,&zp);
 
-//----------------------------------------------------------------------
+#ifdef DEBUG_REFRESH
+  const int it = particle.type_index("trace");
+  char buffer[80];
+  sprintf (buffer,"refresh-%s-%d.txt",name().c_str(),cycle());
+  particle.write_ifrite (it,buffer,xm,ym,zm,xp,yp,zp);
+#endif  
 
-void Block::refresh_load_particle_face_
-( int refresh_type,
-  Index index_neighbor,
-  int if3[3],
-  int ic3[3])
+  // find block center (x0,y0,z0) and width (xl,yl,zl)
+  const double x0 = 0.5*(xm+xp);
+  const double y0 = 0.5*(ym+yp);
+  const double z0 = 0.5*(zm+zp);
+  const double xl = xp-xm;
+  const double yl = yp-ym;
+  const double zl = zp-zm;
 
-{
-  TRACE_REFRESH("refresh_load_particle_face()");
+#ifdef DEBUG_REFRESH
+  printf ("DEBUG refresh lower %f %f %f\n",xm,ym,zm);
+  printf ("DEBUG refresh upper %f %f %f\n",xp,yp,zp);
+#endif
 
-  std::vector<int> particle_list = refresh()->particle_list();
+  // ...for each particle type to be moved
+  std::vector<int>::iterator it_type;
+#ifdef DEBUG_REFRESH
+  printf ("DEBUG refresh before particle type loop\n");
+	fflush(stdout);
+#endif
+  for (it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
 
-  Particle particle (simulation()->particle_descr(),
-		     data()->particle_data());
-
-  const int nt = particle_list.size();
-
-  // number of calls to p_refresh_store_particle_face
-
-  for (int it=0; it<nt; it++) {
-
-    const bool interleaved = particle.interleaved(it);
+    int it = *it_type;
+#ifdef DEBUG_REFRESH
+    printf ("DEBUG refresh in particle type loop %d nb %d np %d\n",
+	    it,
+	    particle.num_batches(it),
+	    particle.num_particles(it));
+	fflush(stdout);
+#endif
     const int nb = particle.num_batches(it);
 
+    int ia_x = particle.attribute_position(it,0);
+
+    bool is_float =  (cello::type_is_float(particle.attribute_type(it,ia_x)));
+
+    // ...for each batch of particles
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
-      const int mb = particle.batch_size();
-      const int mp = particle.particle_bytes(it);
 
-      // if not interleaved, batch size is always full
+      // ...extract particle positions
 
-      int n = mp*(interleaved ? np : mb);
-      char * array = particle.attribute_array(it,0,ib);
+      double xa[np],ya[np],za[np];
+      particle.position(it,ib,xa,ya,za);
 
-      thisProxy[index_neighbor].p_refresh_store_particle_face
-	(n,array, it, ib, if3, ic3 );
+      // ...initialize masks (scatter mask and delete mask) and index array
+      bool mask_scatter[np],mask_delete[np];
+      int index[np];
+      for (int ip=0; ip<np; ip++) {
+
+	double x = is_float ? 2.0*(xa[ip]-x0)/xl : xa[ip];
+	double y = is_float ? 2.0*(ya[ip]-y0)/yl : ya[ip];
+	double z = is_float ? 2.0*(za[ip]-z0)/zl : za[ip];
+
+	int ix = (rank >= 1) ? (x + 2) : 0;
+	int iy = (rank >= 2) ? (y + 2) : 0;
+	int iz = (rank >= 3) ? (z + 2) : 0;
+	int i = ix + 4*(iy + 4*iz);
+#ifdef DEBUG_REFRESH
+	printf ("DEBUG refresh ib ip %d %d\n",ib,ip);
+	printf ("DEBUG refresh [xyz]a = %f %f %f\n",xa[ip],ya[ip],za[ip]);
+	printf ("DEBUG refresh [xyz]  = %f %f %f\n",x,y,z);
+	printf ("DEBUG refresh i[xyz] = %d %d %d\n",ix,iy,iz);
+	fflush(stdout);
+#endif
+	ASSERT1 ("Block::refresh_load_particle_faces_",
+		 "particle data index ix = %d out of bounds",
+		 ix,(0 <= ix && ix < 4));
+	fflush(stdout);
+	ASSERT1 ("Block::refresh_load_particle_faces_",
+		 "particle data index iy = %d out of bounds",
+		 iy,(0 <= iy && iy < 4));
+	fflush(stdout);
+	ASSERT1 ("Block::refresh_load_particle_faces_",
+		 "particle data index iz = %d out of bounds",
+		 iz,(0 <= iz && iz < 4));
+	fflush(stdout);
+	index[ip] = i;
+	bool in_block = true;
+	in_block = in_block && ((rank < 1) || (1 <= ix && ix <= 2));
+	in_block = in_block && ((rank < 2) || (1 <= iy && iy <= 2));
+	in_block = in_block && ((rank < 3) || (1 <= iz && iz <= 2));
+	mask_scatter[ip] = ! in_block;
+	mask_delete[ip] = mask_scatter[ip];
+#ifdef DEBUG_REFRESH
+	printf ("DEBUG refresh [xyz] = %f %f %f i[xyz] = %d %d %d mask %d\n",
+		x,y,z,
+		ix,iy,iz,mask_scatter[ip]);
+	fflush(stdout);
+#endif
+      }
+
+      // ...scatter particles to particle array
+      particle.scatter (it,ib, np, mask_scatter, index, npa, particle_array);
+      // ... delete scattered particles
+      particle.delete_particles (it,ib,mask_delete);
     }
   }
+
+  // 4. SEND PARTICLE DATA TO NEIGHBORS
+
+  TRACE_REFRESH("send");
+  ParticleDescr * p_descr = simulation() -> particle_descr();
+
+  for (int il=0; il<nl; il++) {
+
+    Index index_neighbor  =    index_list[il];
+    ParticleData * p_data = particle_list[il];
+    Particle particle_send (p_descr,p_data);
+    
+#ifdef DEBUG_REFRESH
+    {
+    const int np = particle_send.num_particles();
+    printf ("DEBUG refresh sending particle block %d / %d np = %d\n", il,nl,np);
+	fflush(stdout);
+  }
+#endif
+
+    const int nt = particle_send.num_types();
+
+    for (int it=0; it<nt; it++) {
+
+      const bool interleaved = particle_send.interleaved(it);
+      const int nb = particle_send.num_batches(it);
+
+      for (int ib=0; ib<nb; ib++) {
+
+	const int np = particle_send.num_particles(it,ib);
+	const int mb = particle_send.batch_size();
+	const int mp = particle_send.particle_bytes(it);
+
+	// if not interleaved, batch size is always full
+
+	int n = mp*(interleaved ? np : mb);
+	char * a = particle_send.attribute_array(it,0,ib);
+
+	thisProxy[index_neighbor].p_refresh_store_particle_face (n,np,a,it);
+      }
+    }
+    
+  }
+
+  TRACE_REFRESH("exit");
+
+#ifdef DEBUG_REFRESH
+  printf ("DEBUG refresh count = %d\n",count);
+	fflush(stdout);
+#endif
 }
 
 //----------------------------------------------------------------------
 
 void Block::refresh_store_particle_face_
-(int n, char * array, 
- int it, int ib,
- int if3[3], 
- int ic3[3])
+  (int n, int np, char * a, int it)
 {
   TRACE_REFRESH("refresh_store_particle_face");
+#ifdef DEBUG_REFRESH
+  printf ("refresh_store_particle_face %d %d\n",n,it);
+#endif
 
-  Particle particle (simulation()->particle_descr(),
-		     data()->particle_data());
+  Particle particle (simulation() -> particle_descr(),
+		     data()       -> particle_data());
 
   // determine number of particles
 
@@ -334,9 +476,11 @@ void Block::refresh_store_particle_face_
   const int mb = particle.batch_size();
 
   const bool interleaved = particle.interleaved(it);
-  int np = (interleaved) ? n/mp : mb;
 
   int j = particle.insert_particles(it,np);
+#ifdef DEBUG_REFRESH
+  int j0 = j;
+#endif
 
   int jb,jp;
   particle.index(j,&jb,&jp);
@@ -351,12 +495,30 @@ void Block::refresh_store_particle_face_
 	mp = particle.attribute_bytes(it,ia);
       int ny = particle.attribute_bytes(it,ia);
       char * a_dst = particle.attribute_array(it,ia,jb);
+      int increment = particle.attribute_array(it,ia,jb) - particle.attribute_array(it,0,jb);
+      char * a_src = a + increment;
       for (int iy=0; iy<ny; iy++) {
-	a_dst [iy + mp*jp] = array [iy + mp*ip];
+	a_dst [iy + mp*jp] = a_src [iy + mp*ip];
       }
     }
     jp = (jp+1) % mb;
     if (jp==0) jb++;
   }
+#ifdef DEBUG_REFRESH
+
+  const int ia_x = particle.attribute_position(it,0);
+  const int ia_y = particle.attribute_position(it,1);
+  const int ia_z = particle.attribute_position(it,2);
+  printf ("it %d ia_[xyz] %d %d %d\n",it,ia_x,ia_y,ia_z);
+  const int d = particle.stride(it,ia_x);
+  for (int j=j0; j<j0+np; j++) {
+    particle.index(j,&jb,&jp);
+    float * xa = (float *) particle.attribute_array (it,ia_x,jb);
+    float * ya = (float *) particle.attribute_array (it,ia_y,jb);
+    float * za = (float *) particle.attribute_array (it,ia_z,jb);
+    printf ("DEBUG refresh store particle %d [%d %d] %f %f %f\n",j,jb,jp,xa[jp*d],ya[jp*d],za[jp*d]);
+  }
+
+#endif
 
 }
