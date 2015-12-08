@@ -100,6 +100,10 @@ public: // attributes
   int                        initial_cycle;
   double                     initial_time;
 
+  int                        initial_trace_dx;
+  int                        initial_trace_dy;
+  int                        initial_trace_dz;
+
   // Memory
 
   bool                       memory_active;
@@ -118,6 +122,7 @@ public: // attributes
   std::vector<std::string>   method_list;
   std::vector<int>           method_schedule_index;
   std::vector<double>        method_courant;
+  std::vector<double>        method_timestep;
 
   // Monitor
 
@@ -139,7 +144,6 @@ public: // attributes
   std::vector < std::string>  output_image_reduce_type;
   std::vector < char>         output_image_ghost;
   std::vector < int >         output_image_face_rank;
-  std::vector < char>         output_image_specify_bounds;
   std::vector < double>       output_image_min;
   std::vector < double>       output_image_max;
   std::vector < int >         output_schedule_index;

@@ -75,7 +75,6 @@ Adapt {
 #	image_block_size  = 5;
 	image_size = [641,641];
         include "input/schedule_cycle_10.incl"
-        image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 4.0;
         include "input/colormap_rainbow.incl"

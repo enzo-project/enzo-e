@@ -101,7 +101,6 @@ int ParticleData::insert_particles
 (ParticleDescr * particle_descr,
  int it, int np)
 {
-
   if (np==0) return 0;
 
   check_arrays_(particle_descr,__FILE__,__LINE__);
@@ -474,9 +473,9 @@ bool ParticleData::position
  int it, int ib,
  double * x, double * y, double * z)
 {
-  int ia_x = particle_descr->attribute_position(it,0);
-  int ia_y = particle_descr->attribute_position(it,1);
-  int ia_z = particle_descr->attribute_position(it,2);
+  const int ia_x = particle_descr->attribute_position(it,0);
+  const int ia_y = particle_descr->attribute_position(it,1);
+  const int ia_z = particle_descr->attribute_position(it,2);
 
   bool l_return = false;
   if (x && (ia_x != -1)) {
@@ -548,6 +547,43 @@ bool ParticleData::velocity
 
 //----------------------------------------------------------------------
 
+void ParticleData::position_update 
+(ParticleDescr * particle_descr,int it, int ib, 
+ long double dx, long double dy, long double dz)
+{
+  const int ia_x = particle_descr->attribute_position(it,0);
+  const int ia_y = particle_descr->attribute_position(it,1);
+  const int ia_z = particle_descr->attribute_position(it,2);
+
+  if (dx != 0.0 && (ia_x != -1)) {
+    const int type_x = particle_descr->attribute_type(it,ia_x);
+    if (cello::type_is_float(type_x)) {
+      update_attribute_float_ (particle_descr,type_x,it,ib,ia_x,dx);
+    } else if (cello::type_is_int(type_x)) {
+      update_position_int_ (particle_descr,type_x,it,ib,ia_x,dx);
+    }
+  }
+  if (dy != 0.0 && (ia_y != -1)) {
+    const int type_y = particle_descr->attribute_type(it,ia_y);
+    if (cello::type_is_float(type_y)) {
+      update_attribute_float_ (particle_descr,type_y,it,ib,ia_y,dy);
+    } else if (cello::type_is_int(type_y)) {
+      update_position_int_ (particle_descr,type_y,it,ib,ia_y,dy);
+    }
+  }
+  if (dz != 0.0 && (ia_z != -1)) {
+    const int type_z = particle_descr->attribute_type(it,ia_z);
+    if (cello::type_is_float(type_z)) {
+      update_attribute_float_ (particle_descr,type_z,it,ib,ia_z,dz);
+    } else if (cello::type_is_int(type_z)) {
+      update_position_int_ (particle_descr,type_z,it,ib,ia_z,dz);
+    }
+  }
+  
+}
+
+//----------------------------------------------------------------------
+
 void ParticleData::copy_attribute_float_ 
 (ParticleDescr * particle_descr,
  int type, int it, int ib, int ia, double * coord)
@@ -563,20 +599,32 @@ void ParticleData::copy_attribute_float_
     const double * array_d = (double *) array;
     for (int ip=0; ip<np; ip++) coord[ip] = array_d[ip*dx];
   } else if (type == type_quadruple) {
-    const long long * array_q = (long long *) array;
+    const long double * array_q = (long double *) array;
     for (int ip=0; ip<np; ip++) coord[ip] = array_q[ip*dx];
-  } else if (type == type_int8) {
-    const int8_t * array_8 = (int8_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_8[ip*dx];
-  } else if (type == type_int16) {
-    const int16_t * array_16 = (int16_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_16[ip*dx];
-  } else if (type == type_int32) {
-    const int32_t * array_32 = (int32_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_32[ip*dx];
-  } else if (type == type_int64) {
-    const int64_t * array_64 = (int64_t *) array;
-    for (int ip=0; ip<np; ip++) coord[ip] = array_64[ip*dx];
+  } else {
+    ERROR1("ParticleData::copy_attribute_float_()",
+	   "Unknown particle attribute type %d", type);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::update_attribute_float_ 
+(ParticleDescr * particle_descr,
+ int type, int it, int ib, int ia, long double da)
+{
+  const int dx = particle_descr->stride(it,ia);
+  char * array = attribute_array(particle_descr,it,ia,ib);
+  const int np = num_particles(particle_descr,it,ib);
+  if (type == type_float) {
+    float * array_f = (float *) array;
+    for (int ip=0; ip<np; ip++) array_f[ip*dx] += da;
+  } else if (type == type_double) {
+    double * array_d = (double *) array;
+    for (int ip=0; ip<np; ip++) array_d[ip*dx] += da;
+  } else if (type == type_quadruple) {
+    long double * array_q = (long double *) array;
+    for (int ip=0; ip<np; ip++) array_q[ip*dx] += da;
   } else {
     ERROR1("ParticleData::copy_attribute_float_()",
 	   "Unknown particle attribute type %d",
@@ -610,7 +658,39 @@ void ParticleData::copy_position_int_
 	   "Unknown particle attribute type %d",
 	   type);
   }
-    
+
+}
+
+//----------------------------------------------------------------------
+
+void ParticleData::update_position_int_ 
+(ParticleDescr * particle_descr,
+ int type, int it, int ib, int ia, int64_t da)
+{
+  const int dx = particle_descr->stride(it,ia);
+  char * array = attribute_array(particle_descr,it,ia,ib);
+  const int np = num_particles(particle_descr,it,ib);
+  if (type == type_int8) {
+    const int8_t da_8 = (int8_t) da / (PMAX_64/PMAX_8);
+    int8_t * array_8 = (int8_t *) array;
+    for (int ip=0; ip<np; ip++) array_8[ip*dx] += da_8;
+  } else if (type == type_int16) {
+    const int16_t da_16 = da / (PMAX_64/PMAX_16);
+    int16_t * array_16 = (int16_t *) array;
+    for (int ip=0; ip<np; ip++) array_16[ip*dx] += da_16;
+  } else if (type == type_int32) {
+    const int32_t da_32 = da / (PMAX_64/PMAX_32);
+    int32_t * array_32 = (int32_t *) array;
+    for (int ip=0; ip<np; ip++) array_32[ip*dx] += da_32;
+  } else if (type == type_int64) {
+    const int64_t da_64 = da;
+    int64_t * array_64 = (int64_t *) array;
+    for (int ip=0; ip<np; ip++) array_64[ip*dx] += da_64;
+  } else {
+    ERROR1("ParticleData::copy_attribute_float_()",
+	   "Unknown particle attribute type %d",
+	   type);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -741,7 +821,6 @@ void ParticleData::write_ifrite (ParticleDescr * particle_descr,
   fprintf (fp,"%d\n",num_particles(particle_descr,it));
   fprintf (fp,"%f %f %f %f %f %f\n",xm,ym,zm,xp,yp,zp);
   const int nb = num_batches(it);
-  printf ("nb = %d\n",nb);
   const int ia_x = particle_descr->attribute_position(it,0);
   const int d = particle_descr->stride(it,ia_x);
   for (int ib=0; ib<nb; ib++) {
@@ -752,5 +831,6 @@ void ParticleData::write_ifrite (ParticleDescr * particle_descr,
       fprintf (fp,"%f %f %f\n",x[ip*d],y[ip*d],z[ip*d]);
     }
   }
+  fflush(fp);
   fclose (fp);
 }

@@ -7,24 +7,30 @@
 
 #include "problem.hpp"
 
+int InitialTrace::id0_ = -1;
+
 //----------------------------------------------------------------------
 
 void InitialTrace::pup (PUP::er &p)
 {
   TRACEPUP;
   // NOTE: change this function whenever attributes change
+  p | dx_;
+  p | dy_;
+  p | dz_;
 }
 
 //======================================================================
 
 void InitialTrace::enforce_block
  ( Block            * block, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr,
-    const Hierarchy  * hierarchy
+   const FieldDescr * field_descr,
+   const ParticleDescr * particle_descr,
+   const Hierarchy  * hierarchy
    ) throw()
-
 {
+  if (id0_ == -1) id0_ = CkMyPe();
+
   Field    field    (block->data()->field());
   Particle particle (block->data()->particle());
 
@@ -61,54 +67,59 @@ void InitialTrace::enforce_block
   const double hy = yl / ny;
   const double hz = zl / nz;
 
-  const int ia_x = particle.attribute_index(it,"x");
-  const int ia_y = particle.attribute_index(it,"y");
-  const int ia_z = particle.attribute_index(it,"z");
+  const int ia_id = particle.attribute_index(it,"id");
+  const int ia_x = particle.attribute_index (it,"x");
+  const int ia_y = particle.attribute_index (it,"y");
+  const int ia_z = particle.attribute_index (it,"z");
 
   const int np = particle.batch_size();
 
   int ib=0;  // batch counter
   int ip=0;  // particle counter 
+  int iid=0; // ID counter
 
+  int64_t * id = 0;
   float * xa = 0;
   float * ya = 0;
   float * za = 0;
 
   const int dp = particle.stride(it,ia_x);
+  const int did = particle.stride(it,ia_id);
 
-  for (int iz=0; iz<nz; iz++) {
+  for (int iz=0; iz<nz; iz+=dz_) {
     float z = (mz>1) ? zm + (iz + 0.5)*hz : 0.0;
-    for (int iy=0; iy<ny; iy++) {
+    for (int iy=0; iy<ny; iy+=dy_) {
       float y = (my>1) ? ym + (iy + 0.5)*hy : 0.0;
 
-      for (int ix=0; ix<nx; ix++) {
+      for (int ix=0; ix<nx; ix+=dx_) {
 	float x = (mx>1) ? xm + (ix + 0.5)*hx : 0.0;
-
 
 	const int i = ix + nx*(iy + ny*iz);
 
 	// ... if new batch then update position arrays
 	if (i % np == 0) {
-	  xa = (float *) particle.attribute_array (it,ia_x,ib);
-	  ya = (float *) particle.attribute_array (it,ia_y,ib);
-	  za = (float *) particle.attribute_array (it,ia_z,ib);
+	  id = (int64_t *) particle.attribute_array (it,ia_id,ib);
+	  xa = (float *)   particle.attribute_array (it,ia_x,ib);
+	  ya = (float *)   particle.attribute_array (it,ia_y,ib);
+	  za = (float *)   particle.attribute_array (it,ia_z,ib);
 	}
 
+	id[iid] = id0_;
 	xa[ip] = x;
 	ya[ip] = y;
 	za[ip] = z;
 
 	ip+=dp;
+	iid+=did;
+
 	if (ip/dp == np) {
 	  ip=0;
 	  ib++;
 	}
+
+	id0_ += CkNumPes();
     
       }
     }
   }
-
-  //  char buffer[80];
-  //  sprintf (buffer,"initial-%s.txt",block->name().c_str());
-  //  particle.write_ifrite (it,buffer,xm,ym,zm,xp,yp,zp);
 }

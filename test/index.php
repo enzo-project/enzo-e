@@ -418,21 +418,27 @@ function end_hidden ($id)
 function test_table ($file_root,$size_array, $types)
 {
   $show_flash = 0;
+  $show_gif = 1;
 
   echo "<table>";
   echo "<tr>";
   //  echo "<th>$file_root</th>";
+  if ($show_gif) echo "<th>gif</th>";
   if ($show_flash) echo "<th>animation</th>";
   for ($j = 0; $j < sizeof($size_array); ++$j) {
     $size = $size_array[$j];
-    printf ("<th>$size</th>\n");
+    printf ("<th>$size</th>");
   }
   echo "</tr>";
+  printf ("\n");
   for ($i = 0; $i < sizeof($types); ++$i) {
     echo "<tr>";
     $type = $types[$i];
     //     	printf ("<th>$type</th>\n"); 
     // Show movie file if available
+    if ($show_gif) {
+      echo "<td> <img width=160 src=$file_root.gif></img></td>";
+    }
     if ($show_flash) {
       echo "<td>";
       $swf_file = "$type/$file_root.swf"; 
@@ -619,6 +625,10 @@ test_summary("Initial",
 
 test_summary("Output", 
 	     array("output-stride-1","output-stride-2","output-stride-4"),
+	     array("enzo-p","enzo-p","enzo-p"),'test');
+
+test_summary("Particle", 
+	     array("test-particle-x","test-particle-y","test-particle-circle"),
 	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
@@ -1067,6 +1077,25 @@ begin_hidden("output_stride_3", "Stride 3");
 tests("Enzo","enzo-p","test_output-stride-4","","");
 test_table_blocks ("output-stride-4",  array("00","10","20"), $types);
 end_hidden("output_stride_3");
+
+//----------------------------------------------------------------------
+
+test_group("Particle");
+
+begin_hidden("particle-x", "Particle (vx,vy) = (1,0)");
+tests("Enzo","enzo-p","test_particle-x","","");
+test_table ("particle-x", array("000","003","006","009"),$types);
+end_hidden("particle-x-1");
+
+begin_hidden("particle-y", "Particle (vx,vy) = (0,1)");
+tests("Enzo","enzo-p","test_particle-y","","");
+test_table ("particle-y", array("000","003","006","009"),$types);
+end_hidden("particle-y-1");
+
+begin_hidden("particle-circle", "Particle (vx,vy) = (-y,x)");
+tests("Enzo","enzo-p","test_particle-circle","","");
+test_table ("particle-circle", array("000","007","014","020"),$types);
+end_hidden("particle-circle-1");
 
 //======================================================================
 

@@ -143,7 +143,7 @@ public: // interface
   const ParticleDescr * particle_descr () const throw()
   {   return (const ParticleDescr *) particle_descr(); }
 
-  /// Return the ith Particle
+  /// Return the Particle object
   Particle particle () throw()
   { return Particle(particle_descr(),
 		    particle_data_); }

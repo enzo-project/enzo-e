@@ -18,12 +18,19 @@ Method {
 }
 
 Output {
-   list += ["trace"];
-   trace {
+   list += ["trace_h5","trace_png"];
+   trace_h5 {
       type = "data";
       field_list = ["density"];
       particle_list = ["trace"];
       name = ["trace-p%02d-c%06d.h5", "proc","cycle"];
+      include "input/schedule_cycle_10.incl"
+   }
+   trace_png {
+      type = "image";
+#      field_list = ["density"];
+      particle_list = ["trace"];
+      name = ["trace-p%02d-c%06d.png", "proc","cycle"];
       include "input/schedule_cycle_10.incl"
    }
 }

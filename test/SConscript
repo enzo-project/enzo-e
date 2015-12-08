@@ -22,15 +22,18 @@ copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $CPIN; $COPY")
 run_parallel = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
+png_to_gif   = Builder(action = "convert -delay 5 -loop 0 ${ARGS} $TARGET ")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
 env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'Hdf5ToPng'   : hdf5_to_png } )
+env.Append(BUILDERS = { 'PngToGif'    : png_to_gif } )
 
 env_mv_out  = env.Clone(COPY = 'mv `ls *.png *.h5` ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
 env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
+
 
 # h5topng
 
@@ -167,6 +170,9 @@ Clean(env_mv_out.RunSerial ('test_method_ppm-1.unit',bin_path + '/enzo-p',
 
 env.MakeMovie ("method_ppm-1.swf", "test_method_ppm-1.unit", \
                 ARGS= test_path + "/method_ppm-1*.png");
+env.PngToGif ("method_ppm-1.gif", "test_method_ppm-1.unit", \
+                ARGS= test_path + "/method_ppm-1*.png");
+
 
 # parallel
 
@@ -544,6 +550,34 @@ env.Requires(output_stride_4_C00,output_stride_4_RUN)
 Clean(output_stride_4,
       [Glob('#/' + test_path + '/output-stride-4*.png'),
        'test_output-stride-4.unit'])
+
+#----------------------------------------------------------------------
+# PARTICLES
+#----------------------------------------------------------------------
+Clean(env_mv_out.RunParallel ('test_particle-x.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/test_particle-x.in'),
+		[Glob('#/' + test_path + '/particle-x.png')])
+
+env.PngToGif("particle-x.gif", "test_particle-x.unit", \
+             ARGS = test_path + "/particle-x*.png")			       
+
+
+Clean(env_mv_out.RunParallel ('test_particle-y.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/test_particle-y.in'),
+		[Glob('#/' + test_path + '/particle-y.png')])
+
+env.PngToGif("particle-y.gif", "test_particle-y.unit", \
+             ARGS = test_path + "/particle-y*.png")			       
+
+Clean(env_mv_out.RunParallel ('test_particle-circle.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/test_particle-circle.in'),
+		[Glob('#/' + test_path + '/particle-circle.png')])
+
+env.PngToGif("particle-circle.gif", "test_particle-circle.unit", \
+             ARGS = test_path + "/particle-circle*.png")			       
 
 #----------------------------------------------------------------------
 

@@ -117,6 +117,12 @@ public: // interface
 		 int it, int ib,
 		 double * x, double * y = 0, double * z = 0);
 
+  /// Update positions given an increment
+  void position_update 
+  (ParticleDescr * particle_descr,int it, int ib, 
+   long double dx, long double dy, long double dz);
+			 
+
   /// Fill a vector of velocity coordinates for the given type and batch
   bool velocity (ParticleDescr * particle_descr,
 		 int it, int ib,
@@ -152,6 +158,12 @@ private: /// functions
   (ParticleDescr * particle_descr,
    int type, int it, int ib, int ia, double * coord);
 
+  /// Increment the given floating point attribute of given float type
+  /// (float, double, quad, etc.) by the given double long constant value.
+  void update_attribute_float_ 
+  (ParticleDescr * particle_descr,
+   int type, int it, int ib, int ia, long double da);
+
   /// Positions may be defined relative to the Block using integer
   /// variables.  If so, copy the position coordinate to the given
   /// double position array, where coordinate range in the Block is
@@ -161,6 +173,11 @@ private: /// functions
   void copy_position_int_ 
   (ParticleDescr * particle_descr,
    int type, int it, int ib, int ia, double * coord);
+
+  /// Update version of copy_position_int_()
+  void update_position_int_ 
+  (ParticleDescr * particle_descr,
+   int type, int it, int ib, int ia, int64_t da);
 
   void write_ifrite (ParticleDescr * particle_descr,
 		     int it, std::string file_name,

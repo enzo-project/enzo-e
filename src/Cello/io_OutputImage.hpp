@@ -50,7 +50,6 @@ public: // functions
 	      int face_rank,
 	      bool image_log,
 	      bool ghost,
-	      bool specify_bounds,
 	      double min, double max) throw();
 
   /// OutputImage destructor: free allocated image data
@@ -137,7 +136,7 @@ private: // functions
   void image_create_ () throw();
 
   /// Generate PNG image, using given min and max for colormap
-  void image_write_ (double min=0.0, double max=0.0) throw();
+  void image_write_ () throw();
 
   /// Close the image data
   void image_close_ () throw();
@@ -185,9 +184,6 @@ private: // attributes
 
   /// Axis along which to reduce
   axis_type axis_;
-
-  /// Whether to use given or computed min/max for colormap
-  bool specify_bounds_;
 
   /// Minimum and maximum values if specified
   double min_;

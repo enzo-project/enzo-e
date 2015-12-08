@@ -143,11 +143,10 @@ Mesh { root_rank = 3; }
                       0.0, 1.0, 0.0, 
                       1.0, 1.0, 0.0, 
                       1.0, 0.0, 0.0 ];
-         image_max = 6.0;
          image_min = 0.0;
+         image_max = 6.0;
          image_reduce_type = "max";
          image_size = [ 1025, 1025 ];
-         image_specify_bounds = true;
          image_type = "mesh";
          name = [ "turbulence3d-mesh-%04d.png", "count" ];
          include "input/schedule_cycle_25.incl"

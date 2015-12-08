@@ -511,7 +511,9 @@ Initial * Problem::create_initial_
 			       config->initial_cycle,
 			       config->initial_time);
   } else if (type == "trace") {
-    initial = new InitialTrace;
+    initial = new InitialTrace (config->initial_trace_dx,
+                                config->initial_trace_dy,
+                                config->initial_trace_dz);
   }
 
   return initial;
@@ -625,7 +627,8 @@ Method * Problem::create_method_
 
   if (name == "trace") {
     method = new MethodTrace(field_descr, particle_descr,
-			     config->method_courant[index_method]);
+			     config->method_courant[index_method],
+			     config->method_timestep[index_method]);
   }
   return method;
 }
@@ -678,8 +681,6 @@ Output * Problem::create_output_
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
-    bool        image_specify_bounds =
-      config->output_image_specify_bounds[index];
     double      image_min = config->output_image_min[index];
     double      image_max = config->output_image_max[index];
 
@@ -698,7 +699,6 @@ Output * Problem::create_output_
 			      image_face_rank,
 			      image_log,
 			      image_ghost,
-			      image_specify_bounds,
 			      image_min, image_max);
 
   } else if (name == "data") {

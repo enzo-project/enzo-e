@@ -14,9 +14,11 @@ MethodTrace::MethodTrace
 (
  const FieldDescr * field_descr,
  const ParticleDescr * particle_descr,
- double courant
+ double courant,
+ double timestep
  ) throw() 
-  : Method (courant)
+  : Method (courant),
+    timestep_(timestep)
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   refresh(ir)->add_all_particles(particle_descr->num_types());
@@ -33,16 +35,13 @@ void MethodTrace::compute ( Block * block) throw()
 
   const int it = particle.type_index("trace");
 
+  const int ia_id = particle.attribute_index(it,"id");
   const int ia_x = particle.attribute_index(it,"x");
   const int ia_y = particle.attribute_index(it,"y");
   const int ia_z = particle.attribute_index(it,"z");
 
-  // declare particle position arrays
-
-  float * xa = 0;
-  float * ya = 0;
-  float * za = 0;
-
+  const int dp =  particle.stride(it,ia_x);
+  const int did =  particle.stride(it,ia_id);
   // get velocity field arrays
   const int rank = block->rank();
   double  * vxa = (rank >= 1) ? 
@@ -63,45 +62,69 @@ void MethodTrace::compute ( Block * block) throw()
   double xp,yp,zp;
   block->lower(&xm,&ym,&zm);
   block->upper(&xp,&yp,&zp);
-  double hx = (xp-xm)/nx;
+
+  const double hx = (xp-xm)/nx;
+  const double hy = (yp-ym)/ny;
+  const double hz = (zp-zm)/nz;
 
   double dt = block -> dt();
 
+  // declare particle position arrays
+
+  int64_t * ida = 0;
+  float * xa = 0;
+  float * ya = 0;
+  float * za = 0;
+
   for (int ib=0; ib<particle.num_batches(it); ib++) {
+    ida = (int64_t *) particle.attribute_array (it,ia_id,ib);
     xa = (float *) particle.attribute_array (it,ia_x,ib);
     ya = (float *) particle.attribute_array (it,ia_y,ib);
     za = (float *) particle.attribute_array (it,ia_z,ib);
     const int np = particle.num_particles(it,ib);
-    double vx,vy,vz;
+
     if (rank == 1) {
+
       for (int ip=0; ip<np; ip++) {
-	double x = xa[ip];
-	int ix0 = floor(nx*(x - xm) / (xp - xm));
-	int ix1 = ix0+1;
-	// x normalized between 0 and 1
-	double x0 = x - ix0;
-	double x1 = ix1 - x;
+
+	double x = xa[ip*dp];
+
+	int ix0 = gx + floor((nx-1)*(x - xm) / (xp - xm));
+
+	int ix1 = ix0 + 1;
+
+	double x0 = xm + (ix0-gx+0.5)*hx;
+
+	double x1 = 1 - x0;
 
 	double v0 = vxa[ix0];
+
 	double v1 = vxa[ix1];
 
-	double vx = v0 * x1 + v1 * x0;
+	double vx = v0*x1 + v1*x0;
 
-	xa[ip] += vx * dt;
+	xa[ip*dp] += vx*dt;
+
       }
+
     } else if (rank == 2) {
+
       for (int ip=0; ip<np; ip++) {
-	double x = xa[ip];
-	double y = ya[ip];
-	int ix0 = floor(nx*(x - xm) / (xp - xm));
-	int ix1 = ix0+1;
-	int iy0 = floor(ny*(y - ym) / (yp - ym));
-	int iy1 = iy0+1;
-	// x,y normalized between 0 and 1
-	double x0 = x - ix0;
-	double x1 = ix1 - x;
-	double y0 = y - iy0;
-	double y1 = iy1 - y;
+
+	double x = xa[ip*dp];
+	double y = ya[ip*dp];
+
+	int ix0 = gx + floor((nx-1)*(x - xm) / (xp - xm));
+	int iy0 = gy + floor((ny-1)*(y - ym) / (yp - ym));
+
+	int ix1 = ix0 + 1;
+	int iy1 = iy0 + 1;
+
+	double x0 = xm + (ix0-gx+0.5)*hx;
+	double y0 = ym + (iy0-gy+0.5)*hy;
+
+	double x1 = 1.0 - x0;
+	double y1 = 1.0 - y0;
 
 	double vx00 = vxa[ix0+mx*iy0];
 	double vx10 = vxa[ix1+mx*iy0];
@@ -123,28 +146,32 @@ void MethodTrace::compute ( Block * block) throw()
 	  +         vy01*x1*y0
 	  +         vy11*x0*y0;
 
-	xa[ip] += vx * dt;
-	ya[ip] += vy * dt;
+	xa[ip*dp] += vx*dt;
+	ya[ip*dp] += vy*dt;
 
       }
     } else if (rank == 3) {
       for (int ip=0; ip<np; ip++) {
-	double x = xa[ip];
-	double y = ya[ip];
-	double z = za[ip];
-	int ix0 = floor(nx*(x - xm) / (xp - xm));
-	int ix1 = ix0+1;
-	int iy0 = floor(ny*(y - ym) / (yp - ym));
-	int iy1 = iy0+1;
-	int iz0 = floor(nz*(z - zm) / (zp - zm));
-	int iz1 = iz0+1;
-	// x,y,z normalized between 0 and 1
-	double x0 = x - ix0;
-	double x1 = ix1 - x;
-	double y0 = y - iy0;
-	double y1 = iy1 - y;
-	double z0 = z - iz0;
-	double z1 = iz1 - z;
+
+	double x = xa[ip*dp];
+	double y = ya[ip*dp];
+	double z = za[ip*dp];
+
+	int ix0 = gx + floor((nx-1)*(x - xm) / (xp - xm));
+	int iy0 = gy + floor((ny-1)*(y - ym) / (yp - ym));
+	int iz0 = gz + floor((nz-1)*(z - zm) / (zp - zm));
+
+	int ix1 = ix0 + 1;
+	int iy1 = iy0 + 1;
+	int iz1 = iz0 + 1;
+
+	double x0 = xm + (ix0-gx+0.5)*hx;
+	double y0 = ym + (iy0-gy+0.5)*hy;
+	double z0 = zm + (iz0-gz+0.5)*hz;
+
+	double x1 = 1.0 - xm;
+	double y1 = 1.0 - ym;
+	double z1 = 1.0 - zm;
 
 	double vx000 = vxa[ix0+mx*(iy0 + my*iz0)];
 	double vx100 = vxa[ix1+mx*(iy0 + my*iz0)];
@@ -200,11 +227,9 @@ void MethodTrace::compute ( Block * block) throw()
 	  +         vz011*x1*y0*z0 
 	  +         vz111*x0*y0*z0;
 
-
-
-	xa[ip] += vx * dt;
-	ya[ip] += vy * dt;
-	za[ip] += vz * dt;
+	xa[ip*dp] += vx*dt;
+	ya[ip*dp] += vy*dt;
+	za[ip*dp] += vz*dt;
 
       }
     }

@@ -20,7 +20,10 @@ class InitialTrace : public Initial
 public: // interface
 
   /// empty constructor for charm++ pup()
-  InitialTrace() throw() {}
+  InitialTrace(int dx, int dy, int dz) throw() 
+  : Initial(),
+    dx_(dx),dy_(dy),dz_(dz)
+  {}
 
   /// Destructor
   virtual ~InitialTrace() throw()
@@ -52,6 +55,11 @@ protected: // functions
 
 protected: // attributes
 
+  /// Put a particle in every cell ix, iy such that (ix%dx_==0) && (iy%dy_ == 0) && (iz%dz_ == 0)
+  int dx_,dy_,dz_;
+
+  /// Next available particle ID, where id0_ = CkMyPe() + k * CkNumPe()
+  static int id0_;
 };
 
 #endif /* PROBLEM_INITIAL_TRACE_HPP */

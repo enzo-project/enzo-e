@@ -22,7 +22,8 @@ public: // interface
   /// Create a new MethodTrace
   MethodTrace (const FieldDescr * field_descr,
 	       const ParticleDescr * particle_descr,
-	       double courant) throw() ;
+	       double courant,
+	       double timestep ) throw() ;
 
   /// Destructor
   virtual ~MethodTrace() throw()
@@ -36,9 +37,17 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
-  {};
+  {
+    TRACEPUP;
+    Method::pup(p);
+    p | timestep_;
+  };
 
 public: // virtual functions
+
+  /// Compute maximum timestep for this method
+  virtual double timestep (Block * block) const throw() 
+  { return timestep_; }
 
   /// Apply the method to advance a block one timestep 
 
@@ -53,6 +62,7 @@ protected: // functions
 
 protected: // attributes
 
+  double timestep_;
 
 };
 

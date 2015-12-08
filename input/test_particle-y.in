@@ -1,0 +1,15 @@
+include "input/test_particle.incl"
+
+ Initial {
+     value {
+         velocity_x = 0.0;
+         velocity_y = 1.0;
+     };
+ }
+
+Output {
+    trace {
+        name = [ "particle-y-%03d.png", "cycle" ];
+    }
+}
+

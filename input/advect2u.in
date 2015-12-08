@@ -1,11 +1,9 @@
 
 include "input/ppm.incl"
-include "input/sedov-amr.incl"
-include "input/sedov-output.incl"
 
 Adapt    {  max_level = 0; }
 
-Mesh { root_size      = [512,512]; }
+Mesh { root_size      = [32,32]; }
 Mesh { root_blocks    = [2,2]; }
 Boundary { type = "periodic"; }
 Initial {
@@ -26,22 +24,26 @@ Initial {
 }
 
 Output { list = ["de","te","mesh"]; 
-Output { list = ["de","te","mesh"]; 
    de {
-          name = ["advect2u-de-%03d.png", "cycle"]; 
-      include "schedule_cycle_10.incl"
+      type = "image";
+         name = ["advect2u-de-%03d.png", "cycle"]; 
+         include "input/schedule_cycle_10.incl"
    }
    te { 
-          name = ["advect2u-te-%03d.png","cycle"];
-      include "schedule_cycle_10.incl"
+     type = "image";
+     name = ["advect2u-te-%03d.png","cycle"];
+      include "input/schedule_cycle_10.incl"
      }
    mesh {
-          name = ["advect2u-mesh-%03d.png", "cycle"]; 
-      include "schedule_cycle_10.incl"
+      type = "image";
+      name = ["advect2u-mesh-%03d.png", "cycle"]; 
+      include "input/schedule_cycle_10.incl"
    }
 }
 
 # Output{  mesh { image_mesh_color = "process"; }}
 
-Stopping { cycle = 10000; }
+Stopping { cycle = 100; }
 
+
+include "input/tracer.incl"

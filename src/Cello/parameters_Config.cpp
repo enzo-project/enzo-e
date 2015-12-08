@@ -77,6 +77,9 @@ void Config::pup (PUP::er &p)
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
+  p | initial_trace_dx;
+  p | initial_trace_dy;
+  p | initial_trace_dz;
 
   // Memory
 
@@ -96,6 +99,7 @@ void Config::pup (PUP::er &p)
   p | method_list;
   p | method_schedule_index;
   p | method_courant;
+  p | method_timestep;
 
   // Monitor
 
@@ -117,7 +121,6 @@ void Config::pup (PUP::er &p)
   p | output_image_reduce_type;
   p | output_image_ghost;
   p | output_image_face_rank;
-  p | output_image_specify_bounds;
   p | output_image_min;
   p | output_image_max;
   p | output_schedule_index;
@@ -548,6 +551,10 @@ void Config::read_initial_ (Parameters * p) throw()
     initial_list[i] = name;
 
   }
+
+  initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
+  initial_trace_dy = p->list_value_integer (1,"Initial:trace:stride",1);
+  initial_trace_dz = p->list_value_integer (2,"Initial:trace:stride",1);
 }
 
 //----------------------------------------------------------------------
@@ -620,6 +627,7 @@ void Config::read_method_ (Parameters * p) throw()
 
   method_list.   resize(num_method);
   method_courant.resize(num_method);
+  method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
 
   for (int index_method=0; index_method<num_method; index_method++) {
@@ -651,6 +659,11 @@ void Config::read_method_ (Parameters * p) throw()
     // Read courant condition if any
     std::string courant = full_name + ":courant";
     method_courant[index_method] = p->value_float  (courant,1.0);
+
+    // Read specified timestep, if any (for MethodTrace)
+    std::string timestep = full_name + ":timestep";
+    method_timestep[index_method] = p->value_float  
+      (timestep,std::numeric_limits<double>::max());
   }
 }
 
@@ -694,7 +707,6 @@ void Config::read_output_ (Parameters * p) throw()
   output_image_reduce_type.resize(num_output);
   output_image_ghost.resize(num_output);
   output_image_face_rank.resize(num_output);
-  output_image_specify_bounds.resize(num_output);
   output_image_min.resize(num_output);
   output_image_max.resize(num_output);
   output_schedule_index.resize(num_output);
@@ -819,8 +831,6 @@ void Config::read_output_ (Parameters * p) throw()
       output_image_ghost[index_output] = 
 	p->value_logical("image_ghost",false);
 
-      output_image_specify_bounds[index_output] =
-	p->value_logical("image_specify_bounds",false);
       output_image_min[index_output] =
 	p->value_float("image_min",0.0);
       output_image_max[index_output] =

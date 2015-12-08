@@ -114,7 +114,6 @@
 	 image_type = "mesh";
 	 image_mesh_color = "age";
 	 image_size = [641,641];
-         image_specify_bounds = true;
          image_min = 0.0;
 	 image_max = 1.0;
 

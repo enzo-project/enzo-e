@@ -45,7 +45,6 @@ Output {
            include "input/schedule_cycle_2.incl"
 	   image_type = "mesh";
 	   image_size = [1025,1025];
-           image_specify_bounds = true;
            image_min = 0.0;
            image_max = 1.0;
            image_mesh_color = "process";

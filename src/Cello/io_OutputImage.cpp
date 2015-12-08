@@ -26,13 +26,11 @@ OutputImage::OutputImage(int index,
 			 int face_rank,
 			 bool image_log,
 			 bool ghost,
-			 bool specify_bounds,
 			 double min, double max) throw ()
 : Output(index,factory,field_descr,particle_descr),
     image_data_(),
     image_mesh_(),
     axis_(axis_z),
-    specify_bounds_(specify_bounds),
     min_(min),max_(max),
     nxi_(image_size_x),
     nyi_(image_size_y),
@@ -87,6 +85,7 @@ OutputImage::OutputImage(int index,
   // Override default Output::process_stride_: only root writes
   set_process_stride(process_count);
 
+  // Set default color map to be black and white
   map_r_.resize(2);
   map_g_.resize(2);
   map_b_.resize(2);
@@ -124,7 +123,6 @@ void OutputImage::pup (PUP::er &p)
   p | op_reduce_;
   p | mesh_color_type_;
   p | axis_;
-  p | specify_bounds_;
   p | min_;
   p | max_;
   p | nxi_;
@@ -190,7 +188,7 @@ void OutputImage::open () throw()
 void OutputImage::close () throw()
 {
   TRACE("OutputImage::close()");
-  if (is_writer()) image_write_(min_,max_);
+  if (is_writer()) image_write_();
   image_close_();
   png_close_();
 }
@@ -236,143 +234,192 @@ void OutputImage::write_block
 
   // (may be size 0 for mesh output)
   int index_field = (it_field_index_->size() > 0) 
-    ? it_field_index_->value() : 0;
-
-  // Get ghost depth
-
-  int ngx,ngy,ngz;
-  field_descr->ghost_depth(index_field,&ngx,&ngy,&ngz);
-
-  // FieldData array dimensions
-  int ndx,ndy,ndz;
-  ndx = nbx + 2*ngx;
-  ndy = nby + 2*ngy;
-  ndz = nbz + 2*ngz;
-
-  // add block contribution to image
-
-  const char * field = (ghost_) ? 
-    field_data->values(field_descr,index_field) :
-    field_data->unknowns(field_descr,index_field);
-
-  float * field_float = (float*)field;
-  double * field_double = (double*)field;
+    ? it_field_index_->value() : -1;
 
   // pixel extents of box
   int ixm,iym,izm; 
   int ixp,iyp,izp;
   extents_img_ (block,&ixm,&ixp,&iym,&iyp,&izm,&izp);
 
+
+  // position extents of box
   double xm,ym,zm;
   double xp,yp,zp;
   block->lower(&xm,&ym,&zm);
   block->upper(&xp,&yp,&zp);
-  double v = 1.0;
-  if (nbx > 1) v *= (xp-xm);
-  if (nby > 1) v *= (yp-ym);
-  if (nbz > 1) v *= (zp-zm);
-  TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),(zp-zm),v);
 
-  const int precision = field_descr->precision(index_field);
+  if (index_field >= 0) {
 
-  if (type_is_data() && block->is_leaf()) {
+    // Get ghost depth
 
-    const double factor = (nbz <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
+    int ngx,ngy,ngz;
+    field_descr->ghost_depth(index_field,&ngx,&ngy,&ngz);
 
-    int mx = ghost_ ? ndx : nbx;
-    int my = ghost_ ? ndy : nby;
-    int mz = ghost_ ? ndz : nbz;
-    for (int ix=0; ix<mx; ix++) {
-      int jxm = ixm +  ix   *(ixp-ixm)/mx;
-      int jxp = ixm + (ix+1)*(ixp-ixm)/mx-1;
-      for (int iy=0; iy<my; iy++) {
-	int jym = iym +  iy   *(iyp-iym)/my;
-	int jyp = iym + (iy+1)*(iyp-iym)/my-1;
-	for (int iz=0; iz<mz; iz++) {
-	  int i=ix + ndx*(iy + ndy*iz);
-	  double value = 0.0;
-	  if (precision == precision_single) {
-	    value = field_float[i];
-	  } else if (precision == precision_double) {
-	    value = field_double[i];
+    // FieldData array dimensions
+    int ndx,ndy,ndz;
+    ndx = nbx + 2*ngx;
+    ndy = nby + 2*ngy;
+    ndz = nbz + 2*ngz;
+
+    // add block contribution to image
+
+    const char * field = (ghost_) ? 
+      field_data->values(field_descr,index_field) :
+      field_data->unknowns(field_descr,index_field);
+
+    float * field_float = (float*)field;
+    double * field_double = (double*)field;
+
+    double v = 1.0;
+    if (nbx > 1) v *= (xp-xm);
+    if (nby > 1) v *= (yp-ym);
+    if (nbz > 1) v *= (zp-zm);
+    TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),(zp-zm),v);
+
+    const int precision = field_descr->precision(index_field);
+
+    if (type_is_data() && block->is_leaf()) {
+
+      const double factor = (nbz <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
+
+      int mx = ghost_ ? ndx : nbx;
+      int my = ghost_ ? ndy : nby;
+      int mz = ghost_ ? ndz : nbz;
+      for (int ix=0; ix<mx; ix++) {
+	int jxm = ixm +  ix   *(ixp-ixm)/mx;
+	int jxp = ixm + (ix+1)*(ixp-ixm)/mx-1;
+	for (int iy=0; iy<my; iy++) {
+	  int jym = iym +  iy   *(iyp-iym)/my;
+	  int jyp = iym + (iy+1)*(iyp-iym)/my-1;
+	  for (int iz=0; iz<mz; iz++) {
+	    int i=ix + ndx*(iy + ndy*iz);
+	    double value = 0.0;
+	    if (precision == precision_single) {
+	      value = field_float[i];
+	    } else if (precision == precision_double) {
+	      value = field_double[i];
+	    }
+
+	    reduce_cube_(image_data_,jxm,jxp,jym,jyp, (value*factor));
 	  }
-
-	  reduce_cube_(image_data_,jxm,jxp,jym,jyp, (value*factor));
 	}
+      }
+
+      if (type_is_mesh()) {
+
+	// value for mesh
+	double value = 0;
+	value = mesh_color_(level,block->age());
+
+	if (face_rank_ >= 1) {
+	  reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
+	} else {
+	  reduce_cube_(image_mesh_,ixm+3,ixp-3,iym+3,iyp-3,value);
+	}
+	reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,0.0,reduce_set);
+
+	if (block->is_leaf()) { // ) {
+	  int xm=(ixm+ixp)/2;
+	  int ym=(iym+iyp)/2;
+	  if (face_rank_ <= 1) {
+	    {
+	      int if3[3] = {-1,0,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
+	    }
+	    {
+	      int if3[3] = {1,0,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
+	    }
+	    {
+	      int if3[3] = {0,-1,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
+	    }
+	    {
+	      int if3[3] = {0,1,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
+	    }
+	  }
+	  if (face_rank_ <= 0) {
+	    {
+	      int if3[3] = {-1,-1,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
+	    }
+	    {
+	      int if3[3] = {1,-1,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
+	    }
+	    {
+	      int if3[3] = {-1,1,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
+	    }
+	    {
+	      int if3[3] = {1,1,0};
+	      int face_level = block->face_level(if3);
+	      double face_color = mesh_color_(face_level,0);
+	      reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
+	    }
+	  }
+	}
+
       }
     }
   }
 
-  if (type_is_mesh()) {
+  // WRITE PARTICLES
+    
+  ParticleData * particle_data = 
+    (ParticleData *)block->data()->particle_data();
 
-    // value for mesh
-    double value = 0;
-    value = mesh_color_(level,block->age());
+  Particle particle ((ParticleDescr *)particle_descr,particle_data);
 
-    if (face_rank_ >= 1) {
-      reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
-    } else {
-      reduce_cube_(image_mesh_,ixm+3,ixp-3,iym+3,iyp-3,value);
-    }
-    reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,0.0,reduce_set);
+  for (it_particle_index_->first();
+       ! it_particle_index_->done();
+       it_particle_index_->next()) {
 
-    if (block->is_leaf()) { // ) {
-      int xm=(ixm+ixp)/2;
-      int ym=(iym+iyp)/2;
-      if (face_rank_ <= 1) {
-	{
-	  int if3[3] = {-1,0,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
-	}
-	{
-	  int if3[3] = {1,0,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
-	}
-	{
-	  int if3[3] = {0,-1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
-	}
-	{
-	  int if3[3] = {0,1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
-	}
-      }
-      if (face_rank_ <= 0) {
-	{
-	  int if3[3] = {-1,-1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
-	}
-	{
-	  int if3[3] = {1,-1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
-	}
-	{
-	  int if3[3] = {-1,1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
-	}
-	{
-	  int if3[3] = {1,1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
+    const int it = it_particle_index_->value();
+
+    const int ia_x = particle.attribute_index(it,"x");
+    const int ia_id = particle.attribute_index(it,"id");
+
+    const int nb = particle.num_batches(it);
+    const int dp = particle.stride(it,ia_x);
+    const int dd = particle.stride(it,ia_id);
+    for (int ib=0; ib<nb; ib++) {
+
+      const int np = particle.num_particles(it,ib);
+      double xa [np];
+      double ya [np];
+      particle.position(it,ib, xa,ya);
+
+      int64_t * ida = (int64_t *)particle.attribute_array(it,ia_id,ib);
+
+      for (int ip=0; ip<np; ip++) {
+	double x = xa[ip*dp];
+	double y = ya[ip*dp];
+	const int ix = ixm + 1.0*((x-xm)/(xp-xm))*(ixp-ixm-1);
+	const int iy = iym + 1.0*((y-ym)/(yp-ym))*(iyp-iym-1);
+	if ( ( xm <= x && x <= xp ) && (ym <= y && y <= yp)) {
+	  // particles may be (temporarily) out of bounds--don't plot them
+	  int i = ix + nxi_*iy;
+	  reduce_point_(&image_data_[i],1.0);
 	}
       }
     }
-
+      
   }
 }
 
@@ -440,7 +487,7 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::update_remote  ( int n, char * buffer) throw()
+void OutputImage::update_remote  ( int m, char * buffer) throw()
 {
   TRACE("OutputImage::update_remote()");
   DEBUG("update_remote");
@@ -456,21 +503,23 @@ void OutputImage::update_remote  ( int n, char * buffer) throw()
   int nx = *p.i++;
   int ny = *p.i++;
 
+  const int n = nx*ny;
+  
   if (op_reduce_ == reduce_min) {
-    for (int k=0; k<nx*ny; k++) image_data_[k] = std::min(image_data_[k],*p.d++);
-    for (int k=0; k<nx*ny; k++) image_mesh_[k] = std::min(image_mesh_[k],*p.d++);
+    for (int k=0; k<n; k++) image_data_[k] = std::min(image_data_[k],*p.d++);
+    for (int k=0; k<n; k++) image_mesh_[k] = std::min(image_mesh_[k],*p.d++);
   } else if (op_reduce_ == reduce_max) {
-    for (int k=0; k<nx*ny; k++) image_data_[k] = std::max(image_data_[k],*p.d++);
-    for (int k=0; k<nx*ny; k++) image_mesh_[k] = std::max(image_mesh_[k],*p.d++);
+    for (int k=0; k<n; k++) image_data_[k] = std::max(image_data_[k],*p.d++);
+    for (int k=0; k<n; k++) image_mesh_[k] = std::max(image_mesh_[k],*p.d++);
   } else if (op_reduce_ == reduce_sum) {
-    for (int k=0; k<nx*ny; k++) image_data_[k] += *p.d++;
-    for (int k=0; k<nx*ny; k++) image_mesh_[k] += *p.d++;
+    for (int k=0; k<n; k++) image_data_[k] += *p.d++;
+    for (int k=0; k<n; k++) image_mesh_[k] += *p.d++;
   } else if (op_reduce_ == reduce_avg) {
-    for (int k=0; k<nx*ny; k++) image_data_[k] += *p.d++;
-    for (int k=0; k<nx*ny; k++) image_mesh_[k] += *p.d++;
+    for (int k=0; k<n; k++) image_data_[k] += *p.d++;
+    for (int k=0; k<n; k++) image_mesh_[k] += *p.d++;
   } else if (op_reduce_ == reduce_set) {
-    for (int k=0; k<nx*ny; k++) image_data_[k]  = *p.d++;
-    for (int k=0; k<nx*ny; k++) image_mesh_[k]  = *p.d++;
+    for (int k=0; k<n; k++) image_data_[k]  = *p.d++;
+    for (int k=0; k<n; k++) image_mesh_[k]  = *p.d++;
   }
 
 }
@@ -565,7 +614,7 @@ void OutputImage::image_create_ () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::image_write_ (double min_color, double max_color) throw()
+void OutputImage::image_write_ () throw()
 {
   // simplified variable names
 
@@ -575,32 +624,29 @@ void OutputImage::image_write_ (double min_color, double max_color) throw()
 
   double min,max;
 
-  if (specify_bounds_) {
+  if (min_ < max_) {
 
-    min = min_color;
-    max = max_color;
+    min = min_;
+    max = max_;
 
   } else {
 
-    double min_val = std::numeric_limits<double>::max();
-    double max_val = std::numeric_limits<double>::min();
+    min = std::numeric_limits<double>::max();
+    max = std::numeric_limits<double>::min();
 
     // Compute min and max
 
     if (image_log_) {
       for (int i=0; i<m; i++) {
-	min_val = MIN(min_val,log(data_(i)));
-	max_val = MAX(max_val,log(data_(i)));
+	min = MIN(min,log(data_(i)));
+	max = MAX(max,log(data_(i)));
       }
     } else {
       for (int i=0; i<m; i++) {
-	min_val = MIN(min_val,data_(i));
-	max_val = MAX(max_val,data_(i));
+	min = MIN(min,data_(i));
+	max = MAX(max,data_(i));
       }
     }
-
-    min = min_val;
-    max = max_val;
   }
 
   size_t n = map_r_.size();
@@ -714,8 +760,11 @@ void OutputImage::reduce_point_
 
 //----------------------------------------------------------------------
 
-void OutputImage::reduce_line_(double * data, int ix0, int ix1, int iy0, int iy1, 
-			       double value, double alpha)
+void OutputImage::reduce_line_
+(double * data, 
+ int ix0, int ix1, 
+ int iy0, int iy1, 
+ double value, double alpha)
 {
   if (ix1 < ix0) { int t = ix1; ix1 = ix0; ix0 = t; }
   if (iy1 < iy0) { int t = iy1; iy1 = iy0; iy0 = t; }
@@ -753,7 +802,11 @@ void OutputImage::reduce_line_(double * data, int ix0, int ix1, int iy0, int iy1
 
 //----------------------------------------------------------------------
 
-void OutputImage::reduce_line_x_(double * data, int ixm, int ixp, int iy, double value, double alpha)
+void OutputImage::reduce_line_x_
+(double * data, 
+ int ixm, int ixp,
+ int iy,
+ double value, double alpha)
 {
   ASSERT2("OutputImage::reduce_line_x","! (ixm (%d) <= ixp (%d)",ixm,ixp,ixm<=ixp);
   if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
@@ -766,7 +819,11 @@ void OutputImage::reduce_line_x_(double * data, int ixm, int ixp, int iy, double
 
 //----------------------------------------------------------------------
 
-void OutputImage::reduce_line_y_(double * data, int ix, int iym, int iyp, double value, double alpha)
+void OutputImage::reduce_line_y_
+(double * data,
+ int ix,
+ int iym, int iyp,
+ double value, double alpha)
 {
   ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
   if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
@@ -778,8 +835,11 @@ void OutputImage::reduce_line_y_(double * data, int ix, int iym, int iyp, double
 
 //----------------------------------------------------------------------
 
-void OutputImage::reduce_box_(double * data,int ixm, int ixp, int iym, int iyp, 
-			      double value, reduce_type reduce, double alpha)
+void OutputImage::reduce_box_
+(double * data,
+ int ixm, int ixp,
+ int iym, int iyp, 
+ double value, reduce_type reduce, double alpha)
 {
   TRACE6("reduce_box %d %d %d %d %f %f",ixm,ixp,iym,iyp,value,alpha);
   reduce_type reduce_save = op_reduce_;
@@ -794,7 +854,11 @@ void OutputImage::reduce_box_(double * data,int ixm, int ixp, int iym, int iyp,
 //----------------------------------------------------------------------
 
 
-void OutputImage::reduce_cube_(double * data, int ixm, int ixp, int iym, int iyp, double value, double alpha)
+void OutputImage::reduce_cube_
+(double * data, 
+ int ixm, int ixp,
+ int iym, int iyp, 
+ double value, double alpha)
 {
   for (int ix=ixm; ix<=ixp; ++ix) {
     for (int iy=iym; iy<=iyp; ++iy) {
@@ -806,10 +870,11 @@ void OutputImage::reduce_cube_(double * data, int ixm, int ixp, int iym, int iyp
 
 //----------------------------------------------------------------------
 
-void OutputImage::extents_img_ (const Block * block,
-				int *ixm, int *ixp,
-				int *iym, int *iyp,
-				int *izm, int *izp) const
+void OutputImage::extents_img_ 
+(const Block * block,
+ int *ixm, int *ixp,
+ int *iym, int *iyp,
+ int *izm, int *izp) const
 {
 
   int mx,my,mz;

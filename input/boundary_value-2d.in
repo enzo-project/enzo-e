@@ -55,7 +55,6 @@ Output {
 #	image_block_size  = 5;
 #	image_size = [1025,1025];
         include "input/schedule_cycle_10.incl"
-        image_specify_bounds = true;
 	image_min = 0.0;
 	image_max = 6.0;
        include "input/colormap_blackbody.incl"
