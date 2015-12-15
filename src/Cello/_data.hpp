@@ -70,5 +70,7 @@ class FieldFace;
 
 #include "data_Data.hpp"
 
+#include "data_DataMsg.hpp"
+
 #endif /* _DATA_HPP */
 

@@ -1,14 +1,14 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_FieldMsg.hpp
+/// @file     data_DataMsg.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2015-07-06
-/// @brief    [\ref Mesh] Declaration of the FieldMsg Charm++ Message
+/// @brief    [\ref Data] Declaration of the DataMsg Charm++ Message
 
-#ifndef MESH_FIELD_MSG_HPP
-#define MESH_FIELD_MSG_HPP
+#ifndef DATA_DATA_MSG_HPP
+#define DATA_DATA_MSG_HPP
 
-class FieldMsg : public CMessage_FieldMsg {
+class DataMsg : public CMessage_DataMsg {
 
 public:
   /// Array length
@@ -21,5 +21,5 @@ public:
   int ic3[3];
 };
 
-#endif /* MESH_FIELD_MSG_HPP */
+#endif /* DATA_DATA_MSG_HPP */
 

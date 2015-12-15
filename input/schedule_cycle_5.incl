@@ -1,0 +1,7 @@
+# File:    schedule_cycle_5.incl
+
+schedule {
+    var =  "cycle";
+    step = 5;
+}
+

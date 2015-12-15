@@ -1,9 +1,0 @@
-include "input/method_ppm-8.in"
-include "input/tracer.incl"
-
-Stopping {
-   cycle = 10;
-}
-
-Boundary {type = "periodic";}
-

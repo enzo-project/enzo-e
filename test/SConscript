@@ -571,13 +571,26 @@ Clean(env_mv_out.RunParallel ('test_particle-y.unit',
 env.PngToGif("particle-y.gif", "test_particle-y.unit", \
              ARGS = test_path + "/particle-y*.png")			       
 
+Clean(env_mv_out.RunParallel ('test_particle-xy.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/test_particle-xy.in'),
+		[Glob('#/' + test_path + '/particle-xy.png')])
+env.PngToGif("particle-xy.gif", "test_particle-xy.unit", \
+             ARGS = test_path + "/particle-xy*.png")			       
+
 Clean(env_mv_out.RunParallel ('test_particle-circle.unit',
                 bin_path + '/enzo-p', 
                 ARGS='input/test_particle-circle.in'),
 		[Glob('#/' + test_path + '/particle-circle.png')])
-
 env.PngToGif("particle-circle.gif", "test_particle-circle.unit", \
-             ARGS = test_path + "/particle-circle*.png")			       
+             ARGS = test_path + "/particle-circle*.png")
+
+Clean(env_mv_out.RunParallel ('test_particle-amr-x.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/test_particle-amr-x.in'),
+		[Glob('#/' + test_path + '/particle-amr-x.png')])
+env.PngToGif("particle-amr-x.gif", "test_particle-amr-x.unit", \
+             ARGS = test_path + "/particle-amr-x*.png")
 
 #----------------------------------------------------------------------
 

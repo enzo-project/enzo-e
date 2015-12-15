@@ -1,0 +1,82 @@
+ Adapt {
+     max_level = 0;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+ Domain {
+     lower = [ 0.0, 0.0 ];
+     upper = [ 1.0, 1.0 ];
+ }
+
+ Field {
+     ghost_depth = 4;
+     list = [ "velocity_x", "velocity_y" ];
+     padding = 0;
+ }
+
+ Initial {
+     list = [ "value", "trace" ];
+ }
+
+ Mesh {
+     root_rank = 2;
+     root_size = [ 8, 8 ];
+     root_blocks = [ 2, 2 ];
+ }
+
+ Method {
+     list = [ "trace" ];
+     trace { timestep = 0.025; }
+ }
+
+ Output {
+     list = [ "trace", "vx", "vy"  ];
+     trace {
+         particle_list = [ "trace" ];
+         schedule {
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+	 image_block_size = 9;
+     };
+     vx {
+         name = ["particle-vx-%03d.png","cycle"];
+	 field_list = ["velocity_x"];
+         schedule {
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+	 image_block_size = 9;
+     };
+     vy {
+         name = ["particle-vy-%03d.png","cycle"];
+	 field_list = ["velocity_y"];
+         schedule {
+             step = 1;
+             var = "cycle";
+         };
+         type = "image";
+	 image_block_size = 9;
+     };
+ }
+
+ Particle {
+     list = [ "trace" ];
+     trace {
+         attributes = [ "id", "int64", 
+                        "x", "single", 
+                        "y", "single",
+                        "z", "single" ];
+         position = [ "x", "y", "z" ];
+     };
+ }
+
+ Stopping {
+     cycle = 9;
+ }
+

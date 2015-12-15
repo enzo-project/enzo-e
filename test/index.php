@@ -628,8 +628,8 @@ test_summary("Output",
 	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 test_summary("Particle", 
-	     array("test-particle-x","test-particle-y","test-particle-circle"),
-	     array("enzo-p","enzo-p","enzo-p"),'test');
+	     array("test-particle-x","test-particle-y","test-particle-xy","test-particle-circle","test-particle-amr-x"),
+	     array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
 // row_divider($num_types);
@@ -1092,10 +1092,21 @@ tests("Enzo","enzo-p","test_particle-y","","");
 test_table ("particle-y", array("000","003","006","009"),$types);
 end_hidden("particle-y-1");
 
+begin_hidden("particle-xy", "Particle (vx,vy) = (0,1)");
+tests("Enzo","enzo-p","test_particle-xy","","");
+test_table ("particle-xy", array("000","003","006","009"),$types);
+end_hidden("particle-xy-1");
+
 begin_hidden("particle-circle", "Particle (vx,vy) = (-y,x)");
 tests("Enzo","enzo-p","test_particle-circle","","");
-test_table ("particle-circle", array("000","007","014","020"),$types);
+test_table ("particle-circle", array("000","100","200","300","400","500"),$types);
 end_hidden("particle-circle-1");
+
+begin_hidden("particle-amr-x", "Particle (vx,vy) = (-y,x)");
+tests("Enzo","enzo-p","test_particle-amr-x","","");
+test_table ("particle-amr-mesh", array("0000","0200","0400","0600","0800","1000"),$types);
+test_table ("particle-amr-x", array("0000","0200","0400","0600","0800","1000"),$types);
+end_hidden("particle-amr-x-1");
 
 //======================================================================
 

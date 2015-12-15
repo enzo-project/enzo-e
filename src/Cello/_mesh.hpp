@@ -121,7 +121,6 @@ class Tree;
 #include "mesh_RefineShear.hpp"
 #include "mesh_RefineSlope.hpp"
 
-#include "mesh_FieldMsg.hpp"
 
 #endif /* _MESH_HPP */
 

@@ -434,6 +434,12 @@ PARALLEL_MAIN_BEGIN
       if (zp[ip] != 1*index+2) error_position++;
     }
   }
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // These position tests fail because they are represented as
+  // integers, which are assumed to be relative to the Block.  These
+  // are converted to float [-2,2) by Particle::position(), where the
+  // Block bounds are [-1,1).
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   unit_func("position()");
   unit_assert(error_position == 0);
 

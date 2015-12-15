@@ -48,7 +48,7 @@ void InitialTrace::enforce_block
 
   const int it = particle.type_index("trace");
 
-  particle.insert_particles (it,nx*ny*nz);
+  particle.insert_particles (it,nx/dx_*ny/dy_*nz/dz_);
 
   // Initialize particle positions
 
@@ -97,22 +97,21 @@ void InitialTrace::enforce_block
 	const int i = ix + nx*(iy + ny*iz);
 
 	// ... if new batch then update position arrays
-	if (i % np == 0) {
+	if (ip % np == 0) {
 	  id = (int64_t *) particle.attribute_array (it,ia_id,ib);
 	  xa = (float *)   particle.attribute_array (it,ia_x,ib);
 	  ya = (float *)   particle.attribute_array (it,ia_y,ib);
 	  za = (float *)   particle.attribute_array (it,ia_z,ib);
 	}
 
-	id[iid] = id0_;
-	xa[ip] = x;
-	ya[ip] = y;
-	za[ip] = z;
+	id[ip*did] = id0_;
+	xa[ip*dp] = x;
+	ya[ip*dp] = y;
+	za[ip*dp] = z;
 
-	ip+=dp;
-	iid+=did;
+	ip++;
 
-	if (ip/dp == np) {
+	if (ip == np) {
 	  ip=0;
 	  ib++;
 	}

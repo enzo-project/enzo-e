@@ -163,7 +163,7 @@ module mesh {
 
   };
 
-  message FieldMsg {
+  message DataMsg {
      char a[];
   };
 

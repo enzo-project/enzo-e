@@ -8,13 +8,13 @@ include "input/test_particle.incl"
          velocity_x = [ -1.0*y ];
          velocity_y = [ x ];
      };
-#     trace {
-#         stride = [1,1];
-#     }
+     trace {
+         stride = [4,4];
+     }
  }
 
 Mesh {
-   root_size = [128,128];
+   root_size = [32,32];
 }
 Method {
    trace { timestep = 0.001; }
