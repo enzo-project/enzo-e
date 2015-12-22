@@ -29,7 +29,7 @@ FieldFace::FieldFace
 {
   for (int i=0; i<3; i++) {
     ghost_[i] = false;
-    face_[i] = 0;
+    face_[i]  = 0;
     child_[i] = 0;
   }
 }
@@ -69,11 +69,11 @@ void FieldFace::copy_(const FieldFace & field_face)
   
   for (int i=0; i<3; i++) {
     ghost_[i] = field_face.ghost_[i];
-    face_[i] = field_face.face_[i];
+    face_[i]  = field_face.face_[i];
     child_[i] = field_face.child_[i];
   }
-  prolong_  =  field_face.prolong_;
-  restrict_ =  field_face.restrict_;
+  prolong_    = field_face.prolong_;
+  restrict_   = field_face.restrict_;
   field_list_ = field_face.field_list_;
 }
 //----------------------------------------------------------------------
@@ -91,7 +91,7 @@ void FieldFace::pup (PUP::er &p)
   PUParray(p,ghost_,3);
   PUParray(p,child_,3);
   p | *restrict_;  // PUPable
-  p | *prolong_;  // PUPable
+  p | *prolong_;   // PUPable
   p | field_list_;
 }
 
@@ -341,10 +341,62 @@ char * FieldFace::allocate () throw()
 
 //----------------------------------------------------------------------
 
+int FieldFace::data_size () const
+{
+  int count = 0;
+
+  count += 3*sizeof(int);  // face_[3]
+  count += 3*sizeof(bool); // ghost_[3]
+  count += 3*sizeof(int);  // child_[3];
+  count += (restrict_) ? restrict_->name().size() + 1 : 1;
+  count += (prolong_)  ? prolong_ ->name().size() + 1 : 1;
+  count += (1+field_list_.size()) * sizeof(int);
+
+  return count;
+
+}
+
+//----------------------------------------------------------------------
+
+char * FieldFace::save_data (char * buffer) const
+{
+  char * p = buffer;
+  int n;
+  memcpy(p,face_, n=3*sizeof(int));  p+=n;
+  memcpy(p,ghost_,n=3*sizeof(bool)); p+=n;
+  memcpy(p,child_,n=3*sizeof(int));  p+=n;
+  char c0 = '0';
+  if (restrict_) {
+    memcpy(p,restrict_->name().c_str(),n=(restrict_->name().size()+1));
+    p+=n;
+  } else {
+    memcpy(p,&c0,1); ++p;
+  }
+  if (prolong_) {
+    memcpy(p,prolong_->name().c_str(),n=(prolong_->name().size()+1));
+    p+=n;
+    memcpy(p,&c0,1); ++p;
+  } else {
+    memcpy(p,&c0,1); ++p;
+  }
+  memcpy(p,&field_list_[0],n=(field_list_.size()*sizeof(int))); p+=n;
+
+  return p;
+}
+
+//----------------------------------------------------------------------
+
+char * FieldFace::load_data (char * buffer)
+{
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
 void FieldFace::deallocate() throw()
 {  array_.clear(); }
 
-//----------------------------------------------------------------------
+//======================================================================
 
 template<class T>
 size_t FieldFace::load_

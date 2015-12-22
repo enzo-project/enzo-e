@@ -27,7 +27,7 @@ components.append(['enzo','simulation', 'problem', 'compute',
 	      'test','cello','external'])
 
 if (use_papi):
-	components.append(['papi','pfm'])
+	components.append(['papi'])
 
 
 components.append(['hdf5','z'])

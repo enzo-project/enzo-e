@@ -8,17 +8,39 @@
 #ifndef DATA_DATA_MSG_HPP
 #define DATA_DATA_MSG_HPP
 
+class ParticleData;
+class FieldData;
+class FieldFace;
+
 class DataMsg : public CMessage_DataMsg {
 
 public:
-  /// Array length
-  int n;
 
-  /// Array data
-  char * a;
+  DataMsg() : pd_(NULL), fd_(NULL), ff_(NULL)
+  {}
 
-  /// Child indices
-  int ic3[3];
+  void set_particle_data (ParticleData * pd) { pd_ = pd; }
+  void set_field_data    (FieldData * fd) { fd_ = fd; }
+  void set_field_face    (FieldFace * ff) { ff_ = ff; }
+
+  /// Pack data to serialize
+  static void * pack (DataMsg*);
+
+  /// Unpack data to de-serialize
+  static DataMsg * unpack(void *);
+
+
+  /// Set Particle data
+protected:
+
+  /// Particle Data
+  ParticleData * pd_;
+
+  /// Field Data
+  FieldData * fd_;
+
+  /// Field Face Data
+  FieldFace * ff_;
 };
 
 #endif /* DATA_DATA_MSG_HPP */

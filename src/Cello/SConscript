@@ -48,7 +48,7 @@ Import('use_papi')
 # test_* -> test
 
 if (use_papi):
-   libs_papi = ['papi','pfm']
+   libs_papi = ['papi']
 else:
    libs_papi = []
 

@@ -40,7 +40,15 @@ module mesh {
   PUPable ScheduleList;
   PUPable ScheduleInterval;
 
+  // depreciated
+  message FieldMsg {
+      char a[];
+  };
+
+  message DataMsg;
+
   array[Index] Block {
+
 
     entry Block
       (Index index,
@@ -148,7 +156,7 @@ module mesh {
     // *** REFRESH
     //--------------------------------------------------
 
-    //    entry void p_refresh_sync();
+    entry void p_refresh_store (/* DataMsg * msg*/);
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
@@ -161,10 +169,6 @@ module mesh {
     entry void x_refresh_child
       (int n, char a[n], int ic3[3]);
 
-  };
-
-  message DataMsg {
-     char a[];
   };
 
 }

@@ -37,6 +37,7 @@ public: // interface
   {
     TRACEPUP;
     PUP::able::pup(p); 
+    p | size_;
   };
 
   /// Number of elements contained in the list

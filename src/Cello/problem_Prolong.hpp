@@ -44,6 +44,9 @@ public: // interface
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]) = 0;
 
+  /// Return the name identifying the prolongation operator
+  virtual std::string name () const = 0;
+
   /// Set whether interpolation should be monotonic
   void set_monotonic (bool monotonic) 
   { monotonic_ = monotonic; }

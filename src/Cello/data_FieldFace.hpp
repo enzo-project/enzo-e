@@ -11,7 +11,7 @@
 class Restrict;
 class Prolong;
 
-class FieldFace {
+class FieldFace : DataBase {
 
   /// @class    FieldFace
   /// @ingroup  Data
@@ -101,6 +101,21 @@ public: // interface
   /// Return a pointer to the array
   char * array () throw() 
   { return size() > 0 ?  &array_[0] : 0; };
+
+  //--------------------------------------------------
+
+public: // virtual functions
+
+  /// Return the number of bytes required to serialize the data object
+  virtual int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer
+  virtual char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data
+  virtual char * load_data (char * buffer);
+
+  //--------------------------------------------------
 
 private: // functions
 

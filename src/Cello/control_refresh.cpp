@@ -131,11 +131,25 @@ void Block::refresh_load_field_face_
   // ... send the face data to the neighbor
   const int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
+  // @@@@@@@@@@@@@
+  // TEMPORARY
+  // @@@@@@@@@@@@@
+  DataMsg * data_msg = new DataMsg;
+  thisProxy[index_neighbor].p_refresh_store (/* data_msg*/);
+
   thisProxy[index_neighbor].p_refresh_store_field_face
     (n,array, refresh_type, of3, ic3);
 
   // ... delete the FieldFace created by load_face()
   delete field_face;
+}
+
+
+//----------------------------------------------------------------------
+
+void Block::p_refresh_store (/* DataMsg * msg */)
+{
+  TRACE_REFRESH("p_refresh_store()");
 }
 
 //----------------------------------------------------------------------

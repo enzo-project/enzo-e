@@ -183,6 +183,8 @@ Clean(env_mv_out.RunParallel ('test_method_ppm-8.unit',bin_path + '/enzo-p',
 
 env.MakeMovie ("method_ppm-8.swf", "test_method_ppm-8.unit", \
                 ARGS= test_path + "/method_ppm-8-*.png");
+env.PngToGif ("method_ppm-8.gif", "test_method_ppm-8.unit", \
+                ARGS= test_path + "/method_ppm-8-*.png");
 
 #----------------------------------------------------------------------
 # MethodGravity tests
@@ -196,6 +198,8 @@ Clean(env_mv_out.RunSerial ('test_method_gravity_cg-1.unit',bin_path + '/enzo-p'
 
 env.MakeMovie ("method_gravity_cg-1.swf", "test_method_gravity_cg-1.unit", \
                 ARGS= test_path + "/method_gravity_cg-1*.png");
+env.PngToGif ("method_gravity_cg-1.gif", "test_method_gravity_cg-1.unit", \
+                ARGS= test_path + "/method_gravity_cg-1*.png");
 
 # parallel
 
@@ -205,6 +209,8 @@ Clean(env_mv_out.RunParallel ('test_method_gravity_cg-8.unit',bin_path + '/enzo-
       Glob('#/' + test_path + '/method_gravity_cg-8*.h5')])
 
 env.MakeMovie ("method_gravity_cg-8.swf", "test_method_gravity_cg-8.unit", \
+                ARGS= test_path + "/method_gravity_cg-8-*.png");
+env.PngToGif ("method_gravity_cg-8.gif", "test_method_gravity_cg-8.unit", \
                 ARGS= test_path + "/method_gravity_cg-8-*.png");
 
 #----------------------------------------------------------------------
@@ -219,6 +225,8 @@ Clean(env_mv_out.RunSerial ('test_method_heat-1.unit',bin_path + '/enzo-p',
 
 env.MakeMovie ("method_heat-1.swf", "test_method_heat-1.unit", \
                 ARGS= test_path + "/method_heat*-1*.png");
+env.PngToGif ("method_heat-1.gif", "test_method_heat-1.unit", \
+                ARGS= test_path + "/method_heat*-1*.png");
 
 # parallel
 
@@ -228,6 +236,8 @@ Clean(env_mv_out.RunParallel ('test_method_heat-8.unit',bin_path + '/enzo-p',
        Glob('#/' + test_path + '/method_heat*-8*.h5')])
 
 env.MakeMovie ("method_heat-8.swf", "test_method_heat-8.unit", \
+                ARGS= test_path + "/method_heat*-8-*.png");
+env.PngToGif ("method_heat-8.gif", "test_method_heat-8.unit", \
                 ARGS= test_path + "/method_heat*-8-*.png");
 
 
@@ -248,6 +258,8 @@ restart_ppm_1 = env_mv_out.RunSerial (
 
 
 env.MakeMovie ("restart_ppm-1.swf", "test_restart_ppm-1.unit", \
+                  ARGS= test_path + "/checkpoint_ppm-1-*.png");
+env.PngToGif ("restart_ppm-1.gif", "test_restart_ppm-1.unit", \
                   ARGS= test_path + "/checkpoint_ppm-1-*.png");
 
 Clean(restart_ppm_1,
@@ -270,6 +282,8 @@ restart_ppm_8 = env_mv_out.RunParallel (
 
 env.MakeMovie ("restart_ppm-8.swf", "test_restart_ppm-8.unit", \
                  ARGS= test_path + "/checkpoint_ppm-8-*.png");
+env.PngToGif ("restart_ppm-8.gif", "test_restart_ppm-8.unit", \
+                 ARGS= test_path + "/checkpoint_ppm-8-*.png");
 
 Clean(restart_ppm_8,
       [Glob('#/' + test_path + '/checkpoint_ppm-8*.png')])
@@ -285,9 +299,15 @@ Clean(env_mv_out.RunSerial ('test_method_ppml-1.unit',bin_path + '/enzo-p',
 
 env.MakeMovie ("method_ppml-1-x.swf", "test_method_ppml-1.unit", \
                 ARGS= test_path + "/method_ppml-1-x-????.png");
+env.PngToGif ("method_ppml-1-x.gif", "test_method_ppml-1.unit", \
+                ARGS= test_path + "/method_ppml-1-x-????.png");
 env.MakeMovie ("method_ppml-1-y.swf", "test_method_ppml-1.unit", \
                 ARGS= test_path + "/method_ppml-1-y-????.png");
+env.PngToGif ("method_ppml-1-y.gif", "test_method_ppml-1.unit", \
+                ARGS= test_path + "/method_ppml-1-y-????.png");
 env.MakeMovie ("method_ppml-1-z.swf", "test_method_ppml-1.unit", \
+                ARGS= test_path + "/method_ppml-1-z-????.png");
+env.PngToGif ("method_ppml-1-z.gif", "test_method_ppml-1.unit", \
                 ARGS= test_path + "/method_ppml-1-z-????.png");
 
 Clean(env_mv_out.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p', 
@@ -297,9 +317,15 @@ Clean(env_mv_out.RunParallel ('test_method_ppml-8.unit',bin_path + '/enzo-p',
 
 env.MakeMovie ("method_ppml-8-x.swf", "test_method_ppml-8.unit", \
                 ARGS= test_path + "/method_ppml-8-x-????.png");
+env.PngToGif ("method_ppml-8-x.gif", "test_method_ppml-8.unit", \
+                ARGS= test_path + "/method_ppml-8-x-????.png");
 env.MakeMovie ("method_ppml-8-y.swf", "test_method_ppml-8.unit", \
                 ARGS= test_path + "/method_ppml-8-y-????.png");
+env.PngToGif ("method_ppml-8-y.gif", "test_method_ppml-8.unit", \
+                ARGS= test_path + "/method_ppml-8-y-????.png");
 env.MakeMovie ("method_ppml-8-z.swf", "test_method_ppml-8.unit", \
+                ARGS= test_path + "/method_ppml-8-z-????.png");
+env.PngToGif ("method_ppml-8-z.gif", "test_method_ppml-8.unit", \
                 ARGS= test_path + "/method_ppml-8-z-????.png");
 
 #----------------------------------------------------------------------
@@ -335,9 +361,15 @@ Clean(env_mv_out.RunParallel ('test_boundary_outflow-2d.unit',
 
 env.MakeMovie ("boundary_reflecting-2d.swf", "test_boundary_reflecting-2d.unit", \
                 ARGS= test_path + "/boundary_reflecting-2d-????.png");
+env.PngToGif ("boundary_reflecting-2d.gif", "test_boundary_reflecting-2d.unit", \
+                ARGS= test_path + "/boundary_reflecting-2d-????.png");
 env.MakeMovie ("boundary_periodic-2d.swf","test_boundary_periodic-2d.unit", \
                 ARGS= test_path + "/boundary_periodic-2d-????.png");
+env.PngToGif ("boundary_periodic-2d.gif","test_boundary_periodic-2d.unit", \
+                ARGS= test_path + "/boundary_periodic-2d-????.png");
 env.MakeMovie ("boundary_outflow-2d.swf","test_boundary_outflow-2d.unit", \
+                ARGS= test_path + "/boundary_outflow-2d-????.png");
+env.PngToGif ("boundary_outflow-2d.gif","test_boundary_outflow-2d.unit", \
                 ARGS= test_path + "/boundary_outflow-2d-????.png");
 
 # 3D boundary condition tests
@@ -368,11 +400,17 @@ Clean(env_mv_out.RunParallel ('test_boundary_outflow-3d.unit',
 
 env.MakeMovie ("boundary_reflecting-3d.swf","test_boundary_reflecting-3d.unit",
                 ARGS= test_path + "/boundary_reflecting-3d-????.png");
+env.PngToGif ("boundary_reflecting-3d.gif","test_boundary_reflecting-3d.unit",
+                ARGS= test_path + "/boundary_reflecting-3d-????.png");
 env.MakeMovie ("boundary_periodic-3d.swf","test_boundary_periodic-3d.unit", \
+                ARGS= test_path + "/boundary_periodic-3d-????.png");
+env.PngToGif ("boundary_periodic-3d.gif","test_boundary_periodic-3d.unit", \
                 ARGS= test_path + "/boundary_periodic-3d-????.png");
 # env.MakeMovie ("boundary_inflow-3d.swf","test_boundary_inflow-3d.unit", \
 #                 ARGS= test_path + "/boundary_inflow-3d-????.png");
 env.MakeMovie ("boundary_outflow-3d.swf","test_boundary_outflow-3d.unit", \
+                ARGS= test_path + "/boundary_outflow-3d-????.png");
+env.PngToGif ("boundary_outflow-3d.gif","test_boundary_outflow-3d.unit", \
                 ARGS= test_path + "/boundary_outflow-3d-????.png");
 
 #----------------------------------------------------------------------
@@ -431,7 +469,11 @@ Clean(env_mv_out.RunParallel ('test_adapt-L5-P1.unit',bin_path + '/enzo-p',
       [Glob('#/' + test_path + '/adapt-L5-P1*.png')])
 env.MakeMovie ("adapt-L5-P1-mesh.swf", "test_adapt-L5-P1.unit", \
                 ARGS= test_path + "/adapt-L5-P1-mesh-*.png");
+env.PngToGif ("adapt-L5-P1-mesh.gif", "test_adapt-L5-P1.unit", \
+                ARGS= test_path + "/adapt-L5-P1-mesh-*.png");
 env.MakeMovie ("adapt-L5-P1-density.swf", "test_adapt-L5-P1.unit", \
+                ARGS= test_path + "/adapt-L5-P1-density-*.png");
+env.PngToGif ("adapt-L5-P1-density.gif", "test_adapt-L5-P1.unit", \
                 ARGS= test_path + "/adapt-L5-P1-density-*.png");
 
 
@@ -451,6 +493,8 @@ Clean(env_mv_out.RunParallel ('test_initial_png.unit',
       [Glob('#/' + test_path + '/initial_png.png'),
        'test_initial_png.unit'])
 env.MakeMovie ("initial_png.swf","test_initial_png.unit", \
+                ARGS= test_path + "/initial_png-??.png");
+env.PngToGif ("initial_png.gif","test_initial_png.unit", \
                 ARGS= test_path + "/initial_png-??.png");
 
 env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_charm)

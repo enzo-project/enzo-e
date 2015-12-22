@@ -321,9 +321,9 @@ public: /// entry methods
   template <class T>
   void p_mg0_restrict_send(CkReductionMsg * msg);
   template <class T>
-  void p_mg0_restrict_recv(DataMsg * msg);
+  void p_mg0_restrict_recv(FieldMsg * msg);
   template <class T>
-  void p_mg0_prolong_recv(DataMsg * msg);
+  void p_mg0_prolong_recv(FieldMsg * msg);
   template <class T>
   void p_mg0_post_smooth(CkReductionMsg * msg);
 

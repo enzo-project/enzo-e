@@ -32,7 +32,15 @@ public: // interface
   ItIndexList (CkMigrateMessage *m) : ItIndex (m) {}
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup (PUP::er &p)
+  {
+    TRACEPUP;
+
+    // NOTE: change this function whenever attributes change
+    ItIndex::pup(p);
+    p | index_;
+    p | values_;
+  }
 
   /// Append a value to the list of values
   void append (int value) 

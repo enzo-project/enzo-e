@@ -417,76 +417,6 @@ void FieldData::deallocate_permanent () throw()
     array_permanent_.clear();
     offsets_.clear();
   }
-  // if (field_faces_ != 0) {
-  //   delete field_faces_;
-  //   field_faces_ = 0;
-  // }
-
-}
-
-//----------------------------------------------------------------------
-
-// void FieldData::allocate_ghosts(const FieldDescr * field_descr) throw ()
-// {
-//   if (! ghosts_allocated() ) {
-
-//   } else {
-//     WARNING("FieldData::allocate_ghosts",
-// 		    "Allocate called with ghosts already allocated");
-//   }
-// }
-
-// //----------------------------------------------------------------------
-
-// void FieldData::deallocate_ghosts(const FieldDescr * field_descr) throw ()
-// {
-//   if ( ghosts_allocated() ) {
-
-//     std::vector<int> old_offsets;
-//     std::vector<char> old_array;
-
-//     old_array = array_permanent_;
-
-//     backup_array_ (field_descr,old_offsets);
-
-//     ghosts_allocated_ = false;
-
-//     allocate_array(field_descr);
-
-//     restore_array_ (field_descr, &old_array[0], old_offsets);
-
-//   } else {
-//     WARNING("FieldData::deallocate_ghosts",
-// 	    "Function called with ghosts not allocated");
-//   }
-// }
-
-//======================================================================
-
-int FieldData::adjust_padding_
-(
- int size, 
- int padding) const throw ()
-{
-  return size + padding;
-}
-
-//----------------------------------------------------------------------
-
-int FieldData::adjust_alignment_
-(
- int size, 
- int alignment) const throw ()
-{
-  return (alignment - (size % alignment)) % alignment;
-}
-
-//----------------------------------------------------------------------
-
-int FieldData::align_padding_ (int alignment) const throw()
-{ 
-  long unsigned start_long = reinterpret_cast<long unsigned>(&array_permanent_[0]);
-  return ( alignment - (start_long % alignment) ) % alignment; 
 }
 
 //----------------------------------------------------------------------
@@ -652,6 +582,55 @@ void FieldData::print
    }
 
 #endif /* ifndef CELLO_DEBUG */
+}
+
+//======================================================================
+
+int FieldData::data_size () const
+{
+  
+}
+
+//----------------------------------------------------------------------
+
+
+char * FieldData::save_data (char * buffer) const
+{
+}
+
+//----------------------------------------------------------------------
+
+
+char * FieldData::load_data (char * buffer)
+{
+}
+
+//======================================================================
+
+int FieldData::adjust_padding_
+(
+ int size, 
+ int padding) const throw ()
+{
+  return size + padding;
+}
+
+//----------------------------------------------------------------------
+
+int FieldData::adjust_alignment_
+(
+ int size, 
+ int alignment) const throw ()
+{
+  return (alignment - (size % alignment)) % alignment;
+}
+
+//----------------------------------------------------------------------
+
+int FieldData::align_padding_ (int alignment) const throw()
+{ 
+  long unsigned start_long = reinterpret_cast<long unsigned>(&array_permanent_[0]);
+  return ( alignment - (start_long % alignment) ) % alignment; 
 }
 
 template <class T>

@@ -37,6 +37,9 @@ public: // interface
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
     const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]);
 
+  /// Return the name identifying the prolongation operator
+  virtual std::string name () const { return "mc1"; }
+
 private: // functions
 
   template <class T>

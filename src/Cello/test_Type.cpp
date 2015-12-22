@@ -29,15 +29,15 @@ PARALLEL_MAIN_BEGIN
   unit_assert (cello::type_bytes[type_int32] == sizeof(int32_t));
   unit_assert (cello::type_bytes[type_int64] == sizeof(int64_t));
 
-  unit_assert (cello::type_name[type_single] == "single");
-  unit_assert (cello::type_name[type_double] == "double");
-  unit_assert (cello::type_name[type_extended80] == "extended80");
-  unit_assert (cello::type_name[type_extended96] == "extended96");
-  unit_assert (cello::type_name[type_quadruple] == "quadruple");
-  unit_assert (cello::type_name[type_int8] == "int8");
-  unit_assert (cello::type_name[type_int16] == "int16");
-  unit_assert (cello::type_name[type_int32] == "int32");
-  unit_assert (cello::type_name[type_int64] == "int64");
+  unit_assert (strcmp(cello::type_name[type_single],"single") == 0);
+  unit_assert (strcmp(cello::type_name[type_double],"double") == 0);
+  unit_assert (strcmp(cello::type_name[type_extended80],"extended80") == 0);
+  unit_assert (strcmp(cello::type_name[type_extended96],"extended96") == 0);
+  unit_assert (strcmp(cello::type_name[type_quadruple],"quadruple") == 0);
+  unit_assert (strcmp(cello::type_name[type_int8],"int8") == 0);
+  unit_assert (strcmp(cello::type_name[type_int16],"int16") == 0);
+  unit_assert (strcmp(cello::type_name[type_int32],"int32") == 0);
+  unit_assert (strcmp(cello::type_name[type_int64],"int64") == 0);
 
 
   unit_finalize();

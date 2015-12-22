@@ -248,37 +248,37 @@ void OutputImage::write_block
   block->lower(&xm,&ym,&zm);
   block->upper(&xp,&yp,&zp);
 
-  if (index_field >= 0) {
+  if (type_is_data() && block->is_leaf()) {
 
-    // Get ghost depth
+    if (index_field >= 0) {
 
-    int ngx,ngy,ngz;
-    field_descr->ghost_depth(index_field,&ngx,&ngy,&ngz);
+      // Get ghost depth
 
-    // FieldData array dimensions
-    int ndx,ndy,ndz;
-    ndx = nbx + 2*ngx;
-    ndy = nby + 2*ngy;
-    ndz = nbz + 2*ngz;
+      int ngx,ngy,ngz;
+      field_descr->ghost_depth(index_field,&ngx,&ngy,&ngz);
 
-    // add block contribution to image
+      // FieldData array dimensions
+      int ndx,ndy,ndz;
+      ndx = nbx + 2*ngx;
+      ndy = nby + 2*ngy;
+      ndz = nbz + 2*ngz;
 
-    const char * field = (ghost_) ? 
-      field_data->values(field_descr,index_field) :
-      field_data->unknowns(field_descr,index_field);
+      // add block contribution to image
 
-    float * field_float = (float*)field;
-    double * field_double = (double*)field;
+      const char * field = (ghost_) ? 
+	field_data->values(field_descr,index_field) :
+	field_data->unknowns(field_descr,index_field);
 
-    double v = 1.0;
-    if (nbx > 1) v *= (xp-xm);
-    if (nby > 1) v *= (yp-ym);
-    if (nbz > 1) v *= (zp-zm);
-    TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),(zp-zm),v);
+      float * field_float = (float*)field;
+      double * field_double = (double*)field;
 
-    const int precision = field_descr->precision(index_field);
+      double v = 1.0;
+      if (nbx > 1) v *= (xp-xm);
+      if (nby > 1) v *= (yp-ym);
+      if (nbz > 1) v *= (zp-zm);
+      TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),(zp-zm),v);
 
-    if (type_is_data() && block->is_leaf()) {
+      const int precision = field_descr->precision(index_field);
 
       const double factor = (nbz <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
 
@@ -304,77 +304,76 @@ void OutputImage::write_block
 	  }
 	}
       }
+    }
+  }
 
-      if (type_is_mesh()) {
+  if (type_is_mesh()) {
 
-	// value for mesh
-	double value = 0;
-	value = mesh_color_(level,block->age());
+    // value for mesh
+    double value = 0;
+    value = mesh_color_(level,block->age());
 
-	if (face_rank_ >= 1) {
-	  reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
-	} else {
-	  reduce_cube_(image_mesh_,ixm+3,ixp-3,iym+3,iyp-3,value);
+    if (face_rank_ >= 1) {
+      reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
+    } else {
+      reduce_cube_(image_mesh_,ixm+3,ixp-3,iym+3,iyp-3,value);
+    }
+    reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,0.0,reduce_set);
+
+    if (block->is_leaf()) { // ) {
+      int xm=(ixm+ixp)/2;
+      int ym=(iym+iyp)/2;
+      if (face_rank_ <= 1) {
+	{
+	  int if3[3] = {-1,0,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
 	}
-	reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,0.0,reduce_set);
-
-	if (block->is_leaf()) { // ) {
-	  int xm=(ixm+ixp)/2;
-	  int ym=(iym+iyp)/2;
-	  if (face_rank_ <= 1) {
-	    {
-	      int if3[3] = {-1,0,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
-	    }
-	    {
-	      int if3[3] = {1,0,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
-	    }
-	    {
-	      int if3[3] = {0,-1,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
-	    }
-	    {
-	      int if3[3] = {0,1,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
-	    }
-	  }
-	  if (face_rank_ <= 0) {
-	    {
-	      int if3[3] = {-1,-1,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
-	    }
-	    {
-	      int if3[3] = {1,-1,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
-	    }
-	    {
-	      int if3[3] = {-1,1,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
-	    }
-	    {
-	      int if3[3] = {1,1,0};
-	      int face_level = block->face_level(if3);
-	      double face_color = mesh_color_(face_level,0);
-	      reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
-	    }
-	  }
+	{
+	  int if3[3] = {1,0,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
 	}
-
+	{
+	  int if3[3] = {0,-1,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
+	}
+	{
+	  int if3[3] = {0,1,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
+	}
+      }
+      if (face_rank_ <= 0) {
+	{
+	  int if3[3] = {-1,-1,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
+	}
+	{
+	  int if3[3] = {1,-1,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
+	}
+	{
+	  int if3[3] = {-1,1,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
+	}
+	{
+	  int if3[3] = {1,1,0};
+	  int face_level = block->face_level(if3);
+	  double face_color = mesh_color_(face_level,0);
+	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
+	}
       }
     }
   }

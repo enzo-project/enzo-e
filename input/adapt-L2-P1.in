@@ -16,5 +16,7 @@ Output {
     te { name = ["adapt-L2-P1-te-%f.png", "time"]; }
     vx { name = ["adapt-L2-P1-vx-%f.png", "time"]; }
     vy { name = ["adapt-L2-P1-vy-%f.png", "time"]; }
-    mesh { name = ["adapt-L2-P1-mesh-%f.png", "time"]; }
+    mesh { name = ["adapt-L2-P1-mesh-%f.png", "time"]; 
+           image_max = 3.0;
+         }
 }

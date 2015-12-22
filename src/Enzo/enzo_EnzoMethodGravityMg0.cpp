@@ -497,29 +497,30 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
     enzo_block->load_field_face (&narray,&array, if3, ic3, lg3, 
 				 refresh_coarse, field_list);
 
-  // Create a DataMsg for sending data to parent
+  // Create a FieldMsg for sending data to parent
   // (note: charm messages not deleted on send; are deleted on receive)
-  DataMsg * data_message  = new (narray) DataMsg;
 
+  FieldMsg * field_message  = new (narray) FieldMsg;
+ 
   /// WARNING: double copy
 
-  // Copy DataFace data to data_message
+  // Copy FieldFace data to field_message
 
   // array size
-  data_message->n = narray;
+  field_message->n = narray;
   // array values
-  memcpy (data_message->a, array, narray);
+  memcpy (field_message->a, array, narray);
   // child index
-  data_message->ic3[0] = ic3[0];
-  data_message->ic3[1] = ic3[1];
-  data_message->ic3[2] = ic3[2];
+  field_message->ic3[0] = ic3[0];
+  field_message->ic3[1] = ic3[1];
+  field_message->ic3[2] = ic3[2];
 
   //  </COMMON CODE>
 
-  // Send data_message to parent
+  // Send field_message to parent
   CkCallback (CkIndex_EnzoBlock::p_mg0_restrict_recv<T>(NULL), 
 	      CkArrayIndexIndex(index_parent),
-	      enzo_block->proxy_array()).send(data_message);
+	      enzo_block->proxy_array()).send(field_message);
 
   delete field_face;
 
@@ -528,7 +529,7 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::p_mg0_restrict_recv(DataMsg * data_message)
+void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
 /// [*]
 {
 
@@ -544,14 +545,14 @@ void EnzoBlock::p_mg0_restrict_recv(DataMsg * data_message)
   std::vector<int> field_list;
   field_list.push_back(data()->field().field_id("B"));
 
-  // copy data from data_message to this EnzoBlock
+  // copy data from field_message to this EnzoBlock
 
-  int n = data_message->n;
-  char * a = data_message->a;
-  int * ic3 = data_message->ic3;
+  int n = field_message->n;
+  char * a = field_message->a;
+  int * ic3 = field_message->ic3;
   store_field_face (n,a, if3, ic3, lg3, refresh_coarse, field_list);
 
-  delete data_message;
+  delete field_message;
 
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());
@@ -639,35 +640,35 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
     FieldFace * field_face = enzo_block->load_field_face
       (&narray,&array, if3, ic3, lg3, refresh_fine, field_list);
 
-    // Create a DataMsg for sending data to parent
+    // Create a FieldMsg for sending data to parent
     // (note: charm messages not deleted on send; are deleted on receive)
-    DataMsg * data_message  = new (narray) DataMsg;
+    FieldMsg * field_message  = new (narray) FieldMsg;
 
     /// WARNING: double copy
 
-    // Copy FieldFace data to data_message
+    // Copy FieldFace data to field_message
 
     // array size
-    data_message->n = narray;
+    field_message->n = narray;
     // array values
-    memcpy (data_message->a, array, narray);
+    memcpy (field_message->a, array, narray);
     // child index
-    data_message->ic3[0] = ic3[0];
-    data_message->ic3[1] = ic3[1];
-    data_message->ic3[2] = ic3[2];
+    field_message->ic3[0] = ic3[0];
+    field_message->ic3[1] = ic3[1];
+    field_message->ic3[2] = ic3[2];
 
   //  </COMMON CODE>
 
     CkCallback (CkIndex_EnzoBlock::p_mg0_prolong_recv<T>(NULL), 
 		CkArrayIndexIndex(index_child),
-		enzo_block->proxy_array()).send(data_message);
+		enzo_block->proxy_array()).send(field_message);
   }
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::p_mg0_prolong_recv(DataMsg * data_message)
+void EnzoBlock::p_mg0_prolong_recv(FieldMsg * field_message)
 /// [*]
 {
   VERBOSE("p_mg0_prolong_recv()");
@@ -684,13 +685,13 @@ void EnzoBlock::p_mg0_prolong_recv(DataMsg * data_message)
 
   // copy data from field_message to this EnzoBlock
 
-  int n = data_message->n;
-  char * a = data_message->a;
-  int * ic3 = data_message->ic3;
+  int n = field_message->n;
+  char * a = field_message->a;
+  int * ic3 = field_message->ic3;
   store_field_face 
-    (data_message->n,
-     data_message->a,   if3, 
-     data_message->ic3, lg3,
+    (field_message->n,
+     field_message->a,   if3, 
+     field_message->ic3, lg3,
      refresh_fine,
      field_list);
 
@@ -699,8 +700,8 @@ void EnzoBlock::p_mg0_prolong_recv(DataMsg * data_message)
 
   // GET DATA
   
-  //  delete data_message;
-  delete data_message;
+  //  delete field_message;
+  delete field_message;
 
   method -> prolong_recv<T>(this);
 }
@@ -822,7 +823,7 @@ void EnzoMethodGravityMg0::exit_solver_
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  T * X         = (T*) field.values(ix_);
+  T * X   = (T*) field.values(ix_);
   T * phi = (T*) field.values(iphi_);
 
 

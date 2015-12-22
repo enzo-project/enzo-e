@@ -77,14 +77,12 @@ Output {
 
     mesh {
 	type     = "image";
-	image_type  = "data+mesh";
+	image_type  = "mesh";
 	image_reduce_type = "max";
         field_list = ["density"];
-#	image_block_size  = 5;
 	image_size = [513,513];
         include "input/schedule_time_0.02.incl"
 	image_min = 0.0;
-	image_max = 1.0;
         include "input/colormap_rainbow.incl"
       }
 }

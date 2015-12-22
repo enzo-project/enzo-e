@@ -418,7 +418,7 @@ function end_hidden ($id)
 function test_table ($file_root,$size_array, $types)
 {
   $show_flash = 0;
-  $show_gif = 1;
+  $show_gif = 0;
 
   echo "<table>";
   echo "<tr>";
@@ -628,7 +628,7 @@ test_summary("Output",
 	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 test_summary("Particle", 
-	     array("test-particle-x","test-particle-y","test-particle-xy","test-particle-circle","test-particle-amr-x"),
+	     array("particle-x","particle-y","particle-xy","particle-circle","particle-amr-x"),
 	     array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
