@@ -167,46 +167,15 @@ Block::Block
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
 
-  int icx=0,icy=0,icz=0;
-  if (level > 0) index_.child(level,&icx,&icy,&icz);
+  int ic3[3];
+  if (level > 0) index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
 
   if (narray != 0) {
     
-    // copy any input data
-    FieldData  * field_data  = data()      ->field_data();
-    FieldDescr * field_descr = simulation()->field_descr();
-    Field field (field_descr,field_data);
-    FieldFace field_face (field);
-
-    //    set "face" to full FieldData
-    field_face.set_face(0,0,0);
-    field_face.set_ghost(true,true,true);
-
-    //    set array operation if any
-
-    Problem * problem = simulation()->problem();
-
-    switch (refresh_type) {
-
-    case refresh_coarse:
-
-      field_face.set_ghost(false,false,false);
-      field_face.set_restrict(problem->restrict(),icx,icy,icz);  
-
-      break;
-
-    case refresh_fine:
-
-      field_face.set_prolong(problem->prolong(),icx,icy,icz);
-
-      break;
-
-    default:
-      break;
-
-    }
-
-    field_face.store(narray,array);
+    int if3[3] = {0,0,0};
+    bool lg3[3] = {true,true,true};
+    std::vector<int> field_list;
+    store_field_face (narray,array, if3, ic3, lg3, refresh_fine, field_list);
 
   }
 
@@ -399,6 +368,7 @@ Block::~Block() throw ()
     // --------------------------------------------------
 
     delete field_face;
+    delete [] array;
   }
   if (data_) delete data_;
   data_ = 0;
@@ -667,6 +637,7 @@ void Block::store_field_face
     (if3,ic3,lg3, refresh_type,field_list);
 
   field_face->store(n, a);
+  //  delete [] a;
   delete field_face;
 }
 

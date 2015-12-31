@@ -441,7 +441,7 @@ public:
   void p_refresh_store_particle_face (int n, int np, char a[],  int it) 
   { refresh_store_particle_face_(n,np,a, it); }
 
-  void p_refresh_store (/* DataMsg * msg */);
+  void p_refresh_store (DataMsg * msg);
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char a[],int ic3[3]);

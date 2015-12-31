@@ -8,7 +8,7 @@
 #ifndef DATA_PARTICLE_DATA_HPP
 #define DATA_PARTICLE_DATA_HPP
 
-class ParticleData {
+class ParticleData : DataBase {
 
   /// @class    ParticleData
   /// @ingroup  Data
@@ -20,6 +20,15 @@ public: // interface
 
   /// Constructor
   ParticleData();
+
+  /// Deconstructor
+  virtual ~ParticleData() throw();
+
+  /// Copy constructor
+  ParticleData(const ParticleData & particle_data) throw ();
+
+  /// Assignment operator
+  ParticleData & operator= (const ParticleData & particle_data) throw ();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -129,6 +138,17 @@ public: // interface
 		 double * vx, double * vy = 0, double * vz = 0);
 
   void debug (ParticleDescr * particle_descr);
+
+public: // virtual functions
+
+  /// Return the number of bytes required to serialize the data object
+  virtual int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer
+  virtual char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data
+  virtual char * load_data (char * buffer);
 
 private: /// functions
 

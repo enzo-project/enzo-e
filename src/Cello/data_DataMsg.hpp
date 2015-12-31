@@ -17,7 +17,7 @@ class DataMsg : public CMessage_DataMsg {
 public:
 
   DataMsg() : pd_(NULL), fd_(NULL), ff_(NULL)
-  {}
+  { }
 
   void set_particle_data (ParticleData * pd) { pd_ = pd; }
   void set_field_data    (FieldData * fd) { fd_ = fd; }

@@ -523,6 +523,7 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 	      enzo_block->proxy_array()).send(field_message);
 
   delete field_face;
+  delete [] array;
 
 }
 

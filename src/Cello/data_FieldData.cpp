@@ -17,7 +17,8 @@ FieldData::FieldData
  const FieldDescr * field_descr,
  int nx, int ny, int nz 
  ) throw()
-  : array_permanent_(),
+  : DataBase(),
+    array_permanent_(),
     array_temporary_(),
     offsets_(),
     ghosts_allocated_(true)
@@ -61,6 +62,8 @@ FieldData & FieldData::operator= ( const FieldData & field_data ) throw ()
 void FieldData::pup(PUP::er &p)
 {
   TRACEPUP;
+
+  DataBase::pup(p);
 
   PUParray(p,size_,3);
 

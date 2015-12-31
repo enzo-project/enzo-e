@@ -36,7 +36,7 @@ public: // interface
 	     int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
-  ~FieldData() throw();
+  virtual ~FieldData() throw();
 
   /// Copy constructor
   FieldData(const FieldData & field_data) throw ();

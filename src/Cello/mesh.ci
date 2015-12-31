@@ -156,7 +156,7 @@ module mesh {
     // *** REFRESH
     //--------------------------------------------------
 
-    entry void p_refresh_store (/* DataMsg * msg*/);
+    entry void p_refresh_store (DataMsg * msg);
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 

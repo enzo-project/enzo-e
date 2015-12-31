@@ -1081,7 +1081,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
       (p->type("step") != parameter_unknown) ||
       (p->type("stop") != parameter_unknown));
   
-  const bool type_is_list = (p->type("value") != parameter_unknown);
+  const bool type_is_list = (p->type("list") != parameter_unknown);
 
   if (type_is_interval && type_is_list) {
       ERROR1 ("Config::read",
@@ -1112,7 +1112,7 @@ int Config::read_schedule_(Parameters * p, const std::string group)
       schedule_stop[index]  = p->value("stop",max_double);
     }
   } else if (type_is_list) {
-    int n = p->list_length("value");
+    int n = p->list_length("list");
     if (n == 0) {
       ERROR1 ("Config::read",
 	      "Schedule variable %s has length 0",
@@ -1121,11 +1121,11 @@ int Config::read_schedule_(Parameters * p, const std::string group)
     schedule_list[index].resize(n);
     if (var_is_int) {
       for (int i=0; i<n; i++) {
-	schedule_list[index][i] = p->value(i,"value",0);
+	schedule_list[index][i] = p->value(i,"list",0);
       }
     } else {
       for (int i=0; i<n; i++) {
-	schedule_list[index][i] = p->value(i,"value",0.0);
+	schedule_list[index][i] = p->value(i,"list",0.0);
       }
     }
   } else {

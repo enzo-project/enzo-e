@@ -20,11 +20,14 @@ class FieldFace : DataBase {
 
 public: // interface
 
+  /// Constructor of uninitialized FieldFace
+  FieldFace () throw() : DataBase(), field_ (NULL,NULL) {};
+
   /// Constructor of initialized FieldFace
   FieldFace (const Field & field) throw();
      
   /// Destructor
-  ~FieldFace() throw();
+  virtual ~FieldFace() throw();
 
   /// Copy constructor
   FieldFace(const FieldFace & FieldFace) throw();
@@ -89,18 +92,8 @@ public: // interface
   void set_field_list (std::vector<int> const & field_list)
   { field_list_ = field_list; }
 
-  /// Allocate array_ storage
-  char * allocate() throw();
-
-  /// Deallocate array_ storage
-  void deallocate() throw();
-
-  /// Return the size of the array
-  size_t size() const throw() { return array_.size(); };
-
-  /// Return a pointer to the array
-  char * array () throw() 
-  { return size() > 0 ?  &array_[0] : 0; };
+  /// Calculate the number of bytes needed
+  int num_bytes () throw();
 
   //--------------------------------------------------
 
@@ -123,7 +116,7 @@ private: // functions
   void copy_(const FieldFace & field_face); 
 
   /// Compute loop limits for load_
-  void new_loop_limits_
+  void loop_limits_
   (int im3[3], int n3[3], const int nd3[3], const int ng3[3], int refresh_type);
 
   /// Set child indices if prolongation or restriction is required
@@ -150,9 +143,6 @@ private: // attributes
 
   /// Field data and descriptor
   Field field_;
-
-  /// Allocated array used for storing all ghosts and face
-  std::vector<char> array_;
 
   /// Select face, including edges and corners (-1,-1,-1) to (1,1,1)
   int face_[3];

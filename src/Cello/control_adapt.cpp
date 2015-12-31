@@ -314,6 +314,7 @@ void Block::adapt_refine_()
 	 simulation());
 
       delete field_face;
+      delete [] array;
 
       children_.push_back(index_child);
 
@@ -645,6 +646,7 @@ void Block::adapt_coarsen_()
   // --------------------------------------------------
 
   delete field_face;
+  delete [] array;
 
 }
 

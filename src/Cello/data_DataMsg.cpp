@@ -9,45 +9,88 @@
 
 //----------------------------------------------------------------------
 
-void * DataMsg::pack (DataMsg * dm)
+void * DataMsg::pack (DataMsg * msg)
 {
-  CkPrintf ("DataMsg::pack()\n");
-
   //  1. determine buffer size
 
   int size = 0;
 
-  //  if (pd_) size += pd_->data_size();
-  //  if (fd_) size += fd_->data_size();
-  if (dm->ff_) size += dm->ff_->data_size();
+  // FieldFace
+  size += 1;
+  if (msg->ff_) size += msg->ff_->data_size();
+
+  // FieldData
+  size += 1;
+  if (msg->fd_) size += msg->fd_->data_size();
+
+  // ParticleData
+  size += 1;
+  if (msg->pd_) size += msg->pd_->data_size();
 
   //  2. allocate buffer using CkAllocBuffer()
-  CkAllocBuffer (dm,size);
+
+  char * buffer = (char *) CkAllocBuffer (msg,size);
 
   //  3. serialize message data into buffer (along with control info
   //  required for de-serializing it)
 
+  char * p = buffer;
+
+  // FieldFace
+  (*p++) = msg->ff_ ? 1 : 0;
+  if (msg->ff_) p = msg->ff_->save_data (p);
+
+  // FieldData
+  (*p++) = msg->fd_ ? 1 : 0;
+  if (msg->fd_) p = msg->fd_->save_data (p);
+
+  // ParticleData
+  (*p++) = msg->pd_ ? 1 : 0;
+  if (msg->pd_) p = msg->pd_->save_data (p);
+
   //  4. free resources occupied by the message, including the message
   //  itself
 
-  delete dm;
+  delete msg;
 
+  // Return the buffer
+
+  return (void *) buffer;
 }
 
 //----------------------------------------------------------------------
 
 DataMsg * DataMsg::unpack(void * buffer)
 {
+  printf ("DataMsg::unpack()\n");
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
+
+  DataMsg * msg = (DataMsg *) CkAllocBuffer (buffer,sizeof(DataMsg));
 
   // 2. De-serialize message data from input buffer into the allocated
   // message
 
+  char * p = (char *) buffer;
+
+  if (*p++) {
+    msg->ff_ = new FieldFace;
+    msg->ff_->load_data(p);
+  }
+
+  if (*p++) {
+    msg->fd_ = new FieldData;
+    msg->fd_->load_data(p);
+  }
+
+  if (*p++) {
+    msg->pd_ = new ParticleData;
+    msg->pd_->load_data(p);
+  }
+
   // 3. Free the input buffer using CkFreeMsg.
 
-  printf ("DataMsg::unpack()\n");
-  DataMsg * msg = new DataMsg;
   CkFreeMsg (buffer);
+
   return msg;
 }
 

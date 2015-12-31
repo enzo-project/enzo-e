@@ -26,7 +26,7 @@ public: // interface
   DataBase & operator= (const DataBase & DataBase) throw() {return *this;};
 
   /// Destructor
-  ~DataBase() throw() {};
+  virtual ~DataBase() throw() {};
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) {};

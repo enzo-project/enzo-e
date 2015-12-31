@@ -329,23 +329,33 @@ PARALLEL_MAIN_BEGIN
 
 	  Field field_lower (field_descr,data_lower);
 	  Field field_upper (field_descr,data_upper);
+
 	  FieldFace face_lower (field_lower);
 	  FieldFace face_upper (field_upper);
+
 	  face_lower.set_ghost(true,true,true);
 	  face_upper.set_ghost(true,true,true);
-
-	  int n;
-	  char * array;
-
 
 	  face_lower.set_face(ixp,iyp,izp);
 	  face_upper.set_face(ixm,iym,izm);
 
+	  std::vector<int> field_list;
+	  field_list.push_back(0);
+	  field_list.push_back(1);
+	  field_list.push_back(2);
+	  face_lower.set_field_list(field_list);
+	  face_upper.set_field_list(field_list);
+
+	  int n;
+	  char * array;
+
 	  face_lower.load (&n, &array);
 	  face_upper.store (n,array);
+	  delete [] array;
 
 	  face_upper.load (&n, &array);
 	  face_lower.store (n,array);
+	  delete [] array;
 
 	  // NEW
 	  //

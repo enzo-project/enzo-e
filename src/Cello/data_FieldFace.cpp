@@ -22,8 +22,8 @@ enum enum_op_type {
 
 FieldFace::FieldFace 
 ( const Field & field ) throw()
-  : field_(field),
-    array_(),
+  : DataBase(),
+    field_(field),
     restrict_(0),
     prolong_(0)
 {
@@ -38,14 +38,12 @@ FieldFace::FieldFace
 
 FieldFace::~FieldFace() throw ()
 {
-  deallocate();
 }
 
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
-  : field_(field_face.field_),
-    array_()
+  : field_(field_face.field_)
 {
   copy_(field_face);
 }
@@ -65,8 +63,6 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 
 void FieldFace::copy_(const FieldFace & field_face)
 {
-  array_        = field_face.array_;
-  
   for (int i=0; i<3; i++) {
     ghost_[i] = field_face.ghost_[i];
     face_[i]  = field_face.face_[i];
@@ -85,8 +81,9 @@ void FieldFace::pup (PUP::er &p)
 
   TRACEPUP;
 
+  DataBase::pup(p);
+
   p | field_;
-  p | array_;
   PUParray(p,face_,3);
   PUParray(p,ghost_,3);
   PUParray(p,child_,3);
@@ -99,23 +96,14 @@ void FieldFace::pup (PUP::er &p)
 
 void FieldFace::load ( int * n, char ** array) throw()
 {
-  if (array_.size() == 0)  allocate ();
-
-  ASSERT("FieldFace::load()",
-	 "array_.size() must be > 0",
-	 array_.size() > 0);
-
-  size_t index_array = 0;
-
-  if (field_list_.size() == 0) {
-    const size_t num_fields = field_.field_count();
-    field_list_.resize(num_fields);
-    for (size_t i=0; i<num_fields; i++) field_list_[i] = i;
-  }
-
   ASSERT("FieldFace::load()",
 	 "field_list.size() must be > 0",
 	 field_list_.size() > 0);
+
+  *n = num_bytes();
+  *array = new char [*n];
+
+  size_t index_array = 0;
 
   for (size_t index_field_list=0;
        index_field_list < field_list_.size();
@@ -127,14 +115,14 @@ void FieldFace::load ( int * n, char ** array) throw()
 
     const void * field_face = field_.values(index_field);
 
-    void * array_face  = &array_[index_array];
+    char * array_face  = &((*array)[index_array]);
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
     field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    new_loop_limits_ (im3,n3,nd3,ng3,op_load);
+    loop_limits_ (im3,n3,nd3,ng3,op_load);
 
     if (restrict_) {
 
@@ -155,23 +143,20 @@ void FieldFace::load ( int * n, char ** array) throw()
       switch (precision) {
       case precision_single:
 	{
-	  float *       array = (float *) array_face;
-	  const float * field = (const float *) field_face;
-	  index_array += load_ ( array,field, nd3,n3,im3);
+	  index_array += load_ ( (float*)array_face,
+				 (const float *) field_face, nd3,n3,im3);
 	}
 	break;
       case precision_double:
 	{
-	  double *       array = (double *)array_face;
-	  const double * field = (const double *) field_face;
-	  index_array += load_ ( array,field, nd3,n3,im3);
+	  index_array += load_ ( (double *)array_face,
+				 (const double *) field_face, nd3,n3,im3);
 	}
 	break;
       case precision_quadruple:
 	{
-	  long double *       array = (long double *)array_face;
-	  const long double * field = (const long double *) field_face;
-	  index_array += load_ ( array,field, nd3,n3,im3);
+	  index_array += load_ ( (long double *)array_face,
+				 (const long double *) field_face, nd3,n3,im3);
 	}
 	break;
       default:
@@ -182,12 +167,10 @@ void FieldFace::load ( int * n, char ** array) throw()
     }
   }
 
-  *n = array_.size();
 
   ASSERT("FieldFace::load()",
 	 "array size must be > 0",
 	 *n > 0);
-  *array = &array_[0];
 
 }
 
@@ -195,7 +178,6 @@ void FieldFace::load ( int * n, char ** array) throw()
 
 void FieldFace::store (int n, char * array) throw()
 {
-  if (array_.size() == 0)  allocate ();
 
   size_t index_array = 0;
 
@@ -216,7 +198,7 @@ void FieldFace::store (int n, char * array) throw()
     field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    new_loop_limits_ (im3,n3,nd3,ng3,op_store);
+    loop_limits_ (im3,n3,nd3,ng3,op_store);
 
     if (prolong_) {
 
@@ -269,22 +251,13 @@ void FieldFace::store (int n, char * array) throw()
       }
     }
   }
-
-  deallocate();
 }
 
 //----------------------------------------------------------------------
 
-char * FieldFace::allocate () throw()
+int FieldFace::num_bytes() throw()
 {
   int array_size = 0;
-
-  // default all fields
-  if (field_list_.size() == 0) {
-    const size_t nf = field_.field_count();
-    field_list_.resize(nf);
-    for (size_t i=0; i<nf; i++) field_list_[i]=i;
-  }
 
   for (size_t index_field_list=0;
        index_field_list < field_list_.size();
@@ -292,51 +265,29 @@ char * FieldFace::allocate () throw()
 
     size_t index_field = field_list_[index_field_list];
 
-    // Need element size for alignment adjust below
-
     precision_type precision = field_.precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
-    int nd3[3];
-    int field_bytes = field_.field_size 
-      (index_field, &nd3[0], &nd3[1], &nd3[2]);
+    int nd3[3],ng3[3],im3[3],n3[3];
 
-    int ng3[3];
+    field_.field_size (index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    int n_old = nd3[0]*nd3[1]*nd3[2];
+    if (prolong_)
+      loop_limits_ (im3,n3,nd3,ng3,op_load);
+    else
+      loop_limits_ (im3,n3,nd3,ng3,op_store);
 
-    if (! ghost_[0]) nd3[0] -= 2*ng3[0];
-    if (! ghost_[1]) nd3[1] -= 2*ng3[1];
-    if (! ghost_[2]) nd3[2] -= 2*ng3[2];
-
-    int n_new = nd3[0]*nd3[1]*nd3[2];
-
-    field_bytes /= n_old;
-    field_bytes *= n_new;
-
-    int face_bytes = field_bytes;
-    if (face_[0]) face_bytes = (face_bytes * ng3[0]) / nd3[0];
-    if (face_[1]) face_bytes = (face_bytes * ng3[1]) / nd3[1];
-    if (face_[2]) face_bytes = (face_bytes * ng3[2]) / nd3[2];
-
-    face_bytes += 
-      field_.field_data()->adjust_alignment_(face_bytes,bytes_per_element);
-
-
-    array_size += face_bytes;
+    array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
 
   }
 
-  ASSERT("FieldFace::allocate()",
+  ASSERT("FieldFace::num_bytes()",
 	 "array_size must be > 0, maybe field_list_.size() is 0?",
 	 array_size);
 
-  array_.resize(array_size);
+  return array_size;
 
-  for (int i=0; i<array_size; i++) array_[i] = 0;
-
-  return &array_[0];
 }
 
 //----------------------------------------------------------------------
@@ -362,24 +313,41 @@ char * FieldFace::save_data (char * buffer) const
 {
   char * p = buffer;
   int n;
-  memcpy(p,face_, n=3*sizeof(int));  p+=n;
-  memcpy(p,ghost_,n=3*sizeof(bool)); p+=n;
-  memcpy(p,child_,n=3*sizeof(int));  p+=n;
-  char c0 = '0';
+
+  memcpy(p,face_, n=3*sizeof(int));  
+  p+=n;
+
+  memcpy(p,ghost_,n=3*sizeof(bool)); 
+  p+=n;
+
+  memcpy(p,child_,n=3*sizeof(int));  
+  p+=n;
+
+  char c0 = 0;
+
   if (restrict_) {
     memcpy(p,restrict_->name().c_str(),n=(restrict_->name().size()+1));
     p+=n;
   } else {
-    memcpy(p,&c0,1); ++p;
+    memcpy(p,&c0,1); 
+    ++p;
   }
+
   if (prolong_) {
     memcpy(p,prolong_->name().c_str(),n=(prolong_->name().size()+1));
     p+=n;
-    memcpy(p,&c0,1); ++p;
   } else {
-    memcpy(p,&c0,1); ++p;
+    memcpy(p,&c0,1); 
+    ++p;
   }
-  memcpy(p,&field_list_[0],n=(field_list_.size()*sizeof(int))); p+=n;
+
+  int length = field_list_.size();
+
+  memcpy(p,&length,n=sizeof(int)); 
+  p+=n;
+
+  memcpy(p,&field_list_[0],n=length*sizeof(int)); 
+  p+=n;
 
   return p;
 }
@@ -388,13 +356,36 @@ char * FieldFace::save_data (char * buffer) const
 
 char * FieldFace::load_data (char * buffer)
 {
-  return NULL;
+  char * p = buffer;
+  int n;
+
+  memcpy(face_,p, n=3*sizeof(int));
+  p+=n;
+
+  memcpy(ghost_,p,n=3*sizeof(bool));
+  p+=n;
+
+  memcpy(child_,p,n=3*sizeof(int));
+  p+=n;
+
+  //  RESTRICT NOT IMPLEMENTED
+  p++;
+
+  //  PROLONG NOT IMPLEMENTED
+  p++;
+
+  int length;
+
+  memcpy(&length,p,n=sizeof(int)); 
+  p+=n;
+
+  field_list_.resize(length);
+
+  memcpy(&field_list_[0],p,n=(field_list_.size()*sizeof(int)));
+  p+=n;
+  
+  return p;
 }
-
-//----------------------------------------------------------------------
-
-void FieldFace::deallocate() throw()
-{  array_.clear(); }
 
 //======================================================================
 
@@ -444,7 +435,7 @@ template<class T> size_t FieldFace::store_
 
 //----------------------------------------------------------------------
 
-void FieldFace::new_loop_limits_
+void FieldFace::loop_limits_
 ( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)
 {
   im3[0]=0;

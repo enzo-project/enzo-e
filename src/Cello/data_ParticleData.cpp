@@ -11,7 +11,8 @@
 //----------------------------------------------------------------------
 
 ParticleData::ParticleData()
-  : attribute_array_(),
+  : DataBase(),
+    attribute_array_(),
     attribute_align_(),
     particle_count_()
 {
@@ -19,8 +20,31 @@ ParticleData::ParticleData()
 
 //----------------------------------------------------------------------
 
+ParticleData::~ParticleData() throw()
+{  
+}
+
+//----------------------------------------------------------------------
+
+ParticleData::ParticleData ( const ParticleData & particle_data ) throw ()
+{
+  
+  INCOMPLETE("ParticleData::ParticleData"); 
+}
+
+//----------------------------------------------------------------------
+
+ParticleData & ParticleData::operator= ( const ParticleData & particle_data ) throw ()
+{  
+  INCOMPLETE("ParticleData::operator=");
+  return *this;
+}
+
+//----------------------------------------------------------------------
+
 void ParticleData::pup (PUP::er &p)
 {
+  DataBase::pup(p);
   p | attribute_array_;
   p | attribute_align_;
   p | particle_count_;
@@ -741,6 +765,54 @@ void ParticleData::debug (ParticleDescr * particle_descr)
   
 }
 
+
+//----------------------------------------------------------------------
+
+void ParticleData::write_ifrite (ParticleDescr * particle_descr,
+				 int it, std::string file_name,
+				 double xm, double ym, double zm,
+				 double xp, double yp, double zp)
+{
+  FILE * fp = fopen (file_name.c_str(),"w");
+
+  fprintf (fp,"%d\n",num_particles(particle_descr,it));
+  fprintf (fp,"%f %f %f %f %f %f\n",xm,ym,zm,xp,yp,zp);
+  const int nb = num_batches(it);
+  const int ia_x = particle_descr->attribute_position(it,0);
+  const int d = particle_descr->stride(it,ia_x);
+  for (int ib=0; ib<nb; ib++) {
+    const int np = num_particles(particle_descr,it,ib);
+    double x[np], y[np], z[np];
+    position (particle_descr,it,ib,x,y,z);
+    for (int ip=0; ip<np; ip++) {
+      fprintf (fp,"%f %f %f\n",x[ip*d],y[ip*d],z[ip*d]);
+    }
+  }
+  fflush(fp);
+  fclose (fp);
+}
+
+//----------------------------------------------------------------------
+
+int ParticleData::data_size () const
+{
+  
+}
+
+//----------------------------------------------------------------------
+
+
+char * ParticleData::save_data (char * buffer) const
+{
+}
+
+//----------------------------------------------------------------------
+
+
+char * ParticleData::load_data (char * buffer)
+{
+}
+
 //======================================================================
 
 
@@ -807,30 +879,4 @@ void ParticleData::check_arrays_ (ParticleDescr * particle_descr,
 	     it,attribute_align_[it].size(),nb,
 	     attribute_align_[it].size()>=nb);
   }
-}
-
-//----------------------------------------------------------------------
-
-void ParticleData::write_ifrite (ParticleDescr * particle_descr,
-				 int it, std::string file_name,
-				 double xm, double ym, double zm,
-				 double xp, double yp, double zp)
-{
-  FILE * fp = fopen (file_name.c_str(),"w");
-
-  fprintf (fp,"%d\n",num_particles(particle_descr,it));
-  fprintf (fp,"%f %f %f %f %f %f\n",xm,ym,zm,xp,yp,zp);
-  const int nb = num_batches(it);
-  const int ia_x = particle_descr->attribute_position(it,0);
-  const int d = particle_descr->stride(it,ia_x);
-  for (int ib=0; ib<nb; ib++) {
-    const int np = num_particles(particle_descr,it,ib);
-    double x[np], y[np], z[np];
-    position (particle_descr,it,ib,x,y,z);
-    for (int ip=0; ip<np; ip++) {
-      fprintf (fp,"%f %f %f\n",x[ip*d],y[ip*d],z[ip*d]);
-    }
-  }
-  fflush(fp);
-  fclose (fp);
 }

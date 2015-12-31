@@ -23,6 +23,7 @@
 #  define TRACE_REFRESH(msg) /* NOTHING */
 #endif
 
+/* #define NEW_REFRESH */
 
 //----------------------------------------------------------------------
 
@@ -131,33 +132,52 @@ void Block::refresh_load_field_face_
   // ... send the face data to the neighbor
   const int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
-  // @@@@@@@@@@@@@
-  // TEMPORARY
-  // @@@@@@@@@@@@@
+#ifdef NEW_REFRESH
+
   DataMsg * data_msg = new DataMsg;
-  thisProxy[index_neighbor].p_refresh_store (/* data_msg*/);
+  data_msg -> set_field_face (field_face);
+  thisProxy[index_neighbor].p_refresh_store (data_msg);
+
+#else
 
   thisProxy[index_neighbor].p_refresh_store_field_face
     (n,array, refresh_type, of3, ic3);
 
+#endif
+
   // ... delete the FieldFace created by load_face()
   delete field_face;
+  delete [] array;
 }
 
 
 //----------------------------------------------------------------------
 
-void Block::p_refresh_store (/* DataMsg * msg */)
+
+void Block::p_refresh_store (DataMsg * msg)
 {
+#ifdef NEW_REFRESH
   TRACE_REFRESH("p_refresh_store()");
+  if (n > 0) {
+    bool lg3[3] = {false,false,false};
+
+    Refresh * refresh = this->refresh();
+    std::vector<int> field_list = refresh->field_list();
+
+    store_field_face (n,buffer, if3, ic3, lg3, refresh_type, field_list);
+  }
+#endif
 }
 
+
 //----------------------------------------------------------------------
+
 
 void Block::refresh_store_field_face_
 (int n, char * buffer, int refresh_type, 
  int if3[3], int ic3[3])
 {
+#ifndef NEW_REFRESH
   TRACE_REFRESH("refresh_store_field_face()");
 
   if (n > 0) {
@@ -168,7 +188,9 @@ void Block::refresh_store_field_face_
 
     store_field_face (n,buffer, if3, ic3, lg3, refresh_type, field_list);
   }
+#endif
 }
+
 
 //----------------------------------------------------------------------
 
@@ -487,6 +509,13 @@ void Block::refresh_load_particle_faces_ (Refresh *refresh)
     }
     
   }
+
+
+  // delete neighbor particle objects
+  for (int il=0; il<nl; il++) {
+    ParticleData * p_data = particle_list[il];
+    delete p_data;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -521,7 +550,8 @@ void Block::refresh_store_particle_face_
 	mp = particle.attribute_bytes(it,ia);
       int ny = particle.attribute_bytes(it,ia);
       char * a_dst = particle.attribute_array(it,ia,jb);
-      int increment = particle.attribute_array(it,ia,jb) - particle.attribute_array(it,0,jb);
+      int increment = particle.attribute_array(it,ia,jb) 
+	-             particle.attribute_array(it,0,jb);
       char * a_src = a + increment;
       for (int iy=0; iy<ny; iy++) {
         a_dst [iy + mp*jp] = a_src [iy + mp*ip];
