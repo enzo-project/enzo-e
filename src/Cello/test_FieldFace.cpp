@@ -333,6 +333,9 @@ PARALLEL_MAIN_BEGIN
 	  FieldFace face_lower (field_lower);
 	  FieldFace face_upper (field_upper);
 
+	  face_lower.set_refresh(refresh_same);
+	  face_upper.set_refresh(refresh_same);
+
 	  face_lower.set_ghost(true,true,true);
 	  face_upper.set_ghost(true,true,true);
 
