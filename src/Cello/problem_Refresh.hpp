@@ -217,7 +217,7 @@ public: // interface
 	  lower[axis] = 1 - ic3[axis];
 	  upper[axis] = 4 - ic3[axis];
 	} else {
-	  ERROR1 ("Refresh::loop_limits_()",
+	  ERROR1 ("Refresh::loop_limits()",
 		  "unknown refresh_type %d",
 		  refresh_type);
 	}

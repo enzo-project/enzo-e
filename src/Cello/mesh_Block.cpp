@@ -619,7 +619,7 @@ FieldFace * Block::load_field_face
 {
   FieldFace * field_face = create_face_ 
     (if3,ic3,lg3, refresh_type,field_list);
-  field_face->load(n, a);
+  field_face->face_to_array(n, a);
   return field_face;
 }
 
@@ -636,7 +636,7 @@ void Block::store_field_face
   FieldFace * field_face = create_face_ 
     (if3,ic3,lg3, refresh_type,field_list);
 
-  field_face->store(n, a);
+  field_face->array_to_face(n, a);
   //  delete [] a;
   delete field_face;
 }
@@ -656,18 +656,10 @@ FieldFace * Block::create_face_
   Field field (field_descr,field_data);
   FieldFace * field_face = new FieldFace(field);
 
-  if (refresh_type == refresh_coarse) {
-
-    field_face->set_restrict(problem->restrict(),ic3[0],ic3[1],ic3[2]);
-
-  } else if (refresh_type == refresh_fine) {
-
-    field_face->set_prolong(problem->prolong(),  ic3[0],ic3[1],ic3[2]);
-
-  }
-
-  field_face->set_face (if3[0],if3[1],if3[2]);
-  field_face->set_ghost(lg3[0],lg3[1],lg3[2]);
+  field_face -> set_refresh (refresh_type);
+  field_face -> set_child (ic3[0],ic3[1],ic3[2]);
+  field_face -> set_face (if3[0],if3[1],if3[2]);
+  field_face -> set_ghost(lg3[0],lg3[1],lg3[2]);
 
   if (field_list.size() == 0) {
     int n = field_descr->field_count();

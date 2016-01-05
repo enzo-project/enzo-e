@@ -11,42 +11,72 @@
 
 void * DataMsg::pack (DataMsg * msg)
 {
+
+  CkPrintf ("DataMsg::unpack()\n");
+
+  //--------------------------------------------------
   //  1. determine buffer size
+  //--------------------------------------------------
 
   int size = 0;
 
+  // FieldFace num_bytes
+  size += sizeof(int);
+
   // FieldFace
-  size += 1;
-  if (msg->ff_) size += msg->ff_->data_size();
+  if (msg->field_face_) size += msg->field_face_->data_size();
 
   // FieldData
-  size += 1;
-  if (msg->fd_) size += msg->fd_->data_size();
+  size += sizeof(int);
 
-  // ParticleData
-  size += 1;
-  if (msg->pd_) size += msg->pd_->data_size();
+  int nf = msg->field_data_ ? msg->field_face_->num_bytes_array() : 0;
 
+  size += nf;
+
+  // // ParticleData
+  // size += 1;
+  // if (msg->pd_) size += msg->pd_->data_size();
+
+  //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
+  //--------------------------------------------------
 
   char * buffer = (char *) CkAllocBuffer (msg,size);
 
-  //  3. serialize message data into buffer (along with control info
-  //  required for de-serializing it)
+  //--------------------------------------------------
+  //  3. serialize message data into buffer
+  //--------------------------------------------------
 
-  char * p = buffer;
+  union {
+    char * pc;
+    int  * pi;
+  };
+
+  pc = buffer;
 
   // FieldFace
-  (*p++) = msg->ff_ ? 1 : 0;
-  if (msg->ff_) p = msg->ff_->save_data (p);
+  (*pc++) = msg->field_face_ ? 1 : 0;
 
-  // FieldData
-  (*p++) = msg->fd_ ? 1 : 0;
-  if (msg->fd_) p = msg->fd_->save_data (p);
+  if (msg->field_face_) {
+    pc = msg->field_face_->save_data (pc);
 
-  // ParticleData
-  (*p++) = msg->pd_ ? 1 : 0;
-  if (msg->pd_) p = msg->pd_->save_data (p);
+  // FieldData buffer length
+
+    int nf = msg->field_face_->num_bytes_array();
+
+    (*pi++) = nf;
+  
+  // FieldData buffer data
+
+    if (nf > 0) {
+      msg->field_face_->face_to_array(pc);
+      pc += nf;
+    }
+  }
+
+  // // ParticleData
+  // 
+  // if (msg->pd_) p = msg->pd_->save_data (p);
 
   //  4. free resources occupied by the message, including the message
   //  itself
@@ -64,30 +94,31 @@ DataMsg * DataMsg::unpack(void * buffer)
 {
   printf ("DataMsg::unpack()\n");
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
-
+ 
   DataMsg * msg = (DataMsg *) CkAllocBuffer (buffer,sizeof(DataMsg));
+
+  msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
   // message
+ 
+  // char * p = (char *) buffer;
+  // if (*p++) {
+  //   msg->ff_ = new FieldFace;
+  //   msg->ff_->load_data(p);
+  //  }
 
-  char * p = (char *) buffer;
+  // if (*p++) {
+  //   msg->fd_ = new FieldData;
+  //   msg->fd_->load_data(p);
+  // }
 
-  if (*p++) {
-    msg->ff_ = new FieldFace;
-    msg->ff_->load_data(p);
-  }
+  // if (*p++) {
+  //   msg->pd_ = new ParticleData;
+  //   msg->pd_->load_data(p);
+  // }
 
-  if (*p++) {
-    msg->fd_ = new FieldData;
-    msg->fd_->load_data(p);
-  }
-
-  if (*p++) {
-    msg->pd_ = new ParticleData;
-    msg->pd_->load_data(p);
-  }
-
-  // 3. Free the input buffer using CkFreeMsg.
+  // // 3. Free the input buffer using CkFreeMsg.
 
   CkFreeMsg (buffer);
 
@@ -95,3 +126,38 @@ DataMsg * DataMsg::unpack(void * buffer)
 }
 
 //----------------------------------------------------------------------
+
+void DataMsg::update (Data * data)
+{
+  if (is_local_) {
+
+    // copy portion of field_data_ described by FieldFace to data
+    union {
+      char * pc;
+      int  * pi;
+    };
+
+    pc = field_array_;
+
+    // FieldFace
+    (*pc++) = field_face_ ? 1 : 0;
+    if (field_face_) pc = field_face_->save_data (pc);
+
+    // FieldData buffer length
+
+    int nf = field_face_->num_bytes_array();
+    (*pi++) = nf;
+  
+    // FieldData buffer data
+
+    if (nf > 0) {
+      field_face_->face_to_array(pc);
+      pc += nf;
+    }
+
+
+  } else {
+    // copy field_array_ to data field
+    
+  }
+}

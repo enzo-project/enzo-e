@@ -11,8 +11,7 @@
 //----------------------------------------------------------------------
 
 ParticleData::ParticleData()
-  : DataBase(),
-    attribute_array_(),
+  : attribute_array_(),
     attribute_align_(),
     particle_count_()
 {
@@ -44,7 +43,6 @@ ParticleData & ParticleData::operator= ( const ParticleData & particle_data ) th
 
 void ParticleData::pup (PUP::er &p)
 {
-  DataBase::pup(p);
   p | attribute_array_;
   p | attribute_align_;
   p | particle_count_;
@@ -790,27 +788,6 @@ void ParticleData::write_ifrite (ParticleDescr * particle_descr,
   }
   fflush(fp);
   fclose (fp);
-}
-
-//----------------------------------------------------------------------
-
-int ParticleData::data_size () const
-{
-  
-}
-
-//----------------------------------------------------------------------
-
-
-char * ParticleData::save_data (char * buffer) const
-{
-}
-
-//----------------------------------------------------------------------
-
-
-char * ParticleData::load_data (char * buffer)
-{
 }
 
 //======================================================================

@@ -349,58 +349,21 @@ PARALLEL_MAIN_BEGIN
 	  int n;
 	  char * array;
 
-	  face_lower.load (&n, &array);
-	  face_upper.store (n,array);
+	  face_lower.face_to_array (&n, &array);
+	  face_upper.array_to_face (n,array);
 	  delete [] array;
 
-	  face_upper.load (&n, &array);
-	  face_lower.store (n,array);
+	  face_upper.face_to_array (&n, &array);
+	  face_lower.array_to_face (n,array);
 	  delete [] array;
 
-	  // NEW
-	  //
-	  //  block    face   block
-	  //   lower   lower   upper
-	  //  +---++    ++    ++    ++---+
-	  //  |   ||    ||    ||    ||   |
-	  //  +---++    ++    ++    ++---+
-	  // 1    xx >> xx
-	  // 2          xx    >>    xx
-	  // 3                yy << yy
-	  // 4    yy    <<    yy
-	  //
-	  //  array_lower = face_lower.load(ixp,iyp,izp)
-	  //  face_upper.store (ixm,iym,izm,array_lower);
-
-
-	  // OLD
-	  //
-	  //  block    face   block
-	  //   lower           upper
-	  //  +---++    ++    ++---+
-	  //  |   ||    ||    ||   |
-	  //  +---++    ++    ++---+
-	  // 1    xx >> xx
-	  // 2          xx >> xx 
-	  // 3          yy << yy
-	  // 4    yy << yy
-
-	  // face.allocate   (field_descr,data_lower,ixm,iym,izm);
-
-	  // face.load       (field_descr, data_lower, ixp,iyp,izp);
-	  // face.store      (field_descr, data_upper, ixm,iym,izm);
-
-	  // face.load       (field_descr, data_upper, ixm,iym,izm);
-	  // face.store      (field_descr, data_lower, ixp,iyp,izp);
-
-	  // face.deallocate ();
 
 	}
       }
     }
   }
 
-  unit_func("load/copy/store");
+  unit_func("face_to_array / array_to_face");
   unit_assert(test_fields(field_descr,field_data,nbx,nby,nbz,mx,my,mz)); // @@@
 
   //----------------------------------------------------------------------	

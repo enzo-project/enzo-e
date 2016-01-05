@@ -7,8 +7,7 @@
 
 #include "cello.hpp"
 #include "data.hpp"
-#include "problem_Prolong.hpp"
-#include "problem_Restrict.hpp"
+#include "charm_simulation.hpp"
 
 // #define DEBUG_FIELD_FACE
 
@@ -22,10 +21,8 @@ enum enum_op_type {
 
 FieldFace::FieldFace 
 ( const Field & field ) throw()
-  : DataBase(),
-    field_(field),
-    restrict_(0),
-    prolong_(0)
+  : field_(field),
+    refresh_type_(refresh_unknown)
 {
   for (int i=0; i<3; i++) {
     ghost_[i] = false;
@@ -68,9 +65,9 @@ void FieldFace::copy_(const FieldFace & field_face)
     face_[i]  = field_face.face_[i];
     child_[i] = field_face.child_[i];
   }
-  prolong_    = field_face.prolong_;
-  restrict_   = field_face.restrict_;
+  refresh_type_ = field_face.refresh_type_;
   field_list_ = field_face.field_list_;
+  
 }
 //----------------------------------------------------------------------
 
@@ -81,27 +78,18 @@ void FieldFace::pup (PUP::er &p)
 
   TRACEPUP;
 
-  DataBase::pup(p);
-
   p | field_;
   PUParray(p,face_,3);
   PUParray(p,ghost_,3);
   PUParray(p,child_,3);
-  p | *restrict_;  // PUPable
-  p | *prolong_;   // PUPable
+  p | refresh_type_;
   p | field_list_;
 }
 
 //======================================================================
 
-void FieldFace::load ( int * n, char ** array) throw()
+void FieldFace::face_to_array ( char * array) throw()
 {
-  ASSERT("FieldFace::load()",
-	 "field_list.size() must be > 0",
-	 field_list_.size() > 0);
-
-  *n = num_bytes();
-  *array = new char [*n];
 
   size_t index_array = 0;
 
@@ -115,16 +103,16 @@ void FieldFace::load ( int * n, char ** array) throw()
 
     const void * field_face = field_.values(index_field);
 
-    char * array_face  = &((*array)[index_array]);
+    char * array_face  = &array[index_array];
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
     field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    loop_limits_ (im3,n3,nd3,ng3,op_load);
+    loop_limits (im3,n3,nd3,ng3,op_load);
 
-    if (restrict_) {
+    if (refresh_type_ == refresh_coarse) {
 
       // Restrict field to array
 
@@ -132,7 +120,11 @@ void FieldFace::load ( int * n, char ** array) throw()
 
       int im3_array[3] = {0,0,0};
 
-      index_array += restrict_->apply
+      Simulation * simulation = proxy_simulation.ckLocalBranch();
+      Problem * problem   = simulation->problem();
+      Restrict * restrict = problem->restrict();
+
+      index_array += restrict->apply
 	(precision, 
 	 array_face,nc3,im3_array,nc3, 
 	 field_face,nd3,im3,      n3);
@@ -160,23 +152,38 @@ void FieldFace::load ( int * n, char ** array) throw()
 	}
 	break;
       default:
-	ERROR("FieldFace::load", "Unsupported precision");
+	ERROR("FieldFace::face_to_array", "Unsupported precision");
 	break;
       }
 
     }
   }
 
+}
 
-  ASSERT("FieldFace::load()",
+//----------------------------------------------------------------------
+
+void FieldFace::face_to_array ( int * n, char ** array) throw()
+{
+  ASSERT("FieldFace::face_to_array()",
+	 "field_list.size() must be > 0",
+	 field_list_.size() > 0);
+
+  *n = num_bytes_array();
+  *array = new char [*n];
+
+
+  ASSERT("FieldFace::face_to_array()",
 	 "array size must be > 0",
 	 *n > 0);
+
+  face_to_array (*array);
 
 }
 
 //----------------------------------------------------------------------
 
-void FieldFace::store (int n, char * array) throw()
+void FieldFace::array_to_face (int n, char * array) throw()
 {
 
   size_t index_array = 0;
@@ -198,15 +205,15 @@ void FieldFace::store (int n, char * array) throw()
     field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    loop_limits_ (im3,n3,nd3,ng3,op_store);
+    loop_limits (im3,n3,nd3,ng3,op_store);
 
-    if (prolong_) {
+    if (refresh_type_ == refresh_fine) {
 
       // Prolong array to field
 
       bool need_padding = (ng3[0]%2==1) || (ng3[1]%2==1) || (ng3[2]%2==1);
 
-      ASSERT("FieldFace::store()",
+      ASSERT("FieldFace::array_to_face()",
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
@@ -214,7 +221,11 @@ void FieldFace::store (int n, char * array) throw()
 
       int im3_array[3] = {0,0,0};
 
-      index_array += prolong_->apply
+      Simulation * simulation = proxy_simulation.ckLocalBranch();
+      Problem * problem   = simulation->problem();
+      Prolong * prolong = problem->prolong();
+
+      index_array += prolong->apply
 	(precision, 
 	 field_ghost,nd3,im3,       n3,
 	 array_ghost,nc3,im3_array, nc3);
@@ -246,7 +257,7 @@ void FieldFace::store (int n, char * array) throw()
 	}
 	break;
       default:
-	ERROR("FieldFace::store", "Unsupported precision");
+	ERROR("FieldFace::array_to_face()", "Unsupported precision");
 	break;
       }
     }
@@ -255,7 +266,7 @@ void FieldFace::store (int n, char * array) throw()
 
 //----------------------------------------------------------------------
 
-int FieldFace::num_bytes() throw()
+int FieldFace::num_bytes_array() throw()
 {
   int array_size = 0;
 
@@ -273,16 +284,16 @@ int FieldFace::num_bytes() throw()
     field_.field_size (index_field,&nd3[0],&nd3[1],&nd3[2]);
     field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    if (prolong_)
-      loop_limits_ (im3,n3,nd3,ng3,op_load);
+    if (refresh_type_ == refresh_fine)
+      loop_limits (im3,n3,nd3,ng3,op_load);
     else
-      loop_limits_ (im3,n3,nd3,ng3,op_store);
+      loop_limits (im3,n3,nd3,ng3,op_store);
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
 
   }
 
-  ASSERT("FieldFace::num_bytes()",
+  ASSERT("FieldFace::num_bytes_array()",
 	 "array_size must be > 0, maybe field_list_.size() is 0?",
 	 array_size);
 
@@ -299,9 +310,10 @@ int FieldFace::data_size () const
   count += 3*sizeof(int);  // face_[3]
   count += 3*sizeof(bool); // ghost_[3]
   count += 3*sizeof(int);  // child_[3];
-  count += (restrict_) ? restrict_->name().size() + 1 : 1;
-  count += (prolong_)  ? prolong_ ->name().size() + 1 : 1;
+  count += 1*sizeof(int);  // refresh_type_ (restrict,prolong,copy)
   count += (1+field_list_.size()) * sizeof(int);
+
+  CkPrintf ("%s:%d data_size %d",__FILE__,__LINE__,count);
 
   return count;
 
@@ -311,6 +323,8 @@ int FieldFace::data_size () const
 
 char * FieldFace::save_data (char * buffer) const
 {
+  CkPrintf ("%s:%d save_data",__FILE__,__LINE__);
+
   char * p = buffer;
   int n;
 
@@ -323,23 +337,8 @@ char * FieldFace::save_data (char * buffer) const
   memcpy(p,child_,n=3*sizeof(int));  
   p+=n;
 
-  char c0 = 0;
-
-  if (restrict_) {
-    memcpy(p,restrict_->name().c_str(),n=(restrict_->name().size()+1));
-    p+=n;
-  } else {
-    memcpy(p,&c0,1); 
-    ++p;
-  }
-
-  if (prolong_) {
-    memcpy(p,prolong_->name().c_str(),n=(prolong_->name().size()+1));
-    p+=n;
-  } else {
-    memcpy(p,&c0,1); 
-    ++p;
-  }
+  memcpy(p,&refresh_type_,n=sizeof(int));  
+  p+=n;
 
   int length = field_list_.size();
 
@@ -356,6 +355,8 @@ char * FieldFace::save_data (char * buffer) const
 
 char * FieldFace::load_data (char * buffer)
 {
+  CkPrintf ("%s:%d load_data",__FILE__,__LINE__);
+
   char * p = buffer;
   int n;
 
@@ -368,11 +369,8 @@ char * FieldFace::load_data (char * buffer)
   memcpy(child_,p,n=3*sizeof(int));
   p+=n;
 
-  //  RESTRICT NOT IMPLEMENTED
-  p++;
-
-  //  PROLONG NOT IMPLEMENTED
-  p++;
+  memcpy(&refresh_type_,p,n=sizeof(int));
+  p+=n;
 
   int length;
 
@@ -435,7 +433,7 @@ template<class T> size_t FieldFace::store_
 
 //----------------------------------------------------------------------
 
-void FieldFace::loop_limits_
+void FieldFace::loop_limits
 ( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)
 {
   im3[0]=0;
@@ -445,7 +443,7 @@ void FieldFace::loop_limits_
   n3[1]=0;
   n3[2]=0;
 
-  const bool lcopy = ( ! prolong_ && ! restrict_ );
+  const bool lcopy = (refresh_type_ == refresh_copy);
 
   for (int axis=0; axis<3; axis++) {
 
@@ -485,7 +483,7 @@ void FieldFace::loop_limits_
 
     const int co = child_[axis]*(nd3[axis]-2*ng3[axis])/2;
 
-    if (prolong_) {
+    if (refresh_type_ == refresh_fine) {
 
       if (face_[axis] == 0 && ! ghost_[axis] && op_type == op_load) {
 	im3[axis] = ng3[axis] + co;
@@ -543,7 +541,7 @@ void FieldFace::loop_limits_
       }
     }
 
-    if (restrict_) {
+    if (refresh_type_ == refresh_coarse) {
 
       if (face_[axis] == 0 && !ghost_[axis] && op_type == op_load) {
 	im3[axis] = ng3[axis];

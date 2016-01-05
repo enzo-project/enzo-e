@@ -16,12 +16,10 @@ class DataMsg : public CMessage_DataMsg {
 
 public:
 
-  DataMsg() : pd_(NULL), fd_(NULL), ff_(NULL)
+  DataMsg() : is_local_(true), field_data_(NULL), particle_data_(NULL)
   { }
 
-  void set_particle_data (ParticleData * pd) { pd_ = pd; }
-  void set_field_data    (FieldData * fd) { fd_ = fd; }
-  void set_field_face    (FieldFace * ff) { ff_ = ff; }
+  void set_field_face    (FieldFace * field_face) { field_face_ = field_face; }
 
   /// Pack data to serialize
   static void * pack (DataMsg*);
@@ -29,18 +27,34 @@ public:
   /// Unpack data to de-serialize
   static DataMsg * unpack(void *);
 
+  /// Update the Block Data with data stored in this message, ghost or
+  /// interior
+  void update (Data * data);
 
-  /// Set Particle data
 protected:
 
-  /// Particle Data
-  ParticleData * pd_;
-
-  /// Field Data
-  FieldData * fd_;
+  /// Whether destination is local or remote
+  bool is_local_;
 
   /// Field Face Data
-  FieldFace * ff_;
+  FieldFace * field_face_;
+
+  /// Field data
+  union {
+    // source field data if local
+    FieldData * field_data_;
+    // packed source field data if remote
+    char * field_array_;
+  };
+
+  /// Particle data
+  union {
+    // source particle data if local
+    ParticleData * particle_data_;
+    // packed source particle data if remote
+    char * particle_array_;
+  };
+
 };
 
 #endif /* DATA_DATA_MSG_HPP */

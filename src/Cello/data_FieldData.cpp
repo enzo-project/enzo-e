@@ -17,8 +17,7 @@ FieldData::FieldData
  const FieldDescr * field_descr,
  int nx, int ny, int nz 
  ) throw()
-  : DataBase(),
-    array_permanent_(),
+  : array_permanent_(),
     array_temporary_(),
     offsets_(),
     ghosts_allocated_(true)
@@ -62,8 +61,6 @@ FieldData & FieldData::operator= ( const FieldData & field_data ) throw ()
 void FieldData::pup(PUP::er &p)
 {
   TRACEPUP;
-
-  DataBase::pup(p);
 
   PUParray(p,size_,3);
 
@@ -585,27 +582,6 @@ void FieldData::print
    }
 
 #endif /* ifndef CELLO_DEBUG */
-}
-
-//======================================================================
-
-int FieldData::data_size () const
-{
-  
-}
-
-//----------------------------------------------------------------------
-
-
-char * FieldData::save_data (char * buffer) const
-{
-}
-
-//----------------------------------------------------------------------
-
-
-char * FieldData::load_data (char * buffer)
-{
 }
 
 //======================================================================

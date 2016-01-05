@@ -8,7 +8,7 @@
 #ifndef DATA_PARTICLE_DATA_HPP
 #define DATA_PARTICLE_DATA_HPP
 
-class ParticleData : DataBase {
+class ParticleData {
 
   /// @class    ParticleData
   /// @ingroup  Data
@@ -139,30 +139,12 @@ public: // interface
 
   void debug (ParticleDescr * particle_descr);
 
-public: // virtual functions
-
-  /// Return the number of bytes required to serialize the data object
-  virtual int data_size () const;
-
-  /// Serialize the object into the provided empty memory buffer
-  virtual char * save_data (char * buffer) const;
-
-  /// Restore the object from the provided initialized memory buffer data
-  virtual char * load_data (char * buffer);
-
 private: /// functions
 
   /// Return an id (not "index"); for a particle that is guaranteed to
   /// be unique across all processors.  May involve communication.
 
   /// long long assign_id_ ()
-
-  // void new_type()
-  // {
-  //   attribute_array_.resize(attribute_array_.size()+1);
-  //   attribute_align_.resize(attribute_align_.size()+1);
-  //   particle_count_.resize(particle_count_.size()+1);
-  // }
 
   /// Allocate attribute_array_ block, aligned at 16 byte boundary
   /// with updated attribute_align_

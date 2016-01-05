@@ -121,7 +121,7 @@ void Block::refresh_load_field_face_
     index_.child(index_.level(),ic3,ic3+1,ic3+2);
   }
 
-  // ... copy field ghosts using FieldFace object.
+  // ... copy field ghosts to array using FieldFace object
   int n; char * array;
   bool lg3[3] = {false,false,false};
   std::vector<int> field_list = refresh()->field_list();
@@ -129,8 +129,6 @@ void Block::refresh_load_field_face_
   FieldFace * field_face = load_field_face 
     (&n, &array, if3, ic3, lg3, refresh_type, field_list);
 
-  // ... send the face data to the neighbor
-  const int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
 #ifdef NEW_REFRESH
 
@@ -139,6 +137,9 @@ void Block::refresh_load_field_face_
   thisProxy[index_neighbor].p_refresh_store (data_msg);
 
 #else
+
+  // ... send the face data to the neighbor
+  const int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
   thisProxy[index_neighbor].p_refresh_store_field_face
     (n,array, refresh_type, of3, ic3);
@@ -157,15 +158,7 @@ void Block::refresh_load_field_face_
 void Block::p_refresh_store (DataMsg * msg)
 {
 #ifdef NEW_REFRESH
-  TRACE_REFRESH("p_refresh_store()");
-  if (n > 0) {
-    bool lg3[3] = {false,false,false};
-
-    Refresh * refresh = this->refresh();
-    std::vector<int> field_list = refresh->field_list();
-
-    store_field_face (n,buffer, if3, ic3, lg3, refresh_type, field_list);
-  }
+ msg->update(data());
 #endif
 }
 
@@ -174,19 +167,22 @@ void Block::p_refresh_store (DataMsg * msg)
 
 
 void Block::refresh_store_field_face_
-(int n, char * buffer, int refresh_type, 
+(int n, char * array, int refresh_type, 
  int if3[3], int ic3[3])
 {
 #ifndef NEW_REFRESH
   TRACE_REFRESH("refresh_store_field_face()");
 
   if (n > 0) {
+
+    // copy array to FieldData
+
     bool lg3[3] = {false,false,false};
 
     Refresh * refresh = this->refresh();
     std::vector<int> field_list = refresh->field_list();
 
-    store_field_face (n,buffer, if3, ic3, lg3, refresh_type, field_list);
+    store_field_face (n,array, if3, ic3, lg3, refresh_type, field_list);
   }
 #endif
 }

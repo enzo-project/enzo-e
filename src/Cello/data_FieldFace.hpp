@@ -8,10 +8,7 @@
 #ifndef DATA_FIELD_FACE_HPP
 #define DATA_FIELD_FACE_HPP
 
-class Restrict;
-class Prolong;
-
-class FieldFace : DataBase {
+class FieldFace {
 
   /// @class    FieldFace
   /// @ingroup  Data
@@ -21,7 +18,7 @@ class FieldFace : DataBase {
 public: // interface
 
   /// Constructor of uninitialized FieldFace
-  FieldFace () throw() : DataBase(), field_ (NULL,NULL) {};
+  FieldFace () throw() : field_ (NULL,NULL) {};
 
   /// Constructor of initialized FieldFace
   FieldFace (const Field & field) throw();
@@ -48,14 +45,6 @@ public: // interface
     ghost_[2] = gz;
   }
 
-  /// Get whether or not to include ghost zones along each axis
-  inline void get_ghost (bool * gx, bool * gy = 0, bool * gz = 0)
-  {
-    if (gx) (*gx) = ghost_[0];
-    if (gy) (*gy) = ghost_[1];
-    if (gz) (*gz) = ghost_[2];
-  }
-
   /// Set the face
   inline void set_face (int fx, int fy = 0, int fz = 0)
   {
@@ -64,49 +53,50 @@ public: // interface
     face_[2] = fz;
   }
   
-  /// Get the face
-  inline void get_face (int * fx, int * fy = 0, int * fz = 0)
+  /// Set child if restrict or prolong is required
+  void set_child(int icx, int icy=0, int icz=0) throw()
   {
-    if (fx) (*fx) = face_[0];
-    if (fy) (*fy) = face_[1];
-    if (fz) (*fz) = face_[2];
+    child_[0] = icx;
+    child_[1] = icy;
+    child_[2] = icz;
   }
-  
-  /// Create an array with the field's face data
-  void load(int * n, char ** array) throw();
 
-  /// Copy the input array data to the field's ghost zones
-  void store(int n, char * array) throw();
+  /// Set refresh type: refresh_fine(prolong),
+  /// refresh_coarse(restrict), or refresh_same(copy)
 
-  /// Interpolate the data using the given prolongation operator
-  void set_prolong(Prolong * prolong, int icx, int icy=0, int icz=0) throw()
-  { prolong_ = prolong; 
-    set_child_(icx,icy,icz);  }
-
-  /// Restrict the data using the given restriction operator
-  void set_restrict(Restrict * restrict, int icx, int icy=0, int icz=0) throw()
-  { restrict_ = restrict; 
-    set_child_(icx,icy,icz);  }
+  void set_refresh (int refresh_type)
+  {  refresh_type_ = refresh_type;  }
 
   /// Set the list of fields
   void set_field_list (std::vector<int> const & field_list)
   { field_list_ = field_list; }
 
+  /// Create an array with the field's face data
+  void face_to_array(int * n, char ** array) throw();
+
+  /// Use existing array for field's face data
+  void face_to_array (char * array) throw();
+
+  /// Copy the input array data to the field's ghost zones
+  void array_to_face(int n, char * array) throw();
+
   /// Calculate the number of bytes needed
-  int num_bytes () throw();
+  int num_bytes_array () throw();
+
+  /// Compute loop limits for load or store
+  void loop_limits
+  (int im3[3], int n3[3], const int nd3[3], const int ng3[3], int refresh_type);
 
   //--------------------------------------------------
 
-public: // virtual functions
-
   /// Return the number of bytes required to serialize the data object
-  virtual int data_size () const;
+  int data_size () const;
 
   /// Serialize the object into the provided empty memory buffer
-  virtual char * save_data (char * buffer) const;
+  char * save_data (char * buffer) const;
 
   /// Restore the object from the provided initialized memory buffer data
-  virtual char * load_data (char * buffer);
+  char * load_data (char * buffer);
 
   //--------------------------------------------------
 
@@ -114,18 +104,6 @@ private: // functions
 
   /// copy data
   void copy_(const FieldFace & field_face); 
-
-  /// Compute loop limits for load_
-  void loop_limits_
-  (int im3[3], int n3[3], const int nd3[3], const int ng3[3], int refresh_type);
-
-  /// Set child indices if prolongation or restriction is required
-  inline void set_child_ (int icx, int icy = 0, int icz = 0)
-  {
-    child_[0] = icx;
-    child_[1] = icy;
-    child_[2] = icz;
-  }
 
   /// Precision-agnostic function for loading field block face into
   /// the field_face array; returns number of bytes copied
@@ -153,11 +131,8 @@ private: // attributes
   /// Child index (0,0,0) to (1,1,1) if restriction or prolongation are used
   int child_[3];
 
-  /// Restriction operation if any
-  Restrict * restrict_;
-
-  /// Prolongation operation if any
-  Prolong * prolong_;
+  /// Refresh type: fine, coarse, or same
+  int refresh_type_;
 
   /// List of fields (default all)
   std::vector<int> field_list_;
