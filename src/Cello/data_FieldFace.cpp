@@ -443,7 +443,7 @@ void FieldFace::loop_limits
   n3[1]=0;
   n3[2]=0;
 
-  const bool lcopy = (refresh_type_ == refresh_copy);
+  const bool lcopy = (refresh_type_ == refresh_same);
 
   for (int axis=0; axis<3; axis++) {
 
