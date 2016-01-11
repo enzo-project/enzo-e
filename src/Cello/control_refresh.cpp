@@ -13,17 +13,18 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-/* #define DEBUG_REFRESH */
+// #define DEBUG_REFRESH
 
 #ifdef DEBUG_REFRESH
 #  define TRACE_REFRESH(msg) \
-  printf ("%s:%d %p TRACE_REFRESH %s\n",__FILE__,__LINE__,this,msg);	\
+  printf ("%d %s:%d %p TRACE_REFRESH %s\n",CkMyPe(),	\
+	  __FILE__,__LINE__,this,msg);			\
   fflush(stdout);
 #else
 #  define TRACE_REFRESH(msg) /* NOTHING */
 #endif
 
-/* #define NEW_REFRESH */
+// #define NEW_REFRESH
 
 //----------------------------------------------------------------------
 
@@ -122,18 +123,21 @@ void Block::refresh_load_field_face_
   }
 
   // ... copy field ghosts to array using FieldFace object
-  int n; char * array;
   bool lg3[3] = {false,false,false};
   std::vector<int> field_list = refresh()->field_list();
 
-  FieldFace * field_face = load_field_face 
-    (&n, &array, if3, ic3, lg3, refresh_type, field_list);
+  FieldFace * field_face = create_face_
+    (if3, ic3, lg3, refresh_type, field_list);
 
+  //  field_face->print();
 
 #ifdef NEW_REFRESH
 
   DataMsg * data_msg = new DataMsg;
+
   data_msg -> set_field_face (field_face);
+  data_msg -> set_field_data (data()->field_data());
+
   thisProxy[index_neighbor].p_refresh_store (data_msg);
 
 #else
@@ -141,14 +145,18 @@ void Block::refresh_load_field_face_
   // ... send the face data to the neighbor
   const int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
+  int n; char * array;
+  field_face->face_to_array (&n,&array);
+
   thisProxy[index_neighbor].p_refresh_store_field_face
     (n,array, refresh_type, of3, ic3);
+
+  delete field_face;
+  delete [] array;
 
 #endif
 
   // ... delete the FieldFace created by load_face()
-  delete field_face;
-  delete [] array;
 }
 
 

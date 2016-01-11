@@ -251,8 +251,8 @@ void Block::pup(PUP::er &p)
   p | age_;
   p | face_level_last_;
   p | name_;
-  p | refresh_;
   p | index_method_;
+  p | refresh_;
   // SKIP method_: initialized when needed
 
   if (up) debug_faces_("PUP");

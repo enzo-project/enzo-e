@@ -132,8 +132,9 @@
 #   define TRACE_CHARM(M)				\
   { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
 #   define TRACEPUP				\
-  { m2_(stdout,"TRACEPUP",__FILE__,__LINE__,"",	\
-	"%s %s %s %s",					\
+  { m2_(stderr,"TRACEPUP",__FILE__,__LINE__,"",	\
+	"%p %s %s %s %s",				\
+	this ,						\
 	p.isPacking()   ?"Packing"   : "",		\
 	p.isUnpacking() ?"Unpacking" : "",		\
 	p.isSizing()    ?"Sizing"    : "",		\

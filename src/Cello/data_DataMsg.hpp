@@ -16,10 +16,29 @@ class DataMsg : public CMessage_DataMsg {
 
 public:
 
-  DataMsg() : is_local_(true), field_data_(NULL), particle_data_(NULL)
-  { }
+  static int id_count;
+  DataMsg() 
+    : is_local_(true),
+      n_ff_(0),
+      n_fa_(0),
+      id_(-1),
+      field_face_(NULL)
+  { field_array_ = NULL;  }
+  virtual ~DataMsg()
+  {  }
+  /// Copy constructor
+  DataMsg(const DataMsg & data_msg) throw()
+  { };
 
+  /// Assignment operator
+  DataMsg & operator= (const DataMsg & data_msg) throw()
+  { return *this; }
+
+  FieldFace * field_face () { return field_face_; }
+  /// Set the FieldFace object
   void set_field_face    (FieldFace * field_face) { field_face_ = field_face; }
+  /// Set the FieldData object
+  void set_field_data    (FieldData * field_data) { field_data_ = field_data; }
 
   /// Pack data to serialize
   static void * pack (DataMsg*);
@@ -36,24 +55,37 @@ protected:
   /// Whether destination is local or remote
   bool is_local_;
 
-  /// Field Face Data
-  FieldFace * field_face_;
+  /// FieldFace array size
+  int n_ff_;
 
-  /// Field data
+  /// FieldData array size
+  int n_fa_;
+
+  /// Id identifying message (TEMPORARY FOR DEBUGGING)
+  int id_;
+
+    /// Field Face Data
+    FieldFace * field_face_;
+
   union {
-    // source field data if local
+
+    /// Field data if local
     FieldData * field_data_;
-    // packed source field data if remote
+    /// packed source field data if remote
     char * field_array_;
-  };
 
-  /// Particle data
-  union {
-    // source particle data if local
-    ParticleData * particle_data_;
-    // packed source particle data if remote
-    char * particle_array_;
   };
+  
+  // /// Particle data
+  // union {
+  //   // source particle data if local
+  //   ParticleData * particle_data_;
+  //   // packed source particle data if remote
+  //   char * particle_array_;
+  // };
+
+  /// Saved Charm++ buffer for deleting after unpack()
+  void * buffer_;
 
 };
 

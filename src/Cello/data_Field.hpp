@@ -58,6 +58,12 @@ public: // interface
   /// Return the field data for this field
   FieldData * field_data() { return field_data_; }
 
+  void set_field_data(FieldData * field_data) 
+  { field_data_ = field_data; }
+
+  void set_field_descr(FieldDescr * field_descr) 
+  { field_descr_ = field_descr; }
+
   //==================================================
   // FieldDescr
   //==================================================

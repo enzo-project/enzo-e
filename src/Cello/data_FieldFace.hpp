@@ -18,7 +18,8 @@ class FieldFace {
 public: // interface
 
   /// Constructor of uninitialized FieldFace
-  FieldFace () throw() : field_ (NULL,NULL) {};
+  FieldFace () throw() : field_ (NULL,NULL) 
+  { }
 
   /// Constructor of initialized FieldFace
   FieldFace (const Field & field) throw();
@@ -34,6 +35,12 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p);
+
+  /// Set the Field for the FieldFace
+  void set_field (Field & field) { field_ = field;}
+
+  /// Return the Field
+  Field field () { return field_; }
 
   //----------------------------------------------------------------------
 
@@ -53,6 +60,20 @@ public: // interface
     face_[2] = fz;
   }
   
+  /// Set the face
+  inline void face (int * fx, int * fy = 0, int * fz = 0)
+  {
+    if (fx) (*fx) = face_[0]; 
+    if (fy) (*fy) = face_[1]; 
+    if (fz) (*fz) = face_[2]; 
+  }
+  
+  inline void invert_face ()
+  {
+    face_[0] = -face_[0];
+    face_[1] = -face_[1];
+    face_[2] = -face_[2];
+  }
   /// Set child if restrict or prolong is required
   void set_child(int icx, int icy=0, int icz=0) throw()
   {
@@ -70,6 +91,8 @@ public: // interface
   /// Set the list of fields
   void set_field_list (std::vector<int> const & field_list)
   { field_list_ = field_list; }
+
+  std::vector<int> const & field_list () { return field_list_; }
 
   /// Create an array with the field's face data
   void face_to_array(int * n, char ** array) throw();
@@ -98,6 +121,24 @@ public: // interface
   /// Restore the object from the provided initialized memory buffer data
   char * load_data (char * buffer);
 
+  void print (const char * message)
+  {
+    char filename[40];
+    sprintf (filename,"ff-%02d.debug",CkMyPe());
+    
+    FILE * fp = fopen (filename,"a");
+    fprintf (fp," FieldFace %s %p\n",message,this);
+    fprintf (fp,"    field_ (%p %p)\n",field_.field_data(), field_.field_descr());
+    fprintf (fp,"    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
+    fprintf (fp,"    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
+    fprintf (fp,"    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
+    fprintf (fp,"    refresh_type %d\n",refresh_type_);
+    int n;
+    fprintf (fp,"    field_list size %d = ",n=field_list_.size());
+    for (int i=0; i<n; i++) fprintf (fp," %d",field_list_[i]);
+    fprintf (fp,"\n");
+    fclose (fp);
+  }
   //--------------------------------------------------
 
 private: // functions

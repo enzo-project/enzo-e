@@ -11,6 +11,12 @@
 
 // #define DEBUG_FIELD_FACE
 
+#ifdef DEBUG_FIELD_FACE
+#   define TRACE(MSG) CkPrintf ("%s:%d %s\n",__FILE__,__LINE__,MSG); fflush(stdout)
+#else
+#   define TRACE(MSG) /* empty */
+#endif
+
 enum enum_op_type {
   op_unknown,
   op_load,
@@ -24,6 +30,10 @@ FieldFace::FieldFace
   : field_(field),
     refresh_type_(refresh_unknown)
 {
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%d FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
+#endif
+
   for (int i=0; i<3; i++) {
     ghost_[i] = false;
     face_[i]  = 0;
@@ -313,7 +323,10 @@ int FieldFace::data_size () const
   count += 1*sizeof(int);  // refresh_type_ (restrict,prolong,copy)
   count += (1+field_list_.size()) * sizeof(int);
 
-  CkPrintf ("%s:%d data_size %d",__FILE__,__LINE__,count);
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%s:%d data_size %d\n",__FILE__,__LINE__,count);
+  fflush(stdout);
+#endif
 
   return count;
 
@@ -323,7 +336,10 @@ int FieldFace::data_size () const
 
 char * FieldFace::save_data (char * buffer) const
 {
-  CkPrintf ("%s:%d save_data",__FILE__,__LINE__);
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%s:%d save_data %p\n",__FILE__,__LINE__,buffer);
+  fflush(stdout);
+#endif
 
   char * p = buffer;
   int n;
@@ -355,33 +371,57 @@ char * FieldFace::save_data (char * buffer) const
 
 char * FieldFace::load_data (char * buffer)
 {
-  CkPrintf ("%s:%d load_data",__FILE__,__LINE__);
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("load_data\n"); fflush(stdout);
+#endif
 
+  TRACE("");
+
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%s:%d load_data buffer %p\n",__FILE__,__LINE__,buffer);
+  fflush(stdout);
+#endif
+
+  TRACE("");
+  
   char * p = buffer;
   int n;
+  int *pi = (int *)p;
 
+  TRACE("");
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("p = %p\n",p);
+  CkPrintf ("p[0] = %d\n",pi[0]);
+#endif
   memcpy(face_,p, n=3*sizeof(int));
   p+=n;
 
+  TRACE("");
   memcpy(ghost_,p,n=3*sizeof(bool));
   p+=n;
 
+  TRACE("");
   memcpy(child_,p,n=3*sizeof(int));
   p+=n;
 
+  TRACE("");
   memcpy(&refresh_type_,p,n=sizeof(int));
   p+=n;
 
   int length;
 
+  TRACE("");
   memcpy(&length,p,n=sizeof(int)); 
   p+=n;
 
+  TRACE("");
   field_list_.resize(length);
 
   memcpy(&field_list_[0],p,n=(field_list_.size()*sizeof(int)));
+  TRACE("");
   p+=n;
   
+  TRACE("");
   return p;
 }
 
