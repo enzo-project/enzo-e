@@ -24,7 +24,7 @@
 
 ### How do I start using Enzo-P/Cello? ###
 
-   To learn how to install and use Enzo-P, see the [Using Enzo-P](http://cello-project.org/using-enzo-p.pdf) tutorial module.  To learn to develop using the Cello AMR framework, see the [Developing with Cello] (http://cello-project.org/developing-with-cello.pdf) tutorial module.
+   To learn how to install and use Enzo-P, see the [Using Enzo-P](http://cello-project.org/using-enzo-p.pdf) tutorial module.  To learn to develop using the Cello AMR framework, see the [Developing with Cello](http://cello-project.org/developing-with-cello.pdf) tutorial module.
 
 ### Who do I talk to? ###
 
