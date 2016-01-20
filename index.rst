@@ -46,9 +46,12 @@ developed, including self-gravity and support for particle methods.
    parameters-list
    design
 
-**More complete documentation in the form of a large-scale PDF
-presentation is currently being developed, and will be available here
-about 2015-10-01.**
+A short workshop on using Enzo-P and developing with Cello was presented
+at the Enzo Workshop in 2015.  Below are PDF documents of the presentation.
+
+   :download:`Using and Developing Enzo-P/Cello--Part I: Using Enzo-P <using-enzo-p.pdf>`
+
+   :download:`Using and Developing Enzo-P/Cello--Part II: Developing with Cello <developing-with-cello.pdf>`
 
 James Bordner
 jobordner@ucsd.edu
