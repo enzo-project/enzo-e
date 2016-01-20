@@ -17,7 +17,7 @@
    other scientific fields to develop AMR applications capable of
    running on "Petascale-and-beyond" HPC platforms.
 
-   Enzo-P/Cello is currently in V1.0beta.  It still has several known 
+   Enzo-P/Cello is currently in V2.0beta.  It still has several known 
    issues that need to be addressed before it can be used for scientific
    research, though it is still usable as a hydrodynamics solver, 
    especially in an educational setting.
