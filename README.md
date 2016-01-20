@@ -22,11 +22,9 @@
    research, though it is still usable as a hydrodynamics solver, 
    especially in an educational setting.
 
-### How do I get set up? ###
+### How do I start using Enzo-P/Cello? ###
 
-   For information on how to build Enzo-P/Cello, as well as installing the 
-   Charm++ parallel programming system on which it is build, please see the
-   [FAQ Presentation](http://client64-249.sdsc.edu/cello/1405-enzop.pdf)
+   To learn how to install and use Enzo-P, see the [Using Enzo-P](http://cello-project.org/using-enzo-p.pdf) tutorial module.  To learn to develop using the Cello AMR framework, see the [Developing with Cello] (http://cello-project.org/developing-with-cello.pdf) tutorial module.
 
 ### Who do I talk to? ###
 
