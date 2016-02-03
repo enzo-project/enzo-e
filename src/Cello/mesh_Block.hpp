@@ -570,16 +570,9 @@ public: // virtual functions
 
   void ResumeFromSync();
 
-  /// Create the specified FieldFace and return its array a of length n
-  FieldFace * load_field_face
-  (int * n, char ** a, int if3[3], int ic3[3], bool lg3[3],
-   int refresh_type, std::vector<int> & field_list);
-
-  /// Inverse of load_field_face
-  void store_field_face
-  (int n, char * a, int if3[3], int ic3[3], bool lg3[3],
-   int refresh_type, std::vector<int> & field_list);
-
+  FieldFace * create_face
+  (int if3[3], int ic3[3], bool lg3[3], int refresh_type,
+   std::vector<int> & field_list);
 
 protected: // functions
 
@@ -676,10 +669,6 @@ protected: // functions
     }
     return skip;
   }
-
-  FieldFace * create_face_
-  (int if3[3], int ic3[3], bool lg3[3], int refresh_type,
-   std::vector<int> & field_list);
 
   /// Set the current refresh object
   void set_refresh (Refresh * refresh) 

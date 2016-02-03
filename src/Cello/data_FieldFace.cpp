@@ -27,8 +27,7 @@ enum enum_op_type {
 
 FieldFace::FieldFace 
 ( const Field & field ) throw()
-  : field_(field),
-    refresh_type_(refresh_unknown)
+  :  refresh_type_(refresh_unknown)
 {
 #ifdef DEBUG_FIELD_FACE
   CkPrintf ("%d FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
@@ -50,7 +49,6 @@ FieldFace::~FieldFace() throw ()
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
-  : field_(field_face.field_)
 {
   copy_(field_face);
 }
@@ -88,7 +86,6 @@ void FieldFace::pup (PUP::er &p)
 
   TRACEPUP;
 
-  p | field_;
   PUParray(p,face_,3);
   PUParray(p,ghost_,3);
   PUParray(p,child_,3);
@@ -98,7 +95,26 @@ void FieldFace::pup (PUP::er &p)
 
 //======================================================================
 
-void FieldFace::face_to_array ( char * array) throw()
+void FieldFace::face_to_array ( Field field, int * n, char ** array) throw()
+{
+  ASSERT("FieldFace::face_to_array()",
+	 "field_list.size() must be > 0",
+	 field_list_.size() > 0);
+
+  *n = num_bytes_array(field);
+  *array = new char [*n];
+
+
+  ASSERT("FieldFace::face_to_array()",
+	 "array size must be > 0",
+	 *n > 0);
+
+  face_to_array (field, *array);
+
+}
+
+//----------------------------------------------------------------------
+void FieldFace::face_to_array ( Field field,char * array) throw()
 {
 
   size_t index_array = 0;
@@ -109,16 +125,16 @@ void FieldFace::face_to_array ( char * array) throw()
 
     size_t index_field = field_list_[index_field_list];
   
-    precision_type precision = field_.precision(index_field);
+    precision_type precision = field.precision(index_field);
 
-    const void * field_face = field_.values(index_field);
+    const void * field_face = field.values(index_field);
 
     char * array_face  = &array[index_array];
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     loop_limits (im3,n3,nd3,ng3,op_load);
 
@@ -173,27 +189,7 @@ void FieldFace::face_to_array ( char * array) throw()
 
 //----------------------------------------------------------------------
 
-void FieldFace::face_to_array ( int * n, char ** array) throw()
-{
-  ASSERT("FieldFace::face_to_array()",
-	 "field_list.size() must be > 0",
-	 field_list_.size() > 0);
-
-  *n = num_bytes_array();
-  *array = new char [*n];
-
-
-  ASSERT("FieldFace::face_to_array()",
-	 "array size must be > 0",
-	 *n > 0);
-
-  face_to_array (*array);
-
-}
-
-//----------------------------------------------------------------------
-
-void FieldFace::array_to_face (int n, char * array) throw()
+void FieldFace::array_to_face (char * array, Field field) throw()
 {
 
   size_t index_array = 0;
@@ -204,16 +200,16 @@ void FieldFace::array_to_face (int n, char * array) throw()
 
     size_t index_field = field_list_[index_field_list];
 
-    precision_type precision = field_.precision(index_field);
+    precision_type precision = field.precision(index_field);
 
-    char * field_ghost = field_.values(index_field);
+    char * field_ghost = field.values(index_field);
     
     char * array_ghost  = array + index_array;
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     loop_limits (im3,n3,nd3,ng3,op_store);
 
@@ -276,7 +272,98 @@ void FieldFace::array_to_face (int n, char * array) throw()
 
 //----------------------------------------------------------------------
 
-int FieldFace::num_bytes_array() throw()
+void FieldFace::face_to_face (Field field_src, Field field_dst)
+{
+  
+  for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
+
+    size_t index_field = field_list_[i_f];
+
+    precision_type precision = field_src.precision(index_field);
+
+    char * values_src = field_src.values(index_field);
+    char * values_dst = field_dst.values(index_field);
+    
+    int m3[3],g3[3],is3[3],id3[3],ns3[3],nd3[3];
+
+    field_src.field_size (index_field,&m3[0],&m3[1],&m3[2]);
+    field_src.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
+
+    //    invert_face();
+    loop_limits (is3,ns3,m3,g3,op_load);
+    invert_face();
+
+    loop_limits (id3,nd3,m3,g3,op_store);
+    invert_face();
+
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    Problem * problem   = simulation->problem();
+
+    if (refresh_type_ == refresh_fine) {
+
+      // Prolong field
+
+      bool need_padding = (g3[0]%2==1) || (g3[1]%2==1) || (g3[2]%2==1);
+
+      ASSERT("FieldFace::array_to_face()",
+	     "Odd ghost zones not implemented yet: prolong needs padding",
+	     ! need_padding);
+
+
+      Prolong * prolong = problem->prolong();
+
+      prolong->apply (precision, 
+		      values_dst,m3,id3, nd3,
+		      values_src,m3,is3, ns3);
+
+    } else if (refresh_type_ == refresh_coarse) {
+
+      // Restrict field
+
+      Restrict * restrict = problem->restrict();
+
+      restrict->apply (precision, 
+		       values_dst,m3,id3, nd3,
+		       values_src,m3,is3, ns3);
+
+    } else {
+
+      // Copy faces to ghosts
+
+      switch (precision) {
+      case precision_single:
+	{
+	  const float * vs = (const float *) values_src;
+	  float       * vd = (float *) values_dst;
+	  copy_ (vd,m3,nd3,id3, vs,m3,ns3,is3);
+	}
+	break;
+      case precision_double:
+	{
+	  const double * vs = (const double *) values_src;
+	  double       * vd = (double *) values_dst;
+	  copy_ (vd,m3,nd3,id3, vs,m3,ns3,is3);
+	}
+	break;
+      case precision_quadruple:
+	{
+	  const long double * vs = (const long double *) values_src;
+	  long double       * vd = (long double *) values_dst;
+	  copy_ (vd,m3,nd3,id3, vs,m3,ns3,is3);
+	}
+	break;
+      default:
+	ERROR("FieldFace::array_to_face()", "Unsupported precision");
+	break;
+	}
+      }
+
+    }
+
+  }
+  //----------------------------------------------------------------------
+
+int FieldFace::num_bytes_array(Field field) throw()
 {
   int array_size = 0;
 
@@ -286,13 +373,13 @@ int FieldFace::num_bytes_array() throw()
 
     size_t index_field = field_list_[index_field_list];
 
-    precision_type precision = field_.precision(index_field);
+    precision_type precision = field.precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     int nd3[3],ng3[3],im3[3],n3[3];
 
-    field_.field_size (index_field,&nd3[0],&nd3[1],&nd3[2]);
-    field_.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+    field.field_size (index_field,&nd3[0],&nd3[1],&nd3[2]);
+    field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
     if (refresh_type_ == refresh_fine)
       loop_limits (im3,n3,nd3,ng3,op_load);
@@ -472,6 +559,23 @@ template<class T> size_t FieldFace::store_
 }
 
 //----------------------------------------------------------------------
+
+template<class T> void FieldFace::copy_
+( T       * vd, int md3[3],int nd3[3],int id3[3],
+  const T * vs, int ms3[3],int ns3[3],int is3[3]) throw()
+{
+  for (int iz=0; iz <ns3[2]; iz++)  {
+    for (int iy=0; iy < ns3[1]; iy++) {
+      for (int ix=0; ix < ns3[0]; ix++) {
+	int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
+	int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
+	vd[i_dst] = vs[i_src];
+      }
+    }
+  }
+}
+//----------------------------------------------------------------------
+
 
 void FieldFace::loop_limits
 ( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)

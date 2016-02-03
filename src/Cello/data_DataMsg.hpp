@@ -18,9 +18,8 @@ public:
 
   static int id_count;
   DataMsg() 
-    : is_local_(true),
-      n_ff_(0),
-      n_fa_(0),
+    : CMessage_DataMsg(),
+      is_local_(true),
       id_(-1),
       field_face_(NULL)
   { field_array_ = NULL;  }
@@ -54,12 +53,6 @@ protected:
 
   /// Whether destination is local or remote
   bool is_local_;
-
-  /// FieldFace array size
-  int n_ff_;
-
-  /// FieldData array size
-  int n_fa_;
 
   /// Id identifying message (TEMPORARY FOR DEBUGGING)
   int id_;

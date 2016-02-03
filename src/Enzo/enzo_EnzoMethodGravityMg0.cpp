@@ -494,8 +494,9 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
   int narray; 
   char * array;
   FieldFace * field_face = 
-    enzo_block->load_field_face (&narray,&array, if3, ic3, lg3, 
-				 refresh_coarse, field_list);
+    enzo_block->create_face (if3, ic3, lg3, 
+			     refresh_coarse, field_list);
+  field_face->face_to_array(enzo_block->data()->field(),&narray,&array);
 
   // Create a FieldMsg for sending data to parent
   // (note: charm messages not deleted on send; are deleted on receive)
@@ -548,10 +549,14 @@ void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
 
   // copy data from field_message to this EnzoBlock
 
-  int n = field_message->n;
-  char * a = field_message->a;
-  int * ic3 = field_message->ic3;
-  store_field_face (n,a, if3, ic3, lg3, refresh_coarse, field_list);
+   int * ic3 = field_message->ic3;
+
+   FieldFace * field_face = create_face 
+     (if3, ic3, lg3, refresh_coarse, field_list);
+   char * a = field_message->a;
+
+   field_face->array_to_face(a, data()->field());
+   delete field_face;
 
   delete field_message;
 
@@ -638,8 +643,10 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
     int narray; 
     char * array;
-    FieldFace * field_face = enzo_block->load_field_face
-      (&narray,&array, if3, ic3, lg3, refresh_fine, field_list);
+    FieldFace * field_face = enzo_block->create_face
+      (if3, ic3, lg3, refresh_fine, field_list);
+    
+    field_face->face_to_array (enzo_block->data()->field(),&narray,&array);
 
     // Create a FieldMsg for sending data to parent
     // (note: charm messages not deleted on send; are deleted on receive)
@@ -689,12 +696,17 @@ void EnzoBlock::p_mg0_prolong_recv(FieldMsg * field_message)
   int n = field_message->n;
   char * a = field_message->a;
   int * ic3 = field_message->ic3;
-  store_field_face 
-    (field_message->n,
-     field_message->a,   if3, 
+
+  FieldFace * field_face = create_face 
+    (if3, 
      field_message->ic3, lg3,
      refresh_fine,
      field_list);
+  field_face->array_to_face 
+    (field_message->a,
+     data()->field());
+
+  delete field_face;
 
   EnzoMethodGravityMg0 * method = 
     static_cast<EnzoMethodGravityMg0*> (this->method());

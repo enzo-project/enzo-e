@@ -352,12 +352,14 @@ PARALLEL_MAIN_BEGIN
 	  int n;
 	  char * array;
 
-	  face_lower.face_to_array (&n, &array);
-	  face_upper.array_to_face (n,array);
+	  face_lower.face_to_array (field_lower, &n, &array);
+	  face_upper.array_to_face (array,field_upper);
+
 	  delete [] array;
 
-	  face_upper.face_to_array (&n, &array);
-	  face_lower.array_to_face (n,array);
+	  face_upper.face_to_array (field_upper,&n, &array);
+	  face_lower.array_to_face (array,field_lower);
+
 	  delete [] array;
 
 

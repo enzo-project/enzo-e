@@ -18,7 +18,7 @@ class FieldFace {
 public: // interface
 
   /// Constructor of uninitialized FieldFace
-  FieldFace () throw() : field_ (NULL,NULL) 
+  FieldFace () throw() 
   { }
 
   /// Constructor of initialized FieldFace
@@ -35,12 +35,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p);
-
-  /// Set the Field for the FieldFace
-  void set_field (Field & field) { field_ = field;}
-
-  /// Return the Field
-  Field field () { return field_; }
 
   //----------------------------------------------------------------------
 
@@ -95,16 +89,19 @@ public: // interface
   std::vector<int> const & field_list () { return field_list_; }
 
   /// Create an array with the field's face data
-  void face_to_array(int * n, char ** array) throw();
+  void face_to_array(Field field, int * n, char ** array) throw();
 
   /// Use existing array for field's face data
-  void face_to_array (char * array) throw();
+  void face_to_array (Field field, char * array) throw();
 
   /// Copy the input array data to the field's ghost zones
-  void array_to_face(int n, char * array) throw();
+  void array_to_face (char * array, Field field) throw();
+
+  /// Copy directly the face from source FieldData to destination FieldData
+  void face_to_face (Field field_src, Field field_dst);
 
   /// Calculate the number of bytes needed
-  int num_bytes_array () throw();
+  int num_bytes_array ( Field field ) throw();
 
   /// Compute loop limits for load or store
   void loop_limits
@@ -128,7 +125,6 @@ public: // interface
     
     FILE * fp = fopen (filename,"a");
     fprintf (fp," FieldFace %s %p\n",message,this);
-    fprintf (fp,"    field_ (%p %p)\n",field_.field_data(), field_.field_descr());
     fprintf (fp,"    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
     fprintf (fp,"    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
     fprintf (fp,"    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
@@ -158,10 +154,13 @@ private: // functions
   size_t store_ (T * field_ghosts,  const T * array_ghosts, 
 		 int nd3[3], int nf3[3], int im3[3]) throw();
 
-private: // attributes
+  /// Precision-agnostic function for copying a field block face
+  /// into another block's ghost zones
+  template<class T>
+  void copy_ (T       * vd, int md3[3], int nd3[3], int id3[3],
+	      const T * vs, int ms3[3], int ns3[3], int is3[3]) throw();
 
-  /// Field data and descriptor
-  Field field_;
+private: // attributes
 
   /// Select face, including edges and corners (-1,-1,-1) to (1,1,1)
   int face_[3];

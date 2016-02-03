@@ -175,7 +175,10 @@ Block::Block
     int if3[3] = {0,0,0};
     bool lg3[3] = {true,true,true};
     std::vector<int> field_list;
-    store_field_face (narray,array, if3, ic3, lg3, refresh_fine, field_list);
+    FieldFace * field_face = create_face
+      (if3, ic3, lg3, refresh_fine, field_list);
+    field_face -> array_to_face (array, data()->field());
+    delete field_face;
 
   }
 
@@ -355,8 +358,10 @@ Block::~Block() throw ()
     bool lg3[3]={false,false,false};
     
     std::vector<int> field_list;
-    FieldFace * field_face = load_field_face
-      ( &n,&array,if3,ic3,lg3,refresh_coarse,field_list);
+    FieldFace * field_face = create_face
+      ( if3,ic3,lg3,refresh_coarse,field_list);
+    field_face->face_to_array(data()->field(),&n,&array);
+    delete field_face;
 
     const Index index_parent = index_.index_parent();
 
@@ -367,7 +372,6 @@ Block::~Block() throw ()
     thisProxy[index_parent].x_refresh_child(n,array,ic3);
     // --------------------------------------------------
 
-    delete field_face;
     delete [] array;
   }
   if (data_) delete data_;
@@ -393,7 +397,11 @@ void Block::x_refresh_child
   int  if3[3]  = {0,0,0};
   bool lg3[3] = {false,false,false};
   std::vector<int> field_list;
-  store_field_face (n,buffer, if3, ic3, lg3, refresh_coarse,field_list);
+  FieldFace * field_face = create_face
+    (if3, ic3, lg3, refresh_coarse,field_list);
+  field_face -> array_to_face (buffer, data()->field());
+  delete field_face;
+
 }
 
 //----------------------------------------------------------------------
@@ -541,6 +549,52 @@ void Block::index_global
 
 //----------------------------------------------------------------------
 
+FieldFace * Block::create_face
+(int if3[3], int ic3[3], bool lg3[3],
+ int refresh_type,
+ std::vector<int> & field_list
+ )
+{
+  Problem * problem        = simulation()->problem();
+
+  FieldDescr * field_descr = simulation()->field_descr();
+  FieldFace  * field_face = new FieldFace;
+
+  field_face -> set_refresh (refresh_type);
+  field_face -> set_child (ic3[0],ic3[1],ic3[2]);
+  field_face -> set_face (if3[0],if3[1],if3[2]);
+  field_face -> set_ghost(lg3[0],lg3[1],lg3[2]);
+
+  if (field_list.size() == 0) {
+    int n = field_descr->field_count();
+    field_list.resize(n);
+    for (int i=0; i<n; i++) field_list[i] = i;
+  }
+  field_face->set_field_list(field_list);
+  return field_face;
+}
+
+//----------------------------------------------------------------------
+
+void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
+{
+
+  // Boundary * boundary = simulation()->problem()->boundary();
+  // bool periodic = boundary->is_periodic();
+
+  int n3[3];
+  size_forest (&n3[0],&n3[1],&n3[2]);
+  
+  for (int axis=0; axis<3; axis++) {
+    for (int face=0; face<2; face++) {
+      is_boundary[axis][face] = 
+	index_.is_on_boundary(axis,2*face-1,n3[axis]);
+    }
+  }
+}
+
+//======================================================================
+
 void Block::determine_boundary_
 (
  bool bndry[3][2],
@@ -609,69 +663,6 @@ void Block::periodicity (bool p32[3][2]) const
 
 //----------------------------------------------------------------------
 
-FieldFace * Block::load_field_face
-(
- int *   n, char ** a,
- int if3[3], int ic3[3], bool lg3[3],
- int refresh_type,
- std::vector<int> & field_list 
- )
-{
-  FieldFace * field_face = create_face_ 
-    (if3,ic3,lg3, refresh_type,field_list);
-  field_face->face_to_array(n, a);
-  return field_face;
-}
-
-//----------------------------------------------------------------------
-
-void Block::store_field_face
-(
- int n, char * a, 
- int if3[3], int ic3[3], bool lg3[3],
- int refresh_type,
- std::vector<int> & field_list
- )
-{
-  FieldFace * field_face = create_face_ 
-    (if3,ic3,lg3, refresh_type,field_list);
-
-  field_face->array_to_face(n, a);
-  //  delete [] a;
-  delete field_face;
-}
-
-//----------------------------------------------------------------------
-
-FieldFace * Block::create_face_
-(int if3[3], int ic3[3], bool lg3[3],
- int refresh_type,
- std::vector<int> & field_list
- )
-{
-  Problem * problem        = simulation()->problem();
-
-  FieldData  * field_data  = data()      ->field_data();
-  FieldDescr * field_descr = simulation()->field_descr();
-  Field field (field_descr,field_data);
-  FieldFace * field_face = new FieldFace(field);
-
-  field_face -> set_refresh (refresh_type);
-  field_face -> set_child (ic3[0],ic3[1],ic3[2]);
-  field_face -> set_face (if3[0],if3[1],if3[2]);
-  field_face -> set_ghost(lg3[0],lg3[1],lg3[2]);
-
-  if (field_list.size() == 0) {
-    int n = field_descr->field_count();
-    field_list.resize(n);
-    for (int i=0; i<n; i++) field_list[i] = i;
-  }
-  field_face->set_field_list(field_list);
-  return field_face;
-}
-
-//----------------------------------------------------------------------
-
 void Block::facing_child_(int jc3[3], const int ic3[3], const int if3[3]) const
 {
   jc3[0] = if3[0] ? 1 - ic3[0] : ic3[0];
@@ -707,23 +698,6 @@ void Block::copy_(const Block & block) throw()
 }
 
 //----------------------------------------------------------------------
-
-void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
-{
-
-  // Boundary * boundary = simulation()->problem()->boundary();
-  // bool periodic = boundary->is_periodic();
-
-  int n3[3];
-  size_forest (&n3[0],&n3[1],&n3[2]);
-  
-  for (int axis=0; axis<3; axis++) {
-    for (int face=0; face<2; face++) {
-      is_boundary[axis][face] = 
-	index_.is_on_boundary(axis,2*face-1,n3[axis]);
-    }
-  }
-}
 
 //----------------------------------------------------------------------
 

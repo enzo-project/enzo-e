@@ -354,9 +354,9 @@ void Problem::initialize_output
 
 	output_image->set_colormap(n,r,g,b);
 
-	delete r;
-	delete g;
-	delete b;
+	delete [] r;
+	delete [] g;
+	delete [] b;
 
       }
 

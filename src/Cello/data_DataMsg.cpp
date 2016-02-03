@@ -26,8 +26,8 @@ void * DataMsg::pack (DataMsg * msg)
 
   // FieldFace and FieldData serialized data
 
-  msg->n_ff_ = (ff) ? ff->data_size() : 0;
-  msg->n_fa_ = (fa) ? ff->num_bytes_array() : 0;
+  FieldDescr * field_descr = proxy_simulation.ckLocalBranch()->field_descr();
+  Field field (field_descr, msg->field_data_);
 
   if (id_count == -1) id_count = CkMyPe()+CkNumPes();
 
@@ -37,11 +37,14 @@ void * DataMsg::pack (DataMsg * msg)
   
   int size = 0;
 
+  const int n_ff = (ff) ? ff->data_size() : 0;
+  const int n_fa = (fa) ? ff->num_bytes_array(field) : 0;
+
   size += sizeof(int); // n_ff_
   size += sizeof(int); // n_fa_
   size += sizeof(int); // id_
-  size += msg->n_ff_*sizeof(char);
-  size += msg->n_fa_*sizeof(char);
+  size += n_ff*sizeof(char);
+  size += n_fa*sizeof(char);
   // (Particles)
 
 
@@ -63,17 +66,17 @@ void * DataMsg::pack (DataMsg * msg)
 
   pc = buffer;
 
-  (*pi++) = msg->n_ff_;
-  (*pi++) = msg->n_fa_;
+  (*pi++) = n_ff;
+  (*pi++) = n_fa;
   (*pi++) = msg->id_;
 
-  if (msg->n_ff_ > 0) {
+  if (n_ff > 0) {
     ff->save_data (pc);
-    pc += msg->n_ff_;
+    pc += n_ff;
   }
-  if (msg->n_fa_ > 0) {
-    ff->face_to_array(pc);
-    pc += msg->n_fa_;
+  if (n_fa > 0) {
+    ff->face_to_array(field,pc);
+    pc += n_fa;
   }
 
   // serialize ParticleData
@@ -95,6 +98,8 @@ DataMsg * DataMsg::unpack(void * buffer)
  
   DataMsg * msg = (DataMsg *) CkAllocBuffer (buffer,sizeof(DataMsg));
 
+  msg = new ((void*)msg) DataMsg;
+
   msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
@@ -109,17 +114,19 @@ DataMsg * DataMsg::unpack(void * buffer)
 
   msg->field_face_ = new FieldFace;
 
-  msg->n_ff_ = (*pi++);
-  msg->n_fa_ = (*pi++);
+  const int n_ff = (*pi++);
+  const int n_fa = (*pi++);
   msg->id_ = (*pi++);
 
-  if (msg->n_ff_ > 0) {
+  if (n_ff > 0) {
     msg->field_face_->load_data (pc);
-    pc += msg->n_ff_;
+    pc += n_ff;
   }
-  if (msg->n_fa_ > 0) {
+  if (n_fa > 0) {
     msg->field_array_ = pc;
-    pc += msg->n_fa_;
+    pc += n_fa;
+  } else {
+    msg->field_array_ = NULL;
   }
 
   // 3. Save the input buffer for freeing later
@@ -133,38 +140,32 @@ DataMsg * DataMsg::unpack(void * buffer)
 
 void DataMsg::update (Data * data)
 {
-  
-  int n = 0;
-  char * array = NULL;
-
-  if (is_local_) {
-    field_face_->face_to_array(&n, &array);
-  }
-
-  // Set field_face Field
-  Field field = field_face_->field();
-  field.set_field_descr(proxy_simulation.ckLocalBranch()->field_descr());
-  field.set_field_data (data->field_data());
-  field_face_->set_field(field);
+  FieldDescr * field_descr = proxy_simulation.ckLocalBranch()->field_descr();
+ 
+  // Invert face since incoming not outgoing
+  Field field_dst = data->field();
+ 
+  FieldFace * ff = field_face_;
 
   // Invert face since incoming not outgoing
 
-  field_face_->invert_face();
 
   if (is_local_) {
 
-    field_face_->array_to_face(n,array);
-
-    double * darray = (double*)array;
+    Field field_src(field_descr,field_data_);
+    field_face_->face_to_face(field_src, field_dst);
 
     delete field_face_;
-    delete [] array;
-    //    field_face_->loop_limits 
-  } else {
-      double * darray = (double*)field_array_;
-      field_face_->array_to_face(n_fa_,field_array_);
 
+  } else { // ! is_local_
+
+    if (field_array_ != NULL) {
+
+      // Invert face since incoming not outgoing
+      field_face_->invert_face();
+      field_face_->array_to_face(field_array_,field_dst);
 
       CkFreeMsg (buffer_);
+    }
   }
 }

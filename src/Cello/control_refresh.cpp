@@ -126,7 +126,7 @@ void Block::refresh_load_field_face_
   bool lg3[3] = {false,false,false};
   std::vector<int> field_list = refresh()->field_list();
 
-  FieldFace * field_face = create_face_
+  FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_type, field_list);
 
   //  field_face->print();
@@ -146,7 +146,10 @@ void Block::refresh_load_field_face_
   const int of3[3] = {-if3[0], -if3[1], -if3[2]};
 
   int n; char * array;
-  field_face->face_to_array (&n,&array);
+  FieldDescr * field_descr = proxy_simulation.ckLocalBranch()->field_descr();
+  FieldData * field_data = data()->field_data();
+  Field field (field_descr,field_data);
+  field_face->face_to_array (field,&n,&array);
 
   thisProxy[index_neighbor].p_refresh_store_field_face
     (n,array, refresh_type, of3, ic3);
@@ -166,7 +169,12 @@ void Block::refresh_load_field_face_
 void Block::p_refresh_store (DataMsg * msg)
 {
 #ifdef NEW_REFRESH
- msg->update(data());
+#ifdef DEBUG_REFRESH
+  CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
+  msg->field_face()->print("called store");
+#endif
+  msg->update(data());
+
 #endif
 }
 
@@ -190,7 +198,13 @@ void Block::refresh_store_field_face_
     Refresh * refresh = this->refresh();
     std::vector<int> field_list = refresh->field_list();
 
-    store_field_face (n,array, if3, ic3, lg3, refresh_type, field_list);
+    FieldFace * field_face = create_face
+      (if3, ic3, lg3, refresh_type, field_list);
+
+    FieldDescr * field_descr = proxy_simulation.ckLocalBranch()->field_descr();
+    FieldData * field_data = data()->field_data();
+    Field field (field_descr,field_data);
+    field_face -> array_to_face (array,field);
   }
 #endif
 }

@@ -436,8 +436,6 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
   if (enzo_block->is_leaf()) {
 
     // face data
-    int n; 
-    char * array;
     bool lghost[3] = {false,false,false};
     std::vector<int> field_list;
     field_list.push_back(ix_);
@@ -457,6 +455,9 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
 
       int refresh_type = refresh_unknown;
 
+      int n; 
+      char * array;
+
       //  if neighbor level not coarser
       if (! (level_neighbor > level)) {
 	// pack face data
@@ -467,8 +468,11 @@ void EnzoMethodGravityMlat::send_faces_(EnzoBlock * enzo_block) throw()
 
 	// WARNING not accessed
 	FieldFace * field_face;
-	field_face = enzo_block->load_field_face 
-	  (&n, &array, of3, ic3, lghost, refresh_type, field_list);
+
+	field_face = enzo_block->create_face 
+	  (of3, ic3, lghost, refresh_type, field_list);
+
+	field_face->face_to_array (enzo_block->data()->field(), &n, &array);
 
 	delete field_face;
       } 
