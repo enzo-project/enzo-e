@@ -30,7 +30,7 @@ FieldFace::FieldFace
   :  refresh_type_(refresh_unknown)
 {
 #ifdef DEBUG_FIELD_FACE
-  CkPrintf ("%d FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
+  CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
 
   for (int i=0; i<3; i++) {
@@ -44,12 +44,18 @@ FieldFace::FieldFace
 
 FieldFace::~FieldFace() throw ()
 {
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%d DEBUG FieldFace::~FieldFace(Field) %p\n",CkMyPe(),this);
+#endif
 }
 
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
 {
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%d DEBUG FieldFace::FieldFace(FieldFace) %p\n",CkMyPe(),this);
+#endif
   copy_(field_face);
 }
 
@@ -119,11 +125,9 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
   size_t index_array = 0;
 
-  for (size_t index_field_list=0;
-       index_field_list < field_list_.size();
-       index_field_list++) {
+  for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
 
-    size_t index_field = field_list_[index_field_list];
+    size_t index_field = field_list_[i_f];
   
     precision_type precision = field.precision(index_field);
 
@@ -194,11 +198,9 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
   size_t index_array = 0;
 
-  for (size_t index_field_list=0;
-       index_field_list < field_list_.size();
-       index_field_list++) {
+  for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
 
-    size_t index_field = field_list_[index_field_list];
+    size_t index_field = field_list_[i_f];
 
     precision_type precision = field.precision(index_field);
 
@@ -367,11 +369,9 @@ int FieldFace::num_bytes_array(Field field) throw()
 {
   int array_size = 0;
 
-  for (size_t index_field_list=0;
-       index_field_list < field_list_.size();
-       index_field_list++) {
+  for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
 
-    size_t index_field = field_list_[index_field_list];
+    size_t index_field = field_list_[i_f];
 
     precision_type precision = field.precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
@@ -381,10 +381,8 @@ int FieldFace::num_bytes_array(Field field) throw()
     field.field_size (index_field,&nd3[0],&nd3[1],&nd3[2]);
     field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    if (refresh_type_ == refresh_fine)
-      loop_limits (im3,n3,nd3,ng3,op_load);
-    else
-      loop_limits (im3,n3,nd3,ng3,op_store);
+    int op_type = (refresh_type_ == refresh_fine) ? op_load : op_store;
+    loop_limits (im3,n3,nd3,ng3,op_type);
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
 
@@ -574,8 +572,8 @@ template<class T> void FieldFace::copy_
     }
   }
 }
-//----------------------------------------------------------------------
 
+//----------------------------------------------------------------------
 
 void FieldFace::loop_limits
 ( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)

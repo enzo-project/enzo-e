@@ -18,8 +18,11 @@ class FieldFace {
 public: // interface
 
   /// Constructor of uninitialized FieldFace
-  FieldFace () throw() 
-  { }
+
+  FieldFace () throw()
+  { 
+    // CkPrintf ("%d DEBUG FieldFace::FieldFace() %p\n",CkMyPe(),this); 
+  }
 
   /// Constructor of initialized FieldFace
   FieldFace (const Field & field) throw();
@@ -95,13 +98,15 @@ public: // interface
   void face_to_array (Field field, char * array) throw();
 
   /// Copy the input array data to the field's ghost zones
-  void array_to_face (char * array, Field field) throw();
+
+  void array_to_face(char * array, Field field) throw();
 
   /// Copy directly the face from source FieldData to destination FieldData
   void face_to_face (Field field_src, Field field_dst);
 
   /// Calculate the number of bytes needed
-  int num_bytes_array ( Field field ) throw();
+
+  int num_bytes_array (Field field) throw();
 
   /// Compute loop limits for load or store
   void loop_limits
