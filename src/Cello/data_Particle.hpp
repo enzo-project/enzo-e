@@ -49,6 +49,13 @@ public: // interface
     return *this;
   }
 
+  /// Comparison operator
+  bool operator== (const Particle & particle) throw ()
+  {
+    return (particle_descr_ == particle.particle_descr_) &&
+      (*particle_data_ == *particle.particle_data_);
+  }
+
   /// Destructor
   ~Particle() throw()
   {};
@@ -305,6 +312,26 @@ public: // interface
   bool velocity (int it, int ib,
 		 double * vx, double * vy = 0, double * vz = 0)
   { return particle_data_->velocity(particle_descr_,it,ib,vx,vy,vz); }
+
+  //--------------------------------------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const
+  { return particle_data_->data_size (particle_descr_); }
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (char * buffer) const
+  { return particle_data_->save_data (particle_descr_,buffer); }
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (char * buffer)
+  { return particle_data_->load_data (particle_descr_,buffer); }
+
+  //--------------------------------------------------
 
   void debug () const
   { particle_data_->debug (particle_descr_); }

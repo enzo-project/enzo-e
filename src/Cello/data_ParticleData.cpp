@@ -41,6 +41,16 @@ ParticleData & ParticleData::operator= ( const ParticleData & particle_data ) th
 
 //----------------------------------------------------------------------
 
+bool ParticleData::operator== (const ParticleData & particle_data) throw ()
+{
+  return 
+    (attribute_array_ == particle_data.attribute_array_) &&
+    (attribute_align_ == particle_data.attribute_align_) &&
+    (particle_count_  == particle_data.particle_count_);
+}
+
+//----------------------------------------------------------------------
+
 void ParticleData::pup (PUP::er &p)
 {
   p | attribute_array_;
@@ -713,6 +723,201 @@ void ParticleData::update_position_int_
 	   "Unknown particle attribute type %d",
 	   type);
   }
+}
+
+//----------------------------------------------------------------------
+
+int ParticleData::data_size (ParticleDescr * particle_descr) const
+{
+
+  int size = 0;
+  const int nt = particle_descr->num_types();
+
+  // array lengths
+
+  size += sizeof(int); 
+
+  for (int it=0; it<nt; it++) {
+
+    // array[it] lengths
+
+    size += sizeof(int); 
+
+    const int nb = num_batches(it);
+
+    // attribute_align_[it] values
+    size += nb*sizeof(char);
+
+    // particle_count_[it] values
+    size += nb*sizeof(int);
+
+    for (int ib=0; ib<nb; ib++) {
+
+      // array[it][ib] length
+      size += sizeof(int); 
+
+      // attribute_array_[it][ib] values
+      const int mp = attribute_array_[it][ib].size();
+      size += mp * sizeof(char);
+    }
+  }
+  return size;
+}
+
+//----------------------------------------------------------------------
+
+char * ParticleData::save_data (ParticleDescr * particle_descr,
+				char * buffer) const
+{
+  union {
+    int  * pi;
+    char * pc;
+  };
+
+  // NOTE: integers stored first, then char's, to avoid alignment issues
+
+  pc = (char *) buffer;
+
+  //--------------------
+  // Store array sizes
+  //--------------------
+
+  // ...store number of types
+
+  const int nt = (*pi++) = particle_descr->num_types();
+
+  for (int it=0; it<nt; it++) {
+
+    // ...store number of batches for the type
+
+    int nb = (*pi++) = num_batches(it);
+
+    for (int ib=0; ib<nb; ib++) {
+
+      // ...store particle attribute array lengths
+
+      int mp = (*pi++) = attribute_array_[it][ib].size();
+      
+    }
+  }
+
+  // store int particle_count_[it][ib]
+
+  for (int it=0; it<nt; it++) {
+    const int nb = particle_count_[it].size();
+    for (int ib=0; ib<nb; ib++) {
+      (*pi++) = particle_count_[it][ib];
+    }
+  }
+
+  // store char attribute_align_[it][ib] array
+
+  for (int it=0; it<nt; it++) {
+    const int nb = attribute_align_[it].size();
+    for (int ib=0; ib<nb; ib++) {
+      (*pc++) = attribute_align_[it][ib];
+    }
+  }
+
+  // store char attribute_array_[it][ib][k]
+
+  for (int it=0; it<nt; it++) {
+    const int nb = attribute_array_[it].size();
+    for (int ib=0; ib<nb; ib++) {
+      const int n = attribute_array_[it][ib].size();
+      for (int k=0; k<n; k++) {
+	(*pc++) = attribute_array_[it][ib][k];
+      }
+    }
+  }
+
+  return pc;
+}
+
+//----------------------------------------------------------------------
+
+char * ParticleData::load_data (ParticleDescr * particle_descr,
+				char * buffer)
+{
+  // NOTE: integers stored first, then char's, to avoid alignment issues
+
+  union {
+    int  * pi;
+    char * pc;
+  };
+
+  pc = (char *) buffer;
+
+  //-----------------------------------------
+  // Load array sizes and pre-allocate arrays
+  //-----------------------------------------
+
+  // ...load number of types
+
+  const int nt = (*pi++);
+
+  // ... allocate arrays
+
+  attribute_array_.resize(nt);
+  attribute_align_.resize(nt);
+  particle_count_.resize(nt);
+
+  for (int it=0; it<nt; it++) {
+
+    // ...load number of batches for the type
+
+    int nb = (*pi++);
+
+    // ... allocate arrays[it]
+
+    attribute_array_[it].resize(nb);
+    attribute_align_[it].resize(nb);
+    particle_count_[it].resize(nb);
+
+    for (int ib=0; ib<nb; ib++) {
+
+      // ...load particle attribute array lengths
+
+      int mp = (*pi++);
+
+      // ... allocate array[it][ib]
+
+      attribute_array_[it][ib].resize(mp);
+      
+    }
+  }
+
+  // load int particle_count_[it][ib]
+
+  for (int it=0; it<nt; it++) {
+    const int nb = particle_count_[it].size();
+    for (int ib=0; ib<nb; ib++) {
+      particle_count_[it][ib] = (*pi++);
+    }
+  }
+
+  // load char attribute_align_[it][ib] array
+
+  for (int it=0; it<nt; it++) {
+    const int nb = attribute_align_[it].size();
+    for (int ib=0; ib<nb; ib++) {
+      attribute_align_[it][ib] = (*pc++);
+    }
+  }
+
+  // load char attribute_array_[it][ib][k]
+
+  for (int it=0; it<nt; it++) {
+    const int nb = attribute_array_[it].size();
+    for (int ib=0; ib<nb; ib++) {
+      const int n = attribute_array_[it][ib].size();
+      for (int k=0; k<n; k++) {
+	attribute_array_[it][ib][k] = (*pc++);
+      }
+    }
+  }
+
+  return pc;
 }
 
 //----------------------------------------------------------------------

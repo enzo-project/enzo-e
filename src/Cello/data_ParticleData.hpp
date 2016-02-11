@@ -30,6 +30,9 @@ public: // interface
   /// Assignment operator
   ParticleData & operator= (const ParticleData & particle_data) throw ();
 
+  /// Comparison operator
+  bool operator== (const ParticleData & particle_data) throw ();
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
@@ -137,6 +140,23 @@ public: // interface
 		 int it, int ib,
 		 double * vx, double * vy = 0, double * vz = 0);
 
+  //--------------------------------------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size (ParticleDescr * particle_descr) const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (ParticleDescr * particle_descr, char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (ParticleDescr * particle_descr, char * buffer);
+
+  //--------------------------------------------------
+
   void debug (ParticleDescr * particle_descr);
 
 private: /// functions
@@ -188,7 +208,7 @@ private: /// functions
 
 private: /// attributes
 
-  /// Array of blocks of particle attributes array_[it][ib];
+  /// Array of blocks of particle attributes array_[it][ib][iap];
   std::vector< std::vector< std::vector<char> > > attribute_array_;
 
   /// Alignment adjustment to correct for 16-byte alignment of

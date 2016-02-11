@@ -967,6 +967,31 @@ PARALLEL_MAIN_BEGIN
   }
 
   unit_assert (error_gather_int == 0);
+
+  //--------------------------------------------------
+  // data_size(), save_data(), load_data() 
+  //--------------------------------------------------
+
+  unit_func("data_size()");
+  int n = p_dst.data_size();
+
+  unit_func("save_data()");
+  char * buffer = new char[n];
+  char * buffer_next = p_dst.save_data(buffer);
+  unit_assert (buffer_next - buffer == n);
+  if (buffer_next - buffer != n)
+    printf ("buffer size mismatch: %d %d\n",buffer_next - buffer,n);
+
+  unit_func("load_data()");
+  ParticleData new_p_data;
+  Particle new_p (particle_descr,&new_p_data);
+  buffer_next = new_p.load_data(buffer);
+  if (buffer_next - buffer != n)
+    printf ("buffer size mismatch: %d %d\n",buffer_next - buffer,n);
+  unit_assert (buffer_next - buffer == n);
+  unit_assert (p_dst == new_p);
+
+
   // printf ("error_gather_int %d\n",error_gather_int);
 
   //--------------------------------------------------
