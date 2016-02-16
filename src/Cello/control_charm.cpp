@@ -171,6 +171,7 @@ void Block::refresh_exit_()
 
 void Block::control_sync (int entry_point, int sync, int id)
 {
+  TRACE_CONTROL("control_sync");
   
   if (sync == sync_quiescence) {
 

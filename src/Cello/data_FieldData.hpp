@@ -131,8 +131,8 @@ public: // interface
   bool ghosts_allocated() const throw ()
   {  return ghosts_allocated_; }
 
-  /// Return the number of elements (nx,ny,nz) along each axis, and total
-  /// number of bytes n
+  /// Return the number of elements (nx,ny,nz) along each axis
+  /// (including ghosts), and total number of bytes n
   int field_size (const FieldDescr *,
 		  int id_field, int *nx=0, int *ny=0, int *nz=0) const throw();
 

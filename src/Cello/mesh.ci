@@ -45,13 +45,7 @@ module mesh {
       char a[];
   };
 
-  message DataMsg
-  {
-    FieldFace * field_face_;
-    FieldData * field_data_;
-    void * buffer_;
-    //     ParticleData * particle_data_;
-  };
+  message DataMsg;
 
   array[Index] Block {
 

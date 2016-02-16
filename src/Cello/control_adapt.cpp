@@ -537,6 +537,7 @@ void Block::adapt_recv ( const int of3[3], const int ic3[3], int level_face_new,
 
     ItChild it_child (rank,of3);
     int jc3[3];
+
     while (it_child.next(jc3)) {
 
       int kf3[3];
@@ -564,7 +565,9 @@ void Block::adapt_recv ( const int of3[3], const int ic3[3], int level_face_new,
 	}
       }
     }
+
   } else if (level_relative == -1) {
+
     // RECV-COARSE: Face and level are received from unique
     // neighbor.  Possibly multiple faces of block are updated
     // corresponding to the coarse neighbor's face.  Levels of
@@ -648,7 +651,6 @@ void Block::adapt_coarsen_()
   // --------------------------------------------------
 
   delete [] array;
-
 }
 
 //----------------------------------------------------------------------

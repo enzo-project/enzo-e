@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <execinfo.h>
 
 #include "pup_stl.h"
 
@@ -53,6 +54,8 @@ inline int INDEX2(int ix,int iy,int nx)
 template <class T>
 inline void SWAP(T &a, T &b) 
 {  T t = a; a=b; b=t; }
+
+
 
 //----------------------------------------------------------------------
 // ENUMERATED TYPES
@@ -209,6 +212,7 @@ namespace cello {
     }					
   }
 
+  void backtrace(const char * msg);
 
 };
 

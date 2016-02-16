@@ -302,6 +302,23 @@ Method * Block::method () throw ()
   return method;
 }
 
+//----------------------------------------------------------------------
+
+void Block::periodicity (bool p32[3][2]) const
+{
+  for (int axis=0; axis<3; axis++) {
+    for (int face=0; face<2; face++) {
+      p32[axis][face] = false;
+    }
+  }
+  int index_boundary = 0;
+  Problem * problem = simulation()->problem();
+  Boundary * boundary;
+  while ( (boundary = problem->boundary(index_boundary++)) ) {
+    boundary->periodicity(p32);
+  }
+}
+
 //======================================================================
 
 void Block::apply_initial_() throw ()
@@ -646,36 +663,11 @@ void Block::update_boundary_ ()
 
 //----------------------------------------------------------------------
 
-void Block::periodicity (bool p32[3][2]) const
-{
-  for (int axis=0; axis<3; axis++) {
-    for (int face=0; face<2; face++) {
-      p32[axis][face] = false;
-    }
-  }
-  int index_boundary = 0;
-  Problem * problem = simulation()->problem();
-  Boundary * boundary;
-  while ( (boundary = problem->boundary(index_boundary++)) ) {
-    boundary->periodicity(p32);
-  }
-}
-
-//----------------------------------------------------------------------
-
 void Block::facing_child_(int jc3[3], const int ic3[3], const int if3[3]) const
 {
   jc3[0] = if3[0] ? 1 - ic3[0] : ic3[0];
   jc3[1] = if3[1] ? 1 - ic3[1] : ic3[1];
   jc3[2] = if3[2] ? 1 - ic3[2] : ic3[2];
-  // if (if3[0]) jc3[0] = 1 - jc3[0];
-  // if (if3[0]) jc3[0] = 1 - jc3[0];
-  // if (if3[0]) jc3[0] = 1 - jc3[0];
-  // if (if3[1]==-1) jc3[1] = 1;
-  // if (if3[2]==-1) jc3[2] = 1;
-  // if (if3[0]==+1) jc3[0] = 0;
-  // if (if3[1]==+1) jc3[1] = 0;
-  // if (if3[2]==+1) jc3[2] = 0;
   TRACE9("facing_child %d %d %d  child %d %d %d  face %d %d %d",
 	 jc3[0],jc3[1],jc3[2],ic3[0],ic3[1],ic3[2],if3[0],if3[1],if3[2]);
 }
@@ -696,8 +688,6 @@ void Block::copy_(const Block & block) throw()
   coarsened_  = block.coarsened_;
   delete_     = block.delete_;
 }
-
-//----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
 

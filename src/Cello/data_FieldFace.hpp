@@ -36,6 +36,9 @@ public: // interface
   /// Assignment operator
   FieldFace & operator= (const FieldFace & FieldFace) throw();
 
+  /// Comparison operator
+  bool operator== (const FieldFace & FieldFace) throw();
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p);
 
@@ -117,10 +120,14 @@ public: // interface
   /// Return the number of bytes required to serialize the data object
   int data_size () const;
 
-  /// Serialize the object into the provided empty memory buffer
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
   char * save_data (char * buffer) const;
 
-  /// Restore the object from the provided initialized memory buffer data
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
   char * load_data (char * buffer);
 
   void print (const char * message)

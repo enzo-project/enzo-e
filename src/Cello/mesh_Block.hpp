@@ -576,7 +576,6 @@ public: // virtual functions
 
 protected: // functions
 
-
   /// Return the child adjacent to the given child in the direction of
   /// the given face
   void facing_child_(int jc3[3], const int ic3[3], const int if3[3]) const;

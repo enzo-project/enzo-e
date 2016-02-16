@@ -13,6 +13,9 @@ SConscript('Balance/SConscript')
 env['COPY'] = ''
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
 env['RMIN'] = 'rm -f parameters.out'
+# env['ASAN_SYMBOLIZER_PATH'] = '/usr/bin/llvm-symbolizer-3.4'
+# env['ASAN_OPTIONS'] = 'symbolize=1'
+
 
 # Define a test for running unit tests
 

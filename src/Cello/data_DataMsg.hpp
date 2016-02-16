@@ -14,7 +14,7 @@ class FieldFace;
 
 class DataMsg : public CMessage_DataMsg {
 
-public:
+public: // interface
 
   static int id_count;
   DataMsg() 
@@ -22,9 +22,13 @@ public:
       is_local_(true),
       id_(-1),
       field_face_(NULL)
-  { field_array_ = NULL;  }
+  {
+    field_array_ = NULL;  
+  }
+
   virtual ~DataMsg()
   {  }
+
   /// Copy constructor
   DataMsg(const DataMsg & data_msg) throw()
   { };
@@ -33,11 +37,26 @@ public:
   DataMsg & operator= (const DataMsg & data_msg) throw()
   { return *this; }
 
-  FieldFace * field_face () { return field_face_; }
+  /// Return the FieldFace
+  FieldFace * field_face () 
+  { return field_face_; }
+
   /// Set the FieldFace object
-  void set_field_face    (FieldFace * field_face) { field_face_ = field_face; }
+  void set_field_face    (FieldFace * field_face) 
+  { field_face_ = field_face; }
+
   /// Set the FieldData object
-  void set_field_data    (FieldData * field_data) { field_data_ = field_data; }
+  void set_field_data    (FieldData * field_data) 
+  { field_data_ = field_data; }
+
+  /// Set the ParticleData object
+  void set_particle_data    (ParticleData * particle_data) 
+  { particle_data_ = particle_data; }
+
+  /// Update the Data with data stored in this message
+  void update (Data * data);
+
+public: // static methods
 
   /// Pack data to serialize
   static void * pack (DataMsg*);
@@ -45,11 +64,7 @@ public:
   /// Unpack data to de-serialize
   static DataMsg * unpack(void *);
 
-  /// Update the Block Data with data stored in this message, ghost or
-  /// interior
-  void update (Data * data);
-
-protected:
+protected: // attributes
 
   /// Whether destination is local or remote
   bool is_local_;
@@ -57,25 +72,30 @@ protected:
   /// Id identifying message (TEMPORARY FOR DEBUGGING)
   int id_;
 
-    /// Field Face Data
-    FieldFace * field_face_;
+  /// Field Face Data
+  FieldFace * field_face_;
 
+  /// Field data
   union {
 
     /// Field data if local
     FieldData * field_data_;
+
     /// packed source field data if remote
     char * field_array_;
 
   };
   
-  // /// Particle data
-  // union {
-  //   // source particle data if local
-  //   ParticleData * particle_data_;
-  //   // packed source particle data if remote
-  //   char * particle_array_;
-  // };
+  /// Particle data
+  union {
+
+    // source particle data if local
+    ParticleData * particle_data_;
+
+    // packed source particle data if remote
+    char * particle_array_;
+
+  };
 
   /// Saved Charm++ buffer for deleting after unpack()
   void * buffer_;

@@ -54,7 +54,8 @@ double init_value (int ix, int iy, int iz,
 		   int index_field, 
 		   int MD3, int ND3)
 {
-  double value = test_value (ix,iy,iz,gx,gy,gz,mdx,mdy,mdz,ibx,iby,ibz,nbx,nby,nbz,index_field,MD3,ND3);
+  double value = test_value (ix,iy,iz,gx,gy,gz,mdx,mdy,mdz,
+			     ibx,iby,ibz,nbx,nby,nbz,index_field,MD3,ND3);
   return is_ghost(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz) ? -value : value;
 }
 
@@ -120,7 +121,6 @@ bool test_field(T * values,
 				  nbx,nby,nbz,
 				  index_field,
 				  MD3,ND3);
-	//	printf ("%p test\n",values+i);
 	if (values[i] != value) result = false;
       }
     }
@@ -140,7 +140,6 @@ bool test_field(T * values,
 				    nbx,nby,nbz,
 				    index_field,
 				    MD3,ND3);
-	  printf ("%d %d %d  %07g %07g\n",ix,iy,iz,double(values[i]),value);
 	}
       }
     }
@@ -232,23 +231,25 @@ bool test_fields
 	// field 0
 	field_descr->ghost_depth(0, &gx, &gy, &gz);
 	float * v1 = (float *) (data->values(field_descr,0));
-	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,mx,my,mz,gx,gy,gz,ND3);
-	unit_assert(test_result);  // @@@@
+	test_result = test_field(v1,ibx,iby,ibz,nbx,nby,nbz,0,
+				 mx,my,mz,gx,gy,gz,ND3);
+	unit_assert(test_result);
 	result = result && test_result;
-	printf ("gx,gy,gz = %d %d %d\n",gx,gy,gz);
 
 	// field 1
 	field_descr->ghost_depth(1, &gx, &gy, &gz);
 	double * v2 = (double *) (data->values(field_descr,1));
-	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,mx,my,mz,gx,gy,gz,ND3);
-	unit_assert(test_result);  // @@@@
+	test_result = test_field(v2,ibx,iby,ibz,nbx,nby,nbz,1,
+				 mx,my,mz,gx,gy,gz,ND3);
+	unit_assert(test_result);
 	result = result && test_result;
 
 	// field 2
 	field_descr->ghost_depth(2, &gx, &gy, &gz);
 	long double * v3 = (long double *) (data->values(field_descr,2));
-	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,mx,my,mz,gx,gy,gz,ND3);
-	unit_assert(test_result);  // @@@@
+	test_result = test_field(v3,ibx,iby,ibz,nbx,nby,nbz,2,
+				 mx,my,mz,gx,gy,gz,ND3);
+	unit_assert(test_result);
 	result = result && test_result;
  
       }
@@ -314,9 +315,12 @@ PARALLEL_MAIN_BEGIN
 	  FieldData * data_lower = field_data[index_lower];
 
 	  int index_upper = 0;
-	  if (axis==0) index_upper = ((ibx+1)%nbx) + nbx * (  iby        + nby * ibz);
-	  if (axis==1) index_upper =   ibx        + nbx * (((iby+1)%nby) + nby * ibz);
-	  if (axis==2) index_upper =   ibx        + nbx * (  iby        + nby * ((ibz+1)%nbz));
+	  if (axis==0) 
+	    index_upper = ((ibx+1)%nbx) + nbx * (  iby        + nby * ibz);
+	  if (axis==1) 
+	    index_upper = ibx        + nbx * (((iby+1)%nby) + nby * ibz);
+	  if (axis==2) 
+	    index_upper = ibx     + nbx * (  iby        + nby * ((ibz+1)%nbz));
 
 	  FieldData * data_upper = field_data[index_upper];
 
@@ -346,6 +350,7 @@ PARALLEL_MAIN_BEGIN
 	  field_list.push_back(0);
 	  field_list.push_back(1);
 	  field_list.push_back(2);
+
 	  face_lower.set_field_list(field_list);
 	  face_upper.set_field_list(field_list);
 
@@ -362,6 +367,21 @@ PARALLEL_MAIN_BEGIN
 
 	  delete [] array;
 
+	  // test data_size(), save_data(), load_data() 
+
+	  unit_func("data_size()");
+	  int nm = face_lower.data_size();
+
+	  unit_func("save_data()");
+	  char * buffer = new char[nm];
+	  char * buffer_next = face_lower.save_data(buffer);
+	  unit_assert (buffer_next - buffer == nm);
+
+	  unit_func("load_data()");
+	  FieldFace new_face_lower;
+	  buffer_next = new_face_lower.load_data(buffer);
+	  unit_assert (buffer_next - buffer == nm);
+	  unit_assert (face_lower == new_face_lower);
 
 	}
       }
@@ -369,7 +389,7 @@ PARALLEL_MAIN_BEGIN
   }
 
   unit_func("face_to_array / array_to_face");
-  unit_assert(test_fields(field_descr,field_data,nbx,nby,nbz,mx,my,mz)); // @@@
+  unit_assert(test_fields(field_descr,field_data,nbx,nby,nbz,mx,my,mz));
 
   //----------------------------------------------------------------------	
   // clean up

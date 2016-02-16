@@ -4,6 +4,7 @@ is_arch_valid = 1
 
 flags_arch = '-Wall -O3 -g'
 #flags_arch = '-Wall -g'
+#flags_arch = '-Wall -g -fsanitize=address -fno-omit-frame-pointer'
 #flags_arch = '-Wall -O3 -pg'
 
 flags_link_charm = ' -rdynamic' # required for backtraces

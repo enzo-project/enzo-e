@@ -26,6 +26,8 @@
 
 // #define NEW_REFRESH
 
+//#define NEW_PARTICLE
+
 //----------------------------------------------------------------------
 
 void Block::refresh_begin_() 
@@ -138,6 +140,15 @@ void Block::refresh_load_field_face_
   data_msg -> set_field_face (field_face);
   data_msg -> set_field_data (data()->field_data());
 
+#ifdef NEW_PARTICLE
+  data_msg -> set_particle_data (data()->particle_data());
+#endif
+
+#ifdef DEBUG_REFRESH
+  CkPrintf ("%d DEBUG REFRESH calling p_refresh_store()\n",CkMyPe());
+  CkPrintf ("%d DEBUG REFRESH field_data size %d\n",CkMyPe(),data()->field_data()->permanent_size());
+  field_face->print("DEBUG REFRESH calling store");
+#endif
   thisProxy[index_neighbor].p_refresh_store (data_msg);
 
 #else
@@ -169,6 +180,7 @@ void Block::refresh_load_field_face_
 void Block::p_refresh_store (DataMsg * msg)
 {
 #ifdef NEW_REFRESH
+
 #ifdef DEBUG_REFRESH
   CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
   msg->field_face()->print("called store");
@@ -205,6 +217,7 @@ void Block::refresh_store_field_face_
     FieldData * field_data = data()->field_data();
     Field field (field_descr,field_data);
     field_face -> array_to_face (array,field);
+
   }
 #endif
 }

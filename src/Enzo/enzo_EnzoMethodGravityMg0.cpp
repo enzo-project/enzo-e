@@ -491,11 +491,12 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   // copy data from EnzoBlock to array via FieldFace
 
-  int narray; 
-  char * array;
   FieldFace * field_face = 
     enzo_block->create_face (if3, ic3, lg3, 
 			     refresh_coarse, field_list);
+  int narray; 
+  char * array;
+
   field_face->face_to_array(enzo_block->data()->field(),&narray,&array);
 
   // Create a FieldMsg for sending data to parent
@@ -549,14 +550,15 @@ void EnzoBlock::p_mg0_restrict_recv(FieldMsg * field_message)
 
   // copy data from field_message to this EnzoBlock
 
-   int * ic3 = field_message->ic3;
 
-   FieldFace * field_face = create_face 
-     (if3, ic3, lg3, refresh_coarse, field_list);
-   char * a = field_message->a;
+  int * ic3 = field_message->ic3;
 
-   field_face->array_to_face(a, data()->field());
-   delete field_face;
+  FieldFace * field_face = create_face 
+    (if3, ic3, lg3, refresh_coarse, field_list);
+
+  char * a = field_message->a;
+  field_face->array_to_face(a, data()->field());
+  delete field_face;
 
   delete field_message;
 
@@ -641,10 +643,11 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
     // <COMMON CODE> in restrict_send_() and prolong_send_()
 
-    int narray; 
-    char * array;
     FieldFace * field_face = enzo_block->create_face
       (if3, ic3, lg3, refresh_fine, field_list);
+
+    int narray; 
+    char * array;
     
     field_face->face_to_array (enzo_block->data()->field(),&narray,&array);
 
@@ -696,7 +699,6 @@ void EnzoBlock::p_mg0_prolong_recv(FieldMsg * field_message)
   int n = field_message->n;
   char * a = field_message->a;
   int * ic3 = field_message->ic3;
-
   FieldFace * field_face = create_face 
     (if3, 
      field_message->ic3, lg3,
