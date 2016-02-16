@@ -12,8 +12,7 @@ Adapt {
 
    MASK {
       type = "mask";
-      value = [ 6.0, (x - 0.5*cos(12.27*t))*(x - 0.5*cos(12.27*t)) + (y - 0.5*sin(12.27*t))*(y - 0.5*sin(12.27*t)) <= 0.25, 0.0 ];
-#      value = [ 6.0, (x - 0.5)*(x - 0.5) + y*y <= 0.25, 0.0 ];
+      value = [ 6.0, (x - 0.5)*(x - 0.5) + y*y <= 0.25, 0.0 ];
    }
    
 }
@@ -37,7 +36,7 @@ Method { trace {  timestep = 0.002; } }
 Output {
     list = ["mesh","trace"];       
     trace {
-        name = [ "particle-amr-x-%04d.png", "cycle" ];
+        name = [ "particle-amr-static-%04d.png", "cycle" ];
         include "input/schedule_cycle_10.incl"
 #        image_reduce_type = "max";
         image_size = [ 512, 512 ];
@@ -49,7 +48,7 @@ Output {
 	image_type = "data+mesh";
 	field_list = ["velocity_x"];
         include "input/schedule_cycle_10.incl"
-	name = [ "particle-amr-mesh-%04d.png", "cycle" ];
+	name = [ "particle-amr-static-mesh-%04d.png", "cycle" ];
 	include "input/colormap_rainbow.incl"
     }
 }

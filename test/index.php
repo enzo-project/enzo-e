@@ -628,8 +628,8 @@ test_summary("Output",
 	     array("enzo-p","enzo-p","enzo-p"),'test');
 
 test_summary("Particle", 
-	     array("particle-x","particle-y","particle-xy","particle-circle","particle-amr-x"),
-	     array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
+	     array("particle-x","particle-y","particle-xy","particle-circle","particle-amr-static","particle-amr-dynamic"),
+	     array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
 
 //----------------------------------------------------------------------
 // row_divider($num_types);
@@ -1102,11 +1102,17 @@ tests("Enzo","enzo-p","test_particle-circle","","");
 test_table ("particle-circle", array("000","100","200","300","400","500"),$types);
 end_hidden("particle-circle-1");
 
-begin_hidden("particle-amr-x", "Particle (vx,vy) = (-y,x)");
-tests("Enzo","enzo-p","test_particle-amr-x","","");
-test_table ("particle-amr-mesh", array("0000","0200","0400","0600","0800","1000"),$types);
-test_table ("particle-amr-x", array("0000","0200","0400","0600","0800","1000"),$types);
-end_hidden("particle-amr-x-1");
+begin_hidden("particle-amr-static", "Particle (vx,vy) = (-y,x)");
+tests("Enzo","enzo-p","test_particle-amr-static","","");
+test_table ("particle-amr-static-mesh", array("0000","0200","0400","0600","0800","1000"),$types);
+test_table ("particle-amr-static", array("0000","0200","0400","0600","0800","1000"),$types);
+end_hidden("particle-amr-static-1");
+
+begin_hidden("particle-amr-dynamic", "Particle (vx,vy) = (-y,x)");
+tests("Enzo","enzo-p","test_particle-amr-dynamic","","");
+test_table ("particle-amr-dynamic-mesh", array("0000","0200","0400","0600","0800","1000"),$types);
+test_table ("particle-amr-dynamic", array("0000","0200","0400","0600","0800","1000"),$types);
+end_hidden("particle-amr-dynamic-1");
 
 //======================================================================
 
