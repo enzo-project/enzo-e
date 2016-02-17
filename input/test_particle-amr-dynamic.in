@@ -1,0 +1,55 @@
+include "input/test_particle.incl"
+
+Domain { 
+    lower = [-1.0, -1.0];
+    upper = [ 1.0,  1.0];
+}
+
+Adapt {
+   list = ["MASK"];
+
+   max_level = 3;
+
+   MASK {
+      type = "mask";
+      value = [ 6.0, (x - 0.5*cos(12.27*t))*(x - 0.5*cos(12.27*t)) + (y - 0.5*sin(12.27*t))*(y - 0.5*sin(12.27*t)) <= 0.25, 0.0 ];
+   }
+   
+}
+
+Mesh {
+   root_size = [128,128];
+}
+
+Stopping { cycle = 1023; }
+
+ Initial {
+     value {
+         velocity_x = 1.0;
+         velocity_y = 0.0;
+     };
+     trace { stride = [8,8];}
+  }
+
+Method { trace {  timestep = 0.002; } }
+
+Output {
+    list = ["mesh","trace"];       
+    trace {
+        name = [ "particle-amr-dynamic-%04d.png", "cycle" ];
+        include "input/schedule_cycle_10.incl"
+#        image_reduce_type = "max";
+        image_size = [ 512, 512 ];
+    }
+    mesh {
+        type = "image";
+        image_size = [ 513, 513 ];
+        image_reduce_type = "max";
+	image_type = "data+mesh";
+	field_list = ["velocity_x"];
+        include "input/schedule_cycle_10.incl"
+	name = [ "particle-amr-dynamic-mesh-%04d.png", "cycle" ];
+	include "input/colormap_rainbow.incl"
+    }
+}
+
