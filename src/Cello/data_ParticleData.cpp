@@ -305,7 +305,7 @@ void ParticleData::gather
 (ParticleDescr * particle_descr, int it, 
  int n, ParticleData * particle_array[])
 {
-  // copy particle array since we sort it
+  // Sort particle array to simplify skipping duplicates
   ParticleData * particle_array_sorted[n];
   for (int i=0; i<n; i++) particle_array_sorted[i] = particle_array[i];
   std::sort(&particle_array_sorted[0],
@@ -796,7 +796,7 @@ char * ParticleData::save_data (ParticleDescr * particle_descr,
 
       // ...store particle attribute array lengths
 
-      int mp = (*pi++) = attribute_array_[it][ib].size();
+      (*pi++) = attribute_array_[it][ib].size();
       
     }
   }
@@ -878,11 +878,7 @@ char * ParticleData::load_data (ParticleDescr * particle_descr,
 
       // ...load particle attribute array lengths
 
-      int mp = (*pi++);
-
-      // ... allocate array[it][ib]
-
-      attribute_array_[it][ib].resize(mp);
+      attribute_array_[it][ib].resize((*pi++));
       
     }
   }
@@ -1009,7 +1005,8 @@ void ParticleData::resize_array_(ParticleDescr * particle_descr,
   if (!particle_descr->interleaved(it)) {
     np = particle_descr->batch_size();
   }
-  int new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
+
+  size_t new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
 
   if (attribute_array_[it][ib].size() != new_size) {
     attribute_array_[it][ib].resize(new_size);

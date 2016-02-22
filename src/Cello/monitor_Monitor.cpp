@@ -101,6 +101,11 @@ void Monitor::header () const
   print ("Define","BUILD DIR     %s",CELLO_DIR);
   print ("Define","BUILD DATE    %s",CELLO_DATE);
   print ("Define","BUILD TIME    %s",CELLO_TIME);
+#ifdef NEW_REFRESH
+  print ("Define","NEW_REFRESH %s","Yes");
+#else
+  print ("Define","NEW_REFRESH %s","no");
+#endif
 #ifndef CONFIG_PYTHON_LT_27
   print ("Define","CHARM_VERSION %s",CELLO_CHARM_VERSION);
 #   ifdef CONFIG_HAVE_MERCURIAL  

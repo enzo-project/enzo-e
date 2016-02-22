@@ -478,10 +478,12 @@ void Block::lower
 
   index_global (&ix,&iy,&iz,&nx,&ny,&nz);
 
+  Hierarchy * hierarchy = simulation()->hierarchy();
   double xdm, ydm, zdm;
+  hierarchy->lower(&xdm,&ydm,&zdm);
   double xdp, ydp, zdp;
-  simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
-  simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
+  hierarchy->upper(&xdp,&ydp,&zdp);
+
   double ax = 1.0*ix/nx;
   double ay = 1.0*iy/ny;
   double az = 1.0*iz/nz;
@@ -506,10 +508,11 @@ void Block::upper
 
   index_global (&ix,&iy,&iz,&nx,&ny,&nz);
 
+  Hierarchy * hierarchy = simulation()->hierarchy();
   double xdm, ydm, zdm;
+  hierarchy->lower(&xdm,&ydm,&zdm);
   double xdp, ydp, zdp;
-  simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
-  simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
+  hierarchy->upper(&xdp,&ydp,&zdp);
 
   double ax = 1.0*(ix+1)/nx;
   double ay = 1.0*(iy+1)/ny;

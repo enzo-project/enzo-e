@@ -26,6 +26,8 @@ class Hierarchy;
 class ItFace;
 class ItNeighbor;
 class Method;
+class Particle;
+class ParticleData;
 class Refresh;
 class Simulation;
 
@@ -448,12 +450,15 @@ public:
 
 protected:
 
+  //--------------------------------------------------
+  // REFRESH
+  //--------------------------------------------------
   void refresh_begin_();
 
   /// Pack field face data into arrays and send to neighbors
   void refresh_load_field_faces_ (Refresh * refresh);
   /// Pack particle type data into arrays and send to neighbors
-  void refresh_load_particle_faces_ (Refresh * refresh);
+  void refresh_load_particle_faces_ (Refresh * refresh, bool interior = false);
 
   void refresh_load_field_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
@@ -464,6 +469,38 @@ protected:
   (int n, char a[], int refresh_type, int if3[3], int ic3[3]);
   void refresh_store_particle_face_
   (int n, int np, char a[], int it);
+
+  //--------------------------------------------------
+  // PARTICLES
+  //--------------------------------------------------
+
+  /// Create ParticleData objects for particle_array[] (with possibly
+  /// duplicated pointers) and particle_list[] (with unique
+  /// ParticleData objects) Also calls
+  /// particle_determine_periodic_update_
+  int particle_create_array_neighbors_
+  (Refresh * refresh,
+   double * dpx, double * dpy, double *dpz,
+   ParticleData * particle_array[],
+   ParticleData * particle_list[],
+   Index index_list[]);
+
+  /// Computes updates to positions (dpx[i],dpy[i],dpz[i]) for faces that
+  /// cross periodic domain boundaries
+  void particle_determine_periodic_update_ 
+  (int * index_lower, int * index_upper, double * dpx, double * dpy, double * dpz);
+  void particle_apply_periodic_update_
+  ( int nl, double * dpx, double * dpy, double * dpz,
+    ParticleData * particle_list[]);
+
+  /// Scatter particles of given types in type_list, to appropriate particle_array
+  /// ParticleData elements
+  void particle_scatter_neighbors_
+  (int npa, ParticleData * particle_array[],
+   std::vector<int> & type_list, Particle particle);
+
+  /// Send particles in list to corresponding indices
+  void particle_send_(int nl,Index index_list[], ParticleData * particle_list[]);
 
   //--------------------------------------------------
   // STOPPING

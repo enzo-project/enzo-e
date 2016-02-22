@@ -160,6 +160,10 @@ module mesh {
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
+    // WARNING: removing "[expedited]" below leads to higher
+    //          probability of errors in load balancing regression
+    //          tests
+
     entry [expedited] void p_refresh_store_field_face
       (int n, char a[n],  char rtype, int if3[3], int ic3[3]);
 

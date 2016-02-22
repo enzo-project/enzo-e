@@ -9,6 +9,13 @@ import socket
 #======================================================================
 
 #----------------------------------------------------------------------
+# Whether to use the new field/particle refresh using DataMsg.  Intended
+# to be temporary
+#----------------------------------------------------------------------
+
+new_refresh = 0
+
+#----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements
 #----------------------------------------------------------------------
 
@@ -225,6 +232,7 @@ papi_path           = 'papi_path_not_set'
 
 # Debugging defines
 
+define_new_refresh =  ['NEW_REFRESH']
 define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
@@ -347,6 +355,7 @@ if (use_gprof == 1):
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
+if (new_refresh != 0):   defines = defines + define_new_refresh
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm

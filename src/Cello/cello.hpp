@@ -68,7 +68,6 @@ enum face_enum {
   face_upper = 1,
   face_all
 };
-typedef int face_type;
 
 /// @enum     axis_enum
 /// @brief    Axis [x|y|z]

@@ -41,17 +41,17 @@ public: // interface
   FieldFace * field_face () 
   { return field_face_; }
 
-  /// Set the FieldFace object
-  void set_field_face    (FieldFace * field_face) 
-  { field_face_ = field_face; }
-
   /// Set the FieldData object
-  void set_field_data    (FieldData * field_data) 
+  void set_field_data  (FieldData * field_data) 
   { field_data_ = field_data; }
 
   /// Set the ParticleData object
-  void set_particle_data    (ParticleData * particle_data) 
+  void set_particle_data  (ParticleData * particle_data) 
   { particle_data_ = particle_data; }
+
+  /// Set the FieldFace object
+  void set_field_face    (FieldFace * field_face) 
+  { field_face_ = field_face; }
 
   /// Update the Data with data stored in this message
   void update (Data * data);
@@ -63,7 +63,7 @@ public: // static methods
 
   /// Unpack data to de-serialize
   static DataMsg * unpack(void *);
-
+  
 protected: // attributes
 
   /// Whether destination is local or remote
@@ -87,15 +87,7 @@ protected: // attributes
   };
   
   /// Particle data
-  union {
-
-    // source particle data if local
-    ParticleData * particle_data_;
-
-    // packed source particle data if remote
-    char * particle_array_;
-
-  };
+  ParticleData * particle_data_;
 
   /// Saved Charm++ buffer for deleting after unpack()
   void * buffer_;
