@@ -21,9 +21,11 @@ public: // interface
     : CMessage_DataMsg(),
       is_local_(true),
       id_(-1),
-      field_face_(NULL)
+      field_face_(NULL),
+      field_data_(NULL),
+      particle_data_(NULL),
+      buffer_(NULL)
   {
-    field_array_ = NULL;  
   }
 
   virtual ~DataMsg()
@@ -43,7 +45,8 @@ public: // interface
 
   /// Set the FieldData object
   void set_field_data  (FieldData * field_data) 
-  { field_data_ = field_data; }
+  { field_data_ = field_data; 
+  }
 
   /// Set the ParticleData object
   void set_particle_data  (ParticleData * particle_data) 

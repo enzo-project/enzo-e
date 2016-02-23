@@ -44,9 +44,37 @@ void Block::refresh_begin_()
   if ( refresh && refresh->active() ) {
 
     refresh_load_field_faces_   (refresh);
-#ifndef NEW_REFRESH
-    refresh_load_particle_faces_(refresh);
-#endif
+    
+    const int rank = this->rank();
+
+    const int npa = (rank == 1) ? 4 
+      :             (rank == 2) ? 4*4 
+      :                           4*4*4;
+
+    ParticleData * particle_array[npa];
+    ParticleData * particle_list [npa];
+    Index             index_list [npa];
+  
+    for (int i=0; i<npa; i++) {
+      particle_list[i] = NULL;
+      particle_array[i] = NULL;
+    }
+
+    bool interior;
+    int nl=0;
+    load_particle_faces_
+      (npa,&nl,particle_list,particle_array, index_list,
+       refresh, interior = false);
+
+    // 4. SEND PARTICLE DATA TO NEIGHBORS
+
+    particle_send_(nl,index_list,particle_list);
+
+    // delete neighbor particle objects
+    for (int il=0; il<nl; il++) {
+      ParticleData * pd = particle_list[il];
+      //      delete pd;
+    }
 
   }
   control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
@@ -137,16 +165,12 @@ void Block::refresh_load_field_face_
 
   data_msg -> set_field_face (field_face);
   data_msg -> set_field_data (data()->field_data());
-
-  // SET PARTICLE DATA TO 4x4x4 particle_array[] element
-
-  //  INCOMPLETE ("Block::refresh_load_field_face_");
-  data_msg -> set_particle_data (NULL);
+  data_msg -> set_particle_data(NULL);
 
 #ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG REFRESH calling p_refresh_store()\n",CkMyPe());
+  CkPrintf ("%d DEBUG REFRESH calling p_refresh_store() for fields\n",CkMyPe());
   CkPrintf ("%d DEBUG REFRESH field_data size %d\n",CkMyPe(),data()->field_data()->permanent_size());
-  field_face->print("DEBUG REFRESH calling store");
+  if (field_face) field_face->print("DEBUG REFRESH calling store");
 #endif
   thisProxy[index_neighbor].p_refresh_store (data_msg);
 
@@ -163,6 +187,10 @@ void Block::refresh_load_field_face_
 
   thisProxy[index_neighbor].p_refresh_store_field_face
     (n,array, refresh_type, of3, ic3);
+
+#ifdef DEBUG_REFRESH
+  CkPrintf ("%d %p delete field_face\n",CkMyPe(),field_face); fflush(stdout);
+#endif
 
   delete field_face;
   delete [] array;
@@ -184,7 +212,7 @@ void Block::p_refresh_store (DataMsg * msg)
 #ifdef DEBUG_REFRESH
   CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
   fflush(stdout);
-  msg->field_face()->print("called store");
+  if (msg->field_face()) msg->field_face()->print("called store");
 #endif
   msg->update(data());
 
@@ -229,8 +257,12 @@ void Block::refresh_store_field_face_
 
 //----------------------------------------------------------------------
 
-void Block::refresh_load_particle_faces_ (Refresh *refresh,
-					  bool interior)
+void Block::load_particle_faces_ (int npa, int * nl,
+				  ParticleData * particle_list[],
+				  ParticleData * particle_array[],
+				  Index index_list[],
+				  Refresh *refresh,
+				  bool interior)
 {
   // Array elements correspond to child-sized blocks to
   // the left, inside, and right of the main Block.  Particles
@@ -277,39 +309,13 @@ void Block::refresh_load_particle_faces_ (Refresh *refresh,
 
   const int rank = this->rank();
 
-  // 1. CREATE PARTICLE_DATA ARRAY
-
-  // ... size of the ParticleData array
-  const int npa = (rank == 1) ? 4 
-    :             (rank == 2) ? 4*4 
-    :                           4*4*4;
-
-  ParticleData * particle_array[npa];
-  ParticleData * particle_list [npa];
-  Index             index_list [npa];
-  
-  for (int i=0; i<npa; i++) {
-    particle_list[i] = NULL;
-    particle_array[i] = NULL;
-  }
-
-  // 2. INITIALIZE THE PARTICLE_DATA ARRAY
-
   // ... arrays for updating positions of particles that cross
   // periodic boundaries
 
-  double dpx[npa],dpy[npa],dpz[npa];
+  (*nl) = particle_create_array_neighbors_
+    (refresh, particle_array,particle_list,index_list);
 
-  for (int i=0; i<npa; i++) {
-    dpx[i]=0.0;
-    dpy[i]=0.0;
-    dpz[i]=0.0; 
-  }
-
-  const int nl = particle_create_array_neighbors_
-    (refresh,dpx,dpy,dpz, particle_array,particle_list,index_list);
-
-  // 3. SCATTER PARTICLES AMONG PARTICLE_DATA ARRAY
+  // Scatter particles among particle_data array
 
   std::vector<int> type_list = refresh->particle_list();
 
@@ -318,26 +324,16 @@ void Block::refresh_load_particle_faces_ (Refresh *refresh,
 
   particle_scatter_neighbors_(npa,particle_array,type_list, particle);
 
-  // 3.5 Update positions particles crossing periodic boundaries
+  // Update positions particles crossing periodic boundaries
 
-  particle_apply_periodic_update_  (nl,dpx,dpy,dpz,particle_list);
+  particle_apply_periodic_update_  (*nl,particle_list,refresh);
 
-  // 4. SEND PARTICLE DATA TO NEIGHBORS
-
-  particle_send_(nl,index_list,particle_list);
-
-  // delete neighbor particle objects
-  for (int il=0; il<nl; il++) {
-    ParticleData * pd = particle_list[il];
-    delete pd;
-  }
 }
 
 //----------------------------------------------------------------------
 
 int Block::particle_create_array_neighbors_
 (Refresh * refresh, 
- double * dpx, double * dpy, double *dpz,
  ParticleData * particle_array[],
  ParticleData * particle_list[],
  Index index_list[])
@@ -378,15 +374,14 @@ int Block::particle_create_array_neighbors_
 
     ParticleData * pd = new ParticleData;
     ParticleDescr * p_descr = simulation() -> particle_descr();
+#ifdef DEBUG_REFRESH
+    CkPrintf ("%d %p DEBUG particle_create_array_neighbors\n",
+	      CkMyPe(),pd);fflush(stdout);
+#endif
     pd->allocate(p_descr);
 
     particle_list[il] = pd;
     index_list[il] = it_neighbor.index();
-
-    // ... compute position updates for particles crossing periodic boundaries
-
-    particle_determine_periodic_update_
-      (index_lower,index_upper,&dpx[il],&dpy[il],&dpz[il]);
 
     ++ il;
 
@@ -408,7 +403,6 @@ void Block::particle_determine_periodic_update_
 (int * index_lower, int * index_upper,
  double *dpx, double *dpy, double *dpz)
 {
-
   //     ... domain extents
   double dxm,dym,dzm;
   double dxp,dyp,dzp;
@@ -446,14 +440,57 @@ void Block::particle_determine_periodic_update_
 //----------------------------------------------------------------------
 
 void Block::particle_apply_periodic_update_
-(int nl,double * dpx,double * dpy, double * dpz, ParticleData * particle_list[])
+(int nl, ParticleData * particle_list[], Refresh * refresh)
 {
 
   const int rank = this->rank();
+  const int level = this->level();
+  const int min_face_rank = refresh->min_face_rank();
+
+  double dpx[nl],dpy[nl],dpz[nl];
+
+  for (int i=0; i<nl; i++) {
+    dpx[i]=0.0;
+    dpy[i]=0.0;
+    dpz[i]=0.0; 
+  }
+
+  // Compute position updates for particles crossing periodic boundaries
+
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+
+  int il=0;
+
+  while (it_neighbor.next()) {
+
+    const int level_face = it_neighbor.face_level();
+
+    Index index_neighbor = it_neighbor.index();
+
+    int if3[3],ic3[3];
+    it_neighbor.face (if3);
+    it_neighbor.child(ic3);
+
+    const int refresh_type = 
+      (level_face == level - 1) ? refresh_coarse :
+      (level_face == level)     ? refresh_same :
+      (level_face == level + 1) ? refresh_fine : refresh_unknown;
+
+    int index_lower[3] = {0,0,0};
+    int index_upper[3] = {1,1,1};
+    refresh->index_limits (rank,refresh_type,if3,ic3,index_lower,index_upper);
+
+    // ASSERT: il < nl
+    particle_determine_periodic_update_
+      (index_lower,index_upper,&dpx[il],&dpy[il],&dpz[il]);
+
+    il++;
+
+  }
 
   ParticleDescr * p_descr = simulation() -> particle_descr();
 
-  // ... loop over particle list not 4x4x4 array to prevent multiple updates
+  // Apply the updates to the list of particles
 
   for (int il=0; il<nl; il++) {
 
@@ -569,15 +606,15 @@ void Block::particle_scatter_neighbors_
 	  printf ("xm ym zm %f %f %f\n",xm,ym,zm);
 	  printf ("xp yp zp %f %f %f\n",xp,yp,zp);
 	  fflush(stdout);
-	  ASSERT1 ("Block::refresh_load_particle_faces_",
+	  ASSERT1 ("Block::particle_scatter_neighbors_",
 		   "particle data index ix = %d out of bounds",
 		   ix,(0 <= ix && ix < 4));
 	}
-	ASSERT1 ("Block::refresh_load_particle_faces_",
+	ASSERT1 ("Block::particle_scatter_neighbors_",
 		 "particle data index iy = %d out of bounds",
 		 iy,(0 <= iy && iy < 4));
 	fflush(stdout);
-	ASSERT1 ("Block::refresh_load_particle_faces_",
+	ASSERT1 ("Block::particle_scatter_neighbors_",
 		 "particle data index iz = %d out of bounds",
 		 iz,(0 <= iz && iz < 4));
 	fflush(stdout);
@@ -603,6 +640,7 @@ void Block::particle_scatter_neighbors_
 void Block::particle_send_
 (int nl,Index index_list[], ParticleData * particle_list[])
 {
+
   ParticleDescr * p_descr = simulation() -> particle_descr();
 
   for (int il=0; il<nl; il++) {
@@ -611,6 +649,26 @@ void Block::particle_send_
     ParticleData * p_data = particle_list[il];
     Particle particle_send (p_descr,p_data);
     
+#ifdef NEW_REFRESH
+
+#ifdef DEBUG_REFRESH
+    printf ("%d %p DEBUG num_particles = %d\n",
+	    CkMyPe(),p_data,p_data?p_data->num_particles(p_descr):0);
+    fflush(stdout);
+#endif
+    if (p_data && p_data->num_particles(p_descr)>0) {
+
+#ifdef DEBUG_REFRESH
+      printf ("%d %p DEBUG Calling p_refresh_store for particle\n",
+	      CkMyPe(),p_data);fflush(stdout);
+#endif
+      
+      DataMsg * data_msg = new DataMsg;
+      data_msg ->set_particle_data(p_data);
+      thisProxy[index].p_refresh_store (data_msg);
+    }
+
+#else
     const int nt = particle_send.num_types();
 
     for (int it=0; it<nt; it++) {
@@ -632,6 +690,7 @@ void Block::particle_send_
 	thisProxy[index].p_refresh_store_particle_face (n,np,a,it);
       }
     }
+#endif
     
   }
 }

@@ -458,7 +458,11 @@ protected:
   /// Pack field face data into arrays and send to neighbors
   void refresh_load_field_faces_ (Refresh * refresh);
   /// Pack particle type data into arrays and send to neighbors
-  void refresh_load_particle_faces_ (Refresh * refresh, bool interior = false);
+  void load_particle_faces_ (int npa, int * nl,
+			     ParticleData * particle_list[],
+			     ParticleData * particle_array[],
+			     Index index_list[],
+			     Refresh * refresh, bool interior = false);
 
   void refresh_load_field_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
@@ -480,7 +484,6 @@ protected:
   /// particle_determine_periodic_update_
   int particle_create_array_neighbors_
   (Refresh * refresh,
-   double * dpx, double * dpy, double *dpz,
    ParticleData * particle_array[],
    ParticleData * particle_list[],
    Index index_list[]);
@@ -490,11 +493,10 @@ protected:
   void particle_determine_periodic_update_ 
   (int * index_lower, int * index_upper, double * dpx, double * dpy, double * dpz);
   void particle_apply_periodic_update_
-  ( int nl, double * dpx, double * dpy, double * dpz,
-    ParticleData * particle_list[]);
+  ( int nl, ParticleData * particle_list[], Refresh * refresh);
 
-  /// Scatter particles of given types in type_list, to appropriate particle_array
-  /// ParticleData elements
+  /// Scatter particles of given types in type_list, to appropriate
+  /// particle_array ParticleData elements
   void particle_scatter_neighbors_
   (int npa, ParticleData * particle_array[],
    std::vector<int> & type_list, Particle particle);
