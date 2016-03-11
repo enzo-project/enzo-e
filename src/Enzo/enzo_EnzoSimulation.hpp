@@ -9,6 +9,8 @@
 #ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
 #define ENZO_ENZO_SIMULATION_CHARM_HPP
 
+#include "charm++.h"
+
 class EnzoSimulation : public Simulation
 			    
 {
@@ -36,6 +38,24 @@ public: // functions
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
+  /// Barrier after constructor to ensure all EnzoSimulation objects created
+  void r_startup_begun (CkReductionMsg *);
+
+  /// Read parameter file one process at a time
+  void p_read_parameters()
+  { 
+    read_parameters_(); 
+  }
+private:
+  void read_parameters_();
+public:
+
+  /// Barrier after parameters read to synchronize before initializing 
+  void r_startup_finished (CkReductionMsg *);
+
+
+public: // virtual functions
 
   /// Initialize the Enzo Simulation
   virtual void initialize() throw();

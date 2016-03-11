@@ -307,8 +307,6 @@ void Block::load_particle_faces_ (int npa, int * nl,
 
   TRACE_REFRESH("refresh_load_particle_faces()");
 
-  const int rank = this->rank();
-
   // ... arrays for updating positions of particles that cross
   // periodic boundaries
 
@@ -464,8 +462,6 @@ void Block::particle_apply_periodic_update_
   while (it_neighbor.next()) {
 
     const int level_face = it_neighbor.face_level();
-
-    Index index_neighbor = it_neighbor.index();
 
     int if3[3],ic3[3];
     it_neighbor.face (if3);

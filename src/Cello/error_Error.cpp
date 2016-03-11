@@ -36,10 +36,10 @@ extern void m2_
   Monitor * monitor = Monitor::instance();
 
   // Override Monitor::is_active() when output is to stderr
-  bool save_active = true;
+  int save_mode = monitor_mode_all;
   if (fp == stderr) {
-    save_active = monitor->is_active();
-    monitor->set_active(true);
+    save_mode = monitor->mode();
+    monitor->set_mode(monitor_mode_all);
   }
   std::string file_str = file;
   if (strlen(file)>0) {
@@ -55,7 +55,7 @@ extern void m2_
   if (strlen(message)  > 0) monitor->write (fp,type,"%s",buffer);
 
   if (fp == stderr) {
-    monitor->set_active(save_active);
+    monitor->set_mode(save_mode);
   }
 
   if (strcmp(type,"ERROR") == 0)

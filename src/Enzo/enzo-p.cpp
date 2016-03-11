@@ -40,6 +40,7 @@
 
 //----------------------------------------------------------------------
 
+extern CProxy_EnzoSimulation proxy_enzo_simulation;
 extern CProxy_Simulation proxy_simulation;
 
 //----------------------------------------------------------------------
@@ -70,7 +71,7 @@ PARALLEL_MAIN_BEGIN
   // Initialize Monitor
 
   monitor_ = Monitor::instance();
-  monitor_->set_active (ip == 0);
+  monitor_->set_mode (monitor_mode_root);
   monitor_->header();
   monitor_->print ("","BEGIN ENZO-P");
 
@@ -88,7 +89,7 @@ PARALLEL_MAIN_BEGIN
   // ENTRY: #1 Main::Main() -> EnzoSimulation::EnzoSimulation()
   // ENTRY: create
   // --------------------------------------------------
-  proxy_simulation = CProxy_EnzoSimulation::ckNew
+  proxy_simulation = proxy_enzo_simulation = CProxy_EnzoSimulation::ckNew
     (parameter_file, strlen(parameter_file)+1);
   // --------------------------------------------------
 

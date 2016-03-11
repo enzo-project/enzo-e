@@ -21,6 +21,7 @@ libs_fortran    = ['gfortran']
 home = os.getenv('HOME')
 
 charm_path = os.getenv('CHARM_HOME')
+
 if charm_path is None:
 	if home is not None:
 		if os.path.isdir(home + '/Charm/charm'):
@@ -41,7 +42,7 @@ if charm_path is None:
 		else:
 			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
 
-papi_path    = '/usr/local'
+# papi_path    = '/usr/local'
 
 hdf5_path = os.getenv('HDF5_HOME')
 if hdf5_path is None:

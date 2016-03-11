@@ -167,7 +167,6 @@ void DataMsg::update (Data * data)
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr    *    field_descr = simulation->   field_descr();
-  ParticleDescr * particle_descr = simulation->particle_descr();
  
   Field field_dst = data->field();
  

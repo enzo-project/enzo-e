@@ -86,10 +86,15 @@ module enzo {
 
   extern module mesh;
 
-  group [migratable] EnzoSimulation : Simulation {
-    entry EnzoSimulation // [ESC0]
-      (const char filename[n], int n);
+  readonly CProxy_EnzoSimulation proxy_enzo_simulation;
 
+  group [migratable] EnzoSimulation : Simulation {
+
+    entry EnzoSimulation (const char filename[n], int n);
+
+    entry void r_startup_begun (CkReductionMsg *);
+    entry void r_startup_finished (CkReductionMsg *);
+    entry void p_read_parameters();
   }
 
   array[Index] EnzoBlock : Block {

@@ -14,6 +14,7 @@
 
 #include "simulation.hpp"
 
+CProxy_EnzoSimulation proxy_enzo_simulation;
 
 //----------------------------------------------------------------------
 
@@ -23,14 +24,13 @@ EnzoSimulation::EnzoSimulation
  int                n) throw ()
   : Simulation(parameter_file, n)
 {
+  // Synchronize to ensure all EnzoSimulation objects exist before
+  // reading parameters
 
-  TRACE("EnzoSimulation::EnzoSimulation()");
+  CkCallback callback (CkIndex_EnzoSimulation::r_startup_begun(NULL),
+			 thisProxy);
+  contribute(callback);
 
-  problem_ = new EnzoProblem;
-
-  initialize_config_();
-
-  initialize();
 }
 
 //----------------------------------------------------------------------
@@ -57,6 +57,53 @@ void EnzoSimulation::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
+void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
+{
+  delete msg;
+
+  // Serialize reading parameters within each logical node
+  if (CkMyRank() == 0) {
+    read_parameters_();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::read_parameters_()
+{
+  const int ipn = CkMyRank();
+  const int npn = CkNodeSize(ipn);
+
+  // Read parameter file
+  parameters_ = new Parameters(parameter_file_.c_str(),monitor_);
+
+  // Then tell next Simulation object in node to read parameter file
+  if (((ipn + 1) % npn) != 0) {
+    proxy_enzo_simulation[CkMyPe()+1].p_read_parameters();
+  }
+
+  // Everybody synchronizes afterwards with barrier
+
+  CkCallback callback (CkIndex_EnzoSimulation::r_startup_finished(NULL),
+			 thisProxy);
+  contribute(callback);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
+{
+  delete msg;
+
+  problem_ = new EnzoProblem;
+
+  initialize_config_();
+
+  initialize();
+}
+
+//----------------------------------------------------------------------
+
 void EnzoSimulation::initialize_config_() throw()
 {
   if (config_ == NULL) {
@@ -71,7 +118,6 @@ void EnzoSimulation::initialize_config_() throw()
 
 void EnzoSimulation::initialize() throw()
 {
-
 
   // Call initialize() on base Simulation class
   Simulation::initialize();

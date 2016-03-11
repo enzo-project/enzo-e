@@ -175,6 +175,8 @@ public: // virtual functions
   /// Return a Hierarchy factory object
   virtual const Factory * factory () const throw();
   
+  // Performance
+
   int & perf_counter(int perf_region) {return perf_count_[perf_region]; }
 
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)

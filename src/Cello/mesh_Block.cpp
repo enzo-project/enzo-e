@@ -575,8 +575,6 @@ FieldFace * Block::create_face
  std::vector<int> & field_list
  )
 {
-  Problem * problem        = simulation()->problem();
-
   FieldDescr * field_descr = simulation()->field_descr();
   FieldFace  * field_face = new FieldFace;
 

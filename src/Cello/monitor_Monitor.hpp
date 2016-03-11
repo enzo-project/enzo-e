@@ -10,6 +10,8 @@
 #ifndef MONITOR_MONITOR_HPP
 #define MONITOR_MONITOR_HPP
 
+#include "charm++.h"
+
 //----------------------------------------------------------------------
 /// @def    MONITOR_LENGTH
 /// @brief  Maximum length of monitor text output
@@ -56,7 +58,7 @@ public: // interface
 
     // // NOTE: change this function whenever attributes change
     // p |  *timer_;
-    p |  active_;
+    p |  mode_;
     p |  verbose_;
     // p |  group_default_;
     // p |  group_active_;
@@ -71,14 +73,14 @@ public: // interface
 
   /// Set whether the monitor is active for text output.  Useful for
   /// parallel, e.g. "monitor->set_active(parallel->is_root())"
-  void set_active(bool active) { active_ = active; };
+  void set_mode(int mode) { mode_ = mode; };
 
   /// Return whether monitoring is active
-  bool is_active() const throw () { return active_; };
+  bool mode() const throw () { return mode_; };
 
   /// Set whether to monitor for the given component
-  void set_active(const char * component, bool active) 
-  { group_active_[component] = active; };
+  void set_mode(const char * component, int mode) 
+  { group_mode_[component] = mode; };
 
   /// Return whether monitoring is active for this component
   bool is_active(const char *) const throw ();
@@ -102,13 +104,14 @@ public: // interface
 
 
   void set_verbose (bool verbose) 
-  { verbose_ = verbose; }
+  { 
+    if (CkMyRank() == 0) verbose_ = verbose; 
+  }
 
   bool is_verbose () const { return verbose_; }
 
   /// Print a message without format specifications to stdout
   void print_verbatim (const char * component, const char * buffer) const;
-
 
 private: // functions
 
@@ -121,8 +124,8 @@ private: // attributes
   /// Timer for keeping track of time for output
   Timer * timer_; 
 
-  /// Whether monitoring is activated.  Used for e.g. ip != 0.
-  bool active_;
+  /// Monitoring mode, either unknown, none, root, or all
+  int mode_;
 
   /// Whether verbose mode is active
   bool verbose_;
@@ -131,7 +134,7 @@ private: // attributes
   bool group_default_;
 
   /// Override default of group_active_ for specific groups
-  std::map<std::string,bool> group_active_;
+  std::map<std::string,int> group_mode_;
 
 
   //----------------------------------------------------------------------

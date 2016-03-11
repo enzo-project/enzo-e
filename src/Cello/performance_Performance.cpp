@@ -105,7 +105,7 @@ Performance::refresh_counters_() throw()
   }
 
   Memory * memory = Memory::instance();
-  
+
   counter_values_[index_time_]          = time_real_();
   counter_values_[index_bytes_]         = memory->bytes();
   counter_values_[index_bytes_high_]    = memory->bytes_high();

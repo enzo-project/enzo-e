@@ -35,13 +35,12 @@ void MethodTrace::compute ( Block * block) throw()
 
   const int it = particle.type_index("trace");
 
-  const int ia_id = particle.attribute_index(it,"id");
   const int ia_x = particle.attribute_index(it,"x");
   const int ia_y = particle.attribute_index(it,"y");
   const int ia_z = particle.attribute_index(it,"z");
 
   const int dp =  particle.stride(it,ia_x);
-  const int did =  particle.stride(it,ia_id);
+
   // get velocity field arrays
   const int rank = block->rank();
   double  * vxa = (rank >= 1) ? 
@@ -71,13 +70,11 @@ void MethodTrace::compute ( Block * block) throw()
 
   // declare particle position arrays
 
-  int64_t * ida = 0;
   float * xa = 0;
   float * ya = 0;
   float * za = 0;
 
   for (int ib=0; ib<particle.num_batches(it); ib++) {
-    ida = (int64_t *) particle.attribute_array (it,ia_id,ib);
     xa = (float *) particle.attribute_array (it,ia_x,ib);
     ya = (float *) particle.attribute_array (it,ia_y,ib);
     za = (float *) particle.attribute_array (it,ia_z,ib);

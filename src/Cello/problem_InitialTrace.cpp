@@ -76,7 +76,6 @@ void InitialTrace::enforce_block
 
   int ib=0;  // batch counter
   int ip=0;  // particle counter 
-  int iid=0; // ID counter
 
   int64_t * id = 0;
   float * xa = 0;
@@ -93,8 +92,6 @@ void InitialTrace::enforce_block
 
       for (int ix=0; ix<nx; ix+=dx_) {
 	float x = (mx>1) ? xm + (ix + 0.5)*hx : 0.0;
-
-	const int i = ix + nx*(iy + ny*iz);
 
 	// ... if new batch then update position arrays
 	if (ip % np == 0) {

@@ -18,15 +18,15 @@ Monitor Monitor::instance_; // singleton design pattern)
 
 Monitor::Monitor()
   : timer_(new Timer),
-    active_(true)
+    mode_(monitor_mode_root)
 { 
   timer_->start();
 
   // Default: always output
-  group_default_ = true;
+  group_default_ = monitor_mode_all;
 
   // turn off debugging
-  group_active_["DEBUG"] = false;
+  group_mode_["DEBUG"] = monitor_mode_none;
 }
 
 //----------------------------------------------------------------------
@@ -119,12 +119,16 @@ void Monitor::header () const
 
 bool Monitor::is_active(const char * component) const throw ()
 {
-  if (! active_) return false;
-  
-  std::map<std::string,bool>::const_iterator it_active
-    = group_active_.find(component);
+  if (mode_ == monitor_mode_none)                   
+    return false;
 
-  bool in_list = it_active != group_active_.end();
+  if (mode_ == monitor_mode_root && CkMyPe() != 0) 
+    return false;
+  
+  std::map<std::string,int>::const_iterator it_active
+    = group_mode_.find(component);
+
+  bool in_list = it_active != group_mode_.end();
 
   return in_list ? it_active->second : group_default_;
 }

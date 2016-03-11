@@ -17,10 +17,9 @@
 
 #ifdef DEBUG_ADAPT
 
-static char buffer [256];
-
 #   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
   {									\
+    char buffer [256];							\
     sprintf (buffer,"%s %s"						\
 	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d",		\
 	     MSG,name().c_str(),					\
@@ -122,9 +121,13 @@ void Block::adapt_next_()
   trace("adapt_next 3");
 
 #ifdef DEBUG_ADAPT
-  if (level() != level_next_) {
-    sprintf (buffer,"is leaf %d level %d -> %d",is_leaf(),level(),level_next_);
-    index_.print(buffer,-1,2,false,simulation());
+  {
+    char buffer[255];
+    if (level() != level_next_) {
+      sprintf (buffer,"is leaf %d level %d -> %d",
+	       is_leaf(),level(),level_next_);
+      index_.print(buffer,-1,2,false,simulation());
+    }
   }
 #endif
 
@@ -398,16 +401,19 @@ void Block::p_adapt_recv_level
   const bool skip_face_update = ! (level_face_new > face_level_last_[ICF3(ic3,if3)]);
 
 #ifdef DEBUG_ADAPT
-  sprintf (buffer,"%s %s"
-	   " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d  "			
-	   "%d <- %d [%d] %s",					
-	   "recv",name().c_str(),
-	   level(), level_next_,
-	   if3[0],if3[1],if3[2],				
-	   ic3[0],ic3[1],ic3[2],				
-	   level_face_curr,level_face_new,face_level_last_[ICF3(ic3,if3)],
-	   skip_face_update ? "SKIP" : "");
-  index_.print(buffer,-1,2,false,simulation());		
+  {
+    char buffer [255];
+    sprintf (buffer,"%s %s"
+	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d  "			
+	     "%d <- %d [%d] %s",					
+	     "recv",name().c_str(),
+	     level(), level_next_,
+	     if3[0],if3[1],if3[2],				
+	     ic3[0],ic3[1],ic3[2],				
+	     level_face_curr,level_face_new,face_level_last_[ICF3(ic3,if3)],
+	     skip_face_update ? "SKIP" : "");
+    index_.print(buffer,-1,2,false,simulation());		
+  }
 #endif
 
   if (skip_face_update) return;

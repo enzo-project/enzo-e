@@ -11,12 +11,6 @@
 
 // #define DEBUG_FIELD_FACE
 
-#ifdef DEBUG_FIELD_FACE
-#   define TRACE(MSG) CkPrintf ("%s:%d %s\n",__FILE__,__LINE__,MSG); fflush(stdout)
-#else
-#   define TRACE(MSG) /* empty */
-#endif
-
 enum enum_op_type {
   op_unknown,
   op_load,
@@ -474,20 +468,15 @@ char * FieldFace::load_data (char * buffer)
   CkPrintf ("load_data\n"); fflush(stdout);
 #endif
 
-  TRACE("");
-
 #ifdef DEBUG_FIELD_FACE
   CkPrintf ("%s:%d load_data buffer %p\n",__FILE__,__LINE__,buffer);
   fflush(stdout);
 #endif
 
-  TRACE("");
-  
   char * p = buffer;
   int n;
   int *pi = (int *)p;
 
-  TRACE("");
 #ifdef DEBUG_FIELD_FACE
   CkPrintf ("p = %p\n",p);
   CkPrintf ("p[0] = %d\n",pi[0]);
@@ -495,32 +484,25 @@ char * FieldFace::load_data (char * buffer)
   memcpy(face_,p, n=3*sizeof(int));
   p+=n;
 
-  TRACE("");
   memcpy(ghost_,p,n=3*sizeof(bool));
   p+=n;
 
-  TRACE("");
   memcpy(child_,p,n=3*sizeof(int));
   p+=n;
 
-  TRACE("");
   memcpy(&refresh_type_,p,n=sizeof(int));
   p+=n;
 
   int length;
 
-  TRACE("");
   memcpy(&length,p,n=sizeof(int)); 
   p+=n;
 
-  TRACE("");
   field_list_.resize(length);
 
   memcpy(&field_list_[0],p,n=(field_list_.size()*sizeof(int)));
-  TRACE("");
   p+=n;
   
-  TRACE("");
   return p;
 }
 

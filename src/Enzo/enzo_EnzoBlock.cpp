@@ -508,7 +508,7 @@ int EnzoBlock::CosmologyComputeExpansionFactor
       if (fabs(eta-eta_old) < ETA_TOLERANCE) break;
     }
     if (i == 40) {
-      fprintf(stderr, "Case 2 -- no convergence after %"ISYM" iterations.\n", i);
+      fprintf(stderr, "Case 2 -- no convergence after %" ISYM " iterations.\n", i);
       return ENZO_FAIL;
     }
  

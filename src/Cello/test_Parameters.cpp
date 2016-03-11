@@ -554,7 +554,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Parameters");
 
-  Monitor::instance()->set_active(true);
+  Monitor::instance()->set_mode(monitor_mode_all);
 
   //----------------------------------------------------------------------
   // test parameter

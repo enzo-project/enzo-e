@@ -19,6 +19,13 @@
 #include <string>
 #include <map>
 
+enum monitor_mode {
+  monitor_mode_unknown,
+  monitor_mode_none,
+  monitor_mode_root,
+  monitor_mode_all
+};
+
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------

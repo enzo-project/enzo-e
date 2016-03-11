@@ -44,41 +44,13 @@ Simulation::Simulation
 
   monitor_ = Monitor::instance();
 #ifdef CELLO_DEBUG
-  monitor_->set_active(true);
+  monitor_->set_mode(monitor_mode_all);
 #else
-  monitor_->set_active(CkMyPe() == 0);
+  monitor_->set_mode(monitor_mode_root);
 #endif
 
-  // Read in parameters
-
-  //  if (CkMyPe() == 0) {
-    parameters_ = new Parameters(parameter_file,monitor_);
-    //  }
-    //  send_config();
 }
 
-//----------------------------------------------------------------------
-
-void Simulation::send_config()
-{
-  CkPrintf ("DEBUG %s:%d %d r_send_config\n",
-	    __FILE__,__LINE__,CkMyPe());
-
-  CkCallback callback (CkIndex_Simulation::r_recv_config(NULL),
-			 thisProxy);
-
-  contribute(callback);
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::r_recv_config(CkReductionMsg * msg)
-{
-  CkPrintf ("DEBUG %s:%d %d r_recv_config\n",
-	    __FILE__,__LINE__,CkMyPe());
-
-  delete msg;
-}
 //----------------------------------------------------------------------
 
 Simulation::Simulation()
@@ -259,7 +231,8 @@ void Simulation::initialize_config_() throw()
 void Simulation::initialize_monitor_() throw()
 {
   bool debug = config_->monitor_debug;
-  monitor_->set_active("DEBUG",debug);
+  int debug_mode = debug ? monitor_mode_all : monitor_mode_none;
+  monitor_->set_mode("DEBUG",debug_mode);
   monitor_->set_verbose(config_->monitor_verbose);
 }
 

@@ -170,7 +170,7 @@ if not env.GetOption('clean'):
 
      env = configure.Finish()
 
-# use_papi = 0
+use_papi = 0
 
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS

@@ -58,7 +58,7 @@ protected: // attributes
   /// Put a particle in every cell ix, iy such that (ix%dx_==0) && (iy%dy_ == 0) && (iz%dz_ == 0)
   int dx_,dy_,dz_;
 
-  /// Next available particle ID, where id0_ = CkMyPe() + k * CkNumPe()
+  /// Next available particle ID, where id0_ = CkMyPe() + k * CkNumPes()
   static int id0_;
 };
 

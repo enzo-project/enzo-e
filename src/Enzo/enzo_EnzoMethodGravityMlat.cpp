@@ -223,11 +223,11 @@
 
 #define MG_VERBOSE(FUNCTION)				\
   Monitor * monitor = enzo_block->simulation()->monitor();	\
-  monitor->verbose(stdout,"Method", "%s "FUNCTION,enzo_block->name().c_str());
+  monitor->verbose(stdout,"Method", "%s " FUNCTION,enzo_block->name().c_str());
 
 #define VERBOSE(FUNCTION)				\
   Monitor * monitor = simulation()->monitor();	\
-  monitor->verbose(stdout,"Method", "%s "FUNCTION,name().c_str());
+  monitor->verbose(stdout,"Method", "%s " FUNCTION,name().c_str());
 
 //----------------------------------------------------------------------
 
