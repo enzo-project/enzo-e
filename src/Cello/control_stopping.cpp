@@ -211,6 +211,22 @@ void Block::exit_()
 {
   TRACE_STOPPING("Block::exit_");
   if (index_.is_root()) {
+    if (DataMsgRefresh::counter != 0) {
+      WARNING1 ("Block::exit_()","DataMsgRefresh::counter = %ld != 0",
+		DataMsgRefresh::counter);
+    }
+    if (DataMsgRefine::counter != 0) {
+      WARNING1 ("Block::exit_()","DataMsgRefine::counter = %ld != 0",
+		DataMsgRefine::counter);
+    }
+    if (DataMsgCoarsen::counter != 0) {
+      WARNING1 ("Block::exit_()","DataMsgCoarsen::counter = %ld != 0",
+		DataMsgCoarsen::counter);
+    }
+    if (FieldFace::counter != 0) {
+      WARNING1 ("Block::exit_()","FieldFace::counter = %ld != 0",
+		FieldFace::counter);
+    }
     proxy_main.p_exit(1);
   }
 }

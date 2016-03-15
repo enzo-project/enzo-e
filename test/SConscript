@@ -248,11 +248,10 @@ env.PngToGif ("method_heat-8.gif", "test_method_heat-8.unit", \
 # serial restart
 #----------------------------------------------------------------------
 
-
 checkpoint_ppm_1 = env_rm_png.RunSerial (
-   'test_checkpoint_ppm-1.unit',
-   bin_path + '/enzo-p', 
-   ARGS='input/checkpoint_ppm-1.in')
+  'test_checkpoint_ppm-1.unit',
+  bin_path + '/enzo-p', 
+  ARGS='input/checkpoint_ppm-1.in')
 
 restart_ppm_1 = env_mv_out.RunSerial (
    'test_restart_ppm-1.unit',
@@ -271,6 +270,7 @@ Clean(restart_ppm_1,
 env.Requires(restart_ppm_1,checkpoint_ppm_1)
 
 # parallel restart
+
 
 checkpoint_ppm_8 = env_rm_png.RunParallel (
    'test_checkpoint_ppm-8.unit',

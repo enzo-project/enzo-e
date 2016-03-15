@@ -233,7 +233,9 @@ void Hierarchy::create_forest
   block_array_ = new CProxy_Block;
 
   (*block_array_) = factory_->create_block_array
-    (blocking_[0],blocking_[1],blocking_[2],
+    (
+     NULL,
+     blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
      num_field_blocks,
      testing);
@@ -264,7 +266,8 @@ void Hierarchy::create_subforest
   TRACE("Allocating sub-block_array_");
 
   factory_->create_subblock_array
-    (block_array_,min_level,
+    (NULL,
+     block_array_,min_level,
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
      num_field_blocks,

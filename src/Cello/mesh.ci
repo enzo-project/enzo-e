@@ -46,9 +46,13 @@ module mesh {
   };
 
   message DataMsg;
+  message DataMsgCoarsen;
+  message DataMsgRefresh;
+  message DataMsgRefine;
 
   array[Index] Block {
 
+    entry Block     (DataMsgRefine * msg);
 
     entry Block
       (Index index,
@@ -117,11 +121,8 @@ module mesh {
     // *** CONTROL ***
     //--------------------------------------------------
 
-//// #ifdef NEW_NEIGHBOR
-    entry [expedited] void p_control_sync_count ( int entry_point, int id, int count = 0);
-////#else
-///    entry [expedited] void p_control_sync_count ( int phase, int count = 0);
-////#endif
+    entry [expedited] void p_control_sync_count 
+      ( int entry_point, int id, int count = 0);
 
     //--------------------------------------------------
     // *** ADAPT ***
@@ -156,7 +157,7 @@ module mesh {
     // *** REFRESH
     //--------------------------------------------------
 
-    entry void p_refresh_store (DataMsg * msg);
+    entry void p_refresh_store (DataMsgRefresh * msg);
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 

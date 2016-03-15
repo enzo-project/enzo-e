@@ -18,7 +18,9 @@
 #endif
 
 class Data;
-class DataMsg;
+class DataMsgRefresh;
+class DataMsgRefine;
+class DataMsgCoarsen;
 class Factory;
 class FieldDescr;
 class FieldFace;
@@ -47,7 +49,9 @@ public: // interface
 
   /// create a Block with the given block count, lower extent, block
   /// size, and number of field blocks
-  Block
+  Block ( DataMsgRefine * msg ) throw();
+
+  Block 
   (
    Index index,
    int nx, int ny, int nz,
@@ -85,7 +89,7 @@ public: // interface
   Block (CkMigrateMessage *m);
 
   /// CHARM pupper
-  void pup(PUP::er &p);
+  virtual void pup(PUP::er &p);
 
   //----------------------------------------------------------------------
   // ACCESS METHODS
@@ -443,7 +447,7 @@ public:
   void p_refresh_store_particle_face (int n, int np, char a[],  int it) 
   { refresh_store_particle_face_(n,np,a, it); }
 
-  void p_refresh_store (DataMsg * msg);
+  void p_refresh_store (DataMsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char a[],int ic3[3]);

@@ -17,18 +17,18 @@ class FieldFace {
 
 public: // interface
 
+  static long counter;
+
   /// Constructor of uninitialized FieldFace
 
   FieldFace () throw()
-  { 
-    // CkPrintf ("%d DEBUG FieldFace::FieldFace() %p\n",CkMyPe(),this); 
-  }
+  {  ++counter; }
 
   /// Constructor of initialized FieldFace
   FieldFace (const Field & field) throw();
      
   /// Destructor
-  virtual ~FieldFace() throw();
+  ~FieldFace() throw();
 
   /// Copy constructor
   FieldFace(const FieldFace & FieldFace) throw();

@@ -11,6 +11,8 @@
 
 // #define DEBUG_FIELD_FACE
 
+long FieldFace::counter = 0;
+
 enum enum_op_type {
   op_unknown,
   op_load,
@@ -27,6 +29,7 @@ FieldFace::FieldFace
   CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
 
+  counter++;
   for (int i=0; i<3; i++) {
     ghost_[i] = false;
     face_[i]  = 0;
@@ -38,6 +41,7 @@ FieldFace::FieldFace
 
 FieldFace::~FieldFace() throw ()
 {
+  counter--;
 #ifdef DEBUG_FIELD_FACE
   CkPrintf ("%d DEBUG FieldFace::~FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
@@ -47,6 +51,7 @@ FieldFace::~FieldFace() throw ()
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
 {
+  counter++;
 #ifdef DEBUG_FIELD_FACE
   CkPrintf ("%d DEBUG FieldFace::FieldFace(FieldFace) %p\n",CkMyPe(),this);
 #endif

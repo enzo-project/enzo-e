@@ -57,7 +57,7 @@ public: // interface
   virtual ~Simulation() throw();
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  virtual void pup (PUP::er &p);
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS

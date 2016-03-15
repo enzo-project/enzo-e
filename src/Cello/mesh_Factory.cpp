@@ -54,6 +54,7 @@ IoParticleData * Factory::create_io_particle_data
 
 CProxy_Block Factory::create_block_array
 (
+ DataMsgRefine * msg,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int num_field_data,
@@ -94,15 +95,21 @@ CProxy_Block Factory::create_block_array
 	// ENTRY: #2 Factory::create_block_array() -> Block::Block()
 	// ENTRY: level == 0 block array insert
 	// --------------------------------------------------
+
+#ifdef NEW_REFRESH_REFINE	
+	proxy_block[index].insert (msg);
+#else
 	proxy_block[index].insert
-	  (index,
-	   nx,ny,nz,
-	   num_field_data,
-	   count_adapt = 0,
-	   cycle,time,dt,
-	   0,NULL,refresh_same,
-	   num_face_level, face_level,
-	   testing);
+	(index,
+	 nx,ny,nz,
+	 num_field_data,
+	 count_adapt = 0,
+	 cycle,time,dt,
+	 0,NULL,refresh_same,
+	 num_face_level, face_level,
+	 testing);
+#endif	   
+
 	// --------------------------------------------------
 
       }
@@ -116,7 +123,9 @@ CProxy_Block Factory::create_block_array
 //----------------------------------------------------------------------
 
 void Factory::create_subblock_array
-(CProxy_Block * block_array,
+(
+ DataMsgRefine * msg,
+ CProxy_Block * block_array,
  int min_level,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -156,7 +165,10 @@ void Factory::create_subblock_array
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-	  (*block_array)[index].insert
+#ifdef NEW_REFRESH_REFINE
+	  (*block_array)[index].insert (msg);
+#else
+	  (*block_array)[index].insert 
 	    (index,
 	     nx,ny,nz,
 	     num_field_blocks,
@@ -165,6 +177,8 @@ void Factory::create_subblock_array
 	     0,NULL,refresh_same,
 	     num_face_level, face_level,
 	     testing);
+#endif
+
 	  // --------------------------------------------------
 
 	}
@@ -177,6 +191,7 @@ void Factory::create_subblock_array
 
 Block * Factory::create_block
 (
+ DataMsgRefine * msg,
  CProxy_Block * block_array,
  Index index,
  int nx, int ny, int nz,
@@ -198,9 +213,11 @@ Block * Factory::create_block
   // ENTRY: #3 Factory::create_block() -> Block::Block()
   // ENTRY: level > 0 block array insert
   // --------------------------------------------------
+#ifdef NEW_REFRESH_REFINE
+  (*block_array)[index].insert (msg);
+#else
   (*block_array)[index].insert
-    (
-     index,
+    (index,
      nx,ny,nz,
      num_field_data,
      count_adapt,
@@ -208,6 +225,8 @@ Block * Factory::create_block
      narray, array,refresh_type,
      num_face_level, face_level,
      testing);
+#endif
+
   // --------------------------------------------------
 
   Block * block = (*block_array)[index].ckLocal();

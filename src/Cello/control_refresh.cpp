@@ -161,7 +161,7 @@ void Block::refresh_load_field_face_
 
 #ifdef NEW_REFRESH
 
-  DataMsg * data_msg = new DataMsg;
+  DataMsgRefresh * data_msg = new DataMsgRefresh;
 
   data_msg -> set_field_face (field_face);
   data_msg -> set_field_data (data()->field_data());
@@ -204,7 +204,7 @@ void Block::refresh_load_field_face_
 //----------------------------------------------------------------------
 
 
-void Block::p_refresh_store (DataMsg * msg)
+void Block::p_refresh_store (DataMsgRefresh * msg)
 {
 
 #ifdef NEW_REFRESH
@@ -215,6 +215,7 @@ void Block::p_refresh_store (DataMsg * msg)
   if (msg->field_face()) msg->field_face()->print("called store");
 #endif
   msg->update(data());
+  delete msg;
 
 #else 
   CkPrintf ("p_refresh_store() called with new_refresh = 0\n");
@@ -505,11 +506,6 @@ void Block::particle_apply_periodic_update_
 	const int nb = particle_neighbor.num_batches(it);
 	for (int ib=0; ib<nb; ib++) {
 
-	  const int np = particle_neighbor.num_particles(it,ib);
-	  double xa[np],ya[np],za[np];
-
-	  particle_neighbor.position(it,ib,xa,ya,za);
-
 	  particle_neighbor.position_update (it,ib,dpx[il],dpy[il],dpz[il]);
 
 	}
@@ -659,7 +655,7 @@ void Block::particle_send_
 	      CkMyPe(),p_data);fflush(stdout);
 #endif
       
-      DataMsg * data_msg = new DataMsg;
+      DataMsgRefresh * data_msg = new DataMsgRefresh;
       data_msg ->set_particle_data(p_data);
       thisProxy[index].p_refresh_store (data_msg);
     }

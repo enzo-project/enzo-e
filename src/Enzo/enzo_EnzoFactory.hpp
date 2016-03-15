@@ -34,7 +34,9 @@ public: // interface
 
   /// Create a new CHARM++ Block array [abstract factory design pattern]
   virtual CProxy_Block create_block_array
-  (int nbx, int nby, int nbz,
+  (
+   DataMsgRefine * msg,
+   int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks,
    bool testing=false) const throw();
@@ -44,7 +46,9 @@ public: // interface
   ///  minimal level min_level < 0
   /// [abstract factory design pattern] 
   virtual void create_subblock_array
-  (CProxy_Block * block_array,
+  (
+   DataMsgRefine * msg,
+   CProxy_Block * block_array,
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
@@ -54,6 +58,7 @@ public: // interface
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block
   (
+   DataMsgRefine * msg,
    CProxy_Block * block_array,
    Index index,
    int nx, int ny, int nz,
@@ -63,7 +68,8 @@ public: // interface
    int narray, char * array, int refresh_type,
    int num_face_level, int * face_level,
    bool testing=false,
-   Simulation * simulation = 0) const throw();
+   Simulation * simulation = 0
+) const throw();
 
 };
 

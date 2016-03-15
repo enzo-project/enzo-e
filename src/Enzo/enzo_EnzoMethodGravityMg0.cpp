@@ -651,6 +651,8 @@ void EnzoMethodGravityMg0::prolong_send_(EnzoBlock * enzo_block) throw()
     
     field_face->face_to_array (enzo_block->data()->field(),&narray,&array);
 
+    delete field_face;
+
     // Create a FieldMsg for sending data to parent
     // (note: charm messages not deleted on send; are deleted on receive)
     FieldMsg * field_message  = new (narray) FieldMsg;

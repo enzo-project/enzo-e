@@ -123,7 +123,6 @@ class Tree;
 
 // Messages
 #include "mesh_FieldMsg.hpp"
-#include "data_DataMsg.hpp"
 
 #endif /* _MESH_HPP */
 

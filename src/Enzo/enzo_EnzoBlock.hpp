@@ -108,16 +108,18 @@ public:
 public: // interface
 
   /// Initialize the EnzoBlock chare array
+  EnzoBlock ( DataMsgRefine * msg ) throw();
+
+  /// Initialize the EnzoBlock chare array
   EnzoBlock
-  (
-   Index index,
+  ( Index index,
    int nx, int ny, int nz,
    int num_field_blocks,
    int count_adapt,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
    int num_face_level, int * face_level,
-   bool testing=false) throw();
+   bool testing=false ) throw();
 
   /// Initialize an empty EnzoBlock
   EnzoBlock()  { };

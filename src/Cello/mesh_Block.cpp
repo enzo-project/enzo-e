@@ -40,8 +40,41 @@ const char * phase_name[] = {
 
 //----------------------------------------------------------------------
 
-Block::Block
-(
+Block::Block ( DataMsgRefine * msg ) throw ()
+  // :
+  // data_(NULL),
+  // child_data_(NULL),
+  // index_(index),
+  // level_next_(0),
+  // cycle_(cycle),
+  // time_(time),
+  // dt_(dt),
+  // stop_(false),
+  // index_initial_(0),
+  // children_(),
+  // sync_coarsen_(),
+  // count_sync_(),
+  // max_sync_(),
+  // face_level_curr_(),
+  // face_level_next_(),
+  // child_face_level_curr_(),
+  // child_face_level_next_(),
+  // count_coarsen_(0),
+  // adapt_step_(num_adapt_steps),
+  // adapt_(adapt_unknown),
+  // coarsened_(false),
+  // delete_(false),
+  // is_leaf_(true),
+  // age_(0),
+  // face_level_last_(),
+  // name_(name()),
+  // index_method_(-1)
+{
+}
+
+//----------------------------------------------------------------------
+
+  Block::Block (
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,
@@ -80,6 +113,7 @@ Block::Block
   name_(name()),
   index_method_(-1)
 {
+
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = true;
 
@@ -171,13 +205,17 @@ Block::Block
   if (level > 0) index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
 
   if (narray != 0) {
-    
+
+    // Create field face of refined data from parent
     int if3[3] = {0,0,0};
     bool lg3[3] = {true,true,true};
     std::vector<int> field_list;
     FieldFace * field_face = create_face
       (if3, ic3, lg3, refresh_fine, field_list);
+
+    // Copy refined field data
     field_face -> array_to_face (array, data()->field());
+
     delete field_face;
 
   }

@@ -165,6 +165,17 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 //----------------------------------------------------------------------
 
 EnzoBlock::EnzoBlock
+( DataMsgRefine * msg ) throw()
+  : Block 
+    ( msg )
+{
+  initialize_enzo_();
+  initialize();
+}
+
+//----------------------------------------------------------------------
+
+EnzoBlock::EnzoBlock
 (
  Index index,
  int nx, int ny, int nz,
@@ -184,7 +195,8 @@ EnzoBlock::EnzoBlock
      cycle, time, dt,
      narray,  array, refresh_type,
      num_face_level, face_level,
-     testing),
+     testing
+     ),
     dt(dt),
     SubgridFluxes(0)
 {

@@ -13,7 +13,9 @@ import socket
 # to be temporary
 #----------------------------------------------------------------------
 
-new_refresh = 0
+new_refresh         = 0	
+new_refresh_coarsen = 0
+new_refresh_refine  = 0
 
 #----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements
@@ -233,6 +235,8 @@ papi_path           = 'papi_path_not_set'
 # Debugging defines
 
 define_new_refresh =  ['NEW_REFRESH']
+define_new_refresh_refine  =  ['NEW_REFRESH_REFINE']
+define_new_refresh_coarsen =  ['NEW_REFRESH_COARSEN']
 define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
@@ -356,6 +360,8 @@ if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
 if (new_refresh != 0):   defines = defines + define_new_refresh
+if (new_refresh_refine != 0):   defines = defines + define_new_refresh_refine
+if (new_refresh_coarsen != 0): defines = defines + define_new_refresh_coarsen
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm

@@ -287,13 +287,30 @@ void Block::adapt_refine_()
 
     if ( ! is_child_(index_child) ) {
 
-      // Prolong data
+      // Create FieldFace for interpolating field data to child ic3[]
 
       int if3[3] = {0,0,0};
       bool lg3[3] = {true,true,true};
       
       FieldFace * field_face = create_face 
 	(if3,ic3,lg3, refresh_fine,field_list);
+
+      DataMsgRefine * data_msg = NULL;
+
+#ifdef NEW_REFRESH_REFINE
+
+      // Create data message object to send
+
+      DataMsgRefine * data_msg = new DataMsgRefine;
+
+      data_msg -> set_field_face (field_face);
+      data_msg -> set_field_data (data()->field_data());
+      data_msg -> set_particle_data (NULL);  // particles sold separately
+
+#endif
+
+      // Create array of interpolated data to send to child
+      
       int narray = 0;  
       char * array = 0;
       field_face->face_to_array (data()->field(),&narray,&array);
@@ -304,10 +321,12 @@ void Block::adapt_refine_()
 
       const Factory * factory = simulation()->factory();
 
-      // Create child block
+      // Create the child object with interpolated data
 
       factory->create_block 
-	(&thisProxy, index_child,
+	(
+	 data_msg,
+	 &thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_data,
 	 adapt_step_,
@@ -630,33 +649,45 @@ void Block::adapt_coarsen_()
     monitor->print("Adapt",buffer);
   }
 
-  Index index_parent = index_.index_parent();
-  int ic3[3] = {1,1,1};
-  index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
-
-  // copy block data
-  int if3[3] = {0,0,0};
-  bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
-  FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_coarse, field_list);
-  int narray; 
-  char * array;
-  field_face->face_to_array (data()->field(), &narray, &array);
-  delete field_face;
-
   // copy face levels
   int nf = face_level_curr_.size();
   int face_level_curr[nf];
   for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
 
-  // send child data to parent
+  // Create FieldFace for coarsening field data to parent
+
+  int ic3[3];
+  index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
+  int if3[3] = {0,0,0};
+  bool lg3[3] = {false,false,false};
+  std::vector<int> field_list;
+  FieldFace * field_face = create_face
+    (if3, ic3, lg3, refresh_coarse, field_list);
+
+#ifdef NEW_REFRESH_COARSEN
+
+#else
+
+  // Create array of coarsened data to send to parent
+
+  int narray; 
+  char * array;
+  field_face->face_to_array (data()->field(), &narray, &array);
+  delete field_face;
+
+  // send coarsened data to parent
+
+  const Index index_parent = index_.index_parent();
+
   // --------------------------------------------------
   thisProxy[index_parent].p_adapt_recv_child
     (ic3, narray,array, nf,face_level_curr);
   // --------------------------------------------------
 
   delete [] array;
+
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -668,16 +699,25 @@ void Block::p_adapt_recv_child
  int nf, int * child_face_level_curr
  )
 {
-  // copy array
+  // Create Fieldface for receiving 
   int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
-  
   std::vector<int> field_list;
   FieldFace * field_face = create_face 
     (if3, ic3, lg3, refresh_coarse, field_list);
+
+#ifdef NEW_REFRESH_COARSEN
+  // (p_adapt_recv_child() only called when NEW_REFRESH_COARSEN is not defined)
+
+#else
+  // Copy coarsened data from child ic3[] to face data
   field_face->array_to_face (array, data()->field());
 
-  // copy child face level and face level
+#endif
+
+  delete field_face;
+
+  // copy child face level array
   const int min_face_rank = 
     simulation()->config()->adapt_min_face_rank;
   Index index_child = index_.index_child(ic3);
@@ -690,6 +730,7 @@ void Block::p_adapt_recv_child
     set_child_face_level_curr(ic3,of3,level_child);
   }
 
+  // copy face level array
   ItFace it_face = this->it_face(min_face_rank,index_);
   while (it_face.next()) {
     it_face.face(of3);
@@ -700,11 +741,14 @@ void Block::p_adapt_recv_child
     }
   }
 
+  // I am a leaf on the wind
   is_leaf_=true;
+
 #ifdef DEBUG_ADAPT
   index_.print("p_adapt_recv_child is_leaf=1",-1,2,false,simulation());
 #endif
 
+  // Can now safely notify child to delete itself 
   adapt_delete_child_(index_child);
 
   age_ = 0;

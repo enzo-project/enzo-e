@@ -106,6 +106,16 @@ void Monitor::header () const
 #else
   print ("Define","NEW_REFRESH %s","no");
 #endif
+#ifdef NEW_REFRESH_COARSEN
+  print ("Define","NEW_REFRESH_COARSEN %s","Yes");
+#else
+  print ("Define","NEW_REFRESH_COARSEN %s","no");
+#endif
+#ifdef NEW_REFRESH_REFINE
+  print ("Define","NEW_REFRESH_REFINE %s","Yes");
+#else
+  print ("Define","NEW_REFRESH_REFINE %s","no");
+#endif
 #ifndef CONFIG_PYTHON_LT_27
   print ("Define","CHARM_VERSION %s",CELLO_CHARM_VERSION);
 #   ifdef CONFIG_HAVE_MERCURIAL  

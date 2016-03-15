@@ -57,6 +57,7 @@ public: // interface
   /// Create a new CHARM++ Block array
   virtual CProxy_Block create_block_array
   (
+   DataMsgRefine * msg,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks,
@@ -66,7 +67,9 @@ public: // interface
   ///  solvers.  Arguments are the same as create_block_array(), plus
   ///  minimal level min_level < 0
   virtual void create_subblock_array
-  (CProxy_Block * block_array,
+  (
+   DataMsgRefine * msg,
+   CProxy_Block * block_array,
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
@@ -76,6 +79,7 @@ public: // interface
   /// Create a new Block
   virtual Block * create_block
   (
+   DataMsgRefine * msg,
    CProxy_Block * block_array,
    Index index,
    int nx, int ny, int nz,
@@ -85,7 +89,8 @@ public: // interface
    int narray, char * array, int refresh_type,
    int num_face_level, int * face_level,
    bool testing = false,
-   Simulation * simulation = 0) const throw();
+   Simulation * simulation = 0
+) const throw();
 
 };
 
