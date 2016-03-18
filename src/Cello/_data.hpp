@@ -71,9 +71,6 @@ class FieldFace;
 #include "data_Data.hpp"
 
 #include "data_DataMsg.hpp"
-#include "data_DataMsgRefresh.hpp"
-#include "data_DataMsgRefine.hpp"
-#include "data_DataMsgCoarsen.hpp"
 
 #endif /* _DATA_HPP */
 

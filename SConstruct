@@ -13,9 +13,9 @@ import socket
 # to be temporary
 #----------------------------------------------------------------------
 
-new_refresh         = 0	
-new_refresh_coarsen = 0
+new_refresh         = 0
 new_refresh_refine  = 0
+new_refresh_coarsen = 0
 
 #----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements

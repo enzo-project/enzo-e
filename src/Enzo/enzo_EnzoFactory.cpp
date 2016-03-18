@@ -9,6 +9,8 @@
 
 #include "charm_enzo.hpp"
 
+// #define DEBUG_NEW_REFRESH
+
 //----------------------------------------------------------------------
 
 void EnzoFactory::pup (PUP::er &p)
@@ -31,15 +33,13 @@ IoBlock * EnzoFactory::create_io_block () const throw()
 
 CProxy_Block EnzoFactory::create_block_array
 (
- DataMsgRefine * data_msg,
+ DataMsg * data_msg,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int num_field_blocks,
  bool testing
  ) const throw()
 {
-  TRACE7("EnzoFactory::create_block_array(na(%d %d %d) n(%d %d %d) num_field_blocks %d",	 nbx,nby,nbz,nx,ny,nz,num_field_blocks);
-
   CProxy_EnzoBlock enzo_block_array;
 
   // --------------------------------------------------
@@ -71,7 +71,20 @@ CProxy_Block EnzoFactory::create_block_array
 	TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
 #ifdef NEW_REFRESH_REFINE
-	enzo_block_array[index].insert (data_msg);
+
+	MsgRefine * msg = new MsgRefine 
+	  (index,
+	   nx,ny,nz,
+	   num_field_blocks,
+	   count_adapt = 0,
+	   cycle,time,dt,
+	   refresh_same,
+	   num_face_level, face_level,
+	   testing);
+
+	msg->set_data_msg(data_msg);
+
+	enzo_block_array[index].insert (msg);
 #else
 	enzo_block_array[index].insert 
 	  (index,
@@ -99,7 +112,7 @@ CProxy_Block EnzoFactory::create_block_array
 
 void EnzoFactory::create_subblock_array
 (
- DataMsgRefine * data_msg,
+ DataMsg * data_msg,
  CProxy_Block * block_array,
  int min_level,
  int nbx, int nby, int nbz,
@@ -152,17 +165,30 @@ void EnzoFactory::create_subblock_array
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
 #ifdef NEW_REFRESH_REFINE
-	  (*enzo_block_array)[index].insert (data_msg);
+
+	  MsgRefine * msg = new MsgRefine 
+	    (index,
+	     nx,ny,nz,
+	     num_field_blocks,
+	     count_adapt=0,
+	     cycle,time,dt,
+	     refresh_same,
+	     num_face_level, face_level,
+	     testing);
+
+	  msg->set_data_msg(data_msg);
+
+	  (*enzo_block_array)[index].insert (msg);
 #else
 	  (*enzo_block_array)[index].insert 
-	  (index,
-	   nx,ny,nz,
-	   num_field_blocks,
-	   count_adapt = 0,
-	   cycle, time, dt,
-	   0,NULL,refresh_same,
-	   num_face_level, face_level,
-	   testing);
+	    (index,
+	     nx,ny,nz,
+	     num_field_blocks,
+	     count_adapt = 0,
+	     cycle, time, dt,
+	     0,NULL,refresh_same,
+	     num_face_level, face_level,
+	     testing);
 #endif
 	  // --------------------------------------------------
 
@@ -178,7 +204,7 @@ void EnzoFactory::create_subblock_array
 
 Block * EnzoFactory::create_block
 (
- DataMsgRefine * data_msg,
+ DataMsg * data_msg,
  CProxy_Block * block_array,
  Index index,
  int nx, int ny, int nz,
@@ -191,6 +217,12 @@ Block * EnzoFactory::create_block
  Simulation * simulation
  ) const throw()
 {
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%d EnzoFactory::create_block %d %d %d)\n",CkMyPe(), nx,ny,nz);
+  CkPrintf ("%d EnzoFactory::create_block() num_field_blocks %d  count_adapt %d\n",
+	    CkMyPe(), num_field_blocks,count_adapt);
+#endif
+
   TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
   TRACE2("EnzoFactory::create_block() num_field_blocks %d  count_adapt %d",
 	 num_field_blocks,count_adapt);
@@ -202,7 +234,20 @@ Block * EnzoFactory::create_block
 #endif
 
 #ifdef NEW_REFRESH_REFINE
-  (*enzo_block_array)[index].insert ( data_msg )
+
+  MsgRefine * msg = new MsgRefine 
+    (index,
+     nx,ny,nz,
+     num_field_blocks,
+     count_adapt,
+     cycle,time,dt,
+     refresh_type,
+     num_face_level, face_level,
+     testing);
+
+  msg->set_data_msg(data_msg);
+
+  (*enzo_block_array)[index].insert ( msg );
 #else
   (*enzo_block_array)[index].insert 
     (     index,

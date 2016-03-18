@@ -9,7 +9,7 @@
 #include "data.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_FIELD_FACE
+// #define DEBUG_NEW_REFRESH
 
 long FieldFace::counter = 0;
 
@@ -25,7 +25,7 @@ FieldFace::FieldFace
 ( const Field & field ) throw()
   :  refresh_type_(refresh_unknown)
 {
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
 
@@ -42,7 +42,7 @@ FieldFace::FieldFace
 FieldFace::~FieldFace() throw ()
 {
   counter--;
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::~FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
 }
@@ -52,7 +52,7 @@ FieldFace::~FieldFace() throw ()
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
 {
   counter++;
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::FieldFace(FieldFace) %p\n",CkMyPe(),this);
 #endif
   copy_(field_face);
@@ -138,6 +138,9 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
   size_t index_array = 0;
 
+#ifdef DEBUG_NEW_REFRESH
+  print("face_to_array");
+#endif
   for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
 
     size_t index_field = field_list_[i_f];
@@ -208,7 +211,9 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
 void FieldFace::array_to_face (char * array, Field field) throw()
 {
-
+#ifdef DEBUG_NEW_REFRESH
+  print("array_to_face");
+#endif
   size_t index_array = 0;
 
   for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
@@ -289,6 +294,9 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
 void FieldFace::face_to_face (Field field_src, Field field_dst)
 {
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf("%p face_to_face\n",this);
+#endif
   
   for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
 
@@ -421,7 +429,7 @@ int FieldFace::data_size () const
   count += 1*sizeof(int);  // refresh_type_ (restrict,prolong,copy)
   count += (1+field_list_.size()) * sizeof(int);
 
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%s:%d data_size %d\n",__FILE__,__LINE__,count);
   fflush(stdout);
 #endif
@@ -434,7 +442,7 @@ int FieldFace::data_size () const
 
 char * FieldFace::save_data (char * buffer) const
 {
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%s:%d save_data %p\n",__FILE__,__LINE__,buffer);
   fflush(stdout);
 #endif
@@ -469,11 +477,11 @@ char * FieldFace::save_data (char * buffer) const
 
 char * FieldFace::load_data (char * buffer)
 {
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("load_data\n"); fflush(stdout);
 #endif
 
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%s:%d load_data buffer %p\n",__FILE__,__LINE__,buffer);
   fflush(stdout);
 #endif
@@ -482,7 +490,7 @@ char * FieldFace::load_data (char * buffer)
   int n;
   int *pi = (int *)p;
 
-#ifdef DEBUG_FIELD_FACE
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("p = %p\n",p);
   CkPrintf ("p[0] = %d\n",pi[0]);
 #endif

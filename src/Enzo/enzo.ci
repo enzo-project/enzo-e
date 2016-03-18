@@ -99,7 +99,7 @@ module enzo {
 
   array[Index] EnzoBlock : Block {
 
-    entry EnzoBlock (DataMsgRefine * mesg);
+    entry EnzoBlock (MsgRefine * mesg);
 
     entry EnzoBlock (Index index,
        int nx, int ny, int nz,	

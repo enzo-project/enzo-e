@@ -132,20 +132,21 @@ public: // interface
 
   void print (const char * message)
   {
-    char filename[40];
-    sprintf (filename,"ff-%02d.debug",CkMyPe());
+    // char filename[40];
+    // sprintf (filename,"ff-%02d.debug",CkMyPe());
     
-    FILE * fp = fopen (filename,"a");
-    fprintf (fp," FieldFace %s %p\n",message,this);
-    fprintf (fp,"    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
-    fprintf (fp,"    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
-    fprintf (fp,"    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
-    fprintf (fp,"    refresh_type %d\n",refresh_type_);
+    //    FILE * fp = fopen (filename,"a");
+    //    FILE * fp = stdout;
+    CkPrintf (" FieldFace %s %p\n",message,this);
+    CkPrintf ("    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
+    CkPrintf ("    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
+    CkPrintf ("    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
+    CkPrintf ("    refresh_type %d\n",refresh_type_);
     int n;
-    fprintf (fp,"    field_list size %d = ",n=field_list_.size());
-    for (int i=0; i<n; i++) fprintf (fp," %d",field_list_[i]);
-    fprintf (fp,"\n");
-    fclose (fp);
+    CkPrintf ("    field_list size %d = ",n=field_list_.size());
+    for (int i=0; i<n; i++) CkPrintf (" %d",field_list_[i]);
+    CkPrintf ("\n");
+    //    fclose (fp);
   }
   //--------------------------------------------------
 

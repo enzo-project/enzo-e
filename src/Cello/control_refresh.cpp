@@ -157,22 +157,25 @@ void Block::refresh_load_field_face_
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_type, field_list);
 
-  //  field_face->print();
-
 #ifdef NEW_REFRESH
 
-  DataMsgRefresh * data_msg = new DataMsgRefresh;
+  DataMsg * data_msg = new DataMsg;
 
   data_msg -> set_field_face (field_face);
   data_msg -> set_field_data (data()->field_data());
   data_msg -> set_particle_data(NULL);
+
+  MsgRefresh * msg = new MsgRefresh;
+
+  msg->set_data_msg (data_msg);
 
 #ifdef DEBUG_REFRESH
   CkPrintf ("%d DEBUG REFRESH calling p_refresh_store() for fields\n",CkMyPe());
   CkPrintf ("%d DEBUG REFRESH field_data size %d\n",CkMyPe(),data()->field_data()->permanent_size());
   if (field_face) field_face->print("DEBUG REFRESH calling store");
 #endif
-  thisProxy[index_neighbor].p_refresh_store (data_msg);
+
+  thisProxy[index_neighbor].p_refresh_store (msg);
 
 #else
 
@@ -204,7 +207,7 @@ void Block::refresh_load_field_face_
 //----------------------------------------------------------------------
 
 
-void Block::p_refresh_store (DataMsgRefresh * msg)
+void Block::p_refresh_store (MsgRefresh * msg)
 {
 
 #ifdef NEW_REFRESH
@@ -654,10 +657,15 @@ void Block::particle_send_
       printf ("%d %p DEBUG Calling p_refresh_store for particle\n",
 	      CkMyPe(),p_data);fflush(stdout);
 #endif
-      
-      DataMsgRefresh * data_msg = new DataMsgRefresh;
+
+
+      DataMsg * data_msg = new DataMsg;
       data_msg ->set_particle_data(p_data);
-      thisProxy[index].p_refresh_store (data_msg);
+
+      MsgRefresh * msg = new MsgRefresh;
+      msg->set_data_msg (data_msg);
+
+      thisProxy[index].p_refresh_store (msg);
     }
 
 #else

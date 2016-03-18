@@ -13,6 +13,8 @@
 
 /* #define DEBUG_ADAPT */
 
+/* #define DEBUG_NEW_REFRESH */
+
 // KEEP CONSISTENT WITH _comm.hpp: phase_type
 const char * phase_name[] = {
   "unknown",
@@ -40,41 +42,66 @@ const char * phase_name[] = {
 
 //----------------------------------------------------------------------
 
-Block::Block ( DataMsgRefine * msg ) throw ()
-  // :
-  // data_(NULL),
-  // child_data_(NULL),
-  // index_(index),
-  // level_next_(0),
-  // cycle_(cycle),
-  // time_(time),
-  // dt_(dt),
-  // stop_(false),
-  // index_initial_(0),
-  // children_(),
-  // sync_coarsen_(),
-  // count_sync_(),
-  // max_sync_(),
-  // face_level_curr_(),
-  // face_level_next_(),
-  // child_face_level_curr_(),
-  // child_face_level_next_(),
-  // count_coarsen_(0),
-  // adapt_step_(num_adapt_steps),
-  // adapt_(adapt_unknown),
-  // coarsened_(false),
-  // delete_(false),
-  // is_leaf_(true),
-  // age_(0),
-  // face_level_last_(),
-  // name_(name()),
-  // index_method_(-1)
+Block::Block ( MsgRefine * msg ) throw ()
+  :
+  data_(NULL),
+  child_data_(NULL),
+  level_next_(0),
+  stop_(false),
+  index_initial_(0),
+  children_(),
+  sync_coarsen_(),
+  count_sync_(),
+  max_sync_(),
+  face_level_curr_(),
+  face_level_next_(),
+  child_face_level_curr_(),
+  child_face_level_next_(),
+  count_coarsen_(0),
+  coarsened_(false),
+  delete_(false),
+  is_leaf_(true),
+  age_(0),
+  face_level_last_(),
+  name_(name()),
+  index_method_(-1)
 {
+
+  init (msg->index_,
+	msg->nx_, msg->ny_, msg->nz_,
+	msg->num_field_blocks_,
+	msg->num_adapt_steps_,
+	msg->cycle_, msg->time_,  msg->dt_,
+	0, NULL, msg->refresh_type_,
+	msg->num_face_level_, msg->face_level_,
+	msg->testing_);
+
+  msg->update(data());
+  delete msg;
+
+#ifdef DEBUG_NEW_REFRESH
+  Field field = data()->field();
+  int id = field.field_id("density");
+  double * d = (double *) field.values(id);
+  int nx=msg->nx_;
+  int ny=msg->ny_;
+  int nz=msg->nz_;
+  printf ("%d %d %d\n",nx,ny,nz);
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	printf ("%d %d %d  %f\n",ix,iy,iz,d[ix+nx*(iy+ny*iz)]);
+      }
+    }
+  }
+#endif
+
 }
 
 //----------------------------------------------------------------------
 
-  Block::Block (
+Block::Block 
+(
  Index index,
  int nx, int ny, int nz,
  int num_field_blocks,
@@ -113,6 +140,51 @@ Block::Block ( DataMsgRefine * msg ) throw ()
   name_(name()),
   index_method_(-1)
 {
+  
+  init (index,
+	nx, ny, nz,
+	num_field_blocks,
+	num_adapt_steps,
+	cycle, time,  dt,
+	narray, array, refresh_type,
+	num_face_level, face_level,
+	testing);
+
+#ifdef DEBUG_NEW_REFRESH
+  Field field = data()->field();
+  int id = field.field_id("density");
+  double * d = (double *) field.values(id);
+  printf ("%d %d %d\n",nx,ny,nz);
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	printf ("%d %d %d  %f\n",ix,iy,iz,d[ix+nx*(iy+ny*iz)]);
+      }
+    }
+  }
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Block::init
+(
+ Index index,
+ int nx, int ny, int nz,
+ int num_field_blocks,
+ int num_adapt_steps,
+ int cycle, double time, double dt,
+ int narray, char * array, int refresh_type,
+ int num_face_level, int * face_level,
+ bool testing)
+
+{
+  index_ = index;
+  cycle_ = cycle;
+  time_ = time;
+  dt_ = dt;
+  adapt_step_ = num_adapt_steps;
+  adapt_ = adapt_unknown;
 
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = true;
@@ -204,6 +276,9 @@ Block::Block ( DataMsgRefine * msg ) throw ()
   int ic3[3];
   if (level > 0) index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p narray = %d\n",this,narray);
+#endif
   if (narray != 0) {
 
     // Create field face of refined data from parent

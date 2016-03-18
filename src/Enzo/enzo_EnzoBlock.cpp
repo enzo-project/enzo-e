@@ -9,6 +9,8 @@
 
 #include "enzo.hpp"
 
+/* #define DEBUG_NEW_REFRESH */
+
 //======================================================================
 
 int EnzoBlock::UseMinimumPressureSupport;
@@ -165,12 +167,17 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 //----------------------------------------------------------------------
 
 EnzoBlock::EnzoBlock
-( DataMsgRefine * msg ) throw()
-  : Block 
-    ( msg )
+( MsgRefine * msg ) throw()
+  : Block ( msg ),
+    dt(dt),
+    SubgridFluxes(0)
 {
   initialize_enzo_();
   initialize();
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("EnzoBlock(msg)\n");
+  print();
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -202,6 +209,10 @@ EnzoBlock::EnzoBlock
 {
   initialize_enzo_();
   initialize();
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("EnzoBlock(msg)\n");
+  print();
+#endif
 }
 
 //----------------------------------------------------------------------

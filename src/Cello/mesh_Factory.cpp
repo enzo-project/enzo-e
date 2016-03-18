@@ -54,7 +54,7 @@ IoParticleData * Factory::create_io_particle_data
 
 CProxy_Block Factory::create_block_array
 (
- DataMsgRefine * msg,
+ DataMsg * data_msg,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
  int num_field_data,
@@ -97,17 +97,31 @@ CProxy_Block Factory::create_block_array
 	// --------------------------------------------------
 
 #ifdef NEW_REFRESH_REFINE	
+
+	MsgRefine * msg = new MsgRefine 
+	  (index,
+	   nx,ny,nz,
+	   num_field_data,
+	   count_adapt = 0,
+	   cycle,time,dt,
+	   refresh_same,
+	   num_face_level, face_level,
+	   testing);
+
+	msg->set_data_msg(data_msg);
+
 	proxy_block[index].insert (msg);
+
 #else
 	proxy_block[index].insert
-	(index,
-	 nx,ny,nz,
-	 num_field_data,
-	 count_adapt = 0,
-	 cycle,time,dt,
-	 0,NULL,refresh_same,
-	 num_face_level, face_level,
-	 testing);
+	  (index,
+	   nx,ny,nz,
+	   num_field_data,
+	   count_adapt = 0,
+	   cycle,time,dt,
+	   0,NULL,refresh_same,
+	   num_face_level, face_level,
+	   testing);
 #endif	   
 
 	// --------------------------------------------------
@@ -124,7 +138,7 @@ CProxy_Block Factory::create_block_array
 
 void Factory::create_subblock_array
 (
- DataMsgRefine * msg,
+ DataMsg * data_msg,
  CProxy_Block * block_array,
  int min_level,
  int nbx, int nby, int nbz,
@@ -166,7 +180,21 @@ void Factory::create_subblock_array
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
 #ifdef NEW_REFRESH_REFINE
+
+	  MsgRefine * msg = new MsgRefine 
+	    (index,
+	     nx,ny,nz,
+	     num_field_blocks,
+	     count_adapt = 0,
+	     cycle,time,dt,
+	     refresh_same,
+	     num_face_level, face_level,
+	     testing);
+
+	  msg->set_data_msg(data_msg);
+
 	  (*block_array)[index].insert (msg);
+
 #else
 	  (*block_array)[index].insert 
 	    (index,
@@ -191,7 +219,7 @@ void Factory::create_subblock_array
 
 Block * Factory::create_block
 (
- DataMsgRefine * msg,
+ DataMsg * data_msg,
  CProxy_Block * block_array,
  Index index,
  int nx, int ny, int nz,
@@ -209,13 +237,29 @@ Block * Factory::create_block
   TRACE2("Factory::create_block(num_field_data %d  count_adapt %d)",
 	 num_field_data,count_adapt);
 
+
   // --------------------------------------------------
   // ENTRY: #3 Factory::create_block() -> Block::Block()
   // ENTRY: level > 0 block array insert
   // --------------------------------------------------
 #ifdef NEW_REFRESH_REFINE
+
+  MsgRefine * msg = new MsgRefine 
+    (index,
+     nx,ny,nz,
+     num_field_data,
+     count_adapt,
+     cycle,time,dt,
+     refresh_type,
+     num_face_level, face_level,
+     testing);
+
+  msg->set_data_msg (data_msg);
+
   (*block_array)[index].insert (msg);
+
 #else
+
   (*block_array)[index].insert
     (index,
      nx,ny,nz,
@@ -225,6 +269,7 @@ Block * Factory::create_block
      narray, array,refresh_type,
      num_face_level, face_level,
      testing);
+
 #endif
 
   // --------------------------------------------------

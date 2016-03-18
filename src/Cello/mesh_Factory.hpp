@@ -57,7 +57,7 @@ public: // interface
   /// Create a new CHARM++ Block array
   virtual CProxy_Block create_block_array
   (
-   DataMsgRefine * msg,
+   DataMsg * data_msg,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks,
@@ -68,7 +68,7 @@ public: // interface
   ///  minimal level min_level < 0
   virtual void create_subblock_array
   (
-   DataMsgRefine * msg,
+   DataMsg * data_msg,
    CProxy_Block * block_array,
    int min_level,
    int nbx, int nby, int nbz,
@@ -79,7 +79,7 @@ public: // interface
   /// Create a new Block
   virtual Block * create_block
   (
-   DataMsgRefine * msg,
+   DataMsg * data_msg,
    CProxy_Block * block_array,
    Index index,
    int nx, int ny, int nz,

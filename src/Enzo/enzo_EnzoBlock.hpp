@@ -108,7 +108,7 @@ public:
 public: // interface
 
   /// Initialize the EnzoBlock chare array
-  EnzoBlock ( DataMsgRefine * msg ) throw();
+  EnzoBlock ( MsgRefine * msg ) throw();
 
   /// Initialize the EnzoBlock chare array
   EnzoBlock

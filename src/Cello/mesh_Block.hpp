@@ -18,9 +18,9 @@
 #endif
 
 class Data;
-class DataMsgRefresh;
-class DataMsgRefine;
-class DataMsgCoarsen;
+class MsgRefresh;
+class MsgRefine;
+class MsgCoarsen;
 class Factory;
 class FieldDescr;
 class FieldFace;
@@ -49,7 +49,7 @@ public: // interface
 
   /// create a Block with the given block count, lower extent, block
   /// size, and number of field blocks
-  Block ( DataMsgRefine * msg ) throw();
+  Block ( MsgRefine * msg ) throw();
 
   Block 
   (
@@ -62,6 +62,17 @@ public: // interface
    int num_face_level, int * face_level,
    bool testing=false
    ) throw();
+
+  // Initialize
+  void init (
+   Index index,
+   int nx, int ny, int nz,
+   int num_field_blocks,
+   int num_adapt_steps,
+   int cycle, double time, double dt,
+   int narray, char * array, int refresh_type,
+   int num_face_level, int * face_level,
+   bool testing );
 
   /// Destructor
   virtual ~Block() throw();
@@ -447,7 +458,7 @@ public:
   void p_refresh_store_particle_face (int n, int np, char a[],  int it) 
   { refresh_store_particle_face_(n,np,a, it); }
 
-  void p_refresh_store (DataMsgRefresh * msg);
+  void p_refresh_store (MsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
   void x_refresh_child (int n, char a[],int ic3[3]);
@@ -721,6 +732,33 @@ protected: // functions
   {  return &refresh_;  }
 
 
+  void print () const
+  {
+    CkPrintf ("data_ = %p\n",data_);
+    CkPrintf ("child_data_ = %p\n",child_data_);
+    CkPrintf ("index_ = %d\n",name().c_str());
+    CkPrintf ("level_next_ = %d\n",level_next_);
+    CkPrintf ("cycle_ = %d\n",cycle_);
+    CkPrintf ("time_ = %f\n",time_);
+    CkPrintf ("dt_ = %f\n",dt_);
+    CkPrintf ("stop_ = %d\n",stop_);
+    CkPrintf ("index_initial_ = %d\n",index_initial_);
+    CkPrintf ("children_.size() = %d\n",children_.size());
+    CkPrintf ("face_level_curr_.size() = %d\n",face_level_curr_.size());
+    CkPrintf ("face_level_next_.size() = %d\n",face_level_next_.size());
+    CkPrintf ("child_face_level_curr_.size() = %d\n",child_face_level_curr_.size());
+    CkPrintf ("child_face_level_next_.size() = %d\n",child_face_level_next_.size());
+    CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
+    CkPrintf ("adapt_step_ = %d\n",adapt_step_);
+    CkPrintf ("adapt_ = %d\n",adapt_);
+    CkPrintf ("coarsened_ = %d\n",coarsened_);
+    CkPrintf ("delete_ = %d\n",delete_);
+    CkPrintf ("is_leaf_ = %d\n",is_leaf_);
+    CkPrintf ("age_ = %d\n",age_);
+    CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
+    CkPrintf ("name_ = %d\n",name_.c_str());
+    CkPrintf ("index_method_ = %d\n",index_method_);
+  }
 protected: // attributes
 
   /// Whether data exists

@@ -361,8 +361,7 @@ void InitialValue::copy_precision_
     for (int iy = 0; iy<ny; iy++) {
       for (int ix = 0; ix<nx; ix++) {
 	int i = ix + nx*(iy + ny*iz);
-	if (mask[i]) 
-	  (array - offset)[i] = (T) value[i];
+	if (mask[i]) (array - offset)[i] = (T) value[i];
       }
     }
   }

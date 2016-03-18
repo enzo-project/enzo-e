@@ -295,29 +295,31 @@ void Block::adapt_refine_()
       FieldFace * field_face = create_face 
 	(if3,ic3,lg3, refresh_fine,field_list);
 
-      DataMsgRefine * data_msg = NULL;
+      DataMsg * data_msg = NULL;
+
+      int narray = 0;
+      char * array = 0;
+      int num_field_data = 1;
+      bool testing = false;
 
 #ifdef NEW_REFRESH_REFINE
 
       // Create data message object to send
 
-      DataMsgRefine * data_msg = new DataMsgRefine;
+      data_msg = new DataMsg;
 
       data_msg -> set_field_face (field_face);
       data_msg -> set_field_data (data()->field_data());
       data_msg -> set_particle_data (NULL);  // particles sold separately
 
-#endif
+#else
 
       // Create array of interpolated data to send to child
-      
-      int narray = 0;  
-      char * array = 0;
+
       field_face->face_to_array (data()->field(),&narray,&array);
       delete field_face;
 
-      int num_field_data = 1;
-      bool testing = false;
+#endif
 
       const Factory * factory = simulation()->factory();
 
@@ -337,6 +339,7 @@ void Block::adapt_refine_()
 	 simulation());
 
       delete [] array;
+      array = 0;
 
       children_.push_back(index_child);
 

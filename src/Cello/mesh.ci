@@ -45,14 +45,13 @@ module mesh {
       char a[];
   };
 
-  message DataMsg;
-  message DataMsgCoarsen;
-  message DataMsgRefresh;
-  message DataMsgRefine;
+  message MsgCoarsen;
+  message MsgRefresh;
+  message MsgRefine;
 
   array[Index] Block {
 
-    entry Block     (DataMsgRefine * msg);
+    entry Block     (MsgRefine * msg);
 
     entry Block
       (Index index,
@@ -157,7 +156,7 @@ module mesh {
     // *** REFRESH
     //--------------------------------------------------
 
-    entry void p_refresh_store (DataMsgRefresh * msg);
+    entry void p_refresh_store (MsgRefresh * msg);
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 

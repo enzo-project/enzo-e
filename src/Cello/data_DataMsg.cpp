@@ -8,28 +8,15 @@
 #include "data.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_DATA
+// #define DEBUG_NEW_REFRESH
 
 //----------------------------------------------------------------------
 
-int DataMsg::id_count = -1;
-
-//----------------------------------------------------------------------
-
-void * DataMsg::pack (DataMsg * msg)
+int DataMsg::data_size () const
 {
-
-  FieldFace    * ff = msg->field_face_;
-  char         * fa = msg->field_array_;
-  ParticleData * pd = msg->particle_data_;
-
-  // Update ID (for debugging)
-
-  if (id_count == -1) id_count = CkMyPe()+CkNumPes();
-
-  msg->id_ = id_count;
-
-  id_count += CkNumPes();
+  FieldFace    * ff = field_face_;
+  char         * fa = field_array_;
+  ParticleData * pd = particle_data_;
 
   //--------------------------------------------------
   //  1. determine buffer size (must be consistent with #3)
@@ -40,33 +27,29 @@ void * DataMsg::pack (DataMsg * msg)
   FieldDescr * field_descr = simulation->field_descr();
   ParticleDescr * particle_descr = simulation->particle_descr();
 
-  Field field (field_descr, msg->field_data_);
-
-  int size = 0;
+  Field field (field_descr, field_data_);
 
   const int n_ff = (ff) ? ff->data_size() : 0;
   const int n_fa = (fa) ? ff->num_bytes_array(field) : 0;
   const int n_pa = (pd) ? pd->data_size(particle_descr) : 0;
 
+  int size = 0;
+
   size += sizeof(int); // n_ff_
   size += sizeof(int); // n_fa_
   size += sizeof(int); // n_pa_
-  size += sizeof(int); // id_
 
   size += n_ff*sizeof(char);
   size += n_fa*sizeof(char);
   size += n_pa*sizeof(char);
 
-  //--------------------------------------------------
-  //  2. allocate buffer using CkAllocBuffer()
-  //--------------------------------------------------
+  return size;
+}
 
-  char * buffer = (char *) CkAllocBuffer (msg,size);
+//----------------------------------------------------------------------
 
-  //--------------------------------------------------
-  //  3. serialize message data into buffer 
-  //     (must be consistent with #1 and unpack())
-  //--------------------------------------------------
+char * DataMsg::save_data (char * buffer) const
+{
 
   union {
     char * pc;
@@ -75,10 +58,24 @@ void * DataMsg::pack (DataMsg * msg)
 
   pc = buffer;
 
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  FieldDescr * field_descr = simulation->field_descr();
+  ParticleDescr * particle_descr = simulation->particle_descr();
+
+  Field field (field_descr, field_data_);
+
+  FieldFace    * ff = field_face_;
+  char         * fa = field_array_;
+  ParticleData * pd = particle_data_;
+
+  const int n_ff = (ff) ? ff->data_size() : 0;
+  const int n_fa = (fa) ? ff->num_bytes_array(field) : 0;
+  const int n_pa = (pd) ? pd->data_size(particle_descr) : 0;
+
   (*pi++) = n_ff;
   (*pi++) = n_fa;
   (*pi++) = n_pa;
-  (*pi++) = msg->id_;
 
   if (n_ff > 0) {
     ff->save_data (pc);
@@ -93,27 +90,17 @@ void * DataMsg::pack (DataMsg * msg)
     pc += n_pa;
   }
 
-  delete msg;
+  // return first byte after filled buffer
 
-  // Return the buffer
-
-  return (void *) buffer;
+  return pc;
 }
 
 //----------------------------------------------------------------------
 
-DataMsg * DataMsg::unpack(void * buffer)
+char * DataMsg::load_data (char * buffer)
 {
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   ParticleDescr * particle_descr = simulation->particle_descr();
-
-  // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
- 
-  DataMsg * msg = (DataMsg *) CkAllocBuffer (buffer,sizeof(DataMsg));
-  msg = new ((void*)msg) DataMsg;
-
-  msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
@@ -123,94 +110,95 @@ DataMsg * DataMsg::unpack(void * buffer)
     int  * pi;
   };
 
-  pc = (char *) buffer;
+  pc = buffer;
 
-  msg->field_face_ = new FieldFace;
+  field_face_ = new FieldFace;
 
   const int n_ff = (*pi++);
   const int n_fa = (*pi++);
   const int n_pa = (*pi++);
-  msg->id_ = (*pi++);
 
   if (n_ff > 0) {
-    pc = msg->field_face_->load_data (pc);
+    pc = field_face_->load_data (pc);
   }
+
   if (n_fa > 0) {
-    msg->field_array_ = pc;
+    field_array_ = pc;
     pc += n_fa;
   } else {
-    msg->field_array_ = NULL;
+    field_array_ = NULL;
   }
+
   if (n_pa > 0) {
-    ParticleData * pd = msg->particle_data_ = new ParticleData;
-#ifdef DEBUG_DATA
-    CkPrintf ("%d %p DEBUG unpack\n",CkMyPe(),pd);
-    fflush(stdout);
-#endif
+    ParticleData * pd = particle_data_ = new ParticleData;
     pd->allocate(particle_descr);
     pc = pd->load_data(particle_descr,pc);
   } else {
-    msg->particle_data_ = NULL;
+    particle_data_ = NULL;
   }
 
-  // 3. Save the input buffer for freeing later
-
-  msg->buffer_ = buffer;
-
-  return msg;
+  return pc;
 }
 
 //----------------------------------------------------------------------
 
-void DataMsg::update (Data * data)
+void DataMsg::update (Data * data, bool is_local)
 {
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr    *    field_descr = simulation->   field_descr();
  
   Field field_dst = data->field();
  
-  FieldFace * ff = field_face_;
+  FieldData    * fd = field_data();
+  ParticleData * pd = particle_data();
+  FieldFace    * ff = field_face();
+  char         * fa = field_array();
 
-  if (particle_data_ != NULL) {
+  if (pd != NULL) {
 
     // Insert new particles 
 
     Particle particle = data->particle();
     
     for (int it=0; it<particle.num_types(); it++) {
-#ifdef DEBUG_DATA
-      CkPrintf ("%d %p DEBUG update\n",CkMyPe(),particle_data_);
+#ifdef DEBUG_NEW_REFRESH
+      CkPrintf ("%d %p DEBUG update\n",CkMyPe(),pd);
       fflush(stdout);
 #endif
-      particle.gather (it, 1, &particle_data_);
+      particle.gather (it, 1, &pd);
     }
-    delete particle_data_;
-    particle_data_ = NULL;
+    delete_particle_data();
   }
 
-  if (field_array_ != NULL) {
+  if (fa != NULL) {
 
-    if (is_local_) {
+    if (is_local) {
 
-      Field field_src(field_descr,field_data_);
+      // OLD
+      Field field_src(field_descr,fd);
       ff->face_to_face(field_src, field_dst);
+
+      // NEW TEMPORARY (NOTE: DOESN'T WORK FOR 100)
+
+      // int narray = 0;
+      //      char * array = 0;
+      //      Field field_src(field_descr,fd);
+      //      ff->face_to_array (field_src,&narray,&array);
+      //      ff->array_to_face (array, field_dst);
 
       delete ff;
 
-    } else { // ! is_local_
-
+    } else { // ! is_local
 
       // Invert face since incoming not outgoing
 
       ff->invert_face();
 
-      ff->array_to_face(field_array_,field_dst);
+      ff->array_to_face(fa,field_dst);
 
 
     }
-  }
-  if (!is_local_) {
-      CkFreeMsg (buffer_);
   }
 }

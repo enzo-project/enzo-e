@@ -211,17 +211,17 @@ void Block::exit_()
 {
   TRACE_STOPPING("Block::exit_");
   if (index_.is_root()) {
-    if (DataMsgRefresh::counter != 0) {
-      WARNING1 ("Block::exit_()","DataMsgRefresh::counter = %ld != 0",
-		DataMsgRefresh::counter);
+    if (MsgRefresh::counter != 0) {
+      WARNING1 ("Block::exit_()","MsgRefresh::counter = %ld != 0",
+		MsgRefresh::counter);
     }
-    if (DataMsgRefine::counter != 0) {
-      WARNING1 ("Block::exit_()","DataMsgRefine::counter = %ld != 0",
-		DataMsgRefine::counter);
+    if (MsgRefine::counter != 0) {
+      WARNING1 ("Block::exit_()","MsgRefine::counter = %ld != 0",
+		MsgRefine::counter);
     }
-    if (DataMsgCoarsen::counter != 0) {
-      WARNING1 ("Block::exit_()","DataMsgCoarsen::counter = %ld != 0",
-		DataMsgCoarsen::counter);
+    if (MsgCoarsen::counter != 0) {
+      WARNING1 ("Block::exit_()","MsgCoarsen::counter = %ld != 0",
+		MsgCoarsen::counter);
     }
     if (FieldFace::counter != 0) {
       WARNING1 ("Block::exit_()","FieldFace::counter = %ld != 0",
