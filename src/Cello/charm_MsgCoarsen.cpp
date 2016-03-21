@@ -22,7 +22,7 @@ MsgCoarsen::MsgCoarsen()
     : CMessage_MsgCoarsen(),
       is_local_(true),
       id_(-1),
-      data_msg_(new DataMsg),
+      data_msg_(NULL),
       buffer_(NULL)
   {  ++counter; }
 
@@ -31,13 +31,6 @@ MsgCoarsen::MsgCoarsen()
 MsgCoarsen::~MsgCoarsen()
 {
   --counter;
-}
-
-//----------------------------------------------------------------------
-
-FieldFace * MsgCoarsen::field_face () 
-{
-  return (data_msg_) ? data_msg_->field_face() : NULL; 
 }
 
 //----------------------------------------------------------------------
@@ -53,27 +46,6 @@ void MsgCoarsen::set_data_msg  (DataMsg * data_msg)
 }
 
 //----------------------------------------------------------------------
-
-// void MsgCoarsen::set_field_data  (FieldData * field_data) 
-// {
-//   data_msg_->set_field_data(field_data); 
-// }
-
-// //----------------------------------------------------------------------
-
-// void MsgCoarsen::set_particle_data  (ParticleData * particle_data) 
-// { 
-//   data_msg_->set_particle_data(particle_data); 
-// }
-
-// //----------------------------------------------------------------------
-
-// void MsgCoarsen::set_field_face    (FieldFace * field_face) 
-// { 
-//   data_msg_->set_field_face(field_face); 
-// }
-
-// //----------------------------------------------------------------------
 
 void * MsgCoarsen::pack (MsgCoarsen * msg)
 {
@@ -92,7 +64,11 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   int size = 0;
 
   size += sizeof(int); // id_
-  size += msg->data_msg_->data_size();
+
+  int have_data = (msg->data_msg_ != NULL);
+  if (have_data) {
+    size += msg->data_msg_->data_size();
+  }
 
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
@@ -112,7 +88,12 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   pc = buffer;
 
   (*pi++) = msg->id_;
-  pc = msg->data_msg_->save_data(pc);
+
+  have_data = (msg->data_msg_ != NULL);
+  (*pi++) = have_data;
+  if (have_data) {
+    pc = msg->data_msg_->save_data(pc);
+  }
 
   delete msg;
 
@@ -152,7 +133,12 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
 
   msg->id_ = (*pi++);
 
-  pc = msg->data_msg_->load_data(pc);
+  int have_data = (*pi++);
+  if (have_data) {
+    pc = msg->data_msg_->load_data(pc);
+  } else {
+    msg->data_msg_ = NULL;
+  }
 
   // 3. Save the input buffer for freeing later
 
@@ -165,6 +151,9 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
 
 void MsgCoarsen::update (Data * data)
 {
+
+  if (data_msg_ == NULL) return;
+
 #ifdef DEBUG_DATA
   CkPrintf ("DEBUG %p MsgCoarsen::update()\n",this);
 #endif
@@ -173,7 +162,7 @@ void MsgCoarsen::update (Data * data)
   FieldDescr    *    field_descr = simulation->   field_descr();
  
   Field field_dst = data->field();
- 
+
   FieldData    * fd = data_msg_->field_data();
   ParticleData * pd = data_msg_->particle_data();
   FieldFace    * ff = data_msg_->field_face();

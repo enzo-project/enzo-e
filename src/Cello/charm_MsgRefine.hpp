@@ -45,21 +45,9 @@ public: // interface
   MsgRefine & operator= (const MsgRefine & data_msg) throw()
   { return *this; }
 
-  /// Return the FieldFace
-  FieldFace * field_face ();
-
   /// Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
   
-  // /// Set the FieldData object in DataMsg
-  // void set_field_data  (FieldData * field_data);
-
-  // /// Set the ParticleData object in DataMsg
-  // void set_particle_data  (ParticleData * particle_data) ;
-
-  // /// Set the FieldFace object in DataMsg
-  // void set_field_face    (FieldFace * field_face) ;
-
   /// Update the Data with data stored in this message
   void update (Data * data);
 

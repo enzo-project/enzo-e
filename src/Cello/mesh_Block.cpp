@@ -76,8 +76,15 @@ Block::Block ( MsgRefine * msg ) throw ()
 	msg->num_face_level_, msg->face_level_,
 	msg->testing_);
 
-  msg->update(data());
-  delete msg;
+  bool is_first_cycle = 
+    (cycle_ == simulation()->config()->initial_cycle);
+
+  if (is_first_cycle) {
+    apply_initial_();
+  } else {
+    msg->update(data());
+    delete msg;
+  }
 
 #ifdef DEBUG_NEW_REFRESH
   Field field = data()->field();
@@ -149,6 +156,13 @@ Block::Block
 	narray, array, refresh_type,
 	num_face_level, face_level,
 	testing);
+
+  bool is_first_cycle = 
+    (cycle_ == simulation()->config()->initial_cycle);
+
+  if (is_first_cycle) {
+    apply_initial_();
+  }
 
 #ifdef DEBUG_NEW_REFRESH
   Field field = data()->field();
@@ -296,13 +310,6 @@ void Block::init
   }
 
   if (! testing) simulation()->insert_block();
-
-  int initial_cycle = simulation()->config()->initial_cycle;
-  bool is_first_cycle = (initial_cycle == cycle);
-
-  if (is_first_cycle) {
-    apply_initial_();
-  }
 
   if (level > 0) {
 

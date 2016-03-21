@@ -9,7 +9,7 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_CHARM
+// #define DEBUG_NEW_REFRESH
 
 //----------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ MsgRefine::MsgRefine()
   : CMessage_MsgRefine(),
     is_local_(true),
     id_(-1),
-    data_msg_(new DataMsg),
+    data_msg_(NULL),
     index_(),
     nx_(-1), ny_(-1), nz_(-1),
     num_field_blocks_(-1),
@@ -33,7 +33,7 @@ MsgRefine::MsgRefine()
     testing_(false) ,
     buffer_(NULL)
 {  
-#ifdef DEBUG_CHARM
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d MsgRefine::MsgRefine() %p\n",CkMyPe(),this);
   fflush(stdout);
 #endif
@@ -62,7 +62,7 @@ MsgRefine::MsgRefine
   testing_(testing) ,
   buffer_(NULL)
 {  
-#ifdef DEBUG_CHARM
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d MsgRefine::MsgRefine() %p\n",CkMyPe(),this);
   CkPrintf ("%d %d %d\n",nx,ny,nz);
   CkPrintf ("%d %d\n",num_field_blocks,num_adapt_steps);
@@ -88,13 +88,6 @@ MsgRefine::~MsgRefine()
 
 //----------------------------------------------------------------------
 
-FieldFace * MsgRefine::field_face () 
-{
-  return data_msg_ ? data_msg_->field_face() : NULL; 
-}
-
-//----------------------------------------------------------------------
-
 void MsgRefine::set_data_msg  (DataMsg * data_msg) 
 {
   if (data_msg_) {
@@ -110,7 +103,7 @@ void MsgRefine::set_data_msg  (DataMsg * data_msg)
 void * MsgRefine::pack (MsgRefine * msg)
 {
 
-#ifdef DEBUG_CHARM
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG MsgRefine::pack()\n",CkMyPe());
 #endif
   // Update ID (for debugging)
@@ -162,7 +155,11 @@ void * MsgRefine::pack (MsgRefine * msg)
   size += sizeof(bool);
 
   // data_msg_
-  size += msg->data_msg_->data_size();
+
+  int have_data = (msg->data_msg_ != NULL);
+  if (have_data) {
+    size += msg->data_msg_->data_size();
+  }
 
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
@@ -228,9 +225,15 @@ void * MsgRefine::pack (MsgRefine * msg)
   (*pb++) = msg->testing_;
 
   // data_msg_
-  pc = msg->data_msg_->save_data(pc);
+  have_data = (msg->data_msg_ != NULL);
+  (*pi++) = have_data;
+  if (have_data) {
+    pc = msg->data_msg_->save_data(pc);
+  }
 
-  CkPrintf ("%p   pack message size %d\n",msg,(pc - (char*)buffer));
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p MsgRefine pack message size %d\n",msg,(pc - (char*)buffer));
+#endif
 
   delete msg;
 
@@ -243,7 +246,7 @@ void * MsgRefine::pack (MsgRefine * msg)
 
 MsgRefine * MsgRefine::unpack(void * buffer)
 {
-#ifdef DEBUG_CHARM
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d MsgRefine::unpack()\n",CkMyPe());
   fflush(stdout);
 #endif
@@ -256,7 +259,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
     (MsgRefine *) CkAllocBuffer (buffer,sizeof(MsgRefine));
 
   msg = new ((void*)msg) MsgRefine;
-#ifdef DEBUG_CHARM
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgRefine::unpack()\n",msg);
 #endif
   
@@ -324,11 +327,17 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   msg->testing_ = (*pb++);
 
   // data_msg_
-  msg->data_msg_ = new DataMsg;
-  pc = msg->data_msg_->load_data(pc);
+  int have_data = (*pi++);
+  if (have_data) {
+    msg->data_msg_ = new DataMsg;
+    pc = msg->data_msg_->load_data(pc);
+  } else {
+    msg->data_msg_ = 0;
+  }
 
-  CkPrintf ("%p unpack message size %d\n",msg,(pc - (char*)buffer));
-  // [ could double-check buffer size with # bytes unpacked (pc - buffer) ]
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p MsgRefine unpack message size %d\n",msg,(pc - (char*)buffer));
+#endif
 
   // 3. Save the input buffer for freeing later
 
@@ -341,9 +350,9 @@ MsgRefine * MsgRefine::unpack(void * buffer)
 
 void MsgRefine::update (Data * data)
 {
-  if (!data_msg_) return;
+  if (data_msg_ == NULL) return;
 
-#ifdef DEBUG_CHARM
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgRefine::update()\n",this);
 #endif
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -364,7 +373,7 @@ void MsgRefine::update (Data * data)
     Particle particle = data->particle();
     
     for (int it=0; it<particle.num_types(); it++) {
-#ifdef DEBUG_CHARM
+#ifdef DEBUG_NEW_REFRESH
       CkPrintf ("%d %p DEBUG update\n",CkMyPe(),pd);
       fflush(stdout);
 #endif

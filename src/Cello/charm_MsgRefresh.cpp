@@ -9,7 +9,8 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_DATA
+// #define DEBUG_NEW_REFRESH
+// #define TRACE_NEW_REFRESH
 
 //----------------------------------------------------------------------
 
@@ -35,13 +36,6 @@ MsgRefresh::~MsgRefresh()
 
 //----------------------------------------------------------------------
 
-FieldFace * MsgRefresh::field_face () 
-{
-  return data_msg_->field_face(); 
-}
-
-//----------------------------------------------------------------------
-
 void MsgRefresh::set_data_msg  (DataMsg * data_msg) 
 {
   if (data_msg_) {
@@ -56,8 +50,10 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefresh::pack (MsgRefresh * msg)
 {
-
-#ifdef DEBUG_DATA
+#ifdef TRACE_NEW_REFRESH
+  CkPrintf ("DEBUG %p MsgRefresh::pack()\n",msg);
+#endif
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgRefresh::pack()\n",msg);
 #endif
   // Update ID (for debugging)
@@ -71,7 +67,11 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   int size = 0;
 
   size += sizeof(int); // id_
-  size += msg->data_msg_->data_size();
+
+  int have_data = (msg->data_msg_ != NULL);
+  if (have_data) {
+    size += msg->data_msg_->data_size();
+  }
 
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
@@ -92,11 +92,19 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   (*pi++) = msg->id_;
 
-  pc = msg->data_msg_->save_data(pc);
+  have_data = (msg->data_msg_ != NULL);
+  (*pi++) = have_data;
+  if (have_data) {
+    pc = msg->data_msg_->save_data(pc);
+  }
 
   delete msg;
 
   // Return the buffer
+
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p MsgRefresh pack message size %d\n",msg,(pc - (char*)buffer));
+#endif
 
   return (void *) buffer;
 }
@@ -114,7 +122,10 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
     (MsgRefresh *) CkAllocBuffer (buffer,sizeof(MsgRefresh));
 
   msg = new ((void*)msg) MsgRefresh;
-#ifdef DEBUG_DATA
+#ifdef TRACE_NEW_REFRESH
+  CkPrintf ("DEBUG %p MsgRefresh::unpack()\n",msg);
+#endif
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgRefresh::unpack()\n",msg);
 #endif
   
@@ -132,12 +143,21 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   msg->id_ = (*pi++);
 
-  msg->data_msg_ = new DataMsg;
-  pc = msg->data_msg_->load_data(pc);
+  int have_data = (*pi++);
+  if (have_data) {
+    msg->data_msg_ = new DataMsg;
+    pc = msg->data_msg_->load_data(pc);
+  } else {
+    msg->data_msg_ = NULL;
+  }
 
   // 3. Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
+
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p MsgRefresh unpack message size %d\n",msg,(pc - (char*)buffer));
+#endif
 
   return msg;
 }
@@ -146,7 +166,12 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
 void MsgRefresh::update (Data * data)
 {
-#ifdef DEBUG_DATA
+  if (data_msg_ == NULL) return;
+
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("DEBUG %p MsgRefresh::update()\n",this);
+#endif
+#ifdef TRACE_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgRefresh::update()\n",this);
 #endif
   data_msg_->update(data,is_local_);

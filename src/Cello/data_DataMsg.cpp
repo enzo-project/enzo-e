@@ -43,6 +43,9 @@ int DataMsg::data_size () const
   size += n_fa*sizeof(char);
   size += n_pa*sizeof(char);
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg data_size %d\n",this,size);
+#endif
   return size;
 }
 
@@ -77,14 +80,23 @@ char * DataMsg::save_data (char * buffer) const
   (*pi++) = n_fa;
   (*pi++) = n_pa;
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg save_data n_ff %d\n",this, n_ff);
+#endif
   if (n_ff > 0) {
     ff->save_data (pc);
     pc += n_ff;
   }
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg save_data n_fa %d\n",this, n_fa);
+#endif
   if (n_fa > 0) {
     ff->face_to_array(field,pc);
     pc += n_fa;
   }
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg save_data n_pa %d\n",this, n_pa);
+#endif
   if (n_pa > 0) {
     pd->save_data(particle_descr,pc);
     pc += n_pa;
@@ -92,6 +104,9 @@ char * DataMsg::save_data (char * buffer) const
 
   // return first byte after filled buffer
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg save_data %d\n",this, (pc-buffer));
+#endif
   return pc;
 }
 
@@ -118,10 +133,18 @@ char * DataMsg::load_data (char * buffer)
   const int n_fa = (*pi++);
   const int n_pa = (*pi++);
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg load_data n_ff %d\n",this, n_ff);
+  fflush(stdout);
+#endif
   if (n_ff > 0) {
     pc = field_face_->load_data (pc);
   }
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg load_data n_fa %d\n",this, n_fa);
+  fflush(stdout);
+#endif
   if (n_fa > 0) {
     field_array_ = pc;
     pc += n_fa;
@@ -129,6 +152,10 @@ char * DataMsg::load_data (char * buffer)
     field_array_ = NULL;
   }
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg load_data n_pa %d\n",this, n_pa);
+  fflush(stdout);
+#endif
   if (n_pa > 0) {
     ParticleData * pd = particle_data_ = new ParticleData;
     pd->allocate(particle_descr);
@@ -137,6 +164,9 @@ char * DataMsg::load_data (char * buffer)
     particle_data_ = NULL;
   }
 
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p DataMsg load_data %d\n",this, (pc-buffer));
+#endif
   return pc;
 }
 
@@ -188,7 +218,8 @@ void DataMsg::update (Data * data, bool is_local)
       //      ff->face_to_array (field_src,&narray,&array);
       //      ff->array_to_face (array, field_dst);
 
-      delete ff;
+      delete field_face_;
+      field_face_ = NULL;
 
     } else { // ! is_local
 

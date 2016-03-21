@@ -563,11 +563,13 @@ else:
 
 if (python_lt_27 == 0 and have_mercurial):
 
-     cello_def.write ("#define CELLO_CHANGESET "
-                      "\""+subprocess.check_output
-                      (["hg", "id", "-n"]).rstrip()+"\"\n" )
+#     cello_def.write ("#define CELLO_CHANGESET "
+#                      "\""+subprocess.check_output
+#                      (["hg", "id", "-n"]).rstrip()+"\"\n" )
+
+     cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 else:
-     cello_def.write ("#define CELLO_CHANGESET unknown\n" )
+     cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 
 #----------
 

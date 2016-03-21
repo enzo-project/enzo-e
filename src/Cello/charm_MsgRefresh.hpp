@@ -33,9 +33,6 @@ public: // interface
   MsgRefresh & operator= (const MsgRefresh & data_msg) throw()
   { return *this; }
 
-  /// Return the FieldFace
-  FieldFace * field_face ();
-
   // Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
 
