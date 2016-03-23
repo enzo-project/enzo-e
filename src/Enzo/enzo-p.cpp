@@ -32,7 +32,6 @@
 #define CHARM_ENZO
 
 #include "test.hpp"
-
 #include "enzo.hpp"
 #include "main.hpp"
 

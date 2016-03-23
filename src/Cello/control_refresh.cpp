@@ -43,39 +43,10 @@ void Block::refresh_begin_()
 
   if ( refresh && refresh->active() ) {
 
-    refresh_load_field_faces_   (refresh);
-    
-    const int rank = this->rank();
-
-    const int npa = (rank == 1) ? 4 
-      :             (rank == 2) ? 4*4 
-      :                           4*4*4;
-
-    ParticleData * particle_array[npa];
-    ParticleData * particle_list [npa];
-    Index             index_list [npa];
-  
-    for (int i=0; i<npa; i++) {
-      particle_list[i] = NULL;
-      particle_array[i] = NULL;
-    }
-
-    bool interior;
-    int nl=0;
-    load_particle_faces_
-      (npa,&nl,particle_list,particle_array, index_list,
-       refresh, interior = false);
-
-    // 4. SEND PARTICLE DATA TO NEIGHBORS
-
-    particle_send_(nl,index_list,particle_list);
-
-    // delete neighbor particle objects
-    for (int il=0; il<nl; il++) {
-      ParticleData * pd = particle_list[il];
-      //      delete pd;
-    }
-
+    if (data()->any_fields()) 
+      refresh_load_field_faces_   (refresh);
+    if (data()->any_particles())
+      refresh_load_particle_faces_ (refresh);
   }
   control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
 }
@@ -258,15 +229,48 @@ void Block::refresh_store_field_face_
 #endif
 }
 
-
 //----------------------------------------------------------------------
 
-void Block::load_particle_faces_ (int npa, int * nl,
+void Block::refresh_load_particle_faces_ (Refresh * refresh)
+{
+
+    const int rank = this->rank();
+
+    const int npa = (rank == 1) ? 4 
+      :             (rank == 2) ? 4*4 
+      :                           4*4*4;
+
+    ParticleData * particle_array[npa];
+    ParticleData * particle_list [npa];
+    Index             index_list [npa];
+  
+    for (int i=0; i<npa; i++) {
+      particle_list[i] = NULL;
+      particle_array[i] = NULL;
+    }
+
+    int nl=0;
+    particle_load_faces_
+      (npa,&nl,particle_list,particle_array, index_list,
+       refresh);
+
+    // 4. SEND PARTICLE DATA TO NEIGHBORS
+
+    particle_send_(nl,index_list,particle_list);
+
+    // delete neighbor particle objects
+    for (int il=0; il<nl; il++) {
+      ParticleData * pd = particle_list[il];
+      //      delete pd;
+    }
+}
+//----------------------------------------------------------------------
+
+void Block::particle_load_faces_ (int npa, int * nl,
 				  ParticleData * particle_list[],
 				  ParticleData * particle_array[],
 				  Index index_list[],
-				  Refresh *refresh,
-				  bool interior)
+				  Refresh *refresh)
 {
   // Array elements correspond to child-sized blocks to
   // the left, inside, and right of the main Block.  Particles
@@ -309,7 +313,7 @@ void Block::load_particle_faces_ (int npa, int * nl,
   //     | 0 | 1 | 1 | 1 |
   //     +---+---+---+---+
 
-  TRACE_REFRESH("refresh_load_particle_faces()");
+  TRACE_REFRESH("particle_load_faces()");
 
   // ... arrays for updating positions of particles that cross
   // periodic boundaries

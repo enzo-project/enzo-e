@@ -67,7 +67,13 @@ protected: // attributes
   /// Id identifying message (TEMPORARY FOR DEBUGGING)
   int id_;
 
+  /// Field and particle data
   DataMsg * data_msg_;
+
+  /// Saved Charm++ buffer for deleting after unpack()
+  void * buffer_;
+
+  /// MsgRefine-specific attributes
 
   Index index_;
   int nx_, ny_, nz_;
@@ -80,9 +86,6 @@ protected: // attributes
   int num_face_level_;
   int * face_level_;
   bool testing_;
-
-  /// Saved Charm++ buffer for deleting after unpack()
-  void * buffer_;
 
 };
 

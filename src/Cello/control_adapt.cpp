@@ -3,16 +3,15 @@
 /// @file     control_adapt.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-25
-/// @brief    Charm-related mesh adaptation control functions
+/// @brief    Charm-related mesh adaptation control functions.  
 /// @ingroup  Control
-
+///
 /// This file controls adaptive mesh refinement on a distributed
 /// forest of octrees.
-///
-/// adapt_begin_()
 
 //--------------------------------------------------
 // #define DEBUG_ADAPT
+// #define DEBUG_NEW_REFRESH
 //--------------------------------------------------
 
 #ifdef DEBUG_ADAPT
@@ -22,10 +21,8 @@
     char buffer [256];							\
     sprintf (buffer,"%s %s"						\
 	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d",		\
-	     MSG,name().c_str(),					\
-	     LEVEL_NOW,LEVEL_NEW,					\
-	     IF3[0],IF3[1],IF3[2],					\
-	     IC3[0],IC3[1],IC3[2]);					\
+	     MSG,name().c_str(),LEVEL_NOW,LEVEL_NEW,			\
+	     IF3[0],IF3[1],IF3[2],IC3[0],IC3[1],IC3[2]);		\
     INDEX_SEND.print(buffer,-1,2,false,simulation());			\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
     check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
@@ -33,7 +30,6 @@
       (INDEX_SEND,IC3,IF3,LEVEL_NOW,LEVEL_NEW);				\
   }
 #else /* DEBUG_ADAPT */
-
 #   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
   {									\
     thisProxy[INDEX_RECV].p_adapt_recv_level				\
@@ -44,17 +40,20 @@
 
 #ifdef DEBUG_ADAPT
 
-#ifdef CELLO_TRACE
-#   define trace(A) fprintf (simulation()->fp_debug(),"%s:%d %s TRACE %s\n",__FILE__,__LINE__,name_.c_str(),A)
-#else
-#   define trace(A) /*  NULL */
-#endif
+#   ifdef CELLO_TRACE
+#      define trace(A) fprintf (simulation()->fp_debug(),		\
+				"%s:%d %s TRACE %s\n",			\
+				__FILE__,__LINE__,name_.c_str(),A)
+#   else
+#      define trace(A) /*  NULL */
+#   endif
 
 #else
 
 #   define trace(A) /*  NULL */
 
 #endif
+
 //--------------------------------------------------
 
 #include "simulation.hpp"
@@ -84,7 +83,6 @@ void Block::adapt_begin_()
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
   control_sync (CkIndex_Block::p_adapt_called(),sync_neighbor,0);
-
 }
 
 //----------------------------------------------------------------------
@@ -96,13 +94,11 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
-
   trace("adapt_called 2");
 
   adapt_send_level();
 
   control_sync (CkIndex_Main::p_adapt_next(),sync_quiescence);
-
 }
 
 //----------------------------------------------------------------------
@@ -116,7 +112,6 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-
   debug_faces_("adapt_next");
   trace("adapt_next 3");
 
@@ -192,16 +187,15 @@ void Block::adapt_end_()
 /// @brief Return whether the adapt phase should be called this cycle.
 bool Block::do_adapt_()
 {
-
   int adapt_interval = simulation()->config()->adapt_interval;
 
   return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
-
 }
 
 //----------------------------------------------------------------------
 
-/// @brief Determine whether this Block should refine, coarsen, or stay the same.
+/// @brief Determine whether this Block should refine, coarsen, or
+/// stay the same.
 ///
 /// Return if not a leaf; otherwise, apply all Refine refinement
 /// criteria to the Block, and set level_desired accordingly:
@@ -213,7 +207,6 @@ bool Block::do_adapt_()
 /// @return The desired level based on local refinement criteria.
 int Block::adapt_compute_desired_level_(int level_maximum)
 {
-
   if (! is_leaf()) return adapt_same;
 
   adapt_ = adapt_unknown;
@@ -275,6 +268,28 @@ void Block::adapt_refine_()
 
   std::vector<int> field_list;
 
+#ifdef NEW_REFRESH_REFINE
+
+  // First scatter particles to children first to avoid multiple passes
+  
+  ParticleData * particle_list[8];
+
+  ParticleDescr * p_descr = simulation()->particle_descr();
+  ParticleData  * p_data  = data()     -> particle_data();
+
+  const int nc = NUM_CHILDREN(rank);
+  for (int i=0; i<nc; i++) {
+    particle_list[i] = new ParticleData;
+    particle_list[i]->allocate(p_descr);
+  }
+
+  Particle particle (p_descr, p_data);
+  
+
+  // partition particles into 2x2x2 array to send to children
+  particle_scatter_children_ (particle_list,particle);
+#endif
+
   // For each new child
 
   ItChild it_child (rank);
@@ -310,7 +325,7 @@ void Block::adapt_refine_()
 
       data_msg -> set_field_face (field_face);
       data_msg -> set_field_data (data()->field_data());
-      data_msg -> set_particle_data (NULL);  // particles sold separately
+      data_msg -> set_particle_data (particle_list[IC3(ic3)]);
 
 #else
 
@@ -350,6 +365,107 @@ void Block::adapt_refine_()
 #ifdef DEBUG_ADAPT
   index_.print("adapt_refine leaf=0",-1,2,false,simulation());
 #endif
+}
+
+//----------------------------------------------------------------------
+
+void Block::particle_scatter_children_ (ParticleData * particle_list[],
+					Particle particle)
+{
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("DEBUG_NEW_REFRESH particle_scatter_children\n");
+#endif
+
+  const int rank = this->rank();
+  const int npa = NUM_CHILDREN(rank);
+
+  // get Block bounds 
+  double xm,ym,zm;
+  double xp,yp,zp;
+  lower(&xm,&ym,&zm);
+  upper(&xp,&yp,&zp);
+
+  // find block center (x0,y0,z0)
+  const double x0 = 0.5*(xm+xp);
+  const double y0 = 0.5*(ym+yp);
+  const double z0 = 0.5*(zm+zp);
+
+  // for each particle type to be moved
+
+  const int nt = particle.num_types();
+
+  for (int it=0; it<nt; it++) {
+
+#ifdef DEBUG_NEW_REFRESH
+    CkPrintf ("DEBUG_NEW_REFRESH scatter type %d\n",it);
+#endif
+    const int ia_x  = particle.attribute_position(it,0);
+
+    // (...positions may use absolute coordinates (float) or
+    // block-local coordinates (int))
+    const bool is_float = 
+      (cello::type_is_float(particle.attribute_type(it,ia_x)));
+
+    // (...stride may be != 1 if particle attributes are interleaved)
+    const int d  = particle.stride(it,ia_x);
+
+    // ...for each batch of particles
+
+    const int nb = particle.num_batches(it);
+
+    for (int ib=0; ib<nb; ib++) {
+
+      const int np = particle.num_particles(it,ib);
+
+      // ...all particles will be moved
+      bool mask[np];
+      for (int ip=0; ip<np; ip++) {
+	mask[ip] = true;
+      }
+
+      // ...extract particle position arrays
+
+      double xa[np],ya[np],za[np];
+      particle.position(it,ib,xa,ya,za);
+
+      // ...initialize mask used for scatter and delete
+      // ...and corresponding particle indices
+
+      int index[np];
+
+      if (is_float) {
+
+	// absolute coordinates
+
+	for (int ip=0; ip<np; ip++) {
+
+#ifdef DEBUG_NEW_REFRESH
+    CkPrintf ("DEBUG_NEW_REFRESH scatter particle %d\n",ip);
+#endif
+
+	  double x = xa[ip*d];
+	  double y = ya[ip*d];
+	  double z = za[ip*d];
+
+	  int ix = (rank >= 1) ? ( (x < x0) ? 0 : 1) : 0;
+	  int iy = (rank >= 2) ? ( (y < y0) ? 0 : 1) : 0;
+	  int iz = (rank >= 3) ? ( (z < z0) ? 0 : 1) : 0;
+
+	  // save index of ip'th particle's destination Particle object 
+	  index[ip] = ix + 2*(iy + 2*iz);
+	}
+
+      } else {
+	ERROR("Block::particle_scatter_children_",
+	      "Relative (integer) positions not supported");
+      }
+
+      // ...scatter particles to particle array
+      particle.scatter (it,ib, np, mask, index, npa, particle_list);
+      // ... delete scattered particles
+      particle.delete_particles (it,ib,mask);
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -420,7 +536,8 @@ void Block::p_adapt_recv_level
     index_send.print("index_",-1,2,false,simulation());
   }
 
-  const bool skip_face_update = ! (level_face_new > face_level_last_[ICF3(ic3,if3)]);
+  const bool skip_face_update = 
+    ! (level_face_new > face_level_last_[ICF3(ic3,if3)]);
 
 #ifdef DEBUG_ADAPT
   {
@@ -544,12 +661,12 @@ void Block::p_adapt_recv_level
     level_next_ = level_next;
     adapt_send_level();
   }
-
 }
 
 //----------------------------------------------------------------------
 
-void Block::adapt_recv ( const int of3[3], const int ic3[3], int level_face_new, int level_relative )
+void Block::adapt_recv 
+( const int of3[3], const int ic3[3], int level_face_new, int level_relative )
 {
 
   const int rank = this->rank();
@@ -667,8 +784,23 @@ void Block::adapt_coarsen_()
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_coarse, field_list);
 
+  const Index index_parent = index_.index_parent();
+
 #ifdef NEW_REFRESH_COARSEN
 
+  // Create data message object to send
+
+  DataMsg * data_msg = new DataMsg;
+
+  data_msg -> set_field_face (field_face);
+  data_msg -> set_field_data (data()->field_data());
+  data_msg -> set_particle_data (data()->particle_data());
+
+  MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr,ic3);
+  msg->set_data_msg (data_msg);
+
+  thisProxy[index_parent].p_adapt_recv_child (msg);
+  
 #else
 
   // Create array of coarsened data to send to parent
@@ -680,8 +812,6 @@ void Block::adapt_coarsen_()
 
   // send coarsened data to parent
 
-  const Index index_parent = index_.index_parent();
-
   // --------------------------------------------------
   thisProxy[index_parent].p_adapt_recv_child
     (ic3, narray,array, nf,face_level_curr);
@@ -692,6 +822,72 @@ void Block::adapt_coarsen_()
 #endif
 
 }
+
+//----------------------------------------------------------------------
+
+
+void Block::p_adapt_recv_child (MsgCoarsen * msg)
+{
+
+#ifdef NEW_REFRESH_COARSEN
+
+#ifdef DEBUG_REFRESH
+  CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
+  fflush(stdout);
+  if (msg->field_face()) msg->field_face()->print("called store");
+#endif
+
+  msg->update(data());
+
+  int * ic3 = msg->ic3();
+  int * child_face_level_curr = msg->face_level();
+
+  // copy child face level array
+  const int min_face_rank = 
+    simulation()->config()->adapt_min_face_rank;
+  Index index_child = index_.index_child(ic3);
+  ItFace it_face_child = this->it_face(min_face_rank,index_child);
+  int of3[3];
+
+  while (it_face_child.next()) {
+    it_face_child.face(of3);
+    int level_child = child_face_level_curr[IF3(of3)];
+    set_child_face_level_curr(ic3,of3,level_child);
+  }
+
+  // copy face level array
+  ItFace it_face = this->it_face(min_face_rank,index_);
+  while (it_face.next()) {
+    it_face.face(of3);
+    int level_child = child_face_level_curr[IF3(of3)];
+    int opf3[3];
+    if (parent_face_(opf3,of3,ic3)) {
+      set_face_level_curr(opf3,level_child);
+    }
+  }
+
+  // I am a leaf on the wind
+  is_leaf_=true;
+
+#ifdef DEBUG_ADAPT
+  index_.print("p_adapt_recv_child is_leaf=1",-1,2,false,simulation());
+#endif
+
+  // Can now safely notify child to delete itself 
+  adapt_delete_child_(index_child);
+
+  age_ = 0;
+
+  delete msg;
+
+#else 
+
+  CkPrintf ("p_refresh_recv_child() called with new_refresh_coarsen = 0\n");
+  CkExit();
+
+#endif
+}
+
 
 //----------------------------------------------------------------------
 
@@ -783,6 +979,7 @@ void Block::initialize_child_face_levels_()
     simulation()->config()->adapt_min_face_rank;
 
   // For each child
+
   while (it_child.next(ic3)) {
 
     // For each child face

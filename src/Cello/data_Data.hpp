@@ -108,8 +108,7 @@ public: // interface
 
   // Return the ith Field descriptor
   FieldDescr * field_descr () throw();
-  const FieldDescr * field_descr () const throw()
-  {   return (const FieldDescr *) field_descr(); }
+  const FieldDescr * field_descr () const throw();
 
   /// Return the ith Field
   Field field (int i=0) throw()
@@ -140,13 +139,18 @@ public: // interface
 
   // Return the ith Particle descriptor
   ParticleDescr * particle_descr () throw();
-  const ParticleDescr * particle_descr () const throw()
-  {   return (const ParticleDescr *) particle_descr(); }
+  const ParticleDescr * particle_descr () const throw();
 
   /// Return the Particle object
   Particle particle () throw()
   { return Particle(particle_descr(),
 		    particle_data_); }
+
+  bool any_particles() const
+  { return (particle_descr()->num_types() > 0); }
+
+  bool any_fields() const
+  { return (field_descr()->field_count() > 0); }
 
 public: // virtual functions
 

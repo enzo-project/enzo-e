@@ -52,15 +52,16 @@ MsgRefine::MsgRefine
     is_local_(true),
     id_(-1),
     data_msg_(NULL),
+    testing_(testing),
+    buffer_(NULL),
     index_(index),
     nx_(nx), ny_(ny), nz_(nz),
     num_field_blocks_(num_field_blocks),
     num_adapt_steps_(num_adapt_steps),
     cycle_(cycle), time_(time), dt_(dt),
     refresh_type_(refresh_type),
-    num_face_level_(num_face_level), face_level_(new int[27]),
-  testing_(testing) ,
-  buffer_(NULL)
+  num_face_level_(num_face_level),
+  face_level_(new int[num_face_level])
 {  
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d MsgRefine::MsgRefine() %p\n",CkMyPe(),this);
@@ -72,6 +73,7 @@ MsgRefine::MsgRefine
 #endif
 
   ++counter; 
+
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
   }
@@ -82,6 +84,9 @@ MsgRefine::MsgRefine
 MsgRefine::~MsgRefine()
 {
   --counter;
+
+  delete data_msg_;
+  data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
 }
@@ -154,10 +159,12 @@ void * MsgRefine::pack (MsgRefine * msg)
   // testing_
   size += sizeof(bool);
 
-  // data_msg_
+  // have_data
+  size += sizeof(int);
 
   int have_data = (msg->data_msg_ != NULL);
   if (have_data) {
+    // data_msg_
     size += msg->data_msg_->data_size();
   }
 
@@ -227,13 +234,20 @@ void * MsgRefine::pack (MsgRefine * msg)
   // data_msg_
   have_data = (msg->data_msg_ != NULL);
   (*pi++) = have_data;
+
   if (have_data) {
+    // data_msg_
     pc = msg->data_msg_->save_data(pc);
   }
 
 #ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p MsgRefine pack message size %d\n",msg,(pc - (char*)buffer));
+  CkPrintf ("%p MsgRefine pack message size %d %d\n",msg,(pc - (char*)buffer),size);
 #endif
+
+  ASSERT2("MsgRefine::pack()",
+	  "buffer size mismatch %d allocated %d packed",
+	  (pc - (char*)buffer),size,
+	  (pc - (char*)buffer) == size);
 
   delete msg;
 
@@ -326,9 +340,11 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   // testing_
   msg->testing_ = (*pb++);
 
-  // data_msg_
+  // have_data
   int have_data = (*pi++);
+
   if (have_data) {
+    // data_msg_
     msg->data_msg_ = new DataMsg;
     pc = msg->data_msg_->load_data(pc);
   } else {

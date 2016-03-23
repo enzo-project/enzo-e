@@ -9,7 +9,7 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_DATA
+// #define DEBUG_NEW_REFRESH
 
 //----------------------------------------------------------------------
 
@@ -19,18 +19,57 @@ long MsgCoarsen::counter = 0;
 //----------------------------------------------------------------------
 
 MsgCoarsen::MsgCoarsen()
-    : CMessage_MsgCoarsen(),
-      is_local_(true),
-      id_(-1),
-      data_msg_(NULL),
-      buffer_(NULL)
-  {  ++counter; }
+  : CMessage_MsgCoarsen(),
+    is_local_(true),
+    id_(-1),
+    data_msg_(NULL),
+    buffer_(NULL),
+    num_face_level_(0),
+    face_level_(NULL)
+{
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%d MsgCoarsen::MsgCoarsen() %p\n",CkMyPe(),this);
+  fflush(stdout);
+#endif
+  ic3_[0] = ic3_[1] = ic3_[2] = -1;
+  ++counter; 
+}
+
+//----------------------------------------------------------------------
+
+MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
+  : CMessage_MsgCoarsen(),
+    is_local_(true),
+    id_(-1),
+    data_msg_(NULL),
+    buffer_(NULL),
+    num_face_level_(num_face_level),
+    face_level_(new int[num_face_level])
+{
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%d MsgCoarsen::MsgCoarsen() %p\n",CkMyPe(),this);
+  fflush(stdout);
+#endif
+
+  ++counter; 
+
+  for (int i=0; i<num_face_level_; i++) {
+    face_level_[i] = face_level[i];
+  }
+  ic3_[0]=ic3[0];
+  ic3_[1]=ic3[1];
+  ic3_[2]=ic3[2];
+}
 
 //----------------------------------------------------------------------
 
 MsgCoarsen::~MsgCoarsen()
 {
   --counter;
+  delete data_msg_;
+  data_msg_ = 0;
+  delete [] face_level_;
+  face_level_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -50,7 +89,7 @@ void MsgCoarsen::set_data_msg  (DataMsg * data_msg)
 void * MsgCoarsen::pack (MsgCoarsen * msg)
 {
 
-#ifdef DEBUG_DATA
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgCoarsen::pack()\n",msg);
 #endif
   // Update ID (for debugging)
@@ -63,12 +102,25 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
 
   int size = 0;
 
-  size += sizeof(int); // id_
+  // id_
+  size += sizeof(int); 
+
+  // have_data
+  size += sizeof(int); 
 
   int have_data = (msg->data_msg_ != NULL);
   if (have_data) {
     size += msg->data_msg_->data_size();
   }
+
+  // num_face_level_
+  size += sizeof(int);
+
+  // face_level_[]
+  size += msg->num_face_level_ * sizeof(int);
+
+  // ic3_[]
+  size += 3*sizeof(int);
 
   //--------------------------------------------------
   //  2. allocate buffer using CkAllocBuffer()
@@ -87,13 +139,40 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
 
   pc = buffer;
 
+  // id_
   (*pi++) = msg->id_;
 
   have_data = (msg->data_msg_ != NULL);
-  (*pi++) = have_data;
+
+  // have_data
+  (*pi++) = have_data; 
+
   if (have_data) {
-    pc = msg->data_msg_->save_data(pc);
+    // data_msg_
+    pc = msg->data_msg_->save_data(pc);   
   }
+
+  // num_face_level_
+  (*pi++) = msg->num_face_level_;
+
+  // face_level_[]
+  for (size_t i=0; i<msg->num_face_level_; i++) {
+    (*pi++) = msg->face_level_[i];
+  }
+
+  // ic3_[]
+  (*pi++) = msg->ic3_[0];
+  (*pi++) = msg->ic3_[1];
+  (*pi++) = msg->ic3_[2];
+
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%p MsgCoarsen pack message size %d %d\n",msg,(pc - (char*)buffer),size);
+#endif
+
+  ASSERT2("MsgRefresh::pack()",
+	  "buffer size mismatch %d allocated %d packed",
+	  (pc - (char*)buffer),size,
+	  (pc - (char*)buffer) == size);
 
   delete msg;
 
@@ -115,7 +194,7 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
     (MsgCoarsen *) CkAllocBuffer (buffer,sizeof(MsgCoarsen));
 
   msg = new ((void*)msg) MsgCoarsen;
-#ifdef DEBUG_DATA
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgCoarsen::unpack()\n",msg);
 #endif
   
@@ -131,14 +210,36 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
 
   pc = (char *) buffer;
 
+  // id_
   msg->id_ = (*pi++);
 
+  // have_data
   int have_data = (*pi++);
+
   if (have_data) {
+    // data_msg_
     pc = msg->data_msg_->load_data(pc);
   } else {
     msg->data_msg_ = NULL;
   }
+
+  // num_face_level_
+  msg->num_face_level_ = (*pi++);
+
+  // face_level_[]
+  if (msg->num_face_level_ > 0) {
+    msg->face_level_ = new int [msg->num_face_level_];
+    for (size_t i = 0; i<msg->num_face_level_; i++) {
+      msg->face_level_[i] = (*pi++);
+    }
+  } else {
+    msg->face_level_ = 0;
+  }
+
+  // ic3_[]
+  msg->ic3_[0] = (*pi++);
+  msg->ic3_[1] = (*pi++);
+  msg->ic3_[2] = (*pi++);
 
   // 3. Save the input buffer for freeing later
 
@@ -154,7 +255,7 @@ void MsgCoarsen::update (Data * data)
 
   if (data_msg_ == NULL) return;
 
-#ifdef DEBUG_DATA
+#ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgCoarsen::update()\n",this);
 #endif
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -175,13 +276,17 @@ void MsgCoarsen::update (Data * data)
     Particle particle = data->particle();
     
     for (int it=0; it<particle.num_types(); it++) {
-#ifdef DEBUG_DATA
+#ifdef DEBUG_NEW_REFRESH
       CkPrintf ("%d %p DEBUG update\n",CkMyPe(),pd);
       fflush(stdout);
 #endif
       particle.gather (it, 1, &pd);
     }
-    data_msg_->delete_particle_data();
+    // Don't delete particle data if local--done by child Block::data_
+    // destructor()
+    if (!is_local_) {
+      data_msg_->delete_particle_data();
+    }
   }
 
   if (fa != NULL) {
@@ -208,6 +313,7 @@ void MsgCoarsen::update (Data * data)
     //    delete field_face_;
     //    field_face_ = 0;
   }
+
   if (!is_local_) {
       CkFreeMsg (buffer_);
   }

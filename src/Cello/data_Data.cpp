@@ -8,8 +8,6 @@
 #include "data.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_NEW_REFRESH
-
 //----------------------------------------------------------------------
 
 Data::Data(FieldDescr * field_descr,
@@ -23,13 +21,6 @@ Data::Data(FieldDescr * field_descr,
     field_data_(),
     particle_data_()
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d Data::Data() %p\n",CkMyPe(),this);
-  CkPrintf ("   %p  %p  %d %d %d  %d  %f %f %f %f %f %f\n",
-	    field_descr,particle_descr,nx,ny,nz,num_field_data,
-	    xm,xp,ym,yp,zm,zp);
-  fflush(stdout);
-#endif  
   // Initialize field_data_[]
   field_data_.resize(num_field_data);
   for (size_t i=0; i<field_data_.size(); i++) {
@@ -56,13 +47,6 @@ Data::Data(int nx, int ny, int nz,
     field_data_(),
     particle_data_()
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d Data::Data() %p\n",CkMyPe(),this);
-  CkPrintf ("   %d %d %d  %d  %f %f %f %f %f %f\n",
-	    nx,ny,nz,num_field_data,
-	    xm,xp,ym,yp,zm,zp);
-  fflush(stdout);
-#endif  
   // Initialize field_data_[]
   field_data_.resize(num_field_data);
   for (size_t i=0; i<field_data_.size(); i++) {
@@ -88,7 +72,9 @@ Data::~Data() throw ()
     field_data_[i] = 0;
   }
   num_field_data_ = 0;
+
   delete particle_data_;
+
   particle_data_ = 0;
 }
 
@@ -173,7 +159,22 @@ FieldDescr * Data::field_descr () throw()
 
 //----------------------------------------------------------------------
 
+const FieldDescr * Data::field_descr () const throw()
+{
+  return proxy_simulation.ckLocalBranch()->field_descr();  
+}
+
+
+//----------------------------------------------------------------------
+
 ParticleDescr * Data::particle_descr () throw()
+{
+  return proxy_simulation.ckLocalBranch()->particle_descr();  
+}
+
+//----------------------------------------------------------------------
+
+const ParticleDescr * Data::particle_descr () const throw()
 {
   return proxy_simulation.ckLocalBranch()->particle_descr();  
 }

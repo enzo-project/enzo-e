@@ -13,7 +13,7 @@
 
 /* #define DEBUG_ADAPT */
 
-/* #define DEBUG_NEW_REFRESH */
+// #define DEBUG_NEW_REFRESH
 
 // KEEP CONSISTENT WITH _comm.hpp: phase_type
 const char * phase_name[] = {
@@ -85,23 +85,6 @@ Block::Block ( MsgRefine * msg ) throw ()
     msg->update(data());
     delete msg;
   }
-
-#ifdef DEBUG_NEW_REFRESH
-  Field field = data()->field();
-  int id = field.field_id("density");
-  double * d = (double *) field.values(id);
-  int nx=msg->nx_;
-  int ny=msg->ny_;
-  int nz=msg->nz_;
-  printf ("%d %d %d\n",nx,ny,nz);
-  for (int iz=0; iz<nz; iz++) {
-    for (int iy=0; iy<ny; iy++) {
-      for (int ix=0; ix<nx; ix++) {
-	printf ("%d %d %d  %f\n",ix,iy,iz,d[ix+nx*(iy+ny*iz)]);
-      }
-    }
-  }
-#endif
 
 }
 
@@ -511,9 +494,11 @@ Block::~Block() throw ()
 
     delete [] array;
   }
-  if (data_) delete data_;
+
+  delete data_;
   data_ = 0;
-  if (child_data_) delete child_data_;
+
+  delete child_data_;
   child_data_ = 0;
 
   simulation()->delete_block();

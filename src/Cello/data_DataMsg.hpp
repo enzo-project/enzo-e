@@ -73,7 +73,9 @@ public: // interface
 
   /// Delete the ParticleData object
   void delete_particle_data  () 
-  { delete particle_data_; particle_data_ = NULL; }
+  { 
+    delete particle_data_; particle_data_ = NULL; 
+  }
 
   /// Return the FieldData
   FieldData * field_data () 

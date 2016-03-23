@@ -151,6 +151,7 @@ module mesh {
       (int ic3[3], int na, char arr[na], int nf, 
        int child_face_level[nf]);
 
+    entry void p_adapt_recv_child (MsgCoarsen * msg);
 
     //--------------------------------------------------
     // *** REFRESH

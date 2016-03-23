@@ -8,7 +8,9 @@ flags_arch = '-Wall -O3 -g'
 #flags_arch = '-Wall -g -fsanitize=address -fno-omit-frame-pointer'
 #flags_arch = '-Wall -O3 -pg'
 
-flags_link_charm = ' -rdynamic' # required for backtraces
+# rdynamic required for backtraces
+#flags_link_charm = ' -rdynamic -memory paranoid' 
+flags_link_charm = ''
 
 cc  = 'gcc '
 f90 = 'gfortran'

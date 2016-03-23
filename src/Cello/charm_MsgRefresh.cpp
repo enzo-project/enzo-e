@@ -32,6 +32,8 @@ MsgRefresh::MsgRefresh()
 MsgRefresh::~MsgRefresh()
 {
   --counter;
+  delete data_msg_;
+  data_msg_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -53,9 +55,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 #ifdef TRACE_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgRefresh::pack()\n",msg);
 #endif
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefresh::pack()\n",msg);
-#endif
   // Update ID (for debugging)
 
   if (id_count == -1) id_count = CkMyPe()+CkNumPes();
@@ -68,8 +67,11 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   size += sizeof(int); // id_
 
+  size += sizeof(int); // have_data
+
   int have_data = (msg->data_msg_ != NULL);
   if (have_data) {
+    // data_msg_
     size += msg->data_msg_->data_size();
   }
 
@@ -103,8 +105,12 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   // Return the buffer
 
 #ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p MsgRefresh pack message size %d\n",msg,(pc - (char*)buffer));
+  CkPrintf ("%p MsgRefresh pack message size %d %d\n",msg,(pc - (char*)buffer),size);
 #endif
+  ASSERT2("MsgRefresh::pack()",
+	  "buffer size mismatch %d allocated %d packed",
+	  (pc - (char*)buffer),size,
+	  (pc - (char*)buffer) == size);
 
   return (void *) buffer;
 }

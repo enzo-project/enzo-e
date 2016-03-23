@@ -380,6 +380,8 @@ public:
    int ic3[3], 
    int if3[3],
    int level_now, int level_new);
+
+  void p_adapt_recv_child (MsgCoarsen * msg);
   void p_adapt_recv_child
   (int ic3[3],int na, char * array, int nf, int * child_face_level);
 
@@ -472,12 +474,9 @@ protected:
 
   /// Pack field face data into arrays and send to neighbors
   void refresh_load_field_faces_ (Refresh * refresh);
-  /// Pack particle type data into arrays and send to neighbors
-  void load_particle_faces_ (int npa, int * nl,
-			     ParticleData * particle_list[],
-			     ParticleData * particle_array[],
-			     Index index_list[],
-			     Refresh * refresh, bool interior = false);
+
+  /// Scatter particles in ghost zones to neighbors
+  void refresh_load_particle_faces_ (Refresh * refresh);
 
   void refresh_load_field_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
@@ -514,10 +513,22 @@ protected:
   /// particle_array ParticleData elements
   void particle_scatter_neighbors_
   (int npa, ParticleData * particle_array[],
-   std::vector<int> & type_list, Particle particle);
+   std::vector<int> & type_list, Particle particle_src);
+
+  /// Scatter particles to appropriate partictle_list elements
+  void particle_scatter_children_ (ParticleData * particle_list[],
+				   Particle particle_src);
 
   /// Send particles in list to corresponding indices
-  void particle_send_(int nl,Index index_list[], ParticleData * particle_list[]);
+  void particle_send_(int nl,Index index_list[], 
+		      ParticleData * particle_list[]);
+
+  /// Pack particle type data into arrays and send to neighbors
+  void particle_load_faces_ (int npa, int * nl,
+			     ParticleData * particle_list[],
+			     ParticleData * particle_array[],
+			     Index index_list[],
+			     Refresh * refresh);
 
   //--------------------------------------------------
   // STOPPING

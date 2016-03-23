@@ -21,7 +21,10 @@ public: // interface
   static long counter;
 
   static int id_count;
-  MsgCoarsen() ;
+
+  MsgCoarsen();
+
+  MsgCoarsen( int num_face_level, int * face_level, int ic3[3]);
 
   virtual ~MsgCoarsen();
 
@@ -39,6 +42,12 @@ public: // interface
   /// Update the Data with data stored in this message
   void update (Data * data);
 
+  /// Return the ic3_ attribute
+  int * ic3() { return ic3_; }
+
+  /// Return the face_level_ attribute
+  int * face_level() { return face_level_; }
+
 public: // static methods
 
   /// Pack data to serialize
@@ -55,10 +64,17 @@ protected: // attributes
   /// Id identifying message (TEMPORARY FOR DEBUGGING)
   int id_;
 
+  /// Field and particle data
   DataMsg * data_msg_;
 
   /// Saved Charm++ buffer for deleting after unpack()
   void * buffer_;
+
+  /// MsgRefine-specific attributes
+
+  int num_face_level_;
+  int * face_level_;
+  int ic3_[3];
 
 };
 

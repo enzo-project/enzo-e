@@ -283,6 +283,16 @@ python_lt_27 = 0
 
 sys.path.append("./config");
 
+flags_arch_cpp = ''
+flags_config = ''
+flags_cxx = ''
+flags_cc = ''
+flags_fc = ''
+flags_link = ''
+flags_cxx_charm = ''
+flags_cc_charm = ''
+flags_fc_charm = ''
+flags_link_charm = ''
 
 if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
@@ -341,17 +351,6 @@ if (use_projections == 1):
 
 if (use_performance == 1):
      defines = defines + define_performance
-
-flags_arch_cpp = ''
-flags_config = ''
-flags_cxx = ''
-flags_cc = ''
-flags_fc = ''
-flags_link = ''
-flags_cxx_charm = ''
-flags_cc_charm = ''
-flags_fc_charm = ''
-flags_link_charm = ''
 
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
@@ -566,7 +565,6 @@ if (python_lt_27 == 0 and have_mercurial):
 #     cello_def.write ("#define CELLO_CHANGESET "
 #                      "\""+subprocess.check_output
 #                      (["hg", "id", "-n"]).rstrip()+"\"\n" )
-
      cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 else:
      cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )

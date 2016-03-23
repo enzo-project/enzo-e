@@ -5,12 +5,19 @@
 /// @date     2011-03-17
 /// @brief    Implementation of EnzoSimulation user-dependent class member functions
 
+/* #define CHECK_MEMORY */  /* calls mtrace() */
+
+
 #include "cello.hpp"
 
 #include "enzo.hpp"
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
+
+#ifdef CHECK_MEMORY
+#   include <mcheck.h>
+#endif
 
 #include "simulation.hpp"
 
@@ -24,6 +31,10 @@ EnzoSimulation::EnzoSimulation
  int                n) throw ()
   : Simulation(parameter_file, n)
 {
+#ifdef CHECK_MEMORY
+  mtrace();
+#endif
+
   // Synchronize to ensure all EnzoSimulation objects exist before
   // reading parameters
 
