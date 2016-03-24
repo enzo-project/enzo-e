@@ -66,8 +66,8 @@ MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
 MsgCoarsen::~MsgCoarsen()
 {
   --counter;
-  delete data_msg_;
-  data_msg_ = 0;
+  // delete data_msg_;
+  // data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
 }

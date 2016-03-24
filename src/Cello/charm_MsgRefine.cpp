@@ -85,8 +85,8 @@ MsgRefine::~MsgRefine()
 {
   --counter;
 
-  delete data_msg_;
-  data_msg_ = 0;
+  // delete data_msg_;
+  // data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
 }

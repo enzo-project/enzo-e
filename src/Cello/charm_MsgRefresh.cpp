@@ -32,8 +32,8 @@ MsgRefresh::MsgRefresh()
 MsgRefresh::~MsgRefresh()
 {
   --counter;
-  delete data_msg_;
-  data_msg_ = 0;
+  // delete data_msg_;
+  // data_msg_ = 0;
 }
 
 //----------------------------------------------------------------------
