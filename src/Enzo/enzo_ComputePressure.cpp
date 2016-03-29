@@ -27,6 +27,9 @@ int EnzoBlock::ComputePressure(enzo_float time,
 			       enzo_float *pressure,
 			       int comoving_coordinates)
 {
+
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   /* declarations */
  
   int i, size = 1;
@@ -88,10 +91,10 @@ int EnzoBlock::ComputePressure(enzo_float time,
  
       enzo_float d  = density[i];
 
-      pressure[i] = (Gamma - 1.0)*d*internal_energy[i];
+      pressure[i] = (Gamma[in] - 1.0)*d*internal_energy[i];
 
-      if (pressure[i] < pressure_floor)
-	pressure[i] = pressure_floor;
+      if (pressure[i] < pressure_floor[in])
+	pressure[i] = pressure_floor[in];
 
     } // end of loop
 
@@ -133,10 +136,10 @@ int EnzoBlock::ComputePressure(enzo_float time,
  
   /* Correct for Gamma from H2. */
  
-  if (MultiSpecies > 1) {
+  if (MultiSpecies[in] > 1) {
  
     enzo_float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
-      GammaInverse = 1.0/(Gamma-1.0), x, Gamma1, temp;
+      GammaInverse = 1.0/(Gamma[in]-1.0), x, Gamma1, temp;
     enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     /* Find Multi-species fields. */
@@ -179,7 +182,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
       /* First, approximate temperature. */
  
       if (number_density == 0)
-	number_density = number_density_floor;
+	number_density = number_density_floor[in];
       temp = MAX(TemperatureUnits*pressure[i]/(number_density + nH2), 
 		 (enzo_float)(1.0));
  
@@ -199,7 +202,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
 	
       /* Correct pressure with improved Gamma. */
  
-      pressure[i] *= (Gamma1 - 1.0)/(Gamma - 1.0);
+      pressure[i] *= (Gamma1 - 1.0)/(Gamma[in] - 1.0);
  
     } // end: loop over i
  
@@ -208,11 +211,11 @@ int EnzoBlock::ComputePressure(enzo_float time,
     /* To emulate the opacity limit in turbulent star formation 
        simulations */
   
-  enzo_float Gamma1 = Gamma;
-  if ((ProblemType == 60 || ProblemType == 61))
+  enzo_float Gamma1 = Gamma[in];
+  if ((ProblemType[in] == 60 || ProblemType[in] == 61))
     for (i=0; i<size; i++) {
-      Gamma1 = MIN(Gamma + (log10(density[i])-8.0)*0.3999/2.5, 1.4);
-      pressure[i] *= (Gamma1 - 1.0)/(Gamma - 1.0);
+      Gamma1 = MIN(Gamma[in] + (log10(density[i])-8.0)*0.3999/2.5, 1.4);
+      pressure[i] *= (Gamma1 - 1.0)/(Gamma[in] - 1.0);
     }
 
 

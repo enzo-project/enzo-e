@@ -7,35 +7,35 @@
 
 module enzo {
 
-  readonly int EnzoBlock::UseMinimumPressureSupport;
-  readonly enzo_float EnzoBlock::MinimumPressureSupportParameter;
-  readonly enzo_float EnzoBlock::ComovingBoxSize;
-  readonly enzo_float EnzoBlock::HubbleConstantNow;
-  readonly enzo_float EnzoBlock::OmegaMatterNow;
-  readonly enzo_float EnzoBlock::OmegaLambdaNow;
-  readonly enzo_float EnzoBlock::MaxExpansionRate;
-  readonly int EnzoBlock::MultiSpecies;
-  readonly int EnzoBlock::PressureFree;
-  readonly enzo_float EnzoBlock::Gamma;
-  readonly enzo_float EnzoBlock::GravitationalConstant;
-  readonly int EnzoBlock::ProblemType;
-  readonly int EnzoBlock::PPMFlatteningParameter;
-  readonly int EnzoBlock::PPMDiffusionParameter;
-  readonly int EnzoBlock::PPMSteepeningParameter;
-  readonly int EnzoBlock::DualEnergyFormalism;
-  readonly enzo_float EnzoBlock::DualEnergyFormalismEta1;
-  readonly enzo_float EnzoBlock::DualEnergyFormalismEta2;
-  readonly enzo_float EnzoBlock::pressure_floor;
-  readonly enzo_float EnzoBlock::density_floor;
-  readonly enzo_float EnzoBlock::number_density_floor;
-  readonly enzo_float EnzoBlock::temperature_floor;
-  readonly enzo_float EnzoBlock::InitialRedshift;
-  readonly enzo_float EnzoBlock::InitialTimeInCodeUnits;
-  readonly enzo_float EnzoBlock::DomainLeftEdge [MAX_DIMENSION];
-  readonly enzo_float EnzoBlock::DomainRightEdge[MAX_DIMENSION];
-  readonly int EnzoBlock::GridRank;
-  readonly int EnzoBlock::ghost_depth[MAX_DIMENSION];
-  readonly int EnzoBlock::NumberOfBaryonFields;      // active baryon fields
+  readonly int EnzoBlock::UseMinimumPressureSupport[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::ComovingBoxSize[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::HubbleConstantNow[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::OmegaMatterNow[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::OmegaLambdaNow[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::MaxExpansionRate[MAX_NODE_SIZE];
+  readonly int EnzoBlock::MultiSpecies[MAX_NODE_SIZE];
+  readonly int EnzoBlock::PressureFree[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::Gamma[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::GravitationalConstant[MAX_NODE_SIZE];
+  readonly int EnzoBlock::ProblemType[MAX_NODE_SIZE];
+  readonly int EnzoBlock::PPMFlatteningParameter[MAX_NODE_SIZE];
+  readonly int EnzoBlock::PPMDiffusionParameter[MAX_NODE_SIZE];
+  readonly int EnzoBlock::PPMSteepeningParameter[MAX_NODE_SIZE];
+  readonly int EnzoBlock::DualEnergyFormalism[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::DualEnergyFormalismEta1[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::DualEnergyFormalismEta2[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::pressure_floor[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::density_floor[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::number_density_floor[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::temperature_floor[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::InitialRedshift[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::InitialTimeInCodeUnits[MAX_NODE_SIZE];
+  readonly enzo_float EnzoBlock::DomainLeftEdge [MAX_NODE_SIZE_3];
+  readonly enzo_float EnzoBlock::DomainRightEdge[MAX_NODE_SIZE_3];
+  readonly int EnzoBlock::GridRank[MAX_NODE_SIZE];
+  readonly int EnzoBlock::ghost_depth[MAX_NODE_SIZE_3];
+  readonly int EnzoBlock::NumberOfBaryonFields[MAX_NODE_SIZE];      // active baryon fields
 
   //==================================================
   // WARNING: Enable the following two lines iff use_grackle = 1

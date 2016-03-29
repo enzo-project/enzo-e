@@ -130,7 +130,8 @@ void EnzoFactory::create_subblock_array
 	     min_level);
   }
 
-  CProxy_EnzoBlock * enzo_block_array = static_cast<CProxy_EnzoBlock*> (block_array);
+  CProxy_EnzoBlock * enzo_block_array = 
+    static_cast<CProxy_EnzoBlock*> (block_array);
 
   for (int level = -1; level >= min_level; level--) {
 

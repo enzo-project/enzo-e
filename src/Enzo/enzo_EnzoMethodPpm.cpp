@@ -88,7 +88,9 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   /* Compute the pressure. */
 
-  EnzoComputePressure compute_pressure (EnzoBlock::Gamma,
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
 					comoving_coordinates_);
   compute_pressure.compute(enzo_block);
 
@@ -132,7 +134,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 			&enzo_block->CellWidth[0], 
 			&enzo_block->CellWidth[1], 
 			&enzo_block->CellWidth[2],
-			&EnzoBlock::Gamma, &EnzoBlock::PressureFree, &a,
+			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &a,
 			density, pressure,
 			velocity_x, 
 			velocity_y, 

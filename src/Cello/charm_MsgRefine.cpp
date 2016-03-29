@@ -13,15 +13,13 @@
 
 //----------------------------------------------------------------------
 
-int MsgRefine::id_count = -1;
-long MsgRefine::counter = 0;
+long MsgRefine::counter[MAX_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
 MsgRefine::MsgRefine()
   : CMessage_MsgRefine(),
     is_local_(true),
-    id_(-1),
     data_msg_(NULL),
     index_(),
     nx_(-1), ny_(-1), nz_(-1),
@@ -37,7 +35,10 @@ MsgRefine::MsgRefine()
   CkPrintf ("%d MsgRefine::MsgRefine() %p\n",CkMyPe(),this);
   fflush(stdout);
 #endif
-  ++counter; 
+
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  ++counter[in]; 
 }
 
 //----------------------------------------------------------------------
@@ -50,7 +51,6 @@ MsgRefine::MsgRefine
  int num_face_level, int * face_level, bool testing ) 
   : CMessage_MsgRefine(),
     is_local_(true),
-    id_(-1),
     data_msg_(NULL),
     testing_(testing),
     buffer_(NULL),
@@ -72,7 +72,9 @@ MsgRefine::MsgRefine
   fflush(stdout);
 #endif
 
-  ++counter; 
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  ++counter[in]; 
 
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
@@ -83,7 +85,9 @@ MsgRefine::MsgRefine
 
 MsgRefine::~MsgRefine()
 {
-  --counter;
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  --counter[in];
 
   // delete data_msg_;
   // data_msg_ = 0;
@@ -111,13 +115,6 @@ void * MsgRefine::pack (MsgRefine * msg)
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG MsgRefine::pack()\n",CkMyPe());
 #endif
-  // Update ID (for debugging)
-
-  if (id_count == -1) id_count = CkMyPe()+CkNumPes();
-
-  msg->id_ = id_count;
-
-  id_count += CkNumPes();
 
   int size = 0;
 
@@ -128,9 +125,6 @@ void * MsgRefine::pack (MsgRefine * msg)
 
   // dt_;
   size += sizeof(double);
-
-  // id_
-  size += sizeof(int);  
 
   // index_
   size += 3*sizeof(int);
@@ -192,9 +186,6 @@ void * MsgRefine::pack (MsgRefine * msg)
 
   // dt_
   (*pd++) = msg->dt_;
-
-  // id_
-  (*pi++) = msg->id_;
 
   // index_
   int v3[3];
@@ -296,9 +287,6 @@ MsgRefine * MsgRefine::unpack(void * buffer)
 
   // dt_;
   msg->dt_ = (*pd++);
-
-  // id_
-  msg->id_ = (*pi++);
 
   // index_
   int v3[3];

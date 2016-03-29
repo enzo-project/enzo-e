@@ -170,7 +170,12 @@ void Block::refresh_exit_()
 
 void Block::control_sync (int entry_point, int sync, int id)
 {
-  TRACE_CONTROL("control_sync");
+#ifdef DEBUG_CONTROL
+  { char buffer[50];
+    sprintf (buffer,"control_sync %d %d",sync,id);
+    TRACE_CONTROL(buffer);
+  }
+#endif
   
   if (sync == sync_quiescence) {
 

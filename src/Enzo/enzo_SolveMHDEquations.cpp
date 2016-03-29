@@ -45,8 +45,10 @@ int EnzoBlock::SolveMHDEquations
  
     /* Compute size (in floats) of the current grid. */
  
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+
     size = 1;
-    for (dim = 0; dim < GridRank; dim++)
+    for (dim = 0; dim < GridRank[in]; dim++)
       size *= GridDimension[dim];
  
     /* Get easy to handle pointers for each variable. */
@@ -140,14 +142,14 @@ int EnzoBlock::SolveMHDEquations
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
  
-     for (dim = 0; dim < GridRank; dim++)
+     for (dim = 0; dim < GridRank[in]; dim++)
        GridGlobalStart[dim] =
-     	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
+     	NINT((GridLeftEdge[dim] - DomainLeftEdge[in*3+dim])/CellWidth[dim]) -
      	GridStartIndex[dim];
  
     /* fix grid quantities so they are defined to at least 3 dims */
  
-    for (i = GridRank; i < 3; i++) {
+    for (i = GridRank[in]; i < 3; i++) {
       GridDimension[i]   = 1;
       GridStartIndex[i]  = 0;
       GridEndIndex[i]    = 0;
@@ -216,7 +218,7 @@ int EnzoBlock::SolveMHDEquations
     //    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
  
     for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
-      for (dim = 0; dim < GridRank; dim++) {
+      for (dim = 0; dim < GridRank[in]; dim++) {
  
         /* Set i,j dimensions of 2d flux slice (this works even if we
            are in 1 or 2d) the correspond to the dimensions of the global
@@ -302,7 +304,7 @@ int EnzoBlock::SolveMHDEquations
     enzo_float a = 1.0;
     enzo_float CellWidthTemp[MAX_DIMENSION];
     for (dim = 0; dim < MAX_DIMENSION; dim++) {
-      if (dim < GridRank)
+      if (dim < GridRank[in])
 	CellWidthTemp[dim] = enzo_float(a*CellWidth[dim]);
       else
 	CellWidthTemp[dim] = 1.0;

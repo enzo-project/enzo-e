@@ -44,33 +44,33 @@ public:
 
   /// Cosmology
 
-  static int UseMinimumPressureSupport;
-  static enzo_float MinimumPressureSupportParameter;
-  static enzo_float ComovingBoxSize;
-  static enzo_float HubbleConstantNow;
-  static enzo_float OmegaMatterNow;
-  static enzo_float OmegaLambdaNow;
-  static enzo_float MaxExpansionRate;
+  static int UseMinimumPressureSupport[MAX_NODE_SIZE];
+  static enzo_float MinimumPressureSupportParameter[MAX_NODE_SIZE];
+  static enzo_float ComovingBoxSize[MAX_NODE_SIZE];
+  static enzo_float HubbleConstantNow[MAX_NODE_SIZE];
+  static enzo_float OmegaMatterNow[MAX_NODE_SIZE];
+  static enzo_float OmegaLambdaNow[MAX_NODE_SIZE];
+  static enzo_float MaxExpansionRate[MAX_NODE_SIZE];
 
   // Chemistry
 
-  static int MultiSpecies;
+  static int MultiSpecies[MAX_NODE_SIZE];
 
   // Physics
 
-  static int PressureFree;
-  static enzo_float Gamma;
-  static enzo_float GravitationalConstant;
+  static int PressureFree[MAX_NODE_SIZE];
+  static enzo_float Gamma[MAX_NODE_SIZE];
+  static enzo_float GravitationalConstant[MAX_NODE_SIZE];
 
   // Problem-specific
 
-  static int ProblemType;
+  static int ProblemType[MAX_NODE_SIZE];
 
   // Method PPM
 
-  static int PPMFlatteningParameter;
-  static int PPMDiffusionParameter;
-  static int PPMSteepeningParameter;
+  static int PPMFlatteningParameter[MAX_NODE_SIZE];
+  static int PPMDiffusionParameter[MAX_NODE_SIZE];
+  static int PPMSteepeningParameter[MAX_NODE_SIZE];
 
   // Parallel
 
@@ -78,32 +78,32 @@ public:
 
   // Numerics
 
-  static int DualEnergyFormalism;
-  static enzo_float DualEnergyFormalismEta1;
-  static enzo_float DualEnergyFormalismEta2;
+  static int DualEnergyFormalism[MAX_NODE_SIZE];
+  static enzo_float DualEnergyFormalismEta1[MAX_NODE_SIZE];
+  static enzo_float DualEnergyFormalismEta2[MAX_NODE_SIZE];
 
-  static enzo_float pressure_floor;
-  static enzo_float density_floor;
-  static enzo_float number_density_floor;
-  static enzo_float temperature_floor;
+  static enzo_float pressure_floor[MAX_NODE_SIZE];
+  static enzo_float density_floor[MAX_NODE_SIZE];
+  static enzo_float number_density_floor[MAX_NODE_SIZE];
+  static enzo_float temperature_floor[MAX_NODE_SIZE];
 
-  static enzo_float InitialRedshift;
-  static enzo_float InitialTimeInCodeUnits;
+  static enzo_float InitialRedshift[MAX_NODE_SIZE];
+  static enzo_float InitialTimeInCodeUnits[MAX_NODE_SIZE];
 
   // Domain
 
-  static enzo_float DomainLeftEdge [MAX_DIMENSION];
-  static enzo_float DomainRightEdge[MAX_DIMENSION];
+  static enzo_float DomainLeftEdge [MAX_NODE_SIZE_3];
+  static enzo_float DomainRightEdge[MAX_NODE_SIZE_3];
 
   // PPM
 
-  static int GridRank;
+  static int GridRank[MAX_NODE_SIZE];
 
-  static int ghost_depth[MAX_DIMENSION];
+  static int ghost_depth[MAX_NODE_SIZE_3];
 
   // Fields
 
-  static int NumberOfBaryonFields;      // active baryon fields
+  static int NumberOfBaryonFields[MAX_NODE_SIZE];  // active baryon fields
 
 public: // interface
 

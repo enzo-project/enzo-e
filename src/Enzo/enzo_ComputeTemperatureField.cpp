@@ -73,15 +73,17 @@ int EnzoBlock::ComputeTemperatureField
   }
  
   /* Compute the size of the fields. */
- 
+
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   int i, size = 1;
-  for (int dim = 0; dim < GridRank; dim++)
+  for (int dim = 0; dim < GridRank[in]; dim++)
     size *= GridDimension[dim];
  
   enzo_float * density = (enzo_float *) field.values("density");
 
   // @@@ WHY PROBLEM-DEPENDENT? jb @@@
-  if (ProblemType == 60 || ProblemType == 61) { //AK
+  if (ProblemType[in] == 60 || ProblemType[in] == 61) { //AK
     for (i = 0; i < size; i++) {
       if (density[i] <= 0.0)
 	temperature[i] = 1.0;
@@ -107,9 +109,9 @@ int EnzoBlock::ComputeTemperatureField
 
   // @@@ WHY PROBLEM-DEPENDENT? jb @@@
   enzo_float mol_weight = DEFAULT_MU, min_temperature = 1.0;
-  if (ProblemType == 7) {//AK for Sedov explosion test
+  if (ProblemType[in] == 7) {//AK for Sedov explosion test
     mol_weight = 1.0;
-    min_temperature = temperature_floor;
+    min_temperature = temperature_floor[in];
   }
 
   if (MultiSpecies == FALSE)
@@ -120,7 +122,7 @@ int EnzoBlock::ComputeTemperatureField
     for (i = 0; i < size; i++)
       temperature[i] = MAX((TemperatureUnits*temperature[i]*mol_weight
 			    /MAX(density[i], 
-				 (enzo_float)(density_floor))),
+				 (enzo_float)(density_floor[in]))),
 			 min_temperature);
   else {
  
@@ -150,7 +152,7 @@ int EnzoBlock::ComputeTemperatureField
  
       /* Add in H2. */
  
-      if (MultiSpecies > 1)
+      if (MultiSpecies[in] > 1)
 	number_density += species_HM[i]   +
 	  0.5*(species_H2I[i] +
 	       species_H2II[i]);
@@ -158,7 +160,7 @@ int EnzoBlock::ComputeTemperatureField
       /* Ignore deuterium. */
  
       temperature[i] *= TemperatureUnits/
-	MAX(number_density,  number_density_floor);
+	MAX(number_density,  number_density_floor[in]);
       temperature[i] = MAX(temperature[i], 
 			   MINIMUM_TEMPERATURE);
     }

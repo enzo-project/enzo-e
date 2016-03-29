@@ -30,9 +30,11 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
  
     /* Determine the size of the grids. */
  
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+
     int dim, size = 1, i;
-    for (dim = 0; dim < GridRank; dim++)
-      size *= GridDimension[dim];
+    for (dim = 0; dim < GridRank[in]; dim++)
+      size *= GridDimension[in*3+dim];
  
     Field field = data()->field();
 
@@ -46,18 +48,18 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
     /* Set minimum GE. */
  
     MinimumSupportEnergyCoefficient =
-      GravitationalConstant/(4.0*pi) / (pi * (Gamma*(Gamma-1.0))) *
-      CosmoFactor * MinimumPressureSupportParameter *
+      GravitationalConstant[in]/(4.0*pi) / (pi * (Gamma[in]*(Gamma[in]-1.0))) *
+      CosmoFactor * MinimumPressureSupportParameter[in] *
       CellWidth[0] * CellWidth[0];
  
  
     /* PPM: set GE. */
  
-    if (DualEnergyFormalism == TRUE) {
+    if (DualEnergyFormalism[in] == TRUE) {
       for (i = 0; i < size; i++)
 	internal_energy[i] = MAX(internal_energy[i],
 				 MinimumSupportEnergyCoefficient*density[i]);
-      if (GridRank != 3) return ENZO_FAIL;
+      if (GridRank[in] != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
 	total_energy[i] = 
 	  MAX((enzo_float)

@@ -8,6 +8,8 @@
 #ifndef CHARM_MSG_COARSEN_HPP
 #define CHARM_MSG_COARSEN_HPP
 
+#include "cello.hpp"
+
 class ParticleData;
 class FieldData;
 class FieldFace;
@@ -18,9 +20,7 @@ class MsgCoarsen : public CMessage_MsgCoarsen {
 
 public: // interface
 
-  static long counter;
-
-  static int id_count;
+  static long counter[MAX_NODE_SIZE];
 
   MsgCoarsen();
 
@@ -30,7 +30,10 @@ public: // interface
 
   /// Copy constructor
   MsgCoarsen(const MsgCoarsen & data_msg) throw()
-  { ++counter; };
+  {
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+    ++counter[in]; 
+  };
 
   /// Assignment operator
   MsgCoarsen & operator= (const MsgCoarsen & data_msg) throw()
@@ -60,9 +63,6 @@ protected: // attributes
 
   /// Whether destination is local or remote
   bool is_local_;
-
-  /// Id identifying message (TEMPORARY FOR DEBUGGING)
-  int id_;
 
   /// Field and particle data
   DataMsg * data_msg_;

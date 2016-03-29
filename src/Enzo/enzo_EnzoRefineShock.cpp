@@ -49,8 +49,8 @@ int EnzoRefineShock::apply
   int rank = block->rank();
 
   // compute pressure using the EnzoComputePressure class
-  EnzoComputePressure compute_pressure (EnzoBlock::Gamma,
-					comoving_coordinates_);
+
+  EnzoComputePressure compute_pressure (gamma_,comoving_coordinates_);
   compute_pressure.compute(block);
 
   Data * data = block->data();

@@ -65,12 +65,13 @@ void FieldData::pup(PUP::er &p)
   PUParray(p,size_,3);
 
   p | array_permanent_;
-  //  p | array_temporary_;
-  static bool warn = false;
-  if (! warn) {
+  //  p | array_temporary_
+  static bool warn[MAX_NODE_SIZE] = {false};
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  if (! warn[in]) {
     WARNING("FieldData::pup()",
 	    "Skipping array_temporary_");
-    warn = true;
+    warn[in] = true;
   }
   p | offsets_;
   p | ghosts_allocated_;

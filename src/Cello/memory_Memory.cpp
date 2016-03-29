@@ -10,7 +10,7 @@
 #include "memory.hpp"
 
 #ifdef CONFIG_USE_MEMORY
-Memory Memory::instance_; // (singleton design pattern)
+Memory Memory::instance_[MAX_NODE_SIZE]; // (singleton design pattern)
 #endif
 
 //======================================================================
@@ -42,6 +42,13 @@ void * Memory::allocate ( size_t bytes ) throw ()
 /// @return        Pointer to the allocated memory
 {
 #ifdef CONFIG_USE_MEMORY
+
+  if (bytes >= memory_allocate_warning_) {
+    // WARNING: do not use WARNING since allocates memory, leading to
+    //          recursive calls to overloaded operator new 
+    CkPrintf ("%p Allocating %d > %d bytes\n",
+  	      this,bytes,memory_allocate_warning_);
+  }
 
   int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
 

@@ -100,14 +100,16 @@ int EnzoBlock::SolveHydroEquations
 
   /* Determine if Gamma should be a scalar or a field. */
 
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   enzo_float *GammaField;
   GammaField = new enzo_float[1];
-  GammaField[0] = Gamma;
+  GammaField[0] = Gamma[in];
 
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if (UseMinimumPressureSupport == TRUE)
+  if (UseMinimumPressureSupport[in] == TRUE)
     if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
 			  comoving_coordinates) == ENZO_FAIL) {
       fprintf(stderr, "Error in grid->SetMinimumSupport,\n");
@@ -141,7 +143,7 @@ int EnzoBlock::SolveHydroEquations
 
       /* Allocate space (if necessary). */
 
-      for (int field = 0; field < NumberOfBaryonFields; field++) {
+      for (int field = 0; field < NumberOfBaryonFields[in]; field++) {
 	if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
 	  SubgridFluxes[i]->LeftFluxes[field][dim]  = new enzo_float[size];
 	if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
@@ -152,7 +154,8 @@ int EnzoBlock::SolveHydroEquations
 	}
       }
 
-      for (int field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
+      for (int field = NumberOfBaryonFields[in]; 
+	   field < MAX_NUMBER_OF_BARYON_FIELDS;
 	   field++) {
 	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
 	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
@@ -253,15 +256,15 @@ int EnzoBlock::SolveHydroEquations
      acceleration_x,
      acceleration_y,
      acceleration_z,
-     &Gamma, &dt, &cycle_,
+     &Gamma[in], &dt, &cycle_,
      &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
      &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,
-     &PPMFlatteningParameter,
-     &PressureFree,
-     &PPMDiffusionParameter, &PPMSteepeningParameter,
-     &DualEnergyFormalism, &DualEnergyFormalismEta1,
-     &DualEnergyFormalismEta2,
+     &PPMFlatteningParameter[in],
+     &PressureFree[in],
+     &PPMDiffusionParameter[in], &PPMSteepeningParameter[in],
+     &DualEnergyFormalism[in], &DualEnergyFormalismEta1[in],
+     &DualEnergyFormalismEta2[in],
      &NumberOfSubgrids, leftface, rightface,
      istart, iend, jstart, jend,
      standard, dindex, Eindex, uindex, vindex, windex,

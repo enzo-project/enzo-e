@@ -30,18 +30,21 @@ int EnzoBlock::ComputeGammaField
 {
  
   /* Compute the size of the fields. */
- 
+
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   int i, size = 1;
-  for (int dim = 0; dim < GridRank; dim++)
+
+  for (int dim = 0; dim < GridRank[in]; dim++)
     size *= GridDimension[dim];
  
-  if (MultiSpecies < 2)
+  if (MultiSpecies[in] < 2)
  
     /* If molecular hydrogen is not being used, just use monotonic.
        (this should not really be called, but provide it just in case). */
  
     for (i = 0; i < size; i++)
-      GammaField[i] = Gamma;
+      GammaField[i] = Gamma[in];
  
   else {
  
@@ -68,7 +71,7 @@ int EnzoBlock::ComputeGammaField
     /* Compute Gamma with molecular Hydrogen formula from Omukau \& Nishi
        astro-ph/9811308. */
  
-    enzo_float x, nH2, number_density, GammaH2Inverse, GammaInverse = 1/(Gamma-1.0);
+    enzo_float x, nH2, number_density, GammaH2Inverse, GammaInverse = 1/(Gamma[in]-1.0);
     for (i = 0; i < size; i++) {
  
       /* Compute relative number abundence of molecular hydrogen. */

@@ -8,6 +8,8 @@
 #ifndef CHARM_MSG_REFINE_HPP
 #define CHARM_MSG_REFINE_HPP
 
+#include "cello.hpp"
+
 class ParticleData;
 class FieldData;
 class FieldFace;
@@ -19,9 +21,7 @@ class MsgRefine : public CMessage_MsgRefine {
 public: // interface
 
   friend Block;
-  static long counter;
-
-  static int id_count;
+  static long counter[MAX_NODE_SIZE];
 
   MsgRefine();
 
@@ -39,7 +39,10 @@ public: // interface
 
   /// Copy constructor
   MsgRefine(const MsgRefine & data_msg) throw()
-  { ++counter; };
+  {
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+    ++counter[in]; 
+  };
 
   /// Assignment operator
   MsgRefine & operator= (const MsgRefine & data_msg) throw()
@@ -63,9 +66,6 @@ protected: // attributes
 
   /// Whether destination is local or remote
   bool is_local_;
-
-  /// Id identifying message (TEMPORARY FOR DEBUGGING)
-  int id_;
 
   /// Field and particle data
   DataMsg * data_msg_;

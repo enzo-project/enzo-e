@@ -13,62 +13,62 @@
 
 //======================================================================
 
-int EnzoBlock::UseMinimumPressureSupport;
-enzo_float EnzoBlock::MinimumPressureSupportParameter;
-enzo_float EnzoBlock::ComovingBoxSize;
-enzo_float EnzoBlock::HubbleConstantNow;
-enzo_float EnzoBlock::OmegaMatterNow;
-enzo_float EnzoBlock::OmegaLambdaNow;
-enzo_float EnzoBlock::MaxExpansionRate;
+int EnzoBlock::UseMinimumPressureSupport[MAX_NODE_SIZE];
+enzo_float EnzoBlock::MinimumPressureSupportParameter[MAX_NODE_SIZE];
+enzo_float EnzoBlock::ComovingBoxSize[MAX_NODE_SIZE];
+enzo_float EnzoBlock::HubbleConstantNow[MAX_NODE_SIZE];
+enzo_float EnzoBlock::OmegaMatterNow[MAX_NODE_SIZE];
+enzo_float EnzoBlock::OmegaLambdaNow[MAX_NODE_SIZE];
+enzo_float EnzoBlock::MaxExpansionRate[MAX_NODE_SIZE];
 
 // Chemistry
 
-int EnzoBlock::MultiSpecies;
+int EnzoBlock::MultiSpecies[MAX_NODE_SIZE];
 
 // Physics
 
-int EnzoBlock::PressureFree;
-enzo_float EnzoBlock::Gamma;
-enzo_float EnzoBlock::GravitationalConstant;
+int EnzoBlock::PressureFree[MAX_NODE_SIZE];
+enzo_float EnzoBlock::Gamma[MAX_NODE_SIZE];
+enzo_float EnzoBlock::GravitationalConstant[MAX_NODE_SIZE];
 
 // Problem-specific
 
-int EnzoBlock::ProblemType;
+int EnzoBlock::ProblemType[MAX_NODE_SIZE];
 
 // Method PPM
 
-int EnzoBlock::PPMFlatteningParameter;
-int EnzoBlock::PPMDiffusionParameter;
-int EnzoBlock::PPMSteepeningParameter;
+int EnzoBlock::PPMFlatteningParameter[MAX_NODE_SIZE];
+int EnzoBlock::PPMDiffusionParameter[MAX_NODE_SIZE];
+int EnzoBlock::PPMSteepeningParameter[MAX_NODE_SIZE];
 
 // Numerics
 
-int EnzoBlock::DualEnergyFormalism;
-enzo_float EnzoBlock::DualEnergyFormalismEta1;
-enzo_float EnzoBlock::DualEnergyFormalismEta2;
+int EnzoBlock::DualEnergyFormalism[MAX_NODE_SIZE];
+enzo_float EnzoBlock::DualEnergyFormalismEta1[MAX_NODE_SIZE];
+enzo_float EnzoBlock::DualEnergyFormalismEta2[MAX_NODE_SIZE];
 
-enzo_float EnzoBlock::pressure_floor;
-enzo_float EnzoBlock::density_floor;
-enzo_float EnzoBlock::number_density_floor;
-enzo_float EnzoBlock::temperature_floor;
+enzo_float EnzoBlock::pressure_floor[MAX_NODE_SIZE];
+enzo_float EnzoBlock::density_floor[MAX_NODE_SIZE];
+enzo_float EnzoBlock::number_density_floor[MAX_NODE_SIZE];
+enzo_float EnzoBlock::temperature_floor[MAX_NODE_SIZE];
 
-enzo_float EnzoBlock::InitialRedshift;
-enzo_float EnzoBlock::InitialTimeInCodeUnits;
+enzo_float EnzoBlock::InitialRedshift[MAX_NODE_SIZE];
+enzo_float EnzoBlock::InitialTimeInCodeUnits[MAX_NODE_SIZE];
 
 // Domain
 
-enzo_float EnzoBlock::DomainLeftEdge [MAX_DIMENSION];
-enzo_float EnzoBlock::DomainRightEdge[MAX_DIMENSION];
+enzo_float EnzoBlock::DomainLeftEdge [MAX_NODE_SIZE_3];
+enzo_float EnzoBlock::DomainRightEdge[MAX_NODE_SIZE_3];
 
 // PPM
 
-int EnzoBlock::GridRank;
+int EnzoBlock::GridRank[MAX_NODE_SIZE];
 
-int EnzoBlock::ghost_depth[MAX_DIMENSION];
+int EnzoBlock::ghost_depth[MAX_NODE_SIZE_3];
 
 // Fields
 
-int EnzoBlock::NumberOfBaryonFields;
+int EnzoBlock::NumberOfBaryonFields[MAX_NODE_SIZE];
 
 //----------------------------------------------------------------------
 
@@ -77,90 +77,92 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
 {
 
-  GridRank = 0;
-  NumberOfBaryonFields = 0;
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  GridRank[in] = 0;
+  NumberOfBaryonFields[in] = 0;
 
   int i;
 
   for (i=0; i<MAX_DIMENSION; i++) {
-    DomainLeftEdge [i] = 0;
-    DomainRightEdge[i] = 0;
-    ghost_depth[i] = 0;
+    DomainLeftEdge [in*3+i] = 0;
+    DomainRightEdge[in*3+i] = 0;
+    ghost_depth[in*3+i] = 0;
   }
 
-  Gamma               = enzo_config->field_gamma;
+  Gamma[in]               = enzo_config->field_gamma;
 
-  GridRank            = enzo_config->mesh_root_rank;
+  GridRank[in]            = enzo_config->mesh_root_rank;
 
   // Chemistry parameters
 
-  MultiSpecies = 0;    // 0:0 1:6 2:9 3:12
+  MultiSpecies[in] = 0;    // 0:0 1:6 2:9 3:12
 
   // Gravity parameters
 
-  GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
+  GravitationalConstant[in]           = 1.0;  // used only in SetMinimumSupport()
 
   //Problem specific parameter
 
-  ProblemType = 0;
+  ProblemType[in] = 0;
 
   // PPM parameters
 
-  InitialRedshift   = enzo_config->physics_cosmology_initial_redshift;
-  HubbleConstantNow = enzo_config->physics_cosmology_hubble_constant_now;
-  OmegaLambdaNow    = enzo_config->physics_cosmology_omega_lamda_now;
-  OmegaMatterNow    = enzo_config->physics_cosmology_omega_matter_now;
-  MaxExpansionRate  = enzo_config->physics_cosmology_max_expansion_rate;
-  ComovingBoxSize   = enzo_config->physics_cosmology_comoving_box_size;
+  InitialRedshift[in]   = enzo_config->physics_cosmology_initial_redshift;
+  HubbleConstantNow[in] = enzo_config->physics_cosmology_hubble_constant_now;
+  OmegaLambdaNow[in]    = enzo_config->physics_cosmology_omega_lamda_now;
+  OmegaMatterNow[in]    = enzo_config->physics_cosmology_omega_matter_now;
+  MaxExpansionRate[in]  = enzo_config->physics_cosmology_max_expansion_rate;
+  ComovingBoxSize[in]   = enzo_config->physics_cosmology_comoving_box_size;
 
-  PressureFree              = enzo_config->ppm_pressure_free;
-  UseMinimumPressureSupport = enzo_config->ppm_use_minimum_pressure_support;
-  MinimumPressureSupportParameter = 
+  PressureFree[in]              = enzo_config->ppm_pressure_free;
+  UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
+  MinimumPressureSupportParameter[in] = 
     enzo_config->ppm_minimum_pressure_support_parameter;
-  PPMFlatteningParameter    = enzo_config->ppm_flattening;
-  PPMDiffusionParameter     = enzo_config->ppm_diffusion;
-  PPMSteepeningParameter    = enzo_config->ppm_steepening;
-  pressure_floor            = enzo_config->ppm_pressure_floor;
-  density_floor             = enzo_config->ppm_density_floor;
-  temperature_floor         = enzo_config->ppm_temperature_floor;
-  number_density_floor      = enzo_config->ppm_number_density_floor;
-  DualEnergyFormalism       = enzo_config->ppm_dual_energy;
-  DualEnergyFormalismEta1   = enzo_config->ppm_dual_energy_eta_1;
-  DualEnergyFormalismEta2   = enzo_config->ppm_dual_energy_eta_2;
+  PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
+  PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
+  PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
+  pressure_floor[in]            = enzo_config->ppm_pressure_floor;
+  density_floor[in]             = enzo_config->ppm_density_floor;
+  temperature_floor[in]         = enzo_config->ppm_temperature_floor;
+  number_density_floor[in]      = enzo_config->ppm_number_density_floor;
+  DualEnergyFormalism[in]       = enzo_config->ppm_dual_energy;
+  DualEnergyFormalismEta1[in]   = enzo_config->ppm_dual_energy_eta_1;
+  DualEnergyFormalismEta2[in]   = enzo_config->ppm_dual_energy_eta_2;
 
   int gx = enzo_config->field_ghost_depth[0];
   int gy = enzo_config->field_ghost_depth[1];
   int gz = enzo_config->field_ghost_depth[2];
 
-  if (GridRank < 1) gx = 0;
-  if (GridRank < 2) gy = 0;
-  if (GridRank < 3) gz = 0;
+  if (GridRank[in] < 1) gx = 0;
+  if (GridRank[in] < 2) gy = 0;
+  if (GridRank[in] < 3) gz = 0;
 
-  ghost_depth[0] = gx;
-  ghost_depth[1] = gy;
-  ghost_depth[2] = gz;
+  ghost_depth[in*3+0] = gx;
+  ghost_depth[in*3+1] = gy;
+  ghost_depth[in*3+2] = gz;
 
-  NumberOfBaryonFields = enzo_config->field_list.size();
+  NumberOfBaryonFields[in] = enzo_config->field_list.size();
 
   // Check NumberOfBaryonFields
 
-  if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
+  if (NumberOfBaryonFields[in] > MAX_NUMBER_OF_BARYON_FIELDS) {
     ERROR2 ("EnzoBlock::initialize",
 	    "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
-	    MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields );
+	    MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields[in] );
   }
 
-  DomainLeftEdge [0] = enzo_config->domain_lower[0];
-  DomainLeftEdge [1] = enzo_config->domain_lower[1];
-  DomainLeftEdge [2] = enzo_config->domain_lower[2];
+  DomainLeftEdge [in*3+0] = enzo_config->domain_lower[0];
+  DomainLeftEdge [in*3+1] = enzo_config->domain_lower[1];
+  DomainLeftEdge [in*3+2] = enzo_config->domain_lower[2];
 
-  DomainRightEdge[0] = enzo_config->domain_upper[0];
-  DomainRightEdge[1] = enzo_config->domain_upper[1];
-  DomainRightEdge[2] = enzo_config->domain_upper[2];
+  DomainRightEdge[in*3+0] = enzo_config->domain_upper[0];
+  DomainRightEdge[in*3+1] = enzo_config->domain_upper[1];
+  DomainRightEdge[in*3+2] = enzo_config->domain_upper[2];
 
   double time  = enzo_config->initial_time;
 
-  InitialTimeInCodeUnits = time;
+  InitialTimeInCodeUnits[in] = time;
 
 } // void initialize()
 
@@ -247,21 +249,23 @@ void EnzoBlock::pup(PUP::er &p)
   Block::pup(p);
 
   p | dt;
-  static bool warn0 = true;
-  if (warn0) {
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  static bool warn0[MAX_NODE_SIZE] = {true};
+  if (warn0[in]) {
+    warn0[in] = false;
     WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-    warn0=false;
   }
 
-  static bool warn1 = true;
-  if (warn1) {
+  static bool warn1[MAX_NODE_SIZE] = {true};
+  if (warn1[in]) {
+    warn1[in] = false;
     WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-    warn1=false;
   }
-  static bool warn2 = true;
-  if (warn2) {
+  static bool warn2[MAX_NODE_SIZE] = {true};
+  if (warn2[in]) {
+    warn2[in] = false;
     WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
-    warn2=false;
   }
 
   PUParray(p,GridLeftEdge,MAX_DIMENSION); 
@@ -270,9 +274,9 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,GridEndIndex,MAX_DIMENSION); 
   PUParray(p,CellWidth,MAX_DIMENSION);
 
-  static bool warn3 = true;
-  if (warn3) {
-    warn3=false;
+  static bool warn3[MAX_NODE_SIZE] = {true};
+  if (warn3[in]) {
+    warn3[in] = false;
     WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
   }
 
@@ -356,10 +360,16 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // Domain
 
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   fprintf (fp,"EnzoBlock: DomainLeftEdge %g %g %g\n",
-	   DomainLeftEdge [0],DomainLeftEdge [0],DomainLeftEdge [0]);
+	   DomainLeftEdge [in*3+0],
+	   DomainLeftEdge [in*3+1],
+	   DomainLeftEdge [in*3+2]);
   fprintf (fp,"EnzoBlock: DomainRightEdge %g %g %g\n",
-	   DomainRightEdge[0],DomainRightEdge[1],DomainRightEdge[2]);
+	   DomainRightEdge[in*3+0],
+	   DomainRightEdge[in*3+1],
+	   DomainRightEdge[in*3+2]);
 
   // Fields
 
@@ -379,7 +389,9 @@ void EnzoBlock::write(FILE * fp) throw ()
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
 
   fprintf (fp,"EnzoBlock: ghost %d %d %d\n",
-	   ghost_depth[0],ghost_depth[1],ghost_depth[2]);
+	   ghost_depth[in*3+0],
+	   ghost_depth[in*3+1],
+	   ghost_depth[in*3+2]);
 
 
   fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
@@ -434,9 +446,11 @@ void EnzoBlock::initialize () throw()
 
   int gx,gy,gz;
 
-  gx = EnzoBlock::ghost_depth[0];
-  gy = EnzoBlock::ghost_depth[1];
-  gz = EnzoBlock::ghost_depth[2];
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  gx = EnzoBlock::ghost_depth[in*3+0];
+  gy = EnzoBlock::ghost_depth[in*3+1];
+  gz = EnzoBlock::ghost_depth[in*3+2];
 
   GridDimension[0]  = nx + 2*gx;
   GridDimension[1]  = ny + 2*gy;
@@ -472,6 +486,8 @@ int EnzoBlock::CosmologyComputeExpansionFactor
 (enzo_float time, enzo_float *a, enzo_float *dadt)
 {
  
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   /* Error check. */
 
   if (InitialTimeInCodeUnits == 0) {
@@ -485,20 +501,20 @@ int EnzoBlock::CosmologyComputeExpansionFactor
  
   /* Find Omega due to curvature. */
  
-  enzo_float OmegaCurvatureNow = 1 - OmegaMatterNow - OmegaLambdaNow;
+  enzo_float OmegaCurvatureNow = 1 - OmegaMatterNow[in] - OmegaLambdaNow[in];
  
   /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
  
-  enzo_float TimeUnits = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                    pow(1 + InitialRedshift,enzo_float(1.5));
+  enzo_float TimeUnits = 2.52e17/sqrt(OmegaMatterNow[in])/HubbleConstantNow[in]/
+                    pow(1 + InitialRedshift[in],enzo_float(1.5));
  
-  enzo_float TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);
+  enzo_float TimeHubble0 = time * TimeUnits * (HubbleConstantNow[in]*3.24e-18);
  
   /* 1) For a flat universe with OmegaMatterNow = 1, it's easy. */
  
-  if (fabs(OmegaMatterNow-1) < OMEGA_TOLERANCE &&
-      OmegaLambdaNow < OMEGA_TOLERANCE)
-    *a    = pow(time/InitialTimeInCodeUnits, enzo_float(2.0/3.0));
+  if (fabs(OmegaMatterNow[in]-1) < OMEGA_TOLERANCE &&
+      OmegaLambdaNow[in] < OMEGA_TOLERANCE)
+    *a    = pow(time/InitialTimeInCodeUnits[in], enzo_float(2.0/3.0));
  
 #define INVERSE_HYPERBOLIC_EXISTS
  
@@ -510,12 +526,12 @@ int EnzoBlock::CosmologyComputeExpansionFactor
 	Actually, this is a little tricky since we must solve an equation
 	of the form eta - sinh(eta) + x = 0..*/
  
-  if (OmegaMatterNow < 1 && OmegaLambdaNow < OMEGA_TOLERANCE) {
+  if (OmegaMatterNow[in] < 1 && OmegaLambdaNow[in] < OMEGA_TOLERANCE) {
  
     enzo_float eta, eta_old, x;
     int i;
 
-    x = 2*TimeHubble0*pow(1.0 - OmegaMatterNow, 1.5) / OmegaMatterNow;
+    x = 2*TimeHubble0*pow(1.0 - OmegaMatterNow[in], 1.5) / OmegaMatterNow[in];
  
     /* Compute eta in a three step process, first from a third-order
        Taylor expansion of the formula above, then use that in a fifth-order
@@ -537,34 +553,34 @@ int EnzoBlock::CosmologyComputeExpansionFactor
  
     /* Now use eta to compute the expansion factor (eq. 13-10, part 2). */
  
-    *a = OmegaMatterNow/(2*(1 - OmegaMatterNow))*(cosh(eta) - 1);
-    *a *= (1 + InitialRedshift);    // to convert to code units, divide by [a]
+    *a = OmegaMatterNow[in]/(2*(1 - OmegaMatterNow[in]))*(cosh(eta) - 1);
+    *a *= (1 + InitialRedshift[in]);    // to convert to code units, divide by [a]
   }
  
   /* 3) For OmegaMatterNow > 1 && OmegaLambdaNow == 0, use sin/cos.
         Easy, but skip it for now. */
  
-  if (OmegaMatterNow > 1 && OmegaLambdaNow < OMEGA_TOLERANCE) {
+  if (OmegaMatterNow[in] > 1 && OmegaLambdaNow[in] < OMEGA_TOLERANCE) {
   }
  
   /* 4) For flat universe, with non-zero OmegaLambdaNow, see eq. 13-20. */
  
   if (fabs(OmegaCurvatureNow) < OMEGA_TOLERANCE &&
-      OmegaLambdaNow > OMEGA_TOLERANCE) {
-    *a = pow(enzo_float(OmegaMatterNow/(1 - OmegaMatterNow)), enzo_float(1.0/3.0)) *
-         pow(enzo_float(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
+      OmegaLambdaNow[in] > OMEGA_TOLERANCE) {
+    *a = pow(enzo_float(OmegaMatterNow[in]/(1 - OmegaMatterNow[in])), enzo_float(1.0/3.0)) *
+         pow(enzo_float(sinh(1.5 * sqrt(1.0 - OmegaMatterNow[in])*TimeHubble0)),
 	     enzo_float(2.0/3.0));
-    *a *= (1 + InitialRedshift);    // to convert to code units, divide by [a]
+    *a *= (1 + InitialRedshift[in]);    // to convert to code units, divide by [a]
   }
  
 #endif /* INVERSE_HYPERBOLIC_EXISTS */
  
   /* Compute the derivative of the expansion factor (Peebles93, eq. 13.3). */
  
-  enzo_float TempVal = (*a)/(1 + InitialRedshift);
-  *dadt = sqrt( 2.0/(3.0*OmegaMatterNow*(*a)) *
-	       (OmegaMatterNow + OmegaCurvatureNow*TempVal +
-		OmegaLambdaNow*TempVal*TempVal*TempVal));
+  enzo_float TempVal = (*a)/(1 + InitialRedshift[in]);
+  *dadt = sqrt( 2.0/(3.0*OmegaMatterNow[in]*(*a)) *
+	       (OmegaMatterNow[in] + OmegaCurvatureNow*TempVal +
+		OmegaLambdaNow[in]*TempVal*TempVal*TempVal));
  
   /* Someday, we'll implement the general case... */
  
@@ -584,7 +600,9 @@ int EnzoBlock::CosmologyComputeExpansionTimestep
  
   /* Error check. */
  
-  if (InitialTimeInCodeUnits == 0) {
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  if (InitialTimeInCodeUnits[in] == 0) {
     fprintf(stderr, "The cosmology parameters seem to be improperly set.\n");
     return ENZO_FAIL;
   }
@@ -600,7 +618,7 @@ int EnzoBlock::CosmologyComputeExpansionTimestep
   /* Compute the maximum allwed timestep given the maximum allowed
      expansion factor. */
  
-  *dtExpansion = MaxExpansionRate*a/dadt;
+  *dtExpansion = MaxExpansionRate[in]*a/dadt;
  
   return ENZO_SUCCESS;
 }

@@ -7,6 +7,7 @@
 
 /* #define CHECK_MEMORY */  /* calls mtrace() */
 
+#define TRACE_PARAMETERS
 
 #include "cello.hpp"
 
@@ -73,7 +74,15 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   delete msg;
 
   // Serialize reading parameters within each logical node
-  if (CkMyRank() == 0) {
+
+  const int ipn = CkMyPe();
+  const int npn = MIN(MAX_NODE_SIZE,CkNumPes());
+
+  if ((ipn % npn) == 0) {
+#ifdef TRACE_PARAMETERS
+    CkPrintf ("%d CALLING read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
+    fflush(stdout);
+#endif
     read_parameters_();
   }
 }
@@ -82,28 +91,51 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
 
 void EnzoSimulation::read_parameters_()
 {
-  const int ipn = CkMyRank();
-  const int npn = CkNodeSize(ipn);
+
+  const int ipn = CkMyPe();
+  const int npn = MIN(MAX_NODE_SIZE,CkNumPes());
+#ifdef TRACE_PARAMETERS
+  CkPrintf ("%d BEGIN read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
+  fflush(stdout);
+#endif
+  //const int npn = CkNumPes();
 
   // Read parameter file
   parameters_ = new Parameters(parameter_file_.c_str(),monitor_);
 
+#ifdef TRACE_PARAMETERS
+  CkPrintf ("%d END read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
+  fflush(stdout);
+#endif
   // Then tell next Simulation object in node to read parameter file
   if (((ipn + 1) % npn) != 0) {
+#ifdef TRACE_PARAMETERS
+    CkPrintf ("%d CALLING p_read_parameters(%d/%d)\n",CkMyPe(),CkMyPe()+1,npn);
+    fflush(stdout);
+#endif
     proxy_enzo_simulation[CkMyPe()+1].p_read_parameters();
   }
 
   // Everybody synchronizes afterwards with barrier
 
+#ifdef TRACE_PARAMETERS
+  CkPrintf ("%d CALLING r_startup_finished()\n",CkMyPe());
+  fflush(stdout);
+#endif
   CkCallback callback (CkIndex_EnzoSimulation::r_startup_finished(NULL),
 			 thisProxy);
   contribute(callback);
+
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
 {
+#ifdef TRACE_PARAMETERS
+  CkPrintf ("%d BEGIN r_startup_finished()\n",CkMyPe());
+  fflush(stdout);
+#endif
   delete msg;
 
   problem_ = new EnzoProblem;
@@ -111,6 +143,10 @@ void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
   initialize_config_();
 
   initialize();
+#ifdef TRACE_PARAMETERS
+  CkPrintf ("%d END   r_startup_finished()\n",CkMyPe());
+  fflush(stdout);
+#endif
 }
 
 //----------------------------------------------------------------------

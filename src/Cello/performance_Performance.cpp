@@ -14,7 +14,7 @@
 /* #define TRACE_PERFORMANCE */
 
 #ifdef TRACE_PERFORMANCE
-static long long time_start = 0;
+static long long time_start[MAX_NODE_SIZE] = 0;
 #endif /* TRACE_PERFORMANCE */
 
 Performance::Performance (Config * config)

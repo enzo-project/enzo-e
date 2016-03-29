@@ -17,12 +17,15 @@ class FieldFace {
 
 public: // interface
 
-  static long counter;
+  static long counter[MAX_NODE_SIZE];
 
   /// Constructor of uninitialized FieldFace
 
   FieldFace () throw()
-  {  ++counter; }
+  {
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+    ++counter[in]; 
+  }
 
   /// Constructor of initialized FieldFace
   FieldFace (const Field & field) throw();

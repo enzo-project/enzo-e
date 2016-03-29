@@ -89,7 +89,8 @@ public:
     //   instance_ = new Unit;
 
     // return instance_ ? instance_ : (instance_ = new Unit);
-    return & instance_;
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+    return & instance_[in];
   };
 
   /// Initialize unit testing
@@ -113,7 +114,7 @@ public:
 private:
 
   /// Singleton instance of the Unit object
-  static Unit instance_;
+  static Unit instance_[MAX_NODE_SIZE];
 
   /// Output string for passed tests
   static const char * pass_;

@@ -13,7 +13,7 @@
 
 
 //----------------------------------------------------------------------
-Monitor Monitor::instance_; // singleton design pattern)
+Monitor Monitor::instance_[MAX_NODE_SIZE]; // singleton design pattern)
 //----------------------------------------------------------------------
 
 Monitor::Monitor()

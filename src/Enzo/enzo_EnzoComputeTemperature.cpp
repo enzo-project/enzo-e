@@ -67,7 +67,9 @@ void EnzoComputeTemperature::compute_(Block * block)
 
   Field field = enzo_block->data()->field();
 
-  EnzoComputePressure compute_pressure(EnzoBlock::Gamma,
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  EnzoComputePressure compute_pressure(EnzoBlock::Gamma[in],
 				       comoving_coordinates_);
 
   compute_pressure.compute(block);

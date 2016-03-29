@@ -14,6 +14,16 @@
 /// Some global functions and constants are define with cello namespace,
 /// sich as cello:pi and cello::err_rel(), etc.
 
+//----------------------------------------------------------------------
+// GLOBAL DEFINES
+//----------------------------------------------------------------------
+
+// Maximum number of processes within a physical node.  Used for
+// unrolling static variables so that each process has its own copy
+// ip % MAX_NODES
+
+#define MAX_NODE_SIZE 32
+#define MAX_NODE_SIZE_3 96 /* For EnzoBlock static array declarations only */
 
 //----------------------------------------------------------------------
 // SYSTEM INCLUDES
@@ -54,8 +64,6 @@ inline int INDEX2(int ix,int iy,int nx)
 template <class T>
 inline void SWAP(T &a, T &b) 
 {  T t = a; a=b; b=t; }
-
-
 
 //----------------------------------------------------------------------
 // ENUMERATED TYPES

@@ -8,6 +8,8 @@
 #ifndef CHARM_MSG_REFRESH_HPP
 #define CHARM_MSG_REFRESH_HPP
 
+#include "cello.hpp"
+
 class ParticleData;
 class FieldData;
 class FieldFace;
@@ -18,16 +20,18 @@ class MsgRefresh : public CMessage_MsgRefresh {
 
 public: // interface
 
-  static long counter;
+  static long counter[MAX_NODE_SIZE];
 
-  static int id_count;
   MsgRefresh() ;
 
   virtual ~MsgRefresh();
 
   /// Copy constructor
   MsgRefresh(const MsgRefresh & data_msg) throw()
-  { ++counter; };
+  {
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+    ++counter[in]; 
+  };
 
   /// Assignment operator
   MsgRefresh & operator= (const MsgRefresh & data_msg) throw()
@@ -51,9 +55,6 @@ protected: // attributes
 
   /// Whether destination is local or remote
   bool is_local_;
-
-  /// Id identifying message (TEMPORARY FOR DEBUGGING)
-  int id_;
 
   DataMsg * data_msg_;
 

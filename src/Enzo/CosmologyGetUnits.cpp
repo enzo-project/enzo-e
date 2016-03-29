@@ -40,6 +40,8 @@ int EnzoBlock::CosmologyGetUnits
  enzo_float *VelocityUnits, enzo_float time)
 {
  
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   /* From the time, compute the current redshift. */
  
   enzo_float a, dadt;
@@ -50,24 +52,24 @@ int EnzoBlock::CosmologyGetUnits
  
   /* Compute the current redshift (remember a(init) = 1). */
  
-  enzo_float CurrentRedshift = (1 + InitialRedshift)/a - 1;
+  enzo_float CurrentRedshift = (1 + InitialRedshift[in])/a - 1;
  
   /* Determine the units. */
  
-  *DensityUnits     = 1.88e-29*OmegaMatterNow*pow(HubbleConstantNow,2)*
+  *DensityUnits     = 1.88e-29*OmegaMatterNow[in]*pow(HubbleConstantNow[in],2)*
                       pow(1 + CurrentRedshift,3);
  
-  *LengthUnits      = 3.086e24*ComovingBoxSize/HubbleConstantNow/
+  *LengthUnits      = 3.086e24*ComovingBoxSize[in]/HubbleConstantNow[in]/
                       (1 + CurrentRedshift);
  
-  *TemperatureUnits = 1.88e6*pow(ComovingBoxSize,2)*OmegaMatterNow*
-                      (1 + InitialRedshift);
+  *TemperatureUnits = 1.88e6*pow(ComovingBoxSize[in],2)*OmegaMatterNow[in]*
+                      (1 + InitialRedshift[in]);
  
-  *TimeUnits        = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                      pow(1 + InitialRedshift,enzo_float(1.5));
+  *TimeUnits        = 2.52e17/sqrt(OmegaMatterNow[in])/HubbleConstantNow[in]/
+                      pow(1 + InitialRedshift[in],enzo_float(1.5));
  
-  *VelocityUnits    = 1.225e7*ComovingBoxSize*sqrt(OmegaMatterNow)*
-                      sqrt(1 + InitialRedshift);
+  *VelocityUnits    = 1.225e7*ComovingBoxSize[in]*sqrt(OmegaMatterNow[in])*
+                      sqrt(1 + InitialRedshift[in]);
  
   return ENZO_SUCCESS;
 }

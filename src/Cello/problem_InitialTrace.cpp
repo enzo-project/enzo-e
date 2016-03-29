@@ -7,7 +7,7 @@
 
 #include "problem.hpp"
 
-int InitialTrace::id0_ = -1;
+int InitialTrace::id0_[MAX_NODE_SIZE] = {-1};
 
 //----------------------------------------------------------------------
 
@@ -29,7 +29,9 @@ void InitialTrace::enforce_block
    const Hierarchy  * hierarchy
    ) throw()
 {
-  if (id0_ == -1) id0_ = CkMyPe();
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  if (id0_[in] == -1) id0_[in] = CkMyPe();
 
   Field    field    (block->data()->field());
   Particle particle (block->data()->particle());
@@ -101,7 +103,8 @@ void InitialTrace::enforce_block
 	  za = (float *)   particle.attribute_array (it,ia_z,ib);
 	}
 
-	id[ip*did] = id0_;
+	
+	id[ip*did] = id0_[in];
 	xa[ip*dp] = x;
 	ya[ip*dp] = y;
 	za[ip*dp] = z;
@@ -113,9 +116,10 @@ void InitialTrace::enforce_block
 	  ib++;
 	}
 
-	id0_ += CkNumPes();
+	id0_[in] += CkNumPes();
     
       }
     }
   }
+  CkPrintf ("Added %d particles\n",ip);
 }

@@ -95,10 +95,12 @@ void EnzoInitialSedovArray3::enforce_block
   const double sedov_radius = radius_relative_/array_[0];
   const double sedov_radius_2 = sedov_radius*sedov_radius;
 
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   const double sedov_te_in = 
-    pressure_in_  / ((EnzoBlock::Gamma - 1.0) * density_);
+    pressure_in_  / ((EnzoBlock::Gamma[in] - 1.0) * density_);
   const double sedov_te_out= 
-    pressure_out_ / ((EnzoBlock::Gamma - 1.0) * density_);
+    pressure_out_ / ((EnzoBlock::Gamma[in] - 1.0) * density_);
 
   int gx,gy,gz;
   field.ghost_depth(0,&gx,&gy,&gz);

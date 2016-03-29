@@ -11,7 +11,7 @@
 
 // #define DEBUG_NEW_REFRESH
 
-long FieldFace::counter = 0;
+long FieldFace::counter[MAX_NODE_SIZE] = {0};
 
 enum enum_op_type {
   op_unknown,
@@ -29,7 +29,9 @@ FieldFace::FieldFace
   CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
 
-  counter++;
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  ++counter[in];
+
   for (int i=0; i<3; i++) {
     ghost_[i] = false;
     face_[i]  = 0;
@@ -41,7 +43,9 @@ FieldFace::FieldFace
 
 FieldFace::~FieldFace() throw ()
 {
-  counter--;
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  --counter[in];
+
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::~FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
@@ -51,7 +55,9 @@ FieldFace::~FieldFace() throw ()
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
 {
-  counter++;
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  ++counter[in];
+
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::FieldFace(FieldFace) %p\n",CkMyPe(),this);
 #endif

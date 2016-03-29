@@ -26,7 +26,9 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
   /* Compute the size of the grid. */
  
-  for (int dim = 0; dim < GridRank; dim++)
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  for (int dim = 0; dim < GridRank[in]; dim++)
     size *= GridDimension[dim];
  
   Field field = data()->field();
@@ -42,11 +44,11 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
   if (time == this->time()) {
  
     for (i = 0; i < size; i++) {
-      pressure[i] = (Gamma - 1.0) * density[i] *
+      pressure[i] = (Gamma[in] - 1.0) * density[i] *
                                     internal_energy[i];
  
-      if (pressure[i] < pressure_floor)
-	pressure[i] = pressure_floor;
+      if (pressure[i] < pressure_floor[in])
+	pressure[i] = pressure_floor[in];
     }
  
   } else {
@@ -73,10 +75,10 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
 
   /* Correct for Gamma from H2. */
  
-  if (MultiSpecies > 1) {
+  if (MultiSpecies[in] > 1) {
  
     enzo_float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
-      GammaInverse = 1.0/(Gamma-1.0), x, Gamma1, temp;
+      GammaInverse = 1.0/(Gamma[in]-1.0), x, Gamma1, temp;
     enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     enzo_float * species_De    = (enzo_float *) field.values("species_De");
@@ -116,7 +118,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
       /* First, approximate temperature. */
  
       if (number_density == 0)
-	number_density = number_density_floor;
+	number_density = number_density_floor[in];
       temp = MAX(TemperatureUnits*pressure[i]/(number_density + nH2), 
 		 (enzo_float)(1.0));
  
@@ -136,7 +138,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
 	
       /* Correct pressure with improved Gamma. */
  
-      pressure[i] *= (Gamma1 - 1.0)/(Gamma - 1.0);
+      pressure[i] *= (Gamma1 - 1.0)/(Gamma[in] - 1.0);
  
     } // end: loop over i
  

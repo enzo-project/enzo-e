@@ -12,7 +12,7 @@
 /* #define USE_COLOR */
 
 // Unit * Unit::instance_ = 0;
-Unit Unit::instance_;
+Unit Unit::instance_[MAX_NODE_SIZE];
 
 #ifdef USE_COLOR
 

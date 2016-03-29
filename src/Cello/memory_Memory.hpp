@@ -21,7 +21,8 @@ public: // interface
   static Memory * instance() throw ()
   {
 #ifdef CONFIG_USE_MEMORY
-    return & instance_; 
+    const int in = CkMyPe() % MAX_NODE_SIZE;
+    return & instance_[in]; 
 #else
     return 0;
 #endif
@@ -31,7 +32,8 @@ private: // interface
   /// Create the (single) Memory object (singleton design pattern)
   Memory() throw ()
 #ifdef CONFIG_USE_MEMORY
- : is_active_(false)
+  : is_active_(false),
+    memory_allocate_warning_(10000000)
 #endif
   { initialize_(); };
 
@@ -174,7 +176,7 @@ private: // attributes
 
 #ifdef CONFIG_USE_MEMORY
   /// Single instance of the Memory object (singleton design pattern)
-  static Memory instance_;
+  static Memory instance_[MAX_NODE_SIZE];
 #endif
 
 #ifdef CONFIG_USE_MEMORY
@@ -205,6 +207,9 @@ private: // attributes
 
   /// Number of calls to delete for different groups
   std::vector<long long> delete_calls_;
+
+  /// Limit on single memory allocation to display warning
+  size_t memory_allocate_warning_;
 
 #endif
 

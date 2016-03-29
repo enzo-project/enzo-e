@@ -13,15 +13,13 @@
 
 //----------------------------------------------------------------------
 
-int MsgCoarsen::id_count = -1;
-long MsgCoarsen::counter = 0;
+long MsgCoarsen::counter[MAX_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
 MsgCoarsen::MsgCoarsen()
   : CMessage_MsgCoarsen(),
     is_local_(true),
-    id_(-1),
     data_msg_(NULL),
     buffer_(NULL),
     num_face_level_(0),
@@ -32,7 +30,8 @@ MsgCoarsen::MsgCoarsen()
   fflush(stdout);
 #endif
   ic3_[0] = ic3_[1] = ic3_[2] = -1;
-  ++counter; 
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  ++counter[in]; 
 }
 
 //----------------------------------------------------------------------
@@ -40,7 +39,6 @@ MsgCoarsen::MsgCoarsen()
 MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
   : CMessage_MsgCoarsen(),
     is_local_(true),
-    id_(-1),
     data_msg_(NULL),
     buffer_(NULL),
     num_face_level_(num_face_level),
@@ -51,7 +49,9 @@ MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
   fflush(stdout);
 #endif
 
-  ++counter; 
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  ++counter[in]; 
 
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
@@ -65,7 +65,10 @@ MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
 
 MsgCoarsen::~MsgCoarsen()
 {
-  --counter;
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  --counter[in];
+
   // delete data_msg_;
   // data_msg_ = 0;
   delete [] face_level_;
@@ -92,18 +95,8 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgCoarsen::pack()\n",msg);
 #endif
-  // Update ID (for debugging)
-
-  if (id_count == -1) id_count = CkMyPe()+CkNumPes();
-
-  msg->id_ = id_count;
-
-  id_count += CkNumPes();
 
   int size = 0;
-
-  // id_
-  size += sizeof(int); 
 
   // have_data
   size += sizeof(int); 
@@ -138,9 +131,6 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   };
 
   pc = buffer;
-
-  // id_
-  (*pi++) = msg->id_;
 
   have_data = (msg->data_msg_ != NULL);
 
@@ -209,9 +199,6 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
   };
 
   pc = (char *) buffer;
-
-  // id_
-  msg->id_ = (*pi++);
 
   // have_data
   int have_data = (*pi++);

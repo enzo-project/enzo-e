@@ -14,24 +14,26 @@
 
 //----------------------------------------------------------------------
 
-int MsgRefresh::id_count = -1;
-long MsgRefresh::counter = 0;
+long MsgRefresh::counter[MAX_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
 MsgRefresh::MsgRefresh()
     : CMessage_MsgRefresh(),
       is_local_(true),
-      id_(-1),
       data_msg_(NULL),
       buffer_(NULL)
-{  ++counter; }
+{
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  ++counter[in]; 
+}
 
 //----------------------------------------------------------------------
 
 MsgRefresh::~MsgRefresh()
 {
-  --counter;
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  --counter[in];
   // delete data_msg_;
   // data_msg_ = 0;
 }
@@ -55,17 +57,8 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 #ifdef TRACE_NEW_REFRESH
   CkPrintf ("DEBUG %p MsgRefresh::pack()\n",msg);
 #endif
-  // Update ID (for debugging)
-
-  if (id_count == -1) id_count = CkMyPe()+CkNumPes();
-
-  msg->id_ = id_count;
-
-  id_count += CkNumPes();
 
   int size = 0;
-
-  size += sizeof(int); // id_
 
   size += sizeof(int); // have_data
 
@@ -91,8 +84,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   };
 
   pc = buffer;
-
-  (*pi++) = msg->id_;
 
   have_data = (msg->data_msg_ != NULL);
   (*pi++) = have_data;
@@ -146,8 +137,6 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
   };
 
   pc = (char *) buffer;
-
-  msg->id_ = (*pi++);
 
   int have_data = (*pi++);
   if (have_data) {
