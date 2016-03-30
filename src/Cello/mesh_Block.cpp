@@ -63,10 +63,8 @@ Block::Block ( MsgRefine * msg ) throw ()
   is_leaf_(true),
   age_(0),
   face_level_last_(),
-  name_(name()),
   index_method_(-1)
 {
-
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
 	msg->num_field_blocks_,
@@ -75,6 +73,8 @@ Block::Block ( MsgRefine * msg ) throw ()
 	0, NULL, msg->refresh_type_,
 	msg->num_face_level_, msg->face_level_,
 	msg->testing_);
+
+  name_ = name();
 
   bool is_first_cycle = 
     (cycle_ == simulation()->config()->initial_cycle);
@@ -127,7 +127,6 @@ Block::Block
   is_leaf_(true),
   age_(0),
   face_level_last_(),
-  name_(name()),
   index_method_(-1)
 {
   
@@ -139,6 +138,8 @@ Block::Block
 	narray, array, refresh_type,
 	num_face_level, face_level,
 	testing);
+
+  name_ = name();
 
   bool is_first_cycle = 
     (cycle_ == simulation()->config()->initial_cycle);

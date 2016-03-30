@@ -425,13 +425,7 @@ public:
   // REFRESH
   //--------------------------------------------------
 
-  void refresh_enter (int call, Refresh * refresh)
-  { refresh_enter_ (call,refresh); }
-
-protected:
-
-  void refresh_enter_(int call, Refresh * refresh);
-public:
+  void refresh_enter (int call, Refresh * refresh);
 
   // Exit the refresh phase after QD
   void p_refresh_exit () 

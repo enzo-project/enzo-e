@@ -293,74 +293,74 @@ void EnzoBlock::pup(PUP::er &p)
 
 void EnzoBlock::write(FILE * fp) throw ()
 {
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
   fprintf (fp,"EnzoBlock: UseMinimumPressureSupport %d\n",
-	   UseMinimumPressureSupport);
+	   UseMinimumPressureSupport[in]);
   fprintf (fp,"EnzoBlock: MinimumPressureSupportParameter %g\n",
-	   MinimumPressureSupportParameter);
+	   MinimumPressureSupportParameter[in]);
   fprintf (fp,"EnzoBlock: ComovingBoxSize %g\n",
-	   ComovingBoxSize);
+	   ComovingBoxSize[in]);
   fprintf (fp,"EnzoBlock: HubbleConstantNow %g\n",
-	   HubbleConstantNow);
+	   HubbleConstantNow[in]);
   fprintf (fp,"EnzoBlock: OmegaLambdaNow %g\n",
-	   OmegaLambdaNow);
+	   OmegaLambdaNow[in]);
   fprintf (fp,"EnzoBlock: OmegaMatterNow %g\n",
-	   OmegaMatterNow);
+	   OmegaMatterNow[in]);
   fprintf (fp,"EnzoBlock: MaxExpansionRate %g\n",
-	   MaxExpansionRate);
+	   MaxExpansionRate[in]);
 
   // Chemistry
 
   fprintf (fp,"EnzoBlock: MultiSpecies %d\n",
-	   MultiSpecies);
+	   MultiSpecies[in]);
 
   // Physics
 
   fprintf (fp,"EnzoBlock: PressureFree %d\n",
-	   PressureFree);
+	   PressureFree[in]);
   fprintf (fp,"EnzoBlock: Gamma %g\n",
-	   Gamma);
+	   Gamma[in]);
   fprintf (fp,"EnzoBlock: GravitationalConstant %g\n",
-	   GravitationalConstant);
+	   GravitationalConstant[in]);
 
   // Problem-specific
 
   fprintf (fp,"EnzoBlock: ProblemType %d\n",
-	   ProblemType);
+	   ProblemType[in]);
 
   // Method PPM
 
   fprintf (fp,"EnzoBlock: PPMFlatteningParameter %d\n",
-	   PPMFlatteningParameter);
+	   PPMFlatteningParameter[in]);
   fprintf (fp,"EnzoBlock: PPMDiffusionParameter %d\n",
-	   PPMDiffusionParameter);
+	   PPMDiffusionParameter[in]);
   fprintf (fp,"EnzoBlock: PPMSteepeningParameter %d\n",
-	   PPMSteepeningParameter);
+	   PPMSteepeningParameter[in]);
 
   // Numerics
 
   fprintf (fp,"EnzoBlock: DualEnergyFormalism %d\n",
-	   DualEnergyFormalism);
+	   DualEnergyFormalism[in]);
   fprintf (fp,"EnzoBlock: DualEnergyFormalismEta1 %g\n",
-	   DualEnergyFormalismEta1);
+	   DualEnergyFormalismEta1[in]);
   fprintf (fp,"EnzoBlock: DualEnergyFormalismEta2 %g\n",
-	   DualEnergyFormalismEta2);
+	   DualEnergyFormalismEta2[in]);
   fprintf (fp,"EnzoBlock: pressure_floor %g\n",
-	   pressure_floor);
+	   pressure_floor[in]);
   fprintf (fp,"EnzoBlock: density_density_floor %g\n",
-	   density_floor);
+	   density_floor[in]);
   fprintf (fp,"EnzoBlock: number_density_floor %g\n",
-	   number_density_floor);
+	   number_density_floor[in]);
   fprintf (fp,"EnzoBlock: temperature_floor %g\n",
-	   temperature_floor);
+	   temperature_floor[in]);
 
   fprintf (fp,"EnzoBlock: InitialRedshift %g\n",
-	   InitialRedshift);
+	   InitialRedshift[in]);
   fprintf (fp,"EnzoBlock: InitialTimeInCodeUnits %g\n",
-	   InitialTimeInCodeUnits);
+	   InitialTimeInCodeUnits[in]);
 
   // Domain
-
-  const int in = CkMyPe() % MAX_NODE_SIZE;
 
   fprintf (fp,"EnzoBlock: DomainLeftEdge %g %g %g\n",
 	   DomainLeftEdge [in*3+0],
@@ -375,7 +375,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   // Grid
 
-  fprintf (fp,"EnzoBlock: GridRank %d\n",    GridRank);
+  fprintf (fp,"EnzoBlock: GridRank %d\n",    GridRank[in]);
   fprintf (fp,"EnzoBlock: GridDimension %d %d %d\n",
 	   GridDimension[0],GridDimension[1],GridDimension[2]);
   fprintf (fp,"EnzoBlock: GridStartIndex %d %d %d\n",
@@ -395,7 +395,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 
 
   fprintf (fp,"EnzoBlock: NumberOfBaryonFields %d\n",
-	   NumberOfBaryonFields);
+	   NumberOfBaryonFields[in]);
 
   // problem
 

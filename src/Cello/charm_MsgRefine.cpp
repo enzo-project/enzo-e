@@ -21,6 +21,7 @@ MsgRefine::MsgRefine()
   : CMessage_MsgRefine(),
     is_local_(true),
     data_msg_(NULL),
+    buffer_(NULL),
     index_(),
     nx_(-1), ny_(-1), nz_(-1),
     num_field_blocks_(-1),
@@ -28,8 +29,7 @@ MsgRefine::MsgRefine()
     cycle_(-1), time_(-1.0), dt_(-1.0),
     refresh_type_(refresh_unknown),
     num_face_level_(0), face_level_(NULL),
-    testing_(false) ,
-    buffer_(NULL)
+    testing_(false)
 {  
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d MsgRefine::MsgRefine() %p\n",CkMyPe(),this);
@@ -255,8 +255,6 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   CkPrintf ("%d MsgRefine::unpack()\n",CkMyPe());
   fflush(stdout);
 #endif
-
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
  

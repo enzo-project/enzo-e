@@ -141,7 +141,7 @@ void Block::compute_exit_ ()
 
 //----------------------------------------------------------------------
 
-void Block::refresh_enter_(int callback, Refresh * refresh) 
+void Block::refresh_enter (int callback, Refresh * refresh) 
 {
   TRACE_CONTROL("refresh_enter");
   performance_switch_(perf_refresh,__FILE__,__LINE__);

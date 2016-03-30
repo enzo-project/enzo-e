@@ -379,7 +379,12 @@ void OutputImage::write_block
   }
 
   // WRITE PARTICLES
-    
+
+  double xdm,ydm,zdm;
+  double xdp,ydp,zdp;
+  block->simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
+  block->simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
+
   ParticleData * particle_data = 
     (ParticleData *)block->data()->particle_data();
 
@@ -392,11 +397,9 @@ void OutputImage::write_block
     const int it = it_particle_index_->value();
 
     const int ia_x = particle.attribute_index(it,"x");
-    const int ia_id = particle.attribute_index(it,"id");
 
     const int nb = particle.num_batches(it);
     const int dp = particle.stride(it,ia_x);
-    const int dd = particle.stride(it,ia_id);
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
@@ -404,16 +407,16 @@ void OutputImage::write_block
       double ya [np];
       particle.position(it,ib, xa,ya);
 
-      int64_t * ida = (int64_t *)particle.attribute_array(it,ia_id,ib);
-
       for (int ip=0; ip<np; ip++) {
 	double x = xa[ip*dp];
 	double y = ya[ip*dp];
-	const int ix = ixm + 1.0*((x-xm)/(xp-xm))*(ixp-ixm-1);
-	const int iy = iym + 1.0*((y-ym)/(yp-ym))*(iyp-iym-1);
-	if ( ( xm <= x && x <= xp ) && (ym <= y && y <= yp)) {
-	  // particles may be (temporarily) out of bounds--don't plot them
-	  int i = ix + nxi_*iy;
+	const int ix = MIN(int((x - xdm)/(xdp-xdm)*nxi_),nxi_-1);
+	const int iy = MIN(int((y - ydm)/(ydp-ydm)*nyi_),nyi_-1);
+
+	int i = ix + nxi_*iy;
+	// particles may be outside the domain--don't plot them
+	if ( ( 0 <= ix && ix < nxi_) &&
+	     ( 0 <= iy && iy < nyi_)) {
 	  reduce_point_(&image_data_[i],1.0);
 	}
       }

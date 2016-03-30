@@ -176,8 +176,6 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
 MsgCoarsen * MsgCoarsen::unpack(void * buffer)
 {
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
  
   MsgCoarsen * msg = 

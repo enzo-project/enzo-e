@@ -111,8 +111,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 MsgRefresh * MsgRefresh::unpack(void * buffer)
 {
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
  
   MsgRefresh * msg = 
