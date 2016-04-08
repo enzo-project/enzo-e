@@ -108,7 +108,7 @@ void EnzoSimulation::read_parameters_()
   fflush(stdout);
 #endif
   // Then tell next Simulation object in node to read parameter file
-  if (((ipn + 1) % npn) != 0) {
+  if (((ipn + 1) % npn) != 0 && (ipn < CkNumPes())) {
 #ifdef TRACE_PARAMETERS
     CkPrintf ("%d CALLING p_read_parameters(%d/%d)\n",CkMyPe(),CkMyPe()+1,npn);
     fflush(stdout);
