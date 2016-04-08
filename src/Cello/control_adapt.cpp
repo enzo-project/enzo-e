@@ -323,9 +323,10 @@ void Block::adapt_refine_()
 
       data_msg = new DataMsg;
 
-      data_msg -> set_field_face (field_face);
-      data_msg -> set_field_data (data()->field_data());
-      data_msg -> set_particle_data (particle_list[IC3(ic3)]);
+      data_msg -> set_field_face (field_face,false);
+      data_msg -> set_field_data (data()->field_data(),false);
+      ParticleData * p_data = new ParticleData(*particle_list[IC3(ic3)]);
+      data_msg -> set_particle_data (p_data,true);
 
 #else
 
@@ -792,9 +793,10 @@ void Block::adapt_coarsen_()
 
   DataMsg * data_msg = new DataMsg;
 
-  data_msg -> set_field_face (field_face);
-  data_msg -> set_field_data (data()->field_data());
-  data_msg -> set_particle_data (data()->particle_data());
+  // @@@ should be true but ~FieldFace() crashed in Sedov
+  data_msg -> set_field_face (field_face,false);
+  data_msg -> set_field_data (data()->field_data(),false);
+  data_msg -> set_particle_data (data()->particle_data(),false);
 
   MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr,ic3);
   msg->set_data_msg (data_msg);

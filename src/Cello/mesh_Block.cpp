@@ -63,7 +63,8 @@ Block::Block ( MsgRefine * msg ) throw ()
   is_leaf_(true),
   age_(0),
   face_level_last_(),
-  index_method_(-1)
+  index_method_(-1),
+  name_("")
 {
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -83,8 +84,9 @@ Block::Block ( MsgRefine * msg ) throw ()
     apply_initial_();
   } else {
     msg->update(data());
-    delete msg;
   }
+
+  delete msg;
 
 }
 
@@ -127,7 +129,8 @@ Block::Block
   is_leaf_(true),
   age_(0),
   face_level_last_(),
-  index_method_(-1)
+  index_method_(-1),
+  name_("")
 {
   
   init (index,
@@ -293,7 +296,14 @@ void Block::init
 
   }
 
-  if (! testing) simulation()->insert_block();
+  if (! testing) {
+    simulation()->monitor_insert_block();
+    if (data()->any_particles()) {
+      const int np = data()->particle().num_particles();
+      simulation()->monitor_insert_particles(np);
+    }
+    //    simulation()->monitor_insert_zones(nz);
+  }
 
   if (level > 0) {
 
@@ -502,7 +512,7 @@ Block::~Block() throw ()
   delete child_data_;
   child_data_ = 0;
 
-  simulation()->delete_block();
+  simulation()->monitor_delete_block();
 
   thisProxy.doneInserting();
 
@@ -531,7 +541,7 @@ void Block::x_refresh_child
 
 Block::Block (CkMigrateMessage *m) : CBase_Block(m)
 { 
-  simulation()->insert_block();
+  simulation()->monitor_insert_block();
 };
 
 //----------------------------------------------------------------------
@@ -548,25 +558,28 @@ int Block::rank() const
 
 std::string Block::name() const throw()
 {
+  if (name_ != "") {
+    return name_;
+  } else {
+    const int rank = this->rank();
+    int blocking[3] = {1,1,1};
+    simulation()->hierarchy()->blocking(blocking,blocking+1,blocking+2);
+    for (int i=-1; i>=index().level(); i--) {
+      blocking[0] /= 2;
+      blocking[1] /= 2;
+      blocking[2] /= 2;
+    }
+    int bits[3] = {0,0,0};
+    while (blocking[0]/=2) ++bits[0];
+    while (blocking[1]/=2) ++bits[1];
+    while (blocking[2]/=2) ++bits[2];
+    // int bits = 0;
+    // while (nb/=2) ++bits;
 
-  const int rank = this->rank();
-  int blocking[3] = {1,1,1};
-  simulation()->hierarchy()->blocking(blocking,blocking+1,blocking+2);
-  for (int i=-1; i>=index().level(); i--) {
-    blocking[0] /= 2;
-    blocking[1] /= 2;
-    blocking[2] /= 2;
+    std::string name = "B" + index_.bit_string(level(),rank,bits);
+    return name;
+
   }
-  int bits[3] = {0,0,0};
-  while (blocking[0]/=2) ++bits[0];
-  while (blocking[1]/=2) ++bits[1];
-  while (blocking[2]/=2) ++bits[2];
-  // int bits = 0;
-  // while (nb/=2) ++bits;
-
-  std::string name = "B" + index_.bit_string(level(),rank,bits);
-
-  return name;
 }
 
 //----------------------------------------------------------------------

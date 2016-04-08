@@ -9,8 +9,6 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_NEW_REFRESH
-
 //----------------------------------------------------------------------
 
 long MsgCoarsen::counter[MAX_NODE_SIZE] = {0};
@@ -25,10 +23,6 @@ MsgCoarsen::MsgCoarsen()
     num_face_level_(0),
     face_level_(NULL)
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d MsgCoarsen::MsgCoarsen() %p\n",CkMyPe(),this);
-  fflush(stdout);
-#endif
   ic3_[0] = ic3_[1] = ic3_[2] = -1;
   const int in = CkMyPe() % MAX_NODE_SIZE;
   ++counter[in]; 
@@ -44,10 +38,6 @@ MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
     num_face_level_(num_face_level),
     face_level_(new int[num_face_level])
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d MsgCoarsen::MsgCoarsen() %p\n",CkMyPe(),this);
-  fflush(stdout);
-#endif
 
   const int in = CkMyPe() % MAX_NODE_SIZE;
 
@@ -69,8 +59,8 @@ MsgCoarsen::~MsgCoarsen()
 
   --counter[in];
 
-  // delete data_msg_;
-  // data_msg_ = 0;
+  delete data_msg_;
+  data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
 }
@@ -91,10 +81,6 @@ void MsgCoarsen::set_data_msg  (DataMsg * data_msg)
 
 void * MsgCoarsen::pack (MsgCoarsen * msg)
 {
-
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgCoarsen::pack()\n",msg);
-#endif
 
   int size = 0;
 
@@ -155,10 +141,6 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   (*pi++) = msg->ic3_[1];
   (*pi++) = msg->ic3_[2];
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p MsgCoarsen pack message size %d %d\n",msg,(pc - (char*)buffer),size);
-#endif
-
   ASSERT2("MsgRefresh::pack()",
 	  "buffer size mismatch %d allocated %d packed",
 	  (pc - (char*)buffer),size,
@@ -182,9 +164,6 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
     (MsgCoarsen *) CkAllocBuffer (buffer,sizeof(MsgCoarsen));
 
   msg = new ((void*)msg) MsgCoarsen;
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgCoarsen::unpack()\n",msg);
-#endif
   
   msg->is_local_ = false;
 
@@ -240,9 +219,6 @@ void MsgCoarsen::update (Data * data)
 
   if (data_msg_ == NULL) return;
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgCoarsen::update()\n",this);
-#endif
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr    *    field_descr = simulation->   field_descr();
@@ -261,10 +237,6 @@ void MsgCoarsen::update (Data * data)
     Particle particle = data->particle();
     
     for (int it=0; it<particle.num_types(); it++) {
-#ifdef DEBUG_NEW_REFRESH
-      CkPrintf ("%d %p DEBUG update\n",CkMyPe(),pd);
-      fflush(stdout);
-#endif
       particle.gather (it, 1, &pd);
     }
     // Don't delete particle data if local--done by child Block::data_
@@ -292,11 +264,7 @@ void MsgCoarsen::update (Data * data)
 
       ff->array_to_face(fa,field_dst);
 
-
     }
-    // @@@ BUG: segfaults
-    //    delete field_face_;
-    //    field_face_ = 0;
   }
 
   if (!is_local_) {

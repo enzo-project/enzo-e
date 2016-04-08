@@ -9,9 +9,6 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_NEW_REFRESH
-// #define TRACE_NEW_REFRESH
-
 //----------------------------------------------------------------------
 
 long MsgRefresh::counter[MAX_NODE_SIZE] = {0};
@@ -34,8 +31,8 @@ MsgRefresh::~MsgRefresh()
 {
   const int in = CkMyPe() % MAX_NODE_SIZE;
   --counter[in];
-  // delete data_msg_;
-  // data_msg_ = 0;
+  delete data_msg_;
+  data_msg_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -54,10 +51,6 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefresh::pack (MsgRefresh * msg)
 {
-#ifdef TRACE_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefresh::pack()\n",msg);
-#endif
-
   int size = 0;
 
   size += sizeof(int); // have_data
@@ -95,9 +88,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   // Return the buffer
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p MsgRefresh pack message size %d %d\n",msg,(pc - (char*)buffer),size);
-#endif
   ASSERT2("MsgRefresh::pack()",
 	  "buffer size mismatch %d allocated %d packed",
 	  (pc - (char*)buffer),size,
@@ -117,12 +107,6 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
     (MsgRefresh *) CkAllocBuffer (buffer,sizeof(MsgRefresh));
 
   msg = new ((void*)msg) MsgRefresh;
-#ifdef TRACE_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefresh::unpack()\n",msg);
-#endif
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefresh::unpack()\n",msg);
-#endif
   
   msg->is_local_ = false;
 
@@ -148,10 +132,6 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   msg->buffer_ = buffer;
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p MsgRefresh unpack message size %d\n",msg,(pc - (char*)buffer));
-#endif
-
   return msg;
 }
 
@@ -161,13 +141,8 @@ void MsgRefresh::update (Data * data)
 {
   if (data_msg_ == NULL) return;
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefresh::update()\n",this);
-#endif
-#ifdef TRACE_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefresh::update()\n",this);
-#endif
   data_msg_->update(data,is_local_);
+
   if (!is_local_) {
       CkFreeMsg (buffer_);
   }

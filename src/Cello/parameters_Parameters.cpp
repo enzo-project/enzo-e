@@ -18,7 +18,8 @@ Parameters::Parameters(Monitor * monitor)
   : current_group_depth_(0),
     parameter_map_(),
     parameter_tree_(new ParamNode("Cello")),
-    monitor_(monitor)
+    monitor_(monitor),
+    lmonitor_(true)
 {
   if (! monitor_) lmonitor_ = false;
 
@@ -33,7 +34,8 @@ Parameters::Parameters(const char * file_name,
   : current_group_depth_(0),
     parameter_map_(),
     parameter_tree_(new ParamNode("Cello")),
-    monitor_(monitor)
+    monitor_(monitor),
+    lmonitor_(true)
 {
   if (! monitor_) lmonitor_ = false;
   for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;

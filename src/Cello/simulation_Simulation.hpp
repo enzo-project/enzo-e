@@ -198,15 +198,6 @@ public: // virtual functions
 #endif
   }
 
-  // /// Run the simulation
-  // virtual void run() throw();
-
-  /// Add a new Block to this local branch
-  void insert_block() ;
-
-  /// Remove a Block from this local branch
-  void delete_block() ;
-
   /// Wait for all Hierarchy to be initialized before creating any Blocks
   void r_initialize_forest(CkReductionMsg * msg);
 
@@ -243,10 +234,34 @@ public: // virtual functions
 
   void compute ();
 
+  // MONITOR
+
   void p_monitor();
 
   void p_monitor_performance()
   { monitor_performance(); };
+
+  //--------------------------------------------------
+  // Monitor number of blocks, particles, zones per process
+  //--------------------------------------------------
+
+  /// Add a new Block to this local branch
+  void monitor_insert_block(int count=1) ;
+
+  /// Remove a Block from this local branch
+  void monitor_delete_block(int count=1) ;
+
+  /// Add a new Zones to this local branch
+  void monitor_insert_zones(int64_t count_real, int64_t count_ghost) ;
+
+  /// Remove a Zones from this local branch
+  void monitor_delete_zones(int64_t count_real, int64_t count_ghost) ;
+
+  /// Add a new Particle to this local branch
+  void monitor_insert_particles(int64_t count) ;
+
+  /// Remove a Particle from this local branch
+  void monitor_delete_particles(int64_t count) ;
 
   virtual void monitor_performance();
 

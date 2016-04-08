@@ -19,28 +19,6 @@ ParticleData::ParticleData()
 
 //----------------------------------------------------------------------
 
-ParticleData::~ParticleData() throw()
-{  
-}
-
-//----------------------------------------------------------------------
-
-ParticleData::ParticleData ( const ParticleData & particle_data ) throw ()
-{
-  
-  INCOMPLETE("ParticleData::ParticleData"); 
-}
-
-//----------------------------------------------------------------------
-
-ParticleData & ParticleData::operator= ( const ParticleData & particle_data ) throw ()
-{  
-  INCOMPLETE("ParticleData::operator=");
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
 bool ParticleData::operator== (const ParticleData & particle_data) throw ()
 {
   return 

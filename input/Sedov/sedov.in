@@ -7,4 +7,5 @@ include "config-max-level.incl"
 include "config-adapt-interval.incl"
 include "config-stopping-cycle.incl"
 include "config-stopping-interval.incl"
-include "config-output.incl"
+include "config-trace.incl"
+

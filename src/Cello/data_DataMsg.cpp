@@ -10,6 +10,8 @@
 
 // #define DEBUG_NEW_REFRESH
 
+long DataMsg::counter[MAX_NODE_SIZE] = {0};
+
 //----------------------------------------------------------------------
 
 int DataMsg::data_size () const

@@ -87,8 +87,8 @@ void EnzoInitialSedovArray3::enforce_block
 
   double hx,hy,hz;
   field.cell_width(xbm,xbp,&hx,
-			  ybm,ybp,&hy,
-			  zbm,zbp,&hz);
+		   ybm,ybp,&hy,
+		   zbm,zbp,&hz);
 
   // Parameters
 

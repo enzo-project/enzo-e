@@ -37,7 +37,7 @@ public: // interface
        double zm, double zp) throw();
 
   /// Destructor
-  virtual ~Data() throw();
+  ~Data() throw();
 
   /// Copy constructor
   Data(const Data & data) throw();
@@ -100,11 +100,11 @@ public: // interface
 
   /// Return the ith Field data
   const FieldData * field_data (int i=0) const throw()
-  { return field_data_.at(i); }
+  { return (i < field_data_.size()) ? field_data_[i] : NULL; }
 
   /// Return the ith Field data
   FieldData * field_data (int i=0) throw()
-  { return field_data_.at(i); }
+  { return (i < field_data_.size()) ? field_data_[i] : NULL; }
 
   // Return the ith Field descriptor
   FieldDescr * field_descr () throw();
@@ -112,8 +112,7 @@ public: // interface
 
   /// Return the ith Field
   Field field (int i=0) throw()
-  { return Field(field_descr(),
-		 field_data_.at(i)); }
+  { return Field(field_descr(),field_data(i)); }
 
 
   /// Return the x,y,z,t coordinates of field cell centers
@@ -152,9 +151,7 @@ public: // interface
   bool any_fields() const
   { return (field_descr()->field_count() > 0); }
 
-public: // virtual functions
-
-  virtual void allocate () throw();
+  void allocate () throw();
 
 private: // functions
 

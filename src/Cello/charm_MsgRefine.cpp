@@ -9,8 +9,6 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_NEW_REFRESH
-
 //----------------------------------------------------------------------
 
 long MsgRefine::counter[MAX_NODE_SIZE] = {0};
@@ -31,10 +29,6 @@ MsgRefine::MsgRefine()
     num_face_level_(0), face_level_(NULL),
     testing_(false)
 {  
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d MsgRefine::MsgRefine() %p\n",CkMyPe(),this);
-  fflush(stdout);
-#endif
 
   const int in = CkMyPe() % MAX_NODE_SIZE;
 
@@ -63,14 +57,6 @@ MsgRefine::MsgRefine
   num_face_level_(num_face_level),
   face_level_(new int[num_face_level])
 {  
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d MsgRefine::MsgRefine() %p\n",CkMyPe(),this);
-  CkPrintf ("%d %d %d\n",nx,ny,nz);
-  CkPrintf ("%d %d\n",num_field_blocks,num_adapt_steps);
-  CkPrintf ("%d %f %f %d\n",cycle,time,dt,refresh_type);
-  CkPrintf ("%d %p %d\n",num_face_level,face_level,testing);
-  fflush(stdout);
-#endif
 
   const int in = CkMyPe() % MAX_NODE_SIZE;
 
@@ -89,8 +75,8 @@ MsgRefine::~MsgRefine()
 
   --counter[in];
 
-  // delete data_msg_;
-  // data_msg_ = 0;
+  delete data_msg_;
+  data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
 }
@@ -111,10 +97,6 @@ void MsgRefine::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefine::pack (MsgRefine * msg)
 {
-
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d DEBUG MsgRefine::pack()\n",CkMyPe());
-#endif
 
   int size = 0;
 
@@ -231,10 +213,6 @@ void * MsgRefine::pack (MsgRefine * msg)
     pc = msg->data_msg_->save_data(pc);
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p MsgRefine pack message size %d %d\n",msg,(pc - (char*)buffer),size);
-#endif
-
   ASSERT2("MsgRefine::pack()",
 	  "buffer size mismatch %d allocated %d packed",
 	  (pc - (char*)buffer),size,
@@ -251,20 +229,12 @@ void * MsgRefine::pack (MsgRefine * msg)
 
 MsgRefine * MsgRefine::unpack(void * buffer)
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d MsgRefine::unpack()\n",CkMyPe());
-  fflush(stdout);
-#endif
-
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
  
   MsgRefine * msg = 
     (MsgRefine *) CkAllocBuffer (buffer,sizeof(MsgRefine));
 
   msg = new ((void*)msg) MsgRefine;
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefine::unpack()\n",msg);
-#endif
   
   msg->is_local_ = false;
 
@@ -337,10 +307,6 @@ MsgRefine * MsgRefine::unpack(void * buffer)
     msg->data_msg_ = 0;
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p MsgRefine unpack message size %d\n",msg,(pc - (char*)buffer));
-#endif
-
   // 3. Save the input buffer for freeing later
 
   msg->buffer_ = buffer;
@@ -354,9 +320,6 @@ void MsgRefine::update (Data * data)
 {
   if (data_msg_ == NULL) return;
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG %p MsgRefine::update()\n",this);
-#endif
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr    *    field_descr = simulation->   field_descr();
@@ -375,10 +338,6 @@ void MsgRefine::update (Data * data)
     Particle particle = data->particle();
     
     for (int it=0; it<particle.num_types(); it++) {
-#ifdef DEBUG_NEW_REFRESH
-      CkPrintf ("%d %p DEBUG update\n",CkMyPe(),pd);
-      fflush(stdout);
-#endif
       particle.gather (it, 1, &pd);
     }
     data_msg_->delete_particle_data();
@@ -404,9 +363,6 @@ void MsgRefine::update (Data * data)
 
 
     }
-    // @@@ BUG: segfaults
-    //    delete field_face_;
-    //    field_face_ = 0;
   }
   if (!is_local_) {
       CkFreeMsg (buffer_);

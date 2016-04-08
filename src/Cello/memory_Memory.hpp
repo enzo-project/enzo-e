@@ -33,7 +33,8 @@ private: // interface
   Memory() throw ()
 #ifdef CONFIG_USE_MEMORY
   : is_active_(false),
-    memory_allocate_warning_(10000000)
+    memory_allocate_warning_(10000000),
+    memory_allocated_error_ (8000000000 )
 #endif
   { initialize_(); };
 
@@ -210,6 +211,9 @@ private: // attributes
 
   /// Limit on single memory allocation to display warning
   size_t memory_allocate_warning_;
+
+  /// Limit on total memory allocated before error (to prevent crashing machine)
+  size_t memory_allocated_error_;
 
 #endif
 

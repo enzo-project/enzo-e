@@ -11,7 +11,7 @@ Adapt {
 }
 
 Field {
-    ghosts = 4; # must be even for ProlongLinear
+    ghost_depth = 4; # must be even for ProlongLinear
     prolong = "linear";
     padding   = 0;
     alignment = 8;
@@ -44,13 +44,15 @@ Method {
 
     h5_de {
        type = "data";
-       name = ["sedov-de-%03d.h5", "cycle"]; 
+       name = ["sedov-de-c%03d-p%03d.h5", "cycle", "proc"]; 
        field_list = ["density"];
+       include "config-output-schedule.incl"
     };
     h5_te {
        type = "data";
-       name = ["sedov-te-%03d.h5", "cycle"]; 
+       name = ["sedov-te-c%03d-p%03d.h5", "cycle", "proc"]; 
        field_list = ["total_energy"];
+       include "config-output-schedule.incl"
     };
 
 
@@ -65,6 +67,7 @@ Method {
                      0.00, 1.00, 0.00, 
                      1.00, 0.00, 0.00, 
                      0.00, 0.00, 1.00];
+       include "config-output-schedule.incl"
       };
 
       de {
@@ -78,6 +81,7 @@ Method {
                     1.0, 1.0, 0.0, 
                     1.0, 1.0, 1.0];
         
+       include "config-output-schedule.incl"
       };
 
       te {
@@ -92,6 +96,7 @@ Method {
                     1.0, 1.0, 0.0, 
                     1.0, 1.0, 1.0];
         
+       include "config-output-schedule.incl"
       };
    }
 

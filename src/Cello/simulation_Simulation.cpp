@@ -492,25 +492,68 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 
 //======================================================================
 
-void Simulation::insert_block() 
+void Simulation::monitor_insert_block(int count) 
 {
  
 #ifdef CELLO_DEBUG
   PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
 		   CkMyPe(),sync_output_begin_.stop(),hierarchy()->num_blocks());
 #endif
-  hierarchy()->increment_block_count(1);
-  ++sync_output_begin_;
-  ++sync_output_write_;
+  hierarchy()->increment_block_count(count);
+  sync_output_begin_ += count;
+  sync_output_write_ += count;
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::delete_block() 
+void Simulation::monitor_delete_block(int count) 
 {
-  hierarchy()->increment_block_count(-1);
-  --sync_output_begin_;
-  --sync_output_write_;
+  hierarchy()->increment_block_count(-count);
+  sync_output_begin_ -= count;
+  sync_output_write_ -= count;
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::monitor_insert_zones(int64_t count_total, int64_t count_real) 
+{
+ 
+  ASSERT2 ("Simulation::monitor_insert_zones()",
+	   "Total number of zones %ld must be no larger than "
+	   "number of real zones %ld",
+	   count_total,count_real,
+	   count_total >= count_real);
+	   
+  hierarchy()->increment_total_zone_count(count_total);
+  hierarchy()->increment_real_zone_count (count_real);
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::monitor_delete_zones(int64_t count_total, int64_t count_real)
+{
+  ASSERT2 ("Simulation::monitor_insert_zones()",
+	   "Total number of zones %ld must be no larger than "
+	   "number of real zones %ld",
+	   count_total,count_real,
+	   count_total >= count_real);
+	   
+  hierarchy()->increment_total_zone_count(-count_total);
+  hierarchy()->increment_real_zone_count(-count_real);
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::monitor_insert_particles(int64_t count)
+{
+  hierarchy()->increment_particle_count(count);
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::monitor_delete_particles(int64_t count)
+{
+  hierarchy()->increment_particle_count(-count);
 }
 
 //----------------------------------------------------------------------
@@ -531,7 +574,7 @@ void Simulation::monitor_performance()
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = nr * nc + 1;
+  int n = nr * nc + 4;
 
   long long * counters_long_long = new long long [nc];
   long *      counters_long = new long [n];
@@ -539,13 +582,19 @@ void Simulation::monitor_performance()
   for (int ir = 0; ir < nr; ir++) {
     performance_->region_counters(ir,counters_long_long);
     for (int ic = 0; ic < nc; ic++) {
-      int index_counter = ir+nr*ic;
-      counters_long[index_counter] = 
-	(long) counters_long_long[ic];
+      int ia = ir+nr*ic;
+      counters_long[ia] = (long) counters_long_long[ic];
     }
   }
 
-  counters_long[n-1] = hierarchy()->num_blocks(); // number of Blocks
+  // number of Blocks
+  counters_long[n-4] = hierarchy()->num_blocks(); 
+  // number of particles
+  counters_long[n-3] = hierarchy()->num_particles();
+  // number of real zones
+  counters_long[n-2] = hierarchy()->num_zones_real();
+  // number of zones total
+  counters_long[n-1] = hierarchy()->num_zones_total(); 
 
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
@@ -565,7 +614,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = nr * nc + 1;
+  int n = nr * nc + 4;
 
   long *      counters_long = (long * )msg->getData();
 
@@ -573,7 +622,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++) {
-      int index_counter = ir+nr*ic;
+      int ia = ir+nr*ic;
       bool do_print = 
 	(performance_->counter_type(ic) != counter_type_abs) ||
 	(ir == index_region_cycle);
@@ -581,12 +630,18 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			counters_long[index_counter]);
+			counters_long[ia]);
       }
     }
   }
 
   monitor()->print("Performance","simulation num-blocks %d",
+		  counters_long[n-4]);
+  monitor()->print("Performance","simulation num-particles %d",
+		  counters_long[n-3]);
+  monitor()->print("Performance","simulation num-zones-real %d",
+		  counters_long[n-2]);
+  monitor()->print("Performance","simulation num-zones-total %d",
 		  counters_long[n-1]);
 
   Memory::instance()->reset_high();

@@ -19,7 +19,7 @@
    
    Field {
 
-      ghosts = 4;
+      ghost_depth = 4;
 
       list = [
 	"density",	

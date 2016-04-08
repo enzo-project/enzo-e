@@ -21,15 +21,6 @@ public: // interface
   /// Constructor
   ParticleData();
 
-  /// Deconstructor
-  virtual ~ParticleData() throw();
-
-  /// Copy constructor
-  ParticleData(const ParticleData & particle_data) throw ();
-
-  /// Assignment operator
-  ParticleData & operator= (const ParticleData & particle_data) throw ();
-
   /// Comparison operator
   bool operator== (const ParticleData & particle_data) throw ();
 

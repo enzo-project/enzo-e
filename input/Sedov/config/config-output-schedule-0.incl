@@ -1,0 +1,3 @@
+# FILE: output-0
+
+schedule { var = "cycle"; step = 0; }

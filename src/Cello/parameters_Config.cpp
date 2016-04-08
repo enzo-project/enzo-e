@@ -77,6 +77,8 @@ void Config::pup (PUP::er &p)
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
+  p | initial_trace_field;
+  p | initial_trace_mpp;
   p | initial_trace_dx;
   p | initial_trace_dy;
   p | initial_trace_dz;
@@ -552,6 +554,8 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  initial_trace_field = p->value_string ("Initial:trace:field","");
+  initial_trace_mpp = p->value_float ("Initial:trace:mass_per_particle",0.0);
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
   initial_trace_dy = p->list_value_integer (1,"Initial:trace:stride",1);
   initial_trace_dz = p->list_value_integer (2,"Initial:trace:stride",1);

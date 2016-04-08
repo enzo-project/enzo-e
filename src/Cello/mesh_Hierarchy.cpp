@@ -24,6 +24,9 @@ Hierarchy::Hierarchy
   refinement_(refinement),
   max_level_(max_level),
   num_blocks_(0),
+  num_particles_(0),
+  num_zones_total_(0),
+  num_zones_real_(0),
   block_array_(NULL),
   block_exists_(false)
 {
@@ -61,11 +64,20 @@ void Hierarchy::pup (PUP::er &p)
   p | max_level_;
 
   p | num_blocks_;
+  p | num_particles_;
+  p | num_zones_total_;
+  p | num_zones_real_;
+
   // clear if unpacking: load balancing expects num_blocks_ to be
   // updated by Block(CkMigrateMessage) and ~Block(), but
   // checkpoint / restart then double-counts Blocks.
 
-  if (up) num_blocks_ = 0;
+  if (up) {
+    num_blocks_      = 0;
+    num_particles_   = 0;
+    num_zones_total_ = 0;
+    num_zones_real_  = 0;
+  }
 
   // block_array_ is NULL on non-root processes
   bool allocated=(block_array_ != NULL);
@@ -169,6 +181,8 @@ void Hierarchy::blocking (int * nbx, int * nby, int * nbz) const throw()
   if (nby) (*nby) = blocking_[1];
   if (nbz) (*nbz) = blocking_[2];
 }
+
+//----------------------------------------------------------------------
 
 size_t Hierarchy::num_blocks(int * nbx, 
 			     int * nby,

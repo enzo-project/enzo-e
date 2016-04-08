@@ -9,8 +9,8 @@ flags_arch = '-Wall -O3 -g'
 #flags_arch = '-Wall -O3 -pg'
 
 # rdynamic required for backtraces
-#flags_link_charm = ' -rdynamic -memory paranoid' 
-flags_link_charm = ''
+#flags_link_charm = '-rdynamic' 
+#flags_link_charm = '-memory paranoid' 
 
 cc  = 'gcc '
 f90 = 'gfortran'

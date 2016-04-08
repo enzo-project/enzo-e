@@ -1,3 +1,5 @@
+# FILE: trace-on
+
 Particle {
    list += ["trace"];
    trace {
@@ -11,6 +13,10 @@ Particle {
 
 Initial {
    list += ["trace"];
+   trace {
+      field = "total_energy";
+      mass_per_particle = 0.5e-7;
+   }
 }
 
 Method {
@@ -25,14 +31,22 @@ Output {
       field_list = ["density"];
       particle_list = ["trace"];
       name = ["trace-p%02d-c%06d.h5", "proc","cycle"];
-      include "input/schedule_cycle_10.incl"
+      include "config-output-schedule.incl"
    }
    trace_png {
       type = "image";
 #      field_list = ["density"];
       particle_list = ["trace"];
-      include "input/colormap_blackbody.incl"
+      image_size = [1024,1024];
+      colormap =   # blackbody
+          [   0.0, 0.0, 0.0,
+              1.0, 0.0, 0.0,
+              1.0, 1.0, 0.0,
+              1.0, 1.0, 1.0 
+          ];
+
+
       name = ["trace-p%02d-c%06d.png", "proc","cycle"];
-      include "input/schedule_cycle_10.incl"
+      include "config-output-schedule.incl"
    }
 }

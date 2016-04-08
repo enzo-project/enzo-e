@@ -36,13 +36,7 @@ public: // interface
 	     int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
-  virtual ~FieldData() throw();
-
-  /// Copy constructor
-  FieldData(const FieldData & field_data) throw ();
-
-  /// Assignment operator
-  FieldData & operator= (const FieldData & field_data) throw ();
+  ~FieldData() throw();
 
   void pup(PUP::er &p) ;
 

@@ -99,13 +99,21 @@ class Sync {
   inline void reset () throw () 
   { index_curr_ = 0; }
 
-  /// Decrement the stopping value by 
+  /// Decrement the stopping value by one
   inline int operator -- () 
   { --index_stop_; return index_stop_; }
 
   /// Increment the stopping value by one
   inline int operator ++ () 
   { ++index_stop_; return index_stop_; }
+
+  /// Decrement the stopping value by count
+  inline int operator -= (int count) 
+  { index_stop_ -= count; return index_stop_; }
+
+  /// Increment the stopping value by count
+  inline int operator += (int count) 
+  { index_stop_ += count; return index_stop_; }
 
 private:
 

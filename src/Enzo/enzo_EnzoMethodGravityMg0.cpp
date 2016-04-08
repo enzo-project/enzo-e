@@ -499,7 +499,9 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   field_face->face_to_array(enzo_block->data()->field(),&narray,&array);
 
-  // Create a FieldMsg for sending data to parent
+  delete field_face;
+
+// Create a FieldMsg for sending data to parent
   // (note: charm messages not deleted on send; are deleted on receive)
 
   FieldMsg * field_message  = new (narray) FieldMsg;
@@ -524,7 +526,6 @@ void EnzoMethodGravityMg0::restrict_send(EnzoBlock * enzo_block) throw()
 	      CkArrayIndexIndex(index_parent),
 	      enzo_block->proxy_array()).send(field_message);
 
-  delete field_face;
   delete [] array;
 
 }
@@ -701,14 +702,11 @@ void EnzoBlock::p_mg0_prolong_recv(FieldMsg * field_message)
   int n = field_message->n;
   char * a = field_message->a;
   int * ic3 = field_message->ic3;
+
   FieldFace * field_face = create_face 
-    (if3, 
-     field_message->ic3, lg3,
-     refresh_fine,
-     field_list);
-  field_face->array_to_face 
-    (field_message->a,
-     data()->field());
+    (if3, field_message->ic3, lg3, refresh_fine, field_list);
+
+  field_face->array_to_face (field_message->a, data()->field());
 
   delete field_face;
 

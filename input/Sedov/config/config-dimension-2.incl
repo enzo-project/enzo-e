@@ -14,7 +14,7 @@ Mesh {
 
 Field {
 
-   fields = [
+   list = [
         "density",	
 	"velocity_x",
 	"velocity_y",

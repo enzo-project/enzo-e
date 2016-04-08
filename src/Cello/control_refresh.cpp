@@ -132,9 +132,8 @@ void Block::refresh_load_field_face_
 
   DataMsg * data_msg = new DataMsg;
 
-  data_msg -> set_field_face (field_face);
-  data_msg -> set_field_data (data()->field_data());
-  data_msg -> set_particle_data(NULL);
+  data_msg -> set_field_face (field_face,true);
+  data_msg -> set_field_data (data()->field_data(),false);
 
   MsgRefresh * msg = new MsgRefresh;
 
@@ -224,6 +223,7 @@ void Block::refresh_store_field_face_
     FieldData * field_data = data()->field_data();
     Field field (field_descr,field_data);
     field_face -> array_to_face (array,field);
+    //    delete field_face;
 
   }
 #endif
@@ -234,35 +234,35 @@ void Block::refresh_store_field_face_
 void Block::refresh_load_particle_faces_ (Refresh * refresh)
 {
 
-    const int rank = this->rank();
+  const int rank = this->rank();
 
-    const int npa = (rank == 1) ? 4 
-      :             (rank == 2) ? 4*4 
-      :                           4*4*4;
+  const int npa = (rank == 1) ? 4 
+    :             (rank == 2) ? 4*4 
+    :                           4*4*4;
 
-    ParticleData * particle_array[npa];
-    ParticleData * particle_list [npa];
-    Index             index_list [npa];
+  ParticleData * particle_array[npa];
+  ParticleData * particle_list [npa];
+  Index             index_list [npa];
   
-    for (int i=0; i<npa; i++) {
-      particle_list[i] = NULL;
-      particle_array[i] = NULL;
-    }
+  for (int i=0; i<npa; i++) {
+    particle_list[i] = NULL;
+    particle_array[i] = NULL;
+  }
 
-    int nl=0;
-    particle_load_faces_
-      (npa,&nl,particle_list,particle_array, index_list,
-       refresh);
+  int nl=0;
+  particle_load_faces_
+    (npa,&nl,particle_list,particle_array, index_list,
+     refresh);
 
-    // 4. SEND PARTICLE DATA TO NEIGHBORS
+  // 4. SEND PARTICLE DATA TO NEIGHBORS
 
-    particle_send_(nl,index_list,particle_list);
+  particle_send_(nl,index_list,particle_list);
 
-    // delete neighbor particle objects
-    for (int il=0; il<nl; il++) {
-      ParticleData * pd = particle_list[il];
-      //      delete pd;
-    }
+  // delete neighbor particle objects
+  for (int il=0; il<nl; il++) {
+    ParticleData * pd = particle_list[il];
+    //      delete pd;
+  }
 }
 //----------------------------------------------------------------------
 
@@ -378,7 +378,9 @@ int Block::particle_create_array_neighbors_
     int index_upper[3] = {1,1,1};
     refresh->index_limits (rank,refresh_type,if3,ic3,index_lower,index_upper);
 
+    // @@@@ MEMORY LEAK
     ParticleData * pd = new ParticleData;
+
     ParticleDescr * p_descr = simulation() -> particle_descr();
 #ifdef DEBUG_REFRESH
     CkPrintf ("%d %p DEBUG particle_create_array_neighbors\n",
@@ -387,6 +389,7 @@ int Block::particle_create_array_neighbors_
     pd->allocate(p_descr);
 
     particle_list[il] = pd;
+
     index_list[il] = it_neighbor.index();
 
     ++ il;
@@ -664,13 +667,19 @@ void Block::particle_send_
 
 
       DataMsg * data_msg = new DataMsg;
-      data_msg ->set_particle_data(p_data);
+      data_msg ->set_particle_data(p_data,true);
 
       MsgRefresh * msg = new MsgRefresh;
       msg->set_data_msg (data_msg);
 
       thisProxy[index].p_refresh_store (msg);
-    }
+    }//  else if (p_data) {
+    //   // assert ParticleData object exits but has no particles
+    //   CkPrintf ("%d DEBUG del empty ParticleData %p\n",CkMyPe(),p_data);
+    //   delete particle_list[il];
+    //   particle_list[il] = NULL;
+
+    // }
 
 #else
     const int nt = particle_send.num_types();

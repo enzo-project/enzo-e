@@ -43,11 +43,21 @@ void * Memory::allocate ( size_t bytes ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
 
-  if (bytes >= memory_allocate_warning_) {
+  if (memory_allocate_warning_ > 0 && bytes >= memory_allocate_warning_) {
     // WARNING: do not use WARNING since allocates memory, leading to
     //          recursive calls to overloaded operator new 
-    CkPrintf ("%p Allocating %d > %d bytes\n",
-  	      this,bytes,memory_allocate_warning_);
+    CkPrintf ("%d Allocating %d > %d bytes\n",
+  	      CkMyPe(),bytes,memory_allocate_warning_);
+  }
+
+  if (memory_allocated_error_ > 0 && bytes_curr_.size()>0 &&
+      (bytes_curr_[0] + bytes >= memory_allocated_error_)) {
+    // WARNING: do not use ERROR or ASSERT since allocates memory, leading to
+    //          recursive calls to overloaded operator new 
+    CkPrintf ("%d Trying to allocate a total of %lld bytes with limit of %lld\n",
+	      CkMyPe(),
+	      bytes_curr_[0] + bytes,memory_allocated_error_);
+    CkExit();
   }
 
   int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));

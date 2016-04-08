@@ -1,9 +1,0 @@
-# FILE: output-1
-
-Output {
-   h5_de { schedule { var = "cycle"; step = 1; } };
-   h5_te { schedule { var = "cycle"; step = 1; } };
-   mesh { schedule { var = "cycle"; step = 1; } };
-   de   { schedule { var = "cycle"; step = 1; } };
-   te   { schedule { var = "cycle"; step = 1; } };
-}

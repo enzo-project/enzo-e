@@ -511,7 +511,9 @@ Initial * Problem::create_initial_
 			       config->initial_cycle,
 			       config->initial_time);
   } else if (type == "trace") {
-    initial = new InitialTrace (config->initial_trace_dx,
+    initial = new InitialTrace (config->initial_trace_field,
+				config->initial_trace_mpp,
+				config->initial_trace_dx,
                                 config->initial_trace_dy,
                                 config->initial_trace_dz);
   }

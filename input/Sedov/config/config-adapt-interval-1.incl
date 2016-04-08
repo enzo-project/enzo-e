@@ -1,7 +1,6 @@
+
 # FILE: adapt-interval-1
 
-Mesh {
-   adapt {
+   Adapt {
       interval = 1; # 0 == TURN OFF DYNAMIC ADAPT
    }
-}

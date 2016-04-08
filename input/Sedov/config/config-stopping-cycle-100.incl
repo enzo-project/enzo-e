@@ -1,0 +1,4 @@
+# FILE: stopping-cycle-100
+
+Stopping { cycle = 100; }
+

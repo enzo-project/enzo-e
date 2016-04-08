@@ -113,14 +113,38 @@ public: // interface
   CProxy_Block * block_array() const throw()
   { return block_array_;}
 
+  /// Increment (decrement) number of mesh blocks
+  void increment_block_count(int count)
+  { num_blocks_ += count; }
+
+  /// Increment (decrement) number of particles
+  void increment_particle_count(int64_t count)
+  { num_particles_ += count; }
+
+  /// Increment (decrement) number of real_zones
+  void increment_real_zone_count(int64_t count)
+  { num_zones_real_ += count; }
+
+  /// Increment (decrement) number of total_zones
+  void increment_total_zone_count(int64_t count)
+  { num_zones_total_ += count; }
+
   /// Return the number of blocks on this process
   size_t num_blocks() const throw()
-  { 
-    return num_blocks_; 
-  }
+  {  return num_blocks_;  }
 
-  void increment_block_count(int increment)
-  { num_blocks_ += increment; }
+  /// Return the number of particles on this process
+  int64_t num_particles() const throw()
+  {  return num_particles_;  }
+
+  /// Return the number of real zones on this process
+  int64_t num_zones_real() const throw()
+  {  return num_zones_real_;  }
+
+  /// Return the number of total zones on this process
+  int64_t num_zones_total() const throw()
+  {  return num_zones_total_;  }
+
 
   void create_forest (FieldDescr   * field_descr,
 		      bool allocate_data,
@@ -158,6 +182,15 @@ protected: // attributes
 
   /// Current number of blocks on this process
   int num_blocks_; 
+
+  /// Current number of particles on this process
+  int64_t num_particles_; 
+
+  /// Current number of total_zones on this process
+  int64_t num_zones_total_; 
+
+  /// Current number of real_zones on this process
+  int64_t num_zones_real_; 
 
   /// Array of Blocks 
   CProxy_Block * block_array_;

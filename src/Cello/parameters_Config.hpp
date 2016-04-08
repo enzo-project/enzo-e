@@ -100,6 +100,8 @@ public: // attributes
   int                        initial_cycle;
   double                     initial_time;
 
+  std::string                initial_trace_field;
+  double                     initial_trace_mpp;
   int                        initial_trace_dx;
   int                        initial_trace_dy;
   int                        initial_trace_dz;

@@ -42,22 +42,6 @@ FieldData::~FieldData() throw()
 
 //----------------------------------------------------------------------
 
-FieldData::FieldData ( const FieldData & field_data ) throw ()
-{
-  
-  INCOMPLETE("FieldData::FieldData"); 
-}
-
-//----------------------------------------------------------------------
-
-FieldData & FieldData::operator= ( const FieldData & field_data ) throw ()
-{  
-  INCOMPLETE("FieldData::operator=");
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
 void FieldData::pup(PUP::er &p)
 {
   TRACEPUP;
