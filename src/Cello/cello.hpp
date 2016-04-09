@@ -22,8 +22,8 @@
 // unrolling static variables so that each process has its own copy
 // ip % MAX_NODES
 
-#define MAX_NODE_SIZE 24
-#define MAX_NODE_SIZE_3 72 /* For EnzoBlock static array declarations only */
+#define MAX_NODE_SIZE 48
+#define MAX_NODE_SIZE_3 144 /* For EnzoBlock static array declarations only */
 
 //----------------------------------------------------------------------
 // SYSTEM INCLUDES

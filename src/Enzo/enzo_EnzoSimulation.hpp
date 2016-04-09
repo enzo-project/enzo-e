@@ -23,7 +23,7 @@ public: // functions
 
   /// CHARM++ Constructor
   EnzoSimulation
-  ( const char parameter_file[], int n) throw();
+  ( const char parameter_file[], int n, int node_size) throw();
 
   /// CHARM++ Constructor
   EnzoSimulation() {}
@@ -66,6 +66,13 @@ public: // virtual functions
 private: // functions
 
   virtual void initialize_config_() throw();
+
+private: // attributes
+
+  // Number of processes per node: default is MAX_NODE_SIZE, but can be
+  // overridden using NODE_SIZE file.  Used to serialize reading parameters
+  // within a node.
+  int node_size_; 
 
 };
 

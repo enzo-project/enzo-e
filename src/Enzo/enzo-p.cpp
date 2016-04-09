@@ -60,6 +60,12 @@ PARALLEL_MAIN_BEGIN
   }
   const char * parameter_file = PARALLEL_ARGV[1];
 
+  int node_size = MAX_NODE_SIZE;
+  FILE * fp = fopen("NODE_SIZE","r");
+  if (fp) {
+    fscanf (fp,"%d",&node_size);
+  }
+
   // Initialize unit testing
 
   const int ip = CkMyPe();
@@ -89,7 +95,7 @@ PARALLEL_MAIN_BEGIN
   // ENTRY: create
   // --------------------------------------------------
   proxy_simulation = proxy_enzo_simulation = CProxy_EnzoSimulation::ckNew
-    (parameter_file, strlen(parameter_file)+1);
+    (parameter_file, strlen(parameter_file)+1, node_size);
   // --------------------------------------------------
 
 }
