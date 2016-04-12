@@ -80,7 +80,7 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   // Serialize reading parameters within each logical node
 
   const int ipn = CkMyPe();
-  const int npn = MIN(node_size,CkNumPes());
+  const int npn = MIN(node_size_,CkNumPes());
 
   if ((ipn % npn) == 0) {
 #ifdef TRACE_PARAMETERS
@@ -97,7 +97,7 @@ void EnzoSimulation::read_parameters_()
 {
 
   const int ipn = CkMyPe();
-  const int npn = MIN(node_size,CkNumPes());
+  const int npn = MIN(node_size_,CkNumPes());
 #ifdef TRACE_PARAMETERS
   CkPrintf ("%d BEGIN read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
   fflush(stdout);
