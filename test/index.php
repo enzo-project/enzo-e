@@ -12,7 +12,9 @@
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
 
-   <h3><?php system ("hg branch") ?> branch </br> revision <?php system ("hg id -n") ?> </h3>
+   <h3> Cello branch: <?php system ("hg branch") ?></br>
+   Cello revision: <?php system ("hg id -n") ?> </br>
+   Charm++ version: <?php system ("cat CHARM_VERSION") ?> </h3>
  <?php
 
      //----------------------------------------------------------------------
