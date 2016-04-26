@@ -551,11 +551,19 @@ cello_def.write ("#define CELLO_TIME "
 # Python version >= 2.7 is required for subprocess.check_output()
 
 if (python_lt_27 == 0):
+     charm_version =  subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip();
      cello_def.write ("#define CELLO_CHARM_VERSION "
-                      "\""+subprocess.check_output
-                      (["cat", charm_path + "/VERSION"]).rstrip()+"\"\n" )
+                      "\""+charm_version+"\"\n" )
+     
+     fp_charm_version = open ("test/CHARM_VERSION", "w")
+     fp_charm_version.write(charm_version + "\n");
+     fp_charm_version.close()
+     		      
 else:
      cello_def.write ("#define CELLO_CHARM_VERSION unknown\n")	
+     fp_charm_version = open ("test/CHARM_VERSION", "w")
+     fp_charm_version.write("unknown\n");
+     fp_charm_version.close()
 
 #----------
 # Both Python version 2.7 is required, and Mercurial must be installed
