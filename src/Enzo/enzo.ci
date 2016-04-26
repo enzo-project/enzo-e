@@ -95,6 +95,7 @@ module enzo {
     entry void r_startup_begun (CkReductionMsg *);
     entry void r_startup_finished (CkReductionMsg *);
     entry void p_read_parameters();
+    entry void r_write_checkpoint ();
   }
 
   array[Index] EnzoBlock : Block {

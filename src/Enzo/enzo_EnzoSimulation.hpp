@@ -54,6 +54,8 @@ public:
   /// Barrier after parameters read to synchronize before initializing 
   void r_startup_finished (CkReductionMsg *);
 
+  /// Continue on to Problem::output_wait() from checkpoint
+  virtual void r_write_checkpoint();
 
 public: // virtual functions
 

@@ -17,7 +17,7 @@ CProxy_Main proxy_main;
 
 #ifdef CHARM_ENZO
 #include "simulation.hpp"
-extern CProxy_Simulation proxy_simulation;
+extern CProxy_EnzoSimulation proxy_simulation;
 #include "enzo_finalize.hpp"
 #endif
 
@@ -39,7 +39,7 @@ void Main::exit_()
 
 #ifdef CHARM_ENZO
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  EnzoSimulation * simulation = proxy_simulation.ckLocalBranch();
 
   if (simulation) {
     enzo_finalize(simulation);
@@ -72,7 +72,7 @@ void Main::p_checkpoint(int count, std::string dir_name)
     // ENTRY: checkpoint if Simulation is root
     // --------------------------------------------------
 #ifdef CHARM_ENZO
-    CkCallback callback(CkIndex_Simulation::r_write_checkpoint(),proxy_simulation);
+    CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint(),proxy_simulation);
     CkStartCheckpoint (dir_char,callback);
 #endif
   }

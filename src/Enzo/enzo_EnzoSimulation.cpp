@@ -155,6 +155,14 @@ void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
 
 //----------------------------------------------------------------------
 
+void EnzoSimulation::r_write_checkpoint()
+{
+  CkPrintf("EnzoSimulation::r_write_checkpoint()\n");
+  problem()->output_wait(this);
+}
+
+//----------------------------------------------------------------------
+
 void EnzoSimulation::initialize_config_() throw()
 {
   if (config_ == NULL) {

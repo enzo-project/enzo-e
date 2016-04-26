@@ -54,7 +54,7 @@
 
 #include "enzo.decl.h"
 
-/* #define DEBUG_METHOD */
+// #define DEBUG_METHOD
 
 #undef NEW_REFRESH
 
@@ -70,11 +70,11 @@
 #undef CK_TEMPLATES_ONLY
 
 #ifdef DEBUG_METHOD
-#   define TRACE_METHOD							\
-  CkPrintf ("%d %s:%d TRACE_METHOD %p\n",CkMyPe(),__FILE__,__LINE__,this);	\
+#   define TRACE_METHOD(method)						\
+  CkPrintf ("%d %s:%d TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__,method,this); \
   fflush(stdout);
 #else
-#   define TRACE_METHOD /*  */ 
+#   define TRACE_METHOD(method) /*  */ 
 #endif
 //----------------------------------------------------------------------
 
@@ -105,7 +105,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
   , id_refresh_matvec_(-1)
 #endif
 {
-  TRACE_METHOD;
+  TRACE_METHOD("EnzoMethodGravityCg() ENTER");
 
   M_ = (diag_precon) ? (Matrix *)(new EnzoMatrixDiagonal) 
     :                  (Matrix *)(new EnzoMatrixIdentity);
@@ -138,7 +138,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
   //  refresh(id_refresh_matvec_)->add_field(ir_);
 #endif
 
-  TRACE_METHOD;
+  TRACE_METHOD("EnzoMethodGravityCg() EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -146,7 +146,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 void EnzoMethodGravityCg::compute ( Block * block) throw()
 {
   
-  TRACE_METHOD;
+  TRACE_METHOD("compute ENTER");
   Field field = block->data()->field();
 
   field.size                (&nx_,&ny_,&nz_);
@@ -161,7 +161,7 @@ void EnzoMethodGravityCg::compute ( Block * block) throw()
   else if (precision == precision_quadruple) compute_<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
-  TRACE_METHOD;
+  TRACE_METHOD("compute EXIT");
 }
 
 //======================================================================
@@ -177,7 +177,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 //     D = Z
 //     shift (B)
 {
-  TRACE_METHOD;
+  TRACE_METHOD("compute_() ENTER");
 
   iter_ = 0;
 
@@ -233,55 +233,27 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 
   }
 
+#ifdef DEBUG_GRAVITY
+  printf ("%s:%d %s DEBUG_GRAVITY calling callback\n",
+	  __FILE__,__LINE__,enzo_block->name().c_str());
+#endif
+  TRACE_METHOD("   cg_loop_0a callback");
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
+  TRACE_METHOD("   cg_loop_0a callback");
 
 #ifdef DEBUG_GRAVITY
   printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
 	  __FILE__,__LINE__,enzo_block->name().c_str());
 #endif
 	  
+  TRACE_METHOD("   cg_loop_0a contribute");
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
 			  callback);
-  TRACE_METHOD;
-}
-
-//----------------------------------------------------------------------
-
-template <class T>
-void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
-/// - EnzoBlock accumulate global contribution to DOT(R,R)
-/// ==> refresh P for AP = MATVEC (A,P)
-{
-  TRACE_METHOD;
-
-  EnzoMethodGravityCg * method = 
-    static_cast<EnzoMethodGravityCg*> (this->method());
-
-  long double * data = (long double *) msg->getData();
-
-  method->set_rr( data[0] );
-  method->set_bs( data[1] );
-  method->set_bc( data[2] );
-
-  delete msg;
+  TRACE_METHOD("   cg_loop_0a contribute");
   
-  // Refresh if Block is a leaf
-
-#ifdef OLD_REFRESH
-  method->refresh(1)->set_active(is_leaf());
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
-		method->refresh(1));
-#endif
-#ifdef NEW_REFRESH
-  Refresh refresh (4,0,neighbor_level, sync_face);
-  refresh.set_active(is_leaf());
-  refresh.add_all_fields(this->data()->field().field_count());
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
-		&refresh);
-#endif
-  TRACE_METHOD;
+  TRACE_METHOD("compute_() EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -290,7 +262,7 @@ template <class T>
 void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
-  TRACE_METHOD;
+  TRACE_METHOD("cg_loop_0b ENTER");
 
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
@@ -312,14 +284,53 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
 		&refresh);
 #endif
-  TRACE_METHOD;
+  TRACE_METHOD("cg_loop_0b EXIT");
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
+/// - EnzoBlock accumulate global contribution to DOT(R,R)
+/// ==> refresh P for AP = MATVEC (A,P)
+{
+  TRACE_METHOD("cg_loop_0a ENTER");
+
+  EnzoMethodGravityCg * method = 
+    static_cast<EnzoMethodGravityCg*> (this->method());
+
+  long double * data = (long double *) msg->getData();
+
+  method->set_rr( data[0] );
+  method->set_bs( data[1] );
+  method->set_bc( data[2] );
+
+  delete msg;
+  
+  // Refresh if Block is a leaf
+
+#ifdef OLD_REFRESH
+  method->refresh(1)->set_active(is_leaf());
+  TRACE_METHOD("   refresh_enter CALLING");
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
+		method->refresh(1));
+  TRACE_METHOD("   refresh_enter CALLED");
+#endif
+#ifdef NEW_REFRESH
+  Refresh refresh (4,0,neighbor_level, sync_face);
+  refresh.set_active(is_leaf());
+  refresh.add_all_fields(this->data()->field().field_count());
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
+		&refresh);
+#endif
+  TRACE_METHOD("cg_loop_0a EXIT");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::enzo_matvec_()
 {
-  TRACE_METHOD;
+  TRACE_METHOD("enzo_matvec ENTER");
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
@@ -336,7 +347,7 @@ void EnzoBlock::enzo_matvec_()
     method->cg_shift_1<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityCg()", "precision %d not recognized", precision);
-  TRACE_METHOD;
+  TRACE_METHOD("enzo_matvec EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -345,7 +356,7 @@ template <class T>
 void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 {
 
-  TRACE_METHOD;
+  TRACE_METHOD("Method cg_shift_1() ENTER");
   Data * data = enzo_block->data();
   Field field = data->field();
 
@@ -386,20 +397,22 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 
   } 
 
-  TRACE_METHOD;
+  TRACE_METHOD("   cg_shift_1 callback");
   CkCallback callback(CkIndex_EnzoBlock::r_cg_shift_1<T>(NULL), 
-		enzo_block->proxy_array());
-  TRACE_METHOD;
+		       enzo_block->proxy_array());
+  TRACE_METHOD("   cg_shift_1 callback");
 
 #ifdef DEBUG_GRAVITY
   printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
 	  __FILE__,__LINE__,enzo_block->name().c_str());
 #endif
 
+  TRACE_METHOD("   cg_shift_1 contribute");
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
 			  callback);
-  TRACE_METHOD;
+  TRACE_METHOD("   cg_shift_1 contribute");
+  TRACE_METHOD("Method::cg_shift_1() EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -407,7 +420,7 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoBlock::r_cg_shift_1 (CkReductionMsg * msg)
 {
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_shift_1 ENTER");
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
 
@@ -417,7 +430,7 @@ void EnzoBlock::r_cg_shift_1 (CkReductionMsg * msg)
 
   method -> cg_loop_2<T>(this);
 
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_shift_1 EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -425,7 +438,7 @@ void EnzoBlock::r_cg_shift_1 (CkReductionMsg * msg)
 template <class T>
 void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 {
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_loop_2 ENTER");
   cello::check(rr_,"rr_",__FILE__,__LINE__);
 
   if (iter_ == 0) {
@@ -498,19 +511,23 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
       reduce[2] = 0.0;
     }
 
+    TRACE_METHOD("cg_loop_3 callback");
     CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_3<T>(NULL), 
-		  enzo_block->proxy_array());
+			 enzo_block->proxy_array());
+    TRACE_METHOD("cg_loop_3 callback");
 
 #ifdef DEBUG_GRAVITY
   printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
 	  __FILE__,__LINE__,enzo_block->name().c_str());
 #endif
 
+    TRACE_METHOD("cg_loop_3 contribute");
     enzo_block->contribute (3*sizeof(long double), &reduce, 
 			    r_method_gravity_cg_type,
 			    callback);
+    TRACE_METHOD("cg_loop_3 contribute");
   }
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_loop_2 EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -518,7 +535,7 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoBlock::r_cg_loop_3 (CkReductionMsg * msg)
 {
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_loop_3 ENTER");
 
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
@@ -533,7 +550,7 @@ void EnzoBlock::r_cg_loop_3 (CkReductionMsg * msg)
 
   method -> cg_loop_4<T>(this);
 
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_loop_3 EXIT");
 
 }
 
@@ -550,7 +567,7 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 //  D = Z + b*D;
 //  rz = rz2;
 {
-  TRACE_METHOD;
+  TRACE_METHOD("Method cg_loop_4 ENTER");
 
   cello::check(rr_,"rr_",__FILE__,__LINE__);
   cello::check(rz_,"rz_",__FILE__,__LINE__);
@@ -596,19 +613,23 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 
   }
 
+  TRACE_METHOD("cg_loop_5 callback");
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_5<T>(NULL), 
-		      enzo_block->proxy_array());
+		       enzo_block->proxy_array());
+  TRACE_METHOD("cg_loop_5 callback");
 
 #ifdef DEBUG_GRAVITY
   printf ("%s:%d %s DEBUG_GRAVITY calling contribute\n",
 	  __FILE__,__LINE__,enzo_block->name().c_str());
 #endif
 
+  TRACE_METHOD("cg_loop_5 contribute");
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  r_method_gravity_cg_type, 
 			  callback);
+  TRACE_METHOD("cg_loop_5 contribute");
 
-  TRACE_METHOD;
+  TRACE_METHOD("Method cg_loop_4 EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -618,7 +639,7 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> cg_loop_6
 {
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_loop_5 ENTER");
 
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
@@ -633,7 +654,7 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 
   method -> cg_loop_6<T>(this);
 
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_loop_5 EXIT");
 
 }
 
@@ -646,7 +667,7 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 //  D = Z + b*D;
 //  rz = rz2;
 {
-  TRACE_METHOD;
+  TRACE_METHOD("Method cg_loop_6 ENTER");
 
   cello::check(rz2_,"rz2_",__FILE__,__LINE__);
   cello::check(rs_,"rs_",__FILE__,__LINE__);
@@ -680,13 +701,17 @@ void EnzoMethodGravityCg::cg_loop_6 (EnzoBlock * enzo_block) throw ()
 
   int iter = iter_ + 1;
 
+  TRACE_METHOD("cg_loop_0b callback");
   CkCallback callback(CkIndex_EnzoBlock::r_cg_loop_0b<T>(NULL), 
-		enzo_block->proxy_array());
+		      enzo_block->proxy_array());
+  TRACE_METHOD("cg_loop_0b callback");
     
+  TRACE_METHOD("cg_loop_0b contribute");
   enzo_block->contribute (sizeof(int), &iter, 
 			  CkReduction::max_int, callback);
+  TRACE_METHOD("cg_loop_0b contribute");
 
-  TRACE_METHOD;
+  TRACE_METHOD("Block cg_loop_6 EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -701,7 +726,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 ///       ERROR (return-)
 ///    }
 {
-  TRACE_METHOD;
+  TRACE_METHOD("Method cg_end ENTER");
 
   if (enzo_block->is_leaf()) {
 
@@ -728,7 +753,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
   enzo_block->compute_done();
 
-  TRACE_METHOD;
+  TRACE_METHOD("Method cg_end EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -736,7 +761,7 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 void EnzoMethodGravityCg::monitor_output_(EnzoBlock * enzo_block,
 					  bool final) throw()
 {
-  TRACE_METHOD;
+  TRACE_METHOD("monitor_output");
 
   Monitor * monitor = enzo_block->simulation()->monitor();
 
@@ -747,7 +772,7 @@ void EnzoMethodGravityCg::monitor_output_(EnzoBlock * enzo_block,
 		 (double)(rr_min_/ rr0_),
 		 (double)(rr_max_/ rr0_));
 
-  TRACE_METHOD;
+  TRACE_METHOD("monitor_output");
 }
 
 //----------------------------------------------------------------------
@@ -755,7 +780,7 @@ void EnzoMethodGravityCg::monitor_output_(EnzoBlock * enzo_block,
 void EnzoMethodGravityCg::cg_exit_() throw()
 /// deallocate temporary vectors
 {
-  TRACE_METHOD;
+  TRACE_METHOD("cg_exit_");
 }
 
 //======================================================================

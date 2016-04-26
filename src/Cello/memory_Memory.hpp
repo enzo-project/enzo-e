@@ -34,7 +34,7 @@ private: // interface
 #ifdef CONFIG_USE_MEMORY
   : is_active_(false),
     memory_allocate_warning_(10000000),
-    memory_allocated_error_ (8000000000 )
+    memory_allocated_error_ (6000000000 )
 #endif
   { initialize_(); };
 
@@ -163,6 +163,12 @@ public: // interface
     fill_delete_ = value;
 #endif
   };
+
+  void set_memory_allocate_warning (size_t value)
+  {  memory_allocate_warning_ = value; }
+
+  void set_memory_allocated_error (size_t value)
+  {  memory_allocated_error_ = value; }
 
   //======================================================================
 
