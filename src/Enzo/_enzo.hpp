@@ -88,6 +88,15 @@ enum hydro_type
 
 //----------------------------------------------------------------------
 
+enum pm_type {
+  pm_type_unknown,
+  pm_type_cic,  // cloud-in-cell
+  pm_type_ngp,  // nearest grid point
+  pm_type_tsc   // triangular shape cloud
+};
+  
+//----------------------------------------------------------------------
+
 enum return_enum {
   return_unknown,
   return_converged,
@@ -159,12 +168,15 @@ struct fluxes
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
+#include "enzo_EnzoInitialPm.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
+#include "enzo_EnzoMethodPmDeposit.hpp"
+#include "enzo_EnzoMethodPmUpdate.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"

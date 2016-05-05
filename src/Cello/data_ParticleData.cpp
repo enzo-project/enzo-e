@@ -153,7 +153,7 @@ int ParticleData::insert_particles
 
     // allocate particles
     
-    resize_array_(particle_descr,it,ib_this,ip_start+np_this);
+    resize_attribute_array_(particle_descr,it,ib_this,ip_start+np_this);
 
     // prepare for next batch
 
@@ -203,7 +203,7 @@ void ParticleData::delete_particles
   }
 
   if (npd>0) {
-    resize_array_(particle_descr,it,ib,np-npd);
+    resize_attribute_array_(particle_descr,it,ib,np-npd);
   }
 }
 
@@ -381,7 +381,7 @@ void ParticleData::compress (ParticleDescr * particle_descr, int it)
   ip_src = 0;
   np_src = num_particles(particle_descr,it,ib_src);
 
-  resize_array_ (particle_descr,it,ib_dst,mb);
+  resize_attribute_array_ (particle_descr,it,ib_dst,mb);
   np_dst = mb;
 
   int mp = particle_descr->particle_bytes(it);
@@ -405,7 +405,7 @@ void ParticleData::compress (ParticleDescr * particle_descr, int it)
       ip_dst = 0;
       ib_dst++;
       np_dst = mb;
-      if (ib_dst < nb) resize_array_ (particle_descr,it,ib_dst,mb);
+      if (ib_dst < nb) resize_attribute_array_ (particle_descr,it,ib_dst,mb);
     }
 
     ip_src++;
@@ -972,8 +972,8 @@ void ParticleData::write_ifrite (ParticleDescr * particle_descr,
 //======================================================================
 
 
-void ParticleData::resize_array_(ParticleDescr * particle_descr,
-				 int it, int ib, int np)
+void ParticleData::resize_attribute_array_
+(ParticleDescr * particle_descr,int it, int ib, int np)
 {
   // store number of particles allocated
   particle_count_[it][ib] = np;

@@ -46,28 +46,28 @@ PARALLEL_MAIN_BEGIN
   unit_assert (particle.num_types() == 2);
   unit_func ("num_types()");
   unit_assert (it_trace == 1);
-  const int i_star  = particle.new_type ("star");
+  const int it_star  = particle.new_type ("star");
   unit_func ("new_type()");
   unit_assert (particle.num_types() == 3);
   unit_func ("num_types()");
-  unit_assert (i_star == 2);
-  const int i_sink  = particle.new_type ("sink");
+  unit_assert (it_star == 2);
+  const int it_sink  = particle.new_type ("sink");
   unit_func ("new_type()");
   unit_assert (particle.num_types() == 4);
   unit_func ("num_types()");
-  unit_assert (i_sink == 3);
+  unit_assert (it_sink == 3);
 
   unit_func ("type_name()");
   unit_assert(particle.type_name(it_dark) == "dark");
   unit_assert(particle.type_name(it_trace) == "trace");
-  unit_assert(particle.type_name(i_star) == "star");
-  unit_assert(particle.type_name(i_sink) == "sink");
+  unit_assert(particle.type_name(it_star) == "star");
+  unit_assert(particle.type_name(it_sink) == "sink");
 
   unit_func ("type_index()");
   unit_assert(particle.type_index("dark")  == it_dark);
   unit_assert(particle.type_index("trace") == it_trace);
-  unit_assert(particle.type_index("star")  == i_star);
-  unit_assert(particle.type_index("sink")  == i_sink);
+  unit_assert(particle.type_index("star")  == it_star);
+  unit_assert(particle.type_index("sink")  == it_sink);
 
   
   //--------------------------------------------------
@@ -153,6 +153,67 @@ PARALLEL_MAIN_BEGIN
 
   particle.set_position(it_trace,ia_trace_x, ia_trace_y, ia_trace_z);
 
+  //--------------------------------------------------
+  //  Constants
+  //--------------------------------------------------
+
+  unit_func("num_constants()");
+
+  unit_assert (particle.num_constants(it_trace)==0);
+  unit_assert (particle.num_constants(it_dark)==0);
+  unit_assert (particle.num_constants(it_sink)==0);
+  unit_assert (particle.num_constants(it_star)==0);
+
+  unit_func("new_constant()");
+
+  const int ic_dark_mass = particle.new_constant(it_dark, "mass", type_double);
+  const int ic_star_mass = particle.new_constant(it_star, "mass", type_float);
+  const int ic_star_type = particle.new_constant(it_star, "type", type_int8);
+
+  unit_assert (particle.num_constants(it_trace)==0);
+  unit_assert (particle.num_constants(it_dark)==1);
+  unit_assert (particle.num_constants(it_sink)==0);
+  unit_assert (particle.num_constants(it_star)==2);
+
+  unit_func("constant_index()");
+  unit_assert (particle.constant_index(it_dark,"mass") == ic_dark_mass);
+  unit_assert (particle.constant_index(it_star,"mass") == ic_star_mass);
+  unit_assert (particle.constant_index(it_star,"type") == ic_star_type);
+
+  unit_func("constant_name()");
+  unit_assert (particle.constant_name(it_dark,ic_dark_mass) == "mass");
+  unit_assert (particle.constant_name(it_star,ic_star_mass) == "mass");
+  unit_assert (particle.constant_name(it_star,ic_star_type) == "type");
+
+  unit_func("constant_bytes()");
+  unit_assert (particle.constant_bytes(it_dark,ic_dark_mass) == sizeof(double));
+  unit_assert (particle.constant_bytes(it_star,ic_star_mass) == sizeof(float));
+  unit_assert (particle.constant_bytes(it_star,ic_star_type) == 1);
+
+  unit_func("constant_array()");
+  char * dark_constant_array = particle.constant_array (it_dark);
+  char * star_constant_array = particle.constant_array (it_star);
+  double * dark_mass = 
+    (double *) particle.constant_value  (it_dark,ic_dark_mass);
+  float * star_mass = 
+    (float *) particle.constant_value   (it_star,ic_star_mass);
+  int8_t * star_type = 
+    (int8_t *) particle.constant_value   (it_star,ic_star_type);
+  *dark_mass = 10e12;
+  *star_mass = 1.98855e33;
+  *star_type = 'x';
+
+  const int io_dark_mass = particle.constant_offset(it_dark,ic_dark_mass);
+  const int io_star_mass = particle.constant_offset(it_star,ic_star_mass);
+  const int io_star_type = particle.constant_offset(it_star,ic_star_type);
+
+  double * dm = (double *)(&dark_constant_array[io_dark_mass]);
+  float  * sm = (float *) (&star_constant_array[io_star_mass]);
+  int8_t * st = (int8_t *)(&star_constant_array[io_star_type]);
+  unit_assert (*dm == *dark_mass);
+  unit_assert (*sm == *star_mass);
+  unit_assert (*st == *star_type);
+  
   //--------------------------------------------------
   //   Batch
   //--------------------------------------------------

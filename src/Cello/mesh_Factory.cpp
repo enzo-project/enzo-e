@@ -57,8 +57,7 @@ CProxy_Block Factory::create_block_array
  DataMsg * data_msg,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- int num_field_data,
- bool testing
+ int num_field_data
  ) const throw()
 {
   TRACE7("Factory::create_block_array(na(%d %d %d) n(%d %d %d num_field_data %d",
@@ -105,8 +104,7 @@ CProxy_Block Factory::create_block_array
 	   count_adapt = 0,
 	   cycle,time,dt,
 	   refresh_same,
-	   num_face_level, face_level,
-	   testing);
+	   num_face_level, face_level);
 
 	msg->set_data_msg(data_msg);
 
@@ -120,8 +118,7 @@ CProxy_Block Factory::create_block_array
 	   count_adapt = 0,
 	   cycle,time,dt,
 	   0,NULL,refresh_same,
-	   num_face_level, face_level,
-	   testing);
+	   num_face_level, face_level);
 #endif	   
 
 	// --------------------------------------------------
@@ -143,8 +140,7 @@ void Factory::create_subblock_array
  int min_level,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
- int num_field_blocks,
- bool testing
+ int num_field_blocks
  ) const throw()
 {
   TRACE8("Factory::create_subblock_array(min_level %d na(%d %d %d) n(%d %d %d) num_field_blocks %d",
@@ -188,8 +184,7 @@ void Factory::create_subblock_array
 	     count_adapt = 0,
 	     cycle,time,dt,
 	     refresh_same,
-	     num_face_level, face_level,
-	     testing);
+	     num_face_level, face_level);
 
 	  msg->set_data_msg(data_msg);
 
@@ -203,8 +198,7 @@ void Factory::create_subblock_array
 	     count_adapt = 0,
 	     cycle, time, dt,
 	     0,NULL,refresh_same,
-	     num_face_level, face_level,
-	     testing);
+	     num_face_level, face_level);
 #endif
 
 	  // --------------------------------------------------
@@ -228,7 +222,6 @@ Block * Factory::create_block
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
  int num_face_level, int * face_level,
- bool testing,
  Simulation * simulation
  ) const throw()
 {
@@ -251,8 +244,7 @@ Block * Factory::create_block
      count_adapt,
      cycle,time,dt,
      refresh_type,
-     num_face_level, face_level,
-     testing);
+     num_face_level, face_level);
 
   msg->set_data_msg (data_msg);
 
@@ -267,8 +259,7 @@ Block * Factory::create_block
      count_adapt,
      cycle, time,dt,
      narray, array,refresh_type,
-     num_face_level, face_level,
-     testing);
+     num_face_level, face_level);
 
 #endif
 

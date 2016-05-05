@@ -21,10 +21,10 @@ public: // interface
   DataMsg() 
     : field_face_(NULL),
       field_data_(NULL),
-      particle_data_(NULL),
       field_face_delete_(false),
       field_data_delete_(false),
       field_array_delete_(false),
+      particle_data_(NULL),
       particle_data_delete_(false)
       
   {
@@ -147,9 +147,6 @@ protected: // attributes
   /// Field Face Data
   FieldFace * field_face_;
 
-  /// Whethere FieldFace data should be deleted in destructor
-  bool field_face_delete_;
-
   /// Field data
   union {
 
@@ -161,6 +158,9 @@ protected: // attributes
 
   };
   
+  /// Whethere FieldFace data should be deleted in destructor
+  bool field_face_delete_;
+
   bool field_data_delete_;
   bool field_array_delete_;
 

@@ -351,7 +351,6 @@ void Block::adapt_refine_()
 	 cycle_,time_,dt_,
 	 narray, array, refresh_fine,
 	 27,&child_face_level_curr_[27*IC3(ic3)],
-	 testing,
 	 simulation());
 
       delete [] array;

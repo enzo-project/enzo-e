@@ -70,12 +70,18 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_turbulence_pressure;
   p | initial_turbulence_temperature;
 
+  p | initial_pm_field;
+  p | initial_pm_mpp;
+
   p | interpolation_method;
 
   p | method_heat_alpha;
 
   p | method_null_dt;
   p | method_turbulence_edot;
+
+  p | method_gravity_potential_field;
+  p | method_gravity_density_field;
 
   p | method_gravity_cg_grav_const;
   p | method_gravity_cg_iter_max;
@@ -102,6 +108,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_bicgstab_diag_precon;
   p | method_gravity_bicgstab_monitor_iter;
 
+  p | method_pm_deposit_type;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -179,7 +186,16 @@ void EnzoConfig::read(Parameters * p) throw()
   physics_cosmology_omega_matter_now = p->value_float
     ("Method:cosmology:omega_matter_now",   0.279);
 
+  // PM method and initialization
+
+  method_pm_deposit_type = p->value_string ("Method:pm:type","cic");
+				     
+  initial_pm_field        = p->value_string ("Initial:pm:field","density");
+  initial_pm_mpp          = p->value_float  ("Initial:pm:mpp",-1.0);
+
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
+
+  // Sedov initialization
 
   TRACE1("field_gamma = %f",field_gamma);
 
@@ -195,6 +211,8 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:sedov:pressure_out",1e-5);
   initial_sedov_density = 
     p->value_float("Initial:sedov:density",1.0);
+
+  // Turbulence method and initialization
 
   initial_turbulence_density = p->value_float 
     ("Initial:turbulence:density",1.0);
@@ -236,6 +254,13 @@ void EnzoConfig::read(Parameters * p) throw()
   method_null_dt = p->value_float 
     ("Method:null:dt",std::numeric_limits<double>::max());
 
+
+
+  method_gravity_potential_field = p->value_string
+    ("Method:gravity_cg:potential_field","potential");
+
+  method_gravity_density_field = p->value_string
+    ("Method:gravity_cg:density_field","density");
 
   method_gravity_cg_iter_max = p->value_integer
     ("Method:gravity_cg:iter_max",100);

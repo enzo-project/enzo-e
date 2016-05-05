@@ -38,8 +38,7 @@ public: // interface
    DataMsg * data_msg,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
-   int num_field_blocks,
-   bool testing=false) const throw();
+   int num_field_blocks) const throw();
 
   /// Create a new coarse blocks under the Block array.  For Multigrid
   ///  solvers.  Arguments are the same as create_block_array(), plus
@@ -52,8 +51,7 @@ public: // interface
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
-   int num_field_blocks,
-   bool testing=false) const throw();
+   int num_field_blocks) const throw();
 
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block
@@ -67,7 +65,6 @@ public: // interface
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
    int num_face_level, int * face_level,
-   bool testing=false,
    Simulation * simulation = 0
 ) const throw();
 

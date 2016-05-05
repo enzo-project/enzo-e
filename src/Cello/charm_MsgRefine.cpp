@@ -26,8 +26,7 @@ MsgRefine::MsgRefine()
     num_adapt_steps_(-1),
     cycle_(-1), time_(-1.0), dt_(-1.0),
     refresh_type_(refresh_unknown),
-    num_face_level_(0), face_level_(NULL),
-    testing_(false)
+    num_face_level_(0), face_level_(NULL)
 {  
 
   const int in = CkMyPe() % MAX_NODE_SIZE;
@@ -42,11 +41,10 @@ MsgRefine::MsgRefine
  int nx, int ny, int nz,
  int num_field_blocks, int num_adapt_steps,
  int cycle, double time, double dt, int refresh_type,
- int num_face_level, int * face_level, bool testing ) 
+ int num_face_level, int * face_level) 
   : CMessage_MsgRefine(),
     is_local_(true),
     data_msg_(NULL),
-    testing_(testing),
     buffer_(NULL),
     index_(index),
     nx_(nx), ny_(ny), nz_(nz),
@@ -132,9 +130,6 @@ void * MsgRefine::pack (MsgRefine * msg)
   // face_level_[]
   size += msg->num_face_level_ * sizeof(int);
 
-  // testing_
-  size += sizeof(bool);
-
   // have_data
   size += sizeof(int);
 
@@ -200,9 +195,6 @@ void * MsgRefine::pack (MsgRefine * msg)
   for (size_t i=0; i<msg->num_face_level_; i++) {
     (*pi++) = msg->face_level_[i];
   }
-
-  // testing_
-  (*pb++) = msg->testing_;
 
   // data_msg_
   have_data = (msg->data_msg_ != NULL);
@@ -293,9 +285,6 @@ MsgRefine * MsgRefine::unpack(void * buffer)
     msg->face_level_ = 0;
   }
   
-  // testing_
-  msg->testing_ = (*pb++);
-
   // have_data
   int have_data = (*pi++);
 

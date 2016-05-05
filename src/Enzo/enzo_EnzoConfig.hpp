@@ -102,6 +102,10 @@ public: // attributes
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
 
+  // EnzoMethodGravity
+  std::string                method_gravity_potential_field;
+  std::string                method_gravity_density_field;
+
   // EnzoMethodGravityCg
   int                        method_gravity_cg_iter_max;
   double                     method_gravity_cg_res_tol;
@@ -133,7 +137,14 @@ public: // attributes
   int                        method_gravity_mg_min_level;
   int                        method_gravity_mg_max_level;
 
+  // EnzoInitialPm
 
+  std::string                initial_pm_field;
+  double                     initial_pm_mpp;
+
+  // EnzoMethodPm
+
+  std::string                method_pm_deposit_type;
 
 #ifdef CONFIG_USE_GRACKLE
 

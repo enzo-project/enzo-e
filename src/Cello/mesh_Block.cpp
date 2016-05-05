@@ -72,8 +72,7 @@ Block::Block ( MsgRefine * msg ) throw ()
 	msg->num_adapt_steps_,
 	msg->cycle_, msg->time_,  msg->dt_,
 	0, NULL, msg->refresh_type_,
-	msg->num_face_level_, msg->face_level_,
-	msg->testing_);
+	msg->num_face_level_, msg->face_level_);
 
   name_ = name();
 
@@ -100,9 +99,7 @@ Block::Block
  int num_adapt_steps,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level,
- bool testing
- ) throw ()
+ int num_face_level, int * face_level) throw ()
   :
   data_(NULL),
   child_data_(NULL),
@@ -139,8 +136,7 @@ Block::Block
 	num_adapt_steps,
 	cycle, time,  dt,
 	narray, array, refresh_type,
-	num_face_level, face_level,
-	testing);
+	num_face_level, face_level);
 
   name_ = name();
 
@@ -176,8 +172,7 @@ void Block::init
  int num_adapt_steps,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level,
- bool testing)
+ int num_face_level, int * face_level)
 
 {
   index_ = index;
@@ -296,13 +291,10 @@ void Block::init
 
   }
 
-  if (! testing) {
-    simulation()->monitor_insert_block();
-    if (data()->any_particles()) {
-      const int np = data()->particle().num_particles();
-      simulation()->monitor_insert_particles(np);
-    }
-    //    simulation()->monitor_insert_zones(nz);
+  simulation()->monitor_insert_block();
+  if (data()->any_particles()) {
+    const int np = data()->particle().num_particles();
+    simulation()->monitor_insert_particles(np);
   }
 
   if (level > 0) {

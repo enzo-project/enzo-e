@@ -314,7 +314,6 @@ void Simulation::initialize_data_descr_() throw()
   // parameter: Particle : list
   //--------------------------------------------------
 
-
   particle_descr_ = new ParticleDescr;
 
   // Set particle batch size
@@ -328,17 +327,60 @@ void Simulation::initialize_data_descr_() throw()
     type_val[cello::type_name[i]] = i;
   }
 
-
   for (size_t it=0; it<config_->particle_list.size(); it++) {
 
-    // Add particle attributes
     particle_descr_->new_type (config_->particle_list[it]);
+
+    // Add particle constants
+    int nc = config_->particle_constant_name[it].size();
+    for (int ic=0; ic<nc; ic++) {
+      std::string name = config_->particle_constant_name[it][ic];
+      int         type = type_val[config_->particle_constant_type[it][ic]];
+      particle_descr_->new_constant(it,name,type);
+      union {
+	char * c;
+	long long * ill;
+	float * f;
+	double * d;
+	long double * ld;
+	int8_t * i8;
+	int16_t * i16;
+	int32_t * i32;
+	int64_t * i64;
+      };
+      c = particle_descr_->constant_value(it,ic);
+      if (type == type_default) type = default_type;
+      switch (type) {
+      case type_single:     *f = config_->particle_constant_value[it][ic];
+	break;
+      case type_double:     *d = config_->particle_constant_value[it][ic];
+	break;
+      case type_quadruple:  *ld = config_->particle_constant_value[it][ic];
+	break;
+      case type_int8:       *i8 = config_->particle_constant_value[it][ic];
+	break;
+      case type_int16:      *i16 = config_->particle_constant_value[it][ic];
+	break;
+      case type_int32:      *i32 = config_->particle_constant_value[it][ic];
+	break;
+      case type_int64:      *i64 = config_->particle_constant_value[it][ic];
+	break;
+      default:
+	ERROR3 ("Simulation::initialize_data_descr_()",
+		"Unrecognized type %d for particle constant %s in type %s",
+		type,name.c_str(),config_->particle_list[it].c_str());
+	break;
+      }
+    }
+
+    // Add particle attributes
     int na = config_->particle_attribute_name[it].size();
     for (int ia=0; ia<na; ia++) {
       std::string name = config_->particle_attribute_name[it][ia];
       int type         = type_val[config_->particle_attribute_type[it][ia]];
       particle_descr_->new_attribute(it,name,type);
     }
+
     // position and velocity attributes
     particle_descr_->set_position 
       (it,

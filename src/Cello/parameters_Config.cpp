@@ -146,8 +146,10 @@ void Config::pup (PUP::er &p)
   p | particle_list;
   p | particle_index;
   p | particle_interleaved;
+  p | particle_constant_name;
+  p | particle_constant_type;
+  p | particle_constant_value;
   p | particle_attribute_name;
-  p | particle_attribute_index;
   p | particle_attribute_type;
   PUParray (p,particle_attribute_position,3);
   PUParray (p,particle_attribute_velocity,3);
@@ -868,8 +870,10 @@ void Config::read_particle_ (Parameters * p) throw()
 
   particle_list.resize(num_particles);
   particle_interleaved.resize(num_particles);
+  particle_constant_name.resize(num_particles);
+  particle_constant_type.resize(num_particles);
+  particle_constant_value.resize(num_particles);
   particle_attribute_name.resize(num_particles);
-  particle_attribute_index.resize(num_particles);
   particle_attribute_type.resize(num_particles);
   particle_attribute_position[0].resize(num_particles);
   particle_attribute_position[1].resize(num_particles);
@@ -877,6 +881,12 @@ void Config::read_particle_ (Parameters * p) throw()
   particle_attribute_velocity[0].resize(num_particles);
   particle_attribute_velocity[1].resize(num_particles);
   particle_attribute_velocity[2].resize(num_particles);
+
+  // ... first map attribute scalar type name to type_enum int
+  std::map<std::string,int> type_val;
+  for (int i=0; i<NUM_TYPES; i++) {
+    type_val[cello::type_name[i]] = i;
+  }
 
   for (int it=0; it<num_particles; it++) {
 
@@ -886,6 +896,55 @@ void Config::read_particle_ (Parameters * p) throw()
     particle_index[name_type] = it;
 
     std::string type_str = "Particle:" + name_type;
+
+    // are attributes are interleaved?
+
+    particle_interleaved[it] = 
+      p->value_logical(type_str+":interleaved",false);
+
+    // Particle:<type>:constants list elements contain name, type, and
+    // value
+
+    std::string const_str = type_str + ":constants";
+    
+    const int nc3 = p->list_length(const_str);
+
+    ASSERT2 ("read_particle_",
+	     "Particle type %d constants list length %d "
+	     "must be divisible by three",
+	     it,nc3,nc3%3==0);
+
+    const int nc = nc3 / 3;
+
+    particle_constant_name[it].resize(nc);
+    particle_constant_type[it].resize(nc);
+    particle_constant_value[it].resize(nc);
+
+    for (int ia=0; ia<nc; ia++) {
+
+      std::string name = p->list_value_string (3*ia,  const_str,"unknown");
+      std::string type = p->list_value_string (3*ia+1,const_str,"unknown");
+
+      ASSERT3 ("read_particle_",
+	       "Particle type %d constant %d has unknown constant name %s",
+	       it,ia,name.c_str(),
+	       name != "unknown");
+
+      particle_constant_name[it][ia]  = name;
+      particle_constant_type[it][ia]  = type;
+
+      if (cello::type_is_float(type_val[type])) {
+	particle_constant_value[it][ia] = 
+	  p->list_value_float (3*ia+2,const_str,0.0);
+      } else if (cello::type_is_int(type_val[type])) {
+	particle_constant_value[it][ia] =
+	  p->list_value_integer (3*ia+2,const_str,0);
+      }
+
+    }
+
+    // Particle:<type>:attributes list elements alternate attribute
+    // name and its type (see type_enum in cello.hpp)
 
     std::string attrib_str = type_str + ":attributes";
     
@@ -901,29 +960,25 @@ void Config::read_particle_ (Parameters * p) throw()
 
     const int na = na2 / 2;
 
-    particle_interleaved[it] = 
-      p->value_logical(type_str+":interleaved",false);
-
     particle_attribute_name[it].resize(na);
     particle_attribute_type[it].resize(na);
 
-    // Particle:<type>:attributes list elements alternate attribute
-    // name and its type (see type_enum in cello.hpp)
+    std::map <std::string,int> attribute_index;
 
     for (int ia=0; ia<na; ia++) {
 
-      std::string name_attrib = p->list_value_string (2*ia  ,attrib_str,"unknown");
+      std::string name = p->list_value_string (2*ia  ,attrib_str,"unknown");
       std::string type = p->list_value_string (2*ia+1,attrib_str,"unknown");
 
       ASSERT3 ("read_particle_",
 	       "Particle type %d attribute %d has unknown attribute name %s",
-	       it,ia,name_attrib.c_str(),
-	       name_attrib != "unknown");
+	       it,ia,name.c_str(),
+	       name != "unknown");
 
-      particle_attribute_name[it][ia]  = name_attrib;
-      particle_attribute_index[it][name_attrib] = ia;
+      particle_attribute_name[it][ia]  = name;
       particle_attribute_type[it][ia]  = type;
      
+      attribute_index[name] = ia;
     }
 
     // Particle:<type>:position
@@ -935,11 +990,11 @@ void Config::read_particle_ (Parameters * p) throw()
     for (int axis=0; axis<3; axis++) {
 
       std::string pos = p->list_value_string (axis,param_position,"");
-      int ia_p = (pos != "") ? particle_attribute_index[it][pos] : -1;
+      int ia_p = (pos != "") ? attribute_index[pos] : -1;
       particle_attribute_position[axis][it] = ia_p;
 
       std::string vel = p->list_value_string (axis,param_velocity,"");
-      int ia_v = (vel != "") ? particle_attribute_index[it][vel] : -1;
+      int ia_v = (vel != "") ? attribute_index[vel] : -1;
       particle_attribute_velocity[axis][it] = ia_v;
     }
   }

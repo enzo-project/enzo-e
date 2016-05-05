@@ -24,10 +24,16 @@ ParticleDescr::ParticleDescr() throw()
     type_index_(),
     attribute_name_(),
     attribute_index_(),
+    attribute_type_(),
     attribute_position_(),
     attribute_velocity_(),
-    attribute_type_(),
+    constant_name_(),
+    constant_index_(),
+    constant_type_(),
+    constant_bytes_(),
+    constant_offset_(),
     attribute_bytes_(),
+    constant_array_(),
     particle_bytes_(),
     attribute_interleaved_(),
     attribute_offset_(),
@@ -44,9 +50,15 @@ void ParticleDescr::pup (PUP::er &p)
   p | type_index_;
   p | attribute_name_;
   p | attribute_index_;
+  p | attribute_type_;
   p | attribute_position_;
   p | attribute_velocity_;
-  p | attribute_type_;
+  p | constant_name_;
+  p | constant_index_;
+  p | constant_type_;
+  p | constant_offset_;
+  p | constant_bytes_;
+  p | constant_array_;
   p | attribute_bytes_;
   p | particle_bytes_;
   p | attribute_interleaved_;
@@ -80,6 +92,7 @@ int ParticleDescr::new_type(std::string type_name)
 
   attribute_name_. resize(nt + 1);
   attribute_index_.resize(nt + 1);
+  attribute_type_.resize(nt + 1);
 
   attribute_position_.resize(nt + 1);
   attribute_position_[nt].resize(3);
@@ -93,7 +106,14 @@ int ParticleDescr::new_type(std::string type_name)
   attribute_velocity_[nt][1] = -1;
   attribute_velocity_[nt][2] = -1;
 
-  attribute_type_.resize(nt + 1);
+  constant_name_.resize(nt + 1);
+  constant_index_.resize(nt + 1);
+  constant_type_.resize(nt + 1);
+  constant_bytes_.resize(nt + 1);
+  constant_offset_.resize(nt + 1);
+  constant_offset_[nt].push_back(0);
+  constant_array_.resize(nt + 1);
+
   attribute_bytes_.resize(nt + 1);
   attribute_offset_.resize(nt + 1);
   attribute_offset_[nt].push_back(0);
@@ -136,7 +156,7 @@ std::string ParticleDescr::type_name (int it) const
 
 int ParticleDescr::new_attribute (int it, std::string name, int type)
 {
-  int attribute_bytes = cello::type_bytes[type];
+  const int attribute_bytes = cello::type_bytes[type];
 
 #ifdef CELLO_CHECK
   
@@ -152,10 +172,10 @@ int ParticleDescr::new_attribute (int it, std::string name, int type)
 	 
 #endif
 
-  const int ia = num_attributes(it);
+  const int na = num_attributes(it);
 
+  attribute_index_[it][name] = na;
   attribute_name_[it].push_back(name);
-  attribute_index_[it][name] = ia;
   attribute_type_[it]. push_back(type);
   attribute_bytes_[it].push_back(attribute_bytes);
 
@@ -164,7 +184,7 @@ int ParticleDescr::new_attribute (int it, std::string name, int type)
   const int increment = attribute_interleaved_[it] ? 1 : batch_size_;
 
   attribute_offset_[it].push_back
-    (attribute_offset_[it][ia] + increment * attribute_bytes_[it][ia]);
+    (attribute_offset_[it][na] + increment * attribute_bytes_[it][na]);
 
   // update particle bytes
   if (attribute_interleaved_[it]) {
@@ -181,7 +201,7 @@ int ParticleDescr::new_attribute (int it, std::string name, int type)
     particle_bytes_[it] += attribute_bytes;
   }
 
-  return ia;
+  return na;
 }
 
 //----------------------------------------------------------------------
@@ -226,7 +246,7 @@ std::string ParticleDescr::attribute_name (int it, int ia) const
   ASSERT2("ParticleDescr::attribute_name",
 	  "Trying to access unknown particle attribute %d in type %d",
 	  ia,it,
-	  check_(it,ia));
+	  check_ia_(it,ia));
 
   return attribute_name_[it][ia];
 }
@@ -238,7 +258,7 @@ int ParticleDescr::attribute_type(int it,int ia) const
   ASSERT2("ParticleDescr::attribute_type",
 	  "Trying to access unknown particle attribute %d in type %d",
 	  ia,it,
-	  check_(it,ia));
+	  check_ia_(it,ia));
 
   return attribute_type_[it][ia];
 }
@@ -270,13 +290,103 @@ void ParticleDescr::set_velocity (int it, int ix, int iy, int iz)
 }
 
 //----------------------------------------------------------------------
+// Constants
+//----------------------------------------------------------------------
+
+int ParticleDescr::new_constant (int it, std::string name, int type)
+{
+  const int constant_bytes = cello::type_bytes[type];
+
+  const int nc = num_constants(it);
+
+  constant_index_[it][name] = nc;
+  constant_name_[it].push_back(name);
+  constant_type_[it].push_back(type);
+  constant_bytes_[it].push_back(constant_bytes);
+  
+  int max_bytes=0;
+  int num_bytes=0;
+  for (size_t ic=0; ic<constant_bytes_[it].size(); ic++) {
+    num_bytes += constant_bytes_[it][ic];
+    max_bytes = std::max(max_bytes,constant_bytes_[it][ic]);
+  }
+  num_bytes = align_(num_bytes,max_bytes);
+  constant_offset_[it].push_back (constant_offset_[it][nc] + num_bytes);
+  constant_array_[it].resize (constant_offset_[it][nc+1]);
+				  
+  return nc;
+}
+
+//----------------------------------------------------------------------
+
+int ParticleDescr::num_constants(int it) const
+{
+  ASSERT1("ParticleDescr::num_constants",
+	  "Trying to access unknown particle type %d",
+	  it,
+	  check_(it));
+  return constant_name_[it].size();
+}
+
+//----------------------------------------------------------------------
+
+int ParticleDescr::constant_index (int it, std::string constant_name) const
+{
+  ASSERT1("ParticleDescr::constant_index",
+	  "Trying to access unknown particle type %d",
+	  it,
+	  check_(it));
+
+  std::map<const std::string,int>::const_iterator iter;
+
+  iter=constant_index_[it].find(constant_name);
+
+  int index = (iter != constant_index_[it].end()) ? iter->second : -1;
+
+  if (index == -1) {
+    WARNING2("ParticleDescr::constant_index()",
+	     "Trying to access unknown constant %s in particle type \"%s\"",
+	     constant_name.c_str(),type_name(it).c_str());
+  }
+
+  return index;
+}
+
+//----------------------------------------------------------------------
+
+std::string ParticleDescr::constant_name (int it, int ic) const
+{
+  ASSERT2("ParticleDescr::constant_name",
+	  "Trying to access unknown particle constant %d in type %d",
+	  ic,it,
+	  check_ic_(it,ic));
+
+  return constant_name_[it][ic];
+  
+}
+
+//----------------------------------------------------------------------
+
+int ParticleDescr::constant_offset (int it, int ic) const
+{
+  ASSERT2("ParticleDescr::constant_offset",
+	  "Trying to access unknown particle constant %d in type %d",
+	  ic,it,
+	  check_ic_(it,ic));
+  return constant_offset_[it][ic]; 
+}
+
+//----------------------------------------------------------------------
+// Bytes
+//----------------------------------------------------------------------
+
 
 int ParticleDescr::attribute_bytes(int it,int ia) const
 {
   ASSERT2("ParticleDescr::attribute_bytes",
 	  "Trying to access unknown particle attribute %d in type %d",
 	  ia,it,
-	  check_(it,ia));
+	  check_ia_(it,ia));
 
   return attribute_bytes_[it][ia];
 }
@@ -296,12 +406,48 @@ int ParticleDescr::particle_bytes(int it) const
 
 //----------------------------------------------------------------------
 
+int ParticleDescr::constant_bytes(int it,int ic) const
+{
+  ASSERT2("ParticleDescr::constant_bytes",
+	  "Trying to access unknown particle constant %d in type %d",
+	  ic,it,
+	  check_ic_(it,ic));
+
+  return constant_bytes_[it][ic];
+}
+
+//----------------------------------------------------------------------
+
+char * ParticleDescr::constant_array (int it)
+{
+
+  bool in_range = (0 <= it && it < num_types());
+
+  return (in_range) ? &constant_array_[it][0] : NULL;
+}
+
+//----------------------------------------------------------------------
+
+char * ParticleDescr::constant_value 
+(int it, int ic)
+{
+  bool in_range = (0 <= it && it < num_types());
+
+  int io = constant_offset(it,ic);
+  CkPrintf ("constant_value it %d ic %d io %d\n",it,ic,io);
+  CkPrintf ("size %d\n",constant_array_.size());
+  CkPrintf ("size[%d] %d\n",it,constant_array_[it].size());
+  return (in_range) ? &constant_array_[it][io] : NULL;
+}
+
+//======================================================================
+
 int ParticleDescr::stride(int it, int ia) const
 {
   ASSERT2("ParticleDescr::stride",
 	  "Trying to access unknown particle attribute %d in type %d",
 	  ia,it,
-	  check_(it,ia));
+	  check_ia_(it,ia));
 
   return attribute_interleaved_[it] ? 
     particle_bytes_[it] / attribute_bytes(it,ia) : 1;
@@ -351,7 +497,7 @@ int ParticleDescr::attribute_offset (int it, int ia) const
   ASSERT2("ParticleDescr::attribute_offset",
 	  "Trying to access unknown particle attribute %d in type %d",
 	  ia,it,
-	  check_(it,ia));
+	  check_ia_(it,ia));
 
   return attribute_offset_[it][ia]; 
 }
@@ -363,10 +509,16 @@ bool ParticleDescr::check_(int it) const
   return (0 <= it && it < num_types());
 }
 
-bool ParticleDescr::check_(int it, int ia) const
+bool ParticleDescr::check_ia_(int it, int ia) const
 {
   return ( (0 <= it && it < num_types()) &&
 	   (0 <= ia && ia < num_attributes(it)));
+}
+
+bool ParticleDescr::check_ic_(int it, int ic) const
+{
+  return ( (0 <= it && it < num_types()) &&
+	   (0 <= ic && ic < num_constants(it)));
 }
 
 //----------------------------------------------------------------------

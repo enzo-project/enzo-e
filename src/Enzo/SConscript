@@ -45,6 +45,8 @@ if (use_grackle):   libraries.append('grackle')
 sources  = [Glob('enzo_*cpp'),
     	    'calcdiss.F',
 	    'calc_dt.F',
+	    'cic_deposit.F',
+	    'cic_interp.F',
 	    'CosmologyGetUnits.cpp',
 	    'euler.F',
 	    'interp1d.F',

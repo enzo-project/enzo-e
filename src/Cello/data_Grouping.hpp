@@ -86,11 +86,9 @@ public: // interface
   }
 protected: // functions
 
-  std::set<std::pair<std::string,std::string> > groups_;
-
-private: // attributes
-
   // NOTE: change pup() function whenever attributes change
+
+  std::set<std::pair<std::string,std::string> > groups_;
 
 };
 

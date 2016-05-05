@@ -1,10 +1,12 @@
 Particle {
+
    list += ["trace"];
+
    trace {
       attributes = ["id", "int64",
-		    "x", "single",
-                    "y", "single",
-		    "z", "single"];
+		    "x", "double",
+                    "y", "double",
+		    "z", "double"];
       position = ["x","y","z"];
    }
 }

@@ -141,6 +141,51 @@ public: // interface
   { return particle_descr_->attribute_offset(it,ia); }
 
   //--------------------------------------------------
+  // CONSTANTS
+  //--------------------------------------------------
+
+  /// Create a new constant for the given type and return its id
+
+  int new_constant(int it, std::string constant, int constant_type)
+  { return particle_descr_->new_constant (it,constant,constant_type); }
+
+  /// Return the number of constants of the given type.
+
+  int num_constants(int it) const
+  { return particle_descr_->num_constants(it); }
+
+  /// Return the index for the given constant
+
+  int constant_index (int it, std::string constant) const
+  { return particle_descr_->constant_index(it,constant); }
+
+  /// Return the name of the given constant
+
+  std::string constant_name (int it, int ia) const
+  { return particle_descr_->constant_name(it,ia); }
+
+  /// Return the number of bytes allocated for the given constant.
+
+  int constant_bytes (int it,int ic) const
+  { return particle_descr_->constant_bytes(it,ic); }
+
+  /// Return the constant array for the given particle type
+
+  char * constant_array (int it)
+  { return particle_descr_->constant_array(it); }
+
+  /// Return a pointer to the given constant for the given type
+
+  char * constant_value (int it, int ic)
+  { return particle_descr_->constant_value(it, ic); }
+
+  /// Byte offsets of constants into block array.
+
+  int constant_offset(int it, int ic) const
+  { return particle_descr_->constant_offset(it,ic); }
+
+
+  //--------------------------------------------------
   // BYTES
   //--------------------------------------------------
 

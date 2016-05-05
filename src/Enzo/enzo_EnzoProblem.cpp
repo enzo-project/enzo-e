@@ -109,6 +109,12 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_pressure,
        enzo_config->initial_turbulence_temperature,
        enzo_config->field_gamma);
+  } else if (type == "pm") {
+    initial = new EnzoInitialPm
+      (cycle,time,
+       enzo_config->initial_pm_field,
+       enzo_config->initial_pm_mpp
+       );
   } else {
     initial = Problem::create_initial_
       (type,config,parameters,field_descr);
@@ -177,6 +183,11 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodPpml
       (field_descr,
        enzo_config);
+  } else if (name == "pm_deposit") {
+    method = new EnzoMethodPmDeposit  
+      (field_descr, enzo_config->method_pm_deposit_type);
+  } else if (name == "pm_update") {
+    method = new EnzoMethodPmUpdate  (field_descr);
   } else if (name == "heat") {
     method = new EnzoMethodHeat
       (field_descr,

@@ -28,7 +28,6 @@ public: // interface
   void pup (PUP::er &p);
 
   /// Return the attribute array for the given particle type and batch
-
   char * attribute_array (ParticleDescr *, int it, int ia, int ib);
 
   /// Return the number of batches of particles for the given type.
@@ -159,7 +158,7 @@ private: /// functions
 
   /// Allocate attribute_array_ block, aligned at 16 byte boundary
   /// with updated attribute_align_
-  void resize_array_ (ParticleDescr *, int it, int ib, int np);
+  void resize_attribute_array_ (ParticleDescr *, int it, int ib, int np);
 
   void check_arrays_ (ParticleDescr * particle_descr,
 		      std::string file, int line) const;

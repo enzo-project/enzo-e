@@ -59,9 +59,7 @@ public: // interface
    int num_adapt_steps,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level,
-   bool testing=false
-   ) throw();
+   int num_face_level, int * face_level) throw();
 
   // Initialize
   void init (
@@ -71,8 +69,7 @@ public: // interface
    int num_adapt_steps,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level,
-   bool testing );
+   int num_face_level, int * face_level);
 
   /// Destructor
   virtual ~Block() throw();

@@ -26,8 +26,8 @@ public: // interface
 	       double mpp,
 	       int dx, int dy, int dz) throw() 
   : Initial(),
-    field_(field),
     mpp_(mpp),
+    field_(field),
     dx_(dx),dy_(dy),dz_(dz)
   {}
 

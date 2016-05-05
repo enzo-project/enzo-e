@@ -253,8 +253,7 @@ void Hierarchy::create_forest
      data_msg,
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
-     num_field_blocks,
-     testing);
+     num_field_blocks);
     
   block_exists_ = allocate_data;
 
@@ -288,8 +287,7 @@ void Hierarchy::create_subforest
      block_array_,min_level,
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
-     num_field_blocks,
-     testing);
+     num_field_blocks);
     
 }
 

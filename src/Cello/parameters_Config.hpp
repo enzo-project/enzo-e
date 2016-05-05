@@ -169,11 +169,16 @@ public: // attributes
   std::vector<std::string>   particle_list;
   std::map<std::string,int>  particle_index;
   std::vector<char>          particle_interleaved;
+
+  std::vector< std::vector <std::string> > particle_constant_name;
+  std::vector< std::vector <std::string> > particle_constant_type;
+  std::vector< std::vector <double> >      particle_constant_value;
+
   std::vector< std::vector <std::string> > particle_attribute_name;
-  std::vector< std::map <std::string,int> > particle_attribute_index;
   std::vector< std::vector <std::string> > particle_attribute_type;
   std::vector <int>          particle_attribute_position[3];
   std::vector <int>          particle_attribute_velocity[3];
+
   int                        particle_batch_size;
   std::vector< std::vector<std::string> >  particle_group_list;
 

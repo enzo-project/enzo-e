@@ -48,6 +48,37 @@ public: // interface
   std::string type_name (int index) const;
 
   //--------------------------------------------------
+  // CONSTANTS
+  //--------------------------------------------------
+
+  /// Create a new constant for the given type and return its id
+
+  int new_constant (int it, std::string name, int type);
+
+  /// Return the number of attributes of the given type.
+
+  int num_constants(int it) const;
+
+  /// Return the index for the given constant
+
+  int constant_index (int it, std::string constant) const;
+
+  /// Byte offsets of constants in constant array
+  int constant_offset(int it, int ic) const;
+
+  /// Return the index for the given constant
+  std::string constant_name (int it, int ic) const;
+
+  /// Return the number of bytes allocated for the given constant.
+  int constant_bytes (int it,int ic) const;
+
+  /// Return the constant array for the given particle type
+  char * constant_array (int it);
+
+   /// Return a pointer to the given constant for the given type
+  char * constant_value (int it, int ic);
+
+  //--------------------------------------------------
   // ATTRIBUTES
   //--------------------------------------------------
 
@@ -67,15 +98,15 @@ public: // interface
 
   std::string attribute_name (int it, int ia) const;
 
+  /// Byte offsets of attributes into block array.  Not including
+  /// initial offset for 16-byte alignment.
+  int attribute_offset(int it, int ia) const;
+
   /// Define which attributes represent position coordinates (-1 if not defined)
   void set_position (int it, int ix, int iy=-1, int iz=-1);
 
   /// Define which attributes represent velocity coordinates (-1 if not defined)
   void set_velocity (int it, int ix, int iy=-1, int iz=-1);
-
-  /// Byte offsets of attributes into block array.  Not including
-  /// initial offset for 16-byte alignment.
-  int attribute_offset(int it, int ia) const;
 
   //--------------------------------------------------
   // INTERLEAVING
@@ -148,8 +179,9 @@ public: // interface
 private: // functions
 
   /// Return true iff it and ia are in range
-  bool check_(int it, int ia) const;
   bool check_(int it) const;
+  bool check_ia_(int it, int ia) const;
+  bool check_ic_(int it, int ic) const;
 
   /// increment value if needed so that it is a multiple of bytes
   int align_(int value, int bytes) const;
@@ -168,6 +200,30 @@ private: // attributes
   std::map<std::string,int> type_index_;
 
   //--------------------------------------------------
+  // CONSTANTS
+  //--------------------------------------------------
+
+  /// List of particle constants
+  std::vector < std::vector<std::string> > constant_name_;
+
+  /// Index of each particle constant (inverse of constant_)
+  std::vector < std::map<std::string,int> > constant_index_;
+
+  /// Scalar type of each constant of each particle type.  Valid
+  /// scalar types are in type_enum defined in cello.hpp
+  std::vector < std::vector<int> > constant_type_;
+
+  /// Arrays of byte offsets within constant_values_ for each type
+  /// type.  Referenced as [it][ic]
+  std::vector < std::vector <int> > constant_offset_;
+
+  /// Number of bytes used by the given constant
+  std::vector < std::vector<int> > constant_bytes_;
+
+  /// Array of constant data [it][ic];
+  std::vector< std::vector<char> > constant_array_;
+
+  //--------------------------------------------------
   // ATTRIBUTES
   //--------------------------------------------------
 
@@ -183,13 +239,13 @@ private: // attributes
   /// Attributes that define particle velocities
   std::vector < std::vector <int> > attribute_velocity_;
 
-  //--------------------------------------------------
-  // BYTES
-  //--------------------------------------------------
-
   /// Scalar type of each attribute of each particle type.  Valid
   /// scalar types are in type_enum defined in cello.hpp
   std::vector < std::vector<int> > attribute_type_;
+
+  //--------------------------------------------------
+  // BYTES
+  //--------------------------------------------------
 
   /// Number of bytes used by the given attribute
   std::vector < std::vector<int> > attribute_bytes_;

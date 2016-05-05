@@ -55,6 +55,7 @@ module enzo {
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialTurbulence;
+  PUPable EnzoInitialPm;
 
   PUPable EnzoRefineShock;
 
@@ -71,6 +72,8 @@ module enzo {
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodPpml;
+  PUPable EnzoMethodPmDeposit;
+  PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodGravityCg;
   PUPable EnzoMethodGravityMlat;
@@ -108,8 +111,7 @@ module enzo {
        int count_adapt,
        int cycle, double time, double dt,
        int n, char arr[n], int op_array,
-       int num_face_level, int face_level[num_face_level],
-       bool testing);     
+       int num_face_level, int face_level[num_face_level]);     
 
     entry EnzoBlock();
 

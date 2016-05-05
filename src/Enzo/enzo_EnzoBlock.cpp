@@ -192,9 +192,7 @@ EnzoBlock::EnzoBlock
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level,
- bool testing
-) throw()
+ int num_face_level, int * face_level) throw()
   : Block 
     (
      index,
@@ -203,9 +201,7 @@ EnzoBlock::EnzoBlock
      count_adapt,
      cycle, time, dt,
      narray,  array, refresh_type,
-     num_face_level, face_level,
-     testing
-     ),
+     num_face_level, face_level),
     dt(dt),
     SubgridFluxes(0)
 {

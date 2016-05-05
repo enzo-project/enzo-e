@@ -32,8 +32,7 @@ public: // interface
    int num_adapt_steps,
    int cycle, double time, double dt,
    int refresh_type,
-   int num_face_level, int * face_level,
-   bool testing=false ) ;
+   int num_face_level, int * face_level) ;
 
   virtual ~MsgRefine();
 
@@ -85,7 +84,6 @@ protected: // attributes
   int refresh_type_;
   int num_face_level_;
   int * face_level_;
-  bool testing_;
 
 };
 
