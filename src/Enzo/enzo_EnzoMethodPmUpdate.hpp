@@ -17,7 +17,8 @@ class EnzoMethodPmUpdate : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmUpdate object
-  EnzoMethodPmUpdate(const FieldDescr * field_descr);
+  EnzoMethodPmUpdate(const FieldDescr * , 
+		     const ParticleDescr *, double max_dt);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmUpdate);
@@ -38,6 +39,8 @@ public: // interface
   virtual double timestep ( Block * block) const throw();
 
 protected: // attributes
+
+  double max_dt_;
 
 };
 

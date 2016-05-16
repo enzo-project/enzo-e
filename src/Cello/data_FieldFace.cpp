@@ -494,9 +494,9 @@ char * FieldFace::load_data (char * buffer)
 
   char * p = buffer;
   int n;
-  int *pi = (int *)p;
 
 #ifdef DEBUG_NEW_REFRESH
+  int *pi = (int *)p;
   CkPrintf ("p = %p\n",p);
   CkPrintf ("p[0] = %d\n",pi[0]);
 #endif

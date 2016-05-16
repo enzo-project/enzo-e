@@ -185,9 +185,10 @@ Method * EnzoProblem::create_method_
        enzo_config);
   } else if (name == "pm_deposit") {
     method = new EnzoMethodPmDeposit  
-      (field_descr, enzo_config->method_pm_deposit_type);
+      (field_descr, particle_descr, enzo_config->method_pm_deposit_type);
   } else if (name == "pm_update") {
-    method = new EnzoMethodPmUpdate  (field_descr);
+    method = new EnzoMethodPmUpdate  
+      (field_descr, particle_descr, enzo_config->method_pm_update_max_dt);
   } else if (name == "heat") {
     method = new EnzoMethodHeat
       (field_descr,

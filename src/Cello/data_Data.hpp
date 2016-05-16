@@ -60,8 +60,9 @@ public: // interface
       if (up) field_data_[i] = new FieldData;
       p | *field_data_[i];
     }
-
-    if (up) particle_data_ = new ParticleData;
+    if (up) {
+      particle_data_ = new ParticleData;
+    }
     p | *particle_data_;
     PUParray(p,lower_,3);
     PUParray(p,upper_,3);

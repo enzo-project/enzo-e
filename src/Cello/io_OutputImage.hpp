@@ -46,6 +46,7 @@ public: // functions
 	      int         image_size_y,
 	      std::string image_reduce_type,
 	      std::string image_mesh_color,
+	      std::string image_color_particle_attribute,
 	      int         image_block_size,
 	      int face_rank,
 	      bool image_log,
@@ -181,6 +182,9 @@ private: // attributes
 
   /// Color
   int mesh_color_type_;
+
+  /// Particle attribute defining color (default -1: constant)
+  std::string color_particle_attribute_;
 
   /// Axis along which to reduce
   axis_type axis_;

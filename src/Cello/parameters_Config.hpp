@@ -142,6 +142,7 @@ public: // attributes
   std::vector < std::string > output_image_type;
   std::vector < char >        output_image_log;
   std::vector < std::string > output_image_mesh_color;
+  std::vector < std::string > output_image_color_particle_attribute;
   std::vector < std::vector <int> > output_image_size;
   std::vector < std::string>  output_image_reduce_type;
   std::vector < char>         output_image_ghost;

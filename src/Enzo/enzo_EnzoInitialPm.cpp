@@ -110,8 +110,6 @@ void EnzoInitialPm::enforce_block
 	   mpp_,
 	   mpp_ > 0);
 
-  CkPrintf ("mpp_ = %f\n",mpp_);
-
   const int np = ms[nx*ny*nz] / mpp_;
 
   // ... insert uninitialized tracer particles

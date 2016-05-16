@@ -22,6 +22,7 @@ OutputImage::OutputImage(int index,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
 			 std::string image_mesh_color,
+			 std::string color_particle_attribute,
 			 int         image_block_size,
 			 int face_rank,
 			 bool image_log,
@@ -36,6 +37,7 @@ OutputImage::OutputImage(int index,
     nyi_(image_size_y),
     png_(0),
     image_type_(image_type),
+    color_particle_attribute_(color_particle_attribute),
     face_rank_(face_rank),
     image_log_(image_log),
     ghost_(ghost),
@@ -122,6 +124,7 @@ void OutputImage::pup (PUP::er &p)
   if (p.isUnpacking()) image_mesh_ = 0;
   p | op_reduce_;
   p | mesh_color_type_;
+  p | color_particle_attribute_;
   p | axis_;
   p | min_;
   p | max_;
@@ -390,26 +393,33 @@ void OutputImage::write_block
 
   Particle particle ((ParticleDescr *)particle_descr,particle_data);
 
+    
+
   for (it_particle_index_->first();
        ! it_particle_index_->done();
        it_particle_index_->next()) {
 
     const int it = it_particle_index_->value();
 
+    const int ia_color = (color_particle_attribute_ != "") ?
+      particle.attribute_index (it, color_particle_attribute_) : -1;
+
     const int ia_x = particle.attribute_index(it,"x");
 
     const int nb = particle.num_batches(it);
     const int dp = particle.stride(it,ia_x);
+    const int da = (ia_color != -1) ? particle.stride(it,ia_color) : 0;
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
       double xa [np];
       double ya [np];
       particle.position(it,ib, xa,ya);
-
+      double * pa = (double *) particle.attribute_array (it,ia_color,ib);
       for (int ip=0; ip<np; ip++) {
 	double x = xa[ip*dp];
 	double y = ya[ip*dp];
+	double value = (ia_color == -1) ? 1.0 : pa[ip*da];
 	const int ix = MIN(int((x - xdm)/(xdp-xdm)*nxi_),nxi_-1);
 	const int iy = MIN(int((y - ydm)/(ydp-ydm)*nyi_),nyi_-1);
 
@@ -417,7 +427,7 @@ void OutputImage::write_block
 	// particles may be outside the domain--don't plot them
 	if ( ( 0 <= ix && ix < nxi_) &&
 	     ( 0 <= iy && iy < nyi_)) {
-	  reduce_point_(&image_data_[i],1.0);
+	  reduce_point_(&image_data_[i],value);
 	}
       }
     }

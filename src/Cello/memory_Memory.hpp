@@ -165,10 +165,18 @@ public: // interface
   };
 
   void set_memory_allocate_warning (size_t value)
-  {  memory_allocate_warning_ = value; }
+  { 
+#ifdef CONFIG_USE_MEMORY
+    memory_allocate_warning_ = value; 
+#endif
+}
 
   void set_memory_allocated_error (size_t value)
-  {  memory_allocated_error_ = value; }
+  {
+#ifdef CONFIG_USE_MEMORY
+  memory_allocated_error_ = value;
+#endif
+ }
 
   //======================================================================
 

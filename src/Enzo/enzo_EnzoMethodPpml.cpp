@@ -47,7 +47,7 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
   if (!block->is_leaf()) return;
 
-  const FieldDescr * field_descr = block->field_descr();
+  const FieldDescr * field_descr = block->data()->field_descr();
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   enzo_block->SolveMHDEquations ( field_descr, block->dt() );
 

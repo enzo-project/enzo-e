@@ -10,9 +10,6 @@
 
 #include "cello.hpp"
 
-class ParticleData;
-class FieldData;
-class FieldFace;
 class Data;
 class DataMsg;
 

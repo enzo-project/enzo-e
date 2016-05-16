@@ -278,6 +278,7 @@ void Block::adapt_refine_()
   ParticleData  * p_data  = data()     -> particle_data();
 
   const int nc = NUM_CHILDREN(rank);
+
   for (int i=0; i<nc; i++) {
     particle_list[i] = new ParticleData;
     particle_list[i]->allocate(p_descr);
@@ -361,6 +362,12 @@ void Block::adapt_refine_()
     }
   }
 
+#ifdef NEW_REFRESH_REFINE
+  for (int i=0; i<nc; i++) {
+    delete particle_list[i];
+  }
+#endif
+  
   is_leaf_ = false;
 #ifdef DEBUG_ADAPT
   index_.print("adapt_refine leaf=0",-1,2,false,simulation());

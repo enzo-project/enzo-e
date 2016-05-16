@@ -8,6 +8,8 @@
 #include "data.hpp"
 #include <algorithm>
 
+long ParticleData::counter[MAX_NODE_SIZE] = {0};
+
 //----------------------------------------------------------------------
 
 ParticleData::ParticleData()
@@ -15,6 +17,8 @@ ParticleData::ParticleData()
     attribute_align_(),
     particle_count_()
 {
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  ++counter[in]; 
 }
 
 //----------------------------------------------------------------------
@@ -36,6 +40,13 @@ void ParticleData::pup (PUP::er &p)
   p | particle_count_;
 }
 
+//----------------------------------------------------------------------
+
+ParticleData::~ParticleData()
+{
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  --counter[in]; 
+}
 //----------------------------------------------------------------------
 
 char * ParticleData::attribute_array (ParticleDescr * particle_descr,

@@ -193,6 +193,7 @@ struct fluxes
 #include "enzo_EnzoComputeTemperature.hpp"
 #include "enzo_EnzoComputeAcceleration.hpp"
 #include "enzo_EnzoComputeSmoothJacobi.hpp"
+#include "enzo_EnzoComputeCicInterp.hpp"
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"

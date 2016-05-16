@@ -145,6 +145,7 @@ public: // attributes
   // EnzoMethodPm
 
   std::string                method_pm_deposit_type;
+  double                     method_pm_update_max_dt;
 
 #ifdef CONFIG_USE_GRACKLE
 

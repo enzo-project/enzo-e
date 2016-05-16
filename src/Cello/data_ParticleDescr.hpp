@@ -120,18 +120,14 @@ public: // interface
 
   bool interleaved (int it) const;
 
-  //--------------------------------------------------
-  // BYTES
-  //--------------------------------------------------
+  /// Return the number of bytes use to represent a particle.
+  int particle_bytes (int it) const;
 
   /// Return the data type of the given attribute.
   int attribute_type (int it,int ia) const;
 
   /// Return the number of bytes allocated for the given attribute.
   int attribute_bytes (int it,int ia) const;
-
-  /// Return the number of bytes use to represent a particle.
-  int particle_bytes (int it) const;
 
   /// Return the attribute corresponding to the given position
   /// coordinate, -1 if none
@@ -199,6 +195,10 @@ private: // attributes
   /// Index of each particle type (inverse of type_)
   std::map<std::string,int> type_index_;
 
+  /// Number of bytes used to store all attributes for each particle
+  /// type, including any extra for alignment of stride.
+  std::vector < int > particle_bytes_;
+
   //--------------------------------------------------
   // CONSTANTS
   //--------------------------------------------------
@@ -233,30 +233,18 @@ private: // attributes
   /// Index of each particle attribute (inverse of attribute_)
   std::vector < std::map<std::string,int> > attribute_index_;
 
+  /// Scalar type of each attribute of each particle type.  Valid
+  /// scalar types are in type_enum defined in cello.hpp
+  std::vector < std::vector<int> > attribute_type_;
+
   /// Attributes that define particle positions
   std::vector < std::vector <int> > attribute_position_;
 
   /// Attributes that define particle velocities
   std::vector < std::vector <int> > attribute_velocity_;
 
-  /// Scalar type of each attribute of each particle type.  Valid
-  /// scalar types are in type_enum defined in cello.hpp
-  std::vector < std::vector<int> > attribute_type_;
-
-  //--------------------------------------------------
-  // BYTES
-  //--------------------------------------------------
-
   /// Number of bytes used by the given attribute
   std::vector < std::vector<int> > attribute_bytes_;
-
-  /// Number of bytes used to store all attributes for each particle
-  /// type, including any extra for alignment of stride.
-  std::vector < int > particle_bytes_;
-
-  //--------------------------------------------------
-  // INTERLEAVING
-  //--------------------------------------------------
 
   /// Whether attributes are interleaved.  (char since Charm++ pup
   /// doesn't recognize bool)

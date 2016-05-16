@@ -50,7 +50,7 @@ public: // interface
     }
     if (particle_data_delete_) {
       delete particle_data_;
-      particle_data_ = 0;
+      particle_data_ = NULL;
     }
   }
 
@@ -107,8 +107,6 @@ public: // interface
   /// Delete the ParticleData object
   void delete_particle_data  () 
   { 
-    // CkPrintf ("%d DEBUG delete_particle_data del ParticleData %p %d\n",
-    // 	      CkMyPe(),particle_data_,particle_data_delete_);
     delete particle_data_; particle_data_ = NULL; 
   }
 

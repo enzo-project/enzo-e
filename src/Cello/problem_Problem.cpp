@@ -683,6 +683,8 @@ Output * Problem::create_output_
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
+    std::string image_color_particle_attribute =
+      config->output_image_color_particle_attribute[index];
     double      image_min = config->output_image_min[index];
     double      image_max = config->output_image_max[index];
 
@@ -697,6 +699,7 @@ Output * Problem::create_output_
 			      image_size_x,image_size_y,
 			      image_reduce_type,
 			      image_mesh_color,
+			      image_color_particle_attribute,
 			      image_block_size,
 			      image_face_rank,
 			      image_log,

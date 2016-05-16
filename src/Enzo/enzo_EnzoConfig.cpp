@@ -109,6 +109,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_gravity_bicgstab_monitor_iter;
 
   p | method_pm_deposit_type;
+  p | method_pm_update_max_dt;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -188,7 +189,10 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // PM method and initialization
 
-  method_pm_deposit_type = p->value_string ("Method:pm:type","cic");
+  method_pm_deposit_type = p->value_string ("Method:pm_deposit:type","cic");
+
+  method_pm_update_max_dt = p->value_float 
+    ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 				     
   initial_pm_field        = p->value_string ("Initial:pm:field","density");
   initial_pm_mpp          = p->value_float  ("Initial:pm:mpp",-1.0);

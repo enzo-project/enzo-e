@@ -18,11 +18,16 @@ class ParticleData {
 
 public: // interface
 
+  static long counter[MAX_NODE_SIZE];
+
   /// Constructor
   ParticleData();
 
   /// Comparison operator
   bool operator== (const ParticleData & particle_data) throw ();
+
+  /// Destructor
+  ~ParticleData();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

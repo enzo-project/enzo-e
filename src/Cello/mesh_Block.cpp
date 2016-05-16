@@ -63,8 +63,8 @@ Block::Block ( MsgRefine * msg ) throw ()
   is_leaf_(true),
   age_(0),
   face_level_last_(),
-  index_method_(-1),
-  name_("")
+  name_(""),
+  index_method_(-1)
 {
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -366,11 +366,6 @@ void Block::pup(PUP::er &p)
 
   if (up) debug_faces_("PUP");
 }
-
-//----------------------------------------------------------------------
-
-const FieldDescr * Block::field_descr() throw()
-{ return data_->field_descr(); }
 
 //----------------------------------------------------------------------
 

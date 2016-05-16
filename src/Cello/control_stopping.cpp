@@ -212,26 +212,30 @@ void Block::exit_()
 
   TRACE_STOPPING("Block::exit_");
   const int in = CkMyPe() % MAX_NODE_SIZE;
-  // if (MsgRefresh::counter[in] != 0) {
-  //   CkPrintf ("%d Block::exit_() MsgRefresh::counter = %ld != 0\n",
-  // 	      CkMyPe(),MsgRefresh::counter[in]);
-  // }
-  // if (MsgRefine::counter[in] != 0) {
-  //   CkPrintf ("%d Block::exit_() MsgRefine::counter = %ld != 0\n",
-  // 	      CkMyPe(),MsgRefine::counter[in]);
-  // }
-  // if (MsgCoarsen::counter[in] != 0) {
-  //   CkPrintf ("%d Block::exit_() MsgCoarsen::counter = %ld != 0\n",
-  // 	      CkMyPe(),MsgCoarsen::counter[in]);
-  // }
-  // if (FieldFace::counter[in] != 0) {
-  //   CkPrintf ("%d Block::exit_() FieldFace::counter = %ld != 0\n",
-  // 	      CkMyPe(),FieldFace::counter[in]);
-  // }
-  // if (DataMsg::counter[in] != 0) {
-  //   CkPrintf ("%d Block::exit_() DataMsg::counter = %ld != 0\n",
-  // 	      CkMyPe(),DataMsg::counter[in]);
-  // }
+  if (index().is_root()) {
+    if (MsgRefresh::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgRefresh::counter = %ld != 0\n",
+		CkMyPe(),MsgRefresh::counter[in]);
+    }
+    if (MsgRefine::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgRefine::counter = %ld != 0\n",
+		CkMyPe(),MsgRefine::counter[in]);
+    }
+    if (MsgCoarsen::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() MsgCoarsen::counter = %ld != 0\n",
+		CkMyPe(),MsgCoarsen::counter[in]);
+    }
+    if (FieldFace::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() FieldFace::counter = %ld != 0\n",
+		CkMyPe(),FieldFace::counter[in]);
+    }
+    if (DataMsg::counter[in] != 0) {
+      CkPrintf ("%d Block::exit_() DataMsg::counter = %ld != 0\n",
+		CkMyPe(),DataMsg::counter[in]);
+      CkPrintf ("%d Block::exit_() ParticleData::counter = %ld != 0\n",
+		CkMyPe(),ParticleData::counter[in]);
+    }
+  }
   if (index_.is_root()) {
     proxy_main.p_exit(1);
   }

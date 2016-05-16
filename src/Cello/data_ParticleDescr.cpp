@@ -22,19 +22,19 @@
 ParticleDescr::ParticleDescr() throw()
   : type_name_(),
     type_index_(),
+    particle_bytes_(),
+    constant_name_(),
+    constant_index_(),
+    constant_type_(),
+    constant_offset_(),
+    constant_bytes_(),
+    constant_array_(),
     attribute_name_(),
     attribute_index_(),
     attribute_type_(),
     attribute_position_(),
     attribute_velocity_(),
-    constant_name_(),
-    constant_index_(),
-    constant_type_(),
-    constant_bytes_(),
-    constant_offset_(),
     attribute_bytes_(),
-    constant_array_(),
-    particle_bytes_(),
     attribute_interleaved_(),
     attribute_offset_(),
     groups_(),
@@ -48,19 +48,19 @@ void ParticleDescr::pup (PUP::er &p)
 {
   p | type_name_;
   p | type_index_;
-  p | attribute_name_;
-  p | attribute_index_;
-  p | attribute_type_;
-  p | attribute_position_;
-  p | attribute_velocity_;
+  p | particle_bytes_;
   p | constant_name_;
   p | constant_index_;
   p | constant_type_;
   p | constant_offset_;
   p | constant_bytes_;
   p | constant_array_;
+  p | attribute_name_;
+  p | attribute_index_;
+  p | attribute_type_;
+  p | attribute_position_;
+  p | attribute_velocity_;
   p | attribute_bytes_;
-  p | particle_bytes_;
   p | attribute_interleaved_;
   p | attribute_offset_;
   p | groups_;

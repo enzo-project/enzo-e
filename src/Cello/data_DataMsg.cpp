@@ -160,6 +160,7 @@ char * DataMsg::load_data (char * buffer)
 #endif
   if (n_pa > 0) {
     ParticleData * pd = particle_data_ = new ParticleData;
+
     pd->allocate(particle_descr);
     pc = pd->load_data(particle_descr,pc);
   } else {

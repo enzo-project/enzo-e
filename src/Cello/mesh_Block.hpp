@@ -107,8 +107,6 @@ public: // interface
   inline Data * data() throw()
   { return data_; };
 
-  const FieldDescr * field_descr() throw();
-
   inline const Data * data() const throw()   
   { return data_; };
 

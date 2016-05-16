@@ -24,8 +24,10 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPmDeposit::EnzoMethodPmDeposit (const FieldDescr * field_descr,
-					  std::string type)
+EnzoMethodPmDeposit::EnzoMethodPmDeposit 
+(const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr,
+ std::string type)
   : Method(),
     type_(pm_type_unknown)
 {
@@ -50,6 +52,7 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit (const FieldDescr * field_descr,
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_particles(particle_descr->num_types());
 
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -72,7 +75,6 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
 void EnzoMethodPmDeposit::compute ( Block * block) throw()
 {
   TRACE_PM("compute()");
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   if (block->is_leaf()) {
 
@@ -83,8 +85,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     double  * de   = (double *) field.values("density");
     double  * de_t = (double *) field.values("density_total");
-
-    Grouping * group = particle.groups();
 
     int mx,my,mz;
     field.dimensions(0,&mx,&my,&mz);
@@ -110,19 +110,24 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     block->lower(&xm,&ym,&zm);
     block->upper(&xp,&yp,&zp);
 
-    const double hx = (xp-xm)/nx;
-    const double hy = (yp-ym)/ny;
-    const double hz = (zp-zm)/nz;
+    double hx,hy,hz;
+    hx = (xp-xm)/nx;
+    hy = (yp-ym)/ny;
+    hz = (zp-zm)/nz;
 
     // declare particle position arrays
-
-    const int nt = particle.num_types();
 
     const int it = particle.type_index ("dark");
 
     const int ia_mass = particle.constant_index (it,"mass");
 
     double mass = *((double *)(particle.constant_value (it,ia_mass)));
+
+    double vol = 1.0;
+    if (rank >= 1) vol *= hx;
+    if (rank >= 2) vol *= hy;
+    if (rank >= 3) vol *= hz;
+    double dens = mass / vol;
 
     const int ia_x = particle.attribute_index(it,"x");
     const int ia_y = particle.attribute_index(it,"y");
@@ -135,9 +140,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     for (int ib=0; ib<particle.num_batches(it); ib++) {
 
       const int np = particle.num_particles(it,ib);
-
-      double * ya = (double *) particle.attribute_array (it,ia_y,ib);
-      double * za = (double *) particle.attribute_array (it,ia_z,ib);
 
       if (rank == 1) {
 
@@ -157,10 +159,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	  double x1 = 1.0 - x0;
 
-	  de_t[ix0] += mass*x0;
-	  de_t[ix1] += mass*x1;
+	  de_t[ix0] += dens*x0;
+	  de_t[ix1] += dens*x1;
 
 	}
+
       } else if (rank == 2) {
 
 	double * xa = (double *) particle.attribute_array (it,ia_x,ib);
@@ -186,11 +189,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  double x1 = 1.0 - x0;
 	  double y1 = 1.0 - y0;
 
-
-	  de_t[ix0+mx*iy0] += mass*x0*y0;
-	  de_t[ix1+mx*iy0] += mass*x1*y0;
-	  de_t[ix0+mx*iy1] += mass*x0*y1;
-	  de_t[ix1+mx*iy1] += mass*x1*y1;
+	  de_t[ix0+mx*iy0] += dens*x0*y0;
+	  de_t[ix1+mx*iy0] += dens*x1*y0;
+	  de_t[ix0+mx*iy1] += dens*x0*y1;
+	  de_t[ix1+mx*iy1] += dens*x1*y1;
 
 	}
 
@@ -198,6 +200,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	double * xa = (double *) particle.attribute_array (it,ia_x,ib);
 	double * ya = (double *) particle.attribute_array (it,ia_y,ib);
+	double * za = (double *) particle.attribute_array (it,ia_z,ib);
 
 	for (int ip=0; ip<np; ip++) {
 
@@ -225,15 +228,14 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  double y1 = 1.0 - y0;
 	  double z1 = 1.0 - z0;
 
-
-	  de_t[ix0+mx*(iy0+my*iz0)] += mass*x0*y0*z0;
-	  de_t[ix1+mx*(iy0+my*iz0)] += mass*x1*y0*z0;
-	  de_t[ix0+mx*(iy1+my*iz0)] += mass*x0*y1*z0;
-	  de_t[ix1+mx*(iy1+my*iz0)] += mass*x1*y1*z0;
-	  de_t[ix0+mx*(iy0+my*iz1)] += mass*x0*y0*z1;
-	  de_t[ix1+mx*(iy0+my*iz1)] += mass*x1*y0*z1;
-	  de_t[ix0+mx*(iy1+my*iz1)] += mass*x0*y1*z1;
-	  de_t[ix1+mx*(iy1+my*iz1)] += mass*x1*y1*z1;
+	  de_t[ix0+mx*(iy0+my*iz0)] += dens*x0*y0*z0;
+	  de_t[ix1+mx*(iy0+my*iz0)] += dens*x1*y0*z0;
+	  de_t[ix0+mx*(iy1+my*iz0)] += dens*x0*y1*z0;
+	  de_t[ix1+mx*(iy1+my*iz0)] += dens*x1*y1*z0;
+	  de_t[ix0+mx*(iy0+my*iz1)] += dens*x0*y0*z1;
+	  de_t[ix1+mx*(iy0+my*iz1)] += dens*x1*y0*z1;
+	  de_t[ix0+mx*(iy1+my*iz1)] += dens*x0*y1*z1;
+	  de_t[ix1+mx*(iy1+my*iz1)] += dens*x1*y1*z1;
 
 	}
       }

@@ -17,7 +17,7 @@ class EnzoMethodPmDeposit : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmDeposit object
-  EnzoMethodPmDeposit(const FieldDescr * field_descr, std::string type);
+  EnzoMethodPmDeposit(const FieldDescr * , const ParticleDescr *, std::string type);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmDeposit);

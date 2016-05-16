@@ -439,7 +439,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
                      : (Matrix*)(new EnzoMatrixIdentity);
 
   /// access problem-defining fields for eventual RHS and solution
-  idensity_   = field_descr->field_id("density");
+  idensity_   = field_descr->field_id("density_total");
   ipotential_ = field_descr->field_id("potential");
 
   /// access existing fields for temporary vectors (must be declared in parameter file)

@@ -185,8 +185,8 @@ void Block::p_refresh_store (MsgRefresh * msg)
 #ifdef DEBUG_REFRESH
   CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
   fflush(stdout);
-  if (msg->field_face()) msg->field_face()->print("called store");
 #endif
+
   msg->update(data());
   delete msg;
 
@@ -223,7 +223,7 @@ void Block::refresh_store_field_face_
     FieldData * field_data = data()->field_data();
     Field field (field_descr,field_data);
     field_face -> array_to_face (array,field);
-    //    delete field_face;
+    delete field_face;
 
   }
 #endif
@@ -258,11 +258,6 @@ void Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   particle_send_(nl,index_list,particle_list);
 
-  // delete neighbor particle objects
-  for (int il=0; il<nl; il++) {
-    ParticleData * pd = particle_list[il];
-    //      delete pd;
-  }
 }
 //----------------------------------------------------------------------
 
@@ -378,14 +373,14 @@ int Block::particle_create_array_neighbors_
     int index_upper[3] = {1,1,1};
     refresh->index_limits (rank,refresh_type,if3,ic3,index_lower,index_upper);
 
-    // @@@@ MEMORY LEAK
     ParticleData * pd = new ParticleData;
-
     ParticleDescr * p_descr = simulation() -> particle_descr();
+
 #ifdef DEBUG_REFRESH
     CkPrintf ("%d %p DEBUG particle_create_array_neighbors\n",
 	      CkMyPe(),pd);fflush(stdout);
 #endif
+
     pd->allocate(p_descr);
 
     particle_list[il] = pd;
@@ -554,7 +549,6 @@ void Block::particle_scatter_neighbors_
     int it = *it_type;
 
     const int ia_x  = particle.attribute_position(it,0);
-    const int ia_id = particle.attribute_index(it,"id");
 
     // (...positions may use absolute coordinates (float) or
     // block-local coordinates (int))
@@ -563,7 +557,6 @@ void Block::particle_scatter_neighbors_
 
     // (...stride may be != 1 if particle attributes are interleaved)
     const int d  = particle.stride(it,ia_x);
-    const int di = particle.stride(it,ia_id);
 
     // ...for each batch of particles
 
@@ -578,9 +571,6 @@ void Block::particle_scatter_neighbors_
       double xa[np],ya[np],za[np];
       particle.position(it,ib,xa,ya,za);
 
-      // (...and id for debugging)
-      int64_t * ida = (int64_t*)particle.attribute_array (it,ia_id,ib);
-
       // ...initialize mask used for scatter and delete
       // ...and corresponding particle indices
 
@@ -592,8 +582,6 @@ void Block::particle_scatter_neighbors_
 	double y = is_float ? 2.0*(ya[ip*d]-y0)/yl : ya[ip*d];
 	double z = is_float ? 2.0*(za[ip*d]-z0)/zl : za[ip*d];
 
-	int64_t id = ida[ip*di];
-
 	int ix = (rank >= 1) ? (x + 2) : 0;
 	int iy = (rank >= 2) ? (y + 2) : 0;
 	int iz = (rank >= 3) ? (z + 2) : 0;
@@ -601,7 +589,6 @@ void Block::particle_scatter_neighbors_
 	int i = ix + 4*(iy + 4*iz);
 
 	if (! (0 <= ix && ix < 4) ) {
-	  printf ("id %ld\n",id);
 	  printf ("ix iy iz %d %d %d\n",ix,iy,iz);
 	  printf ("x y z %f %f %f\n",x,y,z);
 	  printf ("xa ya za %f %f %f\n",xa[ip*d],ya[ip*d],za[ip*d]);
@@ -665,7 +652,6 @@ void Block::particle_send_
 	      CkMyPe(),p_data);fflush(stdout);
 #endif
 
-
       DataMsg * data_msg = new DataMsg;
       data_msg ->set_particle_data(p_data,true);
 
@@ -673,13 +659,12 @@ void Block::particle_send_
       msg->set_data_msg (data_msg);
 
       thisProxy[index].p_refresh_store (msg);
-    }//  else if (p_data) {
-    //   // assert ParticleData object exits but has no particles
-    //   CkPrintf ("%d DEBUG del empty ParticleData %p\n",CkMyPe(),p_data);
-    //   delete particle_list[il];
-    //   particle_list[il] = NULL;
+    } else if (p_data) {
+      
+      // assert ParticleData object exits but has no particles
+      delete p_data;
 
-    // }
+    }
 
 #else
     const int nt = particle_send.num_types();
