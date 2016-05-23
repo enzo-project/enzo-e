@@ -60,6 +60,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_omega_lamda_now;
   p | physics_cosmology_omega_matter_now;
 
+  p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
   p | initial_sedov_radius_relative;
   p | initial_sedov_pressure_in;
@@ -202,6 +203,8 @@ void EnzoConfig::read(Parameters * p) throw()
   // Sedov initialization
 
   TRACE1("field_gamma = %f",field_gamma);
+
+  initial_sedov_rank = p->value_integer ("Initial:sedov:rank",0);
 
   initial_sedov_array[0] = p->list_value_integer (0,"Initial:sedov:array",1);
   initial_sedov_array[1] = p->list_value_integer (1,"Initial:sedov:array",1);

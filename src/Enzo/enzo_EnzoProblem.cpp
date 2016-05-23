@@ -93,11 +93,28 @@ Initial * EnzoProblem::create_initial_
   EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
 
   if (type == "implosion_2d") {
+
     initial = new EnzoInitialImplosion2(cycle,time);
+
   } else if (type == "sedov_array_2d") {
+
     initial = new EnzoInitialSedovArray2(enzo_config);
+
   } else if (type == "sedov_array_3d") {
+
     initial = new EnzoInitialSedovArray3(enzo_config);
+
+  } else if (type == "sedov") {
+
+    const int rank = enzo_config->initial_sedov_rank;
+
+    ASSERT1 ("EnzoConfig::read()",
+	     "Parameter 'Initial:sedov:rank' is %d, but must be set to 2 or 3",
+	     rank,  (rank == 2 || rank == 3) );
+
+    if (rank == 2) initial = new EnzoInitialSedovArray2(enzo_config);
+    if (rank == 3) initial = new EnzoInitialSedovArray3(enzo_config);
+
 #ifdef CONFIG_USE_GRACKLE
   } else if (type == "grackle_test") {
     initial = new EnzoInitialGrackleTest(enzo_config);

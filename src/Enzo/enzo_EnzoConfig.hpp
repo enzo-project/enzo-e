@@ -79,6 +79,7 @@ public: // attributes
   double                     physics_cosmology_omega_matter_now;
 
   // EnzoInitialSedovArray[23]
+  int                        initial_sedov_rank;
   int                        initial_sedov_array[3];
   double                     initial_sedov_radius_relative;
   double                     initial_sedov_pressure_in;
