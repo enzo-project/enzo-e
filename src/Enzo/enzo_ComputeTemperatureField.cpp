@@ -60,7 +60,9 @@ int EnzoBlock::ComputeTemperatureField
 
   /* Compute the pressure first. */
  
-  if (DualEnergyFormalism)
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+
+  if (DualEnergyFormalism[in])
     result = ComputePressureDualEnergyFormalism(time(), 
 						temperature,
 						comoving_coordinates);
@@ -73,8 +75,6 @@ int EnzoBlock::ComputeTemperatureField
   }
  
   /* Compute the size of the fields. */
-
-  const int in = CkMyPe() % MAX_NODE_SIZE;
 
   int i, size = 1;
   for (int dim = 0; dim < GridRank[in]; dim++)

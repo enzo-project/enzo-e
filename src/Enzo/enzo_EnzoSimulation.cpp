@@ -31,7 +31,7 @@ EnzoSimulation::EnzoSimulation
  const char         parameter_file[],
  int                n,
  int                node_size) throw ()
-  : Simulation(parameter_file, n),
+  : CBase_EnzoSimulation(parameter_file, n),
     node_size_(node_size)
 {
 #ifdef CHECK_MEMORY
@@ -157,8 +157,9 @@ void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
 
 void EnzoSimulation::r_write_checkpoint()
 {
-  CkPrintf("EnzoSimulation::r_write_checkpoint()\n");
+  CkPrintf("EnzoSimulation::r_write_checkpoint() BEGIN\n");
   problem()->output_wait(this);
+  CkPrintf("EnzoSimulation::r_write_checkpoint() END\n");
 }
 
 //----------------------------------------------------------------------

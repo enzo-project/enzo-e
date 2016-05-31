@@ -5,6 +5,8 @@
 /// @date     2011-04-07
 /// @brief    Declaration of the Error class
 
+#include "charm++.h"
+
 #ifndef ERROR_ERROR_HPP
 #define ERROR_ERROR_HPP
 
@@ -129,18 +131,33 @@
 #endif /* CELLO_TRACE */
 
 #ifdef CELLO_TRACE_CHARM
-#   define TRACE_CHARM(M)				\
-  { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
-#   define TRACEPUP				\
-  { m2_(stderr,"TRACEPUP",__FILE__,__LINE__,"",	\
-	"%p %s %s %s %s",				\
-	this ,						\
-	p.isPacking()   ?"Packing"   : "",		\
-	p.isUnpacking() ?"Unpacking" : "",		\
-	p.isSizing()    ?"Sizing"    : "",		\
-	p.isDeleting()  ?"Deleting"  : ""); }
+
+// #   define TRACE_CHARM(M)				
+//   { m2_(stdout,"TRACE_CHARM",__FILE__,__LINE__,"",M); }
+// #   define TRACEPUP				
+//   { m2_(stderr,"TRACEPUP",__FILE__,__LINE__,"",	
+// 	"%p %s %s %s %s",				
+// 	this ,						
+// 	p.isPacking()   ?"Packing"   : "",		
+// 	p.isUnpacking() ?"Unpacking" : "",		
+// 	p.isSizing()    ?"Sizing"    : "",		
+// 	p.isDeleting()  ?"Deleting"  : "");		
+//   }
+
+#   define TRACE_CHARM(M)					\
+  { CkPrintf("TRACE_CHARM %s:%d\n",__FILE__,__LINE__); }
+#   define TRACEPUP					\
+  {							\
+    CkPrintf("TRACEPUP %s:%d\n",__FILE__,__LINE__);	\
+    CkPrintf("TRACEPUP %p %s\n",this,			\
+ 	     p.isPacking()   ?"Packing"   : "",		\
+ 	     p.isUnpacking() ?"Unpacking" : "",		\
+ 	     p.isSizing()    ?"Sizing"    : "",		\
+ 	     p.isDeleting()  ?"Deleting"  : ""); }
+
+
 #else
-#   define TRACE_CHARM(M)				\
+#   define TRACE_CHARM(M)			\
   /* This space intentionally left blank */
 #   define TRACEPUP							\
   /* This space intentionally left blank */

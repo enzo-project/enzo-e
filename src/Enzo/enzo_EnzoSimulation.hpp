@@ -10,8 +10,9 @@
 #define ENZO_ENZO_SIMULATION_CHARM_HPP
 
 #include "charm++.h"
+#include "enzo.decl.h"
 
-class EnzoSimulation : public Simulation
+class EnzoSimulation : public CBase_EnzoSimulation
 			    
 {
 
@@ -29,7 +30,7 @@ public: // functions
   EnzoSimulation() {}
 
   /// CHARM++ Migration constructor
-  EnzoSimulation(CkMigrateMessage * m) : Simulation(m)  
+  EnzoSimulation(CkMigrateMessage * m) : CBase_EnzoSimulation(m)  
   {
   };
 

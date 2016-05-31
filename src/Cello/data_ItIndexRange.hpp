@@ -17,7 +17,7 @@ class ItIndexRange : public ItIndex {
 public: // interface
 
   /// Empty constructor for Charm++ pup()
-  ItIndexRange() throw() {}
+  ItIndexRange() throw() : ItIndex() {}
   
   /// Create an iterator over integers first to last
   ItIndexRange ( size_t first, size_t last ) throw ()

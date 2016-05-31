@@ -33,6 +33,6 @@ Output {
   }
 }
 
-Restart {
-   file = "input/restart.incl";
-}
+# Restart {
+#    file = "input/restart.incl";
+# }

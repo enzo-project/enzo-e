@@ -14,7 +14,7 @@ class CProxy_EnzoBlock;
 
 #include "enzo.decl.h"
 
-class EnzoBlock : public Block
+class EnzoBlock : public CBase_EnzoBlock
 
 {
 
@@ -125,7 +125,7 @@ public: // interface
 
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
-    : Block (m)
+    : CBase_EnzoBlock (m)
   {
     TRACE("CkMigrateMessage");
     //    initialize();

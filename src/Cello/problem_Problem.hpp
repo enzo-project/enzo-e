@@ -108,7 +108,7 @@ public: // interface
   /// Process the next output object if any, else proceed with simulation
   void output_next(Simulation * simulation) throw();
 
-  // /// Reduce output, using p_output_write to send data to writing processes
+  /// Reduce output, using p_output_write to send data to writing processes
   void output_wait(Simulation * simulation) throw();
   
   /// Receive data from non-writing process, write to disk, close, and
@@ -117,11 +117,6 @@ public: // interface
 
   /// Return the stopping object
   Stopping *  stopping() const throw() { return stopping_; }
-
-  // /// Return the timestep control object
-  // Timestep * timestep(int i) const throw()  {
-  //   return (0 <= i && i < (int)timestep_list_.size()) ? timestep_list_[i] : NULL; 
-  // }
 
   /// Initialize the boundary conditions object
   void initialize_boundary(Config * config, 
@@ -139,9 +134,6 @@ public: // interface
 
   /// Initialize the stopping object
   void initialize_stopping(Config * config ) throw();
-
-  // /// Initialize the timestep object
-  // void initialize_timestep(Config * config) throw();
 
   /// Initialize the output objects
   void initialize_output(Config * config,
@@ -207,10 +199,6 @@ protected: // functions
   virtual Stopping * create_stopping_ 
   (std::string type, Config * config) throw ();
 
-  // /// Create named timestep object
-  // virtual Timestep * create_timestep_ 
-  // (std::string type, Config * config) throw ();
-
   /// Create named prolongation object
   virtual Prolong * create_prolong_ 
   (std::string type, Config * config) throw ();
@@ -235,9 +223,6 @@ private: // attributes
 
   /// Stopping criteria
   Stopping * stopping_;
-
-  // /// Time-step computation
-  // std::vector<Timestep *> timestep_list_;
 
   /// List of method objects
   std::vector<Method *> method_list_;

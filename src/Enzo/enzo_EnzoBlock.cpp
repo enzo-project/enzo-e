@@ -170,7 +170,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 EnzoBlock::EnzoBlock
 ( MsgRefine * msg ) throw()
-  : Block ( msg ),
+  : CBase_EnzoBlock ( msg ),
     dt(dt),
     SubgridFluxes(0)
 {
@@ -193,7 +193,7 @@ EnzoBlock::EnzoBlock
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
  int num_face_level, int * face_level) throw()
-  : Block 
+  : CBase_EnzoBlock 
     (
      index,
      nx,ny,nz,
