@@ -24,7 +24,7 @@ public: // functions
 
   /// CHARM++ Constructor
   EnzoSimulation
-  ( const char parameter_file[], int n, int node_size) throw();
+  ( const char parameter_file[], int n, int node_size);
 
   /// CHARM++ Constructor
   EnzoSimulation() {}
@@ -35,7 +35,7 @@ public: // functions
   };
 
   /// Destructor
-  ~EnzoSimulation() throw();
+  ~EnzoSimulation();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

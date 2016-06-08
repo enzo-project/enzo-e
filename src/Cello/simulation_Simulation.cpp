@@ -16,7 +16,7 @@ Simulation::Simulation
 (
  const char *   parameter_file,
  int            n
- ) throw()
+ )
 /// Initialize the Simulation object
 : factory_(0),
   parameters_(0),
@@ -131,7 +131,7 @@ Simulation::Simulation (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
-Simulation::~Simulation() throw()
+Simulation::~Simulation()
 {
   deallocate_();
 }

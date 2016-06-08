@@ -10,6 +10,7 @@
 
 #include "cello.hpp"
 
+class Block;
 class ParticleData;
 class FieldData;
 class FieldFace;

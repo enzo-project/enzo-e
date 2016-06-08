@@ -49,7 +49,7 @@ public: // interface
 
   /// create a Block with the given block count, lower extent, block
   /// size, and number of field blocks
-  Block ( MsgRefine * msg ) throw();
+  Block ( MsgRefine * msg );
 
   Block 
   (
@@ -59,7 +59,7 @@ public: // interface
    int num_adapt_steps,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level) throw();
+   int num_face_level, int * face_level);
 
   // Initialize
   void init (
@@ -72,15 +72,15 @@ public: // interface
    int num_face_level, int * face_level);
 
   /// Destructor
-  virtual ~Block() throw();
+  virtual ~Block();
 
   /// Copy constructor
-  Block(const Block & block) throw ()
+  Block(const Block & block)
   /// @param     block  Object being copied
   {  copy_(block); }
 
   /// Assignment operator
-  Block & operator = (const Block & block) throw ()
+  Block & operator = (const Block & block)
   /// @param     block  Source object of the assignment
   /// @return    The target assigned object
   {  copy_(block);  return *this; }

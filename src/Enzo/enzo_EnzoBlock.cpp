@@ -169,7 +169,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 //----------------------------------------------------------------------
 
 EnzoBlock::EnzoBlock
-( MsgRefine * msg ) throw()
+( MsgRefine * msg )
   : CBase_EnzoBlock ( msg ),
     dt(dt),
     SubgridFluxes(0)
@@ -192,7 +192,7 @@ EnzoBlock::EnzoBlock
  int count_adapt,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level) throw()
+ int num_face_level, int * face_level)
   : CBase_EnzoBlock 
     (
      index,
@@ -230,7 +230,7 @@ void EnzoBlock::initialize_enzo_()
 
 //----------------------------------------------------------------------
 
-EnzoBlock::~EnzoBlock() throw ()
+EnzoBlock::~EnzoBlock()
 {
 }
 

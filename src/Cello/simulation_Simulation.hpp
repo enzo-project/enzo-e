@@ -39,7 +39,7 @@ public: // interface
   Simulation
   ( const char *       parameter_file,
     int                n
-    ) throw();
+    );
 
   //==================================================
   // CHARM
@@ -54,7 +54,7 @@ public: // interface
   //==================================================
 
   /// Destructor
-  virtual ~Simulation() throw();
+  virtual ~Simulation();
 
   /// CHARM++ Pack / Unpack function
   virtual void pup (PUP::er &p);

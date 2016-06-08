@@ -30,7 +30,7 @@ EnzoSimulation::EnzoSimulation
 (
  const char         parameter_file[],
  int                n,
- int                node_size) throw ()
+ int                node_size)
   : CBase_EnzoSimulation(parameter_file, n),
     node_size_(node_size)
 {
@@ -49,7 +49,7 @@ EnzoSimulation::EnzoSimulation
 
 //----------------------------------------------------------------------
 
-EnzoSimulation::~EnzoSimulation() throw()
+EnzoSimulation::~EnzoSimulation()
 {
 }
 

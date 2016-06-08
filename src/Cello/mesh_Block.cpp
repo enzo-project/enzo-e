@@ -42,7 +42,7 @@ const char * phase_name[] = {
 
 //----------------------------------------------------------------------
 
-Block::Block ( MsgRefine * msg ) throw ()
+Block::Block ( MsgRefine * msg )
   :
   data_(NULL),
   child_data_(NULL),
@@ -99,7 +99,7 @@ Block::Block
  int num_adapt_steps,
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
- int num_face_level, int * face_level) throw ()
+ int num_face_level, int * face_level)
   :
   data_(NULL),
   child_data_(NULL),

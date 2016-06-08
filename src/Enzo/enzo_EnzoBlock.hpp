@@ -108,7 +108,7 @@ public:
 public: // interface
 
   /// Initialize the EnzoBlock chare array
-  EnzoBlock ( MsgRefine * msg ) throw();
+  EnzoBlock ( MsgRefine * msg );
 
   /// Initialize the EnzoBlock chare array
   EnzoBlock
@@ -118,10 +118,10 @@ public: // interface
    int count_adapt,
    int cycle, double time, double dt,
    int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level) throw();
+   int num_face_level, int * face_level);
 
   /// Initialize an empty EnzoBlock
-  EnzoBlock()  { };
+  EnzoBlock() { };
 
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
@@ -138,7 +138,7 @@ public: // interface
   void initialize_enzo_();
 
   /// Destructor
-  virtual ~EnzoBlock() throw();
+  virtual ~EnzoBlock();
 
   //--------------------------------------------------
   // Charm++ virtual 
