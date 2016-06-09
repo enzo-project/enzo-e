@@ -21,7 +21,7 @@ class MsgRefine : public CMessage_MsgRefine {
 
 public: // interface
 
-  friend Block;
+  friend class Block;
   static long counter[MAX_NODE_SIZE];
 
   MsgRefine();
