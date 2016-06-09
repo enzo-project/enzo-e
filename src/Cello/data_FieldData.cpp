@@ -485,7 +485,7 @@ void FieldData::print
      const char * field_name = strdup(field_descr->field_name(index_field).c_str());
 
      int nxd,nyd,nzd;
-     field_size(index_field,&nxd,&nyd,&nzd);
+     field_size(field_descr,index_field,&nxd,&nyd,&nzd);
      int gx,gy,gz;
      field_descr->ghost_depth(index_field,&gx,&gy,&gz);
 

@@ -445,7 +445,7 @@ void Block::apply_initial_() throw ()
 
 //----------------------------------------------------------------------
 
-Block::~Block() throw ()
+Block::~Block()
 { 
 #ifdef CELLO_DEBUG
   index_.print("~Block()",-1,2,false,simulation());
