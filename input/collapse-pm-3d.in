@@ -1,0 +1,89 @@
+# Problem: 3D DM (sic) collapse problem using particle-mesh (PM) method
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/pm3.incl"
+
+Adapt {
+   max_level = 5; 
+#   list = ["slope"];
+   list = ["p_any","p_mass"];
+   p_any {
+      type = "particle_mass";
+      max_coarsen = 1.0;
+      min_refine  = 2e33;
+      max_level = 3;
+   }
+
+   p_mass {
+      type = "particle_mass";
+# M0 = nx*ny*nz*M0 = 16*16*16*2e33 = 8e36
+# coarsen 8e36/(2*sqrt(2)) = 2.83e36
+# refine  8e36*(2*sqrt(2)) = 2.26e37
+      max_coarsen = 2.83e36;
+      min_refine  = 2.26e37;
+      max_level = 5;
+   }
+   mask {
+      type = "mask";
+      value = [5.0, x < 0.625, 0.0];
+   }
+   slope {
+      type = "slope";
+      field_list = ["density"];
+      min_refine = 10.0;
+      max_coarsen = 2.0;
+   }
+}
+
+Mesh { root_blocks    = [2,2,2];
+     root_size = [32,32,32]; }
+
+Output {
+
+    list = ["data", "de", "dt",
+            "pox", # "poy", "poz",
+            "dm", 
+            "mesh", 
+  #	    "dmax", "dmay", "dmaz",
+            "axy" #, "axy","axz",
+#            "ayx","ayy","ayz",
+#            "azx","azy","azz"
+	     ];
+
+    de { name = ["collapse-pm-de-8-%06d.png", "cycle"]; } ;
+    axx { name = ["collapse-pm-axx-8-%06d.png", "cycle"]; } ;
+    axy { name = ["collapse-pm-axy-8-%06d.png", "cycle"]; } ;
+    axz { name = ["collapse-pm-axz-8-%06d.png", "cycle"]; } ;
+    ayx { name = ["collapse-pm-ayx-8-%06d.png", "cycle"]; } ;
+    ayy { name = ["collapse-pm-ayy-8-%06d.png", "cycle"]; } ;
+    ayz { name = ["collapse-pm-ayz-8-%06d.png", "cycle"]; } ;
+    azx { name = ["collapse-pm-azx-8-%06d.png", "cycle"]; } ;
+    azy { name = ["collapse-pm-azy-8-%06d.png", "cycle"]; } ;
+    azz { name = ["collapse-pm-azz-8-%06d.png", "cycle"]; } ;
+    dt { name = ["collapse-pm-dt-8-%06d.png", "cycle"]; } ;
+    pox { name = ["collapse-pm-pox-8-%06d.png", "cycle"]; } ;
+    poy { name = ["collapse-pm-poy-8-%06d.png", "cycle"]; } ;
+    poz { name = ["collapse-pm-poz-8-%06d.png", "cycle"]; } ;
+    dm { name = ["collapse-pm-dm-8-%06d.png", "cycle"]; }
+    dmax { name = ["collapse-pm-dmax-8-%06d.png", "cycle"]; }
+    dmay { name = ["collapse-pm-dmay-8-%06d.png", "cycle"]; }
+    dmaz { name = ["collapse-pm-dmaz-8-%06d.png", "cycle"]; }
+    mesh { name = ["collapse-pm-mesh-8-%06d.png", "cycle"]; }
+    data { name = ["collapse-pm-8-%02d-%06d.h5", "proc","cycle"]; }
+}
+
+Stopping { cycle = 1000; }
+
+Method {
+   pm_update {
+      max_dt = 1.0e-18; 
+   }
+}
+
+Method { 
+  gravity_bicgstab {
+     iter_max = 500; 
+     monitor_iter = 10; 
+     res_tol  = 1e-3;
+  }
+}

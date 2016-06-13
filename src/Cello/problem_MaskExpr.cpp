@@ -48,9 +48,9 @@ void MaskExpr::evaluate (bool * mask, double t,
   double * x = new double [nx*ny*nz];
   double * y = new double [nx*ny*nz];
   double * z = new double [nx*ny*nz];
-  for (int ix=0; ix<nx; ix++) {
+  for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
-      for (int iz=0; iz<nz; iz++) {
+      for (int ix=0; ix<nx; ix++) {
 	int i=ix + nx*(iy + ny*iz);
 	x[i] = xv[ix];
 	y[i] = yv[iy];

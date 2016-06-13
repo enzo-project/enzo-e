@@ -18,8 +18,7 @@ class RefineShear : public Refine {
 public: // interface
 
   /// Constructor
-  RefineShear(const FieldDescr * field_descr,
-	      double min_refine,
+  RefineShear(double min_refine,
 	      double max_coarsen,
 	      int    max_level,
 	      bool   include_ghosts,
@@ -41,8 +40,7 @@ public: // interface
   }
 
   /// Evaluate the refinement criteria, updating the refinement field
-  virtual int apply (Block            * block,
-		     const FieldDescr * field_descr) throw();
+  virtual int apply (Block * block) throw();
 
   virtual std::string name () const { return "shear"; };
 

@@ -26,12 +26,9 @@ RefineDensity::RefineDensity
 
 //----------------------------------------------------------------------
 
-int RefineDensity::apply 
-(
- Block * block,
- const FieldDescr * field_descr
- ) throw ()
+int RefineDensity::apply ( Block * block ) throw ()
 {
+
   Field field = block->data()->field();
 
   int id = field.field_id ("density");

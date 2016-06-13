@@ -49,7 +49,9 @@ public: // functions
 	      std::string image_color_particle_attribute,
 	      int         image_block_size,
 	      int face_rank,
+	      int axis,
 	      bool image_log,
+	      bool image_abs,
 	      bool ghost,
 	      double min, double max) throw();
 
@@ -69,10 +71,6 @@ public: // functions
   void set_colormap
   (int n, double * map_r, double * map_g, double * map_b)
   throw();
-
-  // Set the axis for projecting
-  void set_axis (axis_type axis) throw()
-  { axis_ = axis; };
 
 public: // virtual functions
 
@@ -148,8 +146,7 @@ private: // functions
 
   void extents_img_ (const Block * block,
 		     int *ixm, int *ixp,
-		     int *iym, int *iyp,
-		     int *izm, int *izp ) const;
+		     int *iym, int *iyp ) const;
 
   void reduce_line_(double * data, int ixm, int ixp, int iym, int iyp, 
 		    double value, double alpha=1.0);
@@ -194,7 +191,7 @@ private: // attributes
   double max_;
 
   /// Current image size (depending on axis_)
-  int nxi_,nyi_,nzi_;
+  int nxi_, nyi_;
 
   /// Current pngwriter
   pngwriter * png_;
@@ -207,6 +204,9 @@ private: // attributes
 
   /// Whether to plot the log of the field
   int image_log_;
+
+  /// Whether to plot the absolute value of the field
+  int image_abs_;
 
   /// Whether to include ghost zones
   bool ghost_;

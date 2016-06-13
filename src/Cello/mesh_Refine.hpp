@@ -52,8 +52,7 @@ public: // interface
   }
   
   /// Evaluate the refinement criteria, updating the refinement field
-  virtual int apply (Block * block,
-		     const FieldDescr * field_descr) throw ()
+  virtual int apply (Block * block) throw ()
   {
     ERROR("Refine::apply",
 	 "'Abstract' virtual function Refine::apply() should not be called");

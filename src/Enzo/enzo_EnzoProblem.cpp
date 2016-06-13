@@ -74,6 +74,7 @@ Boundary * EnzoProblem::create_boundary_
 Initial * EnzoProblem::create_initial_ 
 (
  std::string  type,
+ int index,
  Config * config,
  Parameters * parameters,
  const FieldDescr * field_descr
@@ -127,14 +128,16 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_turbulence_temperature,
        enzo_config->field_gamma);
   } else if (type == "pm") {
+    std::string param_str = "Initial:" + config->initial_list[index] + ":mask";
     initial = new EnzoInitialPm
-      (cycle,time,
+      (parameters, param_str,
+       cycle,time,
        enzo_config->initial_pm_field,
        enzo_config->initial_pm_mpp
        );
   } else {
     initial = Problem::create_initial_
-      (type,config,parameters,field_descr);
+      (type,index,config,parameters,field_descr);
   }
 
   return initial;
@@ -202,7 +205,8 @@ Method * EnzoProblem::create_method_
        enzo_config);
   } else if (name == "pm_deposit") {
     method = new EnzoMethodPmDeposit  
-      (field_descr, particle_descr, enzo_config->method_pm_deposit_type);
+      (field_descr, particle_descr, 
+       enzo_config->method_pm_deposit_type, 0.5);
   } else if (name == "pm_update") {
     method = new EnzoMethodPmUpdate  
       (field_descr, particle_descr, enzo_config->method_pm_update_max_dt);

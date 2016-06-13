@@ -1,0 +1,320 @@
+# File:    pm2.incl
+# Problem: 2D Particle Mesh include
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+   Domain { 
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 1.0, 1.0];
+   } 
+
+   Mesh { 
+      root_rank = 3;
+      root_size = [128, 128, 128];
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghost_depth = 4;
+
+      list = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"velocity_z",
+	"total_energy",
+	"internal_energy",
+	"pressure",
+	"potential",
+	"density_total",
+	"acceleration_x",
+	"acceleration_y",
+	"acceleration_z"
+      ] ;
+
+      # BiCGStab fields
+       list += [ 
+                "gravity_bicgstab_B",
+                "gravity_bicgstab_X",
+                "gravity_bicgstab_R",
+                "gravity_bicgstab_R0",
+                "gravity_bicgstab_P",
+                "gravity_bicgstab_Y",
+                "gravity_bicgstab_V",
+                "gravity_bicgstab_Q",
+                "gravity_bicgstab_U"
+               ];
+
+      # CG solver fields
+
+      # list += [ "B", "D", "R", "X", "Y", "Z" ];
+
+
+      gamma = 1.4;
+
+      padding   = 0;
+      alignment = 8;    
+   }
+
+   Particle {
+
+      list += ["dark"];
+
+      dark {
+          groups = ["has_mass"];
+
+	  attributes = ["x", "double",
+                        "y", "double",
+                        "z", "double",
+			"vx", "double",
+                        "vy", "double",
+                        "vz", "double",
+			"ax", "double",
+                        "ay", "double",
+                        "az", "double"];
+
+          constants = ["mass", "double", 2e33];
+          position = ["x","y","z"];
+      }
+		    
+   }
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      list = ["pm_deposit", "gravity_bicgstab", "pm_update"];
+
+      ppm {
+
+         courant   = 0.8;
+
+         # method-specific parameters
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+     gravity_bicgstab {
+        iter_max = 100;
+        res_tol  = 1e-3;
+     }
+   }
+
+   Initial {
+      list = ["pm"];
+      value {
+         density = [ 1000.0, 
+	 	              (x - 0.5)*(x - 0.5) +
+	 	              (y - 0.5)*(y - 0.5) +
+	 	              (z - 0.5)*(z - 0.5) < 0.05,
+                       0.125 ];
+         total_energy = [ 1.0  / (0.4 * 1000.0), 
+	 	              (x - 0.5)*(x - 0.5) +
+	 	              (y - 0.5)*(y - 0.5) +
+	 	              (z - 0.5)*(z - 0.5) < 0.05,
+                          0.14 / (0.4 * 0.125) ];
+         velocity_x      = 0.0;
+         velocity_y      = 0.0;
+         velocity_z      = 0.0;
+         acceleration_x      = 0.0;
+         acceleration_y      = 0.0;
+         acceleration_z      = 0.0;
+         internal_energy = 0.0;
+         pressure = 0.0;
+	 density_total = 0.0;
+      } 
+      pm {
+        max_level = 5;
+        mpp = 0.0;
+	mask = (x - 0.5)*(x - 0.5) + 
+	       (y - 0.5)*(y - 0.5) +
+	       (z - 0.5)*(z - 0.5) < 0.05;
+      }
+   }
+
+   Boundary { type = "reflecting"; }
+
+   Stopping {        cycle = 10;   } 
+   Testing {   cycle_final = 400; }
+
+   Output { 
+
+      list = [ "de", "dm", "dt", "mesh", "poz" ];
+
+    mesh {
+	type     = "image";
+	image_type  = "mesh";
+	image_reduce_type = "max";
+	image_size = [1025,1025];
+        include "input/schedule_cycle_1.incl"
+	image_min = 0.0;
+	image_max = 8.0;
+        include "input/colormap_rainbow.incl"
+      }
+
+      de {
+#	image_size = [1024,1024];
+	type     = "image";
+        field_list = ["density"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+      }
+
+      axx {
+	type     = "image";
+#		image_size = [1024,1024];
+        field_list = ["acceleration_x"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "x";
+      }
+      axy {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_x"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "y";
+      }
+      axz {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_x"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "z";
+      }
+
+      ayx {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_y"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "x";
+      }
+      ayy {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_y"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "y";
+      }
+      ayz {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_y"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "z";
+      }
+
+      azx {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_z"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "x";
+      }
+      azy {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_z"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "y";
+      }
+      azz {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["acceleration_z"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "z";
+      }
+
+      dmax {
+	type     = "image";
+	particle_list = ["dark"];
+	image_color_particle_attribute = "ax";
+#	image_size = [1024,1024];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+      }
+
+      dmay {
+	type     = "image";
+	particle_list = ["dark"];
+	image_color_particle_attribute = "ay";
+#	image_size = [1024,1024];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+      }
+
+      dmaz {
+	type     = "image";
+	particle_list = ["dark"];
+	image_color_particle_attribute = "az";
+#	image_size = [1024,1024];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+      }
+
+      dm {
+	type     = "image";
+	particle_list = ["dark"];
+#	image_size = [1024,1024];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	image_min = 0.0;
+	image_max = 8.0;
+      }
+
+      dt {
+	type     = "image";
+        field_list = ["density_total"];
+#	image_size = [1024,1024];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	image_min = 0.0;
+	image_abs = true;
+      }
+
+      pox {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["potential"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "x";
+      }
+      poy {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["potential"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "y";
+      }
+      poz {
+	type     = "image";
+#	image_size = [1024,1024];
+        field_list = ["potential"];
+        include "input/schedule_cycle_1.incl"
+        include "input/colormap_blackbody.incl";
+	axis = "z";
+      }
+
+      data {
+	type     = "data";
+        field_list = ["potential", "acceleration_x", "acceleration_y", "acceleration_z"];
+        include "input/schedule_cycle_1.incl"
+      }
+
+   }

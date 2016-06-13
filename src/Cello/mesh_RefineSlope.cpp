@@ -33,14 +33,10 @@ RefineSlope::RefineSlope(const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
-int RefineSlope::apply 
-(
- Block * block,
- const FieldDescr * field_descr
- ) throw ()
+int RefineSlope::apply ( Block * block ) throw ()
 {
 
-  FieldData * field_data = block->data()->field_data();
+  Field field = block->data()->field();
 
   bool all_coarsen = true;
   bool any_refine = false;
@@ -52,11 +48,11 @@ int RefineSlope::apply
   double xm[3],xp[3];
   data->lower(&xm[0],&xm[1],&xm[2]);
   data->upper(&xp[0],&xp[1],&xp[2]);
-  field_data->cell_width(xm[0],xp[0],&h3[0]);
-  field_data->cell_width(xm[1],xp[1],&h3[1]);
-  field_data->cell_width(xm[2],xp[2],&h3[2]);
+  field.cell_width(xm[0],xp[0],&h3[0]);
+  field.cell_width(xm[1],xp[1],&h3[1]);
+  field.cell_width(xm[2],xp[2],&h3[2]);
 
-  void * output = initialize_output_(field_data);
+  void * output = initialize_output_(field.field_data());
 
   for (size_t k=0; k<field_id_list_.size(); k++) {
 
@@ -68,15 +64,15 @@ int RefineSlope::apply
       gy = (rank >= 2) ? 1 : 0;
       gz = (rank >= 3) ? 1 : 0;
     } else {
-      field_descr->ghost_depth(id_field, &gx,&gy,&gz);
+      field.ghost_depth(id_field, &gx,&gy,&gz);
     }
 
     int mx,my,mz;
-    field_data->dimensions(field_descr,id_field,&mx,&my,&mz);
+    field.dimensions(id_field,&mx,&my,&mz);
 
-    precision_type precision = field_descr->precision(id_field);
+    precision_type precision = field.precision(id_field);
 
-    void * array = field_data->values(field_descr,id_field);
+    void * array = field.values(id_field);
    
     // count number of times slope refine and coarsen conditions are satisified
     switch (precision) {

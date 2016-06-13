@@ -105,7 +105,7 @@ Output {
 	image_min = 0.0;
 	image_max = 3.0;
         include "input/colormap_rainbow.incl"
-        axis = "x";
+        axis = "z";
    }
    phi_png {
      type = "image";

@@ -136,11 +136,12 @@ public: // attributes
   int                         num_output;
   std::vector <std::string>   output_list;
   std::vector < std::string > output_type;
-  std::vector < std::string>  output_axis;
+  std::vector < std::string > output_axis;
   std::vector < int >         output_image_block_size;
   std::vector < std::vector <double> > output_colormap;
   std::vector < std::string > output_image_type;
   std::vector < char >        output_image_log;
+  std::vector < char >        output_image_abs;
   std::vector < std::string > output_image_mesh_color;
   std::vector < std::string > output_image_color_particle_attribute;
   std::vector < std::vector <int> > output_image_size;

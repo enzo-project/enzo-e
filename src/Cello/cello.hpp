@@ -183,7 +183,7 @@ namespace cello {
 
   template <class T>
   T err_abs (const T & a, const T & b)
-  {  return fabs(a-b);  };
+  {  return fabs(a-b);  }
 
   // type_enum functions (prefered)
   int sizeof_type (int);
@@ -221,6 +221,6 @@ namespace cello {
 
   void backtrace(const char * msg);
 
-};
+}
 
 #endif /* CELLO_HPP */

@@ -17,7 +17,10 @@ class EnzoMethodPmDeposit : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmDeposit object
-  EnzoMethodPmDeposit(const FieldDescr * , const ParticleDescr *, std::string type);
+  EnzoMethodPmDeposit(const FieldDescr * ,
+		      const ParticleDescr *,
+		      std::string type,
+		      double alpha = 0.0);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmDeposit);
@@ -41,6 +44,10 @@ protected: // interface
 
   /// Type of PM mass assignment scheme
   int type_;
+
+  /// Deposit at time + alpha*dt
+  double alpha_;
+
 };
 
 #endif /* ENZO_ENZO_METHOD_PM_DEPOSIT_HPP */

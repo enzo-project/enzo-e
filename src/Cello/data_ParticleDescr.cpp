@@ -434,9 +434,6 @@ char * ParticleDescr::constant_value
   bool in_range = (0 <= it && it < num_types());
 
   int io = constant_offset(it,ic);
-  CkPrintf ("constant_value it %d ic %d io %d\n",it,ic,io);
-  CkPrintf ("size %d\n",constant_array_.size());
-  CkPrintf ("size[%d] %d\n",it,constant_array_[it].size());
   return (in_range) ? &constant_array_[it][io] : NULL;
 }
 

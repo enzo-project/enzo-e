@@ -742,11 +742,9 @@ void EnzoMethodGravityCg::cg_end (EnzoBlock * enzo_block,int retval) throw ()
 
     copy_(potential,X,mx_,my_,mz_);
 
-    bool symmetric;
     int order;
     EnzoComputeAcceleration compute_acceleration (field.field_descr(),
-						  rank_, symmetric = true,
-						  order=2);
+						  rank_, order=2);
     compute_acceleration.compute(enzo_block);
 
   }

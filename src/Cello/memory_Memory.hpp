@@ -33,8 +33,8 @@ private: // interface
   Memory() throw ()
 #ifdef CONFIG_USE_MEMORY
   : is_active_(false),
-    memory_allocate_warning_(10000000),
-    memory_allocated_error_ (6000000000 )
+    max_allocate_warning_(10000000),
+    max_allocated_error_ (2000000000 )
 #endif
   { initialize_(); };
 
@@ -164,17 +164,17 @@ public: // interface
 #endif
   };
 
-  void set_memory_allocate_warning (size_t value)
+  void set_max_allocate_warning (size_t value)
   { 
 #ifdef CONFIG_USE_MEMORY
-    memory_allocate_warning_ = value; 
+    max_allocate_warning_ = value; 
 #endif
 }
 
-  void set_memory_allocated_error (size_t value)
+  void set_max_allocated_error (size_t value)
   {
 #ifdef CONFIG_USE_MEMORY
-  memory_allocated_error_ = value;
+  max_allocated_error_ = value;
 #endif
  }
 
@@ -224,10 +224,10 @@ private: // attributes
   std::vector<long long> delete_calls_;
 
   /// Limit on single memory allocation to display warning
-  size_t memory_allocate_warning_;
+  size_t max_allocate_warning_;
 
   /// Limit on total memory allocated before error (to prevent crashing machine)
-  size_t memory_allocated_error_;
+  size_t max_allocated_error_;
 
 #endif
 

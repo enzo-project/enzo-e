@@ -9,8 +9,7 @@
 
 //----------------------------------------------------------------------
 
-RefineShear::RefineShear(const FieldDescr * field_descr,
-			 double min_refine,
+RefineShear::RefineShear(double min_refine,
 			 double max_coarsen,
 			 int    max_level,
 			 bool   include_ghosts,
@@ -21,11 +20,7 @@ RefineShear::RefineShear(const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
-int RefineShear::apply 
-(
- Block * block,
- const FieldDescr * field_descr
- ) throw ()
+int RefineShear::apply ( Block * block ) throw ()
 {
 
   Field field = block->data()->field();

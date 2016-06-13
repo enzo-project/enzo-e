@@ -850,7 +850,8 @@ void EnzoMethodGravityMg0::exit_solver_
 
   FieldDescr * field_descr = field.field_descr();
 
-  EnzoComputeAcceleration compute_acceleration (field_descr,rank_, true,2);
+  int order;
+  EnzoComputeAcceleration compute_acceleration (field_descr,rank_, order=2);
 
   compute_acceleration.compute(enzo_block);
 

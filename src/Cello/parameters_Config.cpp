@@ -118,6 +118,7 @@ void Config::pup (PUP::er &p)
   p | output_colormap;
   p | output_image_type;
   p | output_image_log;
+  p | output_image_abs;
   p | output_image_mesh_color;
   p | output_image_color_particle_attribute;
   p | output_image_size;
@@ -709,6 +710,7 @@ void Config::read_output_ (Parameters * p) throw()
   output_colormap.resize(num_output);
   output_image_type.resize(num_output);
   output_image_log.resize(num_output);
+  output_image_abs.resize(num_output);
   output_image_mesh_color.resize(num_output);
   output_image_color_particle_attribute.resize(num_output);
   output_image_size.resize(num_output);
@@ -806,6 +808,7 @@ void Config::read_output_ (Parameters * p) throw()
 		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
 		output_list[index_output].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
+	output_axis[index_output] = axis;
       }  else {
 	WARNING1 ("Config::read()",
 		  "output_axis[%d] set to z",index_output);
@@ -820,6 +823,7 @@ void Config::read_output_ (Parameters * p) throw()
       output_image_type[index_output] = p->value_string("image_type","data");
 
       output_image_log[index_output] = p->value_logical("image_log",false);
+      output_image_abs[index_output] = p->value_logical("image_abs",false);
 
       output_image_mesh_color[index_output] = 
 	p->value_string("image_mesh_color","level");

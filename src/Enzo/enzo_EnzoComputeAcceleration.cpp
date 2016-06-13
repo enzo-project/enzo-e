@@ -14,11 +14,9 @@
 EnzoComputeAcceleration::EnzoComputeAcceleration 
 (FieldDescr * field_descr,
  int         rank,
- bool        symmetric,
  int         order)
   : Compute(),
     rank_(rank),
-    symmetric_(symmetric),
     order_(order)
 {
   i_ax_ = (rank_ >= 1) ? field_descr->field_id("acceleration_x") : -1;
@@ -27,10 +25,11 @@ EnzoComputeAcceleration::EnzoComputeAcceleration
 
   i_p_ =  field_descr->field_id("potential");
 
-  if (order_ != 2 && order_ != 4 && order_ != 6) {
+  if (order_ != 2 && order_ != 4) {
     ERROR1("EnzoComputeAcceleration",
 	   "Unknown order %d", order_);
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -45,7 +44,6 @@ void EnzoComputeAcceleration::pup (PUP::er &p)
   Compute::pup(p);
 
   p | rank_;
-  p | symmetric_;
   p | order_;
   p | i_ax_;
   p | i_ay_;
@@ -98,6 +96,11 @@ void EnzoComputeAcceleration::compute_(Block * block)
   dy = mx;
   dz = mx*my;
 
+  int dx2,dy2,dz2;
+  dx2 = 2*dx;
+  dy2 = 2*dy;
+  dz2 = 2*dz;
+
   double xm,ym,zm;
   double xp,yp,zp;
   double hx,hy,hz;
@@ -109,73 +112,85 @@ void EnzoComputeAcceleration::compute_(Block * block)
 		   zm,zp,&hz);
 
   if (order_ == 2) {
+
     if (rank_ == 1) {
-      if (symmetric_) {
-	const T fx = 1.0 / (2.0*hx);
+
+      const T fx = 1.0 / (2.0*hx);
+      for (int ix=1; ix<mx-1; ix++) {
+	int i=ix;
+	ax[i] = fx*(p[i+dx] - p[i-dx]);
+      }
+
+    } else if (rank_ == 2) {
+
+      const T fx = 1.0 / (2.0*hx);
+      const T fy = 1.0 / (2.0*hy);
+      for (int iy=1; iy<my-1; iy++) {
 	for (int ix=1; ix<mx-1; ix++) {
-	  int i=ix;
+	  int i=ix + mx*iy;
 	  ax[i] = fx*(p[i+dx] - p[i-dx]);
-	}
-      } else { // ! symmetric_
-	const T fx = 1.0 / hx;
-	for (int ix=0; ix<mx-1; ix++) {
-	  int i=ix;
-	  ax[i] = fx*(p[i+dx] - p[i]);
+	  ay[i] = fy*(p[i+dy] - p[i-dy]);
 	}
       }
-    } else if (rank_ == 2) {
-      if (symmetric_) {
-	const T fx = 1.0 / (2.0*hx);
-	const T fy = 1.0 / (2.0*hy);
+
+    } else if (rank_ == 3) {
+
+      const T fx = 1.0 / (2.0*hx);
+      const T fy = 1.0 / (2.0*hy);
+      const T fz = 1.0 / (2.0*hz);
+      for (int iz=1; iz<mz-1; iz++) {
 	for (int iy=1; iy<my-1; iy++) {
 	  for (int ix=1; ix<mx-1; ix++) {
-	    int i=ix + mx*iy;
+	    int i=ix + mx*(iy + my*iz);
 	    ax[i] = fx*(p[i+dx] - p[i-dx]);
 	    ay[i] = fy*(p[i+dy] - p[i-dy]);
-	  }
-	}
-      } else { // ! symmetric_
-	const T fx = 1.0 / hx;
-	const T fy = 1.0 / hy;
-	for (int iy=0; iy<my-1; iy++) {
-	  for (int ix=0; ix<mx-1; ix++) {
-	    int i=ix + mx*iy;
-	    ax[i] = fx*(p[i+dx] - p[i]);
-	    ay[i] = fy*(p[i+dy] - p[i]);
-	  }
-	}
-      }
-    } else if (rank_ == 3) {
-      if (symmetric_) {
-	const T fx = 1.0 / (2.0*hx);
-	const T fy = 1.0 / (2.0*hy);
-	const T fz = 1.0 / (2.0*hz);
-	for (int iz=1; iz<mz-1; iz++) {
-	  for (int iy=1; iy<my-1; iy++) {
-	    for (int ix=1; ix<mx-1; ix++) {
-	      int i=ix + mx*(iy + my*iz);
-	      ax[i] = fx*(p[i+dx] - p[i-dx]);
-	      ay[i] = fy*(p[i+dy] - p[i-dy]);
-	      az[i] = fz*(p[i+dz] - p[i-dz]);
-	    }
-	  }
-	}
-      } else { // ! symmetric_
-	const T fx = 1.0 / hx;
-	const T fy = 1.0 / hy;
-	const T fz = 1.0 / hz;
-	for (int iz=0; iz<mz-1; iz++) {
-	  for (int iy=0; iy<my-1; iy++) {
-	    for (int ix=0; ix<mx-1; ix++) {
-	      int i=ix + mx*(iy + my*iz);
-	      ax[i] = fx*(p[i+dx] - p[i]);
-	      ay[i] = fy*(p[i+dy] - p[i]);
-	      az[i] = fz*(p[i+dz] - p[i]);
-	    }
+	    az[i] = fz*(p[i+dz] - p[i-dz]);
 	  }
 	}
       }
     }
+
+  } else if (order_ == 4) {
+
+    if (rank_ == 1) {
+
+      const T fx = 1.0 / (12.0*hx);
+
+      for (int ix=2; ix<mx-2; ix++) {
+	int i=ix;
+	ax[i] = fx*( -p[i+dx2] + 8*p[i+dx] - 8*p[i-dx] + p[i-dx2]);
+      }
+
+    } else if (rank_ == 2) {
+
+      const T fx = 1.0 / (12.0*hx);
+      const T fy = 1.0 / (12.0*hy);
+      for (int iy=2; iy<my-2; iy++) {
+	for (int ix=2; ix<mx-2; ix++) {
+	  int i=ix + mx*iy;
+	  ax[i] = fx*( -p[i+dx2] + 8*p[i+dx] - 8*p[i-dx] + p[i-dx2]);
+	  ay[i] = fy*( -p[i+dy2] + 8*p[i+dy] - 8*p[i-dy] + p[i-dy2]);
+	}
+      }
+
+    } else if (rank_ == 3) {
+
+      const T fx = 1.0 / (12.0*hx);
+      const T fy = 1.0 / (12.0*hy);
+      const T fz = 1.0 / (12.0*hz);
+      for (int iz=2; iz<mz-2; iz++) {
+	for (int iy=2; iy<my-2; iy++) {
+	  for (int ix=2; ix<mx-2; ix++) {
+	    int i=ix + mx*(iy + my*iz);
+	    ax[i] = fx*( -p[i+dx2] + 8*p[i+dx] - 8*p[i-dx] + p[i-dx2]);
+	    ay[i] = fy*( -p[i+dy2] + 8*p[i+dy] - 8*p[i-dy] + p[i-dy2]);
+	    az[i] = fz*( -p[i+dz2] + 8*p[i+dz] - 8*p[i-dz] + p[i-dz2]);
+	  }
+	}
+      }
+
+    }
+
   } else {
     ERROR1("EnzoComputeAcceleration",
 	   "Unknown order %d", order_);

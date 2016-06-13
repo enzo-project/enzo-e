@@ -222,7 +222,7 @@ int Block::adapt_compute_desired_level_(int level_maximum)
   int index_refine = 0;
   while ((refine = problem->refine(index_refine++))) {
 
-    adapt_ = std::max(adapt_,refine->apply(this, field_descr));
+    adapt_ = std::max(adapt_,refine->apply(this));
 
   }
 

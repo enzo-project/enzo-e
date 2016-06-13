@@ -100,11 +100,11 @@ public: // interface
   { return num_field_data_; }
 
   /// Return the ith Field data
-  const FieldData * field_data (int i=0) const throw()
+  const FieldData * field_data (size_t i=0) const throw()
   { return (i < field_data_.size()) ? field_data_[i] : NULL; }
 
   /// Return the ith Field data
-  FieldData * field_data (int i=0) throw()
+  FieldData * field_data (size_t i=0) throw()
   { return (i < field_data_.size()) ? field_data_[i] : NULL; }
 
   // Return the ith Field descriptor

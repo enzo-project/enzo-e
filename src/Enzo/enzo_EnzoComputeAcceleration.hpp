@@ -18,10 +18,10 @@ public: // interface
 
   /// Create a new EnzoComputeAcceleration object
   EnzoComputeAcceleration(FieldDescr * field_descr,
-			  int rank, bool symmetric, int order);
+			  int rank, int order);
 
   /// Create a new EnzoComputeAcceleration object
-  EnzoComputeAcceleration() : rank_(0), symmetric_(false), order_(0) {};
+  EnzoComputeAcceleration() : rank_(0), order_(0) {};
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeAcceleration);
@@ -44,10 +44,6 @@ protected: // attributes
 
   /// Dimensionality of the problem: 1, 2, or 3
   int rank_;
-
-  /// Whether to use symmetric differencing or one-sided differencing for 
-  /// 2nd order
-  bool symmetric_;
 
   /// Order of the differencing, either 2, 4, or 6
   int order_;

@@ -43,20 +43,20 @@ void * Memory::allocate ( size_t bytes ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
 
-  if (memory_allocate_warning_ > 0 && bytes >= memory_allocate_warning_) {
+  if (max_allocate_warning_ && (bytes >= max_allocate_warning_)) {
     // WARNING: do not use WARNING since allocates memory, leading to
     //          recursive calls to overloaded operator new 
     CkPrintf ("%d Allocating %d > %d bytes\n",
-  	      CkMyPe(),bytes,memory_allocate_warning_);
+  	      CkMyPe(),bytes,max_allocate_warning_);
   }
 
-  if (memory_allocated_error_ > 0 && bytes_curr_.size()>0 &&
-      (bytes_curr_[0] + bytes >= memory_allocated_error_)) {
+  if (max_allocated_error_ && (bytes_curr_.size() > 0)  &&
+      (bytes_curr_[0] + bytes >= max_allocated_error_)) {
     // WARNING: do not use ERROR or ASSERT since allocates memory, leading to
     //          recursive calls to overloaded operator new 
     CkPrintf ("%d Trying to allocate a total of %lld bytes with limit of %lld\n",
 	      CkMyPe(),
-	      bytes_curr_[0] + bytes,memory_allocated_error_);
+	      bytes_curr_[0] + bytes,max_allocated_error_);
     CkExit();
   }
 

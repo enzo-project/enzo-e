@@ -44,6 +44,7 @@ private: // functions
   /// Create named initialization object
   virtual Initial *  create_initial_ 
   (std::string type, 
+   int index,
    Config * config,
    Parameters * parameters,
    const FieldDescr *) throw ();

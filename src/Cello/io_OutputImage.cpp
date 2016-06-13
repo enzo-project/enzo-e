@@ -25,13 +25,15 @@ OutputImage::OutputImage(int index,
 			 std::string color_particle_attribute,
 			 int         image_block_size,
 			 int face_rank,
+			 int axis,
 			 bool image_log,
+			 bool image_abs,
 			 bool ghost,
 			 double min, double max) throw ()
 : Output(index,factory,field_descr,particle_descr),
     image_data_(NULL),
     image_mesh_(NULL),
-    axis_(axis_z),
+    axis_(axis),
     min_(min),max_(max),
     nxi_(image_size_x),
     nyi_(image_size_y),
@@ -40,6 +42,7 @@ OutputImage::OutputImage(int index,
     color_particle_attribute_(color_particle_attribute),
     face_rank_(face_rank),
     image_log_(image_log),
+    image_abs_(image_abs),
     ghost_(ghost),
     max_level_(max_level)
 
@@ -72,16 +75,15 @@ OutputImage::OutputImage(int index,
     if (ny0>1) ny0*=2;
     if (nz0>1) nz0*=2;
   }
+
   if (nxi_ == 0) nxi_ = (type_is_mesh()) ? 2*nl * nxb + 1 : nl * nx0;
   if (nyi_ == 0) nyi_ = (type_is_mesh()) ? 2*nl * nyb + 1 : nl * ny0;
-  if (nzi_ == 0) nzi_ = (type_is_mesh()) ? 2*nl * nzb + 1 : nl * nz0;
 
   int ngx,ngy,ngz;
   field_descr->ghost_depth(0,&ngx,&ngy,&ngz);
   if (! type_is_mesh() && ghost_) {
     nxi_ += 2*nxb*ngx*nl;
     nyi_ += 2*nyb*ngy*nl;
-    nzi_ += 2*nzb*ngz*nl;
   }
   
   // Override default Output::process_stride_: only root writes
@@ -130,13 +132,13 @@ void OutputImage::pup (PUP::er &p)
   p | max_;
   p | nxi_;
   p | nyi_;
-  p | nzi_;
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = 0;
   p | image_type_;
   p | face_rank_;
   p | image_log_;
+  p | image_abs_;
   p | ghost_;
   p | max_level_;
 }
@@ -221,13 +223,21 @@ void OutputImage::write_block
   TRACE("OutputImage::write_block()");
   const FieldData * field_data = block->data()->field_data();
 
-  // FieldData size
-  int nbx,nby,nbz;
-  field_data->size(&nbx,&nby,&nbz);
+  ASSERT("OutputImage::write_block",
+	 "axis_ must be = axis_z (2) for 2D problems",
+	 ! ( block->rank() == 2 && axis_ != 2));
 
-  // Block forest array size
-  int ix,iy,iz;
-  block->index_forest(&ix,&iy,&iz);
+  ASSERT("OutputImage::write_block",
+	 "cannot output rank == 1 problems",
+	 ! ( block->rank() == 1) );
+
+  const int IX = (axis_+1) % 3;
+  const int IY = (axis_+2) % 3;
+  const int IZ = (axis_+0) % 3;
+
+  // FieldData size
+  int nb3[3];
+  field_data->size(&nb3[0],&nb3[1],&nb3[2]);
 
   const int level = block->level();
 
@@ -240,16 +250,15 @@ void OutputImage::write_block
     ? it_field_index_->value() : -1;
 
   // pixel extents of box
-  int ixm,iym,izm; 
-  int ixp,iyp,izp;
-  extents_img_ (block,&ixm,&ixp,&iym,&iyp,&izm,&izp);
-
+  int ixm, ixp;
+  int iym, iyp;
+  extents_img_ (block,&ixm, &ixp, &iym, &iyp);
 
   // position extents of box
-  double xm,ym,zm;
-  double xp,yp,zp;
-  block->lower(&xm,&ym,&zm);
-  block->upper(&xp,&yp,&zp);
+  double pm3[3];
+  double pp3[3];
+  block->lower(&pm3[0],&pm3[1],&pm3[2]);
+  block->upper(&pp3[0],&pp3[1],&pp3[2]);
 
   if (type_is_data() && block->is_leaf()) {
 
@@ -257,14 +266,20 @@ void OutputImage::write_block
 
       // Get ghost depth
 
-      int ngx,ngy,ngz;
-      field_descr->ghost_depth(index_field,&ngx,&ngy,&ngz);
+      int ng3[3];
+      field_descr->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
       // FieldData array dimensions
-      int ndx,ndy,ndz;
-      ndx = nbx + 2*ngx;
-      ndy = nby + 2*ngy;
-      ndz = nbz + 2*ngz;
+      int nd3[3];
+      nd3[0] = nb3[0] + 2*ng3[0];
+      nd3[1] = nb3[1] + 2*ng3[1];
+      nd3[2] = nb3[2] + 2*ng3[2];
+
+      // array offset multipliers
+      int d3[3];
+      d3[0] = 1;
+      d3[1] = nd3[0];
+      d3[2] = nd3[0]*nd3[1];
 
       // add block contribution to image
 
@@ -276,26 +291,26 @@ void OutputImage::write_block
       double * field_double = (double*)field;
 
       double v = 1.0;
-      if (nbx > 1) v *= (xp-xm);
-      if (nby > 1) v *= (yp-ym);
-      if (nbz > 1) v *= (zp-zm);
-      TRACE4("output-debug %f %f %f  %f",(xp-xm),(yp-ym),(zp-zm),v);
+      if (nb3[0] > 1) v *= (pp3[0]-pm3[0]);
+      if (nb3[1] > 1) v *= (pp3[1]-pm3[1]);
+      if (nb3[2] > 1) v *= (pp3[2]-pm3[2]);
 
       const int precision = field_descr->precision(index_field);
 
-      const double factor = (nbz <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
+      const double factor = (nb3[IZ] <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
 
-      int mx = ghost_ ? ndx : nbx;
-      int my = ghost_ ? ndy : nby;
-      int mz = ghost_ ? ndz : nbz;
-      for (int ix=0; ix<mx; ix++) {
-	int jxm = ixm +  ix   *(ixp-ixm)/mx;
-	int jxp = ixm + (ix+1)*(ixp-ixm)/mx-1;
-	for (int iy=0; iy<my; iy++) {
-	  int jym = iym +  iy   *(iyp-iym)/my;
-	  int jyp = iym + (iy+1)*(iyp-iym)/my-1;
-	  for (int iz=0; iz<mz; iz++) {
-	    int i=ix + ndx*(iy + ndy*iz);
+      int m3[3];
+      m3[0] = ghost_ ? nd3[0] : nb3[0];
+      m3[1] = ghost_ ? nd3[1] : nb3[1];
+      m3[2] = ghost_ ? nd3[2] : nb3[2];
+      for (int ix=0; ix<m3[IX]; ix++) {
+	int jxm = ixm +  ix   *(ixp-ixm)/m3[IX];
+	int jxp = ixm + (ix+1)*(ixp-ixm)/m3[IX]-1;
+	for (int iy=0; iy<m3[IY]; iy++) {
+	  int jym = iym +  iy   *(iyp-iym)/m3[IY];
+	  int jyp = iym + (iy+1)*(iyp-iym)/m3[IY]-1;
+	  for (int iz=0; iz<m3[IZ]; iz++) {
+	    int i=ix*d3[IX] + iy*d3[IY] + iz*d3[IZ];
 	    double value = 0.0;
 	    if (precision == precision_single) {
 	      value = field_float[i];
@@ -653,7 +668,12 @@ void OutputImage::image_write_ () throw()
 	min = MIN(min,log(data_(i)));
 	max = MAX(max,log(data_(i)));
       }
-    } else {
+    } else if (image_abs_) {
+      for (int i=0; i<m; i++) {
+	min = MIN(min,fabs(data_(i)));
+	max = MAX(max,fabs(data_(i)));
+      }
+    } else { 
       for (int i=0; i<m; i++) {
 	min = MIN(min,data_(i));
 	max = MAX(max,data_(i));
@@ -671,7 +691,10 @@ void OutputImage::image_write_ () throw()
 
       int i = ix + mx*iy;
 
-      double value = image_log_ ? log(data_(i)) : data_(i);
+      double value = data_(i);
+
+      if (image_abs_) value = fabs(value);
+      if (image_log_) value = log(value);
 
       double r=0.0,g=0.0,b=0.0;
 
@@ -885,32 +908,29 @@ void OutputImage::reduce_cube_
 void OutputImage::extents_img_ 
 (const Block * block,
  int *ixm, int *ixp,
- int *iym, int *iyp,
- int *izm, int *izp) const
+ int *iym, int *iyp) const
 {
 
-  int mx,my,mz;
+  int i3[3],n3[3];
+  block->index_global(&i3[0],&i3[1],&i3[2],&n3[0],&n3[1],&n3[2]);
 
-  int ix,iy,iz;
-  int nx,ny,nz;
-  block->index_global(&ix,&iy,&iz,&nx,&ny,&nz);
+  const int IX = (axis_+1)%3;
+  const int IY = (axis_+2)%3;
+
+  int m3[3];
 
   if (image_type_ == "mesh") {
-    mx = (nxi_ - 1) / nx;
-    my = (nyi_ - 1) / ny;
-    mz = (nzi_ - 1) / nz;
+    m3[IX] = (nxi_ - 1) / n3[IX];
+    m3[IY] = (nyi_ - 1) / n3[IY];
   } else {
-    mx = (nxi_) / nx;
-    my = (nyi_) / ny;
-    mz = (nzi_) / nz;
+    m3[IX] = (nxi_) / n3[IX];
+    m3[IY] = (nyi_) / n3[IY];
   }
   
-  (*ixm) = ix * mx;
-  (*iym) = iy * my;
-  (*izm) = iz * mz;
+  (*ixm) = i3[IX] * m3[IX];
+  (*iym) = i3[IY] * m3[IY];
 
-  (*ixp) = (ix+1)* mx;
-  (*iyp) = (iy+1)* my;
-  (*izp) = (iz+1)* mz;
+  (*ixp) = (i3[IX]+1)* m3[IX];
+  (*iyp) = (i3[IY]+1)* m3[IY];
   
 }

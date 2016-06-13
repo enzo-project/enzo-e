@@ -8,6 +8,9 @@
 #ifndef ENZO_ENZO_INITIAL_PM_HPP
 #define ENZO_ENZO_INITIAL_PM_HPP
 
+class Mask;
+class Parameters;
+
 class EnzoInitialPm : public Initial {
 
   /// @class    EnzoInitialPm
@@ -16,11 +19,14 @@ class EnzoInitialPm : public Initial {
 
 public: // interface
 
-  EnzoInitialPm (int init_cycle, double init_time,
+  EnzoInitialPm (Parameters * parameters,
+		 const std::string parameter_name,
+		 int init_cycle, double init_time,
 		 std::string field, double mpp) throw ()
     : Initial(init_cycle, init_time),
       field_(field),
-      mpp_(mpp)
+      mpp_(mpp),
+      mask_(Mask::create (parameters->param(parameter_name),parameters))
   { 
   }
 
@@ -48,6 +54,14 @@ public: // interface
    const Hierarchy * hierarchy
    ) throw();
 
+protected: // functions
+
+  /// Initial particle positions are a uniform array if mpp_ <= 0
+  void uniform_placement_ (Block * block, Field field, Particle particle);
+
+  /// Initial particle positions are random based on local density
+  void density_placement_ (Block * block, Field field, Particle particle);
+
 private: // attributes
 
   /// Field to use for initial particle placement--default "density"
@@ -55,6 +69,9 @@ private: // attributes
 
   /// Mass per particle--place on average one particle for each mpp grams
   double mpp_;
+
+  /// To define cloud extents
+  Mask * mask_;
 
 };
 

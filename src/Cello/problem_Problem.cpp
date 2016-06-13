@@ -129,7 +129,7 @@ void Problem::initialize_initial(Config * config,
     std::string type = config->initial_list[index];
 
     Initial * initial = create_initial_
-      (type,config,parameters,field_descr);
+      (type,index,config,parameters,field_descr);
 
     ASSERT1("Problem::initialize_initial",
 	    "Initial type %s not recognized",
@@ -323,14 +323,6 @@ void Problem::initialize_output
 
     if (output != NULL) {
 
-      // AXIS
-
-      std::string axis = config->output_axis[index];
-
-      if (axis == "x") output_image->set_axis(axis_x);
-      if (axis == "y") output_image->set_axis(axis_y);
-      if (axis == "z") output_image->set_axis(axis_z);
-
       // COLORMAP
 
       int n = config->output_colormap[index].size() / 3;
@@ -490,6 +482,7 @@ Boundary * Problem::create_boundary_
 Initial * Problem::create_initial_
 (
  std::string  type,
+ int index,
  Config * config,
  Parameters * parameters,
  const FieldDescr * field_descr
@@ -556,8 +549,7 @@ Refine * Problem::create_refine_
   } else if (type == "shear") {
 
     return new RefineShear 
-      (field_descr,
-       config->adapt_min_refine[index],
+      (config->adapt_min_refine[index],
        config->adapt_max_coarsen[index],
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
@@ -594,6 +586,26 @@ Refine * Problem::create_refine_
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
+
+  } else if (type == "particle_mass") {
+
+    return new RefineParticleMass
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_output[index],
+       config->adapt_level_exponent[index] );
+
+  } else if (type == "particle_count") {
+
+    return new RefineParticleCount
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_output[index],
+       config->adapt_level_exponent[index] );
   }
   return NULL;
 }
@@ -679,6 +691,7 @@ Output * Problem::create_output_
     int         image_block_size = config->output_image_block_size[index];
     bool        image_ghost      = config->output_image_ghost[index];
     bool        image_log        = config->output_image_log[index];
+    bool        image_abs        = config->output_image_abs[index];
     int         image_face_rank  = config->output_image_face_rank[index];
     int         max_level        = config->mesh_max_level;
     std::string image_reduce_type = config->output_image_reduce_type[index];
@@ -687,6 +700,10 @@ Output * Problem::create_output_
       config->output_image_color_particle_attribute[index];
     double      image_min = config->output_image_min[index];
     double      image_max = config->output_image_max[index];
+
+    // AXIS
+
+    int image_axis = config->output_axis[index][0] - 'x';
 
     output = new OutputImage (index,factory,
 			      field_descr,
@@ -702,7 +719,9 @@ Output * Problem::create_output_
 			      image_color_particle_attribute,
 			      image_block_size,
 			      image_face_rank,
+			      image_axis,
 			      image_log,
+			      image_abs,
 			      image_ghost,
 			      image_min, image_max);
 

@@ -63,14 +63,14 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
     FieldDescr    * fd = block->data()->field_descr();
     ParticleDescr * pd = block->data()->particle_descr();
 
-    if (rank >= 2) {
-      EnzoComputeCicInterp interp_y (fd, "acceleration_y", pd, "dark", "ay");
-      interp_y.compute(block);
-    }
-
     if (rank >= 1) {
       EnzoComputeCicInterp interp_x (fd, "acceleration_x", pd, "dark", "ax");
       interp_x.compute(block);
+    }
+
+    if (rank >= 2) {
+      EnzoComputeCicInterp interp_y (fd, "acceleration_y", pd, "dark", "ay");
+      interp_y.compute(block);
     }
 
     if (rank >= 3) {
@@ -85,9 +85,11 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
     const int ia_x  = particle.attribute_index (it, "x");
     const int ia_y  = particle.attribute_index (it, "y");
     const int ia_z  = particle.attribute_index (it, "z");
+
     const int ia_vx = particle.attribute_index (it, "vx");
     const int ia_vy = particle.attribute_index (it, "vy");
     const int ia_vz = particle.attribute_index (it, "vz");
+
     const int ia_ax = particle.attribute_index (it, "ax");
     const int ia_ay = particle.attribute_index (it, "ay");
     const int ia_az = particle.attribute_index (it, "az");
@@ -130,7 +132,7 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  vx[ip*dv] += ax[ip*da]*dt/2;
 
 	  vy[ip*dv] += ay[ip*da]*dt/2;
-	  y [ip*dp]  += vy[ip*dv]*dt;
+	  y [ip*dp] += vy[ip*dv]*dt;
 	  vy[ip*dv] += ay[ip*da]*dt/2;
 
 	}

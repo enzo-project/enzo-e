@@ -43,8 +43,7 @@ public: // interface
   }
 
   /// Evaluate the refinement criteria, updating the refinement field
-  virtual int apply (Block            * block,
-		     const FieldDescr * field_descr) throw();
+  virtual int apply (Block * block) throw();
 
   virtual std::string name () const { return "slope"; };
 

@@ -32,17 +32,13 @@ void RefineMask::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-int RefineMask::apply 
-(
- Block * block,
- const FieldDescr * field_descr
- ) throw ()
+int RefineMask::apply ( Block * block ) throw ()
 {
   Data * data = block->data();
-  FieldData * field_data = data->field_data();
+  Field field = data->field();
 
   int nx,ny,nz;
-  field_data->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   double * x = new double [nx];
   double * y = new double [ny];
@@ -73,12 +69,12 @@ int RefineMask::apply
   const int level_block = block->level();
 
   if (output_ != "") {
-    void * output = initialize_output_(field_data);
+    void * output = initialize_output_(field.field_data());
     float  * output_float  = (float*) output;
     double * output_double = (double*)output;
 
-    precision_type precision = field_descr->precision
-      (field_descr->field_id(output_));
+    precision_type precision = field.precision
+      (field.field_id(output_));
     for (int ix=0; ix<nx; ix++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int iz=0; iz<nz; iz++) {

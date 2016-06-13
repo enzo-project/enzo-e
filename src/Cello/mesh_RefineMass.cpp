@@ -40,7 +40,7 @@ RefineMass::RefineMass
   //	  (DomainRightEdge[dim]-DomainLeftEdge[dim])/
   //	  float(MetaData.TopGridDims[dim]);
 {
-  TRACE("RefineSlope::RefineSlope");
+  TRACE("RefineMass::RefineMass");
   WARNING ("RefineMass::RefineMass()",
 	   "Assuming non-Cosmology problem for RefineMass");
   ERROR ("RefineMass::RefineMass()",
@@ -50,13 +50,9 @@ RefineMass::RefineMass
 
 //----------------------------------------------------------------------
 
-int RefineMass::apply 
-(
- Block * block,
- const FieldDescr * field_descr
- ) throw ()
+int RefineMass::apply ( Block * block ) throw ()
 {
-  FieldData * field_data = block->data()->field_data();
+  Field field = block->data()->field();
   int level = 0;
 
   WARNING ("RefineMass::RefineMass()",
@@ -68,16 +64,16 @@ int RefineMass::apply
   double mass_max_coarsen = max_coarsen_* pow(2.0,level*level_exponent_);
 
   int nx,ny,nz;
-  field_data->size(&nx,&ny,&nz);
+  field.size(&nx,&ny,&nz);
 
   int gx,gy,gz;
-  field_descr->ghost_depth(0, &gx,&gy,&gz);
+  field.ghost_depth(0, &gx,&gy,&gz);
 
-  precision_type precision = field_descr->precision(0);
+  precision_type precision = field.precision(0);
 
   // ERROR: using field id=0!
-  void * void_array  = field_data->values(field_descr,0);
-  void * void_output = initialize_output_(field_data);
+  void * void_array  = field.values(0);
+  void * void_output = initialize_output_(field.field_data());
 
   //  int num_fields = field_descr->field_count();
 

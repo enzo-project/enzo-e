@@ -176,7 +176,7 @@ private: // attributes
 };
 
 #ifndef TEST
-  PUPbytes(Index);
+  PUPbytes(Index)
 #endif
 
 #ifndef TEST
@@ -184,7 +184,7 @@ private: // attributes
 //   void pup(PUP::er &p) {
     
 //   }
-PUPbytes(BIndex);
+PUPbytes(BIndex)
 #endif
 
 //----------------------------------------------------------------------

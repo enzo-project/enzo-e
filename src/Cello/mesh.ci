@@ -32,6 +32,8 @@ module mesh {
   PUPable RefineDensity;
   PUPable RefineMask;
   PUPable RefineMass;
+  PUPable RefineParticleMass;
+  PUPable RefineParticleCount;
   PUPable RefineSlope;
   PUPable RefineShear;
   PUPable Stopping;

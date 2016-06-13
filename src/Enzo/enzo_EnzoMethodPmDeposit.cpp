@@ -13,7 +13,7 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-#define DEBUG_PM_DEPOSIT
+// #define DEBUG_PM_DEPOSIT
 
 #ifdef DEBUG_PM_DEPOSIT
 #  define TRACE_PM(MESSAGE)				\
@@ -27,9 +27,11 @@
 EnzoMethodPmDeposit::EnzoMethodPmDeposit 
 (const FieldDescr * field_descr,
  const ParticleDescr * particle_descr,
- std::string type)
+ std::string type,
+ double alpha)
   : Method(),
-    type_(pm_type_unknown)
+    type_(pm_type_unknown),
+    alpha_(alpha)
 {
   TRACE_PM("EnzoMethodPmDeposit()");
   if (type == "cic") {
@@ -68,6 +70,7 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
   Method::pup(p);
 
   p | type_;
+  p | alpha_;
 }
 
 //----------------------------------------------------------------------
@@ -129,13 +132,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     if (rank >= 3) vol *= hz;
     double dens = mass / vol;
 
-    const int ia_x = particle.attribute_index(it,"x");
-    const int ia_y = particle.attribute_index(it,"y");
-    const int ia_z = particle.attribute_index(it,"z");
-
-    const int dp =  particle.stride(it,ia_x);
-
     // Accumulate particle density using CIC
+
+    const double dt = alpha_ * block->dt();
 
     for (int ib=0; ib<particle.num_batches(it); ib++) {
 
@@ -143,11 +142,18 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
       if (rank == 1) {
 
-	double * xa = (double *) particle.attribute_array (it,ia_x,ib);
+	const int ia_x  = particle.attribute_index(it,"x");
+	const int ia_vx = particle.attribute_index(it,"vx");
+
+	double * xa =  (double *) particle.attribute_array (it,ia_x,ib);
+	double * vxa = (double *) particle.attribute_array (it,ia_vx,ib);
+
+	const int dp =  particle.stride(it,ia_x);
+	const int dv =  particle.stride(it,ia_vx);
 
 	for (int ip=0; ip<np; ip++) {
 
-	  double x = xa[ip*dp];
+	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
 
 	  double tx = nx*(x - xm) / (xp - xm) - 0.5;
 
@@ -156,7 +162,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  int ix1 = ix0 + 1;
 
 	  double x0 = 1.0 - (tx - floor(tx));
-
 	  double x1 = 1.0 - x0;
 
 	  de_t[ix0] += dens*x0;
@@ -166,13 +171,23 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
       } else if (rank == 2) {
 
-	double * xa = (double *) particle.attribute_array (it,ia_x,ib);
-	double * ya = (double *) particle.attribute_array (it,ia_y,ib);
+	const int ia_x  = particle.attribute_index(it,"x");
+	const int ia_y  = particle.attribute_index(it,"y");
+	const int ia_vx = particle.attribute_index(it,"vx");
+	const int ia_vy = particle.attribute_index(it,"vy");
+
+	double * xa  = (double *) particle.attribute_array (it,ia_x,ib);
+	double * ya  = (double *) particle.attribute_array (it,ia_y,ib);
+	double * vxa = (double *) particle.attribute_array (it,ia_vx,ib);
+	double * vya = (double *) particle.attribute_array (it,ia_vy,ib);
+
+	const int dp =  particle.stride(it,ia_x);
+	const int dv =  particle.stride(it,ia_vx);
 
 	for (int ip=0; ip<np; ip++) {
 
-	  double x = xa[ip*dp];
-	  double y = ya[ip*dp];
+	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
+	  double y = ya[ip*dp] + vya[ip*dv]*dt;
 
 	  double tx = nx*(x - xm) / (xp - xm) - 0.5;
 	  double ty = ny*(y - ym) / (yp - ym) - 0.5;
@@ -189,24 +204,66 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  double x1 = 1.0 - x0;
 	  double y1 = 1.0 - y0;
 
+	  if ( ! ((0.0 <= x0 && x0 <= 1) &&
+		  (0.0 <= x1 && x1 <= 1) &&
+		  (0.0 <= y0 && y0 <= 1) &&
+		  (0.0 <= y1 && y1 <= 1))) {
+	    CkPrintf ("%s:%d ERROR: x0 = %f  x1 = %f  y0 = %f  y1 = %f\n",
+		      __FILE__,__LINE__,x0, x1, y0, y1);
+	  }
+
+	  if ( dens < 0.0) {
+	    CkPrintf ("%s:%d ERROR: dens = %f\n", __FILE__,__LINE__,dens);
+	  }
+
 	  de_t[ix0+mx*iy0] += dens*x0*y0;
 	  de_t[ix1+mx*iy0] += dens*x1*y0;
 	  de_t[ix0+mx*iy1] += dens*x0*y1;
 	  de_t[ix1+mx*iy1] += dens*x1*y1;
 
+	  if ( de_t[ix0+mx*iy0] < 0.0) {
+	    CkPrintf ("%s:%d ERROR: de_t %d %d = %f\n",
+		      __FILE__,__LINE__,ix0,iy0,dens);
+	  }
+	  if ( de_t[ix1+mx*iy0] < 0.0) {
+	    CkPrintf ("%s:%d ERROR: de_t %d %d = %f\n",
+		      __FILE__,__LINE__,ix1,iy0,dens);
+	  }
+	  if ( de_t[ix0+mx*iy1] < 0.0) {
+	    CkPrintf ("%s:%d ERROR: de_t %d %d = %f\n",
+		      __FILE__,__LINE__,ix0,iy1,dens);
+	  }
+	  if ( de_t[ix1+mx*iy1] < 0.0) {
+	    CkPrintf ("%s:%d ERROR: de_t %d %d = %f\n",
+		      __FILE__,__LINE__,ix1,iy1,dens);
+	  }
 	}
 
       } else if (rank == 3) {
 
-	double * xa = (double *) particle.attribute_array (it,ia_x,ib);
-	double * ya = (double *) particle.attribute_array (it,ia_y,ib);
-	double * za = (double *) particle.attribute_array (it,ia_z,ib);
+	const int ia_x  = particle.attribute_index(it,"x");
+	const int ia_y  = particle.attribute_index(it,"y");
+	const int ia_z  = particle.attribute_index(it,"z");
+	const int ia_vx = particle.attribute_index(it,"vx");
+	const int ia_vy = particle.attribute_index(it,"vy");
+	const int ia_vz = particle.attribute_index(it,"vz");
+
+	double * xa  = (double *) particle.attribute_array (it,ia_x,ib);
+	double * ya  = (double *) particle.attribute_array (it,ia_y,ib);
+	double * za  = (double *) particle.attribute_array (it,ia_z,ib);
+
+	double * vxa = (double *) particle.attribute_array (it,ia_vx,ib);
+	double * vya = (double *) particle.attribute_array (it,ia_vy,ib);
+	double * vza = (double *) particle.attribute_array (it,ia_vz,ib);
+
+	const int dp =  particle.stride(it,ia_x);
+	const int dv =  particle.stride(it,ia_vx);
 
 	for (int ip=0; ip<np; ip++) {
 
-	  double x = xa[ip*dp];
-	  double y = ya[ip*dp];
-	  double z = za[ip*dp];
+	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
+	  double y = ya[ip*dp] + vya[ip*dv]*dt;
+	  double z = za[ip*dp] + vza[ip*dv]*dt;
 
 	  double tx = nx*(x - xm) / (xp - xm) - 0.5;
 	  double ty = ny*(y - ym) / (yp - ym) - 0.5;
