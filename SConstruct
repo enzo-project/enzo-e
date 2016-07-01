@@ -9,6 +9,16 @@ import socket
 #======================================================================
 
 #----------------------------------------------------------------------
+# Temporary setting for how load-balancing is implemented.  Used
+# for debugging load balancing.  See bug report #85 
+# http://client64-249.sdsc.edu/cello-bug/  Exactly one must be
+# set if load balancing is used
+#----------------------------------------------------------------------
+
+temp_balance_manual = 0
+temp_balance_atsync = 1
+
+#----------------------------------------------------------------------
 # Whether to use the new field/particle refresh using DataMsg.  Intended
 # to be temporary
 #----------------------------------------------------------------------
@@ -234,9 +244,14 @@ papi_path           = 'papi_path_not_set'
 
 # Debugging defines
 
+
+define_temp_balance_manual = ['TEMP_BALANCE_MANUAL']
+define_temp_balance_atsync = ['TEMP_BALANCE_ATSYNC']
+
 define_new_refresh =  ['NEW_REFRESH']
 define_new_refresh_refine  =  ['NEW_REFRESH_REFINE']
 define_new_refresh_coarsen =  ['NEW_REFRESH_COARSEN']
+
 define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
@@ -358,9 +373,14 @@ if (use_gprof == 1):
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
+
+if (temp_balance_manual != 0): defines = defines + define_temp_balance_manual
+if (temp_balance_atsync != 0): defines = defines + define_temp_balance_atsync
+
 if (new_refresh != 0):   defines = defines + define_new_refresh
 if (new_refresh_refine != 0):   defines = defines + define_new_refresh_refine
 if (new_refresh_coarsen != 0): defines = defines + define_new_refresh_coarsen
+
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm
@@ -552,15 +572,14 @@ cello_def.write ("#define CELLO_TIME "
 
 if (python_lt_27 == 0):
      charm_version =  subprocess.check_output (["cat", charm_path + "/VERSION"]).rstrip();
-     cello_def.write ("#define CELLO_CHARM_VERSION "
-                      "\""+charm_version+"\"\n" )
+     cello_def.write ("#define CELLO_CHARM_VERSION "+charm_version+"\n" )
      
      fp_charm_version = open ("test/CHARM_VERSION", "w")
      fp_charm_version.write(charm_version + "\n");
      fp_charm_version.close()
      		      
 else:
-     cello_def.write ("#define CELLO_CHARM_VERSION unknown\n")	
+     cello_def.write ("#define CELLO_CHARM_VERSION 0\n")	
      fp_charm_version = open ("test/CHARM_VERSION", "w")
      fp_charm_version.write("unknown\n");
      fp_charm_version.close()

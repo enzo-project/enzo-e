@@ -173,17 +173,52 @@ void Block::stopping_balance_()
 
   Schedule * schedule = simulation()->schedule_balance();
 
-  if (schedule && 
-      schedule->write_this_cycle(cycle_,time_)) {
+  bool do_balance = (schedule && 
+		     schedule->write_this_cycle(cycle_,time_));
+
+#if !defined(TEMP_BALANCE_MANUAL) && !defined(TEMP_BALANCE_ATSYNC)
+  if (do_balance) {
+    ERROR("Block::stopping_balance_()",
+	  "Load balancing called with neither "
+	  "TEMP_BALANCE_[MANUAL|ATSYNC] defined");
+  }
+#endif
+
+#if defined(TEMP_BALANCE_MANUAL) && defined(TEMP_BALANCE_ATSYNC)
+  if (do_balance) {
+    ERROR("Block::stopping_balance_()",
+	  "Load balancing called with both "
+	  "TEMP_BALANCE_[MANUAL|ATSYNC] defined");
+  }
+#endif
+
+#ifdef TEMP_BALANCE_MANUAL
+
+  if (do_balance && index_.is_root()) {
+
+       CkStartLB();
+
+  }    
+
+  stopping_exit_();
+
+#endif
+
+#ifdef TEMP_BALANCE_ATSYNC
+
+  if (do_balance) {
 
     control_sync(CkIndex_Main::p_stopping_balance(),
 		 sync_quiescence);
 
   } else {
-    
+
     stopping_exit_();
 
   }
+
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -192,14 +227,17 @@ void Block::p_stopping_balance()
 {
     TRACE_STOPPING("Block::p_stopping_balance");
     simulation()->set_phase (phase_balance);
+
     AtSync();
 }
-
+ 
 //----------------------------------------------------------------------
 
 void Block::ResumeFromSync()
 {
   TRACE_STOPPING("Block::balance_exit");
+  // CkPrintf ("%d %p ResumeFromSync()\n",CkMyPe(),this);
+  // fflush(stdout);
 
   stopping_exit_();
 

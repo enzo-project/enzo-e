@@ -305,9 +305,7 @@ void Block::init
 
   }
 
-  if (level == 0) {
-    setMigratable(false);
-  }
+  setMigratable(true);
 
   debug_faces_("Block()");
 

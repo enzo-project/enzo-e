@@ -45,16 +45,17 @@ void MaskExpr::evaluate (bool * mask, double t,
 	  (ndx >= nx) && (ndy >= ny) && (ndz >= nz));
 
   bool * mask_temp = new bool [nx*ny*nz];
-  double * x = new double [nx*ny*nz];
-  double * y = new double [nx*ny*nz];
-  double * z = new double [nx*ny*nz];
+  double * x = (ndx > 1) ? new double [nx*ny*nz] : NULL;
+  double * y = (ndy > 1) ? new double [nx*ny*nz] : NULL;
+  double * z = (ndz > 1) ? new double [nx*ny*nz] : NULL;
+
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
 	int i=ix + nx*(iy + ny*iz);
-	x[i] = xv[ix];
-	y[i] = yv[iy];
-	z[i] = zv[iz];
+	if (x) x[i] = xv[ix];
+	if (y) y[i] = yv[iy];
+	if (z) z[i] = zv[iz];
 	mask_temp[i] = false;
       }
     }

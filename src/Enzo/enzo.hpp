@@ -22,6 +22,8 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "auto_config.def"
+
 #include "cello.hpp"
 #include "charm.hpp"
 

@@ -77,9 +77,9 @@ void EnzoComputeAcceleration::compute_(Block * block)
 
   Field field = enzo_block->data()->field();
 
-  T * ax = (T*) field.values(i_ax_);
-  T * ay = (T*) field.values(i_ay_);
-  T * az = (T*) field.values(i_az_);
+  T * ax = (rank_ >= 1) ? (T*) field.values(i_ax_) : NULL;
+  T * ay = (rank_ >= 2) ? (T*) field.values(i_ay_) : NULL;
+  T * az = (rank_ >= 3) ? (T*) field.values(i_az_) : NULL;
   T * p  = (T*) field.values(i_p_);
 
   int nx,ny,nz;

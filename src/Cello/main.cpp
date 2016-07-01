@@ -145,6 +145,22 @@ void Main::p_stopping_balance()
 
 //----------------------------------------------------------------------
 
+void Main::p_balance()
+{
+#ifdef CHARM_ENZO
+#ifdef TEMP_BALANCE_MANUAL
+  CkPrintf ("%d %p Main Calling CkStartLB()\n",CkMyPe(),this);
+  fflush(stdout);
+
+  //  CkStartLB();
+  CkPrintf ("%d %p Main Called CkStartLB()\n",CkMyPe(),this);
+  fflush(stdout);
+#endif
+#endif
+}
+
+//----------------------------------------------------------------------
+
 void Main::p_stopping_exit()
 {
 #ifdef CHARM_ENZO

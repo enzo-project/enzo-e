@@ -59,6 +59,15 @@
 
 #define MAX_TURBULENCE_ARRAY 16 /* size of global array of global values to track */
 
+
+#if CELLO_CHARM_VERSION >= 60700
+#   define BASE_ENZO_BLOCK      CBase_EnzoBlock
+#   define BASE_ENZO_SIMULATION CBase_EnzoSimulation
+#else
+#   define BASE_ENZO_BLOCK      Block
+#   define BASE_ENZO_SIMULATION Simulation
+#endif
+
 //----------------------------------------------------------------------
 
 // #include "macros_and_parameters.h"

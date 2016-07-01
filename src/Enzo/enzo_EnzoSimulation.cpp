@@ -31,7 +31,7 @@ EnzoSimulation::EnzoSimulation
  const char         parameter_file[],
  int                n,
  int                node_size)
-  : CBase_EnzoSimulation(parameter_file, n),
+  : BASE_ENZO_SIMULATION(parameter_file, n),
     node_size_(node_size)
 {
 #ifdef CHECK_MEMORY
@@ -59,7 +59,7 @@ void EnzoSimulation::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
 
-  Simulation::pup(p);
+  BASE_ENZO_SIMULATION::pup(p);
 
   TRACEPUP;
 
@@ -178,7 +178,6 @@ void EnzoSimulation::initialize_config_() throw()
 
 void EnzoSimulation::initialize() throw()
 {
-
   // Call initialize() on base Simulation class
   Simulation::initialize();
 

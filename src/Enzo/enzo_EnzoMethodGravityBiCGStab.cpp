@@ -1284,7 +1284,7 @@ void EnzoMethodGravityBiCGStab::acc(EnzoBlock* enzo_block) throw()
     /// compute acceleration fields from potential
     int order;
     EnzoComputeAcceleration compute_acceleration(field.field_descr(),
-						 rank_, order=2);
+						 rank_, order=4);
     compute_acceleration.compute(enzo_block);
   }
 

@@ -77,92 +77,96 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
 {
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-
-  GridRank[in] = 0;
-  NumberOfBaryonFields[in] = 0;
-
-  int i;
-
-  for (i=0; i<MAX_DIMENSION; i++) {
-    DomainLeftEdge [in*3+i] = 0;
-    DomainRightEdge[in*3+i] = 0;
-    ghost_depth[in*3+i] = 0;
-  }
-
-  Gamma[in]               = enzo_config->field_gamma;
-
-  GridRank[in]            = enzo_config->mesh_root_rank;
-
-  // Chemistry parameters
-
-  MultiSpecies[in] = 0;    // 0:0 1:6 2:9 3:12
-
-  // Gravity parameters
-
-  GravitationalConstant[in]           = 1.0;  // used only in SetMinimumSupport()
-
-  //Problem specific parameter
-
-  ProblemType[in] = 0;
-
-  // PPM parameters
-
-  InitialRedshift[in]   = enzo_config->physics_cosmology_initial_redshift;
-  HubbleConstantNow[in] = enzo_config->physics_cosmology_hubble_constant_now;
-  OmegaLambdaNow[in]    = enzo_config->physics_cosmology_omega_lamda_now;
-  OmegaMatterNow[in]    = enzo_config->physics_cosmology_omega_matter_now;
-  MaxExpansionRate[in]  = enzo_config->physics_cosmology_max_expansion_rate;
-  ComovingBoxSize[in]   = enzo_config->physics_cosmology_comoving_box_size;
-
-  PressureFree[in]              = enzo_config->ppm_pressure_free;
-  UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
-  MinimumPressureSupportParameter[in] = 
-    enzo_config->ppm_minimum_pressure_support_parameter;
-  PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
-  PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
-  PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
-  pressure_floor[in]            = enzo_config->ppm_pressure_floor;
-  density_floor[in]             = enzo_config->ppm_density_floor;
-  temperature_floor[in]         = enzo_config->ppm_temperature_floor;
-  number_density_floor[in]      = enzo_config->ppm_number_density_floor;
-  DualEnergyFormalism[in]       = enzo_config->ppm_dual_energy;
-  DualEnergyFormalismEta1[in]   = enzo_config->ppm_dual_energy_eta_1;
-  DualEnergyFormalismEta2[in]   = enzo_config->ppm_dual_energy_eta_2;
-
   int gx = enzo_config->field_ghost_depth[0];
   int gy = enzo_config->field_ghost_depth[1];
   int gz = enzo_config->field_ghost_depth[2];
 
-  if (GridRank[in] < 1) gx = 0;
-  if (GridRank[in] < 2) gy = 0;
-  if (GridRank[in] < 3) gz = 0;
+  const int rank = enzo_config->mesh_root_rank;
 
-  ghost_depth[in*3+0] = gx;
-  ghost_depth[in*3+1] = gy;
-  ghost_depth[in*3+2] = gz;
-
-  NumberOfBaryonFields[in] = enzo_config->field_list.size();
-
-  // Check NumberOfBaryonFields
-
-  if (NumberOfBaryonFields[in] > MAX_NUMBER_OF_BARYON_FIELDS) {
-    ERROR2 ("EnzoBlock::initialize",
-	    "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
-	    MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields[in] );
-  }
-
-  DomainLeftEdge [in*3+0] = enzo_config->domain_lower[0];
-  DomainLeftEdge [in*3+1] = enzo_config->domain_lower[1];
-  DomainLeftEdge [in*3+2] = enzo_config->domain_lower[2];
-
-  DomainRightEdge[in*3+0] = enzo_config->domain_upper[0];
-  DomainRightEdge[in*3+1] = enzo_config->domain_upper[1];
-  DomainRightEdge[in*3+2] = enzo_config->domain_upper[2];
+  if (rank < 1) gx = 0;
+  if (rank < 2) gy = 0;
+  if (rank < 3) gz = 0;
 
   double time  = enzo_config->initial_time;
 
-  InitialTimeInCodeUnits[in] = time;
+  for (int in=0; in<MAX_NODE_SIZE; in++) {
+
+    GridRank[in] = 0;
+    NumberOfBaryonFields[in] = 0;
+
+    int i;
+
+    for (i=0; i<MAX_DIMENSION; i++) {
+      DomainLeftEdge [in*3+i] = 0;
+      DomainRightEdge[in*3+i] = 0;
+      ghost_depth[in*3+i] = 0;
+    }
+
+    Gamma[in]               = enzo_config->field_gamma;
+
+    GridRank[in]            = enzo_config->mesh_root_rank;
+
+    // Chemistry parameters
+
+    MultiSpecies[in] = 0;    // 0:0 1:6 2:9 3:12
+
+    // Gravity parameters
+
+    GravitationalConstant[in]           = 1.0;  // used only in SetMinimumSupport()
+
+    //Problem specific parameter
+
+    ProblemType[in] = 0;
+
+    // PPM parameters
+
+    InitialRedshift[in]   = enzo_config->physics_cosmology_initial_redshift;
+    HubbleConstantNow[in] = enzo_config->physics_cosmology_hubble_constant_now;
+    OmegaLambdaNow[in]    = enzo_config->physics_cosmology_omega_lamda_now;
+    OmegaMatterNow[in]    = enzo_config->physics_cosmology_omega_matter_now;
+    MaxExpansionRate[in]  = enzo_config->physics_cosmology_max_expansion_rate;
+    ComovingBoxSize[in]   = enzo_config->physics_cosmology_comoving_box_size;
+
+    PressureFree[in]              = enzo_config->ppm_pressure_free;
+    UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
+    MinimumPressureSupportParameter[in] = 
+      enzo_config->ppm_minimum_pressure_support_parameter;
+    PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
+    PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
+    PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
+    pressure_floor[in]            = enzo_config->ppm_pressure_floor;
+    density_floor[in]             = enzo_config->ppm_density_floor;
+    temperature_floor[in]         = enzo_config->ppm_temperature_floor;
+    number_density_floor[in]      = enzo_config->ppm_number_density_floor;
+    DualEnergyFormalism[in]       = enzo_config->ppm_dual_energy;
+    DualEnergyFormalismEta1[in]   = enzo_config->ppm_dual_energy_eta_1;
+    DualEnergyFormalismEta2[in]   = enzo_config->ppm_dual_energy_eta_2;
+
+    ghost_depth[in*3+0] = gx;
+    ghost_depth[in*3+1] = gy;
+    ghost_depth[in*3+2] = gz;
+
+    NumberOfBaryonFields[in] = enzo_config->field_list.size();
+
+    // Check NumberOfBaryonFields
+
+    if (NumberOfBaryonFields[in] > MAX_NUMBER_OF_BARYON_FIELDS) {
+      ERROR2 ("EnzoBlock::initialize",
+	      "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
+	      MAX_NUMBER_OF_BARYON_FIELDS,NumberOfBaryonFields[in] );
+    }
+
+    DomainLeftEdge [in*3+0] = enzo_config->domain_lower[0];
+    DomainLeftEdge [in*3+1] = enzo_config->domain_lower[1];
+    DomainLeftEdge [in*3+2] = enzo_config->domain_lower[2];
+
+    DomainRightEdge[in*3+0] = enzo_config->domain_upper[0];
+    DomainRightEdge[in*3+1] = enzo_config->domain_upper[1];
+    DomainRightEdge[in*3+2] = enzo_config->domain_upper[2];
+
+    InitialTimeInCodeUnits[in] = time;
+
+  }
 
 } // void initialize()
 
@@ -170,7 +174,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
 EnzoBlock::EnzoBlock
 ( MsgRefine * msg )
-  : CBase_EnzoBlock ( msg ),
+  : BASE_ENZO_BLOCK ( msg ),
     dt(dt),
     SubgridFluxes(0)
 {
@@ -193,7 +197,7 @@ EnzoBlock::EnzoBlock
  int cycle, double time, double dt,
  int narray, char * array, int refresh_type,
  int num_face_level, int * face_level)
-  : CBase_EnzoBlock 
+  : BASE_ENZO_BLOCK
     (
      index,
      nx,ny,nz,
@@ -242,7 +246,7 @@ void EnzoBlock::pup(PUP::er &p)
   TRACEPUP;
   TRACE ("BEGIN EnzoBlock::pup()");
 
-  Block::pup(p);
+  BASE_ENZO_BLOCK::pup(p);
 
   p | dt;
   const int in = CkMyPe() % MAX_NODE_SIZE;
@@ -256,11 +260,6 @@ void EnzoBlock::pup(PUP::er &p)
   static bool warn1[MAX_NODE_SIZE] = {true};
   if (warn1[in]) {
     warn1[in] = false;
-    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-  }
-  static bool warn2[MAX_NODE_SIZE] = {true};
-  if (warn2[in]) {
-    warn2[in] = false;
     WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
   }
 
@@ -269,12 +268,6 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,GridStartIndex,MAX_DIMENSION); 
   PUParray(p,GridEndIndex,MAX_DIMENSION); 
   PUParray(p,CellWidth,MAX_DIMENSION);
-
-  static bool warn3[MAX_NODE_SIZE] = {true};
-  if (warn3[in]) {
-    warn3[in] = false;
-    WARNING("EnzoBlock::pup()", "skipping OldBaryonField[] [not used]");
-  }
 
   PUParray(p,method_turbulence_data,MAX_TURBULENCE_ARRAY);
 
@@ -618,3 +611,4 @@ int EnzoBlock::CosmologyComputeExpansionTimestep
  
   return ENZO_SUCCESS;
 }
+

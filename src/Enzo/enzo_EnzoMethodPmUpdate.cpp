@@ -82,17 +82,17 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     const int it = particle.type_index ("dark");
 
-    const int ia_x  = particle.attribute_index (it, "x");
-    const int ia_y  = particle.attribute_index (it, "y");
-    const int ia_z  = particle.attribute_index (it, "z");
+    const int ia_x  = (rank >= 1) ? particle.attribute_index (it, "x") : -1;
+    const int ia_y  = (rank >= 2) ? particle.attribute_index (it, "y") : -1;
+    const int ia_z  = (rank >= 3) ? particle.attribute_index (it, "z") : -1;
 
-    const int ia_vx = particle.attribute_index (it, "vx");
-    const int ia_vy = particle.attribute_index (it, "vy");
-    const int ia_vz = particle.attribute_index (it, "vz");
+    const int ia_vx = (rank >= 1) ? particle.attribute_index (it, "vx") : -1;
+    const int ia_vy = (rank >= 2) ? particle.attribute_index (it, "vy") : -1;
+    const int ia_vz = (rank >= 3) ? particle.attribute_index (it, "vz") : -1;
 
-    const int ia_ax = particle.attribute_index (it, "ax");
-    const int ia_ay = particle.attribute_index (it, "ay");
-    const int ia_az = particle.attribute_index (it, "az");
+    const int ia_ax = (rank >= 1) ? particle.attribute_index (it, "ax") : -1;
+    const int ia_ay = (rank >= 2) ? particle.attribute_index (it, "ay") : -1;
+    const int ia_az = (rank >= 3) ? particle.attribute_index (it, "az") : -1;
 
     const int dp = particle.stride(it, ia_x);
     const int dv = particle.stride(it, ia_vx);
@@ -104,19 +104,30 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     for (int ib=0; ib<nb; ib++) {
 
+      double *x=0, *y=0, *z=0;
+      double *vx=0, *vy=0, *vz=0;
+      double *ax=0, *ay=0, *az=0;
+
+      if (rank >= 1) {
+	x  = (double *) particle.attribute_array (it, ia_x,  ib);
+	vx = (double *) particle.attribute_array (it, ia_vx, ib);
+	ax = (double *) particle.attribute_array (it, ia_ax,  ib);
+      }
+      if (rank >= 2) {
+	y  = (double *) particle.attribute_array (it, ia_y,  ib);
+	vy = (double *) particle.attribute_array (it, ia_vy,  ib);
+	ay = (double *) particle.attribute_array (it, ia_ay,  ib);
+      }
+      if (rank >= 3) {
+	z  = (double *) particle.attribute_array (it, ia_z,  ib);
+	vz = (double *) particle.attribute_array (it, ia_vz,  ib);
+	az = (double *) particle.attribute_array (it, ia_az,  ib);
+      }
+
       const int np = particle.num_particles(it,ib);
 
-      double *  x = (double *) particle.attribute_array (it, ia_x,  ib); 
-      double *  y = (double *) particle.attribute_array (it, ia_y,  ib); 
-      double *  z = (double *) particle.attribute_array (it, ia_z,  ib); 
-      double * vx = (double *) particle.attribute_array (it, ia_vx, ib); 
-      double * vy = (double *) particle.attribute_array (it, ia_vy, ib); 
-      double * vz = (double *) particle.attribute_array (it, ia_vz, ib); 
-      double * ax = (double *) particle.attribute_array (it, ia_ax, ib); 
-      double * ay = (double *) particle.attribute_array (it, ia_ay, ib); 
-      double * az = (double *) particle.attribute_array (it, ia_az, ib); 
-
       if (rank == 1) {
+
 	for (int ip=0; ip<np; ip++) {
 
 	  vx[ip*dv] += ax[ip*da]*dt/2;
@@ -125,6 +136,7 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
 	}
       } else if (rank == 2) {
+
 	for (int ip=0; ip<np; ip++) {
 
 	  vx[ip*dv] += ax[ip*da]*dt/2;
@@ -137,6 +149,7 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
 	}
       } else if (rank == 3) {
+
 	for (int ip=0; ip<np; ip++) {
 
 	  vx[ip*dv] += ax[ip*da]*dt/2;

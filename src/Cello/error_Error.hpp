@@ -144,16 +144,20 @@
 // 	p.isDeleting()  ?"Deleting"  : "");		
 //   }
 
-#   define TRACE_CHARM(M)					\
-  { CkPrintf("TRACE_CHARM %s:%d\n",__FILE__,__LINE__); }
-#   define TRACEPUP					\
-  {							\
-    CkPrintf("TRACEPUP %s:%d\n",__FILE__,__LINE__);	\
-    CkPrintf("TRACEPUP %p %s\n",this,			\
- 	     p.isPacking()   ?"Packing"   : "",		\
- 	     p.isUnpacking() ?"Unpacking" : "",		\
- 	     p.isSizing()    ?"Sizing"    : "",		\
- 	     p.isDeleting()  ?"Deleting"  : ""); }
+#   define TRACE_CHARM(M)						\
+  { CkPrintf("%d TRACE_CHARM %s:%d\n",CkMyPe(),__FILE__,__LINE__);	\
+  fflush(stdout);						\
+}
+#   define TRACEPUP						\
+  {								\
+    CkPrintf("%d TRACEPUP %s:%d\n",CkMyPe(),__FILE__,__LINE__);	\
+    CkPrintf("%d TRACEPUP %p [%s]\n",CkMyPe(),this,		\
+	     p.isPacking()   ?"Packing"   :			\
+	     (p.isUnpacking() ?"Unpacking" :			\
+	      (p.isSizing()    ?"Sizing"    :			\
+	       (p.isDeleting()  ?"Deleting"  : ""))));		\
+    fflush(stdout);						\
+  }
 
 
 #else

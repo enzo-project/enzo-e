@@ -468,6 +468,13 @@ void Simulation::initialize_balance_() throw()
       config_->schedule_stop[index],
       config_->schedule_step[index],
       config_->schedule_list[index]);
+
+#ifdef TEMP_BALANCE_MANUAL
+  if (schedule_balance_) {
+    TurnManualLBOn();
+  }
+#endif
+
 }
 
 //----------------------------------------------------------------------

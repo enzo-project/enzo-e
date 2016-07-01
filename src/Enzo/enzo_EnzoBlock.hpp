@@ -8,13 +8,11 @@
 #ifndef ENZO_ENZO_BLOCK_HPP
 #define ENZO_ENZO_BLOCK_HPP
 
-class CProxy_EnzoBlock;
-
 //----------------------------------------------------------------------
 
 #include "enzo.decl.h"
 
-class EnzoBlock : public CBase_EnzoBlock
+class EnzoBlock : public BASE_ENZO_BLOCK
 
 {
 
@@ -125,7 +123,7 @@ public: // interface
 
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
-    : CBase_EnzoBlock (m)
+    : BASE_ENZO_BLOCK (m)
   {
     TRACE("CkMigrateMessage");
     //    initialize();

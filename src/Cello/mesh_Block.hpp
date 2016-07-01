@@ -536,6 +536,9 @@ public:
   /// Quiescence before load balancing
   void p_stopping_balance();
 
+  /// Manual call of LB
+  void p_balance();
+
   /// Exit the stopping phase
   void p_stopping_exit () 
   {      stopping_exit_(); }
