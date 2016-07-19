@@ -100,7 +100,6 @@ CProxy_Block EnzoFactory::create_block_array
     }
   }
 
-
   TRACE1("EnzoFactory::create_block_array = %p",&enzo_block_array);
   return enzo_block_array;
 }

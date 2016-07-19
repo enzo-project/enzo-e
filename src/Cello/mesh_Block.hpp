@@ -77,14 +77,13 @@ public: // interface
   /// Copy constructor
   Block(const Block & block)
   /// @param     block  Object being copied
-  {  copy_(block); }
+  {  copy_(block);  }
 
   /// Assignment operator
   Block & operator = (const Block & block)
   /// @param     block  Source object of the assignment
   /// @return    The target assigned object
   {  copy_(block);  return *this; }
-
 
   //----------------------------------------------------------------------
   // CHARM

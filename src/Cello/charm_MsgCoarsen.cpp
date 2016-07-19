@@ -81,6 +81,7 @@ void MsgCoarsen::set_data_msg  (DataMsg * data_msg)
 
 void * MsgCoarsen::pack (MsgCoarsen * msg)
 {
+  if (msg->buffer_ != NULL) return msg->buffer_;
 
   int size = 0;
 
@@ -182,6 +183,7 @@ MsgCoarsen * MsgCoarsen::unpack(void * buffer)
 
   if (have_data) {
     // data_msg_
+    msg->data_msg_ = new DataMsg;
     pc = msg->data_msg_->load_data(pc);
   } else {
     msg->data_msg_ = NULL;

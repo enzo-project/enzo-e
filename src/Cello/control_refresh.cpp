@@ -186,7 +186,6 @@ void Block::p_refresh_store (MsgRefresh * msg)
   CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
   fflush(stdout);
 #endif
-
   msg->update(data());
   delete msg;
 

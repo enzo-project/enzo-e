@@ -28,7 +28,6 @@ MsgRefine::MsgRefine()
     refresh_type_(refresh_unknown),
     num_face_level_(0), face_level_(NULL)
 {  
-
   const int in = CkMyPe() % MAX_NODE_SIZE;
 
   ++counter[in]; 
@@ -55,7 +54,6 @@ MsgRefine::MsgRefine
   num_face_level_(num_face_level),
   face_level_(new int[num_face_level])
 {  
-
   const int in = CkMyPe() % MAX_NODE_SIZE;
 
   ++counter[in]; 
@@ -95,6 +93,7 @@ void MsgRefine::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefine::pack (MsgRefine * msg)
 {
+  if (msg->buffer_ != NULL) return msg->buffer_;
 
   int size = 0;
 
@@ -221,6 +220,7 @@ void * MsgRefine::pack (MsgRefine * msg)
 
 MsgRefine * MsgRefine::unpack(void * buffer)
 {
+
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
  
   MsgRefine * msg = 
@@ -293,7 +293,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
     msg->data_msg_ = new DataMsg;
     pc = msg->data_msg_->load_data(pc);
   } else {
-    msg->data_msg_ = 0;
+    msg->data_msg_ = NULL;
   }
 
   // 3. Save the input buffer for freeing later

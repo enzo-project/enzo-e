@@ -19,12 +19,12 @@ Testing {
 }
 
 Mesh    { 
-   root_size   = [16,16];
+   root_size   = [32,32];
    root_blocks = [4,4];
 }
 
 Adapt {
-   max_level   = 7; 
+   max_level   = 6; 
 }
 
 include "input/initial-enzop-cello.incl"

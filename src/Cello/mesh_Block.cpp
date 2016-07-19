@@ -11,7 +11,9 @@
 #include "main.hpp"
 #include "charm_simulation.hpp"
 
-/* #define DEBUG_ADAPT */
+// #define TRACE_BLOCK
+
+// #define DEBUG_ADAPT 
 
 // #define DEBUG_NEW_REFRESH
 
@@ -76,6 +78,10 @@ Block::Block ( MsgRefine * msg )
 
   name_ = name();
 
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %s TRACE_BLOCK Block(MsgRefine)\n",  CkMyPe(),name_.c_str());
+#endif
+
   bool is_first_cycle = 
     (cycle_ == simulation()->config()->initial_cycle);
 
@@ -129,7 +135,6 @@ Block::Block
   index_method_(-1),
   name_("")
 {
-  
   init (index,
 	nx, ny, nz,
 	num_field_blocks,
@@ -139,6 +144,9 @@ Block::Block
 	num_face_level, face_level);
 
   name_ = name();
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %s TRACE_BLOCK Block(...)\n",  CkMyPe(),name_.c_str());
+#endif
 
   bool is_first_cycle = 
     (cycle_ == simulation()->config()->initial_cycle);
@@ -299,8 +307,6 @@ void Block::init
 
   if (level > 0) {
 
-    thisProxy.doneInserting();
-
     control_sync (CkIndex_Main::p_adapt_end(),sync_quiescence);
 
   }
@@ -445,6 +451,9 @@ void Block::apply_initial_() throw ()
 
 Block::~Block()
 { 
+#ifdef TRACE_BLOCK
+  CkPrintf ("%d %s TRACE_BLOCK Block::~Block())\n",  CkMyPe(),name_.c_str());
+#endif
 #ifdef CELLO_DEBUG
   index_.print("~Block()",-1,2,false,simulation());
 #endif
@@ -498,8 +507,6 @@ Block::~Block()
   child_data_ = 0;
 
   simulation()->monitor_delete_block();
-
-  thisProxy.doneInserting();
 
 }
 

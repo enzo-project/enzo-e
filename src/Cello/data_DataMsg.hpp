@@ -19,12 +19,11 @@ public: // interface
   static long counter[MAX_NODE_SIZE];
 
   DataMsg() 
-    : field_face_(NULL),
-      field_data_(NULL),
-      field_face_delete_(false),
-      field_data_delete_(false),
-      field_array_delete_(false),
+    : field_face_   (NULL),
+      field_data_   (NULL),
       particle_data_(NULL),
+      field_face_delete_   (false),
+      field_data_delete_   (false),
       particle_data_delete_(false)
       
   {
@@ -43,10 +42,6 @@ public: // interface
     if (field_data_delete_) {
       delete field_data_;
       field_data_ = NULL;
-    }
-    if (field_array_delete_) {
-      delete field_array_;
-      field_array_ = NULL;
     }
     if (particle_data_delete_) {
       delete particle_data_;
@@ -85,13 +80,6 @@ public: // interface
   /// Return the serialized FieldFace array
   char * field_array () 
   { return field_array_; }
-
-  /// Set the FieldFace object
-  void set_field_array  (char  * field_array, bool is_new) 
-  {
-    field_array_ = field_array; 
-    field_array_delete_ = is_new;
-  }
 
   /// Return the ParticleData
   ParticleData * particle_data () 
@@ -137,6 +125,18 @@ public: // interface
   /// Update the Data with the data stored in this DataMsg
   void update (Data * data, bool is_local);
 
+  /// Debugging
+  void print ()
+  {
+    CkPrintf ("%d %p TRACE_DATA_MSG field_face_    = %p\n",CkMyPe(),this,field_face_);
+    CkPrintf ("%d %p TRACE_DATA_MSG field_data_    = %p\n",CkMyPe(),this,field_data_);
+    CkPrintf ("%d %p TRACE_DATA_MSG particle_data_ = %p\n",CkMyPe(),this,particle_data_);
+    CkPrintf ("%d %p TRACE_DATA_MSG field_face_delete_    = %d\n",CkMyPe(),this,field_face_delete_);
+    CkPrintf ("%d %p TRACE_DATA_MSG field_data_delete_    = %d\n",CkMyPe(),this,field_data_delete_);
+    CkPrintf ("%d %p TRACE_DATA_MSG particle_data_delete_ = %d\n",CkMyPe(),this,particle_data_delete_);
+    fflush(stdout);
+
+  }
 public: // static methods
 
   
@@ -156,15 +156,16 @@ protected: // attributes
 
   };
   
-  /// Whethere FieldFace data should be deleted in destructor
-  bool field_face_delete_;
-
-  bool field_data_delete_;
-  bool field_array_delete_;
-
   /// Particle data
   ParticleData * particle_data_;
 
+  /// Whethere FieldFace data should be deleted in destructor
+  bool field_face_delete_;
+
+  /// Whethere FieldData data should be deleted in destructor
+  bool field_data_delete_;
+
+  /// Whethere FieldFace data should be deleted in destructor
   bool particle_data_delete_;
 
 };

@@ -227,7 +227,6 @@ void Block::p_stopping_balance()
 {
     TRACE_STOPPING("Block::p_stopping_balance");
     simulation()->set_phase (phase_balance);
-
     AtSync();
 }
  
@@ -236,9 +235,8 @@ void Block::p_stopping_balance()
 void Block::ResumeFromSync()
 {
   TRACE_STOPPING("Block::balance_exit");
-  // CkPrintf ("%d %p ResumeFromSync()\n",CkMyPe(),this);
-  // fflush(stdout);
 
+  if (index_.is_root()) thisProxy.doneInserting();
   stopping_exit_();
 
 }
