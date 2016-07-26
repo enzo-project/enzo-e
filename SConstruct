@@ -23,9 +23,9 @@ temp_balance_atsync = 1
 # to be temporary
 #----------------------------------------------------------------------
 
-new_refresh         = 0
-new_refresh_refine  = 0
-new_refresh_coarsen = 0
+new_refresh         = 1
+new_refresh_refine  = 1
+new_refresh_coarsen = 1
 
 #----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements
