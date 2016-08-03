@@ -60,7 +60,7 @@
 #define MAX_TURBULENCE_ARRAY 16 /* size of global array of global values to track */
 
 
-#if CELLO_CHARM_VERSION >= 60700
+#ifdef CONFIG_NEW_CHARM
 #   define BASE_ENZO_BLOCK      CBase_EnzoBlock
 #   define BASE_ENZO_SIMULATION CBase_EnzoSimulation
 #else

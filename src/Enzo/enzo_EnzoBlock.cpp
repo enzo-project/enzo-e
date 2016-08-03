@@ -9,7 +9,7 @@
 
 #include "enzo.hpp"
 
-/* #define DEBUG_NEW_REFRESH */
+// #define DEBUG_NEW_REFRESH
 
 //======================================================================
 
@@ -181,7 +181,7 @@ EnzoBlock::EnzoBlock
   initialize_enzo_();
   initialize();
 #ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("EnzoBlock(msg)\n");
+  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
   print();
 #endif
 }
@@ -212,7 +212,7 @@ EnzoBlock::EnzoBlock
   initialize_enzo_();
   initialize();
 #ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("EnzoBlock(msg)\n");
+  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(...)\n",CkMyPe(),this);
   print();
 #endif
 }
@@ -236,6 +236,10 @@ void EnzoBlock::initialize_enzo_()
 
 EnzoBlock::~EnzoBlock()
 {
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),this);
+  print();
+#endif
 }
 
 //----------------------------------------------------------------------

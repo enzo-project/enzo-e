@@ -79,6 +79,12 @@ debug_verbose = 0
 memory = 1
 
 #----------------------------------------------------------------------
+# Set to 1 if Charm++ version is >= 6.7.0
+#----------------------------------------------------------------------
+
+new_charm = 1
+
+#----------------------------------------------------------------------
 # Enable charm++ dynamic load balancing
 #----------------------------------------------------------------------
 
@@ -233,6 +239,7 @@ grackle_path     = 'grackle_path_not_set'
 # Performance defines
 
 define_memory =       ['CONFIG_USE_MEMORY']
+define_new_charm =    ['CONFIG_NEW_CHARM']
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_performance =  ['CONFIG_USE_PERFORMANCE']
 define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
@@ -388,6 +395,7 @@ if (debug != 0):         defines = defines + define_debug
 if (check != 0):         defines = defines + define_check
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
+if (new_charm != 0):     defines = defines + define_new_charm
 if (python_lt_27 != 0):  defines = defines + define_python_lt_27
 if (have_mercurial != 0):defines = defines + define_have_mercurial
 

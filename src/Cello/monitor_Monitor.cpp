@@ -122,6 +122,11 @@ void Monitor::header () const
   print ("Define","CHANGESET     %s",CELLO_CHANGESET);
 #   endif
 #endif
+#ifdef CONFIG_NEW_CHARM
+  print ("Define","CHARM_NEW_CHARM %s","Yes");
+#else
+  print ("Define","CHARM_NEW_CHARM %s","no");
+#endif
 
 }
 

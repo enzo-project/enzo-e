@@ -19,9 +19,6 @@ ArrayMap::ArrayMap(int nx, int ny, int nz)
 
 //----------------------------------------------------------------------
 
-ArrayMap::~ArrayMap() {
-}
-
 int ArrayMap::procNum(int, const CkArrayIndex &idx) {
 
   int v3[3];

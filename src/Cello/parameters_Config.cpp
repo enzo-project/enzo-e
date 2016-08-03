@@ -599,11 +599,13 @@ void Config::read_mesh_ (Parameters * p) throw()
   int mz = mesh_root_blocks[2] = p->list_value_integer(2,"Mesh:root_blocks",1);
 
   const int m = mx*my*mz;
-  ASSERT4 ("Config::read_mesh_()",
-	   "Number of root blocks %d x %d x %d must not be "
-	   "less than number of processes %d",
-	   mx,my,mz,CkNumPes(),
-	   m >= CkNumPes());
+
+  if ( ! (m >= CkNumPes()) ) {
+    WARNING4 ("Config::read_mesh_()",
+	      "Number of root blocks %d x %d x %d cannot be be "
+	      "less than number of processes %d",
+	      mx,my,mz,CkNumPes());
+  }
 
   //--------------------------------------------------
 

@@ -79,7 +79,10 @@ Block::Block ( MsgRefine * msg )
   name_ = name();
 
 #ifdef TRACE_BLOCK
-  CkPrintf ("%d %s TRACE_BLOCK Block(MsgRefine)\n",  CkMyPe(),name_.c_str());
+  int v3[3];
+  index_.values(v3);
+  CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name_.c_str(),
+	    v3[0],v3[1],v3[2]);
 #endif
 
   bool is_first_cycle = 
@@ -145,7 +148,10 @@ Block::Block
 
   name_ = name();
 #ifdef TRACE_BLOCK
-  CkPrintf ("%d %s TRACE_BLOCK Block(...)\n",  CkMyPe(),name_.c_str());
+  int v3[3];
+  index_.values(v3);
+  CkPrintf ("%d %s TRACE_BLOCK Block(...) %d %d %d\n",  CkMyPe(),name_.c_str(),
+	    v3[0],v3[1],v3[2]);
 #endif
 
   bool is_first_cycle = 

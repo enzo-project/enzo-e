@@ -11,11 +11,11 @@
 
 struct BIndex {
 
-  // maximum 1024 x 1024 x 1024 root nodes
+  // original order ATL crashed in Charm++ during load balancing
 
-  unsigned array : INDEX_BITS_ARRAY;
   unsigned  tree : INDEX_BITS_TREE; 
   unsigned level : INDEX_BITS_LEVEL; 
+  unsigned array : INDEX_BITS_ARRAY;
 
   // maximum INDEX_BITS_TREE levels / bits
   // L    T

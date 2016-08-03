@@ -384,13 +384,12 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
       default:
 	ERROR("FieldFace::array_to_face()", "Unsupported precision");
 	break;
-	}
       }
-
     }
-
   }
-  //----------------------------------------------------------------------
+}
+
+//----------------------------------------------------------------------
 
 int FieldFace::num_bytes_array(Field field) throw()
 {

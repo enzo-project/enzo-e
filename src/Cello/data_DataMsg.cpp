@@ -209,20 +209,8 @@ void DataMsg::update (Data * data, bool is_local)
 
     if (is_local) {
 
-      // OLD
       Field field_src(field_descr,fd);
       ff->face_to_face(field_src, field_dst);
-
-      // NEW TEMPORARY (NOTE: DOESN'T WORK FOR 100)
-
-      // int narray = 0;
-      //      char * array = 0;
-      //      Field field_src(field_descr,fd);
-      //      ff->face_to_array (field_src,&narray,&array);
-      //      ff->array_to_face (array, field_dst);
-
-      delete field_face_;
-      field_face_ = NULL;
 
     } else { // ! is_local
 
@@ -232,7 +220,9 @@ void DataMsg::update (Data * data, bool is_local)
 
       ff->array_to_face(fa,field_dst);
 
-
     }
+    delete field_face_;
+    field_face_ = NULL;
+
   }
 }

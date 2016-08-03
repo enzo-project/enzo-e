@@ -230,7 +230,10 @@ int ParticleDescr::attribute_index (int it, std::string attribute_name) const
 
   int index = (iter != attribute_index_[it].end()) ? iter->second : -1;
 
-  if (index == -1) {
+  const int in = CkMyPe() % MAX_NODE_SIZE;
+  static int count[MAX_NODE_SIZE] = {0};
+
+  if (index == -1 && count[in]++ < 10 ) {
     WARNING2("ParticleDescr::attribute_index()",
 	     "Trying to access unknown attribute %s in particle type \"%s\"",
 	     attribute_name.c_str(),type_name(it).c_str());

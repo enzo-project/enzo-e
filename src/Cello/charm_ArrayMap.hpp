@@ -23,7 +23,7 @@ public:
   int *mapping;
 
   ArrayMap(int nx, int ny, int nz);
-  ~ArrayMap();
+
   int procNum(int, const CkArrayIndex &idx);
 
   /// CHARM++ migration constructor for PUP::able
