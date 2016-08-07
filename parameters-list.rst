@@ -5,6 +5,8 @@
   .. role:: d
   .. role:: e
   .. role:: o
+  .. role:: c
+  .. role:: z
 
   .. |H+| replace:: H\ :sup:`+`
   .. |D+| replace:: D\ :sup:`+`
@@ -66,7 +68,7 @@ size of blocks.
 :Summary:   :s:`Number of cycles between adapt steps`
 :Type:      :t:`integer`
 :Default:   :d:`1`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The interval parameter is used to set the number of root-level cycles between mesh adaptation.  The default is 1.`
 
@@ -76,7 +78,7 @@ size of blocks.
 :Summary:   :s:`Maximum level in the adaptive mesh hierarchy`
 :Type:    :t:`integer`
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies the level of the most highly refined Block in the mesh hierarchy.  The default is 0, meaning there is no refinement past the initial root-level grid.`
 
@@ -86,7 +88,7 @@ size of blocks.
 :Summary:   :s:`Minimum level in the adaptive mesh hierarchy`
 :Type:    :t:`integer`
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies the coarsest level of "sub-root" Blocks, and must non-positive.  This is used primarily for multigrid methods, such as in the` :t:`"gravity_mg0"` :e:`method.  The default is 0, meaning no sub-root Blocks are created.  If multigrid is used, then both` :p:`Adapt` : :p:`min_level` :e:`and` :p:`Method` : :p:`gravity_mg` : :p:`min_level` :e:`must be set.`
 
@@ -96,7 +98,7 @@ size of blocks.
 :Summary:   :s:`List of refinement criteria`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`List of mesh refinement criteria, each of which has its own associated` ``Adapt : <criteria> :`` :e:`parameters.  When multiple criteria are used, if all refinement criteria evaluate to "coarsen", then the block will coarsen; if any refinement criteria evaluate as "refine", then the block will refine.`
 
@@ -120,7 +122,7 @@ size of blocks.
 :Summary:    :s:`Minimum rank of Block faces to check for 2:1 refinement restriction`
 :Type:    :t:`integer`
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Many numerical methods require a 2:1 refinement restriction on adaptive meshes, such that no Block in level i is adjacent to another Block in a level j with |i - j|>1.  This assumption may be required across corners and edges as well as 2D faces.  This parameter specifies the minimum rank (dimensionality) of Block faces across which to enforce the 2:1 refinement restriction.`
 
@@ -130,7 +132,7 @@ size of blocks.
 :Summary:   :s:`List of field the refinement criterion is applied to`
 :Type:        [ :t:`string` | :t:`list` ( :t:`string` ) ]
 :Default:     :d:`[]` ( all fields )
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies the fields that the refinement criteria is applied to.  For example, if type = "slope" and field_list = ["density"], then the "refine by slope" refinement criterion is applied to the density field.  This is only used for refinement by slope.`
 
@@ -141,7 +143,7 @@ size of blocks.
 :Summary:   :s:`Level exponent parameter`
 :Type:        :t:`float`
 :Default:     :d:`0.0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<criterion>` is of :p:`type` :t:`"mass"`
 
 :e:`The level exponent parameter is used in the "mass" refinement criterion type only.  It is used as a scaling factor for the refinement criteria for different mesh levels.`
@@ -153,7 +155,7 @@ size of blocks.
 :Summary:   :s:`Cutoff value for coarsening a block`
 :Type:        [ :t:`float` | :t:`list` ( :t:`float` ) ]
 :Default:     :d:`0.15`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`A block may coarsen if the refinement criterion applied to the block is smaller than this value everywhere in the block.   A list is used for the` :t:`"shock"` :e:`refinement criterion type, in which case the first value is for pressure and the second is for the energy ratio.`
 
@@ -163,7 +165,7 @@ size of blocks.
 :Summary:   :s:`Whether to include ghost zones when applying the refinement criterion`
 :Type:      :t:`logical`
 :Default:   :d:`false`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`When applying a mesh refinement criterion, this parameter specifies whether to apply it to ghost zones in the block as well as non-ghost zones.`
 
@@ -173,7 +175,7 @@ size of blocks.
 :Summary:   :s:`Cutoff value for refining a block`
 :Type:        [ :t:`float` | :t:`list` ( :t:`float` ) ]
 :Default:     :d:`0.3`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`A block must refine if the refinement criterion applied to the block is larger than this value anywhere in the block.  A list is used for the` :t:`"shock"` :e:`refinement criterion type, in which case the first value is for pressure and the second is for the energy ratio.`
 
@@ -183,7 +185,7 @@ size of blocks.
 :Summary:    :s:`Name of a field in which to store the result of the refinement criterion`
 :Type:    :t:`string`
 :Default: :d:`""`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`In addition to evolved field values, one may also output the refinement criteria.  This may be  useful for example for debugging or for finding appropriate values for max_coarsen and min_refine.  A value of -1 specifies coarsening, +1 for refining, and 0 for staying the same.`
 
@@ -193,7 +195,7 @@ size of blocks.
 :Summary:    :s:`Type of mesh refinement criteria`
 :Type:    :t:`string`
 :Default: :d:`"unknown"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Type of mesh refinement criteria.  This is a required parameter, and must be one of "slope", "shear", "mask", "mass", or "shock".`
  
@@ -213,7 +215,7 @@ is performed.
 :Summary:    :s:`Scheduling parameters for dynamic load balancing`
 :Type:       :t:`integer`
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Dynamic load balancing is scheduled according to` :p:`schedule` :e:`parameters.  Scheduling parameters---including` :p:`var`, :p:`list`, :p:`start`, :p:`stop`, and :p:`step` :e:`---are documented in the` `schedule`_ :e:`section.`
 
@@ -239,7 +241,7 @@ parameter to specify field values at the boundary.
 :Summary:    :s:`List of boundary condition subgroups`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`For mixed boundary conditions, the` :p:`list` :e:`parameter specifies the list of names of subgroups that define boundary conditions on each portion of the domain boundary.  Boundary conditions in each subgroup are applied in the order listed.  In the example below, two subgroups` :t:`"one"` :e:`and` :t:`"two"` :e:`are defined, which specify reflecting boundary conditions along the x-axis and outflow boundary conditions along the y-axis:`
 
@@ -263,7 +265,7 @@ parameter to specify field values at the boundary.
 :Summary:    :s:`Type of boundary condition`
 :Type:    :t:`string`
 :Default: :d:`"undefined"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Boundary conditions in Enzo-P include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`value` :e:`and` :p:`field_list` :e:`parameters.`
 
@@ -273,7 +275,7 @@ parameter to specify field values at the boundary.
 :Summary:    :s:`Axis along which boundary conditions are to be enforced`
 :Type:    :t:`string`
 :Default: :d:`"all"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The`  :p:`axis` :e:`parameter restricts the boundary conditions to the face orthogonal to the specified axis.`  :p:`axis` :e:`must be` :t:`"x"` , :t:`"y"` , :t:`"z"` :e:`or` :t:`"all"`.  :e:`The` :p:`axis` :e:`parameter may be used in conjunction with the` :p:`face` :e:`parameter, or by itself.`
 
@@ -284,7 +286,7 @@ parameter to specify field values at the boundary.
 :Summary:    :s:`Face along which boundary conditions are to be enforced`
 :Type:    :t:`string`
 :Default: :d:`"all"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The` :p:`face` :e:`parameter can restrict the boundary conditions to be applied only to the` :p:`upper` :e:`or` :p:`lower` :e:`faces.  face orthogonal to the given face.`  :p:`face` :e:`must be` :t:`"x"` , :t:`"y"` , :t:`"z"` :e:`or` :t:`"all"`.  :e:`The` :p:`face` :e:`parameter may be used in conjunction with the` :p:`axis` :e:`parameter, or by itself.`
 
@@ -294,7 +296,7 @@ parameter to specify field values at the boundary.
 :Summary:    :s:`Subregion in which boundary conditions are to be enforced`
 :Type:    :t:`logical-expr`
 :Default: :d:`none`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The`  :p:`mask` :e:`parameter specifies the subregion of the boundary on which to apply the boundary conditions.  The logical expression  may be a function of x, y, z, and t, and boundary conditions are restricted to where (and when) it evaluates to true`::
 
@@ -316,7 +318,7 @@ parameter to specify field values at the boundary.
 :Type:    :t:`float-expr`
 :Type:    :t:`list` ( :t:`float-expr` [, :t:`logical-expr`, :t:`float-expr` [, ... ] ] )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The` :p:`value` :e:`parameter is used to specify field values for` :p:`inflow` :e:`type boundary conditions.  The` :p:`value` :e:`parameter is used in conjunction with the` :p:`field_list` :e:`parameter.` :p:`value` :e:`may be of type` :t:`float`, :t:`float-expr`, :e:`or a list of alternating` :t:`float-expr` :e:`and` :t:`logical-expr` :e:`types`.  :t:`float-expr` :e:`may be a function of x, y, z, and t.  When a list is specified, the` :t:`logical-expr` :e:`is treated as a mask, similar to an 'if-then-else' clause`
 
@@ -342,7 +344,7 @@ parameter to specify field values at the boundary.
 :Summary: :s:`List of fields to apply boundary conditions to`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The` :p:`field_list` :e:`parameter is used to restrict boundary conditions to the specified fields.  An empty list, which is the default, is used to specify all fields.`
 
@@ -358,7 +360,7 @@ Domain parameters specify the lower and upper extents of the computational domai
 :Summary: :s:`Lower domain extent`
 :Type:    :t:`list` ( :t:`float` )
 :Default: :d:`[0.0, 0.0, 0.0]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Lower extent of the computational domain,` [x\ :sub:`min`], [ x\ :sub:`min`\, y\ :sub:`min`], :e:`or` [ x\ :sub:`min`\, y\ :sub:`min`\, z\ :sub:`min`].
 
@@ -368,7 +370,7 @@ Domain parameters specify the lower and upper extents of the computational domai
 :Summary: :s:`Upper domain extent`
 :Type:    :t:`list` ( :t:`float` )
 :Default: :d:`[1.0, 1.0, 1.0]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Upper extent of the computational domain,` [x\ :sub:`max`], [ x\ :sub:`max`\, y\ :sub:`max`], :e:`or` [ x\ :sub:`max`\, y\ :sub:`max`\, z\ :sub:`max`].
 
@@ -393,7 +395,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`List of fields`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`All fields must be explicitly listed in the` :p:`list` :e:`parameter.  Field names depend on the Method(s) used; e.g., PPM uses` :t:`"density"`,  :t:`"velocity_x"`, :t:`"velocity_y"`, :t:`"total_energy"`, :e:`and`  :t:`"internal_energy"`.
   
@@ -404,7 +406,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Adiabatic exponent`
 :Type:    :t:`float`
 :Default: :d:`5.0 / 3.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo:  :o:`perhaps move this to a different group, e.g. Physics`
 
 :p:`gamma` :e:`specifies the ratio of specific heats for the ideal gas used by the PPM hydrodynamics solver.`
@@ -416,7 +418,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Force field data on each block to start on alignment bytes`
 :Type:    :t:`integer`
 :Default: :d:`8`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Depending on the computer architecture, variables can be accessed from memory faster if they have at least 4-byte or 8-byte alignment.  This parameter forces each field block array to have an address evenly divisible by the specified number of bytes.`
 
@@ -426,7 +428,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Specify the position of the given field variable within the computational cell.`
 :Type:    :t:`list` ( :t:`logical` )
 :Default: :d:`[ true, true, true ]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`By default, variables are centered within a computational cell.  Some methods expect some variable, e.g. velocity components, to be positioned on a cell face.  The effect of this parameter is to increase the dimension of the field block by one along each axis with a value of "false".  Numerical method implementations like PPML that assume (NX,NY,NZ) sized blocks even for offset variables, as opposed to e.g. (NX+1,NY,NZ), should still define the variable as centered.`
 
@@ -436,7 +438,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Specify a list of groups that the Field belongs to`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[ ]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Different Fields may belong to any number of different "groups".  For example, Enzo uses "color fields", which Enzo-P implements as defining color fields to belong to the group "color".`
 
@@ -446,7 +448,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Courant condition for fields`
 :Type:    :t:`float`
 :Default: :d:`0.6`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Todo:    :o:`Rename?`
 
 :e:`Courant condition for all fields.  This is a multiplication factor for the time step as determined by the respective Method(s) used.  This parameter can be updated on restart using the` `Restart : file` :e:`restart parameter file.`
@@ -457,7 +459,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Field ghost zone depths`
 :Type:    [ :t:`integer` | :t:`list` ( :t:`integer` ) ]
 :Default: :d:`[ 0, 0, 0 ]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The default storage patch / block ghost zone depths [gx, gy, gz] along each axis for fields.  If an integer, then the same ghost zone depth is used for each axis.  Currently this value needs to be $4$ for PPM when AMR is used.`
 
@@ -467,7 +469,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Add padding of the specified number of bytes between fields on each block.`
 :Type:    :t:`integer`
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`If block sizes are large and a power of two, and if the computer's cache has low associativity, performance can suffer due to cache thrashing.  This can be avoided by introducing padding between fields.  A value of twice the cache line width is recommended.  Since field blocks are usually small, this should not usually be an issue.`
 
@@ -477,7 +479,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Default field precision`
 :Type:    :t:`string`
 :Default: :d:`"default"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Default precision for all fields.  Supported precisions include "single" (32-bit) and "double" (64-bit).  "quadruple" is accepted, but not implemented by most numerical methods (e.g. PPM).  "default" is for compatibility with Enzo, and corresponds to either "single" or "double" depending on the CELLO_PREC configuration flag setting.  This precision parameter must not conflict with the CELLO_PREC setting.`
 
@@ -487,7 +489,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Type of prolongation (interpolation)`
 :Type:    :t:`string`
 :Default: :d:`"linear"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`For adaptive mesh refinement, field values may need to be transferred from coarser to finer blocks, either from coarse neighbor blocks in the refresh phase, or to fine child blocks during refinement in the adapt phase.  Valid values include` :t:`"linear"` :e:`; other values accepted but not implemented include` :t:`"enzo"` :e:`and` :t:`"MC1"` :e:` ; which are unfinished implementations of Enzo's` :t:`"InterpolationMethod"` :e:`functionality.`
 
@@ -497,7 +499,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Type of restriction (coarsening)`
 :Type:    :t:`string`
 :Default: :d:`"linear"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`For adaptive mesh refinement, field values may need to be transferred from finer to coarser blocks, either from fine neighbor blocks in the refresh phase, or to the parent block during coarsening in the adapt phase.  Valid values include` :t:`"linear"` :e:`\; ;other values accepted but not implemented include` :t:`"enzo"`.
 
@@ -507,7 +509,7 @@ alignment in memory, and memory padding between fields.
 :Summary: :s:`Type of "enzo" interpolation and coarsening`
 :Type:    :t:`string`
 :Default: :d:`"SecondOrderA"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Status:  **Not accessed**
 
 :e:`For the "enzo"` :p:`prolong` :e:`or` :p:`restrict` :e:`Field parameters, this parameter defines the specific interpolation method used.  It is analogous to the` ``InterpolationMethod`` :e:`parameter in Enzo.  Valid values include` ``"ThirdOrderA"`` ,   ``"SecondOrderA"`` ,    ``"SecondOrderB"``, ``"SecondOrderC"`` , :e:`and` ``"FirstOrderA"``.
@@ -566,7 +568,7 @@ different types of fields and particles using the ``Grouping`` class
 :Summary: :s:`List of groups`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter defines all groups.`
 
@@ -577,7 +579,7 @@ different types of fields and particles using the ``Grouping`` class
 :Summary: :s:`List of fields belonging to the group`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter is used to assign fields to a given group.`
 
@@ -588,7 +590,7 @@ different types of fields and particles using the ``Grouping`` class
 :Summary: :s:`List of particle types belonging to the group`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter is used to assign particle groups to a given group.`
 
@@ -604,7 +606,7 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 :Summary: :s:`Initial cycle number`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Initial value for the cycle number.`
 
@@ -615,7 +617,7 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 :Summary: :s:`Identifier specifying the type of initial conditions`
 :Type:    :t:`string`
 :Default: :d:`"value"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies how the field variables in the simulation will be initialized.  The default is` ``"value"`` :e:`, in which case field variables are initialized directly in the input file, e.g.`
 
@@ -635,7 +637,7 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 :Summary: :s:`Initial time`
 :Type:    :t:`float`
 :Default: :d:`0.0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Initial time in code units.`
 
@@ -645,7 +647,7 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 :Summary: :s:`Initialize field values`
 :Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter is used to initialize fields when the` :p:`type` :e:`parameter is` ``"value".``  :e:`The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  Example: [ sin ( x + y ), x - y < 0, 1.0 ] is read as "sin ( x + y ) where x - y < 0, 1.0 elsewhere".`
 
@@ -656,7 +658,7 @@ sedov
 :Summary: :s:`Size of array of Sedov blasts`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`[ 1, 1, 1 ]`
-:Scope:   Enzo
+:Scope:   :z:`Enzo`
 
 :e:`This parameter defines the size of the array of Sedov blast waves.  The default is a single blast.`
 
@@ -741,7 +743,7 @@ of Cello's dynamic memory allocation and deallocation.
 :Summary: :s:`Whether to track memory usage`
 :Type:    :t:`logical`
 :Default: :d:`true`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter is used to turn on or off Cello's build-in memory tracking.  By default it is on, meaning it tracks the number and size of memory allocations, including the current number of bytes allocated, the maximum over the simulation, and the maximum over the current cycle.  Cello implements this by overloading C's new, new[], delete, and delete[] operators.  This can be problematic on some systems, e.g. if an external library also redefines these operators, in which case this parameter should be set to false.`
 
@@ -753,7 +755,7 @@ Mesh
 :Summary: :s:`Number of Blocks used to tile the coarsest Patch`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`[ 1, 1, 1 ]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies the number of Blocks along each axis in the mesh "forest".  The product must not be smaller than the number of processors used.`
 
@@ -763,7 +765,7 @@ Mesh
 :Summary: :s:`Physical dimensionality of the problem`
 :Type:    :t:`integer`
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Number of physical dimensions in the problem, 1, 2, or 3.`
 
@@ -773,7 +775,7 @@ Mesh
 :Summary: :s:`Coarsest Patch size`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`[ 1, 1, 1 ]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies the total size of the root-level mesh.  For example, [400, 400] specifies a two dimensional root-level discretization of 400 x 400 zones, excluding ghost zones.`
 
@@ -785,7 +787,7 @@ Method
 :Summary: :s:`Sequence of numerical methods to apply.`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`none`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies the list of numerical methods to use.  Each method in the list is applied in the order specified.  Possible values include:`
 
@@ -820,7 +822,7 @@ Currently cosmology parameters are not accessed.
 :Summary: :s:`Turn on or off cosmology machinery`
 :Type:   :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Turn on or off cosmology machinery.`
 
@@ -830,7 +832,7 @@ Currently cosmology parameters are not accessed.
 :Summary: :s:`Enzo's CosmologyComovingBoxSize parameter`
 :Type:    :t:`float`
 :Default: :d:`64.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Enzo's` CosmologyComovingBoxSize :e:`parameter.`
 
@@ -840,7 +842,7 @@ Currently cosmology parameters are not accessed.
 :Summary: :s:`Hubble constant for Z=0`
 :Type:    :t:`float`
 :Default: :d:`0.701`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Hubble constant for Z=0.`  
 
@@ -850,7 +852,7 @@ Currently cosmology parameters are not accessed.
 :Summary: :s:`Enzo's CosmologyInitialRedshift parameter.`
 :Type:    :t:`float`
 :Default: :d:`20.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Enzo's` CosmologyInitialRedshift :e:`parameter.`
 
@@ -860,7 +862,7 @@ Currently cosmology parameters are not accessed.
 :Summary: :s:`Maximum expansion rate`
 :Type:    :t:`float`
 :Default: :d:`0.01`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Maximum expansion rate.`
 
@@ -870,7 +872,7 @@ Currently cosmology parameters are not accessed.
 :Summary: :s:`Omega lambda for Z=0`
 :Type:   :t:`float`
 :Default: :d:`0.721`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Omega lamda for Z=0.`
 
@@ -880,7 +882,7 @@ Currently cosmology parameters are not accessed.
 :Summary: :s:`Omega matter for Z=0`
 :Type:    :t:`float`
 :Default: :d:`0.279`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Omega matter for Z=0.`
 
@@ -891,7 +893,7 @@ gravity_bicgstab
 :Summary: :s:`Iteration limit for the BiCGStab solver`
 :Type:    :t:`int`
 :Default: :d:`100`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Maximum number of BiCGStab iterations to take.`
 
@@ -901,7 +903,7 @@ gravity_bicgstab
 :Summary: :s:`Residual norm reduction tolerance for the BiCGStab solver`
 :Type:    :t:`float`
 :Default: :d:`1e-6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. BiCGStab is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
 
@@ -911,7 +913,7 @@ gravity_bicgstab
 :Summary: :s:`Gravitational constant`
 :Type:    :t:`float`
 :Default: :d:`6.67384e-8`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Gravitational constant used in place of G.  The default is G in cgs units.`
 
@@ -922,7 +924,7 @@ gravity_bicgstab
 :Summary: :s:`Whether to apply diagonal preconditioning`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Whether to diagonally precondition the linear system A*X = B in BiCGStab by 1.0 / (h^2).`
 
@@ -933,7 +935,7 @@ gravity_bicgstab
 :Summary: :s:`How often to display progress`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
 
@@ -944,7 +946,7 @@ gravity_cg
 :Summary: :s:`Iteration limit for the CG solver`
 :Type:    :t:`int`
 :Default: :d:`100`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Maximum number of CG iterations to take.`
 
@@ -954,7 +956,7 @@ gravity_cg
 :Summary: :s:`Residual norm reduction tolerance for the CG solver`
 :Type:    :t:`float`
 :Default: :d:`1e-6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. CG is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
 
@@ -964,7 +966,7 @@ gravity_cg
 :Summary: :s:`Gravitational constant`
 :Type:    :t:`float`
 :Default: :d:`6.67384e-8`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Gravitational constant used in place of G.  The default is G in cgs units.`
 
@@ -975,7 +977,7 @@ gravity_cg
 :Summary: :s:`Whether to apply diagonal preconditioning`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Whether to diagonally precondition the linear system A*X = B in EnzoMethodGravityCg by 1.0 / (h^2).`
 
@@ -986,7 +988,7 @@ gravity_cg
 :Summary: :s:`How often to display progress`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
 
@@ -998,7 +1000,7 @@ gravity_mg
 :Summary: :s:`Maximum number of multigrid cycles.`
 :Type:    :t:`int`
 :Default: :d:`10`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Maximum number of cycles of the multigrid solver.`
 
@@ -1009,7 +1011,7 @@ gravity_mg
 :Summary: :s:`Residual norm reduction limit for the multigrid solver`
 :Type:    :t:`float`
 :Default: :d:`1e-6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. multigrid is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
 
@@ -1019,7 +1021,7 @@ gravity_mg
 :Summary: :s:`Gravitational constant`
 :Type:    :t:`float`
 :Default: :d:`6.67384e-8`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Gravitational constant used in place of G.  The default is G in cgs units.`
 
@@ -1029,7 +1031,7 @@ gravity_mg
 :Summary: :s:`How often to display progress`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
 
@@ -1040,7 +1042,7 @@ gravity_mg
 :Summary: :s:`Multigrid smoother`
 :Type:    :t:`string`
 :Default: :d:`"jacobi"`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The Compute object to use for smoothing the residual in the multigrid method.`
 
@@ -1051,7 +1053,7 @@ gravity_mg
 :Summary: :s:`Multigrid smoother weighting`
 :Type:    :t:`float`
 :Default: :d:`1.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The weighting for the multigrid smoother.`
 
@@ -1062,7 +1064,7 @@ gravity_mg
 :Summary: :s:`Number of multigrid pre-smoothings`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Number of applications of the smoother for pre-smoothings`
 
@@ -1073,7 +1075,7 @@ gravity_mg
 :Summary: :s:`Number of multigrid post-smoothings`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Number of applications of the smoother for post-smoothings`
 
@@ -1084,7 +1086,7 @@ gravity_mg
 :Summary: :s:`Number of multigrid smoothings for coarse solver`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Number of applications of the smoother for approximating the solution on the coarsest level.`
 
@@ -1095,7 +1097,7 @@ gravity_mg
 :Summary: :s:`Multigrid restrict operation`
 :Type:    :t:`string`
 :Default: :d:`"linear"`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The Restrict type to use for transferring residuals to parent (coarser) blocks.`
 
@@ -1106,7 +1108,7 @@ gravity_mg
 :Summary: :s:`Multigrid prolong operation`
 :Type:    :t:`string`
 :Default: :d:`"linear"`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The Prolong type to use for transferring corrections to child (finer) blocks.`
 
@@ -1117,7 +1119,7 @@ gravity_mg
 :Summary: :s:`The coarsest multigrid level`
 :Type:    :t:`integer`
 :Default: :d:`0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The coarsest level in the multigrid algorithm, which is the level at which the coarse grid solver is applied.  This number should be negative.`
 
@@ -1128,7 +1130,7 @@ gravity_mg
 :Summary: :s:`the finest multigrid level`
 :Type:    :t:`integer`
 :Default: :d:`Adapt:max_level`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The finest level in the multigrid algorithm.  Could be less than the finest level in the mesh hierarchy to improve computational speed at the cost of reduced accuracy.`
 
@@ -1150,7 +1152,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: :s:`Units for the density field`
 :Type:    :t:`float`
 :Default: :d:`1.67e-24  (1 m_H/cc)`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Units of density for the Grackle chemistry and cooling solver library.`
 
@@ -1162,7 +1164,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: :s:`Units for distance`
 :Type:    :t:`float`
 :Default: :d:`3.086e21 (1 kpc)`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Units of length for the Grackle chemistry and cooling solver library.`
 
@@ -1173,7 +1175,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: :s:`Units for time`
 :Type:    :t:`float`
 :Default: :d:`3.15569e13 (1 Myr)`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Units of time for the Grackle chemistry and cooling solver library.`
 
@@ -1183,7 +1185,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: :s:`Units for the cosmological expansion factor`
 :Type:    :t:`float`
 :Default: :d:`1.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Units of the cosmological expansion factor for the Grackle chemistry and cooling solver library.`
 
@@ -1193,7 +1195,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: :s:`The ratio of specific heats for an ideal gas`
 :Type:    :t:`float`
 :Default: :d:`5/3`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`The ratio of specific heats for an ideal gas. A direct calculation for the molecular component is used if` :p:`primordial_chemistry` :e:`> 1.`
 
@@ -1203,7 +1205,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary:    :s:`Include radiative cooling`
 :Type:       :t:`logical`
 :Default:    :d:`true`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Flag to include radiative cooling and actually update the thermal energy during the chemistry solver. If off, the chemistry species will still be updated. The most common reason to set this to off is to iterate the chemistry network to an equilibrium state.`
 
@@ -1213,7 +1215,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: :s:`Flag to control which primordial chemistry network is used`
 :Type:    :t:`logical`
 :Default:  :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Flag to control which primordial chemistry network is used.`
 
@@ -1234,7 +1236,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary:  :s:`Flag to enable metal cooling using the Cloudy tables`
 :Type:     :t:`logical`
 :Default:  :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Flag to enable metal cooling using the Cloudy tables. If enabled, the cooling table to be used must be specified with the Grackle` :p:`data_file` :e:`parameter.`
 
@@ -1246,7 +1248,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary:     :s:`Flag to enable H2 formation`
 :Type:        :t:`logical`
 :Default:     :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Flag to enable H2 formation on dust grains, dust cooling, and dust-gas heat transfer follow Omukai (2000). This assumes that the dust to gas ratio scales with the metallicity.`
 
@@ -1256,7 +1258,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary:    :s:`Flag to enable an effective CMB temperature floor.`
 :Type:       :t:`logical`
 :Default:    :d:`true`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Flag to enable an effective CMB temperature floor. This is implemented by subtracting the value of the cooling rate at TCMB from the total cooling rate.`
 
@@ -1266,7 +1268,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary:     :s:`Path to the data file containing the metal cooling and UV background tables.`
 :Type:        :t:`string`
 :Default:     :d:`""`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Path to the data file containing the metal cooling and UV background tables.`
 
@@ -1276,7 +1278,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary:      :s:`Flag to control which three-body H2 formation rate is used.`
 :Type:        :t:`integer`
 :Default:     :d:`0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Status:  **Not accessed**
 
 
@@ -1300,7 +1302,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary:    :s:`Flag to enable |H2| collision-induced emission cooling`
 :Type:        :t:`logical`
 :Default:     :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Flag to enable` |H2| :e:`collision-induced emission cooling from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
 
@@ -1310,7 +1312,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: :s:`Flag to enable |H2| cooling attenuation`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
    
 :e:`Flag to enable H2 cooling attenuation from` `Ripamonti & Abel (2004) <http://adsabs.harvard.edu/abs/2004MNRAS.348.1019R>`_.
 
@@ -1320,7 +1322,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default:
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Flag to enable a spatially uniform heating term approximating photo-electric heating from dust from Tasker & Bryan (2008)http://adsabs.harvard.edu/abs/2008ApJ...673..810T.`
 
@@ -1330,7 +1332,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default:  :d:`8.5e-26`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`If` :p:`photoelectric_heating` :e:`is enabled, the heating rate in units of erg cm-3 s-1.`
 
@@ -1340,7 +1342,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo:  :o:`write`
 
 ----
@@ -1349,7 +1351,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo:       :o:`write`
 :Status:  **Not accessed**
 
@@ -1359,7 +1361,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo:       :o:`write`
 :Status:  **Not accessed**
 
@@ -1369,7 +1371,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1381,7 +1383,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1394,7 +1396,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default:   :d:`0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 
 :e:`Flag to enable Compton heating from an X-ray background following Madau & Efstathiou (1999)http://adsabs.harvard.edu/abs/1999ApJ...517L...9M.`
@@ -1405,7 +1407,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: :d:`0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Intensity of a constant Lyman-Werner H2 photo-dissociating radiation field in units of 10-21 erg s-1 cm-2 Hz-1 sr-1.`
 
@@ -1415,7 +1417,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: :d:`0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 
 :e:`Flag to enable suppression of Lyman-Werner flux due to Lyman-series absorption (giving a sawtooth pattern), taken from Haiman & Abel, & Rees (2000)http://adsabs.harvard.edu/abs/2000ApJ...534...11H.`
@@ -1427,7 +1429,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1437,7 +1439,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1447,7 +1449,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1457,7 +1459,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1467,7 +1469,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1477,7 +1479,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1487,7 +1489,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1497,7 +1499,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1507,7 +1509,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1517,7 +1519,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1527,7 +1529,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1537,7 +1539,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1547,7 +1549,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1557,7 +1559,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1567,7 +1569,7 @@ most up-to-date description of Grackle parameters, see the `Grackle parameters <
 :Summary: 
 :Type:    
 :Default: 
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 :Status:  **Not accessed**
 
@@ -1578,7 +1580,7 @@ heat
 :Summary:    :s:`Parameter for the forward euler heat equation solver`
 :Type:       :t:`float`
 :Default:    :d:`1.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Thermal diffusivity parameter for the heat equation.`
 
@@ -1589,7 +1591,7 @@ null
 :Summary:    :s:`Set the time step for the "null" Method`
 :Type:       :t:`float`
 :Default:    :d:`max (float)`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Sets the time step for the` :p:`null` :e:`Method.  This is typically used for testing the AMR meshing infrastructure without having to use any specific method.  It can also be used to add an additional maximal time step value for other methods.`
 
@@ -1605,7 +1607,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Lower limit on density`
 :Type:   :t:`float`
 :Default: :d:`1.0e-6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Density floor, which replaces Enzo's "tiny_number".`
 
@@ -1615,7 +1617,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`PPM diffusion parameter`
 :Type:   :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`PPM diffusion parameter.`
 
@@ -1626,7 +1628,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Whether to use dual-energy formalism`
 :Type:   :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Whether to use the dual-energy formalism.`
 
@@ -1636,7 +1638,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Dual energy parameter eta 1`
 :Type:   :t:`float`
 :Default: :d:`0.001`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`First dual-energy formalism parameter.`
 
@@ -1646,7 +1648,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Dual energy parameter eta 2`
 :Type:   :t:`float`
 :Default: :d:`0.1`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Second dual-energy formalism parameter.`
 
@@ -1656,7 +1658,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`PPM flattening parameter`
 :Type:   :t:`integer`
 :Default: :d:`3`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`PPM flattening parameter.`
 
@@ -1666,7 +1668,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Enzo's MinimumPressureSupportParameter`
 :Type:   :t:`integer`
 :Default: :d:`100`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
 
@@ -1676,7 +1678,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Lower limit on number density`
 :Type:   :t:`float`
 :Default: :d:`1.0e-6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Number density floor, which replaces Enzo's "tiny_number".`
 
@@ -1686,7 +1688,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Lower limit on pressure`
 :Type:   :t:`float`
 :Default: :d:`1.0e-6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Pressure floor, which replaces Enzo's "tiny_number".`
 
@@ -1696,7 +1698,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Pressure-free flag`
 :Type:   :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Pressure-free flag.` 
 
@@ -1706,7 +1708,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`PPM steepening parameter`
 :Type:   :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`PPM steepening parameter.`
 
@@ -1716,7 +1718,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Lower limit on temperature`
 :Type:   :t:`float`
 :Default: :d:`1.0e-6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Temperature floor, which replaces Enzo's "tiny_number".`
 
@@ -1726,7 +1728,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Minimum pressure support`
 :Type:   :t:`logical`
 :Default: :d:`false`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Enzo's` UseMinimumPressureSupport :e:`parameter.`
 
@@ -1736,7 +1738,7 @@ Enzo-P's PPM hydrodynamics method.
 :Summary: :s:`Mean molecular mass`
 :Type:   :t:`float`
 :Default: :d:`0.6`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 
 :e:`Mean molecular mass used in computing temperature.`
 
@@ -1750,7 +1752,7 @@ turbulence
 :Summary: :s:`Initial value for edot for turbulence Method`
 :Type:    :t:`float`
 :Default: :d:`-1.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 
 ----
@@ -1759,7 +1761,7 @@ turbulence
 :Summary: :s:`Value for Mach number in turbulence problem`
 :Type:    :t:`float`
 :Default: :d:`0.0`
-:Scope:     Enzo
+:Scope:     :z:`Enzo`
 :Todo: :o:`write`
 
 -------
@@ -1770,7 +1772,7 @@ Monitor
 :Summary: :s:`Whether to display debugging output`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`If true, then process DEBUG() statements, writing the output to both stderr and appending to files out.debug.<proc>, where <proc> is the (physical) process rank.  Note that out.debug.<proc> files are not erased at the start of a run. This parameter is not scalable and is inefficient since output files are continually opened and closed by each process.`
 
@@ -1780,7 +1782,7 @@ Monitor
 :Summary: :s:`Whether to display "verbose" output`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`If true, then output requests with Monitor::verbose() will be called.  This will generally produce more detailed output, such as which specific Blocks are refining and coarsening, etc.`
 
@@ -1797,7 +1799,7 @@ perform and on what schedule.
 :Summary: :s:`List of output file sets`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`List of active file sets, each of which has its own associated Output : <file_set> : parameters.  Any file set parameters associated with a file set not in the` `list` :e:`parameter are ignored.`
 
@@ -1807,7 +1809,7 @@ perform and on what schedule.
 :Summary: :s:`Axis of projections for image output`
 :Type:    :t:`string`
 :Default: :d:`none`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`For the "image" output type, the axis along which to project the data for 3D problems.  Values are` `"x", "y", :e:`or` "z".  :e:`See the associated type parameter.` 
@@ -1818,7 +1820,7 @@ perform and on what schedule.
 :Summary: :s:`Color map for image output`
 :Type:    :t:`list` ( :t:`float` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`For the "image" output type, a list of the form` [r\ :sub:`0`\, g\ :sub:`0`\, b\ :sub:`0`\, r\ :sub:`1`\, g\ :sub:`1`\, b\ :sub:`1`\, ...], :e:`where` 0.0 ≤ r\ :sub:`i`\,g\ :sub:`i`\,b\ :sub:`i`\ ≤ :e:`1.0 are RGB values.`
@@ -1829,7 +1831,7 @@ perform and on what schedule.
 :Summary: :s:`List of fields to output`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`List of fields for this output file set.  For "image" field types, the field list must contain exactly one field.`
 
@@ -1839,7 +1841,7 @@ perform and on what schedule.
 :Summary: :s:`List of particle types to output`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`List of particles types for this output file set..`
 
@@ -1849,7 +1851,7 @@ perform and on what schedule.
 :Summary: :s:`File names`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`""`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is *not* of :p:`type` :t:`"restart"`
 
 :e:`This parameter specifies the names of files in the corresponding file_group.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), and "proc" (the physical processor rank).  The file name should include an appropriate extension, e.g. ".png" for "image" output, and ".h5" or ".h5" for "data" output.  Example: ["projection-%04d.png", "cycle"].`
@@ -1860,7 +1862,7 @@ perform and on what schedule.
 :Summary: :s:`Name of the directory for restart dumps`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`""`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"restart"`
 
 :e:`This parameter specifies the names of output restart parameter files.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), and "proc" (the physical processor rank).  Example: ["Restart-%02d", "count"].`
@@ -1871,7 +1873,7 @@ perform and on what schedule.
 :Summary: :s:`Subset of processors to perform write`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
 :Status:    **Broken: see bug** # 13_
 
@@ -1885,7 +1887,7 @@ perform and on what schedule.
 :Summary: :s:`Type of output files`
 :Type:    :t:`string`
 :Default: :d:`"unknown"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The type of files to output in this output file set.  Supported types include "image" (PNG file of 2D fields, or projection of 3D fields) and "data".  For "image" files, see the associated colormap and axis parameters.`
 
@@ -1895,7 +1897,7 @@ perform and on what schedule.
 :Summary: :s:`Data value associated with the first color in the colormap`
 :Type:    :t:`float`
 :Default: :d:`0.0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`This parameter specifies the Field value associated with the first color in the file set's colormap.` **This value is only used if the** :p:`image_specify_bounds` **parameter is** :p:`true`.  :e:`If` :p:`image_specify_bounds` :e:`is` :p:`false`, :e:`then the minimum global value of the field is used instead.`
@@ -1906,7 +1908,7 @@ perform and on what schedule.
 :Summary: :s:`Data value associated with the last color in the colormap`
 :Type:    :t:`float`
 :Default: :d:`0.0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`This parameter specifies the Field value associated with the last color in the file set's colormap.` **This value is only used if the** :p:`image_specify_bounds` **parameter is** :p:`true`.  :e:`If` :p:`image_specify_bounds` :e:`is` :p:`false`, :e:`then the maximum global value of the field is used instead.`
@@ -1917,7 +1919,7 @@ perform and on what schedule.
 :Summary: :s:`Whether to use` :p:`image_min` :s:`and` :p:`image_max`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`This parameter determines whether to use the` :p:`image_min` :e:`and` :p:`image_max` :e:`parameters for mapping the Field data to the color map, or to use the Field data's minimum and maximum.`
@@ -1928,7 +1930,7 @@ perform and on what schedule.
 :Summary: :s:`Whether to include ghost zones in the image`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`Setting the` :p:`image_ghost` :e:`to true will include ghost zone values in the image output.  This is typically used only when debugging.  The default is false.`
@@ -1939,7 +1941,7 @@ perform and on what schedule.
 :Summary: :s:`How to handle 3D field data orthogonal to the image`
 :Type:    :t:`string`
 :Default: :d:`"sum"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`When images are generated for 3D problems, multiple data values will be associated with each pixel in the image.  This parameter defines how to handle these multiple values, including` :t:`"sum"`, :t:`"min"`, :t:`"max"`, :e:`and`, :t:`"avg"`.  :e:`For field data the default of` :t:`"sum"` :e:`is appropriate, though for images of meshes` :t:`"max"` :e:`should be used`.
@@ -1950,7 +1952,7 @@ perform and on what schedule.
 :Summary: :s:`Whether to include neighbor markers in the mesh image output`
 :Type:    :t:`integer`
 :Default: :d:`3`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`This parameter is primarily used for debugging.  Internally, each node in the mesh keeps track of the mesh level of its neighbors.  This parameter includes a marker on each face colored according to the neighbor's level.  The value of this parameter specifies the lower limit on the face "rank" (0 for corners, 1 for edges, 2 for faces).  The default of 3 means no markers are displayed.`
@@ -1961,7 +1963,7 @@ perform and on what schedule.
 :Summary: :s:`Set the size of the image`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`[0,0]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`Specify the size of the output image.  By default it is sized to be one pixel per field value at the finest mesh level.  This is useful to keep images from being to big for large problems, or too small for small problems (e.g. for mesh images which could otherwise be too small).`
@@ -1972,7 +1974,7 @@ perform and on what schedule.
 :Summary: :s:`Whether to output the log of the data`
 :Type:    :t:`logical`
 :Default: :d:`<false>`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`If true, then the natural logarithm of the field value is used for mapping values to the colormap, otherwise use the original field value.`
@@ -1983,7 +1985,7 @@ perform and on what schedule.
 :Summary: :s:`Type of image to write`
 :Type:    :t:`string`
 :Default: :d:`"data"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`This parameter is used to control whether field values are used to generate the image, whether it's an image of the mesh structure, or a combination of both.  Valid values are` :t:`"data"`, :t:`"mesh"`, :e:`or` :t:`"data+mesh"`.
@@ -1994,7 +1996,7 @@ perform and on what schedule.
 :Summary: :s:`Number of pixels for fine-level blocks in a mesh image`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`For images of meshes, this parameter defines how many pixels wide each finest-level block is in the image.  This parameter and the image_size parameter should not both be set.`
@@ -2005,7 +2007,7 @@ perform and on what schedule.
 :Summary: :s:`How to color blocks in a mesh image`
 :Type:    :t:`string`
 :Default: :d:`"level"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`By default, blocks in mesh images are colored according to the level of the block.  In addition to` :t:`"level"`, :e:`other possible ways to assign colors to blocks include` :t:`"process"` :e:`and` :t:`"age"`.
@@ -2075,7 +2077,7 @@ exactly at the specified time.
 :Summary: :s:`Variable associated with scheduling for the given file set`
 :Type:    :t:`string`
 :Default: :d:`"none"`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`The` :p:`var` :e:`parameter specifies what value is checked at each cycle, which may be` :t:`"cycle"`, :t:`"time"`, :e:`or` :t:`"seconds"` :e:`Here "time" refers to simulation time, and "seconds" to wall-clock time.  Note that when simulation "time" is specified, the simulation's time step may be reduced such that the corresponding output occurs exactly at the specified time.`
 
@@ -2085,7 +2087,7 @@ exactly at the specified time.
 :Summary: :s:`List of scheduled values for the specified variable`
 :Type:    [ :t:`list` ( :t:`integer` ) | :t:`list` ( :t:`float` ) ]
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies a list of values to check against for output with respect to cycle, time, or seconds.  If the "var" parameter associated with the schedule is "cycle", then` :p:`value` :e:`must be a list of integers; otherwise,` :p:`value` :e:`must be a list of` :t:`float`:e:`'s  The default is an empty list.`
 
@@ -2095,7 +2097,7 @@ exactly at the specified time.
 :Summary: :s:`Starting value for scheduled interval`
 :Type:    [ :t:`integer` | :t:`float` ]
 :Default: :d:`0 | 0.0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Todo:    :o:`write`
 
 ----
@@ -2104,7 +2106,7 @@ exactly at the specified time.
 :Summary: :s:`Last value for scheduled interval`
 :Type:    [ :t:`integer` | :t:`float` ]
 :Default: :d:`max (integer) | max (double)`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Todo:    :o:`write`
 
 ----
@@ -2113,7 +2115,7 @@ exactly at the specified time.
 :Summary: :s:`Stepping increment for interval`
 :Type:    [ :t:`integer` | :t:`float` ]
 :Default: :d:`1 | 1.0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 :Todo:    :o:`write`
 
 --------
@@ -2165,7 +2167,7 @@ Just as with fields, particle types can be assigned to groups_.
 :Summary: :s:`List of particle types`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Cello allows arbitrary parameter types (dark matter particles, tracer particles, star particles, etc.), each with arbitrary attributes (position, velocity, etc.).  The` :p:`list` :e:`parameter defines which types of particles to use.`
 
@@ -2183,7 +2185,7 @@ Just as with fields, particle types can be assigned to groups_.
 :Summary: :s:`Number of particles in a "batch" of particles`
 :Type:    :t:`integer`
 :Default: :d:`1024`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Particles are allocated and operated on in` *batches*.  :e:`The number of particles in a batch is set using the` :p:`batch_size` :e:`parameter.  The default batch size is 1024.`
 
@@ -2193,7 +2195,7 @@ Just as with fields, particle types can be assigned to groups_.
 :Summary: :s:`List of attribute names and data types`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`none`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Each particle type can have multiple attributes of varying types, which are defined by the` :p:`attributes` :e:`parameter.  The` :p:`attributes` :e:`parameter is a list of strings, alternating between the name of the parameter, and its type.  Names may include` :t:`"position_x"`, :t:`"velocity_z"`, :t:`"mass"`,
 :t:`"id"`, :e:`etc.  Types may include` :t:`"single"`, :t:`"double"`, :t:`"quadruple"`, :t:`"int8"`, :t:`"int16"`, :t:`"int32"`, or :t:`"int64"`.  :e:`Ordering of attributes in memory is as in the` :p:`attributes` :e:`parameter.`
@@ -2233,7 +2235,7 @@ Just as with fields, particle types can be assigned to groups_.
 :Summary: :s:`Format of output files`
 :Type:    :t:`logical`
 :Default: :d:`false`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Particle attributes within a batch of particles may be stored in memory either particle-by-particle, or "interleaved" (attribute-by-attribute).  If` |aij| :e:`represents the jth attribute of particle i, then with` :p:`interleaved = false`, :e:`attributes would be stored as` |a00| ... |am0|, |a01| ... |am1| ... |a0n| ... |amn|. :e:`If, however,` :p:`interleaved = true`, :e:`then attributes would be stored as`   |a00| ... |a0n|, |a10| ... |a1n| ... |am0| ... |amn|. :e:`Non-interleaved particle attributes have array accesses of stride 1 and minimal storage overhead, but may not utilize cache well.  Interleaved particle attributes` *may* :e:`have improved cache utilization, but will have stride > 1, and may require memory padding for correct alignment of attributes in memory.  The default is` :t:`false.`
 
@@ -2244,7 +2246,7 @@ Just as with fields, particle types can be assigned to groups_.
 :Summary: :s:`Specify a list of groups that the Particle type belongs to`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[ ]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 
 :e:`Different Particle types may belong to any number of different "groups", which allows simulation code to loop over multiple related particle types.`
@@ -2281,7 +2283,7 @@ Just as with fields, particle types can be assigned to groups_.
 :Summary: :s:`Format of output files`
 :Type:    :t:`string`
 :Default: :d:`""`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Cello needs to know which particle attributes represent position, so that it can determine when particles migrate out of a Block and need to be moved to a neighboring Block.  This is done using the` :p:`position` :e:`parameter:`
 
@@ -2308,7 +2310,7 @@ Just as with fields, particle types can be assigned to groups_.
 :Summary: :s:`Format of output files`
 :Type:    :t:`string`
 :Default: :d:`""`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Enzo may need to know which particle attributes represent velocity, for example for kick() or drift() operations.  This is done using the` :p:`velocity` :e:`parameter, whose usage is analogous to the` :p:`position` :e:`parameter.  While specifying position is required, specifying velocity is optional.`
 
@@ -2336,7 +2338,7 @@ Performance
 :Summary: :s:`Format of output files`
 :Type:    :t:`string`
 :Default: :d:`""`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This parameter specifies the format of output files, e.g. "cello-perf-%06d.data".  An` :t:`integer` :e:`specifier must be included for processor number.  Default is "", which means no performance data is written to disk.`
 
@@ -2346,7 +2348,7 @@ Performance
 :Summary: :s:`Output file processor stride`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Writing performance data to files can overload parallel file systems if one file is written per process on runs with high processor counts.  This parameter allows for a subset of processors to write to files.  E.g., if Performance:stride=3, then only processors 0, 3, 6, etc. write performance data files.`
 
@@ -2356,7 +2358,7 @@ Performance
 :Summary: :s:`Whether to output performance-related warnings`
 :Type:    :t:`logical`
 :Default: :d:`true`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`If calls to the Performance API are incorrect, e.g. if stop_region() is called on a region that has not been started, then this parameter specifies whether or not to display warning messages`
 
@@ -2366,7 +2368,7 @@ Performance
 :Summary: :s:`List of PAPI counters`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[]`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`List of PAPI hardware performance counters to trace, e.g. 'counters = ["PAPI_FP_OPS", "PAPI_L3_TCA"];'.`
 
@@ -2380,7 +2382,7 @@ Restart
 :Summary: :s:`Parameter file to read on restart`
 :Type:    :t:`string`
 :Default: :d:`""`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`This optional parameter is used to specify the name of a parameter file to read on restart.  Its purpose is to allow a simulation to be restarted with slightly different parameter values, e.g. with a smaller courant number.  Currently, very few parameters are supported in the restart parameter file, just` :p:`Field` : :p:`courant` :e:`and` :p:`Testing` : :p:`time_final`.
 
@@ -2392,7 +2394,7 @@ Stopping
 :Summary: :s:`Stopping cycle`
 :Type:    :t:`integer`
 :Default: :d:`max (` :t:`integer` :d:`)`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Stopping cycle.`
 
@@ -2402,7 +2404,7 @@ Stopping
 :Summary: :s:`Stopping time`
 :Type:    :t:`float`
 :Default: :d:`max (` :t:`double` :d:`)`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Stopping time.`
 
@@ -2412,7 +2414,7 @@ Stopping
 :Summary: :s:`Stop after this number of seconds (wall-clock time)`
 :Type:    :t:`float`
 :Default: :d:`max (` :t:`double` :d:`)`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`End the calculation after this many seconds of wall-clock time.`
 
@@ -2422,7 +2424,7 @@ Stopping
 :Summary: :s:`Stopping interval`
 :Type:    :t:`integer`
 :Default: :d:`1`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Number of cycles between applying the stopping criteria.`
 
@@ -2435,7 +2437,7 @@ Testing
 :Summary: :s:`Enzo-P unit test parameter for expected final cycle number`
 :Type:    :t:`integer`
 :Default: :d:`0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Enzo-P unit test parameter for expected final cycle number.`
 
@@ -2445,7 +2447,7 @@ Testing
 :Summary: :s:`Enzo-P unit test parameter for expected final time`
 :Type:    :t:`float`
 :Default: :d:`0.0`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Enzo-P unit test parameter for expected final time.`
 
@@ -2455,6 +2457,6 @@ Testing
 :Summary: :s:`Tolerance on the absolute error between actual final time and time_final`
 :Type:    :t:`float`
 :Default: :d:`1.0e-6`
-:Scope:     Cello
+:Scope:     :c:`Cello`
 
 :e:`Enzo-P unit test parameter for tolerance on the expected final time.`
