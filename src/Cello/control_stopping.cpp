@@ -237,6 +237,7 @@ void Block::ResumeFromSync()
   TRACE_STOPPING("Block::balance_exit");
 
   if (index_.is_root()) thisProxy.doneInserting();
+
   stopping_exit_();
 
 }

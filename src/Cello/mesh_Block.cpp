@@ -567,12 +567,15 @@ std::string Block::name() const throw()
       blocking[1] /= 2;
       blocking[2] /= 2;
     }
+
     int bits[3] = {0,0,0};
-    while (blocking[0]/=2) ++bits[0];
-    while (blocking[1]/=2) ++bits[1];
-    while (blocking[2]/=2) ++bits[2];
-    // int bits = 0;
-    // while (nb/=2) ++bits;
+    
+    blocking[0]--;
+    blocking[1]--;
+    blocking[2]--;
+    if (blocking[0]) do { ++bits[0]; } while (blocking[0]/=2);
+    if (blocking[1]) do { ++bits[1]; } while (blocking[1]/=2);
+    if (blocking[2]) do { ++bits[2]; } while (blocking[2]/=2);
 
     std::string name = "B" + index_.bit_string(level(),rank,bits);
     return name;

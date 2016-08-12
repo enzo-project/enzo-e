@@ -59,10 +59,10 @@ public: // virtual functions
 protected: // functions
 
   /// Initial particle positions are a uniform array if mpp_ == 0
-  int uniform_placement_ (Block * block, Field field, Particle particle);
-
+  void uniform_placement_ (Block * block, Field field, Particle particle);
+  
   /// Initial particle positions are random based on local density
-  int density_placement_ (Block * block, Field field, Particle particle);
+  void density_placement_ (Block * block, Field field, Particle particle);
 
 protected: // attributes
 

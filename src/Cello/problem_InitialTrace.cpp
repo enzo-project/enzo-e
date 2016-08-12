@@ -38,18 +38,16 @@ void InitialTrace::enforce_block
   Field    field    (block->data()->field());
   Particle particle (block->data()->particle());
 
-  int ip = 0;
-
   if (mpp_ == 0.0) {
-    ip = uniform_placement_ (block,field,particle);
+    uniform_placement_ (block,field,particle);
   } else {
-    ip = density_placement_ (block,field,particle);
+    density_placement_ (block,field,particle);
   }
 }
 
 //----------------------------------------------------------------------
 
-int InitialTrace::uniform_placement_ 
+void InitialTrace::uniform_placement_ 
 (Block * block, Field field, Particle particle)
 {
   // Insert new tracer particles, one per cell
@@ -138,14 +136,12 @@ int InitialTrace::uniform_placement_
     
       }
     }
-      
   }
-  return ip;
 }
 
 //----------------------------------------------------------------------
 
-int InitialTrace::density_placement_ 
+void InitialTrace::density_placement_ 
 (Block * block, Field field, Particle particle)
 {
   // Get density field d
@@ -300,7 +296,6 @@ int InitialTrace::density_placement_
     id0_[in] += CkNumPes();
     
   }
-  return np;
 }
 
 //----------------------------------------------------------------------

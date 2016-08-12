@@ -460,8 +460,8 @@ if (use_papi):
 # HDF5 PATHS
 #----------------------------------------------------------------------
 
-cpppath = cpppath + [hdf5_path + '/include' ]
-libpath = libpath + [hdf5_path + '/lib']
+cpppath = cpppath + [ hdf5_inc ]
+libpath = libpath + [ hdf5_lib ]
 
 if (mpi_path != ''):
    cpppath = cpppath + [mpi_path + '/include']

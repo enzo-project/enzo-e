@@ -20,6 +20,8 @@ libs_fortran    = ['gfortran']
 home = '/home/ux452912'
 
 hdf5_path    = os.environ['HDF5HOME']
+hdf5_inc = hdf5_path + '/include'
+hdf5_lib = hdf5_path + '/lib'
 mpi_path     = os.environ['MPIHOME']
 #charm_path   = home + '/public/Charm/651/gnu/mvapich2/charm'
 charm_path   = home + '/Charm/charm/'

@@ -43,20 +43,20 @@ void * Memory::allocate ( size_t bytes ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
 
-  if (max_allocate_warning_ && (bytes >= max_allocate_warning_)) {
+  if (warning_mb_ != 0.0 && ( (bytes) >= (1e6)*warning_mb_)) {
     // WARNING: do not use WARNING since allocates memory, leading to
     //          recursive calls to overloaded operator new 
-    CkPrintf ("%d Allocating %d > %d bytes\n",
-  	      CkMyPe(),bytes,max_allocate_warning_);
+    CkPrintf ("%d WARNING: Allocating %lld bytes > %f MB\n",
+  	      CkMyPe(),bytes,warning_mb_);
   }
 
-  if (max_allocated_error_ && (bytes_curr_.size() > 0)  &&
-      (bytes_curr_[0] + bytes >= max_allocated_error_)) {
+  if (limit_gb_ != 0.0 && (bytes_curr_.size() > 0)  &&
+      ( ( (bytes_curr_[0] + bytes) <  0 ) ||
+	( (bytes_curr_[0] + bytes) >= (1e9)*limit_gb_))) {
     // WARNING: do not use ERROR or ASSERT since allocates memory, leading to
     //          recursive calls to overloaded operator new 
-    CkPrintf ("%d Trying to allocate a total of %lld bytes with limit of %lld\n",
-	      CkMyPe(),
-	      bytes_curr_[0] + bytes,max_allocated_error_);
+    CkPrintf ("%d ERROR: Cannot allocate %lld bytes: limit is %f GB\n",
+	      CkMyPe(), (bytes_curr_[0] + bytes),limit_gb_);
     CkExit();
   }
 
@@ -154,7 +154,7 @@ void Memory::new_group ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::bytes ( std::string group_name ) throw ()
+int64_t Memory::bytes ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   return bytes_curr_[index_group(group_name)];
@@ -165,7 +165,7 @@ long long Memory::bytes ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::bytes_available ( std::string group_name ) throw ()
+int64_t Memory::bytes_available ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -185,8 +185,8 @@ float Memory::efficiency ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
-  printf ("bytes_limit_[%d] = %lld\n",index_group,bytes_limit_[index_group]);
-  printf ("bytes_curr_[%d] = %lld\n",index_group,bytes_curr_[index_group]);
+  printf ("bytes_limit_[%d] = %ld\n",index_group,bytes_limit_[index_group]);
+  printf ("bytes_curr_[%d] = %ld\n",index_group,bytes_curr_[index_group]);
   if (bytes_limit_[index_group] != 0) {
     return (float) bytes_curr_[index_group] / bytes_limit_[index_group];
   } else {
@@ -200,7 +200,7 @@ float Memory::efficiency ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::bytes_high ( std::string group_name ) throw ()
+int64_t Memory::bytes_high ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -213,7 +213,7 @@ long long Memory::bytes_high ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-long long Memory::bytes_highest ( std::string group_name ) throw ()
+int64_t Memory::bytes_highest ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   int index_group = this->index_group(group_name);
@@ -226,7 +226,7 @@ long long Memory::bytes_highest ( std::string group_name ) throw ()
 
 //----------------------------------------------------------------------
 
-void Memory::set_bytes_limit ( long long size, std::string group_name )
+void Memory::set_bytes_limit ( int64_t size, std::string group_name )
   throw ()
 {
 #ifdef CONFIG_USE_MEMORY
@@ -237,7 +237,7 @@ void Memory::set_bytes_limit ( long long size, std::string group_name )
 
 //----------------------------------------------------------------------
 
-long long Memory::bytes_limit ( std::string group_name ) throw ()
+int64_t Memory::bytes_limit ( std::string group_name ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   return bytes_limit_[index_group(group_name)];

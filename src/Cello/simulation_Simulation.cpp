@@ -174,7 +174,11 @@ void Simulation::initialize_simulation_() throw()
 void Simulation::initialize_memory_() throw()
 {
   Memory * memory = Memory::instance();
-  if (memory) memory->set_active(config_->memory_active);
+  if (memory) {
+    memory->set_active(config_->memory_active);
+    memory->set_warning_mb (config_->memory_warning_mb);
+    memory->set_limit_gb (config_->memory_limit_gb);
+  }
   
 }
 //----------------------------------------------------------------------

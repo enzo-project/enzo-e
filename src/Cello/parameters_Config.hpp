@@ -109,6 +109,8 @@ public: // attributes
   // Memory
 
   bool                       memory_active;
+  double                     memory_warning_mb;
+  double                     memory_limit_gb;
 
   // Mesh
 

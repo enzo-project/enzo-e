@@ -128,6 +128,9 @@ void Monitor::header () const
   print ("Define","CHARM_NEW_CHARM %s","no");
 #endif
 
+  print ("CHARM","CkNumPes()           %d",CkNumPes());
+  print ("CHARM","CkNumNodes()         %d",CkNumNodes());
+
 }
 
 //----------------------------------------------------------------------

@@ -24,6 +24,8 @@ charm_path = home + '/Charm/charm'
 papi_path  = home
 png_path   = home
 hdf5_path  = os.environ["CRAY_HDF5_DIR"]
+hdf5_inc = hdf5_path + '/include'
+hdf5_lib = hdf5_path + '/lib'
 
 if (type == "mpi"):
    parallel_run = "aprun -n 8"

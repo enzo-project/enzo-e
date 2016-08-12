@@ -190,7 +190,7 @@ function tests($component,$testrun,$output,$test_name,$dir) {
       $type = $types[$i];
       $output_file = "../test/$dir/$output.unit";
       if (file_exists($output_file)) {
-	test($type,$output_file,"FAIL");
+	test($output_file,"FAIL");
       }
     }
     echo "</tr></table>";
@@ -199,7 +199,7 @@ function tests($component,$testrun,$output,$test_name,$dir) {
 
 //----------------------------------------------------------------------
 
-function test($type,$output,$type) {
+function test($output,$type) {
   $ltype = strtolower($type);
 
   $cols = "$4,$6,$7,$8,$9,$10";

@@ -47,12 +47,23 @@ if charm_path is None:
 
 # papi_path    = '/usr/local'
 
-hdf5_path = os.getenv('HDF5_HOME')
-if hdf5_path is None:
+hdf5_inc = os.getenv('HDF5_INC')
+if hdf5_inc is None:
 	if os.path.exists('/usr/include/hdf5.h'):
-		hdf5_path    = '/usr'
+	        hdf5_inc    = '/usr/include'
+	elif os.path.exists('/usr/include/hdf5/serial/hdf5.h'):
+		hdf5_inc    = '/usr/include/hdf5/serial'
 	else:
-		raise Exception('HDF5 was not found.  Try setting the HDF5_HOME environment variable such that $HDF5_HOME/include/hdf5.h exists.')
+		raise Exception('HDF5 include file was not found.  Try setting the HDF5_INC environment variable such that $HDF5_INC/hdf5.h exists.')
+
+hdf5_lib = os.getenv('HDF5_LIB')
+if hdf5_lib is None:
+	if os.path.exists('/usr/lib/libhdf5.a'):
+		hdf5_lib    = '/usr/lib'
+	elif os.path.exists('/usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.a'):
+		hdf5_lib    = '/usr/lib/x86_64-linux-gnu/hdf5/serial'
+	else:
+		raise Exception('HDF5 lib file was not found.  Try setting the HDF5_LIB environment variable such that $HDF5_LIB/libhdf5.a exists.')
 
 png_path = os.getenv('LIBPNG_HOME')
 if png_path is None:

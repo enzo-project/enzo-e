@@ -86,6 +86,8 @@ void Config::pup (PUP::er &p)
   // Memory
 
   p | memory_active;
+  p | memory_warning_mb;
+  p | memory_limit_gb;
 
   // Mesh
 
@@ -574,7 +576,8 @@ void Config::read_memory_ (Parameters * p) throw()
   //--------------------------------------------------
 
   memory_active = p->value_logical("Memory:active",true);
-
+  memory_warning_mb =  p->value_float("Memory:warning_mb",0.0);
+  memory_limit_gb =    p->value_float("Memory:limit_gb",0.0);
 }
 
 //----------------------------------------------------------------------

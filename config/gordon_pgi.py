@@ -25,6 +25,8 @@ home = os.environ["HOME"]
 charm_path = home + '/Charm/charm'
 papi_path  = home
 hdf5_path  = os.environ['HDF5HOME']
+hdf5_inc = hdf5_path + '/include'
+hdf5_lib = hdf5_path + '/lib'
 mpi_path   = os.environ['MPIHOME']
 
 png_path   = '/usr/lib64'

@@ -21,7 +21,8 @@ home = os.environ['HOME']
 
 charm_path   = home + '/codes/charm-6.5.1'
 papi_path    = '/usr/local'
-hdf5_path    = '/opt/local'
+hdf5_inc    = '/opt/local/include'
+hdf5_lib    = '/opt/local/lib'
 png_path     = '/opt/local'
 grackle_path = home + '/Software/Grackle/src/clib'
 

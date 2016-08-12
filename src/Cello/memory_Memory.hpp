@@ -33,8 +33,8 @@ private: // interface
   Memory() throw ()
 #ifdef CONFIG_USE_MEMORY
   : is_active_(false),
-    max_allocate_warning_(10000000),
-    max_allocated_error_ (2000000000 )
+    warning_mb_(0.0),
+    limit_gb_ (0.0)
 #endif
   { initialize_(); };
 
@@ -95,26 +95,26 @@ public: // interface
   { return group_name_[index_group_]; }
 
   /// Current number of bytes allocated
-  long long bytes ( std::string group = "" ) throw ();
+  int64_t bytes ( std::string group = "" ) throw ();
   
   /// Estimate of used / available memory
   float efficiency ( std::string group = "" ) throw ();
 
   /// Maximum number of bytes allocated within an interval
-  long long bytes_high ( std::string group = "" ) throw ();
+  int64_t bytes_high ( std::string group = "" ) throw ();
 
   /// Maximum number of bytes allocated during run
-  long long bytes_highest ( std::string group = "" ) throw ();
+  int64_t bytes_highest ( std::string group = "" ) throw ();
 
   /// Specify the maximum number of bytes to use
-  void set_bytes_limit ( long long size, 
+  void set_bytes_limit ( int64_t size, 
 			 std::string group = "") throw ();
 
   /// Return the limit on number of bytes to use
-  long long bytes_limit ( std::string group = "") throw ();
+  int64_t bytes_limit ( std::string group = "") throw ();
 
   /// Query the maximum number of bytes left to use, 0 if unknown
-  long long bytes_available ( std::string group = "" ) throw ();
+  int64_t bytes_available ( std::string group = "" ) throw ();
 
   /// Return the number of calls to allocate for the group
   int num_new ( std::string group = "" ) throw ();
@@ -164,17 +164,17 @@ public: // interface
 #endif
   };
 
-  void set_max_allocate_warning (size_t value)
+  void set_warning_mb (float value)
   { 
 #ifdef CONFIG_USE_MEMORY
-    max_allocate_warning_ = value; 
+    warning_mb_ = value; 
 #endif
 }
 
-  void set_max_allocated_error (size_t value)
+  void set_limit_gb (float value)
   {
 #ifdef CONFIG_USE_MEMORY
-  max_allocated_error_ = value;
+  limit_gb_ = value;
 #endif
  }
 
@@ -206,28 +206,28 @@ private: // attributes
   char fill_delete_;
 
   /// Limit on number of bytes to allocate.  Currently not checked.
-  std::vector<long long> bytes_limit_;
+  std::vector<int64_t> bytes_limit_;
 
   /// Current bytes allocated for different groups
-  std::vector<long long> bytes_curr_;
+  std::vector<int64_t> bytes_curr_;
 
   /// Intervaled high-water bytes allocated for different groups
-  std::vector<long long> bytes_high_;
+  std::vector<int64_t> bytes_high_;
 
   /// High-water bytes allocated for different groups
-  std::vector<long long> bytes_highest_;
+  std::vector<int64_t> bytes_highest_;
 
   /// Number of calls to new for different groups
-  std::vector<long long> new_calls_;
+  std::vector<int64_t> new_calls_;
 
   /// Number of calls to delete for different groups
-  std::vector<long long> delete_calls_;
+  std::vector<int64_t> delete_calls_;
 
   /// Limit on single memory allocation to display warning
-  size_t max_allocate_warning_;
+  float  warning_mb_;
 
   /// Limit on total memory allocated before error (to prevent crashing machine)
-  size_t max_allocated_error_;
+  float  limit_gb_;
 
 #endif
 

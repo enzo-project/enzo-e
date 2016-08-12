@@ -47,7 +47,6 @@ public: // interface
   /// Write parameters to a file
   void write (const char * file_name);
 
-
   int value (std::string s, int deflt) throw()
   { return value_integer(s,deflt); }
 
