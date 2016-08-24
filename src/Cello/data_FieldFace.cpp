@@ -13,6 +13,10 @@
 
 long FieldFace::counter[MAX_NODE_SIZE] = {0};
 
+#define FORTRAN_NAME(NAME) NAME##_
+extern "C" void FORTRAN_NAME(field_face_store_double)
+  (double * field, double * array, int * nd3, int * n3, int * im3);
+
 enum enum_op_type {
   op_unknown,
   op_load,
@@ -554,20 +558,47 @@ size_t FieldFace::load_
 template<class T> size_t FieldFace::store_
 ( T * field_ghost, const T * array, int nd3[3], int n3[3],int im3[3] ) throw()
 {
-  for (int iz=0; iz <n3[2]; iz++)  {
-    int kz = iz+im3[2];
-    for (int iy=0; iy < n3[1]; iy++) {
-      int ky = iy+im3[1];
-      for (int ix=0; ix < n3[0]; ix++) {
-	int kx = ix+im3[0];
-	int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
-	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-	field_ghost[index_field] = array[index_array];
-      }
-    }
+
+  // #define NEW_STORE
+
+#ifdef NEW_STORE
+
+  // This is to get around a bug on SDSC Comet where this function
+  // crashes with -O3 (See Enzo-P / Cello bug report #90)
+  // http://client64-249.sdsc.edu/cello-bug/show_bug.cgi?id=90
+
+  if (sizeof(T)==sizeof(double)) {
+    store_double_((double *)field_ghost,(double *)array, nd3,n3,im3);
+  } else {
+    ERROR1 ("FieldFace::store_()",
+	   "unknown float precision sizeof(T) = %d\n",sizeof(T));
   }
 
+#else
+
+   for (int iz=0; iz <n3[2]; iz++)  {
+     int kz = iz+im3[2];
+     for (int iy=0; iy < n3[1]; iy++) {
+       int ky = iy+im3[1];
+       for (int ix=0; ix < n3[0]; ix++) {
+   	int kx = ix+im3[0];
+   	int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
+   	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+   	field_ghost[index_field] = array[index_array];
+       }
+     }
+   }
+
+#endif
+
   return (sizeof(T) * n3[0] * n3[1] * n3[2]);
+
+}
+
+size_t FieldFace::store_double_
+( double * field_ghost, const double * array, int nd3[3], int n3[3],int im3[3] ) throw()
+{
+  FORTRAN_NAME(field_face_store_double)(field_ghost,(double *)array, nd3,n3,im3);
 }
 
 //----------------------------------------------------------------------
