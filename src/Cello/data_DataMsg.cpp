@@ -86,8 +86,7 @@ char * DataMsg::save_data (char * buffer) const
   CkPrintf ("%p DataMsg save_data n_ff %d\n",this, n_ff);
 #endif
   if (n_ff > 0) {
-    ff->save_data (pc);
-    pc += n_ff;
+    pc = ff->save_data (pc);
   }
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%p DataMsg save_data n_fa %d\n",this, n_fa);
@@ -100,8 +99,7 @@ char * DataMsg::save_data (char * buffer) const
   CkPrintf ("%p DataMsg save_data n_pa %d\n",this, n_pa);
 #endif
   if (n_pa > 0) {
-    pd->save_data(particle_descr,pc);
-    pc += n_pa;
+    pc = pd->save_data(particle_descr,pc);
   }
 
   // return first byte after filled buffer

@@ -84,8 +84,9 @@ void Simulation::r_initialize_forest(CkReductionMsg * msg)
 void Simulation::r_initialize_hierarchy(CkReductionMsg * msg) 
 {
   delete msg;
+
   if (CkMyPe() == 0) {
-    
+
     // --------------------------------------------------
     // ENTRY: #3 Simulation::r_initialize_hierarchy() -> Block::p_adapt_mesh()
     // ENTRY: Block Array if Simulation is_root()

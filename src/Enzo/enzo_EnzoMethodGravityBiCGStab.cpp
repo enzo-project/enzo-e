@@ -409,6 +409,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
     A_(new EnzoMatrixLaplace),
     M_(NULL),
     is_singular_(is_singular),
+    first_call_(true),
     rank_(rank),
     grav_const_(grav_const),
     iter_max_(iter_max), 
@@ -433,7 +434,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
     id_refresh_X_(-1),
     id_refresh_Y_(-1)
 {
-
+  
   /// set preconditioning operator
   M_ = (diag_precon) ? (Matrix*)(new EnzoMatrixDiagonal) 
                      : (Matrix*)(new EnzoMatrixIdentity);
@@ -474,7 +475,6 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   // field_descr->set_precision(iq_, precision);
   // iu_ = field_descr->insert_temporary(name() + "_U");
   // field_descr->set_precision(iu_, precision);
-
 
   const int num_fields = field_descr->field_count();
 
@@ -553,7 +553,11 @@ void EnzoMethodGravityBiCGStab::compute(Block* block) throw() {
 
 /// eventually replace this with a more flexible reduction type
 /// (this one requires an array with 4 entries but handles long doubles)
-extern CkReduction::reducerType r_method_gravity_bicgstab_type;
+
+extern CkReduction::reducerType sum_long_double_type;
+extern CkReduction::reducerType sum_long_double_2_type;
+extern CkReduction::reducerType sum_long_double_3_type;
+extern CkReduction::reducerType sum_long_double_4_type;
 
 template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block) throw() {
 
@@ -574,16 +578,37 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
 
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from the previous solve?]
     /// set B = -h^2 * 4 * PI * G * density
-    for (int iz=0; iz<mz_; iz++) 
-      for (int iy=0; iy<my_; iy++) 
-	for (int ix=0; ix<mx_; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
-	  X[i] = 0.0;
-	  B[i] = - 4.0 * (cello::pi) * grav_const_ * density[i];
+
+
+    long double xsum = 0.0;
+   
+    if (first_call_) {
+
+      for (int iz=0; iz<mz_; iz++) {
+	for (int iy=0; iy<my_; iy++) { 
+	  for (int ix=0; ix<mx_; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    X[i] = 0.0;
+	    B[i] = - 4.0 * (cello::pi) * grav_const_ * density[i];
+	    xsum += X[i];
+	  }
 	}
+      }
+    } else {
+      for (int iz=0; iz<mz_; iz++) {
+	for (int iy=0; iy<my_; iy++) {
+	  for (int ix=0; ix<mx_; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    B[i] = - 4.0 * (cello::pi) * grav_const_ * density[i];
+	    xsum += X[i];
+	  }
+	}
+      }
+    }
   }
 
-  /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
+
+    /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
   if (is_singular_) {
 
     /// set bs_ = SUM(B)   ==> r_gravity_bicgstab_start_1
@@ -599,7 +624,7 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
     CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_start_1<T>(NULL), 
 			enzo_block->proxy_array());
     enzo_block->contribute(4*sizeof(long double), &reduce, 
-			   r_method_gravity_bicgstab_type, callback);
+			   sum_long_double_4_type, callback);
 
   } else {
 
@@ -665,17 +690,17 @@ template<class T> void EnzoMethodGravityBiCGStab::start_2(EnzoBlock* enzo_block)
   }
 
   /// Compute local contributions to beta_n_ = DOT(R, R)
-  long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
+  long double reduce = 0.0;
   if (enzo_block->is_leaf()) {
     T* R = (T*) field.values(ir_);
-    reduce[0] = dot_(R,R);
+    reduce = dot_(R,R);
   }
   
   /// initiate callback for r_gravity_bicgstab_start_3 and contribute to dot-product
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_start_3<T>(NULL), 
 		      enzo_block->proxy_array());
-  enzo_block->contribute(4*sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  enzo_block->contribute(sizeof(long double), &reduce, 
+			 sum_long_double_type, callback);
 }
 
 //----------------------------------------------------------------------
@@ -841,8 +866,8 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_4(EnzoBlock* enzo_block) 
   /// initiate callback to r_gravity_bicgstab_loop_5 and contribute to global sums
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
-  enzo_block->contribute(4*sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  enzo_block->contribute(3*sizeof(long double), &reduce, 
+			 sum_long_double_3_type, callback);
 
 
 }
@@ -1016,7 +1041,7 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_10(EnzoBlock* enzo_block)
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_11<T>(NULL), 
 		      enzo_block->proxy_array());
   enzo_block->contribute(4*sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+			 sum_long_double_4_type, callback);
     
 }
 
@@ -1115,8 +1140,8 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_12(EnzoBlock* enzo_block)
   /// initiate callback to r_gravity_bicgstab_loop_13, and contribute to overall dot-products
   CkCallback callback(CkIndex_EnzoBlock::r_gravity_bicgstab_loop_13<T>(NULL), 
 		      enzo_block->proxy_array());
-  enzo_block->contribute(4*sizeof(long double), &reduce, 
-			 r_method_gravity_bicgstab_type, callback);
+  enzo_block->contribute(2*sizeof(long double), &reduce, 
+			 sum_long_double_2_type, callback);
     
 }
 
@@ -1287,6 +1312,8 @@ void EnzoMethodGravityBiCGStab::acc(EnzoBlock* enzo_block) throw()
 						 rank_, order=4);
     compute_acceleration.compute(enzo_block);
   }
+
+  first_call_ = false;
 
   this->refresh(id_refresh_ACC_)->set_active(enzo_block->is_leaf());
   enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_exit(),

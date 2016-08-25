@@ -166,7 +166,10 @@ void EnzoMethodGravityCg::compute ( Block * block) throw()
 
 //======================================================================
 
-extern CkReduction::reducerType r_method_gravity_cg_type;
+extern CkReduction::reducerType sum_long_double_type;
+extern CkReduction::reducerType sum_long_double_2_type;
+extern CkReduction::reducerType sum_long_double_3_type;
+extern CkReduction::reducerType sum_long_double_4_type;
 
 template <class T>
 void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
@@ -249,7 +252,7 @@ void EnzoMethodGravityCg::compute_ (EnzoBlock * enzo_block) throw()
 	  
   TRACE_METHOD("   cg_loop_0a contribute");
   enzo_block->contribute (3*sizeof(long double), &reduce, 
-			  r_method_gravity_cg_type, 
+			  sum_long_double_3_type, 
 			  callback);
   TRACE_METHOD("   cg_loop_0a contribute");
   
@@ -384,16 +387,12 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
     } 
   }
 
-  long double reduce[3] = {0.0, 0.0, 0.0};
+  long double reduce = 0;
 
   if (enzo_block->is_leaf()) {
 
     T * R  = (T*) field.values(ir_);
-    reduce[0] = dot_(R,R);
-
-  } else {
-
-    reduce[0] = 0.0;
+    reduce = dot_(R,R);
 
   } 
 
@@ -408,8 +407,8 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 #endif
 
   TRACE_METHOD("   cg_shift_1 contribute");
-  enzo_block->contribute (3*sizeof(long double), &reduce, 
-			  r_method_gravity_cg_type, 
+  enzo_block->contribute (sizeof(long double), &reduce, 
+			  sum_long_double_type, 
 			  callback);
   TRACE_METHOD("   cg_shift_1 contribute");
   TRACE_METHOD("Method::cg_shift_1() EXIT");
@@ -523,7 +522,7 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 
     TRACE_METHOD("cg_loop_3 contribute");
     enzo_block->contribute (3*sizeof(long double), &reduce, 
-			    r_method_gravity_cg_type,
+			    sum_long_double_3_type,
 			    callback);
     TRACE_METHOD("cg_loop_3 contribute");
   }
@@ -625,7 +624,7 @@ void EnzoMethodGravityCg::cg_loop_4 (EnzoBlock * enzo_block) throw ()
 
   TRACE_METHOD("cg_loop_5 contribute");
   enzo_block->contribute (3*sizeof(long double), &reduce, 
-			  r_method_gravity_cg_type, 
+			  sum_long_double_3_type, 
 			  callback);
   TRACE_METHOD("cg_loop_5 contribute");
 

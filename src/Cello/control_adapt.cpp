@@ -19,9 +19,10 @@
 #   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
   {									\
     char buffer [256];							\
-    sprintf (buffer,"%s %s"						\
+    int nb3[3] = {1,1,1};						\
+    sprintf (buffer,"%s %s -> %s"					\
 	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d",		\
-	     MSG,name().c_str(),LEVEL_NOW,LEVEL_NEW,			\
+	     MSG,name().c_str(),INDEX_RECV.bit_string(2,2,nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
 	     IF3[0],IF3[1],IF3[2],IC3[0],IC3[1],IC3[2]);		\
     INDEX_SEND.print(buffer,-1,2,false,simulation());			\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
@@ -574,8 +575,9 @@ void Block::p_adapt_recv_level
 
   if ( ! is_leaf()) {
 
-    ERROR ("Block::p_adapt_recv_level()",
-	   "This block is not a leaf");
+    ERROR1 ("Block::p_adapt_recv_level()",
+	    "Block %s is not a leaf",
+	    name().c_str());
   }
 
 

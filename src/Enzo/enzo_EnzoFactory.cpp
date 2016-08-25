@@ -224,7 +224,7 @@ Block * EnzoFactory::create_block
 #ifdef CELLO_DEBUG
   index.print("DEBUG insert()",-1,2,false,simulation);
 #endif
-
+  
 #ifdef NEW_REFRESH_REFINE
 
   MsgRefine * msg = new MsgRefine 

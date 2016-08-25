@@ -283,7 +283,7 @@ void Block::init
   int na3[3];
   size_forest(&na3[0],&na3[1],&na3[2]);
 
-  int ic3[3];
+  int ic3[3] = {0,0,0};
   if (level > 0) index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
 
 #ifdef DEBUG_NEW_REFRESH
@@ -615,7 +615,7 @@ void Block::lower
   if (xm) (*xm) = xbm;
   if (ym) (*ym) = ybm;
   if (zm) (*zm) = zbm;
-  TRACE6 ("DEBUG LOWER %d %d %d  %f %f %f",ix,iy,iz,*xm,*ym,*zm);
+  TRACE6 ("DEBUG LOWER %d %d %d  %g %g %g",ix,iy,iz,*xm,*ym,*zm);
 }
 
 //----------------------------------------------------------------------

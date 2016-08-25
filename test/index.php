@@ -1,6 +1,14 @@
 <html>
 <head>
-<title>Enzo-P / Cello Test Results</title>
+<title>
+<?php
+chdir ("..");
+$pos = strrpos(getcwd(),"/");
+$dir = substr(getcwd(),$pos+1);
+chdir ("test");
+printf ("%s",$dir);
+?>
+</title>
 <link href="cello.css" rel="stylesheet" type="text/css">
 
    <?php
@@ -11,9 +19,9 @@
    </head>
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
-
    <table>
-   <tr> <th> Cello branch </th> <td> <?php system ("hg branch") ?></td> </tr>
+<tr> <th> Cello directory </th> <td> <?php printf ($dir) ?></td> </tr>
+   <tr> <th> Cello branch </th> <td align="left"> <?php system ("hg branch") ?></td> </tr>
    <tr> <th> Cello revision </th>  <td> <?php system ("hg id -n") ?> </td> </tr>
    <tr> <th> Charm++ version </th> <td> <?php system ("cat CHARM_VERSION") ?> </td> </tr>
    </table>

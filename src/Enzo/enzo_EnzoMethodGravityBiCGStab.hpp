@@ -57,6 +57,7 @@ public: // interface
     p | M_;
 
     p | is_singular_;
+    p | first_call_;
     p | rank_;
     p | grav_const_;
     p | iter_max_;
@@ -217,6 +218,9 @@ protected: // attributes
   /// Whether you need to project b into R(A), e.g. fully periodic or Neumann problems
   bool is_singular_;
 
+  /// Whether this is the first call to the solver
+  bool first_call_;
+  
   /// Dimensionality of the problem
   int rank_;
 

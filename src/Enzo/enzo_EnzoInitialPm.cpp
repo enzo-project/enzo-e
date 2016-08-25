@@ -21,7 +21,7 @@ void EnzoInitialPm::pup (PUP::er &p)
 
   p | field_;
   p | mpp_;
-  p | *mask_;
+  p | mask_; // pup::able
 
 }
 

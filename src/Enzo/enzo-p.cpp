@@ -64,8 +64,9 @@ PARALLEL_MAIN_BEGIN
   FILE * fp = fopen("NODE_SIZE","r");
   if (fp) {
     fscanf (fp,"%d",&node_size);
+    fclose (fp);
   }
-
+  
   // Initialize unit testing
 
   const int ip = CkMyPe();
