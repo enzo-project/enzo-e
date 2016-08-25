@@ -178,7 +178,7 @@ includes_simulation.append(['simulation.decl.h','simulation.def.h'])
 
 sources_disk.append(['main.cpp'])
 sources_error.append(['main.cpp'])
-sources_data.append(['main_simulation.cpp','field_face_store_double.F'])
+sources_data.append(['main_simulation.cpp','field_face_store.F'])
 sources_io.append(['main_simulation.cpp'])
 sources_memory.append(["main.cpp"])
 sources_mesh.append(['main_mesh.cpp'])

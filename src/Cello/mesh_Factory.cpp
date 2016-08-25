@@ -66,10 +66,10 @@ CProxy_Block Factory::create_block_array
   CProxy_Block proxy_block;
 
   // --------------------------------------------------
-  // ENTRY: #1 Factory::create_block_array() -> ArrayMap::ArrayMap()
+  // ENTRY: #1 Factory::create_block_array() -> MappingArray::MappingArray()
   // ENTRY: create
   // --------------------------------------------------
-  CProxy_ArrayMap array_map  = CProxy_ArrayMap::ckNew(nbx,nby,nbz);
+  CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
   // --------------------------------------------------
 
   CkArrayOptions opts;

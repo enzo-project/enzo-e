@@ -14,8 +14,13 @@
 long FieldFace::counter[MAX_NODE_SIZE] = {0};
 
 #define FORTRAN_NAME(NAME) NAME##_
-extern "C" void FORTRAN_NAME(field_face_store_double)
-  (double * field, double * array, int * nd3, int * n3, int * im3);
+
+extern "C" void FORTRAN_NAME(field_face_store_4)
+  (float * field, float * array, int * nd3, int * n3);
+extern "C" void FORTRAN_NAME(field_face_store_8)
+  (double * field, double * array, int * nd3, int * n3);
+extern "C" void FORTRAN_NAME(field_face_store_16)
+  (long double * field, long double * array, int * nd3, int * n3);
 
 enum enum_op_type {
   op_unknown,
@@ -556,19 +561,39 @@ size_t FieldFace::load_
 //----------------------------------------------------------------------
 
 template<class T> size_t FieldFace::store_
-( T * field_ghost, const T * array, int nd3[3], int n3[3],int im3[3] ) throw()
+( T * ghost, const T * array, int nd3[3], int n3[3],int im3[3] ) throw()
 {
 
-  // #define NEW_STORE
+#define FORTRAN_STORE
 
-#ifdef NEW_STORE
+#ifdef FORTRAN_STORE
 
   // This is to get around a bug on SDSC Comet where this function
   // crashes with -O3 (See Enzo-P / Cello bug report #90)
   // http://client64-249.sdsc.edu/cello-bug/show_bug.cgi?id=90
 
-  if (sizeof(T)==sizeof(double)) {
-    store_double_((double *)field_ghost,(double *)array, nd3,n3,im3);
+  union {
+    float *       ghost_4;
+    double *      ghost_8;
+    long double * ghost_16;
+  };
+  union {
+    float *       array_4;
+    double *      array_8;
+    long double * array_16;
+  };
+
+  ghost_4 = (float *) ghost;
+  array_4 = (float *) array;
+  
+  int im = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
+
+  if (sizeof(T)==sizeof(float)) {
+    FORTRAN_NAME(field_face_store_4)(ghost_4 + im,   array_4, nd3,n3);
+  } else if (sizeof(T)==sizeof(double)) {
+    FORTRAN_NAME(field_face_store_8)(ghost_8 + im,   array_8, nd3,n3);
+  } else if (sizeof(T)==sizeof(long double)) {
+    FORTRAN_NAME(field_face_store_16)(ghost_16 + im, array_16, nd3,n3);
   } else {
     ERROR1 ("FieldFace::store_()",
 	   "unknown float precision sizeof(T) = %d\n",sizeof(T));
@@ -584,7 +609,7 @@ template<class T> size_t FieldFace::store_
    	int kx = ix+im3[0];
    	int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
    	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-   	field_ghost[index_field] = array[index_array];
+   	ghost[index_field] = array[index_array];
        }
      }
    }
@@ -593,12 +618,6 @@ template<class T> size_t FieldFace::store_
 
   return (sizeof(T) * n3[0] * n3[1] * n3[2]);
 
-}
-
-size_t FieldFace::store_double_
-( double * field_ghost, const double * array, int nd3[3], int n3[3],int im3[3] ) throw()
-{
-  FORTRAN_NAME(field_face_store_double)(field_ghost,(double *)array, nd3,n3,im3);
 }
 
 //----------------------------------------------------------------------

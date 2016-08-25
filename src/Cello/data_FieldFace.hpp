@@ -170,10 +170,6 @@ private: // functions
   size_t store_ (T * field_ghosts,  const T * array_ghosts, 
 		 int nd3[3], int nf3[3], int im3[3]) throw();
 
-  size_t store_double_ 
-  (double * field_ghosts,  const double * array_ghosts, 
-   int nd3[3], int nf3[3], int im3[3]) throw();
-
   /// Precision-agnostic function for copying a field block face
   /// into another block's ghost zones
   template<class T>

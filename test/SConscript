@@ -500,7 +500,6 @@ env.MakeMovie ("initial_png.swf","test_initial_png.unit", \
 env.PngToGif ("initial_png.gif","test_initial_png.unit", \
                 ARGS= test_path + "/initial_png-??.png");
 
-env.RunParallel	('test_GroupProcess.unit',bin_path + '/test_GroupProcess',ARGS=ip_charm)
 
 #----------------------------------------------------------------------
 # PROBLEM
@@ -651,8 +650,7 @@ env.PngToGif("particle-amr-dynamic.gif", "test_particle-amr-dynamic.unit", \
 # Prevent concurrent running of parallel jobs
 
 SideEffect('log.txt', 
-     [ 'test_GroupProcess.unit', 
-       'method_ppm-1.unit',
+     [ 'method_ppm-1.unit',
        'method_ppm-8.unit'])
 
 

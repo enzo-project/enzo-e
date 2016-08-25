@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     charm_ArrayMap.hpp
+/// @file     charm_MappingArray.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-04-22
-/// @brief    [\ref Parallel] Declaration of the ArrayMap class
+/// @brief    [\ref Parallel] Declaration of the MappingArray class
 
-#ifndef CHARM_ARRAY_MAP_HPP
-#define CHARM_ARRAY_MAP_HPP
+#ifndef CHARM_MAPPING_ARRAY_HPP
+#define CHARM_MAPPING_ARRAY_HPP
 
 #include "simulation.decl.h"
 
-class ArrayMap: public CBase_ArrayMap {
+class MappingArray: public CkArrayMap {
 
-  /// @class    ArrayMap
+  /// @class    MappingArray
   /// @ingroup  Charm
   /// @brief    [\ref Parallel] Class for mapping Blocks to processors
   ///
@@ -22,18 +22,18 @@ class ArrayMap: public CBase_ArrayMap {
 public:
   int *mapping;
 
-  ArrayMap(int nx, int ny, int nz);
+  MappingArray(int nx, int ny, int nz);
 
   int procNum(int, const CkArrayIndex &idx);
 
   /// CHARM++ migration constructor for PUP::able
-  ArrayMap (CkMigrateMessage *m) : CBase_ArrayMap(m) {}
+  MappingArray (CkMigrateMessage *m) : CkArrayMap(m) {}
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
-    CBase_ArrayMap::pup(p);
+    CkArrayMap::pup(p);
     // NOTE: change this function whenever attributes change
     p | nx_;
     p | ny_;
@@ -46,5 +46,5 @@ private:
 
 };
 
-#endif /* CHARM_ARRAY_MAP_HPP */
+#endif /* CHARM_MAPPING_ARRAY_HPP */
 
