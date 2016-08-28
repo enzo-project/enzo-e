@@ -58,7 +58,7 @@ public: // interface
   /// may have fewer than max number of particles.  Other batches
   /// remain unchanged.
 
-  void delete_particles (ParticleDescr *, int it, int ib, const bool * m);
+  void delete_particles (ParticleDescr *, int it, int ib, const bool * m = NULL);
 
   /// Scatter particles among an array of other Particle structures.
   /// Typically used for preparing to send particles that have gone

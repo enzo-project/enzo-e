@@ -197,7 +197,7 @@ void ParticleData::delete_particles
   // for each particle
   for (int ip=0; ip<np; ip++) {
     // ... move to next in source if deleting
-    if (mask[ip]) {
+    if ((mask==NULL) || mask[ip]) {
       npd++;
     } else if (npd>0) {
       // ... else copy the particle attributes back to first opening
@@ -234,7 +234,7 @@ void ParticleData::scatter
   for (int ip=0; ip<np; ip++) {
     int k= index[ip];
     // find first of any duplicate elements
-    if (mask[ip]) ++np_array[k];
+    if ((mask == NULL) || mask[ip]) ++np_array[k];
   }
 
   
@@ -264,7 +264,7 @@ void ParticleData::scatter
   int count=0;
   for (int ip_src=0; ip_src<np; ip_src++) {
 
-    if (mask[ip_src]) {
+    if ((mask == NULL) || mask[ip_src]) {
       ++count;
       int k = index[ip_src];
       ParticleData * pd = particle_array[k];

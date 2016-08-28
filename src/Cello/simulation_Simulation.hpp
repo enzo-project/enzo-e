@@ -38,8 +38,7 @@ public: // interface
 
   Simulation
   ( const char *       parameter_file,
-    int                n
-    );
+    int                n  );
 
   //==================================================
   // CHARM

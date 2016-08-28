@@ -13,10 +13,10 @@
 int Particle::insert_particles (int it, int np)
   
 {
-#ifdef CHARM_ENZO
-  // update only if proxy_simulation exists (isn't for test_Particle)
-  proxy_simulation.ckLocalBranch()->monitor_insert_particles(np);
-#endif
+  if (proxy_simulation.ckLocalBranch()) {
+    proxy_simulation.ckLocalBranch()->monitor_insert_particles(np);
+  }
+
   return particle_data_->insert_particles (particle_descr_, it, np); 
 }
 
@@ -28,12 +28,15 @@ void Particle::delete_particles (int it, int ib, const bool * m)
 
   const int np = num_particles(it,ib);
   int npd = 0;
-  for (int ip=0; ip<np; ip++) npd += m[ip]?1:0;
+  if (m == NULL) {
+    npd = np;
+  } else {
+    for (int ip=0; ip<np; ip++) npd += m[ip]?1:0;
+  }
 
-#ifdef CHARM_ENZO
-  // update only if proxy_simulation exists (isn't for test_Particle)
-  proxy_simulation.ckLocalBranch()->monitor_insert_particles(-npd);
-#endif
+  if (proxy_simulation.ckLocalBranch()) {
+    proxy_simulation.ckLocalBranch()->monitor_insert_particles(-npd);
+  }
 
   particle_data_->delete_particles (particle_descr_,it,ib,m); 
 }

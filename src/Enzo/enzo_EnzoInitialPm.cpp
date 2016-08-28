@@ -99,22 +99,13 @@ void EnzoInitialPm::uniform_placement_
   bool * bitmask = new bool[nx*ny*nz];
 
   if (rank >= 1) {
-    for (int ix=0; ix<nx; ++ix) {
-      double x = (mx>1) ? xm + (ix + 0.5)*hx : 0.0;
-      xv[ix] = (rank >= 1) ? x : 0.0;
-    }
+    for (int ix=0; ix<nx; ++ix) xv[ix] = xm + (ix + 0.5)*hx;
   }
   if (rank >= 2) {
-  for (int iy=0; iy<ny; ++iy) {
-    double y = (my>1) ? ym + (iy + 0.5)*hy : 0.0;
-    yv[iy] = (rank >= 2) ? y : 0.0;
-  }
+    for (int iy=0; iy<ny; ++iy) yv[iy] = ym + (iy + 0.5)*hy;
   }
   if (rank >= 3) {
-  for (int iz=0; iz<nz; ++iz) {
-    double z = (mz>1) ? zm + (iz + 0.5)*hz : 0.0;
-    zv[iz] = (rank >= 3) ? z : 0.0;
-  }
+    for (int iz=0; iz<nz; ++iz) zv[iz] = zm + (iz + 0.5)*hz;
   }
 
   double t = block->time();
@@ -139,7 +130,6 @@ void EnzoInitialPm::uniform_placement_
 
   // ... insert uninitialized dark matter particles
 
-  CkPrintf ("Inserting %d particles\n",np);
   particle.insert_particles (it,np);
 
   const int npb = particle.batch_size();
@@ -266,7 +256,6 @@ void EnzoInitialPm::density_placement_
 
   const int it = particle.type_index("dark");
 
-  CkPrintf ("Inserting %d particles\n",np);
   particle.insert_particles (it,np);
 
   const int ia_x = particle.attribute_index (it,"x");

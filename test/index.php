@@ -1084,14 +1084,18 @@ tests("Enzo","enzo-p","test_output-stride-2","","");
 test_table_blocks ("output-stride-2",  array("00","10","20"), $types);
 end_hidden("output_stride_2");
 
-begin_hidden("output_stride_3", "Stride 3");
+begin_hidden("output_stride_4", "Stride 4");
 tests("Enzo","enzo-p","test_output-stride-4","","");
 test_table_blocks ("output-stride-4",  array("00","10","20"), $types);
-end_hidden("output_stride_3");
+end_hidden("output_stride_4");
 
 //----------------------------------------------------------------------
 
 test_group("Particle");
+
+begin_hidden("particle", "Particle");
+tests("Cello","test_Particle","test_Particle","","");
+end_hidden("particle");
 
 begin_hidden("particle-x", "Particle (vx,vy) = (1,0)");
 tests("Enzo","enzo-p","test_particle-x","","");

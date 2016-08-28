@@ -273,7 +273,7 @@ void Block::adapt_refine_()
 
   // First scatter particles to children first to avoid multiple passes
   
-  ParticleData * particle_list[8];
+  ParticleData * particle_list[8] = {0};
 
   ParticleDescr * p_descr = simulation()->particle_descr();
   ParticleData  * p_data  = data()     -> particle_data();
@@ -285,11 +285,12 @@ void Block::adapt_refine_()
     particle_list[i]->allocate(p_descr);
   }
 
-  Particle particle (p_descr, p_data);
-  
+  Particle particle = data()->particle();
 
   // partition particles into 2x2x2 array to send to children
+
   particle_scatter_children_ (particle_list,particle);
+  
 #endif
 
   // For each new child
@@ -368,7 +369,17 @@ void Block::adapt_refine_()
     delete particle_list[i];
   }
 #endif
+
+  // Delete particles since relocated to children
   
+  int nt = particle.num_types();
+  for (int it=0; it<nt; it++) {
+    int nb = particle.num_batches(it);
+    for (int ib=0; ib<nb; ib++) {
+      particle.delete_particles (it, ib);
+    }
+  }
+
   is_leaf_ = false;
 #ifdef DEBUG_ADAPT
   index_.print("adapt_refine leaf=0",-1,2,false,simulation());

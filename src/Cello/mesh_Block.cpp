@@ -306,6 +306,7 @@ void Block::init
   }
 
   simulation()->monitor_insert_block();
+  
   if (data()->any_particles()) {
     const int np = data()->particle().num_particles();
     simulation()->monitor_insert_particles(np);

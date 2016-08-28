@@ -11,6 +11,7 @@
 
 #include "data.hpp"
 
+extern CProxy_Simulation proxy_simulation;
 PARALLEL_MAIN_BEGIN
 {
 
@@ -18,6 +19,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
+  proxy_simulation = CProxy_Simulation::ckNew("",0);
+  
   unit_class("ParticleDescr");
   ParticleDescr * particle_descr = new ParticleDescr;
   particle_descr -> set_batch_size (1024);

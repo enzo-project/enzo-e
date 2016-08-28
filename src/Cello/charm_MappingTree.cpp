@@ -48,7 +48,7 @@ int MappingTree::procNum(int, const CkArrayIndex &idx) {
     iz = (iz<<1) | icz;
   }
 
-  int index = ((ix%nx_) + nx_*((iy%ny_) + ny_*(iz%nz_))) % CkNumPes();
+  int index = (ix + nx_*(iy + ny_*iz)) % CkNumPes();
 
   return index;
 }

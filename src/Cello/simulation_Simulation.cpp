@@ -551,9 +551,9 @@ void Simulation::monitor_insert_block(int count)
  
 #ifdef CELLO_DEBUG
   PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
-		   CkMyPe(),sync_output_begin_.stop(),hierarchy()->num_blocks());
+		   CkMyPe(),sync_output_begin_.stop(),hierarchy_->num_blocks());
 #endif
-  hierarchy()->increment_block_count(count);
+  if (hierarchy_) hierarchy_->increment_block_count(count);
   sync_output_begin_ += count;
   sync_output_write_ += count;
 }
@@ -562,7 +562,7 @@ void Simulation::monitor_insert_block(int count)
 
 void Simulation::monitor_delete_block(int count) 
 {
-  hierarchy()->increment_block_count(-count);
+  if (hierarchy_) hierarchy_->increment_block_count(-count);
   sync_output_begin_ -= count;
   sync_output_write_ -= count;
 }
@@ -578,8 +578,8 @@ void Simulation::monitor_insert_zones(int64_t count_total, int64_t count_real)
 	   count_total,count_real,
 	   count_total >= count_real);
 	   
-  hierarchy()->increment_total_zone_count(count_total);
-  hierarchy()->increment_real_zone_count (count_real);
+  if (hierarchy_) hierarchy_->increment_total_zone_count(count_total);
+  if (hierarchy_) hierarchy_->increment_real_zone_count (count_real);
 }
 
 //----------------------------------------------------------------------
@@ -592,22 +592,22 @@ void Simulation::monitor_delete_zones(int64_t count_total, int64_t count_real)
 	   count_total,count_real,
 	   count_total >= count_real);
 	   
-  hierarchy()->increment_total_zone_count(-count_total);
-  hierarchy()->increment_real_zone_count(-count_real);
+  if (hierarchy_) hierarchy_->increment_total_zone_count(-count_total);
+  if (hierarchy_) hierarchy_->increment_real_zone_count(-count_real);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::monitor_insert_particles(int64_t count)
 {
-  hierarchy()->increment_particle_count(count);
+  if (hierarchy_) hierarchy_->increment_particle_count(count);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::monitor_delete_particles(int64_t count)
 {
-  hierarchy()->increment_particle_count(-count);
+  if (hierarchy_) hierarchy_->increment_particle_count(-count);
 }
 
 //----------------------------------------------------------------------
@@ -642,13 +642,13 @@ void Simulation::monitor_performance()
   }
 
   // number of Blocks
-  counters_long[n-4] = hierarchy()->num_blocks(); 
+  counters_long[n-4] = hierarchy_->num_blocks(); 
   // number of particles
-  counters_long[n-3] = hierarchy()->num_particles();
+  counters_long[n-3] = hierarchy_->num_particles();
   // number of real zones
-  counters_long[n-2] = hierarchy()->num_zones_real();
+  counters_long[n-2] = hierarchy_->num_zones_real();
   // number of zones total
-  counters_long[n-1] = hierarchy()->num_zones_total(); 
+  counters_long[n-1] = hierarchy_->num_zones_total(); 
 
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
