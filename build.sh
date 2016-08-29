@@ -12,7 +12,7 @@ S0=`date +"%S"`
 
 log="log.build"
 
-proc=8
+proc=4
 
 # set default target
 
@@ -168,7 +168,7 @@ if [ $target == "test" ]; then
 
 fi
 
-if [ $CELLO_ARCH == "ncsa-bw" ]; then
+if [ x$CELLO_ARCH == "xncsa-bw" ]; then
    echo "Relinking with static libpng15.a..."
    /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o build/charm/Enzo/enzo-p -g -g build/charm/Enzo/enzo-p.o build/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
 

@@ -142,6 +142,7 @@ public: // attributes
 
   std::string                initial_pm_field;
   double                     initial_pm_mpp;
+  int                        initial_pm_level;
 
   // EnzoMethodPm
 

@@ -172,10 +172,6 @@ void InitialTrace::density_placement_
   data->upper(&xp,&yp,&zp);
   field.cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
 
-  const double xl = xp - xm;
-  const double yl = yp - ym;
-  const double zl = zp - zm;
-
   const int rank = block->rank();
   if (rank < 3) hz = 1.0;
   if (rank < 2) hy = 1.0;

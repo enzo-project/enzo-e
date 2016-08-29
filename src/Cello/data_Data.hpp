@@ -112,7 +112,7 @@ public: // interface
   const FieldDescr * field_descr () const throw();
 
   /// Return the ith Field
-  Field field (int i=0) throw()
+  Field field (size_t i=0) throw()
   { return Field(field_descr(),field_data(i)); }
 
 

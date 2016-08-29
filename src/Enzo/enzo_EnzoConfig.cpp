@@ -73,6 +73,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | initial_pm_field;
   p | initial_pm_mpp;
+  p | initial_pm_level;
 
   p | interpolation_method;
 
@@ -195,8 +196,9 @@ void EnzoConfig::read(Parameters * p) throw()
   method_pm_update_max_dt = p->value_float 
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 				     
-  initial_pm_field        = p->value_string ("Initial:pm:field","density");
-  initial_pm_mpp          = p->value_float  ("Initial:pm:mpp",-1.0);
+  initial_pm_field        = p->value_string  ("Initial:pm:field","density");
+  initial_pm_mpp          = p->value_float   ("Initial:pm:mpp",-1.0);
+  initial_pm_level        = p->value_integer ("Initial:pm:level",-1);
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
 

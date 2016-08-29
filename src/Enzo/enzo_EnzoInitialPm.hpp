@@ -21,11 +21,15 @@ public: // interface
 
   EnzoInitialPm (Parameters * parameters,
 		 const std::string parameter_name,
-		 int init_cycle, double init_time,
-		 std::string field, double mpp) throw ()
+		 int               init_cycle,
+		 double            init_time,
+		 std::string       field,
+		 double            mpp,
+		 int               level) throw ()
     : Initial(init_cycle, init_time),
       field_(field),
       mpp_(mpp),
+      level_(level),
       mask_(Mask::create (parameters->param(parameter_name),parameters))
   { 
   }
@@ -69,6 +73,9 @@ private: // attributes
 
   /// Mass per particle--place on average one particle for each mpp grams
   double mpp_;
+
+  /// Level corresponding to placing one particle per cell
+  int level_;
 
   /// To define cloud extents
   Mask * mask_;

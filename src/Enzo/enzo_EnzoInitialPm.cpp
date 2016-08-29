@@ -21,6 +21,7 @@ void EnzoInitialPm::pup (PUP::er &p)
 
   p | field_;
   p | mpp_;
+  p | level_;
   p | mask_; // pup::able
 
 }
@@ -53,7 +54,7 @@ void EnzoInitialPm::enforce_block
 void EnzoInitialPm::uniform_placement_ 
 (Block * block, Field field, Particle particle)
 {
-  // Insert new tracer particles, one per cell
+  // Insert new tracer particles, one per cell at level_
 
   // ... get number of cells
 
@@ -65,6 +66,17 @@ void EnzoInitialPm::uniform_placement_
   
   const int rank = block->rank();
 
+  // Adjust cell widths for difference in block's level from level_
+  const int level_block = block->level();
+  double r = 1.0;
+  if (level_ != -1) {
+    for (int l=level_;      l<level_block; l++) r*=0.5;
+    for (int l=level_block; l<level_;      l++) r*=2.0;
+  }
+  const int rx = (rank >= 1) ? r : 1;
+  const int ry = (rank >= 2) ? r : 1;
+  const int rz = (rank >= 3) ? r : 1;
+  
   // Initialize particle positions
 
   // ... get block extents
@@ -77,6 +89,11 @@ void EnzoInitialPm::uniform_placement_
   const double xl = xp - xm;
   const double yl = yp - ym;
   const double zl = zp - zm;
+
+  // Size of particle array on block
+  const int NX = rx*nx;
+  const int NY = ry*ny;
+  const int NZ = rz*nz;
 
   const double hx = xl / nx;
   const double hy = yl / ny;
@@ -117,12 +134,14 @@ void EnzoInitialPm::uniform_placement_
 
   // count particles
   int np = 0;
+  const int rp = (rank <= 1) ? r : (rank <= 2) ? r*r : r*r*r;
+
   for (int iz=0; iz<nz; ++iz) {
     for (int iy=0; iy<ny; ++iy) {
       for (int ix=0; ix<nx; ++ix) {
 	int i = ix + nx*(iy + ny*iz);
 	if (bitmask[i]) {
-	  ++np;
+	  np += rp;
 	}
       }
     }
@@ -149,21 +168,27 @@ void EnzoInitialPm::uniform_placement_
       for (int ix=0; ix<nx; ++ix) {
 	int i = ix + nx*(iy + ny*iz);
 	if (bitmask[i]) {
+	  for (int kz = 0; kz<rz; kz++) {
+	    for (int ky = 0; ky<ry; ky++) {
+	      for (int kx = 0; kx<rx; kx++) {
+		if (ipb % npb == 0) {
+		  if (rank >= 1) xa = (double *) particle.attribute_array(it,ia_x,ib);
+		  if (rank >= 2) ya = (double *) particle.attribute_array(it,ia_y,ib);
+		  if (rank >= 3) za = (double *) particle.attribute_array(it,ia_z,ib);
+		}
+		if (rank >= 1) xa[ipb*ps] = xv[ix] - 0.5*hx + (kx+0.5)*hx/rx;
+		if (rank >= 2) ya[ipb*ps] = yv[iy] - 0.5*hy + (ky+0.5)*hy/ry;
+		if (rank >= 3) za[ipb*ps] = zv[iz] - 0.5*hz + (kz+0.5)*hz/rz;
 
-	  if (ipb % npb == 0) {
-	    if (rank >= 1) xa = (double *) particle.attribute_array(it,ia_x,ib);
-	    if (rank >= 2) ya = (double *) particle.attribute_array(it,ia_y,ib);
-	    if (rank >= 3) za = (double *) particle.attribute_array(it,ia_z,ib);
-	  }
-	  if (rank >= 1) xa[ipb*ps] = xv[ix];
-	  if (rank >= 2) ya[ipb*ps] = yv[iy];
-	  if (rank >= 3) za[ipb*ps] = zv[iz];
+		ipb++;
 
-	  ipb++;
+		if (ipb == npb) {
+		  ipb=0;
+		  ib++;
+		}
 
-	  if (ipb == npb) {
-	    ipb=0;
-	    ib++;
+	      }
+	    }
 	  }
 	}
       }
@@ -241,7 +266,8 @@ void EnzoInitialPm::density_placement_
       }
     }
   }
-  const double rmax = ms[nx*ny*nz];
+
+  const double rmax = ms[ims-1];
 
   // ... compute number of particles to place in the block
 
@@ -270,8 +296,6 @@ void EnzoInitialPm::density_placement_
   double * xa = 0;
   double * ya = 0;
   double * za = 0;
-
-  const int in = CkMyPe() % MAX_NODE_SIZE;
 
   const int ps  = particle.stride(it,ia_x);
 

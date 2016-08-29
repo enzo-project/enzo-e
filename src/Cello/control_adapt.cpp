@@ -318,7 +318,6 @@ void Block::adapt_refine_()
       int narray = 0;
       char * array = 0;
       int num_field_data = 1;
-      bool testing = false;
 
 #ifdef NEW_REFRESH_REFINE
 

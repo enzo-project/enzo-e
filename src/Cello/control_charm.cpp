@@ -17,8 +17,11 @@
 
 #ifdef DEBUG_CONTROL
 # define TRACE_CONTROL(A)						\
-  CkPrintf ("%d %s:%d %s TRACE %s\n",					\
-	    CkMyPe(),__FILE__,__LINE__,name_.c_str(),A);		\
+  CkPrintf ("%d %s:%d %ld/%ld %s TRACE %s \n",				\
+	    CkMyPe(),__FILE__,__LINE__,					\
+	    Memory::instance()->bytes(),				\
+	    Memory::instance()->bytes_highest(),			\
+	    name_.c_str(), A);						\
   fflush(stdout);						
 #else
 # define TRACE_CONTROL(A) ;

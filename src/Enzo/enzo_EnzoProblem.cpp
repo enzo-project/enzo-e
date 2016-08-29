@@ -133,8 +133,8 @@ Initial * EnzoProblem::create_initial_
       (parameters, param_str,
        cycle,time,
        enzo_config->initial_pm_field,
-       enzo_config->initial_pm_mpp
-       );
+       enzo_config->initial_pm_mpp,
+       enzo_config->initial_pm_level);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters,field_descr);

@@ -17,9 +17,9 @@ EnzoComputeCicInterp::EnzoComputeCicInterp
  ParticleDescr * particle_descr,
  std::string     particle_type,
  std::string     particle_attribute)
-  : if_ (field_descr->field_id (field_name)),
-    it_p_ (particle_descr->type_index (particle_type)),
-    ia_p_ (particle_descr->attribute_index (it_p_,particle_attribute))
+  : it_p_ (particle_descr->type_index (particle_type)),
+    ia_p_ (particle_descr->attribute_index (it_p_,particle_attribute)),
+    if_ (field_descr->field_id (field_name))
 {
 }
 

@@ -54,7 +54,6 @@ void EnzoMethodPmUpdate::pup (PUP::er &p)
 void EnzoMethodPmUpdate::compute ( Block * block) throw()
 {
   TRACE_PM("compute()");
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   if (block->is_leaf()) {
 

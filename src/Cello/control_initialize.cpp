@@ -17,7 +17,6 @@
 
 void Simulation::initialize() throw()
 {
-
   set_phase(phase_initial);
 
   initialize_config_();
