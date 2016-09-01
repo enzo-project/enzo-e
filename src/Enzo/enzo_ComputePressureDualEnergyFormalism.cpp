@@ -26,7 +26,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
   /* Compute the size of the grid. */
  
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   for (int dim = 0; dim < GridRank[in]; dim++)
     size *= GridDimension[dim];

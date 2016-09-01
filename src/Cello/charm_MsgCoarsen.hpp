@@ -20,7 +20,7 @@ class MsgCoarsen : public CMessage_MsgCoarsen {
 
 public: // interface
 
-  static long counter[MAX_NODE_SIZE];
+  static long counter[CONFIG_NODE_SIZE];
 
   MsgCoarsen();
 
@@ -31,8 +31,7 @@ public: // interface
   /// Copy constructor
   MsgCoarsen(const MsgCoarsen & data_msg) throw()
   {
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    ++counter[in]; 
+    ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator

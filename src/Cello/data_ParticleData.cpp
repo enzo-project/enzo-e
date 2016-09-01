@@ -8,7 +8,7 @@
 #include "data.hpp"
 #include <algorithm>
 
-long ParticleData::counter[MAX_NODE_SIZE] = {0};
+long ParticleData::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
@@ -17,8 +17,7 @@ ParticleData::ParticleData()
     attribute_align_(),
     particle_count_()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  ++counter[in]; 
+  ++counter[cello::index_static()]; 
 }
 
 //----------------------------------------------------------------------
@@ -44,8 +43,7 @@ void ParticleData::pup (PUP::er &p)
 
 ParticleData::~ParticleData()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  --counter[in]; 
+  --counter[cello::index_static()]; 
 }
 //----------------------------------------------------------------------
 

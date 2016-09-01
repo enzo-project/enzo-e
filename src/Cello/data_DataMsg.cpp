@@ -10,7 +10,7 @@
 
 // #define DEBUG_NEW_REFRESH
 
-long DataMsg::counter[MAX_NODE_SIZE] = {0};
+long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 

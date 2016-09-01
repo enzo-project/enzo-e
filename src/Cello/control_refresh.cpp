@@ -128,8 +128,6 @@ void Block::refresh_load_field_face_
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_type, field_list);
 
-#ifdef NEW_REFRESH
-
   DataMsg * data_msg = new DataMsg;
 
   data_msg -> set_field_face (field_face,true);
@@ -147,30 +145,6 @@ void Block::refresh_load_field_face_
 
   thisProxy[index_neighbor].p_refresh_store (msg);
 
-#else
-
-  // ... send the face data to the neighbor
-  const int of3[3] = {-if3[0], -if3[1], -if3[2]};
-
-  int n; char * array;
-  FieldDescr * field_descr = proxy_simulation.ckLocalBranch()->field_descr();
-  FieldData * field_data = data()->field_data();
-  Field field (field_descr,field_data);
-  field_face->face_to_array (field,&n,&array);
-
-  thisProxy[index_neighbor].p_refresh_store_field_face
-    (n,array, refresh_type, of3, ic3);
-
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d %p delete field_face\n",CkMyPe(),field_face); fflush(stdout);
-#endif
-
-  delete field_face;
-  delete [] array;
-
-#endif
-
-  // ... delete the FieldFace created by load_face()
 }
 
 
@@ -180,53 +154,14 @@ void Block::refresh_load_field_face_
 void Block::p_refresh_store (MsgRefresh * msg)
 {
 
-#ifdef NEW_REFRESH
-
 #ifdef DEBUG_REFRESH
   CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
   fflush(stdout);
 #endif
   msg->update(data());
   delete msg;
-
-#else 
-  CkPrintf ("p_refresh_store() called with new_refresh = 0\n");
-  CkExit();
-#endif
 }
 
-
-//----------------------------------------------------------------------
-
-
-void Block::refresh_store_field_face_
-(int n, char * array, int refresh_type, 
- int if3[3], int ic3[3])
-{
-#ifndef NEW_REFRESH
-  TRACE_REFRESH("refresh_store_field_face()");
-
-  if (n > 0) {
-
-    // copy array to FieldData
-
-    bool lg3[3] = {false,false,false};
-
-    Refresh * refresh = this->refresh();
-    std::vector<int> field_list = refresh->field_list();
-
-    FieldFace * field_face = create_face
-      (if3, ic3, lg3, refresh_type, field_list);
-
-    FieldDescr * field_descr = proxy_simulation.ckLocalBranch()->field_descr();
-    FieldData * field_data = data()->field_data();
-    Field field (field_descr,field_data);
-    field_face -> array_to_face (array,field);
-    delete field_face;
-
-  }
-#endif
-}
 
 //----------------------------------------------------------------------
 
@@ -637,8 +572,6 @@ void Block::particle_send_
     ParticleData * p_data = particle_list[il];
     Particle particle_send (p_descr,p_data);
     
-#ifdef NEW_REFRESH
-
 #ifdef DEBUG_REFRESH
     printf ("%d %p DEBUG num_particles = %d\n",
 	    CkMyPe(),p_data,p_data?p_data->num_particles(p_descr):0);
@@ -665,30 +598,6 @@ void Block::particle_send_
 
     }
 
-#else
-    const int nt = particle_send.num_types();
-
-    for (int it=0; it<nt; it++) {
-
-      const bool interleaved = particle_send.interleaved(it);
-      const int nb = particle_send.num_batches(it);
-
-      for (int ib=0; ib<nb; ib++) {
-
-	const int np = particle_send.num_particles(it,ib);
-	const int mb = particle_send.batch_size();
-	int mp = particle_send.particle_bytes(it);
-
-	// if not interleaved, batch size is always full
-
-	int n = mp*(interleaved ? np : mb);
-	char * a = particle_send.attribute_array(it,0,ib);
-
-	thisProxy[index].p_refresh_store_particle_face (n,np,a,it);
-      }
-    }
-#endif
-    
   }
 }
 

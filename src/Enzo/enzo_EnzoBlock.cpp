@@ -13,62 +13,62 @@
 
 //======================================================================
 
-int EnzoBlock::UseMinimumPressureSupport[MAX_NODE_SIZE];
-enzo_float EnzoBlock::MinimumPressureSupportParameter[MAX_NODE_SIZE];
-enzo_float EnzoBlock::ComovingBoxSize[MAX_NODE_SIZE];
-enzo_float EnzoBlock::HubbleConstantNow[MAX_NODE_SIZE];
-enzo_float EnzoBlock::OmegaMatterNow[MAX_NODE_SIZE];
-enzo_float EnzoBlock::OmegaLambdaNow[MAX_NODE_SIZE];
-enzo_float EnzoBlock::MaxExpansionRate[MAX_NODE_SIZE];
+int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::ComovingBoxSize[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::HubbleConstantNow[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::OmegaMatterNow[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::OmegaLambdaNow[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::MaxExpansionRate[CONFIG_NODE_SIZE];
 
 // Chemistry
 
-int EnzoBlock::MultiSpecies[MAX_NODE_SIZE];
+int EnzoBlock::MultiSpecies[CONFIG_NODE_SIZE];
 
 // Physics
 
-int EnzoBlock::PressureFree[MAX_NODE_SIZE];
-enzo_float EnzoBlock::Gamma[MAX_NODE_SIZE];
-enzo_float EnzoBlock::GravitationalConstant[MAX_NODE_SIZE];
+int EnzoBlock::PressureFree[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::Gamma[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::GravitationalConstant[CONFIG_NODE_SIZE];
 
 // Problem-specific
 
-int EnzoBlock::ProblemType[MAX_NODE_SIZE];
+int EnzoBlock::ProblemType[CONFIG_NODE_SIZE];
 
 // Method PPM
 
-int EnzoBlock::PPMFlatteningParameter[MAX_NODE_SIZE];
-int EnzoBlock::PPMDiffusionParameter[MAX_NODE_SIZE];
-int EnzoBlock::PPMSteepeningParameter[MAX_NODE_SIZE];
+int EnzoBlock::PPMFlatteningParameter[CONFIG_NODE_SIZE];
+int EnzoBlock::PPMDiffusionParameter[CONFIG_NODE_SIZE];
+int EnzoBlock::PPMSteepeningParameter[CONFIG_NODE_SIZE];
 
 // Numerics
 
-int EnzoBlock::DualEnergyFormalism[MAX_NODE_SIZE];
-enzo_float EnzoBlock::DualEnergyFormalismEta1[MAX_NODE_SIZE];
-enzo_float EnzoBlock::DualEnergyFormalismEta2[MAX_NODE_SIZE];
+int EnzoBlock::DualEnergyFormalism[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::DualEnergyFormalismEta1[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::DualEnergyFormalismEta2[CONFIG_NODE_SIZE];
 
-enzo_float EnzoBlock::pressure_floor[MAX_NODE_SIZE];
-enzo_float EnzoBlock::density_floor[MAX_NODE_SIZE];
-enzo_float EnzoBlock::number_density_floor[MAX_NODE_SIZE];
-enzo_float EnzoBlock::temperature_floor[MAX_NODE_SIZE];
+enzo_float EnzoBlock::pressure_floor[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::density_floor[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::number_density_floor[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::temperature_floor[CONFIG_NODE_SIZE];
 
-enzo_float EnzoBlock::InitialRedshift[MAX_NODE_SIZE];
-enzo_float EnzoBlock::InitialTimeInCodeUnits[MAX_NODE_SIZE];
+enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
 
 // Domain
 
-enzo_float EnzoBlock::DomainLeftEdge [MAX_NODE_SIZE_3];
-enzo_float EnzoBlock::DomainRightEdge[MAX_NODE_SIZE_3];
+enzo_float EnzoBlock::DomainLeftEdge [3*CONFIG_NODE_SIZE];
+enzo_float EnzoBlock::DomainRightEdge[3*CONFIG_NODE_SIZE];
 
 // PPM
 
-int EnzoBlock::GridRank[MAX_NODE_SIZE];
+int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
 
-int EnzoBlock::ghost_depth[MAX_NODE_SIZE_3];
+int EnzoBlock::ghost_depth[3*CONFIG_NODE_SIZE];
 
 // Fields
 
-int EnzoBlock::NumberOfBaryonFields[MAX_NODE_SIZE];
+int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 
 //----------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
   double time  = enzo_config->initial_time;
 
-  for (int in=0; in<MAX_NODE_SIZE; in++) {
+  for (int in=0; in<CONFIG_NODE_SIZE; in++) {
 
     GridRank[in] = 0;
     NumberOfBaryonFields[in] = 0;
@@ -253,15 +253,16 @@ void EnzoBlock::pup(PUP::er &p)
   BASE_ENZO_BLOCK::pup(p);
 
   p | dt;
-  const int in = CkMyPe() % MAX_NODE_SIZE;
 
-  static bool warn0[MAX_NODE_SIZE] = {true};
+  const int in = cello::index_static();
+
+  static bool warn0[CONFIG_NODE_SIZE] = {true};
   if (warn0[in]) {
     warn0[in] = false;
     WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
   }
 
-  static bool warn1[MAX_NODE_SIZE] = {true};
+  static bool warn1[CONFIG_NODE_SIZE] = {true};
   if (warn1[in]) {
     warn1[in] = false;
     WARNING("EnzoBlock::pup()", "skipping SubgridFluxes (not used)");
@@ -286,7 +287,7 @@ void EnzoBlock::pup(PUP::er &p)
 
 void EnzoBlock::write(FILE * fp) throw ()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   fprintf (fp,"EnzoBlock: UseMinimumPressureSupport %d\n",
 	   UseMinimumPressureSupport[in]);
@@ -439,7 +440,7 @@ void EnzoBlock::initialize () throw()
 
   int gx,gy,gz;
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   gx = EnzoBlock::ghost_depth[in*3+0];
   gy = EnzoBlock::ghost_depth[in*3+1];
@@ -479,7 +480,7 @@ int EnzoBlock::CosmologyComputeExpansionFactor
 (enzo_float time, enzo_float *a, enzo_float *dadt)
 {
  
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   /* Error check. */
 
@@ -593,7 +594,7 @@ int EnzoBlock::CosmologyComputeExpansionTimestep
  
   /* Error check. */
  
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   if (InitialTimeInCodeUnits[in] == 0) {
     fprintf(stderr, "The cosmology parameters seem to be improperly set.\n");

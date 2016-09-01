@@ -15,17 +15,6 @@
 /// sich as cello:pi and cello::err_rel(), etc.
 
 //----------------------------------------------------------------------
-// GLOBAL DEFINES
-//----------------------------------------------------------------------
-
-// Maximum number of processes within a physical node.  Used for
-// unrolling static variables so that each process has its own copy
-// ip % MAX_NODES
-
-#define MAX_NODE_SIZE 48
-#define MAX_NODE_SIZE_3 144 /* For EnzoBlock static array declarations only */
-
-//----------------------------------------------------------------------
 // SYSTEM INCLUDES
 //----------------------------------------------------------------------
 
@@ -40,6 +29,8 @@
 #include <vector>
 #include <cstdlib>
 #include <execinfo.h>
+
+#include <charm++.h>
 
 #include "pup_stl.h"
 
@@ -221,6 +212,7 @@ namespace cello {
 
   void backtrace(const char * msg);
 
+  int index_static();
 }
 
 #endif /* CELLO_HPP */

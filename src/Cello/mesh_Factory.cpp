@@ -95,8 +95,6 @@ CProxy_Block Factory::create_block_array
 	// ENTRY: level == 0 block array insert
 	// --------------------------------------------------
 
-#ifdef NEW_REFRESH_REFINE	
-
 	MsgRefine * msg = new MsgRefine 
 	  (index,
 	   nx,ny,nz,
@@ -109,17 +107,6 @@ CProxy_Block Factory::create_block_array
 	msg->set_data_msg(data_msg);
 
 	proxy_block[index].insert (msg);
-
-#else
-	proxy_block[index].insert
-	  (index,
-	   nx,ny,nz,
-	   num_field_data,
-	   count_adapt = 0,
-	   cycle,time,dt,
-	   0,NULL,refresh_same,
-	   num_face_level, face_level);
-#endif	   
 
 	// --------------------------------------------------
 
@@ -175,8 +162,6 @@ void Factory::create_subblock_array
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-#ifdef NEW_REFRESH_REFINE
-
 	  MsgRefine * msg = new MsgRefine 
 	    (index,
 	     nx,ny,nz,
@@ -189,17 +174,6 @@ void Factory::create_subblock_array
 	  msg->set_data_msg(data_msg);
 
 	  (*block_array)[index].insert (msg);
-
-#else
-	  (*block_array)[index].insert 
-	    (index,
-	     nx,ny,nz,
-	     num_field_blocks,
-	     count_adapt = 0,
-	     cycle, time, dt,
-	     0,NULL,refresh_same,
-	     num_face_level, face_level);
-#endif
 
 	  // --------------------------------------------------
 
@@ -235,7 +209,6 @@ Block * Factory::create_block
   // ENTRY: #3 Factory::create_block() -> Block::Block()
   // ENTRY: level > 0 block array insert
   // --------------------------------------------------
-#ifdef NEW_REFRESH_REFINE
 
   MsgRefine * msg = new MsgRefine 
     (index,
@@ -249,19 +222,6 @@ Block * Factory::create_block
   msg->set_data_msg (data_msg);
 
   (*block_array)[index].insert (msg);
-
-#else
-
-  (*block_array)[index].insert
-    (index,
-     nx,ny,nz,
-     num_field_data,
-     count_adapt,
-     cycle, time,dt,
-     narray, array,refresh_type,
-     num_face_level, face_level);
-
-#endif
 
   // --------------------------------------------------
 

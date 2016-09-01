@@ -45,7 +45,7 @@ int EnzoBlock::SolveMHDEquations
  
     /* Compute size (in floats) of the current grid. */
  
-    const int in = CkMyPe() % MAX_NODE_SIZE;
+    const int in = cello::index_static();
 
     size = 1;
     for (dim = 0; dim < GridRank[in]; dim++)

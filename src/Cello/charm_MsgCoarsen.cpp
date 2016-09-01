@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-long MsgCoarsen::counter[MAX_NODE_SIZE] = {0};
+long MsgCoarsen::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
@@ -24,8 +24,7 @@ MsgCoarsen::MsgCoarsen()
     face_level_(NULL)
 {
   ic3_[0] = ic3_[1] = ic3_[2] = -1;
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  ++counter[in]; 
+  ++counter[cello::index_static()]; 
 }
 
 //----------------------------------------------------------------------
@@ -39,9 +38,7 @@ MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
     face_level_(new int[num_face_level])
 {
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-
-  ++counter[in]; 
+  ++counter[cello::index_static()]; 
 
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
@@ -55,9 +52,7 @@ MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
 
 MsgCoarsen::~MsgCoarsen()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-
-  --counter[in];
+  --counter[cello::index_static()];
 
   delete data_msg_;
   data_msg_ = 0;

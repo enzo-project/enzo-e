@@ -22,7 +22,7 @@ class MsgRefine : public CMessage_MsgRefine {
 public: // interface
 
   friend class Block;
-  static long counter[MAX_NODE_SIZE];
+  static long counter[CONFIG_NODE_SIZE];
 
   MsgRefine();
 
@@ -40,8 +40,7 @@ public: // interface
   /// Copy constructor
   MsgRefine(const MsgRefine & data_msg) throw()
   {
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    ++counter[in]; 
+    ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator

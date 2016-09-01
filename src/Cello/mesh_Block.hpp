@@ -376,8 +376,6 @@ public:
    int level_now, int level_new);
 
   void p_adapt_recv_child (MsgCoarsen * msg);
-  void p_adapt_recv_child
-  (int ic3[3],int na, char * array, int nf, int * child_face_level);
 
   void adapt_recv (const int of3[3], const int ic3[3],
 		   int level_face_new, int level_relative);
@@ -439,11 +437,6 @@ protected:
   void refresh_load_faces_();
 
 public:
-
-  /// Refresh a FieldFace in same, next-coarser, or next-finer level
-  void p_refresh_store_field_face
-  (int n, char a[],  int refresh_type, int if3[3], int ic3[3]) 
-  { refresh_store_field_face_(n,a,refresh_type,if3,ic3); }
 
   void p_refresh_store_particle_face (int n, int np, char a[],  int it) 
   { refresh_store_particle_face_(n,np,a, it); }

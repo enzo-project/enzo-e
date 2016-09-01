@@ -68,8 +68,7 @@ public: // interface
   /// Return an instance of a Monitor object
   static Monitor * instance()
   { 
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    return & instance_[in];
+    return & instance_[cello::index_static()];
   };
 
   /// Set whether the monitor is active for text output.  Useful for
@@ -144,7 +143,7 @@ private: // static attributes
 
   /// Single instance of the Monitor object [singleton design pattern]
   // static Monitor * instance_;
-  static Monitor instance_[MAX_NODE_SIZE];
+  static Monitor instance_[CONFIG_NODE_SIZE];
 
 };
 

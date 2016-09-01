@@ -78,7 +78,7 @@ protected: // attributes
   int dx_,dy_,dz_;
 
   /// Next available particle ID, where id0_ = CkMyPe() + k * CkNumPes()
-  static int id0_[MAX_NODE_SIZE];
+  static int id0_[CONFIG_NODE_SIZE];
 };
 
 #endif /* PROBLEM_INITIAL_TRACE_HPP */

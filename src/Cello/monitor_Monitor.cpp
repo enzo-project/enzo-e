@@ -13,7 +13,7 @@
 
 
 //----------------------------------------------------------------------
-Monitor Monitor::instance_[MAX_NODE_SIZE]; // singleton design pattern)
+Monitor Monitor::instance_[CONFIG_NODE_SIZE]; // singleton design pattern)
 //----------------------------------------------------------------------
 
 Monitor::Monitor()
@@ -101,21 +101,6 @@ void Monitor::header () const
   print ("Define","BUILD DIR           %s",CELLO_DIR);
   print ("Define","BUILD DATE          %s",CELLO_DATE);
   print ("Define","BUILD TIME          %s",CELLO_TIME);
-#ifdef NEW_REFRESH
-  print ("Define","NEW_REFRESH         %s","Yes");
-#else
-  print ("Define","NEW_REFRESH         %s","no");
-#endif
-#ifdef NEW_REFRESH_COARSEN
-  print ("Define","NEW_REFRESH_COARSEN %s","Yes");
-#else
-  print ("Define","NEW_REFRESH_COARSEN %s","no");
-#endif
-#ifdef NEW_REFRESH_REFINE
-  print ("Define","NEW_REFRESH_REFINE %s","Yes");
-#else
-  print ("Define","NEW_REFRESH_REFINE %s","no");
-#endif
 #ifndef CONFIG_PYTHON_LT_27
   print ("Define","CHARM_VERSION %d",CELLO_CHARM_VERSION);
 #   ifdef CONFIG_HAVE_MERCURIAL  

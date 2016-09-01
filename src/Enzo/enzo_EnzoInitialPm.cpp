@@ -37,7 +37,7 @@ void EnzoInitialPm::enforce_block
  ) throw()
 
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   Field    field    (block->data()->field());
   Particle particle (block->data()->particle());
@@ -104,8 +104,6 @@ void EnzoInitialPm::uniform_placement_
   const int ia_x = (rank >= 1) ? particle.attribute_index (it,"x") : -1;
   const int ia_y = (rank >= 2) ? particle.attribute_index (it,"y") : -1;
   const int ia_z = (rank >= 3) ? particle.attribute_index (it,"z") : -1;
-
-  const int in = CkMyPe() % MAX_NODE_SIZE;
 
   const int dp  = particle.stride(it,ia_x);
 

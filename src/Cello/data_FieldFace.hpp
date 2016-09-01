@@ -17,14 +17,13 @@ class FieldFace {
 
 public: // interface
 
-  static long counter[MAX_NODE_SIZE];
+  static long counter[CONFIG_NODE_SIZE];
 
   /// Constructor of uninitialized FieldFace
 
   FieldFace () throw()
   {
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    ++counter[in]; 
+    ++counter[cello::index_static()]; 
   }
 
   /// Constructor of initialized FieldFace

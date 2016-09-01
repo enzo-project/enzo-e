@@ -100,7 +100,7 @@ int EnzoBlock::SolveHydroEquations
 
   /* Determine if Gamma should be a scalar or a field. */
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   enzo_float *GammaField;
   GammaField = new enzo_float[1];

@@ -17,7 +17,7 @@ class MsgRefresh : public CMessage_MsgRefresh {
 
 public: // interface
 
-  static long counter[MAX_NODE_SIZE];
+  static long counter[CONFIG_NODE_SIZE];
 
   MsgRefresh() ;
 
@@ -26,8 +26,7 @@ public: // interface
   /// Copy constructor
   MsgRefresh(const MsgRefresh & data_msg) throw()
   {
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    ++counter[in]; 
+    ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator

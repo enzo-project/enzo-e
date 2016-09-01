@@ -16,7 +16,7 @@ class DataMsg {
 
 public: // interface
 
-  static long counter[MAX_NODE_SIZE];
+  static long counter[CONFIG_NODE_SIZE];
 
   DataMsg() 
     : field_face_   (NULL),
@@ -27,14 +27,13 @@ public: // interface
       particle_data_delete_(false)
       
   {
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    ++counter[in]; 
+    ++counter[cello::index_static()]; 
   }
 
   ~DataMsg()
   {
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    --counter[in]; 
+    --counter[cello::index_static()];
+    
     if (field_face_delete_) {
       delete field_face_;
       field_face_ = NULL;
@@ -52,8 +51,7 @@ public: // interface
   /// Copy constructor
   DataMsg(const DataMsg & data_msg) throw()
   {
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    ++counter[in]; 
+    ++counter[cello::index_static()]; 
   };
 
   /// Assignment operator

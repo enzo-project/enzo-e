@@ -29,10 +29,8 @@ CProxy_EnzoSimulation proxy_enzo_simulation;
 EnzoSimulation::EnzoSimulation
 (
  const char         parameter_file[],
- int                n,
- int                node_size)
-  : BASE_ENZO_SIMULATION(parameter_file, n),
-    node_size_(node_size)
+ int                n)
+  : BASE_ENZO_SIMULATION(parameter_file, n)
 {
 #ifdef CHECK_MEMORY
   mtrace();
@@ -63,8 +61,6 @@ void EnzoSimulation::pup (PUP::er &p)
 
   TRACEPUP;
 
-  p | node_size_;
-
   if (p.isUnpacking()) {
     EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
 			  field_descr());
@@ -80,7 +76,7 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   // Serialize reading parameters within each logical node
 
   const int ipn = CkMyPe();
-  const int npn = MIN(node_size_,CkNumPes());
+  const int npn = MIN(CONFIG_NODE_SIZE,CkNumPes());
 
   if ((ipn % npn) == 0) {
 #ifdef TRACE_PARAMETERS
@@ -97,7 +93,7 @@ void EnzoSimulation::read_parameters_()
 {
 
   const int ipn = CkMyPe();
-  const int npn = MIN(node_size_,CkNumPes());
+  const int npn = MIN(CONFIG_NODE_SIZE,CkNumPes());
 #ifdef TRACE_PARAMETERS
   CkPrintf ("%d BEGIN read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
   fflush(stdout);
@@ -112,12 +108,12 @@ void EnzoSimulation::read_parameters_()
   fflush(stdout);
 #endif
   // Then tell next Simulation object in node to read parameter file
-  if (((ipn + 1) % npn) != 0 && (ipn < CkNumPes())) {
+  if (((ipn + 1) % npn) != 0 && ((ipn+1) < CkNumPes())) {
 #ifdef TRACE_PARAMETERS
     CkPrintf ("%d CALLING p_read_parameters(%d/%d)\n",CkMyPe(),CkMyPe()+1,npn);
     fflush(stdout);
 #endif
-    proxy_enzo_simulation[CkMyPe()+1].p_read_parameters();
+    proxy_enzo_simulation[ipn+1].p_read_parameters();
   }
 
   // Everybody synchronizes afterwards with barrier

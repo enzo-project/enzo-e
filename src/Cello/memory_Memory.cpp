@@ -10,7 +10,7 @@
 #include "memory.hpp"
 
 #ifdef CONFIG_USE_MEMORY
-Memory Memory::instance_[MAX_NODE_SIZE]; // (singleton design pattern)
+Memory Memory::instance_[CONFIG_NODE_SIZE]; // (singleton design pattern)
 #endif
 
 //======================================================================

@@ -85,12 +85,7 @@ public:
   /// Return an instance of a Unit object
   static Unit * instance()
   { 
-    // if ( instance_ == NULL )
-    //   instance_ = new Unit;
-
-    // return instance_ ? instance_ : (instance_ = new Unit);
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    return & instance_[in];
+    return & instance_[cello::index_static()];
   };
 
   /// Initialize unit testing
@@ -114,7 +109,7 @@ public:
 private:
 
   /// Singleton instance of the Unit object
-  static Unit instance_[MAX_NODE_SIZE];
+  static Unit instance_[CONFIG_NODE_SIZE];
 
   /// Output string for passed tests
   static const char * pass_;

@@ -11,7 +11,7 @@
 
 // #define DEBUG_NEW_REFRESH
 
-long FieldFace::counter[MAX_NODE_SIZE] = {0};
+long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
 #define FORTRAN_NAME(NAME) NAME##_
 
@@ -38,8 +38,7 @@ FieldFace::FieldFace
   CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
 #endif
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  ++counter[in];
+  ++counter[cello::index_static()];
 
   for (int i=0; i<3; i++) {
     ghost_[i] = false;
@@ -52,8 +51,7 @@ FieldFace::FieldFace
 
 FieldFace::~FieldFace() throw ()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  --counter[in];
+  --counter[cello::index_static()];
 
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::~FieldFace(Field) %p\n",CkMyPe(),this);
@@ -64,8 +62,7 @@ FieldFace::~FieldFace() throw ()
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  ++counter[in];
+  ++counter[cello::index_static()];
 
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::FieldFace(FieldFace) %p\n",CkMyPe(),this);

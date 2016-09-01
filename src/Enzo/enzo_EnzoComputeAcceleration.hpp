@@ -27,7 +27,12 @@ public: // interface
   PUPable_decl(EnzoComputeAcceleration);
   
   /// Charm++ PUP::able migration constructor
-  EnzoComputeAcceleration (CkMigrateMessage *m) {}
+  EnzoComputeAcceleration (CkMigrateMessage *m)
+    :
+    rank_(0),
+    order_(0),
+    i_ax_(0),i_ay_(0),i_az_(0),i_p_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

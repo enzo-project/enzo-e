@@ -7,7 +7,7 @@
 
 #include "problem.hpp"
 
-int InitialTrace::id0_[MAX_NODE_SIZE] = {-1};
+int InitialTrace::id0_[CONFIG_NODE_SIZE] = {-1};
 
 //----------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ void InitialTrace::enforce_block
    const Hierarchy  * hierarchy
    ) throw()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   if (id0_[in] == -1) id0_[in] = CkMyPe();
 
@@ -98,7 +98,7 @@ void InitialTrace::uniform_placement_
   float * ya = 0;
   float * za = 0;
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   const int dp  = particle.stride(it,ia_x);
   const int did = particle.stride(it,ia_id);
@@ -231,7 +231,7 @@ void InitialTrace::density_placement_
   float * ya = 0;
   float * za = 0;
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   const int ps  = particle.stride(it,ia_x);
   const int ids = particle.stride(it,ia_id);
@@ -251,9 +251,6 @@ void InitialTrace::density_placement_
     	imax = ims;
       }
     } while (imax-imin > 1);
-    // for (ims=0; ims<nx*ny*nz-1; ims++) {
-    //   if (ms[ims] <= r && r <= ms[ims+1]) break;
-    // }
     ims = imin;
     ASSERT6( "InitialTrace",
 	     "[%d %d %d] %f <= %f < %f",imin,ims,imax,ms[ims],r,ms[ims+1],

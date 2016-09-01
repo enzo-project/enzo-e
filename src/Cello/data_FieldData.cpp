@@ -50,8 +50,8 @@ void FieldData::pup(PUP::er &p)
 
   p | array_permanent_;
   //  p | array_temporary_
-  static bool warn[MAX_NODE_SIZE] = {false};
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  static bool warn[CONFIG_NODE_SIZE] = {false};
+  const int in = cello::index_static();
   if (! warn[in]) {
     WARNING("FieldData::pup()",
 	    "Skipping array_temporary_");
@@ -439,13 +439,14 @@ int FieldData::field_size
 
   precision_type precision = field_descr->precision(id_field);
   int bytes_per_element = cello::sizeof_precision (precision);
-  if (nz) {
-    return (*nx) * (*ny) * (*nz) * bytes_per_element;
-  } else if (ny) {
-    return (*nx) * (*ny) * bytes_per_element;
-  } else {
-    return (*nx) * bytes_per_element;
-  }
+
+  int bytes_total = bytes_per_element;
+
+  if (nx) bytes_total *= (*nx);
+  if (ny) bytes_total *= (*ny);
+  if (nz) bytes_total *= (*nz);
+
+  return bytes_total;
 }
 
 //----------------------------------------------------------------------

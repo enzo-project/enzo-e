@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-long MsgRefresh::counter[MAX_NODE_SIZE] = {0};
+long MsgRefresh::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
@@ -21,16 +21,14 @@ MsgRefresh::MsgRefresh()
       data_msg_(NULL),
       buffer_(NULL)
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  ++counter[in]; 
+  ++counter[cello::index_static()]; 
 }
 
 //----------------------------------------------------------------------
 
 MsgRefresh::~MsgRefresh()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-  --counter[in];
+  --counter[cello::index_static()];
   delete data_msg_;
   data_msg_ = 0;
 }

@@ -19,13 +19,10 @@ temp_balance_manual = 0
 temp_balance_atsync = 1
 
 #----------------------------------------------------------------------
-# Whether to use the new field/particle refresh using DataMsg.  Intended
-# to be temporary
+# Maximum number of procesess per shared-memory node (can be larger than needed)
 #----------------------------------------------------------------------
 
-new_refresh         = 1
-new_refresh_refine  = 1
-new_refresh_coarsen = 1
+node_size = 64
 
 #----------------------------------------------------------------------
 # Whether to print out detailed messages with the TRACE() series of statements
@@ -229,6 +226,10 @@ define["single"] =    ['CONFIG_PRECISION_SINGLE']
 define["double"] =    ['CONFIG_PRECISION_DOUBLE']
 define_int_size  =    ['SMALL_INTS']
 
+# Hardware configuration defines
+
+define_node_size =   [{'CONFIG_NODE_SIZE' : node_size }]
+
 # Grackle defines
 
 define_grackle   = ['CONFIG_USE_GRACKLE']
@@ -254,10 +255,6 @@ papi_path           = 'papi_path_not_set'
 
 define_temp_balance_manual = ['TEMP_BALANCE_MANUAL']
 define_temp_balance_atsync = ['TEMP_BALANCE_ATSYNC']
-
-define_new_refresh =  ['NEW_REFRESH']
-define_new_refresh_refine  =  ['NEW_REFRESH_REFINE']
-define_new_refresh_coarsen =  ['NEW_REFRESH_COARSEN']
 
 define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
@@ -362,6 +359,8 @@ else:
 
 defines = defines + define_int_size
 
+defines = defines + define_node_size
+
 defines = defines + define_hdf5
 defines = defines + define_png
 
@@ -383,10 +382,6 @@ if (use_grackle != 0):   defines = defines + define_grackle
 
 if (temp_balance_manual != 0): defines = defines + define_temp_balance_manual
 if (temp_balance_atsync != 0): defines = defines + define_temp_balance_atsync
-
-if (new_refresh != 0):   defines = defines + define_new_refresh
-if (new_refresh_refine != 0):   defines = defines + define_new_refresh_refine
-if (new_refresh_coarsen != 0): defines = defines + define_new_refresh_coarsen
 
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose

@@ -28,7 +28,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
 			       int comoving_coordinates)
 {
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   /* declarations */
  

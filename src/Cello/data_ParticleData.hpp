@@ -18,7 +18,7 @@ class ParticleData {
 
 public: // interface
 
-  static long counter[MAX_NODE_SIZE];
+  static long counter[CONFIG_NODE_SIZE];
 
   /// Constructor
   ParticleData();

@@ -60,7 +60,7 @@ int EnzoBlock::ComputeTemperatureField
 
   /* Compute the pressure first. */
  
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   if (DualEnergyFormalism[in])
     result = ComputePressureDualEnergyFormalism(time(), 

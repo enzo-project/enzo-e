@@ -21,8 +21,7 @@ public: // interface
   static Memory * instance() throw ()
   {
 #ifdef CONFIG_USE_MEMORY
-    const int in = CkMyPe() % MAX_NODE_SIZE;
-    return & instance_[in]; 
+    return & instance_[cello::index_static()]; 
 #else
     return 0;
 #endif
@@ -191,7 +190,7 @@ private: // attributes
 
 #ifdef CONFIG_USE_MEMORY
   /// Single instance of the Memory object (singleton design pattern)
-  static Memory instance_[MAX_NODE_SIZE];
+  static Memory instance_[CONFIG_NODE_SIZE];
 #endif
 
 #ifdef CONFIG_USE_MEMORY

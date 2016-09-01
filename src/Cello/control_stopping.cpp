@@ -248,7 +248,7 @@ void Block::exit_()
 {
 
   TRACE_STOPPING("Block::exit_");
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
   if (index().is_root()) {
     if (MsgRefresh::counter[in] != 0) {
       CkPrintf ("%d Block::exit_() MsgRefresh::counter = %ld != 0\n",

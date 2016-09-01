@@ -40,8 +40,6 @@ int EnzoBlock::CosmologyGetUnits
  enzo_float *VelocityUnits, enzo_float time)
 {
  
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-
   /* From the time, compute the current redshift. */
  
   enzo_float a, dadt;
@@ -52,6 +50,8 @@ int EnzoBlock::CosmologyGetUnits
  
   /* Compute the current redshift (remember a(init) = 1). */
  
+  const int in = cello::index_static();
+
   enzo_float CurrentRedshift = (1 + InitialRedshift[in])/a - 1;
  
   /* Determine the units. */

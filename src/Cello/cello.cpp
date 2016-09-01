@@ -181,4 +181,9 @@ namespace cello {
     free(strings);
   }
 
+  int index_static()
+  {
+    return CkMyPe() % CONFIG_NODE_SIZE;
+  }
+
 }

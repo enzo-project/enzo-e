@@ -31,7 +31,7 @@ int EnzoBlock::ComputeGammaField
  
   /* Compute the size of the fields. */
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   int i, size = 1;
 

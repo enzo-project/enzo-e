@@ -30,7 +30,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
  
     /* Determine the size of the grids. */
  
-    const int in = CkMyPe() % MAX_NODE_SIZE;
+    const int in = cello::index_static();
 
     int dim, size = 1, i;
     for (dim = 0; dim < GridRank[in]; dim++)

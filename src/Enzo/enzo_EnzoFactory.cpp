@@ -69,8 +69,6 @@ CProxy_Block EnzoFactory::create_block_array
 
 	TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-#ifdef NEW_REFRESH_REFINE
-
 	MsgRefine * msg = new MsgRefine 
 	  (index,
 	   nx,ny,nz,
@@ -83,16 +81,6 @@ CProxy_Block EnzoFactory::create_block_array
 	msg->set_data_msg(data_msg);
 
 	enzo_block_array[index].insert (msg);
-#else
-	enzo_block_array[index].insert 
-	  (index,
-	   nx,ny,nz,
-	   num_field_blocks,
-	   count_adapt = 0,
-	   cycle, time, dt,
-	   0,NULL,refresh_same,
-	   num_face_level, face_level);
-#endif
 
 	// --------------------------------------------------
 
@@ -159,8 +147,6 @@ void EnzoFactory::create_subblock_array
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 
-#ifdef NEW_REFRESH_REFINE
-
 	  MsgRefine * msg = new MsgRefine 
 	    (index,
 	     nx,ny,nz,
@@ -173,16 +159,7 @@ void EnzoFactory::create_subblock_array
 	  msg->set_data_msg(data_msg);
 
 	  (*enzo_block_array)[index].insert (msg);
-#else
-	  (*enzo_block_array)[index].insert 
-	    (index,
-	     nx,ny,nz,
-	     num_field_blocks,
-	     count_adapt = 0,
-	     cycle, time, dt,
-	     0,NULL,refresh_same,
-	     num_face_level, face_level);
-#endif
+
 	  // --------------------------------------------------
 
 	}
@@ -225,8 +202,6 @@ Block * EnzoFactory::create_block
   index.print("DEBUG insert()",-1,2,false,simulation);
 #endif
   
-#ifdef NEW_REFRESH_REFINE
-
   MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,
@@ -239,16 +214,7 @@ Block * EnzoFactory::create_block
   msg->set_data_msg(data_msg);
 
   (*enzo_block_array)[index].insert ( msg );
-#else
-  (*enzo_block_array)[index].insert 
-    (     index,
-	  nx,ny,nz,
-	  num_field_blocks,
-	  count_adapt,
-	  cycle,time,dt,
-	  narray, array, refresh_type,
-	  num_face_level, face_level);
-#endif
+
   // --------------------------------------------------
 
 #ifdef CELLO_TRACE

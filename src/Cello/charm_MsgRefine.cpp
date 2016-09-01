@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-long MsgRefine::counter[MAX_NODE_SIZE] = {0};
+long MsgRefine::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
@@ -28,9 +28,7 @@ MsgRefine::MsgRefine()
     refresh_type_(refresh_unknown),
     num_face_level_(0), face_level_(NULL)
 {  
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-
-  ++counter[in]; 
+  ++counter[cello::index_static()]; 
 }
 
 //----------------------------------------------------------------------
@@ -54,9 +52,7 @@ MsgRefine::MsgRefine
   num_face_level_(num_face_level),
   face_level_(new int[num_face_level])
 {  
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-
-  ++counter[in]; 
+  ++counter[cello::index_static()]; 
 
   for (int i=0; i<num_face_level_; i++) {
     face_level_[i] = face_level[i];
@@ -67,9 +63,7 @@ MsgRefine::MsgRefine
 
 MsgRefine::~MsgRefine()
 {
-  const int in = CkMyPe() % MAX_NODE_SIZE;
-
-  --counter[in];
+  --counter[cello::index_static()];
 
   delete data_msg_;
   data_msg_ = 0;

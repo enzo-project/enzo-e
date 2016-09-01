@@ -71,7 +71,7 @@ void EnzoInitialImplosion2::enforce_block
   // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");
 
-  const int in = CkMyPe() % MAX_NODE_SIZE;
+  const int in = cello::index_static();
 
   int mx,my;
   field.dimensions(0,&mx,&my);
