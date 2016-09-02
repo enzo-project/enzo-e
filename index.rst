@@ -49,9 +49,9 @@ developed, including self-gravity and support for particle methods.
 A short workshop on using Enzo-P and developing with Cello was presented
 at the Enzo Workshop in 2015.  Below are PDF documents of the presentation.
 
-   :download:`Using and Developing Enzo-P/Cello--Part I: Using Enzo-P <using-enzo-p.pdf>`
+   :download:`Using and Developing Enzo-P/Cello--Part I: Using Enzo-P <./using-enzo-p.pdf>`
 
-   :download:`Using and Developing Enzo-P/Cello--Part II: Developing with Cello <developing-with-cello.pdf>`
+   :download:`Using and Developing Enzo-P/Cello--Part II: Developing with Cello <./developing-with-cello.pdf>`
 
 James Bordner
 jobordner@ucsd.edu
