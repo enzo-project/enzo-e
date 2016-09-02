@@ -23,7 +23,9 @@ public: // interface
   PUPable_decl(EnzoMethodPpml);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodPpml (CkMigrateMessage *m) {}
+  EnzoMethodPpml (CkMigrateMessage *m)
+    : comoving_coordinates_(false)
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

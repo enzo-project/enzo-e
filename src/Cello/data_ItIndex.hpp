@@ -30,7 +30,10 @@ public: // interface
   PUPable_abstract(ItIndex);
 
   /// Charm++ PUP::able migration constructor
-  ItIndex (CkMigrateMessage *m) : PUP::able(m) {}
+  ItIndex (CkMigrateMessage *m)
+    : PUP::able(m),
+      size_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 

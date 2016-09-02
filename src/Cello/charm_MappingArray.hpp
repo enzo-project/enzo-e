@@ -20,14 +20,16 @@ class MappingArray: public CkArrayMap {
   /// processes
 
 public:
-  int *mapping;
 
   MappingArray(int nx, int ny, int nz);
 
   int procNum(int, const CkArrayIndex &idx);
 
   /// CHARM++ migration constructor for PUP::able
-  MappingArray (CkMigrateMessage *m) : CkArrayMap(m) {}
+  MappingArray (CkMigrateMessage *m)
+    : CkArrayMap(m),
+      nx_(0),ny_(0),nz_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

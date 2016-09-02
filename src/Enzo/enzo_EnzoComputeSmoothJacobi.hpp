@@ -29,7 +29,15 @@ public: // interface
   PUPable_decl(EnzoComputeSmoothJacobi);
 
   /// Charm++ PUP::able migration constructor
-  EnzoComputeSmoothJacobi (CkMigrateMessage *m) {}
+  EnzoComputeSmoothJacobi (CkMigrateMessage *m)
+    : A_(NULL),
+      ix_(0),
+      ib_(0),
+      ir_(0),
+      id_(0),
+      w_(0),
+      n_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)

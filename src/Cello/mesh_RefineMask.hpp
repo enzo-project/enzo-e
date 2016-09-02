@@ -27,12 +27,18 @@ public: // interface
 	     bool include_ghosts,
 	     std::string output) throw();
 
+  /// Destructor
+  ~RefineMask();
+  
   /// default constructor
   // RefineMask () throw() : Refine() {};
 
   PUPable_decl(RefineMask);
 
-  RefineMask(CkMigrateMessage *m) : Refine (m) {}
+  RefineMask(CkMigrateMessage *m)
+    : Refine (m),
+      value_(NULL)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

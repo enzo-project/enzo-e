@@ -11,8 +11,7 @@
 
 //----------------------------------------------------------------------
 
-ScalarExpr::ScalarExpr
-(Param * param) throw()
+ScalarExpr::ScalarExpr (Param * param) throw()
   : param_(param),
     value_(0)
 {
@@ -63,18 +62,20 @@ void ScalarExpr::evaluate (T * value, double t,
 	  ndx,ndy,ndz,nx,ny,nz,
 	  (ndx >= nx) && (ndy >= ny) && (ndz >= nz));
 
-  double * x = new double [ nx*ny*nz ];
-  double * y = new double [ nx*ny*nz ];
-  double * z = new double [ nx*ny*nz ];
-  double * value_temp = new double [nx*ny*nz];
   bool * mv = 0;
   if (mask) {
     mv = new bool [ nx*ny*nz ];
     mask->evaluate(mv, t, nx,nx,xv, ny,ny,yv, nz,nz,zv);
   }
-  for (int ix=0; ix<nx; ix++) {
+
+  double * value_temp = new double [nx*ny*nz];
+  double * x = new double [ nx*ny*nz ];
+  double * y = new double [ nx*ny*nz ];
+  double * z = new double [ nx*ny*nz ];
+
+  for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
-      for (int iz=0; iz<nz; iz++) {
+      for (int ix=0; ix<nx; ix++) {
 	int i=ix + nx*(iy + ny*iz);
 	x[i] = xv[ix];
 	y[i] = yv[iy];

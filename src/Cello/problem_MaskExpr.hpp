@@ -19,7 +19,7 @@ public: // interface
 
   /// Constructor
   MaskExpr() throw() 
-  : Mask() , param_(0)
+  : Mask(), param_(NULL)
   { };
 
   /// Destructor
@@ -43,7 +43,9 @@ public: // interface
 
   PUPable_decl(MaskExpr);
 
-  MaskExpr(CkMigrateMessage *m) : Mask (m) {}
+  MaskExpr(CkMigrateMessage *m)
+    : Mask (m), param_(NULL)
+  {}
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

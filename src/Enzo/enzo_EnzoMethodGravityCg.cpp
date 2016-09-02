@@ -100,7 +100,8 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     iter_(0),
-    rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), bc_(0.0)
+    rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
+    bc_(0.0)
 #ifdef OLD_REFRESH
   , id_refresh_matvec_(-1)
 #endif
@@ -139,6 +140,16 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 #endif
 
   TRACE_METHOD("EnzoMethodGravityCg() EXIT");
+}
+
+//----------------------------------------------------------------------
+
+EnzoMethodGravityCg::~EnzoMethodGravityCg ()
+{
+  if (A_) delete A_;
+  A_ = NULL;
+  if (M_) delete M_;
+  M_ = NULL;
 }
 
 //----------------------------------------------------------------------

@@ -38,7 +38,91 @@ public: // interface
   PUPable_decl(EnzoConfig);
 
   /// CHARM++ migration constructor
-  EnzoConfig(CkMigrateMessage *m) : Config (m) {}
+  EnzoConfig(CkMigrateMessage *m)
+    : Config (m),
+      ppm_density_floor(0.0),
+      ppm_diffusion(false),
+      ppm_dual_energy(false),
+      ppm_dual_energy_eta_1(0.0),
+      ppm_dual_energy_eta_2(0.0),
+      ppm_flattening(0),
+      ppm_minimum_pressure_support_parameter(0),
+      ppm_number_density_floor(0.0),
+      ppm_pressure_floor(0.0),
+      ppm_pressure_free(false),
+      ppm_steepening(false),
+      ppm_temperature_floor(0.0),
+      ppm_use_minimum_pressure_support(false),
+      ppm_mol_weight(0.0),
+      field_gamma(0.0),
+      // Cosmology (NOT ACCESSED)
+      physics_cosmology(false),
+      physics_cosmology_comoving_box_size(0.0),
+      physics_cosmology_hubble_constant_now(0.0),
+      physics_cosmology_initial_redshift(0.0),
+      physics_cosmology_max_expansion_rate(0.0),
+      physics_cosmology_omega_lamda_now(0.0),
+      physics_cosmology_omega_matter_now(0.0),
+      // EnzoInitialSedovArray[23]
+      initial_sedov_rank(0),
+      initial_sedov_radius_relative(0.0),
+      initial_sedov_pressure_in(0.0),
+      initial_sedov_pressure_out(0.0),
+      initial_sedov_density(0.0),
+      initial_turbulence_density(0.0),
+      initial_turbulence_pressure(0.0),
+      initial_turbulence_temperature(0.0),
+      // EnzoProlong
+      interpolation_method(""),
+      // EnzoMethodHeat
+      method_heat_alpha(0.0),
+      // EnzoMethodNull
+      method_null_dt(0.0),
+      // EnzoMethodTurbulence
+      method_turbulence_edot(0.0),
+      method_turbulence_mach_number(0.0),
+      // EnzoMethodGravity
+      method_gravity_potential_field(""),
+      method_gravity_density_field(""),
+      // EnzoMethodGravityCg
+      method_gravity_cg_iter_max(0),
+      method_gravity_cg_res_tol(0.0),
+      method_gravity_cg_grav_const(0.0),
+      method_gravity_cg_diag_precon(false),
+      method_gravity_cg_monitor_iter(0),
+      // EnzoMethodGravityBiCGStab
+      method_gravity_bicgstab_iter_max(0),
+      method_gravity_bicgstab_res_tol(0.0),
+      method_gravity_bicgstab_grav_const(0.0),
+      method_gravity_bicgstab_diag_precon(false),
+      method_gravity_bicgstab_monitor_iter(0),
+      // EnzoMethodGravityMlat
+      // EnzoMethodGravityMg0
+      method_gravity_mg_type(""),
+      method_gravity_mg_iter_max(0),
+      method_gravity_mg_res_tol(0.0),
+      method_gravity_mg_grav_const(0.0),
+      method_gravity_mg_monitor_iter(0),
+      method_gravity_mg_smooth(""),
+      method_gravity_mg_smooth_weight(0.0),
+      method_gravity_mg_smooth_pre(0),
+      method_gravity_mg_smooth_coarse(0),
+      method_gravity_mg_smooth_post(0),
+      method_gravity_mg_restrict(""),
+      method_gravity_mg_prolong(""),
+      method_gravity_mg_min_level(0),
+      method_gravity_mg_max_level(0),
+      // EnzoInitialPm
+      initial_pm_field(""),
+      initial_pm_mpp(0.0),
+      // EnzoMethodPm
+      method_pm_deposit_type(""),
+      method_pm_update_max_dt(0.0)
+  {
+    initial_sedov_array[0] = 0;
+    initial_sedov_array[1] = 0;
+    initial_sedov_array[2] = 0;
+  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

@@ -190,6 +190,8 @@ echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time
 
 d=`date +"%Y-%m-%d %H:%M:%S"`
 echo "$d" > test/STOP
+echo "${t}s" > test/TIME
+
 
 
 

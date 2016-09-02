@@ -78,6 +78,15 @@ enum axis_enum {
 };
 typedef int axis_type;
 
+/// @enum     refresh_type
+/// @brief    Type of mesh refinement--coarsen, refine, or stay the same
+enum refresh_type {
+  refresh_unknown,
+  refresh_coarse,
+  refresh_same,
+  refresh_fine
+};
+
 /// @enum     reduce_enum
 /// @brief    Reduction operator, used for image projections
 enum reduce_enum {

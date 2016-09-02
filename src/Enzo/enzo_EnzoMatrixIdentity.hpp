@@ -18,7 +18,8 @@ public: // interface
 
   /// Create a new EnzoMatrixIdentity
   EnzoMatrixIdentity () throw()
-  {}
+  : Matrix(), mx_(0), my_(0), mz_(0)
+  { }
 
   /// Destructor
   virtual ~EnzoMatrixIdentity() throw()
@@ -28,7 +29,9 @@ public: // interface
   PUPable_decl(EnzoMatrixIdentity);
 
   /// CHARM++ migration constructor
-  EnzoMatrixIdentity(CkMigrateMessage *m) {}
+  EnzoMatrixIdentity(CkMigrateMessage *m)
+    : mx_(0), my_(0), mz_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)

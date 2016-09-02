@@ -27,7 +27,11 @@ public: // interface
   PUPable_decl(EnzoComputeCicInterp);
   
   /// Charm++ PUP::able migration constructor
-  EnzoComputeCicInterp (CkMigrateMessage *m) {}
+  EnzoComputeCicInterp (CkMigrateMessage *m)
+    : it_p_(0),
+      ia_p_(0),
+      if_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

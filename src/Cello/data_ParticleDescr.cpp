@@ -524,9 +524,11 @@ bool ParticleDescr::check_ic_(int it, int ic) const
 
 int ParticleDescr::align_ (int value, int bytes) const
 {
-  int align = value % bytes;
-  if (align != 0) {
-    value += (bytes - align);
+  if (bytes > 0) {
+    int align = value % bytes;
+    if (align != 0) {
+      value += (bytes - align);
+    }
   }
   return value;
 }

@@ -771,11 +771,6 @@ void Block::adapt_coarsen_()
     monitor->print("Adapt",buffer);
   }
 
-  // copy face levels
-  int nf = face_level_curr_.size();
-  int face_level_curr[nf];
-  for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
-
   // Create FieldFace for coarsening field data to parent
 
   int ic3[3];
@@ -796,6 +791,11 @@ void Block::adapt_coarsen_()
   data_msg -> set_field_face (field_face,false);
   data_msg -> set_field_data (data()->field_data(),false);
   data_msg -> set_particle_data (data()->particle_data(),false);
+
+  // copy face levels
+  int nf = face_level_curr_.size();
+  int face_level_curr[nf];
+  for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
 
   MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr,ic3);
   msg->set_data_msg (data_msg);

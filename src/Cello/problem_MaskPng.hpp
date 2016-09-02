@@ -19,7 +19,7 @@ public: // interface
 
   /// Constructor
   MaskPng() throw() 
-  : Mask(),mask_(0), nx_(0),ny_(0), xm_(0),xp_(0),ym_(0),yp_(0)
+  : Mask(),mask_(NULL), nx_(0),ny_(0), xm_(0),xp_(0),ym_(0),yp_(0)
   { };
 
   /// Destructor
@@ -45,7 +45,10 @@ public: // interface
 
   PUPable_decl(MaskPng);
 
-  MaskPng(CkMigrateMessage *m) : Mask (m) {}
+  MaskPng(CkMigrateMessage *m)
+    : Mask (m),
+      mask_(NULL), nx_(0),ny_(0), xm_(0),xp_(0),ym_(0),yp_(0)
+  {}
 
 
   /// CHARM++ Pack / Unpack function

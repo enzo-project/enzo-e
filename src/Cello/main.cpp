@@ -64,8 +64,8 @@ void Main::p_checkpoint(int count, std::string dir_name)
     count_checkpoint_ = 0;
     // Write parameter file
 
-    char dir_char[255];
-    strcpy(dir_char,dir_name.c_str());
+    char dir_char[256];
+    strncpy(dir_char,dir_name.c_str(),255);
 
     // --------------------------------------------------
     // ENTRY: #1 OutputCheckpoint::write_simulation()-> Simulation::s_write()

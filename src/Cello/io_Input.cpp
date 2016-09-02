@@ -17,6 +17,7 @@ Input::Input (const Factory * factory,
   : file_(0),           // Initialization deferred
     process_(0),        // initialization below
     sync_(0),
+    index_charm_(0),
     cycle_(0),
     time_(0),
     file_name_(""),     // set_filename()
@@ -171,8 +172,8 @@ std::string Input::expand_file_name_
   
   const int MAX_BUFFER = 255;
 
-  char buffer[MAX_BUFFER];
-  char buffer_new[MAX_BUFFER];
+  char buffer[MAX_BUFFER+1];
+  char buffer_new[MAX_BUFFER+1];
 
   // Error check no \% in file name
 
@@ -218,7 +219,7 @@ std::string Input::expand_file_name_
     file_middle = file_left.substr(pos,len-pos);
     file_left  = file_left.substr(0,pos);
 
-    strcpy (buffer, file_middle.c_str());
+    strncpy (buffer, file_middle.c_str(),MAX_BUFFER);
     
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }

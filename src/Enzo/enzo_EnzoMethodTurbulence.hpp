@@ -31,7 +31,13 @@ public: // interface
   PUPable_decl(EnzoMethodTurbulence);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodTurbulence (CkMigrateMessage *m) {}
+  EnzoMethodTurbulence (CkMigrateMessage *m)
+    :
+    density_initial_(0.0),
+    temperature_initial_(0.0),
+    edot_(0.0),
+    mach_number_(0.0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

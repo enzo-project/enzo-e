@@ -9,13 +9,6 @@
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
-enum refresh_type {
-  refresh_unknown,
-  refresh_coarse,
-  refresh_same,
-  refresh_fine
-};
-
 class Refresh : public PUP::able {
 
   /// @class    Refresh
@@ -63,7 +56,18 @@ public: // interface
   PUPable_decl(Refresh);
 
   /// CHARM++ migration constructor for PUP::able
-  Refresh (CkMigrateMessage *m) : PUP::able(m)
+  Refresh (CkMigrateMessage *m)
+    : PUP::able(m),
+      field_list_(),
+      particle_list_(),
+      ghost_depth_(0),
+      min_face_rank_(0),
+      neighbor_type_(0),
+      sync_type_(0),
+      sync_load_(),
+      sync_store_(),
+      active_(false),
+      callback_(0)
   {  }
 
   /// CHARM++ Pack / Unpack function

@@ -404,13 +404,13 @@ public:
   void control_sync (int entry_point, int sync, int id = 0);
 
   /// synchronize with count other chares; count only needs to be supplied once
-  void p_control_sync_count(int entry_point, int id, int count = 0) 
+  void p_control_sync_count(int entry_point, int id, int count) 
   {      control_sync_count_(entry_point,id, count); }
 
 protected:
   void control_sync_neighbor_(int entry_point, int id);
   void control_sync_face_(int entry_point, int id);
-  void control_sync_count_(int entry_point, int id, int count = 0);
+  void control_sync_count_(int entry_point, int id, int count);
 public:
 
   //--------------------------------------------------

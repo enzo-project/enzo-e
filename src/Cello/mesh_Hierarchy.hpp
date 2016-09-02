@@ -25,7 +25,27 @@ class Hierarchy {
 public: // interface
 
   /// Empty constructor for Charm++ pup()
-  Hierarchy() throw() { }
+  Hierarchy() throw()
+  : factory_(NULL),
+    rank_(0),
+    refinement_(0),
+    max_level_(0),
+    num_blocks_(0), 
+    num_particles_(0), 
+    num_zones_total_(0), 
+    num_zones_real_(0), 
+    block_array_(NULL),
+    block_exists_(false)
+  {
+    for (int axis=0; axis<3; axis++) {
+      root_size_[axis] = 0;
+      lower_[axis] = 0.0;
+      upper_[axis] = 0.0;
+      blocking_[axis] = 0.0;
+      periodicity_[axis][0] = false;
+      periodicity_[axis][1] = false;
+    }
+  }
   
   /// Initialize a Hierarchy object
   Hierarchy (const Factory * factory, 

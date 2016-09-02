@@ -26,7 +26,10 @@ public: // interface
   PUPable_decl(EnzoMethodPmDeposit);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodPmDeposit (CkMigrateMessage *m) {}
+  EnzoMethodPmDeposit (CkMigrateMessage *m)
+    : alpha_(0.0),
+      type_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

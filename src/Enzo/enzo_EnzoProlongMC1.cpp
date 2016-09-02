@@ -100,6 +100,8 @@ int EnzoProlongMC1::apply_
       work[ix] = 0.5*(values_c[ix] + values_c[ix+dx_c]);
     }
 
+    delete [] work;
+
     return (sizeof(T) * n3_c[0]);
 
 
@@ -154,6 +156,8 @@ int EnzoProlongMC1::apply_
       }
     }
 
+    delete [] work;
+  
     return (sizeof(T) * n3_c[0]*n3_c[1]);
 
   } else {
@@ -161,9 +165,9 @@ int EnzoProlongMC1::apply_
     ERROR("EnzoProlongMC1",
 	  "3D not implemented yet");
 
+    delete [] work;
+
     return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
   }
-
-  delete [] work;
 
 }  

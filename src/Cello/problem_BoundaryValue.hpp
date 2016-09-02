@@ -34,7 +34,11 @@ public: // interface
   /// Charm++ PUP::able declarations
   PUPable_decl(BoundaryValue);
 
-  BoundaryValue(CkMigrateMessage *m) : Boundary (m) {}
+  BoundaryValue(CkMigrateMessage *m)
+    : Boundary (m),
+      value_(NULL),
+      field_list_()
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 

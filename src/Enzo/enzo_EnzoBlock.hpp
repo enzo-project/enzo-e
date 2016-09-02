@@ -119,15 +119,47 @@ public: // interface
    int num_face_level, int * face_level);
 
   /// Initialize an empty EnzoBlock
-  EnzoBlock() { };
+  EnzoBlock()
+    :  BASE_ENZO_BLOCK(),
+       mg_sync_(),
+       mg_iter_(0),
+       dt(0),
+       SubgridFluxes(NULL)
+  { 
+    for (int i=0; i<MAX_DIMENSION; i++) {
+      AccelerationField[i] = NULL; 
+      GridLeftEdge[i] = 0; 
+      GridDimension[i] = 0; 
+      GridStartIndex[i] = 0; 
+      GridEndIndex[i] = 0; 
+      CellWidth[i] = 0.0;
+    }
+    for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
+      method_turbulence_data [i] = 0;
+    }
+  }
 
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
-    : BASE_ENZO_BLOCK (m)
+    : BASE_ENZO_BLOCK (m),
+       mg_sync_(),
+       mg_iter_(0),
+      dt(0.0),
+      SubgridFluxes(NULL)
   {
     TRACE("CkMigrateMessage");
-    //    initialize();
-  };
+    for (int i=0; i<MAX_DIMENSION; i++) {
+      AccelerationField[i] = NULL; 
+      GridLeftEdge[i] = 0; 
+      GridDimension[i] = 0; 
+      GridStartIndex[i] = 0; 
+      GridEndIndex[i] = 0; 
+      CellWidth[i] = 0.0;
+    }
+    for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
+      method_turbulence_data [i] = 0;
+    }
+  }
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program
   void pup(PUP::er &p);

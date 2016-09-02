@@ -41,7 +41,22 @@ public: // functions
   PUPable_abstract(Input);
 
   /// Charm++ PUP::able migration constructor
-  Input (CkMigrateMessage *m) : PUP::able(m) {}
+  Input (CkMigrateMessage *m) :
+    PUP::able(m),
+    file_(0),
+    process_(0),
+    sync_(0),
+    cycle_(0),
+    time_(0),
+    file_name_(""),
+    file_args_(),
+    io_block_(0),
+    it_field_index_(0),
+    io_field_data_(0),
+    it_particle_index_(0),
+    io_particle_data_(0),
+    process_stride_(1)
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

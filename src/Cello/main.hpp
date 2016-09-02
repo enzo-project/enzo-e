@@ -61,7 +61,8 @@ public:
   Main(CkMigrateMessage * m)
     : CBase_Main(m),
       count_exit_(0),
-      count_checkpoint_(0)
+      count_checkpoint_(0),
+      monitor_(NULL)
   { 
     TRACE("Main::Main(CkMigrateMessage)");
   }

@@ -31,7 +31,16 @@ public: // interface
 
   PUPable_decl(InitialValue);
 
-  InitialValue(CkMigrateMessage *m) : Initial (m) {}
+  InitialValue(CkMigrateMessage *m)
+    : Initial (m),
+      parameters_(NULL),
+      field_descr_(NULL),
+      num_fields_(0),
+      num_masks_(NULL),
+      mask_(NULL),
+      nx_(NULL),
+      ny_(NULL)
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -111,8 +120,6 @@ private: // attributes
 
   /// Masks for fields and values: mask_[index_field][index_value]
   bool *** mask_;
-
-  Mask *** mask_list_;
 
   /// Size of the masks
   int **nx_;

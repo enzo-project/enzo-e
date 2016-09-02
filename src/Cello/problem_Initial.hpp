@@ -20,7 +20,8 @@ class Initial : public PUP::able
 public: // interface
 
   /// empty constructor for charm++ pup()
-  Initial() throw() {}
+  Initial() throw()
+  : cycle_(0), time_(0.0) {}
 
   /// Create a new Initial
   Initial(int cycle, double time) throw()

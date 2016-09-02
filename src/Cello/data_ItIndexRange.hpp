@@ -26,7 +26,7 @@ public: // interface
 
   /// Create an iterator over integers 0 to count - 1first to last
   ItIndexRange ( size_t count ) throw ()
-    : ItIndex(), first_(0), last_(count - 1)
+    : ItIndex(), index_(0), first_(0), last_(count - 1)
   { size_ = 0;}
 
   /// Virtual destructor
@@ -37,7 +37,12 @@ public: // interface
   PUPable_decl(ItIndexRange);
 
   /// Charm++ PUP::able migration constructor
-  ItIndexRange (CkMigrateMessage *m) : ItIndex (m) {}
+  ItIndexRange (CkMigrateMessage *m)
+    : ItIndex (m),
+      index_(0),
+      first_(0),
+      last_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)

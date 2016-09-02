@@ -52,7 +52,19 @@ class Performance {
 
 public: // interface
 
-  Performance() {};
+  Performance()
+    : papi_(),
+      counter_name_(),
+      counter_type_(),
+      counter_values_(),
+      region_name_(),
+      region_counters_(),
+      region_started_(),
+      region_index_(),
+      papi_counters_(0),
+      warnings_(false),
+      index_region_current_(perf_unknown)
+  {};
 
   /// Initialize a Performance object
   Performance(Config *);

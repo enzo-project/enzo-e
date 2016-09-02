@@ -32,6 +32,13 @@ test:
 compile:
 	./build.sh compile
 #----------------------------------------------------------------------
+.PHONY: coverity
+coverity:
+	make clean
+	rm -rf cov-int cov-int.tgz
+	cov-build --dir cov-int $(MAKE)
+	tar cfz cov-int.tgz cov-int
+#----------------------------------------------------------------------
 .PHONY: diff
 diff:
 	./tools/diff-org.sh > diff.org

@@ -321,7 +321,7 @@ void Problem::initialize_output
 
     OutputImage * output_image = dynamic_cast<OutputImage *> (output);
 
-    if (output != NULL) {
+    if (output_image != NULL) {
 
       // COLORMAP
 

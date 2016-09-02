@@ -28,9 +28,20 @@ public: // interface
   PUPable_decl(EnzoMatrixLaplace);
 
   /// CHARM++ migration constructor
-  EnzoMatrixLaplace(CkMigrateMessage *m) {}
+  EnzoMatrixLaplace(CkMigrateMessage *m)
+    : mx_(0),
+      my_(0),
+      mz_(0),
+      nx_(0),
+      ny_(0),
+      nz_(0),
+      hx_(0.0),
+      hy_(0.0),
+      hz_(0.0),
+      rank_(0)
+  { }
 
-  /// CHARM++ Pack / Unpack function
+    /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   { TRACEPUP;
     PUP::able::pup(p);

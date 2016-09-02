@@ -24,9 +24,6 @@ public: // interface
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Restrict);
 
-  // /// CHARM++ migration constructor for PUP::able
-  // Restrict (CkMigrateMessage *m) : PUP::able(m) {}
-
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
   { TRACEPUP; PUP::able::pup(p); }

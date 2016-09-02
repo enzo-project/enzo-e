@@ -20,7 +20,7 @@ public: // interface
 
   /// Create a new Boundary
   Boundary() throw() 
-  : axis_(axis_all), face_(face_all), mask_(0)
+  : axis_(axis_all), face_(face_all), mask_(NULL)
   {
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
@@ -41,14 +41,22 @@ public: // interface
   }
 
   /// Destructor
-  virtual ~Boundary() throw() {delete mask_;}
+  virtual ~Boundary() throw() { delete mask_; }
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Boundary);
 
   /// CHARM++ migration constructor for PUP::able
-  Boundary (CkMigrateMessage *m) : PUP::able(m)
-  {   }
+  Boundary (CkMigrateMessage *m)
+    : PUP::able(m),
+       axis_(axis_all), face_(face_all), mask_(NULL)
+  {
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	periodicity_[axis][face] = false;
+      }
+    }
+  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 

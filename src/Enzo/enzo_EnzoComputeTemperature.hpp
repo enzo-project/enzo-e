@@ -27,7 +27,12 @@ public: // interface
   PUPable_decl(EnzoComputeTemperature);
   
   /// Charm++ PUP::able migration constructor
-  EnzoComputeTemperature (CkMigrateMessage *m) {}
+  EnzoComputeTemperature (CkMigrateMessage *m)
+    : density_floor_(0.0),
+      temperature_floor_(0.0),
+      mol_weight_(0.0),
+      comoving_coordinates_(0.0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

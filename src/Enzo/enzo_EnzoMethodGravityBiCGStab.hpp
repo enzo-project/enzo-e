@@ -39,11 +39,41 @@ public: // interface
 			    bool is_singular,
 			    bool diag_precon);
 
+  /// destructor
+  ~EnzoMethodGravityBiCGStab();
+  
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGravityBiCGStab);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodGravityBiCGStab(CkMigrateMessage* m) {}
+  EnzoMethodGravityBiCGStab(CkMigrateMessage* m)
+    : A_(NULL),
+      M_(NULL),
+      is_singular_(false),
+      rank_(0),
+      grav_const_(0.0),
+      iter_max_(0), 
+      res_tol_(0.0),
+      monitor_iter_(0),
+      rho0_(0), err_(0), err_min_(0), err_max_(0),
+      idensity_(0),  ipotential_(0),
+      ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
+      iy_(0), iv_(0), iq_(0), iu_(0),
+      nx_(0), ny_(0), nz_(0),
+      mx_(0), my_(0), mz_(0),
+      gx_(0), gy_(0), gz_(0),
+      iter_(0),
+      beta_d_(0), beta_n_(0), beta_(0), 
+      omega_d_(0), omega_n_(0), omega_(0), 
+      vr0_(0), rr_(0), alpha_(0),
+      bs_(0.0),bc_(0.0),
+      ys_(0.0),vs_(0.0),us_(0.0),
+      id_refresh_ACC_(-1),
+      id_refresh_P_(-1),
+      id_refresh_Q_(-1),
+      id_refresh_X_(-1),
+      id_refresh_Y_(-1)
+  {}
 
   /// Charm++ Pack / Unpack function
   void pup(PUP::er& p) {

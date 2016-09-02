@@ -23,7 +23,11 @@ public: // functions
   PUPable_decl(ScheduleList);
 
   /// CHARM++ migration constructor
-  ScheduleList(CkMigrateMessage *m) {}
+  ScheduleList(CkMigrateMessage *m) 
+    : cycle_list_(),
+      time_list_(),
+      seconds_list_()
+  { }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
@@ -34,6 +38,7 @@ public: // functions
 
     p | cycle_list_;
     p | time_list_;
+    p | seconds_list_;
   }
 
   /// Set cycle list
@@ -68,9 +73,6 @@ protected: // attributes
 
   /// List of seconds clock times to perform schedule
   std::vector<double> seconds_list_;
-
-  /// Previous seconds time
-  double seconds_prev_;
 };
 
 #endif /* IO_SCHEDULE_HPP */

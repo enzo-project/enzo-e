@@ -22,8 +22,16 @@ public: // interface
   /// Constructor of uninitialized FieldFace
 
   FieldFace () throw()
+  : refresh_type_(refresh_unknown),
+    field_list_()
   {
     ++counter[cello::index_static()]; 
+
+    for (int i=0; i<3; i++) {
+      face_[i] = 0;
+      child_[i] = 0;
+    }
+
   }
 
   /// Constructor of initialized FieldFace

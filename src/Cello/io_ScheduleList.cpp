@@ -14,7 +14,8 @@
 ScheduleList::ScheduleList () throw()
   : Schedule(),
     cycle_list_(),
-    time_list_()
+    time_list_(),
+    seconds_list_()
 {
 }
 
@@ -85,6 +86,8 @@ bool ScheduleList::write_this_cycle ( int cycle, double time ) throw()
 
   const double tol = 2*cello::machine_epsilon(precision_single);
 
+  double seconds = timer_.value();
+
   switch (type_) {
 
   case schedule_type_time:
@@ -102,6 +105,15 @@ bool ScheduleList::write_this_cycle ( int cycle, double time ) throw()
   case schedule_type_cycle:
     for (size_t i=0; i<cycle_list_.size(); i++) {
       if (cycle == cycle_list_[i]) {
+	result = true;
+	break;
+      }
+    }
+    break;
+
+  case schedule_type_seconds:
+    for (size_t i=0; i<seconds_list_.size(); i++) {
+      if (seconds == seconds_list_[i]) {
 	result = true;
 	break;
       }

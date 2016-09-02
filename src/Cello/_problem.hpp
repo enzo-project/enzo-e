@@ -27,7 +27,6 @@ enum neighbor_enum {
   neighbor_level    // neighbors is in same level, maybe not leaves
 };
   
-
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------

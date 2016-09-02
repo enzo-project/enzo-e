@@ -27,7 +27,7 @@ public: // interface
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Method);
-
+  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 

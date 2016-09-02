@@ -29,7 +29,9 @@ public: // interface
 
   PUPable_decl(RefineParticleMass);
 
-  RefineParticleMass(CkMigrateMessage *m) : Refine (m) {}
+  RefineParticleMass(CkMigrateMessage *m) :
+    Refine (m),
+    level_exponent_(0.0) {}
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

@@ -29,7 +29,10 @@ public: // interface
 
   PUPable_decl(RefineParticleCount);
 
-  RefineParticleCount(CkMigrateMessage *m) : Refine (m) {}
+  RefineParticleCount(CkMigrateMessage *m)
+    : Refine (m),
+      level_exponent_(0.0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

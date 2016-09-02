@@ -225,7 +225,7 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
 
     Index index_neighbor = it_neighbor.index();
 
-    thisProxy[index_neighbor].p_control_sync_count(entry_point,phase);
+    thisProxy[index_neighbor].p_control_sync_count(entry_point,phase,0);
 
   }
   control_sync_count_(entry_point,phase,num_neighbors + 1);
@@ -248,7 +248,7 @@ void Block::control_sync_face_(int entry_point, int phase)
 
     Index index_face = it_face.index();
 
-    thisProxy[index_face].p_control_sync_count(entry_point,phase);
+    thisProxy[index_face].p_control_sync_count(entry_point,phase,0);
 
   }
   control_sync_count_(entry_point,phase,num_faces + 1);

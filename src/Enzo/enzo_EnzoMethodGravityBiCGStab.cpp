@@ -518,6 +518,16 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
 
 //----------------------------------------------------------------------
 
+EnzoMethodGravityBiCGStab::~EnzoMethodGravityBiCGStab()
+{
+  if (A_) delete A_;
+  A_ = NULL;
+  if (M_) delete M_;
+  M_ = NULL;
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodGravityBiCGStab::compute(Block* block) throw() {
 
   /// cast input argument to the EnzoBlock associated with this char

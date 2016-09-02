@@ -18,8 +18,12 @@ Simulation::Simulation
  int            n
  )
 /// Initialize the Simulation object
-: factory_(0),
-  parameters_(0),
+:
+#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
+  fp_debug_(NULL),
+#endif
+  factory_(NULL),
+  parameters_(NULL),
   parameter_file_(parameter_file),
   rank_(0),
   cycle_(0),
@@ -27,18 +31,24 @@ Simulation::Simulation
   dt_(0),
   stop_(false),
   phase_(phase_unknown),
-  config_(0),
-  problem_(0),
+  config_(NULL),
+  problem_(NULL),
   timer_(),
   performance_(NULL),
   performance_name_(""),
   performance_stride_(1),
-  // projections_tracing_(1),
-  schedule_balance_(0),
-  monitor_(0),
-  hierarchy_(0),
-  field_descr_(0),
-  particle_descr_(0)
+#ifdef CONFIG_USE_PROJECTIONS
+  projections_tracing_(false),
+  projections_schedule_on_(NULL),
+  projections_schedule_off_(NULL),
+#endif
+  schedule_balance_(NULL),
+  monitor_(NULL),
+  hierarchy_(NULL),
+  field_descr_(NULL),
+  particle_descr_(NULL),
+  sync_output_begin_(),
+  sync_output_write_()
 {
   debug_open();
 
@@ -54,6 +64,37 @@ Simulation::Simulation
 //----------------------------------------------------------------------
 
 Simulation::Simulation()
+  :
+#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
+  fp_debug_(NULL),
+#endif
+  factory_(NULL),
+  parameters_(NULL),
+  parameter_file_(""),
+  rank_(0),
+  cycle_(0),
+  time_(0.0),
+  dt_(0),
+  stop_(false),
+  phase_(phase_unknown),
+  config_(NULL),
+  problem_(NULL),
+  timer_(),
+  performance_(NULL),
+  performance_name_(""),
+  performance_stride_(1),
+#ifdef CONFIG_USE_PROJECTIONS
+  projections_tracing_(false),
+  projections_schedule_on_(NULL),
+  projections_schedule_off_(NULL),
+#endif
+  schedule_balance_(NULL),
+  monitor_(NULL),
+  hierarchy_(NULL),
+  field_descr_(NULL),
+  particle_descr_(NULL),
+  sync_output_begin_(),
+  sync_output_write_()
 { TRACE("Simulation()"); }
 
 //----------------------------------------------------------------------

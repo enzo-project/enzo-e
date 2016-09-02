@@ -91,7 +91,7 @@ char * DataMsg::save_data (char * buffer) const
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%p DataMsg save_data n_fa %d\n",this, n_fa);
 #endif
-  if (n_fa > 0) {
+  if (n_ff > 0 && n_fa > 0) {
     ff->face_to_array(field,pc);
     pc += n_fa;
   }

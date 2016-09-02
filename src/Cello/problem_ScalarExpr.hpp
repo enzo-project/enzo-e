@@ -24,7 +24,7 @@ public: // interface
 
   /// Destructor
   ~ScalarExpr() throw()
-  { }
+  {  }
 
   /// Copy constructor
   ScalarExpr(const ScalarExpr & scalar_expr) throw()

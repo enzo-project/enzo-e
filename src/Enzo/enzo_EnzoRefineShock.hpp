@@ -35,7 +35,15 @@ public: // interface
 
   PUPable_decl(EnzoRefineShock);
 
-  EnzoRefineShock(CkMigrateMessage *m) : Refine (m) {}
+  EnzoRefineShock(CkMigrateMessage *m)
+    : Refine (m),
+      pressure_min_refine_(0.0),
+      pressure_max_coarsen_(0.0),
+      energy_ratio_min_refine_(0.0),
+      energy_ratio_max_coarsen_(0.0),
+      gamma_(0.0),
+      comoving_coordinates_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

@@ -44,7 +44,25 @@ public: // interface
   PUPable_decl(EnzoMethodGravityMg0);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodGravityMg0 (CkMigrateMessage *m) {}
+  EnzoMethodGravityMg0 (CkMigrateMessage *m)
+    :  A_(NULL),
+       smooth_pre_(NULL),
+       smooth_coarse_(NULL),
+       smooth_post_(NULL),
+       restrict_(NULL),
+       prolong_(NULL),
+       is_singular_(false),
+       rank_(0),
+       grav_const_(0.0),
+       iter_max_(0), 
+       monitor_iter_(0),
+       rr_(0),rr0_(0),
+       irho_(0),  iphi_(0),
+       ib_(0), ic_(0), ir_(0), ix_(0),
+       min_level_(0),
+       max_level_(0),
+       mx_(0),my_(0),mz_(0)
+  {}
 
   /// Destructor
   ~EnzoMethodGravityMg0 () throw();

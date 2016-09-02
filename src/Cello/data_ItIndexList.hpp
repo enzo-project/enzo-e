@@ -18,7 +18,9 @@ public: // interface
 
   /// Create an iterator over integers 0 to count-1
   ItIndexList () throw ()
-    : ItIndex (), values_()
+  : ItIndex (),
+    index_(0),
+    values_()
   { }
 
   /// Virtual destructor
@@ -29,8 +31,11 @@ public: // interface
   PUPable_decl(ItIndexList);
 
   /// Charm++ PUP::able migration constructor
-  ItIndexList (CkMigrateMessage *m) : ItIndex (m) {}
-
+  ItIndexList (CkMigrateMessage *m)
+    : ItIndex (m),
+      index_(0),
+      values_()
+  { }
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {

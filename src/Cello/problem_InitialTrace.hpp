@@ -39,7 +39,11 @@ public: // interface
   PUPable_decl(InitialTrace);
 
   /// CHARM++ migration constructor for PUP::able
-  InitialTrace (CkMigrateMessage *m) : Initial(m)
+  InitialTrace (CkMigrateMessage *m)
+    : Initial(m),
+      mpp_(0.0),
+      field_(""),
+      dx_(0),dy_(0),dz_(0)
   {  }
 
   /// CHARM++ Pack / Unpack function

@@ -54,6 +54,8 @@ public: // interface
 
   /// Copy constructor
   Param(const Param & param) throw()
+    : type_(parameter_unknown),
+      value_accessed_(false)
   { INCOMPLETE("Param::Param"); };
 
   /// Assignment operator

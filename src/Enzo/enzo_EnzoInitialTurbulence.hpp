@@ -25,7 +25,9 @@ public: // interface
     : Initial(),
       density_initial_(density_initial),
       pressure_initial_(pressure_initial),
-      temperature_initial_(temperature_initial)
+      temperature_initial_(temperature_initial),
+      gamma_(gamma)
+
   { }
   
   /// Constructor
@@ -43,7 +45,8 @@ public: // interface
     : Initial (m), 
       density_initial_(0),
       pressure_initial_(0),
-      temperature_initial_(0)
+      temperature_initial_(0),
+      gamma_(5.0/3.0)
   {}
 
   /// CHARM++ Pack / Unpack function

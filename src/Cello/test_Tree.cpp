@@ -151,8 +151,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(*((int *)parent_trace.node()->data()) == 4);
   parent_trace = tree->node_parent(parent_trace);
   unit_assert(*((int *)parent_trace.node()->data()) == 0);
-  
-
 
   //--------------------------------------------------
   //--------------------------------------------------

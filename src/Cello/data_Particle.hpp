@@ -31,7 +31,7 @@ public: // interface
     : particle_descr_ (particle_descr),
       particle_data_ (particle_data)
   {
-    particle_data_->allocate(particle_descr);
+    if (particle_data_) particle_data_->allocate(particle_descr);
   }
 
   /// Copy constructor

@@ -75,12 +75,30 @@ int EnzoBlock::SolveHydroEquations
   enzo_float * density         = (enzo_float *) field.values("density");
   enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
   enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");
-  enzo_float * velocity_x      = (rank >= 1) ? 
-    (enzo_float *) field.values("velocity_x") : new enzo_float[size];
-  enzo_float * velocity_y      = (rank >= 2) ? 
-    (enzo_float *) field.values("velocity_y") : new enzo_float[size];
-  enzo_float * velocity_z      = (rank >= 3) ?
-    (enzo_float *) field.values("velocity_z") : new enzo_float[size];
+
+  /* velocity_x must exist, but if y & z aren't present, then create blank
+     buffers for them (since the solver needs to advect something). */
+
+  enzo_float * velocity_x = NULL;
+  enzo_float * velocity_y = NULL;
+  enzo_float * velocity_z = NULL;
+
+  velocity_x = (enzo_float *) field.values("velocity_x");
+
+  if (rank >= 2) {
+    velocity_y = (enzo_float *) field.values("velocity_y");
+  } else {
+    velocity_y = new enzo_float[size];
+    for (int i=0; i<size; i++) velocity_y[i] = 0.0;
+  }
+
+    if (rank >= 3) {
+    velocity_z = (enzo_float *) field.values("velocity_z");
+  } else {
+    velocity_z = new enzo_float[size];
+    for (int i=0; i<size; i++) velocity_z[i] = 0.0;
+  }
+
   enzo_float * acceleration_x  = field.is_field("acceleration_x") ? 
     (enzo_float *) field.values("acceleration_x") : NULL;
   enzo_float * acceleration_y  = field.is_field("acceleration_y") ? 
@@ -88,23 +106,11 @@ int EnzoBlock::SolveHydroEquations
   enzo_float * acceleration_z  = field.is_field("acceleration_z") ? 
     (enzo_float *)field.values("acceleration_z") : NULL;
 
-  /* velocity_x must exist, but if y & z aren't present, then create blank
-     buffers for them (since the solver needs to advect something). */
 
-  if (rank < 2) {
-    for (int i=0; i<size; i++) velocity_y[i] = 0.0;
-  }
-  if (rank < 3) {
-    for (int i=0; i<size; i++) velocity_z[i] = 0.0;
-  }
 
   /* Determine if Gamma should be a scalar or a field. */
 
   const int in = cello::index_static();
-
-  enzo_float *GammaField;
-  GammaField = new enzo_float[1];
-  GammaField[0] = Gamma[in];
 
   /* Set minimum support. */
 
@@ -278,14 +284,13 @@ int EnzoBlock::SolveHydroEquations
   if (rank < 2) delete [] velocity_y;
   if (rank < 3) delete [] velocity_z;
 
-  delete [] leftface;
-  delete [] GammaField;
-
+  delete [] array;
+  
   for (int i=0; i<NumberOfSubgrids; i++) {
     delete SubgridFluxes[i];
   }
   delete [] SubgridFluxes;
-  delete [] coloff;
+  if (ncolour > 0) delete [] coloff;
 
   return ENZO_SUCCESS;
 

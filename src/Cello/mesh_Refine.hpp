@@ -36,7 +36,14 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
 
-  Refine (CkMigrateMessage *m) : PUP::able(m) {}
+  Refine (CkMigrateMessage *m)
+    : PUP::able(m),
+      min_refine_(0.0),
+      max_coarsen_(0.0),
+      max_level_(0),
+      include_ghosts_(false),
+      output_("")
+  {}
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

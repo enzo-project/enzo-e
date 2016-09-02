@@ -17,7 +17,13 @@ class EnzoInitialSedovArray3 : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialSedovArray3() throw() { }
+  EnzoInitialSedovArray3() throw()
+  : Initial (),
+    radius_relative_(0.0),
+    pressure_in_(0.0),
+    pressure_out_(0.0),
+    density_(0.0)
+  { }
   
   /// Constructor
   EnzoInitialSedovArray3(const EnzoConfig * enzo_config) throw();
@@ -26,7 +32,13 @@ public: // interface
   PUPable_decl(EnzoInitialSedovArray3);
 
   /// CHARM++ migration constructor
-  EnzoInitialSedovArray3(CkMigrateMessage *m) : Initial (m) {}
+  EnzoInitialSedovArray3(CkMigrateMessage *m)
+    : Initial (m),
+      radius_relative_(0.0),
+      pressure_in_(0.0),
+      pressure_out_(0.0),
+      density_(0.0)
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

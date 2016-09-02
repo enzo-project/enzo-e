@@ -34,7 +34,12 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
 
-  Stopping (CkMigrateMessage *m) : PUP::able(m) {}
+  Stopping (CkMigrateMessage *m)
+    : PUP::able(m),
+      stop_cycle_(0),
+      stop_time_(0),
+      stop_seconds_(0)
+  {}
 
   /// Destructor
   virtual ~Stopping()

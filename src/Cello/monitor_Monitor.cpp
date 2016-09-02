@@ -18,12 +18,11 @@ Monitor Monitor::instance_[CONFIG_NODE_SIZE]; // singleton design pattern)
 
 Monitor::Monitor()
   : timer_(new Timer),
-    mode_(monitor_mode_root)
+    mode_(monitor_mode_root),
+    verbose_(false),
+    group_default_(monitor_mode_all)
 { 
   timer_->start();
-
-  // Default: always output
-  group_default_ = monitor_mode_all;
 
   // turn off debugging
   group_mode_["DEBUG"] = monitor_mode_none;

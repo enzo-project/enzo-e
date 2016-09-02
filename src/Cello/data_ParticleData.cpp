@@ -8,7 +8,7 @@
 #include "data.hpp"
 #include <algorithm>
 
-long ParticleData::counter[CONFIG_NODE_SIZE] = {0};
+int64_t ParticleData::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
 
@@ -434,7 +434,7 @@ void ParticleData::compress (ParticleDescr * particle_descr, int it)
 
 float ParticleData::efficiency (ParticleDescr * particle_descr)
 {
-  long bytes_min=0,bytes_used=0;
+  int64_t bytes_min=0,bytes_used=0;
   const int mb = particle_descr->batch_size();
 
   const int nt = particle_descr->num_types();
@@ -447,7 +447,7 @@ float ParticleData::efficiency (ParticleDescr * particle_descr)
       bytes_used += mb*mp;
     }
   }
-  return 1.0*bytes_min/bytes_used;
+  return (bytes_used) ? 1.0*bytes_min/bytes_used : 1.0;
 
 }
 
@@ -455,7 +455,7 @@ float ParticleData::efficiency (ParticleDescr * particle_descr)
 
 float ParticleData::efficiency (ParticleDescr * particle_descr, int it)
 {
-  long bytes_min=0,bytes_used=0;
+  int64_t bytes_min=0,bytes_used=0;
   const int mb = particle_descr->batch_size();
 
   const int nb = num_batches(it);
@@ -465,7 +465,7 @@ float ParticleData::efficiency (ParticleDescr * particle_descr, int it)
     bytes_min += np*mp;
     bytes_used += mb*mp;
   }
-  return 1.0*bytes_min/bytes_used;
+  return (bytes_used) ? 1.0*bytes_min/bytes_used : 1.0;
 }
 
 //----------------------------------------------------------------------
@@ -477,10 +477,10 @@ float ParticleData::efficiency (ParticleDescr * particle_descr, int it, int ib)
   const int np = num_particles(particle_descr,it,ib);
   const int mb = particle_descr->batch_size();
 
-  const long bytes_min  = np*mp;
-  const long bytes_used = mb*mp;
+  const int64_t bytes_min  = np*mp;
+  const int64_t bytes_used = mb*mp;
 
-  return 1.0*bytes_min/bytes_used;
+  return (bytes_used) ? 1.0*bytes_min/bytes_used : -1.0;
   
 }
 

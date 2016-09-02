@@ -34,7 +34,12 @@ public: // interface
 
   PUPable_decl(InitialFile);
 
-  InitialFile(CkMigrateMessage *m) : Initial (m) {}
+  InitialFile(CkMigrateMessage *m)
+    : Initial (m),
+      parameters_(NULL),
+      input_(NULL)
+    
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

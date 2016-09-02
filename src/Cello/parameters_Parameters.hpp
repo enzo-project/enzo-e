@@ -239,7 +239,7 @@ private: // functions
 
     if (! is_full_parameter) {
       parameter_name = "";
-      for (int i=0; current_group_[i] != 0 && i<MAX_GROUP_DEPTH; i++) {
+      for (int i=0; ( i < MAX_GROUP_DEPTH) && current_group_[i] != 0; i++) {
 	parameter_name = parameter_name + current_group_[i] + ":";
       }
       parameter_name = parameter_name + parameter;

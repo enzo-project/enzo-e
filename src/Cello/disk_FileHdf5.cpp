@@ -741,7 +741,7 @@ int FileHdf5::scalar_to_hdf5_ (int type) const throw()
 
   // Whether to use native encodings.  Note, setting to false doesn't
   // work--written values are garbage when viewed using h5dump
-  bool native = true;
+  const bool native = true;
 
   // Whether to use big-endian or little-endian.  Ignored if native
   // is true

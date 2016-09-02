@@ -42,7 +42,25 @@ public: // functions
   PUPable_abstract(Output);
 
   /// Charm++ PUP::able migration constructor
-  Output (CkMigrateMessage *m) : PUP::able(m) {}
+  Output (CkMigrateMessage *m)
+    : PUP::able(m),
+      file_(0),           // Initialization deferred
+      schedule_(0),
+      process_(0),        // initialization below
+      sync_write_(1),     // default process-per-stride
+      index_(0),
+      cycle_(0),
+      count_(0),
+      time_(0),
+      file_name_(""),     // set_filename()
+      file_args_(),       // set_filename()
+      io_block_(0),
+      it_field_index_(0),        // set_it_index_field()
+      io_field_data_(0),
+      it_particle_index_(0),        // set_it_index_particle()
+      io_particle_data_(0),
+      process_stride_(1) // default one file per process
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

@@ -46,7 +46,18 @@ public: // interface
   Data & operator= (const Data & data) throw();
 
   /// Empty constructor
-  Data() { }
+  Data()
+    : num_field_data_(0),
+      field_data_(),
+      particle_data_(NULL)
+  {
+    lower_[0] = 0.0;
+    lower_[1] = 0.0;
+    lower_[2] = 0.0;
+    upper_[0] = 0.0;
+    upper_[1] = 0.0;
+    upper_[2] = 0.0;
+  }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

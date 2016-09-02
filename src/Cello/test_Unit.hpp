@@ -69,8 +69,8 @@ private:
 
     WARNING ("Unit::pup","skipping instance_ [static]");
 
-    PUParray (p,class_name_,UNIT_MAX_NAME_LEN);
-    PUParray (p,func_name_, UNIT_MAX_NAME_LEN);
+    PUParray (p,class_name_,UNIT_MAX_NAME_LEN+1);
+    PUParray (p,func_name_, UNIT_MAX_NAME_LEN+1);
     p | test_num_;
     p | is_active_;
     p | comm_size_;
@@ -121,10 +121,10 @@ private:
   static const char * incomplete_;
   
   /// Name of the current class being tested
-  char class_name_ [UNIT_MAX_NAME_LEN];
+  char class_name_ [UNIT_MAX_NAME_LEN+1];
 
   /// Name of the current function being tested
-  char func_name_  [UNIT_MAX_NAME_LEN];
+  char func_name_  [UNIT_MAX_NAME_LEN+1];
 
   /// Running count of tests
   int test_num_;

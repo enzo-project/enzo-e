@@ -86,6 +86,10 @@ Schedule * Schedule::create
 
   }
 
+  ASSERT ("Schedule::create",
+	  "Bad shedule parameters",
+	  schedule != NULL);
+
   if (var_cycle) schedule->set_type(schedule_type_cycle);
   if (var_time)  schedule->set_type(schedule_type_time);
   if (var_seconds)  schedule->set_type(schedule_type_seconds);

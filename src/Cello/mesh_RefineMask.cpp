@@ -21,6 +21,12 @@ RefineMask::RefineMask(Parameters * parameters,
 }
 
 //----------------------------------------------------------------------
+RefineMask::~RefineMask()
+{
+  if (value_) delete value_;
+  value_ = NULL;
+}
+//----------------------------------------------------------------------
 
 void RefineMask::pup (PUP::er &p)
 {

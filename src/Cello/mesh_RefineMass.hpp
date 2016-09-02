@@ -31,7 +31,10 @@ public: // interface
 
   PUPable_decl(RefineMass);
 
-  RefineMass(CkMigrateMessage *m) : Refine (m) {}
+  RefineMass(CkMigrateMessage *m)
+    : Refine (m),
+      level_exponent_(0.0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

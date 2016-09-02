@@ -14,7 +14,16 @@
 //----------------------------------------------------------------------
 
 ScheduleInterval::ScheduleInterval () throw()
-  : Schedule()
+  : Schedule(),
+    cycle_start_(0),
+    cycle_step_(0),
+    cycle_stop_(0),
+    time_start_(0.0),
+    time_step_(0.0),
+    time_stop_(0.0),
+    seconds_start_(0.0),
+    seconds_step_(0.0),
+    seconds_stop_(0.0)
 {
 }
 

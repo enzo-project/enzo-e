@@ -23,8 +23,17 @@ public: // functions
   PUPable_decl(ScheduleInterval);
 
   /// CHARM++ migration constructor
-  ScheduleInterval(CkMigrateMessage *m) {}
-
+  ScheduleInterval(CkMigrateMessage *m)
+    :  cycle_start_(0),
+       cycle_step_(0),
+       cycle_stop_(0),
+       time_start_(0),
+       time_step_(0),
+       time_stop_(0),
+       seconds_start_(0),
+       seconds_step_(0),
+       seconds_stop_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

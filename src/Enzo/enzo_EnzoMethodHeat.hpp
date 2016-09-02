@@ -22,13 +22,20 @@ public: // interface
   /// Create a new EnzoMethodHeat object
   EnzoMethodHeat(const FieldDescr *, double alpha, double courant);
 
-  EnzoMethodHeat() {};
+  EnzoMethodHeat()
+    : Method(),
+      alpha_(0.0),
+      courant_(0.0)
+  { }
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodHeat);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodHeat (CkMigrateMessage *m) {}
+  EnzoMethodHeat (CkMigrateMessage *m)
+    : alpha_(0.0),
+      courant_(0.0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) ;
