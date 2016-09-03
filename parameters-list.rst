@@ -445,13 +445,13 @@ alignment in memory, and memory padding between fields.
 ----
 
 :Parameter:  :p:`Field` : :p:`courant`
-:Summary: :s:`Courant condition for fields`
+:Summary: :s:`Courant safety factor for fields`
 :Type:    :t:`float`
 :Default: :d:`0.6`
 :Scope:     :c:`Cello`
 :Todo:    :o:`Rename?`
 
-:e:`Courant condition for all fields.  This is a multiplication factor for the time step as determined by the respective Method(s) used.  This parameter can be updated on restart using the` `Restart : file` :e:`restart parameter file.`
+:e:`Courant safety factor for all fields.  This is a multiplication factor for the time step as determined by the respective Method(s) used.  This parameter can be updated on restart using the` `Restart : file` :e:`restart parameter file.`
 
 ----
 
@@ -810,6 +810,16 @@ Method
         }
      }
 
+
+----
+
+:Parameter:  :p:`Method` : :p:`courant`
+:Summary: :s:`Global Courant safety factor`
+:Type:    :t:`float`
+:Default: :d:`1.0`
+:Scope:     :c:`Cello`
+
+:e:`The global Courant safety factor is a multiplication factor for the time step applied on top of any Field or Particle specific Courant safety factors.`
 
 cosmology
 ---------
