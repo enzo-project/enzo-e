@@ -110,58 +110,62 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
       if (rank >= 1) {
 	x  = (double *) particle.attribute_array (it, ia_x,  ib);
 	vx = (double *) particle.attribute_array (it, ia_vx, ib);
-	ax = (double *) particle.attribute_array (it, ia_ax,  ib);
+	ax = (double *) particle.attribute_array (it, ia_ax, ib);
       }
       if (rank >= 2) {
 	y  = (double *) particle.attribute_array (it, ia_y,  ib);
-	vy = (double *) particle.attribute_array (it, ia_vy,  ib);
-	ay = (double *) particle.attribute_array (it, ia_ay,  ib);
+	vy = (double *) particle.attribute_array (it, ia_vy, ib);
+	ay = (double *) particle.attribute_array (it, ia_ay, ib);
       }
       if (rank >= 3) {
 	z  = (double *) particle.attribute_array (it, ia_z,  ib);
-	vz = (double *) particle.attribute_array (it, ia_vz,  ib);
-	az = (double *) particle.attribute_array (it, ia_az,  ib);
+	vz = (double *) particle.attribute_array (it, ia_vz, ib);
+	az = (double *) particle.attribute_array (it, ia_az, ib);
       }
 
       const int np = particle.num_particles(it,ib);
 
-      if (rank == 1) {
+      if (rank >= 1) {
 
 	for (int ip=0; ip<np; ip++) {
 
-	  vx[ip*dv] += ax[ip*da]*dt/2;
-	  x[ip*dp] += vx[ip*dv]*dt;
-	  vx[ip*dv] += ax[ip*da]*dt/2;
+	  const int ipdv = ip*dv;
+	  const int ipdp = ip*dp;
+	  const int ipda = ip*da;
+
+	  vx[ipdv] += ax[ipda]*dt/2;
+	  x [ipdp] += vx[ipdv]*dt;
+	  vx[ipdv] += ax[ipda]*dt/2;
 
 	}
-      } else if (rank == 2) {
+	
+      }
+      if (rank >= 2) {
 
 	for (int ip=0; ip<np; ip++) {
 
-	  vx[ip*dv] += ax[ip*da]*dt/2;
-	  x [ip*dp] += vx[ip*dv]*dt;
-	  vx[ip*dv] += ax[ip*da]*dt/2;
+	  const int ipdv = ip*dv;
+	  const int ipdp = ip*dp;
+	  const int ipda = ip*da;
 
-	  vy[ip*dv] += ay[ip*da]*dt/2;
-	  y [ip*dp] += vy[ip*dv]*dt;
-	  vy[ip*dv] += ay[ip*da]*dt/2;
+	  vy[ipdv] += ay[ipda]*dt/2;
+	  y [ipdp] += vy[ipdv]*dt;
+	  vy[ipdv] += ay[ipda]*dt/2;
 
 	}
-      } else if (rank == 3) {
+	
+      }
+      if (rank >= 3) {
 
 	for (int ip=0; ip<np; ip++) {
 
-	  vx[ip*dv] += ax[ip*da]*dt/2;
-	  x [ip*dp] += vx[ip*dv]*dt;
-	  vx[ip*dv] += ax[ip*da]*dt/2;
+	  const int ipdv = ip*dv;
+	  const int ipdp = ip*dp;
+	  const int ipda = ip*da;
 
-	  vy[ip*dv] += ay[ip*da]*dt/2;
-	  y [ip*dp] += vy[ip*dv]*dt;
-	  vy[ip*dv] += ay[ip*da]*dt/2;
-
-	  vz[ip*dv] += az[ip*da]*dt/2;
-	  z [ip*dp] += vz[ip*dv]*dt;
-	  vz[ip*dv] += az[ip*da]*dt/2;
+	  vz[ipdv] += az[ipda]*dt/2;
+	  z [ipdp] += vz[ipdv]*dt;
+	  vz[ipdv] += az[ipda]*dt/2;
 
 	}
       }
@@ -204,7 +208,7 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     double xm,ym,zm;
     double xp,yp,zp;
     block->lower(&xm,&ym,&zm);
-     block->upper(&xp,&yp,&zp);
+    block->upper(&xp,&yp,&zp);
 
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
@@ -222,50 +226,56 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     // /* Multiply resulting dt by ParticleCourantSafetyNumber. */
  
     // dtParticles *= ParticleCourantSafetyNumber;
- 
 
+    const double hx = (xp-xm)/nx;
+    const double hy = (yp-ym)/ny;
+    const double hz = (zp-zm)/nz;
+    
     for (int ib=0; ib<nb; ib++) {
       const int np = particle.num_particles(it,ib);
 
       if (rank >= 1) {
-	const double hx = (xp-xm)/nx;
 	const double * vx = (const double *) 
 	  particle.attribute_array (it, ia_vx, ib); 
 	const double * ax = (const double *) 
 	  particle.attribute_array (it, ia_ax, ib); 
 	for (int ip=0; ip<np; ip++) {
-	  const double dt_v = hx/MAX(fabs(vx[ip*dv]), 1e-6);
+	  const double v = fabs(vx[ip*dv]);
+	  const double a = fabs(ax[ip*da]);
+	  const double dt_v = hx /MAX(v,1e-6);
+	  const double dt_a = sqrt(2.0*hx/MAX(a,1e-6));
 	  dt = MIN(dt,dt_v);
-	  // const double dt_a = 2*sqrt(hx)/MAX(fabs(ax[ib*da]), 1e-6);
-	  // dt = MIN(dt,dt_a);
+	  dt = MIN(dt,dt_a);
 	}
       }
 
       if (rank >= 2) {
-	const double hy = (yp-ym)/ny;
 	const double * vy = (const double *) 
 	  particle.attribute_array (it, ia_vy, ib); 
 	const double * ay = (const double *) 
 	  particle.attribute_array (it, ia_ay, ib); 
 	for (int ip=0; ip<np; ip++) {
-	  const double dt_v = hy/MAX(fabs(vy[ip*dv]), 1e-6);
+	  const double v = fabs(vy[ip*dv]);
+	  const double a = fabs(ay[ip*da]);
+	  const double dt_v = hy /MAX(v,1e-6);
+	  const double dt_a = sqrt(2.0*hy/MAX(a,1e-6));
 	  dt = MIN(dt,dt_v);
-	  // const double dt_a = 2*sqrt(hy)/MAX(fabs(ay[ib*da]), 1e-6);
-	  // dt = MIN(dt,dt_a);
+	  dt = MIN(dt,dt_a);
 	}
       }
 
       if (rank >= 3) {
-	const double hz = (zp-zm)/nz;
 	const double * vz = (const double *) 
 	  particle.attribute_array (it, ia_vz, ib); 
 	const double * az = (const double *) 
 	  particle.attribute_array (it, ia_az, ib); 
 	for (int ip=0; ip<np; ip++) {
-	  const double dt_v = hz/MAX(fabs(vz[ip*dv]), 1e-6);
+	  const double v = fabs(vz[ip*dv]);
+	  const double a = fabs(az[ip*da]);
+	  const double dt_v = hz/MAX(v,1e-6);
+	  const double dt_a = sqrt(2.0*hz/MAX(a,1e-6));
 	  dt = MIN(dt,dt_v);
-	  // const double dt_a = 2*sqrt(hz)/MAX(fabs(az[ib*da]), 1e-6);
-	  // dt = MIN(dt,dt_a);
+	  dt = MIN(dt,dt_a);
 	}
       }
 

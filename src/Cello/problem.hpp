@@ -24,6 +24,6 @@
 #include "_compute.hpp"
 #include "_problem.hpp"
 #include "_mesh.hpp"
-
+#include "_simulation.hpp"
 
 #endif /* PROBLEM_HPP */

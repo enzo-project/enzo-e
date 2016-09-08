@@ -20,10 +20,14 @@ printf ("%s",$dir);
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
    <table>
-<tr> <th> Cello directory </th> <td> <?php printf ($dir) ?></td> </tr>
-   <tr> <th> Cello branch </th> <td align="left"> <?php system ("hg branch") ?></td> </tr>
-   <tr> <th> Cello revision </th>  <td> <?php system ("hg id -n") ?> </td> </tr>
-   <tr> <th> Charm++ version </th> <td> <?php system ("cat CHARM_VERSION") ?> </td> </tr>
+   <tr> <th> Cello directory </th> <td> <?php printf ($dir) ?></td>
+    <th> Date </th> <td> <?php system ("cat DATE") ?></td> </tr>
+   <tr> <th> Cello branch </th> <td align="left"> <?php system ("hg branch") ?></td> 
+    <th> Start </th> <td> <?php system ("cat START") ?></td> </tr>
+   <tr> <th> Cello revision </th>  <td> <?php system ("hg id -n") ?> </td> 
+    <th> Stop </th> <td> <?php system ("cat STOP") ?></td> </tr>
+   <tr> <th> Charm++ version </th> <td> <?php system ("cat CHARM_VERSION") ?> </td> 
+    <th> Duration </th> <td> <?php system ("cat TIME") ?> min</td> </tr>
    </table>
  <?php
 

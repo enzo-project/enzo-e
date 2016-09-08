@@ -68,6 +68,11 @@ protected: // functions
   /// Initial particle positions are random based on local density
   void density_placement_ (Block * block, Field field, Particle particle);
 
+public: // static attributes
+  
+  /// Next available particle ID, where id0_ = CkMyPe() + k * CkNumPes()
+  static int id0_[CONFIG_NODE_SIZE];
+
 protected: // attributes
 
   /// if mpp_ != 0, mass per particle--place on average one particle
@@ -81,8 +86,6 @@ protected: // attributes
   /// (ix%dx_==0) && (iy%dy_ == 0) && (iz%dz_ == 0)
   int dx_,dy_,dz_;
 
-  /// Next available particle ID, where id0_ = CkMyPe() + k * CkNumPes()
-  static int id0_[CONFIG_NODE_SIZE];
 };
 
 #endif /* PROBLEM_INITIAL_TRACE_HPP */

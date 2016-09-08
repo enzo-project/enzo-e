@@ -669,27 +669,22 @@ void Simulation::monitor_performance()
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = nr * nc + 4;
+  int n = nr * nc + 2;
 
   long long * counters_long_long = new long long [nc];
   long *      counters_long = new long [n];
 
+  int m = 0;
+
+  counters_long[m++] = hierarchy_->num_particles(); 
+  counters_long[m++] = hierarchy_->num_blocks(); 
+
   for (int ir = 0; ir < nr; ir++) {
     performance_->region_counters(ir,counters_long_long);
-    for (int ic = 0; ic < nc; ic++) {
-      int ia = ir+nr*ic;
-      counters_long[ia] = (long) counters_long_long[ic];
+    for (int ic = 0; ic < nc; ic++,m++) {
+      counters_long[m] = (long) counters_long_long[ic];
     }
   }
-
-  // number of Blocks
-  counters_long[n-4] = hierarchy_->num_blocks(); 
-  // number of particles
-  counters_long[n-3] = hierarchy_->num_particles();
-  // number of real zones
-  counters_long[n-2] = hierarchy_->num_zones_real();
-  // number of zones total
-  counters_long[n-1] = hierarchy_->num_zones_total(); 
 
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
@@ -709,15 +704,21 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = nr * nc + 4;
+  int n = nr * nc + 2;
 
   long *      counters_long = (long * )msg->getData();
 
   int index_region_cycle = performance_->region_index("cycle");
 
+  int m = 0;
+  
+  monitor()->print("Performance","simulation num-particles total %d",
+		   counters_long[m++]);
+  monitor()->print("Performance","simulation num-blocks %d",
+		   counters_long[m++]);
+
   for (int ir = 0; ir < nr; ir++) {
-    for (int ic = 0; ic < nc; ic++) {
-      int ia = ir+nr*ic;
+    for (int ic = 0; ic < nc; ic++, m++) {
       bool do_print = 
 	(performance_->counter_type(ic) != counter_type_abs) ||
 	(ir == index_region_cycle);
@@ -725,19 +726,12 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			counters_long[ia]);
+			counters_long[m]);
       }
+      
     }
   }
 
-  monitor()->print("Performance","simulation num-blocks %d",
-		  counters_long[n-4]);
-  monitor()->print("Performance","simulation num-particles %d",
-		  counters_long[n-3]);
-  monitor()->print("Performance","simulation num-zones-real %d",
-		  counters_long[n-2]);
-  monitor()->print("Performance","simulation num-zones-total %d",
-		  counters_long[n-1]);
 
   Memory::instance()->reset_high();
 

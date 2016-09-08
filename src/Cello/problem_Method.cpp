@@ -7,6 +7,8 @@
 
 #include "problem.hpp"
 
+double Method::courant_global[CONFIG_NODE_SIZE] = {0.0};
+
 //----------------------------------------------------------------------
 
 Method::~Method() throw()

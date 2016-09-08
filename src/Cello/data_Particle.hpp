@@ -285,9 +285,9 @@ public: // interface
   /// Delete the given particles in the batch according to mask
   /// attribute.  Compresses the batch if particles deleted, so batch
   /// may have fewer than max number of particles.  Other batches
-  /// remain unchanged.
+  /// remain unchanged.  Return the number of particles deleted.
 
-  void delete_particles (int it, int ib, const bool * m = 0);
+  int delete_particles (int it, int ib, const bool * m = 0);
 
   /// Scatter particles among an array of other Particle structures.
   /// Typically used for preparing to send particles that have gone
@@ -301,11 +301,11 @@ public: // interface
   
   /// Gather particles from an array of other Particle structures.
   /// Typically used after receiving particles from neighboring blocks
-  /// that have entered this block.
+  /// that have entered this block.  Return the total number of particles
+  /// inserted
 
-  void gather (int it, 
-	       int n, ParticleData **particle_array)
-  { particle_data_->gather(particle_descr_,it,n,particle_array); }
+  int gather (int it, int n, ParticleData **particle_array)
+  { return particle_data_->gather(particle_descr_,it,n,particle_array); }
 
   /// Compress particles in batches so that all batches except
   /// possibly the last have batch_size() particles.  May be performed

@@ -58,7 +58,7 @@ public: // interface
   /// may have fewer than max number of particles.  Other batches
   /// remain unchanged.
 
-  void delete_particles (ParticleDescr *, int it, int ib, const bool * m = NULL);
+  int delete_particles (ParticleDescr *, int it, int ib, const bool * m = NULL);
 
   /// Scatter particles among an array of other Particle structures.
   /// Typically used for preparing to send particles that have gone
@@ -71,10 +71,10 @@ public: // interface
   
   /// Gather particles from an array of other Particle structures.
   /// Typically used after receiving particles from neighboring blocks
-  /// that have entered this block.
+  /// that have entered this block.  Return the total number of particles
+  /// inserted
 
-  void gather (ParticleDescr *, int it, 
-	       int n, ParticleData * particle_array[]);
+  int gather (ParticleDescr *, int it, int n, ParticleData * particle_array[]);
 
   /// Compress particles in batches so that all batches except
   /// possibly the last have batch_size() particles.  May be performed

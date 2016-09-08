@@ -7,6 +7,15 @@
 
 module mesh {
 
+  readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
+  readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
+  readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
+  readonly int DataMsg::counter[CONFIG_NODE_SIZE];
+  readonly int FieldFace::counter[CONFIG_NODE_SIZE];
+  readonly int ParticleData::counter[CONFIG_NODE_SIZE];
+  readonly int InitialTrace::id0_[CONFIG_NODE_SIZE];
+  readonly double Method::courant_global[CONFIG_NODE_SIZE];  	   
+  
   PUPable BoundaryPeriodic;
   PUPable BoundaryValue;
   PUPable Config;
@@ -54,16 +63,6 @@ module mesh {
   array[Index] Block {
 
     entry Block     (MsgRefine * msg);
-
-    entry Block
-      (Index index,
-       int nx, int ny, int nz,	
-       int num_field_blocks,
-       int count_adapt,
-       int cycle, double time, double dt,
-       int  n,     char arr[n],  int op_array,
-       int num_face_level, int face_level[num_face_level]);
-
     entry Block();
 
     //--------------------------------------------------
@@ -157,13 +156,6 @@ module mesh {
     entry void p_refresh_store (MsgRefresh * msg);
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
-
-    // WARNING: removing "[expedited]" below leads to higher
-    //          probability of errors in load balancing regression
-    //          tests
-
-    entry [expedited] void p_refresh_store_particle_face
-      (int n, int np, char a[n],  int it);
 
     entry void x_refresh_child
       (int n, char a[n], int ic3[3]);

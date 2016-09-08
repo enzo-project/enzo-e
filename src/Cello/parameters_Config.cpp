@@ -100,6 +100,7 @@ void Config::pup (PUP::er &p)
   // Method
 
   p | num_method;
+  p | method_courant_global;
   p | method_list;
   p | method_schedule_index;
   p | method_courant;
@@ -642,7 +643,9 @@ void Config::read_method_ (Parameters * p) throw()
   method_courant.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
-
+  
+  method_courant_global = p->value_float ("Method:courant",1.0);
+  
   for (int index_method=0; index_method<num_method; index_method++) {
 
     std::string name = 

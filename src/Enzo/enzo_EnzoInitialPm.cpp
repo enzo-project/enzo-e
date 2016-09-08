@@ -148,7 +148,8 @@ void EnzoInitialPm::uniform_placement_
   // ... insert uninitialized dark matter particles
 
   particle.insert_particles (it,np);
-
+  block->simulation()->monitor_insert_particles(np);
+  
   const int npb = particle.batch_size();
 
   int ib=0;  // batch counter
@@ -281,6 +282,7 @@ void EnzoInitialPm::density_placement_
   const int it = particle.type_index("dark");
 
   particle.insert_particles (it,np);
+  block->simulation()->monitor_insert_particles(np);
 
   const int ia_x = particle.attribute_index (it,"x");
   const int ia_y = particle.attribute_index (it,"y");

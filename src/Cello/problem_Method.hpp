@@ -94,6 +94,10 @@ protected: // functions
     for (int i=0; i<m; i++) X[i] = Y[i];
   }
 
+public: // attributes (static)
+
+  static double courant_global [CONFIG_NODE_SIZE];
+
 protected: // attributes
 
   ///  Refresh object

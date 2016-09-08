@@ -8,7 +8,6 @@
 #ifndef MESH_HIERARCHY_HPP
 #define MESH_HIERARCHY_HPP
 
-
 class Factory;
 class Simulation;
 
@@ -204,7 +203,7 @@ protected: // attributes
   int num_blocks_; 
 
   /// Current number of particles on this process
-  int64_t num_particles_; 
+  int64_t num_particles_;
 
   /// Current number of total_zones on this process
   int64_t num_zones_total_; 

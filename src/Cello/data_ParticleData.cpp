@@ -8,6 +8,8 @@
 #include "data.hpp"
 #include <algorithm>
 
+// #define DEBUG_PARTICLES
+
 int64_t ParticleData::counter[CONFIG_NODE_SIZE] = {0};
 
 //----------------------------------------------------------------------
@@ -177,7 +179,7 @@ int ParticleData::insert_particles
 
 //----------------------------------------------------------------------
 
-void ParticleData::delete_particles 
+int ParticleData::delete_particles 
 (ParticleDescr * particle_descr,
  int it, int ib, const bool * mask)
 {
@@ -214,6 +216,8 @@ void ParticleData::delete_particles
   if (npd>0) {
     resize_attribute_array_(particle_descr,it,ib,np-npd);
   }
+
+  return npd;
 }
 
 //----------------------------------------------------------------------
@@ -288,10 +292,12 @@ void ParticleData::scatter
 
 //----------------------------------------------------------------------
 
-void ParticleData::gather 
+int ParticleData::gather 
 (ParticleDescr * particle_descr, int it, 
  int n, ParticleData * particle_array[])
 {
+  int count = 0;
+  
   // Sort particle array to simplify skipping duplicates
   ParticleData * particle_array_sorted[n];
   for (int i=0; i<n; i++) particle_array_sorted[i] = particle_array[i];
@@ -329,6 +335,7 @@ void ParticleData::gather
     const int nb = pd ? pd->num_batches(it) : 0;
     for (int ib=0; ib<nb; ib++) {
       const int np = pd->num_particles(particle_descr,it,ib);
+      count += np;
       for (int ip=0; ip<np; ip++) {
 	for (int ia=0; ia<na; ia++) {
 	  if (!interleaved) 
@@ -346,6 +353,7 @@ void ParticleData::gather
       }
     }
   }
+  return count;
 }
 
 //----------------------------------------------------------------------

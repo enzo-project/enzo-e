@@ -192,14 +192,13 @@ void DataMsg::update (Data * data, bool is_local)
     // Insert new particles 
 
     Particle particle = data->particle();
-    
+
+    int count = 0;
     for (int it=0; it<particle.num_types(); it++) {
-#ifdef DEBUG_NEW_REFRESH
-      CkPrintf ("%d %p DEBUG update\n",CkMyPe(),pd);
-      fflush(stdout);
-#endif
-      particle.gather (it, 1, &pd);
+      count += particle.gather (it, 1, &pd);
     }
+    simulation->monitor_insert_particles(count);
+    
     delete_particle_data();
   }
 

@@ -236,6 +236,7 @@ void MsgCoarsen::update (Data * data)
     for (int it=0; it<particle.num_types(); it++) {
       particle.gather (it, 1, &pd);
     }
+    
     // Don't delete particle data if local--done by child Block::data_
     // destructor()
     if (!is_local_) {

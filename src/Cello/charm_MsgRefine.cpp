@@ -319,10 +319,13 @@ void MsgRefine::update (Data * data)
     // Insert new particles 
 
     Particle particle = data->particle();
-    
+
+    int count = 0;
     for (int it=0; it<particle.num_types(); it++) {
-      particle.gather (it, 1, &pd);
+      count += particle.gather (it, 1, &pd);
     }
+    simulation->monitor_insert_particles(count);
+
     data_msg_->delete_particle_data();
   }
 

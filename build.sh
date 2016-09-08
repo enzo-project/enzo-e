@@ -1,5 +1,18 @@
 #!/bin/bash
-    
+#
+# Input environment variables
+#
+#   CELLO_ARCH
+#   CELLO_PREC
+#
+# Output status files
+#
+#   test/STATUS
+#   test/DATE
+#   test/START
+#   test/STOP
+#   test/TIME
+
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
 
@@ -20,10 +33,7 @@ target="install-bin"
 k_switch="-k"
 
 if [ "$#" -ge 1 ]; then
-   if [ "$1" == "reset" ]; then
-       rm -f test/STATUS test/START test/STOP
-       exit
-   elif [ "$1" == "clean" ]; then
+   if [ "$1" == "clean" ]; then
        TMP=`mktemp -t build.sh.XXXXXX`
        trap "rm $TMP* 2>/dev/null" EXIT
        
@@ -35,7 +45,6 @@ if [ "$#" -ge 1 ]; then
          rm -rf lib >& /dev/null
       done
       rm -rf include >& /dev/null
-      rm -f test/STATUS test/START test/STOP
       rm -f input/*.in.out >& /dev/null
       rm -rf build
       rm -rf test/*.h5
@@ -48,7 +57,12 @@ if [ "$#" -ge 1 ]; then
       rm -rf `find test -name "*.h5"`
       printf "done\n"
       rm -rf test/out.scons
-      exit
+   fi
+      if [ "$1" == "reset" -o "$1" == "clean" ]; then
+	  echo "reset or clean"
+	cd test
+	rm -f STATUS DATE START STOP TIME
+       exit
    elif [ "$1" == "compile" ]; then
       target=install-bin
    elif [ "$1" == "test" ]; then
@@ -80,8 +94,9 @@ else
     echo "Remove $target"
 fi
 
-d=`date +"%Y-%m-%d %H:%M:%S"`
-echo "$d BEGIN"
+date=`date +"%Y-%m-%d"`
+start=`date +"%H:%M:%S"`
+echo "$date $start BEGIN"
 
 echo "BEGIN Enzo-P/Cello ${0}"
 echo "arch=$arch"
@@ -94,7 +109,8 @@ configure=$arch-$prec
 configure_print=`printf "%s %s %s" $arch $prec`
 
 echo "Compiling" > test/STATUS
-echo "$d" > test/START
+echo "$date" > test/DATE
+echo "$start" > test/START
 rm -f test/STOP
 
 # make output directory for compilation and tests
@@ -105,8 +121,8 @@ dir=test
 
 d=`date +"%Y-%m-%d %H:%M:%S"`
 
-printf "$d %-14s %-14s" "compiling..."
-printf "$d %-14s %-14s" "compiling..." >> $log
+printf "$date $start %-14s %-14s" "compiling..."
+printf "$date $start %-14s %-14s" "compiling..." >> $log
 
 touch "$dir/running.$arch.$prec"
 
@@ -144,9 +160,9 @@ if [ $target == "test" ]; then
    i=`wc -l $dir/incomplete.$configure`
    p=`wc -l $dir/pass.$configure`
 
-   d=`date +"%Y-%m-%d %H:%M:%S"`
+   stop=`date +"%H:%M:%S"`
 
-   line="$d ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
+   line="$stop ${configure_print} FAIL: $f Incomplete: $i Pass: $p "
 
    printf "%s %s %-12s %-6s %-6s %s %-2s %s %-2s %s %-4s %s %-2s\n" \
         $line | tee $log
@@ -184,13 +200,13 @@ H1=`date +"%H"`
 M1=`date +"%M"`
 S1=`date +"%S"`
 
-t=`echo "( $S1 - $S0 ) + 60 * ( ( $M1 - $M0 ) + 60 * ( $H1 - $H0) )" | bc`
+t=`echo "scale=2; (( $S1 - $S0 ) + 60 * ( ( $M1 - $M0 ) + 60 * ( $H1 - $H0) ))/60.0" | bc`
 
-echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time = ${t}s"
+echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time = ${t} min"
 
-d=`date +"%Y-%m-%d %H:%M:%S"`
-echo "$d" > test/STOP
-echo "${t}s" > test/TIME
+d=`date "+%H:%M:%S"`
+echo "$stop" > test/STOP
+echo "${t}" > test/TIME
 
 
 

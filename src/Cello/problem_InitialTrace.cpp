@@ -64,7 +64,10 @@ void InitialTrace::uniform_placement_
 
   const int it = particle.type_index("trace");
 
-  particle.insert_particles (it,nx/dx_*ny/dy_*nz/dz_);
+  const int npn = nx/dx_*ny/dy_*nz/dz_;
+  
+  particle.insert_particles (it,npn);
+  block->simulation()->monitor_insert_particles(npn);
 
   // Initialize particle positions
 
@@ -213,9 +216,10 @@ void InitialTrace::density_placement_
 
   const int it = particle.type_index("trace");
 
-  CkPrintf ("Inserting %d particles\n",np);
   particle.insert_particles (it,np);
 
+  block->simulation()->monitor_insert_particles(np);
+  
   const int ia_id = particle.attribute_index(it,"id");
   const int ia_x = particle.attribute_index (it,"x");
   const int ia_y = particle.attribute_index (it,"y");

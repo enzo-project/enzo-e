@@ -394,7 +394,6 @@ protected: // attributes
 
   Sync sync_output_begin_;
   Sync sync_output_write_;
-
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

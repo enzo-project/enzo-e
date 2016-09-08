@@ -353,15 +353,17 @@ void Block::adapt_refine_()
   }
 
   // Delete particles since relocated to children
-  
+
+  int count = 0;
   int nt = particle.num_types();
   for (int it=0; it<nt; it++) {
     int nb = particle.num_batches(it);
     for (int ib=0; ib<nb; ib++) {
-      particle.delete_particles (it, ib);
+      count += particle.delete_particles (it, ib);
     }
   }
-
+  simulation()->monitor_delete_particles(count);
+  
   is_leaf_ = false;
 #ifdef DEBUG_ADAPT
   index_.print("adapt_refine leaf=0",-1,2,false,simulation());
@@ -395,6 +397,7 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 
   const int nt = particle.num_types();
 
+  int count = 0;
   for (int it=0; it<nt; it++) {
 
 #ifdef DEBUG_NEW_REFRESH
@@ -464,9 +467,10 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
       // ...scatter particles to particle array
       particle.scatter (it,ib, np, mask, index, npa, particle_list);
       // ... delete scattered particles
-      particle.delete_particles (it,ib,mask);
+      count += particle.delete_particles (it,ib,mask);
     }
   }
+  simulation()->monitor_delete_particles(count);
 }
 
 //----------------------------------------------------------------------

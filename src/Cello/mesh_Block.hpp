@@ -51,16 +51,6 @@ public: // interface
   /// size, and number of field blocks
   Block ( MsgRefine * msg );
 
-  Block 
-  (
-   Index index,
-   int nx, int ny, int nz,
-   int num_field_blocks,
-   int num_adapt_steps,
-   int cycle, double time, double dt,
-   int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level);
-
   // Initialize
   void init (
    Index index,
@@ -438,9 +428,6 @@ protected:
 
 public:
 
-  void p_refresh_store_particle_face (int n, int np, char a[],  int it) 
-  { refresh_store_particle_face_(n,np,a, it); }
-
   void p_refresh_store (MsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
@@ -463,11 +450,6 @@ protected:
   (int refresh_type, Index index, int if3[3], int ic3[3]);
   void refresh_load_particle_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
-
-  void refresh_store_field_face_
-  (int n, char a[], int refresh_type, int if3[3], int ic3[3]);
-  void refresh_store_particle_face_
-  (int n, int np, char a[], int it);
 
   //--------------------------------------------------
   // PARTICLES

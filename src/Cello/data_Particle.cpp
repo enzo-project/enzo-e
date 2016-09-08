@@ -11,34 +11,19 @@
 //----------------------------------------------------------------------
 
 int Particle::insert_particles (int it, int np)
-  
 {
-  if (proxy_simulation.ckLocalBranch()) {
-    proxy_simulation.ckLocalBranch()->monitor_insert_particles(np);
-  }
-
-  return particle_data_->insert_particles (particle_descr_, it, np); 
+  particle_data_->insert_particles (particle_descr_, it, np);
+  
+  return np;
 }
 
 //----------------------------------------------------------------------
 
-void Particle::delete_particles (int it, int ib, const bool * m)
+int Particle::delete_particles (int it, int ib, const bool * mask)
 {
-  // count number of particles npd to delete
+  int np = particle_data_->delete_particles (particle_descr_,it,ib,mask); 
 
-  const int np = num_particles(it,ib);
-  int npd = 0;
-  if (m == NULL) {
-    npd = np;
-  } else {
-    for (int ip=0; ip<np; ip++) npd += m[ip]?1:0;
-  }
-
-  if (proxy_simulation.ckLocalBranch()) {
-    proxy_simulation.ckLocalBranch()->monitor_insert_particles(-npd);
-  }
-
-  particle_data_->delete_particles (particle_descr_,it,ib,m); 
+  return np;
 }
 
 //----------------------------------------------------------------------

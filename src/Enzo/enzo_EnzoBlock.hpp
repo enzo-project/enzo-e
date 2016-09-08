@@ -108,16 +108,6 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( MsgRefine * msg );
 
-  /// Initialize the EnzoBlock chare array
-  EnzoBlock
-  ( Index index,
-   int nx, int ny, int nz,
-   int num_field_blocks,
-   int count_adapt,
-   int cycle, double time, double dt,
-   int narray, char * array, int refresh_type,
-   int num_face_level, int * face_level);
-
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),

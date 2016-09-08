@@ -14,6 +14,7 @@
 #include "charm_mesh.hpp"
 
 // #define DEBUG_REFRESH
+// #define DEBUG_PARTICLES
 
 #ifdef DEBUG_REFRESH
 #  define TRACE_REFRESH(msg) \
@@ -476,6 +477,7 @@ void Block::particle_scatter_neighbors_
   const double yl = yp-ym;
   const double zl = zp-zm;
 
+  int count = 0;
   // ...for each particle type to be moved
   std::vector<int>::iterator it_type;
   for (it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
@@ -552,9 +554,11 @@ void Block::particle_scatter_neighbors_
       // ...scatter particles to particle array
       particle.scatter (it,ib, np, mask, index, npa, particle_array);
       // ... delete scattered particles
-      particle.delete_particles (it,ib,mask);
+      count += particle.delete_particles (it,ib,mask);
     }
   }
+
+  simulation()->monitor_delete_particles(count);
 
 }
 
@@ -598,50 +602,5 @@ void Block::particle_send_
 
     }
 
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Block::refresh_store_particle_face_
-  (int n, int np, char * a, int it)
-{
-  TRACE_REFRESH("refresh_store_particle_face");
-
-  Particle particle (simulation() -> particle_descr(),
-		     data()       -> particle_data());
-
-  // determine number of particles
-
-  int mp = particle.particle_bytes(it);
-  const int mb = particle.batch_size();
-
-  const bool interleaved = particle.interleaved(it);
-
-  int j = particle.insert_particles(it,np);
-
-  int jb,jp;
-  particle.index(j,&jb,&jp);
-
-  // copy particles from array
-
-  const int na = particle.num_attributes(it);
-
-  for (int ip=0; ip<np; ip++) {
-    for (int ia=0; ia<na; ia++) {
-      if (!interleaved) 
-	mp = particle.attribute_bytes(it,ia);
-      int ny = particle.attribute_bytes(it,ia);
-      char * a_dst = particle.attribute_array(it,ia,jb);
-      int increment = particle.attribute_array(it,ia,jb) 
-	-             particle.attribute_array(it,0,jb);
-      char * a_src = a + increment;
-      for (int iy=0; iy<ny; iy++) {
-        a_dst [iy + mp*jp] = a_src [iy + mp*ip];
-      }
-    }
-
-    jp = (jp+1) % mb;
-    if (jp==0) jb++;
   }
 }

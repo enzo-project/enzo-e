@@ -188,37 +188,6 @@ EnzoBlock::EnzoBlock
 
 //----------------------------------------------------------------------
 
-EnzoBlock::EnzoBlock
-(
- Index index,
- int nx, int ny, int nz,
- int num_field_blocks,
- int count_adapt,
- int cycle, double time, double dt,
- int narray, char * array, int refresh_type,
- int num_face_level, int * face_level)
-  : BASE_ENZO_BLOCK
-    (
-     index,
-     nx,ny,nz,
-     num_field_blocks,
-     count_adapt,
-     cycle, time, dt,
-     narray,  array, refresh_type,
-     num_face_level, face_level),
-    dt(dt),
-    SubgridFluxes(0)
-{
-  initialize_enzo_();
-  initialize();
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(...)\n",CkMyPe(),this);
-  print();
-#endif
-}
-
-//----------------------------------------------------------------------
-
 void EnzoBlock::initialize_enzo_()
 {
   for (int i=0; i<MAX_DIMENSION; i++) {

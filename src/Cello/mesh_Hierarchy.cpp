@@ -32,6 +32,7 @@ Hierarchy::Hierarchy
 {
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
+				   
   for (int i=0; i<3; i++) {
     root_size_[i] = 1;
     lower_[i] = 0.0;

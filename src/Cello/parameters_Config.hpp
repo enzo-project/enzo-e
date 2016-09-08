@@ -123,6 +123,7 @@ public: // attributes
   // Method
 
   int                        num_method;
+  double                     method_courant_global;
   std::vector<std::string>   method_list;
   std::vector<int>           method_schedule_index;
   std::vector<double>        method_courant;
