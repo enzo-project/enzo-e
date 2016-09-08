@@ -49,8 +49,10 @@ BEGIN {
     if (num_blocks_start == 0) num_blocks_start = $6;
 }
 /num-particles/ {
-    num_particles = $7;
-    if (num_particles_start == 0) num_particles_start = $7;
+    num_particles = $NF;
+    if (num_particles_start == 0) {
+	num_particles_start = num_particles;
+    }
 }
 /Mesh:root_blocks/ {
     root_blocks[i_root_blocks] = $6;
@@ -91,6 +93,10 @@ END {
     printf (format, "dimensions",root_rank);
     printf (format3,"root blocks",root_blocks[0],root_blocks[1],root_blocks[2]);
     printf (format3,"root size",root_size[0],root_size[1],root_size[2]);
+    printf (format3,"effective size",
+	    root_size[0]*2^max_level,
+	    root_size[1]*2^max_level,
+	    root_size[2]*2^max_level);
     printf (format3,"block size",(root_size[0]/root_blocks[0]),
 	    (root_size[1]/root_blocks[1]),
 	    (root_size[2]/root_blocks[2]));
