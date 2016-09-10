@@ -59,7 +59,6 @@ if [ "$#" -ge 1 ]; then
       rm -rf test/out.scons
    fi
       if [ "$1" == "reset" -o "$1" == "clean" ]; then
-	  echo "reset or clean"
 	cd test
 	rm -f STATUS DATE START STOP TIME
        exit

@@ -175,8 +175,10 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 EnzoBlock::EnzoBlock
 ( MsgRefine * msg )
   : BASE_ENZO_BLOCK ( msg ),
-    dt(dt),
-    SubgridFluxes(0)
+    dt(dt_),
+    SubgridFluxes(0),
+    mg_iter_(0),
+    mg_sync_()
 {
   initialize_enzo_();
   initialize();
@@ -453,7 +455,7 @@ int EnzoBlock::CosmologyComputeExpansionFactor
 
   /* Error check. */
 
-  if (InitialTimeInCodeUnits == 0) {
+  if (InitialTimeInCodeUnits[in] == 0) {
     
     char error_message[ERROR_LENGTH];
     sprintf(error_message, "The cosmology parameters seem to be improperly set");

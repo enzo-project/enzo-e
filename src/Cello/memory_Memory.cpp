@@ -51,8 +51,7 @@ void * Memory::allocate ( size_t bytes ) throw ()
   }
 
   if (limit_gb_ != 0.0 && (bytes_curr_.size() > 0)  &&
-      ( ( (bytes_curr_[0] + bytes) <  0 ) ||
-	( (bytes_curr_[0] + bytes) >= (1e9)*limit_gb_))) {
+      ((bytes_curr_[0] + bytes) >= (1e9)*limit_gb_)) {
     // WARNING: do not use ERROR or ASSERT since allocates memory, leading to
     //          recursive calls to overloaded operator new 
     CkPrintf ("%d ERROR: Cannot allocate %lld bytes: limit is %f GB\n",

@@ -261,7 +261,8 @@ EnzoMethodGravityMlat::EnzoMethodGravityMlat
     ib_(0), ir_(0), ix_(0), iy_(0),
     iter_(0),
     level_min_(level_min),
-    level_max_(level_max)
+    level_max_(level_max),
+    precision_(precision_unknown)
 {
 
   // Initialize default Refresh

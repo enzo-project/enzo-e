@@ -24,7 +24,10 @@ public: // interface
   PUPable_decl(EnzoComputePressure);
   
   /// Charm++ PUP::able migration constructor
-  EnzoComputePressure (CkMigrateMessage *m) {}
+  EnzoComputePressure (CkMigrateMessage *m)
+    : gamma_(0.0),
+      comoving_coordinates_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

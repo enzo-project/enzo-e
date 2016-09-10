@@ -279,19 +279,22 @@ bool Tree::node_neighbor
 
 void Tree::index_(int k, int * kx, int *ky, int *kz) const
 {
-  if (kx) (*kx) = k % r_;
-  if (d_ > 1) {
-    k -= (*kx);
-    k /= r_;
-    if (ky) (*ky) = k % r_;
-    if (d_ > 2) {
-      k -= (*ky);
+  if (kx) {
+    (*kx) = k % r_;
+    if (d_ > 1) {
+      k -= (*kx);
       k /= r_;
-      if (kz) (*kz) = k % r_;
+      if (ky) {
+  	(*ky) = k % r_;
+  	if (d_ > 2) {
+  	  k -= (*ky);
+  	  k /= r_;
+  	  if (kz) (*kz) = k % r_;
+  	}
+      }
     }
   }
 }
-
 //----------------------------------------------------------------------
 
 NodeTrace Tree::node_parent (const NodeTrace & node_trace) const

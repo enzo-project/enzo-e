@@ -18,6 +18,13 @@ public: // interface
 
   /// Create a new EnzoMatrixDiagonal
   EnzoMatrixDiagonal () throw()
+  : Matrix (),
+    mx_(0),
+    my_(0),
+    mz_(0),
+    hx_(0),
+    hy_(0),
+    hz_(0)
   {}
 
   /// Destructor
@@ -28,7 +35,14 @@ public: // interface
   PUPable_decl(EnzoMatrixDiagonal);
 
   /// CHARM++ migration constructor
-  EnzoMatrixDiagonal(CkMigrateMessage *m) {}
+  EnzoMatrixDiagonal(CkMigrateMessage *m)
+    : mx_(0),
+      my_(0),
+      mz_(0),
+      hx_(0),
+      hy_(0),
+      hz_(0)
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)

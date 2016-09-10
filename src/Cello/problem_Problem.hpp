@@ -56,7 +56,22 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
 
-  Problem (CkMigrateMessage *m) : PUP::able(m) {}
+  Problem (CkMigrateMessage *m)
+    : PUP::able(m),
+      boundary_list_(),
+      is_periodic_(false),
+      initial_list_(),
+      refine_list_(),
+      stopping_(NULL),
+      method_list_(),
+      output_list_(),
+      prolong_(NULL),
+      restrict_(NULL),
+      index_refine_(0),
+      index_output_(0),
+      index_boundary_(0)
+      
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

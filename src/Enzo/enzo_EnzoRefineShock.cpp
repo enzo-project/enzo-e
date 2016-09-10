@@ -60,7 +60,11 @@ int EnzoRefineShock::apply
 
   int id_velocity = field.field_id("velocity_x");
 
-  void * v3[3] = {
+  ASSERT("EnzoRefineShock::apply",
+	  "velocity_x field must be defined",
+	 (id_velocity >= 0));
+
+    void * v3[3] = {
     (rank >= 1) ? field.values("velocity_x") : NULL,
     (rank >= 2) ? field.values("velocity_y") : NULL,
     (rank >= 3) ? field.values("velocity_z") : NULL

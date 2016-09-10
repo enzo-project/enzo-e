@@ -30,16 +30,25 @@ public: // interface
       field_(field),
       mpp_(mpp),
       level_(level),
-      mask_(Mask::create (parameters->param(parameter_name),parameters))
-  { 
+      mask_()
+  {
+    if (parameters) {
+      mask_ = Mask::create (parameters->param(parameter_name),parameters);
+    } else {
+      mask_ = NULL;
+    } 
   }
-
   
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialPm);
 
   /// CHARM++ migration constructor
-  EnzoInitialPm(CkMigrateMessage *m) : Initial (m) {}
+  EnzoInitialPm(CkMigrateMessage *m)
+    : Initial (m),
+      mpp_(0.0),
+      level_(0),
+      mask_(NULL)
+  {  }
 
   /// Destructor
   virtual ~EnzoInitialPm() throw()

@@ -33,7 +33,9 @@ public: // interface
   PUPable_decl(MethodTrace);
 
   /// Charm++ PUP::able migration constructor
-  MethodTrace (CkMigrateMessage *m) {}
+  MethodTrace (CkMigrateMessage *m)
+    : timestep_(0.0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)

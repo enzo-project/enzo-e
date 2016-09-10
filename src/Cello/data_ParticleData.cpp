@@ -485,8 +485,8 @@ float ParticleData::efficiency (ParticleDescr * particle_descr, int it, int ib)
   const int np = num_particles(particle_descr,it,ib);
   const int mb = particle_descr->batch_size();
 
-  const int64_t bytes_min  = np*mp;
-  const int64_t bytes_used = mb*mp;
+  const int64_t bytes_min  = (int64_t)np*mp;
+  const int64_t bytes_used = (int64_t)mb*mp;
 
   return (bytes_used) ? 1.0*bytes_min/bytes_used : -1.0;
   

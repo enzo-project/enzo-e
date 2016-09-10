@@ -24,7 +24,10 @@ public: // interface
 
   /// Destructor
   ~ScalarExpr() throw()
-  {  }
+  {
+    delete param_;
+    param_ = NULL;
+  }
 
   /// Copy constructor
   ScalarExpr(const ScalarExpr & scalar_expr) throw()

@@ -25,7 +25,9 @@ public: // interface
   PUPable_decl(EnzoProlongMC1);
 
   /// CHARM++ migration constructor
-  EnzoProlongMC1(CkMigrateMessage *m) {}
+  EnzoProlongMC1(CkMigrateMessage *m)
+    : method_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

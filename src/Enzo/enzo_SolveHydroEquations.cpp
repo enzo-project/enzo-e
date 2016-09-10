@@ -227,7 +227,7 @@ int EnzoBlock::SolveHydroEquations
   if (comoving_coordinates)
     if (CosmologyComputeExpansionFactor(time+0.5*dt, &a, &dadt)
 	== ENZO_FAIL) {
-      fprintf(stderr, "Error in CsomologyComputeExpansionFactors.\n");
+      fprintf(stderr, "Error in CosmologyComputeExpansionFactors.\n");
       return ENZO_FAIL;
     }
 
