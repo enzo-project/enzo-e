@@ -244,10 +244,12 @@ void Simulation::initialize_performance_() throw()
 
   timer_.start();
 
+#ifdef CONFIG_USE_PAPI  
   for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
     performance_->new_counter(counter_type_papi, 
 			      config_->performance_papi_counters[i]);
   }
+#endif  
 
   performance_->begin();
 

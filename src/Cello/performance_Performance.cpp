@@ -11,24 +11,28 @@
 
 #include "performance.hpp"
 
-/* #define TRACE_PERFORMANCE */
+// #define TRACE_PERFORMANCE
 
 #ifdef TRACE_PERFORMANCE
-static long long time_start[CONFIG_NODE_SIZE] = 0;
+static long long time_start[CONFIG_NODE_SIZE] = { 0 };
 #endif /* TRACE_PERFORMANCE */
 
 Performance::Performance (Config * config)
-  : papi_(),
-    counter_name_(),
-    counter_type_(),
-    counter_values_(),
-    region_name_(),
-    region_counters_(),
-    region_started_(),
-    region_index_(),
-    papi_counters_(0),
-    warnings_(config ? config->performance_warnings : true),
-    index_region_current_(perf_unknown)
+  :
+#ifdef CONFIG_USE_PAPI  
+  papi_(config ? config->performance_warnings : false),
+#endif
+  counter_name_(),
+  counter_type_(),
+  counter_values_(),
+  region_name_(),
+  region_counters_(),
+  region_started_(),
+  region_index_(),
+#ifdef CONFIG_USE_PAPI  
+  papi_counters_(0),
+#endif  
+  index_region_current_(perf_unknown)
 
 {
 
@@ -38,7 +42,9 @@ Performance::Performance (Config * config)
   new_counter(counter_type_abs,"bytes-high");
   new_counter(counter_type_abs,"bytes-highest");
 
+#ifdef CONFIG_USE_PAPI  
   papi_.init();
+#endif  
 
 }
 
@@ -46,8 +52,10 @@ Performance::Performance (Config * config)
 
 Performance::~Performance()
 {
+#ifdef CONFIG_USE_PAPI  
   delete [] papi_counters_;
   papi_counters_ = 0;
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -55,7 +63,9 @@ Performance::~Performance()
 void
 Performance::begin() throw()
 {
-  TRACE ("Performance::begin()");
+#ifdef TRACE_PERFORMANCE
+  CkPrintf ("Performance::begin()\n");
+#endif
   int n = num_counters();
 
   for (int i=0; i<num_regions(); i++) {
@@ -63,8 +73,9 @@ Performance::begin() throw()
     region_started_[i] = false;
   }
 
-  papi_.start_events();
+#ifdef CONFIG_USE_PAPI  
   papi_counters_ = new long long [papi_.num_events()];
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -72,9 +83,9 @@ Performance::begin() throw()
 void
 Performance::end() throw()
 {
-  TRACE ("Performance::end()");
-  papi_.stop_events();
-  // stop regions?
+#ifdef TRACE_PERFORMANCE
+  CkPrintf ("Performance::end()\n");
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -87,6 +98,12 @@ Performance::new_counter ( int type, std::string  counter_name )
   counter_type_.push_back(type);
   counter_values_.push_back(0);
 
+#ifdef CONFIG_USE_PAPI  
+  if (type == counter_type_papi) {
+    papi_.add_event(counter_name);
+  }
+#endif
+
   return counter_name_.size() - 1;
 }
 
@@ -95,6 +112,7 @@ Performance::new_counter ( int type, std::string  counter_name )
 void
 Performance::refresh_counters_() throw()
 {
+#ifdef CONFIG_USE_PAPI  
   papi_.event_values(papi_counters_);
 
   int ip=0;
@@ -103,6 +121,7 @@ Performance::refresh_counters_() throw()
       counter_values_[ic] = papi_counters_[ip++];
     }
   }
+#endif
 
   Memory * memory = Memory::instance();
 
@@ -168,7 +187,9 @@ void
 Performance::new_region (int         region_index,
 			 std::string region_name) throw()
 { 
-  TRACE2 ("Performance::new_region (%d %s)",region_index,region_name.c_str());
+#ifdef TRACE_PERFORMANCE
+  CkPrintf ("Performance::new_region (%d %s)\n",region_index,region_name.c_str());
+#endif
   if ((size_t)region_index >= region_name_.size()) {
     region_name_.resize(region_index+1);
   }
@@ -186,18 +207,26 @@ Performance::new_region (int         region_index,
 void
 Performance::start_region(int id_region, std::string file, int line, void * block) throw()
 {
-#ifdef TRACE_PERFORMANCE  
-  if (time_start == 0) time_start = time_real_();
+#ifdef TRACE_PERFORMANCE
+  const int in = cello::index_static();
+  if (time_start[in] == 0) time_start[in] = time_real_();
   PARALLEL_PRINTF ("%d %6.4f %s:%d %p start_region(%s)\n",
-		   CkMyPe(),1.0e-6*(time_real_()-time_start),file.c_str(),line,block,
+		   CkMyPe(),1.0e-6*(time_real_()-time_start[in]),file.c_str(),line,block,
 		   region_name_[id_region].c_str());
 #endif
 
-  TRACE1 ("Performance::start_region (%d)",id_region);
+#ifdef TRACE_PERFORMANCE
+  CkPrintf ("Performance::start_region (%d)\n",id_region);
+#endif
   // NOTE: similar to stop_region()
 
-  TRACE1("Performance::start_region %s",region_name_[id_region].c_str());
+#ifdef TRACE_PERFORMANCE
+  CkPrintf("Performance::start_region %s\n",region_name_[id_region].c_str());
+#endif
 
+#ifdef CONFIG_USE_PAPI
+  papi_.start_events();
+#endif  
   int index_region = id_region;
 
   if (! region_started_[index_region]) {
@@ -236,16 +265,25 @@ void
 Performance::stop_region(int id_region, std::string file, int line, void * block) throw()
 {
 #ifdef TRACE_PERFORMANCE
-  if (time_start == 0) time_start = time_real_();
+  const int in = cello::index_static();
+  if (time_start[in] == 0) time_start[in] = time_real_();
   PARALLEL_PRINTF ("%d %6.4f %s:%d %p stop_region(%s)\n",
-		   CkMyPe(),1.0e-6*(time_real_()-time_start),file.c_str(),line,block,
+		   CkMyPe(),1.0e-6*(time_real_()-time_start[in]),file.c_str(),line,block,
 		   region_name_[id_region].c_str());
 #endif /* TRACE_PERFORMANCE */
 
-  TRACE1 ("Performance::stop_region (%d)",id_region);
+#ifdef TRACE_PERFORMANCE
+  CkPrintf ("Performance::stop_region (%d)\n",id_region);
+#endif
   // NOTE: similar to start_region()
 
-  TRACE1("Performance::stop_region %s",region_name_[id_region].c_str());
+#ifdef TRACE_PERFORMANCE
+  CkPrintf("Performance::stop_region %s\n",region_name_[id_region].c_str());
+#endif
+
+#ifdef CONFIG_USE_PAPI
+  papi_.stop_events();
+#endif  
 
   int index_region = id_region;
 

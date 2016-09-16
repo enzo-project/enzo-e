@@ -40,6 +40,15 @@ PARALLEL_MAIN_BEGIN
   Parameters parameters;
   unit_class("Performance");
 
+#ifdef CONFIG_USE_PAPI
+  int retval = PAPI_library_init(PAPI_VER_CURRENT);
+  if (retval != PAPI_VER_CURRENT && retval > 0) {
+    WARNING("Papi::init","PAPI library version mismatch!");
+  } else if (retval < 0) {
+    WARNING("Papi::init","PAPI initialization error!");
+  }
+#endif
+
   Performance * performance = new Performance (NULL);
 
   // Initialize counters that are non-zero at start

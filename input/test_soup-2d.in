@@ -1,0 +1,37 @@
+Domain {
+   lower = [0.0, 0.0];
+   upper = [1.0, 1.0];
+}
+
+Boundary {
+   type = "periodic";
+}
+
+Mesh {
+   root_rank = 2;
+   root_size   = [256,256];
+   root_blocks = [  4,  4];	     
+}
+
+Initial {
+   list = ["soup"];
+   soup {
+   	file = "input/soup.png";
+	rank = 2;
+	array = [10,10];	     
+   }
+}
+Method {
+   list = ["ppm"];
+}
+
+Field {
+   list = ["density",
+   	   "velocity_x",
+	   "velocity_y",
+	   "internal_energy",
+	   "total_energy",
+	   "pressure",
+	   "temperature"];
+}
+

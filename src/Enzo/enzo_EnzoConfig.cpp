@@ -90,13 +90,20 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoInitialPm
   initial_pm_field(""),
   initial_pm_mpp(0.0),
+  initial_soup_rank(0),
+  initial_soup_file(""),
+  initial_soup_rotate(false),
+
   // EnzoMethodPm
   method_pm_deposit_type(""),
   method_pm_update_max_dt(0.0)
 {
-  initial_sedov_array[0] = 0;
-  initial_sedov_array[1] = 0;
-  initial_sedov_array[2] = 0;
+  for (int i=0; i<3; i++) {
+    initial_sedov_array[i] = 0;
+    initial_soup_array[i]  = 0;
+    initial_soup_d_pos[i]  = 0.0;
+    initial_soup_d_size[i] = 0.0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -155,6 +162,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_pm_field;
   p | initial_pm_mpp;
   p | initial_pm_level;
+
+  p | initial_soup_rank;
+  p | initial_soup_file;
+  p | initial_soup_rotate;
+  PUParray(p,initial_soup_array,3);
+  PUParray(p,initial_soup_d_pos,3);
+  PUParray(p,initial_soup_d_size,3);
 
   p | interpolation_method;
 
@@ -283,6 +297,20 @@ void EnzoConfig::read(Parameters * p) throw()
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
 
+  // InitialSoup initialization
+
+  initial_soup_rank      = p->value_integer ("Initial:soup:rank",0);
+  initial_soup_file      = p->value_string ("Initial:soup:file","soup.png");
+  initial_soup_rotate    = p->value_logical ("Initial:soup:rotate",false);
+  for (int axis=0; axis<3; axis++) {
+    initial_soup_array[axis]  = p->list_value_integer
+      (axis,"Initial:soup:array",1);
+    initial_soup_d_pos[axis]  = p->list_value_float
+      (axis,"Initial:soup:d_pos",0.0);
+    initial_soup_d_size[axis] = p->list_value_float
+      (axis,"Initial:soup:d_size",0.0);
+  }
+  
   // Sedov initialization
 
   TRACE1("field_gamma = %f",field_gamma);

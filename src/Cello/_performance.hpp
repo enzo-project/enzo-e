@@ -32,7 +32,9 @@
 
 #include "performance_Timer.hpp"
 #include "performance_PerfCounters.hpp"
+#ifdef CONFIG_USE_PAPI  
 #include "performance_Papi.hpp"
+#endif
 #include "performance_Performance.hpp"
 
 

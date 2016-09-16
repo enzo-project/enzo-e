@@ -79,16 +79,16 @@ void EnzoInitialSedovArray3::enforce_block
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
 
-  double xbm,ybm,zbm;
-  block->data()->lower(&xbm,&ybm,&zbm);
+  double xmb,ymb,zmb;
+  block->data()->lower(&xmb,&ymb,&zmb);
 
-  double xbp,ybp,zbp;
-  block->data()->upper(&xbp,&ybp,&zbp);
+  double xpb,ypb,zpb;
+  block->data()->upper(&xpb,&ypb,&zpb);
 
   double hx,hy,hz;
-  field.cell_width(xbm,xbp,&hx,
-		   ybm,ybp,&hy,
-		   zbm,zbp,&hz);
+  field.cell_width(xmb,xpb,&hx,
+		   ymb,ypb,&hy,
+		   zmb,zpb,&hz);
 
   // Parameters
 
@@ -105,9 +105,9 @@ void EnzoInitialSedovArray3::enforce_block
   int gx,gy,gz;
   field.ghost_depth(0,&gx,&gy,&gz);
 
-  int ndx = nx + 2*gx;
-  int ndy = ny + 2*gy;
-  int ndz = nz + 2*gz;
+  int mx = nx + 2*gx;
+  int my = ny + 2*gy;
+  int mz = nz + 2*gz;
 
   // clear all fields
 
@@ -115,10 +115,10 @@ void EnzoInitialSedovArray3::enforce_block
 
     enzo_float * array = (enzo_float *) field.values (iv);
 
-    for (int iz=0; iz<ndz; iz++) {
-      for (int iy=0; iy<ndy; iy++) {
-	for (int ix=0; ix<ndx; ix++) {
-	  int i = INDEX(ix,iy,iz,ndx,ndy);
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
+	  int i = INDEX(ix,iy,iz,mx,my);
 	  array[i] = 0.0;
 	}
       }
@@ -127,11 +127,11 @@ void EnzoInitialSedovArray3::enforce_block
 
   // background 
 
-  for (int iz=0; iz<ndz; iz++) {
-    for (int iy=0; iy<ndy; iy++) {
-      for (int ix=0; ix<ndx; ix++) {
+  for (int iz=0; iz<mz; iz++) {
+    for (int iy=0; iy<my; iy++) {
+      for (int ix=0; ix<mx; ix++) {
 
-	int i = INDEX(ix,iy,iz,ndx,ndy);
+	int i = INDEX(ix,iy,iz,mx,my);
 	d[i]  = density_;
 	te[i] = sedov_te_out;
 
@@ -141,24 +141,29 @@ void EnzoInitialSedovArray3::enforce_block
 
   // array of explosions
 
-  // (kx,ky,kz) index of explosion in domain
-  // (x,y,z) position in block
-  int kxm = 0;
-  int kym = 0;
-  int kzm = 0;
-  int kxp = array_[0];
-  int kyp = array_[1];
-  int kzp = array_[2];
+  double xmd,ymd,zmd;
+  hierarchy->lower(&xmd,&ymd,&zmd);
+  double xpd,ypd,zpd;
+  hierarchy->upper(&xpd,&ypd,&zpd);
+
+  // bounds of possible explosions intersecting this Block
+
+  double r = sedov_radius;
+  
+  int kxm = MAX((int)floor((xmb-xmd-r)/(xpd-xmd)*array_[0])-1,0);
+  int kym = MAX((int)floor((ymb-ymd-r)/(ypd-ymd)*array_[1])-1,0);
+  int kzm = MAX((int)floor((zmb-zmd-r)/(zpd-zmd)*array_[2])-1,0);
+  int kxp = MIN( (int)ceil((xpb-xmd+r)/(xpd-xmd)*array_[0])+1,array_[0]);
+  int kyp = MIN( (int)ceil((ypb-ymd+r)/(ypd-ymd)*array_[1])+1,array_[1]);
+  int kzp = MIN( (int)ceil((zpb-zmd+r)/(zpd-zmd)*array_[2])+1,array_[2]);
+  
   TRACE3 ("SEDOV: %d %d %d",kxp,kyp,kzp);
 
-  double xdm,ydm,zdm;
-  hierarchy->lower(&xdm,&ydm,&zdm);
-  double xdp,ydp,zdp;
-  hierarchy->upper(&xdp,&ydp,&zdp);
+  double hxa = (xpd-xmd) / array_[0];
+  double hya = (ypd-ymd) / array_[1];
+  double hza = (zpd-zmd) / array_[2];
 
-  double hxa = (xdp-xdm) / array_[0];
-  double hya = (ydp-ydm) / array_[1];
-  double hza = (zdp-zdm) / array_[2];
+  // (kx,ky,kz) index bounds of explosions in domain
 
   for (int kz=kzm; kz<kzp; kz++) {
     double zc = hza*(0.5+kz);
@@ -170,15 +175,15 @@ void EnzoInitialSedovArray3::enforce_block
 
 	// (explosion center xc,yc,zc)
 
-	for (int iz=0; iz<ndz; iz++) {
-	  double z = zbm + (iz - gz + 0.5)*hz - zc;
-	  for (int iy=0; iy<ndy; iy++) {
-	    double y = ybm + (iy - gy + 0.5)*hy - yc;
-	    for (int ix=0; ix<ndx; ix++) {
-	      double x = xbm + (ix - gx + 0.5)*hx - xc;
+	for (int iz=0; iz<mz; iz++) {
+	  double z = zmb + (iz - gz + 0.5)*hz - zc;
+	  for (int iy=0; iy<my; iy++) {
+	    double y = ymb + (iy - gy + 0.5)*hy - yc;
+	    for (int ix=0; ix<mx; ix++) {
+	      double x = xmb + (ix - gx + 0.5)*hx - xc;
 	      double r2 = x*x + y*y + z*z;
 
-	      int i = INDEX(ix,iy,iz,ndx,ndy);
+	      int i = INDEX(ix,iy,iz,mx,my);
 	  
 	      if (r2 < sedov_radius_2) {
 		te[i] = sedov_te_in;

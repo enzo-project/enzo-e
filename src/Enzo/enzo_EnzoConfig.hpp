@@ -72,6 +72,12 @@ public: // interface
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
+      // EnzoInitialPm
+      initial_pm_field(""),
+      initial_pm_mpp(0.0),
+      // EnzoInitialSoup
+      initial_soup_file(""),
+      initial_soup_rank(0),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -112,9 +118,6 @@ public: // interface
       method_gravity_mg_prolong(""),
       method_gravity_mg_min_level(0),
       method_gravity_mg_max_level(0),
-      // EnzoInitialPm
-      initial_pm_field(""),
-      initial_pm_mpp(0.0),
       // EnzoMethodPm
       method_pm_deposit_type(""),
       method_pm_update_max_dt(0.0)
@@ -174,6 +177,17 @@ public: // attributes
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 
+  std::string                initial_pm_field;
+  double                     initial_pm_mpp;
+  int                        initial_pm_level;
+
+  int                        initial_soup_rank;
+  std::string                initial_soup_file;
+  bool                       initial_soup_rotate;
+  int                        initial_soup_array[3];
+  double                     initial_soup_d_pos[3];
+  double                     initial_soup_d_size[3];
+
   // EnzoProlong
   std::string                interpolation_method;
 
@@ -221,12 +235,6 @@ public: // attributes
   std::string                method_gravity_mg_prolong;
   int                        method_gravity_mg_min_level;
   int                        method_gravity_mg_max_level;
-
-  // EnzoInitialPm
-
-  std::string                initial_pm_field;
-  double                     initial_pm_mpp;
-  int                        initial_pm_level;
 
   // EnzoMethodPm
 

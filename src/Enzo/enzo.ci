@@ -52,10 +52,11 @@ module enzo {
   PUPable EnzoFactory;
 
   PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialPm;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
+  PUPable EnzoInitialSoup;  	  
   PUPable EnzoInitialTurbulence;
-  PUPable EnzoInitialPm;
 
   PUPable EnzoRefineShock;
 

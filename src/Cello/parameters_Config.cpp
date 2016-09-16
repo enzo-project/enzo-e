@@ -1074,6 +1074,7 @@ void Config::read_particle_ (Parameters * p) throw()
 
 void Config::read_performance_ (Parameters * p) throw()
 {
+#ifdef CONFIG_USE_PAPI  
   if (p->type("Performance:papi:counters") == parameter_list) {
     int length = p->list_length("Performance:papi:counters");
     performance_papi_counters.resize(length);
@@ -1084,10 +1085,11 @@ void Config::read_performance_ (Parameters * p) throw()
 	     i,performance_papi_counters[i].c_str());
     }
   }
+#endif  
 
   performance_name     = p->value_string ("Performance:name","");
   performance_stride   = p->value_integer("Performance:stride",1);
-  performance_warnings = p->value_logical("Performance:warnings",true);
+  performance_warnings = p->value_logical("Performance:warnings",false);
 
 }
 

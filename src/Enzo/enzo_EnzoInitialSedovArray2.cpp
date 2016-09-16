@@ -67,13 +67,8 @@ void EnzoInitialSedovArray2::enforce_block
 	 "Insufficient number of fields",
 	 field.field_count() >= 4);
 
-  enzo_float *  d = (enzo_float *) field.values
-    (field.field_id("density"));
-  
-  enzo_float * te = 0;
-
-  te = (enzo_float *) field.values
-    (field.field_id("total_energy"));
+  enzo_float *  d = (enzo_float *) field.values ("density");
+  enzo_float * te = (enzo_float *) field.values ("total_energy");
 
   int nx,ny;
   field.size(&nx,&ny);

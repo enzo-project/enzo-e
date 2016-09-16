@@ -135,6 +135,22 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_pm_field,
        enzo_config->initial_pm_mpp,
        enzo_config->initial_pm_level);
+  } else if (type == "soup") {
+    const int rank = enzo_config->initial_soup_rank;
+    initial = new EnzoInitialSoup
+      (cycle, time,
+       enzo_config->initial_soup_file,
+       rank,
+       enzo_config->initial_soup_rotate,
+       enzo_config->initial_soup_array[0],
+       enzo_config->initial_soup_array[1],
+       enzo_config->initial_soup_array[2],
+       enzo_config->initial_soup_d_pos[0],
+       enzo_config->initial_soup_d_pos[1],
+       enzo_config->initial_soup_d_pos[2],
+       enzo_config->initial_soup_d_size[0],
+       enzo_config->initial_soup_d_size[1],
+       enzo_config->initial_soup_d_size[2]);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters,field_descr);

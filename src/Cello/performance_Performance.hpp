@@ -53,17 +53,22 @@ class Performance {
 public: // interface
 
   Performance()
-    : papi_(),
-      counter_name_(),
-      counter_type_(),
-      counter_values_(),
-      region_name_(),
-      region_counters_(),
-      region_started_(),
-      region_index_(),
-      papi_counters_(0),
-      warnings_(false),
-      index_region_current_(perf_unknown)
+    :
+#ifdef CONFIG_USE_PAPI  
+     papi_(),
+#endif     
+     counter_name_(),
+     counter_type_(),
+     counter_values_(),
+     region_name_(),
+     region_counters_(),
+     region_started_(),
+     region_index_(),
+#ifdef CONFIG_USE_PAPI     
+     papi_counters_(0),
+#endif
+     warnings_(false),
+     index_region_current_(perf_unknown)
   {};
 
   /// Initialize a Performance object
@@ -78,19 +83,21 @@ public: // interface
     TRACEPUP;
     
     // NOTE: change this function whenever attributes change
+#ifdef CONFIG_USE_PAPI  
     p | papi_;
+#endif
     p | counter_name_;
     p | counter_type_;
     p | counter_values_;
     p | region_name_;
     p | region_counters_;
     p | region_started_;
-    //    WARNING("Performance::pup",
-    //	    "skipping Performance:region_index_");
     p | region_index_;
+#ifdef CONFIG_USE_PAPI  
     WARNING("Performance::pup",
 	    "skipping Performance:papi_counters_");
     //    p | papi_counters_
+#endif    
     p | warnings_;
     p | index_region_current_;
   }
@@ -180,8 +187,10 @@ public: // interface
   bool region_started(int index_region) const throw()
   { return region_started_[index_region]; }
 
+#ifdef CONFIG_USE_PAPI  
   /// Return the associated Papi object
   Papi * papi() { return &papi_; };
+#endif  
 
 private: // functions
 
@@ -201,8 +210,10 @@ private: // functions
 
 private: // attributes
 
+#ifdef CONFIG_USE_PAPI  
   /// PAPI counters, if available
   Papi papi_;
+#endif
 
   /// Counter names
   std::vector<std::string> counter_name_;
@@ -225,8 +236,10 @@ private: // attributes
   /// mapping of region name to index
   std::map<std::string,int> region_index_;
 
+#ifdef CONFIG_USE_PAPI  
   /// Array for storing PAPI counter values
   long long * papi_counters_;
+#endif  
 
   /// Whether to output warning messages
   bool warnings_;

@@ -176,8 +176,6 @@ public: // virtual functions
   
   // Performance
 
-  int & perf_counter(int perf_region) {return perf_count_[perf_region]; }
-
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
   FILE * fp_debug() { return fp_debug_; }
 #endif
@@ -365,9 +363,6 @@ protected: // attributes
 
   /// Processor stride for writing strict processor subset of performance data
   int performance_stride_;
-
-  /// Counter for knowing when to call Performance start() and stop()
-  int perf_count_[perf_last];
 
   // /// Schedule for projections on / off
 

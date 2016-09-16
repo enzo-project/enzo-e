@@ -81,7 +81,16 @@ PARALLEL_MAIN_BEGIN
   monitor_->print("Memory","bytes %lld bytes_high %lld",
 		  memory->bytes(), memory->bytes_high());
 
-  //--------------------------------------------------
+#ifdef CONFIG_USE_PAPI
+  int retval = PAPI_library_init(PAPI_VER_CURRENT);
+  if (retval != PAPI_VER_CURRENT && retval > 0) {
+    WARNING("Papi::init","PAPI library version mismatch!");
+  } else if (retval < 0) {
+    WARNING("Papi::init","PAPI initialization error!");
+  }
+#endif
+
+ //--------------------------------------------------
 
   proxy_main     = thishandle;
 

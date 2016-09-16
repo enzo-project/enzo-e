@@ -38,7 +38,7 @@ OutputImage::OutputImage(int index,
     min_(min),max_(max),
     nxi_(image_size_x),
     nyi_(image_size_y),
-    png_(0),
+    png_(NULL),
     image_type_(image_type),
     face_rank_(face_rank),
     image_log_(image_log),
@@ -107,6 +107,12 @@ OutputImage::OutputImage(int index,
 
 OutputImage::~OutputImage() throw ()
 {
+  delete png_;
+  png_ = NULL;
+  delete image_data_;
+  image_data_ = NULL;
+  delete image_mesh_;
+  image_mesh_ = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -134,7 +140,7 @@ void OutputImage::pup (PUP::er &p)
   p | nyi_;
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
-  if (p.isUnpacking()) png_ = 0;
+  if (p.isUnpacking()) png_ = NULL;
   p | image_type_;
   p | face_rank_;
   p | image_log_;

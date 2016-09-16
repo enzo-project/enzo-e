@@ -17,15 +17,19 @@ class Papi {
 public: // interface
 
   /// Constructor
-  Papi() throw();
+  Papi(bool warnings = false) throw();
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {
     TRACEPUP;
     // NOTE: change this function whenever attributes change
-    WARNING("PerformancePapi::pup","skipping");
-    return;
+    // p | is_initialized_;
+    // p | is_started_;
+    // p | event_set_;
+    // p | num_events_;
+    // p |  event_names_;
+    // p | warnings_;
   }
 
   //----------------------------------------------------------------------
@@ -71,6 +75,9 @@ private: // attributes
 
   /// vector of event names in event set
   std::vector<std::string> event_names_;
+
+  /// Whether to print warnings
+  bool warnings_;
 
 };
 
