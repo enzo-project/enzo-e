@@ -57,7 +57,8 @@ public: // interface
   }
 
   /// Destructor
-  ~Particle() throw();
+  ~Particle() throw()
+  {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -280,14 +281,16 @@ public: // interface
   /// particle spaces in earlier batches, to ease initialization via
   /// index()
 
-  int insert_particles (int it, int np);
+  int insert_particles (int it, int np)
+  { return  particle_data_->insert_particles (particle_descr_, it, np); }
 
   /// Delete the given particles in the batch according to mask
   /// attribute.  Compresses the batch if particles deleted, so batch
   /// may have fewer than max number of particles.  Other batches
   /// remain unchanged.  Return the number of particles deleted.
 
-  int delete_particles (int it, int ib, const bool * m = 0);
+  int delete_particles (int it, int ib, const bool * mask = 0)
+  { return particle_data_->delete_particles (particle_descr_,it,ib,mask); }
 
   /// Scatter particles among an array of other Particle structures.
   /// Typically used for preparing to send particles that have gone
