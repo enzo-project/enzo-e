@@ -47,7 +47,7 @@ public: // interface
 
   /// Add an item to a group
   void add(std::string item, std::string group) 
-    throw(std::out_of_range)
+    throw()
   {
     std::pair<std::string,std::string> value(item,group);
     groups_.insert(value);
@@ -55,7 +55,7 @@ public: // interface
 
   /// Return whether the item is in the given group
   bool is_in(std::string item, std::string group) const
-    throw(std::out_of_range)
+    throw()
   {
     std::pair<std::string,std::string> value(item,group);
     return groups_.find(value) != groups_.end();

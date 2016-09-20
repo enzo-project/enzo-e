@@ -78,18 +78,18 @@ public: // interface
 
   /// Set centering for a field
   void set_centering(int id, int cx, int cy=0, int cz=0) 
-    throw(std::out_of_range)
+    throw()
   { field_descr_->set_centering(id,cx,cy,cz); }
 
   /// Set ghost_depth for a field
   void set_ghost_depth(int id, int gx, int gy=0, int gz=0) 
-    throw(std::out_of_range)
+    throw()
   { field_descr_->set_ghost_depth(id,gx,gy,gz); }
 
 
   /// Set precision for a field
-  void set_precision(int id, precision_type precision) 
-    throw(std::out_of_range)
+  void set_precision(int id, int precision) 
+    throw()
   { field_descr_->set_precision(id,precision); }
 
   /// Insert a new field
@@ -105,7 +105,7 @@ public: // interface
   { return field_descr_->field_count(); }
 
   /// Return name of the ith field
-  std::string field_name(size_t id) const throw(std::out_of_range)
+  std::string field_name(size_t id) const throw()
   { return field_descr_->field_name(id); }
 
   /// Return whether the field has been inserted
@@ -136,16 +136,16 @@ public: // interface
 
   /// centering of given field
   void centering(int id, int * cx, int * cy = 0, int * cz = 0) const 
-    throw(std::out_of_range)
+    throw()
   { return field_descr_->centering(id,cx,cy,cz); }
 
   /// depth of ghost zones of given field
   void ghost_depth(int id, int * gx, int * gy = 0, int * gz = 0) const 
-    throw(std::out_of_range)
+    throw()
   { return field_descr_->ghost_depth(id,gx,gy,gz); }
 
   /// Return precision of given field
-  int precision(int id) const throw(std::out_of_range)
+  int precision(int id) const throw()
   { return field_descr_->precision(id); }
 
   /// Number of bytes per element required by the given field
@@ -174,32 +174,32 @@ public: // interface
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  char * values (int id) throw (std::out_of_range)
+  char * values (int id) throw ()
   { return field_data_->values(field_descr_,id); }
 
-  char * values (std::string name) throw (std::out_of_range)
+  char * values (std::string name) throw ()
   { return field_data_->values(field_descr_,name); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  const char * values (int id) const throw (std::out_of_range)
+  const char * values (int id) const throw ()
   { return field_data_->values(field_descr_,id); }
 
-  const char * values (std::string name) const throw (std::out_of_range)
+  const char * values (std::string name) const throw ()
   { return field_data_->values(field_descr_,name); }
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
-  char * unknowns ( int id) throw (std::out_of_range)
+  char * unknowns ( int id) throw ()
   { return field_data_->unknowns(field_descr_,id); }
 
-  char * unknowns (std::string name) throw (std::out_of_range)
+  char * unknowns (std::string name) throw ()
   { return field_data_->unknowns(field_descr_,name); }
 
-  const char * unknowns ( int id) const throw (std::out_of_range)
+  const char * unknowns ( int id) const throw ()
   { return field_data_->unknowns(field_descr_,id); }
 
-  const char * unknowns (std::string name) const throw (std::out_of_range)
+  const char * unknowns (std::string name) const throw ()
   { return field_data_->unknowns(field_descr_,name); }
 
   /// Return raw pointer to the array of all fields.  Const since
@@ -235,11 +235,11 @@ public: // interface
   { field_data_->allocate_permanent(field_descr_,ghosts_allocated); }
 
   /// Allocate storage for the temporary fields
-  void allocate_temporary(int id) throw (std::out_of_range)
+  void allocate_temporary(int id) throw ()
   { field_data_->allocate_temporary(field_descr_,id); }
 
   /// Deallocate storage for the temporary fields
-  void deallocate_temporary(int id) throw (std::out_of_range)
+  void deallocate_temporary(int id) throw ()
   { field_data_->deallocate_temporary(field_descr_,id); }
 
   /// Reallocate storage for the field data, e.g. when changing

@@ -58,7 +58,7 @@ public: // interface
        monitor_iter_(0),
        rr_(0),rr0_(0),
        irho_(0),  iphi_(0),
-       ib_(0), ic_(0), ir_(0), ix_(0),
+       ib_(0), ic_(0), id_(0), ir_(0), ix_(0),
        min_level_(0),
        max_level_(0),
        mx_(0),my_(0),mz_(0)

@@ -262,7 +262,7 @@ void Config::read_adapt_ (Parameters * p) throw()
       }
     } else if (type == parameter_string) {
       adapt_field_list[ia].resize(1);
-      adapt_field_list[ia][0] = p->value(param_str,"none");
+      adapt_field_list[ia][0] = p->value_string (param_str,"none");
     } else if (type != parameter_unknown) {
       ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
 	      type,param_str.c_str());

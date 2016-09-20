@@ -114,7 +114,7 @@ int EnzoBlock::ComputeTemperatureField
     min_temperature = temperature_floor[in];
   }
 
-  if (MultiSpecies == FALSE)
+  if (MultiSpecies[in] == FALSE)
  
     /* If the multi-species flag is not set,
        Compute temperature T = p/d and assume mu = DEFAULT_MU. */

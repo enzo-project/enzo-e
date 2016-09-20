@@ -418,6 +418,16 @@ void Tree::coalesce ()
     passes ++;
     printf ("Pass %d  Count %d\n",passes,count);
   } while (count > 0);
+
+  // Clear node data
+  ItNode it_node_clean (this);
+  while (it_node_clean.next_leaf()) {
+    const NodeTrace * node_trace = it_node_clean.node_trace();
+    node_trace->node()->set_data(NULL);
+  }
+  // Delete array of node data
+  delete [] level_data;
+  
 }
 //----------------------------------------------------------------------
 //======================================================================

@@ -38,12 +38,24 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_max_expansion_rate(0.0),
   physics_cosmology_omega_lamda_now(0.0),
   physics_cosmology_omega_matter_now(0.0),
-  // EnzoInitialSedovArray[23]
+  // EnzoInitialPm
+  initial_pm_field(""),
+  initial_pm_mpp(0.0),
+  initial_pm_level(0),
+  // EnzoInitialSoup
+  initial_soup_rank(0),
+  initial_soup_file(""),
+  initial_soup_rotate(false),
+  initial_soup_pressure_in(0.0),
+  initial_soup_pressure_out(0.0),
+  initial_soup_density(0.0),
+  // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
   initial_sedov_pressure_in(0.0),
   initial_sedov_pressure_out(0.0),
   initial_sedov_density(0.0),
+  // EnzoInitialTurbulence
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
   initial_turbulence_temperature(0.0),
@@ -87,13 +99,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_gravity_mg_prolong(""),
   method_gravity_mg_min_level(0),
   method_gravity_mg_max_level(0),
-  // EnzoInitialPm
-  initial_pm_field(""),
-  initial_pm_mpp(0.0),
-  initial_soup_rank(0),
-  initial_soup_file(""),
-  initial_soup_rotate(false),
-
   // EnzoMethodPm
   method_pm_deposit_type(""),
   method_pm_update_max_dt(0.0)
@@ -169,6 +174,9 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p,initial_soup_array,3);
   PUParray(p,initial_soup_d_pos,3);
   PUParray(p,initial_soup_d_size,3);
+  p | initial_soup_pressure_in;
+  p | initial_soup_pressure_out;
+  p | initial_soup_density;
 
   p | interpolation_method;
 
@@ -310,6 +318,12 @@ void EnzoConfig::read(Parameters * p) throw()
     initial_soup_d_size[axis] = p->list_value_float
       (axis,"Initial:soup:d_size",0.0);
   }
+  initial_soup_pressure_in = 
+    p->value_float("Initial:soup:pressure_in",1.0);
+  initial_soup_pressure_out = 
+    p->value_float("Initial:soup:pressure_out",1e-5);
+  initial_soup_density = 
+    p->value_float("Initial:soup:density",1.0);
   
   // Sedov initialization
 

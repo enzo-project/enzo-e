@@ -150,7 +150,10 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_soup_d_pos[2],
        enzo_config->initial_soup_d_size[0],
        enzo_config->initial_soup_d_size[1],
-       enzo_config->initial_soup_d_size[2]);
+       enzo_config->initial_soup_d_size[2],
+       enzo_config->initial_soup_density,
+       enzo_config->initial_soup_pressure_in,
+       enzo_config->initial_soup_pressure_out);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters,field_descr);
@@ -313,15 +316,16 @@ Method * EnzoProblem::create_method_
       (name,config, index_method,field_descr,particle_descr);
   }
 
-  // set the method's courant safety factor
   if (method) {
-    method->set_courant(config->method_courant[index_method]);
-  }
 
-  ASSERT2("EnzoProblem::create_method",
-	  "Method created %s does not match method requested %s",
-	  method->name().c_str(),name.c_str(),
-	  method->name() == name);
+    // set the method's courant safety factor
+    method->set_courant(config->method_courant[index_method]);
+
+    ASSERT2("EnzoProblem::create_method",
+	    "Method created %s does not match method requested %s",
+	    method->name().c_str(),name.c_str(),
+	    method->name() == name);
+  }
 
   return method;
 }

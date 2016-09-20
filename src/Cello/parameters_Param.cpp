@@ -177,7 +177,7 @@ void Param::evaluate_float
     right = new double [n];
     evaluate_float(n,right,x,y,z,t,node->right);
   }
-      
+  
   int i;
   switch (node->type) {
   case enum_node_operation:
@@ -265,10 +265,10 @@ void Param::evaluate_logical
 
   // Recurse on left subtree
 
-  if (node->left && node->left->type == enum_node_operation) {
+  if (node->left && (node->left->type == enum_node_operation)) {
     // left node is an operation
-    if (node->op_value == enum_op_and || 
-	node->op_value == enum_op_or) {
+    if ((node->op_value == enum_op_and) || 
+	(node->op_value == enum_op_or)) {
       // left node is a logical operation
       left_logical = new bool [n];
       evaluate_logical(n,left_logical,x,y,z,t,node->left);
@@ -285,11 +285,11 @@ void Param::evaluate_logical
 
   // Recurse on left subtree
 
-  if (node->right && node->right->type == enum_node_operation) {
+  if (node->right && (node->right->type == enum_node_operation)) {
     // right node exists
     // right node is an operation
-    if (node->op_value == enum_op_and || 
-	node->op_value == enum_op_or) {
+    if ((node->op_value == enum_op_and) || 
+	(node->op_value == enum_op_or)) {
       // right node is a logical operation
       right_logical = new bool [n];
       evaluate_logical(n,right_logical,x,y,z,t,node->right);

@@ -11,8 +11,7 @@
 
 //----------------------------------------------------------------------
 
-FieldDescr::FieldDescr () 
-  throw ()
+FieldDescr::FieldDescr () throw ()
   : name_(),
     num_permanent_(0),
     id_(),
@@ -27,8 +26,7 @@ FieldDescr::FieldDescr ()
 
 //----------------------------------------------------------------------
 
-FieldDescr::~FieldDescr() 
-  throw()
+FieldDescr::~FieldDescr() throw()
 {
   for (size_t i=0; i<centering_.size(); i++) {
     delete [] centering_[i];
@@ -49,8 +47,7 @@ FieldDescr::FieldDescr(const FieldDescr & field_descr) throw()
 
 //----------------------------------------------------------------------
 
-FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr) 
-  throw()
+FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr) throw()
 {
   copy_(field_descr);
 
@@ -59,32 +56,28 @@ FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr)
 
 //----------------------------------------------------------------------
 
-int FieldDescr::field_count() const 
-  throw()
+int FieldDescr::field_count() const throw()
 {
   return name_.size();
 }
 
 //----------------------------------------------------------------------
 
-std::string FieldDescr::field_name(size_t id_field) const 
-  throw(std::out_of_range)
+std::string FieldDescr::field_name(size_t id_field) const throw()
 { 
   return name_.at(id_field);
 }
 
 //----------------------------------------------------------------------
 
-bool FieldDescr::is_field(const std::string & name) const 
-  throw()
+bool FieldDescr::is_field(const std::string & name) const throw()
 { 
   return (id_.find(name) != id_.end());
 }
 
 //----------------------------------------------------------------------
 
-int FieldDescr::field_id(const std::string & name) const
-  throw()
+int FieldDescr::field_id(const std::string & name) const throw()
 {
   //  return id_[name]; // ERROR IN PGI ON GORDON 11.9-0 64-bit
   std::map<const std::string,int>::const_iterator it;
@@ -107,7 +100,7 @@ void FieldDescr::centering
  int * cx, 
  int * cy, 
  int * cz
- ) const throw(std::out_of_range)
+ ) const throw()
 {
   if (cx) (*cx) = centering_.at(id_field)[0];
   if (cy) (*cy) = centering_.at(id_field)[1];
@@ -122,7 +115,7 @@ void FieldDescr::ghost_depth
  int * gx, 
  int * gy, 
  int * gz
- ) const throw(std::out_of_range)
+ ) const throw()
 {
   if (gx) (*gx) = ghost_depth_.at(id_field)[0];
   if (gy) (*gy) = ghost_depth_.at(id_field)[1];
@@ -174,7 +167,7 @@ int FieldDescr::insert_(const std::string & field_name) throw()
 
   // Initialize attributes with default values
 
-  precision_type precision = default_precision;
+  int precision = default_precision;
 
   int * centered = new int[3];
   centered[0] = 0;
@@ -197,8 +190,7 @@ int FieldDescr::insert_(const std::string & field_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_precision(int id_field, precision_type precision) 
-  throw(std::out_of_range)
+void FieldDescr::set_precision(int id_field, int precision) throw()
 {
   if ( ! cello::is_precision_supported (precision) ) {
     char buffer[80];
@@ -207,8 +199,10 @@ void FieldDescr::set_precision(int id_field, precision_type precision)
     WARNING("FieldDescr::set_precision",
 	    buffer);
   }
-  precision_.at(id_field) = 
-    (precision == precision_default) ? default_precision : precision;
+  if (id_field >= 0) {
+    precision_.at(id_field) = 
+      (precision == precision_default) ? default_precision : precision;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -220,22 +214,24 @@ int FieldDescr::bytes_per_element(int id_field) const throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_centering(int id_field, int cx, int cy, int cz) 
-  throw(std::out_of_range)
+void FieldDescr::set_centering(int id_field, int cx, int cy, int cz) throw()
 {
-  centering_.at(id_field)[0] = cx;
-  centering_.at(id_field)[1] = cy;
-  centering_.at(id_field)[2] = cz;
+  if (id_field >= 0) {
+    centering_.at(id_field)[0] = cx;
+    centering_.at(id_field)[1] = cy;
+    centering_.at(id_field)[2] = cz;
+  }
 }
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_ghost_depth(int id_field, int gx, int gy, int gz) 
-  throw(std::out_of_range)
+void FieldDescr::set_ghost_depth(int id_field, int gx, int gy, int gz) throw()
 {
-  ghost_depth_.at(id_field)[0] = gx;
-  ghost_depth_.at(id_field)[1] = gy;
-  ghost_depth_.at(id_field)[2] = gz;
+  if (id_field >= 0) {
+    ghost_depth_.at(id_field)[0] = gx;
+    ghost_depth_.at(id_field)[1] = gy;
+    ghost_depth_.at(id_field)[2] = gz;
+  }
 }
 
 //======================================================================

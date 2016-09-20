@@ -50,8 +50,8 @@ int EnzoBlock::ComputePressure(enzo_float time,
   enzo_float * density         = (enzo_float *) field.values("density");
   enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
   enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");
-  enzo_float * velocity_x      = (rank >= 1) ? 
-    (enzo_float *) field.values("velocity_x") : NULL;
+  enzo_float * velocity_x      = 
+    (enzo_float *) field.values("velocity_x");
   enzo_float * velocity_y      = (rank >= 2) ? 
     (enzo_float *) field.values("velocity_y") : NULL;
   enzo_float * velocity_z      = (rank >= 3) ? 
@@ -65,22 +65,20 @@ int EnzoBlock::ComputePressure(enzo_float time,
   // WARNING: floating point comparison
   if (time == this->time()) {
 
-    if (rank >= 1) {
-      for (i = 0; i < size; i++) {
-	enzo_float te = total_energy[i];
-	enzo_float vx = (rank >= 1) ? velocity_x[i] : 0.0;
-	internal_energy[i] = te - 0.5*vx*vx;
-      }
+    for (i = 0; i < size; i++) {
+      enzo_float te = total_energy[i];
+      enzo_float vx = velocity_x[i];
+      internal_energy[i] = te - 0.5*vx*vx;
     }
     if (rank >= 2) {
       for (i = 0; i < size; i++) {
-	enzo_float vy = (rank >= 2) ? velocity_y[i] : 0.0;
+	enzo_float vy = velocity_y[i];
 	internal_energy[i] -= 0.5*vy*vy;
       }
     }
     if (rank >= 3) {
       for (i = 0; i < size; i++) {
-	enzo_float vz = (rank >= 3) ? velocity_z[i] : 0.0;
+	enzo_float vz = velocity_z[i];
 	internal_energy[i] -= 0.5*vz*vz;
       }
     }

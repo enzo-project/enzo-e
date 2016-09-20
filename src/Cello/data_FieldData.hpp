@@ -50,30 +50,30 @@ public: // interface
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
   char * values (const FieldDescr * , int id_field) 
-    throw (std::out_of_range);
+    throw ();
   char * values (const FieldDescr * field_descr, std::string name) 
-    throw (std::out_of_range)
+    throw ()
   { return values (field_descr,field_descr->field_id(name)); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
   const char * values (const FieldDescr *, int id_field) const 
-    throw (std::out_of_range);
+    throw ();
   const char * values (const FieldDescr * field_descr, std::string name) const 
-    throw (std::out_of_range)
+    throw ()
   { return values (field_descr,field_descr->field_id(name)); }
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
   char * unknowns (const FieldDescr *, int id_field) 
-    throw (std::out_of_range);
+    throw ();
   char * unknowns (const FieldDescr * field_descr, std::string name) 
-    throw (std::out_of_range)
+    throw ()
   { return unknowns (field_descr,field_descr->field_id(name)); }
 
   const char * unknowns (const FieldDescr *,  int id_field) const 
-    throw (std::out_of_range);
-  const char * unknowns (const FieldDescr * field_descr, std::string name) const     throw (std::out_of_range)
+    throw ();
+  const char * unknowns (const FieldDescr * field_descr, std::string name) const     throw ()
   { return unknowns (field_descr,field_descr->field_id(name)); }
 
   /// Return raw pointer to the array of all permanent fields.  Const since
@@ -107,7 +107,7 @@ public: // interface
 
   /// Allocate storage for the temporary fields
   void allocate_temporary(const FieldDescr *,
-			  int id) throw (std::out_of_range);
+			  int id) throw ();
 
   /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
@@ -119,7 +119,7 @@ public: // interface
 
   /// Deallocate storage for the temporary fields
   void deallocate_temporary(const FieldDescr *,int id) 
-    throw (std::out_of_range);
+    throw ();
 
   /// Return whether ghost cells are allocated or not.  
   bool ghosts_allocated() const throw ()
@@ -154,7 +154,7 @@ private: // functions
   void restore_permanent_ 
   (const FieldDescr *,
    const char       * array_from,
-   std::vector<int> & offsets_from ) throw (std::out_of_range);
+   std::vector<int> & offsets_from ) throw ();
 
   template <class T>
   void print_

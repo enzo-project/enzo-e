@@ -18,6 +18,16 @@ public: // interface
 
   /// Create a new EnzoMatrixLaplace
   EnzoMatrixLaplace () throw()
+    : mx_(0),
+      my_(0),
+      mz_(0),
+      nx_(0),
+      ny_(0),
+      nz_(0),
+      hx_(0.0),
+      hy_(0.0),
+      hz_(0.0),
+      rank_(0)
   {}
 
   /// Destructor

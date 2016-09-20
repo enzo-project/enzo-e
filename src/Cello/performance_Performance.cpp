@@ -31,7 +31,8 @@ Performance::Performance (Config * config)
   region_index_(),
 #ifdef CONFIG_USE_PAPI  
   papi_counters_(0),
-#endif  
+#endif
+  warnings_(config ? config->performance_warnings : false),
   index_region_current_(perf_unknown)
 
 {

@@ -46,6 +46,7 @@ public: // functions
     file_(0),
     process_(0),
     sync_(0),
+    index_charm_(0),
     cycle_(0),
     time_(0),
     file_name_(""),

@@ -54,7 +54,7 @@ public: // interface
       monitor_iter_(0),
       rr_(0),rr0_(0), rr_min_(0),rr_max_(0),
       idensity_(0),  ipotential_(0),
-      ib_(0), ir_(0), ix_(0), iy_(0),
+      ib_(0), id_(0), ir_(0), ix_(0), iy_(0),
       iter_(0),
       level_min_(0),
       level_max_(0)

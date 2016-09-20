@@ -10,18 +10,26 @@
 Mask * Mask::create(Param * param, Parameters * parameters)
 {
   Mask * mask = NULL;
-  if ((param->type() == parameter_logical_expr)) {
-    mask = new MaskExpr(param);
-  } else if ((param->type() == parameter_string)) {
-    double xm = parameters->list_value_float(0,"Domain:lower",0.0);
-    double xp = parameters->list_value_float(0,"Domain:upper",0.0);
-    double ym = parameters->list_value_float(1,"Domain:lower",0.0);
-    double yp = parameters->list_value_float(1,"Domain:upper",0.0);
-    mask = new MaskPng(param->get_string(),xm,xp,ym,yp);
-  } else {
-    ERROR("Mask::create()",
-	   "Invalid Mask type: must be logical expression or file name");
-  }
+  if (param) {
+    if ((param->type() == parameter_logical_expr)) {
+      mask = new MaskExpr(param);
+    } else if ((param->type() == parameter_string)) {
+      double xm = 0.0;
+      double ym = 0.0;
+      double xp = 0.0;
+      double yp = 0.0;
+      if (parameters) {
+	xm = parameters->list_value_float(0,"Domain:lower",0.0);
+	ym = parameters->list_value_float(1,"Domain:lower",0.0);
+	xp = parameters->list_value_float(0,"Domain:upper",0.0);
+	yp = parameters->list_value_float(1,"Domain:upper",0.0);
+      }
+      mask = new MaskPng(param->get_string(),xm,xp,ym,yp);
+    } else {
+      ERROR("Mask::create()",
+	    "Invalid Mask type: must be logical expression or file name");
+    }
+  } 
   return mask;
 
 }

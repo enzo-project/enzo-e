@@ -230,8 +230,7 @@ void ParticleData::scatter
 {
   // count number of particles in each particle_array element
 
-  int np_array[n];
-  for (int k=0; k<n; k++) np_array[k]=0;
+  int np_array[n] = {0};
 
   for (int ip=0; ip<np; ip++) {
     int k= index[ip];

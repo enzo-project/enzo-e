@@ -75,19 +75,16 @@ public: // functions
   { padding_ = padding; }
 
   /// Set precision for a field
-  void set_precision(int id_field, precision_type precision) 
-    throw(std::out_of_range);
+  void set_precision(int id_field, int precision) throw();
 
   /// Set centering for a field
-  void set_centering(int id_field, int cx, int cy=0, int cz=0) 
-    throw(std::out_of_range);
+  void set_centering(int id_field, int cx, int cy=0, int cz=0) throw();
 
   /// Set ghost_depth for a field
-  void set_ghost_depth(int id_field, int gx, int gy=0, int gz=0) 
-    throw(std::out_of_range);
+  void set_ghost_depth(int id_field, int gx, int gy=0, int gz=0) throw();
 
   /// Set whether a field is a conserved quantity
-  void set_conserved(int id_field, bool conserved) throw(std::out_of_range);
+  void set_conserved(int id_field, bool conserved) throw();
 
   /// Insert a new permanent field
   int insert_permanent(const std::string & name_field) throw();
@@ -99,7 +96,7 @@ public: // functions
   int field_count() const throw();
 
   /// Return name of the ith field
-  std::string field_name(size_t id_field) const throw(std::out_of_range);
+  std::string field_name(size_t id_field) const throw();
 
   /// Return whether the field has been inserted
   bool is_field(const std::string & name) const throw();
@@ -123,20 +120,20 @@ public: // functions
   { return padding_; }
 
   /// Return precision of given field
-  int precision(int id_field) const throw(std::out_of_range)
+  int precision(int id_field) const throw()
   {  return precision_.at(id_field); }
 
   /// centering of given field
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
-    throw(std::out_of_range);
+    throw();
 
   /// depth of ghost zones of given field
   void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
-    throw(std::out_of_range);
+    throw();
 
   /// whether the field is a conserved quantity
   bool conserved(int id_field) const 
-    throw(std::out_of_range)
+    throw()
   { return conserved_.at(id_field); }
   
   /// Number of bytes per element required by the given field

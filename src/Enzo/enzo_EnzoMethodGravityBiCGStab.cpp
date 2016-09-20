@@ -1278,7 +1278,8 @@ void EnzoBlock::p_gravity_bicgstab_acc() {
 
   Field field = data()->field();
 
-  int precision = field.precision(field.field_id("density")); // assuming 
+  // assuming all fields have same precision
+  int precision = field.precision(field.field_id("density"));
 
   if      (precision == precision_single) {
     method->acc<float>(enzo_block);

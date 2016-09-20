@@ -354,8 +354,10 @@ void Index::print_ (FILE * fp,
 
   if (! no_nl) buffer = buffer + "\n";
 
-  fprintf (fp,"%s",buffer.c_str());
-  fflush(fp);
+  if (fp != NULL) {
+    fprintf (fp,"%s",buffer.c_str());
+    fflush(fp);
+  }
 }
 
 //----------------------------------------------------------------------

@@ -89,7 +89,7 @@ public: // interface
   /// Return the ith initialization object
   Initial *  initial(size_t i) const throw()
   {
-    return (0 <= i && i < initial_list_.size()) ? initial_list_[i] : NULL; 
+    return (i < initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
   /// Return the ith refine object
@@ -108,7 +108,7 @@ public: // interface
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
-  { return (0 <= i && i < method_list_.size()) ? method_list_[i] : NULL; }
+  { return (i < method_list_.size()) ? method_list_[i] : NULL; }
 
   /// Return the prolong object
   Prolong * prolong() const throw()  { return prolong_; }

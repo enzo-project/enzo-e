@@ -41,7 +41,11 @@ public: // interface
   }
 
   /// Destructor
-  virtual ~Boundary() throw() { delete mask_; }
+  virtual ~Boundary() throw()
+  {
+    delete mask_;
+    mask_ = NULL;
+  }
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Boundary);

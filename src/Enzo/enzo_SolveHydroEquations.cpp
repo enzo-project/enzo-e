@@ -107,7 +107,6 @@ int EnzoBlock::SolveHydroEquations
     (enzo_float *)field.values("acceleration_z") : NULL;
 
 
-
   /* Determine if Gamma should be a scalar or a field. */
 
   const int in = cello::index_static();
@@ -115,13 +114,13 @@ int EnzoBlock::SolveHydroEquations
   /* Set minimum support. */
 
   enzo_float MinimumSupportEnergyCoefficient = 0;
-  if (UseMinimumPressureSupport[in] == TRUE)
+  if (UseMinimumPressureSupport[in] == TRUE) {
     if (SetMinimumSupport(MinimumSupportEnergyCoefficient,
 			  comoving_coordinates) == ENZO_FAIL) {
-      fprintf(stderr, "Error in grid->SetMinimumSupport,\n");
-      return ENZO_FAIL;
+      ERROR("EnzoBlock::SolveHydroEquations()",
+	    "Grid::SetMinimumSupport() returned ENZO_FAIL");
     }
-
+  }
   /* allocate space for fluxes */
 
   SubgridFluxes = new fluxes *[NumberOfSubgrids];
@@ -227,8 +226,8 @@ int EnzoBlock::SolveHydroEquations
   if (comoving_coordinates)
     if (CosmologyComputeExpansionFactor(time+0.5*dt, &a, &dadt)
 	== ENZO_FAIL) {
-      fprintf(stderr, "Error in CosmologyComputeExpansionFactors.\n");
-      return ENZO_FAIL;
+      ERROR("EnzoBlock::SolveHydroEquations()",
+	    "CosmologyComputeExpansionFactorsGrid() returned ENZO_FAIL");
     }
 
   /* Create a cell width array to pass (and convert to absolute coords). */
@@ -240,7 +239,6 @@ int EnzoBlock::SolveHydroEquations
     else
       CellWidthTemp[dim] = 1.0;
   }
-
 
   /* call a Fortran routine to actually compute the hydro equations
      on this grid.

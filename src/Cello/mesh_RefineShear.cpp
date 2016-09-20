@@ -55,7 +55,6 @@ int RefineShear::apply ( Block * block ) throw ()
   int nyd = ny + 2*gy;
   int nzd = nz + 2*gz;
 
-  if (rank < 1) gx = 0;
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;
 

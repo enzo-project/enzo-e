@@ -92,7 +92,7 @@ void FieldData::size( int * nx, int * ny, int * nz ) const throw()
 
 const char * FieldData::values ( const FieldDescr * field_descr,
 				 int id_field ) const 
-  throw (std::out_of_range)
+  throw ()
 {
   return (const char *)
     ((FieldData *)this) -> values(field_descr,id_field);
@@ -102,7 +102,7 @@ const char * FieldData::values ( const FieldDescr * field_descr,
 
 char * FieldData::values (const FieldDescr * field_descr,
 			  int id_field ) 
-  throw (std::out_of_range)
+  throw ()
 {
   if (id_field == -1) return NULL;
 
@@ -132,7 +132,7 @@ char * FieldData::values (const FieldDescr * field_descr,
 
 const char * FieldData::unknowns ( const FieldDescr * field_descr, 
 				   int id_field ) const
-  throw (std::out_of_range)
+  throw ()
 {
   return (const char *)
     ((FieldData *)this) -> unknowns(field_descr,id_field);
@@ -142,7 +142,7 @@ const char * FieldData::unknowns ( const FieldDescr * field_descr,
 
 char * FieldData::unknowns (const FieldDescr * field_descr,
 			    int id_field  )
-  throw (std::out_of_range)
+  throw ()
 {
   char * unknowns = values(field_descr,id_field);
 
@@ -314,7 +314,7 @@ void FieldData::allocate_permanent
 //----------------------------------------------------------------------
 
 void FieldData::allocate_temporary (const FieldDescr * field_descr,
-				    int id_field) throw (std::out_of_range)
+				    int id_field) throw ()
 
 {
   int index_field = id_field - field_descr->num_permanent();
@@ -343,7 +343,7 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
 //----------------------------------------------------------------------
 
 void FieldData::deallocate_temporary (const FieldDescr * field_descr,
-				      int id_field) throw(std::out_of_range)
+				      int id_field) throw()
 {
   int index_field = id_field - field_descr->num_permanent();
 
@@ -651,7 +651,7 @@ void FieldData::restore_permanent_
 (
  const FieldDescr * field_descr,
  const char * array_from,
-  std::vector<int> & offsets_from) throw (std::out_of_range)
+  std::vector<int> & offsets_from) throw ()
 {
 
   // copy values

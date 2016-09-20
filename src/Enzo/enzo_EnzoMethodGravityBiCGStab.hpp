@@ -50,6 +50,7 @@ public: // interface
     : A_(NULL),
       M_(NULL),
       is_singular_(false),
+      first_call_(true),
       rank_(0),
       grav_const_(0.0),
       iter_max_(0), 

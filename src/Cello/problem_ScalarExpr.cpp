@@ -73,6 +73,10 @@ void ScalarExpr::evaluate (T * value, double t,
   double * y = new double [ nx*ny*nz ];
   double * z = new double [ nx*ny*nz ];
 
+  for (int i=0; i<nx*ny*nz; i++) {
+    x[i] = y[i] = z[i] = 0.0;
+  }
+  
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
@@ -92,7 +96,6 @@ void ScalarExpr::evaluate (T * value, double t,
   } else {
     for (int i=0; i<n; i++) value_temp[i]=value_;
   }
-
 
   if (mask) {
     for (int ix=0; ix<nx; ix++) {

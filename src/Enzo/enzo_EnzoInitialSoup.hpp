@@ -34,7 +34,9 @@ public: // interface
    bool rotate,
    int     nx,     int ny,     int nz,
    double dpx, double dpy, double dpz,
-   double dsx, double dsy, double dsz ) throw ();
+   double dsx, double dsy, double dsz,
+   double density,
+   double pressure_in, double pressure_out) throw ();
 
   /// Constructor
   EnzoInitialSoup(const EnzoConfig * enzo_config) throw();
@@ -51,7 +53,8 @@ public: // interface
       png_(NULL),
       density_(0.0),
       pressure_in_(0.0),
-      pressure_out_(0.0)
+      pressure_out_(0.0),
+      letter_(NULL)
   {
     for (int axis=0; axis<3; axis++) {
       array_[axis] = 1;

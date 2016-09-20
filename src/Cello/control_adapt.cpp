@@ -798,7 +798,8 @@ void Block::adapt_coarsen_()
 
   // copy face levels
   int nf = face_level_curr_.size();
-  int face_level_curr[nf];
+  int face_level_curr[nf] = {0};
+  
   for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
 
   MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr,ic3);

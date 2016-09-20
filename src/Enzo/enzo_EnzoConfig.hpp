@@ -78,6 +78,9 @@ public: // interface
       // EnzoInitialSoup
       initial_soup_file(""),
       initial_soup_rank(0),
+      initial_soup_pressure_in(0.0),
+      initial_soup_pressure_out(0.0),
+      initial_soup_density(0.0),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -122,9 +125,12 @@ public: // interface
       method_pm_deposit_type(""),
       method_pm_update_max_dt(0.0)
   {
-    initial_sedov_array[0] = 0;
-    initial_sedov_array[1] = 0;
-    initial_sedov_array[2] = 0;
+    for (int axis=0; axis<3; axis++) {
+      initial_sedov_array[axis] = 0;
+      initial_soup_array[axis] = 0;
+      initial_soup_d_pos[axis] = 0;
+      initial_soup_d_size[axis] = 0;
+    }
   }
 
   /// CHARM++ Pack / Unpack function
@@ -187,6 +193,9 @@ public: // attributes
   int                        initial_soup_array[3];
   double                     initial_soup_d_pos[3];
   double                     initial_soup_d_size[3];
+  double                     initial_soup_pressure_in;
+  double                     initial_soup_pressure_out;
+  double                     initial_soup_density;
 
   // EnzoProlong
   std::string                interpolation_method;

@@ -224,7 +224,7 @@ void EnzoMethodTurbulence::compute_resume
   if (edot_ < 0.0) {
     // Only compute if needed at the beginning--could/should be in
     // EnzoInitialTurbulence
-    double domain_x = (rank >= 1) ? (xdp - xdm) : 1.0;
+    double domain_x =               (xdp - xdm);
     double domain_y = (rank >= 2) ? (ydp - ydm) : 1.0;
     double domain_z = (rank >= 3) ? (zdp - zdm) : 1.0;
     double box_size = domain_x;

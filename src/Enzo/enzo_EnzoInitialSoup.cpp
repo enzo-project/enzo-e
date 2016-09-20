@@ -22,12 +22,17 @@ EnzoInitialSoup::EnzoInitialSoup
  bool rotate,
  int    nax,    int nay,    int naz,
  double dpx, double dpy, double dpz,
- double dsx, double dsy, double dsz ) throw ()
+ double dsx, double dsy, double dsz,
+ double density,
+ double pressure_in, double pressure_out) throw ()
   : Initial(cycle,time),
     file_name_(filename),
     rank_(rank),
     rotate_(rotate),
-    png_(NULL)
+    png_(NULL),
+    density_(density),
+    pressure_in_(pressure_in),
+    pressure_out_(pressure_out)
 {
   array_[0] = nax;
   array_[1] = nay;
