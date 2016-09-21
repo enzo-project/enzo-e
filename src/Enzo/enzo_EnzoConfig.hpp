@@ -76,8 +76,8 @@ public: // interface
       initial_pm_field(""),
       initial_pm_mpp(0.0),
       // EnzoInitialSoup
-      initial_soup_file(""),
       initial_soup_rank(0),
+      initial_soup_file(""),
       initial_soup_pressure_in(0.0),
       initial_soup_pressure_out(0.0),
       initial_soup_density(0.0),

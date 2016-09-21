@@ -1,6 +1,6 @@
 Domain {
-   lower = [0.0, 0.0];
-   upper = [1.0, 1.0];
+   lower = [0.0, 0.0, 0.0];
+   upper = [1.0, 1.0, 1.0];
 }
 
 Boundary {
@@ -8,9 +8,9 @@ Boundary {
 }
 
 Mesh {
-   root_rank = 2;
-   root_size   = [512,512];
-   root_blocks = [  16,  16];	     
+   root_rank = 3;
+   root_size   = [64, 64, 64];
+   root_blocks = [ 2,  2,  2];	     
 }
 
 Adapt {
@@ -20,26 +20,25 @@ Adapt {
       field_list = ["total_energy"];
       min_refine = 1e3;
    };
-   max_level = 3;
+   max_level = 4;
 }
 
 Initial {
    list = ["value","soup"];
    value {
-      density = [ 0.125, x + y < 0.5,
-                    1.0 ];
-      total_energy = [ 0.14 / (0.4 * 0.125), x + y < 0.5,
-                       1.0  / (0.4 * 1.0) ];
+      density         = 0.0;
       velocity_x      = 0.0;
       velocity_y      = 0.0;
+      velocity_z      = 0.0;
       internal_energy = 0.0;
-       pressure = 0.0;
+      total_energy    = 0.0;
+      pressure        = 0.0;
    } 
    soup {
    	file = "input/soup.png";
-	rank = 2;
-	array = [8,8];
-	d_size = [0.02, 0.02];
+	rank = 3;
+	array = [1,1,1];
+	d_size = [0.1, 0.1, 0.1];
    }
 }
 Method {
@@ -53,6 +52,7 @@ Field {
    list = ["density",
    	   "velocity_x",
 	   "velocity_y",
+	   "velocity_z",
 	   "internal_energy",
 	   "total_energy",
 	   "pressure"];

@@ -23,6 +23,14 @@ ScalarExpr::ScalarExpr (Param * param) throw()
 
 //----------------------------------------------------------------------
 
+ScalarExpr::~ScalarExpr() throw()
+{
+  delete param_;
+  param_ = NULL;
+}
+
+//----------------------------------------------------------------------
+
 void ScalarExpr::copy_(const ScalarExpr & scalar_expr) throw()
 {
  

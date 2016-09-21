@@ -215,8 +215,6 @@ int Block::adapt_compute_desired_level_(int level_maximum)
   int level = this->level();
   int level_desired = level;
 
-  const FieldDescr * field_descr = simulation()->field_descr();
-
   Problem * problem = simulation()->problem();
   Refine * refine;
 
@@ -274,7 +272,6 @@ void Block::adapt_refine_()
   ParticleData * particle_list[8] = {0};
 
   ParticleDescr * p_descr = simulation()->particle_descr();
-  ParticleData  * p_data  = data()     -> particle_data();
 
   const int nc = NUM_CHILDREN(rank);
 

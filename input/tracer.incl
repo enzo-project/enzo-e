@@ -17,6 +17,7 @@ Initial {
 
 Method {
    list += ["trace"];
+    trace { timestep = 0.025; }
 }
 
 Output {
@@ -33,8 +34,8 @@ Output {
       type = "image";
 #      field_list = ["density"];
       particle_list = ["trace"];
-      include "input/colormap_blackbody.incl"
-      name = ["trace-p%02d-c%06d.png", "proc","cycle"];
+      include "input/colormap_rainbow.incl"
+      name = ["trace-%04d.png", "cycle"];
       include "input/schedule_cycle_10.incl"
    }
 }

@@ -45,11 +45,11 @@ public: // interface
 
 protected: // interface
 
-  /// Type of PM mass assignment scheme
-  int type_;
-
   /// Deposit at time + alpha*dt
   double alpha_;
+
+  /// Type of PM mass assignment scheme
+  int type_;
 
 };
 

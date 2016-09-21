@@ -487,8 +487,8 @@ Block::Block (CkMigrateMessage *m)
     is_leaf_(true),
     age_(0),
     face_level_last_(),
-    index_method_(-1),
-    name_("")
+    name_(""),
+    index_method_(-1)
 { 
   simulation()->monitor_insert_block();
 };

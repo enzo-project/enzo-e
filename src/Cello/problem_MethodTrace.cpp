@@ -45,8 +45,7 @@ void MethodTrace::compute ( Block * block) throw()
 
     // get velocity field arrays
     const int rank = block->rank();
-    double  * vxa = (rank >= 1) ? 
-      (double *)field.values("velocity_x") : NULL;
+    double  * vxa = (double *)field.values("velocity_x");
     double * vya = (rank >= 2) ? 
       (double *)field.values("velocity_y") : NULL;
     double * vza = (rank >= 3) ? 
@@ -235,4 +234,72 @@ void MethodTrace::compute ( Block * block) throw()
     }
   }
   block->compute_done(); 
+}
+
+
+double MethodTrace::timestep (Block * block) const throw()
+{
+  const int rank = block->rank();
+
+  double dt = std::numeric_limits<double>::max();
+
+  if (block->is_leaf()) {
+
+    Field    field    = block->data()->field();
+
+    double * vx = (double *) field.values("velocity_x");
+    double * vy = (double *) field.values("velocity_y");
+    double * vz = (double *) field.values("velocity_z");
+
+    double xm,ym,zm;
+    double xp,yp,zp;
+    block->lower(&xm,&ym,&zm);
+    block->upper(&xp,&yp,&zp);
+
+    int nx,ny,nz;
+    field.size(&nx,&ny,&nz);
+    int gx,gy,gz;
+    field.ghost_depth(0,&gx,&gy,&gz);
+    int mx,my,mz;
+    mx = nx + 2*gx;
+    my = (rank >= 2) ? ny + 2*gy : 1;
+    mz = (rank >= 3) ? nz + 2*gz : 1;
+
+    const double hx = (xp-xm)/nx;
+    const double hy = (yp-ym)/ny;
+    const double hz = (zp-zm)/nz;
+
+    if (rank == 1) {
+      for (int ix=0; ix<mx; ix++) {
+	int i = ix;
+	double dt_vx = hx / MAX(fabs(vx[i]),1e-6);
+	dt = MIN(dt,dt_vx);
+      }
+    } else if (rank == 2) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
+	  int i = ix + mx*iy;
+	  double dt_vx = hx / MAX(fabs(vx[i]),1e-6);
+	  double dt_vy = hy / MAX(fabs(vy[i]),1e-6);
+	  dt = MIN(dt,dt_vx);
+	  dt = MIN(dt,dt_vy);
+	}
+      }
+    } else if (rank == 3) {
+      for (int iz=0; iz<mz; iz++) {
+	for (int iy=0; iy<my; iy++) {
+	  for (int ix=0; ix<mx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    double dt_vx = hx / MAX(fabs(vx[i]),1e-6);
+	    double dt_vy = hy / MAX(fabs(vy[i]),1e-6);
+	    double dt_vz = hz / MAX(fabs(vz[i]),1e-6);
+	    dt = MIN(dt,dt_vx);
+	    dt = MIN(dt,dt_vy);
+	    dt = MIN(dt,dt_vz);
+	  }
+	}
+      }
+    }
+  }
+  return MIN(timestep_,dt);
 }

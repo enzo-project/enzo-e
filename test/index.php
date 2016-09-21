@@ -154,9 +154,9 @@ function tests($component,$testrun,$output,$test_name,$dir) {
     if ($test_name != "") {
       echo "($test_name)";
     }
-    if (file_exists($input_file)) {
-      echo " $input_html";
-    }
+    /* if (file_exists($input_file)) { */
+    /*   echo " $input_html"; */
+    /* } */
     echo "</th></tr>\n";
     echo "<tr>\n";
     echo "   <th>Input</th>";

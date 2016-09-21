@@ -30,8 +30,8 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit
  std::string type,
  double alpha)
   : Method(),
-    type_(pm_type_unknown),
-    alpha_(alpha)
+    alpha_(alpha),
+    type_(pm_type_unknown)
 {
   TRACE_PM("EnzoMethodPmDeposit()");
   if (type == "cic") {
@@ -69,8 +69,8 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
 
   Method::pup(p);
 
-  p | type_;
   p | alpha_;
+  p | type_;
 }
 
 //----------------------------------------------------------------------

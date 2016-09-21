@@ -196,7 +196,7 @@ c
 c
 c normalize to get rms 3D Mach = 1.0
 c
-	       u(i,j,k) = u(i,j,k)/2.84832
+               u(i,j,k) = u(i,j,k)/2.84832
                v(i,j,k) = v(i,j,k)/2.84832
                w(i,j,k) = w(i,j,k)/2.84832
             enddo

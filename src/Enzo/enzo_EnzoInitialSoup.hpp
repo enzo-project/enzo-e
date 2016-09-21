@@ -10,12 +10,12 @@
 
 #define SOUP_IMAGE_NX  518
 #define SOUP_IMAGE_NY 366
-#define SOUP_CHAR_NX 37
-#define SOUP_CHAR_NY 41
 #define SOUP_CHAR_X0 10
 #define SOUP_CHAR_Y0 29
 #define SOUP_CHAR_DX 65
 #define SOUP_CHAR_DY 92
+#define SOUP_CHAR_NX 37
+#define SOUP_CHAR_NY 41
 
 class EnzoInitialSoup : public Initial {
 
