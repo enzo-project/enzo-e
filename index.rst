@@ -10,7 +10,7 @@ Enzo-P/Cello Documentation
 
 **Cello** is a highly scalable, fully-distributed forest-of-octree
 adaptive mesh refinement (AMR) framework, and **Enzo-P** is an
-Eularian hydrodynamics and MHD astrophysics application that is built
+Eulerian hydrodynamics and MHD astrophysics application that is built
 using Cello.  Enzo-P is a branch of the `Enzo
 <http://enzo-project.org/>`_ parallel astrophysics and cosmology
 application.  Enzo-P and Cello is currently funded by
