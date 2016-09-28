@@ -156,9 +156,9 @@ void EnzoInitialSoup::enforce_block
   int kyp = MIN((int) ceil(ypb/(ypd-ymd)*array_[1])+1,array_[1]);
   int kzp = MIN((int) ceil(zpb/(zpd-zmd)*array_[2])+1,array_[2]);
 
-  const double rx = d_size_[0];
-  const double ry = d_size_[1];
-  const double rz = d_size_[2];
+  const double rx = d_size_[0]/array_[0];
+  const double ry = d_size_[1]/array_[1];
+  const double rz = d_size_[2]/array_[2];
 	
   double xc,yc,zc;
   for (int kz=kzm; kz<kzp; kz++) {

@@ -40,7 +40,7 @@ public: // interface
 			    bool diag_precon);
 
   /// destructor
-  ~EnzoMethodGravityBiCGStab();
+  ~EnzoMethodGravityBiCGStab() throw();
   
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGravityBiCGStab);

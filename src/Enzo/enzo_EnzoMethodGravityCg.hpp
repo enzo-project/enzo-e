@@ -35,7 +35,7 @@ public: // interface
   EnzoMethodGravityCg() {};
 
   /// Destructor
-  ~EnzoMethodGravityCg();
+  ~EnzoMethodGravityCg() throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGravityCg);

@@ -518,7 +518,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
 
 //----------------------------------------------------------------------
 
-EnzoMethodGravityBiCGStab::~EnzoMethodGravityBiCGStab()
+EnzoMethodGravityBiCGStab::~EnzoMethodGravityBiCGStab() throw()
 {
   if (A_) delete A_;
   A_ = NULL;

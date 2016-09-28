@@ -4,6 +4,8 @@ f90 = {}
 cxx = {}
 cc  = {}
 
+python_lt_27 = 1
+
 is_arch_valid = 1
 
 flags_arch = '-O3'
@@ -18,12 +20,12 @@ f90  = 'ftn'
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
-home_path = os.environ["HOME"]
+home = os.environ['HOME']
 
 charm_path = home + '/Charm/charm'
-papi_path  = home
 png_path   = home
-hdf5_path  = os.environ["CRAY_HDF5_DIR"]
+#papi_path  = home
+hdf5_path  = os.environ["HDF5_DIR"]
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
 

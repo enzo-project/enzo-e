@@ -7,7 +7,7 @@
 
 /* #define CHECK_MEMORY */  /* calls mtrace() */
 
-#define TRACE_PARAMETERS
+// #define TRACE_PARAMETERS
 
 #include "cello.hpp"
 

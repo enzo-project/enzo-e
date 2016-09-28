@@ -144,7 +144,7 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 
 //----------------------------------------------------------------------
 
-EnzoMethodGravityCg::~EnzoMethodGravityCg ()
+EnzoMethodGravityCg::~EnzoMethodGravityCg () throw ()
 {
   if (A_) delete A_;
   A_ = NULL;

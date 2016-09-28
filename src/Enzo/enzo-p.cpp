@@ -50,6 +50,20 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+#ifdef PNG_1_2_X
+  CkPrintf ("PNG_1_2_X\n");
+#endif
+#ifdef PNG_1_3_X
+  CkPrintf ("PNG_1_3_X\n");
+#endif
+#ifdef PNG_1_4_X
+  CkPrintf ("PNG_1_4_X\n");
+#endif
+#ifdef PNG_1_5_X
+  CkPrintf ("PNG_1_5_X\n");
+#endif
+  
+
   // Check parameter file
 
   if (PARALLEL_ARGC != 2) {

@@ -465,7 +465,8 @@ if (use_grackle != 0):
 # LIBPNG PATHS
 #----------------------------------------------------------------------
 
-libpath = libpath + [png_path + '/lib']
+cpppath = cpppath + [ png_path + '/include' ]
+libpath = libpath + [ png_path + '/lib']
 
 #----------------------------------------------------------------------
 # FORTRAN LINK PATH
