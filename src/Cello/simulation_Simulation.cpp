@@ -752,14 +752,15 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++, m++) {
-      bool do_print = 
+      bool do_print =
+	(ir != perf_unknown) && (
 	(performance_->counter_type(ic) != counter_type_abs) ||
-	(ir == index_region_cycle);
+	(ir == index_region_cycle));
       if (do_print) {
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			counters_long[m]);
+			 counters_long[m]);
       }
       
     }

@@ -33,6 +33,8 @@ BEGIN {
 
 # Linear Solver
 /iter 0000/  {time_start=$2;}
+/Simulation cycle 0000/{cycle_start=$2;}
+/Simulation cycle /{cycle_last=$2;}
 /final iter/ {
     max_iter      = $7;
     time_stop     = $2;
@@ -70,6 +72,15 @@ BEGIN {
     time_final = $2;
 }
 
+/simulation time-usec/  {time_simulation  = $6}
+/initial time-usec/  {time_initial  = $6}
+/cycle time-usec/    {time_cycle    = $6}
+/compute time-usec/  {time_compute  = $6};
+/adapt time-usec/    {time_adapt    = $6};
+/refresh time-usec/  {time_refresh  = $6};
+/output time-usec/   {time_output   = $6};
+/stopping time-usec/ {time_stopping = $6};
+
 END {
 
     format = "%20s: %g\n";
@@ -82,15 +93,28 @@ END {
 	print ("RUN INCOMPLETE");
     }
 
-    print "\nSIMULATION\n"
+    print "\nSUMMARY\n"
     
     printf (format, "Total time",time_final);
     printf (format, "Cycles",cycle);
-    printf (format, "Avg time per cycle",(time_final-time_start)/cycle);
+    printf (format, "Init time",cycle_start);
+    printf (format, "Cycle time",(cycle_last-cycle_start)/cycle);
 
+    printf "\nPHASES\n"
+
+    printf (format, "Simulation",time_simulation/num_processors*0.000001);
+    printf (format, "Initial",time_initial/num_processors*0.000001);
+    printf (format, "Cycling",time_cycle/num_processors*0.000001);
+    printf("\n");
+    printf (format, "Compute",time_compute/num_processors*0.000001);
+    printf (format, "Adapt",time_adapt/num_processors*0.000001);
+    printf (format, "Refresh",time_refresh/num_processors*0.000001);
+    printf (format, "Output",time_output/num_processors*0.000001);
+    printf (format, "Stopping",time_stopping/num_processors*0.000001);
+    
     printf "\nMESH HIERARCHY\n"
     
-    printf (format, "dimensions",root_rank);
+    printf (format, "rank",root_rank);
     printf (format3,"root blocks",root_blocks[0],root_blocks[1],root_blocks[2]);
     printf (format3,"root size",root_size[0],root_size[1],root_size[2]);
     printf (format3,"effective size",
@@ -113,21 +137,27 @@ END {
     printf (format, "memory change",bytes_high / bytes_high_start);
 
 
-    printf ("\nLINEAR SOLVER\n");
+    printf ("\nLINEAR SOLVER");
+    if (time_per_iter > 0) {
+	print;
+	printf (format, "time per block",time_per_iter/num_blocks);
+	printf (format, "time per real zone",time_per_iter/(num_blocks*block_zones_real));
+	printf (format, "time per zone",time_per_iter/(num_blocks*block_zones_ghost));
+	printf (format, "solver max-iter",max_iter);
+	printf (format, "time per iter",time_per_iter);
+    } else {
+	print " not called"
+    }
+
+    printf ("\nPARTICLES");
     
-
-    printf (format, "time per block",time_per_iter/num_blocks);
-    printf (format, "time per real zone",time_per_iter/(num_blocks*block_zones_real));
-    printf (format, "time per zone",time_per_iter/(num_blocks*block_zones_ghost));
-    printf (format, "solver max-iter",max_iter);
-    printf (format, "time per iter",time_per_iter);
-
-
-    printf ("\nPARTICLES\n");
-    printf (format,"num-particles",num_particles);
     if (num_particles > 0) {
+	print
+	printf (format,"num-particles",num_particles);
 	printf (format, "time per particle",time_per_iter/num_particles);
 	printf (format, "particles change",num_particles / num_particles_start);
+    } else {
+	print " not used"
     }
 }
 

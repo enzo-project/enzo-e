@@ -53,6 +53,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
+  
   TRACE_PPM("compute()");
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 

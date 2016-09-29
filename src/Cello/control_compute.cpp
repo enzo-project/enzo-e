@@ -63,6 +63,8 @@ void Block::compute_continue_ ()
   CkPrintf ("%s DEBUG_COMPUTE Block::compute_continue_()\n", name().c_str());
 #endif
 
+  performance_switch_(perf_compute,__FILE__,__LINE__);
+
 #ifdef CONFIG_USE_PROJECTIONS
   //  double time_start = CmiWallTimer();
 #endif
