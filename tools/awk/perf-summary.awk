@@ -77,6 +77,9 @@ BEGIN {
 /cycle time-usec/    {time_cycle    = $6}
 /compute time-usec/  {time_compute  = $6};
 /adapt time-usec/    {time_adapt    = $6};
+/adapt_compute time-usec/    {time_adapt_compute    = $6};
+/adapt_notify time-usec/    {time_adapt_notify    = $6};
+/adapt_update time-usec/    {time_adapt_update    = $6};
 /refresh time-usec/  {time_refresh  = $6};
 /output time-usec/   {time_output   = $6};
 /stopping time-usec/ {time_stopping = $6};
@@ -108,6 +111,9 @@ END {
     printf("\n");
     printf (format, "Compute",time_compute/num_processors*0.000001);
     printf (format, "Adapt",time_adapt/num_processors*0.000001);
+    printf (format, "(adapt compute)",time_adapt_compute/num_processors*0.000001);
+    printf (format, "(adapt notify)",time_adapt_notify/num_processors*0.000001);
+    printf (format, "(adapt update)",time_adapt_update/num_processors*0.000001);
     printf (format, "Refresh",time_refresh/num_processors*0.000001);
     printf (format, "Output",time_output/num_processors*0.000001);
     printf (format, "Stopping",time_stopping/num_processors*0.000001);

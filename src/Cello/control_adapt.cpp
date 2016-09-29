@@ -77,6 +77,8 @@ void Block::adapt_begin_()
 {
   trace("adapt_begin 1");
 
+  performance_start_ (perf_adapt_compute,__FILE__,__LINE__);
+
   simulation()->set_phase(phase_adapt);
 
   int level_maximum = simulation()->config()->mesh_max_level;
@@ -95,6 +97,9 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
+  performance_stop_  (perf_adapt_compute,__FILE__,__LINE__);
+  performance_start_ (perf_adapt_notify, __FILE__,__LINE__);
+
   trace("adapt_called 2");
 
   adapt_send_level();
@@ -113,6 +118,9 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
+  performance_stop_  (perf_adapt_notify,__FILE__,__LINE__);
+  performance_start_ (perf_adapt_update,__FILE__,__LINE__);
+
   debug_faces_("adapt_next");
   trace("adapt_next 3");
 
@@ -149,6 +157,8 @@ void Block::adapt_next_()
 /// been deleted.  
 void Block::adapt_end_()
 {
+  performance_stop_ (perf_adapt_update,__FILE__,__LINE__);
+  
   trace("adapt_end 4");
 
   if (index_.is_root()) {

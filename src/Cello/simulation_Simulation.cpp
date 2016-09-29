@@ -265,6 +265,9 @@ void Simulation::initialize_performance_() throw()
   performance_->new_region(perf_cycle,      "cycle");
   performance_->new_region(perf_initial,    "initial");
   performance_->new_region(perf_adapt,      "adapt");
+  performance_->new_region(perf_adapt_compute,"adapt_compute");
+  performance_->new_region(perf_adapt_notify, "adapt_notify");
+  performance_->new_region(perf_adapt_update, "adapt_update");
   performance_->new_region(perf_refresh,    "refresh");
   performance_->new_region(perf_compute,    "compute");
   performance_->new_region(perf_output,     "output");
