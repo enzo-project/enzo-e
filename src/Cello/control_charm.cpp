@@ -17,10 +17,8 @@
 
 #ifdef DEBUG_CONTROL
 # define TRACE_CONTROL(A)						\
-  CkPrintf ("%d %s:%d %ld/%ld %s TRACE %s \n",				\
+  CkPrintf ("%d %s:%d %s TRACE_CONTROL %s \n",				\
 	    CkMyPe(),__FILE__,__LINE__,					\
-	    Memory::instance()->bytes(),				\
-	    Memory::instance()->bytes_highest(),			\
 	    name_.c_str(), A);						\
   fflush(stdout);						
 #else
@@ -107,8 +105,13 @@ void Block::stopping_enter_()
 
 void Block::stopping_exit_()
 {
-
   TRACE_CONTROL("stopping_exit");
+
+  if (cycle_ > 0 ) {
+    performance_stop_(perf_cycle,__FILE__,__LINE__);
+  }
+  performance_start_ (perf_cycle,__FILE__,__LINE__);
+
 
   if (stop_) {
 

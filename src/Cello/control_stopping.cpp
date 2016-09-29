@@ -129,11 +129,6 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   simulation->set_dt(dt_);
   simulation->set_stop(stop_);
 
-  if (cycle_ > 0 ) {
-    performance_stop_(perf_cycle,__FILE__,__LINE__);
-  }
-  performance_start_ (perf_cycle,__FILE__,__LINE__);
-
 #ifdef CONFIG_USE_PROJECTIONS
   // COMMENTED OUT--BUGGY, projections_schedule_on() crashed with bad schedule_on object
   // bool was_off = (simulation->projections_tracing() == false);
