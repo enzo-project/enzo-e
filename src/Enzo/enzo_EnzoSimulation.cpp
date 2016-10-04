@@ -180,6 +180,7 @@ void EnzoSimulation::initialize() throw()
   // Initialize EnzoBlock static variables
   EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
 			field_descr());
+
 }
 
 //----------------------------------------------------------------------

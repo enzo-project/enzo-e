@@ -76,9 +76,11 @@ void MethodTrace::compute ( Block * block) throw()
     float * za = 0;
 
     for (int ib=0; ib<particle.num_batches(it); ib++) {
+
       xa = (float *) particle.attribute_array (it,ia_x,ib);
       ya = (float *) particle.attribute_array (it,ia_y,ib);
       za = (float *) particle.attribute_array (it,ia_z,ib);
+
       const int np = particle.num_particles(it,ib);
 
       if (rank == 1) {
@@ -228,6 +230,7 @@ void MethodTrace::compute ( Block * block) throw()
 	  xa[ip*dp] += vx*dt;
 	  ya[ip*dp] += vy*dt;
 	  za[ip*dp] += vz*dt;
+
 
 	}
       }

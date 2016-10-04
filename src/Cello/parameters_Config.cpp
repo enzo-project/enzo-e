@@ -119,6 +119,8 @@ void Config::pup (PUP::er &p)
   p | output_axis;
   p | output_image_block_size;
   p | output_colormap;
+  p | output_image_lower;
+  p | output_image_upper;
   p | output_image_type;
   p | output_image_log;
   p | output_image_abs;
@@ -716,6 +718,8 @@ void Config::read_output_ (Parameters * p) throw()
   output_axis.resize(num_output);
   output_image_block_size.resize(num_output);
   output_colormap.resize(num_output);
+  output_image_lower.resize(num_output);
+  output_image_upper.resize(num_output);
   output_image_type.resize(num_output);
   output_image_log.resize(num_output);
   output_image_abs.resize(num_output);
@@ -866,6 +870,15 @@ void Config::read_output_ (Parameters * p) throw()
 	  output_colormap[index_output][i] = 
 	    p->list_value_float(i,"colormap",0.0);
 	}
+      }
+
+      output_image_lower[index_output].resize(3);
+      output_image_upper[index_output].resize(3);
+      for (int axis=0; axis<3; axis++) {
+	output_image_lower[index_output][axis] =
+	  p->list_value_float(axis,"image_lower",std::numeric_limits<double>::min());
+	output_image_upper[index_output][axis] =
+	  p->list_value_float(axis,"image_upper",std::numeric_limits<double>::max());
       }
 
     }

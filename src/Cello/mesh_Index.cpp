@@ -232,6 +232,7 @@ void Index::set_level(int level)
   a_[1].level = (abs_level >> (1*shift)) & mask;
   a_[2].level = ((abs_level >> (2*shift-1)) & (mask-1)) | sign_mask;
   clean_();
+  
   ASSERT3 ("Index::set_level",
 	   "%s set_level() failed: level %d != level() %d",
 	   bit_string(5,3,0).c_str(),level,this->level(),
@@ -284,6 +285,47 @@ void Index::set_child(int level, int ix, int iy, int iz, int min_level)
     a_[1].array = (a_[1].array & mask) | (iy<<shift);
     a_[2].array = (a_[2].array & mask) | (iz<<shift);
   }
+}
+
+//----------------------------------------------------------------------
+void Index::lower (double v3[3], int array[3], int max_level) const
+{
+  int ix = (a_[0].array << max_level) + (a_[0].tree >> (INDEX_BITS_TREE-max_level));
+  int iy = (a_[1].array << max_level) + (a_[1].tree >> (INDEX_BITS_TREE-max_level));
+  int iz = (a_[2].array << max_level) + (a_[2].tree >> (INDEX_BITS_TREE-max_level));
+
+  int kx = array[0] << max_level;
+  int ky = array[1] << max_level;
+  int kz = array[2] << max_level;
+
+  v3[0] = 1.0*ix/kx;
+  v3[1] = 1.0*iy/ky;
+  v3[2] = 1.0*iz/kz;
+}
+
+//----------------------------------------------------------------------
+
+void Index::upper (double v3[3], int a3[3], int max_level) const
+{
+
+  int ix = (a_[0].array << max_level) + (a_[0].tree >> (INDEX_BITS_TREE-max_level));
+  int iy = (a_[1].array << max_level) + (a_[1].tree >> (INDEX_BITS_TREE-max_level));
+  int iz = (a_[2].array << max_level) + (a_[2].tree >> (INDEX_BITS_TREE-max_level));
+
+  const int ip = (1 << max_level - level());
+
+  ix += ip;
+  iy += ip;
+  iz += ip;
+  
+  int kx = a3[0] << max_level;
+  int ky = a3[1] << max_level;
+  int kz = a3[2] << max_level;
+
+  v3[0] = 1.0*ix/kx;
+  v3[1] = 1.0*iy/ky;
+  v3[2] = 1.0*iz/kz;
+  
 }
 
 //----------------------------------------------------------------------

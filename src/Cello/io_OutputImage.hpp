@@ -48,12 +48,14 @@ public: // functions
 	      std::string image_mesh_color,
 	      std::string image_color_particle_attribute,
 	      int         image_block_size,
+	      double      image_lower[],
+	      double      image_upper[],
 	      int face_rank,
 	      int axis,
 	      bool image_log,
 	      bool image_abs,
 	      bool ghost,
-	      double min, double max) throw();
+	      double min_value, double max_value) throw();
 
   /// OutputImage destructor: free allocated image data
   virtual ~OutputImage() throw();
@@ -71,8 +73,8 @@ public: // functions
       mesh_color_type_(mesh_color_unknown),
       color_particle_attribute_(""),
       axis_(axis_all),
-      min_(0.0),
-      max_(0.0),
+      min_value_(0.0),
+      max_value_(0.0),
       nxi_(0),
       nyi_(0),
       png_(NULL),
@@ -82,7 +84,12 @@ public: // functions
       image_abs_(false),
       ghost_(false),
       max_level_(0)
-  { }
+  {
+    for (int axis=0; axis<3; axis++) {
+      image_lower_[axis] = std::numeric_limits<double>::min();
+      image_upper_[axis] = std::numeric_limits<double>::max();
+    }
+  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -161,8 +168,8 @@ private: // functions
   void image_close_ () throw();
 
    /// Generate a PNG image of array data
-  void reduce_point_ ( double * data, 
-		       double value, double alpha=1.0) throw();
+  void reduce_point_
+  ( double * data,  int ix, int iy, double value, double alpha=1.0) throw();
 
   void extents_img_ (const Block * block,
 		     int *ixm, int *ixp,
@@ -176,7 +183,7 @@ private: // functions
 		      double value, double alpha=1.0);
   void reduce_box_(double * data, int ixm, int ixp, int iym, int iyp, 
 		   double value, reduce_type reduce, double alpha=1.0);
-  void reduce_cube_(double * data, int ixm, int ixp, int iym, int iyp, 
+  void reduce_box_filled_(double * data, int ixm, int ixp, int iym, int iyp, 
 		    double value, double alpha=1.0);
 
   double data_(int i) const ;
@@ -207,8 +214,8 @@ private: // attributes
   axis_type axis_;
 
   /// Minimum and maximum values if specified
-  double min_;
-  double max_;
+  double min_value_;
+  double max_value_;
 
   /// Current image size (depending on axis_)
   int nxi_, nyi_;
@@ -233,6 +240,11 @@ private: // attributes
 
   /// Maximum mesh level
   int max_level_;
+
+  /// Lower and upper bounds on image (can be used for slices)
+  double image_lower_[3];
+  double image_upper_[3];
+  
 };
 
 #endif /* IO_OUTPUT_IMAGE_HPP */

@@ -74,6 +74,10 @@ public: // interface
 
   //----------------------------------------------------------------------
 
+  /// Return the maximum refinement level (0 for unigrid)
+  int max_level() const
+  { return max_level_; }
+  
   /// Return rank
   int rank() const throw ();
 

@@ -199,6 +199,8 @@ public: // interface
       output_axis(),
       output_image_block_size(),
       output_colormap(),
+      output_image_lower(),
+      output_image_upper(),
       output_image_type(),
       output_image_log(),
       output_image_abs(),
@@ -366,6 +368,8 @@ public: // attributes
   std::vector < std::string > output_type;
   std::vector < std::string > output_axis;
   std::vector < int >         output_image_block_size;
+  std::vector < std::vector <double> > output_image_lower;
+  std::vector < std::vector <double> > output_image_upper;
   std::vector < std::vector <double> > output_colormap;
   std::vector < std::string > output_image_type;
   std::vector < char >        output_image_log;

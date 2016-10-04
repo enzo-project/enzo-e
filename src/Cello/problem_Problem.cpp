@@ -703,6 +703,12 @@ Output * Problem::create_output_
     double      image_min = config->output_image_min[index];
     double      image_max = config->output_image_max[index];
 
+    double image_lower[3] = { config->output_image_lower[index][0],
+			      config->output_image_lower[index][1],
+			      config->output_image_lower[index][2] };
+    double image_upper[3] = { config->output_image_upper[index][0],
+			      config->output_image_upper[index][1],
+			      config->output_image_upper[index][2] };
     // AXIS
 
     int image_axis = config->output_axis[index][0] - 'x';
@@ -720,6 +726,7 @@ Output * Problem::create_output_
 			      image_mesh_color,
 			      image_color_particle_attribute,
 			      image_block_size,
+			      image_lower, image_upper,
 			      image_face_rank,
 			      image_axis,
 			      image_log,

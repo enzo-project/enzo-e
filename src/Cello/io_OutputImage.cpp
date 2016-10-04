@@ -24,18 +24,20 @@ OutputImage::OutputImage(int index,
 			 std::string image_mesh_color,
 			 std::string color_particle_attribute,
 			 int         image_block_size,
+			 double image_lower[],
+			 double image_upper[],
 			 int face_rank,
 			 int axis,
 			 bool image_log,
 			 bool image_abs,
 			 bool ghost,
-			 double min, double max) throw ()
+			 double min_value, double max_value) throw ()
 : Output(index,factory,field_descr,particle_descr),
     image_data_(NULL),
     image_mesh_(NULL),
     color_particle_attribute_(color_particle_attribute),
     axis_(axis),
-    min_(min),max_(max),
+    min_value_(min_value),max_value_(max_value),
     nxi_(image_size_x),
     nyi_(image_size_y),
     png_(NULL),
@@ -81,6 +83,7 @@ OutputImage::OutputImage(int index,
 
   int ngx,ngy,ngz;
   field_descr->ghost_depth(0,&ngx,&ngy,&ngz);
+
   if (! type_is_mesh() && ghost_) {
     nxi_ += 2*nxb*ngx*nl;
     nyi_ += 2*nyb*ngy*nl;
@@ -101,6 +104,11 @@ OutputImage::OutputImage(int index,
   map_r_[1] = 1.0;
   map_g_[1] = 1.0;
   map_b_[1] = 1.0;
+
+  for (int axis=0; axis<3; axis++) {
+    image_lower_[axis] = image_lower[axis];
+    image_upper_[axis] = image_upper[axis];
+  }
 }
 
 //----------------------------------------------------------------------
@@ -134,8 +142,8 @@ void OutputImage::pup (PUP::er &p)
   p | mesh_color_type_;
   p | color_particle_attribute_;
   p | axis_;
-  p | min_;
-  p | max_;
+  p | min_value_;
+  p | max_value_;
   p | nxi_;
   p | nyi_;
   WARNING("OutputImage::pup","skipping png");
@@ -145,6 +153,8 @@ void OutputImage::pup (PUP::er &p)
   p | face_rank_;
   p | image_log_;
   p | image_abs_;
+  PUParray(p,image_lower_,3);
+  PUParray(p,image_upper_,3);
   p | ghost_;
   p | max_level_;
 }
@@ -266,7 +276,7 @@ void OutputImage::write_block
   block->lower(&pm3[0],&pm3[1],&pm3[2]);
   block->upper(&pp3[0],&pp3[1],&pp3[2]);
 
-  if (type_is_data() && block->is_leaf()) {
+  if (type_is_data()) {
 
     if (index_field >= 0) {
 
@@ -324,7 +334,7 @@ void OutputImage::write_block
 	      value = field_double[i];
 	    }
 
-	    reduce_cube_(image_data_,jxm,jxp,jym,jyp, (value*factor));
+	    reduce_box_filled_(image_data_,jxm,jxp,jym,jyp, (value*factor));
 	  }
 	}
       }
@@ -338,66 +348,64 @@ void OutputImage::write_block
     value = mesh_color_(level,block->age());
 
     if (face_rank_ >= 1) {
-      reduce_cube_(image_mesh_,ixm,ixp,iym,iyp,value);
+      reduce_box_filled_(image_mesh_,ixm,ixp,iym,iyp,value);
     } else {
-      reduce_cube_(image_mesh_,ixm+3,ixp-3,iym+3,iyp-3,value);
+      reduce_box_filled_(image_mesh_,ixm+3,ixp-3,iym+3,iyp-3,value);
     }
     reduce_box_ (image_mesh_,ixm,ixp,iym,iyp,0.0,reduce_set);
 
-    if (block->is_leaf()) { // ) {
-      int xm=(ixm+ixp)/2;
-      int ym=(iym+iyp)/2;
-      if (face_rank_ <= 1) {
-	{
-	  int if3[3] = {-1,0,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
-	}
-	{
-	  int if3[3] = {1,0,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
-	}
-	{
-	  int if3[3] = {0,-1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
-	}
-	{
-	  int if3[3] = {0,1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
-	}
+    int xm=(ixm+ixp)/2;
+    int ym=(iym+iyp)/2;
+    if (face_rank_ <= 1) {
+      {
+	int if3[3] = {-1,0,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,ym-1,ym+1, face_color);
       }
-      if (face_rank_ <= 0) {
-	{
-	  int if3[3] = {-1,-1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
-	}
-	{
-	  int if3[3] = {1,-1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
-	}
-	{
-	  int if3[3] = {-1,1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
-	}
-	{
-	  int if3[3] = {1,1,0};
-	  int face_level = block->face_level(if3);
-	  double face_color = mesh_color_(face_level,0);
-	  reduce_cube_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
-	}
+      {
+	int if3[3] = {1,0,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,ym-1,ym+1, face_color);
+      }
+      {
+	int if3[3] = {0,-1,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,xm-1,xm+1,iym+1,iym+2, face_color);
+      }
+      {
+	int if3[3] = {0,1,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,xm-1,xm+1,iyp-2,iyp-1, face_color);
+      }
+    }
+    if (face_rank_ <= 0) {
+      {
+	int if3[3] = {-1,-1,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iym+1,iym+2, face_color);
+      }
+      {
+	int if3[3] = {1,-1,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iym+1,iym+2, face_color);
+      }
+      {
+	int if3[3] = {-1,1,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,ixm+1,ixm+2,iyp-2,iyp-1, face_color);
+      }
+      {
+	int if3[3] = {1,1,0};
+	int face_level = block->face_level(if3);
+	double face_color = mesh_color_(face_level,0);
+	reduce_box_filled_(image_mesh_,ixp-2,ixp-1,iyp-2,iyp-1, face_color);
       }
     }
   }
@@ -438,21 +446,28 @@ void OutputImage::write_block
       particle.position(it,ib, xa,ya);
       double * pa = (double *) particle.attribute_array (it,ia_color,ib);
       for (int ip=0; ip<np; ip++) {
-	double x = xa[ip*dp];
-	double y = ya[ip*dp];
-	double value = (ia_color == -1) ? 1.0 : pa[ip*da];
-	const int ix = MIN(int((x - xdm)/(xdp-xdm)*nxi_),nxi_-1);
-	const int iy = MIN(int((y - ydm)/(ydp-ydm)*nyi_),nyi_-1);
 
-	int i = ix + nxi_*iy;
-	// particles may be outside the domain--don't plot them
-	if ( ( 0 <= ix && ix < nxi_) &&
-	     ( 0 <= iy && iy < nyi_)) {
-	  reduce_point_(&image_data_[i],value);
-	}
+ 	double x = xa[ip*dp];
+ 	double y = ya[ip*dp];
+ 	double value = (ia_color == -1) ? 1.0 : pa[ip*da];
+	double tx = std::min(nxi_*(x - xdm)/(xdp-xdm) - 0.5,nxi_-1.0);
+	double ty = std::min(nyi_*(y - ydm)/(ydp-ydm) - 0.5,nyi_-1.0);
+	int ix0 = floor(tx);
+	int iy0 = floor(ty);
+	int ix1 = ix0+1;
+	int iy1 = iy0+1;
+	double ax0 = 1.0 - (tx - floor(tx));
+	double ax1 = 1.0 - ax0;
+	double ay0 = 1.0 - (ty - floor(ty));
+	double ay1 = 1.0 - ay0;
+ 
+	reduce_point_(image_data_,ix0,iy0,value,ax0*ay0);
+	reduce_point_(image_data_,ix1,iy0,value,ax1*ay0);
+	reduce_point_(image_data_,ix0,iy1,value,ax0*ay1);
+	reduce_point_(image_data_,ix1,iy1,value,ax1*ay1);
+
       }
     }
-      
   }
 }
 
@@ -657,10 +672,10 @@ void OutputImage::image_write_ () throw()
 
   double min,max;
 
-  if (min_ < max_) {
+  if (min_value_ < max_value_) {
 
-    min = min_;
-    max = max_;
+    min = min_value_;
+    max = max_value_;
 
   } else {
 
@@ -781,21 +796,33 @@ void OutputImage::image_close_ () throw()
 //----------------------------------------------------------------------
 
 void OutputImage::reduce_point_ 
-(double * data, double value, double alpha) throw()
+(double * data, int ix, int iy, double value, double alpha) throw()
 {
+  if ( ! (0 <= ix && ix < nxi_)) return;
+  if ( ! (0 <= iy && iy < nyi_)) return;
+
+  if ( ! (0.0 <= alpha && alpha <= 1.0)) CkPrintf ("%d %d  alpha = %g\n",ix,iy,alpha);
+  const int i = ix + nxi_*iy;
+
+  double value_new = 0.0;
+  
   switch (op_reduce_) {
   case reduce_min:
-    *data = std::min(*data,alpha*value); 
+    value_new = alpha*value + (1-alpha)*(data[i]);
+    data[i] = std::min(data[i],value_new); 
     break;
   case reduce_max:
-    *data = std::max(*data,alpha*value); 
+    value_new = alpha*value + (1-alpha)*(data[i]);
+    data[i] = std::max(data[i],value_new); 
     break;
   case reduce_avg:
   case reduce_sum:
-    *data += alpha*value;
+    value_new = alpha*value;
+    data[i] += value_new;
     break;
   case reduce_set:
-    *data = alpha*value;
+    value_new = alpha*value + (1-alpha)*(data[i]);
+    data[i] = value_new;
   }
 }
 
@@ -818,8 +845,7 @@ void OutputImage::reduce_line_
     double derr = fabs(1.0*dy/dx);
     int iy = iy0;
     for (int ix = ix0; ix<=ix1; ix++) {
-      int i = ix + nxi_*iy;
-      reduce_point_(&data[i],value,alpha);
+      reduce_point_(data, ix, iy,value,alpha);
       err += derr;
       if (err >= 0.5) {
 	++iy;
@@ -830,8 +856,7 @@ void OutputImage::reduce_line_
     double derr = fabs(1.0*dx/dy);
     int ix = ix0;
     for (int iy = iy0; iy<=iy1; iy++) {
-      int i = ix + nxi_*iy;
-      reduce_point_(&data[i],value,alpha);
+      reduce_point_(data,ix,iy,value,alpha);
       err += derr;
       if (err >= 0.5) {
 	++ix;
@@ -853,8 +878,7 @@ void OutputImage::reduce_line_x_
   if (ixp < ixm) { int t = ixp; ixp = ixm; ixm = t; }
 
   for (int ix=ixm; ix<=ixp; ++ix) {
-    int i = ix + nxi_*iy;
-    reduce_point_(&data[i],value,alpha);
+    reduce_point_(data,ix,iy,value,alpha);
   }
 }
 
@@ -869,8 +893,7 @@ void OutputImage::reduce_line_y_
   ASSERT2("OutputImage::reduce_line_y","! (iym (%d) <= iyp (%d)",iym,iyp,iym<=iyp);
   if (iyp < iym) { int t = iyp; iyp = iym; iym = t; }
   for (int iy=iym; iy<=iyp; ++iy) {
-    int i = ix + nxi_*iy;
-    reduce_point_(&data[i],value,alpha);
+    reduce_point_(data,ix,iy,value,alpha);
   }
 }
 
@@ -895,7 +918,7 @@ void OutputImage::reduce_box_
 //----------------------------------------------------------------------
 
 
-void OutputImage::reduce_cube_
+void OutputImage::reduce_box_filled_
 (double * data, 
  int ixm, int ixp,
  int iym, int iyp, 
@@ -903,8 +926,7 @@ void OutputImage::reduce_cube_
 {
   for (int ix=ixm; ix<=ixp; ++ix) {
     for (int iy=iym; iy<=iyp; ++iy) {
-      int i = ix + nxi_*iy;
-      reduce_point_(&data[i],value,alpha);
+      reduce_point_(data,ix,iy,value,alpha);
     }
   }
 }
