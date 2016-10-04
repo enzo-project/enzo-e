@@ -1925,6 +1925,28 @@ perform and on what schedule.
 
 ----
 
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_lower`
+:Summary: :s:`Lower bound on domain to be output in image`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[min (` :t:`float` :d:`), min (` :t:`float` :d:`), min (` :t:`float` :d:`)]`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`This parameter specifies the lower limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_upper`
+:Summary: :s:`Upper bound on domain to be output in image`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[max (` :t:`float` :d:`), max (` :t:`float` :d:`), max (` :t:`float` :d:`)]`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`This parameter specifies the upper limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
+
+----
+
 :Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_specify_bounds`
 :Summary: :s:`Whether to use` :p:`image_min` :s:`and` :p:`image_max`
 :Type:    :t:`logical`
