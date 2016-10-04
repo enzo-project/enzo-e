@@ -1931,7 +1931,8 @@ perform and on what schedule.
 :Default: :d:`[min (` :t:`float` :d:`), min (` :t:`float` :d:`), min (` :t:`float` :d:`)]`
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
-
+:Todo: 	    :o:`Restricting bounds of images is not implemented yet.`
+	    
 :e:`This parameter specifies the lower limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
 
 ----
@@ -1942,6 +1943,7 @@ perform and on what schedule.
 :Default: :d:`[max (` :t:`float` :d:`), max (` :t:`float` :d:`), max (` :t:`float` :d:`)]`
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+:Todo: 	    :o:`Restricting bounds of images is not implemented yet.`
 
 :e:`This parameter specifies the upper limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
 
