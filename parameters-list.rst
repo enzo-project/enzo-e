@@ -2368,26 +2368,6 @@ Just as with fields, particle types can be assigned to groups_.
 Performance
 -----------
 
-:Parameter:  :p:`Performance` : :p:`name`
-:Summary: :s:`Format of output files`
-:Type:    :t:`string`
-:Default: :d:`""`
-:Scope:     :c:`Cello`
-
-:e:`This parameter specifies the format of output files, e.g. "cello-perf-%06d.data".  An` :t:`integer` :e:`specifier must be included for processor number.  Default is "", which means no performance data is written to disk.`
-
-----
-
-:Parameter:  :p:`Performance` : :p:`stride`
-:Summary: :s:`Output file processor stride`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :c:`Cello`
-
-:e:`Writing performance data to files can overload parallel file systems if one file is written per process on runs with high processor counts.  This parameter allows for a subset of processors to write to files.  E.g., if Performance:stride=3, then only processors 0, 3, 6, etc. write performance data files.`
-
-----
-
 :Parameter:  :p:`Performance` : :p:`warnings`
 :Summary: :s:`Whether to output performance-related warnings`
 :Type:    :t:`logical`
@@ -2404,8 +2384,7 @@ Performance
 :Default: :d:`[]`
 :Scope:     :c:`Cello`
 
-:e:`List of PAPI hardware performance counters to trace, e.g. 'counters = ["PAPI_FP_OPS", "PAPI_L3_TCA"];'.`
-
+:e:`List of PAPI hardware performance counters to trace, e.g. 'counters = ["PAPI_FP_OPS", "PAPI_L3_TCA"];'.  For a list of available counters, use the PAPI "papi_avail" utility.`
 
 
 -------
