@@ -647,6 +647,7 @@ template<class T> void EnzoMethodGravityBiCGStab::compute_(EnzoBlock* enzo_block
 //----------------------------------------------------------------------
 
 template<class T> void EnzoBlock::r_gravity_bicgstab_start_1(CkReductionMsg* msg) {
+  performance_start_(perf_compute,__FILE__,__LINE__);
 
   /// EnzoBlock accumulates global contributions to SUM(B) and COUNT(B)
   EnzoMethodGravityBiCGStab* method = 
@@ -658,6 +659,7 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_start_1(CkReductionMsg* msg
 
   /// call start_2 to continue
   method->start_2<T>(this);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
@@ -717,6 +719,8 @@ template<class T> void EnzoMethodGravityBiCGStab::start_2(EnzoBlock* enzo_block)
 
 template<class T> void EnzoBlock::r_gravity_bicgstab_start_3(CkReductionMsg* msg) {
 
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   /// EnzoBlock accumulates global contributions to DOT(R, R)
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -726,6 +730,7 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_start_3(CkReductionMsg* msg
 
   /// call loop_0 to begin solver loop
   method->loop_0<T>(this);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -779,6 +784,9 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_0(EnzoBlock* enzo_block) 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_1() {
+
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   /// re-entry into loop_2, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -793,6 +801,8 @@ void EnzoBlock::p_gravity_bicgstab_loop_1() {
     method->loop_2<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -820,6 +830,9 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_2(EnzoBlock* enzo_block) 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_3() {
+
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   /// re-entry into loop_4, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -834,6 +847,9 @@ void EnzoBlock::p_gravity_bicgstab_loop_3() {
     method->loop_4<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+  
 }
 
 //----------------------------------------------------------------------
@@ -886,6 +902,8 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_4(EnzoBlock* enzo_block) 
 
 template<class T> void EnzoBlock::r_gravity_bicgstab_loop_5(CkReductionMsg* msg) {
 
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   /// EnzoBlock accumulates global contributions to SUM(Y) and SUM(V)
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -897,6 +915,8 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_5(CkReductionMsg* msg)
 
   /// call loop_6 to continue
   method->loop_6<T>(this);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -953,6 +973,9 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_6(EnzoBlock* enzo_block) 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_7() {
+
+  performance_start_(perf_compute,__FILE__,__LINE__);
+  
   /// re-entry into loop_8, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -967,6 +990,9 @@ void EnzoBlock::p_gravity_bicgstab_loop_7() {
     method->loop_8<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+  
 }
 
 //----------------------------------------------------------------------
@@ -994,6 +1020,9 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_8(EnzoBlock* enzo_block) 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_loop_9() {
+
+  performance_start_(perf_compute,__FILE__,__LINE__);
+  
   /// re-entry into loop_10, using template with appropriate precision
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -1008,6 +1037,9 @@ void EnzoBlock::p_gravity_bicgstab_loop_9() {
     method->loop_10<long double>(enzo_block);
   else 
     ERROR1("EnzoMethodGravityBiCGStab()", "precision %d not recognized", precision);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+  
 }
 
 //----------------------------------------------------------------------
@@ -1059,6 +1091,8 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_10(EnzoBlock* enzo_block)
 
 template<class T> void EnzoBlock::r_gravity_bicgstab_loop_11(CkReductionMsg* msg) {
 
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   /// EnzoBlock accumulates global contributions to SUM(Y) and SUM(U)
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -1071,6 +1105,7 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_11(CkReductionMsg* msg
 
   /// call loop_12 to continue
   method->loop_12<T>(this);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1159,6 +1194,8 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_12(EnzoBlock* enzo_block)
 
 template<class T> void EnzoBlock::r_gravity_bicgstab_loop_13(CkReductionMsg* msg) {
 
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   // EnzoBlock accumulates global contributions to DOT(R,R) and DOT(R,R0)
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -1169,6 +1206,8 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_13(CkReductionMsg* msg
 
   // call loop_14 to continue
   method->loop_14<T>(this);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1221,6 +1260,8 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_14(EnzoBlock* enzo_block)
 
 template<class T> void EnzoBlock::r_gravity_bicgstab_loop_15(CkReductionMsg* msg) {
 
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   // EnzoBlock accumulates global contributions to iter
   EnzoMethodGravityBiCGStab* method = 
     static_cast<EnzoMethodGravityBiCGStab*> (this->method());
@@ -1229,6 +1270,8 @@ template<class T> void EnzoBlock::r_gravity_bicgstab_loop_15(CkReductionMsg* msg
 
   // call loop_0 to continue to next iteration
   method->loop_0<T>(this);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1269,6 +1312,9 @@ template<class T> void EnzoMethodGravityBiCGStab::end(EnzoBlock* enzo_block, int
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_gravity_bicgstab_acc() {
+
+  performance_start_(perf_compute,__FILE__,__LINE__);
+  
   /// re-entry to compute accelerations with refreshed solution
 
   EnzoMethodGravityBiCGStab* method = 
@@ -1291,6 +1337,9 @@ void EnzoBlock::p_gravity_bicgstab_acc() {
     ERROR1("EnzoBlock::p_gravity_bicgstab_acc()",
 	   "precision %d not recognized", precision);
   }
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+  
 }
 
 //----------------------------------------------------------------------
@@ -1336,6 +1385,8 @@ void EnzoMethodGravityBiCGStab::acc(EnzoBlock* enzo_block) throw()
 
 void EnzoBlock::p_gravity_bicgstab_exit() {
 
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   //  /// deallocate temporary vector data
 
   // field.deallocate_temporary(ib_);
@@ -1349,6 +1400,8 @@ void EnzoBlock::p_gravity_bicgstab_exit() {
   // field.deallocate_temporary(iu_);
 
   compute_done();
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+  
 }
 
 //----------------------------------------------------------------------

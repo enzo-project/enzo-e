@@ -115,7 +115,8 @@ public: // interface
        mg_iter_(0),
        dt(0),
        SubgridFluxes(NULL)
-  { 
+  {
+    performance_start_(perf_block);
     for (int i=0; i<MAX_DIMENSION; i++) {
       AccelerationField[i] = NULL; 
       GridLeftEdge[i] = 0; 
@@ -127,6 +128,7 @@ public: // interface
     for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
       method_turbulence_data [i] = 0;
     }
+    performance_stop_(perf_block);
   }
 
   /// Initialize a migrated EnzoBlock
@@ -137,6 +139,7 @@ public: // interface
       dt(0.0),
       SubgridFluxes(NULL)
   {
+    performance_start_(perf_block);
     TRACE("CkMigrateMessage");
     for (int i=0; i<MAX_DIMENSION; i++) {
       AccelerationField[i] = NULL; 
@@ -149,6 +152,7 @@ public: // interface
     for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
       method_turbulence_data [i] = 0;
     }
+    performance_stop_(perf_block);
   }
 
   /// Pack / unpack the EnzoBlock in a CHARM++ program
@@ -261,10 +265,6 @@ public: /// entry methods
   template <class T>
   void r_cg_shift_1 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg entry method: refresh P for MATVEC
-  template <class T>
-  void r_cg_loop_1 (CkReductionMsg * msg) ;
-
   /// EnzoMethodGravityCg entry method: DOT(P,AP)
   template <class T>
   void r_cg_loop_3 (CkReductionMsg * msg) ;
@@ -327,9 +327,19 @@ public: /// entry methods
   CkReductionMsg* r_method_gravity_bicgstab(int n, CkReductionMsg** msgs);
 
   void p_enzo_matvec()
-  {      enzo_matvec_(); }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    enzo_matvec_();
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+ 
+  }
   void r_enzo_matvec(CkReductionMsg * msg)
-  {      enzo_matvec_(); delete msg; }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    enzo_matvec_(); delete msg;
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+   
+  }
 
   /// EnzoMethodSolverMlat entry method: receive face data for refresh
   void p_mg_receive_face

@@ -157,7 +157,7 @@ module mesh {
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
-    entry void x_refresh_child
+    entry void p_refresh_child
       (int n, char a[n], int ic3[3]);
 
   };

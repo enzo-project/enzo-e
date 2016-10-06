@@ -117,8 +117,8 @@ module enzo {
     entry void r_cg_loop_0a(CkReductionMsg *msg);
     template <class T>
     entry void r_cg_loop_0b(CkReductionMsg *msg);
-    template <class T>
-    entry void r_cg_loop_1(CkReductionMsg *msg);
+//    template <class T>
+//    entry void r_cg_loop_1(CkReductionMsg *msg);
     template <class T>
     entry void r_cg_shift_1(CkReductionMsg *msg);
     template <class T>
@@ -217,10 +217,6 @@ module template_defs {
    extern entry void EnzoBlock r_cg_loop_0b<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_0b<double>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_0b<long double>(CkReductionMsg *msg);
-
-   extern entry void EnzoBlock r_cg_loop_1<float>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_cg_loop_1<double>(CkReductionMsg *msg);
-   extern entry void EnzoBlock r_cg_loop_1<long double>(CkReductionMsg *msg);
 
    extern entry void EnzoBlock r_cg_loop_3<float>(CkReductionMsg *msg);
    extern entry void EnzoBlock r_cg_loop_3<double>(CkReductionMsg *msg);

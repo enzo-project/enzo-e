@@ -107,6 +107,16 @@ public: // interface
   void set_stop(bool stop) throw()
   { stop_ = stop; }
 
+  /// Return true iff cycle_ changes
+  bool cycle_changed() {
+    bool value = false;
+    if (cycle_ != cycle_watch_) {
+      value = true;
+      cycle_watch_ = cycle_;
+    }
+    return value;
+  }
+  
   /// Return the current cycle number
   int cycle() const throw() 
   { return cycle_; };
@@ -208,7 +218,11 @@ public: // virtual functions
 
   /// Call output on Problem list of Output objects
   void p_begin_output()
-  { begin_output(); }
+  {
+    performance_->start_region(perf_output);
+    begin_output();
+    performance_->stop_region (perf_output);
+  }
   void begin_output ();
   void output_exit();
   void r_output(CkReductionMsg * msg);
@@ -216,7 +230,12 @@ public: // virtual functions
   //  void r_output (CkReductionMsg * msg);
 
   /// Reduce output, using p_output_write to send data to writing processes
-  void s_write() { write_(); };
+  void s_write()
+  {
+    performance_->start_region(perf_output);
+    write_();
+    performance_->stop_region(perf_output);
+  };
   void write_();
 
   /// Continue on to Problem::output_wait()
@@ -237,6 +256,9 @@ public: // virtual functions
 
   void p_monitor_performance()
   { monitor_performance(); };
+
+  /// Reduction for performance data
+  void r_monitor_performance (CkReductionMsg * msg);
 
   //--------------------------------------------------
   // Monitor number of blocks, particles, zones per process
@@ -261,9 +283,6 @@ public: // virtual functions
   void monitor_delete_particles(int64_t count) ;
 
   virtual void monitor_performance();
-
-  /// Reduction for performance data
-  void r_monitor_performance (CkReductionMsg * msg);
 
 protected: // functions
 
@@ -330,6 +349,9 @@ protected: // attributes
   /// Current cycle
   int cycle_;
 
+  /// Cycle at last start of performance monitoring
+  int cycle_watch_;
+
   /// Current time
   double time_;
 
@@ -358,13 +380,7 @@ protected: // attributes
   /// Simulation Performance object
   Performance * performance_;
 
-  /// Performance file name format (requires %d for process rank)
-  std::string performance_name_;
-
-  /// Processor stride for writing strict processor subset of performance data
-  int performance_stride_;
-
-  // /// Schedule for projections on / off
+  /// Schedule for projections on / off
 
 #ifdef CONFIG_USE_PROJECTIONS
   bool projections_tracing_;

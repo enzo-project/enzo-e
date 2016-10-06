@@ -119,8 +119,6 @@ public: // interface
       particle_batch_size(0),
       particle_group_list(),
       performance_papi_counters(),
-      performance_name(""),
-      performance_stride(0),
       performance_warnings(false),
       restart_file(""),
       stopping_cycle(0),
@@ -237,8 +235,6 @@ public: // interface
       particle_batch_size(0),
       particle_group_list(),
       performance_papi_counters(),
-      performance_name(""),
-      performance_stride(0),
       performance_warnings(false),
       restart_file(""),
       stopping_cycle(0),
@@ -419,8 +415,6 @@ public: // attributes
   // Performance
 
   std::vector<std::string>   performance_papi_counters;
-  std::string                performance_name;
-  int                        performance_stride;
   bool                       performance_warnings;
 
   // Restart

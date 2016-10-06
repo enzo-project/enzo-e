@@ -166,8 +166,6 @@ void Config::pup (PUP::er &p)
   // Performance
 
   p | performance_papi_counters;
-  p | performance_name;
-  p | performance_stride;
   p | performance_warnings;
 
   // Restart
@@ -1100,8 +1098,6 @@ void Config::read_performance_ (Parameters * p) throw()
   }
 #endif  
 
-  performance_name     = p->value_string ("Performance:name","");
-  performance_stride   = p->value_integer("Performance:stride",1);
   performance_warnings = p->value_logical("Performance:warnings",false);
 
 }

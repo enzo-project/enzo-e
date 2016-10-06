@@ -243,33 +243,70 @@ public: // interface
 
   void initial_exit_();
   void p_initial_exit()
-  {      initial_exit_(); }
+  {
+    performance_start_(perf_initial);
+    initial_exit_();
+    performance_stop_(perf_initial);
+  }
   void r_initial_exit(CkReductionMsg * msg)
-  {      initial_exit_(); delete msg; }
+  {
+    performance_start_(perf_initial);
+    initial_exit_(); delete msg;
+    performance_stop_(perf_initial);
+  }
 
   //--------------------------------------------------
   // COMPUTE
   //--------------------------------------------------
 
   void p_compute_enter()
-  {      compute_enter_(); }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    compute_enter_();
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+  }
   void r_compute_enter(CkReductionMsg * msg)
-  {      compute_enter_(); delete msg; }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    delete msg;    
+    compute_enter_();
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+  }
 
   void p_compute_continue()
-  {      compute_continue_(); }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    compute_continue_();
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+  }
   void r_compute_continue(CkReductionMsg * msg)
-  {      compute_continue_(); delete msg; }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    delete msg;
+    compute_continue_();
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+  }
 
   void p_compute_exit()
-  {      compute_exit_(); }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    compute_exit_();
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+  }
   void r_compute_exit(CkReductionMsg * msg)
-  {      compute_exit_(); delete msg; }
+  {
+    performance_start_(perf_compute,__FILE__,__LINE__);
+    delete msg;
+    compute_exit_();
+    performance_stop_(perf_compute,__FILE__,__LINE__);
+    
+  }
 
   /// Set the currently active Method.  Used to resume a Method's
   /// computation after a reduction
   void set_method_index (int index_method) throw()
-  { index_method_ = index_method; }
+  {
+    index_method_ = index_method; }
 
   /// Return the currently active Method
   int index_method() const throw()
@@ -303,23 +340,47 @@ public:
   //--------------------------------------------------
 
   void p_output_enter()
-  {      output_enter_(); }
+  {
+    performance_start_(perf_output);
+    output_enter_();
+    performance_stop_(perf_output);
+  }
   void r_output_enter(CkReductionMsg * msg)
-  {      output_enter_(); delete msg;}
+  {
+    performance_start_(perf_output);
+    delete msg;
+    output_enter_();
+    performance_stop_(perf_output);
+
+  }
 
   void p_output_end();
 
   void p_output_exit()
-  {      output_exit_(); }
+  {
+    performance_start_(perf_output);
+    output_exit_();
+    performance_stop_(perf_output);
+    
+  }
   void r_output_exit(CkReductionMsg * msg)
-  {      output_exit_(); delete msg; }
+  {
+    performance_start_(perf_output);
+    delete msg;
+    output_exit_();
+    performance_stop_(perf_output);
+  }
 
   /// Contribute block data to ith output object in the simulation
   void p_output_write (int index_output);
 
   /// Contribute block data to the Initial input object
   void p_output_read (int index_input = 0)
-  {  INCOMPLETE("Block::p_output_read"); }
+  {
+    performance_start_(perf_output);
+    INCOMPLETE("Block::p_output_read");
+    performance_stop_(perf_output);
+  }
 
 protected:
   void output_enter_();
@@ -332,29 +393,83 @@ public:
   //--------------------------------------------------
 
   void p_adapt_enter() 
-  {      adapt_enter_(); }
+  {
+    performance_start_(perf_adapt_apply);
+    adapt_enter_();
+    performance_stop_(perf_adapt_apply);
+    performance_start_(perf_adapt_apply_sync);
+  }
   void r_adapt_enter(CkReductionMsg * msg) 
-  {      adapt_enter_(); delete msg;}
+  {
+    performance_start_(perf_adapt_apply);
+    adapt_enter_(); delete msg;
+    performance_stop_(perf_adapt_apply);
+    performance_start_(perf_adapt_apply_sync);
+  }
 
   void p_adapt_next ()
-  {      adapt_next_(); }
+  {
+    performance_start_(perf_adapt_update);
+    adapt_next_();
+    performance_stop_(perf_adapt_update);
+    performance_start_(perf_adapt_update_sync);
+  }
   void r_adapt_next (CkReductionMsg * msg)
-  {      adapt_next_(); delete msg; }
+  {
+    performance_start_(perf_adapt_update);
+    delete msg;    
+    adapt_next_();
+    performance_stop_(perf_adapt_update);
+    performance_start_(perf_adapt_update_sync);
+  }
 
   void p_adapt_called() 
-  {      adapt_called_(); }
+  {
+    performance_start_(perf_adapt_notify);
+    adapt_called_();
+    performance_stop_(perf_adapt_notify);
+    performance_start_(perf_adapt_notify_sync);
+  }
   void r_adapt_called(CkReductionMsg * msg) 
-  {      adapt_called_(); delete msg; }
+  {
+    performance_start_(perf_adapt_notify);
+    delete msg;    
+    adapt_called_();
+    performance_stop_(perf_adapt_notify);
+    performance_start_(perf_adapt_notify_sync);
+  }
 
   void p_adapt_end ()  
-  {      adapt_end_(); }
+  {
+    performance_start_(perf_adapt_end);
+    adapt_end_();
+    performance_stop_(perf_adapt_end);
+    performance_start_(perf_adapt_end_sync);
+  }
   void r_adapt_end (CkReductionMsg * msg)  
-  {      adapt_end_(); delete msg;}
+  {
+    performance_start_(perf_adapt_end);
+    delete msg;    
+    adapt_end_();
+    performance_stop_(perf_adapt_end);
+    performance_start_(perf_adapt_end_sync);
+  }
 
   void p_adapt_exit() 
-  {      adapt_exit_(); }
+  {
+    performance_start_(perf_adapt_end);
+    adapt_exit_();
+    performance_stop_(perf_adapt_end);
+    performance_start_(perf_adapt_end_sync);
+  }
   void r_adapt_exit(CkReductionMsg * msg) 
-  {      adapt_exit_(); delete msg;}
+  {
+    performance_start_(perf_adapt_end);
+    delete msg;
+    adapt_exit_();
+    performance_stop_(perf_adapt_end);
+    performance_start_(perf_adapt_end_sync);
+  }
 
 
   /// Parent tells child to delete itself
@@ -395,7 +510,11 @@ public:
 
   /// synchronize with count other chares; count only needs to be supplied once
   void p_control_sync_count(int entry_point, int id, int count) 
-  {      control_sync_count_(entry_point,id, count); }
+  {
+    performance_start_(perf_control);
+    control_sync_count_(entry_point,id, count);
+    performance_stop_(perf_control);
+  }
 
 protected:
   void control_sync_neighbor_(int entry_point, int id);
@@ -411,9 +530,20 @@ public:
 
   // Exit the refresh phase after QD
   void p_refresh_exit () 
-  {      refresh_exit_(); }
+  {
+    performance_start_(perf_refresh_exit);
+    refresh_exit_();
+    performance_stop_(perf_refresh_exit);
+    performance_start_(perf_refresh_exit_sync);
+  }
   void r_refresh_exit (CkReductionMsg * msg) 
-  {      refresh_exit_(); delete msg;  }
+  {
+    performance_start_(perf_refresh_exit);
+    delete msg;    
+    refresh_exit_();
+    performance_stop_(perf_refresh_exit);
+    performance_start_(perf_refresh_exit_sync);
+  }
 protected:
   void refresh_exit_ ();
 public:
@@ -431,7 +561,7 @@ public:
   void p_refresh_store (MsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
-  void x_refresh_child (int n, char a[],int ic3[3]);
+  void p_refresh_child (int n, char a[],int ic3[3]);
 
 protected:
 
@@ -503,9 +633,18 @@ public:
 
   /// Enter the stopping phase
   void p_stopping_enter () 
-  {      stopping_enter_(); }
+  {
+    performance_start_(perf_stopping);
+    stopping_enter_();
+    performance_stop_(perf_stopping);
+  }
   void r_stopping_enter (CkReductionMsg * msg) 
-  {      stopping_enter_(); delete msg;  }
+  {
+    performance_start_(perf_stopping);
+    delete msg;    
+    stopping_enter_();
+    performance_stop_(perf_stopping);
+  }
 
   /// Quiescence before load balancing
   void p_stopping_balance();
@@ -515,9 +654,18 @@ public:
 
   /// Exit the stopping phase
   void p_stopping_exit () 
-  {      stopping_exit_(); }
+  {
+    performance_start_(perf_stopping);
+    stopping_exit_();
+    performance_stop_(perf_stopping);
+  }
   void r_stopping_exit (CkReductionMsg * msg) 
-  {      stopping_exit_(); delete msg;  }
+  {
+    delete msg;    
+    stopping_exit_();
+    performance_stop_(perf_stopping);
+  }
+  
 protected:
 
   void stopping_enter_();
@@ -528,9 +676,18 @@ protected:
 public:
   /// Exit the stopping phase to exit
   void p_exit () 
-  {      exit_(); }
+  {
+    performance_start_(perf_exit);
+    exit_();
+    performance_stop_(perf_exit);
+  }
   void r_exit (CkReductionMsg * msg) 
-  {      exit_(); delete msg;  }
+  {
+    performance_start_(perf_exit);
+    delete msg;    
+    exit_();
+    performance_stop_(perf_exit);
+  }
 protected:
 
   void exit_();
@@ -544,8 +701,6 @@ protected:
   void performance_start_
   (int index_region, std::string file="", int line=0);
   void performance_stop_
-  (int index_region, std::string file="", int line=0);
-  void performance_switch_
   (int index_region, std::string file="", int line=0);
 
   //--------------------------------------------------

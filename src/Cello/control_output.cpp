@@ -72,8 +72,6 @@ void Simulation::begin_output ()
   // 	  __FILE__,__LINE__,sync_output_begin_.value(),sync_output_begin_.stop());
   if (sync_output_begin_.next()) {
 
-    performance()->switch_region(perf_output,__FILE__,__LINE__);
-
     // Barrier
 
     TRACE_OUTPUT("Block::output_begin() calling Simulation::r_output()");
@@ -90,7 +88,7 @@ void Simulation::begin_output ()
 
 void Simulation::r_output(CkReductionMsg * msg)
 {
- 
+  performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_output()");
 
   delete msg;
@@ -99,6 +97,7 @@ void Simulation::r_output(CkReductionMsg * msg)
 
   problem()->output_reset();
   problem()->output_next(this);
+  performance_->stop_region(perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -145,6 +144,8 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void Block::p_output_write (int index_output)
 {
+  performance_start_ (perf_output);
+  
   TRACE_OUTPUT("Block::p_output_write()");
 
   FieldDescr * field_descr = simulation()->field_descr();
@@ -154,6 +155,7 @@ void Block::p_output_write (int index_output)
   output->write_block(this,field_descr,particle_descr);
 
   simulation()->write_();
+  performance_stop_ (perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -176,18 +178,22 @@ void Simulation::write_()
 
 void Simulation::r_write(CkReductionMsg * msg)
 {
+  performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_write()");
   delete msg;
 
   problem()->output_wait(this);
+  performance_->stop_region(perf_output);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::r_write_checkpoint()
 {
+  performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_write_checkpoint()");
   problem()->output_wait(this);
+  performance_->stop_region(perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -278,8 +284,10 @@ void Simulation::output_exit()
 
 void Block::p_output_end()
 {
+  performance_start_(perf_output);
   TRACE_OUTPUT("Block::p_output_end()");
   output_exit_();
+  performance_stop_(perf_output);
   // control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
 }
 //======================================================================

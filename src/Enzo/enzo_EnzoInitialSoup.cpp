@@ -204,7 +204,6 @@ void EnzoInitialSoup::enforce_block
 		  te[i] = te_in;
 		}
 	      }
-
 	    }
 	  }
 	}

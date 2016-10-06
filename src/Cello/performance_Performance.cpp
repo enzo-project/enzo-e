@@ -27,12 +27,12 @@ Performance::Performance (Config * config)
   region_counters_(),
   region_started_(),
   region_index_(),
+  region_in_charm_(),
 #ifdef CONFIG_USE_PAPI  
   papi_counters_(0),
 #endif
   warnings_(config ? config->performance_warnings : false),
   index_region_current_(perf_unknown)
-
 {
 
   const int in = cello::index_static();
@@ -57,7 +57,7 @@ Performance::~Performance()
 {
 #ifdef CONFIG_USE_PAPI  
   delete [] papi_counters_;
-  papi_counters_ = 0;
+  papi_counters_ = NULL;
 #endif  
 }
 
@@ -78,6 +78,7 @@ Performance::begin() throw()
 
 #ifdef CONFIG_USE_PAPI  
   papi_counters_ = new long long [papi_.num_events()];
+  papi_.start_events();
 #endif  
 }
 
@@ -190,7 +191,8 @@ Performance::region_index (std::string name) const throw()
 
 void
 Performance::new_region (int         region_index,
-			 std::string region_name) throw()
+			 std::string region_name,
+			 bool        in_charm) throw()
 { 
 #ifdef TRACE_PERFORMANCE
   CkPrintf ("%d TRACE_PERFORMANCE Performance::new_region (%d %s)\n",CkMyPe(),
@@ -198,10 +200,12 @@ Performance::new_region (int         region_index,
 #endif
   if ((size_t)region_index >= region_name_.size()) {
     region_name_.resize(region_index+1);
+    region_in_charm_.resize(region_index+1);
   }
 
-  region_name_[region_index] = region_name;
-  region_index_[region_name]  = region_index;
+  region_name_[region_index]    = region_name;
+  region_index_[region_name]    = region_index;
+  region_in_charm_[region_index] = in_charm;
 
   std::vector <long long> counters;
   region_counters_.push_back(counters);
@@ -211,17 +215,20 @@ Performance::new_region (int         region_index,
 //----------------------------------------------------------------------
 
 void
-Performance::start_region(int id_region, std::string file, int line, void * block) throw()
+Performance::start_region(int id_region, std::string file, int line) throw()
 {
 #ifdef TRACE_PERFORMANCE
-  CkPrintf ("%d TRACE_PERFORMANCE Performance::start_region (%d %s)\n",CkMyPe(),
-	    id_region,region_name_[id_region].c_str());
+  CkPrintf ("%d TRACE_PERFORMANCE Performance::start_region (%d,%s) %s:%d\n",CkMyPe(),
+	    id_region,region_name_[id_region].c_str(),file.c_str(),line);
 #endif
 
-#ifdef CONFIG_USE_PAPI
-  papi_.start_events();
-#endif  
+  if (region_in_charm_[index_region_current_]) {
+    stop_region(index_region_current_);
+  }
+  
   int index_region = id_region;
+
+  index_region_current_ = index_region;
 
   if (! region_started_[index_region]) {
 
@@ -256,17 +263,13 @@ Performance::start_region(int id_region, std::string file, int line, void * bloc
 //----------------------------------------------------------------------
 
 void
-Performance::stop_region(int id_region, std::string file, int line, void * block) throw()
+Performance::stop_region(int id_region, std::string file, int line) throw()
 {
 
 #ifdef TRACE_PERFORMANCE
-  CkPrintf ("%d TRACE_PERFORMANCE Performance::stop_region (%d,%s)\n",CkMyPe(),
-	    id_region,region_name_[id_region].c_str());
+  CkPrintf ("%d TRACE_PERFORMANCE Performance::stop_region (%d,%s) %s:%d\n",CkMyPe(),
+	    id_region,region_name_[id_region].c_str(),file.c_str(),line);
 #endif
-
-#ifdef CONFIG_USE_PAPI
-  papi_.stop_events();
-#endif  
 
   int index_region = id_region;
 

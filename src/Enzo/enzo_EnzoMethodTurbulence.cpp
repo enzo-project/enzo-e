@@ -176,8 +176,10 @@ void EnzoBlock::method_turbulence_begin()
 
 void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   method()->compute_resume (this,msg);
   delete msg;
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------

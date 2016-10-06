@@ -43,9 +43,9 @@ public: // functions
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
 
-  /// Read parameter file one process at a time
+  /// Read parameter file one process at a time within a shared-memory node
   void p_read_parameters()
-  { 
+  {
     read_parameters_(); 
   }
 private:

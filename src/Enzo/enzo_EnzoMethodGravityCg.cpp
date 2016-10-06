@@ -276,6 +276,7 @@ template <class T>
 void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   TRACE_METHOD("cg_loop_0b ENTER");
 
   EnzoMethodGravityCg * method = 
@@ -299,6 +300,7 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 		&refresh);
 #endif
   TRACE_METHOD("cg_loop_0b EXIT");
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -308,6 +310,7 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   TRACE_METHOD("cg_loop_0a ENTER");
 
   EnzoMethodGravityCg * method = 
@@ -338,6 +341,7 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 		&refresh);
 #endif
   TRACE_METHOD("cg_loop_0a EXIT");
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -430,6 +434,7 @@ void EnzoMethodGravityCg::cg_shift_1 (EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoBlock::r_cg_shift_1 (CkReductionMsg * msg)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   TRACE_METHOD("Block cg_shift_1 ENTER");
   EnzoMethodGravityCg * method = 
     static_cast<EnzoMethodGravityCg*> (this->method());
@@ -441,6 +446,7 @@ void EnzoBlock::r_cg_shift_1 (CkReductionMsg * msg)
   method -> cg_loop_2<T>(this);
 
   TRACE_METHOD("Block cg_shift_1 EXIT");
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -545,6 +551,7 @@ void EnzoMethodGravityCg::cg_loop_2 (EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoBlock::r_cg_loop_3 (CkReductionMsg * msg)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   TRACE_METHOD("Block cg_loop_3 ENTER");
 
   EnzoMethodGravityCg * method = 
@@ -561,6 +568,7 @@ void EnzoBlock::r_cg_loop_3 (CkReductionMsg * msg)
   method -> cg_loop_4<T>(this);
 
   TRACE_METHOD("Block cg_loop_3 EXIT");
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
@@ -649,6 +657,7 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> cg_loop_6
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   TRACE_METHOD("Block cg_loop_5 ENTER");
 
   EnzoMethodGravityCg * method = 
@@ -666,6 +675,7 @@ void EnzoBlock::r_cg_loop_5 (CkReductionMsg * msg)
 
   TRACE_METHOD("Block cg_loop_5 EXIT");
 
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------

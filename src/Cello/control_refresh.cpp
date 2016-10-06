@@ -154,6 +154,7 @@ void Block::refresh_load_field_face_
 
 void Block::p_refresh_store (MsgRefresh * msg)
 {
+  performance_start_(perf_refresh_store);
 
 #ifdef DEBUG_REFRESH
   CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
@@ -161,6 +162,8 @@ void Block::p_refresh_store (MsgRefresh * msg)
 #endif
   msg->update(data());
   delete msg;
+  performance_stop_(perf_refresh_store);
+  performance_start_(perf_refresh_store_sync);
 }
 
 

@@ -153,9 +153,11 @@ void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
 
 void EnzoSimulation::r_write_checkpoint()
 {
-  CkPrintf("EnzoSimulation::r_write_checkpoint() BEGIN\n");
+  performance_->start_region(perf_output);
+  monitor()->print ("Output","begin writing checkpoint...");
   problem()->output_wait(this);
-  CkPrintf("EnzoSimulation::r_write_checkpoint() END\n");
+  monitor()->print ("Output","end writing checkpoint");
+  performance_->stop_region(perf_output);
 }
 
 //----------------------------------------------------------------------

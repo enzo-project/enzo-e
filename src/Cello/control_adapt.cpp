@@ -77,8 +77,6 @@ void Block::adapt_begin_()
 {
   trace("adapt_begin 1");
 
-  performance_start_ (perf_adapt_compute,__FILE__,__LINE__);
-
   simulation()->set_phase(phase_adapt);
 
   int level_maximum = simulation()->config()->mesh_max_level;
@@ -86,6 +84,7 @@ void Block::adapt_begin_()
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
   control_sync (CkIndex_Block::p_adapt_called(),sync_neighbor,0);
+
 }
 
 //----------------------------------------------------------------------
@@ -97,9 +96,6 @@ void Block::adapt_begin_()
 /// detection.
 void Block::adapt_called_()
 {
-  performance_stop_  (perf_adapt_compute,__FILE__,__LINE__);
-  performance_start_ (perf_adapt_notify, __FILE__,__LINE__);
-
   trace("adapt_called 2");
 
   adapt_send_level();
@@ -118,9 +114,6 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  performance_stop_  (perf_adapt_notify,__FILE__,__LINE__);
-  performance_start_ (perf_adapt_update,__FILE__,__LINE__);
-
   debug_faces_("adapt_next");
   trace("adapt_next 3");
 
@@ -157,8 +150,6 @@ void Block::adapt_next_()
 /// been deleted.  
 void Block::adapt_end_()
 {
-  performance_stop_ (perf_adapt_update,__FILE__,__LINE__);
-  
   trace("adapt_end 4");
 
   if (index_.is_root()) {
@@ -191,6 +182,7 @@ void Block::adapt_end_()
   } else {
     control_sync (CkIndex_Main::p_adapt_exit(),sync_quiescence);
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -539,7 +531,8 @@ void Block::p_adapt_recv_level
  int level_face_new
  )
 {
-
+  performance_start_(perf_adapt_update);
+  
   if (index_send.level() != level_face_curr) {
     PARALLEL_PRINTF 
       ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
@@ -567,7 +560,11 @@ void Block::p_adapt_recv_level
   }
 #endif
 
-  if (skip_face_update) return;
+  if (skip_face_update) {
+    performance_stop_(perf_adapt_update);
+    performance_start_(perf_adapt_update_sync);
+    return;
+  }
 
   face_level_last_[ICF3(ic3,if3)] = level_face_new;
 
@@ -674,6 +671,8 @@ void Block::p_adapt_recv_level
     level_next_ = level_next;
     adapt_send_level();
   }
+  performance_stop_(perf_adapt_update);
+  performance_start_(perf_adapt_update_sync);
 }
 
 //----------------------------------------------------------------------
@@ -822,6 +821,8 @@ void Block::adapt_coarsen_()
 void Block::p_adapt_recv_child (MsgCoarsen * msg)
 {
 
+  performance_start_(perf_adapt_update);
+
 #ifdef DEBUG_REFRESH
   CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
   fflush(stdout);
@@ -871,6 +872,8 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 
   delete msg;
 
+  performance_stop_(perf_adapt_update);
+  performance_start_(perf_adapt_update_sync);
 }
 
 
@@ -880,10 +883,13 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 
 void Block::p_adapt_delete()
 {
+  performance_start_(perf_adapt_end);
 #ifdef DEBUG_ADAPT
   index_.print("DELETING",-1,2,false,simulation());
 #endif
   delete_ = true;
+  performance_stop_(perf_adapt_end);
+  performance_start_(perf_adapt_end_sync);
 }
 
 //======================================================================

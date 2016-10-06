@@ -78,14 +78,25 @@ BEGIN {
 }
 
 /simulation time-usec/  {time_simulation  = $6}
+/simulation PAPI_FP_INS/ {fp_ins_simulation = $6}
+/simulation PAPI_FP_OPS/ {fp_ops_simulation = $6}
 /initial time-usec/  {time_initial  = $6}
 /cycle time-usec/    {time_cycle    = $6}
 /compute time-usec/  {time_compute  = $6};
-/adapt time-usec/    {time_adapt    = $6};
-/adapt_compute time-usec/    {time_adapt_compute    = $6};
+/adapt_apply time-usec/    {time_adapt_apply    = $6};
+/adapt_apply_sync time-usec/    {time_adapt_apply_sync    = $6};
 /adapt_notify time-usec/    {time_adapt_notify    = $6};
+/adapt_notify_sync time-usec/    {time_adapt_notify_sync    = $6};
 /adapt_update time-usec/    {time_adapt_update    = $6};
-/refresh time-usec/  {time_refresh  = $6};
+/adapt_update_sync time-usec/    {time_adapt_update_sync    = $6};
+/adapt_end time-usec/    {time_adapt_end    = $6};
+/adapt_end_sync time-usec/    {time_adapt_end_sync    = $6};
+/refresh_store time-usec/  {time_refresh_store  = $6};
+/refresh_child time-usec/  {time_refresh_child  = $6};
+/refresh_exit time-usec/  {time_refresh_exit  = $6};
+/refresh_store_sync time-usec/  {time_refresh_store_sync  = $6};
+/refresh_child_sync time-usec/  {time_refresh_child_sync  = $6};
+/refresh_exit_sync time-usec/  {time_refresh_exit_sync  = $6};
 /output time-usec/   {time_output   = $6};
 /stopping time-usec/ {time_stopping = $6};
 
@@ -94,10 +105,12 @@ END {
     zones_per_block       = root_size / root_blocks;
     total_zones_per_block = total_root_size  / root_blocks;
 
-    format = "%20s: %g\n";
-    formati = "%20s: %ld\n";
-    format3 = "%20s: %d %d %d\n";
-
+    format = "%20s: %8.2f\n";
+    format_int = "%20s: %8ld\n";
+    format2 = "%20s: %8.2f [%8.2f]\n";
+    format2_ind = "   %20s: %8.2f [%8.2f]\n";
+    format3 = "%20s: %8d %d %d\n";
+    format0 = "%20s\n";
 
     if (done == 1) {
 	print ("Run completed");
@@ -108,29 +121,64 @@ END {
     print "\nSUMMARY\n"
     
     printf (format, "Total time",time_final);
-    printf (format, "Cycles",cycle);
+    printf (format_int, "Processes", num_processors);
+    printf (format_int, "Cycles",cycle);
     printf (format, "Init time",cycle_start);
-    printf (format, "Cycle time",(cycle_last-cycle_start)/cycle);
-    printf (format, "Processes", num_processors);
+    printf (format, "Time per cycle",(cycle_last-cycle_start)/cycle);
+    if (fp_ins_simulation > 0) {
+	printf (format, "GFlop ins. rate", 1e-9*fp_ins_simulation/time_final);
+    }
+    if (fp_ops_simulation > 0) {
+	printf (format, "GFlop ops. rate", 1e-9*fp_ops_simulation/time_final);
+    }
 
     printf "\nPHASES\n"
 
-    printf (format, "Simulation",time_simulation/num_processors*0.000001);
-    printf (format, "Initial",time_initial/num_processors*0.000001);
-    printf (format, "Cycling",time_cycle/num_processors*0.000001);
+    t_scale=1.0/num_processors*0.000001;
+    printf (format, "Simulation",time_simulation*t_scale);
+    printf (format, "Initial",time_initial*t_scale);
+    printf (format, "Cycling",time_cycle*t_scale);
     printf("\n");
-    printf (format, "Compute",time_compute/num_processors*0.000001);
-    printf (format, "Adapt",time_adapt/num_processors*0.000001);
-    printf (format, "(adapt compute)",time_adapt_compute/num_processors*0.000001);
-    printf (format, "(adapt notify)",time_adapt_notify/num_processors*0.000001);
-    printf (format, "(adapt update)",time_adapt_update/num_processors*0.000001);
-    printf (format, "Refresh",time_refresh/num_processors*0.000001);
-    printf (format, "Output",time_output/num_processors*0.000001);
-    printf (format, "Stopping",time_stopping/num_processors*0.000001);
+    printf (format, "Compute",time_compute*t_scale);
+    time_adapt = time_adapt_apply + time_adapt_update + time_adapt_notify + time_adapt_end;
+    time_adapt_sync = time_adapt_apply_sync + time_adapt_update_sync + time_adapt_notify_sync + time_adapt_end_sync;
+    printf (format2, "Adapt",
+	    t_scale*time_adapt,
+	    t_scale*time_adapt_sync);
+    printf (format2_ind, "apply",
+	    t_scale*time_adapt_apply,
+	    t_scale*time_adapt_apply_sync);
+    printf (format2_ind, "update",
+	    t_scale*time_adapt_update,
+	    t_scale*time_adapt_update_sync);
+    printf (format2_ind, "notify",
+	    t_scale*time_adapt_notify,
+	    t_scale*time_adapt_notify_sync);
+    printf (format2_ind, "end",
+	    t_scale*time_adapt_end,
+	    t_scale*time_adapt_end_sync);
+    time_refresh = time_refresh_store + time_refresh_child + time_refresh_exit;
+    time_refresh_sync = time_refresh_store_sync + time_refresh_child_sync + time_refresh_exit_sync;
+    printf (format2, "Refresh",
+	    t_scale*time_refresh,
+	    t_scale*time_refresh_sync);
+
+    printf (format2_ind, "store",
+	    t_scale*time_refresh_store,
+	    t_scale*time_refresh_store_sync);
+    printf (format2_ind, "child",
+	    t_scale*time_refresh_child,
+	    t_scale*time_refresh_child_sync);
+    printf (format2_ind, "exit",
+	    t_scale*time_refresh_exit,
+	    t_scale*time_refresh_exit_sync);
+    
+    printf (format, "Output",time_output*t_scale);
+    printf (format, "Stopping",time_stopping*t_scale);
     
     printf "\nHIERARCHY\n"
     
-    printf (format, "rank",root_rank);
+    printf (format_int, "rank",root_rank);
     printf (format3,"root blocks",root_blocks3[0],root_blocks3[1],root_blocks3[2]);
     printf (format3,"root size",root_size3[0],root_size3[1],root_size3[2]);
     printf (format3,"effective size",
@@ -140,13 +188,13 @@ END {
     printf (format3,"block size",(root_size3[0]/root_blocks3[0]),
 	    (root_size3[1]/root_blocks3[1]),
 	    (root_size3[2]/root_blocks3[2]));
-    printf (format, "max-level",max_level);
-    printf (format, "num-blocks",num_blocks);
+    printf (format_int, "max-level",max_level);
+    printf (format_int, "num-blocks",num_blocks);
     printf (format, "blocks change",num_blocks / num_blocks_start);
 
     printf ("\nMEMORY\n");
-    printf (format, "bytes-high",bytes_high);
-    printf (format, "bytes-highest",bytes_highest);
+    printf (format, "Gbytes-high",bytes_high*1e-9);
+    printf (format, "Gbytes-highest",bytes_highest*1e-9);
     printf (format, "memory change",bytes_high / bytes_high_start);
     printf (format, "bytes per real zone",bytes_high / (num_blocks*zones_per_block));
     printf (format, "bytes per zone",bytes_high / (num_blocks*total_zones_per_block));
@@ -158,7 +206,7 @@ END {
 	printf (format, "time per block",time_per_iter/num_blocks);
 	printf (format, "time per real zone",time_per_iter/(num_blocks*zones_per_block));
 	printf (format, "time per zone",time_per_iter/(num_blocks*total_zones_per_block));
-	printf (format, "solver max-iter",max_iter);
+	printf (format_int, "solver max-iter",max_iter);
 	printf (format, "time per iter",time_per_iter);
     } else {
 	print " not called"
@@ -168,7 +216,7 @@ END {
     
     if (num_particles > 0) {
 	printf ("\n");
-	printf (formati,"num-particles",num_particles);
+	printf (format_inti,"num-particles",num_particles);
 	printf (format, "time per particle",time_per_iter/num_particles);
 	printf (format, "particles change",num_particles / num_particles_start);
     } else {

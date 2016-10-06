@@ -62,7 +62,7 @@ void Simulation::initialize() throw()
 
 void Simulation::r_initialize_forest(CkReductionMsg * msg) 
 {
-
+  performance_->start_region(perf_initial);
   delete msg;
   
   initialize_forest_();
@@ -76,12 +76,14 @@ void Simulation::r_initialize_forest(CkReductionMsg * msg)
   // --------------------------------------------------
 
   contribute(0,0,CkReduction::concat,callback);
+  performance_->stop_region(perf_initial);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::r_initialize_hierarchy(CkReductionMsg * msg) 
 {
+  performance_->start_region(perf_initial);
   delete msg;
 
   if (CkMyPe() == 0) {
@@ -93,5 +95,6 @@ void Simulation::r_initialize_hierarchy(CkReductionMsg * msg)
     (*hierarchy()->block_array() ).p_initial_exit();
     // --------------------------------------------------
   }
+  performance_->stop_region(perf_initial);
 }
 

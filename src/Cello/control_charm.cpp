@@ -39,9 +39,7 @@ void Block::initial_exit_()
 void Block::adapt_enter_()
 {
   TRACE_CONTROL("adapt_enter");
-
-  performance_switch_ (perf_adapt,__FILE__,__LINE__);
-
+  
   if ( do_adapt_()) {
 
     adapt_begin_();
@@ -68,8 +66,6 @@ void Block::output_enter_ ()
 {
   TRACE_CONTROL("output_enter");
 
-  performance_switch_ (perf_output,__FILE__,__LINE__);
-
   output_begin_();
 }
 
@@ -95,10 +91,7 @@ void Block::stopping_enter_()
 
   TRACE_CONTROL("stopping_enter");
 
-  performance_switch_(perf_stopping,__FILE__,__LINE__);
-
   stopping_begin_();
-
 }
 
 //----------------------------------------------------------------------
@@ -107,11 +100,16 @@ void Block::stopping_exit_()
 {
   TRACE_CONTROL("stopping_exit");
 
-  if (cycle_ > 0 ) {
-    performance_stop_(perf_cycle,__FILE__,__LINE__);
+  if (simulation()->cycle_changed()) {
+    // if performance counters haven't started yet for this cycle
+    int cycle_initial = simulation()->config()->initial_cycle;
+    if (cycle_ > cycle_initial) {
+      // stop if any previous cycle
+      performance_stop_(perf_cycle,__FILE__,__LINE__);
+    }
+    // start 
+    performance_start_ (perf_cycle,__FILE__,__LINE__);
   }
-  performance_start_ (perf_cycle,__FILE__,__LINE__);
-
 
   if (stop_) {
 
@@ -122,7 +120,6 @@ void Block::stopping_exit_()
     compute_enter_();
 
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -130,8 +127,6 @@ void Block::stopping_exit_()
 void Block::compute_enter_ ()
 {
   TRACE_CONTROL("compute_enter");
-
-  performance_switch_(perf_compute,__FILE__,__LINE__);
 
   compute_begin_();
 }
@@ -150,8 +145,6 @@ void Block::compute_exit_ ()
 void Block::refresh_enter (int callback, Refresh * refresh) 
 {
   TRACE_CONTROL("refresh_enter");
-  performance_switch_(perf_refresh,__FILE__,__LINE__);
-
   set_refresh(refresh);
 
   // Update refresh object for the Block

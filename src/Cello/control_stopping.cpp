@@ -107,7 +107,8 @@ void Block::stopping_begin_()
 
 void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 {
-
+  performance_start_(perf_stopping);
+  
   TRACE_STOPPING("Block::r_stopping_compute_timestep");
   
   ++age_;
@@ -161,6 +162,7 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
   stopping_balance_();
 
+  performance_stop_(perf_stopping);
 }
 
 //----------------------------------------------------------------------
@@ -222,9 +224,11 @@ void Block::stopping_balance_()
 
 void Block::p_stopping_balance()
 {
-    TRACE_STOPPING("Block::p_stopping_balance");
-    simulation()->set_phase (phase_balance);
-    AtSync();
+  performance_start_(perf_stopping);
+  TRACE_STOPPING("Block::p_stopping_balance");
+  simulation()->set_phase (phase_balance);
+  AtSync();
+  performance_stop_(perf_stopping);
 }
  
 //----------------------------------------------------------------------

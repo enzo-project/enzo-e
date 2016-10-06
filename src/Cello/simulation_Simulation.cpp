@@ -27,6 +27,7 @@ Simulation::Simulation
   parameter_file_(parameter_file),
   rank_(0),
   cycle_(0),
+  cycle_watch_(-1),
   time_(0.0),
   dt_(0),
   stop_(false),
@@ -35,8 +36,6 @@ Simulation::Simulation
   problem_(NULL),
   timer_(),
   performance_(NULL),
-  performance_name_(""),
-  performance_stride_(1),
 #ifdef CONFIG_USE_PROJECTIONS
   projections_tracing_(false),
   projections_schedule_on_(NULL),
@@ -73,6 +72,7 @@ Simulation::Simulation()
   parameter_file_(""),
   rank_(0),
   cycle_(0),
+  cycle_watch_(-1),
   time_(0.0),
   dt_(0),
   stop_(false),
@@ -81,8 +81,6 @@ Simulation::Simulation()
   problem_(NULL),
   timer_(),
   performance_(NULL),
-  performance_name_(""),
-  performance_stride_(1),
 #ifdef CONFIG_USE_PROJECTIONS
   projections_tracing_(false),
   projections_schedule_on_(NULL),
@@ -119,6 +117,7 @@ void Simulation::pup (PUP::er &p)
 
   p | rank_; 
   p | cycle_;
+  p | cycle_watch_;
   p | time_;
   p | dt_;
   p | stop_;
@@ -129,9 +128,6 @@ void Simulation::pup (PUP::er &p)
 
   if (up) performance_ = new Performance;
   p | *performance_;
-
-  p | performance_name_;
-  p | performance_stride_;
 
   // p | projections_tracing_;
   // if (up) projections_schedule_on_ = new Schedule;
@@ -176,6 +172,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     parameter_file_(""),
     rank_(0),
     cycle_(0),
+    cycle_watch_(-1),
     time_(0.0),
     dt_(0),
     stop_(false),
@@ -184,8 +181,6 @@ Simulation::Simulation (CkMigrateMessage *m)
     problem_(NULL),
     timer_(),
     performance_(NULL),
-    performance_name_(""),
-    performance_stride_(1),
 #ifdef CONFIG_USE_PROJECTIONS
     projections_tracing_(false),
     projections_schedule_on_(NULL),
@@ -237,6 +232,7 @@ void Simulation::initialize_simulation_() throw()
 	  (1 <= rank_) && (rank_ <= 3));
 
   cycle_ = config_->initial_cycle;
+  cycle_watch_ = cycle_ - 1;
   time_  = config_->initial_time;
   dt_ = 0;
 }
@@ -260,34 +256,45 @@ void Simulation::initialize_performance_() throw()
 
   performance_ = new Performance (config_);
 
-  performance_->new_region(perf_unknown,    "unknown");
-  performance_->new_region(perf_simulation, "simulation");
-  performance_->new_region(perf_cycle,      "cycle");
-  performance_->new_region(perf_initial,    "initial");
-  performance_->new_region(perf_adapt,      "adapt");
-  performance_->new_region(perf_adapt_compute,"adapt_compute");
-  performance_->new_region(perf_adapt_notify, "adapt_notify");
-  performance_->new_region(perf_adapt_update, "adapt_update");
-  performance_->new_region(perf_refresh,    "refresh");
-  performance_->new_region(perf_compute,    "compute");
-  performance_->new_region(perf_output,     "output");
-  performance_->new_region(perf_stopping,   "stopping");
-
-  performance_name_   = config_->performance_name;
-  performance_stride_ = config_->performance_stride;
+  const bool in_charm = true;
+  Performance * p = performance_;
+  p->new_region(perf_unknown,    "unknown");
+  p->new_region(perf_simulation, "simulation");
+  p->new_region(perf_cycle,      "cycle");
+  p->new_region(perf_initial,    "initial");
+  p->new_region(perf_adapt_apply,"adapt_apply");
+  p->new_region(perf_adapt_apply_sync, "adapt_apply_sync",in_charm);
+  p->new_region(perf_adapt_notify, "adapt_notify");
+  p->new_region(perf_adapt_notify_sync, "adapt_notify_sync",in_charm);
+  p->new_region(perf_adapt_update, "adapt_update");
+  p->new_region(perf_adapt_update_sync, "adapt_update_sync",in_charm);
+  p->new_region(perf_adapt_end, "adapt_end");
+  p->new_region(perf_adapt_end_sync, "adapt_end_sync",in_charm);
+  p->new_region(perf_refresh_store,    "refresh_store");
+  p->new_region(perf_refresh_child,    "refresh_child");
+  p->new_region(perf_refresh_exit,    "refresh_exit");
+  p->new_region(perf_refresh_store_sync, "refresh_store_sync",in_charm);
+  p->new_region(perf_refresh_child_sync, "refresh_child_sync",in_charm);
+  p->new_region(perf_refresh_exit_sync,  "refresh_exit_sync",in_charm);
+  p->new_region(perf_compute,    "compute");
+  p->new_region(perf_control,    "control");
+  p->new_region(perf_output,     "output");
+  p->new_region(perf_stopping,   "stopping");
+  p->new_region(perf_block,   "block");
+  p->new_region(perf_exit,   "exit");
 
   timer_.start();
 
 #ifdef CONFIG_USE_PAPI  
   for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
-    performance_->new_counter(counter_type_papi, 
+    p->new_counter(counter_type_papi, 
 			      config_->performance_papi_counters[i]);
   }
 #endif  
 
-  performance_->begin();
+  p->begin();
 
-  performance_->start_region(perf_simulation);
+  p->start_region(perf_simulation);
 
 }
 

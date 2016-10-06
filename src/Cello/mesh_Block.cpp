@@ -68,6 +68,7 @@ Block::Block ( MsgRefine * msg )
   name_(""),
   index_method_(-1)
 {
+  performance_start_(perf_block);
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
 	msg->num_field_blocks_,
@@ -95,6 +96,7 @@ Block::Block ( MsgRefine * msg )
   }
 
   delete msg;
+  performance_stop_(perf_block);
 
 }
 
@@ -360,7 +362,7 @@ void Block::apply_initial_() throw ()
 
   TRACE("Block::apply_initial_()");
 
-  performance_switch_(perf_initial,__FILE__,__LINE__);
+  performance_start_(perf_initial,__FILE__,__LINE__);
 
   FieldDescr * field_descr = simulation()->field_descr();
   ParticleDescr * particle_descr = simulation()->particle_descr();
@@ -373,7 +375,9 @@ void Block::apply_initial_() throw ()
     initial->enforce_block(this,field_descr, particle_descr,
 			   simulation()->hierarchy());
   }
-  //  performance_stop_(perf_initial);
+
+  performance_stop_(perf_initial,__FILE__,__LINE__);
+
 }
 
 //----------------------------------------------------------------------
@@ -420,10 +424,10 @@ Block::~Block()
     const Index index_parent = index_.index_parent();
 
     // --------------------------------------------------
-    // ENTRY: #2 Block::~Block()-> Block::x_refresh_child()
+    // ENTRY: #2 Block::~Block()-> Block::p_refresh_child()
     // ENTRY: parent if level > 0
     // --------------------------------------------------
-    thisProxy[index_parent].x_refresh_child(n,array,ic3);
+    thisProxy[index_parent].p_refresh_child(n,array,ic3);
     // --------------------------------------------------
 
     delete [] array;
@@ -441,13 +445,14 @@ Block::~Block()
 
 //----------------------------------------------------------------------
 
-void Block::x_refresh_child 
+void Block::p_refresh_child 
 (
  int    n, 
  char * buffer, 
  int    ic3[3]
  )
 {
+  performance_start_(perf_refresh_child);
   int  if3[3]  = {0,0,0};
   bool lg3[3] = {false,false,false};
   std::vector<int> field_list;
@@ -455,7 +460,8 @@ void Block::x_refresh_child
     (if3, ic3, lg3, refresh_coarse,field_list);
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;
-
+  performance_stop_(perf_refresh_child);
+  performance_start_(perf_refresh_child_sync);
 }
 
 //----------------------------------------------------------------------
@@ -490,7 +496,9 @@ Block::Block (CkMigrateMessage *m)
     name_(""),
     index_method_(-1)
 { 
+  performance_start_(perf_block);
   simulation()->monitor_insert_block();
+  performance_stop_(perf_block);
 };
 
 //----------------------------------------------------------------------
@@ -792,14 +800,6 @@ void Block::performance_stop_
 (int index_region, std::string file, int line)
 {
   simulation()->performance()->stop_region(index_region,file,line);
-}
-
-//----------------------------------------------------------------------
-
-void Block::performance_switch_
-(int index_region, std::string file, int line)
-{
-  simulation()->performance()->switch_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
