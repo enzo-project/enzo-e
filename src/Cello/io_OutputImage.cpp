@@ -261,21 +261,37 @@ void OutputImage::write_block
 
   it_field_index_->first();
 
-  // (may be size 0 for mesh output)
   int index_field = (it_field_index_->size() > 0) 
     ? it_field_index_->value() : -1;
 
-  // pixel extents of box
+  // extents of domain
+  double dm3[3],dp3[3];
+  block->simulation()->hierarchy()->lower(dm3,dm3+1,dm3+2);
+  block->simulation()->hierarchy()->upper(dp3,dp3+1,dp3+2);
+
+  // adjust for image_lower / image_upper
+  for (int axis=0; axis<3; axis++) {
+    dm3[axis] = std::max(dm3[axis],image_lower_[axis]);
+    dp3[axis] = std::min(dp3[axis],image_upper_[axis]);
+  }
+  
+  // extents of block
+  double bm3[3];
+  double bp3[3];
+  block->lower(bm3,bm3+1,bm3+2);
+  block->upper(bp3,bp3+1,bp3+2);
+
+  // image extents of box
   int ixm, ixp;
   int iym, iyp;
-  extents_img_ (block,&ixm, &ixp, &iym, &iyp);
+  ixm = (bm3[IX]-dm3[IX])/(dp3[IX]-dm3[IX])*nxi_;
+  iym = (bm3[IY]-dm3[IY])/(dp3[IY]-dm3[IY])*nyi_;
+  ixp = (bp3[IX]-dm3[IX])/(dp3[IX]-dm3[IX])*nxi_;
+  iyp = (bp3[IY]-dm3[IY])/(dp3[IY]-dm3[IY])*nyi_;
 
-  // position extents of box
-  double pm3[3];
-  double pp3[3];
-  block->lower(&pm3[0],&pm3[1],&pm3[2]);
-  block->upper(&pp3[0],&pp3[1],&pp3[2]);
-
+  double h3[3];
+  block->cell_width(h3,h3+1,h3+2);
+  
   if (type_is_data()) {
 
     if (index_field >= 0) {
@@ -303,38 +319,44 @@ void OutputImage::write_block
 	field_data->values(field_descr,index_field) :
 	field_data->unknowns(field_descr,index_field);
 
-      float * field_float = (float*)field;
+      float  * field_float = (float*)field;
       double * field_double = (double*)field;
-
-      double v = 1.0;
-      if (nb3[0] > 1) v *= (pp3[0]-pm3[0]);
-      if (nb3[1] > 1) v *= (pp3[1]-pm3[1]);
-      if (nb3[2] > 1) v *= (pp3[2]-pm3[2]);
 
       const int precision = field_descr->precision(index_field);
 
       const double factor = (nb3[IZ] <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
 
+      const int rank = block->rank();
+      
       int m3[3];
       m3[0] = ghost_ ? nd3[0] : nb3[0];
       m3[1] = ghost_ ? nd3[1] : nb3[1];
       m3[2] = ghost_ ? nd3[2] : nb3[2];
       for (int ix=0; ix<m3[IX]; ix++) {
+	double x = bm3[IX] + (bp3[IX]-bm3[IX])/m3[IX];
 	int jxm = ixm +  ix   *(ixp-ixm)/m3[IX];
 	int jxp = ixm + (ix+1)*(ixp-ixm)/m3[IX]-1;
-	for (int iy=0; iy<m3[IY]; iy++) {
-	  int jym = iym +  iy   *(iyp-iym)/m3[IY];
-	  int jyp = iym + (iy+1)*(iyp-iym)/m3[IY]-1;
-	  for (int iz=0; iz<m3[IZ]; iz++) {
-	    int i=ix*d3[IX] + iy*d3[IY] + iz*d3[IZ];
-	    double value = 0.0;
-	    if (precision == precision_single) {
-	      value = field_float[i];
-	    } else if (precision == precision_double) {
-	      value = field_double[i];
-	    }
+	if (dm3[IX] <= x && x <= dp3[IX]) {
+	  for (int iy=0; iy<m3[IY]; iy++) {
+	    double y = bm3[IY] + (bp3[IY]-bm3[IY])/m3[IY];
+	    int jym = iym +  iy   *(iyp-iym)/m3[IY];
+	    int jyp = iym + (iy+1)*(iyp-iym)/m3[IY]-1;
+	    if (dm3[IY] <= y && y <= dp3[IY]) {
+	      for (int iz=0; iz<m3[IZ]; iz++) {
+		double z = bm3[IZ] + (bp3[IZ]-bm3[IZ])/m3[IZ];
+		if (rank < 3 || (dm3[IZ] -h3[IZ] <= z && z <= dp3[IZ]+h3[IZ])) {
+		  int i=ix*d3[IX] + iy*d3[IY] + iz*d3[IZ];
+		  double value = 0.0;
+		  if (precision == precision_single) {
+		    value = field_float[i];
+		  } else if (precision == precision_double) {
+		    value = field_double[i];
+		  }
 
-	    reduce_box_filled_(image_data_,jxm,jxp,jym,jyp, (value*factor));
+		  reduce_box_filled_(image_data_,jxm,jxp,jym,jyp, (value*factor));
+		}
+	      }
+	    }
 	  }
 	}
       }
@@ -412,17 +434,16 @@ void OutputImage::write_block
 
   // WRITE PARTICLES
 
-  double xdm,ydm,zdm;
-  double xdp,ydp,zdp;
-  block->simulation()->hierarchy()->lower(&xdm,&ydm,&zdm);
-  block->simulation()->hierarchy()->upper(&xdp,&ydp,&zdp);
-
   ParticleData * particle_data = 
     (ParticleData *)block->data()->particle_data();
 
   Particle particle ((ParticleDescr *)particle_descr,particle_data);
 
-    
+
+  double xdm = dm3[IX];
+  double ydm = dm3[IY];
+  double xdp = dp3[IX];
+  double ydp = dp3[IY];
 
   for (it_particle_index_->first();
        ! it_particle_index_->done();
@@ -433,25 +454,27 @@ void OutputImage::write_block
     const int ia_color = (color_particle_attribute_ != "") ?
       particle.attribute_index (it, color_particle_attribute_) : -1;
 
+    // get particle attribute stride
     const int ia_x = particle.attribute_index(it,"x");
+    const int dp = particle.stride(it,ia_x);
 
     const int nb = particle.num_batches(it);
-    const int dp = particle.stride(it,ia_x);
     const int da = (ia_color != -1) ? particle.stride(it,ia_color) : 0;
     for (int ib=0; ib<nb; ib++) {
 
       const int np = particle.num_particles(it,ib);
-      double xa [np];
-      double ya [np];
-      particle.position(it,ib, xa,ya);
+      double position[3][np];
+      particle.position(it,ib, position[0], position[1], position[2]);
+      const double * xa = position[IX];
+      const double * ya = position[IY];
       double * pa = (double *) particle.attribute_array (it,ia_color,ib);
       for (int ip=0; ip<np; ip++) {
 
  	double x = xa[ip*dp];
  	double y = ya[ip*dp];
  	double value = (ia_color == -1) ? 1.0 : pa[ip*da];
-	double tx = std::min(nxi_*(x - xdm)/(xdp-xdm) - 0.5,nxi_-1.0);
-	double ty = std::min(nyi_*(y - ydm)/(ydp-ydm) - 0.5,nyi_-1.0);
+	double tx = nxi_*(x - xdm)/(xdp-xdm) - 0.5;
+	double ty = nyi_*(y - ydm)/(ydp-ydm) - 0.5;
 	int ix0 = floor(tx);
 	int iy0 = floor(ty);
 	int ix1 = ix0+1;
@@ -460,7 +483,7 @@ void OutputImage::write_block
 	double ax1 = 1.0 - ax0;
 	double ay0 = 1.0 - (ty - floor(ty));
 	double ay1 = 1.0 - ay0;
- 
+
 	reduce_point_(image_data_,ix0,iy0,value,ax0*ay0);
 	reduce_point_(image_data_,ix1,iy0,value,ax1*ay0);
 	reduce_point_(image_data_,ix0,iy1,value,ax0*ay1);
@@ -528,7 +551,6 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
   *p.i++ = ny;
 
   for (int k=0; k<nx*ny; k++) *p.d++ = image_data_[k];
-
   for (int k=0; k<nx*ny; k++) *p.d++ = image_mesh_[k];
   
 }
@@ -801,7 +823,11 @@ void OutputImage::reduce_point_
   if ( ! (0 <= ix && ix < nxi_)) return;
   if ( ! (0 <= iy && iy < nyi_)) return;
 
-  if ( ! (0.0 <= alpha && alpha <= 1.0)) CkPrintf ("%d %d  alpha = %g\n",ix,iy,alpha);
+  if ( ! (0.0 <= alpha && alpha <= 1.0)) {
+    WARNING1 ("OutputImage::reduce_point_()",
+	     "Alpha %g is not between 0.0 and 1.0",
+	      alpha);
+  }
   const int i = ix + nxi_*iy;
 
   double value_new = 0.0;
@@ -917,7 +943,6 @@ void OutputImage::reduce_box_
 
 //----------------------------------------------------------------------
 
-
 void OutputImage::reduce_box_filled_
 (double * data, 
  int ixm, int ixp,
@@ -932,33 +957,3 @@ void OutputImage::reduce_box_filled_
 }
 
 //----------------------------------------------------------------------
-
-void OutputImage::extents_img_ 
-(const Block * block,
- int *ixm, int *ixp,
- int *iym, int *iyp) const
-{
-
-  int i3[3],n3[3];
-  block->index_global(&i3[0],&i3[1],&i3[2],&n3[0],&n3[1],&n3[2]);
-
-  const int IX = (axis_+1)%3;
-  const int IY = (axis_+2)%3;
-
-  int m3[3];
-
-  if (image_type_ == "mesh") {
-    m3[IX] = (nxi_ - 1) / n3[IX];
-    m3[IY] = (nyi_ - 1) / n3[IY];
-  } else {
-    m3[IX] = (nxi_) / n3[IX];
-    m3[IY] = (nyi_) / n3[IY];
-  }
-  
-  (*ixm) = i3[IX] * m3[IX];
-  (*iym) = i3[IY] * m3[IY];
-
-  (*ixp) = (i3[IX]+1)* m3[IX];
-  (*iyp) = (i3[IY]+1)* m3[IY];
-  
-}

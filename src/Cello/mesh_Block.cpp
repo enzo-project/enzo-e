@@ -205,10 +205,10 @@ void Block::init
   const int level = this->level();
 
   int na3[3];
-  size_forest(&na3[0],&na3[1],&na3[2]);
+  size_forest(na3,na3+1,na3+2);
 
   int ic3[3] = {0,0,0};
-  if (level > 0) index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
+  if (level > 0) index_.child(level,ic3,ic3+1,ic3+2);
 
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%p narray = %d\n",this,narray);
@@ -312,7 +312,7 @@ ItFace Block::it_face
 {
   int rank = this->rank();
   int n3[3];
-  size_forest(&n3[0],&n3[1],&n3[2]);
+  size_forest(n3,n3+1,n3+2);
   bool periodic[3][2];
   periodicity(periodic);
   return ItFace (rank,min_face_rank,periodic,n3,index,ic3,if3);

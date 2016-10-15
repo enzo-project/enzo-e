@@ -124,7 +124,9 @@ END {
     printf (format_int, "Processes", num_processors);
     printf (format_int, "Cycles",cycle);
     printf (format, "Init time",cycle_start);
-    printf (format, "Time per cycle",(cycle_last-cycle_start)/cycle);
+    if (cycle != 0) {
+	printf (format, "Time per cycle",(cycle_last-cycle_start)/cycle);
+    }
     if (fp_ins_simulation > 0) {
 	printf (format, "GFlop ins. rate", 1e-9*fp_ins_simulation/time_final);
     }
@@ -195,7 +197,9 @@ END {
     printf ("\nMEMORY\n");
     printf (format, "Gbytes-high",bytes_high*1e-9);
     printf (format, "Gbytes-highest",bytes_highest*1e-9);
-    printf (format, "memory change",bytes_high / bytes_high_start);
+    if (bytes_high_start != 0) {
+	printf (format, "memory change",bytes_high / bytes_high_start);
+    }
     printf (format, "bytes per real zone",bytes_high / (num_blocks*zones_per_block));
     printf (format, "bytes per zone",bytes_high / (num_blocks*total_zones_per_block));
 
@@ -216,7 +220,7 @@ END {
     
     if (num_particles > 0) {
 	printf ("\n");
-	printf (format_inti,"num-particles",num_particles);
+	printf (format_int,"num-particles",num_particles);
 	printf (format, "time per particle",time_per_iter/num_particles);
 	printf (format, "particles change",num_particles / num_particles_start);
     } else {

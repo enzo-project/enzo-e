@@ -7,6 +7,7 @@
 
 mainmodule main_enzo {
 
+  initnode void register_reduce_performance(void);
   initnode void register_method_turbulence(void);
   initnode void register_sum_long_double(void);
   initnode void register_sum_long_double_2(void);

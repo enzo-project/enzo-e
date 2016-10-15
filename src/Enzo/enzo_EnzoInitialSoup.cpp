@@ -170,8 +170,7 @@ void EnzoInitialSoup::enforce_block
 	// (cx,cy,cz) center of letter in domain
 	// (kx,ky,kz) index of letter in array
 	const int k = kx + array_[0]*(ky + array_[1]*kz);
-	//	char letter = letter_[k];
-	char letter = 'E';
+	char letter = letter_[k];
 	// (jx,jy) position of letter in font image
 	int jx=position_[letter-'A'] % 8;
 	int jy=position_[letter-'A'] / 8;

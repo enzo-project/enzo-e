@@ -171,10 +171,6 @@ private: // functions
   void reduce_point_
   ( double * data,  int ix, int iy, double value, double alpha=1.0) throw();
 
-  void extents_img_ (const Block * block,
-		     int *ixm, int *ixp,
-		     int *iym, int *iyp ) const;
-
   void reduce_line_(double * data, int ixm, int ixp, int iym, int iyp, 
 		    double value, double alpha=1.0);
   void reduce_line_x_(double * data, int ixm, int ixp, int iy, 

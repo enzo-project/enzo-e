@@ -3,21 +3,10 @@
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
+// SEE enzo_EnzoMethodTurbulence.cpp for context
 
 CkReduction::reducerType r_method_turbulence_type;
 
-extern CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
-
-//--------------------------------------------------
-
-void register_method_turbulence(void)
-{
-  r_method_turbulence_type = CkReduction::addReducer(r_method_turbulence); 
-}
-
-//--------------------------------------------------
-
-// SEE enzo_EnzoMethodTurbulence.cpp for context
 CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
 {
   double accum[MAX_TURBULENCE_ARRAY] = { 0.0 };
@@ -37,14 +26,34 @@ CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
   return CkReductionMsg::buildNew(MAX_TURBULENCE_ARRAY*sizeof(double),accum);
 }
 
+void register_method_turbulence(void)
+{ r_method_turbulence_type = CkReduction::addReducer(r_method_turbulence); }
+
+//======================================================================
+
+CkReduction::reducerType r_reduce_performance_type;
+
+CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
+{
+  // NOT IMPLEMENTED YET
+}
+
+void register_reduce_performance(void)
+{ r_reduce_performance_type = CkReduction::addReducer(r_reduce_performance); }
+
+
 //======================================================================
 
 CkReduction::reducerType sum_long_double_type;
 
 extern CkReductionMsg * sum_long_double(int n, CkReductionMsg ** msgs);
 
+//--------------------------------------------------
+
 void register_sum_long_double(void)
 { sum_long_double_type = CkReduction::addReducer(sum_long_double); }
+
+//--------------------------------------------------
 
 CkReductionMsg * sum_long_double(int n, CkReductionMsg ** msgs)
 {
