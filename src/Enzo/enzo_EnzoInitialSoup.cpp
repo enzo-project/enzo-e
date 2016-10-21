@@ -66,7 +66,7 @@ EnzoInitialSoup::EnzoInitialSoup
     for (int ky=0; ky<nay; ky++) {
       for (int kx=0; kx<nax; kx++) {
 	int k = kx + nax*(ky + nay*kz);
-	letter_[k] = 'A' + 26*(rand()/(RAND_MAX+1.0));
+	letter_[k] = 'A' + (rand() % 26);
       }
     }
   }
@@ -159,7 +159,9 @@ void EnzoInitialSoup::enforce_block
   const double rx = d_size_[0]/array_[0];
   const double ry = d_size_[1]/array_[1];
   const double rz = d_size_[2]/array_[2];
-	
+
+  const bool one_letter = (array_[0]*array_[1]*array_[2] == 1);
+  
   double xc,yc,zc;
   for (int kz=kzm; kz<kzp; kz++) {
     double cz = hza*(0.5+kz);
@@ -170,7 +172,7 @@ void EnzoInitialSoup::enforce_block
 	// (cx,cy,cz) center of letter in domain
 	// (kx,ky,kz) index of letter in array
 	const int k = kx + array_[0]*(ky + array_[1]*kz);
-	char letter = letter_[k];
+	char letter = one_letter ? 'C' : letter_[k];
 	// (jx,jy) position of letter in font image
 	int jx=position_[letter-'A'] % 8;
 	int jy=position_[letter-'A'] / 8;

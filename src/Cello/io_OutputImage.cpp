@@ -239,13 +239,15 @@ void OutputImage::write_block
   TRACE("OutputImage::write_block()");
   const FieldData * field_data = block->data()->field_data();
 
+  const int rank = block->rank();
+
   ASSERT("OutputImage::write_block",
 	 "axis_ must be = axis_z (2) for 2D problems",
-	 ! ( block->rank() == 2 && axis_ != 2));
+	 ! ( rank == 2 && axis_ != 2));
 
   ASSERT("OutputImage::write_block",
 	 "cannot output rank == 1 problems",
-	 ! ( block->rank() == 1) );
+	 ! ( rank == 1) );
 
   const int IX = (axis_+1) % 3;
   const int IY = (axis_+2) % 3;
@@ -270,11 +272,11 @@ void OutputImage::write_block
   block->simulation()->hierarchy()->upper(dp3,dp3+1,dp3+2);
 
   // adjust for image_lower / image_upper
+
   for (int axis=0; axis<3; axis++) {
     dm3[axis] = std::max(dm3[axis],image_lower_[axis]);
     dp3[axis] = std::min(dp3[axis],image_upper_[axis]);
   }
-  
   // extents of block
   double bm3[3];
   double bp3[3];
@@ -311,7 +313,7 @@ void OutputImage::write_block
       int d3[3];
       d3[0] = 1;
       d3[1] = nd3[0];
-      d3[2] = nd3[0]*nd3[1];
+      d3[2] = (rank >= 3) ? nd3[0]*nd3[1] : 0;
 
       // add block contribution to image
 
@@ -324,27 +326,28 @@ void OutputImage::write_block
 
       const int precision = field_descr->precision(index_field);
 
-      const double factor = (nb3[IZ] <= 1) ? 1.0 : 1.0 / pow(2.0,1.0*level);
-
-      const int rank = block->rank();
+      double factor = (nb3[IZ] > 1) ? 1.0 / pow(2.0,1.0*level) : 1.0;
+      if (rank >= 2 && (std::abs(dm3[IZ] - dp3[IZ]) < h3[IZ])) factor = 1.0;
       
       int m3[3];
       m3[0] = ghost_ ? nd3[0] : nb3[0];
       m3[1] = ghost_ ? nd3[1] : nb3[1];
       m3[2] = ghost_ ? nd3[2] : nb3[2];
       for (int ix=0; ix<m3[IX]; ix++) {
-	double x = bm3[IX] + (bp3[IX]-bm3[IX])/m3[IX];
+	double x = bm3[IX] + (ix-0.5)*(bp3[IX]-bm3[IX])/m3[IX];
 	int jxm = ixm +  ix   *(ixp-ixm)/m3[IX];
 	int jxp = ixm + (ix+1)*(ixp-ixm)/m3[IX]-1;
 	if (dm3[IX] <= x && x <= dp3[IX]) {
 	  for (int iy=0; iy<m3[IY]; iy++) {
-	    double y = bm3[IY] + (bp3[IY]-bm3[IY])/m3[IY];
+	    double y = bm3[IY] + (iy-0.5)*(bp3[IY]-bm3[IY])/m3[IY];
 	    int jym = iym +  iy   *(iyp-iym)/m3[IY];
 	    int jyp = iym + (iy+1)*(iyp-iym)/m3[IY]-1;
 	    if (dm3[IY] <= y && y <= dp3[IY]) {
 	      for (int iz=0; iz<m3[IZ]; iz++) {
-		double z = bm3[IZ] + (bp3[IZ]-bm3[IZ])/m3[IZ];
-		if (rank < 3 || (dm3[IZ] -h3[IZ] <= z && z <= dp3[IZ]+h3[IZ])) {
+		double z = bm3[IZ] + (iz-0.5)*(bp3[IZ]-bm3[IZ])/m3[IZ];
+		double zlo = dm3[IZ] - 0.5*h3[IZ];
+		double zhi = dp3[IZ] + 0.5*h3[IZ];
+		if (rank < 3 || (zlo <= z && z <= zhi)) {
 		  int i=ix*d3[IX] + iy*d3[IY] + iz*d3[IZ];
 		  double value = 0.0;
 		  if (precision == precision_single) {
@@ -352,7 +355,6 @@ void OutputImage::write_block
 		  } else if (precision == precision_double) {
 		    value = field_double[i];
 		  }
-
 		  reduce_box_filled_(image_data_,jxm,jxp,jym,jyp, (value*factor));
 		}
 	      }
@@ -658,7 +660,7 @@ void OutputImage::image_create_ () throw()
   TRACE2("new image_data_ = %p image_mesh_ = %p",image_data_,image_mesh_);
 
   const double min = std::numeric_limits<double>::max();
-  const double max = std::numeric_limits<double>::min();
+  const double max = -min;
 
   double value0;
 
@@ -694,34 +696,34 @@ void OutputImage::image_write_ () throw()
 
   double min,max;
 
+
+  min = std::numeric_limits<double>::max();
+  max = -min;
+
+  // Compute min and max
+
+  if (image_log_) {
+    for (int i=0; i<m; i++) {
+      min = MIN(min,log(data_(i)));
+      max = MAX(max,log(data_(i)));
+    }
+  } else if (image_abs_) {
+    for (int i=0; i<m; i++) {
+      min = MIN(min,fabs(data_(i)));
+      max = MAX(max,fabs(data_(i)));
+    }
+  } else { 
+    for (int i=0; i<m; i++) {
+      min = MIN(min,data_(i));
+      max = MAX(max,data_(i));
+    }
+  }
+
   if (min_value_ < max_value_) {
 
     min = min_value_;
     max = max_value_;
 
-  } else {
-
-    min = std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::min();
-
-    // Compute min and max
-
-    if (image_log_) {
-      for (int i=0; i<m; i++) {
-	min = MIN(min,log(data_(i)));
-	max = MAX(max,log(data_(i)));
-      }
-    } else if (image_abs_) {
-      for (int i=0; i<m; i++) {
-	min = MIN(min,fabs(data_(i)));
-	max = MAX(max,fabs(data_(i)));
-      }
-    } else { 
-      for (int i=0; i<m; i++) {
-	min = MIN(min,data_(i));
-	max = MAX(max,data_(i));
-      }
-    }
   }
 
   size_t n = map_r_.size();
@@ -757,8 +759,6 @@ void OutputImage::image_write_ () throw()
 	// linear interpolate colormap values
 	double lo = min +  k   *(max-min)/(n-1);
 	double hi = min + (k+1)*(max-min)/(n-1);
-
-	// should be in bounds, but force if not due to rounding error
 
 	double ratio = (value - lo) / (hi-lo);
 

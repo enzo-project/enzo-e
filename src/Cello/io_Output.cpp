@@ -188,6 +188,7 @@ std::string Output::expand_file_name_
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
     else if (arg == "count") { sprintf (buffer_new,buffer, count_); }
     else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
+    else if (arg == "flipflop")  { sprintf (buffer_new,buffer, count_%2); }
     else 
       {
 	ERROR3("Output::expand_file_name_",

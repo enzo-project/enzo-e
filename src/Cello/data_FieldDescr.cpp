@@ -85,9 +85,9 @@ int FieldDescr::field_id(const std::string & name) const throw()
   if (it != id_.end()) {
     return it->second;
   } else {
-    WARNING1("FieldDescr::field_id()",
-	   "Trying to access unknown Field \"%s\"",
-	   name.c_str());
+    //    WARNING1("FieldDescr::field_id()",
+    //	   "Trying to access unknown Field \"%s\"",
+    //	   name.c_str());
     return -1;
   }
 }

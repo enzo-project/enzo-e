@@ -41,13 +41,10 @@ CProxy_Block EnzoFactory::create_block_array
 {
   CProxy_EnzoBlock enzo_block_array;
 
-  // --------------------------------------------------
-  // ENTRY: #1 Factory::create_block_array() -> MappingTree::MappingTree()
-  // ENTRY: create
-  // --------------------------------------------------
+  
   //  CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
   CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
-  // --------------------------------------------------
+
 
   CkArrayOptions opts;
   opts.setMap(array_map);
@@ -122,10 +119,8 @@ void EnzoFactory::create_subblock_array
     if (nby > 1) nby = ceil(0.5*nby);
     if (nbz > 1) nbz = ceil(0.5*nbz);
 
-    // --------------------------------------------------
-    //    CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
+    // CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
     CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
-    // --------------------------------------------------
 
     CkArrayOptions opts;
     opts.setMap(array_map);

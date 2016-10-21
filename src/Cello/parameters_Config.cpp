@@ -874,7 +874,7 @@ void Config::read_output_ (Parameters * p) throw()
       output_image_upper[index_output].resize(3);
       for (int axis=0; axis<3; axis++) {
 	output_image_lower[index_output][axis] =
-	  p->list_value_float(axis,"image_lower",std::numeric_limits<double>::min());
+	  p->list_value_float(axis,"image_lower",-std::numeric_limits<double>::max());
 	output_image_upper[index_output][axis] =
 	  p->list_value_float(axis,"image_upper",std::numeric_limits<double>::max());
       }

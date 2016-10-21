@@ -78,8 +78,18 @@ BEGIN {
 }
 
 /simulation time-usec/  {time_simulation  = $6}
-/simulation PAPI_FP_INS/ {fp_ins_simulation = $6}
-/simulation PAPI_FP_OPS/ {fp_ops_simulation = $6}
+/simulation PAPI_FP_INS/ {
+    if (fp_ins_simulation == 0) {
+	fp_ins_simulation_start = $6;
+    }
+    fp_ins_simulation = $6;
+}
+/simulation PAPI_FP_OPS/ {
+    if (fp_ops_simulation == 0) {
+	fp_ops_simulation_start = $6;
+    }
+    fp_ops_simulation = $6;
+}
 /initial time-usec/  {time_initial  = $6}
 /cycle time-usec/    {time_cycle    = $6}
 /compute time-usec/  {time_compute  = $6};
@@ -128,9 +138,13 @@ END {
 	printf (format, "Time per cycle",(cycle_last-cycle_start)/cycle);
     }
     if (fp_ins_simulation > 0) {
+	printf (format_int, "GFlops", fp_ins_simulation);
+	printf (format, "GFlops per cycle", (fp_ins_simulation-fp_ins_simulation_start)/cycle);
 	printf (format, "GFlop ins. rate", 1e-9*fp_ins_simulation/time_final);
     }
     if (fp_ops_simulation > 0) {
+	printf (format_int, "GFlops", fp_ops_simulation);
+	printf (format, "GFlops per cycle", (fp_ops_simulation-fp_ops_simulation_start)/cycle);
 	printf (format, "GFlop ops. rate", 1e-9*fp_ops_simulation/time_final);
     }
 

@@ -56,6 +56,9 @@ void * Memory::allocate ( size_t bytes ) throw ()
     //          recursive calls to overloaded operator new 
     CkPrintf ("%d ERROR: Cannot allocate %lld bytes: limit is %f GB\n",
 	      CkMyPe(), (bytes_curr_[0] + bytes),limit_gb_);
+    void * array[10];
+    size_t size = backtrace(array,10);
+    backtrace_symbols_fd(array,size,STDERR_FILENO);
     CkExit();
   }
 
