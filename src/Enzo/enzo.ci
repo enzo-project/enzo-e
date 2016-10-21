@@ -31,10 +31,10 @@ module enzo {
   readonly enzo_float EnzoBlock::temperature_floor[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::InitialRedshift[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::InitialTimeInCodeUnits[CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::DomainLeftEdge [3*CONFIG_NODE_SIZE];
-  readonly enzo_float EnzoBlock::DomainRightEdge[3*CONFIG_NODE_SIZE];
+  readonly enzo_float EnzoBlock::DomainLeftEdge [CONFIG_NODE_SIZE_3];
+  readonly enzo_float EnzoBlock::DomainRightEdge[CONFIG_NODE_SIZE_3];
   readonly int EnzoBlock::GridRank[CONFIG_NODE_SIZE];
-  readonly int EnzoBlock::ghost_depth[3*CONFIG_NODE_SIZE];
+  readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
   readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
 
   //==================================================

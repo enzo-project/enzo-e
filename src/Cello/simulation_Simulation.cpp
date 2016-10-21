@@ -755,7 +755,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   int m = 0;
   
-  monitor()->print("Performance","simulation num-particles total %d",
+  monitor()->print("Performance","simulation num-particles total %ld",
 		   counters_long[m++]);
   monitor()->print("Performance","simulation num-blocks %d",
 		   counters_long[m++]);

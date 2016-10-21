@@ -107,8 +107,8 @@ END {
 
     format = "%20s: %8.2f\n";
     format_int = "%20s: %8ld\n";
-    format2 = "%20s: %8.2f [%8.2f]\n";
-    format2_ind = "   %20s: %8.2f [%8.2f]\n";
+    format2 = "%20s: %8.2f [%8.2f ]\n";
+    format2_ind = "   %20s: %8.2f [%8.2f ]\n";
     format3 = "%20s: %8d %d %d\n";
     format0 = "%20s\n";
 
@@ -133,6 +133,34 @@ END {
     if (fp_ops_simulation > 0) {
 	printf (format, "GFlop ops. rate", 1e-9*fp_ops_simulation/time_final);
     }
+
+    printf "\nHIERARCHY\n"
+    
+    printf (format_int, "rank",root_rank);
+    printf (format3,"root blocks",root_blocks3[0],root_blocks3[1],root_blocks3[2]);
+    printf (format3,"root size",root_size3[0],root_size3[1],root_size3[2]);
+    printf (format3,"effective size",
+	    root_size3[0]*2^max_level,
+	    root_size3[1]*2^max_level,
+	    root_size3[2]*2^max_level);
+    bx=(root_size3[0]/root_blocks3[0]);
+    by=(root_size3[1]/root_blocks3[1]);
+    bz=(root_size3[2]/root_blocks3[2]);
+    printf (format3,"block size",bx,by,bz);
+    printf (format_int, "max-level",max_level);
+    printf (format_int, "num-blocks",num_blocks);
+    printf (format_int, "num-zones",num_blocks*bx*by*bz);
+#    printf (format, "blocks change",num_blocks / num_blocks_start);
+
+    printf ("\nMEMORY\n");
+    printf (format, "Gbytes-high",bytes_high*1e-9);
+    printf (format, "Gbytes-highest",bytes_highest*1e-9);
+    if (bytes_high_start != 0) {
+	printf (format, "memory change",bytes_high / bytes_high_start);
+    }
+    printf (format, "bytes per real zone",bytes_high / (num_blocks*zones_per_block));
+    printf (format, "bytes per zone",bytes_high / (num_blocks*total_zones_per_block));
+
 
     printf "\nPHASES\n"
 
@@ -178,31 +206,6 @@ END {
     printf (format, "Output",time_output*t_scale);
     printf (format, "Stopping",time_stopping*t_scale);
     
-    printf "\nHIERARCHY\n"
-    
-    printf (format_int, "rank",root_rank);
-    printf (format3,"root blocks",root_blocks3[0],root_blocks3[1],root_blocks3[2]);
-    printf (format3,"root size",root_size3[0],root_size3[1],root_size3[2]);
-    printf (format3,"effective size",
-	    root_size3[0]*2^max_level,
-	    root_size3[1]*2^max_level,
-	    root_size3[2]*2^max_level);
-    printf (format3,"block size",(root_size3[0]/root_blocks3[0]),
-	    (root_size3[1]/root_blocks3[1]),
-	    (root_size3[2]/root_blocks3[2]));
-    printf (format_int, "max-level",max_level);
-    printf (format_int, "num-blocks",num_blocks);
-    printf (format, "blocks change",num_blocks / num_blocks_start);
-
-    printf ("\nMEMORY\n");
-    printf (format, "Gbytes-high",bytes_high*1e-9);
-    printf (format, "Gbytes-highest",bytes_highest*1e-9);
-    if (bytes_high_start != 0) {
-	printf (format, "memory change",bytes_high / bytes_high_start);
-    }
-    printf (format, "bytes per real zone",bytes_high / (num_blocks*zones_per_block));
-    printf (format, "bytes per zone",bytes_high / (num_blocks*total_zones_per_block));
-
 
     printf ("\nSOLVER");
     if (time_per_iter > 0) {
@@ -218,7 +221,7 @@ END {
 
     printf ("\nPARTICLES");
     
-    if (num_particles > 0) {
+    if (num_particles != 0) {
 	printf ("\n");
 	printf (format_int,"num-particles",num_particles);
 	printf (format, "time per particle",time_per_iter/num_particles);

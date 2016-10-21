@@ -111,6 +111,7 @@ void Monitor::header () const
 #else
   print ("Define","CHARM_NEW_CHARM %s","no");
 #endif
+  print ("Define","CONFIG_NODE_SIZE    %d",CONFIG_NODE_SIZE);
 
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());

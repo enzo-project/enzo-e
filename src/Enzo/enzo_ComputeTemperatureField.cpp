@@ -27,7 +27,7 @@
  
 /* This is minimum returned temperature. (K) */
  
-#define MINIMUM_TEMPERATURE 1.0
+const static enzo_float MINIMUM_TEMPERATURE = 1.0;
  
 //---------------------------------------------------------------------- 
  

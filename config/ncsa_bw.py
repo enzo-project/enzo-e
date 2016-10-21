@@ -1,3 +1,4 @@
+
 import os
 
 f90 = {}
@@ -6,10 +7,12 @@ cc  = {}
 
 python_lt_27 = 1
 
+node_size = 32 # for BW integer cores
+
 is_arch_valid = 1
 
 flags_arch = '-O3'
-flags_link  = '-O3'
+flags_link  = ''
 
 flags_prec_single = ''
 flags_prec_double = ''

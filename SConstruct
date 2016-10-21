@@ -224,10 +224,6 @@ define["single"] =    ['CONFIG_PRECISION_SINGLE']
 define["double"] =    ['CONFIG_PRECISION_DOUBLE']
 define_int_size  =    ['SMALL_INTS']
 
-# Hardware configuration defines
-
-define_node_size =   [{'CONFIG_NODE_SIZE' : node_size }]
-
 # Grackle defines
 
 define_grackle   = ['CONFIG_USE_GRACKLE']
@@ -351,7 +347,8 @@ else:
 
 defines = defines + define_int_size
 
-defines = defines + define_node_size
+defines = defines + [{'CONFIG_NODE_SIZE' : node_size }]
+defines = defines + [{'CONFIG_NODE_SIZE_3' : node_size*3 }]
 
 defines = defines + define_hdf5
 defines = defines + define_png
