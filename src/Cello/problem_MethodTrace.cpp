@@ -45,11 +45,9 @@ void MethodTrace::compute ( Block * block) throw()
 
     // get velocity field arrays
     const int rank = block->rank();
-    double  * vxa = (double *)field.values("velocity_x");
-    double * vya = (rank >= 2) ? 
-      (double *)field.values("velocity_y") : NULL;
-    double * vza = (rank >= 3) ? 
-      (double *)field.values("velocity_z") : NULL;
+    double  * vxa = (double *) field.values("velocity_x");
+    double * vya = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
+    double * vza = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
 
     int mx,my,mz;
     field.dimensions(0,&mx,&my,&mz);
@@ -251,8 +249,8 @@ double MethodTrace::timestep (Block * block) const throw()
     Field    field    = block->data()->field();
 
     double * vx = (double *) field.values("velocity_x");
-    double * vy = (double *) field.values("velocity_y");
-    double * vz = (double *) field.values("velocity_z");
+    double * vy = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
+    double * vz = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
 
     double xm,ym,zm;
     double xp,yp,zp;

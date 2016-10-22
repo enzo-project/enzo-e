@@ -16,7 +16,7 @@ flags_arch = '-Wall -O3 -g'
 cc  = 'gcc '
 f90 = 'gfortran'
 
-flags_prec_single = '-fdefault-real-4 -fdefault-double-8'
+flags_prec_single = ''
 flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
 
 libpath_fortran = '.'
@@ -46,6 +46,7 @@ if charm_path is None:
 		else:
 			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
 
+use_papi=1                
 papi_path    = '/usr/local'
 
 hdf5_inc = os.getenv('HDF5_INC')

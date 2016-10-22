@@ -157,9 +157,14 @@ int ParticleData::insert_particles
 
     // resize arrays for a new batch if needed
     if ( ip_start == 0) {
+
+      ASSERT1("ParticleData::insert_particles",
+	     "Trying to insert negative particles: ib_this = %d",
+	      ib_this, ib_this >= 0);
+
       attribute_array_[it].resize(ib_this+1);
       attribute_align_[it].resize(ib_this+1);
-      particle_count_[it].resize(ib_this+1);
+      particle_count_ [it].resize(ib_this+1);
     }
 
     // allocate particles
@@ -204,10 +209,12 @@ int ParticleData::delete_particles
       for (int ia=0; ia<na; ia++) {
 	if (!interleaved) 
 	  mp = particle_descr->attribute_bytes(it,ia);
-	int ny = particle_descr->attribute_bytes(it,ia);
+	const int ny = particle_descr->attribute_bytes(it,ia);
 	char * a = attribute_array(particle_descr,it,ia,ib);
 	for (int iy=0; iy<ny; iy++) {
-	  a [iy + mp*(ip-npd)] = a [iy + mp*ip];
+	  const int i_old = iy + mp*ip;
+	  const int i_new = iy + mp*(ip-npd);
+	  a [i_new] = a [i_old];
 	}
       }
     }
@@ -233,14 +240,13 @@ void ParticleData::scatter
   int np_array[n] = {0};
 
   for (int ip=0; ip<np; ip++) {
-    int k= index[ip];
-    // find first of any duplicate elements
-    if ((mask == NULL) || mask[ip]) ++np_array[k];
+    if ((mask == NULL) || mask[ip]) {
+      ++np_array[index[ip]];
+    }
   }
-
   
   // insert uninitialized particles
-  std::map<ParticleData *, int> i_array;
+  std::map<ParticleData *, int>  i_array;
   std::map<ParticleData *, bool> is_first;
   for (int k=0; k<n; k++) {
     ParticleData * pd = particle_array[k];
@@ -852,6 +858,10 @@ char * ParticleData::load_data (ParticleDescr * particle_descr,
 
   // ... allocate arrays
 
+  ASSERT1("ParticleData::load_data",
+	  "Trying to allocate negative particle types: nt = %d",
+	  nt, nt >= 0);
+  
   attribute_array_.resize(nt);
   attribute_align_.resize(nt);
   particle_count_.resize(nt);
@@ -864,6 +874,10 @@ char * ParticleData::load_data (ParticleDescr * particle_descr,
 
     // ... allocate arrays[it]
 
+    ASSERT1("ParticleData::load_data",
+	    "Trying to allocate negative particle batches: nb = %d",
+	    nb, nb >= 0);
+
     attribute_array_[it].resize(nb);
     attribute_align_[it].resize(nb);
     particle_count_[it].resize(nb);
@@ -872,7 +886,13 @@ char * ParticleData::load_data (ParticleDescr * particle_descr,
 
       // ...load particle attribute array lengths
 
-      attribute_array_[it][ib].resize((*pi++));
+      const int np = (*pi++);
+
+      ASSERT1("ParticleData::load_data",
+	      "Trying to allocate negative particles: np = %d",
+	      np, np >= 0);
+      
+      attribute_array_[it][ib].resize(np);
       
     }
   }
@@ -1003,6 +1023,11 @@ void ParticleData::resize_attribute_array_
   size_t new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
 
   if (attribute_array_[it][ib].size() != new_size) {
+
+    ASSERT1("ParticleData::resize_attribute_array_",
+	    "Trying to allocate negative particles: new_size = %d",
+	    new_size, new_size >= 0);
+      
     attribute_array_[it][ib].resize(new_size);
     char * array = &attribute_array_[it][ib][0];
     uintptr_t iarray = (uintptr_t) array;

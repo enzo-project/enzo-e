@@ -334,17 +334,17 @@ void OutputImage::write_block
       m3[1] = ghost_ ? nd3[1] : nb3[1];
       m3[2] = ghost_ ? nd3[2] : nb3[2];
       for (int ix=0; ix<m3[IX]; ix++) {
-	double x = bm3[IX] + (ix-0.5)*(bp3[IX]-bm3[IX])/m3[IX];
+	double x = bm3[IX] + (ix+0.5)*(bp3[IX]-bm3[IX])/m3[IX];
 	int jxm = ixm +  ix   *(ixp-ixm)/m3[IX];
 	int jxp = ixm + (ix+1)*(ixp-ixm)/m3[IX]-1;
 	if (dm3[IX] <= x && x <= dp3[IX]) {
 	  for (int iy=0; iy<m3[IY]; iy++) {
-	    double y = bm3[IY] + (iy-0.5)*(bp3[IY]-bm3[IY])/m3[IY];
+	    double y = bm3[IY] + (iy+0.5)*(bp3[IY]-bm3[IY])/m3[IY];
 	    int jym = iym +  iy   *(iyp-iym)/m3[IY];
 	    int jyp = iym + (iy+1)*(iyp-iym)/m3[IY]-1;
 	    if (dm3[IY] <= y && y <= dp3[IY]) {
 	      for (int iz=0; iz<m3[IZ]; iz++) {
-		double z = bm3[IZ] + (iz-0.5)*(bp3[IZ]-bm3[IZ])/m3[IZ];
+		double z = bm3[IZ] + (iz+0.5)*(bp3[IZ]-bm3[IZ])/m3[IZ];
 		double zlo = dm3[IZ] - 0.5*h3[IZ];
 		double zhi = dp3[IZ] + 0.5*h3[IZ];
 		if (rank < 3 || (zlo <= z && z <= zhi)) {

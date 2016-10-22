@@ -174,25 +174,26 @@ void Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   const int rank = this->rank();
 
-  const int npa = (rank == 1) ? 4 
-    :             (rank == 2) ? 4*4 
-    :                           4*4*4;
+  const int npa = (rank == 1) ? 4 : ((rank == 2) ? 4*4 : 4*4*4);
 
   ParticleData * particle_array[npa];
   ParticleData * particle_list [npa];
   Index             index_list [npa];
   
   for (int i=0; i<npa; i++) {
-    particle_list[i] = NULL;
+    particle_list[i]  = NULL;
     particle_array[i] = NULL;
   }
+
+  // Sort particles that have left the Block into 4x4x4 array
+  // corresponding to neighbors
 
   int nl=0;
   particle_load_faces_
     (npa,&nl,particle_list,particle_array, index_list,
      refresh);
 
-  // 4. SEND PARTICLE DATA TO NEIGHBORS
+  // Send particle data to neighbors
 
   particle_send_(nl,index_list,particle_list);
 
