@@ -7,7 +7,7 @@
 
 #include "data.hpp"
 #include "charm_simulation.hpp"
-
+  
 //----------------------------------------------------------------------
 
 MethodTrace::MethodTrace 
@@ -43,11 +43,19 @@ void MethodTrace::compute ( Block * block) throw()
 
     const int dp =  particle.stride(it,ia_x);
 
-    // get velocity field arrays
     const int rank = block->rank();
-    double  * vxa = (double *) field.values("velocity_x");
-    double * vya = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
-    double * vza = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
+
+    // get velocity field arrays
+
+    union { float * vxa4; double * vxa8; };
+    union { float * vya4; double * vya8; };
+    union { float * vza4; double * vza8; };
+  
+    // NOTE: union so v?a4 also initialized
+    
+    vxa8 = (double *) field.values("velocity_x");
+    vya8 = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
+    vza8 = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
 
     int mx,my,mz;
     field.dimensions(0,&mx,&my,&mz);
@@ -66,6 +74,10 @@ void MethodTrace::compute ( Block * block) throw()
     const double hz = (zp-zm)/nz;
 
     double dt = block -> dt();
+
+    // Get velocity precision: ASSUMES precision same for all axes and is single or double
+    
+    const bool is_single = (field.precision (field.field_id("velocity_x")) == precision_single);
 
     // declare particle position arrays
 
@@ -88,17 +100,11 @@ void MethodTrace::compute ( Block * block) throw()
 	  double x = xa[ip*dp];
 
 	  int ix0 = gx + floor((nx-1)*(x - xm) / (xp - xm));
-
 	  int ix1 = ix0 + 1;
-
 	  double x0 = xm + (ix0-gx+0.5)*hx;
-
 	  double x1 = 1 - x0;
-
-	  double v0 = vxa[ix0];
-
-	  double v1 = vxa[ix1];
-
+	  double v0 = is_single ? vxa4[ix0] : vxa8[ix0];
+	  double v1 = is_single ? vxa4[ix1] : vxa8[ix1];
 	  double vx = v0*x1 + v1*x0;
 
 	  xa[ip*dp] += vx*dt;
@@ -124,20 +130,20 @@ void MethodTrace::compute ( Block * block) throw()
 	  double x1 = 1.0 - x0;
 	  double y1 = 1.0 - y0;
 
-	  double vx00 = vxa[ix0+mx*iy0];
-	  double vx10 = vxa[ix1+mx*iy0];
-	  double vx01 = vxa[ix0+mx*iy1];
-	  double vx11 = vxa[ix1+mx*iy1];
+	  double vx00 = is_single ? vxa4[ix0+mx*iy0] : vxa8[ix0+mx*iy0];
+	  double vx10 = is_single ? vxa4[ix1+mx*iy0] : vxa8[ix1+mx*iy0];
+	  double vx01 = is_single ? vxa4[ix0+mx*iy1] : vxa8[ix0+mx*iy1];
+	  double vx11 = is_single ? vxa4[ix1+mx*iy1] : vxa8[ix1+mx*iy1];
 
 	  double vx = vx00*x1*y1 
 	    +         vx10*x0*y1
 	    +         vx01*x1*y0
 	    +         vx11*x0*y0;
 
-	  double vy00 = vya[ix0+mx*iy0];
-	  double vy10 = vya[ix1+mx*iy0];
-	  double vy01 = vya[ix0+mx*iy1];
-	  double vy11 = vya[ix1+mx*iy1];
+	  double vy00 = is_single ? vya4[ix0+mx*iy0] : vya8[ix0+mx*iy0];
+	  double vy10 = is_single ? vya4[ix1+mx*iy0] : vya8[ix1+mx*iy0];
+	  double vy01 = is_single ? vya4[ix0+mx*iy1] : vya8[ix0+mx*iy1];
+	  double vy11 = is_single ? vya4[ix1+mx*iy1] : vya8[ix1+mx*iy1];
 
 	  double vy = vy00*x1*y1 
 	    +         vy10*x0*y1
@@ -171,14 +177,14 @@ void MethodTrace::compute ( Block * block) throw()
 	  double y1 = 1.0 - ym;
 	  double z1 = 1.0 - zm;
 
-	  double vx000 = vxa[ix0+mx*(iy0 + my*iz0)];
-	  double vx100 = vxa[ix1+mx*(iy0 + my*iz0)];
-	  double vx010 = vxa[ix0+mx*(iy1 + my*iz0)];
-	  double vx110 = vxa[ix1+mx*(iy1 + my*iz0)];
-	  double vx001 = vxa[ix0+mx*(iy0 + my*iz1)];
-	  double vx101 = vxa[ix1+mx*(iy0 + my*iz1)];
-	  double vx011 = vxa[ix0+mx*(iy1 + my*iz1)];
-	  double vx111 = vxa[ix1+mx*(iy1 + my*iz1)];
+	  double vx000 = is_single ? vxa4[ix0+mx*(iy0 + my*iz0)] : vxa8[ix0+mx*(iy0 + my*iz0)];
+	  double vx100 = is_single ? vxa4[ix1+mx*(iy0 + my*iz0)] : vxa8[ix1+mx*(iy0 + my*iz0)];
+	  double vx010 = is_single ? vxa4[ix0+mx*(iy1 + my*iz0)] : vxa8[ix0+mx*(iy1 + my*iz0)];
+	  double vx110 = is_single ? vxa4[ix1+mx*(iy1 + my*iz0)] : vxa8[ix1+mx*(iy1 + my*iz0)];
+	  double vx001 = is_single ? vxa4[ix0+mx*(iy0 + my*iz1)] : vxa8[ix0+mx*(iy0 + my*iz1)];
+	  double vx101 = is_single ? vxa4[ix1+mx*(iy0 + my*iz1)] : vxa8[ix1+mx*(iy0 + my*iz1)];
+	  double vx011 = is_single ? vxa4[ix0+mx*(iy1 + my*iz1)] : vxa8[ix0+mx*(iy1 + my*iz1)];
+	  double vx111 = is_single ? vxa4[ix1+mx*(iy1 + my*iz1)] : vxa8[ix1+mx*(iy1 + my*iz1)];
 
 	  double vx = vx000*x1*y1*z1 
 	    +         vx100*x0*y1*z1 
@@ -189,14 +195,14 @@ void MethodTrace::compute ( Block * block) throw()
 	    +         vx011*x1*y0*z0 
 	    +         vx111*x0*y0*z0;
 
-	  double vy000 = vya[ix0+mx*(iy0 + my*iz0)];
-	  double vy100 = vya[ix1+mx*(iy0 + my*iz0)];
-	  double vy010 = vya[ix0+mx*(iy1 + my*iz0)];
-	  double vy110 = vya[ix1+mx*(iy1 + my*iz0)];
-	  double vy001 = vya[ix0+mx*(iy0 + my*iz1)];
-	  double vy101 = vya[ix1+mx*(iy0 + my*iz1)];
-	  double vy011 = vya[ix0+mx*(iy1 + my*iz1)];
-	  double vy111 = vya[ix1+mx*(iy1 + my*iz1)];
+	  double vy000 = is_single ? vya4[ix0+mx*(iy0 + my*iz0)] : vya8[ix0+mx*(iy0 + my*iz0)];
+	  double vy100 = is_single ? vya4[ix1+mx*(iy0 + my*iz0)] : vya8[ix1+mx*(iy0 + my*iz0)];
+	  double vy010 = is_single ? vya4[ix0+mx*(iy1 + my*iz0)] : vya8[ix0+mx*(iy1 + my*iz0)];
+	  double vy110 = is_single ? vya4[ix1+mx*(iy1 + my*iz0)] : vya8[ix1+mx*(iy1 + my*iz0)];
+	  double vy001 = is_single ? vya4[ix0+mx*(iy0 + my*iz1)] : vya8[ix0+mx*(iy0 + my*iz1)];
+	  double vy101 = is_single ? vya4[ix1+mx*(iy0 + my*iz1)] : vya8[ix1+mx*(iy0 + my*iz1)];
+	  double vy011 = is_single ? vya4[ix0+mx*(iy1 + my*iz1)] : vya8[ix0+mx*(iy1 + my*iz1)];
+	  double vy111 = is_single ? vya4[ix1+mx*(iy1 + my*iz1)] : vya8[ix1+mx*(iy1 + my*iz1)];
 
 	  double vy = vy000*x1*y1*z1 
 	    +         vy100*x0*y1*z1 
@@ -207,14 +213,14 @@ void MethodTrace::compute ( Block * block) throw()
 	    +         vy011*x1*y0*z0 
 	    +         vy111*x0*y0*z0;
 
-	  double vz000 = vza[ix0+mx*(iy0 + my*iz0)];
-	  double vz100 = vza[ix1+mx*(iy0 + my*iz0)];
-	  double vz010 = vza[ix0+mx*(iy1 + my*iz0)];
-	  double vz110 = vza[ix1+mx*(iy1 + my*iz0)];
-	  double vz001 = vza[ix0+mx*(iy0 + my*iz1)];
-	  double vz101 = vza[ix1+mx*(iy0 + my*iz1)];
-	  double vz011 = vza[ix0+mx*(iy1 + my*iz1)];
-	  double vz111 = vza[ix1+mx*(iy1 + my*iz1)];
+	  double vz000 = is_single ? vza4[ix0+mx*(iy0 + my*iz0)] : vza8[ix0+mx*(iy0 + my*iz0)];
+	  double vz100 = is_single ? vza4[ix1+mx*(iy0 + my*iz0)] : vza8[ix1+mx*(iy0 + my*iz0)];
+	  double vz010 = is_single ? vza4[ix0+mx*(iy1 + my*iz0)] : vza8[ix0+mx*(iy1 + my*iz0)];
+	  double vz110 = is_single ? vza4[ix1+mx*(iy1 + my*iz0)] : vza8[ix1+mx*(iy1 + my*iz0)];
+	  double vz001 = is_single ? vza4[ix0+mx*(iy0 + my*iz1)] : vza8[ix0+mx*(iy0 + my*iz1)];
+	  double vz101 = is_single ? vza4[ix1+mx*(iy0 + my*iz1)] : vza8[ix1+mx*(iy0 + my*iz1)];
+	  double vz011 = is_single ? vza4[ix0+mx*(iy1 + my*iz1)] : vza8[ix0+mx*(iy1 + my*iz1)];
+	  double vz111 = is_single ? vza4[ix1+mx*(iy1 + my*iz1)] : vza8[ix1+mx*(iy1 + my*iz1)];
 
 	  double vz = vz000*x1*y1*z1 
 	    +         vz100*x0*y1*z1 
@@ -228,8 +234,6 @@ void MethodTrace::compute ( Block * block) throw()
 	  xa[ip*dp] += vx*dt;
 	  ya[ip*dp] += vy*dt;
 	  za[ip*dp] += vz*dt;
-
-
 	}
       }
     }
@@ -248,9 +252,15 @@ double MethodTrace::timestep (Block * block) const throw()
 
     Field    field    = block->data()->field();
 
-    double * vx = (double *) field.values("velocity_x");
-    double * vy = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
-    double * vz = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
+    union { float * vxa4; double * vxa8; };
+    union { float * vya4; double * vya8; };
+    union { float * vza4; double * vza8; };
+
+    // NOTE: union so v?a4 also initialized
+
+    vxa8 = (double *) field.values("velocity_x");
+    vya8 = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
+    vza8 = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
 
     double xm,ym,zm;
     double xp,yp,zp;
@@ -266,6 +276,11 @@ double MethodTrace::timestep (Block * block) const throw()
     my = (rank >= 2) ? ny + 2*gy : 1;
     mz = (rank >= 3) ? nz + 2*gz : 1;
 
+    // Get velocity precision: ASSUMES precision same for all axes and
+    // is single or double
+
+    const bool is_single = (field.precision (field.field_id("velocity_x")) == precision_single);
+
     const double hx = (xp-xm)/nx;
     const double hy = (yp-ym)/ny;
     const double hz = (zp-zm)/nz;
@@ -273,15 +288,18 @@ double MethodTrace::timestep (Block * block) const throw()
     if (rank == 1) {
       for (int ix=0; ix<mx; ix++) {
 	int i = ix;
-	double dt_vx = hx / MAX(fabs(vx[i]),1e-6);
+	double vx = is_single ? vxa4[i] : vxa8[i];
+	double dt_vx = hx / MAX(fabs(vx),1e-6);
 	dt = MIN(dt,dt_vx);
       }
     } else if (rank == 2) {
       for (int iy=0; iy<my; iy++) {
 	for (int ix=0; ix<mx; ix++) {
 	  int i = ix + mx*iy;
-	  double dt_vx = hx / MAX(fabs(vx[i]),1e-6);
-	  double dt_vy = hy / MAX(fabs(vy[i]),1e-6);
+	  double vx = is_single ? vxa4[i] : vxa8[i];
+	  double vy = is_single ? vya4[i] : vya8[i];
+	  double dt_vx = hx / MAX(fabs(vx),1e-6);
+	  double dt_vy = hy / MAX(fabs(vy),1e-6);
 	  dt = MIN(dt,dt_vx);
 	  dt = MIN(dt,dt_vy);
 	}
@@ -291,9 +309,12 @@ double MethodTrace::timestep (Block * block) const throw()
 	for (int iy=0; iy<my; iy++) {
 	  for (int ix=0; ix<mx; ix++) {
 	    int i = ix + mx*(iy + my*iz);
-	    double dt_vx = hx / MAX(fabs(vx[i]),1e-6);
-	    double dt_vy = hy / MAX(fabs(vy[i]),1e-6);
-	    double dt_vz = hz / MAX(fabs(vz[i]),1e-6);
+	    double vx = fabs(is_single ? vxa4[i] : vxa8[i]);
+	    double vy = fabs(is_single ? vya4[i] : vya8[i]);
+	    double vz = fabs(is_single ? vza4[i] : vza8[i]);
+	    double dt_vx = hx / MAX(fabs(vx),1e-6);
+	    double dt_vy = hy / MAX(fabs(vy),1e-6);
+	    double dt_vz = hz / MAX(fabs(vz),1e-6);
 	    dt = MIN(dt,dt_vx);
 	    dt = MIN(dt,dt_vy);
 	    dt = MIN(dt,dt_vz);
