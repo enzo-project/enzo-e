@@ -526,27 +526,21 @@ void Block::particle_scatter_neighbors_
 	int iy = (rank >= 2) ? (y + 2) : 0;
 	int iz = (rank >= 3) ? (z + 2) : 0;
 
-	int i = ix + 4*(iy + 4*iz);
-
-	if (! (0 <= ix && ix < 4) ) {
-	  printf ("ix iy iz %d %d %d\n",ix,iy,iz);
-	  printf ("x y z %f %f %f\n",x,y,z);
-	  printf ("xa ya za %f %f %f\n",xa[ip*d],ya[ip*d],za[ip*d]);
-	  printf ("xm ym zm %f %f %f\n",xm,ym,zm);
-	  printf ("xp yp zp %f %f %f\n",xp,yp,zp);
-	  fflush(stdout);
-	  ASSERT1 ("Block::particle_scatter_neighbors_",
-		   "particle data index ix = %d out of bounds",
-		   ix,(0 <= ix && ix < 4));
+	if (! (0 <= ix && ix < 4) ||
+	    ! (0 <= iy && iy < 4) ||
+	    ! (0 <= iz && iz < 4)) {
+	  
+	  printf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
+	  printf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
+	  printf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
+	  printf ("%d xm ym zm %f %f %f\n",CkMyPe(),xm,ym,zm);
+	  printf ("%d xp yp zp %f %f %f\n",CkMyPe(),xp,yp,zp);
+	  ERROR3 ("Block::particle_scatter_neighbors_",
+		  "particle indices (ix,iy,iz) = (%d,%d,%d) out of bounds",
+		  ix,iy,iz);
 	}
-	ASSERT1 ("Block::particle_scatter_neighbors_",
-		 "particle data index iy = %d out of bounds",
-		 iy,(0 <= iy && iy < 4));
-	fflush(stdout);
-	ASSERT1 ("Block::particle_scatter_neighbors_",
-		 "particle data index iz = %d out of bounds",
-		 iz,(0 <= iz && iz < 4));
-	fflush(stdout);
+
+	const int i = ix + 4*(iy + 4*iz);
 	index[ip] = i;
 	bool in_block = true;
 	in_block = in_block && (!(rank >= 1) || (1 <= ix && ix <= 2));
