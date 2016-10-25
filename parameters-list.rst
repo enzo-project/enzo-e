@@ -1864,7 +1864,7 @@ perform and on what schedule.
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is *not* of :p:`type` :t:`"restart"`
 
-:e:`This parameter specifies the names of files in the corresponding file_group.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), and "proc" (the physical processor rank).  The file name should include an appropriate extension, e.g. ".png" for "image" output, and ".h5" or ".h5" for "data" output.  Example: ["projection-%04d.png", "cycle"].`
+:e:`This parameter specifies the names of files in the corresponding file_group.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), "proc" (the process rank), and "flipflop" (alternating 0 and 1, which can be useful for checkpoint directories).  The file name should include an appropriate extension, e.g. ".png" for "image" output, and ".h5" or ".h5" for "data" output.  Example: ["projection-%04d.png", "cycle"].`
 
 ----
 
@@ -1875,7 +1875,7 @@ perform and on what schedule.
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"restart"`
 
-:e:`This parameter specifies the names of output restart parameter files.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), and "proc" (the physical processor rank).  Example: ["Restart-%02d", "count"].`
+:e:`This parameter specifies the names of output restart parameter files.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), "proc" (the process rank), and "flipflop" (alternating 0 and 1, which can be useful for checkpoint directories).  Example: ["Checkpoint-%d", "flipflop"].`
 
 ----
 
