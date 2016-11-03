@@ -7,6 +7,7 @@
 
 module enzo {
 
+  readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
   readonly enzo_float EnzoBlock::ComovingBoxSize[CONFIG_NODE_SIZE];
@@ -98,8 +99,6 @@ module enzo {
     entry EnzoSimulation (const char filename[n], int n);
 
     entry void r_startup_begun (CkReductionMsg *);
-    entry void r_startup_finished (CkReductionMsg *);
-    entry void p_read_parameters();
     entry void r_write_checkpoint ();
   }
 

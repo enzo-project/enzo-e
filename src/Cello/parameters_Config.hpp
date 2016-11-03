@@ -260,6 +260,9 @@ public: // interface
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
 
+  /// Write Config attributes to a file
+  void write (FILE * fp);
+  
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -458,6 +461,8 @@ protected: // functions
 		      const std::string group   );
 
 };
+
+extern Config g_config;
 
 #endif /* PARAMETERS_CONFIG_HPP */
 

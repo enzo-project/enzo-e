@@ -10,6 +10,8 @@
 
 //----------------------------------------------------------------------
 
+EnzoConfig g_enzo_config;
+
 EnzoConfig::EnzoConfig() throw ()
   :
 #ifdef CONFIG_USE_GRACKLE
@@ -569,10 +571,130 @@ void EnzoConfig::read(Parameters * p) throw()
   }  
 #endif /* CONFIG_USE_GRACKLE */
 
-  //======================================================================
-
   TRACE("END   EnzoConfig::read()");
 }
 
+//======================================================================
+
+void EnzoConfig::write(FILE * fp)
+{
+  fprintf (fp,"EnzoConfig\n\n");
+  fprintf (fp,"ppm_density_floor %g\n",ppm_density_floor);
+  fprintf (fp,"ppm_diffusion = %s\n",ppm_diffusion?"true":"false");
+  fprintf (fp,"ppm_dual_energy = %s\n",ppm_dual_energy?"true":"false");
+  fprintf (fp,"ppm_dual_energy_eta_1 = %g\n",ppm_dual_energy_eta_1);
+  fprintf (fp,"ppm_dual_energy_eta_2 = %g\n",ppm_dual_energy_eta_2);
+  fprintf (fp,"ppm_flattening = %d\n",ppm_flattening);
+  fprintf (fp,"ppm_minimum_pressure_support_parameter = %d\n",ppm_minimum_pressure_support_parameter);
+  fprintf (fp,"ppm_number_density_floor = %g\n",ppm_number_density_floor);
+  fprintf (fp,"ppm_pressure_floor = %g\n",ppm_pressure_floor);
+  fprintf (fp,"ppm_pressure_free = %s\n",ppm_pressure_free?"true":"false");
+  fprintf (fp,"ppm_steepening = %s\n",ppm_steepening?"true":"false");
+  fprintf (fp,"ppm_temperature_floor = %g\n",ppm_temperature_floor);
+  fprintf (fp,"ppm_use_minimum_pressure_support = %s\n",ppm_use_minimum_pressure_support?"true":"false");
+  fprintf (fp,"ppm_mol_weight = %g\n",ppm_mol_weight);
+
+  fprintf (fp,"field_gamma = %g\n",field_gamma);
+
+  // Cosmology (NOT ACCESSED)
+  fprintf (fp,"physics_cosmology = %s\n",physics_cosmology?"true":"false");
+  fprintf (fp,"physics_cosmology_comoving_box_size = %g\n",physics_cosmology_comoving_box_size);
+  fprintf (fp,"physics_cosmology_hubble_constant_now = %g\n",physics_cosmology_hubble_constant_now);
+  fprintf (fp,"physics_cosmology_initial_redshift = %g\n",physics_cosmology_initial_redshift);
+  fprintf (fp,"physics_cosmology_max_expansion_rate = %g\n",physics_cosmology_max_expansion_rate);
+  fprintf (fp,"physics_cosmology_omega_lamda_now = %g\n",physics_cosmology_omega_lamda_now);
+  fprintf (fp,"physics_cosmology_omega_matter_now = %g\n",physics_cosmology_omega_matter_now);
+
+  // EnzoInitialSedovArray[23]
+  fprintf (fp,"initial_sedov_rank = %d\n",initial_sedov_rank);
+  fprintf (fp,"initial_sedov_array = %d %d %d\n",initial_sedov_array[0],initial_sedov_array[1],initial_sedov_array[2]);
+  fprintf (fp,"initial_sedov_radius_relative = %g\n",initial_sedov_radius_relative);
+  fprintf (fp,"initial_sedov_pressure_in = %g\n",initial_sedov_pressure_in);
+  fprintf (fp,"initial_sedov_pressure_out = %g\n",initial_sedov_pressure_out);
+  fprintf (fp,"initial_sedov_density = %g\n",initial_sedov_density);
+
+  fprintf (fp,"initial_turbulence_density = %g\n",initial_turbulence_density);
+  fprintf (fp,"initial_turbulence_pressure = %g\n",initial_turbulence_pressure);
+  fprintf (fp,"initial_turbulence_temperature = %g\n",initial_turbulence_temperature);
+
+  //   std::string                initial_pm_field;
+  fprintf (fp,"initial_pm_mpp = %g\n",initial_pm_mpp);
+  fprintf (fp,"initial_pm_level = %d\n",initial_pm_level);
+
+  fprintf (fp,"initial_soup_rank = %d\n",initial_soup_rank);
+  //   std::string                initial_soup_file;
+  fprintf (fp,"initial_soup_rotate = %s\n",initial_soup_rotate?"true":"false");
+  fprintf (fp,"initial_soup_array = %d %d %d\n",initial_soup_array[0],initial_soup_array[1],initial_soup_array[2]);
+  fprintf (fp,"initial_soup_d_pos = %g %g %g\n",initial_soup_d_pos[0],initial_soup_d_pos[1],initial_soup_d_pos[2]);
+  fprintf (fp,"initial_soup_d_size = %g %g %g\n",initial_soup_d_size[0],initial_soup_d_size[1],initial_soup_d_size[2]);
+  fprintf (fp,"initial_soup_pressure_in = %g\n",initial_soup_pressure_in);
+  fprintf (fp,"initial_soup_pressure_out = %g\n",initial_soup_pressure_out);
+  fprintf (fp,"initial_soup_density = %g\n",initial_soup_density);
+
+  // EnzoProlong
+  //   std::string                interpolation_method;
+
+  // EnzoMethodHeat
+  fprintf (fp,"method_heat_alpha = %g\n",method_heat_alpha);
+
+  // EnzoMethodNull
+  fprintf (fp,"method_null_dt = %g\n",method_null_dt);
+
+  // EnzoMethodTurbulence
+  fprintf (fp,"method_turbulence_edot = %g\n",method_turbulence_edot);
+  fprintf (fp,"method_turbulence_mach_number = %g\n",method_turbulence_mach_number);
+
+  // EnzoMethodGravity
+  //   std::string                method_gravity_potential_field;
+  //   std::string                method_gravity_density_field;
+
+  // EnzoMethodGravityCg
+  fprintf (fp,"method_gravity_cg_iter_max = %d\n",method_gravity_cg_iter_max);
+  fprintf (fp,"method_gravity_cg_res_tol = %g\n",method_gravity_cg_res_tol);
+  fprintf (fp,"method_gravity_cg_grav_const = %g\n",method_gravity_cg_grav_const);
+  fprintf (fp,"method_gravity_cg_diag_precon = %s\n",method_gravity_cg_diag_precon?"true":"false");
+  fprintf (fp,"method_gravity_cg_monitor_iter = %d\n",method_gravity_cg_monitor_iter);
+
+  // EnzoMethodGravityBiCGStab
+  fprintf (fp,"method_gravity_bicgstab_iter_max = %d\n",method_gravity_bicgstab_iter_max);
+  fprintf (fp,"method_gravity_bicgstab_res_tol = %g\n",method_gravity_bicgstab_res_tol);
+  fprintf (fp,"method_gravity_bicgstab_grav_const = %g\n",method_gravity_bicgstab_grav_const);
+  fprintf (fp,"method_gravity_bicgstab_diag_precon = %s\n",method_gravity_bicgstab_diag_precon?"true":"false");
+  fprintf (fp,"method_gravity_bicgstab_monitor_iter = %d\n",method_gravity_bicgstab_monitor_iter);
+
+  // EnzoMethodGravityMlat
+  // EnzoMethodGravityMg0
+  //   std::string                method_gravity_mg_type;
+  fprintf (fp,"method_gravity_mg_iter_max = %d\n",method_gravity_mg_iter_max);
+  fprintf (fp,"method_gravity_mg_res_tol = %g\n",method_gravity_mg_res_tol);
+  fprintf (fp,"method_gravity_mg_grav_const = %g\n",method_gravity_mg_grav_const);
+  fprintf (fp,"method_gravity_mg_monitor_iter = %d\n",method_gravity_mg_monitor_iter);
+//   std::string                method_gravity_mg_smooth;
+  fprintf (fp,"method_gravity_mg_smooth_weight = %g\n",method_gravity_mg_smooth_weight);
+  fprintf (fp,"method_gravity_mg_smooth_pre = %d\n",method_gravity_mg_smooth_pre);
+  fprintf (fp,"method_gravity_mg_smooth_coarse = %d\n",method_gravity_mg_smooth_coarse);
+  fprintf (fp,"method_gravity_mg_smooth_post = %d\n",method_gravity_mg_smooth_post);
+  //   std::string                method_gravity_mg_restrict;
+  //   std::string                method_gravity_mg_prolong;
+  fprintf (fp,"method_gravity_mg_min_level = %d\n",method_gravity_mg_min_level);
+  fprintf (fp,"method_gravity_mg_max_level = %d\n",method_gravity_mg_max_level);
+
+  // EnzoMethodPm
+
+  //   std::string                method_pm_deposit_type;
+  fprintf (fp,"method_pm_update_max_dt = %g\n",method_pm_update_max_dt);
+
+#ifdef CONFIG_USE_GRACKLE
+
+  // EnzoMethodGrackle
+
+  //   code_units      method_grackle_units;
+  //   chemistry_data  method_grackle_chemistry;
+
+#endif /* CONFIG_USE_GRACKLE */
+
+  ((Config*)this)->write(fp);
+  
+}
 //======================================================================
 

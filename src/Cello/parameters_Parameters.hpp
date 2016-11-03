@@ -234,19 +234,7 @@ private: // functions
   std::string parameter_name_(std::string parameter)
   {
     bool is_full_parameter = (parameter.find(":") != std::string::npos);
-
-    std::string parameter_name;
-
-    if (! is_full_parameter) {
-      parameter_name = "";
-      for (int i=0; ( i < MAX_GROUP_DEPTH) && current_group_[i] != 0; i++) {
-	parameter_name = parameter_name + current_group_[i] + ":";
-      }
-      parameter_name = parameter_name + parameter;
-    } else {
-      parameter_name = parameter;
-    }
-    return parameter_name;
+    return (is_full_parameter ? parameter : full_name (parameter));
   }
 
   /// Return the Param pointer for the specified list parameter element
@@ -271,10 +259,7 @@ private: // functions
 private: // attributes
 
   /// Stack of current grouping
-  char * current_group_[MAX_GROUP_DEPTH];
-
-  /// Top of the current_group_ stack
-  int current_group_depth_;
+  std::vector <std::string> current_group_;
 
   /// Map parameter name to Param object
   std::map<std::string, Param *>  parameter_map_;
@@ -297,6 +282,8 @@ extern "C" {
   /// C function for printing parameters to stdout
   void cello_parameters_print();
 }
+
+extern Parameters g_parameters;
 
 //----------------------------------------------------------------------
 

@@ -132,7 +132,6 @@ const char * op_name[] = {
     return node;
   }
 
-
   /* The head of the linked list of parameter / value pairs */
 
   struct param_struct * param_head = NULL; /* head of entire list */

@@ -9,7 +9,7 @@
 
 #include "charm_enzo.hpp"
 
-// #define DEBUG_NEW_REFRESH
+// #define DEBUG_ENZO_FACTORY
 
 //----------------------------------------------------------------------
 
@@ -41,6 +41,11 @@ CProxy_Block EnzoFactory::create_block_array
 {
   CProxy_EnzoBlock enzo_block_array;
 
+#ifdef DEBUG_ENZO_FACTORY
+  CkPrintf ("%d EnzoFactory::create_block_array %d %d %d)\n",CkMyPe(), nx,ny,nz);
+  CkPrintf ("%d EnzoFactory::create_block_array() num_field_blocks %d\n",
+	    CkMyPe(), num_field_blocks);
+#endif
   
   //  CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
   CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
@@ -183,7 +188,7 @@ Block * EnzoFactory::create_block
  Simulation * simulation
  ) const throw()
 {
-#ifdef DEBUG_NEW_REFRESH
+#ifdef DEBUG_ENZO_FACTORY
   CkPrintf ("%d EnzoFactory::create_block %d %d %d)\n",CkMyPe(), nx,ny,nz);
   CkPrintf ("%d EnzoFactory::create_block() num_field_blocks %d  count_adapt %d\n",
 	    CkMyPe(), num_field_blocks,count_adapt);

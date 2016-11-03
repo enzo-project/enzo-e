@@ -9,21 +9,19 @@
 
 #include "parameters.hpp"
 
-// Parameters Parameters::instance_; // (singleton design pattern)
+Parameters g_parameters;
 
 //----------------------------------------------------------------------
 
 Parameters::Parameters(Monitor * monitor) 
   throw()
-  : current_group_depth_(0),
+  : current_group_(),
     parameter_map_(),
     parameter_tree_(new ParamNode("Cello")),
     monitor_(monitor),
     lmonitor_(true)
 {
   if (! monitor_) lmonitor_ = false;
-
-  for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
 }
 
 //----------------------------------------------------------------------
@@ -31,14 +29,13 @@ Parameters::Parameters(Monitor * monitor)
 Parameters::Parameters(const char * file_name,
 		       Monitor * monitor) 
   throw()
-  : current_group_depth_(0),
+  : current_group_(),
     parameter_map_(),
     parameter_tree_(new ParamNode("Cello")),
     monitor_(monitor),
     lmonitor_(true)
 {
   if (! monitor_) lmonitor_ = false;
-  for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
   read(file_name);
 }
 
@@ -56,10 +53,6 @@ Parameters::~Parameters()
     delete it_param->second;
   }
   delete parameter_tree_;
-  for (int i=0; i<current_group_depth_; i++) {
-    free (current_group_[i]);
-    current_group_[i] = 0;
-  }
 }
 
 //----------------------------------------------------------------------
@@ -67,20 +60,46 @@ Parameters::~Parameters()
 void Parameters::pup (PUP::er &p)
 {
   TRACEPUP;
-  WARNING("Parameters::pup",
-	  "skipping Parameters::pup(): Config used for parameters instead");
 
-  p | current_group_depth_;
-  WARNING("Parameters::pup","skipping current_group_ (array of char *: change to std::string)");
-  //    PUParray(p,current_group_,MAX_GROUP_DEPTH);
-  WARNING("Parameters::pup","skipping parameter_map_ (map <std::string,Param *>)");
-  //    p | parameter_map_;
-  WARNING("Parameters::pup","skipping parameter_tree_");
-  //  p | *parameter_tree_;
-  WARNING("Parameters::pup","skipping monitor");
-  //  p | *monitor_; 
-  p | lmonitor_;
+  p | current_group_;
 
+  int n = 0;
+  if (!p.isUnpacking()) {
+    // Figure out size
+    std::map<std::string, Param *>::iterator it_param;
+    for (it_param =  parameter_map_.begin();
+	 it_param != parameter_map_.end();
+	 ++it_param) {
+      n++;
+    }
+  }
+  p | n;
+  if (!p.isUnpacking()) {
+    std::map<std::string, Param *>::iterator it_param;
+    for (it_param =  parameter_map_.begin();
+	 it_param != parameter_map_.end();
+	 ++it_param) {
+      std::string name = it_param->first;
+      Param * param = it_param->second;
+      p | name;
+      int lparam = (param != NULL);
+      p | lparam;
+      if (lparam) p | *param;
+    } 
+  } else {
+    for (int i=0; i<n; i++) {
+      std::string name;
+      p | name;
+      int lparam=0;
+      p | lparam;
+      Param * param = NULL;
+      if (lparam) {
+	param = new Param;
+	p | *param;
+      }
+      parameter_map_[name] = param;
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -145,12 +164,12 @@ void Parameters::write ( const char * file_name )
 /// @param  file_name   An opened output parameter file or stdout
 {
 
-  FILE * file_pointer = fopen(file_name,"w");
+  FILE * fp = fopen(file_name,"w");
 
   ASSERT1("Parameters::write",
 	  "Error opening parameter file '%s' for writing",
 	  file_name,
-	  ( file_pointer != NULL ) );
+	  ( fp != NULL ) );
 
   // "Previous" groups are empty
   int n_prev = 0;
@@ -193,22 +212,22 @@ void Parameters::write ( const char * file_name )
       for (int i=i_group; i<n_prev; i++) {
 	--group_depth;
 	indent_string = indent_string.substr(0, indent_string.size()-indent_size);
-	fprintf (file_pointer, "%s}%c\n",indent_string.c_str(),
+	fprintf (fp, "%s}%c\n",indent_string.c_str(),
 		 (group_depth==0) ? '\n' : ';' );
       }
 
       // Begin new groups
 
       for (int i=i_group; i<n_curr; i++) {
-	fprintf (file_pointer,"%s%s {\n",indent_string.c_str(),
+	fprintf (fp,"%s%s {\n",indent_string.c_str(),
 		 group_curr[i].c_str());
 	indent_string = indent_string + indent_amount;
 	++group_depth;
       }
 
       // Print parameter
-      fprintf (file_pointer,"%s",indent_string.c_str());
-      it_param->second->write(file_pointer,it_param->first);
+      fprintf (fp,"%s",indent_string.c_str());
+      it_param->second->write(fp,it_param->first);
 
       // Copy current groups to previous groups (inefficient)
       n_prev = n_curr;
@@ -216,11 +235,6 @@ void Parameters::write ( const char * file_name )
 	group_prev[i] = group_curr[i];
       }
 
-    } else {
-      // OK--just means parameter default was used
-      // WARNING1("Parameters::write",
-      // 	       "uninitialized parameter %s accessed",
-      // 	       it_param->first.c_str());
     }
   }
 
@@ -228,11 +242,11 @@ void Parameters::write ( const char * file_name )
 
   for (int i=0; i<n_prev; i++) {
     indent_string = indent_string.substr(indent_size,std::string::npos);
-    fprintf (file_pointer, "%s}\n",indent_string.c_str());
+    fprintf (fp, "%s}\n",indent_string.c_str());
     --group_depth;
   }
 
-  if (file_pointer != stdout) fclose(file_pointer);
+  if (fp != stdout) fclose(fp);
 
 }
 
@@ -776,14 +790,14 @@ void Parameters::list_evaluate_logical
 
 std::string Parameters::group(int i) const throw()
 {
-  return (i < current_group_depth_) ? current_group_[i] : "";
+  return (i < current_group_.size()) ? current_group_[i] : "";
 }
 
 //----------------------------------------------------------------------
 
 int Parameters::group_depth() const throw()
 {
-  return current_group_depth_;
+  return current_group_.size();
 }
 
 //----------------------------------------------------------------------
@@ -792,7 +806,7 @@ int Parameters::group_count() const throw()
 {
   // Find the parameter node for the current list of groups
   ParamNode * param_node = parameter_tree_;
-  for (int i=0; i<current_group_depth_; i++) {
+  for (int i=0; i<current_group_.size(); i++) {
     if (param_node->subnode(current_group_[i]) != 0) {
       param_node = param_node->subnode(current_group_[i]);
     }
@@ -805,31 +819,28 @@ int Parameters::group_count() const throw()
 
 void Parameters::group_push(std::string str) throw()
 {
-  ASSERT2("Parameters::group_push",
-	 "Parameter grouping depth %d exceeds MAX_GROUP_DEPTH = %d",
-	 current_group_depth_,MAX_GROUP_DEPTH,
-	 (current_group_depth_ < MAX_GROUP_DEPTH - 1));
-
-  current_group_[current_group_depth_++] = strdup(str.c_str());
+  int n = current_group_.size();
+  current_group_.resize(n + 1);
+  current_group_[n] = str;
 }
 
 //----------------------------------------------------------------------
 
 void Parameters::group_pop(std::string group) throw()
 {
+  int n = current_group_.size();
+  
   ASSERT("Parameters::group_pop",
 	"More calls to group_pop() than group_push()",
-	(current_group_depth_ > 0));
+	 (n > 0));
 
-  if (group != "" && group != current_group_[current_group_depth_-1]) {
+  if (group != "" && group != current_group_[n-1]) {
     WARNING2("Parameters::group_pop",
 	     "group_pop(%s) does not match group_push(%s)",
-	     group.c_str(),current_group_[current_group_depth_-1]);
+	     group.c_str(),current_group_[n-1]);
   }
 
-  --current_group_depth_;
-  free (current_group_[current_group_depth_]);
-  current_group_[current_group_depth_] = NULL;
+  current_group_.resize(n - 1);
   
 }
 
@@ -837,41 +848,25 @@ void Parameters::group_pop(std::string group) throw()
 
 void Parameters::group_set(int index, std::string group) throw()
 {
-  ASSERT4("Parameters::group_set",
-	  "group_set(%d,%s) index %d exceeds MAX_GROUP_DEPTH = %d",
-	  index,group.c_str(),index,MAX_GROUP_DEPTH,
-	  (index < MAX_GROUP_DEPTH));
-
-  for (int i=index; i<current_group_depth_; i++) {
-    if (current_group_[i]) {
-      free (current_group_[i]);
-      current_group_[i] = NULL;
-    }
-  }
-  current_group_depth_ = index + 1;
-  current_group_[index] = strdup(group.c_str());
+  current_group_.resize(index+1);
+  current_group_[index] = group;
 }
 
 //----------------------------------------------------------------------
 
 void Parameters::group_clear() throw ()
 {
-  for (int i=0; i<current_group_depth_; i++) {
-    if (current_group_[i]) {
-      free (current_group_[i]);
-      current_group_[i] = NULL;
-    }
-  }
-  current_group_depth_ = 0;
+  current_group_.resize(0);
 }
 
 //----------------------------------------------------------------------
 
 std::string Parameters::full_name(std::string parameter) throw()
 {
+  int n = current_group_.size();
   std::string full_name = "";
-  for (int i=0; i<current_group_depth_; i++) {
-    if (current_group_[i]) full_name = full_name + current_group_[i] + ":";
+  for (int i=0; i<n; i++) {
+    full_name = full_name + current_group_[i] + ":";
   }
   full_name = full_name + parameter;
   return full_name;
@@ -969,11 +964,11 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 //----------------------------------------------------------------------
 
 int Parameters::readline_ 
-( FILE*  file_pointer, 
+( FILE*  fp, 
   char * buffer, 
   int    buffer_length ) 
   throw()
-/// @param   file_pointer       the opened input file
+/// @param   fp                 the opened input file
 /// @param   buffer             a character string buffer
 /// @param   buffer_length      size of the buffer
 /// @return  Whether the end of the file has been reached
@@ -991,7 +986,7 @@ int Parameters::readline_
 
   int c = 0;
   for (i=0; c != EOF && c != '\n' && i < buffer_length-1; i++) {
-    buffer[i] = c = fgetc(file_pointer);
+    buffer[i] = c = fgetc(fp);
   }
 
   // Back up i to last character read

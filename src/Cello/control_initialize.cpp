@@ -20,7 +20,6 @@ void Simulation::initialize() throw()
   set_phase(phase_initial);
 
   initialize_config_();
-  parameters_->set_monitor(false);
 
   initialize_monitor_();
   initialize_memory_();

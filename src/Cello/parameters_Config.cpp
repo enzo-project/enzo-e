@@ -10,6 +10,8 @@
 #include "cello.hpp"
 #include "parameters.hpp"
 
+Config g_config;
+
 //----------------------------------------------------------------------
 
 void Config::pup (PUP::er &p)
@@ -1224,6 +1226,177 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   return index_schedule_++;
 }
 
+void Config::write (FILE * fp)
+{
+  // Adapt
+  // int                        num_adapt;
+  // std::vector <std::string>  adapt_list;
+  // int                        adapt_interval;
+  // int                        adapt_min_face_rank;
+  // std::vector <std::string>  adapt_type;
+  // std::vector 
+  // < std::vector<std::string> > adapt_field_list;
+  // std::vector <double>       adapt_min_refine;
+  // std::vector <double>       adapt_max_coarsen;
+  // std::vector <double>       adapt_min_refine2;
+  // std::vector <double>       adapt_max_coarsen2;
+  // std::vector <int>          adapt_max_level;
+  // std::vector <double>       adapt_level_exponent;
+  // std::vector <char>         adapt_include_ghosts;
+  // std::vector <std::string>  adapt_output;
+  
+  //  Balance (dynamic load balancing)
 
+  // int                        balance_schedule_index;
+
+  //  Boundary
+
+  // int                        num_boundary;
+  // std::vector<std::string>   boundary_list;
+  // std::vector<std::string>   boundary_type;
+  // std::vector<int>           boundary_axis;
+  // std::vector<int>           boundary_face;
+  // std::vector<int>           boundary_mask;
+  // std::vector<std::vector<std::string> >  
+  //                            boundary_field_list;
+
+  //  Domain
+
+  fprintf (fp,"domain_lower[] = %g %g %g\n",domain_lower[0],domain_lower[1],domain_lower[2]);
+  fprintf (fp,"domain_upper[] = %g %g %g\n",domain_upper[0],domain_upper[1],domain_upper[2]);
+
+  //  Field
+
+  // int                        num_fields;
+  // std::vector<std::string>   field_list;
+  // std::map<std::string,int>  field_index;
+  // int                        field_alignment;
+  // std::vector<int>           field_centering [3];
+  // int                        field_ghost_depth[3];
+  // int                        field_padding;
+  // int                        field_precision;
+  // std::string                field_prolong;
+  // std::string                field_restrict;
+  // std::vector< std::vector<std::string> >  field_group_list;
+
+  //  Initial
+
+  // int                        num_initial;
+  // std::vector<std::string>   initial_list;
+  // int                        initial_cycle;
+  fprintf (fp,"initial_time = %g\n",initial_time);
+
+  // std::string                initial_trace_field;
+  fprintf (fp,"initial_trace_mpp = %g\n",initial_trace_mpp);
+  // int                        initial_trace_dx;
+  // int                        initial_trace_dy;
+  // int                        initial_trace_dz;
+
+  //  Memory
+
+  // bool                       memory_active;
+  fprintf (fp,"memory_warning_mb = %g\n",memory_warning_mb);
+  fprintf (fp,"memory_limit_gb = %g\n",memory_limit_gb);
+
+  //  Mesh
+
+  // int                        mesh_root_blocks[3];
+  // int                        mesh_root_rank;
+  // int                        mesh_root_size[3];
+  // int                        mesh_min_level;
+  // int                        mesh_max_level;
+
+  //  Method
+
+  // int                        num_method;
+  fprintf (fp,"method_courant_global = %g\n",method_courant_global);
+  // std::vector<std::string>   method_list;
+  // std::vector<int>           method_schedule_index;
+  // std::vector<double>        method_courant;
+  // std::vector<double>        method_timestep;
+
+  //  Monitor
+
+  // bool                       monitor_debug;
+  // bool                       monitor_verbose;
+
+  //  Output
+
+  // int                         num_output;
+  // std::vector <std::string>   output_list;
+  // std::vector < std::string > output_type;
+  // std::vector < std::string > output_axis;
+  // std::vector < int >         output_image_block_size;
+  // std::vector < std::vector <double> > output_image_lower;
+  // std::vector < std::vector <double> > output_image_upper;
+  // std::vector < std::vector <double> > output_colormap;
+  // std::vector < std::string > output_image_type;
+  // std::vector < char >        output_image_log;
+  // std::vector < char >        output_image_abs;
+  // std::vector < std::string > output_image_mesh_color;
+  // std::vector < std::string > output_image_color_particle_attribute;
+  // std::vector < std::vector <int> > output_image_size;
+  // std::vector < std::string>  output_image_reduce_type;
+  // std::vector < char>         output_image_ghost;
+  // std::vector < int >         output_image_face_rank;
+  // std::vector < double>       output_image_min;
+  // std::vector < double>       output_image_max;
+  // std::vector < int >         output_schedule_index;
+  // std::vector < std::vector <std::string> >  output_dir;
+  // std::vector < int >         output_stride;
+  // std::vector < std::vector <std::string> >  output_field_list;
+  // std::vector < std::vector <std::string> > output_particle_list;
+  // std::vector < std::vector <std::string> >  output_name;
+
+  // int                        index_schedule_;
+  // std::vector< std::vector<double> > schedule_list;
+  // std::vector< std::string > schedule_type;
+  // std::vector< std::string > schedule_var;
+  // std::vector< double >      schedule_start;
+  // std::vector< double >      schedule_stop;
+  // std::vector< double >      schedule_step;
+
+  //  Particles
+
+  // int                        num_particles;  // number of particle types
+  // std::vector<std::string>   particle_list;
+  // std::map<std::string,int>  particle_index;
+  // std::vector<char>          particle_interleaved;
+
+  // std::vector< std::vector <std::string> > particle_constant_name;
+  // std::vector< std::vector <std::string> > particle_constant_type;
+  // std::vector< std::vector <double> >      particle_constant_value;
+
+  // std::vector< std::vector <std::string> > particle_attribute_name;
+  // std::vector< std::vector <std::string> > particle_attribute_type;
+  // std::vector <int>          particle_attribute_position[3];
+  // std::vector <int>          particle_attribute_velocity[3];
+
+  // int                        particle_batch_size;
+  // std::vector< std::vector<std::string> >  particle_group_list;
+
+  //  Performance
+
+  // std::vector<std::string>   performance_papi_counters;
+  // bool                       performance_warnings;
+
+  //  Restart
+
+  // std::string                restart_file;
+
+  //  Stopping
+
+  fprintf (fp,"stopping_cycle = %d\n",stopping_cycle);
+  // int                        stopping_cycle;
+  fprintf (fp,"stopping_time = %g\n",stopping_time);
+  fprintf (fp,"stopping_seconds = %g\n",stopping_seconds);
+  // int                        stopping_interval;
+
+  //  Testing
+
+  // int                        testing_cycle_final;
+  fprintf (fp,"testing_time_final = %g\n",testing_time_final);
+  fprintf (fp,"testing_time_tolerance = %g\n",testing_time_tolerance);
+}
 //======================================================================
 

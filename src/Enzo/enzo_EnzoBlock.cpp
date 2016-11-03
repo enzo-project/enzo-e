@@ -9,7 +9,7 @@
 
 #include "enzo.hpp"
 
-// #define DEBUG_NEW_REFRESH
+// #define DEBUG_ENZO_BLOCK
 
 //======================================================================
 
@@ -76,7 +76,9 @@ int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 void EnzoBlock::initialize(EnzoConfig * enzo_config,
 			   FieldDescr * field_descr)
 {
-
+#ifdef DEBUG_ENZO_BLOCK
+  CkPrintf ("%d DEBUG_ENZO_BLOCK EnzoBlock::initialize\n",CkMyPe());
+#endif
   int gx = enzo_config->field_ghost_depth[0];
   int gy = enzo_config->field_ghost_depth[1];
   int gz = enzo_config->field_ghost_depth[2];
@@ -182,7 +184,7 @@ EnzoBlock::EnzoBlock
 {
   initialize_enzo_();
   initialize();
-#ifdef DEBUG_NEW_REFRESH
+#ifdef DEBUG_ENZO_BLOCK
   CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
   print();
 #endif
@@ -207,7 +209,7 @@ void EnzoBlock::initialize_enzo_()
 
 EnzoBlock::~EnzoBlock()
 {
-#ifdef DEBUG_NEW_REFRESH
+#ifdef DEBUG_ENZO_BLOCK
   CkPrintf ("%d %p TRACE_BLOCK ~EnzoBlock(...)\n",CkMyPe(),this);
   print();
 #endif

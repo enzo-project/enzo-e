@@ -96,7 +96,7 @@ protected: // functions
 
 public: // attributes (static)
 
-  static double courant_global [CONFIG_NODE_SIZE];
+  static double courant_global;
 
 protected: // attributes
 

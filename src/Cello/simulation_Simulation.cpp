@@ -12,6 +12,8 @@
 #include "simulation.hpp"
 #include "charm_simulation.hpp"
 
+// #define DEBUG_SIMULATION
+
 Simulation::Simulation
 (
  const char *   parameter_file,
@@ -23,7 +25,7 @@ Simulation::Simulation
   fp_debug_(NULL),
 #endif
   factory_(NULL),
-  parameters_(NULL),
+  parameters_(&g_parameters),
   parameter_file_(parameter_file),
   rank_(0),
   cycle_(0),
@@ -32,7 +34,7 @@ Simulation::Simulation
   dt_(0),
   stop_(false),
   phase_(phase_unknown),
-  config_(NULL),
+  config_(&g_config),
   problem_(NULL),
   timer_(),
   performance_(NULL),
@@ -49,6 +51,14 @@ Simulation::Simulation
   sync_output_begin_(),
   sync_output_write_()
 {
+#ifdef DEBUG_SIMULATION
+  CkPrintf ("%d DEBUG_SIMULATION Simulation(parameter_file,n)\n",CkMyPe());
+  fflush(stdout);
+  char name[40];
+  sprintf (name,"parameters-%02d.text",CkMyPe());
+  parameters_->write(name);
+#endif
+  
   debug_open();
 
   monitor_ = Monitor::instance();
@@ -68,7 +78,7 @@ Simulation::Simulation()
   fp_debug_(NULL),
 #endif
   factory_(NULL),
-  parameters_(NULL),
+  parameters_(&g_parameters),
   parameter_file_(""),
   rank_(0),
   cycle_(0),
@@ -77,7 +87,7 @@ Simulation::Simulation()
   dt_(0),
   stop_(false),
   phase_(phase_unknown),
-  config_(NULL),
+  config_(&g_config),
   problem_(NULL),
   timer_(),
   performance_(NULL),
@@ -93,12 +103,22 @@ Simulation::Simulation()
   particle_descr_(NULL),
   sync_output_begin_(),
   sync_output_write_()
-{ TRACE("Simulation()"); }
+{
+#ifdef DEBUG_SIMULATION
+  CkPrintf ("%d DEBUG_SIMULATION Simulation()\n",CkMyPe());
+  fflush(stdout);
+#endif  
+  TRACE("Simulation()");
+}
 
 //----------------------------------------------------------------------
 
 void Simulation::pup (PUP::er &p)
 {
+#ifdef DEBUG_SIMULATION
+  CkPrintf ("%d DEBUG_SIMULATION Simulation::pup()\n",CkMyPe());
+  fflush(stdout);
+#endif  
   // NOTE: change this function whenever attributes change
 
   TRACEPUP;
@@ -168,7 +188,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     fp_debug_(NULL),
 #endif
     factory_(NULL),
-    parameters_(NULL),
+    parameters_(&g_parameters),
     parameter_file_(""),
     rank_(0),
     cycle_(0),
@@ -177,7 +197,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     dt_(0),
     stop_(false),
     phase_(phase_unknown),
-    config_(NULL),
+    config_(&g_config),
     problem_(NULL),
     timer_(),
     performance_(NULL),
@@ -194,7 +214,13 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_begin_(),
     sync_output_write_()
 
-{ TRACE("Simulation(CkMigrateMessage)"); }
+{
+#ifdef DEBUG_SIMULATION
+  CkPrintf ("%d DEBUG_SIMULATION Simulation(msg)\n",CkMyPe());
+  fflush(stdout);
+#endif  
+  TRACE("Simulation(CkMigrateMessage)");
+}
 
 //----------------------------------------------------------------------
 
@@ -221,8 +247,13 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
+#ifdef DEBUG_SIMULATION
+  CkPrintf ("%d DEBUG_SIMULATION Simulation::initialize_simulation_()\n",CkMyPe());
+  fflush(stdout);
+#endif  
+
   rank_ = config_->mesh_root_rank;
-  
+
   ASSERT ("Simulation::initialize_simulation_()", 
 	  "Parameter 'Mesh:root_rank' must be specified",
 	  rank_ != 0);
@@ -303,14 +334,6 @@ void Simulation::initialize_performance_() throw()
 void Simulation::initialize_config_() throw()
 {
   TRACE("BEGIN Simulation::initialize_config_");
-  if (config_ == NULL) {
-    config_ = new Config;
-    TRACE("Simulation::initialize_config_ calling Config::read()");
-    config_->read(parameters_);
-  }
-  if (CkMyPe() == 0) {
-    parameters_->write("parameters.out");
-  }
   TRACE("END   Simulation::initialize_config_");
 }
 
@@ -500,6 +523,10 @@ void Simulation::initialize_data_descr_() throw()
 
 void Simulation::initialize_hierarchy_() throw()
 {
+#ifdef DEBUG_SIMULATION
+  CkPrintf ("%d DEBUG_SIMULATION Simulation::initialize_hierarchy_()\n",CkMyPe());
+  fflush(stdout);
+#endif  
 
   ASSERT("Simulation::initialize_hierarchy_",
 	 "data must be initialized before hierarchy",

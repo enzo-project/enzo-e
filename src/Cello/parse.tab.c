@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.2.  */
+/* A Bison parser, made by GNU Bison 3.0.4.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.2"
+#define YYBISON_VERSION "3.0.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -197,12 +197,10 @@ const char * op_name[] = {
     return node;
   }
 
-
   /* The head of the linked list of parameter / value pairs */
 
   struct param_struct * param_head = NULL; /* head of entire list */
   struct param_struct * param_curr = NULL; /* head of current list */
-  struct param_struct * param_save = NULL; /* saved head of current list */
 
   /* The current groups and parameter type */
 
@@ -219,7 +217,6 @@ const char * op_name[] = {
     }
   };
 
-
   void copy_groups (char * group_dest[], char * group_src[]) {
     int i;
     for (i=0; i<MAX_GROUP_DEPTH; i++) {
@@ -229,8 +226,6 @@ const char * op_name[] = {
   };
 
   /* Insert a parameter into the list */
-
-  void cello_print_parameter(struct param_struct * p,int level);
 
   void insert_param(struct param_struct * head, struct param_struct * new)
   {
@@ -445,7 +440,7 @@ const char * op_name[] = {
   }
 
 
-#line 449 "build/Cello/parse.tab.c" /* yacc.c:339  */
+#line 444 "build/Cello/parse.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -530,10 +525,10 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE YYSTYPE;
+
 union YYSTYPE
 {
-#line 385 "build/Cello/parse.y" /* yacc.c:355  */
+#line 380 "build/Cello/parse.y" /* yacc.c:355  */
  
   int logical_type;  
   int integer_type; 
@@ -543,8 +538,10 @@ union YYSTYPE
   struct node_expr * node_type;
   
 
-#line 547 "build/Cello/parse.tab.c" /* yacc.c:355  */
+#line 542 "build/Cello/parse.tab.c" /* yacc.c:355  */
 };
+
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -558,7 +555,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 562 "build/Cello/parse.tab.c" /* yacc.c:358  */
+#line 559 "build/Cello/parse.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -860,23 +857,23 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   469,   469,   470,   474,   477,   478,   481,   482,   483,
-     484,   485,   486,   487,   488,   492,   497,   500,   504,   508,
-     509,   510,   511,   512,   513,   514,   520,   521,   523,   524,
-     527,   535,   555,   562,   563,   563,   570,   571,   572,   573,
-     574,   575,   576,   577,   578,   579,   583,   584,   585,   586,
-     587,   588,   589,   590,   591,   592,   593,   594,   595,   596,
-     597,   598,   599,   600,   601,   602,   603,   604,   606,   607,
-     608,   609,   610,   611,   612,   613,   614,   615,   616,   617,
-     618,   619,   620,   621,   622,   626,   627,   628,   629,   630,
-     631,   632,   636,   637,   638,   639,   640,   641,   642,   643,
-     644,   645,   646,   647,   648,   649,   650,   651,   652,   653,
-     654,   655,   656,   657,   658,   659,   660,   661,   662,   663,
-     664,   665,   666,   667,   669,   670,   671,   672,   673,   674,
-     675,   676,   677,   678,   679,   680,   681,   682,   683,   684,
-     689,   690,   691,   692,   693,   694,   695,   696,   697,   698,
-     699,   700,   701,   702,   703,   704,   705,   706,   707,   708,
-     709,   710,   711,   712,   713
+       0,   464,   464,   465,   469,   472,   473,   476,   477,   478,
+     479,   480,   481,   482,   483,   487,   492,   495,   499,   503,
+     504,   505,   506,   507,   508,   509,   515,   516,   518,   519,
+     522,   530,   550,   557,   558,   558,   565,   566,   567,   568,
+     569,   570,   571,   572,   573,   574,   578,   579,   580,   581,
+     582,   583,   584,   585,   586,   587,   588,   589,   590,   591,
+     592,   593,   594,   595,   596,   597,   598,   599,   601,   602,
+     603,   604,   605,   606,   607,   608,   609,   610,   611,   612,
+     613,   614,   615,   616,   617,   621,   622,   623,   624,   625,
+     626,   627,   631,   632,   633,   634,   635,   636,   637,   638,
+     639,   640,   641,   642,   643,   644,   645,   646,   647,   648,
+     649,   650,   651,   652,   653,   654,   655,   656,   657,   658,
+     659,   660,   661,   662,   664,   665,   666,   667,   668,   669,
+     670,   671,   672,   673,   674,   675,   676,   677,   678,   679,
+     684,   685,   686,   687,   688,   689,   690,   691,   692,   693,
+     694,   695,   696,   697,   698,   699,   700,   701,   702,   703,
+     704,   705,   706,   707,   708
 };
 #endif
 
@@ -2016,182 +2013,182 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 470 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 465 "build/Cello/parse.y" /* yacc.c:1646  */
     { }
-#line 2022 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2019 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 474 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 469 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2028 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2025 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 477 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 472 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_group[--current_group_level] = 0; }
-#line 2034 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2031 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 478 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 473 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_group[--current_group_level] = 0; }
-#line 2040 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2037 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 481 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 476 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2046 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2043 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 482 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 477 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2052 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2049 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 483 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 478 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2058 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2055 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 484 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 479 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2064 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2061 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 485 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 480 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2070 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2067 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 486 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 481 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2076 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2073 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 487 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 482 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2082 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2079 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 488 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 483 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2088 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2085 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 492 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 487 "build/Cello/parse.y" /* yacc.c:1646  */
     {
   current_group[current_group_level++] = (yyvsp[0].string_type); 
 }
-#line 2096 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2093 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 497 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 492 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_parameter = (yyvsp[0].string_type);}
-#line 2102 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2099 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 500 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 495 "build/Cello/parse.y" /* yacc.c:1646  */
     { new_parameter(); }
-#line 2108 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2105 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 504 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 499 "build/Cello/parse.y" /* yacc.c:1646  */
     { new_parameter(); }
-#line 2114 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2111 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 508 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 503 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_type = enum_parameter_string;       yylval.string_type = (yyvsp[0].string_type); }
-#line 2120 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2117 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 509 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 504 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_type = enum_parameter_integer;      yylval.integer_type = (yyvsp[0].integer_type);}
-#line 2126 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2123 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 510 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 505 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_type = enum_parameter_float;        yylval.float_type = (yyvsp[0].float_type);}
-#line 2132 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2129 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 511 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 506 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_type = enum_parameter_logical;      yylval.logical_type = (yyvsp[0].logical_type); }
-#line 2138 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2135 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 512 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 507 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_type = enum_parameter_float_expr;   yylval.node_type = (yyvsp[0].node_type); }
-#line 2144 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2141 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 513 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 508 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_type = enum_parameter_logical_expr; yylval.node_type = (yyvsp[0].node_type); }
-#line 2150 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2147 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 514 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 509 "build/Cello/parse.y" /* yacc.c:1646  */
     { current_type = enum_parameter_list; }
-#line 2156 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2153 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 520 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 515 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2162 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2159 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 521 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 516 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2168 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2165 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 523 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 518 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2174 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2171 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 524 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 519 "build/Cello/parse.y" /* yacc.c:1646  */
     {  }
-#line 2180 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2177 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 527 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 522 "build/Cello/parse.y" /* yacc.c:1646  */
     { 
    struct param_struct * p = new_param_sentinel();
    p->list_value = param_curr; /* save param_curr */
    new_param_list(p);
    param_curr = p;
  }
-#line 2191 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2188 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 535 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 530 "build/Cello/parse.y" /* yacc.c:1646  */
     { 
   
    struct param_struct * p = find_param();
@@ -2210,812 +2207,812 @@ yyreduce:
      param_curr = p;
    }
  }
-#line 2214 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2211 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 555 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 550 "build/Cello/parse.y" /* yacc.c:1646  */
     {
   current_type = enum_parameter_list;
   param_curr = param_curr->list_value; /* restore param_curr */ 
 }
-#line 2223 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2220 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 562 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 557 "build/Cello/parse.y" /* yacc.c:1646  */
     { new_parameter(); }
-#line 2229 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2226 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 563 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 558 "build/Cello/parse.y" /* yacc.c:1646  */
     { new_parameter(); }
-#line 2235 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2232 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 565 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 560 "build/Cello/parse.y" /* yacc.c:1646  */
     { }
-#line 2241 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2238 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 570 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 565 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-1].logical_type); }
-#line 2247 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2244 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 571 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 566 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].float_type) <= (yyvsp[0].float_type); }
-#line 2253 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2250 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 572 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 567 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].float_type) >= (yyvsp[0].float_type); }
-#line 2259 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2256 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 573 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 568 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].float_type) <  (yyvsp[0].float_type); }
-#line 2265 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2262 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 574 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 569 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].float_type) >  (yyvsp[0].float_type); }
-#line 2271 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2268 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 575 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 570 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].float_type) == (yyvsp[0].float_type); }
-#line 2277 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2274 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 576 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 571 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].float_type) != (yyvsp[0].float_type); }
-#line 2283 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2280 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 577 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 572 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].logical_type) || (yyvsp[0].logical_type); }
-#line 2289 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2286 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 578 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 573 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[-2].logical_type) && (yyvsp[0].logical_type); }
-#line 2295 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2292 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 579 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 574 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.logical_type) = (yyvsp[0].logical_type); }
-#line 2301 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2298 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 583 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 578 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = (yyvsp[-1].float_type); }
-#line 2307 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2304 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 584 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 579 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = (yyvsp[-2].float_type) + (yyvsp[0].float_type);}
-#line 2313 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2310 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 585 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 580 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = (yyvsp[-2].float_type) - (yyvsp[0].float_type);}
-#line 2319 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2316 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 586 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 581 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = (yyvsp[-2].float_type) * (yyvsp[0].float_type);}
-#line 2325 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2322 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 587 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 582 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = (yyvsp[-2].float_type) / (yyvsp[0].float_type);}
-#line 2331 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2328 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 588 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 583 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = pow((double)(yyvsp[-2].float_type), (double)(yyvsp[0].float_type)); }
-#line 2337 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2334 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 589 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 584 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = acos((yyvsp[-1].float_type)); }
-#line 2343 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2340 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 590 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 585 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = acosh((yyvsp[-1].float_type)); }
-#line 2349 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2346 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 591 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 586 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = asin((yyvsp[-1].float_type)); }
-#line 2355 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2352 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 592 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 587 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = asinh((yyvsp[-1].float_type)); }
-#line 2361 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2358 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 593 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 588 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = atan((yyvsp[-1].float_type)); }
-#line 2367 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2364 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 594 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 589 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = atanh((yyvsp[-1].float_type)); }
-#line 2373 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2370 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 595 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 590 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = cbrt((yyvsp[-1].float_type)); }
-#line 2379 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2376 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 596 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 591 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = ceil((yyvsp[-1].float_type)); }
-#line 2385 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2382 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 597 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 592 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = cos((yyvsp[-1].float_type)); }
-#line 2391 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2388 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 598 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 593 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = cosh((yyvsp[-1].float_type)); }
-#line 2397 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2394 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 599 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 594 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = erfc((yyvsp[-1].float_type)); }
-#line 2403 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2400 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 63:
-#line 600 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 595 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = erf((yyvsp[-1].float_type)); }
-#line 2409 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2406 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 601 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 596 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = exp((yyvsp[-1].float_type)); }
-#line 2415 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2412 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 602 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 597 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = expm1((yyvsp[-1].float_type)); }
-#line 2421 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2418 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 66:
-#line 603 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 598 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = fabs((yyvsp[-1].float_type)); }
-#line 2427 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2424 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 67:
-#line 604 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 599 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = floor((yyvsp[-1].float_type)); }
-#line 2433 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2430 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 606 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 601 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = j0((yyvsp[-1].float_type)); }
-#line 2439 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2436 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 607 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 602 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = j1((yyvsp[-1].float_type)); }
-#line 2445 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2442 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 70:
-#line 608 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 603 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = lgamma((yyvsp[-1].float_type)); }
-#line 2451 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2448 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 609 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 604 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = log10((yyvsp[-1].float_type)); }
-#line 2457 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2454 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 72:
-#line 610 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 605 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = log1p((yyvsp[-1].float_type)); }
-#line 2463 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2460 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 73:
-#line 611 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 606 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = logb((yyvsp[-1].float_type)); }
-#line 2469 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2466 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 74:
-#line 612 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 607 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = log((yyvsp[-1].float_type)); }
-#line 2475 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2472 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 75:
-#line 613 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 608 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = sin((yyvsp[-1].float_type)); }
-#line 2481 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2478 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 76:
-#line 614 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 609 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = sinh((yyvsp[-1].float_type)); }
-#line 2487 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2484 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 77:
-#line 615 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 610 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = sqrt((yyvsp[-1].float_type)); }
-#line 2493 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2490 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 78:
-#line 616 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 611 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = tan((yyvsp[-1].float_type)); }
-#line 2499 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2496 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 79:
-#line 617 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 612 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = tanh((yyvsp[-1].float_type)); }
-#line 2505 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2502 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 80:
-#line 618 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 613 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = y0((yyvsp[-1].float_type)); }
-#line 2511 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2508 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 81:
-#line 619 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 614 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = y1((yyvsp[-1].float_type)); }
-#line 2517 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2514 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 82:
-#line 620 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 615 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = rint((yyvsp[-1].float_type)); }
-#line 2523 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2520 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 83:
-#line 621 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 616 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = (yyvsp[0].float_type);}
-#line 2529 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2526 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 84:
-#line 622 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 617 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.float_type) = M_PI ; }
-#line 2535 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2532 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 85:
-#line 626 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 621 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.integer_type) = (yyvsp[-1].integer_type); }
-#line 2541 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2538 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 86:
-#line 627 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 622 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.integer_type) = (yyvsp[-2].integer_type) + (yyvsp[0].integer_type);}
-#line 2547 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2544 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 87:
-#line 628 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 623 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.integer_type) = (yyvsp[-2].integer_type) - (yyvsp[0].integer_type);}
-#line 2553 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2550 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 88:
-#line 629 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 624 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.integer_type) = (yyvsp[-2].integer_type) * (yyvsp[0].integer_type);}
-#line 2559 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2556 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 89:
-#line 630 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 625 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.integer_type) = (yyvsp[-2].integer_type) / (yyvsp[0].integer_type);}
-#line 2565 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2562 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 90:
-#line 631 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 626 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.integer_type) = pow((double)(yyvsp[-2].integer_type), (double)(yyvsp[0].integer_type));}
-#line 2571 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2568 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 91:
-#line 632 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 627 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.integer_type) = (yyvsp[0].integer_type);}
-#line 2577 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2574 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 92:
-#line 636 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 631 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = (yyvsp[-1].node_type); }
-#line 2583 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2580 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 93:
-#line 637 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 632 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,new_node_float((yyvsp[0].float_type))); }
-#line 2589 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2586 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 94:
-#line 638 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 633 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_add,(yyvsp[0].node_type)); }
-#line 2595 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2592 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 95:
-#line 639 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 634 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_add,(yyvsp[0].node_type)); }
-#line 2601 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2598 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 96:
-#line 640 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 635 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,new_node_float((yyvsp[0].float_type))); }
-#line 2607 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2604 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 97:
-#line 641 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 636 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_sub,(yyvsp[0].node_type)); }
-#line 2613 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2610 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 98:
-#line 642 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 637 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_sub,(yyvsp[0].node_type)); }
-#line 2619 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2616 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 99:
-#line 643 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 638 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,new_node_float((yyvsp[0].float_type))); }
-#line 2625 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2622 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 100:
-#line 644 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 639 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_mul,(yyvsp[0].node_type)); }
-#line 2631 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2628 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 101:
-#line 645 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 640 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_mul,(yyvsp[0].node_type)); }
-#line 2637 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2634 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 102:
-#line 646 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 641 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,new_node_float((yyvsp[0].float_type))); }
-#line 2643 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2640 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 103:
-#line 647 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 642 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_div,(yyvsp[0].node_type)); }
-#line 2649 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2646 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 104:
-#line 648 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 643 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_div,(yyvsp[0].node_type)); }
-#line 2655 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2652 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 105:
-#line 649 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 644 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, new_node_float((yyvsp[0].float_type))); }
-#line 2661 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2658 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 106:
-#line 650 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 645 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_pow, (yyvsp[0].node_type)); }
-#line 2667 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2664 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 107:
-#line 651 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 646 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_pow, (yyvsp[0].node_type)); }
-#line 2673 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2670 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 108:
-#line 652 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 647 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( acos, "acos", (yyvsp[-1].node_type)); }
-#line 2679 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2676 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 109:
-#line 653 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 648 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( acosh, "acosh", (yyvsp[-1].node_type)); }
-#line 2685 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2682 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 110:
-#line 654 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 649 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( asin, "asin", (yyvsp[-1].node_type)); }
-#line 2691 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2688 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 111:
-#line 655 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 650 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( asinh, "asinh", (yyvsp[-1].node_type)); }
-#line 2697 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2694 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 112:
-#line 656 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 651 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( atan, "atan", (yyvsp[-1].node_type)); }
-#line 2703 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2700 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 113:
-#line 657 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 652 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( atanh, "atanh", (yyvsp[-1].node_type)); }
-#line 2709 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2706 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 114:
-#line 658 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 653 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( cbrt, "cbrt", (yyvsp[-1].node_type)); }
-#line 2715 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2712 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 115:
-#line 659 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 654 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( ceil, "ceil", (yyvsp[-1].node_type)); }
-#line 2721 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2718 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 116:
-#line 660 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 655 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( cos, "cos", (yyvsp[-1].node_type)); }
-#line 2727 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2724 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 117:
-#line 661 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 656 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( cosh, "cosh", (yyvsp[-1].node_type)); }
-#line 2733 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2730 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 118:
-#line 662 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 657 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( erfc, "erfc", (yyvsp[-1].node_type)); }
-#line 2739 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2736 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 119:
-#line 663 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 658 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( erf, "erf", (yyvsp[-1].node_type)); }
-#line 2745 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2742 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 120:
-#line 664 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 659 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( exp, "exp", (yyvsp[-1].node_type)); }
-#line 2751 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2748 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 121:
-#line 665 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 660 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( expm1, "expm1", (yyvsp[-1].node_type)); }
-#line 2757 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2754 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 122:
-#line 666 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 661 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( fabs, "fabs", (yyvsp[-1].node_type)); }
-#line 2763 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2760 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 123:
-#line 667 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 662 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( floor, "floor", (yyvsp[-1].node_type)); }
-#line 2769 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2766 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 124:
-#line 669 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 664 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( j0, "j0", (yyvsp[-1].node_type)); }
-#line 2775 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2772 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 125:
-#line 670 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 665 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( j1, "j1", (yyvsp[-1].node_type)); }
-#line 2781 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2778 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 126:
-#line 671 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 666 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( lgamma, "lgamma", (yyvsp[-1].node_type)); }
-#line 2787 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2784 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 127:
-#line 672 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 667 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( log10, "log10", (yyvsp[-1].node_type)); }
-#line 2793 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2790 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 128:
-#line 673 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 668 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( log1p, "log1p", (yyvsp[-1].node_type)); }
-#line 2799 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2796 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 129:
-#line 674 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 669 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( logb, "logb", (yyvsp[-1].node_type)); }
-#line 2805 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2802 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 130:
-#line 675 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 670 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( log, "log", (yyvsp[-1].node_type)); }
-#line 2811 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2808 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 131:
-#line 676 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 671 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( sin, "sin", (yyvsp[-1].node_type)); }
-#line 2817 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2814 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 132:
-#line 677 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 672 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( sinh, "sinh", (yyvsp[-1].node_type)); }
-#line 2823 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2820 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 133:
-#line 678 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 673 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( sqrt, "sqrt", (yyvsp[-1].node_type)); }
-#line 2829 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2826 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 134:
-#line 679 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 674 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( tan, "tan", (yyvsp[-1].node_type)); }
-#line 2835 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2832 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 135:
-#line 680 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 675 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( tanh, "tanh", (yyvsp[-1].node_type)); }
-#line 2841 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2838 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 136:
-#line 681 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 676 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( y0, "y0", (yyvsp[-1].node_type)); }
-#line 2847 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2844 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 137:
-#line 682 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 677 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( y1, "y1", (yyvsp[-1].node_type)); }
-#line 2853 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2850 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 138:
-#line 683 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 678 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_function ( rint, "rint", (yyvsp[-1].node_type)); }
-#line 2859 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2856 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 139:
-#line 684 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 679 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_variable ((yyvsp[0].string_type));  }
-#line 2865 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2862 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 140:
-#line 689 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 684 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = (yyvsp[-1].node_type); }
-#line 2871 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2868 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 141:
-#line 690 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 685 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_le,new_node_float((yyvsp[0].float_type))); }
-#line 2877 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2874 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 142:
-#line 691 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 686 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_le,(yyvsp[0].node_type)); }
-#line 2883 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2880 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 143:
-#line 692 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 687 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_le,(yyvsp[0].node_type)); }
-#line 2889 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2886 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 144:
-#line 693 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 688 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ge,new_node_float((yyvsp[0].float_type))); }
-#line 2895 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2892 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 145:
-#line 694 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 689 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_ge,(yyvsp[0].node_type)); }
-#line 2901 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2898 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 146:
-#line 695 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 690 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ge,(yyvsp[0].node_type)); }
-#line 2907 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2904 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 147:
-#line 696 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 691 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_lt,new_node_float((yyvsp[0].float_type))); }
-#line 2913 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2910 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 148:
-#line 697 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 692 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_lt,(yyvsp[0].node_type)); }
-#line 2919 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2916 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 149:
-#line 698 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 693 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_lt,(yyvsp[0].node_type)); }
-#line 2925 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2922 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 150:
-#line 699 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 694 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_gt,new_node_float((yyvsp[0].float_type))); }
-#line 2931 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2928 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 151:
-#line 700 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 695 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_gt,(yyvsp[0].node_type)); }
-#line 2937 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2934 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 152:
-#line 701 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 696 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_gt,(yyvsp[0].node_type)); }
-#line 2943 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2940 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 153:
-#line 702 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 697 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_eq,new_node_float((yyvsp[0].float_type))); }
-#line 2949 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2946 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 154:
-#line 703 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 698 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_eq,(yyvsp[0].node_type)); }
-#line 2955 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2952 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 155:
-#line 704 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 699 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_eq,(yyvsp[0].node_type)); }
-#line 2961 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2958 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 156:
-#line 705 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 700 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ne,new_node_float((yyvsp[0].float_type))); }
-#line 2967 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2964 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 157:
-#line 706 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 701 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_float((yyvsp[-2].float_type)), enum_op_ne,(yyvsp[0].node_type)); }
-#line 2973 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2970 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 158:
-#line 707 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 702 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_ne,(yyvsp[0].node_type)); }
-#line 2979 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2976 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 159:
-#line 708 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 703 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_or,new_node_logical((yyvsp[0].logical_type))); }
-#line 2985 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2982 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 160:
-#line 709 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 704 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[-2].logical_type)), enum_op_or,(yyvsp[0].node_type)); }
-#line 2991 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2988 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 161:
-#line 710 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 705 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_or,(yyvsp[0].node_type)); }
-#line 2997 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 2994 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 162:
-#line 711 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 706 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_and,new_node_logical((yyvsp[0].logical_type))); }
-#line 3003 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 3000 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 163:
-#line 712 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 707 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation (new_node_logical((yyvsp[-2].logical_type)), enum_op_and,(yyvsp[0].node_type)); }
-#line 3009 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 3006 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
   case 164:
-#line 713 "build/Cello/parse.y" /* yacc.c:1646  */
+#line 708 "build/Cello/parse.y" /* yacc.c:1646  */
     { (yyval.node_type) = new_node_operation ((yyvsp[-2].node_type), enum_op_and,(yyvsp[0].node_type)); }
-#line 3015 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 3012 "build/Cello/parse.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 3019 "build/Cello/parse.tab.c" /* yacc.c:1646  */
+#line 3016 "build/Cello/parse.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3243,7 +3240,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 717 "build/Cello/parse.y" /* yacc.c:1906  */
+#line 712 "build/Cello/parse.y" /* yacc.c:1906  */
 
 
 int cello_new_file(const char * filename);

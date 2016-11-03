@@ -9,6 +9,158 @@
 
 #include "parameters.hpp"
 
+const std::map<std::string, double (*) (double)> Param::function_map =
+  {
+    {"acos",acos},
+    {"acosh", acosh},
+    {"asin", asin},
+    {"asinh", asinh},
+    {"atan", atan},
+    {"atanh", atanh},
+    {"cbrt", cbrt},
+    {"ceil", ceil},
+    {"cos", cos},
+    {"cosh", cosh},
+    {"erfc", erfc},
+    {"erf", erf},
+    {"exp", exp},
+    {"expm1", expm1},
+    {"fabs", fabs},
+    {"floor", floor},
+    {"j0", j0},
+    {"j1", j1},
+    {"lgamma", lgamma},
+    {"log10", log10},
+    {"log1p", log1p},
+    {"logb", logb},
+    {"log", log},
+    {"sin", sin},
+    {"sinh", sinh},
+    {"sqrt", sqrt},
+    {"tan", tan},
+    {"tanh", tanh},
+    {"y0", y0},
+    {"y1", y1},
+    {"rint", rint},
+  };
+
+//----------------------------------------------------------------------
+
+void Param::pup (PUP::er &p)
+{
+  TRACEPUP;
+  // NOTE: change this function whenever attributes change
+  p | type_;
+  p | value_accessed_;
+  if (type_ == parameter_integer) {
+    p | value_integer_;
+  } else if (type_ == parameter_float) {
+    p | value_float_;
+  } else if (type_ == parameter_logical) {
+    p | value_logical_; 
+  } else if (type_ == parameter_string) {
+    int n = 0;
+    if (!p.isUnpacking()) {
+      n=strlen(value_string_);
+    }
+    p | n;
+    if (p.isUnpacking()) value_string_ = new char [n];
+    if (n > 0) PUParray(p,value_string_,n);
+  } else if (type_ == parameter_list) {
+    int n = 0;
+    if (! p.isUnpacking()) {
+      n = value_list_->size();
+    }
+    p | n;
+    if (p.isUnpacking()) {
+      value_list_ = new list_type;
+      value_list_->resize(n);
+    }
+    for (int i=0; i<n; i++) {
+      int l_param = 0;
+      if (! p.isUnpacking() ) {
+	l_param = ((*value_list_)[i] != NULL);
+      }
+      p | l_param;
+      if (l_param) {
+	if (p.isUnpacking())
+	  (*value_list_)[i] = new Param;
+	p | *(*value_list_)[i];
+      }
+    }
+  } else if (type_ == parameter_logical_expr) {
+    pup_expr_(p,&value_expr_);
+  } else if (type_ == parameter_float_expr) {
+    pup_expr_(p,&value_expr_);
+  } else if (type_ == parameter_unknown) {
+    WARNING("Param::pup","parameter type is unknown");
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Param::pup_expr_ (PUP::er &p, struct node_expr ** node) {
+  int l_expr = 0;
+  if (! p.isUnpacking() ) {
+    l_expr = ((*node) != NULL);
+  }
+  p | l_expr;
+  if (!l_expr && p.isUnpacking()) (*node) = NULL;
+  if (l_expr) {
+
+    // PUP type
+    if (p.isUnpacking()) {
+      (*node) = new struct node_expr;
+    }
+    p | (*node)->type;
+
+    // PUP function_name
+    int n = 0;
+    if (!p.isUnpacking() && (*node)->function_name) {
+      n = strlen((*node)->function_name);
+    }
+    p | n;
+    if (n > 0) {
+      if (p.isUnpacking()) {
+	(*node)->function_name = new char [ n + 1];
+      }
+      PUParray (p,(*node)->function_name,n+1);
+    } else {
+      if (p.isUnpacking()) (*node)->function_name = NULL;
+    }
+
+    // PUP value (note function_name needs to be before value)
+    void * pointer;
+    switch ((*node)->type) {
+    case enum_node_operation:
+      p | (*node)->op_value;
+      break;
+    case enum_node_float:
+      p | (*node)->float_value;
+      break;
+    case enum_node_integer:
+      p | (*node)->integer_value;
+      break;
+    case enum_node_variable:
+      p | (*node)->var_value;
+      break;
+    case enum_node_function:
+      if (p.isUnpacking()) {
+      	(*node)->fun_value = function_map.at((*node)->function_name);
+      }
+      break;
+    default:
+      WARNING("Param::pup_expr_()",
+	      "Unknown node type");
+      break;
+    }
+
+    // Recurse on left and right subexpressions
+    pup_expr_(p,&(*node)->left);
+    pup_expr_(p,&(*node)->right);
+  }
+}
+
 //----------------------------------------------------------------------
 
 void Param::set (struct param_struct * node)
@@ -89,15 +241,8 @@ void Param::write
     full_parameter : full_parameter.substr(i_group+1,std::string::npos);
 
   fprintf (file_pointer,"%s = %s;\n",
-	   parameter.c_str(),
-	   value_to_string().c_str());
-
-  // Write comment describing parameter access properties
-  // if (value_accessed_) {
-  //   fprintf (file_pointer," # Accessed\n");
-  // } else {
-  //   fprintf (file_pointer," # Not accessed\n");
-  // }
+  	   parameter.c_str(),
+  	   value_to_string().c_str());
 }
 
 //----------------------------------------------------------------------

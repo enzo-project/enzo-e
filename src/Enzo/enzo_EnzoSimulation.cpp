@@ -8,6 +8,7 @@
 /* #define CHECK_MEMORY */  /* calls mtrace() */
 
 // #define TRACE_PARAMETERS
+// #define DEBUG_ENZO_SIMULATION
 
 #include "cello.hpp"
 
@@ -36,6 +37,11 @@ EnzoSimulation::EnzoSimulation
   mtrace();
 #endif
 
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION EnzoSimulation()\n",CkMyPe());
+  fflush(stdout);
+#endif  
+
   // Synchronize to ensure all EnzoSimulation objects exist before
   // reading parameters
 
@@ -55,6 +61,10 @@ EnzoSimulation::~EnzoSimulation()
 
 void EnzoSimulation::pup (PUP::er &p)
 {
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION EnzoSimulation::pup()\n",CkMyPe());
+  fflush(stdout);
+#endif  
   // NOTE: change this function whenever attributes change
 
   BASE_ENZO_SIMULATION::pup(p);
@@ -71,72 +81,18 @@ void EnzoSimulation::pup (PUP::er &p)
 
 void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
 {
+
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION r_startup_begun()\n",CkMyPe());
+  fflush(stdout);
+#endif  
+
   delete msg;
 
-  // Serialize reading parameters within each logical node
-
-  const int ipn = CkMyPe();
-  const int npn = MIN(CONFIG_NODE_SIZE,CkNumPes());
-
-  if ((ipn % npn) == 0) {
-#ifdef TRACE_PARAMETERS
-    CkPrintf ("%d CALLING read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
-    fflush(stdout);
-#endif
-    read_parameters_();
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulation::read_parameters_()
-{
-
-  const int ipn = CkMyPe();
-  const int npn = MIN(CONFIG_NODE_SIZE,CkNumPes());
-#ifdef TRACE_PARAMETERS
-  CkPrintf ("%d BEGIN read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION r_startup_begun()\n",CkMyPe());
   fflush(stdout);
-#endif
-  //const int npn = CkNumPes();
-
-  // Read parameter file
-  parameters_ = new Parameters(parameter_file_.c_str(),monitor_);
-
-#ifdef TRACE_PARAMETERS
-  CkPrintf ("%d END read_parameters(%d/%d)\n",CkMyPe(),ipn,npn);
-  fflush(stdout);
-#endif
-  // Then tell next Simulation object in node to read parameter file
-  if (((ipn + 1) % npn) != 0 && ((ipn+1) < CkNumPes())) {
-#ifdef TRACE_PARAMETERS
-    CkPrintf ("%d CALLING p_read_parameters(%d/%d)\n",CkMyPe(),CkMyPe()+1,npn);
-    fflush(stdout);
-#endif
-    proxy_enzo_simulation[ipn+1].p_read_parameters();
-  }
-
-  // Everybody synchronizes afterwards with barrier
-
-#ifdef TRACE_PARAMETERS
-  CkPrintf ("%d CALLING r_startup_finished()\n",CkMyPe());
-  fflush(stdout);
-#endif
-  CkCallback callback (CkIndex_EnzoSimulation::r_startup_finished(NULL),
-			 thisProxy);
-  contribute(callback);
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
-{
-#ifdef TRACE_PARAMETERS
-  CkPrintf ("%d BEGIN r_startup_finished()\n",CkMyPe());
-  fflush(stdout);
-#endif
-  delete msg;
+#endif  
 
   problem_ = new EnzoProblem;
 
@@ -144,7 +100,7 @@ void EnzoSimulation::r_startup_finished (CkReductionMsg *msg)
 
   initialize();
 #ifdef TRACE_PARAMETERS
-  CkPrintf ("%d END   r_startup_finished()\n",CkMyPe());
+  CkPrintf ("%d END   r_startup_begun()\n",CkMyPe());
   fflush(stdout);
 #endif
 }
@@ -164,11 +120,24 @@ void EnzoSimulation::r_write_checkpoint()
 
 void EnzoSimulation::initialize_config_() throw()
 {
-  if (config_ == NULL) {
-    config_ = new EnzoConfig;
-  }
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION begin initialize_config()\n",CkMyPe());
+  fflush(stdout);
+#endif  
 
-  static_cast<EnzoConfig*>(config_)->read(parameters_);
+  config_ = static_cast<EnzoConfig*>(&g_enzo_config);
+
+  // char buffer[40];
+  // sprintf (buffer,"config-%02d.text",CkMyPe());
+  // FILE * fp = fopen (buffer,"w");
+  // EnzoConfig * enzo_config = static_cast<EnzoConfig*>(config_);
+  //  enzo_config->write(fp);
+  // fclose(fp);
+  
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION end initialize_config()\n",CkMyPe());
+  fflush(stdout);
+#endif  
 
 }
 
@@ -176,6 +145,10 @@ void EnzoSimulation::initialize_config_() throw()
 
 void EnzoSimulation::initialize() throw()
 {
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION initialize()\n",CkMyPe());
+  fflush(stdout);
+#endif  
   // Call initialize() on base Simulation class
   Simulation::initialize();
 
@@ -189,6 +162,10 @@ void EnzoSimulation::initialize() throw()
 
 const Factory * EnzoSimulation::factory() const throw()
 { 
+#ifdef DEBUG_ENZO_SIMULATION
+  CkPrintf ("%d DEBUG_ENZO_SIMULATION factory()\n",CkMyPe());
+  fflush(stdout);
+#endif  
   if (! factory_) factory_ = new EnzoFactory;
   return factory_;
 }

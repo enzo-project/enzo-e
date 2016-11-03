@@ -139,6 +139,9 @@ public: // interface
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
 
+  /// Write configuration to a file
+  void write (FILE * fp);
+  
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -260,6 +263,8 @@ public: // attributes
 #endif /* CONFIG_USE_GRACKLE */
 
 };
+
+extern EnzoConfig g_enzo_config;
 
 #endif /* PARAMETERS_ENZO_CONFIG_HPP */
 

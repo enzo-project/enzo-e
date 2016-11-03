@@ -122,7 +122,7 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  dt_ *= Method::courant_global[cello::index_static()];
+  dt_ *= Method::courant_global;
   
   set_dt   (dt_);
   set_stop (stop_);

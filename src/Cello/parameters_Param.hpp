@@ -42,6 +42,8 @@ class Param {
 
 public: // interface
 
+  static const std::map<std::string, double (*) (double)> function_map;
+
   /// Initialize a Param object
   Param () 
     : type_(parameter_unknown),
@@ -64,34 +66,7 @@ public: // interface
     return *this; };
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    // NOTE: change this function whenever attributes change
-    p | type_;
-    p | value_accessed_;
-    if (type_ == parameter_integer) {
-      p | value_integer_;
-    } else if (type_ == parameter_float) {
-      p | value_float_;
-    } else if (type_ == parameter_logical) {
-      p | value_logical_; 
-    } else if (type_ == parameter_string) {
-      // *value_string_;
-      WARNING("Param::pup","skipping value_string");
-    } else if (type_ == parameter_list) {
-      // *value_list_;
-      WARNING("Param::pup","skipping value_list");
-    } else if (type_ == parameter_logical_expr) {
-      // *value_expr_;
-      WARNING("Param::pup","skipping value_logical_expr");
-    } else if (type_ == parameter_float_expr) {
-      // *value_expr_;
-      WARNING("Param::pup","skipping value_float_expr");
-    } else if (type_ == parameter_unknown) {
-      ERROR("Param::pup","parameter type is unknown");
-    }
-  }
+  void pup (PUP::er &p);
 
   /// Evaluate a floating-point expression given vectos x,y,z,t
   void evaluate_float  
@@ -152,6 +127,9 @@ public: // interface
   //----------------------------------------------------------------------
 
 private: // functions
+
+  /// PUP a logical or floating-point expression (recursive)
+  void pup_expr_ (PUP::er &p, struct node_expr ** node);
 
   /// Set an integer parameter
   void set_integer_ (int value)

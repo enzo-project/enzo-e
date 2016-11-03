@@ -45,12 +45,12 @@ enum enum_op {
 };
 
 struct node_expr {
-  enum enum_node type;
+  int  type;
   union {
-    enum enum_op op_value;       /* arthmetic / logical operation */
-    double       float_value;   /* floating point number */
-    int          integer_value;  /* integer / logical constant */
-    char         var_value;      /* variable, e.g. x,y,z,t */
+    int      op_value;       /* arthmetic / logical operation */
+    double   float_value;   /* floating point number */
+    int      integer_value;  /* integer / logical constant */
+    char     var_value;      /* variable, e.g. x,y,z,t */
     double (*fun_value)(double); /* math.h function */
   };
   struct node_expr * left;
@@ -61,7 +61,7 @@ struct node_expr {
 struct param_struct {
   char * group[MAX_GROUP_DEPTH];
   char * parameter;
-  enum enum_parameter type;
+  int  type;
   union  {
     int                 logical_value; 
     int                 integer_value; 

@@ -14,8 +14,10 @@ module mesh {
   readonly int FieldFace::counter[CONFIG_NODE_SIZE];
   readonly int ParticleData::counter[CONFIG_NODE_SIZE];
   readonly int InitialTrace::id0_[CONFIG_NODE_SIZE];
-  readonly double Method::courant_global[CONFIG_NODE_SIZE];  	   
-  
+  readonly double Method::courant_global;
+  readonly Config g_config;
+  readonly Parameters g_parameters;
+
   PUPable BoundaryPeriodic;
   PUPable BoundaryValue;
   PUPable Config;

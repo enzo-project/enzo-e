@@ -43,17 +43,7 @@ public: // functions
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
 
-  /// Read parameter file one process at a time within a shared-memory node
-  void p_read_parameters()
-  {
-    read_parameters_(); 
-  }
-private:
-  void read_parameters_();
 public:
-
-  /// Barrier after parameters read to synchronize before initializing 
-  void r_startup_finished (CkReductionMsg *);
 
   /// Continue on to Problem::output_wait() from checkpoint
   virtual void r_write_checkpoint();

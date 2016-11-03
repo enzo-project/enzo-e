@@ -574,7 +574,6 @@ void Block::lower
   if (xm) (*xm) = xbm;
   if (ym) (*ym) = ybm;
   if (zm) (*zm) = zbm;
-  TRACE6 ("DEBUG LOWER %d %d %d  %g %g %g",ix,iy,iz,*xm,*ym,*zm);
 }
 
 //----------------------------------------------------------------------
@@ -642,8 +641,6 @@ void Block::index_global
     if (ny) (*ny) <<= 1;
     if (nz) (*nz) <<= 1;
   }
-  TRACE6("DEBUG INDEX B %d %d %d  %d %d %d",
-	 *ix,*iy,*iz,*nx,*ny,*nz);
 }
 
 //----------------------------------------------------------------------

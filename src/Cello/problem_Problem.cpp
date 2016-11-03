@@ -372,10 +372,9 @@ void Problem::initialize_method
  const ParticleDescr * particle_descr
  ) throw()
 {
-
   const size_t num_method = config->method_list.size();
 
-  Method::courant_global[cello::index_static()] = config->method_courant_global;
+  Method::courant_global = config->method_courant_global;
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
