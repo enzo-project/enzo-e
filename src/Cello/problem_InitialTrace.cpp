@@ -1,10 +1,11 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     problem_Classname.cpp
+/// @file     problem_InitialTrace.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2015-11-06
 /// @brief    Implementation of the InitialTrace class
 
+#include <random>
 #include "problem.hpp"
 
 int InitialTrace::id0_[CONFIG_NODE_SIZE] = {-1};
@@ -148,7 +149,6 @@ void InitialTrace::density_placement_
 (Block * block, Field field, Particle particle)
 {
   // Get density field d
-
   int did;
   int mx,my,mz;
   int nx,ny,nz;
@@ -193,9 +193,7 @@ void InitialTrace::density_placement_
   zs.resize(nx*ny*nz + 1);
 
   ms[0] = 0.0;
-  xs[0] = xm ;
-  ys[0] = ym ;
-  zs[0] = zm ;
+
   int ims=1;
 
   for (int iz=gz; iz<nz+gz; iz++) {
@@ -246,10 +244,23 @@ void InitialTrace::density_placement_
   const int ps  = particle.stride(it,ia_x);
   const int ids = particle.stride(it,ia_id);
 
+  // Define random uniform distribution between 0.0 and 1.0
+  std::random_device rd;
+  std::mt19937 gen_0_1(rd());
+  std::uniform_real_distribution<double> random_0_1(0.0, 1.0);
+  
+  // Define random uniform distribution between 0.0 and rmax
+  std::mt19937 gen_0_rmax(rd());
+  std::uniform_real_distribution<double> random_0_rmax (0,rmax);
+
   for (int ip=0; ip<np; ip++) {
 
-    double r = rmax*rand()/RAND_MAX;
+    double r = random_0_rmax(gen_0_rmax);
 
+    ASSERT3 ("InitialTrace",
+	     "Random number not in range: %20.16e [%20.16e,%20.16e]",
+	     r,0.0,rmax,(0 <= r && r <= rmax));
+    
     int imin=0;
     int imax=nx*ny*nz;
     int ims;
@@ -262,20 +273,16 @@ void InitialTrace::density_placement_
       }
     } while (imax-imin > 1);
     ims = imin;
-    ASSERT6( "InitialTrace",
-	     "[%d %d %d] %f <= %f < %f",imin,ims,imax,ms[ims],r,ms[ims+1],
-	     (ms[ims] <= r && r < ms[ims+1]));
-
-    //    CkPrintf ("%d %f <= %f < %f\n",ims,ms[ims],r,ms[ims+1]);
-
-    // assert (ims < 0 || ims >= nx*ny*nz) ||
-    // ;
+    ASSERT7( "InitialTrace",
+	     "[%d %d %d] %f <= %f <= %f  rmax=%f",
+	     imin,ims,imax,ms[ims],r,ms[ims+1],rmax,
+	     (ms[ims] <= r && r <= ms[ims+1]));
 
     // randomize within cell
-    double x = xs[ims] + hx*rand()/(RAND_MAX+1.0);
-    double y = ys[ims] + hy*rand()/(RAND_MAX+1.0);
-    double z = zs[ims] + hz*rand()/(RAND_MAX+1.0);
-    
+    double x = xs[ims] + hx*random_0_1(gen_0_1);
+    double y = ys[ims] + hy*random_0_1(gen_0_1);
+    double z = zs[ims] + hz*random_0_1(gen_0_1);
+
     // ... if new batch then update position arrays
     if (ipb % npb == 0) {
       id = (int64_t *) particle.attribute_array (it,ia_id,ib);

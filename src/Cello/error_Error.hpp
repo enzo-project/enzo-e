@@ -243,6 +243,8 @@
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5); t_(); } }
 #define ASSERT6(F,M,A1,A2,A3,A4,A5,A6,A)				\
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6); t_(); } }
+#define ASSERT7(F,M,A1,A2,A3,A4,A5,A6,A7,A)				\
+  {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1,A2,A3,A4,A5,A6,A7); t_(); } }
 
 // #else  /* CELLO_DEBUG */
 

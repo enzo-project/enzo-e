@@ -1165,24 +1165,8 @@ int Config::read_schedule_(Parameters * p, const std::string group)
 
   // Determine the schedule type (interval or list)
 
-  const bool type_is_interval = 
-    ( (p->type("start") != parameter_unknown) ||
-      (p->type("step") != parameter_unknown) ||
-      (p->type("stop") != parameter_unknown));
-  
   const bool type_is_list = (p->type("list") != parameter_unknown);
-
-  if (type_is_interval && type_is_list) {
-      ERROR1 ("Config::read",
-	      "Schedule %s seems to be both an interval and a list",
-	      (group).c_str());
-  }
-
-  if (!type_is_interval && !type_is_list) {
-      ERROR1 ("Config::read",
-	      "Schedule %s seems to be neither an interval nor a list",
-	      (group).c_str());
-  }
+  const bool type_is_interval = ! type_is_list;
 
   if (type_is_interval) schedule_type[index] = "interval";
   if (type_is_list)     schedule_type[index] = "list";
