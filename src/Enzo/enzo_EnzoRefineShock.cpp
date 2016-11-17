@@ -31,11 +31,7 @@ EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
-int EnzoRefineShock::apply 
-(
- Block * block,
- const FieldDescr * field_descr
- ) throw ()
+int EnzoRefineShock::apply ( Block * block ) throw ()
 {
 
   Field field = block->data()->field();
