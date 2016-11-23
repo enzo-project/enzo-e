@@ -212,8 +212,9 @@ Method * EnzoProblem::create_method_
   Method * method = 0;
 
   EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
-
+ 
   TRACE1("EnzoProblem::create_method %s",name.c_str());
+  
   if (name == "ppm") {
     method = new EnzoMethodPpm 
       (field_descr,

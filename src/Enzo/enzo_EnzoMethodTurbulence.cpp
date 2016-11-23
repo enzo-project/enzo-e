@@ -12,6 +12,14 @@
 
 #include "enzo.decl.h"
 
+// #define DEBUG_TURBULENCE
+
+#ifdef DEBUG_TURBULENCE
+#   define TRACE CkPrintf ("%s:%d TRACE DEBUG_TURBULENCE\n",__FILE__,__LINE__);
+#else
+#   define TRACE /*   */
+#endif
+
 //----------------------------------------------------------------------
 
 EnzoMethodTurbulence::EnzoMethodTurbulence 
@@ -28,6 +36,8 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
     mach_number_(mach_number),
     comoving_coordinates_(comoving_coordinates)
 {
+  TRACE;  
+  
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
@@ -60,6 +70,7 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 
 void EnzoMethodTurbulence::compute ( Block * block) throw()
 {
+  TRACE;  
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   
@@ -100,13 +111,13 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
   ASSERT2 ("EnzoMethodTurbulence::compute()",
 	   "Size of EnzoBlock::method_turbulence_data array %d "
 	   "must be at least %d",
-	   n, MAX_TURBULENCE_ARRAY, 
-	   (n >= MAX_TURBULENCE_ARRAY));
+	   n, max_turbulence_array, 
+	   (n >= max_turbulence_array));
 
-  for (int i=0; i<MAX_TURBULENCE_ARRAY-2; i++) g[i] = 0.0;
+  for (int i=0; i<max_turbulence_array-2; i++) g[i] = 0.0;
 
-  g[INDEX_TURBULENCE_minD] = std::numeric_limits<double>::max();
-  g[INDEX_TURBULENCE_maxD] = std::numeric_limits<double>::min();
+  g[index_turbulence_mind] = std::numeric_limits<double>::max();
+  g[index_turbulence_maxd] = - std::numeric_limits<double>::max();
 
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
@@ -114,11 +125,11 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
-    for (int iz=gz; iz<gz+nz; iz++) {
-      for (int iy=gy; iy<gy+ny; iy++) {
-	for (int ix=gx; ix<gx+nx; ix++) {
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int ix=0; ix<nx; ix++) {
 
-	  int i = ix + ndx*(iy + ndy*iz);
+	  int i = (ix+gx) + ndx*((iy+gy) + ndy*(iz+gz));
 
 	  enzo_float d  = density[i];
 	  for (int id=0; id<rank; id++) {
@@ -127,25 +138,26 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 	    enzo_float a  = driving[id][i];
 	    enzo_float ti = 1.0 / temperature[i];
 
-	    g[INDEX_TURBULENCE_VAD] +=   v*a*d;
-	    g[INDEX_TURBULENCE_AAD] +=   a*a*d;
-	    g[INDEX_TURBULENCE_VVDoT] += v2*d*ti;
-	    g[INDEX_TURBULENCE_VVoT] +=  v2*ti;
-	    g[INDEX_TURBULENCE_VVD] +=   v2*d;
-	    g[INDEX_TURBULENCE_VV] +=    v2;
+	    g[index_turbulence_vad] +=   v*a*d;
+	    g[index_turbulence_aad] +=   a*a*d;
+	    g[index_turbulence_vvdot] += v2*d*ti;
+	    g[index_turbulence_vvot] +=  v2*ti;
+	    g[index_turbulence_vvd] +=   v2*d;
+	    g[index_turbulence_vv] +=    v2;
 	  }
-	  g[INDEX_TURBULENCE_DD] +=   d*d;
-	  g[INDEX_TURBULENCE_DAx] +=  d*driving[0][i];
-	  g[INDEX_TURBULENCE_DAy] +=  (rank >= 2) ? d*driving[1][i] : 0.0;
-	  g[INDEX_TURBULENCE_DAz] +=  (rank >= 3) ? d*driving[2][i] : 0.0;
-	  g[INDEX_TURBULENCE_DVx] +=  d*velocity[0][i];
-	  g[INDEX_TURBULENCE_DVy] +=  (rank >= 2) ? d*velocity[1][i] : 0.0;
-	  g[INDEX_TURBULENCE_DVz] +=  (rank >= 3) ? d*velocity[2][i] : 0.0;
-	  g[INDEX_TURBULENCE_DlnD] += d*log(d);
-	  g[INDEX_TURBULENCE_minD] =
-	    std::min(g[INDEX_TURBULENCE_minD], (double) d);
-	  g[INDEX_TURBULENCE_maxD] =
-	    std::max(g[INDEX_TURBULENCE_maxD], (double) d);
+	  g[index_turbulence_dd]  +=   d*d;
+	  g[index_turbulence_d]   +=   d;
+	  g[index_turbulence_dax] +=  d*driving[0][i];
+	  g[index_turbulence_day] +=  (rank >= 2) ? d*driving[1][i] : 0.0;
+	  g[index_turbulence_daz] +=  (rank >= 3) ? d*driving[2][i] : 0.0;
+	  g[index_turbulence_dvx] +=  d*velocity[0][i];
+	  g[index_turbulence_dvy] +=  (rank >= 2) ? d*velocity[1][i] : 0.0;
+	  g[index_turbulence_dvz] +=  (rank >= 3) ? d*velocity[2][i] : 0.0;
+	  g[index_turbulence_dlnd] += d*log(d);
+	  g[index_turbulence_mind] =
+	    std::min(g[index_turbulence_mind], (double) d);
+	  g[index_turbulence_maxd] =
+	    std::max(g[index_turbulence_maxd], (double) d);
 	}
       }
     }
@@ -159,7 +171,8 @@ extern CkReduction::reducerType r_method_turbulence_type;
 
 void EnzoBlock::method_turbulence_begin()
 {
-  const int n = MAX_TURBULENCE_ARRAY * sizeof(double);
+  TRACE;  
+  const int n = max_turbulence_array * sizeof(double);
   double * g = method_turbulence_data;
   CkCallback callback (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),
 		       thisProxy);
@@ -176,6 +189,7 @@ void EnzoBlock::method_turbulence_begin()
 
 void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
 {
+  TRACE;  
   performance_start_(perf_compute,__FILE__,__LINE__);
   method()->compute_resume (this,msg);
   delete msg;
@@ -188,11 +202,12 @@ void EnzoMethodTurbulence::compute_resume
 (Block * block,
  CkReductionMsg * msg) throw()
 {
+  TRACE;  
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   double * g = enzo_block->method_turbulence_data;
-  for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
+  for (int i=0; i<max_turbulence_array; i++) {
     g[i] = ((double *)msg->getData())[i];
   }
 
@@ -270,7 +285,7 @@ void EnzoMethodTurbulence::compute_resume
     //     else    *norm = 1.25*dt*RandomForcingEdot*numberOfGridZones/gv0;
 
     
-    double vad = g[INDEX_TURBULENCE_VAD];
+    double vad = g[index_turbulence_vad];
 
     const bool small_g0 = std::abs(vad) < 1e-30;
 
@@ -290,45 +305,48 @@ void EnzoMethodTurbulence::compute_resume
   if (block->index().is_root()) {
 
     Monitor * monitor = block->simulation()->monitor();
+    monitor->print ("Method","sum v*a*d    " "%.17g", g[index_turbulence_vad]);
+    monitor->print ("Method","sum a*a*d    " "%.17g",g[index_turbulence_aad]);
+    monitor->print ("Method","sum v*v*d/t  " "%.17g",g[index_turbulence_vvdot]);
+    monitor->print ("Method","sum v*v/t    " "%.17g",g[index_turbulence_vvot]);
+    monitor->print ("Method","sum v*v*d    " "%.17g",g[index_turbulence_vvd]);
+    monitor->print ("Method","sum v*v      " "%.17g",g[index_turbulence_vv]);
+    monitor->print ("Method","sum d*d      " "%.17g",g[index_turbulence_dd]);
 
-    monitor->print ("Method","sum v*a*d   = %lg",g[INDEX_TURBULENCE_VAD]);
-    monitor->print ("Method","sum a*a*d   = %lg",g[INDEX_TURBULENCE_AAD]);
-    monitor->print ("Method","sum v*v*d/t = %lg",g[INDEX_TURBULENCE_VVDoT]);
-    monitor->print ("Method","sum v*v/t   = %lg",g[INDEX_TURBULENCE_VVoT]);
-    monitor->print ("Method","sum v*v*d   = %lg",g[INDEX_TURBULENCE_VVD]);
-    monitor->print ("Method","sum v*v     = %lg",g[INDEX_TURBULENCE_VV]);
-    monitor->print ("Method","sum d*d     = %lg",g[INDEX_TURBULENCE_DD]);
+    monitor->print ("Method","sum d*ax     " "%.17g",g[index_turbulence_dax]);
+    monitor->print ("Method","sum d*ay     " "%.17g",g[index_turbulence_day]);
+    monitor->print ("Method","sum d*az     " "%.17g",g[index_turbulence_daz]);
 
-    monitor->print ("Method","sum d*ax    = %lg",g[INDEX_TURBULENCE_DAx]);
-    monitor->print ("Method","sum d*ay    = %lg",g[INDEX_TURBULENCE_DAy]);
-    monitor->print ("Method","sum d*az    = %lg",g[INDEX_TURBULENCE_DAz]);
+    monitor->print ("Method","sum d*vx     " "%.17g",g[index_turbulence_dvx]);
+    monitor->print ("Method","sum d*vy     " "%.17g",g[index_turbulence_dvy]);
+    monitor->print ("Method","sum d*vz     " "%.17g",g[index_turbulence_dvz]);
 
-    monitor->print ("Method","sum d*vx    = %lg",g[INDEX_TURBULENCE_DVx]);
-    monitor->print ("Method","sum d*vy    = %lg",g[INDEX_TURBULENCE_DVy]);
-    monitor->print ("Method","sum d*vz    = %lg",g[INDEX_TURBULENCE_DVz]);
-
-    monitor->print ("Method","sum d*ln(d) = %lg",g[INDEX_TURBULENCE_DlnD]);
+    monitor->print ("Method","sum d*ln(d)  " "%.17g",g[index_turbulence_dlnd]);
     
-    monitor->print ("Method","min d       = %lg",g[INDEX_TURBULENCE_minD]);
-    monitor->print ("Method","max d       = %lg",g[INDEX_TURBULENCE_maxD]);
-    monitor->print ("Method","norm        = %lg",norm);
+    monitor->print ("Method","min d        " "%.17g",g[index_turbulence_mind]);
+    monitor->print ("Method","max d        " "%.17g",g[index_turbulence_maxd]);
+    monitor->print ("Method","sum d        " "%.17g",g[index_turbulence_d]);
+    monitor->print ("Method","norm         " "%.17g",norm);
 
-    monitor->print ("Method","kinetic energy          %lg",
-		    0.50*g[INDEX_TURBULENCE_VVD]/n);
-    monitor->print ("Method","mass weighted rms Mach  %lg",
-		    sqrt(g[INDEX_TURBULENCE_VVDoT]/n));
-    monitor->print ("Method","volume weighed rms Mach %lg",
-		    sqrt(g[INDEX_TURBULENCE_VVoT]/n));
-    monitor->print ("Method","rms Velocity            %lg",
-		    sqrt(g[INDEX_TURBULENCE_VV]/n));
-    monitor->print ("Method","Density variance        %lg",
-		    sqrt(g[INDEX_TURBULENCE_DD]/n));
-    monitor->print ("Method","min/max Density         %lg",
-		    g[INDEX_TURBULENCE_minD] /
-		    g[INDEX_TURBULENCE_maxD]);                  
+    monitor->print ("Method","kinetic energy          " "%.17g",
+		    0.50*g[index_turbulence_vvd]/n);
+    monitor->print ("Method","mass weighted rms Mach  " "%.17g",
+		    sqrt(g[index_turbulence_vvdot]/n));
+    monitor->print ("Method","volume weighed rms Mach " "%.17g",
+		    sqrt(g[index_turbulence_vvot]/n));
+    monitor->print ("Method","rms Velocity            " "%.17g",
+		    sqrt(g[index_turbulence_vv]/n));
+    monitor->print ("Method","Density variance        " "%.17g",
+		    sqrt(g[index_turbulence_dd]/n));
+    monitor->print ("Method","min/max Density         " "%.17g",
+		    g[index_turbulence_mind] /
+		    g[index_turbulence_maxd]);                  
   }
 
-  if (!block->is_leaf()) return;
+  if (!block->is_leaf()) {
+    enzo_block->compute_done();
+    return;
+  }
 
   const int p = field.precision (0);
 
@@ -348,6 +366,7 @@ void EnzoMethodTurbulence::compute_resume_
  CkReductionMsg * msg) throw()
 {
 
+  TRACE;  
   // Compute normalization
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
@@ -391,9 +410,9 @@ void EnzoMethodTurbulence::compute_resume_
 
   // compute bulk momentum
   const T bm[3] = 
-    { T(g[INDEX_TURBULENCE_DAx]/nd),
-      T(g[INDEX_TURBULENCE_DAy]/nd),
-      T(g[INDEX_TURBULENCE_DAz]/nd)};
+    { T(g[index_turbulence_dax]/nd),
+      T(g[index_turbulence_day]/nd),
+      T(g[index_turbulence_daz]/nd)};
 
   //  for (int dim = 0; dim <  MetaData->TopGridRank; dim++)
   //	bulkMomentum[dim] = GlobVal[7+dim]/numberOfGridZones;
@@ -413,6 +432,7 @@ void EnzoMethodTurbulence::compute_resume_
     }
   }
 
+  TRACE;  
   enzo_block->compute_done();
   
 }

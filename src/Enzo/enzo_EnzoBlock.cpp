@@ -247,7 +247,7 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,GridEndIndex,MAX_DIMENSION); 
   PUParray(p,CellWidth,MAX_DIMENSION);
 
-  PUParray(p,method_turbulence_data,MAX_TURBULENCE_ARRAY);
+  PUParray(p,method_turbulence_data,max_turbulence_array);
 
   p | mg_sync_;
   p | mg_iter_;

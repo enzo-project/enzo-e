@@ -35,30 +35,25 @@
 
 //----------------------------------------------------------------------
 
-#define INDEX_TURBULENCE_VAD   0
-#define INDEX_TURBULENCE_AAD   1
-#define INDEX_TURBULENCE_VVDoT 2
-#define INDEX_TURBULENCE_VVoT  3
-#define INDEX_TURBULENCE_VVD   4
-#define INDEX_TURBULENCE_VV    5
-#define INDEX_TURBULENCE_DD    6
-
-#define INDEX_TURBULENCE_DAx   7
-#define INDEX_TURBULENCE_DAy   8
-#define INDEX_TURBULENCE_DAz   9
-
-#define INDEX_TURBULENCE_DVx   10
-#define INDEX_TURBULENCE_DVy   11
-#define INDEX_TURBULENCE_DVz   12
-
-#define INDEX_TURBULENCE_DlnD  13
-
-/* minD and maxD must be the last two */
-#define INDEX_TURBULENCE_minD  14
-#define INDEX_TURBULENCE_maxD  15
-
-#define MAX_TURBULENCE_ARRAY 16 /* size of global array of global values to track */
-
+enum {
+  index_turbulence_vad,
+  index_turbulence_aad,
+  index_turbulence_vvdot,
+  index_turbulence_vvot,
+  index_turbulence_vvd,
+  index_turbulence_vv,
+  index_turbulence_dd,
+  index_turbulence_d,
+  index_turbulence_dax,
+  index_turbulence_day,
+  index_turbulence_daz,
+  index_turbulence_dvx,
+  index_turbulence_dvy,
+  index_turbulence_dvz,
+  index_turbulence_dlnd,
+  index_turbulence_mind,
+  index_turbulence_maxd,
+  max_turbulence_array };
 
 #ifdef CONFIG_NEW_CHARM
 #   define BASE_ENZO_BLOCK      CBase_EnzoBlock

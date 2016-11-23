@@ -125,7 +125,7 @@ public: // interface
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
     }
-    for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
+    for (int i=0; i<max_turbulence_array; i++) {
       method_turbulence_data [i] = 0;
     }
     performance_stop_(perf_block);
@@ -149,7 +149,7 @@ public: // interface
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
     }
-    for (int i=0; i<MAX_TURBULENCE_ARRAY; i++) {
+    for (int i=0; i<max_turbulence_array; i++) {
       method_turbulence_data [i] = 0;
     }
     performance_stop_(perf_block);
@@ -406,7 +406,7 @@ public: // attributes (YIKES!)
   enzo_float CellWidth[MAX_DIMENSION];
 
   /// Data for turbulence reductions
-  double method_turbulence_data [MAX_TURBULENCE_ARRAY];
+  double method_turbulence_data [max_turbulence_array];
 
 };
 

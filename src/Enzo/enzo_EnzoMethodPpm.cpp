@@ -12,8 +12,9 @@
 
 #ifdef DEBUG_PPM
 #  define TRACE_PPM(MESSAGE)						\
-  CkPrintf ("%s:%d %s %s\n",						\
-	    __FILE__,__LINE__,block->name().c_str(),MESSAGE);				
+  CkPrintf ("%s:%d TRACE_PPM %s %s\n",					\
+	    __FILE__,__LINE__,block->name().c_str(),MESSAGE);		\
+  fflush (stdout);
 #else
 #  define TRACE_PPM(MESSAGE) /* ... */
 #endif

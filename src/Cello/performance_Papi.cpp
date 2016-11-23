@@ -30,21 +30,7 @@ Papi::Papi(bool warnings) throw()
 
 void Papi::init() throw()
 {
-  // http://icl.cs.utk.edu/projects/papi/wiki/PAPIC:Low_Level
-
   int retval;
-
-  CkPrintf ("%d PAPI_library_init()\n",CkMyPe());
-  
-  // retval = PAPI_library_init(PAPI_VER_CURRENT);
-
-  // if (retval != PAPI_VER_CURRENT && retval > 0) {
-  //   if (warnings_) WARNING("Papi::init","PAPI library version mismatch!");
-  // } else if (retval < 0) {
-  //   if (warnings_) WARNING("Papi::init","PAPI initialization error!");
-  // } else {
-  //   is_initialized_ = true;
-  // }
 
   retval = PAPI_create_eventset(&event_set_);
 

@@ -13,10 +13,19 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define DEBUG_INITIALIZE
+
+#ifdef DEBUG_INITIALIZE
+#  define TRACE CkPrintf ("%s:%d TEBUG_INITIALIZE\n",__FILE__,__LINE__);
+#else
+#  define TRACE /*  */
+#endif
+
 //----------------------------------------------------------------------
 
 void Simulation::initialize() throw()
 {
+  TRACE;
   set_phase(phase_initial);
 
   initialize_config_();
@@ -61,6 +70,7 @@ void Simulation::initialize() throw()
 
 void Simulation::r_initialize_forest(CkReductionMsg * msg) 
 {
+  TRACE;
   performance_->start_region(perf_initial);
   delete msg;
   
@@ -82,6 +92,7 @@ void Simulation::r_initialize_forest(CkReductionMsg * msg)
 
 void Simulation::r_initialize_hierarchy(CkReductionMsg * msg) 
 {
+  TRACE;
   performance_->start_region(perf_initial);
   delete msg;
 

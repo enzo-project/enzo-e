@@ -10,6 +10,13 @@
 
 #include "enzo.hpp"
 
+// #define DEBUG_TURBULENCE
+
+#ifdef DEBUG_TURBULENCE
+#  define TRACE CkPrintf("%s:%d TRACE DEBUG_TURBULENCE\n",__FILE__,__LINE__);
+#else
+#  define TRACE /*  */
+#endif
 //----------------------------------------------------------------------
 
 EnzoInitialTurbulence::EnzoInitialTurbulence 
@@ -53,7 +60,7 @@ void EnzoInitialTurbulence::enforce_block
  ) throw()
 
 {
-
+  TRACE;
   if (!block->is_leaf()) return;
 
   //  INCOMPLETE("EnzoInitialTurbulence::enforce_block()");

@@ -74,7 +74,7 @@ Mesh { root_rank = 3; }
               "p_png", "te_png", "mesh", "refine_shock", "refine_shear"  ];
 
      checkpoint {
-          dir   = ["turbulence3d-checkpoint-%d","count"];
+          dir   = ["turbulence3d-checkpoint-%d","flipflop"];
           type = "checkpoint";
           schedule {
              var =  "seconds";

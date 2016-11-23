@@ -7,6 +7,8 @@
 
 #include "enzo.hpp"
 
+// #define DEBUG_ENZO_REFINE_SHOCK
+
 //----------------------------------------------------------------------
 
 EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
@@ -35,9 +37,6 @@ int EnzoRefineShock::apply ( Block * block ) throw ()
 {
 
   Field field = block->data()->field();
-
-  bool all_coarsen = true;
-  bool any_refine = false;
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -85,6 +84,9 @@ int EnzoRefineShock::apply ( Block * block ) throw ()
 
   void * output = initialize_output_(field.field_data());
 
+  bool any_refine;
+  bool all_coarsen;
+  
   switch (precision) {
   case precision_single:
     evaluate_block_((const float**) v3,
@@ -137,8 +139,18 @@ void EnzoRefineShock::evaluate_block_
  bool * all_coarsen, 
  int rank)
 {
+  (*all_coarsen) = true;
+  (*any_refine)  = false;
+
   const int d3[3] = {1, ndx, ndx*ndy};
 
+#ifdef DEBUG_ENZO_REFINE_SHOCK
+  T dp_min = std::numeric_limits<T>::max();
+  T dp_max = -std::numeric_limits<T>::max();
+  T er_min = std::numeric_limits<T>::max();
+  T er_max = -std::numeric_limits<T>::max();
+#endif
+  
   for (int axis=0; axis<rank; axis++) {
 
     for (int iz=gz; iz<nz+gz; iz++) {
@@ -169,6 +181,12 @@ void EnzoRefineShock::evaluate_block_
 	    (dp > pressure_max_coarsen_) &&
 	    (er > energy_ratio_max_coarsen_);
 
+#ifdef DEBUG_ENZO_REFINE_SHOCK
+	  dp_min = std::min(dp_min,dp);
+	  dp_max = std::max(dp_max,dp);
+	  er_min = std::min(er_min,er);
+	  er_max = std::max(er_max,er);
+#endif
 	  if (l_refine)  *any_refine = true;
 	  if (l_same)    *all_coarsen = false;
 
@@ -180,6 +198,14 @@ void EnzoRefineShock::evaluate_block_
       }
     }
   }
+#ifdef DEBUG_ENZO_REFINE_SHOCK
+  CkPrintf ("%s dp limits %lf %lf  dp min/max %lf %lf\n",
+	    pressure_max_coarsen_,pressure_min_refine_,
+	    dp_min,dp_max);
+  CkPrintf ("%s er limits %lf %lf  er min/max %lf %lf\n",
+	    energy_ratio_max_coarsen_,energy_ratio_min_refine_,
+	    er_min,er_max);
+#endif  
 }
 //======================================================================
 
