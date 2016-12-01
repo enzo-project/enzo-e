@@ -164,7 +164,13 @@ void EnzoInitialTurbulence::enforce_block
 
   unsigned mask = 1 << (INDEX_BITS_TREE - 1);
 
+  int ix0=gx;
+  int iy0=gy;
+  int iz0=gz;
   for (int i=0; i<level; i++) {
+    ix0 *= 2;
+    iy0 *= 2;
+    iz0 *= 2;
     bool mx = (mask & bx);
     bool my = (mask & by);
     bool mz = (mask & bz);
@@ -173,6 +179,9 @@ void EnzoInitialTurbulence::enforce_block
     o3[2] = 2*o3[2] + (mz ? nz : 0);
     mask = mask >> 1;
   }
+  o3[0] += ix0 - gx;
+  o3[1] += iy0 - gy;
+  o3[2] += iz0 - gz;
 
   if ( rank == 2 ) {
 

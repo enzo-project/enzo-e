@@ -7,6 +7,8 @@
 
 #include "mesh.hpp"
 
+// #define TRACE_REFINE_SHEAR
+
 //----------------------------------------------------------------------
 
 RefineShear::RefineShear(double min_refine,
@@ -14,7 +16,7 @@ RefineShear::RefineShear(double min_refine,
 			 int    max_level,
 			 bool   include_ghosts,
 			 std::string output) throw ()
-  : Refine (min_refine_, max_coarsen, max_level, include_ghosts, output)
+  : Refine (min_refine, max_coarsen, max_level, include_ghosts, output)
 {
 }
 
@@ -120,6 +122,10 @@ void RefineShear::evaluate_block_(const T * u,
   // Compute inner-product of shear vector.  Note works for
   // rank = 1, 2, 3 since 
 
+#ifdef TRACE_REFINE_SHEAR
+  T min_shear = std::numeric_limits<T>::max();
+  T max_shear = -std::numeric_limits<T>::max();
+#endif
   for (int iz=gz; iz<nz+gz; iz++) {
     for (int iy=gy; iy<ny+gy; iy++) {
       for (int ix=gx; ix<nx+gx; ix++) {
@@ -135,6 +141,10 @@ void RefineShear::evaluate_block_(const T * u,
 	  wy = w[i+ky] - w[i-ky]; wy *= wy;
 	}
 	shear = uy + uz + vx + vz + wx + wy;
+#ifdef TRACE_REFINE_SHEAR
+	min_shear = std::min(min_shear,shear);
+	max_shear = std::max(max_shear,shear);
+#endif
 	if (shear > min_refine_)  *any_refine  = true;
 	if (shear > max_coarsen_) *all_coarsen = false;
 	if (output) {
@@ -144,6 +154,11 @@ void RefineShear::evaluate_block_(const T * u,
       }
     }
   }
+#ifdef TRACE_REFINE_SHEAR
+  CkPrintf ("%s:%d TRACE_REFINE_SHEAR %s %f %f (%f %f)\n",
+    __FILE__,__LINE__,block_temp_->name().c_str(),min_shear,max_shear,
+    max_coarsen_, min_refine_);
+#endif  
 }
 //======================================================================
 

@@ -57,7 +57,6 @@ private: // functions
 		       bool *any_refine,
 		       bool * all_coarsen, 
 		       int rank);
-
 };
 
 #endif /* MESH_REFINE_SHEAR_HPP */
