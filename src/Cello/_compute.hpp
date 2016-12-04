@@ -25,6 +25,7 @@
 
 #include "compute_Compute.hpp"
 #include "compute_Matrix.hpp"
+#include "compute_Solver.hpp"
 
 #endif /* _FIELD_HPP */
 

@@ -3,8 +3,8 @@
 /// @file     compute_Matrix.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @author   Daniel R. Reynolds (reynolds@smu.edu)
-/// @date     yyyy-mm-dd
-/// @brief    
+/// @date     2015-06-09
+/// @brief    [\ref Compute] Implementation of the Matrix class
 
 #include "compute.hpp"
 

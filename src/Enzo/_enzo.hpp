@@ -178,6 +178,7 @@ struct fluxes
 #include "enzo_EnzoRefineShock.hpp"
 
 #include "enzo_EnzoMethodGrackle.hpp"
+#include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodGravityBiCGStab.hpp"
 #include "enzo_EnzoMethodGravityCg.hpp"
 #include "enzo_EnzoMethodGravityMg0.hpp"
@@ -199,6 +200,8 @@ struct fluxes
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeSmoothJacobi.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
+
+#include "enzo_EnzoSolverCg.hpp"
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"

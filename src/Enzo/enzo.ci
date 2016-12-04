@@ -78,6 +78,7 @@ module enzo {
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodTurbulence;
+  PUPable EnzoMethodGravity;
   PUPable EnzoMethodGravityCg;
   PUPable EnzoMethodGravityMlat;
   PUPable EnzoMethodGravityMg0;
