@@ -91,6 +91,8 @@ module enzo {
 
   PUPable EnzoRestrict;
 
+  PUPable EnzoSolverCg;
+
   extern module mesh;
 
   readonly CProxy_EnzoSimulation proxy_enzo_simulation;

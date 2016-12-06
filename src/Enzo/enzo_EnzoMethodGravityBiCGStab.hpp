@@ -209,14 +209,6 @@ public: // interface
   void set_beta_n(long double beta_n) throw() { beta_n_ = beta_n; }
   void set_iter(int iter) throw() { iter_ = iter; }
 
-  /// TEMPORARY
-  // virtual double timestep (Block * block) const throw() 
-  // {
-  //   WARNING ("EnzoMethodGravityBiCGStab::timestep()",
-  // 	     "TEMPORARY: setting timestep to 1.0 for debugging");
-  //   return 1.0;
-  // }
-
 protected: // methods
 
   /// internal routine to report solver progress to stdout
@@ -246,7 +238,8 @@ protected: // attributes
   /// Preconditioner
   Matrix* M_;
 
-  /// Whether you need to project b into R(A), e.g. fully periodic or Neumann problems
+  /// Whether you need to project b into R(A), e.g. fully periodic or
+  /// Neumann problems
   bool is_singular_;
 
   /// Whether this is the first call to the solver

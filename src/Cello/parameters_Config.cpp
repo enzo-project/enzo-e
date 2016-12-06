@@ -174,6 +174,15 @@ void Config::pup (PUP::er &p)
 
   p | restart_file;
 
+  // Solvers
+  
+  p | num_solvers;
+  p | solver_list;
+  p | solver_type;
+  p | solver_iter_max;
+  p | solver_res_tol;
+  p | solver_monitor_iter;
+  
   // Stopping
 
   p | stopping_cycle;
@@ -203,6 +212,7 @@ void Config::read(Parameters * p) throw()
   read_initial_(p);
   read_memory_(p);
   read_mesh_(p);
+  read_solver_(p); // before read_method_
   read_method_(p);
   read_monitor_(p);
   read_output_(p);
@@ -659,10 +669,8 @@ void Config::read_method_ (Parameters * p) throw()
 
     // Read schedule for the Method object if any
       
-    std::string schedule_var = full_name + ":schedule:var";
-
     const bool method_scheduled = 
-      (p->type(schedule_var) != parameter_unknown);
+      (p->type(full_name + ":schedule:var") != parameter_unknown);
 
     if (method_scheduled) {
       p->group_set(0,"Method");
@@ -675,13 +683,11 @@ void Config::read_method_ (Parameters * p) throw()
     }
 
     // Read courant condition if any
-    std::string courant = full_name + ":courant";
-    method_courant[index_method] = p->value_float  (courant,1.0);
+    method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
 
     // Read specified timestep, if any (for MethodTrace)
-    std::string timestep = full_name + ":timestep";
     method_timestep[index_method] = p->value_float  
-      (timestep,std::numeric_limits<double>::max());
+      (full_name + ":timestep",std::numeric_limits<double>::max());
   }
 }
 
@@ -1109,6 +1115,47 @@ void Config::read_performance_ (Parameters * p) throw()
 void Config::read_restart_ (Parameters * p) throw()
 {
   restart_file = p->value_string("Restart:file","");
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_solver_ (Parameters * p) throw()
+{
+  //--------------------------------------------------
+  // Solver
+  //--------------------------------------------------
+
+  TRACE("Parameters: Solver");
+
+  num_solvers = p->list_length("Solver:list");
+
+  solver_list.resize(num_solvers);
+  solver_type.resize(num_solvers);
+  solver_iter_max.resize(num_solvers);
+  solver_res_tol.resize(num_solvers);
+  solver_monitor_iter.resize(num_solvers);
+
+  for (int index_solver=0; index_solver<num_solvers; index_solver++) {
+
+    std::string name = 
+      p->list_value_string(index_solver,"Solver:list");
+
+    std::string full_name = std::string("Solver:") + name;
+
+    solver_list[index_solver] = name;
+
+    solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
+    
+    solver_iter_max[index_solver] = p->value_integer
+      (full_name + ":iter_max",1000);
+    
+    solver_res_tol[index_solver] = p->value_float
+      (full_name + ":res_tol",1e-6);
+    
+    solver_monitor_iter[index_solver] = p->value_integer
+      (full_name + ":monitor_iter",0);
+  }  
+
 }
 
 //----------------------------------------------------------------------

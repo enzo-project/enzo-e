@@ -8,7 +8,7 @@
 #ifndef ENZO_ENZO_SOLVER_CG_HPP
 #define ENZO_ENZO_SOLVER_CG_HPP
 
-class EnzoSolverCg : Solver {
+class EnzoSolverCg : public Solver {
 
   /// @class    EnzoSolverCg
   /// @ingroup  Enzo
@@ -21,6 +21,13 @@ public: // interface
 
   /// Copy constructor
   EnzoSolverCg(const EnzoSolverCg & EnzoSolverCg) throw();
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoSolverCg);
+
+  /// Charm++ PUP::able migration constructor
+  EnzoSolverCg (CkMigrateMessage *m)
+  {}
 
   /// Assignment operator
   EnzoSolverCg & operator= (const EnzoSolverCg & EnzoSolverCg) throw();

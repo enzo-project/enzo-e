@@ -250,17 +250,42 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
+  } else if (name == "gravity") {
+    const bool is_singular = is_periodic();
+    std::string solver_name = enzo_config->method_gravity_solver;
+
+    int index_solver = 0;
+    while (index_solver < enzo_config->num_solvers &&
+	   enzo_config->solver_list[index_solver] != solver_name) {
+      ++index_solver;
+    }
+    std::string solver_type = enzo_config->solver_type[index_solver];
+    CkPrintf ("solver_name = %s  solver_type = %s\n",
+	      solver_name.c_str(),solver_type.c_str());
+    Solver * solver = NULL;
+    if (solver_type == "cg") {
+      solver = new EnzoSolverCg;
+    } else if (solver_type == "bicgstab") {
+    }
+    ASSERT1 ("EnzoProblem::create_method()",
+	     "Unknown solver %s for gravity method",
+	     solver_type,
+	     solver != NULL);
+    
+    method = new EnzoMethodGravity (solver);
+      
   } else if (name == "gravity_cg") {
     const bool is_singular = is_periodic();
     int rank = config->mesh_root_rank;
+    FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
     method = new EnzoMethodGravityCg
       (field_descr, rank,
        enzo_config->method_gravity_cg_grav_const,
-       enzo_config->method_gravity_cg_iter_max,
-       enzo_config->method_gravity_cg_res_tol,
-       enzo_config->method_gravity_cg_monitor_iter,
-       is_singular,
-       enzo_config->method_gravity_cg_diag_precon );
+	 enzo_config->method_gravity_cg_iter_max,
+	 enzo_config->method_gravity_cg_res_tol,
+	 enzo_config->method_gravity_cg_monitor_iter,
+	 is_singular,
+	 enzo_config->method_gravity_cg_diag_precon );
   } else if (name == "gravity_bicgstab") {
     const bool is_singular = is_periodic();
     int rank = config->mesh_root_rank;

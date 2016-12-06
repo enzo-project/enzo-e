@@ -121,6 +121,12 @@ public: // interface
       performance_papi_counters(),
       performance_warnings(false),
       restart_file(""),
+      num_solvers(),
+      solver_list(),
+      solver_type(),
+      solver_iter_max(),
+      solver_res_tol(),
+      solver_monitor_iter(),
       stopping_cycle(0),
       stopping_time(0.0),
       stopping_seconds(0.0),
@@ -237,6 +243,12 @@ public: // interface
       performance_papi_counters(),
       performance_warnings(false),
       restart_file(""),
+      num_solvers(),
+      solver_list(),
+      solver_type(),
+      solver_iter_max(),
+      solver_res_tol(),
+      solver_monitor_iter(),
       stopping_cycle(0),
       stopping_time(0.0),
       stopping_seconds(0.0),
@@ -424,6 +436,15 @@ public: // attributes
 
   std::string                restart_file;
 
+  // Solvers
+
+  int                        num_solvers;
+  std::vector<std::string>   solver_list;
+  std::vector<std::string>   solver_type;
+  std::vector<int>           solver_iter_max;
+  std::vector<double>        solver_res_tol;
+  std::vector<int>           solver_monitor_iter;
+
   // Stopping
 
   int                        stopping_cycle;
@@ -454,6 +475,7 @@ protected: // functions
   void read_particle_    ( Parameters * ) throw();
   void read_performance_ ( Parameters * ) throw();
   void read_restart_     ( Parameters * ) throw();
+  void read_solver_      ( Parameters * ) throw();
   void read_stopping_    ( Parameters * ) throw();
   void read_testing_     ( Parameters * ) throw();
 

@@ -93,6 +93,7 @@ public: // interface
       // EnzoMethodGravity
       method_gravity_potential_field(""),
       method_gravity_density_field(""),
+      method_gravity_solver(),
       // EnzoMethodGravityCg
       method_gravity_cg_iter_max(0),
       method_gravity_cg_res_tol(0.0),
@@ -216,6 +217,7 @@ public: // attributes
   // EnzoMethodGravity
   std::string                method_gravity_potential_field;
   std::string                method_gravity_density_field;
+  std::string                method_gravity_solver;
 
   // EnzoMethodGravityCg
   int                        method_gravity_cg_iter_max;
