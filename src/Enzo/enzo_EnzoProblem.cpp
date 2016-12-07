@@ -264,7 +264,18 @@ Method * EnzoProblem::create_method_
 	      solver_name.c_str(),solver_type.c_str());
     Solver * solver = NULL;
     if (solver_type == "cg") {
-      solver = new EnzoSolverCg;
+      const bool is_singular = is_periodic();
+      FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
+      int rank = config->mesh_root_rank;
+      solver = new EnzoSolverCg
+	(field_descr,
+	 new EnzoMatrixLaplace,
+	 rank,
+	 enzo_config->solver_iter_max[index_solver],
+	 enzo_config->solver_res_tol[index_solver],
+	 enzo_config->solver_monitor_iter[index_solver],
+	 is_singular,
+	 enzo_config->solver_diag_precon[index_solver]) ;
     } else if (solver_type == "bicgstab") {
     }
     ASSERT1 ("EnzoProblem::create_method()",

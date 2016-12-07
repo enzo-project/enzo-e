@@ -11,6 +11,12 @@
 #ifndef ENZO_ENZO_METHOD_GRAVITY_CG_HPP
 #define ENZO_ENZO_METHOD_GRAVITY_CG_HPP
 
+// class EnzoMethodGravityCgData : public CBase_EnzoMethodGravityCgData {
+//   friend class EnzoMethodGravityCg;
+// protected:
+//   double test_;
+// };
+
 class EnzoMethodGravityCg : public Method {
 
   /// @class    EnzoMethodGravityCg

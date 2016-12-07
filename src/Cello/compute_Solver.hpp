@@ -8,6 +8,7 @@
 #ifndef COMPUTE_SOLVER_HPP
 #define COMPUTE_SOLVER_HPP
 
+class Refresh;
 class Solver : public PUP::able 
 {
   /// @class    Solver
@@ -22,16 +23,32 @@ public: // interface
 
   /// Destructor
   virtual ~Solver() throw()
-  {}
+  {
+    for (size_t i=0; i<refresh_list_.size(); i++) {
+      delete refresh_list_[i];
+      refresh_list_[i] = 0;
+    }
+  }
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Solver);
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
-  { TRACEPUP;
+  {
+    TRACEPUP;
+    
     PUP::able::pup(p);
+    
+    p | refresh_list_;
   }
+
+  int add_refresh (int ghost_depth, 
+		   int min_face_rank, 
+		   int neighbor_type, 
+		   int sync_type);
+
+  Refresh * refresh(size_t index=0) ;
 
 public: // virtual functions
 
@@ -39,7 +56,10 @@ public: // virtual functions
 
   virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw() = 0; 
 
-protected: // functions
+protected: // attributes
+
+  ///  Refresh object
+  std::vector<Refresh *> refresh_list_;
 
 };
 

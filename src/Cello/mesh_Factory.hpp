@@ -89,6 +89,17 @@ public: // interface
    Simulation * simulation = 0
 ) const throw();
 
+// NEW CODE: See 161206 notes: implementing data objects bound with
+// block_array elements
+//  
+//   virtual void bound_with_block(const CkArrayID &b)
+//   {bound_arrays_.push_back(b);};
+
+// protected:
+
+//   std::vector<CkArrayID> bound_arrays_;
+  
+
 };
 
 #endif /* MESH_FACTORY_HPP */

@@ -181,6 +181,7 @@ void Config::pup (PUP::er &p)
   p | solver_type;
   p | solver_iter_max;
   p | solver_res_tol;
+  p | solver_diag_precon;
   p | solver_monitor_iter;
   
   // Stopping
@@ -1133,6 +1134,7 @@ void Config::read_solver_ (Parameters * p) throw()
   solver_type.resize(num_solvers);
   solver_iter_max.resize(num_solvers);
   solver_res_tol.resize(num_solvers);
+  solver_diag_precon.resize(num_solvers);
   solver_monitor_iter.resize(num_solvers);
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
@@ -1151,6 +1153,9 @@ void Config::read_solver_ (Parameters * p) throw()
     
     solver_res_tol[index_solver] = p->value_float
       (full_name + ":res_tol",1e-6);
+
+    solver_diag_precon[index_solver] = p->value_logical
+      (full_name + ":diag_precon",false);
     
     solver_monitor_iter[index_solver] = p->value_integer
       (full_name + ":monitor_iter",0);

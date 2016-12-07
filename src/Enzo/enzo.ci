@@ -105,6 +105,10 @@ module enzo {
     entry void r_write_checkpoint ();
   }
 
+// starting to implement bound data array test: see 161206 notes
+
+//  array[Index] EnzoMethodGravityCgData;
+  
   array[Index] EnzoBlock : Block {
 
     entry EnzoBlock (MsgRefine * mesg);

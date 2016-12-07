@@ -126,6 +126,7 @@ public: // interface
       solver_type(),
       solver_iter_max(),
       solver_res_tol(),
+      solver_diag_precon(),
       solver_monitor_iter(),
       stopping_cycle(0),
       stopping_time(0.0),
@@ -248,6 +249,7 @@ public: // interface
       solver_type(),
       solver_iter_max(),
       solver_res_tol(),
+      solver_diag_precon(),
       solver_monitor_iter(),
       stopping_cycle(0),
       stopping_time(0.0),
@@ -443,6 +445,7 @@ public: // attributes
   std::vector<std::string>   solver_type;
   std::vector<int>           solver_iter_max;
   std::vector<double>        solver_res_tol;
+  std::vector<char>          solver_diag_precon;
   std::vector<int>           solver_monitor_iter;
 
   // Stopping

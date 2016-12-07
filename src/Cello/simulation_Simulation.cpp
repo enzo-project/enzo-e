@@ -607,9 +607,7 @@ void Simulation::initialize_forest_() throw()
   if (allocate_blocks) {
 
     // Create the root-level blocks for level = 0
-    hierarchy_->create_forest
-      (field_descr_,
-       allocate_data);
+    hierarchy_->create_forest (field_descr_, allocate_data);
 
     // Create the "sub-root" blocks if mesh_min_level < 0
     if (config_->mesh_min_level < 0) {

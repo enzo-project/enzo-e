@@ -21,9 +21,12 @@ void Factory::pup (PUP::er &p)
 {
   TRACEPUP;
 
+  // NOTE: change this function whenever attributes change
+
   PUP::able::pup(p);
 
-  // NOTE: change this function whenever attributes change
+  //  p | bound_arrays_;
+  
 }
 
 //----------------------------------------------------------------------
