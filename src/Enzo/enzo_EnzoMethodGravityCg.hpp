@@ -78,8 +78,7 @@ public: // interface
       bs_(0.0),
       rs_(0.0),
       xs_(0.0),
-      bc_(0.0),
-      id_refresh_matvec_(0)
+      bc_(0.0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -133,7 +132,6 @@ public: // interface
     p | dy_;
     p | bs_;
     p | bc_;
-    p | id_refresh_matvec_;
 
   }
 
@@ -305,9 +303,6 @@ protected: // attributes
 
   /// count of elements B(i) for singular systems
   long double bc_;
-
-  /// matvec refresh index
-  int id_refresh_matvec_;
 };
 
 #endif /* ENZO_ENZO_METHOD_GRAVITY_CG_HPP */

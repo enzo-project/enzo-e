@@ -22,8 +22,12 @@ Method {
 
 Field {
    
-   list = ["density", "potential"];
-   ghost_depth = [1,1,1];
+   list = [ "density", "potential", "acceleration_x", "acceleration_y",
+            "gravity_bicgstab_B", "gravity_bicgstab_X", "gravity_bicgstab_R",
+	    "gravity_bicgstab_R0","gravity_bicgstab_P", "gravity_bicgstab_Y",
+	    "gravity_bicgstab_V", "gravity_bicgstab_Q", "gravity_bicgstab_U" ];
+	    
+   ghost_depth = [1,1];
 }
 
 Initial {
@@ -32,7 +36,7 @@ Initial {
    value {
       density = [ 1.0,
                      (x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) < 0.05,
-                  0.0 ];
+                  0.1 ];
    }
 }
 

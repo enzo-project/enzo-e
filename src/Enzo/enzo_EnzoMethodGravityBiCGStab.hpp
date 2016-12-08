@@ -68,12 +68,7 @@ public: // interface
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
       bs_(0.0),bc_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0),
-      id_refresh_ACC_(-1),
-      id_refresh_P_(-1),
-      id_refresh_Q_(-1),
-      id_refresh_X_(-1),
-      id_refresh_Y_(-1)
+      ys_(0.0),vs_(0.0),us_(0.0)
   {}
 
   /// Charm++ Pack / Unpack function
@@ -139,12 +134,6 @@ public: // interface
     p | ys_;
     p | vs_;
     p | us_;
-
-    p | id_refresh_ACC_;
-    p | id_refresh_P_;
-    p | id_refresh_Q_;
-    p | id_refresh_X_;
-    p | id_refresh_Y_;
 
   }
 
@@ -312,13 +301,6 @@ protected: // attributes
   long double ys_;
   long double vs_;
   long double us_;
-
-  /// refresh indices
-  int id_refresh_ACC_;
-  int id_refresh_P_;
-  int id_refresh_Q_;
-  int id_refresh_X_;
-  int id_refresh_Y_;
 
 };
 

@@ -56,15 +56,6 @@
 
 // #define DEBUG_METHOD
 
-#undef NEW_REFRESH
-
-/* #define NEW_REFRESH */
-
-#ifndef NEW_REFRESH
-#  define OLD_REFRESH
-#endif
-
-
 #define CK_TEMPLATES_ONLY
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
@@ -102,9 +93,6 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
     iter_(0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
     bc_(0.0)
-#ifdef OLD_REFRESH
-  , id_refresh_matvec_(-1)
-#endif
 {
   TRACE_METHOD("EnzoMethodGravityCg() ENTER");
 
@@ -125,19 +113,11 @@ EnzoMethodGravityCg::EnzoMethodGravityCg
 
   const int num_fields = field_descr->field_count();
 
-  field_descr->ghost_depth    (idensity_,&gx_,&gy_,&gz_);
-
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   //  refresh(ir)->add_field(idensity_);
   refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
-
-#ifdef OLD_REFRESH
-  id_refresh_matvec_ = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(id_refresh_matvec_)->add_all_fields(num_fields);
-  //  refresh(id_refresh_matvec_)->add_field(ir_);
-#endif
 
   TRACE_METHOD("EnzoMethodGravityCg() EXIT");
 }
@@ -160,8 +140,9 @@ void EnzoMethodGravityCg::compute ( Block * block) throw()
   TRACE_METHOD("compute ENTER");
   Field field = block->data()->field();
 
-  field.size                (&nx_,&ny_,&nz_);
-  field.dimensions(idensity_,&mx_,&my_,&mz_);
+  field.size                 (&nx_,&ny_,&nz_);
+  field.dimensions (idensity_,&mx_,&my_,&mz_);
+  field.ghost_depth(idensity_,&gx_,&gy_,&gz_);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
@@ -284,21 +265,13 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   method->set_iter ( ((int*)msg->getData())[0] );
 
-  // Refresh if Block is a leaf, then continue with enzo_matvec_()
+  // Refresh field faces then call enzo_matvec
 
-#ifdef OLD_REFRESH
-  method->refresh(1)->set_active(is_leaf());
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
-		method->refresh(1));
-#endif
-
-#ifdef NEW_REFRESH
-  Refresh refresh (4,0,neighbor_level, sync_face);
+  Refresh refresh (4,0,neighbor_leaf, sync_neighbor);
   refresh.set_active(is_leaf());
   refresh.add_all_fields(this->data()->field().field_count());
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
-		&refresh);
-#endif
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL), &refresh);
+
   TRACE_METHOD("cg_loop_0b EXIT");
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
@@ -324,22 +297,13 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
 
   delete msg;
   
-  // Refresh if Block is a leaf
+  // Refresh field faces then call enzo_matvec
 
-#ifdef OLD_REFRESH
-  method->refresh(1)->set_active(is_leaf());
-  TRACE_METHOD("   refresh_enter CALLING");
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
-		method->refresh(1));
-  TRACE_METHOD("   refresh_enter CALLED");
-#endif
-#ifdef NEW_REFRESH
-  Refresh refresh (4,0,neighbor_level, sync_face);
+  Refresh refresh (4,0,neighbor_leaf, sync_neighbor);
   refresh.set_active(is_leaf());
   refresh.add_all_fields(this->data()->field().field_count());
-  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),
-		&refresh);
-#endif
+  refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
+  
   TRACE_METHOD("cg_loop_0a EXIT");
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }

@@ -26,10 +26,8 @@ public: // interface
 		bool diag_precon);
 
   /// Constructor
-  EnzoSolverCg() throw();
-
-  /// Copy constructor
-  EnzoSolverCg(const EnzoSolverCg & EnzoSolverCg) throw();
+  EnzoSolverCg() throw()
+  {};
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoSolverCg);

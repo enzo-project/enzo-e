@@ -427,12 +427,7 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
     omega_d_(0), omega_n_(0), omega_(0), 
     vr0_(0), rr_(0), alpha_(0),
     bs_(0.0),bc_(0.0),
-    ys_(0.0),vs_(0.0),us_(0.0),
-    id_refresh_ACC_(-1),
-    id_refresh_P_(-1),
-    id_refresh_Q_(-1),
-    id_refresh_X_(-1),
-    id_refresh_Y_(-1)
+    ys_(0.0),vs_(0.0),us_(0.0)
 {
   
   /// set preconditioning operator
@@ -440,9 +435,19 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
                      : (Matrix*)(new EnzoMatrixIdentity);
 
   /// access problem-defining fields for eventual RHS and solution
-  idensity_   = field_descr->field_id("density_total");
+  int id  = field_descr->field_id("density");
+  int idt = field_descr->field_id("density_total");
+
+  idensity_ = (idt != -1) ? idt : id;
   ipotential_ = field_descr->field_id("potential");
 
+  ASSERT("EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab()",
+	 "Either field \"density\" or \"density_total\" mush be defined",
+	 idensity_ != -1);
+  ASSERT("EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab()",
+	 "Field \"potential\" mush be defined",
+	 ipotential_ != -1);
+	 
   /// access existing fields for temporary vectors (must be declared in parameter file)
 
   ib_ = field_descr->field_id(name() + "_B");
@@ -479,17 +484,11 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   const int num_fields = field_descr->field_count();
 
   /// Initialize default Refresh (called before entry to compute())
+  
   const int ir = add_refresh(4, 0, neighbor_leaf, sync_barrier);
 
-  /// Initialize specific vector Refreshes
-  id_refresh_ACC_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  id_refresh_P_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  id_refresh_Q_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  id_refresh_X_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-  id_refresh_Y_ = add_refresh(4, 0, neighbor_leaf, sync_barrier);
-
   // int ax,ay,az;
-  // refresh(ir)->add_field(idensity_);
+  refresh(ir)->add_field(idensity_);
   // if (rank_ >= 1) {
   //     ax = field.field_id("acceleration_x");
   //     refresh(id_refresh_ACC)->add_field(ax);
@@ -506,14 +505,6 @@ EnzoMethodGravityBiCGStab::EnzoMethodGravityBiCGStab
   // refresh(id_refresh_Q_)->add_field(iq_);
   // refresh(id_refresh_X_)->add_field(ix_);
   // refresh(id_refresh_Y_)->add_field(iy_);
-
-  refresh(ir)->add_all_fields(num_fields);
-  refresh(id_refresh_ACC_)->add_all_fields(num_fields);
-  refresh(id_refresh_P_)->add_all_fields(num_fields);
-  refresh(id_refresh_Q_)->add_all_fields(num_fields);
-  refresh(id_refresh_X_)->add_all_fields(num_fields);
-  refresh(id_refresh_Y_)->add_all_fields(num_fields);
-
 }
 
 //----------------------------------------------------------------------
@@ -536,6 +527,7 @@ void EnzoMethodGravityBiCGStab::compute(Block* block) throw() {
   /// access the field infromation on this block
   Field field = block->data()->field();
   field.size(&nx_, &ny_, &nz_);
+  
   field.dimensions(idensity_, &mx_, &my_, &mz_);
   field.ghost_depth(idensity_, &gx_, &gy_, &gz_);
 
@@ -774,10 +766,14 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_0(EnzoBlock* enzo_block) 
   /// otherwise refresh P with callback to p_gravity_bicgstab_loop_1 for re-entry
   } else {
 
-    this->refresh(id_refresh_P_)->set_active(enzo_block->is_leaf());
-    enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_1(),
-			      this->refresh(id_refresh_P_));
+    // Refresh field faces then call gravity_bicgstab_loop_1
 
+    Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+    refresh.set_active(enzo_block->is_leaf());
+    refresh.add_all_fields(enzo_block->data()->field().field_count());
+    enzo_block->refresh_enter
+      (CkIndex_EnzoBlock::p_gravity_bicgstab_loop_1(), &refresh);
+  
   }
 }
 
@@ -821,9 +817,14 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_2(EnzoBlock* enzo_block) 
   }
 
   // refresh Y with callback to p_gravity_bicgstab_loop_3 to handle re-entry
-  this->refresh(id_refresh_Y_)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_3(),
-			    this->refresh(id_refresh_Y_));
+
+  // Refresh field faces then call p_gravity_bicgstab_loop_3()
+
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  refresh.set_active(enzo_block->is_leaf());
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_gravity_bicgstab_loop_3(),&refresh);
 
 }
 
@@ -963,10 +964,14 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_6(EnzoBlock* enzo_block) 
 
   }
 
+  // Refresh field faces then call p_gravity_bicgstab_loop_7
+
   /// refresh Q with callback to p_gravity_bicgstab_loop_7 to handle re-entry
-  this->refresh(id_refresh_Q_)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_7(),
-			    this->refresh(id_refresh_Q_));
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  refresh.set_active(enzo_block->is_leaf());
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_gravity_bicgstab_loop_7(),&refresh);
 
 }
 
@@ -1010,10 +1015,13 @@ template<class T> void EnzoMethodGravityBiCGStab::loop_8(EnzoBlock* enzo_block) 
     M_->matvec(iy_, iq_, enzo_block);     /// apply preconditioner to local block
   }
 
-  // refresh Y with callback to p_gravity_bicgstab_loop_9 to handle re-entry
-  this->refresh(id_refresh_Y_)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_loop_9(),
-			    this->refresh(id_refresh_Y_));
+  // Refresh field faces then call gravity_bicgstab_loop_9
+
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  refresh.set_active(enzo_block->is_leaf());
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_gravity_bicgstab_loop_9(),&refresh);
 
 }
 
@@ -1302,10 +1310,13 @@ template<class T> void EnzoMethodGravityBiCGStab::end(EnzoBlock* enzo_block, int
 
   /// indicate that method is finished
 
-  /// refresh X before computing acceleration
-  this->refresh(id_refresh_X_)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_acc(),
-			    this->refresh(id_refresh_X_));
+  // Refresh field faces then call gravity_bicgstab_acc()
+
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  refresh.set_active(enzo_block->is_leaf());
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_gravity_bicgstab_acc(),&refresh);
 
 }
 
@@ -1375,9 +1386,13 @@ void EnzoMethodGravityBiCGStab::acc(EnzoBlock* enzo_block) throw()
 
   first_call_ = false;
 
-  this->refresh(id_refresh_ACC_)->set_active(enzo_block->is_leaf());
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::p_gravity_bicgstab_exit(),
-			    this->refresh(id_refresh_ACC_));
+  // Refresh field faces then call gravity_bicgstab_exit()
+
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  refresh.set_active(enzo_block->is_leaf());
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_gravity_bicgstab_exit(), &refresh);
 
 }
 

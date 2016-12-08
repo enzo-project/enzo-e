@@ -76,30 +76,6 @@ EnzoSolverCg::EnzoSolverCg
 
 //----------------------------------------------------------------------
 
-EnzoSolverCg::EnzoSolverCg() throw ()
-{
-}
-
-//----------------------------------------------------------------------
-
-EnzoSolverCg::EnzoSolverCg(const EnzoSolverCg & EnzoSolverCg) throw ()
-/// @param     EnzoSolverCg  Object being copied
-{
-  INCOMPLETE("EnzoSolverCg::EnzoSolverCg(EnzoSolverCg)");
-}
-
-//----------------------------------------------------------------------
-
-EnzoSolverCg & EnzoSolverCg::operator= (const EnzoSolverCg & EnzoSolverCg) throw ()
-/// @param     EnzoSolverCg  Source object of the assignment
-/// @return    The target assigned object
-{
-  INCOMPLETE("EnzoSolverCg::operator=");
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
 EnzoSolverCg::~EnzoSolverCg() throw ()
 {
   INCOMPLETE("EnzoSolverCg::~EnzoSolverCg");
