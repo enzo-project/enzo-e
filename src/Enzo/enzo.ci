@@ -118,13 +118,25 @@ module enzo {
     // EnzoMethodTurbulence synchronization entry methods
     entry void p_method_turbulence_end(CkReductionMsg *msg);
 
+    // EnzoSolverCg synchronization entry methods
+
+    template <class T>
+    entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
+    template <class T>
+    entry void r_solver_cg_loop_0b(CkReductionMsg *msg);
+    template <class T>
+    entry void r_solver_cg_shift_1(CkReductionMsg *msg);
+    template <class T>
+    entry void r_solver_cg_loop_3(CkReductionMsg *msg);
+    template <class T>
+    entry void r_solver_cg_loop_5(CkReductionMsg *msg);
+
     // EnzoMethodGravityCg synchronization entry methods
+
     template <class T>
     entry void r_cg_loop_0a(CkReductionMsg *msg);
     template <class T>
     entry void r_cg_loop_0b(CkReductionMsg *msg);
-//    template <class T>
-//    entry void r_cg_loop_1(CkReductionMsg *msg);
     template <class T>
     entry void r_cg_shift_1(CkReductionMsg *msg);
     template <class T>
@@ -133,6 +145,7 @@ module enzo {
     entry void r_cg_loop_5(CkReductionMsg *msg);
 
     // EnzoMethodGravityBiCGStab post-reduction entry methods
+
     template <class T>
     entry void r_gravity_bicgstab_start_1(CkReductionMsg *msg);
     template <class T>

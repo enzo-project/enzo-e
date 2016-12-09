@@ -229,9 +229,9 @@
   Monitor * monitor = simulation()->monitor();	\
   monitor->verbose(stdout,"Method", "%s " FUNCTION,name().c_str());
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-extern CkReduction::reducerType r_method_gravity_mg_type;
+// extern CkReduction::reducerType r_method_gravity_mg_type;
 
 //----------------------------------------------------------------------
 

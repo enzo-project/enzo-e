@@ -161,9 +161,9 @@
 #  define PRINT_BDRX ;
 #endif
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-extern CkReduction::reducerType r_method_gravity_mg_type;
+// extern CkReduction::reducerType r_method_gravity_mg_type;
 
 //----------------------------------------------------------------------
 

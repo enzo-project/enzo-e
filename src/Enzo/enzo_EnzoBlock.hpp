@@ -253,6 +253,33 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
+  //--------------------------------------------------
+
+    /// EnzoMethodGravityCg entry method: DOT ==> refresh P
+  template <class T>
+  void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
+
+  /// EnzoMethodGravityCg entry method: ==> refresh P
+  template <class T>
+  void r_solver_cg_loop_0b (CkReductionMsg * msg) ;  
+
+  /// EnzoMethodGravityCg entry method: DOT(R,R) after shift
+  template <class T>
+  void r_solver_cg_shift_1 (CkReductionMsg * msg) ;
+
+  /// EnzoMethodGravityCg entry method: DOT(P,AP)
+  template <class T>
+  void r_solver_cg_loop_3 (CkReductionMsg * msg) ;
+
+  /// EnzoMethodGravityCg entry method: DOT(R,R)
+  template <class T>
+  void r_solver_cg_loop_5 (CkReductionMsg * msg) ;
+
+  /// EnzoMethodGravityCg entry method: 
+  /// perform the necessary reductions for shift
+  CkReductionMsg * r_solver_cg_shift(int n, CkReductionMsg ** msgs);
+
+  //--------------------------------------------------
   /// EnzoMethodGravityCg entry method: DOT ==> refresh P
   template <class T>
   void r_cg_loop_0a (CkReductionMsg * msg) ;  
@@ -273,10 +300,12 @@ public: /// entry methods
   template <class T>
   void r_cg_loop_5 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg entry method: 
-  /// perform the necessary reductions for shift
-  CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
+  // /// EnzoMethodGravityCg entry method: 
+  // /// perform the necessary reductions for shift
+  // CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
 
+  //--------------------------------------------------
+  
   /// EnzoMethodGravityBiCGStab entry method: SUM(B) and COUNT(B)
   template <class T>
   void r_gravity_bicgstab_start_1(CkReductionMsg* msg);  
@@ -324,7 +353,7 @@ public: /// entry methods
 
   /// EnzoMethodGravityBiCGStab entry method: 
   /// perform the necessary reductions for shift
-  CkReductionMsg* r_method_gravity_bicgstab(int n, CkReductionMsg** msgs);
+  // CkReductionMsg* r_method_gravity_bicgstab(int n, CkReductionMsg** msgs);
 
   void p_enzo_matvec()
   {
