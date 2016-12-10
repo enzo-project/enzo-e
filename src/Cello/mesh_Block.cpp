@@ -38,7 +38,6 @@ const char * phase_name[] = {
   "output_exit",
   "restart",
   "balance",
-  "enzo_matvec",
   "exit"
 };
 

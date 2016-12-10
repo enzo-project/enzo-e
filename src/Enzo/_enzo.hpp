@@ -110,16 +110,6 @@ enum return_enum {
 };
 
 //----------------------------------------------------------------------
-// WARNING 100 must be larger than number of phases in
-// src/Cello/_mesh.hpp phase_type
-
-enum enzo_phase_type 
-  {
-    phase_enzo_first = 100,
-    phase_enzo_matvec = phase_enzo_first
-  };
-
-//----------------------------------------------------------------------
 
 const int field_undefined = -1;
 

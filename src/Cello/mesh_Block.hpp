@@ -305,8 +305,7 @@ public: // interface
   /// Set the currently active Method.  Used to resume a Method's
   /// computation after a reduction
   void set_method_index (int index_method) throw()
-  {
-    index_method_ = index_method; }
+  { index_method_ = index_method; }
 
   /// Return the currently active Method
   int index_method() const throw()
@@ -315,7 +314,8 @@ public: // interface
   /// Return the currently-active Method
   Method * method () throw();
 
-protected:
+protected: // methods
+  
   /// Enter control compute phase
   void compute_enter_();
   /// Initiate computing the sequence of Methods
@@ -328,7 +328,8 @@ protected:
   void compute_end_();
   /// Exit control compute phase
   void compute_exit_();
-public:
+
+public: // methods
 
   /// Prepare to call compute_next_() after computing (used to synchronize between methods)
   /// Must be called at end of Method

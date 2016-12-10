@@ -195,6 +195,50 @@ Refine * EnzoProblem::create_refine_
   }
 }
 
+//----------------------------------------------------------------------
+
+Solver * EnzoProblem::create_solver_ 
+( std::string  solver_type,  
+  Config * config,
+  int index_solver,
+  const FieldDescr * field_descr,
+  const ParticleDescr * particle_descr) throw ()
+/// @param solver_type   Name of the solver to create
+/// @param config Configuration parameters class
+/// @param field_descr Field descriptor
+{
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+
+  Solver * solver = NULL;
+  
+  if (solver_type == "cg") {
+    const bool is_singular = is_periodic();
+    FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
+    int rank = config->mesh_root_rank;
+    solver = new EnzoSolverCg
+      (field_descr,
+       new EnzoMatrixLaplace,
+       rank,
+       enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_res_tol[index_solver],
+       enzo_config->solver_monitor_iter[index_solver],
+       is_singular,
+       enzo_config->solver_diag_precon[index_solver]) ;
+
+  } else {
+    // Not an Enzo Solver--try base class Cello Solver
+    solver = Problem::create_solver_ 
+      (solver_type,config, index_solver,field_descr,particle_descr);
+    
+  }
+
+  ASSERT1 ("EnzoProblem::create_solver()",
+	   "Unknown solver %s",
+	   solver_type.c_str(),
+	   solver != NULL);
+
+  return solver;
+}    
 
 //----------------------------------------------------------------------
 
@@ -262,27 +306,10 @@ Method * EnzoProblem::create_method_
     std::string solver_type = enzo_config->solver_type[index_solver];
     CkPrintf ("solver_name = %s  solver_type = %s\n",
 	      solver_name.c_str(),solver_type.c_str());
-    Solver * solver = NULL;
-    if (solver_type == "cg") {
-      const bool is_singular = is_periodic();
-      FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
-      int rank = config->mesh_root_rank;
-      solver = new EnzoSolverCg
-	(field_descr,
-	 new EnzoMatrixLaplace,
-	 rank,
-	 enzo_config->solver_iter_max[index_solver],
-	 enzo_config->solver_res_tol[index_solver],
-	 enzo_config->solver_monitor_iter[index_solver],
-	 is_singular,
-	 enzo_config->solver_diag_precon[index_solver]) ;
-    } else if (solver_type == "bicgstab") {
-    }
-    ASSERT1 ("EnzoProblem::create_method()",
-	     "Unknown solver %s for gravity method",
-	     solver_type,
-	     solver != NULL);
-    
+
+    Solver * solver = create_solver_
+      (solver_type,enzo_config,index_solver,field_descr,particle_descr);
+
     method = new EnzoMethodGravity (solver);
       
   } else if (name == "gravity_cg") {

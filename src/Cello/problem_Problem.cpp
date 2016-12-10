@@ -82,6 +82,13 @@ void Problem::pup (PUP::er &p)
     p | method_list_[i]; // PUP::able
   }
 
+  if (pk) n=solver_list_.size();
+  p | n;
+  if (up) solver_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | solver_list_[i]; // PUP::able
+  }
+
   if (pk) n=output_list_.size();
   p | n;
   if (up) output_list_.resize(n);
@@ -427,6 +434,9 @@ void Problem::deallocate_() throw()
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }
+  for (size_t i=0; i<solver_list_.size(); i++) {
+    delete solver_list_[i];    solver_list_[i] = 0;
+  }
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];    method_list_[i] = 0;
   }
@@ -618,12 +628,29 @@ Stopping * Problem::create_stopping_
  std::string  type,
  Config * config
  ) throw ()
-/// @param type   Type of the stopping method to create (ignored)
+/// @param type   Type of the stopping criterion to create (ignored)
 /// @param config  Configuration parameter class
 {
   return new Stopping(config->stopping_cycle,
 		      config->stopping_time,
 		      config->stopping_seconds);
+}
+
+//----------------------------------------------------------------------
+
+Solver * Problem::create_solver_ 
+( std::string  name,
+  Config * config,
+  int index_solver,
+  const FieldDescr * field_descr,
+  const ParticleDescr * particle_descr) throw ()
+{
+  TRACE1("Problem::create_solver %s",name.c_str());
+
+  // No default solver
+  Solver * solver = NULL;
+
+  return solver;
 }
 
 //----------------------------------------------------------------------

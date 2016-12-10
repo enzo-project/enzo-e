@@ -53,8 +53,28 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
+  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw() = 0;
 
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw() = 0; 
+  /// Return the name of this solver
+  virtual std::string name () const
+  { return "UNKNOWN"; }
+
+protected: // functions
+
+  void monitor_output_(Block * block, int iter, double rr0,
+		       double rr_min, double rr, double rr_max,
+		       bool final = false) throw();
+  
+  /// Perform vector copy X <- Y
+  template <class T>
+  void copy_ (T * X, const T * Y,
+	      int mx, int my, int mz,
+	      bool active = true) const throw()
+  {
+    if (! active ) return;
+    const int m = mx*my*mz;
+    for (int i=0; i<m; i++) X[i] = Y[i];
+  }
 
 protected: // attributes
 

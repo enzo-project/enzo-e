@@ -33,7 +33,6 @@ mainmodule main {
      entry void p_stopping_balance();
      entry void p_balance();
      entry void p_stopping_exit();
-     entry void p_enzo_matvec();
      entry void p_exit();
 
   };

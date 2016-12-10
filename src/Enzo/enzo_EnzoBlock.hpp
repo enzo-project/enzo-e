@@ -255,29 +255,31 @@ public: /// entry methods
 
   //--------------------------------------------------
 
-    /// EnzoMethodGravityCg entry method: DOT ==> refresh P
+  /// EnzoSolverCg entry method: DOT ==> refresh P
   template <class T>
   void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
 
-  /// EnzoMethodGravityCg entry method: ==> refresh P
+  /// EnzoSolverCg entry method: ==> refresh P
   template <class T>
   void r_solver_cg_loop_0b (CkReductionMsg * msg) ;  
 
-  /// EnzoMethodGravityCg entry method: DOT(R,R) after shift
+  /// EnzoSolverCg entry method: DOT(R,R) after shift
   template <class T>
   void r_solver_cg_shift_1 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg entry method: DOT(P,AP)
+  /// EnzoSolverCg entry method: DOT(P,AP)
   template <class T>
   void r_solver_cg_loop_3 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg entry method: DOT(R,R)
+  /// EnzoSolverCg entry method: DOT(R,R)
   template <class T>
   void r_solver_cg_loop_5 (CkReductionMsg * msg) ;
 
-  /// EnzoMethodGravityCg entry method: 
+  /// EnzoSolverCg entry method: 
   /// perform the necessary reductions for shift
   CkReductionMsg * r_solver_cg_shift(int n, CkReductionMsg ** msgs);
+
+  void r_solver_cg_matvec(CkReductionMsg * msg);
 
   //--------------------------------------------------
   /// EnzoMethodGravityCg entry method: DOT ==> refresh P
@@ -351,17 +353,7 @@ public: /// entry methods
   void r_gravity_bicgstab_loop_15(CkReductionMsg* msg);
 
 
-  /// EnzoMethodGravityBiCGStab entry method: 
-  /// perform the necessary reductions for shift
-  // CkReductionMsg* r_method_gravity_bicgstab(int n, CkReductionMsg** msgs);
-
-  void p_enzo_matvec()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    enzo_matvec_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
- 
-  }
+  /// Matvec synchronization for EnzoMethodGravityCg
   void r_enzo_matvec(CkReductionMsg * msg)
   {
     performance_start_(perf_compute,__FILE__,__LINE__);

@@ -48,8 +48,6 @@
 /// - acceleration_z [rank >= 3] acceleration along Z-axis
 
 
-#include "cello.hpp"
-
 #include "enzo.hpp"
 
 #include "enzo.decl.h"
@@ -67,6 +65,7 @@
 #else
 #   define TRACE_METHOD(method) /*  */ 
 #endif
+
 //----------------------------------------------------------------------
 
 EnzoMethodGravityCg::EnzoMethodGravityCg 

@@ -11,7 +11,8 @@
 ///    Boundary:    Boundary conditions
 ///    Initial:     Initial conditions
 ///    Refine:      Refinement criteria
-///    Method:      List of numerical methods
+///    Solver:      List of linear solvers
+///    Method:      List of physics methods
 ///    Refresh:     List of ghost zone refresh objects
 ///    Output:      List of output functions
 ///    Refinement:  How the mesh hierarchy is to be refined
@@ -34,6 +35,7 @@ class Refine;
 class Refresh;
 class Restrict;
 class Simulation;
+class Solver;
 class Stopping;
 
 class Problem : public PUP::able
@@ -63,6 +65,7 @@ public: // interface
       initial_list_(),
       refine_list_(),
       stopping_(NULL),
+      solver_list_(),
       method_list_(),
       output_list_(),
       prolong_(NULL),
@@ -105,6 +108,10 @@ public: // interface
     if (i == -1) i = index_output_;
     return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : NULL; 
   }
+
+  /// Return the ith solver object
+  Solver * solver(size_t i) const throw() 
+  { return (i < solver_list_.size()) ? solver_list_[i] : NULL; }
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
@@ -196,6 +203,14 @@ protected: // functions
    const FieldDescr * field_descr,
    int index) throw ();
 
+  /// Create named solver object
+  virtual Solver *   create_solver_
+  (std::string type, 
+   Config * config, 
+   int index_solver,
+   const FieldDescr * field_descr,
+   const ParticleDescr * particle_descr) throw ();
+
   /// Create named method object
   virtual Method *   create_method_
   (std::string type, 
@@ -239,6 +254,9 @@ private: // attributes
 
   /// Stopping criteria
   Stopping * stopping_;
+
+  /// List of solver objects
+  std::vector<Solver *> solver_list_;
 
   /// List of method objects
   std::vector<Method *> method_list_;

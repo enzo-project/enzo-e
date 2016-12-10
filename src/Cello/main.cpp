@@ -170,16 +170,6 @@ void Main::p_stopping_exit()
 
 //----------------------------------------------------------------------
 
-void Main::p_enzo_matvec()
-{
-#ifdef CHARM_ENZO
-  CProxy_EnzoBlock * enzo_array = (CProxy_EnzoBlock*)proxy_simulation.ckLocalBranch()->hierarchy()->block_array();
-  enzo_array->p_enzo_matvec();
-#endif
-}
-
-//----------------------------------------------------------------------
-
 void Main::p_exit()
 {
 #ifdef CHARM_ENZO

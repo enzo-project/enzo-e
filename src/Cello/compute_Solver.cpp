@@ -30,3 +30,19 @@ Refresh * Solver::refresh(size_t index)
 
 //======================================================================
 
+void Solver::monitor_output_
+(Block * block,
+ int iter, double rr0,
+ double rr_min, double rr, double rr_max,
+ bool final) throw()
+{
+  Monitor * monitor = block->simulation()->monitor();
+
+  monitor->print("Solver", "%s %s iter %04d  err %.16g [%g %g]",
+		 this->name(),
+		 final ? "final" : "",
+		 iter,
+		 (double)(rr    / rr0),
+		 (double)(rr_min/ rr0),
+		 (double)(rr_max/ rr0));
+}

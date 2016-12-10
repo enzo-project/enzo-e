@@ -100,7 +100,6 @@ public:
   void p_stopping_balance();
   void p_balance();
   void p_stopping_exit();
-  void p_enzo_matvec();
   void p_exit();
 
   /// Finalize the simulation

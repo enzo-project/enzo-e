@@ -135,11 +135,19 @@ public: // interface
 
   }
 
+  //--------------------------------------------------
+
+public: // virtual functions
+  
   /// Solve for the gravitational potential
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
   { return "gravity_cg"; }
+
+  //--------------------------------------------------
+  
+public: // virtual functions
 
   /// Continuation after global reduction
   template <class T>

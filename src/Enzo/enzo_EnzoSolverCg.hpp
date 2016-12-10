@@ -47,12 +47,103 @@ public: // interface
 
 public: // virtual functions
 
+  //--------------------------------------------------
+
+public: // virtual functions
+
+  /// Solve the linear system Ax = b
   virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
   
-private: // functions
+  /// Return the name of this solver
+  virtual std::string name () const
+  { return "cg"; }
 
+  //--------------------------------------------------
+  
+public: // virtual functions
 
-private: // attributes
+  /// Continuation after global reduction
+  template <class T>
+  void shift_1(EnzoBlock * enzo_block) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void loop_2(EnzoBlock * enzo_block) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void loop_4(EnzoBlock * enzo_block) throw();
+
+  // /// Continuation after global reduction
+  // template <class T>
+  // void shift_2(EnzoBlock * enzo_block) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void loop_6(EnzoBlock * enzo_block) throw();
+
+  template <class T>
+  void end (EnzoBlock * enzo_block, int retval) throw();
+
+  /// Set rz_ by EnzoBlock after reduction
+  void set_rz(long double rz) throw()    {  rz_ = rz; }
+
+  /// Set rr_ by EnzoBlock after reduction
+  void set_rr(long double rr) throw()    {  rr_ = rr; }
+
+  /// Set rr_new_ by EnzoBlock after reduction
+  void set_rz2(long double rz2) throw()  {  rz2_ = rz2; }
+
+  /// Set dy_ by EnzoBlock after reduction
+  void set_dy(long double dy) throw()         { dy_ = dy; }
+
+  /// Set bs_ (B sum) by EnzoBlock after reduction
+  void set_bs(long double bs) throw()    { bs_ = bs;  }
+  /// Set rs_ (R sum) by EnzoBlock after reduction
+  void set_rs(long double rs) throw()    { rs_ = rs;  }
+  /// Set xs_ (X sum) by EnzoBlock after reduction
+  void set_xs(long double xs) throw()    { xs_ = xs;  }
+
+  /// Set bc_ (B count) by EnzoBlock after reduction
+  void set_bc(long double bc) throw()    { bc_ = bc;  }
+
+  /// Set iter_ by EnzoBlock after reduction
+  void set_iter(int iter) throw()        { iter_ = iter; }
+
+protected: // methods
+
+  template <class T>
+  void compute_ (EnzoBlock * enzo_block) throw();
+
+  template <class T>
+  void begin_1_() throw();
+
+  void exit_() throw();
+
+  /// Compute local contribution to inner-product X*Y
+  template <class T>
+  long double dot_ (const T * X, const T * Y) const throw();
+
+  template <class T>
+  void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
+  
+  /// Compute local sum of vector elements X_i
+  template <class T>
+  long double sum_ (const T * X) const throw();
+
+  /// scale the vector by the given scalar Y = a*X
+  template <class T>
+  void scale_ (T * Y, T a, const T * X) const throw();
+
+  /// return the number of elements of the vector X
+  int count_ () const throw();
+  
+  /// Shift the vector X by a scalar multiple of Y
+  /// NOTE includes ghost zones since performed after ghost refresh
+  template <class T>
+  void shift_ (T * X, const T a, const T * Y) const throw();
+
+protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 

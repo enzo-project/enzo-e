@@ -57,6 +57,14 @@ private: // functions
    const FieldDescr * field_descr,
    int index) throw ();
 
+  /// Create named solver object
+  virtual Solver * create_solver_ 
+  (std::string type, 
+   Config * config,
+   int index_solver,
+   const FieldDescr *,
+   const ParticleDescr *) throw ();
+
   /// Create named method object
   virtual Method * create_method_ 
   (std::string type, 
