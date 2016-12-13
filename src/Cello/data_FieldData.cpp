@@ -115,6 +115,7 @@ char * FieldData::values (const FieldDescr * field_descr,
     if (0 <= id_field && id_field < num_fields) {
       values = &array_permanent_[0] + offsets_[id_field];
     }
+
   } else {
 
     // temporary field

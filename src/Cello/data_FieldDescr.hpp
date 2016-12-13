@@ -47,6 +47,7 @@ public: // functions
     // NOTE: change this function whenever attributes change
     p | name_;
     p | num_permanent_;
+    p | num_temporary_;
     p | id_;
     p | groups_;
     p | alignment_;
@@ -89,8 +90,8 @@ public: // functions
   /// Insert a new permanent field
   int insert_permanent(const std::string & name_field) throw();
 
-  /// Insert a new temporary field
-  int insert_temporary(const std::string & name_field) throw();
+  /// Insert a new temporary field (does not require a name)
+  int insert_temporary(const std::string & name_field = "") throw();
 
   /// Return the number of fields
   int field_count() const throw();
@@ -139,9 +140,16 @@ public: // functions
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
 
-  /// Whether the field is permanent or temporary
+  /// Whether the field id refers to a valid permanent field
   bool is_permanent (int id_field) const throw()
-  { return (id_field < num_permanent_); }
+  {
+    return ( (0 <= id_field) &&
+	     (id_field < num_permanent_)); }
+
+    /// Whether the field id refers to a valid temporary field
+  bool is_temporary (int id_field) const throw()
+  { return ((num_permanent_ <= id_field) &&
+	    (id_field < num_permanent_ + num_temporary_)); }
 
   /// Return the number of permanent fields
   int num_permanent() const throw()
@@ -151,15 +159,19 @@ private: // functions
 
   void copy_(const FieldDescr & field_descr) throw();
 
-  int insert_(const std::string & name_field) throw();
+  int insert_(const std::string & name_field,
+	      bool is_permanent = true) throw();
 
 private: // attributes
 
   /// String identifying each field
   std::vector<std::string> name_;
 
-  /// Number of permanent fields; remaining are temporary
+  /// Number of permanent fields declared
   int num_permanent_;
+
+    /// Number of temporary fields declared
+  int num_temporary_;
 
   /// Index of each field in name_
   std::map<std::string,int> id_;

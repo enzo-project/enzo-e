@@ -14,6 +14,7 @@
 FieldDescr::FieldDescr () throw ()
   : name_(),
     num_permanent_(0),
+    num_temporary_(0),
     id_(),
     groups_(),
     alignment_(1),
@@ -127,9 +128,11 @@ void FieldDescr::ghost_depth
 int FieldDescr::insert_permanent(const std::string & field_name) throw()
 {
 
-  int id = insert_(field_name);
+  bool permanent;
+  
+  int id = insert_(field_name, permanent = true);
 
-  num_permanent_ = id+1;
+  ++ num_permanent_;
 
   return id;
 }
@@ -138,33 +141,44 @@ int FieldDescr::insert_permanent(const std::string & field_name) throw()
 
 int FieldDescr::insert_temporary(const std::string & field_name) throw()
 {
-  return insert_(field_name);
+  bool permanent;
+  
+  return insert_(field_name, permanent = false);
+
+  ++ num_temporary_;
 }
 
 //----------------------------------------------------------------------
 
-int FieldDescr::insert_(const std::string & field_name) throw()
+int FieldDescr::insert_(const std::string & field_name,
+			bool is_permanent) throw()
 {
-  int id = field_count();
+  // Assumes all permanent added before any temporary
+  
+  int id = num_permanent_ + num_temporary_;
 
   // Check if field has already been inserted
 
-  for (int i=0; i<id; i++) {
-    if (name_[i] == field_name) {
-      char buffer [ ERROR_LENGTH ];
-      sprintf (buffer,
-	       "Insert field called multiple times with same field %s",
-	       field_name.c_str());
-      WARNING("FieldDescr::insert_permanent", buffer);
-      return i;
+  if (is_permanent) {
+    for (int i=0; i<id; i++) {
+      if (name_[i] == field_name) {
+	char buffer [ ERROR_LENGTH ];
+	sprintf (buffer,
+		 "Insert field called multiple times with same field %s",
+		 field_name.c_str());
+	WARNING("FieldDescr::insert_permanent", buffer);
+	return i;
+      }
     }
   }
-  // Insert field name and id
 
-  name_.push_back(field_name);
-
-  id_[field_name] = id;
-
+  // Save field name (unless anonymous temporary)
+  
+  if (field_name != "") {
+    name_.push_back(field_name);
+    id_[field_name] = id;
+  }
+  
   // Initialize attributes with default values
 
   int precision = default_precision;
@@ -175,14 +189,13 @@ int FieldDescr::insert_(const std::string & field_name) throw()
   centered[2] = 0;
 
   int * ghost_depth = new int [3];
+
   ghost_depth[0] = 1;
   ghost_depth[1] = 1;
   ghost_depth[2] = 1;
 
-  // int_set_type a;
-  // field_in_group_.push_back(a);
-  precision_. push_back(precision);
-  centering_. push_back(centered);
+  precision_.  push_back(precision);
+  centering_.  push_back(centered);
   ghost_depth_.push_back(ghost_depth);
 
   return id;

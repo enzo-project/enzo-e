@@ -11,6 +11,7 @@
 #include "mesh.hpp"
 #include "data.hpp"
 
+
 struct field_info_type {
   int field_density;
   int field_velocity_x;
@@ -43,21 +44,25 @@ PARALLEL_MAIN_BEGIN
     FieldDescr * field_descr = new FieldDescr;
     FieldData * field_data = new FieldData(field_descr, nx,ny,nz);
 
-    Field * field = new Field(field_descr,field_data);
+    Field field(field_descr,field_data);
   
-    int i1 = field->insert_permanent("f1");
-    int i2 = field->insert_permanent("f2");
-    int i3 = field->insert_permanent("f3");
-    int i4 = field->insert_permanent("f4");
-    int i5 = field->insert_permanent("f5");
+    int i1 = field.insert_permanent("f1");
+    int i2 = field.insert_permanent("f2");
+    int i3 = field.insert_permanent("f3");
+    int i4 = field.insert_permanent("f4");
+    int i5 = field.insert_permanent("f5");
+
+    int j1 = field.insert_temporary();
+    int j2 = field.insert_temporary();
+    int j3 = field.insert_temporary();
 
     // set precision
 
-    field->set_precision(i1, precision_single);
-    field->set_precision(i2, precision_double);
-    field->set_precision(i3, precision_double);
-    field->set_precision(i4, precision_double);
-    field->set_precision(i5, precision_quadruple);
+    field.set_precision(i1, precision_single);
+    field.set_precision(i2, precision_double);
+    field.set_precision(i3, precision_double);
+    field.set_precision(i4, precision_double);
+    field.set_precision(i5, precision_quadruple);
 
     unit_class ("Cello");
 
@@ -78,17 +83,17 @@ PARALLEL_MAIN_BEGIN
     int g4[3] = {0,0,0};
     int g5[3] = {3,3,3};
 
-    field->set_ghost_depth(i1, g1[0],g1[1],g1[2]);
-    field->set_ghost_depth(i2, g2[0],g2[1],g2[2]);
-    field->set_ghost_depth(i3, g3[0],g3[1],g3[2]);
-    field->set_ghost_depth(i4, g4[0],g4[1],g4[2]);
-    field->set_ghost_depth(i5, g5[0],g5[1],g5[2]);
+    field.set_ghost_depth(i1, g1[0],g1[1],g1[2]);
+    field.set_ghost_depth(i2, g2[0],g2[1],g2[2]);
+    field.set_ghost_depth(i3, g3[0],g3[1],g3[2]);
+    field.set_ghost_depth(i4, g4[0],g4[1],g4[2]);
+    field.set_ghost_depth(i5, g5[0],g5[1],g5[2]);
 
     // set centering
 
-    field->set_centering(i2, 1, 0, 0);
-    field->set_centering(i3, 0, 1, 0);
-    field->set_centering(i4, 0, 0, 1);
+    field.set_centering(i2, 1, 0, 0);
+    field.set_centering(i3, 0, 1, 0);
+    field.set_centering(i4, 0, 0, 1);
 
     double xpm,ypm,zpm;
     xpm = -1.0;  ypm = -2.0, zpm = -3.0;
@@ -106,7 +111,7 @@ PARALLEL_MAIN_BEGIN
 
     int size[3];
 
-    field->size(size+0,size+1,size+2);
+    field.size(size+0,size+1,size+2);
 
     unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
 
@@ -115,56 +120,56 @@ PARALLEL_MAIN_BEGIN
     //----------------------------------------------------------------------
 
     unit_func("array_allocated");
-    unit_assert( ! field->permanent_allocated());
+    unit_assert( ! field.permanent_allocated());
 
     // Allocate
 
     unit_func("allocate_permanent");
 
-    field->allocate_permanent(false);
+    field.allocate_permanent(false);
 
-    size_t array_size_without_ghosts = field->permanent_size();
+    size_t array_size_without_ghosts = field.permanent_size();
 
-    unit_assert(field->permanent() != 0);
-    unit_assert(field->permanent_allocated());
-    unit_assert(field->permanent_size() > 0);
+    unit_assert(field.permanent() != 0);
+    unit_assert(field.permanent_allocated());
+    unit_assert(field.permanent_size() > 0);
 
     // Reallocate
 
     unit_func("reallocate_permanent");
 
-    field->reallocate_permanent(true);
+    field.reallocate_permanent(true);
 
-    size_t array_size_with_ghosts = field->permanent_size();
+    size_t array_size_with_ghosts = field.permanent_size();
 
-    unit_assert(field->permanent() != 0);
-    unit_assert(field->permanent_allocated());
-    unit_assert(field->permanent_size() > 0);
+    unit_assert(field.permanent() != 0);
+    unit_assert(field.permanent_allocated());
+    unit_assert(field.permanent_size() > 0);
     unit_assert(array_size_with_ghosts > array_size_without_ghosts);
 
     // Deallocate
 
     unit_func("deallocate_permanent");
 
-    field->deallocate_permanent();
+    field.deallocate_permanent();
 
-    unit_assert(field->permanent() == 0);
-    unit_assert( ! field->permanent_allocated());
-    unit_assert(field->permanent_size() == 0);
+    unit_assert(field.permanent() == 0);
+    unit_assert( ! field.permanent_allocated());
+    unit_assert(field.permanent_size() == 0);
 
     // Allocate
 
     unit_func("allocate_permanent");
 
-    field->allocate_permanent(true);
+    field.allocate_permanent(true);
 
-    unit_assert(field->permanent() != 0);
-    unit_assert(field->permanent_allocated());
-    unit_assert(field->permanent_size() == array_size_with_ghosts);
+    unit_assert(field.permanent() != 0);
+    unit_assert(field.permanent_allocated());
+    unit_assert(field.permanent_size() == array_size_with_ghosts);
 
   
     //----------------------------------------------------------------------
-    field->reallocate_permanent(false);
+    field.reallocate_permanent(false);
 
 
     float       *v1,*u1;
@@ -175,11 +180,11 @@ PARALLEL_MAIN_BEGIN
 
     unit_func("values");  // without ghosts
   
-    v1 = (float *)       field->values(i1);
-    v2 = (double *)      field->values(i2);
-    v3 = (double *)      field->values(i3);
-    v4 = (double *)      field->values(i4);
-    v5 = (long double *) field->values(i5);
+    v1 = (float *)       field.values(i1);
+    v2 = (double *)      field.values(i2);
+    v3 = (double *)      field.values(i3);
+    v4 = (double *)      field.values(i4);
+    v5 = (long double *) field.values(i5);
   
     // field sizes without ghosts
 
@@ -212,11 +217,11 @@ PARALLEL_MAIN_BEGIN
     unit_func("unknowns");  // without ghosts
 
     typedef float type_f1;
-    u1 = (type_f1 *)      field->unknowns(i1);
-    u2 = (double *)       field->unknowns(i2);
-    u3 = (double *)       field->unknowns(i3);
-    u4 = (double *)       field->unknowns(i4);
-    u5 = (long double *)  field->unknowns(i5);
+    u1 = (type_f1 *)      field.unknowns(i1);
+    u2 = (double *)       field.unknowns(i2);
+    u3 = (double *)       field.unknowns(i3);
+    u4 = (double *)       field.unknowns(i4);
+    u5 = (long double *)  field.unknowns(i5);
 
     unit_assert(u1 != 0);
     unit_assert(u2 != 0);
@@ -235,32 +240,32 @@ PARALLEL_MAIN_BEGIN
     unit_assert (nb4 == sizeof (double)* nu4);
 
     // unknown field
-    unit_assert (field->unknowns (1000) == NULL);
-    unit_assert (field->unknowns ("not a field") == NULL);
+    unit_assert (field.unknowns (1000) == NULL);
+    unit_assert (field.unknowns ("not a field") == NULL);
 
 
     //----------------------------------------------------------------------
 
     // with ghosts
 
-    field->reallocate_permanent(true);
+    field.reallocate_permanent(true);
 
-    v1 =  (float *)      field->values(i1);
-    v2 = (double *)      field->values(i2);
-    v3 = (double *)      field->values(i3);
-    v4 = (double *)      field->values(i4);
-    v5 = (long double *) field->values(i5);
+    v1 =  (float *)      field.values(i1);
+    v2 = (double *)      field.values(i2);
+    v3 = (double *)      field.values(i3);
+    v4 = (double *)      field.values(i4);
+    v5 = (long double *) field.values(i5);
   
-    unit_assert(field->values(i1) == 
-		field->values("f1"));
-    unit_assert(field->values(i2) == 
-		field->values("f2"));
-    unit_assert(field->values(i3) == 
-		field->values("f3"));
-    unit_assert(field->values(i4) == 
-		field->values("f4"));
-    unit_assert(field->values(i5) == 
-		field->values("f5"));
+    unit_assert(field.values(i1) == 
+		field.values("f1"));
+    unit_assert(field.values(i2) == 
+		field.values("f2"));
+    unit_assert(field.values(i3) == 
+		field.values("f3"));
+    unit_assert(field.values(i4) == 
+		field.values("f4"));
+    unit_assert(field.values(i5) == 
+		field.values("f5"));
 
     unit_assert(v1 != 0);
     unit_assert(v2 != 0);
@@ -279,16 +284,16 @@ PARALLEL_MAIN_BEGIN
     unit_assert (nb4 == sizeof (double) * nv4);
 
     // unknown field
-    unit_assert (field->values (1000) == NULL);
-    unit_assert (field->values ("not a field") == NULL);
+    unit_assert (field.values (1000) == NULL);
+    unit_assert (field.values ("not a field") == NULL);
 
     unit_func("unknowns");  // with ghosts
 
-    u1 = (float *)       field->unknowns(i1);
-    u2 = (double *)      field->unknowns(i2);
-    u3 = (double *)      field->unknowns(i3);
-    u4 = (double *)      field->unknowns(i4);
-    u5 = (long double *) field->unknowns(i5);
+    u1 = (float *)       field.unknowns(i1);
+    u2 = (double *)      field.unknowns(i2);
+    u3 = (double *)      field.unknowns(i3);
+    u4 = (double *)      field.unknowns(i4);
+    u5 = (long double *) field.unknowns(i5);
 
     unit_assert(u1 != 0);
     unit_assert(u2 != 0);
@@ -487,7 +492,7 @@ PARALLEL_MAIN_BEGIN
 
     double hx=0,hy=0,hz=0;
 
-    field->cell_width(xpm,xpp,&hx,ypm,ypp,&hy,zpm,zpp,&hz);
+    field.cell_width(xpm,xpp,&hx,ypm,ypp,&hy,zpm,zpp,&hz);
 
     unit_assert(fabs(hx-2.0/nx) < 1e-6);
     unit_assert(fabs(hy-4.0/ny) < 1e-6);
@@ -497,19 +502,19 @@ PARALLEL_MAIN_BEGIN
     //----------------------------------------------------------------------
     unit_func("clear");
 
-    field->clear(2.0);
+    field.clear(2.0);
 
     unit_assert(2.0 == v1[0]);
     unit_assert(2.0 == v5[n5[0]*n5[1]*n5[2]-1]);
 
-    field->clear(3.0, 1 );
+    field.clear(3.0, 1 );
   
     unit_assert(2.0 == v1[n1[0]*n1[1]*n1[2]-1]);
     unit_assert(3.0 == v2[0] );
     unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
     unit_assert(2.0 == v3[0] );
 	
-    field->clear(4.0, 2, 3 );
+    field.clear(4.0, 2, 3 );
 
     unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
     unit_assert(4.0 == v3[0] );
@@ -521,18 +526,18 @@ PARALLEL_MAIN_BEGIN
     //----------------------------------------------------------------------
     unit_func("reallocate_ghosts");
 
-    field->reallocate_permanent(false);
+    field.reallocate_permanent(false);
 
     v1    = 
-      (float *) field->values(i1);
+      (float *) field.values(i1);
     v2 = 
-				 (double *) field->values(i2);
+				 (double *) field.values(i2);
     v3 = 
-      (double *) field->values(i3);
+      (double *) field.values(i3);
     v4 = 
-      (double *) field->values(i4);
+      (double *) field.values(i4);
     v5 =
-      (long double *) field->values(i5);
+      (long double *) field.values(i5);
 
     unit_assert(3.0 == v2[(nx+1)*ny*nz-1]);
     unit_assert(4.0 == v3[0] );
@@ -542,9 +547,8 @@ PARALLEL_MAIN_BEGIN
     unit_assert(2.0 == v5[0] );
 
     unit_func("delete");
-    delete field->field_descr();
-    delete field->field_data();
-    delete field;
+    delete field.field_descr();
+    delete field.field_data();
   }
 
   //----------------------------------------------------------------------
@@ -560,7 +564,7 @@ PARALLEL_MAIN_BEGIN
     FieldDescr * field_descr = new FieldDescr;
     FieldData * field_data = 0;
 
-    Field * field = new Field(field_descr,field_data);
+    Field field(field_descr,field_data);
 
     unit_assert(field_descr != 0);
     printf ("sizeof(FieldDescr) = %lud\n",sizeof(FieldDescr));
@@ -568,49 +572,53 @@ PARALLEL_MAIN_BEGIN
     // Fields
 
     unit_func("insert_permanent");
-    unit_assert(field->field_count()==0);
-    field->insert_permanent("density");
-    unit_assert(field->field_count()==1);
-    field->insert_permanent("velocity_x");
-    unit_assert(field->field_count()==2);
-    field->insert_permanent("velocity_y");
-    unit_assert(field->field_count()==3);
-    field->insert_permanent("velocity_z");
-    unit_assert(field->field_count()==4);
-    field->insert_permanent("total_energy");
-    unit_assert(field->field_count()==5);
-    field->insert_permanent("total_energy");
-    unit_assert(field->field_count()==5);
+    unit_assert(field.field_count()==0);
+    field.insert_permanent("density");
+    unit_assert(field.field_count()==1);
+    field.insert_permanent("velocity_x");
+    unit_assert(field.field_count()==2);
+    field.insert_permanent("velocity_y");
+    unit_assert(field.field_count()==3);
+    field.insert_permanent("velocity_z");
+    unit_assert(field.field_count()==4);
+    field.insert_permanent("total_energy");
+    unit_assert(field.field_count()==5);
+    field.insert_permanent("total_energy");
+    unit_assert(field.field_count()==5);
+
+    int j1 = field.insert_temporary();
+    int j2 = field.insert_temporary();
+    int j3 = field.insert_temporary();
 
     unit_func("field_count");
-    unit_assert(field->field_count()==5);
+    unit_assert(field.field_count()==5);
 
     unit_func("field_id");
 
-    info.field_density      = field->field_id("density");
-    info.field_velocity_x   = field->field_id("velocity_x");
-    info.field_velocity_y   = field->field_id("velocity_y");
-    info.field_velocity_z   = field->field_id("velocity_z");
-    info.field_total_energy = field->field_id("total_energy");
+    info.field_density      = field.field_id("density");
+    info.field_velocity_x   = field.field_id("velocity_x");
+    info.field_velocity_y   = field.field_id("velocity_y");
+    info.field_velocity_z   = field.field_id("velocity_z");
+    info.field_total_energy = field.field_id("total_energy");
 
-    unit_assert(field->field_id("density")      == info.field_density);
-    unit_assert(field->field_id("velocity_x")   == info.field_velocity_x);
-    unit_assert(field->field_id("velocity_y")   == info.field_velocity_y);
-    unit_assert(field->field_id("velocity_z")   == info.field_velocity_z);
-    unit_assert(field->field_id("total_energy") == info.field_total_energy);
+    unit_assert(field.field_id("density")      == info.field_density);
+    unit_assert(field.field_id("velocity_x")   == info.field_velocity_x);
+    unit_assert(field.field_id("velocity_y")   == info.field_velocity_y);
+    unit_assert(field.field_id("velocity_z")   == info.field_velocity_z);
+    unit_assert(field.field_id("total_energy") == info.field_total_energy);
 
     unit_func("is_field");
 
-    unit_assert(field->is_field("density"));
-    unit_assert(! field->is_field("not_a_field"));
+    unit_assert(field.is_field("density"));
+    unit_assert(! field.is_field("not_a_field"));
 
     unit_func("field_name");
 
-    unit_assert(field->field_name(info.field_density)      == "density");
-    unit_assert(field->field_name(info.field_velocity_x)   == "velocity_x");
-    unit_assert(field->field_name(info.field_velocity_y)   == "velocity_y");
-    unit_assert(field->field_name(info.field_velocity_z)   == "velocity_z");
-    unit_assert(field->field_name(info.field_total_energy) == "total_energy");
+    unit_assert(field.field_name(info.field_density)      == "density");
+    unit_assert(field.field_name(info.field_velocity_x)   == "velocity_x");
+    unit_assert(field.field_name(info.field_velocity_y)   == "velocity_y");
+    unit_assert(field.field_name(info.field_velocity_z)   == "velocity_z");
+    unit_assert(field.field_name(info.field_total_energy) == "total_energy");
 
     //----------------------------------------------------------------------
     // Global attributes
@@ -618,21 +626,21 @@ PARALLEL_MAIN_BEGIN
 
     // (set and reset in case test value is a default)
 
-    field->set_alignment(8);
-    field->set_padding(64);
+    field.set_alignment(8);
+    field.set_padding(64);
   
     unit_func("alignment");
-    unit_assert(field->alignment() == 8);
+    unit_assert(field.alignment() == 8);
     unit_func("padding");
-    unit_assert(field->padding() == 64);
+    unit_assert(field.padding() == 64);
 
-    field->set_alignment(4);
-    field->set_padding(32);
+    field.set_alignment(4);
+    field.set_padding(32);
   
     unit_func("alignment");
-    unit_assert(field->alignment() == 4);
+    unit_assert(field.alignment() == 4);
     unit_func("padding");
-    unit_assert(field->padding() == 32);
+    unit_assert(field.padding() == 32);
   
     //----------------------------------------------------------------------
     // Field attributes
@@ -642,58 +650,60 @@ PARALLEL_MAIN_BEGIN
 
     unit_func("precision");
 
-    field->set_precision(info.field_density,    precision_single);
-    field->set_precision(info.field_velocity_x, precision_double);
-    field->set_precision(info.field_velocity_y, precision_double);
-    field->set_precision(info.field_velocity_z, precision_double);
+    field.set_precision(info.field_density,    precision_single);
+    field.set_precision(info.field_velocity_x, precision_double);
+    field.set_precision(info.field_velocity_y, precision_double);
+    field.set_precision(info.field_velocity_z, precision_double);
 
-    unit_assert(field->precision(info.field_density)      == precision_single);
-    unit_assert(field->precision(info.field_velocity_x)   == precision_double);
-    unit_assert(field->precision(info.field_velocity_y)   == precision_double);
-    unit_assert(field->precision(info.field_velocity_z)   == precision_double);
-    unit_assert(field->precision(info.field_total_energy) == default_precision);
+    unit_assert(field.precision(info.field_density)      == precision_single);
+    unit_assert(field.precision(info.field_velocity_x)   == precision_double);
+    unit_assert(field.precision(info.field_velocity_y)   == precision_double);
+    unit_assert(field.precision(info.field_velocity_z)   == precision_double);
+    unit_assert(field.precision(info.field_total_energy) == default_precision);
   
-
     unit_func("bytes_per_element");
-    unit_assert(field->bytes_per_element(info.field_density)==4);
+    unit_assert(field.bytes_per_element(info.field_density)==4);
+    unit_assert(field.bytes_per_element(info.field_velocity_x)==8);
+    unit_assert(field.bytes_per_element(info.field_velocity_y)==8);
+    unit_assert(field.bytes_per_element(info.field_velocity_z)==8);
 
     // Centering
 
     unit_func("centering");
 
-    field->set_centering(info.field_velocity_x, 1, 0, 0);
-    field->set_centering(info.field_velocity_y, 0, 1, 0);
-    field->set_centering(info.field_velocity_z, 0, 0, 1);
+    field.set_centering(info.field_velocity_x, 1, 0, 0);
+    field.set_centering(info.field_velocity_y, 0, 1, 0);
+    field.set_centering(info.field_velocity_z, 0, 0, 1);
 
 
-    field->centering(info.field_density, &info.cx, &info.cy, &info.cz);
+    field.centering(info.field_density, &info.cx, &info.cy, &info.cz);
     unit_assert(info.cx == 0 && info.cy == 0 && info.cz == 0);
 
-    field->centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
+    field.centering(info.field_velocity_x, &info.cx, &info.cy, &info.cz);
     unit_assert(info.cx == 1 && info.cy == 0 && info.cz == 0);
 
-    field->centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
+    field.centering(info.field_velocity_y, &info.cx, &info.cy, &info.cz);
     unit_assert(info.cx == 0 && info.cy == 1 && info.cz == 0);
 
-    field->centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
+    field.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
     unit_assert(info.cx == 0 && info.cy == 0 && info.cz == 1);
   
     // Ghost zone depth
 
     unit_func("ghosts");
 
-    field->set_ghost_depth(info.field_density, 3, 3, 3);
-    field->set_ghost_depth(info.field_velocity_x, 1, 0, 0);
-    field->set_ghost_depth(info.field_velocity_y, 0, 1, 0);
-    field->set_ghost_depth(info.field_velocity_z, 0, 0, 1);
+    field.set_ghost_depth(info.field_density, 3, 3, 3);
+    field.set_ghost_depth(info.field_velocity_x, 1, 0, 0);
+    field.set_ghost_depth(info.field_velocity_y, 0, 1, 0);
+    field.set_ghost_depth(info.field_velocity_z, 0, 0, 1);
 
-    field->ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
+    field.ghost_depth(info.field_density, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
-    field->ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
+    field.ghost_depth(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==1 && info.gy==0 && info.gz==0);
-    field->ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
+    field.ghost_depth(info.field_velocity_y, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==0 && info.gy==1 && info.gz==0);
-    field->ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
+    field.ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
 

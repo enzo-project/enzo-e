@@ -31,6 +31,7 @@ class Method;
 class Particle;
 class ParticleData;
 class Refresh;
+class Solver;
 class Simulation;
 
 //----------------------------------------------------------------------
@@ -302,17 +303,20 @@ public: // interface
     
   }
 
-  /// Set the currently active Method.  Used to resume a Method's
-  /// computation after a reduction
-  void set_method_index (int index_method) throw()
-  { index_method_ = index_method; }
-
   /// Return the currently active Method
   int index_method() const throw()
   { return index_method_; }
 
   /// Return the currently-active Method
   Method * method () throw();
+
+  /// Return the currently active Solver
+  void set_solver(Solver * solver) throw()
+  { solver_ = solver; }
+
+  /// Return the currently-active Solver
+  Solver * solver () const throw()
+  { return solver_; }
 
 protected: // methods
   
@@ -864,33 +868,8 @@ protected: // functions
   {  return &refresh_;  }
 
 
-  void print () const
-  {
-    CkPrintf ("data_ = %p\n",data_);
-    CkPrintf ("child_data_ = %p\n",child_data_);
-    CkPrintf ("index_ = %d\n",name().c_str());
-    CkPrintf ("level_next_ = %d\n",level_next_);
-    CkPrintf ("cycle_ = %d\n",cycle_);
-    CkPrintf ("time_ = %f\n",time_);
-    CkPrintf ("dt_ = %f\n",dt_);
-    CkPrintf ("stop_ = %d\n",stop_);
-    CkPrintf ("index_initial_ = %d\n",index_initial_);
-    CkPrintf ("children_.size() = %d\n",children_.size());
-    CkPrintf ("face_level_curr_.size() = %d\n",face_level_curr_.size());
-    CkPrintf ("face_level_next_.size() = %d\n",face_level_next_.size());
-    CkPrintf ("child_face_level_curr_.size() = %d\n",child_face_level_curr_.size());
-    CkPrintf ("child_face_level_next_.size() = %d\n",child_face_level_next_.size());
-    CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
-    CkPrintf ("adapt_step_ = %d\n",adapt_step_);
-    CkPrintf ("adapt_ = %d\n",adapt_);
-    CkPrintf ("coarsened_ = %d\n",coarsened_);
-    CkPrintf ("delete_ = %d\n",delete_);
-    CkPrintf ("is_leaf_ = %d\n",is_leaf_);
-    CkPrintf ("age_ = %d\n",age_);
-    CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
-    CkPrintf ("name_ = %d\n",name_.c_str());
-    CkPrintf ("index_method_ = %d\n",index_method_);
-  }
+  void print () const;
+  
 protected: // attributes
 
   /// Whether data exists
@@ -981,6 +960,9 @@ protected: // attributes
 
   /// Index of currently-active Method
   int index_method_;
+
+  /// Index of currently-active Solver
+  Solver * solver_;
 
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)

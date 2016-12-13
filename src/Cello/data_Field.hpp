@@ -97,7 +97,7 @@ public: // interface
   { return field_descr_->insert_permanent(name); }
 
   /// Insert a new field
-  int insert_temporary(const std::string & name) throw()
+  int insert_temporary(const std::string & name = "") throw()
   { return field_descr_->insert_temporary(name); }
 
   /// Return the number of fields

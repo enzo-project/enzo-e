@@ -24,7 +24,9 @@ class EnzoMethodGravity : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravity object
-  EnzoMethodGravity(Solver * solver);
+  EnzoMethodGravity(const FieldDescr * field_descr,
+		    Solver * solver,
+		    double grav_const);
 
   EnzoMethodGravity() {};
 
@@ -52,6 +54,7 @@ public: // interface
     Method::pup(p);
 
     p | *solver_;
+    p | grav_const_;
 
   }
 
@@ -70,6 +73,11 @@ protected: // attributes
 
   /// Linear solver used to compute the potential
   Solver * solver_;
+
+  /// Gas constant, e.g. 6.67384e-8 (cgs)
+  double grav_const_;
+  
 };
+
 
 #endif /* ENZO_ENZO_METHOD_GRAVITY_HPP */

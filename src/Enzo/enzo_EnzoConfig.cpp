@@ -71,8 +71,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
   // EnzoMethodGravity
-  method_gravity_potential_field(""),
-  method_gravity_density_field(""),
+  method_gravity_grav_const(0.0),
   method_gravity_solver(""),
   // EnzoMethodGravityCg
   method_gravity_cg_iter_max(0),
@@ -188,8 +187,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_null_dt;
   p | method_turbulence_edot;
 
-  p | method_gravity_potential_field;
-  p | method_gravity_density_field;
+  p | method_gravity_grav_const;
   p | method_gravity_solver;
 
   p | method_gravity_cg_grav_const;
@@ -391,12 +389,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:null:dt",std::numeric_limits<double>::max());
 
 
-
-  method_gravity_potential_field = p->value_string
-    ("Method:gravity:potential_field","potential");
-
-  method_gravity_density_field = p->value_string
-    ("Method:gravity:density_field","density");
+  method_gravity_grav_const = p->value_float
+    ("Method:gravity:grav_const",6.67384e-8);
 
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","bicgstab");
@@ -650,12 +644,10 @@ void EnzoConfig::write(FILE * fp)
   fprintf (fp,"method_turbulence_mach_number = %g\n",method_turbulence_mach_number);
 
   // EnzoMethodGravity
-  fprintf (fp,"method_gravity_potential_field = %s\n",
-	   method_gravity_potential_field);
-  fprintf (fp,"method_gravity_density_field = %s\n",
-	   method_gravity_density_field);
+  fprintf (fp,"method_gravity_grav_const = %g\n",
+	   method_gravity_grav_const);
   fprintf (fp,"method_gravity_solver = %s\n",
-	   method_gravity_density_field);
+	   method_gravity_solver);
 
   // EnzoMethodGravityCg
   fprintf (fp,"method_gravity_cg_iter_max = %d\n",method_gravity_cg_iter_max);

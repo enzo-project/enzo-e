@@ -217,7 +217,6 @@ Solver * EnzoProblem::create_solver_
     int rank = config->mesh_root_rank;
     solver = new EnzoSolverCg
       (field_descr,
-       new EnzoMatrixLaplace,
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
@@ -310,7 +309,9 @@ Method * EnzoProblem::create_method_
     Solver * solver = create_solver_
       (solver_type,enzo_config,index_solver,field_descr,particle_descr);
 
-    method = new EnzoMethodGravity (solver);
+    method = new EnzoMethodGravity
+      (field_descr, solver,
+       enzo_config->method_gravity_grav_const);
       
   } else if (name == "gravity_cg") {
     const bool is_singular = is_periodic();

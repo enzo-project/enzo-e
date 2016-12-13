@@ -17,7 +17,6 @@ class EnzoSolverCg : public Solver {
 public: // interface
 
   EnzoSolverCg (const FieldDescr * field_descr,
-		Matrix * A,
 		int rank,
 		int iter_max, 
 		double res_tol,
@@ -181,11 +180,6 @@ protected: // attributes
 
   /// Maximum residual
   long double rr_max_;
-
-  /// Density and potential field id's
-
-  int idensity_;
-  int ipotential_;
 
   /// CG vector id's
   int ir_;

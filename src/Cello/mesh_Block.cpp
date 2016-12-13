@@ -354,6 +354,38 @@ void Block::periodicity (bool p32[3][2]) const
   }
 }
 
+//----------------------------------------------------------------------
+
+void Block::print () const
+  
+{
+  CkPrintf ("data_ = %p\n",data_);
+  CkPrintf ("child_data_ = %p\n",child_data_);
+  CkPrintf ("index_ = %d\n",name().c_str());
+  CkPrintf ("level_next_ = %d\n",level_next_);
+  CkPrintf ("cycle_ = %d\n",cycle_);
+  CkPrintf ("time_ = %f\n",time_);
+  CkPrintf ("dt_ = %f\n",dt_);
+  CkPrintf ("stop_ = %d\n",stop_);
+  CkPrintf ("index_initial_ = %d\n",index_initial_);
+  CkPrintf ("children_.size() = %d\n",children_.size());
+  CkPrintf ("face_level_curr_.size() = %d\n",face_level_curr_.size());
+  CkPrintf ("face_level_next_.size() = %d\n",face_level_next_.size());
+  CkPrintf ("child_face_level_curr_.size() = %d\n",child_face_level_curr_.size());
+  CkPrintf ("child_face_level_next_.size() = %d\n",child_face_level_next_.size());
+  CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
+  CkPrintf ("adapt_step_ = %d\n",adapt_step_);
+  CkPrintf ("adapt_ = %d\n",adapt_);
+  CkPrintf ("coarsened_ = %d\n",coarsened_);
+  CkPrintf ("delete_ = %d\n",delete_);
+  CkPrintf ("is_leaf_ = %d\n",is_leaf_);
+  CkPrintf ("age_ = %d\n",age_);
+  CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
+  CkPrintf ("name_ = %d\n",name_.c_str());
+  CkPrintf ("index_method_ = %d\n",index_method_);
+  CkPrintf ("solver_ = %s\n",solver_->name().c_str());
+}
+
 //======================================================================
 
 void Block::apply_initial_() throw ()

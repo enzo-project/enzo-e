@@ -26,13 +26,11 @@
 
 EnzoSolverCg::EnzoSolverCg 
 (const FieldDescr * field_descr,
- Matrix * A,
  int rank,
  int iter_max, double res_tol, int monitor_iter,
  bool is_singular,
  bool diag_precon) 
   : Solver(), 
-    A_(A),
     M_((diag_precon) ?
        (Matrix *)(new EnzoMatrixDiagonal) :
        (Matrix *)(new EnzoMatrixIdentity)),
@@ -43,7 +41,7 @@ EnzoSolverCg::EnzoSolverCg
     monitor_iter_(monitor_iter),
     rr0_(0),
     rr_min_(0),rr_max_(0),
-    idensity_(0),  ipotential_(0),
+    ix_(0),  ib_(0),
     ir_(0), id_(0), iy_(0), iz_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
@@ -63,10 +61,10 @@ EnzoSolverCg::EnzoSolverCg
 
   const int num_fields = field_descr->field_count();
 
-  field_descr->ghost_depth    (idensity_,&gx_,&gy_,&gz_);
+  field_descr->ghost_depth    (ib_,&gx_,&gy_,&gz_);
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  //  refresh(ir)->add_field(idensity_);
+  //  refresh(ir)->add_field(ib_);
   refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
@@ -108,8 +106,8 @@ void EnzoSolverCg::pup (PUP::er &p)
   p | rr0_;
   p | rr_min_;
   p | rr_max_;
-  p | idensity_;
-  p | ipotential_;
+  p | ib_;
+  p | ix_;
   p | ir_;
   p | id_;
   p | iy_;
@@ -142,21 +140,28 @@ void EnzoSolverCg::pup (PUP::er &p)
 
 void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
 {
+  A_ = A;
+  ix_ = ix;
+  ib_ = ib;
   
   TRACE_SOLVER("compute ENTER");
   Field field = block->data()->field();
 
-  field.size                 (&nx_,&ny_,&nz_);
-  field.dimensions (idensity_,&mx_,&my_,&mz_);
-  field.ghost_depth(idensity_,&gx_,&gy_,&gz_);
+  field.size           (&nx_,&ny_,&nz_);
+  field.dimensions (ib_,&mx_,&my_,&mz_);
+  field.ghost_depth(ib_,&gx_,&gy_,&gz_);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  int precision = field.precision(idensity_);
+  // assumes all fields involved in calculation have same precision
+  int precision = field.precision(ib_);
 
-  if      (precision == precision_single)    compute_<float>      (enzo_block);
-  else if (precision == precision_double)    compute_<double>     (enzo_block);
-  else if (precision == precision_quadruple) compute_<long double>(enzo_block);
+  if      (precision == precision_single)
+    compute_<float>      (enzo_block);
+  else if (precision == precision_double)
+    compute_<double>     (enzo_block);
+  else if (precision == precision_quadruple)
+    compute_<long double>(enzo_block);
   else 
     ERROR1("EnzoSolverCg()", "precision %d not recognized", precision);
   TRACE_SOLVER("compute EXIT");
@@ -189,11 +194,8 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
   if (enzo_block->is_leaf()) {
 
     ///   - X = 0
-    ///   - B = -h^2 * 4 * PI * G * density
     ///   - R = P = B ( residual with X = 0);
 
-    T * density = (T*) field.values(idensity_);
-    
     T * B = (T*) field.values(ib_);
     T * X = (T*) field.values(ix_);
     T * R = (T*) field.values(ir_);
@@ -325,7 +327,10 @@ void EnzoBlock::r_solver_cg_matvec(CkReductionMsg * msg)
     static_cast<EnzoSolverCg*> (this->solver());
 
   Field field = data()->field();
-  int precision = field.precision(field.field_id("density")); // assuming 
+
+  // assumes all fields involved in calculation have same precision
+  const int id = field.field_id("density");
+  int precision = field.precision(id);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (this);
 
@@ -711,7 +716,6 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 template <class T>
 void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 ///    if (return == return_converged) {
-///       potential = X
 ///       ==> exit()
 ///    } else {
 ///       ERROR (return-)
@@ -724,14 +728,9 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
     Data * data = enzo_block->data();
     Field field = data->field();
 
-    T * X         = (T*) field.values(ix_);
-    T * potential = (T*) field.values(ipotential_);
-
     if (enzo_block->index().is_root()) {
       monitor_output_ (enzo_block,iter_,rr0_,rr_min_,rr_,rr_max_,true);
     }
-
-    copy_(potential,X,mx_,my_,mz_);
 
     int order;
     EnzoComputeAcceleration compute_acceleration (field.field_descr(),

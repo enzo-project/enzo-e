@@ -91,8 +91,7 @@ public: // interface
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
       // EnzoMethodGravity
-      method_gravity_potential_field(""),
-      method_gravity_density_field(""),
+      method_gravity_grav_const(0.0),
       method_gravity_solver(),
       // EnzoMethodGravityCg
       method_gravity_cg_iter_max(0),
@@ -215,8 +214,7 @@ public: // attributes
   double                     method_turbulence_mach_number;
 
   // EnzoMethodGravity
-  std::string                method_gravity_potential_field;
-  std::string                method_gravity_density_field;
+  double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
 
   // EnzoMethodGravityCg
