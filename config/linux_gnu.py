@@ -3,6 +3,7 @@ import os
 
 is_arch_valid = 1
 
+#
 flags_arch = '-Wall -O3 -g'
 # flags_arch = '-pg'
 #flags_arch = '-fprofile-arcs -ftest-coverage'

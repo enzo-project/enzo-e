@@ -119,13 +119,6 @@ protected: // methods
 
   void exit_() throw();
 
-  /// Compute local contribution to inner-product X*Y
-  template <class T>
-  long double dot_ (const T * X, const T * Y) const throw();
-
-  template <class T>
-  void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
-  
   /// Compute local sum of vector elements X_i
   template <class T>
   long double sum_ (const T * X) const throw();

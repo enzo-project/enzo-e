@@ -262,6 +262,26 @@ public: // interface
 
   //----------------------------------------------------------------------
 
+  // BLAS Operations
+
+  // /// copy field is to field id
+  // void copy (int id, int is, bool ghosts = true ) throw()
+  // { field_data_->copy ( field_descr_, id,is,ghosts); }
+
+  /// Compute field(iz) =  a * field(ix) + field(iy)
+  void axpy (int iz, double a, int ix, int iy, bool ghosts = true ) throw()
+  { field_data_->axpy (field_descr_, iz,a,ix,iy,ghosts); }
+
+  /// Compute inner product field(ix) . field(iy)
+  double dot (int ix, int iy) throw()
+  { return field_data_->dot (field_descr_,ix,iy); }
+  
+  /// Scale vector ix by scalar a
+  void scale (int iy, long double a, int ix, bool ghosts = true ) throw()
+  { field_data_->scale(field_descr_, iy,a,ix,ghosts); }
+
+  //----------------------------------------------------------------------
+
   /// Print basic field characteristics for debugging
   void print (const char * message,
 	      bool use_file = false) const throw()

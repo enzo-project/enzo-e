@@ -218,22 +218,29 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
     M_->matvec(iz_,ir_,enzo_block);
   }
 
-  long double reduce[3];
+  long double reduce[3] = {0.0};
 
   if (enzo_block->is_leaf()) {
 
     T * B = (T*) field.values(ib_);
     T * R = (T*) field.values(ir_);
-    reduce[0] = dot_(R,R);
-    reduce[1] = sum_(B);
-    reduce[2] = count_();
+
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+
+    // reduce[0] = field.dot(ir_,ir_);
+    // reduce[1] = sum_(B);
+    // reduce[2] = count_();
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + (ix + mx_*(iy + my_*iz));
+	  reduce[0] += R[i]*R[i];
+	  reduce[1] += B[i];
+	  ++reduce[2];
+	}
+      }
+    }
     
-  } else {
-
-    reduce[0] = 0.0;
-    reduce[1] = 0.0;
-    reduce[2] = 0.0;
-
   }
 
 #ifdef DEBUG_SOLVER
@@ -251,6 +258,7 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 #endif
 	  
   TRACE_SOLVER("   loop_0a contribute");
+  enzo_block->set_solver(this);
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  sum_long_double_3_type, 
 			  callback);
@@ -329,8 +337,7 @@ void EnzoBlock::r_solver_cg_matvec(CkReductionMsg * msg)
   Field field = data()->field();
 
   // assumes all fields involved in calculation have same precision
-  const int id = field.field_id("density");
-  int precision = field.precision(id);
+  int precision = field.precision(0);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (this);
 
@@ -370,9 +377,18 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
       // eT*e == n === zone count (bc)
       // eT*b == sum_i=1,n B[i]
 
+      // shift_ (R,shift,R);
+      // shift_ (B,shift,B);
       T shift = -bs_ / bc_;
-      shift_ (R,shift,R);
-      shift_ (B,shift,B);
+      for (int iz=0; iz<mz_; iz++) {
+	for (int iy=0; iy<my_; iy++) {
+	  for (int ix=0; ix<mx_; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    R[i] += shift;
+	    B[i] += shift;
+	  }
+	}
+      }
 
       M_->matvec(id_,ir_,enzo_block);
       M_->matvec(iz_,ir_,enzo_block);
@@ -384,8 +400,16 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
   if (enzo_block->is_leaf()) {
 
     T * R  = (T*) field.values(ir_);
-    reduce = dot_(R,R);
-
+    // reduce = field.dot(ir_,ir_);
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + (ix + mx_*(iy + my_*iz));
+	  reduce += R[i]*R[i];
+	}
+      }
+    }
   } 
 
   TRACE_SOLVER("   shift_1 callback");
@@ -399,6 +423,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 #endif
 
   TRACE_SOLVER("   shift_1 contribute");
+  enzo_block->set_solver(this);
   enzo_block->contribute (sizeof(long double), &reduce, 
 			  sum_long_double_type, 
 			  callback);
@@ -484,7 +509,7 @@ void EnzoSolverCg::loop_2 (EnzoBlock * enzo_block) throw()
 
     }
 
-    long double reduce[3];
+    long double reduce[3] = {0.0} ;
 
     if (enzo_block->is_leaf()) {
 
@@ -493,15 +518,18 @@ void EnzoSolverCg::loop_2 (EnzoBlock * enzo_block) throw()
       T * R = (T*) field.values(ir_);
       T * Z = (T*) field.values(iz_);
 
-      reduce[0] = dot_(R,R);
-      reduce[1] = dot_(R,Z);
-      reduce[2] = dot_(D,Y);
-
-    } else {
-
-      reduce[0] = 0.0;
-      reduce[1] = 0.0;
-      reduce[2] = 0.0;
+      const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+	 
+      for (int iz=0; iz<nz_; iz++) {
+	for (int iy=0; iy<ny_; iy++) {
+	  for (int ix=0; ix<nx_; ix++) {
+	    int i = i0 + (ix + mx_*(iy + my_*iz));
+	    reduce[0] += R[i]*R[i];
+	    reduce[1] += R[i]*Z[i];
+	    reduce[2] += D[i]*Y[i];
+	  }
+	}
+      }
     }
 
     TRACE_SOLVER("loop_3 callback");
@@ -514,6 +542,7 @@ void EnzoSolverCg::loop_2 (EnzoBlock * enzo_block) throw()
     TRACE_SOLVER("loop_3 contribute");
     CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_3<T>(NULL), 
 			enzo_block->proxy_array());
+    enzo_block->set_solver(this);
     enzo_block->contribute (3*sizeof(long double), &reduce, 
 			    sum_long_double_3_type,
 			    callback);
@@ -581,30 +610,45 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 
     cello::check(a,"a",__FILE__,__LINE__);
 
-    zaxpy_ (X,  a ,D,X);
-    zaxpy_ (R, -a, Y,R);
+    //    field.axpy (ix_,  a ,id_, ix_);
+    //    field.axpy (ir_, -a, iy_, ir_);
+    for (int iz=0; iz<mz_; iz++) {
+      for (int iy=0; iy<my_; iy++) {
+	for (int ix=0; ix<mx_; ix++) {
+	  int i = ix + mx_*(iy + my_*iz);
+	  X[i] += a * D[i];
+	  R[i] -= a * Y[i];
+	}
+      }
+    }
 
     M_->matvec(iz_,ir_,enzo_block);
 
   }
 
-  long double reduce[3];
+  long double reduce[3] = {0.0};
 
   if (enzo_block->is_leaf()) {
 
     T * X = (T*) field.values(ix_);
     T * R = (T*) field.values(ir_);
     T * Z = (T*) field.values(iz_);
-    reduce[0] = dot_(R,Z);
-    reduce[1] = sum_(R);
-    reduce[2] = sum_(X);
 
-  } else {
-
-    reduce[0] = 0.0;
-    reduce[1] = 0.0;
-    reduce[2] = 0.0;
-
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+       
+    //    reduce[0] = field.dot(ir_,iz_);
+    //    reduce[1] = sum_(R);
+    //    reduce[2] = sum_(X);
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + (ix + mx_*(iy + my_*iz));
+	  reduce[0] += R[i]*Z[i];
+	  reduce[1] += R[i];
+	  reduce[2] += X[i];
+	}
+      }
+    }
   }
 
   TRACE_SOLVER("loop_5 callback");
@@ -618,6 +662,7 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 #endif
 
   TRACE_SOLVER("loop_5 contribute");
+  enzo_block->set_solver(this);
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  sum_long_double_3_type, 
 			  callback);
@@ -681,8 +726,20 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 
       T * X  = (T*) field.values(ix_);
       T * R  = (T*) field.values(ir_);
-      shift_ (X,T(-xs_/bc_),X);
-      shift_ (R,T(-rs_/bc_),R);
+
+      // shift_ (X,T(-xs_/bc_),X);
+      // shift_ (R,T(-rs_/bc_),R);
+
+      for (int iz=0; iz<mz_; iz++) {
+	for (int iy=0; iy<my_; iy++) {
+	  for (int ix=0; ix<mx_; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    X[i] -= T(xs_/bc_);
+	    R[i] -= T(rs_/bc_);
+	  }
+	}
+      }
+      
     }
 
     T * D  = (T*) field.values(id_);
@@ -692,7 +749,15 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 
     cello::check(b,"b",__FILE__,__LINE__);
 
-    zaxpy_ (D,b,D,Z);
+    // zaxpy_ (D,b,D,Z);
+    for (int iz=0; iz<mz_; iz++) {
+      for (int iy=0; iy<my_; iy++) {
+	for (int ix=0; ix<mx_; ix++) {
+	  int i = ix + mx_*(iy + my_*iz);
+	  D[i] = Z[i] + b * D[i];
+	}
+      }
+    }
   }
 
   int iter = iter_ + 1;
@@ -703,6 +768,7 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
   TRACE_SOLVER("loop_0b callback");
     
   TRACE_SOLVER("loop_0b contribute");
+  enzo_block->set_solver(this);
   enzo_block->contribute (sizeof(int), &iter, 
 			  CkReduction::max_int, callback);
   TRACE_SOLVER("loop_0b contribute");
@@ -739,8 +805,6 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 
   }
 
-  enzo_block->compute_done();
-
   TRACE_SOLVER("Solver end EXIT");
 }
 
@@ -753,41 +817,6 @@ void EnzoSolverCg::exit_() throw()
 }
 
 //======================================================================
-
-template <class T>
-long double EnzoSolverCg::dot_ (const T * X, const T * Y) const throw()
-{
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-
-  long double value = 0.0;
-  for (int iz=0; iz<nz_; iz++) {
-    for (int iy=0; iy<ny_; iy++) {
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + (ix + mx_*(iy + my_*iz));
-	value += X[i]*Y[i];
-      }
-    }
-  }
-
-  return value;
-}
-
-//----------------------------------------------------------------------
-
-template <class T>
-void EnzoSolverCg::zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw()
-{
-  for (int iz=0; iz<mz_; iz++) {
-    for (int iy=0; iy<my_; iy++) {
-      for (int ix=0; ix<mx_; ix++) {
-	int i = ix + mx_*(iy + my_*iz);
-	Z[i] = a * X[i] + Y[i];
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
 
 template <class T>
 long double EnzoSolverCg::sum_ (const T * X) const throw()

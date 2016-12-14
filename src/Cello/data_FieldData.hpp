@@ -135,9 +135,46 @@ public: // interface
 	      const char * message,
 	      bool use_file = false) const throw();
 
+  //----------------------------------------------------------------------
+
+  // BLAS Operations
+
+  // /// copy field is to field id
+  // void copy (const FieldDescr *, int id, int is, bool ghosts = true ) throw();
+
+  /// Compute field(iz) =  a * field(ix) + field(iy)
+  void axpy (const FieldDescr *, int iz, long double a, int ix, int iy,
+  	     bool ghosts = true ) throw();
+
+  /// Compute inner product field(ix) . field(iy)
+  double dot (const FieldDescr *, int ix, int iy) throw();
+
+  /// Scale vector ix by scalar a
+  void scale (const FieldDescr *,
+	      int iy, long double a, int ix, bool ghosts = true ) throw();
+
   //--------------------------------------------------
 private: // functions
   //--------------------------------------------------
+
+  template<class T>
+  void axpy_ (T * Z, long double a, const T * X, const T * Y, bool ghosts,
+	      int mx, int my, int mz,
+	      int nx, int ny, int nz,
+	      int gx, int gy, int gz) const throw();
+
+  template<class T>
+  long double dot_(const T* X, const T* Y,
+		   int mx, int my, int mz,
+		   int nx, int ny, int nz,
+		   int gx, int gy, int gz) const throw();
+
+  template<class T>
+  void scale_(T* Y, long double a, T * X, bool ghosts,
+	      int mx, int my, int mz,
+	      int nx, int ny, int nz,
+	      int gx, int gy, int gz) const throw();
+
 
   /// Given field size and padding, compute offset to start of the next field
   int adjust_padding_ (int size, int padding) const throw();

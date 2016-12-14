@@ -29,7 +29,7 @@ EnzoMethodGravity::EnzoMethodGravity
  double grav_const)
   : Method(),
     grav_const_(grav_const),
-    solver_(NULL)
+    solver_(solver)
 {
   const int num_fields = field_descr->field_count();
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
@@ -59,11 +59,12 @@ void EnzoMethodGravity::compute(Block * block) throw()
   /// access problem-defining fields for eventual RHS and solution
   const int id  = field.field_id("density");
   const int idt = field.field_id("density_total");
-
-  const int ib = field.field_id("potential");
+  const int idensity = (idt != -1) ? idt : id;
+  const int ib = field.field_id ("B");
   
-    
   // Solve the linear system
+  field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
+  
   solver_->apply (A, ix, ib, block);
   
   block->compute_done();

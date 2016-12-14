@@ -571,6 +571,222 @@ void FieldData::print
 #endif /* ifndef CELLO_DEBUG */
 }
 
+//----------------------------------------------------------------------
+
+// void FieldData::copy
+// (const FieldDescr * field_descr,
+//  int id, int is,
+//  bool ghosts = true ) throw()
+// {
+// }
+
+// //----------------------------------------------------------------------
+
+// void FieldData::axpy
+// (const FieldDescr * field_descr, int iz, double a, int ix, int iy,
+//  bool ghosts = true ) throw()
+// {
+// }
+
+//----------------------------------------------------------------------
+
+// template<class T>
+//   void FieldData::axpy_ (T* Z, double a, const T* X, const T* Y) const throw()
+// {
+//   for (int iz=0; iz<mz_; iz++) 
+//     for (int iy=0; iy<my_; iy++) 
+//       for (int ix=0; ix<mx_; ix++) {
+// 	int i = ix + mx_*(iy + my_*iz);
+// 	Z[i] = a * X[i] + Y[i];
+//       }
+// }
+
+//----------------------------------------------------------------------
+
+void FieldData::axpy
+(const FieldDescr * field_descr,
+ int iz, long double a, int ix, int iy, bool ghosts) throw()
+{
+  int mx,my,mz;
+  int nx,ny,nz;
+  int gx,gy,gz;
+
+  size                        (&nx, &ny, &nz);
+  dimensions  (field_descr,ix, &mx, &my, &mz);
+  field_descr->ghost_depth(ix, &gx, &gy, &gz);
+
+  void * x = values(field_descr,ix);
+  void * y = values(field_descr,iy);
+  void * z = values(field_descr,iz);
+
+  switch (field_descr->precision(ix)) {
+  case precision_single:
+    axpy_ ((float*)z,a,(float*)x,(float*)y,ghosts,
+	  mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  case precision_double:
+    axpy_ ((double*)z,a,(double*)x,(double*)y,ghosts,
+	   mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  case precision_quadruple:
+    axpy_ ((long double*)z,a,(long double*)x,(long double*)y,ghosts,
+	   mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  default:
+    ERROR2("FieldData::axpy()",
+	   "Unknown precision %d for field id %d",
+	   field_descr->precision(ix),ix);
+    break;
+  }
+
+}
+
+template<class T>
+void FieldData::axpy_
+(T * Z, long double a, const T * X, const T * Y, bool ghosts,
+ int mx, int my, int mz,
+ int nx, int ny, int nz,
+ int gx, int gy, int gz) const throw()
+{
+  if (ghosts) {
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  Z[i] = a * X[i] + Y[i];
+	}
+      }
+    }
+  } else {
+    int i0 = gx + mx*(gy + my*gz);
+    for (int iz=0; iz<nx; iz++) {
+      for (int iy=0; iy<ny; iy++) { 
+	for (int ix=0; ix<mx; ix++) {
+	  int i = i0 + ix + mx*(iy + my*iz);
+	  Z[i] = a * X[i] + Y[i];
+	}
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+double FieldData::dot (const FieldDescr * field_descr, int ix, int iy) throw()
+{
+  int mx,my,mz;
+  int nx,ny,nz;
+  int gx,gy,gz;
+
+  size                        (&nx, &ny, &nz);
+  dimensions  (field_descr,ix, &mx, &my, &mz);
+  field_descr->ghost_depth(ix, &gx, &gy, &gz);
+
+  void * x = values(field_descr,ix);
+  void * y = values(field_descr,iy);
+
+  switch (field_descr->precision(ix)) {
+  case precision_single:
+    return dot_ ((float*)x,(float*)y,mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  case precision_double:
+    return dot_ ((double*)x,(double*)y,mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  case precision_quadruple:
+    return dot_ ((long double*)x,(long double*)y,mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  default:
+    ERROR2("FieldData::dot()",
+	   "Unknown precision %d for field id %d",
+	   field_descr->precision(ix),ix);
+    break;
+  }
+}
+
+template<class T>
+long double FieldData::dot_(const T* X, const T* Y, int mx, int my, int mz, int nx, int ny, int nz, int gx, int gy, int gz) const throw()
+{
+  const int i0 = gx + mx*(gy + my*gz);
+  long double value = 0.0;
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	int i = i0 + (ix + mx*(iy + my*iz));
+	value += X[i]*Y[i];
+      }
+    }
+  }
+  return value;
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::scale
+(const FieldDescr * field_descr,
+ int iy, long double a, int ix, bool ghosts) throw()
+{
+  int mx,my,mz;
+  int nx,ny,nz;
+  int gx,gy,gz;
+
+  size                        (&nx, &ny, &nz);
+  dimensions  (field_descr,ix, &mx, &my, &mz);
+  field_descr->ghost_depth(ix, &gx, &gy, &gz);
+
+  void * x = values(field_descr,ix);
+  void * y = values(field_descr,iy);
+
+  switch (field_descr->precision(ix)) {
+  case precision_single:
+    scale_ ((float*)y,a,(float*)x,ghosts,
+	  mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  case precision_double:
+    scale_ ((double*)y,a,(double*)x,ghosts,
+	   mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  case precision_quadruple:
+    scale_ ((long double*)y,a,(long double*)x,ghosts,
+	   mx,my,mz,nx,ny,nz,gx,gy,gz);
+    break;
+  default:
+    ERROR2("FieldData::scale()",
+	   "Unknown precision %d for field id %d",
+	   field_descr->precision(ix),ix);
+    break;
+  }
+
+}
+
+template<class T>
+void FieldData::scale_
+(T * Y, long double a, T * X, bool ghosts,
+ int mx, int my, int mz,
+ int nx, int ny, int nz,
+ int gx, int gy, int gz) const throw()
+{
+  if (ghosts) {
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  Y[i] = a*X[i];
+	}
+      }
+    }
+  } else {
+    int i0 = gx + mx*(gy + my*gz);
+    for (int iz=0; iz<nx; iz++) {
+      for (int iy=0; iy<ny; iy++) { 
+	for (int ix=0; ix<mx; ix++) {
+	  int i = i0 + ix + mx*(iy + my*iz);
+	  Y[i] = a*X[i];
+	}
+      }
+    }
+  }
+}
+
 //======================================================================
 
 int FieldData::adjust_padding_

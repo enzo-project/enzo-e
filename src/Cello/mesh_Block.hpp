@@ -335,8 +335,8 @@ protected: // methods
 
 public: // methods
 
-  /// Prepare to call compute_next_() after computing (used to synchronize between methods)
-  /// Must be called at end of Method
+  /// Prepare to call compute_next_() after computing (used to
+  /// synchronize between methods) Must be called at end of Method
   void compute_done();
 
   //--------------------------------------------------

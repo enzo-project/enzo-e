@@ -39,7 +39,7 @@ void Solver::monitor_output_
   Monitor * monitor = block->simulation()->monitor();
 
   monitor->print("Solver", "%s %s iter %04d  err %.16g [%g %g]",
-		 this->name(),
+		 this->name().c_str(),
 		 final ? "final" : "",
 		 iter,
 		 (double)(rr    / rr0),
