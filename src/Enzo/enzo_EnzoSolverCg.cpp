@@ -64,16 +64,9 @@ EnzoSolverCg::EnzoSolverCg
   field_descr->ghost_depth    (ib_,&gx_,&gy_,&gz_);
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  //  refresh(ir)->add_field(ib_);
   refresh(ir)->add_all_fields(num_fields);
 
   /// Initialize matvec Refresh
-
-#ifdef OLD_REFRESH
-  id_refresh_matvec_ = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(id_refresh_matvec_)->add_all_fields(num_fields);
-  //  refresh(id_refresh_matvec_)->add_field(ir_);
-#endif
 
   TRACE_SOLVER("EnzoSolverCg() EXIT");
 }
@@ -445,7 +438,7 @@ void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 
   delete msg;
 
-  solver -> loop_2<T>(this);
+  solver -> loop_2a<T>(this);
 
   TRACE_SOLVER("Block solver_cg_shift_1 EXIT");
   performance_stop_(perf_compute,__FILE__,__LINE__);
@@ -454,9 +447,32 @@ void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoSolverCg::loop_2 (EnzoBlock * enzo_block) throw()
+void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
 {
-  TRACE_SOLVER("Block loop_2 ENTER");
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  refresh.set_active(enzo_block->is_leaf());
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  enzo_block->refresh_enter
+    (CkIndex_EnzoBlock::p_solver_cg_loop_2<T>(NULL),&refresh);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoBlock::p_solver_cg_loop_2 (CkReductionMsg * msg)
+{
+  EnzoSolverCg * solver = 
+    static_cast<EnzoSolverCg*> (this->solver());
+
+  solver->loop_2b<T>(this);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
+{
+  TRACE_SOLVER("Block loop_2b ENTER");
   cello::check(rr_,"rr_",__FILE__,__LINE__);
 
   if (iter_ == 0) {
@@ -548,7 +564,7 @@ void EnzoSolverCg::loop_2 (EnzoBlock * enzo_block) throw()
 			    callback);
     TRACE_SOLVER("loop_3 contribute");
   }
-  TRACE_SOLVER("Block loop_2 EXIT");
+  TRACE_SOLVER("Block loop_2b EXIT");
 }
 
 //----------------------------------------------------------------------

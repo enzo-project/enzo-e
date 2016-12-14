@@ -67,7 +67,11 @@ public: // virtual functions
 
   /// Continuation after global reduction
   template <class T>
-  void loop_2(EnzoBlock * enzo_block) throw();
+  void loop_2a(EnzoBlock * enzo_block) throw();
+
+    /// Continuation after global reduction
+  template <class T>
+  void loop_2b(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
   template <class T>

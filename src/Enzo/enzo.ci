@@ -129,6 +129,8 @@ module enzo {
     template <class T>
     entry void r_solver_cg_shift_1(CkReductionMsg *msg);
     template <class T>
+    entry void p_solver_cg_loop_2(CkReductionMsg *msg);
+    template <class T>
     entry void r_solver_cg_loop_3(CkReductionMsg *msg);
     template <class T>
     entry void r_solver_cg_loop_5(CkReductionMsg *msg);

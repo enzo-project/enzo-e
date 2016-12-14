@@ -267,6 +267,10 @@ public: /// entry methods
   template <class T>
   void r_solver_cg_shift_1 (CkReductionMsg * msg) ;
 
+  /// EnzoSolverCg entry method
+  template <class T>
+  void p_solver_cg_loop_2 (CkReductionMsg * msg) ;
+
   /// EnzoSolverCg entry method: DOT(P,AP)
   template <class T>
   void r_solver_cg_loop_3 (CkReductionMsg * msg) ;
