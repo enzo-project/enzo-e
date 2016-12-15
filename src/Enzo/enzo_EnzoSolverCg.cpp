@@ -30,7 +30,8 @@ EnzoSolverCg::EnzoSolverCg
  int iter_max, double res_tol, int monitor_iter,
  bool is_singular,
  bool diag_precon) 
-  : Solver(), 
+  : Solver(),
+    A_(NULL),
     M_((diag_precon) ?
        (Matrix *)(new EnzoMatrixDiagonal) :
        (Matrix *)(new EnzoMatrixIdentity)),

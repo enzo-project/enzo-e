@@ -286,6 +286,53 @@ public: /// entry methods
   void r_solver_cg_matvec(CkReductionMsg * msg);
 
   //--------------------------------------------------
+  
+  /// EnzoSolverBiCGStab entry method: SUM(B) and COUNT(B)
+  template <class T>
+  void r_solver_bicgstab_start_1(CkReductionMsg* msg);  
+
+  /// EnzoSolverBiCGStab entry method: DOT(R,R)
+  template <class T>
+  void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
+
+  /// EnzoSolverBiCGStab entry method: refresh P
+  void p_solver_bicgstab_loop_1();  
+
+  /// EnzoSolverBiCGStab entry method: refresh Y
+  void p_solver_bicgstab_loop_3();
+
+  /// EnzoSolverBiCGStab entry method: DOT(V,R0), SUM(Y) and SUM(V)
+  template <class T>
+  void r_solver_bicgstab_loop_5(CkReductionMsg* msg);  
+
+  /// EnzoSolverBiCGStab entry method: refresh Q
+  void p_solver_bicgstab_loop_7();
+
+  /// EnzoSolverBiCGStab entry method: refresh Y
+  void p_solver_bicgstab_loop_9();
+
+  /// EnzoSolverBiCGStab entry method: refresh X before
+  /// computing accelerations
+  void p_solver_bicgstab_acc();
+
+  /// EnzoSolverBiCGStab entry method: refresh accelerations
+  /// before exiting
+  void p_solver_bicgstab_exit();
+
+  /// EnzoSolverBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
+  template <class T>
+  void r_solver_bicgstab_loop_11(CkReductionMsg* msg);
+
+  /// EnzoSolverBiCGStab entry method: DOT(R,R) and DOT(R,R0)
+  template <class T>
+  void r_solver_bicgstab_loop_13(CkReductionMsg* msg);
+
+  /// EnzoSolverBiCGStab entry method: ITER++
+  template <class T>
+  void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
+
+
+  //--------------------------------------------------
   /// EnzoMethodGravityCg entry method: DOT ==> refresh P
   template <class T>
   void r_cg_loop_0a (CkReductionMsg * msg) ;  
@@ -366,12 +413,12 @@ public: /// entry methods
    
   }
 
-  /// EnzoMethodSolverMlat entry method: receive face data for refresh
+  /// EnzoSolverMlat entry method: receive face data for refresh
   void p_mg_receive_face
   (int n, char buffer[],  int type_refresh, 
    int if3[3], int ic3[3], int count = 0);
 
-  /// EnzoMethodSolverMg0
+  /// EnzoSolverMg0
   template <class T>
   void p_mg0_pre_smooth(CkReductionMsg * msg);
   template <class T>

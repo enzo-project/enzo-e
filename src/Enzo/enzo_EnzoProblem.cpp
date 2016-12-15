@@ -211,11 +211,24 @@ Solver * EnzoProblem::create_solver_
 
   Solver * solver = NULL;
   
+  const bool is_singular = is_periodic();
+  FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
+  int rank = config->mesh_root_rank;
+
   if (solver_type == "cg") {
-    const bool is_singular = is_periodic();
-    FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
-    int rank = config->mesh_root_rank;
+
     solver = new EnzoSolverCg
+      (field_descr,
+       rank,
+       enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_res_tol[index_solver],
+       enzo_config->solver_monitor_iter[index_solver],
+       is_singular,
+       enzo_config->solver_diag_precon[index_solver]) ;
+
+  } else if (solver_type == "bicgstab") {
+
+    solver = new EnzoSolverBiCgStab
       (field_descr,
        rank,
        enzo_config->solver_iter_max[index_solver],

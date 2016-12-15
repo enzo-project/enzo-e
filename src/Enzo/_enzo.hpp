@@ -192,6 +192,7 @@ struct fluxes
 #include "enzo_EnzoComputeTemperature.hpp"
 
 #include "enzo_EnzoSolverCg.hpp"
+#include "enzo_EnzoSolverBiCgStab.hpp"
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"
