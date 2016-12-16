@@ -266,7 +266,7 @@ void EnzoBlock::r_cg_loop_0b (CkReductionMsg * msg)
 
   // Refresh field faces then call enzo_matvec
 
-  Refresh refresh (4,0,neighbor_leaf, sync_neighbor);
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
   refresh.set_active(is_leaf());
   refresh.add_all_fields(this->data()->field().field_count());
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL), &refresh);
@@ -298,7 +298,7 @@ void EnzoBlock::r_cg_loop_0a (CkReductionMsg * msg)
   
   // Refresh field faces then call enzo_matvec
 
-  Refresh refresh (4,0,neighbor_leaf, sync_neighbor);
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
   refresh.set_active(is_leaf());
   refresh.add_all_fields(this->data()->field().field_count());
   refresh_enter(CkIndex_EnzoBlock::r_enzo_matvec(NULL),&refresh);
