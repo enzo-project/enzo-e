@@ -64,7 +64,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   
   // Solve the linear system
   field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
-  
+
   solver_->apply (A, ix, ib, block);
   
   block->compute_done();

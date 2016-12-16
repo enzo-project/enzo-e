@@ -18,7 +18,15 @@ class Solver : public PUP::able
 public: // interface
 
   /// Create a new Solver
+  Solver (int monitor_iter) throw()
+    : PUP::able(),
+      monitor_iter_(monitor_iter)
+  {}
+
+  /// Create an uninitialized Solver
   Solver () throw()
+    : PUP::able(),
+      monitor_iter_(0)
   {}
 
   /// Destructor
@@ -33,6 +41,10 @@ public: // interface
   /// Charm++ PUP::able declarations
   PUPable_abstract(Solver);
 
+  Solver (CkMigrateMessage *m)
+    : PUP::able (m)
+  { }
+  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
@@ -41,6 +53,7 @@ public: // interface
     PUP::able::pup(p);
     
     p | refresh_list_;
+    p | monitor_iter_;
   }
 
   int add_refresh (int ghost_depth, 
@@ -81,6 +94,8 @@ protected: // attributes
   ///  Refresh object
   std::vector<Refresh *> refresh_list_;
 
+  /// How often to write output
+  int monitor_iter_;
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

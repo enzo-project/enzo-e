@@ -28,15 +28,37 @@ public: // interface
 
   /// normal constructor
   EnzoSolverBiCgStab(const FieldDescr* field_descr,
+		     int monitor_iter,
 		     int rank,
 		     int iter_max, 
 		     double res_tol,
-		     int monitor_iter,
 		     bool is_singular,
 		     bool diag_precon);
 
   /// default constructor
-  EnzoSolverBiCgStab() {};
+  EnzoSolverBiCgStab()
+    : Solver(),
+      A_(NULL),
+      M_(NULL),
+      is_singular_(false),
+      first_call_(true),
+      rank_(0),
+      iter_max_(0), 
+      res_tol_(0.0),
+      rho0_(0), err_(0), err_min_(0), err_max_(0),
+      idensity_(0),  ipotential_(0),
+      ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
+      iy_(0), iv_(0), iq_(0), iu_(0),
+      nx_(0), ny_(0), nz_(0),
+      mx_(0), my_(0), mz_(0),
+      gx_(0), gy_(0), gz_(0),
+      iter_(0),
+      beta_d_(0), beta_n_(0), beta_(0), 
+      omega_d_(0), omega_n_(0), omega_(0), 
+      vr0_(0), rr_(0), alpha_(0),
+      bs_(0.0),bc_(0.0),
+      ys_(0.0),vs_(0.0),us_(0.0)
+  {};
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoSolverBiCgStab);
@@ -46,14 +68,14 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoSolverBiCgStab(CkMigrateMessage* m)
-    : A_(NULL),
+    : Solver(m),
+      A_(NULL),
       M_(NULL),
       is_singular_(false),
       first_call_(true),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
-      monitor_iter_(0),
       rho0_(0), err_(0), err_min_(0), err_max_(0),
       idensity_(0),  ipotential_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
@@ -85,7 +107,6 @@ public: // interface
     p | rank_;
     p | iter_max_;
     p | res_tol_;
-    p | monitor_iter_;
 
     p | idensity_;
     p | ipotential_;
@@ -198,10 +219,6 @@ public: // interface
 
 protected: // methods
 
-  /// internal routine to report solver progress to stdout
-  void monitor_output_(EnzoBlock * enzo_block,
-		       bool final = false) throw();
-
   /// internal routine to handle actual start to solver
   template<class T> void compute_(EnzoBlock * enzo_block) throw();
 
@@ -240,9 +257,6 @@ protected: // attributes
 
   /// Convergence tolerance on the relative residual
   double res_tol_;
-
-  /// How often to display progress to stdout
-  int monitor_iter_;
 
   /// Initial residual
   long double rho0_;

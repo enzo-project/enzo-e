@@ -128,6 +128,15 @@ public: // interface
       solver_res_tol(),
       solver_diag_precon(),
       solver_monitor_iter(),
+      solver_smooth(),
+      solver_smooth_weight(),
+      solver_smooth_pre(),
+      solver_smooth_coarse(),
+      solver_smooth_post(),
+      solver_restrict(),
+      solver_prolong(),
+      solver_min_level(),
+      solver_max_level(),
       stopping_cycle(0),
       stopping_time(0.0),
       stopping_seconds(0.0),
@@ -251,6 +260,15 @@ public: // interface
       solver_res_tol(),
       solver_diag_precon(),
       solver_monitor_iter(),
+      solver_smooth(),
+      solver_smooth_weight(),
+      solver_smooth_pre(),
+      solver_smooth_coarse(),
+      solver_smooth_post(),
+      solver_restrict(),
+      solver_prolong(),
+      solver_min_level(),
+      solver_max_level(),
       stopping_cycle(0),
       stopping_time(0.0),
       stopping_seconds(0.0),
@@ -447,6 +465,15 @@ public: // attributes
   std::vector<double>        solver_res_tol;
   std::vector<char>          solver_diag_precon;
   std::vector<int>           solver_monitor_iter;
+  std::vector<std::string>   solver_smooth;
+  std::vector<double>        solver_smooth_weight;
+  std::vector<int>           solver_smooth_pre;
+  std::vector<int>           solver_smooth_coarse;
+  std::vector<int>           solver_smooth_post;
+  std::vector<std::string>   solver_restrict;
+  std::vector<std::string>   solver_prolong;
+  std::vector<int>           solver_min_level;
+  std::vector<int>           solver_max_level;
 
   // Stopping
 

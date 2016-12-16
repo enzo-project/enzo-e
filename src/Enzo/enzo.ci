@@ -93,6 +93,7 @@ module enzo {
 
   PUPable EnzoSolverCg;
   PUPable EnzoSolverBiCgStab;
+  PUPable EnzoSolverMg0;
 
   extern module mesh;
 
@@ -158,7 +159,20 @@ module enzo {
     entry void p_solver_bicgstab_acc();
     entry void p_solver_bicgstab_exit();
 
-    // EnzoMethodGravityCg synchronization entry methods
+    // EnzoSolverMg0
+    
+    template <class T>
+    entry void p_solver_mg0_pre_smooth(CkReductionMsg *msg);
+    template <class T>
+    entry void p_solver_mg0_restrict_send(CkReductionMsg *msg);
+    template <class T>
+    entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
+    template <class T>
+    entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
+    template <class T>
+    entry void p_solver_mg0_post_smooth(CkReductionMsg *msg);
+
+// EnzoMethodGravityCg synchronization entry methods
 
     template <class T>
     entry void r_cg_loop_0a(CkReductionMsg *msg);
@@ -320,6 +334,28 @@ module template_defs {
    extern entry void EnzoBlock p_solver_bicgstab_exit<float>();
    extern entry void EnzoBlock p_solver_bicgstab_exit<double>();
    extern entry void EnzoBlock p_solver_bicgstab_exit<long double>();
+
+   // EnzoSolverMg0
+   
+   extern entry void EnzoBlock p_solver_mg0_pre_smooth<float>(CkReductionMsg *);
+   extern entry void EnzoBlock p_solver_mg0_pre_smooth<double>(CkReductionMsg *);
+   extern entry void EnzoBlock p_solver_mg0_pre_smooth<long double>(CkReductionMsg *);
+
+   extern entry void EnzoBlock p_solver_mg0_restrict_send<float>();
+   extern entry void EnzoBlock p_solver_mg0_restrict_send<double>();
+   extern entry void EnzoBlock p_solver_mg0_restrict_send<long double>();
+
+   extern entry void EnzoBlock p_solver_mg0_restrict_recv<float>();
+   extern entry void EnzoBlock p_solver_mg0_restrict_recv<double>();
+   extern entry void EnzoBlock p_solver_mg0_restrict_recv<long double>();
+
+   extern entry void EnzoBlock p_solver_mg0_prolong_recv<float>();
+   extern entry void EnzoBlock p_solver_mg0_prolong_recv<double>();
+   extern entry void EnzoBlock p_solver_mg0_prolong_recv<long double>();
+
+   extern entry void EnzoBlock p_solver_mg0_post_smooth<float>();
+   extern entry void EnzoBlock p_solver_mg0_post_smooth<double>();
+   extern entry void EnzoBlock p_solver_mg0_post_smooth<long double>();
 
    // EnzoMethodGravityCg
 

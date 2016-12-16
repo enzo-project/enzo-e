@@ -26,11 +26,12 @@
 
 EnzoSolverCg::EnzoSolverCg 
 (const FieldDescr * field_descr,
+ int monitor_iter, 
  int rank,
- int iter_max, double res_tol, int monitor_iter,
+ int iter_max, double res_tol,
  bool is_singular,
  bool diag_precon) 
-  : Solver(),
+  : Solver(monitor_iter),
     A_(NULL),
     M_((diag_precon) ?
        (Matrix *)(new EnzoMatrixDiagonal) :
@@ -39,7 +40,6 @@ EnzoSolverCg::EnzoSolverCg
     rank_(rank),
     iter_max_(iter_max), 
     res_tol_(res_tol),
-    monitor_iter_(monitor_iter),
     rr0_(0),
     rr_min_(0),rr_max_(0),
     ix_(0),  ib_(0),
@@ -96,7 +96,6 @@ void EnzoSolverCg::pup (PUP::er &p)
   p | rank_;
   p | iter_max_;
   p | res_tol_;
-  p | monitor_iter_;
   p | rr0_;
   p | rr_min_;
   p | rr_max_;

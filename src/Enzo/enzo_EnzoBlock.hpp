@@ -113,6 +113,8 @@ public: // interface
     :  BASE_ENZO_BLOCK(),
        mg_sync_(),
        mg_iter_(0),
+       solver_mg_sync_(),
+       solver_mg_iter_(0),
        dt(0),
        SubgridFluxes(NULL)
   {
@@ -136,6 +138,8 @@ public: // interface
     : BASE_ENZO_BLOCK (m),
        mg_sync_(),
        mg_iter_(0),
+       solver_mg_sync_(),
+       solver_mg_iter_(0),
       dt(0.0),
       SubgridFluxes(NULL)
   {
@@ -331,6 +335,28 @@ public: /// entry methods
   template <class T>
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
+  // EnzoSolverMg0
+  template <class T>
+  void p_solver_mg0_pre_smooth(CkReductionMsg * msg);
+  template <class T>
+  void p_solver_mg0_restrict_send(CkReductionMsg * msg);
+  template <class T>
+  void p_solver_mg0_restrict_recv(FieldMsg * msg);
+  template <class T>
+  void p_solver_mg0_prolong_recv(FieldMsg * msg);
+  template <class T>
+  void p_solver_mg0_post_smooth(CkReductionMsg * msg);
+
+  void solver_mg_sync_reset()             { solver_mg_sync_.reset(); }
+  void solver_mg_sync_set_stop(int value) { solver_mg_sync_.set_stop(value); }
+  bool solver_mg_sync_next()         { return solver_mg_sync_.next(); };
+  int  solver_mg_sync_value()        { return solver_mg_sync_.value(); };
+  int  solver_mg_sync_stop()         { return solver_mg_sync_.stop(); };
+
+  void solver_mg_iter_clear() { solver_mg_iter_ = 0; }
+  void solver_mg_iter_increment() { ++solver_mg_iter_; }
+  int solver_mg_iter() const {return solver_mg_iter_; }
+
 
   //--------------------------------------------------
   /// EnzoMethodGravityCg entry method: DOT ==> refresh P
@@ -418,7 +444,8 @@ public: /// entry methods
   (int n, char buffer[],  int type_refresh, 
    int if3[3], int ic3[3], int count = 0);
 
-  /// EnzoSolverMg0
+  /// EnzoMethodGravityMg0
+  
   template <class T>
   void p_mg0_pre_smooth(CkReductionMsg * msg);
   template <class T>
@@ -448,7 +475,13 @@ protected: // functions
 
 protected: // attributes
   
-  // MG SOLVER
+  // MG SOLVER (EnzoMethodGravityMg0)
+  Sync solver_mg_sync_;
+
+  // MG iteration count
+  int solver_mg_iter_;
+
+  // MG SOLVER ( EnzoSolverMg0)
   Sync mg_sync_;
 
   // MG iteration count

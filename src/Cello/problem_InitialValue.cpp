@@ -207,7 +207,7 @@ void InitialValue::enforce_block
       }
 
     } else if (parameter_type == parameter_unknown) {
-      if (CkMyPe()==0) {
+      if (block->index().is_root()) {
 	WARNING1("InitialValue::enforce_block",  
 		 "Uninitialized field %s",
 		 field_name.c_str());

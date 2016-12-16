@@ -17,10 +17,10 @@ class EnzoSolverCg : public Solver {
 public: // interface
 
   EnzoSolverCg (const FieldDescr * field_descr,
+		int monitor_iter,
 		int rank,
 		int iter_max, 
 		double res_tol,
-		int monitor_iter,
 		bool is_singular,
 		bool diag_precon);
 
@@ -33,7 +33,6 @@ public: // interface
     rank_(0),
     iter_max_(0), 
     res_tol_(0.0),
-    monitor_iter_(0),
     rr0_(0),
     rr_min_(0),rr_max_(0),
     ix_(0),  ib_(0),
@@ -51,6 +50,23 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   EnzoSolverCg (CkMigrateMessage *m)
+    : Solver(m), 
+      M_(NULL),
+      A_(NULL),
+      is_singular_(false),
+      rank_(0),
+      iter_max_(0), 
+      res_tol_(0.0),
+      rr0_(0),
+      rr_min_(0),rr_max_(0),
+      ix_(0),  ib_(0),
+      ir_(0), id_(0), iy_(0), iz_(0),
+      nx_(0),ny_(0),nz_(0),
+      mx_(0),my_(0),mz_(0),
+      gx_(0),gy_(0),gz_(0),
+      iter_(0),
+      rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
+      bc_(0.0)
   {}
 
   /// Assignment operator
@@ -61,8 +77,6 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-
-public: // virtual functions
 
   //--------------------------------------------------
 
@@ -183,9 +197,6 @@ protected: // attributes
 
   /// Convergence tolerance on the residual reduction rz_ / rz0_
   double res_tol_;
-
-  /// How often to display progress
-  int monitor_iter_;
 
   /// Initial residual
   long double rr0_;

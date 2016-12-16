@@ -401,10 +401,11 @@
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
-(const FieldDescr* field_descr, int rank,
+(const FieldDescr* field_descr,
+ int monitor_iter, int rank,
  int iter_max, double res_tol, 
- int monitor_iter, bool is_singular, bool diag_precon) 
-  : Solver(), 
+ bool is_singular, bool diag_precon) 
+  : Solver(monitor_iter), 
     A_(new EnzoMatrixLaplace),
     M_(NULL),
     is_singular_(is_singular),
@@ -412,7 +413,6 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     rank_(rank),
     iter_max_(iter_max), 
     res_tol_(res_tol),
-    monitor_iter_(monitor_iter),
     rho0_(0), err_(0), err_min_(0), err_max_(0),
     idensity_(0),  ipotential_(0),
     ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
@@ -726,7 +726,7 @@ template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw()
       monitor->print("Enzo", "BiCgStab iter %04d  rho0 %.16g",
 		     iter_,(double)(rho0_));
     if (monitor_iter_ && (iter_ % monitor_iter_) == 0 ) 
-      monitor_output_(enzo_block);
+      monitor_output_(enzo_block,iter_,err_,err_min_,err_,err_max_);
   }
 
   /// check for convergence
@@ -1351,7 +1351,7 @@ void EnzoSolverBiCgStab::acc(EnzoBlock* enzo_block) throw()
 
     /// output solution progress (iteration, residual, etc)
     if (enzo_block->index().is_root()) 
-      monitor_output_(enzo_block,true);
+      monitor_output_(enzo_block,iter_,err_,err_min_,err_,err_max_,true);
 
     /// copy potential from solution vector X
     copy_(potential, X, mx_, my_, mz_);
@@ -1391,20 +1391,6 @@ void EnzoBlock::p_solver_bicgstab_exit() {
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
   
-}
-
-//----------------------------------------------------------------------
-
-void EnzoSolverBiCgStab::monitor_output_(EnzoBlock* enzo_block,
-						bool final) throw() {
-
-  Monitor* monitor = enzo_block->simulation()->monitor();
-  monitor->print("Enzo", "BiCgStab %s iter %04d  err %.16g [%g %g]",
-		 final ? "final" : "",
-		 iter_,
-		 (double)(err_),
-		 (double)(err_min_),
-		 (double)(err_max_));
 }
 
 //======================================================================

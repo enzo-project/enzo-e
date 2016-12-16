@@ -183,6 +183,15 @@ void Config::pup (PUP::er &p)
   p | solver_res_tol;
   p | solver_diag_precon;
   p | solver_monitor_iter;
+  p | solver_smooth;
+  p | solver_smooth_weight;
+  p | solver_smooth_pre;
+  p | solver_smooth_coarse;
+  p | solver_smooth_post;
+  p | solver_restrict;
+  p | solver_prolong;
+  p | solver_min_level;
+  p | solver_max_level;
   
   // Stopping
 
@@ -1130,12 +1139,22 @@ void Config::read_solver_ (Parameters * p) throw()
 
   num_solvers = p->list_length("Solver:list");
 
-  solver_list.resize(num_solvers);
-  solver_type.resize(num_solvers);
-  solver_iter_max.resize(num_solvers);
-  solver_res_tol.resize(num_solvers);
-  solver_diag_precon.resize(num_solvers);
-  solver_monitor_iter.resize(num_solvers);
+  solver_list         .resize(num_solvers);
+  solver_type         .resize(num_solvers);
+  solver_iter_max     .resize(num_solvers);
+  solver_res_tol      .resize(num_solvers);
+  solver_diag_precon  .resize(num_solvers);
+  solver_monitor_iter .resize(num_solvers);
+  solver_smooth       .resize(num_solvers);
+  solver_smooth_weight.resize(num_solvers);
+  solver_smooth_pre   .resize(num_solvers);
+  solver_smooth_coarse.resize(num_solvers);
+  solver_smooth_post  .resize(num_solvers);
+  solver_restrict     .resize(num_solvers);
+  solver_prolong      .resize(num_solvers);
+  solver_min_level    .resize(num_solvers);
+  solver_max_level    .resize(num_solvers);
+
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
 
@@ -1159,6 +1178,34 @@ void Config::read_solver_ (Parameters * p) throw()
     
     solver_monitor_iter[index_solver] = p->value_integer
       (full_name + ":monitor_iter",0);
+
+    solver_smooth[index_solver] = p->value_string
+      (full_name + ":smooth","jacobi");
+
+    solver_smooth_weight[index_solver] = p->value_float
+      (full_name + ":smooth_weight",1.0);
+
+    solver_smooth_pre[index_solver] = p->value_integer
+      (full_name + ":smooth_pre",1);
+
+    solver_smooth_coarse[index_solver] = p->value_integer
+      (full_name + ":smooth_coarse",1);
+
+    solver_smooth_post[index_solver] = p->value_integer
+      (full_name + ":smooth_post",1);
+
+    solver_restrict[index_solver] = p->value_string
+      (full_name + ":restrict","linear");
+
+    solver_prolong[index_solver] = p->value_string
+      (full_name + ":prolong","linear");
+
+    solver_min_level[index_solver] = p->value_integer
+      (full_name + ":min_level",0);
+
+    solver_max_level[index_solver] = p->value_integer
+      (full_name + ":max_level",mesh_max_level);
+    
   }  
 
 }
