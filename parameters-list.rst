@@ -197,7 +197,7 @@ size of blocks.
 :Default: :d:`"unknown"`
 :Scope:     :c:`Cello`
 
-:e:`Type of mesh refinement criteria.  This is a required parameter, and must be one of "slope", "shear", "mask", "mass", or "shock".`
+:e:`Type of mesh refinement criteria.  This is a required parameter, and must be one of "slope", "shear", "mask", "mass", "density", "shock", "particle_mass", or "particle_count".`
  
 
 -------
