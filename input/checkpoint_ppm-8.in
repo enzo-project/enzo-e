@@ -8,7 +8,8 @@ Mesh { root_blocks    = [4,4]; }
 include "input/adapt_slope.incl"
 
 Testing {
-   time_final = 0.00632951818516996;
+#   time_final = 0.00632951818516996;
+   time_final = 0.00632976560208543;
    cycle_final = 20;
 }
 

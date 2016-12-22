@@ -37,14 +37,14 @@ int ProlongLinear::apply
   case precision_single:
 
     return apply_(       (float *) values_f, nd3_f, im3_f, n3_f,
-                   (const float *) values_c, nd3_c, im3_c, n3_c);
+			 (const float *) values_c, nd3_c, im3_c, n3_c);
 
     break;
 
   case precision_double:
 
     return apply_(       (double *) values_f, nd3_f, im3_f, n3_f,
-                   (const double *) values_c, nd3_c, im3_c, n3_c);
+			 (const double *) values_c, nd3_c, im3_c, n3_c);
 
     break;
 
@@ -63,11 +63,16 @@ int ProlongLinear::apply
 template <class T>
 int ProlongLinear::apply_
 (       T * values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+	const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
-  int dx_c = 1;
-  int dy_c = nd3_c[0];
-  int dz_c = nd3_c[0]*nd3_c[1];
+
+  const int dx_c = 1;
+  const int dy_c = nd3_c[0];
+  const int dz_c = nd3_c[0]*nd3_c[1];
+
+  const int dx_f = 1;
+  const int dy_f = nd3_f[0];
+  const int dz_f = nd3_f[0]*nd3_f[1];
 
   const double c1[4] = { 5.0*0.25, 3.0*0.25, 1.0*0.25, -1.0*0.25};
   const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
@@ -77,35 +82,51 @@ int ProlongLinear::apply_
   for (int i=0; i<rank; i++) {
     const char * xyz = "xyz";
     ASSERT3 ("ProlongLinear::apply_",
-             "fine array %c-axis %d must be twice the size of the coarse axis %d",
+             "fine array %c-axis %d must be 2 x coarse axis %d",
              xyz[i],n3_c[i],n3_f[i],
              n3_f[i]==n3_c[i]*2);
 
     ASSERT2 ("ProlongLinear::apply_",
-             "fine grid %c-axis %d must be divisible by 4",
-             xyz[i],n3_f[i],n3_f[i] % 4 == 0);
+             "fine grid %c-axis %d must be divisible by 2",
+             xyz[i],n3_f[i],n3_f[i] % 2 == 0);
+    ASSERT2 ("ProlongLinear::apply_",
+             "fine grid %c-axis %d must be at least 4",
+             xyz[i],n3_f[i],n3_f[i] >= 4);
   }
 
   if (n3_f[1]==1) {
 
-    for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
-      int ic_x = ix0/2;
-      for (int ix=ix0; ix<ix0+4; ix++) {
-        int icx = ix-ix0;
-        int if_x = ix;
+    const int ix0_f = im3_f[0];
+    const int ix0_c = im3_c[0];
+    const int nx_f = n3_f[0];
+    const int mx_c = nd3_c[0];
+    const int mx_f = nd3_f[0];
 
-        int i_c = im3_c[0]+ic_x;
-        int i_f = im3_f[0]+if_x;
+    for (int ix_f = 0; ix_f<nx_f; ix_f++) {
 
-        values_f[i_f] = ( c1[icx]*values_c[i_c] + 
-                          c2[icx]*values_c[i_c+dx_c]);
+      int ix_c = ((ix_f+1) >> 1) - 1;
 
-        if (positive_ && (values_f[i_f] < 0)) {
-          // revert to linear
-          int icc = i_c + (icx/2)*dx_c;
-          values_f[i_f] = values_c[icc];          
-        }
-      }
+      // shift coarse cells for fine grid cells on faces
+      ix_c += (ix_f==0) ? +1 : (ix_f < nx_f-1) ? 0 : -1;
+
+      // weighting factor for even / odd odd / even
+      // take into account extrapolating at edges
+      //
+      // 1D: (5/4 -1/4) (3/4 1/4) (1/4 3/4) ... (3/4 1/4) (1/4 3/4) (-1/4 5/4)
+      //     so wy is (5/4 -1/4) or (1/4 3/4) for even,
+      //             (-1/4 5/4)  or (3/4 1/4) for odd
+      
+      int wx[2] = { (0 < ix_f && ix_f < nx_f-1) ? 1 : 5,
+		    (0 < ix_f && ix_f < nx_f-1) ? 3 : -1 };
+    
+      T wx0 = 0.25*wx[ ix_f&1];
+      T wx1 = 0.25*wx[~ix_f&1];
+
+      int i_c = (ix0_c+ix_c) ;
+      int i_f = (ix0_f+ix_f) ;
+	  
+      values_f[i_f] = wx0*values_c[i_c]
+	+             wx1*values_c[i_c + dx_c ];
     }
 
     return (sizeof(T) * n3_c[0]);
@@ -113,88 +134,120 @@ int ProlongLinear::apply_
 
   } else if (n3_f[2] == 1) {
 
-    for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
-      int ic_x = ix0/2;
-      for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
-        int ic_y = iy0/2;
-        for (int ix=ix0; ix<ix0+4; ix++) {
-          int icx = ix-ix0;
-          int if_x = ix;
-          for (int iy=iy0; iy<iy0+4; iy++) {
-            int icy = iy-iy0;
-            int if_y = iy;
+    const int ix0_f = im3_f[0];
+    const int iy0_f = im3_f[1];
+    const int ix0_c = im3_c[0];
+    const int iy0_c = im3_c[1];
+    const int nx_f = n3_f[0];
+    const int ny_f = n3_f[1];
+    const int mx_c = nd3_c[0];
+    const int my_c = nd3_c[1];
+    const int mx_f = nd3_f[0];
+    const int my_f = nd3_f[1];
+    
+    for (int iy_f = 0; iy_f<ny_f; iy_f++) {
 
-            int i_c = (im3_c[0]+ic_x) + nd3_c[0]*
-              (       (im3_c[1]+ic_y));
-            int i_f = (im3_f[0]+if_x) + nd3_f[0]*
-              (       (im3_f[1]+if_y));
+      int iy_c = ((iy_f+1) >> 1) - 1;
+      iy_c += (iy_f==0) ? +1 : (iy_f < ny_f-1) ? 0 : -1;
 
-            values_f[i_f] = 
-              ( c1[icx]*c1[icy]*values_c[i_c] +
-                c2[icx]*c1[icy]*values_c[i_c+dx_c] +
-                c1[icx]*c2[icy]*values_c[i_c     +dy_c] +
-                c2[icx]*c2[icy]*values_c[i_c+dx_c+dy_c]);
-            if (positive_ && (values_f[i_f] < 0)) {
-              // revert to linear
-              int icc = i_c + (icx/2)*dx_c + (icy/2)*dy_c;
-              values_f[i_f] = values_c[icc];          
-            }
-          }
-        }
+      int wy[2] = { (0 < iy_f && iy_f < ny_f-1) ? 1 : 5,
+		    (0 < iy_f && iy_f < ny_f-1) ? 3 : -1 };
+    
+      T wy0 = 0.25*wy[ iy_f&1];
+      T wy1 = 0.25*wy[~iy_f&1];
+
+      for (int ix_f = 0; ix_f<nx_f; ix_f++) {
+
+	int ix_c = ((ix_f+1) >> 1) - 1;
+	ix_c += (ix_f==0) ? +1 : (ix_f < nx_f-1) ? 0 : -1;
+
+	int wx[2] = { (0 < ix_f && ix_f < nx_f-1) ? 1 : 5,
+		      (0 < ix_f && ix_f < nx_f-1) ? 3 : -1 };
+
+	T wx0 = 0.25*wx[ ix_f&1];
+	T wx1 = 0.25*wx[~ix_f&1];
+
+	int i_c = (ix0_c+ix_c) + mx_c * ( (iy0_c+iy_c) );
+	int i_f = (ix0_f+ix_f) + mx_f * ( (iy0_f+iy_f) );
+
+	values_f[i_f] = wx0*wy0*values_c[i_c]
+	  +             wx1*wy0*values_c[i_c + dx_c ]
+	  +             wx0*wy1*values_c[i_c        + dy_c ]
+	  +             wx1*wy1*values_c[i_c + dx_c + dy_c ];
       }
     }
+
     return (sizeof(T) * n3_c[0]*n3_c[1]);
 
   } else {
 
-    for (int ix0=0; ix0<n3_f[0]; ix0+=4) {
-      int ic_x = ix0/2;
-      for (int iy0=0; iy0<n3_f[1]; iy0+=4) {
-        int ic_y = iy0/2;
-        for (int iz0=0; iz0<n3_f[2]; iz0+=4) {
-          int ic_z = iz0/2;
+    const int ix0_f = im3_f[0];
+    const int iy0_f = im3_f[1];
+    const int iz0_f = im3_f[2];
+    const int ix0_c = im3_c[0];
+    const int iy0_c = im3_c[1];
+    const int iz0_c = im3_c[2];
+    const int nx_f = n3_f[0];
+    const int ny_f = n3_f[1];
+    const int nz_f = n3_f[2];
+    const int mx_c = nd3_c[0];
+    const int my_c = nd3_c[1];
+    const int mz_c = nd3_c[2];
+    const int mx_f = nd3_f[0];
+    const int my_f = nd3_f[1];
+    const int mz_f = nd3_f[2];
+    
+    for (int iz_f = 0; iz_f<nz_f; iz_f++) {
 
-          for (int ix=ix0; ix<ix0+4; ix++) {
-            int icx = ix-ix0;
-            int if_x = ix;
-            for (int iy=iy0; iy<iy0+4; iy++) {
-              int icy = iy-iy0;
-              int if_y = iy;
-              for (int iz=iz0; iz<iz0+4; iz++) {
-                int icz = iz-iz0;
-                int if_z = iz;
+      int iz_c = ((iz_f+1) >> 1) - 1;
+      iz_c += (iz_f==0) ? +1 : (iz_f < nz_f-1) ? 0 : -1;
 
-                int i_c = (im3_c[0]+ic_x) + nd3_c[0]*
-                  (       (im3_c[1]+ic_y) + nd3_c[1]*
-                          (im3_c[2]+ic_z));
-                int i_f = (im3_f[0]+if_x) + nd3_f[0]*
-                  (       (im3_f[1]+if_y) + nd3_f[1]*
-                          (im3_f[2]+if_z));
+      int wz[2] = { (0 < iz_f && iz_f < nz_f-1) ? 1 : 5,
+		    (0 < iz_f && iz_f < nz_f-1) ? 3 : -1 };
+    
+      T wz0 = 0.25*wz[ iz_f&1];
+      T wz1 = 0.25*wz[~iz_f&1];
 
-                values_f[i_f] = 
-                  ( c1[icx]*c1[icy]*c1[icz]*values_c[i_c] +
-                    c2[icx]*c1[icy]*c1[icz]*values_c[i_c+dx_c] +
-                    c1[icx]*c2[icy]*c1[icz]*values_c[i_c     +dy_c] +
-                    c2[icx]*c2[icy]*c1[icz]*values_c[i_c+dx_c+dy_c] +
-                    c1[icx]*c1[icy]*c2[icz]*values_c[i_c          +dz_c] +
-                    c2[icx]*c1[icy]*c2[icz]*values_c[i_c+dx_c     +dz_c] +
-                    c1[icx]*c2[icy]*c2[icz]*values_c[i_c     +dy_c+dz_c] +
-                    c2[icx]*c2[icy]*c2[icz]*values_c[i_c+dx_c+dy_c+dz_c]);
-                if (positive_ && (values_f[i_f] < 0)) {
-		  WARNING("ProlongLinear::apply_()", "Reverting to linear");
-                  // revert to linear
-                  int icc = i_c + (icx/2)*dx_c + (icy/2)*dy_c + (icz/2)*dz_c;
-                  values_f[i_f] = values_c[icc];          
-                }
-              }
-            }
-          }
-        }
+      for (int iy_f = 0; iy_f<ny_f; iy_f++) {
+
+	int iy_c = ((iy_f+1) >> 1) - 1;
+	iy_c += (iy_f==0) ? +1 : (iy_f < ny_f-1) ? 0 : -1;
+
+	int wy[2] = { (0 < iy_f && iy_f < ny_f-1) ? 1 : 5,
+		      (0 < iy_f && iy_f < ny_f-1) ? 3 : -1 };
+
+	T wy0 = 0.25*wy[ iy_f&1];
+	T wy1 = 0.25*wy[~iy_f&1];
+
+	for (int ix_f = 0; ix_f<nx_f; ix_f++) {
+
+	  int ix_c = ((ix_f+1) >> 1) - 1;
+	  ix_c += (ix_f==0) ? +1 : (ix_f < nx_f-1) ? 0 : -1;
+
+	  int wx[2] = { (0 < ix_f && ix_f < nx_f-1) ? 1 : 5,
+			(0 < ix_f && ix_f < nx_f-1) ? 3 : -1 };
+
+	  T wx0 = 0.25*wx[ ix_f&1];
+	  T wx1 = 0.25*wx[~ix_f&1];
+
+	  int i_c = (ix0_c+ix_c) + mx_c*( (iy0_c+iy_c) + my_c*(iz0_c+iz_c) );
+	  int i_f = (ix0_f+ix_f) + mx_f*( (iy0_f+iy_f) + my_f*(iz0_f+iz_f) );
+	  
+	  values_f[i_f] = wx0*wy0*wz0*values_c[i_c]
+	    +             wx1*wy0*wz0*values_c[i_c + dx_c ]
+	    +             wx0*wy1*wz0*values_c[i_c        + dy_c ]
+	    +             wx1*wy1*wz0*values_c[i_c + dx_c + dy_c ]
+	    +             wx0*wy0*wz1*values_c[i_c               + dz_c ]
+	    +             wx1*wy0*wz1*values_c[i_c + dx_c        + dz_c ]
+	    +             wx0*wy1*wz1*values_c[i_c        + dy_c + dz_c ]
+	    +             wx1*wy1*wz1*values_c[i_c + dx_c + dy_c + dz_c ];
+	}
       }
     }
-  }
-  return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
 
+    return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
+
+  }
 }
 
 //======================================================================

@@ -16,7 +16,8 @@ Testing {
    cycle_final = 20;
 #   time_final = 0.00134903668604035;
 #   time_final = 0.00134807696987889;
-    time_final = 0.0013708054024426;
+#    time_final = 0.0013708054024426;
+    time_final = 0.00137275213641413;
 }
 
 Mesh    { 

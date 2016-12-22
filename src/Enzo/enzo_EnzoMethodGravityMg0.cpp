@@ -228,15 +228,15 @@ EnzoMethodGravityMg0::EnzoMethodGravityMg0
   ix_ = field_descr->field_id("X");
   ic_ = field_descr->field_id("C");
   id_ = field_descr->field_id("D");
-  if (smooth == "jacobi") {
-    smooth_pre_ = new EnzoComputeSmoothJacobi 
-      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_pre);
-    smooth_coarse_ = new EnzoComputeSmoothJacobi 
-      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_coarse);
-    smooth_post_ = new EnzoComputeSmoothJacobi 
-      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_post);
+  // if (smooth == "jacobi") {
+  //   smooth_pre_ = new EnzoComputeSmoothJacobi 
+  //     (smooth_weight, smooth_count_pre);
+  //   smooth_coarse_ = new EnzoComputeSmoothJacobi 
+  //     (smooth_weight, smooth_count_coarse);
+  //   smooth_post_ = new EnzoComputeSmoothJacobi 
+  //     (smooth_weight, smooth_count_post);
 
-  }
+  // }
 }
 
 //----------------------------------------------------------------------

@@ -281,9 +281,9 @@ EnzoMethodGravityMlat::EnzoMethodGravityMlat
   id_ = field_descr->field_id("D");
 
 
-  if (smoother == "jacobi") {
-    smooth_ = new EnzoComputeSmoothJacobi (A_,ix_,ib_,ir_,id_);
-  }
+  // if (smoother == "jacobi") {
+  //   smooth_ = new EnzoComputeSmoothJacobi ();
+  // }
 }
 
 //----------------------------------------------------------------------

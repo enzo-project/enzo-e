@@ -164,7 +164,7 @@ void Problem::initialize_refine(Config * config,
       refine_list_.push_back( refine );
     } else {
       ERROR1("Problem::initialize_refine",
-	     "Cannot create Mesh type %s",name.c_str());
+	     "Cannot create Refine type %s",name.c_str());
     }
   }
 }

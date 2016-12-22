@@ -336,8 +336,7 @@ public: /// entry methods
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
   // EnzoSolverMg0
-  template <class T>
-  void p_solver_mg0_pre_smooth(CkReductionMsg * msg);
+  void p_solver_mg0_pre_smooth();
   template <class T>
   void p_solver_mg0_restrict_send(CkReductionMsg * msg);
   template <class T>
@@ -447,7 +446,7 @@ public: /// entry methods
   /// EnzoMethodGravityMg0
   
   template <class T>
-  void p_mg0_pre_smooth(CkReductionMsg * msg);
+  void p_mg0_pre_smooth(CkReductionMsg *);
   template <class T>
   void p_mg0_restrict_send(CkReductionMsg * msg);
   template <class T>

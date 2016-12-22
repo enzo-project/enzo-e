@@ -1,35 +1,31 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoComputeSmoothJacobi.hpp
+/// @file     enzo_EnzoSolverJacobi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2015-04-30 18:45:58
-/// @brief    [\ref Enzo] Declaration of the EnzoComputeSmoothJacobi class
+/// @brief    [\ref Enzo] Declaration of the EnzoSolverJacobi class
 
-#ifndef ENZO_ENZO_COMPUTE_SMOOTH_JACOBI_HPP
-#define ENZO_ENZO_COMPUTE_SMOOTH_JACOBI_HPP
+#ifndef ENZO_ENZO_SOLVER_JACOBI_HPP
+#define ENZO_ENZO_SOLVER_JACOBI_HPP
 
-class EnzoComputeSmoothJacobi : public Compute {
+class EnzoSolverJacobi : public Solver {
 
-  /// @class    EnzoComputeSmoothJacobi
+  /// @class    EnzoSolverJacobi
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] 
 
 public: // interface
 
   /// Constructor
-  EnzoComputeSmoothJacobi(Matrix * A,
-			  int ix,
-			  int ib,
-			  int ir,
-			  int id,
-			  double weight=1.0,
-			  int iter_max = 1) throw();
+  EnzoSolverJacobi(int id, int ir,
+		   double weight=1.0,
+		   int iter_max = 1) throw();
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoComputeSmoothJacobi);
+  PUPable_decl(EnzoSolverJacobi);
 
   /// Charm++ PUP::able migration constructor
-  EnzoComputeSmoothJacobi (CkMigrateMessage *m)
+  EnzoSolverJacobi (CkMigrateMessage *m)
     : A_(NULL),
       ix_(0),
       ib_(0),
@@ -43,7 +39,7 @@ public: // interface
   void pup (PUP::er &p)
   { 
     TRACEPUP;
-    Compute::pup(p);
+    Solver::pup(p);
 
     p | A_;
     p | ix_;
@@ -56,13 +52,18 @@ public: // interface
 
 public: // virtual functions
 
-  virtual void compute ( Block * block) throw(); 
+  /// Solve the linear system Ax = b
+  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+
+  /// Return the name of this solver
+  virtual std::string name () const
+  { return "jacobi"; }
 
 private: // functions
 
-  /// Implementation of compute() for given precision 
+  /// Implementation of solver() for given precision 
   template <typename T>
-  void compute_(Block * block);
+  void apply_(Block * block);
 
 private: // attributes
 
@@ -91,5 +92,5 @@ private: // attributes
 
 };
 
-#endif /* ENZO_ENZO_COMPUTE_SMOOTH_JACOBI_HPP */
+#endif /* ENZO_ENZO_SOLVER_JACOBI_HPP */
 

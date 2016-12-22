@@ -46,6 +46,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverMg0 (CkMigrateMessage *m)
     :  A_(NULL),
+       smooth_(""),
        smooth_pre_(NULL),
        smooth_coarse_(NULL),
        smooth_post_(NULL),
@@ -77,6 +78,7 @@ public: // interface
     Solver::pup(p);
 
     p | A_;
+    p | smooth_;
     p | smooth_pre_;
     p | smooth_coarse_;
     p | smooth_post_;
@@ -164,14 +166,17 @@ protected: // attributes
   /// Matrix
   Matrix * A_;
 
+  /// Smoother name
+  std::string smooth_;
+  
   /// Pre-smoother
-  Compute * smooth_pre_;
+  Solver * smooth_pre_;
 
   /// Coarse smoother
-  Compute * smooth_coarse_;
+  Solver * smooth_coarse_;
 
   /// Post smoother
-  Compute * smooth_post_;
+  Solver * smooth_post_;
 
   /// Restriction
   Restrict * restrict_;

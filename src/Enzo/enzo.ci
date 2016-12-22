@@ -64,7 +64,7 @@ module enzo {
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;
   PUPable EnzoComputeAcceleration;
-  PUPable EnzoComputeSmoothJacobi;
+  PUPable EnzoSolverJacobi;
   PUPable EnzoComputeCicInterp;
 
   PUPable EnzoMatrixLaplace;
@@ -161,8 +161,7 @@ module enzo {
 
     // EnzoSolverMg0
     
-    template <class T>
-    entry void p_solver_mg0_pre_smooth(CkReductionMsg *msg);
+    entry void p_solver_mg0_pre_smooth();
     template <class T>
     entry void p_solver_mg0_restrict_send(CkReductionMsg *msg);
     template <class T>
@@ -337,10 +336,6 @@ module template_defs {
 
    // EnzoSolverMg0
    
-   extern entry void EnzoBlock p_solver_mg0_pre_smooth<float>(CkReductionMsg *);
-   extern entry void EnzoBlock p_solver_mg0_pre_smooth<double>(CkReductionMsg *);
-   extern entry void EnzoBlock p_solver_mg0_pre_smooth<long double>(CkReductionMsg *);
-
    extern entry void EnzoBlock p_solver_mg0_restrict_send<float>();
    extern entry void EnzoBlock p_solver_mg0_restrict_send<double>();
    extern entry void EnzoBlock p_solver_mg0_restrict_send<long double>();

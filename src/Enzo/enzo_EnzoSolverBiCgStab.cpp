@@ -565,6 +565,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 	  }
 	}
       }
+      
     } else {
       for (int iz=0; iz<mz_; iz++) {
 	for (int iy=0; iy<my_; iy++) {

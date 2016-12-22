@@ -145,6 +145,7 @@ void Block::compute_exit_ ()
 void Block::refresh_enter (int callback, Refresh * refresh) 
 {
   TRACE_CONTROL("refresh_enter");
+
   set_refresh(refresh);
 
   // Update refresh object for the Block
@@ -169,6 +170,8 @@ void Block::refresh_exit_()
 
 void Block::control_sync (int entry_point, int sync, int id)
 {
+  TRACE_CONTROL("control_sync()");
+  
 #ifdef DEBUG_CONTROL
   { char buffer[50];
     sprintf (buffer,"control_sync %d %d",sync,id);
@@ -202,6 +205,8 @@ void Block::control_sync (int entry_point, int sync, int id)
 
 void Block::control_sync_neighbor_(int entry_point, int phase)
 {
+  TRACE_CONTROL("control_sync_neighbor");
+  
   if ( ! is_leaf() ) {
 
     CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
@@ -233,6 +238,8 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
 void Block::control_sync_face_(int entry_point, int phase)
 {
 
+  TRACE_CONTROL("control_sync_face");
+
   const int min_face_rank = 0;
 
   ItFace it_face = this->it_face(min_face_rank,index_);
@@ -263,6 +270,12 @@ void Block::control_sync_count_ (int entry_point, int phase, int count)
 
   // max_sync reached: continue and reset counter
 
+#ifdef DEBUG_CONTROL
+  CkPrintf ("DEBUG_CONTROL %s entry %d control_sync_count %d > 0 && %d >= %d\n",
+	    name().c_str(),entry_point,max_sync_[phase] ,count_sync_[phase], max_sync_[phase]);
+  fflush(stdout);
+#endif
+  
   if (max_sync_[phase] > 0 && count_sync_[phase] >= max_sync_[phase]) {
 
     max_sync_[phase] = 0;

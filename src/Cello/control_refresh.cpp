@@ -18,8 +18,8 @@
 
 #ifdef DEBUG_REFRESH
 #  define TRACE_REFRESH(msg) \
-  printf ("%d %s:%d %p TRACE_REFRESH %s\n",CkMyPe(),	\
-	  __FILE__,__LINE__,this,msg);			\
+  printf ("%d %s:%d %s TRACE_REFRESH %s\n",CkMyPe(),	\
+	  __FILE__,__LINE__,name().c_str(),msg);	\
   fflush(stdout);
 #else
 #  define TRACE_REFRESH(msg) /* NOTHING */
@@ -49,6 +49,7 @@ void Block::refresh_begin_()
     if (data()->any_particles())
       refresh_load_particle_faces_ (refresh);
   }
+  TRACE_REFRESH("calling control_sync p_refresh_exit()");
   control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
 }
 
@@ -154,6 +155,9 @@ void Block::refresh_load_field_face_
 
 void Block::p_refresh_store (MsgRefresh * msg)
 {
+
+  TRACE_REFRESH("p_refresh_store()");
+  
   performance_start_(perf_refresh_store);
 
 #ifdef DEBUG_REFRESH
@@ -172,6 +176,8 @@ void Block::p_refresh_store (MsgRefresh * msg)
 void Block::refresh_load_particle_faces_ (Refresh * refresh)
 {
 
+  TRACE_REFRESH("refresh_load_particle_faces()");
+  
   const int rank = this->rank();
 
   const int npa = (rank == 1) ? 4 : ((rank == 2) ? 4*4 : 4*4*4);
@@ -278,6 +284,8 @@ int Block::particle_create_array_neighbors_
  ParticleData * particle_list[],
  Index index_list[])
 { 
+  TRACE_REFRESH("particle_create_array_neighbors()");
+
   const int rank = this->rank();
   const int level = this->level();
 

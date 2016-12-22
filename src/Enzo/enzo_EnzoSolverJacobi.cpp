@@ -1,9 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoComputeSmoothJacobi.cpp
+/// @file     enzo_EnzoSolverJacobi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-10-27 22:37:41
-/// @brief    Implements the EnzoComputeSmoothJacobi class
+/// @brief    Implements the EnzoSolverJacobi class
 
 #include "cello.hpp"
 
@@ -29,37 +29,42 @@
 
 //----------------------------------------------------------------------
 
-EnzoComputeSmoothJacobi::EnzoComputeSmoothJacobi
-( Matrix * A, int ix, int ib, int ir, int id, 
-  double weight, int iter_max) throw()
-  : A_ (A),
-    ix_ (ix),
-    ib_ (ib),
+EnzoSolverJacobi::EnzoSolverJacobi
+( int id, int ir, double weight, int iter_max) throw()
+  : A_ (NULL),
+    ix_ (-1),
+    ib_ (-1),
     ir_ (ir),
     id_ (id),
     w_(weight),
     n_(iter_max)
 {
+  //  CkPrintf ("%d DEBUG_SMOOTHER %p ix_=%d\n",__LINE__,this,ix_);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoComputeSmoothJacobi::compute ( Block * block) throw()
+void EnzoSolverJacobi::apply
+( Matrix * A, int ix, int ib, Block * block) throw()
 {
+  A_ = A;
+  ix_ = ix;
+  ib_ = ib;
+  
   Field field = block->data()->field();
   if (field.precision(0) == precision_single) {
-    compute_<float>(block);
+    apply_<float>(block);
   } else if (field.precision(0) == precision_double) {
-    compute_<double>(block);
+    apply_<double>(block);
   } else if (field.precision(0) == precision_quadruple) {
-    compute_<long double>(block);
+    apply_<long double>(block);
   }
 }
 
 //----------------------------------------------------------------------
 
 template <typename T>
-void EnzoComputeSmoothJacobi::compute_(Block * block)
+void EnzoSolverJacobi::apply_(Block * block)
 {
   Field field = block->data()->field();
 
@@ -109,16 +114,22 @@ void EnzoComputeSmoothJacobi::compute_(Block * block)
     T * D = (T*) field.values(id_);
     T * R = (T*) field.values(ir_);
     T * X = (T*) field.values(ix_);
-
+    double rr=0,dd=0,xx=0;
     for (int iz=iz0; iz<mz-iz0; iz++) {
       for (int iy=iy0; iy<my-iy0; iy++) {
 	for (int ix=ix0; ix<mx-ix0; ix++) {
 	  int i = ix + mx*(iy + my*iz);
 	  X[i] += R[i] / D[i];
+	  rr += R[i]*R[i];
+	  dd += D[i]*D[i];
+	  xx += X[i]*X[i];
 	}
       }
     }
 
+    //    CkPrintf ("DEBUG_SMOOTH %s rr,dd,xx %g %g %g\n",block->name().c_str(),rr,dd,xx);
+    //    CkPrintf ("%d DEBUG_SMOOTHER %p ix_=%d\n",__LINE__,this,ix_);
+    
 #ifdef DEBUG_SMOOTH
     printf ("%s:%d %s DEBUG_SMOOTH  Done with SmoothJacobi\n",
 	    __FILE__,__LINE__,block->name().c_str());

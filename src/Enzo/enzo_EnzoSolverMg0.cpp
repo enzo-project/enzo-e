@@ -131,11 +131,31 @@
 
 #ifdef DEBUG_MG
 #   define TRACE_MG(block,msg)						\
-  CkPrintf ("%d %s %s\n",						\
+  CkPrintf ("%d %s TRACE_MG %s\n",					\
 	    CkMyPe(),(block != NULL) ? block->name().c_str() : "root",msg); \
   fflush(stdout);
+
+#define DEBUG_PRINT_XX							\
+  {									\
+    Data * data = enzo_block->data();					\
+    Field field = data->field();					\
+    T * X = (T*) field.values(ix_);					\
+    double xx=0;							\
+    for (int iz=0; iz<mz_; iz++) {					\
+      for (int iy=0; iy<my_; iy++) {					\
+	for (int ix=0; ix<mx_; ix++) {					\
+	  int i = ix + mx_*(iy + my_*iz);				\
+	  xx+=X[i]*X[i];						\
+	}								\
+      }									\
+    }									\
+    CkPrintf ("%d DEBUG_SOLVER %s ix=%d xx=%g\n",__LINE__,enzo_block->name().c_str(),ix_); \
+  }
+
 #else
 #   define TRACE_MG(block,msg) /*  ... */
+
+#   define DEBUG_PRINT_XX /* ... */
 #endif
 
 // //----------------------------------------------------------------------
@@ -177,17 +197,11 @@ EnzoSolverMg0::EnzoSolverMg0
     nx_(0),ny_(0),nz_(0),
     gx_(0),gy_(0),gz_(0)
 
-  // [*]
+    // [*]
 {
   EnzoBlock * null_block = NULL;
   TRACE_MG(null_block,"EnzoSolverMg0()");
   
-  if (max_level_ > 0) {
-    WARNING1 ("EnzoSolverMg0::EnzoSolverMg0()",
-	     "Solver Mg0 is for root-level solves only: "
-	     "changing max_level_ from %d to 0",max_level_);
-    max_level_ = 0;
-  }
   if (min_level_ > 0) {
     ERROR1 ("EnzoSolverMg0::EnzoSolverMg0()",
 	    "Solver Mg0 requires min_level = %d to be <= 0",
@@ -202,15 +216,16 @@ EnzoSolverMg0::EnzoSolverMg0
   ir_ = field_descr->field_id("R");
   ic_ = field_descr->field_id("C");
   id_ = field_descr->field_id("D");
-  if (smooth == "jacobi") {
-    smooth_pre_ = new EnzoComputeSmoothJacobi 
-      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_pre);
-    smooth_coarse_ = new EnzoComputeSmoothJacobi 
-      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_coarse);
-    smooth_post_ = new EnzoComputeSmoothJacobi 
-      (A_,ix_,ib_,ir_,id_, smooth_weight, smooth_count_post);
 
+  if (smooth == "jacobi") {
+    smooth_pre_ = new EnzoSolverJacobi
+      (id_, ir_, smooth_weight, smooth_count_pre);
+    smooth_coarse_ = new EnzoSolverJacobi
+      (id_, ir_, smooth_weight, smooth_count_coarse);
+    smooth_post_ = new EnzoSolverJacobi
+      (id_, ir_, smooth_weight, smooth_count_post);
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -246,6 +261,7 @@ void EnzoSolverMg0::apply
   ix_ = ix;
   ib_ = ib;
 
+  block->set_solver(this);
   Field field = block->data()->field();
 
   field.size           (&nx_,&ny_,&nz_);
@@ -299,12 +315,9 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   // R = B ( residual with X = 0 )
   // C = 0
 
-  const int ix0 = 0;
-  const int iy0 = 0;
-  const int iz0 = 0;
-  for (int iz=iz0; iz<mz_-iz0; iz++) {
-    for (int iy=iy0; iy<my_-iy0; iy++) {
-      for (int ix=ix0; ix<mx_-ix0; ix++) {
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
 	int i = ix + mx_*(iy + my_*iz);
 	X[i] = 0.0;
 	R[i] = B[i];
@@ -314,8 +327,9 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   }
 
   // start the MG V-cycle with the root level
-  if (enzo_block->level() == max_level_)
+  if (enzo_block->level() == max_level_) {
     begin_cycle_<T>(enzo_block);
+  }
 
 }
 
@@ -335,25 +349,30 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
   TRACE_MG(enzo_block,"EnzoSolverMg0::begin_cycle()");
   const int level = enzo_block->level();
 
-  CkPrintf ("level  %d %d %d\n",min_level_,level,max_level_);
-  
   if (is_converged_(enzo_block)) {
 
+    TRACE_MG(enzo_block,"converged");
     exit_solver_<T>(enzo_block, return_converged);
 
   } else if (level == min_level_) {
     // TODO REFRESH X
+    TRACE_MG(enzo_block,"calling coarse solve");
     solve_coarse_<T>(enzo_block);
 
   } else {
 
+    TRACE_MG(enzo_block,"calling smoother");
+
     const Data * data = enzo_block->data();
 
     Refresh refresh (4,0,neighbor_level, sync_face);
-    refresh.add_field (ix_);
+    refresh.add_all_fields(enzo_block->data()->field().field_count());
 
+    refresh.set_active(true);
+
+    //    enzo_block->set_solver(this);
     enzo_block->refresh_enter
-      (CkIndex_EnzoBlock::p_solver_mg0_pre_smooth<T>(NULL),&refresh);
+      (CkIndex_EnzoBlock::p_solver_mg0_pre_smooth(),&refresh);
     // // Skip refresh
     // pre_smooth<T>(enzo_block);
 
@@ -362,18 +381,25 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoBlock::p_solver_mg0_pre_smooth(CkReductionMsg * msg)
+void EnzoBlock::p_solver_mg0_pre_smooth()
 /// [*]
 {
   TRACE_MG(this,"EnzoBlock::solver_mg0_pre_smooth()");
   
-  delete msg;
-
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  solver -> pre_smooth<T>(this);
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+  Field field = data()->field();
+  int precision = field.precision(field.field_id("density")); // assuming 
+  if      (precision == precision_single)    
+    solver->pre_smooth<float>(enzo_block);
+  else if (precision == precision_double)    
+    solver->pre_smooth<double>(enzo_block);
+  else if (precision == precision_quadruple) 
+    solver->pre_smooth<long double>(enzo_block);
+  else 
+    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
@@ -391,14 +417,15 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
   Data * data = enzo_block->data();
   Field field = data->field();
   T * X = (T*) field.values(ix_);
-  smooth_pre_->compute(enzo_block);
+
+  smooth_pre_->apply(A_,ix_,ib_,enzo_block);
 
   Refresh refresh (4,0,neighbor_level, sync_face);
-  refresh.add_field (ix_);
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
 
   refresh.set_active(true);
-  refresh.print();
 
+  //  enzo_block->set_solver(this);
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_mg0_restrict_send<T>(NULL),&refresh);
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -442,7 +469,6 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   Data * data = enzo_block->data();
   Field field = data->field();
-  T * X = (T*) field.values(ix_);
 
   A_->residual(ir_, ib_, ix_, enzo_block);
 
@@ -476,7 +502,7 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   delete field_face;
 
-// Create a FieldMsg for sending data to parent
+  // Create a FieldMsg for sending data to parent
   // (note: charm messages not deleted on send; are deleted on receive)
 
   FieldMsg * field_message  = new (narray) FieldMsg;
@@ -497,6 +523,8 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
   //  </COMMON CODE>
 
   // Send field_message to parent
+  //  enzo_block->set_solver(this);
+
   CkCallback (CkIndex_EnzoBlock::p_solver_mg0_restrict_recv<T>(NULL), 
 	      CkArrayIndexIndex(index_parent),
 	      enzo_block->proxy_array()).send(field_message);
@@ -542,6 +570,7 @@ void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * field_message)
     static_cast<EnzoSolverMg0*> (this->solver());
 
   // continue with EnzoSolverMg0
+
   solver -> restrict_recv<T>(this);
 }
 
@@ -576,7 +605,7 @@ void EnzoSolverMg0::solve_coarse_(EnzoBlock * enzo_block) throw()
   TRACE_MG(enzo_block,"EnzoSolverMg0::solver_coarse()");
 
   /// Apply smoother
-  smooth_coarse_->compute(enzo_block);
+  smooth_coarse_->apply(A_,ix_,ib_,enzo_block);
 
   if (enzo_block->level() < max_level_) {
 
@@ -644,7 +673,7 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
     field_message->ic3[1] = ic3[1];
     field_message->ic3[2] = ic3[2];
 
-  //  </COMMON CODE>
+    //  </COMMON CODE>
 
     CkCallback (CkIndex_EnzoBlock::p_solver_mg0_prolong_recv<T>(NULL), 
 		CkArrayIndexIndex(index_child),
@@ -721,8 +750,9 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 
   Refresh refresh (4,0,neighbor_level, sync_face);
 
-    refresh.add_field (ix_);
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
 
+  //  enzo_block->set_solver(this);
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_mg0_post_smooth<T>(NULL),&refresh);
 }
@@ -755,7 +785,7 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
 {
   TRACE_MG(enzo_block,"EnzoSolverMg0::post_smooth()");
 
-  smooth_post_->compute(enzo_block);
+  smooth_post_->apply(A_,ix_,ib_,enzo_block);
 
   if (enzo_block->level() < max_level_) {
 
@@ -814,6 +844,7 @@ void EnzoSolverMg0::exit_solver_
 bool EnzoSolverMg0::is_converged_(EnzoBlock * enzo_block) const
 /// [*]
 {
+  TRACE_MG(enzo_block,"EnzoSolverMg0::is_converged");
   return (enzo_block->mg_iter() >= iter_max_);
 }
 
