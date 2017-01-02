@@ -352,7 +352,7 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
   if (is_converged_(enzo_block)) {
 
     TRACE_MG(enzo_block,"converged");
-    exit_solver_<T>(enzo_block, return_converged);
+    // implicitly exit solver
 
   } else if (level == min_level_) {
     // TODO REFRESH X
@@ -745,8 +745,14 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
   T * X = (T*) field.values(ix_);
   T * C = (T*) field.values(ic_);
 
-  zaxpy_(X,1.0,X,C);
-
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
+	X[i] += C[i];
+      }
+    }
+  }
 
   Refresh refresh (4,0,neighbor_level, sync_face);
 
@@ -815,7 +821,8 @@ void EnzoSolverMg0::end_cycle_(EnzoBlock * enzo_block) throw()
 
   if (is_converged_(enzo_block)) {
 
-    exit_solver_<T>(enzo_block, return_converged);
+    //    exit_solver_<T>(enzo_block, return_converged);
+    // implicitly exit solver
 
   }
 
@@ -826,19 +833,6 @@ void EnzoSolverMg0::end_cycle_(EnzoBlock * enzo_block) throw()
   }
 }
 
-//----------------------------------------------------------------------
-
-template <class T>
-void EnzoSolverMg0::exit_solver_ 
-( EnzoBlock * enzo_block, int retval ) throw ()
-/// 
-/// [ ] exit solver
-///
-///      acceleration.compute(X)
-{
-  TRACE_MG(enzo_block,"EnzoSolverMg0::exit_solver_");
-}
-
 //======================================================================
 
 bool EnzoSolverMg0::is_converged_(EnzoBlock * enzo_block) const
@@ -846,22 +840,6 @@ bool EnzoSolverMg0::is_converged_(EnzoBlock * enzo_block) const
 {
   TRACE_MG(enzo_block,"EnzoSolverMg0::is_converged");
   return (enzo_block->mg_iter() >= iter_max_);
-}
-
-//----------------------------------------------------------------------
-
-template <class T>
-void EnzoSolverMg0::zaxpy_ 
-(T * Z, double a, const T * X, const T * Y) const throw()
-{
-  for (int iz=0; iz<mz_; iz++) {
-    for (int iy=0; iy<my_; iy++) {
-      for (int ix=0; ix<mx_; ix++) {
-	int i = ix + mx_*(iy + my_*iz);
-	Z[i] = a * X[i] + Y[i];
-      }
-    }
-  }
 }
 
 //======================================================================

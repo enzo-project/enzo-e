@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoSolverBiCgStab.hpp
-/// @author   James Bordner (jobordner@ucsd.edu) 
 /// @author   Daniel R. Reynolds (reynolds@smu.edu)
+/// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2014-10-21 17:25:40
 /// @brief    [\ref Enzo] Declaration of EnzoSolverBiCgStab
 ///
@@ -160,7 +160,7 @@ public: // interface
   virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
 
   /// Name to call the solver within Enzo-P
-  virtual std::string name() throw()
+  virtual std::string name() const
   { return "bicgstab"; }
 
   /// Projects RHS and sets initial vectors R, R0, and P

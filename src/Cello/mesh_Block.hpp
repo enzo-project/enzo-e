@@ -861,11 +861,11 @@ protected: // functions
 
   /// Set the current refresh object
   void set_refresh (Refresh * refresh) 
-  {  refresh_ = *refresh; };
+  {  refresh_.push_back(*refresh); };
 
   /// Return the currently-active Refresh object
   Refresh * refresh () throw()
-  {  return &refresh_;  }
+  {  return &refresh_.back();  }
 
 
   void print () const;
@@ -966,7 +966,7 @@ protected: // attributes
 
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
-  Refresh refresh_;
+  std::vector<Refresh> refresh_;
 
 };
 

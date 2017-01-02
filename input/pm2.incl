@@ -29,20 +29,21 @@
 	"potential",
 	"density_total",
 	"acceleration_x",
-	"acceleration_y"
+	"acceleration_y",
+        "B"
       ] ;
 
       # BiCGStab fields
-       list += [ 
-                "gravity_bicgstab_B",
-                "gravity_bicgstab_X",
-                "gravity_bicgstab_R",
-                "gravity_bicgstab_R0",
-                "gravity_bicgstab_P",
-                "gravity_bicgstab_Y",
-                "gravity_bicgstab_V",
-                "gravity_bicgstab_Q",
-                "gravity_bicgstab_U"
+       list += [
+                "bicgstab_B",
+                "bicgstab_X",
+                "bicgstab_R",
+                "bicgstab_R0",
+                "bicgstab_P",
+                "bicgstab_Y",
+                "bicgstab_V",
+                "bicgstab_Q",
+                "bicgstab_U"
                ];
 
       # CG solver fields
@@ -79,7 +80,7 @@
 
       # list of methods to apply and in what order
  
-      list = ["pm_deposit", "gravity_bicgstab", "pm_update"];
+      list = ["pm_deposit", "gravity", "pm_update"];
 
       ppm {
 
@@ -93,12 +94,19 @@
 
          dual_energy = false;
      }
-     gravity_bicgstab {
-        iter_max = 100;
-        res_tol  = 1e-3;
+     gravity {
+        solver = "gravity";
      }
    }
 
+   Solver {
+      list = ["gravity"];
+      gravity {
+         type = "bicgstab";
+         iter_max = 100;
+         res_tol  = 1e-3;
+      }
+   }
    Initial {
       list = ["pm"];
       value {

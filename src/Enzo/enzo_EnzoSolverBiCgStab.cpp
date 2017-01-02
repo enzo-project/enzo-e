@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoSolverBiCgStab.cpp
-/// @author   James Bordner (jobordner@ucsd.edu)
 /// @author   Daniel R. Reynolds (reynolds@smu.edu)
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2014-10-23 16:19:06
 /// @brief    Implements the EnzoSolverBiCgStab class
 //
@@ -552,8 +552,6 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     
     /// set B = -h^2 * 4 * PI * G * density
 
-    long double xsum = 0.0;
-   
     if (first_call_) {
 
       for (int iz=0; iz<mz_; iz++) {
@@ -561,17 +559,6 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 	  for (int ix=0; ix<mx_; ix++) {
 	    int i = ix + mx_*(iy + my_*iz);
 	    X[i] = 0.0;
-	    xsum += X[i];
-	  }
-	}
-      }
-      
-    } else {
-      for (int iz=0; iz<mz_; iz++) {
-	for (int iy=0; iy<my_; iy++) {
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    xsum += X[i];
 	  }
 	}
       }

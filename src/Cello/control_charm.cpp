@@ -150,7 +150,7 @@ void Block::refresh_enter (int callback, Refresh * refresh)
 
   // Update refresh object for the Block
 
-  refresh_.set_callback(callback);
+  refresh_.back().set_callback(callback);
 
   refresh_begin_();
 }
@@ -163,7 +163,8 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
-  control_sync(refresh_.callback(), refresh_.sync_type());
+  control_sync(refresh_.back().callback(), refresh_.back().sync_type());
+  refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
@@ -275,7 +276,7 @@ void Block::control_sync_count_ (int entry_point, int phase, int count)
 	    name().c_str(),entry_point,max_sync_[phase] ,count_sync_[phase], max_sync_[phase]);
   fflush(stdout);
 #endif
-  
+
   if (max_sync_[phase] > 0 && count_sync_[phase] >= max_sync_[phase]) {
 
     max_sync_[phase] = 0;

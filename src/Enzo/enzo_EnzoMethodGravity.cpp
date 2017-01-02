@@ -65,8 +65,18 @@ void EnzoMethodGravity::compute(Block * block) throw()
   // Solve the linear system
   field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
 
+  // May exit before solve is done...
   solver_->apply (A, ix, ib, block);
+
+  // BUG: acceleration computed before Solver completes
   
+  /// compute acceleration fields from potential
+  int order;
+  EnzoComputeAcceleration compute_acceleration(field.field_descr(),
+					       block->rank(), order=4);
+  compute_acceleration.compute(block);
+
+  // wait for all Blocks before continuing
   block->compute_done();
 }
 

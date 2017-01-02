@@ -150,16 +150,10 @@ protected: // methods
 
   template <class T>
   void end_cycle_(EnzoBlock * enzo_block) throw();
-  template <class T>
-  void exit_solver_(EnzoBlock * enzo_block, int retval) throw();
   
   void monitor_output_(EnzoBlock * enzo_block) throw();
 
   bool is_converged_(EnzoBlock * enzo_block) const;
-
-  template <class T>
-  void zaxpy_ (T * Z, double a, const T * X, const T * Y) const throw();
-
 
 protected: // attributes
 

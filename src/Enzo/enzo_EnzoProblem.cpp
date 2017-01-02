@@ -347,69 +347,6 @@ Method * EnzoProblem::create_method_
       (field_descr, solver,
        enzo_config->method_gravity_grav_const);
       
-  } else if (name == "gravity_cg") {
-    const bool is_singular = is_periodic();
-    int rank = config->mesh_root_rank;
-    FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
-    method = new EnzoMethodGravityCg
-      (field_descr, rank,
-       enzo_config->method_gravity_cg_grav_const,
-	 enzo_config->method_gravity_cg_iter_max,
-	 enzo_config->method_gravity_cg_res_tol,
-	 enzo_config->method_gravity_cg_monitor_iter,
-	 is_singular,
-	 enzo_config->method_gravity_cg_diag_precon );
-  } else if (name == "gravity_bicgstab") {
-    const bool is_singular = is_periodic();
-    int rank = config->mesh_root_rank;
-    FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
-    method = new EnzoMethodGravityBiCGStab
-      (field_descr_ptr, rank,
-       enzo_config->method_gravity_bicgstab_grav_const,
-       enzo_config->method_gravity_bicgstab_iter_max,
-       enzo_config->method_gravity_bicgstab_res_tol,
-       enzo_config->method_gravity_bicgstab_monitor_iter,
-       is_singular,
-       enzo_config->method_gravity_bicgstab_diag_precon );
-  } else if (name == "gravity_mg") {
-    const bool is_singular = is_periodic();
-    int rank = config->mesh_root_rank;
-    Restrict * restrict = 
-      create_restrict_(enzo_config->method_gravity_mg_restrict,config);
-    Prolong * prolong = 
-      create_prolong_(enzo_config->method_gravity_mg_prolong,config);
-    std::string type = enzo_config->method_gravity_mg_type;
-    if (type == "mlat") {
-      method = new EnzoMethodGravityMlat
-	(field_descr, rank,
-	 enzo_config->method_gravity_mg_grav_const,
-	 enzo_config->method_gravity_mg_iter_max,
-	 enzo_config->method_gravity_mg_res_tol,
-	 enzo_config->method_gravity_mg_monitor_iter,
-	 enzo_config->method_gravity_mg_smooth,
-	 is_singular,  restrict,  prolong,
-	 enzo_config->method_gravity_mg_min_level,
-	 enzo_config->method_gravity_mg_max_level);
-    } else if (type == "mg0") {
-      method = new EnzoMethodGravityMg0
-	(field_descr, rank,
-	 enzo_config->method_gravity_mg_grav_const,
-	 enzo_config->method_gravity_mg_iter_max,
-	 enzo_config->method_gravity_mg_monitor_iter,
-	 enzo_config->method_gravity_mg_smooth,
-	 enzo_config->method_gravity_mg_smooth_weight,
-	 enzo_config->method_gravity_mg_smooth_pre,
-	 enzo_config->method_gravity_mg_smooth_coarse,
-	 enzo_config->method_gravity_mg_smooth_post,
-	 is_singular,  restrict,  prolong,
-	 enzo_config->method_gravity_mg_min_level,
-	 enzo_config->method_gravity_mg_max_level);
-    } else {
-      ERROR1 ("EnzoProblem::create_method",
-	       "Unknown gravity_mg type %s",
-	       type.c_str());
-	       
-    }
   } else {
     method = Problem::create_method_ 
       (name,config, index_method,field_descr,particle_descr);
@@ -438,25 +375,7 @@ Prolong * EnzoProblem::create_prolong_
 
   Prolong * prolong = 0;
 
-  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
-
-  if (type == "enzo") {
-    
-    prolong = new EnzoProlong (enzo_config->interpolation_method);
-
-  } else if (type == "MC1") {
-    
-    prolong = new EnzoProlongMC1 (enzo_config->interpolation_method);
-
-  } else if (type == "poisson") {
-    
-    prolong = new EnzoProlongPoisson;
-
-  } else {
-
-    prolong = Problem::create_prolong_(type,config);
-
-  }
+  prolong = Problem::create_prolong_(type,config);
 
   return prolong;
   

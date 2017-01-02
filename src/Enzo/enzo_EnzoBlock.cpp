@@ -180,9 +180,7 @@ EnzoBlock::EnzoBlock
     dt(dt_),
     SubgridFluxes(0),
     mg_iter_(0),
-    mg_sync_(),
-    solver_mg_iter_(0),
-    solver_mg_sync_()
+    mg_sync_()
 {
   initialize_enzo_();
   initialize();
@@ -253,8 +251,6 @@ void EnzoBlock::pup(PUP::er &p)
 
   p | mg_sync_;
   p | mg_iter_;
-  p | solver_mg_sync_;
-  p | solver_mg_iter_;
 
   TRACE ("END EnzoBlock::pup()");
 

@@ -70,39 +70,9 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-  // EnzoMethodGravity
-  method_gravity_grav_const(0.0),
-  method_gravity_solver(""),
-  // EnzoMethodGravityCg
-  method_gravity_cg_iter_max(0),
-  method_gravity_cg_res_tol(0.0),
-  method_gravity_cg_grav_const(0.0),
-  method_gravity_cg_diag_precon(false),
-  method_gravity_cg_monitor_iter(0),
-  // EnzoMethodGravityBiCGStab
-  method_gravity_bicgstab_iter_max(0),
-  method_gravity_bicgstab_res_tol(0.0),
-  method_gravity_bicgstab_grav_const(0.0),
-  method_gravity_bicgstab_diag_precon(false),
-  method_gravity_bicgstab_monitor_iter(0),
-  // EnzoMethodGravityMlat
-  // EnzoMethodGravityMg0
-  method_gravity_mg_type(""),
-  method_gravity_mg_iter_max(0),
-  method_gravity_mg_res_tol(0.0),
-  method_gravity_mg_grav_const(0.0),
-  method_gravity_mg_monitor_iter(0),
-  method_gravity_mg_smooth(""),
-  method_gravity_mg_smooth_weight(0.0),
-  method_gravity_mg_smooth_pre(0),
-  method_gravity_mg_smooth_coarse(0),
-  method_gravity_mg_smooth_post(0),
-  method_gravity_mg_restrict(""),
-  method_gravity_mg_prolong(""),
-  method_gravity_mg_min_level(0),
-  method_gravity_mg_max_level(0),
-  // EnzoMethodPm
+  // EnzoMethodPmDeposit
   method_pm_deposit_type(""),
+  // EnzoMethodPmUpdate
   method_pm_update_max_dt(0.0)
 {
   for (int i=0; i<3; i++) {
@@ -189,31 +159,6 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_gravity_grav_const;
   p | method_gravity_solver;
-
-  p | method_gravity_cg_grav_const;
-  p | method_gravity_cg_iter_max;
-  p | method_gravity_cg_res_tol;
-  p | method_gravity_cg_diag_precon;
-  p | method_gravity_cg_monitor_iter;
-
-  p | method_gravity_mg_type;
-  p | method_gravity_mg_iter_max;
-  p | method_gravity_mg_grav_const;
-  p | method_gravity_mg_res_tol;
-  p | method_gravity_mg_monitor_iter;
-  p | method_gravity_mg_smooth;
-  p | method_gravity_mg_smooth_weight;
-  p | method_gravity_mg_smooth_pre;
-  p | method_gravity_mg_smooth_coarse;
-  p | method_gravity_mg_smooth_post;
-  p | method_gravity_mg_restrict;
-  p | method_gravity_mg_prolong;
-
-  p | method_gravity_bicgstab_grav_const;
-  p | method_gravity_bicgstab_iter_max;
-  p | method_gravity_bicgstab_res_tol;
-  p | method_gravity_bicgstab_diag_precon;
-  p | method_gravity_bicgstab_monitor_iter;
 
   p | method_pm_deposit_type;
   p | method_pm_update_max_dt;
@@ -395,82 +340,6 @@ void EnzoConfig::read(Parameters * p) throw()
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","bicgstab");
 
-  method_gravity_cg_iter_max = p->value_integer
-    ("Method:gravity_cg:iter_max",100);
-
-  method_gravity_cg_grav_const = p->value_float
-    ("Method:gravity_cg:grav_const",6.67384e-8); // default: G (cgs)
-
-  method_gravity_cg_res_tol = p->value_float
-    ("Method:gravity_cg:res_tol",1e-6);
-
-  method_gravity_cg_diag_precon = p->value_logical
-    ("Method:gravity_cg:diag_precon",false);
-
-  method_gravity_cg_monitor_iter = p->value_integer
-    ("Method:gravity_cg:monitor_iter",1);
-
-
-  method_gravity_mg_type = p->value_string
-    ("Method:gravity_mg:type","unknown");
-
-  method_gravity_mg_iter_max = p->value_integer
-    ("Method:gravity_mg:iter_max",10);
-
-  method_gravity_mg_grav_const = p->value_float
-    ("Method:gravity_mg:grav_const",6.67384e-8); // default: G (cgs)
-
-  method_gravity_mg_res_tol = p->value_float
-    ("Method:gravity_mg:res_tol",1e-6);
-
-  method_gravity_mg_monitor_iter = p->value_integer
-    ("Method:gravity_mg:monitor_iter",1);
-
-  method_gravity_mg_smooth = p->value_string
-    ("Method:gravity_mg:smooth","jacobi");
-
-  method_gravity_mg_smooth_weight = p->value_float
-    ("Method:gravity_mg:smooth_weight",1.0);
-
-  method_gravity_mg_smooth_pre = p->value_integer
-    ("Method:gravity_mg:smooth_pre",1);
-
-  method_gravity_mg_smooth_coarse = p->value_integer
-    ("Method:gravity_mg:smooth_coarse",1);
-
-  method_gravity_mg_smooth_post = p->value_integer
-    ("Method:gravity_mg:smooth_post",1);
-
-  method_gravity_mg_restrict = p->value_string
-    ("Method:gravity_mg:restrict","linear");
-
-  method_gravity_mg_prolong = p->value_string
-    ("Method:gravity_mg:prolong","linear");
-
-  method_gravity_mg_min_level = p->value_integer
-    ("Method:gravity_mg:min_level",0);
-
-  method_gravity_mg_max_level = p->value_integer
-    ("Method:gravity_mg:max_level",mesh_max_level);
-
-
-  method_gravity_bicgstab_iter_max = p->value_integer
-    ("Method:gravity_bicgstab:iter_max",100);
-
-  method_gravity_bicgstab_grav_const = p->value_float
-    ("Method:gravity_bicgstab:grav_const",6.67384e-8); // default: G (cgs)
-
-  method_gravity_bicgstab_res_tol = p->value_float
-    ("Method:gravity_bicgstab:res_tol",1e-6);
-
-  method_gravity_bicgstab_diag_precon = p->value_logical
-    ("Method:gravity_bicgstab:diag_precon",false);
-
-  method_gravity_bicgstab_monitor_iter = p->value_integer
-    ("Method:gravity_bicgstab:monitor_iter",1);
-
-
-
   //======================================================================
 
 #ifdef CONFIG_USE_GRACKLE
@@ -648,37 +517,6 @@ void EnzoConfig::write(FILE * fp)
 	   method_gravity_grav_const);
   fprintf (fp,"method_gravity_solver = %s\n",
 	   method_gravity_solver);
-
-  // EnzoMethodGravityCg
-  fprintf (fp,"method_gravity_cg_iter_max = %d\n",method_gravity_cg_iter_max);
-  fprintf (fp,"method_gravity_cg_res_tol = %g\n",method_gravity_cg_res_tol);
-  fprintf (fp,"method_gravity_cg_grav_const = %g\n",method_gravity_cg_grav_const);
-  fprintf (fp,"method_gravity_cg_diag_precon = %s\n",method_gravity_cg_diag_precon?"true":"false");
-  fprintf (fp,"method_gravity_cg_monitor_iter = %d\n",method_gravity_cg_monitor_iter);
-
-  // EnzoMethodGravityBiCGStab
-  fprintf (fp,"method_gravity_bicgstab_iter_max = %d\n",method_gravity_bicgstab_iter_max);
-  fprintf (fp,"method_gravity_bicgstab_res_tol = %g\n",method_gravity_bicgstab_res_tol);
-  fprintf (fp,"method_gravity_bicgstab_grav_const = %g\n",method_gravity_bicgstab_grav_const);
-  fprintf (fp,"method_gravity_bicgstab_diag_precon = %s\n",method_gravity_bicgstab_diag_precon?"true":"false");
-  fprintf (fp,"method_gravity_bicgstab_monitor_iter = %d\n",method_gravity_bicgstab_monitor_iter);
-
-  // EnzoMethodGravityMlat
-  // EnzoMethodGravityMg0
-  //   std::string                method_gravity_mg_type;
-  fprintf (fp,"method_gravity_mg_iter_max = %d\n",method_gravity_mg_iter_max);
-  fprintf (fp,"method_gravity_mg_res_tol = %g\n",method_gravity_mg_res_tol);
-  fprintf (fp,"method_gravity_mg_grav_const = %g\n",method_gravity_mg_grav_const);
-  fprintf (fp,"method_gravity_mg_monitor_iter = %d\n",method_gravity_mg_monitor_iter);
-//   std::string                method_gravity_mg_smooth;
-  fprintf (fp,"method_gravity_mg_smooth_weight = %g\n",method_gravity_mg_smooth_weight);
-  fprintf (fp,"method_gravity_mg_smooth_pre = %d\n",method_gravity_mg_smooth_pre);
-  fprintf (fp,"method_gravity_mg_smooth_coarse = %d\n",method_gravity_mg_smooth_coarse);
-  fprintf (fp,"method_gravity_mg_smooth_post = %d\n",method_gravity_mg_smooth_post);
-  //   std::string                method_gravity_mg_restrict;
-  //   std::string                method_gravity_mg_prolong;
-  fprintf (fp,"method_gravity_mg_min_level = %d\n",method_gravity_mg_min_level);
-  fprintf (fp,"method_gravity_mg_max_level = %d\n",method_gravity_mg_max_level);
 
   // EnzoMethodPm
 
