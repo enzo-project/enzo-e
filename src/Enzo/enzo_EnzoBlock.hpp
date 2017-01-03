@@ -255,6 +255,11 @@ public: /// entry methods
 
   //--------------------------------------------------
 
+  /// Synchronize after potential solver before computing accelerations
+  void r_method_gravity_end(CkReductionMsg * msg);
+  
+  //--------------------------------------------------
+
   /// EnzoSolverCg entry method: DOT ==> refresh P
   template <class T>
   void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  

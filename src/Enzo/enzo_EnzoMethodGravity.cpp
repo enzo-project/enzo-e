@@ -68,15 +68,38 @@ void EnzoMethodGravity::compute(Block * block) throw()
   // May exit before solve is done...
   solver_->apply (A, ix, ib, block);
 
+  Refresh refresh (4,0,neighbor_leaf, sync_neighbor);
+  refresh.set_active(block->is_leaf());
+  refresh.add_all_fields(block->data()->field().field_count());
+  CkPrintf ("%s DEBUG_METHOD_GRAVITY calling refresh_enter()\n",
+	   block->name().c_str());
+  fflush(stdout);
+  block->refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
+{
+  CkPrintf ("%s DEBUG_METHOD_GRAVITY entering r_method_gravity_end()\n",
+	   name().c_str());
+
+  delete msg;
+  
   // BUG: acceleration computed before Solver completes
   
   /// compute acceleration fields from potential
   int order;
-  EnzoComputeAcceleration compute_acceleration(field.field_descr(),
-					       block->rank(), order=4);
-  compute_acceleration.compute(block);
+  EnzoComputeAcceleration compute_acceleration(data()->field().field_descr(),
+					       rank(), order=4);
+
+  EnzoMethodGravity * method = 
+    static_cast<EnzoMethodGravity*> (this->method());
+  
+  compute_acceleration.compute(this);
 
   // wait for all Blocks before continuing
-  block->compute_done();
+  compute_done();
 }
 
