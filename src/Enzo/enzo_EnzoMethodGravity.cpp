@@ -68,12 +68,15 @@ void EnzoMethodGravity::compute(Block * block) throw()
   // May exit before solve is done...
   solver_->apply (A, ix, ib, block);
 
-  Refresh refresh (4,0,neighbor_leaf, sync_neighbor);
+  // So do refresh with barrier synch (note barrier instead of
+  // neighbor synchronization otherwise will conflict with Method
+  // refresh ("Charm++ fatal error: mis-matched client callbacks in
+  // reduction messages")
+
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
   refresh.set_active(block->is_leaf());
   refresh.add_all_fields(block->data()->field().field_count());
-  CkPrintf ("%s DEBUG_METHOD_GRAVITY calling refresh_enter()\n",
-	   block->name().c_str());
-  fflush(stdout);
+
   block->refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
 
 }
@@ -82,8 +85,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
 void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 {
-  CkPrintf ("%s DEBUG_METHOD_GRAVITY entering r_method_gravity_end()\n",
-	   name().c_str());
 
   delete msg;
   

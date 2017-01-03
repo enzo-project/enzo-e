@@ -55,7 +55,7 @@ Solver {
       type = "cg";
        iter_max = 500;
        res_tol  = 1e-3;
-       monitor_iter = 1;
+       monitor_iter = 0;
    }      
 }
 
