@@ -43,15 +43,14 @@ This page documents all current parameters implemented in Enzo-P /
 Cello.  Each parameter is summarized, its type or types are listed,
 and the default value (if any) is provided.  The scope of the
 parameter is also listed, which is either "Cello" or "Enzo", depending
-on whether the parameter is associated with Cello code or Enzo-P code.
-Some parameters also may have specified assumptions associated with
-them; for example, a parameter may only be valid if some
-other parameter is set to a certain value.
+on whether the parameter is associated with Cello framework or Enzo-P
+application.  Any assumptions associated with a parameter are also
+listed; for example, a parameter may only be valid if some other
+parameter is set to a certain value.
 
-The last parameters review was performed on 2015-09-10 with code
-revision 3836.  If you find any errors in the documentation, or have
-any specific suggestions, please contact the documentation maintainer
-at jobordner@ucsd.edu.
+If you find any errors in the documentation, or have any specific
+suggestions, please contact the documentation maintainer at
+jobordner@ucsd.edu.
 
 -----
 Adapt
