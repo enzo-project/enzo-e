@@ -15,18 +15,17 @@
 ///   @code
 ///
 ///   $MG(A_h,X_h,B_h)$
-///   
-///    if (level == max_level)
-///       if (converged()) exit()
-///    if (level == min_level) then
-///       coarse_solve()     solve $A_h X_h = B_h$
-///    else
-///       p_pre_smooth()     smooth $A_h X_h = B_h$
-///       p_residual()       $R_h = B_h - A_h * X_h$
-///       p_restrict ()      $B_H = I_h^H R_h$
-///       MG()               solve $A_H X_H = B_H$  (repeat for W-cycle)
-///       p_prolong ()       $X_h = X_h + I_H^h X_H$
-///       p_post_smooth()    smooth $A_h X_h = B_h$
+///
+///    while ( ! converged() ) 
+///       if (level == min_level) then
+///          coarse_solve()     solve $A_h X_h = B_h$
+///       else
+///          p_pre_smooth()     smooth $A_h X_h = B_h$
+///          p_residual()       $R_h = B_h - A_h * X_h$
+///          p_restrict ()      $B_H = I_h^H R_h$
+///          MG()               solve $A_H X_H = B_H$  (repeat for W-cycle)
+///          p_prolong ()       $X_h = X_h + I_H^h X_H$
+///          p_post_smooth()    smooth $A_h X_h = B_h$
 ///
 ///  @endcode
 ///
@@ -39,7 +38,7 @@
 ///  enter_solver()
 ///
 ///     iter = 0
-///     initialize X,B,R,C
+///     initialize X,R,C
 ///     if (level == max_level) 
 ///        begin_cycle()
 ///
@@ -60,29 +59,34 @@
 ///
 ///  p_restrict_send(X)
 ///
-///      A.residual(R,B,X)
+///      A.residual(R,B,X) on level
 ///      pack R
 ///      index_parent.p_restrict_recv(R)
 ///
 ///  p_restrict_recv(B)
 ///
 ///      unpack B
+///      --level
 ///      if (sync.next())
 ///          begin_cycle()
 ///      
 ///  coarse_solve(A,X,B)
 ///
 ///      solve A X = B
-///      end_cycle()
+///      prolong_send(X)
 ///
 ///  prolong_send(X)
 ///
-///      for child           
-///         pack X
-///         child.prolong_recv(X)
+///      if (level < max_level)
+///         for child           
+///            pack X
+///            child.prolong_recv(X)
+///      else
+///         begin_cycle()
 ///
 ///  prolong_recv(C)
 ///
+///      ++level
 ///      unpack C         
 ///      X = X + C
 ///      callback = p_post_smooth()
@@ -91,19 +95,7 @@
 ///  p_post_smooth(A,X,B)
 /// 
 ///      smooth.apply (A,X,B)
-///      end_cycle()
-///
-///  end_cycle()
-///
-///      ++iter
-///      if (level < max_level)
-///         prolong_send(X)
-///      else
-///         begin_cycle()
-///
-///  exit_solver()
-///  
-///      acceleration.compute(X)
+///      prolong_send()
 ///
 ///  @endcode
 ///
@@ -115,9 +107,6 @@
 /// - R                          residual R = B - A*X
 /// - X                          current solution to A*X = B
 /// - C                          coarse-grid correction
-/// - acceleration_x             acceleration along X-axis
-/// - acceleration_y (rank >= 2) acceleration along Y-axis
-/// - acceleration_z (rank >= 3) acceleration along Z-axis
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -745,8 +734,14 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
   T * X = (T*) field.values(ix_);
   T * C = (T*) field.values(ic_);
 
-  zaxpy_(X,1.0,X,C);
-
+  for (int iz=0; iz<mz_; iz++) {
+    for (int iy=0; iy<my_; iy++) {
+      for (int ix=0; ix<mx_; ix++) {
+	int i = ix + mx_*(iy + my_*iz);
+	X[i] += C[i];
+      }
+    }
+  }
 
   Refresh refresh (4,0,neighbor_level, sync_face);
 
@@ -831,10 +826,6 @@ void EnzoSolverMg0::end_cycle_(EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoSolverMg0::exit_solver_ 
 ( EnzoBlock * enzo_block, int retval ) throw ()
-/// 
-/// [ ] exit solver
-///
-///      acceleration.compute(X)
 {
   TRACE_MG(enzo_block,"EnzoSolverMg0::exit_solver_");
 }
