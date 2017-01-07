@@ -90,39 +90,9 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
-      // EnzoMethodGravity
-      method_gravity_grav_const(0.0),
-      method_gravity_solver(),
-      // EnzoMethodGravityCg
-      method_gravity_cg_iter_max(0),
-      method_gravity_cg_res_tol(0.0),
-      method_gravity_cg_grav_const(0.0),
-      method_gravity_cg_diag_precon(false),
-      method_gravity_cg_monitor_iter(0),
-      // EnzoMethodGravityBiCGStab
-      method_gravity_bicgstab_iter_max(0),
-      method_gravity_bicgstab_res_tol(0.0),
-      method_gravity_bicgstab_grav_const(0.0),
-      method_gravity_bicgstab_diag_precon(false),
-      method_gravity_bicgstab_monitor_iter(0),
-      // EnzoMethodGravityMlat
-      // EnzoMethodGravityMg0
-      method_gravity_mg_type(""),
-      method_gravity_mg_iter_max(0),
-      method_gravity_mg_res_tol(0.0),
-      method_gravity_mg_grav_const(0.0),
-      method_gravity_mg_monitor_iter(0),
-      method_gravity_mg_smooth(""),
-      method_gravity_mg_smooth_weight(0.0),
-      method_gravity_mg_smooth_pre(0),
-      method_gravity_mg_smooth_coarse(0),
-      method_gravity_mg_smooth_post(0),
-      method_gravity_mg_restrict(""),
-      method_gravity_mg_prolong(""),
-      method_gravity_mg_min_level(0),
-      method_gravity_mg_max_level(0),
-      // EnzoMethodPm
+      // EnzoMethodPmDeposit
       method_pm_deposit_type(""),
+      // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0)
   {
     for (int axis=0; axis<3; axis++) {
@@ -217,40 +187,12 @@ public: // attributes
   double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
 
-  // EnzoMethodGravityCg
-  int                        method_gravity_cg_iter_max;
-  double                     method_gravity_cg_res_tol;
-  double                     method_gravity_cg_grav_const;
-  bool                       method_gravity_cg_diag_precon;
-  int                        method_gravity_cg_monitor_iter;
-
-  // EnzoMethodGravityBiCGStab
-  int                        method_gravity_bicgstab_iter_max;
-  double                     method_gravity_bicgstab_res_tol;
-  double                     method_gravity_bicgstab_grav_const;
-  bool                       method_gravity_bicgstab_diag_precon;
-  int                        method_gravity_bicgstab_monitor_iter;
-
-  // EnzoMethodGravityMlat
-  // EnzoMethodGravityMg0
-  std::string                method_gravity_mg_type;
-  int                        method_gravity_mg_iter_max;
-  double                     method_gravity_mg_res_tol;
-  double                     method_gravity_mg_grav_const;
-  int                        method_gravity_mg_monitor_iter;
-  std::string                method_gravity_mg_smooth;
-  double                     method_gravity_mg_smooth_weight;
-  int                        method_gravity_mg_smooth_pre;
-  int                        method_gravity_mg_smooth_coarse;
-  int                        method_gravity_mg_smooth_post;
-  std::string                method_gravity_mg_restrict;
-  std::string                method_gravity_mg_prolong;
-  int                        method_gravity_mg_min_level;
-  int                        method_gravity_mg_max_level;
-
-  // EnzoMethodPm
+  // EnzoMethodPmDeposit
 
   std::string                method_pm_deposit_type;
+
+  // EnzoMethodPmUpdate
+
   double                     method_pm_update_max_dt;
 
 #ifdef CONFIG_USE_GRACKLE

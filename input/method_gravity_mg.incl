@@ -71,7 +71,7 @@ Field {
            "B","R","X","C"];
 
    ghost_depth = 4;
-   prolong = "poisson";
+   prolong = "linear";
 }
 
 Monitor {

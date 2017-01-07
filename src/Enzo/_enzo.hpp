@@ -169,10 +169,6 @@ struct fluxes
 
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
-#include "enzo_EnzoMethodGravityBiCGStab.hpp"
-#include "enzo_EnzoMethodGravityCg.hpp"
-#include "enzo_EnzoMethodGravityMg0.hpp"
-#include "enzo_EnzoMethodGravityMlat.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"

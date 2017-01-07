@@ -113,8 +113,6 @@ public: // interface
     :  BASE_ENZO_BLOCK(),
        mg_sync_(),
        mg_iter_(0),
-       solver_mg_sync_(),
-       solver_mg_iter_(0),
        dt(0),
        SubgridFluxes(NULL)
   {
@@ -138,8 +136,6 @@ public: // interface
     : BASE_ENZO_BLOCK (m),
        mg_sync_(),
        mg_iter_(0),
-       solver_mg_sync_(),
-       solver_mg_iter_(0),
       dt(0.0),
       SubgridFluxes(NULL)
   {
@@ -259,6 +255,11 @@ public: /// entry methods
 
   //--------------------------------------------------
 
+  /// Synchronize after potential solver before computing accelerations
+  void r_method_gravity_end(CkReductionMsg * msg);
+  
+  //--------------------------------------------------
+
   /// EnzoSolverCg entry method: DOT ==> refresh P
   template <class T>
   void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
@@ -346,116 +347,6 @@ public: /// entry methods
   template <class T>
   void p_solver_mg0_post_smooth(CkReductionMsg * msg);
 
-  void solver_mg_sync_reset()             { solver_mg_sync_.reset(); }
-  void solver_mg_sync_set_stop(int value) { solver_mg_sync_.set_stop(value); }
-  bool solver_mg_sync_next()         { return solver_mg_sync_.next(); };
-  int  solver_mg_sync_value()        { return solver_mg_sync_.value(); };
-  int  solver_mg_sync_stop()         { return solver_mg_sync_.stop(); };
-
-  void solver_mg_iter_clear() { solver_mg_iter_ = 0; }
-  void solver_mg_iter_increment() { ++solver_mg_iter_; }
-  int solver_mg_iter() const {return solver_mg_iter_; }
-
-
-  //--------------------------------------------------
-  /// EnzoMethodGravityCg entry method: DOT ==> refresh P
-  template <class T>
-  void r_cg_loop_0a (CkReductionMsg * msg) ;  
-
-  /// EnzoMethodGravityCg entry method: ==> refresh P
-  template <class T>
-  void r_cg_loop_0b (CkReductionMsg * msg) ;  
-
-  /// EnzoMethodGravityCg entry method: DOT(R,R) after shift
-  template <class T>
-  void r_cg_shift_1 (CkReductionMsg * msg) ;
-
-  /// EnzoMethodGravityCg entry method: DOT(P,AP)
-  template <class T>
-  void r_cg_loop_3 (CkReductionMsg * msg) ;
-
-  /// EnzoMethodGravityCg entry method: DOT(R,R)
-  template <class T>
-  void r_cg_loop_5 (CkReductionMsg * msg) ;
-
-  // /// EnzoMethodGravityCg entry method: 
-  // /// perform the necessary reductions for shift
-  // CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
-
-  //--------------------------------------------------
-  
-  /// EnzoMethodGravityBiCGStab entry method: SUM(B) and COUNT(B)
-  template <class T>
-  void r_gravity_bicgstab_start_1(CkReductionMsg* msg);  
-
-  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R)
-  template <class T>
-  void r_gravity_bicgstab_start_3(CkReductionMsg* msg);  
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh P
-  void p_gravity_bicgstab_loop_1();  
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh Y
-  void p_gravity_bicgstab_loop_3();
-
-  /// EnzoMethodGravityBiCGStab entry method: DOT(V,R0), SUM(Y) and SUM(V)
-  template <class T>
-  void r_gravity_bicgstab_loop_5(CkReductionMsg* msg);  
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh Q
-  void p_gravity_bicgstab_loop_7();
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh Y
-  void p_gravity_bicgstab_loop_9();
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh X before
-  /// computing accelerations
-  void p_gravity_bicgstab_acc();
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh accelerations
-  /// before exiting
-  void p_gravity_bicgstab_exit();
-
-  /// EnzoMethodGravityBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
-  template <class T>
-  void r_gravity_bicgstab_loop_11(CkReductionMsg* msg);
-
-  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R) and DOT(R,R0)
-  template <class T>
-  void r_gravity_bicgstab_loop_13(CkReductionMsg* msg);
-
-  /// EnzoMethodGravityBiCGStab entry method: ITER++
-  template <class T>
-  void r_gravity_bicgstab_loop_15(CkReductionMsg* msg);
-
-
-  /// Matvec synchronization for EnzoMethodGravityCg
-  void r_enzo_matvec(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    enzo_matvec_(); delete msg;
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-   
-  }
-
-  /// EnzoSolverMlat entry method: receive face data for refresh
-  void p_mg_receive_face
-  (int n, char buffer[],  int type_refresh, 
-   int if3[3], int ic3[3], int count = 0);
-
-  /// EnzoMethodGravityMg0
-  
-  template <class T>
-  void p_mg0_pre_smooth(CkReductionMsg *);
-  template <class T>
-  void p_mg0_restrict_send(CkReductionMsg * msg);
-  template <class T>
-  void p_mg0_restrict_recv(FieldMsg * msg);
-  template <class T>
-  void p_mg0_prolong_recv(FieldMsg * msg);
-  template <class T>
-  void p_mg0_post_smooth(CkReductionMsg * msg);
-
   void mg_sync_reset()             { mg_sync_.reset(); }
   void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }
   bool mg_sync_next()         { return mg_sync_.next(); };
@@ -466,20 +357,8 @@ public: /// entry methods
   void mg_iter_increment() { ++mg_iter_; }
   int mg_iter() const {return mg_iter_; }
 
-protected: // functions
-
-  void enzo_matvec_() ;
-  void gravity_bicgstab_matvec_1_();
-  void gravity_bicgstab_matvec_2_();
-
 protected: // attributes
   
-  // MG SOLVER (EnzoMethodGravityMg0)
-  Sync solver_mg_sync_;
-
-  // MG iteration count
-  int solver_mg_iter_;
-
   // MG SOLVER ( EnzoSolverMg0)
   Sync mg_sync_;
 

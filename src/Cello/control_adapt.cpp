@@ -42,8 +42,7 @@
 #ifdef DEBUG_ADAPT
 
 #   ifdef CELLO_TRACE
-#      define trace(A) fprintf (simulation()->fp_debug(),		\
-				"%s:%d %s TRACE %s\n",			\
+#      define trace(A) printf ("%s:%d %s TRACE %s\n",			\
 				__FILE__,__LINE__,name_.c_str(),A)
 #   else
 #      define trace(A) /*  NULL */

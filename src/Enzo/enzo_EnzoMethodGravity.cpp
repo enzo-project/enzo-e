@@ -65,8 +65,42 @@ void EnzoMethodGravity::compute(Block * block) throw()
   // Solve the linear system
   field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
 
+  // May exit before solve is done...
   solver_->apply (A, ix, ib, block);
+
+  // So do refresh with barrier synch (note barrier instead of
+  // neighbor synchronization otherwise will conflict with Method
+  // refresh ("Charm++ fatal error: mis-matched client callbacks in
+  // reduction messages")
+
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  refresh.set_active(block->is_leaf());
+  refresh.add_all_fields(block->data()->field().field_count());
+
+  block->refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
+{
+
+  delete msg;
   
-  block->compute_done();
+  // BUG: acceleration computed before Solver completes
+  
+  /// compute acceleration fields from potential
+  int order;
+  EnzoComputeAcceleration compute_acceleration(data()->field().field_descr(),
+					       rank(), order=4);
+
+  EnzoMethodGravity * method = 
+    static_cast<EnzoMethodGravity*> (this->method());
+  
+  compute_acceleration.compute(this);
+
+  // wait for all Blocks before continuing
+  compute_done();
 }
 
