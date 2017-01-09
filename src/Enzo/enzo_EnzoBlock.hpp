@@ -337,15 +337,14 @@ public: /// entry methods
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
   // EnzoSolverMg0
+
+  template <class T> void p_solver_mg0_shift_b(CkReductionMsg* msg);  
+
   void p_solver_mg0_pre_smooth();
-  template <class T>
-  void p_solver_mg0_restrict_send(CkReductionMsg * msg);
-  template <class T>
-  void p_solver_mg0_restrict_recv(FieldMsg * msg);
-  template <class T>
-  void p_solver_mg0_prolong_recv(FieldMsg * msg);
-  template <class T>
-  void p_solver_mg0_post_smooth(CkReductionMsg * msg);
+  template <class T> void p_solver_mg0_restrict_send(CkReductionMsg * msg);
+  template <class T> void p_solver_mg0_restrict_recv(FieldMsg * msg);
+  template <class T> void p_solver_mg0_prolong_recv(FieldMsg * msg);
+  template <class T> void p_solver_mg0_post_smooth(CkReductionMsg * msg);
 
   void mg_sync_reset()             { mg_sync_.reset(); }
   void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }

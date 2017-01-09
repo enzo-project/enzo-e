@@ -61,7 +61,8 @@ public: // interface
        max_level_(0),
        mx_(0),my_(0),mz_(0),
        nx_(0),ny_(0),nz_(0),
-       gx_(0),gy_(0),gz_(0)
+       gx_(0),gy_(0),gz_(0),
+       bs_(0), bc_(0)
   {}
 
   /// Destructor
@@ -107,6 +108,9 @@ public: // interface
     p | gx_;
     p | gy_;
     p | gz_;
+
+    p | bc_;
+    p | bs_;
   }
 
   /// Solve the linear system 
@@ -135,15 +139,24 @@ public: // interface
   template <class T>
   void post_smooth(EnzoBlock * enzo_block) throw();
 
+  void set_bs(long double bs) throw() { bs_ = bs; }
+  void set_bc(long double bc) throw() { bc_ = bc; }
+
+  template <class T>
+  void begin_solve_(EnzoBlock * enzo_block) throw();
+
 protected: // methods
 
   template <class T>
   void enter_solver_(EnzoBlock * enzo_block) throw();
+
   template <class T>
   void begin_cycle_(EnzoBlock * enzo_block) throw();
+  
   /// Solve the coarse-grid equation A*C = R
   template <class T>
   void solve_coarse_(EnzoBlock * enzo_block) throw();
+
   /// Prolong the correction C to the next-finer level
   template <class T>
   void prolong_send_(EnzoBlock * enzo_block) throw();
@@ -211,6 +224,10 @@ protected: // attributes
   int mx_,my_,mz_;
   int nx_,ny_,nz_;
   int gx_,gy_,gz_;
+
+  /// scalars used for projections of singular systems
+  long double bs_;
+  long double bc_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_GRAVITY_MG0_HPP */

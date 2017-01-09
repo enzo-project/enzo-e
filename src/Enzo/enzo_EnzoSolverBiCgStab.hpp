@@ -230,9 +230,6 @@ protected: // methods
   
   /// Compute local sum of vector elements X_i
   template<class T> long double sum_(const T* X) const throw();
-
-  /// return the number of elements of the vector on this block
-  long double count_() const throw();
   
 protected: // attributes
 

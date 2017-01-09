@@ -520,13 +520,12 @@ void EnzoSolverBiCgStab::apply ( Matrix * A, int ix, int ib, Block * block) thro
 
 //======================================================================
 
-/// eventually replace this with a more flexible reduction type
-/// (this one requires an array with 4 entries but handles long doubles)
-
 extern CkReduction::reducerType sum_long_double_type;
 extern CkReduction::reducerType sum_long_double_2_type;
 extern CkReduction::reducerType sum_long_double_3_type;
 extern CkReduction::reducerType sum_long_double_4_type;
+
+//======================================================================
 
 template<class T>
 void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
@@ -570,11 +569,11 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
     /// set bs_ = SUM(B)   ==> r_solver_bicgstab_start_1
     /// set bc_ = COUNT(B) ==> r_solver_bicgstab_start_1
-    long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
+    long double reduce[2] = {0.0, 0.0};
     if (enzo_block->is_leaf()) {
       T* B = (T*) field.values(ib_);
       reduce[0] = sum_(B);
-      reduce[1] = count_();
+      reduce[1] = 1.0*nx_*ny_*nz_;
     }
 
     /// initiate callback for r_solver_bicgstab_start_1 and
@@ -584,8 +583,8 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 			enzo_block->proxy_array());
     
     enzo_block->set_solver(this);
-    enzo_block->contribute(4*sizeof(long double), &reduce, 
-			   sum_long_double_4_type, callback);
+    enzo_block->contribute(2*sizeof(long double), &reduce, 
+			   sum_long_double_2_type, callback);
 
   } else {
 
@@ -1421,12 +1420,6 @@ template<class T> long double EnzoSolverBiCgStab::sum_(const T* X) const throw()
 	value += X[i];
       }
   return value;
-}
-
-//----------------------------------------------------------------------
-
-long double EnzoSolverBiCgStab::count_() const throw() {
-  return 1.0*nx_*ny_*nz_;
 }
 
 //----------------------------------------------------------------------

@@ -24,7 +24,7 @@
 	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d",		\
 	     MSG,name().c_str(),INDEX_RECV.bit_string(2,2,nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
 	     IF3[0],IF3[1],IF3[2],IC3[0],IC3[1],IC3[2]);		\
-    INDEX_SEND.print(buffer,-1,2,false,simulation());			\
+    INDEX_SEND.print(buffer,3,2,false,simulation());			\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
     check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
     thisProxy[INDEX_RECV].p_adapt_recv_level				\

@@ -14,6 +14,8 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
+// #define DEBUG_METHOD
+
 #ifdef DEBUG_METHOD
 #   define TRACE_METHOD(method)						\
   CkPrintf ("%d %s:%d TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__,method,this); \
@@ -48,6 +50,8 @@ EnzoMethodGravity::~EnzoMethodGravity() throw()
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
+
+  TRACE_METHOD("compute()");
 
   // Initialize the linear system
 
@@ -85,7 +89,8 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
 void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 {
-
+  TRACE_METHOD("r_method_gravity_end()");
+  
   delete msg;
   
   // BUG: acceleration computed before Solver completes

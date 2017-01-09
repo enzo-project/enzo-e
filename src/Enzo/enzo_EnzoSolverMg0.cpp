@@ -116,9 +116,9 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
-// #define DEBUG_MG
+// #define DEBUG_SOLVER_MG0
 
-#ifdef DEBUG_MG
+#ifdef DEBUG_SOLVER_MG0
 #   define TRACE_MG(block,msg)						\
   CkPrintf ("%d %s TRACE_MG %s\n",					\
 	    CkMyPe(),(block != NULL) ? block->name().c_str() : "root",msg); \
@@ -147,11 +147,11 @@
 #   define DEBUG_PRINT_XX /* ... */
 #endif
 
-// //----------------------------------------------------------------------
+//======================================================================
 
-// extern CkReduction::reducerType r_method_gravity_mg_type;
+extern CkReduction::reducerType sum_long_double_2_type;
 
-//----------------------------------------------------------------------
+//======================================================================
 
 EnzoSolverMg0::EnzoSolverMg0 
 (const FieldDescr * field_descr, 
@@ -184,8 +184,8 @@ EnzoSolverMg0::EnzoSolverMg0
     max_level_(max_level),
     mx_(0),my_(0),mz_(0),
     nx_(0),ny_(0),nz_(0),
-    gx_(0),gy_(0),gz_(0)
-
+    gx_(0),gy_(0),gz_(0),
+    bs_(0), bc_(0)
     // [*]
 {
   EnzoBlock * null_block = NULL;
@@ -315,11 +315,110 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     }
   }
 
-  // start the MG V-cycle with the root level
-  if (enzo_block->level() == max_level_) {
-    begin_cycle_<T>(enzo_block);
+  if (is_singular_) {
+
+    // Compute sum(B) and length() to project B onto range of A
+    // if A is singular (
+
+    long double reduce[2] = {0.0, 0.0};
+
+    if (enzo_block->is_leaf()) {
+
+      T* B = (T*) field.values(ib_);
+
+      long double value = 0.0;
+      for (int iz=gz_; iz<nz_+gz_; iz++) {
+	for (int iy=gy_; iy<ny_+gy_; iy++) {
+	  for (int ix=gx_; ix<nx_+gx_; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    reduce[0] += B[i];
+	  }
+	}
+      }
+      
+      reduce[1] = 1.0*nx_*ny_*nz_;
+    }
+
+#ifdef DEBUG_SOLVER_MG0    
+    CkPrintf ("%d %s DEBUG_SOLVER_MG0 bs %lf bc %lf\n",
+	      __LINE__,enzo_block->name().c_str(),double(reduce[0]),double(reduce[1]));
+#endif    
+
+    /// initiate callback for r_solver_bicgstab_start_1 and
+    /// contribute to sum and count
+    
+    CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_shift_b<T>(NULL), 
+			enzo_block->proxy_array());
+    
+    enzo_block->set_solver(this);
+    enzo_block->contribute(2*sizeof(long double), &reduce, 
+			   sum_long_double_2_type, callback);
+
+  } else {
+    begin_solve_<T>(enzo_block);
   }
 
+}
+
+//----------------------------------------------------------------------
+
+template<class T>
+void EnzoBlock::p_solver_mg0_shift_b(CkReductionMsg* msg)
+{
+
+  /// EnzoBlock accumulates global contributions to SUM(B) and COUNT(B)
+  EnzoSolverMg0* solver = 
+    static_cast<EnzoSolverMg0*> (this->solver());
+  
+  long double* data = (long double*) msg->getData();
+
+  solver->set_bs( data[0] );
+  solver->set_bc( data[1] );
+
+#ifdef DEBUG_SOLVER_MG0  
+  CkPrintf ("%d %s DEBUG_SOLVER_MG0 bs %lf bc %lf\n",
+	    __LINE__,name().c_str(),double(data[0]),double(data[1]));
+#endif  
+
+  delete msg;
+
+  /// Start solver
+  solver->begin_solve_<T>(this);
+
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoSolverMg0::begin_solve_(EnzoBlock * enzo_block) throw()
+{
+  // start the MG V-cycle with the max level blocks
+
+  if (enzo_block->level() == max_level_) {
+
+    if (is_singular_) {
+
+      Field field = enzo_block->data()->field();
+      T* B  = (T*) field.values(ib_);
+      T shift = -bs_ / bc_;
+#ifdef DEBUG_SOLVER_MG0      
+      CkPrintf ("%d %s DEBUG_SOLVER_MG0 bs %lf bc %lf\n",
+		__LINE__,enzo_block->name().c_str(),double(bs_),double(bc_));
+#endif      
+
+      for (int iz=0; iz<mz_; iz++) {
+	for (int iy=0; iy<my_; iy++) {
+	  for (int ix=0; ix<mx_; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    B[i] += shift;
+	  }
+	}
+      }
+
+    }
+
+    begin_cycle_<T>(enzo_block);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -335,8 +434,9 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 ///        callback = p_pre_smooth()
 ///        call refresh (X,"level")
 {
-  TRACE_MG(enzo_block,"EnzoSolverMg0::begin_cycle()");
   const int level = enzo_block->level();
+
+  TRACE_MG(enzo_block,"EnzoSolverMg0::begin_cycle()");
 
   if (is_converged_(enzo_block)) {
 
@@ -417,11 +517,6 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
   //  enzo_block->set_solver(this);
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_mg0_restrict_send<T>(NULL),&refresh);
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  // // Skip refresh
-  // restrict_send<T>(enzo_block);
-
 
 }
 
