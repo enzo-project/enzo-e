@@ -791,6 +791,10 @@ Prolong * Problem::create_prolong_ ( std::string  name ,
 
     prolong = new ProlongLinear;
 
+  } else if (name == "inject") {
+
+    prolong = new ProlongInject;
+
   } else {
     
     ERROR1("Problem::create_prolong_",

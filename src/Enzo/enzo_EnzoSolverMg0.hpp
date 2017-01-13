@@ -131,6 +131,12 @@ public: // interface
   template <class T>
   void restrict_recv(EnzoBlock * enzo_block) throw();
 
+  /// Access the Restrict operator by EnzoBlock
+  Restrict * restrict() { return restrict_; }
+
+  /// Access the Prolong operator by EnzoBlock
+  Prolong * prolong() { return prolong_; }
+  
   /// Prolong the correction C to the next-finer level
   template <class T>
   void prolong_recv(EnzoBlock * enzo_block) throw();

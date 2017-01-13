@@ -37,6 +37,7 @@ module mesh {
   PUPable OutputData;
   PUPable OutputImage;
   PUPable Problem;
+  PUPable ProlongInject;
   PUPable ProlongLinear;
   PUPable Refine;
   PUPable RefineDensity;

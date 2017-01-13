@@ -8,6 +8,9 @@
 #ifndef DATA_FIELD_FACE_HPP
 #define DATA_FIELD_FACE_HPP
 
+class Prolong;
+class Restrict;
+
 class FieldFace {
 
   /// @class    FieldFace
@@ -23,7 +26,9 @@ public: // interface
 
   FieldFace () throw()
   : refresh_type_(refresh_unknown),
-    field_list_()
+    field_list_(),
+    prolong_(NULL),
+    restrict_(NULL)
   {
     ++counter[cello::index_static()]; 
 
@@ -98,6 +103,14 @@ public: // interface
   void set_refresh (int refresh_type)
   {  refresh_type_ = refresh_type;  }
 
+  /// Set Prolong operation (default is Problem::prolong() )
+  void set_prolong (Prolong * prolong)
+  { prolong_ = prolong; }
+  
+  /// Set Restrict operation (default is Problem::restrict() )
+  void set_restrict (Restrict * restrict)
+  { restrict_ = restrict; }
+  
   /// Set the list of fields
   void set_field_list (std::vector<int> const & field_list)
   { field_list_ = field_list; }
@@ -199,6 +212,12 @@ private: // attributes
 
   /// List of fields (default all)
   std::vector<int> field_list_;
+
+  /// Prolongation object
+  Prolong * prolong_;
+
+  /// Restriction object
+  Restrict * restrict_;
 
 };
 

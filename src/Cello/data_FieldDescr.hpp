@@ -128,6 +128,10 @@ public: // functions
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
     throw();
 
+  /// return whether the field variable is centered in the cell
+  bool is_centered(int id_field) const
+  { return (centering_[0] == 0 && centering_[1] == 0 && centering_[2] == 0); }
+
   /// depth of ghost zones of given field
   void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw();

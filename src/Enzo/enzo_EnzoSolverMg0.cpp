@@ -20,12 +20,12 @@
 ///       if (level == min_level) then
 ///          coarse_solve()     solve $A_h X_h = B_h$
 ///       else
-///          p_pre_smooth()     smooth $A_h X_h = B_h$
-///          p_residual()       $R_h = B_h - A_h * X_h$
-///          p_restrict ()      $B_H = I_h^H R_h$
-///          MG()               solve $A_H X_H = B_H$  (repeat for W-cycle)
-///          p_prolong ()       $X_h = X_h + I_H^h X_H$
-///          p_post_smooth()    smooth $A_h X_h = B_h$
+/// 1        p_pre_smooth()     smooth $A_h X_h = B_h$
+/// 2        p_residual()       $R_h = B_h - A_h * X_h$
+/// 3        p_restrict ()      $B_H = I_h^H R_h$
+/// 4        MG()               solve $A_H X_H = B_H$  (repeat for W-cycle)
+/// 5        p_prolong ()       $X_h = X_h + I_H^h X_H$
+/// 6        p_post_smooth()    smooth $A_h X_h = B_h$
 ///
 ///  @endcode
 ///
@@ -146,6 +146,34 @@
 
 #   define DEBUG_PRINT_XX /* ... */
 #endif
+
+#ifdef DEBUG_SOLVER_MG0
+#define LOCAL_SUM(M,it)							\
+  {									\
+    T * X = (T*) enzo_block->data()->field().values(it);		\
+    double min=std::numeric_limits<double>::max();			\
+    double max=-std::numeric_limits<double>::max();			\
+    double sum =0.0;							\
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);				\
+									\
+    for (int iz=0; iz<nz_; iz++) {					\
+      for (int iy=0; iy<ny_; iy++) {					\
+	for (int ix=0; ix<nx_; ix++) {					\
+	  int i = i0 + ix + mx_*(iy + my_*iz);				\
+	  min = std::min(min,double(X[i]));				\
+	  max = std::max(max,double(X[i]));				\
+	  sum += X[i];							\
+	}								\
+      }									\
+    }									\
+    CkPrintf ("LOCAL_SUM iter %d level %d %s block %s"			\
+	      "min %20.15e sum %20.15e max %20.15e\n",			\
+	      enzo_block->mg_iter(), enzo_block->level(),	M, 	\
+	      enzo_block->name().c_str(), min,sum,max);			\
+  }
+#else
+#define LOCAL_SUM(M,it) /* EMPTY */
+#endif  
 
 //======================================================================
 
@@ -309,7 +337,7 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
       for (int ix=0; ix<mx_; ix++) {
 	int i = ix + mx_*(iy + my_*iz);
 	X[i] = 0.0;
-	R[i] = B[i];
+	R[i] = 0.0;
 	C[i] = 0.0;
       }
     }
@@ -436,6 +464,11 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 {
   const int level = enzo_block->level();
 
+  LOCAL_SUM("0 X",ix_);
+  LOCAL_SUM("0 R",ir_);
+  LOCAL_SUM("0 B",ib_);
+  LOCAL_SUM("0 C",ic_);
+  
   TRACE_MG(enzo_block,"EnzoSolverMg0::begin_cycle()");
 
   if (is_converged_(enzo_block)) {
@@ -447,6 +480,7 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
     // TODO REFRESH X
     TRACE_MG(enzo_block,"calling coarse solve");
     solve_coarse_<T>(enzo_block);
+    LOCAL_SUM("4 X",ix_);
 
   } else {
 
@@ -509,6 +543,8 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
 
   smooth_pre_->apply(A_,ix_,ib_,enzo_block);
 
+  LOCAL_SUM("1 X",ix_);
+
   Refresh refresh (4,0,neighbor_level, sync_face);
   refresh.add_all_fields(enzo_block->data()->field().field_count());
 
@@ -556,6 +592,7 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   A_->residual(ir_, ib_, ix_, enzo_block);
 
+  LOCAL_SUM("2 R",ir_);
 
   Index index        = enzo_block->index();
   Index index_parent = index.index_parent(min_level_);
@@ -563,22 +600,25 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
   
   // copy face data to FieldFace
 
-  // face (0,0,0) is the entire block
-  int if3[3] = {0,0,0};
-  // find which child this block is in its parent
+  // Pack and send "R" to parent
+
   int ic3[3];
   index.child(level,&ic3[0],&ic3[1],&ic3[2],min_level_);
-  // exclude ghost zones
+
+  // <COMMON CODE> in restrict_send_() and prolong_send_()
+  
+  int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
-  // send vector "R" data only
   std::vector<int> field_list;
   field_list.push_back(ir_);
 
   // copy data from EnzoBlock to array via FieldFace
 
-  FieldFace * field_face = 
-    enzo_block->create_face (if3, ic3, lg3, 
-			     refresh_coarse, field_list);
+  FieldFace * field_face = enzo_block->create_face
+    (if3, ic3, lg3, refresh_coarse, field_list);
+
+  field_face->set_restrict(restrict_);
+  
   int narray; 
   char * array;
 
@@ -595,19 +635,13 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   // Copy FieldFace data to field_message
 
-  // array size
   field_message->n = narray;
-  // array values
   memcpy (field_message->a, array, narray);
-  // child index
   field_message->ic3[0] = ic3[0];
   field_message->ic3[1] = ic3[1];
   field_message->ic3[2] = ic3[2];
 
   //  </COMMON CODE>
-
-  // Send field_message to parent
-  //  enzo_block->set_solver(this);
 
   CkCallback (CkIndex_EnzoBlock::p_solver_mg0_restrict_recv<T>(NULL), 
 	      CkArrayIndexIndex(index_parent),
@@ -638,20 +672,21 @@ void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * field_message)
 
   // copy data from field_message to this EnzoBlock
 
+  EnzoSolverMg0 * solver = 
+    static_cast<EnzoSolverMg0*> (this->solver());
 
   int * ic3 = field_message->ic3;
 
   FieldFace * field_face = create_face 
     (if3, ic3, lg3, refresh_coarse, field_list);
 
+  field_face->set_restrict(solver->restrict());
+
   char * a = field_message->a;
   field_face->array_to_face(a, data()->field());
   delete field_face;
 
   delete field_message;
-
-  EnzoSolverMg0 * solver = 
-    static_cast<EnzoSolverMg0*> (this->solver());
 
   // continue with EnzoSolverMg0
 
@@ -672,6 +707,7 @@ void EnzoSolverMg0::restrict_recv(EnzoBlock * enzo_block) throw()
   TRACE_MG(enzo_block,"EnzoSolverMg0::restrict_recv()");
   
   if (enzo_block->mg_sync_next()) {
+    LOCAL_SUM("3 B",ib_);
     begin_cycle_<T>(enzo_block);
   }
 }
@@ -718,20 +754,21 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
     Index index_child = enzo_block->index().index_child(ic3,min_level_);
 
-    // face (0,0,0) is the entire block
+    // Pack and send "X" to children
+
+    // <COMMON CODE> in restrict_send_() and prolong_send_()
+
     int if3[3] = {0,0,0};
-    // exclude ghost zones
     bool lg3[3] = {false,false,false};
-    // send vector "X" data only
     std::vector<int> field_list;
     field_list.push_back(ix_);
 
     // copy data from EnzoBlock to array via FieldFace
 
-    // <COMMON CODE> in restrict_send_() and prolong_send_()
-
     FieldFace * field_face = enzo_block->create_face
       (if3, ic3, lg3, refresh_fine, field_list);
+
+    field_face->set_prolong(prolong_);
 
     int narray; 
     char * array;
@@ -742,17 +779,15 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
     // Create a FieldMsg for sending data to parent
     // (note: charm messages not deleted on send; are deleted on receive)
+    
     FieldMsg * field_message  = new (narray) FieldMsg;
 
     /// WARNING: double copy
 
     // Copy FieldFace data to field_message
 
-    // array size
     field_message->n = narray;
-    // array values
     memcpy (field_message->a, array, narray);
-    // child index
     field_message->ic3[0] = ic3[0];
     field_message->ic3[1] = ic3[1];
     field_message->ic3[2] = ic3[2];
@@ -762,6 +797,9 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
     CkCallback (CkIndex_EnzoBlock::p_solver_mg0_prolong_recv<T>(NULL), 
 		CkArrayIndexIndex(index_child),
 		enzo_block->proxy_array()).send(field_message);
+
+    delete [] array;
+
   }
 }
 
@@ -776,11 +814,8 @@ void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * field_message)
   
   // Unpack "C" vector data from children
 
-  // Face (0,0,0) is the entire block
   int if3[3] = {0,0,0};
-  // exclude ghost zones
   bool lg3[3] = {false,false,false};
-  // receive in vector "C"
   std::vector<int> field_list;
   field_list.push_back(data()->field().field_id("C"));
 
@@ -790,15 +825,17 @@ void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * field_message)
   char * a = field_message->a;
   int * ic3 = field_message->ic3;
 
+  EnzoSolverMg0 * solver = 
+    static_cast<EnzoSolverMg0*> (this->solver());
+
   FieldFace * field_face = create_face 
     (if3, field_message->ic3, lg3, refresh_fine, field_list);
+
+  field_face->set_prolong(solver->prolong());
 
   field_face->array_to_face (field_message->a, data()->field());
 
   delete field_face;
-
-  EnzoSolverMg0 * solver = 
-    static_cast<EnzoSolverMg0*> (this->solver());
 
   // GET DATA
   
@@ -823,6 +860,9 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 
   TRACE_MG (enzo_block,"EnzoSolverMg0::prolong_recv()");
   
+  LOCAL_SUM("5 X",ix_);
+  LOCAL_SUM("5 C",ic_);
+
   Data * data = enzo_block->data();
   Field field = data->field();
 
@@ -833,7 +873,7 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
     for (int iy=0; iy<my_; iy++) {
       for (int ix=0; ix<mx_; ix++) {
 	int i = ix + mx_*(iy + my_*iz);
-	X[i] += C[i];
+	X[i] -= C[i];
       }
     }
   }
@@ -876,6 +916,8 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
   TRACE_MG(enzo_block,"EnzoSolverMg0::post_smooth()");
 
   smooth_post_->apply(A_,ix_,ib_,enzo_block);
+
+  LOCAL_SUM("6 X",ix_);
 
   if (enzo_block->level() < max_level_) {
 

@@ -256,7 +256,6 @@ void Block::control_sync_face_(int entry_point, int phase)
 
   }
   control_sync_count_(entry_point,phase,num_faces + 1);
-
 }
 
 //----------------------------------------------------------------------

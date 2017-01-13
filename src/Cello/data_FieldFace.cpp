@@ -122,6 +122,8 @@ void FieldFace::pup (PUP::er &p)
   PUParray(p,child_,3);
   p | refresh_type_;
   p | field_list_;
+  p | restrict_;
+  p | prolong_;
 }
 
 //======================================================================
@@ -180,7 +182,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
       Simulation * simulation = proxy_simulation.ckLocalBranch();
       Problem * problem   = simulation->problem();
-      Restrict * restrict = problem->restrict();
+      Restrict * restrict = restrict_ ? restrict_ : problem->restrict();
 
       index_array += restrict->apply
 	(precision, 
@@ -261,7 +263,8 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       Simulation * simulation = proxy_simulation.ckLocalBranch();
       Problem * problem   = simulation->problem();
-      Prolong * prolong = problem->prolong();
+
+      Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
 
       index_array += prolong->apply
 	(precision, 
@@ -310,27 +313,38 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
   CkPrintf("%p face_to_face\n",this);
 #endif
   
+  int M3[3],G3[3],IS3[3],ID3[3],NS3[3],ND3[3];
+  int m3[3],g3[3],is3[3],id3[3],ns3[3],nd3[3];
+  
+  field_src.field_size (0,&M3[0],&M3[1],&M3[2]);
+  field_src.ghost_depth(0,&G3[0],&G3[1],&G3[2]);
+
+  //    invert_face();
+  loop_limits (IS3,NS3,M3,G3,op_load);
+  invert_face();
+
+  loop_limits (ID3,ND3,M3,G3,op_store);
+  invert_face();
+
   for (size_t i_f=0; i_f < field_list_.size(); i_f++) {
 
     size_t index_field = field_list_[i_f];
+
+    if (! field_src.is_centered(index_field)) {
+      // recompute loop limits if Field is not centered
+      field_src.field_size (0,&m3[0],&m3[1],&m3[2]);
+      field_src.ghost_depth(0,&g3[0],&g3[1],&g3[2]);
+      loop_limits (is3,ns3,m3,g3,op_load);
+      invert_face();
+      loop_limits (id3,nd3,m3,g3,op_store);
+      invert_face();
+    }
 
     precision_type precision = field_src.precision(index_field);
 
     char * values_src = field_src.values(index_field);
     char * values_dst = field_dst.values(index_field);
     
-    int m3[3],g3[3],is3[3],id3[3],ns3[3],nd3[3];
-
-    field_src.field_size (index_field,&m3[0],&m3[1],&m3[2]);
-    field_src.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
-
-    //    invert_face();
-    loop_limits (is3,ns3,m3,g3,op_load);
-    invert_face();
-
-    loop_limits (id3,nd3,m3,g3,op_store);
-    invert_face();
-
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Problem * problem   = simulation->problem();
 
@@ -344,8 +358,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
-
-      Prolong * prolong = problem->prolong();
+      Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
 
       prolong->apply (precision, 
 		      values_dst,m3,id3, nd3,
@@ -355,7 +368,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       // Restrict field
 
-      Restrict * restrict = problem->restrict();
+      Restrict * restrict = restrict_ ? restrict_ : problem->restrict();
 
       restrict->apply (precision, 
 		       values_dst,m3,id3, nd3,
@@ -392,6 +405,17 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 	break;
       }
     }
+    if (! field_src.is_centered(index_field) ) {
+      // reinitialize loop limits to centered
+      m3[0] =  M3[0];  m3[1] =  M3[1];  m3[2] =  M3[2];
+      g3[0] =  G3[0];  g3[1] =  G3[1];  g3[2] =  G3[2];
+      is3[0] = IS3[0]; is3[1] = IS3[1]; is3[2] = IS3[2];
+      id3[0] = ID3[0]; id3[1] = ID3[1]; id3[2] = ID3[2];
+      ns3[0] = NS3[0]; ns3[1] = NS3[1]; ns3[2] = NS3[2];
+      nd3[0] = ND3[0]; nd3[1] = ND3[1]; nd3[2] = ND3[2];
+    }
+
+
   }
 }
 
@@ -628,7 +652,7 @@ template<class T> void FieldFace::copy_
       for (int ix=0; ix < ns3[0]; ix++) {
 	int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
 	int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-	vd[i_dst] = vs[i_src];
+      	vd[i_dst] = vs[i_src];
       }
     }
   }

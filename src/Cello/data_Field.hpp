@@ -139,6 +139,10 @@ public: // interface
     throw()
   { return field_descr_->centering(id,cx,cy,cz); }
 
+  /// return whether the field variable is centered in the cell
+  bool is_centered(int id) const
+  { return field_descr_->is_centered(id); }
+
   /// depth of ghost zones of given field
   void ghost_depth(int id, int * gx, int * gy = 0, int * gz = 0) const 
     throw()
