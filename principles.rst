@@ -26,7 +26,7 @@ Scalability
 -----------
 
 Cello enables high scalability in part through the innovative
-combination of Charm++ and Cello's forest-of-octree AMR.  Charm++, the
+combination of Charm++ and Cello's array-of-octree AMR.  Charm++, the
 externally-developed parallel programming system on which Cello is
 built, is a data-driven, asynchronous, programming language based on
 C++.  Charm++ incorporates state-of-the-art dynamic load balancing,
@@ -37,7 +37,7 @@ also being researched and incorporated into Charm++, allowing Enzo-P /
 Cello to benefit automatically as the parallel programming system
 continues to improve.
 
-The *forest-of-octree* AMR approach that is implemented in Cello has
+The *array-of-octree* AMR approach that is implemented in Cello has
 been shown to be among the most scalable known AMR approaches to date.
 The specific AMR remeshing algorithm is based on that developed and
 prototyped by the Charm++ group (see `Langer, et al

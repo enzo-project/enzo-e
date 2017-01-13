@@ -55,7 +55,7 @@ components, and the proposed ``Particle`` and ``Ray`` components, for
 implementing the distributed computational data containers. The
 ``Mesh`` component includes classes for representing and operating on
 an adaptive mesh hierarchy, implemented as a fully-distributed
-forest-of-octrees.  Octree nodes are associated with Blocks, which are
+array-of-octrees.  Octree nodes are associated with Blocks, which are
 containers for the ``Field`` and other data, and implemented as a
 Charm++ *chare array*.
 

@@ -281,7 +281,7 @@
     int mesh_root_blocks[3];
     default: [1,1,1]
     The root_blocks parameter specifies the size of the "octree
-    forest".  If mesh refinement is used, then this specifies the
+    array".  If mesh refinement is used, then this specifies the
     number of blocks in the root grid, though, depending on the
     problem, coarser mesh layers may be fully refined.
 **** TODO Mesh:root_rank;

@@ -751,12 +751,12 @@ Mesh
 ----
 
 :Parameter:  :p:`Mesh` : :p:`root_blocks`
-:Summary: :s:`Number of Blocks used to tile the coarsest Patch`
+:Summary: :s:`Number of Blocks used to tile the coarsest refinement level`
 :Type:    :t:`list` ( :t:`integer` )
 :Default: :d:`[ 1, 1, 1 ]`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the number of Blocks along each axis in the mesh "forest".  The product must not be smaller than the number of processors used.`
+:e:`This parameter specifies the number of Blocks along each axis in the mesh "array".  The product must not be smaller than the number of processors used.`
 
 ----
 
