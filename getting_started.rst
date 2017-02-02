@@ -12,9 +12,9 @@ configuring and compiling the code, and running a sample test problem.
 Downloading
 ===========
 
-``Enzo-P / Cello`` is currently in beta-testing.  To obtain V2.0b of
-the source code, you may clone it from the Bitbucket repository
-`Enzo-P/Cello bitbucket repository
+``Enzo-P / Cello`` is currently in beta-testing.  To obtain the latest
+version of the source code, you may clone it from the Bitbucket
+repository `Enzo-P / Cello bitbucket repository
 <https://bitbucket.org/cello-project/cello-src/>`_:
 
    ``hg clone https://bitbucket.org/cello-project/cello-src``
@@ -26,8 +26,7 @@ and install ``Charm++``, HDF5, and ``libpng``:
 1. Install ``Charm++``
 ----------------------
 
-``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/distrib/charm-6.5.1.tar.gz>`_.  *(Note that this is not the most recent version of Charm++!  Enzo-P / Cello is currently incompatible with versions > 6.5.1.)*
-It includes a helpful interactive script ``smart-build.pl`` that can
+``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/software>`_.  It includes a helpful interactive script ``smart-build.pl`` that can
 be used to configure and install ``Charm++``.  You may also want to
 include the Charm++ bin directory in your ``$PATH``, which simplifies
 running ``Charm++`` programs.
@@ -37,7 +36,7 @@ running ``Charm++`` programs.
 
 "`HDF5 <http://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
 file format for storing and managing data", and is the primary library
-used by Enzo-P/Cello for data output.
+used by Enzo-P / Cello for data output.
 
 If HDF5 is not already installed on your machine, it may be available
 through your operating system distribution, otherwise it can be
@@ -47,7 +46,7 @@ downloaded from the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ website.
 ---------------------
 
 "`libpng <http://www.libpng.org/pub/png/libpng.html>`_ is the official
-PNG reference library", and is the image format used by Enzo-P/Cello.
+PNG reference library", and is the image format used by Enzo-P / Cello.
 
 If ``libpng`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
@@ -71,7 +70,8 @@ these optional settings.)
 
 Before compiling Enzo-P/Cello, you first have to define which set of
 available machine-dependent configuration settings to use via the
-``CELLO_ARCH`` environment variable:
+``CELLO_ARCH`` environment variable.  Some examples include the
+following:
 
    ===========================  ========================================================
    ===========================  ========================================================
@@ -122,26 +122,30 @@ Machine configuration files are found in the ``config/`` subdirectory.
 To create a new one for your machine, try copying an existing one
 and editing it.  Configuration variables include the following:
 
-  * ``is_arch_valid``:  This must be set to 1
-  * ``flags_arch``: Compiler flags, such as optimization settings or warning levels
-  * ``flags_link_charm``: Link flags, such as optimization settings
-  * ``cc`` : The C compiler to use
-  * ``f90``: The Fortran compiler to use
-  * ``flags_prec_single``: Fortran flags for using single-precision by default
-  * ``flags_prec_double``: Fortran flags for using double-precision by default
-  * ``libpath_fortran``: Path for any Fortran libraries required when linking with C++
-  * ``libs_fortran``: Fortran libraries required when linking with C++
-  * ``charm_path``: Path to the ``Charm++`` installation directory
-  * ``papi_path``: Path to the PAPI performance library installation directory (OPTIONAL)
-  * ``hdf5_path``: Path to HDF5 installation directory
-  * ``png_path``: Path to the ``libpng`` library
-  * ``grackle_path``: Path to the Grackle chemistry and cooling library (OPTIONAL)
+  =====================  ======================================================================
+  =====================  ======================================================================
+  ``is_arch_valid``      This must be set to 1
+  ``flags_arch``         Compiler flags, such as optimization settings or warning levels
+  ``flags_link_charm``   Link flags, such as optimization settings
+  ``cc``                 The C compiler to use
+  ``f90``                The Fortran compiler to use
+  ``flags_prec_single``  Fortran flags for using single-precision by default
+  ``flags_prec_double``  Fortran flags for using double-precision by default
+  ``libpath_fortran``    Path for any Fortran libraries required when linking with C++
+  ``libs_fortran``       Fortran libraries required when linking with C++
+  ``charm_path``         Path to the ``Charm++`` installation directory
+  ``papi_path``          Path to the PAPI performance library installation directory (OPTIONAL)
+  ``hdf5_inc``           Path for HDF5 include files
+  ``hdf5_lib``           Path for HDF5 library files
+  ``png_path``           Path to the ``libpng`` library
+  ``grackle_path``       Path to the Grackle chemistry and cooling library (OPTIONAL)
+  =====================  ======================================================================
 
 
 2. Edit ``SConstruct``
 ----------------------
 
-To incorporate your new machine configuration file into teh ``Enzo-P /
+To incorporate your new machine configuration file into the ``Enzo-P /
 Cello`` build system, insert a new line to the following list in the
 ``SConstruct`` file in the top-level ``Enzo-P / Cello`` directory:
 

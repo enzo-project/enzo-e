@@ -45,7 +45,7 @@ Below, ``Initial`` is a group, ``density`` is a subgroup, and
 
  ::
 
-  Intial {
+  Initial {
 
      density {
         value = [ x + y, x - y < 0.5, 1.0 ];
@@ -113,7 +113,7 @@ A parameter value is one of several different basic data types:
 **Scalar types** are any floating point or integral numerical values.  
 The constant 'pi' is also recognized.
 
-   *Note that floating-point and integers are not interchangable: if a
+   *Note that floating-point and integers are not interchangeable: if a
    floating point type is expected, one cannot use an integer.*
 
 **String types** are enclosed in double-quotes. 

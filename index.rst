@@ -45,10 +45,10 @@ solver.
    :maxdepth: 1
 
    principles
+   parameters-list
    getting_started
    parameters-example
    parameters-file
-   parameters-list
    design
 
 A short workshop on using Enzo-P and developing with Cello was presented

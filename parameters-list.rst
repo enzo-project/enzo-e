@@ -35,9 +35,9 @@
   .. |am1| replace:: a\ :sub:`m,1`
   .. |a1n| replace:: a\ :sub:`1,n`
 
-***************
-Parameters List
-***************
+**********************************
+Enzo-P / Cello Parameter Reference
+**********************************
 
 This page documents all current parameters implemented in Enzo-P /
 Cello.  Each parameter is summarized, its type or types are listed,

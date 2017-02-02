@@ -101,7 +101,7 @@ rank and core count, and is being depreciated.
 Interface components
 ====================
 
-Interface compenents include ``Monitor`` (current) and ``Portal``
+Interface components include ``Monitor`` (current) and ``Portal``
 (proposed).  The ``Monitor`` component controls the user-readable
 summary of progress to stdout, and the proposed ``Portal`` component
 will control the interaction of ``Enzo-P`` with external applications
