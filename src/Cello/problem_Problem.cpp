@@ -721,7 +721,10 @@ Output * Problem::create_output_
     bool        image_log        = config->output_image_log[index];
     bool        image_abs        = config->output_image_abs[index];
     int         image_face_rank  = config->output_image_face_rank[index];
-    int         max_level        = config->mesh_max_level;
+    int         min_level        = config->output_min_level[index];
+    int         max_level        = std::min(config->output_max_level[index],
+					    config->mesh_max_level);
+    bool        leaf_only        = config->output_leaf_only[index];
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
     std::string image_color_particle_attribute =
@@ -744,8 +747,10 @@ Output * Problem::create_output_
 			      particle_descr,
 			      CkNumPes(),
 			      nx,ny,nz, 
-			      nbx,nby,nbz, 
+			      nbx,nby,nbz,
+			      min_level,
 			      max_level,
+			      leaf_only,
 			      image_type,
 			      image_size_x,image_size_y,
 			      image_reduce_type,

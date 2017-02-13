@@ -189,6 +189,7 @@ struct fluxes
 #include "enzo_EnzoSolverCg.hpp"
 #include "enzo_EnzoSolverBiCgStab.hpp"
 #include "enzo_EnzoSolverMg0.hpp"
+#include "enzo_EnzoSolverHg.hpp"
 #include "enzo_EnzoSolverJacobi.hpp"
 
 #include "enzo_EnzoProlong.hpp"

@@ -54,6 +54,7 @@ public: // interface
     
     p | refresh_list_;
     p | monitor_iter_;
+    p | callback_;
   }
 
   int add_refresh (int ghost_depth, 
@@ -63,6 +64,9 @@ public: // interface
 
   Refresh * refresh(size_t index=0) ;
 
+  void set_callback (int callback)
+  { callback_ = callback; }
+  
 public: // virtual functions
 
   /// Solve the linear system Ax = b
@@ -96,6 +100,9 @@ protected: // attributes
 
   /// How often to write output
   int monitor_iter_;
+
+  /// Callback id
+  int callback_;
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

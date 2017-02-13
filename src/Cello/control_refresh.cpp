@@ -50,7 +50,7 @@ void Block::refresh_begin_()
       refresh_load_particle_faces_ (refresh);
   }
   TRACE_REFRESH("calling control_sync p_refresh_exit()");
-  control_sync (CkIndex_Block::p_refresh_exit(),refresh_.back().sync_type(),2);
+  control_sync (CkIndex_Block::p_refresh_exit(),refresh->sync_type(),refresh->sync_id());
 }
 
 //----------------------------------------------------------------------

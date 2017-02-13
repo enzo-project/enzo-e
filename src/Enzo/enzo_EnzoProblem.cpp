@@ -226,6 +226,27 @@ Solver * EnzoProblem::create_solver_
        is_singular,
        enzo_config->solver_diag_precon[index_solver]) ;
 
+  } else if (solver_type == "hg") {
+
+    Restrict * restrict = 
+      create_restrict_(enzo_config->solver_restrict[index_solver],config);
+    Prolong * prolong = 
+      create_prolong_(enzo_config->solver_prolong[index_solver],config);
+
+    solver = new EnzoSolverHg
+      (field_descr,
+       enzo_config->solver_monitor_iter[index_solver],
+       rank,
+       enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_smooth[index_solver],
+       enzo_config->solver_smooth_weight[index_solver],
+       enzo_config->solver_smooth_pre[index_solver],
+       enzo_config->solver_smooth_coarse[index_solver],
+       enzo_config->solver_smooth_post[index_solver],
+       is_singular,  restrict,  prolong,
+       enzo_config->solver_min_level[index_solver],
+       enzo_config->solver_max_level[index_solver]);
+
   } else if (solver_type == "bicgstab") {
 
     solver = new EnzoSolverBiCgStab
@@ -336,9 +357,12 @@ Method * EnzoProblem::create_method_
 	   enzo_config->solver_list[index_solver] != solver_name) {
       ++index_solver;
     }
+    ASSERT1 ("EnzoProblem::create_solver_()",
+	     "Cannot find solver \"%s\"",
+	     solver_name.c_str(),
+	     index_solver < enzo_config->num_solvers);
+    
     std::string solver_type = enzo_config->solver_type[index_solver];
-    CkPrintf ("solver_name = %s  solver_type = %s\n",
-	      solver_name.c_str(),solver_type.c_str());
 
     Solver * solver = create_solver_
       (solver_type,enzo_config,index_solver,field_descr,particle_descr);

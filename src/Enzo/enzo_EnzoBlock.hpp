@@ -255,9 +255,12 @@ public: /// entry methods
 
   //--------------------------------------------------
 
-  /// Synchronize after potential solver before computing accelerations
+  /// Synchronize after potential solve and before accelerations
+  void r_method_gravity_continue(CkReductionMsg * msg);
+
+  /// Synchronize for refresh
   void r_method_gravity_end(CkReductionMsg * msg);
-  
+
   //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
@@ -338,14 +341,24 @@ public: /// entry methods
 
   // EnzoSolverMg0
 
-  template <class T> void p_solver_mg0_shift_b(CkReductionMsg* msg);  
-
   void p_solver_mg0_pre_smooth();
+  void p_solver_mg0_solve_coarse();
+  template <class T> void p_solver_mg0_shift_b(CkReductionMsg* msg);  
   template <class T> void p_solver_mg0_restrict_send(CkReductionMsg * msg);
   template <class T> void p_solver_mg0_restrict_recv(FieldMsg * msg);
   template <class T> void p_solver_mg0_prolong_recv(FieldMsg * msg);
   template <class T> void p_solver_mg0_post_smooth(CkReductionMsg * msg);
+  template <class T> void p_solver_mg0_end_cycle(CkReductionMsg* msg);  
 
+  void p_solver_hg_pre_smooth();
+  void p_solver_hg_solve_coarse();
+  template <class T> void p_solver_hg_shift_b(CkReductionMsg* msg);  
+  template <class T> void p_solver_hg_restrict_send(CkReductionMsg * msg);
+  template <class T> void p_solver_hg_restrict_recv(FieldMsg * msg);
+  template <class T> void p_solver_hg_prolong_recv(FieldMsg * msg);
+  template <class T> void p_solver_hg_post_smooth(CkReductionMsg * msg);
+  template <class T> void p_solver_hg_end_cycle(CkReductionMsg* msg);  
+  
   void mg_sync_reset()             { mg_sync_.reset(); }
   void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }
   bool mg_sync_next()         { return mg_sync_.next(); };
@@ -365,6 +378,19 @@ protected: // attributes
   int mg_iter_;
 
 public: // attributes (YIKES!)
+
+  // TEMPORARY DEBUGGING ARRAYS
+#define MG0_MAX_LEVEL 10
+
+  static int mg0_count[MG0_MAX_LEVEL];
+  static double mg0_bsum[MG0_MAX_LEVEL];
+  static double mg0_csum[MG0_MAX_LEVEL];
+  static double mg0_rsum[MG0_MAX_LEVEL];
+  static double mg0_xsum[MG0_MAX_LEVEL];
+  static double mg0_babssum[MG0_MAX_LEVEL];
+  static double mg0_cabssum[MG0_MAX_LEVEL];
+  static double mg0_rabssum[MG0_MAX_LEVEL];
+  static double mg0_xabssum[MG0_MAX_LEVEL];
 
   union {
     enzo_float dt;

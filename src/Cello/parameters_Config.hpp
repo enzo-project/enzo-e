@@ -94,6 +94,9 @@ public: // interface
       output_image_face_rank(),
       output_image_min(),
       output_image_max(),
+      output_max_level(),
+      output_min_level(),
+      output_leaf_only(),
       output_schedule_index(),
       output_dir(),
       output_stride(),
@@ -226,6 +229,9 @@ public: // interface
       output_image_face_rank(),
       output_image_min(),
       output_image_max(),
+      output_max_level(),
+      output_min_level(),
+      output_leaf_only(),
       output_schedule_index(),
       output_dir(),
       output_stride(),
@@ -414,6 +420,9 @@ public: // attributes
   std::vector < double>       output_image_min;
   std::vector < double>       output_image_max;
   std::vector < int >         output_schedule_index;
+  std::vector < int >         output_max_level;
+  std::vector < int >         output_min_level;
+  std::vector < char >        output_leaf_only;
   std::vector < std::vector <std::string> >  output_dir;
   std::vector < int >         output_stride;
   std::vector < std::vector <std::string> >  output_field_list;

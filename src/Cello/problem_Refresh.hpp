@@ -25,6 +25,7 @@ public: // interface
     min_face_rank_(0),
     neighbor_type_(neighbor_unknown),
     sync_type_   (sync_unknown),
+    sync_id_ (0),
     sync_load_(),
     sync_store_(),
     active_(true),
@@ -38,6 +39,7 @@ public: // interface
    int min_face_rank,
    int neighbor_type,
    int sync_type,
+   int sync_id=0,
    bool active=true) throw() 
   : field_list_(),
     particle_list_(),
@@ -47,6 +49,7 @@ public: // interface
     sync_type_(sync_type),
     sync_load_(),
     sync_store_(),
+    sync_id_(sync_id),
     active_(active),
     callback_(0) 
   {
@@ -66,6 +69,7 @@ public: // interface
       sync_type_(0),
       sync_load_(),
       sync_store_(),
+      sync_id_ (0),
       active_(false),
       callback_(0)
   {  }
@@ -84,6 +88,7 @@ public: // interface
     p | sync_type_;
     p | sync_load_;
     p | sync_store_;
+    p | sync_id_;
     p | active_;
     p | callback_;
   }
@@ -169,6 +174,9 @@ public: // interface
   Sync & sync_store() 
   {  return sync_store_; }
 
+  int sync_id() 
+  {  return sync_id_; }
+
 
   void print() const 
   {
@@ -191,6 +199,7 @@ public: // interface
     printf ("Refresh sync_store: %d/%d\n",
 	    sync_store_.value(),
 	    sync_store_.stop());
+    printf ("Refresh sync_id: %d\n",sync_id_);
     printf ("Refresh active: %d\n",active_);
     printf ("Refresh callback: %d\n",callback_);
   }
@@ -259,6 +268,9 @@ private: // attributes
 
   /// Counter for synchronization after storing data
   Sync sync_store_;
+
+  /// Index for refresh synchronization counter
+  int sync_id_;
 
   /// Whether the Refresh object is active for the block (replaces is_leaf())
   bool active_;

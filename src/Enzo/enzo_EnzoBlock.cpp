@@ -70,6 +70,16 @@ int EnzoBlock::ghost_depth[3*CONFIG_NODE_SIZE];
 
 int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 
+int EnzoBlock::mg0_count[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_xsum[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_csum[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_rsum[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_bsum[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_xabssum[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_cabssum[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_rabssum[MG0_MAX_LEVEL];
+double EnzoBlock::mg0_babssum[MG0_MAX_LEVEL];
+
 //----------------------------------------------------------------------
 
 // STATIC

@@ -192,7 +192,7 @@ void Block::init
   }
 
   for (size_t i=0; i<face_level_last_.size(); i++) 
-    face_level_last_[i] = 0;
+    face_level_last_[i] = -1;
   for (size_t i=0; i<child_face_level_curr_.size(); i++) 
     child_face_level_curr_[i] = 0;
 
@@ -877,7 +877,7 @@ void Block::debug_faces_(const char * mesg)
   for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
     for (if3[1]=1; if3[1]>=-1; if3[1]--) {
 
-      index_.print(mesg,-1,2,true,simulation());
+      PARALLEL_PRINTF ("%s ",name().c_str());
 
       for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 #ifdef CELLO_DEBUG

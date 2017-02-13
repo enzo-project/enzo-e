@@ -16,15 +16,16 @@
 
 #ifdef DEBUG_ADAPT
 
+#define CELLO_TRACE
+
 #   define PUT_LEVEL(INDEX_SEND,INDEX_RECV,IC3,IF3,LEVEL_NOW,LEVEL_NEW,MSG) \
   {									\
     char buffer [256];							\
-    int nb3[3] = {1,1,1};						\
-    sprintf (buffer,"%s %s -> %s"					\
-	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d",		\
-	     MSG,name().c_str(),INDEX_RECV.bit_string(2,2,nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
+    int nb3[3] = {2,2,2};						\
+    CkPrintf ("%s %s -> B%s"						\
+	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d\n",		\
+	      name().c_str(),MSG,INDEX_RECV.bit_string(INDEX_RECV.level(),rank(),nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
 	     IF3[0],IF3[1],IF3[2],IC3[0],IC3[1],IC3[2]);		\
-    INDEX_SEND.print(buffer,3,2,false,simulation());			\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
     check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
     thisProxy[INDEX_RECV].p_adapt_recv_level				\
@@ -38,12 +39,11 @@
   }
 #endif /* DEBUG_ADAPT */
 
-
 #ifdef DEBUG_ADAPT
 
 #   ifdef CELLO_TRACE
-#      define trace(A) printf ("%s:%d %s TRACE %s\n",			\
-				__FILE__,__LINE__,name_.c_str(),A)
+#      define trace(A) CkPrintf ("%s:%d %s TRACE %s\n",			\
+				 __FILE__,__LINE__,name_.c_str(),A); fflush(stdout)
 #   else
 #      define trace(A) /*  NULL */
 #   endif
@@ -120,9 +120,8 @@ void Block::adapt_next_()
   {
     char buffer[255];
     if (level() != level_next_) {
-      sprintf (buffer,"is leaf %d level %d -> %d",
-	       is_leaf(),level(),level_next_);
-      index_.print(buffer,-1,2,false,simulation());
+      CkPrintf ("%s is leaf %d level %d -> %d\n",
+		name().c_str(),is_leaf(),level(),level_next_);
     }
   }
 #endif
@@ -157,14 +156,15 @@ void Block::adapt_end_()
 
   if (delete_) {
 #ifdef DEBUG_ADAPT
-    index_.print("DESTROY",-1,2,false,simulation());
+  CkPrintf ("%s DESTROY\n",name().c_str());
+  fflush(stdout);
 #endif
     ckDestroy();
     return;
   }
 
   for (size_t i=0; i<face_level_last_.size(); i++)
-    face_level_last_[i] = 0;
+    face_level_last_[i] = -1;
 
   const int rank = this->rank();
   sync_coarsen_.set_stop(NUM_CHILDREN(rank));
@@ -256,7 +256,8 @@ void Block::adapt_refine_()
   }
 
 #ifdef DEBUG_ADAPT
-  index_.print("REFINE",-1,2,false,simulation());
+  CkPrintf ("%s REFINE\n",name().c_str());
+  fflush(stdout);
 #endif
 
   adapt_ = adapt_unknown;
@@ -364,7 +365,8 @@ void Block::adapt_refine_()
   
   is_leaf_ = false;
 #ifdef DEBUG_ADAPT
-  index_.print("adapt_refine leaf=0",-1,2,false,simulation());
+  CkPrintf ("%s adapt_refine is_leaf <- 0\n",name().c_str());
+  fflush(stdout);
 #endif
 }
 
@@ -476,7 +478,10 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 void Block::adapt_delete_child_(Index index_child)
 {
 #ifdef DEBUG_ADAPT
-  index_child.print("adapt_delete_child",-1,2,false,simulation());
+  int nb3[3] = {2,2,2};
+  CkPrintf ("%s deleting child %s\n",
+	    name().c_str(), index_child.bit_string(index_child.level(),rank(),nb3).c_str());
+  fflush(stdout);
 #endif
   thisProxy[index_child].p_adapt_delete();
 
@@ -540,22 +545,23 @@ void Block::p_adapt_recv_level
     index_send.print("index_",-1,2,false,simulation());
   }
 
+  // note face_level_last_ initialized as -1, in which case won't skip
   const bool skip_face_update = 
-    ! (level_face_new > face_level_last_[ICF3(ic3,if3)]);
+    (level_face_new == face_level_last_[ICF3(ic3,if3)]);
 
 #ifdef DEBUG_ADAPT
   {
     char buffer [255];
-    sprintf (buffer,"%s %s"
-	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d  "			
-	     "%d <- %d [%d] %s",					
-	     "recv",name().c_str(),
-	     level(), level_next_,
-	     if3[0],if3[1],if3[2],				
-	     ic3[0],ic3[1],ic3[2],				
-	     level_face_curr,level_face_new,face_level_last_[ICF3(ic3,if3)],
-	     skip_face_update ? "SKIP" : "");
-    index_.print(buffer,-1,2,false,simulation());		
+    int nb3[3] = {2,2,2};				
+    CkPrintf ("%s %s <- B%s"
+	      " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d [%d] %s\n",
+	      name().c_str(),"recv",
+	      index_send.bit_string(index_send.level(),rank(),nb3).c_str(),
+	      level_face_curr,level_face_new,
+	      if3[0],if3[1],if3[2],				
+	      ic3[0],ic3[1],ic3[2], face_level_last_[ICF3(ic3,if3)],
+	      skip_face_update ? "SKIP" : "");
+    fflush(stdout);
   }
 #endif
 
@@ -759,7 +765,8 @@ void Block::adapt_recv
 void Block::adapt_coarsen_()
 {
 #ifdef DEBUG_ADAPT
-  index_.print("COARSEN",-1,2,false,simulation());
+  CkPrintf ("%s COARSEN\n",name().c_str());
+  fflush(stdout);
 #endif
   const int level = this->level();
   
@@ -861,7 +868,7 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
   is_leaf_=true;
 
 #ifdef DEBUG_ADAPT
-  index_.print("p_adapt_recv_child is_leaf=1",-1,2,false,simulation());
+  CkPrintf ("%s p_adapt_recv_child is_leaf <- 1\n",name().c_str());
 #endif
 
   // Can now safely notify child to delete itself 
@@ -884,7 +891,7 @@ void Block::p_adapt_delete()
 {
   performance_start_(perf_adapt_end);
 #ifdef DEBUG_ADAPT
-  index_.print("DELETING",-1,2,false,simulation());
+  CkPrintf ("%s DELETING\n",name().c_str());
 #endif
   delete_ = true;
   performance_stop_(perf_adapt_end);

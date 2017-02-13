@@ -805,21 +805,9 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 {
   TRACE_SOLVER("Solver end ENTER");
 
-  if (enzo_block->is_leaf()) {
-
-    Data * data = enzo_block->data();
-    Field field = data->field();
-
-    if (enzo_block->index().is_root()) {
-      monitor_output_ (enzo_block,iter_,rr0_,rr_min_,rr_,rr_max_,true);
-    }
-
-    int order;
-    EnzoComputeAcceleration compute_acceleration (field.field_descr(),
-						  rank_, order=2);
-    compute_acceleration.compute(enzo_block);
-
-  }
+  CkCallback(callback_,
+	     CkArrayIndexIndex(enzo_block->index()),
+	     enzo_block->proxy_array()).send();
 
   TRACE_SOLVER("Solver end EXIT");
 }

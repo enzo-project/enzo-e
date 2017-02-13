@@ -243,9 +243,10 @@ void Block::control_sync_face_(int entry_point, int phase)
 
   const int min_face_rank = 0;
 
+  int num_faces = 0;
+
   ItFace it_face = this->it_face(min_face_rank,index_);
 
-  int num_faces = 0;
   while (it_face.next()) {
 
     ++num_faces;

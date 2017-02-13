@@ -1255,34 +1255,10 @@ template<class T> void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg)
 //----------------------------------------------------------------------
 
 template<class T> void EnzoSolverBiCgStab::end(EnzoBlock* enzo_block, int retval) throw () {
-  /// supposed to do:
-  ///    if (retval == return_converged) {
-  ///       potential = X
-  ///       compute acceleration field
-  ///       ==> solver_bicgstab_exit()
-  ///    } else {
-  ///       ERROR (retval)
-  ///    }
-  /// 
-  /// actually just does
-  ///    calls refresh then exit()
 
-  // /// deallocate temporary vector data
-  // field.deallocate_temporary(ib_);
-  // field.deallocate_temporary(ix_);
-  // field.deallocate_temporary(ir_);
-  // field.deallocate_temporary(ir0_);
-  // field.deallocate_temporary(ip_);
-  // field.deallocate_temporary(iy_);
-  // field.deallocate_temporary(iv_);
-  // field.deallocate_temporary(iq_);
-  // field.deallocate_temporary(iu_);
-
-  /// indicate that solver is finished
-
-  // Refresh field faces then call solver_bicgstab_acc()
-
-    enzo_block->p_solver_bicgstab_acc();
+  CkCallback(callback_,
+	     CkArrayIndexIndex(enzo_block->index()),
+	     enzo_block->proxy_array()).send();
 
 }
 
@@ -1330,31 +1306,11 @@ void EnzoSolverBiCgStab::acc(EnzoBlock* enzo_block) throw()
   Field field = data->field();
 
   /// extract the solution and compute derived acceleration fields (leaf blocks only)
-  if (enzo_block->is_leaf()) {
-
-    /// access relevant fields
-    T* X         = (T*) field.values(ix_);
-    T* potential = (T*) field.values(ipotential_);
-
-    /// output solution progress (iteration, residual, etc)
-    if (enzo_block->index().is_root()) 
-      monitor_output_(enzo_block,iter_,err_,err_min_,err_,err_max_,true);
-
-    /// copy potential from solution vector X
-    copy_(potential, X, mx_, my_, mz_);
-
-    /// compute acceleration fields from potential
-    int order;
-    EnzoComputeAcceleration compute_acceleration(field.field_descr(),
-						 rank_, order=4);
-    compute_acceleration.compute(enzo_block);
-  }
-
   first_call_ = false;
 
   // Refresh field faces then call solver_bicgstab_exit()
 
-    enzo_block->p_solver_bicgstab_exit();
+  enzo_block->p_solver_bicgstab_exit();
 
 }
 
@@ -1362,21 +1318,9 @@ void EnzoSolverBiCgStab::acc(EnzoBlock* enzo_block) throw()
 
 void EnzoBlock::p_solver_bicgstab_exit() {
 
-  performance_start_(perf_compute,__FILE__,__LINE__);
+  //  performance_start_(perf_compute,__FILE__,__LINE__);
 
-  //  /// deallocate temporary vector data
-
-  // field.deallocate_temporary(ib_);
-  // field.deallocate_temporary(ix_);
-  // field.deallocate_temporary(ir_);
-  // field.deallocate_temporary(ir0_);
-  // field.deallocate_temporary(ip_);
-  // field.deallocate_temporary(iy_);
-  // field.deallocate_temporary(iv_);
-  // field.deallocate_temporary(iq_);
-  // field.deallocate_temporary(iu_);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+  //  performance_stop_(perf_compute,__FILE__,__LINE__);
   
 }
 

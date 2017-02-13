@@ -1,18 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoSolverMg0.hpp
+/// @file     enzo_EnzoSolverHg.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2015-06-02
-/// @brief    [\ref Enzo] Declaration of EnzoSolverMg0
+/// @brief    [\ref Enzo] Declaration of EnzoSolverHg
 ///
 /// Multigrid for solving a linear system on the root-level grid only
 
-#ifndef ENZO_ENZO_SOLVER_MG0_HPP
-#define ENZO_ENZO_SOLVER_MG0_HPP
+#ifndef ENZO_ENZO_SOLVER_HG_HPP
+#define ENZO_ENZO_SOLVER_HG_HPP
 
-class EnzoSolverMg0 : public Solver {
+class EnzoSolverHg : public Solver {
 
-  /// @class    EnzoSolverMg0
+  /// @class    EnzoSolverHg
   /// @ingroup  Enzo
   ///
   /// @brief [\ref Enzo] Multigrid on the root-level grid.  For use either
@@ -21,8 +21,8 @@ class EnzoSolverMg0 : public Solver {
 
 public: // interface
 
-  /// Create a new EnzoSolverMg0 object
-  EnzoSolverMg0
+  /// Create a new EnzoSolverHg object
+  EnzoSolverHg
   (const FieldDescr * field_descr,
    int monitor_iter,
    int rank,
@@ -38,13 +38,13 @@ public: // interface
    int min_level,
    int max_level);
 
-  EnzoSolverMg0() {};
+  EnzoSolverHg() {};
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoSolverMg0);
+  PUPable_decl(EnzoSolverHg);
   
   /// Charm++ PUP::able migration constructor
-  EnzoSolverMg0 (CkMigrateMessage *m)
+  EnzoSolverHg (CkMigrateMessage *m)
     :  A_(NULL),
        smooth_(""),
        smooth_pre_(NULL),
@@ -66,7 +66,7 @@ public: // interface
   {}
 
   /// Destructor
-  ~EnzoSolverMg0 () throw();
+  ~EnzoSolverHg () throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -117,7 +117,7 @@ public: // interface
   virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
 
   virtual std::string name () const
-  { return "mg0"; }
+  { return "hg"; }
 
   void compute_correction(EnzoBlock * enzo_block) throw();
 
@@ -237,4 +237,4 @@ protected: // attributes
   long double bc_;
 };
 
-#endif /* ENZO_ENZO_SOLVER_GRAVITY_MG0_HPP */
+#endif /* ENZO_ENZO_SOLVER_GRAVITY_HG_HPP */

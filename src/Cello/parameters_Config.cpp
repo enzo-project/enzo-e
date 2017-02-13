@@ -134,6 +134,9 @@ void Config::pup (PUP::er &p)
   p | output_image_face_rank;
   p | output_image_min;
   p | output_image_max;
+  p | output_min_level;
+  p | output_max_level;
+  p | output_leaf_only;
   p | output_schedule_index;
   p | output_dir;
   p | output_stride;
@@ -747,6 +750,9 @@ void Config::read_output_ (Parameters * p) throw()
   output_image_face_rank.resize(num_output);
   output_image_min.resize(num_output);
   output_image_max.resize(num_output);
+  output_min_level.resize(num_output);
+  output_max_level.resize(num_output);
+  output_leaf_only.resize(num_output);
   output_schedule_index.resize(num_output);
   output_dir.resize(num_output);
   output_stride.resize(num_output);
@@ -878,6 +884,11 @@ void Config::read_output_ (Parameters * p) throw()
 	p->value_float("image_min",0.0);
       output_image_max[index_output] =
 	p->value_float("image_max",0.0);
+
+      output_min_level[index_output] = p->value_integer("min_level",0);
+      output_max_level[index_output] =
+	p->value_integer("max_level",std::numeric_limits<int>::max());
+      output_leaf_only[index_output] = p->value_logical("leaf_only",true);
 
       if (p->type("colormap") == parameter_list) {
 	int size = p->list_length("colormap");

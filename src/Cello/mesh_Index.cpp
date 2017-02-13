@@ -352,52 +352,14 @@ void Index::print_ (FILE * fp,
 		    int rank,
 		    bool no_nl) const
 {
-
-  std::string buffer;
-
-  const int level = this->level();
-
-  if (max_level == -1) max_level = level;
-
-  int nb = 0;
-
+  int nb3[3] = {0};
   for (int axis=0; axis<rank; axis++) {
-    nb = std::max(nb,num_bits_(a_[axis].array));
+    nb3[axis] = std::max(nb3[axis],num_bits_(a_[axis].array));
   }
-
-  buffer = buffer + "[ ";
-  for (int axis=0; axis<rank; axis++) {
-
-    for (int i=nb; i>=0; i--) {
-      int bit = (a_[axis].array & ( 1 << i));
-      if (fp != NULL) buffer = buffer + (bit?"1":"0");
-    }
-
-    for (int i=0; i<max_level; i++) {
-      if (i==0) {
-	buffer = buffer + ":";
-      }
-
-      if (i < level) {
-	int ic3[3];
-	child (i+1, &ic3[0], &ic3[1], &ic3[2]);
-	buffer = buffer + (ic3[axis] ? "1":"0");
-      } else {
-	buffer = buffer + " ";
-      }
-	
-    }
-    buffer = buffer + " ";
-      
-  }
-  buffer = buffer + "] ";
-
-  buffer = buffer + msg;
-
-  if (! no_nl) buffer = buffer + "\n";
-
+  
   if (fp != NULL) {
-    fprintf (fp,"%s",buffer.c_str());
+    fprintf (fp,"[%s] %s",this->bit_string (max_level,rank,nb3).c_str(),msg);
+    if (! no_nl) fprintf (fp,"\n");
     fflush(fp);
   }
 }
@@ -413,40 +375,12 @@ void Index::write (int ip,
   sprintf (filename,"index.%s.%d",msg,ip);
   FILE * fp = fopen(filename,"a");
 
-  if (max_level == -1) max_level = this->level();
-    
-  // fprintf (fp,"INDEX %p %s: ", this,msg);
-  fprintf (fp,"INDEX %s: ", msg);
-
-  int nb = 0;
-
-  for (int axis=0; axis<rank; axis++) {
-    nb = std::max(nb,num_bits_(a_[axis].array));
-  }
-
-  for (int axis=0; axis<rank; axis++) {
-
-    for (int i=nb; i>=0; i--) {
-      int bit = (a_[axis].array & ( 1 << i));
-      fprintf (fp,"%d",bit?1:0);
-    }
-
-    for (int level=0; level<max_level; level++) {
-
-      if (level == 0) fprintf (fp,":");
-      int ic3[3];
-      child (level+1, &ic3[0], &ic3[1], &ic3[2]);
-      fprintf (fp,"%d",ic3[axis]);
-	
-    }
-    fprintf (fp," ");
-      
-  }
-  fprintf (fp,"\n");
+  print_(fp,msg,max_level,rank,false);
 
   fflush(fp);
 
   fclose(fp);
+  
 }
 
 //----------------------------------------------------------------------

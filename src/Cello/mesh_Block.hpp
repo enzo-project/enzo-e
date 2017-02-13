@@ -962,6 +962,8 @@ protected: // attributes
   int index_method_;
 
   /// Index of currently-active Solver
+  int index_solver_;
+  
   Solver * solver_;
 
   /// Refresh object associated with current refresh operation

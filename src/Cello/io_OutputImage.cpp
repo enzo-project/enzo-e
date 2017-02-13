@@ -17,7 +17,7 @@ OutputImage::OutputImage(int index,
 			 int process_count,
 			 int nx0, int ny0, int nz0,
 			 int nxb, int nyb, int nzb,
-			 int max_level,
+			 int min_level, int max_level, int leaf_only,
 			 std::string image_type,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
@@ -46,7 +46,9 @@ OutputImage::OutputImage(int index,
     image_log_(image_log),
     image_abs_(image_abs),
     ghost_(ghost),
-    max_level_(max_level)
+    min_level_(min_level),
+    max_level_(max_level),
+    leaf_only_(leaf_only)
 
 {
   if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
@@ -78,13 +80,13 @@ OutputImage::OutputImage(int index,
     if (nz0>1) nz0*=2;
   }
 
-  if (nxi_ == 0) nxi_ = (type_is_mesh()) ? 2*nl * nxb + 1 : nl * nx0;
-  if (nyi_ == 0) nyi_ = (type_is_mesh()) ? 2*nl * nyb + 1 : nl * ny0;
+  if (nxi_ == 0) nxi_ = (type_is_mesh_()) ? 2*nl * nxb + 1 : nl * nx0;
+  if (nyi_ == 0) nyi_ = (type_is_mesh_()) ? 2*nl * nyb + 1 : nl * ny0;
 
   int ngx,ngy,ngz;
   field_descr->ghost_depth(0,&ngx,&ngy,&ngz);
 
-  if (! type_is_mesh() && ghost_) {
+  if (! type_is_mesh_() && ghost_) {
     nxi_ += 2*nxb*ngx*nl;
     nyi_ += 2*nyb*ngy*nl;
   }
@@ -142,14 +144,15 @@ void OutputImage::pup (PUP::er &p)
   p | mesh_color_type_;
   p | color_particle_attribute_;
   p | axis_;
-  p | min_value_;
-  p | max_value_;
   p | nxi_;
   p | nyi_;
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = NULL;
   p | image_type_;
+  p | min_level_;
+  p | max_level_;
+  p | leaf_only_;
   p | face_rank_;
   p | image_log_;
   p | image_abs_;
@@ -234,8 +237,10 @@ void OutputImage::write_block
 // @param particle_descr  Particle descriptor
 {
 
-  if (!block->is_leaf()) return;
-
+  // Exit if Block is not participating in output
+  
+  if (! is_active_(block) ) return;
+  
   TRACE("OutputImage::write_block()");
   const FieldData * field_data = block->data()->field_data();
 
@@ -294,7 +299,7 @@ void OutputImage::write_block
   double h3[3];
   block->cell_width(h3,h3+1,h3+2);
   
-  if (type_is_data()) {
+  if (type_is_data_()) {
 
     if (index_field >= 0) {
 
@@ -365,7 +370,7 @@ void OutputImage::write_block
     }
   }
 
-  if (type_is_mesh()) {
+  if (type_is_mesh_()) {
 
     // value for mesh
     double value = 0;
@@ -627,6 +632,20 @@ double OutputImage::mesh_color_(int level,int age) const
 
 //----------------------------------------------------------------------
 
+bool OutputImage::is_active_ (const Block * block) const
+{
+  const int level = block->level();
+  if (leaf_only_ && !block->is_leaf()) {
+    return false;
+  } else if (!((min_level_ <= level) && (level <= max_level_))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+//----------------------------------------------------------------------
+
 void OutputImage::png_create_ (std::string filename) throw()
 {
   if (is_writer()) {
@@ -785,11 +804,11 @@ void OutputImage::image_write_ () throw()
 
 double OutputImage::data_(int index) const
 {
-  if (type_is_mesh() && type_is_data())
+  if (type_is_mesh_() && type_is_data_())
     return (image_data_[index] + 0.2*image_mesh_[index])/1.2;
-  else if (type_is_data()) 
+  else if (type_is_data_()) 
     return image_data_[index];
-  else  if (type_is_mesh()) 
+  else  if (type_is_mesh_()) 
     return image_mesh_[index];
   else {
     ERROR ("OutputImage::data_()",
