@@ -547,7 +547,7 @@ void Block::p_adapt_recv_level
 
   // note face_level_last_ initialized as -1, in which case won't skip
   const bool skip_face_update = 
-    (level_face_new == face_level_last_[ICF3(ic3,if3)]);
+    (level_face_new <= face_level_last_[ICF3(ic3,if3)]);
 
 #ifdef DEBUG_ADAPT
   {
