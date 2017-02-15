@@ -837,7 +837,7 @@ void Parameters::group_pop(std::string group) throw()
   if (group != "" && group != current_group_[n-1]) {
     WARNING2("Parameters::group_pop",
 	     "group_pop(%s) does not match group_push(%s)",
-	     group.c_str(),current_group_[n-1]);
+	     group.c_str(),current_group_[n-1].c_str());
   }
 
   current_group_.resize(n - 1);
