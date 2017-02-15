@@ -541,7 +541,7 @@ void EnzoSolverHg::begin_cycle_(EnzoBlock * enzo_block) throw()
 
     const int field_count = enzo_block->data()->field().field_count();
 
-    Refresh refresh (4,0,neighbor_level, sync_face, 5);
+    Refresh refresh (4,0,neighbor_level, sync_face, 6);
     refresh.add_all_fields(field_count);
 
     //    enzo_block->set_solver(this);
@@ -975,7 +975,7 @@ void EnzoSolverHg::prolong_recv(EnzoBlock * enzo_block) throw()
     }
   }
 
-  Refresh refresh (4,0,neighbor_level, sync_face,6);
+  Refresh refresh (4,0,neighbor_level, sync_face,8);
 
   refresh.add_all_fields(enzo_block->data()->field().field_count());
 

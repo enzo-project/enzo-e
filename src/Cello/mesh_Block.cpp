@@ -6,7 +6,6 @@
 /// @brief    Implementation of the Block object
 
 #include "cello.hpp"
-
 #include "mesh.hpp"
 #include "main.hpp"
 #include "charm_simulation.hpp"

@@ -785,6 +785,7 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
   refresh.set_active(enzo_block->is_leaf());
   refresh.add_all_fields(enzo_block->data()->field().field_count());
   enzo_block->set_solver(this);
+  
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_bicgstab_loop_3(),&refresh);
 

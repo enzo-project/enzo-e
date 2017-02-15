@@ -12,12 +12,13 @@
 int Solver::add_refresh (int ghost_depth, 
 			 int min_face_rank, 
 			 int neighbor_type, 
-			 int sync_type)
+			 int sync_type,
+			 int id)
 {
   int index=refresh_list_.size();
   refresh_list_.resize(index+1);
   refresh_list_[index] = new Refresh 
-    (ghost_depth,min_face_rank,neighbor_type,sync_type,true);
+    (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true);
   return index;
 }
 

@@ -39,8 +39,17 @@ void Block::refresh_begin_()
 
   simulation()->set_phase(phase_refresh);
 
+  control_sync (CkIndex_Block::p_refresh_continue(),refresh->sync_type(),refresh->sync_id());
+}
+
+//----------------------------------------------------------------------
+
+void Block::refresh_continue()
+{
 
   // Refresh if Refresh object exists and have data
+
+  Refresh * refresh = this->refresh();
 
   if ( refresh && refresh->active() ) {
 
@@ -50,7 +59,8 @@ void Block::refresh_begin_()
       refresh_load_particle_faces_ (refresh);
   }
   TRACE_REFRESH("calling control_sync p_refresh_exit()");
-  control_sync (CkIndex_Block::p_refresh_exit(),refresh->sync_type(),refresh->sync_id());
+
+  control_sync (CkIndex_Block::p_refresh_exit(),refresh->sync_type(),refresh->sync_id()+1);
 }
 
 //----------------------------------------------------------------------

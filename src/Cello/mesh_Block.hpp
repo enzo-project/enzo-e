@@ -532,7 +532,15 @@ public:
 
   void refresh_enter (int call, Refresh * refresh);
 
-  // Exit the refresh phase after QD
+  /// Enter the refresh phase after synchronizing
+  void p_refresh_continue ()
+  {
+    refresh_continue();
+  }
+
+  void refresh_continue();
+
+  /// Exit the refresh phase after synchronizing
   void p_refresh_exit () 
   {
     performance_start_(perf_refresh_exit);

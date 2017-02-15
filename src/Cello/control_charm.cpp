@@ -173,13 +173,6 @@ void Block::control_sync (int entry_point, int sync, int id)
 {
   TRACE_CONTROL("control_sync()");
   
-#ifdef DEBUG_CONTROL
-  { char buffer[50];
-    sprintf (buffer,"control_sync %d %d",sync,id);
-    TRACE_CONTROL(buffer);
-  }
-#endif
-  
   if (sync == sync_quiescence) {
 
     if (index_.is_root())
@@ -263,19 +256,12 @@ void Block::control_sync_face_(int entry_point, int phase)
 
 void Block::control_sync_count_ (int entry_point, int phase, int count)
 {
-  TRACE_CONTROL("control_sync_count");
 
   if (count != 0)  max_sync_[phase] = count;
 
   ++count_sync_[phase];
 
   // max_sync reached: continue and reset counter
-
-#ifdef DEBUG_CONTROL
-  CkPrintf ("DEBUG_CONTROL %s entry %d control_sync_count %d > 0 && %d >= %d\n",
-	    name().c_str(),entry_point,max_sync_[phase] ,count_sync_[phase], max_sync_[phase]);
-  fflush(stdout);
-#endif
 
   if (max_sync_[phase] > 0 && count_sync_[phase] >= max_sync_[phase]) {
 

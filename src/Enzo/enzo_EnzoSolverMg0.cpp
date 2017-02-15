@@ -523,10 +523,6 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
     Refresh refresh (4,0,neighbor_level, sync_face, 4);
     refresh.add_all_fields(field_count);
 
-#ifdef DEBUG_SOLVER_REFRESH    
-    CkPrintf ("DEBUG_SOLVER_MG refresh sync_face %d\n",refresh.sync_id());
-#endif
-
     enzo_block->refresh_enter
       (CkIndex_EnzoBlock::p_solver_mg0_solve_coarse(),&refresh);
 
@@ -536,7 +532,7 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
     const int field_count = enzo_block->data()->field().field_count();
 
-    Refresh refresh (4,0,neighbor_level, sync_face, 5);
+    Refresh refresh (4,0,neighbor_level, sync_face, 6);
     refresh.add_all_fields(field_count);
 
     if (level < max_level_) {
@@ -964,7 +960,7 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
     }
   }
 
-  Refresh refresh (4,0,neighbor_level, sync_face,6);
+  Refresh refresh (4,0,neighbor_level, sync_face,8);
 
   refresh.add_all_fields(enzo_block->data()->field().field_count());
 

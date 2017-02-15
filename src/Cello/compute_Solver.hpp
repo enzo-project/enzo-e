@@ -60,7 +60,8 @@ public: // interface
   int add_refresh (int ghost_depth, 
 		   int min_face_rank, 
 		   int neighbor_type, 
-		   int sync_type);
+		   int sync_type,
+		   int id_in=0);
 
   Refresh * refresh(size_t index=0) ;
 
