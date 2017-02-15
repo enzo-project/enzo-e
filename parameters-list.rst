@@ -210,13 +210,13 @@ is performed.
 
 ----
 
-:Parameter:  :p:`Balance` : :p:`schedule` : :g:`<schedule_parameter>`
+:Parameter:  :p:`Balance` : :p:`schedule`
 :Summary:    :s:`Scheduling parameters for dynamic load balancing`
-:Type:       :t:`integer`
-:Default: :d:`0`
+:Type:       :t:`subgroup`
+:Default: :d:`none`
 :Scope:     :c:`Cello`
 
-:e:`Dynamic load balancing is scheduled according to` :p:`schedule` :e:`parameters.  Scheduling parameters---including` :p:`var`, :p:`list`, :p:`start`, :p:`stop`, and :p:`step` :e:`---are documented in the` `schedule`_ :e:`section.`
+:e:`See the` `schedule`_ :e:` subgroup for parameters used to define when to trigger the dynamic load balancing operation.`
 
 --------
 Boundary
@@ -1825,6 +1825,16 @@ perform and on what schedule.
 
 ----
 
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`schedule`
+:Summary: :s:`Output schedule for the given file set`
+:Type:    :t:`subgroup`
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+
+:e:`See the` `schedule`_ :e:`subgroup for parameters used to define when to perform output for the given file set.` 
+
+----
+
 :Parameter:  :p:`Output` : :g:`<file_set>` : :p:`colormap`
 :Summary: :s:`Color map for image output`
 :Type:    :t:`list` ( :t:`float` )
@@ -2044,112 +2054,6 @@ perform and on what schedule.
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`By default, blocks in mesh images are colored according to the level of the block.  In addition to` :t:`"level"`, :e:`other possible ways to assign colors to blocks include` :t:`"process"` :e:`and` :t:`"age"`.
-
-   
-schedule
---------
-
-The schedule parameter subgroup defines when to do something, such as
-perform output, apply a method, or to apply the dynamic load balancer.
-Schedules can be specified as a :p:`list` of values, or as an interval of
-values specified using some subset of :p:`start`, :p:`stop`, and
-:p:`step`.  The associated variable, set using :p:`var`, can be "cycle",
-"time", or "seconds".  Here "time" refers to simulation time, and
-"seconds" to wall-clock time.  At each cycle, all schedules are
-checked to see if the cycle number, simulation time or wall-clock
-seconds match the list or interval of values.  If there is a match,
-the associated output or is performed; otherwise, it is skipped.
-
-Note that when simulation "time" is specified, then the simulation's
-time step may be reduced so that the corresponding output occurs
-exactly at the specified time.
-
-::
-
-    Output {
-
-       check {
-
-          # **** write a checkpoint every 100.0 seconds ****
-
-          schedule {
-             var = "seconds";
-             start = 100.0;
-             step =  100.0;
-          }
-           ...
-       };
-
-       dump {
-
-          # **** perform a data dump every 50 cycles until cycle 1000 ****
-
-          schedule {
-             var = "cycle";
-             step =   50;
-             stop = 1000;
-           }
-            ...
-       };
-
-       image {
-
-          # **** write an image at times t = 1.0,  2.0, and 5.0 ****
-
-          schedule {
-             var = "time";
-             list = [1.0, 2.0, 5.0];
-           }
-            ...
-       };
-    }
-            
-----
-
-:Parameter:    :p:`Output` : :g:`<file_set>` : :p:`schedule` : :p:`var`
-:Summary: :s:`Variable associated with scheduling for the given file set`
-:Type:    :t:`string`
-:Default: :d:`"none"`
-:Scope:     :c:`Cello`
-
-:e:`The` :p:`var` :e:`parameter specifies what value is checked at each cycle, which may be` :t:`"cycle"`, :t:`"time"`, :e:`or` :t:`"seconds"` :e:`Here "time" refers to simulation time, and "seconds" to wall-clock time.  Note that when simulation "time" is specified, the simulation's time step may be reduced such that the corresponding output occurs exactly at the specified time.`
-
----- 
-
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`schedule` : :p:`list`
-:Summary: :s:`List of scheduled values for the specified variable`
-:Type:    [ :t:`list` ( :t:`integer` ) | :t:`list` ( :t:`float` ) ]
-:Default: :d:`[]`
-:Scope:     :c:`Cello`
-
-:e:`This parameter specifies a list of values to check against for output with respect to cycle, time, or seconds.  If the "var" parameter associated with the schedule is "cycle", then` :p:`value` :e:`must be a list of integers; otherwise,` :p:`value` :e:`must be a list of` :t:`float`:e:`'s  The default is an empty list.`
-
-----
-
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`schedule` : :p:`start`
-:Summary: :s:`Starting value for scheduled interval`
-:Type:    [ :t:`integer` | :t:`float` ]
-:Default: :d:`0 | 0.0`
-:Scope:     :c:`Cello`
-:Todo:    :o:`write`
-
-----
-
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`schedule` : :p:`stop`
-:Summary: :s:`Last value for scheduled interval`
-:Type:    [ :t:`integer` | :t:`float` ]
-:Default: :d:`max (integer) | max (double)`
-:Scope:     :c:`Cello`
-:Todo:    :o:`write`
-
-----
-
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`schedule` : :p:`step`
-:Summary: :s:`Stepping increment for interval`
-:Type:    [ :t:`integer` | :t:`float` ]
-:Default: :d:`1 | 1.0`
-:Scope:     :c:`Cello`
-:Todo:    :o:`write`
 
 --------
 Particle
@@ -2397,6 +2301,117 @@ Restart
 :Scope:     :c:`Cello`
 
 :e:`This optional parameter is used to specify the name of a parameter file to read on restart.  Its purpose is to allow a simulation to be restarted with slightly different parameter values, e.g. with a smaller courant number.  Currently, very few parameters are supported in the restart parameter file, just` :p:`Field` : :p:`courant` :e:`and` :p:`Testing` : :p:`time_final`.
+
+   
+--------
+schedule
+--------
+
+"schedule" is a parameter *subgroup* that defines when to do something, such as
+perform output, apply a method, or to apply the dynamic load balancer.
+Schedules can be specified as a :p:`list` of values, or as an interval of
+values specified using some subset of :p:`start`, :p:`stop`, and
+:p:`step`.  The associated variable, set using :p:`var`, can be "cycle",
+"time", or "seconds".  Here "time" refers to simulation time, and
+"seconds" to wall-clock time.  At each cycle, all schedules are
+checked to see if the cycle number, simulation time or wall-clock
+seconds match the list or interval of values.  If there is a match,
+the associated output or is performed; otherwise, it is skipped.
+
+Note that when simulation "time" is specified, then the simulation's
+time step may be reduced so that the corresponding output occurs
+exactly at the specified time.
+
+::
+
+    Output {
+
+
+       list = ["check", "dump", "image"];
+    
+       check {
+
+          # **** write a checkpoint every 100.0 seconds ****
+
+          schedule {
+             var = "seconds";
+             start = 100.0;
+             step =  100.0;
+          }
+           ...
+       };
+
+       dump {
+
+          # **** perform a data dump every 50 cycles until cycle 1000 ****
+
+          schedule {
+             var = "cycle";
+             step =   50;
+             stop = 1000;
+           }
+            ...
+       };
+
+       image {
+
+          # **** write an image at times t = 1.0,  2.0, and 5.0 ****
+
+          schedule {
+             var = "time";
+             list = [1.0, 2.0, 5.0];
+           }
+            ...
+       };
+    }
+            
+----
+
+:Parameter:   :p:`schedule` : :p:`var`
+:Summary: :s:`Variable associated with scheduling for the given file set`
+:Type:    :t:`string`
+:Default: :d:`"none"`
+:Scope:     :c:`Cello`
+
+:e:`The` :p:`var` :e:`parameter specifies what value is checked at each cycle, which may be` :t:`"cycle"`, :t:`"time"`, :e:`or` :t:`"seconds"` :e:`Here "time" refers to simulation time, and "seconds" to wall-clock time.  Note that when simulation "time" is specified, the simulation's time step may be reduced such that the corresponding output occurs exactly at the specified time.`
+
+---- 
+
+:Parameter:  :p:`schedule` : :p:`list`
+:Summary: :s:`List of scheduled values for the specified variable`
+:Type:    [ :t:`list` ( :t:`integer` ) | :t:`list` ( :t:`float` ) ]
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies a list of values to check against for output with respect to cycle, time, or seconds.  If the "var" parameter associated with the schedule is "cycle", then` :p:`value` :e:`must be a list of integers; otherwise,` :p:`value` :e:`must be a list of` :t:`float`:e:`'s  The default is an empty list.`
+
+----
+
+:Parameter:  :p:`schedule` : :p:`start`
+:Summary: :s:`Starting value for scheduled interval`
+:Type:    [ :t:`integer` | :t:`float` ]
+:Default: :d:`0 | 0.0`
+:Scope:     :c:`Cello`
+:Todo:    :o:`write`
+
+----
+
+:Parameter:  :p:`schedule` : :p:`stop`
+:Summary: :s:`Last value for scheduled interval`
+:Type:    [ :t:`integer` | :t:`float` ]
+:Default: :d:`max (integer) | max (double)`
+:Scope:     :c:`Cello`
+:Todo:    :o:`write`
+
+----
+
+:Parameter:  :p:`schedule` : :p:`step`
+:Summary: :s:`Stepping increment for interval`
+:Type:    [ :t:`integer` | :t:`float` ]
+:Default: :d:`1 | 1.0`
+:Scope:     :c:`Cello`
+:Todo:    :o:`write`
+
 
 --------
 Stopping
