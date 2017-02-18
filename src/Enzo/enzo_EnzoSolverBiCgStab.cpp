@@ -483,6 +483,8 @@ EnzoSolverBiCgStab::~EnzoSolverBiCgStab() throw()
 void EnzoSolverBiCgStab::apply ( Matrix * A, int ix, int ib, Block * block) throw()
 {
 
+  Solver::begin_(block);
+  
   A_ = A;
   ix_ = ix;
   ib_ = ib;
@@ -582,7 +584,6 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_start_1<T>(NULL), 
 			enzo_block->proxy_array());
     
-    enzo_block->set_solver(this);
     enzo_block->contribute(2*sizeof(long double), &reduce, 
 			   sum_long_double_2_type, callback);
 
@@ -663,7 +664,6 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_start_3<T>(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->set_solver(this);
   enzo_block->contribute(sizeof(long double), &reduce, 
 			 sum_long_double_type, callback);
 }
@@ -784,7 +784,6 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
   Refresh refresh (4,0,neighbor_leaf, sync_barrier);
   refresh.set_active(enzo_block->is_leaf());
   refresh.add_all_fields(enzo_block->data()->field().field_count());
-  enzo_block->set_solver(this);
   
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_bicgstab_loop_3(),&refresh);
@@ -861,7 +860,6 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
   CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->set_solver(this);
   enzo_block->contribute(3*sizeof(long double), &reduce, 
 			 sum_long_double_3_type, callback);
 
@@ -989,7 +987,6 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
   Refresh refresh (4,0,neighbor_leaf, sync_barrier);
   refresh.set_active(enzo_block->is_leaf());
   refresh.add_all_fields(enzo_block->data()->field().field_count());
-  enzo_block->set_solver(this);
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_bicgstab_loop_9(),&refresh);
 
@@ -1058,7 +1055,6 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
   /// initiate callback to r_solver_bicgstab_loop_11, and contribute to overall dot-products
   CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_11<T>(NULL), 
 		      enzo_block->proxy_array());
-  enzo_block->set_solver(this);
   enzo_block->contribute(4*sizeof(long double), &reduce, 
 			 sum_long_double_4_type, callback);
     
@@ -1162,7 +1158,6 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   /// initiate callback to r_solver_bicgstab_loop_13, and contribute to overall dot-products
   CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_13<T>(NULL), 
 		      enzo_block->proxy_array());
-  enzo_block->set_solver(this);
   enzo_block->contribute(2*sizeof(long double), &reduce, 
 			 sum_long_double_2_type, callback);
     
@@ -1229,7 +1224,6 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
   /// initiate callback to r_solver_bicgstab_loop_15, and contribute to overall max
   CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_15<T>(NULL), 
 		      enzo_block->proxy_array());
-  enzo_block->set_solver(this);
   enzo_block->contribute(sizeof(int), &iter, 
 			 CkReduction::max_int, callback);
 
@@ -1257,6 +1251,8 @@ template<class T> void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg)
 
 template<class T> void EnzoSolverBiCgStab::end(EnzoBlock* enzo_block, int retval) throw () {
 
+  Solver::end_(enzo_block);
+  
   CkCallback(callback_,
 	     CkArrayIndexIndex(enzo_block->index()),
 	     enzo_block->proxy_array()).send();

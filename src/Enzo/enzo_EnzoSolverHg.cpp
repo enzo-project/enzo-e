@@ -291,11 +291,11 @@ void EnzoSolverHg::apply
 {
   TRACE_MG(block,"EnzoSolverHg::apply()");
 
+  block->push_solver(index_);
+
   A_ = A;
   ix_ = ix;
   ib_ = ib;
-
-  block->set_solver(this);
 
   TRACE_LEVEL("EnzoSolverHg::apply",block);
 
@@ -403,7 +403,6 @@ void EnzoSolverHg::enter_solver_ (EnzoBlock * enzo_block) throw()
     CkCallback callback(CkIndex_EnzoBlock::p_solver_hg_shift_b<T>(NULL), 
 			enzo_block->proxy_array());
     
-    enzo_block->set_solver(this);
     enzo_block->contribute(2*sizeof(long double), &reduce, 
 			   sum_long_double_2_type, callback);
 
@@ -544,11 +543,8 @@ void EnzoSolverHg::begin_cycle_(EnzoBlock * enzo_block) throw()
     Refresh refresh (4,0,neighbor_level, sync_face, 6);
     refresh.add_all_fields(field_count);
 
-    //    enzo_block->set_solver(this);
     enzo_block->refresh_enter
       (CkIndex_EnzoBlock::p_solver_hg_pre_smooth(),&refresh);
-    // // Skip refresh
-    // pre_smooth<T>(enzo_block);
 
   }
 }
@@ -617,15 +613,6 @@ void EnzoSolverHg::pre_smooth(EnzoBlock * enzo_block) throw()
   T * X = (T*) field.values(ix_);
 
   smooth_pre_->apply(A_,ix_,ib_,enzo_block);
-
-  // //  LOCAL_SUM("1 X",ix_);
-
-  // Refresh refresh (4,0,neighbor_level, sync_face);
-  // refresh.add_all_fields(enzo_block->data()->field().field_count());
-
-  // //  enzo_block->set_solver(this);
-  // enzo_block->refresh_enter
-  //   (CkIndex_EnzoBlock::p_solver_hg_restrict_send<T>(NULL),&refresh);
 
   restrict_send<T>(enzo_block);
 }
@@ -979,7 +966,6 @@ void EnzoSolverHg::prolong_recv(EnzoBlock * enzo_block) throw()
 
   refresh.add_all_fields(enzo_block->data()->field().field_count());
 
-  //  enzo_block->set_solver(this);
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_hg_post_smooth<T>(NULL),&refresh);
 }

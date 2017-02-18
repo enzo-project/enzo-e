@@ -64,7 +64,8 @@ Block::Block ( MsgRefine * msg )
   age_(0),
   face_level_last_(),
   name_(""),
-  index_method_(-1)
+  index_method_(-1),
+  index_solver_()
 {
   performance_start_(perf_block);
   init (msg->index_,
@@ -294,6 +295,7 @@ void Block::pup(PUP::er &p)
   p | face_level_last_;
   p | name_;
   p | index_method_;
+  p | index_solver_;
   p | refresh_;
   // SKIP method_: initialized when needed
 
@@ -334,6 +336,15 @@ Method * Block::method () throw ()
   Problem * problem = simulation()->problem();
   Method * method = problem->method(index_method_);
   return method;
+}
+
+//----------------------------------------------------------------------
+
+Solver * Block::solver () throw ()
+{
+  Problem * problem = simulation()->problem();
+  Solver * solver = problem->solver(index_solver());
+  return solver;
 }
 
 //----------------------------------------------------------------------
@@ -382,7 +393,7 @@ void Block::print () const
   CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
   CkPrintf ("name_ = %d\n",name_.c_str());
   CkPrintf ("index_method_ = %d\n",index_method_);
-  CkPrintf ("solver_ = %s\n",solver_->name().c_str());
+  CkPrintf ("index_solver_ = %d\n",index_solver());
 }
 
 //======================================================================
@@ -524,7 +535,8 @@ Block::Block (CkMigrateMessage *m)
     age_(0),
     face_level_last_(),
     name_(""),
-    index_method_(-1)
+    index_method_(-1),
+    index_solver_()
 { 
   performance_start_(perf_block);
   simulation()->monitor_insert_block();

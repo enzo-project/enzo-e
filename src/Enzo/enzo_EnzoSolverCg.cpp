@@ -133,6 +133,8 @@ void EnzoSolverCg::pup (PUP::er &p)
 
 void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
 {
+  Solver::begin_(block);
+
   A_ = A;
   ix_ = ix;
   ib_ = ib;
@@ -251,7 +253,7 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 #endif
 	  
   TRACE_SOLVER("   loop_0a contribute");
-  enzo_block->set_solver(this);
+
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  sum_long_double_3_type, 
 			  callback);
@@ -416,7 +418,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 #endif
 
   TRACE_SOLVER("   shift_1 contribute");
-  enzo_block->set_solver(this);
+
   enzo_block->contribute (sizeof(long double), &reduce, 
 			  sum_long_double_type, 
 			  callback);
@@ -558,7 +560,7 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
     TRACE_SOLVER("loop_3 contribute");
     CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_3<T>(NULL), 
 			enzo_block->proxy_array());
-    enzo_block->set_solver(this);
+
     enzo_block->contribute (3*sizeof(long double), &reduce, 
 			    sum_long_double_3_type,
 			    callback);
@@ -678,7 +680,7 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 #endif
 
   TRACE_SOLVER("loop_5 contribute");
-  enzo_block->set_solver(this);
+
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  sum_long_double_3_type, 
 			  callback);
@@ -784,7 +786,7 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
   TRACE_SOLVER("loop_0b callback");
     
   TRACE_SOLVER("loop_0b contribute");
-  enzo_block->set_solver(this);
+
   enzo_block->contribute (sizeof(int), &iter, 
 			  CkReduction::max_int, callback);
   TRACE_SOLVER("loop_0b contribute");
@@ -803,6 +805,9 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 ///       ERROR (return-)
 ///    }
 {
+
+  Solver::end_(enzo_block);
+  
   TRACE_SOLVER("Solver end ENTER");
 
   CkCallback(callback_,

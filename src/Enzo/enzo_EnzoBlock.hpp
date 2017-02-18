@@ -343,11 +343,11 @@ public: /// entry methods
 
   void p_solver_mg0_pre_smooth();
   void p_solver_mg0_solve_coarse();
+  void p_solver_mg0_post_smooth();
   template <class T> void p_solver_mg0_shift_b(CkReductionMsg* msg);  
   template <class T> void p_solver_mg0_restrict_send(CkReductionMsg * msg);
   template <class T> void p_solver_mg0_restrict_recv(FieldMsg * msg);
   template <class T> void p_solver_mg0_prolong_recv(FieldMsg * msg);
-  template <class T> void p_solver_mg0_post_smooth(CkReductionMsg * msg);
   template <class T> void p_solver_mg0_end_cycle(CkReductionMsg* msg);  
 
   void p_solver_hg_pre_smooth();

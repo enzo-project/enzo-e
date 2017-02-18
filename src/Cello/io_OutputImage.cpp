@@ -8,6 +8,17 @@
 #include "cello.hpp"
 #include "io.hpp"
 
+// #define DEBUG_OUTPUT
+
+#ifdef DEBUG_OUTPUT
+#  define TRACE_OUTPUT \
+  CkPrintf ("%s:%d %d %s TRACE_OUTPUT image_mesh_ %p\n",				\
+	    __FILE__,__LINE__,CkMyPe(),block->name().c_str(),image_mesh_);		\
+  fflush(stdout);
+#else
+#  define TRACE_OUTPUT /* ... */
+#endif
+
 //----------------------------------------------------------------------
 
 OutputImage::OutputImage(int index,
@@ -119,10 +130,14 @@ OutputImage::~OutputImage() throw ()
 {
   delete png_;
   png_ = NULL;
-  delete image_data_;
+  delete [] image_data_;
   image_data_ = NULL;
-  delete image_mesh_;
+  delete [] image_mesh_;
   image_mesh_ = NULL;
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT ~OutputImage %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -136,16 +151,35 @@ void OutputImage::pup (PUP::er &p)
   p | map_r_;
   p | map_g_;
   p | map_b_;
-  WARNING("OutputImage::pup","skipping image_data_");
-  if (p.isUnpacking()) image_data_ = 0;
-  WARNING("OutputImage::pup","skipping image_mesh_");
-  if (p.isUnpacking()) image_mesh_ = 0;
   p | op_reduce_;
   p | mesh_color_type_;
   p | color_particle_attribute_;
   p | axis_;
   p | nxi_;
   p | nyi_;
+
+  int has_data = (image_data_ != NULL);
+  p | has_data;
+  if (has_data) {
+    if (p.isUnpacking()) image_data_ = new double [nxi_*nyi_];
+    PUParray(p,image_data_,nxi_*nyi_);
+  } else {
+    image_data_ = NULL;
+  }
+
+  int has_mesh = (image_mesh_ != NULL);
+  p | has_mesh;
+  if (has_mesh) {
+    if (p.isUnpacking()) image_mesh_ = new double [nxi_*nyi_];
+    PUParray(p,image_mesh_,nxi_*nyi_);
+  } else {
+    image_mesh_ = NULL;
+  }
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT pup %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
+  
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = NULL;
@@ -159,7 +193,6 @@ void OutputImage::pup (PUP::er &p)
   PUParray(p,image_lower_,3);
   PUParray(p,image_upper_,3);
   p | ghost_;
-  p | max_level_;
 }
 
 //----------------------------------------------------------------------
@@ -238,12 +271,13 @@ void OutputImage::write_block
 {
 
   // Exit if Block is not participating in output
-  
-  if (! is_active_(block) ) return;
-  
-  TRACE("OutputImage::write_block()");
-  const FieldData * field_data = block->data()->field_data();
 
+  if (! is_active_(block) ) return;
+
+  TRACE("OutputImage::write_block()");
+
+  Field field = ((Data *)block->data())->field();
+  
   const int rank = block->rank();
 
   ASSERT("OutputImage::write_block",
@@ -258,9 +292,9 @@ void OutputImage::write_block
   const int IY = (axis_+2) % 3;
   const int IZ = (axis_+0) % 3;
 
-  // FieldData size
+  // Field block size
   int nb3[3];
-  field_data->size(&nb3[0],&nb3[1],&nb3[2]);
+  field.size(&nb3[0],&nb3[1],&nb3[2]);
 
   const int level = block->level();
 
@@ -306,9 +340,9 @@ void OutputImage::write_block
       // Get ghost depth
 
       int ng3[3];
-      field_descr->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+      field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-      // FieldData array dimensions
+      // Field array dimensions
       int nd3[3];
       nd3[0] = nb3[0] + 2*ng3[0];
       nd3[1] = nb3[1] + 2*ng3[1];
@@ -322,14 +356,14 @@ void OutputImage::write_block
 
       // add block contribution to image
 
-      const char * field = (ghost_) ? 
-	field_data->values(field_descr,index_field) :
-	field_data->unknowns(field_descr,index_field);
+      const char * field_values = (ghost_) ? 
+	field.values(index_field) :
+	field.unknowns(index_field);
 
-      float  * field_float = (float*)field;
-      double * field_double = (double*)field;
+      float  * field_float  = (float*)field_values;
+      double * field_double = (double*)field_values;
 
-      const int precision = field_descr->precision(index_field);
+      const int precision = field.precision(index_field);
 
       double factor = (nb3[IZ] > 1) ? 1.0 / pow(2.0,1.0*level) : 1.0;
       if (rank >= 2 && (std::abs(dm3[IZ] - dp3[IZ]) < h3[IZ])) factor = 1.0;
@@ -677,6 +711,10 @@ void OutputImage::image_create_ () throw()
   image_data_  = new double [nxi_*nyi_];
   image_mesh_  = new double [nxi_*nyi_];
   TRACE2("new image_data_ = %p image_mesh_ = %p",image_data_,image_mesh_);
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT image_create_ %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
 
   const double min = std::numeric_limits<double>::max();
   const double max = -min;
@@ -832,6 +870,10 @@ void OutputImage::image_close_ () throw()
   TRACE1("delete image_mesh_ = %p",image_mesh_)
   delete [] image_mesh_;
   image_mesh_ = 0;
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT image_close_ %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
 }
 
 //----------------------------------------------------------------------

@@ -47,3 +47,20 @@ void Solver::monitor_output_
 		 (double)(rr_min/ rr0),
 		 (double)(rr_max/ rr0));
 }
+
+//----------------------------------------------------------------------
+
+void Solver::begin_(Block * block)
+{
+  block->push_solver(index_);
+}
+
+//----------------------------------------------------------------------
+
+void Solver::end_(Block * block)
+{
+  int index = block->pop_solver();
+  ASSERT2("Solver::end_()",
+	  "Solver mismatch was %d expected %d",
+	  index,index_,(index == index_));
+}

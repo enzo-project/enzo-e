@@ -310,13 +310,25 @@ public: // interface
   /// Return the currently-active Method
   Method * method () throw();
 
-  /// Return the currently active Solver
-  void set_solver(Solver * solver) throw()
-  { solver_ = solver; }
+  /// Start a new solver
+  void push_solver(int index_solver) throw()
+  { index_solver_.push_back(index_solver); }
 
+  /// Return from a solver
+  int pop_solver() throw()
+  { int index = index_solver();
+    index_solver_.resize(index_solver_.size()-1); }
+
+  /// Return the index of the current solver
+  int index_solver() const throw()
+  {
+    ASSERT("Block::index_solver()","index_solver_[] stack is empty",
+	   (index_solver_.size() > 0));
+    return index_solver_[index_solver_.size()-1];
+  }
+  
   /// Return the currently-active Solver
-  Solver * solver () const throw()
-  { return solver_; }
+  Solver * solver () throw();
 
 protected: // methods
   
@@ -969,11 +981,9 @@ protected: // attributes
   /// Index of currently-active Method
   int index_method_;
 
-  /// Index of currently-active Solver
-  int index_solver_;
+  /// Stack of currently active solvers
+  std::vector<int> index_solver_;
   
-  Solver * solver_;
-
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
   std::vector<Refresh> refresh_;

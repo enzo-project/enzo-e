@@ -291,6 +291,10 @@ Solver * EnzoProblem::create_solver_
 	   solver_type.c_str(),
 	   solver != NULL);
 
+  solver->set_index(index_solver);
+  
+  solver_list_.push_back(solver); 
+
   return solver;
 }    
 

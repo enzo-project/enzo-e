@@ -55,6 +55,7 @@ public: // interface
     p | refresh_list_;
     p | monitor_iter_;
     p | callback_;
+    p | index_;
   }
 
   int add_refresh (int ghost_depth, 
@@ -67,6 +68,9 @@ public: // interface
 
   void set_callback (int callback)
   { callback_ = callback; }
+
+  void set_index (int index)
+  { index_ = index; }
   
 public: // virtual functions
 
@@ -78,6 +82,12 @@ public: // virtual functions
   { return "UNKNOWN"; }
 
 protected: // functions
+
+  /// Initialize a solve
+  void begin_(Block * block);
+  
+  /// Clean up after a solver is done and returning to its callback_
+  void end_(Block * block);
 
   void monitor_output_(Block * block, int iter, double rr0,
 		       double rr_min, double rr, double rr_max,
@@ -104,6 +114,9 @@ protected: // attributes
 
   /// Callback id
   int callback_;
+
+  /// Index of this solver
+  int index_;
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

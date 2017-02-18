@@ -106,14 +106,23 @@ balance = 1
 # strategy limits the number of objects migrated.
 
 balancer = [
+'BlockLB',
+'ComboCentLB',
+'DistributedLB',
 'GreedyCommLB',
 'GreedyLB', 
 'HybridLB',
+#'MetisLB',
 'NeighborLB',
 'RandCentLB',
 'RefineCommLB',
 'RefineLB',
-'RotateLB']
+'RefineSwapLB',
+#'RefineTopoLB',
+'RotateLB',
+#'TopoCentLB',
+# 'WSLB'
+]
 
 #----------------------------------------------------------------------
 # Whether to compile with -pg to use gprof for performance profiling

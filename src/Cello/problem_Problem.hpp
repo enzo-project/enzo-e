@@ -238,7 +238,7 @@ protected: // functions
   virtual Restrict * create_restrict_ 
   (std::string type, Config * config) throw ();
 
-private: // attributes
+protected: // attributes
 
   /// Boundary conditions object for each (axis,face)
   std::vector<Boundary *> boundary_list_;

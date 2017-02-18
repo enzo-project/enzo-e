@@ -126,7 +126,6 @@ public: // interface
   Field field (size_t i=0) throw()
   { return Field(field_descr(),field_data(i)); }
 
-
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
 		    int gx = 0, int gy = 0, int gz = 0) const;

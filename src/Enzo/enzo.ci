@@ -162,10 +162,10 @@ module enzo {
     
     entry void p_solver_mg0_pre_smooth();
     entry void p_solver_mg0_solve_coarse();
+    entry void p_solver_mg0_post_smooth();
     template <class T> entry void p_solver_mg0_restrict_send(CkReductionMsg *msg);
     template <class T> entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
     template <class T> entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
-    template <class T> entry void p_solver_mg0_post_smooth(CkReductionMsg *msg);
     template <class T> entry void p_solver_mg0_end_cycle(CkReductionMsg *msg);
 
     // EnzoSolverHg
@@ -269,10 +269,6 @@ module template_defs {
    extern entry void EnzoBlock p_solver_mg0_prolong_recv<float>();
    extern entry void EnzoBlock p_solver_mg0_prolong_recv<double>();
    extern entry void EnzoBlock p_solver_mg0_prolong_recv<long double>();
-
-   extern entry void EnzoBlock p_solver_mg0_post_smooth<float>();
-   extern entry void EnzoBlock p_solver_mg0_post_smooth<double>();
-   extern entry void EnzoBlock p_solver_mg0_post_smooth<long double>();
 
    // EnzoSolverHg
    

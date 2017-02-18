@@ -292,11 +292,11 @@ void EnzoSolverMg0::apply
 {
   TRACE_MG(block,"EnzoSolverMg0::apply()");
 
+  Solver::begin_(block);
+
   A_ = A;
   ix_ = ix;
   ib_ = ib;
-
-  block->set_solver(this);
 
   TRACE_LEVEL("EnzoSolverMg0::apply",block);
 
@@ -401,7 +401,6 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_shift_b<T>(NULL), 
 			enzo_block->proxy_array());
     
-    enzo_block->set_solver(this);
     enzo_block->contribute(2*sizeof(long double), &reduce, 
 			   sum_long_double_2_type, callback);
 
@@ -550,11 +549,9 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 #ifdef DEBUG_SOLVER_REFRESH    
     CkPrintf ("DEBUG_SOLVER_MG refresh sync_face %d\n",refresh.sync_id());
 #endif
-    //    enzo_block->set_solver(this);
+
     enzo_block->refresh_enter
       (CkIndex_EnzoBlock::p_solver_mg0_pre_smooth(),&refresh);
-    // // Skip refresh
-    // pre_smooth<T>(enzo_block);
 
   }
 }
@@ -579,7 +576,8 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
   else if (precision == precision_quadruple) 
     solver->solve_coarse<long double>(enzo_block);
   else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized", precision);
+    ERROR1("EnzoSolverMg0::p_solver_mg0_solve_coarse()",
+	   "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
@@ -602,7 +600,8 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
   else if (precision == precision_quadruple) 
     solver->pre_smooth<long double>(enzo_block);
   else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized", precision);
+    ERROR1("EnzoSolverMg0::p_solver_mg0_pre_smooth()",
+	   "precision %d not recognized", precision);
 }
 
 //----------------------------------------------------------------------
@@ -620,7 +619,6 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
 
   Data * data = enzo_block->data();
   Field field = data->field();
-  T * X = (T*) field.values(ix_);
 
   smooth_pre_->apply(A_,ix_,ib_,enzo_block);
 
@@ -968,25 +966,33 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
   CkPrintf ("DEBUG_SOLVER_MG refresh sync_face %d\n",refresh.sync_id());
 #endif  
 
-    //  enzo_block->set_solver(this);
   enzo_block->refresh_enter
-    (CkIndex_EnzoBlock::p_solver_mg0_post_smooth<T>(NULL),&refresh);
+    (CkIndex_EnzoBlock::p_solver_mg0_post_smooth(),&refresh);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoBlock::p_solver_mg0_post_smooth(CkReductionMsg * msg)
+void EnzoBlock::p_solver_mg0_post_smooth()
 /// [*]
 {
   TRACE_MG (this,"EnzoBlock::p_solver_mg0_post_smooth()");
   
-  delete msg;
-
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  solver -> post_smooth<T>(this);
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+  Field field = data()->field();
+  int precision = field.precision(field.field_id("density")); // assuming 
+  if      (precision == precision_single)    
+    solver->post_smooth<float>(enzo_block);
+  else if (precision == precision_double)    
+    solver->post_smooth<double>(enzo_block);
+  else if (precision == precision_quadruple) 
+    solver->post_smooth<long double>(enzo_block);
+  else 
+    ERROR1("EnzoSolverMg0::p_solver_mg0_post_smooth()",
+	   "precision %d not recognized", precision);
+
 }
 
 //----------------------------------------------------------------------
@@ -1132,6 +1138,7 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
   if (is_converged_(enzo_block)) {
 
+    Solver::end_(enzo_block);
     CkCallback(callback_,
     	       CkArrayIndexIndex(enzo_block->index()),
     	       enzo_block->proxy_array()).send();
