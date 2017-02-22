@@ -255,7 +255,8 @@ Solver * EnzoProblem::create_solver_
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
-       is_singular,
+       enzo_config->solver_min_level[index_solver],
+       enzo_config->solver_max_level[index_solver],
        enzo_config->solver_diag_precon[index_solver]) ;
 
   } else if (solver_type == "mg0") {

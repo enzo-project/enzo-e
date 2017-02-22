@@ -32,7 +32,8 @@ public: // interface
 		     int rank,
 		     int iter_max, 
 		     double res_tol,
-		     bool is_singular,
+		     int min_level,
+		     int max_level,
 		     bool diag_precon);
 
   /// default constructor
@@ -40,12 +41,13 @@ public: // interface
     : Solver(),
       A_(NULL),
       M_(NULL),
-      is_singular_(false),
       first_call_(true),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
-      rho0_(0), err_(0), err_min_(0), err_max_(0),
+      rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
+      min_level_( -std::numeric_limits<int>::max()),
+      max_level_(  std::numeric_limits<int>::max()),
       idensity_(0),  ipotential_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
@@ -71,12 +73,13 @@ public: // interface
     : Solver(m),
       A_(NULL),
       M_(NULL),
-      is_singular_(false),
       first_call_(true),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
-      rho0_(0), err_(0), err_min_(0), err_max_(0),
+      rho0_(0), err_(0), err0_(0),err_min_(0), err_max_(0),
+      min_level_( -std::numeric_limits<int>::max()),
+      max_level_(  std::numeric_limits<int>::max()),
       idensity_(0),  ipotential_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
@@ -102,7 +105,6 @@ public: // interface
     p | A_;
     p | M_;
 
-    p | is_singular_;
     p | first_call_;
     p | rank_;
     p | iter_max_;
@@ -143,8 +145,11 @@ public: // interface
     p | iter_;
     p | beta_;
     p | err_;
+    p | err0_;
     p | err_min_;
     p | err_max_;
+    p | min_level_;
+    p | max_level_;
     p | alpha_;
     p | omega_;
     p | bs_;
@@ -230,6 +235,26 @@ protected: // methods
   
   /// Compute local sum of vector elements X_i
   template<class T> long double sum_(const T* X) const throw();
+
+  /// Whether Block is active
+  bool is_active_(Block * block) {
+    const int level = block->level();
+    const bool is_leaf = block->is_leaf();
+    const bool is_unigrid = (min_level_ == max_level_);
+    const bool in_range = (min_level_ <= level && level <= max_level_);
+    return (is_unigrid) ? (in_range) : (is_leaf && in_range);
+  }
+
+  /// Type of neighbor: level if min_level == max_level, else leaf
+  int neighbor_type_() const throw() {
+    return (min_level_ == max_level_) ? neighbor_level : neighbor_leaf;
+  }
+
+  /// Type of synchronization: sync_face if min_level == max_level,
+  /// else sync_neighbor)
+  int sync_type_() const throw() {
+    return (min_level_ == max_level_) ? sync_face : sync_neighbor;
+  }
   
 protected: // attributes
 
@@ -238,10 +263,6 @@ protected: // attributes
 
   /// Preconditioner
   Matrix* M_;
-
-  /// Whether you need to project b into R(A), e.g. fully periodic or
-  /// Neumann problems
-  bool is_singular_;
 
   /// Whether this is the first call to the solver
   bool first_call_;
@@ -261,12 +282,21 @@ protected: // attributes
   /// Current error
   long double err_;
 
+  /// Initial error
+  long double err0_;
+
   /// Minimum error (all iterations so far)
   long double err_min_;
 
   /// Maximum error (all iterations so far)
   long double err_max_;
 
+  /// Minimum and maximum active level.  Non-leaf restriction
+  /// only if min_level < max_level, otherwise assumes all Blocks
+  /// and face syncronization
+  int min_level_;
+  int max_level_;
+  
   /// Density and potential field id's (for RHS and solution)
   int idensity_;
   int ipotential_;

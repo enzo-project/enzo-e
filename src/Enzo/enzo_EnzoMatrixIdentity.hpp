@@ -58,6 +58,9 @@ protected: // functions
   template <class T>
   void diagonal_ (T * X, int g0) const throw();
 
+  bool is_singular() const throw()
+  { return false; }
+  
 protected: // attributes
 
   int mx_,my_,mz_;

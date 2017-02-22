@@ -1,23 +1,24 @@
 # Problem: 2D double mach reflection
 #
-#  From http://www.astro.virginia.edu/VITA/ATHENA/dmr.html:
+#  From http://www.astro.virginia.edu/VITA/ATHENA/dmr.html
+#       (2017-02-20 broken link)
 #
 # Domain
-#     0.0 ≤ x ≤ 4.0, 0.0 ≤ y ≤ 1.0 
+#     0.0 ≤ x ≤ 4.0, 0.0 ≤ y ≤ 1.0
 # Boundary conditions
-# 
+#
 #     The inner x boundary is simply an "inflow" condition, in which the
 #     ghost zone fluid values are set by the initial conditions in the
 #     post-shock region.
-# 
-#     The outer x boundary is a simple outflow condition. 
-# 
+#
+#     The outer x boundary is a simple outflow condition.
+#
 #     The lower y boundary is constructed to mimic the wedge that the
 #     shock is being driven into. For x ≥ x0, this y boundary is a
 #     reflecting wall. For x < x0, the lower y ghost zone fluid values
 #     are set by the initial post-shock conditions. Here, we take x0 to
 #     be 1/6.
-# 
+#
 #     The upper y boundary is constructed to follow the flow of the
 #     diagonal shock such that there is no interaction between the shock
 #     and this boundary. Given the initial condtions here, the
@@ -26,35 +27,35 @@
 #     Properties" below). For x ≥ xs(t), the upper y ghost zone values
 #     are set by the initial pre-shock conditions. For x < xs(t), the
 #     ghost zone values are set by the initial post-shock conditions.
-# 
+#
 # Equation of state
-# 
-#     Adiabatic with γ = 1.4 
-# 
+#
+#     Adiabatic with γ = 1.4
+#
 # Initial density
-# 
+#
 #     The shock is initially set up to be inclined at an angle of 60º to
 #     the x-axis, and has a Mach number of 10.
-# 
+#
 #     Therefore, the initial density is 8.0 for x < x0 + y(1.0/sqrt(3.0)) and
 #     is 1.4 for x ≥ x0 + y(1.0/sqrt(3.0))
-# 
+#
 # Initial pressure
-# 
+#
 #     P = 116.5 for x < x0 + y(1.0/sqrt(3.0)), P = 1.0 for x ≥ x0 + y(1.0/sqrt(3.0))
-# 
+#
 # Initial velocity
-# 
-#     vx = 8.25 cos(30º) for x < x0 + y(1.0/sqrt(3.0)) 
-#     vy = -8.25 sin(30º) for x < x0 + y(1.0/sqrt(3.0)) 
-#     All velocities are zero for x ≥ x0 + y(1.0/sqrt(3.0)) 
-# 
+#
+#     vx = 8.25 cos(30º) for x < x0 + y(1.0/sqrt(3.0))
+#     vy = -8.25 sin(30º) for x < x0 + y(1.0/sqrt(3.0))
+#     All velocities are zero for x ≥ x0 + y(1.0/sqrt(3.0))
+#
 # MHD Components
-# 
-#     There is no MHD version of this test. 
-# 
+#
+#     There is no MHD version of this test.
+#
 # Fluid and Shock Properties
-# 
+#
 #     Given the initial conditions described above, the sound speed of
 #     the pre-shock gas is 1, and the shock speed is 10. Given the
 #     geometry, the intersection of this diagonal shock with the upper y
@@ -64,22 +65,31 @@
 #     above. This shock is driven by a contact discontinuity that is
 #     initialized with velocity 8.25 pointing downward with respect to
 #     the horizontal by 30º.
- 
- 
-   Domain { 
+
+   #--------------------------------------------------
+   # The domain is (x,y) such that 0 < x < 4 and 0 < y < 1
+
+   Domain {
       lower = [0.0, 0.0];
       upper = [4.0, 1.0];
-   } 
+   }
 
-   # The computational mesh is a single uniform grid
+   #--------------------------------------------------
+   # The root-level mesh is four blocks, each with 24x24 cells
 
    Mesh {
       root_rank = 2;
       root_size = [96,24];
       root_blocks = [4,1];
    }
+
+   #--------------------------------------------------
+   # Each root block can refine up to five additional octree levels
+   # Refinement is based on the absolute value of the (relative) slope
+   # of the density field.
+
    Adapt {
-      max_level = 5; 
+      max_level = 5;
       list = ["SLOPE"];
       SLOPE {
          type = "slope";
@@ -89,11 +99,18 @@
       }
    }
 
-   Stopping { cycle = 10000;   } 
+   #--------------------------------------------------
+   # The simulation stops after 10K cycles
+
+   Stopping { cycle = 10000;   }
+
+   #--------------------------------------------------
+   # There are fields for density, velocity, total and internal
+   # energy, and pressure.  All fields have a ghost zone depth of 4
 
    Field {
 
-      ghost_depth = 4;  # required for ProlongLinear :-/
+      ghost_depth = 4;
 
       list = [
 	"density",	
@@ -107,8 +124,11 @@
       gamma = 1.4;
 
       padding   = 0;
-      alignment = 8;    
+      alignment = 8;
    }
+
+   #--------------------------------------------------
+   # The computational method used is PPM hydrodynamics
 
    Method {
       list = ["ppm"];
@@ -122,121 +142,147 @@
      }
    }
 
-   Output { 
-
-      list = ["de_png","mesh","de_hdf5"];
-#      list = ["de_png","mesh"];
-
-
-       mesh {
-           type     = "image";
-           name = ["doublemach-mesh-%04d.png", "count"];
-           image_type  = "mesh";
-           image_reduce_type = "max";
-           image_size = [1025,257];
-           include "input/schedule_cycle_25.incl"
-           image_min = 0.0;
-           image_max = 6.0;
-           include "input/colormap_rainbow.incl"
-         }
-
-         de_png {
-           name = ["doublemach-de-%04d.png", "count"]; 
-           field_list = ["density"];
-           image_size = [1024,256];
-           type     = "image";
-           include "input/schedule_cycle_25.incl"
-           include "input/colormap_blackbody.incl";
-         }
-         de_hdf5 {
-           name = ["doublemach-p%02d-c%04d.h5", "proc","count"]; 
-           type     = "data";
-           include "input/schedule_cycle_25.incl"
-         }
-      }
+   #--------------------------------------------------
+   # Initial conditions as described in the header comment
 
    Initial {
 
       list = ["value"];
 
-      value {   
-         density    = [ 8.0, 
-                          (x <= 0.16667 + 0.57735*y), 
+      value {
+         density    = [ 8.0,
+                          (x <= 0.16667 + 0.57735*y),
                         1.4 ];
          velocity_x = [ 8.25*0.8660253,
                           (x <= 0.16667 + 0.57735*y),
-                        0.0 ]; 
+                        0.0 ];
          velocity_y = [-8.25*0.5,
                           (x <= 0.16667 + 0.57735*y),
-                        0.0]; 
+                        0.0];
 
          total_energy = [116.5 / (0.4 * 8.0) + 34.03125,
-                          (x <= 0.16667 + 0.57735*y), 
-                         1.0 / (0.4 * 1.4)]; 
+                          (x <= 0.16667 + 0.57735*y),
+                         1.0 / (0.4 * 1.4)];
       }
    }
 
-Boundary {
+   #--------------------------------------------------
+   # Boundary conditions as described in the header comment
 
-   list = [
-           "OUT",
-           "REFLECT",
-           "DENSITY",
-           "VELOCITY_X",
-           "VELOCITY_Y",
-           "TOTAL_ENERGY"
-         ];
+   # (Note that instead of, e.g., "y == 1.0" for the upper-y (top)
+   # boundary, we use "y >= 1.0" to avoid issues with comparing two
+   # fixed-precision floating-point numbers.)
 
-   OUT {
-      type = "outflow";
-      mask = [ (x >= 4.0) || 
-               (y >= 1.0 && (x >= 0.744017 + 11.547* t))];
-   }
-   REFLECT {
-      type = "reflecting";
-      axis = "y";
-      face = "lower";
-      mask = (x >= 0.166667);
-   }
+   Boundary {
 
-   DENSITY {
-      type = "inflow";
-      field_list = "density";
-      value = [ 8.0, 
-                 ((x <= 0.166667) && (y <= 0.0) ) ||
-                  (x <= 0.0) ||
-                  ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
-              ];
-    }
+      list = [
+              "OUT",
+              "REFLECT",
+              "DENSITY",
+              "VELOCITY_X",
+              "VELOCITY_Y",
+              "TOTAL_ENERGY"
+            ];
 
-   VELOCITY_X {
-      type = "inflow";
-      field_list = "velocity_x";
-      value = [ 8.25*0.8660253,
-                 ((x <= 0.166667) && (y <= 0.0) ) ||
-                  (x <= 0.0) ||
-                  ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
-               ];
-    }
+      # right boundary (x=4) outside the shock
 
-   VELOCITY_Y {
-      type = "inflow";
-      field_list = "velocity_y";
-      value = [ -8.25*0.5,
-                 ((x <= 0.166667) && (y <= 0.0) ) ||
-                  (x <= 0.0) ||
-                  ((x < 0.744017 + 11.547*t) && (y >= 1.0))
-               ];
-    }
+      OUT {
+         type = "outflow";
+         mask = [ (x >= 4.0) ||
+                  (y >= 1.0 && (x >= 0.744017 + 11.547* t))];
+      }
 
-   TOTAL_ENERGY {
-      type = "inflow";
-      field_list = "total_energy";
-      value = [ 116.5 / (0.4 * 8.0) + 34.03125,
-                 ( (x <= 0.166667) && (y <= 0.0) ) ||
-                   (x <= 0.0) ||
-                  ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
-               ];
-    }
+      # lower y reflecting boundary outside the initial shock
+
+      REFLECT {
+         type = "reflecting";
+         axis = "y";
+         face = "lower";
+         mask = (x >= 0.166667);
+      }
+
+      # inflow density boundary inside the shock
+
+      DENSITY {
+         type = "inflow";
+         field_list = "density";
+         value = [ 8.0,
+                    ((x <= 0.166667) && (y <= 0.0) ) ||
+                     (x <= 0.0) ||
+                     ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
+                 ];
+      }
+
+      # x-velocity value inside the shock
+
+      VELOCITY_X {
+         type = "inflow";
+         field_list = "velocity_x";
+         value = [ 8.25*0.8660253,
+                    ((x <= 0.166667) && (y <= 0.0) ) ||
+                     (x <= 0.0) ||
+                     ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
+                  ];
+      }
+
+      # y-velocity value inside the shock
+
+      VELOCITY_Y {
+         type = "inflow";
+         field_list = "velocity_y";
+         value = [ -8.25*0.5,
+                    ((x <= 0.166667) && (y <= 0.0) ) ||
+                     (x <= 0.0) ||
+                     ((x < 0.744017 + 11.547*t) && (y >= 1.0))
+                  ];
+      }
+
+      # total energy value inside the shock
+
+      TOTAL_ENERGY {
+         type = "inflow";
+         field_list = "total_energy";
+         value = [ 116.5 / (0.4 * 8.0) + 34.03125,
+                    ( (x <= 0.166667) && (y <= 0.0) ) ||
+                      (x <= 0.0) ||
+                     ((x <= 0.744017 + 11.547*t) && (y >= 1.0))
+                  ];
+      }
 }
+
+   #--------------------------------------------------
+   # Three sets of files are output--one HDF5 file set for
+   # the density field, and two PNG image file sets for
+   # denisity field and mesh refinement
+
+   Output {
+
+      list = ["de_png","mesh","de_hdf5"];
+      mesh {
+         type     = "image";
+         name = ["doublemach-mesh-%04d.png", "count"];
+         image_type  = "mesh";
+         image_reduce_type = "max";
+         image_size = [1025,257];
+         include "input/schedule_cycle_25.incl"
+         image_min = 0.0;
+         image_max = 6.0;
+         include "input/colormap_rainbow.incl"
+      }
+
+      de_png {
+         name = ["doublemach-de-%04d.png", "count"];
+         field_list = ["density"];
+         image_size = [1024,256];
+         type     = "image";
+         include "input/schedule_cycle_25.incl"
+         include "input/colormap_blackbody.incl";
+      }
+      de_hdf5 {
+         field_list = ["density"];
+         name = ["doublemach-p%02d-c%04d.h5", "proc","count"]
+         type     = "data";
+         include "input/schedule_cycle_25.incl"
+      }
+   }
 

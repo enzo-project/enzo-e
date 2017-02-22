@@ -131,6 +131,7 @@
 //     iter -- integer
 //     beta -- floating-point
 //     err -- floating-point
+//     err0 -- floating-point
 //     err_min -- floating-point
 //     err_max -- floating-point
 //     alpha -- floating-point
@@ -153,7 +154,7 @@
 //    
 //    iter = 0
 //
-//    if (is_singular_) {
+//    if (is_singular) {
 //       bs_ = SUM(B)   ==> r_solver_bicgstab_start_1
 //       bc_ = COUNT(B) ==> r_solver_bicgstab_start_1
 //    } else {
@@ -172,7 +173,7 @@
 // start_2()
 // --------------------
 //
-//    if (is_singular_)
+//    if (is_singular)
 //      B = B - bs_/bc_;
 //
 //    R = B
@@ -198,6 +199,7 @@
 //       rho0_ = sqrt(beta_n_)
 //       if (rho0_ == 0.0)  rho0_ = 1.0
 //       err_ = sqrt(beta_n_) / rho0_
+//       err0_ = err_
 //       err_min_ = err_
 //       err_max_ = err_
 //    } else {
@@ -245,7 +247,7 @@
 //
 //    vr0_ = DOT(V, R0) ==> r_solver_bicgstab_loop_5
 //
-//    if (is_singular_) {
+//    if (is_singular) {
 //       ys_ = SUM(Y) ==> r_solver_bicgstab_loop_5
 //       vs_ = SUM(V) ==> r_solver_bicgstab_loop_5
 //    }  
@@ -262,7 +264,7 @@
 // loop_6()
 // --------------------
 //
-//    if (is_singular_) {
+//    if (is_singular) {
 //      Y = Y - ys_/bc_;
 //      V = V - vs_/bc_;
 //    }
@@ -302,7 +304,7 @@
 //    omega_d_ = DOT(U, U) ==> r_solver_bicgstab_loop_11
 //    omega_n_ = DOT(U, Q) ==> r_solver_bicgstab_loop_11
 //
-//    if (is_singular_) {
+//    if (is_singular) {
 //       ys_ = SUM(Y) ==> r_solver_bicgstab_loop_11
 //       us_ = SUM(U) ==> r_solver_bicgstab_loop_11
 //    }  
@@ -319,7 +321,7 @@
 // loop_12()
 // --------------------
 //
-//    if (is_singular_) {
+//    if (is_singular) {
 //      Y = Y - ys_/bc_;
 //      U = U - us_/bc_;
 //
@@ -387,11 +389,8 @@
 //
 // --------------------------------------------------
 
-
 #include "cello.hpp"
-
 #include "enzo.hpp"
-
 #include "enzo.decl.h"
 
 #define CK_TEMPLATES_ONLY
@@ -403,17 +402,18 @@
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
 (const FieldDescr* field_descr,
  int monitor_iter, int rank,
- int iter_max, double res_tol, 
- bool is_singular, bool diag_precon) 
+ int iter_max, double res_tol,
+ int min_level, int max_level,
+ bool diag_precon) 
   : Solver(monitor_iter), 
-    A_(new EnzoMatrixLaplace),
+    A_(NULL),
     M_(NULL),
-    is_singular_(is_singular),
     first_call_(true),
     rank_(rank),
     iter_max_(iter_max), 
     res_tol_(res_tol),
-    rho0_(0), err_(0), err_min_(0), err_max_(0),
+    rho0_(0), err_(0), err0_(0),err_min_(0), err_max_(0),
+    min_level_(min_level), max_level_(max_level),
     idensity_(0),  ipotential_(0),
     ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
     iy_(0), iv_(0), iq_(0), iu_(0),
@@ -463,7 +463,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 
   /// Initialize default Refresh (called before entry to compute())
   
-  const int ir = add_refresh(4, 0, neighbor_leaf, sync_barrier);
+  const int ir = add_refresh(4, 0, neighbor_type_(), sync_type_());
   refresh(ir)->add_field(idensity_);
   
 }
@@ -541,7 +541,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
   /// construct RHS B, initialize initial solution X to zero (only on
   /// leaf blocks)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     /// access relevant fields
     T* density = (T*) field.values(idensity_);
@@ -567,12 +567,12 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
   }
 
   /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
-  if (is_singular_) {
+  if (A_->is_singular()) {
 
     /// set bs_ = SUM(B)   ==> r_solver_bicgstab_start_1
     /// set bc_ = COUNT(B) ==> r_solver_bicgstab_start_1
     long double reduce[2] = {0.0, 0.0};
-    if (enzo_block->is_leaf()) {
+    if (is_active_(enzo_block)) {
       T* B = (T*) field.values(ib_);
       reduce[0] = sum_(B);
       reduce[1] = 1.0*nx_*ny_*nz_;
@@ -625,7 +625,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   /// update B and initialize temporary vectors (on leaf blocks only)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     /// access relevant fields
     T* B  = (T*) field.values(ib_);
@@ -634,7 +634,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
     T* R  = (T*) field.values(ir_);
 
     /// for singular problems, project B into R(A)
-    if (is_singular_) {
+    if (A_->is_singular()) {
       T shift = -bs_ / bc_;
       for (int iz=0; iz<mz_; iz++) 
 	for (int iy=0; iy<my_; iy++) 
@@ -654,7 +654,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   }
   /// Compute local contributions to beta_n_ = DOT(R, R)
   long double reduce = 0.0;
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     T* R = (T*) field.values(ir_);
     reduce = dot_(R,R);
   }
@@ -698,6 +698,7 @@ template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw()
     rho0_ = sqrt(beta_n_);
     if (rho0_ == 0.0)  rho0_ = 1.0;
     err_ = sqrt(beta_n_) / rho0_;
+    err0_ = err_;
     err_min_ = err_;
     err_max_ = err_;
   } else {
@@ -713,7 +714,7 @@ template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw()
       monitor->print("Enzo", "BiCgStab iter %04d  rho0 %.16g",
 		     iter_,(double)(rho0_));
     if (monitor_iter_ && (iter_ % monitor_iter_) == 0 ) 
-      monitor_output_(enzo_block,iter_,err_,err_min_,err_,err_max_);
+      monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
   }
 
   /// check for convergence
@@ -772,7 +773,7 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   /// Y = SOLVE(M, P)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     /// apply preconditioner to local block
     M_->matvec(iy_, ip_, enzo_block);
   }
@@ -781,8 +782,8 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
 
   // Refresh field faces then call p_solver_bicgstab_loop_3()
 
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
-  refresh.set_active(enzo_block->is_leaf());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields(enzo_block->data()->field().field_count());
   
   enzo_block->refresh_enter
@@ -826,14 +827,14 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   /// V = MATVEC(A,Y)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     /// apply matrix to local block
     A_->matvec(iv_, iy_, enzo_block);     
   }
 
   /// compute local contributions to vr0_ = DOT(V, R0)
   long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     T* R0 = (T*) field.values(ir0_);
     T* V  = (T*) field.values(iv_);
     reduce[0] = dot_(V,R0);
@@ -842,16 +843,15 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
   /// for singular Poisson problems need all vectors in R(A), so
   /// project both Y and V into R(A)
 
-  if (is_singular_) {
+  if (A_->is_singular()) {
     /// set ys_ = SUM(Y)
     /// set vs_ = SUM(V)
-    if (enzo_block->is_leaf()) {
+    if (is_active_(enzo_block)) {
       T* Y = (T*) field.values(iy_);
       T* V = (T*) field.values(iv_);
       reduce[1] = sum_(Y);
       reduce[2] = sum_(V);
     }
-
   }
 
   /// initiate callback to r_solver_bicgstab_loop_5 and contribute to
@@ -862,8 +862,6 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
 
   enzo_block->contribute(3*sizeof(long double), &reduce, 
 			 sum_long_double_3_type, callback);
-
-
 }
 
 //----------------------------------------------------------------------
@@ -898,7 +896,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   /// for singular problems, project Y and V into R(A)
-  if (enzo_block->is_leaf() && is_singular_) {
+  if (is_active_(enzo_block) && A_->is_singular()) {
     T* Y = (T*) field.values(iy_);
     T* V = (T*) field.values(iv_);
     T yshift = -ys_ / bc_;
@@ -916,7 +914,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
   alpha_ = beta_n_ / vr0_;
 
   /// update vectors (on leaf blocks only)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     /// access relevant fields
     T* Q = (T*) field.values(iq_);
@@ -977,15 +975,15 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
  
   // Y = SOLVE(M, Q)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     /// apply preconditioner to local block
     M_->matvec(iy_, iq_, enzo_block);
   }
 
   // Refresh field faces then call solver_bicgstab_loop_9
 
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
-  refresh.set_active(enzo_block->is_leaf());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields(enzo_block->data()->field().field_count());
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_bicgstab_loop_9(),&refresh);
@@ -1026,7 +1024,7 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
   Field field = data->field();
 
   // U = MATVEC(A,Y)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     A_->matvec(iu_, iy_, enzo_block);     /// apply matrix to local block
   }
 
@@ -1034,7 +1032,7 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
   /// omega_d_ = DOT(U, U)
   /// omega_n_ = DOT(U, Q)
   long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     T* U  = (T*) field.values(iu_);
     T* Q  = (T*) field.values(iq_);
     reduce[0] = dot_(U,U);
@@ -1042,7 +1040,7 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
   }
 
   /// for singular Poisson problems, project both Y and U into R(A)
-  if (is_singular_ && enzo_block->is_leaf()) {
+  if (A_->is_singular() && is_active_(enzo_block)) {
 
     /// set ys_ = SUM(Y)
     /// set us_ = SUM(U)
@@ -1094,11 +1092,12 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   Field field = data->field();
 
   /// for singular problems, update omega_d_ and project Y and U into R(A)
-  if (is_singular_) {
+
+  if (A_->is_singular()) {
 
     omega_d_ = omega_d_ - us_*us_/bc_;
 
-    if (enzo_block->is_leaf()) {
+    if (is_active_(enzo_block)) {
       T* Y = (T*) field.values(iy_);
       T* U = (T*) field.values(iu_);
       T yshift = -ys_ / bc_;
@@ -1124,7 +1123,7 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
     this->end<T>(enzo_block, return_error_omega_eq_0);
 
   /// update vectors (on leaf blocks only)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     /// access relevant fields
     T* X = (T*) field.values(ix_);
@@ -1148,7 +1147,7 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   /// rr_     = DOT(R, R)
   /// beta_n_ = DOT(R, R0)
   long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
     T* R  = (T*) field.values(ir_);
     T* R0 = (T*) field.values(ir0_);
     reduce[0] = dot_(R,R);
@@ -1203,7 +1202,7 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
   beta_ = (beta_n_/beta_d_)*(alpha_/omega_);
 
   /// update direction vector (on leaf blocks only) -- P = R+beta*(P-omega*V)
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     /// access relevant fields
     T* P = (T*) field.values(ip_);

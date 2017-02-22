@@ -45,6 +45,9 @@ public: // virtual functions
   /// Extract the diagonal into the given field
   virtual void diagonal (int ix, Block * block, int g0=1) throw() = 0;
 
+  /// Whether the matrix is singular or not
+  virtual bool is_singular() const throw() = 0;
+
 protected: // functions
 
   template<class T>

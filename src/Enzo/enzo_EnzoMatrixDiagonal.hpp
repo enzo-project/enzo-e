@@ -72,6 +72,10 @@ protected: // functions
   template <class T>
   void diagonal_ (T * X, int g0) const throw();
 
+  /// Whether the matrix is singular or not
+  virtual bool is_singular() const throw()
+  { return false; }
+
 protected: // attributes
 
   double hx_, hy_, hz_;
