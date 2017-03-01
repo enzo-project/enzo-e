@@ -339,16 +339,20 @@ public: /// entry methods
   template <class T>
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
+  // EnzoSolverJacobi
+
+  void p_solver_jacobi_continue();
+
   // EnzoSolverMg0
 
   void p_solver_mg0_pre_smooth();
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
   template <class T> void p_solver_mg0_shift_b(CkReductionMsg* msg);  
-  template <class T> void p_solver_mg0_restrict_send(CkReductionMsg * msg);
+  //  template <class T> void p_solver_mg0_restrict_send(CkReductionMsg * msg);
   template <class T> void p_solver_mg0_restrict_recv(FieldMsg * msg);
   template <class T> void p_solver_mg0_prolong_recv(FieldMsg * msg);
-  template <class T> void p_solver_mg0_end_cycle(CkReductionMsg* msg);  
+  //  template <class T> void p_solver_mg0_end_cycle(CkReductionMsg* msg);  
 
   void p_solver_hg_pre_smooth();
   void p_solver_hg_solve_coarse();
@@ -380,17 +384,6 @@ protected: // attributes
 public: // attributes (YIKES!)
 
   // TEMPORARY DEBUGGING ARRAYS
-#define MG0_MAX_LEVEL 10
-
-  static int mg0_count[MG0_MAX_LEVEL];
-  static double mg0_bsum[MG0_MAX_LEVEL];
-  static double mg0_csum[MG0_MAX_LEVEL];
-  static double mg0_rsum[MG0_MAX_LEVEL];
-  static double mg0_xsum[MG0_MAX_LEVEL];
-  static double mg0_babssum[MG0_MAX_LEVEL];
-  static double mg0_cabssum[MG0_MAX_LEVEL];
-  static double mg0_rabssum[MG0_MAX_LEVEL];
-  static double mg0_xabssum[MG0_MAX_LEVEL];
 
   union {
     enzo_float dt;

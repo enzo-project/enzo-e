@@ -46,7 +46,7 @@ EnzoSimulation::EnzoSimulation
   // reading parameters
 
   CkCallback callback (CkIndex_EnzoSimulation::r_startup_begun(NULL),
-			 thisProxy);
+                       thisProxy);
   contribute(callback);
 
 }

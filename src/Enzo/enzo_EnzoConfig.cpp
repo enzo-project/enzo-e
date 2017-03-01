@@ -163,6 +163,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_pm_deposit_type;
   p | method_pm_update_max_dt;
 
+  p | solver_pre_smooth;
+  p | solver_post_smooth;
+  p | solver_coarse_solve;
+  p | solver_weight;
+
 #ifdef CONFIG_USE_GRACKLE
 
   // Grackle cooling parameters
@@ -333,13 +338,45 @@ void EnzoConfig::read(Parameters * p) throw()
   method_null_dt = p->value_float 
     ("Method:null:dt",std::numeric_limits<double>::max());
 
-
   method_gravity_grav_const = p->value_float
     ("Method:gravity:grav_const",6.67384e-8);
 
   method_gravity_solver = p->value_string
-    ("Method:gravity:solver","bicgstab");
+    ("Method:gravity:solver","unknown");
 
+  //======================================================================
+  // SOLVER
+  //======================================================================
+
+  num_solvers = p->list_length("Solver:list");
+
+  solver_pre_smooth.  resize(num_solvers);
+  solver_coarse_solve.resize(num_solvers);
+  solver_post_smooth. resize(num_solvers);
+  solver_weight.      resize(num_solvers);
+
+  for (int index_solver=0; index_solver<num_solvers; index_solver++) {
+
+    std::string solver_name =
+      std::string("Solver:") + p->list_value_string(index_solver,"Solver:list");
+
+    std::string solver;
+
+    solver = p->value_string (solver_name + ":solver_pre_smooth","unknown");
+    solver_pre_smooth[index_solver] = solver_index[solver];
+    
+    solver = p->value_string (solver_name + ":solver_coarse_solve","unknown");
+    solver_coarse_solve[index_solver] = solver_index[solver];
+
+    solver = p->value_string (solver_name + ":solver_post_smooth","unknown");
+    solver_post_smooth[index_solver] = solver_index[solver];
+
+    solver_weight[index_solver] =
+      p->value_float(solver_name + ":solver_weight",1.0);
+  }  
+  
+  //======================================================================
+  // GRACKLE
   //======================================================================
 
 #ifdef CONFIG_USE_GRACKLE

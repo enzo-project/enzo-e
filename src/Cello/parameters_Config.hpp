@@ -126,16 +126,12 @@ public: // interface
       restart_file(""),
       num_solvers(),
       solver_list(),
+      solver_index(),
       solver_type(),
       solver_iter_max(),
       solver_res_tol(),
       solver_diag_precon(),
       solver_monitor_iter(),
-      solver_smooth(),
-      solver_smooth_weight(),
-      solver_smooth_pre(),
-      solver_smooth_coarse(),
-      solver_smooth_post(),
       solver_restrict(),
       solver_prolong(),
       solver_min_level(),
@@ -261,16 +257,12 @@ public: // interface
       restart_file(""),
       num_solvers(),
       solver_list(),
+      solver_index(),
       solver_type(),
       solver_iter_max(),
       solver_res_tol(),
       solver_diag_precon(),
       solver_monitor_iter(),
-      solver_smooth(),
-      solver_smooth_weight(),
-      solver_smooth_pre(),
-      solver_smooth_coarse(),
-      solver_smooth_post(),
       solver_restrict(),
       solver_prolong(),
       solver_min_level(),
@@ -469,16 +461,12 @@ public: // attributes
 
   int                        num_solvers;
   std::vector<std::string>   solver_list;
+  std::map<std::string,int>  solver_index;
   std::vector<std::string>   solver_type;
   std::vector<int>           solver_iter_max;
   std::vector<double>        solver_res_tol;
   std::vector<char>          solver_diag_precon;
   std::vector<int>           solver_monitor_iter;
-  std::vector<std::string>   solver_smooth;
-  std::vector<double>        solver_smooth_weight;
-  std::vector<int>           solver_smooth_pre;
-  std::vector<int>           solver_smooth_coarse;
-  std::vector<int>           solver_smooth_post;
   std::vector<std::string>   solver_restrict;
   std::vector<std::string>   solver_prolong;
   std::vector<int>           solver_min_level;

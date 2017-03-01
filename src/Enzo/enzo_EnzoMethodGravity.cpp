@@ -17,21 +17,22 @@
 // #define DEBUG_METHOD
 
 #ifdef DEBUG_METHOD
-#   define TRACE_METHOD(method)						\
-  CkPrintf ("%d %s:%d TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__,method,this); \
+#   define TRACE_METHOD(METHOD,BLOCK)					\
+  CkPrintf ("%d %s:%d %s TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__, \
+	    BLOCK->name().c_str(),METHOD,this);			    \
   fflush(stdout);
 #else
-#   define TRACE_METHOD(method) /*  */ 
+#   define TRACE_METHOD(METHOD,BLOCK) /*  */ 
 #endif
 //----------------------------------------------------------------------
 
 EnzoMethodGravity::EnzoMethodGravity
 (const FieldDescr * field_descr,
- Solver * solver,
+ int index_solver,
  double grav_const)
   : Method(),
-    grav_const_(grav_const),
-    solver_(solver)
+    index_solver_(index_solver),
+    grav_const_(grav_const)
 {
   const int num_fields = field_descr->field_count();
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
@@ -42,8 +43,6 @@ EnzoMethodGravity::EnzoMethodGravity
 
 EnzoMethodGravity::~EnzoMethodGravity() throw()
 {
-  delete solver_;
-  solver_ = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -51,7 +50,7 @@ EnzoMethodGravity::~EnzoMethodGravity() throw()
 void EnzoMethodGravity::compute(Block * block) throw()
 {
 
-  TRACE_METHOD("compute()");
+  TRACE_METHOD("compute()",block);
 
   // Initialize the linear system
 
@@ -69,10 +68,12 @@ void EnzoMethodGravity::compute(Block * block) throw()
   // Solve the linear system
   field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
 
-  // May exit before solve is done...
-  solver_->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue(NULL));
+  Solver * solver = block->simulation()->problem()->solver(index_solver_);
   
-  solver_->apply (A, ix, ib, block);
+  // May exit before solve is done...
+  solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue(NULL));
+  
+  solver->apply (A, ix, ib, block);
 
 }
 
@@ -81,7 +82,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 void EnzoBlock::r_method_gravity_continue(CkReductionMsg * msg)
 {
 
-  TRACE_METHOD("r_method_gravity_end()");
+  TRACE_METHOD("r_method_gravity_end()",this);
   
   // So do refresh with barrier synch (note barrier instead of
   // neighbor synchronization otherwise will conflict with Method
@@ -101,7 +102,7 @@ void EnzoBlock::r_method_gravity_continue(CkReductionMsg * msg)
 
 void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 {
-  TRACE_METHOD("r_method_gravity_end()");
+  TRACE_METHOD("r_method_gravity_end()",this);
   
   delete msg;
   

@@ -46,8 +46,6 @@ public: // interface
       iter_max_(0), 
       res_tol_(0.0),
       rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
-      min_level_( -std::numeric_limits<int>::max()),
-      max_level_(  std::numeric_limits<int>::max()),
       idensity_(0),  ipotential_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
@@ -78,8 +76,6 @@ public: // interface
       iter_max_(0), 
       res_tol_(0.0),
       rho0_(0), err_(0), err0_(0),err_min_(0), err_max_(0),
-      min_level_( -std::numeric_limits<int>::max()),
-      max_level_(  std::numeric_limits<int>::max()),
       idensity_(0),  ipotential_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
@@ -148,8 +144,6 @@ public: // interface
     p | err0_;
     p | err_min_;
     p | err_max_;
-    p | min_level_;
-    p | max_level_;
     p | alpha_;
     p | omega_;
     p | bs_;
@@ -236,26 +230,6 @@ protected: // methods
   /// Compute local sum of vector elements X_i
   template<class T> long double sum_(const T* X) const throw();
 
-  /// Whether Block is active
-  bool is_active_(Block * block) {
-    const int level = block->level();
-    const bool is_leaf = block->is_leaf();
-    const bool is_unigrid = (min_level_ == max_level_);
-    const bool in_range = (min_level_ <= level && level <= max_level_);
-    return (is_unigrid) ? (in_range) : (is_leaf && in_range);
-  }
-
-  /// Type of neighbor: level if min_level == max_level, else leaf
-  int neighbor_type_() const throw() {
-    return (min_level_ == max_level_) ? neighbor_level : neighbor_leaf;
-  }
-
-  /// Type of synchronization: sync_face if min_level == max_level,
-  /// else sync_neighbor)
-  int sync_type_() const throw() {
-    return (min_level_ == max_level_) ? sync_face : sync_neighbor;
-  }
-  
 protected: // attributes
 
   /// Matrix

@@ -211,7 +211,6 @@ Solver * EnzoProblem::create_solver_
 
   Solver * solver = NULL;
   
-  const bool is_singular = is_periodic();
   FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
   int rank = config->mesh_root_rank;
 
@@ -223,7 +222,6 @@ Solver * EnzoProblem::create_solver_
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
-       is_singular,
        enzo_config->solver_diag_precon[index_solver]) ;
 
   } else if (solver_type == "hg") {
@@ -238,12 +236,8 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_monitor_iter[index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
-       enzo_config->solver_smooth[index_solver],
-       enzo_config->solver_smooth_weight[index_solver],
-       enzo_config->solver_smooth_pre[index_solver],
-       enzo_config->solver_smooth_coarse[index_solver],
-       enzo_config->solver_smooth_post[index_solver],
-       is_singular,  restrict,  prolong,
+       enzo_config->solver_coarse_solve[index_solver],
+       restrict,  prolong,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver]);
 
@@ -259,6 +253,13 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_max_level[index_solver],
        enzo_config->solver_diag_precon[index_solver]) ;
 
+  } else if (solver_type == "jacobi") {
+
+    solver = new EnzoSolverJacobi
+      (field_descr,
+       enzo_config->solver_weight[index_solver],
+       enzo_config->solver_iter_max[index_solver]);
+
   } else if (solver_type == "mg0") {
 
     Restrict * restrict = 
@@ -271,12 +272,10 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_monitor_iter[index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
-       enzo_config->solver_smooth[index_solver],
-       enzo_config->solver_smooth_weight[index_solver],
-       enzo_config->solver_smooth_pre[index_solver],
-       enzo_config->solver_smooth_coarse[index_solver],
-       enzo_config->solver_smooth_post[index_solver],
-       is_singular,  restrict,  prolong,
+       enzo_config->solver_pre_smooth[index_solver],
+       enzo_config->solver_coarse_solve[index_solver],
+       enzo_config->solver_post_smooth[index_solver],
+       restrict,  prolong,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver]);
 
@@ -293,8 +292,6 @@ Solver * EnzoProblem::create_solver_
 	   solver != NULL);
 
   solver->set_index(index_solver);
-  
-  solver_list_.push_back(solver); 
 
   return solver;
 }    
@@ -354,7 +351,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
   } else if (name == "gravity") {
-    const bool is_singular = is_periodic();
+
     std::string solver_name = enzo_config->method_gravity_solver;
 
     int index_solver = 0;
@@ -367,13 +364,8 @@ Method * EnzoProblem::create_method_
 	     solver_name.c_str(),
 	     index_solver < enzo_config->num_solvers);
     
-    std::string solver_type = enzo_config->solver_type[index_solver];
-
-    Solver * solver = create_solver_
-      (solver_type,enzo_config,index_solver,field_descr,particle_descr);
-
     method = new EnzoMethodGravity
-      (field_descr, solver,
+      (field_descr, enzo_config->solver_index[solver_name],
        enzo_config->method_gravity_grav_const);
       
   } else {

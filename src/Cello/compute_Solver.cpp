@@ -13,12 +13,13 @@ int Solver::add_refresh (int ghost_depth,
 			 int min_face_rank, 
 			 int neighbor_type, 
 			 int sync_type,
-			 int id)
+			 int sync_id)
 {
   int index=refresh_list_.size();
   refresh_list_.resize(index+1);
   refresh_list_[index] = new Refresh 
-    (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true);
+    (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true);
+  id_sync_ = sync_id;
   return index;
 }
 
@@ -60,7 +61,31 @@ void Solver::begin_(Block * block)
 void Solver::end_(Block * block)
 {
   int index = block->pop_solver();
+
   ASSERT2("Solver::end_()",
 	  "Solver mismatch was %d expected %d",
 	  index,index_,(index == index_));
+}
+
+//----------------------------------------------------------------------
+
+bool Solver::is_active_(Block * block)
+{
+  const int level = block->level();
+  const bool is_leaf = block->is_leaf();
+  const bool is_unigrid = (min_level_ == max_level_);
+  const bool in_range = (min_level_ <= level && level <= max_level_);
+  return (is_unigrid) ? (in_range) : (is_leaf && in_range);
+}
+
+// ----------------------------------------------------------------------
+
+int Solver::neighbor_type_() const throw() {
+  return (min_level_ == max_level_) ? neighbor_level : neighbor_leaf;
+}
+
+// ----------------------------------------------------------------------
+
+int Solver::sync_type_() const throw() {
+  return (min_level_ == max_level_) ? sync_face : sync_neighbor;
 }

@@ -21,7 +21,6 @@ public: // interface
 		int rank,
 		int iter_max, 
 		double res_tol,
-		bool is_singular,
 		bool diag_precon);
 
   /// Constructor
@@ -29,7 +28,6 @@ public: // interface
   : Solver(), 
     M_(NULL),
     A_(NULL),
-    is_singular_(false),
     rank_(0),
     iter_max_(0), 
     res_tol_(0.0),
@@ -53,7 +51,6 @@ public: // interface
     : Solver(m), 
       M_(NULL),
       A_(NULL),
-      is_singular_(false),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
@@ -184,10 +181,6 @@ protected: // attributes
 
   /// Preconditioner
   Matrix * M_;
-
-  /// Whether you need to subtract of the nullspace of A from b, e.g. fully
-  /// periodic or Neumann problems
-  bool is_singular_;
 
   /// Dimensionality of the problem
   int rank_;

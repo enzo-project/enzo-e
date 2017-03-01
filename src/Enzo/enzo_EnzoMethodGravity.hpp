@@ -25,10 +25,13 @@ public: // interface
 
   /// Create a new EnzoMethodGravity object
   EnzoMethodGravity(const FieldDescr * field_descr,
-		    Solver * solver,
+		    int index_solver,
 		    double grav_const);
 
-  EnzoMethodGravity() {};
+  EnzoMethodGravity()
+    : index_solver_(-1),
+      grav_const_(0.0)
+  {};
 
   /// Destructor
   ~EnzoMethodGravity() throw();
@@ -38,7 +41,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodGravity (CkMigrateMessage *m)
-    : solver_(NULL)
+    : index_solver_(-1),
+      grav_const_(0.0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -53,7 +57,7 @@ public: // interface
 
     Method::pup(p);
 
-    p | *solver_;
+    p | index_solver_;
     p | grav_const_;
 
   }
@@ -71,8 +75,8 @@ protected: // methods
 
 protected: // attributes
 
-  /// Linear solver used to compute the potential
-  Solver * solver_;
+  /// Solver index for the linear solver used to compute the potential
+  int index_solver_;
 
   /// Gas constant, e.g. 6.67384e-8 (cgs)
   double grav_const_;

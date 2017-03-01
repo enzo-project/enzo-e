@@ -397,6 +397,17 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
+// #define DEBUG_BICGSTAB
+
+#ifdef DEBUG_BICGSTAB
+#   define TRACE_BICGSTAB(MSG,BLOCK) \
+  CkPrintf ("%s DEBUG_BICGSTAB %s\n", \
+	    BLOCK->name().c_str(),MSG); \
+  fflush(stdout);
+#else
+#   define TRACE_BICGSTAB(F,B) /*  ...  */
+#endif
+
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
@@ -405,7 +416,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
  int iter_max, double res_tol,
  int min_level, int max_level,
  bool diag_precon) 
-  : Solver(monitor_iter), 
+  : Solver(monitor_iter,min_level,max_level), 
     A_(NULL),
     M_(NULL),
     first_call_(true),
@@ -413,7 +424,6 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     iter_max_(iter_max), 
     res_tol_(res_tol),
     rho0_(0), err_(0), err0_(0),err_min_(0), err_max_(0),
-    min_level_(min_level), max_level_(max_level),
     idensity_(0),  ipotential_(0),
     ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
     iy_(0), iv_(0), iq_(0), iu_(0),
@@ -482,7 +492,8 @@ EnzoSolverBiCgStab::~EnzoSolverBiCgStab() throw()
 
 void EnzoSolverBiCgStab::apply ( Matrix * A, int ix, int ib, Block * block) throw()
 {
-
+  TRACE_BICGSTAB("apply()",block);
+  
   Solver::begin_(block);
   
   A_ = A;
@@ -531,6 +542,8 @@ extern CkReduction::reducerType sum_long_double_4_type;
 
 template<class T>
 void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
+
+  TRACE_BICGSTAB("compute_",enzo_block);
 
   /// initialize BiCgStab iteration counter
   iter_ = 0;
@@ -599,6 +612,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
 template<class T>
 void EnzoBlock::r_solver_bicgstab_start_1(CkReductionMsg* msg) {
+  TRACE_BICGSTAB("r_solver_bicgstab_start_1()",this);
   performance_start_(perf_compute,__FILE__,__LINE__);
 
   /// EnzoBlock accumulates global contributions to SUM(B) and COUNT(B)
@@ -619,6 +633,7 @@ void EnzoBlock::r_solver_bicgstab_start_1(CkReductionMsg* msg) {
 
 template<class T>
 void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
+  TRACE_BICGSTAB("start_2()",this);
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -1250,6 +1265,7 @@ template<class T> void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg)
 
 template<class T> void EnzoSolverBiCgStab::end(EnzoBlock* enzo_block, int retval) throw () {
 
+  TRACE_BICGSTAB("end()",this);
   Solver::end_(enzo_block);
   
   CkCallback(callback_,

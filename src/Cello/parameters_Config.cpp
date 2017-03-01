@@ -181,16 +181,12 @@ void Config::pup (PUP::er &p)
   
   p | num_solvers;
   p | solver_list;
+  p | solver_index;
   p | solver_type;
   p | solver_iter_max;
   p | solver_res_tol;
   p | solver_diag_precon;
   p | solver_monitor_iter;
-  p | solver_smooth;
-  p | solver_smooth_weight;
-  p | solver_smooth_pre;
-  p | solver_smooth_coarse;
-  p | solver_smooth_post;
   p | solver_restrict;
   p | solver_prolong;
   p | solver_min_level;
@@ -1156,11 +1152,6 @@ void Config::read_solver_ (Parameters * p) throw()
   solver_res_tol      .resize(num_solvers);
   solver_diag_precon  .resize(num_solvers);
   solver_monitor_iter .resize(num_solvers);
-  solver_smooth       .resize(num_solvers);
-  solver_smooth_weight.resize(num_solvers);
-  solver_smooth_pre   .resize(num_solvers);
-  solver_smooth_coarse.resize(num_solvers);
-  solver_smooth_post  .resize(num_solvers);
   solver_restrict     .resize(num_solvers);
   solver_prolong      .resize(num_solvers);
   solver_min_level    .resize(num_solvers);
@@ -1176,6 +1167,8 @@ void Config::read_solver_ (Parameters * p) throw()
 
     solver_list[index_solver] = name;
 
+    solver_index[name] = index_solver;
+
     solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
     
     solver_iter_max[index_solver] = p->value_integer
@@ -1189,21 +1182,6 @@ void Config::read_solver_ (Parameters * p) throw()
     
     solver_monitor_iter[index_solver] = p->value_integer
       (full_name + ":monitor_iter",0);
-
-    solver_smooth[index_solver] = p->value_string
-      (full_name + ":smooth","jacobi");
-
-    solver_smooth_weight[index_solver] = p->value_float
-      (full_name + ":smooth_weight",1.0);
-
-    solver_smooth_pre[index_solver] = p->value_integer
-      (full_name + ":smooth_pre",1);
-
-    solver_smooth_coarse[index_solver] = p->value_integer
-      (full_name + ":smooth_coarse",1);
-
-    solver_smooth_post[index_solver] = p->value_integer
-      (full_name + ":smooth_post",1);
 
     solver_restrict[index_solver] = p->value_string
       (full_name + ":restrict","linear");

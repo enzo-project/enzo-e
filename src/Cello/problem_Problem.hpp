@@ -110,8 +110,7 @@ public: // interface
   }
 
   /// Return the ith solver object
-  Solver * solver(size_t i) const throw() 
-  { return (i < solver_list_.size()) ? solver_list_[i] : NULL; }
+  Solver * solver(size_t i) const throw() ;
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
@@ -168,6 +167,11 @@ public: // interface
 			 const FieldDescr * field_descr,
 			 const ParticleDescr * particle_descr) throw();
 
+  /// Initialize Solver objects
+  void initialize_solver(Config * config, 
+			 const FieldDescr * field_descr,
+			 const ParticleDescr * particle_descr) throw();
+  
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
 

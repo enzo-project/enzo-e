@@ -29,14 +29,12 @@ EnzoSolverCg::EnzoSolverCg
  int monitor_iter, 
  int rank,
  int iter_max, double res_tol,
- bool is_singular,
  bool diag_precon) 
   : Solver(monitor_iter),
     A_(NULL),
     M_((diag_precon) ?
        (Matrix *)(new EnzoMatrixDiagonal) :
        (Matrix *)(new EnzoMatrixIdentity)),
-    is_singular_(is_singular),
     rank_(rank),
     iter_max_(iter_max), 
     res_tol_(res_tol),
@@ -92,7 +90,6 @@ void EnzoSolverCg::pup (PUP::er &p)
 
   p | A_;
   p | M_;
-  p | is_singular_;
   p | rank_;
   p | iter_max_;
   p | res_tol_;
@@ -366,7 +363,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
     T * B  = (T*) field.values(ib_);
     T * R  = (T*) field.values(ir_);
 
-    if (iter_ == 0 && is_singular_)  {
+    if (iter_ == 0 && A_->is_singular())  {
 
       // shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
       // eT*e == n === zone count (bc)
@@ -736,7 +733,7 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 
   if (enzo_block->is_leaf()) {
 
-    if (is_singular_)  {
+    if (A_->is_singular())  {
 
       // shift rhs B by projection of B onto e: B~ <== B - (e*eT)/(eT*e) b
       // eT*e == n === zone count (bc)

@@ -93,7 +93,12 @@ public: // interface
       // EnzoMethodPmDeposit
       method_pm_deposit_type(""),
       // EnzoMethodPmUpdate
-      method_pm_update_max_dt(0.0)
+      method_pm_update_max_dt(0.0),
+      // EnzoMethodMg0
+      solver_pre_smooth(),
+      solver_post_smooth(),
+      solver_coarse_solve(),
+      solver_weight()
   {
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
@@ -194,6 +199,20 @@ public: // attributes
   // EnzoMethodPmUpdate
 
   double                     method_pm_update_max_dt;
+
+  // EnzoSolverMg0
+
+  /// Solver index for multigrid pre-smoother
+  std::vector<int> solver_pre_smooth;
+
+  /// Solver index for multigrid post-smoother
+  std::vector<int> solver_post_smooth;
+
+  /// Solver index for multigrid coarse solver
+  std::vector<int> solver_coarse_solve;
+
+  /// Weighting factor for smoother
+  std::vector<double> solver_weight;
 
 #ifdef CONFIG_USE_GRACKLE
 

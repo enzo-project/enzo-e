@@ -8,6 +8,8 @@
 #ifndef COMPUTE_SOLVER_HPP
 #define COMPUTE_SOLVER_HPP
 
+#include <cstring>
+
 class Refresh;
 class Solver : public PUP::able 
 {
@@ -18,15 +20,21 @@ class Solver : public PUP::able
 public: // interface
 
   /// Create a new Solver
-  Solver (int monitor_iter) throw()
+  Solver (int monitor_iter,
+	  int min_level = std::numeric_limits<int>::min(),
+	  int max_level = std::numeric_limits<int>::max()) throw()
     : PUP::able(),
-      monitor_iter_(monitor_iter)
+      monitor_iter_(monitor_iter),
+      min_level_(min_level),
+      max_level_(max_level)
   {}
 
   /// Create an uninitialized Solver
   Solver () throw()
-    : PUP::able(),
-      monitor_iter_(0)
+  : PUP::able(),
+    monitor_iter_(0),
+    min_level_(std::numeric_limits<int>::min()),
+    max_level_(std::numeric_limits<int>::max())
   {}
 
   /// Destructor
@@ -56,13 +64,16 @@ public: // interface
     p | monitor_iter_;
     p | callback_;
     p | index_;
+    p | min_level_;
+    p | max_level_;
+    p | id_sync_;
   }
 
   int add_refresh (int ghost_depth, 
 		   int min_face_rank, 
 		   int neighbor_type, 
 		   int sync_type,
-		   int id_in=0);
+		   int sync_id = 0);
 
   Refresh * refresh(size_t index=0) ;
 
@@ -71,6 +82,17 @@ public: // interface
 
   void set_index (int index)
   { index_ = index; }
+
+  int index() const { return index_; }
+
+  void set_min_level (int min_level)
+  { min_level_ = min_level; }
+
+  void set_max_level (int max_level)
+  { max_level_ = max_level; }
+
+  void set_sync_id (int sync_id)
+  { id_sync_ = sync_id; }
   
 public: // virtual functions
 
@@ -101,9 +123,22 @@ protected: // functions
   {
     if (! active ) return;
     const int m = mx*my*mz;
-    for (int i=0; i<m; i++) X[i] = Y[i];
+    std::memcpy(X,Y,m*sizeof(T));
   }
 
+  /// Whether Block is active
+  bool is_active_(Block * block);
+
+  /// Type of neighbor: level if min_level == max_level, else leaf
+  int neighbor_type_() const throw();
+
+  /// Type of synchronization: sync_face if min_level == max_level,
+  /// else sync_neighbor)
+  int sync_type_() const throw();
+
+  int sync_id_() const throw()
+  { return this->id_sync_; }
+  
 protected: // attributes
 
   ///  Refresh object
@@ -117,6 +152,15 @@ protected: // attributes
 
   /// Index of this solver
   int index_;
+
+  /// Minimum mesh level
+  int min_level_;
+  
+  /// Maximum mesh level
+  int max_level_;
+
+  /// Sync id
+  int id_sync_;
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

@@ -413,6 +413,47 @@ void Problem::initialize_method
   }
 }
 
+//----------------------------------------------------------------------
+
+void Problem::initialize_solver
+(
+ Config * config,
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
+ ) throw()
+{
+  const size_t num_solver = config->solver_list.size();
+
+  for (size_t index_solver=0; index_solver < num_solver ; index_solver++) {
+
+    std::string type = config->solver_type[index_solver];
+
+    Solver * solver = create_solver_(type, config, index_solver, 
+				     field_descr, particle_descr);
+
+    if (solver) {
+
+      solver_list_.push_back(solver); 
+
+    } else {
+      ERROR1("Problem::initialize_method",
+	     "Unknown Method %s",type.c_str());
+    }
+
+  }
+}
+
+//----------------------------------------------------------------------
+
+Solver * Problem::solver(size_t i) const throw()
+{
+  ASSERT2("Problem::solver",
+	  "Solver id %d out of range [0,%d)",
+	  i < solver_list_.size(),
+	  i,solver_list_.size());
+  return solver_list_.at(i);
+}
+
 //======================================================================
 
 void Problem::deallocate_() throw()

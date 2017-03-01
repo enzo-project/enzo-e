@@ -17,7 +17,7 @@ class EnzoSolverJacobi : public Solver {
 public: // interface
 
   /// Constructor
-  EnzoSolverJacobi(int id, int ir,
+  EnzoSolverJacobi(const FieldDescr * field_descr,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 
@@ -59,13 +59,18 @@ public: // virtual functions
   virtual std::string name () const
   { return "jacobi"; }
 
-private: // functions
+public: // functions
+
+  /// Continue after refresh to perform Jacobi update
+  void compute (Block * block);
+  
+protected: // functions
 
   /// Implementation of solver() for given precision 
   template <typename T>
   void apply_(Block * block);
 
-private: // attributes
+protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 

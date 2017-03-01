@@ -26,13 +26,10 @@ public: // interface
   (const FieldDescr * field_descr,
    int monitor_iter,
    int rank,
-   int iter_max, 
-   std::string smooth,
-   double      smooth_weight,
-   int         smooth_pre,
-   int         smooth_coarse,
-   int         smooth_post,
-   bool is_singular,
+   int iter_max,
+   int index_smooth_pre,
+   int index_solve_coarse,
+   int index_smooth_post,
    Restrict * restrict,
    Prolong * prolong,
    int min_level,
@@ -46,17 +43,15 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverMg0 (CkMigrateMessage *m)
     :  A_(NULL),
-       smooth_(""),
-       smooth_pre_(NULL),
-       smooth_coarse_(NULL),
-       smooth_post_(NULL),
+       index_smooth_pre_(-1),
+       index_solve_coarse_(-1),
+       index_smooth_post_(-1),
        restrict_(NULL),
        prolong_(NULL),
-       is_singular_(false),
        rank_(0),
        iter_max_(0), 
        monitor_iter_(0),
-       ib_(0), ic_(0), id_(0), ir_(0), ix_(0),
+       ib_(0), ic_(0), ir_(0), ix_(0),
        min_level_(0),
        max_level_(0),
        mx_(0),my_(0),mz_(0),
@@ -79,20 +74,17 @@ public: // interface
     Solver::pup(p);
 
     p | A_;
-    p | smooth_;
-    p | smooth_pre_;
-    p | smooth_coarse_;
-    p | smooth_post_;
+    p | index_smooth_pre_;
+    p | index_solve_coarse_;
+    p | index_smooth_post_;
     p | restrict_;
     p | prolong_;
-    p | is_singular_;
     p | rank_;
     p | iter_max_;
     p | monitor_iter_;
 
     p | ib_;
     p | ic_;
-    p | id_;
     p | ir_;
     p | ix_;
 
@@ -180,27 +172,20 @@ protected: // attributes
   /// Matrix
   Matrix * A_;
 
-  /// Smoother name
-  std::string smooth_;
-  
-  /// Pre-smoother
-  Solver * smooth_pre_;
+  /// Solver for pre-smoother
+  int index_smooth_pre_;
 
-  /// Coarse smoother
-  Solver * smooth_coarse_;
+  /// Solver for coarse solver
+  int index_solve_coarse_;
 
-  /// Post smoother
-  Solver * smooth_post_;
+  /// Solver for post smoother
+  int index_smooth_post_;
 
   /// Restriction
   Restrict * restrict_;
 
   /// Prolongation
   Prolong * prolong_;
-
-  /// Whether you need to subtract of the nullspace of A from b, e.g. fully
-  /// periodic or Neumann problems
-  bool is_singular_;
 
   /// Dimensionality of the problem
   int rank_;
@@ -217,7 +202,6 @@ protected: // attributes
   /// MG vector id's
   int ib_;
   int ic_;
-  int id_;
   int ir_;
   int ix_;
 

@@ -30,16 +30,19 @@
 //----------------------------------------------------------------------
 
 EnzoSolverJacobi::EnzoSolverJacobi
-( int id, int ir, double weight, int iter_max) throw()
-  : A_ (NULL),
+( const FieldDescr * field_descr, double weight, int iter_max) throw()
+  : Solver(0),
+    A_ (NULL),
     ix_ (-1),
     ib_ (-1),
-    ir_ (ir),
-    id_ (id),
+    ir_ (-1),
+    id_ (-1),
     w_(weight),
     n_(iter_max)
 {
-  //  CkPrintf ("%d DEBUG_SMOOTHER %p ix_=%d\n",__LINE__,this,ix_);
+  // may be temporary fields
+  id_ = field_descr->field_id("D");
+  ir_ = field_descr->field_id("R");
 }
 
 //----------------------------------------------------------------------
@@ -47,16 +50,51 @@ EnzoSolverJacobi::EnzoSolverJacobi
 void EnzoSolverJacobi::apply
 ( Matrix * A, int ix, int ib, Block * block) throw()
 {
+
+  begin_(block);
+  
   A_ = A;
   ix_ = ix;
   ib_ = ib;
-  
+
+  // Refresh X
+  Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
+
   Field field = block->data()->field();
-  if (field.precision(0) == precision_single) {
+  const int num_fields = field.field_count();
+  refresh.add_all_fields(num_fields);
+
+  // try refresh.add_field(ix);
+
+  block->refresh_enter
+    (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_solver_jacobi_continue()
+{
+  EnzoSolverJacobi * solver = 
+    static_cast<EnzoSolverJacobi *> (this->solver());
+
+  solver->compute(this);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSolverJacobi::compute(Block * block)
+{
+  
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (block);
+  Field field = enzo_block->data()->field();
+  // assume all fields have same precision
+  int precision = field.precision(field.field_id("density"));
+
+  if (precision == precision_single) {
     apply_<float>(block);
-  } else if (field.precision(0) == precision_double) {
+  } else if (precision == precision_double) {
     apply_<double>(block);
-  } else if (field.precision(0) == precision_quadruple) {
+  } else if (precision == precision_quadruple) {
     apply_<long double>(block);
   }
 }
@@ -93,7 +131,7 @@ void EnzoSolverJacobi::apply_(Block * block)
     A_->residual (ir_, ib_, ix_, block,g0);
 
 #ifdef DEBUG_SMOOTH
-    printf ("%s:%d %s DEBUG_SMOOTHComputing diagonal\n",
+    CkPrintf ("%s:%d %s DEBUG_SMOOTH Computing diagonal\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
     PRINT_BDRX;
@@ -101,13 +139,13 @@ void EnzoSolverJacobi::apply_(Block * block)
     A_->diagonal (id_, block,g0);
 
 #ifdef DEBUG_SMOOTH
-    printf ("%s:%d %s DEBUG_SMOOTH Computing X=R/D\n",
+    CkPrintf ("%s:%d %s DEBUG_SMOOTH Computing X=R/D\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
     PRINT_BDRX;
 
 #ifdef DEBUG_SMOOTH
-    printf ("%s:%d DEBUG LOOP LIMITS X=R/D ix=%d:%d iy=%d:%d iz=%d:%d\n",
+    CkPrintf ("%s:%d DEBUG LOOP LIMITS X=R/D ix=%d:%d iy=%d:%d iz=%d:%d\n",
 	    __FILE__,__LINE__,ix0,mx-ix0,iy0,my-iy0, iz0, mz-iz0);
 #endif
 
@@ -127,15 +165,21 @@ void EnzoSolverJacobi::apply_(Block * block)
       }
     }
 
-    //    CkPrintf ("DEBUG_SMOOTH %s rr,dd,xx %g %g %g\n",block->name().c_str(),rr,dd,xx);
-    //    CkPrintf ("%d DEBUG_SMOOTHER %p ix_=%d\n",__LINE__,this,ix_);
-    
 #ifdef DEBUG_SMOOTH
-    printf ("%s:%d %s DEBUG_SMOOTH  Done with SmoothJacobi\n",
+    CkPrintf ("%s:%d %s DEBUG_SMOOTH  Done with SmoothJacobi\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
     PRINT_BDRX;
 
   }
+  
+#ifdef DEBUG_SMOOTH
+    CkPrintf ("%s:%d %s DEBUG_SMOOTH  Calling Solver::end_()\n",
+	    __FILE__,__LINE__,block->name().c_str());
+#endif
+  end_(block);
+  CkCallback(callback_,
+	     CkArrayIndexIndex(block->index()),
+	     block->proxy_array()).send();
 }
 

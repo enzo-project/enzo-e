@@ -312,17 +312,24 @@ public: // interface
 
   /// Start a new solver
   void push_solver(int index_solver) throw()
-  { index_solver_.push_back(index_solver); }
+  {  index_solver_.push_back(index_solver); }
 
   /// Return from a solver
   int pop_solver() throw()
-  { int index = index_solver();
-    index_solver_.resize(index_solver_.size()-1); }
+  {
+    int index = index_solver();
+    ASSERT ("Block::pop_solver",
+	    "Trying to pop element off of empty Block::index_solver_ stack",
+	    index_solver_.size() > 0);
+    index_solver_.resize(index_solver_.size()-1);
+    return index;
+  }
 
   /// Return the index of the current solver
   int index_solver() const throw()
   {
-    ASSERT("Block::index_solver()","index_solver_[] stack is empty",
+    ASSERT1("Block::index_solver()","%s index_solver_[] stack is empty",
+	   name().c_str(),
 	   (index_solver_.size() > 0));
     return index_solver_[index_solver_.size()-1];
   }
