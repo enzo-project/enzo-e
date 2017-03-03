@@ -8,7 +8,9 @@ Performance
 -----------
 
 Cello enables high single-node performance through the design of its
-field classes for representing arrays of field variables (density,
+data classes for fields (Eularian) and particles (Lagrangian)
+
+The **Field** class represents arrays of field variables (density,
 velocity, etc.) that are associated with blocks of the AMR hierarchy.
 The size of these block-local arrays is specified by the user in
 Enzo's configuration file, allowing flexibility for optimizing for
@@ -21,6 +23,17 @@ some small multiple of the cache line length---can reduce cache
 conflict and improve cache reuse.  Block size, data alignment, and
 data structure padding are all controllable through Enzo-P's parameter
 file.
+
+The **Particle** class represents particles associated with blocks in
+the AMR hierarchy.  It can represent multiple particle types, with
+particles in each type having arbitrary attributes (though a minimal
+particle type must have a position).  For efficiency, particles are
+allocated and operated on a *batch* at a time, where the number of
+particles in each batch is specified by the user.  Particles within a
+batch can be stored in two different ways: by particle, or by
+attribute, which again can affect efficiency.  Additionally, storing
+particles in fixed-sized batches should aid in the implementation of
+efficient accelerator-based code (CUDA, OpenACC, etc.) for particles.
 
 Scalability
 -----------
