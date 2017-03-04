@@ -82,12 +82,14 @@ int ParticleData::num_batches (int it) const
 //----------------------------------------------------------------------
 
 int ParticleData::num_particles 
-(ParticleDescr * particle_descr, int it, int ib) const
+(ParticleDescr * particle_descr) const
 {
-  if ( !(0 <= it && it < particle_descr->num_types()) ) return 0;
-  if ( !(0 <= ib && ib < num_batches(it)) ) return 0;
-
-  return particle_count_[it][ib];
+  const int nt = particle_descr->num_types();
+  int np = 0;
+  for (int it=0; it<nt; it++) {
+    np += num_particles(particle_descr,it);
+  }
+  return np;
 }
 
 //----------------------------------------------------------------------
@@ -106,14 +108,12 @@ int ParticleData::num_particles
 //----------------------------------------------------------------------
 
 int ParticleData::num_particles 
-(ParticleDescr * particle_descr) const
+(ParticleDescr * particle_descr, int it, int ib) const
 {
-  const int nt = particle_descr->num_types();
-  int np = 0;
-  for (int it=0; it<nt; it++) {
-    np += num_particles(particle_descr,it);
-  }
-  return np;
+  if ( !(0 <= it && it < particle_descr->num_types()) ) return 0;
+  if ( !(0 <= ib && ib < num_batches(it)) ) return 0;
+
+  return particle_count_[it][ib];
 }
 
 //----------------------------------------------------------------------

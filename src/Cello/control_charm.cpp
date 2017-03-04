@@ -242,11 +242,17 @@ void Block::control_sync_face_(int entry_point, int phase)
 
   while (it_face.next()) {
 
-    ++num_faces;
+    int of3[3];
+    it_face.face(of3);
+    
+    // Only count face if a Block exists in the level
+    if (face_level(of3) >= level()) {
+      ++num_faces;
 
-    Index index_face = it_face.index();
+      Index index_face = it_face.index();
 
-    thisProxy[index_face].p_control_sync_count(entry_point,phase,0);
+      thisProxy[index_face].p_control_sync_count(entry_point,phase,0);
+    }
 
   }
   control_sync_count_(entry_point,phase,num_faces + 1);

@@ -212,7 +212,7 @@ EnzoSolverMg0::EnzoSolverMg0
  Prolong * prolong,
  int min_level,
  int max_level) 
-  : Solver(), 
+  : Solver(monitor_iter,min_level,max_level), 
     A_(new EnzoMatrixLaplace),
     index_smooth_pre_(index_smooth_pre),
     index_solve_coarse_(index_solve_coarse),
@@ -221,10 +221,7 @@ EnzoSolverMg0::EnzoSolverMg0
     prolong_(prolong),
     rank_(rank),
     iter_max_(iter_max), 
-    monitor_iter_(monitor_iter),
     ib_(0), ic_(0), ir_(0), ix_(0),
-    min_level_(min_level),
-    max_level_(max_level),
     mx_(0),my_(0),mz_(0),
     nx_(0),ny_(0),nz_(0),
     gx_(0),gy_(0),gz_(0),
@@ -275,6 +272,8 @@ void EnzoSolverMg0::apply
 
   Solver::begin_(block);
 
+  const int level = block->level();
+
   A_ = A;
   ix_ = ix;
   ib_ = ib;
@@ -288,8 +287,6 @@ void EnzoSolverMg0::apply
   field.ghost_depth(ib_,&gx_,&gy_,&gz_);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
-  const int level = block->level();
 
   // Initialize child counter for restrict synchronization
   enzo_block->mg_sync_set_stop(NUM_CHILDREN(enzo_block->rank()));
@@ -376,8 +373,8 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 	      __LINE__,enzo_block->name().c_str(),double(reduce[0]),double(reduce[1]));
 #endif    
 
-    /// initiate callback for r_solver_bicgstab_start_1 and
-    /// contribute to sum and count
+    /// initiate callback for p_solver_mg0_shift_b and contribute to
+    /// sum and count
 
     CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_shift_b<T>(NULL), 
 			enzo_block->proxy_array());
@@ -426,7 +423,7 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block) throw()
   TRACE_LEVEL("EnzoSolverMg0::begin_solve",enzo_block);
   // start the MG V-cycle with the max level blocks
 
-  if (enzo_block->level() == max_level_) {
+  if (enzo_block->is_leaf() || (enzo_block->level() == max_level_)) {
 
     if (A_->is_singular()) {
 
@@ -512,7 +509,7 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
     const int field_count = enzo_block->data()->field().field_count();
 
-    if (level < max_level_) {
+    if (!(enzo_block->is_leaf()) || level != max_level_) {
       Field field = enzo_block->data()->field();
       T * X = (T*) field.values(ix_);
       for (int iz=0; iz<mz_; iz++) {
@@ -533,14 +530,23 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
     Field field = data->field();
 
     Simulation * simulation = proxy_simulation.ckLocalBranch();
-    Solver * smooth_pre = simulation->problem()->solver(index_smooth_pre_);
 
-    smooth_pre->set_min_level(enzo_block->level());
-    smooth_pre->set_max_level(enzo_block->level());
-    smooth_pre->set_sync_id (6);
-    smooth_pre->set_callback(CkIndex_EnzoBlock::p_solver_mg0_pre_smooth());
+    if (index_smooth_pre_ >= 0) {
 
-    smooth_pre->apply(A_,ix_,ib_,enzo_block);
+      Solver * smooth_pre = simulation->problem()->solver(index_smooth_pre_);
+
+      smooth_pre->set_min_level(enzo_block->level());
+      smooth_pre->set_max_level(enzo_block->level());
+      smooth_pre->set_sync_id (6);
+      smooth_pre->set_callback(CkIndex_EnzoBlock::p_solver_mg0_pre_smooth());
+
+      smooth_pre->apply(A_,ix_,ib_,enzo_block);
+
+    } else {
+
+      pre_smooth<T>(enzo_block);
+
+    }
 
   }
 }
@@ -800,7 +806,7 @@ void EnzoSolverMg0::solve_coarse(EnzoBlock * enzo_block) throw()
   
   if (level == min_level_) {
 
-    if (level < max_level_) {
+    if ( ! enzo_block->is_leaf() && level < max_level_) {
 
       prolong_send_<T>(enzo_block);
       
@@ -951,15 +957,19 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
     }
   }
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  Solver * smooth_post = simulation->problem()->solver(index_smooth_post_);
+  if (index_smooth_post_ >= 0) {
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    Solver * smooth_post = simulation->problem()->solver(index_smooth_post_);
 
-  smooth_post->set_min_level(enzo_block->level());
-  smooth_post->set_max_level(enzo_block->level());
-  smooth_post->set_sync_id (8);
-  smooth_post->set_callback(CkIndex_EnzoBlock::p_solver_mg0_post_smooth());
+    smooth_post->set_min_level(enzo_block->level());
+    smooth_post->set_max_level(enzo_block->level());
+    smooth_post->set_sync_id (8);
+    smooth_post->set_callback(CkIndex_EnzoBlock::p_solver_mg0_post_smooth());
   
-  smooth_post->apply(A_,ix_,ib_,enzo_block);
+    smooth_post->apply(A_,ix_,ib_,enzo_block);
+  } else {
+    post_smooth<T>(enzo_block);
+  }
 
 }
 
@@ -1002,7 +1012,7 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
   TRACE_LEVEL("EnzoSolverMg0::post_smooth",enzo_block);
   TRACE_MG(enzo_block,"EnzoSolverMg0::post_smooth()");
 
-  if (enzo_block->level() < max_level_) {
+  if (!enzo_block->is_leaf() && enzo_block->level() < max_level_) {
 
     prolong_send_<T>(enzo_block);
 
@@ -1039,7 +1049,7 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
   }
 
-  if (enzo_block->level() >= max_level_) {
+  if (enzo_block->is_leaf() || enzo_block->level() == max_level_) {
 
     begin_cycle_<T>(enzo_block);
 

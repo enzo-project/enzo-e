@@ -230,8 +230,8 @@ void Block::init
 
   simulation()->monitor_insert_block();
   
-  if (data()->any_particles()) {
-    const int np = data()->particle().num_particles();
+  const int np = data()->particle().num_particles();
+  if (np > 0) {
     simulation()->monitor_insert_particles(np);
   }
 

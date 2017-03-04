@@ -52,8 +52,6 @@ public: // interface
        iter_max_(0), 
        monitor_iter_(0),
        ib_(0), ic_(0), ir_(0), ix_(0),
-       min_level_(0),
-       max_level_(0),
        mx_(0),my_(0),mz_(0),
        nx_(0),ny_(0),nz_(0),
        gx_(0),gy_(0),gz_(0),
@@ -87,9 +85,6 @@ public: // interface
     p | ic_;
     p | ir_;
     p | ix_;
-
-    p | min_level_;
-    p | max_level_;
 
     p | mx_;
     p | my_;
@@ -204,12 +199,6 @@ protected: // attributes
   int ic_;
   int ir_;
   int ix_;
-
-  /// Minimum refinement level (may be < 0)
-  int min_level_;
-
-  /// Maximum refinement level
-  int max_level_;
 
   /// Block field attributes
   int mx_,my_,mz_;

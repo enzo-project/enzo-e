@@ -152,22 +152,6 @@ protected: // methods
 
   void exit_() throw();
 
-  /// Compute local sum of vector elements X_i
-  template <class T>
-  long double sum_ (const T * X) const throw();
-
-  /// scale the vector by the given scalar Y = a*X
-  template <class T>
-  void scale_ (T * Y, T a, const T * X) const throw();
-
-  /// return the number of elements of the vector X
-  int count_ () const throw();
-  
-  /// Shift the vector X by a scalar multiple of Y
-  /// NOTE includes ghost zones since performed after ghost refresh
-  template <class T>
-  void shift_ (T * X, const T a, const T * Y) const throw();
-
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change

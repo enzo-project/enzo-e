@@ -306,6 +306,9 @@ public: /// entry methods
   /// EnzoSolverBiCGStab entry method: refresh P
   void p_solver_bicgstab_loop_1();  
 
+  /// EnzoSolverBiCGStab entry method: return from preconditioner
+  void p_solver_bicgstab_loop_2();
+
   /// EnzoSolverBiCGStab entry method: refresh Y
   void p_solver_bicgstab_loop_3();
 
@@ -315,6 +318,9 @@ public: /// entry methods
 
   /// EnzoSolverBiCGStab entry method: refresh Q
   void p_solver_bicgstab_loop_7();
+
+  /// EnzoSolverBiCGStab entry method: return from preconditioner
+  void p_solver_bicgstab_loop_8();
 
   /// EnzoSolverBiCGStab entry method: refresh Y
   void p_solver_bicgstab_loop_9();

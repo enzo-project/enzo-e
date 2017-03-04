@@ -75,6 +75,7 @@ bool Solver::is_active_(Block * block)
   const bool is_leaf = block->is_leaf();
   const bool is_unigrid = (min_level_ == max_level_);
   const bool in_range = (min_level_ <= level && level <= max_level_);
+
   return (is_unigrid) ? (in_range) : (is_leaf && in_range);
 }
 

@@ -94,11 +94,13 @@ public: // interface
       method_pm_deposit_type(""),
       // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0),
-      // EnzoMethodMg0
+      // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
       solver_coarse_solve(),
-      solver_weight()
+      solver_weight(),
+      // EnzoSolver<Krylov>
+      solver_precondition()
   {
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
@@ -214,6 +216,11 @@ public: // attributes
   /// Weighting factor for smoother
   std::vector<double> solver_weight;
 
+  // EnzoSolver<Krylov>
+  
+  /// Solver index for Krylov solver preconditioner
+  std::vector<int> solver_precondition;
+  
 #ifdef CONFIG_USE_GRACKLE
 
   // EnzoMethodGrackle

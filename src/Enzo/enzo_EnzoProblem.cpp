@@ -251,7 +251,11 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_res_tol[index_solver],
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
-       enzo_config->solver_diag_precon[index_solver]) ;
+       enzo_config->solver_precondition[index_solver]) ;
+
+  } else if (solver_type == "diagonal") {
+
+    solver = new EnzoSolverDiagonal;
 
   } else if (solver_type == "jacobi") {
 

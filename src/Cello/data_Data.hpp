@@ -156,12 +156,6 @@ public: // interface
   { return Particle(particle_descr(),
 		    particle_data_); }
 
-  bool any_particles() const
-  { return (particle_descr()->num_types() > 0); }
-
-  bool any_fields() const
-  { return (field_descr()->field_count() > 0); }
-
   void allocate () throw();
 
 private: // functions

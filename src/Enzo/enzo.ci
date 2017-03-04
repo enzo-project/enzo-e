@@ -87,6 +87,7 @@ module enzo {
   PUPable EnzoRestrict;
 
   PUPable EnzoSolverCg;
+  PUPable EnzoSolverDiagonal;
   PUPable EnzoSolverBiCgStab;
   PUPable EnzoSolverMg0;
   PUPable EnzoSolverHg;
@@ -150,8 +151,10 @@ module enzo {
     entry void r_solver_bicgstab_loop_15(CkReductionMsg *msg);
 
     entry void p_solver_bicgstab_loop_1();
+    entry void p_solver_bicgstab_loop_2();
     entry void p_solver_bicgstab_loop_3();
     entry void p_solver_bicgstab_loop_7();
+    entry void p_solver_bicgstab_loop_8();
     entry void p_solver_bicgstab_loop_9();
     entry void p_solver_bicgstab_acc();
     entry void p_solver_bicgstab_exit();

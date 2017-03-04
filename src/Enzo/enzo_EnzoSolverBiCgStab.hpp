@@ -34,13 +34,12 @@ public: // interface
 		     double res_tol,
 		     int min_level,
 		     int max_level,
-		     bool diag_precon);
+		     int index_precon);
 
   /// default constructor
   EnzoSolverBiCgStab()
     : Solver(),
       A_(NULL),
-      M_(NULL),
       first_call_(true),
       rank_(0),
       iter_max_(0), 
@@ -57,7 +56,8 @@ public: // interface
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
       bs_(0.0),bc_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0)
+      ys_(0.0),vs_(0.0),us_(0.0),
+      index_precon_(-1)
   {};
 
   /// Charm++ PUP::able declarations
@@ -70,7 +70,6 @@ public: // interface
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
       A_(NULL),
-      M_(NULL),
       first_call_(true),
       rank_(0),
       iter_max_(0), 
@@ -99,8 +98,8 @@ public: // interface
     Solver::pup(p);
 
     p | A_;
-    p | M_;
-
+    p | index_precon_;
+    
     p | first_call_;
     p | rank_;
     p | iter_max_;
@@ -168,8 +167,11 @@ public: // interface
   /// Entry into BiCgStab iteration loop, begins refresh on P
   template<class T> void loop_0(EnzoBlock* enzo_block) throw();
 
-  /// First preconditioner solve, begins refresh on Y
+  /// First preconditioner solve
   template<class T> void loop_2(EnzoBlock* enzo_block) throw();
+
+  /// Return from preconditioner solve, begins refresh on Y
+  template<class T> void loop_25(EnzoBlock* enzo_block) throw();
 
   /// First matrix-vector product, begins DOT(V,R0) and projection of
   /// Y and V
@@ -180,6 +182,9 @@ public: // interface
 
   /// Second preconditioner solve, begins refresh on Y
   template<class T> void loop_8(EnzoBlock* enzo_block) throw();
+
+  /// Return from preconditioner solve, begins refresh on Y
+  template<class T> void loop_85(EnzoBlock* enzo_block) throw();
 
   /// Second matrix-vector product, begins DOT(U,U), DOT(U,Q) and
   /// projection of Y and U
@@ -235,8 +240,8 @@ protected: // attributes
   /// Matrix
   Matrix* A_;
 
-  /// Preconditioner
-  Matrix* M_;
+  /// Preconditioner (-1 if none)
+  int index_precon_;
 
   /// Whether this is the first call to the solver
   bool first_call_;
@@ -265,12 +270,6 @@ protected: // attributes
   /// Maximum error (all iterations so far)
   long double err_max_;
 
-  /// Minimum and maximum active level.  Non-leaf restriction
-  /// only if min_level < max_level, otherwise assumes all Blocks
-  /// and face syncronization
-  int min_level_;
-  int max_level_;
-  
   /// Density and potential field id's (for RHS and solution)
   int idensity_;
   int ipotential_;
