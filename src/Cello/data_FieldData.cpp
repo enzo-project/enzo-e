@@ -49,12 +49,12 @@ void FieldData::pup(PUP::er &p)
   PUParray(p,size_,3);
 
   p | array_permanent_;
-  //  p | array_temporary_
+  //  p | array_temporary_;
   static bool warn[CONFIG_NODE_SIZE] = {false};
   const int in = cello::index_static();
   if (! warn[in]) {
     WARNING("FieldData::pup()",
-	    "Skipping array_temporary_");
+  	    "Skipping array_temporary_");
     warn[in] = true;
   }
   p | offsets_;
@@ -329,15 +329,16 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
     dimensions(field_descr,id_field,&mx,&my,&mz);
     int m = mx*my*mz;
     precision_type precision = field_descr->precision(id_field);
-    if (precision == precision_single)    
+    if (precision == precision_single) {
       array_temporary_[index_field] = (char*) new float [m];
-    if (precision == precision_double)    
+    } else if (precision == precision_double) {
       array_temporary_[index_field] = (char*) new double [m];
-    if (precision == precision_quadruple) 
+    } else if (precision == precision_quadruple) {
       array_temporary_[index_field] = (char*) new long double [m];
-  } else {
-    WARNING("FieldData::allocate_temporary",
-	    "Calling allocate_temporary() on already-allocated Field");
+    } else {
+      WARNING("FieldData::allocate_temporary",
+	      "Calling allocate_temporary() on already-allocated Field");
+    }
   }
 }
 
@@ -699,6 +700,7 @@ double FieldData::dot (const FieldDescr * field_descr, int ix, int iy) throw()
     ERROR2("FieldData::dot()",
 	   "Unknown precision %d for field id %d",
 	   field_descr->precision(ix),ix);
+    return 0.0;
     break;
   }
 }
@@ -831,7 +833,7 @@ void FieldData::print_
 {
 
   T min = std::numeric_limits<T>::max();
-  T max = std::numeric_limits<T>::min();
+  T max = - std::numeric_limits<T>::max();
   double sum = 0.0;
   for (int iz=izm; iz<izp; iz++) {
     for (int iy=iym; iy<iyp; iy++) {

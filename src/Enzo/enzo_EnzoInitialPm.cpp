@@ -37,8 +37,6 @@ void EnzoInitialPm::enforce_block
  ) throw()
 
 {
-  const int in = cello::index_static();
-
   Field    field    (block->data()->field());
   Particle particle (block->data()->particle());
 
@@ -90,11 +88,6 @@ void EnzoInitialPm::uniform_placement_
   const double yl = yp - ym;
   const double zl = zp - zm;
 
-  // Size of particle array on block
-  const int NX = rx*nx;
-  const int NY = ry*ny;
-  const int NZ = rz*nz;
-
   const double hx = xl / nx;
   const double hy = yl / ny;
   const double hz = zl / nz;
@@ -104,8 +97,6 @@ void EnzoInitialPm::uniform_placement_
   const int ia_x = (rank >= 1) ? particle.attribute_index (it,"x") : -1;
   const int ia_y = (rank >= 2) ? particle.attribute_index (it,"y") : -1;
   const int ia_z = (rank >= 3) ? particle.attribute_index (it,"z") : -1;
-
-  const int dp  = particle.stride(it,ia_x);
 
   double * xv = (rank >= 1) ? new double [nx] : NULL;
   double * yv = (rank >= 2) ? new double [ny] : NULL;
@@ -161,7 +152,6 @@ void EnzoInitialPm::uniform_placement_
 
   const int ps  = particle.stride(it,ia_x);
 
-  int ip = 0;
   for (int iz=0; iz<nz; ++iz) {
     for (int iy=0; iy<ny; ++iy) {
       for (int ix=0; ix<nx; ++ix) {

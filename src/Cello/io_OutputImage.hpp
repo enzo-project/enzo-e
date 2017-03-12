@@ -78,18 +78,18 @@ public: // functions
       nxi_(0),
       nyi_(0),
       png_(NULL),
-      min_level_(0),
-      max_level_(0),
-      leaf_only_(false),
       image_type_(""),
       face_rank_(0),
       image_log_(false),
       image_abs_(false),
-      ghost_(false)
+      ghost_(false),
+      min_level_(0),
+      max_level_(0),
+      leaf_only_(false)
   {
     for (int axis=0; axis<3; axis++) {
-      image_lower_[axis] = std::numeric_limits<double>::min();
-      image_upper_[axis] = std::numeric_limits<double>::max();
+      image_lower_[axis] = -std::numeric_limits<double>::max();
+      image_upper_[axis] =  std::numeric_limits<double>::max();
     }
   }
 

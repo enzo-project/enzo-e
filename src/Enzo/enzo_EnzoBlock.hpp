@@ -111,8 +111,8 @@ public: // interface
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
-       mg_sync_(),
        mg_iter_(0),
+       mg_sync_(),
        dt(0),
        SubgridFluxes(NULL)
   {
@@ -134,8 +134,8 @@ public: // interface
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : BASE_ENZO_BLOCK (m),
-       mg_sync_(),
-       mg_iter_(0),
+      mg_iter_(0),
+      mg_sync_(),
       dt(0.0),
       SubgridFluxes(NULL)
   {
@@ -381,11 +381,11 @@ public: /// entry methods
 
 protected: // attributes
   
-  // MG SOLVER ( EnzoSolverMg0)
-  Sync mg_sync_;
-
   // MG iteration count
   int mg_iter_;
+
+  // MG SOLVER ( EnzoSolverMg0)
+  Sync mg_sync_;
 
 public: // attributes (YIKES!)
 

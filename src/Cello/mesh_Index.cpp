@@ -312,7 +312,7 @@ void Index::upper (double v3[3], int a3[3], int max_level) const
   int iy = (a_[1].array << max_level) + (a_[1].tree >> (INDEX_BITS_TREE-max_level));
   int iz = (a_[2].array << max_level) + (a_[2].tree >> (INDEX_BITS_TREE-max_level));
 
-  const int ip = (1 << max_level - level());
+  const int ip = 1 << (max_level - level());
 
   ix += ip;
   iy += ip;

@@ -50,13 +50,13 @@ EnzoSolverJacobi::EnzoSolverJacobi
 void EnzoSolverJacobi::apply
 ( Matrix * A, int ix, int ib, Block * block) throw()
 {
+  
 #ifdef DEBUG_SMOOTH
     printf ("%s:%d %s DEBUG_SMOOTH apply() called\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
 
   begin_(block);
-  
   A_ = A;
   ix_ = ix;
   ib_ = ib;
@@ -166,18 +166,15 @@ void EnzoSolverJacobi::apply_(Block * block)
 	      __FILE__,__LINE__,ix0,mx-ix0,iy0,my-iy0, iz0, mz-iz0);
 #endif
 
-    T * D = (T*) field.values(id_);
-    T * R = (T*) field.values(ir_);
     T * X = (T*) field.values(ix_);
-    double rr=0,dd=0,xx=0;
+    T * R = (T*) field.values(ir_);
+    T * D = (T*) field.values(id_);
+
     for (int iz=iz0; iz<mz-iz0; iz++) {
       for (int iy=iy0; iy<my-iy0; iy++) {
 	for (int ix=ix0; ix<mx-ix0; ix++) {
 	  int i = ix + mx*(iy + my*iz);
 	  X[i] += R[i] / D[i];
-	  rr += R[i]*R[i];
-	  dd += D[i]*D[i];
-	  xx += X[i]*X[i];
 	}
       }
     }

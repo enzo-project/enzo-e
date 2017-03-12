@@ -55,7 +55,6 @@ c
 c
 c  locals
 c
-      integer iii, jjj, kkk
       integer i1, j1, k1, i2,j2,k2,n
       ENZO_REAL    xpos, ypos, zpos, dx1, dy1, dz1, dx2,dy2,dz2
       ENZO_REAL edge1, edge2, edge3, fact, shift, half, refine

@@ -70,13 +70,6 @@ int ProlongLinear::apply_
   const int dy_c = nd3_c[0];
   const int dz_c = nd3_c[0]*nd3_c[1];
 
-  const int dx_f = 1;
-  const int dy_f = nd3_f[0];
-  const int dz_f = nd3_f[0]*nd3_f[1];
-
-  const double c1[4] = { 5.0*0.25, 3.0*0.25, 1.0*0.25, -1.0*0.25};
-  const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
-
   int rank = (nd3_f[2] > 1) ? 3 : ( (nd3_f[1] > 1) ? 2 : 1 );
 
   for (int i=0; i<rank; i++) {
@@ -99,8 +92,6 @@ int ProlongLinear::apply_
     const int ix0_f = im3_f[0];
     const int ix0_c = im3_c[0];
     const int nx_f = n3_f[0];
-    const int mx_c = nd3_c[0];
-    const int mx_f = nd3_f[0];
 
     for (int ix_f = 0; ix_f<nx_f; ix_f++) {
 
@@ -141,9 +132,7 @@ int ProlongLinear::apply_
     const int nx_f = n3_f[0];
     const int ny_f = n3_f[1];
     const int mx_c = nd3_c[0];
-    const int my_c = nd3_c[1];
     const int mx_f = nd3_f[0];
-    const int my_f = nd3_f[1];
     
     for (int iy_f = 0; iy_f<ny_f; iy_f++) {
 
@@ -191,11 +180,9 @@ int ProlongLinear::apply_
     const int ny_f = n3_f[1];
     const int nz_f = n3_f[2];
     const int mx_c = nd3_c[0];
-    const int my_c = nd3_c[1];
-    const int mz_c = nd3_c[2];
     const int mx_f = nd3_f[0];
+    const int my_c = nd3_c[1];
     const int my_f = nd3_f[1];
-    const int mz_f = nd3_f[2];
     
     for (int iz_f = 0; iz_f<nz_f; iz_f++) {
 

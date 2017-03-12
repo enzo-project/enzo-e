@@ -44,6 +44,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_pm_field(""),
   initial_pm_mpp(0.0),
   initial_pm_level(0),
+  // EnzoInitialSedov[23]
+  initial_sedov_rank(0),
+  initial_sedov_radius_relative(0.0),
+  initial_sedov_pressure_in(0.0),
+  initial_sedov_pressure_out(0.0),
+  initial_sedov_density(0.0),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -51,12 +57,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_soup_pressure_in(0.0),
   initial_soup_pressure_out(0.0),
   initial_soup_density(0.0),
-  // EnzoInitialSedov[23]
-  initial_sedov_rank(0),
-  initial_sedov_radius_relative(0.0),
-  initial_sedov_pressure_in(0.0),
-  initial_sedov_pressure_out(0.0),
-  initial_sedov_density(0.0),
   // EnzoInitialTurbulence
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
@@ -574,7 +574,7 @@ void EnzoConfig::write(FILE * fp)
   fprintf (fp,"method_gravity_grav_const = %g\n",
 	   method_gravity_grav_const);
   fprintf (fp,"method_gravity_solver = %s\n",
-	   method_gravity_solver);
+	   method_gravity_solver.c_str());
 
   // EnzoMethodPm
 

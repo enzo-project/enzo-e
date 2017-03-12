@@ -84,8 +84,8 @@ int EnzoRefineShock::apply ( Block * block ) throw ()
 
   void * output = initialize_output_(field.field_data());
 
-  bool any_refine;
-  bool all_coarsen;
+  bool any_refine  = false;
+  bool all_coarsen = true;
   
   switch (precision) {
   case precision_single:

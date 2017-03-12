@@ -7,6 +7,16 @@
 
 #include "compute.hpp"
 
+//======================================================================
+
+Solver::~Solver() throw()
+{
+  for (size_t i=0; i<refresh_list_.size(); i++) {
+    delete refresh_list_[i];
+    refresh_list_[i] = 0;
+  }
+}
+
 //----------------------------------------------------------------------
 
 int Solver::add_refresh (int ghost_depth, 

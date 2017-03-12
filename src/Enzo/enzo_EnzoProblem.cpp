@@ -211,7 +211,6 @@ Solver * EnzoProblem::create_solver_
 
   Solver * solver = NULL;
   
-  FieldDescr * field_descr_ptr = (FieldDescr *) field_descr;
   int rank = config->mesh_root_rank;
 
   if (solver_type == "cg") {

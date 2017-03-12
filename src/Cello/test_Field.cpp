@@ -64,6 +64,10 @@ PARALLEL_MAIN_BEGIN
     field.set_precision(i4, precision_double);
     field.set_precision(i5, precision_quadruple);
 
+    field.set_precision(j1,precision_single);
+    field.set_precision(j2,precision_double);
+    field.set_precision(j3,precision_quadruple);
+
     unit_class ("Cello");
 
     unit_func ("32-bit floating-point");
@@ -528,16 +532,11 @@ PARALLEL_MAIN_BEGIN
 
     field.reallocate_permanent(false);
 
-    v1    = 
-      (float *) field.values(i1);
-    v2 = 
-				 (double *) field.values(i2);
-    v3 = 
-      (double *) field.values(i3);
-    v4 = 
-      (double *) field.values(i4);
-    v5 =
-      (long double *) field.values(i5);
+    v1 =       (float *) field.values(i1);
+    v2 =      (double *) field.values(i2);
+    v3 =      (double *) field.values(i3);
+    v4 =      (double *) field.values(i4);
+    v5 = (long double *) field.values(i5);
 
     unit_assert(3.0 == v2[(nx+1)*ny*nz-1]);
     unit_assert(4.0 == v3[0] );
@@ -546,6 +545,54 @@ PARALLEL_MAIN_BEGIN
     unit_assert(4.0 == v4[nx*ny*(nz+1)-1]);
     unit_assert(2.0 == v5[0] );
 
+    // Test temporary fields
+    
+    float * t1;
+    double * t2;
+    long double * t3;
+
+    unit_func("insert_temporary");
+
+    t1 = (float *) field.values(j1);
+    t2 = (double *) field.values(j2);
+    t3 = (long double *) field.values(j3);
+
+    unit_assert (t1 == NULL);
+    unit_assert (t2 == NULL);
+    unit_assert (t3 == NULL);
+    
+    unit_func("allocate_temporary");
+
+    field.allocate_temporary(j1);    
+    field.allocate_temporary(j2);    
+    field.allocate_temporary(j3);
+
+    t1 = (float *)       field.values(j1);
+    t2 = (double *)      field.values(j2);
+    t3 = (long double *) field.values(j3);
+
+    t1[0] = -1.00;
+    t2[0] = -2.00;
+    t3[0] = -3.00;
+
+    unit_assert ((t1[0] == -1.00));
+    unit_assert ((t2[0] == -2.00));
+    unit_assert ((t3[0] == -3.00));
+
+    unit_func("deallocate_temporary");
+
+    field.deallocate_temporary(j1);    
+    field.deallocate_temporary(j2);    
+    field.deallocate_temporary(j3);
+
+    t1 = (float *) field.values(j1);
+    t2 = (double *) field.values(j2);
+    t3 = (long double *) field.values(j3);
+
+    unit_assert (t1 == NULL);
+    unit_assert (t2 == NULL);
+    unit_assert (t3 == NULL);
+    
     unit_func("delete");
     delete field.field_descr();
     delete field.field_data();
@@ -586,9 +633,6 @@ PARALLEL_MAIN_BEGIN
     field.insert_permanent("total_energy");
     unit_assert(field.field_count()==5);
 
-    int j1 = field.insert_temporary();
-    int j2 = field.insert_temporary();
-    int j3 = field.insert_temporary();
 
     unit_func("field_count");
     unit_assert(field.field_count()==5);

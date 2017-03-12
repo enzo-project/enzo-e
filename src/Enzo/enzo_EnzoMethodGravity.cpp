@@ -72,7 +72,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   
   // May exit before solve is done...
   solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue(NULL));
-  
+
   solver->apply (A, ix, ib, block);
 
 }
@@ -113,9 +113,6 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   EnzoComputeAcceleration compute_acceleration(data()->field().field_descr(),
 					       rank(), order=4);
 
-  EnzoMethodGravity * method = 
-    static_cast<EnzoMethodGravity*> (this->method());
-  
   compute_acceleration.compute(this);
 
   // wait for all Blocks before continuing

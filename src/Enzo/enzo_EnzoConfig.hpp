@@ -63,24 +63,25 @@ public: // interface
       physics_cosmology_max_expansion_rate(0.0),
       physics_cosmology_omega_lamda_now(0.0),
       physics_cosmology_omega_matter_now(0.0),
+      // EnzoInitialPm
+      initial_pm_field(""),
+      initial_pm_mpp(0.0),
       // EnzoInitialSedovArray[23]
       initial_sedov_rank(0),
       initial_sedov_radius_relative(0.0),
       initial_sedov_pressure_in(0.0),
       initial_sedov_pressure_out(0.0),
       initial_sedov_density(0.0),
-      initial_turbulence_density(0.0),
-      initial_turbulence_pressure(0.0),
-      initial_turbulence_temperature(0.0),
-      // EnzoInitialPm
-      initial_pm_field(""),
-      initial_pm_mpp(0.0),
       // EnzoInitialSoup
       initial_soup_rank(0),
       initial_soup_file(""),
       initial_soup_pressure_in(0.0),
       initial_soup_pressure_out(0.0),
       initial_soup_density(0.0),
+      // EnzoInitialTurbulence
+      initial_turbulence_density(0.0),
+      initial_turbulence_pressure(0.0),
+      initial_turbulence_temperature(0.0),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -151,6 +152,11 @@ public: // attributes
   double                     physics_cosmology_omega_lamda_now;
   double                     physics_cosmology_omega_matter_now;
 
+  // EnzoInitialPm
+  std::string                initial_pm_field;
+  double                     initial_pm_mpp;
+  int                        initial_pm_level;
+
   // EnzoInitialSedovArray[23]
   int                        initial_sedov_rank;
   int                        initial_sedov_array[3];
@@ -159,14 +165,7 @@ public: // attributes
   double                     initial_sedov_pressure_out;
   double                     initial_sedov_density;
 
-  double                     initial_turbulence_density;
-  double                     initial_turbulence_pressure;
-  double                     initial_turbulence_temperature;
-
-  std::string                initial_pm_field;
-  double                     initial_pm_mpp;
-  int                        initial_pm_level;
-
+  // EnzoInitialSoup
   int                        initial_soup_rank;
   std::string                initial_soup_file;
   bool                       initial_soup_rotate;
@@ -176,6 +175,11 @@ public: // attributes
   double                     initial_soup_pressure_in;
   double                     initial_soup_pressure_out;
   double                     initial_soup_density;
+
+  // EnzoInitialTurbulence
+  double                     initial_turbulence_density;
+  double                     initial_turbulence_pressure;
+  double                     initial_turbulence_temperature;
 
   // EnzoProlong
   std::string                interpolation_method;

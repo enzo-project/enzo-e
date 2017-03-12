@@ -38,13 +38,7 @@ public: // interface
   {}
 
   /// Destructor
-  virtual ~Solver() throw()
-  {
-    for (size_t i=0; i<refresh_list_.size(); i++) {
-      delete refresh_list_[i];
-      refresh_list_[i] = 0;
-    }
-  }
+  virtual ~Solver() throw();
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Solver);
@@ -94,6 +88,16 @@ public: // interface
   void set_sync_id (int sync_id)
   { id_sync_ = sync_id; }
   
+  /// Type of neighbor: level if min_level == max_level, else leaf
+  int neighbor_type_() const throw();
+
+  /// Type of synchronization: sync_face if min_level == max_level,
+  /// else sync_neighbor)
+  int sync_type_() const throw();
+
+  /// Whether Block is active
+  bool is_active_(Block * block);
+
 public: // virtual functions
 
   /// Solve the linear system Ax = b
@@ -125,16 +129,6 @@ protected: // functions
     const int m = mx*my*mz;
     std::memcpy(X,Y,m*sizeof(T));
   }
-
-  /// Whether Block is active
-  bool is_active_(Block * block);
-
-  /// Type of neighbor: level if min_level == max_level, else leaf
-  int neighbor_type_() const throw();
-
-  /// Type of synchronization: sync_face if min_level == max_level,
-  /// else sync_neighbor)
-  int sync_type_() const throw();
 
   int sync_id_() const throw()
   { return this->id_sync_; }

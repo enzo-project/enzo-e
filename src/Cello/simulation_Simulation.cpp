@@ -772,8 +772,6 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = nr * nc + 2;
-
   long *      counters_long = (long * )msg->getData();
 
   int index_region_cycle = performance_->region_index("cycle");

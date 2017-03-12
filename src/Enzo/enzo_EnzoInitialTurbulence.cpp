@@ -13,9 +13,9 @@
 // #define DEBUG_TURBULENCE
 
 #ifdef DEBUG_TURBULENCE
-#  define TRACE CkPrintf("%s:%d TRACE DEBUG_TURBULENCE\n",__FILE__,__LINE__);
+#  define TRACE_TURBULENCE CkPrintf("%s:%d TRACE DEBUG_TURBULENCE\n",__FILE__,__LINE__);
 #else
-#  define TRACE /*  */
+#  define TRACE_TURBULENCE /*  */
 #endif
 //----------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ void EnzoInitialTurbulence::enforce_block
  ) throw()
 
 {
-  TRACE;
+  TRACE_TURBULENCE;
   if (!block->is_leaf()) return;
 
   //  INCOMPLETE("EnzoInitialTurbulence::enforce_block()");

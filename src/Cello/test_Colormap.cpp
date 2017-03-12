@@ -36,7 +36,7 @@ PARALLEL_MAIN_BEGIN
   float  * array = new float [nd];
 
   float array_min = std::numeric_limits<float>::max();
-  float array_max = std::numeric_limits<float>::min();
+  float array_max = - std::numeric_limits<float>::max();
   for (int ix=gx; ix<nx+gx; ix++) {
     for (int iy=gy; iy<ny+gy; iy++) {
       for (int iz=gz; iz<nz+gz; iz++) {

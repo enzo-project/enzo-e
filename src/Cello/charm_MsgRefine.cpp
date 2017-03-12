@@ -185,7 +185,7 @@ void * MsgRefine::pack (MsgRefine * msg)
   (*pi++) = msg->num_face_level_;
 
   // face_level_[]
-  for (size_t i=0; i<msg->num_face_level_; i++) {
+  for (int i=0; i<msg->num_face_level_; i++) {
     (*pi++) = msg->face_level_[i];
   }
 
@@ -272,7 +272,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   // face_level_[]
   if (msg->num_face_level_ > 0) {
     msg->face_level_ = new int [msg->num_face_level_];
-    for (size_t i = 0; i<msg->num_face_level_; i++) {
+    for (int i = 0; i<msg->num_face_level_; i++) {
       msg->face_level_[i] = (*pi++);
     }
   } else {

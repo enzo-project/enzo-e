@@ -143,9 +143,11 @@ int FieldDescr::insert_temporary(const std::string & field_name) throw()
 {
   bool permanent;
   
-  return insert_(field_name, permanent = false);
+  int id = insert_(field_name, permanent = false);
 
   ++ num_temporary_;
+
+  return id;
 }
 
 //----------------------------------------------------------------------

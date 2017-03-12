@@ -211,11 +211,11 @@ EnzoSolverHg::EnzoSolverHg
  int max_level) 
   : Solver(), 
     A_(new EnzoMatrixLaplace),
+    index_solve_coarse_(index_solve_coarse),
     restrict_(restrict),
     prolong_(prolong),
     rank_(rank),
     iter_max_(iter_max),
-    index_solve_coarse_(index_solve_coarse),
     monitor_iter_(monitor_iter),
     ib_(0), ic_(0), ir_(0), ix_(0),
     min_level_(min_level),
@@ -226,9 +226,6 @@ EnzoSolverHg::EnzoSolverHg
     bs_(0), bc_(0)
     // [*]
 {
-  EnzoBlock * null_block = NULL;
-  TRACE_MG(null_block,"EnzoSolverHg()");
-  
   if (min_level_ > 0) {
     ERROR1 ("EnzoSolverHg::EnzoSolverHg()",
 	    "Solver Hg requires min_level = %d to be <= 0",
@@ -251,9 +248,6 @@ EnzoSolverHg::EnzoSolverHg
 EnzoSolverHg::~EnzoSolverHg () throw()
 // [*]
 {
-  EnzoBlock * null_block = NULL;
-  TRACE_MG(null_block,"~EnzoSolverHg()");
-
   delete prolong_;
   delete restrict_;
 
@@ -284,8 +278,6 @@ void EnzoSolverHg::apply
   field.ghost_depth(ib_,&gx_,&gy_,&gz_);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
-  const int level = block->level();
 
   // Initialize child counter for restrict synchronization
   enzo_block->mg_sync_set_stop(NUM_CHILDREN(enzo_block->rank()));
@@ -323,7 +315,6 @@ void EnzoSolverHg::enter_solver_ (EnzoBlock * enzo_block) throw()
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  T * B = (T*) field.values(ib_);
   T * X = (T*) field.values(ix_);
   T * R = (T*) field.values(ir_);
   T * C = (T*) field.values(ic_);
@@ -354,7 +345,6 @@ void EnzoSolverHg::enter_solver_ (EnzoBlock * enzo_block) throw()
 
       T* B = (T*) field.values(ib_);
 
-      long double value = 0.0;
       for (int iz=gz_; iz<nz_+gz_; iz++) {
 	for (int iy=gy_; iy<ny_+gy_; iy++) {
 	  for (int ix=gx_; ix<nx_+gx_; ix++) {
@@ -573,7 +563,6 @@ void EnzoSolverHg::pre_smooth(EnzoBlock * enzo_block) throw()
 
   Data * data = enzo_block->data();
   Field field = data->field();
-  T * X = (T*) field.values(ix_);
 
   //  smooth_pre_->apply(A_,ix_,ib_,enzo_block);
 
@@ -870,10 +859,6 @@ void EnzoBlock::p_solver_hg_prolong_recv(FieldMsg * field_message)
 
   // copy data from field_message to this EnzoBlock
 
-  int n = field_message->n;
-  char * a = field_message->a;
-  int * ic3 = field_message->ic3;
-
   EnzoSolverHg * solver = 
     static_cast<EnzoSolverHg*> (this->solver());
 
@@ -1019,10 +1004,6 @@ void EnzoSolverHg::end_cycle(EnzoBlock * enzo_block) throw()
 {
   TRACE_LEVEL("EnzoSolverHg::end_cycle",enzo_block);
   Field field = enzo_block->data()->field();
-  T * B = (T*) field.values(ib_);
-  T * X = (T*) field.values(ix_);
-  T * R = (T*) field.values(ir_);
-  T * C = (T*) field.values(ic_);
 
   const int level = enzo_block->level();
 
@@ -1037,7 +1018,7 @@ void EnzoSolverHg::end_cycle(EnzoBlock * enzo_block) throw()
 
   }
 
-  if (enzo_block->level() >= max_level_) {
+  if (level >= max_level_) {
 
     begin_cycle_<T>(enzo_block);
 

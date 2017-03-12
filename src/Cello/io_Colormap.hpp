@@ -21,7 +21,7 @@ public: // interface
 
   /// Constructor
   Colormap() throw() 
-  : min_(std::numeric_limits<double>::min()),
+  : min_(- std::numeric_limits<double>::max()),
     max_(std::numeric_limits<double>::max())
   {}
 

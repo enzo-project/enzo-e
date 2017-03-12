@@ -177,10 +177,10 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 EnzoBlock::EnzoBlock
 ( MsgRefine * msg )
   : BASE_ENZO_BLOCK ( msg ),
-    dt(dt_),
-    SubgridFluxes(0),
     mg_iter_(0),
-    mg_sync_()
+    mg_sync_(),
+    dt(dt_),
+    SubgridFluxes(NULL)
 {
   initialize_enzo_();
   initialize();
@@ -249,8 +249,8 @@ void EnzoBlock::pup(PUP::er &p)
 
   PUParray(p,method_turbulence_data,max_turbulence_array);
 
-  p | mg_sync_;
   p | mg_iter_;
+  p | mg_sync_;
 
   TRACE ("END EnzoBlock::pup()");
 

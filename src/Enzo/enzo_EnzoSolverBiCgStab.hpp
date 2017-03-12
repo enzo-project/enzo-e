@@ -40,6 +40,7 @@ public: // interface
   EnzoSolverBiCgStab()
     : Solver(),
       A_(NULL),
+      index_precon_(-1),
       first_call_(true),
       rank_(0),
       iter_max_(0), 
@@ -56,8 +57,7 @@ public: // interface
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
       bs_(0.0),bc_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0),
-      index_precon_(-1)
+      ys_(0.0),vs_(0.0),us_(0.0)
   {};
 
   /// Charm++ PUP::able declarations
@@ -236,6 +236,8 @@ protected: // methods
   template<class T> long double sum_(const T* X) const throw();
 
 protected: // attributes
+
+  // NOTE: change pup() function whenever attributes change
 
   /// Matrix
   Matrix* A_;

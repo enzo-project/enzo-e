@@ -130,7 +130,6 @@ void Param::pup_expr_ (PUP::er &p, struct node_expr ** node) {
     }
 
     // PUP value (note function_name needs to be before value)
-    void * pointer;
     switch ((*node)->type) {
     case enum_node_operation:
       p | (*node)->op_value;

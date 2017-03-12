@@ -116,7 +116,8 @@ public: // interface
   template <class T>
   void restrict_send(EnzoBlock * enzo_block) throw();
   template <class T>
-  void restrict_recv(EnzoBlock * enzo_block) throw();
+  void restrict_recv(EnzoBlock * enzo_block,
+		      FieldMsg * field_message) throw();
 
   /// Access the Restrict operator by EnzoBlock
   Restrict * restrict() { return restrict_; }
@@ -130,7 +131,8 @@ public: // interface
 
   /// Prolong the correction C to the next-finer level
   template <class T>
-  void prolong_recv(EnzoBlock * enzo_block) throw();
+  void prolong_recv(EnzoBlock * enzo_block,
+		    FieldMsg * field_message) throw();
 
   /// Apply post-smoothing to the current level
   template <class T>
@@ -145,7 +147,28 @@ public: // interface
   template <class T>
   void end_cycle(EnzoBlock * enzo_block) throw();
   
-
+  void print()
+  {
+    CkPrintf (" A_ = %p\n",A_);
+    CkPrintf (" index_smooth_pre_ = %d\n",index_smooth_pre_);
+    CkPrintf (" index_solve_coarse_ = %d\n",index_solve_coarse_);
+    CkPrintf (" index_smooth_post_ = %d\n",index_smooth_post_);
+    CkPrintf (" restrict_ = %p\n",restrict_);
+    CkPrintf (" prolong_ = %p\n",prolong_);
+    CkPrintf (" rank_ = %d\n",rank_);
+    CkPrintf (" iter_max_ = %d\n",iter_max_);
+    CkPrintf (" monitor_iter_ = %d\n",monitor_iter_);
+    CkPrintf (" rr0_ = %g\n",rr0_);
+    CkPrintf (" ib_ = %d\n",ib_);
+    CkPrintf (" ic_ = %d\n",ic_);
+    CkPrintf (" ir_ = %d\n",ir_);
+    CkPrintf (" ix_ = %d\n",ix_);
+    CkPrintf (" mx_,my_,mz_ = %d %d %d\n",mx_,my_,mz_);
+    CkPrintf (" nx_,ny_,nz_ = %d %d %d\n",nx_,ny_,nz_);
+    CkPrintf (" gx_,gy_,gz_ = %d %d %d\n",gx_,gy_,gz_);
+    CkPrintf (" bs_ = %g\n",bs_);
+    CkPrintf (" bc_ = %g\n",bc_);
+  }
 protected: // methods
 
   template <class T>

@@ -419,6 +419,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
  ) 
   : Solver(monitor_iter,min_level,max_level), 
     A_(NULL),
+    index_precon_(index_precon),
     first_call_(true),
     rank_(rank),
     iter_max_(iter_max), 
@@ -435,7 +436,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     omega_d_(0), omega_n_(0), omega_(0), 
     vr0_(0), rr_(0), alpha_(0),
     bs_(0.0),bc_(0.0),
-    ys_(0.0),vs_(0.0),us_(0.0), index_precon_(index_precon)
+    ys_(0.0),vs_(0.0),us_(0.0)
 {
   /// access problem-defining fields for eventual RHS and solution
   int id  = field_descr->field_id("density");
@@ -464,8 +465,6 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   iq_ = field_descr->field_id(name() + "_Q");
   iu_ = field_descr->field_id(name() + "_U");
 
-  const int num_fields = field_descr->field_count();
-
   /// Initialize default Refresh (called before entry to compute())
   
   const int ir = add_refresh(4, 0, neighbor_type_(), sync_type_());
@@ -483,7 +482,8 @@ EnzoSolverBiCgStab::~EnzoSolverBiCgStab() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSolverBiCgStab::apply ( Matrix * A, int ix, int ib, Block * block) throw()
+void EnzoSolverBiCgStab::apply
+( Matrix * A, int ix, int ib, Block * block) throw()
 {
   TRACE_BICGSTAB("apply()",block);
   
@@ -526,13 +526,6 @@ void EnzoSolverBiCgStab::apply ( Matrix * A, int ix, int ib, Block * block) thro
 
 //======================================================================
 
-extern CkReduction::reducerType sum_long_double_type;
-extern CkReduction::reducerType sum_long_double_2_type;
-extern CkReduction::reducerType sum_long_double_3_type;
-extern CkReduction::reducerType sum_long_double_4_type;
-
-//======================================================================
-
 template<class T>
 void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
@@ -550,8 +543,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
   if (is_active_(enzo_block)) {
 
     /// access relevant fields
-    T* density = (T*) field.values(idensity_);
-    T* B       = (T*) field.values(ib_);
+
     T* X       = (T*) field.values(ix_);
 
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from
@@ -1042,12 +1034,12 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
   if (index_precon_ >= 0) {
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Solver * precon = simulation->problem()->solver(index_precon_);
-    precon->set_sync_id (8);
+    precon->set_sync_id (10);
     precon->set_min_level(min_level_);
     precon->set_max_level(max_level_);
 
     precon->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_8());
-  
+
     precon->apply(A_,iy_,iq_,enzo_block);
   } else {
 

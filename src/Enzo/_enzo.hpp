@@ -69,6 +69,7 @@ enum {
 #include "enzo_defines.hpp"
 #include "enzo_typedefs.hpp"
 #include "enzo_fortran.hpp"
+#include "enzo_reductions.hpp"
 
 //----------------------------------------------------------------------
 

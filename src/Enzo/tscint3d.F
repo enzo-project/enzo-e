@@ -68,8 +68,8 @@ c
       real   coefm1(MAX_REFINE), coefp1(MAX_REFINE), coef01(MAX_REFINE),
      &       coefm2(MAX_REFINE), coefp2(MAX_REFINE), coef02(MAX_REFINE),
      &       coefm3(MAX_REFINE), coefp3(MAX_REFINE), coef03(MAX_REFINE),
-     &       del1left, del2left, del1next, del2next, 
-     &       del1right, del2right, dV, factor, sum,
+     &       del1left, del2left, del1next,
+     &       del1right, del2right, dV,
      &       w01, w02, w03, wm1, wm2, wm3, wp1, wp2, wp3
       real   temp(ijkn), fraction(ijkn)
 c

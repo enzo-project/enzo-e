@@ -15,9 +15,9 @@
 // #define DEBUG_TURBULENCE
 
 #ifdef DEBUG_TURBULENCE
-#   define TRACE CkPrintf ("%s:%d TRACE DEBUG_TURBULENCE\n",__FILE__,__LINE__);
+#   define TRACE_TURBULENCE CkPrintf ("%s:%d TRACE DEBUG_TURBULENCE\n",__FILE__,__LINE__);
 #else
-#   define TRACE /*   */
+#   define TRACE_TURBULENCE /*   */
 #endif
 
 //----------------------------------------------------------------------
@@ -36,7 +36,7 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
     mach_number_(mach_number),
     comoving_coordinates_(comoving_coordinates)
 {
-  TRACE;  
+  TRACE_TURBULENCE;  
   
   // Initialize default Refresh object
 
@@ -70,7 +70,7 @@ void EnzoMethodTurbulence::pup (PUP::er &p)
 
 void EnzoMethodTurbulence::compute ( Block * block) throw()
 {
-  TRACE;  
+  TRACE_TURBULENCE;  
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   
@@ -171,7 +171,7 @@ extern CkReduction::reducerType r_method_turbulence_type;
 
 void EnzoBlock::method_turbulence_begin()
 {
-  TRACE;  
+  TRACE_TURBULENCE;  
   const int n = max_turbulence_array * sizeof(double);
   double * g = method_turbulence_data;
   CkCallback callback (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),
@@ -189,7 +189,7 @@ void EnzoBlock::method_turbulence_begin()
 
 void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
 {
-  TRACE;  
+  TRACE_TURBULENCE;  
   performance_start_(perf_compute,__FILE__,__LINE__);
   method()->compute_resume (this,msg);
   delete msg;
@@ -202,7 +202,7 @@ void EnzoMethodTurbulence::compute_resume
 (Block * block,
  CkReductionMsg * msg) throw()
 {
-  TRACE;  
+  TRACE_TURBULENCE;  
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
@@ -366,7 +366,7 @@ void EnzoMethodTurbulence::compute_resume_
  CkReductionMsg * msg) throw()
 {
 
-  TRACE;  
+  TRACE_TURBULENCE;  
   // Compute normalization
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
@@ -432,7 +432,7 @@ void EnzoMethodTurbulence::compute_resume_
     }
   }
 
-  TRACE;  
+  TRACE_TURBULENCE;  
   enzo_block->compute_done();
   
 }

@@ -143,11 +143,11 @@
 	    CkMyPe(),(block != NULL) ? block->name().c_str() : "root",msg); \
   fflush(stdout);
 
-#define DEBUG_PRINT_XX							\
+#define DEBUG_FIELD(IX,NAME)						\
   {									\
     Data * data = enzo_block->data();					\
     Field field = data->field();					\
-    T * X = (T*) field.values(ix_);					\
+    T * X = (T*) field.values(IX);					\
     double xx=0;							\
     for (int iz=0; iz<mz_; iz++) {					\
       for (int iy=0; iy<my_; iy++) {					\
@@ -157,13 +157,14 @@
 	}								\
       }									\
     }									\
-    CkPrintf ("%d DEBUG_SOLVER %s ix=%d xx=%g\n",__LINE__,enzo_block->name().c_str(),ix_); \
+    CkPrintf ("%s:%d %s DEBUG_SOLVER ||%s|| = %g\n",			\
+	      __FILE__,__LINE__,enzo_block->name().c_str(),NAME,xx);	\
   }
 
 #else
 #   define TRACE_MG(block,msg) /*  ... */
 
-#   define DEBUG_PRINT_XX /* ... */
+#   define DEBUG_FIELD(IX,NAME) /* ... */
 #endif
 
 #ifdef DEBUG_SOLVER_MG0
@@ -228,9 +229,6 @@ EnzoSolverMg0::EnzoSolverMg0
     bs_(0), bc_(0)
     // [*]
 {
-  EnzoBlock * null_block = NULL;
-  TRACE_MG(null_block,"EnzoSolverMg0()");
-  
   if (min_level_ > 0) {
     ERROR1 ("EnzoSolverMg0::EnzoSolverMg0()",
 	    "Solver Mg0 requires min_level = %d to be <= 0",
@@ -252,9 +250,6 @@ EnzoSolverMg0::EnzoSolverMg0
 EnzoSolverMg0::~EnzoSolverMg0 () throw()
 // [*]
 {
-  EnzoBlock * null_block = NULL;
-  TRACE_MG(null_block,"~EnzoSolverMg0()");
-
   delete prolong_;
   delete restrict_;
 
@@ -271,8 +266,6 @@ void EnzoSolverMg0::apply
   TRACE_MG(block,"EnzoSolverMg0::apply()");
 
   Solver::begin_(block);
-
-  const int level = block->level();
 
   A_ = A;
   ix_ = ix;
@@ -321,10 +314,10 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
   enzo_block->mg_iter_clear();
 
+
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  T * B = (T*) field.values(ib_);
   T * X = (T*) field.values(ix_);
   T * R = (T*) field.values(ir_);
   T * C = (T*) field.values(ic_);
@@ -355,7 +348,6 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
       T* B = (T*) field.values(ib_);
 
-      long double value = 0.0;
       for (int iz=gz_; iz<nz_+gz_; iz++) {
 	for (int iy=gy_; iy<ny_+gy_; iy++) {
 	  for (int ix=gx_; ix<nx_+gx_; ix++) {
@@ -507,9 +499,8 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
     TRACE_MG(enzo_block,"calling smoother");
 
-    const int field_count = enzo_block->data()->field().field_count();
+    if ( (! enzo_block->is_leaf()) && (level < max_level_) ) {
 
-    if (!(enzo_block->is_leaf()) || level != max_level_) {
       Field field = enzo_block->data()->field();
       T * X = (T*) field.values(ix_);
       for (int iz=0; iz<mz_; iz++) {
@@ -564,7 +555,7 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
   // assume all fields have same precision
-  int precision = field.precision(field.field_id("density"));
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->solve_coarse<float>(enzo_block);
   else if (precision == precision_double)    
@@ -589,7 +580,7 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
   // assume all fields have same precision
-  int precision = field.precision(field.field_id("density"));
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->pre_smooth<float>(enzo_block);
   else if (precision == precision_double)    
@@ -718,6 +709,8 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   //  </COMMON CODE>
 
+  DEBUG_FIELD(ir_,"R");
+  
   CkCallback (CkIndex_EnzoBlock::p_solver_mg0_restrict_recv<T>(NULL), 
 	      CkArrayIndexIndex(index_parent),
 	      enzo_block->proxy_array()).send(field_message);
@@ -735,43 +728,16 @@ void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * field_message)
 
   TRACE_MG(this,"EnzoBlock::restrict_recv()");
 
-  // Unpack "B" vector data from children
-
-  // Face (0,0,0) is the entire block
-  int if3[3] = {0,0,0};
-  // exclude ghost zones
-  bool lg3[3] = {false,false,false};
-  // receive in vector "B"
-  std::vector<int> field_list;
-  field_list.push_back(data()->field().field_id("B"));
-
-  // copy data from field_message to this EnzoBlock
-
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  int * ic3 = field_message->ic3;
-
-  FieldFace * field_face = create_face 
-    (if3, ic3, lg3, refresh_coarse, field_list);
-
-  field_face->set_restrict(solver->restrict());
-
-  char * a = field_message->a;
-  field_face->array_to_face(a, data()->field());
-  delete field_face;
-
-  delete field_message;
-
-  // continue with EnzoSolverMg0
-
-  solver -> restrict_recv<T>(this);
+  solver -> restrict_recv<T>(this,field_message);
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoSolverMg0::restrict_recv(EnzoBlock * enzo_block) throw()
+void EnzoSolverMg0::restrict_recv(EnzoBlock * enzo_block, FieldMsg * field_message) throw()
 /// 
 /// [*] restrict recv
 ///
@@ -779,8 +745,36 @@ void EnzoSolverMg0::restrict_recv(EnzoBlock * enzo_block) throw()
 ///      if (sync.next())
 ///          begin_cycle()
 {
+
+  // Unpack "B" vector data from children
+
+  int if3[3] = {0,0,0};
+  bool lg3[3] = {false,false,false};
+  std::vector<int> field_list;
+  field_list.push_back(ib_);
+
+  // copy data from field_message to this EnzoBlock
+
+  int * ic3 = field_message->ic3;
+
+  FieldFace * field_face = enzo_block->create_face 
+    (if3, ic3, lg3, refresh_coarse, field_list);
+
+  field_face->set_restrict(restrict());
+
+  char * a = field_message->a;
+  field_face->array_to_face(a, enzo_block->data()->field());
+  delete field_face;
+
+  delete field_message;
+
+  // continue with EnzoSolverMg0
+
+
   TRACE_LEVEL("EnzoSolverMg0::restrict_recv",enzo_block);
   TRACE_MG(enzo_block,"EnzoSolverMg0::restrict_recv()");
+
+  DEBUG_FIELD(ib_,"B");
   
   if (enzo_block->mg_sync_next()) {
     begin_cycle_<T>(enzo_block);
@@ -806,7 +800,7 @@ void EnzoSolverMg0::solve_coarse(EnzoBlock * enzo_block) throw()
   
   if (level == min_level_) {
 
-    if ( ! enzo_block->is_leaf() && level < max_level_) {
+    if ( (! enzo_block->is_leaf()) && (level < max_level_) ) {
 
       prolong_send_<T>(enzo_block);
       
@@ -831,6 +825,7 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
   ItChild it_child(enzo_block->rank());
   int ic3[3];
+  DEBUG_FIELD(ix_,"X");
   while (it_child.next(ic3)) {
 
     Index index_child = enzo_block->index().index_child(ic3,min_level_);
@@ -893,43 +888,16 @@ void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * field_message)
 
   TRACE_MG (this,"EnzoBlock::p_solver_mg0_prolong_recv()");
   
-  // Unpack "C" vector data from children
-
-  int if3[3] = {0,0,0};
-  bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
-  field_list.push_back(data()->field().field_id("C"));
-
-  // copy data from field_message to this EnzoBlock
-
-  int n = field_message->n;
-  char * a = field_message->a;
-  int * ic3 = field_message->ic3;
-
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  FieldFace * field_face = create_face 
-    (if3, field_message->ic3, lg3, refresh_fine, field_list);
-
-  field_face->set_prolong(solver->prolong());
-
-  field_face->array_to_face (field_message->a, data()->field());
-
-  delete field_face;
-
-  // GET DATA
-  
-  //  delete field_message;
-  delete field_message;
-
-  solver -> prolong_recv<T>(this);
+  solver -> prolong_recv<T>(this,field_message);
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
+void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block, FieldMsg * field_message) throw()
 /// 
 /// [ ] prolong recv
 ///
@@ -938,6 +906,30 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block) throw()
 ///      callback = p_post_smooth()
 ///      call refresh (X,"level")
 {
+
+  // Unpack "C" vector data from children
+
+  int if3[3] = {0,0,0};
+  bool lg3[3] = {false,false,false};
+  std::vector<int> field_list;
+  field_list.push_back(ic_);
+
+  // copy data from field_message to this EnzoBlock
+
+  FieldFace * field_face = enzo_block->create_face 
+    (if3, field_message->ic3, lg3, refresh_fine, field_list);
+
+  field_face->set_prolong(prolong());
+
+  field_face->array_to_face (field_message->a, enzo_block->data()->field());
+
+  delete field_face;
+
+  // GET DATA
+  
+  delete field_message;
+
+  DEBUG_FIELD(ic_,"C");
 
   TRACE_LEVEL("EnzoSolverMg0::prolong_recv",enzo_block);
   TRACE_MG (enzo_block,"EnzoSolverMg0::prolong_recv()");
@@ -986,7 +978,7 @@ void EnzoBlock::p_solver_mg0_post_smooth()
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
   // assume all fields have same precision
-  int precision = field.precision(field.field_id("density"));
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->post_smooth<float>(enzo_block);
   else if (precision == precision_double)    
@@ -1012,7 +1004,9 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
   TRACE_LEVEL("EnzoSolverMg0::post_smooth",enzo_block);
   TRACE_MG(enzo_block,"EnzoSolverMg0::post_smooth()");
 
-  if (!enzo_block->is_leaf() && enzo_block->level() < max_level_) {
+  const int level = enzo_block->level();
+
+  if ( ( ! enzo_block->is_leaf() ) && (level < max_level_)) {
 
     prolong_send_<T>(enzo_block);
 
@@ -1049,7 +1043,7 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
   }
 
-  if (enzo_block->is_leaf() || enzo_block->level() == max_level_) {
+  if (enzo_block->is_leaf() || (enzo_block->level() == max_level_)) {
 
     begin_cycle_<T>(enzo_block);
 

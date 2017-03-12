@@ -25,9 +25,9 @@ public: // interface
     min_face_rank_(0),
     neighbor_type_(neighbor_unknown),
     sync_type_   (sync_unknown),
-    sync_id_ (0),
     sync_load_(),
     sync_store_(),
+    sync_id_ (0),
     active_(true),
     callback_(0) 
   {
