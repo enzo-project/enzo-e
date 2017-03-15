@@ -1,7 +1,10 @@
-Steps for preparing to run Enzo-P / Cello on Blue Waters
+The following are steps for preparing to run Enzo-P / Cello on NCSA
+Blue Waters.     
 
-1. Add the following to ~/.bashrc:
+1. Run the following commands, and also put them in your shell startup
+   file (e.g. ~/.bashrc) for future login sessions.
 
+   --------------------------------------------------
    export CELLO_ARCH=ncsa_bw
    export CELLO_PREC=double
 
@@ -9,17 +12,20 @@ Steps for preparing to run Enzo-P / Cello on Blue Waters
    module load PrgEnv-gnu
    module load craype-hugepages8M
    module load cray-hdf5
+   module load libpng
+   --------------------------------------------------
 
-2. Download and install Charm
+2. Download and install Charm in your home directory
 
    mkdir ~/Charm
    cd ~/Charm
    wget http://charm.cs.illinois.edu/distrib/charm-6.7.1.tar.gz
    tar zxf charm-6.7.1.tar.gz
+   ln -s charm-6.7.1 charm
    cd charm
    ./build charm++ gni-crayxe   smp  -j16  --with-production
 
-3. Download and install Enzo-P
+3. Download and install Enzo-P in your home directory
 
    mkdir ~/Cello
    cd ~/Cello
