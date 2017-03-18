@@ -1885,7 +1885,7 @@ perform and on what schedule.
 
 :e:`This parameter specifies the subdirectory for the output file.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), "proc" (the process rank), and "flipflop" (alternating 0 and 1, which can be useful for checkpoint directories).  Example: ["Checkpoint-%d", "flipflop"].`
 
-:e:`This parameter is required for file groups of type "checkpoint".  While optional for other file types, the behavior is different for groups of type "data".  In that case, two extra files are output: <DIR>.file_list, which contains a list of all data files output, and <DIR>.block_list, which contains a list of all Blocks output and the corresponding data file containing each Block.`
+:e:`This parameter is required for file groups of type "checkpoint".  While optional for other file types, the behavior is different for groups of type "data".  In that case, two extra files are output: <DIR>.file_list, which contains a list of all data files output, and <DIR>.block_list, which contains a list of all names of Blocks and the corresponding data file containing each Block.`
 
 ----
 
