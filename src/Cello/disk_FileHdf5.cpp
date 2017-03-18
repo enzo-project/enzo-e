@@ -37,10 +37,11 @@ FileHdf5::FileHdf5 (std::string path, std::string name) throw()
     data_dims_[i] = 0;
   }
 
+  // data_prop_ = H5P_DEFAULT;
   // group_prop_ = H5Pcreate (H5P_GROUP_CREATE);
+
   data_prop_  = H5Pcreate (H5P_DATASET_CREATE);
   group_prop_ = H5P_DEFAULT;
-  //data_prop_ = H5P_DEFAULT;
 }
 
 //----------------------------------------------------------------------

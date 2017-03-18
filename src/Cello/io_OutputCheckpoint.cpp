@@ -22,8 +22,6 @@ OutputCheckpoint::OutputCheckpoint
  int process_count
 ) throw ()
   : Output(index,factory,field_descr,particle_descr),
-    dir_name_(""),
-    dir_args_(),
     restart_file_("")
 {
 
@@ -33,12 +31,6 @@ OutputCheckpoint::OutputCheckpoint
   TRACE2 ("config->output_dir[%d]=%p",index_,&config->output_dir[index_]);
   TRACE2 ("config->output_dir[%d][0]=%s",
 	  index_,config->output_dir[index_][0].c_str());
-  dir_name_ = config->output_dir[index_][0];
-  TRACE0;
-
-  for (size_t i=1; i<config->output_dir[index_].size(); i++) {
-    dir_args_.push_back(config->output_dir[index_][i]);
-  }
 
   restart_file_ = config->restart_file;
 
@@ -54,8 +46,6 @@ void OutputCheckpoint::pup (PUP::er &p)
 
   Output::pup(p);
 
-  p | dir_name_;
-  p | dir_args_;
   p | restart_file_;
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
@@ -90,7 +80,7 @@ void OutputCheckpoint::write_simulation ( const Simulation * simulation ) throw(
 {
   TRACE("OutputCheckpoint::write_simulation()");
 
-  std::string dir_name = expand_file_name_(&dir_name_,&dir_args_);
+  std::string dir_name = expand_name_(&dir_name_,&dir_args_);
 
   simulation->set_phase (phase_restart);
 

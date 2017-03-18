@@ -5,7 +5,9 @@
 /// @date     Thu Mar 17 11:14:18 PDT 2011
 /// @brief    Implementation of the OutputData class
 
+
 #include "cello.hpp"
+#include "main.hpp"
 #include "io.hpp"
 
 //----------------------------------------------------------------------
@@ -18,7 +20,8 @@ OutputData::OutputData
  const ParticleDescr * particle_descr,
  Config * config
 ) throw ()
-  : Output(index,factory,field_descr,particle_descr)
+  : Output(index,factory,field_descr,particle_descr),
+    text_block_count_(0)
 {
   // Set process stride, with default = 1
 
@@ -26,6 +29,7 @@ OutputData::OutputData
 
   process_stride_ = stride == 0 ? 1 : stride;
   set_process_stride(process_stride_);
+
 }
 
 //----------------------------------------------------------------------
@@ -46,21 +50,23 @@ void OutputData::pup (PUP::er &p)
 
   Output::pup(p);
 
-  // this function intentionally left blank
+  p | text_block_count_;
 }
 
 //======================================================================
 
 void OutputData::open () throw()
 {
-  std::string file_name = expand_file_name_(&file_name_,&file_args_);
+  std::string file_name = expand_name_(&file_name_,&file_args_);
 
   Monitor::instance()->print 
     ("Output","writing data file %s", file_name.c_str());
 
   close();
 
-  file_ = new FileHdf5 (".",file_name);
+  std::string dir = directory();
+
+  file_ = new FileHdf5 (dir,file_name);
 
   file_->file_create();
 }
@@ -103,6 +109,55 @@ void OutputData::write_block
   const FieldDescr * field_descr,
   const ParticleDescr * particle_descr) throw()
 {
+
+  char file[256];
+  char dir[256];
+  char line[256];
+
+  std::string name_dir = expand_name_(&dir_name_,&dir_args_);
+
+  // Write blocks text file
+  
+  if (name_dir != "") {
+
+    std::string name_file  = expand_name_(&file_name_,&file_args_);
+    const int num_blocks = block->simulation()->hierarchy()->num_blocks();
+    int count = 0;
+    
+    // Contribute to DIR.blocks file
+    
+    count = (text_block_count_ == 0) ? num_blocks : 0;
+    
+    sprintf (file,"%s.block_list",name_dir.c_str());
+    sprintf (dir, "%s",           name_dir.c_str());
+    sprintf (line,"%s %s\n",      block->name().c_str(),name_file.c_str());
+    
+    proxy_main.p_text_file_write(strlen(dir)+1, dir,
+				 strlen(file)+1, file,
+				 strlen(line)+1,line,
+				 count);
+    
+    // Contribute to DIR.file_list file
+
+    if (text_block_count_ == 0) {
+      
+      count = (CkMyPe() == 0) ? CkNumPes() : 0;
+    
+      sprintf (file,"%s.file_list",name_dir.c_str());
+      sprintf (dir, "%s",          name_dir.c_str());
+      sprintf (line,"%s\n",        name_file.c_str());
+    
+      proxy_main.p_text_file_write(strlen(dir)+1, dir,
+				   strlen(file)+1, file,
+				   strlen(line)+1,line,
+				   count);
+    }    
+
+    // Increment block counter
+
+    text_block_count_ = (text_block_count_ + 1) % num_blocks;
+
+  }
 
   // Create file group for block
 

@@ -170,6 +170,51 @@ void Main::p_stopping_exit()
 
 //----------------------------------------------------------------------
 
+void Main::p_text_file_write
+(int nd, char * dir,
+ int nf, char * file,
+ int nl, char * line, int count)
+{
+  // Open file if first call. Increment count by number of pe's
+  std::string full_file = std::string(dir) + "/" + file;
+
+  FILE * fp_text   = fp_text_[full_file];
+  Sync * sync_text = sync_text_[full_file];
+  
+  if (fp_text_[full_file] == NULL) {
+
+    if (dir != ".") {
+      struct stat st = {0};
+      if (stat(dir, &st) == -1) {
+	mkdir(dir, 0700);
+      }
+    }
+    
+    fp_text   = fp_text_[full_file] = fopen(full_file.c_str(),"w");
+    sync_text = sync_text_[full_file] = new Sync;
+    
+    sync_text->set_stop(CkNumPes());
+  }
+
+  // First call from any Block on a processor includes count
+  // minus one for CkNumPes() above
+  if (count > 0) {
+    sync_text->inc_stop(count-1);
+  }
+
+  fprintf (fp_text,line);
+
+  if (sync_text->next()) {
+    //    text_file_close_();
+    fclose(fp_text);
+    fp_text_[full_file] = NULL;
+    delete sync_text_[full_file];
+    sync_text_[full_file] = NULL;
+  }
+}
+
+//----------------------------------------------------------------------
+
 void Main::p_exit()
 {
 #ifdef CHARM_ENZO

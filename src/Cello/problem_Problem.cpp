@@ -238,6 +238,18 @@ void Problem::initialize_output
       output->set_filename (file_name,file_args);
     }
 
+    if (config->output_dir[index].size() > 0) {
+      std::string dir_name = config->output_dir[index][0];
+
+      std::vector<std::string> dir_args;
+
+      for (size_t i=1; i<config->output_dir[index].size(); i++) {
+	dir_args.push_back(config->output_dir[index][i]);
+      }
+
+      output->set_dir (dir_name,dir_args);
+    }
+
     //--------------------------------------------------
     // field_list
     //--------------------------------------------------

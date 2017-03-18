@@ -62,6 +62,7 @@ OutputImage::OutputImage(int index,
     leaf_only_(leaf_only)
 
 {
+
   if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
   else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
   else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
@@ -231,12 +232,14 @@ void OutputImage::open () throw()
 
   if (is_writer()) {
 
-    std::string file_name = expand_file_name_ (&file_name_,&file_args_);
+    std::string file_name = expand_name_ (&file_name_,&file_args_);
 
+    std::string dir_name = directory();
+    
     // Create png object
     Monitor::instance()->print ("Output","writing image file %s", 
-				file_name.c_str());
-    png_create_(file_name);
+				(dir_name + "/" + file_name).c_str());
+    png_create_(dir_name + "/" + file_name);
   }
 }
 

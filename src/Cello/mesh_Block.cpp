@@ -76,12 +76,10 @@ Block::Block ( MsgRefine * msg )
 	0, NULL, msg->refresh_type_,
 	msg->num_face_level_, msg->face_level_);
 
-  name_ = name();
-
 #ifdef TRACE_BLOCK
   int v3[3];
   index_.values(v3);
-  CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name_.c_str(),
+  CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
 	    v3[0],v3[1],v3[2]);
 #endif
 
@@ -557,9 +555,8 @@ int Block::rank() const
 
 std::string Block::name() const throw()
 {
-  if (name_ != "") {
-    return name_;
-  } else {
+  if (name_ == "") {
+
     const int rank = this->rank();
     int blocking[3] = {1,1,1};
     simulation()->hierarchy()->blocking(blocking,blocking+1,blocking+2);
@@ -578,10 +575,10 @@ std::string Block::name() const throw()
     if (blocking[1]) do { ++bits[1]; } while (blocking[1]/=2);
     if (blocking[2]) do { ++bits[2]; } while (blocking[2]/=2);
 
-    std::string name = "B" + index_.bit_string(level(),rank,bits);
-    return name;
+    name_ = "B" + index_.bit_string(level(),rank,bits);
 
   }
+  return name_;
 }
 
 //----------------------------------------------------------------------

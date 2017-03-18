@@ -291,9 +291,6 @@ public: // interface
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
-
-  /// Write Config attributes to a file
-  void write (FILE * fp);
   
 public: // attributes
 
@@ -422,7 +419,6 @@ public: // attributes
   std::vector < std::vector <std::string> >  output_field_list;
   std::vector < std::vector <std::string> > output_particle_list;
   std::vector < std::vector <std::string> >  output_name;
-
   int                        index_schedule_;
   std::vector< std::vector<double> > schedule_list;
   std::vector< std::string > schedule_type;

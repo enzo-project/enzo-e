@@ -172,7 +172,7 @@ public:
 protected:
 
   /// Return the filename for the file format and given arguments
-  std::string expand_file_name_
+  std::string expand_name_
   (const std::string * file_name,
    const std::vector<std::string> * file_args) const throw();
 

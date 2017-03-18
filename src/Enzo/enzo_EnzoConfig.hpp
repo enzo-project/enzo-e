@@ -116,9 +116,6 @@ public: // interface
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
-
-  /// Write configuration to a file
-  void write (FILE * fp);
   
 public: // attributes
 

@@ -983,7 +983,7 @@ protected: // attributes
   std::vector<int> face_level_last_;
 
   /// String for storing bit ID name
-  std::string name_;
+  mutable std::string name_;
 
   /// Index of currently-active Method
   int index_method_;

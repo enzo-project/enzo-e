@@ -28,6 +28,9 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <execinfo.h>
 
 #include <charm++.h>

@@ -27,7 +27,9 @@
   Main::Main(CkArgMsg* main) 			\
     : count_exit_(0),				\
       count_checkpoint_(0),                     \
-      monitor_(NULL) 				\
+      monitor_(NULL), 				\
+      fp_text_(),                               \
+      sync_text_()
 
 #  define PARALLEL_MAIN_END 
 

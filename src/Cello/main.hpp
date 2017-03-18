@@ -62,7 +62,9 @@ public:
     : CBase_Main(m),
       count_exit_(0),
       count_checkpoint_(0),
-      monitor_(NULL)
+      monitor_(NULL),
+      fp_text_(),
+      sync_text_()
   { 
     TRACE("Main::Main(CkMigrateMessage)");
   }
@@ -77,6 +79,10 @@ public:
     WARNING ("Main::pup","skipping monitor_");
     if (p.isUnpacking()) monitor_ = Monitor::instance();
     //    p|*monitor_;
+    WARNING ("Main::pup","skipping FILE * fp_text_");
+    //    p | fp_text_;
+    WARNING ("Main::pup","skipping FILE * sync_text_");
+    //    p | sync_text_;
   }
 
   /// Exit the program
@@ -98,6 +104,10 @@ public:
   void p_refresh_exit();
   void p_stopping_enter();
   void p_stopping_balance();
+  void p_text_file_write(int nd, char * dir,
+			 int nf, char * file,
+			 int nl, char * line,
+			 int count);
   void p_balance();
   void p_stopping_exit();
   void p_exit();
@@ -105,14 +115,20 @@ public:
   /// Finalize the simulation
   void enzo_finalize(Simulation * simulation);
 
-private: // functions
+protected: // functions
 
   void exit_ ();
 
-private: // attributes
+protected: // attributes
 
-   int count_exit_; 
-   int count_checkpoint_; 
-   Monitor * monitor_;
+  int count_exit_; 
+  int count_checkpoint_; 
+  Monitor * monitor_;
+
+  /// Mapping of file name to File pointer for p_text_file_write()
+  std::map<std::string,FILE *> fp_text_;
+
+  /// Mapping of file name to counter for writing text data
+  std::map<std::string,Sync *> sync_text_;
 
 };

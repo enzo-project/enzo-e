@@ -161,14 +161,14 @@ Block * Input::read_block
 
 //======================================================================
 
-std::string Input::expand_file_name_
+std::string Input::expand_name_
 (
- const std::string              * file_name_p,
- const std::vector<std::string> * file_args_p
+ const std::string              * name_p,
+ const std::vector<std::string> * args_p
 ) const throw()
 {
-  const std::string & file_name = *file_name_p;
-  const std::vector<std::string> & file_args = *file_args_p;
+  const std::string & name = *name_p;
+  const std::vector<std::string> & args = *args_p;
   
   const int MAX_BUFFER = 255;
 
@@ -177,65 +177,65 @@ std::string Input::expand_file_name_
 
   // Error check no \% in file name
 
-  ASSERT1 ("Input::expand_file_name_",
+  ASSERT1 ("Input::expand_name_",
 	   "File name %s cannot contain '\\%%'",
-	   file_name.c_str(),
-	   file_name.find("\\%") == std::string::npos);
+	   name.c_str(),
+	   name.find("\\%") == std::string::npos);
 
   // Error check variable count equals format conversion specifier count
 
-  std::string file_rest = file_name;
+  std::string rest = name;
   size_t count = 0;
   size_t pos = 0;
   size_t len;
-  while ((pos = file_rest.find("%")) != std::string::npos) {
+  while ((pos = rest.find("%")) != std::string::npos) {
     count ++;
-    len = file_rest.size();
-    file_rest = file_rest.substr(pos+1,len-pos-1);
+    len = rest.size();
+    rest = rest.substr(pos+1,len-pos-1);
   }
 
-  ASSERT3 ("Input::expand_file_name_",
+  ASSERT3 ("Input::expand_name_",
 	   "The number of format conversion specifiers %d "
 	   "associated with file name %s "
 	   "must equal the number of variables %d",
-	    count, file_name.c_str(),file_args.size(),
-	   file_args.size() == count);
+	    count, name.c_str(),args.size(),
+	   args.size() == count);
 
-  // loop through file_args[] from the right and replace 
+  // loop through args[] from the right and replace 
   // format strings with variable values
 
-  std::string file_left  = file_name;
-  std::string file_middle = "";
-  std::string file_right = "";
+  std::string left  = name;
+  std::string middle = "";
+  std::string right = "";
 
-  for (size_t i=0; i<file_args.size(); i++) {
+  for (size_t i=0; i<args.size(); i++) {
 
     // visit variables from right to left
-    const std::string & arg = file_args[file_args.size() - i - 1];
+    const std::string & arg = args[args.size() - i - 1];
 
-    size_t pos = file_left.rfind("%");
-    size_t len = file_left.size();
+    size_t pos = left.rfind("%");
+    size_t len = left.size();
 
-    file_middle = file_left.substr(pos,len-pos);
-    file_left  = file_left.substr(0,pos);
+    middle = left.substr(pos,len-pos);
+    left  = left.substr(0,pos);
 
-    strncpy (buffer, file_middle.c_str(),MAX_BUFFER);
+    strncpy (buffer, middle.c_str(),MAX_BUFFER);
     
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
     else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
     else 
       {
-	ERROR3("Input::expand_file_name_",
+	ERROR3("Input::expand_name_",
 	       "Unknown file variable #%d '%s' for file '%s'",
-	       int(i),arg.c_str(),file_name.c_str());
+	       int(i),arg.c_str(),name.c_str());
       }
 
-    file_right = std::string(buffer_new) + file_right;
+    right = std::string(buffer_new) + right;
 
   }
 
-  return file_left + file_right;
+  return left + right;
 }
 
 //----------------------------------------------------------------------
