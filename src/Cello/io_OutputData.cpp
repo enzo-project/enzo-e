@@ -141,7 +141,7 @@ void OutputData::write_block
 
     if (text_block_count_ == 0) {
       
-      count = (CkMyPe() == 0) ? CkNumPes() : 0;
+      count = 0;
     
       sprintf (file,"%s.file_list",name_dir.c_str());
       sprintf (dir, "%s",          name_dir.c_str());
