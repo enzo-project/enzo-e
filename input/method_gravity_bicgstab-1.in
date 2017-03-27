@@ -22,10 +22,7 @@ Method {
 
 Field {
    
-   list = [ "density", "potential", "acceleration_x", "acceleration_y",
-            "gravity_bicgstab_B", "gravity_bicgstab_X", "gravity_bicgstab_R",
-	    "gravity_bicgstab_R0","gravity_bicgstab_P", "gravity_bicgstab_Y",
-	    "gravity_bicgstab_V", "gravity_bicgstab_Q", "gravity_bicgstab_U" ];
+   list = [ "density", "potential", "acceleration_x", "acceleration_y", "B" ];
 	    
    ghost_depth = [1,1];
 }

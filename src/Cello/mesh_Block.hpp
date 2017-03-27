@@ -252,7 +252,8 @@ public: // interface
   void r_initial_exit(CkReductionMsg * msg)
   {
     performance_start_(perf_initial);
-    initial_exit_(); delete msg;
+    initial_exit_();
+    delete msg;
     performance_stop_(perf_initial);
   }
 
@@ -425,7 +426,8 @@ public:
   void r_adapt_enter(CkReductionMsg * msg) 
   {
     performance_start_(perf_adapt_apply);
-    adapt_enter_(); delete msg;
+    adapt_enter_();
+    delete msg;
     performance_stop_(perf_adapt_apply);
     performance_start_(perf_adapt_apply_sync);
   }

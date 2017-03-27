@@ -16,24 +16,26 @@ class EnzoSolverCg : public Solver {
 
 public: // interface
 
-  EnzoSolverCg (const FieldDescr * field_descr,
+  EnzoSolverCg (FieldDescr * field_descr,
 		int monitor_iter,
 		int rank,
 		int iter_max, 
 		double res_tol,
-		bool diag_precon);
+		int min_level,
+		int max_level,
+		int index_precon);
 
   /// Constructor
   EnzoSolverCg() throw()
   : Solver(), 
-    M_(NULL),
     A_(NULL),
+    ix_(0),  ib_(0),
+    index_precon_(-1),
     rank_(0),
     iter_max_(0), 
     res_tol_(0.0),
     rr0_(0),
     rr_min_(0),rr_max_(0),
-    ix_(0),  ib_(0),
     ir_(0), id_(0), iy_(0), iz_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
@@ -49,14 +51,14 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverCg (CkMigrateMessage *m)
     : Solver(m), 
-      M_(NULL),
       A_(NULL),
+      ix_(0),  ib_(0),
+      index_precon_(-1),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
       rr0_(0),
       rr_min_(0),rr_max_(0),
-      ix_(0),  ib_(0),
       ir_(0), id_(0), iy_(0), iz_(0),
       nx_(0),ny_(0),nz_(0),
       mx_(0),my_(0),mz_(0),
@@ -93,6 +95,14 @@ public: // virtual functions
   /// Continuation after global reduction
   template <class T>
   void shift_1(EnzoBlock * enzo_block) throw();
+
+  /// Continuation after global reduction
+  template <class T>
+  void loop_0a(EnzoBlock * enzo_block, CkReductionMsg *) throw();
+
+    /// Continuation after global reduction
+  template <class T>
+  void loop_0b(EnzoBlock * enzo_block, CkReductionMsg *) throw();
 
   /// Continuation after global reduction
   template <class T>
@@ -152,6 +162,24 @@ protected: // methods
 
   void exit_() throw();
 
+  /// Allocate temporary Fields
+  void allocate_temporary_(Field field)
+  {
+    field.allocate_temporary(id_);
+    field.allocate_temporary(ir_);
+    field.allocate_temporary(iy_);
+    field.allocate_temporary(iz_);
+  }
+
+  /// Dellocate temporary Fields
+  void deallocate_temporary_(Field field)
+  {
+    field.deallocate_temporary(id_);
+    field.deallocate_temporary(ir_);
+    field.deallocate_temporary(iy_);
+    field.deallocate_temporary(iz_);
+  }
+  
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -163,8 +191,8 @@ protected: // attributes
   int ix_;
   int ib_;
 
-  /// Preconditioner
-  Matrix * M_;
+  /// Preconditioner (-1 if none)
+  int index_precon_;
 
   /// Dimensionality of the problem
   int rank_;

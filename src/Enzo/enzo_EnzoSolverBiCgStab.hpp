@@ -27,7 +27,7 @@ class EnzoSolverBiCgStab : public Solver {
 public: // interface
 
   /// normal constructor
-  EnzoSolverBiCgStab(const FieldDescr* field_descr,
+  EnzoSolverBiCgStab(FieldDescr* field_descr,
 		     int monitor_iter,
 		     int rank,
 		     int iter_max, 
@@ -46,7 +46,6 @@ public: // interface
       iter_max_(0), 
       res_tol_(0.0),
       rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
-      idensity_(0),  ipotential_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
       nx_(0), ny_(0), nz_(0),
@@ -70,12 +69,12 @@ public: // interface
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
       A_(NULL),
+      index_precon_(-1),
       first_call_(true),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
       rho0_(0), err_(0), err0_(0),err_min_(0), err_max_(0),
-      idensity_(0),  ipotential_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
       nx_(0), ny_(0), nz_(0),
@@ -105,8 +104,6 @@ public: // interface
     p | iter_max_;
     p | res_tol_;
 
-    p | idensity_;
-    p | ipotential_;
     p | ib_;
     p | ix_;
     p | ir_;
@@ -235,6 +232,30 @@ protected: // methods
   /// Compute local sum of vector elements X_i
   template<class T> long double sum_(const T* X) const throw();
 
+  /// Allocate temporary Fields
+  void allocate_temporary_(Field field)
+  {
+    field.allocate_temporary(ir_);
+    field.allocate_temporary(ir0_);
+    field.allocate_temporary(ip_);
+    field.allocate_temporary(iy_);
+    field.allocate_temporary(iv_);
+    field.allocate_temporary(iq_);
+    field.allocate_temporary(iu_);
+  }
+
+  /// Dellocate temporary Fields
+  void deallocate_temporary_(Field field)
+  {
+    field.deallocate_temporary(ir_);
+    field.deallocate_temporary(ir0_);
+    field.deallocate_temporary(ip_);
+    field.deallocate_temporary(iy_);
+    field.deallocate_temporary(iv_);
+    field.deallocate_temporary(iq_);
+    field.deallocate_temporary(iu_);
+  }
+  
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -271,10 +292,6 @@ protected: // attributes
 
   /// Maximum error (all iterations so far)
   long double err_max_;
-
-  /// Density and potential field id's (for RHS and solution)
-  int idensity_;
-  int ipotential_;
 
   /// BiCgStab vector id's
   int ib_;

@@ -256,7 +256,7 @@ public: /// entry methods
   //--------------------------------------------------
 
   /// Synchronize after potential solve and before accelerations
-  void r_method_gravity_continue(CkReductionMsg * msg);
+  void r_method_gravity_continue();
 
   /// Synchronize for refresh
   void r_method_gravity_end(CkReductionMsg * msg);
@@ -277,7 +277,7 @@ public: /// entry methods
 
   /// EnzoSolverCg entry method
   template <class T>
-  void p_solver_cg_loop_2 (CkReductionMsg * msg) ;
+  void p_solver_cg_loop_2 () ;
 
   /// EnzoSolverCg entry method: DOT(P,AP)
   template <class T>
@@ -291,7 +291,7 @@ public: /// entry methods
   /// perform the necessary reductions for shift
   CkReductionMsg * r_solver_cg_shift(int n, CkReductionMsg ** msgs);
 
-  void r_solver_cg_matvec(CkReductionMsg * msg);
+  void r_solver_cg_matvec();
 
   //--------------------------------------------------
   
@@ -360,15 +360,6 @@ public: /// entry methods
   template <class T> void p_solver_mg0_prolong_recv(FieldMsg * msg);
   //  template <class T> void p_solver_mg0_end_cycle(CkReductionMsg* msg);  
 
-  void p_solver_hg_pre_smooth();
-  void p_solver_hg_solve_coarse();
-  template <class T> void p_solver_hg_shift_b(CkReductionMsg* msg);  
-  template <class T> void p_solver_hg_restrict_send(CkReductionMsg * msg);
-  template <class T> void p_solver_hg_restrict_recv(FieldMsg * msg);
-  template <class T> void p_solver_hg_prolong_recv(FieldMsg * msg);
-  template <class T> void p_solver_hg_post_smooth(CkReductionMsg * msg);
-  template <class T> void p_solver_hg_end_cycle(CkReductionMsg* msg);  
-  
   void mg_sync_reset()             { mg_sync_.reset(); }
   void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }
   bool mg_sync_next()         { return mg_sync_.next(); };

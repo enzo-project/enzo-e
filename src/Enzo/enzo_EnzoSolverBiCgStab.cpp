@@ -411,7 +411,7 @@
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
-(const FieldDescr* field_descr,
+(FieldDescr* field_descr,
  int monitor_iter, int rank,
  int iter_max, double res_tol,
  int min_level, int max_level,
@@ -425,7 +425,6 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     iter_max_(iter_max), 
     res_tol_(res_tol),
     rho0_(0), err_(0), err0_(0),err_min_(0), err_max_(0),
-    idensity_(0),  ipotential_(0),
     ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
     iy_(0), iv_(0), iq_(0), iu_(0),
     nx_(0), ny_(0), nz_(0),
@@ -438,37 +437,27 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     bs_(0.0),bc_(0.0),
     ys_(0.0),vs_(0.0),us_(0.0)
 {
-  /// access problem-defining fields for eventual RHS and solution
-  int id  = field_descr->field_id("density");
-  int idt = field_descr->field_id("density_total");
 
-  idensity_ = (idt != -1) ? idt : id;
-  ipotential_ = field_descr->field_id("potential");
-
-  ASSERT("EnzoSolverBiCgStab::EnzoSolverBiCgStab()",
-	 "Either field \"density\" or \"density_total\" mush be defined",
-	 idensity_ != -1);
-  ASSERT("EnzoSolverBiCgStab::EnzoSolverBiCgStab()",
-	 "Field \"potential\" mush be defined",
-	 ipotential_ != -1);
-	 
-  /// access existing fields for temporary vectors (currently must be
-  /// declared in parameter file)
-
-  ib_ = field_descr->field_id(name() + "_B");
-  ix_ = field_descr->field_id(name() + "_X");
-  ir_ = field_descr->field_id(name() + "_R");
-  ir0_ = field_descr->field_id(name() + "_R0");
-  ip_ = field_descr->field_id(name() + "_P");
-  iy_ = field_descr->field_id(name() + "_Y");
-  iv_ = field_descr->field_id(name() + "_V");
-  iq_ = field_descr->field_id(name() + "_Q");
-  iu_ = field_descr->field_id(name() + "_U");
-
+  ir_ = field_descr->insert_temporary();
+  ir0_ = field_descr->insert_temporary();
+  ip_ = field_descr->insert_temporary();
+  iy_ = field_descr->insert_temporary();
+  iv_ = field_descr->insert_temporary();
+  iq_ = field_descr->insert_temporary();
+  iu_ = field_descr->insert_temporary();
+  
   /// Initialize default Refresh (called before entry to compute())
   
   const int ir = add_refresh(4, 0, neighbor_type_(), sync_type_());
-  refresh(ir)->add_field(idensity_);
+  refresh(ir)->add_all_fields(field_descr->field_count());
+  
+  refresh(ir)->add_field (ir_);
+  refresh(ir)->add_field (ir0_);
+  refresh(ir)->add_field (ip_);
+  refresh(ir)->add_field (iy_);
+  refresh(ir)->add_field (iv_);
+  refresh(ir)->add_field (iq_);
+  refresh(ir)->add_field (iu_);
   
 }
 
@@ -493,29 +482,22 @@ void EnzoSolverBiCgStab::apply
   ix_ = ix;
   ib_ = ib;
 
+  Field field = block->data()->field();
+
+  allocate_temporary_(field);
+
   /// cast input argument to the EnzoBlock associated with this char
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (block);
 
   /// access the field infromation on this block
-  Field field = block->data()->field();
   field.size(&nx_, &ny_, &nz_);
   
-  field.dimensions(idensity_, &mx_, &my_, &mz_);
-  field.ghost_depth(idensity_, &gx_, &gy_, &gz_);
-
-  /// allocate temporary vector data for use witin solve
-  // field.allocate_temporary(ib_);
-  // field.allocate_temporary(ix_);
-  // field.allocate_temporary(ir_);
-  // field.allocate_temporary(ir0_);
-  // field.allocate_temporary(ip_);
-  // field.allocate_temporary(iy_);
-  // field.allocate_temporary(iv_);
-  // field.allocate_temporary(iq_);
-  // field.allocate_temporary(iu_);
+  field.dimensions(0, &mx_, &my_, &mz_);
+  field.ghost_depth(0, &gx_, &gy_, &gz_);
 
   /// call templated internal compute_ routine
-  int precision = field.precision(idensity_);
+  // assuming all fields have same precision
+  int precision = field.precision(0);
   if      (precision == precision_single)    compute_<float>      (enzo_block);
   else if (precision == precision_double)    compute_<double>     (enzo_block);
   else if (precision == precision_quadruple) compute_<long double>(enzo_block);
@@ -549,8 +531,6 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from
     /// the previous solve?]
     
-    /// set B = -h^2 * 4 * PI * G * density
-
     if (first_call_) {
 
       for (int iz=0; iz<mz_; iz++) {
@@ -625,6 +605,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   /// update B and initialize temporary vectors (on leaf blocks only)
+  long double reduce = 0.0;
   if (is_active_(enzo_block)) {
 
     /// access relevant fields
@@ -651,11 +632,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
 	  R[i] = R0[i] = P[i] = B[i];
 	}
 
-  }
-  /// Compute local contributions to beta_n_ = DOT(R, R)
-  long double reduce = 0.0;
-  if (is_active_(enzo_block)) {
-    T* R = (T*) field.values(ir_);
+    /// Compute local contributions to beta_n_ = DOT(R, R)
     reduce = dot_(R,R);
   }
   
@@ -752,8 +729,8 @@ void EnzoBlock::p_solver_bicgstab_loop_1() {
     static_cast<EnzoSolverBiCgStab*> (this->solver());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
-  // assumes all fields have same precision
-  int precision = field.precision(field.field_id("density"));
+  // assuming all fields have same precision
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->loop_2<float>(enzo_block);
   else if (precision == precision_double)    
@@ -809,7 +786,8 @@ void EnzoBlock::p_solver_bicgstab_loop_2() {
     static_cast<EnzoSolverBiCgStab*> (this->solver());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
-  int precision = field.precision(field.field_id("density")); // assuming 
+  // assuming all fields have same precision
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->loop_25<float>(enzo_block);
   else if (precision == precision_double)    
@@ -836,6 +814,14 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * enzo_block) throw() {
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields(enzo_block->data()->field().field_count());
   
+  refresh.add_field (ir_);
+  refresh.add_field (ir0_);
+  refresh.add_field (ip_);
+  refresh.add_field (iy_);
+  refresh.add_field (iv_);
+  refresh.add_field (iq_);
+  refresh.add_field (iu_);
+
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_bicgstab_loop_3(),&refresh);
 
@@ -854,7 +840,8 @@ void EnzoBlock::p_solver_bicgstab_loop_3() {
     static_cast<EnzoSolverBiCgStab*> (this->solver());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
-  int precision = field.precision(field.field_id("density")); // assuming 
+  // assuming all fields have same precision
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->loop_4<float>(enzo_block);
   else if (precision == precision_double)    
@@ -1006,7 +993,8 @@ void EnzoBlock::p_solver_bicgstab_loop_7() {
     static_cast<EnzoSolverBiCgStab*> (this->solver());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
-  int precision = field.precision(field.field_id("density")); // assuming 
+  // assuming all fields have same precision
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->loop_8<float>(enzo_block);
   else if (precision == precision_double)    
@@ -1044,8 +1032,8 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
   } else {
 
     T * Y = (T*) field.values(iy_);
-    T * P = (T*) field.values(iq_);
-    for (int i=0; i<mx_*my_*mz_; i++) Y[i] = P[i];
+    T * Q = (T*) field.values(iq_);
+    for (int i=0; i<mx_*my_*mz_; i++) Y[i] = Q[i];
     loop_85<T>(enzo_block);
   }
 }
@@ -1061,7 +1049,8 @@ void EnzoBlock::p_solver_bicgstab_loop_8() {
     static_cast<EnzoSolverBiCgStab*> (this->solver());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
-  int precision = field.precision(field.field_id("density")); // assuming 
+  // assuming all fields have same precision
+  int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->loop_85<float>(enzo_block);
   else if (precision == precision_double)    
@@ -1088,6 +1077,14 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * enzo_block) throw() {
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields(enzo_block->data()->field().field_count());
+
+  refresh.add_field (ir_);
+  refresh.add_field (ir0_);
+  refresh.add_field (ip_);
+  refresh.add_field (iy_);
+  refresh.add_field (iv_);
+  refresh.add_field (iq_);
+  refresh.add_field (iu_);
   
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_bicgstab_loop_9(),&refresh);
@@ -1106,7 +1103,8 @@ void EnzoBlock::p_solver_bicgstab_loop_9() {
     static_cast<EnzoSolverBiCgStab*> (this->solver());
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
-  int precision = field.precision(field.field_id("density")); // assuming 
+  // assuming all fields have same precision
+  int precision = field.precision(0); 
   if      (precision == precision_single)    
     solver->loop_10<float>(enzo_block);
   else if (precision == precision_double)    
@@ -1356,9 +1354,15 @@ template<class T> void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg)
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoSolverBiCgStab::end(EnzoBlock* enzo_block, int retval) throw () {
+template<class T> void EnzoSolverBiCgStab::end
+(EnzoBlock* enzo_block, int retval) throw () {
 
   TRACE_BICGSTAB("end()",this);
+
+  Field field = enzo_block->data()->field();
+
+  deallocate_temporary_(field);
+  
   Solver::end_(enzo_block);
   
   CkCallback(callback_,
@@ -1383,7 +1387,7 @@ void EnzoBlock::p_solver_bicgstab_acc() {
   Field field = data()->field();
 
   // assuming all fields have same precision
-  int precision = field.precision(field.field_id("density"));
+  int precision = field.precision(0);
 
   if      (precision == precision_single) {
     solver->acc<float>(enzo_block);

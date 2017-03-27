@@ -92,7 +92,6 @@ module enzo {
   PUPable EnzoSolverDiagonal;
   PUPable EnzoSolverBiCgStab;
   PUPable EnzoSolverMg0;
-  PUPable EnzoSolverHg;
   PUPable EnzoSolverJacobi;
 
   extern module mesh;
@@ -117,12 +116,12 @@ module enzo {
     entry void p_method_turbulence_end(CkReductionMsg *msg);
 
     // EnzoMethodGravity synchronization entry methods
-    entry void r_method_gravity_continue(CkReductionMsg * msg);
+    entry void r_method_gravity_continue();
     entry void r_method_gravity_end(CkReductionMsg * msg);
 
     // EnzoSolverCg synchronization entry methods
 
-    entry void r_solver_cg_matvec(CkReductionMsg *);
+    entry void r_solver_cg_matvec();
 
     template <class T>
     entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
@@ -131,7 +130,7 @@ module enzo {
     template <class T>
     entry void r_solver_cg_shift_1(CkReductionMsg *msg);
     template <class T>
-    entry void p_solver_cg_loop_2(CkReductionMsg *msg);
+    entry void p_solver_cg_loop_2();
     template <class T>
     entry void r_solver_cg_loop_3(CkReductionMsg *msg);
     template <class T>
@@ -176,18 +175,6 @@ module enzo {
     template <class T> entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
     template <class T> entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
 //    template <class T> entry void p_solver_mg0_end_cycle(CkReductionMsg *msg);
-
-    // EnzoSolverHg
-    
-    template <class T>  entry void p_solver_hg_shift_b(CkReductionMsg *msg);
-    
-    entry void p_solver_hg_pre_smooth();
-    entry void p_solver_hg_solve_coarse();
-    template <class T> entry void p_solver_hg_restrict_send(CkReductionMsg *msg);
-    template <class T> entry void p_solver_hg_restrict_recv(FieldMsg * msg);
-    template <class T> entry void p_solver_hg_prolong_recv(FieldMsg * msg);
-    template <class T> entry void p_solver_hg_post_smooth(CkReductionMsg *msg);
-    template <class T> entry void p_solver_hg_end_cycle(CkReductionMsg *msg);
 
   };
 
@@ -278,27 +265,5 @@ module template_defs {
    extern entry void EnzoBlock p_solver_mg0_prolong_recv<float>();
    extern entry void EnzoBlock p_solver_mg0_prolong_recv<double>();
    extern entry void EnzoBlock p_solver_mg0_prolong_recv<long double>();
-
-   // EnzoSolverHg
-   
-   extern entry void EnzoBlock p_solver_hg_shift_b<float>();
-   extern entry void EnzoBlock p_solver_hg_shift_b<double>();
-   extern entry void EnzoBlock p_solver_hg_shift_b<long double>();
-
-   extern entry void EnzoBlock p_solver_hg_restrict_send<float>();
-   extern entry void EnzoBlock p_solver_hg_restrict_send<double>();
-   extern entry void EnzoBlock p_solver_hg_restrict_send<long double>();
-
-   extern entry void EnzoBlock p_solver_hg_restrict_recv<float>();
-   extern entry void EnzoBlock p_solver_hg_restrict_recv<double>();
-   extern entry void EnzoBlock p_solver_hg_restrict_recv<long double>();
-
-   extern entry void EnzoBlock p_solver_hg_prolong_recv<float>();
-   extern entry void EnzoBlock p_solver_hg_prolong_recv<double>();
-   extern entry void EnzoBlock p_solver_hg_prolong_recv<long double>();
-
-   extern entry void EnzoBlock p_solver_hg_post_smooth<float>();
-   extern entry void EnzoBlock p_solver_hg_post_smooth<double>();
-   extern entry void EnzoBlock p_solver_hg_post_smooth<long double>();
 
 };

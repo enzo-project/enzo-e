@@ -30,7 +30,7 @@
 //----------------------------------------------------------------------
 
 EnzoSolverJacobi::EnzoSolverJacobi
-( const FieldDescr * field_descr, double weight, int iter_max) throw()
+( FieldDescr * field_descr, double weight, int iter_max) throw()
   : Solver(0),
     A_ (NULL),
     ix_ (-1),
@@ -40,9 +40,9 @@ EnzoSolverJacobi::EnzoSolverJacobi
     w_(weight),
     n_(iter_max)
 {
-  // may be temporary fields
-  id_ = field_descr->field_id("D");
-  ir_ = field_descr->field_id("R");
+  // Reserve temporary fields
+  id_ = field_descr->insert_temporary();
+  ir_ = field_descr->insert_temporary();
 }
 
 //----------------------------------------------------------------------
@@ -57,16 +57,23 @@ void EnzoSolverJacobi::apply
 #endif
 
   begin_(block);
+
   A_ = A;
   ix_ = ix;
   ib_ = ib;
 
+  Field field = block->data()->field();
+
+  allocate_temporary_(field);
+  
   // Refresh X
   Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
 
-  Field field = block->data()->field();
   const int num_fields = field.field_count();
+
   refresh.add_all_fields(num_fields);
+  refresh.add_field (id_);
+  refresh.add_field (ir_);
 
   // try refresh.add_field(ix);
 
@@ -126,17 +133,20 @@ void EnzoSolverJacobi::apply_(Block * block)
   int mx,my,mz;
   field.dimensions(ix_,&mx,&my,&mz);
 
+  const int g0 = n_;
+
+  const int ix0 = (mx > 1) ? g0 : 0;
+  const int iy0 = (my > 1) ? g0 : 0;
+  const int iz0 = (mz > 1) ? g0 : 0;
+
+  A_->diagonal (id_, block,g0);
+
   for (int iter=0; iter<n_; iter++) {
     
     /// Loop bounds minimal given iteration, ending at
     /// ghost_depth iter=n_-1
 
     //        const int g0 = MAX(gx - (n_-1-iter), 0);
-    const int g0 = 1;
-
-    const int ix0 = (mx > 1) ? g0 : 0;
-    const int iy0 = (my > 1) ? g0 : 0;
-    const int iz0 = (mz > 1) ? g0 : 0;
 
     // XXXX iter = 0
 #ifdef DEBUG_SMOOTH
@@ -153,8 +163,6 @@ void EnzoSolverJacobi::apply_(Block * block)
 #endif
     PRINT_BDRX;
     
-    A_->diagonal (id_, block,g0);
-
 #ifdef DEBUG_SMOOTH
     CkPrintf ("%s:%d %s DEBUG_SMOOTH Computing X=R/D\n",
 	      __FILE__,__LINE__,block->name().c_str());
@@ -191,7 +199,8 @@ void EnzoSolverJacobi::apply_(Block * block)
   CkPrintf ("%s:%d %s DEBUG_SMOOTH  Calling Solver::end_()\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
-  end_(block);
+  deallocate_temporary_ (field);
+  Solver::end_(block);
   CkCallback(callback_,
 	     CkArrayIndexIndex(block->index()),
 	     block->proxy_array()).send();

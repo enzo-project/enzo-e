@@ -62,7 +62,7 @@ private: // functions
   (std::string type, 
    Config * config,
    int index_solver,
-   const FieldDescr *,
+   FieldDescr *,
    const ParticleDescr *) throw ();
 
   /// Create named method object

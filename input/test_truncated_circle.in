@@ -22,7 +22,7 @@ Method {
 Field {
    
    list = ["density", "potential",
-           "B","D","R","X", "Y", "Z",
+           "B",
 	   "acceleration_x",
 	   "acceleration_y"];
 

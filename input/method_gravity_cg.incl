@@ -71,7 +71,7 @@ Field {
            "velocity_z",
            "internal_energy",
 	   "pressure",
-           "B","D","R","X","Y","Z"];
+           "B"];
 
    ghost_depth = 4;
    prolong = "linear";

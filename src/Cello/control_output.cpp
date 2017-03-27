@@ -25,10 +25,6 @@
 
 void Block::output_begin_ ()
 {
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d TRACE_OUTPUT Block::output_begin()\n",
-	    CkMyPe()); fflush(stdout);
-#endif  
   TRACE_OUTPUT("Block::output_begin_()");
 
   // Determine if there is any output this cycle
@@ -68,29 +64,14 @@ void Block::output_begin_ ()
 void Simulation::begin_output ()
 {
 
-#ifdef DEBUG_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT Block::begin_output()\n",
-	      CkMyPe()); fflush(stdout);
-#endif    
   TRACE_OUTPUT("Simulation::begin_output()");
 
   // Switching from Block to Simulation: wait for last Block
 
-  // printf ("%s:%d sync_output_begin_.value() = %d/%d\n",
-  // 	  __FILE__,__LINE__,sync_output_begin_.value(),sync_output_begin_.stop());
-#ifdef DEBUG_OUTPUT
-  CkPrintf ("%d DEBUG_SYNC begin_output sync_output_begin_ %d/%d\n",
-	    CkMyPe(),sync_output_begin_.value(),sync_output_begin_.stop());
-#endif  
-  fflush(stdout);
   if (sync_output_begin_.next()) {
 
     // Barrier
 
-#ifdef DEBUG_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT Block::begin_output()\n",
-	      CkMyPe()); fflush(stdout);
-#endif    
     TRACE_OUTPUT("Block::output_begin() calling Simulation::r_output()");
     // --------------------------------------------------
     //    CkCallback callback (CkIndex_Simulation::r_output(NULL), thisProxy);
@@ -105,10 +86,6 @@ void Simulation::begin_output ()
 
 void Simulation::r_output(CkReductionMsg * msg)
 {
-#ifdef DEBUG_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT Block::r_output()\n",
-	      CkMyPe()); fflush(stdout);
-#endif    
   performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_output()");
 
@@ -165,10 +142,6 @@ void Problem::output_next(Simulation * simulation) throw()
 
 void Block::p_output_write (int index_output)
 {
-#ifdef DEBUG_OUTPUT
-    CkPrintf ("%d TRACE_OUTPUT Block::p_output_write()\n",
-	      CkMyPe()); fflush(stdout);
-#endif    
   performance_start_ (perf_output);
   
   TRACE_OUTPUT("Block::p_output_write()");

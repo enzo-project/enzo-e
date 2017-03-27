@@ -17,7 +17,7 @@ class EnzoSolverJacobi : public Solver {
 public: // interface
 
   /// Constructor
-  EnzoSolverJacobi(const FieldDescr * field_descr,
+  EnzoSolverJacobi(FieldDescr * field_descr,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 
@@ -69,6 +69,21 @@ protected: // functions
   /// Implementation of solver() for given precision 
   template <typename T>
   void apply_(Block * block);
+
+  /// Allocate temporary Fields
+  void allocate_temporary_(Field field)
+  {
+    field.allocate_temporary(id_);
+    field.allocate_temporary(ir_);
+  }
+
+  /// Dellocate temporary Fields
+  void deallocate_temporary_(Field field)
+  {
+    field.deallocate_temporary(id_);
+    field.deallocate_temporary(ir_);
+  }
+  
 
 protected: // attributes
 

@@ -6,8 +6,8 @@
 /// @brief    [\ref Mesh] Declaration of the ItFace class
 ///
 
-#ifndef MESH_ITFACE_HPP
-#define MESH_ITFACE_HPP
+#ifndef MESH_IT_FACE_HPP
+#define MESH_IT_FACE_HPP
 
 class ItFace {
 

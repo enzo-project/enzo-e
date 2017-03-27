@@ -47,6 +47,7 @@ void Block::refresh_begin_()
 
 void Block::refresh_continue()
 {
+  TRACE_REFRESH("refresh_continue_()");
 
   // Refresh if Refresh object exists and have data
 

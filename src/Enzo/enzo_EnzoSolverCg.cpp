@@ -25,22 +25,22 @@
 //----------------------------------------------------------------------
 
 EnzoSolverCg::EnzoSolverCg 
-(const FieldDescr * field_descr,
+(FieldDescr * field_descr,
  int monitor_iter, 
  int rank,
  int iter_max, double res_tol,
- bool diag_precon) 
-  : Solver(monitor_iter),
+ int min_level, int max_level,
+ int index_precon
+ )
+  : Solver(monitor_iter,min_level,max_level), 
     A_(NULL),
-    M_((diag_precon) ?
-       (Matrix *)(new EnzoMatrixDiagonal) :
-       (Matrix *)(new EnzoMatrixIdentity)),
+    ix_(0),  ib_(0),
+    index_precon_(index_precon),
     rank_(rank),
     iter_max_(iter_max), 
     res_tol_(res_tol),
     rr0_(0),
     rr_min_(0),rr_max_(0),
-    ix_(0),  ib_(0),
     ir_(0), id_(0), iy_(0), iz_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
@@ -51,10 +51,10 @@ EnzoSolverCg::EnzoSolverCg
 {
   TRACE_SOLVER("EnzoSolverCg() ENTER");
 
-  id_ = field_descr->field_id("D");
-  ir_ = field_descr->field_id("R");
-  iy_ = field_descr->field_id("Y");
-  iz_ = field_descr->field_id("Z");
+  id_ = field_descr->insert_temporary();
+  ir_ = field_descr->insert_temporary();
+  iy_ = field_descr->insert_temporary();
+  iz_ = field_descr->insert_temporary();
 
   /// Initialize default Refresh
 
@@ -62,8 +62,13 @@ EnzoSolverCg::EnzoSolverCg
 
   field_descr->ghost_depth    (ib_,&gx_,&gy_,&gz_);
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_type_(),sync_type_());
   refresh(ir)->add_all_fields(num_fields);
+
+  refresh(ir)->add_field (id_);
+  refresh(ir)->add_field (ir_);
+  refresh(ir)->add_field (iy_);
+  refresh(ir)->add_field (iz_);
 
   /// Initialize matvec Refresh
 
@@ -76,8 +81,6 @@ EnzoSolverCg::~EnzoSolverCg() throw ()
 {
   if (A_) delete A_;
   A_ = NULL;
-  if (M_) delete M_;
-  M_ = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -89,15 +92,17 @@ void EnzoSolverCg::pup (PUP::er &p)
   Solver::pup(p);
 
   p | A_;
-  p | M_;
+  p | ix_;
+  p | ib_;
+
+  p | index_precon_;
+  
   p | rank_;
   p | iter_max_;
   p | res_tol_;
   p | rr0_;
   p | rr_min_;
   p | rr_max_;
-  p | ib_;
-  p | ix_;
   p | ir_;
   p | id_;
   p | iy_;
@@ -136,8 +141,11 @@ void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
   ix_ = ix;
   ib_ = ib;
   
-  TRACE_SOLVER("compute ENTER");
   Field field = block->data()->field();
+
+  allocate_temporary_(field);
+
+  TRACE_SOLVER("compute ENTER");
 
   field.size           (&nx_,&ny_,&nz_);
   field.dimensions (ib_,&mx_,&my_,&mz_);
@@ -162,11 +170,6 @@ void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
 
 //======================================================================
 
-extern CkReduction::reducerType sum_long_double_type;
-extern CkReduction::reducerType sum_long_double_2_type;
-extern CkReduction::reducerType sum_long_double_3_type;
-extern CkReduction::reducerType sum_long_double_4_type;
-
 template <class T>
 void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 //     X = initial guess
@@ -183,7 +186,7 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     ///   - X = 0
     ///   - R = P = B ( residual with X = 0);
@@ -196,43 +199,40 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
     const int iy0 = 0;
     const int iz0 = 0;
 
-    for (int iz=iz0; iz<mz_-iz0; iz++) {
-      for (int iy=iy0; iy<my_-iy0; iy++) {
-	for (int ix=ix0; ix<mx_-ix0; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
-	  X[i] = 0.0;
-	  R[i] = B[i];
-	}
-      }
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      X[i] = 0.0;
+      R[i] = B[i];
     }
 
-    M_->matvec(id_,ir_,enzo_block);
-    M_->matvec(iz_,ir_,enzo_block);
+    // M_->matvec(id_,ir_,enzo_block);
+    // M_->matvec(iz_,ir_,enzo_block);
+    T * D = (T*) field.values(id_);
+    T * Z = (T*) field.values(iz_);
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      D[i] = R[i];
+      Z[i] = R[i];
+    }
   }
 
   long double reduce[3] = {0.0};
 
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     T * B = (T*) field.values(ib_);
     T * R = (T*) field.values(ir_);
 
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 
-    // reduce[0] = field.dot(ir_,ir_);
-    // reduce[1] = sum_(B);
-    // reduce[2] = count_();
     for (int iz=0; iz<nz_; iz++) {
       for (int iy=0; iy<ny_; iy++) {
 	for (int ix=0; ix<nx_; ix++) {
 	  int i = i0 + (ix + mx_*(iy + my_*iz));
 	  reduce[0] += R[i]*R[i];
 	  reduce[1] += B[i];
-	  ++reduce[2];
+	  reduce[2] ++;
 	}
       }
     }
-    
   }
 
 #ifdef DEBUG_SOLVER
@@ -272,23 +272,38 @@ void EnzoBlock::r_solver_cg_loop_0a (CkReductionMsg * msg)
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
+  solver->loop_0a<T>(this,msg);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoSolverCg::loop_0a
+(EnzoBlock * enzo_block, CkReductionMsg * msg) throw ()
+{
+
   long double * data = (long double *) msg->getData();
 
-  solver->set_rr( data[0] );
-  solver->set_bs( data[1] );
-  solver->set_bc( data[2] );
+  set_rr( data[0] );
+  set_bs( data[1] );
+  set_bc( data[2] );
 
   delete msg;
-  
-  // Refresh field faces then call r_solver_cg_matvec
 
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
-  refresh.set_active(is_leaf());
-  refresh.add_all_fields(this->data()->field().field_count());
-  refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(NULL),&refresh);
+// Refresh field faces then call r_solver_cg_matvec
+
+  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  refresh.set_active(is_active_(enzo_block));
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+
+  refresh.add_field (id_);
+  refresh.add_field (ir_);
+  refresh.add_field (iy_);
+  refresh.add_field (iz_);
+  
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(),&refresh);
   
   TRACE_SOLVER("solver_cg_loop_0a EXIT");
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -303,24 +318,39 @@ void EnzoBlock::r_solver_cg_loop_0b (CkReductionMsg * msg)
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
-  solver->set_iter ( ((int*)msg->getData())[0] );
-
-  // Refresh field faces then call solver_matvec
-
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
-  refresh.set_active(is_leaf());
-  refresh.add_all_fields(this->data()->field().field_count());
-  refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(NULL), &refresh);
-
-  TRACE_SOLVER("solver_cg_loop_0b EXIT");
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+  solver->loop_0b<T>(this,msg);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_solver_cg_matvec(CkReductionMsg * msg)
+template <class T>
+void EnzoSolverCg::loop_0b
+(EnzoBlock * enzo_block, CkReductionMsg * msg) throw ()
 {
+
+  set_iter ( ((int*)msg->getData())[0] );
+
   delete msg;
+  
+  // Refresh field faces then call solver_matvec
+
+  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  refresh.set_active(is_active_(enzo_block));
+  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  refresh.add_field (id_);
+  refresh.add_field (ir_);
+  refresh.add_field (iy_);
+  refresh.add_field (iz_);
+
+  enzo_block->refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(), &refresh);
+
+  TRACE_SOLVER("solver_cg_loop_0b EXIT");
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::r_solver_cg_matvec()
+{
   
   TRACE_SOLVER("solver_cg_matvec ENTER");
   EnzoSolverCg * solver = 
@@ -354,7 +384,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     cello::check(rr_,"rr_",__FILE__,__LINE__);
     cello::check(bs_,"bs_",__FILE__,__LINE__);
@@ -372,24 +402,25 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
       // shift_ (R,shift,R);
       // shift_ (B,shift,B);
       T shift = -bs_ / bc_;
-      for (int iz=0; iz<mz_; iz++) {
-	for (int iy=0; iy<my_; iy++) {
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    R[i] += shift;
-	    B[i] += shift;
-	  }
-	}
+      for (int i=0; i<mx_*my_*mz_; i++) {
+	R[i] += shift;
+	B[i] += shift;
       }
 
-      M_->matvec(id_,ir_,enzo_block);
-      M_->matvec(iz_,ir_,enzo_block);
+      // M_->matvec(id_,ir_,enzo_block);
+      // M_->matvec(iz_,ir_,enzo_block);
+      T * D = (T*) field.values(id_);
+      T * Z = (T*) field.values(iz_);
+      for (int i=0; i<mx_*my_*mz_; i++) {
+	D[i] = R[i];
+	Z[i] = R[i];
+      }
     } 
   }
 
   long double reduce = 0;
 
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     T * R  = (T*) field.values(ir_);
     // reduce = field.dot(ir_,ir_);
@@ -448,18 +479,23 @@ void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 template <class T>
 void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
 {
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
-  refresh.set_active(enzo_block->is_leaf());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields(enzo_block->data()->field().field_count());
+  refresh.add_field (id_);
+  refresh.add_field (ir_);
+  refresh.add_field (iy_);
+  refresh.add_field (iz_);
   enzo_block->refresh_enter
-    (CkIndex_EnzoBlock::p_solver_cg_loop_2<T>(NULL),&refresh);
+    (CkIndex_EnzoBlock::p_solver_cg_loop_2<T>(),&refresh);
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoBlock::p_solver_cg_loop_2 (CkReductionMsg * msg)
+void EnzoBlock::p_solver_cg_loop_2 ()
 {
+  
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -515,7 +551,7 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
     Data * data = enzo_block->data();
     Field field = data->field();
 
-    if (enzo_block->is_leaf()) {
+    if (is_active_(enzo_block)) {
 
       double hx,hy,hz;
       data->field_cell_width(&hx,&hy,&hz);
@@ -526,7 +562,7 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
 
     long double reduce[3] = {0.0} ;
 
-    if (enzo_block->is_leaf()) {
+    if (is_active_(enzo_block)) {
 
       T * D = (T*) field.values(id_);
       T * Y = (T*) field.values(iy_);
@@ -614,7 +650,7 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
   Data * data = enzo_block->data();
   Field field = data->field();
 
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     T * X = (T*) field.values(ix_);
     T * D = (T*) field.values(id_);
@@ -627,23 +663,24 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 
     //    field.axpy (ix_,  a ,id_, ix_);
     //    field.axpy (ir_, -a, iy_, ir_);
-    for (int iz=0; iz<mz_; iz++) {
-      for (int iy=0; iy<my_; iy++) {
-	for (int ix=0; ix<mx_; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
-	  X[i] += a * D[i];
-	  R[i] -= a * Y[i];
-	}
-      }
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      X[i] += a * D[i];
+      R[i] -= a * Y[i];
     }
 
-    M_->matvec(iz_,ir_,enzo_block);
+    
+    T * Z = (T*) field.values(iz_);
+    
+    // M_->matvec(iz_,ir_,enzo_block);
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      Z[i] = R[i];
+    }
 
   }
 
   long double reduce[3] = {0.0};
 
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     T * X = (T*) field.values(ix_);
     T * R = (T*) field.values(ir_);
@@ -731,7 +768,7 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 
   Field field = enzo_block->data()->field();
 
-  if (enzo_block->is_leaf()) {
+  if (is_active_(enzo_block)) {
 
     if (A_->is_singular())  {
 
@@ -803,9 +840,14 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 ///    }
 {
 
+  TRACE_SOLVER("Solver end ENTER");
+
+  Field field = enzo_block->data()->field();
+
+  deallocate_temporary_(field);
+
   Solver::end_(enzo_block);
   
-  TRACE_SOLVER("Solver end ENTER");
 
   CkCallback(callback_,
 	     CkArrayIndexIndex(enzo_block->index()),

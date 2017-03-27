@@ -64,6 +64,7 @@ public: // functions
       if (up) ghost_depth_[i] = new int[3];
       PUParray(p,ghost_depth_[i],3);
     }
+    PUParray(p,ghost_depth_default_,3);
     p | conserved_;
   }
 
@@ -80,6 +81,9 @@ public: // functions
 
   /// Set centering for a field
   void set_centering(int id_field, int cx, int cy=0, int cz=0) throw();
+
+  /// Set default ghost_depth
+  void set_default_ghost_depth(int gx, int gy=0, int gz=0) throw();
 
   /// Set ghost_depth for a field
   void set_ghost_depth(int id_field, int gx, int gy=0, int gz=0) throw();
@@ -195,14 +199,17 @@ private: // attributes
   /// cell centering for each field
   std::vector<int *> centering_;
 
-  /// Ghost depth of each field
+  /// Ghost depth of each field, or -1 if using default
   std::vector<int *> ghost_depth_;
+
+  /// Default ghost depth if not specified
+  int ghost_depth_default_[3];
 
   /// Whether the field is conserved or not.  If so it is multiplied
   /// by density when interpolated or coarsened, then divided again.
-  /// (int instead of bool otherwise charmc complains at compile time:
+  /// (char instead of bool otherwise charmc complains at compile time:
   /// "Error 1: taking address of temporary (-fpermissive)"
-  std::vector<int> conserved_;
+  std::vector<char> conserved_;
 
 };
 

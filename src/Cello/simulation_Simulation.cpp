@@ -370,9 +370,7 @@ void Simulation::initialize_data_descr_() throw()
   int gy = config_->field_ghost_depth[1];
   int gz = config_->field_ghost_depth[2];
 
-  for (int i=0; i<field_descr_->field_count(); i++) {
-    field_descr_->set_ghost_depth (i,gx,gy,gz);
-  }
+  field_descr_->set_default_ghost_depth (gx,gy,gz);
 
   // Default precision
 
@@ -799,9 +797,8 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
     }
   }
 
+  delete msg;
 
   Memory::instance()->reset_high();
-
-  delete msg;
 
 }

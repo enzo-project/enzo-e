@@ -23,6 +23,9 @@ FieldDescr::FieldDescr () throw ()
     centering_(),
     ghost_depth_()
 {
+  for (int i=0; i<3; i++) {
+    ghost_depth_default_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -118,9 +121,16 @@ void FieldDescr::ghost_depth
  int * gz
  ) const throw()
 {
-  if (gx) (*gx) = ghost_depth_.at(id_field)[0];
-  if (gy) (*gy) = ghost_depth_.at(id_field)[1];
-  if (gz) (*gz) = ghost_depth_.at(id_field)[2];
+  int g3[3] = {ghost_depth_.at(id_field)[0],
+	       ghost_depth_.at(id_field)[1],
+	       ghost_depth_.at(id_field)[2]};
+  int gd[3] = {ghost_depth_default_[0],
+	       ghost_depth_default_[1],
+	       ghost_depth_default_[2]};
+	       
+  if (gx) (*gx) = g3[0] < 0 ? gd[0] : g3[0];
+  if (gy) (*gy) = g3[1] < 0 ? gd[1] : g3[1];
+  if (gz) (*gz) = g3[2] < 0 ? gd[2] : g3[2];
 }
 
 //----------------------------------------------------------------------
@@ -192,9 +202,9 @@ int FieldDescr::insert_(const std::string & field_name,
 
   int * ghost_depth = new int [3];
 
-  ghost_depth[0] = 1;
-  ghost_depth[1] = 1;
-  ghost_depth[2] = 1;
+  ghost_depth[0] = -1;
+  ghost_depth[1] = -1;
+  ghost_depth[2] = -1;
 
   precision_.  push_back(precision);
   centering_.  push_back(centered);
@@ -247,6 +257,15 @@ void FieldDescr::set_ghost_depth(int id_field, int gx, int gy, int gz) throw()
     ghost_depth_.at(id_field)[1] = gy;
     ghost_depth_.at(id_field)[2] = gz;
   }
+}
+
+//----------------------------------------------------------------------
+
+void FieldDescr::set_default_ghost_depth(int gx, int gy, int gz) throw()
+{
+  ghost_depth_default_[0] = gx;
+  ghost_depth_default_[1] = gy;
+  ghost_depth_default_[2] = gz;
 }
 
 //======================================================================

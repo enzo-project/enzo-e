@@ -202,7 +202,7 @@ extern CkReduction::reducerType sum_long_double_2_type;
 //======================================================================
 
 EnzoSolverMg0::EnzoSolverMg0 
-(const FieldDescr * field_descr, 
+(FieldDescr * field_descr, 
  int monitor_iter,
  int rank,
  int iter_max,
@@ -235,13 +235,18 @@ EnzoSolverMg0::EnzoSolverMg0
 	    min_level_);
   }
 
+  // Initialize temporary fields
+  
+  ir_ = field_descr->insert_temporary();
+  ic_ = field_descr->insert_temporary();
+
   /// Initialize default Refresh
 
   add_refresh(4,0,neighbor_level,sync_barrier);
   refresh(0)->add_all_fields(field_descr->field_count());
 
-  ir_ = field_descr->field_id("R");
-  ic_ = field_descr->field_id("C");
+  refresh(0)->add_field (ir_);
+  refresh(0)->add_field (ic_);
 
 }
 
@@ -271,9 +276,11 @@ void EnzoSolverMg0::apply
   ix_ = ix;
   ib_ = ib;
 
-  TRACE_LEVEL("EnzoSolverMg0::apply",block);
-
   Field field = block->data()->field();
+
+  allocate_temporary_(field);
+  
+  TRACE_LEVEL("EnzoSolverMg0::apply",block);
 
   field.size           (&nx_,&ny_,&nz_);
   field.dimensions (ib_,&mx_,&my_,&mz_);
@@ -959,7 +966,9 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block, FieldMsg * field_messag
     smooth_post->set_callback(CkIndex_EnzoBlock::p_solver_mg0_post_smooth());
   
     smooth_post->apply(A_,ix_,ib_,enzo_block);
+
   } else {
+
     post_smooth<T>(enzo_block);
   }
 
@@ -1030,12 +1039,15 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 {
   TRACE_LEVEL("EnzoSolverMg0::end_cycle",enzo_block);
 
+  Field field = enzo_block->data()->field();
+
   TRACE_MG(enzo_block,"EnzoSolverMg0::end_cycle()");
   
   enzo_block->mg_iter_increment();
 
   if (is_converged_(enzo_block)) {
 
+    deallocate_temporary_(field);
     Solver::end_(enzo_block);
     CkCallback(callback_,
     	       CkArrayIndexIndex(enzo_block->index()),

@@ -92,7 +92,7 @@ public: // interface
   int neighbor_type_() const throw();
 
   /// Type of synchronization: sync_face if min_level == max_level,
-  /// else sync_neighbor)
+  /// else sync_neighbor
   int sync_type_() const throw();
 
   /// Whether Block is active

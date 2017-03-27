@@ -23,7 +23,7 @@ public: // interface
 
   /// Create a new EnzoSolverMg0 object
   EnzoSolverMg0
-  (const FieldDescr * field_descr,
+  (FieldDescr * field_descr,
    int monitor_iter,
    int rank,
    int iter_max,
@@ -185,6 +185,20 @@ protected: // methods
 
   bool is_converged_(EnzoBlock * enzo_block) const;
 
+  /// Allocate temporary Fields
+  void allocate_temporary_(Field field)
+  {
+    field.allocate_temporary(ir_);
+    field.allocate_temporary(ic_);
+  }
+
+  /// Dellocate temporary Fields
+  void deallocate_temporary_(Field field)
+  {
+    field.deallocate_temporary(ir_);
+    field.deallocate_temporary(ic_);
+  }
+  
 protected: // attributes
 
   /// Matrix

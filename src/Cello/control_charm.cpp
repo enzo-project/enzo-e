@@ -203,6 +203,7 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
   
   if ( ! is_leaf() ) {
 
+    TRACE_CONTROL("control_sync_neighbor ! is_leaf()");
     CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
 
     return;
@@ -220,9 +221,19 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
 
     Index index_neighbor = it_neighbor.index();
 
+#ifdef DEBUG_CONTROL
+    CkPrintf ("%s calling p_control_sync_count (%d %d 0)\n",
+	      name().c_str(),entry_point,phase);
+    fflush(stdout);
+#endif    
     thisProxy[index_neighbor].p_control_sync_count(entry_point,phase,0);
 
   }
+#ifdef DEBUG_CONTROL
+    CkPrintf ("%s calling p_control_sync_count (%d %d 0)\n",
+	      name().c_str(), entry_point,phase);
+    fflush(stdout);
+#endif    
   control_sync_count_(entry_point,phase,num_neighbors + 1);
 
 }
@@ -263,6 +274,12 @@ void Block::control_sync_face_(int entry_point, int phase)
 void Block::control_sync_count_ (int entry_point, int phase, int count)
 {
 
+#ifdef DEBUG_CONTROL
+  CkPrintf ("%s control_sync_count %d %d %d/%d\n",
+	    name().c_str(),entry_point,phase,count,max_sync_[phase]);
+  fflush(stdout);
+#endif
+  
   if (count != 0)  max_sync_[phase] = count;
 
   ++count_sync_[phase];
@@ -275,7 +292,7 @@ void Block::control_sync_count_ (int entry_point, int phase, int count)
 
     count_sync_[phase] = 0;
 
-    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
+    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send(NULL);
 
   }
 }

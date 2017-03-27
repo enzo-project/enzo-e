@@ -6,8 +6,8 @@
 /// @brief    [\ref Mesh] Declaration of the ItNeighbor class
 ///
 
-#ifndef MESH_ITNEIGHBOR_HPP
-#define MESH_ITNEIGHBOR_HPP
+#ifndef MESH_IT_NEIGHBOR_HPP
+#define MESH_IT_NEIGHBOR_HPP
 
 class ItNeighbor {
 

@@ -365,7 +365,8 @@ void EnzoMethodTurbulence::compute_resume_
 (Block * block,
  CkReductionMsg * msg) throw()
 {
-
+  delete msg;
+  
   TRACE_TURBULENCE;  
   // Compute normalization
 

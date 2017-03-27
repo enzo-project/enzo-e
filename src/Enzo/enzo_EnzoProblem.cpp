@@ -201,7 +201,7 @@ Solver * EnzoProblem::create_solver_
 ( std::string  solver_type,  
   Config * config,
   int index_solver,
-  const FieldDescr * field_descr,
+  FieldDescr * field_descr,
   const ParticleDescr * particle_descr) throw ()
 /// @param solver_type   Name of the solver to create
 /// @param config Configuration parameters class
@@ -221,24 +221,9 @@ Solver * EnzoProblem::create_solver_
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
-       enzo_config->solver_diag_precon[index_solver]) ;
-
-  } else if (solver_type == "hg") {
-
-    Restrict * restrict = 
-      create_restrict_(enzo_config->solver_restrict[index_solver],config);
-    Prolong * prolong = 
-      create_prolong_(enzo_config->solver_prolong[index_solver],config);
-
-    solver = new EnzoSolverHg
-      (field_descr,
-       enzo_config->solver_monitor_iter[index_solver],
-       rank,
-       enzo_config->solver_iter_max[index_solver],
-       enzo_config->solver_coarse_solve[index_solver],
-       restrict,  prolong,
        enzo_config->solver_min_level[index_solver],
-       enzo_config->solver_max_level[index_solver]);
+       enzo_config->solver_max_level[index_solver],
+       enzo_config->solver_precondition[index_solver]);
 
   } else if (solver_type == "bicgstab") {
 
@@ -285,7 +270,7 @@ Solver * EnzoProblem::create_solver_
   } else {
     // Not an Enzo Solver--try base class Cello Solver
     solver = Problem::create_solver_ 
-      (solver_type,config, index_solver,field_descr,particle_descr);
+      (solver_type,config, index_solver,(FieldDescr *)field_descr,particle_descr);
     
   }
 

@@ -441,7 +441,7 @@ void Problem::initialize_solver
     std::string type = config->solver_type[index_solver];
 
     Solver * solver = create_solver_(type, config, index_solver, 
-				     field_descr, particle_descr);
+				     (FieldDescr *)field_descr, particle_descr);
 
     if (solver) {
 
@@ -695,7 +695,7 @@ Solver * Problem::create_solver_
 ( std::string  name,
   Config * config,
   int index_solver,
-  const FieldDescr * field_descr,
+  FieldDescr * field_descr,
   const ParticleDescr * particle_descr) throw ()
 {
   TRACE1("Problem::create_solver %s",name.c_str());

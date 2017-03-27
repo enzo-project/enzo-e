@@ -29,27 +29,7 @@
 	"potential",
 	"density_total",
 	"acceleration_x",
-	"acceleration_y",
-        "B"
-      ] ;
-
-      # BiCGStab fields
-       list += [
-                "bicgstab_B",
-                "bicgstab_X",
-                "bicgstab_R",
-                "bicgstab_R0",
-                "bicgstab_P",
-                "bicgstab_Y",
-                "bicgstab_V",
-                "bicgstab_Q",
-                "bicgstab_U"
-               ];
-
-      # CG solver fields
-
-      # list += [ "B", "D", "R", "X", "Y", "Z" ];
-
+	"acceleration_y", "B" ] ;
 
       gamma = 1.4;
 
