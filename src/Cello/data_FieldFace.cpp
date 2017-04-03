@@ -634,7 +634,6 @@ template<class T> size_t FieldFace::store_
        }
      }
    }
-
 #endif
 
   return (sizeof(T) * n3[0] * n3[1] * n3[2]);

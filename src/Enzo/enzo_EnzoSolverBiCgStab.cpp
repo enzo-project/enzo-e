@@ -532,14 +532,9 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     /// the previous solve?]
     
     if (first_call_) {
-
-      for (int iz=0; iz<mz_; iz++) {
-	for (int iy=0; iy<my_; iy++) { 
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    X[i] = 0.0;
-	  }
-	}
+      int m = mx_*my_*mz_;
+      for (int i=0; i<m; i++) {
+	X[i] = 0.0;
       }
     }
   }
@@ -552,7 +547,16 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     long double reduce[2] = {0.0, 0.0};
     if (is_active_(enzo_block)) {
       T* B = (T*) field.values(ib_);
-      reduce[0] = sum_(B);
+      const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+      reduce[0] = 0.0;
+      for (int iz=0; iz<nz_; iz++) {
+	for (int iy=0; iy<ny_; iy++) {
+	  for (int ix=0; ix<nx_; ix++) {
+	    int i = i0 + ix + mx_*(iy + my_*iz);
+	    reduce[0] += B[i];
+	  }
+	}
+      }
       reduce[1] = 1.0*nx_*ny_*nz_;
     }
 
@@ -615,25 +619,29 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
     T* R  = (T*) field.values(ir_);
 
     /// for singular problems, project B into R(A)
+    int m = mx_*my_*mz_;
     if (A_->is_singular()) {
       T shift = -bs_ / bc_;
-      for (int iz=0; iz<mz_; iz++) 
-	for (int iy=0; iy<my_; iy++) 
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    B[i] += shift;
-	  }
+      for (int i=0; i<m; i++) {
+	B[i] += shift;
+      }
     }
     /// initialize R = R0 = P = B
-    for (int iz=0; iz<mz_; iz++) 
-      for (int iy=0; iy<my_; iy++) 
-	for (int ix=0; ix<mx_; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
-	  R[i] = R0[i] = P[i] = B[i];
-	}
+    for (int i=0; i<m; i++) {
+      R[i] = R0[i] = P[i] = B[i];
+    }
 
     /// Compute local contributions to beta_n_ = DOT(R, R)
-    reduce = dot_(R,R);
+    reduce = 0.0;
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + ix + mx_*(iy + my_*iz);
+	  reduce += R[i]*R[i];
+	}
+      }
+    }
   }
   
   /// initiate callback for r_solver_bicgstab_start_3 and contribute
@@ -769,7 +777,12 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
 
     T * Y = (T*) field.values(iy_);
     T * P = (T*) field.values(ip_);
-    for (int i=0; i<mx_*my_*mz_; i++) Y[i] = P[i];
+
+    int m = mx_*my_*mz_;
+    for (int i=0; i<m; i++) {
+      Y[i] = P[i];
+    }
+
     loop_25<T>(enzo_block);
   }
 
@@ -877,7 +890,16 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
   if (is_active_(enzo_block)) {
     T* R0 = (T*) field.values(ir0_);
     T* V  = (T*) field.values(iv_);
-    reduce[0] = dot_(V,R0);
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+    reduce[0] = 0.0;
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + ix + mx_*(iy + my_*iz);
+	  reduce[0] += V[i]*R0[i];
+	}
+      }
+    }
   }
 
   /// for singular Poisson problems need all vectors in R(A), so
@@ -889,11 +911,20 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
     if (is_active_(enzo_block)) {
       T* Y = (T*) field.values(iy_);
       T* V = (T*) field.values(iv_);
-      reduce[1] = sum_(Y);
-      reduce[2] = sum_(V);
+      const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+      reduce[1] = 0.0;
+      reduce[2] = 0.0;
+      for (int iz=0; iz<nz_; iz++) {
+	for (int iy=0; iy<ny_; iy++) {
+	  for (int ix=0; ix<nx_; ix++) {
+	    int i = i0 + ix + mx_*(iy + my_*iz);
+	    reduce[1] += Y[i];
+	    reduce[2] += V[i];
+	  }
+	}
+      }
     }
   }
-
   /// initiate callback to r_solver_bicgstab_loop_5 and contribute to
   /// global sums
 
@@ -938,18 +969,16 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   /// for singular problems, project Y and V into R(A)
+  int m = mx_*my_*mz_;
   if (is_active_(enzo_block) && A_->is_singular()) {
     T* Y = (T*) field.values(iy_);
     T* V = (T*) field.values(iv_);
     T yshift = -ys_ / bc_;
     T vshift = -vs_ / bc_;
-    for (int iz=0; iz<mz_; iz++) 
-      for (int iy=0; iy<my_; iy++) 
-	for (int ix=0; ix<mx_; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
-	  Y[i] += yshift;
-	  V[i] += vshift;
-	}
+    for (int i=0; i<m; i++) {
+      Y[i] += yshift;
+      V[i] += vshift;
+    }
   }
 
   /// compute alpha factor in BiCgStab algorithm (all blocks)
@@ -966,10 +995,12 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
     T* Y = (T*) field.values(iy_);
 
     /// update: Q = -alpha_*V + R
-    zaxpy_(Q, -alpha_, V, R);
-
     /// update: X = alpha_*Y + X
-    zaxpy_(X, alpha_, Y, X);
+
+    for (int i=0; i<m; i++) {
+      Q[i] = R[i] - alpha_*V[i];
+      X[i] = X[i] + alpha_*Y[i];
+    }
 
   }
 
@@ -1033,7 +1064,10 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
 
     T * Y = (T*) field.values(iy_);
     T * Q = (T*) field.values(iq_);
-    for (int i=0; i<mx_*my_*mz_; i++) Y[i] = Q[i];
+    int m = mx_*my_*mz_;
+    for (int i=0; i<m; i++) {
+      Y[i] = Q[i];
+    }
     loop_85<T>(enzo_block);
   }
 }
@@ -1139,8 +1173,19 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
   if (is_active_(enzo_block)) {
     T* U  = (T*) field.values(iu_);
     T* Q  = (T*) field.values(iq_);
-    reduce[0] = dot_(U,U);
-    reduce[1] = dot_(U,Q);
+    
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+    reduce[0] = 0.0;
+    reduce[1] = 0.0;
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + ix + mx_*(iy + my_*iz);
+	  reduce[0] += U[i]*U[i];
+	  reduce[1] += U[i]*Q[i];
+	}
+      }
+    }
   }
 
   /// for singular Poisson problems, project both Y and U into R(A)
@@ -1150,8 +1195,18 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
     /// set us_ = SUM(U)
     T* Y = (T*) field.values(iy_);
     T* U = (T*) field.values(iu_);
-    reduce[2] = sum_(Y);
-    reduce[3] = sum_(U);
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+    reduce[2] = 0.0;
+    reduce[3] = 0.0;
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + ix + mx_*(iy + my_*iz);
+	  reduce[2] += Y[i];
+	  reduce[3] += U[i];
+	}
+      }
+    }
   }
 
   /// initiate callback to r_solver_bicgstab_loop_11, and contribute to overall dot-products
@@ -1198,6 +1253,8 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
 
   /// for singular problems, update omega_d_ and project Y and U into R(A)
 
+  int m = mx_*my_*mz_;
+
   if (A_->is_singular()) {
 
     omega_d_ = omega_d_ - us_*us_/bc_;
@@ -1207,13 +1264,10 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
       T* U = (T*) field.values(iu_);
       T yshift = -ys_ / bc_;
       T ushift = -us_ / bc_;
-      for (int iz=0; iz<mz_; iz++) 
-	for (int iy=0; iy<my_; iy++) 
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    Y[i] += yshift;
-	    U[i] += ushift;
-	  }
+      for (int i=0; i<m; i++) {
+	Y[i] += yshift;
+	U[i] += ushift;
+      }
     }
   }
 
@@ -1238,10 +1292,12 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
     T* U = (T*) field.values(iu_);
     
     /// update: X = omega_*Y + X
-    zaxpy_(X, omega_, Y, X);
-
     /// update: R = -omega_*U + Q
-    zaxpy_(R, -omega_, U, Q);
+
+    for (int i=0; i<m; i++) {
+      X[i] = X[i] + omega_*Y[i];
+      R[i] = Q[i] - omega_*U[i];
+    }
 
   }
 
@@ -1255,8 +1311,18 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   if (is_active_(enzo_block)) {
     T* R  = (T*) field.values(ir_);
     T* R0 = (T*) field.values(ir0_);
-    reduce[0] = dot_(R,R);
-    reduce[1] = dot_(R,R0);
+    const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+    reduce[0] = 0.0;
+    reduce[1] = 0.0;
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + ix + mx_*(iy + my_*iz);
+	  reduce[0] += R[i]*R[i];
+	  reduce[1] += R[i]*R0[i];
+	}
+      }
+    }
   }
 
   /// initiate callback to r_solver_bicgstab_loop_13, and contribute to overall dot-products
@@ -1316,11 +1382,12 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
     T* V = (T*) field.values(iv_);
 
     /// update: P = beta_*P + R
-    zaxpy_(P, beta_, P, R);
-
     /// update: P = -beta_*omega_*V + P
-    zaxpy_(P, -beta_*omega_, V, P);
 
+    int m = mx_*my_*mz_;
+    for (int i=0; i<m; i++) {
+      P[i] = R[i] + beta_*(P[i] - omega_*V[i]);
+    }
   }
 
   /// contribute to global iteration counter
@@ -1435,45 +1502,3 @@ void EnzoBlock::p_solver_bicgstab_exit() {
 }
 
 //======================================================================
-
-template<class T> long double EnzoSolverBiCgStab::dot_(const T* X, const T* Y) const throw() {
-
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-  long double value = 0.0;
-  for (int iz=0; iz<nz_; iz++) 
-    for (int iy=0; iy<ny_; iy++) 
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + (ix + mx_*(iy + my_*iz));
-	value += X[i]*Y[i];
-      }
-  return value;
-}
-
-//----------------------------------------------------------------------
-
-template<class T> void EnzoSolverBiCgStab::zaxpy_(T* Z, double a, const T* X, const T* Y) const throw() {
-
-  for (int iz=0; iz<mz_; iz++) 
-    for (int iy=0; iy<my_; iy++) 
-      for (int ix=0; ix<mx_; ix++) {
-	int i = ix + mx_*(iy + my_*iz);
-	Z[i] = a * X[i] + Y[i];
-      }
-}
-
-//----------------------------------------------------------------------
-
-template<class T> long double EnzoSolverBiCgStab::sum_(const T* X) const throw() {
-
-  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
-  long double value = 0.0;
-  for (int iz=0; iz<nz_; iz++) 
-    for (int iy=0; iy<ny_; iy++) 
-      for (int ix=0; ix<nx_; ix++) {
-	int i = i0 + (ix + mx_*(iy + my_*iz));
-	value += X[i];
-      }
-  return value;
-}
-
-//----------------------------------------------------------------------

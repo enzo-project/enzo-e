@@ -148,7 +148,8 @@
     Data * data = enzo_block->data();					\
     Field field = data->field();					\
     T * X = (T*) field.values(IX);					\
-    double xx=0;							\
+    double xx=0.0;							\
+    double yy=0.0;							\
     for (int iz=0; iz<mz_; iz++) {					\
       for (int iy=0; iy<my_; iy++) {					\
 	for (int ix=0; ix<mx_; ix++) {					\
@@ -157,8 +158,16 @@
 	}								\
       }									\
     }									\
-    CkPrintf ("%s:%d %s DEBUG_SOLVER ||%s|| = %g\n",			\
-	      __FILE__,__LINE__,enzo_block->name().c_str(),NAME,xx);	\
+    for (int iz=gz_; iz<mz_-gz_; iz++) {				\
+      for (int iy=gy_; iy<my_-gy_; iy++) {				\
+	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
+	  int i = ix + mx_*(iy + my_*iz);				\
+	  yy+=X[i]*X[i];						\
+	}								\
+      }									\
+    }									\
+    CkPrintf ("%s:%d %s DEBUG_SOLVER ||%s|| = [%g] (%g)\n",		\
+	      __FILE__,__LINE__,enzo_block->name().c_str(),NAME,xx,yy);	\
   }
 
 #else
@@ -166,34 +175,6 @@
 
 #   define DEBUG_FIELD(IX,NAME) /* ... */
 #endif
-
-#ifdef DEBUG_SOLVER_MG0
-#define LOCAL_SUM(M,it)							\
-  {									\
-    T * X = (T*) enzo_block->data()->field().values(it);		\
-    double min=std::numeric_limits<double>::max();			\
-    double max=-std::numeric_limits<double>::max();			\
-    double sum =0.0;							\
-    const int i0 = gx_ + mx_*(gy_ + my_*gz_);				\
-									\
-    for (int iz=0; iz<nz_; iz++) {					\
-      for (int iy=0; iy<ny_; iy++) {					\
-	for (int ix=0; ix<nx_; ix++) {					\
-	  int i = i0 + ix + mx_*(iy + my_*iz);				\
-	  min = std::min(min,double(X[i]));				\
-	  max = std::max(max,double(X[i]));				\
-	  sum += X[i];							\
-	}								\
-      }									\
-    }									\
-    CkPrintf ("LOCAL_SUM %d iter %d level %d %s block %s"		\
-	      "min %20.15e sum %20.15e max %20.15e\n",			\
-	      __LINE__,enzo_block->mg_iter(), enzo_block->level(),M,	\
-	      enzo_block->name().c_str(), min,sum,max);			\
-  }
-#else
-#define LOCAL_SUM(M,it) /* EMPTY */
-#endif  
 
 //======================================================================
 
@@ -268,6 +249,7 @@ EnzoSolverMg0::~EnzoSolverMg0 () throw()
 void EnzoSolverMg0::apply
 ( Matrix * A, int ix, int ib, Block * block) throw()
 {
+
   TRACE_MG(block,"EnzoSolverMg0::apply()");
 
   Solver::begin_(block);
@@ -320,7 +302,6 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   TRACE_MG(enzo_block,"EnzoSolverMg0::enter_solver()");
 
   enzo_block->mg_iter_clear();
-
 
   Data * data = enzo_block->data();
   Field field = data->field();
@@ -434,7 +415,7 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block) throw()
 		__LINE__,enzo_block->name().c_str(),double(bs_),double(bc_));
 #endif      
 
-      LOCAL_SUM("B shift 0",ib_);
+      DEBUG_FIELD(ib_,"B shift 0");
       for (int iz=0; iz<mz_; iz++) {
 	for (int iy=0; iy<my_; iy++) {
 	  for (int ix=0; ix<mx_; ix++) {
@@ -444,7 +425,7 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block) throw()
 	}
       }
 
-      LOCAL_SUM("B shift 1",ib_);
+      DEBUG_FIELD(ib_,"B shift 1");
     }
 
     begin_cycle_<T>(enzo_block);
@@ -669,15 +650,14 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   Index index        = enzo_block->index();
   Index index_parent = index.index_parent(min_level_);
-  int level          = index.level();
-  
+  const  int level   = index.level();  
   // copy face data to FieldFace
 
   // Pack and send "R" to parent
 
   int ic3[3];
   index.child(level,&ic3[0],&ic3[1],&ic3[2],min_level_);
-
+  
   // <COMMON CODE> in restrict_send_() and prolong_send_()
   
   int if3[3] = {0,0,0};
@@ -1048,6 +1028,7 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
   if (is_converged_(enzo_block)) {
 
     deallocate_temporary_(field);
+    
     Solver::end_(enzo_block);
     CkCallback(callback_,
     	       CkArrayIndexIndex(enzo_block->index()),

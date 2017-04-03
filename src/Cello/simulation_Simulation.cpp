@@ -778,8 +778,27 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   
   monitor()->print("Performance","simulation num-particles total %ld",
 		   counters_long[m++]);
+
+  
+  int nb;
   monitor()->print("Performance","simulation num-blocks %d",
-		   counters_long[m++]);
+		   nb=counters_long[m++]);
+
+  // number of root blocks n0
+  int nx,ny,nz;
+  hierarchy()->num_blocks(&nx,&ny,&nz);
+  int n0 = nx*ny*nz;
+  // rank-dependent factor for computing leaf block count
+  int rank = hierarchy()->rank();
+  double f =
+    (rank == 1) ? 0.5 :
+    (rank == 2) ? 0.75 :
+    (rank == 3) ? 0.875 : 0.0;
+  
+  // compute number of leaf blocks
+  int nl = n0 + f*(nb - n0);
+  monitor()->print("Performance","simulation num-leaves %d",
+		   nl);
 
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++, m++) {

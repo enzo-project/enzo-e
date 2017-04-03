@@ -793,6 +793,8 @@ public: // virtual functions
   (int if3[3], int ic3[3], bool lg3[3], int refresh_type,
    std::vector<int> & field_list);
 
+  void print () const;
+
 protected: // functions
 
   /// Return the child adjacent to the given child in the direction of
@@ -897,8 +899,6 @@ protected: // functions
   {  return &refresh_.back();  }
 
 
-  void print () const;
-  
 protected: // attributes
 
   /// Whether data exists

@@ -223,15 +223,6 @@ protected: // methods
   /// internal routine to handle actual start to solver
   template<class T> void compute_(EnzoBlock * enzo_block) throw();
 
-  /// Compute local contribution to inner-product X*Y
-  template<class T> long double dot_(const T* X, const T* Y) const throw();
-
-  /// Perform local vector update: Z = A*X + Y
-  template<class T> void zaxpy_(T* Z, double a, const T* X, const T* Y) const throw();
-  
-  /// Compute local sum of vector elements X_i
-  template<class T> long double sum_(const T* X) const throw();
-
   /// Allocate temporary Fields
   void allocate_temporary_(Field field)
   {

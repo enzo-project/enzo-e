@@ -369,7 +369,8 @@ void Block::print () const
 {
   CkPrintf ("data_ = %p\n",data_);
   CkPrintf ("child_data_ = %p\n",child_data_);
-  CkPrintf ("index_ = %d\n",name().c_str());
+  int v3[3];index().values(v3);
+  CkPrintf ("index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
   CkPrintf ("level_next_ = %d\n",level_next_);
   CkPrintf ("cycle_ = %d\n",cycle_);
   CkPrintf ("time_ = %f\n",time_);
@@ -560,7 +561,8 @@ std::string Block::name() const throw()
     const int rank = this->rank();
     int blocking[3] = {1,1,1};
     simulation()->hierarchy()->blocking(blocking,blocking+1,blocking+2);
-    for (int i=-1; i>=index().level(); i--) {
+    const int level = this->level();
+    for (int i=-1; i>=level; i--) {
       blocking[0] /= 2;
       blocking[1] /= 2;
       blocking[2] /= 2;
@@ -571,12 +573,12 @@ std::string Block::name() const throw()
     blocking[0]--;
     blocking[1]--;
     blocking[2]--;
+
     if (blocking[0]) do { ++bits[0]; } while (blocking[0]/=2);
     if (blocking[1]) do { ++bits[1]; } while (blocking[1]/=2);
     if (blocking[2]) do { ++bits[2]; } while (blocking[2]/=2);
 
-    name_ = "B" + index_.bit_string(level(),rank,bits);
-
+    name_ = "B" + index_.bit_string(level,rank,bits);
   }
   return name_;
 }
@@ -670,15 +672,26 @@ void Block::index_global
 
   const int level = this->level();
 
-  for (int i=0; i<level; i++) {
-    int bx,by,bz;
-    index.child(i+1,&bx,&by,&bz);
-    if (ix) (*ix) = ((*ix) << 1) | bx;
-    if (iy) (*iy) = ((*iy) << 1) | by;
-    if (iz) (*iz) = ((*iz) << 1) | bz;
-    if (nx) (*nx) <<= 1;
-    if (ny) (*ny) <<= 1;
-    if (nz) (*nz) <<= 1;
+  if (level < 0 ) {
+    for (int i=level; i<0; i++) {
+      if (ix) (*ix) = ((*ix) >> 1);
+      if (iy) (*iy) = ((*iy) >> 1);
+      if (iz) (*iz) = ((*iz) >> 1);
+      if (nx) (*nx) >>= 1;
+      if (ny) (*ny) >>= 1;
+      if (nz) (*nz) >>= 1;
+    }
+  }  else if (0 < level) {
+    for (int i=0; i<level; i++) {
+      int bx,by,bz;
+      index.child(i+1,&bx,&by,&bz);
+      if (ix) (*ix) = ((*ix) << 1) | bx;
+      if (iy) (*iy) = ((*iy) << 1) | by;
+      if (iz) (*iz) = ((*iz) << 1) | bz;
+      if (nx) (*nx) <<= 1;
+      if (ny) (*ny) <<= 1;
+      if (nz) (*nz) <<= 1;
+    }
   }
 }
 
@@ -717,7 +730,16 @@ void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
 
   int n3[3];
   size_forest (&n3[0],&n3[1],&n3[2]);
-  
+
+  const int level = this->level();
+  // adjust array size for negative levels
+  if (level < 0) {
+    int shift = -level;
+    n3[0] = n3[0] >> shift;
+    n3[1] = n3[1] >> shift;
+    n3[2] = n3[2] >> shift;
+  }
+
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
       is_boundary[axis][face] = 
@@ -842,15 +864,14 @@ void Block::performance_stop_
 
 void Block::check_leaf_()
 {
-  if ((  is_leaf() && children_.size() != 0) ||
-      (! is_leaf() && children_.size() == 0)) {
+  if (level() >= 0 &&
+      ((  is_leaf() && children_.size() != 0) ||
+       (! is_leaf() && children_.size() == 0))) {
 
-    WARNING4("Block::refresh_begin_()",
-	     "%s: is_leaf() == %s && children_.size() == %d"
-	     "setting is_leaf_ <== %s",
+    WARNING3("Block::refresh_begin_()",
+	     "%s: is_leaf() == %s && children_.size() == %d",
 	     name_.c_str(), is_leaf()?"true":"false",
-	     children_.size(),is_leaf()?"false":"true");
-    is_leaf_ = ! is_leaf();
+	     children_.size());
   }
 }
 

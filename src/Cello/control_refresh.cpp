@@ -107,7 +107,7 @@ void Block::refresh_load_field_faces_ (Refresh *refresh)
 
       Index index_face = it_face.index();
 
-      int if3[3],ic3[3];
+      int if3[3],ic3[3] = {0,0,0};
       it_face.face(if3);
 
       refresh_load_field_face_ (refresh_same,index_face,if3,ic3);

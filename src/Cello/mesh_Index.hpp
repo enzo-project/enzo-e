@@ -130,14 +130,16 @@ public:
   void print (const char * msg,
 	      int max_level,
 	      int rank,
+	      const int nb3[3],
 	      bool no_nl,
 	      void * simulation = 0) const;
   
 
   void write (int ip,
-	      const char * msg = "\0",
-	      int max_level = -1,
-	      int rank = 3) const;
+	      const char * msg,
+	      int max_level,
+	      int rank,
+	      const int nb3[3]) const;
 
   std::string bit_string (int max_level,int rank, const int nb3[3]) const;
 
@@ -169,6 +171,7 @@ private: // functions
 	       const char * msg,
 	       int max_level,
 	       int rank,
+	       const int nb3[3],
 	       bool no_nl) const;
 
 private: // attributes

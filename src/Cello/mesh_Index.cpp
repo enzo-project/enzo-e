@@ -89,23 +89,22 @@ Index Index::index_child (int icx, int icy, int icz, int min_level) const
 }
 
 //----------------------------------------------------------------------
-
 bool Index::is_on_boundary (int axis, int face, int narray) const
 {
 
   int level = this->level();
-
+ 
   unsigned array = a_[axis].array;
   unsigned tree  = a_[axis].tree;
-
+ 
   // update tree bits
-
+ 
   unsigned shift_level = (1 << (INDEX_BITS_TREE - level));
-
+ 
   tree += face*shift_level; 
-
+ 
   unsigned shift_overflow = (1 << INDEX_BITS_TREE);
-
+ 
   bool retval = false;
 
   if (tree & shift_overflow) {
@@ -118,10 +117,10 @@ bool Index::is_on_boundary (int axis, int face, int narray) const
     
     retval = false;
   }
-
+ 
   return retval;
 }
-
+ 
 //----------------------------------------------------------------------
 
 bool Index::is_on_boundary 
@@ -139,37 +138,40 @@ bool Index::is_on_boundary
 
 Index Index::index_neighbor (const int if3[3], const int n3[3]) const
 {
+
   Index index = *this;
 
   const int level = index.level();
 
   for (int axis = 0; axis < 3; axis++) {
-    
-    unsigned array = index.a_[axis].array;
-    unsigned tree  = index.a_[axis].tree;
 
-    // update tree bits
+    int64_t array = index.a_[axis].array;
+    int64_t tree  = index.a_[axis].tree;
 
-    unsigned shift_level = (1 << (INDEX_BITS_TREE - level));
+    // create unified bit mask
 
-    tree += if3[axis]*shift_level; 
+    int64_t array_tree = (array << INDEX_BITS_TREE) + tree;
 
-    // update array if necessary
+    // add or subtract one in that level
 
-    unsigned shift_overflow = (1 << INDEX_BITS_TREE);
+    int64_t shift_level = (1 << (INDEX_BITS_TREE - level));
 
-    if (tree & shift_overflow) {
+    array_tree += if3[axis]*shift_level;
 
-      tree &= ~(shift_overflow);
+    // recover new array and tree values
 
-      const int i = array+if3[axis];
+    int array_bits = 0;
+    int count = n3[axis];
+    while (count/=2) array_bits++;
 
-      array = (n3[axis] + i) % n3[axis];
+    int64_t tree_mask = ~((~0 >> INDEX_BITS_TREE) << INDEX_BITS_TREE);
+    int64_t array_mask = ~((~0 >> array_bits)     << array_bits);
 
-    }
-    index.a_[axis].array = array;
-    index.a_[axis].tree  = tree;
+    index.a_[axis].array = (array_tree >> INDEX_BITS_TREE) & array_mask;
+    index.a_[axis].tree  = array_tree & tree_mask;
+
   }
+
   return index;
 }
 
@@ -203,6 +205,14 @@ void Index::array (int * ix, int *iy, int *iz) const
   if (ix) (*ix) = a_[0].array;
   if (iy) (*iy) = a_[1].array;
   if (iz) (*iz) = a_[2].array;
+  const int level = this->level();
+  if (level < 0) {
+    // adjust array index for level
+    int shift = - level;
+    if (ix) (*ix) = (*ix) >> shift;
+    if (iy) (*iy) = (*iy) >> shift;
+    if (iz) (*iz) = (*iz) >> shift;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -333,14 +343,15 @@ void Index::upper (double v3[3], int a3[3], int max_level) const
 void Index::print (const char * msg,
 		   int max_level,
 		   int rank,
+		   const int nb3[3],
 		   bool no_nl,
 		   void * simulation ) const
 {
-  print_(stdout,msg,max_level,rank,no_nl);
+  print_(stdout,msg,max_level,rank,nb3,no_nl);
 
 #ifdef CELLO_DEBUG
   FILE * fp_debug = ((Simulation *)simulation)->fp_debug();
-  print_(fp_debug,msg,max_level,rank,no_nl);
+  print_(fp_debug,msg,max_level,rank,nb3,no_nl);
 #endif
 }
 
@@ -350,13 +361,9 @@ void Index::print_ (FILE * fp,
 		    const char * msg,
 		    int max_level,
 		    int rank,
+		    const int nb3[3],
 		    bool no_nl) const
 {
-  int nb3[3] = {0};
-  for (int axis=0; axis<rank; axis++) {
-    nb3[axis] = std::max(nb3[axis],num_bits_(a_[axis].array));
-  }
-  
   if (fp != NULL) {
     fprintf (fp,"[%s] %s",this->bit_string (max_level,rank,nb3).c_str(),msg);
     if (! no_nl) fprintf (fp,"\n");
@@ -369,13 +376,14 @@ void Index::print_ (FILE * fp,
 void Index::write (int ip,
 		   const char * msg,
 		   int max_level,
-		   int rank) const
+		   int rank,
+		   const int nb3[3]) const
 {
   char filename[80];
   sprintf (filename,"index.%s.%d",msg,ip);
   FILE * fp = fopen(filename,"a");
 
-  print_(fp,msg,max_level,rank,false);
+  print_(fp,msg,max_level,rank,nb3,false);
 
   fflush(fp);
 
@@ -385,12 +393,11 @@ void Index::write (int ip,
 
 //----------------------------------------------------------------------
 
-
 std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
 {
   const int level = this->level();
 
-  if (max_level == -1) max_level = this->level();
+  if (max_level < 0 ) max_level = this->level();
 
   std::string bits = "";
   const std::string separator = "_";
@@ -398,7 +405,8 @@ std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
   for (int axis=0; axis<rank; axis++) {
 
     for (int i=nb3[axis]-1; i>=0; i--) {
-      int bit = (a_[axis].array & ( 1 << i));
+      int shift = (level >= 0) ? i : i-level;
+      int bit = (a_[axis].array & ( 1 << shift));
       bits = bits + (bit?"1":"0");
     }
 
