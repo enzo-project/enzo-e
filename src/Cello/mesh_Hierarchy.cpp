@@ -11,6 +11,8 @@
 
 #include "charm_mesh.hpp"
 
+// #define CELLO_TRACE
+
 //----------------------------------------------------------------------
 
 Hierarchy::Hierarchy 

@@ -44,6 +44,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_pm_field(""),
   initial_pm_mpp(0.0),
   initial_pm_level(0),
+  // EnzoInitialCollapse
+  initial_collapse_rank(0),
+  initial_collapse_radius_relative(0.0),
+  initial_collapse_particle_ratio(0.0),
+  initial_collapse_mass(0.0),
+  initial_collapse_temperature(0.0),
   // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
@@ -80,6 +86,7 @@ EnzoConfig::EnzoConfig() throw ()
     initial_soup_array[i]  = 0;
     initial_soup_d_pos[i]  = 0.0;
     initial_soup_d_size[i] = 0.0;
+    initial_collapse_array[i] = 0;
   }
 }
 
@@ -124,6 +131,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_max_expansion_rate;
   p | physics_cosmology_omega_lamda_now;
   p | physics_cosmology_omega_matter_now;
+
+  p | initial_collapse_rank;
+  PUParray(p,initial_collapse_array,3);
+  p | initial_collapse_radius_relative;
+  p | initial_collapse_particle_ratio;
+  p | initial_collapse_mass;
+  p | initial_collapse_temperature;
 
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
@@ -296,6 +310,25 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:sedov:pressure_out",1e-5);
   initial_sedov_density = 
     p->value_float("Initial:sedov:density",1.0);
+
+  // Collapse initialization
+
+  initial_collapse_rank =  p->value_integer("Initial:collapse:rank",0);
+  for (int i=0; i<initial_collapse_rank; i++) {
+    initial_collapse_array[i] =
+      p->list_value_integer (i,"Initial:collapse:array",1);
+  }
+  for (int i=initial_collapse_rank; i<3; i++) {
+    initial_collapse_array[i] = 1;
+  }
+  initial_collapse_radius_relative =
+    p->value_float("Initial:collapse:radius_relative",0.1);
+  initial_collapse_particle_ratio =
+    p->value_float("Initial:collapse:particle_ratio",0.0);
+  initial_collapse_mass =
+    p->value_float("Initial:collapse:mass",cello::mass_solar);
+  initial_collapse_temperature =
+    p->value_float("Initial:collapse:temperature",10.0);
 
   // Turbulence method and initialization
 

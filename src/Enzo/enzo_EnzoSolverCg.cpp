@@ -523,31 +523,36 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
 
   if (is_root) {
 
+    // Write monitor output
     Monitor * monitor = enzo_block->simulation()->monitor();
 
-    if (iter_ == 0) {
-      monitor->print ("Enzo", "CG iter %04d  rr0 %g",
-		      iter_,(double)(rr0_));
-    }
+    const bool l_first_iter = (iter_ == 0);
+    const bool l_max_iter   = (iter_ >= iter_max_);
+    const bool l_monitor    = (monitor_iter_ && (iter_ % monitor_iter_) == 0 );
+    const bool l_converged  = (rr_ / rr0_ < res_tol_);
 
-    if (monitor_iter_ && (iter_ % monitor_iter_) == 0 ) {
+    const bool l_output =
+      l_first_iter || l_max_iter || l_monitor || l_converged;
+      
+    if (l_output) {
       monitor_output_ (enzo_block,iter_,rr0_,rr_min_,rr_,rr_max_);
     }
+
   }
 
   if (rr_ / rr0_ < res_tol_) {
 
-    if (is_root && monitor_iter_) {
-      monitor_output_ (enzo_block,iter_,rr0_,rr_min_,rr_,rr_max_);
-    }
+    // end if converged
     end<T> (enzo_block,return_converged);
 
   } else if (iter_ >= iter_max_)  {
 
+    // end if diverged
     end<T>(enzo_block,return_error_max_iter_reached);
 
   } else {
-    
+
+    // else continue
     Data * data = enzo_block->data();
     Field field = data->field();
 

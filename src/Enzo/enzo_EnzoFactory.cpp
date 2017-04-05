@@ -9,6 +9,7 @@
 
 #include "charm_enzo.hpp"
 
+// #define CELLO_TRACE
 // #define DEBUG_ENZO_FACTORY
 
 //----------------------------------------------------------------------

@@ -59,12 +59,14 @@ void OutputData::open () throw()
 {
   std::string file_name = expand_name_(&file_name_,&file_args_);
 
-  Monitor::instance()->print 
-    ("Output","writing data file %s", file_name.c_str());
 
   close();
 
   std::string dir = directory();
+
+  Monitor::instance()->print 
+    ("Output","writing data file %s",
+     (dir + "/" + file_name).c_str());
 
   file_ = new FileHdf5 (dir,file_name);
 

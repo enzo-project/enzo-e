@@ -63,6 +63,12 @@ public: // interface
       physics_cosmology_max_expansion_rate(0.0),
       physics_cosmology_omega_lamda_now(0.0),
       physics_cosmology_omega_matter_now(0.0),
+      // EnzoInitialCollapse
+      initial_collapse_rank(0),
+      initial_collapse_mass(0.0),
+      initial_collapse_radius_relative(0.0),
+      initial_collapse_particle_ratio(0.0),
+      initial_collapse_temperature(0.0),
       // EnzoInitialPm
       initial_pm_field(""),
       initial_pm_mpp(0.0),
@@ -108,6 +114,7 @@ public: // interface
       initial_soup_array[axis] = 0;
       initial_soup_d_pos[axis] = 0;
       initial_soup_d_size[axis] = 0;
+      initial_collapse_array[axis] = 0;
     }
   }
 
@@ -148,6 +155,14 @@ public: // attributes
   double                     physics_cosmology_max_expansion_rate;
   double                     physics_cosmology_omega_lamda_now;
   double                     physics_cosmology_omega_matter_now;
+
+  // EnzoInitialCollapse
+  int                        initial_collapse_rank;
+  int                        initial_collapse_array[3];
+  double                     initial_collapse_radius_relative;
+  double                     initial_collapse_particle_ratio;
+  double                     initial_collapse_mass;
+  double                     initial_collapse_temperature;
 
   // EnzoInitialPm
   std::string                initial_pm_field;

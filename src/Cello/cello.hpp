@@ -177,7 +177,11 @@ namespace cello {
   // Constants
 
   const double pi = 3.14159265358979324;
-
+  // Boltzman constant in CGS  
+  const double k  = 1.3806504e-16;
+  // Solar mass in CGS
+  const double mass_solar = 1.98855e33;
+  
   // precision functions
   double machine_epsilon     (int);
   template <class T>

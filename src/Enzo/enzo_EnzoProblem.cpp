@@ -120,6 +120,16 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "grackle_test") {
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
+  } else if (type == "collapse") {
+    const int rank = enzo_config->initial_collapse_rank;
+    initial = new EnzoInitialCollapse
+      (cycle,time,
+       enzo_config->initial_collapse_rank,
+       enzo_config->initial_collapse_array,
+       enzo_config->initial_collapse_radius_relative,
+       enzo_config->initial_collapse_particle_ratio,
+       enzo_config->initial_collapse_mass,
+       enzo_config->initial_collapse_temperature);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence 
       (cycle,time, 
