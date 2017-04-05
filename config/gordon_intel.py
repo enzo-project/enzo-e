@@ -25,7 +25,8 @@ libs_fortran    = ['ifcore']
 
 home = os.environ["HOME"]
 charm_path = home + '/Charm/charm'
-papi_path  = home
+papi_inc = home + '/include'
+papi_lib = home + '/lib'
 hdf5_path  = os.environ['HDF5HOME']
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
