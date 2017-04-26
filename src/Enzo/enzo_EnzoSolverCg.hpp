@@ -163,7 +163,7 @@ protected: // methods
   void exit_() throw();
 
   /// Allocate temporary Fields
-  void allocate_temporary_(Field field)
+  void allocate_temporary_(Field field, Block * block = NULL)
   {
     field.allocate_temporary(id_);
     field.allocate_temporary(ir_);
@@ -172,7 +172,7 @@ protected: // methods
   }
 
   /// Dellocate temporary Fields
-  void deallocate_temporary_(Field field)
+  void deallocate_temporary_(Field field, Block * block = NULL)
   {
     field.deallocate_temporary(id_);
     field.deallocate_temporary(ir_);

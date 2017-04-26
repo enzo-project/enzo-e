@@ -246,10 +246,6 @@ int EnzoBlock::SolveHydroEquations
      the right thing for < 3 dimensions. */
   /* note: Start/EndIndex are zero based */
 
-  //     AccelerationField[0] = density;
-  //     AccelerationField[1] = density;
-  //     AccelerationField[2] = density;
-
   int gravity_on = (acceleration_x != NULL) ? 1 : 0;
   
   FORTRAN_NAME(ppm_de)

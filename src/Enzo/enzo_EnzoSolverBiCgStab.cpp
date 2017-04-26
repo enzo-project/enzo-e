@@ -397,6 +397,8 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
+// #define DEBUG_ENTRY
+
 // #define DEBUG_BICGSTAB
 
 #ifdef DEBUG_BICGSTAB
@@ -474,6 +476,10 @@ EnzoSolverBiCgStab::~EnzoSolverBiCgStab() throw()
 void EnzoSolverBiCgStab::apply
 ( Matrix * A, int ix, int ib, Block * block) throw()
 {
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p bicgstab DEBUG_ENTRY begin\n",
+	      CkMyPe(),block->name().c_str(),this);
+#endif
   TRACE_BICGSTAB("apply()",block);
   
   Solver::begin_(block);
@@ -484,7 +490,7 @@ void EnzoSolverBiCgStab::apply
 
   Field field = block->data()->field();
 
-  allocate_temporary_(field);
+  allocate_temporary_(field,block);
 
   /// cast input argument to the EnzoBlock associated with this char
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (block);
@@ -719,37 +725,9 @@ template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw()
 
     // Refresh field faces then call solver_bicgstab_loop_1
 
-    enzo_block->p_solver_bicgstab_loop_1();
+    loop_2<T>(enzo_block);
   
   }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::p_solver_bicgstab_loop_1() {
-
-  TRACE_BICGSTAB("EnzoBlock::loop_1()",this);
-
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
-  /// re-entry into loop_2, using template with appropriate precision
-  EnzoSolverBiCgStab* solver = 
-    static_cast<EnzoSolverBiCgStab*> (this->solver());
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-  Field field = data()->field();
-  // assuming all fields have same precision
-  int precision = field.precision(0);
-  if      (precision == precision_single)    
-    solver->loop_2<float>(enzo_block);
-  else if (precision == precision_double)    
-    solver->loop_2<double>(enzo_block);
-  else if (precision == precision_quadruple) 
-    solver->loop_2<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized",
-	   precision);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1008,36 +986,8 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
 
   /// refresh Q with callback to p_solver_bicgstab_loop_7 to handle re-entry
 
-  enzo_block->p_solver_bicgstab_loop_7();
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::p_solver_bicgstab_loop_7() {
-
-  TRACE_BICGSTAB("EnzoBlock::loop_7()",this);
-  performance_start_(perf_compute,__FILE__,__LINE__);
-  
-  /// re-entry into loop_8, using template with appropriate precision
-  EnzoSolverBiCgStab* solver = 
-    static_cast<EnzoSolverBiCgStab*> (this->solver());
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-  Field field = data()->field();
-  // assuming all fields have same precision
-  int precision = field.precision(0);
-  if      (precision == precision_single)    
-    solver->loop_8<float>(enzo_block);
-  else if (precision == precision_double)    
-    solver->loop_8<double>(enzo_block);
-  else if (precision == precision_quadruple) 
-    solver->loop_8<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized",
-	   precision);
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
-  
+  loop_8<T>(enzo_block);
+  //enzo_block->p_solver_bicgstab_loop_7();
 }
 
 //----------------------------------------------------------------------
@@ -1428,77 +1378,19 @@ template<class T> void EnzoSolverBiCgStab::end
 
   Field field = enzo_block->data()->field();
 
-  deallocate_temporary_(field);
+  deallocate_temporary_(field,enzo_block);
   
   Solver::end_(enzo_block);
   
-  CkCallback(callback_,
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p bicgstab DEBUG_ENTRY calling callback_ %d\n",
+	      CkMyPe(),enzo_block->name().c_str(),this,callback_);
+#endif
+
+    CkCallback(callback_,
 	     CkArrayIndexIndex(enzo_block->index()),
 	     enzo_block->proxy_array()).send();
 
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::p_solver_bicgstab_acc() {
-
-  performance_start_(perf_compute,__FILE__,__LINE__);
-  
-  /// re-entry to compute accelerations with refreshed solution
-
-  EnzoSolverBiCgStab* solver = 
-    static_cast<EnzoSolverBiCgStab*> (this->solver());
-
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-
-  Field field = data()->field();
-
-  // assuming all fields have same precision
-  int precision = field.precision(0);
-
-  if      (precision == precision_single) {
-    solver->acc<float>(enzo_block);
-  } else if (precision == precision_double) {
-    solver->acc<double>(enzo_block);
-  } else if (precision == precision_quadruple) {
-    solver->acc<long double>(enzo_block);
-  } else {
-    ERROR1("EnzoBlock::p_solver_bicgstab_acc()",
-	   "precision %d not recognized", precision);
-  }
-
-  performance_stop_(perf_compute,__FILE__,__LINE__);
-  
-}
-
-//----------------------------------------------------------------------
-
-template<class T> 
-void EnzoSolverBiCgStab::acc(EnzoBlock* enzo_block) throw() 
-{
-  TRACE_BICGSTAB("acc()",enzo_block);
-
-  /// access field container on this block
-  Data* data = enzo_block->data();
-  Field field = data->field();
-
-  /// extract the solution and compute derived acceleration fields (leaf blocks only)
-  first_call_ = false;
-
-  // Refresh field faces then call solver_bicgstab_exit()
-
-  enzo_block->p_solver_bicgstab_exit();
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoBlock::p_solver_bicgstab_exit() {
-
-  //  performance_start_(perf_compute,__FILE__,__LINE__);
-
-  //  performance_stop_(perf_compute,__FILE__,__LINE__);
-  
 }
 
 //======================================================================

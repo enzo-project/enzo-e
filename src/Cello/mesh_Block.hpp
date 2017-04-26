@@ -244,65 +244,28 @@ public: // interface
 
   void initial_exit_();
   void p_initial_exit()
-  {
-    performance_start_(perf_initial);
-    initial_exit_();
-    performance_stop_(perf_initial);
-  }
+  {      initial_exit_();  }
   void r_initial_exit(CkReductionMsg * msg)
-  {
-    performance_start_(perf_initial);
-    initial_exit_();
-    delete msg;
-    performance_stop_(perf_initial);
-  }
+  {      initial_exit_();  delete msg;  }
 
   //--------------------------------------------------
   // COMPUTE
   //--------------------------------------------------
 
   void p_compute_enter()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    compute_enter_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_enter_();  }
   void r_compute_enter(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    delete msg;    
-    compute_enter_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {    compute_enter_();    delete msg;      }
 
   void p_compute_continue()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    compute_continue_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_continue_();  }
   void r_compute_continue(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    delete msg;
-    compute_continue_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_continue_();    delete msg;      }
 
   void p_compute_exit()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    compute_exit_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_exit_();  }
   void r_compute_exit(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    delete msg;
-    compute_exit_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-    
-  }
+  {      compute_exit_();    delete msg;  }
 
   /// Return the currently active Method
   int index_method() const throw()
@@ -313,7 +276,8 @@ public: // interface
 
   /// Start a new solver
   void push_solver(int index_solver) throw()
-  {  index_solver_.push_back(index_solver); }
+  {
+    index_solver_.push_back(index_solver); }
 
   /// Return from a solver
   int pop_solver() throw()
@@ -364,47 +328,19 @@ public: // methods
   //--------------------------------------------------
 
   void p_output_enter()
-  {
-    performance_start_(perf_output);
-    output_enter_();
-    performance_stop_(perf_output);
-  }
+  {      output_enter_();  }
   void r_output_enter(CkReductionMsg * msg)
-  {
-    performance_start_(perf_output);
-    delete msg;
-    output_enter_();
-    performance_stop_(perf_output);
-
-  }
+  {      output_enter_();  delete msg;  }
 
   void p_output_end();
 
   void p_output_exit()
-  {
-    performance_start_(perf_output);
-    output_exit_();
-    performance_stop_(perf_output);
-    
-  }
+  {      output_exit_();  }
   void r_output_exit(CkReductionMsg * msg)
-  {
-    performance_start_(perf_output);
-    delete msg;
-    output_exit_();
-    performance_stop_(perf_output);
-  }
+  {      output_exit_();  delete msg; }
 
   /// Contribute block data to ith output object in the simulation
   void p_output_write (int index_output);
-
-  /// Contribute block data to the Initial input object
-  void p_output_read (int index_input = 0)
-  {
-    performance_start_(perf_output);
-    INCOMPLETE("Block::p_output_read");
-    performance_stop_(perf_output);
-  }
 
 protected:
   void output_enter_();
@@ -681,9 +617,6 @@ public:
 
   /// Quiescence before load balancing
   void p_stopping_balance();
-
-  /// Manual call of LB
-  void p_balance();
 
   /// Exit the stopping phase
   void p_stopping_exit () 

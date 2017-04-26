@@ -152,14 +152,10 @@ module enzo {
     template <class T>
     entry void r_solver_bicgstab_loop_15(CkReductionMsg *msg);
 
-    entry void p_solver_bicgstab_loop_1();
     entry void p_solver_bicgstab_loop_2();
     entry void p_solver_bicgstab_loop_3();
-    entry void p_solver_bicgstab_loop_7();
     entry void p_solver_bicgstab_loop_8();
     entry void p_solver_bicgstab_loop_9();
-    entry void p_solver_bicgstab_acc();
-    entry void p_solver_bicgstab_exit();
 
     // EnzoSolverJacobi
 
@@ -167,15 +163,13 @@ module enzo {
 
     // EnzoSolverMg0
     
-    template <class T>  entry void p_solver_mg0_shift_b(CkReductionMsg *msg);
-    
     entry void p_solver_mg0_pre_smooth();
     entry void p_solver_mg0_solve_coarse();
     entry void p_solver_mg0_post_smooth();
-//    template <class T> entry void p_solver_mg0_restrict_send(CkReductionMsg *msg);
-    template <class T> entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
-    template <class T> entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
-//    template <class T> entry void p_solver_mg0_end_cycle(CkReductionMsg *msg);
+    entry void p_solver_mg0_shift_b(CkReductionMsg *msg);
+    entry void p_solver_mg0_barrier(CkReductionMsg* msg);  
+    entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
+    entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   };
 
@@ -195,6 +189,14 @@ module template_defs {
    extern entry void EnzoBlock r_solver_cg_loop_0b<double>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_cg_loop_0b<long double>(CkReductionMsg *);
 
+   extern entry void EnzoBlock r_solver_cg_shift_1<float>(CkReductionMsg *);
+   extern entry void EnzoBlock r_solver_cg_shift_1<double>(CkReductionMsg *);
+   extern entry void EnzoBlock r_solver_cg_shift_1<long double>(CkReductionMsg *);
+
+   extern entry void EnzoBlock r_solver_cg_loop_2<float>();
+   extern entry void EnzoBlock r_solver_cg_loop_2<double>();
+   extern entry void EnzoBlock r_solver_cg_loop_2<long double>();
+   
    extern entry void EnzoBlock r_solver_cg_loop_3<float>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_cg_loop_3<double>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_cg_loop_3<long double>(CkReductionMsg *);
@@ -213,21 +215,9 @@ module template_defs {
    extern entry void EnzoBlock r_solver_bicgstab_start_3<double>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_bicgstab_start_3<long double>(CkReductionMsg *);
 
-   extern entry void EnzoBlock r_solver_bicgstab_loop_1<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_1<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_1<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_bicgstab_loop_3<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_3<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_3<long double>(CkReductionMsg *);
-
    extern entry void EnzoBlock r_solver_bicgstab_loop_5<float>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_bicgstab_loop_5<double>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_bicgstab_loop_5<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_bicgstab_loop_7<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_7<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_7<long double>(CkReductionMsg *);
 
    extern entry void EnzoBlock r_solver_bicgstab_loop_11<float>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_bicgstab_loop_11<double>(CkReductionMsg *);
@@ -240,31 +230,6 @@ module template_defs {
    extern entry void EnzoBlock r_solver_bicgstab_loop_15<float>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_bicgstab_loop_15<double>(CkReductionMsg *);
    extern entry void EnzoBlock r_solver_bicgstab_loop_15<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock p_solver_bicgstab_acc<float>();
-   extern entry void EnzoBlock p_solver_bicgstab_acc<double>();
-   extern entry void EnzoBlock p_solver_bicgstab_acc<long double>();
-
-   extern entry void EnzoBlock p_solver_bicgstab_exit<float>();
-   extern entry void EnzoBlock p_solver_bicgstab_exit<double>();
-   extern entry void EnzoBlock p_solver_bicgstab_exit<long double>();
-
-   // EnzoSolverMg0
    
-   extern entry void EnzoBlock p_solver_mg0_shift_b<float>();
-   extern entry void EnzoBlock p_solver_mg0_shift_b<double>();
-   extern entry void EnzoBlock p_solver_mg0_shift_b<long double>();
-
-//   extern entry void EnzoBlock p_solver_mg0_restrict_send<float>();
-//   extern entry void EnzoBlock p_solver_mg0_restrict_send<double>();
-//   extern entry void EnzoBlock p_solver_mg0_restrict_send<long double>();
-
-   extern entry void EnzoBlock p_solver_mg0_restrict_recv<float>();
-   extern entry void EnzoBlock p_solver_mg0_restrict_recv<double>();
-   extern entry void EnzoBlock p_solver_mg0_restrict_recv<long double>();
-
-   extern entry void EnzoBlock p_solver_mg0_prolong_recv<float>();
-   extern entry void EnzoBlock p_solver_mg0_prolong_recv<double>();
-   extern entry void EnzoBlock p_solver_mg0_prolong_recv<long double>();
 
 };

@@ -117,7 +117,7 @@ public: // interface
   void restrict_send(EnzoBlock * enzo_block) throw();
   template <class T>
   void restrict_recv(EnzoBlock * enzo_block,
-		      FieldMsg * field_message) throw();
+		     FieldMsg * field_message) throw();
 
   /// Access the Restrict operator by EnzoBlock
   Restrict * restrict() { return restrict_; }
@@ -186,18 +186,21 @@ protected: // methods
   bool is_converged_(EnzoBlock * enzo_block) const;
 
   /// Allocate temporary Fields
-  void allocate_temporary_(Field field)
+  void allocate_temporary_(Field field, Block * block = NULL)
   {
     field.allocate_temporary(ir_);
     field.allocate_temporary(ic_);
   }
-
+	      
   /// Dellocate temporary Fields
-  void deallocate_temporary_(Field field)
+  void deallocate_temporary_(Field field, Block * block = NULL)
   {
     field.deallocate_temporary(ir_);
     field.deallocate_temporary(ic_);
   }
+
+  /// Exit the solver
+  void end_(Block * block);
   
 protected: // attributes
 

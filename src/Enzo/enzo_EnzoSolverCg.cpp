@@ -143,7 +143,7 @@ void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
   
   Field field = block->data()->field();
 
-  allocate_temporary_(field);
+  allocate_temporary_(field,block);
 
   TRACE_SOLVER("compute ENTER");
 
@@ -849,11 +849,10 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 
   Field field = enzo_block->data()->field();
 
-  deallocate_temporary_(field);
+  deallocate_temporary_(field,enzo_block);
 
   Solver::end_(enzo_block);
   
-
   CkCallback(callback_,
 	     CkArrayIndexIndex(enzo_block->index()),
 	     enzo_block->proxy_array()).send();

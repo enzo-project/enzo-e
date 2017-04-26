@@ -20,3 +20,4 @@
 #include "charm_MsgRefresh.hpp"
 #include "charm_MsgCoarsen.hpp"
 #include "charm_MsgRefine.hpp"
+#include "mesh_FieldMsg.hpp"

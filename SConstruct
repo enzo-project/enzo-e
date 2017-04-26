@@ -87,42 +87,7 @@ new_charm = 1
 
 balance = 1
 
-# balancer =  # Uses a greedy algorithm that always assigns
-# the heaviest object to the least loaded processor.
-
-# balancer =  # Extends the greedy algorithm to take the
-# communication graph into account.
-
-# balancer = 'TopoCentLB' # Extends the greedy algorithm to take
-# processor topology into account.
-
-# balancer = 'RefineLB' # Moves objects away from the most overloaded
-# processors to reach average, limits the number of objects migrated.
-
-# balancer = 'RefineSwapLB' # Moves objects away from the most
-# overloaded processors to reach average. In case it cannot migrate an
-# object from an overloaded processor to an underloaded processor, it
-# swaps objects to reduce the load on the overloaded processor. This
-# strategy limits the number of objects migrated.
-
-balancer = [
-'BlockLB',
-'ComboCentLB',
-'DistributedLB',
-'GreedyCommLB',
-'GreedyLB', 
-'HybridLB',
-#'MetisLB',
-'NeighborLB',
-'RandCentLB',
-'RefineCommLB',
-'RefineLB',
-'RefineSwapLB',
-#'RefineTopoLB',
-'RotateLB',
-#'TopoCentLB',
-# 'WSLB'
-]
+balancer = ['CommonLBs']
 
 #----------------------------------------------------------------------
 # Whether to compile with -pg to use gprof for performance profiling

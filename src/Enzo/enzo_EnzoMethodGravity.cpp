@@ -8,11 +8,6 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
-#include "enzo.decl.h"
-
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
 
 // #define DEBUG_METHOD
 
@@ -37,12 +32,6 @@ EnzoMethodGravity::EnzoMethodGravity
   const int num_fields = field_descr->field_count();
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   refresh(ir)->add_all_fields(num_fields);
-}
-
-//----------------------------------------------------------------------
-
-EnzoMethodGravity::~EnzoMethodGravity() throw()
-{
 }
 
 //----------------------------------------------------------------------

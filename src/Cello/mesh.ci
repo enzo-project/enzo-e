@@ -92,7 +92,6 @@ module mesh {
     entry void r_output_exit(CkReductionMsg *);
 
     entry void p_output_write (int index_output);
-    entry void p_output_read (int index_input);
 
     //--------------------------------------------------
     // *** COMPUTE ***

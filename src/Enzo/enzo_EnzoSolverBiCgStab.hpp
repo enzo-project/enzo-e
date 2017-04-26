@@ -197,9 +197,6 @@ public: // interface
   /// End of iteration
   template<class T> void end(EnzoBlock* enzo_block, int retval) throw();
 
-  /// Compute accelerations
-  template<class T> void acc(EnzoBlock* enzo_block) throw();
-
   /// Exit the solver
   template<class T> void exit(EnzoBlock* enzo_block) throw();
 
@@ -224,7 +221,7 @@ protected: // methods
   template<class T> void compute_(EnzoBlock * enzo_block) throw();
 
   /// Allocate temporary Fields
-  void allocate_temporary_(Field field)
+  void allocate_temporary_(Field field, Block * block = NULL)
   {
     field.allocate_temporary(ir_);
     field.allocate_temporary(ir0_);
@@ -236,7 +233,7 @@ protected: // methods
   }
 
   /// Dellocate temporary Fields
-  void deallocate_temporary_(Field field)
+  void deallocate_temporary_(Field field, Block * block = NULL)
   {
     field.deallocate_temporary(ir_);
     field.deallocate_temporary(ir0_);

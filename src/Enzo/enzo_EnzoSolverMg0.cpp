@@ -117,9 +117,11 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
+// #define DEBUG_ENTRY
 // #define DEBUG_SOLVER_MG0
-
 // #define DEBUG_TRACE_LEVEL
+// #define DEBUG_FIELD_MESSAGE
+// #define DEBUG_SOLVER_INDEX
 
 #ifdef DEBUG_TRACE_LEVEL
 #   define TRACE_LEVEL(MSG,BLOCK)					\
@@ -176,13 +178,41 @@
 #   define DEBUG_FIELD(IX,NAME) /* ... */
 #endif
 
+#ifdef DEBUG_FIELD_MESSAGE
+#  define DEBUG_FIELD_MSG(BLOCK,MESSAGE)				\
+  CkPrintf ("%d %s:%d %s DEBUG_FIELD_MESSAGE %s %d  %d %d %d  %lf  %lf\n", \
+	    CkMyPe(),__FILE__,__LINE__,BLOCK->name().c_str(),		\
+	    MESSAGE,							\
+	    msg->n, msg->ic3[0],msg->ic3[1],msg->ic3[2],		\
+	    msg->a[0],msg->a[msg->n-1]);					\
+  fflush(stdout)
+#else
+#  define DEBUG_FIELD_MSG(BLOCK,MESSAGE) /* ...  */
+#endif  
+
+#ifdef DEBUG_SOLVER_INDEX
+#  define DEBUG_INDEX(BLOCK,MESSAGE,INDX)			 \
+  {									\
+    int v3[3];								\
+    BLOCK->index().values(v3);						\
+    int w3[3] = {0};							\
+    if ((INDX) != NULL) ((Index*)INDX)->values(w3);			\
+    CkPrintf ("%d %s:%d  %08x %08x %08x --> %08x %08x %08x %s DEBUG_INDEX %s\n", \
+	      CkMyPe(),__FILE__,__LINE__,				\
+	      v3[0],v3[1],v3[2],					\
+	      w3[0],w3[1],w3[2],					\
+	      BLOCK->name().c_str(),					\
+	      MESSAGE);							\
+    fflush(stdout);							\
+  }
+#else
+#  define DEBUG_INDEX(BLOCK,MESSAGE,INDEX)	\
+  /* ... */
+#endif
+  
 //======================================================================
 
-extern CkReduction::reducerType sum_long_double_2_type;
-
-//======================================================================
-
-EnzoSolverMg0::EnzoSolverMg0 
+EnzoSolverMg0::EnzoSolverMg0
 (FieldDescr * field_descr, 
  int monitor_iter,
  int rank,
@@ -210,12 +240,6 @@ EnzoSolverMg0::EnzoSolverMg0
     bs_(0), bc_(0)
     // [*]
 {
-  if (min_level_ > 0) {
-    ERROR1 ("EnzoSolverMg0::EnzoSolverMg0()",
-	    "Solver Mg0 requires min_level = %d to be <= 0",
-	    min_level_);
-  }
-
   // Initialize temporary fields
   
   ir_ = field_descr->insert_temporary();
@@ -260,7 +284,7 @@ void EnzoSolverMg0::apply
 
   Field field = block->data()->field();
 
-  allocate_temporary_(field);
+  allocate_temporary_(field,block);
   
   TRACE_LEVEL("EnzoSolverMg0::apply",block);
 
@@ -356,7 +380,7 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
     /// initiate callback for p_solver_mg0_shift_b and contribute to
     /// sum and count
 
-    CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_shift_b<T>(NULL), 
+    CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_shift_b(NULL), 
 			enzo_block->proxy_array());
 
     enzo_block->contribute(2*sizeof(long double), &reduce, 
@@ -370,9 +394,12 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoBlock::p_solver_mg0_shift_b(CkReductionMsg* msg)
 {
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_shift_b\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
 
   /// EnzoBlock accumulates global contributions to SUM(B) and COUNT(B)
   EnzoSolverMg0* solver = 
@@ -391,8 +418,22 @@ void EnzoBlock::p_solver_mg0_shift_b(CkReductionMsg* msg)
   delete msg;
 
   /// Start solver
-  solver->begin_solve<T>(this);
+  Field field = this->data()->field();
+  int precision = field.precision(0);
+  if      (precision == precision_single)    
+    solver->begin_solve<float>(this);
+  else if      (precision == precision_double)    
+    solver->begin_solve<double>(this);
+  else if      (precision == precision_quadruple)    
+    solver->begin_solve<long double>(this);
+  else 
+    ERROR1("EnzoSolverMg0::p_solver_mg0_shift_b()",
+	   "precision %d not recognized", precision);
 
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_shift_b\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -403,33 +444,39 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block) throw()
   TRACE_LEVEL("EnzoSolverMg0::begin_solve",enzo_block);
   // start the MG V-cycle with the max level blocks
 
-  if (enzo_block->is_leaf() || (enzo_block->level() == max_level_)) {
 
-    if (A_->is_singular()) {
+  if (A_->is_singular() && (enzo_block->level() == max_level_)) {
 
-      Field field = enzo_block->data()->field();
-      T* B  = (T*) field.values(ib_);
-      T shift = -bs_ / bc_;
+    // Shift B if needed to be in range(A) for periodic b.c.
+    
+    Field field = enzo_block->data()->field();
+    T* B  = (T*) field.values(ib_);
+    T shift = -bs_ / bc_;
 #ifdef DEBUG_SOLVER_MG0      
-      CkPrintf ("%d %s DEBUG_SOLVER_MG0 bs %lf bc %lf\n",
-		__LINE__,enzo_block->name().c_str(),double(bs_),double(bc_));
+    CkPrintf ("%d %s DEBUG_SOLVER_MG0 bs %lf bc %lf\n",
+	      __LINE__,enzo_block->name().c_str(),double(bs_),double(bc_));
 #endif      
 
-      DEBUG_FIELD(ib_,"B shift 0");
-      for (int iz=0; iz<mz_; iz++) {
-	for (int iy=0; iy<my_; iy++) {
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    B[i] += shift;
-	  }
+    DEBUG_FIELD(ib_,"B shift 0");
+    for (int iz=0; iz<mz_; iz++) {
+      for (int iy=0; iy<my_; iy++) {
+	for (int ix=0; ix<mx_; ix++) {
+	  int i = ix + mx_*(iy + my_*iz);
+	  B[i] += shift;
 	}
       }
-
-      DEBUG_FIELD(ib_,"B shift 1");
     }
 
+    DEBUG_FIELD(ib_,"B shift 1");
+  }
+
+  // control flow starts at leaves, even in level > max_level,
+  // since coarse solve may require reductions over all Blocks
+
+  if (enzo_block->is_leaf()) {
     begin_cycle_<T>(enzo_block);
   }
+  
 }
 
 //----------------------------------------------------------------------
@@ -464,14 +511,8 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
     Field field = enzo_block->data()->field();
     T * X = (T*) field.values(ix_);
-    for (int iz=0; iz<mz_; iz++) {
-      for (int iy=0; iy<my_; iy++) {
-	for (int ix=0; ix<mx_; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
-	  X[i] = 0.0;
-	}
-      }
-    }
+
+    std::fill_n(X,mx_*my_*mz_,0.0);
 
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Solver * solve_coarse = simulation->problem()->solver(index_solve_coarse_);
@@ -491,26 +532,20 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
       Field field = enzo_block->data()->field();
       T * X = (T*) field.values(ix_);
-      for (int iz=0; iz<mz_; iz++) {
-	for (int iy=0; iy<my_; iy++) {
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    X[i] = 0;
-	  }
-	}
-      }
+      std::fill_n(X,mx_*my_*mz_,0.0);
+
     }
 
 #ifdef DEBUG_SOLVER_REFRESH    
     CkPrintf ("DEBUG_SOLVER_MG refresh sync_face %d\n",refresh.sync_id());
 #endif
 
-    Data * data = enzo_block->data();
-    Field field = data->field();
-
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-
     if (index_smooth_pre_ >= 0) {
+
+      Data * data = enzo_block->data();
+      Field field = data->field();
+
+      Simulation * simulation = proxy_simulation.ckLocalBranch();
 
       Solver * smooth_pre = simulation->problem()->solver(index_smooth_pre_);
 
@@ -535,6 +570,22 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 void EnzoBlock::p_solver_mg0_solve_coarse()
 /// [*]
 {
+  long double reduce[1] = {0};
+  
+  CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_barrier(NULL), 
+		      proxy_array());
+  contribute(0, reduce, sum_long_double_type, callback);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
+{
+  delete msg;
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_solve_coarse\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
   TRACE_MG(this,"EnzoBlock::solver_mg0_coarse_solve()");
   
   EnzoSolverMg0 * solver = 
@@ -542,6 +593,7 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
+  
   // assume all fields have same precision
   int precision = field.precision(0);
   if      (precision == precision_single)    
@@ -553,6 +605,11 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
   else 
     ERROR1("EnzoSolverMg0::p_solver_mg0_solve_coarse()",
 	   "precision %d not recognized", precision);
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_solve_coarse\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -560,6 +617,10 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 void EnzoBlock::p_solver_mg0_pre_smooth()
 /// [*]
 {
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_pre_smooth\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
   TRACE_MG(this,"EnzoBlock::solver_mg0_pre_smooth()");
   
   EnzoSolverMg0 * solver = 
@@ -567,6 +628,7 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
 
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
+
   // assume all fields have same precision
   int precision = field.precision(0);
   if      (precision == precision_single)    
@@ -578,6 +640,10 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
   else 
     ERROR1("EnzoSolverMg0::p_solver_mg0_pre_smooth()",
 	   "precision %d not recognized", precision);
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_pre_smooth\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -610,24 +676,6 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
 
   
 }
-
-//----------------------------------------------------------------------
-
-// template <class T>
-// void EnzoBlock::p_solver_mg0_restrict_send(CkReductionMsg * msg)
-// /// [*]
-// {
-//   TRACE_MG(this,"EnzoBlock::p_solver_mg0_restrict_send()");
-
-//   EnzoSolverMg0 * solver = 
-//     static_cast<EnzoSolverMg0*> (this->solver());
-
-//   // GET DATA
-  
-//   delete msg;
-
-//   solver -> restrict_send<T>(this);
-// }
 
 //----------------------------------------------------------------------
 
@@ -682,49 +730,71 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
   // Create a FieldMsg for sending data to parent
   // (note: charm messages not deleted on send; are deleted on receive)
 
-  FieldMsg * field_message  = new (narray) FieldMsg;
+  FieldMsg * msg  = new (narray) FieldMsg;
  
   /// WARNING: double copy
 
-  // Copy FieldFace data to field_message
+  // Copy FieldFace data to msg
 
-  field_message->n = narray;
-  memcpy (field_message->a, array, narray);
-  field_message->ic3[0] = ic3[0];
-  field_message->ic3[1] = ic3[1];
-  field_message->ic3[2] = ic3[2];
+  msg->n = narray;
+  memcpy (msg->a, array, narray);
+  delete [] array;
+  msg->ic3[0] = ic3[0];
+  msg->ic3[1] = ic3[1];
+  msg->ic3[2] = ic3[2];
 
   //  </COMMON CODE>
 
   DEBUG_FIELD(ir_,"R");
-  
-  CkCallback (CkIndex_EnzoBlock::p_solver_mg0_restrict_recv<T>(NULL), 
-	      CkArrayIndexIndex(index_parent),
-	      enzo_block->proxy_array()).send(field_message);
 
-  delete [] array;
+  DEBUG_FIELD_MSG(enzo_block,"restrict_send");
+  DEBUG_INDEX(enzo_block,"restrict_send",(&index_parent));
+  
+  enzo_block->thisProxy[index_parent].p_solver_mg0_restrict_recv(msg);
 
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * field_message)
+void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
 /// [*]
 {
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_restrict_recv\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
+  DEBUG_FIELD_MSG(this,"restrict_inter");
 
   TRACE_MG(this,"EnzoBlock::restrict_recv()");
+  DEBUG_INDEX(this,"restrict_inter",NULL);
 
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  solver -> restrict_recv<T>(this,field_message);
+  Field field = data()->field();
+  // assume all fields have same precision
+  int precision = field.precision(0);
+  if      (precision == precision_single)    
+    solver->restrict_recv<float>(this,msg);
+  else if (precision == precision_double)    
+    solver->restrict_recv<double>(this,msg);
+  else if (precision == precision_quadruple) 
+    solver->restrict_recv<long double>(this,msg);
+  else 
+    ERROR1("EnzoSolverMg0::p_solver_mg0_restrict_recv()",
+	   "precision %d not recognized", precision);
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_restrict_recv\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
+
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoSolverMg0::restrict_recv(EnzoBlock * enzo_block, FieldMsg * field_message) throw()
+void EnzoSolverMg0::restrict_recv
+(EnzoBlock * enzo_block, FieldMsg * msg) throw()
 /// 
 /// [*] restrict recv
 ///
@@ -733,6 +803,8 @@ void EnzoSolverMg0::restrict_recv(EnzoBlock * enzo_block, FieldMsg * field_messa
 ///          begin_cycle()
 {
 
+  DEBUG_FIELD_MSG(enzo_block,"restrict_recv");
+
   // Unpack "B" vector data from children
 
   int if3[3] = {0,0,0};
@@ -740,23 +812,22 @@ void EnzoSolverMg0::restrict_recv(EnzoBlock * enzo_block, FieldMsg * field_messa
   std::vector<int> field_list;
   field_list.push_back(ib_);
 
-  // copy data from field_message to this EnzoBlock
+  // copy data from msg to this EnzoBlock
 
-  int * ic3 = field_message->ic3;
+  int * ic3 = msg->ic3;
 
   FieldFace * field_face = enzo_block->create_face 
     (if3, ic3, lg3, refresh_coarse, field_list);
 
   field_face->set_restrict(restrict());
 
-  char * a = field_message->a;
+  char * a = msg->a;
   field_face->array_to_face(a, enzo_block->data()->field());
   delete field_face;
 
-  delete field_message;
+  delete msg;
 
   // continue with EnzoSolverMg0
-
 
   TRACE_LEVEL("EnzoSolverMg0::restrict_recv",enzo_block);
   TRACE_MG(enzo_block,"EnzoSolverMg0::restrict_recv()");
@@ -843,48 +914,69 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
     // Create a FieldMsg for sending data to parent
     // (note: charm messages not deleted on send; are deleted on receive)
     
-    FieldMsg * field_message  = new (narray) FieldMsg;
+    FieldMsg * msg  = new (narray) FieldMsg;
 
     /// WARNING: double copy
 
-    // Copy FieldFace data to field_message
+    // Copy FieldFace data to msg
 
-    field_message->n = narray;
-    memcpy (field_message->a, array, narray);
-    field_message->ic3[0] = ic3[0];
-    field_message->ic3[1] = ic3[1];
-    field_message->ic3[2] = ic3[2];
+    msg->n = narray;
+    memcpy (msg->a, array, narray);
+    delete [] array;
+    msg->ic3[0] = ic3[0];
+    msg->ic3[1] = ic3[1];
+    msg->ic3[2] = ic3[2];
 
     //  </COMMON CODE>
 
-    CkCallback (CkIndex_EnzoBlock::p_solver_mg0_prolong_recv<T>(NULL), 
-		CkArrayIndexIndex(index_child),
-		enzo_block->proxy_array()).send(field_message);
+    DEBUG_FIELD_MSG(enzo_block,"prolong_send");
 
-    delete [] array;
+    DEBUG_INDEX(enzo_block,"prolong_send",&index_child);
+
+    enzo_block->thisProxy[index_child].p_solver_mg0_prolong_recv(msg);
 
   }
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * field_message)
+void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
 /// [*]
 {
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_prolong_recv\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
+  DEBUG_INDEX(this,"prolong_inter",NULL);
 
   TRACE_MG (this,"EnzoBlock::p_solver_mg0_prolong_recv()");
   
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  solver -> prolong_recv<T>(this,field_message);
+  Field field = data()->field();
+  // assume all fields have same precision
+  int precision = field.precision(0);
+  if      (precision == precision_single)    
+    solver->prolong_recv<float>(this,msg);
+  else if (precision == precision_double)    
+    solver->prolong_recv<double>(this,msg);
+  else if (precision == precision_quadruple) 
+    solver->prolong_recv<long double>(this,msg);
+  else 
+    ERROR1("EnzoSolverMg0::p_solver_mg0_prolong_recv()",
+	   "precision %d not recognized", precision);
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_prolong_recv\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
 }
 
 //----------------------------------------------------------------------
 
 template <class T>
-void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block, FieldMsg * field_message) throw()
+void EnzoSolverMg0::prolong_recv
+(EnzoBlock * enzo_block, FieldMsg * msg) throw()
 /// 
 /// [ ] prolong recv
 ///
@@ -896,25 +988,27 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block, FieldMsg * field_messag
 
   // Unpack "C" vector data from children
 
+  DEBUG_FIELD_MSG(enzo_block,"prolong_recv");
+    
   int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
   std::vector<int> field_list;
   field_list.push_back(ic_);
 
-  // copy data from field_message to this EnzoBlock
+  // copy data from msg to this EnzoBlock
 
   FieldFace * field_face = enzo_block->create_face 
-    (if3, field_message->ic3, lg3, refresh_fine, field_list);
+    (if3, msg->ic3, lg3, refresh_fine, field_list);
 
   field_face->set_prolong(prolong());
 
-  field_face->array_to_face (field_message->a, enzo_block->data()->field());
+  field_face->array_to_face (msg->a, enzo_block->data()->field());
 
   delete field_face;
 
   // GET DATA
   
-  delete field_message;
+  delete msg;
 
   DEBUG_FIELD(ic_,"C");
 
@@ -959,6 +1053,10 @@ void EnzoSolverMg0::prolong_recv(EnzoBlock * enzo_block, FieldMsg * field_messag
 void EnzoBlock::p_solver_mg0_post_smooth()
 /// [*]
 {
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_post_smooth\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
   TRACE_MG (this,"EnzoBlock::p_solver_mg0_post_smooth()");
   
   EnzoSolverMg0 * solver = 
@@ -966,6 +1064,7 @@ void EnzoBlock::p_solver_mg0_post_smooth()
 
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
   Field field = data()->field();
+  
   // assume all fields have same precision
   int precision = field.precision(0);
   if      (precision == precision_single)    
@@ -978,6 +1077,10 @@ void EnzoBlock::p_solver_mg0_post_smooth()
     ERROR1("EnzoSolverMg0::p_solver_mg0_post_smooth()",
 	   "precision %d not recognized", precision);
 
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_post_smooth\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -998,7 +1101,6 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
   if ( ( ! enzo_block->is_leaf() ) && (level < max_level_)) {
 
     prolong_send_<T>(enzo_block);
-
   } 
 
   end_cycle<T>(enzo_block);
@@ -1019,24 +1121,15 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 {
   TRACE_LEVEL("EnzoSolverMg0::end_cycle",enzo_block);
 
-  Field field = enzo_block->data()->field();
-
   TRACE_MG(enzo_block,"EnzoSolverMg0::end_cycle()");
   
   enzo_block->mg_iter_increment();
 
   if (is_converged_(enzo_block)) {
 
-    deallocate_temporary_(field);
-    
-    Solver::end_(enzo_block);
-    CkCallback(callback_,
-    	       CkArrayIndexIndex(enzo_block->index()),
-    	       enzo_block->proxy_array()).send();
+    end_(enzo_block);
 
-  }
-
-  if (enzo_block->is_leaf() || (enzo_block->level() == max_level_)) {
+  } else if (enzo_block->is_leaf() || (enzo_block->level() == max_level_)) {
 
     begin_cycle_<T>(enzo_block);
 
@@ -1053,4 +1146,19 @@ bool EnzoSolverMg0::is_converged_(EnzoBlock * enzo_block) const
   return (enzo_block->mg_iter() >= iter_max_);
 }
 
-//======================================================================
+//----------------------------------------------------------------------
+
+void EnzoSolverMg0::end_(Block * block)
+{
+  Field field = block->data()->field();
+
+  deallocate_temporary_(field,block);
+    
+  Solver::end_(block);
+
+  CkCallback(callback_,
+	     CkArrayIndexIndex(block->index()),
+	     block->proxy_array()).send();
+
+}
+

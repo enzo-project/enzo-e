@@ -65,9 +65,9 @@ public: // interface
       physics_cosmology_omega_matter_now(0.0),
       // EnzoInitialCollapse
       initial_collapse_rank(0),
-      initial_collapse_mass(0.0),
       initial_collapse_radius_relative(0.0),
       initial_collapse_particle_ratio(0.0),
+      initial_collapse_mass(0.0),
       initial_collapse_temperature(0.0),
       // EnzoInitialPm
       initial_pm_field(""),

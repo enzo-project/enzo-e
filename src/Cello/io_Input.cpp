@@ -115,15 +115,6 @@ void Input::read_hierarchy
 ) throw()
 {
 
-  if (CkMyPe() == 0)
-
-    // --------------------------------------------------
-    // ENTRY: #1 Input::read_hierarchy()-> Block::p_output_read()
-    // ENTRY: Block array if Simulation is root
-    // --------------------------------------------------
-    hierarchy->block_array()->p_output_read (index_charm_);
-    // --------------------------------------------------
-
 }
 
 //----------------------------------------------------------------------

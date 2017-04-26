@@ -195,7 +195,6 @@ EnzoBlock::EnzoBlock
 void EnzoBlock::initialize_enzo_()
 {
   for (int i=0; i<MAX_DIMENSION; i++) {
-    AccelerationField[i] = 0;
     GridLeftEdge[i] = 0;
     GridDimension[i] = 0;
     GridStartIndex[i] = 0;
@@ -228,12 +227,6 @@ void EnzoBlock::pup(PUP::er &p)
   p | dt;
 
   const int in = cello::index_static();
-
-  static bool warn0[CONFIG_NODE_SIZE] = {true};
-  if (warn0[in]) {
-    warn0[in] = false;
-    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-  }
 
   static bool warn1[CONFIG_NODE_SIZE] = {true};
   if (warn1[in]) {

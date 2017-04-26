@@ -9,6 +9,7 @@
 
 #include "enzo.hpp"
 
+// #define DEBUG_ENTRY
 // #define DEBUG_SMOOTH
 // #define DEBUG_VERBOSE
 
@@ -51,12 +52,12 @@ void EnzoSolverJacobi::apply
 ( Matrix * A, int ix, int ib, Block * block) throw()
 {
   
+  begin_(block);
+
 #ifdef DEBUG_SMOOTH
     printf ("%s:%d %s DEBUG_SMOOTH apply() called\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
-
-  begin_(block);
 
   A_ = A;
   ix_ = ix;
@@ -64,7 +65,7 @@ void EnzoSolverJacobi::apply
 
   Field field = block->data()->field();
 
-  allocate_temporary_(field);
+  allocate_temporary_(field,block);
   
   // Refresh X
   Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
@@ -81,6 +82,10 @@ void EnzoSolverJacobi::apply
   printf ("%s:%d %s DEBUG_SMOOTH calling p_solver_jacobi_continue() sync_type %d sync_id %d\n",
 	  __FILE__,__LINE__,block->name().c_str(), sync_type_(),sync_id_());
 #endif
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY enter refresh then p_solver_jacobi_continue\n",
+	      CkMyPe(),block->name().c_str(),this);
+#endif
 
     block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
@@ -90,6 +95,10 @@ void EnzoSolverJacobi::apply
 
 void EnzoBlock::p_solver_jacobi_continue()
 {
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY enter p_solver_jacobi_continue\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
 #ifdef DEBUG_SMOOTH
     printf ("%s:%d %s DEBUG_SMOOTH p_solver_jacobi_continue()\n",
 	    __FILE__,__LINE__,name().c_str());
@@ -98,6 +107,10 @@ void EnzoBlock::p_solver_jacobi_continue()
     static_cast<EnzoSolverJacobi *> (this->solver());
 
   solver->compute(this);
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY  exit p_solver_jacobi_continue\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -199,8 +212,12 @@ void EnzoSolverJacobi::apply_(Block * block)
   CkPrintf ("%s:%d %s DEBUG_SMOOTH  Calling Solver::end_()\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
-  deallocate_temporary_ (field);
+  deallocate_temporary_ (field,block);
   Solver::end_(block);
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY calling callback %d\n",
+	      CkMyPe(),name().c_str(),this,callback_);
+#endif
   CkCallback(callback_,
 	     CkArrayIndexIndex(block->index()),
 	     block->proxy_array()).send();

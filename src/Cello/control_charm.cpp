@@ -29,9 +29,11 @@
 
 void Block::initial_exit_()
 {
+  performance_start_(perf_initial);
   TRACE_CONTROL("initial_exit");
 
   control_sync(CkIndex_Block::r_adapt_enter(NULL),sync_barrier); 
+  performance_stop_(perf_initial);
 }
 
 //----------------------------------------------------------------------
@@ -64,15 +66,18 @@ void Block::adapt_exit_()
 
 void Block::output_enter_ ()
 {
+  performance_start_(perf_output);
   TRACE_CONTROL("output_enter");
 
   output_begin_();
+  performance_stop_(perf_output);
 }
 
 //----------------------------------------------------------------------
 
 void Block::output_exit_()
 {
+  performance_start_(perf_output);
 
   TRACE_CONTROL("output_exit");
 
@@ -81,7 +86,10 @@ void Block::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
+  performance_stop_(perf_output);
+
   control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
+
 }
 
 //----------------------------------------------------------------------
@@ -126,9 +134,11 @@ void Block::stopping_exit_()
 
 void Block::compute_enter_ ()
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   TRACE_CONTROL("compute_enter");
 
   compute_begin_();
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------

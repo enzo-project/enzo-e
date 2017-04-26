@@ -123,8 +123,5 @@ class Tree;
 #include "mesh_RefineParticleMass.hpp"
 #include "mesh_RefineParticleCount.hpp"
 
-// Messages
-#include "mesh_FieldMsg.hpp"
-
 #endif /* _MESH_HPP */
 

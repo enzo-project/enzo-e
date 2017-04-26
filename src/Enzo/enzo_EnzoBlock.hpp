@@ -118,7 +118,6 @@ public: // interface
   {
     performance_start_(perf_block);
     for (int i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = NULL; 
       GridLeftEdge[i] = 0; 
       GridDimension[i] = 0; 
       GridStartIndex[i] = 0; 
@@ -142,7 +141,6 @@ public: // interface
     performance_start_(perf_block);
     TRACE("CkMigrateMessage");
     for (int i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = NULL; 
       GridLeftEdge[i] = 0; 
       GridDimension[i] = 0; 
       GridStartIndex[i] = 0; 
@@ -303,9 +301,6 @@ public: /// entry methods
   template <class T>
   void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
 
-  /// EnzoSolverBiCGStab entry method: refresh P
-  void p_solver_bicgstab_loop_1();  
-
   /// EnzoSolverBiCGStab entry method: return from preconditioner
   void p_solver_bicgstab_loop_2();
 
@@ -316,22 +311,11 @@ public: /// entry methods
   template <class T>
   void r_solver_bicgstab_loop_5(CkReductionMsg* msg);  
 
-  /// EnzoSolverBiCGStab entry method: refresh Q
-  void p_solver_bicgstab_loop_7();
-
   /// EnzoSolverBiCGStab entry method: return from preconditioner
   void p_solver_bicgstab_loop_8();
 
   /// EnzoSolverBiCGStab entry method: refresh Y
   void p_solver_bicgstab_loop_9();
-
-  /// EnzoSolverBiCGStab entry method: refresh X before
-  /// computing accelerations
-  void p_solver_bicgstab_acc();
-
-  /// EnzoSolverBiCGStab entry method: refresh accelerations
-  /// before exiting
-  void p_solver_bicgstab_exit();
 
   /// EnzoSolverBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
   template <class T>
@@ -354,11 +338,10 @@ public: /// entry methods
   void p_solver_mg0_pre_smooth();
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
-  template <class T> void p_solver_mg0_shift_b(CkReductionMsg* msg);  
-  //  template <class T> void p_solver_mg0_restrict_send(CkReductionMsg * msg);
-  template <class T> void p_solver_mg0_restrict_recv(FieldMsg * msg);
-  template <class T> void p_solver_mg0_prolong_recv(FieldMsg * msg);
-  //  template <class T> void p_solver_mg0_end_cycle(CkReductionMsg* msg);  
+  void p_solver_mg0_barrier(CkReductionMsg* msg);  
+  void p_solver_mg0_shift_b(CkReductionMsg* msg);  
+  void p_solver_mg0_prolong_recv(FieldMsg * msg);
+  void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   void mg_sync_reset()             { mg_sync_.reset(); }
   void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }
@@ -386,9 +369,6 @@ public: // attributes (YIKES!)
     enzo_float dt;
     enzo_float dtFixed;
   };
-
-  /// cell cntr acceleration at n+1/2
-  enzo_float *AccelerationField[MAX_DIMENSION]; 
 
   /// Fluxes
   fluxes ** SubgridFluxes;

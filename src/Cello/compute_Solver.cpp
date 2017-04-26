@@ -75,6 +75,7 @@ void Solver::end_(Block * block)
   ASSERT2("Solver::end_()",
 	  "Solver mismatch was %d expected %d",
 	  index,index_,(index == index_));
+
 }
 
 //----------------------------------------------------------------------
