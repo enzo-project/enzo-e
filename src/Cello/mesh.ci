@@ -127,7 +127,7 @@ module mesh {
     // *** CONTROL ***
     //--------------------------------------------------
 
-    entry [expedited] void p_control_sync_count 
+    entry void p_control_sync_count 
       ( int entry_point, int id, int count);
 
     //--------------------------------------------------

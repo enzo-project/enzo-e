@@ -67,7 +67,7 @@
 ///
 ///      unpack B
 ///      --level
-///      if (sync.next())
+///      if (sync_restrict.next())
 ///          begin_cycle()
 ///      
 ///  coarse_solve(A,X,B)
@@ -295,8 +295,10 @@ void EnzoSolverMg0::apply
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   // Initialize child counter for restrict synchronization
-  enzo_block->mg_sync_set_stop(NUM_CHILDREN(enzo_block->rank()));
-  enzo_block->mg_sync_reset();
+  enzo_block->mg_sync_restrict_set_stop(NUM_CHILDREN(enzo_block->rank()));
+  enzo_block->mg_sync_restrict_reset();
+  enzo_block->mg_sync_prolong_set_stop(2); // self and parent
+  enzo_block->mg_sync_prolong_reset();
 
   int precision = field.precision(ix_);
 
@@ -574,6 +576,10 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
   
   CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_barrier(NULL), 
 		      proxy_array());
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY before barrier\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
   contribute(0, reduce, sum_long_double_type, callback);
 }
 
@@ -582,8 +588,9 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
 {
   delete msg;
+
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_solve_coarse\n",
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  after barrier\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
   TRACE_MG(this,"EnzoBlock::solver_mg0_coarse_solve()");
@@ -605,10 +612,6 @@ void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
   else 
     ERROR1("EnzoSolverMg0::p_solver_mg0_solve_coarse()",
 	   "precision %d not recognized", precision);
-#ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_solve_coarse\n",
-	      CkMyPe(),name().c_str(),this);
-#endif
 
 }
 
@@ -630,6 +633,7 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
   Field field = data()->field();
 
   // assume all fields have same precision
+
   int precision = field.precision(0);
   if      (precision == precision_single)    
     solver->pre_smooth<float>(enzo_block);
@@ -834,7 +838,7 @@ void EnzoSolverMg0::restrict_recv
 
   DEBUG_FIELD(ib_,"B");
   
-  if (enzo_block->mg_sync_next()) {
+  if (enzo_block->mg_sync_restrict_next()) {
     begin_cycle_<T>(enzo_block);
   }
 }
@@ -862,8 +866,14 @@ void EnzoSolverMg0::solve_coarse(EnzoBlock * enzo_block) throw()
 
       prolong_send_<T>(enzo_block);
       
-    } 
+    }
+
     end_cycle<T>(enzo_block);
+
+  } else if (level > min_level_) {
+
+    enzo_block->p_solver_mg0_prolong_recv(NULL);
+
   }
 }
 
@@ -941,8 +951,18 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
-/// [*]
 {
+  // Save message
+  if (msg != NULL) mg_msg_ = msg;
+
+  // Return if not ready yet
+  if (! mg_sync_prolong_next())
+    return;
+
+  // Restore saved message
+  msg = mg_msg_;
+  mg_msg_ = NULL;
+  
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_prolong_recv\n",
 	      CkMyPe(),name().c_str(),this);
@@ -1103,6 +1123,7 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
     prolong_send_<T>(enzo_block);
   } 
 
+  TRACE_MG(enzo_block,"EnzoSolverMg0::post_smooth() calling end_cycle()");
   end_cycle<T>(enzo_block);
 }
 
@@ -1161,4 +1182,3 @@ void EnzoSolverMg0::end_(Block * block)
 	     block->proxy_array()).send();
 
 }
-

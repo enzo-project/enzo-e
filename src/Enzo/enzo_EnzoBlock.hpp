@@ -112,7 +112,9 @@ public: // interface
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
        mg_iter_(0),
-       mg_sync_(),
+       mg_sync_restrict_(),
+       mg_sync_prolong_(),
+       mg_msg_(NULL),
        dt(0),
        SubgridFluxes(NULL)
   {
@@ -134,7 +136,9 @@ public: // interface
   EnzoBlock (CkMigrateMessage *m) 
     : BASE_ENZO_BLOCK (m),
       mg_iter_(0),
-      mg_sync_(),
+      mg_sync_restrict_(),
+      mg_sync_prolong_(),
+      mg_msg_(NULL),
       dt(0.0),
       SubgridFluxes(NULL)
   {
@@ -343,12 +347,14 @@ public: /// entry methods
   void p_solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
-  void mg_sync_reset()             { mg_sync_.reset(); }
-  void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }
-  bool mg_sync_next()         { return mg_sync_.next(); };
-  int  mg_sync_value()        { return mg_sync_.value(); };
-  int  mg_sync_stop()         { return mg_sync_.stop(); };
+  void mg_sync_restrict_reset()             { mg_sync_restrict_.reset(); }
+  void mg_sync_restrict_set_stop(int value) { mg_sync_restrict_.set_stop(value); }
+  bool mg_sync_restrict_next()        { return mg_sync_restrict_.next(); };
 
+  void mg_sync_prolong_reset()             { mg_sync_prolong_.reset(); }
+  void mg_sync_prolong_set_stop(int value) { mg_sync_prolong_.set_stop(value); }
+  bool mg_sync_prolong_next()        { return mg_sync_prolong_.next(); };
+  
   void mg_iter_clear() { mg_iter_ = 0; }
   void mg_iter_increment() { ++mg_iter_; }
   int mg_iter() const {return mg_iter_; }
@@ -359,7 +365,15 @@ protected: // attributes
   int mg_iter_;
 
   // MG SOLVER ( EnzoSolverMg0)
-  Sync mg_sync_;
+  Sync mg_sync_restrict_;
+
+  // Synchronize to not call prolong until all children have exited coarse solve
+  Sync mg_sync_prolong_;
+
+  // Saved FieldMsg for prolong
+  FieldMsg * mg_msg_;
+
+  // FieldMsg for prolong if called out of order
 
 public: // attributes (YIKES!)
 

@@ -193,6 +193,7 @@ protected: // methods
   }
 	      
   /// Dellocate temporary Fields
+
   void deallocate_temporary_(Field field, Block * block = NULL)
   {
     field.deallocate_temporary(ir_);

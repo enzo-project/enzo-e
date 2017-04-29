@@ -178,7 +178,9 @@ EnzoBlock::EnzoBlock
 ( MsgRefine * msg )
   : BASE_ENZO_BLOCK ( msg ),
     mg_iter_(0),
-    mg_sync_(),
+    mg_sync_restrict_(),
+    mg_sync_prolong_(),
+    mg_msg_(NULL),
     dt(dt_),
     SubgridFluxes(NULL)
 {
@@ -243,7 +245,13 @@ void EnzoBlock::pup(PUP::er &p)
   PUParray(p,method_turbulence_data,max_turbulence_array);
 
   p | mg_iter_;
-  p | mg_sync_;
+  p | mg_sync_restrict_;
+  p | mg_sync_prolong_;
+  static bool warn2[CONFIG_NODE_SIZE] = {true};
+  if (warn2[in]) {
+    warn2[in] = false;
+    WARNING("EnzoBlock::pup()", "skipping mg_msg_");
+  }
 
   TRACE ("END EnzoBlock::pup()");
 
