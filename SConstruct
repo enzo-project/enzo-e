@@ -564,6 +564,19 @@ else:
 
 #----------
 
+# Find how Charm++ was compiled using the bin symbolic link real path
+
+t = os.path.realpath(charm_path + '/bin')
+i0=t.rfind('/')
+i0=t.rfind('/',0,i0)
+i1=t.rfind('/bin')
+charm_build = t[i0+1:i1]
+
+cello_def.write ("#define CELLO_BUILD \"" + charm_build + "\"\n")
+fp_charm_build = open ("test/CHARM_BUILD", "w")
+fp_charm_build.write(charm_build + "\n");
+fp_charm_build.close()
+
 cello_def.close()
 #======================================================================
 # BUILDERS

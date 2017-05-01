@@ -27,47 +27,86 @@ BEGIN {
 /processors/{num_processors = $6; }
 # Block size
 
-/ghost_depth/ { ghosts = $6;}
+/ghost_depth/ { ghosts = $3;}
+
 /root_blocks/ {
-    root_blocks = root_blocks * $6;
+    if ($4 ~ /^[0-9]+$/) {
+	root_blocks3[0] = $4
+	root_blocks = root_blocks * $4;
+    } else root_blocks3[0] = 1;
+    if ($5 ~ /^[0-9]+$/) {
+	root_blocks3[1] = $5
+	root_blocks = root_blocks * $5;
+    } else root_blocks3[1] = 1;
+    if ($6 ~ /^[0-9]+$/) {
+	root_blocks3[2] = $6
+	root_blocks = root_blocks * $6;
+    } else root_blocks3[2] = 1;
 }
+
 /root_size/ {
-    root_size = root_size * $6;
-    total_root_size = total_root_size * ($6+2*ghosts)
+    if ($4 ~ /^[0-9]+$/) {
+	root_size = root_size * $4;
+	total_root_size = total_root_size * ($4+2*ghosts)
+    }
+    if ($5 ~ /^[0-9]+$/) {
+	root_size = root_size * $5;
+	total_root_size = total_root_size * ($5+2*ghosts)
+    }
+    if ($6 ~ /^[0-9]+$/) {
+	root_size = root_size * $6;
+	total_root_size = total_root_size * ($6+2*ghosts)
+    }
+}
+
+
+/Simulation cycle 0000/ {
+    cycle_start=$2;
+}
+
+/Simulation cycle / {
+    cycle_last=$2;
+    cycle = $5;
 }
 
 # Linear Solver
 /iter 0000/  {time_start=$2;}
-/Simulation cycle 0000/{cycle_start=$2;}
-/Simulation cycle /{cycle_last=$2;}
+
+# Linear Solver
 /final iter/ {
     max_iter      = $7;
     time_stop     = $2;
     time_per_iter = (time_stop-time_start)/max_iter; 
 }
-/Simulation cycle/ {cycle = $5;}
+
 /bytes-high / {
     bytes_high = $6;
     if (bytes_high_start == 0) bytes_high_start = $6;
 }
+
 /bytes-highest/ {  bytes_highest = $6; }
+
 /num-blocks/ {
     num_blocks = $6;
     if (num_blocks_start == 0) num_blocks_start = $6;
 }
+
 /num-particles/ {
     num_particles = $7;
     if (num_particles_start == 0) {
 	num_particles_start = num_particles;
     }
 }
-/Mesh:root_blocks/ {
-    root_blocks3[i_root_blocks] = $6;
-    i_root_blocks++;
-}
 /Mesh:root_size/ {
-    root_size3[i_root_size] = $6;
-    i_root_size++;
+    if ($4 ~ /^[0-9]+$/) {
+	root_size3[0] = $4;
+    }
+    if ($5 ~ /^[0-9]+$/) {
+	root_size3[1] = $5;
+    }
+    if ($6 ~ /^[0-9]+$/) {
+	root_size3[2] = $6;
+    }
 }
 /Adapt:max_level/ { max_level = $6 }
 
@@ -167,8 +206,29 @@ END {
 #    printf (format, "blocks change",num_blocks / num_blocks_start);
 
     printf ("\nMEMORY\n");
-    printf (format, "Gbytes-high",bytes_high*1e-9);
-    printf (format, "Gbytes-highest",bytes_highest*1e-9);
+    
+    scale = 1;
+    prefix="";
+
+    if (bytes_high > 1e3) {
+	scale = scale * 1024;
+	prefix="K";
+    }
+    if (bytes_high > 1e6) {
+	scale = scale * 1024;
+	prefix="M";
+    }
+    if (bytes_high > 1e9) {
+	scale = scale * 1024;
+	prefix="G";
+    }
+    if (bytes_high > 1e12) {
+	scale = scale * 1024;
+	prefix="T";
+    }
+
+    printf (format, "bytes-high (" prefix "B)",bytes_high/scale);
+    printf (format, "bytes-highest (" prefix "B)", bytes_highest/scale);
     if (bytes_high_start != 0) {
 	printf (format, "memory change",bytes_high / bytes_high_start);
     }

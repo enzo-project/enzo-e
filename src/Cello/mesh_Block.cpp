@@ -124,8 +124,9 @@ void Block::init
   index_.print("Block()",-1,2,false,simulation());
 #endif
 
-  Monitor * monitor = simulation()->monitor();
-  if (monitor->is_verbose()) {
+  Monitor * monitor = (simulation() != NULL) ? simulation()->monitor() : NULL;
+  
+  if ((monitor != NULL) && monitor->is_verbose()) {
     char buffer [80];
     int v3[3];
     this->index().values(v3);
@@ -226,11 +227,13 @@ void Block::init
 
   }
 
-  simulation()->monitor_insert_block();
+  if (simulation())
+    simulation()->monitor_insert_block();
   
   const int np = data()->particle().num_particles();
   if (np > 0) {
-    simulation()->monitor_insert_particles(np);
+    if (simulation())
+      simulation()->monitor_insert_particles(np);
   }
 
   if (level > 0) {
@@ -538,7 +541,8 @@ Block::Block (CkMigrateMessage *m)
     index_solver_()
 { 
   performance_start_(perf_block);
-  simulation()->monitor_insert_block();
+  if (simulation()) 
+    simulation()->monitor_insert_block();
   performance_stop_(perf_block);
 };
 
@@ -586,7 +590,9 @@ std::string Block::name() const throw()
 //----------------------------------------------------------------------
 
 void Block::size_forest (int * nx, int * ny, int * nz) const throw ()
-{  simulation()->hierarchy()->num_blocks(nx,ny,nz); }
+{
+  simulation()->hierarchy()->num_blocks(nx,ny,nz);
+}
 
 //----------------------------------------------------------------------
 
@@ -849,7 +855,8 @@ Index Block::neighbor_
 void Block::performance_start_
 (int index_region, std::string file, int line)
 {
-  simulation()->performance()->start_region(index_region,file,line);
+  if (simulation())
+    simulation()->performance()->start_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
@@ -857,7 +864,8 @@ void Block::performance_start_
 void Block::performance_stop_
 (int index_region, std::string file, int line)
 {
-  simulation()->performance()->stop_region(index_region,file,line);
+  if (simulation())
+    simulation()->performance()->stop_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------

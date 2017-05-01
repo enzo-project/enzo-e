@@ -160,17 +160,23 @@ void Parameters::read ( const char * file_name )
 
 //----------------------------------------------------------------------
 
-void Parameters::write ( const char * file_name )
+void Parameters::write ( const char * file_name, bool full_names )
 /// @param  file_name   An opened output parameter file or stdout
 {
-
   FILE * fp = fopen(file_name,"w");
-
   ASSERT1("Parameters::write",
 	  "Error opening parameter file '%s' for writing",
 	  file_name,
 	  ( fp != NULL ) );
 
+  write (fp,full_names);
+  fclose(fp);
+}
+  //----------------------------------------------------------------------
+
+void Parameters::write ( FILE * fp, bool full_names )
+/// @param  file_name   An opened output parameter file or stdout
+{
   // "Previous" groups are empty
   int n_prev = 0;
   std::string group_prev[MAX_GROUP_DEPTH];
@@ -212,22 +218,34 @@ void Parameters::write ( const char * file_name )
       for (int i=i_group; i<n_prev; i++) {
 	--group_depth;
 	indent_string = indent_string.substr(0, indent_string.size()-indent_size);
-	fprintf (fp, "%s}%c\n",indent_string.c_str(),
-		 (group_depth==0) ? '\n' : ';' );
+	if (!full_names) {
+	  fprintf (fp, "%s}%c\n",indent_string.c_str(),
+		   (group_depth==0) ? '\n' : ';' );
+	}
       }
 
       // Begin new groups
 
       for (int i=i_group; i<n_curr; i++) {
-	fprintf (fp,"%s%s {\n",indent_string.c_str(),
-		 group_curr[i].c_str());
+	if (!full_names) {
+	  fprintf (fp,"%s%s {\n",indent_string.c_str(),
+		   group_curr[i].c_str());
+	}
 	indent_string = indent_string + indent_amount;
 	++group_depth;
       }
 
       // Print parameter
-      fprintf (fp,"%s",indent_string.c_str());
-      it_param->second->write(fp,it_param->first);
+      if (full_names) {
+	for (int i=0; i < n_curr; i++) {
+	  fprintf (fp,"%s:",group_curr[i].c_str());
+	}
+	bool no_commas = true;
+	it_param->second->write(fp,it_param->first,no_commas);
+      } else {	
+	fprintf (fp,"%s",indent_string.c_str());
+	it_param->second->write(fp,it_param->first);
+      }
 
       // Copy current groups to previous groups (inefficient)
       n_prev = n_curr;
@@ -242,11 +260,11 @@ void Parameters::write ( const char * file_name )
 
   for (int i=0; i<n_prev; i++) {
     indent_string = indent_string.substr(indent_size,std::string::npos);
-    fprintf (fp, "%s}\n",indent_string.c_str());
+    if (!full_names) {
+      fprintf (fp, "%s}\n",indent_string.c_str());
+    }
     --group_depth;
   }
-
-  if (fp != stdout) fclose(fp);
 
 }
 

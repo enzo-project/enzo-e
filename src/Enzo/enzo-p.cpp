@@ -78,7 +78,7 @@ PARALLEL_MAIN_BEGIN
   g_parameters.read(PARALLEL_ARGV[1]);
   g_parameters.write("parameters.out");
   g_enzo_config.read(&g_parameters);
-
+  
   // Initialize unit testing
 
   const int ip = CkMyPe();

@@ -38,14 +38,14 @@ EnzoSolverCg::EnzoSolverCg
     index_precon_(index_precon),
     rank_(rank),
     iter_max_(iter_max), 
-    res_tol_(res_tol),
-    rr0_(0),
-    rr_min_(0),rr_max_(0),
     ir_(0), id_(0), iy_(0), iz_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     iter_(0),
+    res_tol_(res_tol),
+    rr0_(0.0),
+    rr_min_(0.0),rr_max_(0.0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
     bc_(0.0)
 {
@@ -99,10 +99,6 @@ void EnzoSolverCg::pup (PUP::er &p)
   
   p | rank_;
   p | iter_max_;
-  p | res_tol_;
-  p | rr0_;
-  p | rr_min_;
-  p | rr_max_;
   p | ir_;
   p | id_;
   p | iy_;
@@ -122,6 +118,10 @@ void EnzoSolverCg::pup (PUP::er &p)
 
   p | iter_;
   
+  p | res_tol_;
+  p | rr0_;
+  p | rr_min_;
+  p | rr_max_;
   p | rz_;
   p | rz2_;
   p | dy_;

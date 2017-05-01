@@ -196,7 +196,7 @@ void Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   ParticleData * particle_array[npa];
   ParticleData * particle_list [npa];
-  Index             index_list [npa];
+  Index * index_list = new Index[npa];
   
   for (int i=0; i<npa; i++) {
     particle_list[i]  = NULL;
@@ -214,6 +214,8 @@ void Block::refresh_load_particle_faces_ (Refresh * refresh)
   // Send particle data to neighbors
 
   particle_send_(nl,index_list,particle_list);
+
+  delete [] index_list;
 
 }
 //----------------------------------------------------------------------

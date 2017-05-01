@@ -93,7 +93,8 @@ public: // interface
 
   /// Write the parameter to the file
   void write(FILE * file_pointer,
-	     std::string parameter);
+	     std::string parameter,
+	     bool no_commas=false);
 
   /// Return whether the parameter has the given type
   bool is_type (parameter_enum type) { return type_ == type; }

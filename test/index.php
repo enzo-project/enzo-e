@@ -20,14 +20,21 @@ printf ("%s",$dir);
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
    <table>
-   <tr> <th> Cello directory </th> <td> <?php printf ($dir) ?></td>
-    <th> Date </th> <td> <?php system ("cat DATE") ?></td> </tr>
-   <tr> <th> Cello branch </th> <td align="left"> <?php system ("hg branch") ?></td> 
-    <th> Start </th> <td> <?php system ("cat START") ?></td> </tr>
-   <tr> <th> Cello revision </th>  <td> <?php system ("hg id -n") ?> </td> 
-    <th> Stop </th> <td> <?php system ("cat STOP") ?></td> </tr>
-   <tr> <th> Charm++ version </th> <td> <?php system ("cat CHARM_VERSION") ?> </td> 
-    <th> Duration </th> <td> <?php system ("cat TIME") ?> min</td> </tr>
+     <tr><th class=cello colspan=2><center><b>Enzo-P/Cello</b></center></th>
+         <th class=charm colspan="2"><center><b>Charm++</b></center></th>
+         <th class=time colspan="2"><center><b>Time</b></center></th>
+     </tr>
+    <tr> <th class=cello> directory </th> <td class=cello> <?php printf ($dir) ?></td>
+        <th class=charm> build </th> <td class=charm><?php system ("cat CHARM_BUILD") ?> </td>
+        <th class=time> date </th> <td class=time> <?php system ("cat DATE") ?></td> </tr>
+
+   <tr> <th class=cello> branch </th> <td class=cello align="left"> <?php system ("hg branch") ?></td> 
+        <th class=charm> version </th> <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
+        <th class=time> start </th> <td class=time> <?php system ("cat START") ?></td> </tr>
+
+   <tr> <th class=cello> revision </th>  <td class=cello> <?php system ("hg id -n") ?> </td>
+    <th></th><td></td>
+        <th class=time> duration </th> <td class=time> <?php system ("cat TIME") ?> min</td> </tr>
    </table>
  <?php
 

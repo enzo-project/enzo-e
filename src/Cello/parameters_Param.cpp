@@ -228,7 +228,8 @@ void Param::dealloc_()
 void Param::write
 (
  FILE *      file_pointer,
- std::string full_parameter)
+ std::string full_parameter,
+ bool no_commas)
 /// @param file_pointer    File pointer to which the parameter is written
 /// @param full_parameter  Name of this parameter including groups
 {
@@ -239,9 +240,21 @@ void Param::write
   std::string parameter = (i_group == std::string::npos) ?
     full_parameter : full_parameter.substr(i_group+1,std::string::npos);
 
-  fprintf (file_pointer,"%s = %s;\n",
-  	   parameter.c_str(),
-  	   value_to_string().c_str());
+  std::string value = value_to_string();
+  if (no_commas) {
+    std::size_t found;
+    while ((found=value.find(",")) != std::string::npos ) {
+      value.erase(found,1);
+    }
+    fprintf (file_pointer,"%s = %s\n",
+	     parameter.c_str(),
+	     value.c_str());
+  } else {
+    fprintf (file_pointer,"%s = %s;\n",
+	     parameter.c_str(),
+	     value.c_str());
+  }
+  
 }
 
 //----------------------------------------------------------------------

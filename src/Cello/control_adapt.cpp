@@ -541,8 +541,9 @@ void Block::p_adapt_recv_level
     PARALLEL_PRINTF 
       ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
        __LINE__,index_send.level(), level_face_curr);
-    index_.print("index_",-1,2,false,simulation());
-    index_send.print("index_",-1,2,false,simulation());
+    int nb3[3] = {2,2,2};
+    index_.print("index_",-1,2,nb3,false,simulation());
+    index_send.print("index_",-1,2,nb3,false,simulation());
   }
 
   // note face_level_last_ initialized as -1, in which case won't skip
@@ -810,7 +811,7 @@ void Block::adapt_coarsen_()
 
   // copy face levels
   int nf = face_level_curr_.size();
-  int face_level_curr[nf] = {0};
+  int face_level_curr[nf];
   
   for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
 

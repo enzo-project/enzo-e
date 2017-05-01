@@ -247,6 +247,9 @@ void Simulation::finalize() throw()
 void Simulation::initialize_simulation_() throw()
 {
 
+  if (CkMyPe() == 0)
+    g_parameters.write(stdout,true);
+
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation::initialize_simulation_()\n",CkMyPe());
   fflush(stdout);

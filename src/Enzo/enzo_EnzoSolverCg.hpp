@@ -33,14 +33,14 @@ public: // interface
     index_precon_(-1),
     rank_(0),
     iter_max_(0), 
-    res_tol_(0.0),
-    rr0_(0),
-    rr_min_(0),rr_max_(0),
     ir_(0), id_(0), iy_(0), iz_(0),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     iter_(0),
+    res_tol_(0.0),
+    rr0_(0),
+    rr_min_(0),rr_max_(0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
     bc_(0.0)
   {};
@@ -56,14 +56,14 @@ public: // interface
       index_precon_(-1),
       rank_(0),
       iter_max_(0), 
-      res_tol_(0.0),
-      rr0_(0),
-      rr_min_(0),rr_max_(0),
       ir_(0), id_(0), iy_(0), iz_(0),
       nx_(0),ny_(0),nz_(0),
       mx_(0),my_(0),mz_(0),
       gx_(0),gy_(0),gz_(0),
       iter_(0),
+      res_tol_(0.0),
+      rr0_(0),
+      rr_min_(0),rr_max_(0),
       rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
       bc_(0.0)
   {}
@@ -200,18 +200,6 @@ protected: // attributes
   /// Maximum number of Cg iterations
   int iter_max_;
 
-  /// Convergence tolerance on the residual reduction rz_ / rz0_
-  double res_tol_;
-
-  /// Initial residual
-  long double rr0_;
-
-  /// Minimum residual
-  long double rr_min_;
-
-  /// Maximum residual
-  long double rr_max_;
-
   /// CG vector id's
   int ir_;
   int id_;
@@ -225,6 +213,18 @@ protected: // attributes
 
   /// Current CG iteration
   int iter_;
+
+  /// Convergence tolerance on the residual reduction rz_ / rz0_
+  double res_tol_;
+
+  /// Initial residual
+  long double rr0_;
+
+  /// Minimum residual
+  long double rr_min_;
+
+  /// Maximum residual
+  long double rr_max_;
 
   /// dot (R_i,R_i)
   long double rr_;
