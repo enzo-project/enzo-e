@@ -178,6 +178,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_pm_update_max_dt;
 
   p | solver_precondition;
+  p | solver_local;
   p | solver_pre_smooth;
   p | solver_post_smooth;
   p | solver_coarse_solve;
@@ -385,6 +386,7 @@ void EnzoConfig::read(Parameters * p) throw()
   num_solvers = p->list_length("Solver:list");
 
   solver_precondition.resize(num_solvers);
+  solver_local.       resize(num_solvers);
   solver_pre_smooth.  resize(num_solvers);
   solver_coarse_solve.resize(num_solvers);
   solver_post_smooth. resize(num_solvers);
@@ -403,7 +405,7 @@ void EnzoConfig::read(Parameters * p) throw()
     } else {
       solver_precondition[index_solver] = -1;
     }
-    
+
     solver = p->value_string (solver_name + ":pre_smooth","unknown");
     if (solver_index.find(solver) != solver_index.end()) {
       solver_pre_smooth[index_solver] = solver_index[solver];
@@ -427,6 +429,10 @@ void EnzoConfig::read(Parameters * p) throw()
 
     solver_weight[index_solver] =
       p->value_float(solver_name + ":weight",1.0);
+
+    solver_local[index_solver] =
+      p->value_logical (solver_name + ":local",false);
+    
   }  
   
   //======================================================================

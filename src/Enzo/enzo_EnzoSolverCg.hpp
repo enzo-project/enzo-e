@@ -23,7 +23,8 @@ public: // interface
 		double res_tol,
 		int min_level,
 		int max_level,
-		int index_precon);
+		int index_precon,
+		bool local=false);
 
   /// Constructor
   EnzoSolverCg() throw()
@@ -42,7 +43,8 @@ public: // interface
     rr0_(0),
     rr_min_(0),rr_max_(0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
-    bc_(0.0)
+    bc_(0.0),
+    local_(false)
   {};
 
   /// Charm++ PUP::able declarations
@@ -65,7 +67,8 @@ public: // interface
       rr0_(0),
       rr_min_(0),rr_max_(0),
       rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
-      bc_(0.0)
+      bc_(0.0),
+      local_(false)
   {}
 
   /// Assignment operator
@@ -160,8 +163,6 @@ protected: // methods
   template <class T>
   void begin_1_() throw();
 
-  void exit_() throw();
-
   /// Allocate temporary Fields
   void allocate_temporary_(Field field, Block * block = NULL)
   {
@@ -179,6 +180,16 @@ protected: // methods
     field.deallocate_temporary(iy_);
     field.deallocate_temporary(iz_);
   }
+
+  /// Serial CG solver if local_ == true
+  template <class T>
+  void local_cg_ (EnzoBlock * enzo_block);
+
+  /// Apply boundary conditions for the Field on the local block
+  template <class T>
+  void refresh_local_(int ix, EnzoBlock * enzo_block);
+  
+  void monitor_output_(EnzoBlock *);
   
 protected: // attributes
 
@@ -251,6 +262,8 @@ protected: // attributes
   /// matvec refresh index
   int id_refresh_matvec_;
 
+  /// Whether to solve on a standalone Block, e.g. for MG coarse solver
+  bool local_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_CG_HPP */

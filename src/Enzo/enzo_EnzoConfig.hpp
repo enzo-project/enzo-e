@@ -107,7 +107,8 @@ public: // interface
       solver_coarse_solve(),
       solver_weight(),
       // EnzoSolver<Krylov>
-      solver_precondition()
+      solver_precondition(),
+      solver_local()
   {
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
@@ -128,7 +129,7 @@ public: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  // EnzoMethodPpm
+  /// EnzoMethodPpm
 
   double                     ppm_density_floor;
   bool                       ppm_diffusion;
@@ -147,7 +148,7 @@ public: // attributes
 
   double                     field_gamma;
 
-  // Cosmology (NOT ACCESSED)
+  /// Cosmology (NOT ACCESSED)
   bool                       physics_cosmology;
   double                     physics_cosmology_comoving_box_size;
   double                     physics_cosmology_hubble_constant_now;
@@ -156,7 +157,7 @@ public: // attributes
   double                     physics_cosmology_omega_lamda_now;
   double                     physics_cosmology_omega_matter_now;
 
-  // EnzoInitialCollapse
+  /// EnzoInitialCollapse
   int                        initial_collapse_rank;
   int                        initial_collapse_array[3];
   double                     initial_collapse_radius_relative;
@@ -164,12 +165,12 @@ public: // attributes
   double                     initial_collapse_mass;
   double                     initial_collapse_temperature;
 
-  // EnzoInitialPm
+  /// EnzoInitialPm
   std::string                initial_pm_field;
   double                     initial_pm_mpp;
   int                        initial_pm_level;
 
-  // EnzoInitialSedovArray[23]
+  /// EnzoInitialSedovArray[23]
   int                        initial_sedov_rank;
   int                        initial_sedov_array[3];
   double                     initial_sedov_radius_relative;
@@ -177,7 +178,7 @@ public: // attributes
   double                     initial_sedov_pressure_out;
   double                     initial_sedov_density;
 
-  // EnzoInitialSoup
+  /// EnzoInitialSoup
   int                        initial_soup_rank;
   std::string                initial_soup_file;
   bool                       initial_soup_rotate;
@@ -188,58 +189,66 @@ public: // attributes
   double                     initial_soup_pressure_out;
   double                     initial_soup_density;
 
-  // EnzoInitialTurbulence
+  /// EnzoInitialTurbulence
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 
-  // EnzoProlong
+  /// EnzoProlong
   std::string                interpolation_method;
 
-  // EnzoMethodHeat
+  /// EnzoMethodHeat
   double                     method_heat_alpha;
 
-  // EnzoMethodNull
+  /// EnzoMethodNull
   double                     method_null_dt;
 
-  // EnzoMethodTurbulence
+  /// EnzoMethodTurbulence
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
 
-  // EnzoMethodGravity
+  /// EnzoMethodGravity
   double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
 
-  // EnzoMethodPmDeposit
+  /// EnzoMethodPmDeposit
 
   std::string                method_pm_deposit_type;
 
-  // EnzoMethodPmUpdate
+  /// EnzoMethodPmUpdate
 
   double                     method_pm_update_max_dt;
 
-  // EnzoSolverMg0
+  /// EnzoSolverMg0
 
   /// Solver index for multigrid pre-smoother
-  std::vector<int> solver_pre_smooth;
+  
+  std::vector<int>           solver_pre_smooth;
 
   /// Solver index for multigrid post-smoother
-  std::vector<int> solver_post_smooth;
+
+  std::vector<int>           solver_post_smooth;
 
   /// Solver index for multigrid coarse solver
-  std::vector<int> solver_coarse_solve;
+  
+  std::vector<int>           solver_coarse_solve;
 
   /// Weighting factor for smoother
-  std::vector<double> solver_weight;
+  
+  std::vector<double>        solver_weight;
 
-  // EnzoSolver<Krylov>
+  /// EnzoSolver<Krylov>
   
   /// Solver index for Krylov solver preconditioner
-  std::vector<int> solver_precondition;
-  
+  std::vector<int>           solver_precondition;
+
+  /// Whether the solver is for an isolated Block, e.g. for
+  /// Mg0 coarse grid solver
+  std::vector<int>           solver_local;
+
 #ifdef CONFIG_USE_GRACKLE
 
-  // EnzoMethodGrackle
+  /// EnzoMethodGrackle
 
   code_units      method_grackle_units;
   chemistry_data  method_grackle_chemistry;

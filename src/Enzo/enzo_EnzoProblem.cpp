@@ -227,13 +227,15 @@ Solver * EnzoProblem::create_solver_
 
     solver = new EnzoSolverCg
       (field_descr,
-       enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_monitor_iter [index_solver],
        rank,
-       enzo_config->solver_iter_max[index_solver],
-       enzo_config->solver_res_tol[index_solver],
-       enzo_config->solver_min_level[index_solver],
-       enzo_config->solver_max_level[index_solver],
-       enzo_config->solver_precondition[index_solver]);
+       enzo_config->solver_iter_max     [index_solver],
+       enzo_config->solver_res_tol      [index_solver],
+       enzo_config->solver_min_level    [index_solver],
+       enzo_config->solver_max_level    [index_solver],
+       enzo_config->solver_precondition [index_solver],
+       enzo_config->solver_local        [index_solver]
+       );
 
   } else if (solver_type == "bicgstab") {
 

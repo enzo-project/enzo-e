@@ -213,7 +213,7 @@
 //       ==> end(return_converged)
 //
 //    if (iter_ >= iter_max_) {
-//       ==> end(return_error_max_iter_reached);
+//       ==> end(return_error);
 //    }
 // 
 //    refresh(P) ==> p_solver_bicgstab_loop_1
@@ -329,7 +329,7 @@
 //
 //    if (omega_d_ == 0.0)  omega_d_ = 1.0
 //    if ( omega_n_ == 0.0 ) 
-//       end(return_error_omega_eq_0)
+//       end(return_error)
 //
 //    omega_ = omega_n_ / omega_d_
 //    X = X + omega_*Y
@@ -353,7 +353,7 @@
 // --------------------
 //
 //    if ( beta_n_ == 0.0 )
-//       end(return_error_beta_n_eq_0)
+//       end(return_error)
 //
 //    beta_ = (beta_n_/beta_d_)*(alpha_/omega_)
 //    P = R + beta_*( P - omega_*V )
@@ -710,16 +710,17 @@ template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw()
       monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
   }
 
-  /// check for convergence
-  if (err_ < res_tol_) {
+  const bool is_converged = (err_ < res_tol_);
+  const bool is_diverged = (iter_ >= iter_max_);
+  
+  if (is_converged) {
+
     this->end<T>(enzo_block, return_converged);
 
-  /// otherwise check for failure
-  } else if (iter_ >= iter_max_)  {
-    this->end<T>(enzo_block, return_error_max_iter_reached);
+  } else if (is_diverged)  {
 
-  /// otherwise refresh P with callback to p_solver_bicgstab_loop_1
-  /// for re-entry
+    this->end<T>(enzo_block, return_diverged);
+
     
   } else {
 
@@ -1228,8 +1229,11 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   omega_ = omega_n_ / omega_d_;
 
   /// check for breakdown in BiCgStab
-  if ( omega_ == 0.0 )
-    this->end<T>(enzo_block, return_error_omega_eq_0);
+  if ( omega_ == 0.0 ) {
+    WARNING ("EnzoSolverBiCgStab::loop12()",
+	     "Solver error: omega_ == 0");
+    this->end<T>(enzo_block, return_error);
+  }
 
   /// update vectors (on leaf blocks only)
   if (is_active_(enzo_block)) {
@@ -1317,8 +1321,11 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
   Field field = data->field();
 
   /// check for breakdown in BiCgStab
-  if (beta_n_ == 0.0)
-    this->end<T>(enzo_block, return_error_beta_n_eq_0);
+  if (beta_n_ == 0.0) {
+    WARNING ("EnzoSolverBiCgStab::loop14()",
+	     "Solver error: beta_n_ == 0");
+    this->end<T>(enzo_block, return_error);
+  }
   
   /// compute beta factor in BiCgStab algorithm (all blocks)
   beta_ = (beta_n_/beta_d_)*(alpha_/omega_);

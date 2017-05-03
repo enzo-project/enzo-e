@@ -13,15 +13,6 @@
 #include "enzo.def.h"
 #undef CK_TEMPLATES_ONLY
 
-// #define DEBUG_SOLVER
-#ifdef DEBUG_SOLVER
-#   define TRACE_SOLVER(solver)						\
-  CkPrintf ("%d %s:%d TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__,solver,this); \
-  fflush(stdout);
-#else
-#   define TRACE_SOLVER(solver) /*  */ 
-#endif
-
 //----------------------------------------------------------------------
 
 EnzoSolverCg::EnzoSolverCg 
@@ -30,7 +21,8 @@ EnzoSolverCg::EnzoSolverCg
  int rank,
  int iter_max, double res_tol,
  int min_level, int max_level,
- int index_precon
+ int index_precon,
+ bool local
  )
   : Solver(monitor_iter,min_level,max_level), 
     A_(NULL),
@@ -47,10 +39,9 @@ EnzoSolverCg::EnzoSolverCg
     rr0_(0.0),
     rr_min_(0.0),rr_max_(0.0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
-    bc_(0.0)
+    bc_(0.0),
+    local_(local)
 {
-  TRACE_SOLVER("EnzoSolverCg() ENTER");
-
   id_ = field_descr->insert_temporary();
   ir_ = field_descr->insert_temporary();
   iy_ = field_descr->insert_temporary();
@@ -62,17 +53,16 @@ EnzoSolverCg::EnzoSolverCg
 
   field_descr->ghost_depth    (ib_,&gx_,&gy_,&gz_);
 
-  const int ir = add_refresh(4,0,neighbor_type_(),sync_type_());
-  refresh(ir)->add_all_fields(num_fields);
+  if (! local_) {
+    const int ir = add_refresh(4,0,neighbor_type_(),sync_type_());
+    refresh(ir)->add_all_fields(num_fields);
 
-  refresh(ir)->add_field (id_);
-  refresh(ir)->add_field (ir_);
-  refresh(ir)->add_field (iy_);
-  refresh(ir)->add_field (iz_);
+    refresh(ir)->add_field (id_);
+    refresh(ir)->add_field (ir_);
+    refresh(ir)->add_field (iy_);
+    refresh(ir)->add_field (iz_);
+  }
 
-  /// Initialize matvec Refresh
-
-  TRACE_SOLVER("EnzoSolverCg() EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -129,6 +119,7 @@ void EnzoSolverCg::pup (PUP::er &p)
   p | bc_;
   p | id_refresh_matvec_;
 
+  p | local_;
 }
 
 //======================================================================
@@ -144,8 +135,6 @@ void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
   Field field = block->data()->field();
 
   allocate_temporary_(field,block);
-
-  TRACE_SOLVER("compute ENTER");
 
   field.size           (&nx_,&ny_,&nz_);
   field.dimensions (ib_,&mx_,&my_,&mz_);
@@ -164,8 +153,6 @@ void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
     compute_<long double>(enzo_block);
   else 
     ERROR1("EnzoSolverCg()", "precision %d not recognized", precision);
-  TRACE_SOLVER("compute EXIT");
-
 }
 
 //======================================================================
@@ -179,12 +166,16 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 //     D = Z
 //     shift (B)
 {
-  TRACE_SOLVER("compute_() ENTER");
 
+  // If local, call serial CG solver
+  if (local_) {
+    local_cg_<T>(enzo_block);
+    return;
+  }
+  
   iter_ = 0;
 
-  Data * data = enzo_block->data();
-  Field field = data->field();
+  Field field = enzo_block->data()->field();
 
   if (is_active_(enzo_block)) {
 
@@ -194,24 +185,16 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
     T * B = (T*) field.values(ib_);
     T * X = (T*) field.values(ix_);
     T * R = (T*) field.values(ir_);
-
-    const int ix0 = 0;
-    const int iy0 = 0;
-    const int iz0 = 0;
+    T * D = (T*) field.values(id_);
+    T * Z = (T*) field.values(iz_);
 
     for (int i=0; i<mx_*my_*mz_; i++) {
       X[i] = 0.0;
       R[i] = B[i];
-    }
-
-    // M_->matvec(id_,ir_,enzo_block);
-    // M_->matvec(iz_,ir_,enzo_block);
-    T * D = (T*) field.values(id_);
-    T * Z = (T*) field.values(iz_);
-    for (int i=0; i<mx_*my_*mz_; i++) {
       D[i] = R[i];
       Z[i] = R[i];
     }
+
   }
 
   long double reduce[3] = {0.0};
@@ -229,34 +212,19 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 	  int i = i0 + (ix + mx_*(iy + my_*iz));
 	  reduce[0] += R[i]*R[i];
 	  reduce[1] += B[i];
-	  reduce[2] ++;
 	}
       }
     }
+    reduce[2] = nx_*ny_*nz_;
   }
 
-#ifdef DEBUG_SOLVER
-  printf ("%s:%d %s DEBUG_SOLVER calling callback\n",
-	  __FILE__,__LINE__,enzo_block->name().c_str());
-#endif
-  TRACE_SOLVER("   loop_0a callback");
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0a<T>(NULL), 
 		      enzo_block->proxy_array());
-  TRACE_SOLVER("   loop_0a callback");
 
-#ifdef DEBUG_SOLVER
-  printf ("%s:%d %s DEBUG_SOLVER calling contribute\n",
-	  __FILE__,__LINE__,enzo_block->name().c_str());
-#endif
 	  
-  TRACE_SOLVER("   loop_0a contribute");
-
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  sum_long_double_3_type, 
 			  callback);
-  TRACE_SOLVER("   loop_0a contribute");
-  
-  TRACE_SOLVER("compute_() EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -267,7 +235,6 @@ void EnzoBlock::r_solver_cg_loop_0a (CkReductionMsg * msg)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
-  TRACE_SOLVER("solver_cg_loop_0a ENTER");
 
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
@@ -284,9 +251,9 @@ void EnzoSolverCg::loop_0a
 
   long double * data = (long double *) msg->getData();
 
-  set_rr( data[0] );
-  set_bs( data[1] );
-  set_bc( data[2] );
+  rr_ = data[0];
+  bs_ = data[1];
+  bc_ = data[2];
 
   delete msg;
 
@@ -302,8 +269,6 @@ void EnzoSolverCg::loop_0a
   refresh.add_field (iz_);
   
   enzo_block->refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(),&refresh);
-  
-  TRACE_SOLVER("solver_cg_loop_0a EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -313,7 +278,6 @@ void EnzoBlock::r_solver_cg_loop_0b (CkReductionMsg * msg)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
-  TRACE_SOLVER("solver_cg_loop_0b ENTER");
 
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
@@ -343,8 +307,6 @@ void EnzoSolverCg::loop_0b
   refresh.add_field (iz_);
 
   enzo_block->refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(), &refresh);
-
-  TRACE_SOLVER("solver_cg_loop_0b EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -352,7 +314,6 @@ void EnzoSolverCg::loop_0b
 void EnzoBlock::r_solver_cg_matvec()
 {
   
-  TRACE_SOLVER("solver_cg_matvec ENTER");
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -371,7 +332,6 @@ void EnzoBlock::r_solver_cg_matvec()
     solver->shift_1<long double>(enzo_block);
   else 
     ERROR1("EnzoSolverCg()", "precision %d not recognized", precision);
-  TRACE_SOLVER("solver_cg_matvec EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -379,8 +339,6 @@ void EnzoBlock::r_solver_cg_matvec()
 template <class T>
 void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 {
-
-  TRACE_SOLVER("Solver shift_1() ENTER");
   Data * data = enzo_block->data();
   Field field = data->field();
 
@@ -401,17 +359,16 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 
       // shift_ (R,shift,R);
       // shift_ (B,shift,B);
+      cello::check(bc_,"bc_",__FILE__,__LINE__);
+      cello::check(bs_,"bs_",__FILE__,__LINE__);
+  
       T shift = -bs_ / bc_;
-      for (int i=0; i<mx_*my_*mz_; i++) {
-	R[i] += shift;
-	B[i] += shift;
-      }
-
-      // M_->matvec(id_,ir_,enzo_block);
-      // M_->matvec(iz_,ir_,enzo_block);
+      cello::check(shift,"shift",__FILE__,__LINE__);
       T * D = (T*) field.values(id_);
       T * Z = (T*) field.values(iz_);
       for (int i=0; i<mx_*my_*mz_; i++) {
+	R[i] += shift;
+	B[i] += shift;
 	D[i] = R[i];
 	Z[i] = R[i];
       }
@@ -435,23 +392,12 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
     }
   } 
 
-  TRACE_SOLVER("   shift_1 callback");
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_shift_1<T>(NULL), 
 		      enzo_block->proxy_array());
-  TRACE_SOLVER("   shift_1 callback");
-
-#ifdef DEBUG_SOLVER
-  printf ("%s:%d %s DEBUG_SOLVER calling contribute\n",
-	  __FILE__,__LINE__,enzo_block->name().c_str());
-#endif
-
-  TRACE_SOLVER("   shift_1 contribute");
 
   enzo_block->contribute (sizeof(long double), &reduce, 
 			  sum_long_double_type, 
 			  callback);
-  TRACE_SOLVER("   shift_1 contribute");
-  TRACE_SOLVER("Solver::shift_1() EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -460,7 +406,7 @@ template <class T>
 void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
-  TRACE_SOLVER("Block solver_cg_shift_1 ENTER");
+
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -470,7 +416,6 @@ void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 
   solver -> loop_2a<T>(this);
 
-  TRACE_SOLVER("Block solver_cg_shift_1 EXIT");
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
@@ -507,7 +452,6 @@ void EnzoBlock::p_solver_cg_loop_2 ()
 template <class T>
 void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
 {
-  TRACE_SOLVER("Block loop_2b ENTER");
   cello::check(rr_,"rr_",__FILE__,__LINE__);
 
   if (iter_ == 0) {
@@ -520,35 +464,18 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
   }
 
   const bool is_root = enzo_block->index().is_root();
+  if (is_root) monitor_output_(enzo_block);
 
-  if (is_root) {
+  const bool is_converged = (rr_ / rr0_ < res_tol_);
+  const bool is_diverged = (iter_ >= iter_max_);
+    
+  if (is_converged) {
 
-    // Write monitor output
-    Monitor * monitor = enzo_block->simulation()->monitor();
-
-    const bool l_first_iter = (iter_ == 0);
-    const bool l_max_iter   = (iter_ >= iter_max_);
-    const bool l_monitor    = (monitor_iter_ && (iter_ % monitor_iter_) == 0 );
-    const bool l_converged  = (rr_ / rr0_ < res_tol_);
-
-    const bool l_output =
-      l_first_iter || l_max_iter || l_monitor || l_converged;
-      
-    if (l_output) {
-      monitor_output_ (enzo_block,iter_,rr0_,rr_min_,rr_,rr_max_);
-    }
-
-  }
-
-  if (rr_ / rr0_ < res_tol_) {
-
-    // end if converged
     end<T> (enzo_block,return_converged);
 
-  } else if (iter_ >= iter_max_)  {
+  } else if (is_diverged)  {
 
-    // end if diverged
-    end<T>(enzo_block,return_error_max_iter_reached);
+    end<T>(enzo_block,return_error);
 
   } else {
 
@@ -557,9 +484,6 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
     Field field = data->field();
 
     if (is_active_(enzo_block)) {
-
-      double hx,hy,hz;
-      data->field_cell_width(&hx,&hy,&hz);
 
       A_->matvec(iy_,id_,enzo_block);
 
@@ -588,23 +512,13 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
       }
     }
 
-    TRACE_SOLVER("loop_3 callback");
-
-#ifdef DEBUG_SOLVER
-    printf ("%s:%d %s DEBUG_SOLVER calling contribute\n",
-	    __FILE__,__LINE__,enzo_block->name().c_str());
-#endif
-
-    TRACE_SOLVER("loop_3 contribute");
     CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_3<T>(NULL), 
 			enzo_block->proxy_array());
 
     enzo_block->contribute (3*sizeof(long double), &reduce, 
 			    sum_long_double_3_type,
 			    callback);
-    TRACE_SOLVER("loop_3 contribute");
   }
-  TRACE_SOLVER("Block loop_2b EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -613,7 +527,6 @@ template <class T>
 void EnzoBlock::r_solver_cg_loop_3 (CkReductionMsg * msg)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
-  TRACE_SOLVER("Block solver_cg_loop_3 ENTER");
 
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
@@ -628,7 +541,6 @@ void EnzoBlock::r_solver_cg_loop_3 (CkReductionMsg * msg)
 
   solver -> loop_4<T>(this);
 
-  TRACE_SOLVER("Block solver_cg_loop_3 EXIT");
   performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
@@ -646,7 +558,6 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 //  D = Z + b*D;
 //  rz = rz2;
 {
-  TRACE_SOLVER("Solver loop_4 ENTER");
 
   cello::check(rr_,"rr_",__FILE__,__LINE__);
   cello::check(rz_,"rz_",__FILE__,__LINE__);
@@ -708,24 +619,12 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
     }
   }
 
-  TRACE_SOLVER("loop_5 callback");
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_5<T>(NULL), 
 		      enzo_block->proxy_array());
-  TRACE_SOLVER("loop_5 callback");
-
-#ifdef DEBUG_SOLVER
-  printf ("%s:%d %s DEBUG_SOLVER calling contribute\n",
-	  __FILE__,__LINE__,enzo_block->name().c_str());
-#endif
-
-  TRACE_SOLVER("loop_5 contribute");
 
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  sum_long_double_3_type, 
 			  callback);
-  TRACE_SOLVER("loop_5 contribute");
-
-  TRACE_SOLVER("Solver loop_4 EXIT");
 }
 
 //----------------------------------------------------------------------
@@ -736,7 +635,6 @@ void EnzoBlock::r_solver_cg_loop_5 (CkReductionMsg * msg)
 /// ==> solver_cg_loop_6
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
-  TRACE_SOLVER("Block solver_cg_loop_5 ENTER");
 
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
@@ -751,8 +649,6 @@ void EnzoBlock::r_solver_cg_loop_5 (CkReductionMsg * msg)
 
   solver -> loop_6<T>(this);
 
-  TRACE_SOLVER("Block solver_cg_loop_5 EXIT");
-
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
@@ -765,8 +661,6 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 //  D = Z + b*D;
 //  rz = rz2;
 {
-  TRACE_SOLVER("Solver loop_6 ENTER");
-
   cello::check(rz2_,"rz2_",__FILE__,__LINE__);
   cello::check(rs_,"rs_",__FILE__,__LINE__);
   cello::check(xs_,"xs_",__FILE__,__LINE__);
@@ -787,17 +681,12 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
       // shift_ (X,T(-xs_/bc_),X);
       // shift_ (R,T(-rs_/bc_),R);
 
-      for (int iz=0; iz<mz_; iz++) {
-	for (int iy=0; iy<my_; iy++) {
-	  for (int ix=0; ix<mx_; ix++) {
-	    int i = ix + mx_*(iy + my_*iz);
-	    X[i] -= T(xs_/bc_);
-	    R[i] -= T(rs_/bc_);
-	  }
-	}
+      for (int i=0; i<mx_*my_*mz_; i++) {
+	X[i] -= T(xs_/bc_);
+	R[i] -= T(rs_/bc_);
       }
       
-    }
+   }
 
     T * D  = (T*) field.values(id_);
     T * Z  = (T*) field.values(iz_);
@@ -819,22 +708,271 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 
   int iter = iter_ + 1;
 
-  TRACE_SOLVER("loop_0b callback");
   CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0b<T>(NULL), 
 		      enzo_block->proxy_array());
-  TRACE_SOLVER("loop_0b callback");
-    
-  TRACE_SOLVER("loop_0b contribute");
 
   enzo_block->contribute (sizeof(int), &iter, 
 			  CkReduction::max_int, callback);
-  TRACE_SOLVER("loop_0b contribute");
-
-  TRACE_SOLVER("Block loop_6 EXIT");
 }
 
 //----------------------------------------------------------------------
 
+template <class T>
+void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
+{
+  if (!is_active_(enzo_block)) {
+    end<T>(enzo_block,return_unknown);
+    return;
+  }
+  
+  iter_ = 0;
+
+  Field field = enzo_block->data()->field();
+
+  T * B = (T*) field.values(ib_);
+  T * D = (T*) field.values(id_);
+  T * R = (T*) field.values(ir_);
+  T * X = (T*) field.values(ix_);
+  T * Y = (T*) field.values(iy_);
+  T * Z = (T*) field.values(iz_);
+
+  for (int i=0; i<mx_*my_*mz_; i++) {
+    X[i] = 0.0;
+    R[i] = B[i];
+    D[i] = R[i];
+    Z[i] = R[i];
+  }
+  bs_ = 0.0;
+  bc_ = 0.0;
+
+  refresh_local_<T>(ib_,enzo_block);
+  refresh_local_<T>(ix_,enzo_block);
+  refresh_local_<T>(ir_,enzo_block);
+  refresh_local_<T>(id_,enzo_block);
+  refresh_local_<T>(iz_,enzo_block);
+
+  const int i0 = gx_ + mx_*(gy_ + my_*gz_);
+
+  // Compute shift and update B if needed
+  if (iter_ == 0 && A_->is_singular()) {
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + (ix + mx_*(iy + my_*iz));
+	  bs_ += B[i];
+	}
+      }
+    }
+    bc_ = nx_*ny_*nz_;
+    cello::check(bc_,"bc_",__FILE__,__LINE__);
+    cello::check(bs_,"bs_",__FILE__,__LINE__);
+    T shift = -bs_ / bc_;
+    cello::check(shift,"shift",__FILE__,__LINE__);
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      R[i] += shift;
+      B[i] += shift;
+      D[i] = R[i];
+      Z[i] = R[i];
+    }
+  }
+
+  // compute residual
+  rr_ = 0.0;
+  for (int iz=0; iz<nz_; iz++) {
+    for (int iy=0; iy<ny_; iy++) {
+      for (int ix=0; ix<nx_; ix++) {
+	int i = i0 + (ix + mx_*(iy + my_*iz));
+	rr_ += R[i]*R[i];
+      }
+    }
+  }
+
+  cello::check(rr_,"rr_",__FILE__,__LINE__);
+  cello::check(bs_,"bs_",__FILE__,__LINE__);
+  cello::check(bc_,"bc_",__FILE__,__LINE__);
+
+  rr0_ = rr_;
+  
+  bool is_converged = (rr_ / rr0_ < res_tol_);
+  bool is_diverged = iter_ >= iter_max_;
+
+  while ( (! is_converged) && (! is_diverged) ) {
+
+    rr_min_ = std::min(rr_min_,rr_);
+    rr_max_ = std::max(rr_max_,rr_);
+
+    refresh_local_<T>(id_,enzo_block);
+
+    A_->matvec(iy_,id_,enzo_block);
+
+    rr_ = 0.0;
+    rz_ = 0.0;
+    dy_ = 0.0;
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + (ix + mx_*(iy + my_*iz));
+	  rr_ += R[i]*R[i];
+	  rz_ += R[i]*Z[i];
+	  dy_ += D[i]*Y[i];
+	}
+      }
+    }
+
+    cello::check(rr_,"rr_",__FILE__,__LINE__);
+    cello::check(rz_,"rz_",__FILE__,__LINE__);
+    cello::check(dy_,"dy_",__FILE__,__LINE__);
+
+    T a = rz_ / dy_;
+
+    cello::check(a,"a",__FILE__,__LINE__);
+
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      X[i] += a * D[i];
+      R[i] -= a * Y[i];
+      Z[i] = R[i];
+    }
+
+    rz2_ = 0.0;
+    rs_ = 0.0;
+    xs_ = 0.0;
+    for (int iz=0; iz<nz_; iz++) {
+      for (int iy=0; iy<ny_; iy++) {
+	for (int ix=0; ix<nx_; ix++) {
+	  int i = i0 + (ix + mx_*(iy + my_*iz));
+	  rz2_ += R[i]*Z[i];
+	  rs_  += R[i];
+	  xs_  += X[i];
+	}
+      }
+    }
+
+    cello::check(rz2_,"rz2_",__FILE__,__LINE__);
+    cello::check(rs_,"rs_",__FILE__,__LINE__);
+    cello::check(xs_,"xs_",__FILE__,__LINE__);
+    
+    if (A_->is_singular()) {
+      for (int i=0; i<mx_*my_*mz_; i++) {
+	X[i] -= T(xs_/bc_);
+	R[i] -= T(rs_/bc_);
+      }
+    }
+
+
+    T b = rz2_ / rz_;
+
+    cello::check(b,"b",__FILE__,__LINE__);
+
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      D[i] = Z[i] + b * D[i];
+    }
+    
+    monitor_output_(enzo_block);
+
+    ++iter_;
+    is_converged = (rr_ / rr0_ < res_tol_);
+    is_diverged = iter_ >= iter_max_;
+  }
+
+  if (is_converged) {
+
+    end<T> (enzo_block,return_converged);
+
+  } else if (is_diverged)  {
+
+    end<T>(enzo_block,return_error);
+
+  }
+    
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
+{
+
+  T * X = (T*) enzo_block->data()->field().values(ix);
+
+  const int dx = 1;
+  const int dy = mx_;
+  const int dz = mx_*my_;
+
+  // ASSUMES SINGULAR MATRIX IMPLIES PERIODIC DOMAIN.
+
+  if (A_->is_singular()) {
+  
+    for (int iz=gz_; iz<nz_+gz_; iz++) {
+      for (int iy=gy_; iy<ny_+gy_; iy++) {
+	for (int ix=0; ix<gx_; ix++) {
+	  int is = (ix+nx_) + mx_*(iy + my_*iz);
+	  int id = (ix    ) + mx_*(iy + my_*iz);
+	  X[id] = X[is];
+	}
+      }
+    }
+
+    for (int iz=gz_; iz<nz_+gz_; iz++) {
+      for (int iy=gy_; iy<ny_+gy_; iy++) {
+	for (int ix=nx_+gx_; ix<nx_+2*gx_; ix++) {
+	  int is = (ix-nx_) + mx_*(iy + my_*iz);
+	  int id = (ix    ) + mx_*(iy + my_*iz);
+	  X[id] = X[is];
+	}
+      }
+    }
+
+    for (int iz=gz_; iz<nz_+gz_; iz++) {
+      for (int iy=0; iy<gy_; iy++) {
+	for (int ix=0; ix<mx_; ix++) {
+	  int is = ix + mx_*((iy+ny_) + my_*iz);
+	  int id = ix + mx_*((iy    ) + my_*iz);
+	  X[id] = X[is];
+	}
+      }
+    }
+
+    for (int iz=gz_; iz<nz_+gz_; iz++) {
+      for (int iy=ny_+gy_; iy<ny_+2*gy_; iy++) {
+	for (int ix=0; ix<mx_; ix++) {
+	  int is = ix + mx_*((iy-ny_) + my_*iz);
+	  int id = ix + mx_*((iy    ) + my_*iz);
+	  X[id] = X[is];
+	}
+      }
+    }
+
+    for (int iz=0; iz<gz_; iz++) {
+      for (int iy=0; iy<my_; iy++) {
+	for (int ix=0; ix<mx_; ix++) {
+	  int is = ix + mx_*(iy + my_*(iz + nz_));
+	  int id = ix + mx_*(iy + my_*(iz      ));
+	  X[id] = X[is];
+	}
+      }
+    }
+
+    for (int iz=nz_+gz_; iz<nz_+2*gz_; iz++) {
+      for (int iy=0; iy<my_; iy++) {
+	for (int ix=0; ix<mx_; ix++) {
+	  int is = ix + mx_*(iy + my_*(iz - nz_));
+	  int id = ix + mx_*(iy + my_*(iz      ));
+	  X[id] = X[is];
+	}
+      }
+    }
+
+
+  } else {
+
+    ERROR("EnzoSolverCg::refresh_local_()",
+	  "Only periodic boundary conditions available");
+
+  }
+  
+}
+
+//----------------------------------------------------------------------
 
 template <class T>
 void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
@@ -844,9 +982,6 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 ///       ERROR (return-)
 ///    }
 {
-
-  TRACE_SOLVER("Solver end ENTER");
-
   Field field = enzo_block->data()->field();
 
   deallocate_temporary_(field,enzo_block);
@@ -856,14 +991,25 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
   CkCallback(callback_,
 	     CkArrayIndexIndex(enzo_block->index()),
 	     enzo_block->proxy_array()).send();
-
-  TRACE_SOLVER("Solver end EXIT");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSolverCg::exit_() throw()
-/// deallocate temporary vectors
+void EnzoSolverCg::monitor_output_(EnzoBlock * enzo_block)
 {
-  TRACE_SOLVER("exit_");
+  // Write monitor output
+  Monitor * monitor = enzo_block->simulation()->monitor();
+
+  const bool l_first_iter = (iter_ == 0);
+  const bool l_max_iter   = (iter_ >= iter_max_);
+  const bool l_monitor    = (monitor_iter_ && (iter_ % monitor_iter_) == 0 );
+  const bool l_converged  = (rr_ / rr0_ < res_tol_);
+
+  const bool l_output =
+    l_first_iter || l_max_iter || l_monitor || l_converged;
+      
+  if (l_output) {
+    Solver::monitor_output_ (enzo_block,iter_,rr0_,rr_min_,rr_,rr_max_);
+  }
+
 }
