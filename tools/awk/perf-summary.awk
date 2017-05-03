@@ -12,6 +12,8 @@
 #
 
 BEGIN {
+    max_level = 0;
+    min_level = 0;
     done = 0;
     root_blocks = 1;
     root_size = 1;
@@ -27,35 +29,35 @@ BEGIN {
 /processors/{num_processors = $6; }
 # Block size
 
-/ghost_depth/ { ghosts = $3;}
+/ghost_depth/ { ghosts = $6;}
 
 /root_blocks/ {
-    if ($4 ~ /^[0-9]+$/) {
-	root_blocks3[0] = $4
-	root_blocks = root_blocks * $4;
+    if ($7 ~ /^[0-9]+$/) {
+	root_blocks3[0] = $7
+	root_blocks = root_blocks * $7;
     } else root_blocks3[0] = 1;
-    if ($5 ~ /^[0-9]+$/) {
-	root_blocks3[1] = $5
-	root_blocks = root_blocks * $5;
+    if ($8 ~ /^[0-9]+$/) {
+	root_blocks3[1] = $8
+	root_blocks = root_blocks * $8;
     } else root_blocks3[1] = 1;
-    if ($6 ~ /^[0-9]+$/) {
-	root_blocks3[2] = $6
-	root_blocks = root_blocks * $6;
+    if ($9 ~ /^[0-9]+$/) {
+	root_blocks3[2] = $9
+	root_blocks = root_blocks * $9;
     } else root_blocks3[2] = 1;
 }
 
 /root_size/ {
-    if ($4 ~ /^[0-9]+$/) {
-	root_size = root_size * $4;
-	total_root_size = total_root_size * ($4+2*ghosts)
+    if ($7 ~ /^[0-9]+$/) {
+	root_size = root_size * $7;
+	total_root_size = total_root_size * ($7+2*ghosts)
     }
-    if ($5 ~ /^[0-9]+$/) {
-	root_size = root_size * $5;
-	total_root_size = total_root_size * ($5+2*ghosts)
+    if ($8 ~ /^[0-9]+$/) {
+	root_size = root_size * $8;
+	total_root_size = total_root_size * ($8+2*ghosts)
     }
-    if ($6 ~ /^[0-9]+$/) {
-	root_size = root_size * $6;
-	total_root_size = total_root_size * ($6+2*ghosts)
+    if ($9 ~ /^[0-9]+$/) {
+	root_size = root_size * $9;
+	total_root_size = total_root_size * ($9+2*ghosts)
     }
 }
 
@@ -98,19 +100,21 @@ BEGIN {
     }
 }
 /Mesh:root_size/ {
-    if ($4 ~ /^[0-9]+$/) {
-	root_size3[0] = $4;
+    if ($7 ~ /^[0-9]+$/) {
+	root_size3[0] = $7;
     }
-    if ($5 ~ /^[0-9]+$/) {
-	root_size3[1] = $5;
+    if ($8 ~ /^[0-9]+$/) {
+	root_size3[1] = $8;
     }
-    if ($6 ~ /^[0-9]+$/) {
-	root_size3[2] = $6;
+    if ($9 ~ /^[0-9]+$/) {
+	root_size3[2] = $9;
     }
 }
-/Adapt:max_level/ { max_level = $6 }
+/Adapt:max_level/ { max_level = $9 }
+/Adapt:min_level/ { min_level = $9 }
 
 /Mesh:root_rank/ {root_rank = $6; }
+
 /END ENZO/ {
     done = 1;
     time_final = $2;
@@ -201,6 +205,7 @@ END {
     bz=(root_size3[2]/root_blocks3[2]);
     printf (format3,"block size",bx,by,bz);
     printf (format_int, "max-level",max_level);
+    printf (format_int, "min-level",min_level);
     printf (format_int, "num-blocks",num_blocks);
     printf (format_int, "num-zones",num_blocks*bx*by*bz);
 #    printf (format, "blocks change",num_blocks / num_blocks_start);

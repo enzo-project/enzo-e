@@ -237,6 +237,10 @@ void Parameters::write ( FILE * fp, bool full_names )
 
       // Print parameter
       if (full_names) {
+	Monitor monitor;
+	monitor.set_mode(monitor_mode_all);
+	// display Monitor prefix if full_names
+	monitor.write(fp,"Parameters","");
 	for (int i=0; i < n_curr; i++) {
 	  fprintf (fp,"%s:",group_curr[i].c_str());
 	}

@@ -199,15 +199,16 @@ void Monitor::write_ (FILE * fp, const char * component, const char * message) c
 
   // Print 
 
+  const char newline = (strcmp(message,"")==0) ? ' ' : '\n';
   if (fp == stdout) {
     PARALLEL_PRINTF 
-      ("%s %s %s %s\n",
-       process, time, component, message);
+      ("%s %s %s %s%c",
+       process, time, component, message,newline);
     fflush(stdout);
   } else {
     fprintf 
-      (fp,"%s %s %s %s\n",
-       process, time, component, message);
+      (fp,"%s %s %s %s%c",
+       process, time, component, message,newline);
   }
 }
 

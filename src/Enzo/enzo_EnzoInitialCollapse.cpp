@@ -12,6 +12,8 @@
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
+#define DEBUG_PERFORMANCE
+//----------------------------------------------------------------------
 
 void EnzoInitialCollapse::pup (PUP::er &p)
 {
@@ -36,6 +38,11 @@ void EnzoInitialCollapse::enforce_block
  ) throw()
 
 {
+
+  if (!block->is_leaf()) return;
+
+  Timer timer;
+  timer.start();
 
   ASSERT("EnzoInitialCollapse",
 	 "Block does not exist",
@@ -185,6 +192,13 @@ void EnzoInitialCollapse::enforce_block
     }
   }
 
+#ifdef DEBUG_PERFORMANCE  
+  if (CkMyPe()==0) {
+    CkPrintf ("%s:%d %s DEBUG_PERFORMANCE %f\n",
+	      __FILE__,__LINE__,block->name().c_str(),
+	      timer.value());
+  }
+#endif  
   // Initialize particles
 
   Particle particle = block->data()->particle();
