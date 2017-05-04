@@ -240,6 +240,7 @@ void EnzoBlock::r_solver_cg_loop_0a (CkReductionMsg * msg)
     static_cast<EnzoSolverCg*> (this->solver());
 
   solver->loop_0a<T>(this,msg);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -283,6 +284,7 @@ void EnzoBlock::r_solver_cg_loop_0b (CkReductionMsg * msg)
     static_cast<EnzoSolverCg*> (this->solver());
 
   solver->loop_0b<T>(this,msg);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
