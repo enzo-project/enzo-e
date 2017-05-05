@@ -404,6 +404,8 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::p_solver_mg0_shift_b(CkReductionMsg* msg)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_shift_b\n",
 	      CkMyPe(),name().c_str(),this);
@@ -442,6 +444,7 @@ void EnzoBlock::p_solver_mg0_shift_b(CkReductionMsg* msg)
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_shift_b\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -586,6 +589,7 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 void EnzoBlock::p_solver_mg0_solve_coarse()
 /// [*]
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   long double reduce[1] = {0};
   
   CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_barrier(NULL), 
@@ -595,12 +599,15 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 	      CkMyPe(),name().c_str(),this);
 #endif
   contribute(0, reduce, sum_long_double_type, callback);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   delete msg;
 
 #ifdef DEBUG_ENTRY
@@ -627,6 +634,7 @@ void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
     ERROR1("EnzoSolverMg0::p_solver_mg0_solve_coarse()",
 	   "precision %d not recognized", precision);
 
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -634,6 +642,7 @@ void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
 void EnzoBlock::p_solver_mg0_pre_smooth()
 /// [*]
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_pre_smooth\n",
 	      CkMyPe(),name().c_str(),this);
@@ -662,6 +671,7 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_pre_smooth\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -777,6 +787,7 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
 /// [*]
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_restrict_recv\n",
 	      CkMyPe(),name().c_str(),this);
@@ -805,6 +816,7 @@ void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_restrict_recv\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
@@ -966,6 +978,7 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
 void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   // Save message
   if (msg != NULL) mg_msg_ = msg;
 
@@ -1004,6 +1017,7 @@ void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_prolong_recv\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1087,6 +1101,7 @@ void EnzoSolverMg0::prolong_recv
 void EnzoBlock::p_solver_mg0_post_smooth()
 /// [*]
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_post_smooth\n",
 	      CkMyPe(),name().c_str(),this);
@@ -1115,6 +1130,7 @@ void EnzoBlock::p_solver_mg0_post_smooth()
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_post_smooth\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------

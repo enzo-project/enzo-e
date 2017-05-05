@@ -316,6 +316,8 @@ void EnzoSolverCg::loop_0b
 void EnzoBlock::r_solver_cg_matvec()
 {
   
+  performance_start_(perf_compute,__FILE__,__LINE__);
+
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
@@ -334,6 +336,8 @@ void EnzoBlock::r_solver_cg_matvec()
     solver->shift_1<long double>(enzo_block);
   else 
     ERROR1("EnzoSolverCg()", "precision %d not recognized", precision);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -442,11 +446,14 @@ void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
 template <class T>
 void EnzoBlock::p_solver_cg_loop_2 ()
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
   solver->loop_2b<T>(this);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+  
 }
 
 //----------------------------------------------------------------------

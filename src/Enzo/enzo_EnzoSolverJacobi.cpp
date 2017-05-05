@@ -105,6 +105,7 @@ void EnzoSolverJacobi::apply
 
 void EnzoBlock::p_solver_jacobi_continue()
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p jacobi DEBUG_ENTRY enter p_solver_jacobi_continue\n",
 	      CkMyPe(),name().c_str(),this);
@@ -121,6 +122,7 @@ void EnzoBlock::p_solver_jacobi_continue()
     CkPrintf ("%d %s %p jacobi DEBUG_ENTRY  exit p_solver_jacobi_continue\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
