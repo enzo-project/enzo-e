@@ -24,6 +24,7 @@ BEGIN {
     num_blocks_start = 0;
     zones_per_block = 1;
     total_zones_per_block = 1;
+    first_solver = 1;
 }
 
 /processors/{num_processors = $6; }
@@ -136,6 +137,28 @@ BEGIN {
 /initial time-usec/  {time_initial  = $6}
 /cycle time-usec/    {time_cycle    = $6}
 /compute time-usec/  {time_compute  = $6};
+// {
+    if (in_solver == 1 && $3 != "Solver") {
+	print "time_solver = ",$2 - time_solver;
+	time_solver = $2 - time_solver;
+	in_solver = 0;
+	
+    }
+}
+/ Solver / {
+    if (first_solver==1) {
+	time_solver = time_last;
+	print "time_solver = ",time_solver;
+	first_solver = 0;
+    }
+    in_solver = 1;
+}
+// {
+    if (first_solver==1) {
+	time_last = $2;
+	print "time_last = ",time_last;
+    }
+}
 /adapt_apply time-usec/    {time_adapt_apply    = $6};
 /adapt_apply_sync time-usec/    {time_adapt_apply_sync    = $6};
 /adapt_notify time-usec/    {time_adapt_notify    = $6};
@@ -286,17 +309,18 @@ END {
     printf (format, "Stopping",time_stopping*t_scale);
     
 
-    printf ("\nSOLVER");
-    if (time_per_iter > 0) {
-	print;
-	printf (format, "time per block",time_per_iter/num_blocks);
-	printf (format, "time per real zone",time_per_iter/(num_blocks*zones_per_block));
-	printf (format, "time per zone",time_per_iter/(num_blocks*total_zones_per_block));
-	printf (format_int, "solver max-iter",max_iter);
-	printf (format, "time per iter",time_per_iter);
-    } else {
-	print " not called"
-    }
+    printf ("\nSOLVER\n");
+#    if (time_per_iter > 0) {
+#	print;
+#	printf (format, "time per block",time_per_iter/num_blocks);
+#	printf (format, "time per real zone",time_per_iter/(num_blocks*zones_per_block));
+#	printf (format, "time per zone",time_per_iter/(num_blocks*total_zones_per_block));
+#	printf (format_int, "solver max-iter",max_iter);
+#	printf (format, "time per iter",time_per_iter);
+#    } else {
+#	print " not called"
+#    }
+    printf (format, "Time Solver",time_solver);
 
     printf ("\nPARTICLES");
     

@@ -508,14 +508,6 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
   TRACE_MG(enzo_block,"EnzoSolverMg0::begin_cycle()");
 
-  if (enzo_block->index().is_root()) {
-    Monitor* monitor = enzo_block->simulation()->monitor();
-    if (iter_ == 0)  
-      monitor->print("Enzo", "BiCgStab iter %04d  rho0 %.16g",
-		     iter_,(double)(rho0_));
-    if (monitor_iter_ && (iter_ % monitor_iter_) == 0 ) 
-      monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
-  }
   if (is_converged_(enzo_block)) {
 
     TRACE_MG(enzo_block,"converged");
