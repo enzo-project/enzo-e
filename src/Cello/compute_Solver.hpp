@@ -115,8 +115,9 @@ protected: // functions
   /// Clean up after a solver is done and returning to its callback_
   void end_(Block * block);
 
-  void monitor_output_(Block * block, int iter, double rr0,
-		       double rr_min, double rr, double rr_max,
+  void monitor_output_(Block * block, int iter,
+		       double rr0=0.0,
+		       double rr_min=0.0, double rr=0.0, double rr_max=0.0,
 		       bool final = false) throw();
   
   /// Perform vector copy X <- Y

@@ -28,6 +28,8 @@
 #  define PRINT_BDRX ;
 #endif
 
+#define NEW_REFRESH
+
 //----------------------------------------------------------------------
 
 EnzoSolverJacobi::EnzoSolverJacobi
@@ -72,9 +74,17 @@ void EnzoSolverJacobi::apply
 
   const int num_fields = field.field_count();
 
+#ifdef NEW_REFRESH
+  refresh.add_field (ix_);
+  //  refresh.add_field (id_);
+
+  //  refresh.add_field (ir_);
+  //  refresh.add_field (ib_);
+#else
   refresh.add_all_fields(num_fields);
   refresh.add_field (id_);
   refresh.add_field (ir_);
+#endif  
 
   // try refresh.add_field(ix);
 

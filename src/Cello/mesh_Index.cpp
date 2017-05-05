@@ -200,6 +200,18 @@ bool Index::is_root() const
 
 //----------------------------------------------------------------------
 
+bool Index::is_zero() const
+{ return (a_[0].array == 0 &&
+	  a_[1].array == 0 &&
+	  a_[2].array == 0 &&
+	  a_[0].tree == 0 &&
+	  a_[1].tree == 0 &&
+	  a_[2].tree == 0);
+}
+	  
+
+//----------------------------------------------------------------------
+
 void Index::array (int * ix, int *iy, int *iz) const
 { 
   if (ix) (*ix) = a_[0].array;

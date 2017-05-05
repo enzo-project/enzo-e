@@ -43,9 +43,11 @@ Refresh * Solver::refresh(size_t index)
 //======================================================================
 
 void Solver::monitor_output_
-(Block * block,
- int iter, double rr0,
- double rr_min, double rr, double rr_max,
+(Block * block, int iter,
+ double rr0,
+ double rr_min,
+ double rr,
+ double rr_max,
  bool final) throw()
 {
   Monitor * monitor = block->simulation()->monitor();
@@ -54,9 +56,9 @@ void Solver::monitor_output_
 		 this->name().c_str(),
 		 final ? "final" : "",
 		 iter,
-		 (double)(rr    / rr0),
-		 (double)(rr_min/ rr0),
-		 (double)(rr_max/ rr0));
+		 (rr0 != 0) ? (rr    / rr0) : 0.0,
+		 (rr0 != 0) ? (rr_min/ rr0) : 0.0,
+		 (rr0 != 0) ? (rr_max/ rr0) : 0.0);
 }
 
 //----------------------------------------------------------------------
