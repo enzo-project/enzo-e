@@ -22,21 +22,21 @@ printf ("%s",$dir);
    <table>
      <tr><th class=cello colspan=2><center><b>Enzo-P/Cello</b></center></th>
          <th class=charm colspan="2"><center><b>Charm++</b></center></th>
-         <th class=time colspan="2"><center><b>Time</b></center></th>
      </tr>
     <tr> <th class=cello> directory </th> <td class=cello> <?php printf ($dir) ?></td>
         <th class=charm> build </th> <td class=charm><?php system ("cat CHARM_BUILD") ?> </td>
-        <th class=time> date </th> <td class=time> <?php system ("cat DATE") ?></td> </tr>
-
    <tr> <th class=cello> branch </th> <td class=cello align="left"> <?php system ("hg branch") ?></td> 
         <th class=charm> version </th> <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
-        <th class=time> start </th> <td class=time> <?php system ("cat START") ?></td> </tr>
-
+        </tr>
    <tr> <th class=cello> revision </th>  <td class=cello> <?php system ("hg id -n") ?> </td>
     <th></th><td></td>
-        <th class=time> duration </th> <td class=time> <?php system ("cat TIME") ?> min</td> </tr>
+    </tr>
+<tr>         <th class=time ><center><b>Time</b></center></th>
+        <td class=time> <?php system ("cat DATE") ?></td> 
+     <td class=time> <?php system ("cat START") ?></td>
+    <td class=time> <?php system ("cat TIME") ?> min</td></tr>    
    </table>
- <?php
+   <?php
 
      //----------------------------------------------------------------------
 
@@ -712,8 +712,7 @@ printf ("</tr></table></br>\n");
    /* <code>Stop:&nbsp; <?php system ("cat STOP") ?></code> */
 
 //======================================================================
-     
-     
+
      echo "<a name=\"enzop\"><h1>Enzo-P application tests</h1>";
 
 test_group("Method: ppm");

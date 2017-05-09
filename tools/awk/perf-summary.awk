@@ -25,6 +25,8 @@ BEGIN {
     zones_per_block = 1;
     total_zones_per_block = 1;
     first_solver = 1;
+    index_solver = 0;
+    num_solvers = 0;
 }
 
 /processors/{num_processors = $6; }
@@ -73,7 +75,20 @@ BEGIN {
 }
 
 # Linear Solver
-/iter 0000/  {time_start=$2;}
+/ iter /  {
+    # ASSUMES ONLY FIRST AND LAST ITERATIONS OUTPUT
+    # (i.e. monitor_iter = 0 for all solvers)
+    time=$2
+    name=$4;
+    iter=$6;
+    if (iter == "0000") {
+	index_solver++;
+	if (index_solver > num_solvers) num_solvers = index_solver;
+    } else {
+	index_solver--;
+    }
+    solver_time[name] = time - solver_time[name];
+}
 
 # Linear Solver
 /final iter/ {
@@ -137,28 +152,6 @@ BEGIN {
 /initial time-usec/  {time_initial  = $6}
 /cycle time-usec/    {time_cycle    = $6}
 /compute time-usec/  {time_compute  = $6};
-// {
-    if (in_solver == 1 && $3 != "Solver") {
-	print "time_solver = ",$2 - time_solver;
-	time_solver = $2 - time_solver;
-	in_solver = 0;
-	
-    }
-}
-/ Solver / {
-    if (first_solver==1) {
-	time_solver = time_last;
-	print "time_solver = ",time_solver;
-	first_solver = 0;
-    }
-    in_solver = 1;
-}
-// {
-    if (first_solver==1) {
-	time_last = $2;
-	print "time_last = ",time_last;
-    }
-}
 /adapt_apply time-usec/    {time_adapt_apply    = $6};
 /adapt_apply_sync time-usec/    {time_adapt_apply_sync    = $6};
 /adapt_notify time-usec/    {time_adapt_notify    = $6};
@@ -310,6 +303,12 @@ END {
     
 
     printf ("\nSOLVER\n");
+
+    for (name in solver_time) {
+	printf (format, "Solver " name, solver_time[name]);
+    }
+	
+    
 #    if (time_per_iter > 0) {
 #	print;
 #	printf (format, "time per block",time_per_iter/num_blocks);
@@ -320,7 +319,6 @@ END {
 #    } else {
 #	print " not called"
 #    }
-    printf (format, "Time Solver",time_solver);
 
     printf ("\nPARTICLES");
     

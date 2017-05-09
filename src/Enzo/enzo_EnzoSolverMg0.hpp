@@ -181,8 +181,6 @@ protected: // methods
   template <class T>
   void prolong_send_(EnzoBlock * enzo_block) throw();
 
-  void monitor_output_(EnzoBlock * enzo_block) throw();
-
   bool is_converged_(EnzoBlock * enzo_block) const;
 
   /// Allocate temporary Fields

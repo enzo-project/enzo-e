@@ -398,7 +398,7 @@
 #undef CK_TEMPLATES_ONLY
 
 // #define DEBUG_ENTRY
-
+// #define DEBUG_FIELD
 // #define DEBUG_BICGSTAB
 
 #ifdef DEBUG_BICGSTAB
@@ -410,6 +410,51 @@
 #   define TRACE_BICGSTAB(F,B) /*  ...  */
 #endif
 
+#ifdef DEBUG_FIELD
+
+#   define TRACE_BCG(block,msg)						\
+  CkPrintf ("%d %s TRACE_BCG %s\n",					\
+	    CkMyPe(),(block != NULL) ? block->name().c_str() : "root",msg); \
+  fflush(stdout);
+
+#define TRACE_FIELD(IX,NAME)						\
+  {									\
+    Data * data = enzo_block->data();					\
+    Field field = data->field();					\
+    T * X = (T*) field.values(IX);					\
+    double xx=0.0;							\
+    double yy=0.0;							\
+    double xs=0.0;							\
+    double ys=0.0;							\
+    for (int iz=0; iz<mz_; iz++) {					\
+      for (int iy=0; iy<my_; iy++) {					\
+	for (int ix=0; ix<mx_; ix++) {					\
+	  int i = ix + mx_*(iy + my_*iz);				\
+	  xs+=X[i];							\
+	  xx+=X[i]*X[i];						\
+	}								\
+      }									\
+    }									\
+    for (int iz=gz_; iz<mz_-gz_; iz++) {				\
+      for (int iy=gy_; iy<my_-gy_; iy++) {				\
+	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
+	  int i = ix + mx_*(iy + my_*iz);				\
+	  ys+=X[i];							\
+	  yy+=X[i]*X[i];						\
+	}								\
+      }									\
+    }									\
+    xx = sqrt(xx);							\
+    yy = sqrt(yy);							\
+    CkPrintf ("%d %s TRACE_FIELD BCG %s [%g] (%g)\n",			\
+	      __LINE__,enzo_block->name().c_str(),NAME,			\
+	      xs/xx,ys/yy);						\
+  }
+
+#else
+
+#   define TRACE_FIELD(IX,NAME) /* ... */
+#endif
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
@@ -637,6 +682,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
       R[i] = R0[i] = P[i] = B[i];
     }
 
+    TRACE_FIELD(ir_,"R");
     /// Compute local contributions to beta_n_ = DOT(R, R)
     reduce = 0.0;
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
@@ -700,19 +746,22 @@ template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw()
     err_max_ = std::max(err_, err_max_);
   }
 
-  /// output solution progress (iteration, residual, etc)
-  if (enzo_block->index().is_root()) {
-    Monitor* monitor = enzo_block->simulation()->monitor();
-    if (iter_ == 0)  
-      monitor->print("Enzo", "BiCgStab iter %04d  rho0 %.16g",
-		     iter_,(double)(rho0_));
-    if (monitor_iter_ && (iter_ % monitor_iter_) == 0 ) 
-      monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
-  }
-
   const bool is_converged = (err_ < res_tol_);
   const bool is_diverged = (iter_ >= iter_max_);
   
+  /// monitor output solution progress (iteration, residual, etc)
+
+  const bool l_output =
+    ( enzo_block->index().is_root() &&
+      ( (iter_ == 0) ||
+	(is_converged || is_diverged) ||
+	(monitor_iter_ && (iter_ % monitor_iter_) == 0 )) );
+
+  if (l_output) {
+    Monitor* monitor = enzo_block->simulation()->monitor();
+    monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
+  }
+
   if (is_converged) {
 
     this->end<T>(enzo_block, return_converged);
@@ -738,6 +787,8 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("start coarse solve()",enzo_block);
 
+  TRACE_FIELD(ip_,"P");
+  TRACE_FIELD(iy_,"Y");
   /// access field container on this block
   Data* data = enzo_block->data();
   Field field = data->field();
@@ -960,6 +1011,9 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
     }
   }
 
+  TRACE_FIELD(iv_,"V");
+  TRACE_FIELD(ip_,"P");
+  TRACE_FIELD(iy_,"Y");
   /// compute alpha factor in BiCgStab algorithm (all blocks)
   alpha_ = beta_n_ / vr0_;
 
@@ -973,6 +1027,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
     T* X = (T*) field.values(ix_);
     T* Y = (T*) field.values(iy_);
 
+    TRACE_FIELD(ix_,"X");
     /// update: Q = -alpha_*V + R
     /// update: X = alpha_*Y + X
 
@@ -1216,8 +1271,8 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
       T yshift = -ys_ / bc_;
       T ushift = -us_ / bc_;
       for (int i=0; i<m; i++) {
-	Y[i] += yshift;
-	U[i] += ushift;
+    	Y[i] += yshift;
+    	U[i] += ushift;
       }
     }
   }

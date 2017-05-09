@@ -12,6 +12,7 @@
 // #define DEBUG_ENTRY
 // #define DEBUG_SMOOTH
 // #define DEBUG_VERBOSE
+// #define DEBUG_SOLVER
 
 #if defined(DEBUG_SMOOTH) && defined(DEBUG_VERBOSE)
 #   define PRINT_BDRX				\
@@ -122,7 +123,7 @@ void EnzoBlock::p_solver_jacobi_continue()
     CkPrintf ("%d %s %p jacobi DEBUG_ENTRY  exit p_solver_jacobi_continue\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -158,6 +159,7 @@ void EnzoSolverJacobi::apply_(Block * block)
   int mx,my,mz;
   field.dimensions(ix_,&mx,&my,&mz);
 
+
   const int g0 = n_;
 
   const int ix0 = (mx > 1) ? g0 : 0;
@@ -167,7 +169,7 @@ void EnzoSolverJacobi::apply_(Block * block)
   A_->diagonal (id_, block,g0);
 
   for (int iter=0; iter<n_; iter++) {
-    
+
     /// Loop bounds minimal given iteration, ending at
     /// ghost_depth iter=n_-1
 
@@ -217,7 +219,6 @@ void EnzoSolverJacobi::apply_(Block * block)
 	      __FILE__,__LINE__,block->name().c_str());
 #endif
     PRINT_BDRX;
-
   }
   
 #ifdef DEBUG_SMOOTH

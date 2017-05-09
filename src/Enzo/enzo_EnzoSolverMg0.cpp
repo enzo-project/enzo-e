@@ -444,7 +444,7 @@ void EnzoBlock::p_solver_mg0_shift_b(CkReductionMsg* msg)
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_shift_b\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -508,7 +508,24 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 
   TRACE_MG(enzo_block,"EnzoSolverMg0::begin_cycle()");
 
-  if (is_converged_(enzo_block)) {
+  // Monitor output
+  
+  bool is_converged = is_converged_(enzo_block);
+
+  const int iter = enzo_block->mg_iter();
+
+  const bool l_output =
+    ( ( enzo_block->index().is_zero() && level == max_level_) &&
+      ( (iter == 0) ||
+	(is_converged) ||
+	(monitor_iter_ && (iter % monitor_iter_) == 0 )) );
+
+  if (l_output) {
+    Monitor* monitor = enzo_block->simulation()->monitor();
+    monitor_output_(enzo_block,iter,0.0,0.0,0.0,0.0);
+  }
+
+  if (is_converged) {
 
     TRACE_MG(enzo_block,"converged");
 
@@ -663,7 +680,7 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_pre_smooth\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -692,6 +709,8 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
   solve_coarse->set_sync_id (4);
   solve_coarse->set_callback(CkIndex_EnzoBlock::p_solver_mg0_solve_coarse());
   
+  DEBUG_FIELD(ix_,"X");
+  DEBUG_FIELD(ib_,"B");
   solve_coarse->apply(A_,ix_,ib_,enzo_block);
 
   
@@ -765,7 +784,9 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   //  </COMMON CODE>
 
-  DEBUG_FIELD(ir_,"R");
+  DEBUG_FIELD(ib_,"B");
+  DEBUG_FIELD(ix_,"X"); // XXXXX
+  DEBUG_FIELD(ir_,"R"); // XXXXX
 
   DEBUG_FIELD_MSG(enzo_block,"restrict_send");
   DEBUG_INDEX(enzo_block,"restrict_send",(&index_parent));
@@ -808,7 +829,7 @@ void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_restrict_recv\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
@@ -1009,7 +1030,7 @@ void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_prolong_recv\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1122,7 +1143,7 @@ void EnzoBlock::p_solver_mg0_post_smooth()
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_post_smooth\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
-  performance_stop_(perf_compute,__FILE__,__LINE__);
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1168,7 +1189,23 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
   
   enzo_block->mg_iter_increment();
 
-  if (is_converged_(enzo_block)) {
+  bool is_converged = is_converged_(enzo_block);
+
+  const int iter = enzo_block->mg_iter();
+	    
+  const int level = enzo_block->level();
+
+  const bool l_output =
+    ( ( enzo_block->index().is_zero() && level == max_level_) &&
+      ( (is_converged) ||
+	(monitor_iter_ && (iter % monitor_iter_) == 0 )) );
+
+  if (l_output) {
+    Monitor* monitor = enzo_block->simulation()->monitor();
+    monitor_output_(enzo_block,iter,0.0,0.0,0.0,0.0);
+  }
+
+  if (is_converged) {
 
     end_(enzo_block);
 

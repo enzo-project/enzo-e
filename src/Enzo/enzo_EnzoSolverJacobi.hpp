@@ -109,7 +109,6 @@ protected: // attributes
 
   /// Number of iterations
   int n_;
-
 };
 
 #endif /* ENZO_ENZO_SOLVER_JACOBI_HPP */
