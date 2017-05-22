@@ -163,6 +163,7 @@ struct fluxes
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
+#include "enzo_EnzoInitialSedovRandom"
 #include "enzo_EnzoInitialSoup.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
 

@@ -56,6 +56,15 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_pressure_in(0.0),
   initial_sedov_pressure_out(0.0),
   initial_sedov_density(0.0),
+  // EnzoInitialSedovRandom
+  initial_sedov_random_half_empty(false),
+  initial_sedov_random_grackle_cooling(false),
+  initial_sedov_random_max_blasts(0),
+  initial_sedov_random_radius_relative(0.0),
+  initial_sedov_random_pressure_in(0.0),
+  initial_sedov_random_pressure_out(0.0),
+  initial_sedov_random_density(0.0),
+  initial_sedov_random_te_multiplier(0),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -145,6 +154,16 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_sedov_pressure_in;
   p | initial_sedov_pressure_out;
   p | initial_sedov_density;
+
+  PUParray(p,initial_sedov_random_array,3);
+  p | initial_sedov_random_half_empty;
+  p | initial_sedov_random_grackle_cooling;
+  p | initial_sedov_random_max_blasts;
+  p | initial_sedov_random_radius_relative;
+  p | initial_sedov_random_pressure_in;
+  p | initial_sedov_random_pressure_out;
+  p | initial_sedov_random_density;
+  p | initial_sedov_random_te_multiplier;
 
   p | initial_turbulence_density;
   p | initial_turbulence_pressure;
@@ -311,6 +330,32 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:sedov:pressure_out",1e-5);
   initial_sedov_density = 
     p->value_float("Initial:sedov:density",1.0);
+
+  // Sedov Random Initialization
+
+  initial_sedov_random_array[0] = 
+    p->list_value_integer (0,"Initial:sedov_random:array",1);
+  initial_sedov_random_array[1] = 
+    p->list_value_integer (1,"Initial:sedov_random:array",1);
+  initial_sedov_random_array[2] = 
+    p->list_value_integer (2,"Initial:sedov_random:array",1);
+
+  initial_sedov_random_half_empty = 
+    p->value_logical ("Initial:sedov_random:half_empty",false);
+  initial_sedov_random_grackle_cooling = 
+    p->value_logical ("Initial:sedov_random:grackle_cooling",false);
+  initial_sedov_random_max_blasts = 
+    p->value_integer ("Initial:sedov_random:max_blasts",1);
+  initial_sedov_random_radius_relative = 
+    p->value_float   ("Initial:sedov_random:radius_relative",0.1);
+  initial_sedov_random_pressure_in = 
+    p->value_float   ("Initial:sedov_random:pressure_in",1.0);
+  initial_sedov_random_pressure_out =
+    p->value_float   ("Initial:sedov_random:pressure_out",1e-5);
+  initial_sedov_random_density = 
+    p->value_float   ("Initial:sedov_random:density",1.0);
+  initial_sedov_random_te_multiplier = 
+    p->value_integer  ("Initial:sedov_random:te_multiplier",1);
 
   // Collapse initialization
 

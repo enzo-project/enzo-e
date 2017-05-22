@@ -1,0 +1,99 @@
+Adapt {
+    list = [ "te_slope" ];
+    interval = 1;
+    max_level = 0;
+    te_slope {
+        field_list = [ "total_energy" ];
+        min_refine = 1000.0000000000;
+        type = "slope";
+    };
+}
+
+Boundary {
+    type = "periodic";
+}
+
+Domain {
+    lower = [ 0.0000000000000, 0.0000000000000, 0.0000000000000 ];
+    upper = [ 1.0000000000000, 1.0000000000000, 1.0000000000000 ];
+}
+
+Field {
+    alignment = 8;
+    courant = 0.80000000000000;
+    ghost_depth = 4;
+    list = [ "density", "velocity_x", "velocity_y", "velocity_z", "total_energy", "internal_energy", "pressure" ];
+    padding = 0;
+    prolong = "linear";
+}
+
+Initial {
+    list = ["sedov_random"];
+    sedov_random {
+        rank = 3;
+        array = [ 2, 2, 2 ];
+        max_blasts = 4;
+        te_multiplier = 2;
+        half_empty = true;
+    }
+}
+
+Mesh {
+    root_blocks = [ 4, 4, 4 ];
+    root_rank = 3;
+    root_size = [ 64, 64, 64 ];
+}
+
+Method {
+    list = [ "ppm" ];
+    ppm {
+        diffusion = true;
+        dual_energy = false;
+        flattening = 3;
+        steepening = true;
+     };
+ }
+
+Output {
+    list = [ "data", "mesh", "de", "te" ];
+    data {
+        field_list = [ "density" , "total_energy" , "internal_energy" ];
+        dir   = ["SEDOV_RANDOM_%03d","cycle"];
+        name = [ "sedov-random-data-%03d-%03d.h5", "cycle", "proc" ];
+        type = "data";
+        include "input/schedule_cycle_10.incl"
+    };
+    de {
+        axis = "z";
+        include "input/colormap_seashore.incl"
+        field_list = [ "density" ];
+        image_reduce_type = "avg";
+        dir   = ["SEDOV_RANDOM_%03d","cycle"];
+        name = [ "sedov-random-de-%03d.png", "cycle" ];
+        type = "image";
+        include "input/schedule_cycle_10.incl"
+    };
+    te {
+        axis = "z";
+        include "input/colormap_blackbody.incl"
+        field_list = [ "total_energy" ];
+        image_log = true;
+        name = [ "sedov-random-te-%03d.png", "cycle" ];
+        dir   = ["SEDOV_RANDOM_%03d","cycle"];
+        type = "image";
+        include "input/schedule_cycle_10.incl"
+    };
+    mesh {
+        include "input/colormap_rainbow.incl"
+        image_type = "mesh";
+        dir   = ["SEDOV_RANDOM_%03d","cycle"];
+        name = [ "sedov-random-mesh-%03d.png", "cycle" ];
+        type = "image";
+        include "input/schedule_cycle_10.incl"
+    };
+}
+
+Stopping {
+    cycle = 100;
+    interval = 1;
+}
