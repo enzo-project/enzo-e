@@ -429,8 +429,8 @@ if (mpi_path != ''):
 #----------------------------------------------------------------------
 
 if (use_grackle != 0):
-      cpppath.append(grackle_path)
-      libpath.append(grackle_path)
+      cpppath.append(grackle_path + '/include')
+      libpath.append(grackle_path + '/lib')
 
 #----------------------------------------------------------------------
 # LIBPNG PATHS

@@ -14,11 +14,11 @@
 EnzoInitialGrackleTest::EnzoInitialGrackleTest 
 (const EnzoConfig * config) throw ()
   : Initial(config->initial_cycle, config->initial_time)
-#ifdef CONFIG_USE_GRACKLE
-    ,chemistry_(& config->method_grackle_chemistry),
-    units_(& config->method_grackle_units)
-#endif
 { 
+#ifdef CONFIG_USE_GRACKLE
+    chemistry_ = config->method_grackle_chemistry;
+    units_     = config->method_grackle_units;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -33,9 +33,9 @@ void EnzoInitialGrackleTest::pup (PUP::er &p)
 
 #ifdef CONFIG_USE_GRACKLE
   WARNING("EnzoInitialGrackleTest::pup()","Skipping units_");
-  //  const code_units      * units_;
+    code_units        units_;
   WARNING("EnzoInitialGrackleTest::pup()", "Skipping chemistry_");
-  //  const chemistry_data  * chemistry_;
+    chemistry_data  * chemistry_;
 #endif
 }
 
@@ -53,64 +53,41 @@ void EnzoInitialGrackleTest::enforce_block
 #ifndef CONFIG_USE_GRACKLE
 
   ERROR("EnzoInitialGrackleTest::compute()",
-	"Trying to use Initialization 'grackle_test' with "
-	"Grackle configuration turned off!");
+  "Trying to use Initialization 'grackle_test' with "
+  "Grackle configuration turned off!");
 
 #else /* CONFIG_USE_GRACKLE */
 
   ASSERT("EnzoInitialGrackleTest",
-	 "Block does not exist",
-	 block != NULL);
+   "Block does not exist",
+   block != NULL);
 
   Field field = block->data()->field();
 
+  grackle_field_data grackle_fields_;
 
-  gr_float * density 
-    = (gr_float *) field.values("density");
-  gr_float * internal_energy  
-    = (gr_float *) field.values("internal_energy");
-  gr_float * total_energy  
-    = (gr_float *) field.values("total_energy");
-  gr_float * velocity_x
-    = (gr_float *) field.values("velocity_x");
-  gr_float * velocity_y
-    = (gr_float *) field.values("velocity_y");
-  gr_float * velocity_z
-    = (gr_float *) field.values("velocity_z");
-  gr_float * HI_density 
-    = (gr_float *) field.values("HI_density");
-  gr_float * HII_density 
-    = (gr_float *) field.values("HII_density");
-  gr_float * HM_density 
-    = (gr_float *) field.values("HM_density");
-  gr_float * HeI_density 
-    = (gr_float *) field.values("HeI_density");
-  gr_float * HeII_density 
-    = (gr_float *) field.values("HeII_density");
-  gr_float * HeIII_density 
-    = (gr_float *) field.values("HeIII_density");
-  gr_float * H2I_density 
-    = (gr_float *) field.values("H2I_density");
-  gr_float * H2II_density 
-    = (gr_float *) field.values("H2II_density");
-  gr_float * DI_density 
-    = (gr_float *) field.values("DI_density");
-  gr_float * DII_density 
-    = (gr_float *) field.values("DII_density");
-  gr_float * HDI_density 
-    = (gr_float *) field.values("HDI_density");
-  gr_float * e_density 
-    = (gr_float *) field.values("e_density");
-  gr_float * metal_density 
-    = (gr_float *) field.values("metal_density");
-  gr_float * cooling_time 
-    = (gr_float *) field.values("cooling_time");
-  gr_float * temperature 
-    = (gr_float *) field.values("temperature");
-  gr_float * pressure 
-    = (gr_float *) field.values("pressure");
-  gr_float * gamma 
-    = (gr_float *) field.values("gamma");
+  grackle_fields_.density         = (gr_float *) field.values("density");
+  grackle_fields_.internal_energy = (gr_float *) field.values("internal_energy");
+  grackle_fields_.x_velocity      = (gr_float *) field.values("velocity_x");
+  grackle_fields_.y_velocity      = (gr_float *) field.values("velocity_y");
+  grackle_fields_.z_velocity      = (gr_float *) field.values("velocity_z");
+  grackle_fields_.HI_density      = (gr_float *) field.values("HI_density");
+  grackle_fields_.HII_density     = (gr_float *) field.values("HII_density");
+  grackle_fields_.HM_density      = (gr_float *) field.values("HM_density");
+  grackle_fields_.HeI_density     = (gr_float *) field.values("HeI_density");
+  grackle_fields_.HeII_density    = (gr_float *) field.values("HeII_density");
+  grackle_fields_.HeIII_density   = (gr_float *) field.values("HeIII_density");
+  grackle_fields_.H2I_density     = (gr_float *) field.values("H2I_density");
+  grackle_fields_.H2II_density    = (gr_float *) field.values("H2II_density");
+  grackle_fields_.DI_density      = (gr_float *) field.values("DI_density");
+  grackle_fields_.DII_density     = (gr_float *) field.values("DII_density");
+  grackle_fields_.HDI_density     = (gr_float *) field.values("HDI_density");
+  grackle_fields_.e_density       = (gr_float *) field.values("e_density");
+  grackle_fields_.metal_density   = (gr_float *) field.values("metal_density");
+  //grackle_fields_.cooling_time  = (gr_float *) field.values("cooling_time");
+  //grackle_fields_.temperature   = (gr_float *) field.values("temperature");
+  //grackle_fields_.pressure      = (gr_float *) field.values("pressure");
+  //grackle_fields_.gamma         = (gr_float *) field.values("gamma");
 
   // Block size (excluding ghosts)
   int nx,ny;
@@ -131,7 +108,7 @@ void EnzoInitialGrackleTest::enforce_block
   field.ghost_depth(0,&gx,&gy);
 
   // WARNING("EnzoInitialGrackleTest",
-  // 		  "Assumes same ghost zone depth for all fields");
+  //      "Assumes same ghost zone depth for all fields");
 
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
@@ -139,9 +116,9 @@ void EnzoInitialGrackleTest::enforce_block
   const double mh     = 1.67262171e-24;
   const double kboltz = 1.3806504e-16;
 
-  gr_float temperature_units =  mh * pow(units_->a_units * 
-                                         units_->length_units /
-                                         units_->time_units, 2) / kboltz;
+  gr_float temperature_units =  mh * pow(units_.a_units * 
+                                         units_.length_units /
+                                         units_.time_units, 2) / kboltz;
 
   const double density_out = 1.0;
   const double density_in  = 0.125;
@@ -157,28 +134,28 @@ void EnzoInitialGrackleTest::enforce_block
 
       const bool in = (x + y < 0.3) ;
 
-      density[i] = in ? density_in : density_out;
-      internal_energy[i] = in ? (pressure_in) / (0.4 * density[i]) 
-	:                       (pressure_out) / (0.4 * density[i]) ;
+      grackle_fields_.density[i] = in ? density_in : density_out;
+      grackle_fields_.internal_energy[i] = in ? (pressure_in)  / (0.4 * grackle_fields_.density[i]) 
+                                              : (pressure_out) / (0.4 * grackle_fields_.density[i]);
 
-      HI_density[i]    = density[i] * chemistry_->HydrogenFractionByMass;
-      HII_density[i]   = density[i] * tiny_number;
-      HM_density[i]    = density[i] * tiny_number;
-      HeI_density[i]   = density[i] * (1.0 - chemistry_->HydrogenFractionByMass);
-      HeII_density[i]  = density[i] * tiny_number;
-      HeIII_density[i] = density[i] * tiny_number;
-      H2I_density[i]   = density[i] * tiny_number;
-      H2II_density[i]  = density[i] * tiny_number;
-      DI_density[i]    = density[i] * 2.0 * 3.4e-5;
-      DII_density[i]   = density[i] * tiny_number;
-      HDI_density[i]   = density[i] * tiny_number;
-      e_density[i]     = density[i] * tiny_number;
+      grackle_fields_.HI_density[i]    = grackle_fields_.density[i] * chemistry_->HydrogenFractionByMass;
+      grackle_fields_.HII_density[i]   = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.HM_density[i]    = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.HeI_density[i]   = grackle_fields_.density[i] * (1.0 - chemistry_->HydrogenFractionByMass);
+      grackle_fields_.HeII_density[i]  = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.HeIII_density[i] = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.H2I_density[i]   = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.H2II_density[i]  = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.DI_density[i]    = grackle_fields_.density[i] * 2.0 * 3.4e-5;
+      grackle_fields_.DII_density[i]   = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.HDI_density[i]   = grackle_fields_.density[i] * tiny_number;
+      grackle_fields_.e_density[i]     = grackle_fields_.density[i] * tiny_number;
       // solar metallicity
-      metal_density[i] = density[i] * chemistry_->SolarMetalFractionByMass;
+      grackle_fields_.metal_density[i] = grackle_fields_.density[i] * chemistry_->SolarMetalFractionByMass;
 
-      velocity_x[i] = 0.0;
-      velocity_y[i] = 0.0;
-      velocity_z[i] = 0.0;
+      grackle_fields_.x_velocity[i] = 0.0;
+      grackle_fields_.y_velocity[i] = 0.0;
+      grackle_fields_.z_velocity[i] = 0.0;
 
     }
   }

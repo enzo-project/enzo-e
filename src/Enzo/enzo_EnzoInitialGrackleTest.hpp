@@ -18,6 +18,7 @@ public: // interface
 
   /// CHARM++ constructor
   EnzoInitialGrackleTest() throw() { }
+  // EnzoInitialGrackleTest() throw();
   
   /// Constructor
   EnzoInitialGrackleTest
@@ -46,8 +47,8 @@ private:
 
 #ifdef CONFIG_USE_GRACKLE
 
-  const code_units      * units_;
-  const chemistry_data  * chemistry_;
+  code_units        units_;
+  chemistry_data  * chemistry_;// = new chemistry_data;
 
 #endif
   
