@@ -65,7 +65,8 @@ public:
       monitor_(NULL),
       fp_text_(),
       sync_text_()
-  { 
+  {
+    for (int i=0; i<256; i++) dir_checkpoint_[i]='\0';
     TRACE("Main::Main(CkMigrateMessage)");
   }
 
@@ -76,6 +77,7 @@ public:
     CBase_Main::pup(p);
     p|count_exit_;
     p|count_checkpoint_;
+    PUParray(p,dir_checkpoint_,256);
     WARNING ("Main::pup","skipping monitor_");
     if (p.isUnpacking()) monitor_ = Monitor::instance();
     //    p|*monitor_;
@@ -123,6 +125,7 @@ protected: // attributes
 
   int count_exit_; 
   int count_checkpoint_; 
+  char  dir_checkpoint_[256];
   Monitor * monitor_;
 
   /// Mapping of file name to File pointer for p_text_file_write()

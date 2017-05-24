@@ -65,8 +65,7 @@ public: // interface
   int size(std::string item) const
   {
     int count = 0;
-    std::set<std::pair<std::string,std::string> >::iterator it;
-    for (it=groups_.begin(); it != groups_.end(); it++) {
+    for (auto it=groups_.begin(); it != groups_.end(); it++) {
       if (it->second == item) ++count;
     }
     return count;
@@ -75,8 +74,8 @@ public: // interface
   std::string item (std::string group, int index)
   {
     int count = 0;
-    std::set<std::pair<std::string,std::string> >::iterator it;
-    for (it=groups_.begin(); it != groups_.end(); it++) {
+
+    for (auto it=groups_.begin(); it != groups_.end(); it++) {
       if (it->second == group) {
 	if (count == index) return it->first;
 	++count;

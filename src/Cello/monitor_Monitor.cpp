@@ -106,7 +106,7 @@ void Monitor::header () const
   print ("Define","CHANGESET     %s",CELLO_CHANGESET);
 #   endif
 #endif
-  print ("Define","CHARM_BUILD         %s",CELLO_BUILD);
+  print ("Define","CHARM_BUILD         %s",CHARM_BUILD);
 #ifdef CONFIG_NEW_CHARM
   print ("Define","CHARM_NEW_CHARM %s","Yes");
 #else
@@ -129,8 +129,7 @@ bool Monitor::is_active(const char * component) const throw ()
   if (mode_ == monitor_mode_root && CkMyPe() != 0) 
     return false;
   
-  std::map<std::string,int>::const_iterator it_active
-    = group_mode_.find(component);
+  auto it_active = group_mode_.find(component);
 
   bool in_list = it_active != group_mode_.end();
 

@@ -127,7 +127,7 @@ void ScalarExpr::evaluate (T * value, double t,
     }
   }
 
-  if (mv) delete [] mv; mv = 0;
+  if (mv) { delete [] mv; }
   delete [] value_temp;
   delete [] z;
   delete [] y;

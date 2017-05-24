@@ -132,8 +132,8 @@ int ParticleDescr::num_types() const
 
 int ParticleDescr::type_index (std::string type_name) const
 {
-  std::map<const std::string,int>::const_iterator it;
-  it=type_index_.find(type_name);
+
+  auto it=type_index_.find(type_name);
 
   return (it != type_index_.end()) ? it->second : -1;
 }
@@ -224,9 +224,7 @@ int ParticleDescr::attribute_index (int it, std::string attribute_name) const
 	  it,
 	  check_(it));
 
-  std::map<const std::string,int>::const_iterator iter;
-
-  iter=attribute_index_[it].find(attribute_name);
+  auto iter=attribute_index_[it].find(attribute_name);
 
   int index = (iter != attribute_index_[it].end()) ? iter->second : -1;
 
@@ -339,9 +337,7 @@ int ParticleDescr::constant_index (int it, std::string constant_name) const
 	  it,
 	  check_(it));
 
-  std::map<const std::string,int>::const_iterator iter;
-
-  iter=constant_index_[it].find(constant_name);
+  auto iter=constant_index_[it].find(constant_name);
 
   int index = (iter != constant_index_[it].end()) ? iter->second : -1;
 

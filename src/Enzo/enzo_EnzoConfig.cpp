@@ -245,21 +245,6 @@ void EnzoConfig::read(Parameters * p) throw()
   ppm_mol_weight = p->value_float
     ("Method:ppm:mol_weight",0.6);
 
-
-  physics_cosmology = p->value_logical ("Method:cosmology",false);
-  physics_cosmology_comoving_box_size = p->value_float
-    ("Method:cosmology:comoving_box_size", 64.0);
-  physics_cosmology_hubble_constant_now = p->value_float
-    ("Method:cosmology:hubble_constant_now",0.701);
-  physics_cosmology_initial_redshift = p->value_float
-    ("Method:cosmology:initial_redshift",  20.0);;
-  physics_cosmology_max_expansion_rate = p->value_float
-    ("Method:cosmology:max_expansion_rate", 0.01);
-  physics_cosmology_omega_lamda_now = p->value_float
-    ("Method:cosmology:omega_lambda_now",   0.721);
-  physics_cosmology_omega_matter_now = p->value_float
-    ("Method:cosmology:omega_matter_now",   0.279);
-
   // PM method and initialization
 
   method_pm_deposit_type = p->value_string ("Method:pm_deposit:type","cic");
@@ -378,6 +363,30 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","unknown");
+
+  //======================================================================
+  // PHYSICS: Cosmology
+  //======================================================================
+
+  physics_cosmology = p->value_logical ("Method:cosmology",false);
+
+  physics_cosmology_comoving_box_size = p->value_float
+    ("Method:cosmology:comoving_box_size", 64.0);
+
+  physics_cosmology_hubble_constant_now = p->value_float
+    ("Method:cosmology:hubble_constant_now",0.701);
+
+  physics_cosmology_initial_redshift = p->value_float
+    ("Method:cosmology:initial_redshift",  20.0);;
+
+  physics_cosmology_max_expansion_rate = p->value_float
+    ("Method:cosmology:max_expansion_rate", 0.01);
+
+  physics_cosmology_omega_lamda_now = p->value_float
+    ("Method:cosmology:omega_lambda_now",   0.721);
+
+  physics_cosmology_omega_matter_now = p->value_float
+    ("Method:cosmology:omega_matter_now",   0.279);
 
   //======================================================================
   // SOLVER

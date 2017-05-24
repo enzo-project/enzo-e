@@ -178,8 +178,7 @@ Performance::increment_counter(int index, long long value)
 int
 Performance::region_index (std::string name) const throw()
 {
-  std::map<const std::string,int>::const_iterator it;
-  it=region_index_.find(name);
+  auto it=region_index_.find(name);
   if (it != region_index_.end()) {
     return it->second;
   } else {

@@ -83,9 +83,7 @@ bool FieldDescr::is_field(const std::string & name) const throw()
 
 int FieldDescr::field_id(const std::string & name) const throw()
 {
-  //  return id_[name]; // ERROR IN PGI ON GORDON 11.9-0 64-bit
-  std::map<const std::string,int>::const_iterator it;
-  it=id_.find(name);
+  auto it = id_.find(name);
   if (it != id_.end()) {
     return it->second;
   } else {
