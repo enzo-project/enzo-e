@@ -228,7 +228,7 @@ define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
 # Library defines
 
-define_hdf5  =        ['H5_USE_16_API']
+define_hdf5  =        []
 
 define_png   =        ['NO_FREETYPE']
 
