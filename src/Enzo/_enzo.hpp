@@ -168,6 +168,7 @@ struct fluxes
 
 #include "enzo_EnzoRefineShock.hpp"
 
+#include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
