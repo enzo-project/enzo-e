@@ -34,10 +34,12 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
      2. we are using comoving coordinates
      3. baryon fields are present.
   */
-  if !(block->is_leaf() &&
-       comoving_coordinates_ &&
-       field.field_count() > 0)
-    { block->compute_done(); }
+  if (!(block->is_leaf() &&
+        comoving_coordinates_ &&
+        field.field_count() > 0))
+    {
+      block->compute_done();
+    }
 
   /* Compute adot/a at time = t-1/2dt (time-centered). */
 
@@ -52,14 +54,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
     exit(ENZO_FAIL);
   }
 
-  enzo_float Coefficient = enzo_block->dt()*dadt/a;
+  enzo_float Coefficient = block->dt()*dadt/a;
 
   /* Determine the size of the grids. */
 
   int i, dim, size = 1;
   int rank = enzo_block->rank();
   for (dim = 0; dim < rank; dim++)
-    size *= GridDimension[dim];
+    size *= enzo_block->GridDimension[dim];
 
   /* If we can, compute the pressure at the mid-point.
      We can, because we will always have an old baryon field now. */
@@ -86,8 +88,8 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
   // hard-code CR method to off
   int CRModel = 0;
-  enzo_float * cr_field, old_cr_field;
-  cr_field = old_cr_field = NULL;
+  enzo_float * cr_field = NULL;
+  enzo_float * old_cr_field = NULL;
 
   /* Get the necessary fields. */
   // For now, assume the existence of "old_<field>".
@@ -140,7 +142,7 @@ double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
 
   enzo_float dtExpansion = ENZO_HUGE_VAL;
 
-  if !(comoving_coordinates_)
+  if (!comoving_coordinates_)
     return (double) dtExpansion;
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
