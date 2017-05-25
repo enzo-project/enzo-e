@@ -30,11 +30,13 @@ extern "C" void FORTRAN_NAME(calc_dt)
    enzo_float *dt);
  
 extern "C" void FORTRAN_NAME(expand_terms)(
-   int *rank, int *isize, int *idual, float *coef, int *imethod, float *gamma,
-   float *p,  float *d, float *e, float *ge, 
-      float *u, float *v, float *w,
-   float *dold, float *eold, float *geold, float *uold, float *vold, 
-   float *wold, int *icr, float *ecr, float *ecrold);
+   int *rank, int *isize, int *idual, enzo_float *coef,
+   int *imethod, enzo_float *gamma,
+   enzo_float *p,  enzo_float *d, enzo_float *e, enzo_float *ge,
+   enzo_float *u, enzo_float *v, enzo_float *w,
+   enzo_float *dold, enzo_float *eold, enzo_float *geold,
+   enzo_float *uold, enzo_float *vold, enzo_float *wold,
+   int *icr, enzo_float *ecr, enzo_float *ecrold);
 
 extern "C" void FORTRAN_NAME(turboinit)
   (int *rank, int *nbox,
