@@ -1,20 +1,18 @@
 // See LICENSE_CELLO file for license and copyright information
 
-// See LICENSE_ENZO file for license and copyright information
-
-/// @file      enzo_SolveHydroEquations.cpp
-/// @author    Greg Bryan
-/// @date      November, 1994
-/// @brief     Solve the hydro equations, saving subgrid fluxes
+/// @file     enzo_EnzoMethodComovingExpansion.cpp
+/// @author   Britton Smith (bds006@ucsd.edu)
+/// @date     Wed May 24 12:25:56 PDT 2017
+/// @brief    Implements comoving expansion class
 
 #ifndef ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
 #define ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
 
-class Classname {
+class EnzoMethodComovingExpansion {
 
-  /// @class    Classname
-  /// @ingroup  Component
-  /// @brief    [\ref Component] 
+  /// @class    EnzoMethodComovingExpansion
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Encapsulate Enzo comoving expansion terms
 
 public: // interface
 
@@ -45,7 +43,6 @@ public: // interface
 private: // attributes
 
   int comoving_coordinates_;
-
 };
 
 #endif /* ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP */
