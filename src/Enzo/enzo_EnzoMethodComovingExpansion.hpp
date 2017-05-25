@@ -8,7 +8,7 @@
 #ifndef ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
 #define ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
 
-class EnzoMethodComovingExpansion {
+class EnzoMethodComovingExpansion : public Method {
 
   /// @class    EnzoMethodComovingExpansion
   /// @ingroup  Enzo
