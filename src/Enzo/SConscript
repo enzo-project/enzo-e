@@ -32,7 +32,7 @@ components.append(['hdf5','z'])
 
 libraries  = ['png','$FORTRANLIBS']
 
-includes = [Glob('*enzo*hpp'),'fortran.h']
+includes = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
 
 if (use_grackle):   libraries.append('grackle')
 

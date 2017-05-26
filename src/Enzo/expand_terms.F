@@ -1,4 +1,4 @@
-#include "fortran.def"
+#include "fortran.h"
 c=======================================================================
 c///////////////////////  SUBROUTINE EXPAND_TERMS  \\\\\\\\\\\\\\\\\\\\\
 c
@@ -33,20 +33,21 @@ c
 c-----------------------------------------------------------------------
 c
       implicit NONE
-#include "fortran_types.def"
+#define FORTRAN
+#include "fortran_types.h"
 c
 c     Arguments
 c
-      INTG_PREC isize, idual, imethod, rank, icr
-      R_PREC    gamma, coef
-      R_PREC    d(isize), p(isize), e(isize), ge(isize),
+      integer isize, idual, imethod, rank, icr
+      ENZO_REAL gamma, coef
+      ENZO_REAL d(isize), p(isize), e(isize), ge(isize),
      &        u(isize), v(isize), w(isize), ecr(isize)
-      R_PREC    dold(isize), eold(isize), geold(isize),
+      ENZO_REAL dold(isize), eold(isize), geold(isize),
      &        uold(isize), vold(isize), wold(isize), ecrold(isize)
 c
 c     Locals
 c
-      INTG_PREC i
+      integer i
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
 c=======================================================================
