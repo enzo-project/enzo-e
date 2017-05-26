@@ -107,3 +107,77 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   compute_done();
 }
 
+//----------------------------------------------------------------------
+
+double EnzoMethodGravity::timestep (Block * block) const throw()
+{
+  Field field = block->data()->field();
+  
+  int precision = field.precision(0);
+
+  if      (precision == precision_single)
+    return timestep_<float>      (block);
+  else if (precision == precision_double)
+    return timestep_<double>     (block);
+  else if (precision == precision_quadruple)
+    return timestep_<long double>(block);
+  else 
+    ERROR1("EnzoMethodGravity()", "precision %d not recognized", precision);
+}
+
+//----------------------------------------------------------------------
+
+template <class T>
+double EnzoMethodGravity::timestep_ (Block * block) const throw()
+{
+  Field field = block->data()->field();
+
+  int nx,ny,nz;
+  int mx,my,mz;
+  int gx,gy,gz;
+  field.size         (&nx,&ny,&nz);
+  field.dimensions (0,&mx,&my,&mz);
+  field.ghost_depth(0,&gx,&gy,&gz);
+
+  T * ax = (T*) field.values ("acceleration_x");
+  T * ay = (T*) field.values ("acceleration_y");
+  T * az = (T*) field.values ("acceleration_z");
+
+  double dt = std::numeric_limits<double>::max();
+
+  double hx,hy,hz;
+  block->cell_width(&hx,&hy,&hz);
+  
+  if (ax) {
+    for (int ix=gx; ix<nx+gx; ix++) {
+      for (int iy=gy; iy<ny+gy; iy++) {
+	for (int iz=gz; iz<nz+gz; iz++) {
+	  int i=ix + mx*(iy + iz*my);
+	  dt = std::min(dt,sqrt(hx/(fabs(ax[i]+1e-20))));
+	}
+      }
+    }
+  }
+  if (ay) {
+    for (int ix=gx; ix<nx+gx; ix++) {
+      for (int iy=gy; iy<ny+gy; iy++) {
+	for (int iz=gz; iz<nz+gz; iz++) {
+	  int i=ix + mx*(iy + iz*my);
+	  dt = std::min(dt,sqrt(hy/(fabs(ay[i]+1e-20))));
+	}
+      }
+    }
+  }
+  if (az) {
+    for (int ix=gx; ix<nx+gx; ix++) {
+      for (int iy=gy; iy<ny+gy; iy++) {
+	for (int iz=gz; iz<nz+gz; iz++) {
+	  int i=ix + mx*(iy + iz*my);
+	  dt = std::min(dt,sqrt(hz/(fabs(az[i]+1e-20))));
+	}
+      }
+    }
+  }
+
+  return 0.5*dt;
+}
