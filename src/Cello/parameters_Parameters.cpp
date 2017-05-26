@@ -11,6 +11,8 @@
 
 Parameters g_parameters;
 
+// #define TEMP_BYPASS_DESTRUCTOR
+
 //----------------------------------------------------------------------
 
 Parameters::Parameters(Monitor * monitor) 
@@ -46,12 +48,15 @@ Parameters::~Parameters()
 {
   // Iterate over all parameters, deleting their values
 
+
+#ifdef TEMP_BYPASS_DESTRUCTOR
   for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
     delete it_param->second;
   }
   delete parameter_tree_;
+#endif  
 }
 
 //----------------------------------------------------------------------
