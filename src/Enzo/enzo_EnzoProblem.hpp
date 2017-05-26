@@ -81,6 +81,9 @@ private: // functions
   virtual Restrict * create_restrict_
   (std::string type, Config * config) throw ();
 
+protected: // attributes
+
+  EnzoCosmology cosmology_;
 };
 
 #endif /* ENZO_ENZO_PROBLEM_HPP */

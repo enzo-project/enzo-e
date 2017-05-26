@@ -221,7 +221,9 @@ void FileHdf5::data_create
 			name.c_str(),
 			scalar_to_hdf5_(type),
 			data_space_id_,
-			data_prop_ );
+			H5P_DEFAULT,
+			data_prop_,
+			H5P_DEFAULT);
 
   // error check H5Dcreate
 
@@ -483,7 +485,7 @@ void FileHdf5::group_open () throw()
   
   // open group
 
-  group_id_ = H5Gopen(file_id_, group_name_.c_str());
+  group_id_ = H5Gopen(file_id_, group_name_.c_str(),H5P_DEFAULT);
 
   // error check H5Gopen()
 
@@ -510,7 +512,7 @@ void FileHdf5::group_create () throw()
   std::string group_rest = group_name_;
   group_rest.erase(0,1);
 
-  group_id_ = H5Gopen(file_id_,group_full.c_str());
+  group_id_ = H5Gopen(file_id_,group_full.c_str(),H5P_DEFAULT);
 
   // loop through ancestor groups
 
@@ -551,9 +553,10 @@ void FileHdf5::group_create () throw()
     hid_t group_new;
 
     if (group_exists) {
-      group_new = H5Gopen   (file_id_,group_full.c_str());
+      group_new = H5Gopen   (file_id_,group_full.c_str(), H5P_DEFAULT);
     } else {
-      group_new = H5Gcreate (file_id_,group_full.c_str(), H5P_DEFAULT);
+      group_new = H5Gcreate (file_id_,group_full.c_str(),
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
 
     // Close parent group
@@ -696,6 +699,7 @@ void FileHdf5::write_meta_
 			      name.c_str(),
 			      scalar_to_hdf5_(type),
 			      meta_space_id,
+			      H5P_DEFAULT,
 			      H5P_DEFAULT);
 
   // error check H5Acreate
@@ -722,7 +726,7 @@ void FileHdf5::write_meta_
 
 //----------------------------------------------------------------------
 
-int FileHdf5::scalar_to_hdf5_ (int type) const throw()
+hid_t FileHdf5::scalar_to_hdf5_ (int type) const throw()
 {
   // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
   // ( ) IEEE      -   F32BE F64BE     -
@@ -797,7 +801,7 @@ int FileHdf5::scalar_to_hdf5_ (int type) const throw()
 
 //----------------------------------------------------------------------
 
-int FileHdf5::hdf5_to_scalar_ (int hdf5_type) const throw()
+int FileHdf5::hdf5_to_scalar_ (hid_t hdf5_type) const throw()
 {
 
   H5T_class_t hdf5_class = H5Tget_class(hdf5_type);
@@ -1034,7 +1038,7 @@ void FileHdf5::close_space_ (hid_t space_id) throw()
 
 hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
 {
-  hid_t dataset_id = H5Dopen( group, name.c_str());
+  hid_t dataset_id = H5Dopen( group, name.c_str(), H5P_DEFAULT);
 
   // error check H5Dopen
 

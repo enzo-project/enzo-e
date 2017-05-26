@@ -31,6 +31,8 @@ void EnzoProblem::pup (PUP::er &p)
   TRACEPUP;
 
   Problem::pup(p);
+
+  p | cosmology_;
 }
 
 //======================================================================

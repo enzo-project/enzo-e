@@ -55,7 +55,7 @@ public: // interface
       ppm_use_minimum_pressure_support(false),
       ppm_mol_weight(0.0),
       field_gamma(0.0),
-      // Cosmology (NOT ACCESSED)
+      // Cosmology
       physics_cosmology(false),
       physics_cosmology_comoving_box_size(0.0),
       physics_cosmology_hubble_constant_now(0.0),
