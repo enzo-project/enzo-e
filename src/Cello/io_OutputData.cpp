@@ -126,7 +126,12 @@ void OutputData::write_block
     const int num_blocks = block->simulation()->hierarchy()->num_blocks();
     int count = 0;
     
-    // Contribute to DIR.blocks file
+    // Write DIR.parameters file
+    
+    std::string param_file_name = name_dir+"/"+name_dir+".parameters";
+    g_parameters.write(param_file_name.c_str(),false);
+    
+    // Contribute to DIR.block_list file
     
     count = (text_block_count_ == 0) ? num_blocks : 0;
     
