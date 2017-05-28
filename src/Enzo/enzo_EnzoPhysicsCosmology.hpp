@@ -27,8 +27,7 @@ public: // interface
     max_expansion_rate_(0.01),
     initial_redshift_(20.0),
     final_redshift_(0.0)
-  {
-  }
+  {  }
 
   /// Constructor
   EnzoPhysicsCosmology
@@ -51,9 +50,7 @@ public: // interface
       max_expansion_rate_(max_expansion_rate),
       initial_redshift_(initial_redshift),
       final_redshift_(final_redshift)
-  {
-    CkPrintf ("TRACE EnzoPhysicsCosmology\n");
-  }
+  {  }
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoPhysicsCosmology);

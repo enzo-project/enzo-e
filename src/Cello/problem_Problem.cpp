@@ -797,9 +797,6 @@ Physics * Problem::create_physics_
 Physics * Problem::physics (std::string type) const throw()
 {
   for (int i=0; i<physics_list_.size(); i++) {
-    CkPrintf ("Problem::physics %s physics_list[%d] = %s\n",
-	      type.c_str(),i,physics_list_[i]->type().c_str());
-    
     if (physics_list_[i]->type() == type) return physics_list_[i];
   }
   return NULL;

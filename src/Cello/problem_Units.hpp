@@ -24,9 +24,7 @@ public: // interface
     density_(1.0),
     temperature_(1.0),
     velocity_(1.0)
-  {
-    CkPrintf ("TRACE Units\n");
-  }
+  {  }
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(Units);

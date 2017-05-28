@@ -40,7 +40,4 @@ void Initial::enforce_block
  const Hierarchy  * hierarchy
  ) throw()
 {
-  CkPrintf ("Initial::enforce_block %d %g\n",cycle_,time_);
-    block->set_cycle(cycle_);
-    block->set_time(time_);
 }
