@@ -32,7 +32,7 @@ void Initial::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_block_
+void Initial::enforce_block
 (
  Block            * block,
  const FieldDescr * field_descr,
@@ -40,8 +40,7 @@ void Initial::enforce_block_
  const Hierarchy  * hierarchy
  ) throw()
 {
-  // Enforce fields
-
-  ERROR("Initial::enforce_block_",
-	"This function should not be called");
+  CkPrintf ("Initial::enforce_block %d %g\n",cycle_,time_);
+    block->set_cycle(cycle_);
+    block->set_time(time_);
 }

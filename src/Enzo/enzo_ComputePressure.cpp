@@ -157,13 +157,24 @@ int EnzoBlock::ComputePressure(enzo_float time,
     // enzo_float * species_HDI   = (enzo_float *) field.values("species_HDI");
 
     /* Find the temperature units if we are using comoving coordinates. */
- 
-    if (comoving_coordinates)
-      if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			    &TimeUnits, &VelocityUnits, this->time()) == ENZO_FAIL) {
-	fprintf(stderr, "Error in CosmologyGetUnits.\n");
-	return ENZO_FAIL;
-      }
+
+    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+      simulation()->problem()->physics("cosmology");
+
+    ASSERT ("EnzoBlock::ComputePressure()",
+	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
+	    ! (comoving_coordinates && (cosmology != NULL)) );
+    
+    if (comoving_coordinates) {
+
+      cosmology->get_units
+	  (&DensityUnits,
+	   &LengthUnits,
+	   &TemperatureUnits,
+	   &TimeUnits,
+	   &VelocityUnits,
+	   time);
+    }
  
     for (i = 0; i < size; i++) {
  
