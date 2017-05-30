@@ -500,7 +500,17 @@ alignment in memory, and memory padding between fields.
 :Default: :d:`"linear"`
 :Scope:     :c:`Cello`
 
-:e:`For adaptive mesh refinement, field values may need to be transferred from finer to coarser blocks, either from fine neighbor blocks in the refresh phase, or to the parent block during coarsening in the adapt phase.  Valid values include` :t:`"linear"` :e:`\; ;other values accepted but not implemented include` :t:`"enzo"`.
+:e:`For adaptive mesh refinement, field values may need to be transferred from finer to coarser blocks, either from fine neighbor blocks in the refresh phase, or to the parent block during coarsening in the adapt phase.  Valid values include` :t:`"linear"` :e:`\; ;other values accepted but not implemented include` :t:`"enzo".`
+
+----
+
+:Parameter:  :p:`Field` : :p:`history`
+:Summary: :s:`How many generations of "old" fields to maintain`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:     :c:`Cello`
+
+:e:`Many problems may require field values from the previous timestep, e.g. for flux-correction, updating particles, etc.  Cello supports this by allowing one or more generations of all fields to be stored and maintained.  The default is 0, though 1 may be fairly common, and even more generations are supported if needed.`
 
 ----
 
@@ -819,81 +829,6 @@ Method
 :Scope:     :c:`Cello`
 
 :e:`The global Courant safety factor is a multiplication factor for the time step applied on top of any Field or Particle specific Courant safety factors.`
-
-cosmology
----------
-
-Currently cosmology parameters are not accessed.
-
-----
-
-:Parameter:  :p:`Method` : :p:`cosmology`
-:Summary: :s:`Turn on or off cosmology machinery`
-:Type:   :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Turn on or off cosmology machinery.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`cosmology` : :p:`comoving_box_size`
-:Summary: :s:`Enzo's CosmologyComovingBoxSize parameter`
-:Type:    :t:`float`
-:Default: :d:`64.0`
-:Scope:     :z:`Enzo`
-
-:e:`Enzo's` CosmologyComovingBoxSize :e:`parameter.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`cosmology` : :p:`hubble_constant_now`
-:Summary: :s:`Hubble constant for Z=0`
-:Type:    :t:`float`
-:Default: :d:`0.701`
-:Scope:     :z:`Enzo`
-
-:e:`Hubble constant for Z=0.`  
-
-----
-
-:Parameter:  :p:`Method` : :p:`cosmology` : :p:`initial_redshift`
-:Summary: :s:`Enzo's CosmologyInitialRedshift parameter.`
-:Type:    :t:`float`
-:Default: :d:`20.0`
-:Scope:     :z:`Enzo`
-
-:e:`Enzo's` CosmologyInitialRedshift :e:`parameter.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`cosmology` : :p:`max_expansion_rate`
-:Summary: :s:`Maximum expansion rate`
-:Type:    :t:`float`
-:Default: :d:`0.01`
-:Scope:     :z:`Enzo`
-
-:e:`Maximum expansion rate.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`cosmology` : :p:`omega_lamda_now`
-:Summary: :s:`Omega lambda for Z=0`
-:Type:   :t:`float`
-:Default: :d:`0.721`
-:Scope:     :z:`Enzo`
-
-:e:`Omega lamda for Z=0.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`cosmology` : :p:`omega_matter_now`
-:Summary: :s:`Omega matter for Z=0`
-:Type:    :t:`float`
-:Default: :d:`0.279`
-:Scope:     :z:`Enzo`
-
-:e:`Omega matter for Z=0.`
 
 gravity_bicgstab
 ----------------
@@ -2288,6 +2223,72 @@ Performance
 
 :e:`List of PAPI hardware performance counters to trace, e.g. 'counters = ["PAPI_FP_OPS", "PAPI_L3_TCA"];'.  For a list of available counters, use the PAPI "papi_avail" utility.`
 
+-------   
+Physics
+-------
+
+cosmology
+---------
+
+
+:Parameter:  :p:`Physics` : :p:`cosmology` : :p:`comoving_box_size`
+:Summary: :s:`Enzo's CosmologyComovingBoxSize parameter`
+:Type:    :t:`float`
+:Default: :d:`64.0`
+:Scope:     :z:`Enzo`
+
+:e:`Enzo's` CosmologyComovingBoxSize :e:`parameter.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`cosmology` : :p:`hubble_constant_now`
+:Summary: :s:`Hubble constant for Z=0`
+:Type:    :t:`float`
+:Default: :d:`0.701`
+:Scope:     :z:`Enzo`
+
+:e:`Hubble constant for Z=0.`  
+
+----
+
+:Parameter:  :p:`Physics` : :p:`cosmology` : :p:`initial_redshift`
+:Summary: :s:`Enzo's CosmologyInitialRedshift parameter.`
+:Type:    :t:`float`
+:Default: :d:`20.0`
+:Scope:     :z:`Enzo`
+
+:e:`Enzo's` CosmologyInitialRedshift :e:`parameter.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`cosmology` : :p:`max_expansion_rate`
+:Summary: :s:`Maximum expansion rate`
+:Type:    :t:`float`
+:Default: :d:`0.01`
+:Scope:     :z:`Enzo`
+
+:e:`Maximum expansion rate.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`cosmology` : :p:`omega_lamda_now`
+:Summary: :s:`Omega lambda for Z=0`
+:Type:   :t:`float`
+:Default: :d:`0.721`
+:Scope:     :z:`Enzo`
+
+:e:`Omega lamda for Z=0.`
+
+----
+
+:Parameter:  :p:`Physics` : :p:`cosmology` : :p:`omega_matter_now`
+:Summary: :s:`Omega matter for Z=0`
+:Type:    :t:`float`
+:Default: :d:`0.279`
+:Scope:     :z:`Enzo`
+
+:e:`Omega matter for Z=0.`
+
 
 -------
 Restart
@@ -2486,3 +2487,50 @@ Testing
 :Scope:     :c:`Cello`
 
 :e:`Enzo-P unit test parameter for tolerance on the expected final time.`
+
+-----   
+Units
+-----   
+
+
+:Parameter:  :p:`Units` : :p:`length`
+:Summary: :s:`Units scaling factor for length`
+:Type:    :t:`double`
+:Default: :d:`1.0`
+:Scope:     :c:`Cello`
+
+:e:`Units scaling factor for length.`
+
+----
+
+
+:Parameter:  :p:`Units` : :p:`mass`
+:Summary: :s:`Units scaling factor for mass`
+:Type:    :t:`double`
+:Default: :d:`1.0`
+:Scope:     :c:`Cello`
+
+:e:`Units scaling factor for mass.  Only one of mass and density Units parameters can be initialized to	≠ 0.`
+
+----
+
+
+:Parameter:  :p:`Units` : :p:`time`
+:Summary: :s:`Units scaling factor for time`
+:Type:    :t:`double`
+:Default: :d:`1.0`
+:Scope:     :c:`Cello`
+
+:e:`Units scaling factor for time.`
+
+----
+
+
+:Parameter:  :p:`Units` : :p:`density`
+:Summary: :s:`Units scaling factor for density`
+:Type:    :t:`double`
+:Default: :d:`1.0`
+:Scope:     :c:`Cello`
+
+:e:`Units scaling factor for density.  Only one of mass and density Units parameters can be initialized to	≠ 0.`
+
