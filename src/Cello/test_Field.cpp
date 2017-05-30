@@ -77,7 +77,7 @@ PARALLEL_MAIN_BEGIN
     unit_func ("128-bit floating-point");
     unit_assert (sizeof(long double) == 16);
 
-    bool is_quad_supported = sizeof(long double) == 16;
+    bool have_quad = sizeof(long double) == 16;
 
     // set ghosts
 
@@ -104,6 +104,13 @@ PARALLEL_MAIN_BEGIN
     double xpp,ypp,zpp;
     xpp =  1.0;  ypp =  2.0, zpp =  3.0;
 
+    // set history
+
+    unit_func("set_history");
+    
+    field.set_history (3);
+
+    unit_assert(field.num_history() == 3);
 
     //----------------------------------------------------------------------
 
@@ -310,53 +317,51 @@ PARALLEL_MAIN_BEGIN
     nb3 = (char *)u4 - (char *)u3;
     nb4 = (char *)u5 - (char *)u4;
 
+    // test value arrays differ from unknown arrays by ghost offset
     // a,b fields  u unknowns  v values  g ghosts
     // bu - au = (bv + bg) - (av + ag) 
     //         = (bv + (bu-bv)) - (av + (au-av))
     //         = (bv - av) + (bu-bv) - (au-av)
 
+    int m1[3] = { nx+2*g1[0],   ny+2*g1[1],   nz+2*g1[2]};
+    int m2[3] = { nx+2*g2[0]+1, ny+2*g2[1],   nz+2*g2[2]};
+    int m3[3] = { nx+2*g3[0],   ny+2*g3[1]+1, nz+2*g3[2]};
+    int m4[3] = { nx+2*g4[0],   ny+2*g4[1],   nz+2*g4[2]+1};
+    int m5[3] = { nx+2*g5[0],   ny+2*g5[1],   nz+2*g5[2]};
 
-    int n1[3] = { nx+2*g1[0],   ny+2*g1[1],   nz+2*g1[2]};
-    int n2[3] = { nx+2*g2[0]+1, ny+2*g2[1],   nz+2*g2[2]};
-    int n3[3] = { nx+2*g3[0],   ny+2*g3[1]+1, nz+2*g3[2]};
-    int n4[3] = { nx+2*g4[0],   ny+2*g4[1],   nz+2*g4[2]+1};
-    int n5[3] = { nx+2*g5[0],   ny+2*g5[1],   nz+2*g5[2]};
-
-    size_t ng1 = sizeof (float)      * (g1[0] + n1[0] *(g1[1] + n1[1]*g1[2]));
-    size_t ng2 = sizeof (double)     * (g2[0] + n2[0] *(g2[1] + n2[1]*g2[2]));
-    size_t ng3 = sizeof (double)     * (g3[0] + n3[0] *(g3[1] + n3[1]*g3[2]));
-    size_t ng4 = sizeof (double)     * (g4[0] + n4[0] *(g4[1] + n4[1]*g4[2]));
-    size_t ng5 = sizeof (long double)* (g5[0] + n5[0] *(g5[1] + n5[1]*g5[2]));
+    size_t ng1 = sizeof (float)      * (g1[0] + m1[0] *(g1[1] + m1[1]*g1[2]));
+    size_t ng2 = sizeof (double)     * (g2[0] + m2[0] *(g2[1] + m2[1]*g2[2]));
+    size_t ng3 = sizeof (double)     * (g3[0] + m3[0] *(g3[1] + m3[1]*g3[2]));
+    size_t ng4 = sizeof (double)     * (g4[0] + m4[0] *(g4[1] + m4[1]*g4[2]));
+    size_t ng5 = sizeof (long double)* (g5[0] + m5[0] *(g5[1] + m5[1]*g5[2]));
 
     unit_assert (nb1 == sizeof (float) * nv1 + ng2 - ng1);
     unit_assert (nb2 == sizeof (double)* nv2 + ng3 - ng2);
     unit_assert (nb3 == sizeof (double)* nv3 + ng4 - ng3);
-    if (is_quad_supported) unit_assert (nb4 == sizeof (double)* nv4 + ng5 - ng4);
-
-    bool passed;
+    if (have_quad) unit_assert (nb4 == sizeof (double)* nv4 + ng5 - ng4);
 
     //--------------------------------------------------
     // Fill values interior then test against unknowns
 
-    for (int iz=0; iz<n1[2]; iz++) {
-      for (int iy=0; iy<n1[1]; iy++) {
-	for (int ix=0; ix<n1[0]; ix++) {
-	  int i = ix + n1[0]*(iy + n1[1]*iz);
+    for (int iz=0; iz<m1[2]; iz++) {
+      for (int iy=0; iy<m1[1]; iy++) {
+	for (int ix=0; ix<m1[0]; ix++) {
+	  int i = ix + m1[0]*(iy + m1[1]*iz);
 	  v1[i] = 
-	    (g1[0] <= ix && ix < n1[0]-g1[0] &&
-	     g1[1] <= iy && iy < n1[1]-g1[1] &&
-	     g1[2] <= iz && iz < n1[2]-g1[2]) ? 10 : -10;
+	    (g1[0] <= ix && ix < m1[0]-g1[0] &&
+	     g1[1] <= iy && iy < m1[1]-g1[1] &&
+	     g1[2] <= iz && iz < m1[2]-g1[2]) ? 10 : -10;
 
 	}
       }
     }
 
-    passed = true;
+    bool passed = true;
 
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
-	  int i = ix + n1[0]*(iy + n1[1]*iz);
+	  int i = ix + m1[0]*(iy + m1[1]*iz);
 	  if (u1[i] != 10) passed = false;
 	}
       }
@@ -366,14 +371,14 @@ PARALLEL_MAIN_BEGIN
 
     //--------------------------------------------------
 
-    for (int iz=0; iz<n2[2]; iz++) {
-      for (int iy=0; iy<n2[1]; iy++) {
-	for (int ix=0; ix<n2[0]; ix++) {
-	  int i = ix + n2[0]*(iy + n2[1]*iz);
+    for (int iz=0; iz<m2[2]; iz++) {
+      for (int iy=0; iy<m2[1]; iy++) {
+	for (int ix=0; ix<m2[0]; ix++) {
+	  int i = ix + m2[0]*(iy + m2[1]*iz);
 	  v2[i] = 
-	    (g2[0] <= ix && ix < n2[0]-g2[0] &&
-	     g2[1] <= iy && iy < n2[1]-g2[1] &&
-	     g2[2] <= iz && iz < n2[2]-g2[2]) ? 20 : -20;
+	    (g2[0] <= ix && ix < m2[0]-g2[0] &&
+	     g2[1] <= iy && iy < m2[1]-g2[1] &&
+	     g2[2] <= iz && iz < m2[2]-g2[2]) ? 20 : -20;
 
 	}
       }
@@ -384,7 +389,7 @@ PARALLEL_MAIN_BEGIN
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
-	  int i = ix + n2[0]*(iy + n2[1]*iz);
+	  int i = ix + m2[0]*(iy + m2[1]*iz);
 	  if (u2[i] != 20) passed = false;
 	}
       }
@@ -394,14 +399,14 @@ PARALLEL_MAIN_BEGIN
 
     //--------------------------------------------------
 
-    for (int iz=0; iz<n3[2]; iz++) {
-      for (int iy=0; iy<n3[1]; iy++) {
-	for (int ix=0; ix<n3[0]; ix++) {
-	  int i = ix + n3[0]*(iy + n3[1]*iz);
+    for (int iz=0; iz<m3[2]; iz++) {
+      for (int iy=0; iy<m3[1]; iy++) {
+	for (int ix=0; ix<m3[0]; ix++) {
+	  int i = ix + m3[0]*(iy + m3[1]*iz);
 	  v3[i] = 
-	    (g3[0] <= ix && ix < n3[0]-g3[0] &&
-	     g3[1] <= iy && iy < n3[1]-g3[1] &&
-	     g3[2] <= iz && iz < n3[2]-g3[2]) ? 30 : -30;
+	    (g3[0] <= ix && ix < m3[0]-g3[0] &&
+	     g3[1] <= iy && iy < m3[1]-g3[1] &&
+	     g3[2] <= iz && iz < m3[2]-g3[2]) ? 30 : -30;
 
 	}
       }
@@ -412,7 +417,7 @@ PARALLEL_MAIN_BEGIN
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
-	  int i = ix + n3[0]*(iy + n3[1]*iz);
+	  int i = ix + m3[0]*(iy + m3[1]*iz);
 	  if (u3[i] != 30) passed = false;
 	}
       }
@@ -422,14 +427,14 @@ PARALLEL_MAIN_BEGIN
 
     //--------------------------------------------------
 
-    for (int iz=0; iz<n4[2]; iz++) {
-      for (int iy=0; iy<n4[1]; iy++) {
-	for (int ix=0; ix<n4[0]; ix++) {
-	  int i = ix + n4[0]*(iy + n4[1]*iz);
+    for (int iz=0; iz<m4[2]; iz++) {
+      for (int iy=0; iy<m4[1]; iy++) {
+	for (int ix=0; ix<m4[0]; ix++) {
+	  int i = ix + m4[0]*(iy + m4[1]*iz);
 	  v4[i] = 
-	    (g4[0] <= ix && ix < n4[0]-g4[0] &&
-	     g4[1] <= iy && iy < n4[1]-g4[1] &&
-	     g4[2] <= iz && iz < n4[2]-g4[2]) ? 40 : -40;
+	    (g4[0] <= ix && ix < m4[0]-g4[0] &&
+	     g4[1] <= iy && iy < m4[1]-g4[1] &&
+	     g4[2] <= iz && iz < m4[2]-g4[2]) ? 40 : -40;
 
 	}
       }
@@ -440,7 +445,7 @@ PARALLEL_MAIN_BEGIN
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
-	  int i = ix + n4[0]*(iy + n4[1]*iz);
+	  int i = ix + m4[0]*(iy + m4[1]*iz);
 	  if (u4[i] != 40) passed = false;
 	}
       }
@@ -451,14 +456,14 @@ PARALLEL_MAIN_BEGIN
     //--------------------------------------------------
 
 
-    for (int iz=0; iz<n5[2]; iz++) {
-      for (int iy=0; iy<n5[1]; iy++) {
-	for (int ix=0; ix<n5[0]; ix++) {
-	  int i = ix + n5[0]*(iy + n5[1]*iz);
+    for (int iz=0; iz<m5[2]; iz++) {
+      for (int iy=0; iy<m5[1]; iy++) {
+	for (int ix=0; ix<m5[0]; ix++) {
+	  int i = ix + m5[0]*(iy + m5[1]*iz);
 	  v5[i] = 
-	    (g5[0] <= ix && ix < n5[0]-g5[0] &&
-	     g5[1] <= iy && iy < n5[1]-g5[1] &&
-	     g5[2] <= iz && iz < n5[2]-g5[2]) ? 50 : -50;
+	    (g5[0] <= ix && ix < m5[0]-g5[0] &&
+	     g5[1] <= iy && iy < m5[1]-g5[1] &&
+	     g5[2] <= iz && iz < m5[2]-g5[2]) ? 50 : -50;
 
 	}
       }
@@ -469,27 +474,33 @@ PARALLEL_MAIN_BEGIN
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
-	  int i = ix + n5[0]*(iy + n5[1]*iz);
+	  int i = ix + m5[0]*(iy + m5[1]*iz);
 	  if (u5[i] != 50) passed = false;
 	}
       }
     }
 
-    if (is_quad_supported) unit_assert(passed);
+    if (have_quad) unit_assert(passed);
 
     //--------------------------------------------------
 
     // test that first value after f1 is f2 ghost, etc.
 
-    unit_assert(*((double *)(v1+n1[0]*n1[1]*n1[2]))     == -20);
-    unit_assert(*((double *)(v2+n2[0]*n2[1]*n2[2]))     == -30);
-    unit_assert(*((double *)(v3+n3[0]*n3[1]*n3[2]))     ==  40);  // g4 has no ghosts
-    unit_assert(*((long double *)(v4+n4[0]*n4[1]*n4[2])) == -50);
+    const int M1 = m1[0]*m1[1]*m1[2];
+    const int M2 = m2[0]*m2[1]*m2[2];
+    const int M3 = m3[0]*m3[1]*m3[2];
+    const int M4 = m4[0]*m4[1]*m4[2];
+    const int M5 = m5[0]*m5[1]*m5[2];
+
+    unit_assert(*((double *)(v1+M1))     == -20);
+    unit_assert(*((double *)(v2+M2))     == -30);
+    unit_assert(*((double *)(v3+M3))     ==  40);
+    unit_assert(*((long double *)(v4+M4)) == -50);
 
     unit_assert(*((float *) (v2-1)) == -10);
     unit_assert(*((double *) (v3-1)) == -20);
     unit_assert(*((double *) (v4-1)) == -30);
-    unit_assert(*((double *) (v5-1)) ==  40); // g4 has no ghosts
+    unit_assert(*((double *) (v5-1)) ==  40);
 
     //----------------------------------------------------------------------
     unit_func("cell_width");
@@ -509,22 +520,22 @@ PARALLEL_MAIN_BEGIN
     field.clear(2.0);
 
     unit_assert(2.0 == v1[0]);
-    unit_assert(2.0 == v5[n5[0]*n5[1]*n5[2]-1]);
+    unit_assert(2.0 == v5[M5-1]);
 
     field.clear(3.0, 1 );
   
-    unit_assert(2.0 == v1[n1[0]*n1[1]*n1[2]-1]);
+    unit_assert(2.0 == v1[M1-1]);
     unit_assert(3.0 == v2[0] );
-    unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
+    unit_assert(3.0 == v2[M2-1]);
     unit_assert(2.0 == v3[0] );
 	
     field.clear(4.0, 2, 3 );
 
-    unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
+    unit_assert(3.0 == v2[M2-1]);
     unit_assert(4.0 == v3[0] );
-    unit_assert(4.0 == v3[n3[0]*n3[1]*n3[2]-1]);
+    unit_assert(4.0 == v3[M3-1]);
     unit_assert(4.0 == v4[0] );
-    unit_assert(4.0 == v4[n4[0]*n4[1]*n4[2]-1]);
+    unit_assert(4.0 == v4[M4-1]);
     unit_assert(2.0 == v5[0] );
 
     //----------------------------------------------------------------------
@@ -579,6 +590,174 @@ PARALLEL_MAIN_BEGIN
     unit_assert ((t2[0] == -2.00));
     unit_assert ((t3[0] == -3.00));
 
+    //--------------------------------------------------
+
+    // History
+
+#define HIST_INIT(ip,ih,i) (17.0*(ip+3) + 7.0*(ih+2) - 13.0*(i+7))
+    
+    field.reallocate_permanent(true);
+
+    v1 =       (float *) field.values(i1);
+    v2 =      (double *) field.values(i2);
+    v3 =      (double *) field.values(i3);
+    v4 =      (double *) field.values(i4);
+    v5 = (long double *) field.values(i5);
+
+    // Initialize and save what will be history 3
+
+    int ih = 3;
+    
+    for (int i=0; i<M1; i++) {  v1[i] = HIST_INIT(1,ih,i); }
+    for (int i=0; i<M2; i++) {  v2[i] = HIST_INIT(2,ih,i); }
+    for (int i=0; i<M3; i++) {  v3[i] = HIST_INIT(3,ih,i); }
+    for (int i=0; i<M4; i++) {  v4[i] = HIST_INIT(4,ih,i); }
+    for (int i=0; i<M5; i++) {  v5[i] = HIST_INIT(5,ih,i); }
+
+    field.save_history(5.0-ih);
+
+    // Initialize and save what will be history 2
+
+    ih = 2;
+
+    for (int i=0; i<M1; i++) {  v1[i] = HIST_INIT(1,ih,i); }
+    for (int i=0; i<M2; i++) {  v2[i] = HIST_INIT(2,ih,i); }
+    for (int i=0; i<M3; i++) {  v3[i] = HIST_INIT(3,ih,i); }
+    for (int i=0; i<M4; i++) {  v4[i] = HIST_INIT(4,ih,i); }
+    for (int i=0; i<M5; i++) {  v5[i] = HIST_INIT(5,ih,i); }
+
+    field.save_history(5.0-ih);
+
+    // Initialize and save what will be history 1
+
+    ih = 1;
+
+    for (int i=0; i<M1; i++) {  v1[i] = HIST_INIT(1,ih,i); }
+    for (int i=0; i<M2; i++) {  v2[i] = HIST_INIT(2,ih,i); }
+    for (int i=0; i<M3; i++) {  v3[i] = HIST_INIT(3,ih,i); }
+    for (int i=0; i<M4; i++) {  v4[i] = HIST_INIT(4,ih,i); }
+    for (int i=0; i<M5; i++) {  v5[i] = HIST_INIT(5,ih,i); }
+
+    field.save_history(5.0-ih);
+
+    // Initialize current values (index_history = 0)
+    
+    ih = 0;
+
+    for (int i=0; i<M1; i++) {  v1[i] = HIST_INIT(1,ih,i); }
+    for (int i=0; i<M2; i++) {  v2[i] = HIST_INIT(2,ih,i); }
+    for (int i=0; i<M3; i++) {  v3[i] = HIST_INIT(3,ih,i); }
+    for (int i=0; i<M4; i++) {  v4[i] = HIST_INIT(4,ih,i); }
+    for (int i=0; i<M5; i++) {  v5[i] = HIST_INIT(5,ih,i); }
+
+    float       *v1h1,*v1h2,*v1h3;
+    double      *v2h1,*v2h2,*v2h3;
+    double      *v3h1,*v3h2,*v3h3;
+    double      *v4h1,*v4h2,*v4h3;
+    long double *v5h1,*v5h2,*v5h3;
+
+    v1h1 = (float *) field.values(i1,1);
+    v1h2 = (float *) field.values(i1,2);
+    v1h3 = (float *) field.values(i1,3);
+    v2h1 = (double *) field.values(i2,1);
+    v2h2 = (double *) field.values(i2,2);
+    v2h3 = (double *) field.values(i2,3);
+    v3h1 = (double *) field.values(i3,1);
+    v3h2 = (double *) field.values(i3,2);
+    v3h3 = (double *) field.values(i3,3);
+    v4h1 = (double *) field.values(i4,1);
+    v4h2 = (double *) field.values(i4,2);
+    v4h3 = (double *) field.values(i4,3);
+    v5h1 = (long double *) field.values(i5,1);
+    v5h2 = (long double *) field.values(i5,2);
+    v5h3 = (long double *) field.values(i5,3);
+
+    // test current values
+    ih = 0;
+    unit_func ("history[0]");
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1[i] == HIST_INIT(1,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2[i] == HIST_INIT(2,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3[i] == HIST_INIT(3,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4[i] == HIST_INIT(4,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5[i] == HIST_INIT(5,ih,i));  }
+    unit_assert (passed);
+    
+    // note--no time saved for history = 0
+
+    ih = 1;
+    unit_func ("history[1]");
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1h1[i] == HIST_INIT(1,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2h1[i] == HIST_INIT(2,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3h1[i] == HIST_INIT(3,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4h1[i] == HIST_INIT(4,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5h1[i] == HIST_INIT(5,ih,i));  }
+    unit_assert (passed);
+
+    unit_func ("history_time[1]");
+    unit_assert (5.0-ih == field.history_time(ih));
+
+    ih = 2;
+    unit_func ("history[2]");
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1h2[i] == HIST_INIT(1,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2h2[i] == HIST_INIT(2,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3h2[i] == HIST_INIT(3,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4h2[i] == HIST_INIT(4,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5h2[i] == HIST_INIT(5,ih,i));  }
+    unit_assert (passed);
+
+    unit_func ("history_time[2]");
+    unit_assert (5.0-ih == field.history_time(ih));
+
+    ih = 3;
+    unit_func ("history[3]");
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1h3[i] == HIST_INIT(1,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2h3[i] == HIST_INIT(2,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3h3[i] == HIST_INIT(3,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4h3[i] == HIST_INIT(4,ih,i));  }
+    unit_assert (passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5h3[i] == HIST_INIT(5,ih,i));  }
+    unit_assert (passed);
+
+    unit_func ("history_time[3]");
+    unit_assert (5.0-ih == field.history_time(ih));
+    
+    //--------------------------------------------------
+    
     unit_func("deallocate_temporary");
 
     field.deallocate_temporary(j1);    
@@ -749,7 +928,6 @@ PARALLEL_MAIN_BEGIN
     unit_assert(info.gx==0 && info.gy==1 && info.gz==0);
     field.ghost_depth(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
     unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
-
 
   }
   //----------------------------------------------------------------------

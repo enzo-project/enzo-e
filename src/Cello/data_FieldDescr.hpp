@@ -210,7 +210,6 @@ private: // attributes
   /// (char instead of bool otherwise charmc complains at compile time:
   /// "Error 1: taking address of temporary (-fpermissive)"
   std::vector<char> conserved_;
-
 };
 
 #endif /* DATA_FIELD_DESCR_HPP */

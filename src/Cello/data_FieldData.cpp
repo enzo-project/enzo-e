@@ -20,7 +20,10 @@ FieldData::FieldData
   : array_permanent_(),
     array_temporary_(),
     offsets_(),
-    ghosts_allocated_(true)
+    ghosts_allocated_(true),
+    num_history_(0),
+    history_id_(),
+    history_time_()
 {
   if (nx != 0) {
     size_[0] = nx;
@@ -59,13 +62,17 @@ void FieldData::pup(PUP::er &p)
   }
   p | offsets_;
   p | ghosts_allocated_;
+  p | num_history_;
+  p | history_id_;
+  p | history_time_;
 }
 
 
 //----------------------------------------------------------------------
 
-void FieldData::dimensions(const FieldDescr * field_descr,
-			   int id_field, int * mx, int * my, int * mz ) const throw()
+void FieldData::dimensions
+(const FieldDescr * field_descr, int id_field,
+ int * mx, int * my, int * mz ) const throw()
 {
   int nx,ny,nz;
   int gx,gy,gz;
@@ -90,27 +97,32 @@ void FieldData::size( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-const char * FieldData::values ( const FieldDescr * field_descr,
-				 int id_field ) const 
-  throw ()
+const char * FieldData::values
+( const FieldDescr * field_descr,
+  int id_field, int index_history ) const throw ()
 {
   return (const char *)
-    ((FieldData *)this) -> values(field_descr,id_field);
+    ((FieldData *)this) -> values(field_descr,id_field, index_history);
 }
 
 //----------------------------------------------------------------------
 
-char * FieldData::values (const FieldDescr * field_descr,
-			  int id_field ) 
-  throw ()
+char * FieldData::values
+(const FieldDescr * field_descr,
+ int id_field, int index_history ) throw ()
 {
   if (id_field == -1) return NULL;
 
   char * values = 0;
 
+  if (field_descr->is_permanent(id_field) &&
+      (1 <= index_history && index_history <= num_history_)) {
+      const int np = field_descr->num_permanent();
+      id_field = history_id_[id_field + np*(index_history-1)];
+  }
+  
   if (field_descr->is_permanent(id_field)) {
 
-    // permanent field
     const int num_fields = field_descr->field_count();
     if (0 <= id_field && id_field < num_fields) {
       values = &array_permanent_[0] + offsets_[id_field];
@@ -131,9 +143,9 @@ char * FieldData::values (const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
-const char * FieldData::unknowns ( const FieldDescr * field_descr, 
-				   int id_field ) const
-  throw ()
+const char * FieldData::unknowns
+( const FieldDescr * field_descr, 
+  int id_field, int index_history ) const throw ()
 {
   return (const char *)
     ((FieldData *)this) -> unknowns(field_descr,id_field);
@@ -141,12 +153,24 @@ const char * FieldData::unknowns ( const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
-char * FieldData::unknowns (const FieldDescr * field_descr,
-			    int id_field  )
-  throw ()
+char * FieldData::unknowns
+(const FieldDescr * field_descr,
+ int id_field, int index_history  ) throw ()
 {
+
+  // update field id if permanent and old value in history
+
+  if (field_descr->is_permanent(id_field) &&
+      (1 <= index_history && index_history <= num_history_)) {
+    const int np = field_descr->num_permanent();
+    id_field = history_id_[id_field + np*(index_history-1)];
+  }
+      
+  // First get values including ghosts
+  // (note index_history ommitted since already have updated id_field)
   char * unknowns = values(field_descr,id_field);
 
+  // Then adjust for ghost zones
   if ( ghosts_allocated() && unknowns ) {
 
     int gx,gy,gz;
@@ -319,7 +343,6 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
 
 {
   int index_field = id_field - field_descr->num_permanent();
-
   if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
   }
@@ -789,6 +812,106 @@ void FieldData::scale_
   }
 }
 
+//----------------------------------------------------------------------
+
+void FieldData::set_history (FieldDescr * field_descr, int num_history)
+{
+  const int np = field_descr->num_permanent();
+  const int nh = num_history;
+  
+  // insert new temporary fields if needed
+
+  if (num_history > num_history_) {
+    history_time_.resize(nh);
+    history_id_.resize(np*nh);
+    for (int ih=num_history_; ih<nh; ih++) {
+      for (int ip=0; ip<np; ip++) {
+
+	int i = ip + np*ih;
+
+	const int ih = field_descr->insert_temporary();
+	
+	history_id_[i] = ih;
+
+	// set precision
+	field_descr->set_precision (ih, field_descr->precision(ip));
+
+	// set ghost zones
+	int gx,gy,gz;
+	field_descr->    ghost_depth(ip,&gx,&gy,&gz);
+	field_descr->set_ghost_depth(ih,gx,gy,gz);
+
+	// set centering
+	int cx,cy,cz;
+	field_descr->    centering(ip,&cx,&cy,&cz);
+	field_descr->set_centering(ih,cx,cy,cz);
+	
+	allocate_temporary(field_descr,ih);
+      }
+      
+      history_time_[ih] = 0.0;
+      
+    }
+    num_history_ = num_history;
+  }
+}
+
+//----------------------------------------------------------------------
+  
+void FieldData::save_history (const FieldDescr * field_descr, double time)
+{
+  // Cycle temporary field id's, and copy permanent to history_id_[0]
+
+  // if history_ == 3,
+  //
+  // save history_id_[2]
+  // history_id_[2] = history_id_[1];
+  // history_id_[1] = history_id_[0];
+  // history_id_[0] = history_id_[2];
+  // copy history_id_[0] = permanent
+
+  const int np = field_descr->num_permanent();
+  const int nh = num_history_;
+
+  // Save oldest history id's
+  
+  std::vector<int> history_id_save;
+  history_id_save.resize(np);
+  for (int ip=0; ip<np; ip++) {
+    history_id_save[ip] = history_id_[ip+np*(nh-1)];
+  }
+
+  // Shuffle remaining id's
+  for (int ih=nh-1; ih>0; ih--) {
+    for (int ip=0; ip<np; ip++) {
+      history_id_[ip+np*(ih)] = history_id_[ip+np*(ih-1)];
+    }
+  }
+
+  // Copy saved oldest id's to newest id's
+      
+  for (int ip=0; ip<np; ip++) {
+    history_id_[ip] = history_id_save[ip];
+  }
+
+  // Copy field values to newest history
+  for (int ip=0; ip<np; ip++) {
+    int mx,my,mz;
+    char * src = values(field_descr,ip,0);
+    char * dst = values(field_descr,ip,1);
+    const int bytes = field_size(field_descr,ip,&mx,&my,&mz);
+    memcpy (dst,src,bytes);
+  }
+
+  // Shuffle times and save newest time
+
+  for (int ih=nh-1; ih>0; ih--) {
+    history_time_[ih] = history_time_[ih-1];
+  }
+  
+  history_time_[0] = time;
+}
+
 //======================================================================
 
 int FieldData::adjust_padding_
@@ -927,7 +1050,7 @@ void FieldData::restore_permanent_
 	  for (int ip=0; ip<bytes_per_element; ip++) {
 	    int i1 = ip + bytes_per_element*(ix + nx1*(iy + ny1*iz));
 	    int i2 = ip + bytes_per_element*(ix + nx2*(iy + ny2*iz));
-	    array2[i2] = array1[i1]; // XXX array1 = garbage
+	    array2[i2] = array1[i1];
 	  }
 	}
       }

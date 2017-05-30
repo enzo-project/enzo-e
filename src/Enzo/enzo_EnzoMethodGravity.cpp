@@ -143,7 +143,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   T * ay = (T*) field.values ("acceleration_y");
   T * az = (T*) field.values ("acceleration_z");
 
-  double dt = std::numeric_limits<double>::max();
+  T dt = std::numeric_limits<T>::max();
 
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
@@ -153,7 +153,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
       for (int iy=gy; iy<ny+gy; iy++) {
 	for (int iz=gz; iz<nz+gz; iz++) {
 	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(dt,sqrt(hx/(fabs(ax[i]+1e-20))));
+	  dt = std::min(T(dt),T(sqrt(hx/(fabs(ax[i]+1e-20)))));
 	}
       }
     }
@@ -163,7 +163,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
       for (int iy=gy; iy<ny+gy; iy++) {
 	for (int iz=gz; iz<nz+gz; iz++) {
 	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(dt,sqrt(hy/(fabs(ay[i]+1e-20))));
+	  dt = std::min(T(dt),T(sqrt(hy/(fabs(ay[i]+1e-20)))));
 	}
       }
     }
@@ -173,7 +173,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
       for (int iy=gy; iy<ny+gy; iy++) {
 	for (int iz=gz; iz<nz+gz; iz++) {
 	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(dt,sqrt(hz/(fabs(az[i]+1e-20))));
+	  dt = std::min(T(dt),T(sqrt(hz/(fabs(az[i]+1e-20)))));
 	}
       }
     }

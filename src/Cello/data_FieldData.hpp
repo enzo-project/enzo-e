@@ -49,32 +49,33 @@ public: // interface
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  char * values (const FieldDescr * , int id_field) 
-    throw ();
-  char * values (const FieldDescr * field_descr, std::string name) 
-    throw ()
-  { return values (field_descr,field_descr->field_id(name)); }
+  char * values (const FieldDescr *,
+		 int id_field, int history=0) throw ();
+  char * values (const FieldDescr * field_descr,
+		 std::string name, int history=0) throw ()
+  { return values (field_descr,field_descr->field_id(name),history); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  const char * values (const FieldDescr *, int id_field) const 
-    throw ();
-  const char * values (const FieldDescr * field_descr, std::string name) const 
-    throw ()
-  { return values (field_descr,field_descr->field_id(name)); }
+  const char * values (const FieldDescr *,
+		       int id_field, int history=0) const throw ();
+  const char * values (const FieldDescr * field_descr,
+		       std::string name, int history=0) const throw ()
+  { return values (field_descr,field_descr->field_id(name),history); }
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
-  char * unknowns (const FieldDescr *, int id_field) 
-    throw ();
-  char * unknowns (const FieldDescr * field_descr, std::string name) 
-    throw ()
-  { return unknowns (field_descr,field_descr->field_id(name)); }
+  char * unknowns (const FieldDescr *,
+		   int id_field, int history=0) throw ();
+  char * unknowns (const FieldDescr * field_descr,
+		   std::string name, int history=0) throw ()
+  { return unknowns (field_descr,field_descr->field_id(name),history); }
 
-  const char * unknowns (const FieldDescr *,  int id_field) const 
-    throw ();
-  const char * unknowns (const FieldDescr * field_descr, std::string name) const     throw ()
-  { return unknowns (field_descr,field_descr->field_id(name)); }
+  const char * unknowns (const FieldDescr *,
+			 int id_field, int history=0) const throw ();
+  const char * unknowns (const FieldDescr * field_descr,
+			 std::string name, int history=0) const throw ()
+  { return unknowns (field_descr,field_descr->field_id(name),history); }
 
   /// Return raw pointer to the array of all permanent fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
@@ -136,8 +137,8 @@ public: // interface
 	      bool use_file = false) const throw();
 
   //----------------------------------------------------------------------
-
   // BLAS Operations
+  //----------------------------------------------------------------------
 
   // /// copy field is to field id
   // void copy (const FieldDescr *, int id, int is, bool ghosts = true ) throw();
@@ -152,6 +153,26 @@ public: // interface
   /// Scale vector ix by scalar a
   void scale (const FieldDescr *,
 	      int iy, long double a, int ix, bool ghosts = true ) throw();
+
+  //----------------------------------------------------------------------
+  // History operations
+  //----------------------------------------------------------------------
+
+  /// Set the history depth for storing old field values
+  void set_history (FieldDescr *, int history);
+
+  /// Return the history depth for storing old field values
+  int num_history () const
+  { return num_history_; }
+  
+  /// Copy "current" fields to "old" fields
+  void save_history (const FieldDescr *, double time);
+
+  /// Return time for given history
+  double history_time (int ih) const
+  {
+    return (0 < ih && ih <= num_history_) ? history_time_[ih-1] : 0.0;
+  }
 
   //--------------------------------------------------
 private: // functions
@@ -222,7 +243,14 @@ private: // attributes
   /// Whether ghost values are allocated or not 
   bool ghosts_allocated_;
 
+  /// Number of sets of old fields to store
+  int num_history_;
 
+  /// Id's of "old" fields for all permanent fields [ip][ih]
+  std::vector<int> history_id_;
+
+  /// Saved times for history fields [ip]
+  std::vector<double> history_time_;
 };   
 
 #endif /* DATA_FIELD_DATA_HPP */
