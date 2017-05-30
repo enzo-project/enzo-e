@@ -862,43 +862,46 @@ void FieldData::save_history (const FieldDescr * field_descr, double time)
   const int np = field_descr->num_permanent();
   const int nh = field_descr->num_history();
 
-  // Save oldest history id's
-  
-  std::vector<int> history_id_save;
-  history_id_save.resize(np);
-  for (int ip=0; ip<np; ip++) {
-    history_id_save[ip] = history_id_[ip+np*(nh-1)];
-  }
+  if (nh > 0) {
 
-  // Shuffle remaining id's
-  for (int ih=nh-1; ih>0; ih--) {
+    // Save oldest history id's
+  
+    std::vector<int> history_id_save;
+    history_id_save.resize(np);
     for (int ip=0; ip<np; ip++) {
-      history_id_[ip+np*(ih)] = history_id_[ip+np*(ih-1)];
+      history_id_save[ip] = history_id_[ip+np*(nh-1)];
     }
-  }
 
-  // Copy saved oldest id's to newest id's
+    // Shuffle remaining id's
+    for (int ih=nh-1; ih>0; ih--) {
+      for (int ip=0; ip<np; ip++) {
+	history_id_[ip+np*(ih)] = history_id_[ip+np*(ih-1)];
+      }
+    }
+
+    // Copy saved oldest id's to newest id's
       
-  for (int ip=0; ip<np; ip++) {
-    history_id_[ip] = history_id_save[ip];
-  }
+    for (int ip=0; ip<np; ip++) {
+      history_id_[ip] = history_id_save[ip];
+    }
 
-  // Copy field values to newest history
-  for (int ip=0; ip<np; ip++) {
-    int mx,my,mz;
-    char * src = values(field_descr,ip,0);
-    char * dst = values(field_descr,ip,1);
-    const int bytes = field_size(field_descr,ip,&mx,&my,&mz);
-    memcpy (dst,src,bytes);
-  }
+    // Copy field values to newest history
+    for (int ip=0; ip<np; ip++) {
+      int mx,my,mz;
+      char * src = values(field_descr,ip,0);
+      char * dst = values(field_descr,ip,1);
+      const int bytes = field_size(field_descr,ip,&mx,&my,&mz);
+      memcpy (dst,src,bytes);
+    }
 
-  // Shuffle times and save newest time
+    // Shuffle times and save newest time
 
-  for (int ih=nh-1; ih>0; ih--) {
-    history_time_[ih] = history_time_[ih-1];
-  }
+    for (int ih=nh-1; ih>0; ih--) {
+      history_time_[ih] = history_time_[ih-1];
+    }
   
-  history_time_[0] = time;
+    history_time_[0] = time;
+  }
 }
 
 //======================================================================
