@@ -68,6 +68,7 @@ void Config::pup (PUP::er &p)
   PUParray(p,field_centering,3);
   PUParray(p,field_ghost_depth,3);
   p | field_padding;
+  p | field_history;
   p | field_precision;
   p | field_prolong;
   p | field_restrict;
@@ -544,6 +545,8 @@ void Config::read_field_ (Parameters * p) throw()
   }
 
   field_padding = p->value_integer("Field:padding",0);
+
+  field_history = p->value_integer("Field:history",0);
 
   // Field precision
 

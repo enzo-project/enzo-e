@@ -170,11 +170,14 @@ public: // interface
 
   /// Set the history depth for storing old field values
   void set_history (int num_history)
-  { field_data_->set_history (field_descr_,num_history); }
+  {
+    field_descr_->set_history (num_history);
+    field_data_ ->set_history_(field_descr_);
+  }
 
   /// Return the number of history generations to store
   int num_history () const
-  { return field_data_->num_history(); }
+  { return field_descr_->num_history(); }
 
   /// Copy "current" fields to history = 1 fields (saving time), and push
   /// back older generations up to num_history()
@@ -183,7 +186,7 @@ public: // interface
   
   /// Return time for given history
   double history_time (int ih) const
-  { return field_data_->history_time (ih); }
+  { return field_data_->history_time (field_descr_,ih); }
 
   //==================================================
   // FieldData

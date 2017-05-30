@@ -22,6 +22,8 @@ class FieldDescr
   /// Simulation object.  Actual Field data are stored in FieldData
   /// objects, which are each associated with a unique Block of data.
 
+  friend class Field;
+
 public: // functions
 
   /// Initialize a FieldDescr object
@@ -66,6 +68,8 @@ public: // functions
     }
     PUParray(p,ghost_depth_default_,3);
     p | conserved_;
+    p | history_;
+    p | history_id_;
   }
 
   /// Set alignment
@@ -108,6 +112,57 @@ public: // functions
 
   /// Return the integer handle for the named field
   int field_id(const std::string & name) const throw();
+
+  //----------------------------------------------------------------------
+  // History
+  //----------------------------------------------------------------------
+  
+  /// Set the history depth for storing old field values
+  void set_history (int history) throw()
+  {
+    const int np = num_permanent();
+    const int nh = history;
+    
+    if (history > history_) {
+      history_id_.resize(np*nh);
+      for (int ih=0; ih<nh; ih++) {
+	for (int ip=0; ip<np; ip++) {
+
+	  int i = ip + np*ih;
+
+	  const int ih = insert_temporary();
+	
+	  history_id_[i] = ih;
+
+	  // set precision
+	  set_precision (ih, precision(ip));
+
+	  // set ghost zones
+	  int gx,gy,gz;
+	  ghost_depth(ip,&gx,&gy,&gz);
+	  set_ghost_depth(ih,gx,gy,gz);
+
+	  // set centering
+	  int cx,cy,cz;
+	  centering(ip,&cx,&cy,&cz);
+	  set_centering(ih,cx,cy,cz);
+	}
+      }
+    }
+    history_ = history;
+  }
+  
+  /// Return the history depth for storing old field values
+  int num_history () const throw()
+  { return history_; }
+
+  /// Return the temporary field id for ih'th generation of permanent
+  /// field ip (0 is current, 1 first generation, etc.)
+  int history_id (int ip, int ih) const throw()
+  {
+    int np = num_permanent();
+    return (ih == 0) ? ip : history_id_[ip + np*(ih-1)];
+  }
 
   //----------------------------------------------------------------------
   // Properties
@@ -210,6 +265,13 @@ private: // attributes
   /// (char instead of bool otherwise charmc complains at compile time:
   /// "Error 1: taking address of temporary (-fpermissive)"
   std::vector<char> conserved_;
+
+  /// Number of generations of history to save
+  int history_;
+
+  /// Temporary fields used for history.  Non-permuted.
+  std::vector<int> history_id_;
+
 };
 
 #endif /* DATA_FIELD_DESCR_HPP */

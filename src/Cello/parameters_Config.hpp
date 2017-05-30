@@ -50,6 +50,7 @@ public: // interface
       field_index(),
       field_alignment(0),
       field_padding(0),
+      field_history(0),
       field_precision(0),
       field_prolong(""),
       field_restrict(""),
@@ -188,6 +189,7 @@ public: // interface
       field_index(),
       field_alignment(0),
       field_padding(0),
+      field_history(0),
       field_precision(0),
       field_prolong(""),
       field_restrict(""),
@@ -357,6 +359,7 @@ public: // attributes
   std::vector<int>           field_centering [3];
   int                        field_ghost_depth[3];
   int                        field_padding;
+  int                        field_history;
   int                        field_precision;
   std::string                field_prolong;
   std::string                field_restrict;

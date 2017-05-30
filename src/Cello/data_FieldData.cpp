@@ -19,9 +19,9 @@ FieldData::FieldData
  ) throw()
   : array_permanent_(),
     array_temporary_(),
+    temporary_size_(),
     offsets_(),
     ghosts_allocated_(true),
-    num_history_(0),
     history_id_(),
     history_time_()
 {
@@ -34,6 +34,10 @@ FieldData::FieldData
     size_[1] = 0;
     size_[2] = 0;
   }
+
+  // Initialize history temporary fields
+
+  if (field_descr) set_history_(field_descr);
 }
 
 //----------------------------------------------------------------------
@@ -52,7 +56,19 @@ void FieldData::pup(PUP::er &p)
   PUParray(p,size_,3);
 
   p | array_permanent_;
-  //  p | array_temporary_;
+  p | temporary_size_;
+
+  int nt = temporary_size_.size();
+  p | nt;
+  if (p.isUnpacking()) {
+    array_temporary_.resize(nt,0);
+  }
+  for (int i=0; i<nt; i++) {
+    int n = temporary_size_[i];
+    if (n > 0) {
+      PUParray(p,array_temporary_[i],n);
+    }
+  }  
   static bool warn[CONFIG_NODE_SIZE] = {false};
   const int in = cello::index_static();
   if (! warn[in]) {
@@ -62,7 +78,6 @@ void FieldData::pup(PUP::er &p)
   }
   p | offsets_;
   p | ghosts_allocated_;
-  p | num_history_;
   p | history_id_;
   p | history_time_;
 }
@@ -115,8 +130,9 @@ char * FieldData::values
 
   char * values = 0;
 
+  int nh = field_descr->num_history();
   if (field_descr->is_permanent(id_field) &&
-      (1 <= index_history && index_history <= num_history_)) {
+      (1 <= index_history && index_history <= nh)) {
       const int np = field_descr->num_permanent();
       id_field = history_id_[id_field + np*(index_history-1)];
   }
@@ -160,8 +176,9 @@ char * FieldData::unknowns
 
   // update field id if permanent and old value in history
 
+  int nh = field_descr->num_history();
   if (field_descr->is_permanent(id_field) &&
-      (1 <= index_history && index_history <= num_history_)) {
+      (1 <= index_history && index_history <= nh)) {
     const int np = field_descr->num_permanent();
     id_field = history_id_[id_field + np*(index_history-1)];
   }
@@ -334,6 +351,16 @@ void FieldData::allocate_permanent
 	   "Code error: array size was computed incorrectly");
   };
 
+  // Allocate any "temporary" fields for history
+
+  const int np = field_descr->num_permanent();
+  const int nh = field_descr->num_history();
+  for (int ih=0; ih<nh; ih++) {
+    for (int ip=0; ip<np; ip++) {
+      int i = ip + np*ih;
+      allocate_temporary (field_descr,history_id_[i]);
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -345,6 +372,7 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
   int index_field = id_field - field_descr->num_permanent();
   if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
+    temporary_size_. resize(index_field+1, 0);
   }
     
   if (array_temporary_[index_field] == 0) {
@@ -354,10 +382,13 @@ void FieldData::allocate_temporary (const FieldDescr * field_descr,
     precision_type precision = field_descr->precision(id_field);
     if (precision == precision_single) {
       array_temporary_[index_field] = (char*) new float [m];
+      temporary_size_[index_field] = m*sizeof(float);
     } else if (precision == precision_double) {
       array_temporary_[index_field] = (char*) new double [m];
+      temporary_size_[index_field] = m*sizeof(double);
     } else if (precision == precision_quadruple) {
       array_temporary_[index_field] = (char*) new long double [m];
+      temporary_size_[index_field] = m*sizeof(long double);
     } else {
       WARNING("FieldData::allocate_temporary",
 	      "Calling allocate_temporary() on already-allocated Field");
@@ -374,6 +405,7 @@ void FieldData::deallocate_temporary (const FieldDescr * field_descr,
 
   if (! (index_field < int(array_temporary_.size()))) {
     array_temporary_.resize(index_field+1, 0);
+    temporary_size_. resize(index_field+1, 0);
   }
   if (array_temporary_[index_field] != 0) {
     precision_type precision = field_descr->precision(id_field);
@@ -385,6 +417,7 @@ void FieldData::deallocate_temporary (const FieldDescr * field_descr,
       delete [] (long double *) array_temporary_[index_field];
   }
   array_temporary_[index_field] = 0;
+  temporary_size_ [index_field] = 0;
 
 }
 //----------------------------------------------------------------------
@@ -813,50 +846,6 @@ void FieldData::scale_
 }
 
 //----------------------------------------------------------------------
-
-void FieldData::set_history (FieldDescr * field_descr, int num_history)
-{
-  const int np = field_descr->num_permanent();
-  const int nh = num_history;
-  
-  // insert new temporary fields if needed
-
-  if (num_history > num_history_) {
-    history_time_.resize(nh);
-    history_id_.resize(np*nh);
-    for (int ih=num_history_; ih<nh; ih++) {
-      for (int ip=0; ip<np; ip++) {
-
-	int i = ip + np*ih;
-
-	const int ih = field_descr->insert_temporary();
-	
-	history_id_[i] = ih;
-
-	// set precision
-	field_descr->set_precision (ih, field_descr->precision(ip));
-
-	// set ghost zones
-	int gx,gy,gz;
-	field_descr->    ghost_depth(ip,&gx,&gy,&gz);
-	field_descr->set_ghost_depth(ih,gx,gy,gz);
-
-	// set centering
-	int cx,cy,cz;
-	field_descr->    centering(ip,&cx,&cy,&cz);
-	field_descr->set_centering(ih,cx,cy,cz);
-	
-	allocate_temporary(field_descr,ih);
-      }
-      
-      history_time_[ih] = 0.0;
-      
-    }
-    num_history_ = num_history;
-  }
-}
-
-//----------------------------------------------------------------------
   
 void FieldData::save_history (const FieldDescr * field_descr, double time)
 {
@@ -871,7 +860,7 @@ void FieldData::save_history (const FieldDescr * field_descr, double time)
   // copy history_id_[0] = permanent
 
   const int np = field_descr->num_permanent();
-  const int nh = num_history_;
+  const int nh = field_descr->num_history();
 
   // Save oldest history id's
   
@@ -1058,4 +1047,26 @@ void FieldData::restore_permanent_
   }
 
   offsets_from.clear();
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::set_history_(const FieldDescr * field_descr)
+{
+  const int np = field_descr->num_permanent();
+  const int nh = field_descr->num_history();
+  
+  if (nh > 0) {
+    history_id_.  resize(np*nh);
+    history_time_.resize(nh);
+    for (int ih=0; ih<nh; ih++) {
+      for (int ip=0; ip<np; ip++) {
+
+	int i = ip + np*ih;
+	
+	history_id_[i] = field_descr->history_id(ip,ih+1);
+      }
+      history_time_[ih] = 0.0;
+    }
+  }
 }

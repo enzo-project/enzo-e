@@ -400,6 +400,7 @@ void Simulation::initialize_data_descr_() throw()
   
   field_descr_->set_padding (config_->field_padding);
 
+  field_descr_->set_history (config_->field_history);
 
   for (int i=0; i<field_descr_->field_count(); i++) {
 

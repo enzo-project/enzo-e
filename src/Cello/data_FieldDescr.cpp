@@ -21,7 +21,10 @@ FieldDescr::FieldDescr () throw ()
     padding_(0),
     precision_(),
     centering_(),
-    ghost_depth_()
+    ghost_depth_(),
+    conserved_(),
+    history_(0),
+    history_id_()
 {
   for (int i=0; i<3; i++) {
     ghost_depth_default_[i] = 0;

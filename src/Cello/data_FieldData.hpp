@@ -27,12 +27,13 @@ class FieldData {
   /// are stored in a separate FieldDescr object, for which there is
   /// one per Simulation object (i.e. one per process)
 
+  friend class Field;
   friend class FieldFace; // required for adjust_alignment_()
 
 public: // interface
 
-  /// Create a new uninitialized FieldData object
-  FieldData(const FieldDescr * = 0,
+  /// Create a new initialized FieldData object
+  FieldData(const FieldDescr * = NULL,
 	     int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
@@ -107,8 +108,7 @@ public: // interface
 			  bool ghosts_allocated = false) throw();
 
   /// Allocate storage for the temporary fields
-  void allocate_temporary(const FieldDescr *,
-			  int id) throw ();
+  void allocate_temporary(const FieldDescr *, int id) throw ();
 
   /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
@@ -158,20 +158,14 @@ public: // interface
   // History operations
   //----------------------------------------------------------------------
 
-  /// Set the history depth for storing old field values
-  void set_history (FieldDescr *, int history);
-
-  /// Return the history depth for storing old field values
-  int num_history () const
-  { return num_history_; }
-  
   /// Copy "current" fields to "old" fields
   void save_history (const FieldDescr *, double time);
 
   /// Return time for given history
-  double history_time (int ih) const
+  double history_time (const FieldDescr * field_descr, int ih) const
   {
-    return (0 < ih && ih <= num_history_) ? history_time_[ih-1] : 0.0;
+    const int nh = field_descr->num_history();
+    return (1 <= ih && ih <= nh) ? history_time_[ih-1] : 0.0;
   }
 
   //--------------------------------------------------
@@ -214,6 +208,9 @@ private: // functions
    const char       * array_from,
    std::vector<int> & offsets_from ) throw ();
 
+  /// (Re-)initialize temporary fields for history
+  void set_history_ (const FieldDescr * field_descr);
+ 
   template <class T>
   void print_
   (const T * field,
@@ -234,6 +231,9 @@ private: // attributes
   /// Single array of permanent fields
   std::vector<char> array_permanent_;
 
+  /// Length of allocated temporary fields
+  std::vector<int> temporary_size_;
+
   /// Array of temporary fields
   std::vector<char *> array_temporary_;
 
@@ -243,10 +243,9 @@ private: // attributes
   /// Whether ghost values are allocated or not 
   bool ghosts_allocated_;
 
-  /// Number of sets of old fields to store
-  int num_history_;
-
-  /// Id's of "old" fields for all permanent fields [ip][ih]
+  /// Temporary field id's used for history.  May be permuted
+  /// wrt FieldDescr when copying generations.  Initialized from
+  /// FieldDescr copy
   std::vector<int> history_id_;
 
   /// Saved times for history fields [ip]
