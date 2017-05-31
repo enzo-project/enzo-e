@@ -95,8 +95,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
     
   }
 
-  enzo_float dtBaryons      = ENZO_HUGE_VAL;
-  enzo_float dtExpansion    = ENZO_HUGE_VAL;
+  enzo_float dtBaryons = ENZO_HUGE_VAL;
 
   /* Compute the pressure. */
 
@@ -119,9 +118,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
     (enzo_float *)field.values("velocity_z") : NULL;
   enzo_float * pressure = (enzo_float *) field.values("pressure");
  
-  /* 2) Calculate dt from particles. */
- 
-  /* 3) Find dt from expansion. */
+  /* Find dt from expansion. */
  
   if (cosmology) {
 
@@ -129,9 +126,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
     
   }
   
-  //   /* 4) Calculate minimum dt due to acceleration field (if present). */
- 
-  /* 5) calculate minimum timestep */
+  /* calculate minimum timestep */
 
   FORTRAN_NAME(calc_dt)(&rank, 
 			enzo_block->GridDimension, 

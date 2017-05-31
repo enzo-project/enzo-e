@@ -116,6 +116,7 @@ void Block::init
   dt_ = dt;
   adapt_step_ = num_adapt_steps;
   adapt_ = adapt_unknown;
+  old_time_ = time_;
 
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = true;

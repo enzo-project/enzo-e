@@ -143,6 +143,8 @@ struct fluxes
 
 #include "fortran.h" /* included so scons knowns to install fortran.h */
 
+#include "fortran_types.h" /* included so scons knowns to install fortran.h */
+
 #include "enzo_EnzoPhysicsCosmology.hpp"
 
 #include "enzo_EnzoUnits.hpp"
@@ -172,6 +174,7 @@ struct fluxes
 
 #include "enzo_EnzoRefineShock.hpp"
 
+#include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
