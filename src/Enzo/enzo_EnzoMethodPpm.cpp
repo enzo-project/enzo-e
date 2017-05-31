@@ -79,7 +79,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  enzo_float a = 1, dadt, dtExpansion;
+  enzo_float a = 1, dadt;
 
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     block->simulation()->problem()->physics("cosmology");
@@ -117,15 +117,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
   enzo_float * velocity_z = (rank >= 3) ? 
     (enzo_float *)field.values("velocity_z") : NULL;
   enzo_float * pressure = (enzo_float *) field.values("pressure");
- 
-  /* Find dt from expansion. */
- 
-  if (cosmology) {
-
-    cosmology->compute_expansion_timestep(&dtExpansion, block->time());
-    
-  }
-  
+   
   /* calculate minimum timestep */
 
   FORTRAN_NAME(calc_dt)(&rank, 
