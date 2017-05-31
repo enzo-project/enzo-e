@@ -147,10 +147,6 @@ void Block::compute_exit_ ()
 {
   TRACE_CONTROL("compute_exit");
 
-  // TODO: copy baryon field to old baryon field here
-
-  old_time_ = time_;
-
   adapt_enter_();
 }
 

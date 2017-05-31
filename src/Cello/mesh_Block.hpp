@@ -118,10 +118,6 @@ public: // interface
   double time() const throw()   
   { return time_; };
 
-  /// Return the current old_time
-  double old_time() const throw()
-  { return old_time_; };
-
   /// Return the level in the Hierarchy
   int level() const throw() 
   {  return index_.level(); };
@@ -704,10 +700,6 @@ public: // virtual functions
   virtual void set_time (double time) throw()
   { time_  = time; }
 
-  /// Set Block's old_time
-  virtual void set_old_time (double old_time) throw()
-  { old_time_  = old_time; }
-
   /// Set Block's timestep
   virtual void set_dt (double dt) throw()
   { dt_  = dt; }
@@ -864,9 +856,6 @@ protected: // attributes
 
   /// Current time
   double time_;
-
-  /// Time at last cycle
-  double old_time_;
 
   /// Current timestep
   double dt_;
