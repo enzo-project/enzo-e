@@ -41,19 +41,27 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       block->compute_done();
     }
 
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+
+  ASSERT ("EnzoMethodComovingExpansion::compute()",
+	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
+	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+
   /* Compute adot/a at time = t-1/2dt (time-centered). */
 
-  enzo_float a, dadt, time, old_time;
-  time     = enzo_block->time();
-  old_time = enzo_block->old_time();
+  enzo_float a, dadt, compute_time;
+  int has_history = field.history_time(1) > 0.;
 
-  if (enzo_block->CosmologyComputeExpansionFactor(
-          0.5*(enzo_block->time()+enzo_block->old_time()),
-          &a, &dadt) == ENZO_FAIL) {
-    fprintf(stderr, "Error in CosmologyComputeExpansionFactor.\n");
-    exit(ENZO_FAIL);
+  if (has_history) {
+    compute_time = 0.5 * (field.history_time(0) +
+                          field.history_time(1));
+  }
+  else {
+    compute_time = field.history_time(0);
   }
 
+  cosmology->compute_expansion_factor(&a, &dadt, compute_time);
   enzo_float Coefficient = block->dt()*dadt/a;
 
   /* Determine the size of the grids. */
@@ -66,20 +74,20 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   /* If we can, compute the pressure at the mid-point.
      We can, because we will always have an old baryon field now. */
   const int in = cello::index_static();
-  enzo_float PressureTime = 0.5 * (time + old_time);
   enzo_float * pressure = new enzo_float[size];
   int rval;
 
   if (EnzoBlock::DualEnergyFormalism[in]) {
     rval = enzo_block->ComputePressureDualEnergyFormalism(
-        PressureTime, pressure, comoving_coordinates_);
+        compute_time, pressure, comoving_coordinates_);
   }
   else{
     rval = enzo_block->ComputePressure(
-        PressureTime, pressure, comoving_coordinates_);
+        compute_time, pressure, comoving_coordinates_);
   }
   if (rval == ENZO_FAIL) {
-    fprintf(stderr, "Error in ComputePressureDualEnergyFormalism or ComputePressure.\n");
+    fprintf(stderr,
+            "Error in ComputePressureDualEnergyFormalism or ComputePressure.\n");
     exit(ENZO_FAIL);
   }
 
@@ -88,35 +96,41 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
   // hard-code CR method to off
   int CRModel = 0;
-  enzo_float * cr_field = NULL;
-  enzo_float * old_cr_field = NULL;
+  enzo_float * cr_field_0 = NULL;
+  enzo_float * cr_field_1 = NULL;
 
-  /* Get the necessary fields. */
-  // For now, assume the existence of "old_<field>".
+  /* Get the necessary fields.
+     field.values(<field_name>, 0) is the field at the current time.
+     field.values(<field_name>, 1) is the field at the previous time.
+  */
 
-  enzo_float * density         = (enzo_float *) field.values("density");
-  enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
-  enzo_float * internal_energy = (enzo_float *) field.values("internal_energy");
-  enzo_float * old_density         = (enzo_float *) field.values("old_density");
-  enzo_float * old_total_energy    = (enzo_float *) field.values("old_total_energy");
-  enzo_float * old_internal_energy = (enzo_float *) field.values("old_internal_energy");
+  enzo_float * density_0         = (enzo_float *) field.values("density", 0);
+  enzo_float * total_energy_0    = (enzo_float *) field.values("total_energy", 0);
+  enzo_float * internal_energy_0 = (enzo_float *) field.values("internal_energy", 0);
+  enzo_float * density_1, * total_energy_1, * internal_energy_1;
 
-  enzo_float * velocity_x = NULL;
-  enzo_float * velocity_y = NULL;
-  enzo_float * velocity_z = NULL;
-  enzo_float * old_velocity_x = NULL;
-  enzo_float * old_velocity_y = NULL;
-  enzo_float * old_velocity_z = NULL;
+  density_1 = has_history ?
+    (enzo_float *) field.values("density", 1) : density_0;
+  total_energy_1    = has_history ?
+    (enzo_float *) field.values("total_energy", 1) : total_energy_0;
+  internal_energy_1 = has_history ?
+    (enzo_float *) field.values("internal_energy", 1): internal_energy_0;
 
-  velocity_x = (enzo_float *) field.values("velocity_x");
-  old_velocity_x = (enzo_float *) field.values("old_velocity_x");
+  enzo_float * velocity_x_0, * velocity_y_0, * velocity_z_0,
+    * velocity_x_1, * velocity_y_1, * velocity_z_1 = NULL;
+
+  velocity_x_0 = (enzo_float *) field.values("velocity_x", 0);
+  velocity_x_1 = has_history ?
+    (enzo_float *) field.values("velocity_x", 1) : velocity_x_0;
   if (rank >= 2) {
-    velocity_y = (enzo_float *) field.values("velocity_y");
-    old_velocity_y = (enzo_float *) field.values("old_velocity_y");
+    velocity_y_0 = (enzo_float *) field.values("velocity_y", 0);
+    velocity_y_1 = has_history ?
+      (enzo_float *) field.values("velocity_y", 1) : velocity_y_0;
   }
   if (rank >= 3) {
-    velocity_z = (enzo_float *) field.values("velocity_z");
-    old_velocity_z = (enzo_float *) field.values("old_velocity_z");
+    velocity_z_0 = (enzo_float *) field.values("velocity_z", 0);
+    velocity_z_1 = has_history ?
+      (enzo_float *) field.values("velocity_z", 1) : velocity_z_0;
   }
 
   /* Call fortran routine to do the real work. */
@@ -125,11 +139,11 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       &rank, &size, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
       (int*) &HydroMethod, &EnzoBlock::Gamma[in],
       pressure,
-      density, total_energy, internal_energy,
-      velocity_x, velocity_y, velocity_z,
-      old_density, old_total_energy, old_internal_energy,
-      old_velocity_x, old_velocity_y, old_velocity_z,
-      &CRModel, cr_field, old_cr_field);
+      density_0, total_energy_0, internal_energy_0,
+      velocity_x_0, velocity_y_0, velocity_z_0,
+      density_1, total_energy_1, internal_energy_1,
+      velocity_x_1, velocity_y_1, velocity_z_1,
+      &CRModel, cr_field_0, cr_field_1);
 
   block->compute_done();
 
@@ -145,23 +159,19 @@ double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
   if (!comoving_coordinates_)
     return (double) dtExpansion;
 
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+
+  ASSERT ("EnzoMethodComovingExpansion::timestep()",
+	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
+	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  enzo_float a = 1, dadt;
+  cosmology->compute_expansion_timestep(&dtExpansion,
+                                        (enzo_float) enzo_block->time());
 
-  if (enzo_block->CosmologyComputeExpansionFactor(
-                  enzo_block->time(), &a, &dadt) == ENZO_FAIL) {
-    fprintf(stderr, "Error in CosmologyComputeExpansionFactor.\n");
-    exit(ENZO_FAIL);
-  }
-
-  if (enzo_block->CosmologyComputeExpansionTimestep(
-                  enzo_block->time(), &dtExpansion) == ENZO_FAIL) {
-    fprintf(stderr, "Error in ComputeExpansionTimestep.\n");
-    exit(ENZO_FAIL);
-  }
-
-  return dtExpansion;
+  return (double) dtExpansion;
 
 }
 

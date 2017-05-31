@@ -79,8 +79,8 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  enzo_float a = 1, dadt;
-  
+  enzo_float a = 1, dadt, dtExpansion;
+
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     block->simulation()->problem()->physics("cosmology");
 
