@@ -51,7 +51,8 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   /* Compute adot/a at time = t-1/2dt (time-centered). */
 
   enzo_float a, dadt, compute_time;
-  int has_history = field.history_time(1) > 0.;
+  int has_history = ((field.num_history() > 0) &&
+                     (field.history_time(1) > 0.));
 
   if (has_history) {
     compute_time = 0.5 * (enzo_block->time() +
