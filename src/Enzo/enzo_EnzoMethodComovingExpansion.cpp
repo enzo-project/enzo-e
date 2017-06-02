@@ -54,27 +54,27 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   int has_history = field.history_time(1) > 0.;
 
   if (has_history) {
-    compute_time = 0.5 * (field.history_time(0) +
+    compute_time = 0.5 * (enzo_block->time() +
                           field.history_time(1));
   }
   else {
-    compute_time = field.history_time(0);
+    compute_time = enzo_block->time();
   }
 
   cosmology->compute_expansion_factor(&a, &dadt, compute_time);
   enzo_float Coefficient = block->dt()*dadt/a;
 
-  /* Determine the size of the grids. */
+  /* Determine the size of the block. */
 
-  int i, dim, size = 1;
-  int rank = enzo_block->rank();
-  for (dim = 0; dim < rank; dim++)
-    size *= enzo_block->GridDimension[dim];
+  int mx, my, mz, m, rank;
+  field.dimensions(0,&mx,&my,&mz);
+  m = mx*my*mz;
+  rank = enzo_block->rank();
 
   /* If we can, compute the pressure at the mid-point.
      We can, because we will always have an old baryon field now. */
   const int in = cello::index_static();
-  enzo_float * pressure = new enzo_float[size];
+  enzo_float * pressure = new enzo_float[m];
   int rval;
 
   if (EnzoBlock::DualEnergyFormalism[in]) {
@@ -96,54 +96,49 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
   // hard-code CR method to off
   int CRModel = 0;
-  enzo_float * cr_field_0 = NULL;
-  enzo_float * cr_field_1 = NULL;
+  enzo_float * cr_field_new = NULL;
+  enzo_float * cr_field_old = NULL;
 
   /* Get the necessary fields.
      field.values(<field_name>, 0) is the field at the current time.
      field.values(<field_name>, 1) is the field at the previous time.
   */
 
-  enzo_float * density_0         = (enzo_float *) field.values("density", 0);
-  enzo_float * total_energy_0    = (enzo_float *) field.values("total_energy", 0);
-  enzo_float * internal_energy_0 = (enzo_float *) field.values("internal_energy", 0);
-  enzo_float * density_1, * total_energy_1, * internal_energy_1;
+  int i_new = 0;
+  int i_old = has_history ? 1 : 0;
 
-  density_1 = has_history ?
-    (enzo_float *) field.values("density", 1) : density_0;
-  total_energy_1    = has_history ?
-    (enzo_float *) field.values("total_energy", 1) : total_energy_0;
-  internal_energy_1 = has_history ?
-    (enzo_float *) field.values("internal_energy", 1): internal_energy_0;
+  enzo_float * density_new         = (enzo_float *) field.values("density", i_new);
+  enzo_float * density_old         = (enzo_float *) field.values("density", i_old);
+  enzo_float * total_energy_new    = (enzo_float *) field.values("total_energy", i_new);
+  enzo_float * total_energy_old    = (enzo_float *) field.values("total_energy", i_old);
+  enzo_float * internal_energy_new = (enzo_float *) field.values("internal_energy", i_new);
+  enzo_float * internal_energy_old = (enzo_float *) field.values("internal_energy", i_old);
 
-  enzo_float * velocity_x_0, * velocity_y_0, * velocity_z_0,
-    * velocity_x_1, * velocity_y_1, * velocity_z_1 = NULL;
+  enzo_float * velocity_x_new, * velocity_y_new, * velocity_z_new,
+    * velocity_x_old, * velocity_y_old, * velocity_z_old = NULL;
 
-  velocity_x_0 = (enzo_float *) field.values("velocity_x", 0);
-  velocity_x_1 = has_history ?
-    (enzo_float *) field.values("velocity_x", 1) : velocity_x_0;
+  velocity_x_new   = (enzo_float *) field.values("velocity_x", i_new);
+  velocity_x_old   = (enzo_float *) field.values("velocity_x", i_old);
   if (rank >= 2) {
-    velocity_y_0 = (enzo_float *) field.values("velocity_y", 0);
-    velocity_y_1 = has_history ?
-      (enzo_float *) field.values("velocity_y", 1) : velocity_y_0;
+    velocity_y_new = (enzo_float *) field.values("velocity_y", i_new);
+    velocity_y_old = (enzo_float *) field.values("velocity_y", i_old);
   }
   if (rank >= 3) {
-    velocity_z_0 = (enzo_float *) field.values("velocity_z", 0);
-    velocity_z_1 = has_history ?
-      (enzo_float *) field.values("velocity_z", 1) : velocity_z_0;
+    velocity_z_new = (enzo_float *) field.values("velocity_z", i_new);
+    velocity_z_old = (enzo_float *) field.values("velocity_z", i_old);
   }
 
   /* Call fortran routine to do the real work. */
 
   FORTRAN_NAME(expand_terms)(
-      &rank, &size, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
+      &rank, &m, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
       (int*) &HydroMethod, &EnzoBlock::Gamma[in],
       pressure,
-      density_0, total_energy_0, internal_energy_0,
-      velocity_x_0, velocity_y_0, velocity_z_0,
-      density_1, total_energy_1, internal_energy_1,
-      velocity_x_1, velocity_y_1, velocity_z_1,
-      &CRModel, cr_field_0, cr_field_1);
+      density_new, total_energy_new, internal_energy_new,
+      velocity_x_new, velocity_y_new, velocity_z_new,
+      density_old, total_energy_old, internal_energy_old,
+      velocity_x_old, velocity_y_old, velocity_z_old,
+      &CRModel, cr_field_new, cr_field_old);
 
   block->compute_done();
 
@@ -181,6 +176,10 @@ void EnzoMethodComovingExpansion::pup (PUP::er &p)
 {
   TRACEPUP;
   // NOTE: change this function whenever attributes change
+
+  Method::pup(p);
+
+  p | comoving_coordinates_;
 }
 
 //======================================================================
