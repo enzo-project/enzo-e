@@ -4,14 +4,29 @@
 
 CkReduction::reducerType r_reduce_performance_type;
 
-CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
-{
-  return NULL;
-  // NOT IMPLEMENTED YET
-}
-
 void register_reduce_performance(void)
 { r_reduce_performance_type = CkReduction::addReducer(r_reduce_performance); }
+
+CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
+{
+  if (n > 0) {
+
+    int length = ((int*) msgs[0]->getData())[0];
+    long long * accum = new long long [length];
+
+    for (int i=0; i<length; i++) accum[i] = 0.0;
+    
+    for (int i=0; i<n; i++) {
+      long long * values = (long long *) msgs[i]->getData();
+      for (int j=1; j<length; j++) {
+	accum [j] += values[j];
+      }
+    }
+    return CkReductionMsg::buildNew(length*sizeof(long long),accum);
+  } else {
+    return NULL;
+  }
+}
 
 
 //======================================================================

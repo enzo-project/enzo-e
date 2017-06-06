@@ -399,7 +399,25 @@
 
 // #define DEBUG_ENTRY
 // #define DEBUG_FIELD
+// #define DEBUG_COPY_TEMP
 // #define DEBUG_BICGSTAB
+
+#ifdef DEBUG_COPY_TEMP
+#   define COPY_TEMP(I_FIELD,FIELD_TMP)		\
+  {						\
+    Data* data = enzo_block->data();		\
+    Field field = data->field();		\
+    T * X = (T*)field.values(I_FIELD);		\
+    int it = field.field_id(FIELD_TMP);		\
+    T * t_X = (T*) field.values(it);		\
+    for (int i=0; i<mx_*my_*mz_; i++) {		\
+      t_X[i] = X[i];				\
+    }						\
+  }
+# else
+#   define COPY_TEMP(I_FIELD,FIELD_TMP) /* EMPTY */
+#endif
+
 
 #ifdef DEBUG_BICGSTAB
 #   define TRACE_BICGSTAB(MSG,BLOCK) \
@@ -467,7 +485,6 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   : Solver(monitor_iter,min_level,max_level), 
     A_(NULL),
     index_precon_(index_precon),
-    first_call_(true),
     rank_(rank),
     iter_max_(iter_max), 
     res_tol_(res_tol),
@@ -577,16 +594,28 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
     /// access relevant fields
 
-    T* X       = (T*) field.values(ix_);
+    T* X   = (T*) field.values(ix_);
+    T* R   = (T*) field.values(ir_);
+    T* R0  = (T*) field.values(ir0_);
+    T* P   = (T*) field.values(ip_);
+    T* Y   = (T*) field.values(iy_);
+    T* V   = (T*) field.values(iv_);
+    T* Q   = (T*) field.values(iq_);
+    T* U   = (T*) field.values(iu_);
 
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from
     /// the previous solve?]
     
-    if (first_call_) {
-      int m = mx_*my_*mz_;
-      for (int i=0; i<m; i++) {
-	X[i] = 0.0;
-      }
+    int m = mx_*my_*mz_;
+    for (int i=0; i<m; i++) {
+      X[i] = 0.0;
+      R[i] = 0.0;
+      R0[i] = 0.0;
+      P[i] = 0.0;
+      Y[i] = 0.0;
+      V[i] = 0.0;
+      Q[i] = 0.0;
+      U[i] = 0.0;
     }
   }
 
@@ -694,6 +723,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
 	}
       }
     }
+    COPY_TEMP(ib_,"B_temp");
   }
   
   /// initiate callback for r_solver_bicgstab_start_3 and contribute
@@ -788,18 +818,23 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
   TRACE_BICGSTAB("start coarse solve()",enzo_block);
 
   TRACE_FIELD(ip_,"P");
-  TRACE_FIELD(iy_,"Y");
+
   /// access field container on this block
   Data* data = enzo_block->data();
   Field field = data->field();
 
   if (index_precon_ >= 0) {
+
+    T * Y = (T*) field.values(iy_);
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      Y[i] = 0.0;
+    }
+
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Solver * precon = simulation->problem()->solver(index_precon_);
     precon->set_sync_id (8);
     precon->set_min_level(min_level_);
     precon->set_max_level(max_level_);
-
     precon->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_2());
     precon->apply(A_,iy_,ip_,enzo_block);
     
@@ -856,7 +891,7 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * enzo_block) throw() {
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields(enzo_block->data()->field().field_count());
-  
+
   refresh.add_field (ir_);
   refresh.add_field (ir0_);
   refresh.add_field (ip_);
@@ -903,6 +938,8 @@ void EnzoBlock::p_solver_bicgstab_loop_3() {
 
 template<class T>
 void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
+
+  COPY_TEMP(iy_,"Y1_temp");
 
   TRACE_BICGSTAB("loop_4()",enzo_block);
   /// access field container on this block
@@ -1011,8 +1048,9 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
     }
   }
 
+  COPY_TEMP(iv_,"V_temp");
+
   TRACE_FIELD(iv_,"V");
-  TRACE_FIELD(ip_,"P");
   TRACE_FIELD(iy_,"Y");
   /// compute alpha factor in BiCgStab algorithm (all blocks)
   alpha_ = beta_n_ / vr0_;
@@ -1038,6 +1076,9 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
 
   }
 
+  COPY_TEMP(iq_,"Q_temp");
+  COPY_TEMP(ix_,"X1_temp");
+  
   // Refresh field faces then call p_solver_bicgstab_loop_7
 
   /// refresh Q with callback to p_solver_bicgstab_loop_7 to handle re-entry
@@ -1057,6 +1098,10 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   if (index_precon_ >= 0) {
+    T * Y = (T*) field.values(iy_);
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      Y[i] = 0.0;
+    }
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Solver * precon = simulation->problem()->solver(index_precon_);
     precon->set_sync_id (10);
@@ -1161,6 +1206,8 @@ void EnzoBlock::p_solver_bicgstab_loop_9() {
 //----------------------------------------------------------------------
 
 template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw() {
+
+  COPY_TEMP (iy_,"Y2_temp");
 
   TRACE_BICGSTAB("loop_10()",enzo_block);
   /// access field container on this block
@@ -1271,11 +1318,14 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
       T yshift = -ys_ / bc_;
       T ushift = -us_ / bc_;
       for (int i=0; i<m; i++) {
-    	Y[i] += yshift;
-    	U[i] += ushift;
+	Y[i] += yshift;
+	U[i] += ushift;
       }
     }
   }
+
+  COPY_TEMP (iu_,"U_temp");
+  COPY_TEMP (iy_,"Y3_temp");
 
   /// fix omega_d_ if necessary (for division)
   if (omega_d_ == 0.0)  omega_d_ = 1.0;
@@ -1310,6 +1360,9 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
 
   }
 
+  COPY_TEMP(ir_,"R_temp");
+  COPY_TEMP(ix_,"X2_temp");
+  
   /// Update previous beta value (beta_d_) to current value (beta_n_)
   beta_d_ = beta_n_;
 
@@ -1402,6 +1455,8 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
     }
   }
 
+  COPY_TEMP (ip_,"P_temp");
+  
   /// contribute to global iteration counter
   int iter = iter_ + 1;
 

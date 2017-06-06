@@ -37,18 +37,13 @@ class EnzoBlock : public BASE_ENZO_BLOCK
 
   //----------------------------------------------------------------------
   // variables
-
+  
 public:
 
-  /// Cosmology
+  // /// Cosmology
 
   static int UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   static enzo_float MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-  static enzo_float ComovingBoxSize[CONFIG_NODE_SIZE];
-  static enzo_float HubbleConstantNow[CONFIG_NODE_SIZE];
-  static enzo_float OmegaMatterNow[CONFIG_NODE_SIZE];
-  static enzo_float OmegaLambdaNow[CONFIG_NODE_SIZE];
-  static enzo_float MaxExpansionRate[CONFIG_NODE_SIZE];
 
   // Chemistry
 
@@ -202,23 +197,6 @@ public: // interface
   /// Compute the temperature field
   int ComputeTemperatureField (enzo_float *temperature, 
 			       int comoving_coordinates);
-
-  /// Computes the expansion factors (a & dadt) at the requested time
-  int CosmologyComputeExpansionFactor
-  (enzo_float time, enzo_float *a, enzo_float *dadt);
-
-  /// Computes the maximum allowed expansion timestep at given time
-  int CosmologyComputeExpansionTimestep
-  (enzo_float time, enzo_float *dtExpansion);
-
-  /// Compute and return the cosmology units
-  int CosmologyGetUnits
-  ( enzo_float *DensityUnits, 
-    enzo_float *LengthUnits, 
-    enzo_float *TemperatureUnits, 
-    enzo_float *TimeUnits, 
-    enzo_float *VelocityUnits, 
-    enzo_float Time);
 
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
@@ -376,8 +354,6 @@ protected: // attributes
   // FieldMsg for prolong if called out of order
 
 public: // attributes (YIKES!)
-
-  // TEMPORARY DEBUGGING ARRAYS
 
   union {
     enzo_float dt;

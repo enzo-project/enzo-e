@@ -228,7 +228,7 @@ define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
 # Library defines
 
-define_hdf5  =        ['H5_USE_16_API']
+define_hdf5  =        []
 
 define_png   =        ['NO_FREETYPE']
 
@@ -572,7 +572,7 @@ i0=t.rfind('/',0,i0)
 i1=t.rfind('/bin')
 charm_build = t[i0+1:i1]
 
-cello_def.write ("#define CELLO_BUILD \"" + charm_build + "\"\n")
+cello_def.write ("#define CHARM_BUILD \"" + charm_build + "\"\n")
 fp_charm_build = open ("test/CHARM_BUILD", "w")
 fp_charm_build.write(charm_build + "\n");
 fp_charm_build.close()

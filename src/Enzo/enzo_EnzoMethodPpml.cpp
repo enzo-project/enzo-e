@@ -84,9 +84,16 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
  
   enzo_float a = 1, dadt;
   
-  if (comoving_coordinates_)
-    enzo_block->CosmologyComputeExpansionFactor
-      (enzo_block->time(), &a, &dadt);
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+
+  ASSERT ("EnzoMethodPpml::timestep()",
+	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
+	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+
+  if (cosmology) {
+    cosmology->compute_expansion_factor (&a, &dadt,enzo_block->time());
+  }
   //  float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */

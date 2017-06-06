@@ -125,6 +125,9 @@ void InitialValue::enforce_block
  const Hierarchy  * hierarchy
  ) throw()
 {
+
+  Initial::enforce_block(block,field_descr,particle_descr,hierarchy);
+  
   // Initialize Fields according to parameters
 
   ASSERT("InitialValue::enforce_block",

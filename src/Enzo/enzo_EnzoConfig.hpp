@@ -55,14 +55,16 @@ public: // interface
       ppm_use_minimum_pressure_support(false),
       ppm_mol_weight(0.0),
       field_gamma(0.0),
-      // Cosmology (NOT ACCESSED)
+      // Cosmology
       physics_cosmology(false),
-      physics_cosmology_comoving_box_size(0.0),
       physics_cosmology_hubble_constant_now(0.0),
-      physics_cosmology_initial_redshift(0.0),
-      physics_cosmology_max_expansion_rate(0.0),
-      physics_cosmology_omega_lamda_now(0.0),
       physics_cosmology_omega_matter_now(0.0),
+      physics_cosmology_omega_dark_matter_now(0.0),
+      physics_cosmology_omega_lamda_now(0.0),
+      physics_cosmology_comoving_box_size(0.0),
+      physics_cosmology_max_expansion_rate(0.0),
+      physics_cosmology_initial_redshift(0.0),
+      physics_cosmology_final_redshift(0.0),
       // EnzoInitialCollapse
       initial_collapse_rank(0),
       initial_collapse_radius_relative(0.0),
@@ -118,6 +120,7 @@ public: // interface
       // EnzoSolver<Krylov>
       solver_precondition(),
       solver_local()
+      
   {
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
@@ -160,12 +163,14 @@ public: // attributes
 
   /// Cosmology (NOT ACCESSED)
   bool                       physics_cosmology;
-  double                     physics_cosmology_comoving_box_size;
   double                     physics_cosmology_hubble_constant_now;
-  double                     physics_cosmology_initial_redshift;
-  double                     physics_cosmology_max_expansion_rate;
-  double                     physics_cosmology_omega_lamda_now;
+  double                     physics_cosmology_omega_dark_matter_now;
   double                     physics_cosmology_omega_matter_now;
+  double                     physics_cosmology_omega_lamda_now;
+  double                     physics_cosmology_comoving_box_size;
+  double                     physics_cosmology_max_expansion_rate;
+  double                     physics_cosmology_initial_redshift;
+  double                     physics_cosmology_final_redshift;
 
   /// EnzoInitialCollapse
   int                        initial_collapse_rank;
@@ -267,6 +272,7 @@ public: // attributes
   /// Mg0 coarse grid solver
   std::vector<int>           solver_local;
 
+ 
 #ifdef CONFIG_USE_GRACKLE
 
   /// EnzoMethodGrackle

@@ -34,12 +34,14 @@ EnzoConfig::EnzoConfig() throw ()
   ppm_mol_weight(0.0),
   field_gamma(0.0),
   physics_cosmology(false),
-  physics_cosmology_comoving_box_size(0.0),
   physics_cosmology_hubble_constant_now(0.0),
-  physics_cosmology_initial_redshift(0.0),
-  physics_cosmology_max_expansion_rate(0.0),
-  physics_cosmology_omega_lamda_now(0.0),
   physics_cosmology_omega_matter_now(0.0),
+  physics_cosmology_omega_dark_matter_now(0.0),
+  physics_cosmology_omega_lamda_now(0.0),
+  physics_cosmology_comoving_box_size(0.0),
+  physics_cosmology_max_expansion_rate(0.0),
+  physics_cosmology_initial_redshift(0.0),
+  physics_cosmology_final_redshift(0.0),
   // EnzoInitialPm
   initial_pm_field(""),
   initial_pm_mpp(0.0),
@@ -134,12 +136,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | field_gamma;
 
   p | physics_cosmology;
-  p | physics_cosmology_comoving_box_size;
   p | physics_cosmology_hubble_constant_now;
-  p | physics_cosmology_initial_redshift;
-  p | physics_cosmology_max_expansion_rate;
   p | physics_cosmology_omega_lamda_now;
   p | physics_cosmology_omega_matter_now;
+  p | physics_cosmology_omega_dark_matter_now;
+  p | physics_cosmology_comoving_box_size;
+  p | physics_cosmology_max_expansion_rate;
+  p | physics_cosmology_initial_redshift;
+  p | physics_cosmology_final_redshift;
 
   p | initial_collapse_rank;
   PUParray(p,initial_collapse_array,3);
@@ -203,6 +207,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | solver_coarse_solve;
   p | solver_weight;
 
+  p | units_mass;
+  p | units_density;
+  p | units_length;
+  p | units_time;
+
 #ifdef CONFIG_USE_GRACKLE
 
   // Grackle cooling parameters
@@ -263,21 +272,6 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:use_minimum_pressure_support",false);
   ppm_mol_weight = p->value_float
     ("Method:ppm:mol_weight",0.6);
-
-
-  physics_cosmology = p->value_logical ("Method:cosmology",false);
-  physics_cosmology_comoving_box_size = p->value_float
-    ("Method:cosmology:comoving_box_size", 64.0);
-  physics_cosmology_hubble_constant_now = p->value_float
-    ("Method:cosmology:hubble_constant_now",0.701);
-  physics_cosmology_initial_redshift = p->value_float
-    ("Method:cosmology:initial_redshift",  20.0);;
-  physics_cosmology_max_expansion_rate = p->value_float
-    ("Method:cosmology:max_expansion_rate", 0.01);
-  physics_cosmology_omega_lamda_now = p->value_float
-    ("Method:cosmology:omega_lambda_now",   0.721);
-  physics_cosmology_omega_matter_now = p->value_float
-    ("Method:cosmology:omega_matter_now",   0.279);
 
   // PM method and initialization
 
@@ -424,6 +418,52 @@ void EnzoConfig::read(Parameters * p) throw()
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","unknown");
 
+  //--------------------------------------------------
+  // Physics
+  //--------------------------------------------------
+
+  num_physics = p->list_length("Physics:list"); 
+
+  for (int index_physics=0; index_physics<num_physics; index_physics++) {
+
+    std::string name = 
+      p->list_value_string(index_physics,"Physics:list");
+
+    std::string full_name = std::string("Physics:") + name;
+
+    if (physics_list[index_physics] == "cosmology") {
+
+      physics_cosmology = true;
+
+      physics_cosmology_hubble_constant_now = p->value_float
+	(full_name + ":hubble_constant_now",0.701);
+
+      physics_cosmology_omega_matter_now = p->value_float
+	(full_name + ":omega_matter_now",   0.279);
+
+      physics_cosmology_omega_dark_matter_now = p->value_float
+	(full_name + ":omega_dark_matter_now",   -1.0);
+
+      physics_cosmology_omega_lamda_now = p->value_float
+	(full_name + ":omega_lambda_now",   0.721);
+
+
+      physics_cosmology_comoving_box_size = p->value_float
+	(full_name + ":comoving_box_size", 64.0);
+
+      physics_cosmology_max_expansion_rate = p->value_float
+	(full_name + ":max_expansion_rate", 0.01);
+
+      physics_cosmology_initial_redshift = p->value_float
+	(full_name + ":initial_redshift",  20.0);;
+
+      physics_cosmology_final_redshift = p->value_float
+	(full_name + ":final_redshift",  0.0);;
+
+    }
+
+  }
+ 
   //======================================================================
   // SOLVER
   //======================================================================
@@ -498,8 +538,15 @@ void EnzoConfig::read(Parameters * p) throw()
 
   if (uses_grackle) {
 
-    method_grackle_units.comoving_coordinates 
-      = p->value_logical ("Method:cosmology",false);
+    method_grackle_units.comoving_coordinates = false;
+
+    for (int index_physics=0; index_physics<num_physics; index_physics++) {
+      // Check if EnzoPhysicsCosmology object is present
+      if (physics_list[index_physics] == "cosmology") {
+	method_grackle_units.comoving_coordinates = true;
+	break;
+      }
+    }
 
     method_grackle_units.density_units             // 1 m_H/cc
       = p->value_float("Method:grackle:density_units",1.67e-24);

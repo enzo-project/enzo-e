@@ -32,7 +32,7 @@ void Initial::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_block_
+void Initial::enforce_block
 (
  Block            * block,
  const FieldDescr * field_descr,
@@ -40,8 +40,4 @@ void Initial::enforce_block_
  const Hierarchy  * hierarchy
  ) throw()
 {
-  // Enforce fields
-
-  ERROR("Initial::enforce_block_",
-	"This function should not be called");
 }

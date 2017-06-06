@@ -27,12 +27,13 @@ class FieldData {
   /// are stored in a separate FieldDescr object, for which there is
   /// one per Simulation object (i.e. one per process)
 
+  friend class Field;
   friend class FieldFace; // required for adjust_alignment_()
 
 public: // interface
 
-  /// Create a new uninitialized FieldData object
-  FieldData(const FieldDescr * = 0,
+  /// Create a new initialized FieldData object
+  FieldData(const FieldDescr * = NULL,
 	     int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
@@ -49,32 +50,33 @@ public: // interface
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  char * values (const FieldDescr * , int id_field) 
-    throw ();
-  char * values (const FieldDescr * field_descr, std::string name) 
-    throw ()
-  { return values (field_descr,field_descr->field_id(name)); }
+  char * values (const FieldDescr *,
+		 int id_field, int history=0) throw ();
+  char * values (const FieldDescr * field_descr,
+		 std::string name, int history=0) throw ()
+  { return values (field_descr,field_descr->field_id(name),history); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  const char * values (const FieldDescr *, int id_field) const 
-    throw ();
-  const char * values (const FieldDescr * field_descr, std::string name) const 
-    throw ()
-  { return values (field_descr,field_descr->field_id(name)); }
+  const char * values (const FieldDescr *,
+		       int id_field, int history=0) const throw ();
+  const char * values (const FieldDescr * field_descr,
+		       std::string name, int history=0) const throw ()
+  { return values (field_descr,field_descr->field_id(name),history); }
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
-  char * unknowns (const FieldDescr *, int id_field) 
-    throw ();
-  char * unknowns (const FieldDescr * field_descr, std::string name) 
-    throw ()
-  { return unknowns (field_descr,field_descr->field_id(name)); }
+  char * unknowns (const FieldDescr *,
+		   int id_field, int history=0) throw ();
+  char * unknowns (const FieldDescr * field_descr,
+		   std::string name, int history=0) throw ()
+  { return unknowns (field_descr,field_descr->field_id(name),history); }
 
-  const char * unknowns (const FieldDescr *,  int id_field) const 
-    throw ();
-  const char * unknowns (const FieldDescr * field_descr, std::string name) const     throw ()
-  { return unknowns (field_descr,field_descr->field_id(name)); }
+  const char * unknowns (const FieldDescr *,
+			 int id_field, int history=0) const throw ();
+  const char * unknowns (const FieldDescr * field_descr,
+			 std::string name, int history=0) const throw ()
+  { return unknowns (field_descr,field_descr->field_id(name),history); }
 
   /// Return raw pointer to the array of all permanent fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
@@ -106,8 +108,7 @@ public: // interface
 			  bool ghosts_allocated = false) throw();
 
   /// Allocate storage for the temporary fields
-  void allocate_temporary(const FieldDescr *,
-			  int id) throw ();
+  void allocate_temporary(const FieldDescr *, int id) throw ();
 
   /// Reallocate storage for the field data, e.g. when changing
   /// from ghosts to non-ghosts [ costly for large blocks ]
@@ -136,8 +137,8 @@ public: // interface
 	      bool use_file = false) const throw();
 
   //----------------------------------------------------------------------
-
   // BLAS Operations
+  //----------------------------------------------------------------------
 
   // /// copy field is to field id
   // void copy (const FieldDescr *, int id, int is, bool ghosts = true ) throw();
@@ -152,6 +153,20 @@ public: // interface
   /// Scale vector ix by scalar a
   void scale (const FieldDescr *,
 	      int iy, long double a, int ix, bool ghosts = true ) throw();
+
+  //----------------------------------------------------------------------
+  // History operations
+  //----------------------------------------------------------------------
+
+  /// Copy "current" fields to "old" fields
+  void save_history (const FieldDescr *, double time);
+
+  /// Return time for given history
+  double history_time (const FieldDescr * field_descr, int ih) const
+  {
+    const int nh = field_descr->num_history();
+    return (1 <= ih && ih <= nh) ? history_time_[ih-1] : 0.0;
+  }
 
   //--------------------------------------------------
 private: // functions
@@ -193,6 +208,9 @@ private: // functions
    const char       * array_from,
    std::vector<int> & offsets_from ) throw ();
 
+  /// (Re-)initialize temporary fields for history
+  void set_history_ (const FieldDescr * field_descr);
+ 
   template <class T>
   void print_
   (const T * field,
@@ -213,6 +231,9 @@ private: // attributes
   /// Single array of permanent fields
   std::vector<char> array_permanent_;
 
+  /// Length of allocated temporary fields
+  std::vector<int> temporary_size_;
+
   /// Array of temporary fields
   std::vector<char *> array_temporary_;
 
@@ -222,7 +243,13 @@ private: // attributes
   /// Whether ghost values are allocated or not 
   bool ghosts_allocated_;
 
+  /// Temporary field id's used for history.  May be permuted
+  /// wrt FieldDescr when copying generations.  Initialized from
+  /// FieldDescr copy
+  std::vector<int> history_id_;
 
+  /// Saved times for history fields [ip]
+  std::vector<double> history_time_;
 };   
 
 #endif /* DATA_FIELD_DATA_HPP */

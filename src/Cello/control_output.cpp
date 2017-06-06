@@ -176,6 +176,7 @@ void Simulation::write_()
 
 void Simulation::r_write(CkReductionMsg * msg)
 {
+  create_checkpoint_link();
   performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_write()");
   delete msg;

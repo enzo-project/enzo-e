@@ -68,6 +68,7 @@ void Config::pup (PUP::er &p)
   PUParray(p,field_centering,3);
   PUParray(p,field_ghost_depth,3);
   p | field_padding;
+  p | field_history;
   p | field_precision;
   p | field_prolong;
   p | field_restrict;
@@ -172,6 +173,11 @@ void Config::pup (PUP::er &p)
   p | performance_papi_counters;
   p | performance_warnings;
 
+  // Physics
+  
+  p | num_physics;
+  p | physics_list;
+
   // Restart
 
   p | restart_file;
@@ -226,9 +232,11 @@ void Config::read(Parameters * p) throw()
   read_output_(p);
   read_particle_(p);
   read_performance_(p);
+  read_physics_(p);
   read_restart_(p);
   read_stopping_(p);
   read_testing_(p);
+  read_units_(p);
 
   TRACE("END   Config::read()");
 
@@ -537,6 +545,8 @@ void Config::read_field_ (Parameters * p) throw()
   }
 
   field_padding = p->value_integer("Field:padding",0);
+
+  field_history = p->value_integer("Field:history",0);
 
   // Field precision
 
@@ -1105,10 +1115,7 @@ void Config::read_particle_ (Parameters * p) throw()
       particle_group_list[index_particle].push_back(group);
     }
   }
-
-
 }
-
 
 //----------------------------------------------------------------------
 
@@ -1129,6 +1136,28 @@ void Config::read_performance_ (Parameters * p) throw()
 
   performance_warnings = p->value_logical("Performance:warnings",false);
 
+}
+
+//----------------------------------------------------------------------
+
+void Config::read_physics_ (Parameters * p) throw()
+{
+  //--------------------------------------------------
+  // Physics
+  //--------------------------------------------------
+
+  num_physics = p->list_length("Physics:list"); 
+
+  physics_list.resize(num_physics);
+  
+  for (int index_physics=0; index_physics<num_physics; index_physics++) {
+
+    std::string name = 
+      p->list_value_string(index_physics,"Physics:list");
+
+    physics_list[index_physics] = name;
+
+  }
 }
 
 //----------------------------------------------------------------------
@@ -1215,6 +1244,19 @@ void Config::read_stopping_ (Parameters * p) throw()
     ( "Stopping:seconds" , std::numeric_limits<double>::max() );
   stopping_interval = p->value_integer
     ( "Stopping:interval" , 1);
+}
+
+void Config::read_units_ (Parameters * p) throw()
+{
+  //======================================================================
+  // Units
+  //======================================================================
+  
+  units_mass    = p->value_float ("Units:mass",   1.0);
+  units_density = p->value_float ("Units:density",1.0);
+  units_length  = p->value_float ("Units:length", 1.0);
+  units_time    = p->value_float ("Units:time",   1.0);
+
 }
 
 //----------------------------------------------------------------------

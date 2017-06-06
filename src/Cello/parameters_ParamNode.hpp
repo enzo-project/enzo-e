@@ -30,8 +30,7 @@ public: // interface
   /// Destructor
   ~ParamNode() throw()
   {
-    std::map<std::string,ParamNode *>::iterator it_param;
-    for (it_param =  subnodes_.begin();
+    for (auto it_param =  subnodes_.begin();
 	 it_param != subnodes_.end();
 	 ++it_param) {
       delete it_param->second;
@@ -62,15 +61,14 @@ public: // interface
 
     // pup std::map<std::string,ParamNode*> subnodes_ using arrays
     
-    typedef std::map<std::string, ParamNode *>::iterator it_type;
     int n;
     if (p.isPacking()) {
       n = 0;
-      for(it_type it=subnodes_.begin(); it != subnodes_.end(); it++) {
+      for(auto it=subnodes_.begin(); it != subnodes_.end(); it++) {
 	++n;
       }
       p | n;
-      for(it_type it=subnodes_.begin(); it != subnodes_.end(); it++) {
+      for(auto it=subnodes_.begin(); it != subnodes_.end(); it++) {
 	std::string name = it->first;
 	int l = name.size();
 	char * array = new char[l];
@@ -107,9 +105,8 @@ public: // interface
   std::string subgroup (int group_index)
   {
     if (0 <= group_index && group_index < size()) {
-      std::map<std::string,ParamNode *>::iterator it_param;
-      int i;
-      for (i=0,it_param =  subnodes_.begin();
+      int i = 0;
+      for (auto it_param =  subnodes_.begin();
 	   it_param != subnodes_.end();
 	   ++it_param,i++) {
 	if (group_index == i) {
