@@ -120,8 +120,14 @@ void Block::compute_end_ ()
   //  traceUserBracketEvent(10,time_start, CmiWallTimer());
 #endif
 
+  // Push back fields if saving old ones
+  data()->field().save_history(time_);
+
+  // Update block cycle and time
   set_cycle (cycle_ + 1);
   set_time  (time_  + dt_);
+
+  // Update Simulation cycle and time (redundant)
   simulation()->set_cycle(cycle_);
   simulation()->set_time(time_);
 

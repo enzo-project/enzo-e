@@ -68,6 +68,8 @@ void Problem::pup (PUP::er &p)
 
   p | stopping_;
 
+  p | units_;
+
   // if (pk) n=timestep_list_.size();
   // p | n;
   // if (up) timestep_list_.resize(n);
@@ -145,6 +147,30 @@ void Problem::initialize_initial(Config * config,
 
     initial_list_.push_back( initial );
   }
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initialize_physics(Config * config,
+				 Parameters * parameters,
+				 const FieldDescr * field_descr) throw()
+{
+
+  for (int index=0; index < config->num_physics; index++) {
+
+    std::string type = config->physics_list[index];
+
+    Physics * physics = create_physics_
+      (type,index,config,parameters,field_descr);
+
+    ASSERT1("Problem::initialize_physics",
+	    "Physics type %s not recognized",
+	    config->physics_list[index].c_str(),
+	    (physics != NULL) );
+
+    physics_list_.push_back( physics );
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -457,6 +483,17 @@ void Problem::initialize_solver
 
 //----------------------------------------------------------------------
 
+void Problem::initialize_units(Config * config) throw()
+{
+  units_ = create_units_(config);
+
+  ASSERT("Problem::initialize_units",
+	  "Units object not successfully created",
+	  units_ != NULL);
+}
+
+//----------------------------------------------------------------------
+
 Solver * Problem::solver(size_t i) const throw()
 {
   ASSERT2("Problem::solver",
@@ -481,9 +518,10 @@ void Problem::deallocate_() throw()
     delete refine_list_[i];    refine_list_[i] = 0;
   }
   delete stopping_;      stopping_ = 0;
-  // for (size_t i=0; i<timestep_list_.size(); i++) {
-  //   delete timestep_list_[i];     timestep_list_[i] = 0;
-  // }
+  delete units_;         units_ = NULL;
+  for (size_t i=0; i<physics_list_.size(); i++) {
+    delete physics_list_[i];   physics_list_[i] = NULL;
+  }
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
   }
@@ -691,6 +729,37 @@ Stopping * Problem::create_stopping_
 
 //----------------------------------------------------------------------
 
+Units * Problem::create_units_ 
+(
+ Config * config
+ ) throw ()
+/// @param type   Type of the units criterion to create (ignored)
+/// @param config  Configuration parameter class
+{
+  Units * units = new Units;
+  
+  if (config->units_mass == 1.0) {
+
+    units->set_using_density (config->units_length,
+			       config->units_density,
+			       config->units_time);
+    
+  } else if (config->units_density == 1.0) {
+
+    units->set_using_mass (config->units_length,
+			    config->units_mass,
+			    config->units_time);
+  } else {
+    
+    ERROR("Problem::create_units_",
+	  "Cannot set both Units:density and Units:time parameters");
+  }
+
+  return units;
+}
+
+//----------------------------------------------------------------------
+
 Solver * Problem::create_solver_ 
 ( std::string  name,
   Config * config,
@@ -704,6 +773,33 @@ Solver * Problem::create_solver_
   Solver * solver = NULL;
 
   return solver;
+}
+
+//----------------------------------------------------------------------
+
+Physics * Problem::create_physics_ 
+( std::string  name,
+  int index,
+  Config * config,
+  Parameters * parameters,
+  const FieldDescr * field_descr) throw ()
+{
+  TRACE1("Problem::create_physics %s",name.c_str());
+
+  // No default physics
+  Physics * physics = NULL;
+
+  return physics;
+}
+
+//----------------------------------------------------------------------
+
+Physics * Problem::physics (std::string type) const throw()
+{
+  for (int i=0; i<physics_list_.size(); i++) {
+    if (physics_list_[i]->type() == type) return physics_list_[i];
+  }
+  return NULL;
 }
 
 //----------------------------------------------------------------------

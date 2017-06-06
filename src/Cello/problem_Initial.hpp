@@ -26,11 +26,10 @@ public: // interface
   /// Create a new Initial
   Initial(int cycle, double time) throw()
     : cycle_(cycle), time_(time)
-  {};
+  { }
 
   /// Destructor
-  virtual ~Initial() throw()
-  {} ;
+  virtual ~Initial() throw() {} 
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(Initial);
@@ -59,8 +58,7 @@ public: // virtual functions
     const FieldDescr * field_descr,
     const ParticleDescr * particle_descr,
     const Hierarchy  * hierarchy
-    ) throw()
-  { enforce_block_(block,field_descr,particle_descr,hierarchy); }
+    ) throw();
 
   /// Return whether enforce() expects block != NULL
   virtual bool expects_blocks_allocated() const throw()
@@ -68,13 +66,6 @@ public: // virtual functions
 
 protected: // functions
 
-  /// Loop over enforcing initial conditions Field data in the Block
-  void enforce_block_
-  ( Block            * block, 
-    const FieldDescr * field_descr,  
-    const ParticleDescr * particle_descr,  
-    const Hierarchy  * hierarchy
-    ) throw();
 
 protected: // attributes
 

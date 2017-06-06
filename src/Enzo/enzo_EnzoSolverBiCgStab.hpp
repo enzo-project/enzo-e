@@ -41,7 +41,6 @@ public: // interface
     : Solver(),
       A_(NULL),
       index_precon_(-1),
-      first_call_(true),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
@@ -70,7 +69,6 @@ public: // interface
     : Solver(m),
       A_(NULL),
       index_precon_(-1),
-      first_call_(true),
       rank_(0),
       iter_max_(0), 
       res_tol_(0.0),
@@ -99,7 +97,6 @@ public: // interface
     p | A_;
     p | index_precon_;
     
-    p | first_call_;
     p | rank_;
     p | iter_max_;
     p | res_tol_;
@@ -254,9 +251,6 @@ protected: // attributes
   /// Preconditioner (-1 if none)
   int index_precon_;
 
-  /// Whether this is the first call to the solver
-  bool first_call_;
-  
   /// Dimensionality of the problem
   int rank_;
 

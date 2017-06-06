@@ -64,8 +64,11 @@ void Main::p_checkpoint(int count, std::string dir_name)
     count_checkpoint_ = 0;
     // Write parameter file
 
-    char dir_char[256];
-    strncpy(dir_char,dir_name.c_str(),255);
+#ifdef CHARM_ENZO
+    strncpy(dir_checkpoint_,dir_name.c_str(),255);
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    simulation->set_checkpoint(dir_checkpoint_);
+#endif    
 
     // --------------------------------------------------
     // ENTRY: #1 OutputCheckpoint::write_simulation()-> Simulation::s_write()
@@ -73,7 +76,7 @@ void Main::p_checkpoint(int count, std::string dir_name)
     // --------------------------------------------------
 #ifdef CHARM_ENZO
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint(),proxy_simulation);
-    CkStartCheckpoint (dir_char,callback);
+    CkStartCheckpoint (dir_checkpoint_,callback);
 #endif
   }
   // --------------------------------------------------

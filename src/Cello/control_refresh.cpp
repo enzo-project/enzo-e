@@ -505,8 +505,8 @@ void Block::particle_scatter_neighbors_
 
   int count = 0;
   // ...for each particle type to be moved
-  std::vector<int>::iterator it_type;
-  for (it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
+
+  for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
 
     int it = *it_type;
 

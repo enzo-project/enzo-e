@@ -284,6 +284,9 @@ public: // virtual functions
 
   virtual void monitor_performance();
 
+  void set_checkpoint(char * checkpoint)
+  { strncpy (dir_checkpoint_,checkpoint,256);}
+
 protected: // functions
 
   /// Initialize the Config object
@@ -324,6 +327,16 @@ protected: // functions
 			      double stop,
 			      double step);
 
+  void create_checkpoint_link() {
+    if (CkMyPe() == 0) {
+      CkPrintf ("creating symlink %s -> %s\n",
+		dir_checkpoint_,
+		"Checkpoint");
+
+      unlink ("Checkpoint");
+      symlink(dir_checkpoint_,"Checkpoint");
+    }
+  }
 protected: // attributes
 
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
@@ -405,6 +418,10 @@ protected: // attributes
 
   Sync sync_output_begin_;
   Sync sync_output_write_;
+
+  /// Saved latest checkpoint directory for creating symlink
+  char dir_checkpoint_[256];
+  
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

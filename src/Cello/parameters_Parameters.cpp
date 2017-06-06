@@ -11,6 +11,8 @@
 
 Parameters g_parameters;
 
+// #define TEMP_BYPASS_DESTRUCTOR
+
 //----------------------------------------------------------------------
 
 Parameters::Parameters(Monitor * monitor) 
@@ -46,13 +48,15 @@ Parameters::~Parameters()
 {
   // Iterate over all parameters, deleting their values
 
-  std::map<std::string,Param *>::iterator it_param;
-  for (it_param =  parameter_map_.begin();
+
+#ifdef TEMP_BYPASS_DESTRUCTOR
+  for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
     delete it_param->second;
   }
   delete parameter_tree_;
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -66,8 +70,7 @@ void Parameters::pup (PUP::er &p)
   int n = 0;
   if (!p.isUnpacking()) {
     // Figure out size
-    std::map<std::string, Param *>::iterator it_param;
-    for (it_param =  parameter_map_.begin();
+    for (auto it_param =  parameter_map_.begin();
 	 it_param != parameter_map_.end();
 	 ++it_param) {
       n++;
@@ -75,8 +78,7 @@ void Parameters::pup (PUP::er &p)
   }
   p | n;
   if (!p.isUnpacking()) {
-    std::map<std::string, Param *>::iterator it_param;
-    for (it_param =  parameter_map_.begin();
+    for (auto it_param =  parameter_map_.begin();
 	 it_param != parameter_map_.end();
 	 ++it_param) {
       std::string name = it_param->first;
@@ -192,9 +194,7 @@ void Parameters::write ( FILE * fp, bool full_names )
 
   // Loop over parameters
 
-  std::map<std::string,Param *>::iterator it_param;
-
-  for (it_param =  parameter_map_.begin();
+  for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
 
@@ -1101,9 +1101,7 @@ void Parameters::new_param_
 
 void Parameters::check()
 {
-  std::map<std::string,Param *>::iterator it_param;
-
-  for (it_param =  parameter_map_.begin();
+  for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
     if (it_param->second && ! it_param->second->accessed()) {

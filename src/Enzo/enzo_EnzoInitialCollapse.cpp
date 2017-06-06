@@ -116,8 +116,6 @@ void EnzoInitialCollapse::enforce_block
   const double ry2i = 1.0/(ry*ry);
   const double rz2i = 1.0/(rz*rz);
   
-  const int i0 = gx + mx*(gy + my*gz);
-  
   const double density = mass_ / (4.0/3.0*(cello::pi)*rx*ry*rz);
 
   // bounds of possible explosions intersecting this Block

@@ -146,6 +146,10 @@ extern "C" {
 
 #include "fortran.h" /* included so scons knowns to install fortran.h */
 
+#include "enzo_EnzoPhysicsCosmology.hpp"
+
+#include "enzo_EnzoUnits.hpp"
+
 #include "enzo_EnzoFactory.hpp"
 
 #include "enzo_EnzoSimulation.hpp"

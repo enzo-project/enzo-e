@@ -42,6 +42,7 @@ module mesh {
   PUPable OutputCheckpoint;
   PUPable OutputData;
   PUPable OutputImage;
+  PUPable Physics;
   PUPable Problem;
   PUPable ProlongInject;
   PUPable ProlongLinear;
@@ -58,6 +59,7 @@ module mesh {
   PUPable RestrictLinear;
   PUPable ScheduleList;
   PUPable ScheduleInterval;
+  PUPable Units;
 
   // depreciated
   message FieldMsg {

@@ -51,6 +51,7 @@ Simulation::Simulation
   sync_output_begin_(),
   sync_output_write_()
 {
+  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation(parameter_file,n)\n",CkMyPe());
   fflush(stdout);
@@ -104,6 +105,7 @@ Simulation::Simulation()
   sync_output_begin_(),
   sync_output_write_()
 {
+  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation()\n",CkMyPe());
   fflush(stdout);
@@ -143,8 +145,7 @@ void Simulation::pup (PUP::er &p)
   p | stop_;
   p | phase_;
 
-  if (up) problem_ = new Problem;
-  p | * problem_;
+  p | problem_; // PUPable
 
   if (up) performance_ = new Performance;
   p | *performance_;
@@ -178,6 +179,8 @@ void Simulation::pup (PUP::er &p)
   if (up) sync_output_write_.set_stop(0);
 
   p | schedule_balance_;
+
+  PUParray(p,dir_checkpoint_,256);
 }
 
 //----------------------------------------------------------------------
@@ -215,6 +218,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_write_()
 
 {
+  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation(msg)\n",CkMyPe());
   fflush(stdout);
@@ -396,6 +400,7 @@ void Simulation::initialize_data_descr_() throw()
   
   field_descr_->set_padding (config_->field_padding);
 
+  field_descr_->set_history (config_->field_history);
 
   for (int i=0; i<field_descr_->field_count(); i++) {
 
@@ -740,29 +745,36 @@ void Simulation::monitor_performance()
 
   int n = nr * nc + 2;
 
-  long long * counters_long_long = new long long [nc];
-  long *      counters_long = new long [n];
+  long long * counters_region = new long long [nc+1];
+  long long * counters_reduce = new long long [n+1];
 
   int m = 0;
 
-  counters_long[m++] = hierarchy_->num_particles(); 
-  counters_long[m++] = hierarchy_->num_blocks(); 
+  // save space for count
+  m++;
+  
+  counters_reduce[m++] = hierarchy_->num_particles(); 
+  counters_reduce[m++] = hierarchy_->num_blocks(); 
 
   for (int ir = 0; ir < nr; ir++) {
-    performance_->region_counters(ir,counters_long_long);
-    for (int ic = 0; ic < nc; ic++,m++) {
-      counters_long[m] = (long) counters_long_long[ic];
+
+    performance_->region_counters(ir,counters_region);
+    for (int ic = 0; ic < nc; ic++) {
+      counters_reduce[m++] = counters_region[ic];
     }
   }
 
+  counters_reduce[0] = m;
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
 		       thisProxy);
-  contribute (n*sizeof(long), counters_long,CkReduction::sum_long,callback);
+
+  contribute (m*sizeof(long long), counters_reduce,r_reduce_performance_type,
+	      callback);
   // --------------------------------------------------
 
-  delete [] counters_long;
-  delete [] counters_long_long;
+  delete [] counters_reduce;
+  delete [] counters_region;
 
 }
 
@@ -773,19 +785,19 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  long *      counters_long = (long * )msg->getData();
+  long long * counters_reduce = (long long *)msg->getData() + 1;
 
   int index_region_cycle = performance_->region_index("cycle");
 
   int m = 0;
   
   monitor()->print("Performance","simulation num-particles total %ld",
-		   counters_long[m++]);
+		   counters_reduce[m++]);
 
   
   int nb;
   monitor()->print("Performance","simulation num-blocks %d",
-		   nb=counters_long[m++]);
+		   nb=counters_reduce[m++]);
 
   // number of root blocks n0
   int nx,ny,nz;
@@ -813,7 +825,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			 counters_long[m]);
+			 counters_reduce[m]);
       }
       
     }

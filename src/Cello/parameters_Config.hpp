@@ -50,6 +50,7 @@ public: // interface
       field_index(),
       field_alignment(0),
       field_padding(0),
+      field_history(0),
       field_precision(0),
       field_prolong(""),
       field_restrict(""),
@@ -125,6 +126,8 @@ public: // interface
       particle_group_list(),
       performance_papi_counters(),
       performance_warnings(false),
+      num_physics(0),
+      physics_list(),
       restart_file(""),
       num_solvers(),
       solver_list(),
@@ -142,6 +145,11 @@ public: // interface
       stopping_time(0.0),
       stopping_seconds(0.0),
       stopping_interval(0),
+      // Units
+      units_mass(1.0),
+      units_density(1.0),
+      units_length(1.0),
+      units_time(1.0),
       testing_cycle_final(0),
       testing_time_final(0.0),
       testing_time_tolerance(0.0)
@@ -181,6 +189,7 @@ public: // interface
       field_index(),
       field_alignment(0),
       field_padding(0),
+      field_history(0),
       field_precision(0),
       field_prolong(""),
       field_restrict(""),
@@ -256,6 +265,8 @@ public: // interface
       particle_group_list(),
       performance_papi_counters(),
       performance_warnings(false),
+      num_physics(0),
+      physics_list(),
       restart_file(""),
       num_solvers(),
       solver_list(),
@@ -273,6 +284,11 @@ public: // interface
       stopping_time(0.0),
       stopping_seconds(0.0),
       stopping_interval(0),
+      // Units
+      units_mass(1.0),
+      units_density(1.0),
+      units_length(1.0),
+      units_time(1.0),
       testing_cycle_final(0),
       testing_time_final(0.0),
       testing_time_tolerance(0.0)
@@ -343,6 +359,7 @@ public: // attributes
   std::vector<int>           field_centering [3];
   int                        field_ghost_depth[3];
   int                        field_padding;
+  int                        field_history;
   int                        field_precision;
   std::string                field_prolong;
   std::string                field_restrict;
@@ -451,6 +468,11 @@ public: // attributes
   std::vector<std::string>   performance_papi_counters;
   bool                       performance_warnings;
 
+  // Physics
+  
+  int                        num_physics;  // number of physics objects
+  std::vector<std::string>   physics_list;
+
   // Restart
 
   std::string                restart_file;
@@ -477,6 +499,13 @@ public: // attributes
   double                     stopping_seconds;
   int                        stopping_interval;
 
+  /// Units
+
+  double                     units_mass;
+  double                     units_density;
+  double                     units_length;
+  double                     units_time;
+
   // Testing
 
   int                        testing_cycle_final;
@@ -485,7 +514,6 @@ public: // attributes
 
 protected: // functions
 
-  /// Read boundary-related values from the Parameters object
   void read_adapt_       ( Parameters * ) throw();
   void read_balance_     ( Parameters * ) throw();
   void read_boundary_    ( Parameters * ) throw();
@@ -499,10 +527,12 @@ protected: // functions
   void read_output_      ( Parameters * ) throw();
   void read_particle_    ( Parameters * ) throw();
   void read_performance_ ( Parameters * ) throw();
+  void read_physics_     ( Parameters * ) throw();
   void read_restart_     ( Parameters * ) throw();
   void read_solver_      ( Parameters * ) throw();
   void read_stopping_    ( Parameters * ) throw();
   void read_testing_     ( Parameters * ) throw();
+  void read_units_       ( Parameters * ) throw();
 
   int read_schedule_( Parameters * ,
 		      const std::string group   );

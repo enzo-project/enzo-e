@@ -406,6 +406,76 @@ Prolong * EnzoProblem::create_prolong_
 
 //----------------------------------------------------------------------
 
+Physics * EnzoProblem::create_physics_ 
+( std::string  type,
+   int index,
+   Config * config,
+   Parameters * parameters,
+   const FieldDescr * field_descr) throw ()
+{
+
+  Physics * physics = NULL;
+
+  if (type == "cosmology") {
+
+    EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+
+    physics = new EnzoPhysicsCosmology
+      (
+       enzo_config->physics_cosmology_hubble_constant_now,
+       enzo_config->physics_cosmology_omega_matter_now,
+       enzo_config->physics_cosmology_omega_dark_matter_now,
+       enzo_config->physics_cosmology_omega_lamda_now,
+       enzo_config->physics_cosmology_comoving_box_size,
+       enzo_config->physics_cosmology_max_expansion_rate,
+       enzo_config->physics_cosmology_initial_redshift,
+       enzo_config->physics_cosmology_final_redshift
+       );
+
+  } else {
+    
+    physics = Problem::create_physics_
+      (type,index,config,parameters,field_descr);
+    
+  }
+
+  return physics;
+  
+}
+
+//----------------------------------------------------------------------
+
+Units * EnzoProblem::create_units_ 
+( std::string  type,
+   Config * config,
+   Parameters * parameters,
+   const FieldDescr * field_descr) throw ()
+{
+  EnzoUnits * units = new EnzoUnits;
+
+  if (config->units_mass == 1.0) {
+
+    units->set_using_density (config->units_length,
+			      config->units_density,
+			      config->units_time);
+    
+  } else if (config->units_density == 1.0) {
+
+    units->set_using_mass (config->units_length,
+			   config->units_mass,
+			   config->units_time);
+  } else {
+    
+    ERROR("Problem::create_units_",
+	  "Cannot set both Units:density and Units:time parameters");
+  }
+
+  return units;
+  
+}
+
+//----------------------------------------------------------------------
+
 Restrict * EnzoProblem::create_restrict_ 
 (
  std::string  type,

@@ -161,10 +161,10 @@ protected: // functions
 private: // functions
 
   /// Convert the scalar type to HDF5 datatype
-  int scalar_to_hdf5_(int type) const throw();
+  hid_t scalar_to_hdf5_(int type) const throw();
 
   /// Convert the scalar type to an HDF5 datatype
-  int hdf5_to_scalar_(int type) const throw();
+  int hdf5_to_scalar_(hid_t type) const throw();
 
   /// Convert a relative path to an absolute path
   std::string relative_to_absolute_

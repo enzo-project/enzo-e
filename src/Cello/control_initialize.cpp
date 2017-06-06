@@ -50,6 +50,8 @@ void Simulation::initialize() throw()
   problem_->initialize_solver  (config_,field_descr_,particle_descr_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
+  problem_->initialize_physics (config_,parameters_,field_descr_);
+  problem_->initialize_units (config_);
 
   initialize_hierarchy_();
 
