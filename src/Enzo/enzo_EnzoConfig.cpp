@@ -499,8 +499,8 @@ void EnzoConfig::read(Parameters * p) throw()
     for (int index_physics=0; index_physics<num_physics; index_physics++) {
       // Check if EnzoPhysicsCosmology object is present
       if (physics_list[index_physics] == "cosmology") {
-	    method_grackle_units.comoving_coordinates = true;
-	    break;
+	method_grackle_units.comoving_coordinates = true;
+	break;
       }
     }
 
