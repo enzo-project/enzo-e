@@ -80,6 +80,15 @@ public: // interface
       initial_sedov_pressure_in(0.0),
       initial_sedov_pressure_out(0.0),
       initial_sedov_density(0.0),
+      // EnzoInitialSedovRandom
+      initial_sedov_random_half_empty(false),
+      initial_sedov_random_grackle_cooling(false),
+      initial_sedov_random_max_blasts(0),
+      initial_sedov_random_radius_relative(0.0),
+      initial_sedov_random_pressure_in(0.0),
+      initial_sedov_random_pressure_out(0.0),
+      initial_sedov_random_density(0.0),
+      initial_sedov_random_te_multiplier(0),
       // EnzoInitialSoup
       initial_soup_rank(0),
       initial_soup_file(""),
@@ -115,6 +124,7 @@ public: // interface
   {
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
+      initial_sedov_random_array[axis] = 0;
       initial_soup_array[axis] = 0;
       initial_soup_d_pos[axis] = 0;
       initial_soup_d_size[axis] = 0;
@@ -182,6 +192,17 @@ public: // attributes
   double                     initial_sedov_pressure_in;
   double                     initial_sedov_pressure_out;
   double                     initial_sedov_density;
+
+  /// EnzoInitialSedovRandom
+  int                        initial_sedov_random_array[3];
+  bool                       initial_sedov_random_half_empty; 
+  bool                       initial_sedov_random_grackle_cooling;
+  int                        initial_sedov_random_max_blasts;
+  double                     initial_sedov_random_radius_relative;
+  double                     initial_sedov_random_pressure_in;
+  double                     initial_sedov_random_pressure_out;
+  double                     initial_sedov_random_density;
+  int                        initial_sedov_random_te_multiplier;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;

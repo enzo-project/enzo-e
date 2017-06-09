@@ -105,6 +105,10 @@ Initial * EnzoProblem::create_initial_
 
     initial = new EnzoInitialSedovArray3(enzo_config);
 
+  } else if (type == "sedov_random") {
+
+    initial = new EnzoInitialSedovRandom(enzo_config);
+
   } else if (type == "sedov") {
 
     const int rank = enzo_config->initial_sedov_rank;
