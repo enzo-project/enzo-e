@@ -40,7 +40,7 @@ public: // functions
 	      int process_count,
 	      int nx0, int ny0, int nz0,
 	      int nxb, int nyb, int nzb,
-	      int max_level,
+	      int min_level, int max_level, int leaf_only,
 	      std::string image_type,
 	      int         image_size_x,
 	      int         image_size_y,
@@ -83,11 +83,13 @@ public: // functions
       image_log_(false),
       image_abs_(false),
       ghost_(false),
-      max_level_(0)
+      min_level_(0),
+      max_level_(0),
+      leaf_only_(false)
   {
     for (int axis=0; axis<3; axis++) {
-      image_lower_[axis] = std::numeric_limits<double>::min();
-      image_upper_[axis] = std::numeric_limits<double>::max();
+      image_lower_[axis] = -std::numeric_limits<double>::max();
+      image_upper_[axis] =  std::numeric_limits<double>::max();
     }
   }
 
@@ -146,11 +148,13 @@ private: // functions
   /// value associated with the given mesh level
   double mesh_color_(int level, int age) const;
 
-  bool type_is_mesh () const
+  bool type_is_mesh_ () const
   { return (image_type_ == "mesh" || image_type_ == "data+mesh"); }
 
-  bool type_is_data () const
+  bool type_is_data_ () const
   { return (image_type_ == "data" || image_type_ == "data+mesh"); }
+
+  bool is_active_ (const Block * block) const;
 
   /// Create the png file object
   void png_create_ (std::string filename) throw();
@@ -234,8 +238,14 @@ private: // attributes
   /// Whether to include ghost zones
   bool ghost_;
 
-  /// Maximum mesh level
+  /// Maximum mesh level of Block to output
+  int min_level_;
+
+  /// Maximum mesh level of Block to output
   int max_level_;
+
+  /// Whether to restrict Blocks to only leaf nodes
+  bool leaf_only_;
 
   /// Lower and upper bounds on image (can be used for slices)
   double image_lower_[3];

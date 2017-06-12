@@ -57,6 +57,8 @@ void EnzoInitialSedovArray2::enforce_block
 
 {
 
+  if (!block->is_leaf()) return;
+
   ASSERT("EnzoInitialSedovArray2",
 	 "Block does not exist",
 	 block != NULL);

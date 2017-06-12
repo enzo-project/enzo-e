@@ -97,7 +97,7 @@ public: // interface
   { return field_descr_->insert_permanent(name); }
 
   /// Insert a new field
-  int insert_temporary(const std::string & name) throw()
+  int insert_temporary(const std::string & name = "") throw()
   { return field_descr_->insert_temporary(name); }
 
   /// Return the number of fields
@@ -139,6 +139,10 @@ public: // interface
     throw()
   { return field_descr_->centering(id,cx,cy,cz); }
 
+  /// return whether the field variable is centered in the cell
+  bool is_centered(int id) const
+  { return field_descr_->is_centered(id); }
+
   /// depth of ghost zones of given field
   void ghost_depth(int id, int * gx, int * gy = 0, int * gz = 0) const 
     throw()
@@ -160,6 +164,30 @@ public: // interface
   int num_permanent() const throw()
   { return field_descr_->num_permanent(); }
 
+  //--------------------------------------------------
+  // History operations
+  //--------------------------------------------------
+
+  /// Set the history depth for storing old field values
+  void set_history (int num_history)
+  {
+    field_descr_->set_history (num_history);
+    field_data_ ->set_history_(field_descr_);
+  }
+
+  /// Return the number of history generations to store
+  int num_history () const
+  { return field_descr_->num_history(); }
+
+  /// Copy "current" fields to history = 1 fields (saving time), and push
+  /// back older generations up to num_history()
+  void save_history (double time)
+  { field_data_->save_history(field_descr_,time); }
+  
+  /// Return time for given history
+  double history_time (int ih) const
+  { return field_data_->history_time (field_descr_,ih); }
+
   //==================================================
   // FieldData
   //==================================================
@@ -174,33 +202,33 @@ public: // interface
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  char * values (int id) throw ()
-  { return field_data_->values(field_descr_,id); }
+  char * values (int id_field, int index_history=0) throw ()
+  { return field_data_->values(field_descr_,id_field,index_history); }
 
-  char * values (std::string name) throw ()
-  { return field_data_->values(field_descr_,name); }
+  char * values (std::string name, int index_history=0) throw ()
+  { return field_data_->values(field_descr_,name,index_history); }
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  const char * values (int id) const throw ()
-  { return field_data_->values(field_descr_,id); }
+  const char * values (int id_field, int index_history=0) const throw ()
+  { return field_data_->values(field_descr_,id_field,index_history); }
 
-  const char * values (std::string name) const throw ()
-  { return field_data_->values(field_descr_,name); }
+  const char * values (std::string name, int index_history=0) const throw ()
+  { return field_data_->values(field_descr_,name,index_history); }
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
-  char * unknowns ( int id) throw ()
-  { return field_data_->unknowns(field_descr_,id); }
+  char * unknowns (int id_field, int index_history=0) throw ()
+  { return field_data_->unknowns(field_descr_,id_field,index_history); }
 
-  char * unknowns (std::string name) throw ()
-  { return field_data_->unknowns(field_descr_,name); }
+  char * unknowns (std::string name, int index_history=0) throw ()
+  { return field_data_->unknowns(field_descr_,name,index_history); }
 
-  const char * unknowns ( int id) const throw ()
-  { return field_data_->unknowns(field_descr_,id); }
+  const char * unknowns (int id_field, int index_history=0) const throw ()
+  { return field_data_->unknowns(field_descr_,id_field,index_history); }
 
-  const char * unknowns (std::string name) const throw ()
-  { return field_data_->unknowns(field_descr_,name); }
+  const char * unknowns (std::string name, int index_history=0) const throw ()
+  { return field_data_->unknowns(field_descr_,name,index_history); }
 
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
@@ -259,6 +287,26 @@ public: // interface
   /// number of bytes n
   int field_size (int id, int *nx=0, int *ny=0, int *nz=0) const throw()
   { return field_data_->field_size(field_descr_,id,nx,ny,nz); }
+
+  //----------------------------------------------------------------------
+
+  // BLAS Operations
+
+  // /// copy field is to field id
+  // void copy (int id, int is, bool ghosts = true ) throw()
+  // { field_data_->copy ( field_descr_, id,is,ghosts); }
+
+  /// Compute field(iz) =  a * field(ix) + field(iy)
+  void axpy (int iz, double a, int ix, int iy, bool ghosts = true ) throw()
+  { field_data_->axpy (field_descr_, iz,a,ix,iy,ghosts); }
+
+  /// Compute inner product field(ix) . field(iy)
+  double dot (int ix, int iy) throw()
+  { return field_data_->dot (field_descr_,ix,iy); }
+  
+  /// Scale vector ix by scalar a
+  void scale (int iy, long double a, int ix, bool ghosts = true ) throw()
+  { field_data_->scale(field_descr_, iy,a,ix,ghosts); }
 
   //----------------------------------------------------------------------
 

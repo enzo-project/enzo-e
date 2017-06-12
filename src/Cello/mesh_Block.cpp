@@ -6,7 +6,6 @@
 /// @brief    Implementation of the Block object
 
 #include "cello.hpp"
-
 #include "mesh.hpp"
 #include "main.hpp"
 #include "charm_simulation.hpp"
@@ -38,7 +37,6 @@ const char * phase_name[] = {
   "output_exit",
   "restart",
   "balance",
-  "enzo_matvec",
   "exit"
 };
 
@@ -66,7 +64,8 @@ Block::Block ( MsgRefine * msg )
   age_(0),
   face_level_last_(),
   name_(""),
-  index_method_(-1)
+  index_method_(-1),
+  index_solver_()
 {
   performance_start_(perf_block);
   init (msg->index_,
@@ -77,12 +76,10 @@ Block::Block ( MsgRefine * msg )
 	0, NULL, msg->refresh_type_,
 	msg->num_face_level_, msg->face_level_);
 
-  name_ = name();
-
 #ifdef TRACE_BLOCK
   int v3[3];
   index_.values(v3);
-  CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name_.c_str(),
+  CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
 	    v3[0],v3[1],v3[2]);
 #endif
 
@@ -127,8 +124,9 @@ void Block::init
   index_.print("Block()",-1,2,false,simulation());
 #endif
 
-  Monitor * monitor = simulation()->monitor();
-  if (monitor->is_verbose()) {
+  Monitor * monitor = (simulation() != NULL) ? simulation()->monitor() : NULL;
+  
+  if ((monitor != NULL) && monitor->is_verbose()) {
     char buffer [80];
     int v3[3];
     this->index().values(v3);
@@ -193,7 +191,7 @@ void Block::init
   }
 
   for (size_t i=0; i<face_level_last_.size(); i++) 
-    face_level_last_[i] = 0;
+    face_level_last_[i] = -1;
   for (size_t i=0; i<child_face_level_curr_.size(); i++) 
     child_face_level_curr_[i] = 0;
 
@@ -229,11 +227,13 @@ void Block::init
 
   }
 
-  simulation()->monitor_insert_block();
+  if (simulation())
+    simulation()->monitor_insert_block();
   
-  if (data()->any_particles()) {
-    const int np = data()->particle().num_particles();
-    simulation()->monitor_insert_particles(np);
+  const int np = data()->particle().num_particles();
+  if (np > 0) {
+    if (simulation())
+      simulation()->monitor_insert_particles(np);
   }
 
   if (level > 0) {
@@ -296,6 +296,7 @@ void Block::pup(PUP::er &p)
   p | face_level_last_;
   p | name_;
   p | index_method_;
+  p | index_solver_;
   p | refresh_;
   // SKIP method_: initialized when needed
 
@@ -340,6 +341,15 @@ Method * Block::method () throw ()
 
 //----------------------------------------------------------------------
 
+Solver * Block::solver () throw ()
+{
+  Problem * problem = simulation()->problem();
+  Solver * solver = problem->solver(index_solver());
+  return solver;
+}
+
+//----------------------------------------------------------------------
+
 void Block::periodicity (bool p32[3][2]) const
 {
   for (int axis=0; axis<3; axis++) {
@@ -353,6 +363,39 @@ void Block::periodicity (bool p32[3][2]) const
   while ( (boundary = problem->boundary(index_boundary++)) ) {
     boundary->periodicity(p32);
   }
+}
+
+//----------------------------------------------------------------------
+
+void Block::print () const
+  
+{
+  CkPrintf ("data_ = %p\n",data_);
+  CkPrintf ("child_data_ = %p\n",child_data_);
+  int v3[3];index().values(v3);
+  CkPrintf ("index_ = %0x %0x %0x\n",v3[0],v3[1],v3[2]);
+  CkPrintf ("level_next_ = %d\n",level_next_);
+  CkPrintf ("cycle_ = %d\n",cycle_);
+  CkPrintf ("time_ = %f\n",time_);
+  CkPrintf ("dt_ = %f\n",dt_);
+  CkPrintf ("stop_ = %d\n",stop_);
+  CkPrintf ("index_initial_ = %d\n",index_initial_);
+  CkPrintf ("children_.size() = %d\n",children_.size());
+  CkPrintf ("face_level_curr_.size() = %d\n",face_level_curr_.size());
+  CkPrintf ("face_level_next_.size() = %d\n",face_level_next_.size());
+  CkPrintf ("child_face_level_curr_.size() = %d\n",child_face_level_curr_.size());
+  CkPrintf ("child_face_level_next_.size() = %d\n",child_face_level_next_.size());
+  CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
+  CkPrintf ("adapt_step_ = %d\n",adapt_step_);
+  CkPrintf ("adapt_ = %d\n",adapt_);
+  CkPrintf ("coarsened_ = %d\n",coarsened_);
+  CkPrintf ("delete_ = %d\n",delete_);
+  CkPrintf ("is_leaf_ = %d\n",is_leaf_);
+  CkPrintf ("age_ = %d\n",age_);
+  CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
+  CkPrintf ("name_ = %d\n",name_.c_str());
+  CkPrintf ("index_method_ = %d\n",index_method_);
+  CkPrintf ("index_solver_ = %d\n",index_solver());
 }
 
 //======================================================================
@@ -494,10 +537,12 @@ Block::Block (CkMigrateMessage *m)
     age_(0),
     face_level_last_(),
     name_(""),
-    index_method_(-1)
+    index_method_(-1),
+    index_solver_()
 { 
   performance_start_(perf_block);
-  simulation()->monitor_insert_block();
+  if (simulation()) 
+    simulation()->monitor_insert_block();
   performance_stop_(perf_block);
 };
 
@@ -515,13 +560,13 @@ int Block::rank() const
 
 std::string Block::name() const throw()
 {
-  if (name_ != "") {
-    return name_;
-  } else {
+  if (name_ == "") {
+
     const int rank = this->rank();
     int blocking[3] = {1,1,1};
     simulation()->hierarchy()->blocking(blocking,blocking+1,blocking+2);
-    for (int i=-1; i>=index().level(); i--) {
+    const int level = this->level();
+    for (int i=-1; i>=level; i--) {
       blocking[0] /= 2;
       blocking[1] /= 2;
       blocking[2] /= 2;
@@ -532,20 +577,22 @@ std::string Block::name() const throw()
     blocking[0]--;
     blocking[1]--;
     blocking[2]--;
+
     if (blocking[0]) do { ++bits[0]; } while (blocking[0]/=2);
     if (blocking[1]) do { ++bits[1]; } while (blocking[1]/=2);
     if (blocking[2]) do { ++bits[2]; } while (blocking[2]/=2);
 
-    std::string name = "B" + index_.bit_string(level(),rank,bits);
-    return name;
-
+    name_ = "B" + index_.bit_string(level,rank,bits);
   }
+  return name_;
 }
 
 //----------------------------------------------------------------------
 
 void Block::size_forest (int * nx, int * ny, int * nz) const throw ()
-{  simulation()->hierarchy()->num_blocks(nx,ny,nz); }
+{
+  simulation()->hierarchy()->num_blocks(nx,ny,nz);
+}
 
 //----------------------------------------------------------------------
 
@@ -631,15 +678,26 @@ void Block::index_global
 
   const int level = this->level();
 
-  for (int i=0; i<level; i++) {
-    int bx,by,bz;
-    index.child(i+1,&bx,&by,&bz);
-    if (ix) (*ix) = ((*ix) << 1) | bx;
-    if (iy) (*iy) = ((*iy) << 1) | by;
-    if (iz) (*iz) = ((*iz) << 1) | bz;
-    if (nx) (*nx) <<= 1;
-    if (ny) (*ny) <<= 1;
-    if (nz) (*nz) <<= 1;
+  if (level < 0 ) {
+    for (int i=level; i<0; i++) {
+      if (ix) (*ix) = ((*ix) >> 1);
+      if (iy) (*iy) = ((*iy) >> 1);
+      if (iz) (*iz) = ((*iz) >> 1);
+      if (nx) (*nx) >>= 1;
+      if (ny) (*ny) >>= 1;
+      if (nz) (*nz) >>= 1;
+    }
+  }  else if (0 < level) {
+    for (int i=0; i<level; i++) {
+      int bx,by,bz;
+      index.child(i+1,&bx,&by,&bz);
+      if (ix) (*ix) = ((*ix) << 1) | bx;
+      if (iy) (*iy) = ((*iy) << 1) | by;
+      if (iz) (*iz) = ((*iz) << 1) | bz;
+      if (nx) (*nx) <<= 1;
+      if (ny) (*ny) <<= 1;
+      if (nz) (*nz) <<= 1;
+    }
   }
 }
 
@@ -678,7 +736,16 @@ void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
 
   int n3[3];
   size_forest (&n3[0],&n3[1],&n3[2]);
-  
+
+  const int level = this->level();
+  // adjust array size for negative levels
+  if (level < 0) {
+    int shift = -level;
+    n3[0] = n3[0] >> shift;
+    n3[1] = n3[1] >> shift;
+    n3[2] = n3[2] >> shift;
+  }
+
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
       is_boundary[axis][face] = 
@@ -788,7 +855,8 @@ Index Block::neighbor_
 void Block::performance_start_
 (int index_region, std::string file, int line)
 {
-  simulation()->performance()->start_region(index_region,file,line);
+  if (simulation())
+    simulation()->performance()->start_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
@@ -796,22 +864,22 @@ void Block::performance_start_
 void Block::performance_stop_
 (int index_region, std::string file, int line)
 {
-  simulation()->performance()->stop_region(index_region,file,line);
+  if (simulation())
+    simulation()->performance()->stop_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
 
 void Block::check_leaf_()
 {
-  if ((  is_leaf() && children_.size() != 0) ||
-      (! is_leaf() && children_.size() == 0)) {
+  if (level() >= 0 &&
+      ((  is_leaf() && children_.size() != 0) ||
+       (! is_leaf() && children_.size() == 0))) {
 
-    WARNING4("Block::refresh_begin_()",
-	     "%s: is_leaf() == %s && children_.size() == %d"
-	     "setting is_leaf_ <== %s",
+    WARNING3("Block::refresh_begin_()",
+	     "%s: is_leaf() == %s && children_.size() == %d",
 	     name_.c_str(), is_leaf()?"true":"false",
-	     children_.size(),is_leaf()?"false":"true");
-    is_leaf_ = ! is_leaf();
+	     children_.size());
   }
 }
 
@@ -846,7 +914,7 @@ void Block::debug_faces_(const char * mesg)
   for (ic3[1]=1; ic3[1]>=0; ic3[1]--) {
     for (if3[1]=1; if3[1]>=-1; if3[1]--) {
 
-      index_.print(mesg,-1,2,true,simulation());
+      PARALLEL_PRINTF ("%s ",name().c_str());
 
       for (if3[0]=-1; if3[0]<=1; if3[0]++) {
 #ifdef CELLO_DEBUG

@@ -87,33 +87,7 @@ new_charm = 1
 
 balance = 1
 
-# balancer =  # Uses a greedy algorithm that always assigns
-# the heaviest object to the least loaded processor.
-
-# balancer =  # Extends the greedy algorithm to take the
-# communication graph into account.
-
-# balancer = 'TopoCentLB' # Extends the greedy algorithm to take
-# processor topology into account.
-
-# balancer = 'RefineLB' # Moves objects away from the most overloaded
-# processors to reach average, limits the number of objects migrated.
-
-# balancer = 'RefineSwapLB' # Moves objects away from the most
-# overloaded processors to reach average. In case it cannot migrate an
-# object from an overloaded processor to an underloaded processor, it
-# swaps objects to reduce the load on the overloaded processor. This
-# strategy limits the number of objects migrated.
-
-balancer = [
-'GreedyCommLB',
-'GreedyLB', 
-'HybridLB',
-'NeighborLB',
-'RandCentLB',
-'RefineCommLB',
-'RefineLB',
-'RotateLB']
+balancer = ['CommonLBs']
 
 #----------------------------------------------------------------------
 # Whether to compile with -pg to use gprof for performance profiling
@@ -239,7 +213,7 @@ define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
 
 # Library defines
 
-define_hdf5  =        ['H5_USE_16_API']
+define_hdf5  =        []
 
 define_png   =        ['NO_FREETYPE']
 
@@ -290,6 +264,7 @@ if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
 elif (arch == "linux_gnu"):    from linux_gnu    import *
+elif (arch == "linux_intel"):  from linux_intel  import *
 elif (arch == "linux_yt"):     from linux_yt     import *
 elif (arch == "linux_gprof"):  from linux_gprof  import *
 elif (arch == "linux_mpe"):    from linux_mpe    import *
@@ -302,6 +277,7 @@ elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
 elif (arch == "davros_gnu"):   from davros_gnu   import *
 elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
 elif (arch == "darwin_gnu"):   from darwin_gnu   import *
+elif (arch == "darwin_homebrew"):   from darwin_homebrew   import *
 
 #======================================================================
 # END ARCHITECTURE SETTINGS
@@ -576,6 +552,19 @@ else:
      cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 
 #----------
+
+# Find how Charm++ was compiled using the bin symbolic link real path
+
+t = os.path.realpath(charm_path + '/bin')
+i0=t.rfind('/')
+i0=t.rfind('/',0,i0)
+i1=t.rfind('/bin')
+charm_build = t[i0+1:i1]
+
+cello_def.write ("#define CHARM_BUILD \"" + charm_build + "\"\n")
+fp_charm_build = open ("test/CHARM_BUILD", "w")
+fp_charm_build.write(charm_build + "\n");
+fp_charm_build.close()
 
 cello_def.close()
 #======================================================================

@@ -69,6 +69,7 @@ enum {
 #include "enzo_defines.hpp"
 #include "enzo_typedefs.hpp"
 #include "enzo_fortran.hpp"
+#include "enzo_reductions.hpp"
 
 //----------------------------------------------------------------------
 
@@ -104,20 +105,9 @@ enum pm_type {
 enum return_enum {
   return_unknown,
   return_converged,
-  return_error_max_iter_reached,
-  return_error_omega_eq_0,
-  return_error_beta_n_eq_0
+  return_diverged,
+  return_error
 };
-
-//----------------------------------------------------------------------
-// WARNING 100 must be larger than number of phases in
-// src/Cello/_mesh.hpp phase_type
-
-enum enzo_phase_type 
-  {
-    phase_enzo_first = 100,
-    phase_enzo_matvec = phase_enzo_first
-  };
 
 //----------------------------------------------------------------------
 
@@ -153,6 +143,12 @@ struct fluxes
 
 #include "fortran.h" /* included so scons knowns to install fortran.h */
 
+#include "fortran_types.h" /* included so scons knowns to install fortran.h */
+
+#include "enzo_EnzoPhysicsCosmology.hpp"
+
+#include "enzo_EnzoUnits.hpp"
+
 #include "enzo_EnzoFactory.hpp"
 
 #include "enzo_EnzoSimulation.hpp"
@@ -170,18 +166,18 @@ struct fluxes
 #include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialPm.hpp"
+#include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
+#include "enzo_EnzoInitialSedovRandom.hpp"
 #include "enzo_EnzoInitialSoup.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 
+#include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
-#include "enzo_EnzoMethodGravityBiCGStab.hpp"
-#include "enzo_EnzoMethodGravityCg.hpp"
-#include "enzo_EnzoMethodGravityMg0.hpp"
-#include "enzo_EnzoMethodGravityMlat.hpp"
+#include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
@@ -197,8 +193,13 @@ struct fluxes
 #include "enzo_EnzoComputeAcceleration.hpp"
 #include "enzo_EnzoComputeCicInterp.hpp"
 #include "enzo_EnzoComputePressure.hpp"
-#include "enzo_EnzoComputeSmoothJacobi.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
+
+#include "enzo_EnzoSolverBiCgStab.hpp"
+#include "enzo_EnzoSolverCg.hpp"
+#include "enzo_EnzoSolverDiagonal.hpp"
+#include "enzo_EnzoSolverJacobi.hpp"
+#include "enzo_EnzoSolverMg0.hpp"
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"

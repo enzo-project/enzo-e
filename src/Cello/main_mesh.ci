@@ -35,7 +35,10 @@ mainmodule main_mesh {
      entry void p_stopping_balance();
      entry void p_balance();
      entry void p_stopping_exit();
-     entry void p_enzo_matvec();
+     entry void p_text_file_write(int nd, char dir[nd],
+     	                          int nf, char file[nf],
+     	                          int nl, char line[nl],
+				  int count);
      entry void p_exit();
 
   };

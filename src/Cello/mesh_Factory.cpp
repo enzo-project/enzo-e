@@ -21,9 +21,12 @@ void Factory::pup (PUP::er &p)
 {
   TRACEPUP;
 
+  // NOTE: change this function whenever attributes change
+
   PUP::able::pup(p);
 
-  // NOTE: change this function whenever attributes change
+  //  p | bound_arrays_;
+  
 }
 
 //----------------------------------------------------------------------
@@ -158,7 +161,11 @@ void Factory::create_subblock_array
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
 
-	  Index index(ix,iy,iz);
+	  int shift = -level;
+	  
+	  Index index(ix<<shift,iy<<shift,iz<<shift);
+
+	  index.set_level(level);
 
 	  TRACE3 ("inserting %d %d %d",ix,iy,iz);
 

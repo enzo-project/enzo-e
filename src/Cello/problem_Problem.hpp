@@ -10,12 +10,15 @@
 ///
 ///    Boundary:    Boundary conditions
 ///    Initial:     Initial conditions
+///    Physics:     Physics related objects (e.g. cosmology)
 ///    Refine:      Refinement criteria
-///    Method:      List of numerical methods
+///    Solver:      List of linear solvers
+///    Method:      List of physics methods
 ///    Refresh:     List of ghost zone refresh objects
 ///    Output:      List of output functions
 ///    Refinement:  How the mesh hierarchy is to be refined
 ///    Stopping:    Stopping criteria
+///    Units:       Physical units
 
 #ifndef PROBLEM_PROBLEM_HPP
 #define PROBLEM_PROBLEM_HPP
@@ -24,6 +27,7 @@ class Boundary;
 class Factory;
 class FieldDescr;
 class Initial;
+class Physics;
 class Input;
 class Method;
 class Output;
@@ -34,7 +38,9 @@ class Refine;
 class Refresh;
 class Restrict;
 class Simulation;
+class Solver;
 class Stopping;
+class Units;
 
 class Problem : public PUP::able
 {
@@ -61,15 +67,18 @@ public: // interface
       boundary_list_(),
       is_periodic_(false),
       initial_list_(),
+      physics_list_(),
       refine_list_(),
       stopping_(NULL),
+      solver_list_(),
       method_list_(),
       output_list_(),
       prolong_(NULL),
       restrict_(NULL),
+      units_(NULL),
       index_refine_(0),
       index_output_(0),
-      index_boundary_(0)
+    index_boundary_(0)
       
   {}
 
@@ -92,6 +101,15 @@ public: // interface
     return (i < initial_list_.size()) ? initial_list_[i] : NULL; 
   }
 
+  /// Return the ith physics object
+  Physics * physics(size_t i) const throw()
+  {
+    return (i < physics_list_.size()) ? physics_list_[i] : NULL; 
+  }
+
+  /// Return the named physics object if present
+  Physics * physics (std::string type) const throw();
+
   /// Return the ith refine object
   Refine *  refine(int i) const throw()
   {
@@ -105,6 +123,9 @@ public: // interface
     if (i == -1) i = index_output_;
     return (0 <= i && i < (int)output_list_.size()) ? output_list_[i] : NULL; 
   }
+
+  /// Return the ith solver object
+  Solver * solver(size_t i) const throw() ;
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
@@ -131,14 +152,22 @@ public: // interface
   void output_write (Simulation * simulation, int n, char * buffer) throw();
 
   /// Return the stopping object
-  Stopping *  stopping() const throw() { return stopping_; }
+  Stopping * stopping() const throw() { return stopping_; }
 
+  /// Return the Units object
+  Units * units() const throw() { return units_; }
+  
   /// Initialize the boundary conditions object
   void initialize_boundary(Config * config, 
 			   Parameters * parameters) throw();
 
   /// Initialize the initial conditions object
   void initialize_initial(Config * config,
+			  Parameters * parameters,
+			  const FieldDescr * field_descr) throw();
+
+  /// Initialize any physics-related objects
+  void initialize_physics(Config * config,
 			  Parameters * parameters,
 			  const FieldDescr * field_descr) throw();
 
@@ -161,11 +190,19 @@ public: // interface
 			 const FieldDescr * field_descr,
 			 const ParticleDescr * particle_descr) throw();
 
+  /// Initialize Solver objects
+  void initialize_solver(Config * config, 
+			 const FieldDescr * field_descr,
+			 const ParticleDescr * particle_descr) throw();
+  
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
 
   /// Initialize the restrict objects
   void initialize_restrict(Config * config) throw();
+
+  /// Initialize the units object
+  void initialize_units(Config * config ) throw();
 
 protected: // functions
 
@@ -188,6 +225,14 @@ protected: // functions
    Parameters * parameters,
    const FieldDescr *) throw ();
 
+  /// Create named physics object
+  virtual Physics *  create_physics_ 
+  (std::string type, 
+   int index,
+   Config * config,
+   Parameters * parameters,
+   const FieldDescr *) throw ();
+
   /// Create named refine object
   virtual Refine * create_refine_ 
   (std::string type, 
@@ -195,6 +240,14 @@ protected: // functions
    Parameters * parameters,
    const FieldDescr * field_descr,
    int index) throw ();
+
+  /// Create named solver object
+  virtual Solver *   create_solver_
+  (std::string type, 
+   Config * config, 
+   int index_solver,
+   FieldDescr * field_descr,
+   const ParticleDescr * particle_descr) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
@@ -223,7 +276,10 @@ protected: // functions
   virtual Restrict * create_restrict_ 
   (std::string type, Config * config) throw ();
 
-private: // attributes
+  /// Create named units object
+  virtual Units * create_units_ (Config * config) throw ();
+
+protected: // attributes
 
   /// Boundary conditions object for each (axis,face)
   std::vector<Boundary *> boundary_list_;
@@ -231,14 +287,20 @@ private: // attributes
   /// Whether the problem is fully periodic or not
   bool is_periodic_;
 
-  /// Initial conditions object
+  /// Initial conditions objects
   std::vector<Initial *> initial_list_;
+
+  /// Physics objects
+  std::vector<Physics *> physics_list_;
 
   /// Refinement criteria objects
   std::vector<Refine *> refine_list_;
 
   /// Stopping criteria
   Stopping * stopping_;
+
+  /// List of solver objects
+  std::vector<Solver *> solver_list_;
 
   /// List of method objects
   std::vector<Method *> method_list_;
@@ -252,6 +314,9 @@ private: // attributes
   /// Restriction object
   Restrict * restrict_;
 
+  /// Units
+  Units * units_;
+  
   /// Index of currently active Refine object
   int index_refine_;
 

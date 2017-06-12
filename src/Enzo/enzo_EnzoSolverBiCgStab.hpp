@@ -1,63 +1,50 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodGravityBiCGStab.hpp
-/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @file     enzo_EnzoSolverBiCgStab.hpp
 /// @author   Daniel R. Reynolds (reynolds@smu.edu)
+/// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     2014-10-21 17:25:40
-/// @brief    [\ref Enzo] Declaration of EnzoMethodGravityBiCGStab
+/// @brief    [\ref Enzo] Declaration of EnzoSolverBiCgStab
 ///
-/// Bicongugate gradient stabilized method (BiCGStab) for solving 
-/// for self-gravity on field data.
+/// Bicongugate gradient stabilized solver (BiCgStab) for solving 
+/// linear systems on field data.
 
-#ifndef ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP
-#define ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP
+#ifndef ENZO_ENZO_SOLVER_BICGSTAB_HPP
+#define ENZO_ENZO_SOLVER_BICGSTAB_HPP
 
-class EnzoMethodGravityBiCGStab : public Method {
+class EnzoSolverBiCgStab : public Solver {
 
-  /// @class    EnzoMethodGravityBiCGStab
+  /// @class    EnzoSolverBiCgStab
   /// @ingroup  Enzo
   ///
-  /// @brief [\ref Enzo] Demonstration method to solve self-gravity
-  /// using the BiCGStab method.  Alone, this is more applicable to 
-  /// smaller problems since the method doesn't scale as well as 
-  /// some other methods (FFT, MG, etc.) for larger problems.  
-  /// Alternately, a more scalable method may be combined as a 
-  /// preconditioner for a robust and scalable overall method.
+  /// @brief [\ref Enzo] This class implements the BiCgStab Krylov
+  /// linear solver.  Alone, this is more applicable to smaller
+  /// problems since the solver doesn't scale as well as some other
+  /// solvers (FFT, MG, etc.) for larger problems.  Alternately, a
+  /// more scalable solver may be combined as a preconditioner for a
+  /// robust and scalable overall solver.
 
 public: // interface
 
-  /// default constructor
-  EnzoMethodGravityBiCGStab() {};
-
   /// normal constructor
-  EnzoMethodGravityBiCGStab(FieldDescr* field_descr,
-			    int rank,
-			    double grav_const,
-			    int iter_max, 
-			    double res_tol,
-			    int monitor_iter,
-			    bool is_singular,
-			    bool diag_precon);
+  EnzoSolverBiCgStab(FieldDescr* field_descr,
+		     int monitor_iter,
+		     int rank,
+		     int iter_max, 
+		     double res_tol,
+		     int min_level,
+		     int max_level,
+		     int index_precon);
 
-  /// destructor
-  ~EnzoMethodGravityBiCGStab() throw();
-  
-  /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodGravityBiCGStab);
-  
-  /// Charm++ PUP::able migration constructor
-  EnzoMethodGravityBiCGStab(CkMigrateMessage* m)
-    : A_(NULL),
-      M_(NULL),
-      is_singular_(false),
-      first_call_(true),
+  /// default constructor
+  EnzoSolverBiCgStab()
+    : Solver(),
+      A_(NULL),
+      index_precon_(-1),
       rank_(0),
-      grav_const_(0.0),
       iter_max_(0), 
       res_tol_(0.0),
-      monitor_iter_(0),
-      rho0_(0), err_(0), err_min_(0), err_max_(0),
-      idensity_(0),  ipotential_(0),
+      rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
       nx_(0), ny_(0), nz_(0),
@@ -68,12 +55,35 @@ public: // interface
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
       bs_(0.0),bc_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0),
-      id_refresh_ACC_(-1),
-      id_refresh_P_(-1),
-      id_refresh_Q_(-1),
-      id_refresh_X_(-1),
-      id_refresh_Y_(-1)
+      ys_(0.0),vs_(0.0),us_(0.0)
+  {};
+
+  /// Charm++ PUP::able declarations
+  PUPable_decl(EnzoSolverBiCgStab);
+  
+  /// destructor
+  ~EnzoSolverBiCgStab() throw();
+  
+  /// Charm++ PUP::able migration constructor
+  EnzoSolverBiCgStab(CkMigrateMessage* m)
+    : Solver(m),
+      A_(NULL),
+      index_precon_(-1),
+      rank_(0),
+      iter_max_(0), 
+      res_tol_(0.0),
+      rho0_(0), err_(0), err0_(0),err_min_(0), err_max_(0),
+      ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
+      iy_(0), iv_(0), iq_(0), iu_(0),
+      nx_(0), ny_(0), nz_(0),
+      mx_(0), my_(0), mz_(0),
+      gx_(0), gy_(0), gz_(0),
+      iter_(0),
+      beta_d_(0), beta_n_(0), beta_(0), 
+      omega_d_(0), omega_n_(0), omega_(0), 
+      vr0_(0), rr_(0), alpha_(0),
+      bs_(0.0),bc_(0.0),
+      ys_(0.0),vs_(0.0),us_(0.0)
   {}
 
   /// Charm++ Pack / Unpack function
@@ -82,21 +92,15 @@ public: // interface
     // JB NOTE: change this function whenever attributes change
     TRACEPUP;
 
-    Method::pup(p);
+    Solver::pup(p);
 
     p | A_;
-    p | M_;
-
-    p | is_singular_;
-    p | first_call_;
+    p | index_precon_;
+    
     p | rank_;
-    p | grav_const_;
     p | iter_max_;
     p | res_tol_;
-    p | monitor_iter_;
 
-    p | idensity_;
-    p | ipotential_;
     p | ib_;
     p | ix_;
     p | ir_;
@@ -130,6 +134,7 @@ public: // interface
     p | iter_;
     p | beta_;
     p | err_;
+    p | err0_;
     p | err_min_;
     p | err_max_;
     p | alpha_;
@@ -140,29 +145,27 @@ public: // interface
     p | vs_;
     p | us_;
 
-    p | id_refresh_ACC_;
-    p | id_refresh_P_;
-    p | id_refresh_Q_;
-    p | id_refresh_X_;
-    p | id_refresh_Y_;
-
   }
 
   
   /// Main solver entry routine
-  virtual void compute(Block* block) throw();
+  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
 
   /// Name to call the solver within Enzo-P
-  virtual std::string name() throw() { return "gravity_bicgstab"; }
+  virtual std::string name() const
+  { return "bicgstab"; }
 
   /// Projects RHS and sets initial vectors R, R0, and P
   template<class T> void start_2(EnzoBlock* enzo_block) throw();
 
-  /// Entry into BiCGStab iteration loop, begins refresh on P
+  /// Entry into BiCgStab iteration loop, begins refresh on P
   template<class T> void loop_0(EnzoBlock* enzo_block) throw();
 
-  /// First preconditioner solve, begins refresh on Y
+  /// First preconditioner solve
   template<class T> void loop_2(EnzoBlock* enzo_block) throw();
+
+  /// Return from preconditioner solve, begins refresh on Y
+  template<class T> void loop_25(EnzoBlock* enzo_block) throw();
 
   /// First matrix-vector product, begins DOT(V,R0) and projection of
   /// Y and V
@@ -173,6 +176,9 @@ public: // interface
 
   /// Second preconditioner solve, begins refresh on Y
   template<class T> void loop_8(EnzoBlock* enzo_block) throw();
+
+  /// Return from preconditioner solve, begins refresh on Y
+  template<class T> void loop_85(EnzoBlock* enzo_block) throw();
 
   /// Second matrix-vector product, begins DOT(U,U), DOT(U,Q) and
   /// projection of Y and U
@@ -187,9 +193,6 @@ public: // interface
 
   /// End of iteration
   template<class T> void end(EnzoBlock* enzo_block, int retval) throw();
-
-  /// Compute accelerations
-  template<class T> void acc(EnzoBlock* enzo_block) throw();
 
   /// Exit the solver
   template<class T> void exit(EnzoBlock* enzo_block) throw();
@@ -209,63 +212,53 @@ public: // interface
   void set_beta_n(long double beta_n) throw() { beta_n_ = beta_n; }
   void set_iter(int iter) throw() { iter_ = iter; }
 
-  /// TEMPORARY
-  // virtual double timestep (Block * block) const throw() 
-  // {
-  //   WARNING ("EnzoMethodGravityBiCGStab::timestep()",
-  // 	     "TEMPORARY: setting timestep to 1.0 for debugging");
-  //   return 1.0;
-  // }
-
 protected: // methods
-
-  /// internal routine to report solver progress to stdout
-  void monitor_output_(EnzoBlock * enzo_block,
-		       bool final = false) throw();
 
   /// internal routine to handle actual start to solver
   template<class T> void compute_(EnzoBlock * enzo_block) throw();
 
-  /// Compute local contribution to inner-product X*Y
-  template<class T> long double dot_(const T* X, const T* Y) const throw();
+  /// Allocate temporary Fields
+  void allocate_temporary_(Field field, Block * block = NULL)
+  {
+    field.allocate_temporary(ir_);
+    field.allocate_temporary(ir0_);
+    field.allocate_temporary(ip_);
+    field.allocate_temporary(iy_);
+    field.allocate_temporary(iv_);
+    field.allocate_temporary(iq_);
+    field.allocate_temporary(iu_);
+  }
 
-  /// Perform local vector update: Z = A*X + Y
-  template<class T> void zaxpy_(T* Z, double a, const T* X, const T* Y) const throw();
-  
-  /// Compute local sum of vector elements X_i
-  template<class T> long double sum_(const T* X) const throw();
-
-  /// return the number of elements of the vector on this block
-  long double count_() const throw();
+  /// Dellocate temporary Fields
+  void deallocate_temporary_(Field field, Block * block = NULL)
+  {
+    field.deallocate_temporary(ir_);
+    field.deallocate_temporary(ir0_);
+    field.deallocate_temporary(ip_);
+    field.deallocate_temporary(iy_);
+    field.deallocate_temporary(iv_);
+    field.deallocate_temporary(iq_);
+    field.deallocate_temporary(iu_);
+  }
   
 protected: // attributes
+
+  // NOTE: change pup() function whenever attributes change
 
   /// Matrix
   Matrix* A_;
 
-  /// Preconditioner
-  Matrix* M_;
+  /// Preconditioner (-1 if none)
+  int index_precon_;
 
-  /// Whether you need to project b into R(A), e.g. fully periodic or Neumann problems
-  bool is_singular_;
-
-  /// Whether this is the first call to the solver
-  bool first_call_;
-  
   /// Dimensionality of the problem
   int rank_;
 
-  /// Gravitational constant, e.g. 6.67384e-8 [cgs]
-  double grav_const_;
-
-  /// Maximum number of allowed BiCGStab iterations
+  /// Maximum number of allowed BiCgStab iterations
   int iter_max_;
 
   /// Convergence tolerance on the relative residual
   double res_tol_;
-
-  /// How often to display progress to stdout
-  int monitor_iter_;
 
   /// Initial residual
   long double rho0_;
@@ -273,17 +266,16 @@ protected: // attributes
   /// Current error
   long double err_;
 
+  /// Initial error
+  long double err0_;
+
   /// Minimum error (all iterations so far)
   long double err_min_;
 
   /// Maximum error (all iterations so far)
   long double err_max_;
 
-  /// Density and potential field id's (for RHS and solution)
-  int idensity_;
-  int ipotential_;
-
-  /// BiCGStab vector id's
+  /// BiCgStab vector id's
   int ib_;
   int ix_;
   int ir_;
@@ -299,10 +291,10 @@ protected: // attributes
   int mx_, my_, mz_;   /// total block size
   int gx_, gy_, gz_;   /// ghost zones
 
-  /// Current BiCGStab iteration
+  /// Current BiCgStab iteration
   int iter_;
 
-  /// scalars used within BiCGStab iteration
+  /// scalars used within BiCgStab iteration
   long double beta_d_;
   long double beta_n_;
   long double beta_;
@@ -313,20 +305,13 @@ protected: // attributes
   long double rr_;
   long double alpha_;
 
-  /// scalars used for projections of singular gravity systems
+  /// scalars used for projections of singular systems
   long double bs_;
   long double bc_;
   long double ys_;
   long double vs_;
   long double us_;
 
-  /// refresh indices
-  int id_refresh_ACC_;
-  int id_refresh_P_;
-  int id_refresh_Q_;
-  int id_refresh_X_;
-  int id_refresh_Y_;
-
 };
 
-#endif /* ENZO_ENZO_METHOD_GRAVITY_BICGSTAB_HPP */
+#endif /* ENZO_ENZO_SOLVER_BICGSTAB_HPP */

@@ -51,6 +51,7 @@ Simulation::Simulation
   sync_output_begin_(),
   sync_output_write_()
 {
+  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation(parameter_file,n)\n",CkMyPe());
   fflush(stdout);
@@ -104,6 +105,7 @@ Simulation::Simulation()
   sync_output_begin_(),
   sync_output_write_()
 {
+  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation()\n",CkMyPe());
   fflush(stdout);
@@ -143,8 +145,7 @@ void Simulation::pup (PUP::er &p)
   p | stop_;
   p | phase_;
 
-  if (up) problem_ = new Problem;
-  p | * problem_;
+  p | problem_; // PUPable
 
   if (up) performance_ = new Performance;
   p | *performance_;
@@ -178,6 +179,8 @@ void Simulation::pup (PUP::er &p)
   if (up) sync_output_write_.set_stop(0);
 
   p | schedule_balance_;
+
+  PUParray(p,dir_checkpoint_,256);
 }
 
 //----------------------------------------------------------------------
@@ -215,6 +218,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_write_()
 
 {
+  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation(msg)\n",CkMyPe());
   fflush(stdout);
@@ -246,6 +250,9 @@ void Simulation::finalize() throw()
 
 void Simulation::initialize_simulation_() throw()
 {
+
+  if (CkMyPe() == 0)
+    g_parameters.write(stdout,true);
 
 #ifdef DEBUG_SIMULATION
   CkPrintf ("%d DEBUG_SIMULATION Simulation::initialize_simulation_()\n",CkMyPe());
@@ -370,9 +377,7 @@ void Simulation::initialize_data_descr_() throw()
   int gy = config_->field_ghost_depth[1];
   int gz = config_->field_ghost_depth[2];
 
-  for (int i=0; i<field_descr_->field_count(); i++) {
-    field_descr_->set_ghost_depth (i,gx,gy,gz);
-  }
+  field_descr_->set_default_ghost_depth (gx,gy,gz);
 
   // Default precision
 
@@ -395,6 +400,7 @@ void Simulation::initialize_data_descr_() throw()
   
   field_descr_->set_padding (config_->field_padding);
 
+  field_descr_->set_history (config_->field_history);
 
   for (int i=0; i<field_descr_->field_count(); i++) {
 
@@ -607,9 +613,7 @@ void Simulation::initialize_forest_() throw()
   if (allocate_blocks) {
 
     // Create the root-level blocks for level = 0
-    hierarchy_->create_forest
-      (field_descr_,
-       allocate_data);
+    hierarchy_->create_forest (field_descr_, allocate_data);
 
     // Create the "sub-root" blocks if mesh_min_level < 0
     if (config_->mesh_min_level < 0) {
@@ -741,29 +745,36 @@ void Simulation::monitor_performance()
 
   int n = nr * nc + 2;
 
-  long long * counters_long_long = new long long [nc];
-  long *      counters_long = new long [n];
+  long long * counters_region = new long long [nc+1];
+  long long * counters_reduce = new long long [n+1];
 
   int m = 0;
 
-  counters_long[m++] = hierarchy_->num_particles(); 
-  counters_long[m++] = hierarchy_->num_blocks(); 
+  // save space for count
+  m++;
+  
+  counters_reduce[m++] = hierarchy_->num_particles(); 
+  counters_reduce[m++] = hierarchy_->num_blocks(); 
 
   for (int ir = 0; ir < nr; ir++) {
-    performance_->region_counters(ir,counters_long_long);
-    for (int ic = 0; ic < nc; ic++,m++) {
-      counters_long[m] = (long) counters_long_long[ic];
+
+    performance_->region_counters(ir,counters_region);
+    for (int ic = 0; ic < nc; ic++) {
+      counters_reduce[m++] = counters_region[ic];
     }
   }
 
+  counters_reduce[0] = m;
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
 		       thisProxy);
-  contribute (n*sizeof(long), counters_long,CkReduction::sum_long,callback);
+
+  contribute (m*sizeof(long long), counters_reduce,r_reduce_performance_type,
+	      callback);
   // --------------------------------------------------
 
-  delete [] counters_long;
-  delete [] counters_long_long;
+  delete [] counters_reduce;
+  delete [] counters_region;
 
 }
 
@@ -774,18 +785,35 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = nr * nc + 2;
-
-  long *      counters_long = (long * )msg->getData();
+  long long * counters_reduce = (long long *)msg->getData() + 1;
 
   int index_region_cycle = performance_->region_index("cycle");
 
   int m = 0;
   
   monitor()->print("Performance","simulation num-particles total %ld",
-		   counters_long[m++]);
+		   counters_reduce[m++]);
+
+  
+  int nb;
   monitor()->print("Performance","simulation num-blocks %d",
-		   counters_long[m++]);
+		   nb=counters_reduce[m++]);
+
+  // number of root blocks n0
+  int nx,ny,nz;
+  hierarchy()->num_blocks(&nx,&ny,&nz);
+  int n0 = nx*ny*nz;
+  // rank-dependent factor for computing leaf block count
+  int rank = hierarchy()->rank();
+  double f =
+    (rank == 1) ? 0.5 :
+    (rank == 2) ? 0.75 :
+    (rank == 3) ? 0.875 : 0.0;
+  
+  // compute number of leaf blocks
+  int nl = n0 + f*(nb - n0);
+  monitor()->print("Performance","simulation num-leaves %d",
+		   nl);
 
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++, m++) {
@@ -797,15 +825,14 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			 counters_long[m]);
+			 counters_reduce[m]);
       }
       
     }
   }
 
+  delete msg;
 
   Memory::instance()->reset_high();
-
-  delete msg;
 
 }

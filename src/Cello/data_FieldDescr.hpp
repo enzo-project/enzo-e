@@ -22,6 +22,8 @@ class FieldDescr
   /// Simulation object.  Actual Field data are stored in FieldData
   /// objects, which are each associated with a unique Block of data.
 
+  friend class Field;
+
 public: // functions
 
   /// Initialize a FieldDescr object
@@ -47,6 +49,7 @@ public: // functions
     // NOTE: change this function whenever attributes change
     p | name_;
     p | num_permanent_;
+    p | num_temporary_;
     p | id_;
     p | groups_;
     p | alignment_;
@@ -63,7 +66,10 @@ public: // functions
       if (up) ghost_depth_[i] = new int[3];
       PUParray(p,ghost_depth_[i],3);
     }
+    PUParray(p,ghost_depth_default_,3);
     p | conserved_;
+    p | history_;
+    p | history_id_;
   }
 
   /// Set alignment
@@ -80,6 +86,9 @@ public: // functions
   /// Set centering for a field
   void set_centering(int id_field, int cx, int cy=0, int cz=0) throw();
 
+  /// Set default ghost_depth
+  void set_default_ghost_depth(int gx, int gy=0, int gz=0) throw();
+
   /// Set ghost_depth for a field
   void set_ghost_depth(int id_field, int gx, int gy=0, int gz=0) throw();
 
@@ -89,8 +98,8 @@ public: // functions
   /// Insert a new permanent field
   int insert_permanent(const std::string & name_field) throw();
 
-  /// Insert a new temporary field
-  int insert_temporary(const std::string & name_field) throw();
+  /// Insert a new temporary field (does not require a name)
+  int insert_temporary(const std::string & name_field = "") throw();
 
   /// Return the number of fields
   int field_count() const throw();
@@ -103,6 +112,57 @@ public: // functions
 
   /// Return the integer handle for the named field
   int field_id(const std::string & name) const throw();
+
+  //----------------------------------------------------------------------
+  // History
+  //----------------------------------------------------------------------
+  
+  /// Set the history depth for storing old field values
+  void set_history (int history) throw()
+  {
+    const int np = num_permanent();
+    const int nh = history;
+    
+    if (history > history_) {
+      history_id_.resize(np*nh);
+      for (int ih=0; ih<nh; ih++) {
+	for (int ip=0; ip<np; ip++) {
+
+	  int i = ip + np*ih;
+
+	  const int ih = insert_temporary();
+	
+	  history_id_[i] = ih;
+
+	  // set precision
+	  set_precision (ih, precision(ip));
+
+	  // set ghost zones
+	  int gx,gy,gz;
+	  ghost_depth(ip,&gx,&gy,&gz);
+	  set_ghost_depth(ih,gx,gy,gz);
+
+	  // set centering
+	  int cx,cy,cz;
+	  centering(ip,&cx,&cy,&cz);
+	  set_centering(ih,cx,cy,cz);
+	}
+      }
+    }
+    history_ = history;
+  }
+  
+  /// Return the history depth for storing old field values
+  int num_history () const throw()
+  { return history_; }
+
+  /// Return the temporary field id for ih'th generation of permanent
+  /// field ip (0 is current, 1 first generation, etc.)
+  int history_id (int ip, int ih) const throw()
+  {
+    int np = num_permanent();
+    return (ih == 0) ? ip : history_id_[ip + np*(ih-1)];
+  }
 
   //----------------------------------------------------------------------
   // Properties
@@ -127,6 +187,10 @@ public: // functions
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
     throw();
 
+  /// return whether the field variable is centered in the cell
+  bool is_centered(int id_field) const
+  { return (centering_[0] == 0 && centering_[1] == 0 && centering_[2] == 0); }
+
   /// depth of ghost zones of given field
   void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
     throw();
@@ -139,9 +203,16 @@ public: // functions
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
 
-  /// Whether the field is permanent or temporary
+  /// Whether the field id refers to a valid permanent field
   bool is_permanent (int id_field) const throw()
-  { return (id_field < num_permanent_); }
+  {
+    return ( (0 <= id_field) &&
+	     (id_field < num_permanent_)); }
+
+    /// Whether the field id refers to a valid temporary field
+  bool is_temporary (int id_field) const throw()
+  { return ((num_permanent_ <= id_field) &&
+	    (id_field < num_permanent_ + num_temporary_)); }
 
   /// Return the number of permanent fields
   int num_permanent() const throw()
@@ -151,15 +222,19 @@ private: // functions
 
   void copy_(const FieldDescr & field_descr) throw();
 
-  int insert_(const std::string & name_field) throw();
+  int insert_(const std::string & name_field,
+	      bool is_permanent = true) throw();
 
 private: // attributes
 
   /// String identifying each field
   std::vector<std::string> name_;
 
-  /// Number of permanent fields; remaining are temporary
+  /// Number of permanent fields declared
   int num_permanent_;
+
+    /// Number of temporary fields declared
+  int num_temporary_;
 
   /// Index of each field in name_
   std::map<std::string,int> id_;
@@ -179,14 +254,23 @@ private: // attributes
   /// cell centering for each field
   std::vector<int *> centering_;
 
-  /// Ghost depth of each field
+  /// Ghost depth of each field, or -1 if using default
   std::vector<int *> ghost_depth_;
+
+  /// Default ghost depth if not specified
+  int ghost_depth_default_[3];
 
   /// Whether the field is conserved or not.  If so it is multiplied
   /// by density when interpolated or coarsened, then divided again.
-  /// (int instead of bool otherwise charmc complains at compile time:
+  /// (char instead of bool otherwise charmc complains at compile time:
   /// "Error 1: taking address of temporary (-fpermissive)"
-  std::vector<int> conserved_;
+  std::vector<char> conserved_;
+
+  /// Number of generations of history to save
+  int history_;
+
+  /// Temporary fields used for history.  Non-permuted.
+  std::vector<int> history_id_;
 
 };
 

@@ -68,6 +68,8 @@ void Problem::pup (PUP::er &p)
 
   p | stopping_;
 
+  p | units_;
+
   // if (pk) n=timestep_list_.size();
   // p | n;
   // if (up) timestep_list_.resize(n);
@@ -80,6 +82,13 @@ void Problem::pup (PUP::er &p)
   if (up) method_list_.resize(n);
   for (int i=0; i<n; i++) {
     p | method_list_[i]; // PUP::able
+  }
+
+  if (pk) n=solver_list_.size();
+  p | n;
+  if (up) solver_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | solver_list_[i]; // PUP::able
   }
 
   if (pk) n=output_list_.size();
@@ -142,6 +151,30 @@ void Problem::initialize_initial(Config * config,
 
 //----------------------------------------------------------------------
 
+void Problem::initialize_physics(Config * config,
+				 Parameters * parameters,
+				 const FieldDescr * field_descr) throw()
+{
+
+  for (int index=0; index < config->num_physics; index++) {
+
+    std::string type = config->physics_list[index];
+
+    Physics * physics = create_physics_
+      (type,index,config,parameters,field_descr);
+
+    ASSERT1("Problem::initialize_physics",
+	    "Physics type %s not recognized",
+	    config->physics_list[index].c_str(),
+	    (physics != NULL) );
+
+    physics_list_.push_back( physics );
+  }
+
+}
+
+//----------------------------------------------------------------------
+
 void Problem::initialize_refine(Config * config,
 				Parameters * parameters,
 				const FieldDescr * field_descr) throw()
@@ -157,7 +190,7 @@ void Problem::initialize_refine(Config * config,
       refine_list_.push_back( refine );
     } else {
       ERROR1("Problem::initialize_refine",
-	     "Cannot create Mesh type %s",name.c_str());
+	     "Cannot create Refine type %s",name.c_str());
     }
   }
 }
@@ -229,6 +262,18 @@ void Problem::initialize_output
       }
 
       output->set_filename (file_name,file_args);
+    }
+
+    if (config->output_dir[index].size() > 0) {
+      std::string dir_name = config->output_dir[index][0];
+
+      std::vector<std::string> dir_args;
+
+      for (size_t i=1; i<config->output_dir[index].size(); i++) {
+	dir_args.push_back(config->output_dir[index][i]);
+      }
+
+      output->set_dir (dir_name,dir_args);
     }
 
     //--------------------------------------------------
@@ -406,6 +451,58 @@ void Problem::initialize_method
   }
 }
 
+//----------------------------------------------------------------------
+
+void Problem::initialize_solver
+(
+ Config * config,
+ const FieldDescr * field_descr,
+ const ParticleDescr * particle_descr
+ ) throw()
+{
+  const size_t num_solver = config->solver_list.size();
+
+  for (size_t index_solver=0; index_solver < num_solver ; index_solver++) {
+
+    std::string type = config->solver_type[index_solver];
+
+    Solver * solver = create_solver_(type, config, index_solver, 
+				     (FieldDescr *)field_descr, particle_descr);
+
+    if (solver) {
+
+      solver_list_.push_back(solver); 
+
+    } else {
+      ERROR1("Problem::initialize_method",
+	     "Unknown Method %s",type.c_str());
+    }
+
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Problem::initialize_units(Config * config) throw()
+{
+  units_ = create_units_(config);
+
+  ASSERT("Problem::initialize_units",
+	  "Units object not successfully created",
+	  units_ != NULL);
+}
+
+//----------------------------------------------------------------------
+
+Solver * Problem::solver(size_t i) const throw()
+{
+  ASSERT2("Problem::solver",
+	  "Solver id %d out of range [0,%d)",
+	  i < solver_list_.size(),
+	  i,solver_list_.size());
+  return solver_list_.at(i);
+}
+
 //======================================================================
 
 void Problem::deallocate_() throw()
@@ -421,11 +518,15 @@ void Problem::deallocate_() throw()
     delete refine_list_[i];    refine_list_[i] = 0;
   }
   delete stopping_;      stopping_ = 0;
-  // for (size_t i=0; i<timestep_list_.size(); i++) {
-  //   delete timestep_list_[i];     timestep_list_[i] = 0;
-  // }
+  delete units_;         units_ = NULL;
+  for (size_t i=0; i<physics_list_.size(); i++) {
+    delete physics_list_[i];   physics_list_[i] = NULL;
+  }
   for (size_t i=0; i<output_list_.size(); i++) {
     delete output_list_[i];    output_list_[i] = 0;
+  }
+  for (size_t i=0; i<solver_list_.size(); i++) {
+    delete solver_list_[i];    solver_list_[i] = 0;
   }
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];    method_list_[i] = 0;
@@ -618,12 +719,87 @@ Stopping * Problem::create_stopping_
  std::string  type,
  Config * config
  ) throw ()
-/// @param type   Type of the stopping method to create (ignored)
+/// @param type   Type of the stopping criterion to create (ignored)
 /// @param config  Configuration parameter class
 {
   return new Stopping(config->stopping_cycle,
 		      config->stopping_time,
 		      config->stopping_seconds);
+}
+
+//----------------------------------------------------------------------
+
+Units * Problem::create_units_ 
+(
+ Config * config
+ ) throw ()
+/// @param type   Type of the units criterion to create (ignored)
+/// @param config  Configuration parameter class
+{
+  Units * units = new Units;
+  
+  if (config->units_mass == 1.0) {
+
+    units->set_using_density (config->units_length,
+			       config->units_density,
+			       config->units_time);
+    
+  } else if (config->units_density == 1.0) {
+
+    units->set_using_mass (config->units_length,
+			    config->units_mass,
+			    config->units_time);
+  } else {
+    
+    ERROR("Problem::create_units_",
+	  "Cannot set both Units:density and Units:time parameters");
+  }
+
+  return units;
+}
+
+//----------------------------------------------------------------------
+
+Solver * Problem::create_solver_ 
+( std::string  name,
+  Config * config,
+  int index_solver,
+  FieldDescr * field_descr,
+  const ParticleDescr * particle_descr) throw ()
+{
+  TRACE1("Problem::create_solver %s",name.c_str());
+
+  // No default solver
+  Solver * solver = NULL;
+
+  return solver;
+}
+
+//----------------------------------------------------------------------
+
+Physics * Problem::create_physics_ 
+( std::string  name,
+  int index,
+  Config * config,
+  Parameters * parameters,
+  const FieldDescr * field_descr) throw ()
+{
+  TRACE1("Problem::create_physics %s",name.c_str());
+
+  // No default physics
+  Physics * physics = NULL;
+
+  return physics;
+}
+
+//----------------------------------------------------------------------
+
+Physics * Problem::physics (std::string type) const throw()
+{
+  for (int i=0; i<physics_list_.size(); i++) {
+    if (physics_list_[i]->type() == type) return physics_list_[i];
+  }
+  return NULL;
 }
 
 //----------------------------------------------------------------------
@@ -694,7 +870,10 @@ Output * Problem::create_output_
     bool        image_log        = config->output_image_log[index];
     bool        image_abs        = config->output_image_abs[index];
     int         image_face_rank  = config->output_image_face_rank[index];
-    int         max_level        = config->mesh_max_level;
+    int         min_level        = config->output_min_level[index];
+    int         max_level        = std::min(config->output_max_level[index],
+					    config->mesh_max_level);
+    bool        leaf_only        = config->output_leaf_only[index];
     std::string image_reduce_type = config->output_image_reduce_type[index];
     std::string image_mesh_color  = config->output_image_mesh_color[index];
     std::string image_color_particle_attribute =
@@ -717,8 +896,10 @@ Output * Problem::create_output_
 			      particle_descr,
 			      CkNumPes(),
 			      nx,ny,nz, 
-			      nbx,nby,nbz, 
+			      nbx,nby,nbz,
+			      min_level,
 			      max_level,
+			      leaf_only,
 			      image_type,
 			      image_size_x,image_size_y,
 			      image_reduce_type,
@@ -763,6 +944,10 @@ Prolong * Problem::create_prolong_ ( std::string  name ,
   if (name == "linear") {
 
     prolong = new ProlongLinear;
+
+  } else if (name == "inject") {
+
+    prolong = new ProlongInject;
 
   } else {
     

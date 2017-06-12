@@ -54,7 +54,6 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
-  
   TRACE_PPM("compute()");
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
@@ -75,18 +74,28 @@ void EnzoMethodPpm::compute ( Block * block) throw()
 
 double EnzoMethodPpm::timestep ( Block * block ) const throw()
 {
+
   TRACE_PPM("timestep()");
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   enzo_float a = 1, dadt;
-  
-  if (comoving_coordinates_)
-    enzo_block->CosmologyComputeExpansionFactor
-      (enzo_block->time(), &a, &dadt);
 
-  enzo_float dtBaryons      = ENZO_HUGE_VAL;
-  enzo_float dtExpansion    = ENZO_HUGE_VAL;
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+
+  ASSERT ("EnzoMethodPpm::timestep()",
+	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
+	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+
+  if (comoving_coordinates_) {
+
+    cosmology->compute_expansion_factor
+      (&a, &dadt,(enzo_float)enzo_block->time());
+    
+  }
+
+  enzo_float dtBaryons = ENZO_HUGE_VAL;
 
   /* Compute the pressure. */
 
@@ -108,20 +117,8 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
   enzo_float * velocity_z = (rank >= 3) ? 
     (enzo_float *)field.values("velocity_z") : NULL;
   enzo_float * pressure = (enzo_float *) field.values("pressure");
- 
-  /* 2) Calculate dt from particles. */
- 
-  /* 3) Find dt from expansion. */
- 
-  if (comoving_coordinates_)
-    if (enzo_block->CosmologyComputeExpansionTimestep(block->time(), &dtExpansion) == ENZO_FAIL) {
-      fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
-      exit(ENZO_FAIL);
-    }
- 
-  //   /* 4) Calculate minimum dt due to acceleration field (if present). */
- 
-  /* 5) calculate minimum timestep */
+   
+  /* calculate minimum timestep */
 
   FORTRAN_NAME(calc_dt)(&rank, 
 			enzo_block->GridDimension, 

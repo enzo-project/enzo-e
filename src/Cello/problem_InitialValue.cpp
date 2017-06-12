@@ -125,6 +125,9 @@ void InitialValue::enforce_block
  const Hierarchy  * hierarchy
  ) throw()
 {
+
+  Initial::enforce_block(block,field_descr,particle_descr,hierarchy);
+  
   // Initialize Fields according to parameters
 
   ASSERT("InitialValue::enforce_block",
@@ -207,7 +210,7 @@ void InitialValue::enforce_block
       }
 
     } else if (parameter_type == parameter_unknown) {
-      if (CkMyPe()==0) {
+      if (block->index().is_root()) {
 	WARNING1("InitialValue::enforce_block",  
 		 "Uninitialized field %s",
 		 field_name.c_str());

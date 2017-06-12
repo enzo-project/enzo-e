@@ -68,8 +68,6 @@ void Simulation::begin_output ()
 
   // Switching from Block to Simulation: wait for last Block
 
-  // printf ("%s:%d sync_output_begin_.value() = %d/%d\n",
-  // 	  __FILE__,__LINE__,sync_output_begin_.value(),sync_output_begin_.stop());
   if (sync_output_begin_.next()) {
 
     // Barrier
@@ -178,6 +176,7 @@ void Simulation::write_()
 
 void Simulation::r_write(CkReductionMsg * msg)
 {
+  create_checkpoint_link();
   performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_write()");
   delete msg;

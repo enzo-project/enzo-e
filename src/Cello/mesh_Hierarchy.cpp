@@ -11,6 +11,8 @@
 
 #include "charm_mesh.hpp"
 
+// #define CELLO_TRACE
+
 //----------------------------------------------------------------------
 
 Hierarchy::Hierarchy 
@@ -255,7 +257,7 @@ void Hierarchy::create_forest
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
      num_field_blocks);
-    
+
   block_exists_ = allocate_data;
 
 }

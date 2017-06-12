@@ -9,6 +9,7 @@
 
 #include "charm_enzo.hpp"
 
+// #define CELLO_TRACE
 // #define DEBUG_ENZO_FACTORY
 
 //----------------------------------------------------------------------
@@ -143,7 +144,9 @@ void EnzoFactory::create_subblock_array
       for (int iy=0; iy<nby; iy++) {
 	for (int iz=0; iz<nbz; iz++) {
 
-	  Index index(ix,iy,iz);
+	  int shift = -level;
+	  
+	  Index index(ix<<shift,iy<<shift,iz<<shift);
 
 	  index.set_level(level);
 

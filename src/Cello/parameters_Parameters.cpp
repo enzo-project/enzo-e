@@ -11,6 +11,8 @@
 
 Parameters g_parameters;
 
+// #define TEMP_BYPASS_DESTRUCTOR
+
 //----------------------------------------------------------------------
 
 Parameters::Parameters(Monitor * monitor) 
@@ -46,13 +48,15 @@ Parameters::~Parameters()
 {
   // Iterate over all parameters, deleting their values
 
-  std::map<std::string,Param *>::iterator it_param;
-  for (it_param =  parameter_map_.begin();
+
+#ifdef TEMP_BYPASS_DESTRUCTOR
+  for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
     delete it_param->second;
   }
   delete parameter_tree_;
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -66,8 +70,7 @@ void Parameters::pup (PUP::er &p)
   int n = 0;
   if (!p.isUnpacking()) {
     // Figure out size
-    std::map<std::string, Param *>::iterator it_param;
-    for (it_param =  parameter_map_.begin();
+    for (auto it_param =  parameter_map_.begin();
 	 it_param != parameter_map_.end();
 	 ++it_param) {
       n++;
@@ -75,8 +78,7 @@ void Parameters::pup (PUP::er &p)
   }
   p | n;
   if (!p.isUnpacking()) {
-    std::map<std::string, Param *>::iterator it_param;
-    for (it_param =  parameter_map_.begin();
+    for (auto it_param =  parameter_map_.begin();
 	 it_param != parameter_map_.end();
 	 ++it_param) {
       std::string name = it_param->first;
@@ -160,17 +162,23 @@ void Parameters::read ( const char * file_name )
 
 //----------------------------------------------------------------------
 
-void Parameters::write ( const char * file_name )
+void Parameters::write ( const char * file_name, bool full_names )
 /// @param  file_name   An opened output parameter file or stdout
 {
-
   FILE * fp = fopen(file_name,"w");
-
   ASSERT1("Parameters::write",
 	  "Error opening parameter file '%s' for writing",
 	  file_name,
 	  ( fp != NULL ) );
 
+  write (fp,full_names);
+  fclose(fp);
+}
+  //----------------------------------------------------------------------
+
+void Parameters::write ( FILE * fp, bool full_names )
+/// @param  file_name   An opened output parameter file or stdout
+{
   // "Previous" groups are empty
   int n_prev = 0;
   std::string group_prev[MAX_GROUP_DEPTH];
@@ -186,9 +194,7 @@ void Parameters::write ( const char * file_name )
 
   // Loop over parameters
 
-  std::map<std::string,Param *>::iterator it_param;
-
-  for (it_param =  parameter_map_.begin();
+  for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
 
@@ -212,22 +218,38 @@ void Parameters::write ( const char * file_name )
       for (int i=i_group; i<n_prev; i++) {
 	--group_depth;
 	indent_string = indent_string.substr(0, indent_string.size()-indent_size);
-	fprintf (fp, "%s}%c\n",indent_string.c_str(),
-		 (group_depth==0) ? '\n' : ';' );
+	if (!full_names) {
+	  fprintf (fp, "%s}%c\n",indent_string.c_str(),
+		   (group_depth==0) ? '\n' : ';' );
+	}
       }
 
       // Begin new groups
 
       for (int i=i_group; i<n_curr; i++) {
-	fprintf (fp,"%s%s {\n",indent_string.c_str(),
-		 group_curr[i].c_str());
+	if (!full_names) {
+	  fprintf (fp,"%s%s {\n",indent_string.c_str(),
+		   group_curr[i].c_str());
+	}
 	indent_string = indent_string + indent_amount;
 	++group_depth;
       }
 
       // Print parameter
-      fprintf (fp,"%s",indent_string.c_str());
-      it_param->second->write(fp,it_param->first);
+      if (full_names) {
+	Monitor monitor;
+	monitor.set_mode(monitor_mode_all);
+	// display Monitor prefix if full_names
+	monitor.write(fp,"Parameters","");
+	for (int i=0; i < n_curr; i++) {
+	  fprintf (fp,"%s:",group_curr[i].c_str());
+	}
+	bool no_commas = true;
+	it_param->second->write(fp,it_param->first,no_commas);
+      } else {	
+	fprintf (fp,"%s",indent_string.c_str());
+	it_param->second->write(fp,it_param->first);
+      }
 
       // Copy current groups to previous groups (inefficient)
       n_prev = n_curr;
@@ -242,11 +264,11 @@ void Parameters::write ( const char * file_name )
 
   for (int i=0; i<n_prev; i++) {
     indent_string = indent_string.substr(indent_size,std::string::npos);
-    fprintf (fp, "%s}\n",indent_string.c_str());
+    if (!full_names) {
+      fprintf (fp, "%s}\n",indent_string.c_str());
+    }
     --group_depth;
   }
-
-  if (fp != stdout) fclose(fp);
 
 }
 
@@ -1079,9 +1101,7 @@ void Parameters::new_param_
 
 void Parameters::check()
 {
-  std::map<std::string,Param *>::iterator it_param;
-
-  for (it_param =  parameter_map_.begin();
+  for (auto it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
     if (it_param->second && ! it_param->second->accessed()) {

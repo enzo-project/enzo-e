@@ -14,14 +14,21 @@
 FieldDescr::FieldDescr () throw ()
   : name_(),
     num_permanent_(0),
+    num_temporary_(0),
     id_(),
     groups_(),
     alignment_(1),
     padding_(0),
     precision_(),
     centering_(),
-    ghost_depth_()
+    ghost_depth_(),
+    conserved_(),
+    history_(0),
+    history_id_()
 {
+  for (int i=0; i<3; i++) {
+    ghost_depth_default_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -79,9 +86,7 @@ bool FieldDescr::is_field(const std::string & name) const throw()
 
 int FieldDescr::field_id(const std::string & name) const throw()
 {
-  //  return id_[name]; // ERROR IN PGI ON GORDON 11.9-0 64-bit
-  std::map<const std::string,int>::const_iterator it;
-  it=id_.find(name);
+  auto it = id_.find(name);
   if (it != id_.end()) {
     return it->second;
   } else {
@@ -117,9 +122,16 @@ void FieldDescr::ghost_depth
  int * gz
  ) const throw()
 {
-  if (gx) (*gx) = ghost_depth_.at(id_field)[0];
-  if (gy) (*gy) = ghost_depth_.at(id_field)[1];
-  if (gz) (*gz) = ghost_depth_.at(id_field)[2];
+  int g3[3] = {ghost_depth_.at(id_field)[0],
+	       ghost_depth_.at(id_field)[1],
+	       ghost_depth_.at(id_field)[2]};
+  int gd[3] = {ghost_depth_default_[0],
+	       ghost_depth_default_[1],
+	       ghost_depth_default_[2]};
+	       
+  if (gx) (*gx) = g3[0] < 0 ? gd[0] : g3[0];
+  if (gy) (*gy) = g3[1] < 0 ? gd[1] : g3[1];
+  if (gz) (*gz) = g3[2] < 0 ? gd[2] : g3[2];
 }
 
 //----------------------------------------------------------------------
@@ -127,9 +139,11 @@ void FieldDescr::ghost_depth
 int FieldDescr::insert_permanent(const std::string & field_name) throw()
 {
 
-  int id = insert_(field_name);
+  bool permanent;
+  
+  int id = insert_(field_name, permanent = true);
 
-  num_permanent_ = id+1;
+  ++ num_permanent_;
 
   return id;
 }
@@ -138,33 +152,46 @@ int FieldDescr::insert_permanent(const std::string & field_name) throw()
 
 int FieldDescr::insert_temporary(const std::string & field_name) throw()
 {
-  return insert_(field_name);
+  bool permanent;
+  
+  int id = insert_(field_name, permanent = false);
+
+  ++ num_temporary_;
+
+  return id;
 }
 
 //----------------------------------------------------------------------
 
-int FieldDescr::insert_(const std::string & field_name) throw()
+int FieldDescr::insert_(const std::string & field_name,
+			bool is_permanent) throw()
 {
-  int id = field_count();
+  // Assumes all permanent added before any temporary
+  
+  int id = num_permanent_ + num_temporary_;
 
   // Check if field has already been inserted
 
-  for (int i=0; i<id; i++) {
-    if (name_[i] == field_name) {
-      char buffer [ ERROR_LENGTH ];
-      sprintf (buffer,
-	       "Insert field called multiple times with same field %s",
-	       field_name.c_str());
-      WARNING("FieldDescr::insert_permanent", buffer);
-      return i;
+  if (is_permanent) {
+    for (int i=0; i<id; i++) {
+      if (name_[i] == field_name) {
+	char buffer [ ERROR_LENGTH ];
+	sprintf (buffer,
+		 "Insert field called multiple times with same field %s",
+		 field_name.c_str());
+	WARNING("FieldDescr::insert_permanent", buffer);
+	return i;
+      }
     }
   }
-  // Insert field name and id
 
-  name_.push_back(field_name);
-
-  id_[field_name] = id;
-
+  // Save field name (unless anonymous temporary)
+  
+  if (field_name != "") {
+    name_.push_back(field_name);
+    id_[field_name] = id;
+  }
+  
   // Initialize attributes with default values
 
   int precision = default_precision;
@@ -175,14 +202,13 @@ int FieldDescr::insert_(const std::string & field_name) throw()
   centered[2] = 0;
 
   int * ghost_depth = new int [3];
-  ghost_depth[0] = 1;
-  ghost_depth[1] = 1;
-  ghost_depth[2] = 1;
 
-  // int_set_type a;
-  // field_in_group_.push_back(a);
-  precision_. push_back(precision);
-  centering_. push_back(centered);
+  ghost_depth[0] = -1;
+  ghost_depth[1] = -1;
+  ghost_depth[2] = -1;
+
+  precision_.  push_back(precision);
+  centering_.  push_back(centered);
   ghost_depth_.push_back(ghost_depth);
 
   return id;
@@ -232,6 +258,15 @@ void FieldDescr::set_ghost_depth(int id_field, int gx, int gy, int gz) throw()
     ghost_depth_.at(id_field)[1] = gy;
     ghost_depth_.at(id_field)[2] = gz;
   }
+}
+
+//----------------------------------------------------------------------
+
+void FieldDescr::set_default_ghost_depth(int gx, int gy, int gz) throw()
+{
+  ghost_depth_default_[0] = gx;
+  ghost_depth_default_[1] = gy;
+  ghost_depth_default_[2] = gz;
 }
 
 //======================================================================

@@ -42,7 +42,7 @@ void InputData::pup (PUP::er &p)
 
 void InputData::open () throw()
 {
-  std::string file_name = expand_file_name_(&file_name_,&file_args_);
+  std::string file_name = expand_name_(&file_name_,&file_args_);
 
   Monitor::instance()->print ("Input","reading data file %s", 
 			      file_name.c_str());

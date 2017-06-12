@@ -74,12 +74,6 @@ private: // private functions
 
   private: // attributes
 
-  /// Name of the checkpoint directory, including format arguments 
-  std::string dir_name_;
-
-  /// Format strings for dir_name_, if any ("cycle", "time", etc.)
-  std::vector<std::string> dir_args_;
-
   /// Name of parameter file to read on restart for updated parameters
   std::string restart_file_;
 

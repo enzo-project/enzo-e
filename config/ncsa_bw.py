@@ -1,3 +1,7 @@
+#
+# Enzo-P/Cello Configuration file for NCSA Blue Waters
+#
+# See README.ncsa_bw for additional information
 
 import os
 
@@ -11,8 +15,8 @@ node_size = 32 # for BW integer cores
 
 is_arch_valid = 1
 
-flags_arch = '-Wall -O3 -std=gnu++11'
-flags_link  = '-O3'
+flags_arch = '-O3 -std=gnu++11 -Wall'
+flags_link = '-O3 -std=gnu++11'
 
 flags_prec_single = ''
 flags_prec_double = ''
@@ -25,11 +29,12 @@ libs_fortran    = ['gfortran']
 
 home = os.environ['HOME']
 
-charm_path = home + '/Charm/671/gnu/smp/charm'
+charm_path = home + '/Charm/charm'
 png_path   = home
 use_papi = 1
 papi_inc="/opt/cray/papi/default/include"
 papi_lib="/opt/cray/papi/default/lib64"
+
 hdf5_path  = os.environ["HDF5_DIR"]
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'

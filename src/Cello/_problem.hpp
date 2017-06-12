@@ -51,7 +51,6 @@ enum neighbor_enum {
 //#include "problem_ExprValue.hpp"
 #include "problem_Problem.hpp"
 #include "problem_Stopping.hpp"
-//#include "problem_Timestep.hpp"
 #include "problem_Initial.hpp"
 #include "problem_InitialTrace.hpp"
 #include "problem_InitialFile.hpp"
@@ -61,9 +60,12 @@ enum neighbor_enum {
 #include "problem_BoundaryPeriodic.hpp"
 #include "problem_Method.hpp"
 #include "problem_MethodTrace.hpp"
+#include "problem_Physics.hpp"
 #include "problem_Prolong.hpp"
+#include "problem_ProlongInject.hpp"
 #include "problem_ProlongLinear.hpp"
 #include "problem_Restrict.hpp"
 #include "problem_RestrictLinear.hpp"
+#include "problem_Units.hpp"
 
 #endif /* _PROBLEM_HPP */

@@ -126,7 +126,6 @@ public: // interface
   Field field (size_t i=0) throw()
   { return Field(field_descr(),field_data(i)); }
 
-
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
 		    int gx = 0, int gy = 0, int gz = 0) const;
@@ -156,12 +155,6 @@ public: // interface
   Particle particle () throw()
   { return Particle(particle_descr(),
 		    particle_data_); }
-
-  bool any_particles() const
-  { return (particle_descr()->num_types() > 0); }
-
-  bool any_fields() const
-  { return (field_descr()->field_count() > 0); }
 
   void allocate () throw();
 

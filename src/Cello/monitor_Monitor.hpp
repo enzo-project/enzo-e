@@ -36,15 +36,20 @@ class Monitor {
 
   //----------------------------------------------------------------------
 
+public:
+  
+  /// Private constructor of the Monitor object [singleton design pattern]
+  /// (MADE PUBLIC FOR Parameters::write())
+  Monitor();
+
+  /// Private destructor  of the Monitor object [singleton design pattern]
+  /// (MADE PUBLIC FOR Parameters::write())
+  ~Monitor();
+
 private:
 
   friend class Simulation;
 
-  /// Private constructor of the Monitor object [singleton design pattern]
-  Monitor();
-
-  /// Private destructor  of the Monitor object [singleton design pattern]
-  ~Monitor();
 
 //----------------------------------------------------------------------
 
@@ -91,6 +96,7 @@ public: // interface
   /// Write a message to file
   void write (FILE * fp, 
 	      const char * component, const char * buffer, ...) const;
+
   /// Print a message only if verbose is set
   void verbose (FILE * fp, 
 	      const char * component, const char * buffer, ...) const;

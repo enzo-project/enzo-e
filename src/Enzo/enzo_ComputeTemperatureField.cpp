@@ -98,13 +98,18 @@ int EnzoBlock::ComputeTemperatureField
  
   /* Find the temperature units if we are using comoving coordinates. */
  
-  if (comoving_coordinates)
-    if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			  &TimeUnits, &VelocityUnits, time()) == ENZO_FAIL) {
-      fprintf(stderr, "Error in CosmologyGetUnits.\n");
-      return ENZO_FAIL;
-    }
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+    simulation()->problem()->physics("cosmology");
 
+  ASSERT ("EnzoBlock::ComputeTemperatureField()",
+	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
+	  ! (comoving_coordinates && (cosmology != NULL)) );
+
+  if (comoving_coordinates) {
+
+    cosmology->get_units(&DensityUnits, &LengthUnits, &TemperatureUnits,
+			 &TimeUnits, &VelocityUnits, time());
+  }
   /* For Sedov Explosion compute temperature without floor */
 
   // @@@ WHY PROBLEM-DEPENDENT? jb @@@

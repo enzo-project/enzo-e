@@ -33,7 +33,7 @@ env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'Hdf5ToPng'   : hdf5_to_png } )
 env.Append(BUILDERS = { 'PngToGif'    : png_to_gif } )
 
-env_mv_out  = env.Clone(COPY = 'mv `ls *.png *.h5` ' + test_path)
+env_mv_out  = env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
 env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
 
@@ -87,7 +87,8 @@ env.RunSerial('test_Hierarchy.unit', bin_path + '/test_Hierarchy')
 env.RunSerial('test_Data.unit',     bin_path + '/test_Data')
 env.RunSerial('test_Index.unit',     bin_path + '/test_Index')
 Clean(env_mv_out.RunSerial('test_Tree.unit', bin_path + '/test_Tree'),
-      ['#/test_tree_1-initial.png',
+      ['#/test_Tree.unit.in',
+       '#/test_tree_1-initial.png',	
        '#/test_tree_2-balanced.png',
        '#/test_tree_3-merged.png' ])
 Clean(env_mv_out.RunSerial('test_TreeDensity.unit',
@@ -596,6 +597,13 @@ env.Requires(output_stride_4_C00,output_stride_4_RUN)
 Clean(output_stride_4,
       [Glob('#/' + test_path + '/output-stride-4*.png'),
        'test_output-stride-4.unit'])
+
+#----------------------------------------------------------------------
+
+Clean(env_mv_out.RunParallel ('test_output-headers.unit',
+                bin_path + '/enzo-p', 
+                ARGS='input/output-headers.in'),
+		[Glob('#/' + test_path + '/Dir_*')])
 
 #----------------------------------------------------------------------
 # PARTICLES

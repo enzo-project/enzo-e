@@ -54,6 +54,8 @@ public: // functions
       time_(0),
       file_name_(""),     // set_filename()
       file_args_(),       // set_filename()
+      dir_name_(""),     // set_dirname()
+      dir_args_(),
       io_block_(0),
       it_field_index_(0),        // set_it_index_field()
       io_field_data_(0),
@@ -66,9 +68,20 @@ public: // functions
   void pup (PUP::er &p);
 
   /// Set file name
-  void set_filename (std::string filename,
-		     std::vector<std::string> fileargs) throw()
-  { file_name_ = filename;  file_args_ = fileargs;  }
+  void set_filename (std::string file_name,
+		     std::vector<std::string> file_args) throw()
+  {
+    file_name_ = file_name;
+    file_args_ = file_args;
+  }
+
+  /// Set dir name
+  void set_dir (std::string dir_name,
+		  std::vector<std::string> dir_args) throw()
+  {
+    dir_name_ = dir_name;
+    dir_args_ = dir_args;
+  }
 
   /// Set field iterator
   void set_it_field_index (ItIndex * it_index) throw()
@@ -79,13 +92,16 @@ public: // functions
   { it_particle_index_ = it_index; }
   
   /// Return the IoBlock object
-  IoBlock * io_block () const throw() { return io_block_; }
+  IoBlock * io_block () const throw()
+  { return io_block_; }
 
   /// Return the IoFieldData object
-  IoFieldData * io_field_data () const throw() { return io_field_data_; }
+  IoFieldData * io_field_data () const throw()
+  { return io_field_data_; }
 
   /// Return the IoParticleData object
-  IoParticleData * io_particle_data () const throw() { return io_particle_data_; }
+  IoParticleData * io_particle_data () const throw()
+  { return io_particle_data_; }
 
   /// Return the File object pointer
   File * file() throw() 
@@ -201,10 +217,29 @@ public: // virtual functions
 
 protected:
 
-  /// Return the filename for the file format and given arguments
-  std::string expand_file_name_
+  /// Return the name for the format and given arguments
+  std::string expand_name_
   (const std::string * file_name,
    const std::vector<std::string> * file_args) const throw();
+
+  /// Return the path for this file group output.  Creates
+  /// the subdirectories if they don't exist
+  std::string directory () const
+  {
+    std::string dir = ".";
+
+    std::string name_dir = expand_name_(&dir_name_,&dir_args_);
+    
+    if (name_dir != "") {
+      dir = name_dir;
+      struct stat st = {0};
+      if (stat(dir.c_str(), &st) == -1) {
+	mkdir(dir.c_str(), 0700);
+      }
+    }
+
+    return dir;
+  }
 
 private:
 
@@ -227,7 +262,6 @@ private:
 
   /// Implementation of write_meta() and write_meta_group()
   void write_meta_ ( meta_type type, Io * io ) throw();
-
 
 protected: // attributes
 
@@ -260,6 +294,12 @@ protected: // attributes
 
   /// Format strings for file name, if any ("cycle", "time", etc.)
   std::vector<std::string> file_args_;
+
+  /// Name of the directory, including format arguments 
+  std::string dir_name_;
+
+  /// Format strings for dir_name_, if any ("cycle", "time", etc.)
+  std::vector<std::string> dir_args_;
 
   /// I/O Block data accessor
   IoBlock * io_block_;

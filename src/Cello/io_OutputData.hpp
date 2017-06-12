@@ -23,7 +23,7 @@ class OutputData : public Output {
 public: // functions
 
   /// Empty constructor for Charm++ pup()
-  OutputData() throw() {}
+  OutputData() throw() : text_block_count_(0) {}
 
   /// Create an uninitialized OutputData object
   OutputData(int index,
@@ -86,6 +86,9 @@ public: // virtual functions
 
 protected:
 
+  /// Count of number of Blocks sent from local process for text file
+  /// output
+  int text_block_count_;
 };
 
 #endif /* IO_OUTPUT_DATA_HPP */

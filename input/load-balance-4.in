@@ -6,7 +6,8 @@ include "input/adapt.incl"
 Balance { 
    schedule {
      var = "cycle";
-     step = 1;
+     start = 1;
+     step = 2;
    }
 }
 
@@ -16,7 +17,8 @@ Testing {
    cycle_final = 20;
 #   time_final = 0.00134903668604035;
 #   time_final = 0.00134807696987889;
-    time_final = 0.0013708054024426;
+#    time_final = 0.0013708054024426;
+    time_final = 0.00137275213641413;
 }
 
 Mesh    { 
@@ -34,6 +36,7 @@ Boundary { type = "periodic"; }
 
 Output {
      list = ["mesh","de"];
+
       de {
            name = ["balance-de-%05d.png", "cycle"]; 
            include "input/schedule_cycle_2.incl"

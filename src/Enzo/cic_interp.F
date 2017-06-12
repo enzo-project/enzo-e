@@ -48,7 +48,7 @@ c
 c
 c  locals
 c
-      integer i1, j1, k1, i2,j2,k2, n
+      integer i1, j1, k1, n
       ENZO_REAL xpos, ypos, zpos, dx, dy, dz
       ENZO_REAL half, edge1, edge2, edge3, fact
 c

@@ -18,74 +18,232 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  unit_class("Index");
-
-  Index * index = new Index;
-
-  unit_assert (index != NULL);
+#define N 8
+  Index i8[N+1];
 
   int trace[][3] = { {0,0,0},
-		     {1,0,0},
-		     {0,1,0},
-		     {0,0,1},
-		     {0,1,1},
-		     {1,0,1},
-		     {1,1,0},
-		     {1,1,1} };
+		       {1,0,0},
+		       {0,1,0},
+		       {0,0,1},
+		       {0,1,1},
+		       {1,0,1},
+		       {1,1,0},
+		       {1,1,1} };
 
-  int nb3[3] = {0,0,0};
-  index->set_level(0);
-  nb3[0] = 1;
-  printf ("index = %s\n",index->bit_string(0,3,nb3).c_str());
-  nb3[1] = 1;
-  printf ("index = %s\n",index->bit_string(0,3,nb3).c_str());
-  nb3[2] = 1;
-  printf ("index = %s\n",index->bit_string(0,3,nb3).c_str());
-  index->set_child(1,0,0,0);
-  index->set_level(1);
-  printf ("index = %s\n",index->bit_string(1,3,nb3).c_str());
-  index->set_child(2,1,0,0);
-  index->set_level(2);
-  printf ("index = %s\n",index->bit_string(2,3,nb3).c_str());
-  index->set_child(3,0,1,0);
-  index->set_level(3);
-  printf ("index = %s\n",index->bit_string(3,3,nb3).c_str());
-  index->set_child(4,0,0,1);
-  index->set_level(4);
-  printf ("index = %s\n",index->bit_string(4,3,nb3).c_str());
-  index->set_child(5,0,1,1);
-  index->set_level(5);
-  printf ("index = %s\n",index->bit_string(5,3,nb3).c_str());
-  index->set_child(6,1,0,1);
-  index->set_level(6);
-  printf ("index = %s\n",index->bit_string(6,3,nb3).c_str());
-  index->set_child(7,1,1,0);
-  index->set_level(7);
-  printf ("index = %s\n",index->bit_string(7,3,nb3).c_str());
-  index->set_child(8,1,1,1);
-  index->set_level(8);
-  printf ("index = %s\n",index->bit_string(8,3,nb3).c_str());
+  
+  // Number of bits (not array size)
+  
+  int nb3[3] = {3,4,2};
+  int na3[3] = {1<<nb3[0], 1<<nb3[1], 1<<nb3[2]};
 
-  const int max_level = 8;
-  index->set_level(max_level);
+  for (int i=1; i<N+1; i++) {
+    unit_func("operator =()");
+    if (i>0) {
+      i8[i] = i8[i-1];
+      unit_assert(i8[i] == i8[i-1]);
+    }
+    i8[i].set_level(i);
+    i8[i].set_child(i,trace[i-1][0],trace[i-1][1],trace[i-1][2]);
+  }
 
-  //  index->clean();
-  unit_func ("set_child()");
+  //==================================================
+  // Parent
+  //==================================================
 
-  for (int level = 0; level < max_level; level++) {
+  unit_func ("index_parent");
 
-    int ic3[3];
-    index->child(level+1,&ic3[0],&ic3[1],&ic3[2]);
-    
-    unit_assert(ic3[0] == trace[level][0] && 
-		ic3[1] == trace[level][1] && 
-		ic3[2] == trace[level][2]);
+  for (int i=0; i<N; i++) {
+    unit_assert (i8[i+1].index_parent() == i8[i]);
+  }
+
+  //==================================================
+  // Child
+  //==================================================
+
+  for (int i=1; i<N; i++) {
+    int c3[3];
+    i8[i].child(i,c3,c3+1,c3+2);
+    unit_func ("child");
+    unit_assert (c3[0]==trace[i-1][0] &&
+		 c3[1]==trace[i-1][1] &&
+		 c3[2]==trace[i-1][2]);
+    unit_func ("index_child");
+    unit_assert (i8[i].index_child(trace[i][0],trace[i][1],trace[i][2]) == i8[i+1]);
+  }
+
+  //==================================================
+  // Neighbor
+  //==================================================
+
+  unit_func ("index_neighbor");
+  for (int axis=0; axis<3; axis++) {
+    int w3[3] = {na3[0],na3[1],na3[2]};
+    for (int i=0; i<N; i++) {
+      int if3[3] = { 0,0,0};
+
+      Index index,index_neighbor;
+
+      // positive direction
+      if3[axis] = 1;
+      index = i8[i];
+      for (int j=0; j<w3[axis]; j++) {
+	index_neighbor = index.index_neighbor(if3,na3);
+	unit_assert (index_neighbor != index);
+	index = index_neighbor;
+      }
+      unit_assert (index_neighbor == i8[i]);
+      if (index_neighbor != i8[i]) {
+	int a3[3];
+	int t3[3];
+	i8[i].array(a3,a3+1,a3+2);
+	i8[i].tree (t3,t3+1,t3+2);
+	index_neighbor.array(a3,a3+1,a3+2);
+	index_neighbor.tree (t3,t3+1,t3+2);
+      }
+
+      // negative direction
+      if3[axis] = -1;
+      index = i8[i];
+      for (int j=0; j<w3[axis]; j++) {
+	index_neighbor = index.index_neighbor(if3,na3);
+	unit_assert (index_neighbor != index);
+	index = index_neighbor;
+      }
+      unit_assert (index_neighbor == i8[i]);
+      if (index_neighbor != i8[i]) {
+	int a3[3];
+	int t3[3];
+	i8[i].array(a3,a3+1,a3+2);
+	i8[i].tree (t3,t3+1,t3+2);
+	index_neighbor.array(a3,a3+1,a3+2);
+	index_neighbor.tree (t3,t3+1,t3+2);
+      }
+
+      // Update mesh width for next refinement level
+      w3[axis] *= 2;
+    }
   }
 
 
-  int na3[] = { 3,3,3};
+  // ==================================================
+  // Array
+  // ==================================================
 
-  for (int level = 0; level < max_level; level++) {
+  int nx = na3[0];
+  int ny = na3[1];
+  int nz = na3[2];
+  Index * index_root = new Index [nx*ny*nz];
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	int i=ix + nx*(iy + ny*iz);
+	index_root[i].set_level(0);
+	index_root[i].set_array(ix,iy,iz);
+	int a3[3];
+	index_root[i].array(a3,a3+1,a3+2);
+	unit_func ("array");
+	unit_assert (a3[0] == ix);
+	unit_assert (a3[1] == iy);
+	unit_assert (a3[2] == iz);
+      }
+    }
+  }
+  
+  // ==================================================
+  // Parent (negative levels)
+  // ==================================================
+
+  // Level == -1
+  int dx=1;
+  int dy=nx;
+  int dz=nx*ny;
+  unit_func ("index_parent (level < 0)");
+  for (int iz=0; iz<nz; iz+=2) {
+    for (int iy=0; iy<ny; iy+=2) {
+      for (int ix=0; ix<nx; ix+=2) {
+	int i=ix + nx*(iy + ny*iz);
+	Index p = index_root[i].index_parent(-2);
+	unit_assert (p == index_root[i+dx].index_parent(-2));
+	unit_assert (p == index_root[i+dy].index_parent(-2));
+	unit_assert (p == index_root[i+dz].index_parent(-2));
+	unit_assert (p == index_root[i+dx+dy].index_parent(-2));
+	unit_assert (p == index_root[i+dy+dz].index_parent(-2));
+	unit_assert (p == index_root[i+dz+dx].index_parent(-2));
+	unit_assert (p == index_root[i+dx+dy+dz].index_parent(-2));
+
+	unit_assert (p != index_root[i+2*dx].index_parent(-2));
+	unit_assert (p != index_root[i+2*dy].index_parent(-2));
+	unit_assert (p != index_root[i+2*dz].index_parent(-2));
+	unit_assert (p != index_root[i+2*dx+dy].index_parent(-2));
+	unit_assert (p != index_root[i+2*dx+dz].index_parent(-2));
+	unit_assert (p != index_root[i+2*dz+dy].index_parent(-2));
+      }
+    }
+  }
+  for (int iz=0; iz<nz; iz+=4) {
+    for (int iy=0; iy<ny; iy+=4) {
+      for (int ix=0; ix<nx; ix+=4) {
+	int i=ix + nx*(iy + ny*iz);
+	Index p = index_root[i].index_parent(-2).index_parent(-2);
+	unit_assert (p == index_root[i+dx].index_parent(-2).index_parent(-2));
+	unit_assert (p == index_root[i+2*dx].index_parent(-2).index_parent(-2));
+	unit_assert (p == index_root[i+3*dx].index_parent(-2).index_parent(-2));
+	unit_assert (p == index_root[i+2*dy].index_parent(-2).index_parent(-2));
+	unit_assert (p == index_root[i+3*dy].index_parent(-2).index_parent(-2));
+	unit_assert (p == index_root[i+2*dz].index_parent(-2).index_parent(-2));
+	unit_assert (p == index_root[i+3*dz].index_parent(-2).index_parent(-2));
+	unit_assert (p != index_root[i+4*dx].index_parent(-2).index_parent(-2));
+	unit_assert (p != index_root[i+4*dy].index_parent(-2).index_parent(-2));
+	unit_assert (p != index_root[i+4*dz].index_parent(-2).index_parent(-2));
+      }
+    }
+  }
+
+  //==================================================
+  // Neighbor (negative levels)
+  //==================================================
+
+  for (int iz=0; iz<nz; iz+=2) {
+    for (int iy=0; iy<ny; iy+=2) {
+      for (int ix=0; ix<nx; ix+=2) {
+	int i=ix + nx*(iy + ny*iz);
+
+	int if3[3] = {1,0,0};
+	Index ic = index_root[i];
+	Index ip = ic.index_parent(-2);
+
+	// block's neighbor's neighbor's parent
+	Index icnnp = ic.index_neighbor(if3,na3);
+	icnnp = icnnp.index_neighbor(if3,na3);
+	icnnp = icnnp.index_parent(-2);
+
+	// block's parent's neighbor
+	Index ipn = ip.index_neighbor(if3,na3);
+
+	unit_assert (icnnp == ipn);
+	if (icnnp != ipn) {
+	  CkPrintf ("--------------------------------------------------\n");
+	  CkPrintf ("   ic    %s\n",ic.bit_string(0,3,nb3).c_str());
+	  icnnp = ic.index_neighbor(if3,na3);
+	  CkPrintf ("   icn   %s\n",icnnp.bit_string(0,3,nb3).c_str());
+	  icnnp = icnnp.index_neighbor(if3,na3);
+	  CkPrintf ("   icnn  %s\n",icnnp.bit_string(0,3,nb3).c_str());
+	  icnnp = icnnp.index_parent(-2);
+	  CkPrintf ("** icnnp %s\n",icnnp.bit_string(0,3,nb3).c_str());
+	  CkPrintf ("   ip    %s\n",ip.bit_string(0,3,nb3).c_str());
+	  CkPrintf ("** ipn   %s\n",ipn.bit_string(0,3,nb3).c_str());
+
+	}
+      }
+    }
+  }
+
+
+  //  int na3[] = { 3,3,3};
+
+  Index * index = new Index;
+  *index = i8[7];
+  for (int level = 0; level < N; level++) {
 
     Index i1,i2;
     i1 = *index;
@@ -174,10 +332,7 @@ PARALLEL_MAIN_BEGIN
 	}
       }
     }
-
   }
-  
-
 
   unit_finalize();
 
@@ -185,4 +340,3 @@ PARALLEL_MAIN_BEGIN
 }
 
 PARALLEL_MAIN_END
-

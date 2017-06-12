@@ -15,11 +15,6 @@
 
 int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
 enzo_float EnzoBlock::MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::ComovingBoxSize[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::HubbleConstantNow[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::OmegaMatterNow[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::OmegaLambdaNow[CONFIG_NODE_SIZE];
-enzo_float EnzoBlock::MaxExpansionRate[CONFIG_NODE_SIZE];
 
 // Chemistry
 
@@ -122,17 +117,11 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 
     // PPM parameters
 
-    InitialRedshift[in]   = enzo_config->physics_cosmology_initial_redshift;
-    HubbleConstantNow[in] = enzo_config->physics_cosmology_hubble_constant_now;
-    OmegaLambdaNow[in]    = enzo_config->physics_cosmology_omega_lamda_now;
-    OmegaMatterNow[in]    = enzo_config->physics_cosmology_omega_matter_now;
-    MaxExpansionRate[in]  = enzo_config->physics_cosmology_max_expansion_rate;
-    ComovingBoxSize[in]   = enzo_config->physics_cosmology_comoving_box_size;
-
     PressureFree[in]              = enzo_config->ppm_pressure_free;
     UseMinimumPressureSupport[in] = enzo_config->ppm_use_minimum_pressure_support;
     MinimumPressureSupportParameter[in] = 
       enzo_config->ppm_minimum_pressure_support_parameter;
+    
     PPMFlatteningParameter[in]    = enzo_config->ppm_flattening;
     PPMDiffusionParameter[in]     = enzo_config->ppm_diffusion;
     PPMSteepeningParameter[in]    = enzo_config->ppm_steepening;
@@ -177,10 +166,12 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config,
 EnzoBlock::EnzoBlock
 ( MsgRefine * msg )
   : BASE_ENZO_BLOCK ( msg ),
-    dt(dt_),
-    SubgridFluxes(0),
     mg_iter_(0),
-    mg_sync_()
+    mg_sync_restrict_(),
+    mg_sync_prolong_(),
+    mg_msg_(NULL),
+    dt(dt_),
+    SubgridFluxes(NULL)
 {
   initialize_enzo_();
   initialize();
@@ -195,7 +186,6 @@ EnzoBlock::EnzoBlock
 void EnzoBlock::initialize_enzo_()
 {
   for (int i=0; i<MAX_DIMENSION; i++) {
-    AccelerationField[i] = 0;
     GridLeftEdge[i] = 0;
     GridDimension[i] = 0;
     GridStartIndex[i] = 0;
@@ -229,12 +219,6 @@ void EnzoBlock::pup(PUP::er &p)
 
   const int in = cello::index_static();
 
-  static bool warn0[CONFIG_NODE_SIZE] = {true};
-  if (warn0[in]) {
-    warn0[in] = false;
-    WARNING("EnzoBlock::pup()", "skipping AccelerationField_ (not used)");
-  }
-
   static bool warn1[CONFIG_NODE_SIZE] = {true};
   if (warn1[in]) {
     warn1[in] = false;
@@ -249,8 +233,14 @@ void EnzoBlock::pup(PUP::er &p)
 
   PUParray(p,method_turbulence_data,max_turbulence_array);
 
-  p | mg_sync_;
   p | mg_iter_;
+  p | mg_sync_restrict_;
+  p | mg_sync_prolong_;
+  static bool warn2[CONFIG_NODE_SIZE] = {true};
+  if (warn2[in]) {
+    warn2[in] = false;
+    WARNING("EnzoBlock::pup()", "skipping mg_msg_");
+  }
 
   TRACE ("END EnzoBlock::pup()");
 
@@ -266,16 +256,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 	   UseMinimumPressureSupport[in]);
   fprintf (fp,"EnzoBlock: MinimumPressureSupportParameter %g\n",
 	   MinimumPressureSupportParameter[in]);
-  fprintf (fp,"EnzoBlock: ComovingBoxSize %g\n",
-	   ComovingBoxSize[in]);
-  fprintf (fp,"EnzoBlock: HubbleConstantNow %g\n",
-	   HubbleConstantNow[in]);
-  fprintf (fp,"EnzoBlock: OmegaLambdaNow %g\n",
-	   OmegaLambdaNow[in]);
-  fprintf (fp,"EnzoBlock: OmegaMatterNow %g\n",
-	   OmegaMatterNow[in]);
-  fprintf (fp,"EnzoBlock: MaxExpansionRate %g\n",
-	   MaxExpansionRate[in]);
 
   // Chemistry
 
@@ -445,148 +425,5 @@ void EnzoBlock::initialize () throw()
   CellWidth[2] = hz;
 
   TRACE ("Exit  EnzoBlock::initialize()\n");
-}
-
-//----------------------------------------------------------------------
-
-int EnzoBlock::CosmologyComputeExpansionFactor
-(enzo_float time, enzo_float *a, enzo_float *dadt)
-{
- 
-  const int in = cello::index_static();
-
-  /* Error check. */
-
-  if (InitialTimeInCodeUnits[in] == 0) {
-    
-    char error_message[ERROR_LENGTH];
-    sprintf(error_message, "The cosmology parameters seem to be improperly set");
-    ERROR("CosmologyComputeExpansionFactor",error_message);
-  }
- 
-  *a = ENZO_FLOAT_UNDEFINED;
- 
-  /* Find Omega due to curvature. */
- 
-  enzo_float OmegaCurvatureNow = 1 - OmegaMatterNow[in] - OmegaLambdaNow[in];
- 
-  /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
- 
-  enzo_float TimeUnits = 2.52e17/sqrt(OmegaMatterNow[in])/HubbleConstantNow[in]/
-                    pow(1 + InitialRedshift[in],enzo_float(1.5));
- 
-  enzo_float TimeHubble0 = time * TimeUnits * (HubbleConstantNow[in]*3.24e-18);
- 
-  /* 1) For a flat universe with OmegaMatterNow = 1, it's easy. */
- 
-  if (fabs(OmegaMatterNow[in]-1) < OMEGA_TOLERANCE &&
-      OmegaLambdaNow[in] < OMEGA_TOLERANCE)
-    *a    = pow(time/InitialTimeInCodeUnits[in], enzo_float(2.0/3.0));
- 
-#define INVERSE_HYPERBOLIC_EXISTS
- 
-#ifdef INVERSE_HYPERBOLIC_EXISTS
- 
- 
-  /* 2) For OmegaMatterNow < 1 and OmegaLambdaNow == 0 see
-        Peebles 1993, eq. 13-3, 13-10.
-	Actually, this is a little tricky since we must solve an equation
-	of the form eta - sinh(eta) + x = 0..*/
- 
-  if (OmegaMatterNow[in] < 1 && OmegaLambdaNow[in] < OMEGA_TOLERANCE) {
- 
-    enzo_float eta, eta_old, x;
-    int i;
-
-    x = 2*TimeHubble0*pow(1.0 - OmegaMatterNow[in], 1.5) / OmegaMatterNow[in];
- 
-    /* Compute eta in a three step process, first from a third-order
-       Taylor expansion of the formula above, then use that in a fifth-order
-       approximation.  Then finally, iterate on the formula itself, solving for
-       eta.  This works well because parts 1 & 2 are an excellent approximation
-       when x is small and part 3 converges quickly when x is large. */
- 
-    eta = pow(6*x, enzo_float(1.0/3.0));                     // part 1
-    eta = pow(120*x/(20+eta*eta), enzo_float(1.0/3.0));      // part 2
-    for (i = 0; i < 40; i++) {                          // part 3
-      eta_old = eta;
-      eta = asinh(eta + x);
-      if (fabs(eta-eta_old) < ETA_TOLERANCE) break;
-    }
-    if (i == 40) {
-      fprintf(stderr, "Case 2 -- no convergence after %" ISYM " iterations.\n", i);
-      return ENZO_FAIL;
-    }
- 
-    /* Now use eta to compute the expansion factor (eq. 13-10, part 2). */
- 
-    *a = OmegaMatterNow[in]/(2*(1 - OmegaMatterNow[in]))*(cosh(eta) - 1);
-    *a *= (1 + InitialRedshift[in]);    // to convert to code units, divide by [a]
-  }
- 
-  /* 3) For OmegaMatterNow > 1 && OmegaLambdaNow == 0, use sin/cos.
-        Easy, but skip it for now. */
- 
-  if (OmegaMatterNow[in] > 1 && OmegaLambdaNow[in] < OMEGA_TOLERANCE) {
-  }
- 
-  /* 4) For flat universe, with non-zero OmegaLambdaNow, see eq. 13-20. */
- 
-  if (fabs(OmegaCurvatureNow) < OMEGA_TOLERANCE &&
-      OmegaLambdaNow[in] > OMEGA_TOLERANCE) {
-    *a = pow(enzo_float(OmegaMatterNow[in]/(1 - OmegaMatterNow[in])), enzo_float(1.0/3.0)) *
-         pow(enzo_float(sinh(1.5 * sqrt(1.0 - OmegaMatterNow[in])*TimeHubble0)),
-	     enzo_float(2.0/3.0));
-    *a *= (1 + InitialRedshift[in]);    // to convert to code units, divide by [a]
-  }
- 
-#endif /* INVERSE_HYPERBOLIC_EXISTS */
- 
-  /* Compute the derivative of the expansion factor (Peebles93, eq. 13.3). */
- 
-  enzo_float TempVal = (*a)/(1 + InitialRedshift[in]);
-  *dadt = sqrt( 2.0/(3.0*OmegaMatterNow[in]*(*a)) *
-	       (OmegaMatterNow[in] + OmegaCurvatureNow*TempVal +
-		OmegaLambdaNow[in]*TempVal*TempVal*TempVal));
- 
-  /* Someday, we'll implement the general case... */
- 
-  if ((*a) == ENZO_FLOAT_UNDEFINED) {
-    fprintf(stderr, "Cosmology selected is not implemented.\n");
-    return ENZO_FAIL;
-  }
- 
-  return ENZO_SUCCESS;
-}
-
-//---------------------------------------------------------------------- 
- 
-int EnzoBlock::CosmologyComputeExpansionTimestep
-(enzo_float time, enzo_float *dtExpansion)
-{
- 
-  /* Error check. */
- 
-  const int in = cello::index_static();
-
-  if (InitialTimeInCodeUnits[in] == 0) {
-    fprintf(stderr, "The cosmology parameters seem to be improperly set.\n");
-    return ENZO_FAIL;
-  }
- 
-  /* Compute the expansion factors. */
- 
-  enzo_float a, dadt;
-  if (CosmologyComputeExpansionFactor(time, &a, &dadt) == ENZO_FAIL) {
-    fprintf(stderr, "Error in ComputeExpnasionFactors.\n");
-    return ENZO_FAIL;
-  }
- 
-  /* Compute the maximum allwed timestep given the maximum allowed
-     expansion factor. */
- 
-  *dtExpansion = MaxExpansionRate[in]*a/dadt;
- 
-  return ENZO_SUCCESS;
 }
 

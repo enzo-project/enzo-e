@@ -67,11 +67,10 @@ Field {
            "velocity_z",
            "internal_energy",
 	   "pressure",
-	   "D", # required for Jacobi Smoother
-           "B","R","X","C"];
+           "B" ];
 
    ghost_depth = 4;
-   prolong = "poisson";
+   prolong = "linear";
 }
 
 Monitor {

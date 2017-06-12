@@ -26,7 +26,9 @@ public: // interface
   PUPable_decl(EnzoProblem);
 
   /// CHARM++ migration constructor
-  EnzoProblem(CkMigrateMessage *m) : Problem (m) {}
+  EnzoProblem(CkMigrateMessage *m)
+    : Problem (m)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -49,6 +51,21 @@ private: // functions
    Parameters * parameters,
    const FieldDescr *) throw ();
 
+  /// Create named physics object
+  virtual Physics *  create_physics_ 
+  (std::string type, 
+   int index,
+   Config * config,
+   Parameters * parameters,
+   const FieldDescr *) throw ();
+
+  /// Create a Units object
+  virtual Units *  create_units_ 
+  (std::string type, 
+   Config * config,
+   Parameters * parameters,
+   const FieldDescr *) throw ();
+
   /// Create named refine object
   virtual Refine * create_refine_ 
   (std::string type, 
@@ -56,6 +73,14 @@ private: // functions
    Parameters * parameters,
    const FieldDescr * field_descr,
    int index) throw ();
+
+  /// Create named solver object
+  virtual Solver * create_solver_ 
+  (std::string type, 
+   Config * config,
+   int index_solver,
+   FieldDescr *,
+   const ParticleDescr *) throw ();
 
   /// Create named method object
   virtual Method * create_method_ 
@@ -72,6 +97,8 @@ private: // functions
   /// Create named restriction object
   virtual Restrict * create_restrict_
   (std::string type, Config * config) throw ();
+
+protected: // attributes
 
 };
 

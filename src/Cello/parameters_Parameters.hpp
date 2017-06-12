@@ -45,7 +45,8 @@ public: // interface
   /// Read in parameters from a file
   void read (const char * file_name);
   /// Write parameters to a file
-  void write (const char * file_name);
+  void write (const char * file_name, bool full_names = false);
+  void write (FILE * fp, bool full_names = false);
 
   int value (std::string s, int deflt) throw()
   { return value_integer(s,deflt); }

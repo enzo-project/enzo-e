@@ -13,7 +13,7 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-//#define DEBUG_CONTROL
+// #define DEBUG_CONTROL
 
 #ifdef DEBUG_CONTROL
 # define TRACE_CONTROL(A)						\
@@ -29,9 +29,11 @@
 
 void Block::initial_exit_()
 {
+  performance_start_(perf_initial);
   TRACE_CONTROL("initial_exit");
 
   control_sync(CkIndex_Block::r_adapt_enter(NULL),sync_barrier); 
+  performance_stop_(perf_initial);
 }
 
 //----------------------------------------------------------------------
@@ -64,15 +66,18 @@ void Block::adapt_exit_()
 
 void Block::output_enter_ ()
 {
+  performance_start_(perf_output);
   TRACE_CONTROL("output_enter");
 
   output_begin_();
+  performance_stop_(perf_output);
 }
 
 //----------------------------------------------------------------------
 
 void Block::output_exit_()
 {
+  performance_start_(perf_output);
 
   TRACE_CONTROL("output_exit");
 
@@ -81,7 +86,10 @@ void Block::output_exit_()
     proxy_simulation[0].p_monitor();
   }
 
+  performance_stop_(perf_output);
+
   control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
+
 }
 
 //----------------------------------------------------------------------
@@ -126,9 +134,11 @@ void Block::stopping_exit_()
 
 void Block::compute_enter_ ()
 {
+  performance_start_(perf_compute,__FILE__,__LINE__);
   TRACE_CONTROL("compute_enter");
 
   compute_begin_();
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -145,11 +155,12 @@ void Block::compute_exit_ ()
 void Block::refresh_enter (int callback, Refresh * refresh) 
 {
   TRACE_CONTROL("refresh_enter");
+
   set_refresh(refresh);
 
   // Update refresh object for the Block
 
-  refresh_.set_callback(callback);
+  refresh_.back().set_callback(callback);
 
   refresh_begin_();
 }
@@ -162,19 +173,15 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
-  control_sync(refresh_.callback(), refresh_.sync_type());
+  control_sync(refresh_.back().callback(), refresh_.back().sync_type());
+  refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
 
 void Block::control_sync (int entry_point, int sync, int id)
 {
-#ifdef DEBUG_CONTROL
-  { char buffer[50];
-    sprintf (buffer,"control_sync %d %d",sync,id);
-    TRACE_CONTROL(buffer);
-  }
-#endif
+  TRACE_CONTROL("control_sync()");
   
   if (sync == sync_quiescence) {
 
@@ -202,8 +209,11 @@ void Block::control_sync (int entry_point, int sync, int id)
 
 void Block::control_sync_neighbor_(int entry_point, int phase)
 {
+  TRACE_CONTROL("control_sync_neighbor");
+  
   if ( ! is_leaf() ) {
 
+    TRACE_CONTROL("control_sync_neighbor ! is_leaf()");
     CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
 
     return;
@@ -221,9 +231,19 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
 
     Index index_neighbor = it_neighbor.index();
 
+#ifdef DEBUG_CONTROL
+    CkPrintf ("%s calling p_control_sync_count (%d %d 0)\n",
+	      name().c_str(),entry_point,phase);
+    fflush(stdout);
+#endif    
     thisProxy[index_neighbor].p_control_sync_count(entry_point,phase,0);
 
   }
+#ifdef DEBUG_CONTROL
+    CkPrintf ("%s calling p_control_sync_count (%d %d 0)\n",
+	      name().c_str(), entry_point,phase);
+    fflush(stdout);
+#endif    
   control_sync_count_(entry_point,phase,num_neighbors + 1);
 
 }
@@ -233,30 +253,43 @@ void Block::control_sync_neighbor_(int entry_point, int phase)
 void Block::control_sync_face_(int entry_point, int phase)
 {
 
+  TRACE_CONTROL("control_sync_face");
+
   const int min_face_rank = 0;
+
+  int num_faces = 0;
 
   ItFace it_face = this->it_face(min_face_rank,index_);
 
-  int num_faces = 0;
   while (it_face.next()) {
 
-    ++num_faces;
+    int of3[3];
+    it_face.face(of3);
+    
+    // Only count face if a Block exists in the level
+    if (face_level(of3) >= level()) {
+      ++num_faces;
 
-    Index index_face = it_face.index();
+      Index index_face = it_face.index();
 
-    thisProxy[index_face].p_control_sync_count(entry_point,phase,0);
+      thisProxy[index_face].p_control_sync_count(entry_point,phase,0);
+    }
 
   }
   control_sync_count_(entry_point,phase,num_faces + 1);
-
 }
 
 //----------------------------------------------------------------------
 
 void Block::control_sync_count_ (int entry_point, int phase, int count)
 {
-  TRACE_CONTROL("control_sync_count");
 
+#ifdef DEBUG_CONTROL
+  CkPrintf ("%s control_sync_count %d %d %d/%d\n",
+	    name().c_str(),entry_point,phase,count,max_sync_[phase]);
+  fflush(stdout);
+#endif
+  
   if (count != 0)  max_sync_[phase] = count;
 
   ++count_sync_[phase];
@@ -269,7 +302,7 @@ void Block::control_sync_count_ (int entry_point, int phase, int count)
 
     count_sync_[phase] = 0;
 
-    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
+    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send(NULL);
 
   }
 }

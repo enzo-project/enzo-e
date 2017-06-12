@@ -1,0 +1,72 @@
+The following are steps for preparing to run Enzo-P / Cello on NCSA
+Blue Waters.     
+
+1. Run the following commands, and also put them in your shell startup
+   file (e.g. ~/.bashrc) for future login sessions.
+
+   --------------------------------------------------
+   export CELLO_ARCH=ncsa_bw
+   export CELLO_PREC=double
+
+   module unload PrgEnv-cray
+   module load PrgEnv-gnu
+   module load craype-hugepages8M
+   module load cray-hdf5
+   module load libpng
+   --------------------------------------------------
+
+2. Download and install Charm in your home directory
+
+   mkdir ~/Charm
+   cd ~/Charm
+   wget http://charm.cs.illinois.edu/distrib/charm-6.7.1.tar.gz
+   tar zxf charm-6.7.1.tar.gz
+   ln -s charm-6.7.1 charm
+   cd charm
+   ./build charm++ gni-crayxe   smp  -j16  --with-production
+
+3. Download and install Enzo-P in your home directory
+
+   mkdir ~/Cello
+   cd ~/Cello
+   hg clone ssh://hg@bitbucket.org/cello-project/cello-src
+   cd cello-src
+   hg update solver
+
+4. Compile Enzo-P (bin/enzo-p)
+
+   cd ~/Cello
+   make
+
+5. Run Enzo-P
+
+   Below is a sample batch script for running on 4 nodes, with 15 (out
+   of 16) floating-point cores per node.  (This is recommended when
+   using Charm++ compiled with the SMP mode).  It is assumed the
+   executable is ./enzo-p, and the input parameter file is
+   test-problem.in.  If you have multiple accounts, you may also need
+   a "#PBS -A <project>" header line.
+
+
+   ==================================================
+   #!/bin/bash
+   #PBS -l nodes=4:ppn=32:xe
+   #PBS -l walltime=00:10:00
+   #PBS -N test-problem
+   #PBS -e $PBS_JOBID.err
+   #PBS -o $PBS_JOBID.out
+   #PBS -W umask=0027
+
+   . /opt/modules/default/init/bash # NEEDED to add module commands to shell
+   module unload PrgEnv-cray
+   module load   PrgEnv-gnu
+
+   input=test-problem.in
+   output=test-problem.out
+
+   charmrun="aprun -n 4 -N 1"
+   charmarg="+ppn15 +pemap 2-30:2"
+
+   $charmrun ./enzo-p $charmarg $input >& $output
+   ==================================================
+

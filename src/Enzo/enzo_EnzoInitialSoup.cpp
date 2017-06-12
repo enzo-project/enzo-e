@@ -162,7 +162,6 @@ void EnzoInitialSoup::enforce_block
 
   const bool one_letter = (array_[0]*array_[1]*array_[2] == 1);
   
-  double xc,yc,zc;
   for (int kz=kzm; kz<kzp; kz++) {
     double cz = hza*(0.5+kz);
     for (int ky=kym; ky<kyp; ky++) {

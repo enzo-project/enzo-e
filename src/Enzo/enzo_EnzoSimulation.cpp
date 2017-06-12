@@ -46,7 +46,7 @@ EnzoSimulation::EnzoSimulation
   // reading parameters
 
   CkCallback callback (CkIndex_EnzoSimulation::r_startup_begun(NULL),
-			 thisProxy);
+                       thisProxy);
   contribute(callback);
 
 }
@@ -99,6 +99,17 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   initialize_config_();
 
   initialize();
+
+  // Initialize Units::cosmology if needed
+  
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+    problem()->physics("cosmology");
+  
+  if (cosmology) {
+    EnzoUnits * units = (EnzoUnits *) problem()->units();
+    units->set_cosmology(cosmology);
+  }
+  
 #ifdef TRACE_PARAMETERS
   CkPrintf ("%d END   r_startup_begun()\n",CkMyPe());
   fflush(stdout);

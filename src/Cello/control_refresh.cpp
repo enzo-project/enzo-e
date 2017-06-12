@@ -18,8 +18,8 @@
 
 #ifdef DEBUG_REFRESH
 #  define TRACE_REFRESH(msg) \
-  printf ("%d %s:%d %p TRACE_REFRESH %s\n",CkMyPe(),	\
-	  __FILE__,__LINE__,this,msg);			\
+  printf ("%d %s:%d %s TRACE_REFRESH %s\n",CkMyPe(),	\
+	  __FILE__,__LINE__,name().c_str(),msg);	\
   fflush(stdout);
 #else
 #  define TRACE_REFRESH(msg) /* NOTHING */
@@ -39,17 +39,30 @@ void Block::refresh_begin_()
 
   simulation()->set_phase(phase_refresh);
 
+  control_sync (CkIndex_Block::p_refresh_continue(),
+		refresh->sync_type(),refresh->sync_id());
+}
+
+//----------------------------------------------------------------------
+
+void Block::refresh_continue()
+{
+  TRACE_REFRESH("refresh_continue_()");
 
   // Refresh if Refresh object exists and have data
 
+  Refresh * refresh = this->refresh();
+
   if ( refresh && refresh->active() ) {
 
-    if (data()->any_fields()) 
+    if (refresh->field_list().size() > 0) 
       refresh_load_field_faces_   (refresh);
-    if (data()->any_particles())
+    if (refresh->particle_list().size() > 0)
       refresh_load_particle_faces_ (refresh);
   }
-  control_sync (CkIndex_Block::p_refresh_exit(),refresh_.sync_type(),2);
+  TRACE_REFRESH("calling control_sync p_refresh_exit()");
+
+  control_sync (CkIndex_Block::p_refresh_exit(),refresh->sync_type(),refresh->sync_id()+1);
 }
 
 //----------------------------------------------------------------------
@@ -94,7 +107,7 @@ void Block::refresh_load_field_faces_ (Refresh *refresh)
 
       Index index_face = it_face.index();
 
-      int if3[3],ic3[3];
+      int if3[3],ic3[3] = {0,0,0};
       it_face.face(if3);
 
       refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
@@ -154,6 +167,9 @@ void Block::refresh_load_field_face_
 
 void Block::p_refresh_store (MsgRefresh * msg)
 {
+
+  TRACE_REFRESH("p_refresh_store()");
+  
   performance_start_(perf_refresh_store);
 
 #ifdef DEBUG_REFRESH
@@ -172,13 +188,15 @@ void Block::p_refresh_store (MsgRefresh * msg)
 void Block::refresh_load_particle_faces_ (Refresh * refresh)
 {
 
+  TRACE_REFRESH("refresh_load_particle_faces()");
+  
   const int rank = this->rank();
 
   const int npa = (rank == 1) ? 4 : ((rank == 2) ? 4*4 : 4*4*4);
 
   ParticleData * particle_array[npa];
   ParticleData * particle_list [npa];
-  Index             index_list [npa];
+  Index * index_list = new Index[npa];
   
   for (int i=0; i<npa; i++) {
     particle_list[i]  = NULL;
@@ -196,6 +214,8 @@ void Block::refresh_load_particle_faces_ (Refresh * refresh)
   // Send particle data to neighbors
 
   particle_send_(nl,index_list,particle_list);
+
+  delete [] index_list;
 
 }
 //----------------------------------------------------------------------
@@ -278,6 +298,8 @@ int Block::particle_create_array_neighbors_
  ParticleData * particle_list[],
  Index index_list[])
 { 
+  TRACE_REFRESH("particle_create_array_neighbors()");
+
   const int rank = this->rank();
   const int level = this->level();
 
@@ -483,8 +505,8 @@ void Block::particle_scatter_neighbors_
 
   int count = 0;
   // ...for each particle type to be moved
-  std::vector<int>::iterator it_type;
-  for (it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
+
+  for (auto it_type=type_list.begin(); it_type!=type_list.end(); it_type++) {
 
     int it = *it_type;
 

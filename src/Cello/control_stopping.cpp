@@ -227,6 +227,13 @@ void Block::p_stopping_balance()
   performance_start_(perf_stopping);
   TRACE_STOPPING("Block::p_stopping_balance");
   simulation()->set_phase (phase_balance);
+
+  // Monitor * monitor = simulation()->monitor();
+  // int mode_saved = monitor->mode();
+  // monitor->set_mode(monitor_mode_all);
+  // if (index().is_root()) monitor->print ("Balance","BEGIN");
+  // monitor->set_mode(mode_saved);
+  
   AtSync();
   performance_stop_(perf_stopping);
 }
@@ -235,6 +242,12 @@ void Block::p_stopping_balance()
 
 void Block::ResumeFromSync()
 {
+  // Monitor * monitor = simulation()->monitor();
+  // int mode_saved = monitor->mode();
+  // monitor->set_mode(monitor_mode_all);
+  // if (index().is_root()) monitor->print ("Balance","END");
+  // monitor->set_mode(mode_saved);
+  
   TRACE_STOPPING("Block::balance_exit");
 
   if (index_.is_root()) thisProxy.doneInserting();

@@ -16,16 +16,16 @@
 // #define DEBUG_INITIALIZE
 
 #ifdef DEBUG_INITIALIZE
-#  define TRACE CkPrintf ("%s:%d TEBUG_INITIALIZE\n",__FILE__,__LINE__);
+#  define TRACE_INITIALIZE CkPrintf ("%s:%d TEBUG_INITIALIZE\n",__FILE__,__LINE__);
 #else
-#  define TRACE /*  */
+#  define TRACE_INITIALIZE /*  */
 #endif
 
 //----------------------------------------------------------------------
 
 void Simulation::initialize() throw()
 {
-  TRACE;
+  TRACE_INITIALIZE;
   set_phase(phase_initial);
 
   initialize_config_();
@@ -47,8 +47,11 @@ void Simulation::initialize() throw()
 				particle_descr_,
 				factory());
   problem_->initialize_method  (config_,field_descr_,particle_descr_);
+  problem_->initialize_solver  (config_,field_descr_,particle_descr_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
+  problem_->initialize_physics (config_,parameters_,field_descr_);
+  problem_->initialize_units (config_);
 
   initialize_hierarchy_();
 
@@ -70,7 +73,7 @@ void Simulation::initialize() throw()
 
 void Simulation::r_initialize_forest(CkReductionMsg * msg) 
 {
-  TRACE;
+  TRACE_INITIALIZE;
   performance_->start_region(perf_initial);
   delete msg;
   
@@ -92,7 +95,7 @@ void Simulation::r_initialize_forest(CkReductionMsg * msg)
 
 void Simulation::r_initialize_hierarchy(CkReductionMsg * msg) 
 {
-  TRACE;
+  TRACE_INITIALIZE;
   performance_->start_region(perf_initial);
   delete msg;
 

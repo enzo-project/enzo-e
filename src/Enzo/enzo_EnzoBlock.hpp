@@ -37,18 +37,13 @@ class EnzoBlock : public BASE_ENZO_BLOCK
 
   //----------------------------------------------------------------------
   // variables
-
+  
 public:
 
-  /// Cosmology
+  // /// Cosmology
 
   static int UseMinimumPressureSupport[CONFIG_NODE_SIZE];
   static enzo_float MinimumPressureSupportParameter[CONFIG_NODE_SIZE];
-  static enzo_float ComovingBoxSize[CONFIG_NODE_SIZE];
-  static enzo_float HubbleConstantNow[CONFIG_NODE_SIZE];
-  static enzo_float OmegaMatterNow[CONFIG_NODE_SIZE];
-  static enzo_float OmegaLambdaNow[CONFIG_NODE_SIZE];
-  static enzo_float MaxExpansionRate[CONFIG_NODE_SIZE];
 
   // Chemistry
 
@@ -111,14 +106,15 @@ public: // interface
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
-       mg_sync_(),
        mg_iter_(0),
+       mg_sync_restrict_(),
+       mg_sync_prolong_(),
+       mg_msg_(NULL),
        dt(0),
        SubgridFluxes(NULL)
   {
     performance_start_(perf_block);
     for (int i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = NULL; 
       GridLeftEdge[i] = 0; 
       GridDimension[i] = 0; 
       GridStartIndex[i] = 0; 
@@ -134,15 +130,16 @@ public: // interface
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : BASE_ENZO_BLOCK (m),
-       mg_sync_(),
-       mg_iter_(0),
+      mg_iter_(0),
+      mg_sync_restrict_(),
+      mg_sync_prolong_(),
+      mg_msg_(NULL),
       dt(0.0),
       SubgridFluxes(NULL)
   {
     performance_start_(perf_block);
     TRACE("CkMigrateMessage");
     for (int i=0; i<MAX_DIMENSION; i++) {
-      AccelerationField[i] = NULL; 
       GridLeftEdge[i] = 0; 
       GridDimension[i] = 0; 
       GridStartIndex[i] = 0; 
@@ -201,23 +198,6 @@ public: // interface
   int ComputeTemperatureField (enzo_float *temperature, 
 			       int comoving_coordinates);
 
-  /// Computes the expansion factors (a & dadt) at the requested time
-  int CosmologyComputeExpansionFactor
-  (enzo_float time, enzo_float *a, enzo_float *dadt);
-
-  /// Computes the maximum allowed expansion timestep at given time
-  int CosmologyComputeExpansionTimestep
-  (enzo_float time, enzo_float *dtExpansion);
-
-  /// Compute and return the cosmology units
-  int CosmologyGetUnits
-  ( enzo_float *DensityUnits, 
-    enzo_float *LengthUnits, 
-    enzo_float *TemperatureUnits, 
-    enzo_float *TimeUnits, 
-    enzo_float *VelocityUnits, 
-    enzo_float Time);
-
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 			int comoving_coordinates);
@@ -253,134 +233,125 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
-  /// EnzoMethodGravityCg entry method: DOT ==> refresh P
-  template <class T>
-  void r_cg_loop_0a (CkReductionMsg * msg) ;  
+  //--------------------------------------------------
 
-  /// EnzoMethodGravityCg entry method: ==> refresh P
-  template <class T>
-  void r_cg_loop_0b (CkReductionMsg * msg) ;  
+  /// Synchronize after potential solve and before accelerations
+  void r_method_gravity_continue();
 
-  /// EnzoMethodGravityCg entry method: DOT(R,R) after shift
-  template <class T>
-  void r_cg_shift_1 (CkReductionMsg * msg) ;
+  /// Synchronize for refresh
+  void r_method_gravity_end(CkReductionMsg * msg);
 
-  /// EnzoMethodGravityCg entry method: DOT(P,AP)
-  template <class T>
-  void r_cg_loop_3 (CkReductionMsg * msg) ;
+  //--------------------------------------------------
 
-  /// EnzoMethodGravityCg entry method: DOT(R,R)
+  /// EnzoSolverCg entry method: DOT ==> refresh P
   template <class T>
-  void r_cg_loop_5 (CkReductionMsg * msg) ;
+  void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
 
-  /// EnzoMethodGravityCg entry method: 
+  /// EnzoSolverCg entry method: ==> refresh P
+  template <class T>
+  void r_solver_cg_loop_0b (CkReductionMsg * msg) ;  
+
+  /// EnzoSolverCg entry method: DOT(R,R) after shift
+  template <class T>
+  void r_solver_cg_shift_1 (CkReductionMsg * msg) ;
+
+  /// EnzoSolverCg entry method
+  template <class T>
+  void p_solver_cg_loop_2 () ;
+
+  /// EnzoSolverCg entry method: DOT(P,AP)
+  template <class T>
+  void r_solver_cg_loop_3 (CkReductionMsg * msg) ;
+
+  /// EnzoSolverCg entry method: DOT(R,R)
+  template <class T>
+  void r_solver_cg_loop_5 (CkReductionMsg * msg) ;
+
+  /// EnzoSolverCg entry method: 
   /// perform the necessary reductions for shift
-  CkReductionMsg * r_method_gravity_cg(int n, CkReductionMsg ** msgs);
+  CkReductionMsg * r_solver_cg_shift(int n, CkReductionMsg ** msgs);
 
-  /// EnzoMethodGravityBiCGStab entry method: SUM(B) and COUNT(B)
+  void r_solver_cg_matvec();
+
+  //--------------------------------------------------
+  
+  /// EnzoSolverBiCGStab entry method: SUM(B) and COUNT(B)
   template <class T>
-  void r_gravity_bicgstab_start_1(CkReductionMsg* msg);  
+  void r_solver_bicgstab_start_1(CkReductionMsg* msg);  
 
-  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R)
+  /// EnzoSolverBiCGStab entry method: DOT(R,R)
   template <class T>
-  void r_gravity_bicgstab_start_3(CkReductionMsg* msg);  
+  void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
 
-  /// EnzoMethodGravityBiCGStab entry method: refresh P
-  void p_gravity_bicgstab_loop_1();  
+  /// EnzoSolverBiCGStab entry method: return from preconditioner
+  void p_solver_bicgstab_loop_2();
 
-  /// EnzoMethodGravityBiCGStab entry method: refresh Y
-  void p_gravity_bicgstab_loop_3();
+  /// EnzoSolverBiCGStab entry method: refresh Y
+  void p_solver_bicgstab_loop_3();
 
-  /// EnzoMethodGravityBiCGStab entry method: DOT(V,R0), SUM(Y) and SUM(V)
+  /// EnzoSolverBiCGStab entry method: DOT(V,R0), SUM(Y) and SUM(V)
   template <class T>
-  void r_gravity_bicgstab_loop_5(CkReductionMsg* msg);  
+  void r_solver_bicgstab_loop_5(CkReductionMsg* msg);  
 
-  /// EnzoMethodGravityBiCGStab entry method: refresh Q
-  void p_gravity_bicgstab_loop_7();
+  /// EnzoSolverBiCGStab entry method: return from preconditioner
+  void p_solver_bicgstab_loop_8();
 
-  /// EnzoMethodGravityBiCGStab entry method: refresh Y
-  void p_gravity_bicgstab_loop_9();
+  /// EnzoSolverBiCGStab entry method: refresh Y
+  void p_solver_bicgstab_loop_9();
 
-  /// EnzoMethodGravityBiCGStab entry method: refresh X before
-  /// computing accelerations
-  void p_gravity_bicgstab_acc();
-
-  /// EnzoMethodGravityBiCGStab entry method: refresh accelerations
-  /// before exiting
-  void p_gravity_bicgstab_exit();
-
-  /// EnzoMethodGravityBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
+  /// EnzoSolverBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
   template <class T>
-  void r_gravity_bicgstab_loop_11(CkReductionMsg* msg);
+  void r_solver_bicgstab_loop_11(CkReductionMsg* msg);
 
-  /// EnzoMethodGravityBiCGStab entry method: DOT(R,R) and DOT(R,R0)
+  /// EnzoSolverBiCGStab entry method: DOT(R,R) and DOT(R,R0)
   template <class T>
-  void r_gravity_bicgstab_loop_13(CkReductionMsg* msg);
+  void r_solver_bicgstab_loop_13(CkReductionMsg* msg);
 
-  /// EnzoMethodGravityBiCGStab entry method: ITER++
+  /// EnzoSolverBiCGStab entry method: ITER++
   template <class T>
-  void r_gravity_bicgstab_loop_15(CkReductionMsg* msg);
+  void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
+  // EnzoSolverJacobi
 
-  /// EnzoMethodGravityBiCGStab entry method: 
-  /// perform the necessary reductions for shift
-  CkReductionMsg* r_method_gravity_bicgstab(int n, CkReductionMsg** msgs);
+  void p_solver_jacobi_continue();
 
-  void p_enzo_matvec()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    enzo_matvec_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
- 
-  }
-  void r_enzo_matvec(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    enzo_matvec_(); delete msg;
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-   
-  }
+  // EnzoSolverMg0
 
-  /// EnzoMethodSolverMlat entry method: receive face data for refresh
-  void p_mg_receive_face
-  (int n, char buffer[],  int type_refresh, 
-   int if3[3], int ic3[3], int count = 0);
+  void p_solver_mg0_pre_smooth();
+  void p_solver_mg0_solve_coarse();
+  void p_solver_mg0_post_smooth();
+  void p_solver_mg0_barrier(CkReductionMsg* msg);  
+  void p_solver_mg0_shift_b(CkReductionMsg* msg);  
+  void p_solver_mg0_prolong_recv(FieldMsg * msg);
+  void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
-  /// EnzoMethodSolverMg0
-  template <class T>
-  void p_mg0_pre_smooth(CkReductionMsg * msg);
-  template <class T>
-  void p_mg0_restrict_send(CkReductionMsg * msg);
-  template <class T>
-  void p_mg0_restrict_recv(FieldMsg * msg);
-  template <class T>
-  void p_mg0_prolong_recv(FieldMsg * msg);
-  template <class T>
-  void p_mg0_post_smooth(CkReductionMsg * msg);
+  void mg_sync_restrict_reset()             { mg_sync_restrict_.reset(); }
+  void mg_sync_restrict_set_stop(int value) { mg_sync_restrict_.set_stop(value); }
+  bool mg_sync_restrict_next()        { return mg_sync_restrict_.next(); };
 
-  void mg_sync_reset()             { mg_sync_.reset(); }
-  void mg_sync_set_stop(int value) { mg_sync_.set_stop(value); }
-  bool mg_sync_next()         { return mg_sync_.next(); };
-  int  mg_sync_value()        { return mg_sync_.value(); };
-  int  mg_sync_stop()         { return mg_sync_.stop(); };
-
+  void mg_sync_prolong_reset()             { mg_sync_prolong_.reset(); }
+  void mg_sync_prolong_set_stop(int value) { mg_sync_prolong_.set_stop(value); }
+  bool mg_sync_prolong_next()        { return mg_sync_prolong_.next(); };
+  
   void mg_iter_clear() { mg_iter_ = 0; }
   void mg_iter_increment() { ++mg_iter_; }
   int mg_iter() const {return mg_iter_; }
 
-protected: // functions
-
-  void enzo_matvec_() ;
-  void gravity_bicgstab_matvec_1_();
-  void gravity_bicgstab_matvec_2_();
-
 protected: // attributes
   
-  // MG SOLVER
-  Sync mg_sync_;
-
   // MG iteration count
   int mg_iter_;
+
+  // MG SOLVER ( EnzoSolverMg0)
+  Sync mg_sync_restrict_;
+
+  // Synchronize to not call prolong until all children have exited coarse solve
+  Sync mg_sync_prolong_;
+
+  // Saved FieldMsg for prolong
+  FieldMsg * mg_msg_;
+
+  // FieldMsg for prolong if called out of order
 
 public: // attributes (YIKES!)
 
@@ -388,9 +359,6 @@ public: // attributes (YIKES!)
     enzo_float dt;
     enzo_float dtFixed;
   };
-
-  /// cell cntr acceleration at n+1/2
-  enzo_float *AccelerationField[MAX_DIMENSION]; 
 
   /// Fluxes
   fluxes ** SubgridFluxes;

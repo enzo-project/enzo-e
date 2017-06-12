@@ -83,6 +83,10 @@ public:
   /// (array (0 0 0), level 0)
   bool is_root() const;
 
+  /// Return whether this is in the "root position" in the forest
+  /// (array (0 0 0), tree (0,0,0), any level)
+  bool is_zero() const;
+  
   /// Return the level of this node
   int level() const;
 
@@ -130,14 +134,16 @@ public:
   void print (const char * msg,
 	      int max_level,
 	      int rank,
+	      const int nb3[3],
 	      bool no_nl,
 	      void * simulation = 0) const;
   
 
   void write (int ip,
-	      const char * msg = "\0",
-	      int max_level = -1,
-	      int rank = 3) const;
+	      const char * msg,
+	      int max_level,
+	      int rank,
+	      const int nb3[3]) const;
 
   std::string bit_string (int max_level,int rank, const int nb3[3]) const;
 
@@ -169,6 +175,7 @@ private: // functions
 	       const char * msg,
 	       int max_level,
 	       int rank,
+	       const int nb3[3],
 	       bool no_nl) const;
 
 private: // attributes

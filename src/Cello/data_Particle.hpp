@@ -125,12 +125,14 @@ public: // interface
   std::string attribute_name (int it, int ia) const
   { return particle_descr_->attribute_name(it,ia); }
 
-  /// Define which attributes represent position coordinates (-1 if not defined)
+  /// Define which attributes represent position coordinates (-1 if
+  /// not defined)
 
   void set_position (int it, int ix, int iy=-1, int iz=-1)
   { particle_descr_->set_position (it,ix,iy,iz); }
 
-  /// Define which attributes represent velocity coordinates (-1 if not defined)
+  /// Define which attributes represent velocity coordinates (-1 if
+  /// not defined)
 
   void set_velocity (int it, int ix, int iy=-1, int iz=-1)
   { particle_descr_->set_velocity (it,ix,iy,iz); }

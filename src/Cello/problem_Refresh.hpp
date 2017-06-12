@@ -27,6 +27,7 @@ public: // interface
     sync_type_   (sync_unknown),
     sync_load_(),
     sync_store_(),
+    sync_id_ (0),
     active_(true),
     callback_(0) 
   {
@@ -38,6 +39,7 @@ public: // interface
    int min_face_rank,
    int neighbor_type,
    int sync_type,
+   int sync_id=0,
    bool active=true) throw() 
   : field_list_(),
     particle_list_(),
@@ -47,6 +49,7 @@ public: // interface
     sync_type_(sync_type),
     sync_load_(),
     sync_store_(),
+    sync_id_(sync_id),
     active_(active),
     callback_(0) 
   {
@@ -66,6 +69,7 @@ public: // interface
       sync_type_(0),
       sync_load_(),
       sync_store_(),
+      sync_id_ (0),
       active_(false),
       callback_(0)
   {  }
@@ -84,6 +88,7 @@ public: // interface
     p | sync_type_;
     p | sync_load_;
     p | sync_store_;
+    p | sync_id_;
     p | active_;
     p | callback_;
   }
@@ -169,30 +174,35 @@ public: // interface
   Sync & sync_store() 
   {  return sync_store_; }
 
+  int sync_id() 
+  {  return sync_id_; }
+
 
   void print() const 
   {
-    printf ("Refresh %p\n",this);
-    printf ("Refresh fields:");
+    CkPrintf ("Refresh %p\n",this);
+    CkPrintf ("Refresh fields:");
     for (size_t i=0; i<field_list_.size(); i++)
-      printf (" %d",field_list_[i]);
-    printf ("\n");
-    printf ("Refresh particles:");
+      CkPrintf (" %d",field_list_[i]);
+    CkPrintf ("\n");
+    CkPrintf ("Refresh particles:");
     for (size_t i=0; i<particle_list_.size(); i++)
-      printf (" %d",particle_list_[i]);
-    printf ("\n");
-    printf ("Refresh ghost_depth = %d\n",ghost_depth_);
-    printf ("Refresh min_face_rank: %d\n",min_face_rank_);
-    printf ("Refresh neighbor_type: %d\n",neighbor_type_);
-    printf ("Refresh sync_type: %d\n",sync_type_);
-    printf ("Refresh sync_load: %d/%d\n", 
+      CkPrintf (" %d",particle_list_[i]);
+    CkPrintf ("\n");
+    CkPrintf ("Refresh ghost_depth = %d\n",ghost_depth_);
+    CkPrintf ("Refresh min_face_rank: %d\n",min_face_rank_);
+    CkPrintf ("Refresh neighbor_type: %d\n",neighbor_type_);
+    CkPrintf ("Refresh sync_type: %d\n",sync_type_);
+    CkPrintf ("Refresh sync_load: %d/%d\n", 
 	    sync_load_.value(),
 	    sync_load_.stop());
-    printf ("Refresh sync_store: %d/%d\n",
+    CkPrintf ("Refresh sync_store: %d/%d\n",
 	    sync_store_.value(),
 	    sync_store_.stop());
-    printf ("Refresh active: %d\n",active_);
-    printf ("Refresh callback: %d\n",callback_);
+    CkPrintf ("Refresh sync_id: %d\n",sync_id_);
+    CkPrintf ("Refresh active: %d\n",active_);
+    CkPrintf ("Refresh callback: %d\n",callback_);
+    fflush(stdout);
   }
 
   /// Return loop limits 0:3 for 4x4x4 particle data array indices
@@ -221,6 +231,7 @@ public: // interface
 	  lower[axis] = 1 - ic3[axis];
 	  upper[axis] = 4 - ic3[axis];
 	} else {
+	  print();
 	  ERROR1 ("Refresh::loop_limits()",
 		  "unknown refresh_type %d",
 		  refresh_type);
@@ -259,6 +270,9 @@ private: // attributes
 
   /// Counter for synchronization after storing data
   Sync sync_store_;
+
+  /// Index for refresh synchronization counter
+  int sync_id_;
 
   /// Whether the Refresh object is active for the block (replaces is_leaf())
   bool active_;

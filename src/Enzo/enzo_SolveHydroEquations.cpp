@@ -223,12 +223,16 @@ int EnzoBlock::SolveHydroEquations
      in comoving form (except for the expansion terms which are taken
      care of elsewhere). */
 
-  if (comoving_coordinates)
-    if (CosmologyComputeExpansionFactor(time+0.5*dt, &a, &dadt)
-	== ENZO_FAIL) {
-      ERROR("EnzoBlock::SolveHydroEquations()",
-	    "CosmologyComputeExpansionFactorsGrid() returned ENZO_FAIL");
-    }
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    simulation()->problem()->physics("cosmology");
+
+  ASSERT ("EnzoBlock::SolveHydroEquations()",
+	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
+	  ! (comoving_coordinates && (cosmology != NULL)) );
+
+  if (comoving_coordinates) {
+    cosmology->compute_expansion_factor(&a, &dadt, time+0.5*dt);
+  }
 
   /* Create a cell width array to pass (and convert to absolute coords). */
 
@@ -245,10 +249,6 @@ int EnzoBlock::SolveHydroEquations
      Notice that it is hard-wired for three dimensions, but it does
      the right thing for < 3 dimensions. */
   /* note: Start/EndIndex are zero based */
-
-  //     AccelerationField[0] = density;
-  //     AccelerationField[1] = density;
-  //     AccelerationField[2] = density;
 
   int gravity_on = (acceleration_x != NULL) ? 1 : 0;
   

@@ -7,12 +7,6 @@
 
 mainmodule main_enzo {
 
-  initnode void register_reduce_performance(void);
-  initnode void register_method_turbulence(void);
-  initnode void register_sum_long_double(void);
-  initnode void register_sum_long_double_2(void);
-  initnode void register_sum_long_double_3(void);
-  initnode void register_sum_long_double_4(void);
   extern module simulation;
   extern module enzo;
   extern module mesh;
@@ -43,7 +37,10 @@ mainmodule main_enzo {
      entry void p_stopping_balance();
      entry void p_balance();
      entry void p_stopping_exit();
-     entry void p_enzo_matvec();
+     entry void p_text_file_write(int nd, char dir[nd],
+     	                          int nf, char file[nf],
+     	                          int nl, char line[nl],
+				  int count);
      entry void p_exit();
 
   };

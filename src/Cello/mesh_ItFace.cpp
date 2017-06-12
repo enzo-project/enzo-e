@@ -185,7 +185,6 @@ bool ItFace::valid_() const
     if (if3_[2] == -1 && ! periodicity_[2][0]) l_periodic = false;
     if (if3_[2] == +1 && ! periodicity_[2][1]) l_periodic = false;
   }
-
   return (l_face && l_range && l_parent && l_periodic);
 }
 //======================================================================

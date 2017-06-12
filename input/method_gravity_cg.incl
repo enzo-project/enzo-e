@@ -34,12 +34,10 @@ Mesh {
 }
 
 Method {
-    list = ["gravity_cg", "ppm"]; 
+    list = ["gravity", "ppm"]; 
 
-    gravity_cg {
-       iter_max = 500;
-       res_tol  = 1e-3;
-       monitor_iter = 0;
+    gravity {
+       solver = "cg";    	    
 #       grav_const = 6.67384e-8;
 #       grav_const = 1.0e-1;
     }
@@ -50,6 +48,15 @@ Method {
        steepening  = true;
        dual_energy = false;
    }
+}
+Solver {
+   list = ["cg"];
+   cg {
+      type = "cg";
+       iter_max = 500;
+       res_tol  = 1e-3;
+       monitor_iter = 0;
+   }      
 }
 
 Field {
@@ -64,10 +71,10 @@ Field {
            "velocity_z",
            "internal_energy",
 	   "pressure",
-           "B","D","R","X","Y","Z"];
+           "B"];
 
    ghost_depth = 4;
-   prolong = "poisson";
+   prolong = "linear";
 }
 
 Initial {

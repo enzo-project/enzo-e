@@ -17,9 +17,7 @@ Import('lib_path')
 
 components = []
 
-components.append(['charm'])
-
-components.append(['enzo','simulation', 'problem', 'compute',
+components.append(['enzo','charm','simulation', 'problem', 'compute',
 	      'control', 'mesh', 'data',
 	      'io', 'disk','memory',
 	      'parameters', 
@@ -34,7 +32,7 @@ components.append(['hdf5','z'])
 
 libraries  = ['png','$FORTRANLIBS']
 
-includes = [Glob('*enzo*hpp'),'fortran.h']
+includes = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
 
 if (use_grackle):   libraries.append('grackle')
 
@@ -47,8 +45,8 @@ sources  = [Glob('enzo_*cpp'),
 	    'calc_dt.F',
 	    'cic_deposit.F',
 	    'cic_interp.F',
-	    'CosmologyGetUnits.cpp',
 	    'euler.F',
+	    'expand_terms.F',
 	    'interp1d.F',
 	    'interp2d.F',
 	    'interp3d.F',

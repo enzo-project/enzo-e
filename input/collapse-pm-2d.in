@@ -60,8 +60,16 @@ Method {
 }
 
 Method { 
-  gravity_bicgstab {
-     iter_max = 500; 
-     monitor_iter = 10; 
+  gravity {
+     solver = "gravity";
   }
 }
+
+Solver {
+  list = ["gravity"];
+  gravity {
+     type = "bicgstab";
+     iter_max = 500;
+     monitor_iter = 10;
+  }
+} 

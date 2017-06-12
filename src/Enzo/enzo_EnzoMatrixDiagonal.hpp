@@ -19,12 +19,12 @@ public: // interface
   /// Create a new EnzoMatrixDiagonal
   EnzoMatrixDiagonal () throw()
   : Matrix (),
-    mx_(0),
-    my_(0),
-    mz_(0),
     hx_(0),
     hy_(0),
-    hz_(0)
+    hz_(0),
+    mx_(0),
+    my_(0),
+    mz_(0)
   {}
 
   /// Destructor
@@ -36,24 +36,24 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoMatrixDiagonal(CkMigrateMessage *m)
-    : mx_(0),
-      my_(0),
-      mz_(0),
-      hx_(0),
+    : hx_(0),
       hy_(0),
-      hz_(0)
+      hz_(0),
+      mx_(0),
+      my_(0),
+      mz_(0)
   {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   { TRACEPUP;
     PUP::able::pup(p);
-    p | mx_;
-    p | my_;
-    p | mz_;
     p | hx_;
     p | hy_;
     p | hz_;
+    p | mx_;
+    p | my_;
+    p | mz_;
   }
 
 public: // virtual functions
@@ -71,6 +71,10 @@ protected: // functions
 
   template <class T>
   void diagonal_ (T * X, int g0) const throw();
+
+  /// Whether the matrix is singular or not
+  virtual bool is_singular() const throw()
+  { return false; }
 
 protected: // attributes
 

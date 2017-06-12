@@ -12,6 +12,8 @@
 #
 
 BEGIN {
+    max_level = 0;
+    min_level = 0;
     done = 0;
     root_blocks = 1;
     root_size = 1;
@@ -22,56 +24,113 @@ BEGIN {
     num_blocks_start = 0;
     zones_per_block = 1;
     total_zones_per_block = 1;
+    first_solver = 1;
+    index_solver = 0;
+    num_solvers = 0;
 }
 
 /processors/{num_processors = $6; }
 # Block size
 
 /ghost_depth/ { ghosts = $6;}
+
 /root_blocks/ {
-    root_blocks = root_blocks * $6;
+    if ($7 ~ /^[0-9]+$/) {
+	root_blocks3[0] = $7
+	root_blocks = root_blocks * $7;
+    } else root_blocks3[0] = 1;
+    if ($8 ~ /^[0-9]+$/) {
+	root_blocks3[1] = $8
+	root_blocks = root_blocks * $8;
+    } else root_blocks3[1] = 1;
+    if ($9 ~ /^[0-9]+$/) {
+	root_blocks3[2] = $9
+	root_blocks = root_blocks * $9;
+    } else root_blocks3[2] = 1;
 }
+
 /root_size/ {
-    root_size = root_size * $6;
-    total_root_size = total_root_size * ($6+2*ghosts)
+    if ($7 ~ /^[0-9]+$/) {
+	root_size = root_size * $7;
+	total_root_size = total_root_size * ($7+2*ghosts)
+    }
+    if ($8 ~ /^[0-9]+$/) {
+	root_size = root_size * $8;
+	total_root_size = total_root_size * ($8+2*ghosts)
+    }
+    if ($9 ~ /^[0-9]+$/) {
+	root_size = root_size * $9;
+	total_root_size = total_root_size * ($9+2*ghosts)
+    }
+}
+
+
+/Simulation cycle 0000/ {
+    cycle_start=$2;
+}
+
+/Simulation cycle / {
+    cycle_last=$2;
+    cycle = $5;
 }
 
 # Linear Solver
-/iter 0000/  {time_start=$2;}
-/Simulation cycle 0000/{cycle_start=$2;}
-/Simulation cycle /{cycle_last=$2;}
+/ iter /  {
+    # ASSUMES ONLY FIRST AND LAST ITERATIONS OUTPUT
+    # (i.e. monitor_iter = 0 for all solvers)
+    time=$2
+    name=$4;
+    iter=$6;
+    if (iter == "0000") {
+	index_solver++;
+	if (index_solver > num_solvers) num_solvers = index_solver;
+    } else {
+	index_solver--;
+    }
+    solver_time[name] = time - solver_time[name];
+}
+
+# Linear Solver
 /final iter/ {
     max_iter      = $7;
     time_stop     = $2;
     time_per_iter = (time_stop-time_start)/max_iter; 
 }
-/Simulation cycle/ {cycle = $5;}
+
 /bytes-high / {
     bytes_high = $6;
     if (bytes_high_start == 0) bytes_high_start = $6;
 }
+
 /bytes-highest/ {  bytes_highest = $6; }
+
 /num-blocks/ {
     num_blocks = $6;
     if (num_blocks_start == 0) num_blocks_start = $6;
 }
+
 /num-particles/ {
     num_particles = $7;
     if (num_particles_start == 0) {
 	num_particles_start = num_particles;
     }
 }
-/Mesh:root_blocks/ {
-    root_blocks3[i_root_blocks] = $6;
-    i_root_blocks++;
-}
 /Mesh:root_size/ {
-    root_size3[i_root_size] = $6;
-    i_root_size++;
+    if ($7 ~ /^[0-9]+$/) {
+	root_size3[0] = $7;
+    }
+    if ($8 ~ /^[0-9]+$/) {
+	root_size3[1] = $8;
+    }
+    if ($9 ~ /^[0-9]+$/) {
+	root_size3[2] = $9;
+    }
 }
-/Adapt:max_level/ { max_level = $6 }
+/Adapt:max_level/ { max_level = $9 }
+/Adapt:min_level/ { min_level = $9 }
 
 /Mesh:root_rank/ {root_rank = $6; }
+
 /END ENZO/ {
     done = 1;
     time_final = $2;
@@ -162,13 +221,35 @@ END {
     bz=(root_size3[2]/root_blocks3[2]);
     printf (format3,"block size",bx,by,bz);
     printf (format_int, "max-level",max_level);
+    printf (format_int, "min-level",min_level);
     printf (format_int, "num-blocks",num_blocks);
     printf (format_int, "num-zones",num_blocks*bx*by*bz);
 #    printf (format, "blocks change",num_blocks / num_blocks_start);
 
     printf ("\nMEMORY\n");
-    printf (format, "Gbytes-high",bytes_high*1e-9);
-    printf (format, "Gbytes-highest",bytes_highest*1e-9);
+    
+    scale = 1;
+    prefix="";
+
+    if (bytes_high > 1e3) {
+	scale = scale * 1024;
+	prefix="K";
+    }
+    if (bytes_high > 1e6) {
+	scale = scale * 1024;
+	prefix="M";
+    }
+    if (bytes_high > 1e9) {
+	scale = scale * 1024;
+	prefix="G";
+    }
+    if (bytes_high > 1e12) {
+	scale = scale * 1024;
+	prefix="T";
+    }
+
+    printf (format, "bytes-high (" prefix "B)",bytes_high/scale);
+    printf (format, "bytes-highest (" prefix "B)", bytes_highest/scale);
     if (bytes_high_start != 0) {
 	printf (format, "memory change",bytes_high / bytes_high_start);
     }
@@ -221,17 +302,23 @@ END {
     printf (format, "Stopping",time_stopping*t_scale);
     
 
-    printf ("\nSOLVER");
-    if (time_per_iter > 0) {
-	print;
-	printf (format, "time per block",time_per_iter/num_blocks);
-	printf (format, "time per real zone",time_per_iter/(num_blocks*zones_per_block));
-	printf (format, "time per zone",time_per_iter/(num_blocks*total_zones_per_block));
-	printf (format_int, "solver max-iter",max_iter);
-	printf (format, "time per iter",time_per_iter);
-    } else {
-	print " not called"
+    printf ("\nSOLVER\n");
+
+    for (name in solver_time) {
+	printf (format, "Solver " name, solver_time[name]);
     }
+	
+    
+#    if (time_per_iter > 0) {
+#	print;
+#	printf (format, "time per block",time_per_iter/num_blocks);
+#	printf (format, "time per real zone",time_per_iter/(num_blocks*zones_per_block));
+#	printf (format, "time per zone",time_per_iter/(num_blocks*total_zones_per_block));
+#	printf (format_int, "solver max-iter",max_iter);
+#	printf (format, "time per iter",time_per_iter);
+#    } else {
+#	print " not called"
+#    }
 
     printf ("\nPARTICLES");
     

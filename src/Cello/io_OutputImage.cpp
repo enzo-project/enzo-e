@@ -8,6 +8,17 @@
 #include "cello.hpp"
 #include "io.hpp"
 
+// #define DEBUG_OUTPUT
+
+#ifdef DEBUG_OUTPUT
+#  define TRACE_OUTPUT \
+  CkPrintf ("%s:%d %d %s TRACE_OUTPUT image_mesh_ %p\n",				\
+	    __FILE__,__LINE__,CkMyPe(),block->name().c_str(),image_mesh_);		\
+  fflush(stdout);
+#else
+#  define TRACE_OUTPUT /* ... */
+#endif
+
 //----------------------------------------------------------------------
 
 OutputImage::OutputImage(int index,
@@ -17,7 +28,7 @@ OutputImage::OutputImage(int index,
 			 int process_count,
 			 int nx0, int ny0, int nz0,
 			 int nxb, int nyb, int nzb,
-			 int max_level,
+			 int min_level, int max_level, int leaf_only,
 			 std::string image_type,
 			 int image_size_x, int image_size_y,
 			 std::string image_reduce_type,
@@ -46,9 +57,12 @@ OutputImage::OutputImage(int index,
     image_log_(image_log),
     image_abs_(image_abs),
     ghost_(ghost),
-    max_level_(max_level)
+    min_level_(min_level),
+    max_level_(max_level),
+    leaf_only_(leaf_only)
 
 {
+
   if      (image_reduce_type=="min") { op_reduce_ = reduce_min; } 
   else if (image_reduce_type=="max") { op_reduce_ = reduce_max; }
   else if (image_reduce_type=="avg") { op_reduce_ = reduce_avg; }
@@ -78,13 +92,13 @@ OutputImage::OutputImage(int index,
     if (nz0>1) nz0*=2;
   }
 
-  if (nxi_ == 0) nxi_ = (type_is_mesh()) ? 2*nl * nxb + 1 : nl * nx0;
-  if (nyi_ == 0) nyi_ = (type_is_mesh()) ? 2*nl * nyb + 1 : nl * ny0;
+  if (nxi_ == 0) nxi_ = (type_is_mesh_()) ? 2*nl * nxb + 1 : nl * nx0;
+  if (nyi_ == 0) nyi_ = (type_is_mesh_()) ? 2*nl * nyb + 1 : nl * ny0;
 
   int ngx,ngy,ngz;
   field_descr->ghost_depth(0,&ngx,&ngy,&ngz);
 
-  if (! type_is_mesh() && ghost_) {
+  if (! type_is_mesh_() && ghost_) {
     nxi_ += 2*nxb*ngx*nl;
     nyi_ += 2*nyb*ngy*nl;
   }
@@ -117,10 +131,14 @@ OutputImage::~OutputImage() throw ()
 {
   delete png_;
   png_ = NULL;
-  delete image_data_;
+  delete [] image_data_;
   image_data_ = NULL;
-  delete image_mesh_;
+  delete [] image_mesh_;
   image_mesh_ = NULL;
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT ~OutputImage %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -134,29 +152,48 @@ void OutputImage::pup (PUP::er &p)
   p | map_r_;
   p | map_g_;
   p | map_b_;
-  WARNING("OutputImage::pup","skipping image_data_");
-  if (p.isUnpacking()) image_data_ = 0;
-  WARNING("OutputImage::pup","skipping image_mesh_");
-  if (p.isUnpacking()) image_mesh_ = 0;
   p | op_reduce_;
   p | mesh_color_type_;
   p | color_particle_attribute_;
   p | axis_;
-  p | min_value_;
-  p | max_value_;
   p | nxi_;
   p | nyi_;
+
+  int has_data = (image_data_ != NULL);
+  p | has_data;
+  if (has_data) {
+    if (p.isUnpacking()) image_data_ = new double [nxi_*nyi_];
+    PUParray(p,image_data_,nxi_*nyi_);
+  } else {
+    image_data_ = NULL;
+  }
+
+  int has_mesh = (image_mesh_ != NULL);
+  p | has_mesh;
+  if (has_mesh) {
+    if (p.isUnpacking()) image_mesh_ = new double [nxi_*nyi_];
+    PUParray(p,image_mesh_,nxi_*nyi_);
+  } else {
+    image_mesh_ = NULL;
+  }
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT pup %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
+  
   WARNING("OutputImage::pup","skipping png");
   // p | *png_;
   if (p.isUnpacking()) png_ = NULL;
   p | image_type_;
+  p | min_level_;
+  p | max_level_;
+  p | leaf_only_;
   p | face_rank_;
   p | image_log_;
   p | image_abs_;
   PUParray(p,image_lower_,3);
   PUParray(p,image_upper_,3);
   p | ghost_;
-  p | max_level_;
 }
 
 //----------------------------------------------------------------------
@@ -195,12 +232,14 @@ void OutputImage::open () throw()
 
   if (is_writer()) {
 
-    std::string file_name = expand_file_name_ (&file_name_,&file_args_);
+    std::string file_name = expand_name_ (&file_name_,&file_args_);
 
+    std::string dir_name = directory();
+    
     // Create png object
     Monitor::instance()->print ("Output","writing image file %s", 
-				file_name.c_str());
-    png_create_(file_name);
+				(dir_name + "/" + file_name).c_str());
+    png_create_(dir_name + "/" + file_name);
   }
 }
 
@@ -234,11 +273,14 @@ void OutputImage::write_block
 // @param particle_descr  Particle descriptor
 {
 
-  if (!block->is_leaf()) return;
+  // Exit if Block is not participating in output
+
+  if (! is_active_(block) ) return;
 
   TRACE("OutputImage::write_block()");
-  const FieldData * field_data = block->data()->field_data();
 
+  Field field = ((Data *)block->data())->field();
+  
   const int rank = block->rank();
 
   ASSERT("OutputImage::write_block",
@@ -253,9 +295,9 @@ void OutputImage::write_block
   const int IY = (axis_+2) % 3;
   const int IZ = (axis_+0) % 3;
 
-  // FieldData size
+  // Field block size
   int nb3[3];
-  field_data->size(&nb3[0],&nb3[1],&nb3[2]);
+  field.size(&nb3[0],&nb3[1],&nb3[2]);
 
   const int level = block->level();
 
@@ -294,16 +336,16 @@ void OutputImage::write_block
   double h3[3];
   block->cell_width(h3,h3+1,h3+2);
   
-  if (type_is_data()) {
+  if (type_is_data_()) {
 
     if (index_field >= 0) {
 
       // Get ghost depth
 
       int ng3[3];
-      field_descr->ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
+      field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-      // FieldData array dimensions
+      // Field array dimensions
       int nd3[3];
       nd3[0] = nb3[0] + 2*ng3[0];
       nd3[1] = nb3[1] + 2*ng3[1];
@@ -317,14 +359,14 @@ void OutputImage::write_block
 
       // add block contribution to image
 
-      const char * field = (ghost_) ? 
-	field_data->values(field_descr,index_field) :
-	field_data->unknowns(field_descr,index_field);
+      const char * field_values = (ghost_) ? 
+	field.values(index_field) :
+	field.unknowns(index_field);
 
-      float  * field_float = (float*)field;
-      double * field_double = (double*)field;
+      float  * field_float  = (float*)field_values;
+      double * field_double = (double*)field_values;
 
-      const int precision = field_descr->precision(index_field);
+      const int precision = field.precision(index_field);
 
       double factor = (nb3[IZ] > 1) ? 1.0 / pow(2.0,1.0*level) : 1.0;
       if (rank >= 2 && (std::abs(dm3[IZ] - dp3[IZ]) < h3[IZ])) factor = 1.0;
@@ -365,7 +407,7 @@ void OutputImage::write_block
     }
   }
 
-  if (type_is_mesh()) {
+  if (type_is_mesh_()) {
 
     // value for mesh
     double value = 0;
@@ -627,6 +669,20 @@ double OutputImage::mesh_color_(int level,int age) const
 
 //----------------------------------------------------------------------
 
+bool OutputImage::is_active_ (const Block * block) const
+{
+  const int level = block->level();
+  if (leaf_only_ && !block->is_leaf()) {
+    return false;
+  } else if (!((min_level_ <= level) && (level <= max_level_))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+//----------------------------------------------------------------------
+
 void OutputImage::png_create_ (std::string filename) throw()
 {
   if (is_writer()) {
@@ -658,6 +714,10 @@ void OutputImage::image_create_ () throw()
   image_data_  = new double [nxi_*nyi_];
   image_mesh_  = new double [nxi_*nyi_];
   TRACE2("new image_data_ = %p image_mesh_ = %p",image_data_,image_mesh_);
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT image_create_ %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
 
   const double min = std::numeric_limits<double>::max();
   const double max = -min;
@@ -785,11 +845,11 @@ void OutputImage::image_write_ () throw()
 
 double OutputImage::data_(int index) const
 {
-  if (type_is_mesh() && type_is_data())
+  if (type_is_mesh_() && type_is_data_())
     return (image_data_[index] + 0.2*image_mesh_[index])/1.2;
-  else if (type_is_data()) 
+  else if (type_is_data_()) 
     return image_data_[index];
-  else  if (type_is_mesh()) 
+  else  if (type_is_mesh_()) 
     return image_mesh_[index];
   else {
     ERROR ("OutputImage::data_()",
@@ -813,6 +873,10 @@ void OutputImage::image_close_ () throw()
   TRACE1("delete image_mesh_ = %p",image_mesh_)
   delete [] image_mesh_;
   image_mesh_ = 0;
+#ifdef DEBUG_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT image_close_ %p %p\n",
+	    CkMyPe(),image_data_,image_mesh_); fflush(stdout);
+#endif  
 }
 
 //----------------------------------------------------------------------

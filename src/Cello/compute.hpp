@@ -21,9 +21,10 @@
 #include "_disk.hpp"
 #include "_io.hpp"
 #include "_parameters.hpp"
-#include "_compute.hpp"
 #include "_problem.hpp"
+#include "_compute.hpp"
 #include "_mesh.hpp"
+#include "_simulation.hpp"
 
 
 #endif /* COMPUTE_HPP */

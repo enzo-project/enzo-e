@@ -62,6 +62,12 @@ td.unfinished {  color: #000;  background-color: #fa7; }
 td.pass       {  color: #030;  background-color: #7f7; }
 td.inverse    {  color: #fff;  background-color: #000; }
 th.block {    padding: 0px 0px;   }
+th.cello { background-color: #aff; text-align:right }
+th.charm { background-color: #ffa; text-align:right }
+th.time { background-color: #faf; text-align:right }
+td.cello { background-color: #aff; text-align:left; }
+td.charm { background-color: #ffa; text-align:left; }
+td.time { background-color: #faf; text-align:left; }
 th.divider {    background-color:gray;}
 th.running {    background-color:yellow;  }
 

@@ -31,6 +31,7 @@ class Method;
 class Particle;
 class ParticleData;
 class Refresh;
+class Solver;
 class Simulation;
 
 //----------------------------------------------------------------------
@@ -243,70 +244,28 @@ public: // interface
 
   void initial_exit_();
   void p_initial_exit()
-  {
-    performance_start_(perf_initial);
-    initial_exit_();
-    performance_stop_(perf_initial);
-  }
+  {      initial_exit_();  }
   void r_initial_exit(CkReductionMsg * msg)
-  {
-    performance_start_(perf_initial);
-    initial_exit_(); delete msg;
-    performance_stop_(perf_initial);
-  }
+  {      initial_exit_();  delete msg;  }
 
   //--------------------------------------------------
   // COMPUTE
   //--------------------------------------------------
 
   void p_compute_enter()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    compute_enter_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_enter_();  }
   void r_compute_enter(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    delete msg;    
-    compute_enter_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {    compute_enter_();    delete msg;      }
 
   void p_compute_continue()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    compute_continue_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_continue_();  }
   void r_compute_continue(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    delete msg;
-    compute_continue_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_continue_();    delete msg;      }
 
   void p_compute_exit()
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    compute_exit_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-  }
+  {      compute_exit_();  }
   void r_compute_exit(CkReductionMsg * msg)
-  {
-    performance_start_(perf_compute,__FILE__,__LINE__);
-    delete msg;
-    compute_exit_();
-    performance_stop_(perf_compute,__FILE__,__LINE__);
-    
-  }
-
-  /// Set the currently active Method.  Used to resume a Method's
-  /// computation after a reduction
-  void set_method_index (int index_method) throw()
-  {
-    index_method_ = index_method; }
+  {      compute_exit_();    delete msg;  }
 
   /// Return the currently active Method
   int index_method() const throw()
@@ -315,7 +274,36 @@ public: // interface
   /// Return the currently-active Method
   Method * method () throw();
 
-protected:
+  /// Start a new solver
+  void push_solver(int index_solver) throw()
+  {
+    index_solver_.push_back(index_solver); }
+
+  /// Return from a solver
+  int pop_solver() throw()
+  {
+    int index = index_solver();
+    ASSERT ("Block::pop_solver",
+	    "Trying to pop element off of empty Block::index_solver_ stack",
+	    index_solver_.size() > 0);
+    index_solver_.resize(index_solver_.size()-1);
+    return index;
+  }
+
+  /// Return the index of the current solver
+  int index_solver() const throw()
+  {
+    ASSERT1("Block::index_solver()","%s index_solver_[] stack is empty",
+	   name().c_str(),
+	   (index_solver_.size() > 0));
+    return index_solver_[index_solver_.size()-1];
+  }
+  
+  /// Return the currently-active Solver
+  Solver * solver () throw();
+
+protected: // methods
+  
   /// Enter control compute phase
   void compute_enter_();
   /// Initiate computing the sequence of Methods
@@ -328,59 +316,31 @@ protected:
   void compute_end_();
   /// Exit control compute phase
   void compute_exit_();
-public:
 
-  /// Prepare to call compute_next_() after computing (used to synchronize between methods)
-  /// Must be called at end of Method
+public: // methods
+
+  /// Prepare to call compute_next_() after computing (used to
+  /// synchronize between methods) Must be called at end of Method
   void compute_done();
-
 
   //--------------------------------------------------
   // OUTPUT
   //--------------------------------------------------
 
   void p_output_enter()
-  {
-    performance_start_(perf_output);
-    output_enter_();
-    performance_stop_(perf_output);
-  }
+  {      output_enter_();  }
   void r_output_enter(CkReductionMsg * msg)
-  {
-    performance_start_(perf_output);
-    delete msg;
-    output_enter_();
-    performance_stop_(perf_output);
-
-  }
+  {      output_enter_();  delete msg;  }
 
   void p_output_end();
 
   void p_output_exit()
-  {
-    performance_start_(perf_output);
-    output_exit_();
-    performance_stop_(perf_output);
-    
-  }
+  {      output_exit_();  }
   void r_output_exit(CkReductionMsg * msg)
-  {
-    performance_start_(perf_output);
-    delete msg;
-    output_exit_();
-    performance_stop_(perf_output);
-  }
+  {      output_exit_();  delete msg; }
 
   /// Contribute block data to ith output object in the simulation
   void p_output_write (int index_output);
-
-  /// Contribute block data to the Initial input object
-  void p_output_read (int index_input = 0)
-  {
-    performance_start_(perf_output);
-    INCOMPLETE("Block::p_output_read");
-    performance_stop_(perf_output);
-  }
 
 protected:
   void output_enter_();
@@ -402,7 +362,8 @@ public:
   void r_adapt_enter(CkReductionMsg * msg) 
   {
     performance_start_(perf_adapt_apply);
-    adapt_enter_(); delete msg;
+    adapt_enter_();
+    delete msg;
     performance_stop_(perf_adapt_apply);
     performance_start_(perf_adapt_apply_sync);
   }
@@ -528,7 +489,15 @@ public:
 
   void refresh_enter (int call, Refresh * refresh);
 
-  // Exit the refresh phase after QD
+  /// Enter the refresh phase after synchronizing
+  void p_refresh_continue ()
+  {
+    refresh_continue();
+  }
+
+  void refresh_continue();
+
+  /// Exit the refresh phase after synchronizing
   void p_refresh_exit () 
   {
     performance_start_(perf_refresh_exit);
@@ -649,9 +618,6 @@ public:
   /// Quiescence before load balancing
   void p_stopping_balance();
 
-  /// Manual call of LB
-  void p_balance();
-
   /// Exit the stopping phase
   void p_stopping_exit () 
   {
@@ -760,6 +726,8 @@ public: // virtual functions
   (int if3[3], int ic3[3], bool lg3[3], int refresh_type,
    std::vector<int> & field_list);
 
+  void print () const;
+
 protected: // functions
 
   /// Return the child adjacent to the given child in the direction of
@@ -857,40 +825,13 @@ protected: // functions
 
   /// Set the current refresh object
   void set_refresh (Refresh * refresh) 
-  {  refresh_ = *refresh; };
+  {  refresh_.push_back(*refresh); };
 
   /// Return the currently-active Refresh object
   Refresh * refresh () throw()
-  {  return &refresh_;  }
+  {  return &refresh_.back();  }
 
 
-  void print () const
-  {
-    CkPrintf ("data_ = %p\n",data_);
-    CkPrintf ("child_data_ = %p\n",child_data_);
-    CkPrintf ("index_ = %d\n",name().c_str());
-    CkPrintf ("level_next_ = %d\n",level_next_);
-    CkPrintf ("cycle_ = %d\n",cycle_);
-    CkPrintf ("time_ = %f\n",time_);
-    CkPrintf ("dt_ = %f\n",dt_);
-    CkPrintf ("stop_ = %d\n",stop_);
-    CkPrintf ("index_initial_ = %d\n",index_initial_);
-    CkPrintf ("children_.size() = %d\n",children_.size());
-    CkPrintf ("face_level_curr_.size() = %d\n",face_level_curr_.size());
-    CkPrintf ("face_level_next_.size() = %d\n",face_level_next_.size());
-    CkPrintf ("child_face_level_curr_.size() = %d\n",child_face_level_curr_.size());
-    CkPrintf ("child_face_level_next_.size() = %d\n",child_face_level_next_.size());
-    CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
-    CkPrintf ("adapt_step_ = %d\n",adapt_step_);
-    CkPrintf ("adapt_ = %d\n",adapt_);
-    CkPrintf ("coarsened_ = %d\n",coarsened_);
-    CkPrintf ("delete_ = %d\n",delete_);
-    CkPrintf ("is_leaf_ = %d\n",is_leaf_);
-    CkPrintf ("age_ = %d\n",age_);
-    CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
-    CkPrintf ("name_ = %d\n",name_.c_str());
-    CkPrintf ("index_method_ = %d\n",index_method_);
-  }
 protected: // attributes
 
   /// Whether data exists
@@ -977,14 +918,17 @@ protected: // attributes
   std::vector<int> face_level_last_;
 
   /// String for storing bit ID name
-  std::string name_;
+  mutable std::string name_;
 
   /// Index of currently-active Method
   int index_method_;
 
+  /// Stack of currently active solvers
+  std::vector<int> index_solver_;
+  
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
-  Refresh refresh_;
+  std::vector<Refresh> refresh_;
 
 };
 
