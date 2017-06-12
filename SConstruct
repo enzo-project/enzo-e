@@ -58,7 +58,7 @@ debug = 0
 # slow calculations down
 #----------------------------------------------------------------------
 
-check = 1
+check = 0
 
 #----------------------------------------------------------------------
 # Whether to periodically print all field values.  See
@@ -141,23 +141,9 @@ have_mercurial = 1
 #----------------------------------------------------------------------
 
 # Whether the system has the PAPI performance API installed
+# (config include may override use_papi)
 
 use_papi = 0
-
-env = Environment()
-
-if not env.GetOption('clean'):
-
-     configure = Configure(env)
-
-     if not configure.CheckCHeader('papi.h'):
-          print 'PAPI not installed'
-          use_papi = 0
-     else:
-          print 'PAPI installed'
-          use_papi = 1
-
-     env = configure.Finish()
 
 #-----------------------------------------------------------------------
 # COMMAND-LINE ARGUMENTS
@@ -210,7 +196,6 @@ define_new_charm =    ['CONFIG_NEW_CHARM']
 define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_performance =  ['CONFIG_USE_PERFORMANCE']
 define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
-papi_path           = 'papi_path_not_set'  
 
 # Debugging defines
 
@@ -413,8 +398,8 @@ libpath     = [lib_path]
 #----------------------------------------------------------------------
 
 if (use_papi):
-     cpppath = cpppath + [papi_path + '/include']
-     libpath = libpath + [papi_path + '/lib']
+     cpppath = cpppath + [papi_inc]
+     libpath = libpath + [papi_lib]
 
 #----------------------------------------------------------------------
 # HDF5 PATHS
@@ -552,6 +537,8 @@ else:
      fp_charm_version = open ("test/CHARM_VERSION", "w")
      fp_charm_version.write("unknown\n");
      fp_charm_version.close()
+
+cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
 
 #----------
 # Both Python version 2.7 is required, and Mercurial must be installed

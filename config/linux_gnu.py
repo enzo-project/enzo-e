@@ -49,7 +49,8 @@ if charm_path is None:
 			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
 
 use_papi=1                
-papi_path    = '/usr/local'
+papi_inc = '/usr/local/include'
+papi_lib = '/usr/local/lib'
 
 hdf5_inc = os.getenv('HDF5_INC')
 if hdf5_inc is None:

@@ -22,8 +22,8 @@ libpath_fortran = '.'
 libs_fortran    = ['gfortran']
 
 charm_path   = os.path.join(home, 'src/Charm/charm')
-# papi doesn't come with yt
-papi_path    = '/usr/local'
+papi_inc    = '/usr/local/include'
+papi_lib    = '/usr/local/lib'
 hdf5_path    = home
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
