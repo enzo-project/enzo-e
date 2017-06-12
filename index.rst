@@ -51,12 +51,9 @@ solver.
    parameters-file
    design
 
-A short workshop on using Enzo-P and developing with Cello was presented
-at the Enzo Workshop in 2015.  Below are PDF documents of the presentation.
+An Enzo-P / Cello User and Developer Guide is available from the link below.  (Warning, it's big (0.2GB).  And mostly outdated, though I will be updating it over the coming weeks.)
 
-   :download:`Using and Developing Enzo-P/Cello--Part I: Using Enzo-P <./using-enzo-p.pdf>`
-
-   :download:`Using and Developing Enzo-P/Cello--Part II: Developing with Cello <./developing-with-cello.pdf>`
+   :download:`Using and Developing Enzo-P/Cello <./enzo-p-cello.pdf>`
 
 James Bordner
 jobordner@ucsd.edu
