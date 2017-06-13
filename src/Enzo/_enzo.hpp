@@ -166,6 +166,7 @@ struct fluxes
 #include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialPm.hpp"
+#include "enzo_EnzoInitialPpmlTest.hpp"
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"

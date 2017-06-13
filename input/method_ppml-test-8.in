@@ -1,0 +1,20 @@
+# Problem: PPML test program
+# Author:  James Bordner (jobordner@ucsd.edu)
+
+include "input/ppml.incl"
+
+Mesh { root_blocks = [2,2,2]; }
+
+Output { list = ["d_x","d_y","d_z"]; }
+
+Output { d_x  { name = ["method_ppml-test-8-x-%04d.png", "cycle"]; } }
+Output { d_y  { name = ["method_ppml-test-8-y-%04d.png", "cycle"]; } }
+Output { d_z  { name = ["method_ppml-test-8-z-%04d.png", "cycle"]; } }
+
+Initial {
+   list = ["ppml_test"];
+}
+
+Testing {
+   time_final = 0.00294577296105476;
+}
