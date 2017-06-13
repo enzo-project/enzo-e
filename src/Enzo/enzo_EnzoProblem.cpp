@@ -149,6 +149,8 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_pm_field,
        enzo_config->initial_pm_mpp,
        enzo_config->initial_pm_level);
+  } else if (type == "ppml_test") {
+    initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup

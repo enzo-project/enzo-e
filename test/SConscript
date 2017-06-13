@@ -332,6 +332,16 @@ env.MakeMovie ("method_ppml-8-z.swf", "test_method_ppml-8.unit", \
 env.PngToGif ("method_ppml-8-z.gif", "test_method_ppml-8.unit", \
                 ARGS= test_path + "/method_ppml-8-z-????.png");
 
+# Updated PPML test using EnzoInitialPpmlTest for multi-nodes
+
+Clean(env_mv_out.RunSerial ('test_method_ppml-test-1.unit',bin_path + '/enzo-p',
+                            ARGS='input/method_ppml-test-1.in'),
+      [Glob('#/' + test_path + '/PPML1_*')])
+
+Clean(env_mv_out.RunSerial ('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
+                            ARGS='input/method_ppml-test-8.in'),
+      [Glob('#/' + test_path + '/PPML8_*')])
+
 #----------------------------------------------------------------------
 # BOUNDARY CONDITIONS
 #----------------------------------------------------------------------

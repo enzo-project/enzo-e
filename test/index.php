@@ -602,8 +602,9 @@ test_summary("Method: ppm",
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Method: ppml",
-	     array("method_ppml-1","method_ppml-8"),
-	     array("enzo-p",  "enzo-p"),'test');
+         array("method_ppml-1","method_ppml-8",
+               "method_ppml-test-1","method_ppml-test-8"),
+         array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Method: heat",
 	     array("method_heat-1","method_heat-8"),
@@ -799,6 +800,32 @@ test_table ("method_ppml-8-z",
 	    array("0000","0010","0020","0030","0040"), $types);
 
 end_hidden ("method_ppml-8");
+
+  begin_hidden("method_ppml-1", "PPML (serial)");
+
+tests("Enzo","enzo-p","test_method_ppml-test-1","PPML-TEST 1 block","");
+
+test_table ("method_ppml-test-1-x",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-test-1-y",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-test-1-z",
+	    array("0000","0010","0020","0030","0040"), $types);
+
+end_hidden ("method_ppml-test-1");
+
+begin_hidden("method_ppml-test-8", "PPML-TEST (parallel)");
+
+tests("Enzo","enzo-p","test_method_ppml-test-8","PPML-TEST 8 blocks","");
+
+test_table ("method_ppml-test-8-x",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-test-8-y",
+	    array("0000","0010","0020","0030","0040"), $types);
+test_table ("method_ppml-test-8-z",
+	    array("0000","0010","0020","0030","0040"), $types);
+
+end_hidden ("method_ppml-test-8");
 
 //======================================================================
 

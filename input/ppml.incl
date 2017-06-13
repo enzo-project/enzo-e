@@ -19,7 +19,7 @@
 
    Field {
 
-      ghost_depth = 3;
+      ghost_depth = 4;
 
       list = [
          "density",
@@ -36,7 +36,7 @@
          "bfieldx_rz",  "bfieldy_rz",  "bfieldz_rz"
       ] ;
 
-      gamma = 1.4;
+      gamma = 1.0;
 
       padding   = 0;
       alignment = 8;
@@ -48,7 +48,7 @@
 
       list = ["ppml"];
       ppml { 
-         courant   = 0.8;
+         courant   = 0.3;
       }
 
    }
@@ -73,7 +73,7 @@
           velox_rx = 0.0; 
           veloy_rx = 0.0; 
           veloz_rx = 0.0; 
-          bfieldx_rx = 0.0; 
+          bfieldx_rx = 10.0; 
           bfieldy_rx = 0.0; 
           bfieldz_rx = 0.0; 
 
@@ -81,7 +81,7 @@
           velox_ry = 0.0; 
           veloy_ry = 0.0; 
           veloz_ry = 0.0; 
-          bfieldx_ry = 0.0; 
+          bfieldx_ry = 10.0; 
           bfieldy_ry = 0.0; 
           bfieldz_ry = 0.0; 
 
@@ -89,7 +89,7 @@
           velox_rz = 0.0; 
           veloy_rz = 0.0; 
           veloz_rz = 0.0; 
-          bfieldx_rz = 0.0; 
+          bfieldx_rz = 10.0; 
           bfieldy_rz = 0.0; 
           bfieldz_rz = 0.0; 
        }
@@ -105,7 +105,7 @@
 # OLD TIME
 #      time_final  = 0.1129506208626;  # 40 cycles
 # TIME FOR UPDATED InitialDefault
-      time_final  = 0.115152057844972;
+      time_final  = 0.00294577296105476;
    }
 
    Output {
@@ -125,6 +125,7 @@
         include "input/schedule_cycle_2.incl"
         axis = "x";
         include "input/colormap_blackbody.incl";
+	image_size = [256,256];
       }
       d_y {
         field_list = ["density"];
@@ -132,6 +133,7 @@
         include "input/schedule_cycle_2.incl"
         axis = "y";
         include "input/colormap_blackbody.incl";
+	image_size = [256,256];
       }
       d_z {
         field_list = ["density"];
@@ -139,6 +141,7 @@
         include "input/schedule_cycle_2.incl"
         axis = "z";
         include "input/colormap_blackbody.incl";
+	image_size = [256,256];
       }
    }
 
