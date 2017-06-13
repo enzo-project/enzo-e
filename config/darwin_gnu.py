@@ -19,10 +19,11 @@ libs_fortran    = ['gfortran']
 
 home = os.environ['HOME']
 
-charm_path   = home + '/codes/charm-6.5.1'
-papi_path    = '/usr/local'
-hdf5_inc    = '/opt/local/include'
-hdf5_lib    = '/opt/local/lib'
-png_path     = '/opt/local'
+charm_path = home + '/codes/charm-6.5.1'
+papi_inc   = '/usr/local/include'
+papi_lib   = '/usr/local/lib'
+hdf5_inc   = '/opt/local/include'
+hdf5_lib   = '/opt/local/lib'
+png_path   = '/opt/local'
 grackle_path = home + '/Software/Grackle/src/clib'
 

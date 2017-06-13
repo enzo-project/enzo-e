@@ -19,7 +19,8 @@ home = os.environ['HOME']
 
 # edit to point to path of local charm++ installation
 charm_path   = home + '/Documents/charm-6.7.1'
-papi_path    = '/usr/local'
+papi_inc    = '/usr/local/include'
+papi_lib    = '/usr/local/lib'
 hdf5_inc    = '/usr/local/include'
 hdf5_lib    = '/usr/local/lib'
 png_path     = '/usr/local'
