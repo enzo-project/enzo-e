@@ -5,8 +5,9 @@ Enzo-P methods
 *[ This page is under development ]*
   
 This section decribes all Methods available in Enzo-P: what they do,
-what fields / particles they access or update, solvers used, and how
-different Methods are intended to be used with each other.
+what method-specific parameters they have, what fields / particles
+they access or update, what solvers if any used, and how different
+Methods are intended to be used with each other.
 
 Current Enzo-P methods available include those listed below.
 
