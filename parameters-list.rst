@@ -36,7 +36,7 @@
   .. |a1n| replace:: a\ :sub:`1,n`
 
 **********************************
-Enzo-P / Cello Parameter Reference
+Enzo-P / Cello parameter reference
 **********************************
 
 This page documents all current parameters implemented in Enzo-P /

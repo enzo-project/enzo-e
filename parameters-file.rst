@@ -1,5 +1,5 @@
-Parameter File Syntax
----------------------
+Parameter files
+---------------
 
 Whereas Enzo uses a flat parameter list with relatively simple data
 types, Cello uses a more "hierarchical" parameter list and allows more

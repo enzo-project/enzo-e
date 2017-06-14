@@ -42,16 +42,55 @@ developing and implementing a highly scalable multigrid-based linear
 solver.
 
 .. toctree::
-   :maxdepth: 1
+   :hidden:
 
-   principles
-   parameters-list
    getting_started
+   parameters-list
    parameters-example
    parameters-file
+   using      
+   principles
    design
 
-An Enzo-P / Cello User and Developer Guide is available from the link below.  (Warning, it's big (0.2GB).  And mostly outdated, though I will be updating it over the coming weeks.)
+Getting started
+---------------
+
+The `getting started`_ section covers everything you need to know to download Enzo-P / Cello and its dependent software, configure, port, build, and run an example test problem.
+
+.. _getting started: getting_started.html
+
+Parameters
+----------
+
+The `parameters list`_ section is a reference page for all Enzo-P and
+Cello parameters, which are used to write parameters files defining
+simulations to run.
+
+.. _parameters list: parameters-list.html
+
+How parameters are organized within a parameter file is described in
+`parameter files`_, which covers parameter groups, subgroups,
+parameters, and data types recognized.
+
+.. _parameter files: parameters-file.html
+
+An example parameter file is described in its entirety in `parameter
+file example`_.
+
+.. _parameter file example: parameters-example.html
+
+Using Enzo-P
+------------
+
+The new `using Enzo-P`_ section will describe in detail how to use Enzo-P, including what methods, fields, particle types etc. are available.  While only an outline exists now, we are working on getting this section completed soon.
+
+.. _using Enzo-P: using.html
+
+
+PDF User and Developer Guide
+----------------------------
+
+An Enzo-P / Cello User and Developer Guide is available from the link below.  Warning, it's big (0.2GB).  And mostly outdated, though I will be updating it over the coming weeks.  This document is written as a presentation, though its content will also be converted to online documentation here.
 
    :download:`Using and Developing Enzo-P/Cello <./enzo-p-cello.pdf>`
 
