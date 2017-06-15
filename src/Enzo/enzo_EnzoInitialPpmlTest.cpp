@@ -14,7 +14,6 @@ EnzoInitialPpmlTest::EnzoInitialPpmlTest
  const EnzoConfig * enzo_config) throw ()
   : Initial(cycle,time)
 {
-  CkPrintf ("EnzoInitialPpml\n");
 }
 
 //----------------------------------------------------------------------
