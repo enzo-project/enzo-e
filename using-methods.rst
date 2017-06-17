@@ -1,5 +1,5 @@
 **************
-Enzo-P methods
+Enzo-P Methods
 **************
 
 *[ This page is under development ]*

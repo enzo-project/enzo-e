@@ -1,5 +1,5 @@
 ****************
-Enzo-P particles
+Enzo-P Particles
 ****************
 
 *[ This page is under development ]*

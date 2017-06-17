@@ -49,6 +49,7 @@ solver.
    parameters-example
    parameters-file
    using      
+   devel
    principles
    design
 
@@ -82,15 +83,35 @@ file example`_.
 Using Enzo-P
 ------------
 
-The new `using Enzo-P`_ section will describe in detail how to use Enzo-P, including what methods, fields, particle types etc. are available.  While only an outline exists now, we are working on getting this section completed soon.
+The new `Using Enzo-P`_ section will describe in detail how to use
+Enzo-P, including what methods, fields, particle types etc. are
+available.  While only an outline exists now, we are working on
+getting this section completed soon.
 
-.. _using Enzo-P: using.html
+.. _Using Enzo-P: using.html
+
+Developing with Cello
+---------------------
+
+The new `Developing with Cello`_ section will describe how to add new
+functionality to an application such as Enzo-P built on Cello,
+including adding new computational methods, initial conditions, and
+refinement criteria.  As with the `Using Enzo-P`_ section, this
+documentation is under active development, and is mostly an outline at
+this point.
+
+.. _Developing with Cello: devel.html
 
 
 PDF User and Developer Guide
 ----------------------------
 
-An Enzo-P / Cello User and Developer Guide is available from the link below.  Warning, it's big (0.2GB).  And mostly outdated, though I will be updating it over the coming weeks.  This document is written as a presentation, though its content will also be converted to online documentation here.
+An Enzo-P / Cello User and Developer Guide is available from the link
+below.  Warning, it's big (0.2GB), and currently written as a
+presentation.  Parts are also a little outdated, though I will be
+transferring content to the above online "Using Enzo-P" and
+"Developing with Cello" sections over the coming weeks, and will
+update things along the way.
 
    :download:`Using and Developing Enzo-P/Cello <./enzo-p-cello.pdf>`
 
