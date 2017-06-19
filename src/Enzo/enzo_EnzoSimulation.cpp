@@ -118,17 +118,6 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::r_write_checkpoint()
-{
-  performance_->start_region(perf_output);
-  monitor()->print ("Output","begin writing checkpoint...");
-  problem()->output_wait(this);
-  monitor()->print ("Output","end writing checkpoint");
-  performance_->stop_region(perf_output);
-}
-
-//----------------------------------------------------------------------
-
 void EnzoSimulation::initialize_config_() throw()
 {
 #ifdef DEBUG_ENZO_SIMULATION

@@ -23,7 +23,8 @@ FieldData::FieldData
     offsets_(),
     ghosts_allocated_(true),
     history_id_(),
-    history_time_()
+    history_time_(),
+    units_scaling_()
 {
   if (nx != 0) {
     size_[0] = nx;
@@ -80,6 +81,7 @@ void FieldData::pup(PUP::er &p)
   p | ghosts_allocated_;
   p | history_id_;
   p | history_time_;
+  p | units_scaling_;
 }
 
 
@@ -630,105 +632,6 @@ void FieldData::print
 
 //----------------------------------------------------------------------
 
-// void FieldData::copy
-// (const FieldDescr * field_descr,
-//  int id, int is,
-//  bool ghosts = true ) throw()
-// {
-// }
-
-// //----------------------------------------------------------------------
-
-// void FieldData::axpy
-// (const FieldDescr * field_descr, int iz, double a, int ix, int iy,
-//  bool ghosts = true ) throw()
-// {
-// }
-
-//----------------------------------------------------------------------
-
-// template<class T>
-//   void FieldData::axpy_ (T* Z, double a, const T* X, const T* Y) const throw()
-// {
-//   for (int iz=0; iz<mz_; iz++) 
-//     for (int iy=0; iy<my_; iy++) 
-//       for (int ix=0; ix<mx_; ix++) {
-// 	int i = ix + mx_*(iy + my_*iz);
-// 	Z[i] = a * X[i] + Y[i];
-//       }
-// }
-
-//----------------------------------------------------------------------
-
-void FieldData::axpy
-(const FieldDescr * field_descr,
- int iz, long double a, int ix, int iy, bool ghosts) throw()
-{
-  int mx,my,mz;
-  int nx,ny,nz;
-  int gx,gy,gz;
-
-  size                        (&nx, &ny, &nz);
-  dimensions  (field_descr,ix, &mx, &my, &mz);
-  field_descr->ghost_depth(ix, &gx, &gy, &gz);
-
-  void * x = values(field_descr,ix);
-  void * y = values(field_descr,iy);
-  void * z = values(field_descr,iz);
-
-  switch (field_descr->precision(ix)) {
-  case precision_single:
-    axpy_ ((float*)z,a,(float*)x,(float*)y,ghosts,
-	  mx,my,mz,nx,ny,nz,gx,gy,gz);
-    break;
-  case precision_double:
-    axpy_ ((double*)z,a,(double*)x,(double*)y,ghosts,
-	   mx,my,mz,nx,ny,nz,gx,gy,gz);
-    break;
-  case precision_quadruple:
-    axpy_ ((long double*)z,a,(long double*)x,(long double*)y,ghosts,
-	   mx,my,mz,nx,ny,nz,gx,gy,gz);
-    break;
-  default:
-    ERROR2("FieldData::axpy()",
-	   "Unknown precision %d for field id %d",
-	   field_descr->precision(ix),ix);
-    break;
-  }
-
-}
-
-template<class T>
-void FieldData::axpy_
-(T * Z, long double a, const T * X, const T * Y, bool ghosts,
- int mx, int my, int mz,
- int nx, int ny, int nz,
- int gx, int gy, int gz) const throw()
-{
-  if (ghosts) {
-    for (int iz=0; iz<mz; iz++) {
-      for (int iy=0; iy<my; iy++) {
-	for (int ix=0; ix<mx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  Z[i] = a * X[i] + Y[i];
-	}
-      }
-    }
-  } else {
-    int i0 = gx + mx*(gy + my*gz);
-    for (int iz=0; iz<nx; iz++) {
-      for (int iy=0; iy<ny; iy++) { 
-	for (int ix=0; ix<mx; ix++) {
-	  int i = i0 + ix + mx*(iy + my*iz);
-	  Z[i] = a * X[i] + Y[i];
-	}
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
 double FieldData::dot (const FieldDescr * field_descr, int ix, int iy) throw()
 {
   int mx,my,mz;
@@ -901,6 +804,85 @@ void FieldData::save_history (const FieldDescr * field_descr, double time)
     }
   
     history_time_[0] = time;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::units_scale_cgs
+(const FieldDescr * field_descr, int id, double amount)
+{
+  // Return if scaling by 1.0
+  if (amount == 1.0) return;
+
+  // Allocate units scaling for this field if not allocated
+  units_allocate_(id);
+
+  // Return if already scaled by amount
+  if (units_scaling_[id] == amount) return;
+  
+  // Error if scaling by 0.0
+  ASSERT1("FieldData::units_scale_cgs()",
+	  "Trying to scale field %d by 0.0",
+	  id, (amount != 0.0));
+    
+  // Unscale first if already scaled
+  if (units_scaling_[id] != 1.0) {
+    units_scale_code (field_descr,id, units_scaling_[id]);
+  }
+
+  // Scale by "amount"
+  int precision = field_descr->precision(id);
+  int mx,my,mz;
+  this->dimensions(field_descr,id,&mx,&my,&mz);
+  const int m = mx*my*mz;
+  char * array = values(field_descr,id);
+  if (precision == precision_single) {
+    float * a = (float *) array;
+    for (int i=0; i<m; i++) a[i] *= amount;
+  } else if (precision == precision_double) {
+    double * a = (double *) array;
+    for (int i=0; i<m; i++) a[i] *= amount;
+  } else if (precision == precision_quadruple) {
+    long double * a = (long double *) array;
+    for (int i=0; i<m; i++) a[i] *= amount;
+  }
+  // update units_scaling_ to indicate it's scaled by amount
+  units_scaling_[id] = amount;
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::units_scale_code (const FieldDescr * field_descr, int id, double amount)
+{
+ // Allocate units scaling for this field if not allocated
+  units_allocate_(id);
+
+  if (units_scaling_[id] != 1.0) {
+    // scale by "scale" = 1.0 / [current scaling]
+    double scale = 1.0 / amount;
+    if (units_scaling_[id] != amount) {
+      WARNING3("FieldData::units_scale_code()",
+	       "new scaling factor %g differs from old scaling factor %g for field %d\n",
+	       amount,units_scaling_[id],id);
+    }
+    int precision = field_descr->precision(id);
+    int mx,my,mz;
+    this->dimensions(field_descr,id,&mx,&my,&mz);
+    const int m = mx*my*mz;
+    char * array = values(field_descr,id);
+    if (precision == precision_single) {
+      float * a = (float *) array;
+      for (int i=0; i<m; i++) a[i] *= scale;
+    } else if (precision == precision_double) {
+      double * a = (double *) array;
+      for (int i=0; i<m; i++) a[i] *= scale;
+    } else if (precision == precision_quadruple) {
+      long double * a = (long double *) array;
+      for (int i=0; i<m; i++) a[i] *= scale;
+    }
+
+    units_scaling_[id] = 1.0;
   }
 }
 

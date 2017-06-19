@@ -757,6 +757,170 @@ PARALLEL_MAIN_BEGIN
     unit_assert (5.0-ih == field.history_time(ih));
     
     //--------------------------------------------------
+    unit_func ("units_scale_cgs");
+
+    double s1 = 2.0;
+    double s2 = 4.0;
+    double s3 = 8.0;
+    double s4 = 16.0;
+    double s5 = 32.0;
+
+    // initialize fields in code units
+    for (int i=0; i<M1; i++) {  v1[i] = HIST_INIT(1,0,i); }
+    for (int i=0; i<M2; i++) {  v2[i] = HIST_INIT(2,0,i); }
+    for (int i=0; i<M3; i++) {  v3[i] = HIST_INIT(3,0,i); }
+    for (int i=0; i<M4; i++) {  v4[i] = HIST_INIT(4,0,i); }
+    for (int i=0; i<M5; i++) {  v5[i] = HIST_INIT(5,0,i); }
+
+    // scale fields to cgs given scaling
+
+    field.units_scale_cgs (i1,s1);
+    field.units_scale_cgs (i2,s2);
+    field.units_scale_cgs (i3,s3);
+    field.units_scale_cgs (i4,s4);
+    field.units_scale_cgs (i5,s5);
+
+    // test fields are scaled
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1[i] == s1*HIST_INIT(1,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2[i] == s2*HIST_INIT(2,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3[i] == s3*HIST_INIT(3,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4[i] == s4*HIST_INIT(4,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5[i] == s5*HIST_INIT(5,0,i)); }
+    unit_assert(passed);
+
+    // try to rescale fields again
+
+    field.units_scale_cgs (i1,s1);
+    field.units_scale_cgs (i2,s2);
+    field.units_scale_cgs (i3,s3);
+    field.units_scale_cgs (i4,s4);
+    field.units_scale_cgs (i5,s5);
+
+    // check that they were not scaled twice
+
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1[i] == s1*HIST_INIT(1,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2[i] == s2*HIST_INIT(2,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3[i] == s3*HIST_INIT(3,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4[i] == s4*HIST_INIT(4,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5[i] == s5*HIST_INIT(5,0,i)); }
+    unit_assert(passed);
+
+    // unscale fields back to code units
+
+    unit_func ("units_scale_code");
+
+    field.units_scale_code (i1,s1);
+    field.units_scale_code (i2,s2);
+    field.units_scale_code (i3,s3);
+    field.units_scale_code (i4,s4);
+    field.units_scale_code (i5,s5);
+
+    // test that fields are in original code units
+    
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1[i] == HIST_INIT(1,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2[i] == HIST_INIT(2,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3[i] == HIST_INIT(3,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4[i] == HIST_INIT(4,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5[i] == HIST_INIT(5,0,i)); }
+    unit_assert(passed);
+
+    // try to re-scale fields to code units
+
+    field.units_scale_code (i1,s1);
+    field.units_scale_code (i2,s2);
+    field.units_scale_code (i3,s3);
+    field.units_scale_code (i4,s4);
+    field.units_scale_code (i5,s5);
+
+    // check that fields were not unscaled twice
+
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1[i] == HIST_INIT(1,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2[i] == HIST_INIT(2,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3[i] == HIST_INIT(3,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4[i] == HIST_INIT(4,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5[i] == HIST_INIT(5,0,i)); }
+    unit_assert(passed);
+
+    // convert to cgs using units  s
+
+    unit_func ("units_scale_cgs");
+
+    field.units_scale_cgs (i1,s1);
+    field.units_scale_cgs (i2,s2);
+    field.units_scale_cgs (i3,s3);
+    field.units_scale_cgs (i4,s4);
+    field.units_scale_cgs (i5,s5);
+
+    // reconvert to cgs using updated units r
+
+    double r1 = 0.25;
+    double r2 = 0.125;
+    double r3 = 64.0;
+    double r4 = 32.0;
+    double r5 = 16.0;
+
+    field.units_scale_cgs (i1,r1);
+    field.units_scale_cgs (i2,r2);
+    field.units_scale_cgs (i3,r3);
+    field.units_scale_cgs (i4,r4);
+    field.units_scale_cgs (i5,r5);
+
+    // test that fields were unscaled by s first before being re-scaled by r
+
+    passed = true;
+    for (int i=0; i<M1; i++) { passed &= (v1[i] == r1*HIST_INIT(1,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M2; i++) { passed &= (v2[i] == r2*HIST_INIT(2,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M3; i++) { passed &= (v3[i] == r3*HIST_INIT(3,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M4; i++) { passed &= (v4[i] == r4*HIST_INIT(4,0,i)); }
+    unit_assert(passed);
+    passed = true;
+    for (int i=0; i<M5; i++) { passed &= (v5[i] == r5*HIST_INIT(5,0,i)); }
+    unit_assert(passed);
+
+    
+    //--------------------------------------------------
     
     unit_func("deallocate_temporary");
 

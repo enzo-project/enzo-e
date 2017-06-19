@@ -43,11 +43,6 @@ public: // functions
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
 
-public:
-
-  /// Continue on to Problem::output_wait() from checkpoint
-  virtual void r_write_checkpoint();
-
 public: // virtual functions
 
   /// Initialize the Enzo Simulation

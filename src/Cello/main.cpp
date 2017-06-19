@@ -75,6 +75,7 @@ void Main::p_checkpoint(int count, std::string dir_name)
     // ENTRY: checkpoint if Simulation is root
     // --------------------------------------------------
 #ifdef CHARM_ENZO
+    CkPrintf ("Calling CkStartCheckpoint\n");
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint(),proxy_simulation);
     CkStartCheckpoint (dir_checkpoint_,callback);
 #endif

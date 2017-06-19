@@ -137,15 +137,8 @@ public: // interface
 	      bool use_file = false) const throw();
 
   //----------------------------------------------------------------------
-  // BLAS Operations
+  // BLAS Operations [depreciated]
   //----------------------------------------------------------------------
-
-  // /// copy field is to field id
-  // void copy (const FieldDescr *, int id, int is, bool ghosts = true ) throw();
-
-  /// Compute field(iz) =  a * field(ix) + field(iy)
-  void axpy (const FieldDescr *, int iz, long double a, int ix, int iy,
-  	     bool ghosts = true ) throw();
 
   /// Compute inner product field(ix) . field(iy)
   double dot (const FieldDescr *, int ix, int iy) throw();
@@ -168,15 +161,28 @@ public: // interface
     return (1 <= ih && ih <= nh) ? history_time_[ih-1] : 0.0;
   }
 
+  //----------------------------------------------------------------------
+  // Units operations
+  //----------------------------------------------------------------------
+
+  /// scale the field to cgs units given the unit scaling factor
+  /// if it's already in cgs, then leave as-is
+  /// except if it's in cgs but the scaling factor has changed (e.g. due to
+  /// expansion) then adjust for the new scaling factor
+  void units_scale_cgs (const FieldDescr *, int id, double amount);
+    
+  /// convert the field to "code units" given the unit scaling factor
+  /// if it's already in code units, leave it as-is
+  /// warning if scaling factor has changed
+  void units_scale_code (const FieldDescr *, int id, double amount);
+
+  /// Return the current scaling factor of the given Field
+  /// 1.0 if in code units, or the scaling factor if in cgs
+  double units_scaling (const FieldDescr *, int id);
+
   //--------------------------------------------------
 private: // functions
   //--------------------------------------------------
-
-  template<class T>
-  void axpy_ (T * Z, long double a, const T * X, const T * Y, bool ghosts,
-	      int mx, int my, int mz,
-	      int nx, int ny, int nz,
-	      int gx, int gy, int gz) const throw();
 
   template<class T>
   long double dot_(const T* X, const T* Y,
@@ -210,7 +216,18 @@ private: // functions
 
   /// (Re-)initialize temporary fields for history
   void set_history_ (const FieldDescr * field_descr);
- 
+
+  /// Allocate (more) units_scaling_ array values
+  void units_allocate_ (int n)
+  {
+    int i=units_scaling_.size();
+    if (i < n+1) {
+      units_scaling_.resize(n+1);
+      for (; i<n+1; i++) {
+	units_scaling_[i] = 1.0;
+      }
+    }
+  }
   template <class T>
   void print_
   (const T * field,
@@ -250,6 +267,9 @@ private: // attributes
 
   /// Saved times for history fields [ip]
   std::vector<double> history_time_;
+
+  /// Current scaling of each field
+  std::vector<double> units_scaling_;
 };   
 
 #endif /* DATA_FIELD_DATA_HPP */

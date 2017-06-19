@@ -181,6 +181,8 @@ namespace cello {
   const double k  = 1.3806504e-16;
   // Solar mass in CGS
   const double mass_solar = 1.98855e33;
+  // Hydrogen mass in CGS
+  const double mass_hydrogen = 1.67262171e-24;
   
   // precision functions
   double machine_epsilon     (int);

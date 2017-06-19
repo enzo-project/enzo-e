@@ -105,7 +105,6 @@ module enzo {
     entry EnzoSimulation (const char filename[n], int n);
 
     entry void r_startup_begun (CkReductionMsg *);
-    entry void r_write_checkpoint ();
   }
 
   array[Index] EnzoBlock : Block {

@@ -56,6 +56,11 @@ public: // interface
   void set_cosmology(Physics * cosmology)
   { cosmology_ = cosmology; }
 
+  
+  /// Return magnetic units scaling factor
+  inline double magnetic() const
+  { return std::sqrt(pressure()*4.0*(cello::pi)); }
+
 private: // functions
 
 
