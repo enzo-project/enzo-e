@@ -1,0 +1,146 @@
+.. include:: roles.incl
+
+
+:p:`Method:ppm` parameters are used to initialize parameters for
+Enzo-P's PPM hydrodynamics method.
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`density_floor`
+:Summary: :s:`Lower limit on density`
+:Type:   :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:     :z:`Enzo`
+
+:e:`Density floor, which replaces Enzo's "tiny_number".`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`diffusion`
+:Summary: :s:`PPM diffusion parameter`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`PPM diffusion parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`dual_energy`
+:Summary: :s:`Whether to use dual-energy formalism`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Whether to use the dual-energy formalism.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`dual_energy_eta_1`
+:Summary: :s:`Dual energy parameter eta 1`
+:Type:   :t:`float`
+:Default: :d:`0.001`
+:Scope:     :z:`Enzo`
+
+:e:`First dual-energy formalism parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`dual_energy_eta_2`
+:Summary: :s:`Dual energy parameter eta 2`
+:Type:   :t:`float`
+:Default: :d:`0.1`
+:Scope:     :z:`Enzo`
+
+:e:`Second dual-energy formalism parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`flattening`
+:Summary: :s:`PPM flattening parameter`
+:Type:   :t:`integer`
+:Default: :d:`3`
+:Scope:     :z:`Enzo`
+
+:e:`PPM flattening parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`minimum_pressure_support_parameter`
+:Summary: :s:`Enzo's MinimumPressureSupportParameter`
+:Type:   :t:`integer`
+:Default: :d:`100`
+:Scope:     :z:`Enzo`
+
+:e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`number_density_floor`
+:Summary: :s:`Lower limit on number density`
+:Type:   :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:     :z:`Enzo`
+
+:e:`Number density floor, which replaces Enzo's "tiny_number".`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`pressure_floor`
+:Summary: :s:`Lower limit on pressure`
+:Type:   :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:     :z:`Enzo`
+
+:e:`Pressure floor, which replaces Enzo's "tiny_number".`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`pressure_free`
+:Summary: :s:`Pressure-free flag`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Pressure-free flag.` 
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`steepening`
+:Summary: :s:`PPM steepening parameter`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`PPM steepening parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`temperature_floor`
+:Summary: :s:`Lower limit on temperature`
+:Type:   :t:`float`
+:Default: :d:`1.0e-6`
+:Scope:     :z:`Enzo`
+
+:e:`Temperature floor, which replaces Enzo's "tiny_number".`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`use_minimum_pressure_support`
+:Summary: :s:`Minimum pressure support`
+:Type:   :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Enzo's` UseMinimumPressureSupport :e:`parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`mol_weight`
+:Summary: :s:`Mean molecular mass`
+:Type:   :t:`float`
+:Default: :d:`0.6`
+:Scope:     :z:`Enzo`
+
+:e:`Mean molecular mass used in computing temperature.`
+
