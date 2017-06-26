@@ -21,7 +21,7 @@ public: // interface
   (double density_floor,
    double temperature_floor,
    double mol_weight,
-   int comoving_coordinates);
+   bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeTemperature);
@@ -31,7 +31,7 @@ public: // interface
     : density_floor_(0.0),
       temperature_floor_(0.0),
       mol_weight_(0.0),
-      comoving_coordinates_(0.0)
+      comoving_coordinates_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -56,7 +56,7 @@ private: // attributes
   // mol weight: default 0.6
   double mol_weight_;
 
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 
 };
 

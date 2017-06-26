@@ -15,7 +15,7 @@ EnzoComputeTemperature::EnzoComputeTemperature
 (double density_floor,
  double temperature_floor,
  double mol_weight,
- int comoving_coordinates ) 
+ bool comoving_coordinates ) 
   : Compute(),
     density_floor_(density_floor),
     temperature_floor_(temperature_floor),

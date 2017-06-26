@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoComputePressure::EnzoComputePressure (double gamma,
-					  int comoving_coordinates)
+					  bool comoving_coordinates)
   : Compute(),
     gamma_(gamma),
     comoving_coordinates_(comoving_coordinates)

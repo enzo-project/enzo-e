@@ -24,7 +24,7 @@ int EnzoBlock::SolveHydroEquations
 (
  enzo_float time,
  enzo_float dt,
- int comoving_coordinates
+ bool comoving_coordinates
  )
 {
   int NumberOfSubgrids = 0;
@@ -228,7 +228,7 @@ int EnzoBlock::SolveHydroEquations
 
   ASSERT ("EnzoBlock::SolveHydroEquations()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates && (cosmology != NULL)) );
+	  ! (comoving_coordinates && (cosmology == NULL)) );
 
   if (comoving_coordinates) {
     cosmology->compute_expansion_factor(&a, &dadt, time+0.5*dt);

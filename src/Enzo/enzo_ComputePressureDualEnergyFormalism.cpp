@@ -17,7 +17,7 @@
 int EnzoBlock::ComputePressureDualEnergyFormalism
 (enzo_float time, 
  enzo_float *pressure,
- int comoving_coordinates)
+ bool comoving_coordinates)
 {
  
   /* declarations */
@@ -101,7 +101,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
 
     ASSERT ("EnzoBlock::ComputePressureDualEnergyFormalism()",
 	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	    ! (comoving_coordinates && (cosmology != NULL)) );
+	    ! (comoving_coordinates && (cosmology == NULL)) );
 
     if (comoving_coordinates) {
 

@@ -13,12 +13,16 @@
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
 (
  const FieldDescr * field_descr,
- EnzoConfig * enzo_config
+ bool comoving_coordinates
 ) 
   : Method(),
-    comoving_coordinates_(enzo_config->physics_cosmology)
+    comoving_coordinates_(comoving_coordinates)
 {
-  // do nothing!
+  if ( ! comoving_coordinates_ ) {
+    WARNING
+      ("EnzoMethodComovingExpansion::EnzoMethodComovingExpansion()",
+       "Including \"comoving_expansion\" method but cosmology is disabled");
+  }
 }
 
 //----------------------------------------------------------------------
@@ -46,7 +50,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
   ASSERT ("EnzoMethodComovingExpansion::compute()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
   /* Compute adot/a at time = t-1/2dt (time-centered). */
 
@@ -160,7 +164,7 @@ double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
 
   ASSERT ("EnzoMethodComovingExpansion::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 

@@ -89,7 +89,7 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
 
   ASSERT ("EnzoMethodPpml::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
   if (cosmology) {
     cosmology->compute_expansion_factor (&a, &dadt,enzo_block->time());

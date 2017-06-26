@@ -17,7 +17,7 @@ EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
 				 double energy_ratio_min_refine,
 				 double energy_ratio_max_coarsen,
 				 double gamma,
-				 int comoving_coordinates,
+				 bool comoving_coordinates,
 				 int max_level,
 				 bool include_ghosts,
 				 std::string output) throw ()

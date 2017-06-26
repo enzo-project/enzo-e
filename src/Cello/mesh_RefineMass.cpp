@@ -20,7 +20,6 @@ RefineMass::RefineMass
  std::string output) throw ()
   : Refine(min_refine,max_coarsen,max_level,include_ghosts,output),
     level_exponent_(level_exponent)
-  // ENZO non-cosmology
 
   //    MinimumMassForRefinement[0] = MinimumOverDensityForRefinement[0];
   //    for (int dim = 0; dim < MetaData.TopGridRank; dim++)

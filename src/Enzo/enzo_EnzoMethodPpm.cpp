@@ -86,7 +86,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   ASSERT ("EnzoMethodPpm::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
   if (comoving_coordinates_) {
 

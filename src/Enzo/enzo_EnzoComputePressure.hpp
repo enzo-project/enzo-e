@@ -18,7 +18,7 @@ public: // interface
 
   /// Create a new EnzoComputePressure object
   EnzoComputePressure(double gamma,
-		      int comoving_coordinates);
+		      bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputePressure);
@@ -26,7 +26,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoComputePressure (CkMigrateMessage *m)
     : gamma_(0.0),
-      comoving_coordinates_(0)
+      comoving_coordinates_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -43,7 +43,7 @@ protected: // functions
 protected: // attributes
 
   double gamma_;
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 
 };
 

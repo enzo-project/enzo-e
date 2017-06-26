@@ -34,7 +34,7 @@ static const enzo_float MINIMUM_TEMPERATURE = 1.0;
 int EnzoBlock::ComputeTemperatureField
 (
  enzo_float *temperature,
- int comoving_coordinates
+ bool comoving_coordinates
  )
 {
  
@@ -103,7 +103,7 @@ int EnzoBlock::ComputeTemperatureField
 
   ASSERT ("EnzoBlock::ComputeTemperatureField()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates && (cosmology != NULL)) );
+	  ! (comoving_coordinates && (cosmology == NULL)) );
 
   if (comoving_coordinates) {
 

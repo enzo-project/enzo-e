@@ -28,7 +28,7 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
  double density_initial,
  double temperature_initial,
  double mach_number,
- int comoving_coordinates)
+ bool comoving_coordinates)
   : Method(),
     density_initial_(density_initial),
     temperature_initial_(temperature_initial),

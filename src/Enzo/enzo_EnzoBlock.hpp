@@ -182,30 +182,30 @@ public: // interface
 
   /// Compute the ratio of specific heats
   int ComputeGammaField(enzo_float *GammaField,
-			int comoving_coordinates);
+			bool comoving_coordinates);
 
   /// Compute the pressure field at the given time) - dual energy
   int ComputePressureDualEnergyFormalism
   ( enzo_float time, 
     enzo_float *pressure,
-    int comoving_coordinates);
+    bool comoving_coordinates);
 
   /// Compute the pressure field at the given time
   int ComputePressure(enzo_float time, enzo_float *pressure, 
-		      int comoving_coordinates);
+		      bool comoving_coordinates);
 
   /// Compute the temperature field
   int ComputeTemperatureField (enzo_float *temperature, 
-			       int comoving_coordinates);
+			       bool comoving_coordinates);
 
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-			int comoving_coordinates);
+			bool comoving_coordinates);
 
   /// Solve the hydro equations using PPM
   int SolveHydroEquations ( enzo_float time, 
 			    enzo_float dt,
-			    int comoving_coordinates);
+			    bool comoving_coordinates);
 
   /// Solve the hydro equations using Enzo 3.0 PPM
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);

@@ -25,7 +25,7 @@
 int EnzoBlock::ComputeGammaField
 (
  enzo_float *GammaField,
- int comoving_coordinates
+ bool comoving_coordinates
 )
 {
  

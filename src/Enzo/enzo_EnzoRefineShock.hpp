@@ -25,7 +25,7 @@ public: // interface
    double energy_ratio_min_refine,
    double energy_ratio_max_coarsen,
    double gamma,
-   int comoving_coordinates,
+   bool comoving_coordinates,
    int max_level,
    bool include_ghosts,
    std::string output) throw();
@@ -42,7 +42,7 @@ public: // interface
       energy_ratio_min_refine_(0.0),
       energy_ratio_max_coarsen_(0.0),
       gamma_(0.0),
-      comoving_coordinates_(0)
+      comoving_coordinates_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -100,7 +100,7 @@ private: // attributes
   double gamma_;
 
   /// Comoving coordinates
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_REFINE_SHOCK_HPP */

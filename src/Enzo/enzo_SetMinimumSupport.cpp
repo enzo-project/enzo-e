@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
  
 int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-				 int comoving_coordinates)
+				 bool comoving_coordinates)
 {
   if (NumberOfBaryonFields > 0) {
  
@@ -27,7 +27,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 
     ASSERT ("EnzoBlock::SetMinimumSupport()",
 	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	    ! (comoving_coordinates && (cosmology != NULL)) );
+	    ! (comoving_coordinates && (cosmology == NULL)) );
 
     if (comoving_coordinates) {
       cosmology ->compute_expansion_factor(&a, &dadt,time());

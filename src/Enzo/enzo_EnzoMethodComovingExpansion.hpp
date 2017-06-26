@@ -18,7 +18,7 @@ public: // interface
 
   /// Create a new EnzoMethodComovingExpansion object
   EnzoMethodComovingExpansion(const FieldDescr * field_descr,
-                              EnzoConfig * enzo_config);
+                              bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodComovingExpansion);
@@ -42,7 +42,7 @@ public: // interface
 
 private: // attributes
 
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP */

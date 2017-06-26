@@ -25,7 +25,7 @@
  
 int EnzoBlock::ComputePressure(enzo_float time, 
 			       enzo_float *pressure,
-			       int comoving_coordinates)
+			       bool comoving_coordinates)
 {
 
   const int in = cello::index_static();
@@ -163,7 +163,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
 
     ASSERT ("EnzoBlock::ComputePressure()",
 	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	    ! (comoving_coordinates && (cosmology != NULL)) );
+	    ! (comoving_coordinates && (cosmology == NULL)) );
     
     if (comoving_coordinates) {
 

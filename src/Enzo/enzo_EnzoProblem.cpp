@@ -321,33 +321,41 @@ Method * EnzoProblem::create_method_
  
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   
+  //--------------------------------------------------
   if (name == "ppm") {
     method = new EnzoMethodPpm 
       (field_descr,
        enzo_config);
+    //--------------------------------------------------
   } else if (name == "ppml") {
     method = new EnzoMethodPpml
       (field_descr,
        enzo_config);
+    //--------------------------------------------------
   } else if (name == "pm_deposit") {
     method = new EnzoMethodPmDeposit  
       (field_descr, particle_descr, 
        enzo_config->method_pm_deposit_type, 0.5);
+    //--------------------------------------------------
   } else if (name == "pm_update") {
     method = new EnzoMethodPmUpdate  
       (field_descr, particle_descr, enzo_config->method_pm_update_max_dt);
+    //--------------------------------------------------
   } else if (name == "heat") {
     method = new EnzoMethodHeat
       (field_descr,
        enzo_config->method_heat_alpha,
        config->method_courant[index_method]);
+    //--------------------------------------------------
   } else if (name == "null") {
     method = new EnzoMethodNull
       (enzo_config->method_null_dt);
 #ifdef CONFIG_USE_GRACKLE
+    //--------------------------------------------------
   } else if (name == "grackle") {
     method = new EnzoMethodGrackle (enzo_config,field_descr);
 #endif /* CONFIG_USE_GRACKLE */
+    //--------------------------------------------------
   } else if (name == "turbulence") {
     method = new EnzoMethodTurbulence 
       (field_descr,
@@ -356,6 +364,16 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
+
+    //--------------------------------------------------
+  } else if (name == "comoving_expansion") {
+
+    bool comoving_coordinates = enzo_config->physics_cosmology;
+    
+    method = new EnzoMethodComovingExpansion
+      ( field_descr, comoving_coordinates );
+
+    //--------------------------------------------------
   } else if (name == "gravity") {
 
     std::string solver_name = enzo_config->method_gravity_solver;
@@ -374,6 +392,7 @@ Method * EnzoProblem::create_method_
       (field_descr, enzo_config->solver_index[solver_name],
        enzo_config->method_gravity_grav_const);
       
+    //--------------------------------------------------
   } else {
     method = Problem::create_method_ 
       (name,config, index_method,field_descr,particle_descr);

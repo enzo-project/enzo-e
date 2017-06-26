@@ -42,7 +42,7 @@ public: // interface
 
 protected: // interface
 
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_METHOD_PPM_HPP */

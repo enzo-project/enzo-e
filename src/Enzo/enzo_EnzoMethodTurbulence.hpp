@@ -25,7 +25,7 @@ public: // interface
 		       double density_initial,
 		       double temperature_initial,
 		       double mach_number,
-		       int comoving_coordinates);
+		       bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodTurbulence);
@@ -73,7 +73,7 @@ private: // attributes
   double mach_number_;
 
   // Comoving Coordinates
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_METHOD_TURBULENCE_HPP */
