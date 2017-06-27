@@ -16,21 +16,15 @@
 #   define ETA_TOLERANCE 1.0e-5
 #   define ENZO_HUGE_VAL HUGE_VALF
 #   define type_enzo_float type_float
-#   define CONFIG_BFLOAT_4
-#   define CONFIG_PFLOAT_4
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
 #   define ETA_TOLERANCE 1.0e-10
 #   define ENZO_HUGE_VAL HUGE_VAL
 #   define type_enzo_float type_double
-#   define CONFIG_BFLOAT_8
-#   define CONFIG_PFLOAT_8
 #endif
 #ifdef CONFIG_PRECISION_QUAD
 #   define ETA_TOLERANCE 1.0e-20
 #   define ENZO_HUGE_VAL HUGE_VALL
-#   define CONFIG_BFLOAT_16
-#   define CONFIG_PFLOAT_16
 #endif
 
 //----------------------------------------------------------------------
