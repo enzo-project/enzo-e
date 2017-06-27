@@ -138,13 +138,13 @@ fields
 PPML ideal MHD solver
 
 ``"pm_deposit"``: particle-mesh
-=======================================
+===============================
 
 Particle-mesh ("PM") method component to deposit of field and particle
 mass into a "total density" field
    
 ``"pm_update"``: particle-mesh
-======================================
+==============================
 
 Particle-mesh ("PM") method component to update particle positions
 given acceleration fields
@@ -157,17 +157,25 @@ A sample Method for implementing forward-euler to solve the heat equation.
 ``"grackle"``: chemistry/cooling
 ================================
 
-Calls methods provided by the external Grackle 3.0 chemistry and cooling library.
+Calls methods provided by the external Grackle 3.0 chemistry and
+cooling library.
+   
+``"comoving_expansion"``: comoving expansion
+============================================
+
+Adds the comoving expansion terms to the physical variables.
    
 ``"turbulence"``: driving
-===================================
+=========================
 
 Turbulence driving.
 
 ``"gravity"``: particle-mesh
-====================================
+============================
 
-Particle-mesh ("PM") method component to compute gravitational potential given a total density field, and calculate associated acceleration fields.
+Particle-mesh ("PM") method component to compute gravitational
+potential given a total density field, and calculate associated
+acceleration fields.
    
 ``"trace"``: tracer particles
 =============================
