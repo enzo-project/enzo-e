@@ -593,7 +593,7 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 :Default: :d:`"value"`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies how the field variables in the simulation will be initialized.  The default is` ``"value"`` :e:`, in which case field variables are initialized directly in the input file, e.g.`
+:e:`This parameter specifies how the field variables in the simulation will be initialized.  The default is` ``"value"``, :e:`in which case field variables are initialized directly in the input file, e.g.`
 
     ::
 
@@ -624,6 +624,116 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 :Scope:     :c:`Cello`
 
 :e:`This parameter is used to initialize fields when the` :p:`type` :e:`parameter is` ``"value".``  :e:`The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  Example: [ sin ( x + y ), x - y < 0, 1.0 ] is read as "sin ( x + y ) where x - y < 0, 1.0 elsewhere".`
+
+hdf5
+----
+
+The :p:`hdf5` Initial subgroup is used to read block data from HDF5
+files.  Parameters are used to specify the HDF5 files to read from, the
+names of the HDF5 datasets, what type of data the datasets contain (``"field"`` or
+``"particle"``), and field names or particle names and attributes.
+Additionally, a :p:`coords` parameter is used to specify the axis
+ordering used.  The :p:`hdf5` group has its own :p:`list` parameter, one
+for each field or particle type and attribute.
+
+The following example reads the ``"density"`` field from ``"GridDensity"``
+file, and the ``"dark"`` particle ``"position_x"`` attributes from the
+``"ParticleDisplacements_x"`` file:
+
+    ::
+
+     Initial {
+
+       list = ["hdf5"];
+       hdf5 {
+
+          file_list = ["FD","PX"];
+          FD {
+            type      = "field";
+	    name      = "density";
+	    coords    = ".zyx";
+	    file      = "GridDensity";
+	    dataset   = "GridDensity";
+	  }
+          PX {
+	    type      = "particle";
+	    name      = "dark";
+	    coords    = ".zyx";
+	    attribute = "position_x";
+	    file      = "ParticleDisplacements_x";
+	    dataset   = "ParticleDisplacements_x";
+	  }
+       }
+     }
+  
+:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`list`
+:Summary: :s:`Name of the HDF5 to read from`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`List of file identifiers, one for each field or particle type+attribute.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`type`
+:Summary: :s:`Type of data to read in`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Type of data to read in, either "field" or "particle".`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`file`
+:Summary: :s:`Name of the HDF5 file to read from`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Name of the HDF5 file to read from.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`dataset`
+:Summary: :s:`Name of the dataset to read from the the HDF5 file`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Name of the dataset to read from the the HDF5 file.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`name`
+:Summary: :s:`Name of the field or particle type`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Name of the field or particle type.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`attribute`
+:Summary: :s:`Name of the particle attribute to initialize`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:   :z:`Enzo`
+
+:e:`Name of the particle attribute to initialize..`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`coords`
+:Summary: :s:`Ordering of axes in the HDF5 file`
+:Type:    :t:`string`
+:Default: :d:`"zyx"`
+:Scope:   :z:`Enzo`
+
+:e:`String defining the axis ordering of 'x', 'y', and 'z' in the HDF5 file.  For MUSIC initial conditions, which may have 4D datasets, "tzyx" can be used,  where "t" is ignored and can be any character other than 'x', 'y', or 'z'.`
+
 
 sedov
 -----
