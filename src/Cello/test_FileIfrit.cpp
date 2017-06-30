@@ -129,7 +129,9 @@ PARALLEL_MAIN_BEGIN
   ifrit_a.group_write_meta(&a_nx,"nx",type_int);
   ifrit_a.group_write_meta(&a_ny,"ny",type_int);
 
-  ifrit_a.data_create ("char", type_char, a_nx,a_ny,a_nz);
+  ifrit_a.mem_create(a_nx,a_ny,a_nz,a_nx,a_ny,a_nz,0,0,0);
+
+  ifrit_a.data_create ("char", type_char, a_nx,a_ny,a_nz,1);
   ifrit_a.data_write_meta(&ma_char, "meta_char", type_char, a_mx, a_my);
   ifrit_a.data_write (a_char);
   ifrit_a.data_close ();
@@ -138,7 +140,7 @@ PARALLEL_MAIN_BEGIN
   //  ifrit_a.group_create ("/test/int");
   ifrit_a.group_chdir ("int");
   ifrit_a.group_create ();
-  ifrit_a.data_create ("int", type_int, a_nx,a_ny,a_nz);
+  ifrit_a.data_create ("int", type_int, a_nx,a_ny,a_nz,1);
   ifrit_a.data_write_meta(&ma_int, "meta_int", type_int, a_mx, a_my);
   ifrit_a.data_write (a_int);
   ifrit_a.data_close ();
@@ -149,7 +151,7 @@ PARALLEL_MAIN_BEGIN
   ifrit_a.group_chdir ("../../test2/long/long/type/is/long");
   ifrit_a.group_create ();
 
-  ifrit_a.data_create ("long_long", type_long_long, a_nx,a_ny,a_nz);
+  ifrit_a.data_create ("long_long", type_long_long, a_nx,a_ny,a_nz,1);
   ifrit_a.data_write_meta
     (&ma_long_long, "meta_long_long", type_long_long, a_mx, a_my);
   ifrit_a.data_write (a_long_long);
@@ -159,13 +161,13 @@ PARALLEL_MAIN_BEGIN
   ifrit_a.group_chdir ("/test2/scalar/long/group");
   ifrit_a.group_create ();
 
-  ifrit_a.data_create ("float", type_float, a_nx,a_ny,a_nz);
+  ifrit_a.data_create ("float", type_float, a_nx,a_ny,a_nz,1);
   ifrit_a.data_write_meta(&ma_float, "meta_float", type_float, a_mx, a_my);
   ifrit_a.data_write (a_float);
   ifrit_a.data_close ();
   ifrit_a.group_close();
 
-  ifrit_a.data_create ("double",type_double, a_nx,a_ny,a_nz);
+  ifrit_a.data_create ("double",type_double, a_nx,a_ny,a_nz,1);
   ifrit_a.data_write_meta(&ma_double, "meta_double", type_double, a_mx, a_my);
   ifrit_a.data_write (a_double);
   ifrit_a.data_close ();

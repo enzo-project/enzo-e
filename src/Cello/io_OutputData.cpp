@@ -215,7 +215,14 @@ void OutputData::write_field_data
 
     // Write ith FieldData data
 
-    file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
+    file_->mem_create(nx,ny,nz,nx,ny,nz,0,0,0);
+    if (nzd > 1) {
+      file_->data_create(name.c_str(),type,nzd,nyd,nxd,1,nz,ny,nx,1);
+    } else if (nyd > 1) {
+      file_->data_create(name.c_str(),type,nyd,nxd,  1,1,ny,nx, 1,1);
+    } else {
+      file_->data_create(name.c_str(),type,nxd,  1,  1,1,nx,  1,1,1);
+    }
     file_->data_write(buffer);
     file_->data_close();
   }
@@ -273,7 +280,8 @@ void OutputData::write_particle_data
 	nx=n;	ny=1;	nz=1;
       }
 
-      file_->data_create(name.c_str(),type,nxd,nyd,nzd,nx,ny,nz);
+      file_->mem_create(nxd,nyd,nzd,nx,ny,nz,0,0,0);
+      file_->data_create(name.c_str(),type,nxd,nyd,nzd,1,nx,ny,nz,1);
       file_->data_write(buffer);
       file_->data_close();
     }

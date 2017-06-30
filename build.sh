@@ -5,7 +5,7 @@
 #   CELLO_ARCH
 #   CELLO_PREC
 #
-# Output status files
+# Output status files for ./build.sh test
 #
 #   test/STATUS
 #   test/DATE
@@ -93,6 +93,8 @@ else
     echo "Remove $target"
 fi
 
+echo "Compiling" > test/STATUS
+
 date=`date +"%Y-%m-%d"`
 start=`date +"%H:%M:%S"`
 echo "$date $start BEGIN"
@@ -106,11 +108,6 @@ rm -f "test/*/running.$arch.$prec"
 
 configure=$arch-$prec
 configure_print=`printf "%s %s %s" $arch $prec`
-
-echo "Compiling" > test/STATUS
-echo "$date" > test/DATE
-echo "$start" > test/START
-rm -f test/STOP
 
 # make output directory for compilation and tests
 
@@ -149,6 +146,11 @@ printf "done\n" >> $log
 
 if [ $target == "test" ]; then
 
+    echo "$date"     > test/DATE
+    echo "$start"    > test/START
+
+    rm -f              test/STOP
+
    # count crashes
 
    grep FAIL $dir/*unit       | grep "0/" | sort > $dir/fail.$configure
@@ -180,6 +182,8 @@ if [ $target == "test" ]; then
       fi
    done
 
+   echo "$stop" > test/STOP
+   echo "${t}"  > test/TIME
 
 fi
 
@@ -190,8 +194,6 @@ if [ x$CELLO_ARCH == "xncsa-bw" ]; then
    mv build/charm/Enzo/enzo-p bin/charm
 
 fi
-
-rm -f test/STATUS
 
 cp test/out.scons out.scons.$arch-$prec
 
@@ -204,8 +206,8 @@ t=`echo "scale=2; (( $S1 - $S0 ) + 60 * ( ( $M1 - $M0 ) + 60 * ( $H1 - $H0) ))/6
 echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time = ${t} min"
 
 d=`date "+%H:%M:%S"`
-echo "$stop" > test/STOP
-echo "${t}" > test/TIME
+
+rm -f          test/STATUS
 
 
 

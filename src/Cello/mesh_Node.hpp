@@ -27,7 +27,6 @@ public: // interface
   /// Set the data payload for the Node
   void set_data(void * data)
   { data_ = data;
-    have_data_ = data != NULL;
   }
 
   /// Return the data for the given Node
@@ -52,9 +51,6 @@ private: // functions
 
 
 private: // attributes
-
-  /// Whether data_ is null
-  bool have_data_;
 
   /// Pointer to the data payload for the Node
   void * data_;

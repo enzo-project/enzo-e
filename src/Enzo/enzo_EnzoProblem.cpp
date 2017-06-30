@@ -93,7 +93,10 @@ Initial * EnzoProblem::create_initial_
 
   EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
 
-  if (type == "implosion_2d") {
+  if (type == "hdf5") {
+    initial = new EnzoInitialHdf5 (cycle,time,enzo_config);
+    
+  } else if (type == "implosion_2d") {
 
     initial = new EnzoInitialImplosion2(cycle,time);
 

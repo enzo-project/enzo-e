@@ -49,10 +49,11 @@ module enzo {
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  PUPable EnzoInitialCollapse;
   PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialHdf5;
   PUPable EnzoInitialPm;
   PUPable EnzoInitialPpmlTest;
-  PUPable EnzoInitialCollapse;
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;

@@ -19,7 +19,10 @@ class File {
 public: // interface
 
   /// Create a file with the given path and filename
-  File (std::string path, std::string name) throw();
+  File (std::string path, std::string name) throw()
+    : path_(path),
+      name_(name)
+  {}
 
   /// Create a file with the given path and filename
   virtual ~File () throw()
@@ -52,26 +55,36 @@ public: // virtual functions
   /// Read a metadata item associated with the file
   virtual void file_read_meta
   ( void * buffer, std::string name,  int * s_type,
-    int * nx=0, int * ny=0, int * nz=0) throw() = 0;
+    int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
   
   /// Write a metadata item associated with the file
   virtual void file_write_meta
   ( const void * buffer, std::string name, int type,
-    int nx=1, int ny=0, int nz=0) throw() = 0;
+    int n1=1, int n2=0, int n3=0, int n4=0) throw() = 0;
   
 
   // Datasets
 
-  /// Open an existing dataset for reading
-  virtual void data_open
-  ( std::string name,  int * type,
-    int * nx=0, int * ny=0, int * nz=0) throw() = 0;
-
   /// Create a new dataset for writing (and open it)
   virtual void data_create
   ( std::string name,  int type,
-    int nxd=1, int nyd=0, int nzd=0,
-    int nx=0,  int ny=0,  int nz=0) throw() = 0;
+    int m1=1, int m2=0, int m3=0, int m4=0,
+    int n1=0, int n2=0, int n3=0, int n4=0,
+    int o1=0, int o2=0, int o3=0, int o4=0) throw() = 0;
+
+  /// Open an existing dataset for reading
+  virtual void data_open
+  ( std::string name,  int * type,
+    int * m1=0, int * m2=0, int * m3=0, int * m4=0) throw() = 0;
+
+  /// Select a subset of the data
+  virtual void data_slice
+  ( int m1, int m2, int m3, int m4,
+    int n1, int n2, int n3, int n4,
+    int o1, int o2, int o3, int o4) throw() = 0;
+
+  /// Return the size of the disk dataset
+  virtual int data_size (int * m4) throw() = 0;
 
   /// Read from the opened dataset
   virtual void data_read (void * buffer) throw() = 0;
@@ -86,13 +99,18 @@ public: // virtual functions
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
   ( void * buffer, std::string name,  int * s_type,
-    int * nx, int * ny=0, int * nz=0) throw() = 0;
+    int * n1, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
   ( const void * buffer, std::string name, int type,
-    int nx=1, int ny=0, int nz=0) throw() = 0;
+    int n1=1, int n2=0, int n3=0, int n4=0) throw() = 0;
 
+  /// Create memory space
+  virtual void mem_create
+  ( int mx, int my, int mz,
+    int nx, int ny, int nz,
+    int gx, int gy, int gz ) = 0;
 
   // Groups
 
@@ -117,12 +135,12 @@ public: // virtual functions
   /// Read a metadata item associated with the opened group
   virtual void group_read_meta
   ( void * buffer, std::string name,  int * s_type,
-    int * nx=0, int * ny=0, int * nz=0) throw() = 0;
+    int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw() = 0;
   
   /// Write a metadata item associated with the opened group
   virtual void group_write_meta
   ( const void * buffer, std::string name, int type,
-    int nx=1, int ny=0, int nz=0) throw() = 0;
+    int n1=1, int n2=0, int n3=0, int n4=0) throw() = 0;
 
 protected: // attributes
 

@@ -46,11 +46,10 @@ public: // interface
     p | data_name_;
     p | data_type_;
     p | data_rank_;
-    PUParray(p,data_dims_,3);
+    PUParray(p,data_dims_,4);
     p | data_prop_;
     p | is_data_open_;
     p | compress_level_;
-    
   }
 
 public: // virtual functions
@@ -69,27 +68,37 @@ public: // virtual functions
   /// Read a metadata item associated with the file
   virtual void file_read_meta
   ( void * buffer, std::string name,  int * s_type,
-    int * nx=0, int * ny=0, int * nz=0) throw();
+    int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
   /// Write a metadata item associated with the file
   virtual void file_write_meta
   ( const void * buffer, std::string name, int type,
-    int nx=1, int ny=0, int nz=0) throw()
-  { write_meta_ ( file_id_, buffer, name, type, nx,ny,nz); }
+    int n1=1, int n2=0, int n3=0, int n4=0) throw()
+  { write_meta_ ( file_id_, buffer, name, type, n1,n2,n3,n4); }
 
   // Datasets
+
+/// Create a new dataset for writing (and open it)
+  virtual void data_create
+  ( std::string name,  int type,
+    int m1=1, int m2=0, int m3=0, int m4=0,
+    int n1=0, int n2=0, int n3=0, int n4=0,
+    int o1=0, int o2=0, int o3=0, int o4=0) throw();
 
   /// Open an existing dataset for reading
   virtual void data_open
   ( std::string name,  int * type,
-    int * nx=0, int * ny=0, int * nz=0) throw();
+    int * m1=0, int * m2=0, int * m3=0, int * m4=0) throw();
 
-  /// Create a new dataset for writing (and open it)
-  virtual void data_create
-  ( std::string name,  int type,
-    int nxd=1, int nyd=0, int nzd=0,
-    int nx=0, int ny=0, int nz=0) throw();
+  /// Select a subset of the data
+  virtual void data_slice
+  ( int m1, int m2, int m3, int m4,
+    int n1, int n2, int n3, int n4,
+    int o1, int o2, int o3, int o4) throw();
 
+  /// Return the size of the disk dataset
+  virtual int data_size (int * m4) throw();
+  
   /// Read from the opened dataset
   virtual void data_read (void * buffer) throw();
 
@@ -103,14 +112,19 @@ public: // virtual functions
   /// Read a metadata item associated with the opened dataset
   virtual void data_read_meta
   ( void * buffer, std::string name,  int * s_type,
-    int * nx=0, int * ny=0, int * nz=0) throw();
+    int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
   /// Write a metadata item associated with the opened dataset
   virtual void data_write_meta
   ( const void * buffer, std::string name, int type,
-    int nx=1, int ny=0, int nz=0) throw()
-  { write_meta_ ( data_id_, buffer, name, type, nx,ny,nz); }
+    int n1=1, int n2=0, int n3=0, int n4=0) throw()
+  { write_meta_ ( data_id_, buffer, name, type, n1,n2,n3,n4); }
 
+  /// Create memory space
+  virtual void mem_create
+  ( int mx, int my, int mz,
+    int nx, int ny, int nz,
+    int gx, int gy, int gz );
 
   // Groups
 
@@ -135,13 +149,13 @@ public: // virtual functions
   /// Read a metadata item associated with the opened group
   void group_read_meta
   ( void * buffer, std::string name,  int * s_type,
-    int * nx=0, int * ny=0, int * nz=0) throw();
+    int * n1=0, int * n2=0, int * n3=0, int * n4=0) throw();
   
   /// Write a metadata item associated with the opened group
   virtual void group_write_meta
   ( const void * buffer, std::string name, int type,
-    int nx=1, int ny=0, int nz=0) throw()
-  { write_meta_ ( group_id_, buffer, name, type, nx,ny,nz ); }
+    int n1=1, int n2=0, int n3=0, int n4=0) throw()
+  { write_meta_ ( group_id_, buffer, name, type, n1,n2,n3,n4); }
 
 public: // functions
 
@@ -156,7 +170,7 @@ protected: // functions
 
   virtual void write_meta_
   ( hid_t id, const void * buffer, std::string name, int type,
-    int nx=1, int ny=0, int nz=0) throw();
+    int n1=1, int n2=0, int n3=0, int n4=0) throw();
 
 private: // functions
 
@@ -171,26 +185,26 @@ private: // functions
   (std::string path_relative, std::string path_current) const throw();
 
   /// Get output extents
-  void get_output_extents_
-  ( hid_t space_id, int * nx, int * ny, int * nz) throw();
+  void get_extents_
+  ( hid_t space_id, int * n1, int * n2=0, int * n3=0, int * n4=0) throw();
 
   /// create the space for the array on disk
 
-  hid_t create_data_space_
-  (int nxd, int nyd, int nzd, int nx,int ny,int nz) throw()
-  { return create_space_ (nx,ny,nz,nx,ny,nz); }
+  /// create data spaces for memory or disk data
+  hid_t space_create_
+  (int m1, int m2, int m3, int m4,
+   int n1, int n2, int n3, int n4,
+   int o1, int o2, int o3, int o4) throw();
 
-  /// create the space for the array in memory
-  hid_t create_mem_space_
-  (int nxd, int nyd, int nzd, int nx,int ny,int nz) throw()
-  { return create_space_ (nxd,nyd,nzd,nx,ny,nz); }
-
-  /// implementation of create_mem_space() and create_data_space_()
-  hid_t create_space_
-  (int nxd, int nyd, int nzd, int nx,int ny,int nz) throw();
-
+  /// given a space, select a slice
+  hid_t space_slice_
+  (hid_t space_id,
+   int m1, int m2, int m3, int m4,
+   int n1, int n2, int n3, int n4,
+   int o1, int o2, int o3, int o4) throw();
+  
   /// Close the given dataspace
-  void close_space_ (hid_t space_id) throw();
+  void space_close_ (hid_t space_id) throw();
 
   /// Return the space for the given dataset
   hid_t get_data_space_(hid_t dataset_id, std::string name) throw ();
@@ -248,11 +262,11 @@ private: // attributes
   /// Type of data in the HDF5 datatype
   int data_type_;
 
-  /// Dataset rank, 0 to 3
+  /// Dataset rank, 1 to 4
   int data_rank_;
 
   /// Dataset size
-  hsize_t data_dims_[3];
+  hsize_t data_dims_[4];
 
   /// HDF5 dataset property list
   hid_t data_prop_;

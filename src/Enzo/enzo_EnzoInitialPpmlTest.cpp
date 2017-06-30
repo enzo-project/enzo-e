@@ -2,8 +2,8 @@
 
 /// @file     enzo_PpmlTest.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2016-09-10
-/// @brief    Definition of the PpmlTest class for "alphabet soup" test problem
+/// @date     2017-06-12
+/// @brief    Definition of the PpmlTest class
 
 #include "enzo.hpp"
 
