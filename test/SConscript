@@ -33,7 +33,7 @@ env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'Hdf5ToPng'   : hdf5_to_png } )
 env.Append(BUILDERS = { 'PngToGif'    : png_to_gif } )
 
-env_mv_out  = env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
+env_mv_out  = env.Clone(COPY = 'rm -rf '+test_path+'/Dir_*; mv *.png *.h5 Dir_* ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
 env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
 
@@ -66,6 +66,36 @@ env.RunSerial('test_Field.unit',     bin_path + '/test_Field')
 env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
 env.RunSerial('test_ItIndex.unit',   bin_path + '/test_ItIndex')
 env.RunSerial('test_Grouping.unit',  bin_path + '/test_Grouping')
+#----------------------------------------------------------------------
+# INITIAL COMPONENT
+#----------------------------------------------------------------------
+Clean(env_mv_out.RunSerial ('test_initial_music-111.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-111.in'),
+      [Glob('#/' + test_path + '/*-111.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-222.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-222.in'),
+      [Glob('#/' + test_path + '/*-222.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-444.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-444.in'),
+      [Glob('#/' + test_path + '/*-444.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-211.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-211.in'),
+      [Glob('#/' + test_path + '/*-211.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-121.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-121.in'),
+      [Glob('#/' + test_path + '/*-121.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-112.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-112.in'),
+      [Glob('#/' + test_path + '/*-112.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-411.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-411.in'),
+      [Glob('#/' + test_path + '/*-411.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-141.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-141.in'),
+      [Glob('#/' + test_path + '/*-141.png')])
+Clean(env_mv_out.RunSerial ('test_initial_music-114.unit',bin_path + '/enzo-p', 
+		ARGS='input/initial_music-114.in'),
+      [Glob('#/' + test_path + '/*-114.png')])
 #----------------------------------------------------------------------
 # IO COMPONENT        
 #----------------------------------------------------------------------

@@ -1,13 +1,15 @@
 #======================================================================
 #
-#  File        : initial-music.in
+#  File        : debug.incl
 #  Author      : James Bordner (jobordner@ucsd.edu)
-#  Date        : 2017-06-23
+#  Date        : 2017-06-29
 #  Brief       : Test file for reading MUSIC HDF5 initial conditions
 #
 #  Description : Solves a small cosmology problem using initial
 #                conditions from the MUSIC HDF5 initial conditions
 #                generator
+#
+#  REQUIRES root_blocks
 #
 #======================================================================
 
@@ -24,7 +26,6 @@
   Mesh {
     root_rank = 3;
     root_size = [32,32,32];
-    root_blocks = [4,4,4];
   }
 
 # Refine by (relative) slope of density
@@ -42,7 +43,7 @@
 
 # The simulation stops after 10 cycles
 
-  Stopping { cycle = 10;   }
+  Stopping { cycle = 0;   }
 
 # There are fields for density, velocity, total and internal
 # energy, and pressure.  All fields have a ghost zone depth of 4
@@ -68,20 +69,24 @@
   }
 
   Particle {
+
      list = [ "dark" ];
+
      dark {
-     	  attributes = ["position_x",      "double",
-	                "position_y",      "double",
-                        "position_z",      "double" ];
-     	  attributes += ["velocity_x",     "double",
-                         "velocity_y",     "double",
-                         "velocity_z",     "double" ];
+     	  attributes = ["position_x",      "single",
+	                "position_y",      "single",
+                        "position_z",      "single" ];
+     	  attributes += ["velocity_x",     "single",
+                         "velocity_y",     "single",
+                         "velocity_z",     "single" ];
+	  position = ["position_x","position_y","position_z"];
       }
   }
 
 # The computational method used is PPM hydrodynamics
 
   Method {
+
      list = ["ppm"];
 
      ppm {
@@ -97,88 +102,96 @@
 
   Initial {
 
-     list = ["hdf5"];
+     list = ["value", "music"];
 
-     hdf5 {
+     value {
+         density = [0.0];
+     }
+
+     music {
 
         file_list = ["FD","FVX","FVY","FVZ",
-		     "PX","PY","PZ",
-	             "PVX","PVY","PVZ" ];
+                     "PX","PY","PZ",
+		     "PVX","PVY","PVZ"];
 
         FD {
 	   type = "field";
 	   name = "density";
-	   coords    = ".zyx";
+	   coords = "tzyx";
 	   file      = "GridDensity";
 	   dataset   = "GridDensity";
+	   dimensions = "Dimensions";
 	}
         FVX {
 	   type = "field";
 	   name = "velocity_x";
-	   coords    = ".zyx";
+	   coords = "tzyx";
 	   file      = "GridVelocities_x";
 	   dataset   = "GridVelocities_x";
+	   dimensions = "Dimensions";
 	}
         FVY {
 	   type = "field";
 	   name = "velocity_y";
-	   coords    = ".zyx";
+	   coords = "tzyx";
 	   file      = "GridVelocities_y";
 	   dataset   = "GridVelocities_y";
+	   dimensions = "Dimensions";
 	}
         FVZ {
 	   type = "field";
 	   name = "velocity_z";
-	   coords    = ".zyx";
+	   coords = "tzyx";
 	   file      = "GridVelocities_z";
 	   dataset   = "GridVelocities_z";
+	   dimensions = "Dimensions";
 	}
 	
         PX {
 	   type      = "particle";
 	   name      = "dark";
-	   coords    = ".zyx";
 	   attribute = "position_x";
+	   coords    = "tzyx";
 	   file      = "ParticleDisplacements_x";
 	   dataset   = "ParticleDisplacements_x";
 	}
         PY {
 	   type      = "particle";
 	   name      = "dark";
-	   coords    = ".zyx";
 	   attribute = "position_y";
+	   coords    = "tzyx";
 	   file      = "ParticleDisplacements_y";
 	   dataset   = "ParticleDisplacements_y";
 	}
         PZ {
 	   type      = "particle";
 	   name      = "dark";
-	   coords    = ".zyx";
 	   attribute = "position_z";
+	   coords    = "tzyx";
 	   file      = "ParticleDisplacements_z";
 	   dataset   = "ParticleDisplacements_z";
 	}
         PVX {
 	   type      = "particle";
 	   name      = "dark";
-	   coords    = ".zyx";
-	   attribute = "position_x";
+	   attribute = "velocity_x";
+	   coords    = "tzyx";
 	   file      = "ParticleVelocities_x";
 	   dataset   = "ParticleVelocities_x";
 	}
         PVY {
 	   type      = "particle";
 	   name      = "dark";
-	   coords    = ".zyx";
-	   attribute = "position_y";
+	   attribute = "velocity_y";
+	   coords    = "tzyx";
 	   file      = "ParticleVelocities_y";
 	   dataset   = "ParticleVelocities_y";
 	}
         PVZ {
 	   type      = "particle";
 	   name      = "dark";
-	   coords    = ".zyx";
-	   attribute = "position_z";
+	   coords    = "tzyx";
+	   attribute = "velocity_z";
 	   file      = "ParticleVelocities_z";
 	   dataset   = "ParticleVelocities_z";
 	}
@@ -197,7 +210,8 @@
 
   Output {
 
-    list = ["de"];
+
+    list = ["de","vx","vy","vz","dark","hdf5"];
 
     de {
        type = "image";
@@ -205,6 +219,60 @@
        image_type = "data";
        field_list = ["density"];
        image_size = [ 256,256];
+       schedule { var =  "cycle"; step = 1;  }
+       image_specify_bounds = true;
+       image_min=5.0;
+       image_max=6.0;
+       include "input/colormap_blackbody.incl"
+    }
+
+    vx {
+       type = "image";
+       name = ["vx-%02d.png","count"];
+       image_type = "data";
+       field_list = ["velocity_x"];
+       image_size = [ 256,256];
+       schedule { var =  "cycle"; step = 1;  }
+       colormap = [1.0, 0.0, 0.0,
+       		   0.0, 0.0, 0.0,
+		   0.0, 0.0, 1.0];
+    }
+    vy {
+       type = "image";
+       name = ["vy-%02d.png","count"];
+       image_type = "data";
+       field_list = ["velocity_y"];
+       image_size = [ 256,256];
+       schedule { var =  "cycle"; step = 1;  }
+       colormap = [1.0, 0.0, 0.0,
+       		   0.0, 0.0, 0.0,
+		   0.0, 0.0, 1.0];
+    }
+    vz {
+       type = "image";
+       name = ["vz-%02d.png","count"];
+       image_type = "data";
+       field_list = ["velocity_z"];
+       image_size = [ 256,256];
+       schedule { var =  "cycle"; step = 1;  }
+       colormap = [1.0, 0.0, 0.0,
+       		   0.0, 0.0, 0.0,
+		   0.0, 0.0, 1.0];
+    }
+
+    dark {
+       type = "image";
+       name = ["dark-%02d.png","count"];
+       image_type = "data";
+       particle_list = ["dark"];
+       image_size = [ 256,256];
+       schedule { var =  "cycle"; step = 1;  }
+    }
+      
+    hdf5 {
+       type = "data";
+       name = ["data-%02d.h5","count"];
+       field_list = ["density"];
        schedule { var =  "cycle"; step = 1;  }
     }
   

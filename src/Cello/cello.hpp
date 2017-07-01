@@ -200,6 +200,7 @@ namespace cello {
 
   extern bool type_is_float(int type);
   extern bool type_is_int(int type);
+  extern bool type_is_valid(int type);
 
   extern const char * type_name[NUM_TYPES];
   extern const int type_bytes[NUM_TYPES];

@@ -1,0 +1,11 @@
+include "input/initial_music.incl"
+
+Mesh {
+    root_blocks = [4,4,4];
+}
+Output {   de { name = [  "de-444-%02d.png","count"]; } }
+Output { hdf5 { name = ["data-444-%02d.png","count"]; } }
+Output {   vx { name = [  "vx-444-%02d.png","count"]; } }
+Output {   vy { name = [  "vy-444-%02d.png","count"]; } }
+Output {   vz { name = [  "vz-444-%02d.png","count"]; } }
+Output { dark { name = ["dark-444-%02d.png","count"]; } }

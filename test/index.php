@@ -643,8 +643,18 @@ test_summary("Boundary",
 
 
 test_summary("Initial", 
-	     array("initial_png"),
-	     array("enzo-p"),'test');
+         array("initial_png",
+         "initial_music-111",
+         "initial_music-222",
+         "initial_music-444",
+         "initial_music-211",
+         "initial_music-121",
+         "initial_music-112",
+         "initial_music-411",
+         "initial_music-141",
+         "initial_music-114"
+         ),
+         array("enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Output", 
 	     array("output-stride-1","output-stride-2","output-stride-4"),
@@ -1105,6 +1115,19 @@ begin_hidden("initial_mask","png mask initial conditions");
 tests("Enzo","enzo-p","test_initial_png","","");
 test_table ("initial_png",
 	    array("00","10","20","30","40", "50"), $types);
+end_hidden("initial_mask");
+
+begin_hidden("initial_music-111","MUSIC initial conditions");
+
+tests("Enzo","enzo-p","test-initial_music","","");
+test_table ("de",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
+test_table ("vx",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
+test_table ("vy",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
+test_table ("dark",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
 end_hidden("initial_mask");
 
 //----------------------------------------------------------------------

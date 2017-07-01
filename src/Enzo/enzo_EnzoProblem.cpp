@@ -93,8 +93,9 @@ Initial * EnzoProblem::create_initial_
 
   EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
 
-  if (type == "hdf5") {
-    initial = new EnzoInitialHdf5 (cycle,time,enzo_config);
+  if (type == "music") {
+    
+    initial = new EnzoInitialMusic (cycle,time,enzo_config);
     
   } else if (type == "implosion_2d") {
 

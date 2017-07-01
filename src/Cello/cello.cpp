@@ -59,6 +59,10 @@ namespace cello {
 	    type == type_extended80 ||
 	    type == type_extended96);
   }
+  bool type_is_valid(int type) {
+    return (0 <= type && type < NUM_TYPES) &&
+      (type_bytes[type] > 0);
+  }
 
   //----------------------------------------------------------------------
 

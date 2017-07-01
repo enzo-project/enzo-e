@@ -42,15 +42,15 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_max_expansion_rate(0.0),
   physics_cosmology_initial_redshift(0.0),
   physics_cosmology_final_redshift(0.0),
-  // EnzoInitialHdf5
-  initial_hdf5_field_files(),
-  initial_hdf5_field_datasets(),
-  initial_hdf5_field_names(),
-  initial_hdf5_field_coords(),
-  initial_hdf5_particle_files(),
-  initial_hdf5_particle_datasets(),
-  initial_hdf5_particle_types(),
-  initial_hdf5_particle_attributes(),
+  // EnzoInitialMusic
+  initial_music_field_files(),
+  initial_music_field_datasets(),
+  initial_music_field_names(),
+  initial_music_field_coords(),
+  initial_music_particle_files(),
+  initial_music_particle_datasets(),
+  initial_music_particle_types(),
+  initial_music_particle_attributes(),
   // EnzoInitialPm
   initial_pm_field(""),
   initial_pm_mpp(0.0),
@@ -182,15 +182,15 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_turbulence_pressure;
   p | initial_turbulence_temperature;
 
-  p | initial_hdf5_field_files;
-  p | initial_hdf5_field_datasets;
-  p | initial_hdf5_field_names;
-  p | initial_hdf5_field_coords;
+  p | initial_music_field_files;
+  p | initial_music_field_datasets;
+  p | initial_music_field_names;
+  p | initial_music_field_coords;
 
-  p | initial_hdf5_particle_files;
-  p | initial_hdf5_particle_datasets;
-  p | initial_hdf5_particle_types;
-  p | initial_hdf5_particle_attributes;
+  p | initial_music_particle_files;
+  p | initial_music_particle_datasets;
+  p | initial_music_particle_types;
+  p | initial_music_particle_attributes;
 
   p | initial_pm_field;
   p | initial_pm_mpp;
@@ -292,9 +292,9 @@ void EnzoConfig::read(Parameters * p) throw()
   ppm_mol_weight = p->value_float
     ("Method:ppm:mol_weight",0.6);
 
-  // InitialHdf5
+  // InitialMusic
 
-  std::string name_initial = "Initial:hdf5:";
+  std::string name_initial = "Initial:music:";
   int num_files = p->list_length (name_initial + "file_list");
   for (int index_file=0; index_file<num_files; index_file++) {
     std::string file_id = name_initial +
@@ -304,23 +304,23 @@ void EnzoConfig::read(Parameters * p) throw()
     std::string name    = p->value_string (file_id+"name","");
     std::string file    = p->value_string (file_id+"file","");
     std::string dataset = p->value_string (file_id+"dataset","");
+    std::string coords  = p->value_string (file_id+"coords","xyz");
 
     if (type == "particle") {
       std::string attribute = p->value_string (file_id+"attribute","");
       //      if (name != "") {
-	initial_hdf5_particle_files.     push_back(file);
-	initial_hdf5_particle_datasets.  push_back(dataset);
-	initial_hdf5_particle_types.     push_back(name);
-	initial_hdf5_particle_attributes.push_back(attribute);
+	initial_music_particle_files.     push_back(file);
+	initial_music_particle_datasets.  push_back(dataset);
+	initial_music_particle_coords.    push_back(coords);
+	initial_music_particle_types.     push_back(name);
+	initial_music_particle_attributes.push_back(attribute);
 	//      }
     } else if (type == "field") {
 
-      std::string coords     = p->value_string (file_id+"coords","xyz");
-
-      initial_hdf5_field_files.        push_back(file);
-      initial_hdf5_field_datasets.     push_back(dataset);
-      initial_hdf5_field_names.        push_back(name);
-      initial_hdf5_field_coords.       push_back(coords);
+      initial_music_field_files.        push_back(file);
+      initial_music_field_datasets.     push_back(dataset);
+      initial_music_field_coords.       push_back(coords);
+      initial_music_field_names.        push_back(name);
     } else {
       ERROR2 ("EnzoConfig::read",
 	      "Unknown particle type %s for parameter %s",

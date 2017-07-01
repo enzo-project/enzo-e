@@ -1,39 +1,41 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoInitialHdf5.hpp
+/// @file     enzo_EnzoInitialMusic.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2017-06-23
-/// @brief    [\ref Enzo] Declaration of the EnzoInitialHdf5 class
+/// @brief    [\ref Enzo] Declaration of the EnzoInitialMusic class
 
-#ifndef ENZO_ENZO_INITIAL_HDF5_HPP
-#define ENZO_ENZO_INITIAL_HDF5_HPP
+#ifndef ENZO_ENZO_INITIAL_MUSIC_HPP
+#define ENZO_ENZO_INITIAL_MUSIC_HPP
 
-class EnzoInitialHdf5 : public Initial {
+class EnzoInitialMusic : public Initial {
 
-  /// @class    EnzoInitialHdf5
+  /// @class    EnzoInitialMusic
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Read initial conditions from the HDF5 files
+  /// @brief    [\ref Enzo] Read initial conditions from the MUSIC HDF5 files
 
 public: // interface
 
   /// Constructor
-  EnzoInitialHdf5(int cycle,
+  EnzoInitialMusic(int cycle,
 		  double time,
 		  const EnzoConfig * enzo_config) throw();
 
   /// Constructor
-  EnzoInitialHdf5() throw();
+  EnzoInitialMusic() throw()
+  { }
 
   /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoInitialHdf5);
+  PUPable_decl(EnzoInitialMusic);
 
   /// CHARM++ migration constructor
-  EnzoInitialHdf5(CkMigrateMessage *m)
+  EnzoInitialMusic(CkMigrateMessage *m)
     : Initial (m)
   {  }
 
   /// Destructor
-  ~EnzoInitialHdf5() throw();
+  ~EnzoInitialMusic() throw()
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -55,15 +57,16 @@ protected: // attributes
 
   std::vector < std::string > field_files_;
   std::vector < std::string > field_datasets_;
-  std::vector < std::string > field_names_;
   std::vector < std::string > field_coords_;
+  std::vector < std::string > field_names_;
 
   std::vector < std::string > particle_files_;
   std::vector < std::string > particle_datasets_;
+  std::vector < std::string > particle_coords_;
   std::vector < std::string > particle_types_;
   std::vector < std::string > particle_attributes_;
 
 };
 
-#endif /* ENZO_ENZO_INITIAL_HDF5_HPP */
+#endif /* ENZO_ENZO_INITIAL_MUSIC_HPP */
 

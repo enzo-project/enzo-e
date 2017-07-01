@@ -71,15 +71,16 @@ public: // interface
       initial_collapse_particle_ratio(0.0),
       initial_collapse_mass(0.0),
       initial_collapse_temperature(0.0),
-      // EnzoInitialHdf5
-      initial_hdf5_field_files(),
-      initial_hdf5_field_datasets(),
-      initial_hdf5_field_names(),
-      initial_hdf5_field_coords(),
-      initial_hdf5_particle_files(),
-      initial_hdf5_particle_datasets(),
-      initial_hdf5_particle_types(),
-      initial_hdf5_particle_attributes(),
+      // EnzoInitialMusic
+      initial_music_field_files(),
+      initial_music_field_datasets(),
+      initial_music_field_coords(),
+      initial_music_field_names(),
+      initial_music_particle_files(),
+      initial_music_particle_datasets(),
+      initial_music_particle_coords(),
+      initial_music_particle_types(),
+      initial_music_particle_attributes(),
       // EnzoInitialPm
       initial_pm_field(""),
       initial_pm_mpp(0.0),
@@ -190,17 +191,18 @@ public: // attributes
   double                     initial_collapse_mass;
   double                     initial_collapse_temperature;
 
-  /// EnzoInitialHdf5
+  /// EnzoInitialMusic
 
-  std::vector < std::string > initial_hdf5_field_files;
-  std::vector < std::string > initial_hdf5_field_datasets;
-  std::vector < std::string > initial_hdf5_field_names;
-  std::vector < std::string > initial_hdf5_field_coords;
+  std::vector < std::string > initial_music_field_files;
+  std::vector < std::string > initial_music_field_datasets;
+  std::vector < std::string > initial_music_field_coords;
+  std::vector < std::string > initial_music_field_names;
   
-  std::vector < std::string > initial_hdf5_particle_files;
-  std::vector < std::string > initial_hdf5_particle_datasets;
-  std::vector < std::string > initial_hdf5_particle_types;
-  std::vector < std::string > initial_hdf5_particle_attributes;
+  std::vector < std::string > initial_music_particle_files;
+  std::vector < std::string > initial_music_particle_datasets;
+  std::vector < std::string > initial_music_particle_coords;
+  std::vector < std::string > initial_music_particle_types;
+  std::vector < std::string > initial_music_particle_attributes;
   
   /// EnzoInitialPm
   std::string                initial_pm_field;

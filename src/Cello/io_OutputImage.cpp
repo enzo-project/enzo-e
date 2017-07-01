@@ -499,7 +499,7 @@ void OutputImage::write_block
       particle.attribute_index (it, color_particle_attribute_) : -1;
 
     // get particle attribute stride
-    const int ia_x = particle.attribute_index(it,"x");
+    const int ia_x = particle.attribute_position(it,0);
     const int dp = particle.stride(it,ia_x);
 
     const int nb = particle.num_batches(it);
