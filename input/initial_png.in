@@ -53,7 +53,7 @@ Method {
 
 # Define initial conditions
 
-include "input/initial_cello.incl"
+include "input/initial-cello.incl"
 
 # Define boundary conditions
 
