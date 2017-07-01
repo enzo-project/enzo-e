@@ -118,7 +118,7 @@
 	   type = "field";
 	   name = "density";
 	   coords = "tzyx";
-	   file      = "GridDensity";
+	   file      = "input/GridDensity";
 	   dataset   = "GridDensity";
 	   dimensions = "Dimensions";
 	}
@@ -126,7 +126,7 @@
 	   type = "field";
 	   name = "velocity_x";
 	   coords = "tzyx";
-	   file      = "GridVelocities_x";
+	   file      = "input/GridVelocities_x";
 	   dataset   = "GridVelocities_x";
 	   dimensions = "Dimensions";
 	}
@@ -134,7 +134,7 @@
 	   type = "field";
 	   name = "velocity_y";
 	   coords = "tzyx";
-	   file      = "GridVelocities_y";
+	   file      = "input/GridVelocities_y";
 	   dataset   = "GridVelocities_y";
 	   dimensions = "Dimensions";
 	}
@@ -142,7 +142,7 @@
 	   type = "field";
 	   name = "velocity_z";
 	   coords = "tzyx";
-	   file      = "GridVelocities_z";
+	   file      = "input/GridVelocities_z";
 	   dataset   = "GridVelocities_z";
 	   dimensions = "Dimensions";
 	}
@@ -152,7 +152,7 @@
 	   name      = "dark";
 	   attribute = "position_x";
 	   coords    = "tzyx";
-	   file      = "ParticleDisplacements_x";
+	   file      = "input/ParticleDisplacements_x";
 	   dataset   = "ParticleDisplacements_x";
 	}
         PY {
@@ -160,7 +160,7 @@
 	   name      = "dark";
 	   attribute = "position_y";
 	   coords    = "tzyx";
-	   file      = "ParticleDisplacements_y";
+	   file      = "input/ParticleDisplacements_y";
 	   dataset   = "ParticleDisplacements_y";
 	}
         PZ {
@@ -168,7 +168,7 @@
 	   name      = "dark";
 	   attribute = "position_z";
 	   coords    = "tzyx";
-	   file      = "ParticleDisplacements_z";
+	   file      = "input/ParticleDisplacements_z";
 	   dataset   = "ParticleDisplacements_z";
 	}
         PVX {
@@ -176,7 +176,7 @@
 	   name      = "dark";
 	   attribute = "velocity_x";
 	   coords    = "tzyx";
-	   file      = "ParticleVelocities_x";
+	   file      = "input/ParticleVelocities_x";
 	   dataset   = "ParticleVelocities_x";
 	}
         PVY {
@@ -184,7 +184,7 @@
 	   name      = "dark";
 	   attribute = "velocity_y";
 	   coords    = "tzyx";
-	   file      = "ParticleVelocities_y";
+	   file      = "input/ParticleVelocities_y";
 	   dataset   = "ParticleVelocities_y";
 	}
         PVZ {
@@ -192,7 +192,7 @@
 	   name      = "dark";
 	   coords    = "tzyx";
 	   attribute = "velocity_z";
-	   file      = "ParticleVelocities_z";
+	   file      = "input/ParticleVelocities_z";
 	   dataset   = "ParticleVelocities_z";
 	}
      }	  
