@@ -631,7 +631,7 @@ hdf5
 The :p:`hdf5` Initial subgroup is used to read block data from HDF5
 files.  Parameters are used to specify the HDF5 files to read from, the
 names of the HDF5 datasets, what type of data the datasets contain (``"field"`` or
-``"particle"``), and field names or particle names and attributes.
+``"particle"``), field or particle names, and particle attributes.
 Additionally, a :p:`coords` parameter is used to specify the axis
 ordering used.  The :p:`hdf5` group has its own :p:`list` parameter, one
 for each field or particle type and attribute.
