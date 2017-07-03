@@ -4,7 +4,7 @@ Mesh {
     root_blocks = [2,1,1];
 }
 Output {   de { name = [  "de-211-%02d.png","count"]; } }
-Output { hdf5 { name = ["data-211-%02d.png","count"]; } }
+Output { hdf5 { name = ["data-211-%02d.h5","count"]; } }
 Output {   vx { name = [  "vx-211-%02d.png","count"]; } }
 Output {   vy { name = [  "vy-211-%02d.png","count"]; } }
 Output {   vz { name = [  "vz-211-%02d.png","count"]; } }
