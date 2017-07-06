@@ -11,11 +11,15 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 {
   if (n > 0) {
 
-    int length = ((int*) msgs[0]->getData())[0];
-    long long * accum = new long long [length];
+    long long length = ((long long*) (msgs[0]->getData()))[0];
 
+    long long * accum = new long long [length];
     for (int i=0; i<length; i++) accum[i] = 0.0;
-    
+
+    // save length
+    accum [0] = length;
+
+    // sum remaining values
     for (int i=0; i<n; i++) {
       long long * values = (long long *) msgs[i]->getData();
       for (int j=1; j<length; j++) {

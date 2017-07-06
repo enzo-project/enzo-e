@@ -296,37 +296,37 @@ void Simulation::initialize_performance_() throw()
 
   const bool in_charm = true;
   Performance * p = performance_;
-  p->new_region(perf_unknown,    "unknown");
-  p->new_region(perf_simulation, "simulation");
-  p->new_region(perf_cycle,      "cycle");
-  p->new_region(perf_initial,    "initial");
-  p->new_region(perf_adapt_apply,"adapt_apply");
-  p->new_region(perf_adapt_apply_sync, "adapt_apply_sync",in_charm);
-  p->new_region(perf_adapt_notify, "adapt_notify");
-  p->new_region(perf_adapt_notify_sync, "adapt_notify_sync",in_charm);
-  p->new_region(perf_adapt_update, "adapt_update");
-  p->new_region(perf_adapt_update_sync, "adapt_update_sync",in_charm);
-  p->new_region(perf_adapt_end, "adapt_end");
-  p->new_region(perf_adapt_end_sync, "adapt_end_sync",in_charm);
-  p->new_region(perf_refresh_store,    "refresh_store");
-  p->new_region(perf_refresh_child,    "refresh_child");
-  p->new_region(perf_refresh_exit,    "refresh_exit");
+  p->new_region(perf_unknown,            "unknown");
+  p->new_region(perf_simulation,         "simulation");
+  p->new_region(perf_cycle,              "cycle");
+  p->new_region(perf_initial,            "initial");
+  p->new_region(perf_adapt_apply,        "adapt_apply");
+  p->new_region(perf_adapt_apply_sync,   "adapt_apply_sync",in_charm);
+  p->new_region(perf_adapt_notify,       "adapt_notify");
+  p->new_region(perf_adapt_notify_sync,  "adapt_notify_sync",in_charm);
+  p->new_region(perf_adapt_update,       "adapt_update");
+  p->new_region(perf_adapt_update_sync,  "adapt_update_sync",in_charm);
+  p->new_region(perf_adapt_end,          "adapt_end");
+  p->new_region(perf_adapt_end_sync,     "adapt_end_sync",in_charm);
+  p->new_region(perf_refresh_store,      "refresh_store");
+  p->new_region(perf_refresh_child,      "refresh_child");
+  p->new_region(perf_refresh_exit,       "refresh_exit");
   p->new_region(perf_refresh_store_sync, "refresh_store_sync",in_charm);
   p->new_region(perf_refresh_child_sync, "refresh_child_sync",in_charm);
   p->new_region(perf_refresh_exit_sync,  "refresh_exit_sync",in_charm);
-  p->new_region(perf_compute,    "compute");
-  p->new_region(perf_control,    "control");
-  p->new_region(perf_output,     "output");
-  p->new_region(perf_stopping,   "stopping");
-  p->new_region(perf_block,   "block");
-  p->new_region(perf_exit,   "exit");
+  p->new_region(perf_compute,            "compute");
+  p->new_region(perf_control,            "control");
+  p->new_region(perf_output,             "output");
+  p->new_region(perf_stopping,           "stopping");
+  p->new_region(perf_block,              "block");
+  p->new_region(perf_exit,               "exit");
 
   timer_.start();
 
 #ifdef CONFIG_USE_PAPI  
   for (size_t i=0; i<config_->performance_papi_counters.size(); i++) {
     p->new_counter(counter_type_papi, 
-			      config_->performance_papi_counters[i]);
+		   config_->performance_papi_counters[i]);
   }
 #endif  
 
@@ -778,6 +778,7 @@ void Simulation::monitor_performance()
   }
 
   counters_reduce[0] = m;
+  
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
 		       thisProxy);
