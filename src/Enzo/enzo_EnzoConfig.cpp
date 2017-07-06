@@ -309,12 +309,12 @@ void EnzoConfig::read(Parameters * p) throw()
     if (type == "particle") {
       std::string attribute = p->value_string (file_id+"attribute","");
       //      if (name != "") {
-	initial_music_particle_files.     push_back(file);
-	initial_music_particle_datasets.  push_back(dataset);
-	initial_music_particle_coords.    push_back(coords);
-	initial_music_particle_types.     push_back(name);
-	initial_music_particle_attributes.push_back(attribute);
-	//      }
+      initial_music_particle_files.     push_back(file);
+      initial_music_particle_datasets.  push_back(dataset);
+      initial_music_particle_coords.    push_back(coords);
+      initial_music_particle_types.     push_back(name);
+      initial_music_particle_attributes.push_back(attribute);
+      //      }
     } else if (type == "field") {
 
       initial_music_field_files.        push_back(file);
@@ -324,7 +324,7 @@ void EnzoConfig::read(Parameters * p) throw()
     } else {
       ERROR2 ("EnzoConfig::read",
 	      "Unknown particle type %s for parameter %s",
-	      type,(file_id+"type").c_str());
+	      type.c_str(),(file_id+"type").c_str());
     }
   }
 
