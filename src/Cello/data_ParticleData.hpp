@@ -33,7 +33,12 @@ public: // interface
   void pup (PUP::er &p);
 
   /// Return the attribute array for the given particle type and batch
-  char * attribute_array (ParticleDescr *, int it, int ia, int ib);
+  char * attribute_array (ParticleDescr *pd, int it, int ia, int ib);
+  const char * attribute_array (ParticleDescr *pd, int it, int ia, int ib) const
+  {
+    return (const char *)
+      ((ParticleData*)this) -> attribute_array (pd,it,ia,ib);
+  }
 
   /// Return the number of batches of particles for the given type.
 

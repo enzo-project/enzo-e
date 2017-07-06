@@ -112,6 +112,9 @@ public: // virtual functions
     int nx, int ny, int nz,
     int gx, int gy, int gz ) = 0;
 
+  virtual void mem_close ()
+  { }
+
   // Groups
 
   /// Return the number of subgroups in the current group

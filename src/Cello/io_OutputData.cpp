@@ -253,38 +253,57 @@ void OutputData::write_particle_data
   const int nb = particle.num_batches(it);
   const int na = particle.num_attributes(it);
 
+  // For each particle attribute
   for (int ia=0; ia<na; ia++) {
+
+    int np = particle.num_particles (it);
+
+    const std::string name = "particle "
+      +                particle.type_name(it) + " "
+      +                particle.attribute_name(it,ia);
+    
+    const int type = particle.attribute_type(it,ia);
+
+    // create the disk array
+    file_->data_create(name.c_str(),type,np,1,1,1,np,1,1,1);
+    
+    const int dx = particle.stride(it,ia);
+    int i0 = 0;
+
+    // for each batch of particles
+    
     for (int ib=0; ib<nb; ib++) {
+      
+      int mb = particle.num_particles(it,ib);
 
-      // write ith batch of particle index 
-      void * buffer;
-      std::string name;
-      int type;
-      int n,k;
+      // create the memory space for the batch
+      file_->mem_create(mb,1,1,mb,1,1,0,0,0);
+      
+      const void * buffer = (const void *) particle.attribute_array(it,ia,ib);
 
-      // Get ith batch of Particle data for particle type it
-      io_particle_data()->particle_array(it,ib,ia,
-				      &buffer, &name, &type, 
-				      &n,&k);
+      // find the hyper_slab of the disk dataset
+      file_->data_slice
+	(np, 1, 1, 1,
+	 mb, 1, 1, 1,
+	 i0, 0, 0, 0);
+      
+      i0 += mb;
 
-      // Write ith batch of attributes
-
-      int nxd,nyd,nzd;
-      int nx,ny,nz;
-
-      if (particle.interleaved(it)) {
-	nxd=k;	nyd=n;	nzd=1;
-	nx=1;	ny=n;	nz=1;
-      } else {
-	nxd=n;	nyd=1;	nzd=1;
-	nx=n;	ny=1;	nz=1;
-      }
-
-      file_->mem_create(nxd,nyd,nzd,nx,ny,nz,0,0,0);
-      file_->data_create(name.c_str(),type,nxd,nyd,nzd,1,nx,ny,nz,1);
+      // write the batch to disk
       file_->data_write(buffer);
-      file_->data_close();
+      
+      if (mb > 0) file_->mem_close();
     }
+
+    // check that the number of particles equals the number written
+    
+    ASSERT2 ("OutputData::write_particle_data()",
+	     "Particle count mismatch %d particles %d written",
+	     np,i0,
+	     np == i0);
+
+    // close the attribute dataset
+    if (np > 0) file_->data_close();
   }
 
 }

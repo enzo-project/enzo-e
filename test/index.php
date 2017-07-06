@@ -19,22 +19,35 @@ printf ("%s",$dir);
    </head>
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
-   <table>
-     <tr><th class=cello colspan=2><center><b>Enzo-P/Cello</b></center></th>
-         <th class=charm colspan="2"><center><b>Charm++</b></center></th>
-     </tr>
-    <tr> <th class=cello> directory </th> <td class=cello> <?php printf ($dir) ?></td>
-        <th class=charm> build </th> <td class=charm><?php system ("cat CHARM_BUILD") ?> </td>
-   <tr> <th class=cello> branch </th> <td class=cello align="left"> <?php system ("hg branch") ?></td> 
-        <th class=charm> version </th> <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
-        </tr>
-   <tr> <th class=cello> revision </th>  <td class=cello> <?php system ("hg id -n") ?> </td>
-    <th></th><td></td>
+<table>
+<tr>
+<th class=cello colspan=2><center><b>Enzo-P/Cello</b></center></th>
+    <th class=charm colspan="2"><center><b>Charm++</b></center></th>
     </tr>
-<tr>         <th class=time ><center><b>Time</b></center></th>
-        <td class=time> <?php system ("cat DATE") ?></td> 
-     <td class=time> <?php system ("cat START") ?></td>
-    <td class=time> <?php system ("cat TIME") ?> min</td></tr>    
+    <tr>
+    <th class=cello> <b>branch</b> </th>
+    <td class=cello align="left"> <?php system ("hg branch") ?></td> 
+    <th class=charm> <b>build</b> </th>
+    <td class=charm><?php system ("cat CHARM_BUILD") ?> </td>
+    </tr>
+    <tr>
+    <th class=cello> <b>revision</b> </th>
+    <td class=cello> <?php system ("hg id -n") ?> </td>
+    <th class=charm> <b>version</b> </th>
+    <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
+    </tr>
+    <tr>
+    <th class=cello> <b>precision</b></th>
+    <td class=cello> <?php system ("cat PREC") ?></td>
+    <th class=time ><center><b>date</b></center></th>
+    <td class=time> <?php system ("cat DATE") ?></td> 
+    </tr>
+    <tr>
+    <th class=cello> <b> architecture</b> </th>
+    <td class=cello> <?php system ("cat ARCH") ?></td>
+    <th class=time ><center><b>time</b></center></th>
+    <td class=time> <?php system ("cat START") ?></td>
+    </tr>    
    </table>
    <?php
 
@@ -42,6 +55,12 @@ printf ("%s",$dir);
 
    function test_group($testgroup) {
      printf ("<hr><a name=\"$testgroup\"><h2>$testgroup</h2>");
+     }
+
+     //----------------------------------------------------------------------
+
+   function test_subgroup($testgroup) {
+     printf ("<h3>$testgroup</h3>");
      }
 
      //----------------------------------------------------------------------
@@ -1110,6 +1129,7 @@ end_hidden("boundary_outflow_3d");
 
 test_group("Initial");
 
+test_subgroup ("InitialValue with PNG mask");
 begin_hidden("initial_mask","png mask initial conditions");
 
 tests("Enzo","enzo-p","test_initial_png","","");
@@ -1117,9 +1137,18 @@ test_table ("initial_png",
 	    array("00","10","20","30","40", "50"), $types);
 end_hidden("initial_mask");
 
+test_subgroup ("EnzoInitialMusic");
 begin_hidden("initial_music-111","MUSIC initial conditions");
 
-tests("Enzo","enzo-p","test-initial_music","","");
+tests("Enzo","enzo-p","test_initial_music-111","MUSIC (1,1,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-222","MUSIC (2,2,2) blocking","");
+tests("Enzo","enzo-p","test_initial_music-444","MUSIC (4,4,4) blocking","");
+tests("Enzo","enzo-p","test_initial_music-211","MUSIC (2,1,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-121","MUSIC (1,2,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-112","MUSIC (1,1,2) blocking","");
+tests("Enzo","enzo-p","test_initial_music-411","MUSIC (4,1,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-141","MUSIC (1,4,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-114","MUSIC (1,1,4) blocking","");
 test_table ("de",
 array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
 test_table ("vx",

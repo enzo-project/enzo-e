@@ -9,7 +9,7 @@
 
    Mesh { 
       root_rank = 2;
-      root_size = [64, 64];
+      root_size = [128, 128];
    }
 
    # Field parameters include those concerning fields as a group, as
@@ -211,6 +211,7 @@
       data {
 	type     = "data";
         field_list = ["density_total"];
+	particle_list = ["dark"];
         include "input/schedule_cycle_5.incl"
       }
 

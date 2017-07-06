@@ -126,6 +126,9 @@ public: // virtual functions
     int nx, int ny, int nz,
     int gx, int gy, int gz );
 
+  virtual void mem_close ()
+  { space_close_(mem_space_id_) ; }
+  
   // Groups
 
   /// Number of subgroups in the current group

@@ -297,6 +297,7 @@
       data {
 	type     = "data";
         field_list = ["potential", "acceleration_x", "acceleration_y", "acceleration_z"];
+	particle_list = ["dark"];
         include "input/schedule_cycle_1.incl"
       }
 

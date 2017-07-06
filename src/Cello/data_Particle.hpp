@@ -263,6 +263,10 @@ public: // interface
   { return particle_data_->attribute_array 
       (particle_descr_, it,ia,ib); }
 
+  const char * attribute_array (int it,int ia,int ib) const
+  { return particle_data_->attribute_array 
+      (particle_descr_, it,ia,ib); }
+
   /// Return the number of batches of particles for the given type.
 
   int num_batches (int it) const

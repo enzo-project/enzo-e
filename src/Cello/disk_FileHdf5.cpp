@@ -327,7 +327,7 @@ void FileHdf5::data_write ( const void * buffer ) throw()
     H5Dwrite (data_id_,
 	      scalar_to_hdf5_(data_type_),
 	      mem_space_id_,
-	      H5S_ALL,
+	      data_space_id_,
 	      H5P_DEFAULT,
 	      buffer);
 
@@ -346,7 +346,7 @@ void FileHdf5::data_close() throw()
     // close the dataspace
 
     space_close_(data_space_id_);
-    space_close_(mem_space_id_);
+    //    space_close_(mem_space_id_);
 
     // close the dataset
 

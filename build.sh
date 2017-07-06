@@ -11,7 +11,6 @@
 #   test/DATE
 #   test/START
 #   test/STOP
-#   test/TIME
 
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
@@ -60,7 +59,7 @@ if [ "$#" -ge 1 ]; then
    fi
       if [ "$1" == "reset" -o "$1" == "clean" ]; then
 	cd test
-	rm -f STATUS DATE START STOP TIME
+	rm -f STATUS DATE START STOP ARCH PREC
        exit
    elif [ "$1" == "compile" ]; then
       target=install-bin
@@ -89,9 +88,15 @@ else
    # assume enzo-p
    k_switch=""
    target="bin/enzo-p"
-#   rm -f $target
-    echo "Remove $target"
 fi
+
+if [ $target == "bin/enzo-p" ]; then
+   if [ -e $target ]; then
+       echo "Saving existing bin/enzo-p to bin/enzo-p.prev"
+       mv bin/enzo-p bin/enzo-p.prev
+   fi
+fi
+    
 
 echo "Compiling" > test/STATUS
 
@@ -125,6 +130,15 @@ touch "$dir/running.$arch.$prec"
 CELLO_ARCH=$arch; export $CELLO_ARCH
 CELLO_PREC=$prec; export $CELLO_PREC
 
+if [ $target == "test" ]; then
+
+    echo "$date"     > test/DATE
+    echo "$start"    > test/START
+    echo "$arch"     > test/ARCH
+    echo "$prec"     > test/PREC
+fi    
+
+
 $python scons.py install-inc    &>  $dir/out.scons
 $python scons.py $k_switch -j $proc -Q $target  2>&1 | tee $dir/out.scons
 
@@ -145,9 +159,6 @@ printf "done\n" >> $log
 # TESTS
 
 if [ $target == "test" ]; then
-
-    echo "$date"     > test/DATE
-    echo "$start"    > test/START
 
     rm -f              test/STOP
 
@@ -183,7 +194,6 @@ if [ $target == "test" ]; then
    done
 
    echo "$stop" > test/STOP
-   echo "${t}"  > test/TIME
 
 fi
 
@@ -207,7 +217,7 @@ echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time
 
 d=`date "+%H:%M:%S"`
 
-rm -f          test/STATUS
+rm -f test/STATUS
 
 
 
