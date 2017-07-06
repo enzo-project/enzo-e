@@ -119,7 +119,7 @@
       }
    }
 
-   Boundary { type = "reflecting"; }
+   Boundary { type = "periodic"; }
 
    Stopping {        cycle = 10;   } 
    Testing {   cycle_final = 400; }
