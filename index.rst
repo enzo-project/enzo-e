@@ -42,12 +42,12 @@ developing and implementing a highly scalable multigrid-based linear
 solver.
 
 .. toctree::
-   :hidden:
-
+   :maxdepth: 1
+	   
    getting_started
    parameters-list
-   parameters-example
    parameters-file
+   parameters-example
    using      
    devel
    principles
@@ -56,32 +56,32 @@ solver.
 Getting started
 ---------------
 
-The `getting started`_ section covers everything you need to know to download Enzo-P / Cello and its dependent software, configure, port, build, and run an example test problem.
+The `Getting started using Enzo-P`_ section covers everything you need to know to download Enzo-P / Cello and its dependent software, configure, port, build, and run an example test problem.
 
-.. _getting started: getting_started.html
+.. _Getting started using Enzo-P: getting_started.html
 
 Parameters
 ----------
 
-The `parameters list`_ section is a reference page for all Enzo-P and
+The `Enzo-P / Cello parameter reference`_ section is a reference page for all Enzo-P and
 Cello parameters, which are used to write parameters files defining
 simulations to run.
 
-.. _parameters list: parameters-list.html
+.. _Enzo-P / Cello parameter reference: parameters-list.html
 
 How parameters are organized within a parameter file is described in
-`parameter files`_, which covers parameter groups, subgroups,
+`Parameter files`_, which covers parameter groups, subgroups,
 parameters, and data types recognized.
 
-.. _parameter files: parameters-file.html
+.. _Parameter files: parameters-file.html
 
-An example parameter file is described in its entirety in `parameter
+An example parameter file is described in detail in `Parameter
 file example`_.
 
-.. _parameter file example: parameters-example.html
+.. _Parameter file example: parameters-example.html
 
-Using Enzo-P
-------------
+Using and developing Enzo-P / Cello
+-----------------------------------
 
 The new `Using Enzo-P`_ section will describe in detail how to use
 Enzo-P, including what methods, fields, particle types etc. are
@@ -89,9 +89,6 @@ available.  While only an outline exists now, we are working on
 getting this section completed soon.
 
 .. _Using Enzo-P: using.html
-
-Developing with Cello
----------------------
 
 The new `Developing with Cello`_ section will describe how to add new
 functionality to an application such as Enzo-P built on Cello,

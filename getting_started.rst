@@ -2,7 +2,7 @@
 
 
 ----------------------------
-Getting Started Using Enzo-P
+Getting started using Enzo-P
 ----------------------------
 
 This page will help you get Enzo-P and Cello up and running.  It
