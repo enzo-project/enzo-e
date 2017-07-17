@@ -11,7 +11,7 @@ Output {
 
     stride {
        type = "data";
-       stride = 1;
+       stride_write = 1;
        name = ["output-stride-1-p%1d-%02d.h5","proc","cycle"];
        field_list = ["density"];
        include "input/schedule_cycle_10.incl"

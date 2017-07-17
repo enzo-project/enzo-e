@@ -6,10 +6,10 @@
 /// @ingroup  Control
 /// @brief    Functions implementing CHARM++ output-related functions
 
-// #define DEBUG_OUTPUT
+// #define TRACE_OUTPUT
 
-#ifdef DEBUG_OUTPUT
-#  define TRACE_OUTPUT(M) printf ("TRACE Output %s:%d %d " M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
+#ifdef TRACE_OUTPUT
+#  define TRACE_OUTPUT(M) printf ("%d TRACE_OUTPUT %s:%d " M "\n",CkMyPe(), __FILE__,__LINE__); fflush(stdout);
 #else
 #  define TRACE_OUTPUT(M) /*  */
 #endif
@@ -25,38 +25,7 @@
 
 void Block::output_begin_ ()
 {
-  TRACE_OUTPUT("Block::output_begin_()");
-
-  // Determine if there is any output this cycle
-
-  simulation()->set_phase(phase_output);
-
-  int cycle   = simulation()->cycle();
-  double time = simulation()->time();
-
-  Output * output;
-
-  int index_output = -1;
-
-  do {
-
-    output = simulation()->problem()->output(++index_output);
-
-  } while (output && ! output->is_scheduled(cycle, time));
-
-  if (output != NULL) {
-
-    // Start output if any...
-
-    simulation() -> begin_output();
-
-  } else {
-
-    // ...otherwise continue with next phase
-
-    output_exit_();
-
-  }
+  simulation() -> begin_output();
 }
 
 //----------------------------------------------------------------------
@@ -70,32 +39,15 @@ void Simulation::begin_output ()
 
   if (sync_output_begin_.next()) {
 
-    // Barrier
+    set_phase(phase_output);
 
-    TRACE_OUTPUT("Block::output_begin() calling Simulation::r_output()");
-    // --------------------------------------------------
-    //    CkCallback callback (CkIndex_Simulation::r_output(NULL), thisProxy);
-    //    contribute(0,0,CkReduction::concat,callback);
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    simulation->r_output(NULL);
-    // --------------------------------------------------
+    performance_->start_region(perf_output);
+
+    problem()->output_reset();
+    problem()->output_next(this);
+
+    performance_->stop_region(perf_output);
   }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::r_output(CkReductionMsg * msg)
-{
-  performance_->start_region(perf_output);
-  TRACE_OUTPUT("Simulation::r_output()");
-
-  delete msg;
-
-  // start first output
-
-  problem()->output_reset();
-  problem()->output_next(this);
-  performance_->stop_region(perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -124,10 +76,13 @@ void Problem::output_next(Simulation * simulation) throw()
 
     // Perform output if any...
 
-    output->init();
-    output->open();
-    output->write_simulation(simulation);
-    output->next();
+    const int stride = output->stride_wait();
+
+    if (CkMyPe() % stride == 0) {
+
+      simulation->do_output (index_output_);
+
+    }
 
   } else {
 
@@ -136,6 +91,18 @@ void Problem::output_next(Simulation * simulation) throw()
     simulation->output_exit();
 
   }
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::do_output(int index_output)
+{
+  TRACE_OUTPUT("Simulation::p_do_output()");
+  Output * output = problem()->output(index_output);
+  output->init();
+  output->open();
+  output->write_simulation(this);
+  output->next();
 }
 
 //----------------------------------------------------------------------
@@ -203,13 +170,14 @@ void Problem::output_wait(Simulation * simulation) throw()
   
   Output * output = this->output(index_output_);
 
-  int ip       = CkMyPe();
+  int ip        = CkMyPe();
   int ip_writer = output->process_writer();
 
   if (ip == ip_writer) {
 
     // --------------------------------------------------
-    proxy_simulation[ip].p_output_write(0,0);
+    //    proxy_simulation[ip].p_output_write(0,0);
+    output_write(simulation,0,0);
     // --------------------------------------------------
 
   } else {
@@ -228,6 +196,10 @@ void Problem::output_wait(Simulation * simulation) throw()
     output->cleanup_remote(&n,&buffer);
     output->finalize();
     output_next(simulation);
+    const int stride = output->stride_wait();
+    if ((CkMyPe()+1)%stride != 0 && (CkMyPe()+1) < CkNumPes()) {
+      proxy_simulation[CkMyPe()+1].p_do_output(index_output_);
+    }
 
   }
 
@@ -262,6 +234,10 @@ void Problem::output_write
     output->close();
     output->finalize();
     output_next(simulation);
+    const int stride = output->stride_wait();
+    if ((CkMyPe()+1)%stride != 0 && (CkMyPe()+1) < CkNumPes()) {
+      proxy_simulation[CkMyPe()+1].p_do_output(index_output_);
+    }
   }
 
 }

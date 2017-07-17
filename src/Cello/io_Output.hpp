@@ -61,7 +61,8 @@ public: // functions
       io_field_data_(0),
       it_particle_index_(0),        // set_it_index_particle()
       io_particle_data_(0),
-      process_stride_(1) // default one file per process
+      stride_write_(1), // default one file per process
+      stride_wait_(1) // default all processes can write at once
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -105,36 +106,43 @@ public: // functions
 
   /// Return the File object pointer
   File * file() throw() 
-  { return file_; };
+  { return file_; }
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
-  { return schedule_; };
+  { return schedule_; }
 
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
 
-  int process_stride () const throw () 
-  { return process_stride_; };
+  int stride_write () const throw () 
+  { return stride_write_; }
 
-  void set_process_stride (int stride) throw () 
+  void set_stride_write (int stride) throw () 
   {
-    process_stride_ = stride; 
-    fflush(stdout);
-    sync_write_.set_stop(process_stride_);
-  };
+    stride_write_ = stride; 
+    sync_write_.set_stop(stride_write_);
+  }
+
+  int stride_wait () const throw () 
+  { return stride_wait_; }
+
+  void set_stride_wait (int stride) throw () 
+  {
+    stride_wait_ = stride; 
+  }
 
   /// Return whether output is scheduled for this cycle
   bool is_scheduled (int cycle, double time) throw();
 
   /// Return whether this process is a writer
   bool is_writer () const throw () 
-  { return (process_ == process_writer()); };
+  { return (process_ == process_writer()); }
 
   /// Return the process id of the writer for this process id
   int process_writer() const throw()
   {
-    return process_ - (process_ % process_stride_);
+    return process_ - (process_ % stride_write_);
   }
 
   /// Return the updated timestep if time + dt goes past a scheduled output
@@ -149,7 +157,7 @@ public: // functions
   { write_meta_ (meta_type_group, io); }
 
   /// Accessor function for Charm synchronization of writers
-  Sync * sync_write () { return & sync_write_; };
+  Sync * sync_write () { return & sync_write_; }
 
   /// Return the index id in the containing Problem
   int index() const throw() { return index_; }
@@ -205,15 +213,15 @@ public: // virtual functions
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw()
-  {};
+  {}
 
   /// Accumulate and write data sent from a remote processes
   virtual void update_remote  ( int n, char * buffer) throw()
-  {};
+  {}
 
   /// Free local array if allocated; NOP if not
   virtual void cleanup_remote (int * n, char ** buffer) throw()
-  {};
+  {}
 
 protected:
 
@@ -316,9 +324,15 @@ protected: // attributes
   /// I/O ParticleData data accessor
   IoParticleData * io_particle_data_;
 
-  /// Only processes with id's divisible by process_stride_ writes
+  /// Only processes with id's divisible by stride_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
-  int process_stride_;
+  int stride_write_;
+
+  /// Number of processes within which to sequence writing 0, 1, 2...
+  /// If 1 then all processes can write in parallel; if CkNumPes()
+  /// then all processes write files sequentially, in which process i
+  /// writes and closes its file before process i+1 opens its file
+  int stride_wait_;
 
 };
 

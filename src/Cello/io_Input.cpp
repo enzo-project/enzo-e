@@ -27,7 +27,7 @@ Input::Input (const Factory * factory,
     io_field_data_(0),
     it_particle_index_(0),        // set_it_index_particle()
     io_particle_data_(0),
-    process_stride_(1) // default one file per process
+    stride_reader_(1) // default one file per process
 {
 
   process_  = CkMyPe();
@@ -82,7 +82,7 @@ void Input::pup (PUP::er &p)
   // if (up) io_particle_data_ = new IoParticleData;
   // p | *io_particle_data_;
 
-  p | process_stride_;
+  p | stride_reader_;
 }
 
 //----------------------------------------------------------------------

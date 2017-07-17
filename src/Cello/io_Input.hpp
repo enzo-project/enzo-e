@@ -56,7 +56,7 @@ public: // functions
     io_field_data_(0),
     it_particle_index_(0),
     io_particle_data_(0),
-    process_stride_(1)
+    stride_reader_(1)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -86,13 +86,13 @@ public: // functions
   /// Return the File object pointer
   File * file() throw() { return file_; };
 
-  int process_stride () const throw () 
-  { return process_stride_; };
+  int stride_reader () const throw () 
+  { return stride_reader_; };
 
-  void set_process_stride (int stride) throw () 
+  void set_stride_reader (int stride) throw () 
   {
-    process_stride_ = stride; 
-    sync_.set_stop(process_stride_);
+    stride_reader_ = stride; 
+    sync_.set_stop(stride_reader_);
   };
 
   /// Accessor function for the CHARM Sync class
@@ -221,9 +221,9 @@ protected: // attributes
   /// I/O ParticleData data accessor
   IoParticleData * io_particle_data_;
 
-  /// Only processes with id's divisible by process_stride_ reads
+  /// Only processes with id's divisible by stride_reader_ reads
   /// (1: all processes read; 2: 0,2,4,... read; np: root process reads)
-  int process_stride_;
+  int stride_reader_;
 };
 
 #endif /* IO_INPUT_HPP */

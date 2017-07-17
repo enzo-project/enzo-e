@@ -25,10 +25,15 @@ OutputData::OutputData
 {
   // Set process stride, with default = 1
 
-  int stride = config->output_stride[index_];
+  int stride;
 
-  process_stride_ = stride == 0 ? 1 : stride;
-  set_process_stride(process_stride_);
+  stride = config->output_stride_write[index_];
+  stride_write_ = (stride == 0) ? 1 : stride;
+  set_stride_write(stride_write_);
+  
+  stride = config->output_stride_wait[index_];
+  stride_wait_ = (stride == 0) ? 1 : stride;
+  set_stride_wait(stride_wait_);
 
 }
 

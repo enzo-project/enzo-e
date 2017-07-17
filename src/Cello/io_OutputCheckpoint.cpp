@@ -25,7 +25,8 @@ OutputCheckpoint::OutputCheckpoint
     restart_file_("")
 {
 
-  set_process_stride(process_count);
+  set_stride_write(process_count);
+  set_stride_wait (1);
 
   TRACE1 ("index = %d",index_);
   TRACE2 ("config->output_dir[%d]=%p",index_,&config->output_dir[index_]);

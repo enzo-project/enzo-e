@@ -103,8 +103,11 @@ OutputImage::OutputImage(int index,
     nyi_ += 2*nyb*ngy*nl;
   }
   
-  // Override default Output::process_stride_: only root writes
-  set_process_stride(process_count);
+  // Override default Output::stride_write_: only root writes
+  set_stride_write(process_count);
+  // Let all processes contribute data when its available
+  // (wait stride may be helpful for performance?)
+  set_stride_wait(1);
 
   // Set default color map to be black and white
   map_r_.resize(2);

@@ -224,10 +224,11 @@ public: // virtual functions
     performance_->stop_region (perf_output);
   }
   void begin_output ();
+  void p_do_output (int index_output)
+  { do_output (index_output); }
+  
+  void do_output (int index_output);
   void output_exit();
-  void r_output(CkReductionMsg * msg);
-
-  //  void r_output (CkReductionMsg * msg);
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write()

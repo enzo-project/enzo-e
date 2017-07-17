@@ -140,7 +140,8 @@ void Config::pup (PUP::er &p)
   p | output_leaf_only;
   p | output_schedule_index;
   p | output_dir;
-  p | output_stride;
+  p | output_stride_write;
+  p | output_stride_wait;
   p | output_field_list;
   p | output_particle_list;
   p | output_name;
@@ -760,7 +761,8 @@ void Config::read_output_ (Parameters * p) throw()
   output_leaf_only.resize(num_output);
   output_schedule_index.resize(num_output);
   output_dir.resize(num_output);
-  output_stride.resize(num_output);
+  output_stride_write.resize(num_output);
+  output_stride_wait.resize(num_output);
   output_field_list.resize(num_output);
   output_particle_list.resize(num_output);
   output_name.resize(num_output);
@@ -782,8 +784,10 @@ void Config::read_output_ (Parameters * p) throw()
 	     output_list[index_output].c_str());
     }
 
-    output_stride[index_output] = p->value_integer("stride",0);
+    output_stride_write[index_output] = p->value_integer("stride_write",0);
 
+    output_stride_wait[index_output] = p->value_integer("stride_wait",0);
+    
     if (p->type("dir") == parameter_string) {
       output_dir[index_output].resize(1);
       output_dir[index_output][0] = p->value_string("dir","");

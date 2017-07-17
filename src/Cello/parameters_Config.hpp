@@ -102,7 +102,8 @@ public: // interface
       output_min_level(),
       output_leaf_only(),
       output_dir(),
-      output_stride(),
+      output_stride_write(),
+      output_stride_wait(),
       output_field_list(),
       output_particle_list(),
       output_name(),
@@ -241,7 +242,8 @@ public: // interface
       output_min_level(),
       output_leaf_only(),
       output_dir(),
-      output_stride(),
+      output_stride_write(),
+      output_stride_wait(),
       output_field_list(),
       output_particle_list(),
       output_name(),
@@ -432,7 +434,8 @@ public: // attributes
   std::vector < int >         output_min_level;
   std::vector < char >        output_leaf_only;
   std::vector < std::vector <std::string> >  output_dir;
-  std::vector < int >         output_stride;
+  std::vector < int >         output_stride_write;
+  std::vector < int >         output_stride_wait;
   std::vector < std::vector <std::string> >  output_field_list;
   std::vector < std::vector <std::string> > output_particle_list;
   std::vector < std::vector <std::string> >  output_name;
