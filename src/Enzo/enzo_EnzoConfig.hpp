@@ -130,7 +130,9 @@ public: // interface
       solver_weight(),
       // EnzoSolver<Krylov>
       solver_precondition(),
-      solver_local()
+      solver_local(),
+      // EnzoStopping
+      stopping_redshift()
       
   {
     for (int axis=0; axis<3; axis++) {
@@ -295,6 +297,9 @@ public: // attributes
   /// Whether the solver is for an isolated Block, e.g. for
   /// Mg0 coarse grid solver
   std::vector<int>           solver_local;
+
+  /// Stop at specified redshift for cosmology
+  double                     stopping_redshift;
 
  
 #ifdef CONFIG_USE_GRACKLE

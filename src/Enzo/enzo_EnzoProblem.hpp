@@ -43,6 +43,10 @@ private: // functions
    Parameters * parameters
    ) throw ();
 
+  /// Create stopping criteria
+  virtual Stopping * create_stopping_ 
+  (std::string type, Config * config) throw ();
+
   /// Create named initialization object
   virtual Initial *  create_initial_ 
   (std::string type, 

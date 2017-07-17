@@ -185,6 +185,20 @@ Initial * EnzoProblem::create_initial_
 
 //----------------------------------------------------------------------
 
+Stopping * EnzoProblem::create_stopping_ 
+( std::string  type, Config * config ) throw ()
+/// @param type   Type of the stopping criterion to create (ignored)
+/// @param config  Configuration parameter class
+{
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+  return new EnzoStopping(enzo_config->stopping_cycle,
+			  enzo_config->stopping_time,
+			  enzo_config->stopping_seconds,
+			  enzo_config->stopping_redshift);
+}
+
+//----------------------------------------------------------------------
+
 Refine * EnzoProblem::create_refine_
 (
  std::string        type,

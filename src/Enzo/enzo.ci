@@ -96,6 +96,8 @@ module enzo {
   PUPable EnzoSolverMg0;
   PUPable EnzoSolverJacobi;
 
+  PUPable EnzoStopping;
+
   PUPable EnzoUnits;
 
   extern module mesh;

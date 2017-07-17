@@ -226,6 +226,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | solver_coarse_solve;
   p | solver_weight;
 
+  p | stopping_redshift;
+
   p | units_mass;
   p | units_density;
   p | units_length;
@@ -575,6 +577,13 @@ void EnzoConfig::read(Parameters * p) throw()
       p->value_logical (solver_name + ":local",false);
     
   }  
+  
+  //======================================================================
+  // STOPPING
+  //======================================================================
+
+  stopping_redshift = p->value_float
+    ("Stopping:redshift",std::numeric_limits<double>::max());
   
   //======================================================================
   // GRACKLE

@@ -41,7 +41,7 @@ Monitor::~Monitor()
 void Monitor::header () const
 {
   print ("","==============================================");
-  print ("","");
+  print (""," ");
   print ("","  .oooooo.             oooo  oooo            ");
   print (""," d8P'  `Y8b            `888  `888            ");
   print ("","888           .ooooo.   888   888   .ooooo.  ");
@@ -49,15 +49,15 @@ void Monitor::header () const
   print ("","888          888ooo888  888   888  888   888 ");
   print ("","`88b    ooo  888    .o  888   888  888   888 ");
   print (""," `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' ");
-  print ("","");
+  print (""," ");
   print ("","A Parallel Adaptive Mesh Refinement Framework");
-  print ("","");  
+  print (""," ");  
   print ("","  Laboratory for Computational Astrophysics");
   print ("","        San Diego Supercomputer Center");
   print ("","     University of California, San Diego");
-  print ("","");  
+  print (""," ");  
   print ("","See 'LICENSE_CELLO' for software license information");
-  print ("","");  
+  print (""," ");  
 
   // Get date text
 
@@ -202,13 +202,10 @@ void Monitor::write_ (FILE * fp, const char * component, const char * message) c
   const char newline = (strcmp(message,"")==0) ? ' ' : '\n';
   if (fp == stdout) {
     PARALLEL_PRINTF 
-      ("%s %s %s %s%c",
-       process, time, component, message,newline);
-    fflush(stdout);
+      ("%s %s %s %s%c",     process, time, component, message,newline);
   } else {
     fprintf 
-      (fp,"%s %s %s %s%c",
-       process, time, component, message,newline);
+      (fp,"%s %s %s %s%c",  process, time, component, message,newline);
   }
 }
 
@@ -241,7 +238,6 @@ void Monitor::write_verbatim
       PARALLEL_PRINTF 
 	("%s %s %s %s\n",
 	 buffer_process, buffer_time, component, message);
-      fflush(stdout);
     } else {
       fprintf 
 	(fp,"%s %s %s %s\n",

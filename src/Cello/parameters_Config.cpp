@@ -317,7 +317,7 @@ void Config::read_adapt_ (Parameters * p) throw()
     }
 
     adapt_max_level[ia] = p->value (prefix + "max_level",
-				   std::numeric_limits<int>::max());
+				    std::numeric_limits<int>::max());
 
     adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
