@@ -105,7 +105,7 @@ void OutputData::write_hierarchy
   write_meta (&io_hierarchy);
 
   Output::write_hierarchy(hierarchy, field_descr, particle_descr);
-
+  
 }
 
 //----------------------------------------------------------------------

@@ -32,9 +32,9 @@ enum meta_type {
 #include "io_ColormapRGB.hpp"
 
 #include "io_Io.hpp"
-#include "io_IoHierarchy.hpp"
 #include "io_IoBlock.hpp"
 #include "io_IoFieldData.hpp"
+#include "io_IoHierarchy.hpp"
 #include "io_IoParticleData.hpp"
 
 #include "io_Input.hpp"

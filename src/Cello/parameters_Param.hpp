@@ -31,6 +31,17 @@ typedef std::vector<class Param *> list_type;
 
 //----------------------------------------------------------------------
 
+
+/// Types of formats for writing parameter
+
+enum {
+  param_write_cello,     // format readable as input file
+  param_write_monitor,   // monitor display of parameters in stdout
+  param_write_libconfig  // format readable by libconfig library
+};
+
+//----------------------------------------------------------------------
+
 class Param {
 
   /// @class    Param
@@ -94,7 +105,7 @@ public: // interface
   /// Write the parameter to the file
   void write(FILE * file_pointer,
 	     std::string parameter,
-	     bool no_commas=false);
+	     int param_write_type);
 
   /// Return whether the parameter has the given type
   bool is_type (parameter_enum type) { return type_ == type; }
@@ -120,7 +131,7 @@ public: // interface
   { value_accessed_ = true; return value_string_; }
 
   /// Convert the parameter value into a string
-  std::string value_to_string ();
+  std::string value_to_string (int write_type);
 
   /// Return the type of the parameter
   parameter_type type() const { return type_; } 
