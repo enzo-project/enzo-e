@@ -59,7 +59,6 @@ public: // interface
       physics_cosmology(false),
       physics_cosmology_hubble_constant_now(0.0),
       physics_cosmology_omega_matter_now(0.0),
-      physics_cosmology_omega_dark_matter_now(0.0),
       physics_cosmology_omega_lamda_now(0.0),
       physics_cosmology_comoving_box_size(0.0),
       physics_cosmology_max_expansion_rate(0.0),
@@ -174,10 +173,9 @@ public: // attributes
 
   double                     field_gamma;
 
-  /// Cosmology (NOT ACCESSED)
+  /// Cosmology
   bool                       physics_cosmology;
   double                     physics_cosmology_hubble_constant_now;
-  double                     physics_cosmology_omega_dark_matter_now;
   double                     physics_cosmology_omega_matter_now;
   double                     physics_cosmology_omega_lamda_now;
   double                     physics_cosmology_comoving_box_size;

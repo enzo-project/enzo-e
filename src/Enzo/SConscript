@@ -30,11 +30,11 @@ if (use_papi):
 
 components.append(['hdf5','z'])
 
-libraries  = ['png','$FORTRANLIBS']
+libraries_external  = ['png','$FORTRANLIBS']
 
-includes = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
+includes_enzo = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
 
-if (use_grackle):   libraries.append('grackle')
+if (use_grackle):   libraries_external.append('grackle')
 
 #------------------------------
 # SOURCE
@@ -82,26 +82,28 @@ sources  = [Glob('enzo_*cpp'),
 
 
 charm_main = []
-includes.append(['enzo.decl.h','enzo.def.h'])
+includes_enzo.append(['enzo.decl.h','enzo.def.h'])
 charm_main = ['../Cello/main_enzo.cpp']
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components,libraries])
+env = env.Clone(LIBS=[components,libraries_external])
 
 #------------------------------
 # TARGETS
 #------------------------------
 
-libraries   = env.Library ('enzo', sources)
+libraries_enzo   = env.Library ('enzo', sources)
 
 test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 
+test_enzo_units = env.Program (['test_EnzoUnits.cpp'])
+
 test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
 
-binaries = [test_enzo_p, test_enzo_prolong]
+binaries = [test_enzo_p, test_enzo_prolong, test_enzo_units]
 
 env.CharmBuilder(['enzo.decl.h','enzo.def.h'],'enzo.ci',ARG = 'enzo')
 # env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
@@ -114,8 +116,8 @@ env.CharmBuilder(['enzo.decl.h','enzo.def.h'],'enzo.ci',ARG = 'enzo')
 env.Alias('install-bin',env.Install (bin_path,binaries))
 env.Alias('install-bin',env.Install ('#/bin/',binaries))
 
-env.Alias('install-inc',env.Install (inc_path,includes))
-env.Alias('install-lib',env.Install (lib_path,libraries))
+env.Alias('install-inc',env.Install (inc_path,includes_enzo))
+env.Alias('install-lib',env.Install (lib_path,libraries_enzo))
 
 
 

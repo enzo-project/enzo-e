@@ -233,6 +233,10 @@ protected: // functions
    Parameters * parameters,
    const FieldDescr *) throw ();
 
+  /// Create named stopping object
+  virtual Stopping * create_stopping_ 
+  (std::string type, Config * config) throw ();
+
   /// Create named refine object
   virtual Refine * create_refine_ 
   (std::string type, 
@@ -263,10 +267,6 @@ protected: // functions
    const FieldDescr * field_descr, 
    const ParticleDescr * particle_descr, 
    const Factory * ) throw ();
-
-  /// Create named stopping object
-  virtual Stopping * create_stopping_ 
-  (std::string type, Config * config) throw ();
 
   /// Create named prolongation object
   virtual Prolong * create_prolong_ 

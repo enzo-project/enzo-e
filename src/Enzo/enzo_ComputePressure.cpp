@@ -158,23 +158,11 @@ int EnzoBlock::ComputePressure(enzo_float time,
 
     /* Find the temperature units if we are using comoving coordinates. */
 
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-      simulation()->problem()->physics("cosmology");
+    EnzoUnits * units = (EnzoUnits *) simulation()->problem()->units();
 
-    ASSERT ("EnzoBlock::ComputePressure()",
-	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	    ! (comoving_coordinates && (cosmology == NULL)) );
+    units->set_current_time (time);
     
-    if (comoving_coordinates) {
-
-      cosmology->get_units
-	  (&DensityUnits,
-	   &LengthUnits,
-	   &TemperatureUnits,
-	   &TimeUnits,
-	   &VelocityUnits,
-	   time);
-    }
+    TemperatureUnits = units->temperature();
  
     for (i = 0; i < size; i++) {
  

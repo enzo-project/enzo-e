@@ -170,6 +170,13 @@ env.RunSerial('test_Refresh.unit', bin_path + '/test_Refresh')
 env.RunSerial('test_Mask.unit',    bin_path + '/test_Mask')
 env.RunSerial('test_Value.unit',   bin_path + '/test_Value')
 
+
+#----------------------------------------------------------------------
+# UNITS COMPONENT        
+#----------------------------------------------------------------------
+
+env.RunSerial('test_EnzoUnits.unit',bin_path + '/test_EnzoUnits')
+
 #----------------------------------------------------------------------
 # CELLO
 #----------------------------------------------------------------------

@@ -465,7 +465,6 @@ Physics * EnzoProblem::create_physics_
       (
        enzo_config->physics_cosmology_hubble_constant_now,
        enzo_config->physics_cosmology_omega_matter_now,
-       enzo_config->physics_cosmology_omega_dark_matter_now,
        enzo_config->physics_cosmology_omega_lamda_now,
        enzo_config->physics_cosmology_comoving_box_size,
        enzo_config->physics_cosmology_max_expansion_rate,
@@ -486,11 +485,7 @@ Physics * EnzoProblem::create_physics_
 
 //----------------------------------------------------------------------
 
-Units * EnzoProblem::create_units_ 
-( std::string  type,
-   Config * config,
-   Parameters * parameters,
-   const FieldDescr * field_descr) throw ()
+Units * EnzoProblem::create_units_ (  Config * config  ) throw ()
 {
   EnzoUnits * units = new EnzoUnits;
 

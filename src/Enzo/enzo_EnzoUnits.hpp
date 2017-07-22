@@ -25,12 +25,17 @@ public: // interface
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoUnits);
-
+  
   /// CHARM++ migration constructor for PUP::able
   EnzoUnits (CkMigrateMessage *m)
-    : Units (m)
+    : Units (m),
+      cosmology_(NULL)
   {  }
 
+  /// Virtual destructor
+  virtual ~EnzoUnits ()
+  { }
+  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) {
 
@@ -50,16 +55,43 @@ public: // interface
   }
 
   /// Update current units for cosmological problems
-  void update_cosmology (double time);
+  void set_current_time (double time)
+  {
+    if (cosmology_ != NULL) {
+      cosmology_->set_current_time(time);
+    }
+  }
 
   /// Initialize the cosmology object, if any
-  void set_cosmology(Physics * cosmology)
+  void set_cosmology(EnzoPhysicsCosmology * cosmology)
   { cosmology_ = cosmology; }
-
   
   /// Return magnetic units scaling factor
   inline double magnetic() const
   { return std::sqrt(pressure()*4.0*(cello::pi)); }
+
+public: // virtual methods
+ 
+  /// Return time units scaling factor (virtual)
+  virtual double time() const
+  {
+    return (cosmology_ == NULL) ?
+      Units::time() : cosmology_->time_units();
+  }
+  
+  /// Return mass units scaling factor (virtual)
+  virtual double mass() const
+  {
+    return (cosmology_ == NULL) ?
+      Units::mass() : cosmology_->mass_units();
+  }
+
+  /// Return length units scaling factor (virtual)
+  virtual double length() const
+  {
+    return (cosmology_ == NULL) ?
+      Units::length() : cosmology_->length_units();
+  }
 
 private: // functions
 
@@ -69,8 +101,8 @@ private: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// EnzoCosmology units parameters
-  Physics * cosmology_;
-  
+  EnzoPhysicsCosmology * cosmology_;
+
 };
 
 #endif /* ENZO_ENZO_UNITS_HPP */

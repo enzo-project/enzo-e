@@ -7,7 +7,7 @@
 
 #include "enzo.hpp"
 
-enzo_float EnzoPhysicsCosmology::time_from_redshift_ (enzo_float redshift) const
+enzo_float EnzoPhysicsCosmology::time_from_redshift (enzo_float redshift) const
 {
   enzo_float eta, time_hubble_0 = -1.0;
  
@@ -54,14 +54,14 @@ enzo_float EnzoPhysicsCosmology::time_from_redshift_ (enzo_float redshift) const
     time_units;
 }
 
-//----------------------------------------------------------------------
+//======================================================================
 
 void EnzoPhysicsCosmology::compute_expansion_factor
 (enzo_float *a, enzo_float *dadt, enzo_float time) const
 {
  
   /* Error check. */
-  
+
   ASSERT ("EnzoPhysicsCosmology::compute_expansion_factor",
 	  "Initial time in code units is 0",
 	  (initial_time_in_code_units() != 0) );
@@ -74,14 +74,15 @@ void EnzoPhysicsCosmology::compute_expansion_factor
  
   enzo_float time_units = 2.52e17/sqrt(omega_matter_now_)/hubble_constant_now_/
                     pow(1 + initial_redshift_,enzo_float(1.5));
- 
+
   enzo_float time_hubble_0 = time * time_units * (hubble_constant_now_*3.24e-18);
  
   /* 1) For a flat universe with omega_matter_now_ = 1, it's easy. */
  
   if (fabs(omega_matter_now_-1) < OMEGA_TOLERANCE &&
-      omega_lambda_now_ < OMEGA_TOLERANCE)
+      omega_lambda_now_ < OMEGA_TOLERANCE) {
     *a    = pow(time/initial_time_in_code_units(), enzo_float(2.0/3.0));
+  }
  
   /* 2) For omega_matter_now_ < 1 and omega_lambda_now_ == 0 see
         Peebles 1993, eq. 13-3, 13-10.
@@ -167,46 +168,6 @@ void EnzoPhysicsCosmology::compute_expansion_timestep
      expansion factor. */
  
   *dt_expansion = max_expansion_rate_*a/dadt;
-}
-
-//----------------------------------------------------------------------
-
-void EnzoPhysicsCosmology::get_units
-(enzo_float * density_units,
- enzo_float * length_units,
- enzo_float * temperature_units,
- enzo_float * time_units,
- enzo_float * velocity_units,
- enzo_float time) const
-{
-  /* From the time, compute the current redshift. */
- 
-  enzo_float a, dadt;
-
-  compute_expansion_factor(&a, &dadt,time);
- 
-  /* Compute the current redshift (remember a(init) = 1). */
-
-  enzo_float current_redshift_ = (1 + initial_redshift_)/a - 1;
- 
-  /* Determine the units. */
-
-  *density_units     = 1.88e-29*omega_matter_now_*
-                       pow(hubble_constant_now_,2)*
-                       pow(1 + current_redshift_,3);
- 
-  *length_units      = 3.086e24*comoving_box_size_/hubble_constant_now_/
-                      (1 + current_redshift_);
- 
-  *temperature_units = 1.88e6*pow(comoving_box_size_,2)*omega_matter_now_*
-                      (1 + initial_redshift_);
- 
-  *time_units        = 2.52e17/sqrt(omega_matter_now_)/hubble_constant_now_/
-                      pow(1 + initial_redshift_,enzo_float(1.5));
- 
-  *velocity_units    = 1.225e7*comoving_box_size_*sqrt(omega_matter_now_)*
-                      sqrt(1 + initial_redshift_);
-   
 }
 
 //----------------------------------------------------------------------

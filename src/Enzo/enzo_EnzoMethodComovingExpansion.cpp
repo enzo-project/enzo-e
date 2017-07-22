@@ -66,7 +66,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
     compute_time = enzo_block->time();
   }
 
-  cosmology->compute_expansion_factor(&a, &dadt, compute_time);
+  cosmology->compute_expansion_factor (&a, &dadt, compute_time);
   enzo_float Coefficient = block->dt()*dadt/a;
 
   /* Determine the size of the block. */

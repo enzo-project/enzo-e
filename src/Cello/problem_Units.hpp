@@ -21,8 +21,13 @@ public: // interface
   : time_(1.0),
     mass_(1.0),
     length_(1.0)
-  {  }
+  {
+  }
 
+  /// Virtual destructor
+  virtual ~Units ()
+  { }
+  
   /// CHARM++ PUP::able declaration
   PUPable_decl(Units);
 
@@ -59,19 +64,6 @@ public: // interface
     time_    = time;
   }
 
-  /// Return time units scaling factor (virtual)
-  virtual double time() const
-  { return time_; }
-
-  /// Return mass units scaling factor (virtual)
-  virtual double mass() const
-  { return mass_; }
-
-  /// Return length units scaling factor (virtual)
-  virtual double length() const
-  { return length_; }
-
-
   /// Return volume units scaling factor (derived)
   inline double volume() const
   { return length()*length()*length(); }
@@ -96,9 +88,20 @@ public: // interface
   inline double pressure() const
   { return density() * velocity() * velocity(); }
 
-private: // functions
+public: // virtual methods
 
+  /// Return time units scaling factor (virtual)
+  virtual double time() const
+  { return time_; }
 
+  /// Return mass units scaling factor (virtual)
+  virtual double mass() const
+  { return mass_; }
+
+  /// Return length units scaling factor (virtual)
+  virtual double length() const
+  { return length_; }
+  
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change

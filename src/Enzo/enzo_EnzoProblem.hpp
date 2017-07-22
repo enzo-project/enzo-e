@@ -20,7 +20,7 @@ public: // interface
   EnzoProblem() throw();
 
   /// Destructor
-  ~EnzoProblem() throw();
+  virtual ~EnzoProblem() throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoProblem);
@@ -43,10 +43,6 @@ private: // functions
    Parameters * parameters
    ) throw ();
 
-  /// Create stopping criteria
-  virtual Stopping * create_stopping_ 
-  (std::string type, Config * config) throw ();
-
   /// Create named initialization object
   virtual Initial *  create_initial_ 
   (std::string type, 
@@ -63,12 +59,13 @@ private: // functions
    Parameters * parameters,
    const FieldDescr *) throw ();
 
+  /// Create stopping criteria
+  virtual Stopping * create_stopping_ 
+  (std::string type, Config * config) throw ();
+
   /// Create a Units object
   virtual Units *  create_units_ 
-  (std::string type, 
-   Config * config,
-   Parameters * parameters,
-   const FieldDescr *) throw ();
+  (Config * config) throw ();
 
   /// Create named refine object
   virtual Refine * create_refine_ 

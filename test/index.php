@@ -733,6 +733,10 @@ test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule"),'test'); 
 test_summary("Type",array("Type"),
 	     array("test_Type"),'test'); 
+test_summary("Units", 
+	     array("EnzoUnits"),
+	     array("test_EnzoUnits"),'test');
+
 test_summary("Colormap",array("Colormap"),
 	     array("test_Colormap"),'test'); 
 
@@ -1397,6 +1401,13 @@ begin_hidden("type", "Type");
 tests("Cello","test_Type","test_Type","","");
 end_hidden("type");
 
+//----------------------------------------------------------------------
+
+test_group("Units");
+
+begin_hidden("enzo_units", "HDF5");
+tests("Enzo","test_EnzoUnits", "test_EnzoUnits","","");
+end_hidden("enzo_units");
 
 //----------------------------------------------------------------------
 
