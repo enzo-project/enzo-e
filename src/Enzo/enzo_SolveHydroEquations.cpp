@@ -251,7 +251,22 @@ int EnzoBlock::SolveHydroEquations
   /* note: Start/EndIndex are zero based */
 
   int gravity_on = (acceleration_x != NULL) ? 1 : 0;
+
+  int mx,my,mz;
+  int gx,gy,gz;
+  field.dimensions(0,&mx,&my,&mz);
+  field.ghost_depth(0,&gx,&gy,&gz);
   
+  TRACE_FIELD("ppm-0-density",density,1.0);
+  TRACE_FIELD("ppm-0-total_energy",total_energy,1.0);
+  TRACE_FIELD("ppm-0-velocity_x",velocity_x,1.0);
+  TRACE_FIELD("ppm-0-velocity_y",velocity_y,1.0);
+  TRACE_FIELD("ppm-0-velocity_z",velocity_z,1.0);
+  TRACE_FIELD("ppm-0-acceleration_x",acceleration_x,1.0);
+  TRACE_FIELD("ppm-0-acceleration_y",acceleration_y,1.0);
+  TRACE_FIELD("ppm-0-acceleration_z",acceleration_z,1.0);
+  TRACE_FIELD("ppm-0-internal_energy",internal_energy,1.0);
+   
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
@@ -275,6 +290,16 @@ int EnzoBlock::SolveHydroEquations
      geindex, temp,
      &ncolour, colourpt, coloff, colindex
      );
+
+  TRACE_FIELD("ppm-1-density",density,1.0);
+  TRACE_FIELD("ppm-1-total_energy",total_energy,1.0);
+  TRACE_FIELD("ppm-1-velocity_x",velocity_x,1.0);
+  TRACE_FIELD("ppm-1-velocity_y",velocity_y,1.0);
+  TRACE_FIELD("ppm-1-velocity_z",velocity_z,1.0);
+  TRACE_FIELD("ppm-1-acceleration_x",acceleration_x,1.0);
+  TRACE_FIELD("ppm-1-acceleration_y",acceleration_y,1.0);
+  TRACE_FIELD("ppm-1-acceleration_z",acceleration_z,1.0);
+  TRACE_FIELD("ppm-1-internal_energy",internal_energy,1.0);
 
   /* deallocate temporary space for solver */
 

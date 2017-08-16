@@ -28,7 +28,8 @@ public: // interface
   : refresh_type_(refresh_unknown),
     field_list_(),
     prolong_(NULL),
-    restrict_(NULL)
+    restrict_(NULL),
+    accumulate_(false)
   {
     ++counter[cello::index_static()]; 
 
@@ -110,6 +111,12 @@ public: // interface
   /// Set Restrict operation (default is Problem::restrict() )
   void set_restrict (Restrict * restrict)
   { restrict_ = restrict; }
+
+  void set_accumulate(bool accumulate)
+  { accumulate_ = accumulate; }
+
+  bool accumulate() const
+  { return accumulate_; }
   
   /// Set the list of fields
   void set_field_list (std::vector<int> const & field_list)
@@ -218,6 +225,9 @@ private: // attributes
 
   /// Restriction object
   Restrict * restrict_;
+
+  /// Whether to add or copy face values to ghost values
+  bool accumulate_;
 
 };
 

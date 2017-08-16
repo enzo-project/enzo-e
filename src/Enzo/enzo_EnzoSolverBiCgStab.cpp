@@ -398,7 +398,6 @@
 #undef CK_TEMPLATES_ONLY
 
 // #define DEBUG_ENTRY
-// #define DEBUG_FIELD
 // #define DEBUG_COPY_TEMP
 // #define DEBUG_BICGSTAB
 
@@ -428,51 +427,6 @@
 #   define TRACE_BICGSTAB(F,B) /*  ...  */
 #endif
 
-#ifdef DEBUG_FIELD
-
-#   define TRACE_BCG(block,msg)						\
-  CkPrintf ("%d %s TRACE_BCG %s\n",					\
-	    CkMyPe(),(block != NULL) ? block->name().c_str() : "root",msg); \
-  fflush(stdout);
-
-#define TRACE_FIELD(IX,NAME)						\
-  {									\
-    Data * data = enzo_block->data();					\
-    Field field = data->field();					\
-    T * X = (T*) field.values(IX);					\
-    double xx=0.0;							\
-    double yy=0.0;							\
-    double xs=0.0;							\
-    double ys=0.0;							\
-    for (int iz=0; iz<mz_; iz++) {					\
-      for (int iy=0; iy<my_; iy++) {					\
-	for (int ix=0; ix<mx_; ix++) {					\
-	  int i = ix + mx_*(iy + my_*iz);				\
-	  xs+=X[i];							\
-	  xx+=X[i]*X[i];						\
-	}								\
-      }									\
-    }									\
-    for (int iz=gz_; iz<mz_-gz_; iz++) {				\
-      for (int iy=gy_; iy<my_-gy_; iy++) {				\
-	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
-	  int i = ix + mx_*(iy + my_*iz);				\
-	  ys+=X[i];							\
-	  yy+=X[i]*X[i];						\
-	}								\
-      }									\
-    }									\
-    xx = sqrt(xx);							\
-    yy = sqrt(yy);							\
-    CkPrintf ("%d %s TRACE_FIELD BCG %s [%g] (%g)\n",			\
-	      __LINE__,enzo_block->name().c_str(),NAME,			\
-	      xs/xx,ys/yy);						\
-  }
-
-#else
-
-#   define TRACE_FIELD(IX,NAME) /* ... */
-#endif
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
@@ -603,6 +557,9 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     T* Q   = (T*) field.values(iq_);
     T* U   = (T*) field.values(iu_);
 
+    T * B =  (T*) field.values(ib_);
+
+    TRACE_FIELD_("B1",B,1.0);
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from
     /// the previous solve?]
     
@@ -617,9 +574,11 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
       Q[i] = 0.0;
       U[i] = 0.0;
     }
+    TRACE_FIELD_("B1",B,1.0);
   }
 
   /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
+
   if (A_->is_singular()) {
 
     /// set bs_ = SUM(B)   ==> r_solver_bicgstab_start_1
@@ -649,9 +608,14 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     enzo_block->contribute(2*sizeof(long double), &reduce, 
 			   sum_long_double_2_type, callback);
 
+      T* B = (T*) field.values(ib_);
+
+      TRACE_FIELD_("B",B,1.0);
   } else {
 
     /// nonsingular system, just call start_2 directly
+      T* B = (T*) field.values(ib_);
+    TRACE_FIELD_("B",B,1.0);
     this->start_2<T>(enzo_block);
 
   }
@@ -700,6 +664,8 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
 
     /// for singular problems, project B into R(A)
     int m = mx_*my_*mz_;
+    // @@@@@ B == 0
+    TRACE_FIELD_("B",B,1.0);
     if (A_->is_singular()) {
       T shift = -bs_ / bc_;
       for (int i=0; i<m; i++) {
@@ -711,7 +677,8 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
       R[i] = R0[i] = P[i] = B[i];
     }
 
-    TRACE_FIELD(ir_,"R");
+    TRACE_FIELD_("R",R,1.0);
+    TRACE_FIELD_("B",B,1.0);
     /// Compute local contributions to beta_n_ = DOT(R, R)
     reduce = 0.0;
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
@@ -817,11 +784,14 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("start coarse solve()",enzo_block);
 
-  TRACE_FIELD(ip_,"P");
-
   /// access field container on this block
   Data* data = enzo_block->data();
   Field field = data->field();
+
+  {
+    T * P = (T*) field.values(ip_);
+    TRACE_FIELD_("P",P,1.0);
+  }
 
   if (index_precon_ >= 0) {
 
@@ -1046,12 +1016,12 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
       Y[i] += yshift;
       V[i] += vshift;
     }
+    TRACE_FIELD_("V",V,1.0);
+    TRACE_FIELD_("Y",Y,1.0);
   }
 
   COPY_TEMP(iv_,"V_temp");
 
-  TRACE_FIELD(iv_,"V");
-  TRACE_FIELD(iy_,"Y");
   /// compute alpha factor in BiCgStab algorithm (all blocks)
   alpha_ = beta_n_ / vr0_;
 
@@ -1065,7 +1035,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
     T* X = (T*) field.values(ix_);
     T* Y = (T*) field.values(iy_);
 
-    TRACE_FIELD(ix_,"X");
+    TRACE_FIELD_("X",X,1.0);
     /// update: Q = -alpha_*V + R
     /// update: X = alpha_*Y + X
 
@@ -1160,6 +1130,7 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * enzo_block) throw() {
   // Refresh field faces then call p_solver_bicgstab_loop_85()
 
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields(enzo_block->data()->field().field_count());
 

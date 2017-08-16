@@ -706,8 +706,8 @@ void Block::index_global
 FieldFace * Block::create_face
 (int if3[3], int ic3[3], bool lg3[3],
  int refresh_type,
- std::vector<int> & field_list
- )
+ std::vector<int> & field_list,
+ bool accumulate) const
 {
   FieldDescr * field_descr = simulation()->field_descr();
   FieldFace  * field_face = new FieldFace;
@@ -723,6 +723,7 @@ FieldFace * Block::create_face
     for (int i=0; i<n; i++) field_list[i] = i;
   }
   field_face->set_field_list(field_list);
+  field_face->set_accumulate(accumulate);
   return field_face;
 }
 

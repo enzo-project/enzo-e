@@ -29,7 +29,9 @@ public: // interface
   PUPable_decl(EnzoMethodGrackle);
 
   /// Charm++ PUP::able migration constructor
-  EnzoMethodGrackle (CkMigrateMessage *m) {}
+  EnzoMethodGrackle (CkMigrateMessage *m)
+    : Method (m)
+  {  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) ;

@@ -140,7 +140,7 @@ void Block::refresh_load_field_face_
   std::vector<int> field_list = refresh()->field_list();
 
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_type, field_list);
+    (if3, ic3, lg3, refresh_type, field_list,refresh()->accumulate());
 
   DataMsg * data_msg = new DataMsg;
 

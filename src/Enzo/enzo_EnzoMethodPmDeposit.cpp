@@ -14,6 +14,7 @@
 #include "enzo.hpp"
 
 // #define DEBUG_PM_DEPOSIT
+// #define DEBUG_FIELD
 
 #ifdef DEBUG_PM_DEPOSIT
 #  define TRACE_PM(MESSAGE)				\
@@ -21,6 +22,31 @@
 #else
 #  define TRACE_PM(MESSAGE) /* ... */
 #endif
+
+#define FORTRAN_NAME(NAME) NAME##_
+
+extern "C" void  FORTRAN_NAME(dep_grid_cic_4)
+  (float * de,float * de_t,float * temp,
+   float * vx, float * vy, float * vz, 
+   float * dt, float * rfield, int *rank,
+   float * hx, float * hy, float * hz,
+   int * mx,int * my,int * mz,
+   int * gxi,int * gyi,int * gzi,
+   int * nxi,int * nyi,int * nzi,
+   int * ,int * ,int * ,
+   int * nx,int * ny,int * nz,
+   int * ,int * ,int * );
+extern "C" void  FORTRAN_NAME(dep_grid_cic_8)
+  (double * de,double * de_t,double * temp,
+   double * vx, double * vy, double * vz, 
+   double * dt, double * rfield, int *rank,
+   double * hx, double * hy, double * hz,
+   int * mx,int * my,int * mz,
+   int * gxi,int * gyi,int * gzi,
+   int * nxi,int * nyi,int * nzi,
+   int * ,int * ,int * ,
+   int * nx,int * ny,int * nz,
+   int * ,int * ,int * );
 
 //----------------------------------------------------------------------
 
@@ -54,7 +80,6 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   refresh(ir)->add_all_fields(field_descr->field_count());
-  refresh(ir)->add_all_particles(particle_descr->num_types());
 
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -84,10 +109,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     Particle particle (block->data()->particle());
     Field    field    (block->data()->field());
 
-    const int rank = block->rank();
+    int rank = block->rank();
 
-    double  * de   = (double *) field.values("density");
-    double  * de_t = (double *) field.values("density_total");
+    enzo_float  * de_t = (enzo_float *) field.values("density_total");
 
     int mx,my,mz;
     field.dimensions(0,&mx,&my,&mz);
@@ -98,15 +122,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // Initialize "density_total" with gas "density"
 
-    for (int iz=0; iz<mz; iz++) {
-      for (int iy=0; iy<my; iy++) {
-	for (int ix=0; ix<mx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  de_t[i]  = de[i];
-	}
-      }
-    }
-
+    for (int i=0; i<mx*my*mz; i++) de_t[i] = 0;
     // Get block extents and cell widths
     double xm,ym,zm;
     double xp,yp,zp;
@@ -124,17 +140,19 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     const int ia_mass = particle.constant_index (it,"mass");
 
-    double mass = *((double *)(particle.constant_value (it,ia_mass)));
+    enzo_float mass = *((enzo_float *)(particle.constant_value (it,ia_mass)));
 
     double vol = 1.0;
     if (rank >= 1) vol *= hx;
     if (rank >= 2) vol *= hy;
     if (rank >= 3) vol *= hz;
-    double dens = mass / vol;
+    double dens = mass; // / vol;
 
     // Accumulate particle density using CIC
 
     const double dt = alpha_ * block->dt();
+
+    // Accumulated single velocity array for Baryon deposit
 
     for (int ib=0; ib<particle.num_batches(it); ib++) {
 
@@ -145,8 +163,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	const int ia_x  = particle.attribute_index(it,"x");
 	const int ia_vx = particle.attribute_index(it,"vx");
 
-	double * xa =  (double *) particle.attribute_array (it,ia_x,ib);
-	double * vxa = (double *) particle.attribute_array (it,ia_vx,ib);
+	enzo_float * xa =  (enzo_float *) particle.attribute_array (it,ia_x,ib);
+	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
 
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
@@ -176,10 +194,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	const int ia_vx = particle.attribute_index(it,"vx");
 	const int ia_vy = particle.attribute_index(it,"vy");
 
-	double * xa  = (double *) particle.attribute_array (it,ia_x,ib);
-	double * ya  = (double *) particle.attribute_array (it,ia_y,ib);
-	double * vxa = (double *) particle.attribute_array (it,ia_vx,ib);
-	double * vya = (double *) particle.attribute_array (it,ia_vy,ib);
+	// Batch arrays
+	enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
+	enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
+	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
+	enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
+
+	int iv = 0;
 
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
@@ -248,19 +269,25 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	const int ia_vy = particle.attribute_index(it,"vy");
 	const int ia_vz = particle.attribute_index(it,"vz");
 
-	double * xa  = (double *) particle.attribute_array (it,ia_x,ib);
-	double * ya  = (double *) particle.attribute_array (it,ia_y,ib);
-	double * za  = (double *) particle.attribute_array (it,ia_z,ib);
+	enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
+	enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
+	enzo_float * za  = (enzo_float *) particle.attribute_array (it,ia_z,ib);
 
-	double * vxa = (double *) particle.attribute_array (it,ia_vx,ib);
-	double * vya = (double *) particle.attribute_array (it,ia_vy,ib);
-	double * vza = (double *) particle.attribute_array (it,ia_vz,ib);
+	// Particle batch velocities
+	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
+	enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
+	enzo_float * vza = (enzo_float *) particle.attribute_array (it,ia_vz,ib);
 
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
 
+	int iv = 0;
+	
 	for (int ip=0; ip<np; ip++) {
 
+	  // Copy batch particle velocities to temporary block field velocities
+	  iv++;
+	  
 	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
 	  double y = ya[ip*dp] + vya[ip*dv]*dt;
 	  double z = za[ip*dp] + vza[ip*dv]*dt;
@@ -297,7 +324,122 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	}
       }
     }
+
+    TRACE_FIELD("density-particle",de_t,1.0);
+
+    enzo_float  * de   = (enzo_float *) field.values("density");
+    enzo_float  * de_gas   = (enzo_float *) field.values("density_gas");
+    enzo_float * temp = new enzo_float [4*mx*my*mz];
+    enzo_float * rfield = new enzo_float[mx*my*mz];
+    for (int i=0; i<mx*my*mz; i++) rfield[i] = 0.0;
+    for (int i=0; i<4*mx*my*mz; i++) temp[i] = 0.0;
+
+    int gxi=gx;
+    int gyi=gy;
+    int gzi=gz;
+    int nxi=mx-gx-1;
+    int nyi=my-gy-1;
+    int nzi=mz-gz-1;
+    int i0 = 0;
+    int i1 = 1;
+    enzo_float hxf = hx;
+    enzo_float hyf = hy;
+    enzo_float hzf = hz;
+    enzo_float dtf = 0.0;
+
+#define FIELD_CIC
+
+#ifdef FIELD_CIC    
+    enzo_float * de_gas_0 = de_gas + gx + mx*(gy + my*gz);
+    for (int i=0; i<mx*my*mz; i++) de_gas[i] = 0.0;
+#else
+    enzo_float * de_gas_0 = new enzo_float [nx*ny*nz];
+    for (int i=0; i<nx*ny*nz; i++) de_gas_0[i] = 0.0;
+#endif    
+    
+
+    enzo_float * vxf = (enzo_float *) field.values("velocity_x");
+    enzo_float * vyf = (enzo_float *) field.values("velocity_y");
+    enzo_float * vzf = (enzo_float *) field.values("velocity_z");
+    enzo_float * vx = new enzo_float [mx*my*mz];
+    enzo_float * vy = new enzo_float [mx*my*mz];
+    enzo_float * vz = new enzo_float [mx*my*mz];
+
+    gx=gy=gz=0;
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int k = ix + mx*(iy + my*iz);
+	  int i = (ix-gx) + nx*((iy-gy) + ny*(iz-gz));
+	  vx[k] = vxf[k];
+	  vy[k] = vyf[k];
+	  vz[k] = vzf[k];
+	}
+      }
+    }
+    gx=gy=gz=3;
+    
+    if (sizeof(enzo_float)==sizeof(float)) {
+      FORTRAN_NAME(dep_grid_cic_4)((float *)de,(float *)de_gas_0,(float *)temp,
+				   (float *)vx, (float *)vy, (float *)vz, 
+				   (float *)&dtf, (float *)rfield, &rank,
+				   (float *)&hxf,(float *)&hyf,(float *)&hzf,
+				   &mx,&my,&mz,
+				   &gxi,&gyi,&gzi,
+				   &nxi,&nyi,&nzi,
+				   &i0,&i0,&i0,
+				   &nx,&ny,&nz,
+				   &i1,&i1,&i1);
+    } else if (sizeof(enzo_float)==sizeof(double)) {
+      FORTRAN_NAME(dep_grid_cic_8)((double *)de,(double *)de_gas_0,(double *)temp,
+      				   (double *)vx, (double *)vy, (double *)vz, 
+      				   (double *)&dtf, (double *)rfield, &rank,
+      				   (double *)&hxf,(double *)&hyf,(double *)&hzf,
+      				   &mx,&my,&mz,
+      				   &gxi,&gyi,&gzi,
+      				   &nxi,&nyi,&nzi,
+      				   &i0,&i0,&i0,
+      				   &mx,&my,&mz,
+      				   &i1,&i1,&i1);
+    } else {
+      ERROR1 ("FieldFace::store_()",
+	      "unknown float precision sizeof(enzo_float) = %d\n",sizeof(enzo_float));
+    }
+    png_array ("renzo-p-velocity-cic-x.png",vx,3,3,3,mx,my,mz,__FILE__,__LINE__,2,16,16,1.0);
+    png_array ("renzo-p-velocity-cic-y.png",vy,3,3,3,mx,my,mz,__FILE__,__LINE__,2,16,16,1.0);
+    png_array ("renzo-p-velocity-cic-z.png",vz,3,3,3,mx,my,mz,__FILE__,__LINE__,2,16,16,1.0);
+
+    delete [] rfield;
+    delete [] temp;
+    delete [] vx;
+    delete [] vy;
+    delete [] vz;
+    TRACE_FIELD("density-gas",de,1.0);
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+    	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+#ifdef FIELD_CIC
+	  int ig = (ix-gx) + nx*((iy-gy) + ny*(iz-gz));
+#else
+	  int ig = ix + nx*(iy + ny*iz);
+#endif	  
+    	  de_t[i] += de_gas_0[ig];
+    	}
+      }
+    }
+
+    png_array ("enzo-p-density-cic.png",de_gas_0,0,0,0,nx,ny,nz,__FILE__,__LINE__,2,16,16,1.0);
+    png_array ("renzo-p-density-cic.png",de_gas_0,0,0,0,nx,ny,nz,__FILE__,__LINE__,2,16,16,1.0);
+    TRACE_FIELD("density-gas-particle",de_t,1.0);
+
+#ifndef FIELD_CIC
+    delete [] de_gas_0;
+#endif    
+
+    
   }
+
 
   block->compute_done(); 
   

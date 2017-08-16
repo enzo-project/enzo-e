@@ -724,7 +724,8 @@ public: // virtual functions
 
   FieldFace * create_face
   (int if3[3], int ic3[3], bool lg3[3], int refresh_type,
-   std::vector<int> & field_list);
+   std::vector<int> & field_list,
+   bool accumulate = false) const;
 
   void print () const;
 

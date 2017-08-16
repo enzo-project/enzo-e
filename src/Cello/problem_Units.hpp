@@ -72,14 +72,6 @@ public: // interface
   inline double density() const
   { return mass() / volume(); }
 
-  /// Return temperature units scaling factor (derived)
-  inline double temperature() const
-  { return (cello::mass_hydrogen)*std::pow(length()/time(),2)/(cello::k); }
-
-  /// Return velocity units scaling factor (derived)
-  inline double velocity() const
-  { return length() / time(); }
-
   /// Return acceleration units scaling factor (derived)
   inline double acceleration() const
   { return length() / time() / time(); }
@@ -101,6 +93,14 @@ public: // virtual methods
   /// Return length units scaling factor (virtual)
   virtual double length() const
   { return length_; }
+  
+  /// Return temperature units scaling factor (derived)
+  virtual double temperature() const
+  { return (cello::mass_hydrogen)*std::pow(length()/time(),2)/(cello::k); }
+
+  /// Return velocity units scaling factor (derived)
+  virtual double velocity() const
+  { return length() / time(); }
   
 private: // attributes
 

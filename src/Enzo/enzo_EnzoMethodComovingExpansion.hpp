@@ -25,12 +25,15 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodComovingExpansion (CkMigrateMessage *m)
-    : comoving_coordinates_(false)
+    : Method (m),
+      comoving_coordinates_(false)
   {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+public: // virtual methods
+  
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
 
