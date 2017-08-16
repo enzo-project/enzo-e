@@ -25,7 +25,7 @@ public: // interface
   PUPable_decl(ColormapRGB);
 
   /// CHARM++ migration constructor
-  ColormapRGB(CkMigrateMessage *m) {}
+  ColormapRGB(CkMigrateMessage *m) : Colormap (m) {}
 
   /// Constructor
   ColormapRGB(std::vector<double> rgb) throw()

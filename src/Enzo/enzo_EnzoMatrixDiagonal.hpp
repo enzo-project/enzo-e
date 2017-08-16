@@ -36,7 +36,8 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoMatrixDiagonal(CkMigrateMessage *m)
-    : hx_(0),
+    : Matrix(m),
+      hx_(0),
       hy_(0),
       hz_(0),
       mx_(0),

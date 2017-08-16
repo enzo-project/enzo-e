@@ -30,7 +30,8 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoMatrixIdentity(CkMigrateMessage *m)
-    : mx_(0), my_(0), mz_(0)
+    : Matrix(m),
+      mx_(0), my_(0), mz_(0)
   { }
 
   /// CHARM++ Pack / Unpack function

@@ -26,7 +26,7 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoProlongMC1(CkMigrateMessage *m)
-    : method_(0)
+    : Prolong(m), method_(0)
   { }
 
   /// CHARM++ Pack / Unpack function

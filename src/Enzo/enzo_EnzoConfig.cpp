@@ -54,6 +54,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_pm_field(""),
   initial_pm_mpp(0.0),
   initial_pm_level(0),
+  // EnzoInitialCosmology
+  initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
   initial_collapse_rank(0),
   initial_collapse_radius_relative(0.0),
@@ -152,6 +154,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_initial_redshift;
   p | physics_cosmology_final_redshift;
 
+  p | initial_cosmology_temperature;
+  
   p | initial_collapse_rank;
   PUParray(p,initial_collapse_array,3);
   p | initial_collapse_radius_relative;
@@ -407,6 +411,9 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_random_te_multiplier = 
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
 
+  // Cosmology initialization
+  initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
+  
   // Collapse initialization
 
   initial_collapse_rank =  p->value_integer("Initial:collapse:rank",0);

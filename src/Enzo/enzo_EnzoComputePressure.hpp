@@ -25,7 +25,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoComputePressure (CkMigrateMessage *m)
-    : gamma_(0.0),
+    : Compute(m),
+      gamma_(0.0),
       comoving_coordinates_(false)
   { }
 

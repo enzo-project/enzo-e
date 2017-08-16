@@ -19,6 +19,15 @@
 #include <string>
 #include <vector>
 
+extern void png_array (const char * filename,
+		       float * array,
+		       int gx,int gy,int gz,
+		       int mx,int my,int mz,
+		       const char * file, int line,
+		       int axis = 2,
+		       int px=0, int py=0,
+		       double scale = 1.0
+		       );
 //----------------------------------------------------------------------
 // Defines
 //----------------------------------------------------------------------
@@ -71,6 +80,59 @@ class FieldFace;
 #include "data_Data.hpp"
 
 #include "data_DataMsg.hpp"
+
+#ifdef DEBUG_FIELD
+
+static int count = 0;
+
+#   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz)		\
+  {									\
+    double sum_all=0.0;							\
+    double sum_real=0.0;						\
+    double sum2_all=0.0;						\
+    double sum2_real=0.0;						\
+    for (int iz=0; iz<mz; iz++) {					\
+      for (int iy=0; iy<my; iy++) {					\
+	for (int ix=0; ix<mx; ix++) {					\
+	  int i = ix + mx*(iy + my*iz);					\
+	  sum_all+=SCALE*(FIELD[i]);					\
+	  sum2_all += SCALE*(FIELD[i]) * SCALE*(FIELD[i]);		\
+	}								\
+      }									\
+    }									\
+    for (int iz=gz; iz<mz-gz; iz++) {					\
+      for (int iy=gy; iy<my-gy; iy++) {					\
+	for (int ix=gx; ix<mx-gx; ix++) {				\
+	  int i = ix + mx*(iy + my*iz);					\
+	  sum_real+=SCALE*(FIELD[i]);					\
+	  sum2_real+=SCALE*(FIELD[i])*SCALE*(FIELD[i]);			\
+	}								\
+      }									\
+    }									\
+    CkPrintf ("DEBUG_FIELD %p (%g) [%g] | (%g : %g %g %g) %s:%d %s\n",	\
+	      FIELD,sum_real,sum_all,					\
+	      SCALE*(FIELD[gx+mx*(gy+my*gz)]),				\
+	      SCALE*(FIELD[(gx+1)+mx*(gy+my*gz)]),			\
+	      SCALE*(FIELD[gx+mx*((gy+1)+my*gz)]),			\
+	      SCALE*(FIELD[gx+mx*(gy+my*(gz+1))]),			\
+	      __FILE__,__LINE__,NAME);					\
+    fflush(stdout);							\
+    char filename[80];						\
+    sprintf (filename,"renzo-p-%s.png",NAME);				\
+    png_array (filename,(float*)(FIELD),gx,gy,gz,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
+    sprintf (filename,"enzo-p-%s.png",NAME);				\
+    png_array (filename,(float*)(FIELD),0,0,0,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
+  }
+#   define TRACE_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_)
+#   define TRACE_FIELD(NAME,FIELD,SCALE)  TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz)
+
+#else
+
+#   define TRACE_FIELD(NAME,FIELD,SCALE) /* ... */
+#   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz) /* ... */
+#   define TRACE_FIELD_(NAME,FIELD,SCALE) /* ... */
+
+#endif
 
 #endif /* _DATA_HPP */
 

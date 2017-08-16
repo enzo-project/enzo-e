@@ -52,6 +52,7 @@ trace_charm = 0
 #----------------------------------------------------------------------
 
 debug = 0
+debug_field = 0
 
 #----------------------------------------------------------------------
 # Do extra run-time checking.  Useful for debugging, but can potentially
@@ -207,6 +208,7 @@ define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
+define_debug_field =  ['DEBUG_FIELD']
 define_check =        ['CELLO_CHECK']
 
 define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
@@ -337,6 +339,7 @@ if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
+if (debug_field != 0):   defines = defines + define_debug_field
 if (check != 0):         defines = defines + define_check
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory

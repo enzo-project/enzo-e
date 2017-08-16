@@ -38,7 +38,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoBoundary (CkMigrateMessage *m)
-     : boundary_type_(boundary_type_undefined)
+    : Boundary(m),
+      boundary_type_(boundary_type_undefined)
   { }
 
   /// CHARM++ Pack / Unpack function

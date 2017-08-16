@@ -26,7 +26,8 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   EnzoSolverJacobi (CkMigrateMessage *m)
-    : A_(NULL),
+    : Solver(m),
+      A_(NULL),
       ix_(0),
       ib_(0),
       ir_(0),

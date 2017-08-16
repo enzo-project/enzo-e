@@ -178,7 +178,7 @@ void DataMsg::update (Data * data, bool is_local)
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  FieldDescr    *    field_descr = simulation->   field_descr();
+  FieldDescr * field_descr = simulation->field_descr();
  
   Field field_dst = data->field();
  

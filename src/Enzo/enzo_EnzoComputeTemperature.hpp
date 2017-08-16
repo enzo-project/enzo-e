@@ -28,7 +28,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoComputeTemperature (CkMigrateMessage *m)
-    : density_floor_(0.0),
+    : Compute(m),
+      density_floor_(0.0),
       temperature_floor_(0.0),
       mol_weight_(0.0),
       comoving_coordinates_(false)

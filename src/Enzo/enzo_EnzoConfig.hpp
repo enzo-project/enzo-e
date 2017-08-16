@@ -64,6 +64,8 @@ public: // interface
       physics_cosmology_max_expansion_rate(0.0),
       physics_cosmology_initial_redshift(0.0),
       physics_cosmology_final_redshift(0.0),
+      // EnzoInitialCosmology
+      initial_cosmology_temperature(0.0),
       // EnzoInitialCollapse
       initial_collapse_rank(0),
       initial_collapse_radius_relative(0.0),
@@ -183,6 +185,9 @@ public: // attributes
   double                     physics_cosmology_initial_redshift;
   double                     physics_cosmology_final_redshift;
 
+  /// EnzoInitialCosmology
+  double                     initial_cosmology_temperature;
+  
   /// EnzoInitialCollapse
   int                        initial_collapse_rank;
   int                        initial_collapse_array[3];

@@ -28,6 +28,9 @@ public: // interface
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Colormap);
 
+  Colormap (CkMigrateMessage *m)
+    : PUP::able(m) { }
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {

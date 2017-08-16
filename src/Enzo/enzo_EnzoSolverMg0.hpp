@@ -42,7 +42,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoSolverMg0 (CkMigrateMessage *m)
-    :  A_(NULL),
+    :  Solver(m),
+       A_(NULL),
        index_smooth_pre_(-1),
        index_solve_coarse_(-1),
        index_smooth_post_(-1),

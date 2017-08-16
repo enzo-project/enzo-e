@@ -25,7 +25,7 @@ public: // interface
   PUPable_decl(ProlongInject);
 
   /// CHARM++ migration constructor
-  ProlongInject(CkMigrateMessage *m) {}
+  ProlongInject(CkMigrateMessage *m) : Prolong(m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 

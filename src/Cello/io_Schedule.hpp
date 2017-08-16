@@ -43,6 +43,9 @@ public: // functions
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Schedule);
 
+  Schedule (CkMigrateMessage *m)
+    : PUP::able(m) { }
+
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)
   {

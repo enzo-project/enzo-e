@@ -50,6 +50,7 @@ module enzo {
   PUPable EnzoFactory;
 
   PUPable EnzoInitialCollapse;
+  PUPable EnzoInitialCosmology;
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
@@ -71,6 +72,8 @@ module enzo {
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
 
+  PUPable EnzoMethodComovingExpansion;
+  PUPable EnzoMethodCosmology;
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
@@ -79,7 +82,6 @@ module enzo {
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodGravity;
-  PUPable EnzoMethodComovingExpansion;
 
   PUPable EnzoPhysicsCosmology;
 

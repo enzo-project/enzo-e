@@ -25,7 +25,7 @@ public: // interface
   PUPable_decl(RestrictLinear);
 
   /// CHARM++ migration constructor
-  RestrictLinear(CkMigrateMessage *m) {}
+  RestrictLinear(CkMigrateMessage *m) : Restrict(m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 

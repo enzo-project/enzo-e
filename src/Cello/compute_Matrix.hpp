@@ -24,6 +24,8 @@ public: // interface
   virtual ~Matrix() throw()
   {}
 
+  Matrix(CkMigrateMessage *m) : PUP::able(m) { }
+
   /// Charm++ PUP::able declarations
   PUPable_abstract(Matrix);
 

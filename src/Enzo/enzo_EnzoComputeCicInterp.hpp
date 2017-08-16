@@ -28,7 +28,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoComputeCicInterp (CkMigrateMessage *m)
-    : it_p_(0),
+    : Compute(m),
+      it_p_(0),
       ia_p_(0),
       if_(0)
   { }

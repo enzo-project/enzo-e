@@ -62,6 +62,10 @@ public: // interface
     }
   }
 
+  /// Return the Cosmology object (may be NULL)
+  EnzoPhysicsCosmology * cosmology()
+  { return cosmology_; }
+  
   /// Initialize the cosmology object, if any
   void set_cosmology(EnzoPhysicsCosmology * cosmology)
   { cosmology_ = cosmology; }
@@ -93,6 +97,20 @@ public: // virtual methods
       Units::length() : cosmology_->length_units();
   }
 
+  /// Return temperature units scaling factor (virtual)
+  virtual double temperature() const
+  {
+    return (cosmology_ == NULL) ?
+      Units::temperature() : cosmology_->temperature_units();
+  }
+  
+  /// Return velocity units scaling factor (virtual)
+  virtual double velocity() const
+  {
+    return (cosmology_ == NULL) ?
+      Units::velocity() : cosmology_->velocity_units();
+  }
+  
 private: // functions
 
 

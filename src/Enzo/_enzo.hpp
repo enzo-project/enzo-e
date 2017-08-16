@@ -158,6 +158,7 @@ struct fluxes
 #include "enzo_EnzoBoundary.hpp"
 
 #include "enzo_EnzoInitialCollapse.hpp"
+#include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
@@ -172,6 +173,7 @@ struct fluxes
 #include "enzo_EnzoRefineShock.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
+#include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHeat.hpp"

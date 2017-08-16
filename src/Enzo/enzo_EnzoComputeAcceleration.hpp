@@ -28,10 +28,10 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoComputeAcceleration (CkMigrateMessage *m)
-    :
-    rank_(0),
-    order_(0),
-    i_ax_(0),i_ay_(0),i_az_(0),i_p_(0)
+    : Compute (m),
+      rank_(0),
+      order_(0),
+      i_ax_(0),i_ay_(0),i_az_(0),i_p_(0)
   { }
 
   /// CHARM++ Pack / Unpack function

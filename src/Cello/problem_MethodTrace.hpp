@@ -34,7 +34,8 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   MethodTrace (CkMigrateMessage *m)
-    : timestep_(0.0)
+    : Method(m),
+      timestep_(0.0)
   { }
 
   /// CHARM++ Pack / Unpack function

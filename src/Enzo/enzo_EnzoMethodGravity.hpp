@@ -41,7 +41,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodGravity (CkMigrateMessage *m)
-    : index_solver_(-1),
+    : Method (m),
+      index_solver_(-1),
       grav_const_(0.0)
   { }
 

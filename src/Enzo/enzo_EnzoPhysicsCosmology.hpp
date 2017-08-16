@@ -29,7 +29,8 @@ public: // interface
     a_(0.0),
     dadt_(0.0),
     current_redshift_(-1.0)
-  {  }
+  {
+  }
 
   /// Constructor
   EnzoPhysicsCosmology
@@ -53,7 +54,8 @@ public: // interface
       a_(0.0),
       dadt_(0.0),
       current_redshift_(-1.0)
-  {  }
+  {
+  }
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoPhysicsCosmology);
@@ -95,19 +97,19 @@ public: // interface
   enzo_float initial_redshift()      { return initial_redshift_; }
   enzo_float final_redshift()        { return final_redshift_; }
 
-  enzo_float set_hubble_constant_now(enzo_float value)
+  void set_hubble_constant_now(enzo_float value)
   { hubble_constant_now_=value; }
-  enzo_float set_omega_matter_now(enzo_float value)
+  void set_omega_matter_now(enzo_float value)
   { omega_matter_now_=value; }
-  enzo_float set_omega_lambda_now(enzo_float value)
+  void set_omega_lambda_now(enzo_float value)
   { omega_lambda_now_=value; }
-  enzo_float set_comoving_box_size(enzo_float value)
+  void set_comoving_box_size(enzo_float value)
   { comoving_box_size_=value; }
-  enzo_float set_max_expansion_rate(enzo_float value)
+  void set_max_expansion_rate(enzo_float value)
   { max_expansion_rate_=value; }
-  enzo_float set_initial_redshift(enzo_float value)
+  void set_initial_redshift(enzo_float value)
   { initial_redshift_=value; }
-  enzo_float set_final_redshift(enzo_float value)
+  void set_final_redshift(enzo_float value)
   { final_redshift_=value; }
   
   enzo_float initial_time_in_code_units() const
@@ -126,6 +128,12 @@ public: // interface
     current_redshift_ = (1 + initial_redshift_)/a_ - 1;
     
   }
+
+  void set_current_redshift (enzo_float redshift)
+  {
+    set_current_time(time_from_redshift(redshift));
+  }
+  
   void update_expansion_factor(enzo_float time)
   {
     compute_expansion_factor(&a_,&dadt_,time);
@@ -140,7 +148,7 @@ public: // interface
   /// Return current mass units scaling (requires set_current_time())
   double mass_units() const
   {
-    double density = 1.88e-29*omega_matter_now_*
+    double density = 1.8788e-29*omega_matter_now_*
       pow(hubble_constant_now_,2)*
       pow(1 + current_redshift_,3);
     double length = length_units();
@@ -150,7 +158,7 @@ public: // interface
   /// Return current length units scaling (requires set_current_time())
   double length_units() const
   {
-    return 3.086e24*comoving_box_size_/hubble_constant_now_/
+    return 3.085678e24*comoving_box_size_/hubble_constant_now_/
       (1.0 + current_redshift_);
   }
 
@@ -161,18 +169,32 @@ public: // interface
       pow(1.0 + initial_redshift_,1.5);
   }
 
+  /// Return current temperature units (requires set_current_time())
+  double temperature_units() const
+  {
+    return 1.81723e6*pow(comoving_box_size_,2.0)*omega_matter_now_*
+                      (1.0 + initial_redshift_);
+  }
+
+  double velocity_units() const
+  {
+    return 1.22475e7*comoving_box_size_*sqrt(omega_matter_now_)*
+                      sqrt(1.0 + initial_redshift_);
+  }
+
   void print () const
   {
-    CkPrintf ("hubble_constant_now_   = %g\n",hubble_constant_now_);
-    CkPrintf ("omega_matter_now_      = %g\n",omega_matter_now_);
-    CkPrintf ("omega_lambda_now_      = %g\n",omega_lambda_now_);
-    CkPrintf ("comoving_box_size_     = %g\n",comoving_box_size_);
-    CkPrintf ("max_expansion_rate_    = %g\n",max_expansion_rate_);
-    CkPrintf ("initial_redshift_      = %g\n",initial_redshift_);
-    CkPrintf ("final_redshift_        = %g\n",final_redshift_);
-    CkPrintf ("a_                     = %g\n",a_);
-    CkPrintf ("dadt_                  = %g\n",dadt_);
-    CkPrintf ("current_redshift_      = %g\n",current_redshift_);
+    CkPrintf ("DEBUG_COSMO hubble_constant_now = %g\n",hubble_constant_now_);
+    CkPrintf ("DEBUG_COSMO omega_matter_now    = %g\n",omega_matter_now_);
+    CkPrintf ("DEBUG_COSMO omega_lambda_now    = %g\n",omega_lambda_now_);
+    CkPrintf ("DEBUG_COSMO comoving_box_size   = %g\n",comoving_box_size_);
+    CkPrintf ("DEBUG_COSMO max_expansion_rate  = %g\n",max_expansion_rate_);
+    CkPrintf ("DEBUG_COSMO initial_redshift    = %g\n",initial_redshift_);
+    CkPrintf ("DEBUG_COSMO final_redshift      = %g\n",final_redshift_);
+    CkPrintf ("DEBUG_COSMO a                   = %g\n",a_);
+    CkPrintf ("DEBUG_COSMO dadt                = %g\n",dadt_);
+    CkPrintf ("DEBUG_COSMO current_redshift    = %g\n",current_redshift_);
+    fflush(stdout);
   }
 
 public: // virtual methods

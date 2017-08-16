@@ -25,7 +25,7 @@ public: // interface
   PUPable_decl(EnzoRestrict);
 
   /// CHARM++ migration constructor
-  EnzoRestrict(CkMigrateMessage *m) {}
+  EnzoRestrict(CkMigrateMessage *m) : Restrict(m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
