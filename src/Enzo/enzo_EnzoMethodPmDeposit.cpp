@@ -14,7 +14,6 @@
 #include "enzo.hpp"
 
 // #define DEBUG_PM_DEPOSIT
-#define DEBUG_FIELD
 
 #ifdef DEBUG_PM_DEPOSIT
 #  define TRACE_PM(MESSAGE)				\

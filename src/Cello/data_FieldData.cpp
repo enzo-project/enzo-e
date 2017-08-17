@@ -521,7 +521,7 @@ void FieldData::print
 {
 
 #ifndef CELLO_DEBUG
-  return;
+   return;
 #else
 
   int ip=0;

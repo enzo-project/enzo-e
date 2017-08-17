@@ -578,6 +578,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
   }
 
   /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
+
   if (A_->is_singular()) {
 
     /// set bs_ = SUM(B)   ==> r_solver_bicgstab_start_1
@@ -608,7 +609,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 			   sum_long_double_2_type, callback);
 
       T* B = (T*) field.values(ib_);
-      // @@@ B == 0!
+
       TRACE_FIELD_("B",B,1.0);
   } else {
 

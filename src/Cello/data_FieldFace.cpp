@@ -37,7 +37,6 @@ FieldFace::FieldFace
      prolong_(NULL),
      restrict_(NULL),
      accumulate_(false)
-     
 {
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
@@ -719,6 +718,7 @@ template<class T> void FieldFace::copy_
 ( T       * vd, int md3[3],int nd3[3],int id3[3],
   const T * vs, int ms3[3],int ns3[3],int is3[3]) throw()
 {
+
   if (accumulate_) {
 
     double s=0,d=0;

@@ -30,6 +30,7 @@ EnzoMethodGravity::EnzoMethodGravity
     grav_const_(grav_const)
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
   const int idensity = (idt != -1) ? idt : id;
@@ -57,8 +58,9 @@ void EnzoMethodGravity::compute(Block * block) throw()
   const int idt = field.field_id("density_total");
   const int idensity = (idt != -1) ? idt : id;
   const int ib = field.field_id ("B");
-  
+  //  printf ("id = %d\n",idensity);
   // Solve the linear system
+
   int gx,gy,gz;
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
