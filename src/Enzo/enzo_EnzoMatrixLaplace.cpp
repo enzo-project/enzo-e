@@ -72,40 +72,109 @@ void EnzoMatrixLaplace::matvec_ (T * Y, T * X, int g0) const throw()
   const int idx = 1;
   const int idy = mx_;
   const int idz = mx_*my_;
+  const int idx2 = 2*idx;
+  const int idy2 = 2*idy;
+  const int idz2 = 2*idz;
 
-  if (rank_ == 1) {
+  if (order_ == 2) {
 
-    for (int ix=g0; ix<mx_-g0; ix++) {
-      const int i = ix;
-      Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) / (hx_*hx_);
-    }
+    g0 = std::max(1,g0);
 
-  } else if (rank_ == 2) {
-#ifdef DEBUG_MATRIX
-    printf ("%s:%d DEBUG_LOOP_LIMITS: (%d:%d) (%d:%d)\n",
-	    __FILE__,__LINE__, g0,mx_-g0,g0,my_-g0);
-#endif
-    for   (int iy=g0; iy<my_-g0; iy++) {
+    if (rank_ == 1) {
+
       for (int ix=g0; ix<mx_-g0; ix++) {
-	const int i = ix + mx_*iy;
-	Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx_*hx_)
-	  +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_);
+	const int i = ix;
+	Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) / (hx_*hx_);
       }
-    }
 
-  } else if (rank_ == 3) {
-
-    for     (int iz=g0; iz<mz_-g0; iz++) {
+    } else if (rank_ == 2) {
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
-	  const int i = ix + mx_*(iy + my_*iz);
+	  const int i = ix + mx_*iy;
 	  Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx_*hx_)
-	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_)
-	    +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz_*hz_);
+	    +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_);
+	}
+      }
+
+    } else if (rank_ == 3) {
+
+      for     (int iz=g0; iz<mz_-g0; iz++) {
+	for   (int iy=g0; iy<my_-g0; iy++) {
+	  for (int ix=g0; ix<mx_-g0; ix++) {
+	    const int i = ix + mx_*(iy + my_*iz);
+	    Y[i] = ( X[i+idx] - 2.0*X[i] + X[i-idx]) / (hx_*hx_)
+	      +    ( X[i+idy] - 2.0*X[i] + X[i-idy]) / (hy_*hy_)
+	      +    ( X[i+idz] - 2.0*X[i] + X[i-idz]) / (hz_*hz_);
+	  }
 	}
       }
     }
-  }
+
+  } else if (order_ == 4) {
+
+    g0 = std::max(2,g0);
+
+    if (rank_ == 1) {
+
+      const T c0 = -30.0;
+      const T c1 = 16.0;
+      const T c2 = -1.0;
+      const T d  = 12.0*hx_*hx_;
+      for (int ix=g0; ix<mx_-g0; ix++) {
+	const int i = ix;
+	Y[i] = (c0*(X[i]) +
+		c1*(X[i-idx] +X[i+idx]) +
+		c2*(X[i-idx2]+X[i+idx2])) / d;
+      }
+
+    } else if (rank_ == 2) {
+      const T c0 = -30.0;
+      const T c1 = 16.0;
+      const T c2 = -1.0;
+      const T dx  = 12.0*hx_*hx_;
+      const T dy  = 12.0*hy_*hy_;
+      for   (int iy=g0; iy<my_-g0; iy++) {
+	for (int ix=g0; ix<mx_-g0; ix++) {
+	  const int i = ix + mx_*iy;
+	  Y[i] = (c0*(X[i]) +
+		  c1*(X[i-idx] +X[i+idx]) +
+		  c2*(X[i-idx2]+X[i+idx2])) / dx
+	    +    (c0*(X[i]) +
+		  c1*(X[i-idy] +X[i+idy]) +
+		  c2*(X[i-idy2]+X[i+idy2])) / dy;
+	}
+      }
+
+    } else if (rank_ == 3) {
+
+      const T c0 = -30.0;
+      const T c1 = 16.0;
+      const T c2 = -1.0;
+      const T dx  = 12.0*hx_*hx_;
+      const T dy  = 12.0*hy_*hy_;
+      const T dz  = 12.0*hz_*hz_;
+      for     (int iz=g0; iz<mz_-g0; iz++) {
+	for   (int iy=g0; iy<my_-g0; iy++) {
+	  for (int ix=g0; ix<mx_-g0; ix++) {
+	    const int i = ix + mx_*(iy + my_*iz);
+	    Y[i] = (c0*(X[i]) +
+		    c1*(X[i-idx] +X[i+idx]) +
+		    c2*(X[i-idx2]+X[i+idx2])) / dx
+	      +    (c0*(X[i]) +
+		    c1*(X[i-idy] +X[i+idy]) +
+		    c2*(X[i-idy2]+X[i+idy2])) / dy
+	      +    (c0*(X[i]) +
+		    c1*(X[i-idz] +X[i+idz]) +
+		    c2*(X[i-idz2]+X[i+idz2])) / dz;
+	  }
+	}
+      }
+    }
+  } else {
+    ERROR1 ("EnzoMatrixLaplace::diagonal()",
+	    "Order %d operator is not supported",
+	    order_);
+  } 
 }
 
 //----------------------------------------------------------------------
@@ -113,34 +182,83 @@ void EnzoMatrixLaplace::matvec_ (T * Y, T * X, int g0) const throw()
 template <class T>
 void EnzoMatrixLaplace::diagonal_ (T * X, int g0) const throw()
 {
-  if (rank_ == 1) {
-    for (int ix=g0; ix<mx_-g0; ix++) {
-      int i = ix;
-      X[i] = - 2.0 / (hx_*hx_);
-    }
-  } else if (rank_ == 2) {
-#ifdef DEBUG_MATRIX
-    printf ("%s:%d DEBUG_LOOP_LIMITS: (%d:%d) (%d:%d)\n",
-	    __FILE__,__LINE__, g0,mx_-g0,g0,my_-g0);
-#endif
-    for   (int iy=g0; iy<my_-g0; iy++) {
+  if (order_ == 2) {
+    
+    g0 = std::max(1,g0);
+
+    // Second-order 7-point discretization
+    
+    if (rank_ == 1) {
       for (int ix=g0; ix<mx_-g0; ix++) {
-	int i = ix + mx_*iy;
-	X[i] = - 2.0 / (hx_*hx_)
-	       - 2.0 / (hy_*hy_);
+	int i = ix;
+	X[i] = - 2.0 / (hx_*hx_);
       }
-    }
-  } else if (rank_ == 3) {
-    for     (int iz=g0; iz<mz_-g0; iz++) {
+    } else if (rank_ == 2) {
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
-	  int i = ix + mx_*(iy + my_*iz);
+	  int i = ix + mx_*iy;
 	  X[i] = - 2.0 / (hx_*hx_)
-	    +    - 2.0 / (hy_*hy_)
-	    +    - 2.0 / (hz_*hz_);
+	    - 2.0 / (hy_*hy_);
+	}
+      }
+    } else if (rank_ == 3) {
+      for     (int iz=g0; iz<mz_-g0; iz++) {
+	for   (int iy=g0; iy<my_-g0; iy++) {
+	  for (int ix=g0; ix<mx_-g0; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    X[i] = - 2.0 / (hx_*hx_)
+	      +    - 2.0 / (hy_*hy_)
+	      +    - 2.0 / (hz_*hz_);
+	  }
 	}
       }
     }
+
+  } else if (order_ == 4) {
+
+    g0 = std::max(2,g0);
+
+    // Fourth-order 13-point discretization
+
+    if (rank_ == 1) {
+      const T c0 = -30.0;
+      const T dx  = 12.0*hx_*hx_;
+      for (int ix=g0; ix<mx_-g0; ix++) {
+	int i = ix;
+	X[i] = c0 / dx;
+      }
+    } else if (rank_ == 2) {
+      const T c0 = -30.0;
+      const T dx  = 12.0*hx_*hx_;
+      const T dy  = 12.0*hy_*hy_;
+      for   (int iy=g0; iy<my_-g0; iy++) {
+	for (int ix=g0; ix<mx_-g0; ix++) {
+	  int i = ix + mx_*iy;
+	  X[i] = c0 / dx
+	    +    c0 / dy;
+	}
+      }
+    } else if (rank_ == 3) {
+      const T c0 = -30.0;
+      const T dx  = 12.0*hx_*hx_;
+      const T dy  = 12.0*hy_*hy_;
+      const T dz  = 12.0*hz_*hz_;
+      for     (int iz=g0; iz<mz_-g0; iz++) {
+	for   (int iy=g0; iy<my_-g0; iy++) {
+	  for (int ix=g0; ix<mx_-g0; ix++) {
+	    int i = ix + mx_*(iy + my_*iz);
+	    X[i] = c0 / dx
+	      +    c0 / dy
+	      +    c0 / dz;
+	  }
+	}
+      }
+    }
+  } else {
+    ERROR1 ("EnzoMatrixLaplace::diagonal()",
+	    "Order %d operator is not supported",
+	    order_);
   }
+  
 }
 

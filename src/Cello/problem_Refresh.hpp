@@ -24,6 +24,7 @@ public: // interface
     ghost_depth_(0),
     min_face_rank_(0),
     neighbor_type_(neighbor_unknown),
+    accumulate_(false),
     sync_type_   (sync_unknown),
     sync_load_(),
     sync_store_(),
@@ -46,6 +47,7 @@ public: // interface
     ghost_depth_(ghost_depth),
     min_face_rank_(min_face_rank),
     neighbor_type_(neighbor_type),
+    accumulate_(false),
     sync_type_(sync_type),
     sync_load_(),
     sync_store_(),
@@ -66,6 +68,7 @@ public: // interface
       ghost_depth_(0),
       min_face_rank_(0),
       neighbor_type_(0),
+      accumulate_(false),
       sync_type_(0),
       sync_load_(),
       sync_store_(),
@@ -85,6 +88,7 @@ public: // interface
     p | ghost_depth_;
     p | min_face_rank_;
     p | neighbor_type_;
+    p | accumulate_;
     p | sync_type_;
     p | sync_load_;
     p | sync_store_;
@@ -165,6 +169,12 @@ public: // interface
   int neighbor_type() const 
   { return neighbor_type_; }
 
+  bool accumulate() const 
+  { return accumulate_; }
+
+  void set_accumulate(bool accumulate)
+  { accumulate_ = accumulate; }
+
   int sync_type() const 
   { return sync_type_; }
 
@@ -192,6 +202,7 @@ public: // interface
     CkPrintf ("Refresh ghost_depth = %d\n",ghost_depth_);
     CkPrintf ("Refresh min_face_rank: %d\n",min_face_rank_);
     CkPrintf ("Refresh neighbor_type: %d\n",neighbor_type_);
+    CkPrintf ("Refresh accumulate: %d\n",accumulate_);
     CkPrintf ("Refresh sync_type: %d\n",sync_type_);
     CkPrintf ("Refresh sync_load: %d/%d\n", 
 	    sync_load_.value(),
@@ -262,6 +273,9 @@ private: // attributes
   /// Which subset of adjacent Blocks to refresh with
   int neighbor_type_;
 
+  /// Whether to copy or add values
+  bool accumulate_;
+  
   /// Synchronization type
   int sync_type_;
 

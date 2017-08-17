@@ -468,7 +468,7 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block) throw()
 	      __LINE__,enzo_block->name().c_str(),double(bs_),double(bc_));
 #endif      
 
-    DEBUG_FIELD(ib_,"B shift 0");
+    TRACE_FIELD_("B shift 0",B,1.0);
     for (int iz=0; iz<mz_; iz++) {
       for (int iy=0; iy<my_; iy++) {
 	for (int ix=0; ix<mx_; ix++) {
@@ -478,7 +478,7 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block) throw()
       }
     }
 
-    DEBUG_FIELD(ib_,"B shift 1");
+    TRACE_FIELD_("B shift 1",B,1.0);
   }
 
   // control flow starts at leaves, even in level > max_level,
@@ -709,8 +709,8 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
   solve_coarse->set_sync_id (4);
   solve_coarse->set_callback(CkIndex_EnzoBlock::p_solver_mg0_solve_coarse());
   
-  DEBUG_FIELD(ix_,"X");
-  DEBUG_FIELD(ib_,"B");
+  //  TRACE_FIELD_("X",X,1.0);
+  //  TRACE_FIELD_("B",B,1.0);
   solve_coarse->apply(A_,ix_,ib_,enzo_block);
 
   
@@ -784,9 +784,9 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   //  </COMMON CODE>
 
-  DEBUG_FIELD(ib_,"B");
-  DEBUG_FIELD(ix_,"X"); // XXXXX
-  DEBUG_FIELD(ir_,"R"); // XXXXX
+  //  TRACE_FIELD_("B",B,1.0);
+  //  TRACE_FIELD_("X",X,1.0); // XXXXX
+  //  TRACE_FIELD_("R",R,1.0); // XXXXX
 
   DEBUG_FIELD_MSG(enzo_block,"restrict_send");
   DEBUG_INDEX(enzo_block,"restrict_send",(&index_parent));
@@ -875,7 +875,7 @@ void EnzoSolverMg0::restrict_recv
   TRACE_LEVEL("EnzoSolverMg0::restrict_recv",enzo_block);
   TRACE_MG(enzo_block,"EnzoSolverMg0::restrict_recv()");
 
-  DEBUG_FIELD(ib_,"B");
+  //  TRACE_FIELD_("B",B,1.0);
   
   if (enzo_block->mg_sync_restrict_next()) {
     begin_cycle_<T>(enzo_block);
@@ -932,7 +932,7 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
   ItChild it_child(enzo_block->rank());
   int ic3[3];
-  DEBUG_FIELD(ix_,"X");
+  //  TRACE_FIELD_("X",X,1.0);
   while (it_child.next(ic3)) {
 
     Index index_child = enzo_block->index().index_child(ic3,min_level_);
@@ -1071,8 +1071,6 @@ void EnzoSolverMg0::prolong_recv
   
   delete msg;
 
-  DEBUG_FIELD(ic_,"C");
-
   TRACE_LEVEL("EnzoSolverMg0::prolong_recv",enzo_block);
   TRACE_MG (enzo_block,"EnzoSolverMg0::prolong_recv()");
   
@@ -1081,6 +1079,8 @@ void EnzoSolverMg0::prolong_recv
 
   T * X = (T*) field.values(ix_);
   T * C = (T*) field.values(ic_);
+
+  TRACE_FIELD_("C",C,1.0);
 
   for (int iz=0; iz<mz_; iz++) {
     for (int iy=0; iy<my_; iy++) {

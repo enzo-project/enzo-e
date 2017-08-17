@@ -64,7 +64,7 @@ void png_array (const char * filename,
 	  array[(gx)+mx*((gy) + my*(gz+1))]);
   printf ("DEBUG_PNG %s: sum_real %20.15g sum_ghost %20.15g\n",filename,sum_real,sum_ghost);
   printf ("DEBUG_PNG %s: sum2_real %20.15g sum2_ghost %20.15g\n",filename,sum2_real,sum2_ghost);
-#endif  
+#endif    
   int nx=mx-2*gx;
   int ny=my-2*gy;
   for (int ky=0; ky<py; ky++) {

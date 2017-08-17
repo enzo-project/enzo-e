@@ -27,7 +27,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodPmDeposit (CkMigrateMessage *m)
-    : alpha_(0.0),
+    : Method (m),
+      alpha_(0.0),
       type_(0)
   { }
 

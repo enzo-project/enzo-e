@@ -138,6 +138,12 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_collapse_particle_ratio,
        enzo_config->initial_collapse_mass,
        enzo_config->initial_collapse_temperature);
+  } else if (type == "cosmology") {
+    initial = new EnzoInitialCosmology 
+      (cycle,time,
+       enzo_config->field_gamma,
+       enzo_config->initial_cosmology_temperature
+       );
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence 
       (cycle,time, 
@@ -367,7 +373,7 @@ Method * EnzoProblem::create_method_
     //--------------------------------------------------
   } else if (name == "null") {
     method = new EnzoMethodNull
-      (enzo_config->method_null_dt);
+      (field_descr, enzo_config->method_null_dt);
 #ifdef CONFIG_USE_GRACKLE
     //--------------------------------------------------
   } else if (name == "grackle") {
@@ -382,6 +388,11 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
+
+    //--------------------------------------------------
+  } else if (name == "cosmology") {
+
+    method = new EnzoMethodCosmology(field_descr);
 
     //--------------------------------------------------
   } else if (name == "comoving_expansion") {

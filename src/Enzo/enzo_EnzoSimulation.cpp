@@ -108,6 +108,9 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   if (cosmology) {
     EnzoUnits * units = (EnzoUnits *) problem()->units();
     units->set_cosmology(cosmology);
+
+    // Set current time to be initial time
+    cosmology->set_current_redshift(cosmology->initial_redshift());
   }
   
 #ifdef TRACE_PARAMETERS

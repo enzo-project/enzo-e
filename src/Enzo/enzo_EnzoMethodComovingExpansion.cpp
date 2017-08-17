@@ -18,6 +18,8 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  refresh(ir)->add_all_fields(field_descr->field_count());
   if ( ! comoving_coordinates_ ) {
     WARNING
       ("EnzoMethodComovingExpansion::EnzoMethodComovingExpansion()",
@@ -112,12 +114,18 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   int i_new = 0;
   int i_old = has_history ? 1 : 0;
 
-  enzo_float * density_new         = (enzo_float *) field.values("density", i_new);
-  enzo_float * density_old         = (enzo_float *) field.values("density", i_old);
-  enzo_float * total_energy_new    = (enzo_float *) field.values("total_energy", i_new);
-  enzo_float * total_energy_old    = (enzo_float *) field.values("total_energy", i_old);
-  enzo_float * internal_energy_new = (enzo_float *) field.values("internal_energy", i_new);
-  enzo_float * internal_energy_old = (enzo_float *) field.values("internal_energy", i_old);
+  enzo_float * density_new         =
+    (enzo_float *) field.values("density", i_new);
+  enzo_float * density_old         =
+    (enzo_float *) field.values("density", i_old);
+  enzo_float * total_energy_new    =
+    (enzo_float *) field.values("total_energy", i_new);
+  enzo_float * total_energy_old    =
+    (enzo_float *) field.values("total_energy", i_old);
+  enzo_float * internal_energy_new =
+    (enzo_float *) field.values("internal_energy", i_new);
+  enzo_float * internal_energy_old =
+    (enzo_float *) field.values("internal_energy", i_old);
 
   enzo_float * velocity_x_new, * velocity_y_new, * velocity_z_new,
     * velocity_x_old, * velocity_y_old, * velocity_z_old = NULL;

@@ -16,11 +16,11 @@ long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 #define FORTRAN_NAME(NAME) NAME##_
 
 extern "C" void FORTRAN_NAME(field_face_store_4)
-  (float * field, float * array, int * nd3, int * n3);
+  (float * field, float * array, int * nd3, int * n3, int * accumulate);
 extern "C" void FORTRAN_NAME(field_face_store_8)
-  (double * field, double * array, int * nd3, int * n3);
+  (double * field, double * array, int * nd3, int * n3, int * accumulate);
 extern "C" void FORTRAN_NAME(field_face_store_16)
-  (long double * field, long double * array, int * nd3, int * n3);
+  (long double * field, long double * array, int * nd3, int * n3, int * accumulate);
 
 enum enum_op_type {
   op_unknown,
@@ -32,7 +32,12 @@ enum enum_op_type {
 
 FieldFace::FieldFace 
 ( const Field & field ) throw()
-  :  refresh_type_(refresh_unknown)
+  :  refresh_type_(refresh_unknown),
+     field_list_(),
+     prolong_(NULL),
+     restrict_(NULL),
+     accumulate_(false)
+     
 {
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
@@ -41,8 +46,8 @@ FieldFace::FieldFace
   ++counter[cello::index_static()];
 
   for (int i=0; i<3; i++) {
-    ghost_[i] = false;
     face_[i]  = 0;
+    ghost_[i] = false;
     child_[i] = 0;
   }
 }
@@ -61,6 +66,12 @@ FieldFace::~FieldFace() throw ()
 //----------------------------------------------------------------------
 
 FieldFace::FieldFace(const FieldFace & field_face) throw ()
+  :  refresh_type_(refresh_unknown),
+     field_list_(),
+     prolong_(NULL),
+     restrict_(NULL),
+     accumulate_(false)
+
 {
   ++counter[cello::index_static()];
 
@@ -105,8 +116,10 @@ void FieldFace::copy_(const FieldFace & field_face)
     child_[i] = field_face.child_[i];
   }
   refresh_type_ = field_face.refresh_type_;
-  field_list_ = field_face.field_list_;
-  
+  field_list_   = field_face.field_list_;
+  restrict_     = field_face.restrict_;
+  prolong_      = field_face.prolong_;
+  accumulate_   = field_face.accumulate_;
 }
 //----------------------------------------------------------------------
 
@@ -124,6 +137,7 @@ void FieldFace::pup (PUP::er &p)
   p | field_list_;
   p | restrict_;
   p | prolong_;
+  p | accumulate_;
 }
 
 //======================================================================
@@ -149,7 +163,6 @@ void FieldFace::face_to_array ( Field field, int * n, char ** array) throw()
 //----------------------------------------------------------------------
 void FieldFace::face_to_array ( Field field,char * array) throw()
 {
-
   size_t index_array = 0;
 
 #ifdef DEBUG_NEW_REFRESH
@@ -330,6 +343,14 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
     size_t index_field = field_list_[i_f];
 
+#ifdef DEBUG_NEW_REFRESH    
+    CkPrintf ("DEBUG_FACE field_src (%p %p)  field_dst (%p %p)\n",
+	      field_src.field_descr(),field_src.field_data(),
+	      field_dst.field_descr(),field_dst.field_data());
+	      
+    CkPrintf ("DEBUG_FACE index_field = %d\n",index_field);
+#endif    
+      
     if (! field_src.is_centered(index_field)) {
       // recompute loop limits if Field is not centered
       field_src.field_size (0,&m3[0],&m3[1],&m3[2]);
@@ -338,6 +359,26 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
       invert_face();
       loop_limits (id3,nd3,m3,g3,op_store);
       invert_face();
+    }
+
+    // Adjust loop limits if accumulating to include ghost zones
+    // on neighbor axes
+    if (accumulate_) {
+      if (refresh_type_ == refresh_same) {
+	for (int axis=0; axis<3; axis++) {
+	  if (face_[axis] == 1) {
+	    is3[axis] --;
+	    id3[axis] --;
+	  }
+	  if (face_[axis] != 0) {
+	    ns3[axis] ++;
+	    nd3[axis] ++;
+	  }
+	}
+      // } else {
+      // 	ERROR("FieldFace::face_to_face()",
+      // 	      "Accumulating ghost zones is not supported yet for AMR");
+      }
     }
 
     precision_type precision = field_src.precision(index_field);
@@ -561,16 +602,30 @@ size_t FieldFace::load_
 ( T * array_face, const T * field_face, 
   int nd3[3], int n3[3],int im3[3] ) throw()
 {
-
-  for (int iz=0; iz <n3[2]; iz++)  {
-    int kz = iz+im3[2];
-    for (int iy=0; iy < n3[1]; iy++) {
-      int ky = iy+im3[1];
-      for (int ix=0; ix < n3[0]; ix++) {
-	int kx = ix+im3[0];
-	int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
-	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-	array_face[index_array] = field_face[index_field];
+  if (accumulate_) {
+    for (int iz=0; iz <n3[2]; iz++)  {
+      int kz = iz+im3[2];
+      for (int iy=0; iy < n3[1]; iy++) {
+	int ky = iy+im3[1];
+	for (int ix=0; ix < n3[0]; ix++) {
+	  int kx = ix+im3[0];
+	  int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
+	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+	  array_face[index_array] += field_face[index_field];
+	}
+      }
+    }
+  } else {
+    for (int iz=0; iz <n3[2]; iz++)  {
+      int kz = iz+im3[2];
+      for (int iy=0; iy < n3[1]; iy++) {
+	int ky = iy+im3[1];
+	for (int ix=0; ix < n3[0]; ix++) {
+	  int kx = ix+im3[0];
+	  int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
+	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+	  array_face[index_array] = field_face[index_field];
+	}
       }
     }
   }
@@ -582,9 +637,8 @@ size_t FieldFace::load_
 //----------------------------------------------------------------------
 
 template<class T> size_t FieldFace::store_
-( T * ghost, const T * array, int nd3[3], int n3[3],int im3[3] ) throw()
+( T * ghost, const T * array, int nd3[3], int n3[3],int im3[3]) throw()
 {
-
 #define FORTRAN_STORE
 
 #ifdef FORTRAN_STORE
@@ -609,12 +663,14 @@ template<class T> size_t FieldFace::store_
   
   int im = im3[0] + nd3[0]*(im3[1] + nd3[1]*im3[2]);
 
+  int accumulate = accumulate_ ? 1 : 0;
+  
   if (sizeof(T)==sizeof(float)) {
-    FORTRAN_NAME(field_face_store_4)(ghost_4 + im,   array_4, nd3,n3);
+    FORTRAN_NAME(field_face_store_4)(ghost_4 + im,   array_4, nd3,n3,&accumulate);
   } else if (sizeof(T)==sizeof(double)) {
-    FORTRAN_NAME(field_face_store_8)(ghost_8 + im,   array_8, nd3,n3);
+    FORTRAN_NAME(field_face_store_8)(ghost_8 + im,   array_8, nd3,n3,&accumulate);
   } else if (sizeof(T)==sizeof(long double)) {
-    FORTRAN_NAME(field_face_store_16)(ghost_16 + im, array_16, nd3,n3);
+    FORTRAN_NAME(field_face_store_16)(ghost_16 + im, array_16, nd3,n3,&accumulate);
   } else {
     ERROR1 ("FieldFace::store_()",
 	   "unknown float precision sizeof(T) = %d\n",sizeof(T));
@@ -622,18 +678,35 @@ template<class T> size_t FieldFace::store_
 
 #else
 
-   for (int iz=0; iz <n3[2]; iz++)  {
-     int kz = iz+im3[2];
-     for (int iy=0; iy < n3[1]; iy++) {
-       int ky = iy+im3[1];
-       for (int ix=0; ix < n3[0]; ix++) {
-   	int kx = ix+im3[0];
-   	int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
-   	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-   	ghost[index_field] = array[index_array];
-       }
-     }
-   }
+  if (accumulate_) {
+    // add values
+    for (int iz=0; iz <n3[2]; iz++)  {
+      int kz = iz+im3[2];
+      for (int iy=0; iy < n3[1]; iy++) {
+	int ky = iy+im3[1];
+	for (int ix=0; ix < n3[0]; ix++) {
+	  int kx = ix+im3[0];
+	  int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
+	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+	  ghost[index_field] += array[index_array];
+	}
+      }
+    }
+  } else {
+    // copy values
+    for (int iz=0; iz <n3[2]; iz++)  {
+      int kz = iz+im3[2];
+      for (int iy=0; iy < n3[1]; iy++) {
+	int ky = iy+im3[1];
+	for (int ix=0; ix < n3[0]; ix++) {
+	  int kx = ix+im3[0];
+	  int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
+	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+	  ghost[index_field] = array[index_array];
+	}
+      }
+    }
+  }
 #endif
 
   return (sizeof(T) * n3[0] * n3[1] * n3[2]);
@@ -646,12 +719,37 @@ template<class T> void FieldFace::copy_
 ( T       * vd, int md3[3],int nd3[3],int id3[3],
   const T * vs, int ms3[3],int ns3[3],int is3[3]) throw()
 {
-  for (int iz=0; iz <ns3[2]; iz++)  {
-    for (int iy=0; iy < ns3[1]; iy++) {
-      for (int ix=0; ix < ns3[0]; ix++) {
-	int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
-	int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-      	vd[i_dst] = vs[i_src];
+  if (accumulate_) {
+
+    double s=0,d=0;
+    for (int iz=0; iz <ns3[2]; iz++)  {
+      for (int iy=0; iy < ns3[1]; iy++) {
+	for (int ix=0; ix < ns3[0]; ix++) {
+	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
+	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
+	  s+=vs[i_src];
+	  d+=vd[i_dst];
+	  vd[i_dst] += vs[i_src];
+	}
+      }
+    }
+
+#ifdef DEBUG_NEW_REFRESH
+    CkPrintf ("DEBUG_FACE accumulate %d %d %d  %d %d %d -> %d %d %d  %g += %g\n",
+	      ns3[0],ns3[1],ns3[2],
+	      is3[0],is3[1],is3[2],
+	      id3[0],id3[1],id3[2],
+	      d,s);
+#endif    
+    
+  } else {
+    for (int iz=0; iz <ns3[2]; iz++)  {
+      for (int iy=0; iy < ns3[1]; iy++) {
+	for (int ix=0; ix < ns3[0]; ix++) {
+	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
+	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
+	  vd[i_dst] = vs[i_src];
+	}
       }
     }
   }

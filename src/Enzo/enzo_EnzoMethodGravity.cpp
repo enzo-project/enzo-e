@@ -29,9 +29,13 @@ EnzoMethodGravity::EnzoMethodGravity
     index_solver_(index_solver),
     grav_const_(grav_const)
 {
-  const int num_fields = field_descr->field_count();
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_fields(num_fields);
+  const int id  = field_descr->field_id("density");
+  const int idt = field_descr->field_id("density_total");
+  const int idensity = (idt != -1) ? idt : id;
+  //  refresh(ir)->set_accumulate(true);
+  //  refresh(ir)->add_field(idensity);
+  refresh(ir)->add_all_fields(field_descr->field_count());
 }
 
 //----------------------------------------------------------------------
@@ -55,13 +59,38 @@ void EnzoMethodGravity::compute(Block * block) throw()
   const int ib = field.field_id ("B");
   
   // Solve the linear system
+  int gx,gy,gz;
+  int mx,my,mz;
+  field.dimensions (0,&mx,&my,&mz);
+  field.ghost_depth(0,&gx,&gy,&gz);
+
+  enzo_float * B = (enzo_float*) field.values (ib);
+  enzo_float * D = (enzo_float*) field.values (idensity);
+  enzo_float * X = (enzo_float*) field.values ("X");
+
+  TRACE_FIELD("density-total",D,1.0);
+
+  // for (int iz=0; iz<mz; iz++) {
+  //   for (int iy=0; iy<my; iy++) {
+  //     for (int ix=0; ix<mx; ix++) {
+  // 	int i = ix + mx*(iy + my*iz);
+  // 	D[i]  -= 1.0;
+  //     }
+  //   }
+  // }
+
+  TRACE_FIELD("density-shift",D,1.0);
+
   field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
+
+  TRACE_FIELD("density-rhs",B,1.0);
 
   Solver * solver = block->simulation()->problem()->solver(index_solver_);
   
   // May exit before solve is done...
   solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue());
 
+  
   solver->apply (A, ix, ib, block);
 
 }
@@ -94,7 +123,13 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   
   delete msg;
   
-  // BUG: acceleration computed before Solver completes
+  Field field = data()->field();
+  int gx,gy,gz;
+  int mx,my,mz;
+  field.dimensions (0,&mx,&my,&mz);
+  field.ghost_depth(0,&gx,&gy,&gz);
+  enzo_float * potential = (enzo_float*) field.values ("potential");
+  TRACE_FIELD("potential",potential,-1.0);
   
   /// compute acceleration fields from potential
   int order;

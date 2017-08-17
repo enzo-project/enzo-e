@@ -58,7 +58,6 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   if (block->is_leaf()) {
-
     TRACE_PPM ("BEGIN SolveHydroEquations");
     enzo_block->SolveHydroEquations 
       ( block->time(), block->dt(), comoving_coordinates_ );
