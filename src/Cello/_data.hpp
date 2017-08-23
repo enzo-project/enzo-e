@@ -83,9 +83,7 @@ class FieldFace;
 
 #ifdef DEBUG_FIELD
 
-static int count = 0;
-
-#   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz)		\
+#   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,PLOT)	\
   {									\
     double sum_all=0.0;							\
     double sum_real=0.0;						\
@@ -104,6 +102,7 @@ static int count = 0;
       for (int iy=gy; iy<my-gy; iy++) {					\
 	for (int ix=gx; ix<mx-gx; ix++) {				\
 	  int i = ix + mx*(iy + my*iz);					\
+	  if (PLOT) CkPrintf ("PRINT:%s %24.18f\n",NAME,SCALE*FIELD[i]);	\
 	  sum_real+=SCALE*(FIELD[i]);					\
 	  sum2_real+=SCALE*(FIELD[i])*SCALE*(FIELD[i]);			\
 	}								\
@@ -123,12 +122,15 @@ static int count = 0;
     sprintf (filename,"enzo-p-%s.png",NAME);				\
     png_array (filename,(float*)(FIELD),0,0,0,mx,my,mz,__FILE__,__LINE__,2,16,16,SCALE); \
   }
-#   define TRACE_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_)
-#   define TRACE_FIELD(NAME,FIELD,SCALE)  TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz)
+#   define TRACE_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,false)
+#   define TRACE_FIELD(NAME,FIELD,SCALE)  TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,false)
+#   define PRINT_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,true)
+#   define PRINT_FIELD(NAME,FIELD,SCALE)  TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,true)
 
 #else
 
 #   define TRACE_FIELD(NAME,FIELD,SCALE) /* ... */
+#   define PRINT_FIELD(NAME,FIELD,SCALE) /* ... */
 #   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz) /* ... */
 #   define TRACE_FIELD_(NAME,FIELD,SCALE) /* ... */
 

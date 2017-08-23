@@ -216,9 +216,11 @@ void Block::init
     // Create field face of refined data from parent
     int if3[3] = {0,0,0};
     bool lg3[3] = {true,true,true};
-    std::vector<int> field_list;
+    Refresh * refresh = new Refresh;
+    refresh->add_all_data();
+    
     FieldFace * field_face = create_face
-      (if3, ic3, lg3, refresh_fine, field_list);
+      (if3, ic3, lg3, refresh_fine, refresh, true);
 
     // Copy refined field data
     field_face -> array_to_face (array, data()->field());
@@ -457,10 +459,11 @@ Block::~Block()
     char * array;
     int if3[3]={0,0,0};
     bool lg3[3]={false,false,false};
+    Refresh * refresh = new Refresh;
+    refresh->add_all_data();
     
-    std::vector<int> field_list;
     FieldFace * field_face = create_face
-      ( if3,ic3,lg3,refresh_coarse,field_list);
+      ( if3,ic3,lg3,refresh_coarse,refresh,true);
     field_face->face_to_array(data()->field(),&n,&array);
     delete field_face;
 
@@ -498,9 +501,12 @@ void Block::p_refresh_child
   performance_start_(perf_refresh_child);
   int  if3[3]  = {0,0,0};
   bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
+  Refresh * refresh = new Refresh;
+  refresh->add_all_data();
+  
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_coarse,field_list);
+    (if3, ic3, lg3, refresh_coarse,refresh,true);
+  
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;
   performance_stop_(perf_refresh_child);
@@ -705,25 +711,17 @@ void Block::index_global
 
 FieldFace * Block::create_face
 (int if3[3], int ic3[3], bool lg3[3],
- int refresh_type,
- std::vector<int> & field_list,
- bool accumulate) const
+ int refresh_type, Refresh * refresh, bool new_refresh) const
 {
   FieldDescr * field_descr = simulation()->field_descr();
   FieldFace  * field_face = new FieldFace;
 
-  field_face -> set_refresh (refresh_type);
+  field_face -> set_refresh_type (refresh_type);
   field_face -> set_child (ic3[0],ic3[1],ic3[2]);
   field_face -> set_face (if3[0],if3[1],if3[2]);
   field_face -> set_ghost(lg3[0],lg3[1],lg3[2]);
+  field_face -> set_refresh(refresh,new_refresh);
 
-  if (field_list.size() == 0) {
-    int n = field_descr->field_count();
-    field_list.resize(n);
-    for (int i=0; i<n; i++) field_list[i] = i;
-  }
-  field_face->set_field_list(field_list);
-  field_face->set_accumulate(accumulate);
   return field_face;
 }
 

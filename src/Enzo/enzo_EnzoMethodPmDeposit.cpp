@@ -14,6 +14,7 @@
 #include "enzo.hpp"
 
 // #define DEBUG_PM_DEPOSIT
+// #define DEBUG_FIELD
 
 #ifdef DEBUG_PM_DEPOSIT
 #  define TRACE_PM(MESSAGE)				\
@@ -78,7 +79,7 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_fields();
 
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -139,13 +140,15 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     const int ia_mass = particle.constant_index (it,"mass");
 
-    enzo_float mass = *((enzo_float *)(particle.constant_value (it,ia_mass)));
+    enzo_float dens = *((enzo_float *)(particle.constant_value (it,ia_mass)));
 
-    double vol = 1.0;
-    if (rank >= 1) vol *= hx;
-    if (rank >= 2) vol *= hy;
-    if (rank >= 3) vol *= hz;
-    double dens = mass; // / vol;
+    // Scale by volume if particle value is mass instead of density
+    
+    // double vol = 1.0;
+    // if (rank >= 1) vol *= hx;
+    // if (rank >= 2) vol *= hy;
+    // if (rank >= 3) vol *= hz;
+    //    dens = dens / vol;
 
     // Accumulate particle density using CIC
 
@@ -223,14 +226,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	  double x1 = 1.0 - x0;
 	  double y1 = 1.0 - y0;
-
-	  if ( ! ((0.0 <= x0 && x0 <= 1) &&
-		  (0.0 <= x1 && x1 <= 1) &&
-		  (0.0 <= y0 && y0 <= 1) &&
-		  (0.0 <= y1 && y1 <= 1))) {
-	    CkPrintf ("%s:%d ERROR: x0 = %f  x1 = %f  y0 = %f  y1 = %f\n",
-		      __FILE__,__LINE__,x0, x1, y0, y1);
-	  }
 
 	  if ( dens < 0.0) {
 	    CkPrintf ("%s:%d ERROR: dens = %f\n", __FILE__,__LINE__,dens);

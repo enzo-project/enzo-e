@@ -55,14 +55,14 @@ void Block::refresh_continue()
 
   if ( refresh && refresh->active() ) {
 
-    if (refresh->field_list().size() > 0) 
-      refresh_load_field_faces_   (refresh);
-    if (refresh->particle_list().size() > 0)
-      refresh_load_particle_faces_ (refresh);
+    if (refresh->any_fields())    refresh_load_field_faces_    (refresh);
+    if (refresh->any_particles()) refresh_load_particle_faces_ (refresh);
+    
   }
   TRACE_REFRESH("calling control_sync p_refresh_exit()");
 
-  control_sync (CkIndex_Block::p_refresh_exit(),refresh->sync_type(),refresh->sync_id()+1);
+  control_sync (CkIndex_Block::p_refresh_exit(),
+		refresh->sync_type(),refresh->sync_id()+1);
 }
 
 //----------------------------------------------------------------------
@@ -137,10 +137,11 @@ void Block::refresh_load_field_face_
 
   // ... copy field ghosts to array using FieldFace object
   bool lg3[3] = {false,false,false};
-  std::vector<int> field_list = refresh()->field_list();
+
+  Refresh * refresh = this->refresh();
 
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_type, field_list,refresh()->accumulate());
+    (if3, ic3, lg3, refresh_type, refresh,false);
 
   DataMsg * data_msg = new DataMsg;
 
@@ -277,10 +278,17 @@ void Block::particle_load_faces_ (int npa, int * nl,
 
   // Scatter particles among particle_data array
 
-  std::vector<int> type_list = refresh->particle_list();
-
   Particle particle (simulation() -> particle_descr(),
 		     data()       -> particle_data());
+
+  std::vector<int> type_list;
+  if (refresh->all_particles()) {
+    const int nt = particle.num_types();
+    type_list.resize(nt);
+    for (int i=0; i<nt; i++) type_list[i] = i;
+  } else {
+    type_list = refresh->particle_list();
+  }
 
   particle_scatter_neighbors_(npa,particle_array,type_list, particle);
 

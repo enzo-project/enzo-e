@@ -723,9 +723,10 @@ public: // virtual functions
   void ResumeFromSync();
 
   FieldFace * create_face
-  (int if3[3], int ic3[3], bool lg3[3], int refresh_type,
-   std::vector<int> & field_list,
-   bool accumulate = false) const;
+  (int if3[3], int ic3[3], bool lg3[3],
+   int refresh_type,
+   Refresh * refresh,
+   bool new_refresh) const;
 
   void print () const;
 

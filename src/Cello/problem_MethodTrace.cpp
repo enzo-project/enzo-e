@@ -21,7 +21,7 @@ MethodTrace::MethodTrace
     timestep_(timestep)
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_particles(particle_descr->num_types());
+  refresh(ir)->add_all_particles();
 }
 
 //----------------------------------------------------------------------

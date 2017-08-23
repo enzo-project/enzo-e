@@ -55,7 +55,7 @@ EnzoSolverCg::EnzoSolverCg
 
   if (! local_) {
     const int ir = add_refresh(4,0,neighbor_type_(),sync_type_());
-    refresh(ir)->add_all_fields(num_fields);
+    refresh(ir)->add_all_fields();
 
     refresh(ir)->add_field (id_);
     refresh(ir)->add_field (ir_);
@@ -262,7 +262,7 @@ void EnzoSolverCg::loop_0a
 
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  refresh.add_all_fields();
 
   refresh.add_field (id_);
   refresh.add_field (ir_);
@@ -302,7 +302,7 @@ void EnzoSolverCg::loop_0b
 
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  refresh.add_all_fields();
   refresh.add_field (id_);
   refresh.add_field (ir_);
   refresh.add_field (iy_);
@@ -432,11 +432,12 @@ void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
 {
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  refresh.add_all_fields();
   refresh.add_field (id_);
   refresh.add_field (ir_);
   refresh.add_field (iy_);
   refresh.add_field (iz_);
+
   enzo_block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_cg_loop_2<T>(),&refresh);
 }

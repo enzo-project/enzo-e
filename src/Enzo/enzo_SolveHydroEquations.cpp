@@ -262,7 +262,7 @@ int EnzoBlock::SolveHydroEquations
   TRACE_FIELD("ppm-0-velocity_x",velocity_x,1.0);
   TRACE_FIELD("ppm-0-velocity_y",velocity_y,1.0);
   TRACE_FIELD("ppm-0-velocity_z",velocity_z,1.0);
-  TRACE_FIELD("ppm-0-acceleration_x",acceleration_x,1.0);
+  PRINT_FIELD("ppm-0-acceleration_x",acceleration_x,1.0);
   TRACE_FIELD("ppm-0-acceleration_y",acceleration_y,1.0);
   TRACE_FIELD("ppm-0-acceleration_z",acceleration_z,1.0);
   TRACE_FIELD("ppm-0-internal_energy",internal_energy,1.0);

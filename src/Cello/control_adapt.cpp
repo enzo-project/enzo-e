@@ -267,9 +267,7 @@ void Block::adapt_refine_()
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);
 
-  std::vector<int> field_list;
-
-  // First scatter particles to children first to avoid multiple passes
+  // First scatter particles to children to avoid multiple passes
   
   ParticleData * particle_list[8] = {0};
 
@@ -304,9 +302,11 @@ void Block::adapt_refine_()
 
       int if3[3] = {0,0,0};
       bool lg3[3] = {true,true,true};
+      Refresh * refresh = new Refresh;
+      refresh->add_all_data();
       
       FieldFace * field_face = create_face 
-	(if3,ic3,lg3, refresh_fine,field_list);
+	(if3,ic3,lg3, refresh_fine, refresh, true);
 
       DataMsg * data_msg = NULL;
 
@@ -794,9 +794,11 @@ void Block::adapt_coarsen_()
   index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
   int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
+  Refresh * refresh = new Refresh;
+  refresh->add_all_data();
+
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_coarse, field_list);
+    (if3, ic3, lg3, refresh_coarse, refresh, true);
 
   const Index index_parent = index_.index_parent();
 

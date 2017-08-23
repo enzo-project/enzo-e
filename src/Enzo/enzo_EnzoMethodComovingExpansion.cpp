@@ -19,7 +19,7 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
     comoving_coordinates_(comoving_coordinates)
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_fields();
   if ( ! comoving_coordinates_ ) {
     WARNING
       ("EnzoMethodComovingExpansion::EnzoMethodComovingExpansion()",

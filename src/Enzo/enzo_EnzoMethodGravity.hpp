@@ -26,7 +26,8 @@ public: // interface
   /// Create a new EnzoMethodGravity object
   EnzoMethodGravity(const FieldDescr * field_descr,
 		    int index_solver,
-		    double grav_const);
+		    double grav_const,
+		    bool accumulate);
 
   EnzoMethodGravity()
     : index_solver_(-1),

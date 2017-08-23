@@ -24,19 +24,29 @@
 EnzoMethodGravity::EnzoMethodGravity
 (const FieldDescr * field_descr,
  int index_solver,
- double grav_const)
+ double grav_const,
+ bool accumulate)
   : Method(),
     index_solver_(index_solver),
     grav_const_(grav_const)
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
+  const int ib  = field_descr->field_id("B");
   const int idensity = (idt != -1) ? idt : id;
-  //  refresh(ir)->set_accumulate(true);
-  //  refresh(ir)->add_field(idensity);
-  refresh(ir)->add_all_fields(field_descr->field_count());
+
+  // Refresh adds density_total field faces and one layer of ghost
+  // zones to "B" field
+
+  if (accumulate) {
+    // Accumulate is used when particles are deposited into density_total.
+    refresh(ir)->add_field_src_dst(idensity,ib);
+    refresh(ir)->set_accumulate(true);
+  } else {
+    // WARNING: accumulate cannot be used with AMR yet [170818]
+    refresh(ir)->add_all_fields();
+  }
 }
 
 //----------------------------------------------------------------------
@@ -54,13 +64,12 @@ void EnzoMethodGravity::compute(Block * block) throw()
   const int ix = field.field_id ("potential");
 
   /// access problem-defining fields for eventual RHS and solution
+  const int ib = field.field_id ("B");
   const int id  = field.field_id("density");
   const int idt = field.field_id("density_total");
   const int idensity = (idt != -1) ? idt : id;
-  const int ib = field.field_id ("B");
-  //  printf ("id = %d\n",idensity);
+  
   // Solve the linear system
-
   int gx,gy,gz;
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
@@ -70,22 +79,48 @@ void EnzoMethodGravity::compute(Block * block) throw()
   enzo_float * D = (enzo_float*) field.values (idensity);
   enzo_float * X = (enzo_float*) field.values ("X");
 
+  TRACE_FIELD("B",B,1.0);
+
+  for (int iz=0; iz<mz; iz++) {
+    for (int iy=0; iy<my; iy++) {
+      for (int ix=0; ix<mx; ix++) {
+	int i = ix + mx*(iy + my*iz);
+	D[i]  += B[i];
+      }
+    }
+  }
+
   TRACE_FIELD("density-total",D,1.0);
 
-  // for (int iz=0; iz<mz; iz++) {
-  //   for (int iy=0; iy<my; iy++) {
-  //     for (int ix=0; ix<mx; ix++) {
-  // 	int i = ix + mx*(iy + my*iz);
-  // 	D[i]  -= 1.0;
-  //     }
-  //   }
-  // }
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+  
+  if (cosmology) {
 
-  TRACE_FIELD("density-shift",D,1.0);
+    enzo_float a,dadt;
+    double time = block->time();
+    cosmology-> compute_expansion_factor (&a,&dadt,time);
+    CkPrintf ("DEBUG_COSMO time %g a %g dadt %g\n",time,a,dadt);
+    
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  B[i]  = -(D[i] - 1.0)/a;
+	}
+      }
+    }
 
-  field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
+  } else {
 
-  TRACE_FIELD("density-rhs",B,1.0);
+    field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
+
+  }
+  
+  //  TRACE_FIELD("density-shift",D,1.0);
+
+
+  TRACE_FIELD("density-rhs",B,-1.0);
 
   Solver * solver = block->simulation()->problem()->solver(index_solver_);
   
@@ -111,7 +146,7 @@ void EnzoBlock::r_method_gravity_continue()
 
   Refresh refresh (4,0,neighbor_leaf, sync_barrier);
   refresh.set_active(is_leaf());
-  refresh.add_all_fields(data()->field().field_count());
+  refresh.add_all_fields();
 
   refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
 
@@ -136,10 +171,14 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   /// compute acceleration fields from potential
   int order;
   EnzoComputeAcceleration compute_acceleration(data()->field().field_descr(),
-					       rank(), order=4);
+					       rank(), order=2);
 
   compute_acceleration.compute(this);
 
+  // Clear "B" field since on entry adding density to B!
+
+  enzo_float * B = (enzo_float*) field.values("B");
+  for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
   // wait for all Blocks before continuing
   compute_done();
 }

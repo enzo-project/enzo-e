@@ -42,7 +42,7 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
 
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_fields();
 
    // TURBULENCE parameters initialized in EnzoBlock::initialize()
 }

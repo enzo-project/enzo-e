@@ -66,7 +66,9 @@ public: // interface
 
   /// Return the FieldFace
   FieldFace * field_face () 
-  { return field_face_; }
+  {
+    return field_face_;
+  }
 
   /// Set the FieldFace object
   void set_field_face  (FieldFace * field_face, bool is_new) 

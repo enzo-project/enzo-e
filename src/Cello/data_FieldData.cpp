@@ -521,111 +521,111 @@ void FieldData::print
 {
 
 #ifndef CELLO_DEBUG
-   return;
+  return;
 #else
 
   int ip=0;
 
-   ip=CkMyPe();
+  ip=CkMyPe();
 
-   char filename [80];
-   sprintf (filename,"%s-%d.debug",message,ip);
-   printf ("DEBUG message = %s\n",message);
-   printf ("DEBUG filename = %s\n",filename);
+  char filename [80];
+  sprintf (filename,"%s-%d.debug",message,ip);
+  printf ("DEBUG message = %s\n",message);
+  printf ("DEBUG filename = %s\n",filename);
 
-   FILE * fp = fopen (filename,"w");
+  FILE * fp = fopen (filename,"w");
 
-   ASSERT("FieldData::print",
-	  "FieldData not allocated",
-	  permanent_allocated());
+  ASSERT("FieldData::print",
+	 "FieldData not allocated",
+	 permanent_allocated());
 
-   int field_count = field_descr->field_count();
-   for (int index_field=0; index_field<field_count; index_field++) {
+  int field_count = field_descr->field_count();
+  for (int index_field=0; index_field<field_count; index_field++) {
 
-     // WARNING: not copying string works on some compilers but not others
-     const char * field_name = strdup(field_descr->field_name(index_field).c_str());
+    // WARNING: not copying string works on some compilers but not others
+    const char * field_name = strdup(field_descr->field_name(index_field).c_str());
 
-     int nxd,nyd,nzd;
-     field_size(field_descr,index_field,&nxd,&nyd,&nzd);
-     int gx,gy,gz;
-     field_descr->ghost_depth(index_field,&gx,&gy,&gz);
+    int nxd,nyd,nzd;
+    field_size(field_descr,index_field,&nxd,&nyd,&nzd);
+    int gx,gy,gz;
+    field_descr->ghost_depth(index_field,&gx,&gy,&gz);
 
-     int ixm,iym,izm;
-     int ixp,iyp,izp;
+    int ixm,iym,izm;
+    int ixp,iyp,izp;
 
-     // Exclude ghost zones
+    // Exclude ghost zones
 
-     // ixm = gx;
-     // iym = gy;
-     // izm = gz;
+    // ixm = gx;
+    // iym = gy;
+    // izm = gz;
 
-     // ixp = nxd - gx;
-     // iyp = nyd - gy;
-     // izp = nzd - gz;
+    // ixp = nxd - gx;
+    // iyp = nyd - gy;
+    // izp = nzd - gz;
 
-     // Include ghost zones
+    // Include ghost zones
 
-     ixm = 0;
-     iym = 0;
-     izm = 0;
+    ixm = 0;
+    iym = 0;
+    izm = 0;
 
-     ixp = nxd;
-     iyp = nyd;
-     izp = nzd;
+    ixp = nxd;
+    iyp = nyd;
+    izp = nzd;
 
-     int nx,ny,nz;
+    int nx,ny,nz;
 
-     nx = (ixp-ixm);
-     ny = (iyp-iym);
-     nz = (izp-izm);
+    nx = (ixp-ixm);
+    ny = (iyp-iym);
+    nz = (izp-izm);
 
-     //     double hx,hy,hz;
+    //     double hx,hy,hz;
 
-     // hx = (upper[0]-lower[0])/(nxd-2*gx);
-     // hy = (upper[1]-lower[1])/(nyd-2*gy);
-     // hz = (upper[2]-lower[2])/(nzd-2*gz);
+    // hx = (upper[0]-lower[0])/(nxd-2*gx);
+    // hy = (upper[1]-lower[1])/(nyd-2*gy);
+    // hz = (upper[2]-lower[2])/(nzd-2*gz);
 
-     const char * array_offset = &array_permanent_[0]+offsets_[index_field];
-     switch (field_descr->precision(index_field)) {
-     case precision_single:
-       print_((const float * ) array_offset,
-	      field_name, message, // lower,
-	      fp,
-	      ixm,iym,izm,
-	      ixp,iyp,izp,
-	      nx, ny, nz,
-	      gx, gy ,gz,
-	      //	      hx, hy ,hz,
-	      nxd,nyd);
-       break;
-     case precision_double:
-       print_((const double * ) array_offset, 
-	      field_name, message, // lower,
-	      fp,
-	      ixm,iym,izm,
-	      ixp,iyp,izp,
-	      nx, ny, nz,
-	      gx, gy ,gz,
-	      //	      hx, hy ,hz,
-	      nxd,nyd);
-       break;
-     case precision_quadruple:
-       print_((const long double * ) array_offset, 
-	      field_name, message, // lower,
-	      fp,
-	      ixm,iym,izm,
-	      ixp,iyp,izp,
-	      nx, ny, nz,
-	      gx, gy ,gz,
-	      //	      hx, hy ,hz,
-	      nxd,nyd);
-       break;
-     default:
-       ERROR("FieldData::print", "Unsupported precision");
-     }
+    const char * array_offset = &array_permanent_[0]+offsets_[index_field];
+    switch (field_descr->precision(index_field)) {
+    case precision_single:
+      print_((const float * ) array_offset,
+	     field_name, message, // lower,
+	     fp,
+	     ixm,iym,izm,
+	     ixp,iyp,izp,
+	     nx, ny, nz,
+	     gx, gy ,gz,
+	     //	      hx, hy ,hz,
+	     nxd,nyd);
+      break;
+    case precision_double:
+      print_((const double * ) array_offset, 
+	     field_name, message, // lower,
+	     fp,
+	     ixm,iym,izm,
+	     ixp,iyp,izp,
+	     nx, ny, nz,
+	     gx, gy ,gz,
+	     //	      hx, hy ,hz,
+	     nxd,nyd);
+      break;
+    case precision_quadruple:
+      print_((const long double * ) array_offset, 
+	     field_name, message, // lower,
+	     fp,
+	     ixm,iym,izm,
+	     ixp,iyp,izp,
+	     nx, ny, nz,
+	     gx, gy ,gz,
+	     //	      hx, hy ,hz,
+	     nxd,nyd);
+      break;
+    default:
+      ERROR("FieldData::print", "Unsupported precision");
+    }
 
-     free ((void *)field_name);
-   }
+    free ((void *)field_name);
+  }
 
 #endif /* ifndef CELLO_DEBUG */
 }

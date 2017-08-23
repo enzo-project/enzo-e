@@ -34,7 +34,7 @@ PARALLEL_MAIN_BEGIN
   refresh->add_field (12);
   refresh->add_field (9);
   refresh->add_field (-2);
-  std::vector <int> field_list = refresh->field_list();
+  std::vector <int> field_list = refresh->field_list_src();
   
   unit_assert (find (field_list.begin(),field_list.end(),12) 
 	       != field_list.end());

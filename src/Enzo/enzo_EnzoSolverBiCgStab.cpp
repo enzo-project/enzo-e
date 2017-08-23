@@ -467,7 +467,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   /// Initialize default Refresh (called before entry to compute())
   
   const int ir = add_refresh(4, 0, neighbor_type_(), sync_type_());
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_fields();
   
   refresh(ir)->add_field (ir_);
   refresh(ir)->add_field (ir0_);
@@ -560,6 +560,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     T * B =  (T*) field.values(ib_);
 
     TRACE_FIELD_("B1",B,1.0);
+
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from
     /// the previous solve?]
     
@@ -578,7 +579,6 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
   }
 
   /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
-
   if (A_->is_singular()) {
 
     /// set bs_ = SUM(B)   ==> r_solver_bicgstab_start_1
@@ -609,8 +609,8 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 			   sum_long_double_2_type, callback);
 
       T* B = (T*) field.values(ib_);
-
       TRACE_FIELD_("B",B,1.0);
+      
   } else {
 
     /// nonsingular system, just call start_2 directly
@@ -860,7 +860,7 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * enzo_block) throw() {
   // Refresh field faces then call p_solver_bicgstab_loop_25()
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  refresh.add_all_fields();
 
   refresh.add_field (ir_);
   refresh.add_field (ir0_);
@@ -1132,7 +1132,7 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * enzo_block) throw() {
   Refresh refresh (4,0,neighbor_type_(), sync_type_());
   
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields(enzo_block->data()->field().field_count());
+  refresh.add_all_fields();
 
   refresh.add_field (ir_);
   refresh.add_field (ir0_);

@@ -30,8 +30,8 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_particles(particle_descr->num_types());
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_particles();
+  refresh(ir)->add_all_fields();
 
   // PM parameters initialized in EnzoBlock::initialize()
 }

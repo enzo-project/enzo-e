@@ -31,6 +31,7 @@ void png_array (const char * filename,
   double max=-std::numeric_limits<double>::max();
 
   double sum_real=0.0;
+  double sum_abs=0.0;
   double sum_ghost=0.0;
   double sum2_real=0.0;
   double sum2_ghost=0.0;
@@ -44,6 +45,7 @@ void png_array (const char * filename,
 	int i=ix + mx*(iy + my*iz);
 	if (lx&&ly&&lz) sum += scale*array[i];
 	if (lx&&ly&&lz) sum_real+=array[i];
+	if (lx&&ly&&lz) sum_abs+=fabs(array[i]);
 	if (lx&&ly&&lz) sum2_real+=array[i]*array[i];
 	sum_ghost+=array[i];
 	sum2_ghost+=array[i]*array[i];
@@ -63,8 +65,9 @@ void png_array (const char * filename,
 	  array[(gx)+mx*((gy+1) + my*(gz))],
 	  array[(gx)+mx*((gy) + my*(gz+1))]);
   printf ("DEBUG_PNG %s: sum_real %20.15g sum_ghost %20.15g\n",filename,sum_real,sum_ghost);
+  printf ("DEBUG_PNG %s: sum_abs %20.15g\n",filename,sum_abs);
   printf ("DEBUG_PNG %s: sum2_real %20.15g sum2_ghost %20.15g\n",filename,sum2_real,sum2_ghost);
-#endif    
+#endif
   int nx=mx-2*gx;
   int ny=my-2*gy;
   for (int ky=0; ky<py; ky++) {

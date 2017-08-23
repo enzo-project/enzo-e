@@ -251,7 +251,7 @@ EnzoSolverMg0::EnzoSolverMg0
   add_refresh(4,0,neighbor_level,sync_barrier);
 
 #ifdef NEW_REFRESH
-  refresh(0)->add_all_fields(field_descr->field_count());
+  refresh(0)->add_all_fields();
 
   refresh(0)->add_field (ir_);
   refresh(0)->add_field (ic_);
@@ -749,13 +749,13 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
   
   int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
-  field_list.push_back(ir_);
+  Refresh * refresh = new Refresh;
+  refresh->add_field(ir_);
 
   // copy data from EnzoBlock to array via FieldFace
 
   FieldFace * field_face = enzo_block->create_face
-    (if3, ic3, lg3, refresh_coarse, field_list);
+    (if3, ic3, lg3, refresh_coarse, refresh, true);
 
   field_face->set_restrict(restrict_);
   
@@ -852,15 +852,15 @@ void EnzoSolverMg0::restrict_recv
 
   int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
-  field_list.push_back(ib_);
+  Refresh * refresh = new Refresh;
+  refresh->add_field(ib_);
 
   // copy data from msg to this EnzoBlock
 
   int * ic3 = msg->ic3;
 
   FieldFace * field_face = enzo_block->create_face 
-    (if3, ic3, lg3, refresh_coarse, field_list);
+    (if3, ic3, lg3, refresh_coarse, refresh, true);
 
   field_face->set_restrict(restrict());
 
@@ -943,13 +943,13 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
     int if3[3] = {0,0,0};
     bool lg3[3] = {false,false,false};
-    std::vector<int> field_list;
-    field_list.push_back(ix_);
-
+    Refresh * refresh = new Refresh;
+    refresh->add_field(ix_);
+    
     // copy data from EnzoBlock to array via FieldFace
 
     FieldFace * field_face = enzo_block->create_face
-      (if3, ic3, lg3, refresh_fine, field_list);
+      (if3, ic3, lg3, refresh_fine, refresh, true);
 
     field_face->set_prolong(prolong_);
 
@@ -1053,13 +1053,13 @@ void EnzoSolverMg0::prolong_recv
     
   int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
-  field_list.push_back(ic_);
+  Refresh * refresh = new Refresh;
+  refresh->add_field(ic_);
 
   // copy data from msg to this EnzoBlock
 
   FieldFace * field_face = enzo_block->create_face 
-    (if3, msg->ic3, lg3, refresh_fine, field_list);
+    (if3, msg->ic3, lg3, refresh_fine, refresh, true);
 
   field_face->set_prolong(prolong());
 
