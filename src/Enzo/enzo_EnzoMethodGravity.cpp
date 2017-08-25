@@ -99,8 +99,8 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
     enzo_float a,dadt;
     double time = block->time();
-    cosmology-> compute_expansion_factor (&a,&dadt,time);
-    CkPrintf ("DEBUG_COSMO time %g a %g dadt %g\n",time,a,dadt);
+    double dt   = block->dt();
+    cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
     
     for (int iz=0; iz<mz; iz++) {
       for (int iy=0; iy<my; iy++) {

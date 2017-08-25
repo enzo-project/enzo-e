@@ -503,6 +503,52 @@ function test_table ($file_root,$size_array, $types)
   echo "</table></br>";
 }
 
+function test_table_dir ($file_root,$dir,$size_array, $types)
+{
+  $show_flash = 0;
+  $show_gif = 0;
+
+  echo "<table>";
+  echo "<tr>";
+  //  echo "<th>$file_root</th>";
+  if ($show_gif) echo "<th>gif</th>";
+  if ($show_flash) echo "<th>animation</th>";
+  for ($j = 0; $j < sizeof($size_array); ++$j) {
+    $size = $size_array[$j];
+    printf ("<th>$size</th>");
+  }
+  echo "</tr>";
+  printf ("\n");
+  for ($i = 0; $i < sizeof($types); ++$i) {
+    echo "<tr>";
+    $type = $types[$i];
+    //     	printf ("<th>$type</th>\n"); 
+    // Show movie file if available
+    if ($show_gif) {
+      echo "<td> <img width=160 src=$file_root.gif></img></td>";
+    }
+    if ($show_flash) {
+      echo "<td>";
+      $swf_file = "$type/$file_root.swf"; 
+      $size_last = $size_array[sizeof($size_array)-1]; 
+      $png_file_last = "$dir/$file_root-$size_last.png"; 
+      swf_movie($swf_file, 
+		$png_file_last, 
+		160); 
+      echo "</td>";
+    }
+    // Show available image frames
+    for ($j = 0; $j < sizeof($size_array); ++$j) {
+      $size = $size_array[$j];
+      $png_file = "$dir/$file_root-$size.png"; 
+
+      printf ("<td><img width=160 src=$png_file></img></td>\n");  
+    }  
+    echo "</tr>";  
+  }
+  echo "</table></br>";
+}
+
 function binary ($value,$count)
 {
   $strval = "";
@@ -631,6 +677,10 @@ test_summary("Method: heat",
 
 test_summary("Method: gravity",
 	     array("method_gravity_cg-1","method_gravity_cg-8"),
+	     array("enzo-p",  "enzo-p"),'test');
+
+test_summary("Method: cosmology",
+	     array("method_cosmology-1","method_cosmology-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Checkpoint",
@@ -943,6 +993,80 @@ test_table ("method_gravity_cg-8",
 	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
 end_hidden("method_gravity_cg-8");
+
+//======================================================================
+
+test_group("Method: cosmology");
+
+?>
+
+Method-cosmology tests serve to test basic functionality of the "cosmology" method
+in Enzo-P.
+
+</p>
+
+<?php
+
+
+  begin_hidden("method_cosmology-1", "COSMOLOGY (serial)");
+
+tests("Enzo","enzo-p","test_method_cosmology-1","COSMOLOGY 1 block","");
+
+test_table_dir ("cosmo-111", "Dir_COSMO1-0000",
+array("de-00",
+"dark-00",
+"po-00",
+"vx-00",
+"vy-00",
+"vz-00",
+"ax-00",
+"ay-00",
+"az-00"),
+$types);
+test_table_dir ("cosmo-111", "Dir_COSMO1-0001",
+array("de-01",
+"dark-01",
+"po-01",
+"vx-01",
+"vy-01",
+"vz-01",
+"ax-01",
+"ay-01",
+"az-01"),
+$types);
+
+end_hidden("method_cosmology-1");
+
+begin_hidden("method_cosmology-8", "COSMOLOGY (parallel)");
+
+tests("Enzo","enzo-p","test_method_cosmology-8","COSMOLOGY 8 blocks","");
+
+test_table_dir ("cosmo-222", "Dir_COSMO8-0000",
+array("de-00",
+"dark-00",
+"dt-00",
+"po-00",
+"vx-00",
+"vy-00",
+"vz-00",
+"ax-00",
+"ay-00",
+"az-00"),
+$types);
+test_table_dir ("cosmo-222", "Dir_COSMO8-0001",
+array("de-01",
+"dark-01",
+"dt-01",
+"po-01",
+"vx-01",
+"vy-01",
+"vz-01",
+"ax-01",
+"ay-01",
+"az-01"),
+$types);
+
+end_hidden("method_cosmology-8");
 
 //======================================================================
 

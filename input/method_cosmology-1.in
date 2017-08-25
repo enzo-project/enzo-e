@@ -1,0 +1,53 @@
+
+  include "input/method_cosmology.incl"
+  
+  Mesh {
+     root_blocks = [1, 1, 1];
+  }
+  
+  Output {
+     dark {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-dark-%02d.png", "count" ];
+     }
+     de {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-de-%02d.png", "count" ];
+     }
+     dt {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-dt-%02d.png", "count" ];
+     }
+     po {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-po-%02d.png", "count" ];
+     }
+     hdf5 {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-data-%02d.h5", "count" ];
+     }
+     vx {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-vx-%02d.png", "count" ];
+     }
+     vy {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-vy-%02d.png", "count" ];
+     }
+     vz {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-vz-%02d.png", "count" ];
+     }
+     ax {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-ax-%02d.png", "count" ];
+     }
+     ay {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-ay-%02d.png", "count" ];
+     }
+     az {
+         dir=["Dir_COSMO1-%04d","count"];
+         name = [ "cosmo-111-az-%02d.png", "count" ];
+     }
+ }

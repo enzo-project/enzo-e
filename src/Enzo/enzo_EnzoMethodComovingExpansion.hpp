@@ -5,8 +5,8 @@
 /// @date     Wed May 24 12:25:56 PDT 2017
 /// @brief    Implements comoving expansion class
 
-#ifndef ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
-#define ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
+#ifndef ENZO_ENZO_METHOD_COMOVING_EXPANSION_HPP
+#define ENZO_ENZO_METHOD_COMOVING_EXPANSION_HPP
 
 class EnzoMethodComovingExpansion : public Method {
 
@@ -48,5 +48,5 @@ private: // attributes
   bool comoving_coordinates_;
 };
 
-#endif /* ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP */
+#endif /* ENZO_ENZO_METHOD_COMOVING_EXPANSION_HPP */
 

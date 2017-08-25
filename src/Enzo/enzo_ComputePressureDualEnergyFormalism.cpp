@@ -45,34 +45,36 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
     for (i = 0; i < size; i++) {
       pressure[i] = (Gamma[in] - 1.0) * density[i] *
-                                    internal_energy[i];
- 
-      if (pressure[i] < pressure_floor[in])
-	pressure[i] = pressure_floor[in];
+	internal_energy[i];
+      pressure[i] = std::max(pressure[i],pressure_floor[in]);
     }
  
   } else {
  
     /* general case: */
 
-    ERROR("EnzoBlock::ComputePressureDualEnergyFormalism()",
-	    "Accessing OldBaryonField");
+    double time_prev = field.history_time(1);
+    double time_now = this->time();
+    double coef = (time - time_prev) / (time_now - time_prev);
+    
+    enzo_float * density_old         =
+      (enzo_float *) field.values("density",1);
+    enzo_float * internal_energy_old =
+      (enzo_float *) field.values("internal_energy",1);
 
-    // for (i = 0; i < size; i++) {
+    for (i = 0; i < size; i++) {
  
-    //   gas_energy    = coef   *   internal_energy[i] +
-    // 	coefold*OldBaryonField[GENum][i];
-    //   density       = coef   *   density[i] +
-    // 	coefold*OldBaryonField[DensNum][i][i];
+      enzo_float ge = coef*internal_energy[i]
+	+       (1.0-coef)*internal_energy_old[i];
+      enzo_float de = coef*density[i]
+	+    	(1.0-coef)*density_old[i];
  
-    //   pressure[i] = (Gamma - 1.0)*density*gas_energy;
+      pressure[i] = (Gamma[in] - 1.0)*de*ge;
+      pressure[i] = std::max(pressure[i],pressure_floor[in]);
  
-    //   if (pressure[i] < pressure_floor)
-    // 	pressure[i] = pressure_floor;
- 
-    // }
+    }
   }
-
+ 
   /* Correct for Gamma from H2. */
  
   if (MultiSpecies[in] > 1) {

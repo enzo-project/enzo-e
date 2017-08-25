@@ -243,6 +243,7 @@ void OutputImage::open () throw()
     Monitor::instance()->print ("Output","writing image file %s", 
 				(dir_name + "/" + file_name).c_str());
     png_create_(dir_name + "/" + file_name);
+    chmod (dir_name.c_str(),0755);
   }
 }
 

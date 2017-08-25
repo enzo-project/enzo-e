@@ -611,30 +611,17 @@ size_t FieldFace::load_
 ( T * array_face, const T * field_face, 
   int nd3[3], int n3[3],int im3[3], bool accumulate ) throw()
 {
-  if (accumulate) {
-    for (int iz=0; iz <n3[2]; iz++)  {
-      int kz = iz+im3[2];
-      for (int iy=0; iy < n3[1]; iy++) {
-	int ky = iy+im3[1];
-	for (int ix=0; ix < n3[0]; ix++) {
-	  int kx = ix+im3[0];
-	  int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
-	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-	  array_face[index_array] += field_face[index_field];
-	}
-      }
-    }
-  } else {
-    for (int iz=0; iz <n3[2]; iz++)  {
-      int kz = iz+im3[2];
-      for (int iy=0; iy < n3[1]; iy++) {
-	int ky = iy+im3[1];
-	for (int ix=0; ix < n3[0]; ix++) {
-	  int kx = ix+im3[0];
-	  int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
-	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-	  array_face[index_array] = field_face[index_field];
-	}
+  // NOTE: don't check accumulate since loading array; accumulate
+  // is handled in corresponding store_() at the receiving end
+  for (int iz=0; iz <n3[2]; iz++)  {
+    int kz = iz+im3[2];
+    for (int iy=0; iy < n3[1]; iy++) {
+      int ky = iy+im3[1];
+      for (int ix=0; ix < n3[0]; ix++) {
+	int kx = ix+im3[0];
+	int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
+	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+	array_face[index_array] = field_face[index_field];
       }
     }
   }

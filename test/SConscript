@@ -33,7 +33,7 @@ env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'Hdf5ToPng'   : hdf5_to_png } )
 env.Append(BUILDERS = { 'PngToGif'    : png_to_gif } )
 
-env_mv_out  = env.Clone(COPY = 'rm -rf '+test_path+'/Dir_*; mv *.png *.h5 Dir_* ' + test_path)
+env_mv_out  = env.Clone(COPY = 'mv *.png *.h5 Dir_* ' + test_path)
 env_mv_test = env.Clone(COPY = 'mv test*out test*in ' + test_path)
 env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
 
@@ -253,6 +253,34 @@ env.MakeMovie ("method_gravity_cg-8.swf", "test_method_gravity_cg-8.unit", \
                 ARGS= test_path + "/method_gravity_cg-8-*.png");
 env.PngToGif ("method_gravity_cg-8.gif", "test_method_gravity_cg-8.unit", \
                 ARGS= test_path + "/method_gravity_cg-8-*.png");
+
+#----------------------------------------------------------------------
+# MethodCosmology tests
+#----------------------------------------------------------------------
+
+# serial
+Clean(env_mv_out.RunSerial ('test_method_cosmology-1.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_cosmology-1.in'),
+      [Glob('#/' + test_path + '/Dir_COSMO-1'),
+       Glob('#/' + test_path + '/Dir_COSMO-1')])
+
+#env.MakeMovie ("cosmo-111.swf", "test_method_cosmology-1.unit", \
+#                ARGS= test_path + "/cosmo-111*.png");
+#env.PngToGif ("cosmo-111.gif", "test_cosmo-111.unit", \
+#                ARGS= test_path + "/cosmo-111*.png");
+
+
+# parallel
+
+Clean(env_mv_out.RunParallel ('test_method_cosmology-8.unit',bin_path + '/enzo-p', 
+		ARGS='input/method_cosmology-8.in'),
+      [Glob('#/' + test_path + '/Dir_COSMO-8'),
+      Glob('#/' + test_path + '/Dir_COSMO-8')])
+
+#env.MakeMovie ("cosmo-222.swf", "test_method_cosmology-8.unit", \
+#                ARGS= test_path + "/cosmo-222-*.png");
+#env.PngToGif ("cosmo-222.gif", "test_method_cosmology-8.unit", \
+#                ARGS= test_path + "/cosmo-222-*.png");
 
 #----------------------------------------------------------------------
 # MethodHeat tests

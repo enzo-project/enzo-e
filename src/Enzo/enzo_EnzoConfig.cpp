@@ -47,6 +47,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_music_field_names(),
   initial_music_field_coords(),
   initial_music_particle_files(),
+  initial_music_particle_coords(),
   initial_music_particle_datasets(),
   initial_music_particle_types(),
   initial_music_particle_attributes(),
@@ -190,6 +191,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_music_field_coords;
 
   p | initial_music_particle_files;
+  p | initial_music_particle_coords;
   p | initial_music_particle_datasets;
   p | initial_music_particle_types;
   p | initial_music_particle_attributes;

@@ -111,6 +111,23 @@ void EnzoComputeAcceleration::compute_(Block * block)
 		   ym,yp,&hy,
 		   zm,zp,&hz);
 
+  // Update cell widths (hx,hy,hz) if needed for expansion
+
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+
+  if (cosmology) {
+   
+    enzo_float a,dadt;
+    double time = block->time();
+    double dt   = block->dt();
+    cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
+
+    hx *= a;
+    hy *= a;
+    hz *= a;
+  }
+
   if (order_ == 2) {
 
     if (rank_ == 1) {

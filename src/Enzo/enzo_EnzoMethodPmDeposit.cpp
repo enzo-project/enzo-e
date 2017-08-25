@@ -399,9 +399,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       ERROR1 ("FieldFace::store_()",
 	      "unknown float precision sizeof(enzo_float) = %d\n",sizeof(enzo_float));
     }
-    png_array ("renzo-p-velocity-cic-x.png",vx,3,3,3,mx,my,mz,__FILE__,__LINE__,2,16,16,1.0);
-    png_array ("renzo-p-velocity-cic-y.png",vy,3,3,3,mx,my,mz,__FILE__,__LINE__,2,16,16,1.0);
-    png_array ("renzo-p-velocity-cic-z.png",vz,3,3,3,mx,my,mz,__FILE__,__LINE__,2,16,16,1.0);
 
     delete [] rfield;
     delete [] temp;
@@ -423,8 +420,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       }
     }
 
-    png_array ("enzo-p-density-cic.png",de_gas_0,0,0,0,nx,ny,nz,__FILE__,__LINE__,2,16,16,1.0);
-    png_array ("renzo-p-density-cic.png",de_gas_0,0,0,0,nx,ny,nz,__FILE__,__LINE__,2,16,16,1.0);
     TRACE_FIELD("density-gas-particle",de_t,1.0);
 
 #ifndef FIELD_CIC

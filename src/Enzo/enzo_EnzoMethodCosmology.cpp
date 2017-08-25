@@ -27,12 +27,5 @@ void EnzoMethodCosmology::compute(Block * block) throw()
   
   cosmology->print();
   
-  printf ("DEBUG_UNITS %g %g %g %g %g\n",
-	  units->density(),
-	  units->length(),
-	  units->temperature(),
-	  units->time(),
-	  units->velocity());
-  CkPrintf ("%s EnzoMethodCosmology::compute()\n",block->name().c_str());
   block->compute_done(); 
 }
