@@ -679,10 +679,10 @@ protected:
   /// Check if Block should have been deleted
   void check_delete_();
 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+public: // virtual functions
 
   /// Set state
-  inline void set_state (int cycle, double time, double dt, bool stop)
+  void set_state (int cycle, double time, double dt, bool stop)
   { 
     set_cycle(cycle);
     set_time(time); 
@@ -690,10 +690,8 @@ protected:
     set_stop(stop); 
   }
 
-public: // virtual functions
-
   /// Set Block's cycle
-  virtual void set_cycle (int cycle) throw()
+  void set_cycle (int cycle) throw()
   { cycle_ = cycle;}
 
   /// Set Block's time
@@ -705,7 +703,7 @@ public: // virtual functions
   { dt_  = dt; }
 
   /// Set Block's stopping criteria
-  virtual void set_stop (double stop) throw()
+  void set_stop (double stop) throw()
   { stop_  = stop; }
 
   /// Initialize Block

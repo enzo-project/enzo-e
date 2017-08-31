@@ -226,7 +226,7 @@ EnzoSolverMg0::EnzoSolverMg0
  int min_level,
  int max_level) 
   : Solver(monitor_iter,min_level,max_level), 
-    A_(new EnzoMatrixLaplace),
+    A_(NULL),
     index_smooth_pre_(index_smooth_pre),
     index_solve_coarse_(index_solve_coarse),
     index_smooth_post_(index_smooth_post),
@@ -712,8 +712,6 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
   //  TRACE_FIELD_("X",X,1.0);
   //  TRACE_FIELD_("B",B,1.0);
   solve_coarse->apply(A_,ix_,ib_,enzo_block);
-
-  
 }
 
 //----------------------------------------------------------------------

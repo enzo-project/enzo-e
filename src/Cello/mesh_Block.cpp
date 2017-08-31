@@ -83,6 +83,7 @@ Block::Block ( MsgRefine * msg )
 	    v3[0],v3[1],v3[2]);
 #endif
 
+
   bool is_first_cycle = 
     (cycle_ == simulation()->config()->initial_cycle);
 

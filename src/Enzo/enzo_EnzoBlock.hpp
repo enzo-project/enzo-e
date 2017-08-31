@@ -213,11 +213,14 @@ public: // interface
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(const FieldDescr *,  enzo_float dt);
 
-  /// Set EnzoBlock's dt
+  /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();
 
+  /// Set EnzoBlock's time (overloaded to update current time)
+  virtual void set_time (double time) throw();
+  
   /// Set EnzoBlock's stopping criteria
-  virtual void set_stop (bool stop) throw();
+  void set_stop (bool stop) throw();
 
   /// Initialize EnzoBlock
   virtual void initialize () throw();
@@ -360,6 +363,9 @@ public: // attributes (YIKES!)
     enzo_float dtFixed;
   };
 
+  /// Cosmological redshift for the current cycle
+  enzo_float redshift;
+  
   /// Fluxes
   fluxes ** SubgridFluxes;
 

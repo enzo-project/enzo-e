@@ -219,6 +219,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_gravity_grav_const;
   p | method_gravity_solver;
+  p | method_gravity_accumulate;
 
   p | method_pm_deposit_type;
   p | method_pm_update_max_dt;
@@ -483,6 +484,9 @@ void EnzoConfig::read(Parameters * p) throw()
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","unknown");
 
+  method_gravity_accumulate = p->value_logical
+    ("Method:gravity:accumulate",true);
+  
   //--------------------------------------------------
   // Physics
   //--------------------------------------------------
@@ -586,8 +590,7 @@ void EnzoConfig::read(Parameters * p) throw()
   // STOPPING
   //======================================================================
 
-  stopping_redshift = p->value_float
-    ("Stopping:redshift",std::numeric_limits<double>::max());
+  stopping_redshift = p->value_float ("Stopping:redshift",0.0);
   
   //======================================================================
   // GRACKLE

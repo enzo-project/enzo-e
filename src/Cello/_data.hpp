@@ -108,8 +108,8 @@ class FieldFace;
 	}								\
       }									\
     }									\
-    CkPrintf ("DEBUG_FIELD %p (%g) [%g] | (%g : %g %g %g) %s:%d %s\n",	\
-	      FIELD,sum_real,sum_all,					\
+    CkPrintf ("DEBUG_FIELD (%g) [%g] | (%g : %g %g %g) %s:%d %s\n",	\
+	      sum_real,sum_all,					\
 	      SCALE*(FIELD[gx+mx*(gy+my*gz)]),				\
 	      SCALE*(FIELD[(gx+1)+mx*(gy+my*gz)]),			\
 	      SCALE*(FIELD[gx+mx*((gy+1)+my*gz)]),			\

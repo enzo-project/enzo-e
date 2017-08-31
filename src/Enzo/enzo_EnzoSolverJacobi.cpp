@@ -76,10 +76,10 @@ void EnzoSolverJacobi::apply
   const int num_fields = field.field_count();
 
 #ifdef NEW_REFRESH
+  refresh.add_all_fields();
   refresh.add_field (ix_);
-  //  refresh.add_field (id_);
-
-  //  refresh.add_field (ir_);
+  refresh.add_field (id_);
+  refresh.add_field (ir_);
   //  refresh.add_field (ib_);
 #else
   refresh.add_all_fields(num_fields);

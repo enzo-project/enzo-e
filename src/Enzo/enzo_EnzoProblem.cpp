@@ -419,8 +419,8 @@ Method * EnzoProblem::create_method_
 
     // WARNING: accumulate is currently only implemented for non-AMR
     // problems
-    bool accumulate =
-      (enzo_config->mesh_min_level == enzo_config->mesh_max_level);
+    bool accumulate = enzo_config->method_gravity_accumulate;
+
     method = new EnzoMethodGravity
       (field_descr, enzo_config->solver_index[solver_name],
        enzo_config->method_gravity_grav_const,

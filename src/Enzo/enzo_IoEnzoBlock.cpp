@@ -23,6 +23,8 @@ IoEnzoBlock::IoEnzoBlock() throw ()
   meta_name_.push_back("enzo_GridStartIndex");
   meta_name_.push_back("enzo_GridEndIndex");
   meta_name_.push_back("enzo_CellWidth");
+  meta_name_.push_back("enzo_redshift");
+  
 }
 
 //----------------------------------------------------------------------
@@ -79,6 +81,10 @@ void IoEnzoBlock::meta_value
       *buffer = (void *) enzo_block->CellWidth;
       *type   = type_enzo_float;
       *nxd     = 3;
+      
+    } else if (index == index_count++) {
+      *buffer = (void *) & enzo_block->redshift;
+      *type   = type_enzo_float;
     }
   }
 }

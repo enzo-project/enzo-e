@@ -94,6 +94,7 @@ public: // interface
   enzo_float omega_lambda_now()      { return omega_lambda_now_; }
   enzo_float comoving_box_size()     { return comoving_box_size_; }
   enzo_float max_expansion_rate()    { return max_expansion_rate_; }
+  enzo_float current_redshift()      { return current_redshift_; }
   enzo_float initial_redshift()      { return initial_redshift_; }
   enzo_float final_redshift()        { return final_redshift_; }
 

@@ -101,7 +101,7 @@ void EnzoSimulation::r_startup_begun (CkReductionMsg *msg)
   initialize();
 
   // Initialize Units::cosmology if needed
-  
+
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
     problem()->physics("cosmology");
   

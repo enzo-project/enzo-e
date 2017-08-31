@@ -55,7 +55,20 @@ public: // interface
     p | stop_time_;
     p | stop_seconds_;
   }
+  /// Return stopping cycle
+  double stop_cycle () const throw()
+  { return stop_cycle_; };
 
+  /// Return stopping time
+  double stop_time () const throw()
+  { return stop_time_; };
+
+  /// Return stopping seconds
+  double stop_seconds () const throw()
+  { return stop_seconds_; };
+
+public: // virtual methods
+  
   /// Return whether the simulation is done
   virtual bool complete (int    curr_cycle,
 			 double curr_time) const throw()
@@ -73,19 +86,7 @@ public: // interface
     return stop;
   }
 
-  /// Return stopping cycle
-  double stop_cycle () const throw()
-  { return stop_cycle_; };
-
-  /// Return stopping time
-  double stop_time () const throw()
-  { return stop_time_; };
-
-  /// Return stopping seconds
-  double stop_seconds () const throw()
-  { return stop_seconds_; };
-
-protected:
+protected: // attributes
 
   /// Stop cycle
   int stop_cycle_;

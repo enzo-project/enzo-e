@@ -5,6 +5,7 @@
 /// @date     Thu Mar  3 23:02:02 PST 2011
 /// @brief    Implementation of the EnzoBlock class
 
+#include "charm_simulation.hpp"
 #include "cello.hpp"
 
 #include "enzo.hpp"
@@ -365,9 +366,18 @@ void EnzoBlock::set_dt (double dt_param) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::set_stop (bool stop) throw ()
+void EnzoBlock::set_time (double time) throw ()
 {
-  Block::set_stop (stop);
+  Block::set_time (time);
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
+  EnzoPhysicsCosmology * cosmology = units->cosmology();
+
+  if (cosmology) {
+    cosmology->set_current_time(time);
+    redshift = cosmology->current_redshift();
+  }
 }
 
 //----------------------------------------------------------------------

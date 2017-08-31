@@ -52,14 +52,7 @@ public: // interface
 
   /// Return whether the simulation is done
   virtual bool complete (int    curr_cycle,
-			 double curr_time) const throw()
-  {
-    bool stop = Stopping::complete(curr_cycle,curr_time);
-
-    // compute current redshift
-    double redshift = 0.0;
-    return stop || ((stop_redshift_ != -1.0) && (redshift >= stop_redshift_));
-  }
+			 double curr_time) const throw();
 
   /// Return stopping cycle
   double stop_redshift () const throw()

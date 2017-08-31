@@ -199,10 +199,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	// Batch arrays
 	enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
 	enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
+
+	// Particle batch velocities
 	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
 	enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
-
-	int iv = 0;
 
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
@@ -275,12 +275,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
 
-	int iv = 0;
-	
 	for (int ip=0; ip<np; ip++) {
 
 	  // Copy batch particle velocities to temporary block field velocities
-	  iv++;
 	  
 	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
 	  double y = ya[ip*dp] + vya[ip*dv]*dt;
@@ -359,19 +356,43 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float * vy = new enzo_float [mx*my*mz];
     enzo_float * vz = new enzo_float [mx*my*mz];
 
-    gx=gy=gz=0;
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
 	  int k = ix + mx*(iy + my*iz);
-	  int i = (ix-gx) + nx*((iy-gy) + ny*(iz-gz));
+	  int i = ix + nx*(iy + ny*iz);
 	  vx[k] = vxf[k];
-	  vy[k] = vyf[k];
-	  vz[k] = vzf[k];
 	}
       }
     }
-    gx=gy=gz=3;
+
+    if (rank >= 2) {
+      for (int iz=0; iz<mz; iz++) {
+	for (int iy=0; iy<my; iy++) {
+	  for (int ix=0; ix<mx; ix++) {
+	    int k = ix + mx*(iy + my*iz);
+	    int i = ix + nx*(iy + ny*iz);
+	    vy[k] = vyf[k];
+	  }
+	}
+      }
+    } else {
+      for (int i=0; i<mx*my*mz; i++) vy[i] = 0.0;
+    }
+    
+    if (rank >= 3) {
+      for (int iz=0; iz<mz; iz++) {
+	for (int iy=0; iy<my; iy++) {
+	  for (int ix=0; ix<mx; ix++) {
+	    int k = ix + mx*(iy + my*iz);
+	    int i = ix + nx*(iy + ny*iz);
+	    vz[k] = vzf[k];
+	  }
+	}
+      }
+    } else {
+      for (int i=0; i<mx*my*mz; i++) vz[i] = 0.0;
+    }
     
     if (sizeof(enzo_float)==sizeof(float)) {
       FORTRAN_NAME(dep_grid_cic_4)((float *)de,(float *)de_gas_0,(float *)temp,

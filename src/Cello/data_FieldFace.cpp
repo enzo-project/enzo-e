@@ -953,6 +953,5 @@ std::vector<int> FieldFace::field_list_dst_(Field field) const
 
 bool FieldFace::accumulate_(int index_src, int index_dst) const
 {
-  
-  return (refresh_->accumulate()) &&  (index_src != index_dst);
+  return ((index_src != index_dst) && refresh_->accumulate());
 }

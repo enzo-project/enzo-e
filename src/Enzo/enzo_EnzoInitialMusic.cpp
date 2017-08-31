@@ -15,6 +15,7 @@ EnzoInitialMusic::EnzoInitialMusic
  double time,
  const EnzoConfig * enzo_config) throw()
   : Initial(cycle,time),
+    level_(enzo_config->mesh_max_level),
     field_files_     (enzo_config->initial_music_field_files),
     field_datasets_  (enzo_config->initial_music_field_datasets),
     field_coords_    (enzo_config->initial_music_field_coords),
@@ -32,6 +33,9 @@ void EnzoInitialMusic::pup (PUP::er &p)
 {
   TRACEPUP;
   // NOTE: change this function whenever attributes change
+
+  p | level_;
+  
   p | field_files_;
   p | field_datasets_;
   p | field_coords_;
@@ -52,6 +56,7 @@ void EnzoInitialMusic::enforce_block
     ) throw()
 {
 
+  if (block->level() != level_) return;
   // Get the domain extents
 
   double lower_domain[3];

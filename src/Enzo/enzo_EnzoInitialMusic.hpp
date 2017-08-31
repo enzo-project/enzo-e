@@ -55,6 +55,9 @@ protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
+  // Only initialize Blocks at this level
+  int level_;
+  
   std::vector < std::string > field_files_;
   std::vector < std::string > field_datasets_;
   std::vector < std::string > field_coords_;

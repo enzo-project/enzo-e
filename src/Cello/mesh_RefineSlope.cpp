@@ -125,14 +125,17 @@ void RefineSlope::evaluate_block_(T * array, T * output ,
 {
   T slope;
   const int d3[3] = {1,mx,mx*my};
+  double tiny = 1e-10;
+  int count=0;
   for (int axis=0; axis<rank; axis++) {
     int id = d3[axis];
     for (int iz=gz; iz<mz-gz; iz++) {
       for (int iy=gy; iy<my-gy; iy++) {
 	for (int ix=gx; ix<mx-gx; ix++) {
 	  int i = ix + mx*(iy + my*iz);
-	  slope = fabs( (array[i+id] - array[i-id]) 
-		       / (2.0*h3[axis]*array[i]));
+	  T a = std::max(2.0*h3[axis]*fabs(array[i]),tiny);
+	  slope = fabs( (array[i+id] - array[i-id]) / a);
+	  count++;
 	  if (slope > min_refine_)  *any_refine  = true;
 	  if (slope > max_coarsen_) *all_coarsen = false;
 	  if (output) {

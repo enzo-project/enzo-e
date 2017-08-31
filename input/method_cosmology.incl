@@ -147,9 +147,9 @@
     list = ["cg"];
     cg {
        type = "cg";
-       iter_max = 1000;
+       iter_max = 100;
        res_tol = 1e-6;
-       monitor_iter = 1;
+       monitor_iter = 10;
     }
  } 
  Output {
@@ -348,9 +348,12 @@
 
  Stopping {
      cycle = 10;
+     redshift = 46.0;
  }
 
  Testing {
-     cycle_final = 10;
-     time_final  = 1.01998152194867;
+     cycle_final = 6; # redshift = 46.0;
+#     time_final  = 1.01998152194867;  # 10 cycles
+     time_final = 0.933125637471676;  # 6 cycles (redshift 46.0)
  }
+ 

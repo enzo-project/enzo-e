@@ -77,7 +77,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   enzo_float * B = (enzo_float*) field.values (ib);
   enzo_float * D = (enzo_float*) field.values (idensity);
-  enzo_float * X = (enzo_float*) field.values ("X");
 
   TRACE_FIELD("B",B,1.0);
 
@@ -94,28 +93,32 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     block->simulation()->problem()->physics("cosmology");
-  
-  if (cosmology) {
 
-    enzo_float a,dadt;
-    double time = block->time();
-    double dt   = block->dt();
-    cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
+  if (block->is_leaf()) {
+    if (cosmology) {
+
+      enzo_float a,dadt;
+      double time = block->time();
+      double dt   = block->dt();
+      cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
     
-    for (int iz=0; iz<mz; iz++) {
-      for (int iy=0; iy<my; iy++) {
-	for (int ix=0; ix<mx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  B[i]  = -(D[i] - 1.0)/a;
+      for (int iz=0; iz<mz; iz++) {
+	for (int iy=0; iy<my; iy++) {
+	  for (int ix=0; ix<mx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    B[i]  = -(D[i] - 1.0)/a;
+	  }
 	}
       }
-    }
 
   } else {
 
     field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
 
   }
+ } else {
+  for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
+ }
   
   //  TRACE_FIELD("density-shift",D,1.0);
 
@@ -175,10 +178,11 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 
   compute_acceleration.compute(this);
 
-  // Clear "B" field since on entry adding density to B!
+  // Clear "B" field for next call since on entry adding density to B
 
   enzo_float * B = (enzo_float*) field.values("B");
   for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
+
   // wait for all Blocks before continuing
   compute_done();
 }
