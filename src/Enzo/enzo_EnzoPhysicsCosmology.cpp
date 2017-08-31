@@ -7,6 +7,8 @@
 
 #include "enzo.hpp"
 
+//----------------------------------------------------------------------
+
 enzo_float EnzoPhysicsCosmology::time_from_redshift (enzo_float redshift) const
 {
   enzo_float eta, time_hubble_0 = -1.0;
