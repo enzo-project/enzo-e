@@ -135,7 +135,9 @@ void OutputData::write_block
 
     if (block->index().is_root()) {
       std::string param_file_name = name_dir+"/"+name_dir+".parameters";
-      g_parameters.write(param_file_name.c_str(),false);
+      g_parameters.write(param_file_name.c_str(),param_write_cello);
+      std::string libconfig_file_name = name_dir+"/"+name_dir+".libconfig";
+      g_parameters.write(libconfig_file_name.c_str(),param_write_libconfig);
     }
     
     // Contribute to DIR.block_list file
