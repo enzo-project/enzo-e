@@ -132,9 +132,11 @@ void OutputData::write_block
     int count = 0;
     
     // Write DIR.parameters file
-    
-    std::string param_file_name = name_dir+"/"+name_dir+".parameters";
-    g_parameters.write(param_file_name.c_str(),false);
+
+    if (block->index().is_root()) {
+      std::string param_file_name = name_dir+"/"+name_dir+".parameters";
+      g_parameters.write(param_file_name.c_str(),false);
+    }
     
     // Contribute to DIR.block_list file
     
