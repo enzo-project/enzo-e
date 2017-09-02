@@ -230,9 +230,10 @@ void EnzoInitialMusic::enforce_block
 
     const int np = nx*ny*nz;
 
-    // insert particles if the don't exist yet
+    // insert particles if they don't exist yet
     if (particle.num_particles(it) == 0) {
       particle.insert_particles(it,np);
+      block->simulation()->monitor_insert_particles(np);
     }
 
     // read particle attribute

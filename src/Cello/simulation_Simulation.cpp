@@ -753,34 +753,34 @@ void Simulation::monitor_performance()
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = nr * nc + 2;
+  int n = 3 + nr*nc;
 
-  long long * counters_region = new long long [nc+1];
-  long long * counters_reduce = new long long [n+1];
-
-  int m = 0;
+  long long * counters_region = new long long [nc];
+  long long * counters_reduce = new long long [n];
 
   // save space for count
-  m++;
-  
+
+  int m=0;
+  counters_reduce[m++] = n;
   counters_reduce[m++] = hierarchy_->num_particles(); 
   counters_reduce[m++] = hierarchy_->num_blocks(); 
 
   for (int ir = 0; ir < nr; ir++) {
-
     performance_->region_counters(ir,counters_region);
     for (int ic = 0; ic < nc; ic++) {
       counters_reduce[m++] = counters_region[ic];
     }
   }
 
-  counters_reduce[0] = m;
+  ASSERT2("Simulation::monitor_performance()",
+	  "Actual array length %d != expected array length %d",
+	  m,n, (m == n) );
   
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
 		       thisProxy);
 
-  contribute (m*sizeof(long long), counters_reduce,r_reduce_performance_type,
+  contribute (n*sizeof(long long), counters_reduce,r_reduce_performance_type,
 	      callback);
   // --------------------------------------------------
 
