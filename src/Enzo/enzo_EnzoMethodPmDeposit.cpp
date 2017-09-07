@@ -25,22 +25,11 @@
 
 #define FORTRAN_NAME(NAME) NAME##_
 
-extern "C" void  FORTRAN_NAME(dep_grid_cic_4)
-  (float * de,float * de_t,float * temp,
-   float * vx, float * vy, float * vz, 
-   float * dt, float * rfield, int *rank,
-   float * hx, float * hy, float * hz,
-   int * mx,int * my,int * mz,
-   int * gxi,int * gyi,int * gzi,
-   int * nxi,int * nyi,int * nzi,
-   int * ,int * ,int * ,
-   int * nx,int * ny,int * nz,
-   int * ,int * ,int * );
-extern "C" void  FORTRAN_NAME(dep_grid_cic_8)
-  (double * de,double * de_t,double * temp,
-   double * vx, double * vy, double * vz, 
-   double * dt, double * rfield, int *rank,
-   double * hx, double * hy, double * hz,
+extern "C" void  FORTRAN_NAME(dep_grid_cic)
+  (enzo_float * de,enzo_float * de_t,enzo_float * temp,
+   enzo_float * vx, enzo_float * vy, enzo_float * vz, 
+   enzo_float * dt, enzo_float * rfield, int *rank,
+   enzo_float * hx, enzo_float * hy, enzo_float * hz,
    int * mx,int * my,int * mz,
    int * gxi,int * gyi,int * gzi,
    int * nxi,int * nyi,int * nzi,
@@ -149,6 +138,22 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     // if (rank >= 2) vol *= hy;
     // if (rank >= 3) vol *= hz;
     //    dens = dens / vol;
+
+    // check precisions match
+    
+    int ia = particle.attribute_index(it,"x");
+    int ba = particle.attribute_bytes(it,ia); // "bytes (actual)"
+    int be = sizeof(enzo_float);                // "bytes (expected)"
+
+    ASSERT4 ("EnzoMethodPmUpdate::compute()",
+	     "Particle type %s attribute %s defined as %s but expecting %s",
+	     particle.type_name(it).c_str(),
+	     particle.attribute_name(it,ia).c_str(),
+	     ((ba == 4) ? "single" :
+	      ((ba == 8) ? "double" : "quadruple")),
+	     ((be == 4) ? "single" :
+	      ((be == 8) ? "double" : "quadruple")),
+	     (ba == be));
 
     // Accumulate particle density using CIC
 
@@ -394,32 +399,16 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       for (int i=0; i<mx*my*mz; i++) vz[i] = 0.0;
     }
     
-    if (sizeof(enzo_float)==sizeof(float)) {
-      FORTRAN_NAME(dep_grid_cic_4)((float *)de,(float *)de_gas_0,(float *)temp,
-				   (float *)vx, (float *)vy, (float *)vz, 
-				   (float *)&dtf, (float *)rfield, &rank,
-				   (float *)&hxf,(float *)&hyf,(float *)&hzf,
-				   &mx,&my,&mz,
-				   &gxi,&gyi,&gzi,
-				   &nxi,&nyi,&nzi,
-				   &i0,&i0,&i0,
-				   &nx,&ny,&nz,
-				   &i1,&i1,&i1);
-    } else if (sizeof(enzo_float)==sizeof(double)) {
-      FORTRAN_NAME(dep_grid_cic_8)((double *)de,(double *)de_gas_0,(double *)temp,
-      				   (double *)vx, (double *)vy, (double *)vz, 
-      				   (double *)&dtf, (double *)rfield, &rank,
-      				   (double *)&hxf,(double *)&hyf,(double *)&hzf,
-      				   &mx,&my,&mz,
-      				   &gxi,&gyi,&gzi,
-      				   &nxi,&nyi,&nzi,
-      				   &i0,&i0,&i0,
-      				   &mx,&my,&mz,
-      				   &i1,&i1,&i1);
-    } else {
-      ERROR1 ("FieldFace::store_()",
-	      "unknown float precision sizeof(enzo_float) = %d\n",sizeof(enzo_float));
-    }
+    FORTRAN_NAME(dep_grid_cic)(de,de_gas_0,temp,
+			       vx, vy, vz, 
+			       &dtf, rfield, &rank,
+			       &hxf,&hyf,&hzf,
+			       &mx,&my,&mz,
+			       &gxi,&gyi,&gzi,
+			       &nxi,&nyi,&nzi,
+			       &i0,&i0,&i0,
+			       &nx,&ny,&nz,
+			       &i1,&i1,&i1);
 
     delete [] rfield;
     delete [] temp;

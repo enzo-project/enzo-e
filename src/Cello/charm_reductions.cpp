@@ -21,6 +21,11 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 
     // sum remaining values
     for (int i=0; i<n; i++) {
+      ASSERT2("r_reduce_performance()",
+	      "CkReductionMsg actual size %d is different from expected %d",
+	      msgs[i]->getSize(),length*sizeof(long long),
+	      (msgs[i]->getSize() == length*sizeof(long long)));
+      
       long long * values = (long long *) msgs[i]->getData();
       for (int j=1; j<length; j++) {
 	accum [j] += values[j];
@@ -45,6 +50,10 @@ CkReductionMsg * sum_long_double(int n, CkReductionMsg ** msgs)
   long double accum = 0.0;
 
   for (int i=0; i<n; i++) {
+    ASSERT2("sum_long_double()",
+	    "CkReductionMsg actual size %d is different from expected %d",
+	    msgs[i]->getSize(),sizeof(long double),
+	    (msgs[i]->getSize() == sizeof(long double)));
     long double * values = (long double *) msgs[i]->getData();
     accum += values[0];
   }
@@ -64,6 +73,10 @@ CkReductionMsg * sum_long_double_2(int n, CkReductionMsg ** msgs)
   long double accum[2] = { 0.0, 0.0 };
 
   for (int i=0; i<n; i++) {
+    ASSERT2("sum_long_double_2()",
+	    "CkReductionMsg actual size %d is different from expected %d",
+	    msgs[i]->getSize(),2*sizeof(long double),
+	    (msgs[i]->getSize() == 2*sizeof(long double)));
     long double * values = (long double *) msgs[i]->getData();
     accum [0] += values[0];
     accum [1] += values[1];
@@ -83,6 +96,10 @@ CkReductionMsg * sum_long_double_3(int n, CkReductionMsg ** msgs)
 {
   long double accum[3] = { 0.0, 0.0, 0.0 };
   for (int i=0; i<n; i++) {
+    ASSERT2("sum_long_double_3()",
+	    "CkReductionMsg actual size %d is different from expected %d",
+	    msgs[i]->getSize(),3*sizeof(long double),
+	    (msgs[i]->getSize() == 3*sizeof(long double)));
     long double * values = (long double *) msgs[i]->getData();
     accum [0] += values[0];
     accum [1] += values[1];
@@ -103,7 +120,14 @@ CkReductionMsg * sum_long_double_4(int n, CkReductionMsg ** msgs)
   long double accum[4] = { 0.0, 0.0, 0.0, 0.0 };
 
   for (int i=0; i<n; i++) {
+
+    ASSERT2("sum_long_double_4()",
+	    "CkReductionMsg actual size %d is different from expected %d",
+	    msgs[i]->getSize(),4*sizeof(long double),
+	    (msgs[i]->getSize() == 4*sizeof(long double)));
+    
     long double * values = (long double *) msgs[i]->getData();
+    
     accum [0] += values[0];
     accum [1] += values[1];
     accum [2] += values[2];

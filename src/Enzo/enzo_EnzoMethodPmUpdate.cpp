@@ -101,6 +101,23 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     const double dt = block->dt();
 
+    // check precisions match
+    
+    int ba = particle.attribute_bytes(it,ia_x); // "bytes (actual)"
+    int be = sizeof(enzo_float);                // "bytes (expected)"
+
+    CkPrintf ("DEBUG_COSMO ba = %d be = %d\n",ba,be);
+    fflush(stdout);
+    ASSERT4 ("EnzoMethodPmUpdate::compute()",
+	     "Particle type %s attribute %s defined as %s but expecting %s",
+	     particle.type_name(it).c_str(),
+	     particle.attribute_name(it,ia_x).c_str(),
+	     ((ba == 4) ? "single" :
+	      ((ba == 8) ? "double" : "quadruple")),
+	     ((be == 4) ? "single" :
+	      ((be == 8) ? "double" : "quadruple")),
+	     (ba == be));
+
     for (int ib=0; ib<nb; ib++) {
 
       enzo_float *x=0, *y=0, *z=0;

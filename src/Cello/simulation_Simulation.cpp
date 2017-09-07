@@ -780,7 +780,9 @@ void Simulation::monitor_performance()
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
 		       thisProxy);
 
-  contribute (n*sizeof(long long), counters_reduce,r_reduce_performance_type,
+  contribute (n*sizeof(long long),
+	      counters_reduce,
+	      r_reduce_performance_type,
 	      callback);
   // --------------------------------------------------
 
@@ -796,11 +798,11 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  long long * counters_reduce = (long long *)msg->getData() + 1;
+  long long * counters_reduce = (long long *)msg->getData();
 
   int index_region_cycle = performance_->region_index("cycle");
 
-  int m = 0;
+  int m = 1; // skip array length
   
   monitor()->print("Performance","simulation num-particles total %ld",
 		   counters_reduce[m++]);

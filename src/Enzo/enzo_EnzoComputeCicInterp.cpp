@@ -78,7 +78,7 @@ void EnzoComputeCicInterp::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-template <typename TP, typename TF>
+template <class TP, class TF>
 void EnzoComputeCicInterp::compute_(Block * block)
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
