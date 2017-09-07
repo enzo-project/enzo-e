@@ -607,7 +607,7 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY before barrier\n",
 	      CkMyPe(),name().c_str(),this);
 #endif
-  contribute(0, reduce, sum_long_double_type, callback);
+    contribute(sizeof(long double), reduce, sum_long_double_type, callback);
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
