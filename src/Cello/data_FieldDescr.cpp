@@ -70,7 +70,7 @@ int FieldDescr::field_count() const throw()
 
 //----------------------------------------------------------------------
 
-std::string FieldDescr::field_name(size_t id_field) const throw()
+std::string FieldDescr::field_name(int id_field) const throw()
 { 
   return name_.at(id_field);
 }
@@ -273,12 +273,13 @@ void FieldDescr::set_default_ghost_depth(int gx, int gy, int gz) throw()
 
 void FieldDescr::copy_(const FieldDescr & field_descr) throw()
 {
-  alignment_ = field_descr.alignment_;
-  padding_   = field_descr.padding_;
   name_      = field_descr.name_;
   num_permanent_ = field_descr.num_permanent_;
+  num_temporary_ = field_descr.num_temporary_;
   id_        = field_descr.id_;
   groups_    = field_descr.groups_;
+  alignment_ = field_descr.alignment_;
+  padding_   = field_descr.padding_;
   precision_ = field_descr.precision_;
   for (size_t i=0; i<centering_.size(); i++) {
     delete [] centering_[i];
@@ -300,10 +301,19 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
     ghost_depth_[i][1] = field_descr.ghost_depth_[i][1];
     ghost_depth_[i][2] = field_descr.ghost_depth_[i][2];
   }
+  for (int i=0; i<3; i++) {
+    ghost_depth_default_[i] = field_descr.ghost_depth_default_[i];
+  }
   conserved_.resize(field_descr.conserved_.size());
   for (size_t i=0; i<field_descr.conserved_.size(); i++) {
     conserved_[i] = field_descr.conserved_[i];
   }
+  history_ = field_descr.history_;
+  history_id_.resize(field_descr.history_id_.size());
+  for (size_t i=0; i<field_descr.history_id_.size(); i++) {
+    history_id_[i] = field_descr.history_id_[i];
+  }
+  
 }
 
 

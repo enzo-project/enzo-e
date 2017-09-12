@@ -26,7 +26,9 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoInitialCosmology(CkMigrateMessage *m) 
-    : Initial (m)
+    : Initial (m),
+      gamma_(0.0),
+      temperature_(0.0)
   {}
 
   /// CHARM++ Pack / Unpack function

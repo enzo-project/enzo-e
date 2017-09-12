@@ -30,7 +30,8 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoInitialMusic(CkMigrateMessage *m)
-    : Initial (m)
+    : Initial (m),
+      level_(0)
   {  }
 
   /// Destructor

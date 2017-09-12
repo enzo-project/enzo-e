@@ -187,10 +187,14 @@ void Main::p_text_file_write
   
   if (fp_text_[full_file] == NULL) {
 
-    if (dir != ".") {
+    if (strcmp(dir,".") == 0) {
       struct stat st = {0};
       if (stat(dir, &st) == -1) {
-	mkdir(dir, 0700);
+	if (mkdir(dir, 0700)) {
+	  ERROR3 ("Main::p_text_file_write()",
+		  "Error %d in mkdir(%s): %s\n",
+		  dir,errno,strerror(errno));
+	};
       }
     }
     

@@ -1021,7 +1021,7 @@ void ParticleData::resize_attribute_array_
     np = particle_descr->batch_size();
   }
 
-  size_t new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
+  long new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
 
   if (attribute_array_[it][ib].size() != new_size) {
 

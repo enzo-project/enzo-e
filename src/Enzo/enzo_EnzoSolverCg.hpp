@@ -259,9 +259,6 @@ protected: // attributes
   /// count of elements B(i) for singular systems
   long double bc_;
 
-  /// matvec refresh index
-  int id_refresh_matvec_;
-
   /// Whether to solve on a standalone Block, e.g. for MG coarse solver
   bool local_;
 };

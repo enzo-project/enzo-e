@@ -27,8 +27,6 @@ int EnzoBlock::SolveHydroEquations
  bool comoving_coordinates
  )
 {
-  int NumberOfSubgrids = 0;
-
   /* initialize */
 
   int dim, i,j,  size;
@@ -123,64 +121,67 @@ int EnzoBlock::SolveHydroEquations
   }
   /* allocate space for fluxes */
 
-  SubgridFluxes = new fluxes *[NumberOfSubgrids];
+  int NumberOfSubgrids = 0;
 
-  for (i = 0; i < NumberOfSubgrids; i++) {
-    SubgridFluxes[i] = new fluxes;
+  //  SubgridFluxes = new fluxes *[NumberOfSubgrids];
+  SubgridFluxes = NULL;
+
+  // for (i = 0; i < NumberOfSubgrids; i++) {
+  //   SubgridFluxes[i] = new fluxes;
       
-    for (dim = 0; dim < rank; dim++)  {
+  //   for (dim = 0; dim < rank; dim++)  {
 
-      /* compute size (in enzo_floats) of flux storage */
+  //     /* compute size (in enzo_floats) of flux storage */
 
-      size = 1;
-      for (j = 0; j < rank; j++)
-	size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
-	  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
+  //     size = 1;
+  //     for (j = 0; j < rank; j++)
+  // 	size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
+  // 	  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
 
-      /* set unused dims (for the solver, which is hardwired for 3d). */
+  //     /* set unused dims (for the solver, which is hardwired for 3d). */
 
-      for (j = rank; j < 3; j++) {
-	SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
-	SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
-	SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
-	SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j] = 0;
-      }
+  //     for (j = rank; j < 3; j++) {
+  // 	SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
+  // 	SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
+  // 	SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
+  // 	SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j] = 0;
+  //     }
 
-      /* Allocate space (if necessary). */
+  //     /* Allocate space (if necessary). */
 
-      for (int field = 0; field < NumberOfBaryonFields[in]; field++) {
-	if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-	  SubgridFluxes[i]->LeftFluxes[field][dim]  = new enzo_float[size];
-	if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-	  SubgridFluxes[i]->RightFluxes[field][dim] = new enzo_float[size];
-	for (int n = 0; n < size; n++) {
-	  SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
-	  SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
-	}
-      }
+  //     for (int field = 0; field < NumberOfBaryonFields[in]; field++) {
+  // 	if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
+  // 	  SubgridFluxes[i]->LeftFluxes[field][dim]  = new enzo_float[size];
+  // 	if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
+  // 	  SubgridFluxes[i]->RightFluxes[field][dim] = new enzo_float[size];
+  // 	for (int n = 0; n < size; n++) {
+  // 	  SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
+  // 	  SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
+  // 	}
+  //     }
 
-      for (int field = NumberOfBaryonFields[in]; 
-	   field < MAX_NUMBER_OF_BARYON_FIELDS;
-	   field++) {
-	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-      }
+  //     for (int field = NumberOfBaryonFields[in]; 
+  // 	   field < MAX_NUMBER_OF_BARYON_FIELDS;
+  // 	   field++) {
+  // 	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
+  // 	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+  //     }
 
-    }  // next dimension
+  //   }  // next dimension
 
-    /* make things pretty */
+  //   /* make things pretty */
 
-    for (dim = rank; dim < 3; dim++)
-      for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
-	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-      }
+  //   for (dim = rank; dim < 3; dim++)
+  //     for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
+  // 	SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
+  // 	SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+  //     }
 
-  } // end of loop over subgrids
+  // } // end of loop over subgrids
 
   /* fix grid quantities so they are defined to at least 3 dims */
 
-  for (i = rank; i < 3; i++) {
+  for (int i = rank; i < 3; i++) {
     GridDimension[i]   = 1;
     GridStartIndex[i]  = 0;
     GridEndIndex[i]    = 0;

@@ -41,6 +41,14 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_max_expansion_rate(0.0),
   physics_cosmology_initial_redshift(0.0),
   physics_cosmology_final_redshift(0.0),
+  // EnzoInitialCosmology
+  initial_cosmology_temperature(0.0),
+  // EnzoInitialCollapse
+  initial_collapse_rank(0),
+  initial_collapse_radius_relative(0.0),
+  initial_collapse_particle_ratio(0.0),
+  initial_collapse_mass(0.0),
+  initial_collapse_temperature(0.0),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -55,14 +63,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_pm_field(""),
   initial_pm_mpp(0.0),
   initial_pm_level(0),
-  // EnzoInitialCosmology
-  initial_cosmology_temperature(0.0),
-  // EnzoInitialCollapse
-  initial_collapse_rank(0),
-  initial_collapse_radius_relative(0.0),
-  initial_collapse_particle_ratio(0.0),
-  initial_collapse_mass(0.0),
-  initial_collapse_temperature(0.0),
   // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
@@ -98,10 +98,24 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-  // EnzoMethodPmDeposit
+  // EnzoMethodGravity
+  method_gravity_grav_const(0.0),
+  method_gravity_solver(""),
+  method_gravity_accumulate(false),
+  /// EnzoMethodPmDeposit
   method_pm_deposit_type(""),
-  // EnzoMethodPmUpdate
-  method_pm_update_max_dt(0.0)
+  /// EnzoMethodPmUpdate
+  method_pm_update_max_dt(std::numeric_limits<double>::max()),
+  /// EnzoSolverMg0
+  solver_pre_smooth(),
+  solver_post_smooth(),
+  solver_coarse_solve(),
+  solver_weight(),
+  /// EnzoSolver<Krylov>
+  solver_precondition(),
+  solver_local(),
+  stopping_redshift()
+ 
 {
   for (int i=0; i<3; i++) {
     initial_sedov_array[i] = 0;

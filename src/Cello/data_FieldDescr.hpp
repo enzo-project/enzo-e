@@ -105,7 +105,7 @@ public: // functions
   int field_count() const throw();
 
   /// Return name of the ith field
-  std::string field_name(size_t id_field) const throw();
+  std::string field_name(int id_field) const throw();
 
   /// Return whether the field has been inserted
   bool is_field(const std::string & name) const throw();

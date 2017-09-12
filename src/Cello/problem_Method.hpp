@@ -20,7 +20,11 @@ class Method : public PUP::able
 public: // interface
 
   /// Create a new Method
-  Method (double courant = 1.0) throw() : schedule_(NULL), courant_(courant) {}
+  Method (double courant = 1.0) throw()
+    : refresh_list_(),
+      schedule_(NULL),
+      courant_(courant)
+  { }
 
   /// Destructor
   virtual ~Method() throw();
@@ -29,8 +33,12 @@ public: // interface
   PUPable_abstract(Method);
   
   Method (CkMigrateMessage *m)
-    : PUP::able(m) { }
-
+    : PUP::able(m),
+      refresh_list_(),
+      schedule_(NULL),
+      courant_(1.0)
+  { }
+      
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 

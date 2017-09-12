@@ -117,7 +117,6 @@ void EnzoSolverCg::pup (PUP::er &p)
   p | dy_;
   p | bs_;
   p | bc_;
-  p | id_refresh_matvec_;
 
   p | local_;
 }

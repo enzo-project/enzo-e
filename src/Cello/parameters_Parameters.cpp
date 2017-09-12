@@ -55,8 +55,8 @@ Parameters::~Parameters()
        ++it_param) {
     delete it_param->second;
   }
-  delete parameter_tree_;
 #endif  
+  delete parameter_tree_;
 }
 
 //----------------------------------------------------------------------

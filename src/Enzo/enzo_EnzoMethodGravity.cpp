@@ -97,7 +97,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   if (block->is_leaf()) {
     if (cosmology) {
 
-      enzo_float a,dadt;
+      enzo_float a=0.0,dadt=0.0;
       double time = block->time();
       double dt   = block->dt();
       cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);

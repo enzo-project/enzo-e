@@ -33,7 +33,10 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
   Units (CkMigrateMessage *m)
-    : PUP::able(m)
+    : PUP::able(m),
+      time_(1.0),
+      mass_(1.0),
+      length_(1.0)
   {  }
 
   /// CHARM++ Pack / Unpack function

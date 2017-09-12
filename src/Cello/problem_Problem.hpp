@@ -78,8 +78,7 @@ public: // interface
       units_(NULL),
       index_refine_(0),
       index_output_(0),
-    index_boundary_(0)
-      
+      index_boundary_(0)
   {}
 
   /// CHARM++ Pack / Unpack function

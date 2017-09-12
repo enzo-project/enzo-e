@@ -21,20 +21,29 @@ public: // interface
 
   /// Create a new Solver
   Solver (int monitor_iter,
-	  int min_level = std::numeric_limits<int>::min(),
+	  int min_level = 0,
 	  int max_level = std::numeric_limits<int>::max()) throw()
     : PUP::able(),
+      refresh_list_(),
       monitor_iter_(monitor_iter),
+      callback_(0),
+      index_(0),
       min_level_(min_level),
-      max_level_(max_level)
+      max_level_(max_level),
+      id_sync_(0)
   {}
 
   /// Create an uninitialized Solver
   Solver () throw()
   : PUP::able(),
+    refresh_list_(),
     monitor_iter_(0),
-    min_level_(std::numeric_limits<int>::min()),
-    max_level_(std::numeric_limits<int>::max())
+    callback_(0),
+    index_(0),
+    min_level_(0),
+    max_level_(std::numeric_limits<int>::max()),
+    id_sync_(0)
+
   {}
 
   /// Destructor
@@ -44,7 +53,14 @@ public: // interface
   PUPable_abstract(Solver);
 
   Solver (CkMigrateMessage *m)
-    : PUP::able (m)
+    : PUP::able (m),
+    refresh_list_(),
+    monitor_iter_(0),
+    callback_(0),
+    index_(0),
+    min_level_(- std::numeric_limits<int>::max()),
+    max_level_(  std::numeric_limits<int>::max()),
+    id_sync_(0)
   { }
   
   /// CHARM++ Pack / Unpack function

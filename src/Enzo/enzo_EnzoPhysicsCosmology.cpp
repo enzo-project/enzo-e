@@ -67,7 +67,10 @@ void EnzoPhysicsCosmology::compute_expansion_factor
   ASSERT ("EnzoPhysicsCosmology::compute_expansion_factor",
 	  "Initial time in code units is 0",
 	  (initial_time_in_code_units() != 0) );
- 
+
+  // Default -1.0 to check for a being initialized below
+  *a = -1.0;
+  
   /* Find Omega due to curvature. */
  
   enzo_float omega_curvature_now_ = 1 - omega_matter_now_ - omega_lambda_now_;
@@ -144,7 +147,11 @@ void EnzoPhysicsCosmology::compute_expansion_factor
   *dadt = sqrt( 2.0/(3.0*omega_matter_now_*(*a)) *
 	       (omega_matter_now_ + omega_curvature_now_*temp +
 		omega_lambda_now_*temp*temp*temp));
- 
+
+  ASSERT ("EnzoPhysicsCosmology::compute_expansion_factor()",
+	  "expansion factor a was not initialized correctly",
+	  (*a != -1.0) );
+  
   /* Someday, we'll implement the general case... */
  
 }

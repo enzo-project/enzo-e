@@ -105,7 +105,7 @@ public: // interface
   { return field_descr_->field_count(); }
 
   /// Return name of the ith field
-  std::string field_name(size_t id) const throw()
+  std::string field_name(int id) const throw()
   { return field_descr_->field_name(id); }
 
   /// Return whether the field has been inserted

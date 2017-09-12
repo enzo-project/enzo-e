@@ -296,7 +296,8 @@ double MethodTrace::timestep (Block * block) const throw()
     // Get velocity precision: ASSUMES precision same for all axes and
     // is single or double
 
-    const bool is_single = (field.precision (field.field_id("velocity_x")) == precision_single);
+    const bool is_single =
+      (field.precision (field.field_id("velocity_x")) == precision_single);
 
     const double hx = (xp-xm)/nx;
     const double hy = (yp-ym)/ny;

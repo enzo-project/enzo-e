@@ -200,25 +200,41 @@ int EnzoBlock::SolveMHDEquations
 
     int NumberOfSubgrids = 0; // JB
 
-    int *leftface  = new int[NumberOfSubgrids*3*20];
-    int *rightface = leftface + NumberOfSubgrids*3*1;
-    int *istart    = leftface + NumberOfSubgrids*3*2;
-    int *jstart    = leftface + NumberOfSubgrids*3*3;
-    int *iend      = leftface + NumberOfSubgrids*3*4;
-    int *jend      = leftface + NumberOfSubgrids*3*5;
-    int *dnindex   = leftface + NumberOfSubgrids*3*6;
-    int *vxindex   = leftface + NumberOfSubgrids*3*8;
-    int *vyindex   = leftface + NumberOfSubgrids*3*10;
-    int *vzindex   = leftface + NumberOfSubgrids*3*12;
-    int *bxindex   = leftface + NumberOfSubgrids*3*14;
-    int *byindex   = leftface + NumberOfSubgrids*3*16;
-    int *bzindex   = leftface + NumberOfSubgrids*3*18;
+    // int *leftface  = new int[NumberOfSubgrids*3*20];
+    // int *rightface = leftface + NumberOfSubgrids*3*1;
+    // int *istart    = leftface + NumberOfSubgrids*3*2;
+    // int *jstart    = leftface + NumberOfSubgrids*3*3;
+    // int *iend      = leftface + NumberOfSubgrids*3*4;
+    // int *jend      = leftface + NumberOfSubgrids*3*5;
+    // int *dnindex   = leftface + NumberOfSubgrids*3*6;
+    // int *vxindex   = leftface + NumberOfSubgrids*3*8;
+    // int *vyindex   = leftface + NumberOfSubgrids*3*10;
+    // int *vzindex   = leftface + NumberOfSubgrids*3*12;
+    // int *bxindex   = leftface + NumberOfSubgrids*3*14;
+    // int *byindex   = leftface + NumberOfSubgrids*3*16;
+    // int *bzindex   = leftface + NumberOfSubgrids*3*18;
 
     enzo_float *standard = NULL;
+
+    int *leftface  = NULL;
+    int *rightface =  NULL;
+    int *istart    =  NULL;
+    int *jstart    =  NULL;
+    int *iend      =  NULL;
+    int *jend      =  NULL;
+    int *dnindex   =  NULL;
+    int *vxindex   =  NULL;
+    int *vyindex   =  NULL;
+    int *vzindex   =  NULL;
+    int *bxindex   =  NULL;
+    int *byindex   =  NULL;
+    int *bzindex   =  NULL;
+
+    // enzo_float *standard = NULL;
     //    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
  
-    for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
-      for (dim = 0; dim < GridRank[in]; dim++) {
+    // for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
+    //   for (dim = 0; dim < GridRank[in]; dim++) {
  
         /* Set i,j dimensions of 2d flux slice (this works even if we
            are in 1 or 2d) the correspond to the dimensions of the global
@@ -233,12 +249,12 @@ int EnzoBlock::SolveMHDEquations
            plane) of the left and right flux planes.  The index is zero
            based from the left side of the entire grid. */
  
- 	leftface[subgrid*3+dim] =
- 	  SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
- 	    GridGlobalStart[dim];
- 	rightface[subgrid*3+dim] =
- 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
- 	    GridGlobalStart[dim];   // (+1 done by fortran code)
+ 	// leftface[subgrid*3+dim] =
+ 	//   SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
+ 	//     GridGlobalStart[dim];
+ 	// rightface[subgrid*3+dim] =
+ 	//   SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
+ 	//     GridGlobalStart[dim];   // (+1 done by fortran code)
  
         /* set the start and end indicies (zero based on entire grid)
            of the 2d flux plane. */
@@ -291,7 +307,7 @@ int EnzoBlock::SolveMHDEquations
 // 	bzindex[subgrid*6+dim*2+1] =
 // 	  SubgridFluxes[subgrid]->RightFluxes[6][dim] - standard;
  
-      }
+      // }
  
     /* If using comoving coordinates, multiply dx by a(n+1/2).
        In one fell swoop, this recasts the equations solved by solver

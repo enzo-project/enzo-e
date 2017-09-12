@@ -54,10 +54,10 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
       /* Compute adot/a at time = t-1/2dt (time-centered). */
 
-      enzo_float a, dadt, compute_time;
       int has_history = ((field.num_history() > 0) &&
   			 (field.history_time(1) > 0.));
 
+      enzo_float compute_time;
       if (has_history) {
   	compute_time = 0.5 * (enzo_block->time() +
   			      field.history_time(1));
@@ -66,6 +66,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   	compute_time = enzo_block->time();
       }
 
+      enzo_float a, dadt;
       cosmology->compute_expansion_factor (&a, &dadt, compute_time);
       enzo_float Coefficient = block->dt()*dadt/a;
 
@@ -83,16 +84,17 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       int rval;
 
       if (EnzoBlock::DualEnergyFormalism[in]) {
-  	rval = enzo_block->ComputePressureDualEnergyFormalism(
-  							      compute_time, pressure, comoving_coordinates_);
+  	rval = enzo_block->ComputePressureDualEnergyFormalism
+	  (compute_time, pressure, comoving_coordinates_);
       }
       else{
-  	rval = enzo_block->ComputePressure(
-  					   compute_time, pressure, comoving_coordinates_);
+  	rval = enzo_block->ComputePressure
+	  (compute_time, pressure, comoving_coordinates_);
       }
       if (rval == ENZO_FAIL) {
   	fprintf(stderr,
-  		"Error in ComputePressureDualEnergyFormalism or ComputePressure.\n");
+  		"Error in ComputePressureDualEnergyFormalism or "
+		"ComputePressure.\n");
   	exit(ENZO_FAIL);
       }
 
@@ -125,8 +127,12 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       enzo_float * internal_energy_old =
   	(enzo_float *) field.values("internal_energy", i_old);
 
-      enzo_float * velocity_x_new, * velocity_y_new, * velocity_z_new,
-  	* velocity_x_old, * velocity_y_old, * velocity_z_old = NULL;
+      enzo_float * velocity_x_new = NULL;
+      enzo_float * velocity_y_new = NULL;
+      enzo_float * velocity_z_new = NULL;
+      enzo_float * velocity_x_old = NULL;
+      enzo_float * velocity_y_old = NULL;
+      enzo_float * velocity_z_old = NULL;
 
       velocity_x_new   = (enzo_float *) field.values("velocity_x", i_new);
       velocity_x_old   = (enzo_float *) field.values("velocity_x", i_old);
@@ -141,15 +147,16 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
       /* Call fortran routine to do the real work. */
 
-      FORTRAN_NAME(expand_terms)(
-  				 &rank, &m, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
-  				 (int*) &HydroMethod, &EnzoBlock::Gamma[in],
-  				 pressure,
-  				 density_new, total_energy_new, internal_energy_new,
-  				 velocity_x_new, velocity_y_new, velocity_z_new,
-  				 density_old, total_energy_old, internal_energy_old,
-  				 velocity_x_old, velocity_y_old, velocity_z_old,
-  				 &CRModel, cr_field_new, cr_field_old);
+      FORTRAN_NAME(expand_terms)
+	(
+	 &rank, &m, &EnzoBlock::DualEnergyFormalism[in], &Coefficient,
+	 (int*) &HydroMethod, &EnzoBlock::Gamma[in],
+	 pressure,
+	 density_new, total_energy_new, internal_energy_new,
+	 velocity_x_new, velocity_y_new, velocity_z_new,
+	 density_old, total_energy_old, internal_energy_old,
+	 velocity_x_old, velocity_y_old, velocity_z_old,
+	 &CRModel, cr_field_new, cr_field_old);
 
     }
 

@@ -62,7 +62,17 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoPhysicsCosmology(CkMigrateMessage *m)
-    : Physics (m)
+    : Physics (m),
+      hubble_constant_now_(0.701),
+      omega_matter_now_(0.279),
+      omega_lambda_now_(0.721),
+      comoving_box_size_(64),
+      max_expansion_rate_(0.01),
+      initial_redshift_(20.0),
+      final_redshift_(0.0),
+      a_(0.0),
+      dadt_(0.0),
+      current_redshift_(-1.0)
   {}
 
   /// Virtual destructor

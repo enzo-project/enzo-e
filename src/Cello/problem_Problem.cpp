@@ -10,10 +10,18 @@
 //----------------------------------------------------------------------
 
 Problem::Problem() throw()
-  : is_periodic_(true),
+  : boundary_list_(),
+    is_periodic_(true),
+    initial_list_(),
+    physics_list_(),
+    refine_list_(),
     stopping_(NULL),
+    solver_list_(),
+    method_list_(),
+    output_list_(),
     prolong_(NULL),
     restrict_(NULL),
+    units_(NULL),
     index_refine_(0),
     index_output_(0),
     index_boundary_(0)

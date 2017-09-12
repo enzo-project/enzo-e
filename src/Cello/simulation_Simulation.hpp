@@ -286,7 +286,7 @@ public: // virtual functions
   virtual void monitor_performance();
 
   void set_checkpoint(char * checkpoint)
-  { strncpy (dir_checkpoint_,checkpoint,256);}
+  { strncpy (dir_checkpoint_,checkpoint,255);}
 
 protected: // functions
 

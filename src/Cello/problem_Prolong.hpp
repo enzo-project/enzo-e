@@ -26,7 +26,11 @@ public: // interface
   PUPable_abstract(Prolong);
 
   /// CHARM++ migration constructor for PUP::able
-  Prolong (CkMigrateMessage *m) : PUP::able(m) {}
+  Prolong (CkMigrateMessage *m) :
+    PUP::able(m),
+    monotonic_(false),
+    positive_(false)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
