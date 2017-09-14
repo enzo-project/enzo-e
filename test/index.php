@@ -37,13 +37,13 @@ printf ("%s",$dir);
     <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
     </tr>
     <tr>
-    <th class=cello> <b>precision</b></th>
+    <th class=cello> <b><code>CELLO_PREC</code></b></th>
     <td class=cello> <?php system ("cat PREC") ?></td>
     <th class=time ><center><b>date</b></center></th>
     <td class=time> <?php system ("cat DATE") ?></td> 
     </tr>
     <tr>
-    <th class=cello> <b> architecture</b> </th>
+    <th class=cello> <b><code>CELLO_ARCH</code></b> </th>
     <td class=cello> <?php system ("cat ARCH") ?></td>
     <th class=time ><center><b>time</b></center></th>
     <td class=time> <?php system ("cat START") ?></td>

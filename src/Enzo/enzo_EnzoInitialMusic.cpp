@@ -57,7 +57,17 @@ void EnzoInitialMusic::enforce_block
 {
 
   if (block->level() != level_) return;
-  // Get the domain extents
+
+  // Get the grid size at level_
+
+  // ... first get root grid size
+  int rs3[3];
+  hierarchy->root_size(rs3,rs3+1,rs3+2);
+
+  // ... multiply root grid size by 2**level_  
+  rs3[0] << level_;
+  rs3[1] << level_;
+  rs3[2] << level_;
 
   double lower_domain[3];
   double upper_domain[3];
@@ -108,18 +118,25 @@ void EnzoInitialMusic::enforce_block
     int type = type_unknown;
     file. data_open (field_datasets_[i], &type,
 		     m4,m4+1,m4+2,m4+3);
-
     // compute cell widths
     double h4[4] = {1};
-    h4[IX] = (upper_domain[0] - lower_domain[0]) / m4[IX];
-    h4[IY] = (upper_domain[1] - lower_domain[1]) / m4[IY];
-    h4[IZ] = (upper_domain[2] - lower_domain[2]) / m4[IZ];
+    h4[IX] = (upper_block[0] - lower_block[0]) / nx;
+    h4[IY] = (upper_block[1] - lower_block[1]) / ny;
+    h4[IZ] = (upper_block[2] - lower_block[2]) / nz;
 
     // determine offsets
     int o4[4] = {0};
     o4[IX] = (lower_block[0] - lower_domain[0]) / h4[IX];
     o4[IY] = (lower_block[1] - lower_domain[1]) / h4[IY];
     o4[IZ] = (lower_block[2] - lower_domain[2]) / h4[IZ];
+
+    // adjust offsets if domain is larger than file input
+    // (e.g. to allow N=1024^3 using 512^3 input files
+    // for scaling tests)
+
+    if (o4[IX] >= m4[IX]) o4[IX] = o4[IX] % m4[IX];
+    if (o4[IY] >= m4[IY]) o4[IY] = o4[IY] % m4[IY];
+    if (o4[IZ] >= m4[IZ]) o4[IZ] = o4[IZ] % m4[IZ];
 
     int n4[4] = {1};
     n4[IX] = (upper_block[0] - lower_block[0]) / h4[IX];
@@ -160,7 +177,6 @@ void EnzoInitialMusic::enforce_block
 
   }
 
-
   for (int i=0; i<particle_files_.size(); i++) {
 
     std::string file_name = particle_files_[i];
@@ -177,23 +193,36 @@ void EnzoInitialMusic::enforce_block
     file. data_open (particle_datasets_[i], &type,
 		     m4,m4+1,m4+2,m4+3);
 
+    // Block size
+
+    int mx,my,mz;
+    int nx,ny,nz;
+    int gx,gy,gz;
+ 
+    field.dimensions (0,&mx,&my,&mz);
+    field.size         (&nx,&ny,&nz);
+    field.ghost_depth(0,&gx,&gy,&gz);
+
     // coordinate mapping
     const int IX = particle_coords_[i].find ("x");
     const int IY = particle_coords_[i].find ("y");
     const int IZ = particle_coords_[i].find ("z");
 
-
     // compute cell widths
     double h4[4] = {1};
-    h4[IX] = (upper_domain[0] - lower_domain[0]) / m4[IX];
-    h4[IY] = (upper_domain[1] - lower_domain[1]) / m4[IY];
-    h4[IZ] = (upper_domain[2] - lower_domain[2]) / m4[IZ];
+    h4[IX] = (upper_block[0] - lower_block[0]) / nx;
+    h4[IY] = (upper_block[1] - lower_block[1]) / ny;
+    h4[IZ] = (upper_block[2] - lower_block[2]) / nz;
 
     // determine offsets
     int o4[4] = {0};
     o4[IX] = (lower_block[0] - lower_domain[0]) / h4[IX];
     o4[IY] = (lower_block[1] - lower_domain[1]) / h4[IY];
     o4[IZ] = (lower_block[2] - lower_domain[2]) / h4[IZ];
+
+    if (o4[IX] >= m4[IX]) o4[IX] = o4[IX] % m4[IX];
+    if (o4[IY] >= m4[IY]) o4[IY] = o4[IY] % m4[IY];
+    if (o4[IZ] >= m4[IZ]) o4[IZ] = o4[IZ] % m4[IZ];
 
     int n4[4] = {1};
     n4[IX] = (upper_block[0] - lower_block[0]) / h4[IX];
@@ -208,9 +237,6 @@ void EnzoInitialMusic::enforce_block
 
     // create memory space
 
-    int nx,ny,nz;
-    field.size (&nx,&ny,&nz);
- 
     file.mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
 
     enzo_float * data = new enzo_float[nx*ny*nz];
