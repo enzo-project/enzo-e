@@ -9,7 +9,8 @@ f90 = {}
 cxx = {}
 cc  = {}
 
-python_lt_27 = 1
+# need to load python module to get >= 2.7
+# python_lt_27 = 1
 
 node_size = 32 # for BW integer cores
 

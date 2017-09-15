@@ -187,7 +187,7 @@ void FileHdf5::data_open
 
   data_name_ = name;
   data_type_ = hdf5_to_scalar_(H5Dget_type (data_id_));
-  WARNING("FileHdf5::data_open","Set memspace");
+  //  WARNING("FileHdf5::data_open","Set memspace");
 
   // set output parameters
 
