@@ -55,8 +55,14 @@ EnzoSolverCg::EnzoSolverCg
 
   if (! local_) {
     const int ir = add_refresh(4,0,neighbor_type_(),sync_type_());
-    refresh(ir)->add_all_fields();
+    //    refresh(ir)->add_all_fields();
 
+    if (CkMyPe() == 0) {
+      WARNING("EnzoSolverCg",
+	      "assuming solution field is 'potential'");
+    }
+    refresh(ir)->add_field (field_descr->field_id("potential"));
+    
     refresh(ir)->add_field (id_);
     refresh(ir)->add_field (ir_);
     refresh(ir)->add_field (iy_);
