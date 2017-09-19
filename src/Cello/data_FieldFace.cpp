@@ -9,8 +9,6 @@
 #include "data.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_NEW_REFRESH
-
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
 #define FORTRAN_NAME(NAME) NAME##_
@@ -38,10 +36,6 @@ FieldFace::FieldFace
      refresh_(NULL),
      new_refresh_(false)
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d DEBUG FieldFace::FieldFace(Field) %p\n",CkMyPe(),this);
-#endif
-
   ++counter[cello::index_static()];
 
   for (int i=0; i<3; i++) {
@@ -61,9 +55,6 @@ FieldFace::~FieldFace() throw ()
     delete refresh_;
     refresh_ = NULL;
   }
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d DEBUG FieldFace::~FieldFace(Field) %p\n",CkMyPe(),this);
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -78,9 +69,6 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
 {
   ++counter[cello::index_static()];
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%d DEBUG FieldFace::FieldFace(FieldFace) %p\n",CkMyPe(),this);
-#endif
   copy_(field_face);
 }
 
@@ -171,10 +159,6 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 {
   size_t index_array = 0;
 
-#ifdef DEBUG_NEW_REFRESH
-  print("face_to_array");
-#endif
-
   std::vector <int> field_list = field_list_src_(field);
 
   for (size_t i_f=0; i_f < field_list.size(); i_f++) {
@@ -192,7 +176,11 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     field.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    loop_limits (im3,n3,nd3,ng3,op_load);
+    int index_src = field_list_src_(field)[i_f];
+    int index_dst = field_list_dst_(field)[i_f];
+    const bool accumulate = accumulate_(index_src,index_dst);
+
+    loop_limits (im3,n3,nd3,ng3,op_load,accumulate);
 
     if (refresh_type_ == refresh_coarse) {
 
@@ -213,38 +201,22 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
     } else {
 
-      // Copy field to array
-      int index_src = field_list_src_(field)[i_f];
-      int index_dst = field_list_dst_(field)[i_f];
-      bool accumulate = accumulate_(index_src,index_dst);
+      union { float * a4; double * a8; long double * a16; };
+      union { float * f4; double * f8;long double * f16;  };
+      a4 = (float *) array_face;
+      f4 = (float *) field_face;
       
-      switch (precision) {
-      case precision_single:
-	{
-	  index_array += load_ ( (float*)array_face,
-				 (const float *) field_face, nd3,n3,im3,
-				 accumulate);
-	}
-	break;
-      case precision_double:
-	{
-	  index_array += load_ ( (double *)array_face,
-				 (const double *) field_face, nd3,n3,im3,
-				 accumulate);
-	}
-	break;
-      case precision_quadruple:
-	{
-	  index_array += load_ ( (long double *)array_face,
-				 (const long double *) field_face, nd3,n3,im3,
-				 accumulate);
-	}
-	break;
-      default:
+      // Copy field to array
+      
+      if (precision == precision_single) {
+	index_array += load_ ( a4,  f4,  nd3,n3,im3, accumulate);
+      } else if (precision == precision_double) {
+	index_array += load_ ( a8,  f8,  nd3,n3,im3, accumulate);
+      } else if (precision == precision_quadruple) {
+	index_array += load_ ( a16, f16, nd3,n3,im3, accumulate);
+      } else {
 	ERROR("FieldFace::face_to_array", "Unsupported precision");
-	break;
       }
-
     }
   }
 
@@ -254,9 +226,6 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
 void FieldFace::array_to_face (char * array, Field field) throw()
 {
-#ifdef DEBUG_NEW_REFRESH
-  print("array_to_face");
-#endif
   size_t index_array = 0;
 
   std::vector<int> field_list = field_list_dst_(field);
@@ -276,7 +245,11 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     field.field_size(index_field,&nd3[0],&nd3[1],&nd3[2]);
     field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
-    loop_limits (im3,n3,nd3,ng3,op_store);
+    int index_src = field_list_src_(field)[i_f];
+    int index_dst = field_list_dst_(field)[i_f];
+    const bool accumulate = accumulate_(index_src,index_dst);
+
+    loop_limits (im3,n3,nd3,ng3,op_store,accumulate);
 
     if (refresh_type_ == refresh_fine) {
 
@@ -305,36 +278,21 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     } else {
 
       // Copy array to field
-
-      int index_src = field_list_src_(field)[i_f];
-      int index_dst = field_list_dst_(field)[i_f];
-      bool accumulate = accumulate_(index_src,index_dst);
+      union { float * as4; double * as8; long double * as16; };
+      union { float * fd4; double * fd8;long double * fd16;  };
+      as4 = (float *) array_ghost;
+      fd4 = (float *) field_ghost;
       
-      switch (precision) {
-      case precision_single:
-	{
-	  float *       field = (float *)field_ghost;
-	  const float * array = (const float *)array_ghost;
-	  index_array += store_ (field, array, nd3,n3,im3,accumulate);
-	}
-	break;
-      case precision_double:
-	{
-	  double *       field = (double *)field_ghost;
-	  const double * array = (const double *)array_ghost;
-	  index_array += store_ (field, array, nd3,n3,im3,accumulate);
-	}
-	break;
-      case precision_quadruple:
-	{
-	  long double *       field = (long double *)field_ghost;
-	  const long double * array = (const long double *)array_ghost;
-	  index_array += store_ (field, array, nd3,n3,im3,accumulate);
-	}
-	break;
-      default:
+      // Copy field to array
+      
+      if (precision == precision_single) {
+	index_array += store_ ( fd4,  as4,  nd3,n3,im3, accumulate);
+      } else if (precision == precision_double) {
+	index_array += store_ ( fd8,  as8,  nd3,n3,im3, accumulate);
+      } else if (precision == precision_quadruple) {
+	index_array += store_ ( fd16, as16, nd3,n3,im3, accumulate);
+      } else {
 	ERROR("FieldFace::array_to_face()", "Unsupported precision");
-	break;
       }
     }
   }
@@ -344,23 +302,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
 void FieldFace::face_to_face (Field field_src, Field field_dst)
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf("%p face_to_face\n",this);
-#endif
   
-  int M3[3],G3[3],IS3[3],ID3[3],NS3[3],ND3[3];
-  int m3[3],g3[3],is3[3],id3[3],ns3[3],nd3[3];
-  
-  field_src.field_size (0,&M3[0],&M3[1],&M3[2]);
-  field_src.ghost_depth(0,&G3[0],&G3[1],&G3[2]);
-
-  //    invert_face();
-  loop_limits (IS3,NS3,M3,G3,op_load);
-  invert_face();
-
-  loop_limits (ID3,ND3,M3,G3,op_store);
-  invert_face();
-
   std::vector<int> field_list_src = field_list_src_(field_src);
   std::vector<int> field_list_dst = field_list_dst_(field_dst);
   
@@ -369,36 +311,19 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     size_t index_src = field_list_src[i_f];
     size_t index_dst = field_list_dst[i_f];
 
-    if (! field_src.is_centered(index_src)) {
-      // recompute loop limits if Field is not centered
-      field_src.field_size (0,&m3[0],&m3[1],&m3[2]);
-      field_src.ghost_depth(0,&g3[0],&g3[1],&g3[2]);
-      loop_limits (is3,ns3,m3,g3,op_load);
-      invert_face();
-      loop_limits (id3,nd3,m3,g3,op_store);
-      invert_face();
-    }
+    int m3[3],g3[3],is3[3],id3[3],ns3[3],nd3[3];
+
+    field_src.field_size (index_src,&m3[0],&m3[1],&m3[2]);
+    field_src.ghost_depth(index_src,&g3[0],&g3[1],&g3[2]);
+    const bool accumulate = accumulate_(index_src,index_dst);
+
+    loop_limits (is3,ns3,m3,g3,op_load,accumulate);
+    invert_face();
+    loop_limits (id3,nd3,m3,g3,op_store,accumulate);
+    invert_face();
 
     // Adjust loop limits if accumulating to include ghost zones
     // on neighbor axes
-    bool accumulate = accumulate_(index_src,index_dst);
-    if (accumulate) {
-      if (refresh_type_ == refresh_same) {
-	for (int axis=0; axis<3; axis++) {
-	  if (face_[axis] == -1) {
-	    is3[axis] --;
-	    id3[axis] --;
-	  }
-	  if (face_[axis] != 0) {
-	    ns3[axis] ++;
-	    nd3[axis] ++;
-	  }
-	}
-      // } else {
-      // 	ERROR("FieldFace::face_to_face()",
-      // 	      "Accumulating ghost zones is not supported yet for AMR");
-      }
-    }
 
     precision_type precision = field_src.precision(index_src);
     
@@ -414,7 +339,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       bool need_padding = (g3[0]%2==1) || (g3[1]%2==1) || (g3[2]%2==1);
 
-      ASSERT("FieldFace::array_to_face()",
+      ASSERT("FieldFace::face_to_face()",
 	     "Odd ghost zones not implemented yet: prolong needs padding",
 	     ! need_padding);
 
@@ -438,46 +363,23 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       // Copy faces to ghosts
 
-      bool accumulate = accumulate_(index_src,index_dst);
-
-      switch (precision) {
-      case precision_single:
-	{
-	  const float * vs = (const float *) values_src;
-	  float       * vd = (float *) values_dst;
-	  copy_ (vd,m3,nd3,id3, vs,m3,ns3,is3,accumulate);
-	}
-	break;
-      case precision_double:
-	{
-	  const double * vs = (const double *) values_src;
-	  double       * vd = (double *) values_dst;
-	  copy_ (vd,m3,nd3,id3, vs,m3,ns3,is3,accumulate);
-	}
-	break;
-      case precision_quadruple:
-	{
-	  const long double * vs = (const long double *) values_src;
-	  long double       * vd = (long double *) values_dst;
-	  copy_ (vd,m3,nd3,id3, vs,m3,ns3,is3,accumulate);
-	}
-	break;
-      default:
-	ERROR("FieldFace::array_to_face()", "Unsupported precision");
-	break;
+      union { float * fs4; double * fs8; long double * fs16; };
+      union { float * fd4; double * fd8;long double * fd16;  };
+      fs4 = (float *) values_src;
+      fd4 = (float *) values_dst;
+      
+      // Copy field to array
+      
+      if (precision == precision_single) {
+	copy_ ( fd4, m3,nd3,id3,fs4, m3, ns3,is3,accumulate);
+      } else if (precision == precision_double) {
+	copy_ ( fd8, m3,nd3,id3,fs8, m3, ns3,is3,accumulate);
+      } else if (precision == precision_quadruple) {
+	copy_ ( fd16,m3,nd3,id3,fs16,m3,ns3,is3,accumulate);
+      } else {
+	ERROR("FieldFace::face_to_face()", "Unsupported precision");
       }
     }
-    if (! field_src.is_centered(index_src) ) {
-      // reinitialize loop limits to centered
-      m3[0] =  M3[0];  m3[1] =  M3[1];  m3[2] =  M3[2];
-      g3[0] =  G3[0];  g3[1] =  G3[1];  g3[2] =  G3[2];
-      is3[0] = IS3[0]; is3[1] = IS3[1]; is3[2] = IS3[2];
-      id3[0] = ID3[0]; id3[1] = ID3[1]; id3[2] = ID3[2];
-      ns3[0] = NS3[0]; ns3[1] = NS3[1]; ns3[2] = NS3[2];
-      nd3[0] = ND3[0]; nd3[1] = ND3[1]; nd3[2] = ND3[2];
-    }
-
-
   }
 }
 
@@ -501,8 +403,11 @@ int FieldFace::num_bytes_array(Field field) throw()
     field.field_size (index_field,&nd3[0],&nd3[1],&nd3[2]);
     field.ghost_depth(index_field,&ng3[0],&ng3[1],&ng3[2]);
 
+    int index_src = field_list_src_(field)[i_f];
+    int index_dst = field_list_dst_(field)[i_f];
+    const bool accumulate = accumulate_(index_src,index_dst);
     int op_type = (refresh_type_ == refresh_fine) ? op_load : op_store;
-    loop_limits (im3,n3,nd3,ng3,op_type);
+    loop_limits (im3,n3,nd3,ng3,op_type,accumulate);
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
 
@@ -528,11 +433,6 @@ int FieldFace::data_size () const
   count += 1*sizeof(int);  // refresh_type_ (restrict,prolong,copy)
   count += refresh_->data_size(); // refresh_
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%s:%d data_size %d\n",__FILE__,__LINE__,count);
-  fflush(stdout);
-#endif
-
   return count;
 
 }
@@ -541,11 +441,6 @@ int FieldFace::data_size () const
 
 char * FieldFace::save_data (char * buffer) const
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%s:%d save_data %p\n",__FILE__,__LINE__,buffer);
-  fflush(stdout);
-#endif
-
   char * p = buffer;
   int n;
 
@@ -570,14 +465,6 @@ char * FieldFace::save_data (char * buffer) const
 
 char * FieldFace::load_data (char * buffer)
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("load_data\n"); fflush(stdout);
-#endif
-
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%s:%d load_data buffer %p\n",__FILE__,__LINE__,buffer);
-  fflush(stdout);
-#endif
 
   char * p = buffer;
   int n;
@@ -594,9 +481,6 @@ char * FieldFace::load_data (char * buffer)
   memcpy(&refresh_type_,p,n=sizeof(int));
   p+=n;
 
-#ifdef DEBUG_FIELD_FACE  
-  CkPrintf ("DEBUG_FIELD_FACE FieldFace::load_data()\n");
-#endif
   set_refresh(new Refresh,true);
 
   p = refresh_->load_data(p);
@@ -750,7 +634,8 @@ template<class T> void FieldFace::copy_
 //----------------------------------------------------------------------
 
 void FieldFace::loop_limits
-( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type)
+( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type,
+  bool accumulate)
 {
   im3[0]=0;
   im3[1]=0;
@@ -896,24 +781,36 @@ void FieldFace::loop_limits
   n3[0] = std::max(n3[0],1);
   n3[1] = std::max(n3[1],1);
   n3[2] = std::max(n3[2],1);
+
+  // adjust for accumulate
+
+  if (accumulate) {
+    // WARNING: accumulate loop index update is not yet implemented
+    // for refresh_coarse or refresh_fine
+    if (refresh_type_ == refresh_same) {
+      for (int axis=0; axis<3; axis++) {
+	if ((op_type == op_load && face_[axis] == -1) ||
+	    (op_type == op_store && face_[axis] == 1)) {
+	  im3[axis] --;
+	}
+	if (face_[axis] != 0) {
+	  n3[axis] ++;
+	}
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------
 
 void FieldFace::print(const char * message)
 {
-  // char filename[40];
-  // sprintf (filename,"ff-%02d.debug",CkMyPe());
-    
-  //    FILE * fp = fopen (filename,"a");
-  //    FILE * fp = stdout;
   CkPrintf (" FieldFace %s %p\n",message,this);
   CkPrintf ("    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
   CkPrintf ("    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
   CkPrintf ("    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
   CkPrintf ("    refresh_type_ %d\n",refresh_type_);
   if (refresh_) refresh_->print();
-  //    fclose (fp);
 }
 
 //----------------------------------------------------------------------

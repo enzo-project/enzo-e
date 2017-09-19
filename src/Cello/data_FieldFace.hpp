@@ -145,7 +145,8 @@ public: // interface
 
   /// Compute loop limits for load or store
   void loop_limits
-  (int im3[3], int n3[3], const int nd3[3], const int ng3[3], int refresh_type);
+  (int im3[3], int n3[3], const int nd3[3], const int ng3[3],
+   int refresh_type, bool accumulate);
 
   //--------------------------------------------------
 
