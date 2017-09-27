@@ -20,7 +20,7 @@ flags_arch = '-O3 -std=gnu++11 -Wall'
 flags_link = '-O3 -std=gnu++11'
 
 flags_prec_single = ''
-flags_prec_double = ''
+flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
 
 cc   = 'cc'
 f90  = 'ftn'

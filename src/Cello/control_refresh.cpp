@@ -14,7 +14,6 @@
 #include "charm_mesh.hpp"
 
 // #define DEBUG_REFRESH
-// #define DEBUG_PARTICLES
 
 #ifdef DEBUG_REFRESH
 #  define TRACE_REFRESH(msg) \
