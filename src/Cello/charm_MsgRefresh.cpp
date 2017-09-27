@@ -57,8 +57,7 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   int have_data = (msg->data_msg_ != NULL);
   if (have_data) {
     // data_msg_
-    const int data_size = msg->data_msg_->data_size();
-    size += data_size;
+    size += msg->data_msg_->data_size();
   }
 
   //--------------------------------------------------

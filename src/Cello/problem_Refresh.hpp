@@ -135,14 +135,12 @@ public: // interface
 
   /// Add a field to the list of fields to refresh
   void add_field(int id_field) {
-    all_fields_ = false;
     field_list_src_.push_back(id_field);
     field_list_dst_.push_back(id_field);
   }
 
   /// Add a source and corresponding destination field to refresh
   void add_field_src_dst(int id_field_src, int id_field_dst) {
-    all_fields_ = false;
     field_list_src_.push_back(id_field_src);
     field_list_dst_.push_back(id_field_dst);
   }
@@ -150,14 +148,11 @@ public: // interface
   /// All fields are refreshed
   void add_all_fields() {
     all_fields_ = true;
-    field_list_src_.clear();
-    field_list_dst_.clear();
   }
 
   /// Add specified fields
   void set_field_list (std::vector<int> field_list)
   {
-    all_fields_ = false;
     field_list_src_ = field_list;
     field_list_dst_ = field_list;
   }
