@@ -129,8 +129,7 @@
 	       "gravity",
 	       "ppm",
 	       "pm_update",
-	       "comoving_expansion",
-	       "ppm"	       
+	       "comoving_expansion"
 	      ];
      ppm {
          courant = 0.5000000000000000;

@@ -11,6 +11,8 @@
 
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
+// #define DEBUG_ACCUM
+
 #define FORTRAN_NAME(NAME) NAME##_
 
 extern "C" void FORTRAN_NAME(field_face_store_4)
@@ -179,8 +181,13 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     int index_src = field_list_src_(field)[i_f];
     int index_dst = field_list_dst_(field)[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
-
     loop_limits (im3,n3,nd3,ng3,op_load,accumulate);
+#ifdef DEBUG_ACCUM
+    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+	      CkMyPe(),__LINE__,
+	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
+    fflush(stdout);
+#endif    
 
     if (refresh_type_ == refresh_coarse) {
 
@@ -250,6 +257,12 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     const bool accumulate = accumulate_(index_src,index_dst);
 
     loop_limits (im3,n3,nd3,ng3,op_store,accumulate);
+#ifdef DEBUG_ACCUM
+    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+	      CkMyPe(),__LINE__,
+	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
+    fflush(stdout);
+#endif    
 
     if (refresh_type_ == refresh_fine) {
 
@@ -311,15 +324,27 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     size_t index_src = field_list_src[i_f];
     size_t index_dst = field_list_dst[i_f];
 
-    int m3[3],g3[3],is3[3],id3[3],ns3[3],nd3[3];
+    int m3[3]={0},g3[3]={0},is3[3]={0},id3[3]={0},ns3[3]={0},nd3[3]={0};
 
     field_src.field_size (index_src,&m3[0],&m3[1],&m3[2]);
     field_src.ghost_depth(index_src,&g3[0],&g3[1],&g3[2]);
     const bool accumulate = accumulate_(index_src,index_dst);
 
     loop_limits (is3,ns3,m3,g3,op_load,accumulate);
+#ifdef DEBUG_ACCUM
+    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+	      CkMyPe(),__LINE__,
+	      accumulate?1:0,is3[0],is3[1],is3[2],ns3[0],ns3[1],ns3[2]);
+    fflush(stdout);
+#endif    
     invert_face();
     loop_limits (id3,nd3,m3,g3,op_store,accumulate);
+#ifdef DEBUG_ACCUM
+    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+	      CkMyPe(),__LINE__,
+	      accumulate?1:0,id3[0],id3[1],id3[2],nd3[0],nd3[1],nd3[2]);
+    fflush(stdout);
+#endif    
     invert_face();
 
     // Adjust loop limits if accumulating to include ghost zones
@@ -408,6 +433,12 @@ int FieldFace::num_bytes_array(Field field) throw()
     const bool accumulate = accumulate_(index_src,index_dst);
     int op_type = (refresh_type_ == refresh_fine) ? op_load : op_store;
     loop_limits (im3,n3,nd3,ng3,op_type,accumulate);
+#ifdef DEBUG_ACCUM
+    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+	      CkMyPe(),__LINE__,
+	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
+    fflush(stdout);
+#endif    
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
 
