@@ -26,7 +26,8 @@ libs_fortran    = ['gfortran']
 
 home = os.getenv('HOME')
 
-charm_path = os.getenv('CHARM_HOME')
+#charm_path = os.getenv('CHARM_HOME')
+charm_path = home + '/Charm/charm.random'
 
 if charm_path is None:
 	if home is not None:

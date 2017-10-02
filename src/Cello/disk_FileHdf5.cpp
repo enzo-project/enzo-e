@@ -1102,8 +1102,14 @@ hid_t FileHdf5::space_slice_(hid_t space_id,
   }
   if (! need_hyper) return space_id;
 
-  hsize_t start[4]  = {o1,o2,o3,o4};
-  hsize_t count[4]  = {n1,n2,n3,n4};
+  hsize_t start[4]  = {hsize_t(o1),
+		       hsize_t(o2),
+		       hsize_t(o3),
+		       hsize_t(o4)};
+  hsize_t count[4]  = {hsize_t(n1),
+		       hsize_t(n2),
+		       hsize_t(n3),
+		       hsize_t(n4)};
 
   H5Sselect_hyperslab (space_id,H5S_SELECT_SET,start,0,count,0);
 

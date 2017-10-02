@@ -12,6 +12,7 @@
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
 // #define DEBUG_ACCUM
+// #define DEBUG_ACCUM_COUNT
 
 #define FORTRAN_NAME(NAME) NAME##_
 
@@ -488,6 +489,11 @@ char * FieldFace::save_data (char * buffer) const
   p+=n;
 
   p = refresh_->save_data(p);
+
+  ASSERT2("FieldFace::save_data()",
+	  "Buffer has size %d but expecting size %d",
+	  (p-buffer),data_size(),
+	  ((p-buffer) == data_size()));
   
   return p;
 }
@@ -516,6 +522,12 @@ char * FieldFace::load_data (char * buffer)
 
   p = refresh_->load_data(p);
   
+
+  ASSERT2("FieldFace::save_data()",
+	  "Buffer has size %d but expecting size %d",
+	  (p-buffer),data_size(),
+	  ((p-buffer) == data_size()));
+
   return p;
 }
 
@@ -528,6 +540,10 @@ size_t FieldFace::load_
 {
   // NOTE: don't check accumulate since loading array; accumulate
   // is handled in corresponding store_() at the receiving end
+    // add values
+#ifdef DEBUG_ACCUM_COUNT
+  double sum1=0.0, sum2=0.0;
+#endif    
   for (int iz=0; iz <n3[2]; iz++)  {
     int kz = iz+im3[2];
     for (int iy=0; iy < n3[1]; iy++) {
@@ -537,9 +553,19 @@ size_t FieldFace::load_
 	int index_array = ix +   n3[0]*(iy +   n3[1] * iz);
 	int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
 	array_face[index_array] = field_face[index_field];
+#ifdef DEBUG_ACCUM_COUNT
+	if (accumulate) {
+	  sum1+=field_face[index_field];
+	}
+#endif    
       }
     }
   }
+#ifdef DEBUG_ACCUM_COUNT
+  if (accumulate) {
+    CkPrintf ("DEBUG_ACCUM_COUNT %14.10f load\n",sum1);
+  }
+#endif    
 
   return (sizeof(T) * n3[0] * n3[1] * n3[2]);
 
@@ -551,7 +577,7 @@ template<class T> size_t FieldFace::store_
 ( T * ghost, const T * array,
   int nd3[3], int n3[3],int im3[3], bool accumulate) throw()
 {
-#define FORTRAN_STORE
+  // #define FORTRAN_STORE
 
 #ifdef FORTRAN_STORE
 
@@ -595,6 +621,9 @@ template<class T> size_t FieldFace::store_
 
   if (accumulate) {
     // add values
+#ifdef DEBUG_ACCUM_COUNT
+    double sum1=0.0, sum2=0.0;
+#endif    
     for (int iz=0; iz <n3[2]; iz++)  {
       int kz = iz+im3[2];
       for (int iy=0; iy < n3[1]; iy++) {
@@ -603,10 +632,17 @@ template<class T> size_t FieldFace::store_
 	  int kx = ix+im3[0];
 	  int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
 	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+#ifdef DEBUG_ACCUM_COUNT
+	  sum1+=array[index_array];
+	  sum2+=ghost[index_field];
+#endif    
 	  ghost[index_field] += array[index_array];
 	}
       }
     }
+#ifdef DEBUG_ACCUM_COUNT
+    CkPrintf ("DEBUG_ACCUM_COUNT %14.10f %14.10f store\n",sum1,sum2);
+#endif    
   } else {
     // copy values
     for (int iz=0; iz <n3[2]; iz++)  {
@@ -637,18 +673,25 @@ template<class T> void FieldFace::copy_
 {
   if (accumulate) {
 
-    double s=0,d=0;
+#ifdef DEBUG_ACCUM_COUNT
+    double sum1=0.0, sum2=0.0;
+#endif    
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
 	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
 	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-	  s+=vs[i_src];
-	  d+=vd[i_dst];
+#ifdef DEBUG_ACCUM_COUNT
+	  sum1+=vs[i_src];
+	  sum2+=vd[i_dst];
+#endif    
 	  vd[i_dst] += vs[i_src];
 	}
       }
     }
+#ifdef DEBUG_ACCUM_COUNT
+    CkPrintf ("DEBUG_ACCUM_COUNT %14.10f %14.10f copy\n",sum1,sum2);
+#endif    
   } else {
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
@@ -820,12 +863,14 @@ void FieldFace::loop_limits
     // for refresh_coarse or refresh_fine
     if (refresh_type_ == refresh_same) {
       for (int axis=0; axis<3; axis++) {
-	if ((op_type == op_load && face_[axis] == -1) ||
-	    (op_type == op_store && face_[axis] == 1)) {
-	  im3[axis] --;
-	}
-	if (face_[axis] != 0) {
-	  n3[axis] ++;
+	if (! ghost_[axis]) {
+	  if ((op_type == op_load && face_[axis] == -1) ||
+	      (op_type == op_store && face_[axis] == 1)) {
+	    im3[axis] -= ng3[axis];
+	  }
+	  if (face_[axis] != 0) {
+	    n3[axis] += ng3[axis];
+	  }
 	}
       }
     }

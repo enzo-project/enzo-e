@@ -446,6 +446,7 @@ cxxflags = flags_arch + ' ' + flags_arch_cpp
 cxxflags = cxxflags + ' ' + flags_cxx
 cxxflags = cxxflags + ' ' + flags_config
 cxxflags = cxxflags + ' ' + flags_cxx_charm
+Export('cxxflags')
 
 cflags   = flags_arch
 cflags   = cflags + ' ' + flags_cc

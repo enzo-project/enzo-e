@@ -51,7 +51,6 @@ public: // interface
        prolong_(NULL),
        rank_(0),
        iter_max_(0),
-       rr0_(0.0),
        ib_(0), ic_(0), ir_(0), ix_(0),
        mx_(0),my_(0),mz_(0),
        nx_(0),ny_(0),nz_(0),
@@ -80,7 +79,6 @@ public: // interface
     p | prolong_;
     p | rank_;
     p | iter_max_;
-    p | rr0_;
 
     p | ib_;
     p | ic_;
@@ -158,7 +156,6 @@ public: // interface
     CkPrintf (" prolong_ = %p\n",prolong_);
     CkPrintf (" rank_ = %d\n",rank_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
-    CkPrintf (" rr0_ = %g\n",rr0_);
     CkPrintf (" ib_ = %d\n",ib_);
     CkPrintf (" ic_ = %d\n",ic_);
     CkPrintf (" ir_ = %d\n",ir_);
@@ -226,9 +223,6 @@ protected: // attributes
 
   /// Maximum number of MG iterations
   int iter_max_;
-
-  /// Initial residual
-  long double rr0_;
 
   /// MG vector id's
   int ib_;
