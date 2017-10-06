@@ -267,8 +267,8 @@ void OutputData::write_particle_data
 
     int np = particle.num_particles (it);
 
-    const std::string name = "particle "
-      +                particle.type_name(it) + " "
+    const std::string name = "particle_"
+      +                particle.type_name(it) + "_"
       +                particle.attribute_name(it,ia);
     
     const int type = particle.attribute_type(it,ia);

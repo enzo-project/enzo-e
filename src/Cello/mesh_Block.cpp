@@ -51,8 +51,8 @@ Block::Block ( MsgRefine * msg )
   index_initial_(0),
   children_(),
   sync_coarsen_(),
-  count_sync_(),
-  max_sync_(),
+  sync_count_(),
+  sync_max_(),
   face_level_curr_(),
   face_level_next_(),
   child_face_level_curr_(),
@@ -166,11 +166,6 @@ void Block::init
   sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
 
-  for (int i=0; i<3; i++) {
-    count_sync_[i] = 0;
-    max_sync_[i] = 0;
-  }
-
   // Initialize neighbor face levels
 
   face_level_last_.resize(27*8);
@@ -283,8 +278,8 @@ void Block::pup(PUP::er &p)
   p | index_initial_;
   p | children_;
   p | sync_coarsen_;
-  PUParray(p,count_sync_, PHASE_COUNT);
-  PUParray(p,max_sync_,   PHASE_COUNT);
+  p | sync_count_;
+  p | sync_max_;
   p | face_level_curr_;
   p | face_level_next_;
   p | child_face_level_curr_;
@@ -529,8 +524,8 @@ Block::Block (CkMigrateMessage *m)
     index_initial_(0),
     children_(),
     sync_coarsen_(),
-    count_sync_(),
-    max_sync_(),
+    sync_count_(),
+    sync_max_(),
     face_level_curr_(),
     face_level_next_(),
     child_face_level_curr_(),

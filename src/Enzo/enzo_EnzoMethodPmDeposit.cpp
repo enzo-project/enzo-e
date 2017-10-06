@@ -67,8 +67,15 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit
   }
   // Initialize default Refresh object
 
+  //   const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,20);
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_fields();
+  //  refresh(ir)->add_all_fields();
+  refresh(ir)->add_field(field_descr->field_id("density_total"));
+  refresh(ir)->add_field(field_descr->field_id("density_gas"));
+  refresh(ir)->add_field(field_descr->field_id("density"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
 
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -436,9 +443,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     delete [] de_gas_0;
 #endif    
 
-    
   }
-
 
   block->compute_done(); 
   

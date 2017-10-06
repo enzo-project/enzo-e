@@ -76,7 +76,6 @@ void Block::compute_continue_ ()
 
   if (is_scheduled) {
 
-
     TRACE2 ("Block::compute_continue() method = %d %p\n",
 	    index_method_,method); fflush(stdout);
 

@@ -9,7 +9,13 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+#include "enzo.decl.h"
+
 // #define DEBUG_METHOD
+
+#define CK_TEMPLATES_ONLY
+#include "enzo.def.h"
+#undef CK_TEMPLATES_ONLY
 
 #ifdef DEBUG_METHOD
 #   define TRACE_METHOD(METHOD,BLOCK)					\
@@ -30,7 +36,6 @@ EnzoMethodGravity::EnzoMethodGravity
     index_solver_(index_solver),
     grav_const_(grav_const)
 {
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
   const int ib  = field_descr->field_id("B");
@@ -39,9 +44,16 @@ EnzoMethodGravity::EnzoMethodGravity
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
+  //  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor, 22);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   if (accumulate) {
     // Accumulate is used when particles are deposited into density_total.
     refresh(ir)->add_field_src_dst(idensity,ib);
+    refresh(ir)->add_field(field_descr->field_id("potential"));
+    refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
+    refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
+    refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+    refresh(ir)->add_field(field_descr->field_id("density"));
     refresh(ir)->set_accumulate(true);
   } else {
     // WARNING: accumulate cannot be used with AMR yet [170818]
@@ -53,7 +65,6 @@ EnzoMethodGravity::EnzoMethodGravity
 
 void EnzoMethodGravity::compute(Block * block) throw()
 {
-
   TRACE_METHOD("compute()",block);
 
   // Initialize the linear system
@@ -122,14 +133,12 @@ void EnzoMethodGravity::compute(Block * block) throw()
   
   //  TRACE_FIELD("density-shift",D,1.0);
 
-
   TRACE_FIELD("density-rhs",B,-1.0);
 
   Solver * solver = block->simulation()->problem()->solver(index_solver_);
   
   // May exit before solve is done...
   solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue());
-
   
   solver->apply (A, ix, ib, block);
 

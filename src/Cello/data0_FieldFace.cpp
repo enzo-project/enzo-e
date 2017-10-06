@@ -13,6 +13,8 @@ long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
 // #define DEBUG_ACCUM
 // #define DEBUG_ACCUM_COUNT
+// #define DEBUG_BYPASS_ACCUM
+// #define DEBUG_BYPASS_EXTEND
 
 #define FORTRAN_NAME(NAME) NAME##_
 
@@ -184,10 +186,12 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     const bool accumulate = accumulate_(index_src,index_dst);
     loop_limits (im3,n3,nd3,ng3,op_load,accumulate);
 #ifdef DEBUG_ACCUM
+    if (accumulate)  {
     CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
     fflush(stdout);
+    }
 #endif    
 
     if (refresh_type_ == refresh_coarse) {
@@ -259,10 +263,12 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
     loop_limits (im3,n3,nd3,ng3,op_store,accumulate);
 #ifdef DEBUG_ACCUM
+    if (accumulate)  {
     CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
     fflush(stdout);
+    }
 #endif    
 
     if (refresh_type_ == refresh_fine) {
@@ -333,18 +339,23 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
     loop_limits (is3,ns3,m3,g3,op_load,accumulate);
 #ifdef DEBUG_ACCUM
+    if (accumulate)  {
+
     CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,is3[0],is3[1],is3[2],ns3[0],ns3[1],ns3[2]);
     fflush(stdout);
+    }
 #endif    
     invert_face();
     loop_limits (id3,nd3,m3,g3,op_store,accumulate);
 #ifdef DEBUG_ACCUM
+    if (accumulate)  {
     CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,id3[0],id3[1],id3[2],nd3[0],nd3[1],nd3[2]);
     fflush(stdout);
+    }
 #endif    
     invert_face();
 
@@ -435,10 +446,12 @@ int FieldFace::num_bytes_array(Field field) throw()
     int op_type = (refresh_type_ == refresh_fine) ? op_load : op_store;
     loop_limits (im3,n3,nd3,ng3,op_type,accumulate);
 #ifdef DEBUG_ACCUM
+    if (accumulate)  {
     CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
     fflush(stdout);
+    }
 #endif    
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
@@ -518,10 +531,10 @@ char * FieldFace::load_data (char * buffer)
   memcpy(&refresh_type_,p,n=sizeof(int));
   p+=n;
 
-  set_refresh(new Refresh,true);
+  Refresh * refresh = new Refresh;
+  set_refresh(refresh,true);
 
   p = refresh_->load_data(p);
-  
 
   ASSERT2("FieldFace::save_data()",
 	  "Buffer has size %d but expecting size %d",
@@ -577,7 +590,7 @@ template<class T> size_t FieldFace::store_
 ( T * ghost, const T * array,
   int nd3[3], int n3[3],int im3[3], bool accumulate) throw()
 {
-  // #define FORTRAN_STORE
+#define FORTRAN_STORE
 
 #ifdef FORTRAN_STORE
 
@@ -636,7 +649,11 @@ template<class T> size_t FieldFace::store_
 	  sum1+=array[index_array];
 	  sum2+=ghost[index_field];
 #endif    
+#ifdef DEBUG_BYPASS_ACCUM
+	  ghost[index_field] = array[index_array];
+#else
 	  ghost[index_field] += array[index_array];
+#endif	  
 	}
       }
     }
@@ -685,7 +702,11 @@ template<class T> void FieldFace::copy_
 	  sum1+=vs[i_src];
 	  sum2+=vd[i_dst];
 #endif    
+#ifdef DEBUG_BYPASS_ACCUM
+	  vd[i_dst] = vs[i_src];
+#else
 	  vd[i_dst] += vs[i_src];
+#endif	  
 	}
       }
     }
@@ -858,6 +879,7 @@ void FieldFace::loop_limits
 
   // adjust for accumulate
 
+#ifndef DEBUG_BYPASS_EXTEND
   if (accumulate) {
     // WARNING: accumulate loop index update is not yet implemented
     // for refresh_coarse or refresh_fine
@@ -866,15 +888,17 @@ void FieldFace::loop_limits
 	if (! ghost_[axis]) {
 	  if ((op_type == op_load && face_[axis] == -1) ||
 	      (op_type == op_store && face_[axis] == 1)) {
-	    im3[axis] -= ng3[axis];
+	    im3[axis] -= 1;
 	  }
 	  if (face_[axis] != 0) {
-	    n3[axis] += ng3[axis];
+	    n3[axis] += 1;
 	  }
 	}
       }
     }
   }
+#endif  
+
 }
 
 //----------------------------------------------------------------------

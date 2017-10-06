@@ -63,7 +63,7 @@ void IoFieldData::field_array
   if (buffer) (*buffer) = (void * ) 
 		field_data_->values(field_descr_,field_index_);
   if (name)   (*name) = 
-		std::string("field ") +	field_descr_->field_name(field_index_);
+		std::string("field_") +	field_descr_->field_name(field_index_);
   if (type) {
 
     precision_type precision = field_descr_->precision(field_index_);

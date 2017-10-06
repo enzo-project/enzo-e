@@ -279,11 +279,11 @@ public: // interface
   {
     CkPrintf ("Refresh %p\n",this);
     CkPrintf ("Refresh all_fields = %d\n",all_fields_);
-    CkPrintf ("Refresh source fields:");
+    CkPrintf ("Refresh src fields:");
     for (size_t i=0; i<field_list_src_.size(); i++)
       CkPrintf (" %d",field_list_src_[i]);
     CkPrintf ("\n");
-    CkPrintf ("Refresh source fields:");
+    CkPrintf ("Refresh dst fields:");
     for (size_t i=0; i<field_list_dst_.size(); i++)
       CkPrintf (" %d",field_list_dst_[i]);
     CkPrintf ("\n");

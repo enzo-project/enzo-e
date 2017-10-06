@@ -9,6 +9,7 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
+// #define DEBUG_MSG_REFRESH
 //----------------------------------------------------------------------
 
 long MsgRefresh::counter[CONFIG_NODE_SIZE] = {0};
@@ -37,6 +38,10 @@ MsgRefresh::~MsgRefresh()
 
 void MsgRefresh::set_data_msg  (DataMsg * data_msg) 
 {
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH set_data_msg\n");
+  fflush(stdout);
+#endif  
   if (data_msg_) {
     WARNING ("MsgRefresh::set_data_msg()",
 	     "overwriting existing data_msg_");
@@ -49,6 +54,10 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefresh::pack (MsgRefresh * msg)
 {
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH pack\n");
+  fflush(stdout);
+#endif  
   if (msg->buffer_ != NULL) return msg->buffer_;
   int size = 0;
 
@@ -100,6 +109,10 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 MsgRefresh * MsgRefresh::unpack(void * buffer)
 {
 
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH unpack()\n");
+  fflush(stdout);
+#endif  
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
  
   MsgRefresh * msg = 
@@ -138,6 +151,10 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
 void MsgRefresh::update (Data * data)
 {
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH update(%p)\n",data);
+  fflush(stdout);
+#endif  
   if (data_msg_ == NULL) return;
 
   data_msg_->update(data,is_local_);

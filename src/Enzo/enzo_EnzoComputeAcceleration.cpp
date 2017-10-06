@@ -29,7 +29,6 @@ EnzoComputeAcceleration::EnzoComputeAcceleration
     ERROR1("EnzoComputeAcceleration",
 	   "Unknown order %d", order_);
   }
-
 }
 
 //----------------------------------------------------------------------

@@ -5,6 +5,8 @@
 /// @date     2016-05-05
 /// @brief    Implements the EnzoComputeCicInterp class
 
+// #define DEBUG_CIC_INTERP
+
 #include "cello.hpp"
 
 #include "enzo.hpp"
@@ -124,39 +126,38 @@ void EnzoComputeCicInterp::compute_(Block * block)
 
     if (rank == 1) {
 
-      double * xa = (double *) particle.attribute_array (it_p_,ia_x,ib);
+      TP * xa = (TP *) particle.attribute_array (it_p_,ia_x,ib);
 
       for (int ip=0; ip<np; ip++) {
 
-	double x = xa[ip*dp];
+	TP x = xa[ip*dp];
 
-	double tx = nx*(x - xm) / (xp - xm) - 0.5;
+	TP tx = nx*(x - xm) / (xp - xm) - 0.5;
 
 	int ix0 = gx + floor(tx);
 
 	int ix1 = ix0 + 1;
 
-	double x0 = 1.0 - (tx - floor(tx));
+	TP x0 = 1.0 - (tx - floor(tx));
 
-	double x1 = 1.0 - x0;
+	TP x1 = 1.0 - x0;
 
 	vp[ip*da] = x0*vf[ix0] + x1*vf[ix1];
-
       }
 
     } else if (rank == 2) {
 
-      double * xa = (double *) particle.attribute_array (it_p_,ia_x,ib);
-      double * ya = (double *) particle.attribute_array (it_p_,ia_y,ib);
+      TP * xa = (TP *) particle.attribute_array (it_p_,ia_x,ib);
+      TP * ya = (TP *) particle.attribute_array (it_p_,ia_y,ib);
 
       //      CkPrintf ("TRACE %s:%d\n",__FILE__,__LINE__);
       for (int ip=0; ip<np; ip++) {
 
-	double x = xa[ip*dp];
-	double y = ya[ip*dp];
+	TP x = xa[ip*dp];
+	TP y = ya[ip*dp];
 
-	double tx = nx*(x - xm) / (xp - xm) - 0.5;
-	double ty = ny*(y - ym) / (yp - ym) - 0.5;
+	TP tx = nx*(x - xm) / (xp - xm) - 0.5;
+	TP ty = ny*(y - ym) / (yp - ym) - 0.5;
 
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
@@ -164,11 +165,11 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int ix1 = ix0 + 1;
 	int iy1 = iy0 + 1;
 
-	double x0 = 1.0 - (tx - floor(tx));
-	double y0 = 1.0 - (ty - floor(ty));
+	TP x0 = 1.0 - (tx - floor(tx));
+	TP y0 = 1.0 - (ty - floor(ty));
 
-	double x1 = 1.0 - x0;
-	double y1 = 1.0 - y0;
+	TP x1 = 1.0 - x0;
+	TP y1 = 1.0 - y0;
 
 	if ( ! ( (0.0 <= x0 && x0 <= 1.0) ||
 		 (0.0 <= y0 && y0 <= 1.0) ||
@@ -186,19 +187,19 @@ void EnzoComputeCicInterp::compute_(Block * block)
 
     } else if (rank == 3) {
 
-      double * xa = (double *) particle.attribute_array (it_p_,ia_x,ib);
-      double * ya = (double *) particle.attribute_array (it_p_,ia_y,ib);
-      double * za = (double *) particle.attribute_array (it_p_,ia_z,ib);
+      TP * xa = (TP *) particle.attribute_array (it_p_,ia_x,ib);
+      TP * ya = (TP *) particle.attribute_array (it_p_,ia_y,ib);
+      TP * za = (TP *) particle.attribute_array (it_p_,ia_z,ib);
 
       for (int ip=0; ip<np; ip++) {
 
-	double x = xa[ip*dp];
-	double y = ya[ip*dp];
-	double z = za[ip*dp];
+	TP x = xa[ip*dp];
+	TP y = ya[ip*dp];
+	TP z = za[ip*dp];
 
-	double tx = nx*(x - xm) / (xp - xm) - 0.5;
-	double ty = ny*(y - ym) / (yp - ym) - 0.5;
-	double tz = nz*(z - zm) / (zp - zm) - 0.5;
+	TP tx = nx*(x - xm) / (xp - xm) - 0.5;
+	TP ty = ny*(y - ym) / (yp - ym) - 0.5;
+	TP tz = nz*(z - zm) / (zp - zm) - 0.5;
 
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
@@ -208,13 +209,13 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int iy1 = iy0 + 1;
 	int iz1 = iz0 + 1;
 
-	double x0 = 1.0 - (tx - floor(tx));
-	double y0 = 1.0 - (ty - floor(ty));
-	double z0 = 1.0 - (tz - floor(tz));
+	TP x0 = 1.0 - (tx - floor(tx));
+	TP y0 = 1.0 - (ty - floor(ty));
+	TP z0 = 1.0 - (tz - floor(tz));
 
-	double x1 = 1.0 - x0;
-	double y1 = 1.0 - y0;
-	double z1 = 1.0 - z0;
+	TP x1 = 1.0 - x0;
+	TP y1 = 1.0 - y0;
+	TP z1 = 1.0 - z0;
 
 	vp[ip*da] = x0*y0*z0*vf[ix0+mx*(iy0+my*iz0)] 
 	  +         x1*y0*z0*vf[ix1+mx*(iy0+my*iz0)] 
@@ -224,11 +225,22 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	  +         x1*y0*z1*vf[ix1+mx*(iy0+my*iz1)] 
 	  +         x0*y1*z1*vf[ix0+mx*(iy1+my*iz1)] 
 	  +         x1*y1*z1*vf[ix1+mx*(iy1+my*iz1)];
+// #ifdef DEBUG_CIC_INTERP
+// 	    CkPrintf ("%s cic %8.5f : %8.5f %8.5f  %8.5f  %8.5f %8.5f %8.5f %8.5f %8.5f\n",
+// 		      block->name().c_str(),vp[ip*da],
+// 		      vf[ix0+mx*(iy0+my*iz0)] ,
+// 		      vf[ix1+mx*(iy0+my*iz0)] ,
+// 		      vf[ix0+mx*(iy1+my*iz0)] ,
+// 		      vf[ix1+mx*(iy1+my*iz0)],
+// 		      vf[ix0+mx*(iy0+my*iz1)] ,
+// 		      vf[ix1+mx*(iy0+my*iz1)] ,
+// 		      vf[ix0+mx*(iy1+my*iz1)] ,
+// 		      vf[ix1+mx*(iy1+my*iz1)]);
+// #endif	    
 
       }
-
     }
   }
-
+  
 }
 

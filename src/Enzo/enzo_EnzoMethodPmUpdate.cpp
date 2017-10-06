@@ -30,8 +30,12 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_particles();
-  refresh(ir)->add_all_fields();
+  //  refresh(ir)->add_all_particles();
+  //  refresh(ir)->add_all_fields();
+  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
+  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
+  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+  refresh(ir)->add_particle(particle_descr->type_index("dark"));
 
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -163,6 +167,10 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
+#ifdef DEBUG_PM_UPDATE
+	    CkPrintf ("%s yva %g %g %g\n",
+		      block->name().c_str(),y[ipdp],vy[ipdv],ay[ipda]);
+#endif	    
 	  vy[ipdv] += ay[ipda]*dt/2;
 	  y [ipdp] += vy[ipdv]*dt;
 	  vy[ipdv] += ay[ipda]*dt/2;
@@ -178,6 +186,10 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
+#ifdef DEBUG_PM_UPDATE
+	    CkPrintf ("%s zva %g %g %g\n",
+		      block->name().c_str(),z[ipdp],vz[ipdv],az[ipda]);
+#endif	    
 	  vz[ipdv] += az[ipda]*dt/2;
 	  z [ipdp] += vz[ipdv]*dt;
 	  vz[ipdv] += az[ipda]*dt/2;

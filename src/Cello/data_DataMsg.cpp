@@ -8,7 +8,7 @@
 #include "data.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_NEW_REFRESH
+// #define DEBUG_DATA_MSG
 
 long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
@@ -45,8 +45,9 @@ int DataMsg::data_size () const
   size += n_fa*sizeof(char);
   size += n_pa*sizeof(char);
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg data_size %d\n",this,size);
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG data_size %d\n",this,size);
+  fflush(stdout);
 #endif
   return size;
 }
@@ -82,21 +83,24 @@ char * DataMsg::save_data (char * buffer) const
   (*pi++) = n_fa;
   (*pi++) = n_pa;
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data n_ff %d\n",this, n_ff);
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG save_data n_ff %d\n",this, n_ff);
+  fflush(stdout);
 #endif
   if (n_ff > 0) {
     pc = ff->save_data (pc);
   }
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data n_fa %d\n",this, n_fa);
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG save_data n_fa %d\n",this, n_fa);
+  fflush(stdout);
 #endif
   if (n_ff > 0 && n_fa > 0) {
     ff->face_to_array(field,pc);
     pc += n_fa;
   }
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data n_pa %d\n",this, n_pa);
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG save_data n_pa %d\n",this, n_pa);
+  fflush(stdout);
 #endif
   if (n_pa > 0) {
     pc = pd->save_data(particle_descr,pc);
@@ -104,8 +108,9 @@ char * DataMsg::save_data (char * buffer) const
 
   // return first byte after filled buffer
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data %d\n",this, (pc-buffer));
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG save_data %d\n",this, (pc-buffer));
+  fflush(stdout);
 #endif
   return pc;
 }
@@ -133,16 +138,16 @@ char * DataMsg::load_data (char * buffer)
   const int n_fa = (*pi++);
   const int n_pa = (*pi++);
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data n_ff %d\n",this, n_ff);
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG load_data n_ff %d\n",this, n_ff);
   fflush(stdout);
 #endif
   if (n_ff > 0) {
     pc = field_face_->load_data (pc);
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data n_fa %d\n",this, n_fa);
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG load_data n_fa %d\n",this, n_fa);
   fflush(stdout);
 #endif
   if (n_fa > 0) {
@@ -152,8 +157,8 @@ char * DataMsg::load_data (char * buffer)
     field_array_ = NULL;
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data n_pa %d\n",this, n_pa);
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG load_data n_pa %d\n",this, n_pa);
   fflush(stdout);
 #endif
   if (n_pa > 0) {
@@ -165,8 +170,9 @@ char * DataMsg::load_data (char * buffer)
     particle_data_ = NULL;
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data %d\n",this, (pc-buffer));
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG load_data %d\n",this, (pc-buffer));
+  fflush(stdout);
 #endif
   return pc;
 }
@@ -175,6 +181,10 @@ char * DataMsg::load_data (char * buffer)
 
 void DataMsg::update (Data * data, bool is_local)
 {
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%p DEBUG_DATA_MSG update\n",this);
+  fflush(stdout);
+#endif
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
@@ -186,6 +196,20 @@ void DataMsg::update (Data * data, bool is_local)
   ParticleData * pd = particle_data();
   FieldFace    * ff = field_face();
   char         * fa = field_array();
+
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d DEBUG_DATA_MSG update field_face = %p refresh = %p\n",
+    CkMyPe(),ff,ff->refresh());
+  fflush(stdout);
+  if (ff->refresh()->field_list_src().size() > 0) {
+    CkPrintf ("%d DEBUG_DATA_MSG field_list_src[0] = %d\n",
+	      CkMyPe(),ff->refresh()->field_list_src()[0]);
+  } else {
+    CkPrintf ("%d DEBUG_DATA_MSG field_list_src.size = 0\n",
+	      CkMyPe());
+  }
+  fflush(stdout);
+#endif
 
   if (pd != NULL) {
 

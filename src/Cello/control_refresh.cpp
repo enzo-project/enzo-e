@@ -151,12 +151,6 @@ void Block::refresh_load_field_face_
 
   msg->set_data_msg (data_msg);
 
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG REFRESH calling p_refresh_store() for fields\n",CkMyPe());
-  CkPrintf ("%d DEBUG REFRESH field_data size %d\n",CkMyPe(),data()->field_data()->permanent_size());
-  if (field_face) field_face->print("DEBUG REFRESH calling store");
-#endif
-
   thisProxy[index_neighbor].p_refresh_store (msg);
 
 }
@@ -172,10 +166,6 @@ void Block::p_refresh_store (MsgRefresh * msg)
   
   performance_start_(perf_refresh_store);
 
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
-  fflush(stdout);
-#endif
   msg->update(data());
   delete msg;
   performance_stop_(perf_refresh_store);
@@ -343,11 +333,6 @@ int Block::particle_create_array_neighbors_
 
     ParticleData * pd = new ParticleData;
     ParticleDescr * p_descr = simulation() -> particle_descr();
-
-#ifdef DEBUG_REFRESH
-    CkPrintf ("%d %p DEBUG particle_create_array_neighbors\n",
-	      CkMyPe(),pd);fflush(stdout);
-#endif
 
     pd->allocate(p_descr);
 
@@ -603,17 +588,7 @@ void Block::particle_send_
     ParticleData * p_data = particle_list[il];
     Particle particle_send (p_descr,p_data);
     
-#ifdef DEBUG_REFRESH
-    printf ("%d %p DEBUG num_particles = %d\n",
-	    CkMyPe(),p_data,p_data?p_data->num_particles(p_descr):0);
-    fflush(stdout);
-#endif
     if (p_data && p_data->num_particles(p_descr)>0) {
-
-#ifdef DEBUG_REFRESH
-      printf ("%d %p DEBUG Calling p_refresh_store for particle\n",
-	      CkMyPe(),p_data);fflush(stdout);
-#endif
 
       DataMsg * data_msg = new DataMsg;
       data_msg ->set_particle_data(p_data,true);

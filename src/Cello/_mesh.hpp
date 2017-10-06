@@ -65,7 +65,8 @@ enum phase_type {
   phase_last
 };
 
-#define PHASE_COUNT (phase_exit + 1)
+// #define PHASE_COUNT (phase_exit + 1)
+// #define PHASE_COUNT 100
 extern const char * phase_name[];
 
 /// @enum     adapt_type

@@ -260,7 +260,10 @@ public: // interface
   void p_compute_continue()
   {      compute_continue_();  }
   void r_compute_continue(CkReductionMsg * msg)
-  {      compute_continue_();    delete msg;      }
+  {
+    compute_continue_();
+    delete msg;
+  }
 
   void p_compute_exit()
   {      compute_exit_();  }
@@ -825,11 +828,14 @@ protected: // functions
 
   /// Set the current refresh object
   void set_refresh (Refresh * refresh) 
-  {  refresh_.push_back(*refresh); };
+  {
+    // WARNING: known memory leak (see bug # 132)
+    refresh_.push_back(new Refresh(*refresh));
+  };
 
   /// Return the currently-active Refresh object
   Refresh * refresh () throw()
-  {  return &refresh_.back();  }
+  {  return refresh_.back();  }
 
 
 protected: // attributes
@@ -877,8 +883,8 @@ protected: // attributes
   Sync sync_coarsen_;
 
   /// Synchronization counters for p_control_sync
-  int  count_sync_[PHASE_COUNT];
-  int  max_sync_[PHASE_COUNT];
+  std::vector<int>  sync_count_;
+  std::vector<int>  sync_max_;
 
   /// current level of neighbors along each face
   std::vector<int> face_level_curr_;
@@ -928,7 +934,7 @@ protected: // attributes
   
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
-  std::vector<Refresh> refresh_;
+  std::vector<Refresh*> refresh_;
 
 };
 

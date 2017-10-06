@@ -13,6 +13,8 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+// #define DEBUG_REFRESH
+
 // #define DEBUG_CONTROL
 
 #ifdef DEBUG_CONTROL
@@ -156,11 +158,16 @@ void Block::refresh_enter (int callback, Refresh * refresh)
 {
   TRACE_CONTROL("refresh_enter");
 
+#ifdef DEBUG_REFRESH
+  CkPrintf ("%s:%d %s Block::set_refresh (%p)\n",
+	    __FILE__,__LINE__,name().c_str(),refresh);
+  fflush(stdout);
+#endif  
   set_refresh(refresh);
 
   // Update refresh object for the Block
 
-  refresh_.back().set_callback(callback);
+  refresh_.back()->set_callback(callback);
 
   refresh_begin_();
 }
@@ -173,7 +180,15 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
-  control_sync(refresh_.back().callback(), refresh_.back().sync_type());
+  control_sync(refresh_.back()->callback(), refresh_.back()->sync_type());
+#ifdef DEBUG_REFRESH
+  printf ("DEBUG_REFRESH Calling Block %s refresh_pop_back(%p)\n",
+	  name().c_str(),refresh());
+  fflush(stdout);
+      
+#endif
+  Refresh * refresh = refresh_.back();
+  delete refresh;
   refresh_.pop_back();
 }
 
@@ -182,14 +197,18 @@ void Block::refresh_exit_()
 void Block::control_sync (int entry_point, int sync, int id)
 {
   TRACE_CONTROL("control_sync()");
-  
+
   if (sync == sync_quiescence) {
 
     if (index_.is_root())
       CkStartQD(CkCallback (entry_point,proxy_main));
 
   } else if (sync == sync_neighbor) {
- 
+
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("DEBUG_REFRESH %s neighbor sync id %d\n",
+	      name().c_str(),id);
+#endif    
     control_sync_neighbor_(entry_point,id);
 
   } else if (sync == sync_face) {
@@ -283,24 +302,28 @@ void Block::control_sync_face_(int entry_point, int phase)
 
 void Block::control_sync_count_ (int entry_point, int phase, int count)
 {
-
+  if (phase >= sync_max_.size()) {
+    sync_count_.resize(phase+1);
+    sync_max_.resize(phase+1);
+    sync_count_[phase] = 0;
+    sync_max_[phase] = 0;
+  }
 #ifdef DEBUG_CONTROL
   CkPrintf ("%s control_sync_count %d %d %d/%d\n",
-	    name().c_str(),entry_point,phase,count,max_sync_[phase]);
+	    name().c_str(),entry_point,phase,count,sync_max_[phase]);
   fflush(stdout);
 #endif
   
-  if (count != 0)  max_sync_[phase] = count;
+  if (count != 0)  sync_max_[phase] = count;
 
-  ++count_sync_[phase];
+  ++sync_count_[phase];
 
-  // max_sync reached: continue and reset counter
+  // sync_max_ reached: continue and reset counter
 
-  if (max_sync_[phase] > 0 && count_sync_[phase] >= max_sync_[phase]) {
+  if (sync_max_[phase] > 0 && sync_count_[phase] >= sync_max_[phase]) {
 
-    max_sync_[phase] = 0;
-
-    count_sync_[phase] = 0;
+    sync_max_  [phase] = 0;
+    sync_count_[phase] = 0;
 
     CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send(NULL);
 
