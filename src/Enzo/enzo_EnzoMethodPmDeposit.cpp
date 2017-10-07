@@ -13,14 +13,16 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_PM_DEPOSIT
+// #define DEBUG_METHOD
 // #define DEBUG_FIELD
 
-#ifdef DEBUG_PM_DEPOSIT
-#  define TRACE_PM(MESSAGE)				\
-  CkPrintf ("%s:%d %s\n", __FILE__,__LINE__,MESSAGE);				
+#ifdef DEBUG_METHOD
+#   define TRACE_METHOD(METHOD,BLOCK)					\
+  CkPrintf ("%d %s:%d %s TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__, \
+	    BLOCK->name().c_str(),METHOD,this);			    \
+  fflush(stdout);
 #else
-#  define TRACE_PM(MESSAGE) /* ... */
+#   define TRACE_METHOD(METHOD,BLOCK) /*  */ 
 #endif
 
 #define FORTRAN_NAME(NAME) NAME##_
@@ -48,7 +50,7 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit
     alpha_(alpha),
     type_(pm_type_unknown)
 {
-  TRACE_PM("EnzoMethodPmDeposit()");
+  //  TRACE_METHOD("EnzoMethodPmDeposit()");
   if (type == "cic") {
     type_ = pm_type_cic;
   } else if (type == "ngp") {
@@ -67,10 +69,10 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit
   }
   // Initialize default Refresh object
 
-  //   const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,20);
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,20);
+  // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   //  refresh(ir)->add_all_fields();
-  refresh(ir)->add_field(field_descr->field_id("density_total"));
+  //  refresh(ir)->add_field(field_descr->field_id("density_total"));
   refresh(ir)->add_field(field_descr->field_id("density_gas"));
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("velocity_x"));
@@ -98,7 +100,7 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
 
 void EnzoMethodPmDeposit::compute ( Block * block) throw()
 {
-  TRACE_PM("compute()");
+  TRACE_METHOD("compute()",block);
 
   if (block->is_leaf()) {
 
@@ -118,7 +120,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // Initialize "density_total" with gas "density"
 
-    for (int i=0; i<mx*my*mz; i++) de_t[i] = 0;
+    // NOTE: density_total is now cleared in EnzoMethodGravity to
+    // instead of here to possible race conditions with refresh.  This
+    // means EnzoMethodPmDeposit ("pm_deposit") currently CANNOT be
+    // used without EnzoMethodGravity ("gravity")
+    
     // Get block extents and cell widths
     double xm,ym,zm;
     double xp,yp,zp;
@@ -453,7 +459,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 double EnzoMethodPmDeposit::timestep ( Block * block ) const throw()
 {
-  TRACE_PM("timestep()");
+  TRACE_METHOD("timestep()",block);
   double dt = std::numeric_limits<double>::max();
 
   return dt;

@@ -12,6 +12,7 @@
 #include "enzo.decl.h"
 
 // #define DEBUG_METHOD
+// #define DEBUG_COPY_DENSITY
 
 #define CK_TEMPLATES_ONLY
 #include "enzo.def.h"
@@ -44,8 +45,8 @@ EnzoMethodGravity::EnzoMethodGravity
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
-  //  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor, 22);
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor, 22);
+  //  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   if (accumulate) {
     // Accumulate is used when particles are deposited into density_total.
     refresh(ir)->add_field_src_dst(idensity,ib);
@@ -121,15 +122,15 @@ void EnzoMethodGravity::compute(Block * block) throw()
 	  }
 	}
       }
+      
+    } else {
 
+      field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
+
+    }
   } else {
-
-    field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
-
+    for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
   }
- } else {
-  for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
- }
   
   //  TRACE_FIELD("density-shift",D,1.0);
 
@@ -187,10 +188,24 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 
   compute_acceleration.compute(this);
 
-  // Clear "B" field for next call since on entry adding density to B
+  // Clear "B" and "density_total" fields for next call
 
-  enzo_float * B = (enzo_float*) field.values("B");
-  for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
+  enzo_float * B =         (enzo_float*) field.values("B");
+  enzo_float * de_t =      (enzo_float*) field.values("density_total");
+
+#ifdef DEBUG_COPY_DENSITY  
+  enzo_float * B_temp =    (enzo_float*) field.values("B_temp");
+  enzo_float * de_t_temp = (enzo_float*) field.values("density_total_temp");
+  for (int i=0; i<mx*my*mz; i++) {
+    B_temp[i] = B[i];
+    de_t_temp[i] = de_t[i];
+#endif  
+
+  for (int i=0; i<mx*my*mz; i++) {
+    B[i] = 0.0;
+    de_t[i] = 0.0;
+  }
+    
 
   // wait for all Blocks before continuing
   compute_done();

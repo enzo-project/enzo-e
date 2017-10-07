@@ -187,7 +187,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     loop_limits (im3,n3,nd3,ng3,op_load,accumulate);
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
-    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+    CkPrintf ("%d %d DEBUG_ACCUM face to array %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
     fflush(stdout);
@@ -264,7 +264,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     loop_limits (im3,n3,nd3,ng3,op_store,accumulate);
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
-    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+    CkPrintf ("%d %d DEBUG_ACCUM array to face %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
     fflush(stdout);
@@ -341,7 +341,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
 
-    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+    CkPrintf ("%d %d DEBUG_ACCUM face to face %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,is3[0],is3[1],is3[2],ns3[0],ns3[1],ns3[2]);
     fflush(stdout);
@@ -351,7 +351,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     loop_limits (id3,nd3,m3,g3,op_store,accumulate);
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
-    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+    CkPrintf ("%d %d DEBUG_ACCUM face to face %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,id3[0],id3[1],id3[2],nd3[0],nd3[1],nd3[2]);
     fflush(stdout);
@@ -446,12 +446,12 @@ int FieldFace::num_bytes_array(Field field) throw()
     int op_type = (refresh_type_ == refresh_fine) ? op_load : op_store;
     loop_limits (im3,n3,nd3,ng3,op_type,accumulate);
 #ifdef DEBUG_ACCUM
-    if (accumulate)  {
-    CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
-	      CkMyPe(),__LINE__,
-	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
-    fflush(stdout);
-    }
+    // if (accumulate)  {
+    // CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
+    // 	      CkMyPe(),__LINE__,
+    // 	      accumulate?1:0,im3[0],im3[1],im3[2],n3[0],n3[1],n3[2]);
+    // fflush(stdout);
+    // }
 #endif    
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;

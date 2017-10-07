@@ -146,9 +146,9 @@ void EnzoInitialPm::uniform_placement_
   int ib=0;  // batch counter
   int ipb=0;  // particle / batch counter 
 
-  double * xa = 0;
-  double * ya = 0;
-  double * za = 0;
+  enzo_float * xa = 0;
+  enzo_float * ya = 0;
+  enzo_float * za = 0;
 
   const int ps  = particle.stride(it,ia_x);
 
@@ -161,9 +161,9 @@ void EnzoInitialPm::uniform_placement_
 	    for (int ky = 0; ky<ry; ky++) {
 	      for (int kx = 0; kx<rx; kx++) {
 		if (ipb % npb == 0) {
-		  if (rank >= 1) xa = (double *) particle.attribute_array(it,ia_x,ib);
-		  if (rank >= 2) ya = (double *) particle.attribute_array(it,ia_y,ib);
-		  if (rank >= 3) za = (double *) particle.attribute_array(it,ia_z,ib);
+		  if (rank >= 1) xa = (enzo_float *) particle.attribute_array(it,ia_x,ib);
+		  if (rank >= 2) ya = (enzo_float *) particle.attribute_array(it,ia_y,ib);
+		  if (rank >= 3) za = (enzo_float *) particle.attribute_array(it,ia_z,ib);
 		}
 		if (rank >= 1) xa[ipb*ps] = xv[ix] - 0.5*hx + (kx+0.5)*hx/rx;
 		if (rank >= 2) ya[ipb*ps] = yv[iy] - 0.5*hy + (ky+0.5)*hy/ry;
@@ -209,7 +209,7 @@ void EnzoInitialPm::density_placement_
   field.size           (&nx,&ny,&nz);
   field.ghost_depth (did,&gx,&gy,&gz);
 
-  double * density = (double *) field.values(did);
+  enzo_float * density = (enzo_float *) field.values(did);
 
   // Get cell widths hx,hy,hz
 
@@ -283,9 +283,9 @@ void EnzoInitialPm::density_placement_
   int ib=0;  // batch counter
   int ipb=0;  // particle / batch counter 
 
-  double * xa = 0;
-  double * ya = 0;
-  double * za = 0;
+  enzo_float * xa = 0;
+  enzo_float * ya = 0;
+  enzo_float * za = 0;
 
   const int ps  = particle.stride(it,ia_x);
 
@@ -324,9 +324,9 @@ void EnzoInitialPm::density_placement_
     
     // ... if new batch then update position arrays
     if (ipb % npb == 0) {
-      if (rank >= 1) xa = (double *) particle.attribute_array (it,ia_x,ib);
-      if (rank >= 2) ya = (double *) particle.attribute_array (it,ia_y,ib);
-      if (rank >= 3) za = (double *) particle.attribute_array (it,ia_z,ib);
+      if (rank >= 1) xa = (enzo_float *) particle.attribute_array (it,ia_x,ib);
+      if (rank >= 2) ya = (enzo_float *) particle.attribute_array (it,ia_y,ib);
+      if (rank >= 3) za = (enzo_float *) particle.attribute_array (it,ia_z,ib);
     }
 
     if (rank >= 1) xa[ipb*ps] = x;

@@ -124,7 +124,7 @@ void Block::refresh_load_field_face_
   int ic3[3])
 
 {
-  TRACE_REFRESH("refresh_load_field_face()");
+  //  TRACE_REFRESH("refresh_load_field_face()");
 
   // REFRESH FIELDS
 
@@ -162,7 +162,7 @@ void Block::refresh_load_field_face_
 void Block::p_refresh_store (MsgRefresh * msg)
 {
 
-  TRACE_REFRESH("p_refresh_store()");
+  //  TRACE_REFRESH("p_refresh_store()");
   
   performance_start_(perf_refresh_store);
 
@@ -178,7 +178,7 @@ void Block::p_refresh_store (MsgRefresh * msg)
 void Block::refresh_load_particle_faces_ (Refresh * refresh)
 {
 
-  TRACE_REFRESH("refresh_load_particle_faces()");
+  //  TRACE_REFRESH("refresh_load_particle_faces()");
   
   const int rank = this->rank();
 
@@ -257,7 +257,7 @@ void Block::particle_load_faces_ (int npa, int * nl,
   //     | 0 | 1 | 1 | 1 |
   //     +---+---+---+---+
 
-  TRACE_REFRESH("particle_load_faces()");
+  //  TRACE_REFRESH("particle_load_faces()");
 
   // ... arrays for updating positions of particles that cross
   // periodic boundaries
@@ -295,7 +295,7 @@ int Block::particle_create_array_neighbors_
  ParticleData * particle_list[],
  Index index_list[])
 { 
-  TRACE_REFRESH("particle_create_array_neighbors()");
+  //  TRACE_REFRESH("particle_create_array_neighbors()");
 
   const int rank = this->rank();
   const int level = this->level();

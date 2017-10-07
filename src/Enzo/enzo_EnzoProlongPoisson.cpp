@@ -67,6 +67,13 @@ int EnzoProlongPoisson::apply
 
     break;
 
+  case precision_quadruple:
+
+    return apply_(       (long double *) values_f, nd3_f, im3_f, n3_f,
+		   (const long double *) values_c, nd3_c, im3_c, n3_c);
+
+    break;
+
   default:
 
     ERROR1 ("EnzoProlongPoisson::apply()",
