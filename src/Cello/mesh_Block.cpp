@@ -236,7 +236,7 @@ void Block::init
 
   if (level > 0) {
 
-    control_sync (CkIndex_Main::p_adapt_end(),sync_quiescence);
+    control_sync_quiescence (CkIndex_Main::p_adapt_end());
 
   }
 

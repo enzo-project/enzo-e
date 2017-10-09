@@ -208,7 +208,7 @@ void Block::stopping_balance_()
 
   if (do_balance) {
 
-    control_sync(CkIndex_Main::p_stopping_balance(), sync_quiescence);
+    control_sync_quiescence (CkIndex_Main::p_stopping_balance());
 
   } else {
 

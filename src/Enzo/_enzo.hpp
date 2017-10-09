@@ -59,6 +59,32 @@ enum {
 
 //----------------------------------------------------------------------
 
+enum enzo_sync_id {
+  enzo_sync_id_cg = sync_id_last,
+  enzo_sync_id_comoving_expansion,
+  enzo_sync_id_method_cosmology,
+  enzo_sync_id_method_grackle,
+  enzo_sync_id_method_gravity,
+  enzo_sync_id_method_heat,
+  enzo_sync_id_method_null,
+  enzo_sync_id_method_pm_deposit,
+  enzo_sync_id_method_pm_update,
+  enzo_sync_id_method_ppm,
+  enzo_sync_id_method_ppml,
+  enzo_sync_id_method_turbulence,
+  enzo_sync_id_solver_bicgstab,
+  enzo_sync_id_solver_cg,
+  enzo_sync_id_solver_mg0,
+  enzo_sync_id_method_gravity_continue,
+  enzo_sync_id_solver_bicgstab_loop_25,
+  enzo_sync_id_solver_bicgstab_loop_85,
+  enzo_sync_id_solver_cg_loop_0a,
+  enzo_sync_id_solver_cg_loop_2a,
+  enzo_sync_id_solver_cg_loop_0b
+};
+  
+//----------------------------------------------------------------------
+
 // #include "macros_and_parameters.h"
 #include "enzo_defines.hpp"
 #include "enzo_typedefs.hpp"

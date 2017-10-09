@@ -39,7 +39,8 @@ void Block::refresh_begin_()
   simulation()->set_phase(phase_refresh);
 
   control_sync (CkIndex_Block::p_refresh_continue(),
-		refresh->sync_type(),refresh->sync_id());
+		refresh->sync_type(),
+		refresh->sync_load());
 }
 
 //----------------------------------------------------------------------
@@ -54,20 +55,63 @@ void Block::refresh_continue()
 
   if ( refresh && refresh->active() ) {
 
-    if (refresh->any_fields())    refresh_load_field_faces_    (refresh);
-    if (refresh->any_particles()) refresh_load_particle_faces_ (refresh);
+    // count self
+    int count = 1;
+
+    // send Field face data
+    if (refresh->any_fields()) {
+      count += refresh_load_field_faces_ (refresh);
+    }
+
+    // send Particle face data
+    if (refresh->any_particles()){
+      count += refresh_load_particle_faces_ (refresh);
+    }
+
+    // wait for all messages to arrive (including this one)
+    // before continuing to p_refresh_exit()
+
+    control_sync_count(CkIndex_Block::p_refresh_exit(),
+			refresh->sync_store(),count);
+    
+  } else {
+
+    refresh_exit_();
     
   }
-  TRACE_REFRESH("calling control_sync p_refresh_exit()");
-
-  control_sync (CkIndex_Block::p_refresh_exit(),
-		refresh->sync_type(),refresh->sync_id()+1);
+  
 }
 
 //----------------------------------------------------------------------
 
-void Block::refresh_load_field_faces_ (Refresh *refresh)
+
+void Block::p_refresh_store (MsgRefresh * msg)
 {
+
+  //  TRACE_REFRESH("p_refresh_store()");
+  
+  performance_start_(perf_refresh_store);
+
+  msg->update(data());
+  delete msg;
+
+  Refresh * refresh = this->refresh();
+  
+  control_sync_count(CkIndex_Block::p_refresh_exit(),
+		     refresh->sync_store(),0);
+  
+  performance_stop_(perf_refresh_store);
+  performance_start_(perf_refresh_store_sync);
+}
+
+
+//----------------------------------------------------------------------
+
+int Block::refresh_load_field_faces_ (Refresh *refresh)
+{
+
+  int count = 0;
+
   const int min_face_rank = refresh->min_face_rank();
   const int neighbor_type = refresh->neighbor_type();
 
@@ -94,6 +138,7 @@ void Block::refresh_load_field_faces_ (Refresh *refresh)
 	(level_face == level + 1) ? refresh_fine : refresh_unknown;
 
       refresh_load_field_face_ (refresh_type,index_neighbor,if3,ic3);
+      ++count;
     }
 
   } else if (neighbor_type == neighbor_level) {
@@ -110,9 +155,12 @@ void Block::refresh_load_field_faces_ (Refresh *refresh)
       it_face.face(if3);
 
       refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
+      ++count;
 
     }
   }
+
+  return count;
 }
 
 //----------------------------------------------------------------------
@@ -158,26 +206,11 @@ void Block::refresh_load_field_face_
 
 //----------------------------------------------------------------------
 
-
-void Block::p_refresh_store (MsgRefresh * msg)
+int Block::refresh_load_particle_faces_ (Refresh * refresh)
 {
 
-  //  TRACE_REFRESH("p_refresh_store()");
+  int count = 0;
   
-  performance_start_(perf_refresh_store);
-
-  msg->update(data());
-  delete msg;
-  performance_stop_(perf_refresh_store);
-  performance_start_(perf_refresh_store_sync);
-}
-
-
-//----------------------------------------------------------------------
-
-void Block::refresh_load_particle_faces_ (Refresh * refresh)
-{
-
   //  TRACE_REFRESH("refresh_load_particle_faces()");
   
   const int rank = this->rank();
@@ -196,10 +229,8 @@ void Block::refresh_load_particle_faces_ (Refresh * refresh)
   // Sort particles that have left the Block into 4x4x4 array
   // corresponding to neighbors
 
-  int nl=0;
-  particle_load_faces_
-    (npa,&nl,particle_list,particle_array, index_list,
-     refresh);
+  int nl = particle_load_faces_
+    (npa,particle_list,particle_array, index_list, refresh);
 
   // Send particle data to neighbors
 
@@ -207,14 +238,15 @@ void Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   delete [] index_list;
 
+  return nl;
 }
 //----------------------------------------------------------------------
 
-void Block::particle_load_faces_ (int npa, int * nl,
-				  ParticleData * particle_list[],
-				  ParticleData * particle_array[],
-				  Index index_list[],
-				  Refresh *refresh)
+int Block::particle_load_faces_ (int npa, 
+				 ParticleData * particle_list[],
+				 ParticleData * particle_array[],
+				 Index index_list[],
+				 Refresh *refresh)
 {
   // Array elements correspond to child-sized blocks to
   // the left, inside, and right of the main Block.  Particles
@@ -262,7 +294,7 @@ void Block::particle_load_faces_ (int npa, int * nl,
   // ... arrays for updating positions of particles that cross
   // periodic boundaries
 
-  (*nl) = particle_create_array_neighbors_
+  int nl = particle_create_array_neighbors_
     (refresh, particle_array,particle_list,index_list);
 
   // Scatter particles among particle_data array
@@ -283,8 +315,9 @@ void Block::particle_load_faces_ (int npa, int * nl,
 
   // Update positions particles crossing periodic boundaries
 
-  particle_apply_periodic_update_  (*nl,particle_list,refresh);
+  particle_apply_periodic_update_  (nl,particle_list,refresh);
 
+  return nl;
 }
 
 //----------------------------------------------------------------------
@@ -305,7 +338,7 @@ int Block::particle_create_array_neighbors_
 
   int il = 0;
 
-  while (it_neighbor.next()) {
+  for (il=0; it_neighbor.next(); il++) {
 
     const int level_face = it_neighbor.face_level();
 
@@ -340,8 +373,6 @@ int Block::particle_create_array_neighbors_
 
     index_list[il] = it_neighbor.index();
 
-    ++ il;
-
     for (int iz=index_lower[2]; iz<index_upper[2]; iz++) {
       for (int iy=index_lower[1]; iy<index_upper[1]; iy++) {
 	for (int ix=index_lower[0]; ix<index_upper[0]; ix++) {
@@ -351,6 +382,7 @@ int Block::particle_create_array_neighbors_
       }
     }
   }
+  
   return il;
 }
 
@@ -544,11 +576,11 @@ void Block::particle_scatter_neighbors_
 	    ! (0 <= iy && iy < 4) ||
 	    ! (0 <= iz && iz < 4)) {
 	  
-	  printf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
-	  printf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
-	  printf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
-	  printf ("%d xm ym zm %f %f %f\n",CkMyPe(),xm,ym,zm);
-	  printf ("%d xp yp zp %f %f %f\n",CkMyPe(),xp,yp,zp);
+	  CkPrintf ("%d ix iy iz %d %d %d\n",CkMyPe(),ix,iy,iz);
+	  CkPrintf ("%d x y z %f %f %f\n",CkMyPe(),x,y,z);
+	  CkPrintf ("%d xa ya za %f %f %f\n",CkMyPe(),xa[ip*d],ya[ip*d],za[ip*d]);
+	  CkPrintf ("%d xm ym zm %f %f %f\n",CkMyPe(),xm,ym,zm);
+	  CkPrintf ("%d xp yp zp %f %f %f\n",CkMyPe(),xp,yp,zp);
 	  ERROR3 ("Block::particle_scatter_neighbors_",
 		  "particle indices (ix,iy,iz) = (%d,%d,%d) out of bounds",
 		  ix,iy,iz);
@@ -597,8 +629,13 @@ void Block::particle_send_
       msg->set_data_msg (data_msg);
 
       thisProxy[index].p_refresh_store (msg);
+
     } else if (p_data) {
       
+      MsgRefresh * msg = new MsgRefresh;
+
+      thisProxy[index].p_refresh_store (msg);
+
       // assert ParticleData object exits but has no particles
       delete p_data;
 

@@ -466,7 +466,10 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   
   /// Initialize default Refresh (called before entry to compute())
   
-  const int ir = add_refresh(4, 0, neighbor_type_(), sync_type_());
+  const int ir = add_refresh(4, 0, neighbor_type_(),
+			     sync_type_(),
+			     enzo_sync_id_solver_bicgstab);
+  
   refresh(ir)->add_all_fields();
   
   refresh(ir)->add_field (ir_);
@@ -858,7 +861,8 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * enzo_block) throw() {
   // refresh Y with callback to p_solver_bicgstab_loop_25 to handle re-entry
 
   // Refresh field faces then call p_solver_bicgstab_loop_25()
-  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
+		   enzo_sync_id_solver_bicgstab_loop_25);
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields();
 
@@ -1129,7 +1133,8 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * enzo_block) throw() {
 
   // Refresh field faces then call p_solver_bicgstab_loop_85()
 
-  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
+		   enzo_sync_id_solver_bicgstab_loop_85);
   
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields();

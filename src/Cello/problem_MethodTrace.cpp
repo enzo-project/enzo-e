@@ -5,7 +5,7 @@
 /// @date     2015-11-06
 /// @brief    Implementation of the Tracer Particle method
 
-#include "data.hpp"
+#include "problem.hpp"
 #include "charm_simulation.hpp"
   
 //----------------------------------------------------------------------
@@ -20,7 +20,8 @@ MethodTrace::MethodTrace
   : Method (courant),
     timestep_(timestep)
 {
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			     sync_id_method_trace);
   refresh(ir)->add_all_particles();
 }
 

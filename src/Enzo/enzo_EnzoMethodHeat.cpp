@@ -18,7 +18,8 @@ EnzoMethodHeat::EnzoMethodHeat (const FieldDescr * field_descr, double alpha, do
 {
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			     enzo_sync_id_method_heat);
 
   refresh(ir)->add_all_fields();
 }

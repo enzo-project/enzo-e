@@ -45,7 +45,8 @@ EnzoMethodGravity::EnzoMethodGravity
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor, 22);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
+			     enzo_sync_id_method_gravity);
   //  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
   if (accumulate) {
     // Accumulate is used when particles are deposited into density_total.
@@ -157,7 +158,9 @@ void EnzoBlock::r_method_gravity_continue()
   // refresh ("Charm++ fatal error: mis-matched client callbacks in
   // reduction messages")
 
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier);
+  Refresh refresh (4,0,neighbor_leaf, sync_barrier,
+		   enzo_sync_id_method_gravity_continue);
+  
   refresh.set_active(is_leaf());
   refresh.add_all_fields();
 
@@ -189,23 +192,33 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   compute_acceleration.compute(this);
 
   // Clear "B" and "density_total" fields for next call
+  // Note density_total may not be defined
 
   enzo_float * B =         (enzo_float*) field.values("B");
-  enzo_float * de_t =      (enzo_float*) field.values("density_total");
 
 #ifdef DEBUG_COPY_DENSITY  
   enzo_float * B_temp =    (enzo_float*) field.values("B_temp");
-  enzo_float * de_t_temp = (enzo_float*) field.values("density_total_temp");
   for (int i=0; i<mx*my*mz; i++) {
     B_temp[i] = B[i];
-    de_t_temp[i] = de_t[i];
 #endif  
 
   for (int i=0; i<mx*my*mz; i++) {
     B[i] = 0.0;
-    de_t[i] = 0.0;
   }
-    
+
+  enzo_float * de_t =      (enzo_float*) field.values("density_total");
+
+  if (de_t) {
+#ifdef DEBUG_COPY_DENSITY  
+    enzo_float * de_t_temp = (enzo_float*) field.values("density_total_temp");
+    for (int i=0; i<mx*my*mz; i++) {
+      de_t_temp[i] = de_t[i];
+#endif  
+
+      for (int i=0; i<mx*my*mz; i++) {
+	de_t[i] = 0.0;
+      }
+    }
 
   // wait for all Blocks before continuing
   compute_done();

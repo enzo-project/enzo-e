@@ -66,7 +66,7 @@ public: // virtual functions
 		   int min_face_rank, 
 		   int neighbor_type, 
 		   int sync_type,
-		   int id=0)
+		   int id)
   {
     int index=refresh_list_.size();
     refresh_list_.resize(index+1);

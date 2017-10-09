@@ -248,7 +248,8 @@ EnzoSolverMg0::EnzoSolverMg0
 
   /// Initialize default Refresh
 
-  add_refresh(4,0,neighbor_level,sync_barrier);
+  add_refresh(4,0,neighbor_level,sync_barrier,
+	      enzo_sync_id_solver_mg0);
 
 #ifdef NEW_REFRESH
   refresh(0)->add_all_fields();

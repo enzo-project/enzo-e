@@ -54,9 +54,9 @@ EnzoSolverCg::EnzoSolverCg
   field_descr->ghost_depth    (ib_,&gx_,&gy_,&gz_);
 
   if (! local_) {
-    const int ir = add_refresh(4,0,neighbor_type_(),sync_type_());
-    //    refresh(ir)->add_all_fields();
-
+    const int ir = add_refresh(4,0,neighbor_type_(),
+			       sync_type_(),
+			       enzo_sync_id_solver_cg);
     if (CkMyPe() == 0) {
       WARNING("EnzoSolverCg",
 	      "assuming solution field is 'potential'");
@@ -265,7 +265,8 @@ void EnzoSolverCg::loop_0a
 
 // Refresh field faces then call r_solver_cg_matvec
 
-  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
+		   enzo_sync_id_solver_cg_loop_0a);
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields();
 
@@ -305,7 +306,8 @@ void EnzoSolverCg::loop_0b
   
   // Refresh field faces then call solver_matvec
 
-  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
+		   enzo_sync_id_solver_cg_loop_0b);
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields();
   refresh.add_field (id_);
@@ -435,7 +437,8 @@ void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 template <class T>
 void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
 {
-  Refresh refresh (4,0,neighbor_type_(), sync_type_());
+  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
+		   enzo_sync_id_solver_cg_loop_2a);
   refresh.set_active(is_active_(enzo_block));
   refresh.add_all_fields();
   refresh.add_field (id_);

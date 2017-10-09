@@ -29,9 +29,7 @@ public: // interface
     neighbor_type_(neighbor_unknown),
     accumulate_(false),
     sync_type_   (sync_unknown),
-    sync_load_(),
-    sync_store_(),
-    sync_id_ (0),
+    sync_id_ (-1),
     active_(true),
     callback_(0) 
   {
@@ -43,7 +41,7 @@ public: // interface
    int min_face_rank,
    int neighbor_type,
    int sync_type,
-   int sync_id=0,
+   int sync_id,
    bool active=true) throw() 
     : all_fields_(false),
       field_list_src_(),
@@ -55,8 +53,6 @@ public: // interface
       neighbor_type_(neighbor_type),
       accumulate_(false),
       sync_type_(sync_type),
-      sync_load_(),
-      sync_store_(),
       sync_id_(sync_id),
       active_(active),
       callback_(0) 
@@ -79,9 +75,7 @@ public: // interface
       neighbor_type_(0),
       accumulate_(false),
       sync_type_(0),
-      sync_load_(),
-      sync_store_(),
-      sync_id_ (0),
+      sync_id_ (-1),
       active_(false),
       callback_(0)
   {
@@ -99,8 +93,6 @@ public: // interface
       &&   (neighbor_type_  == refresh.neighbor_type_)
       &&   (accumulate_  == refresh.accumulate_)
       // &&   (sync_type_  == refresh.sync_type_)
-      // &&   (sync_load_  == refresh.sync_load_)
-      // &&   (sync_store_  == refresh.sync_store_)
       // &&   (sync_id_  == refresh.sync_id_)
       &&   (active_  == refresh.active_);
       // &&   (callback_ == refresh.callback_)
@@ -122,8 +114,6 @@ public: // interface
     p | neighbor_type_;
     p | accumulate_;
     p | sync_type_;
-    p | sync_load_;
-    p | sync_store_;
     p | sync_id_;
     p | active_;
     p | callback_;
@@ -265,11 +255,12 @@ public: // interface
   int sync_type() const 
   { return sync_type_; }
 
-  Sync & sync_load() 
-  {  return sync_load_; }
-
-  Sync & sync_store() 
-  {  return sync_store_; }
+  int sync_load() const
+  { return 3*sync_id_; }
+  int sync_store() const
+  { return 3*sync_id_+1; }
+  int sync_exit() const
+  { return 3*sync_id_+2; }
 
   int sync_id() 
   {  return sync_id_; }
@@ -297,12 +288,6 @@ public: // interface
     CkPrintf ("Refresh neighbor_type: %d\n",neighbor_type_);
     CkPrintf ("Refresh accumulate: %d\n",accumulate_);
     CkPrintf ("Refresh sync_type: %d\n",sync_type_);
-    CkPrintf ("Refresh sync_load: %d/%d\n", 
-	    sync_load_.value(),
-	    sync_load_.stop());
-    CkPrintf ("Refresh sync_store: %d/%d\n",
-	    sync_store_.value(),
-	    sync_store_.stop());
     CkPrintf ("Refresh sync_id: %d\n",sync_id_);
     CkPrintf ("Refresh active: %d\n",active_);
     CkPrintf ("Refresh callback: %d\n",callback_);
@@ -400,12 +385,6 @@ private: // attributes
   
   /// Synchronization type
   int sync_type_;
-
-  /// Counter for synchronization before loading data
-  Sync sync_load_;
-
-  /// Counter for synchronization after storing data
-  Sync sync_store_;
 
   /// Index for refresh synchronization counter
   int sync_id_;

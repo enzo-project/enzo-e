@@ -79,12 +79,6 @@ public: // interface
     p | id_sync_;
   }
 
-  int add_refresh (int ghost_depth, 
-		   int min_face_rank, 
-		   int neighbor_type, 
-		   int sync_type,
-		   int sync_id = 0);
-
   Refresh * refresh(size_t index=0) ;
 
   void set_callback (int callback)
@@ -136,6 +130,12 @@ protected: // functions
 		       double rr_min=0.0, double rr=0.0, double rr_max=0.0,
 		       bool final = false) throw();
   
+  int add_refresh (int ghost_depth, 
+		   int min_face_rank, 
+		   int neighbor_type, 
+		   int sync_type,
+		   int sync_id);
+
   /// Perform vector copy X <- Y
   template <class T>
   void copy_ (T * X, const T * Y,

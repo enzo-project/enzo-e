@@ -31,7 +31,8 @@ EnzoMethodPpm::EnzoMethodPpm
 {
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			       enzo_sync_id_method_ppm);
   refresh(ir)->add_all_fields();
 
   // PPM parameters initialized in EnzoBlock::initialize()

@@ -29,7 +29,8 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   TRACE_PM("EnzoMethodPmUpdate()");
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			     enzo_sync_id_method_pm_update);
   //  refresh(ir)->add_all_particles();
   //  refresh(ir)->add_all_fields();
   refresh(ir)->add_field(field_descr->field_id("acceleration_x"));

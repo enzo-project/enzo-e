@@ -470,20 +470,23 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next callback
-  void control_sync (int entry_point, int sync, int id = 0);
+  void control_sync (int entry_point, int sync_type, int id);
 
-  /// synchronize with count other chares; count only needs to be supplied once
+  /// synchronize with count other chares; count only needs to be
+  /// supplied once with others count arguments 0.  
   void p_control_sync_count(int entry_point, int id, int count) 
   {
     performance_start_(perf_control);
-    control_sync_count_(entry_point,id, count);
+    control_sync_count(entry_point,id, count);
     performance_stop_(perf_control);
   }
 
-protected:
-  void control_sync_neighbor_(int entry_point, int id);
-  void control_sync_face_(int entry_point, int id);
-  void control_sync_count_(int entry_point, int id, int count);
+  void control_sync_neighbor   (int entry_point, int id);
+  void control_sync_face       (int entry_point, int id);
+  void control_sync_barrier    (int entry_point);
+  void control_sync_quiescence (int entry_point);
+  void control_sync_count      (int entry_point, int id, int count);
+  
 public:
 
   //--------------------------------------------------
@@ -543,10 +546,10 @@ protected:
   void refresh_begin_();
 
   /// Pack field face data into arrays and send to neighbors
-  void refresh_load_field_faces_ (Refresh * refresh);
+  int refresh_load_field_faces_ (Refresh * refresh);
 
   /// Scatter particles in ghost zones to neighbors
-  void refresh_load_particle_faces_ (Refresh * refresh);
+  int refresh_load_particle_faces_ (Refresh * refresh);
 
   void refresh_load_field_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
@@ -589,11 +592,11 @@ protected:
 		      ParticleData * particle_list[]);
 
   /// Pack particle type data into arrays and send to neighbors
-  void particle_load_faces_ (int npa, int * nl,
-			     ParticleData * particle_list[],
-			     ParticleData * particle_array[],
-			     Index index_list[],
-			     Refresh * refresh);
+  int particle_load_faces_ (int npa, 
+			    ParticleData * particle_list[],
+			    ParticleData * particle_array[],
+			    Index index_list[],
+			    Refresh * refresh);
 
   //--------------------------------------------------
   // STOPPING
