@@ -14,11 +14,15 @@ void png_array (const char * filename,
 		double scale = 1.0
 		)
 {
-  double colormap[4][3] = {{0.0, 0.0, 0.0},
-			   {1.0, 0.0, 0.0},
-			   {1.0, 1.0, 0.0},
-			   {1.0, 1.0, 1.0}};
-  const int nc = 4;
+  //  double colormap[4][3] = {{0.0, 0.0, 0.0},
+  //			   {1.0, 0.0, 0.0},
+  //			   {1.0, 1.0, 0.0},
+  //			   {1.0, 1.0, 1.0}};
+  // const int nc = 4;
+
+  double colormap[2][3] = {{ 0.0, 0.0, 0.0},
+			   { 1.0, 1.0, 1.0} };
+  const int nc = 2;
  
   pngwriter * png;
   if (px==0) px = 1;

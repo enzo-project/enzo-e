@@ -5,7 +5,8 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the EnzoMethodPmUpdate class
 
-#include "cello.hpp"
+
+#include "charm_simulation.hpp"
 #include "enzo.hpp"
 
 // #define DEBUG_PM_UPDATE
@@ -61,6 +62,24 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
   TRACE_PM("compute()");
 
   if (block->is_leaf()) {
+
+    double a3sum[3]={0.0};
+    double v3sum[3]={0.0};
+    double a3sum2[3]={0.0};
+    double v3sum2[3]={0.0};
+    
+    Simulation * simulation = proxy_simulation.ckLocalBranch();
+    EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
+    EnzoPhysicsCosmology * cosmology = units->cosmology();
+
+    enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
+    
+    if (cosmology) {
+      double time = block->time();
+      double dt   = block->dt();
+      cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+      //      cosmology-> compute_expansion_factor (&av,&dadtv,time+dt);
+    }
 
     const int rank = block->rank();
 
@@ -121,6 +140,11 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	      ((be == 8) ? "double" : "quadruple")),
 	     (ba == be));
 
+    const double cp = dt/cosmo_a;
+    const double coef = 0.25*cosmo_dadt/cosmo_a*dt;
+    const double cvv = (1.0 - coef) / (1.0 + coef);
+    const double cva = 0.5*dt / (1.0 + coef);
+
     for (int ib=0; ib<nb; ib++) {
 
       enzo_float *x=0, *y=0, *z=0;
@@ -153,9 +177,13 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
-	  vx[ipdv] += ax[ipda]*dt/2;
-	  x [ipdp] += vx[ipdv]*dt;
-	  vx[ipdv] += ax[ipda]*dt/2;
+	  v3sum[0]+=std::abs(vx[ipdv]);
+	  a3sum[0]+=std::abs(ax[ipda]);
+	  v3sum2[0]+=vx[ipdv]*vx[ipdv];
+	  a3sum2[0]+=ax[ipda]*ax[ipda];
+	  vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
+	  x [ipdp] += cp*vx[ipdv];
+	  vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
 
 	}
 	
@@ -168,13 +196,13 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
-#ifdef DEBUG_PM_UPDATE
-	    CkPrintf ("%s yva %g %g %g\n",
-		      block->name().c_str(),y[ipdp],vy[ipdv],ay[ipda]);
-#endif	    
-	  vy[ipdv] += ay[ipda]*dt/2;
-	  y [ipdp] += vy[ipdv]*dt;
-	  vy[ipdv] += ay[ipda]*dt/2;
+	  v3sum[1]+=std::abs(vy[ipdv]);
+	  a3sum[1]+=std::abs(ay[ipda]);
+	  v3sum2[1]+=vy[ipdv]*vy[ipdv];
+	  a3sum2[1]+=ay[ipda]*ay[ipda];
+	  vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
+	  y [ipdp] += cp*vy[ipdv];
+	  vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
 
 	}
 	
@@ -187,17 +215,26 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
-#ifdef DEBUG_PM_UPDATE
-	    CkPrintf ("%s zva %g %g %g\n",
-		      block->name().c_str(),z[ipdp],vz[ipdv],az[ipda]);
-#endif	    
-	  vz[ipdv] += az[ipda]*dt/2;
-	  z [ipdp] += vz[ipdv]*dt;
-	  vz[ipdv] += az[ipda]*dt/2;
+	  v3sum[2]+=std::abs(vz[ipdv]);
+	  a3sum[2]+=std::abs(az[ipda]);
+	  v3sum2[2]+=vz[ipdv]*vz[ipdv];
+	  a3sum2[2]+=az[ipda]*az[ipda];
+
+	  vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
+	  z [ipdp] += cp*vz[ipdv];
+	  vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
 
 	}
       }
     }
+#ifdef DEBUG_UPDATE    
+    CkPrintf ("DEBUG_UPDATE asum %g %g %g vsum %g %g %g\n",
+	      a3sum[0],a3sum[1],a3sum[2],
+	      v3sum[0],v3sum[1],v3sum[2]);
+    CkPrintf ("DEBUG_UPDATE asum2 %g %g %g vsum2 %g %g %g\n",
+	      a3sum2[0],a3sum2[1],a3sum2[2],
+	      v3sum2[0],v3sum2[1],v3sum2[2]);
+#endif    
   }
 
   block->compute_done(); 
@@ -214,6 +251,12 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 
   double dt = std::numeric_limits<double>::max();
 
+  // Assume expansion limits dt for cosmology simulations
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
+  EnzoPhysicsCosmology * cosmology = units->cosmology();
+  if (cosmology) return dt;
+    
   if (block->is_leaf()) {
 
     Particle particle = block->data()->particle();
@@ -241,24 +284,10 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
 
-    // ENZO particle time step
-    //
-    // for (dim = 0; dim < GridRank; dim++) {
-    //   float dCell = CellWidth[dim][0]*a;
-    //   for (i = 0; i < NumberOfParticles; i++) {
-    //     dtTemp = dCell/max(fabs(ParticleVelocity[dim][i]), tiny_number);
-    // 	dtParticles = min(dtParticles, dtTemp);
-    //   }
-    // }
- 
-    // /* Multiply resulting dt by ParticleCourantSafetyNumber. */
- 
-    // dtParticles *= ParticleCourantSafetyNumber;
-
     const double hx = (xp-xm)/nx;
     const double hy = (yp-ym)/ny;
     const double hz = (zp-zm)/nz;
-    
+
     for (int ib=0; ib<nb; ib++) {
       const int np = particle.num_particles(it,ib);
 
@@ -309,6 +338,7 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 
     }
   }
+  
   dt = MIN(dt,max_dt_);
   return dt;
 }

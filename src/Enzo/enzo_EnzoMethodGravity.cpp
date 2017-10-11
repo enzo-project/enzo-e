@@ -187,7 +187,7 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   /// compute acceleration fields from potential
   int order;
   EnzoComputeAcceleration compute_acceleration(data()->field().field_descr(),
-					       rank(), order=2);
+					       rank(), order=4);
 
   compute_acceleration.compute(this);
 
@@ -200,6 +200,7 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   enzo_float * B_temp =    (enzo_float*) field.values("B_temp");
   for (int i=0; i<mx*my*mz; i++) {
     B_temp[i] = B[i];
+  }
 #endif  
 
   for (int i=0; i<mx*my*mz; i++) {
@@ -213,12 +214,13 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
     enzo_float * de_t_temp = (enzo_float*) field.values("density_total_temp");
     for (int i=0; i<mx*my*mz; i++) {
       de_t_temp[i] = de_t[i];
+    }
 #endif  
 
-      for (int i=0; i<mx*my*mz; i++) {
-	de_t[i] = 0.0;
-      }
+    for (int i=0; i<mx*my*mz; i++) {
+      de_t[i] = 0.0;
     }
+  }
 
   // wait for all Blocks before continuing
   compute_done();
