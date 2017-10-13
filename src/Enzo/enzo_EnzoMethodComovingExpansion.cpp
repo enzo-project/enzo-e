@@ -159,6 +159,8 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 	 velocity_x_old, velocity_y_old, velocity_z_old,
 	 &CRModel, cr_field_new, cr_field_old);
 
+         delete [] pressure;
+         pressure = NULL;
     }
 
   block->compute_done(); 
