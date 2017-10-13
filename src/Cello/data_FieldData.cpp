@@ -68,7 +68,7 @@ void FieldData::pup(PUP::er &p)
     int n = temporary_size_[i];
     if (n > 0) {
       if (p.isUnpacking()) {
-	array_temporary_[i] = new [n];
+	array_temporary_[i] = new char[n];
       }
       PUParray(p,array_temporary_[i],n);
     }
