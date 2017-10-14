@@ -196,7 +196,8 @@ void Block::stopping_balance_()
 
   if (do_balance && index_.is_root()) {
 
-       CkStartLB();
+    simulation()->monitor()->print ("Balance","staring load balance step");
+    CkStartLB();
 
   }    
 
@@ -208,6 +209,8 @@ void Block::stopping_balance_()
 
   if (do_balance) {
 
+    if (index_.is_root())
+      simulation()->monitor()->print ("Balance","staring load balance step");
     control_sync_quiescence (CkIndex_Main::p_stopping_balance());
 
   } else {
