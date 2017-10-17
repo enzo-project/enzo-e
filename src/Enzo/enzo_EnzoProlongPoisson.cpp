@@ -51,45 +51,16 @@ int EnzoProlongPoisson::apply
 	 im3_c[1],n3_c[1]+im3_c[1],
 	 im3_c[2],n3_c[2]+im3_c[2]);
 
-  switch (precision)  {
+  return apply_((enzo_float *)       values_f, nd3_f, im3_f, n3_f,
+		(const enzo_float *) values_c, nd3_c, im3_c, n3_c);
 
-  case precision_single:
-
-    return apply_(       (float *) values_f, nd3_f, im3_f, n3_f,
-		   (const float *) values_c, nd3_c, im3_c, n3_c);
-
-    break;
-
-  case precision_double:
-
-    return apply_(       (double *) values_f, nd3_f, im3_f, n3_f,
-		   (const double *) values_c, nd3_c, im3_c, n3_c);
-
-    break;
-
-  case precision_quadruple:
-
-    return apply_(       (long double *) values_f, nd3_f, im3_f, n3_f,
-		   (const long double *) values_c, nd3_c, im3_c, n3_c);
-
-    break;
-
-  default:
-
-    ERROR1 ("EnzoProlongPoisson::apply()",
-	    "Unknown precision %d",
-	    precision);
-
-    return 0;
-  }
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 int EnzoProlongPoisson::apply_
-(       T * values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+(       enzo_float * values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+  const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
   int dx_c = 1;
   int dy_c = nd3_c[0];
@@ -133,7 +104,7 @@ int EnzoProlongPoisson::apply_
       }
     }
 
-    return (sizeof(T) * n3_c[0]);
+    return (sizeof(enzo_float) * n3_c[0]);
 
 
   } else if (n3_f[2] == 1) {
@@ -168,7 +139,7 @@ int EnzoProlongPoisson::apply_
 	}
       }
     }
-    return (sizeof(T) * n3_c[0]*n3_c[1]);
+    return (sizeof(enzo_float) * n3_c[0]*n3_c[1]);
 
   } else {
 
@@ -214,7 +185,7 @@ int EnzoProlongPoisson::apply_
     }
   }
 
-  return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
+  return (sizeof(enzo_float) * n3_c[0]*n3_c[1]*n3_c[2]);
 
 }
 

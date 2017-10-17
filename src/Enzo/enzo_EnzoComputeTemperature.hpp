@@ -43,7 +43,6 @@ public: // interface
 
 private: // functions
 
-  template <typename T>
   void compute_(Block * block);
 
 private: // attributes

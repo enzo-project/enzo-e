@@ -130,32 +130,20 @@ module enzo {
 
     entry void r_solver_cg_matvec();
 
-    template <class T>
     entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_cg_loop_0b(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_cg_shift_1(CkReductionMsg *msg);
-    template <class T>
     entry void p_solver_cg_loop_2();
-    template <class T>
     entry void r_solver_cg_loop_3(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_cg_loop_5(CkReductionMsg *msg);
 
     // EnzoSolverBiCGStab post-reduction entry methods
 
-    template <class T>
     entry void r_solver_bicgstab_start_1(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_bicgstab_start_3(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_bicgstab_loop_5(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_bicgstab_loop_11(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_bicgstab_loop_13(CkReductionMsg *msg);
-    template <class T>
     entry void r_solver_bicgstab_loop_15(CkReductionMsg *msg);
 
     entry void p_solver_bicgstab_loop_2();
@@ -178,64 +166,5 @@ module enzo {
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   };
-
-};
-
-module template_defs {
-  
-   extern module enzo;
-
-   // EnzoSolverCg
-   
-   extern entry void EnzoBlock r_solver_cg_loop_0a<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_0a<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_0a<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_cg_loop_0b<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_0b<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_0b<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_cg_shift_1<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_shift_1<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_shift_1<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_cg_loop_2<float>();
-   extern entry void EnzoBlock r_solver_cg_loop_2<double>();
-   extern entry void EnzoBlock r_solver_cg_loop_2<long double>();
-   
-   extern entry void EnzoBlock r_solver_cg_loop_3<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_3<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_3<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_cg_loop_5<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_5<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_cg_loop_5<long double>(CkReductionMsg *);
-
-   // EnzoSolverBiCgStab
-   
-   extern entry void EnzoBlock r_solver_bicgstab_start_1<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_start_1<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_start_1<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_bicgstab_start_3<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_start_3<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_start_3<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_bicgstab_loop_5<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_5<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_5<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_bicgstab_loop_11<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_11<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_11<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_bicgstab_loop_13<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_13<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_13<long double>(CkReductionMsg *);
-
-   extern entry void EnzoBlock r_solver_bicgstab_loop_15<float>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_15<double>(CkReductionMsg *);
-   extern entry void EnzoBlock r_solver_bicgstab_loop_15<long double>(CkReductionMsg *);
-   
 
 };

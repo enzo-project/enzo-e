@@ -39,17 +39,11 @@ void EnzoComputePressure::pup (PUP::er &p)
 
 void EnzoComputePressure::compute ( Block * block) throw()
 {
-  Field field = block->data()->field();
-  if (field.precision(0) == precision_single) {
-    compute_<float>(block);
-  } else if (field.precision(0) == precision_double) {
-    compute_<double>(block);
-  }
+  compute_(block);
 }
 
 //----------------------------------------------------------------------
 
-template <typename T>
 void EnzoComputePressure::compute_(Block * block)
 {
 
@@ -59,15 +53,17 @@ void EnzoComputePressure::compute_(Block * block)
 
   Field field = enzo_block->data()->field();
 
-  T * p = (T*) field.values("pressure");
-  T * d = (T*) field.values("density");
-  const int rank = enzo_block->rank();
-  T * v3[3] = 
-    { (T*) (              field.values("velocity_x")),
-      (T*) ((rank >= 2) ? field.values("velocity_y") : NULL),
-      (T*) ((rank >= 3) ? field.values("velocity_z") : NULL) };
+  enzo_float * p = (enzo_float*) field.values("pressure");
+  enzo_float * d = (enzo_float*) field.values("density");
 
-  T * te = (T*) field.values("total_energy");
+  const int rank = enzo_block->rank();
+
+  enzo_float * v3[3] = 
+    { (enzo_float*) (              field.values("velocity_x")),
+      (enzo_float*) ((rank >= 2) ? field.values("velocity_y") : NULL),
+      (enzo_float*) ((rank >= 3) ? field.values("velocity_z") : NULL) };
+
+  enzo_float * te = (enzo_float*) field.values("total_energy");
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -78,9 +74,9 @@ void EnzoComputePressure::compute_(Block * block)
   if (rank < 3) gz = 0;
 
   int m = (nx+2*gx) * (ny+2*gy) * (nz+2*gz);
-  T gm1 = gamma_ - 1.0;
+  enzo_float gm1 = gamma_ - 1.0;
   for (int i=0; i<m; i++) {
-    T e= te[i];
+    enzo_float e= te[i];
     e -= 0.5*v3[0][i]*v3[0][i];
     if (rank >= 2) e -= 0.5*v3[1][i]*v3[1][i];
     if (rank >= 3) e -= 0.5*v3[2][i]*v3[2][i];

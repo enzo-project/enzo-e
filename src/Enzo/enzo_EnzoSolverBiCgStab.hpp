@@ -156,46 +156,46 @@ public: // interface
   { return "bicgstab"; }
 
   /// Projects RHS and sets initial vectors R, R0, and P
-  template<class T> void start_2(EnzoBlock* enzo_block) throw();
+  void start_2(EnzoBlock* enzo_block) throw();
 
   /// Entry into BiCgStab iteration loop, begins refresh on P
-  template<class T> void loop_0(EnzoBlock* enzo_block) throw();
+  void loop_0(EnzoBlock* enzo_block) throw();
 
   /// First preconditioner solve
-  template<class T> void loop_2(EnzoBlock* enzo_block) throw();
+  void loop_2(EnzoBlock* enzo_block) throw();
 
   /// Return from preconditioner solve, begins refresh on Y
-  template<class T> void loop_25(EnzoBlock* enzo_block) throw();
+  void loop_25(EnzoBlock* enzo_block) throw();
 
   /// First matrix-vector product, begins DOT(V,R0) and projection of
   /// Y and V
-  template<class T> void loop_4(EnzoBlock* enzo_block) throw();
+  void loop_4(EnzoBlock* enzo_block) throw();
 
   /// Shifts Y and V, begins, first vector updates, begins refresh on Q
-  template<class T> void loop_6(EnzoBlock* enzo_block) throw();
+  void loop_6(EnzoBlock* enzo_block) throw();
 
   /// Second preconditioner solve, begins refresh on Y
-  template<class T> void loop_8(EnzoBlock* enzo_block) throw();
+  void loop_8(EnzoBlock* enzo_block) throw();
 
   /// Return from preconditioner solve, begins refresh on Y
-  template<class T> void loop_85(EnzoBlock* enzo_block) throw();
+  void loop_85(EnzoBlock* enzo_block) throw();
 
   /// Second matrix-vector product, begins DOT(U,U), DOT(U,Q) and
   /// projection of Y and U
-  template<class T> void loop_10(EnzoBlock* enzo_block) throw();
+  void loop_10(EnzoBlock* enzo_block) throw();
 
   /// Shifts Y and U, second vector updates, begins DOT(R,R) and
   /// DOT(R,R0)
-  template<class T> void loop_12(EnzoBlock* enzo_block) throw();
+  void loop_12(EnzoBlock* enzo_block) throw();
 
   /// Updates search direction, begins update on iteration counter
-  template<class T> void loop_14(EnzoBlock* enzo_block) throw();
+  void loop_14(EnzoBlock* enzo_block) throw();
 
   /// End of iteration
-  template<class T> void end(EnzoBlock* enzo_block, int retval) throw();
+  void end(EnzoBlock* enzo_block, int retval) throw();
 
   /// Exit the solver
-  template<class T> void exit(EnzoBlock* enzo_block) throw();
+  void exit(EnzoBlock* enzo_block) throw();
 
   /// Set routines for use by EnzoBlock after reductions
   void set_bs(long double bs) throw() { bs_ = bs; }
@@ -215,7 +215,7 @@ public: // interface
 protected: // methods
 
   /// internal routine to handle actual start to solver
-  template<class T> void compute_(EnzoBlock * enzo_block) throw();
+  void compute_(EnzoBlock * enzo_block) throw();
 
   /// Allocate temporary Fields
   void allocate_temporary_(Field field, Block * block = NULL)

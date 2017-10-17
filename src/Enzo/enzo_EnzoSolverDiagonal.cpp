@@ -36,21 +36,14 @@ void EnzoSolverDiagonal::apply
     TRACE_SOLVER("is_active");
     Field field = block->data()->field();
 
-    // assumes all fields involved in calculation have same precision
-    int precision = field.precision(ib);
+    // // assumes all fields involved in calculation have same precision
+    // int precision = field.precision(ib);
 
-    if      (precision == precision_single)
-      compute_<float>      (A,ix,ib,block);
-    else if (precision == precision_double)
-      compute_<double>     (A,ix,ib,block);
-    else if (precision == precision_quadruple)
-      compute_<long double>(A,ix,ib,block);
-    else 
-      ERROR1("EnzoSolverDiagonal()", "precision %d not recognized", precision);
-    TRACE_SOLVER("compute EXIT");
+    compute_(A,ix,ib,block);
   }
   
   Solver::end_(block);
+
   CkCallback(callback_,
 	     CkArrayIndexIndex(block->index()),
 	     block->proxy_array()).send();
@@ -59,7 +52,6 @@ void EnzoSolverDiagonal::apply
 
 //======================================================================
 
-template <class T>
 void EnzoSolverDiagonal::compute_
 ( Matrix * A, int ix, int ib, Block * block) throw()
 //     X = B / diag(A)
@@ -71,7 +63,6 @@ void EnzoSolverDiagonal::compute_
   int mx,my,mz;
   field.dimensions (ib,&mx,&my,&mz);
 
-
   if (is_active_(block)) {
 
     ///   - X = 0
@@ -81,9 +72,9 @@ void EnzoSolverDiagonal::compute_
 
     A->diagonal(id,block);
 
-    T * X = (T*) field.values(ix);
-    T * B = (T*) field.values(ib);
-    T * D = (T*) field.values(id);
+    enzo_float * X = (enzo_float*) field.values(ix);
+    enzo_float * B = (enzo_float*) field.values(ib);
+    enzo_float * D = (enzo_float*) field.values(id);
 
     for (int iz=0; iz<mz; iz++) {
       for (int iy=0; iy<my; iy++) {

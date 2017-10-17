@@ -70,16 +70,14 @@ public: // interface
   virtual std::string name () throw () 
   { return "gravity"; }
 
-protected: // methods
-
-  template <class T>
-  void compute_ (EnzoBlock * enzo_block) throw();
-
   /// Compute maximum timestep for this method
   virtual double timestep (Block * block) const throw() ;
 
+protected: // methods
+
+  void compute_ (EnzoBlock * enzo_block) throw();
+
   /// Compute maximum timestep for this method
-  template <class T>
   double timestep_ (Block * block) const throw() ;
   
 protected: // attributes

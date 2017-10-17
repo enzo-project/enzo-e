@@ -9,10 +9,6 @@
 
 #include "enzo.decl.h"
 
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
-
 //----------------------------------------------------------------------
 
 EnzoSolverCg::EnzoSolverCg 
@@ -148,21 +144,14 @@ void EnzoSolverCg::apply ( Matrix * A, int ix, int ib, Block * block) throw()
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   // assumes all fields involved in calculation have same precision
-  int precision = field.precision(ib_);
+  // int precision = field.precision(ib_);
 
-  if      (precision == precision_single)
-    compute_<float>      (enzo_block);
-  else if (precision == precision_double)
-    compute_<double>     (enzo_block);
-  else if (precision == precision_quadruple)
-    compute_<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverCg()", "precision %d not recognized", precision);
+  compute_(enzo_block);
+
 }
 
 //======================================================================
 
-template <class T>
 void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 //     X = initial guess
 //     B = right-hand side
@@ -174,7 +163,7 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 
   // If local, call serial CG solver
   if (local_) {
-    local_cg_<T>(enzo_block);
+    local_cg_(enzo_block);
     return;
   }
   
@@ -187,11 +176,11 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
     ///   - X = 0
     ///   - R = P = B ( residual with X = 0);
 
-    T * B = (T*) field.values(ib_);
-    T * X = (T*) field.values(ix_);
-    T * R = (T*) field.values(ir_);
-    T * D = (T*) field.values(id_);
-    T * Z = (T*) field.values(iz_);
+    enzo_float * B = (enzo_float*) field.values(ib_);
+    enzo_float * X = (enzo_float*) field.values(ix_);
+    enzo_float * R = (enzo_float*) field.values(ir_);
+    enzo_float * D = (enzo_float*) field.values(id_);
+    enzo_float * Z = (enzo_float*) field.values(iz_);
 
     for (int i=0; i<mx_*my_*mz_; i++) {
       X[i] = 0.0;
@@ -206,8 +195,8 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 
   if (is_active_(enzo_block)) {
 
-    T * B = (T*) field.values(ib_);
-    T * R = (T*) field.values(ir_);
+    enzo_float * B = (enzo_float*) field.values(ib_);
+    enzo_float * R = (enzo_float*) field.values(ir_);
 
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 
@@ -223,9 +212,8 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
     reduce[2] = nx_*ny_*nz_;
   }
 
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0a<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0a(NULL), 
 		      enzo_block->proxy_array());
-
 	  
   enzo_block->contribute (3*sizeof(long double), &reduce, 
 			  sum_long_double_3_type, 
@@ -234,7 +222,6 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoBlock::r_solver_cg_loop_0a (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> refresh P for AP = MATVEC (A,P)
@@ -244,13 +231,12 @@ void EnzoBlock::r_solver_cg_loop_0a (CkReductionMsg * msg)
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
-  solver->loop_0a<T>(this,msg);
+  solver->loop_0a(this,msg);
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::loop_0a
 (EnzoBlock * enzo_block, CkReductionMsg * msg) throw ()
 {
@@ -280,7 +266,6 @@ void EnzoSolverCg::loop_0a
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoBlock::r_solver_cg_loop_0b (CkReductionMsg * msg)
 /// ==> refresh P for AP = MATVEC (A,P)
 {
@@ -289,13 +274,12 @@ void EnzoBlock::r_solver_cg_loop_0b (CkReductionMsg * msg)
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
-  solver->loop_0b<T>(this,msg);
+  solver->loop_0b(this,msg);
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::loop_0b
 (EnzoBlock * enzo_block, CkReductionMsg * msg) throw ()
 {
@@ -328,28 +312,20 @@ void EnzoBlock::r_solver_cg_matvec()
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
-  Field field = data()->field();
+  //  Field field = data()->field();
 
   // assumes all fields involved in calculation have same precision
-  int precision = field.precision(0);
+  //  int precision = field.precision(0);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (this);
 
-  if      (precision == precision_single)    
-    solver->shift_1<float>(enzo_block);
-  else if (precision == precision_double)    
-    solver->shift_1<double>(enzo_block);
-  else if (precision == precision_quadruple) 
-    solver->shift_1<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverCg()", "precision %d not recognized", precision);
+  solver->shift_1(enzo_block);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 {
   Data * data = enzo_block->data();
@@ -361,8 +337,8 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
     cello::check(bs_,"bs_",__FILE__,__LINE__);
     cello::check(bc_,"bc_",__FILE__,__LINE__);
 
-    T * B  = (T*) field.values(ib_);
-    T * R  = (T*) field.values(ir_);
+    enzo_float * B  = (enzo_float*) field.values(ib_);
+    enzo_float * R  = (enzo_float*) field.values(ir_);
 
     if (iter_ == 0 && A_->is_singular())  {
 
@@ -375,10 +351,10 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
       cello::check(bc_,"bc_",__FILE__,__LINE__);
       cello::check(bs_,"bs_",__FILE__,__LINE__);
   
-      T shift = -bs_ / bc_;
+      enzo_float shift = -bs_ / bc_;
       cello::check(shift,"shift",__FILE__,__LINE__);
-      T * D = (T*) field.values(id_);
-      T * Z = (T*) field.values(iz_);
+      enzo_float * D = (enzo_float*) field.values(id_);
+      enzo_float * Z = (enzo_float*) field.values(iz_);
       for (int i=0; i<mx_*my_*mz_; i++) {
 	R[i] += shift;
 	B[i] += shift;
@@ -392,7 +368,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 
   if (is_active_(enzo_block)) {
 
-    T * R  = (T*) field.values(ir_);
+    enzo_float * R  = (enzo_float*) field.values(ir_);
     // reduce = field.dot(ir_,ir_);
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
     for (int iz=0; iz<nz_; iz++) {
@@ -405,7 +381,7 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
     }
   } 
 
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_shift_1<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_shift_1(NULL), 
 		      enzo_block->proxy_array());
 
   enzo_block->contribute (sizeof(long double), &reduce, 
@@ -415,7 +391,6 @@ void EnzoSolverCg::shift_1 (EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
@@ -427,14 +402,13 @@ void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 
   delete msg;
 
-  solver -> loop_2a<T>(this);
+  solver -> loop_2a(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
 {
   Refresh refresh (4,0,neighbor_type_(), sync_type_(),
@@ -447,12 +421,11 @@ void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
   refresh.add_field (iz_);
 
   enzo_block->refresh_enter
-    (CkIndex_EnzoBlock::p_solver_cg_loop_2<T>(),&refresh);
+    (CkIndex_EnzoBlock::p_solver_cg_loop_2(),&refresh);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoBlock::p_solver_cg_loop_2 ()
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
@@ -460,14 +433,13 @@ void EnzoBlock::p_solver_cg_loop_2 ()
   EnzoSolverCg * solver = 
     static_cast<EnzoSolverCg*> (this->solver());
 
-  solver->loop_2b<T>(this);
+  solver->loop_2b(this);
   performance_stop_(perf_compute,__FILE__,__LINE__);
   
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
 {
   cello::check(rr_,"rr_",__FILE__,__LINE__);
@@ -489,11 +461,11 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
     
   if (is_converged) {
 
-    end<T> (enzo_block,return_converged);
+    end (enzo_block,return_converged);
 
   } else if (is_diverged)  {
 
-    end<T>(enzo_block,return_error);
+    end (enzo_block,return_error);
 
   } else {
 
@@ -511,10 +483,10 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
 
     if (is_active_(enzo_block)) {
 
-      T * D = (T*) field.values(id_);
-      T * Y = (T*) field.values(iy_);
-      T * R = (T*) field.values(ir_);
-      T * Z = (T*) field.values(iz_);
+      enzo_float * D = (enzo_float*) field.values(id_);
+      enzo_float * Y = (enzo_float*) field.values(iy_);
+      enzo_float * R = (enzo_float*) field.values(ir_);
+      enzo_float * Z = (enzo_float*) field.values(iz_);
 
       const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 	 
@@ -530,7 +502,7 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
       }
     }
 
-    CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_3<T>(NULL), 
+    CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_3(NULL), 
 			enzo_block->proxy_array());
 
     enzo_block->contribute (3*sizeof(long double), &reduce, 
@@ -541,7 +513,6 @@ void EnzoSolverCg::loop_2b (EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoBlock::r_solver_cg_loop_3 (CkReductionMsg * msg)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
@@ -557,7 +528,7 @@ void EnzoBlock::r_solver_cg_loop_3 (CkReductionMsg * msg)
   
   delete msg;
 
-  solver -> loop_4<T>(this);
+  solver -> loop_4(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 
@@ -565,7 +536,6 @@ void EnzoBlock::r_solver_cg_loop_3 (CkReductionMsg * msg)
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 //  a = rz / dy;
 //  X = X + a*D;
@@ -586,12 +556,12 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 
   if (is_active_(enzo_block)) {
 
-    T * X = (T*) field.values(ix_);
-    T * D = (T*) field.values(id_);
-    T * R = (T*) field.values(ir_);
-    T * Y = (T*) field.values(iy_);
+    enzo_float * X = (enzo_float*) field.values(ix_);
+    enzo_float * D = (enzo_float*) field.values(id_);
+    enzo_float * R = (enzo_float*) field.values(ir_);
+    enzo_float * Y = (enzo_float*) field.values(iy_);
 
-    T a = rz_ / dy_;
+    enzo_float a = rz_ / dy_;
 
     cello::check(a,"a",__FILE__,__LINE__);
 
@@ -602,8 +572,7 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
       R[i] -= a * Y[i];
     }
 
-    
-    T * Z = (T*) field.values(iz_);
+    enzo_float * Z = (enzo_float*) field.values(iz_);
     
     // M_->matvec(iz_,ir_,enzo_block);
     for (int i=0; i<mx_*my_*mz_; i++) {
@@ -616,9 +585,9 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 
   if (is_active_(enzo_block)) {
 
-    T * X = (T*) field.values(ix_);
-    T * R = (T*) field.values(ir_);
-    T * Z = (T*) field.values(iz_);
+    enzo_float * X = (enzo_float*) field.values(ix_);
+    enzo_float * R = (enzo_float*) field.values(ir_);
+    enzo_float * Z = (enzo_float*) field.values(iz_);
 
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
        
@@ -637,7 +606,7 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
     }
   }
 
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_5<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_5(NULL), 
 		      enzo_block->proxy_array());
 
   enzo_block->contribute (3*sizeof(long double), &reduce, 
@@ -647,7 +616,6 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoBlock::r_solver_cg_loop_5 (CkReductionMsg * msg)
 /// - EnzoBlock accumulate global contribution to DOT(R,R)
 /// ==> solver_cg_loop_6
@@ -665,14 +633,13 @@ void EnzoBlock::r_solver_cg_loop_5 (CkReductionMsg * msg)
 
   delete msg;
 
-  solver -> loop_6<T>(this);
+  solver -> loop_6(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 //  rz2 = dot(R,Z)
 //  b = rz2 / rz;
@@ -693,23 +660,23 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
       // eT*e == n === zone count (bc)
       // eT*b == sum_i=1,n B[i]
 
-      T * X  = (T*) field.values(ix_);
-      T * R  = (T*) field.values(ir_);
+      enzo_float * X  = (enzo_float*) field.values(ix_);
+      enzo_float * R  = (enzo_float*) field.values(ir_);
 
       // shift_ (X,T(-xs_/bc_),X);
       // shift_ (R,T(-rs_/bc_),R);
 
       for (int i=0; i<mx_*my_*mz_; i++) {
-	X[i] -= T(xs_/bc_);
-	R[i] -= T(rs_/bc_);
+	X[i] -= enzo_float(xs_/bc_);
+	R[i] -= enzo_float(rs_/bc_);
       }
       
    }
 
-    T * D  = (T*) field.values(id_);
-    T * Z  = (T*) field.values(iz_);
+    enzo_float * D  = (enzo_float*) field.values(id_);
+    enzo_float * Z  = (enzo_float*) field.values(iz_);
 
-    T b = rz2_ / rz_;
+    enzo_float b = rz2_ / rz_;
 
     cello::check(b,"b",__FILE__,__LINE__);
 
@@ -726,7 +693,7 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 
   int iter = iter_ + 1;
 
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0b<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_cg_loop_0b(NULL), 
 		      enzo_block->proxy_array());
 
   enzo_block->contribute (sizeof(int), &iter, 
@@ -735,11 +702,10 @@ void EnzoSolverCg::loop_6 (EnzoBlock * enzo_block) throw ()
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
 {
   if (!is_active_(enzo_block)) {
-    end<T>(enzo_block,return_unknown);
+    end(enzo_block,return_unknown);
     return;
   }
   
@@ -747,12 +713,12 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
 
   Field field = enzo_block->data()->field();
 
-  T * B = (T*) field.values(ib_);
-  T * D = (T*) field.values(id_);
-  T * R = (T*) field.values(ir_);
-  T * X = (T*) field.values(ix_);
-  T * Y = (T*) field.values(iy_);
-  T * Z = (T*) field.values(iz_);
+  enzo_float * B = (enzo_float*) field.values(ib_);
+  enzo_float * D = (enzo_float*) field.values(id_);
+  enzo_float * R = (enzo_float*) field.values(ir_);
+  enzo_float * X = (enzo_float*) field.values(ix_);
+  enzo_float * Y = (enzo_float*) field.values(iy_);
+  enzo_float * Z = (enzo_float*) field.values(iz_);
 
   for (int i=0; i<mx_*my_*mz_; i++) {
     X[i] = 0.0;
@@ -763,11 +729,11 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
   bs_ = 0.0;
   bc_ = 0.0;
 
-  refresh_local_<T>(ib_,enzo_block);
-  refresh_local_<T>(ix_,enzo_block);
-  refresh_local_<T>(ir_,enzo_block);
-  refresh_local_<T>(id_,enzo_block);
-  refresh_local_<T>(iz_,enzo_block);
+  refresh_local_(ib_,enzo_block);
+  refresh_local_(ix_,enzo_block);
+  refresh_local_(ir_,enzo_block);
+  refresh_local_(id_,enzo_block);
+  refresh_local_(iz_,enzo_block);
 
   const int i0 = gx_ + mx_*(gy_ + my_*gz_);
 
@@ -784,7 +750,7 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
     bc_ = nx_*ny_*nz_;
     cello::check(bc_,"bc_",__FILE__,__LINE__);
     cello::check(bs_,"bs_",__FILE__,__LINE__);
-    T shift = -bs_ / bc_;
+    enzo_float shift = -bs_ / bc_;
     cello::check(shift,"shift",__FILE__,__LINE__);
     for (int i=0; i<mx_*my_*mz_; i++) {
       R[i] += shift;
@@ -819,7 +785,7 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
     rr_min_ = std::min(rr_min_,rr_);
     rr_max_ = std::max(rr_max_,rr_);
 
-    refresh_local_<T>(id_,enzo_block);
+    refresh_local_(id_,enzo_block);
 
     A_->matvec(iy_,id_,enzo_block);
 
@@ -841,7 +807,7 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
     cello::check(rz_,"rz_",__FILE__,__LINE__);
     cello::check(dy_,"dy_",__FILE__,__LINE__);
 
-    T a = rz_ / dy_;
+    enzo_float a = rz_ / dy_;
 
     cello::check(a,"a",__FILE__,__LINE__);
 
@@ -871,13 +837,13 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
     
     if (A_->is_singular()) {
       for (int i=0; i<mx_*my_*mz_; i++) {
-	X[i] -= T(xs_/bc_);
-	R[i] -= T(rs_/bc_);
+	X[i] -= enzo_float(xs_/bc_);
+	R[i] -= enzo_float(rs_/bc_);
       }
     }
 
 
-    T b = rz2_ / rz_;
+    enzo_float b = rz2_ / rz_;
 
     cello::check(b,"b",__FILE__,__LINE__);
 
@@ -894,11 +860,11 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
 
   if (is_converged) {
 
-    end<T> (enzo_block,return_converged);
+    end (enzo_block,return_converged);
 
   } else if (is_diverged)  {
 
-    end<T>(enzo_block,return_error);
+    end(enzo_block,return_error);
 
   }
     
@@ -906,11 +872,10 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
 {
 
-  T * X = (T*) enzo_block->data()->field().values(ix);
+  enzo_float * X = (enzo_float*) enzo_block->data()->field().values(ix);
 
   const int dx = 1;
   const int dy = mx_;
@@ -992,7 +957,6 @@ void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 ///    if (return == return_converged) {
 ///       ==> exit()

@@ -391,11 +391,6 @@
 #include "cello.hpp"
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
-#include "enzo.decl.h"
-
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
 
 // #define DEBUG_ENTRY
 // #define DEBUG_COPY_TEMP
@@ -515,25 +510,16 @@ void EnzoSolverBiCgStab::apply
   EnzoBlock* enzo_block = static_cast<EnzoBlock*> (block);
 
   /// access the field infromation on this block
-  field.size(&nx_, &ny_, &nz_);
   
-  field.dimensions(0, &mx_, &my_, &mz_);
+  field.dimensions (0, &mx_, &my_, &mz_);
+  field.size          (&nx_, &ny_, &nz_);
   field.ghost_depth(0, &gx_, &gy_, &gz_);
 
-  /// call templated internal compute_ routine
-  // assuming all fields have same precision
-  int precision = field.precision(0);
-  if      (precision == precision_single)    compute_<float>      (enzo_block);
-  else if (precision == precision_double)    compute_<double>     (enzo_block);
-  else if (precision == precision_quadruple) compute_<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized",
-	   precision);
+  compute_ (enzo_block);
 }
 
 //======================================================================
 
-template<class T>
 void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("compute_",enzo_block);
@@ -551,16 +537,16 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
     /// access relevant fields
 
-    T* X   = (T*) field.values(ix_);
-    T* R   = (T*) field.values(ir_);
-    T* R0  = (T*) field.values(ir0_);
-    T* P   = (T*) field.values(ip_);
-    T* Y   = (T*) field.values(iy_);
-    T* V   = (T*) field.values(iv_);
-    T* Q   = (T*) field.values(iq_);
-    T* U   = (T*) field.values(iu_);
+    enzo_float* X   = (enzo_float*) field.values(ix_);
+    enzo_float* R   = (enzo_float*) field.values(ir_);
+    enzo_float* R0  = (enzo_float*) field.values(ir0_);
+    enzo_float* P   = (enzo_float*) field.values(ip_);
+    enzo_float* Y   = (enzo_float*) field.values(iy_);
+    enzo_float* V   = (enzo_float*) field.values(iv_);
+    enzo_float* Q   = (enzo_float*) field.values(iq_);
+    enzo_float* U   = (enzo_float*) field.values(iu_);
 
-    T * B =  (T*) field.values(ib_);
+    enzo_float * B =  (enzo_float*) field.values(ib_);
 
     TRACE_FIELD_("B1",B,1.0);
 
@@ -588,7 +574,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     /// set bc_ = COUNT(B) ==> r_solver_bicgstab_start_1
     long double reduce[2] = {0.0, 0.0};
     if (is_active_(enzo_block)) {
-      T* B = (T*) field.values(ib_);
+      enzo_float* B = (enzo_float*) field.values(ib_);
       const int i0 = gx_ + mx_*(gy_ + my_*gz_);
       reduce[0] = 0.0;
       for (int iz=0; iz<nz_; iz++) {
@@ -605,28 +591,27 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     /// initiate callback for r_solver_bicgstab_start_1 and
     /// contribute to sum and count
     
-    CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_start_1<T>(NULL), 
+    CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_start_1(NULL), 
 			enzo_block->proxy_array());
     
     enzo_block->contribute(2*sizeof(long double), &reduce, 
 			   sum_long_double_2_type, callback);
 
-      T* B = (T*) field.values(ib_);
+      enzo_float* B = (enzo_float*) field.values(ib_);
       TRACE_FIELD_("B",B,1.0);
       
   } else {
 
     /// nonsingular system, just call start_2 directly
-      T* B = (T*) field.values(ib_);
+      enzo_float* B = (enzo_float*) field.values(ib_);
     TRACE_FIELD_("B",B,1.0);
-    this->start_2<T>(enzo_block);
+    this->start_2(enzo_block);
 
   }
 }
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoBlock::r_solver_bicgstab_start_1(CkReductionMsg* msg) {
   TRACE_BICGSTAB("r_solver_bicgstab_start_1()",this);
   performance_start_(perf_compute,__FILE__,__LINE__);
@@ -640,14 +625,13 @@ void EnzoBlock::r_solver_bicgstab_start_1(CkReductionMsg* msg) {
   delete msg;
 
   /// call start_2 to continue
-  solver->start_2<T>(this);
+  solver->start_2(this);
   performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   TRACE_BICGSTAB("start_2()",this);
 
@@ -660,17 +644,17 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   if (is_active_(enzo_block)) {
 
     /// access relevant fields
-    T* B  = (T*) field.values(ib_);
-    T* R0 = (T*) field.values(ir0_);
-    T* P  = (T*) field.values(ip_);
-    T* R  = (T*) field.values(ir_);
+    enzo_float* B  = (enzo_float*) field.values(ib_);
+    enzo_float* R0 = (enzo_float*) field.values(ir0_);
+    enzo_float* P  = (enzo_float*) field.values(ip_);
+    enzo_float* R  = (enzo_float*) field.values(ir_);
 
     /// for singular problems, project B into R(A)
     int m = mx_*my_*mz_;
     // @@@@@ B == 0
     TRACE_FIELD_("B",B,1.0);
     if (A_->is_singular()) {
-      T shift = -bs_ / bc_;
+      enzo_float shift = -bs_ / bc_;
       for (int i=0; i<m; i++) {
 	B[i] += shift;
       }
@@ -698,7 +682,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   
   /// initiate callback for r_solver_bicgstab_start_3 and contribute
   /// to dot-product
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_start_3<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_start_3(NULL), 
 		      enzo_block->proxy_array());
 
   enzo_block->contribute(sizeof(long double), &reduce, 
@@ -707,7 +691,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoBlock::r_solver_bicgstab_start_3(CkReductionMsg* msg) {
+void EnzoBlock::r_solver_bicgstab_start_3(CkReductionMsg* msg) {
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
@@ -719,13 +703,13 @@ template<class T> void EnzoBlock::r_solver_bicgstab_start_3(CkReductionMsg* msg)
   delete msg;
 
   /// call loop_0 to begin solver loop
-  solver->loop_0<T>(this);
+  solver->loop_0(this);
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw() {
+void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("loop_0()",enzo_block);
 
@@ -764,25 +748,24 @@ template<class T> void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw()
 
   if (is_converged) {
 
-    this->end<T>(enzo_block, return_converged);
+    this->end(enzo_block, return_converged);
 
   } else if (is_diverged)  {
 
-    this->end<T>(enzo_block, return_diverged);
+    this->end(enzo_block, return_diverged);
 
     
   } else {
 
     // Refresh field faces then call solver_bicgstab_loop_1
 
-    loop_2<T>(enzo_block);
+    loop_2(enzo_block);
   
   }
 }
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("start coarse solve()",enzo_block);
@@ -792,13 +775,13 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   {
-    T * P = (T*) field.values(ip_);
+    enzo_float * P = (enzo_float*) field.values(ip_);
     TRACE_FIELD_("P",P,1.0);
   }
 
   if (index_precon_ >= 0) {
 
-    T * Y = (T*) field.values(iy_);
+    enzo_float * Y = (enzo_float*) field.values(iy_);
     for (int i=0; i<mx_*my_*mz_; i++) {
       Y[i] = 0.0;
     }
@@ -813,15 +796,15 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
     
   } else {
 
-    T * Y = (T*) field.values(iy_);
-    T * P = (T*) field.values(ip_);
+    enzo_float * Y = (enzo_float*) field.values(iy_);
+    enzo_float * P = (enzo_float*) field.values(ip_);
 
     int m = mx_*my_*mz_;
     for (int i=0; i<m; i++) {
       Y[i] = P[i];
     }
 
-    loop_25<T>(enzo_block);
+    loop_25(enzo_block);
   }
 
 }
@@ -832,28 +815,19 @@ void EnzoBlock::p_solver_bicgstab_loop_2() {
   TRACE_BICGSTAB("return from coarse solve",this);
   performance_start_(perf_compute,__FILE__,__LINE__);
 
-  /// re-entry into loop_25, using template with appropriate precision
   EnzoSolverBiCgStab* solver = 
     static_cast<EnzoSolverBiCgStab*> (this->solver());
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-  Field field = data()->field();
-  // assuming all fields have same precision
-  int precision = field.precision(0);
-  if      (precision == precision_single)    
-    solver->loop_25<float>(enzo_block);
-  else if (precision == precision_double)    
-    solver->loop_25<double>(enzo_block);
-  else if (precision == precision_quadruple) 
-    solver->loop_25<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized",
-	   precision);
 
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+
+  solver->loop_25(enzo_block);
+  
   performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
-template<class T>
+//----------------------------------------------------------------------
+
 void EnzoSolverBiCgStab::loop_25 (EnzoBlock * enzo_block) throw() {
   
   TRACE_BICGSTAB("refresh after coarse solve",enzo_block);
@@ -887,30 +861,19 @@ void EnzoBlock::p_solver_bicgstab_loop_3() {
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
-  /// re-entry into loop_4, using template with appropriate precision
   EnzoSolverBiCgStab* solver = 
     static_cast<EnzoSolverBiCgStab*> (this->solver());
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-  Field field = data()->field();
-  // assuming all fields have same precision
-  int precision = field.precision(0);
-  if      (precision == precision_single)    
-    solver->loop_4<float>(enzo_block);
-  else if (precision == precision_double)    
-    solver->loop_4<double>(enzo_block);
-  else if (precision == precision_quadruple) 
-    solver->loop_4<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized",
-	   precision);
 
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+
+  solver->loop_4(enzo_block);
+  
   performance_stop_(perf_compute,__FILE__,__LINE__);
   
 }
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
 
   COPY_TEMP(iy_,"Y1_temp");
@@ -929,8 +892,8 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
   /// compute local contributions to vr0_ = DOT(V, R0)
   long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
   if (is_active_(enzo_block)) {
-    T* R0 = (T*) field.values(ir0_);
-    T* V  = (T*) field.values(iv_);
+    enzo_float* R0 = (enzo_float*) field.values(ir0_);
+    enzo_float* V  = (enzo_float*) field.values(iv_);
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
     reduce[0] = 0.0;
     for (int iz=0; iz<nz_; iz++) {
@@ -950,8 +913,8 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
     /// set ys_ = SUM(Y)
     /// set vs_ = SUM(V)
     if (is_active_(enzo_block)) {
-      T* Y = (T*) field.values(iy_);
-      T* V = (T*) field.values(iv_);
+      enzo_float* Y = (enzo_float*) field.values(iy_);
+      enzo_float* V = (enzo_float*) field.values(iv_);
       const int i0 = gx_ + mx_*(gy_ + my_*gz_);
       reduce[1] = 0.0;
       reduce[2] = 0.0;
@@ -969,7 +932,7 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
   /// initiate callback to r_solver_bicgstab_loop_5 and contribute to
   /// global sums
 
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_5<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_5(NULL), 
 		      enzo_block->proxy_array());
 
   enzo_block->contribute(3*sizeof(long double), &reduce, 
@@ -978,30 +941,29 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoBlock::r_solver_bicgstab_loop_5(CkReductionMsg* msg) {
   TRACE_BICGSTAB("EnzoBlock::loop_5()",this);
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
   /// EnzoBlock accumulates global contributions to SUM(Y) and SUM(V)
+
   EnzoSolverBiCgStab* solver = 
     static_cast<EnzoSolverBiCgStab*> (this->solver());
+
   long double* data = (long double*) msg->getData();
   solver->set_vr0( data[0] );
   solver->set_ys(  data[1] );
   solver->set_vs(  data[2] );
   delete msg;
 
-  /// call loop_6 to continue
-  solver->loop_6<T>(this);
+  solver->loop_6(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("loop_6()",enzo_block);
@@ -1012,10 +974,10 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
   /// for singular problems, project Y and V into R(A)
   int m = mx_*my_*mz_;
   if (is_active_(enzo_block) && A_->is_singular()) {
-    T* Y = (T*) field.values(iy_);
-    T* V = (T*) field.values(iv_);
-    T yshift = -ys_ / bc_;
-    T vshift = -vs_ / bc_;
+    enzo_float* Y = (enzo_float*) field.values(iy_);
+    enzo_float* V = (enzo_float*) field.values(iv_);
+    enzo_float yshift = -ys_ / bc_;
+    enzo_float vshift = -vs_ / bc_;
     for (int i=0; i<m; i++) {
       Y[i] += yshift;
       V[i] += vshift;
@@ -1033,11 +995,11 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
   if (is_active_(enzo_block)) {
 
     /// access relevant fields
-    T* Q = (T*) field.values(iq_);
-    T* R = (T*) field.values(ir_);
-    T* V = (T*) field.values(iv_);
-    T* X = (T*) field.values(ix_);
-    T* Y = (T*) field.values(iy_);
+    enzo_float* Q = (enzo_float*) field.values(iq_);
+    enzo_float* R = (enzo_float*) field.values(ir_);
+    enzo_float* V = (enzo_float*) field.values(iv_);
+    enzo_float* X = (enzo_float*) field.values(ix_);
+    enzo_float* Y = (enzo_float*) field.values(iy_);
 
     TRACE_FIELD_("X",X,1.0);
     /// update: Q = -alpha_*V + R
@@ -1057,13 +1019,11 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
 
   /// refresh Q with callback to p_solver_bicgstab_loop_7 to handle re-entry
 
-  loop_8<T>(enzo_block);
-  //enzo_block->p_solver_bicgstab_loop_7();
+  loop_8(enzo_block);
 }
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("loop_8()",enzo_block);
@@ -1072,7 +1032,7 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
   if (index_precon_ >= 0) {
-    T * Y = (T*) field.values(iy_);
+    enzo_float * Y = (enzo_float*) field.values(iy_);
     for (int i=0; i<mx_*my_*mz_; i++) {
       Y[i] = 0.0;
     }
@@ -1087,13 +1047,13 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
     precon->apply(A_,iy_,iq_,enzo_block);
   } else {
 
-    T * Y = (T*) field.values(iy_);
-    T * Q = (T*) field.values(iq_);
+    enzo_float * Y = (enzo_float*) field.values(iy_);
+    enzo_float * Q = (enzo_float*) field.values(iq_);
     int m = mx_*my_*mz_;
     for (int i=0; i<m; i++) {
       Y[i] = Q[i];
     }
-    loop_85<T>(enzo_block);
+    loop_85(enzo_block);
   }
 }
 
@@ -1103,28 +1063,18 @@ void EnzoBlock::p_solver_bicgstab_loop_8() {
   TRACE_BICGSTAB("EnzoBlock::loop_8()",this);
   performance_start_(perf_compute,__FILE__,__LINE__);
 
-  /// re-entry into loop_85, using template with appropriate precision
   EnzoSolverBiCgStab* solver = 
     static_cast<EnzoSolverBiCgStab*> (this->solver());
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-  Field field = data()->field();
-  // assuming all fields have same precision
-  int precision = field.precision(0);
-  if      (precision == precision_single)    
-    solver->loop_85<float>(enzo_block);
-  else if (precision == precision_double)    
-    solver->loop_85<double>(enzo_block);
-  else if (precision == precision_quadruple) 
-    solver->loop_85<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized",
-	   precision);
 
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+  solver->loop_85(enzo_block);
+  
   performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
-template<class T>
+//----------------------------------------------------------------------
+
 void EnzoSolverBiCgStab::loop_85 (EnzoBlock * enzo_block) throw() {
   
   TRACE_BICGSTAB("loop_85()",enzo_block);
@@ -1159,29 +1109,21 @@ void EnzoBlock::p_solver_bicgstab_loop_9() {
   performance_start_(perf_compute,__FILE__,__LINE__);
   
   TRACE_BICGSTAB("EnzoBlock::loop_9()",this);
-  /// re-entry into loop_10, using template with appropriate precision
+
   EnzoSolverBiCgStab* solver = 
     static_cast<EnzoSolverBiCgStab*> (this->solver());
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-  Field field = data()->field();
-  // assuming all fields have same precision
-  int precision = field.precision(0); 
-  if      (precision == precision_single)    
-    solver->loop_10<float>(enzo_block);
-  else if (precision == precision_double)    
-    solver->loop_10<double>(enzo_block);
-  else if (precision == precision_quadruple) 
-    solver->loop_10<long double>(enzo_block);
-  else 
-    ERROR1("EnzoSolverBiCgStab()", "precision %d not recognized", precision);
 
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+
+  solver->loop_10(enzo_block);
+  
   performance_stop_(perf_compute,__FILE__,__LINE__);
   
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw() {
+void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw() {
 
   COPY_TEMP (iy_,"Y2_temp");
 
@@ -1200,8 +1142,8 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
   /// omega_n_ = DOT(U, Q)
   long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
   if (is_active_(enzo_block)) {
-    T* U  = (T*) field.values(iu_);
-    T* Q  = (T*) field.values(iq_);
+    enzo_float* U  = (enzo_float*) field.values(iu_);
+    enzo_float* Q  = (enzo_float*) field.values(iq_);
     
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
     reduce[0] = 0.0;
@@ -1222,8 +1164,8 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
 
     /// set ys_ = SUM(Y)
     /// set us_ = SUM(U)
-    T* Y = (T*) field.values(iy_);
-    T* U = (T*) field.values(iu_);
+    enzo_float* Y = (enzo_float*) field.values(iy_);
+    enzo_float* U = (enzo_float*) field.values(iu_);
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
     reduce[2] = 0.0;
     reduce[3] = 0.0;
@@ -1239,8 +1181,9 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
   }
 
   /// initiate callback to r_solver_bicgstab_loop_11, and contribute to overall dot-products
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_11<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_11(NULL), 
 		      enzo_block->proxy_array());
+  
   enzo_block->contribute(4*sizeof(long double), &reduce, 
 			 sum_long_double_4_type, callback);
     
@@ -1248,7 +1191,7 @@ template<class T> void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw(
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoBlock::r_solver_bicgstab_loop_11(CkReductionMsg* msg) {
+void EnzoBlock::r_solver_bicgstab_loop_11(CkReductionMsg* msg) {
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
@@ -1263,13 +1206,13 @@ template<class T> void EnzoBlock::r_solver_bicgstab_loop_11(CkReductionMsg* msg)
   delete msg;
 
   /// call loop_12 to continue
-  solver->loop_12<T>(this);
+  solver->loop_12(this);
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw() {
+void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("loop_12()",enzo_block);
   /// verify legal floating-point values for preceding reduction results
@@ -1289,10 +1232,10 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
     omega_d_ = omega_d_ - us_*us_/bc_;
 
     if (is_active_(enzo_block)) {
-      T* Y = (T*) field.values(iy_);
-      T* U = (T*) field.values(iu_);
-      T yshift = -ys_ / bc_;
-      T ushift = -us_ / bc_;
+      enzo_float* Y = (enzo_float*) field.values(iy_);
+      enzo_float* U = (enzo_float*) field.values(iu_);
+      enzo_float yshift = -ys_ / bc_;
+      enzo_float ushift = -us_ / bc_;
       for (int i=0; i<m; i++) {
 	Y[i] += yshift;
 	U[i] += ushift;
@@ -1313,18 +1256,18 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   if ( omega_ == 0.0 ) {
     WARNING ("EnzoSolverBiCgStab::loop12()",
 	     "Solver error: omega_ == 0");
-    this->end<T>(enzo_block, return_error);
+    this->end(enzo_block, return_error);
   }
 
   /// update vectors (on leaf blocks only)
   if (is_active_(enzo_block)) {
 
     /// access relevant fields
-    T* X = (T*) field.values(ix_);
-    T* Y = (T*) field.values(iy_);
-    T* R = (T*) field.values(ir_);
-    T* Q = (T*) field.values(iq_);
-    T* U = (T*) field.values(iu_);
+    enzo_float* X = (enzo_float*) field.values(ix_);
+    enzo_float* Y = (enzo_float*) field.values(iy_);
+    enzo_float* R = (enzo_float*) field.values(ir_);
+    enzo_float* Q = (enzo_float*) field.values(iq_);
+    enzo_float* U = (enzo_float*) field.values(iu_);
     
     /// update: X = omega_*Y + X
     /// update: R = -omega_*U + Q
@@ -1347,8 +1290,8 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   /// beta_n_ = DOT(R, R0)
   long double reduce[4] = {0.0, 0.0, 0.0, 0.0};
   if (is_active_(enzo_block)) {
-    T* R  = (T*) field.values(ir_);
-    T* R0 = (T*) field.values(ir0_);
+    enzo_float* R  = (enzo_float*) field.values(ir_);
+    enzo_float* R0 = (enzo_float*) field.values(ir0_);
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
     reduce[0] = 0.0;
     reduce[1] = 0.0;
@@ -1364,8 +1307,9 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
   }
 
   /// initiate callback to r_solver_bicgstab_loop_13, and contribute to overall dot-products
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_13<T>(NULL), 
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_13(NULL), 
 		      enzo_block->proxy_array());
+
   enzo_block->contribute(2*sizeof(long double), &reduce, 
 			 sum_long_double_2_type, callback);
     
@@ -1373,7 +1317,7 @@ template<class T> void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw(
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoBlock::r_solver_bicgstab_loop_13(CkReductionMsg* msg) {
+void EnzoBlock::r_solver_bicgstab_loop_13(CkReductionMsg* msg) {
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
@@ -1386,14 +1330,14 @@ template<class T> void EnzoBlock::r_solver_bicgstab_loop_13(CkReductionMsg* msg)
   delete msg;
 
   // call loop_14 to continue
-  solver->loop_14<T>(this);
+  solver->loop_14(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw() {
+void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("loop_14()",enzo_block);
   /// verify legal floating-point values for preceding reduction results
@@ -1408,7 +1352,7 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
   if (beta_n_ == 0.0) {
     WARNING ("EnzoSolverBiCgStab::loop14()",
 	     "Solver error: beta_n_ == 0");
-    this->end<T>(enzo_block, return_error);
+    this->end(enzo_block, return_error);
   }
   
   /// compute beta factor in BiCgStab algorithm (all blocks)
@@ -1418,9 +1362,9 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
   if (is_active_(enzo_block)) {
 
     /// access relevant fields
-    T* P = (T*) field.values(ip_);
-    T* R = (T*) field.values(ir_);
-    T* V = (T*) field.values(iv_);
+    enzo_float* P = (enzo_float*) field.values(ip_);
+    enzo_float* R = (enzo_float*) field.values(ir_);
+    enzo_float* V = (enzo_float*) field.values(iv_);
 
     /// update: P = beta_*P + R
     /// update: P = -beta_*omega_*V + P
@@ -1437,8 +1381,10 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
   int iter = iter_ + 1;
 
   /// initiate callback to r_solver_bicgstab_loop_15, and contribute to overall max
-  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_15<T>(NULL), 
+
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_loop_15(NULL), 
 		      enzo_block->proxy_array());
+
   enzo_block->contribute(sizeof(int), &iter, 
 			 CkReduction::max_int, callback);
 
@@ -1446,7 +1392,7 @@ template<class T> void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw(
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg) {
+void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg) {
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
@@ -1457,14 +1403,14 @@ template<class T> void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg)
   delete msg;
 
   // call loop_0 to continue to next iteration
-  solver->loop_0<T>(this);
+  solver->loop_0(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
-template<class T> void EnzoSolverBiCgStab::end
+void EnzoSolverBiCgStab::end
 (EnzoBlock* enzo_block, int retval) throw () {
 
   TRACE_BICGSTAB("end()",this);

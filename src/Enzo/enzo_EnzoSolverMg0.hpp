@@ -108,13 +108,10 @@ public: // interface
   void compute_correction(EnzoBlock * enzo_block) throw();
 
   /// Apply pre-smoothing on the current level
-  template <class T>
   void pre_smooth(EnzoBlock * enzo_block) throw();
 
   /// Restrict residual to parent
-  template <class T>
   void restrict_send(EnzoBlock * enzo_block) throw();
-  template <class T>
   void restrict_recv(EnzoBlock * enzo_block,
 		     FieldMsg * field_message) throw();
 
@@ -125,25 +122,20 @@ public: // interface
   Prolong * prolong() { return prolong_; }
   
   /// Solve the coarse-grid equation A*C = R
-  template <class T>
   void solve_coarse(EnzoBlock * enzo_block) throw();
 
   /// Prolong the correction C to the next-finer level
-  template <class T>
   void prolong_recv(EnzoBlock * enzo_block,
 		    FieldMsg * field_message) throw();
 
   /// Apply post-smoothing to the current level
-  template <class T>
   void post_smooth(EnzoBlock * enzo_block) throw();
 
   void set_bs(long double bs) throw() { bs_ = bs; }
   void set_bc(long double bc) throw() { bc_ = bc; }
 
-  template <class T>
   void begin_solve(EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void end_cycle(EnzoBlock * enzo_block) throw();
   
   void print()
@@ -168,14 +160,11 @@ public: // interface
   }
 protected: // methods
 
-  template <class T>
   void enter_solver_(EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void begin_cycle_(EnzoBlock * enzo_block) throw();
   
   /// Prolong the correction C to the next-finer level
-  template <class T>
   void prolong_send_(EnzoBlock * enzo_block) throw();
 
   bool is_converged_(EnzoBlock * enzo_block) const;

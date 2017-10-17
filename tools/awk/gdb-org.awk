@@ -17,7 +17,6 @@ BEGIN {
 }
 /^#/ {
     enum=$1
-    sub(/#/,"",enum);
 }
 / at / {
     n=length($0)
@@ -34,5 +33,5 @@ BEGIN {
     gsub(/:/,"::",s)
     gsub(/build/,"src",s)
     
-    print "** TODO [[file:" s "][" t "]]"
+    print "** TODO",enum,"[[file:" s "][" t "]]"
 }

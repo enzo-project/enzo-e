@@ -42,7 +42,6 @@ public: // interface
 
 private: // functions
 
-  template <typename TP, typename TF>
   void compute_(Block * block);
 
 private: // attributes

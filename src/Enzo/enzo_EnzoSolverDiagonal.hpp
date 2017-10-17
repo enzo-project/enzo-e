@@ -53,7 +53,6 @@ public: // virtual functions
 
 protected: // methods
 
-  template <class T>
   void compute_ (Matrix * A, int ix, int ib, Block * block) throw();
 
 protected: // attributes

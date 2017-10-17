@@ -126,24 +126,11 @@ void EnzoBlock::p_solver_jacobi_continue()
 
 void EnzoSolverJacobi::compute(Block * block)
 {
-  
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (block);
-  Field field = enzo_block->data()->field();
-  // assume all fields have same precision
-  int precision = field.precision(0);
-
-  if (precision == precision_single) {
-    apply_<float>(block);
-  } else if (precision == precision_double) {
-    apply_<double>(block);
-  } else if (precision == precision_quadruple) {
-    apply_<long double>(block);
-  }
+  apply_(block);
 }
 
 //----------------------------------------------------------------------
 
-template <typename T>
 void EnzoSolverJacobi::apply_(Block * block)
 {
 #ifdef DEBUG_SMOOTH
@@ -154,7 +141,6 @@ void EnzoSolverJacobi::apply_(Block * block)
 
   int mx,my,mz;
   field.dimensions(ix_,&mx,&my,&mz);
-
 
   const int g0 = n_;
 
@@ -197,9 +183,9 @@ void EnzoSolverJacobi::apply_(Block * block)
 	      __FILE__,__LINE__,ix0,mx-ix0,iy0,my-iy0, iz0, mz-iz0);
 #endif
 
-    T * X = (T*) field.values(ix_);
-    T * R = (T*) field.values(ir_);
-    T * D = (T*) field.values(id_);
+    enzo_float * X = (enzo_float*) field.values(ix_);
+    enzo_float * R = (enzo_float*) field.values(ir_);
+    enzo_float * D = (enzo_float*) field.values(id_);
 
     for (int iz=iz0; iz<mz-iz0; iz++) {
       for (int iy=iy0; iy<my-iy0; iy++) {
@@ -221,8 +207,11 @@ void EnzoSolverJacobi::apply_(Block * block)
   CkPrintf ("%s:%d %s DEBUG_SMOOTH  Calling Solver::end_()\n",
 	    __FILE__,__LINE__,block->name().c_str());
 #endif
+
   deallocate_temporary_ (field,block);
+
   Solver::end_(block);
+
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p jacobi DEBUG_ENTRY calling callback %d\n",
 	      CkMyPe(),name().c_str(),this,callback_);

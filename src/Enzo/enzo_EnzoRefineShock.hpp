@@ -69,12 +69,11 @@ public: // interface
 
 private: // functions
 
-  template <class T>
-  void evaluate_block_( const T ** v3,
-			const T * te,
-			const T * de,
-			const T * p,
-			T * output,
+  void evaluate_block_( const enzo_float ** v3,
+			const enzo_float * te,
+			const enzo_float * de,
+			const enzo_float * p,
+			enzo_float * output,
 			int ndx, int ndy, int ndz,
 			int nx, int ny, int nz,
 			int gx, int gy, int gz,

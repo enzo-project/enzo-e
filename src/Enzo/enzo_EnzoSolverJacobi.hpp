@@ -68,7 +68,6 @@ public: // functions
 protected: // functions
 
   /// Implementation of solver() for given precision 
-  template <typename T>
   void apply_(Block * block);
 
   /// Allocate temporary Fields

@@ -52,8 +52,7 @@ public: // interface
 
 protected: // methods
 
-  template <class T>
-  void compute_ (Block * block, T * Unew ) const throw();
+  void compute_ (Block * block, enzo_float * Unew ) const throw();
 
 protected: // attributes
 

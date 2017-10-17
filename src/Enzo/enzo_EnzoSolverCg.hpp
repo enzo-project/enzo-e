@@ -96,38 +96,26 @@ public: // virtual functions
 public: // virtual functions
 
   /// Continuation after global reduction
-  template <class T>
   void shift_1(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
-  template <class T>
   void loop_0a(EnzoBlock * enzo_block, CkReductionMsg *) throw();
 
     /// Continuation after global reduction
-  template <class T>
   void loop_0b(EnzoBlock * enzo_block, CkReductionMsg *) throw();
 
   /// Continuation after global reduction
-  template <class T>
   void loop_2a(EnzoBlock * enzo_block) throw();
 
     /// Continuation after global reduction
-  template <class T>
   void loop_2b(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
-  template <class T>
   void loop_4(EnzoBlock * enzo_block) throw();
 
-  // /// Continuation after global reduction
-  // template <class T>
-  // void shift_2(EnzoBlock * enzo_block) throw();
-
   /// Continuation after global reduction
-  template <class T>
   void loop_6(EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void end (EnzoBlock * enzo_block, int retval) throw();
 
   /// Set rz_ by EnzoBlock after reduction
@@ -157,10 +145,8 @@ public: // virtual functions
 
 protected: // methods
 
-  template <class T>
   void compute_ (EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void begin_1_() throw();
 
   /// Allocate temporary Fields
@@ -182,11 +168,9 @@ protected: // methods
   }
 
   /// Serial CG solver if local_ == true
-  template <class T>
   void local_cg_ (EnzoBlock * enzo_block);
 
   /// Apply boundary conditions for the Field on the local block
-  template <class T>
   void refresh_local_(int ix, EnzoBlock * enzo_block);
   
   void monitor_output_(EnzoBlock *);

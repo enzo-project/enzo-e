@@ -230,23 +230,11 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 
 double EnzoMethodGravity::timestep (Block * block) const throw()
 {
-  Field field = block->data()->field();
-  
-  int precision = field.precision(0);
-
-  if      (precision == precision_single)
-    return timestep_<float>      (block);
-  else if (precision == precision_double)
-    return timestep_<double>     (block);
-  else if (precision == precision_quadruple)
-    return timestep_<long double>(block);
-  else 
-    ERROR1("EnzoMethodGravity()", "precision %d not recognized", precision);
+  return timestep_(block);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 double EnzoMethodGravity::timestep_ (Block * block) const throw()
 {
   Field field = block->data()->field();
@@ -258,11 +246,11 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
 
-  T * ax = (T*) field.values ("acceleration_x");
-  T * ay = (T*) field.values ("acceleration_y");
-  T * az = (T*) field.values ("acceleration_z");
+  enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
+  enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
+  enzo_float * az = (enzo_float*) field.values ("acceleration_z");
 
-  T dt = std::numeric_limits<T>::max();
+  enzo_float dt = std::numeric_limits<enzo_float>::max();
 
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
@@ -272,7 +260,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
       for (int iy=gy; iy<ny+gy; iy++) {
 	for (int iz=gz; iz<nz+gz; iz++) {
 	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(T(dt),T(sqrt(hx/(fabs(ax[i]+1e-20)))));
+	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hx/(fabs(ax[i]+1e-20)))));
 	}
       }
     }
@@ -282,7 +270,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
       for (int iy=gy; iy<ny+gy; iy++) {
 	for (int iz=gz; iz<nz+gz; iz++) {
 	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(T(dt),T(sqrt(hy/(fabs(ay[i]+1e-20)))));
+	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hy/(fabs(ay[i]+1e-20)))));
 	}
       }
     }
@@ -292,7 +280,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
       for (int iy=gy; iy<ny+gy; iy++) {
 	for (int iz=gz; iz<nz+gz; iz++) {
 	  int i=ix + mx*(iy + iz*my);
-	  dt = std::min(T(dt),T(sqrt(hz/(fabs(az[i]+1e-20)))));
+	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hz/(fabs(az[i]+1e-20)))));
 	}
       }
     }

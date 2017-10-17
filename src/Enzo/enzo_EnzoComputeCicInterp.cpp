@@ -48,39 +48,12 @@ void EnzoComputeCicInterp::compute ( Block * block) throw()
 
   if (!block->is_leaf()) return;
 
-  Field    field    = block->data()->field();
-  Particle particle = block->data()->particle();
-
-  int field_precision    = field.precision(if_);
-  int particle_precision = particle.attribute_type (it_p_,ia_p_);
-
-  ASSERT1 ("EnzoComputeCicInterp::compute()",
-	   "Unsupported particle_precision %d",
-	   particle_precision,
-	   particle_precision == type_single ||
-	   particle_precision == type_double);
-
-  ASSERT1 ("EnzoComputeCicInterp::compute()",
-	   "Unsupported field_precision %d",
-	   field_precision,
-	   field_precision == precision_single ||
-	   field_precision == precision_double);
-
-  int p_single = (particle_precision == type_single);
-  int p_double = (particle_precision == type_double);
-  int f_single = (field_precision == precision_single);
-  int f_double = (field_precision == precision_double);
-
-  if (p_single && f_single) compute_<float, float>  (block); 
-  if (p_single && f_double) compute_<float, double> (block); 
-  if (p_double && f_single) compute_<double,float> (block); 
-  if (p_double && f_double) compute_<double,double>(block); 
-
+  compute_(block);
+  
 }
 
 //----------------------------------------------------------------------
 
-template <class TP, class TF>
 void EnzoComputeCicInterp::compute_(Block * block)
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
@@ -88,7 +61,7 @@ void EnzoComputeCicInterp::compute_(Block * block)
   Field field = enzo_block->data()->field();
   Particle particle = enzo_block->data()->particle();
 
-  TF * vf = (TF*)field.values(if_);
+  enzo_float * vf = (enzo_float*)field.values(if_);
 
   const int ia_x = particle.attribute_position(it_p_,0);
   const int ia_y = particle.attribute_position(it_p_,1);
@@ -114,50 +87,45 @@ void EnzoComputeCicInterp::compute_(Block * block)
 
   const int nb = particle.num_batches(it_p_);
 
-  //  CkPrintf ("TRACE %s:%d rank = %d\n",__FILE__,__LINE__,rank);
-  //  CkPrintf ("TRACE %s:%d nb = %d\n",__FILE__,__LINE__,nb);
-
   for (int ib=0; ib<nb; ib++) {
 
-    TP * vp = (TP*) particle.attribute_array(it_p_, ia_p_, ib);
+    enzo_float * vp = (enzo_float*) particle.attribute_array(it_p_, ia_p_, ib);
 
     const int np = particle.num_particles(it_p_,ib);
-    //    CkPrintf ("TRACE %s:%d np = %d\n",__FILE__,__LINE__,np);
 
     if (rank == 1) {
 
-      TP * xa = (TP *) particle.attribute_array (it_p_,ia_x,ib);
+      enzo_float * xa = (enzo_float *) particle.attribute_array (it_p_,ia_x,ib);
 
       for (int ip=0; ip<np; ip++) {
 
-	TP x = xa[ip*dp];
+	enzo_float x = xa[ip*dp];
 
-	TP tx = nx*(x - xm) / (xp - xm) - 0.5;
+	enzo_float tx = nx*(x - xm) / (xp - xm) - 0.5;
 
 	int ix0 = gx + floor(tx);
 
 	int ix1 = ix0 + 1;
 
-	TP x0 = 1.0 - (tx - floor(tx));
+	enzo_float x0 = 1.0 - (tx - floor(tx));
 
-	TP x1 = 1.0 - x0;
+	enzo_float x1 = 1.0 - x0;
 
 	vp[ip*da] = x0*vf[ix0] + x1*vf[ix1];
       }
 
     } else if (rank == 2) {
 
-      TP * xa = (TP *) particle.attribute_array (it_p_,ia_x,ib);
-      TP * ya = (TP *) particle.attribute_array (it_p_,ia_y,ib);
+      enzo_float * xa = (enzo_float *) particle.attribute_array (it_p_,ia_x,ib);
+      enzo_float * ya = (enzo_float *) particle.attribute_array (it_p_,ia_y,ib);
 
-      //      CkPrintf ("TRACE %s:%d\n",__FILE__,__LINE__);
       for (int ip=0; ip<np; ip++) {
 
-	TP x = xa[ip*dp];
-	TP y = ya[ip*dp];
+	enzo_float x = xa[ip*dp];
+	enzo_float y = ya[ip*dp];
 
-	TP tx = nx*(x - xm) / (xp - xm) - 0.5;
-	TP ty = ny*(y - ym) / (yp - ym) - 0.5;
+	enzo_float tx = nx*(x - xm) / (xp - xm) - 0.5;
+	enzo_float ty = ny*(y - ym) / (yp - ym) - 0.5;
 
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
@@ -165,11 +133,11 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int ix1 = ix0 + 1;
 	int iy1 = iy0 + 1;
 
-	TP x0 = 1.0 - (tx - floor(tx));
-	TP y0 = 1.0 - (ty - floor(ty));
+	enzo_float x0 = 1.0 - (tx - floor(tx));
+	enzo_float y0 = 1.0 - (ty - floor(ty));
 
-	TP x1 = 1.0 - x0;
-	TP y1 = 1.0 - y0;
+	enzo_float x1 = 1.0 - x0;
+	enzo_float y1 = 1.0 - y0;
 
 	if ( ! ( (0.0 <= x0 && x0 <= 1.0) ||
 		 (0.0 <= y0 && y0 <= 1.0) ||
@@ -187,19 +155,19 @@ void EnzoComputeCicInterp::compute_(Block * block)
 
     } else if (rank == 3) {
 
-      TP * xa = (TP *) particle.attribute_array (it_p_,ia_x,ib);
-      TP * ya = (TP *) particle.attribute_array (it_p_,ia_y,ib);
-      TP * za = (TP *) particle.attribute_array (it_p_,ia_z,ib);
+      enzo_float * xa = (enzo_float *) particle.attribute_array (it_p_,ia_x,ib);
+      enzo_float * ya = (enzo_float *) particle.attribute_array (it_p_,ia_y,ib);
+      enzo_float * za = (enzo_float *) particle.attribute_array (it_p_,ia_z,ib);
 
       for (int ip=0; ip<np; ip++) {
 
-	TP x = xa[ip*dp];
-	TP y = ya[ip*dp];
-	TP z = za[ip*dp];
+	enzo_float x = xa[ip*dp];
+	enzo_float y = ya[ip*dp];
+	enzo_float z = za[ip*dp];
 
-	TP tx = nx*(x - xm) / (xp - xm) - 0.5;
-	TP ty = ny*(y - ym) / (yp - ym) - 0.5;
-	TP tz = nz*(z - zm) / (zp - zm) - 0.5;
+	enzo_float tx = nx*(x - xm) / (xp - xm) - 0.5;
+	enzo_float ty = ny*(y - ym) / (yp - ym) - 0.5;
+	enzo_float tz = nz*(z - zm) / (zp - zm) - 0.5;
 
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
@@ -209,13 +177,13 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int iy1 = iy0 + 1;
 	int iz1 = iz0 + 1;
 
-	TP x0 = 1.0 - (tx - floor(tx));
-	TP y0 = 1.0 - (ty - floor(ty));
-	TP z0 = 1.0 - (tz - floor(tz));
+	enzo_float x0 = 1.0 - (tx - floor(tx));
+	enzo_float y0 = 1.0 - (ty - floor(ty));
+	enzo_float z0 = 1.0 - (tz - floor(tz));
 
-	TP x1 = 1.0 - x0;
-	TP y1 = 1.0 - y0;
-	TP z1 = 1.0 - z0;
+	enzo_float x1 = 1.0 - x0;
+	enzo_float y1 = 1.0 - y0;
+	enzo_float z1 = 1.0 - z0;
 
 	vp[ip*da] = x0*y0*z0*vf[ix0+mx*(iy0+my*iz0)] 
 	  +         x1*y0*z0*vf[ix1+mx*(iy0+my*iz0)] 
@@ -225,19 +193,6 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	  +         x1*y0*z1*vf[ix1+mx*(iy0+my*iz1)] 
 	  +         x0*y1*z1*vf[ix0+mx*(iy1+my*iz1)] 
 	  +         x1*y1*z1*vf[ix1+mx*(iy1+my*iz1)];
-// #ifdef DEBUG_CIC_INTERP
-// 	    CkPrintf ("%s cic %8.5f : %8.5f %8.5f  %8.5f  %8.5f %8.5f %8.5f %8.5f %8.5f\n",
-// 		      block->name().c_str(),vp[ip*da],
-// 		      vf[ix0+mx*(iy0+my*iz0)] ,
-// 		      vf[ix1+mx*(iy0+my*iz0)] ,
-// 		      vf[ix0+mx*(iy1+my*iz0)] ,
-// 		      vf[ix1+mx*(iy1+my*iz0)],
-// 		      vf[ix0+mx*(iy0+my*iz1)] ,
-// 		      vf[ix1+mx*(iy0+my*iz1)] ,
-// 		      vf[ix0+mx*(iy1+my*iz1)] ,
-// 		      vf[ix1+mx*(iy1+my*iz1)]);
-// #endif	    
-
       }
     }
   }

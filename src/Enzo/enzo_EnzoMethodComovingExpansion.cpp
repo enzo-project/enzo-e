@@ -6,8 +6,9 @@
 /// @brief    Implements comoving expansion class
 
 #include "cello.hpp"
+#include "charm_simulation.hpp"
 #include "enzo.hpp"
-
+#include "enzo.decl.h"
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
@@ -20,7 +21,18 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_comoving_expansion);
-  refresh(ir)->add_all_fields();
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  const int rank = simulation->rank();
+  //  refresh(ir)->add_all_fields();
+  refresh(ir)->add_field(field_descr->field_id("density"));
+  refresh(ir)->add_field(field_descr->field_id("total_energy"));
+  refresh(ir)->add_field(field_descr->field_id("internal_density"));
+  if (rank >= 1) refresh(ir)->add_field(field_descr->field_id("velocity_x"));
+  if (rank >= 2) refresh(ir)->add_field(field_descr->field_id("velocity_y"));
+  if (rank >= 3) refresh(ir)->add_field(field_descr->field_id("velocity_z"));
+					
   if ( ! comoving_coordinates_ ) {
     WARNING
       ("EnzoMethodComovingExpansion::EnzoMethodComovingExpansion()",

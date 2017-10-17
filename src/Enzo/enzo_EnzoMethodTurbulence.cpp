@@ -344,27 +344,18 @@ void EnzoMethodTurbulence::compute_resume
 		    g[index_turbulence_maxd]);                  
   }
 
-  if (!block->is_leaf()) {
-    enzo_block->compute_done();
-    return;
+  if (block->is_leaf()) {
+    compute_resume_(block,msg);
   }
 
-  const int p = field.precision (0);
+  enzo_block->compute_done();
 
-  if      (p == precision_single)    
-    compute_resume_<float> (block,msg);
-  else if (p == precision_double)    
-    compute_resume_<double> (block,msg);
-  else if (p == precision_quadruple) 
-    compute_resume_<long double> (block,msg);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoMethodTurbulence::compute_resume_ 
-(Block * block,
- CkReductionMsg * msg) throw()
+(Block * block, CkReductionMsg * msg) throw()
 {
   delete msg;
   
@@ -375,46 +366,44 @@ void EnzoMethodTurbulence::compute_resume_
 
   Field field = block->data()->field();
 
-  int ndx,ndy,ndz;
-  field.size(&ndx,&ndy,&ndz);
-  int nd = ndx*ndy*ndz;
+  int mx,my,mz;
+  int nx,ny,nz;
+  int gx,gy,gz;
+  field.dimensions (0,&mx,&my,&mz);
+  field.size         (&nx,&ny,&nz);
+  field.ghost_depth(0,&gx,&gy,&gz);
+
+  int n = nx*ny*nz;
 
   double * g = enzo_block->method_turbulence_data;
 
   double dt = block->dt();
 
   double norm = (edot_ != 0.0) ?
-    ( sqrt(g[0]*g[0] + 2.0*nd*g[1]*dt*edot_) - g[0] ) / g[1] : 0.0;
+    ( sqrt(g[0]*g[0] + 2.0*n*g[1]*dt*edot_) - g[0] ) / g[1] : 0.0;
 
   // ASSUMES CONSTANT TIME STEP
 
   double dt0 = dt;
   norm = (dt/dt0)*norm;
 
-  int mx,my,mz;
-  field.dimensions (0,&mx,&my,&mz);
-  const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
+  const int rank = (my == 1) ? 1 : ((mz == 1) ? 2 : 3);
 
-  T * te = (T*) field.values ("total_energy");
-  T * v3[3] = { (T*) field.values ("velocity_x"),
-		(T*) field.values ("velocity_y"),
-		(T*) field.values ("velocity_z") };
-  T * a3[3] = { (T*) field.values ("driving_x"),
-		(T*) field.values ("driving_y"),
-		(T*) field.values ("driving_z") };
-
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-  int gx,gy,gz;
-  field.ghost_depth(0,&gx,&gy,&gz);
-  int nbx = nx + 2*gx;
-  int nby = ny + 2*gy;
+  enzo_float * te = (enzo_float*) field.values ("total_energy");
+  enzo_float * v3[3] = {
+    (enzo_float*) field.values ("velocity_x"),
+    (enzo_float*) field.values ("velocity_y"),
+    (enzo_float*) field.values ("velocity_z") };
+  enzo_float * a3[3] = {
+    (enzo_float*) field.values ("driving_x"),
+    (enzo_float*) field.values ("driving_y"),
+    (enzo_float*) field.values ("driving_z") };
 
   // compute bulk momentum
-  const T bm[3] = 
-    { T(g[index_turbulence_dax]/nd),
-      T(g[index_turbulence_day]/nd),
-      T(g[index_turbulence_daz]/nd)};
+  const enzo_float bm[3] = 
+    { enzo_float(g[index_turbulence_dax]/n),
+      enzo_float(g[index_turbulence_day]/n),
+      enzo_float(g[index_turbulence_daz]/n)};
 
   //  for (int dim = 0; dim <  MetaData->TopGridRank; dim++)
   //	bulkMomentum[dim] = GlobVal[7+dim]/numberOfGridZones;
@@ -422,7 +411,7 @@ void EnzoMethodTurbulence::compute_resume_
   for (int iz=gz; iz<gz+nz; iz++) {
     for (int iy=gy; iy<gy+ny; iy++) {
       for (int ix=gx; ix<gx+nx; ix++) {
-	int i = ix + nbx*(iy + nby*iz);
+	int i = ix + mx*(iy + my*iz);
 	for (int id=0; id<rank; id++) {
 	  //	  	  te[i] += v3[id][i]*a3[id][i]*norm + 0.5*a3[id][i]*norm*a3[id][i]*norm;
 	  //	  	  v3[id][i] += a3[id][i]*norm;
@@ -435,6 +424,5 @@ void EnzoMethodTurbulence::compute_resume_
   }
 
   TRACE_TURBULENCE;  
-  enzo_block->compute_done();
   
 }

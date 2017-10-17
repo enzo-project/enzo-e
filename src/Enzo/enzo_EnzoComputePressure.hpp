@@ -38,7 +38,6 @@ public: // interface
 
 protected: // functions
 
-  template <typename T>
   void compute_(Block * block);
 
 protected: // attributes

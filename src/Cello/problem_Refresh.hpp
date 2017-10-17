@@ -125,14 +125,18 @@ public: // interface
 
   /// Add a field to the list of fields to refresh
   void add_field(int id_field) {
-    field_list_src_.push_back(id_field);
-    field_list_dst_.push_back(id_field);
+    if (id_field != -1) {
+      field_list_src_.push_back(id_field);
+      field_list_dst_.push_back(id_field);
+    }
   }
 
   /// Add a source and corresponding destination field to refresh
   void add_field_src_dst(int id_field_src, int id_field_dst) {
-    field_list_src_.push_back(id_field_src);
-    field_list_dst_.push_back(id_field_dst);
+    if (id_field_src != -1 && id_field_dst != -1) {
+      field_list_src_.push_back(id_field_src);
+      field_list_dst_.push_back(id_field_dst);
+    }
   }
   
   /// All fields are refreshed

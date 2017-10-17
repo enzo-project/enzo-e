@@ -247,27 +247,21 @@ public: /// entry methods
   //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
-  template <class T>
   void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
 
   /// EnzoSolverCg entry method: ==> refresh P
-  template <class T>
   void r_solver_cg_loop_0b (CkReductionMsg * msg) ;  
 
   /// EnzoSolverCg entry method: DOT(R,R) after shift
-  template <class T>
   void r_solver_cg_shift_1 (CkReductionMsg * msg) ;
 
   /// EnzoSolverCg entry method
-  template <class T>
   void p_solver_cg_loop_2 () ;
 
   /// EnzoSolverCg entry method: DOT(P,AP)
-  template <class T>
   void r_solver_cg_loop_3 (CkReductionMsg * msg) ;
 
   /// EnzoSolverCg entry method: DOT(R,R)
-  template <class T>
   void r_solver_cg_loop_5 (CkReductionMsg * msg) ;
 
   /// EnzoSolverCg entry method: 
@@ -279,11 +273,9 @@ public: /// entry methods
   //--------------------------------------------------
   
   /// EnzoSolverBiCGStab entry method: SUM(B) and COUNT(B)
-  template <class T>
   void r_solver_bicgstab_start_1(CkReductionMsg* msg);  
 
   /// EnzoSolverBiCGStab entry method: DOT(R,R)
-  template <class T>
   void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
 
   /// EnzoSolverBiCGStab entry method: return from preconditioner
@@ -293,7 +285,6 @@ public: /// entry methods
   void p_solver_bicgstab_loop_3();
 
   /// EnzoSolverBiCGStab entry method: DOT(V,R0), SUM(Y) and SUM(V)
-  template <class T>
   void r_solver_bicgstab_loop_5(CkReductionMsg* msg);  
 
   /// EnzoSolverBiCGStab entry method: return from preconditioner
@@ -303,15 +294,12 @@ public: /// entry methods
   void p_solver_bicgstab_loop_9();
 
   /// EnzoSolverBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
-  template <class T>
   void r_solver_bicgstab_loop_11(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: DOT(R,R) and DOT(R,R0)
-  template <class T>
   void r_solver_bicgstab_loop_13(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: ITER++
-  template <class T>
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
   // EnzoSolverJacobi

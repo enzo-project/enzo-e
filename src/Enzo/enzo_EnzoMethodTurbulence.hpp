@@ -55,7 +55,6 @@ public: // interface
 
 private: // methods
 
-  template <class T>
   void compute_resume_ (Block * block, CkReductionMsg * msg) throw();
 
 private: // attributes

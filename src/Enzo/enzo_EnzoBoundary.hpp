@@ -64,11 +64,10 @@ protected: // functions
     axis_enum axis) const throw();
 
   /// Template for reflecting boundary conditions on different precisions
-  template<class T>
   void enforce_reflecting_precision_
   ( face_enum face,
     axis_enum axis,
-    T * array,
+    enzo_float * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
     bool vx,bool vy,bool vz,
@@ -86,12 +85,11 @@ protected: // functions
     face_enum face, 
     axis_enum axis) const throw();
 
-  /// Template for outflow boundary conditions on different precisions
-  template<class T>
+  /// Enforce outflow boundary conditions on a boundary face
   void enforce_outflow_precision_
   ( face_enum face,
     axis_enum axis,
-    T * array,
+    enzo_float * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
     double * x, double * y, double * z,
