@@ -258,7 +258,9 @@ int EnzoBlock::SolveHydroEquations
   field.dimensions(0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
   
+  enzo_float * potential = (enzo_float *) field.values("potential");
   TRACE_FIELD("ppm-0-density",density,1.0);
+  TRACE_FIELD("ppm-0-potential",potential,1.0);
   TRACE_FIELD("ppm-0-total_energy",total_energy,1.0);
   TRACE_FIELD("ppm-0-velocity_x",velocity_x,1.0);
   TRACE_FIELD("ppm-0-velocity_y",velocity_y,1.0);

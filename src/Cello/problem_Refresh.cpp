@@ -41,7 +41,8 @@ int Refresh::data_size () const
 char * Refresh::save_data (char * buffer) const
 {
 #ifdef DEBUG_REFRESH  
-  CkPrintf ("DEBUG_REFRESH Refresh::save_data()\n");
+  CkPrintf ("%d DEBUG_REFRESH Refresh::save_data() %p\n",
+	    CkMyPe(),this);
   fflush(stdout);
 #endif  
   char * p = buffer;
@@ -103,7 +104,8 @@ char * Refresh::save_data (char * buffer) const
 char * Refresh::load_data (char * buffer)
 {
 #ifdef DEBUG_REFRESH  
-  CkPrintf ("DEBUG_REFRESH Refresh::load_data()\n");
+  CkPrintf ("%d DEBUG_REFRESH Refresh::load_data() %p\n",
+	    CkMyPe(),this);
   fflush(stdout);
 #endif  
   char * p = buffer;

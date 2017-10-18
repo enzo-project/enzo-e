@@ -61,7 +61,6 @@ enzo_float EnzoPhysicsCosmology::time_from_redshift (enzo_float redshift) const
 void EnzoPhysicsCosmology::compute_expansion_factor
 (enzo_float *a, enzo_float *dadt, enzo_float time) const
 {
- 
   /* Error check. */
 
   ASSERT ("EnzoPhysicsCosmology::compute_expansion_factor",

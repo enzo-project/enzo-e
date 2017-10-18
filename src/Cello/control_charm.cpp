@@ -158,8 +158,8 @@ void Block::refresh_enter (int callback, Refresh * refresh)
   TRACE_CONTROL("refresh_enter");
 
 #ifdef DEBUG_REFRESH
-  CkPrintf ("%s:%d %s Block::set_refresh (%p)\n",
-	    __FILE__,__LINE__,name().c_str(),refresh);
+  CkPrintf ("%d %s:%d DEBUG REFRESH %s Block::set_refresh (%p)\n",
+	    CkMyPe(), __FILE__,__LINE__,name().c_str(),refresh);
   fflush(stdout);
 #endif
   
@@ -186,15 +186,15 @@ void Block::refresh_exit_()
 		refresh_.back()->sync_type(),
 		refresh_.back()->sync_exit());
     
-#ifdef DEBUG_REFRESH
-  printf ("DEBUG_REFRESH Calling Block %s refresh_pop_back(%p)\n",
-	  name().c_str(),refresh());
+#ifdef DEBUG_REFRESH 
+ printf ("%d DEBUG_REFRESH Calling Block %s refresh_pop_back(%p)\n",
+	  CkMyPe(),name().c_str(),refresh());
   fflush(stdout);
       
 #endif
-  Refresh * refresh = refresh_.back();
-  delete refresh;
-  refresh_.pop_back();
+  //  Refresh * refresh = refresh_.back();
+  //  delete refresh;
+  //  refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
@@ -261,8 +261,8 @@ void Block::control_sync_neighbor(int entry_point, int id_sync)
 	  (id_sync >= 0));
 
 #ifdef DEBUG_REFRESH    
-  CkPrintf ("DEBUG_REFRESH %s neighbor sync id %d\n",
-	    name().c_str(),id_sync);
+  CkPrintf ("%d DEBUG_REFRESH %s neighbor sync id %d\n",
+	    CkMyPe(), name().c_str(),id_sync);
 #endif    
 
   const int min_face_rank = 0;

@@ -6,6 +6,8 @@
 /// @brief    [\ref Problem] Declaration of the Refresh class
 ///
 
+// #define DEBUG_REFRESH
+
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
@@ -33,6 +35,11 @@ public: // interface
     active_(true),
     callback_(0) 
   {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
+	      CkMyPe(), __FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
   }
 
   /// empty constructor for charm++ pup()
@@ -57,6 +64,11 @@ public: // interface
       active_(active),
       callback_(0) 
   {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
   }
 
   /// CHARM++ PUP::able declaration
@@ -79,8 +91,23 @@ public: // interface
       active_(false),
       callback_(0)
   {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
   }
 
+  /// Destructor
+  ~Refresh()
+  {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH ~Refresh() %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
+  }
+  
   bool operator == (const Refresh & refresh)
   {
     return (all_fields_      == refresh.all_fields_)

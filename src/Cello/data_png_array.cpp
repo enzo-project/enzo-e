@@ -4,6 +4,7 @@
 
 // #define DEBUG_PNG
 
+// #define PLOT
 void png_array (const char * filename,
 		float * array,
 		int gx,int gy,int gz,
@@ -23,14 +24,16 @@ void png_array (const char * filename,
   double colormap[2][3] = {{ 0.0, 0.0, 0.0},
 			   { 1.0, 1.0, 1.0} };
   const int nc = 2;
- 
+
+#ifdef PLOT  
   pngwriter * png;
   if (px==0) px = 1;
   if (py==0) py = 1;
   px = (mx-2*gx)*px;
   py = (my-2*gy)*py;
   png = new pngwriter(px, py,0,filename);
-
+#endif
+  
   double min=std::numeric_limits<double>::max();
   double max=-std::numeric_limits<double>::max();
 
@@ -74,6 +77,7 @@ void png_array (const char * filename,
 #endif
   int nx=mx-2*gx;
   int ny=my-2*gy;
+#ifdef PLOT  
   for (int ky=0; ky<py; ky++) {
     int iy = 1.0*ky*ny/py+gy;
     for (int kx=0; kx<px; kx++) {
@@ -97,5 +101,5 @@ void png_array (const char * filename,
   png->close();
   
   delete png;
-
+#endif
 }

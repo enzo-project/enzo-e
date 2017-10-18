@@ -12,7 +12,6 @@
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
-
 // #define DEBUG_REFRESH
 
 #ifdef DEBUG_REFRESH

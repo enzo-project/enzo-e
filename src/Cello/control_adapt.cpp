@@ -832,12 +832,6 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 
   performance_start_(perf_adapt_update);
 
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
-  fflush(stdout);
-  if (msg->field_face()) msg->field_face()->print("called store");
-#endif
-
   msg->update(data());
 
   int * ic3 = msg->ic3();

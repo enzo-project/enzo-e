@@ -87,6 +87,7 @@ class FieldFace;
   {									\
     double sum_all=0.0;							\
     double sum_real=0.0;						\
+    double sum_abs=0.0;						\
     double sum2_all=0.0;						\
     double sum2_real=0.0;						\
     for (int iz=0; iz<mz; iz++) {					\
@@ -102,8 +103,8 @@ class FieldFace;
       for (int iy=gy; iy<my-gy; iy++) {					\
 	for (int ix=gx; ix<mx-gx; ix++) {				\
 	  int i = ix + mx*(iy + my*iz);					\
-	  if (PLOT) CkPrintf ("PRINT:%s %24.18f\n",NAME,SCALE*FIELD[i]);	\
 	  sum_real+=SCALE*(FIELD[i]);					\
+	  sum_abs+=std::abs(SCALE*(FIELD[i]));				\
 	  sum2_real+=SCALE*(FIELD[i])*SCALE*(FIELD[i]);			\
 	}								\
       }									\
@@ -115,6 +116,8 @@ class FieldFace;
 	      SCALE*(FIELD[gx+mx*((gy+1)+my*gz)]),			\
 	      SCALE*(FIELD[gx+mx*(gy+my*(gz+1))]),			\
 	      __FILE__,__LINE__,NAME);					\
+    CkPrintf ("DEBUG_SUMMARY %s %g | %25.20g |\n",					\
+	      NAME,sum_real,sum_abs);						\
     fflush(stdout);							\
     char filename[80];						\
     sprintf (filename,"renzo-p-%s.png",NAME);				\

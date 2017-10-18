@@ -636,7 +636,7 @@ void Config::read_mesh_ (Parameters * p) throw()
   const int m = mx*my*mz;
 
   if ( ! (m >= CkNumPes()) ) {
-    ERROR4 ("Config::read_mesh_()",
+    WARNING4 ("Config::read_mesh_()",
 	    "Number of root blocks %d x %d x %d cannot be be "
 	    "less than number of processes %d",
 	    mx,my,mz,CkNumPes());

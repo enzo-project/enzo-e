@@ -9,6 +9,8 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
+// #define DEBUG_MSG_REFINE
+
 //----------------------------------------------------------------------
 
 long MsgRefine::counter[CONFIG_NODE_SIZE] = {0};
@@ -27,7 +29,12 @@ MsgRefine::MsgRefine()
     cycle_(-1), time_(-1.0), dt_(-1.0),
     refresh_type_(refresh_unknown),
     num_face_level_(0), face_level_(NULL)
-{  
+{
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine()\n",
+	    __FILE__,__LINE__);
+  fflush(stdout);
+#endif  
   ++counter[cello::index_static()]; 
 }
 
@@ -63,6 +70,11 @@ MsgRefine::MsgRefine
 
 MsgRefine::~MsgRefine()
 {
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE ~MsgRefine()\n",
+	    __FILE__,__LINE__);
+  fflush(stdout);
+#endif  
   --counter[cello::index_static()];
 
   delete data_msg_;
@@ -75,6 +87,11 @@ MsgRefine::~MsgRefine()
 
 void MsgRefine::set_data_msg  (DataMsg * data_msg) 
 {
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine::set_data_msg(%p)\n",
+	    __FILE__,__LINE__,data_msg);
+  fflush(stdout);
+#endif  
   if (data_msg_) {
     WARNING ("MsgRefine::set_data_msg()",
 	     "overwriting existing data_msg_");
@@ -87,6 +104,11 @@ void MsgRefine::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefine::pack (MsgRefine * msg)
 {
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine::pack(%p)\n",
+	    __FILE__,__LINE__,msg);
+  fflush(stdout);
+#endif  
   if (msg->buffer_ != NULL) return msg->buffer_;
 
   int size = 0;
@@ -222,6 +244,12 @@ MsgRefine * MsgRefine::unpack(void * buffer)
 
   msg = new ((void*)msg) MsgRefine;
   
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine::unpack()\n",
+	    __FILE__,__LINE__,msg);
+  fflush(stdout);
+#endif  
+
   msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
@@ -301,6 +329,11 @@ MsgRefine * MsgRefine::unpack(void * buffer)
 
 void MsgRefine::update (Data * data)
 {
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine()\n",
+	    __FILE__,__LINE__);
+  fflush(stdout);
+#endif  
   if (data_msg_ == NULL) return;
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
