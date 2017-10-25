@@ -18,7 +18,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_grackle_units(),
   method_grackle_chemistry(),
 #endif
-  ppm_density_floor(0.0),
   ppm_diffusion(false),
   ppm_dual_energy(false),
   ppm_dual_energy_eta_1(0.0),
@@ -26,10 +25,11 @@ EnzoConfig::EnzoConfig() throw ()
   ppm_flattening(0),
   ppm_minimum_pressure_support_parameter(0),
   ppm_number_density_floor(0.0),
+  ppm_density_floor(0.0),
   ppm_pressure_floor(0.0),
+  ppm_temperature_floor(0.0),
   ppm_pressure_free(false),
   ppm_steepening(false),
-  ppm_temperature_floor(0.0),
   ppm_use_minimum_pressure_support(false),
   ppm_mol_weight(0.0),
   field_gamma(0.0),
@@ -41,6 +41,7 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_max_expansion_rate(0.0),
   physics_cosmology_initial_redshift(0.0),
   physics_cosmology_final_redshift(0.0),
+  physics_gravity(false),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -93,6 +94,15 @@ EnzoConfig::EnzoConfig() throw ()
   interpolation_method(""),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
+  // EnzoMethodHydro
+  method_hydro_method(""),
+  method_hydro_dual_energy(false),
+  method_hydro_dual_energy_eta_1(0.0),
+  method_hydro_dual_energy_eta_2(0.0),
+  method_hydro_reconstruct_method(""),
+  method_hydro_reconstruct_conservative(0),
+  method_hydro_reconstruct_positive(0),
+  method_hydro_riemann_solver(""),
   // EnzoMethodNull
   method_null_dt(0.0),
   // EnzoMethodTurbulence
@@ -143,7 +153,6 @@ void EnzoConfig::pup (PUP::er &p)
 
   // NOTE: change this function whenever attributes change
 
-  p | ppm_density_floor;
   p | ppm_diffusion;
   p | ppm_dual_energy;
   p | ppm_dual_energy_eta_1;
@@ -151,10 +160,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | ppm_flattening;
   p | ppm_minimum_pressure_support_parameter;
   p | ppm_number_density_floor;
+  p | ppm_density_floor;
   p | ppm_pressure_floor;
+  p | ppm_temperature_floor;
   p | ppm_pressure_free;
   p | ppm_steepening;
-  p | ppm_temperature_floor;
   p | ppm_use_minimum_pressure_support;
   p | ppm_mol_weight;
 
@@ -168,6 +178,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_max_expansion_rate;
   p | physics_cosmology_initial_redshift;
   p | physics_cosmology_final_redshift;
+
+  p | physics_gravity;
 
   p | initial_cosmology_temperature;
   
@@ -228,6 +240,15 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_heat_alpha;
 
+  p | method_hydro_method;
+  p | method_hydro_dual_energy;
+  p | method_hydro_dual_energy_eta_1;
+  p | method_hydro_dual_energy_eta_2;
+  p | method_hydro_reconstruct_method;
+  p | method_hydro_reconstruct_conservative;
+  p | method_hydro_reconstruct_positive;
+  p | method_hydro_riemann_solver;
+
   p | method_null_dt;
   p | method_turbulence_edot;
 
@@ -284,10 +305,8 @@ void EnzoConfig::read(Parameters * p) throw()
 
   double floor_default = 1e-6;
 
-  ppm_density_floor = p->value_float
-    ("Method:ppm:density_floor",  floor_default);
-  ppm_diffusion = p->value_logical 
-    ("Method:ppm:diffusion",  false);
+  ppm_diffusion = p->value_logical
+    ("Method:ppm:diffusion", false);
   ppm_dual_energy = p->value_logical 
     ("Method:ppm:dual_energy",false);
   ppm_dual_energy_eta_1 = p->value_float
@@ -300,14 +319,16 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:minimum_pressure_support_parameter",100);
   ppm_number_density_floor = p->value_float
     ("Method:ppm:number_density_floor", floor_default);
+  ppm_density_floor = p->value_float
+    ("Method:ppm:density_floor", floor_default);
   ppm_pressure_floor = p->value_float
     ("Method:ppm:pressure_floor", floor_default);
+  ppm_temperature_floor = p->value_float
+    ("Method:ppm:temperature_floor", floor_default);
   ppm_pressure_free = p->value_logical
     ("Method:ppm:pressure_free",false);
   ppm_steepening = p->value_logical 
     ("Method:ppm:steepening", false);
-  ppm_temperature_floor = p->value_float
-    ("Method:ppm:temperature_floor", floor_default);
   ppm_use_minimum_pressure_support = p->value_logical
     ("Method:ppm:use_minimum_pressure_support",false);
   ppm_mol_weight = p->value_float
@@ -489,6 +510,28 @@ void EnzoConfig::read(Parameters * p) throw()
   method_heat_alpha = p->value_float 
     ("Method:heat:alpha",1.0);
 
+  method_hydro_method = p->value_string 
+    ("Method:hydro:method","ppm");
+
+  method_hydro_dual_energy = p->value_logical
+    ("Method:hydro:dual_energy",false);
+  method_hydro_dual_energy_eta_1 = p->value_float
+    ("Method:hydro:dual_energy_eta_1",0.001);
+  method_hydro_dual_energy_eta_2 = p->value_float
+    ("Method:hydro:dual_energy_eta_2",0.1);
+
+  method_hydro_reconstruct_method = p->value_string
+    ("Method:hydro:reconstruct_method","ppm");
+
+  method_hydro_reconstruct_conservative = p->value_logical
+    ("Method:hydro:reconstruct_conservative","false");
+
+  method_hydro_reconstruct_positive = p->value_logical
+    ("Method:hydro:reconstruct_positive","false");
+
+  method_hydro_riemann_solver = p->value_string
+    ("Method:hydro:riemann_solver","ppm");
+  
   method_null_dt = p->value_float 
     ("Method:null:dt",std::numeric_limits<double>::max());
 
@@ -542,6 +585,11 @@ void EnzoConfig::read(Parameters * p) throw()
 
     }
 
+    if (physics_list[index_physics] == "gravity") {
+
+      physics_gravity = true;
+
+    }
   }
  
   //======================================================================
