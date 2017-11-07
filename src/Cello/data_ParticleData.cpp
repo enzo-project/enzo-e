@@ -553,9 +553,9 @@ bool ParticleData::velocity
  double * vx, double * vy, double * vz)
 {
   // If velocitys are floating-point, return the requested values directly
-  int ia_x = particle_descr->attribute_velocity(it,0);
-  int ia_y = particle_descr->attribute_velocity(it,1);
-  int ia_z = particle_descr->attribute_velocity(it,2);
+  const int ia_x = particle_descr->attribute_velocity(it,0);
+  const int ia_y = particle_descr->attribute_velocity(it,1);
+  const int ia_z = particle_descr->attribute_velocity(it,2);
   bool l_return = false;
   if (vx && (ia_x != -1)) {
     const int type_x = particle_descr->attribute_type(it,ia_x);

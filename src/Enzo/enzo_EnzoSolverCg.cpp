@@ -254,7 +254,8 @@ void EnzoSolverCg::loop_0a
   Refresh refresh (4,0,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_cg_loop_0a);
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields();
+
+  //refresh.add_all_fields();
 
   refresh.add_field (id_);
   refresh.add_field (ir_);

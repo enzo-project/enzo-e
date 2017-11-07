@@ -257,10 +257,12 @@ int EnzoBlock::SolveHydroEquations
   int gx,gy,gz;
   field.dimensions(0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
-  
-  enzo_float * potential = (enzo_float *) field.values("potential");
+
+  enzo_float * potential = (enzo_float *) field.values("potential_temp");
+  enzo_float * density_total = (enzo_float *) field.values("B_temp");
   TRACE_FIELD("ppm-0-density",density,1.0);
   TRACE_FIELD("ppm-0-potential",potential,1.0);
+  TRACE_FIELD("ppm-0-density-total",density_total,1.0);
   TRACE_FIELD("ppm-0-total_energy",total_energy,1.0);
   TRACE_FIELD("ppm-0-velocity_x",velocity_x,1.0);
   TRACE_FIELD("ppm-0-velocity_y",velocity_y,1.0);
@@ -269,6 +271,14 @@ int EnzoBlock::SolveHydroEquations
   TRACE_FIELD("ppm-0-acceleration_y",acceleration_y,1.0);
   TRACE_FIELD("ppm-0-acceleration_z",acceleration_z,1.0);
   TRACE_FIELD("ppm-0-internal_energy",internal_energy,1.0);
+
+  Particle particle = data()->particle();
+  TRACE_PARTICLE("ppm-0-velocity_x",particle,"dark","vx");
+  TRACE_PARTICLE("ppm-0-velocity_y",particle,"dark","vy");
+  TRACE_PARTICLE("ppm-0-velocity_z",particle,"dark","vz");
+  TRACE_PARTICLE("ppm-0-acceleration_x",particle,"dark","ax");
+  TRACE_PARTICLE("ppm-0-acceleration_y",particle,"dark","ay");
+  TRACE_PARTICLE("ppm-0-acceleration_z",particle,"dark","az");
    
   FORTRAN_NAME(ppm_de)
     (

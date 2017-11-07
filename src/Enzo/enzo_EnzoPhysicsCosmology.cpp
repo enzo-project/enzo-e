@@ -61,6 +61,10 @@ enzo_float EnzoPhysicsCosmology::time_from_redshift (enzo_float redshift) const
 void EnzoPhysicsCosmology::compute_expansion_factor
 (enzo_float *a, enzo_float *dadt, enzo_float time) const
 {
+
+  //   *a = 1.0;
+  //     *dadt = 0.0;
+  //     return;
   /* Error check. */
 
   ASSERT ("EnzoPhysicsCosmology::compute_expansion_factor",
@@ -174,7 +178,6 @@ void EnzoPhysicsCosmology::compute_expansion_timestep
  
   /* Compute the maximum allwed timestep given the maximum allowed
      expansion factor. */
- 
   *dt_expansion = max_expansion_rate_*a/dadt;
 }
 

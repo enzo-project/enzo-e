@@ -11,6 +11,9 @@
 
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
+// #define NEW_ACCUM
+#define OLD_ACCUM
+
 // #define DEBUG_ACCUM
 // #define DEBUG_ACCUM_COUNT
 // #define DEBUG_BYPASS_ACCUM
@@ -184,7 +187,8 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     int index_src = field_list_src_(field)[i_f];
     int index_dst = field_list_dst_(field)[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
-    loop_limits (im3,n3,nd3,ng3,op_load,accumulate);
+    int ima3[3],na3[3];
+    loop_limits (im3,n3,nd3,ng3,op_load,accumulate,ima3,na3);
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
     CkPrintf ("%d %d DEBUG_ACCUM face to array %d  %d %d %d  %d %d %d\n",
@@ -261,7 +265,8 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     int index_dst = field_list_dst_(field)[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
 
-    loop_limits (im3,n3,nd3,ng3,op_store,accumulate);
+    int ima3[3],na3[3];
+    loop_limits (im3,n3,nd3,ng3,op_store,accumulate,ima3,na3);
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
     CkPrintf ("%d %d DEBUG_ACCUM array to face %d  %d %d %d  %d %d %d\n",
@@ -337,21 +342,23 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     field_src.ghost_depth(index_src,&g3[0],&g3[1],&g3[2]);
     const bool accumulate = accumulate_(index_src,index_dst);
 
-    loop_limits (is3,ns3,m3,g3,op_load,accumulate);
+    int isa3[3],nsa3[3];
+    loop_limits (is3,ns3,m3,g3,op_load,accumulate,isa3,nsa3);
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
 
-    CkPrintf ("%d %d DEBUG_ACCUM face to face %d  %d %d %d  %d %d %d\n",
+    CkPrintf ("%d %d DEBUG_ACCUM face to face load %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,is3[0],is3[1],is3[2],ns3[0],ns3[1],ns3[2]);
     fflush(stdout);
     }
 #endif    
     invert_face();
-    loop_limits (id3,nd3,m3,g3,op_store,accumulate);
+    int ida3[3],nda3[3];
+    loop_limits (id3,nd3,m3,g3,op_store,accumulate,ida3,nda3);
 #ifdef DEBUG_ACCUM
     if (accumulate)  {
-    CkPrintf ("%d %d DEBUG_ACCUM face to face %d  %d %d %d  %d %d %d\n",
+    CkPrintf ("%d %d DEBUG_ACCUM face to face store %d  %d %d %d  %d %d %d\n",
 	      CkMyPe(),__LINE__,
 	      accumulate?1:0,id3[0],id3[1],id3[2],nd3[0],nd3[1],nd3[2]);
     fflush(stdout);
@@ -408,11 +415,14 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
       // Copy field to array
       
       if (precision == precision_single) {
-	copy_ ( fd4, m3,nd3,id3,fs4, m3, ns3,is3,accumulate);
+	copy_ ( fd4, m3,nd3,id3,fs4, m3, ns3,is3,
+		accumulate,nsa3,isa3,nda3,ida3);
       } else if (precision == precision_double) {
-	copy_ ( fd8, m3,nd3,id3,fs8, m3, ns3,is3,accumulate);
+	copy_ ( fd8, m3,nd3,id3,fs8, m3, ns3,is3,
+		accumulate,nsa3,isa3,nda3,ida3);
       } else if (precision == precision_quadruple) {
-	copy_ ( fd16,m3,nd3,id3,fs16,m3,ns3,is3,accumulate);
+	copy_ ( fd16,m3,nd3,id3,fs16,m3,ns3,is3,
+		accumulate,nsa3,isa3,nda3,ida3);
       } else {
 	ERROR("FieldFace::face_to_face()", "Unsupported precision");
       }
@@ -444,7 +454,8 @@ int FieldFace::num_bytes_array(Field field) throw()
     int index_dst = field_list_dst_(field)[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
     int op_type = (refresh_type_ == refresh_fine) ? op_load : op_store;
-    loop_limits (im3,n3,nd3,ng3,op_type,accumulate);
+    int ima3[3],na3[3];
+    loop_limits (im3,n3,nd3,ng3,op_type,accumulate,ima3,na3);
 #ifdef DEBUG_ACCUM
     // if (accumulate)  {
     // CkPrintf ("%d %d DEBUG_ACCUM %d  %d %d %d  %d %d %d\n",
@@ -554,6 +565,7 @@ size_t FieldFace::load_
   // NOTE: don't check accumulate since loading array; accumulate
   // is handled in corresponding store_() at the receiving end
     // add values
+  //  CkPrintf ("DEBUG_NEW_ACCUM load_\n");
 #ifdef DEBUG_ACCUM_COUNT
   double sum1=0.0, sum2=0.0;
 #endif    
@@ -633,10 +645,8 @@ template<class T> size_t FieldFace::store_
 #else
 
   if (accumulate) {
+#ifdef OLD_ACCUM    
     // add values
-#ifdef DEBUG_ACCUM_COUNT
-    double sum1=0.0, sum2=0.0;
-#endif    
     for (int iz=0; iz <n3[2]; iz++)  {
       int kz = iz+im3[2];
       for (int iy=0; iy < n3[1]; iy++) {
@@ -645,10 +655,6 @@ template<class T> size_t FieldFace::store_
 	  int kx = ix+im3[0];
 	  int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
 	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
-#ifdef DEBUG_ACCUM_COUNT
-	  sum1+=array[index_array];
-	  sum2+=ghost[index_field];
-#endif    
 #ifdef DEBUG_BYPASS_ACCUM
 	  ghost[index_field] = array[index_array];
 #else
@@ -657,6 +663,42 @@ template<class T> size_t FieldFace::store_
 	}
       }
     }
+#endif
+#ifdef NEW_ACCUM
+    // add values
+    for (int iz=0; iz <n3[2]; iz++)  {
+      int kz = iz+im3[2];
+      for (int iy=0; iy < n3[1]; iy++) {
+	int ky = iy+im3[1];
+	for (int ix=0; ix < n3[0]; ix++) {
+	  int kx = ix+im3[0];
+	  int index_array = ix +  n3[0]*(iy +  n3[1] * iz);
+	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+#ifdef DEBUG_BYPASS_ACCUM
+	  ghost[index_field] = array[index_array];
+#else
+	  ghost[index_field] += array[index_array];
+#endif	  
+	}
+      }
+    }
+    for (int iz=0; iz <na3[2]; iz++)  {
+      int kz = iz+ima3[2];
+      for (int iy=0; iy < na3[1]; iy++) {
+	int ky = iy+ima3[1];
+	for (int ix=0; ix < na3[0]; ix++) {
+	  int kx = ix+ima3[0];
+	  int index_array = ix +  na3[0]*(iy +  na3[1] * iz);
+	  int index_field = kx + nd3[0]*(ky + nd3[1] * kz);
+#ifdef DEBUG_BYPASS_ACCUM
+	  ghost[index_field] = array[index_array];
+#else
+	  ghost[index_field] += array[index_array];
+#endif	  
+	}
+      }
+    }
+#endif    
 #ifdef DEBUG_ACCUM_COUNT
     CkPrintf ("DEBUG_ACCUM_COUNT %14.10f %14.10f store\n",sum1,sum2);
 #endif    
@@ -686,22 +728,22 @@ template<class T> size_t FieldFace::store_
 template<class T> void FieldFace::copy_
 ( T       * vd, int md3[3],int nd3[3],int id3[3],
   const T * vs, int ms3[3],int ns3[3],int is3[3],
-  bool accumulate) throw()
+  bool accumulate,
+  int nsa3[3], int isa3[3],
+  int nda3[3], int ida3[3]) throw()
 {
   if (accumulate) {
-
-#ifdef DEBUG_ACCUM_COUNT
-    double sum1=0.0, sum2=0.0;
+#ifdef DEBUG_ACCUM    
+    int ist=0 + ms3[0]*(0 + ms3[1]*2);
+    int idt=0 + md3[0]*(0 + md3[1]*2);
 #endif    
+#ifdef OLD_ACCUM    
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
 	for (int ix=0; ix < ns3[0]; ix++) {
 	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
 	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-#ifdef DEBUG_ACCUM_COUNT
-	  sum1+=vs[i_src];
-	  sum2+=vd[i_dst];
-#endif    
+	
 #ifdef DEBUG_BYPASS_ACCUM
 	  vd[i_dst] = vs[i_src];
 #else
@@ -710,9 +752,62 @@ template<class T> void FieldFace::copy_
 	}
       }
     }
-#ifdef DEBUG_ACCUM_COUNT
-    CkPrintf ("DEBUG_ACCUM_COUNT %14.10f %14.10f copy\n",sum1,sum2);
+#endif
+#ifdef NEW_ACCUM
+#ifdef DEBUG_ACCUM    
+    CkPrintf ("DEBUG_NEW_ACCUM copy_ is3 ns3 %d %d %d  %d %d %d\n",
+	      is3[0],is3[1],is3[2],ns3[0],ns3[1],ns3[2]);
+    CkPrintf ("DEBUG_NEW_ACCUM copy_ id3 nd3 %d %d %d  %d %d %d\n",
+	      id3[0],id3[1],id3[2],nd3[0],nd3[1],nd3[2]);
+#endif	      
+    for (int iz=0; iz <ns3[2]; iz++)  {
+      for (int iy=0; iy < ns3[1]; iy++) {
+	for (int ix=0; ix < ns3[0]; ix++) {
+	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
+	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
+#ifdef DEBUG_ACCUM    
+	  if (i_src==ist || i_src==ist+32 ||
+              i_dst==idt || i_dst==idt+32) {
+	    printf ("copy_ A %20.15f = %20.15f [%d] + %20.15f [%d]\n",
+	       vd[i_dst]+vs[i_src],vd[i_dst],i_dst,vs[i_src],i_src);
+  }
+#endif	  
+#ifdef DEBUG_BYPASS_ACCUM
+	  vd[i_dst] = vs[i_src];
+#else
+	  vd[i_dst] += vs[i_src];
+#endif	  
+	}
+      }
+    }
+#ifdef DEBUG_ACCUM    
+    CkPrintf ("DEBUG_NEW_ACCUM copy_ isa3 nsa3 %d %d %d  %d %d %d\n",
+	      isa3[0],isa3[1],isa3[2],nsa3[0],nsa3[1],nsa3[2]);
+    CkPrintf ("DEBUG_NEW_ACCUM copy_ ida3 nda3 %d %d %d  %d %d %d\n",
+	      ida3[0],ida3[1],ida3[2],nda3[0],nda3[1],nda3[2]);
 #endif    
+    for (int iz=0; iz <nsa3[2]; iz++)  {
+      for (int iy=0; iy < nsa3[1]; iy++) {
+	for (int ix=0; ix < nsa3[0]; ix++) {
+	  int i_src = (ix+isa3[0]) + ms3[0]*((iy+isa3[1]) + ms3[1] * (iz+isa3[2]));
+	  int i_dst = (ix+ida3[0]) + md3[0]*((iy+ida3[1]) + md3[1] * (iz+ida3[2]));
+#ifdef DEBUG_ACCUM    
+	  if (i_src==ist || i_src==ist+32 ||
+              i_dst==idt || i_dst==idt+32) {
+	  printf ("copy_ B %20.15f = %20.15f [%d] + %20.15f [%d]\n",
+	    vd[i_dst]+vs[i_src],vd[i_dst],i_dst,vs[i_src],i_src);
+          }
+#endif	  
+#ifdef DEBUG_BYPASS_ACCUM
+	  vd[i_dst] = vs[i_src];
+#else
+	  vd[i_dst] += vs[i_src];
+#endif	  
+	}
+      }
+    }
+#endif
+    
   } else {
     for (int iz=0; iz <ns3[2]; iz++)  {
       for (int iy=0; iy < ns3[1]; iy++) {
@@ -730,7 +825,7 @@ template<class T> void FieldFace::copy_
 
 void FieldFace::loop_limits
 ( int im3[3],int n3[3], const int nd3[3], const int ng3[3], int op_type,
-  bool accumulate)
+  bool accumulate, int * ima3,int * na3)
 {
   im3[0]=0;
   im3[1]=0;
@@ -885,6 +980,7 @@ void FieldFace::loop_limits
     // for refresh_coarse or refresh_fine
     if (refresh_type_ == refresh_same) {
       for (int axis=0; axis<3; axis++) {
+#ifdef OLD_ACCUM	
 	if (! ghost_[axis]) {
 	  if ((op_type == op_load && face_[axis] == -1) ||
 	      (op_type == op_store && face_[axis] == 1)) {
@@ -894,6 +990,24 @@ void FieldFace::loop_limits
 	    n3[axis] += 1;
 	  }
 	}
+#endif	
+#ifdef NEW_ACCUM
+	ima3[axis]=im3[axis];
+	na3[axis]=n3[axis];
+	if (! ghost_[axis]) {
+	  if ((op_type == op_load && face_[axis] == -1) ||
+	      (op_type == op_store && face_[axis] == 1)) {
+	    ima3[axis] -= 1;
+	  }
+	  if ((op_type == op_load && face_[axis] == 1) ||
+	      (op_type == op_store && face_[axis] == -1)) {
+	    ima3[axis] += n3[axis];
+	  }
+	  if (face_[axis] != 0) {
+	    na3[axis] = 1;
+	  }
+	}
+#endif	
       }
     }
   }

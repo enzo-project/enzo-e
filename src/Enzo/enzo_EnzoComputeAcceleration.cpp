@@ -105,16 +105,19 @@ void EnzoComputeAcceleration::compute_(Block * block)
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     block->simulation()->problem()->physics("cosmology");
 
+  enzo_float cosmo_a = 1.0;
+  enzo_float cosmo_dadt = 0.0;
+  double time = block->time();
+  double dt   = block->dt();
+  
   if (cosmology) {
    
-    enzo_float a,dadt;
-    double time = block->time();
-    double dt   = block->dt();
-    cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
+    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
 
-    hx *= a;
-    hy *= a;
-    hz *= a;
+    hx *= cosmo_a;
+    hy *= cosmo_a;
+    hz *= cosmo_a;
+    dt /= cosmo_a;
   }
 
   if (order_ == 2) {
@@ -200,6 +203,33 @@ void EnzoComputeAcceleration::compute_(Block * block)
   } else {
     ERROR1("EnzoComputeAcceleration",
 	   "Unknown order %d", order_);
+  }
+
+  // Update particle accelerations
+
+  Particle particle = block->data()->particle();
+
+  int it_dark = particle.type_index("dark");
+  if (particle.num_particles(it_dark) > 0) {
+
+    FieldDescr    * fd = block->data()->field_descr();
+    ParticleDescr * pd = block->data()->particle_descr();
+
+    double dt_shift = 0.5*block->dt() / cosmo_a;
+    //  double dt_shift = 0.0;
+  
+    if (rank_ >= 1) {
+      EnzoComputeCicInterp interp_x (fd, "acceleration_x", pd, "dark", "ax",dt_shift);
+      interp_x.compute(block);
+    }
+    if (rank_ >= 2) {
+      EnzoComputeCicInterp interp_y (fd, "acceleration_y", pd, "dark", "ay",dt_shift);
+      interp_y.compute(block);
+    }
+    if (rank_ >= 3) {
+      EnzoComputeCicInterp interp_z (fd, "acceleration_z", pd, "dark", "az",dt_shift);
+      interp_z.compute(block);
+    }
   }
 }
 

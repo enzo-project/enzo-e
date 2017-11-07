@@ -358,7 +358,6 @@ public: // interface
 			long double dx, long double dy, long double dz)
   { particle_data_->position_update (particle_descr_,it,ib,dx,dy,dz);  }
 
-
   /// Fill a vector of velocity coordinates for the given type and batch
   bool velocity (int it, int ib,
 		 double * vx, double * vy = 0, double * vz = 0)

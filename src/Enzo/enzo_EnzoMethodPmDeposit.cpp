@@ -16,6 +16,9 @@
 // #define DEBUG_METHOD
 // #define DEBUG_FIELD
 
+// #define WRITE_DENSITY_PARTICLE
+// #define WRITE_DENSITY_GAS
+
 #ifdef DEBUG_METHOD
 #   define TRACE_METHOD(METHOD,BLOCK)					\
   CkPrintf ("%d %s:%d %s TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__, \
@@ -143,6 +146,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     enzo_float dens = *((enzo_float *)(particle.constant_value (it,ia_mass)));
 
+    for (int i=0; i<mx*my*mz; i++) de_t[i] = 0.0;
     // Scale by volume if particle value is mass instead of density
     
     // double vol = 1.0;
@@ -169,7 +173,17 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // Accumulate particle density using CIC
 
-    const double dt = alpha_ * block->dt();
+    enzo_float cosmo_a=0.0;
+    enzo_float cosmo_dadt=0.0;
+    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+      block->simulation()->problem()->physics("cosmology");
+    if (cosmology) {
+
+      double time = block->time();
+      double dt   = block->dt();
+      cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+alpha_*dt);
+    }
+    const double dt = alpha_ * block->dt() / cosmo_a;
 
     // Accumulated single velocity array for Baryon deposit
 
@@ -365,7 +379,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     for (int i=0; i<nx*ny*nz; i++) de_gas_0[i] = 0.0;
 #endif    
     
-
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
     enzo_float * vyf = (enzo_float *) field.values("velocity_y");
     enzo_float * vzf = (enzo_float *) field.values("velocity_z");
@@ -410,7 +423,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     } else {
       for (int i=0; i<mx*my*mz; i++) vz[i] = 0.0;
     }
-    
+
     FORTRAN_NAME(dep_grid_cic)(de,de_gas_0,temp,
 			       vx, vy, vz, 
 			       &dtf, rfield, &rank,
@@ -444,12 +457,32 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     TRACE_FIELD("density-gas-particle",de_t,1.0);
 
+#ifdef WRITE_DENSITY_GAS  
+
+      char buffer[80];
+    sprintf (buffer,"de-enzop-%03d.data",block->cycle());
+    printf ("DEBUG_GAS cycle=%d\n",block->cycle());
+    FILE * fp = fopen(buffer,"w");
+    field.ghost_depth(0,&gx,&gy,&gz);
+    gx=gy=gz=1;
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+  	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  fprintf (fp,"%d %d %d %20.16g\n",ix-gx,iy-gy,iz-gz,de_gas_0[i]);
+	}
+      }
+    }
+    fclose(fp);
+#endif
+
 #ifndef FIELD_CIC
     delete [] de_gas_0;
 #endif    
 
   }
 
+    
   block->compute_done(); 
   
 }

@@ -236,6 +236,9 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
+  /// TEMP
+  double timestep() { return dt; }
+
   //--------------------------------------------------
 
   /// Synchronize after potential solve and before accelerations

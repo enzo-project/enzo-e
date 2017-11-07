@@ -28,7 +28,7 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   //  refresh(ir)->add_all_fields();
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
-  refresh(ir)->add_field(field_descr->field_id("internal_density"));
+  refresh(ir)->add_field(field_descr->field_id("internal_energy"));
   if (rank >= 1) refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   if (rank >= 2) refresh(ir)->add_field(field_descr->field_id("velocity_y"));
   if (rank >= 3) refresh(ir)->add_field(field_descr->field_id("velocity_z"));
@@ -44,6 +44,12 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
 
 void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 {
+
+  if (block->cycle() == 0) {
+    // skip first cycle
+    block->compute_done(); 
+    return;
+  }
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   Field field = enzo_block->data()->field();
 
@@ -79,10 +85,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   	compute_time = enzo_block->time();
       }
 
-      enzo_float a, dadt;
-      cosmology->compute_expansion_factor (&a, &dadt, compute_time);
-      enzo_float Coefficient = block->dt()*dadt/a;
+      //      printf ("DEBUG_VELOCITY time old new = %g %g\n",field.history_time(1),enzo_block->time());
+      enzo_float cosmo_a, cosmo_dadt;
+      cosmology->compute_expansion_factor (&cosmo_a, &cosmo_dadt, compute_time);
+      double dt = enzo_block->time() - field.history_time(1);
+      //      double dt = block->dt();
+      enzo_float Coefficient = dt*cosmo_dadt/cosmo_a;
 
+      
       /* Determine the size of the block. */
 
       int mx, my, mz, m, rank;

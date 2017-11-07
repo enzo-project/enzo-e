@@ -124,12 +124,12 @@
  }
 
  Method {
-     list = [ "cosmology", 
+     list = [ "comoving_expansion",
+              "cosmology",
               "pm_deposit",
-	       "gravity",
-	       "ppm",
-	       "pm_update",
-	       "comoving_expansion"
+	      "gravity",
+	      "ppm",
+	      "pm_update"
 	      ];
      ppm {
          courant = 0.5000000000000000;

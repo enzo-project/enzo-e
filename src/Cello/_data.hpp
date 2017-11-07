@@ -87,15 +87,18 @@ class FieldFace;
   {									\
     double sum_all=0.0;							\
     double sum_real=0.0;						\
-    double sum_abs=0.0;						\
+    double sum_abs=0.0;							\
+    double sum_mean=0.0;						\
+    double sum_var=0.0;							\
     double sum2_all=0.0;						\
     double sum2_real=0.0;						\
     for (int iz=0; iz<mz; iz++) {					\
       for (int iy=0; iy<my; iy++) {					\
 	for (int ix=0; ix<mx; ix++) {					\
 	  int i = ix + mx*(iy + my*iz);					\
-	  sum_all+=SCALE*(FIELD[i]);					\
-	  sum2_all += SCALE*(FIELD[i]) * SCALE*(FIELD[i]);		\
+	  double value=SCALE*FIELD[i];					\
+	  sum_all+=value;						\
+	  sum2_all += value * value;					\
 	}								\
       }									\
     }									\
@@ -103,9 +106,21 @@ class FieldFace;
       for (int iy=gy; iy<my-gy; iy++) {					\
 	for (int ix=gx; ix<mx-gx; ix++) {				\
 	  int i = ix + mx*(iy + my*iz);					\
-	  sum_real+=SCALE*(FIELD[i]);					\
-	  sum_abs+=std::abs(SCALE*(FIELD[i]));				\
-	  sum2_real+=SCALE*(FIELD[i])*SCALE*(FIELD[i]);			\
+	  double value=SCALE*FIELD[i];					\
+	  sum_real+=value;						\
+	  sum_abs+=std::abs(value);					\
+	  sum2_real+=value*value;					\
+	}								\
+      }									\
+    }									\
+    double mean=sum_real/((mx-2*gx)*(my-2*gy)*(mz-2*gz));		\
+    for (int iz=gz; iz<mz-gz; iz++) {					\
+      for (int iy=gy; iy<my-gy; iy++) {					\
+	for (int ix=gx; ix<mx-gx; ix++) {				\
+	  int i = ix + mx*(iy + my*iz);					\
+	  double value=SCALE*FIELD[i];					\
+	  sum_mean +=std::abs(value-mean);				\
+	  sum_var  +=(value-mean)*(value-mean);				\
 	}								\
       }									\
     }									\
@@ -116,8 +131,7 @@ class FieldFace;
 	      SCALE*(FIELD[gx+mx*((gy+1)+my*gz)]),			\
 	      SCALE*(FIELD[gx+mx*(gy+my*(gz+1))]),			\
 	      __FILE__,__LINE__,NAME);					\
-    CkPrintf ("DEBUG_SUMMARY %s %g | %25.20g |\n",					\
-	      NAME,sum_real,sum_abs);						\
+    CkPrintf ("DEBUG_FIELD %s %20.18g %20.18g %20.18g\n",  NAME,sum_abs,sum_mean,sum_var); \
     fflush(stdout);							\
     char filename[80];						\
     sprintf (filename,"renzo-p-%s.png",NAME);				\
@@ -130,12 +144,30 @@ class FieldFace;
 #   define PRINT_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,true)
 #   define PRINT_FIELD(NAME,FIELD,SCALE)  TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,true)
 
+#define TRACE_PARTICLE(ATTRIBUTE,particle,TYPE_NAME,ATTR_NAME)		\
+  {									\
+    int it = particle.type_index(TYPE_NAME);				\
+    int ia = particle.attribute_index(it,ATTR_NAME);			\
+    int nb = particle.num_batches(it);					\
+    double sum_abs = 0.0;						\
+    for (int ib=0; ib<nb; ib++) {					\
+      int np = particle.num_particles(it,ib);				\
+      enzo_float * array = (enzo_float *) particle.attribute_array(it,ia,ib); \
+      for (int ip=0; ip<np; ip++) {					\
+	sum_abs += std::abs(array[ip]);					\
+      }									\
+    }									\
+    CkPrintf ("DEBUG_PARTICLE %s %20.18g\n",  ATTRIBUTE,sum_abs);		\
+  }
+
+
 #else
 
 #   define TRACE_FIELD(NAME,FIELD,SCALE) /* ... */
 #   define PRINT_FIELD(NAME,FIELD,SCALE) /* ... */
 #   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz) /* ... */
 #   define TRACE_FIELD_(NAME,FIELD,SCALE) /* ... */
+#   define TRACE_PARTICLE(ATTRIBUTE,particle,TYPE_NAME,ATTR_NAME) /* ... */
 
 #endif
 

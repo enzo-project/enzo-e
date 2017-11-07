@@ -134,7 +134,6 @@ public: // interface
   (ParticleDescr * particle_descr,int it, int ib, 
    long double dx, long double dy, long double dz);
 			 
-
   /// Fill a vector of velocity coordinates for the given type and batch
   bool velocity (ParticleDescr * particle_descr,
 		 int it, int ib,

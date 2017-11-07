@@ -68,9 +68,8 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
     double a3sum2[3]={0.0};
     double v3sum2[3]={0.0};
     
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-    EnzoPhysicsCosmology * cosmology = units->cosmology();
+    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+      block->simulation()->problem()->physics("cosmology");
 
     enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
     
@@ -86,18 +85,20 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
     FieldDescr    * fd = block->data()->field_descr();
     ParticleDescr * pd = block->data()->particle_descr();
 
+     double dt_shift = 0.5*block->dt()/cosmo_a;
+    //    double dt_shift = 0.0;
     if (rank >= 1) {
-      EnzoComputeCicInterp interp_x (fd, "acceleration_x", pd, "dark", "ax");
+      EnzoComputeCicInterp interp_x (fd, "acceleration_x", pd, "dark", "ax", dt_shift);
       interp_x.compute(block);
     }
 
     if (rank >= 2) {
-      EnzoComputeCicInterp interp_y (fd, "acceleration_y", pd, "dark", "ay");
+      EnzoComputeCicInterp interp_y (fd, "acceleration_y", pd, "dark", "ay", dt_shift);
       interp_y.compute(block);
     }
 
     if (rank >= 3) {
-      EnzoComputeCicInterp interp_z (fd, "acceleration_z", pd, "dark", "az");
+      EnzoComputeCicInterp interp_z (fd, "acceleration_z", pd, "dark", "az", dt_shift);
       interp_z.compute(block);
     }
 
@@ -251,12 +252,6 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 
   double dt = std::numeric_limits<double>::max();
 
-  // Assume expansion limits dt for cosmology simulations
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-  EnzoPhysicsCosmology * cosmology = units->cosmology();
-  if (cosmology) return dt;
-    
   if (block->is_leaf()) {
 
     Particle particle = block->data()->particle();
@@ -284,9 +279,22 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
 
-    const double hx = (xp-xm)/nx;
-    const double hy = (yp-ym)/ny;
-    const double hz = (zp-zm)/nz;
+    double hx = (xp-xm)/nx;
+    double hy = (yp-ym)/ny;
+    double hz = (zp-zm)/nz;
+    
+    // Adjust for expansion terms if any
+    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+      block->simulation()->problem()->physics("cosmology");
+    if (cosmology) {
+      enzo_float a=0.0,dadt=0.0;
+      double time = block->time();
+      double dt   = block->dt();
+      cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
+      hx *= a;
+      hy *= a;
+      hz *= a;
+    }
 
     for (int ib=0; ib<nb; ib++) {
       const int np = particle.num_particles(it,ib);
