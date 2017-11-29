@@ -1,6 +1,7 @@
 
 #ifdef FORTRAN
 #  ifdef CONFIG_PRECISION_SINGLE
+#     define CONFIG_BFLOAT_4
 #     define tiny 1.d-20
 #     define huge 1.d+20
 #     define P_PREC real*4
@@ -11,6 +12,7 @@
 #  endif
 
 #   ifdef CONFIG_PRECISION_DOUBLE
+#     define CONFIG_BFLOAT_8
 #     define tiny 1.d-20
 #     define huge 1.d+20
 #     define P_PREC real*8

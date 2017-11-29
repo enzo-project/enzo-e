@@ -102,10 +102,8 @@
 
    Testing
    {
-# OLD TIME
-#      time_final  = 0.1129506208626;  # 40 cycles
-# TIME FOR UPDATED InitialDefault
-      time_final  = 0.00294577296105476;
+      time_final  = [0.00294577296105476, # OLD_PPM
+                     0.00294665096589597];
    }
 
    Output {

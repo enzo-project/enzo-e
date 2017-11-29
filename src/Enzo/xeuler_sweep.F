@@ -1,34 +1,36 @@
 c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
-#define V_MAX 1.0
-
-/* #define DEBUG_PPM */
 
 c=======================================================================
 c/////////////////////  SUBROUTINE XEULER_SWEEP  \\\\\\\\\\\\\\\\\\\\\\\
-c
-      subroutine xeuler_sweep(k, d, e, u, v, w, ge, in, jn, kn,
-     &                        gravity, gr_acc, idual, eta1, eta2,
-     &                        is, ie, js, je, ks, ke, 
-     &                        gamma, pmin, dt, dx, dy, dz,
-     &                        idiff, iflatten, isteepen, ipresfree,
-     &                        nsubgrids, lface, rface,
-     &                        fistart, fiend, fjstart, fjend,
-     &                        dindex, eindex, geindex,
-     &                        uindex, vindex, windex, array,
-     &                        ncolor, colorpt, coloff, colindex,
-     &                        dls, drs, flatten, pbar,
-     &                        pls, prs, pslice, ubar,
-     &                        uls, urs, vls, vrs, gels, gers,
-     &                        wls, wrs, diffcoef, dslice,
-     &                        eslice, uslice, vslice, wslice,
-     &                        df, ef, uf, vf,
-     &                        wf, grslice, geslice, gef,
-     &                        colslice, colf, colls, colrs
-     &                       )
-c
-c  CONTROL ROUTINE FOR X-SWEEP DIRECT EULER VERSION OF PPM
+c     
+      subroutine xeuler_sweep (k, d, e, u, v, w, ge, in, jn, kn,
+     &     gravity, gr_acc, idual, eta1, eta2,
+     &     is, ie, js, je, ks, ke, 
+     &     gamma, pmin, dt, dx, dy, dz,
+     &     idiff, iflatten, isteepen,
+     &     iconsrec, iposrec,
+     &     ipresfree,
+     &     nsubgrids, lface, rface,
+     &     fistart, fiend, fjstart, fjend,
+     &     dindex, eindex, geindex,
+     &     uindex, vindex, windex, array,
+     &     ncolor, colorpt, coloff, colindex,
+     &     dls, drs, flatten, pbar,
+     &     pls, prs, pslice, ubar,
+     &     uls, urs, vls, vrs, gels, gers,
+     &     wls, wrs, diffcoef, dslice,
+     &     eslice, uslice, vslice, wslice,
+     &     df, ef, uf, vf,
+     &     wf, grslice, geslice, gef,
+#ifdef NEW_PPM
+     &     ges,
+#endif      
+     &     colslice, colf, colls, colrs
+     &     )
+c     
+c     CONTROL ROUTINE FOR X-SWEEP DIRECT EULER VERSION OF PPM
 c
 c  written by: Greg Bryan
 c  date:       June, 1994
@@ -128,13 +130,18 @@ c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
+      ENZO_REAL SmallRho
+      parameter (SmallRho = 1e-30)
+      
       integer gravity, idiff, idual, iflatten, isteepen, ipresfree,
      &        in, jn, kn, is, ie, js, je, ks, ke, k, nsubgrids,
-     &        ncolor, coloff(ncolor)
+     &     ncolor, coloff(ncolor)
+      integer  iconsrec, iposrec
+
       ENZO_REAL dt, eta1, eta2, gamma, pmin
       ENZO_REAL d(in,jn,kn), e(in,jn,kn), u(in,jn,kn), v(in,jn,kn), 
      &        w(in,jn,kn),ge(in,jn,kn), gr_acc(in,jn,kn),
-     &        dx,dy,dz
+     &        dx(in),dy(jn),dz(kn)
       integer fistart(nsubgrids*3), fiend(nsubgrids*3),
      &        fjstart(nsubgrids*3), fjend(nsubgrids*3), 
      &        lface(nsubgrids*3), rface(nsubgrids*3)
@@ -143,6 +150,9 @@ c
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
      &        colindex(nsubgrids*6,ncolor)
       ENZO_REAL array(1), colorpt(1)
+#ifdef NEW_PPM
+      integer iriemannfallback
+#endif      
 c
 c  define local slices (passed as temps)
 c
@@ -153,7 +163,10 @@ c
      &        vrs(in,jn),    wls(in,jn),    wrs(in,jn),
      &   diffcoef(in,jn),     df(in,jn),     ef(in,jn),
      &         uf(in,jn),     vf(in,jn),     wf(in,jn),
-     &        gef(in,jn),   gels(in,jn),   gers(in,jn)
+     &     gef(in,jn),   gels(in,jn),   gers(in,jn)
+#ifdef NEW_PPM
+      ENZO_REAL ges(in,jn)
+#endif      
       ENZO_REAL dslice(in,jn), eslice(in,jn), grslice(in,jn),
      &     uslice(in,jn), vslice(in,jn),  wslice(in,jn), 
      &    geslice(in,jn)
@@ -181,15 +194,10 @@ c
 
       j1 = 1
       j2 = jn
-
-!     j1 = js
-!     j2 = je
-
-
 c
 c Copy from field to slice
 c
-      do j=j1, j2
+      do j=1, jn
          do i=1, in
             dslice(i,j) = d(i,j,k)
             eslice(i,j) = e(i,j,k)
@@ -217,68 +225,124 @@ c
 c
 c  Compute the pressure on a slice
 c
+      
       if (idual .eq. 1) then
-         call pgas2d_dual(dslice, eslice, geslice, pslice,
-     &                    uslice, vslice, wslice, eta1, eta2,
-     &                    in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+#ifdef NEW_PPM
+         call pgas2d_dual_dev
+#else
+         call pgas2d_dual
+#endif         
+     &        (dslice, eslice, geslice, pslice,
+     &        uslice, vslice, wslice, eta1, eta2,
+     &        in, jn, is-3, ie+3, j1, j2, gamma, pmin)
       else
-         call pgas2d(dslice, eslice, pslice, uslice, vslice, wslice,
+#ifdef NEW_PPM         
+         call pgas2d_dev(
+#else
+         call pgas2d(
+#endif
+     &        dslice, eslice, pslice, uslice, vslice, wslice,
      &               in, jn, is-3, ie+3, j1, j2, gamma, pmin)
       endif
 c
 c  If requested, compute diffusion and slope flattening coefficients
 c
       if (idiff .ne. 0 .or. iflatten .ne. 0)
-     &   call calcdiss(
-     &            dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
-     &            in, jn, kn, is, ie, j1, j2, k, nzz, xsweep,
-c     &            in, jn, kn, is, ie, js, je, k, nzz, xsweep,
-     &            in, jn, kn, dt, gamma, idiff, iflatten,
-     &            diffcoef, flatten
-     &                )
+#ifdef NEW_PPM
+     &     call calcdiss_dev(
+#else
+     &     call calcdiss(
+#endif
+     &     dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
+     &     in, jn, kn, is, ie, j1, j2, k, nzz, xsweep,
+     &     in, jn, kn, dt, gamma, idiff, iflatten,
+     &     diffcoef, flatten
+     &     )
 c
 c  Compute Eulerian left and right states at zone edges via interpolation
 c
-      call inteuler(
-     &            dslice, pslice, gravity, grslice, geslice,
-     &            uslice, vslice, wslice, dx, flatten,
-     &            in, jn, is, ie, j1, j2, idual, eta1, eta2,
-     &            isteepen, iflatten, dt, gamma, ipresfree,
-     &            dls, drs, pls, prs, gels, gers,
-     &            uls, urs, vls, vrs, wls, wrs,
-     &            ncolor, colslice, colls, colrs
-     &             )
+#ifdef NEW_PPM      
+      call inteuler_dev (
+#else
+      call inteuler (
+#endif      
+     &     dslice, pslice, gravity, grslice, geslice,
+     &     uslice, vslice, wslice, dx, flatten,
+     &     in, jn, is, ie, j1, j2, idual, eta1, eta2,
+     &     isteepen, iflatten,
+#ifdef NEW_PPM      
+     &     iconsrec, iposrec,
+#endif      
+     &     dt, gamma, ipresfree,
+     &     dls, drs, pls, prs, gels, gers,
+     &     uls, urs, vls, vrs, wls, wrs,
+     &     ncolor, colslice, colls, colrs
+     &     )
+c     
+c     Compute (Lagrangian part of the) Riemann problem at each zone boundary
 c
-c  Compute (Lagrangian part of the) Riemann problem at each zone boundary
-c
+#ifdef NEW_PPM
+      call twoshock_dev(
+#else
       call twoshock(
-     &            dls, drs, pls, prs, uls, urs, 
-     &            in, jn, is, ie+1, j1, j2, 
-     &            dt, gamma, pmin, ipresfree,
-     &            pbar, ubar, gravity, grslice, idual, eta1
-     &             )
+#endif
+     &     dls, drs, pls, prs, uls, urs, 
+     &     in, jn, is, ie+1, j1, j2, 
+     &     dt, gamma, pmin, ipresfree,
+     &     pbar, ubar, gravity, grslice, idual, eta1
+     &     )
+
+#ifdef NEW_PPM
+
+      iriemannfallback = 1
+      
+      CALL flux_twoshock_dev(
+     &     dslice, eslice, geslice, uslice, vslice, wslice,
+     &     dx, diffcoef, 
+     &     in,jn,
+     &     is, ie, j1, j2, dt, gamma,
+     &     idiff, idual,
+     &     eta1, iriemannfallback,
+     &     dls, drs, pls, prs, gels, gers, uls, urs,
+     &     vls, vrs, wls, wrs, pbar, ubar,
+     &     df, ef, uf, vf, wf, gef, ges,
+     &     ncolor, colslice, colls, colrs, colf)
+#endif                                
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
-      call euler   (
-     &            dslice, eslice, grslice, geslice,
-     &            uslice, vslice, wslice, dx, diffcoef,
-     &            in, jn, is, ie, j1, j2, dt, 
-     &            gamma, idiff, gravity, idual, eta1, eta2,
-     &            dls, drs, pls, prs, gels, gers,
-     &            uls, urs, vls, vrs, wls, wrs,
-     &            pbar, ubar,
-     &            df, ef, uf, vf, wf, gef,
-     &            ncolor, colslice, colls, colrs, colf
-     &             )
-c
+#ifdef NEW_PPM      
+      call euler_dev   (
+#else
+      call euler (
+#endif      
+     &     dslice, eslice, grslice, geslice,
+     &     uslice, vslice, wslice, dx, diffcoef,
+     &     in, jn, is, ie, j1, j2, dt, 
+     &     gamma, idiff, gravity, idual, eta1, eta2,
+#ifdef NEW_PPM
+     &     df, ef, uf, vf, wf, gef, ges,
+     &     ncolor, colslice, colf, SmallRho)
+#else
+     &     dls, drs, pls, prs, gels, gers,
+     &     uls, urs, vls, vrs, wls, wrs,
+     &     pbar, ubar,
+     &     df, ef, uf, vf, wf, gef,
+     &     ncolor, colslice, colls, colrs, colf)
+#endif      
+c     
 c  If necessary, recompute the pressure to correctly set ge and e
 c
       if (idual .eq. 1)
-     &    call pgas2d_dual(dslice, eslice, geslice, pslice,
-     &                    uslice, vslice, wslice, eta1, eta2,
-     &                    in, jn, is-3, ie+3, j1, j2, gamma, pmin)
-c
+#ifdef NEW_PPM
+     &     call pgas2d_dual_dev
+#else
+     &     call pgas2d_dual
+#endif
+     &     (dslice, eslice, geslice, pslice,
+     &     uslice, vslice, wslice, eta1, eta2,
+     &     in, jn, is-3, ie+3, j1, j2, gamma, pmin)
+c     
 c  Check this slice against the list of subgrids 
 c     (all subgrid quantities are zero based)
 c

@@ -1268,7 +1268,16 @@ void Config::read_units_ (Parameters * p) throw()
 void Config::read_testing_ (Parameters * p) throw()
 {
   testing_cycle_final = p->value_integer("Testing:cycle_final",0);
-  testing_time_final  = p->value_float  ("Testing:time_final", 0.0);
+  if (p->type("Testing:time_final") == parameter_list) {
+    int length = p->list_length("Testing:time_final");
+    testing_time_final.resize(length);
+    for (int i=0; i<length; i++) {
+      testing_time_final[i] = p->list_value_float (i,"Testing:time_final",0.0);
+    }
+  } else {
+    testing_time_final.resize(1);
+    testing_time_final[0]  = p->value_float  ("Testing:time_final", 0.0);
+  }
   testing_time_tolerance = p->value_float  ("Testing:time_tolerance", 1e-6);
 }
 

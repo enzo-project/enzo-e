@@ -19,6 +19,12 @@ temp_balance_manual = 0
 temp_balance_atsync = 1
 
 #----------------------------------------------------------------------
+# Temporary setting for using new PPM routines from enzo-dev
+#----------------------------------------------------------------------
+
+new_ppm = 0
+
+#----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
 #----------------------------------------------------------------------
 
@@ -204,6 +210,8 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 define_temp_balance_manual = ['TEMP_BALANCE_MANUAL']
 define_temp_balance_atsync = ['TEMP_BALANCE_ATSYNC']
 
+define_new_ppm = ['NEW_PPM']
+
 define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
@@ -332,8 +340,11 @@ if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
 
+
 if (temp_balance_manual != 0): defines = defines + define_temp_balance_manual
 if (temp_balance_atsync != 0): defines = defines + define_temp_balance_atsync
+
+if (new_ppm != 0): defines = defines + define_new_ppm
 
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose

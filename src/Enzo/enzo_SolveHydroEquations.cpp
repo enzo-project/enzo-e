@@ -7,15 +7,81 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
+#include <stdio.h>
+// #define DEBUG_TRACE_PPM
+// #define DEBUG_READ_FIELDS
+// #define DEBUG_WRITE_FIELDS
 
-// #define DEBUG_PPM
-
-#ifdef DEBUG_PPM
+#ifdef DEBUG_TRACE_PPM
 #  define TRACE_PPM(MESSAGE)						\
   CkPrintf ("%s:%d %s %s\n",						\
 	    __FILE__,__LINE__,block->name().c_str(),MESSAGE);				
 #else
 #  define TRACE_PPM(MESSAGE) /* ... */
+#endif
+
+#ifdef DEBUG_READ_FIELDS
+#   define READ_FIELD(FIELD,NAME,CYCLE,field,gx,gy,gz,mx,my,mz)	\
+  {								\
+    if (CYCLE==0) {						\
+      enzo_float * array = (enzo_float*) field.values(FIELD);	\
+      char buffer[80];						\
+      sprintf (buffer,NAME,CYCLE);				\
+      printf ("READ_FIELD %s cycle=%d\n",FIELD,CYCLE);		\
+      FILE * fp = fopen(buffer,"r");				\
+      for (int iz=gz; iz<mz-gz; iz++) {				\
+	for (int iy=gy; iy<my-gy; iy++) {			\
+	  for (int ix=gx; ix<mx-gx; ix++) {			\
+	    int i=ix+mx*(iy+my*iz);				\
+	    int jx,jy,jz;					\
+	    double value;					\
+	    fscanf (fp,"%d %d %d %lf\n",&jx,&jy,&jz,&value);	\
+	    array[i] = value;					\
+	  }							\
+	}							\
+      }								\
+      fclose(fp);						\
+      fp=NULL;							\
+    }								\
+  }
+#  define READ_STATE(NAME,CYCLE,TIME,DT,DX)		\
+  {							\
+    char buffer[80];					\
+    sprintf (buffer,NAME,CYCLE);			\
+    FILE * fp = fopen(buffer,"r");			\
+    printf ("fscanf returned %d\n",fscanf (fp,"%f %f %f",&TIME,&DT,&DX)); \
+    printf ("DEBUG_TIME %20.15f %20.15f %20.15f\n",TIME,DT,DX);		\
+    fclose(fp);								\
+}
+#else
+#   define READ_FIELD(FIELD,NAME,CYCLE,field,gx,gy,gz,mx,my,mz)	\
+  /* EMPTY */
+#  define READ_STATE(NAME,CYCLE,TIME,DT,DX)	\
+  /* EMPTY */
+#endif
+
+#ifdef DEBUG_WRITE_FIELDS
+#   define WRITE_FIELD(FIELD,NAME,CYCLE,field,gx,gy,gz,mx,my,mz)	\
+  {								\
+    enzo_float * array = (enzo_float*) field.values(FIELD);	\
+    char buffer[80];						\
+    sprintf (buffer,NAME,CYCLE);				\
+    printf ("WRITE_FIELD %s cycle=%d\n",FIELD,CYCLE);		\
+    FILE * fp = fopen(buffer,"w");				\
+    for (int iz=gz; iz<mz-gz; iz++) {				\
+      for (int iy=gy; iy<my-gy; iy++) {				\
+  	for (int ix=gx; ix<mx-gx; ix++) {			\
+  	  int i=ix+mx*(iy+my*iz);				\
+  	  fprintf (fp,"%d %d %d %20.16g\n",ix-gx,iy-gy,iz-gz,array[i]);	\
+  	}							\
+      }								\
+    }								\
+    fclose(fp);							\
+    fp=NULL;							\
+  }
+#else
+#   define WRITE_FIELD(FIELD,FILE,CYCLE,field,gx,gy,gz,mx,my,mz)	\
+  /* EMPTY */
 #endif
 
 //----------------------------------------------------------------------
@@ -30,7 +96,6 @@ int EnzoBlock::SolveHydroEquations
   /* initialize */
 
   int dim, i,j,  size;
-  enzo_float a = 1, dadt;
 
   Field field = data()->field();
 
@@ -194,7 +259,8 @@ int EnzoBlock::SolveHydroEquations
   int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
 			 GridDimension[1]*GridDimension[2]),
 		     GridDimension[2]*GridDimension[0]);
-  enzo_float *temp = new enzo_float[tempsize*(31+ncolour*4)];
+
+  enzo_float *temp = new enzo_float[tempsize*(32+ncolour*4)];
 
   /* create and fill in arrays which are easier for the solver to
      understand. */
@@ -224,26 +290,45 @@ int EnzoBlock::SolveHydroEquations
      in comoving form (except for the expansion terms which are taken
      care of elsewhere). */
 
+  enzo_float a_cosmo = 1, dadt_cosmo;
+
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     simulation()->problem()->physics("cosmology");
+
+  if (comoving_coordinates) {
+    cosmology->compute_expansion_factor(&a_cosmo, &dadt_cosmo, time+0.5*dt);
+  }
 
   ASSERT ("EnzoBlock::SolveHydroEquations()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
 	  ! (comoving_coordinates && (cosmology == NULL)) );
 
-  if (comoving_coordinates) {
-    cosmology->compute_expansion_factor(&a, &dadt, time+0.5*dt);
-  }
-
   /* Create a cell width array to pass (and convert to absolute coords). */
 
-  enzo_float CellWidthTemp[MAX_DIMENSION];
+  enzo_float * CellWidthTemp[MAX_DIMENSION];
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
-    if (dim < rank)
-      CellWidthTemp[dim] = enzo_float(a*CellWidth[dim]);
-    else
-      CellWidthTemp[dim] = 1.0;
+    CellWidthTemp[dim] = new enzo_float [GridDimension[dim]];
+    if (dim < rank) {
+      for (int i=0; i<GridDimension[dim]; i++) 
+	CellWidthTemp[dim][i] = enzo_float(a_cosmo*CellWidth[dim]);
+    } else {
+      for (int i=0; i<GridDimension[dim]; i++) 
+	CellWidthTemp[dim][i] = 1.0;
+    }
   }
+
+#ifdef DEBUG_READ_FIELDS
+  if (cycle_ == 0) {
+    enzo_float dx;
+    READ_STATE("state-enzo-0-%03d.data",cycle_,time,dt,dx);
+    for (dim = 0; dim < MAX_DIMENSION; dim++) {
+      if (dim < rank) {
+	for (int i=0; i<GridDimension[dim]; i++) 
+	  CellWidthTemp[dim][i] = dx;
+      }
+    }
+  }
+#endif  
 
   /* call a Fortran routine to actually compute the hydro equations
      on this grid.
@@ -254,12 +339,32 @@ int EnzoBlock::SolveHydroEquations
   int gravity_on = (acceleration_x != NULL) ? 1 : 0;
 
   int mx,my,mz;
-  int gx,gy,gz;
+  int gx=0,gy=0,gz=0;
   field.dimensions(0,&mx,&my,&mz);
-  field.ghost_depth(0,&gx,&gy,&gz);
+
+  READ_FIELD("density","de-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("velocity_x","vx-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("velocity_y","vy-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("velocity_z","vz-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("acceleration_x","ax-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("acceleration_y","ay-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("acceleration_z","az-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("total_energy","te-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("internal_energy","ie-enzo-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  
+  WRITE_FIELD("density","de-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("velocity_x","vx-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("velocity_y","vy-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("velocity_z","vz-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("acceleration_x","ax-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("acceleration_y","ay-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("acceleration_z","az-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("total_energy","te-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("internal_energy","ie-enzop-0-%03d.data",cycle_,field,0,0,0,mx,my,mz);
 
   enzo_float * potential = (enzo_float *) field.values("potential_temp");
   enzo_float * density_total = (enzo_float *) field.values("B_temp");
+  gx=gy=gz=3;
   TRACE_FIELD("ppm-0-density",density,1.0);
   TRACE_FIELD("ppm-0-potential",potential,1.0);
   TRACE_FIELD("ppm-0-density-total",density_total,1.0);
@@ -272,6 +377,7 @@ int EnzoBlock::SolveHydroEquations
   TRACE_FIELD("ppm-0-acceleration_z",acceleration_z,1.0);
   TRACE_FIELD("ppm-0-internal_energy",internal_energy,1.0);
 
+
   Particle particle = data()->particle();
   TRACE_PARTICLE("ppm-0-velocity_x",particle,"dark","vx");
   TRACE_PARTICLE("ppm-0-velocity_y",particle,"dark","vy");
@@ -279,7 +385,10 @@ int EnzoBlock::SolveHydroEquations
   TRACE_PARTICLE("ppm-0-acceleration_x",particle,"dark","ax");
   TRACE_PARTICLE("ppm-0-acceleration_y",particle,"dark","ay");
   TRACE_PARTICLE("ppm-0-acceleration_z",particle,"dark","az");
-   
+
+  int iconsrec = 0;
+  int iposrec = 0;
+
   FORTRAN_NAME(ppm_de)
     (
      density, total_energy, velocity_x, velocity_y, velocity_z,
@@ -289,11 +398,12 @@ int EnzoBlock::SolveHydroEquations
      acceleration_y,
      acceleration_z,
      &Gamma[in], &dt, &cycle_,
-     &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
+     CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
      &rank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,
      &PPMFlatteningParameter[in],
      &PressureFree[in],
+     &iconsrec, &iposrec,
      &PPMDiffusionParameter[in], &PPMSteepeningParameter[in],
      &DualEnergyFormalism[in], &DualEnergyFormalismEta1[in],
      &DualEnergyFormalismEta2[in],
@@ -303,6 +413,55 @@ int EnzoBlock::SolveHydroEquations
      geindex, temp,
      &ncolour, colourpt, coloff, colindex
      );
+
+#ifdef DEBUG_READ_FIELDS
+  READ_FIELD("density_diff","de-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("velocity_x_diff","vx-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("velocity_y_diff","vy-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("velocity_z_diff","vz-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("acceleration_x_diff","ax-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("acceleration_y_diff","ay-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("acceleration_z_diff","az-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("total_energy_diff","te-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  READ_FIELD("internal_energy_diff","ie-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+
+  enzo_float * density_diff    = (enzo_float *) field.values("density_diff");
+  enzo_float * total_energy_diff    = (enzo_float *) field.values("total_energy_diff");
+  enzo_float * internal_energy_diff = (enzo_float *) field.values("internal_energy_diff");
+  enzo_float * velocity_x_diff = (enzo_float *) field.values("velocity_x_diff");
+  enzo_float * velocity_y_diff = (enzo_float *) field.values("velocity_y_diff");
+  enzo_float * velocity_z_diff = (enzo_float *) field.values("velocity_z_diff");
+  enzo_float * acceleration_x_diff = (enzo_float *) field.values("acceleration_x_diff");
+  enzo_float * acceleration_y_diff = (enzo_float *) field.values("acceleration_y_diff");
+  enzo_float * acceleration_z_diff = (enzo_float *) field.values("acceleration_z_diff");
+
+  for (int iz=0; iz<mz; iz++) {
+    for (int iy=0; iy<my; iy++) {
+      for (int ix=0; ix<mx; ix++) {
+	const int i=ix+mx*(iy+my*iz);
+	density_diff[i] -= density[i];
+	total_energy_diff[i] -= total_energy[i];
+	internal_energy_diff[i] -= internal_energy[i];
+	velocity_x_diff[i] -= velocity_x[i];
+	velocity_y_diff[i] -= velocity_y[i];
+	velocity_z_diff[i] -= velocity_z[i];
+	acceleration_x_diff[i] -= acceleration_x[i];
+	acceleration_y_diff[i] -= acceleration_y[i];
+	acceleration_z_diff[i] -= acceleration_z[i];
+      }
+    }
+  }
+#endif
+  
+  WRITE_FIELD("density","de-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("velocity_x","vx-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("velocity_y","vy-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("velocity_z","vz-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("acceleration_x","ax-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("acceleration_y","ay-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("acceleration_z","az-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("total_energy","te-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
+  WRITE_FIELD("internal_energy","ie-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
 
   TRACE_FIELD("ppm-1-density",density,1.0);
   TRACE_FIELD("ppm-1-total_energy",total_energy,1.0);

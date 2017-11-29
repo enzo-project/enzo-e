@@ -19,7 +19,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  enzo_float *pressure,
  bool comoving_coordinates)
 {
- 
+
   /* declarations */
  
   int i, size = 1;

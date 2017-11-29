@@ -9,7 +9,8 @@ include "input/adapt_slope.incl"
 
 Testing {
 #   time_final = 0.00632951818516996;
-   time_final = 0.00632976560208543;
+   time_final = [0.00632976560208543, # OLD_PPM
+                 0.00634160320623778]; # NEW_PPM
    cycle_final = 20;
 }
 

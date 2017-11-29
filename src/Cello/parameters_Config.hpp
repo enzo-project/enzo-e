@@ -152,7 +152,7 @@ public: // interface
       units_length(1.0),
       units_time(1.0),
       testing_cycle_final(0),
-      testing_time_final(0.0),
+      testing_time_final(),
       testing_time_tolerance(0.0)
   { }
 
@@ -292,7 +292,7 @@ public: // interface
       units_length(1.0),
       units_time(1.0),
       testing_cycle_final(0),
-      testing_time_final(0.0),
+      testing_time_final(),
       testing_time_tolerance(0.0)
   {
     for (int axis=0; axis<3; axis++) {
@@ -512,7 +512,7 @@ public: // attributes
   // Testing
 
   int                        testing_cycle_final;
-  double                     testing_time_final;
+  std::vector<double>        testing_time_final;
   double                     testing_time_tolerance;
 
 protected: // functions
