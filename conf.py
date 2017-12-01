@@ -30,7 +30,7 @@ sys.path.append( "/usr/local/breathe" )
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.jsmath',
-              'sphinx.ext.pngmath', 'sphinx.ext.todo', 'breathe']
+              'sphinx.ext.todo', 'breathe']
 
 breathe_projects = { "cello": "/home/bordner/Cello/cello-src/src-xml/" }
 
