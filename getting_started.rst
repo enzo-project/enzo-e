@@ -174,16 +174,16 @@ regression tests, and running code analysis tools.
 
         ==================  ===============================================================
         ==================  ===============================================================
-	``make``            *Compile Enzo-P as ./bin/enzo-p*
+	``make``            *Compile Enzo-P as* ``./bin/enzo-p``
 	``make clean``      *Remove object and test files*
-	``make reset``      *Clear any settings from an incomplete ./build.sh*
-	``make doc``        *Generate doxygen documentation from source in src-html*
+	``make reset``      *Clear any settings from an incomplete build*
+	``make doc``        *Generate doxygen documentation from source in* ``src-html`` *(requires* ``doxygen`` *)*
         ``make test``       *Run regression tests*
-	``make diff``       *Generate org-mode 'diff.org' file from 'hg diff' output*
-	``make log``        *Generate org-mode 'log.org' file from 'hg log' output*
-	``make gdb``        *Generate org-mode 'gdb.org' from gdb 'where' output in gdb.out*
-        ``make cccc``       *Compute code quality metrics in src/.cccc/cccc.html*
-	``make coverity``   *Compile enzo-p using the coverity static analysis tool*
+	``make diff``       *Generate org-mode* ``'diff.org'`` *file from* ``'hg diff'`` *output*
+	``make log``        *Generate org-mode* ``'log.org'`` *file from* ``'hg log'`` *output*
+	``make gdb``        *Generate org-mode* ``'gdb.org'`` *from gdb* ``'where'`` *output in* ``gdb.out``
+        ``make cccc``       *Compute code quality metrics in* ``src/.cccc/cccc.html``
+	``make coverity``   *Compile Enzo-P/Cello using the Coverity static analysis tool*
         ==================  ===============================================================
 
 Running
