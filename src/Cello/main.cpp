@@ -210,7 +210,7 @@ void Main::p_text_file_write
     sync_text->inc_stop(count-1);
   }
 
-  fprintf (fp_text,line);
+  fprintf (fp_text,"%s",line);
 
   if (sync_text->next()) {
     //    text_file_close_();

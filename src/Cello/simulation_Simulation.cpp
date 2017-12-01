@@ -671,66 +671,37 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 
 //======================================================================
 
-void Simulation::monitor_insert_block(int count) 
+void Simulation::data_insert_block() 
 {
  
 #ifdef CELLO_DEBUG
   PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
 		   CkMyPe(),sync_output_begin_.stop(),hierarchy_->num_blocks());
 #endif
-  if (hierarchy_) hierarchy_->increment_block_count(count);
-  sync_output_begin_ += count;
-  sync_output_write_ += count;
+  if (hierarchy_) hierarchy_->increment_block_count(1);
+  ++sync_output_begin_;
+  ++sync_output_write_;
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::monitor_delete_block(int count) 
+void Simulation::data_delete_block() 
 {
-  if (hierarchy_) hierarchy_->increment_block_count(-count);
-  sync_output_begin_ -= count;
-  sync_output_write_ -= count;
+  if (hierarchy_) hierarchy_->increment_block_count(-1);
+  --sync_output_begin_;
+  --sync_output_write_;
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::monitor_insert_zones(int64_t count_total, int64_t count_real) 
-{
- 
-  ASSERT2 ("Simulation::monitor_insert_zones()",
-	   "Total number of zones %ld must be no larger than "
-	   "number of real zones %ld",
-	   count_total,count_real,
-	   count_total >= count_real);
-	   
-  if (hierarchy_) hierarchy_->increment_total_zone_count(count_total);
-  if (hierarchy_) hierarchy_->increment_real_zone_count (count_real);
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::monitor_delete_zones(int64_t count_total, int64_t count_real)
-{
-  ASSERT2 ("Simulation::monitor_insert_zones()",
-	   "Total number of zones %ld must be no larger than "
-	   "number of real zones %ld",
-	   count_total,count_real,
-	   count_total >= count_real);
-	   
-  if (hierarchy_) hierarchy_->increment_total_zone_count(-count_total);
-  if (hierarchy_) hierarchy_->increment_real_zone_count(-count_real);
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::monitor_insert_particles(int64_t count)
+void Simulation::data_insert_particles(int64_t count)
 {
   if (hierarchy_) hierarchy_->increment_particle_count(count);
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::monitor_delete_particles(int64_t count)
+void Simulation::data_delete_particles(int64_t count)
 {
   if (hierarchy_) hierarchy_->increment_particle_count(-count);
 }

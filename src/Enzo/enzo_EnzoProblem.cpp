@@ -129,7 +129,6 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "collapse") {
-    const int rank = enzo_config->initial_collapse_rank;
     initial = new EnzoInitialCollapse
       (cycle,time,
        enzo_config->initial_collapse_rank,

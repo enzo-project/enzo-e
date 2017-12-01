@@ -60,15 +60,6 @@ void EnzoInitialMusic::enforce_block
 
   // Get the grid size at level_
 
-  // ... first get root grid size
-  int rs3[3];
-  hierarchy->root_size(rs3,rs3+1,rs3+2);
-
-  // ... multiply root grid size by 2**level_  
-  rs3[0] << level_;
-  rs3[1] << level_;
-  rs3[2] << level_;
-
   double lower_domain[3];
   double upper_domain[3];
   hierarchy->lower(lower_domain, lower_domain+1, lower_domain+2);
@@ -252,14 +243,13 @@ void EnzoInitialMusic::enforce_block
 
     const int it = particle.type_index(particle_types_[i]);
     const int ia = particle.attribute_index(it,particle_attributes_[i]);
-    const int da = particle.stride(it,ia);
 
     const int np = nx*ny*nz;
 
     // insert particles if they don't exist yet
     if (particle.num_particles(it) == 0) {
       particle.insert_particles(it,np);
-      block->simulation()->monitor_insert_particles(np);
+      block->simulation()->data_insert_particles(np);
     }
 
     // read particle attribute

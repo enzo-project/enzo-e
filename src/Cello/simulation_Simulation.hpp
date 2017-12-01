@@ -145,9 +145,6 @@ public: // interface
   Schedule * schedule_balance() const throw() 
   { return schedule_balance_; };
 
-  // /// Output Performance information to stdout (root process data only)
-  // virtual void performance_output();
-
   /// Write performance information to disk (all process data)
   void performance_write();
 
@@ -168,7 +165,8 @@ public: // interface
 
 public: // virtual functions
 
-  /// Update Simulation state, including cycle, time, timestep, and stopping criteria
+  /// Update Simulation state, including cycle, time, timestep, and
+  /// stopping criteria
   virtual void update_state(int cycle, double time, double dt, double stop) ;
 
   /// initialize the Simulation given a parameter file
@@ -262,26 +260,20 @@ public: // virtual functions
   void r_monitor_performance (CkReductionMsg * msg);
 
   //--------------------------------------------------
-  // Monitor number of blocks, particles, zones per process
+  // Data
   //--------------------------------------------------
 
   /// Add a new Block to this local branch
-  void monitor_insert_block(int count=1) ;
+  void data_insert_block() ;
 
   /// Remove a Block from this local branch
-  void monitor_delete_block(int count=1) ;
-
-  /// Add a new Zones to this local branch
-  void monitor_insert_zones(int64_t count_real, int64_t count_ghost) ;
-
-  /// Remove a Zones from this local branch
-  void monitor_delete_zones(int64_t count_real, int64_t count_ghost) ;
+  void data_delete_block() ;
 
   /// Add a new Particle to this local branch
-  void monitor_insert_particles(int64_t count) ;
+  void data_insert_particles(int64_t count) ;
 
   /// Remove a Particle from this local branch
-  void monitor_delete_particles(int64_t count) ;
+  void data_delete_particles(int64_t count) ;
 
   virtual void monitor_performance();
 

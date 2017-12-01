@@ -27,8 +27,8 @@ EnzoConfig::EnzoConfig() throw ()
   ppm_number_density_floor(0.0),
   ppm_density_floor(0.0),
   ppm_pressure_floor(0.0),
-  ppm_temperature_floor(0.0),
   ppm_pressure_free(false),
+  ppm_temperature_floor(0.0),
   ppm_steepening(false),
   ppm_use_minimum_pressure_support(false),
   ppm_mol_weight(0.0),
@@ -56,8 +56,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_music_field_names(),
   initial_music_field_coords(),
   initial_music_particle_files(),
-  initial_music_particle_coords(),
   initial_music_particle_datasets(),
+  initial_music_particle_coords(),
   initial_music_particle_types(),
   initial_music_particle_attributes(),
   // EnzoInitialPm
@@ -162,8 +162,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | ppm_number_density_floor;
   p | ppm_density_floor;
   p | ppm_pressure_floor;
-  p | ppm_temperature_floor;
   p | ppm_pressure_free;
+  p | ppm_temperature_floor;
   p | ppm_steepening;
   p | ppm_use_minimum_pressure_support;
   p | ppm_mol_weight;
@@ -217,8 +217,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_music_field_coords;
 
   p | initial_music_particle_files;
-  p | initial_music_particle_coords;
   p | initial_music_particle_datasets;
+  p | initial_music_particle_coords;
   p | initial_music_particle_types;
   p | initial_music_particle_attributes;
 
@@ -323,10 +323,10 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:density_floor", floor_default);
   ppm_pressure_floor = p->value_float
     ("Method:ppm:pressure_floor", floor_default);
-  ppm_temperature_floor = p->value_float
-    ("Method:ppm:temperature_floor", floor_default);
   ppm_pressure_free = p->value_logical
     ("Method:ppm:pressure_free",false);
+  ppm_temperature_floor = p->value_float
+    ("Method:ppm:temperature_floor", floor_default);
   ppm_steepening = p->value_logical 
     ("Method:ppm:steepening", false);
   ppm_use_minimum_pressure_support = p->value_logical
@@ -361,8 +361,8 @@ void EnzoConfig::read(Parameters * p) throw()
 
       initial_music_field_files.        push_back(file);
       initial_music_field_datasets.     push_back(dataset);
-      initial_music_field_coords.       push_back(coords);
       initial_music_field_names.        push_back(name);
+      initial_music_field_coords.       push_back(coords);
     } else {
       ERROR2 ("EnzoConfig::read",
 	      "Unknown particle type %s for parameter %s",

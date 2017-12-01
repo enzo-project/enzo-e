@@ -121,11 +121,13 @@ void Block::init
   // Enable Charm++ AtSync() dynamic load balancing
   usesAtSync = true;
 
+  Simulation * simulation = this->simulation();
+
 #ifdef CELLO_DEBUG
-  index_.print("Block()",-1,2,false,simulation());
+  index_.print("Block()",-1,2,false,simulation);
 #endif
 
-  Monitor * monitor = (simulation() != NULL) ? simulation()->monitor() : NULL;
+  Monitor * monitor = (simulation != NULL) ? simulation->monitor() : NULL;
   
   if ((monitor != NULL) && monitor->is_verbose()) {
     char buffer [80];
@@ -225,13 +227,11 @@ void Block::init
 
   }
 
-  if (simulation())
-    simulation()->monitor_insert_block();
+  if (simulation) simulation->data_insert_block();
   
   const int np = data()->particle().num_particles();
   if (np > 0) {
-    if (simulation())
-      simulation()->monitor_insert_particles(np);
+    if (simulation) simulation->data_insert_particles(np);
   }
 
   if (level > 0) {
@@ -425,15 +425,19 @@ void Block::apply_initial_() throw ()
 
 Block::~Block()
 { 
+  Simulation * simulation = this->simulation();
+
 #ifdef TRACE_BLOCK
   CkPrintf ("%d %s TRACE_BLOCK Block::~Block())\n",  CkMyPe(),name_.c_str());
 #endif
 #ifdef CELLO_DEBUG
-  index_.print("~Block()",-1,2,false,simulation());
+  index_.print("~Block()",-1,2,false,simulation);
 #endif
 
-  Monitor * monitor = simulation()->monitor();
-  if (monitor->is_verbose()) {
+  
+  Monitor * monitor = simulation ? simulation->monitor() : NULL;
+  
+  if (monitor && monitor->is_verbose()) {
     char buffer [80];
     int v3[3];
     index().values(v3);
@@ -481,7 +485,7 @@ Block::~Block()
   delete child_data_;
   child_data_ = 0;
 
-  simulation()->monitor_delete_block();
+  if (simulation) simulation->data_delete_block();
 
 }
 
@@ -543,8 +547,9 @@ Block::Block (CkMigrateMessage *m)
     index_solver_()
 { 
   performance_start_(perf_block);
-  if (simulation()) 
-    simulation()->monitor_insert_block();
+
+  if (simulation()) simulation()->data_insert_block();
+  
   performance_stop_(perf_block);
 };
 

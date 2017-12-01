@@ -95,7 +95,7 @@ int EnzoBlock::SolveHydroEquations
 {
   /* initialize */
 
-  int dim, i,j,  size;
+  int dim, size;
 
   Field field = data()->field();
 
@@ -338,6 +338,7 @@ int EnzoBlock::SolveHydroEquations
 
   int gravity_on = (acceleration_x != NULL) ? 1 : 0;
 
+#ifdef DEBUG_PPM  
   int mx,my,mz;
   int gx=0,gy=0,gz=0;
   field.dimensions(0,&mx,&my,&mz);
@@ -385,7 +386,8 @@ int EnzoBlock::SolveHydroEquations
   TRACE_PARTICLE("ppm-0-acceleration_x",particle,"dark","ax");
   TRACE_PARTICLE("ppm-0-acceleration_y",particle,"dark","ay");
   TRACE_PARTICLE("ppm-0-acceleration_z",particle,"dark","az");
-
+#endif
+  
   int iconsrec = 0;
   int iposrec = 0;
 
@@ -472,7 +474,7 @@ int EnzoBlock::SolveHydroEquations
   TRACE_FIELD("ppm-1-acceleration_y",acceleration_y,1.0);
   TRACE_FIELD("ppm-1-acceleration_z",acceleration_z,1.0);
   TRACE_FIELD("ppm-1-internal_energy",internal_energy,1.0);
-
+  
   /* deallocate temporary space for solver */
 
   delete [] temp;

@@ -33,10 +33,6 @@ void EnzoInitialPpmlTest::enforce_block
   double cz=0.5;
   // ... radius-squared
   double r2 = 0.05;
-  // ... B field
-  double bx = 10.0;
-  double by = 0.0;
-  double bz = 0.0;
 
   Field field = block->data()->field();
 

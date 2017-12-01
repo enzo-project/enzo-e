@@ -361,7 +361,7 @@ void Block::adapt_refine_()
       count += particle.delete_particles (it, ib);
     }
   }
-  simulation()->monitor_delete_particles(count);
+  simulation()->data_delete_particles(count);
   
   is_leaf_ = false;
 #ifdef DEBUG_ADAPT
@@ -470,7 +470,7 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
       count += particle.delete_particles (it,ib,mask);
     }
   }
-  simulation()->monitor_delete_particles(count);
+  simulation()->data_delete_particles(count);
 }
 
 //----------------------------------------------------------------------

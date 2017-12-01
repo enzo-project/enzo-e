@@ -12,7 +12,7 @@
 #
 # * include/ files generating errors cannot be traced back to source
 #   code directory, so it assumes src/Cello, which may be incorrect.
-# * duplicate code with parse_warning.sh
+# * duplicate code with warning-org.awk
 #----------------------------------------------------------------------
 
 
