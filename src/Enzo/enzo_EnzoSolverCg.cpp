@@ -8,7 +8,7 @@
 #include "enzo.hpp"
 
 #include "enzo.decl.h"
-
+// #define DEBUG_RESID
 //----------------------------------------------------------------------
 
 EnzoSolverCg::EnzoSolverCg 
@@ -578,6 +578,21 @@ void EnzoSolverCg::loop_4 (EnzoBlock * enzo_block) throw ()
       Z[i] = R[i];
     }
 
+#ifdef DEBUG_RESID
+    CkPrintf ("Copying residual %s\n",enzo_block->name().c_str());
+    enzo_float * residual = (enzo_float*) field.values("residual");
+    for (int iz=0; iz<nz_; iz++) {
+      int kz=iz+gz_;
+      for (int iy=0; iy<ny_; iy++) {
+	int ky=iy+gy_;
+	for (int ix=0; ix<nx_; ix++) {
+	  int kx=ix+gx_;
+	  int i = kx + mx_*(ky + my_*kz);
+	  residual[i]=R[i];
+	}
+      }
+    }
+#endif    
   }
 
   long double reduce[3] = {0.0};

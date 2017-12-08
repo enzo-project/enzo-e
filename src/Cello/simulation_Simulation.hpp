@@ -264,10 +264,10 @@ public: // virtual functions
   //--------------------------------------------------
 
   /// Add a new Block to this local branch
-  void data_insert_block() ;
+  void data_insert_block(Block *) ;
 
   /// Remove a Block from this local branch
-  void data_delete_block() ;
+  void data_delete_block(Block *) ;
 
   /// Add a new Particle to this local branch
   void data_insert_particles(int64_t count) ;
@@ -414,7 +414,7 @@ protected: // attributes
 
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
-  
+
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

@@ -21,8 +21,8 @@
 // #define READ_ENZO_POTENTIAL
 // #define USE_ENZO_POTENTIAL
 
-// #define DEBUG_COPY_DENSITY
-// #define DEBUG_COPY_B
+//#define DEBUG_COPY_DENSITY
+//#define DEBUG_COPY_B
 // #define READ_PARTICLES
 
 #define CK_TEMPLATES_ONLY

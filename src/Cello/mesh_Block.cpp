@@ -227,7 +227,7 @@ void Block::init
 
   }
 
-  if (simulation) simulation->data_insert_block();
+  if (simulation) simulation->data_insert_block(this);
   
   const int np = data()->particle().num_particles();
   if (np > 0) {
@@ -485,7 +485,7 @@ Block::~Block()
   delete child_data_;
   child_data_ = 0;
 
-  if (simulation) simulation->data_delete_block();
+  if (simulation) simulation->data_delete_block(this);
 
 }
 
@@ -548,7 +548,7 @@ Block::Block (CkMigrateMessage *m)
 { 
   performance_start_(perf_block);
 
-  if (simulation()) simulation()->data_insert_block();
+  if (simulation()) simulation()->data_insert_block(this);
   
   performance_stop_(perf_block);
 };

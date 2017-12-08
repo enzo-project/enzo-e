@@ -65,7 +65,6 @@ int ProlongLinear::apply_
 (       T * values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
 	const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
 {
-
   const int dx_c = 1;
   const int dy_c = nd3_c[0];
   const int dz_c = nd3_c[0]*nd3_c[1];

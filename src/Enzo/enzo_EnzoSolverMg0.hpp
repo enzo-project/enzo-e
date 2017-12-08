@@ -27,6 +27,7 @@ public: // interface
    int monitor_iter,
    int rank,
    int iter_max,
+   double res_tol,
    int index_smooth_pre,
    int index_solve_coarse,
    int index_smooth_post,
@@ -51,11 +52,12 @@ public: // interface
        prolong_(NULL),
        rank_(0),
        iter_max_(0),
+       res_tol_(0),
        ib_(0), ic_(0), ir_(0), ix_(0),
        mx_(0),my_(0),mz_(0),
        nx_(0),ny_(0),nz_(0),
        gx_(0),gy_(0),gz_(0),
-       bs_(0), bc_(0)
+       bs_(0), bc_(0), rr_(0), rr_local_(0), rr0_(0)
   {}
 
   /// Destructor
@@ -79,6 +81,7 @@ public: // interface
     p | prolong_;
     p | rank_;
     p | iter_max_;
+    p | res_tol_;
 
     p | ib_;
     p | ic_;
@@ -97,6 +100,10 @@ public: // interface
 
     p | bc_;
     p | bs_;
+
+    p | rr_;
+    p | rr_local_;
+    p | rr0_;
   }
 
   /// Solve the linear system 
@@ -133,6 +140,12 @@ public: // interface
 
   void set_bs(long double bs) throw() { bs_ = bs; }
   void set_bc(long double bc) throw() { bc_ = bc; }
+  void set_rr_local(long double rr) throw() { rr_local_ = rr; }
+  void set_rr(long double rr) throw() { rr_ = rr; }
+  void set_rr0(long double rr0) throw() { rr0_ = rr0; }
+
+  long double rr_local() throw() { return rr_local_; }
+  long double rr() throw() { return rr_; }
 
   void begin_solve(EnzoBlock * enzo_block) throw();
 
@@ -148,6 +161,7 @@ public: // interface
     CkPrintf (" prolong_ = %p\n",prolong_);
     CkPrintf (" rank_ = %d\n",rank_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
+    CkPrintf (" res_tol_ = %g\n",res_tol_);
     CkPrintf (" ib_ = %d\n",ib_);
     CkPrintf (" ic_ = %d\n",ic_);
     CkPrintf (" ir_ = %d\n",ir_);
@@ -157,6 +171,9 @@ public: // interface
     CkPrintf (" gx_,gy_,gz_ = %d %d %d\n",gx_,gy_,gz_);
     CkPrintf (" bs_ = %g\n",bs_);
     CkPrintf (" bc_ = %g\n",bc_);
+    CkPrintf (" rr_ = %g\n",rr_);
+    CkPrintf (" rr_local_ = %g\n",rr_local_);
+    CkPrintf (" rr0_ = %g\n",rr0_);
   }
 protected: // methods
 
@@ -168,6 +185,7 @@ protected: // methods
   void prolong_send_(EnzoBlock * enzo_block) throw();
 
   bool is_converged_(EnzoBlock * enzo_block) const;
+  bool is_diverged_(EnzoBlock * enzo_block) const;
 
   /// Allocate temporary Fields
   void allocate_temporary_(Field field, Block * block = NULL)
@@ -213,6 +231,9 @@ protected: // attributes
   /// Maximum number of MG iterations
   int iter_max_;
 
+  /// Convergence tolerance on the residual reduction rr_ / rr0_
+  double res_tol_;
+
   /// MG vector id's
   int ib_;
   int ic_;
@@ -227,6 +248,11 @@ protected: // attributes
   /// scalars used for projections of singular systems
   long double bs_;
   long double bc_;
+
+  /// Current and initial residual norm R'*R
+  long double rr_;
+  long double rr_local_;
+  long double rr0_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_GRAVITY_MG0_HPP */

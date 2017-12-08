@@ -345,14 +345,14 @@ protected: // attributes
   // MG SOLVER ( EnzoSolverMg0)
   Sync mg_sync_restrict_;
 
-  // Jacobi iteration count
-  int jacobi_iter_;
-
   // Synchronize to not call prolong until all children have exited coarse solve
   Sync mg_sync_prolong_;
 
   // Saved FieldMsg for prolong
   FieldMsg * mg_msg_;
+
+  // Jacobi iteration count
+  int jacobi_iter_;
 
   // FieldMsg for prolong if called out of order
 

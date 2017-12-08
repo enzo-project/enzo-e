@@ -365,6 +365,7 @@ int EnzoBlock::SolveHydroEquations
 
   enzo_float * potential = (enzo_float *) field.values("potential_temp");
   enzo_float * density_total = (enzo_float *) field.values("B_temp");
+
   gx=gy=gz=3;
   TRACE_FIELD("ppm-0-density",density,1.0);
   TRACE_FIELD("ppm-0-potential",potential,1.0);
@@ -465,6 +466,9 @@ int EnzoBlock::SolveHydroEquations
   WRITE_FIELD("total_energy","te-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
   WRITE_FIELD("internal_energy","ie-enzop-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);
 
+  int mx,my,mz;
+  field.dimensions(0,&mx,&my,&mz);
+  int gx=3,gy=3,gz=3;
   TRACE_FIELD("ppm-1-density",density,1.0);
   TRACE_FIELD("ppm-1-total_energy",total_energy,1.0);
   TRACE_FIELD("ppm-1-velocity_x",velocity_x,1.0);

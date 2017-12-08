@@ -301,6 +301,7 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_monitor_iter[index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_res_tol[index_solver],
        enzo_config->solver_pre_smooth[index_solver],
        enzo_config->solver_coarse_solve[index_solver],
        enzo_config->solver_post_smooth[index_solver],

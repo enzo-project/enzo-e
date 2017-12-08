@@ -29,7 +29,8 @@ public: // interface
     rank_(0),
     refinement_(0),
     max_level_(0),
-    num_blocks_(0), 
+    num_blocks_(0),
+    block_ptr_(),
     num_particles_(0), 
     num_zones_total_(0), 
     num_zones_real_(0), 
@@ -140,6 +141,20 @@ public: // interface
   void increment_block_count(int count)
   { num_blocks_ += count; }
 
+  /// Add Block to the block_ptr_ mapping
+  void insert_block (Block * block)
+  {
+    if (block_ptr_.find(block) == block_ptr_.end())
+      block_ptr_[block] = true;
+  }
+  
+  /// Remove Block from the block_ptr_ mapping
+  void delete_block (Block * block)
+  {
+    if (block_ptr_.find(block) != block_ptr_.end())
+      block_ptr_.erase(block);
+  }
+  
   /// Increment (decrement) number of particles
   void increment_particle_count(int64_t count)
   { num_particles_ += count; }
@@ -204,7 +219,10 @@ protected: // attributes
   /// Maximum number of refinement levels
 
   /// Current number of blocks on this process
-  int num_blocks_; 
+  int num_blocks_;
+
+  /// Pointers to Blocks on this process
+  std::map<Block *,bool> block_ptr_;
 
   /// Current number of particles on this process
   int64_t num_particles_;
@@ -214,7 +232,7 @@ protected: // attributes
 
   /// Current number of real_zones on this process
   int64_t num_zones_real_; 
-
+  
   /// Array of Blocks 
   CProxy_Block * block_array_;
   bool           block_exists_;

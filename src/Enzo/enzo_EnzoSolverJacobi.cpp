@@ -102,6 +102,8 @@ void EnzoSolverJacobi::apply_(Block * block)
 
   int mx,my,mz;
   field.dimensions(ix_,&mx,&my,&mz);
+  // int gx,gy,gz;
+  // field.ghost_depth(ix_,&gx,&gy,&gz);
 
   const int ng = A_->ghost_depth();
 
@@ -148,10 +150,11 @@ void EnzoSolverJacobi::apply_(Block * block)
   // Refresh X
   Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
 
-  refresh.add_all_fields ();
+  refresh.add_field (ix_);
 
   block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
+
 
 }
 

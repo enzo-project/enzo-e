@@ -671,23 +671,29 @@ void Simulation::update_state(int cycle, double time, double dt, double stop)
 
 //======================================================================
 
-void Simulation::data_insert_block() 
+void Simulation::data_insert_block(Block * block) 
 {
  
 #ifdef CELLO_DEBUG
   PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
 		   CkMyPe(),sync_output_begin_.stop(),hierarchy_->num_blocks());
 #endif
-  if (hierarchy_) hierarchy_->increment_block_count(1);
+  if (hierarchy_) {
+    hierarchy_->insert_block(block);
+    hierarchy_->increment_block_count(1);
+  }
   ++sync_output_begin_;
   ++sync_output_write_;
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::data_delete_block() 
+void Simulation::data_delete_block(Block * block) 
 {
-  if (hierarchy_) hierarchy_->increment_block_count(-1);
+  if (hierarchy_) {
+    hierarchy_->delete_block(block);
+    hierarchy_->increment_block_count(-1);
+  }
   --sync_output_begin_;
   --sync_output_write_;
 }
