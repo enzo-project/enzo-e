@@ -496,7 +496,6 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 	(monitor_iter_ && (iter % monitor_iter_) == 0 )) );
 
   if (l_output) {
-    Monitor* monitor = enzo_block->simulation()->monitor();
     monitor_output_(enzo_block,iter,0.0,0.0,0.0,0.0);
   }
 
@@ -1107,7 +1106,6 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 	(monitor_iter_ && (iter % monitor_iter_) == 0 )) );
 
   if (l_output) {
-    Monitor* monitor = enzo_block->simulation()->monitor();
     monitor_output_(enzo_block,iter,0.0,0.0,0.0,0.0);
   }
 

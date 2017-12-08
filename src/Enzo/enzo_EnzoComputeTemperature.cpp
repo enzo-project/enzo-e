@@ -71,8 +71,6 @@ void EnzoComputeTemperature::compute_(Block * block)
   enzo_float * d = (enzo_float*) field.values("density");
   enzo_float * p = (enzo_float*) field.values("pressure");
 
-  const int rank = block->rank();
-
   int mx,my,mz;
   field.dimensions(0,&mx,&my,&mz);
 

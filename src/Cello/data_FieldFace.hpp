@@ -143,11 +143,16 @@ public: // interface
 
   int num_bytes_array (Field field) throw();
 
-  /// Compute loop limits for load or store
+  /// Compute loop limits for copy, load, or store if accumulate == false
   void loop_limits
-  (int im3[3], int n3[3], const int nd3[3], const int ng3[3],
+  (int i3[3], int n3[3], const int m3[3], const int g3[3],
+   int refresh_type);
+
+  /// Compute loop limits for copy, load, or store if accumulate == true
+  void loop_limits
+  (int i3[3], int n3[3], const int m3[3], const int g3[3],
    int refresh_type,
-   bool accumulate, int ima3[3], int na3[3]);
+   int i23[2][3], int n23[2][3]);
 
   //--------------------------------------------------
 
@@ -192,9 +197,7 @@ private: // functions
   template<class T>
   void copy_ (T       * vd, int md3[3], int nd3[3], int id3[3],
 	      const T * vs, int ms3[3], int ns3[3], int is3[3],
-	      bool accumulate,
-	      int nsa3[3], int isa3[3],
-	      int nda3[3], int ida3[3]) throw();
+	      bool accumulate) throw();
 
 
   std::vector<int> field_list_src_(Field field) const;

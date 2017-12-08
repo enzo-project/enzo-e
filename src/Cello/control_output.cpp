@@ -64,7 +64,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   Output * output;
 
-  // Find next schedule output
+  // Find next schedule output (index_output_ initialized to -1)
 
   do {
 
@@ -72,6 +72,8 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } while (output && ! output->is_scheduled(cycle, time));
 
+  // assert (! output) || ( output->is_scheduled() )
+  
   if (output != NULL) {
 
     // Perform output if any...

@@ -546,10 +546,6 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     enzo_float* Q   = (enzo_float*) field.values(iq_);
     enzo_float* U   = (enzo_float*) field.values(iu_);
 
-    enzo_float * B =  (enzo_float*) field.values(ib_);
-
-    TRACE_FIELD_("B1",B,1.0);
-
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from
     /// the previous solve?]
     
@@ -564,7 +560,6 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
       Q[i] = 0.0;
       U[i] = 0.0;
     }
-    TRACE_FIELD_("B1",B,1.0);
   }
 
   /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
@@ -597,14 +592,9 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
     enzo_block->contribute(2*sizeof(long double), &reduce, 
 			   sum_long_double_2_type, callback);
 
-      enzo_float* B = (enzo_float*) field.values(ib_);
-      TRACE_FIELD_("B",B,1.0);
-      
   } else {
 
     /// nonsingular system, just call start_2 directly
-      enzo_float* B = (enzo_float*) field.values(ib_);
-    TRACE_FIELD_("B",B,1.0);
     this->start_2(enzo_block);
 
   }
@@ -652,7 +642,6 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
     /// for singular problems, project B into R(A)
     int m = mx_*my_*mz_;
     // @@@@@ B == 0
-    TRACE_FIELD_("B",B,1.0);
     if (A_->is_singular()) {
       enzo_float shift = -bs_ / bc_;
       for (int i=0; i<m; i++) {
@@ -664,8 +653,6 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
       R[i] = R0[i] = P[i] = B[i];
     }
 
-    TRACE_FIELD_("R",R,1.0);
-    TRACE_FIELD_("B",B,1.0);
     /// Compute local contributions to beta_n_ = DOT(R, R)
     reduce = 0.0;
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
@@ -742,7 +729,6 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw() {
 	(monitor_iter_ && (iter_ % monitor_iter_) == 0 )) );
 
   if (l_output) {
-    Monitor* monitor = enzo_block->simulation()->monitor();
     monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
   }
 
@@ -773,11 +759,6 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
   /// access field container on this block
   Data* data = enzo_block->data();
   Field field = data->field();
-
-  {
-    enzo_float * P = (enzo_float*) field.values(ip_);
-    TRACE_FIELD_("P",P,1.0);
-  }
 
   if (index_precon_ >= 0) {
 
@@ -982,8 +963,6 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
       Y[i] += yshift;
       V[i] += vshift;
     }
-    TRACE_FIELD_("V",V,1.0);
-    TRACE_FIELD_("Y",Y,1.0);
   }
 
   COPY_TEMP(iv_,"V_temp");
@@ -1001,7 +980,6 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
     enzo_float* X = (enzo_float*) field.values(ix_);
     enzo_float* Y = (enzo_float*) field.values(iy_);
 
-    TRACE_FIELD_("X",X,1.0);
     /// update: Q = -alpha_*V + R
     /// update: X = alpha_*Y + X
 

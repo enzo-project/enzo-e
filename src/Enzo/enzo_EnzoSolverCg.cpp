@@ -45,8 +45,6 @@ EnzoSolverCg::EnzoSolverCg
 
   /// Initialize default Refresh
 
-  const int num_fields = field_descr->field_count();
-
   field_descr->ghost_depth    (ib_,&gx_,&gy_,&gz_);
 
   if (! local_) {
@@ -878,14 +876,11 @@ void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
 
   enzo_float * X = (enzo_float*) enzo_block->data()->field().values(ix);
 
-  const int dx = 1;
-  const int dy = mx_;
-  const int dz = mx_*my_;
-
   // ASSUMES SINGULAR MATRIX IMPLIES PERIODIC DOMAIN.
 
   if (A_->is_singular()) {
-  
+
+    // XM ghost <- XP face (y)(z)
     for (int iz=gz_; iz<nz_+gz_; iz++) {
       for (int iy=gy_; iy<ny_+gy_; iy++) {
 	for (int ix=0; ix<gx_; ix++) {
@@ -896,6 +891,7 @@ void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
       }
     }
 
+    // XM ghost <- XP face (y)(z)
     for (int iz=gz_; iz<nz_+gz_; iz++) {
       for (int iy=gy_; iy<ny_+gy_; iy++) {
 	for (int ix=nx_+gx_; ix<nx_+2*gx_; ix++) {
@@ -906,6 +902,7 @@ void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
       }
     }
 
+    // YM ghost <- YP face [x](z)
     for (int iz=gz_; iz<nz_+gz_; iz++) {
       for (int iy=0; iy<gy_; iy++) {
 	for (int ix=0; ix<mx_; ix++) {
@@ -916,6 +913,7 @@ void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
       }
     }
 
+    // YP ghost <- YM face [x](z)
     for (int iz=gz_; iz<nz_+gz_; iz++) {
       for (int iy=ny_+gy_; iy<ny_+2*gy_; iy++) {
 	for (int ix=0; ix<mx_; ix++) {
@@ -926,21 +924,23 @@ void EnzoSolverCg::refresh_local_(int ix,EnzoBlock * enzo_block)
       }
     }
 
+    // ZM ghost <- ZP face [x][y]
     for (int iz=0; iz<gz_; iz++) {
       for (int iy=0; iy<my_; iy++) {
 	for (int ix=0; ix<mx_; ix++) {
-	  int is = ix + mx_*(iy + my_*(iz + nz_));
-	  int id = ix + mx_*(iy + my_*(iz      ));
+	  int is = ix + mx_*(iy + my_*(iz+nz_));
+	  int id = ix + mx_*(iy + my_*(iz    ));
 	  X[id] = X[is];
 	}
       }
     }
 
+    // ZP ghost <- ZM face [x][y]
     for (int iz=nz_+gz_; iz<nz_+2*gz_; iz++) {
       for (int iy=0; iy<my_; iy++) {
 	for (int ix=0; ix<mx_; ix++) {
-	  int is = ix + mx_*(iy + my_*(iz - nz_));
-	  int id = ix + mx_*(iy + my_*(iz      ));
+	  int is = ix + mx_*(iy + my_*(iz-nz_));
+	  int id = ix + mx_*(iy + my_*(iz    ));
 	  X[id] = X[is];
 	}
       }
@@ -980,9 +980,6 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 
 void EnzoSolverCg::monitor_output_(EnzoBlock * enzo_block)
 {
-  // Write monitor output
-  Monitor * monitor = enzo_block->simulation()->monitor();
-
   const bool l_first_iter = (iter_ == 0);
   const bool l_max_iter   = (iter_ >= iter_max_);
   const bool l_monitor    = (monitor_iter_ && (iter_ % monitor_iter_) == 0 );

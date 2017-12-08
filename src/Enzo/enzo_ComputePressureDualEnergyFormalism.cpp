@@ -19,7 +19,7 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  enzo_float *pressure,
  bool comoving_coordinates)
 {
- 
+
   /* declarations */
  
   int i, size = 1;
@@ -81,7 +81,6 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
     enzo_float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
       GammaInverse = 1.0/(Gamma[in]-1.0), x, Gamma1, temp;
-    enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     enzo_float * species_De    = (enzo_float *) field.values("species_De");
     enzo_float * species_HI    = (enzo_float *) field.values("species_HI");

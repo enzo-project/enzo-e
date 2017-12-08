@@ -194,11 +194,11 @@ protected: // attributes
   /// Gamma
   enzo_float gamma_;
 
-  /// comoving coordinates
-  bool comoving_coordinates_;
-
   /// whether gravity is enabled (int for fortran call)
   int gravity_;
+
+  /// comoving coordinates
+  bool comoving_coordinates_;
 
   /// whether to use dual energy (int for fortran call)
   int dual_energy_;

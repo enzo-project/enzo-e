@@ -229,7 +229,7 @@ void DataMsg::update (Data * data, bool is_local)
     for (int it=0; it<particle.num_types(); it++) {
       count += particle.gather (it, 1, &pd);
     }
-    simulation->monitor_insert_particles(count);
+    simulation->data_insert_particles(count);
     
     delete_particle_data();
   }

@@ -101,7 +101,6 @@ void EnzoMethodHydro::pup (PUP::er &p)
 
 void EnzoMethodHydro::compute ( Block * block) throw()
 {
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   Field field = block->data()->field();
 
@@ -672,8 +671,6 @@ void EnzoMethodHydro::ppm_method_ ( Block * block )
   const int cycle = block->cycle();
   const int rank  = block->rank();
 
-  int i0 = cycle % rank;
-
   for (int i0=0; i0<3; i0++) {
     int i = (i0 + cycle) % rank;
 
@@ -840,9 +837,9 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
       field.values(field_groups->item("colour",ic));
     for (int iy=0; iy<my; iy++) {
       for (int ix=0; ix<mx; ix++) {
-	int i  = ix + mx*(iy + my*iz);
-	int ic = ix + mx*(iy + my*ic);
-	colslice[ic] = c[i];
+	int i = ix + mx*(iy + my*iz);
+	int k = ix + mx*(iy + my*ic);
+	colslice[k] = c[i];
       }
     }
   }

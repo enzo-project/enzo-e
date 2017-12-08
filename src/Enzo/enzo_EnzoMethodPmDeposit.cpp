@@ -382,47 +382,20 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
     enzo_float * vyf = (enzo_float *) field.values("velocity_y");
     enzo_float * vzf = (enzo_float *) field.values("velocity_z");
-    enzo_float * vx = new enzo_float [mx*my*mz];
-    enzo_float * vy = new enzo_float [mx*my*mz];
-    enzo_float * vz = new enzo_float [mx*my*mz];
 
-    for (int iz=0; iz<mz; iz++) {
-      for (int iy=0; iy<my; iy++) {
-	for (int ix=0; ix<mx; ix++) {
-	  int k = ix + mx*(iy + my*iz);
-	  int i = ix + nx*(iy + ny*iz);
-	  vx[k] = vxf[k];
-	}
-      }
-    }
+    const int m = mx*my*mz;
 
-    if (rank >= 2) {
-      for (int iz=0; iz<mz; iz++) {
-	for (int iy=0; iy<my; iy++) {
-	  for (int ix=0; ix<mx; ix++) {
-	    int k = ix + mx*(iy + my*iz);
-	    int i = ix + nx*(iy + ny*iz);
-	    vy[k] = vyf[k];
-	  }
-	}
-      }
-    } else {
-      for (int i=0; i<mx*my*mz; i++) vy[i] = 0.0;
-    }
+    enzo_float * vx = new enzo_float [m];
+    enzo_float * vy = new enzo_float [m];
+    enzo_float * vz = new enzo_float [m];
+
+    for (int i=0; i<m; i++) vx[i] = vxf[i];
+
+    if (rank >= 2) for (int i=0; i<m; i++) vy[i] = vyf[i];
+    else           for (int i=0; i<m; i++) vy[i] = 0.0;
     
-    if (rank >= 3) {
-      for (int iz=0; iz<mz; iz++) {
-	for (int iy=0; iy<my; iy++) {
-	  for (int ix=0; ix<mx; ix++) {
-	    int k = ix + mx*(iy + my*iz);
-	    int i = ix + nx*(iy + ny*iz);
-	    vz[k] = vzf[k];
-	  }
-	}
-      }
-    } else {
-      for (int i=0; i<mx*my*mz; i++) vz[i] = 0.0;
-    }
+    if (rank >= 3) for (int i=0; i<m; i++) vz[i] = vzf[i];
+    else           for (int i=0; i<m; i++) vz[i] = 0.0;
 
     FORTRAN_NAME(dep_grid_cic)(de,de_gas_0,temp,
 			       vx, vy, vz, 
@@ -459,7 +432,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 #ifdef WRITE_DENSITY_GAS  
 
-      char buffer[80];
+    char buffer[80];
     sprintf (buffer,"de-enzop-%03d.data",block->cycle());
     printf ("DEBUG_GAS cycle=%d\n",block->cycle());
     FILE * fp = fopen(buffer,"w");

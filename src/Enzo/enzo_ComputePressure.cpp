@@ -138,7 +138,6 @@ int EnzoBlock::ComputePressure(enzo_float time,
  
     enzo_float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
       GammaInverse = 1.0/(Gamma[in]-1.0), x, Gamma1, temp;
-    enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     /* Find Multi-species fields. */
 

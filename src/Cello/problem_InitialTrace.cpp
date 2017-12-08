@@ -68,7 +68,7 @@ void InitialTrace::uniform_placement_
   const int npn = nx/dx_*ny/dy_*nz/dz_;
   
   particle.insert_particles (it,npn);
-  block->simulation()->monitor_insert_particles(npn);
+  block->simulation()->data_insert_particles(npn);
 
   // Initialize particle positions
 
@@ -222,7 +222,7 @@ void InitialTrace::density_placement_
 
   particle.insert_particles (it,np);
 
-  block->simulation()->monitor_insert_particles(np);
+  block->simulation()->data_insert_particles(np);
   
   const int ia_id = particle.attribute_index(it,"id");
   const int ia_x = particle.attribute_index (it,"x");

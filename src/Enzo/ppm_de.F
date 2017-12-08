@@ -2,25 +2,22 @@ c     See LICENSE_ENZO file for license and copyright information
 
 #include "fortran.h"
 
-C #define DEBUG_PPM
-C #define DEBUG_V
-
-C #define V_MAX 100000
 c=======================================================================
 c/////////////////////////  SUBROUTINE PPM_DE  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
       subroutine ppm_de(d, e, u, v, w, ge,
-     &                  gravity, gr_xacc, gr_yacc, gr_zacc,
-     &                  gamma, dt, nhy, dx, dy, dz,
-     &                  rank, in, jn, kn, start, pend,
-     &                  iflatten, ipresfree,
-     &                  idiff, isteepen, idual, eta1, eta2,
-     &                  nsubgrids, lface, rface,
-     &                  fistart, fiend, fjstart, fjend,
-     &                  array, dindex, eindex,
-     &                  uindex, vindex, windex, geindex, tmp,
-     &                  ncolor, colorpt, coloff, colindex)
-c
+     &     gravity, gr_xacc, gr_yacc, gr_zacc,
+     &     gamma, dt, nhy, dx, dy, dz,
+     &     rank, in, jn, kn, start, pend,
+     &     iflatten, ipresfree,
+     &     iconsrec, iposrec,
+     &     idiff, isteepen, idual, eta1, eta2,
+     &     nsubgrids, lface, rface,
+     &     fistart, fiend, fjstart, fjend,
+     &     array, dindex, eindex,
+     &     uindex, vindex, windex, geindex, tmp,
+     &     ncolor, colorpt, coloff, colindex)
+c     
 c  PERFORMS PPM (DIRECT EULERIAN) UPDATE FOR ONE TIMESTEP (WRAPPER)
 c
 c  written by: Greg Bryan
@@ -82,6 +79,8 @@ c
       integer gravity, idiff, idual, iflatten, isteepen, nhy, rank,
      &        ipresfree, pend(3), in, jn, kn, nsubgrids, start(3),
      &        ncolor, coloff(ncolor)
+      integer  iconsrec, iposrec
+      
       integer fistart(nsubgrids*3), fiend(nsubgrids*3),
      &        fjstart(nsubgrids*3), fjend(nsubgrids*3), 
      &        lface(nsubgrids*3), rface(nsubgrids*3)
@@ -92,7 +91,7 @@ c
       ENZO_REAL d(in,jn,kn), e(in,jn,kn), u(in,jn,kn),
      &     v(in,jn,kn), w(in,jn,kn),ge(in,jn,jn),
      &     gr_xacc(in,jn,kn), gr_yacc(in,jn,kn), gr_zacc(in,jn,kn),
-     &        dx,dy,dz
+     &        dx(in),dy(jn),dz(kn)
       ENZO_REAL dt, eta1, eta2, gamma, pmin
       ENZO_REAL array(1), colorpt(1)
 c
@@ -103,7 +102,8 @@ c  Locals
 c
       integer i, ie, is, ixyz, j, je, js, k, ke, ks,
      &        n, nxz, nyz, nzz, ms
-      integer i1, i2, j1, j2, k1, k2
+      integer i1, i2, j1, j2, k1, k2,ii
+      integer ntmp
 
       ENZO_REAL tmp(1)
 c
@@ -112,55 +112,6 @@ c=======================================================================
 c
 c  Error check
 c     
-C      print*, 'd = ',d(i1,j1,k1)
-C      print*, 'e = ',e(i1,j1,k1)
-C      print*, 'u = ',u(i1,j1,k1)
-C      print*, 'v = ',v(i1,j1,k1)
-C      print*, 'w = ',w(i1,j1,k1)
-C      print*, 'ge = ',ge(i1,j1,k1)
-C      print*, 'gravity = ',gravity
-CC      print*, 'gr_xacc = ',gr_xacc(i1,j1,k1)
-CC      print*, 'gr_yacc = ',gr_yacc(i1,j1,k1)
-CC      print*, 'gr_zacc = ',gr_zacc(i1,j1,k1)
-C      print*, 'gamma = ',gamma
-C      print*, 'dt = ',dt
-C      print*, 'nhy = ',nhy
-C      print*, 'dx = ',dx
-C      print*, 'dy = ',dy
-C      print*, 'dz = ',dz
-C      print*, 'rank = ',rank
-C      print*, 'in = ',in
-C      print*, 'jn = ',jn
-C      print*, 'kn = ',kn
-C      print*, 'start = ',start(1),start(2),start(3)
-C      print*, 'pend = ',pend(1),pend(2),pend(3)
-C      print*, 'iflatten = ',iflatten
-C      print*, 'ipresfree = ',ipresfree
-C      print*, 'idiff = ',idiff
-C      print*, 'isteepen = ',isteepen
-C      print*, 'idual = ',idual
-C      print*, 'eta1 = ',eta1
-C      print*, 'eta2 = ',eta2
-C      print*, 'nsubgrids = ',nsubgrids
-C      print*, 'lface = ',lface
-C      print*, 'rface = ',rface
-C      print*, 'fistart = ',fistart
-C      print*, 'fiend = ',fiend
-C      print*, 'fjstart = ',fjstart
-C      print*, 'fjend = ',fjend
-C      print*, 'array = ',array
-C      print*, 'dindex = ',dindex
-C      print*, 'eindex = ',eindex
-C      print*, 'uindex = ',uindex
-C      print*, 'vindex = ',vindex
-C      print*, 'windex = ',windex
-C      print*, 'geindex = ',geindex
-C      print*, 'tmp = ',tmp
-C      print*, 'ncolor = ',ncolor
-C      print*, 'colorpt = ',colorpt
-C      print*, 'coloff = ',coloff
-C      print*, 'colindex = ',colindex
-      
       if (max(in,jn,kn) .gt. MAX_ANY_SINGLE_DIRECTION) then
          write(6,*) 'PPM_DE: A grid dimension is too long.'
          write(6,*) '   (increase MAX_ANY_SINGLE_DIRECTION.)'
@@ -188,17 +139,6 @@ c
       j2 = jn
       k1 = 1
       k2 = kn
-
-!     i1 = is
-!     i2 = ie
-!     j1 = js
-!     j2 = je
-!     k1 = ks
-!     k2 = ke
-
-
-
-!     write(*,'("AAARRGS",9i5)') is,ie,in,js,je,jn,ks,ke,kn
 c
 c  Set minimum pressure (better if it were a parameter)
 c
@@ -206,118 +146,139 @@ c
 c
 c  Loop over directions, using a Strang-type splitting
 c
-!      ixyz = mod(nhy,3)
-!      do n=ixyz,ixyz+2
       ixyz = mod(nhy,rank)
 
+      ntmp = ms*(32+ncolor*4)
+      do ii=1,ntmp
+         tmp(ii)=0.0
+      end do
+      
       do n=ixyz,ixyz+rank-1
 c
 c  Update in x-direction
 c
-!        if (mod(n,3) .eq. 0 .and. nxz .gt. 1) then
         if (mod(n,rank) .eq. 0 .and. nxz .gt. 1) then
-c
-c         write (6,*) 'SOLVER: starting x-sweep'
 c
 c*$* ASSERT CONCURRENT CALL
 c$DOACROSS LOCAL(k)
-!         do k=ks, ke
-          do k=k1, k2
-            call xeuler_sweep(k, d, e, u, v, w, ge, in, jn, kn,
-     &        gravity, gr_xacc, idual, eta1, eta2,
-     &        is, ie, js, je, ks, ke,
-     &        gamma, pmin, dt, dx, dy, dz,
-     &        idiff, iflatten, isteepen, ipresfree,
-     &        nsubgrids, lface, rface,
-     &        fistart, fiend, fjstart, fjend,
-     &        dindex, eindex, geindex,
-     &        uindex, vindex, windex, array,
-     &        ncolor, colorpt, coloff, colindex,
-     &        tmp(1+ms*0),  tmp(1+ms*1),  tmp(1+ms*2),  tmp(1+ms*3),
-     &        tmp(1+ms*4),  tmp(1+ms*5),  tmp(1+ms*6),  tmp(1+ms*7),
-     &        tmp(1+ms*8),  tmp(1+ms*9),  tmp(1+ms*10), tmp(1+ms*11),
-     &        tmp(1+ms*12), tmp(1+ms*13), tmp(1+ms*14), tmp(1+ms*15),
-     &        tmp(1+ms*16), tmp(1+ms*17), tmp(1+ms*18), tmp(1+ms*19),
-     &        tmp(1+ms*20), tmp(1+ms*21), tmp(1+ms*22), tmp(1+ms*23),
-     &        tmp(1+ms*24), tmp(1+ms*25), tmp(1+ms*26), tmp(1+ms*27),
-     &        tmp(1+ms*28), tmp(1+ms*29),
-     &        tmp(1+ms*(30+0*ncolor)), tmp(1+ms*(30+1*ncolor)), 
-     &        tmp(1+ms*(30+2*ncolor)), tmp(1+ms*(30+3*ncolor))
-     &                       )
-          enddo
-c
+           do k=k1, k2
+              do ii=1,ntmp
+                 tmp(ii)=0.0
+              end do
+              call xeuler_sweep(k, d, e, u, v, w, ge, in, jn, kn,
+     &             gravity, gr_xacc, idual, eta1, eta2,
+     &             is, ie, js, je, ks, ke,
+     &             gamma, pmin, dt, dx, dy, dz,
+     &             idiff, iflatten, isteepen,
+     &             iconsrec, iposrec,
+     &             ipresfree,  nsubgrids, lface, rface,
+     &             fistart, fiend, fjstart, fjend,
+     &             dindex, eindex, geindex,
+     &             uindex, vindex, windex, array,
+     &             ncolor, colorpt, coloff, colindex,
+     &             tmp(1+ms*0), tmp(1+ms*1), tmp(1+ms*2), tmp(1+ms*3),
+     &             tmp(1+ms*4), tmp(1+ms*5), tmp(1+ms*6), tmp(1+ms*7),
+     &             tmp(1+ms*8), tmp(1+ms*9), tmp(1+ms*10),tmp(1+ms*11),
+     &             tmp(1+ms*12),tmp(1+ms*13),tmp(1+ms*14),tmp(1+ms*15),
+     &             tmp(1+ms*16),tmp(1+ms*17),tmp(1+ms*18),tmp(1+ms*19),
+     &             tmp(1+ms*20),tmp(1+ms*21),tmp(1+ms*22),tmp(1+ms*23),
+     &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
+#ifdef NEW_PPM
+     &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
+     &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
+     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
+#else
+     &             tmp(1+ms*28),tmp(1+ms*29),
+     &             tmp(1+ms*(30+0*ncolor)),tmp(1+ms*(30+1*ncolor)), 
+     &             tmp(1+ms*(30+2*ncolor)),tmp(1+ms*(30+3*ncolor))
+#endif            
+     &             )
+           enddo
         endif
+c     
+c     Update in y-direction
 c
-c  Update in y-direction
-c
-!        if (mod(n,3) .eq. 1 .and. nyz .gt. 1) then
         if (mod(n,rank) .eq. 1 .and. nyz .gt. 1) then
-c
-c         write (6,*) 'SOLVER: starting y-sweep'
-c
+c           
 c*$* ASSERT CONCURRENT CALL
 c$DOACROSS LOCAL(i)
-!         do i=is, ie
-          do i=i1, i2
-            call yeuler_sweep(i, d, e, u, v, w, ge, in, jn, kn,
-     &        gravity, gr_yacc, idual, eta1, eta2,
-     &        is, ie, js, je, ks, ke,
-     &        gamma, pmin, dt, dx, dy, dz,
-     &        idiff, iflatten, isteepen, ipresfree,
-     &        nsubgrids, lface, rface,
-     &        fistart, fiend, fjstart, fjend,
-     &        dindex, eindex, geindex,
-     &        uindex, vindex, windex, array,
-     &        ncolor, colorpt, coloff, colindex,
-     &        tmp(1+ms*0),  tmp(1+ms*1),  tmp(1+ms*2),  tmp(1+ms*3),
-     &        tmp(1+ms*4),  tmp(1+ms*5),  tmp(1+ms*6),  tmp(1+ms*7),
-     &        tmp(1+ms*8),  tmp(1+ms*9),  tmp(1+ms*10), tmp(1+ms*11),
-     &        tmp(1+ms*12), tmp(1+ms*13), tmp(1+ms*14), tmp(1+ms*15),
-     &        tmp(1+ms*16), tmp(1+ms*17), tmp(1+ms*18), tmp(1+ms*19),
-     &        tmp(1+ms*20), tmp(1+ms*21), tmp(1+ms*22), tmp(1+ms*23),
-     &        tmp(1+ms*24), tmp(1+ms*25), tmp(1+ms*26), tmp(1+ms*27),
-     &        tmp(1+ms*28), tmp(1+ms*29),
-     &        tmp(1+ms*(30+0*ncolor)), tmp(1+ms*(30+1*ncolor)), 
-     &        tmp(1+ms*(30+2*ncolor)), tmp(1+ms*(30+3*ncolor))
-     &                       )
-          enddo
-c
+           do i=i1, i2
+              do ii=1,ntmp
+                 tmp(ii)=0.0
+              end do
+              call yeuler_sweep(i, d, e, u, v, w, ge, in, jn, kn,
+     &             gravity, gr_yacc, idual, eta1, eta2,
+     &             is, ie, js, je, ks, ke,
+     &             gamma, pmin, dt, dx, dy, dz,
+     &             idiff, iflatten, isteepen,
+     &             iconsrec, iposrec,
+     &             ipresfree,
+     &             nsubgrids, lface, rface,
+     &             fistart, fiend, fjstart, fjend,
+     &             dindex, eindex, geindex,
+     &             uindex, vindex, windex, array,
+     &             ncolor, colorpt, coloff, colindex,
+     &             tmp(1+ms*0), tmp(1+ms*1), tmp(1+ms*2), tmp(1+ms*3),
+     &             tmp(1+ms*4), tmp(1+ms*5), tmp(1+ms*6), tmp(1+ms*7),
+     &             tmp(1+ms*8), tmp(1+ms*9), tmp(1+ms*10),tmp(1+ms*11),
+     &             tmp(1+ms*12),tmp(1+ms*13),tmp(1+ms*14),tmp(1+ms*15),
+     &             tmp(1+ms*16),tmp(1+ms*17),tmp(1+ms*18),tmp(1+ms*19),
+     &             tmp(1+ms*20),tmp(1+ms*21),tmp(1+ms*22),tmp(1+ms*23),
+     &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
+#ifdef NEW_PPM
+     &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
+     &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
+     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
+#else
+     &             tmp(1+ms*28),tmp(1+ms*29),
+     &             tmp(1+ms*(30+0*ncolor)),tmp(1+ms*(30+1*ncolor)), 
+     &             tmp(1+ms*(30+2*ncolor)),tmp(1+ms*(30+3*ncolor))
+#endif            
+     &             )
+           enddo
+c     
         endif
 c
 c  Update in z-direction
 c
-!        if (mod(n,3) .eq. 2 .and. nzz .gt. 1) then
         if (mod(n,rank) .eq. 2 .and. nzz .gt. 1) then
-c
-c         write (6,*) 'SOLVER: starting z-sweep'
 c
 c*$* ASSERT CONCURRENT CALL
 c$DOACROSS LOCAL(j)
-!         do j=js, je
-          do j=j1, j2
-            call zeuler_sweep(j, d, e, u, v, w, ge, in, jn, kn,
-     &        gravity, gr_zacc, idual, eta1, eta2,
-     &        is, ie, js, je, ks, ke,
-     &        gamma, pmin, dt, dx, dy, dz,
-     &        idiff, iflatten, isteepen, ipresfree,
-     &        nsubgrids, lface, rface,
-     &        fistart, fiend, fjstart, fjend,
-     &        dindex, eindex, geindex,
-     &        uindex, vindex, windex, array,
-     &        ncolor, colorpt, coloff, colindex,
-     &        tmp(1+ms*0),  tmp(1+ms*1),  tmp(1+ms*2),  tmp(1+ms*3),
-     &        tmp(1+ms*4),  tmp(1+ms*5),  tmp(1+ms*6),  tmp(1+ms*7),
-     &        tmp(1+ms*8),  tmp(1+ms*9),  tmp(1+ms*10), tmp(1+ms*11),
-     &        tmp(1+ms*12), tmp(1+ms*13), tmp(1+ms*14), tmp(1+ms*15),
-     &        tmp(1+ms*16), tmp(1+ms*17), tmp(1+ms*18), tmp(1+ms*19),
-     &        tmp(1+ms*20), tmp(1+ms*21), tmp(1+ms*22), tmp(1+ms*23),
-     &        tmp(1+ms*24), tmp(1+ms*25), tmp(1+ms*26), tmp(1+ms*27),
-     &        tmp(1+ms*28), tmp(1+ms*29),
-     &        tmp(1+ms*(30+0*ncolor)), tmp(1+ms*(30+1*ncolor)), 
-     &        tmp(1+ms*(30+2*ncolor)), tmp(1+ms*(30+3*ncolor))
-     &                       )
-          enddo
-c
+           do j=j1, j2
+              do ii=1,ntmp
+                 tmp(ii)=0.0
+              end do
+              call zeuler_sweep(j, d, e, u, v, w, ge, in, jn, kn,
+     &             gravity, gr_zacc, idual, eta1, eta2,
+     &             is, ie, js, je, ks, ke,
+     &             gamma, pmin, dt, dx, dy, dz,
+     &             idiff, iflatten, isteepen,
+     &             iconsrec, iposrec,
+     &             ipresfree,
+     &             nsubgrids, lface, rface,
+     &             fistart, fiend, fjstart, fjend,
+     &             dindex, eindex, geindex,
+     &             uindex, vindex, windex, array,
+     &             ncolor, colorpt, coloff, colindex,
+     &             tmp(1+ms*0), tmp(1+ms*1), tmp(1+ms*2), tmp(1+ms*3),
+     &             tmp(1+ms*4), tmp(1+ms*5), tmp(1+ms*6), tmp(1+ms*7),
+     &             tmp(1+ms*8), tmp(1+ms*9), tmp(1+ms*10),tmp(1+ms*11),
+     &             tmp(1+ms*12),tmp(1+ms*13),tmp(1+ms*14),tmp(1+ms*15),
+     &             tmp(1+ms*16),tmp(1+ms*17),tmp(1+ms*18),tmp(1+ms*19),
+     &             tmp(1+ms*20),tmp(1+ms*21),tmp(1+ms*22),tmp(1+ms*23),
+     &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
+#ifdef NEW_PPM
+     &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
+     &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
+     &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
+#else
+     &             tmp(1+ms*28),tmp(1+ms*29),
+     &             tmp(1+ms*(30+0*ncolor)),tmp(1+ms*(30+1*ncolor)), 
+     &             tmp(1+ms*(30+2*ncolor)),tmp(1+ms*(30+3*ncolor))
+#endif            
+     &             )
+           enddo
         endif
 c
       enddo

@@ -50,8 +50,8 @@ public: // interface
       ppm_density_floor(0.0),
       ppm_pressure_floor(0.0),
       ppm_pressure_free(false),
-      ppm_steepening(false),
       ppm_temperature_floor(0.0),
+      ppm_steepening(false),
       ppm_use_minimum_pressure_support(false),
       ppm_mol_weight(0.0),
       field_gamma(0.0),
@@ -76,8 +76,8 @@ public: // interface
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
-      initial_music_field_coords(),
       initial_music_field_names(),
+      initial_music_field_coords(),
       initial_music_particle_files(),
       initial_music_particle_datasets(),
       initial_music_particle_coords(),
@@ -177,8 +177,8 @@ public: // attributes
   double                     ppm_number_density_floor;
   double                     ppm_density_floor;
   double                     ppm_pressure_floor;
-  double                     ppm_temperature_floor;
   bool                       ppm_pressure_free;
+  double                     ppm_temperature_floor;
   bool                       ppm_steepening;
   bool                       ppm_use_minimum_pressure_support;
   double                     ppm_mol_weight;
@@ -213,8 +213,8 @@ public: // attributes
 
   std::vector < std::string > initial_music_field_files;
   std::vector < std::string > initial_music_field_datasets;
-  std::vector < std::string > initial_music_field_coords;
   std::vector < std::string > initial_music_field_names;
+  std::vector < std::string > initial_music_field_coords;
   
   std::vector < std::string > initial_music_particle_files;
   std::vector < std::string > initial_music_particle_datasets;

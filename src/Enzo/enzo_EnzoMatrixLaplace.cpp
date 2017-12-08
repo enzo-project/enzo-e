@@ -232,8 +232,6 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
 
     // Second-order 7-point discretization
     
-    const enzo_float c0 = -30.0;
-    
     double dx = 1.0/(hx_*hx_);
     double dy = 1.0/(hy_*hy_);
     double dz = 1.0/(hz_*hz_);

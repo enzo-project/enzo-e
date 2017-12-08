@@ -601,7 +601,7 @@ void Block::particle_scatter_neighbors_
     }
   }
 
-  simulation()->monitor_delete_particles(count);
+  simulation()->data_delete_particles(count);
 
 }
 

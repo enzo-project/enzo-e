@@ -93,16 +93,13 @@ int EnzoBlock::ComputeTemperatureField
     return ENZO_SUCCESS;
   }
  
-  enzo_float TemperatureUnits = 1, number_density;
-  enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
- 
   /* Find the temperature units if we are using comoving coordinates. */
  
   EnzoUnits * units = (EnzoUnits *) simulation()->problem()->units();
 
   units->set_current_time (time());
 
-  TemperatureUnits = units->temperature();
+  enzo_float TemperatureUnits = units->temperature();
 
   /* For Sedov Explosion compute temperature without floor */
 
@@ -143,7 +140,7 @@ int EnzoBlock::ComputeTemperatureField
  
     for (i = 0; i < size; i++) {
  
-      number_density =
+      enzo_float number_density =
 	0.25*(species_HeI[i]  + 
 	      species_HeII[i] +
 	      species_HeIII[i] ) +
