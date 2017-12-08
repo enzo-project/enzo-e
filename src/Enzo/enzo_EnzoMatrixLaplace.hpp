@@ -83,6 +83,10 @@ public: // virtual functions
   virtual bool is_singular() const throw()
   { return true; }
 
+  /// How many ghost zones required for matvec
+  virtual int ghost_depth() const throw()
+  { return (order_ == 2) ? 1 : ( (order_ == 4) ? 2 : 3); }
+
 protected: // functions
 
   void matvec_ (enzo_float * Y, enzo_float * X, int g0) const throw();

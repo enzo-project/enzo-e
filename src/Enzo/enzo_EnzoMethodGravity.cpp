@@ -57,21 +57,20 @@ EnzoMethodGravity::EnzoMethodGravity
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
+
   const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
 			     enzo_sync_id_method_gravity);
-  //  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  if (accumulate) {
-    // Accumulate is used when particles are deposited into density_total.
-    refresh(ir)->add_field_src_dst(idensity,ib);
-    //    refresh(ir)->add_field(field_descr->field_id("potential"));
-    refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
-    refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
-    refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
-    refresh(ir)->add_field(field_descr->field_id("density"));
-    refresh(ir)->set_accumulate(true);
-  } else {
+
+  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
+  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
+  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+  refresh(ir)->add_field(field_descr->field_id("density"));
+
+  if (idt != -1 && accumulate) {
     // WARNING: accumulate cannot be used with AMR yet [170818]
-    refresh(ir)->add_all_fields();
+    // Accumulate is used when particles are deposited into density_total.
+    refresh(ir)->add_field_src_dst(idt,ib);
+    refresh(ir)->set_accumulate(true);
   }
 }
 
@@ -188,7 +187,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
       double time = block->time();
       double dt   = block->dt();
       cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
-    
 #ifdef PRINT_DENSITY_TOTAL
       char buffer[80];
     sprintf (buffer,"dt-enzop-%03d.data",block->cycle());
@@ -222,11 +220,15 @@ void EnzoMethodGravity::compute(Block * block) throw()
 #endif      
     } else {
 
+
       field.scale(ib, -4.0 * (cello::pi) * grav_const_, idensity);
 
     }
+
   } else {
+
     for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
+
   }
   
   //  TRACE_FIELD("density-shift",D,1.0);

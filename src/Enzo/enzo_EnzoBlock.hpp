@@ -110,6 +110,7 @@ public: // interface
        mg_sync_restrict_(),
        mg_sync_prolong_(),
        mg_msg_(NULL),
+       jacobi_iter_(0),
        dt(0),
        SubgridFluxes(NULL)
   {
@@ -134,6 +135,7 @@ public: // interface
       mg_sync_restrict_(),
       mg_sync_prolong_(),
       mg_msg_(NULL),
+      jacobi_iter_(0),
       dt(0.0),
       SubgridFluxes(NULL)
   {
@@ -331,6 +333,10 @@ public: /// entry methods
   void mg_iter_increment() { ++mg_iter_; }
   int mg_iter() const {return mg_iter_; }
 
+  void jacobi_iter_clear() { jacobi_iter_ = 0; }
+  void jacobi_iter_increment() { ++jacobi_iter_; }
+  int jacobi_iter() const {return jacobi_iter_; }
+  
 protected: // attributes
   
   // MG iteration count
@@ -338,6 +344,9 @@ protected: // attributes
 
   // MG SOLVER ( EnzoSolverMg0)
   Sync mg_sync_restrict_;
+
+  // Jacobi iteration count
+  int jacobi_iter_;
 
   // Synchronize to not call prolong until all children have exited coarse solve
   Sync mg_sync_prolong_;

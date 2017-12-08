@@ -112,6 +112,12 @@ char * DataMsg::save_data (char * buffer) const
   CkPrintf ("%p DEBUG_DATA_MSG save_data %d\n",this, (pc-buffer));
   fflush(stdout);
 #endif
+
+  //  ASSERT2 ("DataMsg::save_data()",
+  //	   "Expecting buffer size %d actual size %d",
+  //	   data_size(),(pc-buffer),
+  //	   (data_size() == (pc-buffer)));
+  
   return pc;
 }
 
@@ -170,10 +176,12 @@ char * DataMsg::load_data (char * buffer)
     particle_data_ = NULL;
   }
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG load_data %d\n",this, (pc-buffer));
-  fflush(stdout);
-#endif
+
+  //  ASSERT2 ("DataMsg::load_data()",
+  //  	   "Expecting buffer size %d actual size %d",
+  //  	   data_size(),(pc-buffer),
+  //  	   (data_size() == (pc-buffer)));
+
   return pc;
 }
 

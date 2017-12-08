@@ -10,6 +10,7 @@
 #include "charm_simulation.hpp"
 
 // #define DEBUG_MSG_REFRESH
+
 //----------------------------------------------------------------------
 
 long MsgRefresh::counter[CONFIG_NODE_SIZE] = {0};

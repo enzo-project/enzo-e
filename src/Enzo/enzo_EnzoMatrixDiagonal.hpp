@@ -75,7 +75,9 @@ protected: // functions
   virtual bool is_singular() const throw()
   { return false; }
 
-protected: // attributes
+  /// How many ghost zones required for matvec
+  virtual int ghost_depth() const throw()
+  { return 0; }
 
   double hx_, hy_, hz_;
   int mx_,my_,mz_;

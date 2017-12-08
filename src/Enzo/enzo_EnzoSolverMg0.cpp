@@ -114,6 +114,7 @@
 #include "enzo.decl.h"
 
 #define NEW_REFRESH
+// #define DEBUG_COPY
 // #define DEBUG_ENTRY
 // #define DEBUG_SOLVER_MG0
 // #define DEBUG_TRACE_LEVEL
@@ -309,8 +310,6 @@ void EnzoSolverMg0::apply
 //----------------------------------------------------------------------
 
 void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
-/// [*]
-///
 ///     iter = 0
 ///     initialize X,B,R,C
 ///     if (level == max_level) 
@@ -472,8 +471,6 @@ void EnzoSolverMg0::begin_solve(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
-/// [*]
-///
 ///     if (converged()) exit()
 ///     if (level == min_level) then
 ///        coarse_solve(A,X,B)
@@ -574,7 +571,6 @@ void EnzoSolverMg0::begin_cycle_(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_solve_coarse()
-/// [*]
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
   long double reduce[1] = {0};
@@ -616,7 +612,6 @@ void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_pre_smooth()
-/// [*]
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_ENTRY
@@ -642,8 +637,6 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
 //----------------------------------------------------------------------
 
 void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
-/// [*]
-///
 ///      smooth.apply (A,X,B)
 ///      callback = p_restrict_send()
 ///      call refresh (X,level,"level")
@@ -672,8 +665,6 @@ void EnzoSolverMg0::pre_smooth(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
-/// 
-/// [*] restrict send
 ///
 ///      A.residual(R,B,X)
 ///      pack R
@@ -686,6 +677,14 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
   Field field = data->field();
 
   A_->residual(ir_, ib_, ix_, enzo_block);
+
+#ifdef DEBUG_COPY
+  enzo_float * R_copy = (enzo_float*) field.values("R_copy");
+  enzo_float * R = (enzo_float*) field.values(ir_);
+  for (int i=0; i<mx_*my_*mz_; i++) {
+    R_copy[i]=R[i];
+  }  
+#endif
 
   Index index        = enzo_block->index();
   Index index_parent = index.index_parent(min_level_);
@@ -750,7 +749,6 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
-/// [*]
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_ENTRY
@@ -780,8 +778,6 @@ void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
 void EnzoSolverMg0::restrict_recv
 (EnzoBlock * enzo_block, FieldMsg * msg) throw()
 /// 
-/// [*] restrict recv
-///
 ///      [ unpack B ]
 ///      if (sync.next())
 ///          begin_cycle()
@@ -827,8 +823,6 @@ void EnzoSolverMg0::restrict_recv
 
 void EnzoSolverMg0::solve_coarse(EnzoBlock * enzo_block) throw()
 /// 
-/// [*] coarse solve
-///
 ///      solve A X = B
 ///      end_cycle()
 {
@@ -860,8 +854,6 @@ void EnzoSolverMg0::solve_coarse(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 /// 
-/// [ ] prolong send
-///
 ///      for child           
 ///         pack X
 ///         child.prolong_recv(X)
@@ -967,8 +959,6 @@ void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
 void EnzoSolverMg0::prolong_recv
 (EnzoBlock * enzo_block, FieldMsg * msg) throw()
 /// 
-/// [ ] prolong recv
-///
 ///      [ unpack C ]
 ///      X = X + C
 ///      callback = p_post_smooth()
@@ -1008,6 +998,12 @@ void EnzoSolverMg0::prolong_recv
   enzo_float * X = (enzo_float*) field.values(ix_);
   enzo_float * C = (enzo_float*) field.values(ic_);
 
+#ifdef DEBUG_COPY
+  enzo_float * C_copy = (enzo_float*) field.values("C_copy");
+  for (int i=0; i<mx_*my_*mz_; i++) {
+    C_copy[i]=C[i];
+  }  
+#endif
   TRACE_FIELD_("C",C,1.0);
 
   for (int iz=0; iz<mz_; iz++) {
@@ -1040,7 +1036,6 @@ void EnzoSolverMg0::prolong_recv
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_mg0_post_smooth()
-/// [*]
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
 #ifdef DEBUG_ENTRY
@@ -1066,8 +1061,6 @@ void EnzoBlock::p_solver_mg0_post_smooth()
 //----------------------------------------------------------------------
 
 void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
-/// post smooth
-/// [*]
 ///
 ///      smooth.apply (A,X,B)
 ///      end_cycle()
@@ -1090,8 +1083,6 @@ void EnzoSolverMg0::post_smooth(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 /// 
-/// [X] end cycle
-///
 ///      ++iter
 ///      if (level < max_level)
 ///         prolong_send(X)
@@ -1135,7 +1126,6 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 //======================================================================
 
 bool EnzoSolverMg0::is_converged_(EnzoBlock * enzo_block) const
-/// [*]
 {
   TRACE_MG(enzo_block,"EnzoSolverMg0::is_converged");
   return (enzo_block->mg_iter() >= iter_max_);

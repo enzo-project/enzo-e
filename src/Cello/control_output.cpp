@@ -261,8 +261,8 @@ void Block::p_output_end()
 {
   performance_start_(perf_output);
   TRACE_OUTPUT("Block::p_output_end()");
-  output_exit_();
   performance_stop_(perf_output);
+  output_exit_();
   // control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
 }
 //======================================================================
