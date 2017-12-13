@@ -9,6 +9,15 @@
 #include "enzo.hpp"
 
 // #define DEBUG_COPY
+// #define DEBUG_TRACE
+
+#ifdef DEBUG_TRACE
+#  define TRACE_JACOBI(BLOCK,METHOD) \
+  CkPrintf ("%s:%d %s TRACE_JACOBI %s\n", \
+	    __FILE__,__LINE__,BLOCK->name().c_str(),METHOD);
+#else
+#  define TRACE_JACOBI(BLOCK,METHOD) /* empty */
+#endif
 
 //----------------------------------------------------------------------
 
@@ -33,6 +42,8 @@ EnzoSolverJacobi::EnzoSolverJacobi
 void EnzoSolverJacobi::apply
 ( Matrix * A, int ix, int ib, Block * block) throw()
 {
+  TRACE_JACOBI(block,"apply()");
+  
   begin_(block);
 
   A_ = A;
@@ -59,6 +70,8 @@ void EnzoSolverJacobi::apply
 
 void EnzoBlock::p_solver_jacobi_continue()
 {
+  TRACE_JACOBI(this,"p_solver_jacobi_continue()");
+  
   performance_start_(perf_compute,__FILE__,__LINE__);
 
   EnzoSolverJacobi * solver = 
@@ -73,6 +86,7 @@ void EnzoBlock::p_solver_jacobi_continue()
 
 void EnzoSolverJacobi::compute(Block * block)
 {
+  TRACE_JACOBI(block,"compute()");
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   Field field = block->data()->field();
@@ -98,6 +112,8 @@ void EnzoSolverJacobi::compute(Block * block)
 
 void EnzoSolverJacobi::apply_(Block * block)
 {
+  TRACE_JACOBI(block,"apply_()");
+  
   Field field = block->data()->field();
 
   int mx,my,mz;
@@ -106,9 +122,11 @@ void EnzoSolverJacobi::apply_(Block * block)
   // field.ghost_depth(ix_,&gx,&gy,&gz);
 
   const int ng = A_->ghost_depth();
+  const int gx = (mx > 1) ? ng : 0;
+  const int gy = (my > 1) ? ng : 0;
+  const int gz = (mz > 1) ? ng : 0;
 
   A_->diagonal (id_, block,ng);
-
   A_->residual (ir_, ib_, ix_, block,ng);
 
 #ifdef DEBUG_COPY
@@ -121,21 +139,30 @@ void EnzoSolverJacobi::apply_(Block * block)
       enzo_float * X_J = (enzo_float*) field.values("X_J");
       enzo_float * B = (enzo_float*) field.values(ib_);
       enzo_float * B_J = (enzo_float*) field.values("B_J");
+      double rsum=0.0;
+      double dsum=0.0;
+      double xsum=0.0;
+      double bsum=0.0;
       for (int i=0; i<mx*my*mz; i++) {
 	R_J[i]=R[i];
 	D_J[i]=D[i];
 	X_J[i]=X[i];
 	B_J[i]=B[i];
+	rsum+=std::abs(R[i]);
+	dsum+=std::abs(D[i]);
+	xsum+=X[i];
+	bsum+=std::abs(B[i]);
       }
+      CkPrintf ("DEBUG_COPY rsum dsum xsum bsum %g %g %g %g\n",rsum,dsum,xsum,bsum);
     }
 #endif    
   enzo_float * X = (enzo_float*) field.values(ix_);
   enzo_float * R = (enzo_float*) field.values(ir_);
   enzo_float * D = (enzo_float*) field.values(id_);
 
-  for (int iz=ng; iz<mz-ng; iz++) {
-    for (int iy=ng; iy<my-ng; iy++) {
-      for (int ix=ng; ix<mx-ng; ix++) {
+  for (int iz=gz; iz<mz-gz; iz++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
 	int i = ix + mx*(iy + my*iz);
 	X[i] += R[i] / D[i];
       }

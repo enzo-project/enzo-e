@@ -173,7 +173,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // Accumulate particle density using CIC
 
-    enzo_float cosmo_a=0.0;
+    enzo_float cosmo_a=1.0;
     enzo_float cosmo_dadt=0.0;
     EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
       block->simulation()->problem()->physics("cosmology");

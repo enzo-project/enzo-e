@@ -958,7 +958,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   
   enzo_float dt = block->dt();
   
-  enzo_float * flatten_array = new float[ns];
+  enzo_float * flatten_array = new enzo_float[ns];
 
   int riemann_solver_fallback = 1;
   

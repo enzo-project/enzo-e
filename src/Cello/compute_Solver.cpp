@@ -92,14 +92,3 @@ bool Solver::is_active_(Block * block)
   return (is_unigrid) ? (in_range) : (is_leaf && in_range);
 }
 
-// ----------------------------------------------------------------------
-
-int Solver::neighbor_type_() const throw() {
-  return (min_level_ == max_level_) ? neighbor_level : neighbor_leaf;
-}
-
-// ----------------------------------------------------------------------
-
-int Solver::sync_type_() const throw() {
-  return (min_level_ == max_level_) ? sync_face : sync_neighbor;
-}

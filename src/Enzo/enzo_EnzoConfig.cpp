@@ -111,6 +111,7 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
   method_gravity_solver(""),
+  method_gravity_order(4),
   method_gravity_accumulate(false),
   /// EnzoMethodPmDeposit
   method_pm_deposit_type(""),
@@ -254,6 +255,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_gravity_grav_const;
   p | method_gravity_solver;
+  p | method_gravity_order;
   p | method_gravity_accumulate;
 
   p | method_pm_deposit_type;
@@ -540,6 +542,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","unknown");
+
+  method_gravity_order = p->value_integer
+    ("Method:gravity:order",4);
 
   method_gravity_accumulate = p->value_logical
     ("Method:gravity:accumulate",true);

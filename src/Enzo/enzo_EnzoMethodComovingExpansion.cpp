@@ -86,7 +86,8 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       }
 
       //      printf ("DEBUG_VELOCITY time old new = %g %g\n",field.history_time(1),enzo_block->time());
-      enzo_float cosmo_a, cosmo_dadt;
+      enzo_float cosmo_a=1.0;
+      enzo_float cosmo_dadt=0.0;
       cosmology->compute_expansion_factor (&cosmo_a, &cosmo_dadt, compute_time);
       double dt = enzo_block->time() - field.history_time(1);
       //      double dt = block->dt();

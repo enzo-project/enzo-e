@@ -73,7 +73,7 @@ void EnzoComputeCicInterp::compute_(Block * block)
   const int ia_vx = particle.attribute_velocity(it_p_,0);
   const int ia_vy = particle.attribute_velocity(it_p_,1);
   const int ia_vz = particle.attribute_velocity(it_p_,2);
-  
+
   const int dp =  particle.stride(it_p_,ia_x);
   const int da =  particle.stride(it_p_,ia_p_);
   const int dv =  particle.stride(it_p_,ia_vx);

@@ -22,6 +22,7 @@
 // #define USE_ENZO_POTENTIAL
 
 //#define DEBUG_COPY_DENSITY
+//#define DEBUG_COPY_POTENTIAL
 //#define DEBUG_COPY_B
 // #define READ_PARTICLES
 
@@ -44,10 +45,12 @@ EnzoMethodGravity::EnzoMethodGravity
 (const FieldDescr * field_descr,
  int index_solver,
  double grav_const,
+ int order,
  bool accumulate)
   : Method(),
     index_solver_(index_solver),
-    grav_const_(grav_const)
+    grav_const_(grav_const),
+    order_(order)
 {
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
@@ -84,9 +87,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   Field field = block->data()->field();
 
-  int order=4;
-  Matrix * A = new EnzoMatrixLaplace(order);
-  const int ix = field.field_id ("potential");
+  Matrix * A = new EnzoMatrixLaplace(order_);
 
   /// access problem-defining fields for eventual RHS and solution
   const int ib = field.field_id ("B");
@@ -183,40 +184,36 @@ void EnzoMethodGravity::compute(Block * block) throw()
   if (block->is_leaf()) {
     if (cosmology) {
 
-      enzo_float a=0.0,dadt=0.0;
-      double time = block->time();
-      double dt   = block->dt();
-      cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
 #ifdef PRINT_DENSITY_TOTAL
       char buffer[80];
-    sprintf (buffer,"dt-enzop-%03d.data",block->cycle());
-    printf ("DEBUG_DENSITY_TOTAL cycle=%d\n",block->cycle());
-    FILE * fp = fopen(buffer,"w");
+      sprintf (buffer,"dt-enzop-%03d.data",block->cycle());
+      printf ("DEBUG_DENSITY_TOTAL cycle=%d\n",block->cycle());
+      FILE * fp = fopen(buffer,"w");
 #endif    
-    int gx,gy,gz;
-    field.ghost_depth(0,&gx,&gy,&gz);
+      int gx,gy,gz;
+      field.ghost_depth(0,&gx,&gy,&gz);
 #ifdef READ_ENZO_DENSITY    
-    enzo_float * dt_diff = (enzo_float*) field.values("density_total_diff");
-    enzo_float * dt_enzo = (enzo_float*) field.values("density_total_enzo");
+      enzo_float * dt_diff = (enzo_float*) field.values("density_total_diff");
+      enzo_float * dt_enzo = (enzo_float*) field.values("density_total_enzo");
 #endif    
-    gx=gy=gz=1;
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-  	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  D[i]=-(D[i]-1.0);
+      gx=gy=gz=1;
+      for (int iz=gz; iz<mz-gz; iz++) {
+	for (int iy=gy; iy<my-gy; iy++) {
+	  for (int ix=gx; ix<mx-gx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    D[i]=-(D[i]-1.0);
 #ifdef READ_ENZO_DENSITY    
-	  dt_diff[i] = D[i] - dt_enzo[i];
+	    dt_diff[i] = D[i] - dt_enzo[i];
 #endif	  
-	  B[i]  = D[i];
+	    B[i]  = D[i];
 #ifdef PRINT_DENSITY_TOTAL
-	  fprintf (fp,"%d %d %d %20.16g\n",ix-gx,iy-gy,iz-gz,D[i]);
+	    fprintf (fp,"%d %d %d %20.16g\n",ix-gx,iy-gy,iz-gz,D[i]);
 #endif	    
+	  }
 	}
       }
-    }
 #ifdef PRINT_DENSITY_TOTAL
-    fclose(fp);
+      fclose(fp);
 #endif      
     } else {
 
@@ -240,6 +237,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   // May exit before solve is done...
   solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue());
 
+  const int ix = field.field_id ("potential");
 
   solver->apply (A, ix, ib, block);
 
@@ -274,8 +272,16 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   TRACE_METHOD("r_method_gravity_end()",this);
   
   delete msg;
+
+  EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
+  method->compute_accelerations(this);
   
-  Field field = data()->field();
+}
+
+void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
+{
+  
+  Field field = enzo_block->data()->field();
   int gx,gy,gz;
   int mx,my,mz;
   field.dimensions (0,&mx,&my,&mz);
@@ -284,17 +290,18 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   TRACE_FIELD("potential",potential,-1.0);
   
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    simulation()->problem()->physics("cosmology");
-
+    enzo_block->simulation()->problem()->physics("cosmology");
+  
   if (cosmology) {
 
-    enzo_float a=0.0,dadt=0.0,dt=0.0;
-    dt   = this->timestep();
-    double time = this->time();
-    cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
+    enzo_float cosmo_a = 1.0;
+    enzo_float cosmo_dadt = 0.0;
+    double dt   = enzo_block->timestep();
+    double time = enzo_block->time();
+    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
     //    cosmology-> compute_expansion_factor (&a,&dadt,time);
 
-    for (int i=0; i<mx*my*mz; i++) potential[i] /= a;
+    for (int i=0; i<mx*my*mz; i++) potential[i] /= cosmo_a;
   }
   
 #ifdef READ_ENZO_POTENTIAL  
@@ -330,8 +337,8 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 #endif
 
 #ifdef READ_PARTICLES
-  if ((this->cycle() % 20) == 0) {
-    Particle particle = data()->particle();
+  if ((enzo_block->cycle() % 20) == 0) {
+    Particle particle = enzo_block->data()->particle();
 
     int it = particle.type_index("enzo");
     int ia_x = particle.attribute_index(it,"x");
@@ -347,7 +354,7 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
     field.size (&nx,&ny,&nz);
     int mb = particle.batch_size();
     char buffer[80];
-    sprintf (buffer,"particles-%03d.data",this->cycle());
+    sprintf (buffer,"particles-%03d.data",enzo_block->cycle());
     CkPrintf ("file = %s\n",buffer);
     int np = nx*ny*nz;
     FILE * fp = fopen(buffer,"r");
@@ -385,11 +392,11 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 #endif
 
   /// compute acceleration fields from potential
-  int order;
-  EnzoComputeAcceleration compute_acceleration(data()->field().field_descr(),
-					       rank(), order=4);
 
-  compute_acceleration.compute(this);
+  EnzoComputeAcceleration compute_acceleration(field.field_descr(),
+					       enzo_block->rank(), order_);
+
+  compute_acceleration.compute(enzo_block);
 
   // Clear "B" and "density_total" fields for next call
   // Note density_total may not be defined
@@ -422,7 +429,7 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
     }
   }
   if (de_t) {
-#ifdef DEBUG_COPY_DENSITY  
+#ifdef DEBUG_COPY_POTENTIAL
     enzo_float * po_temp = (enzo_float*) field.values("potential_temp");
     for (int i=0; i<mx*my*mz; i++) {
       po_temp[i] = potential[i];
@@ -434,7 +441,7 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
   }
 
   // wait for all Blocks before continuing
-  compute_done();
+  enzo_block->compute_done();
 }
 
 //----------------------------------------------------------------------

@@ -26,8 +26,8 @@ public: // interface
     max_expansion_rate_(0.01),
     initial_redshift_(20.0),
     final_redshift_(0.0),
-    a_(0.0),
-    dadt_(0.0),
+    cosmo_a_(0.0),
+    cosmo_dadt_(0.0),
     current_redshift_(-1.0)
   {
   }
@@ -51,8 +51,8 @@ public: // interface
       max_expansion_rate_(max_expansion_rate),
       initial_redshift_(initial_redshift),
       final_redshift_(final_redshift),
-      a_(0.0),
-      dadt_(0.0),
+      cosmo_a_(0.0),
+      cosmo_dadt_(0.0),
       current_redshift_(-1.0)
   {
   }
@@ -70,8 +70,8 @@ public: // interface
       max_expansion_rate_(0.01),
       initial_redshift_(20.0),
       final_redshift_(0.0),
-      a_(0.0),
-      dadt_(0.0),
+      cosmo_a_(0.0),
+      cosmo_dadt_(0.0),
       current_redshift_(-1.0)
   {}
 
@@ -94,8 +94,8 @@ public: // interface
     p | initial_redshift_;
     p | final_redshift_;
 
-    p | a_;
-    p | dadt_;
+    p | cosmo_a_;
+    p | cosmo_dadt_;
     p | current_redshift_;
   };
 
@@ -128,15 +128,15 @@ public: // interface
   enzo_float time_from_redshift (enzo_float redshift) const;
   enzo_float redshift_from_time(enzo_float time) const
   {
-    enzo_float a,dadt;
-    compute_expansion_factor (&a,&dadt,time);
-    return (1.0 + initial_redshift_) / a - 1.0;
+    enzo_float cosmo_a,cosmo_dadt;
+    compute_expansion_factor (&cosmo_a,&cosmo_dadt,time);
+    return (1.0 + initial_redshift_) / cosmo_a - 1.0;
   }
 
   void set_current_time (enzo_float time)
   {
     update_expansion_factor (time);
-    current_redshift_ = (1 + initial_redshift_)/a_ - 1;
+    current_redshift_ = (1 + initial_redshift_)/cosmo_a_ - 1;
     
   }
 
@@ -147,14 +147,14 @@ public: // interface
   
   void update_expansion_factor(enzo_float time)
   {
-    compute_expansion_factor(&a_,&dadt_,time);
+    compute_expansion_factor(&cosmo_a_,&cosmo_dadt_,time);
   }
       
   void compute_expansion_timestep
   (enzo_float *dt_expansion, enzo_float time) const;
 
   void compute_expansion_factor
-  (enzo_float *a, enzo_float *dadt, enzo_float time) const;
+  (enzo_float *cosmo_a, enzo_float *cosmo_dadt, enzo_float time) const;
   
   /// Return current mass units scaling (requires set_current_time())
   double mass_units() const
@@ -202,8 +202,8 @@ public: // interface
     CkPrintf ("DEBUG_COSMO max_expansion_rate  = %g\n",max_expansion_rate_);
     CkPrintf ("DEBUG_COSMO initial_redshift    = %g\n",initial_redshift_);
     CkPrintf ("DEBUG_COSMO final_redshift      = %g\n",final_redshift_);
-    CkPrintf ("DEBUG_COSMO a                   = %g\n",a_);
-    CkPrintf ("DEBUG_COSMO dadt                = %g\n",dadt_);
+    CkPrintf ("DEBUG_COSMO cosmo_a             = %g\n",cosmo_a_);
+    CkPrintf ("DEBUG_COSMO cosmo_dadt          = %g\n",cosmo_dadt_);
     CkPrintf ("DEBUG_COSMO current_redshift    = %g\n",current_redshift_);
     fflush(stdout);
   }
@@ -226,8 +226,8 @@ protected: // attributes
   enzo_float final_redshift_;
 
   // Time-dependent parameters
-  enzo_float a_;
-  enzo_float dadt_;
+  enzo_float cosmo_a_;
+  enzo_float cosmo_dadt_;
   enzo_float current_redshift_;
 
 };

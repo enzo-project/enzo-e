@@ -27,11 +27,13 @@ public: // interface
   EnzoMethodGravity(const FieldDescr * field_descr,
 		    int index_solver,
 		    double grav_const,
+		    int order,
 		    bool accumulate);
 
   EnzoMethodGravity()
     : index_solver_(-1),
-      grav_const_(0.0)
+      grav_const_(0.0),
+      order_(4)
   {};
 
   /// Destructor
@@ -44,7 +46,8 @@ public: // interface
   EnzoMethodGravity (CkMigrateMessage *m)
     : Method (m),
       index_solver_(-1),
-      grav_const_(0.0)
+      grav_const_(0.0),
+      order_(4)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -61,6 +64,7 @@ public: // interface
 
     p | index_solver_;
     p | grav_const_;
+    p | order_;
 
   }
 
@@ -73,6 +77,9 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep (Block * block) const throw() ;
 
+  /// Compute accelerations from potential and exit solver
+  void compute_accelerations (EnzoBlock * enzo_block) throw();
+  
 protected: // methods
 
   void compute_ (EnzoBlock * enzo_block) throw();
@@ -87,7 +94,11 @@ protected: // attributes
 
   /// Gas constant, e.g. 6.67384e-8 (cgs)
   double grav_const_;
-  
+
+  /// Order of Laplacian and acceleration computation: 2 or 4
+  /// (Note EnzoMatrixLaplacian supports order=6 as well)
+  int order_;
+
 };
 
 

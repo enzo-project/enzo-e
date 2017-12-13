@@ -288,6 +288,7 @@ public: // attributes
   /// EnzoMethodGravity
   double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
+  int                        method_gravity_order;
   bool                       method_gravity_accumulate;
 
   /// EnzoMethodPmDeposit

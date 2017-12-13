@@ -440,14 +440,14 @@ Method * EnzoProblem::create_method_
 	     solver_name.c_str(),
 	     index_solver < enzo_config->num_solvers);
 
-    // WARNING: accumulate is currently only implemented for non-AMR
-    // problems
-    bool accumulate = enzo_config->method_gravity_accumulate;
+   // WARNING: method_gravity_accumulate is currently only implemented
+   // for non-AMR problems
 
-    method = new EnzoMethodGravity
+  method = new EnzoMethodGravity
       (field_descr, enzo_config->solver_index[solver_name],
        enzo_config->method_gravity_grav_const,
-       accumulate);
+       enzo_config->method_gravity_order,
+       enzo_config->method_gravity_accumulate);
       
   } else {
 

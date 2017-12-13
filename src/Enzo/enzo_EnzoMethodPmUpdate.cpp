@@ -287,13 +287,13 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
       block->simulation()->problem()->physics("cosmology");
     if (cosmology) {
-      enzo_float a=0.0,dadt=0.0;
+      enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
       double time = block->time();
       double dt   = block->dt();
-      cosmology-> compute_expansion_factor (&a,&dadt,time+0.5*dt);
-      hx *= a;
-      hy *= a;
-      hz *= a;
+      cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+      hx *= cosmo_a;
+      hy *= cosmo_a;
+      hz *= cosmo_a;
     }
 
     for (int ib=0; ib<nb; ib++) {

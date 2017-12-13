@@ -78,7 +78,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  enzo_float a = 1, dadt;
+  enzo_float cosmo_a = 1.0, cosmo_dadt=0.0;
 
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     block->simulation()->problem()->physics("cosmology");
@@ -90,7 +90,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
   if (comoving_coordinates_) {
 
     cosmology->compute_expansion_factor
-      (&a, &dadt,(enzo_float)enzo_block->time());
+      (&cosmo_a, &cosmo_dadt,(enzo_float)enzo_block->time());
     
   }
 
@@ -132,7 +132,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 			&enzo_block->CellWidth[0], 
 			&enzo_block->CellWidth[1], 
 			&enzo_block->CellWidth[2],
-			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &a,
+			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &cosmo_a,
 			density, pressure,
 			velocity_x, 
 			velocity_y, 

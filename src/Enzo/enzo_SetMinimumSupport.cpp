@@ -20,7 +20,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
  
     /* Compute cosmology factors. */
  
-    enzo_float a = 1, dadt;
+    enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
 
     EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
       simulation()->problem()->physics("cosmology");
@@ -30,10 +30,10 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 	    ! (comoving_coordinates && (cosmology == NULL)) );
 
     if (comoving_coordinates) {
-      cosmology ->compute_expansion_factor(&a, &dadt,time());
+      cosmology ->compute_expansion_factor(&cosmo_a, &cosmo_dadt,time());
     }
 
-    enzo_float CosmoFactor = 1.0/a;
+    enzo_float CosmoFactor = 1.0/cosmo_a;
  
     /* Determine the size of the grids. */
  

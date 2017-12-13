@@ -59,7 +59,7 @@ enzo_float EnzoPhysicsCosmology::time_from_redshift (enzo_float redshift) const
 //======================================================================
 
 void EnzoPhysicsCosmology::compute_expansion_factor
-(enzo_float *a, enzo_float *dadt, enzo_float time) const
+(enzo_float *cosmo_a, enzo_float *cosmo_dadt, enzo_float time) const
 {
 
   //   *a = 1.0;
@@ -72,7 +72,7 @@ void EnzoPhysicsCosmology::compute_expansion_factor
 	  (initial_time_in_code_units() != 0) );
 
   // Default -1.0 to check for a being initialized below
-  *a = -1.0;
+  *cosmo_a = -1.0;
   
   /* Find Omega due to curvature. */
  
@@ -89,7 +89,7 @@ void EnzoPhysicsCosmology::compute_expansion_factor
  
   if (fabs(omega_matter_now_-1) < OMEGA_TOLERANCE &&
       omega_lambda_now_ < OMEGA_TOLERANCE) {
-    *a    = pow(time/initial_time_in_code_units(), enzo_float(2.0/3.0));
+    *cosmo_a    = pow(time/initial_time_in_code_units(), enzo_float(2.0/3.0));
   }
  
   /* 2) For omega_matter_now_ < 1 and omega_lambda_now_ == 0 see
@@ -124,8 +124,8 @@ void EnzoPhysicsCosmology::compute_expansion_factor
  
     /* Now use eta to compute the expansion factor (eq. 13-10, part 2). */
  
-    *a = omega_matter_now_/(2*(1 - omega_matter_now_))*(cosh(eta) - 1);
-    *a *= (1 + initial_redshift_);    // to convert to code units, divide by [a]
+    *cosmo_a = omega_matter_now_/(2*(1 - omega_matter_now_))*(cosh(eta) - 1);
+    *cosmo_a *= (1 + initial_redshift_);    // to convert to code units, divide by [a]
   }
  
   /* 3) For omega_matter_now_ > 1 && omega_lambda_now_ == 0, use sin/cos.
@@ -138,22 +138,22 @@ void EnzoPhysicsCosmology::compute_expansion_factor
  
   if (fabs(omega_curvature_now_) < OMEGA_TOLERANCE &&
       omega_lambda_now_ > OMEGA_TOLERANCE) {
-    *a = pow(enzo_float(omega_matter_now_/(1 - omega_matter_now_)), enzo_float(1.0/3.0)) *
+    *cosmo_a = pow(enzo_float(omega_matter_now_/(1 - omega_matter_now_)), enzo_float(1.0/3.0)) *
          pow(enzo_float(sinh(1.5 * sqrt(1.0 - omega_matter_now_)*time_hubble_0)),
 	     enzo_float(2.0/3.0));
-    *a *= (1 + initial_redshift_);    // to convert to code units, divide by [a]
+    *cosmo_a *= (1 + initial_redshift_);    // to convert to code units, divide by [a]
   }
  
   /* Compute the derivative of the expansion factor (Peebles93, eq. 13.3). */
  
-  enzo_float temp = (*a)/(1 + initial_redshift_);
-  *dadt = sqrt( 2.0/(3.0*omega_matter_now_*(*a)) *
+  enzo_float temp = (*cosmo_a)/(1 + initial_redshift_);
+  *cosmo_dadt = sqrt( 2.0/(3.0*omega_matter_now_*(*cosmo_a)) *
 	       (omega_matter_now_ + omega_curvature_now_*temp +
 		omega_lambda_now_*temp*temp*temp));
 
   ASSERT ("EnzoPhysicsCosmology::compute_expansion_factor()",
 	  "expansion factor a was not initialized correctly",
-	  (*a != -1.0) );
+	  (*cosmo_a != -1.0) );
   
   /* Someday, we'll implement the general case... */
  
@@ -173,12 +173,12 @@ void EnzoPhysicsCosmology::compute_expansion_timestep
  
   /* Compute the expansion factors. */
  
-  enzo_float a, dadt;
-  compute_expansion_factor(&a, &dadt, time);
+  enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
+  compute_expansion_factor(&cosmo_a, &cosmo_dadt, time);
  
   /* Compute the maximum allwed timestep given the maximum allowed
      expansion factor. */
-  *dt_expansion = max_expansion_rate_*a/dadt;
+  *dt_expansion = max_expansion_rate_*cosmo_a/cosmo_dadt;
 }
 
 //----------------------------------------------------------------------

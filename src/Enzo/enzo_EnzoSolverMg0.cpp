@@ -113,7 +113,6 @@
 #include "enzo.hpp"
 #include "enzo.decl.h"
 
-#define NEW_REFRESH
 // #define DEBUG_COPY
 // #define DEBUG_ENTRY
 // #define DEBUG_SOLVER_MG0
@@ -251,15 +250,9 @@ EnzoSolverMg0::EnzoSolverMg0
   add_refresh(4,0,neighbor_level,sync_barrier,
 	      enzo_sync_id_solver_mg0);
 
-#ifdef NEW_REFRESH
-  refresh(0)->add_all_fields();
+  refresh(0)->add_field (ir_);
+  refresh(0)->add_field (ic_);
 
-  refresh(0)->add_field (ir_);
-  refresh(0)->add_field (ic_);
-#else
-  refresh(0)->add_field (ir_);
-  refresh(0)->add_field (ic_);
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -716,9 +709,12 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 #ifdef DEBUG_COPY
   enzo_float * R_copy = (enzo_float*) field.values("R_copy");
   enzo_float * R = (enzo_float*) field.values(ir_);
+  double rsum=0.0;
   for (int i=0; i<mx_*my_*mz_; i++) {
     R_copy[i]=R[i];
-  }  
+    rsum += std::abs(R[i]);
+  }
+  CkPrintf ("DEBUG_COPY rsum = %g\n",rsum);
 #endif
 
   Index index        = enzo_block->index();
@@ -1035,9 +1031,13 @@ void EnzoSolverMg0::prolong_recv
 
 #ifdef DEBUG_COPY
   enzo_float * C_copy = (enzo_float*) field.values("C_copy");
+  double csum=0.0;
   for (int i=0; i<mx_*my_*mz_; i++) {
     C_copy[i]=C[i];
-  }  
+    csum += std::abs(C[i]);
+  }
+  CkPrintf ("DEBUG_COPY csum = %g\n",csum);
+ 
 #endif
   TRACE_FIELD_("C",C,1.0);
 

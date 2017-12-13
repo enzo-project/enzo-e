@@ -99,11 +99,15 @@ public: // interface
   { id_sync_ = sync_id; }
   
   /// Type of neighbor: level if min_level == max_level, else leaf
-  int neighbor_type_() const throw();
+  int neighbor_type_() const throw() {
+    return (min_level_ == max_level_) ? neighbor_level : neighbor_leaf;
+  }
 
   /// Type of synchronization: sync_face if min_level == max_level,
   /// else sync_neighbor
-  int sync_type_() const throw();
+  int sync_type_() const throw() {
+    return (min_level_ == max_level_) ? sync_face : sync_neighbor;
+  }
 
   /// Whether Block is active
   bool is_active_(Block * block);

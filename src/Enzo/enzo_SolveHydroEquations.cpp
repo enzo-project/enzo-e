@@ -290,13 +290,13 @@ int EnzoBlock::SolveHydroEquations
      in comoving form (except for the expansion terms which are taken
      care of elsewhere). */
 
-  enzo_float a_cosmo = 1, dadt_cosmo;
+  enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
 
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     simulation()->problem()->physics("cosmology");
 
   if (comoving_coordinates) {
-    cosmology->compute_expansion_factor(&a_cosmo, &dadt_cosmo, time+0.5*dt);
+    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt, time+0.5*dt);
   }
 
   ASSERT ("EnzoBlock::SolveHydroEquations()",
@@ -310,7 +310,7 @@ int EnzoBlock::SolveHydroEquations
     CellWidthTemp[dim] = new enzo_float [GridDimension[dim]];
     if (dim < rank) {
       for (int i=0; i<GridDimension[dim]; i++) 
-	CellWidthTemp[dim][i] = enzo_float(a_cosmo*CellWidth[dim]);
+	CellWidthTemp[dim][i] = enzo_float(cosmo_a*CellWidth[dim]);
     } else {
       for (int i=0; i<GridDimension[dim]; i++) 
 	CellWidthTemp[dim][i] = 1.0;
