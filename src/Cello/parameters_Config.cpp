@@ -894,9 +894,9 @@ void Config::read_output_ (Parameters * p) throw()
 	p->value_logical("image_ghost",false);
 
       output_image_min[index_output] =
-	p->value_float("image_min",0.0);
+	p->value_float("image_min",std::numeric_limits<double>::max());
       output_image_max[index_output] =
-	p->value_float("image_max",0.0);
+	p->value_float("image_max",-std::numeric_limits<double>::max());
 
       output_min_level[index_output] = p->value_integer("min_level",0);
       output_max_level[index_output] =

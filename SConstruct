@@ -22,7 +22,7 @@ temp_balance_atsync = 1
 # Temporary setting for using new PPM routines from enzo-dev
 #----------------------------------------------------------------------
 
-new_ppm = 0
+new_ppm = 1
 
 #----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)

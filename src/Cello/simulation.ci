@@ -22,9 +22,8 @@ module simulation {
     entry void r_write (CkReductionMsg * msg); // [SC7]
     entry void r_write_checkpoint ();
 
-    entry void p_begin_output();
     entry void p_output_write (int n, char buffer[n]); // [SC8]
-    entry void p_do_output (int index_output);
+    entry void p_output_start (int index_output);
 
     entry void p_monitor ();
     entry void p_monitor_performance();

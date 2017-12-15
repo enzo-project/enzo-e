@@ -46,7 +46,7 @@ void Block::compute_next_ ()
     refresh->set_active (is_leaf());
 
     refresh_enter
-      (CkIndex_Block::r_compute_continue(NULL), refresh );
+      (CkIndex_Block::r_compute_continue(), refresh );
 
   } else {
 

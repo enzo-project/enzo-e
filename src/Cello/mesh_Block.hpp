@@ -254,16 +254,11 @@ public: // interface
 
   void p_compute_enter()
   {      compute_enter_();  }
-  void r_compute_enter(CkReductionMsg * msg)
-  {    compute_enter_();    delete msg;      }
 
   void p_compute_continue()
   {      compute_continue_();  }
-  void r_compute_continue(CkReductionMsg * msg)
-  {
-    compute_continue_();
-    delete msg;
-  }
+  void r_compute_continue()
+  {      compute_continue_();  }
 
   void p_compute_exit()
   {      compute_exit_();  }
@@ -343,7 +338,7 @@ public: // methods
   {      output_exit_();  delete msg; }
 
   /// Contribute block data to ith output object in the simulation
-  void p_output_write (int index_output);
+  void p_output_write (int index_output, int step);
 
 protected:
   void output_enter_();

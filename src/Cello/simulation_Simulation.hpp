@@ -215,17 +215,11 @@ public: // virtual functions
   void r_recv_config(CkReductionMsg * msg);
 
   /// Call output on Problem list of Output objects
-  void p_begin_output()
-  {
-    performance_->start_region(perf_output);
-    begin_output();
-    performance_->stop_region (perf_output);
-  }
-  void begin_output ();
-  void p_do_output (int index_output)
-  { do_output (index_output); }
+  void output_enter ();
+  void p_output_start (int index_output)
+  { output_start (index_output); }
   
-  void do_output (int index_output);
+  void output_start (int index_output);
   void output_exit();
 
   /// Reduce output, using p_output_write to send data to writing processes

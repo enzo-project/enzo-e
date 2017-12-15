@@ -8,6 +8,8 @@
 #ifndef IO_OUTPUT_HPP
 #define IO_OUTPUT_HPP
 
+// #define DEBUG_OUTPUT
+
 class Factory;
 class FieldDescr;
 class ParticleDescr;
@@ -46,7 +48,6 @@ public: // functions
     : PUP::able(m),
       file_(0),           // Initialization deferred
       schedule_(0),
-      process_(0),        // initialization below
       sync_write_(1),     // default process-per-stride
       index_(0),
       cycle_(0),
@@ -137,12 +138,13 @@ public: // functions
 
   /// Return whether this process is a writer
   bool is_writer () const throw () 
-  { return (process_ == process_writer()); }
+  { return (CkMyPe() == process_writer()); }
 
   /// Return the process id of the writer for this process id
   int process_writer() const throw()
   {
-    return process_ - (process_ % stride_write_);
+    const int ip=CkMyPe();
+    return ip - (ip % stride_write_);
   }
 
   /// Return the updated timestep if time + dt goes past a scheduled output
@@ -183,21 +185,36 @@ public: // virtual functions
 
   /// Write Simulation data to disk
   virtual void write_simulation ( const Simulation * simulation ) throw()
-  { write_simulation_(simulation); }
+  {
+#ifdef DEBUG_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT Output::write_simulation()\n",CkMyPe());
+#endif    
+    write_simulation_(simulation);
+  }
 
   /// Write Hierarchy data to disk
   virtual void write_hierarchy
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr,
     const ParticleDescr * particle_descr ) throw()
-  { write_hierarchy_(hierarchy,field_descr,particle_descr); }
+  {
+#ifdef DEBUG_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT Output::write_hierarchy()\n",CkMyPe());
+#endif    
+    write_hierarchy_(hierarchy,field_descr,particle_descr);
+  }
 
   /// Write local block data to disk
   virtual void write_block
   ( const Block      * block, 
     const FieldDescr * field_descr, 
     const ParticleDescr * particle_descr) throw()
-  { write_block_(block,field_descr,particle_descr); }
+  {
+#ifdef DEBUG_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT Output::write_block()\n",CkMyPe());
+#endif    
+    write_block_(block,field_descr,particle_descr);
+  }
 
   /// Write local field to disk
   virtual void write_field_data
@@ -278,9 +295,6 @@ protected: // attributes
 
   /// Scheduler for this output
   Schedule * schedule_;
-
-  /// ID of this process
-  int process_;
 
   /// Sync for waiting for writers
   Sync sync_write_;

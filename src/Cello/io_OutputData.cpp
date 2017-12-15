@@ -12,6 +12,8 @@
 
 //----------------------------------------------------------------------
 
+// #define TRACE_OUTPUT
+
 OutputData::OutputData
 (
  int index,
@@ -26,6 +28,13 @@ OutputData::OutputData
   // Set process stride, with default = 1
 
   int stride;
+
+#ifdef TRACE_OUTPUT  
+  CkPrintf ("%d TRACE_OUTPUT output_stride_write = %d\n",CkMyPe(),
+	    config->output_stride_write[index_]);
+  CkPrintf ("%d TRACE_OUTPUT output_stride_wait = %d\n",CkMyPe(),
+	    config->output_stride_wait[index_]);
+#endif  
 
   stride = config->output_stride_write[index_];
   stride_write_ = (stride == 0) ? 1 : stride;
@@ -62,10 +71,10 @@ void OutputData::pup (PUP::er &p)
 
 void OutputData::open () throw()
 {
+#ifdef TRACE_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT OutputData::open()\n",CkMyPe());
+#endif    
   std::string file_name = expand_name_(&file_name_,&file_args_);
-
-
-  close();
 
   std::string dir = directory();
 
@@ -82,6 +91,9 @@ void OutputData::open () throw()
 
 void OutputData::close () throw()
 {
+#ifdef TRACE_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT OutputData::close()\n",CkMyPe());
+#endif    
   if (file_) file_->file_close();
   delete file_;  file_ = 0;
 }
@@ -89,7 +101,12 @@ void OutputData::close () throw()
 //----------------------------------------------------------------------
 
 void OutputData::finalize () throw ()
-{  Output::finalize(); }
+{
+#ifdef TRACE_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT OutputData::finalize()\n",CkMyPe());
+#endif    
+  Output::finalize();
+}
 
 //----------------------------------------------------------------------
 
@@ -100,6 +117,9 @@ void OutputData::write_hierarchy
  const ParticleDescr * particle_descr
  ) throw()
 {
+#ifdef TRACE_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT OutputData::write_hierarchy()\n",CkMyPe());
+#endif    
   IoHierarchy io_hierarchy(hierarchy);
 
   write_meta (&io_hierarchy);
@@ -116,6 +136,9 @@ void OutputData::write_block
   const FieldDescr * field_descr,
   const ParticleDescr * particle_descr) throw()
 {
+#ifdef TRACE_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT OutputData::write_block()\n",CkMyPe());
+#endif    
 
   char file[256];
   char dir[256];

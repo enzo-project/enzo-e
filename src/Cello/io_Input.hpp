@@ -44,7 +44,6 @@ public: // functions
   Input (CkMigrateMessage *m) :
     PUP::able(m),
     file_(0),
-    process_(0),
     sync_(0),
     index_charm_(0),
     cycle_(0),
@@ -184,9 +183,6 @@ protected: // attributes
 
   /// File object for input
   File * file_;
-
-  /// ID of this process
-  int process_;
 
   /// Sync for ending input
   Sync sync_;
