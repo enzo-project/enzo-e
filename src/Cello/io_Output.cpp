@@ -9,6 +9,8 @@
 #include "main.hpp"
 #include "io.hpp"
 
+// #define TRACE_OUTPUT
+
 //----------------------------------------------------------------------
 
 Output::Output (int index, const Factory * factory,
@@ -237,7 +239,7 @@ void Output::write_simulation_
 ( const Simulation * simulation ) throw()
 {
 #ifdef TRACE_OUTPUT
-    CkPrintf ("TRACE_OUTPUT Output::write_simulation_()\n");
+  CkPrintf ("%d TRACE_OUTPUT Output::write_simulation_()\n",CkMyPe());
 #endif    
   write_hierarchy(simulation->hierarchy(), 
 		  simulation->field_descr(),
@@ -259,7 +261,7 @@ void Output::write_hierarchy_
 {
 
 #ifdef TRACE_OUTPUT
-  CkPrintf ("TRACE_OUTPUT Output::write_hierarchy_()\n");
+  CkPrintf ("%d TRACE_OUTPUT Output::write_hierarchy_()\n",CkMyPe());
 #endif    
 
 }
@@ -274,7 +276,7 @@ void Output::write_block_
  ) throw()
 {
 #ifdef TRACE_OUTPUT
-    CkPrintf ("TRACE_OUTPUT Output::write_block_()\n");
+    CkPrintf ("%d TRACE_OUTPUT Output::write_block_()\n",CkMyPe());
 #endif    
   // Write fields
 

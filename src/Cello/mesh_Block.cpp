@@ -571,7 +571,7 @@ std::string Block::name() const throw()
 
     const int rank = this->rank();
     int blocking[3] = {1,1,1};
-    simulation()->hierarchy()->blocking(blocking,blocking+1,blocking+2);
+    simulation()->hierarchy()->root_blocks(blocking,blocking+1,blocking+2);
     const int level = this->level();
     for (int i=-1; i>=level; i--) {
       blocking[0] /= 2;
@@ -598,7 +598,7 @@ std::string Block::name() const throw()
 
 void Block::size_forest (int * nx, int * ny, int * nz) const throw ()
 {
-  simulation()->hierarchy()->num_blocks(nx,ny,nz);
+  simulation()->hierarchy()->root_blocks(nx,ny,nz);
 }
 
 //----------------------------------------------------------------------

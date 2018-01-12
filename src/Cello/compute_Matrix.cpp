@@ -61,7 +61,7 @@ void Matrix::residual_ (T * r, T * b,
     for (int iy=iy0; iy<my-iy0; iy++) {
       for (int ix=ix0; ix<mx-ix0; ix++) {
 
-	const int i=ix + mx*(iy + mz*iz);
+	const int i=ix + mx*(iy + my*iz);
 
 	r[i] = b[i] - r[i];
       }

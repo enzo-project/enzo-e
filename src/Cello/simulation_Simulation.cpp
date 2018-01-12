@@ -49,7 +49,9 @@ Simulation::Simulation
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
-  sync_output_write_()
+  sync_output_write_(),
+  sync_new_output_start_(),
+  sync_new_output_next_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -103,7 +105,9 @@ Simulation::Simulation()
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
-  sync_output_write_()
+  sync_output_write_(),
+  sync_new_output_start_(),
+  sync_new_output_next_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -178,6 +182,12 @@ void Simulation::pup (PUP::er &p)
   if (up) sync_output_begin_.set_stop(0);
   if (up) sync_output_write_.set_stop(0);
 
+  p | sync_new_output_start_;
+  p | sync_new_output_next_;
+
+  if (up) sync_new_output_start_.set_stop(0);
+  if (up) sync_new_output_next_.set_stop(0);
+
   p | schedule_balance_;
 
   PUParray(p,dir_checkpoint_,256);
@@ -215,7 +225,9 @@ Simulation::Simulation (CkMigrateMessage *m)
     field_descr_(NULL),
     particle_descr_(NULL),
     sync_output_begin_(),
-    sync_output_write_()
+    sync_output_write_(),
+    sync_new_output_start_(),
+    sync_new_output_next_()
 
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
@@ -600,12 +612,6 @@ void Simulation::initialize_balance_() throw()
       config_->schedule_step[index],
       config_->schedule_list[index]);
 
-#ifdef TEMP_BALANCE_MANUAL
-  if (schedule_balance_) {
-    TurnManualLBOn();
-  }
-#endif
-
 }
 
 //----------------------------------------------------------------------
@@ -684,6 +690,8 @@ void Simulation::data_insert_block(Block * block)
   }
   ++sync_output_begin_;
   ++sync_output_write_;
+  ++sync_new_output_start_;
+  ++sync_new_output_next_;
 }
 
 //----------------------------------------------------------------------
@@ -696,6 +704,8 @@ void Simulation::data_delete_block(Block * block)
   }
   --sync_output_begin_;
   --sync_output_write_;
+  --sync_new_output_start_;
+  --sync_new_output_next_;
 }
 
 //----------------------------------------------------------------------
@@ -791,7 +801,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   // number of root blocks n0
   int nx,ny,nz;
-  hierarchy()->num_blocks(&nx,&ny,&nz);
+  hierarchy()->root_blocks(&nx,&ny,&nz);
   int n0 = nx*ny*nz;
   // rank-dependent factor for computing leaf block count
   int rank = hierarchy()->rank();

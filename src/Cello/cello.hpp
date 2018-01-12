@@ -226,7 +226,8 @@ namespace cello {
     }					
     if (std::fpclassify(value) == FP_INFINITE) {
       printf ("WARNING: %s:%d %s inf\n", file,line,message);	
-    }					
+    }
+    //    CkPrintf ("DEBUG_CHECK %s = %llg\n",message,value);
   }
 
   void backtrace(const char * msg);

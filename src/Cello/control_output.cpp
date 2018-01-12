@@ -21,7 +21,70 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
-//----------------------------------------------------------------------
+//======================================================================
+// NEW OUTPUT
+//======================================================================
+
+void Block::new_output_begin_ ()
+{
+  TRACE_OUTPUT("Block::new_output_begin_()");
+  simulation() -> new_output_start();
+}
+
+void Block::new_output_write_block()
+{
+  TRACE_OUTPUT("Block::new_output_write_block_()");
+}
+
+void Simulation::new_output_start()
+{
+  TRACE_OUTPUT("Simulation::new_output_start()");
+  if (sync_output_begin_.next()) {
+    TRACE_OUTPUT("Simulation::new_output_start() continuing\n");
+    problem()->output_reset();
+    problem()->new_output_next(this);
+  }
+}
+
+void Problem::new_output_next(Simulation * simulation) throw()
+{
+  TRACE_OUTPUT("Problem::new_output_next()");
+  int cycle   = simulation->cycle();
+  double time = simulation->time();
+
+  Output * output = NULL;
+
+  // Find next schedule output (index_output_ initialized to -1)
+
+  do {
+
+    output = this->output(++index_output_);
+
+  } while (output && ! output->is_scheduled(cycle, time));
+
+  // assert (! output) || ( output->is_scheduled() )
+  
+  if (output != NULL) {
+
+    // open file if writer
+    //   output->init();
+    //  output->open();
+    //  output->write_simulation(this);
+    //  output->next();
+
+
+  } else {
+
+    // ...otherwise exit output phase
+
+    simulation->output_exit();
+
+  }
+}
+
+//======================================================================
+// OLD OUTPUT
+//======================================================================
 
 void Block::output_begin_ ()
 {
@@ -78,7 +141,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
     const int stride = output->stride_wait();
 
-    if (CkMyPe() % stride == 0) {
+    if ((CkMyPe() % stride) == 0) {
 
       simulation->output_start (index_output_);
 
@@ -118,6 +181,7 @@ void Simulation::output_start(int index_output)
 
 void Block::p_output_write (int index_output, int step)
 {
+  TRACE_OUTPUT("Simulation::p_output_write()");
   performance_start_ (perf_output);
 
   FieldDescr * field_descr = simulation()->field_descr();
@@ -232,6 +296,8 @@ void Problem::output_write
 
   if (output->sync_write()->next()) {
 
+    TRACE_OUTPUT("Problem::output_write(): sync_write()->next() = true");
+
     output->close();
     output->finalize();
     output_next(simulation);
@@ -243,6 +309,8 @@ void Problem::output_write
     if (ip_next%stride != 0 && ip_next < np) {
       proxy_simulation[ip_next].p_output_start(index_output_);
     }
+  } else {
+    TRACE_OUTPUT("Problem::output_write(): sync_write()->next() = false");
   }
 
 }
@@ -268,6 +336,7 @@ void Block::p_output_end()
   performance_stop_(perf_output);
   output_exit_();
 }
+
 //======================================================================
 
 

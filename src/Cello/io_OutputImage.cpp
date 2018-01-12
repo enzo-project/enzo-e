@@ -103,10 +103,10 @@ OutputImage::OutputImage(int index,
   }
   
   // Override default Output::stride_write_: only root writes
-  set_stride_write(process_count);
+  set_stride_write (process_count);
   // Let all processes contribute data when its available
   // (wait stride may be helpful for performance?)
-  set_stride_wait(1);
+  stride_wait_ = 1;
 
   // Set default color map to be black and white
   map_r_.resize(2);

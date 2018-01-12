@@ -88,7 +88,6 @@ module mesh {
 
     entry void p_output_enter();
     entry void r_output_enter(CkReductionMsg *);
-
     entry void p_output_end();
     entry void p_output_exit();
     entry void r_output_exit(CkReductionMsg *);

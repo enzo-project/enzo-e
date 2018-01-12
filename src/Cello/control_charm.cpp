@@ -70,7 +70,11 @@ void Block::output_enter_ ()
   performance_start_(perf_output);
   TRACE_CONTROL("output_enter");
 
+#ifdef NEW_OUTPUT
+  new_output_begin_();
+#else /* NEW_OUTPUT */
   output_begin_();
+#endif  
   performance_stop_(perf_output);
 }
 

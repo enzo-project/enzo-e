@@ -214,6 +214,16 @@ public: // virtual functions
   void send_config();
   void r_recv_config(CkReductionMsg * msg);
 
+  //--------------------------------------------------
+  // NEW OUTPUT
+  //--------------------------------------------------
+
+  void new_output_start ();
+
+  //--------------------------------------------------
+  // OLD OUTPUT
+  //--------------------------------------------------
+
   /// Call output on Problem list of Output objects
   void output_enter ();
   void p_output_start (int index_output)
@@ -241,9 +251,15 @@ public: // virtual functions
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
+  //--------------------------------------------------
+  // Compute
+  //--------------------------------------------------
+  
   void compute ();
 
-  // MONITOR
+  //--------------------------------------------------
+  // Monitor
+  //--------------------------------------------------
 
   void p_monitor();
 
@@ -405,6 +421,9 @@ protected: // attributes
 
   Sync sync_output_begin_;
   Sync sync_output_write_;
+
+  Sync sync_new_output_start_;
+  Sync sync_new_output_next_;
 
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];

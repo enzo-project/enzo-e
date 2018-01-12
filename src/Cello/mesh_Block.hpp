@@ -325,6 +325,23 @@ public: // methods
   // OUTPUT
   //--------------------------------------------------
 
+protected:
+  void output_enter_();
+  void output_begin_();
+  void output_exit_();
+public:
+
+  //--------------------------------------------------
+  // NEW OUTPUT
+  //--------------------------------------------------
+
+  void new_output_begin_();
+  void new_output_write_block();
+
+  //--------------------------------------------------
+  // OLD OUTPUT
+  //--------------------------------------------------
+  
   void p_output_enter()
   {      output_enter_();  }
   void r_output_enter(CkReductionMsg * msg)
@@ -339,12 +356,6 @@ public: // methods
 
   /// Contribute block data to ith output object in the simulation
   void p_output_write (int index_output, int step);
-
-protected:
-  void output_enter_();
-  void output_begin_();
-  void output_exit_();
-public:
 
   //--------------------------------------------------
   // ADAPT

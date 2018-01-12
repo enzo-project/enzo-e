@@ -62,8 +62,7 @@ public: // functions
       io_field_data_(0),
       it_particle_index_(0),        // set_it_index_particle()
       io_particle_data_(0),
-      stride_write_(1), // default one file per process
-      stride_wait_(1) // default all processes can write at once
+      stride_write_(1) // default one file per process
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -116,22 +115,17 @@ public: // functions
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
 
-  int stride_write () const throw () 
-  { return stride_write_; }
-
   void set_stride_write (int stride) throw () 
   {
     stride_write_ = stride; 
     sync_write_.set_stop(stride_write_);
   }
 
+  int stride_write () const throw () 
+  { return stride_write_; }
+
   int stride_wait () const throw () 
   { return stride_wait_; }
-
-  void set_stride_wait (int stride) throw () 
-  {
-    stride_wait_ = stride; 
-  }
 
   /// Return whether output is scheduled for this cycle
   bool is_scheduled (int cycle, double time) throw();
@@ -341,11 +335,7 @@ protected: // attributes
   /// Only processes with id's divisible by stride_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
   int stride_write_;
-
-  /// Number of processes within which to sequence writing 0, 1, 2...
-  /// If 1 then all processes can write in parallel; if CkNumPes()
-  /// then all processes write files sequentially, in which process i
-  /// writes and closes its file before process i+1 opens its file
+  
   int stride_wait_;
 
 };

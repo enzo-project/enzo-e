@@ -37,12 +37,10 @@ OutputData::OutputData
 #endif  
 
   stride = config->output_stride_write[index_];
-  stride_write_ = (stride == 0) ? 1 : stride;
-  set_stride_write(stride_write_);
+  set_stride_write ((stride == 0) ? 1 : stride);
   
   stride = config->output_stride_wait[index_];
   stride_wait_ = (stride == 0) ? 1 : stride;
-  set_stride_wait(stride_wait_);
 
 }
 

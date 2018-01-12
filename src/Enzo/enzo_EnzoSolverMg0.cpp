@@ -113,6 +113,7 @@
 #include "enzo.hpp"
 #include "enzo.decl.h"
 
+// #define DEBUG_NEGATE_X
 // #define DEBUG_COPY
 // #define DEBUG_ENTRY
 // #define DEBUG_SOLVER_MG0
@@ -707,7 +708,7 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
   }
 
 #ifdef DEBUG_COPY
-  enzo_float * R_copy = (enzo_float*) field.values("R_copy");
+  enzo_float * R_copy = (enzo_float*) field.values("RMG");
   enzo_float * R = (enzo_float*) field.values(ir_);
   double rsum=0.0;
   for (int i=0; i<mx_*my_*mz_; i++) {
@@ -1030,7 +1031,7 @@ void EnzoSolverMg0::prolong_recv
   enzo_float * C = (enzo_float*) field.values(ic_);
 
 #ifdef DEBUG_COPY
-  enzo_float * C_copy = (enzo_float*) field.values("C_copy");
+  enzo_float * C_copy = (enzo_float*) field.values("CMG");
   double csum=0.0;
   for (int i=0; i<mx_*my_*mz_; i++) {
     C_copy[i]=C[i];
@@ -1179,8 +1180,9 @@ bool EnzoSolverMg0::is_converged_(EnzoBlock * enzo_block) const
 
 void EnzoSolverMg0::end_(Block * block)
 {
+    
   Field field = block->data()->field();
-
+  
   deallocate_temporary_(field,block);
     
   Solver::end_(block);

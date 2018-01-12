@@ -8,7 +8,7 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_COPY
+//#define DEBUG_COPY
 // #define DEBUG_TRACE
 
 #ifdef DEBUG_TRACE

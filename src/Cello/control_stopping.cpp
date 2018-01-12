@@ -176,41 +176,11 @@ void Block::stopping_balance_()
   bool do_balance = (schedule && 
 		     schedule->write_this_cycle(cycle_,time_));
 
-#if !defined(TEMP_BALANCE_MANUAL) && !defined(TEMP_BALANCE_ATSYNC)
-  if (do_balance) {
-    ERROR("Block::stopping_balance_()",
-	  "Load balancing called with neither "
-	  "TEMP_BALANCE_[MANUAL|ATSYNC] defined");
-  }
-#endif
-
-#if defined(TEMP_BALANCE_MANUAL) && defined(TEMP_BALANCE_ATSYNC)
-  if (do_balance) {
-    ERROR("Block::stopping_balance_()",
-	  "Load balancing called with both "
-	  "TEMP_BALANCE_[MANUAL|ATSYNC] defined");
-  }
-#endif
-
-#ifdef TEMP_BALANCE_MANUAL
-
-  if (do_balance && index_.is_root()) {
-
-    simulation()->monitor()->print ("Balance","staring load balance step");
-    CkStartLB();
-
-  }    
-
-  stopping_exit_();
-
-#endif
-
-#ifdef TEMP_BALANCE_ATSYNC
-
   if (do_balance) {
 
     if (index_.is_root())
       simulation()->monitor()->print ("Balance","staring load balance step");
+    
     control_sync_quiescence (CkIndex_Main::p_stopping_balance());
 
   } else {
@@ -218,8 +188,6 @@ void Block::stopping_balance_()
     stopping_exit_();
 
   }
-
-#endif
 
 }
 

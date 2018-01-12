@@ -8,15 +8,12 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
+
 #----------------------------------------------------------------------
-# Temporary setting for how load-balancing is implemented.  Used
-# for debugging load balancing.  See bug report #85 
-# http://client64-249.sdsc.edu/cello-bug/  Exactly one must be
-# set if load balancing is used
+# Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
 
-temp_balance_manual = 0
-temp_balance_atsync = 1
+new_output = 0
 
 #----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev
@@ -206,11 +203,9 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Debugging defines
 
-
-define_temp_balance_manual = ['TEMP_BALANCE_MANUAL']
-define_temp_balance_atsync = ['TEMP_BALANCE_ATSYNC']
-
 define_new_ppm = ['NEW_PPM']
+
+define_new_output = ['NEW_OUTPUT']
 
 define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
@@ -339,12 +334,9 @@ if (use_gprof == 1):
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
-
-
-if (temp_balance_manual != 0): defines = defines + define_temp_balance_manual
-if (temp_balance_atsync != 0): defines = defines + define_temp_balance_atsync
-
 if (new_ppm != 0): defines = defines + define_new_ppm
+
+if (new_output != 0): defines = defines + define_new_output
 
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose

@@ -85,7 +85,9 @@ void Main::p_checkpoint(int count, std::string dir_name)
 void Main::p_output_enter()
 {
 #ifdef CHARM_ENZO
+
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_output_enter();
+  
 #endif
 }
 
@@ -140,22 +142,6 @@ void Main::p_stopping_balance()
 {
 #ifdef CHARM_ENZO
   proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_stopping_balance();
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void Main::p_balance()
-{
-#ifdef CHARM_ENZO
-#ifdef TEMP_BALANCE_MANUAL
-  CkPrintf ("%d %p Main Calling CkStartLB()\n",CkMyPe(),this);
-  fflush(stdout);
-
-  //  CkStartLB();
-  CkPrintf ("%d %p Main Called CkStartLB()\n",CkMyPe(),this);
-  fflush(stdout);
-#endif
 #endif
 }
 

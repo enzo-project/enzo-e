@@ -55,7 +55,8 @@ EnzoSolverCg::EnzoSolverCg
       WARNING("EnzoSolverCg",
 	      "assuming solution field is 'potential'");
     }
-    refresh(ir)->add_field (field_descr->field_id("potential"));
+    //    refresh(ir)->add_field (field_descr->field_id("potential"));
+    refresh(ir)->add_all_fields ();
     
     refresh(ir)->add_field (id_);
     refresh(ir)->add_field (ir_);
@@ -69,7 +70,7 @@ EnzoSolverCg::EnzoSolverCg
 
 EnzoSolverCg::~EnzoSolverCg() throw ()
 {
-  if (A_) delete A_;
+  delete A_;
   A_ = NULL;
 }
 

@@ -30,7 +30,7 @@ public: // interface
     refinement_(0),
     max_level_(0),
     num_blocks_(0),
-    block_ptr_(),
+    block_vec_(),
     num_particles_(0), 
     num_zones_total_(0), 
     num_zones_real_(0), 
@@ -125,11 +125,6 @@ public: // interface
     return block_exists_;
   }
 
-  /// Return the number of Blocks
-  size_t num_blocks(int * nbx, 
-		    int * nby = 0,
-		    int * nbz = 0) const throw();
-
   /// Deallocate local Blocks
   void deallocate_blocks() throw();
 
@@ -141,18 +136,24 @@ public: // interface
   void increment_block_count(int count)
   { num_blocks_ += count; }
 
-  /// Add Block to the block_ptr_ mapping
+  /// Add Block to the list of blocks (block_vec_ and block_map_)
   void insert_block (Block * block)
   {
-    if (block_ptr_.find(block) == block_ptr_.end())
-      block_ptr_[block] = true;
+    block_vec_.push_back(block);
   }
   
-  /// Remove Block from the block_ptr_ mapping
-  void delete_block (Block * block)
+  /// Remove Block from the list of blocks (block_vec_) and return
+  /// true iff Block is found in the list
+  bool delete_block (Block * block)
   {
-    if (block_ptr_.find(block) != block_ptr_.end())
-      block_ptr_.erase(block);
+    const int n = block_vec_.size();
+    bool found = false;
+    for (int i=0; i<n; i++) {
+      if (found) block_vec_[i-1] = block_vec_[i];
+      if (block_vec_[i] == block) found=true;
+    }
+    if (found) block_vec_.resize(n-1);
+    return found;
   }
   
   /// Increment (decrement) number of particles
@@ -170,6 +171,9 @@ public: // interface
   /// Return the number of blocks on this process
   size_t num_blocks() const throw()
   {  return num_blocks_;  }
+
+  Block * block (int index_block)
+  { return block_vec_.at(index_block); }
 
   /// Return the number of particles on this process
   int64_t num_particles() const throw()
@@ -195,7 +199,7 @@ public: // interface
 
 
   /// Return the number of root-level Blocks along each rank
-  void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
+  void root_blocks (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
@@ -222,7 +226,7 @@ protected: // attributes
   int num_blocks_;
 
   /// Pointers to Blocks on this process
-  std::map<Block *,bool> block_ptr_;
+  std::vector<Block *> block_vec_;
 
   /// Current number of particles on this process
   int64_t num_particles_;

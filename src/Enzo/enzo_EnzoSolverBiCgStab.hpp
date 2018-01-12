@@ -306,11 +306,11 @@ protected: // attributes
   long double alpha_;
 
   /// scalars used for projections of singular systems
-  long double bs_;
-  long double bc_;
-  long double ys_;
-  long double vs_;
-  long double us_;
+  long double bs_; //
+  long double bc_; //
+  long double ys_; //
+  long double vs_; //
+  long double us_; //
 
 };
 

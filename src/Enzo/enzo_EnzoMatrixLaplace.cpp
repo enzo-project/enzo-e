@@ -56,17 +56,17 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 
     g0 = std::max(1,g0);
 
-    if (rank_ == 1) {
+    double dx = (rank_ >= 1) ? 1.0 / (hx_*hx_) : 0.0;
+    double dy = (rank_ >= 2) ? 1.0 / (hy_*hy_) : 0.0;
+    double dz = (rank_ >= 3) ? 1.0 / (hz_*hz_) : 0.0;
 
-      double dx = 1.0/(hx_*hx_);
+    if (rank_ == 1) {
       for (int ix=g0; ix<mx_-g0; ix++) {
 	const int i = ix;
 	Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) * dx;
       }
 
     } else if (rank_ == 2) {
-      double dx = 1.0 / (hx_*hx_);
-      double dy = 1.0 / (hy_*hy_);
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
 	  const int i = ix + mx_*iy;
@@ -76,9 +76,6 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
       }
 
     } else if (rank_ == 3) {
-      double dx = 1.0 / (hx_*hx_);
-      double dy = 1.0 / (hy_*hy_);
-      double dz = 1.0 / (hz_*hz_);
       for     (int iz=g0; iz<mz_-g0; iz++) {
 	for   (int iy=g0; iy<my_-g0; iy++) {
 	  for (int ix=g0; ix<mx_-g0; ix++) {
@@ -102,9 +99,9 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
     const enzo_float c0 = -30.0;
     const enzo_float c1 = 16.0;
     const enzo_float c2 = -1.0;
-    const enzo_float dx  = 1.0/(12.0*hx_*hx_);
-    const enzo_float dy  = 1.0/(12.0*hy_*hy_);
-    const enzo_float dz  = 1.0/(12.0*hz_*hz_);
+    const enzo_float dx = (rank_ >= 1) ? 1.0/(12.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank_ >= 2) ? 1.0/(12.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank_ >= 3) ? 1.0/(12.0*hz_*hz_) : 0.0;
 
     if (rank_ == 1) {
 
@@ -163,9 +160,9 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
     const enzo_float c1 = 1455.0;
     const enzo_float c2 = -96.0;
     const enzo_float c3 = 1.0;
-    const enzo_float dx  = 1.0/(1080.0*hx_*hx_);
-    const enzo_float dy  = 1.0/(1080.0*hy_*hy_);
-    const enzo_float dz  = 1.0/(1080.0*hz_*hz_);
+    const enzo_float dx = (rank_ >= 1) ? 1.0/(1080.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank_ >= 2) ? 1.0/(1080.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank_ >= 3) ? 1.0/(1080.0*hz_*hz_) : 0.0;
 
     if (rank_ == 1) {
 
@@ -232,9 +229,9 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
 
     // Second-order 7-point discretization
     
-    double dx = 1.0/(hx_*hx_);
-    double dy = 1.0/(hy_*hy_);
-    double dz = 1.0/(hz_*hz_);
+    double dx = (rank_ >= 1) ? 1.0/(hx_*hx_) : 0.0;
+    double dy = (rank_ >= 2) ? 1.0/(hy_*hy_) : 0.0;
+    double dz = (rank_ >= 3) ? 1.0/(hz_*hz_) : 0.0;
     
     if (rank_ == 1) {
       for (int ix=g0; ix<mx_-g0; ix++) {
@@ -265,9 +262,9 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
   } else if (order_ == 4) {
 
     const enzo_float c0 = -30.0;
-    const enzo_float dx  = 1.0/(12.0*hx_*hx_);
-    const enzo_float dy  = 1.0/(12.0*hy_*hy_);
-    const enzo_float dz  = 1.0/(12.0*hz_*hz_);
+    const enzo_float dx = (rank_ >= 1) ? 1.0/(12.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank_ >= 2) ? 1.0/(12.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank_ >= 3) ? 1.0/(12.0*hz_*hz_) : 0.0;
 
     g0 = std::max(2,g0);
 
@@ -279,8 +276,6 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
 	X[i] = c0 * dx;
       }
     } else if (rank_ == 2) {
-      const enzo_float dx  = 1.0/(12.0*hx_*hx_);
-
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
 	  int i = ix + mx_*iy;
@@ -308,9 +303,9 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
     // Sixth-order 19-point discretization
 
     const enzo_float c0 = -2720.0;
-    const enzo_float dx  = 1.0/(1080.0*hx_*hx_);
-    const enzo_float dy  = 1.0/(1080.0*hy_*hy_);
-    const enzo_float dz  = 1.0/(1080.0*hz_*hz_);
+    const enzo_float dx = (rank_ >= 1) ? 1.0/(1080.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank_ >= 2) ? 1.0/(1080.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank_ >= 3) ? 1.0/(1080.0*hz_*hz_) : 0.0;
       
     if (rank_ == 1) {
       

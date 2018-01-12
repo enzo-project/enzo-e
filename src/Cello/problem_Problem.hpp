@@ -136,6 +136,17 @@ public: // interface
   /// Return the restrict object
   Restrict * restrict() const throw()  { return restrict_; }
 
+  //--------------------------------------------------
+  // NEW OUTPUT
+  //--------------------------------------------------
+
+  /// Process the next output object if any, else proceed with simulation
+  void new_output_next(Simulation * simulation) throw();
+
+  //--------------------------------------------------
+  // OLD OUTPUT
+  //--------------------------------------------------
+
   /// reset output index to 0
   void output_reset() throw()
   { index_output_ = -1; }
