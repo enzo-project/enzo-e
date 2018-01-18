@@ -26,7 +26,7 @@
 //======================================================================
 
 void EnzoSolverDiagonal::apply
-( Matrix * A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
 {
   Solver::begin_(block);
 
@@ -53,7 +53,7 @@ void EnzoSolverDiagonal::apply
 //======================================================================
 
 void EnzoSolverDiagonal::compute_
-( Matrix * A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
 //     X = B / diag(A)
 {
   TRACE_SOLVER("compute_() ENTER");

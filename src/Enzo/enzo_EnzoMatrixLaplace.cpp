@@ -35,7 +35,7 @@ void EnzoMatrixLaplace::diagonal (int i_x, Block * block, int g0) throw()
   Field field = block->data()->field();
 
   field.dimensions (i_x,&mx_,&my_,&mz_);
-  block->cell_width     (&hx_,&hy_,&hz_);
+  block->cell_width    (&hx_,&hy_,&hz_);
 
   rank_ = block->rank();
 

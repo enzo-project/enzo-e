@@ -61,9 +61,6 @@ public: // interface
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoSolverBiCgStab);
   
-  /// destructor
-  ~EnzoSolverBiCgStab() throw();
-  
   /// Charm++ PUP::able migration constructor
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
@@ -94,7 +91,7 @@ public: // interface
 
     Solver::pup(p);
 
-    p | A_;
+    //    p | A_;
     p | index_precon_;
     
     p | rank_;
@@ -149,7 +146,8 @@ public: // interface
 
   
   /// Main solver entry routine
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+  virtual void apply (std::shared_ptr<Matrix> A, int ix, int ib,
+		      Block * block) throw();
 
   /// Name to call the solver within Enzo-P
   virtual std::string name() const
@@ -246,7 +244,7 @@ protected: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// Matrix
-  Matrix* A_;
+  std::shared_ptr<Matrix> A_;
 
   /// Preconditioner (-1 if none)
   int index_precon_;

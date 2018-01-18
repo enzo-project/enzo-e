@@ -153,8 +153,14 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
       int if3[3],ic3[3] = {0,0,0};
       it_face.face(if3);
 
-      refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
-      ++count;
+      // count all faces if not a leaf, else don't count if face level
+      // is less than this block's level
+      
+      if ( ! is_leaf() || face_level(if3) >= level()) {
+	
+	refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
+	++count;
+      }
 
     }
   }

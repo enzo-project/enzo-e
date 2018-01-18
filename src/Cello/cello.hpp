@@ -37,6 +37,8 @@
 
 #include "pup_stl.h"
 
+// #define DEBUG_CHECK
+
 //----------------------------------------------------------------------
 // TEMPLATE FUNCTIONS
 //----------------------------------------------------------------------
@@ -227,7 +229,14 @@ namespace cello {
     if (std::fpclassify(value) == FP_INFINITE) {
       printf ("WARNING: %s:%d %s inf\n", file,line,message);	
     }
-    //    CkPrintf ("DEBUG_CHECK %s = %llg\n",message,value);
+#ifdef DEBUG_CHECK    
+    if (sizeof(value)==sizeof(float))
+      CkPrintf ("DEBUG_CHECK %s = %25.15g\n",message,value);
+    if (sizeof(value)==sizeof(double))
+      CkPrintf ("DEBUG_CHECK %s = %25.15lg\n",message,value);
+    if (sizeof(value)==sizeof(long double))
+      CkPrintf ("DEBUG_CHECK %s = %25.15Lg\n",message,value);
+#endif    
   }
 
   void backtrace(const char * msg);

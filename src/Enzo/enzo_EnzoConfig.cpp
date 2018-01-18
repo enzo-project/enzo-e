@@ -120,6 +120,7 @@ EnzoConfig::EnzoConfig() throw ()
   /// EnzoSolverMg0
   solver_pre_smooth(),
   solver_post_smooth(),
+  solver_last_smooth(),
   solver_coarse_solve(),
   solver_weight(),
   /// EnzoSolver<Krylov>
@@ -265,6 +266,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | solver_local;
   p | solver_pre_smooth;
   p | solver_post_smooth;
+  p | solver_last_smooth;
   p | solver_coarse_solve;
   p | solver_weight;
 
@@ -608,6 +610,7 @@ void EnzoConfig::read(Parameters * p) throw()
   solver_pre_smooth.  resize(num_solvers);
   solver_coarse_solve.resize(num_solvers);
   solver_post_smooth. resize(num_solvers);
+  solver_last_smooth. resize(num_solvers);
   solver_weight.      resize(num_solvers);
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
@@ -643,6 +646,13 @@ void EnzoConfig::read(Parameters * p) throw()
       solver_post_smooth[index_solver] = solver_index[solver];
     } else {
       solver_post_smooth[index_solver] = -1;
+    }
+
+    solver = p->value_string (solver_name + ":last_smooth","unknown");
+    if (solver_index.find(solver) != solver_index.end()) {
+      solver_last_smooth[index_solver] = solver_index[solver];
+    } else {
+      solver_last_smooth[index_solver] = -1;
     }
 
     solver_weight[index_solver] =

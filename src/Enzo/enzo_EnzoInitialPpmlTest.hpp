@@ -39,7 +39,7 @@ public: // interface
     // NOTE: update this member function whenever class attributes change
   }
 
-  ~EnzoInitialPpmlTest() throw()
+  virtual ~EnzoInitialPpmlTest() throw()
   {  } 
 
 public: // virtual functions

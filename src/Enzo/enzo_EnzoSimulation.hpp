@@ -35,7 +35,7 @@ public: // functions
   };
 
   /// Destructor
-  ~EnzoSimulation();
+  virtual ~EnzoSimulation();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

@@ -392,14 +392,10 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_ENTRY
-// #define DEBUG_NEGATE_Y
-//#define DEBUG_NEGATE_V
-// #define DEBUG_NEGATE_U
-//#define DEBUG_COPY_TEMP
-// #define DEBUG_BICGSTAB
+// #define DEBUG_COPY_TEMP
 
-// #define DEBUG_NO_SHIFT
+// #define DEBUG_ENTRY
+// #define DEBUG_BICGSTAB
 
 #ifdef DEBUG_COPY_TEMP
 #   define COPY_TEMP(I_FIELD,FIELD_TMP)				\
@@ -490,16 +486,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 
 //----------------------------------------------------------------------
 
-EnzoSolverBiCgStab::~EnzoSolverBiCgStab() throw()
-{
-  delete A_;
-  A_ = NULL;
-}
-
-//----------------------------------------------------------------------
-
 void EnzoSolverBiCgStab::apply
-( Matrix * A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
 {
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p bicgstab DEBUG_ENTRY begin\n",
@@ -667,13 +655,13 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
       R[i] = R0[i] = P[i] = B[i];
     }
 
-    /// Compute local contributions to beta_n_ = DOT(R, R)
+    /// Compute local contributions to beta_n_ = DOT(R, R0)
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
     for (int iz=0; iz<nz_; iz++) {
       for (int iy=0; iy<ny_; iy++) {
 	for (int ix=0; ix<nx_; ix++) {
 	  int i = i0 + ix + mx_*(iy + my_*iz);
-	  reduce += R[i]*R[i];
+	  reduce += R[i]*R0[i];
 	}
       }
     }
@@ -716,7 +704,7 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw() {
   TRACE_BICGSTAB("loop_0()",enzo_block);
 
   /// verify legal floating-point value for preceding reduction result
-  cello::check(beta_n_,"beta_n_",__FILE__,__LINE__);
+  cello::check(beta_n_,"BCG_beta_n_",__FILE__,__LINE__);
 
   /// initialize/update current error, store error statistics
   if (iter_ == 0) {
@@ -800,7 +788,6 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
 
     loop_25(enzo_block);
   }
-  COPY_TEMP(iy_,"Y1_temp");
 
 }
 
@@ -871,29 +858,24 @@ void EnzoBlock::p_solver_bicgstab_loop_3() {
 
 void EnzoSolverBiCgStab::loop_4(EnzoBlock* enzo_block) throw() {
 
-
   TRACE_BICGSTAB("loop_4()",enzo_block);
+
   /// access field container on this block
-  Data* data = enzo_block->data();
-  Field field = data->field();
+
+  Field field = enzo_block->data()->field();
+
+#ifdef DEBUG_COPY_TEMP
+  {
+    enzo_float* Y  = (enzo_float*) field.values(iy_);
+    COPY_TEMP(iy_,"Y1_temp");
+  }
+#endif  
 
   /// V = MATVEC(A,Y)
   
   if (is_active_(enzo_block)) {
     /// apply matrix to local block
-#ifdef DEBUG_NEGATE_Y
-    if (index_precon_>=0) {
-      enzo_float* Y  = (enzo_float*) field.values(iy_);
-      for (int i=0; i<mx_*my_*mz_; i++) Y[i] = -Y[i];
-    }
-#endif    
     A_->matvec(iv_, iy_, enzo_block);     
-#ifdef DEBUG_NEGATE_V
-    if (index_precon_>=0) {
-      enzo_float* V  = (enzo_float*) field.values(iv_);
-      for (int i=0; i<mx_*my_*mz_; i++) V[i] = -V[i];
-    }
-#endif    
     COPY_TEMP(iv_,"V_temp");
   }
 
@@ -986,12 +968,10 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* enzo_block) throw() {
     enzo_float* V = (enzo_float*) field.values(iv_);
     enzo_float yshift = -ys_ / bc_;
     enzo_float vshift = -vs_ / bc_;
-#ifndef DEBUG_NO_SHIFT    
     for (int i=0; i<m; i++) {
       Y[i] += yshift;
       V[i] += vshift;
     }
-#endif    
 #ifdef DEBUG_BICGSTAB    
     CkPrintf ("%d DEBUG_BCG ys_=%25.15Lg\n",__LINE__,ys_);
     CkPrintf ("%d DEBUG_BCG vs_=%25.15Lg\n",__LINE__,vs_);
@@ -1151,21 +1131,8 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* enzo_block) throw() {
 
   if (is_active_(enzo_block)) {
 
-#ifdef DEBUG_NEGATE_Y
-    //    if (index_precon_>=0) {
-    //      enzo_float* Y  = (enzo_float*) field.values(iy_);
-    //      for (int i=0; i<mx_*my_*mz_; i++) Y[i] = -Y[i];
-    //    }
-#endif    
-    
-    COPY_TEMP(iy_,"Y2_temp");
     A_->matvec(iu_, iy_, enzo_block);     /// apply matrix to local block
-#ifdef DEBUG_NEGATE_U
-    if (index_precon_>=0) {
-      enzo_float* U  = (enzo_float*) field.values(iu_);
-      for (int i=0; i<mx_*my_*mz_; i++) U[i] = -U[i];
-    }
-#endif    
+
     COPY_TEMP(iu_,"U_temp");
   }
 
@@ -1248,8 +1215,8 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw() {
 
   TRACE_BICGSTAB("loop_12()",enzo_block);
   /// verify legal floating-point values for preceding reduction results
-  cello::check(omega_d_,"omega_d_",__FILE__,__LINE__);
-  cello::check(omega_n_,"omega_n_",__FILE__,__LINE__);
+  cello::check(omega_d_,"BCG_omega_d_",__FILE__,__LINE__);
+  cello::check(omega_n_,"BCG_omega_n_",__FILE__,__LINE__);
 
 #ifdef DEBUG_BICGSTAB    
   CkPrintf ("%d DEBUG_BCG us_=%25.15Lg\n",__LINE__,us_);
@@ -1274,15 +1241,12 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw() {
       enzo_float* U = (enzo_float*) field.values(iu_);
       enzo_float yshift = -ys_ / bc_;
       enzo_float ushift = -us_ / bc_;
-#ifndef DEBUG_NO_SHIFT    
       for (int i=0; i<m; i++) {
 	Y[i] += yshift;
 	U[i] += ushift;
       }
-#endif      
     }
   }
-
 
   /// fix omega_d_ if necessary (for division)
   if (omega_d_ == 0.0)  omega_d_ = 1.0;
@@ -1310,10 +1274,21 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw() {
     /// update: X = omega_*Y + X
     /// update: R = -omega_*U + Q
 
+    COPY_TEMP(iy_,"Y2_temp");
+    
+    COPY_TEMP(ix_,"X1_temp");
     for (int i=0; i<m; i++) {
       X[i] = X[i] + omega_*Y[i];
       R[i] = Q[i] - omega_*U[i];
     }
+#ifdef DEBUG_BICGSTAB
+    CkPrintf ("DEBUG_MG0 x1 = %g %g\n",x1min,x1max);
+    CkPrintf ("DEBUG_MG0 y = %g %g\n",ymin,ymax);
+    CkPrintf ("DEBUG_MG0 u = %g %g\n",umin,umax);
+    CkPrintf ("DEBUG_MG0 r = %g %g\n",rmin,rmax);
+    CkPrintf ("DEBUG_MG0 x2 = %g %g\n",x2min,x2max);
+    CkPrintf ("DEBUG_MG0 omega = %Lg\n",omega_);
+#endif    
     COPY_TEMP(ix_,"X2_temp");
     COPY_TEMP(ir_,"R_temp");
   }
@@ -1383,8 +1358,8 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw() {
 #endif
     TRACE_BICGSTAB("loop_14()",enzo_block);
   /// verify legal floating-point values for preceding reduction results
-  cello::check(rr_,    "rr_",    __FILE__,__LINE__);
-  cello::check(beta_n_,"beta_n_",__FILE__,__LINE__);
+  cello::check(rr_,    "BCG_rr_",    __FILE__,__LINE__);
+  cello::check(beta_n_,"BCG_beta_n_",__FILE__,__LINE__);
 
   /// access field container on this block
   Data* data = enzo_block->data();
@@ -1416,10 +1391,11 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw() {
     /// update: P = -beta_*omega_*V + P
 
     int m = mx_*my_*mz_;
+    COPY_TEMP(ip_,"P0_temp");
     for (int i=0; i<m; i++) {
       P[i] = R[i] + beta_*(P[i] - omega_*V[i]);
     }
-    COPY_TEMP(ip_,"P_temp");
+    COPY_TEMP(ip_,"P1_temp");
   }
 
   

@@ -42,7 +42,7 @@ public: // interface
     TRACEPUP;
     Solver::pup(p);
 
-    p | A_;
+    //    p | A_;
     p | ix_;
     p | ib_;
     p | ir_;
@@ -54,7 +54,8 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
+		       Block * block) throw();
 
   /// Return the name of this solver
   virtual std::string name () const
@@ -90,7 +91,7 @@ protected: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// Matrix A for smoothing A*X = B
-  Matrix * A_;
+  std::shared_ptr<Matrix> A_;
   
   /// Field index for vector X
   int ix_;

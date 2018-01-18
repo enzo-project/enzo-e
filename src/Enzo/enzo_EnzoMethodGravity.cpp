@@ -87,8 +87,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   Field field = block->data()->field();
 
-  Matrix * A = new EnzoMatrixLaplace(order_);
-
   /// access problem-defining fields for eventual RHS and solution
   const int ib = field.field_id ("B");
 #ifdef DEBUG_COPY_B  
@@ -239,6 +237,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   const int ix = field.field_id ("potential");
 
+  std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
   solver->apply (A, ix, ib, block);
 
 }

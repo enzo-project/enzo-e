@@ -316,6 +316,7 @@ public: /// entry methods
   void p_solver_mg0_pre_smooth();
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
+  void p_solver_mg0_last_smooth();
   void p_solver_mg0_barrier(CkReductionMsg* msg);  
   void p_solver_mg0_shift_b(CkReductionMsg* msg);  
   void p_solver_mg0_prolong_recv(FieldMsg * msg);

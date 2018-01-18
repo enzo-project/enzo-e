@@ -26,7 +26,7 @@ public: // interface
   EnzoConfig() throw();
 
   /// Destructor
-  ~EnzoConfig() throw();
+  virtual ~EnzoConfig() throw();
 
   /// Copy constructor
   EnzoConfig(const EnzoConfig & config) throw();
@@ -137,6 +137,7 @@ public: // interface
       // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
+      solver_last_smooth(),
       solver_coarse_solve(),
       solver_weight(),
       // EnzoSolver<Krylov>
@@ -308,6 +309,10 @@ public: // attributes
   /// Solver index for multigrid post-smoother
 
   std::vector<int>           solver_post_smooth;
+
+  /// Solver index for multigrid "last"-smoother
+
+  std::vector<int>           solver_last_smooth;
 
   /// Solver index for multigrid coarse solver
   

@@ -31,6 +31,7 @@ public: // interface
    int index_smooth_pre,
    int index_solve_coarse,
    int index_smooth_post,
+   int index_smooth_last,
    Restrict * restrict,
    Prolong * prolong,
    int min_level,
@@ -48,6 +49,7 @@ public: // interface
        index_smooth_pre_(-1),
        index_solve_coarse_(-1),
        index_smooth_post_(-1),
+       index_smooth_last_(-1),
        restrict_(NULL),
        prolong_(NULL),
        rank_(0),
@@ -61,7 +63,7 @@ public: // interface
   {}
 
   /// Destructor
-  ~EnzoSolverMg0 () throw();
+  virtual ~EnzoSolverMg0 () throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -73,10 +75,11 @@ public: // interface
 
     Solver::pup(p);
 
-    p | A_;
+    //    p | A_;
     p | index_smooth_pre_;
     p | index_solve_coarse_;
     p | index_smooth_post_;
+    p | index_smooth_last_;
     p | restrict_;
     p | prolong_;
     p | rank_;
@@ -107,7 +110,8 @@ public: // interface
   }
 
   /// Solve the linear system 
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
+		       Block * block) throw();
 
   virtual std::string name () const
   { return "mg0"; }
@@ -157,6 +161,7 @@ public: // interface
     CkPrintf (" index_smooth_pre_ = %d\n",index_smooth_pre_);
     CkPrintf (" index_solve_coarse_ = %d\n",index_solve_coarse_);
     CkPrintf (" index_smooth_post_ = %d\n",index_smooth_post_);
+    CkPrintf (" index_smooth_last_ = %d\n",index_smooth_last_);
     CkPrintf (" restrict_ = %p\n",restrict_);
     CkPrintf (" prolong_ = %p\n",prolong_);
     CkPrintf (" rank_ = %d\n",rank_);
@@ -175,6 +180,10 @@ public: // interface
     CkPrintf (" rr_local_ = %g\n",rr_local_);
     CkPrintf (" rr0_ = %g\n",rr0_);
   }
+
+  /// Exit the solver
+  void end(Block * block);
+
 protected: // methods
 
   void enter_solver_(EnzoBlock * enzo_block) throw();
@@ -201,14 +210,11 @@ protected: // methods
     field.deallocate_temporary(ir_);
     field.deallocate_temporary(ic_);
   }
-
-  /// Exit the solver
-  void end_(Block * block);
   
 protected: // attributes
 
   /// Matrix
-  Matrix * A_;
+  std::shared_ptr<Matrix> A_;
 
   /// Solver for pre-smoother
   int index_smooth_pre_;
@@ -218,6 +224,9 @@ protected: // attributes
 
   /// Solver for post smoother
   int index_smooth_post_;
+
+  /// Solver for final smoothing of solution
+  int index_smooth_last_;
 
   /// Restriction
   Restrict * restrict_;

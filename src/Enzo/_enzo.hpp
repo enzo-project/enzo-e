@@ -78,6 +78,7 @@ enum enzo_sync_id {
   enzo_sync_id_solver_mg0_coarse,
   enzo_sync_id_solver_mg0_pre,
   enzo_sync_id_solver_mg0_post,
+  enzo_sync_id_solver_mg0_last,
   enzo_sync_id_method_gravity_continue,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,

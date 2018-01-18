@@ -82,7 +82,7 @@ public: // interface
     p | rotate_;
   }
 
-  ~EnzoInitialSoup() throw();
+  virtual ~EnzoInitialSoup() throw();
 
 public: // virtual functions
 

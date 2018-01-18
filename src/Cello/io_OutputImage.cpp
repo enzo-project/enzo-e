@@ -675,9 +675,10 @@ double OutputImage::mesh_color_(int level,int age) const
 bool OutputImage::is_active_ (const Block * block) const
 {
   const int level = block->level();
-  if (leaf_only_ && !block->is_leaf()) {
+
+  if (leaf_only_ && ! block->is_leaf()) {
     return false;
-  } else if (!((min_level_ <= level) && (level <= max_level_))) {
+  } else if (! ((min_level_ <= level) && (level <= max_level_))) {
     return false;
   } else {
     return true;

@@ -8,7 +8,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-//#define DEBUG_COPY
+// #define DEBUG_COPY
+
 // #define DEBUG_TRACE
 
 #ifdef DEBUG_TRACE
@@ -40,7 +41,7 @@ EnzoSolverJacobi::EnzoSolverJacobi
 //----------------------------------------------------------------------
 
 void EnzoSolverJacobi::apply
-( Matrix * A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
 {
   TRACE_JACOBI(block,"apply()");
   

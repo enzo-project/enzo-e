@@ -305,6 +305,7 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_pre_smooth[index_solver],
        enzo_config->solver_coarse_solve[index_solver],
        enzo_config->solver_post_smooth[index_solver],
+       enzo_config->solver_last_smooth[index_solver],
        restrict,  prolong,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver]);

@@ -41,7 +41,8 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
+		       Block * block) throw();
   
   /// Return the name of this solver
   virtual std::string name () const
@@ -53,7 +54,7 @@ public: // virtual functions
 
 protected: // methods
 
-  void compute_ (Matrix * A, int ix, int ib, Block * block) throw();
+  void compute_ (std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw();
 
 protected: // attributes
 

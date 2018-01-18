@@ -13,7 +13,7 @@
 #define ENZO_INDEX_UNDEFINED -1
 
 #define MAX_DIMENSION                3
-#define MAX_NUMBER_OF_BARYON_FIELDS 40
+#define MAX_NUMBER_OF_BARYON_FIELDS 50
 
 #define MAX_COLOR                20
 #define COLOR_FLOOR              1.d-35

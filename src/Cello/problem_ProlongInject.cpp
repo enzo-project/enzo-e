@@ -100,7 +100,7 @@ int ProlongInject::apply_
     const int ny_f = n3_f[1];
     const int mx_c = nd3_c[0];
     const int mx_f = nd3_f[0];
-    
+
     for (int iy_f = 0; iy_f<ny_f; iy_f++) {
 
       int iy_c = iy_f >> 1;
@@ -113,6 +113,7 @@ int ProlongInject::apply_
 	int i_f = (ix0_f+ix_f) + mx_f * ( (iy0_f+iy_f) );
 
 	values_f[i_f] = values_c[i_c];
+
       }
     }
 

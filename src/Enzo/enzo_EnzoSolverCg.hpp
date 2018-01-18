@@ -74,9 +74,6 @@ public: // interface
   /// Assignment operator
   EnzoSolverCg & operator= (const EnzoSolverCg & EnzoSolverCg) throw();
 
-  /// Destructor
-  ~EnzoSolverCg() throw();
-
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
@@ -85,7 +82,8 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
+		       Block * block) throw();
   
   /// Return the name of this solver
   virtual std::string name () const
@@ -180,7 +178,7 @@ protected: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// Matrix
-  Matrix * A_;
+  std::shared_ptr<Matrix> A_;
 
   /// Solution and right-hand-side fields
   int ix_;

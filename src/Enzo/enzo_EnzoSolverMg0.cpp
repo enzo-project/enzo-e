@@ -113,24 +113,20 @@
 #include "enzo.hpp"
 #include "enzo.decl.h"
 
-// #define DEBUG_NEGATE_X
 // #define DEBUG_COPY
+
+// #define DEBUG_NEGATE_X
 // #define DEBUG_ENTRY
 // #define DEBUG_SOLVER_MG0
-//#define DEBUG_TRACE_LEVEL
+// #define DEBUG_TRACE_LEVEL
 // #define DEBUG_FIELD_MESSAGE
 // #define DEBUG_SOLVER_INDEX
 
 #ifdef DEBUG_TRACE_LEVEL
 #   define TRACE_LEVEL(MSG,BLOCK)					\
   {									\
-    int ia3[3];								\
-    int it3[3];								\
-    BLOCK->index().array(ia3,ia3+1,ia3+2);				\
-    BLOCK->index().tree(it3,it3+1,it3+2);				\
-    if (ia3[0]+ia3[1]+ia3[2]+it3[0]+it3[1]+it3[2]==0) {			\
-      CkPrintf ("DEBUG_TRACE_LEVEL %d %s\n",BLOCK->level(),MSG);	\
-    }									\
+      CkPrintf ("%s DEBUG_TRACE_LEVEL %d %s\n",BLOCK->name().c_str(),	\
+		BLOCK->level(),MSG);					\
   }
 #else
 #   define TRACE_LEVEL(MSG,BLOCK) /*  this space for rent */
@@ -219,6 +215,7 @@ EnzoSolverMg0::EnzoSolverMg0
  int index_smooth_pre,
  int index_solve_coarse,
  int index_smooth_post,
+ int index_smooth_last,
  Restrict * restrict,
  Prolong * prolong,
  int min_level,
@@ -228,6 +225,7 @@ EnzoSolverMg0::EnzoSolverMg0
     index_smooth_pre_(index_smooth_pre),
     index_solve_coarse_(index_solve_coarse),
     index_smooth_post_(index_smooth_post),
+    index_smooth_last_(index_smooth_last),
     restrict_(restrict),
     prolong_(prolong),
     rank_(rank),
@@ -239,7 +237,6 @@ EnzoSolverMg0::EnzoSolverMg0
     gx_(0),gy_(0),gz_(0),
     bs_(0), bc_(0),
     rr_(0), rr_local_(0), rr0_(0)
-    // [*]
 {
   // Initialize temporary fields
   
@@ -259,7 +256,6 @@ EnzoSolverMg0::EnzoSolverMg0
 //----------------------------------------------------------------------
 
 EnzoSolverMg0::~EnzoSolverMg0 () throw()
-// [*]
 {
   delete prolong_;
   delete restrict_;
@@ -272,7 +268,7 @@ EnzoSolverMg0::~EnzoSolverMg0 () throw()
 //----------------------------------------------------------------------
 
 void EnzoSolverMg0::apply
-( Matrix * A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
 {
 
   TRACE_MG(block,"EnzoSolverMg0::apply()");
@@ -329,16 +325,9 @@ void EnzoSolverMg0::enter_solver_ (EnzoBlock * enzo_block) throw()
   // R = B ( residual with X = 0 )
   // C = 0
 
-  for (int iz=0; iz<mz_; iz++) {
-    for (int iy=0; iy<my_; iy++) {
-      for (int ix=0; ix<mx_; ix++) {
-	int i = ix + mx_*(iy + my_*iz);
-	X[i] = 0.0;
-	R[i] = 0.0;
-	C[i] = 0.0;
-      }
-    }
-  }
+  std::fill_n(X,mx_*my_*mz_,0.0);
+  std::fill_n(R,mx_*my_*mz_,0.0);
+  std::fill_n(C,mx_*my_*mz_,0.0);
 
   if (A_->is_singular()) {
 
@@ -699,9 +688,6 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 	for (int ix=gx_; ix<nx_+gx_; ix++) {
 	  int i = ix + mx_*(iy + my_*iz);
 	  rr_local_ += R[i]*R[i];
-#ifdef DEBUG_SOLVER_MG0
-	  residual[i]=R[i];
-#endif	  
 	}
       }
     }
@@ -858,6 +844,30 @@ void EnzoSolverMg0::solve_coarse(EnzoBlock * enzo_block) throw()
 ///      solve A X = B
 ///      end_cycle()
 {
+
+#ifdef DEBUG_COPY
+  Field field = enzo_block->data()->field();
+  enzo_float * B_copy = (enzo_float*) field.values("BMG");
+  enzo_float * B = (enzo_float*) field.values(ib_);
+  double bsum=0.0;
+  for (int i=0; i<mx_*my_*mz_; i++) {
+    B_copy[i]=B[i];
+    bsum += std::abs(B[i]);
+  }
+  CkPrintf ("DEBUG_COPY bsum = %g\n",bsum);
+#endif
+  
+#ifdef DEBUG_COPY
+  enzo_float * X_copy = (enzo_float*) field.values("XMG");
+  enzo_float * X = (enzo_float*) field.values(ix_);
+  double xsum=0.0;
+  for (int i=0; i<mx_*my_*mz_; i++) {
+    X_copy[i]=X[i];
+    xsum += std::abs(X[i]);
+  }
+  CkPrintf ("DEBUG_COPY xsum = %g\n",xsum);
+#endif
+  
   TRACE_LEVEL("EnzoSolverMg0::solve_coarse",enzo_block);
   TRACE_MG(enzo_block,"EnzoSolverMg0::solver_coarse()");
  
@@ -1024,8 +1034,7 @@ void EnzoSolverMg0::prolong_recv
   TRACE_LEVEL("EnzoSolverMg0::prolong_recv",enzo_block);
   TRACE_MG (enzo_block,"EnzoSolverMg0::prolong_recv()");
   
-  Data * data = enzo_block->data();
-  Field field = data->field();
+  Field field = enzo_block->data()->field();
 
   enzo_float * X = (enzo_float*) field.values(ix_);
   enzo_float * C = (enzo_float*) field.values(ic_);
@@ -1149,13 +1158,54 @@ void EnzoSolverMg0::end_cycle(EnzoBlock * enzo_block) throw()
 
   if (is_converged || is_diverged) {
 
-    end_(enzo_block);
+    // Do an optional final smoothing on the full mesh For use in Dan
+    // Reynolds HG algorithm in which Mg0 with no pre- or
+    // post-smoothings is used as a preconditioner to BiCgStab
+    
+    if (index_smooth_last_ >= 0 && enzo_block->is_leaf()) {
+
+      Simulation * simulation = proxy_simulation.ckLocalBranch();
+      Solver * smooth_last = simulation->problem()->solver(index_smooth_last_);
+      smooth_last->set_sync_id (enzo_sync_id_solver_mg0_last);
+      smooth_last->set_callback(CkIndex_EnzoBlock::p_solver_mg0_last_smooth());
+  
+      smooth_last->apply(A_,ix_,ib_,enzo_block);
+
+    } else {
+
+      end (enzo_block);
+    }
 
   } else if (enzo_block->is_leaf() || (enzo_block->level() == max_level_)) {
 
     begin_cycle_ (enzo_block);
 
   }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_solver_mg0_last_smooth()
+{
+  performance_start_(perf_compute,__FILE__,__LINE__);
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY enter p_solver_mg0_last_smooth\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
+  TRACE_MG (this,"EnzoBlock::p_solver_mg0_last_smooth()");
+  
+  EnzoSolverMg0 * solver = 
+    static_cast<EnzoSolverMg0*> (this->solver());
+
+  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
+
+  solver->end(enzo_block);
+  
+#ifdef DEBUG_ENTRY
+    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_last_smooth\n",
+	      CkMyPe(),name().c_str(),this);
+#endif
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 
@@ -1178,8 +1228,9 @@ bool EnzoSolverMg0::is_converged_(EnzoBlock * enzo_block) const
 
 //----------------------------------------------------------------------
 
-void EnzoSolverMg0::end_(Block * block)
+void EnzoSolverMg0::end(Block * block)
 {
+  TRACE_MG(block,"EnzoSolverMg0::end");
     
   Field field = block->data()->field();
   

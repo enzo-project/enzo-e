@@ -35,7 +35,7 @@ public: // interface
   {  }
 
   /// Destructor
-  ~EnzoInitialMusic() throw()
+  virtual ~EnzoInitialMusic() throw()
   { }
 
   /// CHARM++ Pack / Unpack function
