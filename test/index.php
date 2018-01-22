@@ -739,6 +739,8 @@ printf ("<tr><td class=center></td><td class=center colspan=5><em><a href=\"#cel
 //----------------------------------------------------------------------
 
 
+test_summary("Colormap",array("Colormap"),
+	     array("test_Colormap"),'test'); 
 test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
 	     array("test_FileHdf5","test_FileIfrit"),'test'); 
 test_summary("Error",array(    "Error"),
@@ -779,6 +781,8 @@ test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer"),'test'); 
 test_summary("Problem",array("Mask","Refresh","Value"),
 	     array("test_Mask","test_Refresh","test_Value"),'test'); 
+test_summary("Prolong",array("prolong_linear"),
+	     array("test_ProlongLinear"),'test'); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule"),'test'); 
 test_summary("Type",array("Type"),
@@ -787,8 +791,6 @@ test_summary("Units",
 	     array("EnzoUnits"),
 	     array("test_EnzoUnits"),'test');
 
-test_summary("Colormap",array("Colormap"),
-	     array("test_Colormap"),'test'); 
 
 printf ("</tr></table></br>\n");
 
@@ -1505,6 +1507,14 @@ end_hidden("refresh");
 begin_hidden("value", "Value");
 tests("Cello","test_Value",   "test_Value","","");
 end_hidden("value");
+
+//----------------------------------------------------------------------
+
+test_group("Prolong");
+
+begin_hidden("prolong", "ProlongLinear");
+tests("Cello","test_ProlongLinear",  "test_prolong_linear","ProlongLinear","");
+end_hidden("Prolong");
 
 //----------------------------------------------------------------------
 

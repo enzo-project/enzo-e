@@ -31,20 +31,26 @@ void Block::new_output_begin_ ()
   simulation() -> new_output_start();
 }
 
+//----------------------------------------------------------------------
+
 void Block::new_output_write_block()
 {
   TRACE_OUTPUT("Block::new_output_write_block_()");
 }
 
+//----------------------------------------------------------------------
+
 void Simulation::new_output_start()
 {
   TRACE_OUTPUT("Simulation::new_output_start()");
-  if (sync_output_begin_.next()) {
+  if (sync_new_output_start_.next()) {
     TRACE_OUTPUT("Simulation::new_output_start() continuing\n");
     problem()->output_reset();
     problem()->new_output_next(this);
   }
 }
+
+//----------------------------------------------------------------------
 
 void Problem::new_output_next(Simulation * simulation) throw()
 {
@@ -63,20 +69,35 @@ void Problem::new_output_next(Simulation * simulation) throw()
   } while (output && ! output->is_scheduled(cycle, time));
 
   // assert (! output) || ( output->is_scheduled() )
-  
+
+  // print blocks on this process to check block_vec_ array
+
+  Hierarchy * hierarchy = simulation->hierarchy();
+  for (int i=0; i<hierarchy->num_blocks(); i++) {
+    CkPrintf ("%d Block %d = %s\n",CkMyPe(),i,
+	      hierarchy->block(i)->name().c_str());
+  }
   if (output != NULL) {
 
+    if (output->is_writer()) {
+      TRACE_OUTPUT("Problem::new_output_next: is_writer==true");
+    } else {
+      TRACE_OUTPUT("Problem::new_output_next: is_writer==false: barrier");
+    }
+
+    
     // open file if writer
-    //   output->init();
-    //  output->open();
-    //  output->write_simulation(this);
-    //  output->next();
+    output->init();
+    output->open();
+    output->write_simulation(simulation);
+    output->next();
 
 
   } else {
 
     // ...otherwise exit output phase
 
+    TRACE_OUTPUT("Problem::new_output_next(): calling output_exit()");
     simulation->output_exit();
 
   }

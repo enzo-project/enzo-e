@@ -259,6 +259,8 @@ test_class_size   = env.Program (['test_class_size.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_index        = env.Program (['test_Index.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
+test_prolong_linear = env.Program (['test_ProlongLinear.cpp',objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
 test_schedule     = env.Program (['test_Schedule.cpp', objs_io],
                                  LIBS=[libs_io,    libs_test]) 
 test_refresh      = env.Program (['test_Refresh.cpp', objs_mesh],
@@ -318,7 +320,7 @@ binaries_data = [test_field_data,
 binaries_problem = [test_mask,test_value,test_refresh]
 binaries_io    = [test_colormap]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_data,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_schedule,test_it_face,test_it_child]
+binaries_mesh = [ test_data,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_prolong_linear,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]
 
 objs_parallel.append(["main.cpp"])
