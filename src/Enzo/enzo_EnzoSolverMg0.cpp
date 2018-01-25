@@ -915,7 +915,7 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
     // <COMMON CODE> in restrict_send_() and prolong_send_()
 
     int if3[3] = {0,0,0};
-    bool lg3[3] = {false,false,false};
+    bool lg3[3] = {true,true,true};
     Refresh * refresh = new Refresh;
     refresh->add_field(ix_);
     
@@ -1012,7 +1012,7 @@ void EnzoSolverMg0::prolong_recv
   DEBUG_FIELD_MSG(enzo_block,"prolong_recv");
     
   int if3[3] = {0,0,0};
-  bool lg3[3] = {false,false,false};
+  bool lg3[3] = {true,true,true};
   Refresh * refresh = new Refresh;
   refresh->add_field(ic_);
 
