@@ -40,6 +40,11 @@ public: // interface
   /// Copy constructor
   MsgRefine(const MsgRefine & data_msg) throw()
   {
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine(MsgRefine)\n",
+	    __FILE__,__LINE__);
+  fflush(stdout);
+#endif  
     ++counter[cello::index_static()]; 
   };
 

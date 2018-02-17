@@ -9,32 +9,29 @@ void register_reduce_performance(void)
 
 CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 {
-  if (n > 0) {
+  if (n <= 0) return NULL;
 
-    long long length = ((long long*) (msgs[0]->getData()))[0];
+  long long length = ((long long*) (msgs[0]->getData()))[0];
 
-    long long * accum = new long long [length];
-    for (int i=0; i<length; i++) accum[i] = 0.0;
+  long long * accum = new long long [length];
+  for (int i=0; i<length; i++) accum[i] = 0.0;
 
-    // save length
-    accum [0] = length;
+  // save length
+  accum [0] = length;
 
-    // sum remaining values
-    for (int i=0; i<n; i++) {
-      ASSERT2("r_reduce_performance()",
-	      "CkReductionMsg actual size %d is different from expected %d",
-	      msgs[i]->getSize(),length*sizeof(long long),
-	      (msgs[i]->getSize() == length*sizeof(long long)));
+  // sum remaining values
+  for (int i=0; i<n; i++) {
+    ASSERT2("r_reduce_performance()",
+	    "CkReductionMsg actual size %d is different from expected %d",
+	    msgs[i]->getSize(),length*sizeof(long long),
+	    (msgs[i]->getSize() == length*sizeof(long long)));
       
-      long long * values = (long long *) msgs[i]->getData();
-      for (int j=1; j<length; j++) {
-	accum [j] += values[j];
-      }
+    long long * values = (long long *) msgs[i]->getData();
+    for (int j=1; j<length; j++) {
+      accum [j] += values[j];
     }
-    return CkReductionMsg::buildNew(length*sizeof(long long),accum);
-  } else {
-    return NULL;
   }
+  return CkReductionMsg::buildNew(length*sizeof(long long),accum);
 }
 
 

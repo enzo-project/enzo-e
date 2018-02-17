@@ -99,6 +99,7 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_root_size,3);
   p | mesh_min_level;
   p | mesh_max_level;
+  p | mesh_max_initial_level;
 
   // Method
 
@@ -649,7 +650,10 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   //--------------------------------------------------
 
-  mesh_max_level = p->value_integer("Adapt:max_level",0);
+  mesh_max_level = p->value_integer
+    ("Adapt:max_level",0);
+  mesh_max_initial_level = p->value_integer
+    ("Adapt:max_initial_level",mesh_max_level);
 
   // Note mesh_min_level may be < 0 for multigrid
 

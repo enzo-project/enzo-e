@@ -203,8 +203,7 @@ void Hierarchy::deallocate_blocks() throw()
 void Hierarchy::create_forest
 (
  FieldDescr   * field_descr,
- bool allocate_data,
- bool testing) throw()
+ bool allocate_data) throw()
 {
   // determine block size
   const int mbx = root_size_[0] / blocking_[0];
@@ -255,8 +254,7 @@ void Hierarchy::create_subforest
 (
  FieldDescr   * field_descr,
  bool allocate_data,
- int min_level,
- bool testing) throw()
+ int min_level) throw()
 {
   // determine block size
 

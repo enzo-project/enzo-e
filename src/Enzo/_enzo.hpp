@@ -201,6 +201,7 @@ struct fluxes
 #include "enzo_EnzoInitialTurbulence.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
+#include "enzo_EnzoRefineParticleMass.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"

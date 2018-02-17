@@ -111,7 +111,7 @@ int EnzoBlock::SolveHydroEquations
   enzo_float * colourpt = (enzo_float *) field.permanent();
 
   // coloff: offsets into the color array (for each color field)
-  int * coloff   = new int [ncolour];
+  int * coloff   = (ncolour > 0) ? (new int [ncolour]) : NULL;
   int index_colour = 0;
   for (int index_field = 0;
        index_field < field.field_count();
@@ -416,6 +416,10 @@ int EnzoBlock::SolveHydroEquations
      geindex, temp,
      &ncolour, colourpt, coloff, colindex
      );
+
+  for (dim = 0; dim < MAX_DIMENSION; dim++) {
+    delete [] CellWidthTemp[dim];
+  }
 
 #ifdef DEBUG_READ_FIELDS
   READ_FIELD("density_diff","de-enzo-1-%03d.data",cycle_,field,0,0,0,mx,my,mz);

@@ -350,10 +350,14 @@ public: // interface
   { return particle_data_->overhead(particle_descr_,it,ib); }
 
   /// Fill a vector of position coordinates for the given type and batch
+  /// Bounds is used when positions are stored relative to the local block
+  /// (e.g. as integers) and used to convert local to global coordinates
   bool position (int it, int ib,
 		 double * x, double * y = 0, double * z = 0)
   { return particle_data_->position(particle_descr_,it,ib,x,y,z); }
 
+  /// Update positions in a batch a given amount.  Only used in refresh for
+  /// updating positions in periodic boundary conditions
   void position_update (int it, int ib, 
 			long double dx, long double dy, long double dz)
   { particle_data_->position_update (particle_descr_,it,ib,dx,dy,dz);  }

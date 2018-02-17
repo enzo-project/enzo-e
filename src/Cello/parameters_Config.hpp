@@ -70,6 +70,7 @@ public: // interface
       mesh_root_rank(0),
       mesh_min_level(0),
       mesh_max_level(0),
+      mesh_max_initial_level(0),
       num_method(0),
       method_courant_global(1.0),
       method_list(),
@@ -210,6 +211,7 @@ public: // interface
       mesh_root_rank(0),
       mesh_min_level(0),
       mesh_max_level(0),
+      mesh_max_initial_level(0),
       num_method(0),
       method_courant_global(1.0),
       method_list(),
@@ -393,6 +395,7 @@ public: // attributes
   int                        mesh_root_size[3];
   int                        mesh_min_level;
   int                        mesh_max_level;
+  int                        mesh_max_initial_level;
 
   // Method
 

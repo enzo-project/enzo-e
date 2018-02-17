@@ -95,7 +95,8 @@ Initial * EnzoProblem::create_initial_
 
   if (type == "music") {
     
-    initial = new EnzoInitialMusic (cycle,time,enzo_config);
+    initial = new EnzoInitialMusic
+      (cycle,time,enzo_config,config->mesh_max_initial_level);
     
   } else if (type == "implosion_2d") {
 
@@ -229,6 +230,16 @@ Refine * EnzoProblem::create_refine_
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
+  } else if (type == "particle_mass") {
+
+    return new EnzoRefineParticleMass
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_output[index],
+       config->adapt_level_exponent[index] );
+
   } else {
     return Problem::create_refine_(type,config,parameters,field_descr,index);
   }

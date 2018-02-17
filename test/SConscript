@@ -46,10 +46,7 @@ env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
 Clean(env.RunSerial
       ('test_FileHdf5.unit',  bin_path + '/test_FileHdf5'),
       '#test_disk.h5')
-       
-Clean(env.RunSerial
-      ('test_FileIfrit.unit', bin_path + '/test_FileIfrit'),
-      '#/FileIfrit_test.bin')
+
 #----------------------------------------------------------------------
 # ENZO COMPONENT          
 #----------------------------------------------------------------------
@@ -113,7 +110,6 @@ env.RunSerial('test_Memory.unit',      bin_path + '/test_Memory')
 #----------------------------------------------------------------------
 # MESH COMPONENT          
 #----------------------------------------------------------------------
-env.RunSerial('test_Hierarchy.unit', bin_path + '/test_Hierarchy')
 env.RunSerial('test_Data.unit',     bin_path + '/test_Data')
 env.RunSerial('test_Index.unit',     bin_path + '/test_Index')
 Clean(env_mv_out.RunSerial('test_Tree.unit', bin_path + '/test_Tree'),

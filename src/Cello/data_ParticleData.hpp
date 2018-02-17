@@ -129,7 +129,8 @@ public: // interface
 		 int it, int ib,
 		 double * x, double * y = 0, double * z = 0);
 
-  /// Update positions given an increment
+  /// Update positions in a batch a given amount.  Only used in refresh for
+  /// updating positions in periodic boundary conditions
   void position_update 
   (ParticleDescr * particle_descr,int it, int ib, 
    long double dx, long double dy, long double dz);

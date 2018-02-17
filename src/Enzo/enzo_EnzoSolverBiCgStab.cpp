@@ -772,8 +772,6 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Solver * precon = simulation->problem()->solver(index_precon_);
     precon->set_sync_id (8);
-    precon->set_min_level(min_level_);
-    precon->set_max_level(max_level_);
     precon->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_2());
     precon->apply(A_,iy_,ip_,enzo_block);
     
@@ -1037,8 +1035,6 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* enzo_block) throw() {
     Simulation * simulation = proxy_simulation.ckLocalBranch();
     Solver * precon = simulation->problem()->solver(index_precon_);
     precon->set_sync_id (10);
-    precon->set_min_level(min_level_);
-    precon->set_max_level(max_level_);
     precon->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_8());
     precon->apply(A_,iy_,iq_,enzo_block);
     
@@ -1281,14 +1277,6 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw() {
       X[i] = X[i] + omega_*Y[i];
       R[i] = Q[i] - omega_*U[i];
     }
-#ifdef DEBUG_BICGSTAB
-    CkPrintf ("DEBUG_MG0 x1 = %g %g\n",x1min,x1max);
-    CkPrintf ("DEBUG_MG0 y = %g %g\n",ymin,ymax);
-    CkPrintf ("DEBUG_MG0 u = %g %g\n",umin,umax);
-    CkPrintf ("DEBUG_MG0 r = %g %g\n",rmin,rmax);
-    CkPrintf ("DEBUG_MG0 x2 = %g %g\n",x2min,x2max);
-    CkPrintf ("DEBUG_MG0 omega = %Lg\n",omega_);
-#endif    
     COPY_TEMP(ix_,"X2_temp");
     COPY_TEMP(ir_,"R_temp");
   }

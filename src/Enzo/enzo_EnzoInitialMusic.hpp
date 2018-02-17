@@ -19,7 +19,8 @@ public: // interface
   /// Constructor
   EnzoInitialMusic(int cycle,
 		  double time,
-		  const EnzoConfig * enzo_config) throw();
+		   const EnzoConfig * enzo_config,
+		   int max_initial_level) throw();
 
   /// Constructor
   EnzoInitialMusic() throw()

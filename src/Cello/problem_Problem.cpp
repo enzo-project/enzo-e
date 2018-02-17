@@ -697,16 +697,6 @@ Refine * Problem::create_refine_
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
 
-  } else if (type == "particle_mass") {
-
-    return new RefineParticleMass
-      (config->adapt_min_refine[index],
-       config->adapt_max_coarsen[index],
-       config->adapt_max_level[index],
-       config->adapt_include_ghosts[index],
-       config->adapt_output[index],
-       config->adapt_level_exponent[index] );
-
   } else if (type == "particle_count") {
 
     return new RefineParticleCount

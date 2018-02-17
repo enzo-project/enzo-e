@@ -741,8 +741,8 @@ printf ("<tr><td class=center></td><td class=center colspan=5><em><a href=\"#cel
 
 test_summary("Colormap",array("Colormap"),
 	     array("test_Colormap"),'test'); 
-test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
-	     array("test_FileHdf5","test_FileIfrit"),'test'); 
+test_summary("Disk",array("FileHdf5"),
+	     array("test_FileHdf5"),'test'); 
 test_summary("Error",array(    "Error"),
 	     array("test_Error"),'test'); 
 test_summary("Field",
@@ -752,8 +752,7 @@ test_summary("Field",
 test_summary("Memory",array("Memory"),
 	     array("test_Memory"),'test'); 
 test_summary("Mesh",
-	     array("Hierarchy",
-		   "Data",
+	     array("Data",
 		   "Index",
 		   "Tree",
 		   "ItFace",
@@ -761,8 +760,7 @@ test_summary("Mesh",
 		   "Node",
 		   "NodeTrace",
 		   "ItNode"),
-	     array("test_Hierarchy",
-		   "test_Data",
+	     array("test_Data",
 		   "test_Index",
 		   "test_Tree",
 		   "test_ItFace",
@@ -1355,9 +1353,6 @@ test_group("Disk");
 begin_hidden("disk_hdf5", "HDF5");
 tests("Cello","test_FileHdf5", "test_FileHdf5","","");
 end_hidden("disk_hdf5");
-begin_hidden("disk_ifrit", "IFRIT");
-tests("Cello","test_FileIfrit","test_FileIfrit","","");
-end_hidden("disk_ifrit");
 
 //----------------------------------------------------------------------
 
@@ -1405,9 +1400,6 @@ end_hidden("memory");
 
 test_group("Mesh");
 
-begin_hidden("hierarchy", "Hierarchy");
-tests("Cello","test_Hierarchy","test_Hierarchy","",""); 
-end_hidden("hierarchy");
 begin_hidden("data", "Data");
 tests("Cello","test_Data","test_Data","",""); 
 end_hidden("data");

@@ -13,9 +13,10 @@
 EnzoInitialMusic::EnzoInitialMusic
 (int cycle,
  double time,
- const EnzoConfig * enzo_config) throw()
+ const EnzoConfig * enzo_config,
+ int level) throw()
   : Initial(cycle,time),
-    level_(enzo_config->mesh_max_level),
+    level_(level),
     field_files_     (enzo_config->initial_music_field_files),
     field_datasets_  (enzo_config->initial_music_field_datasets),
     field_coords_    (enzo_config->initial_music_field_coords),

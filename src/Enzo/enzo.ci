@@ -62,6 +62,7 @@ module enzo {
   PUPable EnzoInitialTurbulence;
 
   PUPable EnzoRefineShock;
+  PUPable EnzoRefineParticleMass;
 
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;

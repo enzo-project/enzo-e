@@ -1,24 +1,24 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_RefineParticleMass.hpp
+/// @file     enzo_EnzoRefineParticleMass.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2016-05-16
-/// @brief    [\ref Mesh] Declaration of the RefineParticleMass class
+/// @brief    [\ref Mesh] Declaration of the EnzoRefineParticleMass class
 ///
 
-#ifndef MESH_REFINE_PARTICLE_MASS_HPP
-#define MESH_REFINE_PARTICLE_MASS_HPP
+#ifndef ENZO_REFINE_PARTICLE_MASS_HPP
+#define ENZO_REFINE_PARTICLE_MASS_HPP
 
-class RefineParticleMass : public Refine {
+class EnzoRefineParticleMass : public Refine {
 
-  /// @class    RefineParticleMass
+  /// @class    EnzoRefineParticleMass
   /// @ingroup  Mesh
   /// @brief    [\ref Mesh] 
 
 public: // interface
 
   /// Constructor
-  RefineParticleMass
+  EnzoRefineParticleMass
   (double min_refine,
    double max_coarsen,
    int    max_level,
@@ -27,9 +27,9 @@ public: // interface
    double level_exponent
    ) throw();
 
-  PUPable_decl(RefineParticleMass);
+  PUPable_decl(EnzoRefineParticleMass);
 
-  RefineParticleMass(CkMigrateMessage *m) :
+  EnzoRefineParticleMass(CkMigrateMessage *m) :
     Refine (m),
     level_exponent_(0.0) {}
 
@@ -53,5 +53,5 @@ private:
 
 };
 
-#endif /* MESH_REFINE_PARTICLE_MASS_HPP */
+#endif /* ENZO_REFINE_PARTICLE_MASS_HPP */
 

@@ -239,7 +239,7 @@ EnzoSolverMg0::EnzoSolverMg0
     rr_(0), rr_local_(0), rr0_(0)
 {
   // Initialize temporary fields
-  
+
   ir_ = field_descr->insert_temporary();
   ic_ = field_descr->insert_temporary();
 
@@ -559,8 +559,6 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
   
-  CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_barrier(NULL), 
-		      proxy_array());
 #ifdef DEBUG_ENTRY
   CkPrintf ("%d %s %p mg0 DEBUG_ENTRY before barrier\n",
 	    CkMyPe(),name().c_str(),this);
@@ -573,6 +571,8 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 	    __LINE__,name().c_str(),solver->rr_local());
 #endif
 
+  CkCallback callback(CkIndex_EnzoBlock::p_solver_mg0_barrier(NULL), 
+		      proxy_array());
   long double data[1] = {solver->rr_local()};
   contribute(sizeof(long double), data, sum_long_double_type, callback);
   performance_stop_(perf_compute,__FILE__,__LINE__);
@@ -582,10 +582,15 @@ void EnzoBlock::p_solver_mg0_solve_coarse()
 
 void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
 {
-  performance_start_(perf_compute,__FILE__,__LINE__);
-
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
+
+#ifdef DEBUG_SOLVER_MG0
+  CkPrintf ("%d DEBUG_SOLVER_MG0 %s rr_ %llg\n",
+    __LINE__,name().c_str(),solver->rr());
+#endif
+
+  performance_start_(perf_compute,__FILE__,__LINE__);
 
   long double rr = ((long double*) msg->getData())[0];
   solver->set_rr(rr);
@@ -594,11 +599,6 @@ void EnzoBlock::p_solver_mg0_barrier(CkReductionMsg* msg)
   
   delete msg;
 
-#ifdef DEBUG_SOLVER_MG0
-  CkPrintf ("%d DEBUG_SOLVER_MG0 %s rr_ %llg\n",
-    __LINE__,name().c_str(),solver->rr());
-#endif
-  
 #ifdef DEBUG_ENTRY
     CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  after barrier\n",
 	      CkMyPe(),name().c_str(),this);

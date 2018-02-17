@@ -59,6 +59,11 @@ MsgRefine::MsgRefine
   num_face_level_(num_face_level),
   face_level_(new int[num_face_level])
 {  
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine()\n",
+	    __FILE__,__LINE__);
+  fflush(stdout);
+#endif  
   ++counter[cello::index_static()]; 
 
   for (int i=0; i<num_face_level_; i++) {

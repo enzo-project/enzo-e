@@ -121,7 +121,6 @@ class Tree;
 #include "mesh_RefineMass.hpp"
 #include "mesh_RefineShear.hpp"
 #include "mesh_RefineSlope.hpp"
-#include "mesh_RefineParticleMass.hpp"
 #include "mesh_RefineParticleCount.hpp"
 
 #endif /* _MESH_HPP */

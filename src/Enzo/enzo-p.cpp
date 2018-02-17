@@ -78,6 +78,7 @@ PARALLEL_MAIN_BEGIN
   g_parameters.read(PARALLEL_ARGV[1]);
   g_parameters.write("parameters.out",      param_write_cello);
   g_parameters.write("parameters.libconfig",param_write_libconfig);
+  g_parameters.write(stdout,param_write_monitor);
   g_enzo_config.read(&g_parameters);
   
   // Initialize unit testing

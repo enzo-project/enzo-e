@@ -147,13 +147,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float dens = *((enzo_float *)(particle.constant_value (it,ia_mass)));
 
     for (int i=0; i<mx*my*mz; i++) de_t[i] = 0.0;
+
     // Scale by volume if particle value is mass instead of density
-    
-    // double vol = 1.0;
-    // if (rank >= 1) vol *= hx;
-    // if (rank >= 2) vol *= hy;
-    // if (rank >= 3) vol *= hz;
-    //    dens = dens / vol;
+    int scale = (1 << rank*block->level());
+    dens *= scale;
 
     // check precisions match
     

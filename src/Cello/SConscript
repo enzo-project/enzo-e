@@ -214,7 +214,6 @@ objs_test = env.Object(sources_test)
 
 
 test_FileHdf5     = env.Program ('test_FileHdf5.cpp',   LIBS=[libs_disk,  libs_test])
-test_FileIfrit    = env.Program ('test_FileIfrit.cpp',  LIBS=[libs_disk,  libs_test])
 test_error        = env.Program ('test_Error.cpp',      LIBS=[libs_error, libs_test])
 
 # FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM++
@@ -245,8 +244,6 @@ test_it_face     = env.Program (['test_ItFace.cpp', objs_mesh],
                                  LIBS=[libs_mesh, libs_test]) 
 test_it_child     = env.Program (['test_ItChild.cpp', objs_mesh],
                                  LIBS=[libs_mesh, libs_test]) 
-test_hierarchy    = env.Program (['test_Hierarchy.cpp',objs_mesh],
-                                 LIBS=[libs_mesh,  libs_test])
 test_tree         = env.Program (['test_Tree.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_tree_density = env.Program (['test_TreeDensity.cpp',objs_mesh],
@@ -307,8 +304,7 @@ libraries_test  = env.Library ('test', objs_test)
 
 binaries_cello = [test_type, test_class_size]
 
-binaries_disk  = [test_FileHdf5,
-                  test_FileIfrit]
+binaries_disk  = [test_FileHdf5]
 binaries_error = [test_error]
 binaries_data = [test_field_data,
                   test_field_descr,
@@ -320,7 +316,7 @@ binaries_data = [test_field_data,
 binaries_problem = [test_mask,test_value,test_refresh]
 binaries_io    = [test_colormap]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_data,test_hierarchy,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_prolong_linear,test_schedule,test_it_face,test_it_child]
+binaries_mesh = [ test_data,test_tree,test_tree_density,test_node,test_node_trace,test_it_node,test_index,test_prolong_linear,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]
 
 objs_parallel.append(["main.cpp"])

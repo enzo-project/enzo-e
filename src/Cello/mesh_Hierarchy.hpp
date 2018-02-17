@@ -189,13 +189,11 @@ public: // interface
 
 
   void create_forest (FieldDescr   * field_descr,
-		      bool allocate_data,
-		      bool testing          = false) throw();
+		      bool allocate_data) throw();
 
   void create_subforest (FieldDescr   * field_descr,
 			 bool allocate_data,
-			 int min_level,
-			 bool testing          = false) throw();
+			 int min_level) throw();
 
 
   /// Return the number of root-level Blocks along each rank
