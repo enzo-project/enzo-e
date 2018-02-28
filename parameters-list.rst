@@ -181,7 +181,7 @@ is performed.
 :Default: :d:`none`
 :Scope:     :c:`Cello`
 
-:e:`See the` `schedule`_ :e:` subgroup for parameters used to define when to trigger the dynamic load balancing operation.`
+:e:`See the` `schedule`_ :e:`subgroup for parameters used to define when to trigger the dynamic load balancing operation.`
 
 --------
 Boundary
