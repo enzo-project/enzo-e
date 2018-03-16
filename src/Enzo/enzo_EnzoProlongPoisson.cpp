@@ -39,7 +39,8 @@ EnzoProlongPoisson::EnzoProlongPoisson() throw()
 int EnzoProlongPoisson::apply 
 ( precision_type precision,
   void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+  bool accumulate)
 {
   TRACE6("EnzoProlongPoisson fine   %d:%d %d:%d %d:%d",
 	 im3_f[0],n3_f[0]+im3_f[0],
@@ -52,7 +53,8 @@ int EnzoProlongPoisson::apply
 	 im3_c[2],n3_c[2]+im3_c[2]);
 
   return apply_((enzo_float *)       values_f, nd3_f, im3_f, n3_f,
-		(const enzo_float *) values_c, nd3_c, im3_c, n3_c);
+		(const enzo_float *) values_c, nd3_c, im3_c, n3_c,
+		accumulate);
 
 }
 
@@ -60,7 +62,8 @@ int EnzoProlongPoisson::apply
 
 int EnzoProlongPoisson::apply_
 (       enzo_float * values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+  const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+	bool accumulate)
 {
   int dx_c = 1;
   int dy_c = nd3_c[0];
@@ -70,6 +73,10 @@ int EnzoProlongPoisson::apply_
   const double c2[4] = {-1.0*0.25, 1.0*0.25, 3.0*0.25,  5.0*0.25};
 
   int rank = (nd3_f[2] > 1) ? 3 : ( (nd3_f[1] > 1) ? 2 : 1 );
+
+  ASSERT ("EnzoProlongPoisson::apply_",
+	  "accumulate=true is not implemented yet",
+	  ! accumulate);
 
   for (int i=0; i<rank; i++) {
     const char * xyz = "xyz";

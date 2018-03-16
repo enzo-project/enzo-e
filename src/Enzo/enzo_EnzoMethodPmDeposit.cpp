@@ -13,6 +13,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_FIELD_FACE
+
 // #define DEBUG_METHOD
 // #define DEBUG_FIELD
 
@@ -112,7 +114,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     int rank = block->rank();
 
     enzo_float  * de_t = (enzo_float *) field.values("density_total");
-
+#ifdef DEBUG_FIELD_FACE    
+    enzo_float * debug_1 = (enzo_float *) field.values("debug_1");
+    enzo_float * debug_2 = (enzo_float *) field.values("debug_2");
+#endif    
     int mx,my,mz;
     field.dimensions(0,&mx,&my,&mz);
     int nx,ny,nz;
@@ -130,27 +135,25 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     // Get block extents and cell widths
     double xm,ym,zm;
     double xp,yp,zp;
+    double hx,hy,hz;
     block->lower(&xm,&ym,&zm);
     block->upper(&xp,&yp,&zp);
-
-    double hx,hy,hz;
-    hx = (xp-xm)/nx;
-    hy = (yp-ym)/ny;
-    hz = (zp-zm)/nz;
+    block->cell_width(&hx,&hy,&hz);
 
     // declare particle position arrays
 
     const int it = particle.type_index ("dark");
 
-    const int ia_mass = particle.constant_index (it,"mass");
+    const int ic_mass = particle.constant_index (it,"mass");
 
-    enzo_float dens = *((enzo_float *)(particle.constant_value (it,ia_mass)));
+    enzo_float dens = *((enzo_float *)(particle.constant_value (it,ic_mass)));
 
     for (int i=0; i<mx*my*mz; i++) de_t[i] = 0.0;
 
-    // Scale by volume if particle value is mass instead of density
-    int scale = (1 << rank*block->level());
-    dens *= scale;
+#ifdef DEBUG_FIELD_FACE    
+    for (int i=0; i<mx*my*mz; i++) debug_1[i] = 1.0;
+    for (int i=0; i<mx*my*mz; i++) debug_2[i] = 0.0;
+#endif    
 
     // check precisions match
     
@@ -178,9 +181,20 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
       double time = block->time();
       double dt   = block->dt();
-      cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+alpha_*dt);
+      cosmology->compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+alpha_*dt);
+      
     }
+    if (rank >= 1) hx *= cosmo_a;
+    if (rank >= 2) hy *= cosmo_a;
+    if (rank >= 3) hz *= cosmo_a;
+    
     const double dt = alpha_ * block->dt() / cosmo_a;
+
+    // Scale mass by volume if particle value is mass instead of density
+
+    int level = block->level();
+
+    dens *= std::pow(2.0,rank*level);
 
     // Accumulated single velocity array for Baryon deposit
 
@@ -193,8 +207,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	const int ia_x  = particle.attribute_index(it,"x");
 	const int ia_vx = particle.attribute_index(it,"vx");
 
-	enzo_float * xa =  (enzo_float *) particle.attribute_array (it,ia_x,ib);
-	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
+	enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
+	enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
 
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
@@ -225,12 +239,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	const int ia_vy = particle.attribute_index(it,"vy");
 
 	// Batch arrays
-	enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
-	enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
-
-	// Particle batch velocities
-	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
-	enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
+	enzo_float * xa  = (enzo_float *)particle.attribute_array (it,ia_x,ib);
+	enzo_float * ya  = (enzo_float *)particle.attribute_array (it,ia_y,ib);
+	enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+	enzo_float * vya = (enzo_float *)particle.attribute_array (it,ia_vy,ib);
 
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
@@ -343,7 +355,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	}
       }
     }
-
     TRACE_FIELD("density-particle",de_t,1.0);
 
     enzo_float  * de   = (enzo_float *) field.values("density");
@@ -420,7 +431,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 #else
 	  int ig = ix + nx*(iy + ny*iz);
 #endif	  
-    	  de_t[i] += de_gas_0[ig];
+	  de_t[i] += de_gas_0[ig];
     	}
       }
     }

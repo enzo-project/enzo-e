@@ -37,6 +37,7 @@ public: // interface
       adapt_level_exponent(),
       adapt_include_ghosts(),
       adapt_output(),
+      adapt_schedule_index(),
       balance_schedule_index(0),
       num_boundary(0),
       boundary_list(),
@@ -59,6 +60,7 @@ public: // interface
       initial_list(),
       initial_cycle(0),
       initial_time(0.0),
+      initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
       initial_trace_dx(0),
@@ -77,6 +79,7 @@ public: // interface
       method_schedule_index(),
       method_courant(),
       method_timestep(),
+      method_trace_name(),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),
@@ -178,7 +181,8 @@ public: // interface
       adapt_level_exponent(),
       adapt_include_ghosts(),
       adapt_output(),
-      balance_schedule_index(0),
+      adapt_schedule_index(),
+      balance_schedule_index(-1),
       num_boundary(0),
       boundary_list(),
       boundary_type(),
@@ -200,6 +204,7 @@ public: // interface
       initial_list(),
       initial_cycle(0),
       initial_time(0.0),
+      initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
       initial_trace_dx(0),
@@ -218,6 +223,7 @@ public: // interface
       method_schedule_index(),
       method_courant(),
       method_timestep(),
+      method_trace_name(),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),
@@ -249,7 +255,7 @@ public: // interface
       output_field_list(),
       output_particle_list(),
       output_name(),
-      index_schedule_(0),
+      index_schedule_(-1),
       schedule_list(),
       schedule_type(),
       schedule_var(),
@@ -333,6 +339,7 @@ public: // attributes
   std::vector <double>       adapt_level_exponent;
   std::vector <char>         adapt_include_ghosts;
   std::vector <std::string>  adapt_output;
+  std::vector <int>          adapt_schedule_index;
   
   // Balance (dynamic load balancing)
 
@@ -376,6 +383,7 @@ public: // attributes
   int                        initial_cycle;
   double                     initial_time;
 
+  std::string                initial_trace_name;
   std::string                initial_trace_field;
   double                     initial_trace_mpp;
   int                        initial_trace_dx;
@@ -405,6 +413,7 @@ public: // attributes
   std::vector<int>           method_schedule_index;
   std::vector<double>        method_courant;
   std::vector<double>        method_timestep;
+  std::vector<std::string>   method_trace_name;
 
   // Monitor
 
@@ -437,6 +446,7 @@ public: // attributes
   std::vector < int >         output_min_level;
   std::vector < char >        output_leaf_only;
   std::vector < std::vector <std::string> >  output_dir;
+  std::string                 output_dir_global;
   std::vector < int >         output_stride_write;
   std::vector < int >         output_stride_wait;
   std::vector < std::vector <std::string> >  output_field_list;

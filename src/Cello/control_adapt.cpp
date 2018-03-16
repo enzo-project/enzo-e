@@ -222,7 +222,11 @@ int Block::adapt_compute_desired_level_(int level_maximum)
   int index_refine = 0;
   while ((refine = problem->refine(index_refine++))) {
 
-    adapt_ = std::max(adapt_,refine->apply(this));
+    Schedule * schedule = refine->schedule();
+    
+    if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time())) {
+      adapt_ = std::max(adapt_,refine->apply(this));
+    }
 
   }
   const int initial_cycle = simulation()->config()->initial_cycle;
@@ -317,7 +321,7 @@ void Block::adapt_refine_()
 
       data_msg = new DataMsg;
 
-      data_msg -> set_field_face (field_face,true);
+      data_msg -> set_field_face (field_face,false);
       data_msg -> set_field_data (data()->field_data(),false);
       ParticleData * p_data = new ParticleData(*particle_list[IC3(ic3)]);
       data_msg -> set_particle_data (p_data,true);

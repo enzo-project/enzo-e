@@ -196,6 +196,17 @@ void Problem::initialize_refine(Config * config,
 
     if (refine) {
       refine_list_.push_back( refine );
+      int index_schedule = config->adapt_schedule_index[i];
+
+      if (index_schedule >= 0) {
+	refine->set_schedule
+	  (Schedule::create( config->schedule_var[index_schedule],
+			     config->schedule_type[index_schedule],
+			     config->schedule_start[index_schedule],
+			     config->schedule_stop[index_schedule],
+			     config->schedule_step[index_schedule],
+			     config->schedule_list[index_schedule]));
+      }
     } else {
       ERROR1("Problem::initialize_refine",
 	     "Cannot create Refine type %s",name.c_str());
@@ -272,15 +283,21 @@ void Problem::initialize_output
       output->set_filename (file_name,file_args);
     }
 
-    if (config->output_dir[index].size() > 0) {
-      std::string dir_name = config->output_dir[index][0];
+    if (config->output_dir[index].size() > 0 ||
+	config->output_dir_global != ".") {
 
+      std::string dir_name;
       std::vector<std::string> dir_args;
+      
+      dir_name = config->output_dir_global;
 
-      for (size_t i=1; i<config->output_dir[index].size(); i++) {
-	dir_args.push_back(config->output_dir[index][i]);
+      if (config->output_dir[index].size() > 0) {
+	dir_name = dir_name + "/" + config->output_dir[index][0];
+
+	for (size_t i=1; i<config->output_dir[index].size(); i++) {
+	  dir_args.push_back(config->output_dir[index][i]);
+	}
       }
-
       output->set_dir (dir_name,dir_args);
     }
 
@@ -485,7 +502,6 @@ void Problem::initialize_solver
       ERROR1("Problem::initialize_method",
 	     "Unknown Method %s",type.c_str());
     }
-
   }
 }
 
@@ -614,7 +630,8 @@ Initial * Problem::create_initial_
 			       config->initial_cycle,
 			       config->initial_time);
   } else if (type == "trace") {
-    initial = new InitialTrace (config->initial_trace_field,
+    initial = new InitialTrace (config->initial_trace_name,
+				config->initial_trace_field,
 				config->initial_trace_mpp,
 				config->initial_trace_dx,
                                 config->initial_trace_dy,
@@ -672,27 +689,6 @@ Refine * Problem::create_refine_
     return new RefineMask 
       (parameters,
        param_str,
-       config->adapt_max_level[index],
-       config->adapt_include_ghosts[index],
-       config->adapt_output[index]);
-
-  } else if (type == "mass") {
-
-    double root_cell_volume = 1.0;
-    for (int i=0; i<config->mesh_root_rank; i++) {
-      double upper = config->domain_upper[i] ;
-      double lower = config->domain_lower[i];
-      int     root = config->mesh_root_size[i];
-
-      root_cell_volume *= (upper - lower) / (root);
-
-    }
-
-    return new RefineMass 
-      (config->adapt_min_refine[index],
-       config->adapt_max_coarsen[index],
-       config->adapt_level_exponent[index],
-       root_cell_volume,
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
@@ -767,9 +763,17 @@ Solver * Problem::create_solver_
 {
   TRACE1("Problem::create_solver %s",name.c_str());
 
-  // No default solver
   Solver * solver = NULL;
 
+  if (name == "null") {
+    solver = new SolverNull
+      (config->solver_monitor_iter [index_solver],
+       config->solver_min_level    [index_solver],
+       config->solver_max_level    [index_solver]);
+  }
+
+  if (solver) solver->set_index(index_solver);
+  
   return solver;
 }
 
@@ -817,7 +821,8 @@ Method * Problem::create_method_
   if (name == "trace") {
     method = new MethodTrace(field_descr, particle_descr,
 			     config->method_courant[index_method],
-			     config->method_timestep[index_method]);
+			     config->method_timestep[index_method],
+			     config->method_trace_name[index_method]);
   }
   return method;
 }

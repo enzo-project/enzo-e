@@ -39,6 +39,7 @@ void Config::pup (PUP::er &p)
   p | adapt_level_exponent;
   p | adapt_include_ghosts;
   p | adapt_output;
+  p | adapt_schedule_index;
   
   // Balance
 
@@ -80,6 +81,7 @@ void Config::pup (PUP::er &p)
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
+  p | initial_trace_name;
   p | initial_trace_field;
   p | initial_trace_mpp;
   p | initial_trace_dx;
@@ -109,6 +111,7 @@ void Config::pup (PUP::er &p)
   p | method_schedule_index;
   p | method_courant;
   p | method_timestep;
+  p | method_trace_name;
 
   // Monitor
 
@@ -141,6 +144,7 @@ void Config::pup (PUP::er &p)
   p | output_leaf_only;
   p | output_schedule_index;
   p | output_dir;
+  p | output_dir_global;
   p | output_stride_write;
   p | output_stride_wait;
   p | output_field_list;
@@ -269,6 +273,9 @@ void Config::read_adapt_ (Parameters * p) throw()
   adapt_level_exponent .resize(num_adapt);
   adapt_include_ghosts .resize(num_adapt);
   adapt_output         .resize(num_adapt);
+  adapt_schedule_index .resize(num_adapt);
+
+  adapt_min_face_rank = p->value_integer("Adapt:min_face_rank",0);
 
   for (int ia=0; ia<num_adapt; ia++) {
 
@@ -277,8 +284,6 @@ void Config::read_adapt_ (Parameters * p) throw()
     std::string prefix = "Adapt:" + adapt_list[ia] + ":";
 
     adapt_type[ia] = p->value_string(prefix+"type","unknown");
-
-    adapt_min_face_rank = p->value_integer("Adapt:min_face_rank",0);
 
     std::string param_str = prefix + "field_list";
 
@@ -325,8 +330,22 @@ void Config::read_adapt_ (Parameters * p) throw()
     adapt_output[ia] = p->value_string (prefix + "output","");
 
     adapt_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
-						false);
+						 false);
+    const bool adapt_scheduled = 
+      (p->type(prefix+"schedule:var") != parameter_unknown);
 
+    if (adapt_scheduled) {
+      p->group_set(0,"Adapt");
+      p->group_push(adapt_list[ia]);
+      p->group_push("schedule");
+      adapt_schedule_index[ia] = read_schedule_(p, prefix);
+      p->group_pop();
+      p->group_pop();
+    } else {
+      adapt_schedule_index[ia] = -1;
+    }
+
+    
   }
 }
 
@@ -592,6 +611,7 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
   initial_trace_mpp = p->value_float ("Initial:trace:mass_per_particle",0.0);
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
@@ -677,6 +697,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_courant.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
+  method_trace_name.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
   
@@ -710,6 +731,9 @@ void Config::read_method_ (Parameters * p) throw()
     // Read specified timestep, if any (for MethodTrace)
     method_timestep[index_method] = p->value_float  
       (full_name + ":timestep",std::numeric_limits<double>::max());
+
+    method_trace_name[index_method] = p->value_string
+      (full_name + ":name", "trace");
   }
 }
 
@@ -770,6 +794,8 @@ void Config::read_output_ (Parameters * p) throw()
   output_particle_list.resize(num_output);
   output_name.resize(num_output);
 
+  output_dir_global = p->value_string("dir_global",".");
+
   for (int index_output=0; index_output<num_output; index_output++) {
 
     TRACE1 ("index = %d",index_output);
@@ -790,7 +816,7 @@ void Config::read_output_ (Parameters * p) throw()
     output_stride_write[index_output] = p->value_integer("stride_write",0);
 
     output_stride_wait[index_output] = p->value_integer("stride_wait",0);
-    
+
     if (p->type("dir") == parameter_string) {
       output_dir[index_output].resize(1);
       output_dir[index_output][0] = p->value_string("dir","");

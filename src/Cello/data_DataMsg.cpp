@@ -251,6 +251,7 @@ void DataMsg::update (Data * data, bool is_local)
       ff->array_to_face(fa,field_dst);
 
     }
+
     delete field_face_;
     field_face_ = NULL;
 

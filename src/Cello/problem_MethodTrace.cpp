@@ -15,10 +15,12 @@ MethodTrace::MethodTrace
  const FieldDescr * field_descr,
  const ParticleDescr * particle_descr,
  double courant,
- double timestep
+ double timestep,
+ std::string name
  ) throw() 
   : Method (courant),
-    timestep_(timestep)
+    timestep_(timestep),
+    name_(name)
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     sync_id_method_trace);
@@ -36,7 +38,7 @@ void MethodTrace::compute ( Block * block) throw()
 
     // initialize trace particle type and position attributes
 
-    const int it = particle.type_index("trace");
+    const int it = particle.type_index(name_);
 
     const int ia_x = particle.attribute_index(it,"x");
     const int ia_y = particle.attribute_index(it,"y");

@@ -115,6 +115,9 @@ public: // functions
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
 
+  /// Return whether output is scheduled for this cycle
+  bool is_scheduled (int cycle, double time) throw();
+
   void set_stride_write (int stride) throw () 
   {
     stride_write_ = stride; 
@@ -126,9 +129,6 @@ public: // functions
 
   int stride_wait () const throw () 
   { return stride_wait_; }
-
-  /// Return whether output is scheduled for this cycle
-  bool is_scheduled (int cycle, double time) throw();
 
   /// Return whether this process is a writer
   bool is_writer () const throw () 

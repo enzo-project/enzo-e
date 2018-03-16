@@ -9,9 +9,9 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_PM_UPDATE
+// #define DEBUG_UPDATE
 
-#ifdef DEBUG_PM_UPDATE
+#ifdef DEBUG_UPDATE
 #  define TRACE_PM(MESSAGE)						\
   CkPrintf ("%s:%d %s\n",						\
 	    __FILE__,__LINE__,MESSAGE);				
@@ -32,11 +32,15 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_pm_update);
-  //  refresh(ir)->add_all_particles();
-  //  refresh(ir)->add_all_fields();
-  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+
+  const int ax = field_descr->field_id("acceleration_x");
+  const int ay = field_descr->field_id("acceleration_y");
+  const int az = field_descr->field_id("acceleration_z");
+
+  if (ax >= 0) refresh(ir)->add_field(ax);
+  if (ay >= 0) refresh(ir)->add_field(ay);
+  if (az >= 0) refresh(ir)->add_field(az);
+			     
   refresh(ir)->add_particle(particle_descr->type_index("dark"));
 
   // PM parameters initialized in EnzoBlock::initialize()
@@ -63,10 +67,12 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
+#ifdef DEBUG_UPDATE    
     double a3sum[3]={0.0};
     double v3sum[3]={0.0};
     double a3sum2[3]={0.0};
     double v3sum2[3]={0.0};
+#endif    
     
     EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
       block->simulation()->problem()->physics("cosmology");
@@ -85,20 +91,23 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
     FieldDescr    * fd = block->data()->field_descr();
     ParticleDescr * pd = block->data()->particle_descr();
 
-     double dt_shift = 0.5*block->dt()/cosmo_a;
+    double dt_shift = 0.5*block->dt()/cosmo_a;
     //    double dt_shift = 0.0;
     if (rank >= 1) {
-      EnzoComputeCicInterp interp_x (fd, "acceleration_x", pd, "dark", "ax", dt_shift);
+      EnzoComputeCicInterp interp_x
+    	(fd, "acceleration_x", pd, "dark", "ax", dt_shift);
       interp_x.compute(block);
     }
 
     if (rank >= 2) {
-      EnzoComputeCicInterp interp_y (fd, "acceleration_y", pd, "dark", "ay", dt_shift);
+      EnzoComputeCicInterp interp_y
+    	(fd, "acceleration_y", pd, "dark", "ay", dt_shift);
       interp_y.compute(block);
     }
 
     if (rank >= 3) {
-      EnzoComputeCicInterp interp_z (fd, "acceleration_z", pd, "dark", "az", dt_shift);
+      EnzoComputeCicInterp interp_z
+    	(fd, "acceleration_z", pd, "dark", "az", dt_shift);
       interp_z.compute(block);
     }
 
@@ -178,10 +187,13 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
+#ifdef DEBUG_UPDATE    
 	  v3sum[0]+=std::abs(vx[ipdv]);
 	  a3sum[0]+=std::abs(ax[ipda]);
 	  v3sum2[0]+=vx[ipdv]*vx[ipdv];
 	  a3sum2[0]+=ax[ipda]*ax[ipda];
+	  CkPrintf ("DEBUG_UPDATE x %g v %g a %g\n",x[ipdp],vx[ipdv],ax[ipda]);
+#endif	  
 	  vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
 	  x [ipdp] += cp*vx[ipdv];
 	  vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
@@ -197,10 +209,12 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
+#ifdef DEBUG_UPDATE    
 	  v3sum[1]+=std::abs(vy[ipdv]);
 	  a3sum[1]+=std::abs(ay[ipda]);
 	  v3sum2[1]+=vy[ipdv]*vy[ipdv];
 	  a3sum2[1]+=ay[ipda]*ay[ipda];
+#endif	  
 	  vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
 	  y [ipdp] += cp*vy[ipdv];
 	  vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
@@ -216,10 +230,12 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
+#ifdef DEBUG_UPDATE    
 	  v3sum[2]+=std::abs(vz[ipdv]);
 	  a3sum[2]+=std::abs(az[ipda]);
 	  v3sum2[2]+=vz[ipdv]*vz[ipdv];
 	  a3sum2[2]+=az[ipda]*az[ipda];
+#endif	  
 
 	  vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
 	  z [ipdp] += cp*vz[ipdv];
@@ -228,6 +244,7 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	}
       }
     }
+    
 #ifdef DEBUG_UPDATE    
     CkPrintf ("DEBUG_UPDATE asum %g %g %g vsum %g %g %g\n",
 	      a3sum[0],a3sum[1],a3sum[2],

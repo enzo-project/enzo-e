@@ -15,7 +15,10 @@ int InitialTrace::id0_[CONFIG_NODE_SIZE] = {-1};
 void InitialTrace::pup (PUP::er &p)
 {
   TRACEPUP;
+
   // NOTE: change this function whenever attributes change
+
+  p | name_;
   p | field_;
   p | mpp_;
   p | dx_;
@@ -63,8 +66,7 @@ void InitialTrace::uniform_placement_
   
   // ... insert uninitialized tracer particles
 
-  const int it = particle.type_index("trace");
-
+  const int it = particle.type_index(name_);
   const int npn = nx/dx_*ny/dy_*nz/dz_;
   
   particle.insert_particles (it,npn);
@@ -92,6 +94,7 @@ void InitialTrace::uniform_placement_
   const int ia_y = particle.attribute_index (it,"y");
   const int ia_z = particle.attribute_index (it,"z");
 
+  const bool have_id = (ia_id >= 0);
   const int np = particle.batch_size();
 
   int ib=0;  // batch counter
@@ -101,11 +104,10 @@ void InitialTrace::uniform_placement_
   float * xa = 0;
   float * ya = 0;
   float * za = 0;
-
   const int in = cello::index_static();
 
   const int dp  = particle.stride(it,ia_x);
-  const int did = particle.stride(it,ia_id);
+  const int did = have_id ? particle.stride(it,ia_id) : 0;
 
   for (int iz=0; iz<nz; iz+=dz_) {
     float z = (mz>1) ? zm + (iz + 0.5)*hz : 0.0;
@@ -117,14 +119,18 @@ void InitialTrace::uniform_placement_
 
 	// ... if new batch then update position arrays
 	if (ip % np == 0) {
-	  id = (int64_t *) particle.attribute_array (it,ia_id,ib);
+	  if (have_id) id = (int64_t *) particle.attribute_array (it,ia_id,ib);
 	  xa = (float *)   particle.attribute_array (it,ia_x,ib);
 	  ya = (float *)   particle.attribute_array (it,ia_y,ib);
 	  za = (float *)   particle.attribute_array (it,ia_z,ib);
 	}
 
 	
-	id[ip*did] = id0_[in];
+	if (have_id) {
+	  id[ip*did] = id0_[in];
+	  id0_[in] += CkNumPes();
+	}
+	
 	xa[ip*dp] = x;
 	ya[ip*dp] = y;
 	za[ip*dp] = z;
@@ -136,8 +142,7 @@ void InitialTrace::uniform_placement_
 	  ib++;
 	}
 
-	id0_[in] += CkNumPes();
-    
+   
       }
     }
   }
@@ -218,7 +223,7 @@ void InitialTrace::density_placement_
 
   // ... insert uninitialized tracer particles
 
-  const int it = particle.type_index("trace");
+  const int it = particle.type_index(name_);
 
   particle.insert_particles (it,np);
 
@@ -229,6 +234,8 @@ void InitialTrace::density_placement_
   const int ia_y = particle.attribute_index (it,"y");
   const int ia_z = particle.attribute_index (it,"z");
 
+  const bool have_id = (ia_id >= 0);
+  
   const int npb = particle.batch_size();
 
   int ib=0;  // batch counter
@@ -242,7 +249,7 @@ void InitialTrace::density_placement_
   const int in = cello::index_static();
 
   const int ps  = particle.stride(it,ia_x);
-  const int ids = particle.stride(it,ia_id);
+  const int ids = have_id ? particle.stride(it,ia_id) : 0;
 
   // Define random uniform distribution between 0.0 and 1.0
   std::random_device rd;
@@ -285,13 +292,17 @@ void InitialTrace::density_placement_
 
     // ... if new batch then update position arrays
     if (ipb % npb == 0) {
-      id = (int64_t *) particle.attribute_array (it,ia_id,ib);
+      if (have_id) id = (int64_t *) particle.attribute_array (it,ia_id,ib);
       xa = (float *)   particle.attribute_array (it,ia_x,ib);
       ya = (float *)   particle.attribute_array (it,ia_y,ib);
       za = (float *)   particle.attribute_array (it,ia_z,ib);
     }
 
-    id[ipb*ids] = id0_[in];
+    if (have_id) {
+      id[ipb*ids] = id0_[in];
+      id0_[in] += CkNumPes();
+    }
+    
     xa[ipb*ps] = x;
     ya[ipb*ps] = y;
     za[ipb*ps] = z;
@@ -303,8 +314,7 @@ void InitialTrace::density_placement_
       ib++;
     }
 
-    id0_[in] += CkNumPes();
-    
+   
   }
 }
 

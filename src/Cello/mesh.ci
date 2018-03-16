@@ -49,10 +49,10 @@ module mesh {
   PUPable Refine;
   PUPable RefineDensity;
   PUPable RefineMask;
-  PUPable RefineMass;
   PUPable RefineParticleCount;
   PUPable RefineSlope;
   PUPable RefineShear;
+  PUPable SolverNull;
   PUPable Stopping;
   PUPable Refresh;
   PUPable RestrictLinear;

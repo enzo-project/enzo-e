@@ -40,6 +40,7 @@ public: // interface
   /// CHARM++ migration constructor
   EnzoConfig(CkMigrateMessage *m)
     : Config (m),
+      adapt_mass_type(),
       ppm_diffusion(0),
       ppm_dual_energy(false),
       ppm_dual_energy_eta_1(0.0),
@@ -166,6 +167,10 @@ public: // interface
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
+
+  /// Refine
+
+  std::vector <std::string>  adapt_mass_type;
 
   /// EnzoMethodPpm
 

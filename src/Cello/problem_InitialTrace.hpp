@@ -22,11 +22,13 @@ class InitialTrace : public Initial
 public: // interface
 
   /// empty constructor for charm++ pup()
-  InitialTrace(std::string field,
+  InitialTrace(std::string name,
+	       std::string field,
 	       double mpp,
 	       int dx, int dy, int dz) throw() 
   : Initial(),
     mpp_(mpp),
+    name_(name),
     field_(field),
     dx_(dx),dy_(dy),dz_(dz)
   {}
@@ -42,6 +44,7 @@ public: // interface
   InitialTrace (CkMigrateMessage *m)
     : Initial(m),
       mpp_(0.0),
+      name_(""),
       field_(""),
       dx_(0),dy_(0),dz_(0)
   {  }
@@ -79,6 +82,9 @@ protected: // attributes
   /// for each mpp grams
   double mpp_;
 
+  /// Name of particle (particle "type"); default is "trace"
+  std::string name_;
+  
   /// Field to use when mpp_ != 0.
   std::string field_;
 

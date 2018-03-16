@@ -10,6 +10,27 @@
 #include "charm_simulation.hpp"
 
 
+void Refine::pup (PUP::er &p)
+{
+  TRACEPUP;
+  PUP::able::pup(p);
+  // NOTE: change this function whenever attributes change
+  p | min_refine_;
+  p | max_coarsen_;
+  p | max_level_;
+  p | include_ghosts_;
+  p | schedule_;
+  p | output_;
+}
+
+//----------------------------------------------------------------------
+
+void Refine::set_schedule (Schedule * schedule) throw()
+{ 
+  if (schedule_) delete schedule_;
+  schedule_ = schedule;
+}
+
 //----------------------------------------------------------------------
 
 void * Refine::initialize_output_(FieldData * field_data)

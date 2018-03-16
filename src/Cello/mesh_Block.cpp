@@ -81,6 +81,7 @@ Block::Block ( MsgRefine * msg )
   index_.values(v3);
   CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
 	    v3[0],v3[1],v3[2]);
+  msg->print();
 #endif
 
 

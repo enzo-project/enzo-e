@@ -40,7 +40,8 @@ void EnzoProlong::pup (PUP::er &p)
 int EnzoProlong::apply 
 ( precision_type precision,
   void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+  bool accumulate)
 {
   ERROR("EnzoProlong::apply()",
 	"Not Implemented yet");
@@ -51,7 +52,8 @@ int EnzoProlong::apply
 
 int EnzoProlong::apply_
 ( enzo_float *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+  const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+  bool accumulate)
 {
   return 0;
   // int nd3_c[3];

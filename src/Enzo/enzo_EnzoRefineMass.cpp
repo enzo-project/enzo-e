@@ -1,24 +1,27 @@
-// See LICENSE_CELLO file for license and copyright information
+// // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_RefineMass.cpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2013-04-23
-/// @brief    Implementation of RefineMass class
+// /// @file     enzo_EnzoRefineMass.cpp
+// /// @author   James Bordner (jobordner@ucsd.edu)
+// /// @date     2013-04-23
+// /// @brief    Implementation of Enzo RefineMass class
 
-#include "mesh.hpp"
+#include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-RefineMass::RefineMass
+EnzoRefineMass::EnzoRefineMass
 (
  double min_refine,
  double max_coarsen,
- double level_exponent,
- double root_cell_volume,
  int    max_level,
  bool include_ghosts,
- std::string output) throw ()
+ std::string output,
+ std::string name,
+ std::string mass_type,
+ double level_exponent) throw ()
   : Refine(min_refine,max_coarsen,max_level,include_ghosts,output),
+    name_(name),
+    mass_type_(0),
     level_exponent_(level_exponent)
 
   //    MinimumMassForRefinement[0] = MinimumOverDensityForRefinement[0];
@@ -39,24 +42,24 @@ RefineMass::RefineMass
   //	  (DomainRightEdge[dim]-DomainLeftEdge[dim])/
   //	  float(MetaData.TopGridDims[dim]);
 {
-  TRACE("RefineMass::RefineMass");
-  WARNING ("RefineMass::RefineMass()",
-	   "Assuming non-Cosmology problem for RefineMass");
-  ERROR ("RefineMass::RefineMass()",
+  TRACE("EnzoRefineMass::EnzoRefineMass");
+  WARNING ("EnzoRefineMass::EnzoRefineMass()",
+	   "Assuming non-Cosmology problem for EnzoRefineMass");
+  ERROR ("EnzoRefineMass::EnzoRefineMass()",
 	 "Refinement by mass is not implemented yet");
 
 }
 
 //----------------------------------------------------------------------
 
-int RefineMass::apply ( Block * block ) throw ()
+int EnzoRefineMass::apply ( Block * block ) throw ()
 {
   Field field = block->data()->field();
   int level = 0;
 
-  WARNING ("RefineMass::RefineMass()",
+  WARNING ("EnzoRefineMass::EnzoRefineMass()",
 	   "Assuming refinement factor == 2");
-  WARNING ("RefineMass::RefineMass()",
+  WARNING ("EnzoRefineMass::EnzoRefineMass()",
 	   "Assuming level==0 for level_exponent");
 
   double mass_min_refine  = min_refine_ * pow(2.0,level*level_exponent_);
@@ -132,7 +135,7 @@ int RefineMass::apply ( Block * block ) throw ()
     }
     break;
   default:
-    ERROR2("RefineMass::apply",
+    ERROR2("EnzoRefineMass::apply",
 	   "Unknown precision %d for field %d",
 	   precision,0);
     break;

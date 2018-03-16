@@ -14,6 +14,7 @@ EnzoConfig g_enzo_config;
 
 EnzoConfig::EnzoConfig() throw ()
   :
+  adapt_mass_type(0),
 #ifdef CONFIG_USE_GRACKLE
   method_grackle_units(),
   method_grackle_chemistry(),
@@ -155,6 +156,8 @@ void EnzoConfig::pup (PUP::er &p)
 
   // NOTE: change this function whenever attributes change
 
+  p | adapt_mass_type;
+  
   p | ppm_diffusion;
   p | ppm_dual_energy;
   p | ppm_dual_energy_eta_1;
@@ -306,6 +309,22 @@ void EnzoConfig::read(Parameters * p) throw()
   TRACE("EnzoCharm::read calling Config::read()");
 
   ((Config*)this) -> read (p);
+
+  adapt_mass_type.resize(num_adapt);
+  
+  for (int ia=0; ia<num_adapt; ia++) {
+
+    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
+    adapt_mass_type[ia] = p->value_string(prefix+"mass_type","unknown");
+    ASSERT2("EnzoConfig::read()",
+	    "Unknown mass_type %s for parameter %s",
+	    adapt_mass_type[ia].c_str(),(prefix+"mass_type").c_str(),
+	    (adapt_type[ia] != "mass" ||
+	     (adapt_mass_type[ia]=="dark" ||
+	      adapt_mass_type[ia]=="baryon")));
+  }
+
+  solver_precondition.resize(num_solvers);
 
   double floor_default = 1e-6;
 

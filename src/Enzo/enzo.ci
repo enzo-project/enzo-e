@@ -63,6 +63,7 @@ module enzo {
 
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
+  PUPable EnzoRefineMass;
 
   PUPable EnzoComputePressure;
   PUPable EnzoComputeTemperature;

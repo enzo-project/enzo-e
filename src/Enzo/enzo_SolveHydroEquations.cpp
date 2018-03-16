@@ -310,7 +310,7 @@ int EnzoBlock::SolveHydroEquations
     CellWidthTemp[dim] = new enzo_float [GridDimension[dim]];
     if (dim < rank) {
       for (int i=0; i<GridDimension[dim]; i++) 
-	CellWidthTemp[dim][i] = enzo_float(cosmo_a*CellWidth[dim]);
+	CellWidthTemp[dim][i] = (cosmo_a*CellWidth[dim]);
     } else {
       for (int i=0; i<GridDimension[dim]; i++) 
 	CellWidthTemp[dim][i] = 1.0;

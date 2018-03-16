@@ -230,6 +230,7 @@ Refine * EnzoProblem::create_refine_
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
+
   } else if (type == "particle_mass") {
 
     return new EnzoRefineParticleMass
@@ -238,6 +239,18 @@ Refine * EnzoProblem::create_refine_
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index],
+       config->adapt_level_exponent[index] );
+
+  } else if (type == "mass") {
+
+    return new EnzoRefineMass 
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_output[index],
+       config->adapt_field_list[index][0],
+       enzo_config->adapt_mass_type[index],
        config->adapt_level_exponent[index] );
 
   } else {

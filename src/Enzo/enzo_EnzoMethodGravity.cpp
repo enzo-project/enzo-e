@@ -11,6 +11,11 @@
 
 #include "enzo.decl.h"
 
+// #define DEBUG_FIELD_FACE
+// #define DEBUG_COPY_DENSITY
+// #define DEBUG_COPY_POTENTIAL
+// #define DEBUG_COPY_B
+
 // #define DEBUG_METHOD
 
 // #define READ_ENZO_DENSITY
@@ -21,9 +26,6 @@
 // #define READ_ENZO_POTENTIAL
 // #define USE_ENZO_POTENTIAL
 
-//#define DEBUG_COPY_DENSITY
-//#define DEBUG_COPY_POTENTIAL
-//#define DEBUG_COPY_B
 // #define READ_PARTICLES
 
 #define CK_TEMPLATES_ONLY
@@ -60,7 +62,11 @@ EnzoMethodGravity::EnzoMethodGravity
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
-
+#ifdef DEBUG_FIELD_FACE  
+  int idebug1 = field_descr->field_id("debug_1");
+  int idebug2 = field_descr->field_id("debug_2");
+#endif  
+  
   const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
 			     enzo_sync_id_method_gravity);
 
@@ -71,8 +77,12 @@ EnzoMethodGravity::EnzoMethodGravity
 
   if (idt != -1 && accumulate) {
     // WARNING: accumulate cannot be used with AMR yet [170818]
-    // Accumulate is used when particles are deposited into density_total.
+    // Accumulate is used when particles are deposited into density_total
     refresh(ir)->add_field_src_dst(idt,ib);
+
+#ifdef DEBUG_FIELD_FACE    
+    refresh(ir)->add_field_src_dst(idebug1,idebug2);
+#endif    
     refresh(ir)->set_accumulate(true);
   }
 }
@@ -89,9 +99,6 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   /// access problem-defining fields for eventual RHS and solution
   const int ib = field.field_id ("B");
-#ifdef DEBUG_COPY_B  
-  const int ib_copy = field.field_id ("B_copy");
-#endif  
   const int id  = field.field_id("density");
   const int idt = field.field_id("density_total");
   const int idensity = (idt != -1) ? idt : id;
@@ -104,6 +111,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   enzo_float * B = (enzo_float*) field.values (ib);
 #ifdef DEBUG_COPY_B  
+  const int ib_copy = field.field_id ("B_copy");
   enzo_float * B_copy = (enzo_float*) field.values (ib_copy);
 #endif  
   enzo_float * D = (enzo_float*) field.values (idensity);
@@ -238,6 +246,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   const int ix = field.field_id ("potential");
 
   std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
+
   solver->apply (A, ix, ib, block);
 
 }
@@ -274,7 +283,6 @@ void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->compute_accelerations(this);
-  
 }
 
 void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
@@ -418,9 +426,13 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   if (de_t) {
 #ifdef DEBUG_COPY_DENSITY  
     enzo_float * de_t_temp = (enzo_float*) field.values("density_total_temp");
-    CkPrintf ("DEBUG_DENSITY dt[0] = %20.15g\n",de_t[1+mx*(1+my*1)]);
-    for (int i=0; i<mx*my*mz; i++) {
-      de_t_temp[i] = de_t[i];
+    for (int iz=0; iz<mz; iz++) {
+      for (int iy=0; iy<my; iy++) {
+	for (int ix=0; ix<mx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  de_t_temp[i] = de_t[i];
+	}
+      }
     }
 #endif  
     for (int i=0; i<mx*my*mz; i++) {
@@ -472,6 +484,20 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
   
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+  if (cosmology) {
+    const int rank = block->rank();
+    enzo_float cosmo_a = 1.0;
+    enzo_float cosmo_dadt = 0.0;
+    double dt   = block->dt();
+    double time = block->time();
+    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+    if (rank >= 1) hx*=cosmo_a;
+    if (rank >= 2) hy*=cosmo_a;
+    if (rank >= 3) hz*=cosmo_a;
+  }
+
   if (ax) {
     for (int ix=gx; ix<nx+gx; ix++) {
       for (int iy=gy; iy<ny+gy; iy++) {

@@ -180,11 +180,11 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
     int index_dst = field_list_dst_(field)[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
 
-    int i3[3], n3[3], i23[2][3]={}, n23[2][3]={};
+    int i3[3], n3[3];
     if (!accumulate) {
       loop_limits (i3,n3,m3,g3,op_load);
     } else {
-      loop_limits (i3,n3,m3,g3,op_load,i23,n23);
+      loop_limits_accumulate (i3,n3,m3,g3,op_load);
     }
   
     if (refresh_type_ == refresh_coarse) {
@@ -213,29 +213,14 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
       
       // Copy field to array
       
-      if (! accumulate) {
-	if (precision == precision_single) {
-	  index_array += load_ ( a4,  f4,  m3,n3,i3, accumulate);
-	} else if (precision == precision_double) {
-	  index_array += load_ ( a8,  f8,  m3,n3,i3, accumulate);
-	} else if (precision == precision_quadruple) {
-	  index_array += load_ ( a16, f16, m3,n3,i3, accumulate);
-	} else {
-	  ERROR("FieldFace::face_to_array", "Unsupported precision");
-	}
+      if (precision == precision_single) {
+	index_array += load_ ( a4,  f4,  m3,n3,i3, accumulate);
+      } else if (precision == precision_double) {
+	index_array += load_ ( a8,  f8,  m3,n3,i3, accumulate);
+      } else if (precision == precision_quadruple) {
+	index_array += load_ ( a16, f16, m3,n3,i3, accumulate);
       } else {
-	if (precision == precision_single) {
-	  index_array += load_ ( a4,  f4,  m3,n23[0],i23[0], accumulate);
-	  index_array += load_ ( a4,  f4,  m3,n23[1],i23[1], accumulate);
-	} else if (precision == precision_double) {
-	  index_array += load_ ( a8,  f8,  m3,n23[0],i23[0], accumulate);
-	  index_array += load_ ( a8,  f8,  m3,n23[1],i23[1], accumulate);
-	} else if (precision == precision_quadruple) {
-	  index_array += load_ ( a16, f16, m3,n23[0],i23[0], accumulate);
-	  index_array += load_ ( a16, f16, m3,n23[1],i23[1], accumulate);
-	} else {
-	  ERROR("FieldFace::face_to_array", "Unsupported precision");
-	}
+	ERROR("FieldFace::face_to_array", "Unsupported precision");
       }
     }
   }
@@ -269,11 +254,11 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     int index_dst = field_list_dst_(field)[i_f];
     const bool accumulate = accumulate_(index_src,index_dst);
 
-    int i3[3], n3[3], i23[2][3]={}, n23[2][3]={};
+    int i3[3], n3[3];
     if (!accumulate) {
       loop_limits (i3,n3,m3,g3,op_store);
     } else {
-      loop_limits (i3,n3,m3,g3,op_store,i23,n23);
+      loop_limits_accumulate (i3,n3,m3,g3,op_store);
     }
 
     if (refresh_type_ == refresh_fine) {
@@ -298,7 +283,8 @@ void FieldFace::array_to_face (char * array, Field field) throw()
       index_array += prolong->apply
 	(precision, 
 	 field_ghost,m3,i3,       n3,
-	 array_ghost,nc3,i3_array, nc3);
+	 array_ghost,nc3,i3_array, nc3,
+	 accumulate);
 
     } else {
 
@@ -310,29 +296,14 @@ void FieldFace::array_to_face (char * array, Field field) throw()
       
       // Copy field to array
 
-      if ( ! accumulate) {
-	if (precision == precision_single) {
-	  index_array += store_ ( fd4,  as4,  m3,n3,i3, accumulate);
-	} else if (precision == precision_double) {
-	  index_array += store_ ( fd8,  as8,  m3,n3,i3, accumulate);
-	} else if (precision == precision_quadruple) {
-	  index_array += store_ ( fd16, as16, m3,n3,i3, accumulate);
-	} else {
-	  ERROR("FieldFace::array_to_face()", "Unsupported precision");
-	}
+      if (precision == precision_single) {
+	index_array += store_ ( fd4,  as4,  m3,n3,i3, accumulate);
+      } else if (precision == precision_double) {
+	index_array += store_ ( fd8,  as8,  m3,n3,i3, accumulate);
+      } else if (precision == precision_quadruple) {
+	index_array += store_ ( fd16, as16, m3,n3,i3, accumulate);
       } else {
-	if (precision == precision_single) {
-	  index_array += store_ ( fd4,  as4,  m3,n23[0],i23[0], accumulate);
-	  index_array += store_ ( fd4,  as4,  m3,n23[1],i23[1], accumulate);
-	} else if (precision == precision_double) {
-	  index_array += store_ ( fd8,  as8,  m3,n23[0],i23[0], accumulate);
-	  index_array += store_ ( fd8,  as8,  m3,n23[1],i23[1], accumulate);
-	} else if (precision == precision_quadruple) {
-	  index_array += store_ ( fd16, as16, m3,n23[0],i23[0], accumulate);
-	  index_array += store_ ( fd16, as16, m3,n23[1],i23[1], accumulate);
-	} else {
-	  ERROR("FieldFace::array_to_face()", "Unsupported precision");
-	}
+	ERROR("FieldFace::array_to_face()", "Unsupported precision");
       }
     }
   }
@@ -361,7 +332,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     if (!accumulate) {
       loop_limits (is3,ns3,m3,g3,op_load);
     } else {
-      loop_limits (is3,ns3,m3,g3,op_load,is23,ns23);
+      loop_limits_accumulate (is3,ns3,m3,g3,op_load);
     }
 
     invert_face();
@@ -370,7 +341,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     if (!accumulate) {
       loop_limits (id3,nd3,m3,g3,op_store);
     } else {
-      loop_limits (id3,nd3,m3,g3,op_store,id23,nd23);
+      loop_limits_accumulate (id3,nd3,m3,g3,op_store);
     }
 
     invert_face();
@@ -400,7 +371,8 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       prolong->apply (precision, 
 		      values_dst,m3,id3, nd3,
-		      values_src,m3,is3, ns3);
+		      values_src,m3,is3, ns3,
+		      accumulate);
 
     } else if (refresh_type_ == refresh_coarse) {
 
@@ -410,7 +382,8 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
       restrict->apply (precision, 
 		       values_dst,m3,id3, nd3,
-		       values_src,m3,is3, ns3);
+		       values_src,m3,is3, ns3,
+		       accumulate);
 
     } else {
 
@@ -423,29 +396,14 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
       
       // Copy field to array
 
-      if ( ! accumulate ) {
-	if (precision == precision_single) {
-	  copy_ ( fd4, m3,nd3,id3,fs4, m3, ns3,is3,accumulate);
-	} else if (precision == precision_double) {
-	  copy_ ( fd8, m3,nd3,id3,fs8, m3, ns3,is3,accumulate);
-	} else if (precision == precision_quadruple) {
-	  copy_ ( fd16,m3,nd3,id3,fs16,m3,ns3,is3,accumulate);
-	} else {
-	  ERROR("FieldFace::face_to_face()", "Unsupported precision");
-	}
+      if (precision == precision_single) {
+	copy_ ( fd4, m3,nd3,id3,fs4, m3, ns3,is3,accumulate);
+      } else if (precision == precision_double) {
+	copy_ ( fd8, m3,nd3,id3,fs8, m3, ns3,is3,accumulate);
+      } else if (precision == precision_quadruple) {
+	copy_ ( fd16,m3,nd3,id3,fs16,m3,ns3,is3,accumulate);
       } else {
-	if (precision == precision_single) {
-	  copy_ ( fd4, m3,nd23[0],id23[0],fs4, m3, ns23[0],is23[0],accumulate);
-	  copy_ ( fd4, m3,nd23[1],id23[1],fs4, m3, ns23[1],is23[1],accumulate);
-	} else if (precision == precision_double) {
-	  copy_ ( fd8, m3,nd23[0],id23[0],fs8, m3, ns23[0],is23[0],accumulate);
-	  copy_ ( fd8, m3,nd23[1],id23[1],fs8, m3, ns23[1],is23[1],accumulate);
-	} else if (precision == precision_quadruple) {
-	  copy_ ( fd16,m3,nd23[0],id23[0],fs16,m3,ns23[0],is23[0],accumulate);
-	  copy_ ( fd16,m3,nd23[1],id23[1],fs16,m3,ns23[1],is23[1],accumulate);
-	} else {
-	  ERROR("FieldFace::face_to_face()", "Unsupported precision");
-	}
+	ERROR("FieldFace::face_to_face()", "Unsupported precision");
       }
     }
   }
@@ -476,11 +434,11 @@ int FieldFace::num_bytes_array(Field field) throw()
     const bool accumulate = accumulate_(index_src,index_dst);
     int op_type = (refresh_type_ == refresh_fine) ? op_load : op_store;
 
-    int i3[3], n3[3], i23[2][3]={}, n23[2][3]={};
+    int i3[3], n3[3];
     if (!accumulate) {
       loop_limits (i3,n3,m3,g3,op_type);
     } else {
-      loop_limits (i3,n3,m3,g3,op_type,i23,n23);
+      loop_limits_accumulate (i3,n3,m3,g3,op_type);
     }
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
@@ -723,95 +681,132 @@ template<class T> void FieldFace::copy_
 
 //----------------------------------------------------------------------
 
-void FieldFace::loop_limits
-( int i3[3],int n3[3], const int m3[3], const int g3[3], int op_type,
-  int i23[2][3], int n23[2][3])
+void FieldFace::loop_limits_accumulate
+( int i3[3],int n3[3], const int m3[3], const int g3[3], int op_type)
 {
+  // ASSUMES accumulate == true
+  
+  // force including ghosts on axes orthogonal to face
+  // (commented out since size mismatch errors in data packing/unpacking
+  //  ghost_[0] = (n3[0]>1);
+  //  ghost_[1] = (n3[1]>1);
+  //  ghost_[2] = (n3[2]>1);
+  
+  // first compute loop limits assuming accumulate == false
   loop_limits (i3,n3,m3,g3,op_type);
-
-  // copy full face limits to accumulate sub-face limits
   
-  for (int i=0; i<2; i++) {
-    for (int j=0; j<3; j++) {
-      i23[i][j] = i3[j];
-      n23[i][j] = n3[j];
-    }
-  }
-  
-  // adjust sub-face limits
+  int i23[2][3]={}, n23[2][3]={};
+  for (int axis=0; axis<3; axis++) {
+    // copy initial limits
+    i23[1][axis]=i23[0][axis]=i3[axis];
+    n23[1][axis]=n23[0][axis]=n3[axis];
 
-  // WARNING: accumulate loop index update is not yet implemented
-  // for refresh_coarse or refresh_fine
-  if (refresh_type_ == refresh_same) {
-    for (int axis=0; axis<3; axis++) {
-      i23[1][axis]=i23[0][axis];
-      n23[1][axis]=n23[0][axis];
-      if (! ghost_[axis]) {
-	if ((op_type == op_load && face_[axis] == -1) ||
-	    (op_type == op_store && face_[axis] == 1)) {
-	  i23[1][axis] -= 1;
-	}
-	if ((op_type == op_load && face_[axis] == 1) ||
-	    (op_type == op_store && face_[axis] == -1)) {
-	  i23[1][axis] += n23[0][axis];
-	}
-	if (face_[axis] != 0) {
-	  n23[1][axis] = 1;
-	}
+    if (refresh_type_ == refresh_same) {
 
+      // adjust sub-face limits for additional zones
+      if ((op_type == op_load  && face_[axis] == -1) ||
+	  (op_type == op_store && face_[axis] == +1)) {
+	i23[1][axis] -= g3[axis];
+      }
+      if ((op_type == op_load  && face_[axis] == +1) ||
+	  (op_type == op_store && face_[axis] == -1)) {
+	i23[1][axis] += n23[0][axis];
+      }
+      if (face_[axis] != 0) {
+	n23[1][axis] = g3[axis];
       }
 
-      // update full face
-      i3[axis] = std::min(i23[0][axis],
-			  i23[1][axis]);
-      n3[axis] = std::max(i23[0][axis] + n23[0][axis],
-			  i23[1][axis] + n23[1][axis]) - i3[axis];
+    } else if (refresh_type_ == refresh_fine) {
+
+      // PROLONG
+      if ((op_type == op_load  && face_[axis] == -1)) {
+	i23[1][axis] -= g3[axis];
+	n23[1][axis]  = g3[axis];
+      }
+      if ((op_type == op_store && face_[axis] == -1)) {
+	i23[1][axis] += n23[0][axis];
+	n23[1][axis]  = 2*g3[axis];
+      }
+      if ((op_type == op_load  && face_[axis] == +1)) {
+	i23[1][axis] += n23[0][axis];
+	n23[1][axis]  = g3[axis];
+      }
+      if ((op_type == op_store && face_[axis] == +1)) {
+	i23[1][axis] -= 2*g3[axis];
+	n23[1][axis]  = 2*g3[axis];
+      }
+
+      
+    } else if (refresh_type_ == refresh_coarse) {
+
+      // RESTRICT
+      if ((op_type == op_load  && face_[axis] == -1)) {
+	i23[1][axis] -= g3[axis];
+	n23[1][axis]  = g3[axis];
+      }
+      if ((op_type == op_store && face_[axis] == -1)) {
+	i23[1][axis] += n23[0][axis];
+	n23[1][axis]  = g3[axis]/2;
+      }
+      if ((op_type == op_load  && face_[axis] == +1)) {
+	i23[1][axis] += n23[0][axis];
+	n23[1][axis]  = g3[axis];
+      }
+      if ((op_type == op_store && face_[axis] == +1)) {
+	i23[1][axis] -= g3[axis]/2;
+	n23[1][axis]  = g3[axis]/2;
+      }
+
     }
+
+    // merge original and accumulate=true regions
+    i3[axis] = std::min(i23[0][axis],
+			i23[1][axis]);
+    n3[axis] = std::max(i23[0][axis] + n23[0][axis],
+			i23[1][axis] + n23[1][axis]) - i3[axis];
+
   }
+    
 }
 
 //----------------------------------------------------------------------
 
 void FieldFace::loop_limits
 ( int i3[3],int n3[3], const int m3[3], const int g3[3], int op_type)
-
 // Return Field array loop limits for the FieldFace in i3[] and n3[]
 // Assumes accumulate is false--use other loop_limits() if accumulate
 // is true
 {
-  for (int i=0; i<3; i++) {
-    i3[i]=0;
-    n3[i]=0;
-  }
-
-  const bool lcopy = (refresh_type_ == refresh_same);
-
+  
   for (int axis=0; axis<3; axis++) {
 
-    if (lcopy) {
+    i3[axis] = 0;
+    n3[axis] = 0;
+
+    if (refresh_type_ == refresh_same) {
       if (face_[axis] == 0 && ! ghost_[axis]) {
 	i3[axis] = g3[axis];
 	n3[axis]  = m3[axis] - 2*g3[axis];
       }
       if (face_[axis] == 0 && ghost_[axis]) {
 	i3[axis] = 0;
-	n3 [axis] = m3[axis];
+	n3[axis] = m3[axis];
       }
       if (face_[axis] == -1 && op_type == op_load) {
 	i3[axis] = g3[axis];
-	n3 [axis] = g3[axis];
+	n3[axis] = g3[axis];
       }
       if (face_[axis] == -1 && op_type == op_store) {
 	i3[axis] = 0;
-	n3 [axis] = g3[axis];
+	n3[axis] = g3[axis];
       }      
       if (face_[axis] == +1 && op_type == op_load) {
 	i3[axis] = m3[axis]-2*g3[axis];
-	n3 [axis] = g3[axis];
+	n3[axis] = g3[axis];
       }
       if (face_[axis] == +1 && op_type == op_store) {
 	i3[axis] = m3[axis]-g3[axis];
-	n3 [axis] = g3[axis];
+	n3[axis] = g3[axis];
       }
     }
 
