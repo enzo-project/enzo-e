@@ -61,6 +61,8 @@ public: // interface
       physics_cosmology_hubble_constant_now(0.0),
       physics_cosmology_omega_matter_now(0.0),
       physics_cosmology_omega_lamda_now(0.0),
+      physics_cosmology_omega_baryon_now(1.0),
+      physics_cosmology_omega_cdm_now(0.0),
       physics_cosmology_comoving_box_size(0.0),
       physics_cosmology_max_expansion_rate(0.0),
       physics_cosmology_initial_redshift(0.0),
@@ -196,6 +198,8 @@ public: // attributes
   double                     physics_cosmology_hubble_constant_now;
   double                     physics_cosmology_omega_matter_now;
   double                     physics_cosmology_omega_lamda_now;
+  double                     physics_cosmology_omega_baryon_now;
+  double                     physics_cosmology_omega_cdm_now;
   double                     physics_cosmology_comoving_box_size;
   double                     physics_cosmology_max_expansion_rate;
   double                     physics_cosmology_initial_redshift;

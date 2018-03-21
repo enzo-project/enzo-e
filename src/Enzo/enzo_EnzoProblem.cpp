@@ -243,7 +243,7 @@ Refine * EnzoProblem::create_refine_
 
   } else if (type == "mass") {
 
-    return new EnzoRefineMass 
+      return new EnzoRefineMass 
       (config->adapt_min_refine[index],
        config->adapt_max_coarsen[index],
        config->adapt_max_level[index],
@@ -531,6 +531,8 @@ Physics * EnzoProblem::create_physics_
       (
        enzo_config->physics_cosmology_hubble_constant_now,
        enzo_config->physics_cosmology_omega_matter_now,
+       enzo_config->physics_cosmology_omega_baryon_now,
+       enzo_config->physics_cosmology_omega_cdm_now,
        enzo_config->physics_cosmology_omega_lamda_now,
        enzo_config->physics_cosmology_comoving_box_size,
        enzo_config->physics_cosmology_max_expansion_rate,

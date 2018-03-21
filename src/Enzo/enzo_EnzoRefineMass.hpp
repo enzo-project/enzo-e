@@ -35,7 +35,7 @@ public: // interface
   EnzoRefineMass(CkMigrateMessage *m)
     : Refine (m),
       name_(""),
-      mass_type_(-1),
+      mass_ratio_(0.0),
       level_exponent_(0.0)
   { }
 
@@ -46,7 +46,7 @@ public: // interface
     // NOTE: change this function whenever attributes change
     Refine::pup(p);
     p | name_;
-    p | mass_type_;
+    p | mass_ratio_;
     p | level_exponent_;
   }
 
@@ -60,9 +60,8 @@ private:
   /// Field containing density to compare against
   std::string name_;
 
-  /// Type of matter in the field: mass_baryon or mass_dark.  Ignored
-  /// for non-cosmology sims
-  int mass_type_;
+  /// Ratio of type of mass (baryon or cdm) to total if cosmology, else 0.0
+  double mass_ratio_;
 
   /// Level expontent
   double level_exponent_;

@@ -38,6 +38,8 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_hubble_constant_now(0.0),
   physics_cosmology_omega_matter_now(0.0),
   physics_cosmology_omega_lamda_now(0.0),
+  physics_cosmology_omega_baryon_now(1.0),
+  physics_cosmology_omega_cdm_now(0.0),
   physics_cosmology_comoving_box_size(0.0),
   physics_cosmology_max_expansion_rate(0.0),
   physics_cosmology_initial_redshift(0.0),
@@ -179,6 +181,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_hubble_constant_now;
   p | physics_cosmology_omega_lamda_now;
   p | physics_cosmology_omega_matter_now;
+  p | physics_cosmology_omega_baryon_now;
+  p | physics_cosmology_omega_cdm_now;
   p | physics_cosmology_comoving_box_size;
   p | physics_cosmology_max_expansion_rate;
   p | physics_cosmology_initial_redshift;
@@ -593,6 +597,12 @@ void EnzoConfig::read(Parameters * p) throw()
       physics_cosmology_omega_matter_now = p->value_float
 	(full_name + ":omega_matter_now",   0.279);
 
+      physics_cosmology_omega_baryon_now = p->value_float
+	(full_name + ":omega_baryon_now",   1.0);
+
+      physics_cosmology_omega_cdm_now = p->value_float
+	(full_name + ":omega_cdm_now",   0.0);
+      
       physics_cosmology_omega_lamda_now = p->value_float
 	(full_name + ":omega_lambda_now",   0.721);
 

@@ -43,7 +43,8 @@ public: // interface
       max_coarsen_(0.0),
       max_level_(0),
       include_ghosts_(false),
-      output_("")
+      output_(""),
+      schedule_(NULL)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -95,12 +96,12 @@ protected:
   /// Whether to include ghost zones when evaluating refinement criteria
   bool include_ghosts_;
 
-  /// Schedule for refinement; NULL if none
-  Schedule * schedule_;
-
   /// Field name to write refinement field to (-1 coarsen 0 same +1 refine)
   std::string output_;
   
+  /// Schedule for refinement; NULL if none
+  Schedule * schedule_;
+
 };
 
 #endif /* MESH_REFINE_HPP */

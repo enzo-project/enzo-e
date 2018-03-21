@@ -56,7 +56,7 @@ void MethodTrace::compute ( Block * block) throw()
   
     // NOTE: union so v?a4 also initialized
     
-    vxa8 = (double *) field.values("velocity_x");
+    vxa8 = (rank >= 1) ? (double *) field.values("velocity_x") : NULL;
     vya8 = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
     vza8 = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
 
@@ -181,9 +181,9 @@ void MethodTrace::compute ( Block * block) throw()
 	  double y0 = ym + (iy0-gy+0.5)*hy;
 	  double z0 = zm + (iz0-gz+0.5)*hz;
 
-	  double x1 = 1.0 - xm;
-	  double y1 = 1.0 - ym;
-	  double z1 = 1.0 - zm;
+	  double x1 = 1.0 - x0;
+	  double y1 = 1.0 - y0;
+	  double z1 = 1.0 - z0;
 
 	  const int i000 = ix0+mx*(iy0 + my*iz0);
 	  const int i001 = ix0+mx*(iy0 + my*iz1);

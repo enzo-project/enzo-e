@@ -5,7 +5,12 @@
 // /// @date     2013-04-23
 // /// @brief    Implementation of Enzo RefineMass class
 
+#define DEBUG_REFINE
+
 #include "enzo.hpp"
+#include "charm_simulation.hpp"
+#include "enzo.hpp"
+#include "enzo.decl.h"
 
 //----------------------------------------------------------------------
 
@@ -21,13 +26,8 @@ EnzoRefineMass::EnzoRefineMass
  double level_exponent) throw ()
   : Refine(min_refine,max_coarsen,max_level,include_ghosts,output),
     name_(name),
-    mass_type_(0),
+    mass_ratio_(0.0),
     level_exponent_(level_exponent)
-
-  //    MinimumMassForRefinement[0] = MinimumOverDensityForRefinement[0];
-  //    for (int dim = 0; dim < MetaData.TopGridRank; dim++)
-  //      MinimumMassForRefinement[0] *=(DomainRightEdge[dim]-DomainLeftEdge[dim])/
-  //        float(MetaData.TopGridDims[dim]);
 
   // ENZO Cosmology
   //      MinimumMassForRefinement[i] = CosmologySimulationOmegaBaryonNow/
@@ -42,12 +42,24 @@ EnzoRefineMass::EnzoRefineMass
   //	  (DomainRightEdge[dim]-DomainLeftEdge[dim])/
   //	  float(MetaData.TopGridDims[dim]);
 {
-  TRACE("EnzoRefineMass::EnzoRefineMass");
-  WARNING ("EnzoRefineMass::EnzoRefineMass()",
-	   "Assuming non-Cosmology problem for EnzoRefineMass");
-  ERROR ("EnzoRefineMass::EnzoRefineMass()",
-	 "Refinement by mass is not implemented yet");
+  EnzoSimulation * simulation =
+    (EnzoSimulation * ) proxy_simulation.ckLocalBranch();
 
+  EnzoPhysicsCosmology * cosmology =
+    (EnzoPhysicsCosmology *) simulation->problem()->physics("cosmology");
+
+  if (cosmology) {
+    if (mass_type == "dark") {
+      mass_ratio_ = cosmology->omega_cdm_now()   /cosmology->omega_matter_now();
+    } else if (mass_type == "baryon") {
+      mass_ratio_ = cosmology->omega_baryon_now()/cosmology->omega_matter_now();
+    } else {
+      ERROR1 ("EnzoRefineMass::EnzoRefineMass()",
+	      "Unknown mass_type %s",  mass_type.c_str());
+    }
+  } else {
+    mass_ratio_ = 0.0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -57,79 +69,147 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
   Field field = block->data()->field();
   int level = 0;
 
-  WARNING ("EnzoRefineMass::EnzoRefineMass()",
-	   "Assuming refinement factor == 2");
-  WARNING ("EnzoRefineMass::EnzoRefineMass()",
-	   "Assuming level==0 for level_exponent");
 
-  double mass_min_refine  = min_refine_ * pow(2.0,level*level_exponent_);
-  double mass_max_coarsen = max_coarsen_* pow(2.0,level*level_exponent_);
+  double hx,hy,hz;
+  block->cell_width(&hx,&hy,&hz);
 
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
+  EnzoSimulation * simulation =
+    (EnzoSimulation * ) proxy_simulation.ckLocalBranch();
+  EnzoPhysicsCosmology * cosmology =
+    (EnzoPhysicsCosmology *) simulation->problem()->physics("cosmology");
 
+  double scale = (mass_ratio_ == 0.0) ? 1.0 :
+    mass_ratio_*pow(2.0,level*level_exponent_)*hx*hy*hz;
+  double mass_min_refine  = scale*min_refine_;
+  double mass_max_coarsen = scale*max_coarsen_;
+
+  const int id_field = field.field_id(name_);
+  ASSERT1 ("EnzoRefineMass::apply()",
+	   "Undefined field name %s",
+	   name_.c_str(), id_field >= 0);
+  
+  int mx,my,mz;
   int gx,gy,gz;
-  field.ghost_depth(0, &gx,&gy,&gz);
+  field.dimensions (id_field, &mx,&my,&mz);
+  field.ghost_depth(id_field, &gx,&gy,&gz);
 
-  precision_type precision = field.precision(0);
-
-  // ERROR: using field id=0!
-  void * void_array  = field.values(0);
-  void * void_output = initialize_output_(field.field_data());
+  precision_type precision = field.precision(id_field);
 
   //  int num_fields = field_descr->field_count();
 
   bool all_coarsen = true;
   bool any_refine = false;
 
-  const int d3[3] = {1,nx,nx*ny};
+  union {
+    float *       rho4;
+    double *      rho8;
+    long double * rho16;
+  };
+  union {
+    float *       out4;
+    double *      out8;
+    long double * out16;
+  };
 
+  rho4 = (float *) field.values(id_field);
+  out4 = (float*) initialize_output_(field.field_data());
+
+  double vol = hx*hy*hz;
+  
   switch (precision) {
   case precision_single:
-    {
-      float * array  = (float*)void_array;
-      float * output = (float*)void_output;
-      float mass;
-      for (int axis=0; axis<3; axis++) {
-	int d = d3[axis];
-	for (int ix=0; ix<nx; ix++) {
-	  for (int iy=0; iy<ny; iy++) {
-	    for (int iz=0; iz<nz; iz++) {
-	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-	      mass = (array[i]) ? (array[i+d] - array[i-d]) / array[i] : 0.0;
-	      if (mass > mass_min_refine)  any_refine  = true;
-	      if (mass > mass_max_coarsen) all_coarsen = false;
-	      if (output) {
-		if (mass > mass_max_coarsen) output[i] =  0;
-		if (mass > mass_min_refine)  output[i] = +1;
-	      }
-	    }
+    if (out4) {
+#ifdef DEBUG_REFINE      
+      double min =  std::numeric_limits<float>::max();
+      double max = -min;
+      double sum = 0.0;
+#endif      
+      for (int iz=gz; iz<mz-gz; iz++) {
+	for (int iy=gy; iy<my-gy; iy++) {
+	  for (int ix=gx; ix<mx-gx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    double mass = vol*rho4[i];
+#ifdef DEBUG_REFINE      
+	    min = std::min(min,mass);
+	    max = std::max(max,mass);
+	    sum += mass;
+#endif	    
+	    if      (mass < mass_max_coarsen) out4[i] = -1;
+	    else if (mass < mass_min_refine)  out4[i] =  0;
+	    else                              out4[i] = +1;
 	  }
+	}
+      }
+#ifdef DEBUG_REFINE      
+      double sum2= 0.0;
+      for (int i=0; i<mx*my*mz; i++) sum2 += vol*rho4[i];
+      CkPrintf ("DEBUG_REFINE_MASS %s sum (%18.15g) [%18.15g]\n",
+		name_.c_str(),sum,sum2);
+      CkPrintf ("DEBUG_REFINE_MASS %s refine %18.15g\n",
+		name_.c_str(),mass_min_refine);
+#endif      
+    }
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  double mass = vol*rho4[i];
+	  if (mass > mass_min_refine)  any_refine  = true;
+	  if (mass > mass_max_coarsen) all_coarsen = false;
 	}
       }
     }
     break;
   case precision_double:
-    {
-      double * array  = (double*)void_array;
-      double * output = (double*)void_output;
-      double mass;
-
-      for (int axis=0; axis<3; axis++) {
-	int d = d3[axis];
-	for (int ix=0; ix<nx; ix++) {
-	  for (int iy=0; iy<ny; iy++) {
-	    for (int iz=0; iz<nz; iz++) {
-	      int i = (gx+ix) + nx*((gy+iy) + ny*(gz+iz));
-	      mass = (array[i]) ? (array[i+d] - array[i-d]) / array[i] : 0.0;
-	      if (mass > mass_min_refine)  any_refine  = true;
-	      if (mass > mass_max_coarsen) all_coarsen = false;
-	      if (output) {
-		if (mass > mass_max_coarsen) output[i] =  0;
-		if (mass > mass_min_refine)  output[i] = +1;
-	      }
-	    }
+    if (out8) {
+      double min =  std::numeric_limits<double>::max();
+      double max = -min;
+      for (int iz=gz; iz<mz-gz; iz++) {
+	for (int iy=gy; iy<my-gy; iy++) {
+	  for (int ix=gx; ix<mx-gx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    double mass = vol*rho8[i];
+	    min = std::min(min,mass);
+	    max = std::max(max,mass);
+	    if      (mass < mass_max_coarsen) out8[i] = -1;
+	    else if (mass < mass_min_refine)  out8[i] =  0;
+	    else                              out8[i] = +1;
 	  }
+	}
+      }
+    }
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  double mass = vol*rho8[i];
+	  if (mass > mass_min_refine)  any_refine  = true;
+	  if (mass > mass_max_coarsen) all_coarsen = false;
+	}
+      }
+    }
+    break;
+  case precision_quadruple:
+    if (rho16) {
+      for (int iz=gz; iz<mz-gz; iz++) {
+	for (int iy=gy; iy<my-gy; iy++) {
+	  for (int ix=gx; ix<mx-gx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    long double mass = vol*rho16[i];
+	    if      (mass < mass_max_coarsen) rho16[i] = -1;
+	    else if (mass < mass_min_refine)  rho16[i] =  0;
+	    else                              rho16[i] = +1;
+	  }
+	}
+      }
+    }
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  long double mass = vol*rho16[i];
+	  if (mass > mass_min_refine)  any_refine  = true;
+	  if (mass > mass_max_coarsen) all_coarsen = false;
 	}
       }
     }
@@ -150,7 +230,6 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
   return adapt_result;
 
 }
-
 
 //======================================================================
 

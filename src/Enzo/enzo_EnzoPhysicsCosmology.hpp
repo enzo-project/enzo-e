@@ -21,6 +21,8 @@ public: // interface
   : Physics(),
     hubble_constant_now_(0.701),
     omega_matter_now_(0.279),
+    omega_baryon_now_(0.279),
+    omega_cdm_now_(0.0),
     omega_lambda_now_(0.721),
     comoving_box_size_(64),
     max_expansion_rate_(0.01),
@@ -37,6 +39,8 @@ public: // interface
   (
    enzo_float hubble_constant_now,
    enzo_float omega_matter_now,
+   enzo_float omega_baryon_now,
+   enzo_float omega_cdm_now,
    enzo_float omega_lambda_now,
    enzo_float comoving_box_size,
    enzo_float max_expansion_rate,
@@ -46,6 +50,8 @@ public: // interface
     : Physics(),
       hubble_constant_now_(hubble_constant_now),
       omega_matter_now_(omega_matter_now),
+      omega_baryon_now_(omega_baryon_now),
+      omega_cdm_now_(omega_cdm_now),
       omega_lambda_now_(omega_lambda_now),
       comoving_box_size_(comoving_box_size),
       max_expansion_rate_(max_expansion_rate),
@@ -55,6 +61,12 @@ public: // interface
       cosmo_dadt_(0.0),
       current_redshift_(-1.0)
   {
+    ASSERT3 ("EnzoPhysicsCosmology::EnzoPhysicsCosmology()",
+	     "omega_matter_now (%g) must equal "
+	     "omega_cdm_now (%g) + omega_baryon_now (%g)",
+	     omega_matter_now_,omega_cdm_now_,omega_baryon_now_,
+	     std::abs
+	     (omega_matter_now_-(omega_cdm_now_+omega_baryon_now_)) < 1e-7);
   }
 
   /// CHARM++ PUP::able declaration
@@ -65,6 +77,8 @@ public: // interface
     : Physics (m),
       hubble_constant_now_(0.701),
       omega_matter_now_(0.279),
+      omega_baryon_now_(1.0),
+      omega_cdm_now_(0.0),
       omega_lambda_now_(0.721),
       comoving_box_size_(64),
       max_expansion_rate_(0.01),
@@ -88,6 +102,8 @@ public: // interface
     
     p | hubble_constant_now_;
     p | omega_matter_now_;
+    p | omega_baryon_now_;
+    p | omega_cdm_now_;
     p | omega_lambda_now_;
     p | comoving_box_size_;
     p | max_expansion_rate_;
@@ -97,10 +113,13 @@ public: // interface
     p | cosmo_a_;
     p | cosmo_dadt_;
     p | current_redshift_;
+
   };
 
   enzo_float hubble_constant_now()   { return hubble_constant_now_; }
   enzo_float omega_matter_now()      { return omega_matter_now_; }
+  enzo_float omega_baryon_now()      { return omega_baryon_now_; }
+  enzo_float omega_cdm_now()         { return omega_cdm_now_; }
   enzo_float omega_lambda_now()      { return omega_lambda_now_; }
   enzo_float comoving_box_size()     { return comoving_box_size_; }
   enzo_float max_expansion_rate()    { return max_expansion_rate_; }
@@ -112,6 +131,10 @@ public: // interface
   { hubble_constant_now_=value; }
   void set_omega_matter_now(enzo_float value)
   { omega_matter_now_=value; }
+  void set_omega_baryon_now(enzo_float value)
+  { omega_baryon_now_=value; }
+  void set_omega_cdm_now(enzo_float value)
+  { omega_cdm_now_=value; }
   void set_omega_lambda_now(enzo_float value)
   { omega_lambda_now_=value; }
   void set_comoving_box_size(enzo_float value)
@@ -197,6 +220,8 @@ public: // interface
   {
     CkPrintf ("DEBUG_COSMO hubble_constant_now = %g\n",hubble_constant_now_);
     CkPrintf ("DEBUG_COSMO omega_matter_now    = %g\n",omega_matter_now_);
+    CkPrintf ("DEBUG_COSMO omega_baryon_now    = %g\n",omega_baryon_now_);
+    CkPrintf ("DEBUG_COSMO omega_cdm_now       = %g\n",omega_cdm_now_);
     CkPrintf ("DEBUG_COSMO omega_lambda_now    = %g\n",omega_lambda_now_);
     CkPrintf ("DEBUG_COSMO comoving_box_size   = %g\n",comoving_box_size_);
     CkPrintf ("DEBUG_COSMO max_expansion_rate  = %g\n",max_expansion_rate_);
@@ -219,6 +244,8 @@ protected: // attributes
   // Constant parameters
   enzo_float hubble_constant_now_;
   enzo_float omega_matter_now_;
+  enzo_float omega_baryon_now_;
+  enzo_float omega_cdm_now_;
   enzo_float omega_lambda_now_;
   enzo_float comoving_box_size_;
   enzo_float max_expansion_rate_;
