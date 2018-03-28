@@ -26,6 +26,7 @@ Hierarchy::Hierarchy
   refinement_(refinement),
   max_level_(max_level),
   num_blocks_(0),
+  num_blocks_level_(),
   num_particles_(0),
   num_zones_total_(0),
   num_zones_real_(0),
@@ -35,6 +36,8 @@ Hierarchy::Hierarchy
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
 				   
+  num_blocks_level_.resize(max_level+1);
+
   for (int i=0; i<3; i++) {
     root_size_[i] = 1;
     lower_[i] = 0.0;
@@ -67,6 +70,7 @@ void Hierarchy::pup (PUP::er &p)
   p | max_level_;
 
   p | num_blocks_;
+  p | num_blocks_level_;
   p | num_particles_;
   p | num_zones_total_;
   p | num_zones_real_;
@@ -76,6 +80,8 @@ void Hierarchy::pup (PUP::er &p)
   // checkpoint / restart then double-counts Blocks.
 
   if (up) {
+    for (int i=0; i<num_blocks_level_.size(); i++)
+      num_blocks_level_[i]=0;
     num_blocks_      = 0;
     num_particles_   = 0;
     num_zones_total_ = 0;

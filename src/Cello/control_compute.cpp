@@ -86,13 +86,14 @@ void Block::compute_continue_ ()
     // Apply the method to the Block
 
     method -> compute (this);
+    performance_stop_(perf_compute,__FILE__,__LINE__);
 
   } else {
 
+    performance_stop_(perf_compute,__FILE__,__LINE__);
     compute_done();
 
   }
-  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------

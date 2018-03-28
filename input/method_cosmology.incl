@@ -27,7 +27,8 @@
      	      "velocity_x", "velocity_y", "velocity_z",
      	      "acceleration_x", "acceleration_y", "acceleration_z",
 	      "total_energy", "internal_energy", "pressure",
-     	  "density_total", "X", "B", "potential", "density_gas"];
+     	  "density_total", "X", "B", "potential", "density_gas",
+	       "density_particle", "density_particle_accumulate"];
      padding = 0;
  }
 

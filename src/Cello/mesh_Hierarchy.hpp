@@ -30,6 +30,7 @@ public: // interface
     refinement_(0),
     max_level_(0),
     num_blocks_(0),
+    num_blocks_level_(),
     block_vec_(),
     num_particles_(0), 
     num_zones_total_(0), 
@@ -133,11 +134,19 @@ public: // interface
   { return block_array_;}
 
   /// Increment (decrement) number of mesh blocks
-  void increment_block_count(int count)
-  { num_blocks_ += count; }
+  void increment_block_count(int count, int level)
+  {
+    num_blocks_ += count;
+    int n=num_blocks_level_.size();
+    if (n < level+1) {
+      num_blocks_level_.resize(level+1);
+      for (int i=n; i<level+1; i++) num_blocks_level_[i] = 0;
+    }
+    num_blocks_level_[level] += count;
+  }
 
-  /// Add Block to the list of blocks (block_vec_ and block_map_)
-  void insert_block (Block * block)
+    /// Add Block to the list of blocks (block_vec_ and block_map_)
+    void insert_block (Block * block)
   {
     block_vec_.push_back(block);
   }
@@ -171,6 +180,10 @@ public: // interface
   /// Return the number of blocks on this process
   size_t num_blocks() const throw()
   {  return num_blocks_;  }
+
+  /// Return the number of blocks on this process for the given level
+  size_t num_blocks(int level) const throw()
+  {  return num_blocks_level_.at(level);  }
 
   Block * block (int index_block)
   { return block_vec_.at(index_block); }
@@ -223,6 +236,9 @@ protected: // attributes
   /// Current number of blocks on this process
   int num_blocks_;
 
+  /// Current number of blocks on this process per refinement level
+  std::vector<int> num_blocks_level_;
+  
   /// Pointers to Blocks on this process
   std::vector<Block *> block_vec_;
 

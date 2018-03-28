@@ -49,6 +49,8 @@ void EnzoInitialMusic::pup (PUP::er &p)
   p | particle_attributes_;
 }
 
+//----------------------------------------------------------------------
+
 void EnzoInitialMusic::enforce_block
   ( Block            * block, 
     const FieldDescr * field_descr,
@@ -73,9 +75,9 @@ void EnzoInitialMusic::enforce_block
 
   Field field = block->data()->field();
 
-  for (int i=0; i<field_files_.size(); i++) {
+  for (int index=0; index<field_files_.size(); index++) {
 
-    std::string file_name = field_files_[i];
+    std::string file_name = field_files_[index];
 
     // Block size
 
@@ -95,9 +97,9 @@ void EnzoInitialMusic::enforce_block
 
     // Read the domain dimensions
 
-    const int IX = field_coords_[i].find ("x");
-    const int IY = field_coords_[i].find ("y");
-    const int IZ = field_coords_[i].find ("z");
+    const int IX = field_coords_[index].find ("x");
+    const int IY = field_coords_[index].find ("y");
+    const int IZ = field_coords_[index].find ("z");
 
     ASSERT3 ("EnzoInitialMusic::enforce_block()",
 	    "bad field coordinates %d %d %d",
@@ -108,7 +110,7 @@ void EnzoInitialMusic::enforce_block
     
     int m4[4] = {0};
     int type = type_unknown;
-    file. data_open (field_datasets_[i], &type,
+    file. data_open (field_datasets_[index], &type,
 		     m4,m4+1,m4+2,m4+3);
     // compute cell widths
     double h4[4] = {1};
@@ -152,12 +154,17 @@ void EnzoInitialMusic::enforce_block
 
     file.data_read (data);
 
-    enzo_float * array = (enzo_float *) field.values(field_names_[i]);
+    enzo_float * array = (enzo_float *) field.values(field_names_[index]);
 
     for (int iz=0; iz<nz; iz++) {
+      int jz = iz+gz;
       for (int iy=0; iy<ny; iy++) {
+	int jy = iy+gy;
 	for (int ix=0; ix<nx; ix++) {
-	  array[ix+gx+mx*(iy+gy+my*(iz+gz))] = data[ix+n4[IX]*(iy+n4[IY]*iz)];
+	  int jx = ix+gx;
+	  int i = ix+n4[IX]*(iy+n4[IY]*iz);
+	  int j = jx+mx*(jy+my*jz);
+	  array[j] = data[i];
 	}
       }
     }
@@ -169,9 +176,9 @@ void EnzoInitialMusic::enforce_block
 
   }
 
-  for (int i=0; i<particle_files_.size(); i++) {
+  for (int index=0; index<particle_files_.size(); index++) {
 
-    std::string file_name = particle_files_[i];
+    std::string file_name = particle_files_[index];
 
     // Open the particle file
 
@@ -182,7 +189,7 @@ void EnzoInitialMusic::enforce_block
     // Open the dataset
     int m4[4] = {0};
     int type = type_unknown;
-    file. data_open (particle_datasets_[i], &type,
+    file. data_open (particle_datasets_[index], &type,
 		     m4,m4+1,m4+2,m4+3);
 
     // Block size
@@ -196,9 +203,9 @@ void EnzoInitialMusic::enforce_block
     field.ghost_depth(0,&gx,&gy,&gz);
 
     // coordinate mapping
-    const int IX = particle_coords_[i].find ("x");
-    const int IY = particle_coords_[i].find ("y");
-    const int IZ = particle_coords_[i].find ("z");
+    const int IX = particle_coords_[index].find ("x");
+    const int IY = particle_coords_[index].find ("y");
+    const int IZ = particle_coords_[index].find ("z");
 
     // compute cell widths
     double h4[4] = {1};
@@ -242,8 +249,8 @@ void EnzoInitialMusic::enforce_block
 
     Particle particle = block->data()->particle();
 
-    const int it = particle.type_index(particle_types_[i]);
-    const int ia = particle.attribute_index(it,particle_attributes_[i]);
+    const int it = particle.type_index(particle_types_[index]);
+    const int ia = particle.attribute_index(it,particle_attributes_[index]);
 
     const int np = nx*ny*nz;
 
@@ -262,7 +269,7 @@ void EnzoInitialMusic::enforce_block
     }
 
     // update positions with displacements
-    if (particle_datasets_[i] == "ParticleDisplacements_x") {
+    if (particle_datasets_[index] == "ParticleDisplacements_x") {
       for (int iz=0; iz<nz; iz++) {
 	for (int iy=0; iy<ny; iy++) {
 	  for (int ix=0; ix<nx; ix++) {
@@ -275,7 +282,7 @@ void EnzoInitialMusic::enforce_block
 	  }
 	}
       }
-    } else if (particle_datasets_[i] == "ParticleDisplacements_y") {
+    } else if (particle_datasets_[index] == "ParticleDisplacements_y") {
       for (int iz=0; iz<nz; iz++) {
 	for (int iy=0; iy<ny; iy++) {
 	  for (int ix=0; ix<nx; ix++) {
@@ -288,7 +295,7 @@ void EnzoInitialMusic::enforce_block
 	  }
 	}
       }
-    } else if (particle_datasets_[i] == "ParticleDisplacements_z") {
+    } else if (particle_datasets_[index] == "ParticleDisplacements_z") {
       for (int iz=0; iz<nz; iz++) {
 	for (int iy=0; iy<ny; iy++) {
 	  for (int ix=0; ix<nx; ix++) {

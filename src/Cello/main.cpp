@@ -50,6 +50,7 @@ void Main::exit_()
   if (Monitor::instance()) {
     Monitor::instance()->print ("","END CELLO");
   }
+
   PARALLEL_EXIT;
 }
 

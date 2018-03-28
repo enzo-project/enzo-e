@@ -97,7 +97,6 @@ Performance::end() throw()
 int
 Performance::new_counter ( int type, std::string  counter_name )
 {
-
   counter_name_.push_back(counter_name);
   counter_type_.push_back(type);
   counter_values_.push_back(0);

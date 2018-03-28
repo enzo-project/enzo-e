@@ -686,7 +686,7 @@ void Simulation::data_insert_block(Block * block)
 #endif
   if (hierarchy_) {
     hierarchy_->insert_block(block);
-    hierarchy_->increment_block_count(1);
+    hierarchy_->increment_block_count(1,block->level());
   }
   ++sync_output_begin_;
   ++sync_output_write_;
@@ -700,7 +700,7 @@ void Simulation::data_delete_block(Block * block)
 {
   if (hierarchy_) {
     hierarchy_->delete_block(block);
-    hierarchy_->increment_block_count(-1);
+    hierarchy_->increment_block_count(-1,block->level());
   }
   --sync_output_begin_;
   --sync_output_write_;
@@ -740,7 +740,7 @@ void Simulation::monitor_performance()
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = 3 + nr*nc;
+  int n = 3+hierarchy_->max_level()+ nr*nc;
 
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
@@ -750,8 +750,8 @@ void Simulation::monitor_performance()
   int m=0;
   counters_reduce[m++] = n;
   counters_reduce[m++] = hierarchy_->num_particles(); 
-  counters_reduce[m++] = hierarchy_->num_blocks(); 
-
+  for (int i=0; i<=hierarchy_->max_level(); i++) 
+    counters_reduce[m++] = hierarchy_->num_blocks(i);
   for (int ir = 0; ir < nr; ir++) {
     performance_->region_counters(ir,counters_region);
     for (int ic = 0; ic < nc; ic++) {
@@ -794,26 +794,20 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   monitor()->print("Performance","simulation num-particles total %ld",
 		   counters_reduce[m++]);
 
-  
-  int nb;
-  monitor()->print("Performance","simulation num-blocks %d",
-		   nb=counters_reduce[m++]);
+  int nt = 0;
+  int nl = counters_reduce[m];;
+  int rank = hierarchy_->rank();
+  int bc = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
+  for (int i=0; i<=hierarchy_->max_level(); i++) {
+    long int nb = counters_reduce[m++];
+    monitor()->print("performance","simulation num-blocks-%d %d",
+		     i,nb);
+    nt += nb;
+    if (i>0) nl += (nb - nb/bc);
+  }
 
-  // number of root blocks n0
-  int nx,ny,nz;
-  hierarchy()->root_blocks(&nx,&ny,&nz);
-  int n0 = nx*ny*nz;
-  // rank-dependent factor for computing leaf block count
-  int rank = hierarchy()->rank();
-  double f =
-    (rank == 1) ? 0.5 :
-    (rank == 2) ? 0.75 :
-    (rank == 3) ? 0.875 : 0.0;
-  
-  // compute number of leaf blocks
-  int nl = n0 + f*(nb - n0);
-  monitor()->print("Performance","simulation num-leaves %d",
-		   nl);
+  monitor()->print("Performance","simulation num-leaf-blocks %d",  nl);
+  monitor()->print("Performance","simulation num-total-blocks %d", nt);
 
   for (int ir = 0; ir < nr; ir++) {
     for (int ic = 0; ic < nc; ic++, m++) {

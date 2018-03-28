@@ -5,7 +5,7 @@
 // /// @date     2013-04-23
 // /// @brief    Implementation of Enzo RefineMass class
 
-#define DEBUG_REFINE
+// #define DEBUG_REFINE
 
 #include "enzo.hpp"
 #include "charm_simulation.hpp"
@@ -67,8 +67,7 @@ EnzoRefineMass::EnzoRefineMass
 int EnzoRefineMass::apply ( Block * block ) throw ()
 {
   Field field = block->data()->field();
-  int level = 0;
-
+  int level = block->level();
 
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
@@ -78,8 +77,11 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
   EnzoPhysicsCosmology * cosmology =
     (EnzoPhysicsCosmology *) simulation->problem()->physics("cosmology");
 
+  double hx0 = hx*pow(2.0,level);
+  double hy0 = hy*pow(2.0,level);
+  double hz0 = hz*pow(2.0,level);
   double scale = (mass_ratio_ == 0.0) ? 1.0 :
-    mass_ratio_*pow(2.0,level*level_exponent_)*hx*hy*hz;
+    mass_ratio_*pow(2.0,level*level_exponent_)*hx0*hy0*hz0;
   double mass_min_refine  = scale*min_refine_;
   double mass_max_coarsen = scale*max_coarsen_;
 

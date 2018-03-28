@@ -58,6 +58,9 @@ EnzoMethodGravity::EnzoMethodGravity
   const int idt = field_descr->field_id("density_total");
   const int ib  = field_descr->field_id("B");
   const int idensity = (idt != -1) ? idt : id;
+  const int iax = field_descr->field_id("acceleration_x");
+  const int iay = field_descr->field_id("acceleration_y");
+  const int iaz = field_descr->field_id("acceleration_z");
 
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
@@ -69,21 +72,27 @@ EnzoMethodGravity::EnzoMethodGravity
   
   const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
 			     enzo_sync_id_method_gravity);
+  
+  refresh(ir)->add_field(iax);
+  refresh(ir)->add_field(iay);
+  refresh(ir)->add_field(iaz);
+  refresh(ir)->add_field(id);
 
-  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
-  refresh(ir)->add_field(field_descr->field_id("density"));
+  // Accumulate is used when particles are deposited into density_total
+  
+  if (accumulate) {
 
-  if (idt != -1 && accumulate) {
-    // WARNING: accumulate cannot be used with AMR yet [170818]
-    // Accumulate is used when particles are deposited into density_total
+    refresh(ir)->set_accumulate(true);
+
+    const int idp = field_descr->field_id("density_particle");
+    const int idpa = field_descr->field_id("density_particle_accumulate");
+
+    refresh(ir)->add_field_src_dst(idp,idpa);
     refresh(ir)->add_field_src_dst(idt,ib);
 
 #ifdef DEBUG_FIELD_FACE    
     refresh(ir)->add_field_src_dst(idebug1,idebug2);
 #endif    
-    refresh(ir)->set_accumulate(true);
   }
 }
 
@@ -98,14 +107,14 @@ void EnzoMethodGravity::compute(Block * block) throw()
   Field field = block->data()->field();
 
   /// access problem-defining fields for eventual RHS and solution
-  const int ib = field.field_id ("B");
+  const int ib  = field.field_id ("B");
   const int id  = field.field_id("density");
   const int idt = field.field_id("density_total");
   const int idensity = (idt != -1) ? idt : id;
   
   // Solve the linear system
-  int gx,gy,gz;
   int mx,my,mz;
+  int gx,gy,gz;
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
 
@@ -130,6 +139,8 @@ void EnzoMethodGravity::compute(Block * block) throw()
     }
   }
 
+  // Add density_particle values to density_particle_accumulate ghosts
+  
 #ifdef WRITE_ACCUM_DENSITY
   {
     char buffer[80];
@@ -181,7 +192,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   	}
       }
     }
-    CkPrintf ("DEBUG_DENSITY dte[0] = %20.15g\n",dt_enzo[1+mx*(1+my*1)]);
+    
     fclose(fp);
     fp=NULL;
   }

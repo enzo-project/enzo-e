@@ -47,7 +47,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (find (field_list.begin(),field_list.end(),0) 
 	       == field_list.end());
   unit_assert (find (field_list.begin(),field_list.end(),-2) 
-	       != field_list.end());
+	       == field_list.end());
 
   //--------------------------------------------------
 
