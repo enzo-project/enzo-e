@@ -23,6 +23,7 @@ Performance::Performance (Config * config)
   counter_name_(),
   counter_type_(),
   counter_values_(),
+  counter_values_reduced_(),
   region_name_(),
   region_counters_(),
   region_started_(),
@@ -44,6 +45,7 @@ Performance::Performance (Config * config)
   new_counter(counter_type_abs,"bytes-curr");
   new_counter(counter_type_abs,"bytes-high");
   new_counter(counter_type_abs,"bytes-highest");
+  new_counter(counter_type_abs,"bytes-available");
 
 #ifdef CONFIG_USE_PAPI  
   papi_.init();
@@ -100,6 +102,7 @@ Performance::new_counter ( int type, std::string  counter_name )
   counter_name_.push_back(counter_name);
   counter_type_.push_back(type);
   counter_values_.push_back(0);
+  counter_values_reduced_.push_back(0);
 
 #ifdef CONFIG_USE_PAPI  
   if (type == counter_type_papi) {
@@ -130,10 +133,11 @@ Performance::refresh_counters_() throw()
 
   const int in = cello::index_static();
 
-  counter_values_[index_time_]          = time_real_()-time_start[in];
-  counter_values_[index_bytes_]         = memory->bytes();
-  counter_values_[index_bytes_high_]    = memory->bytes_high();
-  counter_values_[index_bytes_highest_] = memory->bytes_highest();
+  counter_values_[index_time]          = time_real_()-time_start[in];
+  counter_values_[index_bytes]         = memory->bytes();
+  counter_values_[index_bytes_high]    = memory->bytes_high();
+  counter_values_[index_bytes_highest] = memory->bytes_highest();
+  counter_values_[index_bytes_available] = memory->bytes_available();
 
 }
 
@@ -237,11 +241,11 @@ Performance::start_region(int id_region, std::string file, int line) throw()
       WARNING1 ("Performance::start_region",
 		"Region %s already started",
 		region_name_[id_region].c_str());
-    // } else {
-    //   WARNING3 ("Performance::start_region",
-    // 		"Region %s already started %s %d",
-    // 		region_name_[id_region].c_str(),
-    // 		file.c_str(),line);
+    } else {
+      WARNING3 ("Performance::start_region",
+    		"Region %s already started %s %d",
+    		region_name_[id_region].c_str(),
+    		file.c_str(),line);
     }
     return;
   }

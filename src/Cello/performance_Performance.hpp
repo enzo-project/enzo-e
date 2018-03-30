@@ -22,10 +22,11 @@ enum counter_type_enum {
 };
 
 enum index_enum {
-  index_time_,
-  index_bytes_,
-  index_bytes_high_,
-  index_bytes_highest_
+  index_time,
+  index_bytes,
+  index_bytes_high,
+  index_bytes_highest,
+  index_bytes_available
 };
   
 /// @enum    perf_region
@@ -75,6 +76,7 @@ public: // interface
      counter_name_(),
      counter_type_(),
      counter_values_(),
+     counter_values_reduced_(),
      region_name_(),
      region_counters_(),
      region_started_(),
@@ -105,6 +107,7 @@ public: // interface
     p | counter_name_;
     p | counter_type_;
     p | counter_values_;
+    p | counter_values_reduced_;
     p | region_name_;
     p | region_counters_;
     p | region_started_;
@@ -153,6 +156,11 @@ public: // interface
   int counter_values (const long long * values) const
   { values = &counter_values_[0];
     return counter_values_.size(); }
+
+  ///  	Return the array of counter values
+  int counter_values_reduced (const long long * values) const
+  { values = &counter_values_reduced_[0];
+    return counter_values_reduced_.size(); }
 
   /// Return number of regions
   int num_regions() const throw()
@@ -227,6 +235,9 @@ private: // attributes
   /// Counter values
   std::vector<long long> counter_values_;
 
+  /// Reduced counter values (e.g. sum over processes)
+  std::vector<long long> counter_values_reduced_;
+  
   /// list of region names
   std::vector<std::string> region_name_;
 

@@ -199,7 +199,6 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
 
 	}
-	
       }
       if (rank >= 2) {
 

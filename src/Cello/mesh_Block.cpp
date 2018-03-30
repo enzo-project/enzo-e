@@ -90,6 +90,7 @@ Block::Block ( MsgRefine * msg )
 
   if (is_first_cycle) {
     apply_initial_();
+
   } else {
     msg->update(data());
   }
@@ -404,8 +405,6 @@ void Block::apply_initial_() throw ()
 
   TRACE("Block::apply_initial_()");
 
-  performance_start_(perf_initial,__FILE__,__LINE__);
-
   FieldDescr * field_descr = simulation()->field_descr();
   ParticleDescr * particle_descr = simulation()->particle_descr();
 
@@ -417,9 +416,6 @@ void Block::apply_initial_() throw ()
     initial->enforce_block(this,field_descr, particle_descr,
 			   simulation()->hierarchy());
   }
-
-  performance_stop_(perf_initial,__FILE__,__LINE__);
-
 }
 
 //----------------------------------------------------------------------

@@ -320,6 +320,7 @@ public: /// entry methods
   void p_solver_mg0_barrier(CkReductionMsg* msg);  
   void p_solver_mg0_shift_b(CkReductionMsg* msg);  
   void p_solver_mg0_prolong_recv(FieldMsg * msg);
+  void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   void mg_sync_restrict_reset()             { mg_sync_restrict_.reset(); }

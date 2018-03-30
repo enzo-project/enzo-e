@@ -406,10 +406,10 @@ void EnzoBlock::p_solver_mg0_shift_b(CkReductionMsg* msg)
   solver->begin_solve(this);
 
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_shift_b\n",
-	      CkMyPe(),name().c_str(),this);
+  CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_shift_b\n",
+	    CkMyPe(),name().c_str(),this);
 #endif
-    performance_stop_(perf_compute,__FILE__,__LINE__);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -631,10 +631,10 @@ void EnzoBlock::p_solver_mg0_pre_smooth()
   solver->pre_smooth(enzo_block);
 
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_pre_smooth\n",
-	      CkMyPe(),name().c_str(),this);
+  CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_pre_smooth\n",
+	    CkMyPe(),name().c_str(),this);
 #endif
-    performance_stop_(perf_compute,__FILE__,__LINE__);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -784,10 +784,10 @@ void EnzoBlock::p_solver_mg0_restrict_recv(FieldMsg * msg)
   solver->restrict_recv(this,msg);
 
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_restrict_recv\n",
-	      CkMyPe(),name().c_str(),this);
+  CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_restrict_recv\n",
+	    CkMyPe(),name().c_str(),this);
 #endif
-    performance_stop_(perf_compute,__FILE__,__LINE__);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 
 }
 
@@ -887,7 +887,7 @@ void EnzoSolverMg0::solve_coarse(EnzoBlock * enzo_block) throw()
 
   } else if (level > min_level_) {
 
-    enzo_block->p_solver_mg0_prolong_recv(NULL);
+    enzo_block->solver_mg0_prolong_recv(NULL);
 
   }
 }
@@ -965,6 +965,13 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
 {
   performance_start_(perf_compute,__FILE__,__LINE__);
+  solver_mg0_prolong_recv(msg);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+  
+}
+
+void EnzoBlock::solver_mg0_prolong_recv(FieldMsg * msg)
+{
   // Save message
   if (msg != NULL) mg_msg_ = msg;
 
@@ -990,10 +997,9 @@ void EnzoBlock::p_solver_mg0_prolong_recv(FieldMsg * msg)
   solver->prolong_recv(this,msg);
 
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_prolong_recv\n",
-	      CkMyPe(),name().c_str(),this);
+  CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_prolong_recv\n",
+	    CkMyPe(),name().c_str(),this);
 #endif
-    performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1097,10 +1103,10 @@ void EnzoBlock::p_solver_mg0_post_smooth()
   solver->post_smooth(enzo_block);
   
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_post_smooth\n",
-	      CkMyPe(),name().c_str(),this);
+  CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_post_smooth\n",
+	    CkMyPe(),name().c_str(),this);
 #endif
-    performance_stop_(perf_compute,__FILE__,__LINE__);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
@@ -1202,10 +1208,10 @@ void EnzoBlock::p_solver_mg0_last_smooth()
   solver->end(enzo_block);
   
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_last_smooth\n",
-	      CkMyPe(),name().c_str(),this);
+  CkPrintf ("%d %s %p mg0 DEBUG_ENTRY  exit p_solver_mg0_last_smooth\n",
+	    CkMyPe(),name().c_str(),this);
 #endif
-    performance_stop_(perf_compute,__FILE__,__LINE__);
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 

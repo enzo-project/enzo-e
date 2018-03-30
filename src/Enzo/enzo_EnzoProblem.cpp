@@ -243,7 +243,7 @@ Refine * EnzoProblem::create_refine_
 
   } else if (type == "mass") {
 
-      return new EnzoRefineMass 
+    return new EnzoRefineMass 
       (config->adapt_min_refine[index],
        config->adapt_max_coarsen[index],
        config->adapt_max_level[index],

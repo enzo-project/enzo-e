@@ -782,35 +782,38 @@ void Simulation::monitor_performance()
 
 void Simulation::r_monitor_performance(CkReductionMsg * msg)
 {
-  int nr  = performance_->num_regions();
-  int nc =  performance_->num_counters();
-
   long long * counters_reduce = (long long *)msg->getData();
 
   int index_region_cycle = performance_->region_index("cycle");
 
-  int m = 1; // skip array length
+  int index_counter = 1; // skip array length
   
   monitor()->print("Performance","simulation num-particles total %ld",
-		   counters_reduce[m++]);
+		   counters_reduce[index_counter++]);
 
-  int nt = 0;
-  int nl = counters_reduce[m];;
+  int num_total_blocks = 0;
+  int num_leaf_blocks = counters_reduce[index_counter];;
   int rank = hierarchy_->rank();
-  int bc = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
+  int num_child_blocks = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
   for (int i=0; i<=hierarchy_->max_level(); i++) {
-    long int nb = counters_reduce[m++];
+    long int num_blocks_level = counters_reduce[index_counter++];
     monitor()->print("performance","simulation num-blocks-%d %d",
-		     i,nb);
-    nt += nb;
-    if (i>0) nl += (nb - nb/bc);
+		     i,num_blocks_level);
+    num_total_blocks += num_blocks_level;
+    if (i>0)
+      num_leaf_blocks += (num_blocks_level - num_blocks_level/num_child_blocks);
   }
 
-  monitor()->print("Performance","simulation num-leaf-blocks %d",  nl);
-  monitor()->print("Performance","simulation num-total-blocks %d", nt);
+  monitor()->print
+    ("Performance","simulation num-leaf-blocks %d",  num_leaf_blocks);
+  monitor()->print
+    ("Performance","simulation num-total-blocks %d", num_total_blocks);
 
-  for (int ir = 0; ir < nr; ir++) {
-    for (int ic = 0; ic < nc; ic++, m++) {
+  const int num_regions  = performance_->num_regions();
+  const int num_counters =  performance_->num_counters();
+
+  for (int ir = 0; ir < num_regions; ir++) {
+    for (int ic = 0; ic < num_counters; ic++, index_counter++) {
       bool do_print =
 	(ir != perf_unknown) && (
 	(performance_->counter_type(ic) != counter_type_abs) ||
@@ -819,7 +822,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			 counters_reduce[m]);
+			 counters_reduce[index_counter]);
       }
       
     }

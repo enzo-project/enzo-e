@@ -80,6 +80,7 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
   double hx0 = hx*pow(2.0,level);
   double hy0 = hy*pow(2.0,level);
   double hz0 = hz*pow(2.0,level);
+
   double scale = (mass_ratio_ == 0.0) ? 1.0 :
     mass_ratio_*pow(2.0,level*level_exponent_)*hx0*hy0*hz0;
   double mass_min_refine  = scale*min_refine_;
