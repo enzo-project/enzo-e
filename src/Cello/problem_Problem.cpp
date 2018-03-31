@@ -67,6 +67,13 @@ void Problem::pup (PUP::er &p)
     p | initial_list_[i]; // PUP::able
   }
 
+  if (pk) n=physics_list_.size();
+  p | n;
+  if (up) physics_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | physics_list_[i]; // PUP::able
+  }
+
   if (pk) n=refine_list_.size();
   p | n;
   if (up) refine_list_.resize(n);
