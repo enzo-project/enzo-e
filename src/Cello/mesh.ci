@@ -50,14 +50,14 @@ module mesh {
   PUPable RefineDensity;
   PUPable RefineMask;
   PUPable RefineParticleCount;
-  PUPable RefineSlope;
   PUPable RefineShear;
-  PUPable SolverNull;
-  PUPable Stopping;
+  PUPable RefineSlope;
   PUPable Refresh;
   PUPable RestrictLinear;
-  PUPable ScheduleList;
   PUPable ScheduleInterval;
+  PUPable ScheduleList;
+  PUPable SolverNull;
+  PUPable Stopping;
   PUPable Units;
 
   // depreciated

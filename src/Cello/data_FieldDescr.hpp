@@ -44,7 +44,9 @@ public: // functions
 
     TRACEPUP;
 
+    bool pk = p.isPacking();
     bool up = p.isUnpacking();
+    int n;
 
     // NOTE: change this function whenever attributes change
     p | name_;
@@ -55,14 +57,19 @@ public: // functions
     p | alignment_;
     p | padding_;
     p | precision_;
-    int num_fields = name_.size();
-    if (up) centering_.resize(num_fields);
-    for (int i=0; i<num_fields; i++) {
+
+    if (pk) n=centering_.size();
+    p | n;
+    if (up) centering_.resize(n);
+    for (int i=0; i<n; i++) {
       if (up) centering_[i] = new int[3];
       PUParray(p,centering_[i],3);
     }
-    if (up) ghost_depth_.resize(num_fields);
-    for (int i=0; i<num_fields; i++) {
+    
+    if (pk) n=ghost_depth_.size();
+    p | n;
+    if (up) ghost_depth_.resize(n);
+    for (int i=0; i<n; i++) {
       if (up) ghost_depth_[i] = new int[3];
       PUParray(p,ghost_depth_[i],3);
     }

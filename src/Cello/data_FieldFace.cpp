@@ -128,8 +128,8 @@ void FieldFace::pup (PUP::er &p)
   PUParray(p,ghost_,3);
   PUParray(p,child_,3);
   p | refresh_type_;
-  p | restrict_;
   p | prolong_;
+  p | restrict_;
   p | refresh_;
   p | new_refresh_;
 }

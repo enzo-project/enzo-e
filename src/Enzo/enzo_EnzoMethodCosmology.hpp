@@ -29,7 +29,9 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
-  { }
+  {
+    Method::pup(p);
+  }
   
 public: // virtual methods
   
