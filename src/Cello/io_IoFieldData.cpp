@@ -9,9 +9,8 @@
 
 //----------------------------------------------------------------------
 
-IoFieldData::IoFieldData(const FieldDescr * field_descr) throw ()
+IoFieldData::IoFieldData() throw ()
   : Io(1),
-    field_descr_(field_descr),
     field_data_(0),
     field_index_(0)
 
@@ -33,10 +32,6 @@ void IoFieldData::pup (PUP::er &p)
 
   Io::pup(p);
 
-  //  if (p.isUnpacking()) field_descr_ = new FieldDescr;
-  //  p | *field_descr_;
-  WARNING ("IoFieldData::pup","skipping field_descr_");
-  
   //  if (p.isUnpacking()) field_data_ = new FieldData;
   WARNING ("IoFieldData::pup","skipping field_data_");
   //  p | *field_data_;
@@ -55,18 +50,19 @@ void IoFieldData::meta_value
 //----------------------------------------------------------------------
 
 void IoFieldData::field_array
-(int index, // WARNING: index ignored
+(const FieldDescr * field_descr,
+ int index, // WARNING: index ignored
  void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {
   if (buffer) (*buffer) = (void * ) 
-		field_data_->values(field_descr_,field_index_);
+		field_data_->values(field_descr,field_index_);
   if (name)   (*name) = 
-		std::string("field_") +	field_descr_->field_name(field_index_);
+		std::string("field_") +	field_descr->field_name(field_index_);
   if (type) {
 
-    precision_type precision = field_descr_->precision(field_index_);
+    precision_type precision = field_descr->precision(field_index_);
     if (precision == precision_default) precision = default_precision;
 
     switch (precision) {
@@ -76,7 +72,7 @@ void IoFieldData::field_array
     default:
       ERROR2 ("IoFieldData",
 	      "Unsupported precision type %d for field %s",
-	      precision, field_descr_->field_name(field_index_).c_str());
+	      precision, field_descr->field_name(field_index_).c_str());
     }
   }
   int nbx,nby,nbz;
@@ -84,7 +80,7 @@ void IoFieldData::field_array
 
   int ngx=0,ngy=0,ngz=0;
 
-  field_descr_->ghost_depth(field_index_,&ngx,&ngy,&ngz);
+  field_descr->ghost_depth(field_index_,&ngx,&ngy,&ngz);
 
   if (field_data_->ghosts_allocated()) {
 
@@ -119,7 +115,8 @@ void IoFieldData::field_array
 //----------------------------------------------------------------------
 
 void IoFieldData::particle_array 
-(int it, int ib, int ia,
+(ParticleDescr * particle_descr,
+ int it, int ib, int ia,
  void ** buffer, std::string * name, int * type,
  int * n, int * k) throw()
 {

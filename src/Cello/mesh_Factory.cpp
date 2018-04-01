@@ -41,7 +41,7 @@ IoBlock * Factory::create_io_block () const throw()
 IoFieldData * Factory::create_io_field_data 
 (const FieldDescr * field_descr) const throw()
 {
-  return new IoFieldData(field_descr);
+  return new IoFieldData();
 
 }
 
@@ -50,7 +50,7 @@ IoFieldData * Factory::create_io_field_data
 IoParticleData * Factory::create_io_particle_data 
 (const ParticleDescr * particle_descr) const throw()
 {
-  return new IoParticleData(particle_descr);
+  return new IoParticleData();
 }
 
 //----------------------------------------------------------------------

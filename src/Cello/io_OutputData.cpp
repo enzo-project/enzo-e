@@ -226,7 +226,6 @@ void OutputData::write_field_data
   const FieldDescr * field_descr,
   int index_field) throw()
 {
-  io_field_data()->set_field_descr((FieldDescr*)field_descr);
   io_field_data()->set_field_data((FieldData*)field_data);
   io_field_data()->set_field_index(index_field);
 
@@ -239,7 +238,8 @@ void OutputData::write_field_data
     int nx,ny,nz;     // Array size
 
     // Get ith FieldData data
-    io_field_data()->field_array(i, &buffer, &name, &type, 
+    io_field_data()->field_array(field_descr,
+				 i, &buffer, &name, &type, 
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 
@@ -272,7 +272,6 @@ void OutputData::write_particle_data
 
   // Write particle data for particle type it
 
-  io_particle_data()->set_particle_descr ( (ParticleDescr*) particle_descr);
   io_particle_data()->set_particle_data  ( (ParticleData*)  particle_data);
   io_particle_data()->set_particle_index(it);
 

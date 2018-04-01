@@ -81,12 +81,12 @@ void Output::pup (PUP::er &p)
   p | *io_block_;
   p | it_field_index_;  // PUP::able
   WARNING ("Output::pup","skipping io_field_data_");
-  // if (up) io_field_data_ = new IoFieldData;
-  // p | *io_field_data_;
+  if (up) io_field_data_ = new IoFieldData;
+  p | *io_field_data_;
   p | it_particle_index_;  // PUP::able
   WARNING ("Output::pup","skipping io_particle_data_");
-  // if (up) io_particle_data_ = new IoParticleData;
-  // p | *io_particle_data_;
+  if (up) io_particle_data_ = new IoParticleData;
+  p | *io_particle_data_;
   p | stride_write_;
   p | stride_wait_;
 

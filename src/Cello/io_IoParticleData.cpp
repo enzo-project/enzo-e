@@ -9,9 +9,8 @@
 
 //----------------------------------------------------------------------
 
-IoParticleData::IoParticleData(const ParticleDescr * particle_descr) throw ()
+IoParticleData::IoParticleData() throw ()
   : Io(1),
-    particle_descr_(0),
     particle_data_(0),
     particle_index_(0)
 
@@ -33,10 +32,6 @@ void IoParticleData::pup (PUP::er &p)
 
   Io::pup(p);
 
-  //  if (p.isUnpacking()) particle_descr_ = new ParticleDescr;
-  //  p | *particle_descr_;
-  WARNING ("IoParticleData::pup","skipping particle_descr_");
-  
   //  if (p.isUnpacking()) particle_data_ = new ParticleData;
   WARNING ("IoParticleData::pup","skipping particle_data_");
   //  p | *particle_data_;
@@ -55,7 +50,8 @@ void IoParticleData::meta_value
 //----------------------------------------------------------------------
 
 void IoParticleData::field_array
-(int index,
+(const FieldDescr * field_descr,
+ int index,
  void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
@@ -65,11 +61,12 @@ void IoParticleData::field_array
 //----------------------------------------------------------------------
 
 void IoParticleData::particle_array
-(int it, int ib, int ia,
+(ParticleDescr * particle_descr,
+ int it, int ib, int ia,
  void ** buffer, std::string * name, int * type,
  int * n, int * k) throw()
 {
-  Particle particle (particle_descr_,particle_data_);
+  Particle particle (particle_descr,particle_data_);
 
   if (buffer) (*buffer) = (void * ) 
    		particle.attribute_array(it,ia,ib);
