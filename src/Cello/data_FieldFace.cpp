@@ -328,7 +328,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     field_src.ghost_depth(index_src,&g3[0],&g3[1],&g3[2]);
     const bool accumulate = accumulate_(index_src,index_dst);
 
-    int is3[3], ns3[3], is23[2][3]={}, ns23[2][3]={};
+    int is3[3], ns3[3];
     if (!accumulate) {
       loop_limits (is3,ns3,m3,g3,op_load);
     } else {
@@ -337,7 +337,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
 
     invert_face();
 
-    int id3[3], nd3[3], id23[2][3]={}, nd23[2][3]={};
+    int id3[3], nd3[3];
     if (!accumulate) {
       loop_limits (id3,nd3,m3,g3,op_store);
     } else {
@@ -657,9 +657,6 @@ template<class T> void FieldFace::copy_
 	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
 	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
 	  vd[i_dst] += vs[i_src];
-	  int kx=ix+id3[0];
-	  int ky=iy+id3[1];
-	  int kz=iz+id3[2];
 	}
       }
     }
@@ -669,9 +666,6 @@ template<class T> void FieldFace::copy_
 	for (int ix=0; ix < ns3[0]; ix++) {
 	  int i_src = (ix+is3[0]) + ms3[0]*((iy+is3[1]) + ms3[1] * (iz+is3[2]));
 	  int i_dst = (ix+id3[0]) + md3[0]*((iy+id3[1]) + md3[1] * (iz+id3[2]));
-	  int kx=ix+id3[0];
-	  int ky=iy+id3[1];
-	  int kz=iz+id3[2];
 	  vd[i_dst] = vs[i_src];
 	}
       }

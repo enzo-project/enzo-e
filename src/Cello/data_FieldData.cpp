@@ -131,32 +131,33 @@ char * FieldData::values
 (const FieldDescr * field_descr,
  int id_field, int index_history ) throw ()
 {
-  if (id_field == -1) return NULL;
-
   char * values = 0;
 
-  int nh = field_descr->num_history();
-  if (field_descr->is_permanent(id_field) &&
-      (1 <= index_history && index_history <= nh)) {
+  if (id_field >= 0) {
+
+    int nh = field_descr->num_history();
+    if (field_descr->is_permanent(id_field) &&
+	(1 <= index_history && index_history <= nh)) {
       const int np = field_descr->num_permanent();
       id_field = history_id_[id_field + np*(index_history-1)];
-  }
-  
-  if (field_descr->is_permanent(id_field)) {
-
-    const int num_fields = field_descr->field_count();
-    if (0 <= id_field && id_field < num_fields) {
-      values = &array_permanent_[0] + offsets_[id_field];
     }
+  
+    if (field_descr->is_permanent(id_field)) {
 
-  } else {
+      const int num_fields = field_descr->field_count();
+      if (0 <= id_field && id_field < num_fields) {
+	values = &array_permanent_[0] + offsets_[id_field];
+      }
 
-    // temporary field
+    } else {
 
-    int id_temporary = id_field - field_descr->num_permanent();
+      // temporary field
 
-    if (0 <= id_temporary && id_temporary < int(array_temporary_.size())) {
-      values = array_temporary_[id_temporary];
+      int id_temporary = id_field - field_descr->num_permanent();
+
+      if (0 <= id_temporary && id_temporary < int(array_temporary_.size())) {
+	values = array_temporary_[id_temporary];
+      }
     }
   }
   return values;
@@ -689,6 +690,12 @@ void FieldData::scale
 (const FieldDescr * field_descr,
  int iy, long double a, int ix, bool ghosts) throw()
 {
+
+  ASSERT2 ("FieldData::scale()",
+	   "Calling scale on illegal fields: ix=%d iy=%d",
+	   ix,iy,
+	   (ix>=0) && (iy>=0) );
+  
   int mx,my,mz;
   int nx,ny,nz;
   int gx,gy,gz;

@@ -490,11 +490,14 @@ int EnzoBlock::SolveHydroEquations
   if (rank < 3) delete [] velocity_z;
 
   delete [] array;
-  
-  for (int i=0; i<NumberOfSubgrids; i++) {
-    delete SubgridFluxes[i];
+
+  if (SubgridFluxes != NULL) {    
+    for (int i=0; i<NumberOfSubgrids; i++) {
+      delete SubgridFluxes[i];
+    }
+    delete [] SubgridFluxes;
   }
-  delete [] SubgridFluxes;
+  
   if (ncolour > 0) delete [] coloff;
 
   return ENZO_SUCCESS;

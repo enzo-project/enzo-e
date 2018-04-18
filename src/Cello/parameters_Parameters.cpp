@@ -1009,7 +1009,8 @@ int Parameters::readline_
 
   int c = 0;
   for (i=0; c != EOF && c != '\n' && i < buffer_length-1; i++) {
-    buffer[i] = c = fgetc(fp);
+    c = fgetc(fp);
+    buffer[i] = (CHAR_MIN<=c && c<=CHAR_MAX) ? c : '\0';
   }
 
   // Back up i to last character read

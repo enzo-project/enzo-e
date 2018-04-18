@@ -81,7 +81,37 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Initialize an empty Block
-  Block()  { };
+  Block() :
+    data_(NULL),
+    child_data_(NULL),
+    level_next_(0),
+    cycle_(0),
+    time_(0.0),
+    dt_(0.0),
+    stop_(false),
+    index_initial_(0),
+    children_(),
+    sync_coarsen_(),
+    sync_count_(),
+    sync_max_(),
+    face_level_curr_(),
+    face_level_next_(),
+    child_face_level_curr_(),
+    child_face_level_next_(),
+    count_coarsen_(0),
+    adapt_step_(0),
+    adapt_(0),
+    coarsened_(false),
+    delete_(false),
+    is_leaf_(true),
+    age_(0),
+    face_level_last_(),
+    name_(""),
+    index_method_(-1),
+    index_solver_(),
+    refresh_()
+  {
+  }
 
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m);

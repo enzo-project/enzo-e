@@ -30,7 +30,7 @@ if (use_papi):
 
 components.append(['hdf5','z'])
 
-libraries_external  = ['png','$FORTRANLIBS']
+libraries_external  = ['png','$FORTRANLIBS', 'boost_filesystem', 'boost_system']
 
 includes_enzo = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
 

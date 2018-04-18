@@ -36,8 +36,8 @@ public: // interface
 
 
   /// Clone the object
-  virtual Mask * clone() const
-  { return (new MaskExpr(*this)); }
+  virtual std::shared_ptr<Mask> make_clone() const
+  { return std::make_shared<MaskExpr> (*this); }
 
   MaskExpr(Param * param) throw();
 

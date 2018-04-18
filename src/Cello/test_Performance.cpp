@@ -85,10 +85,6 @@ PARALLEL_MAIN_BEGIN
 
   performance->begin();
 
-  long long counter_values [10];
-  TRACE2("%d %d",performance->counter_values(counter_values) , num_counters);
-  unit_assert (performance->counter_values(counter_values) == num_counters);
-
   performance->start_region(id_region_1);
 
 
@@ -143,17 +139,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(region_counters[index_counter_2] == 100);
 
   performance->end();
-
-  performance->counter_values(counter_values) ;
-
-  for (int index_counter = 0; index_counter < num_counters; index_counter++) {
-    
-    int id_counter = index_counter;
-
-    printf ("COUNTER %s VALUE %lld\n",
-	    performance->counter_name(id_counter).c_str(),
-	    counter_values[index_counter]);
-  }
 
   int num_regions = performance->num_regions();
   for (int ir = 0; ir < num_regions; ir++) {

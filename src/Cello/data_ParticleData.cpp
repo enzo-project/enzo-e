@@ -237,12 +237,16 @@ void ParticleData::scatter
 {
   // count number of particles in each particle_array element
 
-  int np_array[n];
+  int * np_array = new int[n];
   for (int i=0; i<n; i++) np_array[i] = 0;
 
-  for (int ip=0; ip<np; ip++) {
-    if ((mask == NULL) || mask[ip]) {
+  if (mask == NULL) {
+    for (int ip=0; ip<np; ip++) {
       ++np_array[index[ip]];
+    }
+  } else {
+    for (int ip=0; ip<np; ip++) {
+      if (mask[ip]) ++np_array[index[ip]];
     }
   }
   
@@ -264,6 +268,8 @@ void ParticleData::scatter
     }
   }
 
+  delete [] np_array;
+  
   const bool interleaved = particle_descr->interleaved(it);
   const int na = particle_descr->num_attributes(it);
   int mp = particle_descr->particle_bytes(it);

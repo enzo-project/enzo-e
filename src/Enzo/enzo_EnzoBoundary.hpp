@@ -30,7 +30,7 @@ class EnzoBoundary : public Boundary {
 public: // interface
 
   /// Create a new EnzoBoundary
-  EnzoBoundary(axis_enum axis, face_enum face, Mask * mask, 
+  EnzoBoundary(axis_enum axis, face_enum face, std::shared_ptr<Mask> mask, 
 	       boundary_type type) throw();
 
   /// Charm++ PUP::able declarations

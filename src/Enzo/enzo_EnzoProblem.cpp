@@ -47,7 +47,7 @@ Boundary * EnzoProblem::create_boundary_
 /// @param parameters Parameters object (for evaluating expressions)
 {
 
-  Mask * mask = 0;
+  std::shared_ptr<Mask> mask = nullptr;
   if (config->boundary_mask[index]) {
     std::string param_str = "Boundary:" + config->boundary_list[index] + ":mask";
     Param * param = parameters->param(param_str);

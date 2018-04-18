@@ -75,7 +75,7 @@ void EnzoInitialMusic::enforce_block
 
   Field field = block->data()->field();
 
-  for (int index=0; index<field_files_.size(); index++) {
+  for (size_t index=0; index<field_files_.size(); index++) {
 
     std::string file_name = field_files_[index];
 
@@ -176,7 +176,7 @@ void EnzoInitialMusic::enforce_block
 
   }
 
-  for (int index=0; index<particle_files_.size(); index++) {
+  for (size_t index=0; index<particle_files_.size(); index++) {
 
     std::string file_name = particle_files_[index];
 

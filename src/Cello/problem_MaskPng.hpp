@@ -36,8 +36,8 @@ public: // interface
 
 
   /// Clone the object
-  virtual Mask * clone() const
-  { return (new MaskPng(*this)); }
+  virtual std::shared_ptr<Mask> make_clone() const
+  { return std::make_shared<MaskPng>(*this); }
 
   MaskPng(std::string file_name, 
 	  double xm, double xp,

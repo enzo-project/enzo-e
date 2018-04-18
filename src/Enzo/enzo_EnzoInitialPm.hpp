@@ -35,7 +35,7 @@ public: // interface
     if (parameters) {
       mask_ = Mask::create (parameters->param(parameter_name),parameters);
     } else {
-      mask_ = NULL;
+      mask_ = nullptr;
     } 
   }
   
@@ -47,7 +47,7 @@ public: // interface
     : Initial (m),
       mpp_(0.0),
       level_(0),
-      mask_(NULL)
+      mask_(nullptr)
   {  }
 
   /// Destructor
@@ -87,7 +87,7 @@ private: // attributes
   int level_;
 
   /// To define cloud extents
-  Mask * mask_;
+  std::shared_ptr<Mask> mask_;
 
 };
 

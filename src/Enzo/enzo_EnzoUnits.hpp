@@ -43,15 +43,7 @@ public: // interface
 
     Units::pup(p);
 
-    bool not_null = (cosmology_ != NULL);
-    p | not_null;
-    if (not_null) {
-      if (p.isUnpacking()) cosmology_ = new EnzoPhysicsCosmology;
-      p | *cosmology_;
-    } else {
-      cosmology_ = NULL;
-    }
-
+    p | cosmology_; // PUP::able
   }
 
   /// Update current units for cosmological problems

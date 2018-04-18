@@ -79,8 +79,8 @@ int RefineMask::apply ( Block * block ) throw ()
     float  * output_float  = (float*) output;
     double * output_double = (double*)output;
 
-    precision_type precision = field.precision
-      (field.field_id(output_));
+    precision_type precision = field.precision (field.field_id(output_));
+    
     for (int ix=0; ix<nx; ix++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int iz=0; iz<nz; iz++) {

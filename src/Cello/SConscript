@@ -53,24 +53,25 @@ if (use_papi):
 else:
    libs_papi = []
 
+libs_boost = ['boost_filesystem', 'boost_system']
+
 libs_external    = ['external']
-libs_monitor     = ['monitor','parallel']
-libs_error       = ['error'] + libs_monitor
+libs_monitor     = ['monitor','parallel'] + libs_boost
+libs_error       = ['error'] + libs_monitor + libs_boost
 libs_disk        = ['disk'] + libs_error + ['hdf5'] + ['cello']
-libs_performance = ['performance', 'memory','parameters'] + libs_error + libs_papi
+libs_performance = ['performance', 'memory','parameters'] + libs_error + libs_papi + libs_boost
 libs_parallel    = ['parallel'] +libs_error
 libs_data        = ['data', 'mesh', 'io'] + libs_parallel + ['cello']
 libs_main        = ['main']
-libs_memory      = ['memory'] +   libs_error
-libs_mesh        = ['mesh','data','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5']
+libs_memory      = ['memory'] + libs_error + libs_boost
+libs_mesh        = ['mesh','data','io','disk'] + libs_parallel + libs_external + ['cello','png','hdf5'] + libs_boost
 libs_io          = ['io'] + libs_mesh
-libs_parameters  = ['parameters'] + libs_error +  ['cello']
+libs_parameters  = ['parameters'] + libs_error + libs_boost + ['cello']
 
 libs_simulation  = ['simulation','problem']
 libs_test        = ['test'] + libs_parallel + ['cello']
 
-# FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM
-libs_all = ['charm','control','simulation','compute','mesh','data','problem','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi # gtest
+libs_all = ['charm','control','simulation','compute','mesh','data','problem','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi + libs_boost
 libs_data   = libs_all
 libs_io     = libs_all
 libs_mesh   = libs_all
@@ -216,8 +217,6 @@ objs_test = env.Object(sources_test)
 test_FileHdf5     = env.Program ('test_FileHdf5.cpp',   LIBS=[libs_disk,  libs_test])
 test_error        = env.Program ('test_Error.cpp',      LIBS=[libs_error, libs_test])
 
-# FIX CIRCULAR DEPENDENCE BETWEEN MESH FIELD SIMULATION with CHARM++
-# test_FieldData -lsimulation -ldata -lmethod -lcompute -lmesh -lio -lparallel -ldisk -lparameters -lperformance -lmemory -lerror -lcello -ltest -lparallel -lerror -lmonitor -lhdf5 -lexternal -lpng -lpapi
 
 test_colormap    = env.Program (['test_Colormap.cpp', objs_io],
                                  LIBS=[libs_io,    libs_test]) 

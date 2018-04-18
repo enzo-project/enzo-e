@@ -10,9 +10,16 @@
 /// forest of octrees.
 
 //--------------------------------------------------
+// #define DEBUG_FACE
 // #define DEBUG_ADAPT
 // #define DEBUG_NEW_REFRESH
 //--------------------------------------------------
+
+#ifdef DEBUG_FACE
+#   define DEBUG_FACES(MSG) /* ... */
+#else
+#   define DEBUG_FACES(MSG) debug_faces_(MSG)
+#endif
 
 #ifdef DEBUG_ADAPT
 
@@ -113,7 +120,8 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  debug_faces_("adapt_next");
+  DEBUG_FACES("adapt_next");
+
   trace("adapt_next 3");
 
 #ifdef DEBUG_ADAPT
@@ -814,13 +822,8 @@ void Block::adapt_coarsen_()
   data_msg -> set_field_data (data()->field_data(),false);
   data_msg -> set_particle_data (data()->particle_data(),false);
 
-  // copy face levels
-  int nf = face_level_curr_.size();
-  int face_level_curr[nf];
-  
-  for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
-
-  MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr,ic3);
+  const int nf = face_level_curr_.size();
+  MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr_,ic3);
   msg->set_data_msg (data_msg);
 
   thisProxy[index_parent].p_adapt_recv_child (msg);

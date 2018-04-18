@@ -82,13 +82,13 @@ void BoundaryValue::enforce
 
       bool * mask = 0;
 
-      if (mask_) mask = new bool [nx*ny*nz];
+      if (mask_ != nullptr) mask = new bool [nx*ny*nz];
 
       switch (precision) {
       case precision_single:
 	{
 	  float * temp = 0;
-	  if (mask_) {
+	  if (mask_ != nullptr) {
 	    temp = (float *)array;
 	    array = new float [ndx*ndy*ndz];
 	  }
@@ -97,7 +97,7 @@ void BoundaryValue::enforce
 			   ndx,nx,x+ix0, 
 			   ndy,ny,y+iy0,
 			   ndz,nz,z+iz0);
-	  if (mask_) {
+	  if (mask_ != nullptr) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) ((float *)temp)[i]=((float *)array)[i];
 	    delete [] ((float*)array);
 	    array = temp;
@@ -107,7 +107,7 @@ void BoundaryValue::enforce
       case precision_double:
 	{
 	  double * temp = 0;
-	  if (mask_) {
+	  if (mask_ != nullptr) {
 	    temp = (double *)array;
 	    array = new double [ndx*ndy*ndz];
 	  }
@@ -115,7 +115,7 @@ void BoundaryValue::enforce
 			   ndx,nx,x+ix0, 
 			   ndy,ny,y+iy0,
 			   ndz,nz,z+iz0);
-	  if (mask_) {
+	  if (mask_ != nullptr) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) ((double *)temp)[i]=((double *)array)[i];
 	    delete [] ((double *)array);
 	    array = temp;
@@ -127,7 +127,7 @@ void BoundaryValue::enforce
       case precision_quadruple:
 	{
 	  long double * temp = 0;
-	  if (mask_) {
+	  if (mask_ != nullptr) {
 	    temp = (long double *)array;
 	    array = new long double [ndx*ndy*ndz];
 	  }
@@ -135,7 +135,7 @@ void BoundaryValue::enforce
 			   ndx,nx,x+ix0, 
 			   ndy,ny,y+iy0,
 			   ndz,nz,z+iz0);
-	  if (mask_) {
+	  if (mask_ != nullptr) {
 	    for (int i=0; i<ndx*ndy*ndz; i++) 
 	      ((long double *)temp)[i]=((long double *)array)[i];
 	    delete [] ((long double *)array);

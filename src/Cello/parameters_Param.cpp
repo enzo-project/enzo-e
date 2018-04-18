@@ -343,6 +343,10 @@ void Param::evaluate_float
   int i;
   switch (node->type) {
   case enum_node_operation:
+    ASSERT3("Param::evaluate_float()",
+	    "Error in operation %d: left %p right %p",
+	    node ? node->op_value:-1,left,right,
+	    left != NULL && right != NULL);
     switch (node->op_value) {
     case enum_op_add: for (i=0; i<n; i++) result[i] = left[i] + right[i]; break;
     case enum_op_sub: for (i=0; i<n; i++) result[i] = left[i] - right[i]; break;
@@ -384,6 +388,10 @@ void Param::evaluate_float
     }
     break;
   case enum_node_function:
+    ASSERT2("Param::evaluate_float()",
+	    "Error in function %p: left %p",
+	    node?node->fun_value : NULL, left,
+	    left != NULL);
     for (i=0; i<n; i++) result[i] = (*(node->fun_value))(left[i]);
     break;
   case enum_node_unknown:
@@ -468,7 +476,19 @@ void Param::evaluate_logical
       
   int i;
   if (node->type == enum_node_operation) {
-    switch (node->op_value) {
+    int op = node->op_value;
+    ASSERT3("Param::evaluate_logical()",
+	    "Error in operation %d: left_float %p right_float %p",
+	    op,left_float,right_float,
+	    (op==enum_op_and || op==enum_op_or) ||
+	    (left_float != NULL && right_float != NULL));
+    ASSERT3("Param::evaluate_logical()",
+	    "Error in operation %d: left_logical %p right_logical %p",
+	    op,left_logical,right_logical,
+	    (op!=enum_op_and && op!=enum_op_or) ||
+	    (left_logical != NULL && right_logical != NULL));
+	    
+    switch (op) {
     case enum_op_le:
       for (i=0; i<n; i++) result[i] = left_float[i] <= right_float[i];
       break;

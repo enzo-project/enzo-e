@@ -22,7 +22,8 @@ public: // interface
   /// Create the Timer object
   Timer() throw()
   : time_(0),
-    is_running_(false)
+    is_running_(false),
+    t1_(),t2_(),tz_()
   {
   }
 
@@ -34,18 +35,13 @@ public: // interface
     //    return;
 
     // NOTE: change this function whenever attributes change
-    TRACE0;
     p | time_;
-    TRACE0;
     p | is_running_;
-    TRACE0;
     
     p | t1_.tv_sec;
     p | t1_.tv_usec;
-    TRACE0;
     p | t2_.tv_sec;
     p | t2_.tv_usec;
-    TRACE0;
     // tz_ only there for gettimeofday() calls: value is never used
   }
 

@@ -214,8 +214,6 @@ void Block::refresh_load_field_face_
 int Block::refresh_load_particle_faces_ (Refresh * refresh)
 {
 
-  int count = 0;
-  
   //  TRACE_REFRESH("refresh_load_particle_faces()");
   
   const int rank = this->rank();

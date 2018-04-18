@@ -22,7 +22,7 @@ void EnzoInitialPm::pup (PUP::er &p)
   p | field_;
   p | mpp_;
   p | level_;
-  p | mask_; // pup::able
+  WARNING("EnzoInitialPm::pup", "Skipping p | mask_");
 
 }
 

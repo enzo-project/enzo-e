@@ -108,6 +108,7 @@ public: // interface
       // EnzoInitialSoup
       initial_soup_rank(0),
       initial_soup_file(""),
+      initial_soup_rotate(false),
       initial_soup_pressure_in(0.0),
       initial_soup_pressure_out(0.0),
       initial_soup_density(0.0),
@@ -133,6 +134,11 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
+      // EnzoMethodGravity
+      method_gravity_grav_const(0.0),
+      method_gravity_solver(""),
+      method_gravity_order(4),
+      method_gravity_accumulate(false),
       // EnzoMethodPmDeposit
       method_pm_deposit_type(""),
       // EnzoMethodPmUpdate

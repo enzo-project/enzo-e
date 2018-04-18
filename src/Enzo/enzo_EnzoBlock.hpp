@@ -111,7 +111,8 @@ public: // interface
        mg_sync_prolong_(),
        mg_msg_(NULL),
        jacobi_iter_(0),
-       dt(0),
+       dt(0.0),
+       redshift(0.0),
        SubgridFluxes(NULL)
   {
     performance_start_(perf_block);
@@ -137,6 +138,7 @@ public: // interface
       mg_msg_(NULL),
       jacobi_iter_(0),
       dt(0.0),
+      redshift(0.0),
       SubgridFluxes(NULL)
   {
     performance_start_(perf_block);

@@ -551,10 +551,10 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:hydro:reconstruct_method","ppm");
 
   method_hydro_reconstruct_conservative = p->value_logical
-    ("Method:hydro:reconstruct_conservative","false");
+    ("Method:hydro:reconstruct_conservative",false);
 
   method_hydro_reconstruct_positive = p->value_logical
-    ("Method:hydro:reconstruct_positive","false");
+    ("Method:hydro:reconstruct_positive",false);
 
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");

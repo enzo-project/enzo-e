@@ -193,14 +193,14 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
     }
     break;
   case precision_quadruple:
-    if (rho16) {
+    if (out16) {
       for (int iz=gz; iz<mz-gz; iz++) {
 	for (int iy=gy; iy<my-gy; iy++) {
 	  for (int ix=gx; ix<mx-gx; ix++) {
 	    int i = ix + mx*(iy + my*iz);
 	    long double mass = vol*rho16[i];
-	    if      (mass < mass_max_coarsen) rho16[i] = -1;
-	    else if (mass < mass_min_refine)  rho16[i] =  0;
+	    if      (mass < mass_max_coarsen) out16[i] = -1;
+	    else if (mass < mass_min_refine)  out16[i] =  0;
 	    else                              rho16[i] = +1;
 	  }
 	}

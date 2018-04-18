@@ -62,7 +62,8 @@ public: // functions
       io_field_data_(0),
       it_particle_index_(0),        // set_it_index_particle()
       io_particle_data_(0),
-      stride_write_(1) // default one file per process
+      stride_write_(1),// default one file per process
+      stride_wait_(0) // default no synchronization of writes
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -246,14 +247,17 @@ protected:
   std::string directory () const
   {
     std::string dir = ".";
-
     std::string name_dir = expand_name_(&dir_name_,&dir_args_);
-    
+
+    // Create subdirectory if any
     if (name_dir != "") {
       dir = name_dir;
-      struct stat st = {0};
-      if (stat(dir.c_str(), &st) == -1) {
-	mkdir(dir.c_str(), 0700);
+      boost::filesystem::path directory(name_dir);
+      if (! boost::filesystem::is_directory(directory)) {
+	ASSERT1 ("Output::directory()",
+		 "Error creating directory %s",
+		 name_dir.c_str(),
+		 (boost::filesystem::create_directory(directory)));
       }
     }
 

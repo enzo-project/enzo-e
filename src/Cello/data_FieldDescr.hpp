@@ -188,7 +188,9 @@ public: // functions
 
   /// Return precision of given field
   int precision(int id_field) const throw()
-  {  return precision_.at(id_field); }
+  {
+    return (id_field >= 0) ? precision_.at(id_field) : precision_unknown;
+  }
 
   /// centering of given field
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
@@ -208,7 +210,9 @@ public: // functions
   /// whether the field is a conserved quantity
   bool conserved(int id_field) const 
     throw()
-  { return conserved_.at(id_field); }
+  {
+    return (id_field >= 0) ? conserved_.at(id_field) : false;
+  }
   
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();

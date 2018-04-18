@@ -171,7 +171,9 @@ EnzoBlock::EnzoBlock
     mg_sync_restrict_(),
     mg_sync_prolong_(),
     mg_msg_(NULL),
+    jacobi_iter_(0),
     dt(dt_),
+    redshift(0.0),
     SubgridFluxes(NULL)
 {
   initialize_enzo_();
@@ -243,6 +245,8 @@ void EnzoBlock::pup(PUP::er &p)
     WARNING("EnzoBlock::pup()", "skipping mg_msg_");
   }
 
+  p | jacobi_iter_;
+  p | redshift;
   TRACE ("END EnzoBlock::pup()");
 
 }

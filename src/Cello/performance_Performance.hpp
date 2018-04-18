@@ -152,16 +152,6 @@ public: // interface
   int counter_type (int index) const throw()
   { return counter_type_[index]; }
 
-  ///  	Return the array of counter values
-  int counter_values (const long long * values) const
-  { values = &counter_values_[0];
-    return counter_values_.size(); }
-
-  ///  	Return the array of counter values
-  int counter_values_reduced (const long long * values) const
-  { values = &counter_values_reduced_[0];
-    return counter_values_reduced_.size(); }
-
   /// Return number of regions
   int num_regions() const throw()
   {  return region_name_.size(); }

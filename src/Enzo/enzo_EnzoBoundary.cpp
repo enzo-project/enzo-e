@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoBoundary::EnzoBoundary 
-(axis_enum axis, face_enum face, Mask * mask,
+(axis_enum axis, face_enum face, std::shared_ptr<Mask> mask,
  boundary_type type) throw()
   : Boundary(axis,face,mask),
     boundary_type_ (type)

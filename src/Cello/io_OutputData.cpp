@@ -296,7 +296,6 @@ void OutputData::write_particle_data
     // create the disk array
     file_->data_create(name.c_str(),type,np,1,1,1,np,1,1,1);
     
-    const int dx = particle.stride(it,ia);
     int i0 = 0;
 
     // for each batch of particles

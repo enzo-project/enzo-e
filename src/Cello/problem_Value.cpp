@@ -19,10 +19,15 @@ Value::Value(Parameters * parameters,
 
     Param * param = parameters->param(parameter_name);
 
+    ASSERT1("Value::Value()",
+	    "param = NULL for parameter %s",
+	    parameter_name.c_str(),
+	    param != NULL);
+	    
     ScalarExpr * scalar_expr = new ScalarExpr(param);
     scalar_expr_list_.push_back(scalar_expr);
 
-    mask_list_.push_back(NULL);
+    mask_list_.push_back(nullptr);
 
   }  else if (param_type == parameter_list) {
 
@@ -30,16 +35,21 @@ Value::Value(Parameters * parameters,
     for (int index=0; index<list_length; index+=2) {
 
       Param * param = parameters->param(parameter_name,index);
+
+      ASSERT2("Value::Value",
+	      "param = NULL for parameter %s index %d",
+	      parameter_name.c_str(),index,
+	      param != NULL);
+      
       ScalarExpr * scalar_expr = new ScalarExpr(param);
-     
+
       scalar_expr_list_.push_back(scalar_expr);
 
       if (index+1 < list_length) {
 	param = parameters->param(parameter_name,index+1);
-	Mask * mask = Mask::create(param,parameters);
-	mask_list_.push_back(mask);
+	mask_list_.push_back(Mask::create(param,parameters));
       } else {
-	mask_list_.push_back(NULL);
+	mask_list_.push_back(nullptr);
       }
     }
   } else {
@@ -99,7 +109,7 @@ void Value::copy_(const Value & value) throw()
 {
   mask_list_.resize(value.mask_list_.size());
   for (size_t i = 0; i<mask_list_.size(); i++) {
-    mask_list_[i] = value.mask_list_[i]->clone();
+    mask_list_[i] = value.mask_list_[i]->make_clone();
   }
 }
 

@@ -450,7 +450,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
       de_t[i] = 0.0;
     }
   }
-  if (de_t) {
+  if (potential) {
 #ifdef DEBUG_COPY_POTENTIAL
     enzo_float * po_temp = (enzo_float*) field.values("potential_temp");
     for (int i=0; i<mx*my*mz; i++) {

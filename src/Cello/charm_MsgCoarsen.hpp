@@ -24,7 +24,7 @@ public: // interface
 
   MsgCoarsen();
 
-  MsgCoarsen( int num_face_level, int * face_level, int ic3[3]);
+  MsgCoarsen( int num_face_level, std::vector<int> & face_level, int ic3[3]);
 
   virtual ~MsgCoarsen();
 

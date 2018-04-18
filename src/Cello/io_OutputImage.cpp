@@ -242,7 +242,11 @@ void OutputImage::open () throw()
     Monitor::instance()->print ("Output","writing image file %s", 
 				(dir_name + "/" + file_name).c_str());
     png_create_(dir_name + "/" + file_name);
-    chmod (dir_name.c_str(),0755);
+    if (chmod (dir_name.c_str(),0755) == -1) {
+      ERROR2 ("OutputImage::open()",
+	      "chmod() return errno %d: error '%s'",
+	      errno,strerror(errno));
+    };
   }
 }
 

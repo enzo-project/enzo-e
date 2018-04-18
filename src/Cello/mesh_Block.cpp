@@ -12,9 +12,17 @@
 
 // #define TRACE_BLOCK
 
-// #define DEBUG_ADAPT 
+// #define DEBUG_ADAPT
+// #define DEBUG_FACE
+
 
 // #define DEBUG_NEW_REFRESH
+
+#ifdef DEBUG_FACE
+#   define DEBUG_FACES(MSG) debug_faces_(MSG)
+#else
+#   define DEBUG_FACES(MSG) /* ... */
+#endif
 
 // KEEP CONSISTENT WITH _comm.hpp: phase_type
 const char * phase_name[] = {
@@ -47,6 +55,9 @@ Block::Block ( MsgRefine * msg )
   data_(NULL),
   child_data_(NULL),
   level_next_(0),
+  cycle_(0),
+  time_(0.0),
+  dt_(0.0),
   stop_(false),
   index_initial_(0),
   children_(),
@@ -58,6 +69,8 @@ Block::Block ( MsgRefine * msg )
   child_face_level_curr_(),
   child_face_level_next_(),
   count_coarsen_(0),
+  adapt_step_(0),
+  adapt_(0),
   coarsened_(false),
   delete_(false),
   is_leaf_(true),
@@ -65,7 +78,8 @@ Block::Block ( MsgRefine * msg )
   face_level_last_(),
   name_(""),
   index_method_(-1),
-  index_solver_()
+  index_solver_(),
+  refresh_()
 {
   performance_start_(perf_block);
   init (msg->index_,
@@ -244,7 +258,7 @@ void Block::init
 
   setMigratable(true);
 
-  debug_faces_("Block()");
+  DEBUG_FACES("Block()");
 
 }
 
@@ -266,7 +280,9 @@ void Block::pup(PUP::er &p)
   p|allocated;
   if (allocated) {
     if (up) child_data_=new Data;
-    p|*child_data_;
+    // child_data_ guaranteed to be non-NULL: adding check for
+    // Coverity static analysis
+    if (child_data_) p|*child_data_;
   } else {
     child_data_ = NULL;
   }
@@ -300,7 +316,7 @@ void Block::pup(PUP::er &p)
   p | refresh_;
   // SKIP method_: initialized when needed
 
-  if (up) debug_faces_("PUP");
+  if (up) DEBUG_FACES("PUP");
 }
 
 //----------------------------------------------------------------------
