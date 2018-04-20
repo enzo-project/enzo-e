@@ -126,6 +126,7 @@ EnzoConfig::EnzoConfig() throw ()
   solver_last_smooth(),
   solver_coarse_solve(),
   solver_weight(),
+  solver_restart_cycle(),
   /// EnzoSolver<Krylov>
   solver_precondition(),
   solver_local(),
@@ -276,6 +277,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | solver_last_smooth;
   p | solver_coarse_solve;
   p | solver_weight;
+  p | solver_restart_cycle;
 
   p | stopping_redshift;
 
@@ -641,6 +643,7 @@ void EnzoConfig::read(Parameters * p) throw()
   solver_post_smooth. resize(num_solvers);
   solver_last_smooth. resize(num_solvers);
   solver_weight.      resize(num_solvers);
+  solver_restart_cycle.resize(num_solvers);
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
 
@@ -687,6 +690,9 @@ void EnzoConfig::read(Parameters * p) throw()
     solver_weight[index_solver] =
       p->value_float(solver_name + ":weight",1.0);
 
+    solver_restart_cycle[index_solver] =
+      p->value_integer(solver_name + ":restart_cycle",1);
+    
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
     

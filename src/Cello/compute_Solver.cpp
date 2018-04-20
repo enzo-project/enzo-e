@@ -63,6 +63,13 @@ void Solver::monitor_output_
 
 //----------------------------------------------------------------------
 
+bool Solver::reuse_solution_ (int cycle) const throw()
+{
+  return ( ( cycle % restart_cycle_) != 0 );
+}
+
+//----------------------------------------------------------------------
+
 void Solver::begin_(Block * block)
 {
   block->push_solver(index_);

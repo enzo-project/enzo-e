@@ -29,6 +29,7 @@ public: // interface
   /// normal constructor
   EnzoSolverBiCgStab(FieldDescr* field_descr,
 		     int monitor_iter,
+		     int reuse_solution,
 		     int rank,
 		     int iter_max, 
 		     double res_tol,
@@ -55,7 +56,8 @@ public: // interface
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
       bs_(0.0),bc_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0)
+      ys_(0.0),vs_(0.0),us_(0.0),
+      bnorm_(0.0)
   {};
 
   /// Charm++ PUP::able declarations
@@ -80,7 +82,9 @@ public: // interface
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
       bs_(0.0),bc_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0)
+      ys_(0.0),vs_(0.0),us_(0.0),
+      bnorm_(0.0)
+      
   {}
 
   /// Charm++ Pack / Unpack function
@@ -141,6 +145,7 @@ public: // interface
     p | ys_;
     p | vs_;
     p | us_;
+    p | bnorm_;
 
   }
 
@@ -201,6 +206,7 @@ public: // interface
   void set_ys(long double ys) throw() { ys_ = ys; }
   void set_vs(long double vs) throw() { vs_ = vs; }
   void set_us(long double us) throw() { us_ = us; }
+  void set_bnorm(long double bnorm) throw() { bnorm_ = bnorm; }
   void set_rho0(long double rho0) throw() { rho0_ = rho0; }
   void set_beta_d(long double beta_d) throw() { beta_d_ = beta_d; }
   void set_vr0(long double vr0) throw() { vr0_ = vr0; }
@@ -309,6 +315,8 @@ protected: // attributes
   long double ys_; //
   long double vs_; //
   long double us_; //
+
+  long double bnorm_; // used when reuse_solution
 
 };
 

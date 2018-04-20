@@ -82,6 +82,7 @@ public: // interface
 
   /// Initialize an empty Block
   Block() :
+    CBase_Block(),
     data_(NULL),
     child_data_(NULL),
     level_next_(0),

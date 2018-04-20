@@ -21,11 +21,13 @@ public: // interface
 
   /// Create a new Solver
   Solver (int monitor_iter,
+	  int restart_cycle,
 	  int min_level = 0,
 	  int max_level = std::numeric_limits<int>::max()) throw()
     : PUP::able(),
       refresh_list_(),
       monitor_iter_(monitor_iter),
+      restart_cycle_(restart_cycle),
       callback_(0),
       index_(0),
       min_level_(min_level),
@@ -38,6 +40,7 @@ public: // interface
   : PUP::able(),
     refresh_list_(),
     monitor_iter_(0),
+    restart_cycle_(1),
     callback_(0),
     index_(0),
     min_level_(0),
@@ -54,13 +57,14 @@ public: // interface
 
   Solver (CkMigrateMessage *m)
     : PUP::able (m),
-    refresh_list_(),
-    monitor_iter_(0),
-    callback_(0),
-    index_(0),
-    min_level_(- std::numeric_limits<int>::max()),
-    max_level_(  std::numeric_limits<int>::max()),
-    id_sync_(0)
+      refresh_list_(),
+      monitor_iter_(0),
+      restart_cycle_(1),
+      callback_(0),
+      index_(0),
+      min_level_(- std::numeric_limits<int>::max()),
+      max_level_(  std::numeric_limits<int>::max()),
+      id_sync_(0)
   { }
   
   /// CHARM++ Pack / Unpack function
@@ -72,6 +76,7 @@ public: // interface
     
     p | refresh_list_;
     p | monitor_iter_;
+    p | restart_cycle_;
     p | callback_;
     p | index_;
     p | min_level_;
@@ -91,6 +96,9 @@ public: // interface
 
   void set_min_level (int min_level)
   { min_level_ = min_level; }
+
+  const int min_level() { return min_level_; }
+  const int max_level() { return max_level_; }
 
   void set_max_level (int max_level)
   { max_level_ = max_level; }
@@ -154,7 +162,9 @@ protected: // functions
 
   int sync_id_() const throw()
   { return this->id_sync_; }
-  
+
+  bool reuse_solution_ (int cycle) const throw();
+    
 protected: // attributes
 
   ///  Refresh object
@@ -162,6 +172,9 @@ protected: // attributes
 
   /// How often to write output
   int monitor_iter_;
+
+  /// Whether to reuse the previous solution as the initial guess
+  int restart_cycle_;
 
   /// Callback id
   int callback_;

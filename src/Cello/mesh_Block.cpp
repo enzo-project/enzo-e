@@ -70,7 +70,7 @@ Block::Block ( MsgRefine * msg )
   child_face_level_next_(),
   count_coarsen_(0),
   adapt_step_(0),
-  adapt_(0),
+  adapt_(adapt_unknown),
   coarsened_(false),
   delete_(false),
   is_leaf_(true),
@@ -317,6 +317,11 @@ void Block::pup(PUP::er &p)
   // SKIP method_: initialized when needed
 
   if (up) DEBUG_FACES("PUP");
+
+  if (up) {
+    if (simulation()) simulation()->data_insert_block(this);    
+  }
+  
 }
 
 //----------------------------------------------------------------------
@@ -532,7 +537,6 @@ Block::Block (CkMigrateMessage *m)
   : CBase_Block(m),
     data_(NULL),
     child_data_(NULL),
-    index_(),
     level_next_(0),
     cycle_(0),
     time_(0.0),
@@ -557,13 +561,15 @@ Block::Block (CkMigrateMessage *m)
     face_level_last_(),
     name_(""),
     index_method_(-1),
-    index_solver_()
-{ 
-  performance_start_(perf_block);
-
-  if (simulation()) simulation()->data_insert_block(this);
+    index_solver_(),
+    refresh_()
+{
   
-  performance_stop_(perf_block);
+#ifdef TRACE_BLOCK
+  CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n");
+  fflush(stdout);
+#endif  
+  
 };
 
 //----------------------------------------------------------------------

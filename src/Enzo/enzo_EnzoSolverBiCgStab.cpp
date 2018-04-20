@@ -413,7 +413,7 @@
       asum += std::abs(X[i]);					\
     }								\
     CkPrintf ("DEBUG_COPY_TEMP %s relsum %25.15g\n",		\
-	      FIELD_TMP,sum/asum);			  \
+	      FIELD_TMP,sum/asum);				\
   }
 # else
 #   define COPY_TEMP(I_FIELD,FIELD_TMP) /* EMPTY */
@@ -421,9 +421,9 @@
 
 
 #ifdef DEBUG_BICGSTAB
-#   define TRACE_BICGSTAB(MSG,BLOCK) \
-  CkPrintf ("%s DEBUG_BICGSTAB %s\n", \
-	    BLOCK->name().c_str(),MSG); \
+#   define TRACE_BICGSTAB(MSG,BLOCK)		\
+  CkPrintf ("%s DEBUG_BICGSTAB %s\n",		\
+	    BLOCK->name().c_str(),MSG);		\
   fflush(stdout);
 #else
 #   define TRACE_BICGSTAB(F,B) /*  ...  */
@@ -433,12 +433,12 @@
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
 (FieldDescr* field_descr,
- int monitor_iter, int rank,
+ int monitor_iter, int restart_cycle, int rank,
  int iter_max, double res_tol,
  int min_level, int max_level,
  int index_precon
  ) 
-  : Solver(monitor_iter,min_level,max_level), 
+  : Solver(monitor_iter,restart_cycle,min_level,max_level), 
     A_(NULL),
     index_precon_(index_precon),
     rank_(rank),
@@ -455,7 +455,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     omega_d_(0), omega_n_(0), omega_(0), 
     vr0_(0), rr_(0), alpha_(0),
     bs_(0.0),bc_(0.0),
-    ys_(0.0),vs_(0.0),us_(0.0)
+    ys_(0.0),vs_(0.0),us_(0.0),
+    bnorm_(0.0)
 {
 
   ir_ = field_descr->insert_temporary();
@@ -490,8 +491,8 @@ void EnzoSolverBiCgStab::apply
 ( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
 {
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p bicgstab DEBUG_ENTRY begin\n",
-	      CkMyPe(),block->name().c_str(),this);
+  CkPrintf ("%d %s %p bicgstab DEBUG_ENTRY begin\n",
+	    CkMyPe(),block->name().c_str(),this);
 #endif
   TRACE_BICGSTAB("apply()",block);
   
@@ -532,35 +533,49 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* enzo_block) throw() {
 
   /// construct RHS B, initialize initial solution X to zero (only on
   /// leaf blocks)
+
+  /// access relevant fields
+
+  enzo_float* X   = (enzo_float*) field.values(ix_);
+  enzo_float* R   = (enzo_float*) field.values(ir_);
+  enzo_float* R0  = (enzo_float*) field.values(ir0_);
+  enzo_float* P   = (enzo_float*) field.values(ip_);
+  enzo_float* Y   = (enzo_float*) field.values(iy_);
+  enzo_float* V   = (enzo_float*) field.values(iv_);
+  enzo_float* Q   = (enzo_float*) field.values(iq_);
+  enzo_float* U   = (enzo_float*) field.values(iu_);
+  enzo_float* R0_copy  = (enzo_float*) field.values("R0");
+
+  int m = mx_*my_*mz_;
+  for (int i=0; i<m; i++) {
+    X[i] = 0.0;
+    R[i] = 0.0;
+    R0[i] = 0.0;
+    P[i] = 0.0;
+    Y[i] = 0.0;
+    V[i] = 0.0;
+    Q[i] = 0.0;
+    U[i] = 0.0;
+    R0_copy[i] = 0.0;
+  }
+
   if (is_active_(enzo_block)) {
-
-    /// access relevant fields
-
-    enzo_float* X   = (enzo_float*) field.values(ix_);
-    enzo_float* R   = (enzo_float*) field.values(ir_);
-    enzo_float* R0  = (enzo_float*) field.values(ir0_);
-    enzo_float* P   = (enzo_float*) field.values(ip_);
-    enzo_float* Y   = (enzo_float*) field.values(iy_);
-    enzo_float* V   = (enzo_float*) field.values(iv_);
-    enzo_float* Q   = (enzo_float*) field.values(iq_);
-    enzo_float* U   = (enzo_float*) field.values(iu_);
 
     /// set X = 0 [Q: necessary?  couldn't we reuse the solution from
     /// the previous solve?]
-    
-    int m = mx_*my_*mz_;
-    for (int i=0; i<m; i++) {
-      X[i] = 0.0;
-      R[i] = 0.0;
-      R0[i] = 0.0;
-      P[i] = 0.0;
-      Y[i] = 0.0;
-      V[i] = 0.0;
-      Q[i] = 0.0;
-      U[i] = 0.0;
+
+    if ( reuse_solution_ (enzo_block->cycle()) ) {
+      enzo_float* X_copy  = (enzo_float*) field.values("X_copy");
+      for (int i=0; i<mx_*my_*mz_; i++) {
+	X[i] = X_copy[i];
+      }
+      A_->residual (ir_, ib_, ix_, enzo_block);
+      for (int i=0; i<mx_*my_*mz_; i++) {
+	R0_copy[i]=R[i];
+      }
+      
     }
   }
-
   /// for singular Poisson problems, N(A) is not empty, so project B into R(A)
   if (A_->is_singular()) {
 
@@ -629,10 +644,13 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   Field field = data->field();
 
 #ifdef DEBUG_BICGSTAB    
-    CkPrintf ("%d DEBUG_BCG bs_=%25.15Lg\n",__LINE__,bs_);
+  CkPrintf ("%d DEBUG_BCG bs_=%25.15Lg\n",__LINE__,bs_);
 #endif
-    /// update B and initialize temporary vectors (on leaf blocks only)
-  long double reduce = 0.0;
+  /// update B and initialize temporary vectors (on leaf blocks only)
+  long double reduce[2];
+  reduce[0] = 0.0;
+  reduce[1] = 0.0;
+
   if (is_active_(enzo_block)) {
 
     /// access relevant fields
@@ -640,6 +658,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
     enzo_float* R0 = (enzo_float*) field.values(ir0_);
     enzo_float* P  = (enzo_float*) field.values(ip_);
     enzo_float* R  = (enzo_float*) field.values(ir_);
+    enzo_float* X  = (enzo_float*) field.values(ix_);
 
     /// for singular problems, project B into R(A)
     int m = mx_*my_*mz_;
@@ -650,18 +669,29 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
 	B[i] += shift;
       }
     }
-    /// initialize R = R0 = P = B
-    for (int i=0; i<m; i++) {
-      R[i] = R0[i] = P[i] = B[i];
-    }
 
+    /// initialize R, R0, P
+    const int cycle = enzo_block->cycle();
+    if ( reuse_solution_(cycle) ) {
+      for (int i=0; i<m; i++) {
+	R0[i] = R[i];
+	P[i]  = R[i];
+      }      
+    } else {
+      for (int i=0; i<m; i++) {
+	R[i]  = B[i];
+	R0[i] = B[i];
+	P[i]  = B[i];
+      }
+    }
     /// Compute local contributions to beta_n_ = DOT(R, R0)
     const int i0 = gx_ + mx_*(gy_ + my_*gz_);
     for (int iz=0; iz<nz_; iz++) {
       for (int iy=0; iy<ny_; iy++) {
 	for (int ix=0; ix<nx_; ix++) {
 	  int i = i0 + ix + mx_*(iy + my_*iz);
-	  reduce += R[i]*R0[i];
+	  reduce[0] += R[i]*R0[i];
+	  reduce[1] += B[i]*B[i];
 	}
       }
     }
@@ -675,8 +705,8 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* enzo_block) throw() {
   CkCallback callback(CkIndex_EnzoBlock::r_solver_bicgstab_start_3(NULL), 
 		      enzo_block->proxy_array());
 
-  enzo_block->contribute(sizeof(long double), &reduce, 
-			 sum_long_double_type, callback);
+  enzo_block->contribute(2*sizeof(long double), &reduce, 
+			 sum_long_double_2_type, callback);
 }
 
 //----------------------------------------------------------------------
@@ -690,6 +720,7 @@ void EnzoBlock::r_solver_bicgstab_start_3(CkReductionMsg* msg) {
     static_cast<EnzoSolverBiCgStab*> (this->solver());
   long double* data = (long double*) msg->getData();
   solver->set_beta_n( data[0] );
+  solver->set_bnorm ( data[1] );
   delete msg;
 
   /// call loop_0 to begin solver loop
@@ -707,8 +738,11 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw() {
   cello::check(beta_n_,"BCG_beta_n_",__FILE__,__LINE__);
 
   /// initialize/update current error, store error statistics
+  const int cycle = enzo_block->cycle();
+  bool reuse_x = reuse_solution_(cycle);
+
   if (iter_ == 0) {
-    rho0_ = sqrt(beta_n_);
+    rho0_ = sqrt(bnorm_); // ||B||
     if (rho0_ == 0.0)  rho0_ = 1.0;
     err_ = sqrt(beta_n_) / rho0_;
     err0_ = err_;
@@ -732,11 +766,47 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* enzo_block) throw() {
 	(monitor_iter_ && (iter_ % monitor_iter_) == 0 )) );
 
   if (l_output) {
-    monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
+    if (reuse_x) {
+      monitor_output_(enzo_block,iter_,sqrt(bnorm_),
+		      err_min_*sqrt(bnorm_),
+		      err_*sqrt(bnorm_),
+		      err_max_*sqrt(bnorm_));
+    } else {
+      monitor_output_(enzo_block,iter_,err0_,err_min_,err_,err_max_);
+    }
+  }
+
+  // TEMPORARY: copy first few iterations to X0,X1,X2
+  if (0 <= iter_ && iter_ < 3) {
+    Field field = enzo_block->data()->field();
+    char filename[10];
+    sprintf (filename,"X%d",iter_);
+    enzo_float* X  = (enzo_float*) field.values(ix_);
+    enzo_float* Xn  = (enzo_float*) field.values(filename);
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      Xn[i] = X[i];
+    }
+  }
+
+  if (enzo_block->index().is_root() && (is_converged || is_diverged) ) {
+    CkPrintf ("%s DEBUG_SOLVER bicgstab "
+	      "final iter = %d rr = %Lg  rho0 = %Lg  rr/rho0 = %Lg\n",
+	      enzo_block->name().c_str(),
+	      iter_,rr_,rho0_,sqrt(rr_)/rho0_);
   }
 
   if (is_converged) {
 
+    bool reuse_next_x = reuse_solution_(cycle + 1);
+    if (reuse_next_x) {
+      Field field = enzo_block->data()->field();
+      enzo_float* X  = (enzo_float*) field.values(ix_);
+      enzo_float* X_copy  = (enzo_float*) field.values("X_copy");
+      for (int i=0; i<mx_*my_*mz_; i++) {
+	X_copy[i] = X[i];
+      }
+    }
+    
     this->end(enzo_block, return_converged);
 
   } else if (is_diverged)  {
@@ -1285,7 +1355,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* enzo_block) throw() {
   /// Update previous beta value (beta_d_) to current value (beta_n_)
   beta_d_ = beta_n_;
 #ifdef DEBUG_BICGSTAB    
-    CkPrintf ("%d DEBUG_BCG beta_d_=%25.15Lg\n",__LINE__,beta_d_);
+  CkPrintf ("%d DEBUG_BCG beta_d_=%25.15Lg\n",__LINE__,beta_d_);
 #endif
   /// compute local contributions to
   /// rr_     = DOT(R, R)
@@ -1342,9 +1412,9 @@ void EnzoBlock::r_solver_bicgstab_loop_13(CkReductionMsg* msg) {
 void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw() {
 
 #ifdef DEBUG_BICGSTAB    
-    CkPrintf ("%d DEBUG_BCG rr_=%25.15Lg\n",__LINE__,rr_);
+  CkPrintf ("%d DEBUG_BCG rr_=%25.15Lg\n",__LINE__,rr_);
 #endif
-    TRACE_BICGSTAB("loop_14()",enzo_block);
+  TRACE_BICGSTAB("loop_14()",enzo_block);
   /// verify legal floating-point values for preceding reduction results
   cello::check(rr_,    "BCG_rr_",    __FILE__,__LINE__);
   cello::check(beta_n_,"BCG_beta_n_",__FILE__,__LINE__);
@@ -1364,7 +1434,7 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* enzo_block) throw() {
   beta_ = (beta_n_/beta_d_)*(alpha_/omega_);
 
 #ifdef DEBUG_BICGSTAB    
-    CkPrintf ("%d DEBUG_BCG beta_=%25.15Lg\n",__LINE__,beta_);
+  CkPrintf ("%d DEBUG_BCG beta_=%25.15Lg\n",__LINE__,beta_);
 #endif
 
   /// update direction vector (on leaf blocks only) -- P = R+beta*(P-omega*V)
@@ -1432,11 +1502,11 @@ void EnzoSolverBiCgStab::end
   Solver::end_(enzo_block);
   
 #ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p bicgstab DEBUG_ENTRY calling callback_ %d\n",
-	      CkMyPe(),enzo_block->name().c_str(),this,callback_);
+  CkPrintf ("%d %s %p bicgstab DEBUG_ENTRY calling callback_ %d\n",
+	    CkMyPe(),enzo_block->name().c_str(),this,callback_);
 #endif
 
-    CkCallback(callback_,
+  CkCallback(callback_,
 	     CkArrayIndexIndex(enzo_block->index()),
 	     enzo_block->proxy_array()).send();
 

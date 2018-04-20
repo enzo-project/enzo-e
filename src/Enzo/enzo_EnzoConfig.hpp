@@ -149,6 +149,7 @@ public: // interface
       solver_last_smooth(),
       solver_coarse_solve(),
       solver_weight(),
+      solver_restart_cycle(),
       // EnzoSolver<Krylov>
       solver_precondition(),
       solver_local(),
@@ -336,6 +337,10 @@ public: // attributes
   /// Weighting factor for smoother
   
   std::vector<double>        solver_weight;
+
+  /// Whether to start the iterative solver using the previous solution
+
+  std::vector<int>           solver_restart_cycle;
 
   /// EnzoSolver<Krylov>
   

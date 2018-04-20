@@ -36,14 +36,15 @@
 
 EnzoSolverCg::EnzoSolverCg 
 (FieldDescr * field_descr,
- int monitor_iter, 
+ int monitor_iter,
+ int restart_cycle,
  int rank,
  int iter_max, double res_tol,
  int min_level, int max_level,
  int index_precon,
  bool local
  )
-  : Solver(monitor_iter,min_level,max_level), 
+  : Solver(monitor_iter,restart_cycle,min_level,max_level), 
     A_(NULL),
     ix_(0),  ib_(0),
     index_precon_(index_precon),

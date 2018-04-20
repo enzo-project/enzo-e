@@ -168,10 +168,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	     "Particle type %s attribute %s defined as %s but expecting %s",
 	     particle.type_name(it).c_str(),
 	     particle.attribute_name(it,ia).c_str(),
-	     ((ba == 4) ? "single" :
-	      ((ba == 8) ? "double" : "quadruple")),
-	     ((be == 4) ? "single" :
-	      ((be == 8) ? "double" : "quadruple")),
+	     ((ba == 4) ? "single" : ((ba == 8) ? "double" : "quadruple")),
+	     ((be == 4) ? "single" : ((be == 8) ? "double" : "quadruple")),
 	     (ba == be));
 
     // Accumulate particle density using CIC

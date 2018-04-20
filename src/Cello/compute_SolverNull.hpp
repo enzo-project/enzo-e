@@ -20,9 +20,10 @@ public: // interface
 
   /// Create a new SolverNull
   SolverNull (int monitor_iter,
-	  int min_level = 0,
-	  int max_level = std::numeric_limits<int>::max()) throw()
-    : Solver(monitor_iter,min_level,max_level)
+	      int restart_cycle,
+	      int min_level = 0,
+	      int max_level = std::numeric_limits<int>::max()) throw()
+    : Solver(monitor_iter,restart_cycle,min_level,max_level)
   {}
 
   /// Create an uninitialized SolverNull

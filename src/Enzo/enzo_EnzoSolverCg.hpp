@@ -18,6 +18,7 @@ public: // interface
 
   EnzoSolverCg (FieldDescr * field_descr,
 		int monitor_iter,
+		int restart_cycle,
 		int rank,
 		int iter_max, 
 		double res_tol,

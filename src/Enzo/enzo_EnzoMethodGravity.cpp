@@ -57,7 +57,6 @@ EnzoMethodGravity::EnzoMethodGravity
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
   const int ib  = field_descr->field_id("B");
-  const int idensity = (idt != -1) ? idt : id;
   const int iax = field_descr->field_id("acceleration_x");
   const int iay = field_descr->field_id("acceleration_y");
   const int iaz = field_descr->field_id("acceleration_z");
@@ -434,7 +433,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
   enzo_float * de_t =      (enzo_float*) field.values("density_total");
 
-  if (de_t) {
+  if (de_t != NULL) {
 #ifdef DEBUG_COPY_DENSITY  
     enzo_float * de_t_temp = (enzo_float*) field.values("density_total_temp");
     for (int iz=0; iz<mz; iz++) {
@@ -453,8 +452,10 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   if (potential) {
 #ifdef DEBUG_COPY_POTENTIAL
     enzo_float * po_temp = (enzo_float*) field.values("potential_temp");
-    for (int i=0; i<mx*my*mz; i++) {
-      po_temp[i] = potential[i];
+    if (po_temp != NULL) {
+      for (int i=0; i<mx*my*mz; i++) {
+	po_temp[i] = potential[i];
+      }
     }
 #endif  
     for (int i=0; i<mx*my*mz; i++) {

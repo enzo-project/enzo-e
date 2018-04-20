@@ -281,6 +281,7 @@ Solver * EnzoProblem::create_solver_
     solver = new EnzoSolverCg
       (field_descr,
        enzo_config->solver_monitor_iter [index_solver],
+       enzo_config->solver_restart_cycle [index_solver],
        rank,
        enzo_config->solver_iter_max     [index_solver],
        enzo_config->solver_res_tol      [index_solver],
@@ -295,6 +296,7 @@ Solver * EnzoProblem::create_solver_
     solver = new EnzoSolverBiCgStab
       (field_descr,
        enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle [index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
@@ -323,6 +325,7 @@ Solver * EnzoProblem::create_solver_
     solver = new EnzoSolverMg0
       (field_descr,
        enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle [index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],

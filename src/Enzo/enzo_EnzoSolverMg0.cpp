@@ -209,6 +209,7 @@
 EnzoSolverMg0::EnzoSolverMg0
 (FieldDescr * field_descr, 
  int monitor_iter,
+ int restart_cycle,
  int rank,
  int iter_max,
  double res_tol,
@@ -220,7 +221,7 @@ EnzoSolverMg0::EnzoSolverMg0
  Prolong * prolong,
  int min_level,
  int max_level) 
-  : Solver(monitor_iter,min_level,max_level), 
+  : Solver(monitor_iter,restart_cycle,min_level,max_level), 
     A_(NULL),
     index_smooth_pre_(index_smooth_pre),
     index_solve_coarse_(index_solve_coarse),
