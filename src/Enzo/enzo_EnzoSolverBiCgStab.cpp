@@ -450,6 +450,8 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* enzo_block) throw() {
 
   if (index_precon_ >= 0) {
 
+    enzo_float * Y = (enzo_float*) field.values(iy_);
+
     for (int i=0; i<m_; i++) Y[i] = 0.0;
 
     /// Access the preconditioner for this solver, if any
