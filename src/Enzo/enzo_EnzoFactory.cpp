@@ -46,6 +46,7 @@ CProxy_Block EnzoFactory::create_block_array
   CkPrintf ("%d EnzoFactory::create_block_array %d %d %d)\n",CkMyPe(), nx,ny,nz);
   CkPrintf ("%d EnzoFactory::create_block_array() num_field_blocks %d\n",
 	    CkMyPe(), num_field_blocks);
+  fflush(stdout);
 #endif
   
   //  CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
@@ -71,8 +72,6 @@ CProxy_Block EnzoFactory::create_block_array
 
 	Index index(ix,iy,iz);
 
-	TRACE3 ("inserting %d %d %d",ix,iy,iz);
-
 	MsgRefine * msg = new MsgRefine 
 	  (index,
 	   nx,ny,nz,
@@ -84,6 +83,7 @@ CProxy_Block EnzoFactory::create_block_array
 
 	msg->set_data_msg(data_msg);
 
+	TRACE3 ("inserting %d %d %d",ix,iy,iz);
 	enzo_block_array[index].insert (msg);
 
 	// --------------------------------------------------
@@ -195,6 +195,7 @@ Block * EnzoFactory::create_block
   CkPrintf ("%d EnzoFactory::create_block %d %d %d)\n",CkMyPe(), nx,ny,nz);
   CkPrintf ("%d EnzoFactory::create_block() num_field_blocks %d  count_adapt %d\n",
 	    CkMyPe(), num_field_blocks,count_adapt);
+  fflush(stdout);
 #endif
 
   TRACE3("EnzoFactory::create_block(%d %d %d)",nx,ny,nz);
@@ -205,6 +206,7 @@ Block * EnzoFactory::create_block
 
 #ifdef CELLO_DEBUG
   index.print("DEBUG insert()",-1,2,false,simulation);
+  fflush(stdout);
 #endif
   
   MsgRefine * msg = new MsgRefine 
@@ -218,13 +220,15 @@ Block * EnzoFactory::create_block
 
   msg->set_data_msg(data_msg);
 
+#ifdef CELLO_TRACE
+  index.print("ADAPT REFINE insert()",-1,2,false,simulation);
+  fflush(stdout);
+#endif
+
   (*enzo_block_array)[index].insert ( msg );
 
   // --------------------------------------------------
 
-#ifdef CELLO_TRACE
-  index.print("ADAPT REFINE insert()",-1,2,false,simulation);
-#endif
   EnzoBlock * block = (*enzo_block_array)[index].ckLocal();
   TRACE1("block = %p",block);
   //  ASSERT("Factory::create_block()","block is NULL",block != NULL);

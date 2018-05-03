@@ -472,7 +472,6 @@ int EnzoBlock::SolveHydroEquations
 
   int mx,my,mz;
   field.dimensions(0,&mx,&my,&mz);
-  int gx=3,gy=3,gz=3;
   TRACE_FIELD("ppm-1-density",density,1.0);
   TRACE_FIELD("ppm-1-total_energy",total_energy,1.0);
   TRACE_FIELD("ppm-1-velocity_x",velocity_x,1.0);

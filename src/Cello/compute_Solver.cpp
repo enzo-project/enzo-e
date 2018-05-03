@@ -65,7 +65,14 @@ void Solver::monitor_output_
 
 bool Solver::reuse_solution_ (int cycle) const throw()
 {
-  return ( ( cycle % restart_cycle_) != 0 );
+  // 0   0 1 1 1 1 1    always restart from previous solution (except cycle 0)
+  // 1   0 0 0 0 0 0    never restart from previous (default)
+  // 2   0 1 0 1 0 1    restart every 2nd
+  // 3   0 1 1 0 1 1    restart every 3rd
+  //      ...           restart every nth
+  return ( ( cycle > 0 ) &&
+	   ( ( restart_cycle_ == 0 ) ||
+	     ( cycle % restart_cycle_) != 0 ) );
 }
 
 //----------------------------------------------------------------------

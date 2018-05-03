@@ -85,6 +85,7 @@ class FieldFace;
 
 #   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,PLOT)	\
   {									\
+    int gx=3,gy=3,gz=3;							\
     double sum_all=0.0;							\
     double sum_real=0.0;						\
     double sum_abs=0.0;							\

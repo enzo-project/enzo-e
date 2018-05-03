@@ -74,8 +74,6 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
 
   EnzoSimulation * simulation =
     (EnzoSimulation * ) proxy_simulation.ckLocalBranch();
-  EnzoPhysicsCosmology * cosmology =
-    (EnzoPhysicsCosmology *) simulation->problem()->physics("cosmology");
 
   double hx0 = hx*pow(2.0,level);
   double hy0 = hy*pow(2.0,level);

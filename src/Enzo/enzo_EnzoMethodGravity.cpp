@@ -117,6 +117,8 @@ void EnzoMethodGravity::compute(Block * block) throw()
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
 
+  const int m = mx*my*mz;
+
   enzo_float * B = (enzo_float*) field.values (ib);
 #ifdef DEBUG_COPY_B  
   const int ib_copy = field.field_id ("B_copy");
@@ -126,17 +128,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   TRACE_FIELD("B",B,1.0);
 
-  for (int iz=0; iz<mz; iz++) {
-    for (int iy=0; iy<my; iy++) {
-      for (int ix=0; ix<mx; ix++) {
-	int i = ix + mx*(iy + my*iz);
-#ifdef DEBUG_COPY_B  
-	B_copy[i] = B[i];
-#endif	
-	D[i]  += B[i];
-      }
-    }
-  }
+  for (int i=0; i<m; i++) D[i] += B[i];
 
   // Add density_particle values to density_particle_accumulate ghosts
   
@@ -248,6 +240,10 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   TRACE_FIELD("density-rhs",B,-1.0);
 
+#ifdef DEBUG_COPY_B
+  for (int i=0; i<m; i++) B_copy[i] = B[i];
+#endif	
+
   Solver * solver = block->simulation()->problem()->solver(index_solver_);
   
   // May exit before solve is done...
@@ -301,8 +297,9 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   Field field = enzo_block->data()->field();
   int gx,gy,gz;
   int mx,my,mz;
-  field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
+  field.dimensions (0,&mx,&my,&mz);
+  const int m = mx*my*mz;
   enzo_float * potential = (enzo_float*) field.values ("potential");
   TRACE_FIELD("potential",potential,-1.0);
   
@@ -318,7 +315,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
     cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
     //    cosmology-> compute_expansion_factor (&a,&dadt,time);
 
-    for (int i=0; i<mx*my*mz; i++) potential[i] /= cosmo_a;
+    for (int i=0; i<m; i++) potential[i] /= cosmo_a;
   }
   
 #ifdef READ_ENZO_POTENTIAL  
@@ -422,45 +419,28 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
 #ifdef DEBUG_COPY_DENSITY  
   enzo_float * B_temp =    (enzo_float*) field.values("B_temp");
-  for (int i=0; i<mx*my*mz; i++) {
-    B_temp[i] = B[i];
-  }
+  for (int i=0; i<m; i++) B_temp[i] = B[i];
 #endif  
 
-  for (int i=0; i<mx*my*mz; i++) {
-    B[i] = 0.0;
-  }
+  for (int i=0; i<m; i++) B[i] = 0.0;
 
   enzo_float * de_t =      (enzo_float*) field.values("density_total");
 
   if (de_t != NULL) {
 #ifdef DEBUG_COPY_DENSITY  
     enzo_float * de_t_temp = (enzo_float*) field.values("density_total_temp");
-    for (int iz=0; iz<mz; iz++) {
-      for (int iy=0; iy<my; iy++) {
-	for (int ix=0; ix<mx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  de_t_temp[i] = de_t[i];
-	}
-      }
-    }
+    for (int i=0; i<m; i++) de_t_temp[i] = de_t[i];
 #endif  
-    for (int i=0; i<mx*my*mz; i++) {
-      de_t[i] = 0.0;
-    }
+    for (int i=0; i<m; i++) de_t[i] = 0.0;
   }
   if (potential) {
 #ifdef DEBUG_COPY_POTENTIAL
     enzo_float * po_temp = (enzo_float*) field.values("potential_temp");
     if (po_temp != NULL) {
-      for (int i=0; i<mx*my*mz; i++) {
-	po_temp[i] = potential[i];
-      }
+      for (int i=0; i<m; i++) po_temp[i] = potential[i];
     }
 #endif  
-    for (int i=0; i<mx*my*mz; i++) {
-      potential[i] = 0.0;
-    }
+    for (int i=0; i<m; i++) potential[i] = 0.0;
   }
 
   // wait for all Blocks before continuing
@@ -480,10 +460,8 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
 {
   Field field = block->data()->field();
 
-  int nx,ny,nz;
   int mx,my,mz;
   int gx,gy,gz;
-  field.size         (&nx,&ny,&nz);
   field.dimensions (0,&mx,&my,&mz);
   field.ghost_depth(0,&gx,&gy,&gz);
 
@@ -511,9 +489,9 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   }
 
   if (ax) {
-    for (int ix=gx; ix<nx+gx; ix++) {
-      for (int iy=gy; iy<ny+gy; iy++) {
-	for (int iz=gz; iz<nz+gz; iz++) {
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
 	  int i=ix + mx*(iy + iz*my);
 	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hx/(fabs(ax[i]+1e-20)))));
 	}
@@ -521,9 +499,9 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
     }
   }
   if (ay) {
-    for (int ix=gx; ix<nx+gx; ix++) {
-      for (int iy=gy; iy<ny+gy; iy++) {
-	for (int iz=gz; iz<nz+gz; iz++) {
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
 	  int i=ix + mx*(iy + iz*my);
 	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hy/(fabs(ay[i]+1e-20)))));
 	}
@@ -531,9 +509,9 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
     }
   }
   if (az) {
-    for (int ix=gx; ix<nx+gx; ix++) {
-      for (int iy=gy; iy<ny+gy; iy++) {
-	for (int iz=gz; iz<nz+gz; iz++) {
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
 	  int i=ix + mx*(iy + iz*my);
 	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hz/(fabs(az[i]+1e-20)))));
 	}

@@ -67,7 +67,7 @@ void register_sum_long_double_2(void)
 
 CkReductionMsg * sum_long_double_2(int n, CkReductionMsg ** msgs)
 {
-  long double accum[2] = { 0.0, 0.0 };
+  long double accum[2] = {0.0};
 
   for (int i=0; i<n; i++) {
     ASSERT2("sum_long_double_2()",
@@ -91,7 +91,8 @@ void register_sum_long_double_3(void)
 
 CkReductionMsg * sum_long_double_3(int n, CkReductionMsg ** msgs)
 {
-  long double accum[3] = { 0.0, 0.0, 0.0 };
+  long double accum[3] = {0.0};
+  
   for (int i=0; i<n; i++) {
     ASSERT2("sum_long_double_3()",
 	    "CkReductionMsg actual size %d is different from expected %d",
@@ -114,7 +115,7 @@ void register_sum_long_double_4(void)
 
 CkReductionMsg * sum_long_double_4(int n, CkReductionMsg ** msgs)
 {
-  long double accum[4] = { 0.0, 0.0, 0.0, 0.0 };
+  long double accum[4] = {0.0};
 
   for (int i=0; i<n; i++) {
 

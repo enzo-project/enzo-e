@@ -733,7 +733,6 @@ FieldFace * Block::create_face
 (int if3[3], int ic3[3], bool lg3[3],
  int refresh_type, Refresh * refresh, bool new_refresh) const
 {
-  FieldDescr * field_descr = simulation()->field_descr();
   FieldFace  * field_face = new FieldFace;
 
   field_face -> set_refresh_type (refresh_type);

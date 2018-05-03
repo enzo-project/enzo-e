@@ -49,13 +49,13 @@ public: // interface
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
       nx_(0), ny_(0), nz_(0),
-      mx_(0), my_(0), mz_(0),
+      m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
       iter_(0),
       beta_d_(0), beta_n_(0), beta_(0), 
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
-      bs_(0.0),bc_(0.0),
+      bs_(0.0),xs_(0.0),c_(0.0),
       ys_(0.0),vs_(0.0),us_(0.0),
       bnorm_(0.0)
   {};
@@ -75,13 +75,13 @@ public: // interface
       ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
       iy_(0), iv_(0), iq_(0), iu_(0),
       nx_(0), ny_(0), nz_(0),
-      mx_(0), my_(0), mz_(0),
+      m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
       iter_(0),
       beta_d_(0), beta_n_(0), beta_(0), 
       omega_d_(0), omega_n_(0), omega_(0), 
       vr0_(0), rr_(0), alpha_(0),
-      bs_(0.0),bc_(0.0),
+      bs_(0.0),xs_(0.0),c_(0.0),
       ys_(0.0),vs_(0.0),us_(0.0),
       bnorm_(0.0)
       
@@ -116,6 +116,7 @@ public: // interface
     p | ny_;
     p | nz_;
 
+    p | m_;
     p | mx_;
     p | my_;
     p | mz_;
@@ -141,7 +142,8 @@ public: // interface
     p | alpha_;
     p | omega_;
     p | bs_;
-    p | bc_;
+    p | xs_;
+    p | c_;
     p | ys_;
     p | vs_;
     p | us_;
@@ -202,7 +204,8 @@ public: // interface
 
   /// Set routines for use by EnzoBlock after reductions
   void set_bs(long double bs) throw() { bs_ = bs; }
-  void set_bc(long double bc) throw() { bc_ = bc; }
+  void set_xs(long double xs) throw() { xs_ = xs; }
+  void set_c(long double c) throw() { c_ = c; }
   void set_ys(long double ys) throw() { ys_ = ys; }
   void set_vs(long double vs) throw() { vs_ = vs; }
   void set_us(long double us) throw() { us_ = us; }
@@ -292,6 +295,7 @@ protected: // attributes
 
   /// Block field attributes
   int nx_, ny_, nz_;   /// active block size
+  int m_;              /// product mx_*my_*mz_ for convenience
   int mx_, my_, mz_;   /// total block size
   int gx_, gy_, gz_;   /// ghost zones
 
@@ -310,11 +314,12 @@ protected: // attributes
   long double alpha_;
 
   /// scalars used for projections of singular systems
-  long double bs_; //
-  long double bc_; //
-  long double ys_; //
-  long double vs_; //
-  long double us_; //
+  long double bs_; // sum (B[i])
+  long double xs_; // sum (X[i])
+  long double c_;  // B.length() ("count")
+  long double ys_; // sum (Y[i])
+  long double vs_; // sum (V[i])
+  long double us_; // sum (U[i])
 
   long double bnorm_; // used when reuse_solution
 

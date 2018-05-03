@@ -28,6 +28,7 @@
 	"pressure",
 	"potential",
 	"density_total",
+	"density_particle",
 	"acceleration_x",
 	"acceleration_y", "B" ] ;
 
