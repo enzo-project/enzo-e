@@ -1,35 +1,34 @@
 * cello-doc/source
-** Files
+** TODO Files
    - [ ] [[file:index.rst][index.rst]]
      - [ ] [[file:getting_started.rst][getting_started.rst]]
      - [ ] [[file:parameters-list.rst][parameters-list.rst]]
-     - [ ] [[file:parameters-example.rst][parameters-example.rst]]
      - [ ] [[file:parameters-file.rst][parameters-file.rst]]
+     - [ ] [[file:parameters-example.rst][parameters-example.rst]]
      - [ ] [[file:using.rst][using.rst]]
        - [ ] [[file:using-methods.rst][using-methods.rst]]
-       - [ ] [[file:using-initial.rst][using-initial.rst]]
-       - [ ] [[file:using-fields.rst][using-fields.rst]]
-       - [ ] [[file:using-particles.rst][using-particles.rst]]
+       - [ ] [[file:using-initial.rst][using-initial]]
+       - [ ] [[file:using-fields.rst][using-fields]]
+       - [ ] [[file:using-particles.rst][using-particles]]
      - [ ] [[file:devel.rst][devel.rst]]
-       - [ ] [[file:devel-methods.rst][devel-methods.rst]]
-       - [ ] [[file:devel-initial.rst][devel-initial.rst]]
-       - [ ] [[file:devel-refine.rst][devel-refine.rst]]
+       - [ ] [[file:devel-methods.rst][devel-methods]]
+       - [ ] [[file:devel-initial.rst][devel-initial]]
+       - [ ] [[file:devel-refine.rst][devel-refine]]
      - [ ] [[file:principles.rst][principles.rst]]
      - [ ] [[file:design.rst][design.rst]]
-
 ** Parameters [4/16]
-*** DONE Balance  [1/1]
-**** DONE Balance:interval
-*** DONE Boundary [7/7] 
-**** DONE Boundary:list
-**** DONE Boundary:[BOUNDARY]:type
+*** TODO Balance  [1/1]
+**** TODO Balance:interval
+*** TODO Boundary [7/7] 
+**** TODO Boundary:list
+**** TODO Boundary:[BOUNDARY]:type
      std::string boundary_type[MAX_BOUNDARY];
      default: "periodic"
 
      The type Boundary parameter specifies the type of boundary condition.
      Valid types include "outflow", "inflow", "periodic", and "reflecting".
      "inflow" requires the "value" parameter to be set.
-**** DONE Boundary:[BOUNDARY]:axis
+**** TODO Boundary:[BOUNDARY]:axis
      int boundary_axis[MAX_BOUNDARY];
      default: "all"
 
@@ -37,7 +36,7 @@
      only on the given axis.  Valid values for axis are "x", "y", "z",
      or "all".
 
-**** DONE Boundary:[BOUNDARY]:face
+**** TODO Boundary:[BOUNDARY]:face
      int boundary_face[MAX_BOUNDARY];
      default: "all"
 
@@ -45,19 +44,19 @@
      only on the given face.  Valid values for face are "lower", "upper",
      or "all".
 
-**** DONE Boundary:[BOUNDARY]:mask
+**** TODO Boundary:[BOUNDARY]:mask
      int boundary_mask[MAX_BOUNDARY];
      
      The mask Boundary parameter is used to restrict the boundary conditions
      to a subset of the domain boundary.  It must be a logical expression
      in terms of x, y, z, and t, e.g. "mask = (x >= 0.2) && (y < 0.2);"
 
-**** DONE Boundary:[BOUNDARY]:value
+**** TODO Boundary:[BOUNDARY]:value
      default: none
 
      The value Boundary parameter is used by the "inflow" boundary condition
      to specify the value of the Fields given in the list field_list.
-**** DONE Boundary:[BOUNDARY]:field_list
+**** TODO Boundary:[BOUNDARY]:field_list
      default: [] (all Fields)
 
      std::vector<std::string> boundary_field_list[MAX_BOUNDARY];
@@ -66,13 +65,13 @@
      condition is applied.  This is typically used for "inflow"
      boundary condition types.  The default is all Fields.
 
-*** DONE Domain [2/2]
-**** DONE Domain:lower
+*** TODO Domain [2/2]
+**** TODO Domain:lower
      double domain_lower[3];
      default: [0.0, 0.0, 0.0]
      The lower Domain parameter is a list of floating-point values
      specifying the lower boundary of the computational domain.
-**** DONE Domain:upper
+**** TODO Domain:upper
      double domain_upper[3];
      default: [1.0, 1.0, 1.0]
      The upper Domain parameter is a list of floating-point values
@@ -88,10 +87,10 @@
 
 *** TODO Field [4/12]
 
-**** DONE Field:list
-**** DONE Field:alignment
-**** DONE Field:courant
-**** DONE Field:gamma
+**** TODO Field:list
+**** TODO Field:alignment
+**** TODO Field:courant
+**** TODO Field:gamma
 **** TODO Field:ghosts
 **** TODO Field:interpolation_method
 **** TODO Field:padding
@@ -322,79 +321,79 @@
     The max_level Mesh parameter controls the maximum mesh refinement level.
     The default 0 means a uniform grid, i.e. no additional mesh levels.
     
-*** DONE Method [21/21]
-**** DONE Method:list
-**** DONE Method:cosmology
+*** TODO Method [21/21]
+**** TODO Method:list
+**** TODO Method:cosmology
      bool  enzo_cosmology;
      [ future ]
-**** DONE Method:cosmology:comoving_box_size
+**** TODO Method:cosmology:comoving_box_size
      double enzo_cosmology_comoving_box_size;
      [ future ]
-**** DONE Method:cosmology:hubble_constant_now
+**** TODO Method:cosmology:hubble_constant_now
      double enzo_cosmology_hubble_constant_now;
      [ future ]
-**** DONE Method:cosmology:initial_redshift
+**** TODO Method:cosmology:initial_redshift
      double enzo_cosmology_initial_redshift;
      [ future ]
-**** DONE Method:cosmology:max_expansion_rate
+**** TODO Method:cosmology:max_expansion_rate
      double enzo_cosmology_max_expansion_rate;
      [ future ]
-**** DONE Method:cosmology:omega_lamda_now
+**** TODO Method:cosmology:omega_lamda_now
      double enzo_cosmology_omega_lamda_now;
      [ future ]
-**** DONE Method:cosmology:omega_matter_now
+**** TODO Method:cosmology:omega_matter_now
      double enzo_cosmology_omega_matter_now;
      [ future ]
-**** DONE Method:ppm:density_floor
+**** TODO Method:ppm:density_floor
      double enzo_ppm_density_floor;
 
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:diffusion
+**** TODO Method:ppm:diffusion
      bool  enzo_ppm_diffusion;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:dual_energy
+**** TODO Method:ppm:dual_energy
      bool  enzo_ppm_dual_energy;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:dual_energy_eta_1
+**** TODO Method:ppm:dual_energy_eta_1
      double enzo_ppm_dual_energy_eta_1;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:dual_energy_eta_2
+**** TODO Method:ppm:dual_energy_eta_2
      double enzo_ppm_dual_energy_eta_2;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:flattening
+**** TODO Method:ppm:flattening
      int enzo_ppm_flattening;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:minimum_pressure_support_parameter
+**** TODO Method:ppm:minimum_pressure_support_parameter
      int enzo_ppm_minimum_pressure_support_parameter;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:number_density_floor
+**** TODO Method:ppm:number_density_floor
      double enzo_ppm_number_density_floor;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:pressure_floor
+**** TODO Method:ppm:pressure_floor
      double enzo_ppm_pressure_floor;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:pressure_free
+**** TODO Method:ppm:pressure_free
      bool  enzo_ppm_pressure_free;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:steepening
+**** TODO Method:ppm:steepening
      bool  enzo_ppm_steepening;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:temperature_floor
+**** TODO Method:ppm:temperature_floor
      float enzo_ppm_temperature_floor;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
-**** DONE Method:ppm:use_minimum_pressure_support
+**** TODO Method:ppm:use_minimum_pressure_support
      bool  enzo_ppm_use_minimum_pressure_support;
      The density_floor PPM parameter in the Enzo parameter group corresponds
      to the analagous parameter in Enzo.
@@ -494,4 +493,3 @@
 *** TODO Timestep [0/1]
 **** TODO Timestep:type
      std::string timestep_type;
-* Parameters todo [0/0]
