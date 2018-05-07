@@ -52,12 +52,8 @@ public: // interface
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
       iter_(0),
-      beta_d_(0), beta_n_(0), beta_(0), 
-      omega_d_(0), omega_n_(0), omega_(0), 
-      vr0_(0), rr_(0), alpha_(0),
-      bs_(0.0),xs_(0.0),c_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0),
-      bnorm_(0.0)
+      alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
+      rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0)
   {};
 
   /// Charm++ PUP::able declarations
@@ -78,12 +74,8 @@ public: // interface
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
       iter_(0),
-      beta_d_(0), beta_n_(0), beta_(0), 
-      omega_d_(0), omega_n_(0), omega_(0), 
-      vr0_(0), rr_(0), alpha_(0),
-      bs_(0.0),xs_(0.0),c_(0.0),
-      ys_(0.0),vs_(0.0),us_(0.0),
-      bnorm_(0.0)
+      alpha_(0), beta_n_(0), beta_d_(0), omega_(0),
+      rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0)
       
   {}
 
@@ -101,6 +93,12 @@ public: // interface
     p | rank_;
     p | iter_max_;
     p | res_tol_;
+
+    p | rho0_;
+    p | err_;
+    p | err0_;
+    p | err_min_;
+    p | err_max_;
 
     p | ib_;
     p | ix_;
@@ -125,28 +123,16 @@ public: // interface
     p | gy_;
     p | gz_;
 
-    p | rho0_;
-    p | beta_d_;
-    p | beta_n_;
-    p | vr0_;
-    p | omega_d_;
-    p | omega_n_;
-    p | rr_;
-
     p | iter_;
-    p | beta_;
-    p | err_;
-    p | err0_;
-    p | err_min_;
-    p | err_max_;
+
     p | alpha_;
+    p | beta_n_;
+    p | beta_d_;
     p | omega_;
-    p | bs_;
-    p | xs_;
+
+    p | rr_;
+    p | r0s_;
     p | c_;
-    p | ys_;
-    p | vs_;
-    p | us_;
     p | bnorm_;
 
   }
@@ -161,9 +147,14 @@ public: // interface
   { return "bicgstab"; }
 
   /// Projects RHS and sets initial vectors R, R0, and P
-  void start_2(EnzoBlock* enzo_block) throw();
+  void start_2(EnzoBlock* enzo_block,
+	       CkReductionMsg * msg) throw();
 
   /// Entry into BiCgStab iteration loop, begins refresh on P
+  void loop_0a(EnzoBlock* enzo_block,
+	      CkReductionMsg *) throw();
+  void loop_0b(EnzoBlock* enzo_block,
+	      CkReductionMsg *) throw();
   void loop_0(EnzoBlock* enzo_block) throw();
 
   /// First preconditioner solve
@@ -177,7 +168,7 @@ public: // interface
   void loop_4(EnzoBlock* enzo_block) throw();
 
   /// Shifts Y and V, begins, first vector updates, begins refresh on Q
-  void loop_6(EnzoBlock* enzo_block) throw();
+  void loop_6(EnzoBlock* enzo_block, CkReductionMsg *) throw();
 
   /// Second preconditioner solve, begins refresh on Y
   void loop_8(EnzoBlock* enzo_block) throw();
@@ -191,33 +182,16 @@ public: // interface
 
   /// Shifts Y and U, second vector updates, begins DOT(R,R) and
   /// DOT(R,R0)
-  void loop_12(EnzoBlock* enzo_block) throw();
+  void loop_12(EnzoBlock* enzo_block, CkReductionMsg * ) throw();
 
   /// Updates search direction, begins update on iteration counter
-  void loop_14(EnzoBlock* enzo_block) throw();
+  void loop_14(EnzoBlock* enzo_block, CkReductionMsg * ) throw();
 
   /// End of iteration
   void end(EnzoBlock* enzo_block, int retval) throw();
 
   /// Exit the solver
   void exit(EnzoBlock* enzo_block) throw();
-
-  /// Set routines for use by EnzoBlock after reductions
-  void set_bs(long double bs) throw() { bs_ = bs; }
-  void set_xs(long double xs) throw() { xs_ = xs; }
-  void set_c(long double c) throw() { c_ = c; }
-  void set_ys(long double ys) throw() { ys_ = ys; }
-  void set_vs(long double vs) throw() { vs_ = vs; }
-  void set_us(long double us) throw() { us_ = us; }
-  void set_bnorm(long double bnorm) throw() { bnorm_ = bnorm; }
-  void set_rho0(long double rho0) throw() { rho0_ = rho0; }
-  void set_beta_d(long double beta_d) throw() { beta_d_ = beta_d; }
-  void set_vr0(long double vr0) throw() { vr0_ = vr0; }
-  void set_omega_d(long double omega_d) throw() { omega_d_ = omega_d; }
-  void set_omega_n(long double omega_n) throw() { omega_n_ = omega_n; }
-  void set_rr(long double rr) throw() { rr_ = rr; }
-  void set_beta_n(long double beta_n) throw() { beta_n_ = beta_n; }
-  void set_iter(int iter) throw() { iter_ = iter; }
 
 protected: // methods
 
@@ -303,24 +277,14 @@ protected: // attributes
   int iter_;
 
   /// scalars used within BiCgStab iteration
-  long double beta_d_;
-  long double beta_n_;
-  long double beta_;
-  long double omega_d_;
-  long double omega_n_;
-  long double omega_;
-  long double vr0_;
-  long double rr_;
+
   long double alpha_;
-
-  /// scalars used for projections of singular systems
-  long double bs_; // sum (B[i])
-  long double xs_; // sum (X[i])
+  long double beta_n_;
+  long double beta_d_;
+  long double omega_;
+  long double rr_;
+  long double r0s_; // sum (R0[i])
   long double c_;  // B.length() ("count")
-  long double ys_; // sum (Y[i])
-  long double vs_; // sum (V[i])
-  long double us_; // sum (U[i])
-
   long double bnorm_; // used when reuse_solution
 
 };

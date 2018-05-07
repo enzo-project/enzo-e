@@ -72,9 +72,6 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
 
-  EnzoSimulation * simulation =
-    (EnzoSimulation * ) proxy_simulation.ckLocalBranch();
-
   double hx0 = hx*pow(2.0,level);
   double hy0 = hy*pow(2.0,level);
   double hz0 = hz*pow(2.0,level);

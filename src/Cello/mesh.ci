@@ -12,6 +12,10 @@ module mesh {
   initnode void register_sum_long_double_2(void);
   initnode void register_sum_long_double_3(void);
   initnode void register_sum_long_double_4(void);
+  initnode void register_sum_long_double_5(void);
+  initnode void register_sum_long_double_6(void);
+  initnode void register_sum_long_double_7(void);
+  initnode void register_sum_long_double_8(void);
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
