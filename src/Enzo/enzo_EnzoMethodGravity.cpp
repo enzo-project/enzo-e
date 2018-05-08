@@ -273,7 +273,7 @@ void EnzoBlock::r_method_gravity_continue()
 		   enzo_sync_id_method_gravity_continue);
   
   refresh.set_active(is_leaf());
-  refresh.add_all_fields();
+  refresh.add_field(data()->field().field_id("potential"));
 
   refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
 

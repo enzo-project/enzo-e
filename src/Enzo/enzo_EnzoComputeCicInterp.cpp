@@ -97,13 +97,13 @@ void EnzoComputeCicInterp::compute_(Block * block)
   
   const int nb = particle.num_batches(it_p_);
 
-  for (int ib=0; ib<nb; ib++) {
+  if (rank == 1) {
 
-    enzo_float * vp = (enzo_float*) particle.attribute_array(it_p_, ia_p_, ib);
+    for (int ib=0; ib<nb; ib++) {
 
-    const int np = particle.num_particles(it_p_,ib);
+      enzo_float * vp = (enzo_float*) particle.attribute_array(it_p_, ia_p_, ib);
 
-    if (rank == 1) {
+      const int np = particle.num_particles(it_p_,ib);
 
       enzo_float * xa = (enzo_float *) particle.attribute_array (it_p_,ia_x,ib);
       enzo_float * vxa = lshift ?
@@ -125,8 +125,14 @@ void EnzoComputeCicInterp::compute_(Block * block)
 
 	vp[ip*da] = x0*vf[ix0] + x1*vf[ix1];
       }
+    }
+  } else if (rank == 2) {
 
-    } else if (rank == 2) {
+    for (int ib=0; ib<nb; ib++) {
+
+      enzo_float * vp = (enzo_float*) particle.attribute_array(it_p_, ia_p_, ib);
+
+      const int np = particle.num_particles(it_p_,ib);
 
       enzo_float * xa = (enzo_float *) particle.attribute_array (it_p_,ia_x,ib);
       enzo_float * ya = (enzo_float *) particle.attribute_array (it_p_,ia_y,ib);
@@ -169,8 +175,15 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	  +         x1*y1*vf[ix1+mx*iy1];
 
       }
+    }
 
-    } else if (rank == 3) {
+  } else if (rank == 3) {
+
+    for (int ib=0; ib<nb; ib++) {
+
+      enzo_float * vp = (enzo_float*) particle.attribute_array(it_p_, ia_p_, ib);
+
+      const int np = particle.num_particles(it_p_,ib);
 
       enzo_float * xa = (enzo_float *) particle.attribute_array (it_p_,ia_x,ib);
       enzo_float * ya = (enzo_float *) particle.attribute_array (it_p_,ia_y,ib);
@@ -221,6 +234,5 @@ void EnzoComputeCicInterp::compute_(Block * block)
       }
     }
   }
-  
-}
+}  
 

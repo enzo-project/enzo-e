@@ -79,6 +79,5 @@ void t_()
   for (int i=0; i<num_symbols; i++) {
     m2_(stderr,"EXIT","",0,"",symbols[i]);
   }
-  
-  PARALLEL_EXIT;
+  CmiAbort("EXITING");
 }

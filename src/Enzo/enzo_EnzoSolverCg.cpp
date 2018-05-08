@@ -77,7 +77,7 @@ EnzoSolverCg::EnzoSolverCg
 			       sync_type_(),
 			       enzo_sync_id_solver_cg);
 
-    refresh(ir)->add_all_fields ();
+    refresh(ir)->add_field (field_descr->field_id("potential"));
     
     refresh(ir)->add_field (id_);
     refresh(ir)->add_field (ir_);
@@ -307,7 +307,8 @@ void EnzoSolverCg::loop_0b
   Refresh refresh (4,0,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_cg_loop_0b);
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields();
+  //  refresh.add_all_fields();
+  refresh.add_field (ix_);
   refresh.add_field (id_);
   refresh.add_field (ir_);
   refresh.add_field (iy_);
@@ -428,7 +429,8 @@ void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
   Refresh refresh (4,0,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_cg_loop_2a);
   refresh.set_active(is_active_(enzo_block));
-  refresh.add_all_fields();
+
+  refresh.add_field (ix_);
   refresh.add_field (id_);
   refresh.add_field (ir_);
   refresh.add_field (iy_);

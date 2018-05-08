@@ -4,6 +4,7 @@ import os
 is_arch_valid = 1
 
 #
+#flags_arch = '-g -fprofile-arcs -ftest-coverage' # gcov
 flags_arch = '-Wall -O3 -g'
 #flags_arch = '-Wall -g'
 #flags_arch = '-O3 -pg'
@@ -13,7 +14,8 @@ flags_arch = '-Wall -O3 -g'
 
 # rdynamic required for backtraces
 #flags_link_charm = '-rdynamic' 
-#flags_link_charm = '-memory paranoid' 
+#flags_link_charm = '-memory paranoid'
+#flags_link_charm = '-fprofile-arcs' # gcov
 
 cc  = 'gcc '
 f90 = 'gfortran'

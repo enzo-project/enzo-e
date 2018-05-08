@@ -196,7 +196,7 @@ int EnzoRefineMass::apply ( Block * block ) throw ()
 	    long double mass = vol*rho16[i];
 	    if      (mass < mass_max_coarsen) out16[i] = -1;
 	    else if (mass < mass_min_refine)  out16[i] =  0;
-	    else                              rho16[i] = +1;
+	    else                              out16[i] = +1;
 	  }
 	}
       }

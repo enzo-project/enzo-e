@@ -72,8 +72,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 			     sync_type_(),
 			     enzo_sync_id_solver_bicgstab);
   
-  refresh(ir)->add_all_fields();
-  
+  //  refresh(ir)->add_all_fields();
+  refresh(ir)->add_field (field_descr->field_id("potential"));
   refresh(ir)->add_field (ir_);
   refresh(ir)->add_field (ir0_);
   refresh(ir)->add_field (ip_);
@@ -498,10 +498,11 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   
   Refresh refresh (4,0,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_bicgstab_loop_25);
-  
+
   refresh.set_active(is_active_(block));
-  
-  refresh.add_all_fields();
+  //  refresh.add_all_fields();
+
+  refresh.add_field (ix_);
 
   refresh.add_field (ir_);
   refresh.add_field (ir0_);
@@ -737,9 +738,10 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
   Refresh refresh (4,0,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_bicgstab_loop_85);
   
-  refresh.set_active(is_active_(block));
-  refresh.add_all_fields();
 
+  refresh.set_active(is_active_(block));
+
+  refresh.add_field (ix_);
   refresh.add_field (ir_);
   refresh.add_field (ir0_);
   refresh.add_field (ip_);

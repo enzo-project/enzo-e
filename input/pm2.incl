@@ -29,8 +29,10 @@
 	"potential",
 	"density_total",
 	"density_particle",
+	"density_gas",
+	"density_particle_accumulate",
 	"acceleration_x",
-	"acceleration_y", "B" ] ;
+	"acceleration_y", "B", "R0" ] ;
 
       gamma = 1.4;
 
@@ -53,7 +55,8 @@
                         "ay", "double"];
 
           constants = ["mass", "double", 2e33];
-          position = ["x","y","z"];
+          position = ["x","y"];
+          velocity = ["vx","vy"];
       }
 		    
    }

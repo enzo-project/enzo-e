@@ -139,16 +139,20 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
   // bool turn_on  = schedule_on ? schedule_on->write_this_cycle(cycle_,time_) : false;
   // bool turn_off = schedule_off ? schedule_off->write_this_cycle(cycle_,time_) : false;
 
-  // if (was_off && turn_on) {
+  // static bool active = false;
+  // bool turn_on  = (cycle_ == 10);
+  // bool turn_off = (cycle_ == 20);
+  // if (!active && turn_on) {
+  //   active = true;
+  //   simulation->monitor()->print
+  //     ("Performance","turning projections logging ON\n");
 
-    // simulation->monitor()->print
-    //   ("Performance","turning projections logging ON\n");
+  //   simulation->set_projections_tracing(true);
 
-    simulation->set_projections_tracing(true);
+  //   traceBegin();
 
-    traceBegin();
-
-  // } else if (was_on && turn_off) {
+  // } else if (active && turn_off) {
+  //   active = false;
 
   //   simulation->monitor()->print
   //     ("Performance","turning projections logging OFF\n");
