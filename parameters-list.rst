@@ -823,7 +823,7 @@ of Cello's dynamic memory allocation and deallocation.
 :Default: :d:`true`
 :Scope:     :c:`Cello`
 
-:e:`This parameter is used to turn on or off Cello's build-in memory tracking.  By default it is on, meaning it tracks the number and size of memory allocations, including the current number of bytes allocated, the maximum over the simulation, and the maximum over the current cycle.  Cello implements this by overloading C's new, new[], delete, and delete[] operators.  This can be problematic on some systems, e.g. if an external library also redefines these operators, in which case this parameter should be set to false.`
+:e:`This parameter is used to turn on or off Cello's build-in memory tracking.  By default it is on, meaning it tracks the number and size of memory allocations, including the current number of bytes allocated, the maximum over the simulation, and the maximum over the current cycle.  Cello implements this by overloading C's new, new[], delete, and delete[] operators.  This can be problematic on some systems, e.g. if an external library also redefines these operators, in which case this parameter should be set to false.  This can be turned off completely by setting "memory = 0" in the top-level "SConstruct" file.`
 
 ----
 Mesh
@@ -867,16 +867,38 @@ Method
 :Default: :d:`none`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the list of numerical methods to use.  Each method in the list is applied in the order specified.  Possible values include:`
+:e:`This parameter specifies the list of numerical methods to use, and
+is analagous to "EvolveLevel" routine in ENZO.  Each method in the
+list is applied in the order specified.  Possible methods include:`
 
-  *  :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method`
-  *  :t:`"ppml"` :e:`for the PPML ideal MHD solver`
-  *  :t:`"heat"` :e:`for the forward-Euler heat-equation solver, which is used primarily for demonstrating how new Methods are implemented in Enzo-P`
-  *  :t:`"grackle"` (not fully implemented yet)  :e:`for heating and cooling methods in the Enzo Grackle library`
-  * :t:`"gravity_[cg|bicgstab|mg0]"` :e:`for solving for the gravitational potential using the conjugate gradient method (CG), BiCG-STAB, or multigrid on the root-grid.`
-  * :t:`"null"` :e:`for "no solver", which is used to specify time step size for testing the AMR meshing infrastructure without undue computation.`
+  * :t:`"comoving_expansion"` :e:`adds comoving expansion terms to the
+    physical variables.`
+  * :t:`"cosmology"` :e:`for writing redshift to monitor output.`
+  * :t:`"grackle"` :e:`for heating and cooling methods in the Enzo
+    Grackle library`
+  * :t:`"gravity"` :e:`solves for the gravitational potential given gas
+    and particle density fields.`
+  * :t:`"heat"` :e:`for the forward-Euler heat-equation solver, which
+    is used primarily for demonstrating how new Methods are
+    implemented in Enzo-P`
+  * :t:`"pm_deposit"` :e:`deposits "dark" particle density into
+    "density_particle" field using CIC for "gravity" method.`
+  * :t:`"pm_update"` :e:`moves cosmological "dark" particles based on
+    positions, velocities, and accelerations.  This will be phased out
+    in favor of a more general "move_particles" method.`
+  * :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method.  This may be
+    phased out in favor of using a more general "hydro" method
+    instead, with a specific hydro solver specified.`
+  * :t:`"ppml"` :e:`for the PPML ideal MHD solver.  This may be phased
+    out in favor of using a more general "mhd" method instead, with a
+    specific mhd solver specified.`
+  * :t:`"trace"` :e:`for moving tracer particles.  This will be phased
+    out in favor of a more general "move_particles" method.`
+  * :t:`"turbulence"` :e:`computes random forcing for turbulence
+    simulations.`
 
-  :e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
+
+:e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
 
      Method {
         list = ["ppm"];
@@ -888,7 +910,8 @@ Method
         }
      }
 
-
+:e:`For more detailed documentation on Methods, see` :ref:`using-methods`
+   
 ----
 
 :Parameter:  :p:`Method` : :p:`courant`
@@ -897,32 +920,24 @@ Method
 :Default: :d:`1.0`
 :Scope:     :c:`Cello`
 
-:e:`The global Courant safety factor is a multiplication factor for the time step applied on top of any Field or Particle specific Courant safety factors.`
+:e:`The global Courant safety factor is a multiplication factor for
+the time step applied on top of any Field or Particle specific Courant
+safety factors.`
 
-gravity_bicgstab
-----------------
+gravity
+-------
 
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`iter_max`
-:Summary: :s:`Iteration limit for the BiCGStab solver`
-:Type:    :t:`int`
-:Default: :d:`100`
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`solver`
+:Summary: :s:`Name of the linear solver to use`
+:Type:    :t:`string`
+:Default: :d:`"unknown"`
 :Scope:     :z:`Enzo`
 
-:e:`Maximum number of BiCGStab iterations to take.`
+:e:`Identifier for the linear solver to use, which must be included in the "Solver:list" parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`res_tol`
-:Summary: :s:`Residual norm reduction tolerance for the BiCGStab solver`
-:Type:    :t:`float`
-:Default: :d:`1e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. BiCGStab is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`grav_const`
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`grav_const`
 :Summary: :s:`Gravitational constant`
 :Type:    :t:`float`
 :Default: :d:`6.67384e-8`
@@ -933,219 +948,28 @@ gravity_bicgstab
 
 ----
 
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`diag_precon`
-:Summary: :s:`Whether to apply diagonal preconditioning`
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`order`
+:Summary: :s:`Order of accuracy discretization to use for the discrete Laplacian`
+:Type:    :t:`integer`
+:Default: :d:`4`
+:Scope:     :z:`Enzo`
+
+:e:`Second, fourth, and sixth order discretizations of the Laplacian
+are avalaible; valid values are 2, 4, or 6.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`accumulate`
+:Summary: :s:`Whether to add one layer of ghost zones when refreshing particle density`
 :Type:    :t:`logical`
-:Default: :d:`false`
+:Default: :d:`true`
 :Scope:     :z:`Enzo`
 
-:e:`Whether to diagonally precondition the linear system A*X = B in BiCGStab by 1.0 / (h^2).`
+:e:`This should be true for all runs with particles, since particle
+mass deposited in the "density_particle" field may bleed into the
+first layer of ghost zones.  This parameter ensures that that mass
+will be included in "density_total".`
 
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`monitor_iter`
-:Summary: :s:`How often to display progress`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
-
-gravity_cg
-----------
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`iter_max`
-:Summary: :s:`Iteration limit for the CG solver`
-:Type:    :t:`int`
-:Default: :d:`100`
-:Scope:     :z:`Enzo`
-
-:e:`Maximum number of CG iterations to take.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`res_tol`
-:Summary: :s:`Residual norm reduction tolerance for the CG solver`
-:Type:    :t:`float`
-:Default: :d:`1e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. CG is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`grav_const`
-:Summary: :s:`Gravitational constant`
-:Type:    :t:`float`
-:Default: :d:`6.67384e-8`
-:Scope:     :z:`Enzo`
-
-:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
-
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`diag_precon`
-:Summary: :s:`Whether to apply diagonal preconditioning`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Whether to diagonally precondition the linear system A*X = B in EnzoMethodGravityCg by 1.0 / (h^2).`
-
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`monitor_iter`
-:Summary: :s:`How often to display progress`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
-
-gravity_mg
-----------
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`iter_max`
-
-:Summary: :s:`Maximum number of multigrid cycles.`
-:Type:    :t:`int`
-:Default: :d:`10`
-:Scope:     :z:`Enzo`
-
-:e:`Maximum number of cycles of the multigrid solver.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`res_tol`
-
-:Summary: :s:`Residual norm reduction limit for the multigrid solver`
-:Type:    :t:`float`
-:Default: :d:`1e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. multigrid is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`grav_const`
-:Summary: :s:`Gravitational constant`
-:Type:    :t:`float`
-:Default: :d:`6.67384e-8`
-:Scope:     :z:`Enzo`
-
-:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`monitor_iter`
-:Summary: :s:`How often to display progress`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth`
-
-:Summary: :s:`Multigrid smoother`
-:Type:    :t:`string`
-:Default: :d:`"jacobi"`
-:Scope:     :z:`Enzo`
-
-:e:`The Compute object to use for smoothing the residual in the multigrid method.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_weight`
-
-:Summary: :s:`Multigrid smoother weighting`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     :z:`Enzo`
-
-:e:`The weighting for the multigrid smoother.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_pre`
-
-:Summary: :s:`Number of multigrid pre-smoothings`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`Number of applications of the smoother for pre-smoothings`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_post`
-
-:Summary: :s:`Number of multigrid post-smoothings`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`Number of applications of the smoother for post-smoothings`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_coarse`
-
-:Summary: :s:`Number of multigrid smoothings for coarse solver`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`Number of applications of the smoother for approximating the solution on the coarsest level.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`restrict`
-
-:Summary: :s:`Multigrid restrict operation`
-:Type:    :t:`string`
-:Default: :d:`"linear"`
-:Scope:     :z:`Enzo`
-
-:e:`The Restrict type to use for transferring residuals to parent (coarser) blocks.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`prolong`
-
-:Summary: :s:`Multigrid prolong operation`
-:Type:    :t:`string`
-:Default: :d:`"linear"`
-:Scope:     :z:`Enzo`
-
-:e:`The Prolong type to use for transferring corrections to child (finer) blocks.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`min_level`
-
-:Summary: :s:`The coarsest multigrid level`
-:Type:    :t:`integer`
-:Default: :d:`0`
-:Scope:     :z:`Enzo`
-
-:e:`The coarsest level in the multigrid algorithm, which is the level at which the coarse grid solver is applied.  This number should be negative.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`max_level`
-
-:Summary: :s:`the finest multigrid level`
-:Type:    :t:`integer`
-:Default: :d:`Adapt:max_level`
-:Scope:     :z:`Enzo`
-
-:e:`The finest level in the multigrid algorithm.  Could be less than the finest level in the mesh hierarchy to improve computational speed at the cost of reduced accuracy.`
 
 
 grackle
@@ -1750,7 +1574,7 @@ perform and on what schedule.
 
 ----
 
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride`
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride_write`
 :Summary: :s:`Subset of processors to perform write`
 :Type:    :t:`integer`
 :Default: :d:`1`
@@ -1760,7 +1584,27 @@ perform and on what schedule.
 
 .. _13: http://client64-249.sdsc.edu/cello/bug/show_bug.cgi?id=13
 
-:e:`This parameter allows for a strict subset  of physical processors to output data, which is especially helpful for large process counts  to reduce the load on parallel file systems.`
+:e:`This parameter allows for a strict subset of physical processors
+to output data, which is especially helpful for large process counts
+to reduce the load on parallel file systems.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride_wait`
+:Summary: :s:`Stride for sequencing processor data writes`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
+:Status:    **Not implemented**
+
+.. _13: http://client64-249.sdsc.edu/cello/bug/show_bug.cgi?id=13
+
+:e:`This parameter allows for processes to write sequentially to
+prevent too many processes overloading the file system.  A good
+starting point would be the number of processes in a shared memory
+node, in which case at most one process per node will be writing at
+any point in time.`
 
 ----
 
@@ -1781,7 +1625,7 @@ perform and on what schedule.
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
-:e:`This parameter specifies the Field value associated with the first color in the file set's colormap.` **This value is only used if the** :p:`image_specify_bounds` **parameter is** :p:`true`.  :e:`If` :p:`image_specify_bounds` :e:`is` :p:`false`, :e:`then the minimum global value of the field is used instead.`
+:e:`This parameter specifies the Field value associated with the first color in the file set's colormap.`
 
 ----
 
@@ -1792,7 +1636,7 @@ perform and on what schedule.
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
-:e:`This parameter specifies the Field value associated with the last color in the file set's colormap.` **This value is only used if the** :p:`image_specify_bounds` **parameter is** :p:`true`.  :e:`If` :p:`image_specify_bounds` :e:`is` :p:`false`, :e:`then the maximum global value of the field is used instead.`
+:e:`This parameter specifies the Field value associated with the last color in the file set's colormap.`
 
 ----
 
@@ -1815,17 +1659,6 @@ perform and on what schedule.
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`This parameter specifies the upper limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
-
-----
-
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_specify_bounds`
-:Summary: :s:`Whether to use` :p:`image_min` :s:`and` :p:`image_max`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:     :c:`Cello`
-:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
-
-:e:`This parameter determines whether to use the` :p:`image_min` :e:`and` :p:`image_max` :e:`parameters for mapping the Field data to the color map, or to use the Field data's minimum and maximum.`
 
 ----
 
@@ -2040,6 +1873,7 @@ Just as with fields, particle types can be assigned to groups_.
 
 ----
 
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`group_list`
 :Summary: :s:`Specify a list of groups that the Particle type belongs to`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[ ]`
@@ -2337,6 +2171,61 @@ exactly at the specified time.
 :Default: :d:`1 | 1.0`
 :Scope:     :c:`Cello`
 :Todo:    :o:`write`
+
+
+------
+Solver
+------
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`iter_max`
+:Summary: :s:`Iteration limit for the CG solver`
+:Type:    :t:`int`
+:Default: :d:`100`
+:Scope:     :z:`Enzo`
+
+:e:`Maximum number of CG iterations to take.`
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`res_tol`
+:Summary: :s:`Residual norm reduction tolerance for the CG solver`
+:Type:    :t:`float`
+:Default: :d:`1e-6`
+:Scope:     :z:`Enzo`
+
+:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. CG is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`grav_const`
+:Summary: :s:`Gravitational constant`
+:Type:    :t:`float`
+:Default: :d:`6.67384e-8`
+:Scope:     :z:`Enzo`
+
+:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
+
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`diag_precon`
+:Summary: :s:`Whether to apply diagonal preconditioning`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Whether to diagonally precondition the linear system A*X = B in EnzoSolverGravityCg by 1.0 / (h^2).`
+
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`monitor_iter`
+:Summary: :s:`How often to display progress`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :z:`Enzo`
+
+:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
 
 
 --------

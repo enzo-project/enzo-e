@@ -1,5 +1,4 @@
 
-
 :p:`Method:ppm` parameters are used to initialize parameters for
 Enzo-P's PPM hydrodynamics method.
 
@@ -72,6 +71,16 @@ Enzo-P's PPM hydrodynamics method.
 :Scope:     :z:`Enzo`
 
 :e:`Enzo's`  MinimumPressureSupportParameter :e:`parameter.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`ppm` : :p:`mol_weight`
+:Summary: :s:`Enzo's Mu parameter`
+:Type:   :t:`float`
+:Default: :d:`0.6`
+:Scope:     :z:`Enzo`
+
+:e:`Enzo's` Mu molecular :e:`weight parameter.`
 
 ----
 

@@ -1,3 +1,5 @@
+.. _using-methods:
+
 **************
 Enzo-P Methods
 **************
