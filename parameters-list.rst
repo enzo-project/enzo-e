@@ -54,7 +54,7 @@ size of blocks.
 :Default: :d:`0`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the coarsest level of "sub-root" Blocks, and must non-positive.  This is used primarily for multigrid methods, such as in the` :t:`"gravity_mg0"` :e:`method.  The default is 0, meaning no sub-root Blocks are created.  If multigrid is used, then both` :p:`Adapt` : :p:`min_level` :e:`and` :p:`Method` : :p:`gravity_mg` : :p:`min_level` :e:`must be set.`
+:e:`This parameter specifies the coarsest level of "sub-root" Blocks, and must non-positive.  This is used primarily for multigrid methods, such as in the` :t:`"mg0"` :e:`solver.  The default is 0, meaning no sub-root Blocks are created.  If multigrid is used, then both` :p:`Adapt` : :p:`min_level` :e:`and` :p:`Method` : :g:`<mg-solver>` : :p:`min_level` :e:`must be set.`.
 
 ----
 
@@ -64,7 +64,7 @@ size of blocks.
 :Default: :d:`[]`
 :Scope:     :c:`Cello`
 
-:e:`List of mesh refinement criteria, each of which has its own associated` ``Adapt : <criteria> :`` :e:`parameters.  When multiple criteria are used, if all refinement criteria evaluate to "coarsen", then the block will coarsen; if any refinement criteria evaluate as "refine", then the block will refine.`
+:e:`List of mesh refinement criteria, each of which has its own associated` ``Adapt : <criteria> :`` :e:`parameters.  When multiple criteria are used, if all refinement criteria evaluate to "coarsen", then the block will be tagged to coarsen; if any refinement criteria evaluate as "refine", then the block will be tagged to refine.  (Note that a particular block will coarsen only if it and all other sibling blocks are tagged to coarsen as well.)`  
 
 :e:`The items in the list need not be the same as the (required)` :p:`Adapt` : :g:`<criterion>` : :p:`type` :e:`parameter; they are solely used to identify and distinguish between different criteria in the simulation.  This allows the user to use multiple criteria of the same type but with different parameters, e.g. "mask" with different masks:`
 
@@ -74,7 +74,7 @@ size of blocks.
           list = ["criterion_1", "criterion_2"];
           criterion_1 {
              type = "shock";
-          };
+          }
           criterion_2 {
              type = "shear";
           }
@@ -98,7 +98,7 @@ size of blocks.
 :Default:     :d:`[]` ( all fields )
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the fields that the refinement criteria is applied to.  For example, if type = "slope" and field_list = ["density"], then the "refine by slope" refinement criterion is applied to the density field.  This is only used for refinement by slope.`
+:e:`This parameter specifies the fields that the refinement criteria is applied to.  For example, if type = "slope" and field_list = ["density"], then the "refine by slope" refinement criterion is applied to the density field.`
 
 
 ----
@@ -118,7 +118,7 @@ size of blocks.
 :Parameter: :p:`Adapt` : :g:`<criterion>` : :p:`max_coarsen`
 :Summary:   :s:`Cutoff value for coarsening a block`
 :Type:        [ :t:`float` | :t:`list` ( :t:`float` ) ]
-:Default:     :d:`0.15`
+:Default:     :d:`0.5*min_refine`
 :Scope:     :c:`Cello`
 
 :e:`A block may coarsen if the refinement criterion applied to the block is smaller than this value everywhere in the block.   A list is used for the` :t:`"shock"` :e:`refinement criterion type, in which case the first value is for pressure and the second is for the energy ratio.`
@@ -152,6 +152,16 @@ size of blocks.
 :Scope:     :c:`Cello`
 
 :e:`In addition to evolved field values, one may also output the refinement criteria.  This may be  useful for example for debugging or for finding appropriate values for max_coarsen and min_refine.  A value of -1 specifies coarsening, +1 for refining, and 0 for staying the same.`
+
+----
+
+:Parameter:  :p:`Adapt` : :g:`<criterion>` : :p:`max_level`
+:Summary:    :s:`Maximum level to refine using this refinement criterion`
+:Type:    :t:`integer`
+:Default: :d:`max (integer)`
+:Scope:     Cello
+
+:e:`Adapt will not refine past` :p:`max_level` :e:`when using this refinement criterion.  Note if the global` :p:`Adapt:max_level` :e:`is smaller, than that takes precidence; also, another criterion may refine past this if both` :p:`Adapt:max_level` :e:`and` :p:`Adapt` : :g:`<criterion>` : :p:`max_level` :e:`for the other criterion are both larger.`
 
 ----
 
@@ -203,7 +213,7 @@ parameter to specify field values at the boundary.
 
 :Parameter:  :p:`Boundary` : :p:`list`
 :Summary:    :s:`List of boundary condition subgroups`
-:Type:    :t:`list` ( :t:`string` )
+:Type:    [ :t:`string` | :t:`list` ( :t:`string` ) ]
 :Default: :d:`[]`
 :Scope:     :c:`Cello`
 
@@ -216,7 +226,7 @@ parameter to specify field values at the boundary.
           one {
              type = "reflecting";
              axis = "x";
-          };
+          }
           two {
              type = "outflow";
              axis = "y";
@@ -270,7 +280,7 @@ parameter to specify field values at the boundary.
              type = "outflow";
              mask = (x >= 4.0) || 
                     (y >= 1.0 && (x >= 0.744017 + 11.547* t));
-          };
+          }
        }
 
 
@@ -298,7 +308,7 @@ parameter to specify field values at the boundary.
                          (x <= 0.0) ||
                          ((x < 0.744017 + 11.547*t) && (y >= 1.0))
                       ];
-           };
+           }
        }
 
 
@@ -408,24 +418,13 @@ alignment in memory, and memory padding between fields.
 
 ----
 
-:Parameter:  :p:`Field` : :p:`courant`
-:Summary: :s:`Courant safety factor for fields`
-:Type:    :t:`float`
-:Default: :d:`0.6`
-:Scope:     :c:`Cello`
-:Todo:    :o:`Rename?`
-
-:e:`Courant safety factor for all fields.  This is a multiplication factor for the time step as determined by the respective Method(s) used.  This parameter can be updated on restart using the` `Restart : file` :e:`restart parameter file.`
-
-----
-
 :Parameter:  :p:`Field` : :p:`ghost_depth`
 :Summary: :s:`Field ghost zone depths`
 :Type:    [ :t:`integer` | :t:`list` ( :t:`integer` ) ]
 :Default: :d:`[ 0, 0, 0 ]`
 :Scope:     :c:`Cello`
 
-:e:`The default storage patch / block ghost zone depths [gx, gy, gz] along each axis for fields.  If an integer, then the same ghost zone depth is used for each axis.  Currently this value needs to be $4$ for PPM when AMR is used.`
+:e:`The default storage patch / block ghost zone depths [gx, gy, gz] along each axis for fields.  If an integer, then the same ghost zone depth is used for each axis.  Currently this value needs to be 4 for PPM when AMR is used.`
 
 ----
 
@@ -507,11 +506,11 @@ may include "color" and "temporary", and particle groups may include
 
        color {
           field_list = ["species_HI", "species_HII" ]; 
-       }; 
+       } 
 
        temporary {
           field_list = ["pressure", "temperature"]; 
-       };
+       }
 
     }
 
@@ -528,7 +527,7 @@ Field and Particle parameter groups:
 
           group_list = ["temporary"]; 
 
-       };
+       }
 
     }
 
@@ -572,7 +571,7 @@ different types of fields and particles using the ``Grouping`` class
 Initial
 -------
 
-The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specifies the initial cycle number (usually 0), :p:`type` specifies the type of initial conditions, either ``"value"`` for initializing fields directly, or other problem-specific initial condition generators.
+The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specifies the initial cycle number (usually 0), :p:`list` specifies a list of initial conditions, which may include ``"value"`` for initializing fields directly, or other problem-specific initial condition generators.
 
 ----
 
@@ -584,27 +583,6 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 
 :e:`Initial value for the cycle number.`
 
-
-----
-
-:Parameter:  :p:`Initial` : :p:`type`
-:Summary: :s:`Identifier specifying the type of initial conditions`
-:Type:    :t:`string`
-:Default: :d:`"value"`
-:Scope:     :c:`Cello`
-
-:e:`This parameter specifies how the field variables in the simulation will be initialized.  The default is` ``"value"``, :e:`in which case field variables are initialized directly in the input file, e.g.`
-
-    ::
-
-       Initial {
-          type = "value";
-	  density { value = [ 0.125, x + y < 0.5, 1.0 ]; };
-          ...
-       }
-
-:e:`Here, the` :p:`density` :e:`field is initialized to be 0.125 in the subregion of the domain where x + y < 0.5, and is initialized to 1.0 elsewhere.  Other valid values for` :p:`type` :e:`include` ``"implosion_2d"``, ``"sedov_array_2d"``, ``"sedov_array_3d"``, :e:`and` ``grackle_test``, :e:`which are problem-specific initializers analogous to those in the original Enzo application.`
-
 ----
 
 :Parameter:  :p:`Initial` : :p:`time`
@@ -615,26 +593,42 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 
 :e:`Initial time in code units.`
 
-----
+value
+-----
 
-:Parameter:  :p:`Initial` : :g:`<field>` : :p:`value`
+:Parameter:  :p:`Initial` : :p:`value` : :p:`<field>` :
 :Summary: :s:`Initialize field values`
 :Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
 :Default: :d:`[]`
-:Scope:     :c:`Cello`
+:Scope:     Cello
 
-:e:`This parameter is used to initialize fields when the` :p:`type` :e:`parameter is` ``"value".``  :e:`The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  Example: [ sin ( x + y ), x - y < 0, 1.0 ] is read as "sin ( x + y ) where x - y < 0, 1.0 elsewhere".`
+:e:`This initialization approach allows initializing field values directly.  The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  For example:`
 
-hdf5
-----
+::
 
-The :p:`hdf5` Initial subgroup is used to read block data from HDF5
-files.  Parameters are used to specify the HDF5 files to read from, the
-names of the HDF5 datasets, what type of data the datasets contain (``"field"`` or
+   Initial {
+
+      list = ["value"];
+
+      value {
+         density = [ sin ( x + y ), x - y < 0.0, 1.0 ];
+      }
+   }
+     
+	       
+:e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
+
+music
+-----
+
+The :p:`music` Initial subgroup is used to read block data from HDF5
+files generated by MUSIC initial conditions generator.  Parameters are
+used to specify the HDF5 files to read from, the names of the HDF5
+datasets, what type of data the datasets contain (``"field"`` or
 ``"particle"``), field or particle names, and particle attributes.
 Additionally, a :p:`coords` parameter is used to specify the axis
-ordering used.  The :p:`hdf5` group has its own :p:`list` parameter, one
-for each field or particle type and attribute.
+ordering used.  The :p:`music` group has its own :p:`list` parameter,
+one for each field or particle type and attribute.
 
 The following example reads the ``"density"`` field from ``"GridDensity"``
 file, and the ``"dark"`` particle ``"position_x"`` attributes from the
@@ -644,8 +638,8 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
      Initial {
 
-       list = ["hdf5"];
-       hdf5 {
+       list = ["music"];
+       music {
 
           file_list = ["FD","PX"];
           FD {
@@ -666,7 +660,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
        }
      }
   
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`list`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`list`
 :Summary: :s:`Name of the HDF5 to read from`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -676,7 +670,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`type`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`type`
 :Summary: :s:`Type of data to read in`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -686,7 +680,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`file`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`file`
 :Summary: :s:`Name of the HDF5 file to read from`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -696,7 +690,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`dataset`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`dataset`
 :Summary: :s:`Name of the dataset to read from the the HDF5 file`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -706,7 +700,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`name`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`name`
 :Summary: :s:`Name of the field or particle type`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -716,7 +710,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`attribute`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`attribute`
 :Summary: :s:`Name of the particle attribute to initialize`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -726,7 +720,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`coords`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`coords`
 :Summary: :s:`Ordering of axes in the HDF5 file`
 :Type:    :t:`string`
 :Default: :d:`"zyx"`
@@ -2271,7 +2265,7 @@ exactly at the specified time.
              step =  100.0;
           }
            ...
-       };
+       }
 
        dump {
 
@@ -2283,7 +2277,7 @@ exactly at the specified time.
              stop = 1000;
            }
             ...
-       };
+       }
 
        image {
 
@@ -2294,7 +2288,7 @@ exactly at the specified time.
              list = [1.0, 2.0, 5.0];
            }
             ...
-       };
+       }
     }
             
 ----
