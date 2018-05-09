@@ -101,11 +101,6 @@ void Monitor::header () const
   print ("Define","BUILD DATE (UTC)    %s",CELLO_DATE);
   print ("Define","BUILD TIME (UTC)    %s",CELLO_TIME);
   print ("Define","CELLO_CHARM_PATH    %s",CELLO_CHARM_PATH);
-#ifdef NEW_PPM  
-  print ("Define","NEW_PPM             %s","Yes");
-#else
-  print ("Define","NEW_PPM             %s","no");
-#endif  
 #ifdef NEW_OUTPUT  
   print ("Define","NEW_OUTPUT          %s","Yes");
 #else

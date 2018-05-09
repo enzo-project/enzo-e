@@ -31,6 +31,7 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
       accum [j] += values[j];
     }
   }
+
   return CkReductionMsg::buildNew(length*sizeof(long long),accum);
 }
 

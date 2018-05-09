@@ -46,6 +46,11 @@ FieldData::FieldData
 FieldData::~FieldData() throw()
 {  
   deallocate_permanent();
+  for (int i=0; i<array_temporary_.size(); i++) {
+    delete [] array_temporary_[i];
+    array_temporary_[i] = NULL;
+    temporary_size_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
