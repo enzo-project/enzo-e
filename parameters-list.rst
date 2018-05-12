@@ -476,17 +476,6 @@ alignment in memory, and memory padding between fields.
 
 :e:`Many problems may require field values from the previous timestep, e.g. for flux-correction, updating particles, etc.  Cello supports this by allowing one or more generations of all fields to be stored and maintained.  The default is 0, though 1 may be fairly common, and even more generations are supported if needed.`
 
-----
-
-:Parameter:  :p:`Field` : :p:`interpolation_method`
-:Summary: :s:`Type of "enzo" interpolation and coarsening`
-:Type:    :t:`string`
-:Default: :d:`"SecondOrderA"`
-:Scope:     :c:`Cello`
-:Status:  **Not accessed**
-
-:e:`For the "enzo"` :p:`prolong` :e:`or` :p:`restrict` :e:`Field parameters, this parameter defines the specific interpolation method used.  It is analogous to the` ``InterpolationMethod`` :e:`parameter in Enzo.  Valid values include` ``"ThirdOrderA"`` ,   ``"SecondOrderA"`` ,    ``"SecondOrderB"``, ``"SecondOrderC"`` , :e:`and` ``"FirstOrderA"``.
-
 -----
 Group
 -----
