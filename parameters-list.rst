@@ -54,7 +54,7 @@ size of blocks.
 :Default: :d:`0`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the coarsest level of "sub-root" Blocks, and must non-positive.  This is used primarily for multigrid methods, such as in the` :t:`"gravity_mg0"` :e:`method.  The default is 0, meaning no sub-root Blocks are created.  If multigrid is used, then both` :p:`Adapt` : :p:`min_level` :e:`and` :p:`Method` : :p:`gravity_mg` : :p:`min_level` :e:`must be set.`
+:e:`This parameter specifies the coarsest level of "sub-root" Blocks, and must non-positive.  This is used primarily for multigrid methods, such as in the` :t:`"mg0"` :e:`solver.  The default is 0, meaning no sub-root Blocks are created.  If multigrid is used, then both` :p:`Adapt` : :p:`min_level` :e:`and` :p:`Method` : :g:`<mg-solver>` : :p:`min_level` :e:`must be set.`.
 
 ----
 
@@ -64,7 +64,7 @@ size of blocks.
 :Default: :d:`[]`
 :Scope:     :c:`Cello`
 
-:e:`List of mesh refinement criteria, each of which has its own associated` ``Adapt : <criteria> :`` :e:`parameters.  When multiple criteria are used, if all refinement criteria evaluate to "coarsen", then the block will coarsen; if any refinement criteria evaluate as "refine", then the block will refine.`
+:e:`List of mesh refinement criteria, each of which has its own associated` ``Adapt : <criteria> :`` :e:`parameters.  When multiple criteria are used, if all refinement criteria evaluate to "coarsen", then the block will be tagged to coarsen; if any refinement criteria evaluate as "refine", then the block will be tagged to refine.  (Note that a particular block will coarsen only if it and all other sibling blocks are tagged to coarsen as well.)`  
 
 :e:`The items in the list need not be the same as the (required)` :p:`Adapt` : :g:`<criterion>` : :p:`type` :e:`parameter; they are solely used to identify and distinguish between different criteria in the simulation.  This allows the user to use multiple criteria of the same type but with different parameters, e.g. "mask" with different masks:`
 
@@ -74,7 +74,7 @@ size of blocks.
           list = ["criterion_1", "criterion_2"];
           criterion_1 {
              type = "shock";
-          };
+          }
           criterion_2 {
              type = "shear";
           }
@@ -98,7 +98,7 @@ size of blocks.
 :Default:     :d:`[]` ( all fields )
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the fields that the refinement criteria is applied to.  For example, if type = "slope" and field_list = ["density"], then the "refine by slope" refinement criterion is applied to the density field.  This is only used for refinement by slope.`
+:e:`This parameter specifies the fields that the refinement criteria is applied to.  For example, if type = "slope" and field_list = ["density"], then the "refine by slope" refinement criterion is applied to the density field.`
 
 
 ----
@@ -118,7 +118,7 @@ size of blocks.
 :Parameter: :p:`Adapt` : :g:`<criterion>` : :p:`max_coarsen`
 :Summary:   :s:`Cutoff value for coarsening a block`
 :Type:        [ :t:`float` | :t:`list` ( :t:`float` ) ]
-:Default:     :d:`0.15`
+:Default:     :d:`0.5*min_refine`
 :Scope:     :c:`Cello`
 
 :e:`A block may coarsen if the refinement criterion applied to the block is smaller than this value everywhere in the block.   A list is used for the` :t:`"shock"` :e:`refinement criterion type, in which case the first value is for pressure and the second is for the energy ratio.`
@@ -152,6 +152,16 @@ size of blocks.
 :Scope:     :c:`Cello`
 
 :e:`In addition to evolved field values, one may also output the refinement criteria.  This may be  useful for example for debugging or for finding appropriate values for max_coarsen and min_refine.  A value of -1 specifies coarsening, +1 for refining, and 0 for staying the same.`
+
+----
+
+:Parameter:  :p:`Adapt` : :g:`<criterion>` : :p:`max_level`
+:Summary:    :s:`Maximum level to refine using this refinement criterion`
+:Type:    :t:`integer`
+:Default: :d:`max (integer)`
+:Scope:     Cello
+
+:e:`Adapt will not refine past` :p:`max_level` :e:`when using this refinement criterion.  Note if the global` :p:`Adapt:max_level` :e:`is smaller, than that takes precidence; also, another criterion may refine past this if both` :p:`Adapt:max_level` :e:`and` :p:`Adapt` : :g:`<criterion>` : :p:`max_level` :e:`for the other criterion are both larger.`
 
 ----
 
@@ -203,7 +213,7 @@ parameter to specify field values at the boundary.
 
 :Parameter:  :p:`Boundary` : :p:`list`
 :Summary:    :s:`List of boundary condition subgroups`
-:Type:    :t:`list` ( :t:`string` )
+:Type:    [ :t:`string` | :t:`list` ( :t:`string` ) ]
 :Default: :d:`[]`
 :Scope:     :c:`Cello`
 
@@ -216,7 +226,7 @@ parameter to specify field values at the boundary.
           one {
              type = "reflecting";
              axis = "x";
-          };
+          }
           two {
              type = "outflow";
              axis = "y";
@@ -270,7 +280,7 @@ parameter to specify field values at the boundary.
              type = "outflow";
              mask = (x >= 4.0) || 
                     (y >= 1.0 && (x >= 0.744017 + 11.547* t));
-          };
+          }
        }
 
 
@@ -298,7 +308,7 @@ parameter to specify field values at the boundary.
                          (x <= 0.0) ||
                          ((x < 0.744017 + 11.547*t) && (y >= 1.0))
                       ];
-           };
+           }
        }
 
 
@@ -408,24 +418,13 @@ alignment in memory, and memory padding between fields.
 
 ----
 
-:Parameter:  :p:`Field` : :p:`courant`
-:Summary: :s:`Courant safety factor for fields`
-:Type:    :t:`float`
-:Default: :d:`0.6`
-:Scope:     :c:`Cello`
-:Todo:    :o:`Rename?`
-
-:e:`Courant safety factor for all fields.  This is a multiplication factor for the time step as determined by the respective Method(s) used.  This parameter can be updated on restart using the` `Restart : file` :e:`restart parameter file.`
-
-----
-
 :Parameter:  :p:`Field` : :p:`ghost_depth`
 :Summary: :s:`Field ghost zone depths`
 :Type:    [ :t:`integer` | :t:`list` ( :t:`integer` ) ]
 :Default: :d:`[ 0, 0, 0 ]`
 :Scope:     :c:`Cello`
 
-:e:`The default storage patch / block ghost zone depths [gx, gy, gz] along each axis for fields.  If an integer, then the same ghost zone depth is used for each axis.  Currently this value needs to be $4$ for PPM when AMR is used.`
+:e:`The default storage patch / block ghost zone depths [gx, gy, gz] along each axis for fields.  If an integer, then the same ghost zone depth is used for each axis.  Currently this value needs to be 4 for PPM when AMR is used.`
 
 ----
 
@@ -477,17 +476,6 @@ alignment in memory, and memory padding between fields.
 
 :e:`Many problems may require field values from the previous timestep, e.g. for flux-correction, updating particles, etc.  Cello supports this by allowing one or more generations of all fields to be stored and maintained.  The default is 0, though 1 may be fairly common, and even more generations are supported if needed.`
 
-----
-
-:Parameter:  :p:`Field` : :p:`interpolation_method`
-:Summary: :s:`Type of "enzo" interpolation and coarsening`
-:Type:    :t:`string`
-:Default: :d:`"SecondOrderA"`
-:Scope:     :c:`Cello`
-:Status:  **Not accessed**
-
-:e:`For the "enzo"` :p:`prolong` :e:`or` :p:`restrict` :e:`Field parameters, this parameter defines the specific interpolation method used.  It is analogous to the` ``InterpolationMethod`` :e:`parameter in Enzo.  Valid values include` ``"ThirdOrderA"`` ,   ``"SecondOrderA"`` ,    ``"SecondOrderB"``, ``"SecondOrderC"`` , :e:`and` ``"FirstOrderA"``.
-
 -----
 Group
 -----
@@ -507,11 +495,11 @@ may include "color" and "temporary", and particle groups may include
 
        color {
           field_list = ["species_HI", "species_HII" ]; 
-       }; 
+       } 
 
        temporary {
           field_list = ["pressure", "temperature"]; 
-       };
+       }
 
     }
 
@@ -528,7 +516,7 @@ Field and Particle parameter groups:
 
           group_list = ["temporary"]; 
 
-       };
+       }
 
     }
 
@@ -572,7 +560,7 @@ different types of fields and particles using the ``Grouping`` class
 Initial
 -------
 
-The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specifies the initial cycle number (usually 0), :p:`type` specifies the type of initial conditions, either ``"value"`` for initializing fields directly, or other problem-specific initial condition generators.
+The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specifies the initial cycle number (usually 0), :p:`list` specifies a list of initial conditions, which may include ``"value"`` for initializing fields directly, or other problem-specific initial condition generators.
 
 ----
 
@@ -584,27 +572,6 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 
 :e:`Initial value for the cycle number.`
 
-
-----
-
-:Parameter:  :p:`Initial` : :p:`type`
-:Summary: :s:`Identifier specifying the type of initial conditions`
-:Type:    :t:`string`
-:Default: :d:`"value"`
-:Scope:     :c:`Cello`
-
-:e:`This parameter specifies how the field variables in the simulation will be initialized.  The default is` ``"value"``, :e:`in which case field variables are initialized directly in the input file, e.g.`
-
-    ::
-
-       Initial {
-          type = "value";
-	  density { value = [ 0.125, x + y < 0.5, 1.0 ]; };
-          ...
-       }
-
-:e:`Here, the` :p:`density` :e:`field is initialized to be 0.125 in the subregion of the domain where x + y < 0.5, and is initialized to 1.0 elsewhere.  Other valid values for` :p:`type` :e:`include` ``"implosion_2d"``, ``"sedov_array_2d"``, ``"sedov_array_3d"``, :e:`and` ``grackle_test``, :e:`which are problem-specific initializers analogous to those in the original Enzo application.`
-
 ----
 
 :Parameter:  :p:`Initial` : :p:`time`
@@ -615,26 +582,42 @@ The :p:`Initial` group is used to specify initial conditions.  :p:`cycle` specif
 
 :e:`Initial time in code units.`
 
-----
+value
+-----
 
-:Parameter:  :p:`Initial` : :g:`<field>` : :p:`value`
+:Parameter:  :p:`Initial` : :p:`value` : :p:`<field>` :
 :Summary: :s:`Initialize field values`
 :Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
 :Default: :d:`[]`
-:Scope:     :c:`Cello`
+:Scope:     Cello
 
-:e:`This parameter is used to initialize fields when the` :p:`type` :e:`parameter is` ``"value".``  :e:`The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  Example: [ sin ( x + y ), x - y < 0, 1.0 ] is read as "sin ( x + y ) where x - y < 0, 1.0 elsewhere".`
+:e:`This initialization approach allows initializing field values directly.  The first element of the list must be a` :t:`float` :e:`expression, and may include arithmetic operators, variables "x", "y", "z", and most functions in the POSIX math library /include/math.h.  The second optional list element is a logical expression, and  serves as a "mask" of the domain.  The third` :t:`float` :e:`expression parameter is required if a mask is supplied, and serves as the "else" case.  Multiple such mask-value pairs may be used.  For example:`
 
-hdf5
-----
+::
 
-The :p:`hdf5` Initial subgroup is used to read block data from HDF5
-files.  Parameters are used to specify the HDF5 files to read from, the
-names of the HDF5 datasets, what type of data the datasets contain (``"field"`` or
+   Initial {
+
+      list = ["value"];
+
+      value {
+         density = [ sin ( x + y ), x - y < 0.0, 1.0 ];
+      }
+   }
+     
+	       
+:e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
+
+music
+-----
+
+The :p:`music` Initial subgroup is used to read block data from HDF5
+files generated by MUSIC initial conditions generator.  Parameters are
+used to specify the HDF5 files to read from, the names of the HDF5
+datasets, what type of data the datasets contain (``"field"`` or
 ``"particle"``), field or particle names, and particle attributes.
 Additionally, a :p:`coords` parameter is used to specify the axis
-ordering used.  The :p:`hdf5` group has its own :p:`list` parameter, one
-for each field or particle type and attribute.
+ordering used.  The :p:`music` group has its own :p:`list` parameter,
+one for each field or particle type and attribute.
 
 The following example reads the ``"density"`` field from ``"GridDensity"``
 file, and the ``"dark"`` particle ``"position_x"`` attributes from the
@@ -644,8 +627,8 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
      Initial {
 
-       list = ["hdf5"];
-       hdf5 {
+       list = ["music"];
+       music {
 
           file_list = ["FD","PX"];
           FD {
@@ -666,7 +649,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
        }
      }
   
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`list`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`list`
 :Summary: :s:`Name of the HDF5 to read from`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -676,7 +659,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`type`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`type`
 :Summary: :s:`Type of data to read in`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -686,7 +669,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`file`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`file`
 :Summary: :s:`Name of the HDF5 file to read from`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -696,7 +679,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`dataset`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`dataset`
 :Summary: :s:`Name of the dataset to read from the the HDF5 file`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -706,7 +689,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`name`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`name`
 :Summary: :s:`Name of the field or particle type`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -716,7 +699,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`attribute`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`attribute`
 :Summary: :s:`Name of the particle attribute to initialize`
 :Type:    :t:`string`
 :Default: :d:`none`
@@ -726,7 +709,7 @@ file, and the ``"dark"`` particle ``"position_x"`` attributes from the
 
 ----
 
-:Parameter:  :p:`Initial` : :p:`hdf5` : :p:`<file>` : :p:`coords`
+:Parameter:  :p:`Initial` : :p:`music` : :p:`<file>` : :p:`coords`
 :Summary: :s:`Ordering of axes in the HDF5 file`
 :Type:    :t:`string`
 :Default: :d:`"zyx"`
@@ -829,7 +812,7 @@ of Cello's dynamic memory allocation and deallocation.
 :Default: :d:`true`
 :Scope:     :c:`Cello`
 
-:e:`This parameter is used to turn on or off Cello's build-in memory tracking.  By default it is on, meaning it tracks the number and size of memory allocations, including the current number of bytes allocated, the maximum over the simulation, and the maximum over the current cycle.  Cello implements this by overloading C's new, new[], delete, and delete[] operators.  This can be problematic on some systems, e.g. if an external library also redefines these operators, in which case this parameter should be set to false.`
+:e:`This parameter is used to turn on or off Cello's build-in memory tracking.  By default it is on, meaning it tracks the number and size of memory allocations, including the current number of bytes allocated, the maximum over the simulation, and the maximum over the current cycle.  Cello implements this by overloading C's new, new[], delete, and delete[] operators.  This can be problematic on some systems, e.g. if an external library also redefines these operators, in which case this parameter should be set to false.  This can be turned off completely by setting "memory = 0" in the top-level "SConstruct" file.`
 
 ----
 Mesh
@@ -873,16 +856,38 @@ Method
 :Default: :d:`none`
 :Scope:     :c:`Cello`
 
-:e:`This parameter specifies the list of numerical methods to use.  Each method in the list is applied in the order specified.  Possible values include:`
+:e:`This parameter specifies the list of numerical methods to use, and
+is analagous to "EvolveLevel" routine in ENZO.  Each method in the
+list is applied in the order specified.  Possible methods include:`
 
-  *  :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method`
-  *  :t:`"ppml"` :e:`for the PPML ideal MHD solver`
-  *  :t:`"heat"` :e:`for the forward-Euler heat-equation solver, which is used primarily for demonstrating how new Methods are implemented in Enzo-P`
-  *  :t:`"grackle"` (not fully implemented yet)  :e:`for heating and cooling methods in the Enzo Grackle library`
-  * :t:`"gravity_[cg|bicgstab|mg0]"` :e:`for solving for the gravitational potential using the conjugate gradient method (CG), BiCG-STAB, or multigrid on the root-grid.`
-  * :t:`"null"` :e:`for "no solver", which is used to specify time step size for testing the AMR meshing infrastructure without undue computation.`
+  * :t:`"comoving_expansion"` :e:`adds comoving expansion terms to the
+    physical variables.`
+  * :t:`"cosmology"` :e:`for writing redshift to monitor output.`
+  * :t:`"grackle"` :e:`for heating and cooling methods in the Enzo
+    Grackle library`
+  * :t:`"gravity"` :e:`solves for the gravitational potential given gas
+    and particle density fields.`
+  * :t:`"heat"` :e:`for the forward-Euler heat-equation solver, which
+    is used primarily for demonstrating how new Methods are
+    implemented in Enzo-P`
+  * :t:`"pm_deposit"` :e:`deposits "dark" particle density into
+    "density_particle" field using CIC for "gravity" method.`
+  * :t:`"pm_update"` :e:`moves cosmological "dark" particles based on
+    positions, velocities, and accelerations.  This will be phased out
+    in favor of a more general "move_particles" method.`
+  * :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method.  This may be
+    phased out in favor of using a more general "hydro" method
+    instead, with a specific hydro solver specified.`
+  * :t:`"ppml"` :e:`for the PPML ideal MHD solver.  This may be phased
+    out in favor of using a more general "mhd" method instead, with a
+    specific mhd solver specified.`
+  * :t:`"trace"` :e:`for moving tracer particles.  This will be phased
+    out in favor of a more general "move_particles" method.`
+  * :t:`"turbulence"` :e:`computes random forcing for turbulence
+    simulations.`
 
-  :e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
+
+:e:`Parameters specific to individual methods are specified in subgroups, e.g.`::
 
      Method {
         list = ["ppm"];
@@ -894,7 +899,8 @@ Method
         }
      }
 
-
+:e:`For more detailed documentation on Methods, see` :ref:`using-methods`
+   
 ----
 
 :Parameter:  :p:`Method` : :p:`courant`
@@ -903,32 +909,24 @@ Method
 :Default: :d:`1.0`
 :Scope:     :c:`Cello`
 
-:e:`The global Courant safety factor is a multiplication factor for the time step applied on top of any Field or Particle specific Courant safety factors.`
+:e:`The global Courant safety factor is a multiplication factor for
+the time step applied on top of any Field or Particle specific Courant
+safety factors.`
 
-gravity_bicgstab
-----------------
+gravity
+-------
 
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`iter_max`
-:Summary: :s:`Iteration limit for the BiCGStab solver`
-:Type:    :t:`int`
-:Default: :d:`100`
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`solver`
+:Summary: :s:`Name of the linear solver to use`
+:Type:    :t:`string`
+:Default: :d:`"unknown"`
 :Scope:     :z:`Enzo`
 
-:e:`Maximum number of BiCGStab iterations to take.`
+:e:`Identifier for the linear solver to use, which must be included in the "Solver:list" parameter.`
 
 ----
 
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`res_tol`
-:Summary: :s:`Residual norm reduction tolerance for the BiCGStab solver`
-:Type:    :t:`float`
-:Default: :d:`1e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. BiCGStab is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`grav_const`
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`grav_const`
 :Summary: :s:`Gravitational constant`
 :Type:    :t:`float`
 :Default: :d:`6.67384e-8`
@@ -939,219 +937,28 @@ gravity_bicgstab
 
 ----
 
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`diag_precon`
-:Summary: :s:`Whether to apply diagonal preconditioning`
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`order`
+:Summary: :s:`Order of accuracy discretization to use for the discrete Laplacian`
+:Type:    :t:`integer`
+:Default: :d:`4`
+:Scope:     :z:`Enzo`
+
+:e:`Second, fourth, and sixth order discretizations of the Laplacian
+are avalaible; valid values are 2, 4, or 6.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`gravity` : :p:`accumulate`
+:Summary: :s:`Whether to add one layer of ghost zones when refreshing particle density`
 :Type:    :t:`logical`
-:Default: :d:`false`
+:Default: :d:`true`
 :Scope:     :z:`Enzo`
 
-:e:`Whether to diagonally precondition the linear system A*X = B in BiCGStab by 1.0 / (h^2).`
+:e:`This should be true for all runs with particles, since particle
+mass deposited in the "density_particle" field may bleed into the
+first layer of ghost zones.  This parameter ensures that that mass
+will be included in "density_total".`
 
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_bicgstab` : :p:`monitor_iter`
-:Summary: :s:`How often to display progress`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
-
-gravity_cg
-----------
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`iter_max`
-:Summary: :s:`Iteration limit for the CG solver`
-:Type:    :t:`int`
-:Default: :d:`100`
-:Scope:     :z:`Enzo`
-
-:e:`Maximum number of CG iterations to take.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`res_tol`
-:Summary: :s:`Residual norm reduction tolerance for the CG solver`
-:Type:    :t:`float`
-:Default: :d:`1e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. CG is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`grav_const`
-:Summary: :s:`Gravitational constant`
-:Type:    :t:`float`
-:Default: :d:`6.67384e-8`
-:Scope:     :z:`Enzo`
-
-:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
-
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`diag_precon`
-:Summary: :s:`Whether to apply diagonal preconditioning`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:     :z:`Enzo`
-
-:e:`Whether to diagonally precondition the linear system A*X = B in EnzoMethodGravityCg by 1.0 / (h^2).`
-
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`monitor_iter`
-:Summary: :s:`How often to display progress`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
-
-gravity_mg
-----------
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`iter_max`
-
-:Summary: :s:`Maximum number of multigrid cycles.`
-:Type:    :t:`int`
-:Default: :d:`10`
-:Scope:     :z:`Enzo`
-
-:e:`Maximum number of cycles of the multigrid solver.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`res_tol`
-
-:Summary: :s:`Residual norm reduction limit for the multigrid solver`
-:Type:    :t:`float`
-:Default: :d:`1e-6`
-:Scope:     :z:`Enzo`
-
-:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. multigrid is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`grav_const`
-:Summary: :s:`Gravitational constant`
-:Type:    :t:`float`
-:Default: :d:`6.67384e-8`
-:Scope:     :z:`Enzo`
-
-:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_cg` : :p:`monitor_iter`
-:Summary: :s:`How often to display progress`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth`
-
-:Summary: :s:`Multigrid smoother`
-:Type:    :t:`string`
-:Default: :d:`"jacobi"`
-:Scope:     :z:`Enzo`
-
-:e:`The Compute object to use for smoothing the residual in the multigrid method.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_weight`
-
-:Summary: :s:`Multigrid smoother weighting`
-:Type:    :t:`float`
-:Default: :d:`1.0`
-:Scope:     :z:`Enzo`
-
-:e:`The weighting for the multigrid smoother.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_pre`
-
-:Summary: :s:`Number of multigrid pre-smoothings`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`Number of applications of the smoother for pre-smoothings`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_post`
-
-:Summary: :s:`Number of multigrid post-smoothings`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`Number of applications of the smoother for post-smoothings`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`smooth_coarse`
-
-:Summary: :s:`Number of multigrid smoothings for coarse solver`
-:Type:    :t:`integer`
-:Default: :d:`1`
-:Scope:     :z:`Enzo`
-
-:e:`Number of applications of the smoother for approximating the solution on the coarsest level.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`restrict`
-
-:Summary: :s:`Multigrid restrict operation`
-:Type:    :t:`string`
-:Default: :d:`"linear"`
-:Scope:     :z:`Enzo`
-
-:e:`The Restrict type to use for transferring residuals to parent (coarser) blocks.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`prolong`
-
-:Summary: :s:`Multigrid prolong operation`
-:Type:    :t:`string`
-:Default: :d:`"linear"`
-:Scope:     :z:`Enzo`
-
-:e:`The Prolong type to use for transferring corrections to child (finer) blocks.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`min_level`
-
-:Summary: :s:`The coarsest multigrid level`
-:Type:    :t:`integer`
-:Default: :d:`0`
-:Scope:     :z:`Enzo`
-
-:e:`The coarsest level in the multigrid algorithm, which is the level at which the coarse grid solver is applied.  This number should be negative.`
-
-----
-
-:Parameter:  :p:`Method` : :p:`gravity_mg` : :p:`max_level`
-
-:Summary: :s:`the finest multigrid level`
-:Type:    :t:`integer`
-:Default: :d:`Adapt:max_level`
-:Scope:     :z:`Enzo`
-
-:e:`The finest level in the multigrid algorithm.  Could be less than the finest level in the mesh hierarchy to improve computational speed at the cost of reduced accuracy.`
 
 
 grackle
@@ -1756,7 +1563,7 @@ perform and on what schedule.
 
 ----
 
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride`
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride_write`
 :Summary: :s:`Subset of processors to perform write`
 :Type:    :t:`integer`
 :Default: :d:`1`
@@ -1766,7 +1573,27 @@ perform and on what schedule.
 
 .. _13: http://client64-249.sdsc.edu/cello/bug/show_bug.cgi?id=13
 
-:e:`This parameter allows for a strict subset  of physical processors to output data, which is especially helpful for large process counts  to reduce the load on parallel file systems.`
+:e:`This parameter allows for a strict subset of physical processors
+to output data, which is especially helpful for large process counts
+to reduce the load on parallel file systems.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride_wait`
+:Summary: :s:`Stride for sequencing processor data writes`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
+:Status:    **Not implemented**
+
+.. _13: http://client64-249.sdsc.edu/cello/bug/show_bug.cgi?id=13
+
+:e:`This parameter allows for processes to write sequentially to
+prevent too many processes overloading the file system.  A good
+starting point would be the number of processes in a shared memory
+node, in which case at most one process per node will be writing at
+any point in time.`
 
 ----
 
@@ -1787,7 +1614,7 @@ perform and on what schedule.
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
-:e:`This parameter specifies the Field value associated with the first color in the file set's colormap.` **This value is only used if the** :p:`image_specify_bounds` **parameter is** :p:`true`.  :e:`If` :p:`image_specify_bounds` :e:`is` :p:`false`, :e:`then the minimum global value of the field is used instead.`
+:e:`This parameter specifies the Field value associated with the first color in the file set's colormap.`
 
 ----
 
@@ -1798,7 +1625,7 @@ perform and on what schedule.
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
-:e:`This parameter specifies the Field value associated with the last color in the file set's colormap.` **This value is only used if the** :p:`image_specify_bounds` **parameter is** :p:`true`.  :e:`If` :p:`image_specify_bounds` :e:`is` :p:`false`, :e:`then the maximum global value of the field is used instead.`
+:e:`This parameter specifies the Field value associated with the last color in the file set's colormap.`
 
 ----
 
@@ -1821,17 +1648,6 @@ perform and on what schedule.
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
 :e:`This parameter specifies the upper limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
-
-----
-
-:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_specify_bounds`
-:Summary: :s:`Whether to use` :p:`image_min` :s:`and` :p:`image_max`
-:Type:    :t:`logical`
-:Default: :d:`false`
-:Scope:     :c:`Cello`
-:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
-
-:e:`This parameter determines whether to use the` :p:`image_min` :e:`and` :p:`image_max` :e:`parameters for mapping the Field data to the color map, or to use the Field data's minimum and maximum.`
 
 ----
 
@@ -2046,6 +1862,7 @@ Just as with fields, particle types can be assigned to groups_.
 
 ----
 
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`group_list`
 :Summary: :s:`Specify a list of groups that the Particle type belongs to`
 :Type:    :t:`list` ( :t:`string` )
 :Default: :d:`[ ]`
@@ -2271,7 +2088,7 @@ exactly at the specified time.
              step =  100.0;
           }
            ...
-       };
+       }
 
        dump {
 
@@ -2283,7 +2100,7 @@ exactly at the specified time.
              stop = 1000;
            }
             ...
-       };
+       }
 
        image {
 
@@ -2294,7 +2111,7 @@ exactly at the specified time.
              list = [1.0, 2.0, 5.0];
            }
             ...
-       };
+       }
     }
             
 ----
@@ -2343,6 +2160,61 @@ exactly at the specified time.
 :Default: :d:`1 | 1.0`
 :Scope:     :c:`Cello`
 :Todo:    :o:`write`
+
+
+------
+Solver
+------
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`iter_max`
+:Summary: :s:`Iteration limit for the CG solver`
+:Type:    :t:`int`
+:Default: :d:`100`
+:Scope:     :z:`Enzo`
+
+:e:`Maximum number of CG iterations to take.`
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`res_tol`
+:Summary: :s:`Residual norm reduction tolerance for the CG solver`
+:Type:    :t:`float`
+:Default: :d:`1e-6`
+:Scope:     :z:`Enzo`
+
+:e:`Stopping tolerance on the 2-norm of the residual relative to the initial residual, i.e. CG is defined to have converged when ||R_i ||`:sub:`2` `/ ||R_0 ||`:sub:`2` `< res_tol.`
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`grav_const`
+:Summary: :s:`Gravitational constant`
+:Type:    :t:`float`
+:Default: :d:`6.67384e-8`
+:Scope:     :z:`Enzo`
+
+:e:`Gravitational constant used in place of G.  The default is G in cgs units.`
+
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`diag_precon`
+:Summary: :s:`Whether to apply diagonal preconditioning`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :z:`Enzo`
+
+:e:`Whether to diagonally precondition the linear system A*X = B in EnzoSolverGravityCg by 1.0 / (h^2).`
+
+
+----
+
+:Parameter:  :p:`Solver` : :g:`solver` : :p:`monitor_iter`
+:Summary: :s:`How often to display progress`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :z:`Enzo`
+
+:e:`The current iteration, and minimum, current, and maximum relative residuals, are displayed every monitor_iter iterations.  If monitor_iter is 0, then only the first and last iteration are displayed.`
 
 
 --------
