@@ -95,9 +95,9 @@
 	 image_min = 0.4;
 	 image_max = 1.1;
 
-         include "schedule_cycle_25.incl"
+         include "input/schedule_cycle_25.incl"
 
-         include "colormap_blackbody.incl"
+         include "input/colormap_blackbody.incl"
 
       }
 
@@ -107,10 +107,10 @@
 	image_type  = "mesh";
 	image_reduce_type = "max";
 	image_size = [1921, 1081];
-        include "schedule_cycle_25.incl"
+        include "input/schedule_cycle_25.incl"
 	image_min = 0.0;
 	image_max = 4.0;
-        include "colormap_rainbow.incl"
+        include "input/colormap_rainbow.incl"
       }
 
      pressure {
@@ -122,9 +122,9 @@
 	 image_type = "data";
 #	 image_size = [2048,1024];
 
-         include "schedule_cycle_25.incl"
+         include "input/schedule_cycle_25.incl"
 
-         include "colormap_blackbody.incl"
+         include "input/colormap_blackbody.incl"
 
       }
 
@@ -137,15 +137,15 @@
 	 image_type = "data";
 #	 image_size = [2048,1024];
 
-         include "schedule_cycle_25.incl"
+         include "input/schedule_cycle_25.incl"
 
-         include "colormap_blackbody.incl"
+         include "input/colormap_blackbody.incl"
 
       }
         hdf5 {
         field_list = ["density", "pressure", "total_energy"];
         name = ["KH%02d.h5", "count"];
         type = "data";
-        include "schedule_cycle_25.incl"
+        include "input/schedule_cycle_25.incl"
       }
    }
