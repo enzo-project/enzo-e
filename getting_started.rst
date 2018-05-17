@@ -21,7 +21,7 @@ repository `Enzo-P / Cello bitbucket repository
 
 
 Before compiling ``Enzo-P / Cello``, you will also need to download
-and install ``Charm++``, HDF5, ``libpng``, and ``libboost``:
+and install ``Charm++``, ``HDF5``, ``libpng``, and ``libboost``:
 
 1. Install ``Charm++``
 ----------------------
@@ -53,6 +53,15 @@ If ``libpng`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
 be downloaded from the `libpng
 <http://www.libpng.org/pub/png/libpng.html>`_ website.
+
+4. Install ``libboost-dev``
+---------------------------
+
+"`Boost <https://www.boost.org/>`_ provides free peer-reviewed portable C++ source libraries."
+
+If ``libboost-dev`` is not already installed on your machine, it may be
+available through your operating system distribution, otherwise it can
+be downloaded from the `libboost <https://www.boost.org/>`_ website.
 
 Configuring
 ===========

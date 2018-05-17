@@ -873,16 +873,16 @@ list is applied in the order specified.  Possible methods include:`
   * :t:`"pm_deposit"` :e:`deposits "dark" particle density into
     "density_particle" field using CIC for "gravity" method.`
   * :t:`"pm_update"` :e:`moves cosmological "dark" particles based on
-    positions, velocities, and accelerations.`  *This will be phased out
-    in favor of a more general "move_particles" method.*
+    positions, velocities, and accelerations.`  **This will be phased out
+    in favor of a more general "move_particles" method.**
   * :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method.`  *This may be
     phased out in favor of using a more general "hydro" method
     instead, with a specific hydro solver specified.*
   * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
     out in favor of using a more general "mhd" method instead, with a
     specific mhd solver specified.*
-  * :t:`"trace"` :e:`for moving tracer particles.`  *This will be phased
-    out in favor of a more general "move_particles" method.*
+  * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
+    out in favor of a more general "move_particles" method.**
   * :t:`"turbulence"` :e:`computes random forcing for turbulence
     simulations.`
 
@@ -1429,8 +1429,6 @@ ppm
 turbulence
 ----------
 
-----
-
 :Parameter:  :p:`Method` : :p:`turbulence` : :p:`edot`
 :Summary: :s:`Initial value for edot for turbulence Method`
 :Type:    :t:`float`
@@ -1767,7 +1765,7 @@ signed integer of the corresponding size.  Integer types allowed
 include `"int8"`, `"int16"`, `"int32"`, and `"int64"`.  Two byte
 integers `"int16"` should be sufficient for most simulations: it
 has a range of [ -16384, 16384 ) within the particle's containing
-Block, and ranges [-32768, 16384) and [16384, 32768) on either side
+Block, and ranges [-32768, -16384) and [16384, 32768) on either side
 of the associated Block.
 
 Particles are allocated and operated on in "batches".  The
