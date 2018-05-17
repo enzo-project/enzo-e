@@ -1698,7 +1698,7 @@ any point in time.`
 :Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_log`
 :Summary: :s:`Whether to output the log of the data`
 :Type:    :t:`logical`
-:Default: :d:`<false>`
+:Default: :d:`false`
 :Scope:     :c:`Cello`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
 
