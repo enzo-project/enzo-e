@@ -873,16 +873,16 @@ list is applied in the order specified.  Possible methods include:`
   * :t:`"pm_deposit"` :e:`deposits "dark" particle density into
     "density_particle" field using CIC for "gravity" method.`
   * :t:`"pm_update"` :e:`moves cosmological "dark" particles based on
-    positions, velocities, and accelerations.  This will be phased out
-    in favor of a more general "move_particles" method.`
-  * :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method.  This may be
+    positions, velocities, and accelerations.`  *This will be phased out
+    in favor of a more general "move_particles" method.*
+  * :t:`"ppm"` :e:`for Enzo-P's PPM hydrodynamics method.`  *This may be
     phased out in favor of using a more general "hydro" method
-    instead, with a specific hydro solver specified.`
-  * :t:`"ppml"` :e:`for the PPML ideal MHD solver.  This may be phased
+    instead, with a specific hydro solver specified.*
+  * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
     out in favor of using a more general "mhd" method instead, with a
-    specific mhd solver specified.`
-  * :t:`"trace"` :e:`for moving tracer particles.  This will be phased
-    out in favor of a more general "move_particles" method.`
+    specific mhd solver specified.*
+  * :t:`"trace"` :e:`for moving tracer particles.`  *This will be phased
+    out in favor of a more general "move_particles" method.*
   * :t:`"turbulence"` :e:`computes random forcing for turbulence
     simulations.`
 
