@@ -21,7 +21,7 @@ repository `Enzo-P / Cello bitbucket repository
 
 
 Before compiling ``Enzo-P / Cello``, you will also need to download
-and install ``Charm++``, HDF5, and ``libpng``:
+and install ``Charm++``, HDF5, ``libpng``, and ``libboost``:
 
 1. Install ``Charm++``
 ----------------------

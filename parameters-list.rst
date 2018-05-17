@@ -944,7 +944,7 @@ gravity
 :Scope:     :z:`Enzo`
 
 :e:`Second, fourth, and sixth order discretizations of the Laplacian
-are avalaible; valid values are 2, 4, or 6.`
+are available; valid values are 2, 4, or 6.`
 
 ----
 
