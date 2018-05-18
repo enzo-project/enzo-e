@@ -26,10 +26,18 @@ and install ``Charm++``, ``HDF5``, ``libpng``, and ``libboost``:
 1. Install ``Charm++``
 ----------------------
 
-``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/software>`_.  It includes a helpful interactive script ``smart-build.pl`` that can
-be used to configure and install ``Charm++``.  You may also want to
-include the Charm++ bin directory in your ``$PATH``, which simplifies
-running ``Charm++`` programs.
+``Charm++`` can be `downloaded here <http://charm.cs.illinois.edu/software>`_.
+
+To build Charm++ on a Mac, try this:
+
+   ``./build charm++ netlrts-darwin-x86\_64 gcc gfortran -j4 --with-production``
+
+If you're running Linux, try building Charm++ using this:
+
+   ``./build charm++ netlrts-linux-x86\_64   -j4  --with-production``
+
+Charm++ also provides a helpful interactive script ``smart-build.pl`` that can
+be used to configure and install ``Charm++`` on numerous other platforms.
 
 2. Install ``HDF5``
 -------------------
