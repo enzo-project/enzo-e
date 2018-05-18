@@ -21,7 +21,7 @@ repository `Enzo-P / Cello bitbucket repository
 
 
 Before compiling ``Enzo-P / Cello``, you will also need to download
-and install ``Charm++``, ``HDF5``, ``libpng``, and ``libboost``:
+and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, and 3.``libboost``:
 
 1. Install ``Charm++``
 ----------------------
@@ -30,11 +30,11 @@ and install ``Charm++``, ``HDF5``, ``libpng``, and ``libboost``:
 
 To build Charm++ on a Mac, try this:
 
-   ``./build charm++ netlrts-darwin-x86\_64 gcc gfortran -j4 --with-production``
+   ``./build charm++ netlrts-darwin-x86_64 gcc gfortran -j4 --with-production``
 
 If you're running Linux, try building Charm++ using this:
 
-   ``./build charm++ netlrts-linux-x86\_64   -j4  --with-production``
+   ``./build charm++ netlrts-linux-x86_64   -j4  --with-production``
 
 Charm++ also provides a helpful interactive script ``smart-build.pl`` that can
 be used to configure and install ``Charm++`` on numerous other platforms.
