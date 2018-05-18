@@ -53,13 +53,9 @@ char * ParticleData::attribute_array (ParticleDescr * particle_descr,
 				      int it,int ia,int ib)
 {
 
-  bool in_range = true;
-  if ( !(0 <= it && it < particle_descr->num_types()) )
-    in_range = false;
-  if ( !(0 <= ib && ib < num_batches(it)) )
-    in_range = false;
-  if ( !(0 <= ia && ia < particle_descr->num_attributes(it)) )
-    in_range = false;
+  bool in_range =        (0 <= it && it < particle_descr->num_types());
+  in_range = in_range && (0 <= ia && ia < particle_descr->num_attributes(it));
+  in_range = in_range && (0 <= ib && ib < num_batches(it));
 
   char * array = NULL;
   if ( in_range ) {

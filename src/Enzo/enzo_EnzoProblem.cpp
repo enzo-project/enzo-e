@@ -472,7 +472,8 @@ Method * EnzoProblem::create_method_
    // for non-AMR problems
 
   method = new EnzoMethodGravity
-      (field_descr, enzo_config->solver_index[solver_name],
+      (field_descr,
+       enzo_config->solver_index[solver_name],
        enzo_config->method_gravity_grav_const,
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate);

@@ -16,6 +16,12 @@ import socket
 new_output = 0
 
 #----------------------------------------------------------------------
+# Temporary setting for using new PPM routines from enzo-dev
+#----------------------------------------------------------------------
+
+new_ppm = 1
+
+#----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
 #----------------------------------------------------------------------
 
@@ -195,9 +201,13 @@ define_projections =  ['CONFIG_USE_PROJECTIONS']
 define_performance =  ['CONFIG_USE_PERFORMANCE']
 define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
-# Debugging defines
+# Experimental code defines
+
+define_new_ppm = ['NEW_PPM']
 
 define_new_output = ['NEW_OUTPUT']
+
+# Debugging defines
 
 define_trace =        ['CELLO_TRACE']
 define_verbose =      ['CELLO_VERBOSE']
@@ -325,6 +335,8 @@ if (use_gprof == 1):
 
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
+
+if (new_ppm != 0): defines = defines + define_new_ppm
 
 if (new_output != 0): defines = defines + define_new_output
 
