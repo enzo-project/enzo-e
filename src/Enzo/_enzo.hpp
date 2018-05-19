@@ -181,6 +181,8 @@ struct fluxes
 
 #include "enzo_EnzoUnits.hpp"
 
+// #include "enzo_EnzoPhysicalConstants.hpp"
+
 #include "enzo_EnzoFactory.hpp"
 
 #include "enzo_EnzoSimulation.hpp"
@@ -207,6 +209,7 @@ struct fluxes
 #include "enzo_EnzoInitialSedovRandom.hpp"
 #include "enzo_EnzoInitialSoup.hpp"
 #include "enzo_EnzoInitialTurbulence.hpp"
+#include "enzo_EnzoInitialIsolatedGalaxy.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
 #include "enzo_EnzoRefineParticleMass.hpp"

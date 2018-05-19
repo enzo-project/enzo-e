@@ -1,0 +1,167 @@
+#======================================================================
+#
+#  File        : 
+#  Author      : Andrew Emerick (aemerick11@gmail.com)
+#  Date        : 2018-05-16
+#  Brief       : File for initializing an isolated galaxy
+#
+#  Description : 
+#
+#  REQUIRES root_blocks
+#
+#======================================================================
+
+# The domain is (x,y) such that 0 < x,y < 1
+
+  Domain {
+     lower = [0.0, 0.0, 0.0];
+     upper = [1.0, 1.0, 1.0];
+  }
+
+# The root-level mesh 32x32x32
+
+  Mesh {
+    root_rank = 3;
+    root_size = [32, 32, 32];
+  }
+
+# Isolated bounary conditions with outflow
+
+  Boundary {
+      type = "outflow";
+  }
+
+# Refine by (relative) slope of density
+#    this needs to be played with to refine by mass
+
+ Adapt {
+     SLOPE {
+         field_list = [ "density" ];
+         max_coarsen = 2.0;
+         min_refine = 5.0;
+         type = "slope";
+     };
+     list = [ "SLOPE" ];
+     max_level = 2;
+ }
+
+ Field {
+      history     = 1; # what?
+      alignment   = 8; # what?
+      gamma       = 1.6667; 
+      ghost_depth = 4;      # better way to set?
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+              "acceleration_x", "acceleration_y", "acceleration_z",
+              "total_energy", "internal_energy", "pressure"];
+ # "potential"];
+# need potential? 
+      padding = 0;
+      uniform_density = 1.0E-10;
+#     dens units * lengthunits**3
+      units_mass    = 1.9891E41;
+#
+      units_density = 4.89746405317508E-31;
+#     1 Myr
+      units_time    = 3.15576E16;
+#     100.0 kpc
+      units_length  = 7.40562619321E23;
+      # 3.08567758082232E21; 
+  }
+
+  Method {
+      list = ["ppm"];
+#,"gravity_bicgstab"];
+      ppm {
+            diffusion = true;
+            dual_energy = true;
+            flattening = 3;
+            steepening = true;
+            mu = 1.2;
+            courant = 0.4;
+          };
+#     gravity_bicgstab {
+#          iter_max = 100;
+#          res_tol  = 1e-6;
+#          }
+
+  }
+
+  Initial {
+    list = ["isolated_galaxy"];
+    IG {
+        center_position  = [0.5, 0.5, 0.5];
+        scale_length     = 0.004166666667;
+        scale_height     = 0.002916666667;
+        disk_mass        = 0.79972;
+        gas_fraction     = 0.875;
+        disk_temperature = 1.0E4;
+        gas_halo_mass = 0.0069978;
+        gas_halo_temperature = 1.0E6;
+        gas_halo_radius  = 0.18745;
+       }
+   }
+
+Stopping {
+    cycle    = 10;
+    interval = 1;
+}
+
+
+Output {
+    list = [ "data", "mesh", "de", "te" ,"hdf5"];
+    de {
+        axis = "z";
+        include "colormap_greyscale.incl"
+        field_list = [ "density" ];
+        image_reduce_type = "avg";
+        dir   = ["ISOLATED_GALAXY_%03d","cycle"];
+        name = [ "isolated-galaxy-de-z-%03d.png", "cycle" ];
+        type = "image";
+        image_size = [800,800];
+        include "schedule_cycle_1.incl"
+    };
+
+    hdf5 {
+       type = "data";
+       name = ["data-%02d.h5","count"];
+       field_list = ["density"];
+       schedule { var =  "cycle"; step = 1;  }
+    }
+
+    data {
+        field_list = [ "density" , "total_energy" , "internal_energy" ];
+        dir   = ["ISOLATED_GALAXY_%03d","cycle"];
+        name = [ "isolated-galaxy-data-%03d-%03d.h5", "cycle", "proc" ];
+        type = "data";
+        include "schedule_cycle_1.incl"
+    };
+    de {
+        axis = "z";
+        include "colormap_greyscale.incl"
+        field_list = [ "density" ];
+        image_reduce_type = "avg";
+        dir   = ["ISOLATED_GALAXY_%03d","cycle"];
+        image_size = [800,800];
+        name = [ "isolated-galaxy-de-x-%03d.png", "cycle" ];
+        type = "image";
+        include "schedule_cycle_1.incl"
+    };
+    te {
+        axis = "z";
+        include "colormap_blackbody.incl"
+        field_list = [ "total_energy" ];
+        image_log = true;
+        name = [ "isolated-galaxy-te-%03d.png", "cycle" ];
+        dir   = ["ISOLATED_GALAXY_%03d","cycle"];
+        type = "image";
+        include "schedule_cycle_1.incl"
+    };
+    mesh {
+        include "colormap_rainbow.incl"
+        image_type = "mesh";
+        dir   = ["ISOLATED_GALAXY_%03d","cycle"];
+        name = [ "isolated-galaxy-mesh-%03d.png", "cycle" ];
+        type = "image";
+        include "schedule_cycle_1.incl"
+    };
+}

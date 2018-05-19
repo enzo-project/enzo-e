@@ -34,6 +34,11 @@ EnzoConfig::EnzoConfig() throw ()
   ppm_use_minimum_pressure_support(false),
   ppm_mol_weight(0.0),
   field_gamma(0.0),
+  field_uniform_density(1.0),
+  field_units_mass(1.0),
+  field_units_length(1.0),
+  field_units_density(1.0),
+  field_units_time(1.0),
   physics_cosmology(false),
   physics_cosmology_hubble_constant_now(0.0),
   physics_cosmology_omega_matter_now(0.0),
@@ -93,6 +98,18 @@ EnzoConfig::EnzoConfig() throw ()
   initial_turbulence_density(0.0),
   initial_turbulence_pressure(0.0),
   initial_turbulence_temperature(0.0),
+  // EnzoInitialIsolatedGalaxy
+  initial_IG_scale_length(0.0343218),       // Gas disk scale length in code units
+  initial_IG_scale_height(0.00343218),      // Gas disk scale height in code units
+  initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
+  initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
+  initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
+  initial_IG_disk_metallicity(0.0),         // Gas disk metal fraction
+  initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
+  initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
+  initial_IG_gas_halo_metallicity(0.0),      // Gas halo metal fraction
+  initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
+  initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
   // EnzoProlong
   interpolation_method(""),
   // EnzoMethodHeat
@@ -139,6 +156,8 @@ EnzoConfig::EnzoConfig() throw ()
     initial_soup_d_pos[i]  = 0.0;
     initial_soup_d_size[i] = 0.0;
     initial_collapse_array[i] = 0;
+    initial_IG_center_position[i] = 0.5;
+    initial_IG_bfield[i] = 0.0;
   }
 }
 
@@ -177,6 +196,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | ppm_mol_weight;
 
   p | field_gamma;
+  p | field_uniform_density;
 
   p | physics_cosmology;
   p | physics_cosmology_hubble_constant_now;
@@ -236,6 +256,20 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_pm_mpp;
   p | initial_pm_level;
 
+  PUParray(p, initial_IG_center_position,3);
+  PUParray(p, initial_IG_bfield,3);
+  p | initial_IG_scale_length;
+  p | initial_IG_scale_height;
+  p | initial_IG_disk_mass;
+  p | initial_IG_gas_fraction;
+  p | initial_IG_disk_temperature;
+  p | initial_IG_disk_metallicity;
+  p | initial_IG_gas_halo_mass;
+  p | initial_IG_gas_halo_temperature;
+  p | initial_IG_gas_halo_metallicity;
+  p | initial_IG_gas_halo_density;
+  p | initial_IG_gas_halo_radius;
+
   p | initial_soup_rank;
   p | initial_soup_file;
   p | initial_soup_rotate;
@@ -281,10 +315,10 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | stopping_redshift;
 
-  p | units_mass;
-  p | units_density;
-  p | units_length;
-  p | units_time;
+  p | field_units_mass;
+  p | field_units_density;
+  p | field_units_length;
+  p | field_units_time;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -412,6 +446,11 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_pm_level        = p->value_integer ("Initial:pm:level",-1);
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
+  field_uniform_density = p->value_float ("Field:uniform_density",1.0);
+  field_units_mass = p->value_float ("Field:units_mass", 1.0);
+  field_units_density = p->value_float ("Field:units_density", 1.0);
+  field_units_length = p->value_float ("Field:units_length", 1.0);
+  field_units_time = p->value_float ("Field:units_time", 1.0);
 
   // InitialSoup initialization
 
@@ -478,6 +517,7 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_random_te_multiplier = 
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
 
+
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
   
@@ -536,7 +576,29 @@ void EnzoConfig::read(Parameters * p) throw()
   interpolation_method = p->value_string 
     ("Field:interpolation_method","SecondOrderA");
 
-  method_heat_alpha = p->value_float 
+  //
+  initial_IG_scale_length = p->value_float
+    ("Initial:isolated_galaxy:scale_length", 0.0343218);
+  initial_IG_scale_height = p->value_float
+    ("Initial:isolated_galaxy:scale_height", 0.00343218);
+  initial_IG_disk_mass = p->value_float
+    ("Initial:isolated_galaxy:disk_mass", 42.9661);
+  initial_IG_gas_fraction = p->value_float
+    ("Initial:isolated_galaxy:disk_temperature", 1.0E4);
+  initial_IG_disk_metallicity = p->value_float
+    ("Initial:isolated_galaxy:disk_metallicity", 0.0);
+  initial_IG_gas_halo_mass = p->value_float
+    ("Initial:isolated_galaxy:gas_halo_mass", 0.1);
+  initial_IG_gas_halo_temperature = p->value_float
+    ("Initial:isolated_galaxy:gas_halo_temperature", 1.0E4);
+  initial_IG_gas_halo_density = p->value_float
+    ("Initial:isolated_galaxy:gas_halo_density", 0.0);
+  initial_IG_gas_halo_radius = p->value_float
+    ("Initial:isolated_galaxy:gas_halo_radius", 1.0);
+  initial_IG_gas_halo_metallicity = p->value_float
+    ("Initial:isolated_galaxy:gas_halo_metallicity", 0.0);
+
+  method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
 
   method_hydro_method = p->value_string 
@@ -560,7 +622,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");
-  
+
   method_null_dt = p->value_float 
     ("Method:null:dt",std::numeric_limits<double>::max());
 

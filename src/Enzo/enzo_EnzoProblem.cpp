@@ -180,6 +180,8 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_soup_density,
        enzo_config->initial_soup_pressure_in,
        enzo_config->initial_soup_pressure_out);
+  } else if (type == "isolated_galaxy") {
+    initial = new EnzoInitialIsolatedGalaxy (enzo_config);
   } else {
     initial = Problem::create_initial_
       (type,index,config,parameters,field_descr);

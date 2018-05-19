@@ -136,12 +136,12 @@ void EnzoInitialGrackleTest::enforce_block
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
 
-  const double mh     = 1.67262171e-24;
-  const double kboltz = 1.3806504e-16;
+//  const double mh     = 1.67262171e-24;
+//  const double kboltz = 1.3806504e-16;
 
-  gr_float temperature_units =  mh * pow(units_->a_units * 
+  gr_float temperature_units =  cello::mass_hydrogen * pow(units_->a_units *
                                          units_->length_units /
-                                         units_->time_units, 2) / kboltz;
+                                         units_->time_units, 2) / cello::k;
 
   const double density_out = 1.0;
   const double density_in  = 0.125;

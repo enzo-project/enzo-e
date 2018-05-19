@@ -175,17 +175,29 @@ enum type_enum {
 
 /// Namespace for global constants and functions
 namespace cello {
-  
+
   // Constants
 
   const double pi = 3.14159265358979324;
-  // Boltzman constant in CGS  
-  const double k  = 1.3806504e-16;
+  // Boltzman constant in CGS
+  const double k  = 1.3806488e-16;
   // Solar mass in CGS
-  const double mass_solar = 1.98855e33;
+  const double mass_solar = 1.98841586e33;
   // Hydrogen mass in CGS
   const double mass_hydrogen = 1.67262171e-24;
-  
+  // Electron mass in CGS
+  const double mass_electron = 9.10938291E-28;
+  // parsec in CGS
+  const double pc  = 3.0856775809623245E18;
+  // Kiloparsec in CGS
+  const double kpc = 3.0856775809623245E21;
+  // Megaparsec in CGS
+  const double Mpc = 3.0856775809623245E24;
+  // speed of light in CGS
+  const double clight = 29979245800.0;
+  // Gravitational constant in CGS
+  const double grav_constant = 6.67384E-8;
+
   // precision functions
   double machine_epsilon     (int);
   template <class T>

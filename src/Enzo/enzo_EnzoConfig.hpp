@@ -56,6 +56,10 @@ public: // interface
       ppm_use_minimum_pressure_support(false),
       ppm_mol_weight(0.0),
       field_gamma(0.0),
+      field_uniform_density(1.0),
+      field_units_length(1.0),
+      field_units_mass(1.0),
+      field_units_time(1.0),
       // Cosmology
       physics_cosmology(false),
       physics_cosmology_hubble_constant_now(0.0),
@@ -116,6 +120,20 @@ public: // interface
       initial_turbulence_density(0.0),
       initial_turbulence_pressure(0.0),
       initial_turbulence_temperature(0.0),
+      // EnzoInitialIsolatedGalaxy
+      //   AE: Maybe these values (and those in cpp) don't matter
+      //       are they overwritten by the read-in (even when not found in param file)?
+      initial_IG_scale_length(0.0343218),       // Gas disk scale length in code units
+      initial_IG_scale_height(0.00343218),      // Gas disk scale height in code units
+      initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
+      initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
+      initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
+      initial_IG_disk_metallicity(0.0),         // Gas disk metal fraction
+      initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
+      initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
+      initial_IG_gas_halo_metallicity(0.0),      // Gas halo metal fraction
+      initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
+      initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -164,6 +182,8 @@ public: // interface
       initial_soup_d_pos[axis] = 0;
       initial_soup_d_size[axis] = 0;
       initial_collapse_array[axis] = 0;
+      initial_IG_center_position[axis] = 0.5;
+      initial_IG_bfield[axis]         = 0.0;
     }
   }
 
@@ -199,6 +219,11 @@ public: // attributes
   double                     ppm_mol_weight;
 
   double                     field_gamma;
+  double                     field_uniform_density;
+  double                     field_units_mass;
+  double                     field_units_density;
+  double                     field_units_length;
+  double                     field_units_time;
 
   /// Cosmology
   bool                       physics_cosmology;
@@ -278,6 +303,21 @@ public: // attributes
   double                     initial_turbulence_density;
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
+
+  /// EnzoInitialIsolatedGalaxy
+  double                     initial_IG_center_position[3];
+  double                     initial_IG_bfield[3];
+  double                     initial_IG_scale_length;
+  double                     initial_IG_scale_height;
+  double                     initial_IG_disk_mass;
+  double                     initial_IG_gas_fraction;
+  double                     initial_IG_disk_temperature;
+  double                     initial_IG_disk_metallicity;
+  double                     initial_IG_gas_halo_mass;
+  double                     initial_IG_gas_halo_temperature;
+  double                     initial_IG_gas_halo_metallicity;
+  double                     initial_IG_gas_halo_density;
+  double                     initial_IG_gas_halo_radius;
 
   /// EnzoProlong
   std::string                interpolation_method;
