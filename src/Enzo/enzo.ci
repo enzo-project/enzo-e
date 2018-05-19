@@ -58,8 +58,9 @@ module enzo {
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
-  PUPable EnzoInitialSoup;  	  
+  PUPable EnzoInitialSoup;
   PUPable EnzoInitialTurbulence;
+  PUPable EnzoInitialIsolatedGalaxy;
 
   PUPable EnzoRefineShock;
   PUPable EnzoRefineParticleMass;
