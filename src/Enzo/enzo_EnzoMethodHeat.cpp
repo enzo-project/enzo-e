@@ -92,11 +92,9 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
   const int id_temp_ = field.field_id ("temperature");
 
   int mx,my,mz;
-  int nx,ny,nz;
   int gx,gy,gz;
 
   field.dimensions  (id_temp_,&mx,&my,&mz);
-  field.size                 (&nx,&ny,&nz);
   field.ghost_depth (id_temp_,&gx,&gy,&gz);
 
   // Initialize array increments
@@ -124,7 +122,7 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
 
   if (rank == 1) {
 
-    for (int ix=gx; ix<nx+gx; ix++) {
+    for (int ix=gx; ix<mx-gx; ix++) {
 
       int i = ix;
 
@@ -136,8 +134,8 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
 
   } else if (rank == 2) {
 
-    for (int iy=gy; iy<ny+gy; iy++) {
-      for (int ix=gy; ix<nx+gy; ix++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gy; ix<mx-gy; ix++) {
 
 	int i = ix + mx*iy;
 
@@ -151,9 +149,9 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
 
   } else if (rank == 3) {
 
-    for (int iz=gz; iz<nz+gz; iz++) {
-      for (int iy=gy; iy<ny+gy; iy++) {
-	for (int ix=gx; ix<nx+gx; ix++) {
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
 
 	  int i = ix + mx*(iy + my*iz);
 

@@ -1,0 +1,142 @@
+    ### Problem: Hi World (faster version of HelloWorld)
+    ### Summary: Evolve high-pressure region shaped as the text "Hi"
+    ###    Date: 2018-05-18
+    ###  Author: James Bordner (jobordner@ucsd.edu)
+
+    
+   Domain { 
+      lower = [0.0, 0.0];
+      upper = [1.0, 1.0];
+   } 
+
+   Adapt {
+      max_level = 3; 
+      list = ["slope"];
+      slope {
+         type = "slope";
+         field_list = ["density"];
+         min_refine = 10.0;
+         max_coarsen = 2.0;
+      }
+   }
+
+
+   Mesh {
+      root_rank   = 2;
+      root_size   = [80, 80];
+      root_blocks = [ 4,  4 ];
+   }
+
+   Field {
+
+      ghost_depth  = 4;
+      gamma = 1.4;
+
+      list = [
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "total_energy",
+        "internal_energy",
+	"pressure"
+      ] ;
+
+   }
+
+   Method {
+
+     list = ["ppm"];
+
+     ppm {
+         courant = 0.8;
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+         dual_energy = false;
+     }
+   }
+
+
+   Initial {
+
+       list = ["value"];
+
+       value {       
+           density       = [ 1.0, 
+               (0.2 < x && x < 0.3 && 0.3 < y && y < 0.7) ||
+               (0.4 < x && x < 0.5 && 0.3 < y && y < 0.7) ||
+               (0.6 < x && x < 0.7 && 0.3 < y && y < 0.5) ||
+               (0.2 < x && x < 0.5 && 0.45 < y && y < 0.55) ||
+               ((x - 0.65)*(x - 0.65) + (y - 0.6)*(y - 0.6) < 0.0025),
+                             0.125 ];
+           total_energy  = [ 1.0  / (0.4 * 1.0) ,
+               (0.2 < x && x < 0.3 && 0.3 < y && y < 0.7) ||
+               (0.4 < x && x < 0.5 && 0.3 < y && y < 0.7) ||
+               (0.6 < x && x < 0.7 && 0.3 < y && y < 0.5) ||
+               (0.2 < x && x < 0.5 && 0.45 < y && y < 0.55) ||
+               ((x - 0.65)*(x - 0.65) + (y - 0.6)*(y - 0.6) < 0.0025),
+                             0.14 / (0.4 * 0.1)];
+           velocity_x    = 0.0;
+           velocity_y    = 0.0;
+       }
+   }
+
+   Boundary { type = "reflecting"; }
+
+   Stopping {
+      time = 0.1;
+   }
+
+   Output { 
+
+      list = ["density","mesh_age","mesh_level"];
+
+      density {
+
+         name       = ["hi-de-%04d.png","count"];
+         type       = "image";
+         field_list = ["density"];
+
+	 image_type = "data";
+	 image_size = [640,640];
+
+         include "input/schedule_cycle_10.incl"
+
+         include "input/colormap_rainbow.incl"
+
+      }
+
+      mesh_age {
+
+         name       = ["hi-mesh-age-%04d.png","count"];
+         type       = "image";
+
+	 image_type = "mesh";
+	 image_mesh_color = "age";
+	 image_size = [641,641];
+         image_min = 0.0;
+	 image_max = 1.0;
+
+         include "input/schedule_cycle_10.incl"
+
+         include "input/colormap_blackbody.incl"
+
+         
+      }
+
+      mesh_level {
+
+         name       = ["hi-mesh-level-%04d.png","count"];
+         type       = "image";
+
+	 image_type = "mesh";
+	 image_mesh_color = "level";
+	 image_size = [641,641];
+
+         include "input/schedule_cycle_10.incl"
+
+         include "input/colormap_rainbow.incl"
+
+         
+      }
+   }

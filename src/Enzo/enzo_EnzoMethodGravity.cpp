@@ -244,6 +244,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   for (int i=0; i<m; i++) B_copy[i] = B[i];
 #endif	
 
+  
   Solver * solver = block->simulation()->problem()->solver(index_solver_);
   
   // May exit before solve is done...

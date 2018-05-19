@@ -60,7 +60,7 @@ MsgRefine::MsgRefine
   face_level_(new int[num_face_level])
 {  
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine()\n",
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine(index,...)\n",
 	    __FILE__,__LINE__);
   fflush(stdout);
 #endif  
@@ -335,7 +335,7 @@ MsgRefine * MsgRefine::unpack(void * buffer)
 void MsgRefine::update (Data * data)
 {
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine()\n",
+  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine:update()\n",
 	    __FILE__,__LINE__);
   fflush(stdout);
 #endif  

@@ -253,7 +253,10 @@ namespace cello {
 
   void backtrace(const char * msg);
 
-  int index_static();
+  inline int index_static()
+  { return CkMyPe() % CONFIG_NODE_SIZE; }
+
+    
 }
 
 #endif /* CELLO_HPP */
