@@ -9,6 +9,11 @@
 
 #include "parameters.hpp"
 
+extern "C"
+{
+  #include "limits.h"
+}
+
 Parameters g_parameters;
 
 // #define TEMP_BYPASS_DESTRUCTOR
