@@ -18,4 +18,5 @@ bin/enzo-p
 charmrun
 config.log
 errors.org
-
+_ignore
+_test_runs
