@@ -72,11 +72,6 @@ private: // attributes
   double vcirc_radius[10000];
   double vcirc_velocity[10000];
 
-  double mass_units_;
-  double length_units_;
-  double density_units_;
-  double time_units_;
-
 };
 
 #endif /* ENZO_ENZO_INITIAL_ISOLATED_GALAXY_HPP */

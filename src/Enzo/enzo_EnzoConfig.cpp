@@ -576,6 +576,8 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_IG_disk_mass = p->value_float
     ("Initial:isolated_galaxy:disk_mass", 42.9661);
   initial_IG_gas_fraction = p->value_float
+    ("Initial:isolated_galaxy:gas_fraction", 0.2);
+  initial_IG_disk_temperature = p->value_float
     ("Initial:isolated_galaxy:disk_temperature", 1.0E4);
   initial_IG_disk_metallicity = p->value_float
     ("Initial:isolated_galaxy:disk_metallicity", 0.0);
