@@ -54,9 +54,9 @@ public: // interface
   /// Set units using mass
   void set_using_mass (double length, double mass, double time)
   {
-    length_  = length;
-    density_ = mass / (length * length * length);
-    time_    = time;
+    length_ = length;
+    mass_   = mass;
+    time_   = time;
   }
 
   /// Set units using density
@@ -96,7 +96,7 @@ public: // virtual methods
   /// Return length units scaling factor (virtual)
   virtual double length() const
   { return length_; }
-  
+
   /// Return temperature units scaling factor (derived)
   virtual double temperature() const
   { return (cello::mass_hydrogen)*std::pow(length()/time(),2)/(cello::k); }
@@ -104,7 +104,7 @@ public: // virtual methods
   /// Return velocity units scaling factor (derived)
   virtual double velocity() const
   { return length() / time(); }
-  
+
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
