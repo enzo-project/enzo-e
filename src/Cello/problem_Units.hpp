@@ -54,9 +54,9 @@ public: // interface
   /// Set units using mass
   void set_using_mass (double length, double mass, double time)
   {
-    length_ = length;
-    mass_   = mass;
-    time_   = time;
+    length_  = length;
+    density_ = mass / (length * length * length);
+    time_    = time;
   }
 
   /// Set units using density
