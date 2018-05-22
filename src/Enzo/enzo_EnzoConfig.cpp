@@ -35,10 +35,6 @@ EnzoConfig::EnzoConfig() throw ()
   ppm_mol_weight(0.0),
   field_gamma(0.0),
   field_uniform_density(1.0),
-  field_units_mass(1.0),
-  field_units_length(1.0),
-  field_units_density(1.0),
-  field_units_time(1.0),
   physics_cosmology(false),
   physics_cosmology_hubble_constant_now(0.0),
   physics_cosmology_omega_matter_now(0.0),
@@ -315,10 +311,10 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | stopping_redshift;
 
-  p | field_units_mass;
-  p | field_units_density;
-  p | field_units_length;
-  p | field_units_time;
+  p | units_mass;
+  p | units_density;
+  p | units_length;
+  p | units_time;
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -447,10 +443,6 @@ void EnzoConfig::read(Parameters * p) throw()
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
   field_uniform_density = p->value_float ("Field:uniform_density",1.0);
-  field_units_mass = p->value_float ("Field:units_mass", 1.0);
-  field_units_density = p->value_float ("Field:units_density", 1.0);
-  field_units_length = p->value_float ("Field:units_length", 1.0);
-  field_units_time = p->value_float ("Field:units_time", 1.0);
 
   // InitialSoup initialization
 
