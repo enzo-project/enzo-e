@@ -114,6 +114,15 @@ above online content.
 
    :download:`Using and Developing Enzo-P/Cello <./enzo-p-cello.pdf>`
 
+Presentations given at the 2018 Enzo Days Workshop are also available
+below.  They are more up-to-date, but are also still rather large.
+
+   :download:`Enzo-P / Cello Status and What's New? <./1805-1-status.pdf>`
+
+   :download:`Introduction to Enzo-P <./1805-2-intro.pdf>`
+	     
+   :download:`First Steps with Enzo-P <./1805-3-using.pdf>`
+
 James Bordner
 jobordner@ucsd.edu
 
@@ -124,4 +133,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`search`
 
-[Modified 2017-11-30]
+[Modified 2018-05-18]

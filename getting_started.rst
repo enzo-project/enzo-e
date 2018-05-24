@@ -215,18 +215,19 @@ and take a look at Enzo-P's output.
 An included "Hello World" problem can be run using the following
 from the ``$CELLO_HOME`` directory:
 
-     ``charmrun +p4 bin/enzo-p input/HelloWorld.in``
+     ``charmrun +p4 bin/enzo-p input/Hi.in``
 
 This assumes that the ``charmrun`` command is in your path.  If it
 is not, then you will need to include the path name as well, e.g.:
 
-     ``~/Charm/bin/charmrun +p4 bin/enzo-p input/HelloWorld.in``
+     ``~/Charm/bin/charmrun +p4 bin/enzo-p input/Hi.in``
 
-If all goes well, Enzo-P will run the HelloWorld problem.  Note that
-this problem will take some time to run to completion, perhaps between
-one and two hours.  Below are some of the generated images showing
-density and mesh hierarchy structure with blocks colored by level and
-by age.
+If all goes well, Enzo-P will run the Hello World problem.  Below are
+some of the generated images from the longer-running "HelloWorld.in"
+problem (note "HelloWorld.in" runs for about an hour, compared to a
+couple minutes for the shorter "Hi.in" input parameter file).  These
+images show density and mesh hierarchy structure with blocks colored
+by level and by age.
 
 ----
 
@@ -268,7 +269,7 @@ Time = 0.10
    :scale: 40 %
 
 
-If you look at the ``HelloWorld.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-P / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-P / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
+If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-P / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-P / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
 If you encounter any problems in getting Enzo-P to compile or run,
 please contact the Enzo-P/Cello community at cello-l@ucsd.edu, and
