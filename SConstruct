@@ -16,6 +16,14 @@ import socket
 new_output = 0
 
 #----------------------------------------------------------------------
+# Temporary setting for using new Block and EnzoBlock constructors
+# with MsgRefine objects stored on creating process (to bypass Charm++
+# constructor with packed message argument bug)
+#----------------------------------------------------------------------
+
+new_msg_refine = 0
+
+#----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev
 #----------------------------------------------------------------------
 
@@ -203,9 +211,9 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Experimental code defines
 
-define_new_ppm = ['NEW_PPM']
-
-define_new_output = ['NEW_OUTPUT']
+define_new_output      = ['NEW_OUTPUT']
+define_new_msg_refine = ['NEW_MSG_REFINE']
+define_new_ppm         = ['NEW_PPM']
 
 # Debugging defines
 
@@ -336,9 +344,9 @@ if (use_gprof == 1):
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
-if (new_ppm != 0): defines = defines + define_new_ppm
-
-if (new_output != 0): defines = defines + define_new_output
+if (new_output != 0):    defines = defines + define_new_output
+if (new_msg_refine != 0): defines = defines + define_new_msg_refine
+if (new_ppm != 0):       defines = defines + define_new_ppm
 
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
@@ -588,7 +596,7 @@ Export('parallel_run')
 Export('serial_run')
 Export('use_papi')
 
-SConscript( 'src/SConscript',variant_dir='build')
+SConscript( 'src/SConscript',variant_dir='build-new_msg-'+str(new_msg_refine))
 SConscript('test/SConscript')
 
 #======================================================================

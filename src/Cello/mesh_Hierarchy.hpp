@@ -35,7 +35,7 @@ public: // interface
     num_particles_(0), 
     num_zones_total_(0), 
     num_zones_real_(0), 
-    block_array_(NULL),
+    block_array_(),
     block_exists_(false)
   {
     for (int axis=0; axis<3; axis++) {
@@ -130,7 +130,7 @@ public: // interface
   void deallocate_blocks() throw();
 
   /// Return pointer to the Block CHARM++ chare array
-  CProxy_Block * block_array() const throw()
+  CProxy_Block block_array() const throw()
   { return block_array_;}
 
   /// Increment (decrement) number of mesh blocks
@@ -145,8 +145,8 @@ public: // interface
     num_blocks_level_[level] += count;
   }
 
-    /// Add Block to the list of blocks (block_vec_ and block_map_)
-    void insert_block (Block * block)
+  /// Add Block to the list of blocks (block_vec_ and block_map_)
+  void insert_block (Block * block)
   {
     block_vec_.push_back(block);
   }
@@ -252,7 +252,7 @@ protected: // attributes
   int64_t num_zones_real_; 
   
   /// Array of Blocks 
-  CProxy_Block * block_array_;
+  CProxy_Block block_array_;
   bool           block_exists_;
 
   /// Size of the root grid

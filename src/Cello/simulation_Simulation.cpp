@@ -191,6 +191,13 @@ void Simulation::pup (PUP::er &p)
   p | schedule_balance_;
 
   PUParray(p,dir_checkpoint_,256);
+
+  ASSERT1("Simulation::pup()",
+	  "msg_refine_map_ is assumed to be empty but has size %d",
+	  msg_refine_map_.size(),
+	  (msg_refine_map_.size() == 0));
+	  
+  //  p | msg_refine_map_;
 }
 
 //----------------------------------------------------------------------
@@ -255,7 +262,55 @@ void Simulation::finalize() throw()
 
   performance_->end();
 
+}
 
+//----------------------------------------------------------------------
+
+void Simulation::p_get_msg_refine(Index index)
+{
+  CkPrintf ("DEBUG SET_MSG_REFINE\n");
+  MsgRefine * msg = get_msg_refine(index);
+  int v3[3];
+  index.values(v3);
+  hierarchy_->block_array()[index].p_set_msg_refine(msg);
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::set_msg_refine(Index index, MsgRefine * msg)
+{
+  int v3[3];
+  index.values(v3);
+  CkPrintf("%d Simulation::set_msg_refine(%08x %08x %08x)\n",CkMyPe(),v3[0],v3[1],v3[2]);
+  
+  if (msg_refine_map_[index] != NULL) {
+   
+    ASSERT3 ("Simulation::p_set_msg_refine",
+	    "index %08x %08x %08x is already in the msg_refine mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg == NULL));
+  }
+  msg_refine_map_[index] = msg;
+}
+
+MsgRefine * Simulation::get_msg_refine(Index index)
+{
+  int v3[3];
+  index.values(v3);
+  CkPrintf("%d Simulation::get_msg_refine(%08x %08x %08x)\n",CkMyPe(),v3[0],v3[1],v3[2]);
+  
+  MsgRefine * msg = msg_refine_map_[index];
+  if (msg == NULL) {
+    int v3[3];
+    index.values(v3);
+    
+    ASSERT3 ("Simulation::get_msg_refine",
+	    "index %08x %08x %08x is not in the msg_refine mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg != NULL));
+  }
+  msg_refine_map_.erase(index);
+  return msg;
 }
 
 //======================================================================
@@ -565,6 +620,7 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
+
   hierarchy_ = factory()->create_hierarchy 
     (rank_,refinement,config_->mesh_max_level);
 
@@ -639,9 +695,7 @@ void Simulation::initialize_forest_() throw()
 	 config_->mesh_min_level);
     }
 
-    hierarchy_->block_array()->doneInserting();
-
-
+    hierarchy_->block_array().doneInserting();
   }
 }
 
@@ -766,7 +820,9 @@ void Simulation::monitor_performance()
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
 		       thisProxy);
-
+#ifdef TRACE_CONTRIBUTE
+  CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
+#endif  
   contribute (n*sizeof(long long),
 	      counters_reduce,
 	      r_reduce_performance_type,

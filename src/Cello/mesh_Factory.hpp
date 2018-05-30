@@ -68,7 +68,7 @@ public: // interface
   virtual void create_subblock_array
   (
    DataMsg * data_msg,
-   CProxy_Block * block_array,
+   CProxy_Block block_array,
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
@@ -78,7 +78,7 @@ public: // interface
   virtual Block * create_block
   (
    DataMsg * data_msg,
-   CProxy_Block * block_array,
+   CProxy_Block block_array,
    Index index,
    int nx, int ny, int nz,
    int num_field_data,

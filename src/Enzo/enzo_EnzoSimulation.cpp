@@ -47,6 +47,9 @@ EnzoSimulation::EnzoSimulation
 
   CkCallback callback (CkIndex_EnzoSimulation::r_startup_begun(NULL),
                        thisProxy);
+#ifdef TRACE_CONTRIBUTE  
+  CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
+#endif  
   contribute(callback);
 
 }
@@ -75,6 +78,23 @@ void EnzoSimulation::pup (PUP::er &p)
     EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
 			  field_descr());
   }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::p_get_msg_refine(Index index)
+{
+  MsgRefine * msg = get_msg_refine(index);
+
+#ifdef DEBUG_NEW_MSG_REFINE
+  int v3[3];
+  index.values(v3);
+  CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoSimulation::p_get_msg_refine(%p)\n",
+	    __FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
+#endif
+
+  CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock)hierarchy_->block_array();
+  enzo_block_array[index].p_set_msg_refine(msg);
 }
 
 //----------------------------------------------------------------------

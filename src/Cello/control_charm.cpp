@@ -242,6 +242,10 @@ void Block::control_sync_quiescence (int entry_point)
 
 void Block::control_sync_barrier (int entry_point)
 {
+#ifdef TRACE_CONTRIBUTE  
+  CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
+	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
+#endif  
   contribute(CkCallback (entry_point,thisProxy));
 }
 

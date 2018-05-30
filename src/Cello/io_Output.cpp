@@ -246,7 +246,7 @@ void Output::write_simulation_
 		  simulation->particle_descr());
 
   if (CkMyPe() == 0) {
-    simulation->hierarchy()->block_array()->p_output_write(index_,0);
+    simulation->hierarchy()->block_array().p_output_write(index_,0);
   }
 }
 

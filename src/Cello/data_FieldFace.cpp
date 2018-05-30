@@ -416,7 +416,7 @@ int FieldFace::num_bytes_array(Field field) throw()
   int array_size = 0;
 
   std::vector<int> field_list = field_list_src_(field);
-  
+
   for (size_t i_f=0; i_f < field_list.size(); i_f++) {
 
     size_t index_field = field_list[i_f];

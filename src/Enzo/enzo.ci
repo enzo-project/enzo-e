@@ -114,13 +114,16 @@ module enzo {
     entry EnzoSimulation (const char filename[n], int n);
 
     entry void r_startup_begun (CkReductionMsg *);
+
+    entry void p_get_msg_refine(Index index);
   }
 
   array[Index] EnzoBlock : Block {
 
-    entry EnzoBlock (MsgRefine * mesg);
-
+    entry EnzoBlock (MsgRefine * msg);
+    entry EnzoBlock (process_type ip_source);
     entry EnzoBlock();
+    entry void p_set_msg_refine (MsgRefine * msg);
 
     // EnzoMethodTurbulence synchronization entry methods
     entry void p_method_turbulence_end(CkReductionMsg *msg);

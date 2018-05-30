@@ -75,7 +75,9 @@ module mesh {
 
   array[Index] Block {
 
-    entry Block     (MsgRefine * msg);
+    entry Block (MsgRefine * msg);
+    entry Block (process_type ip_source);
+    entry void p_set_msg_refine(MsgRefine * msg);
     entry Block();
 
     //--------------------------------------------------
@@ -84,6 +86,7 @@ module mesh {
 
     entry void p_initial_exit();
     entry void r_initial_exit(CkReductionMsg *);
+    entry void r_end_initialize(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** OUTPUT ***

@@ -158,9 +158,7 @@ void Block::adapt_end_()
 {
   trace("adapt_end 4");
 
-  if (index_.is_root()) {
-    thisProxy.doneInserting();
-  }
+  if (index_.is_root()) thisProxy.doneInserting();
 
   if (delete_) {
 #ifdef DEBUG_ADAPT
@@ -341,7 +339,7 @@ void Block::adapt_refine_()
       factory->create_block 
 	(
 	 data_msg,
-	 &thisProxy, index_child,
+	 thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_data,
 	 adapt_step_,

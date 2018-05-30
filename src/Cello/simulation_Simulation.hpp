@@ -18,9 +18,9 @@ class Performance;
 class Problem;
 class Schedule;
 
+#include <errno.h>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
-
 class Simulation : public CBase_Simulation 
 {
   /// @class    Simulation
@@ -44,11 +44,11 @@ public: // interface
   // CHARM
   //==================================================
 
-   /// Initialize an empty Simulation
-   Simulation();
+  /// Initialize an empty Simulation
+  Simulation();
 
-   /// Initialize a migrated Simulation
-   Simulation (CkMigrateMessage *m);
+  /// Initialize a migrated Simulation
+  Simulation (CkMigrateMessage *m);
 
   //==================================================
 
@@ -57,6 +57,18 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   virtual void pup (PUP::er &p);
+
+  //----------------------------------------------------------------------
+  // BLOCK INITIALIZATION WITH MsgRefine
+  //----------------------------------------------------------------------
+
+  /// Request by newly created Block to get its MsgRefine object
+  virtual void p_get_msg_refine(Index index);
+
+  /// Set MsgRefine * for a newly created Block
+  void set_msg_refine (Index index, MsgRefine *);
+  /// Return MsgRefine * for a newly created Block and remove from list
+  MsgRefine * get_msg_refine (Index index);
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -337,7 +349,10 @@ protected: // functions
 		"Checkpoint");
 
       unlink ("Checkpoint");
-      symlink(dir_checkpoint_,"Checkpoint");
+      if (symlink(dir_checkpoint_,"Checkpoint")) {
+	CkPrintf("Error: symlink(%s,\"Checkpoint\") returned %s\n",
+		 dir_checkpoint_,strerror(errno));
+      }
     }
   }
 protected: // attributes
@@ -428,6 +443,7 @@ protected: // attributes
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 
+  std::map<Index,MsgRefine *> msg_refine_map_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

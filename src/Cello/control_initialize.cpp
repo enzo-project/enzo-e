@@ -16,7 +16,7 @@
 // #define DEBUG_INITIALIZE
 
 #ifdef DEBUG_INITIALIZE
-#  define TRACE_INITIALIZE CkPrintf ("%s:%d TEBUG_INITIALIZE\n",__FILE__,__LINE__);
+#  define TRACE_INITIALIZE CkPrintf ("%d %s:%d DEBUG_INITIALIZE\n",CkMyPe(),__FILE__,__LINE__);
 #else
 #  define TRACE_INITIALIZE /*  */
 #endif
@@ -65,6 +65,9 @@ void Simulation::initialize() throw()
     (CkIndex_Simulation::r_initialize_forest(NULL), thisProxy);
 
   // --------------------------------------------------
+#ifdef TRACE_CONTRIBUTE  
+  CkPrintf ("%s:%d DEBUG_CONTRIBUTE r_initialize_forest()\n",__FILE__,__LINE__); fflush(stdout);
+#endif  
   contribute(0,0,CkReduction::concat,callback);
   // --------------------------------------------------
 }
@@ -79,16 +82,19 @@ void Simulation::r_initialize_forest(CkReductionMsg * msg)
   
   initialize_forest_();
 
-  // --------------------------------------------------
-  // ENTRY: #2 Simulation::r_initialize_forest() -> Simulation::r_initialize_hierarchy()
-  // ENTRY: callback   
-  // --------------------------------------------------
-  CkCallback callback 
-    (CkIndex_Simulation::r_initialize_hierarchy(NULL), thisProxy);
-  // --------------------------------------------------
+#ifdef NEW_MSG_REFINE
+#else  
 
+  CkCallback callback
+    (CkIndex_Simulation::r_initialize_hierarchy(NULL), thisProxy);
+#ifdef TRACE_CONTRIBUTE
+  CkPrintf ("%s:%d DEBUG_CONTRIBUTE r_initialize_hierarchy()\n",__FILE__,__LINE__); fflush(stdout);
+#endif  
   contribute(0,0,CkReduction::concat,callback);
+  
   performance_->stop_region(perf_initial);
+#endif
+  
 }
 
 //----------------------------------------------------------------------
@@ -105,7 +111,7 @@ void Simulation::r_initialize_hierarchy(CkReductionMsg * msg)
     // ENTRY: #3 Simulation::r_initialize_hierarchy() -> Block::p_adapt_mesh()
     // ENTRY: Block Array if Simulation is_root()
     // --------------------------------------------------
-    (*hierarchy()->block_array() ).p_initial_exit();
+    hierarchy()->block_array().p_initial_exit();
     // --------------------------------------------------
   }
   performance_->stop_region(perf_initial);

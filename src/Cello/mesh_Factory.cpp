@@ -6,6 +6,7 @@
 /// @brief    [\ref Mesh] Declaration of the Factory class
 
 #include "mesh.hpp"
+#include "charm_simulation.hpp"
 
 //----------------------------------------------------------------------
 
@@ -108,8 +109,12 @@ CProxy_Block Factory::create_block_array
 	   num_face_level, face_level);
 
 	msg->set_data_msg(data_msg);
-
+#ifdef NEW_MSG_REFRESH
+	proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	proxy_block[index].insert (process_type(CkMyPe()));
+#else	
 	proxy_block[index].insert (msg);
+#endif	
 
 	// --------------------------------------------------
 
@@ -126,7 +131,7 @@ CProxy_Block Factory::create_block_array
 void Factory::create_subblock_array
 (
  DataMsg * data_msg,
- CProxy_Block * block_array,
+ CProxy_Block block_array,
  int min_level,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -180,7 +185,12 @@ void Factory::create_subblock_array
 
 	  msg->set_data_msg(data_msg);
 
-	  (*block_array)[index].insert (msg);
+#ifdef NEW_MSG_REFINE	  
+	  proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	  block_array[index].insert (process_type(CkMyPe()));
+#else	
+	  block_array[index].insert (msg);
+#endif	  
 
 	  // --------------------------------------------------
 
@@ -195,7 +205,7 @@ void Factory::create_subblock_array
 Block * Factory::create_block
 (
  DataMsg * data_msg,
- CProxy_Block * block_array,
+ CProxy_Block block_array,
  Index index,
  int nx, int ny, int nz,
  int num_field_data,
@@ -228,11 +238,16 @@ Block * Factory::create_block
 
   msg->set_data_msg (data_msg);
 
-  (*block_array)[index].insert (msg);
+#ifdef NEW_MSG_REFINE	  
+  proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+  block_array[index].insert (process_type(CkMyPe()));
+#else  
+  block_array[index].insert (msg);
+#endif  
 
   // --------------------------------------------------
 
-  Block * block = (*block_array)[index].ckLocal();
+  Block * block = block_array[index].ckLocal();
 
   ASSERT("Factory::create_block()","block is NULL",block != NULL);
 

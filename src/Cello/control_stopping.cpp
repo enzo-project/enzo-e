@@ -93,6 +93,10 @@ void Block::stopping_begin_()
     CkCallback callback (CkIndex_Block::r_stopping_compute_timestep(NULL),
 			 thisProxy);
 
+#ifdef TRACE_CONTRIBUTE    
+    CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
+	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
+#endif    
     contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
   } else {
@@ -208,7 +212,7 @@ void Block::p_stopping_balance()
   // monitor->set_mode(monitor_mode_all);
   // if (index().is_root()) monitor->print ("Balance","BEGIN");
   // monitor->set_mode(mode_saved);
-  
+
   AtSync();
   performance_stop_(perf_stopping);
 }
@@ -224,9 +228,10 @@ void Block::ResumeFromSync()
   // monitor->set_mode(mode_saved);
   
   TRACE_STOPPING("Block::balance_exit");
-
-  if (index_.is_root()) thisProxy.doneInserting();
-
+ 
+  if (index_.is_root()) {
+    thisProxy.doneInserting();
+  }
   stopping_exit_();
 
 }

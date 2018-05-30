@@ -5,12 +5,13 @@
 /// @date     Thu Mar  3 23:02:02 PST 2011
 /// @brief    Implementation of the EnzoBlock class
 
-#include "charm_simulation.hpp"
 #include "cello.hpp"
+#include "charm_simulation.hpp"
 
 #include "enzo.hpp"
 
 // #define DEBUG_ENZO_BLOCK
+// #define DEBUG_NEW_MSG_REFINE
 
 //======================================================================
 
@@ -176,18 +177,67 @@ EnzoBlock::EnzoBlock
     redshift(0.0),
     SubgridFluxes(NULL)
 {
+#ifdef DEBUG_ENZO_BLOCK
+  CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
+  print();
+#endif
   initialize_enzo_();
   initialize();
 #ifdef DEBUG_ENZO_BLOCK
-  CkPrintf ("%d %p TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
-  print();
+  CkPrintf ("%d %p END TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
+  EnzoBlock::print();
 #endif
+}
+
+//----------------------------------------------------------------------
+
+EnzoBlock::EnzoBlock
+( process_type ip_source)
+  : BASE_ENZO_BLOCK ( ip_source ),
+    mg_iter_(0),
+    mg_sync_restrict_(),
+    mg_sync_prolong_(),
+    mg_msg_(NULL),
+    jacobi_iter_(0),
+    dt(dt_),
+    redshift(0.0),
+    SubgridFluxes(NULL)
+{
+#ifdef DEBUG_NEW_MSG_REFINE  
+  int v3[3];
+  thisIndex.values(v3);
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoBlock::EnzoBlock(%d)\n",
+    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2],ip_source);
+#endif  
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
+{
+  int v3[3];
+  thisIndex.values(v3);
+
+  Block::p_set_msg_refine(msg);
+  initialize_enzo_();
+  initialize();
+#ifdef DEBUG_NEW_MSG_REFINE  
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE EnzoBlock::init() calling Block::initialize()\n",
+    CkMyPe(),__FILE__,__LINE__);
+#endif  
+  Block::initialize();
 }
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::initialize_enzo_()
 {
+  int v3[3];
+  thisIndex.values(v3);
+#ifdef DEBUG_NEW_MSG_REFINE  
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoBlock::initialize_enzo()\n",
+    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2]);
+#endif  
   for (int i=0; i<MAX_DIMENSION; i++) {
     GridLeftEdge[i] = 0;
     GridDimension[i] = 0;
@@ -388,8 +438,6 @@ void EnzoBlock::set_time (double time) throw ()
 
 void EnzoBlock::initialize () throw()
 {
-  TRACE ("EnzoBlock::initialize()\n");
-
   double xm,ym,zm;
 
   data()->lower(&xm,&ym,&zm);

@@ -52,6 +52,13 @@ public: // interface
   /// size, and number of field blocks
   Block ( MsgRefine * msg );
 
+  /// create a Block whose MsgRefine is on the creating process
+  Block ( process_type ip_source );
+
+  /// Initialize Block using MsgRefine returned by creating process
+  virtual void p_set_msg_refine(MsgRefine * msg);
+
+  
   // Initialize
   void init (
    Index index,
@@ -273,6 +280,8 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
+  void r_end_initialize(CkReductionMsg * msg)
+  {      initial_exit_();  delete msg;  }
   void initial_exit_();
   void p_initial_exit()
   {      initial_exit_();  }
@@ -750,8 +759,7 @@ public: // virtual functions
   { stop_  = stop; }
 
   /// Initialize Block
-  virtual void initialize () throw()
-  {  }
+  virtual void initialize ();
 
   /// Return the local simulation object
   Simulation * simulation() const;
@@ -869,7 +877,7 @@ protected: // functions
   /// Set the current refresh object
   void set_refresh (Refresh * refresh) 
   {
-    // WARNING: known memory leak (see bug # 132)
+    // WARNING: known memory leak (see bug # 133)
     refresh_.push_back(new Refresh(*refresh));
   };
 

@@ -7,7 +7,10 @@ BEGIN{
 }
 /lost in loss record/ {
     p=1;
-    printf "** TODO %d/%d %s bytes in %s blocks\n",$(NF-2),$NF,$2,$9
+    for (i=1; i<NF; i++) {
+	if ($i == "blocks") nb=$(i-1);
+    }
+    printf "** TODO %d/%d %s bytes in %s blocks\n",$(NF-2),$NF,$2,nb
 }
 
 /\(/ && /\)/ && /pp:/ {

@@ -30,7 +30,7 @@ Hierarchy::Hierarchy
   num_particles_(0),
   num_zones_total_(0),
   num_zones_real_(0),
-  block_array_(NULL),
+  block_array_(),
   block_exists_(false)
 {
   TRACE("Hierarchy::Hierarchy()");
@@ -88,15 +88,7 @@ void Hierarchy::pup (PUP::er &p)
     num_zones_real_  = 0;
   }
 
-  // block_array_ is NULL on non-root processes
-  bool allocated=(block_array_ != NULL);
-  p|allocated;
-  if (allocated) {
-    if (up) block_array_=new CProxy_Block;
-    p|*block_array_;
-  } else {
-    block_array_ = NULL;
-  }
+  p | block_array_;
   p | block_exists_;
 
   PUParray(p,root_size_,3);
@@ -195,13 +187,6 @@ void Hierarchy::root_blocks (int * nbx, int * nby, int * nbz) const throw()
 
 void Hierarchy::deallocate_blocks() throw()
 {
-
-  if (block_exists_) {
-    block_array_->ckDestroy();
-    delete block_array_; block_array_ = 0;
-    block_exists_ = false;
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -239,11 +224,9 @@ void Hierarchy::create_forest
 
   TRACE("Allocating block_array_");
 
-  block_array_ = new CProxy_Block;
-
   DataMsg * data_msg = NULL;
   
-  (*block_array_) = factory_->create_block_array
+  block_array_ = factory_->create_block_array
     (
      data_msg,
      blocking_[0],blocking_[1],blocking_[2],
@@ -251,7 +234,6 @@ void Hierarchy::create_forest
      num_field_blocks);
 
   block_exists_ = allocate_data;
-
 }
 
 //----------------------------------------------------------------------
