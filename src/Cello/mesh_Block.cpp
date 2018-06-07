@@ -150,14 +150,24 @@ Block::Block ( process_type ip_source )
   refresh_()
 {
   usesAtSync = true;
+#ifdef TRACE_BLOCK
+  {
+  int v3[3];
+  index_.values(v3);
+  CkPrintf ("%d %s index TRACE_BLOCK Block(ip_source)  %d %d %d \n",  CkMyPe(),name().c_str(),
+    v3[0],v3[1],v3[2]);
+}
+#endif
 #ifdef NEW_MSG_REFINE
   performance_start_(perf_block);
 
-#ifdef DEBUG_NEW_MSG_REFINE  
+#ifdef DEBUG_NEW_MSG_REFINE
+  {
   int v3[3];
   thisIndex.values(v3);
   CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::Block(%d)\n",
-	    __FILE__,__LINE__,v3[0],v3[1],v3[2],ip_source);
+    __FILE__,__LINE__,v3[0],v3[1],v3[2],ip_source);
+}
 #endif  
   proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
   
@@ -193,7 +203,7 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   {
   int v3[3];
   index_.values(v3);
-  CkPrintf ("%d %s index TRACE_BLOCK Block(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
+  CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
 	    v3[0],v3[1],v3[2]);
   msg->print();
   }
@@ -203,10 +213,8 @@ void Block::p_set_msg_refine(MsgRefine * msg)
     (cycle_ == simulation()->config()->initial_cycle);
 
   if (is_first_cycle) {
-  CkPrintf ("%d %s:%d Block::p_set_msg_refine(msg) calling apply_initial_\n",CkMyPe(),__FILE__,__LINE__);
     apply_initial_();
   } else {
-  CkPrintf ("%d %s:%d Block::p_set_msg_refine(msg) calling msg->update()\n",CkMyPe(),__FILE__,__LINE__);
     msg->update(data());
   }
 
@@ -330,7 +338,7 @@ void Block::init
   const int level = this->level();
 
   int na3[3];
-  size_forest(na3,na3+1,na3+2);
+  size_array(na3,na3+1,na3+2);
 
   int ic3[3] = {0,0,0};
   if (level > 0) index_.child(level,ic3,ic3+1,ic3+2);
@@ -382,16 +390,16 @@ void Block::initialize()
 #ifdef DEBUG_NEW_MSG_REFINE  
   int v3[3];
   thisIndex.values(v3);
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE Block::initialize()\n",
-	    CkMyPe(),__FILE__,__LINE__);
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::initialize()\n",
+	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2]);
 #endif
 #ifdef NEW_MSG_REFINE  
   bool is_first_cycle = 
     (cycle_ == simulation()->config()->initial_cycle);
-  if (is_first_cycle) {
+  if (is_first_cycle && level() <= 0) {
     CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
 #ifdef TRACE_CONTRIBUTE    
-    CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
+    CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE r_end_initialize()\n",
 	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
 #endif    
     contribute(0,0,CkReduction::concat,callback);
@@ -472,7 +480,7 @@ ItFace Block::it_face
 {
   int rank = this->rank();
   int n3[3];
-  size_forest(n3,n3+1,n3+2);
+  size_array(n3,n3+1,n3+2);
   bool periodic[3][2];
   periodicity(periodic);
   return ItFace (rank,min_face_rank,periodic,n3,index,ic3,if3);
@@ -483,7 +491,7 @@ ItFace Block::it_face
 ItNeighbor Block::it_neighbor (int min_face_rank, Index index) throw()
 {
   int n3[3];
-  size_forest(&n3[0],&n3[1],&n3[2]);
+  size_array(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
   return ItNeighbor (this,min_face_rank,periodic,n3,index);
@@ -753,7 +761,7 @@ std::string Block::name() const throw()
 
 //----------------------------------------------------------------------
 
-void Block::size_forest (int * nx, int * ny, int * nz) const throw ()
+void Block::size_array (int * nx, int * ny, int * nz) const throw ()
 {
   simulation()->hierarchy()->root_blocks(nx,ny,nz);
 }
@@ -835,8 +843,8 @@ void Block::index_global
   int *nx, int *ny, int *nz ) const
 {
   
-  index_forest(ix,iy,iz);
-  size_forest (nx,ny,nz);
+  index_array(ix,iy,iz);
+  size_array (nx,ny,nz);
 
   Index index = this->index();
 
@@ -891,7 +899,7 @@ void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
   // bool periodic = boundary->is_periodic();
 
   int n3[3];
-  size_forest (&n3[0],&n3[1],&n3[2]);
+  size_array (&n3[0],&n3[1],&n3[2]);
 
   const int level = this->level();
   // adjust array size for negative levels
@@ -1000,7 +1008,7 @@ Index Block::neighbor_
   Index index = (ind != 0) ? (*ind) : index_;
 
   int na3[3];
-  size_forest (&na3[0],&na3[1],&na3[2]);
+  size_array (&na3[0],&na3[1],&na3[2]);
   // const bool periodic  = simulation()->problem()->boundary()->is_periodic();
   Index in = index.index_neighbor (of3,na3);
   return in;

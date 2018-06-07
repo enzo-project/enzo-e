@@ -13,6 +13,7 @@
 #include "charm_simulation.hpp"
 
 // #define DEBUG_SIMULATION
+// #define DEBUG_NEW_MSG_REFINE
 
 Simulation::Simulation
 (
@@ -268,10 +269,13 @@ void Simulation::finalize() throw()
 
 void Simulation::p_get_msg_refine(Index index)
 {
-  CkPrintf ("DEBUG SET_MSG_REFINE\n");
   MsgRefine * msg = get_msg_refine(index);
+#ifdef DEBUG_NEW_MSG_REFINE  
   int v3[3];
   index.values(v3);
+  CkPrintf("%d DEBUG_NEW_MSG_REFINE %08x %08x $08x Simulation::p_get_msg_refine(%p)\n",
+	   CkMyPe(),v3[0],v3[1],v3[2],msg);
+#endif
   hierarchy_->block_array()[index].p_set_msg_refine(msg);
 }
 
@@ -279,12 +283,18 @@ void Simulation::p_get_msg_refine(Index index)
 
 void Simulation::set_msg_refine(Index index, MsgRefine * msg)
 {
-  int v3[3];
-  index.values(v3);
-  CkPrintf("%d Simulation::set_msg_refine(%08x %08x %08x)\n",CkMyPe(),v3[0],v3[1],v3[2]);
-  
+#ifdef DEBUG_NEW_MSG_REFINE
+  {
+    int v3[3];
+    index.values(v3);
+    CkPrintf("%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Simulation::set_msg_refine(%p)\n",
+	     CkMyPe(),v3[0],v3[1],v3[2],msg);
+  }
+#endif  
   if (msg_refine_map_[index] != NULL) {
    
+    int v3[3];
+    index.values(v3);
     ASSERT3 ("Simulation::p_set_msg_refine",
 	    "index %08x %08x %08x is already in the msg_refine mapping",
 	    v3[0],v3[1],v3[2],
@@ -293,12 +303,16 @@ void Simulation::set_msg_refine(Index index, MsgRefine * msg)
   msg_refine_map_[index] = msg;
 }
 
+//----------------------------------------------------------------------
+
 MsgRefine * Simulation::get_msg_refine(Index index)
 {
   int v3[3];
   index.values(v3);
-  CkPrintf("%d Simulation::get_msg_refine(%08x %08x %08x)\n",CkMyPe(),v3[0],v3[1],v3[2]);
-  
+#ifdef DEBUG_NEW_MSG_REFINE  
+  CkPrintf("%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Simulation::get_msg_refine()\n",
+	   CkMyPe(),v3[0],v3[1],v3[2]);
+#endif  
   MsgRefine * msg = msg_refine_map_[index];
   if (msg == NULL) {
     int v3[3];
@@ -672,7 +686,7 @@ void Simulation::initialize_balance_() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_forest_() throw()
+void Simulation::initialize_block_array_() throw()
 {
   bool allocate_blocks = (CkMyPe() == 0);
 
@@ -685,11 +699,11 @@ void Simulation::initialize_forest_() throw()
   if (allocate_blocks) {
 
     // Create the root-level blocks for level = 0
-    hierarchy_->create_forest (field_descr_, allocate_data);
+    hierarchy_->create_block_array (field_descr_, allocate_data);
 
     // Create the "sub-root" blocks if mesh_min_level < 0
     if (config_->mesh_min_level < 0) {
-      hierarchy_->create_subforest
+      hierarchy_->create_subblock_array
 	(field_descr_,
 	 allocate_data,
 	 config_->mesh_min_level);
@@ -700,6 +714,15 @@ void Simulation::initialize_forest_() throw()
 }
 
 //----------------------------------------------------------------------
+
+void Simulation::p_set_block_array(CProxy_Block block_array)
+{
+#ifdef NEW_MSG_REFINE  
+  if (CkMyPe() != 0) hierarchy_->set_block_array(block_array);
+#endif  
+}
+
+  //----------------------------------------------------------------------
 
 void Simulation::deallocate_() throw()
 {

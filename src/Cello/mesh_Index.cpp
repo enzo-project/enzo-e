@@ -3,7 +3,7 @@
 /// @file     mesh_Index.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-06
-/// @brief    Implementation of Index class for indexing nodes in a forest of octrees
+/// @brief    Implementation of Index class for indexing nodes in a array of octrees
 
 #include "mesh.hpp"
 

@@ -33,6 +33,10 @@ void Block::initial_exit_()
   performance_start_(perf_initial);
   TRACE_CONTROL("initial_exit");
 
+#ifdef TRACE_CONTRIBUTE  
+  CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_adapt_enter\n",
+	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
+#endif  
   control_sync_barrier (CkIndex_Block::r_adapt_enter(NULL));
   performance_stop_(perf_initial);
 }
@@ -93,6 +97,10 @@ void Block::output_exit_()
 
   performance_stop_(perf_output);
 
+#ifdef TRACE_CONTRIBUTE  
+  CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_stopping_enter()\n",
+	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
+#endif  
   control_sync_barrier (CkIndex_Block::r_stopping_enter(NULL));
 
 }
@@ -126,6 +134,10 @@ void Block::stopping_exit_()
 
   if (stop_) {
 
+#ifdef TRACE_CONTRIBUTE  
+  CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE calling r_exit()\n",
+	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
+#endif  
     control_sync_barrier (CkIndex_Block::r_exit(NULL));
 
   } else {
@@ -242,10 +254,6 @@ void Block::control_sync_quiescence (int entry_point)
 
 void Block::control_sync_barrier (int entry_point)
 {
-#ifdef TRACE_CONTRIBUTE  
-  CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
-	    name().c_str(),__FILE__,__LINE__); fflush(stdout);
-#endif  
   contribute(CkCallback (entry_point,thisProxy));
 }
 

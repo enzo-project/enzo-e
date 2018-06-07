@@ -10,6 +10,8 @@
 // #define TRACE_PARAMETERS
 // #define DEBUG_ENZO_SIMULATION
 
+// #define DEBUG_NEW_MSG_REFINE
+
 #include "cello.hpp"
 
 #include "enzo.hpp"
@@ -84,14 +86,14 @@ void EnzoSimulation::pup (PUP::er &p)
 
 void EnzoSimulation::p_get_msg_refine(Index index)
 {
-  MsgRefine * msg = get_msg_refine(index);
-
 #ifdef DEBUG_NEW_MSG_REFINE
   int v3[3];
   index.values(v3);
-  CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoSimulation::p_get_msg_refine(%p)\n",
-	    __FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
+  CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoSimulation::p_get_msg_refine()\n",
+	    __FILE__,__LINE__,v3[0],v3[1],v3[2]);
 #endif
+
+  MsgRefine * msg = get_msg_refine(index);
 
   CProxy_EnzoBlock enzo_block_array = (CProxy_EnzoBlock)hierarchy_->block_array();
   enzo_block_array[index].p_set_msg_refine(msg);

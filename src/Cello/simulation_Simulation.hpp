@@ -216,7 +216,7 @@ public: // virtual functions
   }
 
   /// Wait for all Hierarchy to be initialized before creating any Blocks
-  void r_initialize_forest(CkReductionMsg * msg);
+  void r_initialize_block_array(CkReductionMsg * msg);
 
   /// Wait for all local patches to be created before calling run
   void r_initialize_hierarchy(CkReductionMsg * msg);
@@ -285,6 +285,9 @@ public: // virtual functions
   // Data
   //--------------------------------------------------
 
+  /// Set block_array proxy on all processes
+  void p_set_block_array(CProxy_Block block_array);
+  
   /// Add a new Block to this local branch
   void data_insert_block(Block *) ;
 
@@ -325,8 +328,8 @@ protected: // functions
   /// Initialize the hierarchy object
   void initialize_hierarchy_ () throw();
 
-  /// Initialize the forest of octrees
-  void initialize_forest_ () throw();
+  /// Initialize the array of octrees
+  void initialize_block_array_ () throw();
 
   /// Initialize the data object
   void initialize_data_descr_ () throw();

@@ -21,7 +21,7 @@ new_output = 0
 # constructor with packed message argument bug)
 #----------------------------------------------------------------------
 
-new_msg_refine = 0
+new_msg_refine = 1
 
 #----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev

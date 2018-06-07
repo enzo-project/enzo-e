@@ -145,7 +145,7 @@ public: // interface
   { return child_data_; };
 
   /// Return the index of the root block containing this block 
-  inline void index_forest (int * ix, int * iy, int * iz) const throw ()
+  inline void index_array (int * ix, int * iy, int * iz) const throw ()
   { index_.array(ix,iy,iz); }
 
   /// Return the current cycle number
@@ -176,7 +176,7 @@ public: // interface
   bool stop() const throw() 
   { return stop_; };
 
-  /// Return whether this Block is a leaf in the octree forest
+  /// Return whether this Block is a leaf in the octree array
   bool is_leaf() const 
   { return is_leaf_ && ! (index_.level() < 0); }
 
@@ -218,7 +218,7 @@ public: // interface
   std::string name () const throw();
 
   /// Return the size the Block array
-  void size_forest (int * nx, int * ny = 0, int * nz = 0) const throw();
+  void size_array (int * nx, int * ny = 0, int * nz = 0) const throw();
 
   /// Compute the lower extent of the Block in the domain
   void lower(double * xm, double * ym = 0, double * zm = 0) const throw ();
@@ -281,7 +281,7 @@ public: // interface
   //--------------------------------------------------
 
   void r_end_initialize(CkReductionMsg * msg)
-  {      initial_exit_();  delete msg;  }
+  {  initial_exit_();  delete msg;  }
   void initial_exit_();
   void p_initial_exit()
   {      initial_exit_();  }
@@ -897,7 +897,7 @@ protected: // attributes
 
   //--------------------------------------------------
 
-  /// Index of this Block in the octree forest
+  /// Index of this Block in the octree array
   Index index_;
 
   /// Desired level for the next cycle

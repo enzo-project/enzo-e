@@ -7,7 +7,7 @@
 /// @ingroup  Control
 ///
 /// This file controls adaptive mesh refinement on a distributed
-/// forest of octrees.
+/// array of octrees.
 
 //--------------------------------------------------
 // #define DEBUG_FACE
@@ -49,8 +49,10 @@
 #ifdef DEBUG_ADAPT
 
 #   ifdef CELLO_TRACE
-#      define trace(A) CkPrintf ("%s:%d %s TRACE %s\n",			\
-				 __FILE__,__LINE__,name_.c_str(),A); fflush(stdout)
+#      define trace(A) \
+  CkPrintf ("%s:%d %s DEBUG_ADAPT %s\n",				\
+	    __FILE__,__LINE__,name_.c_str(),A);				\
+  fflush(stdout)
 #   else
 #      define trace(A) /*  NULL */
 #   endif

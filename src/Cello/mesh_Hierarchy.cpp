@@ -191,7 +191,25 @@ void Hierarchy::deallocate_blocks() throw()
 
 //----------------------------------------------------------------------
 
-void Hierarchy::create_forest
+#ifdef NEW_MSG_REFINE
+CProxy_Block Hierarchy::new_block_proxy
+(
+ FieldDescr   * field_descr,
+ bool allocate_data) throw()
+{
+  TRACE("Creating block_array_");
+
+  DataMsg * data_msg = NULL;
+
+  block_array_ = factory_->new_block_proxy
+    ( data_msg,  blocking_[0],blocking_[1],blocking_[2]);
+  return block_array_;
+}
+#endif
+
+//----------------------------------------------------------------------
+
+void Hierarchy::create_block_array
 (
  FieldDescr   * field_descr,
  bool allocate_data) throw()
@@ -201,21 +219,20 @@ void Hierarchy::create_forest
   const int mby = root_size_[1] / blocking_[1];
   const int mbz = root_size_[2] / blocking_[2];
 
-  // Check that blocks evenly subdivide forest
+  // Check that blocks evenly subdivide array
   if (! ((blocking_[0]*mbx == root_size_[0]) &&
 	 (blocking_[1]*mby == root_size_[1]) &&
 	 (blocking_[2]*mbz == root_size_[2]))) {
 
-    ERROR6("Hierarchy::create_forest()",  
-	   "Blocks must evenly subdivide forest: "
-	   "forest size = (%d %d %d)  block count = (%d %d %d)",
+    ERROR6("Hierarchy::create_block_array()",  
+	   "Blocks must evenly subdivide array: "
+	   "array size = (%d %d %d)  block count = (%d %d %d)",
 	   root_size_[0],
 	   root_size_[1],
 	   root_size_[2],
 	   blocking_[0],
 	   blocking_[1],
 	   blocking_[2]);
-      
   }
 
   // CREATE AND INITIALIZE NEW DATA BLOCKS
@@ -225,20 +242,28 @@ void Hierarchy::create_forest
   TRACE("Allocating block_array_");
 
   DataMsg * data_msg = NULL;
-  
+
+#ifdef NEW_MSG_REFINE  
+  factory_->create_block_array
+    ( data_msg,
+      block_array_,
+      blocking_[0],blocking_[1],blocking_[2],
+      mbx,mby,mbz,
+      num_field_blocks);
+#else
   block_array_ = factory_->create_block_array
-    (
-     data_msg,
-     blocking_[0],blocking_[1],blocking_[2],
-     mbx,mby,mbz,
-     num_field_blocks);
+    ( data_msg,
+      blocking_[0],blocking_[1],blocking_[2],
+      mbx,mby,mbz,
+      num_field_blocks);
+#endif
 
   block_exists_ = allocate_data;
 }
 
 //----------------------------------------------------------------------
 
-void Hierarchy::create_subforest
+void Hierarchy::create_subblock_array
 (
  FieldDescr   * field_descr,
  bool allocate_data,

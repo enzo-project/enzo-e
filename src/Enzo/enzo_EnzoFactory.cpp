@@ -32,6 +32,92 @@ IoBlock * EnzoFactory::create_io_block () const throw()
   return new IoEnzoBlock;
 }
 
+#ifdef NEW_MSG_REFINE
+//----------------------------------------------------------------------
+
+CProxy_Block EnzoFactory::new_block_proxy
+(
+ DataMsg * data_msg,
+ int nbx, int nby, int nbz) const throw()
+{
+  CProxy_EnzoBlock enzo_block_array;
+
+  //  CProxy_MappingTree array_map  = CProxy_MappingTree::ckNew(nbx,nby,nbz);
+  CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
+
+
+  CkArrayOptions opts;
+  opts.setMap(array_map);
+  TRACE_CHARM("ckNew(nbx,nby,nbz)");
+  enzo_block_array = CProxy_EnzoBlock::ckNew(opts);
+
+  return enzo_block_array;
+  
+}
+
+//----------------------------------------------------------------------
+void EnzoFactory::create_block_array
+(
+ DataMsg * data_msg,
+ CProxy_Block block_array,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ int num_field_blocks
+ ) const throw()
+{
+
+  CProxy_EnzoBlock enzo_block_array = 
+    static_cast<CProxy_EnzoBlock> (block_array);
+
+  int count_adapt;
+
+  int    cycle = 0;
+  double time  = 0.0;
+  double dt    = 0.0;
+  int num_face_level = 0;
+  int * face_level = 0;
+
+  for (int ix=0; ix<nbx; ix++) {
+    for (int iy=0; iy<nby; iy++) {
+      for (int iz=0; iz<nbz; iz++) {
+
+	Index index(ix,iy,iz);
+
+	MsgRefine * msg = new MsgRefine 
+	  (index,
+	   nx,ny,nz,
+	   num_field_blocks,
+	   count_adapt = 0,
+	   cycle,time,dt,
+	   refresh_same,
+	   num_face_level, face_level);
+
+	msg->set_data_msg(data_msg);
+
+#ifdef NEW_MSG_REFINE
+#ifdef DEBUG_NEW_MSG_REFINE  
+	int v3[3];
+	index.values(v3);
+	CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoFactory::create_block_array(%p)\n",
+		  __FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
+#endif	
+	proxy_enzo_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	enzo_block_array[index].insert (process_type(CkMyPe()));
+#else	
+	enzo_block_array[index].insert (msg);
+#endif	
+
+	// --------------------------------------------------
+
+      }
+    }
+  }
+
+  TRACE1("EnzoFactory::create_block_array = %p",&enzo_block_array);
+}
+
+#else
+
 //----------------------------------------------------------------------
 
 CProxy_Block EnzoFactory::create_block_array
@@ -108,6 +194,7 @@ CProxy_Block EnzoFactory::create_block_array
   return enzo_block_array;
 }
 
+#endif
 //----------------------------------------------------------------------
 
 void EnzoFactory::create_subblock_array

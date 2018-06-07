@@ -92,7 +92,7 @@ private: // attributes
   /// Periodicity
   int periodicity_[3][2];
 
-  /// Size of the hierarchy forest
+  /// Size of the octree array
   int n3_[3];
 
   /// Index

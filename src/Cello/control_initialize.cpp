@@ -55,18 +55,26 @@ void Simulation::initialize() throw()
 
   initialize_hierarchy_();
 
-  // initialize_forest_() is called in charm_initialize
+  // initialize_block_array() is called in charm_initialize
   // using QD to ensure that initialize_hierarchy() is called
   // on all processors before Blocks are created
 
-  // Barrier (why?)
+#ifdef NEW_MSG_REFINE
+  // Create the Block chare array
+  CProxy_Block block_array;
+  if (CkMyPe() == 0) {
+    bool allocate_data = true;
+    block_array = hierarchy_->new_block_proxy (field_descr_, allocate_data);
+    thisProxy.p_set_block_array(block_array);
+  }
+#endif    
 
   CkCallback callback 
-    (CkIndex_Simulation::r_initialize_forest(NULL), thisProxy);
+    (CkIndex_Simulation::r_initialize_block_array(NULL), thisProxy);
 
   // --------------------------------------------------
 #ifdef TRACE_CONTRIBUTE  
-  CkPrintf ("%s:%d DEBUG_CONTRIBUTE r_initialize_forest()\n",__FILE__,__LINE__); fflush(stdout);
+  CkPrintf ("%s:%d DEBUG_CONTRIBUTE r_initialize_block_array()\n",__FILE__,__LINE__); fflush(stdout);
 #endif  
   contribute(0,0,CkReduction::concat,callback);
   // --------------------------------------------------
@@ -74,13 +82,13 @@ void Simulation::initialize() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::r_initialize_forest(CkReductionMsg * msg) 
+void Simulation::r_initialize_block_array(CkReductionMsg * msg) 
 {
   TRACE_INITIALIZE;
   performance_->start_region(perf_initial);
   delete msg;
   
-  initialize_forest_();
+  initialize_block_array_();
 
 #ifdef NEW_MSG_REFINE
 #else  

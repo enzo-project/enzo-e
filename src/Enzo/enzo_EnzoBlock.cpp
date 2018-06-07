@@ -215,16 +215,16 @@ EnzoBlock::EnzoBlock
 
 void EnzoBlock::p_set_msg_refine(MsgRefine * msg)
 {
+#ifdef DEBUG_NEW_MSG_REFINE  
   int v3[3];
   thisIndex.values(v3);
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08xEnzoBlock::p_set_msg_refine()\n",
+    CkMyPe(),__FILE__,__LINE__, v3[0],v3[1],v3[2]);
+#endif  
 
   Block::p_set_msg_refine(msg);
   initialize_enzo_();
   initialize();
-#ifdef DEBUG_NEW_MSG_REFINE  
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE EnzoBlock::init() calling Block::initialize()\n",
-    CkMyPe(),__FILE__,__LINE__);
-#endif  
   Block::initialize();
 }
 
@@ -438,6 +438,12 @@ void EnzoBlock::set_time (double time) throw ()
 
 void EnzoBlock::initialize () throw()
 {
+#ifdef DEBUG_NEW_MSG_REFINE  
+  int v3[3];
+  thisIndex.values(v3);
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoBlock::initialize()\n",
+    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2]);
+#endif  
   double xm,ym,zm;
 
   data()->lower(&xm,&ym,&zm);
