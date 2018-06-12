@@ -807,7 +807,8 @@ void Simulation::p_monitor()
   monitor()-> print("Simulation", "cycle %04d", cycle_);
   monitor()-> print("Simulation", "time-sim %15.12e",time_);
   monitor()-> print("Simulation", "dt %15.12e", dt_);
-  monitor_performance();
+
+  proxy_simulation.p_monitor_performance();
 }
 
 //----------------------------------------------------------------------

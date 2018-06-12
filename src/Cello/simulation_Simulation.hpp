@@ -275,6 +275,9 @@ public: // virtual functions
 
   void p_monitor();
 
+  void p_monitor_performance()
+  { monitor_performance(); };
+
   /// Reduction for performance data
   void r_monitor_performance (CkReductionMsg * msg);
 
