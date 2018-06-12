@@ -807,7 +807,7 @@ void Simulation::p_monitor()
   monitor()-> print("Simulation", "cycle %04d", cycle_);
   monitor()-> print("Simulation", "time-sim %15.12e",time_);
   monitor()-> print("Simulation", "dt %15.12e", dt_);
-  proxy_simulation.p_monitor_performance();
+  monitor_performance();
 }
 
 //----------------------------------------------------------------------
@@ -817,18 +817,35 @@ void Simulation::monitor_performance()
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = 3+hierarchy_->max_level()+ nr*nc;
+  // 0 n
+  // 1 msg_coarsen
+  // 2 msg_refine
+  // 3 msg_refresh
+  // 4 msg_face_field
+  // 5 msg_face_particle
+  // 6 num-particles
+  // NL num-blocks-<L>
+  // 
+  
+  int n = 8 + hierarchy_->max_level() + nr*nc;
 
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
 
-  // save space for count
+  const int in = cello::index_static();
 
   int m=0;
-  counters_reduce[m++] = n;
-  counters_reduce[m++] = hierarchy_->num_particles(); 
+  counters_reduce[m++] = n; // 0
+  counters_reduce[m++] = MsgCoarsen::counter[in];     // 1
+  counters_reduce[m++] = MsgRefine::counter[in];      // 2
+  counters_reduce[m++] = MsgRefresh::counter[in];     // 3
+  counters_reduce[m++] = FieldFace::counter[in];      // 4
+  counters_reduce[m++] = ParticleData::counter[in];   // 5
+  counters_reduce[m++] = hierarchy_->num_particles(); // 6
+
   for (int i=0; i<=hierarchy_->max_level(); i++) 
     counters_reduce[m++] = hierarchy_->num_blocks(i);
+  
   for (int ir = 0; ir < nr; ir++) {
     performance_->region_counters(ir,counters_region);
     for (int ic = 0; ic < nc; ic++) {
@@ -865,17 +882,31 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   int index_region_cycle = performance_->region_index("cycle");
 
-  int index_counter = 1; // skip array length
-  
-  monitor()->print("Performance","simulation num-particles total %ld",
-		   counters_reduce[index_counter++]);
+  int m = 0;
+  int n = counters_reduce[m++];
+  int msg_coarsen = counters_reduce[m++];   // 1
+  int msg_refine  = counters_reduce[m++];   // 2
+  int msg_refresh = counters_reduce[m++];   // 3
+  int field_face  = counters_reduce[m++];   // 4
+  int particle_data = counters_reduce[m++]; // 5
+  int num_particles = counters_reduce[m++]; // 6
 
+  monitor()->print("Performance","simulation num-msg-coarsen %ld", msg_coarsen);
+  monitor()->print("Performance","simulation num-msg-refine %ld", msg_refine);
+  monitor()->print("Performance","simulation num-msg-refresh %ld", msg_refresh);
+  monitor()->print("Performance","simulation num-field-face %ld", field_face);
+  monitor()->print("Performance","simulation num-particle-data %ld", particle_data);
+
+  monitor()->print("Performance","simulation num-particles total %ld",
+		   num_particles);
+
+  // compute total blocks and leaf blocks
   int num_total_blocks = 0;
-  int num_leaf_blocks = counters_reduce[index_counter];;
+  int num_leaf_blocks = counters_reduce[m];;
   int rank = hierarchy_->rank();
   int num_child_blocks = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
   for (int i=0; i<=hierarchy_->max_level(); i++) {
-    long int num_blocks_level = counters_reduce[index_counter++];
+    long int num_blocks_level = counters_reduce[m++];
     monitor()->print("performance","simulation num-blocks-%d %d",
 		     i,num_blocks_level);
     num_total_blocks += num_blocks_level;
@@ -892,7 +923,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   const int num_counters =  performance_->num_counters();
 
   for (int ir = 0; ir < num_regions; ir++) {
-    for (int ic = 0; ic < num_counters; ic++, index_counter++) {
+    for (int ic = 0; ic < num_counters; ic++, m++) {
       bool do_print =
 	(ir != perf_unknown) && (
 	(performance_->counter_type(ic) != counter_type_abs) ||
@@ -901,7 +932,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			 counters_reduce[index_counter]);
+			 counters_reduce[m]);
       }
       
     }

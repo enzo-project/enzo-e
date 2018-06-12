@@ -42,6 +42,7 @@ Performance::Performance (Config * config)
 
   // ORDER MUST MATCH index_enum
   new_counter(counter_type_rel,"time-usec");
+  // MEMORY
   new_counter(counter_type_abs,"bytes-curr");
   new_counter(counter_type_abs,"bytes-high");
   new_counter(counter_type_abs,"bytes-highest");
@@ -133,11 +134,12 @@ Performance::refresh_counters_() throw()
 
   const int in = cello::index_static();
 
-  counter_values_[index_time]          = time_real_()-time_start[in];
-  counter_values_[index_bytes]         = memory->bytes();
-  counter_values_[index_bytes_high]    = memory->bytes_high();
-  counter_values_[index_bytes_highest] = memory->bytes_highest();
-  counter_values_[index_bytes_available] = memory->bytes_available();
+  counter_values_[perf_index_time]          = time_real_()-time_start[in];
+  // MEMORY
+  counter_values_[perf_index_bytes]         = memory->bytes();
+  counter_values_[perf_index_bytes_high]    = memory->bytes_high();
+  counter_values_[perf_index_bytes_highest] = memory->bytes_highest();
+  counter_values_[perf_index_bytes_available] = memory->bytes_available();
 
 }
 
