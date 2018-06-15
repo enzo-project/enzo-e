@@ -33,9 +33,7 @@ MsgRefine::MsgRefine()
 {
   ++counter[cello::index_static()]; 
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %p %s:%d DEBUG_MSG_REFINE MsgRefine()\n",
-	    CkMyPe(),this, __FILE__,__LINE__);
-  fflush(stdout);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p\n",CkMyPe(),__FILE__,__LINE__,this);
 #endif  
 }
 
@@ -63,9 +61,7 @@ MsgRefine::MsgRefine
 {  
   ++counter[cello::index_static()]; 
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %p %s:%d DEBUG_MSG_REFINE MsgRefine(index,...)\n",
-	    CkMyPe(),this,__FILE__,__LINE__);
-  fflush(stdout);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p\n",CkMyPe(),__FILE__,__LINE__,this);
 #endif  
 
   for (int i=0; i<num_face_level_; i++) {
@@ -79,9 +75,7 @@ MsgRefine::~MsgRefine()
 {
   --counter[cello::index_static()];
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %p %s:%d DEBUG_MSG_REFINE ~MsgRefine()\n",
-	    CkMyPe(),this,__FILE__,__LINE__);
-  fflush(stdout);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE destroying %p\n",CkMyPe(),__FILE__,__LINE__,this);
 #endif  
 
   delete data_msg_;
@@ -113,10 +107,7 @@ void * MsgRefine::pack (MsgRefine * msg)
 {
 
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE MsgRefine::pack(%p)\n",
-	    CkMyPe(),__FILE__,__LINE__,msg);
-  fflush(stdout);
-  msg->print();
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE packing %p\n",CkMyPe(),__FILE__,__LINE__,msg);
 #endif  
 
   // WARNING("MsgRefine::pack()",
@@ -233,17 +224,13 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   MsgRefine * msg =
     (MsgRefine *) CkAllocBuffer (buffer,sizeof(MsgRefine));
 
-#ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE ENTER MsgRefine::unpack() msg %p <-- buffer %p\n",
-	    CkMyPe(),__FILE__,__LINE__,msg,buffer);
-  fflush(stdout);
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE allocate message %p in buffer %p\n",
-	    CkMyPe(),__FILE__,__LINE__,msg,buffer);
-#endif  
-
   msg = new ((void*)msg) MsgRefine;
   
   msg->is_local_ = false;
+
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE unpacking %p\n",CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
 
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
@@ -309,10 +296,9 @@ MsgRefine * MsgRefine::unpack(void * buffer)
 
 void MsgRefine::update (Data * data)
 {
+  
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE ENTER MsgRefine:update() msg %p\n",
-	    CkMyPe(),__FILE__,__LINE__,this);
-  fflush(stdout);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE updating %p\n",CkMyPe(),__FILE__,__LINE__,this);
 #endif  
 
   if (data_msg_ == NULL) return;

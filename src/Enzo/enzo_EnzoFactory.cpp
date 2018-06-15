@@ -319,6 +319,12 @@ Block * EnzoFactory::create_block
   fflush(stdout);
 #endif
 
+
+#ifdef CELLO_TRACE
+  index.print("ADAPT REFINE insert()",-1,2,false,simulation);
+  fflush(stdout);
+#endif
+
   MsgRefine * msg = new MsgRefine 
     (index,
      nx,ny,nz,
@@ -329,11 +335,6 @@ Block * EnzoFactory::create_block
      num_face_level, face_level);
 
   msg->set_data_msg(data_msg);
-
-#ifdef CELLO_TRACE
-  index.print("ADAPT REFINE insert()",-1,2,false,simulation);
-  fflush(stdout);
-#endif
 
 #ifdef NEW_MSG_REFINE
 #ifdef DEBUG_NEW_MSG_REFINE

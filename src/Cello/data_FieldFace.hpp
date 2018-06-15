@@ -32,6 +32,10 @@ public: // interface
     refresh_(NULL),
     new_refresh_(false)
   {
+#ifdef DEBUG_FIELD_FACE    
+    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+#endif    
     ++counter[cello::index_static()]; 
 
     for (int i=0; i<3; i++) {

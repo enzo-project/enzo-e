@@ -13,7 +13,7 @@
 #include "charm_simulation.hpp"
 
 // #define DEBUG_SIMULATION
-// #define DEBUG_NEW_MSG_REFINE
+// #define DEBUG_MSG_REFINE
 
 Simulation::Simulation
 (
@@ -155,12 +155,6 @@ void Simulation::pup (PUP::er &p)
   if (up) performance_ = new Performance;
   p | *performance_;
 
-  // p | projections_tracing_;
-  // if (up) projections_schedule_on_ = new Schedule;
-  // p | *projections_schedule_on_;
-  // if (up) projections_schedule_off_ = new Schedule;
-  // p | *projections_schedule_off_;
-
   if (up) monitor_ = Monitor::instance();
   p | *monitor_;
 
@@ -188,6 +182,14 @@ void Simulation::pup (PUP::er &p)
 
   if (up) sync_new_output_start_.set_stop(0);
   if (up) sync_new_output_next_.set_stop(0);
+
+#ifdef CONFIG_USE_PROJECTIONS
+  p | projections_tracing_;
+  if (projections_tracing_) {
+    p | projections_schedule_on_;
+    p | projections_schedule_off_;
+  }
+#endif
 
   p | schedule_balance_;
 
@@ -270,11 +272,8 @@ void Simulation::finalize() throw()
 void Simulation::p_get_msg_refine(Index index)
 {
   MsgRefine * msg = get_msg_refine(index);
-#ifdef DEBUG_NEW_MSG_REFINE  
-  int v3[3];
-  index.values(v3);
-  CkPrintf("%d DEBUG_NEW_MSG_REFINE %08x %08x $08x Simulation::p_get_msg_refine(%p)\n",
-	   CkMyPe(),v3[0],v3[1],v3[2],msg);
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%d DEBUG_MSG_REFINE sending %p\n",msg);
 #endif
   hierarchy_->block_array()[index].p_set_msg_refine(msg);
 }
@@ -283,14 +282,6 @@ void Simulation::p_get_msg_refine(Index index)
 
 void Simulation::set_msg_refine(Index index, MsgRefine * msg)
 {
-#ifdef DEBUG_NEW_MSG_REFINE
-  {
-    int v3[3];
-    index.values(v3);
-    CkPrintf("%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Simulation::set_msg_refine(%p)\n",
-	     CkMyPe(),v3[0],v3[1],v3[2],msg);
-  }
-#endif  
   if (msg_refine_map_[index] != NULL) {
    
     int v3[3];
@@ -309,10 +300,6 @@ MsgRefine * Simulation::get_msg_refine(Index index)
 {
   int v3[3];
   index.values(v3);
-#ifdef DEBUG_NEW_MSG_REFINE  
-  CkPrintf("%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Simulation::get_msg_refine()\n",
-	   CkMyPe(),v3[0],v3[1],v3[2]);
-#endif  
   MsgRefine * msg = msg_refine_map_[index];
   if (msg == NULL) {
     int v3[3];
@@ -407,6 +394,30 @@ void Simulation::initialize_performance_() throw()
 		   config_->performance_papi_counters[i]);
   }
 #endif  
+
+#ifdef CONFIG_USE_PROJECTIONS
+  int index_on = config_->performance_on_schedule_index;
+  if (index_on >= 0) {
+    projections_schedule_on_ = Schedule::create
+      ( config_->schedule_var[index_on],
+	config_->schedule_type[index_on],
+	config_->schedule_start[index_on],
+	config_->schedule_stop[index_on],
+	config_->schedule_step[index_on],
+	config_->schedule_list[index_on]);
+  }
+  int index_off = config_->performance_off_schedule_index;
+  if (index_off >= 0) {
+    projections_schedule_off_ = Schedule::create
+      ( config_->schedule_var[index_off],
+	config_->schedule_type[index_off],
+	config_->schedule_start[index_off],
+	config_->schedule_stop[index_off],
+	config_->schedule_step[index_off],
+	config_->schedule_list[index_off]);
+    
+  }
+#endif
 
   p->begin();
 
@@ -822,13 +833,14 @@ void Simulation::monitor_performance()
   // 1 msg_coarsen
   // 2 msg_refine
   // 3 msg_refresh
-  // 4 msg_face_field
-  // 5 msg_face_particle
-  // 6 num-particles
+  // 4 data_msg
+  // 5 field_face
+  // 6 particle_data
+  // 7 num-particles
   // NL num-blocks-<L>
   // 
   
-  int n = 8 + hierarchy_->max_level() + nr*nc;
+  int n = 1 + 7 + ( 1 + hierarchy_->max_level()) + nr*nc;
 
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
@@ -840,9 +852,10 @@ void Simulation::monitor_performance()
   counters_reduce[m++] = MsgCoarsen::counter[in];     // 1
   counters_reduce[m++] = MsgRefine::counter[in];      // 2
   counters_reduce[m++] = MsgRefresh::counter[in];     // 3
-  counters_reduce[m++] = FieldFace::counter[in];      // 4
-  counters_reduce[m++] = ParticleData::counter[in];   // 5
-  counters_reduce[m++] = hierarchy_->num_particles(); // 6
+  counters_reduce[m++] = DataMsg::counter[in];        // 4
+  counters_reduce[m++] = FieldFace::counter[in];      // 5
+  counters_reduce[m++] = ParticleData::counter[in];   // 6
+  counters_reduce[m++] = hierarchy_->num_particles(); // 7
 
   for (int i=0; i<=hierarchy_->max_level(); i++) 
     counters_reduce[m++] = hierarchy_->num_blocks(i);
@@ -888,15 +901,17 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   int msg_coarsen = counters_reduce[m++];   // 1
   int msg_refine  = counters_reduce[m++];   // 2
   int msg_refresh = counters_reduce[m++];   // 3
-  int field_face  = counters_reduce[m++];   // 4
-  int particle_data = counters_reduce[m++]; // 5
-  int num_particles = counters_reduce[m++]; // 6
+  int data_msg    = counters_reduce[m++];   // 4
+  int field_face  = counters_reduce[m++];   // 5
+  int particle_data = counters_reduce[m++]; // 6
+  int num_particles = counters_reduce[m++]; // 7
 
-  monitor()->print("Performance","simulation num-msg-coarsen %ld", msg_coarsen);
-  monitor()->print("Performance","simulation num-msg-refine %ld", msg_refine);
-  monitor()->print("Performance","simulation num-msg-refresh %ld", msg_refresh);
-  monitor()->print("Performance","simulation num-field-face %ld", field_face);
-  monitor()->print("Performance","simulation num-particle-data %ld", particle_data);
+  monitor()->print("Performance","counter num-msg-coarsen %ld", msg_coarsen);
+  monitor()->print("Performance","counter num-msg-refine %ld", msg_refine);
+  monitor()->print("Performance","counter num-msg-refresh %ld", msg_refresh);
+  monitor()->print("Performance","counter num-data-msg %ld", data_msg);
+  monitor()->print("Performance","counter num-field-face %ld", field_face);
+  monitor()->print("Performance","counter num-particle-data %ld", particle_data);
 
   monitor()->print("Performance","simulation num-particles total %ld",
 		   num_particles);
@@ -938,6 +953,10 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
       
     }
   }
+
+  ASSERT2("Simulation::monitor_performance()",
+	  "Actual array length %d != expected array length %d",
+	  m,n, (m == n) );
 
   delete msg;
 

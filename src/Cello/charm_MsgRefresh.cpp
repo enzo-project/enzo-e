@@ -39,10 +39,6 @@ MsgRefresh::~MsgRefresh()
 
 void MsgRefresh::set_data_msg  (DataMsg * data_msg) 
 {
-#ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("DEBUG_MSG_REFRESH set_data_msg\n");
-  fflush(stdout);
-#endif  
   if (data_msg_) {
     WARNING ("MsgRefresh::set_data_msg()",
 	     "overwriting existing data_msg_");
@@ -56,8 +52,8 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 void * MsgRefresh::pack (MsgRefresh * msg)
 {
 #ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("DEBUG_MSG_REFRESH pack\n");
-  fflush(stdout);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH packing %p\n",
+	    CkMyPe(),__FILE__,__LINE__,msg);
 #endif  
   if (msg->buffer_ != NULL) return msg->buffer_;
   int size = 0;
@@ -110,10 +106,6 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 MsgRefresh * MsgRefresh::unpack(void * buffer)
 {
 
-#ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("DEBUG_MSG_REFRESH unpack()\n");
-  fflush(stdout);
-#endif  
   // 1. Allocate message using CkAllocBuffer.  NOTE do not use new.
  
   MsgRefresh * msg = 
@@ -121,6 +113,11 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   msg = new ((void*)msg) MsgRefresh;
   
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH unpacking %p\n",
+	    CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
+
   msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
@@ -153,8 +150,8 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 void MsgRefresh::update (Data * data)
 {
 #ifdef DEBUG_MSG_REFRESH
-  CkPrintf ("DEBUG_MSG_REFRESH update(%p)\n",data);
-  fflush(stdout);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH updating %p\n",
+	    CkMyPe(),__FILE__,__LINE__,this);
 #endif  
   if (data_msg_ == NULL) return;
 

@@ -29,6 +29,10 @@ public: // interface
   /// Destructor
   ~ParticleData();
 
+  /// Constructor
+  ParticleData(const ParticleData & particle_data)
+  { ++counter[cello::index_static()]; }
+  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 

@@ -64,6 +64,7 @@ trace_charm = 0
 
 debug = 0
 debug_field = 0
+debug_field_face = 0
 
 #----------------------------------------------------------------------
 # Do extra run-time checking.  Useful for debugging, but can potentially
@@ -222,6 +223,7 @@ define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
 define_debug_field =  ['DEBUG_FIELD']
+define_debug_field_face =  ['DEBUG_FIELD_FACE']
 define_check =        ['CELLO_CHECK']
 
 define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
@@ -353,6 +355,7 @@ if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
 if (debug_field != 0):   defines = defines + define_debug_field
+if (debug_field_face != 0): defines = defines + define_debug_field_face
 if (check != 0):         defines = defines + define_check
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
@@ -596,7 +599,7 @@ Export('parallel_run')
 Export('serial_run')
 Export('use_papi')
 
-SConscript( 'src/SConscript',variant_dir='build-new_msg-'+str(new_msg_refine))
+SConscript( 'src/SConscript',variant_dir='build')
 SConscript('test/SConscript')
 
 #======================================================================

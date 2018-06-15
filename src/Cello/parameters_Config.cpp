@@ -178,6 +178,8 @@ void Config::pup (PUP::er &p)
 
   p | performance_papi_counters;
   p | performance_warnings;
+  p | performance_on_schedule_index;
+  p | performance_off_schedule_index;
 
   // Physics
   
@@ -1168,6 +1170,36 @@ void Config::read_performance_ (Parameters * p) throw()
 #endif  
 
   performance_warnings = p->value_logical("Performance:warnings",false);
+
+#ifdef CONFIG_USE_PROJECTIONS
+  
+  int i_on = -1;
+  int i_off = -1;
+  
+  if (p->type("Performance:projections_on:schedule:var") != parameter_unknown) {
+    p->group_set(0,"Performance");
+    p->group_push("projections_on");
+    p->group_push("schedule");
+    i_on = read_schedule_(p,"projections_on");
+  }
+  if (p->type("Performance:projections_off:schedule:var") != parameter_unknown) {
+    p->group_set(0,"Performance");
+    p->group_push("projections_off");
+    p->group_push("schedule");
+    i_off = read_schedule_(p,"projections_off");
+  }
+
+  // Check that both projections_on and off schedules are defined or undefined together
+  if ((i_on == -1 && i_off == -1) || (i_on != -1 && i_off != -1)) {
+    performance_on_schedule_index  = i_on;
+    performance_off_schedule_index = i_off;
+  } else {
+    ERROR2("Config::read_performance-()",
+	   "Performance:projections_on:schedule [%d] and Performance:projections_off:schedule [%d]\n"
+	   "must be both defined or both undefined",
+	   i_on,i_off);
+  }
+#endif    
 
 }
 

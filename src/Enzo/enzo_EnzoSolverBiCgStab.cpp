@@ -234,9 +234,10 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* block,
     bs = data[1];
     xs = data[2];
 
-    delete msg;
   }
 
+  delete msg;
+  
   /// access field container on this block
 
   Field field = block->data()->field();

@@ -41,9 +41,7 @@ public: // interface
   MsgRefine(const MsgRefine & data_msg) throw()
   {
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine(MsgRefine)\n",
-	    __FILE__,__LINE__);
-  fflush(stdout);
+    CkPrintf ("%d %s:%d DEBUG_MSG_REFINE creating %p(%p)\n",CkMyPe(),__FILE__,__LINE__,this,&data_msg);
 #endif  
     ++counter[cello::index_static()]; 
   };
@@ -52,9 +50,8 @@ public: // interface
   MsgRefine & operator= (const MsgRefine & data_msg) throw()
   {
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%s:%d DEBUG_MSG_REFINE MsgRefine operator =(MsgRefine)\n",
-	    __FILE__,__LINE__);
-  fflush(stdout);
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE assigning %p = %p\n",CkMyPe(),__FILE__,__LINE__,
+	    this,&data_msg);
 #endif  
     return *this;
   }

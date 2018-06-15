@@ -15,7 +15,6 @@
 // #define DEBUG_ADAPT
 // #define DEBUG_FACE
 
-
 // #define DEBUG_NEW_REFRESH
 // #define DEBUG_NEW_MSG_REFINE
 
@@ -110,8 +109,8 @@ Block::Block ( MsgRefine * msg )
     msg->update(data());
   }
 
-  CkFreeMsg(msg);
-  msg = NULL;
+  delete msg;
+
   performance_stop_(perf_block);
 
 }
@@ -179,8 +178,10 @@ Block::Block ( process_type ip_source )
 
 void Block::p_set_msg_refine(MsgRefine * msg)
 {
-
-
+#ifdef DEBUG_MSG_REFINE
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE setting %p\n",CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
+  
 #ifdef NEW_MSG_REFINE
   performance_start_(perf_block);
 
@@ -217,9 +218,11 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   } else {
     msg->update(data());
   }
-
-  CkFreeMsg(msg);
-  msg = NULL;
+#ifdef DEBUG_MSG_REFINE
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE freeing %p\n",CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
+  delete msg;
+  
   performance_stop_(perf_block);
 
 #endif
@@ -356,6 +359,9 @@ void Block::init
     
     FieldFace * field_face = create_face
       (if3, ic3, lg3, refresh_fine, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
     // Copy refined field data
     field_face -> array_to_face (array, data()->field());
@@ -628,6 +634,10 @@ Block::~Block()
     
     FieldFace * field_face = create_face
       ( if3,ic3,lg3,refresh_coarse,refresh,true);
+#ifdef DEBUG_FIELD_FACE  
+    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
+
     field_face->face_to_array(data()->field(),&n,&array);
     delete field_face;
 
@@ -670,6 +680,9 @@ void Block::p_refresh_child
   
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_coarse,refresh,true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
   
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;
@@ -880,6 +893,9 @@ FieldFace * Block::create_face
  int refresh_type, Refresh * refresh, bool new_refresh) const
 {
   FieldFace  * field_face = new FieldFace;
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   field_face -> set_refresh_type (refresh_type);
   field_face -> set_child (ic3[0],ic3[1],ic3[2]);

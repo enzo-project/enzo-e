@@ -318,6 +318,9 @@ void Block::adapt_refine_()
       
       FieldFace * field_face = create_face 
 	(if3,ic3,lg3, refresh_fine, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
       DataMsg * data_msg = NULL;
 
@@ -810,6 +813,9 @@ void Block::adapt_coarsen_()
 
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_coarse, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   const Index index_parent = index_.index_parent();
 

@@ -136,36 +136,35 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
 #ifdef CONFIG_USE_PROJECTIONS
   // COMMENTED OUT--BUGGY, projections_schedule_on() crashed with bad schedule_on object
-  // bool was_off = (simulation->projections_tracing() == false);
-  // bool was_on  = (simulation->projections_tracing() == true);
-  // Schedule * schedule_on = simulation->projections_schedule_on();
-  // Schedule * schedule_off = simulation->projections_schedule_off();
-  // bool turn_on  = schedule_on ? schedule_on->write_this_cycle(cycle_,time_) : false;
-  // bool turn_off = schedule_off ? schedule_off->write_this_cycle(cycle_,time_) : false;
 
-  // static bool active = false;
-  // bool turn_on  = (cycle_ == 10);
-  // bool turn_off = (cycle_ == 20);
-  // if (!active && turn_on) {
-  //   active = true;
-  //   simulation->monitor()->print
-  //     ("Performance","turning projections logging ON\n");
+  bool was_off = (simulation->projections_tracing() == false);
+  bool was_on  = (simulation->projections_tracing() == true);
+  Schedule * schedule_on = simulation->projections_schedule_on();
+  Schedule * schedule_off = simulation->projections_schedule_off();
+  bool turn_on  = schedule_on ? schedule_on->write_this_cycle(cycle_,time_) : false;
+  bool turn_off = schedule_off ? schedule_off->write_this_cycle(cycle_,time_) : false;
 
-  //   simulation->set_projections_tracing(true);
+  static bool active = false;
+  if (!active && turn_on) {
+    active = true;
+    simulation->monitor()->print
+      ("Performance","turning projections logging ON\n");
 
-  //   traceBegin();
+    simulation->set_projections_tracing(true);
 
-  // } else if (active && turn_off) {
-  //   active = false;
+    traceBegin();
 
-  //   simulation->monitor()->print
-  //     ("Performance","turning projections logging OFF\n");
+  } else if (active && turn_off) {
+    active = false;
 
-  //   simulation->set_projections_tracing(false);
+    simulation->monitor()->print
+      ("Performance","turning projections logging OFF\n");
 
-  //   traceEnd();
+    simulation->set_projections_tracing(false);
 
-  // }
+    traceEnd();
+
+  }
 #endif
 
   stopping_balance_();

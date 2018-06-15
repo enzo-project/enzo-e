@@ -411,8 +411,8 @@ public:
   void r_adapt_enter(CkReductionMsg * msg) 
   {
     performance_start_(perf_adapt_apply);
-    adapt_enter_();
     delete msg;
+    adapt_enter_();
     performance_stop_(perf_adapt_apply);
     performance_start_(perf_adapt_apply_sync);
   }
