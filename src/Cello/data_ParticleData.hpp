@@ -31,7 +31,13 @@ public: // interface
 
   /// Constructor
   ParticleData(const ParticleData & particle_data)
-  { ++counter[cello::index_static()]; }
+  {
+    ++counter[cello::index_static()];
+
+    attribute_array_ = particle_data.attribute_array_;
+    attribute_align_ = particle_data.attribute_align_;
+    particle_count_  = particle_data.particle_count_;
+  }
   
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
