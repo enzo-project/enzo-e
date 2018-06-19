@@ -42,6 +42,12 @@ node_size = 64
 trace = 0
 
 #----------------------------------------------------------------------
+# Whether Charm++ is compiled using SMP mode
+#----------------------------------------------------------------------
+
+smp = 0
+
+#----------------------------------------------------------------------
 # Whether to trace main phases
 #----------------------------------------------------------------------
 
@@ -383,7 +389,10 @@ if (balance == 1):
 #======================================================================
 
 serial_run   = ""
-parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
+if (smp == 1):
+   parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
+else:
+   parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
