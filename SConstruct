@@ -156,6 +156,12 @@ ip_charm = '4'
 have_mercurial = 1
 
 #----------------------------------------------------------------------
+# Whether to use the jemalloc library for memory allocation
+#----------------------------------------------------------------------
+
+use_jemalloc = 0
+
+#----------------------------------------------------------------------
 # AUTO CONFIGURATION
 #----------------------------------------------------------------------
 
@@ -207,6 +213,9 @@ define_int_size  =    ['SMALL_INTS']
 
 define_grackle   = ['CONFIG_USE_GRACKLE']
 grackle_path     = 'grackle_path_not_set'
+
+# Jemalloc defines
+define_jemalloc  = ['CONFIG_USE_JEMALLOC']
 
 # Performance defines
 
@@ -349,6 +358,9 @@ if (use_performance == 1):
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
 
+if (use_jemalloc == 1):
+   defines = defines + define_jemalloc
+
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
@@ -411,6 +423,7 @@ test_path= 'test'
 Export('bin_path')
 Export('grackle_path')
 Export('use_grackle')
+Export('use_jemalloc')
 Export('lib_path')
 Export('inc_path')
 Export('test_path')
