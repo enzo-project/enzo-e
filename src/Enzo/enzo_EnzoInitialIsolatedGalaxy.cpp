@@ -33,7 +33,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
     bfield_[i] = config->initial_IG_bfield[i];
   }
   this->scale_height_         = config->initial_IG_scale_height;
-  this->scale_length_	      = config->initial_IG_scale_length;
+  this->scale_length_	        = config->initial_IG_scale_length;
   this->disk_mass_            = config->initial_IG_disk_mass;
   this->gas_fraction_         = config->initial_IG_gas_fraction;
   this->disk_temperature_     = config->initial_IG_disk_temperature;
@@ -63,7 +63,6 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 
   // read in data for initialization
   this->ReadInVcircData();
-
   this->ReadInParticleData(); // AE: Does nothing at the moment
 }
 

@@ -3,7 +3,7 @@
 /// @file     enzo_EnzoConfig.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-10-03
-/// @brief    Implementation of the EnzoConfig class 
+/// @brief    Implementation of the EnzoConfig class
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -121,6 +121,14 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_riemann_solver(""),
   // EnzoMethodNull
   method_null_dt(0.0),
+  /*
+  // EnzoMethodStarMaker,
+  star_maker_use_density_threshold(1),           // check above density threshold before SF
+  star_maker_use_velocity_divergence(1),         // check for converging flow before SF
+  star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
+  star_maker_efficiency(0.01),            // star maker efficiency
+  star_maker_minimum_star_mass(1.0E4),    // star particle mass (if fixed) in solar masses
+  */
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -129,6 +137,18 @@ EnzoConfig::EnzoConfig() throw ()
   method_gravity_solver(""),
   method_gravity_order(4),
   method_gravity_accumulate(false),
+  /// EnzoMethodBackgroundAcceleration
+  method_background_acceleration_type(""),
+  method_background_acceleration_mass(0.0),
+  method_background_acceleration_DM_mass(0.0),
+  method_background_acceleration_DM_density(0.0),
+  method_background_acceleration_bulge_mass(0.0),
+  method_background_acceleration_core_radius(0.0),
+  method_background_acceleration_bulge_radius(0.0),
+  method_background_acceleration_stellar_mass(0.0),
+  method_background_acceleration_DM_mass_radius(0.0),
+  method_background_acceleration_stellar_scale_height_r(0.0),
+  method_background_acceleration_stellar_scale_height_z(0.0),
   /// EnzoMethodPmDeposit
   method_pm_deposit_type(""),
   /// EnzoMethodPmUpdate
@@ -144,7 +164,7 @@ EnzoConfig::EnzoConfig() throw ()
   solver_precondition(),
   solver_local(),
   stopping_redshift()
- 
+
 {
   for (int i=0; i<3; i++) {
     initial_sedov_array[i] = 0;
@@ -154,7 +174,10 @@ EnzoConfig::EnzoConfig() throw ()
     initial_collapse_array[i] = 0;
     initial_IG_center_position[i] = 0.5;
     initial_IG_bfield[i] = 0.0;
+    method_background_acceleration_center[i] = 0.5;
+    method_background_acceleration_angular_momentum[i] = 0;
   }
+  method_background_acceleration_angular_momentum[2] = 1;
 }
 
 //----------------------------------------------------------------------
@@ -175,7 +198,7 @@ void EnzoConfig::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
 
   p | adapt_mass_type;
-  
+
   p | ppm_diffusion;
   p | ppm_dual_energy;
   p | ppm_dual_energy_eta_1;
@@ -208,7 +231,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_gravity;
 
   p | initial_cosmology_temperature;
-  
+
   p | initial_collapse_rank;
   PUParray(p,initial_collapse_array,3);
   p | initial_collapse_radius_relative;
@@ -290,12 +313,34 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_riemann_solver;
 
   p | method_null_dt;
+  /*
+  p | star_maker_use_density_threshold;
+  p | star_maker_use_velocity_divergence;
+  p | star_maker_number_density_threshold;
+  p | star_maker_maximum_mass_fraction;
+  p | star_maker_efficiency;
+  p | star_maker_minimum_star_mass;
+ */
   p | method_turbulence_edot;
 
   p | method_gravity_grav_const;
   p | method_gravity_solver;
   p | method_gravity_order;
   p | method_gravity_accumulate;
+
+  p | method_background_acceleration_type;
+  p | method_background_acceleration_mass;
+  p | method_background_acceleration_DM_mass;
+  p | method_background_acceleration_DM_density;
+  p | method_background_acceleration_bulge_mass;
+  p | method_background_acceleration_core_radius;
+  p | method_background_acceleration_bulge_radius;
+  p | method_background_acceleration_stellar_mass;
+  p | method_background_acceleration_DM_mass_radius;
+  p | method_background_acceleration_stellar_scale_height_r;
+  p | method_background_acceleration_stellar_scale_height_z;
+  PUParray(p,method_background_acceleration_angular_momentum,3);
+  PUParray(p,method_background_acceleration_center,3);
 
   p | method_pm_deposit_type;
   p | method_pm_update_max_dt;
@@ -341,13 +386,13 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Read Cello parameters
 
-  
+
   TRACE("EnzoCharm::read calling Config::read()");
 
   ((Config*)this) -> read (p);
 
   adapt_mass_type.resize(num_adapt);
-  
+
   for (int ia=0; ia<num_adapt; ia++) {
 
     std::string prefix = "Adapt:" + adapt_list[ia] + ":";
@@ -366,7 +411,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   ppm_diffusion = p->value_logical
     ("Method:ppm:diffusion", false);
-  ppm_dual_energy = p->value_logical 
+  ppm_dual_energy = p->value_logical
     ("Method:ppm:dual_energy",false);
   ppm_dual_energy_eta_1 = p->value_float
     ("Method:ppm:dual_energy_eta_1", 0.001);
@@ -386,7 +431,7 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:pressure_free",false);
   ppm_temperature_floor = p->value_float
     ("Method:ppm:temperature_floor", floor_default);
-  ppm_steepening = p->value_logical 
+  ppm_steepening = p->value_logical
     ("Method:ppm:steepening", false);
   ppm_use_minimum_pressure_support = p->value_logical
     ("Method:ppm:use_minimum_pressure_support",false);
@@ -433,10 +478,10 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_pm_deposit_type = p->value_string ("Method:pm_deposit:type","cic");
 
-  method_pm_update_max_dt = p->value_float 
+  method_pm_update_max_dt = p->value_float
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 
-  
+
   initial_pm_field        = p->value_string  ("Initial:pm:field","density");
   initial_pm_mpp          = p->value_float   ("Initial:pm:mpp",-1.0);
   initial_pm_level        = p->value_integer ("Initial:pm:level",-1);
@@ -457,13 +502,13 @@ void EnzoConfig::read(Parameters * p) throw()
     initial_soup_d_size[axis] = p->list_value_float
       (axis,"Initial:soup:d_size",0.0);
   }
-  initial_soup_pressure_in = 
+  initial_soup_pressure_in =
     p->value_float("Initial:soup:pressure_in",1.0);
-  initial_soup_pressure_out = 
+  initial_soup_pressure_out =
     p->value_float("Initial:soup:pressure_out",1e-5);
-  initial_soup_density = 
+  initial_soup_density =
     p->value_float("Initial:soup:density",1.0);
-  
+
   // Sedov initialization
 
   TRACE1("field_gamma = %f",field_gamma);
@@ -474,45 +519,45 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_array[1] = p->list_value_integer (1,"Initial:sedov:array",1);
   initial_sedov_array[2] = p->list_value_integer (2,"Initial:sedov:array",1);
 
-  initial_sedov_radius_relative = 
+  initial_sedov_radius_relative =
     p->value_float("Initial:sedov:radius_relative",0.1);
-  initial_sedov_pressure_in = 
+  initial_sedov_pressure_in =
     p->value_float("Initial:sedov:pressure_in",1.0);
-  initial_sedov_pressure_out = 
+  initial_sedov_pressure_out =
     p->value_float("Initial:sedov:pressure_out",1e-5);
-  initial_sedov_density = 
+  initial_sedov_density =
     p->value_float("Initial:sedov:density",1.0);
 
   // Sedov Random Initialization
 
-  initial_sedov_random_array[0] = 
+  initial_sedov_random_array[0] =
     p->list_value_integer (0,"Initial:sedov_random:array",1);
-  initial_sedov_random_array[1] = 
+  initial_sedov_random_array[1] =
     p->list_value_integer (1,"Initial:sedov_random:array",1);
-  initial_sedov_random_array[2] = 
+  initial_sedov_random_array[2] =
     p->list_value_integer (2,"Initial:sedov_random:array",1);
 
-  initial_sedov_random_half_empty = 
+  initial_sedov_random_half_empty =
     p->value_logical ("Initial:sedov_random:half_empty",false);
-  initial_sedov_random_grackle_cooling = 
+  initial_sedov_random_grackle_cooling =
     p->value_logical ("Initial:sedov_random:grackle_cooling",false);
-  initial_sedov_random_max_blasts = 
+  initial_sedov_random_max_blasts =
     p->value_integer ("Initial:sedov_random:max_blasts",1);
-  initial_sedov_random_radius_relative = 
+  initial_sedov_random_radius_relative =
     p->value_float   ("Initial:sedov_random:radius_relative",0.1);
-  initial_sedov_random_pressure_in = 
+  initial_sedov_random_pressure_in =
     p->value_float   ("Initial:sedov_random:pressure_in",1.0);
   initial_sedov_random_pressure_out =
     p->value_float   ("Initial:sedov_random:pressure_out",1e-5);
-  initial_sedov_random_density = 
+  initial_sedov_random_density =
     p->value_float   ("Initial:sedov_random:density",1.0);
-  initial_sedov_random_te_multiplier = 
+  initial_sedov_random_te_multiplier =
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
 
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
-  
+
   // Collapse initialization
 
   initial_collapse_rank =  p->value_integer("Initial:collapse:rank",0);
@@ -534,13 +579,13 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Turbulence method and initialization
 
-  initial_turbulence_density = p->value_float 
+  initial_turbulence_density = p->value_float
     ("Initial:turbulence:density",1.0);
 
   // Must specify pressure or temperature
-  initial_turbulence_pressure =    p->value_float 
+  initial_turbulence_pressure =    p->value_float
     ("Initial:turbulence:pressure",   0.0);
-  initial_turbulence_temperature = p->value_float 
+  initial_turbulence_temperature = p->value_float
     ("Initial:turbulence:temperature",0.0);
 
   bool uses_turbulence = false;
@@ -562,10 +607,10 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_turbulence_edot = p->value_float
     ("Method:turbulence:edot",-1.0);
-  method_turbulence_mach_number = p->value_float 
+  method_turbulence_mach_number = p->value_float
     ("Method:turbulence:mach_number",0.0);
 
-  interpolation_method = p->value_string 
+  interpolation_method = p->value_string
     ("Field:interpolation_method","SecondOrderA");
 
   //
@@ -592,10 +637,17 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_IG_gas_halo_metallicity = p->value_float
     ("Initial:isolated_galaxy:gas_halo_metallicity", 0.0);
 
+  for (int axis=0; axis<3; axis++) {
+    initial_IG_center_position[axis]  = p->list_value_float
+      (axis,"Initial:isolated_galaxy:center_position",0.5);
+    initial_IG_bfield[axis] = p->list_value_float
+      (axis, "Initial:isolated_galaxy:bfield",0.0);
+  }
+
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
 
-  method_hydro_method = p->value_string 
+  method_hydro_method = p->value_string
     ("Method:hydro:method","ppm");
 
   method_hydro_dual_energy = p->value_logical
@@ -617,8 +669,10 @@ void EnzoConfig::read(Parameters * p) throw()
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");
 
-  method_null_dt = p->value_float 
+  method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());
+
+  // method_star_maker
 
   method_gravity_grav_const = p->value_float
     ("Method:gravity:grav_const",6.67384e-8);
@@ -631,16 +685,55 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_accumulate = p->value_logical
     ("Method:gravity:accumulate",true);
-  
+
+  method_background_acceleration_type = p->value_string
+   ("Method:background_acceleration:potential_type","unknown");
+
+  method_background_acceleration_mass = p->value_float
+   ("Method:background_acceleration:mass",0.0);
+   
+  method_background_acceleration_DM_mass = p->value_float
+   ("Method:background_acceleration:DM_mass",-1.0);
+
+  method_background_acceleration_DM_density = p->value_float
+   ("Method:background_acceleration:DM_density", -1.0);
+
+  method_background_acceleration_bulge_mass = p->value_float
+    ("Method:background_acceleration:bulge_mass", 0.0);
+
+  method_background_acceleration_core_radius = p->value_float
+    ("Method:background_acceleration:core_radius", 0.0);
+
+  method_background_acceleration_bulge_radius = p->value_float
+    ("Method:background_acceleration:bulge_radius", 0.0);
+
+  method_background_acceleration_stellar_mass = p->value_float
+    ("Method:background_acceleration:stellar_mass", 0.0);
+
+  method_background_acceleration_DM_mass_radius = p->value_float
+   ("Method:background_acceleration:DM_mass_radius", 0.0);
+
+  method_background_acceleration_stellar_scale_height_r = p->value_float
+   ("Method:background_acceleration:stellar_scale_height_r",0.0);
+
+  method_background_acceleration_stellar_scale_height_z = p->value_float
+   ("Method:background_acceleration:stellar_scale_height_z", 0.0);
+
+  for (int axis = 0; axis < 3; axis++){
+    method_background_acceleration_center[axis] = p->list_value_float
+      (axis,"Method:background_acceleration:center",0.5);
+    method_background_acceleration_angular_momentum[axis] = p->list_value_float
+      (axis,"Method:background_acceleration:angular_momentum",0);
+  }
   //--------------------------------------------------
   // Physics
   //--------------------------------------------------
 
-  num_physics = p->list_length("Physics:list"); 
+  num_physics = p->list_length("Physics:list");
 
   for (int index_physics=0; index_physics<num_physics; index_physics++) {
 
-    std::string name = 
+    std::string name =
       p->list_value_string(index_physics,"Physics:list");
 
     std::string full_name = std::string("Physics:") + name;
@@ -660,7 +753,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
       physics_cosmology_omega_cdm_now = p->value_float
 	(full_name + ":omega_cdm_now",   0.0);
-      
+
       physics_cosmology_omega_lamda_now = p->value_float
 	(full_name + ":omega_lambda_now",   0.721);
 
@@ -685,7 +778,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
     }
   }
- 
+
   //======================================================================
   // SOLVER
   //======================================================================
@@ -721,14 +814,14 @@ void EnzoConfig::read(Parameters * p) throw()
     } else {
       solver_pre_smooth[index_solver] = -1;
     }
-    
+
     solver = p->value_string (solver_name + ":coarse_solve","unknown");
     if (solver_index.find(solver) != solver_index.end()) {
       solver_coarse_solve[index_solver] = solver_index[solver];
     } else {
       solver_coarse_solve[index_solver] = -1;
     }
-    
+
     solver = p->value_string (solver_name + ":post_smooth","unknown");
     if (solver_index.find(solver) != solver_index.end()) {
       solver_post_smooth[index_solver] = solver_index[solver];
@@ -748,18 +841,18 @@ void EnzoConfig::read(Parameters * p) throw()
 
     solver_restart_cycle[index_solver] =
       p->value_integer(solver_name + ":restart_cycle",1);
-    
+
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
-    
-  }  
-  
+
+  }
+
   //======================================================================
   // STOPPING
   //======================================================================
 
   stopping_redshift = p->value_float ("Stopping:redshift",0.0);
-  
+
   //======================================================================
   // GRACKLE
   //======================================================================
@@ -772,7 +865,7 @@ void EnzoConfig::read(Parameters * p) throw()
   for (size_t i=0; i<method_list.size(); i++) {
     if (method_list[i] == "grackle") uses_grackle=true;
   }
-  
+
   // Defaults alert PUP::er() to ignore
   method_grackle_chemistry.use_grackle = uses_grackle;
 
@@ -801,19 +894,19 @@ void EnzoConfig::read(Parameters * p) throw()
       = p->value_float("Method:grackle:a_units",1.0);
 
     // computed
-    method_grackle_units.velocity_units 
+    method_grackle_units.velocity_units
       = method_grackle_units.length_units / method_grackle_units.time_units;
 
-    method_grackle_units.velocity_units = 
+    method_grackle_units.velocity_units =
       method_grackle_units.length_units / method_grackle_units.time_units;
 
-  
+
     //method_grackle_chemistry.set_default_chemistry_parameters();
     chemistry_data chemistry = set_default_chemistry_parameters();
 
     method_grackle_chemistry.Gamma = p->value_float
       ("Method:grackle:gamma",method_grackle_chemistry.Gamma);
-  
+
     method_grackle_chemistry.with_radiative_cooling =p->value_logical
       ("Method:grackle:with_radiative_cooling",
        method_grackle_chemistry.with_radiative_cooling);
@@ -832,7 +925,7 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:cmb_temperature_floor",
        method_grackle_chemistry.cmb_temperature_floor);
 
-    method_grackle_chemistry.grackle_data_file 
+    method_grackle_chemistry.grackle_data_file
       = strdup(p->value_string
 	       ("Method:grackle:data_file",
 		method_grackle_chemistry.grackle_data_file).c_str());
@@ -857,7 +950,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
     // initialize chemistry data: required here since EnzoMethodGrackle may not be used
 
-    const gr_float a_value = 
+    const gr_float a_value =
       1. / (1. + physics_cosmology_initial_redshift);
 
     if (initialize_chemistry_data
@@ -865,12 +958,10 @@ void EnzoConfig::read(Parameters * p) throw()
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
 	    "Error in initialize_chemistry_data");
     }
-  }  
+  }
 #endif /* CONFIG_USE_GRACKLE */
 
   TRACE("END   EnzoConfig::read()");
 }
 
 //======================================================================
-
-

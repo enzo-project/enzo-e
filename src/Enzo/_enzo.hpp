@@ -73,6 +73,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_grackle,
   enzo_sync_id_method_gravity,
+  enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_heat,
   enzo_sync_id_method_null,
   enzo_sync_id_method_pm_deposit,
@@ -219,6 +220,7 @@ struct fluxes
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
+#include "enzo_EnzoMethodBackgroundAcceleration.hpp"
 #include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodNull.hpp"

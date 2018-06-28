@@ -154,6 +154,18 @@ public: // interface
       method_gravity_solver(""),
       method_gravity_order(4),
       method_gravity_accumulate(false),
+      // EnzoMethodBackgroundAcceleration
+      method_background_acceleration_type(""),
+      method_background_acceleration_mass(0.0),
+      method_background_acceleration_DM_mass(0.0),
+      method_background_acceleration_DM_density(0.0),
+      method_background_acceleration_bulge_mass(0.0),
+      method_background_acceleration_core_radius(0.0),
+      method_background_acceleration_bulge_radius(0.0),
+      method_background_acceleration_stellar_mass(0.0),
+      method_background_acceleration_DM_mass_radius(0.0),
+      method_background_acceleration_stellar_scale_height_r(0.0),
+      method_background_acceleration_stellar_scale_height_z(0.0),
       // EnzoMethodPmDeposit
       method_pm_deposit_type(""),
       // EnzoMethodPmUpdate
@@ -170,7 +182,7 @@ public: // interface
       solver_local(),
       // EnzoStopping
       stopping_redshift()
-      
+
   {
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
@@ -181,7 +193,10 @@ public: // interface
       initial_collapse_array[axis] = 0;
       initial_IG_center_position[axis] = 0.5;
       initial_IG_bfield[axis]         = 0.0;
+      method_background_acceleration_center[axis] = 0.5;
+      method_background_acceleration_angular_momentum[axis] = 0;
     }
+    method_background_acceleration_angular_momentum[2] = 1;
   }
 
   /// CHARM++ Pack / Unpack function
@@ -189,7 +204,7 @@ public: // interface
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
-  
+
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -235,7 +250,7 @@ public: // attributes
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
-  
+
   /// EnzoInitialCollapse
   int                        initial_collapse_rank;
   int                        initial_collapse_array[3];
@@ -250,13 +265,13 @@ public: // attributes
   std::vector < std::string > initial_music_field_datasets;
   std::vector < std::string > initial_music_field_names;
   std::vector < std::string > initial_music_field_coords;
-  
+
   std::vector < std::string > initial_music_particle_files;
   std::vector < std::string > initial_music_particle_datasets;
   std::vector < std::string > initial_music_particle_coords;
   std::vector < std::string > initial_music_particle_types;
   std::vector < std::string > initial_music_particle_attributes;
-  
+
   /// EnzoInitialPm
   std::string                initial_pm_field;
   double                     initial_pm_mpp;
@@ -272,7 +287,7 @@ public: // attributes
 
   /// EnzoInitialSedovRandom
   int                        initial_sedov_random_array[3];
-  bool                       initial_sedov_random_half_empty; 
+  bool                       initial_sedov_random_half_empty;
   bool                       initial_sedov_random_grackle_cooling;
   int                        initial_sedov_random_max_blasts;
   double                     initial_sedov_random_radius_relative;
@@ -341,6 +356,23 @@ public: // attributes
   int                        method_gravity_order;
   bool                       method_gravity_accumulate;
 
+  /// EnzoMethodBackgroundAcceleration
+
+  std::string                method_background_acceleration_type;
+  double                     method_background_acceleration_mass;
+  double                     method_background_acceleration_DM_mass;
+  double                     method_background_acceleration_DM_density;
+  double                     method_background_acceleration_bulge_mass;
+  double                     method_background_acceleration_core_radius;
+  double                     method_background_acceleration_bulge_radius;
+  double                     method_background_acceleration_stellar_mass;
+  double                     method_background_acceleration_DM_mass_radius;
+  double                     method_background_acceleration_stellar_scale_height_r;
+  double                     method_background_acceleration_stellar_scale_height_z;
+  double                     method_background_acceleration_center[3];
+  double                     method_background_acceleration_angular_momentum[3];
+
+
   /// EnzoMethodPmDeposit
 
   std::string                method_pm_deposit_type;
@@ -352,7 +384,7 @@ public: // attributes
   /// EnzoSolverMg0
 
   /// Solver index for multigrid pre-smoother
-  
+
   std::vector<int>           solver_pre_smooth;
 
   /// Solver index for multigrid post-smoother
@@ -364,11 +396,11 @@ public: // attributes
   std::vector<int>           solver_last_smooth;
 
   /// Solver index for multigrid coarse solver
-  
+
   std::vector<int>           solver_coarse_solve;
 
   /// Weighting factor for smoother
-  
+
   std::vector<double>        solver_weight;
 
   /// Whether to start the iterative solver using the previous solution
@@ -376,7 +408,7 @@ public: // attributes
   std::vector<int>           solver_restart_cycle;
 
   /// EnzoSolver<Krylov>
-  
+
   /// Solver index for Krylov solver preconditioner
   std::vector<int>           solver_precondition;
 
@@ -387,7 +419,7 @@ public: // attributes
   /// Stop at specified redshift for cosmology
   double                     stopping_redshift;
 
- 
+
 #ifdef CONFIG_USE_GRACKLE
 
   /// EnzoMethodGrackle
@@ -402,4 +434,3 @@ public: // attributes
 extern EnzoConfig g_enzo_config;
 
 #endif /* PARAMETERS_ENZO_CONFIG_HPP */
-
