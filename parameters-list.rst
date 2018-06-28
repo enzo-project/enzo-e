@@ -1421,6 +1421,18 @@ null
 
 :e:`Sets the time step for the` :p:`null` :e:`Method.  This is typically used for testing the AMR meshing infrastructure without having to use any specific method.  It can also be used to add an additional maximal time step value for other methods.`
 
+pm_deposit
+----------
+
+:Parameter:  :p:`Method` : :p:`pm_deposit` : :p:`alpha`
+:Summary:    :s:`Compute potential at time t + alpha*dt`
+:Type:       :t:`float`
+:Default:    :d:`0.5`
+:Scope:     :z:`Enzo`
+
+:e:`Sets the factor defining at what time to deposit mass into the
+density_total field.  The default is 0.5, meaning t + 0.5*dt.`
+
 ppm
 ---
 
