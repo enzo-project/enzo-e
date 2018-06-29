@@ -10,7 +10,7 @@
 #include "enzo.hpp"
 
 // What are these defs and do I need them?
-#include "enzo.decl.h"
+//#include "enzo.decl.h"
 //
 //
 // #define CK_TEMPLATES_ONLY
@@ -22,41 +22,54 @@ extern CProxy_EnzoSimulation proxy_enzo_simulation;
 //---------------------------------------------------------------------
 
 EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
-(const FieldDescr * field_descr, const bool zero_acceleration) // do need
+(const FieldDescr * field_descr, bool zero_acceleration) // do need
  : Method(),
    zero_acceleration_(zero_acceleration),
-   m_(0), mx_(0), my_(0), mz_(0),
+   mx_(0), my_(0), mz_(0),
    gx_(0), gy_(0), gz_(0),
    xm_(0), ym_(0), zm_(0),
    hx_(0), hy_(0), hz_(0)
 {
 
-  G_four_pi_ = 4.0 * cello::pi * cello::grav_constant;
+  this->G_four_pi_ = 4.0 * cello::pi * cello::grav_constant;
 
   //const int id =  field_descr->field_id("density");
-  const int iax = field_descr->field_id("acceleration_x");
-  const int iay = field_descr->field_id("acceleration_y");
-  const int iaz = field_descr->field_id("acceleration_z");
+  //const int iax = field_descr->field_id("acceleration_x");
+  //const int iay = field_descr->field_id("acceleration_y");
+  //const int iaz = field_descr->field_id("acceleration_z");
 
+/*
+  // Do not need to refresh acceleration fields in this method
+  // since we do not need to know any ghost zone information
+  //
   const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
                              enzo_sync_id_method_background_acceleration);
 
   refresh(ir)->add_field(iax);
   refresh(ir)->add_field(iay);
   refresh(ir)->add_field(iaz);
+*/
   //refresh(ir)->add_field(id);
   // iax iay and iax are used in method gravity to do
   // refreshing of fields.... Do I need ot do this here? If so
   // why do I need it..... otherwise I can just worry about field
   // access with field_values?
 
+  return;
+
 } // EnzoMethodBackgroundAcceleration
 
 //-------------------------------------------------------------------
 void EnzoMethodBackgroundAcceleration::compute ( Block * block) throw()
 {
-  if (!block->is_leaf()) return;
-  compute_(block);
+  std::cout << "Background acceleration compute call\n";
+  if (block->is_leaf()){
+    this->compute_(block);
+  }
+
+  // Wait for all blocks to finish before continuing
+  block->compute_done();
+  std::cout << "Ending background acceleration compute call \n";
   return;
 }
 
@@ -67,7 +80,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
      or can just be tacked into here */
 
   //TRACE_METHOD("compute()",block);
-
+  std::cout << "Beginning background acceleration leaf compute_ call\n";
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
        (enzo_block->simulation()->config());
@@ -101,17 +114,20 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   }
 
 
-  const int m_ = mx_*my_*mz_;
-
   enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
   enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
   enzo_float * az = (enzo_float*) field.values ("acceleration_z");
 
+  int m = mx_ * my_ * mz_;
   if (zero_acceleration_){
-    if (ax){ for(int i = 0; i < m_; i ++){ ax[i] = 0.0;}}
-    if (ay){ for(int i = 0; i < m_; i ++){ ay[i] = 0.0;}}
-    if (az){ for(int i = 0; i < m_; i ++){ az[i] = 0.0;}}
+    if (ax){ for(int i = 0; i < m; i ++){ ax[i] = 0.0;}}
+    if (ay){ for(int i = 0; i < m; i ++){ ay[i] = 0.0;}}
+    if (az){ for(int i = 0; i < m; i ++){ az[i] = 0.0;}}
+    std::cout << "Acceleration will be zeroed\n";
   }
+
+  std::cout << "BackgroundAcceleration: " << enzo_config->method_background_acceleration_type
+            << "     " << "\n";
 
   if (enzo_config->method_background_acceleration_type == "GalaxyModel"){
 
@@ -122,6 +138,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
     this->PointMass(ax, ay, az, block->rank(),
                     cosmo_a, enzo_config, units);
   }
+  std::cout << "Ending background acceleration leaf compute_ call\n";
 
   return;
 
@@ -220,6 +237,9 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
   }
 
   double x = 0.0, y = 0.0, z = 0.0;
+
+  double accel_sph, accel_R, accel_z;
+
   for (int iz=0; iz<mz_; iz++){
      if (rank >= 3) z = zm_ + (iz - gz_ + 0.5)*hz_ - enzo_config->method_background_acceleration_center[2];
 
@@ -244,7 +264,8 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
          // need to multiple all of the below by the gravitational constants
          double xtemp     = radius/rcore;
-         double accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
+         //double
+         accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
                             G * DM_density * pow(rcore,3) *
                             (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
                             (radius * radius); // NFW DM profile
@@ -252,10 +273,12 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 //                            cello::pi * G * DM_density * pow(rcore,3) / pow(radius,2)*
 //                            (-2.0*atan(radius/rcore) + 2.0*log(1.0+radius/rcore)) +
 //                               log(1.0+pow(radius/rcore,2));
-         double accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
+         //double
+         accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
                              + pow(stellar_r + sqrt( pow(zheight,2)
                             + pow(stellar_z,2)),2),3));
-         double accel_z   = G * stellar_mass / sqrt(pow(zheight,2)
+         //double
+         accel_z   = G * stellar_mass / sqrt(pow(zheight,2)
                                + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
                                + pow(stellar_r + sqrt(pow(zheight,2)
                                + pow(stellar_z,2)),2),3))
@@ -274,23 +297,29 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
      }
   } // end loop over grid cells
 
-
+  std::cout << "Accelartion Values:" << accel_sph << "   " << accel_R << "   " << accel_z << "\n";
   // Handle particles here - save for later
 
   return;
 }
-
+/*
 double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
 {
   return timestep_(block);
 }
-
-double EnzoMethodBackgroundAcceleration::timestep_ (Block * block) const throw()
+*/
+double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
 {
   // Use the same timestep check as implemented for gravity. This
   // just goes through the acceleration fields and checkes to make
   // sure they
+  std::cout << "Computing timestep in background acceleration\n";
   Field field = block->data()->field();
+  int mx, my, mz;
+  int gx, gy, gz;
+  field.dimensions(0,&mx,&my,&mz);
+  field.ghost_depth(0,&gx,&gy,&gz);
+
 
   enzo_float * ax = (enzo_float*) field.values ("acceleration_x");
   enzo_float * ay = (enzo_float*) field.values ("acceleration_y");
@@ -298,37 +327,55 @@ double EnzoMethodBackgroundAcceleration::timestep_ (Block * block) const throw()
 
   enzo_float dt = std::numeric_limits<enzo_float>::max();
 
+  double hx,hy,hz;
+  block->cell_width(&hx,&hy,&hz);
+
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+    block->simulation()->problem()->physics("cosmology");
+  if (cosmology) {
+    const int rank = block->rank();
+    enzo_float cosmo_a = 1.0;
+    enzo_float cosmo_dadt = 0.0;
+    double dt   = block->dt();
+    double time = block->time();
+    cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+    if (rank >= 1) hx*=cosmo_a;
+    if (rank >= 2) hy*=cosmo_a;
+    if (rank >= 3) hz*=cosmo_a;
+  }
+
   if (ax) {
-    for (int iz=gz_; iz<mz_-gz_; iz++) {
-      for (int iy=gy_; iy<my_-gy_; iy++) {
-	for (int ix=gx_; ix<mx_-gx_; ix++) {
-	  int i=ix + mx_*(iy + iz*my_);
-	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hx_/(fabs(ax[i]+1e-20)))));
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i=ix + mx*(iy + iz*my);
+	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hx/(fabs(ax[i]+1e-20)))));
 	}
       }
     }
   }
   if (ay) {
-    for (int iz=gz_; iz<mz_-gz_; iz++) {
-      for (int iy=gy_; iy<my_-gy_; iy++) {
-	for (int ix=gx_; ix<mx_-gx_; ix++) {
-	  int i=ix + mx_*(iy + iz*my_);
-	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hy_/(fabs(ay[i]+1e-20)))));
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i=ix + mx*(iy + iz*my);
+	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hy/(fabs(ay[i]+1e-20)))));
 	}
       }
     }
   }
   if (az) {
-    for (int iz=gz_; iz<mz_-gz_; iz++) {
-      for (int iy=gy_; iy<my_-gy_; iy++) {
-	for (int ix=gx_; ix<mx_-gx_; ix++) {
-	  int i=ix + mx_*(iy + iz*my_);
-	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hz_/(fabs(az[i]+1e-20)))));
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i=ix + mx*(iy + iz*my);
+	  dt = std::min(enzo_float(dt),enzo_float(sqrt(hz/(fabs(az[i]+1e-20)))));
 	}
       }
     }
   }
 
+  std::cout<<"End computing timestep in background acceleration\n";
   return 0.5*dt;
 }
 

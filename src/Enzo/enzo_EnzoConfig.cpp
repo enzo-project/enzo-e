@@ -691,7 +691,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_background_acceleration_mass = p->value_float
    ("Method:background_acceleration:mass",0.0);
-   
+
   method_background_acceleration_DM_mass = p->value_float
    ("Method:background_acceleration:DM_mass",-1.0);
 
@@ -725,6 +725,14 @@ void EnzoConfig::read(Parameters * p) throw()
     method_background_acceleration_angular_momentum[axis] = p->list_value_float
       (axis,"Method:background_acceleration:angular_momentum",0);
   }
+
+  // Not sure if I need. Seems this flag tells the hydo solver
+  // if gravity exists... so I would expect to need this... but Does
+  // not get triggered for self-gravity at the moment... so not sure
+  for (size_t i=0; i<method_list.size(); i++) {
+    if (method_list[i] == "background_acceleration") physics_gravity=true;
+  }
+
   //--------------------------------------------------
   // Physics
   //--------------------------------------------------
