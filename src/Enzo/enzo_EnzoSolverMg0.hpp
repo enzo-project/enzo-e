@@ -158,7 +158,7 @@ public: // interface
   
   void print()
   {
-    CkPrintf (" A_ = %p\n",A_);
+    //    CkPrintf (" A_ = %p\n",A_);
     CkPrintf (" index_smooth_pre_ = %d\n",index_smooth_pre_);
     CkPrintf (" index_solve_coarse_ = %d\n",index_solve_coarse_);
     CkPrintf (" index_smooth_post_ = %d\n",index_smooth_post_);

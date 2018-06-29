@@ -93,7 +93,7 @@ void InputData::read_hierarchy
 
   Input::read_meta (&io_hierarchy);
 
-  // Calls read_blocks() on contained forest
+  // Calls read_blocks() on contained octree array
   Input::read_hierarchy (hierarchy, field_descr, particle_descr);
 
 }
@@ -118,7 +118,7 @@ Block * InputData::read_block
   Input::read_meta_group (io_block());
 
   int ibx,iby,ibz;
-  block->index_forest(&ibx,&iby,&ibz);
+  block->index_array(&ibx,&iby,&ibz);
 
   // // Call read_block() on base Input object
 

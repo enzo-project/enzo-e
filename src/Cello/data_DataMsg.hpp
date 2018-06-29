@@ -67,6 +67,10 @@ public: // interface
   /// Return the FieldFace
   FieldFace * field_face () 
   {
+#ifdef DEBUG_DATA_MSG
+    CkPrintf ("%d %s:%d DEBUG_DATA_MSG %p get_field_face(%p,%d)\n",
+	      CkMyPe(),__FILE__,__LINE__,field_face_,field_face_delete_);
+#endif    
     return field_face_;
   }
 
@@ -75,6 +79,10 @@ public: // interface
   {
     field_face_ = field_face; 
     field_face_delete_ = is_new;
+#ifdef DEBUG_DATA_MSG
+    CkPrintf ("%d %s:%d DEBUG_DATA_MSG %p set_field_face(%p,%d)\n",
+	      CkMyPe(),__FILE__,__LINE__,field_face_,field_face_delete_);
+#endif    
   }
 
   /// Return the serialized FieldFace array

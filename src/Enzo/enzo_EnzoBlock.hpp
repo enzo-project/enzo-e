@@ -103,6 +103,12 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( MsgRefine * msg );
 
+  /// Initialize the EnzoBlock chare array
+  EnzoBlock ( process_type ip_source );
+  
+  /// Initialize EnzoBlock using MsgRefine returned by creating process
+  virtual void p_set_msg_refine(MsgRefine * msg);
+
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
@@ -340,6 +346,23 @@ public: /// entry methods
   void jacobi_iter_clear() { jacobi_iter_ = 0; }
   void jacobi_iter_increment() { ++jacobi_iter_; }
   int jacobi_iter() const {return jacobi_iter_; }
+
+  void print() {
+    Block::print();
+    CkPrintf ("mg_iter_ = %d\n",mg_iter_);
+    // CkPrintf ("mg_sync_restrict_ = %d\n",mg_sync_restrict_);
+    // CkPrintf ("mg_sync_prolong_ = %d\n",mg_sync_prolong_);
+    CkPrintf ("mg_msg_ = %p\n",mg_msg_);
+    CkPrintf ("jacobi_iter_ = %d\n",jacobi_iter_);
+    CkPrintf ("dt = %d\n",dt);
+    CkPrintf ("redshift = %d\n",redshift);
+    CkPrintf ("SubgridFluxes = %d\n",SubgridFluxes);
+    CkPrintf ("GridLeftEdge[] = %d %d %d\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
+    CkPrintf ("GridDimension[] = %d %d %d\n",GridDimension[0],GridDimension[1],GridDimension[2]);
+    CkPrintf ("GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
+    CkPrintf ("GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
+    CkPrintf ("CellWidth[] = %g %g %g\n",CellWidth[0],CellWidth[1],CellWidth[2]);
+  }
   
 protected: // attributes
   

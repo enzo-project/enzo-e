@@ -5,6 +5,7 @@
 Import('env')
 Import('use_papi')
 Import('use_grackle')
+Import('use_jemalloc')
 Import('grackle_path')
 
 Import('bin_path')
@@ -31,6 +32,9 @@ if (use_papi):
 components.append(['hdf5','z'])
 
 libraries_external  = ['png','$FORTRANLIBS', 'boost_filesystem', 'boost_system']
+
+if (use_jemalloc):
+   libraries_external.append([ 'jemalloc' ])
 
 includes_enzo = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
 

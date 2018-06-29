@@ -16,6 +16,14 @@ import socket
 new_output = 0
 
 #----------------------------------------------------------------------
+# Temporary setting for using new Block and EnzoBlock constructors
+# with MsgRefine objects stored on creating process (to bypass Charm++
+# constructor with packed message argument bug)
+#----------------------------------------------------------------------
+
+new_msg_refine = 1
+
+#----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev
 #----------------------------------------------------------------------
 
@@ -32,6 +40,12 @@ node_size = 64
 #----------------------------------------------------------------------
 
 trace = 0
+
+#----------------------------------------------------------------------
+# Whether Charm++ is compiled using SMP mode
+#----------------------------------------------------------------------
+
+smp = 0
 
 #----------------------------------------------------------------------
 # Whether to trace main phases
@@ -56,6 +70,7 @@ trace_charm = 0
 
 debug = 0
 debug_field = 0
+debug_field_face = 0
 
 #----------------------------------------------------------------------
 # Do extra run-time checking.  Useful for debugging, but can potentially
@@ -141,6 +156,12 @@ ip_charm = '4'
 have_mercurial = 1
 
 #----------------------------------------------------------------------
+# Whether to use the jemalloc library for memory allocation
+#----------------------------------------------------------------------
+
+use_jemalloc = 0
+
+#----------------------------------------------------------------------
 # AUTO CONFIGURATION
 #----------------------------------------------------------------------
 
@@ -193,6 +214,9 @@ define_int_size  =    ['SMALL_INTS']
 define_grackle   = ['CONFIG_USE_GRACKLE']
 grackle_path     = 'grackle_path_not_set'
 
+# Jemalloc defines
+define_jemalloc  = ['CONFIG_USE_JEMALLOC']
+
 # Performance defines
 
 define_memory =       ['CONFIG_USE_MEMORY']
@@ -203,9 +227,9 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Experimental code defines
 
-define_new_ppm = ['NEW_PPM']
-
-define_new_output = ['NEW_OUTPUT']
+define_new_output      = ['NEW_OUTPUT']
+define_new_msg_refine = ['NEW_MSG_REFINE']
+define_new_ppm         = ['NEW_PPM']
 
 # Debugging defines
 
@@ -214,6 +238,7 @@ define_verbose =      ['CELLO_VERBOSE']
 define_trace_charm =  ['CELLO_TRACE_CHARM']
 define_debug =        ['CELLO_DEBUG']
 define_debug_field =  ['DEBUG_FIELD']
+define_debug_field_face =  ['DEBUG_FIELD_FACE']
 define_check =        ['CELLO_CHECK']
 
 define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
@@ -334,18 +359,22 @@ if (use_performance == 1):
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
 
+if (use_jemalloc == 1):
+   defines = defines + define_jemalloc
+
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
-if (new_ppm != 0): defines = defines + define_new_ppm
-
-if (new_output != 0): defines = defines + define_new_output
+if (new_output != 0):    defines = defines + define_new_output
+if (new_msg_refine != 0): defines = defines + define_new_msg_refine
+if (new_ppm != 0):       defines = defines + define_new_ppm
 
 if (trace != 0):         defines = defines + define_trace
 if (verbose != 0):       defines = defines + define_verbose
 if (trace_charm != 0):   defines = defines + define_trace_charm
 if (debug != 0):         defines = defines + define_debug
 if (debug_field != 0):   defines = defines + define_debug_field
+if (debug_field_face != 0): defines = defines + define_debug_field_face
 if (check != 0):         defines = defines + define_check
 if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
@@ -373,7 +402,10 @@ if (balance == 1):
 #======================================================================
 
 serial_run   = ""
-parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
+if (smp == 1):
+   parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
+else:
+   parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
@@ -392,6 +424,7 @@ test_path= 'test'
 Export('bin_path')
 Export('grackle_path')
 Export('use_grackle')
+Export('use_jemalloc')
 Export('lib_path')
 Export('inc_path')
 Export('test_path')

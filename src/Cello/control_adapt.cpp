@@ -7,7 +7,7 @@
 /// @ingroup  Control
 ///
 /// This file controls adaptive mesh refinement on a distributed
-/// forest of octrees.
+/// array of octrees.
 
 //--------------------------------------------------
 // #define DEBUG_FACE
@@ -49,8 +49,10 @@
 #ifdef DEBUG_ADAPT
 
 #   ifdef CELLO_TRACE
-#      define trace(A) CkPrintf ("%s:%d %s TRACE %s\n",			\
-				 __FILE__,__LINE__,name_.c_str(),A); fflush(stdout)
+#      define trace(A) \
+  CkPrintf ("%s:%d %s DEBUG_ADAPT %s\n",				\
+	    __FILE__,__LINE__,name_.c_str(),A);				\
+  fflush(stdout)
 #   else
 #      define trace(A) /*  NULL */
 #   endif
@@ -158,9 +160,7 @@ void Block::adapt_end_()
 {
   trace("adapt_end 4");
 
-  if (index_.is_root()) {
-    thisProxy.doneInserting();
-  }
+  if (index_.is_root()) thisProxy.doneInserting();
 
   if (delete_) {
 #ifdef DEBUG_ADAPT
@@ -318,6 +318,9 @@ void Block::adapt_refine_()
       
       FieldFace * field_face = create_face 
 	(if3,ic3,lg3, refresh_fine, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
       DataMsg * data_msg = NULL;
 
@@ -341,7 +344,7 @@ void Block::adapt_refine_()
       factory->create_block 
 	(
 	 data_msg,
-	 &thisProxy, index_child,
+	 thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_data,
 	 adapt_step_,
@@ -810,6 +813,9 @@ void Block::adapt_coarsen_()
 
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_coarse, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   const Index index_parent = index_.index_parent();
 

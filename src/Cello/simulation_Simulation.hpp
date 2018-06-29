@@ -18,9 +18,9 @@ class Performance;
 class Problem;
 class Schedule;
 
+#include <errno.h>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
-
 class Simulation : public CBase_Simulation 
 {
   /// @class    Simulation
@@ -44,11 +44,11 @@ public: // interface
   // CHARM
   //==================================================
 
-   /// Initialize an empty Simulation
-   Simulation();
+  /// Initialize an empty Simulation
+  Simulation();
 
-   /// Initialize a migrated Simulation
-   Simulation (CkMigrateMessage *m);
+  /// Initialize a migrated Simulation
+  Simulation (CkMigrateMessage *m);
 
   //==================================================
 
@@ -57,6 +57,18 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   virtual void pup (PUP::er &p);
+
+  //----------------------------------------------------------------------
+  // BLOCK INITIALIZATION WITH MsgRefine
+  //----------------------------------------------------------------------
+
+  /// Request by newly created Block to get its MsgRefine object
+  virtual void p_get_msg_refine(Index index);
+
+  /// Set MsgRefine * for a newly created Block
+  void set_msg_refine (Index index, MsgRefine *);
+  /// Return MsgRefine * for a newly created Block and remove from list
+  MsgRefine * get_msg_refine (Index index);
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -204,7 +216,7 @@ public: // virtual functions
   }
 
   /// Wait for all Hierarchy to be initialized before creating any Blocks
-  void r_initialize_forest(CkReductionMsg * msg);
+  void r_initialize_block_array(CkReductionMsg * msg);
 
   /// Wait for all local patches to be created before calling run
   void r_initialize_hierarchy(CkReductionMsg * msg);
@@ -273,6 +285,9 @@ public: // virtual functions
   // Data
   //--------------------------------------------------
 
+  /// Set block_array proxy on all processes
+  void p_set_block_array(CProxy_Block block_array);
+  
   /// Add a new Block to this local branch
   void data_insert_block(Block *) ;
 
@@ -313,8 +328,8 @@ protected: // functions
   /// Initialize the hierarchy object
   void initialize_hierarchy_ () throw();
 
-  /// Initialize the forest of octrees
-  void initialize_forest_ () throw();
+  /// Initialize the array of octrees
+  void initialize_block_array_ () throw();
 
   /// Initialize the data object
   void initialize_data_descr_ () throw();
@@ -337,7 +352,10 @@ protected: // functions
 		"Checkpoint");
 
       unlink ("Checkpoint");
-      symlink(dir_checkpoint_,"Checkpoint");
+      if (symlink(dir_checkpoint_,"Checkpoint")) {
+	CkPrintf("Error: symlink(%s,\"Checkpoint\") returned %s\n",
+		 dir_checkpoint_,strerror(errno));
+      }
     }
   }
 protected: // attributes
@@ -428,6 +446,7 @@ protected: // attributes
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 
+  std::map<Index,MsgRefine *> msg_refine_map_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

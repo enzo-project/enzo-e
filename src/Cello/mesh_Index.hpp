@@ -79,11 +79,11 @@ public:
   /// Whether the face is on the domain boundary
   bool is_on_boundary (const int if3[3], const int n3[3]) const;
 
-  /// Return whether this is the "root" node in the forest
+  /// Return whether this is the "root" node in the array of octrees
   /// (array (0 0 0), level 0)
   bool is_root() const;
 
-  /// Return whether this is in the "root position" in the forest
+  /// Return whether this is in the "root position" in the array of octrees
   /// (array (0 0 0), tree (0,0,0), any level)
   bool is_zero() const;
   

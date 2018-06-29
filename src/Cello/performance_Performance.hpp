@@ -22,11 +22,13 @@ enum counter_type_enum {
 };
 
 enum index_enum {
-  index_time,
-  index_bytes,
-  index_bytes_high,
-  index_bytes_highest,
-  index_bytes_available
+  perf_index_time,
+  perf_index_bytes,
+  perf_index_bytes_high,
+  perf_index_bytes_highest,
+  perf_index_bytes_available,
+  perf_index_last,
+  num_perf_index = perf_index_last
 };
   
 /// @enum    perf_region

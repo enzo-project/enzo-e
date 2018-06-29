@@ -131,6 +131,8 @@ public: // interface
       particle_group_list(),
       performance_papi_counters(),
       performance_warnings(false),
+      performance_on_schedule_index(-1),
+      performance_off_schedule_index(-1),
       num_physics(0),
       physics_list(),
       restart_file(""),
@@ -275,6 +277,8 @@ public: // interface
       particle_group_list(),
       performance_papi_counters(),
       performance_warnings(false),
+      performance_on_schedule_index(-1),
+      performance_off_schedule_index(-1),
       num_physics(0),
       physics_list(),
       restart_file(""),
@@ -483,6 +487,8 @@ public: // attributes
 
   std::vector<std::string>   performance_papi_counters;
   bool                       performance_warnings;
+  int                        performance_on_schedule_index;
+  int                        performance_off_schedule_index;
 
   // Physics
   

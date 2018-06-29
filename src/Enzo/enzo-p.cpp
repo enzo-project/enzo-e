@@ -17,7 +17,7 @@
 /// Blue Waters, the National Science Foundation's Cray petascale
 /// supercomputer at the University of Illinois at Urbana-Champaign.
 /// Cello's mesh refinement uses the highly-scalable
-/// "forest-of-octrees" approach, and the Charm++ parallel programming
+/// "array-of-octrees" approach, and the Charm++ parallel programming
 /// system enables its high parallel scalability.
 ///
 /// Development of Cello is driven by Enzo, a parallel computational

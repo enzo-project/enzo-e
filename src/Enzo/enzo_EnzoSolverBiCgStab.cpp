@@ -67,8 +67,10 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   iu_ = field_descr->insert_temporary();
   
   /// Initialize default Refresh (called before entry to compute())
+
+  const int min_face_rank = rank - 1;
   
-  const int ir = add_refresh(4, 0, neighbor_type_(),
+  const int ir = add_refresh(4, min_face_rank, neighbor_type_(),
 			     sync_type_(),
 			     enzo_sync_id_solver_bicgstab);
   
@@ -232,9 +234,10 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* block,
     bs = data[1];
     xs = data[2];
 
-    delete msg;
   }
 
+  delete msg;
+  
   /// access field container on this block
 
   Field field = block->data()->field();
@@ -496,7 +499,8 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   
   // Refresh field faces then call p_solver_bicgstab_loop_25()
   
-  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
+  const int min_face_rank = block->rank() - 1;
+  Refresh refresh (4,min_face_rank,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_bicgstab_loop_25);
 
   refresh.set_active(is_active_(block));
@@ -735,7 +739,8 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
   
   // Refresh field faces then call p_solver_bicgstab_loop_85()
 
-  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
+  const int min_face_rank = block->rank() - 1;
+  Refresh refresh (4,min_face_rank,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_bicgstab_loop_85);
   
 

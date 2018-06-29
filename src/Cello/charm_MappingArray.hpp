@@ -8,6 +8,7 @@
 #ifndef CHARM_MAPPING_ARRAY_HPP
 #define CHARM_MAPPING_ARRAY_HPP
 
+#include "cello.hpp"
 #include "simulation.decl.h"
 
 class MappingArray: public CkArrayMap {

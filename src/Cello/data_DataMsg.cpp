@@ -45,10 +45,6 @@ int DataMsg::data_size () const
   size += n_fa*sizeof(char);
   size += n_pa*sizeof(char);
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG data_size %d\n",this,size);
-  fflush(stdout);
-#endif
   return size;
 }
 
@@ -56,6 +52,12 @@ int DataMsg::data_size () const
 
 char * DataMsg::save_data (char * buffer) const
 {
+
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG save_data %p\n",
+	    CkMyPe(),__FILE__,__LINE__,this);
+  fflush(stdout);
+#endif
 
   union {
     char * pc;
@@ -83,35 +85,19 @@ char * DataMsg::save_data (char * buffer) const
   (*pi++) = n_fa;
   (*pi++) = n_pa;
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG save_data n_ff %d\n",this, n_ff);
-  fflush(stdout);
-#endif
   if (n_ff > 0) {
     pc = ff->save_data (pc);
   }
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG save_data n_fa %d\n",this, n_fa);
-  fflush(stdout);
-#endif
   if (n_ff > 0 && n_fa > 0) {
     ff->face_to_array(field,pc);
     pc += n_fa;
   }
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG save_data n_pa %d\n",this, n_pa);
-  fflush(stdout);
-#endif
   if (n_pa > 0) {
     pc = pd->save_data(particle_descr,pc);
   }
 
   // return first byte after filled buffer
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG save_data %d\n",this, (pc-buffer));
-  fflush(stdout);
-#endif
 
   //  ASSERT2 ("DataMsg::save_data()",
   //	   "Expecting buffer size %d actual size %d",
@@ -125,6 +111,12 @@ char * DataMsg::save_data (char * buffer) const
 
 char * DataMsg::load_data (char * buffer)
 {
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG load_data %p\n",
+	    CkMyPe(),__FILE__,__LINE__,this);
+  fflush(stdout);
+#endif
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   ParticleDescr * particle_descr = simulation->particle_descr();
 
@@ -139,23 +131,18 @@ char * DataMsg::load_data (char * buffer)
   pc = buffer;
 
   field_face_ = new FieldFace;
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face_);
+#endif  
 
   const int n_ff = (*pi++);
   const int n_fa = (*pi++);
   const int n_pa = (*pi++);
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG load_data n_ff %d\n",this, n_ff);
-  fflush(stdout);
-#endif
   if (n_ff > 0) {
     pc = field_face_->load_data (pc);
   }
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG load_data n_fa %d\n",this, n_fa);
-  fflush(stdout);
-#endif
   if (n_fa > 0) {
     field_array_ = pc;
     pc += n_fa;
@@ -163,19 +150,13 @@ char * DataMsg::load_data (char * buffer)
     field_array_ = NULL;
   }
 
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG load_data n_pa %d\n",this, n_pa);
-  fflush(stdout);
-#endif
   if (n_pa > 0) {
     ParticleData * pd = particle_data_ = new ParticleData;
-
     pd->allocate(particle_descr);
     pc = pd->load_data(particle_descr,pc);
   } else {
     particle_data_ = NULL;
   }
-
 
   //  ASSERT2 ("DataMsg::load_data()",
   //  	   "Expecting buffer size %d actual size %d",
@@ -189,11 +170,6 @@ char * DataMsg::load_data (char * buffer)
 
 void DataMsg::update (Data * data, bool is_local)
 {
-#ifdef DEBUG_DATA_MSG
-  CkPrintf ("%p DEBUG_DATA_MSG update\n",this);
-  fflush(stdout);
-#endif
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   FieldDescr * field_descr = simulation->field_descr();
@@ -206,18 +182,11 @@ void DataMsg::update (Data * data, bool is_local)
   char         * fa = field_array();
 
 #ifdef DEBUG_DATA_MSG
-  CkPrintf ("%d DEBUG_DATA_MSG update field_face = %p refresh = %p\n",
-    CkMyPe(),ff,ff->refresh());
-  fflush(stdout);
-  if (ff->refresh()->field_list_src().size() > 0) {
-    CkPrintf ("%d DEBUG_DATA_MSG field_list_src[0] = %d\n",
-	      CkMyPe(),ff->refresh()->field_list_src()[0]);
-  } else {
-    CkPrintf ("%d DEBUG_DATA_MSG field_list_src.size = 0\n",
-	      CkMyPe());
-  }
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG update %p (fd:%p pd:%p ff:%p fa:%p local:%d)\n",
+	    CkMyPe(),__FILE__,__LINE__,this,fd,pd,ff,fa,is_local);
   fflush(stdout);
 #endif
+
 
   if (pd != NULL) {
 
@@ -231,10 +200,14 @@ void DataMsg::update (Data * data, bool is_local)
     }
     simulation->data_insert_particles(count);
     
-    delete_particle_data();
-  }
+    delete particle_data_;
+    particle_data_ = NULL; 
 
-  if (fa != NULL) {
+
+  }
+  
+
+  if (ff != NULL && fa != NULL) {
 
     if (is_local) {
 
@@ -251,9 +224,15 @@ void DataMsg::update (Data * data, bool is_local)
       ff->array_to_face(fa,field_dst);
 
     }
-
+  }
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG delete? %p (%p %d)\n",
+	    CkMyPe(),__FILE__,__LINE__,this,ff,field_face_delete_);
+  fflush(stdout);
+#endif
+  if (ff != NULL) {
     delete field_face_;
     field_face_ = NULL;
-
   }
+
 }

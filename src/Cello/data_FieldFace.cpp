@@ -49,6 +49,9 @@ FieldFace::FieldFace
 
 FieldFace::~FieldFace() throw ()
 {
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE deleting %p\n",CkMyPe(),__FILE__,__LINE__,this);
+#endif
   --counter[cello::index_static()];
 
   if (new_refresh_) {
@@ -67,6 +70,9 @@ FieldFace::FieldFace(const FieldFace & field_face) throw ()
      new_refresh_(false)
 
 {
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p(%p)\n",CkMyPe(),__FILE__,__LINE__,this,&field_face);
+#endif  
   ++counter[cello::index_static()];
 
   copy_(field_face);
@@ -79,6 +85,9 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 ///
 /// @return    The target assigned object
 {
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE assigning %p(%p)\n",CkMyPe(),__FILE__,__LINE__,this,&field_face);
+#endif  
   copy_(field_face);
   return *this;
 }
@@ -416,7 +425,7 @@ int FieldFace::num_bytes_array(Field field) throw()
   int array_size = 0;
 
   std::vector<int> field_list = field_list_src_(field);
-  
+
   for (size_t i_f=0; i_f < field_list.size(); i_f++) {
 
     size_t index_field = field_list[i_f];

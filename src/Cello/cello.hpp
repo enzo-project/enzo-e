@@ -173,6 +173,10 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
+/// Type for CkMyPe(); used for Block() constructor to differentiate
+/// from Block(int)
+typedef unsigned process_type;
+
 /// Namespace for global constants and functions
 namespace cello {
 

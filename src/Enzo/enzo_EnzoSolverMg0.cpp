@@ -726,6 +726,9 @@ void EnzoSolverMg0::restrict_send(EnzoBlock * enzo_block) throw()
 
   FieldFace * field_face = enzo_block->create_face
     (if3, ic3, lg3, refresh_coarse, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   field_face->set_restrict(restrict_);
   
@@ -817,6 +820,9 @@ void EnzoSolverMg0::restrict_recv
 
   FieldFace * field_face = enzo_block->create_face 
     (if3, ic3, lg3, refresh_coarse, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   field_face->set_restrict(restrict());
 
@@ -924,6 +930,9 @@ void EnzoSolverMg0::prolong_send_(EnzoBlock * enzo_block) throw()
 
     FieldFace * field_face = enzo_block->create_face
       (if3, ic3, lg3, refresh_fine, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
     field_face->set_prolong(prolong_);
 
@@ -977,8 +986,7 @@ void EnzoBlock::solver_mg0_prolong_recv(FieldMsg * msg)
   if (msg != NULL) mg_msg_ = msg;
 
   // Return if not ready yet
-  if (! mg_sync_prolong_next())
-    return;
+  if (! mg_sync_prolong_next()) return;
 
   // Restore saved message
   msg = mg_msg_;
@@ -1027,6 +1035,9 @@ void EnzoSolverMg0::prolong_recv
 
   FieldFace * field_face = enzo_block->create_face 
     (if3, msg->ic3, lg3, refresh_fine, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   field_face->set_prolong(prolong());
 

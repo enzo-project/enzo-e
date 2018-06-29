@@ -6,6 +6,7 @@
 /// @brief    [\ref Mesh] Declaration of the Factory class
 
 #include "mesh.hpp"
+#include "charm_simulation.hpp"
 
 //----------------------------------------------------------------------
 
@@ -54,6 +55,83 @@ IoParticleData * Factory::create_io_particle_data
 }
 
 //----------------------------------------------------------------------
+#ifdef NEW_MSG_REFINE
+
+CProxy_Block Factory::new_block_proxy
+(
+ DataMsg * data_msg,
+ int nbx, int nby, int nbz
+ ) const throw()
+{
+  TRACE3("Factory::new_block_array(na(%d %d %d)))",
+	  nbx,nby,nbz);
+
+  CProxy_Block proxy_block;
+
+  CProxy_MappingArray array_map  = CProxy_MappingArray::ckNew(nbx,nby,nbz);
+
+  CkArrayOptions opts;
+  opts.setMap(array_map);
+  proxy_block = CProxy_Block::ckNew(opts);
+
+  return proxy_block;
+}
+
+//----------------------------------------------------------------------
+  
+void Factory::create_block_array
+(
+ DataMsg * data_msg,
+ CProxy_Block proxy_block,
+ int nbx, int nby, int nbz,
+ int nx, int ny, int nz,
+ int num_field_data
+ ) const throw()
+{
+  TRACE7("Factory::create_block_array(na(%d %d %d) n(%d %d %d) num_field_data %d)",
+	 nbx,nby,nbz,nx,ny,nz,num_field_data);
+
+  int count_adapt;
+
+  int    cycle = 0;
+  double time  = 0.0;
+  double dt    = 0.0;
+  int num_face_level = 0;
+  int * face_level = 0;
+
+  for (int ix=0; ix<nbx; ix++) {
+    for (int iy=0; iy<nby; iy++) {
+      for (int iz=0; iz<nbz; iz++) {
+
+	Index index(ix,iy,iz);
+
+	MsgRefine * msg = new MsgRefine 
+	  (index,
+	   nx,ny,nz,
+	   num_field_data,
+	   count_adapt = 0,
+	   cycle,time,dt,
+	   refresh_same,
+	   num_face_level, face_level);
+
+	msg->set_data_msg(data_msg);
+#ifdef NEW_MSG_REFRESH
+	proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	proxy_block[index].insert (process_type(CkMyPe()));
+#else	
+	proxy_block[index].insert (msg);
+#endif	
+
+	// --------------------------------------------------
+
+      }
+    }
+  }
+
+  TRACE1("Factory::create_block_array = %p",&proxy_block);
+}
+
+#else
 
 CProxy_Block Factory::create_block_array
 (
@@ -93,11 +171,6 @@ CProxy_Block Factory::create_block_array
 
 	Index index(ix,iy,iz);
 
-	// --------------------------------------------------
-	// ENTRY: #2 Factory::create_block_array() -> Block::Block()
-	// ENTRY: level == 0 block array insert
-	// --------------------------------------------------
-
 	MsgRefine * msg = new MsgRefine 
 	  (index,
 	   nx,ny,nz,
@@ -108,8 +181,12 @@ CProxy_Block Factory::create_block_array
 	   num_face_level, face_level);
 
 	msg->set_data_msg(data_msg);
-
+#ifdef NEW_MSG_REFRESH
+	proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	proxy_block[index].insert (process_type(CkMyPe()));
+#else	
 	proxy_block[index].insert (msg);
+#endif	
 
 	// --------------------------------------------------
 
@@ -121,12 +198,14 @@ CProxy_Block Factory::create_block_array
   return proxy_block;
 }
 
+#endif
+
 //----------------------------------------------------------------------
 
 void Factory::create_subblock_array
 (
  DataMsg * data_msg,
- CProxy_Block * block_array,
+ CProxy_Block block_array,
  int min_level,
  int nbx, int nby, int nbz,
  int nx, int ny, int nz,
@@ -180,7 +259,12 @@ void Factory::create_subblock_array
 
 	  msg->set_data_msg(data_msg);
 
-	  (*block_array)[index].insert (msg);
+#ifdef NEW_MSG_REFINE	  
+	  proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	  block_array[index].insert (process_type(CkMyPe()));
+#else	
+	  block_array[index].insert (msg);
+#endif	  
 
 	  // --------------------------------------------------
 
@@ -195,7 +279,7 @@ void Factory::create_subblock_array
 Block * Factory::create_block
 (
  DataMsg * data_msg,
- CProxy_Block * block_array,
+ CProxy_Block block_array,
  Index index,
  int nx, int ny, int nz,
  int num_field_data,
@@ -228,11 +312,16 @@ Block * Factory::create_block
 
   msg->set_data_msg (data_msg);
 
-  (*block_array)[index].insert (msg);
+#ifdef NEW_MSG_REFINE	  
+  proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+  block_array[index].insert (process_type(CkMyPe()));
+#else  
+  block_array[index].insert (msg);
+#endif  
 
   // --------------------------------------------------
 
-  Block * block = (*block_array)[index].ckLocal();
+  Block * block = block_array[index].ckLocal();
 
   ASSERT("Factory::create_block()","block is NULL",block != NULL);
 

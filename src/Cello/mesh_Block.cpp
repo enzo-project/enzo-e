@@ -15,8 +15,8 @@
 // #define DEBUG_ADAPT
 // #define DEBUG_FACE
 
-
 // #define DEBUG_NEW_REFRESH
+// #define DEBUG_NEW_MSG_REFINE
 
 #ifdef DEBUG_FACE
 #   define DEBUG_FACES(MSG) debug_faces_(MSG)
@@ -82,6 +82,7 @@ Block::Block ( MsgRefine * msg )
   refresh_()
 {
   performance_start_(perf_block);
+  usesAtSync = true;
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
 	msg->num_field_blocks_,
@@ -104,17 +105,130 @@ Block::Block ( MsgRefine * msg )
 
   if (is_first_cycle) {
     apply_initial_();
-
   } else {
     msg->update(data());
   }
 
   delete msg;
+
   performance_stop_(perf_block);
 
 }
 
 //----------------------------------------------------------------------
+
+Block::Block ( process_type ip_source )
+  :
+  data_(NULL),
+  child_data_(NULL),
+  level_next_(0),
+  cycle_(0),
+  time_(0.0),
+  dt_(0.0),
+  stop_(false),
+  index_initial_(0),
+  children_(),
+  sync_coarsen_(),
+  sync_count_(),
+  sync_max_(),
+  face_level_curr_(),
+  face_level_next_(),
+  child_face_level_curr_(),
+  child_face_level_next_(),
+  count_coarsen_(0),
+  adapt_step_(0),
+  adapt_(adapt_unknown),
+  coarsened_(false),
+  delete_(false),
+  is_leaf_(true),
+  age_(0),
+  face_level_last_(),
+  name_(""),
+  index_method_(-1),
+  index_solver_(),
+  refresh_()
+{
+  usesAtSync = true;
+#ifdef TRACE_BLOCK
+  {
+  int v3[3];
+  index_.values(v3);
+  CkPrintf ("%d %s index TRACE_BLOCK Block(ip_source)  %d %d %d \n",  CkMyPe(),name().c_str(),
+    v3[0],v3[1],v3[2]);
+}
+#endif
+#ifdef NEW_MSG_REFINE
+  performance_start_(perf_block);
+
+#ifdef DEBUG_NEW_MSG_REFINE
+  {
+  int v3[3];
+  thisIndex.values(v3);
+  CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::Block(%d)\n",
+    __FILE__,__LINE__,v3[0],v3[1],v3[2],ip_source);
+}
+#endif  
+  proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
+  
+  performance_stop_(perf_block);
+#endif  
+}
+
+//----------------------------------------------------------------------
+
+void Block::p_set_msg_refine(MsgRefine * msg)
+{
+#ifdef DEBUG_MSG_REFINE
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE setting %p\n",CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
+  
+#ifdef NEW_MSG_REFINE
+  performance_start_(perf_block);
+
+#ifdef DEBUG_NEW_MSG_REFINE  
+  int v3[3];
+  thisIndex.values(v3);
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::p_set_msg_refine(%p)\n",
+	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
+#endif  
+
+  init (msg->index_,
+	msg->nx_, msg->ny_, msg->nz_,
+	msg->num_field_blocks_,
+	msg->num_adapt_steps_,
+	msg->cycle_, msg->time_,  msg->dt_,
+	0, NULL, msg->refresh_type_,
+	msg->num_face_level_, msg->face_level_);
+
+#ifdef TRACE_BLOCK
+  {
+  int v3[3];
+  index_.values(v3);
+  CkPrintf ("%d %s index TRACE_BLOCK p_set_msg_refine(MsgRefine)  %d %d %d \n",  CkMyPe(),name().c_str(),
+	    v3[0],v3[1],v3[2]);
+  msg->print();
+  }
+#endif
+
+  bool is_first_cycle = 
+    (cycle_ == simulation()->config()->initial_cycle);
+
+  if (is_first_cycle) {
+    apply_initial_();
+  } else {
+    msg->update(data());
+  }
+#ifdef DEBUG_MSG_REFINE
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE freeing %p\n",CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
+  delete msg;
+  
+  performance_stop_(perf_block);
+
+#endif
+}
+
+  //----------------------------------------------------------------------
 
 void Block::init
 (
@@ -127,6 +241,14 @@ void Block::init
  int num_face_level, int * face_level)
 
 {
+#ifdef DEBUG_NEW_MSG_REFINE  
+  int v3[3];
+  thisIndex.values(v3);
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::init(cycle %d time %g dt %g)\n",
+	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2],
+	    cycle,time,dt);
+#endif  
+  
   index_ = index;
   cycle_ = cycle;
   time_ = time;
@@ -135,7 +257,6 @@ void Block::init
   adapt_ = adapt_unknown;
 
   // Enable Charm++ AtSync() dynamic load balancing
-  usesAtSync = true;
 
   Simulation * simulation = this->simulation();
 
@@ -175,9 +296,12 @@ void Block::init
 
   set_state (cycle,time,dt,stop_);
 
+#ifdef NEW_MSG_REFINE
+#else  
   // Perform any additional initialization for derived class 
 
   initialize ();
+#endif  
 
   const int rank = this->rank();
   
@@ -217,7 +341,7 @@ void Block::init
   const int level = this->level();
 
   int na3[3];
-  size_forest(na3,na3+1,na3+2);
+  size_array(na3,na3+1,na3+2);
 
   int ic3[3] = {0,0,0};
   if (level > 0) index_.child(level,ic3,ic3+1,ic3+2);
@@ -235,6 +359,9 @@ void Block::init
     
     FieldFace * field_face = create_face
       (if3, ic3, lg3, refresh_fine, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
     // Copy refined field data
     field_face -> array_to_face (array, data()->field());
@@ -260,6 +387,31 @@ void Block::init
 
   DEBUG_FACES("Block()");
 
+}
+
+//----------------------------------------------------------------------
+
+void Block::initialize()
+{
+#ifdef DEBUG_NEW_MSG_REFINE  
+  int v3[3];
+  thisIndex.values(v3);
+  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::initialize()\n",
+	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2]);
+#endif
+#ifdef NEW_MSG_REFINE  
+  bool is_first_cycle = 
+    (cycle_ == simulation()->config()->initial_cycle);
+  if (is_first_cycle && level() <= 0) {
+    CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
+#ifdef TRACE_CONTRIBUTE    
+    CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE r_end_initialize()\n",
+	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
+#endif    
+    contribute(0,0,CkReduction::concat,callback);
+  }
+#else
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -334,7 +486,7 @@ ItFace Block::it_face
 {
   int rank = this->rank();
   int n3[3];
-  size_forest(n3,n3+1,n3+2);
+  size_array(n3,n3+1,n3+2);
   bool periodic[3][2];
   periodicity(periodic);
   return ItFace (rank,min_face_rank,periodic,n3,index,ic3,if3);
@@ -345,7 +497,7 @@ ItFace Block::it_face
 ItNeighbor Block::it_neighbor (int min_face_rank, Index index) throw()
 {
   int n3[3];
-  size_forest(&n3[0],&n3[1],&n3[2]);
+  size_array(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
   return ItNeighbor (this,min_face_rank,periodic,n3,index);
@@ -414,9 +566,9 @@ void Block::print () const
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
   CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
-  CkPrintf ("name_ = %d\n",name_.c_str());
+  CkPrintf ("name_ = %s\n",name_.c_str());
   CkPrintf ("index_method_ = %d\n",index_method_);
-  CkPrintf ("index_solver_ = %d\n",index_solver());
+  //  CkPrintf ("index_solver_ = %d\n",index_solver());
 }
 
 //======================================================================
@@ -482,6 +634,10 @@ Block::~Block()
     
     FieldFace * field_face = create_face
       ( if3,ic3,lg3,refresh_coarse,refresh,true);
+#ifdef DEBUG_FIELD_FACE  
+    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
+
     field_face->face_to_array(data()->field(),&n,&array);
     delete field_face;
 
@@ -524,6 +680,9 @@ void Block::p_refresh_child
   
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_coarse,refresh,true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
   
   field_face -> array_to_face (buffer, data()->field());
   delete field_face;
@@ -615,7 +774,7 @@ std::string Block::name() const throw()
 
 //----------------------------------------------------------------------
 
-void Block::size_forest (int * nx, int * ny, int * nz) const throw ()
+void Block::size_array (int * nx, int * ny, int * nz) const throw ()
 {
   simulation()->hierarchy()->root_blocks(nx,ny,nz);
 }
@@ -697,8 +856,8 @@ void Block::index_global
   int *nx, int *ny, int *nz ) const
 {
   
-  index_forest(ix,iy,iz);
-  size_forest (nx,ny,nz);
+  index_array(ix,iy,iz);
+  size_array (nx,ny,nz);
 
   Index index = this->index();
 
@@ -734,6 +893,9 @@ FieldFace * Block::create_face
  int refresh_type, Refresh * refresh, bool new_refresh) const
 {
   FieldFace  * field_face = new FieldFace;
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   field_face -> set_refresh_type (refresh_type);
   field_face -> set_child (ic3[0],ic3[1],ic3[2]);
@@ -753,7 +915,7 @@ void Block::is_on_boundary (bool is_boundary[3][2]) const throw()
   // bool periodic = boundary->is_periodic();
 
   int n3[3];
-  size_forest (&n3[0],&n3[1],&n3[2]);
+  size_array (&n3[0],&n3[1],&n3[2]);
 
   const int level = this->level();
   // adjust array size for negative levels
@@ -862,7 +1024,7 @@ Index Block::neighbor_
   Index index = (ind != 0) ? (*ind) : index_;
 
   int na3[3];
-  size_forest (&na3[0],&na3[1],&na3[2]);
+  size_array (&na3[0],&na3[1],&na3[2]);
   // const bool periodic  = simulation()->problem()->boundary()->is_periodic();
   Index in = index.index_neighbor (of3,na3);
   return in;

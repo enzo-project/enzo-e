@@ -13,6 +13,7 @@
 #include "charm_simulation.hpp"
 
 // #define DEBUG_SIMULATION
+// #define DEBUG_MSG_REFINE
 
 Simulation::Simulation
 (
@@ -154,12 +155,6 @@ void Simulation::pup (PUP::er &p)
   if (up) performance_ = new Performance;
   p | *performance_;
 
-  // p | projections_tracing_;
-  // if (up) projections_schedule_on_ = new Schedule;
-  // p | *projections_schedule_on_;
-  // if (up) projections_schedule_off_ = new Schedule;
-  // p | *projections_schedule_off_;
-
   if (up) monitor_ = Monitor::instance();
   p | *monitor_;
 
@@ -188,9 +183,24 @@ void Simulation::pup (PUP::er &p)
   if (up) sync_new_output_start_.set_stop(0);
   if (up) sync_new_output_next_.set_stop(0);
 
+#ifdef CONFIG_USE_PROJECTIONS
+  p | projections_tracing_;
+  if (projections_tracing_) {
+    p | projections_schedule_on_;
+    p | projections_schedule_off_;
+  }
+#endif
+
   p | schedule_balance_;
 
   PUParray(p,dir_checkpoint_,256);
+
+  ASSERT1("Simulation::pup()",
+	  "msg_refine_map_ is assumed to be empty but has size %d",
+	  msg_refine_map_.size(),
+	  (msg_refine_map_.size() == 0));
+	  
+  //  p | msg_refine_map_;
 }
 
 //----------------------------------------------------------------------
@@ -255,7 +265,53 @@ void Simulation::finalize() throw()
 
   performance_->end();
 
+}
 
+//----------------------------------------------------------------------
+
+void Simulation::p_get_msg_refine(Index index)
+{
+  MsgRefine * msg = get_msg_refine(index);
+#ifdef DEBUG_MSG_REFINE  
+  CkPrintf ("%d DEBUG_MSG_REFINE sending %p\n",msg);
+#endif
+  hierarchy_->block_array()[index].p_set_msg_refine(msg);
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::set_msg_refine(Index index, MsgRefine * msg)
+{
+  if (msg_refine_map_[index] != NULL) {
+   
+    int v3[3];
+    index.values(v3);
+    ASSERT3 ("Simulation::p_set_msg_refine",
+	    "index %08x %08x %08x is already in the msg_refine mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg == NULL));
+  }
+  msg_refine_map_[index] = msg;
+}
+
+//----------------------------------------------------------------------
+
+MsgRefine * Simulation::get_msg_refine(Index index)
+{
+  int v3[3];
+  index.values(v3);
+  MsgRefine * msg = msg_refine_map_[index];
+  if (msg == NULL) {
+    int v3[3];
+    index.values(v3);
+    
+    ASSERT3 ("Simulation::get_msg_refine",
+	    "index %08x %08x %08x is not in the msg_refine mapping",
+	    v3[0],v3[1],v3[2],
+	    (msg != NULL));
+  }
+  msg_refine_map_.erase(index);
+  return msg;
 }
 
 //======================================================================
@@ -338,6 +394,30 @@ void Simulation::initialize_performance_() throw()
 		   config_->performance_papi_counters[i]);
   }
 #endif  
+
+#ifdef CONFIG_USE_PROJECTIONS
+  int index_on = config_->performance_on_schedule_index;
+  if (index_on >= 0) {
+    projections_schedule_on_ = Schedule::create
+      ( config_->schedule_var[index_on],
+	config_->schedule_type[index_on],
+	config_->schedule_start[index_on],
+	config_->schedule_stop[index_on],
+	config_->schedule_step[index_on],
+	config_->schedule_list[index_on]);
+  }
+  int index_off = config_->performance_off_schedule_index;
+  if (index_off >= 0) {
+    projections_schedule_off_ = Schedule::create
+      ( config_->schedule_var[index_off],
+	config_->schedule_type[index_off],
+	config_->schedule_start[index_off],
+	config_->schedule_stop[index_off],
+	config_->schedule_step[index_off],
+	config_->schedule_list[index_off]);
+    
+  }
+#endif
 
   p->begin();
 
@@ -565,6 +645,7 @@ void Simulation::initialize_hierarchy_() throw()
   //----------------------------------------------------------------------
 
   const int refinement = 2;
+
   hierarchy_ = factory()->create_hierarchy 
     (rank_,refinement,config_->mesh_max_level);
 
@@ -616,7 +697,7 @@ void Simulation::initialize_balance_() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_forest_() throw()
+void Simulation::initialize_block_array_() throw()
 {
   bool allocate_blocks = (CkMyPe() == 0);
 
@@ -629,23 +710,30 @@ void Simulation::initialize_forest_() throw()
   if (allocate_blocks) {
 
     // Create the root-level blocks for level = 0
-    hierarchy_->create_forest (field_descr_, allocate_data);
+    hierarchy_->create_block_array (field_descr_, allocate_data);
 
     // Create the "sub-root" blocks if mesh_min_level < 0
     if (config_->mesh_min_level < 0) {
-      hierarchy_->create_subforest
+      hierarchy_->create_subblock_array
 	(field_descr_,
 	 allocate_data,
 	 config_->mesh_min_level);
     }
 
-    hierarchy_->block_array()->doneInserting();
-
-
+    hierarchy_->block_array().doneInserting();
   }
 }
 
 //----------------------------------------------------------------------
+
+void Simulation::p_set_block_array(CProxy_Block block_array)
+{
+#ifdef NEW_MSG_REFINE  
+  if (CkMyPe() != 0) hierarchy_->set_block_array(block_array);
+#endif  
+}
+
+  //----------------------------------------------------------------------
 
 void Simulation::deallocate_() throw()
 {
@@ -730,6 +818,7 @@ void Simulation::p_monitor()
   monitor()-> print("Simulation", "cycle %04d", cycle_);
   monitor()-> print("Simulation", "time-sim %15.12e",time_);
   monitor()-> print("Simulation", "dt %15.12e", dt_);
+
   proxy_simulation.p_monitor_performance();
 }
 
@@ -740,18 +829,37 @@ void Simulation::monitor_performance()
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  int n = 3+hierarchy_->max_level()+ nr*nc;
+  // 0 n
+  // 1 msg_coarsen
+  // 2 msg_refine
+  // 3 msg_refresh
+  // 4 data_msg
+  // 5 field_face
+  // 6 particle_data
+  // 7 num-particles
+  // NL num-blocks-<L>
+  // 
+  
+  int n = 1 + 7 + ( 1 + hierarchy_->max_level()) + nr*nc;
 
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
 
-  // save space for count
+  const int in = cello::index_static();
 
   int m=0;
-  counters_reduce[m++] = n;
-  counters_reduce[m++] = hierarchy_->num_particles(); 
+  counters_reduce[m++] = n; // 0
+  counters_reduce[m++] = MsgCoarsen::counter[in];     // 1
+  counters_reduce[m++] = MsgRefine::counter[in];      // 2
+  counters_reduce[m++] = MsgRefresh::counter[in];     // 3
+  counters_reduce[m++] = DataMsg::counter[in];        // 4
+  counters_reduce[m++] = FieldFace::counter[in];      // 5
+  counters_reduce[m++] = ParticleData::counter[in];   // 6
+  counters_reduce[m++] = hierarchy_->num_particles(); // 7
+
   for (int i=0; i<=hierarchy_->max_level(); i++) 
     counters_reduce[m++] = hierarchy_->num_blocks(i);
+  
   for (int ir = 0; ir < nr; ir++) {
     performance_->region_counters(ir,counters_region);
     for (int ic = 0; ic < nc; ic++) {
@@ -766,7 +874,9 @@ void Simulation::monitor_performance()
   // --------------------------------------------------
   CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
 		       thisProxy);
-
+#ifdef TRACE_CONTRIBUTE
+  CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
+#endif  
   contribute (n*sizeof(long long),
 	      counters_reduce,
 	      r_reduce_performance_type,
@@ -786,17 +896,33 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   int index_region_cycle = performance_->region_index("cycle");
 
-  int index_counter = 1; // skip array length
-  
-  monitor()->print("Performance","simulation num-particles total %ld",
-		   counters_reduce[index_counter++]);
+  int m = 0;
+  int n = counters_reduce[m++];
+  int msg_coarsen = counters_reduce[m++];   // 1
+  int msg_refine  = counters_reduce[m++];   // 2
+  int msg_refresh = counters_reduce[m++];   // 3
+  int data_msg    = counters_reduce[m++];   // 4
+  int field_face  = counters_reduce[m++];   // 5
+  int particle_data = counters_reduce[m++]; // 6
+  int num_particles = counters_reduce[m++]; // 7
 
+  monitor()->print("Performance","counter num-msg-coarsen %ld", msg_coarsen);
+  monitor()->print("Performance","counter num-msg-refine %ld", msg_refine);
+  monitor()->print("Performance","counter num-msg-refresh %ld", msg_refresh);
+  monitor()->print("Performance","counter num-data-msg %ld", data_msg);
+  monitor()->print("Performance","counter num-field-face %ld", field_face);
+  monitor()->print("Performance","counter num-particle-data %ld", particle_data);
+
+  monitor()->print("Performance","simulation num-particles total %ld",
+		   num_particles);
+
+  // compute total blocks and leaf blocks
   int num_total_blocks = 0;
-  int num_leaf_blocks = counters_reduce[index_counter];;
+  int num_leaf_blocks = counters_reduce[m];;
   int rank = hierarchy_->rank();
   int num_child_blocks = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
   for (int i=0; i<=hierarchy_->max_level(); i++) {
-    long int num_blocks_level = counters_reduce[index_counter++];
+    long int num_blocks_level = counters_reduce[m++];
     monitor()->print("performance","simulation num-blocks-%d %d",
 		     i,num_blocks_level);
     num_total_blocks += num_blocks_level;
@@ -813,7 +939,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   const int num_counters =  performance_->num_counters();
 
   for (int ir = 0; ir < num_regions; ir++) {
-    for (int ic = 0; ic < num_counters; ic++, index_counter++) {
+    for (int ic = 0; ic < num_counters; ic++, m++) {
       bool do_print =
 	(ir != perf_unknown) && (
 	(performance_->counter_type(ic) != counter_type_abs) ||
@@ -822,11 +948,15 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	monitor()->print("Performance","%s %s %ld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
-			 counters_reduce[index_counter]);
+			 counters_reduce[m]);
       }
       
     }
   }
+
+  ASSERT2("Simulation::monitor_performance()",
+	  "Actual array length %d != expected array length %d",
+	  m,n, (m == n) );
 
   delete msg;
 

@@ -15,7 +15,9 @@ module simulation {
 
     entry Simulation (const char filename[n], int n); // [S0]
 
-    entry void r_initialize_forest (CkReductionMsg * msg);    // [SC2]
+    entry void p_get_msg_refine (Index);
+    
+    entry void r_initialize_block_array (CkReductionMsg * msg);    // [SC2]
     entry void r_initialize_hierarchy (CkReductionMsg * msg); // [SC3]
 
     entry void s_write (); // [SC6]
@@ -28,6 +30,8 @@ module simulation {
     entry void p_monitor ();
     entry void p_monitor_performance();
     entry void r_monitor_performance (CkReductionMsg * msg); // [SC9]
+
+    entry void p_set_block_array (CProxy_Block block_array);
 
   };
 

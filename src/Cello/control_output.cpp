@@ -193,7 +193,7 @@ void Simulation::output_start(int index_output)
   //        Block::p_output_write()
   
   //  if (CkMyPe() == 0) {
-  //    hierarchy_->block_array()->p_output_write(index_output,0);
+  //    hierarchy_->block_array().p_output_write(index_output,0);
   //  }
 
 }
@@ -345,7 +345,7 @@ void Simulation::output_exit()
   debug_close();
   debug_open();
 
-  if (CkMyPe() == 0) hierarchy()->block_array()->p_output_end();
+  if (CkMyPe() == 0) hierarchy()->block_array().p_output_end();
 }
 
 //----------------------------------------------------------------------

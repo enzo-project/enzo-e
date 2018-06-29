@@ -92,6 +92,7 @@ void Block::p_refresh_store (MsgRefresh * msg)
   performance_start_(perf_refresh_store);
 
   msg->update(data());
+
   delete msg;
 
   Refresh * refresh = this->refresh();
@@ -194,6 +195,9 @@ void Block::refresh_load_field_face_
 
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_type, refresh,false);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   DataMsg * data_msg = new DataMsg;
 
@@ -368,6 +372,7 @@ int Block::particle_create_array_neighbors_
     refresh->index_limits (rank,refresh_type,if3,ic3,index_lower,index_upper);
 
     ParticleData * pd = new ParticleData;
+
     ParticleDescr * p_descr = simulation() -> particle_descr();
 
     pd->allocate(p_descr);
