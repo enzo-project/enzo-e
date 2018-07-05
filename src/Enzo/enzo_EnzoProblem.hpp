@@ -88,7 +88,7 @@ private: // functions
   (std::string type, 
    Config * config,
    int index_method,
-   const FieldDescr *,
+   FieldDescr *,
    const ParticleDescr *) throw ();
 
   /// Create named interpolation object

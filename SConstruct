@@ -266,8 +266,6 @@ define_have_mercurial = ['CONFIG_HAVE_MERCURIAL']
 # ARCHITECTURE SETTINGS
 #======================================================================
 
-mpi_path = '' # this is a hack to compile on gordon with parallel HDF5
-
 is_arch_valid = 0
 
 # Assume Python is new, but may be overridden in machine configuration
@@ -291,6 +289,8 @@ flags_cxx_charm = ''
 flags_cc_charm = ''
 flags_fc_charm = ''
 flags_link_charm = ''
+boost_inc = ''
+boost_lib = ''
 
 if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
@@ -449,8 +449,12 @@ if (use_papi):
 cpppath = cpppath + [ hdf5_inc ]
 libpath = libpath + [ hdf5_lib ]
 
-if (mpi_path != ''):
-   cpppath = cpppath + [mpi_path + '/include']
+#----------------------------------------------------------------------
+# BOOST PATHS
+#----------------------------------------------------------------------
+
+cpppath = cpppath + [ boost_inc ]
+libpath = libpath + [ boost_lib ]
 
 #----------------------------------------------------------------------
 # GRACKLE PATH

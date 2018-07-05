@@ -140,7 +140,7 @@ public: // interface
       method_gravity_order(4),
       method_gravity_accumulate(false),
       // EnzoMethodPmDeposit
-      method_pm_deposit_type(""),
+      method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0),
       // EnzoSolverMg0
@@ -310,7 +310,7 @@ public: // attributes
 
   /// EnzoMethodPmDeposit
 
-  std::string                method_pm_deposit_type;
+  double                     method_pm_deposit_alpha;
 
   /// EnzoMethodPmUpdate
 

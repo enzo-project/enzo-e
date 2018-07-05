@@ -70,8 +70,7 @@ int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 //----------------------------------------------------------------------
 
 // STATIC
-void EnzoBlock::initialize(EnzoConfig * enzo_config,
-			   FieldDescr * field_descr)
+void EnzoBlock::initialize(EnzoConfig * enzo_config)
 {
 #ifdef DEBUG_ENZO_BLOCK
   CkPrintf ("%d DEBUG_ENZO_BLOCK EnzoBlock::initialize\n",CkMyPe());
@@ -424,7 +423,7 @@ void EnzoBlock::set_time (double time) throw ()
 {
   Block::set_time (time);
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Simulation * simulation = cello::simulation();
   EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
   EnzoPhysicsCosmology * cosmology = units->cosmology();
 

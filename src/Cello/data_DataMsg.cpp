@@ -24,10 +24,8 @@ int DataMsg::data_size () const
   //  1. determine buffer size (must be consistent with #3)
   //--------------------------------------------------
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-  ParticleDescr * particle_descr = simulation->particle_descr();
+  FieldDescr    * field_descr    = cello::field_descr();
+  ParticleDescr * particle_descr = cello::particle_descr();
 
   Field field (field_descr, field_data_);
 
@@ -66,10 +64,8 @@ char * DataMsg::save_data (char * buffer) const
 
   pc = buffer;
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
-  ParticleDescr * particle_descr = simulation->particle_descr();
+  FieldDescr    * field_descr    = cello::field_descr();
+  ParticleDescr * particle_descr = cello::particle_descr();
 
   Field field (field_descr, field_data_);
 
@@ -117,8 +113,7 @@ char * DataMsg::load_data (char * buffer)
   fflush(stdout);
 #endif
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  ParticleDescr * particle_descr = simulation->particle_descr();
+  ParticleDescr * particle_descr = cello::particle_descr();
 
   // 2. De-serialize message data from input buffer into the allocated
   // message (must be consistent with pack())
@@ -170,9 +165,8 @@ char * DataMsg::load_data (char * buffer)
 
 void DataMsg::update (Data * data, bool is_local)
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr * field_descr = simulation->field_descr();
+  Simulation * simulation  = cello::simulation();
+  FieldDescr * field_descr = cello::field_descr();
  
   Field field_dst = data->field();
  

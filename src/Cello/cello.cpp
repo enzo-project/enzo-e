@@ -1,5 +1,7 @@
 #include "cello.hpp"
 #include "error.hpp"
+#include "charm_simulation.hpp"
+#include "simulation.hpp"
 //----------------------------------------------------------------------
 
 namespace cello {
@@ -184,5 +186,41 @@ namespace cello {
 
     free(strings);
   }
+
+  //---------------------------------------------------------------------- 
+
+  Simulation * simulation()
+  {
+    return proxy_simulation.ckLocalBranch();
+  }
+
+  //---------------------------------------------------------------------- 
+
+  FieldDescr * field_descr()
+  {
+    return simulation() ? simulation()->field_descr() : new FieldDescr;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  ParticleDescr * particle_descr()
+  {
+    return simulation() ? simulation()->particle_descr() : new ParticleDescr;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Output * output(int index)
+  {
+    return simulation() ? simulation()->problem()->output(index) : NULL;
+  }
+
+  //----------------------------------------------------------------------
+
+  int rank()
+  {
+    return simulation() ? simulation()->rank() : 0;
+  }
+  
 
 }

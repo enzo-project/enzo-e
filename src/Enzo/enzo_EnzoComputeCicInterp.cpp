@@ -82,6 +82,16 @@ void EnzoComputeCicInterp::compute_(Block * block)
 
   int mx,my,mz;
   field.dimensions(0,&mx,&my,&mz);
+  const int mxy=mx*my;
+  const int i000 = 0;
+  const int i001 = mxy;
+  const int i010 = mx;
+  const int i011 = mx+mxy;
+  const int i100 = 1;
+  const int i101 = 1+mxy;
+  const int i110 = 1+mx;
+  const int i111 = 1+mx+mxy;
+  
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
   int gx,gy,gz;
@@ -162,17 +172,10 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	enzo_float x1 = 1.0 - x0;
 	enzo_float y1 = 1.0 - y0;
 
-	if ( ! ( (0.0 <= x0 && x0 <= 1.0) ||
-		 (0.0 <= y0 && y0 <= 1.0) ||
-		 (0.0 <= x1 && x1 <= 1.0) ||
-		 (0.0 <= y1 && y1 <= 1.0))) {
-	  CkPrintf ("ERROR? %s:%d [xy][01] = %f %f  %f %f\n",
-		    __FILE__,__LINE__,x0,y0,x1,y1);
-	}
-	vp[ip*da] = x0*y0*vf[ix0+mx*iy0] 
-	  +         x1*y0*vf[ix1+mx*iy0] 
-	  +         x0*y1*vf[ix0+mx*iy1] 
-	  +         x1*y1*vf[ix1+mx*iy1];
+	enzo_float * vf0 = vf+ix0+mx*iy0;
+	
+	vp[ip*da] = x0*(y0*vf0[i000] + y1*vf0[i010])
+	  +         x1*(y0*vf0[i100] + y1*vf0[i110]);
 
       }
     }
@@ -222,15 +225,12 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	enzo_float y1 = 1.0 - y0;
 	enzo_float z1 = 1.0 - z0;
 
-	vp[ip*da] = x0*y0*z0*vf[ix0+mx*(iy0+my*iz0)] 
-	  +         x1*y0*z0*vf[ix1+mx*(iy0+my*iz0)] 
-	  +         x0*y1*z0*vf[ix0+mx*(iy1+my*iz0)] 
-	  +         x1*y1*z0*vf[ix1+mx*(iy1+my*iz0)]
-	  +         x0*y0*z1*vf[ix0+mx*(iy0+my*iz1)] 
-	  +         x1*y0*z1*vf[ix1+mx*(iy0+my*iz1)] 
-	  +         x0*y1*z1*vf[ix0+mx*(iy1+my*iz1)] 
-	  +         x1*y1*z1*vf[ix1+mx*(iy1+my*iz1)];
+	enzo_float * vf0 = vf + ix0+mx*(iy0+my*iz0);
 
+	vp[ip*da] = x0*(y0*(z0*vf0[i000] + z1*vf0[i001]) +
+			y1*(z0*vf0[i010] + z1*vf0[i011])) 
+	  +         x1*(y0*(z0*vf0[i100] + z1*vf0[i101]) +
+			y1*(z0*vf0[i110] + z1*vf0[i111]));
       }
     }
   }

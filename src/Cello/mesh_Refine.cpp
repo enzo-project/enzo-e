@@ -40,9 +40,8 @@ void * Refine::initialize_output_(FieldData * field_data)
 
   if (do_output) {
     
-    FieldDescr * field_descr = 
-      proxy_simulation.ckLocalBranch()->field_descr();
-    Field field (field_descr,field_data);
+    Field field (cello::field_descr(),field_data);
+    
     const int id_output = field.field_id(output_);
     output = field.values(id_output);
     int mx,my,mz;
