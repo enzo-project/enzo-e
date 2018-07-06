@@ -17,7 +17,7 @@ class EnzoMatrixLaplace : public Matrix
 public: // interface
 
   /// Create a new EnzoMatrixLaplace
-  EnzoMatrixLaplace () throw()
+  EnzoMatrixLaplace (int order = 4) throw()
     : mx_(0),
       my_(0),
       mz_(0),
@@ -27,7 +27,8 @@ public: // interface
       hx_(0.0),
       hy_(0.0),
       hz_(0.0),
-      rank_(0)
+      rank_(0),
+      order_(order)
   {}
 
   /// Destructor
@@ -39,7 +40,8 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoMatrixLaplace(CkMigrateMessage *m)
-    : mx_(0),
+    : Matrix(m),
+      mx_(0),
       my_(0),
       mz_(0),
       nx_(0),
@@ -48,7 +50,8 @@ public: // interface
       hx_(0.0),
       hy_(0.0),
       hz_(0.0),
-      rank_(0)
+      rank_(0),
+      order_(0)
   { }
 
     /// CHARM++ Pack / Unpack function
@@ -65,6 +68,7 @@ public: // interface
     p | hy_;
     p | hz_;
     p | rank_;
+    p | order_;
   }
 
 public: // virtual functions
@@ -79,13 +83,15 @@ public: // virtual functions
   virtual bool is_singular() const throw()
   { return true; }
 
+  /// How many ghost zones required for matvec
+  virtual int ghost_depth() const throw()
+  { return (order_ == 2) ? 1 : ( (order_ == 4) ? 2 : 3); }
+
 protected: // functions
 
-  template <class T>
-  void matvec_ (T * Y, T * X, int g0) const throw();
+  void matvec_ (enzo_float * Y, enzo_float * X, int g0) const throw();
 
-  template <class T>
-  void diagonal_ (T * X, int g0) const throw();
+  void diagonal_ (enzo_float * X, int g0) const throw();
 
 protected: // attributes
 
@@ -93,6 +99,8 @@ protected: // attributes
   int nx_, ny_, nz_;
   double hx_, hy_, hz_;
   int rank_;
+  /// Order of the operator, 2 or 4
+  int order_;
 
 };
 

@@ -31,6 +31,10 @@ public: // interface
     : PUP::able(m)
   {  }
 
+  /// Virtual destructor
+  virtual ~Physics()
+  {  }
+  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {

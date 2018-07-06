@@ -5,12 +5,13 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the EnzoMethodPmUpdate class
 
-#include "cello.hpp"
+
+#include "charm_simulation.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_PM_UPDATE
+// #define DEBUG_UPDATE
 
-#ifdef DEBUG_PM_UPDATE
+#ifdef DEBUG_UPDATE
 #  define TRACE_PM(MESSAGE)						\
   CkPrintf ("%s:%d %s\n",						\
 	    __FILE__,__LINE__,MESSAGE);				
@@ -29,9 +30,18 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   TRACE_PM("EnzoMethodPmUpdate()");
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_particles(particle_descr->num_types());
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			     enzo_sync_id_method_pm_update);
+
+  const int ax = field_descr->field_id("acceleration_x");
+  const int ay = field_descr->field_id("acceleration_y");
+  const int az = field_descr->field_id("acceleration_z");
+
+  if (ax >= 0) refresh(ir)->add_field(ax);
+  if (ay >= 0) refresh(ir)->add_field(ay);
+  if (az >= 0) refresh(ir)->add_field(az);
+			     
+  refresh(ir)->add_particle(particle_descr->type_index("dark"));
 
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -57,23 +67,47 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
+#ifdef DEBUG_UPDATE    
+    double a3sum[3]={0.0};
+    double v3sum[3]={0.0};
+    double a3sum2[3]={0.0};
+    double v3sum2[3]={0.0};
+#endif    
+    
+    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+      block->simulation()->problem()->physics("cosmology");
+
+    enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
+    
+    if (cosmology) {
+      double time = block->time();
+      double dt   = block->dt();
+      cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+      //      cosmology-> compute_expansion_factor (&av,&dadtv,time+dt);
+    }
+
     const int rank = block->rank();
 
     FieldDescr    * fd = block->data()->field_descr();
     ParticleDescr * pd = block->data()->particle_descr();
 
+    double dt_shift = 0.5*block->dt()/cosmo_a;
+    //    double dt_shift = 0.0;
     if (rank >= 1) {
-      EnzoComputeCicInterp interp_x (fd, "acceleration_x", pd, "dark", "ax");
+      EnzoComputeCicInterp interp_x
+    	(fd, "acceleration_x", pd, "dark", "ax", dt_shift);
       interp_x.compute(block);
     }
 
     if (rank >= 2) {
-      EnzoComputeCicInterp interp_y (fd, "acceleration_y", pd, "dark", "ay");
+      EnzoComputeCicInterp interp_y
+    	(fd, "acceleration_y", pd, "dark", "ay", dt_shift);
       interp_y.compute(block);
     }
 
     if (rank >= 3) {
-      EnzoComputeCicInterp interp_z (fd, "acceleration_z", pd, "dark", "az");
+      EnzoComputeCicInterp interp_z
+    	(fd, "acceleration_z", pd, "dark", "az", dt_shift);
       interp_z.compute(block);
     }
 
@@ -101,26 +135,46 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     const double dt = block->dt();
 
+    // check precisions match
+    
+    int ba = particle.attribute_bytes(it,ia_x); // "bytes (actual)"
+    int be = sizeof(enzo_float);                // "bytes (expected)"
+
+    ASSERT4 ("EnzoMethodPmUpdate::compute()",
+	     "Particle type %s attribute %s defined as %s but expecting %s",
+	     particle.type_name(it).c_str(),
+	     particle.attribute_name(it,ia_x).c_str(),
+	     ((ba == 4) ? "single" :
+	      ((ba == 8) ? "double" : "quadruple")),
+	     ((be == 4) ? "single" :
+	      ((be == 8) ? "double" : "quadruple")),
+	     (ba == be));
+
+    const double cp = dt/cosmo_a;
+    const double coef = 0.25*cosmo_dadt/cosmo_a*dt;
+    const double cvv = (1.0 - coef) / (1.0 + coef);
+    const double cva = 0.5*dt / (1.0 + coef);
+
     for (int ib=0; ib<nb; ib++) {
 
-      double *x=0, *y=0, *z=0;
-      double *vx=0, *vy=0, *vz=0;
-      double *ax=0, *ay=0, *az=0;
+      enzo_float *x=0, *y=0, *z=0;
+      enzo_float *vx=0, *vy=0, *vz=0;
+      enzo_float *ax=0, *ay=0, *az=0;
 
       if (rank >= 1) {
-	x  = (double *) particle.attribute_array (it, ia_x,  ib);
-	vx = (double *) particle.attribute_array (it, ia_vx, ib);
-	ax = (double *) particle.attribute_array (it, ia_ax, ib);
+	x  = (enzo_float *) particle.attribute_array (it, ia_x,  ib);
+	vx = (enzo_float *) particle.attribute_array (it, ia_vx, ib);
+	ax = (enzo_float *) particle.attribute_array (it, ia_ax, ib);
       }
       if (rank >= 2) {
-	y  = (double *) particle.attribute_array (it, ia_y,  ib);
-	vy = (double *) particle.attribute_array (it, ia_vy, ib);
-	ay = (double *) particle.attribute_array (it, ia_ay, ib);
+	y  = (enzo_float *) particle.attribute_array (it, ia_y,  ib);
+	vy = (enzo_float *) particle.attribute_array (it, ia_vy, ib);
+	ay = (enzo_float *) particle.attribute_array (it, ia_ay, ib);
       }
       if (rank >= 3) {
-	z  = (double *) particle.attribute_array (it, ia_z,  ib);
-	vz = (double *) particle.attribute_array (it, ia_vz, ib);
-	az = (double *) particle.attribute_array (it, ia_az, ib);
+	z  = (enzo_float *) particle.attribute_array (it, ia_z,  ib);
+	vz = (enzo_float *) particle.attribute_array (it, ia_vz, ib);
+	az = (enzo_float *) particle.attribute_array (it, ia_az, ib);
       }
 
       const int np = particle.num_particles(it,ib);
@@ -133,12 +187,18 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
-	  vx[ipdv] += ax[ipda]*dt/2;
-	  x [ipdp] += vx[ipdv]*dt;
-	  vx[ipdv] += ax[ipda]*dt/2;
+#ifdef DEBUG_UPDATE    
+	  v3sum[0]+=std::abs(vx[ipdv]);
+	  a3sum[0]+=std::abs(ax[ipda]);
+	  v3sum2[0]+=vx[ipdv]*vx[ipdv];
+	  a3sum2[0]+=ax[ipda]*ax[ipda];
+	  CkPrintf ("DEBUG_UPDATE x %g v %g a %g\n",x[ipdp],vx[ipdv],ax[ipda]);
+#endif	  
+	  vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
+	  x [ipdp] += cp*vx[ipdv];
+	  vx[ipdv] = cvv*vx[ipdv] + cva*ax[ipda];
 
 	}
-	
       }
       if (rank >= 2) {
 
@@ -148,9 +208,15 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
-	  vy[ipdv] += ay[ipda]*dt/2;
-	  y [ipdp] += vy[ipdv]*dt;
-	  vy[ipdv] += ay[ipda]*dt/2;
+#ifdef DEBUG_UPDATE    
+	  v3sum[1]+=std::abs(vy[ipdv]);
+	  a3sum[1]+=std::abs(ay[ipda]);
+	  v3sum2[1]+=vy[ipdv]*vy[ipdv];
+	  a3sum2[1]+=ay[ipda]*ay[ipda];
+#endif	  
+	  vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
+	  y [ipdp] += cp*vy[ipdv];
+	  vy[ipdv] = cvv*vy[ipdv] + cva*ay[ipda];
 
 	}
 	
@@ -163,13 +229,29 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 	  const int ipdp = ip*dp;
 	  const int ipda = ip*da;
 
-	  vz[ipdv] += az[ipda]*dt/2;
-	  z [ipdp] += vz[ipdv]*dt;
-	  vz[ipdv] += az[ipda]*dt/2;
+#ifdef DEBUG_UPDATE    
+	  v3sum[2]+=std::abs(vz[ipdv]);
+	  a3sum[2]+=std::abs(az[ipda]);
+	  v3sum2[2]+=vz[ipdv]*vz[ipdv];
+	  a3sum2[2]+=az[ipda]*az[ipda];
+#endif	  
+
+	  vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
+	  z [ipdp] += cp*vz[ipdv];
+	  vz[ipdv] = cvv*vz[ipdv] + cva*az[ipda];
 
 	}
       }
     }
+    
+#ifdef DEBUG_UPDATE    
+    CkPrintf ("DEBUG_UPDATE asum %g %g %g vsum %g %g %g\n",
+	      a3sum[0],a3sum[1],a3sum[2],
+	      v3sum[0],v3sum[1],v3sum[2]);
+    CkPrintf ("DEBUG_UPDATE asum2 %g %g %g vsum2 %g %g %g\n",
+	      a3sum2[0],a3sum2[1],a3sum2[2],
+	      v3sum2[0],v3sum2[1],v3sum2[2]);
+#endif    
   }
 
   block->compute_done(); 
@@ -213,31 +295,30 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
 
-    // ENZO particle time step
-    //
-    // for (dim = 0; dim < GridRank; dim++) {
-    //   float dCell = CellWidth[dim][0]*a;
-    //   for (i = 0; i < NumberOfParticles; i++) {
-    //     dtTemp = dCell/max(fabs(ParticleVelocity[dim][i]), tiny_number);
-    // 	dtParticles = min(dtParticles, dtTemp);
-    //   }
-    // }
- 
-    // /* Multiply resulting dt by ParticleCourantSafetyNumber. */
- 
-    // dtParticles *= ParticleCourantSafetyNumber;
-
-    const double hx = (xp-xm)/nx;
-    const double hy = (yp-ym)/ny;
-    const double hz = (zp-zm)/nz;
+    double hx = (xp-xm)/nx;
+    double hy = (yp-ym)/ny;
+    double hz = (zp-zm)/nz;
     
+    // Adjust for expansion terms if any
+    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
+      block->simulation()->problem()->physics("cosmology");
+    if (cosmology) {
+      enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
+      double time = block->time();
+      double dt   = block->dt();
+      cosmology-> compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+0.5*dt);
+      hx *= cosmo_a;
+      hy *= cosmo_a;
+      hz *= cosmo_a;
+    }
+
     for (int ib=0; ib<nb; ib++) {
       const int np = particle.num_particles(it,ib);
 
       if (rank >= 1) {
-	const double * vx = (const double *) 
+	const enzo_float * vx = (const enzo_float *) 
 	  particle.attribute_array (it, ia_vx, ib); 
-	const double * ax = (const double *) 
+	const enzo_float * ax = (const enzo_float *) 
 	  particle.attribute_array (it, ia_ax, ib); 
 	for (int ip=0; ip<np; ip++) {
 	  const double v = fabs(vx[ip*dv]);
@@ -250,9 +331,9 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
       }
 
       if (rank >= 2) {
-	const double * vy = (const double *) 
+	const enzo_float * vy = (const enzo_float *) 
 	  particle.attribute_array (it, ia_vy, ib); 
-	const double * ay = (const double *) 
+	const enzo_float * ay = (const enzo_float *) 
 	  particle.attribute_array (it, ia_ay, ib); 
 	for (int ip=0; ip<np; ip++) {
 	  const double v = fabs(vy[ip*dv]);
@@ -265,9 +346,9 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
       }
 
       if (rank >= 3) {
-	const double * vz = (const double *) 
+	const enzo_float * vz = (const enzo_float *) 
 	  particle.attribute_array (it, ia_vz, ib); 
-	const double * az = (const double *) 
+	const enzo_float * az = (const enzo_float *) 
 	  particle.attribute_array (it, ia_az, ib); 
 	for (int ip=0; ip<np; ip++) {
 	  const double v = fabs(vz[ip*dv]);
@@ -281,6 +362,7 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 
     }
   }
+  
   dt = MIN(dt,max_dt_);
   return dt;
 }

@@ -44,7 +44,9 @@ public: // functions
 
     TRACEPUP;
 
+    bool pk = p.isPacking();
     bool up = p.isUnpacking();
+    int n;
 
     // NOTE: change this function whenever attributes change
     p | name_;
@@ -55,14 +57,19 @@ public: // functions
     p | alignment_;
     p | padding_;
     p | precision_;
-    int num_fields = name_.size();
-    if (up) centering_.resize(num_fields);
-    for (int i=0; i<num_fields; i++) {
+
+    if (pk) n=centering_.size();
+    p | n;
+    if (up) centering_.resize(n);
+    for (int i=0; i<n; i++) {
       if (up) centering_[i] = new int[3];
       PUParray(p,centering_[i],3);
     }
-    if (up) ghost_depth_.resize(num_fields);
-    for (int i=0; i<num_fields; i++) {
+    
+    if (pk) n=ghost_depth_.size();
+    p | n;
+    if (up) ghost_depth_.resize(n);
+    for (int i=0; i<n; i++) {
       if (up) ghost_depth_[i] = new int[3];
       PUParray(p,ghost_depth_[i],3);
     }
@@ -105,7 +112,7 @@ public: // functions
   int field_count() const throw();
 
   /// Return name of the ith field
-  std::string field_name(size_t id_field) const throw();
+  std::string field_name(int id_field) const throw();
 
   /// Return whether the field has been inserted
   bool is_field(const std::string & name) const throw();
@@ -181,7 +188,9 @@ public: // functions
 
   /// Return precision of given field
   int precision(int id_field) const throw()
-  {  return precision_.at(id_field); }
+  {
+    return (id_field >= 0) ? precision_.at(id_field) : precision_unknown;
+  }
 
   /// centering of given field
   void centering(int id_field, int * cx, int * cy = 0, int * cz = 0) const 
@@ -189,7 +198,10 @@ public: // functions
 
   /// return whether the field variable is centered in the cell
   bool is_centered(int id_field) const
-  { return (centering_[0] == 0 && centering_[1] == 0 && centering_[2] == 0); }
+  {
+    return (centering_[id_field][0] == 0 &&
+	    centering_[id_field][1] == 0 &&
+	    centering_[id_field][2] == 0); }
 
   /// depth of ghost zones of given field
   void ghost_depth(int id_field, int * gx, int * gy = 0, int * gz = 0) const 
@@ -198,7 +210,9 @@ public: // functions
   /// whether the field is a conserved quantity
   bool conserved(int id_field) const 
     throw()
-  { return conserved_.at(id_field); }
+  {
+    return (id_field >= 0) ? conserved_.at(id_field) : false;
+  }
   
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();

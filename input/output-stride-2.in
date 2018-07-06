@@ -6,7 +6,7 @@ include "input/output-stride.incl"
 Output {
 
     stride {
-       stride = 2;
+       stride_write = 2;
        name = ["output-stride-2-p%1d-%02d.h5","proc","cycle"];
     }
 

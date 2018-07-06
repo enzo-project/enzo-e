@@ -28,7 +28,8 @@ public: // interface
       max_coarsen_(max_coarsen),
       max_level_(max_level),
       include_ghosts_(include_ghosts),
-      output_(output)
+      output_(output),
+      schedule_(NULL)
   {};
 
   /// CHARM++ PUP::able declaration
@@ -42,21 +43,12 @@ public: // interface
       max_coarsen_(0.0),
       max_level_(0),
       include_ghosts_(false),
-      output_("")
+      output_(""),
+      schedule_(NULL)
   {}
 
   /// CHARM++ Pack / Unpack function
-  inline void pup (PUP::er &p)
-  {
-    TRACEPUP;
-    PUP::able::pup(p);
-    // NOTE: change this function whenever attributes change
-    p | min_refine_;
-    p | max_coarsen_;
-    p | max_level_;
-    p | include_ghosts_;
-    p | output_;
-  }
+  void pup (PUP::er &p);
   
   /// Evaluate the refinement criteria, updating the refinement field
   virtual int apply (Block * block) throw ()
@@ -71,6 +63,13 @@ public: // interface
 
   /// Clear the output field to the default coarsen (-1)
   void * initialize_output_(FieldData * field_data);
+
+  /// Return the Schedule object pointer
+  Schedule * schedule() throw() 
+  { return schedule_; }
+
+  /// Set schedule
+  void set_schedule (Schedule * schedule) throw();
 
 protected: // functions
 
@@ -100,6 +99,9 @@ protected:
   /// Field name to write refinement field to (-1 coarsen 0 same +1 refine)
   std::string output_;
   
+  /// Schedule for refinement; NULL if none
+  Schedule * schedule_;
+
 };
 
 #endif /* MESH_REFINE_HPP */

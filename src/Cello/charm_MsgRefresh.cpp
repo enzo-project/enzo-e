@@ -9,6 +9,8 @@
 #include "charm.hpp"
 #include "charm_simulation.hpp"
 
+// #define DEBUG_MSG_REFRESH
+
 //----------------------------------------------------------------------
 
 long MsgRefresh::counter[CONFIG_NODE_SIZE] = {0};
@@ -49,6 +51,10 @@ void MsgRefresh::set_data_msg  (DataMsg * data_msg)
 
 void * MsgRefresh::pack (MsgRefresh * msg)
 {
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH packing %p\n",
+	    CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
   if (msg->buffer_ != NULL) return msg->buffer_;
   int size = 0;
 
@@ -57,8 +63,7 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   int have_data = (msg->data_msg_ != NULL);
   if (have_data) {
     // data_msg_
-    const int data_size = msg->data_msg_->data_size();
-    size += data_size;
+    size += msg->data_msg_->data_size();
   }
 
   //--------------------------------------------------
@@ -108,6 +113,11 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   msg = new ((void*)msg) MsgRefresh;
   
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH unpacking %p\n",
+	    CkMyPe(),__FILE__,__LINE__,msg);
+#endif  
+
   msg->is_local_ = false;
 
   // 2. De-serialize message data from input buffer into the allocated
@@ -139,6 +149,10 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
 void MsgRefresh::update (Data * data)
 {
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH updating %p\n",
+	    CkMyPe(),__FILE__,__LINE__,this);
+#endif  
   if (data_msg_ == NULL) return;
 
   data_msg_->update(data,is_local_);

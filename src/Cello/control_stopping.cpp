@@ -93,6 +93,10 @@ void Block::stopping_begin_()
     CkCallback callback (CkIndex_Block::r_stopping_compute_timestep(NULL),
 			 thisProxy);
 
+#ifdef TRACE_CONTRIBUTE    
+    CkPrintf ("%s %s:%d DEBUG_CONTRIBUTE\n",
+	      name().c_str(),__FILE__,__LINE__); fflush(stdout);
+#endif    
     contribute(2*sizeof(double), min_reduce, CkReduction::min_double, callback);
 
   } else {
@@ -132,32 +136,35 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
 #ifdef CONFIG_USE_PROJECTIONS
   // COMMENTED OUT--BUGGY, projections_schedule_on() crashed with bad schedule_on object
-  // bool was_off = (simulation->projections_tracing() == false);
-  // bool was_on  = (simulation->projections_tracing() == true);
-  // Schedule * schedule_on = simulation->projections_schedule_on();
-  // Schedule * schedule_off = simulation->projections_schedule_off();
-  // bool turn_on  = schedule_on ? schedule_on->write_this_cycle(cycle_,time_) : false;
-  // bool turn_off = schedule_off ? schedule_off->write_this_cycle(cycle_,time_) : false;
 
-  // if (was_off && turn_on) {
+  bool was_off = (simulation->projections_tracing() == false);
+  bool was_on  = (simulation->projections_tracing() == true);
+  Schedule * schedule_on = simulation->projections_schedule_on();
+  Schedule * schedule_off = simulation->projections_schedule_off();
+  bool turn_on  = schedule_on ? schedule_on->write_this_cycle(cycle_,time_) : false;
+  bool turn_off = schedule_off ? schedule_off->write_this_cycle(cycle_,time_) : false;
 
-    // simulation->monitor()->print
-    //   ("Performance","turning projections logging ON\n");
+  static bool active = false;
+  if (!active && turn_on) {
+    active = true;
+    simulation->monitor()->print
+      ("Performance","turning projections logging ON\n");
 
     simulation->set_projections_tracing(true);
 
     traceBegin();
 
-  // } else if (was_on && turn_off) {
+  } else if (active && turn_off) {
+    active = false;
 
-  //   simulation->monitor()->print
-  //     ("Performance","turning projections logging OFF\n");
+    simulation->monitor()->print
+      ("Performance","turning projections logging OFF\n");
 
-  //   simulation->set_projections_tracing(false);
+    simulation->set_projections_tracing(false);
 
-  //   traceEnd();
+    traceEnd();
 
-  // }
+  }
 #endif
 
   stopping_balance_();
@@ -176,47 +183,18 @@ void Block::stopping_balance_()
   bool do_balance = (schedule && 
 		     schedule->write_this_cycle(cycle_,time_));
 
-#if !defined(TEMP_BALANCE_MANUAL) && !defined(TEMP_BALANCE_ATSYNC)
-  if (do_balance) {
-    ERROR("Block::stopping_balance_()",
-	  "Load balancing called with neither "
-	  "TEMP_BALANCE_[MANUAL|ATSYNC] defined");
-  }
-#endif
-
-#if defined(TEMP_BALANCE_MANUAL) && defined(TEMP_BALANCE_ATSYNC)
-  if (do_balance) {
-    ERROR("Block::stopping_balance_()",
-	  "Load balancing called with both "
-	  "TEMP_BALANCE_[MANUAL|ATSYNC] defined");
-  }
-#endif
-
-#ifdef TEMP_BALANCE_MANUAL
-
-  if (do_balance && index_.is_root()) {
-
-       CkStartLB();
-
-  }    
-
-  stopping_exit_();
-
-#endif
-
-#ifdef TEMP_BALANCE_ATSYNC
-
   if (do_balance) {
 
-    control_sync(CkIndex_Main::p_stopping_balance(), sync_quiescence);
+    if (index_.is_root())
+      simulation()->monitor()->print ("Balance","staring load balance step");
+    
+    control_sync_quiescence (CkIndex_Main::p_stopping_balance());
 
   } else {
 
     stopping_exit_();
 
   }
-
-#endif
 
 }
 
@@ -233,7 +211,7 @@ void Block::p_stopping_balance()
   // monitor->set_mode(monitor_mode_all);
   // if (index().is_root()) monitor->print ("Balance","BEGIN");
   // monitor->set_mode(mode_saved);
-  
+
   AtSync();
   performance_stop_(perf_stopping);
 }
@@ -249,9 +227,10 @@ void Block::ResumeFromSync()
   // monitor->set_mode(mode_saved);
   
   TRACE_STOPPING("Block::balance_exit");
-
-  if (index_.is_root()) thisProxy.doneInserting();
-
+ 
+  if (index_.is_root()) {
+    thisProxy.doneInserting();
+  }
   stopping_exit_();
 
 }

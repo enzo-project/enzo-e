@@ -9,7 +9,7 @@
 // #define DEBUG_OUTPUT
 
 #ifdef DEBUG_OUTPUT
-#  define TRACE_OUTPUT(M) printf ("TRACE Output %s:%d %d " M "\n", __FILE__,__LINE__,CkMyPe()); fflush(stdout);
+#  define TRACE_OUTPUT(M) CkPrintf ("%d TRACE_OUTPUT %s\n", CkMyPe(), M); fflush(stdout);
 #else
 #  define TRACE_OUTPUT(M) /*  */
 #endif
@@ -21,88 +21,120 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+//======================================================================
+// NEW OUTPUT
+//======================================================================
+
+void Block::new_output_begin_ ()
+{
+  TRACE_OUTPUT("Block::new_output_begin_()");
+  simulation() -> new_output_start();
+}
+
 //----------------------------------------------------------------------
 
-void Block::output_begin_ ()
+void Block::new_output_write_block()
 {
-  TRACE_OUTPUT("Block::output_begin_()");
+  TRACE_OUTPUT("Block::new_output_write_block_()");
+}
 
-  // Determine if there is any output this cycle
+//----------------------------------------------------------------------
 
-  simulation()->set_phase(phase_output);
+void Simulation::new_output_start()
+{
+  TRACE_OUTPUT("Simulation::new_output_start()");
+  if (sync_new_output_start_.next()) {
+    TRACE_OUTPUT("Simulation::new_output_start() continuing\n");
+    problem()->output_reset();
+    problem()->new_output_next(this);
+  }
+}
 
-  int cycle   = simulation()->cycle();
-  double time = simulation()->time();
+//----------------------------------------------------------------------
 
-  Output * output;
+void Problem::new_output_next(Simulation * simulation) throw()
+{
+  TRACE_OUTPUT("Problem::new_output_next()");
+  int cycle   = simulation->cycle();
+  double time = simulation->time();
 
-  int index_output = -1;
+  Output * output = NULL;
+
+  // Find next schedule output (index_output_ initialized to -1)
 
   do {
 
-    output = simulation()->problem()->output(++index_output);
+    output = this->output(++index_output_);
 
   } while (output && ! output->is_scheduled(cycle, time));
 
+  // assert (! output) || ( output->is_scheduled() )
+
+  // print blocks on this process to check block_vec_ array
+
+  Hierarchy * hierarchy = simulation->hierarchy();
+  for (int i=0; i<hierarchy->num_blocks(); i++) {
+    CkPrintf ("%d Block %d = %s\n",CkMyPe(),i,
+	      hierarchy->block(i)->name().c_str());
+  }
   if (output != NULL) {
 
-    // Start output if any...
+    if (output->is_writer()) {
+      TRACE_OUTPUT("Problem::new_output_next: is_writer==true");
+    } else {
+      TRACE_OUTPUT("Problem::new_output_next: is_writer==false: barrier");
+    }
 
-    simulation() -> begin_output();
+    
+    // open file if writer
+    output->init();
+    output->open();
+    output->write_simulation(simulation);
+    output->next();
+
 
   } else {
 
-    // ...otherwise continue with next phase
+    // ...otherwise exit output phase
 
-    output_exit_();
+    TRACE_OUTPUT("Problem::new_output_next(): calling output_exit()");
+    simulation->output_exit();
 
   }
 }
 
+//======================================================================
+// OLD OUTPUT
+//======================================================================
+
+void Block::output_begin_ ()
+{
+  TRACE_OUTPUT("output_begin_()");
+  simulation() -> output_enter();
+}
+
 //----------------------------------------------------------------------
 
-void Simulation::begin_output ()
+void Simulation::output_enter ()
 {
+  TRACE_OUTPUT("Simulation::output_enter()");
 
-  TRACE_OUTPUT("Simulation::begin_output()");
-
-  // Switching from Block to Simulation: wait for last Block
-
+  // Switch from Block to Simulation parallelism
   if (sync_output_begin_.next()) {
+    performance_->start_region(perf_output);
+    set_phase(phase_output);
 
-    // Barrier
+    problem()->output_reset();
+    problem()->output_next(this);
 
-    TRACE_OUTPUT("Block::output_begin() calling Simulation::r_output()");
-    // --------------------------------------------------
-    //    CkCallback callback (CkIndex_Simulation::r_output(NULL), thisProxy);
-    //    contribute(0,0,CkReduction::concat,callback);
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    simulation->r_output(NULL);
-    // --------------------------------------------------
+    performance_->stop_region(perf_output);
   }
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::r_output(CkReductionMsg * msg)
-{
-  performance_->start_region(perf_output);
-  TRACE_OUTPUT("Simulation::r_output()");
-
-  delete msg;
-
-  // start first output
-
-  problem()->output_reset();
-  problem()->output_next(this);
-  performance_->stop_region(perf_output);
 }
 
 //----------------------------------------------------------------------
 
 void Problem::output_next(Simulation * simulation) throw()
 {
-
   TRACE_OUTPUT("Problem::output_next()");
 
   simulation->set_phase(phase_output);
@@ -112,7 +144,7 @@ void Problem::output_next(Simulation * simulation) throw()
 
   Output * output;
 
-  // Find next schedule output
+  // Find next schedule output (index_output_ initialized to -1)
 
   do {
 
@@ -120,14 +152,21 @@ void Problem::output_next(Simulation * simulation) throw()
 
   } while (output && ! output->is_scheduled(cycle, time));
 
+  // assert (! output) || ( output->is_scheduled() )
+  
   if (output != NULL) {
 
+    output->next();  // update Output's schedule
+    
     // Perform output if any...
 
-    output->init();
-    output->open();
-    output->write_simulation(simulation);
-    output->next();
+    const int stride = output->stride_wait();
+
+    if ((CkMyPe() % stride) == 0) {
+
+      simulation->output_start (index_output_);
+
+    }
 
   } else {
 
@@ -140,11 +179,31 @@ void Problem::output_next(Simulation * simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Block::p_output_write (int index_output)
+void Simulation::output_start(int index_output)
 {
-  performance_start_ (perf_output);
+  TRACE_OUTPUT("Simulation::output_start()");
+  Output * output = problem()->output(index_output);
+  output->init();
+  output->open();
+  output->write_simulation(this);
+
+  //  ERROR if this is moved here from Output::write_hierarchy()
+  //        in OutputCheckpoint since that overrides write_hierarchy()
+  //        to not call Output::write_hierarchy_(), which calls
+  //        Block::p_output_write()
   
-  TRACE_OUTPUT("Block::p_output_write()");
+  //  if (CkMyPe() == 0) {
+  //    hierarchy_->block_array().p_output_write(index_output,0);
+  //  }
+
+}
+
+//----------------------------------------------------------------------
+
+void Block::p_output_write (int index_output, int step)
+{
+  TRACE_OUTPUT("Simulation::p_output_write()");
+  performance_start_ (perf_output);
 
   FieldDescr * field_descr = simulation()->field_descr();
   ParticleDescr * particle_descr = simulation()->particle_descr();
@@ -161,13 +220,10 @@ void Block::p_output_write (int index_output)
 void Simulation::write_()
 {
   TRACE_OUTPUT("Simulation::write_()");
+
   if (sync_output_write_.next()) {
 
-    // --------------------------------------------------
-    //    CkCallback callback (CkIndex_Simulation::r_write(NULL), thisProxy);
-    //    contribute(0,0,CkReduction::concat,callback);
     r_write(NULL);
-    // --------------------------------------------------
 
   }
 }
@@ -176,11 +232,9 @@ void Simulation::write_()
 
 void Simulation::r_write(CkReductionMsg * msg)
 {
-  create_checkpoint_link();
   performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_write()");
   delete msg;
-
   problem()->output_wait(this);
   performance_->stop_region(perf_output);
 }
@@ -191,6 +245,7 @@ void Simulation::r_write_checkpoint()
 {
   performance_->start_region(perf_output);
   TRACE_OUTPUT("Simulation::r_write_checkpoint()");
+  create_checkpoint_link();
   problem()->output_wait(this);
   performance_->stop_region(perf_output);
 }
@@ -203,14 +258,13 @@ void Problem::output_wait(Simulation * simulation) throw()
   
   Output * output = this->output(index_output_);
 
-  int ip       = CkMyPe();
-  int ip_writer = output->process_writer();
+  const int ip = CkMyPe();
+  const int np = CkNumPes();
+  const int ip_write = output->process_writer();
 
-  if (ip == ip_writer) {
+  if (ip == ip_write) {
 
-    // --------------------------------------------------
-    proxy_simulation[ip].p_output_write(0,0);
-    // --------------------------------------------------
+    output_write(simulation,0,0);
 
   } else {
 
@@ -219,18 +273,22 @@ void Problem::output_wait(Simulation * simulation) throw()
     // Copy / alias buffer array of data to send
     output->prepare_remote(&n,&buffer);
 
-    // Remote call to receive data
-    // --------------------------------------------------
-    proxy_simulation[ip_writer].p_output_write (n, buffer);
-    // --------------------------------------------------
+    // Send data to writing process
+    proxy_simulation[ip_write].p_output_write (n, buffer);
+
+    // Deallocate buffer
+    output->cleanup_remote(&n,&buffer);
 
     output->close();
-    output->cleanup_remote(&n,&buffer);
     output->finalize();
     output_next(simulation);
-
+    
+    const int stride = output->stride_wait();
+    const int ip_next = ip+1;
+    if (ip_next%stride != 0 && ip_next < np) {
+      proxy_simulation[ip_next].p_output_start(index_output_);
+    }
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -257,11 +315,23 @@ void Problem::output_write
     output->update_remote(n, buffer);
   }
 
-  // ERROR HERE ON RESTART WITH DIFFERENT +p
   if (output->sync_write()->next()) {
+
+    TRACE_OUTPUT("Problem::output_write(): sync_write()->next() = true");
+
     output->close();
     output->finalize();
     output_next(simulation);
+
+    const int stride = output->stride_wait();
+    const int ip = CkMyPe();
+    const int ip_next = ip+1;
+    const int np = CkNumPes();
+    if (ip_next%stride != 0 && ip_next < np) {
+      proxy_simulation[ip_next].p_output_start(index_output_);
+    }
+  } else {
+    TRACE_OUTPUT("Problem::output_write(): sync_write()->next() = false");
   }
 
 }
@@ -272,11 +342,10 @@ void Simulation::output_exit()
 {
   TRACE_OUTPUT("Simulation::output_exit()");
 
-  // reset debug output files to limit file size
   debug_close();
   debug_open();
 
-  if (CkMyPe() == 0) hierarchy()->block_array()->p_output_end();
+  if (CkMyPe() == 0) hierarchy()->block_array().p_output_end();
 }
 
 //----------------------------------------------------------------------
@@ -285,10 +354,10 @@ void Block::p_output_end()
 {
   performance_start_(perf_output);
   TRACE_OUTPUT("Block::p_output_end()");
-  output_exit_();
   performance_stop_(perf_output);
-  // control_sync(CkIndex_Block::r_stopping_enter(NULL),sync_barrier);
+  output_exit_();
 }
+
 //======================================================================
 
 

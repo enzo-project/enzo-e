@@ -1,0 +1,358 @@
+ Adapt {
+     SLOPE {
+         field_list = [ "density" ];
+         max_coarsen = 2.0;
+         min_refine = 5.0;
+         type = "slope";
+     };
+     list = [ "SLOPE" ];
+     max_level = 0;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+ Domain {
+     lower = [ 0.0, 0.0, 0.0 ];
+     upper = [ 1.0, 1.0, 1.0 ];
+ }
+
+ Field {
+     history = 1;
+     alignment = 8;
+     gamma = 1.6667;
+     ghost_depth = 3;
+     list = [ "density",
+     	      "velocity_x", "velocity_y", "velocity_z",
+     	      "acceleration_x", "acceleration_y", "acceleration_z",
+	      "total_energy", "internal_energy", "pressure",
+     	  "density_total", "X", "B", "potential", "density_gas",
+	       "density_particle", "density_particle_accumulate"];
+     padding = 0;
+ }
+
+ Initial {
+     list = [ "value", "music", "cosmology" ];
+     music {
+         FD {
+             coords = "tzyx";
+             dataset = "GridDensity";
+             dimensions = "Dimensions";
+             file = "input/GridDensity";
+             name = "density";
+             type = "field";
+         };
+         FVX {
+             coords = "tzyx";
+             dataset = "GridVelocities_x";
+             dimensions = "Dimensions";
+             file = "input/GridVelocities_x";
+             name = "velocity_x";
+             type = "field";
+         };
+         FVY {
+             coords = "tzyx";
+             dataset = "GridVelocities_y";
+             dimensions = "Dimensions";
+             file = "input/GridVelocities_y";
+             name = "velocity_y";
+             type = "field";
+         };
+         FVZ {
+             coords = "tzyx";
+             dataset = "GridVelocities_z";
+             dimensions = "Dimensions";
+             file = "input/GridVelocities_z";
+             name = "velocity_z";
+             type = "field";
+         };
+         PVX {
+             attribute = "vx";
+             coords = "tzyx";
+             dataset = "ParticleVelocities_x";
+             file = "input/ParticleVelocities_x";
+             name = "dark";
+             type = "particle";
+         };
+         PVY {
+             attribute = "vy";
+             coords = "tzyx";
+             dataset = "ParticleVelocities_y";
+             file = "input/ParticleVelocities_y";
+             name = "dark";
+             type = "particle";
+         };
+         PVZ {
+             attribute = "vz";
+             coords = "tzyx";
+             dataset = "ParticleVelocities_z";
+             file = "input/ParticleVelocities_z";
+             name = "dark";
+             type = "particle";
+         };
+         PX {
+             attribute = "x";
+             coords = "tzyx";
+             dataset = "ParticleDisplacements_x";
+             file = "input/ParticleDisplacements_x";
+             name = "dark";
+             type = "particle";
+         };
+         PY {
+             attribute = "y";
+             coords = "tzyx";
+             dataset = "ParticleDisplacements_y";
+             file = "input/ParticleDisplacements_y";
+             name = "dark";
+             type = "particle";
+         };
+         PZ {
+             attribute = "z";
+             coords = "tzyx";
+             dataset = "ParticleDisplacements_z";
+             file = "input/ParticleDisplacements_z";
+             name = "dark";
+             type = "particle";
+         };
+         file_list = [ "FD", "FVX", "FVY", "FVZ", "PX", "PY", "PZ", "PVX", "PVY", "PVZ" ];
+     }
+ }
+
+ Mesh {
+     root_rank = 3;
+     root_size = [ 32, 32, 32 ];
+ }
+
+ Method {
+     list = [ "comoving_expansion",
+              "cosmology",
+              "pm_deposit",
+	      "gravity",
+	      "ppm",
+	      "pm_update"
+	      ];
+     ppm {
+         courant = 0.5000000000000000;
+         dual_energy = true;
+	 diffusion = false;
+     }
+     gravity {
+     	solver = "cg";
+        grav_const = 1.0;
+    }
+ }
+
+ Solver {
+    list = ["cg"];
+    cg {
+       type = "cg";
+       iter_max = 100;
+       res_tol = 1e-6;
+       monitor_iter = 10;
+    }
+ } 
+ Output {
+     list = [ "de", "vx", "vy", "vz", "ax", "ay", "az", "po", "dt", "dark", "hdf5" ];
+     dark {
+         image_size = [ 256, 256 ];
+         image_type = "data";
+         name = [ "dark-222-%02d.png", "count" ];
+         particle_list = [ "dark" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     de {
+#         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
+         field_list = [ "density" ];
+         image_size = [ 256, 256 ];
+         image_specify_bounds = true;
+         image_type = "data";
+         name = [ "de-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     dt {
+#         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
+         field_list = [ "density_total" ];
+         image_size = [ 256, 256 ];
+         image_specify_bounds = true;
+         image_type = "data";
+         name = [ "dt-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     po {
+#         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
+         field_list = [ "potential" ];
+         image_size = [ 256, 256 ];
+         image_specify_bounds = true;
+         image_type = "data";
+         name = [ "po-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     hdf5 {
+         particle_list = ["dark"];
+     field_list = [ "density",
+     	      "velocity_x", "velocity_y", "velocity_z",
+     	      "acceleration_x", "acceleration_y", "acceleration_z",
+	      "total_energy", "internal_energy", "pressure",
+     	  "density_total", "X", "B", "potential"];
+         name = [ "data-222-%02d.h5", "count" ];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "data";
+     };
+     vx {
+#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
+         field_list = [ "velocity_x" ];
+         image_size = [ 256, 256 ];
+         image_type = "data";
+         name = [ "vx-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     vy {
+#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
+         field_list = [ "velocity_y" ];
+         image_size = [ 256, 256 ];
+         image_type = "data";
+         name = [ "vy-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     vz {
+#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
+         field_list = [ "velocity_z" ];
+         image_size = [ 256, 256 ];
+         image_type = "data";
+         name = [ "vz-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     ax {
+#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
+         field_list = [ "acceleration_x" ];
+         image_size = [ 256, 256 ];
+         image_type = "data";
+         name = [ "ax-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     ay {
+#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
+         field_list = [ "acceleration_y" ];
+         image_size = [ 256, 256 ];
+         image_type = "data";
+         name = [ "ay-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     az {
+#         colormap = [ 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ];
+         field_list = [ "acceleration_z" ];
+         image_size = [ 256, 256 ];
+         image_type = "data";
+         name = [ "az-222-%02d.png", "count" ];
+	 image_lower = [0.0, 0.0, 0.5];
+	 image_upper = [1.0, 1.0, 0.5];
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
+ }
+
+ Particle {
+     list = [ "dark" ];
+     dark {
+         attributes = [ "x", "single",
+	 	        "y", "single",
+			"z", "single",
+			"vx", "single",
+			"vy", "single",
+			"vz", "single",
+			"ax", "single",
+			"ay", "single",
+			"az", "single" ];
+         position = [ "x", "y", "z" ];
+	 velocity = [ "vx", "vy", "vz" ];
+         constants = [ "mass", "single", .8382456140 ];
+
+     }
+ }
+
+ Physics {
+     list = [ "cosmology" ];
+     cosmology {
+        omega_baryon_now    = 0.0461;
+        omega_cdm_now       = 0.2389;
+        omega_matter_now    = 0.285;
+        omega_lambda_now    = 0.715;
+        hubble_constant_now = 0.695;
+        max_expansion_rate  = 0.015;
+        initial_redshift    = 50.0;
+        final_redshift      = 0.0;
+	comoving_box_size   = 32.0;
+     }
+ }
+
+ Stopping {
+     cycle = 20;
+     redshift = 43.0;
+ }
+
+ Testing {
+     cycle_final = 10; # redshift = 43.0;
+     time_final  = 1.01998152194867;  # 10 cycles
+ }
+ 

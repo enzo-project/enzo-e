@@ -19,22 +19,35 @@ printf ("%s",$dir);
    </head>
    <body>
    <h1>Enzo-P / Cello Test Results</h1>
-   <table>
-     <tr><th class=cello colspan=2><center><b>Enzo-P/Cello</b></center></th>
-         <th class=charm colspan="2"><center><b>Charm++</b></center></th>
-     </tr>
-    <tr> <th class=cello> directory </th> <td class=cello> <?php printf ($dir) ?></td>
-        <th class=charm> build </th> <td class=charm><?php system ("cat CHARM_BUILD") ?> </td>
-   <tr> <th class=cello> branch </th> <td class=cello align="left"> <?php system ("hg branch") ?></td> 
-        <th class=charm> version </th> <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
-        </tr>
-   <tr> <th class=cello> revision </th>  <td class=cello> <?php system ("hg id -n") ?> </td>
-    <th></th><td></td>
+<table>
+<tr>
+<th class=cello colspan=2><center><b>Enzo-P/Cello</b></center></th>
+    <th class=charm colspan="2"><center><b>Charm++</b></center></th>
     </tr>
-<tr>         <th class=time ><center><b>Time</b></center></th>
-        <td class=time> <?php system ("cat DATE") ?></td> 
-     <td class=time> <?php system ("cat START") ?></td>
-    <td class=time> <?php system ("cat TIME") ?> min</td></tr>    
+    <tr>
+    <th class=cello> <b>branch</b> </th>
+    <td class=cello align="left"> <?php system ("hg branch") ?></td> 
+    <th class=charm> <b>build</b> </th>
+    <td class=charm><?php system ("cat CHARM_BUILD") ?> </td>
+    </tr>
+    <tr>
+    <th class=cello> <b>revision</b> </th>
+    <td class=cello> <?php system ("hg id -n") ?> </td>
+    <th class=charm> <b>version</b> </th>
+    <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
+    </tr>
+    <tr>
+    <th class=cello> <b><code>CELLO_PREC</code></b></th>
+    <td class=cello> <?php system ("cat PREC") ?></td>
+    <th class=time ><center><b>date</b></center></th>
+    <td class=time> <?php system ("cat DATE") ?></td> 
+    </tr>
+    <tr>
+    <th class=cello> <b><code>CELLO_ARCH</code></b> </th>
+    <td class=cello> <?php system ("cat ARCH") ?></td>
+    <th class=time ><center><b>time</b></center></th>
+    <td class=time> <?php system ("cat START") ?></td>
+    </tr>    
    </table>
    <?php
 
@@ -42,6 +55,12 @@ printf ("%s",$dir);
 
    function test_group($testgroup) {
      printf ("<hr><a name=\"$testgroup\"><h2>$testgroup</h2>");
+     }
+
+     //----------------------------------------------------------------------
+
+   function test_subgroup($testgroup) {
+     printf ("<h3>$testgroup</h3>");
      }
 
      //----------------------------------------------------------------------
@@ -484,6 +503,52 @@ function test_table ($file_root,$size_array, $types)
   echo "</table></br>";
 }
 
+function test_table_dir ($file_root,$dir,$size_array, $types)
+{
+  $show_flash = 0;
+  $show_gif = 0;
+
+  echo "<table>";
+  echo "<tr>";
+  //  echo "<th>$file_root</th>";
+  if ($show_gif) echo "<th>gif</th>";
+  if ($show_flash) echo "<th>animation</th>";
+  for ($j = 0; $j < sizeof($size_array); ++$j) {
+    $size = $size_array[$j];
+    printf ("<th>$size</th>");
+  }
+  echo "</tr>";
+  printf ("\n");
+  for ($i = 0; $i < sizeof($types); ++$i) {
+    echo "<tr>";
+    $type = $types[$i];
+    //     	printf ("<th>$type</th>\n"); 
+    // Show movie file if available
+    if ($show_gif) {
+      echo "<td> <img width=160 src=$file_root.gif></img></td>";
+    }
+    if ($show_flash) {
+      echo "<td>";
+      $swf_file = "$type/$file_root.swf"; 
+      $size_last = $size_array[sizeof($size_array)-1]; 
+      $png_file_last = "$dir/$file_root-$size_last.png"; 
+      swf_movie($swf_file, 
+		$png_file_last, 
+		160); 
+      echo "</td>";
+    }
+    // Show available image frames
+    for ($j = 0; $j < sizeof($size_array); ++$j) {
+      $size = $size_array[$j];
+      $png_file = "$dir/$file_root-$size.png"; 
+
+      printf ("<td><img width=160 src=$png_file></img></td>\n");  
+    }  
+    echo "</tr>";  
+  }
+  echo "</table></br>";
+}
+
 function binary ($value,$count)
 {
   $strval = "";
@@ -614,6 +679,10 @@ test_summary("Method: gravity",
 	     array("method_gravity_cg-1","method_gravity_cg-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
+test_summary("Method: cosmology",
+	     array("method_cosmology-1","method_cosmology-8"),
+	     array("enzo-p",  "enzo-p"),'test');
+
 test_summary("Checkpoint",
 	     array("checkpoint_ppm-1","checkpoint_ppm-8","restart_ppm-1","restart_ppm-8"),
 	     array("enzo-p",  "enzo-p", "enzo-p", "enzo-p"),'test');
@@ -643,8 +712,18 @@ test_summary("Boundary",
 
 
 test_summary("Initial", 
-	     array("initial_png"),
-	     array("enzo-p"),'test');
+         array("initial_png",
+         "initial_music-111",
+         "initial_music-222",
+         "initial_music-444",
+         "initial_music-211",
+         "initial_music-121",
+         "initial_music-112",
+         "initial_music-411",
+         "initial_music-141",
+         "initial_music-114"
+         ),
+         array("enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p", "enzo-p"),'test');
 
 test_summary("Output", 
 	     array("output-stride-1","output-stride-2","output-stride-4"),
@@ -660,8 +739,10 @@ printf ("<tr><td class=center></td><td class=center colspan=5><em><a href=\"#cel
 //----------------------------------------------------------------------
 
 
-test_summary("Disk",array(     "FileHdf5",     "FileIfrit"),
-	     array("test_FileHdf5","test_FileIfrit"),'test'); 
+test_summary("Colormap",array("Colormap"),
+	     array("test_Colormap"),'test'); 
+test_summary("Disk",array("FileHdf5"),
+	     array("test_FileHdf5"),'test'); 
 test_summary("Error",array(    "Error"),
 	     array("test_Error"),'test'); 
 test_summary("Field",
@@ -671,8 +752,7 @@ test_summary("Field",
 test_summary("Memory",array("Memory"),
 	     array("test_Memory"),'test'); 
 test_summary("Mesh",
-	     array("Hierarchy",
-		   "Data",
+	     array("Data",
 		   "Index",
 		   "Tree",
 		   "ItFace",
@@ -680,8 +760,7 @@ test_summary("Mesh",
 		   "Node",
 		   "NodeTrace",
 		   "ItNode"),
-	     array("test_Hierarchy",
-		   "test_Data",
+	     array("test_Data",
 		   "test_Index",
 		   "test_Tree",
 		   "test_ItFace",
@@ -700,12 +779,16 @@ test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer"),'test'); 
 test_summary("Problem",array("Mask","Refresh","Value"),
 	     array("test_Mask","test_Refresh","test_Value"),'test'); 
+test_summary("Prolong",array("prolong_linear"),
+	     array("test_ProlongLinear"),'test'); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule"),'test'); 
 test_summary("Type",array("Type"),
 	     array("test_Type"),'test'); 
-test_summary("Colormap",array("Colormap"),
-	     array("test_Colormap"),'test'); 
+test_summary("Units", 
+	     array("EnzoUnits"),
+	     array("test_EnzoUnits"),'test');
+
 
 printf ("</tr></table></br>\n");
 
@@ -913,6 +996,78 @@ end_hidden("method_gravity_cg-8");
 
 //======================================================================
 
+test_group("Method: cosmology");
+
+?>
+
+Method-cosmology tests serve to test basic functionality of the "cosmology" method
+in Enzo-P.
+
+</p>
+
+<?php
+
+
+  begin_hidden("method_cosmology-1", "COSMOLOGY (serial)");
+
+tests("Enzo","enzo-p","test_method_cosmology-1","COSMOLOGY 1 block","");
+
+test_table_dir ("cosmo-111", "Dir_COSMO1-0000",
+array("de-00",
+"dark-00",
+"po-00",
+"vx-00",
+"vy-00",
+"vz-00",
+"ax-00",
+"ay-00",
+"az-00"),
+$types);
+test_table_dir ("cosmo-111", "Dir_COSMO1-0001",
+array("de-01",
+"dark-01",
+"po-01",
+"vx-01",
+"vy-01",
+"vz-01",
+"ax-01",
+"ay-01",
+"az-01"),
+$types);
+
+end_hidden("method_cosmology-1");
+
+begin_hidden("method_cosmology-8", "COSMOLOGY (parallel)");
+
+tests("Enzo","enzo-p","test_method_cosmology-8","COSMOLOGY 8 blocks","");
+
+test_table_dir ("cosmo-222", "Dir_COSMO8-0000",
+array("de-00",
+"dark-00",
+"po-00",
+"vx-00",
+"vy-00",
+"vz-00",
+"ax-00",
+"ay-00",
+"az-00"),
+$types);
+test_table_dir ("cosmo-222", "Dir_COSMO8-0001",
+array("de-01",
+"dark-01",
+"po-01",
+"vx-01",
+"vy-01",
+"vz-01",
+"ax-01",
+"ay-01",
+"az-01"),
+$types);
+
+end_hidden("method_cosmology-8");
+
+//======================================================================
+
 test_group("Checkpoint");
 
 begin_hidden("checkpoint_ppm-1","Checkpoint/Restart (serial)");
@@ -1100,11 +1255,34 @@ end_hidden("boundary_outflow_3d");
 
 test_group("Initial");
 
+test_subgroup ("InitialValue with PNG mask");
 begin_hidden("initial_mask","png mask initial conditions");
 
 tests("Enzo","enzo-p","test_initial_png","","");
 test_table ("initial_png",
 	    array("00","10","20","30","40", "50"), $types);
+end_hidden("initial_mask");
+
+test_subgroup ("EnzoInitialMusic");
+begin_hidden("initial_music-111","MUSIC initial conditions");
+
+tests("Enzo","enzo-p","test_initial_music-111","MUSIC (1,1,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-222","MUSIC (2,2,2) blocking","");
+tests("Enzo","enzo-p","test_initial_music-444","MUSIC (4,4,4) blocking","");
+tests("Enzo","enzo-p","test_initial_music-211","MUSIC (2,1,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-121","MUSIC (1,2,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-112","MUSIC (1,1,2) blocking","");
+tests("Enzo","enzo-p","test_initial_music-411","MUSIC (4,1,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-141","MUSIC (1,4,1) blocking","");
+tests("Enzo","enzo-p","test_initial_music-114","MUSIC (1,1,4) blocking","");
+test_table ("de",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
+test_table ("vx",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
+test_table ("vy",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
+test_table ("dark",
+array("111-00","222-00","444-00","211-00","121-00","112-00","411-00","141-00","114-00"), $types);
 end_hidden("initial_mask");
 
 //----------------------------------------------------------------------
@@ -1175,9 +1353,6 @@ test_group("Disk");
 begin_hidden("disk_hdf5", "HDF5");
 tests("Cello","test_FileHdf5", "test_FileHdf5","","");
 end_hidden("disk_hdf5");
-begin_hidden("disk_ifrit", "IFRIT");
-tests("Cello","test_FileIfrit","test_FileIfrit","","");
-end_hidden("disk_ifrit");
 
 //----------------------------------------------------------------------
 
@@ -1225,9 +1400,6 @@ end_hidden("memory");
 
 test_group("Mesh");
 
-begin_hidden("hierarchy", "Hierarchy");
-tests("Cello","test_Hierarchy","test_Hierarchy","",""); 
-end_hidden("hierarchy");
 begin_hidden("data", "Data");
 tests("Cello","test_Data","test_Data","",""); 
 end_hidden("data");
@@ -1330,6 +1502,14 @@ end_hidden("value");
 
 //----------------------------------------------------------------------
 
+test_group("Prolong");
+
+begin_hidden("prolong", "ProlongLinear");
+tests("Cello","test_ProlongLinear",  "test_prolong_linear","ProlongLinear","");
+end_hidden("Prolong");
+
+//----------------------------------------------------------------------
+
 test_group("Schedule");
 
 begin_hidden("schedule", "Schedule");
@@ -1345,6 +1525,13 @@ begin_hidden("type", "Type");
 tests("Cello","test_Type","test_Type","","");
 end_hidden("type");
 
+//----------------------------------------------------------------------
+
+test_group("Units");
+
+begin_hidden("enzo_units", "HDF5");
+tests("Enzo","test_EnzoUnits", "test_EnzoUnits","","");
+end_hidden("enzo_units");
 
 //----------------------------------------------------------------------
 

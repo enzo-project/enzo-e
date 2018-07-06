@@ -174,7 +174,6 @@ void EnzoInitialCollapse::enforce_block
 	    double y = bym + (iy - gy + 0.5)*hy - yc;
 	    for (int ix=0; ix<mx; ix++) {
 	      double x = bxm + (ix - gx + 0.5)*hx - xc;
-	      double r2 = x*x + y*y + z*z;
 
 	      int i = INDEX(ix,iy,iz,mx,my);
 

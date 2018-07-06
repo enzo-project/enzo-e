@@ -24,7 +24,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodPpml (CkMigrateMessage *m)
-    : comoving_coordinates_(false)
+    : Method (m),
+      comoving_coordinates_(false)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -41,7 +42,7 @@ public: // interface
 
 protected: // interface
 
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_METHOD_PPML_HPP */

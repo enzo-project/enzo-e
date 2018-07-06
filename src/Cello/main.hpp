@@ -110,7 +110,6 @@ public:
 			 int nf, char * file,
 			 int nl, char * line,
 			 int count);
-  void p_balance();
   void p_stopping_exit();
   void p_exit();
 

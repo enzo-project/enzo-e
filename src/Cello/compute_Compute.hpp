@@ -27,6 +27,8 @@ public: // interface
   /// Charm++ PUP::able declarations
   PUPable_abstract(Compute);
 
+  Compute(CkMigrateMessage *m) : PUP::able(m) { }
+
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   { TRACEPUP;

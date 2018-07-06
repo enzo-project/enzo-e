@@ -25,7 +25,7 @@
  
 int EnzoBlock::ComputePressure(enzo_float time, 
 			       enzo_float *pressure,
-			       int comoving_coordinates)
+			       bool comoving_coordinates)
 {
 
   const int in = cello::index_static();
@@ -138,7 +138,6 @@ int EnzoBlock::ComputePressure(enzo_float time,
  
     enzo_float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
       GammaInverse = 1.0/(Gamma[in]-1.0), x, Gamma1, temp;
-    enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     /* Find Multi-species fields. */
 
@@ -158,23 +157,11 @@ int EnzoBlock::ComputePressure(enzo_float time,
 
     /* Find the temperature units if we are using comoving coordinates. */
 
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-      simulation()->problem()->physics("cosmology");
+    EnzoUnits * units = (EnzoUnits *) simulation()->problem()->units();
 
-    ASSERT ("EnzoBlock::ComputePressure()",
-	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	    ! (comoving_coordinates && (cosmology != NULL)) );
+    units->set_current_time (time);
     
-    if (comoving_coordinates) {
-
-      cosmology->get_units
-	  (&DensityUnits,
-	   &LengthUnits,
-	   &TemperatureUnits,
-	   &TimeUnits,
-	   &VelocityUnits,
-	   time);
-    }
+    TemperatureUnits = units->temperature();
  
     for (i = 0; i < size; i++) {
  

@@ -74,11 +74,11 @@
    Stopping {        cycle = 400;   } 
    Testing {   cycle_final = 400; }
 
-# OLD TIME
-#   Testing {  time_final  = 1.03693807162344;  } 
-# TIME FOR UPDATED InitialDefault
-   Testing {  time_final  = 1.04044035614817; }
-
+   Testing {
+      time_final  = [1.04044035614817,   # OLD_PPM
+                     1.04069746122696];  # NEW_PPM
+   }
+   
    Output { 
 
       list = [ "density", "data" ];

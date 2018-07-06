@@ -24,7 +24,8 @@ public: // functions
 
   /// CHARM++ migration constructor
   ScheduleList(CkMigrateMessage *m) 
-    : cycle_list_(),
+    : Schedule(m),
+      cycle_list_(),
       time_list_(),
       seconds_list_()
   { }

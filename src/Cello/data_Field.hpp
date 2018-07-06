@@ -105,7 +105,7 @@ public: // interface
   { return field_descr_->field_count(); }
 
   /// Return name of the ith field
-  std::string field_name(size_t id) const throw()
+  std::string field_name(int id) const throw()
   { return field_descr_->field_name(id); }
 
   /// Return whether the field has been inserted
@@ -187,6 +187,28 @@ public: // interface
   /// Return time for given history
   double history_time (int ih) const
   { return field_data_->history_time (field_descr_,ih); }
+
+  //----------------------------------------------------------------------
+  // Units operations
+  //----------------------------------------------------------------------
+
+  /// scale the field to cgs units given the unit scaling factor
+  /// if it's already in cgs, then leave as-is
+  /// except if it's in cgs but the scaling factor has changed (e.g. due to
+  /// expansion) then adjust for the new scaling factor
+  void units_scale_cgs (int id, double amount)
+  { field_data_->units_scale_cgs (field_descr_,id,amount); }
+    
+  /// convert the field to "code units" given the unit scaling factor
+  /// if it's already in code units, leave it as-is
+  /// warning if scaling factor has changed
+  void units_scale_code (int id, double amount)
+  { field_data_->units_scale_code (field_descr_,id,amount); }
+
+  /// Return the current scaling factor of the given Field
+  /// 1.0 if in code units, or the scaling factor if in cgs
+  double units_scaling (const FieldDescr *, int id)
+  { return field_data_->units_scaling (field_descr_,id); }
 
   //==================================================
   // FieldData
@@ -290,15 +312,7 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  // BLAS Operations
-
-  // /// copy field is to field id
-  // void copy (int id, int is, bool ghosts = true ) throw()
-  // { field_data_->copy ( field_descr_, id,is,ghosts); }
-
-  /// Compute field(iz) =  a * field(ix) + field(iy)
-  void axpy (int iz, double a, int ix, int iy, bool ghosts = true ) throw()
-  { field_data_->axpy (field_descr_, iz,a,ix,iy,ghosts); }
+  // BLAS Operations [depreciated]
 
   /// Compute inner product field(ix) . field(iy)
   double dot (int ix, int iy) throw()

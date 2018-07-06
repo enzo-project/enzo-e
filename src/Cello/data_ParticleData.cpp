@@ -53,13 +53,9 @@ char * ParticleData::attribute_array (ParticleDescr * particle_descr,
 				      int it,int ia,int ib)
 {
 
-  bool in_range = true;
-  if ( !(0 <= it && it < particle_descr->num_types()) )
-    in_range = false;
-  if ( !(0 <= ib && ib < num_batches(it)) )
-    in_range = false;
-  if ( !(0 <= ia && ia < particle_descr->num_attributes(it)) )
-    in_range = false;
+  bool in_range =        (0 <= it && it < particle_descr->num_types());
+  in_range = in_range && (0 <= ia && ia < particle_descr->num_attributes(it));
+  in_range = in_range && (0 <= ib && ib < num_batches(it));
 
   char * array = NULL;
   if ( in_range ) {
@@ -237,12 +233,16 @@ void ParticleData::scatter
 {
   // count number of particles in each particle_array element
 
-  int np_array[n];
+  int * np_array = new int[n];
   for (int i=0; i<n; i++) np_array[i] = 0;
 
-  for (int ip=0; ip<np; ip++) {
-    if ((mask == NULL) || mask[ip]) {
+  if (mask == NULL) {
+    for (int ip=0; ip<np; ip++) {
       ++np_array[index[ip]];
+    }
+  } else {
+    for (int ip=0; ip<np; ip++) {
+      if (mask[ip]) ++np_array[index[ip]];
     }
   }
   
@@ -264,6 +264,8 @@ void ParticleData::scatter
     }
   }
 
+  delete [] np_array;
+  
   const bool interleaved = particle_descr->interleaved(it);
   const int na = particle_descr->num_attributes(it);
   int mp = particle_descr->particle_bytes(it);
@@ -553,9 +555,9 @@ bool ParticleData::velocity
  double * vx, double * vy, double * vz)
 {
   // If velocitys are floating-point, return the requested values directly
-  int ia_x = particle_descr->attribute_velocity(it,0);
-  int ia_y = particle_descr->attribute_velocity(it,1);
-  int ia_z = particle_descr->attribute_velocity(it,2);
+  const int ia_x = particle_descr->attribute_velocity(it,0);
+  const int ia_y = particle_descr->attribute_velocity(it,1);
+  const int ia_z = particle_descr->attribute_velocity(it,2);
   bool l_return = false;
   if (vx && (ia_x != -1)) {
     const int type_x = particle_descr->attribute_type(it,ia_x);
@@ -1021,7 +1023,7 @@ void ParticleData::resize_attribute_array_
     np = particle_descr->batch_size();
   }
 
-  size_t new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
+  long new_size = mp*(np) + (PARTICLE_ALIGN - 1) ;
 
   if (attribute_array_[it][ib].size() != new_size) {
 

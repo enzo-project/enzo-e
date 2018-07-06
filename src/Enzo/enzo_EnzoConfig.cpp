@@ -14,11 +14,11 @@ EnzoConfig g_enzo_config;
 
 EnzoConfig::EnzoConfig() throw ()
   :
+  adapt_mass_type(0),
 #ifdef CONFIG_USE_GRACKLE
   method_grackle_units(),
   method_grackle_chemistry(),
 #endif
-  ppm_density_floor(0.0),
   ppm_diffusion(false),
   ppm_dual_energy(false),
   ppm_dual_energy_eta_1(0.0),
@@ -26,32 +26,47 @@ EnzoConfig::EnzoConfig() throw ()
   ppm_flattening(0),
   ppm_minimum_pressure_support_parameter(0),
   ppm_number_density_floor(0.0),
+  ppm_density_floor(0.0),
   ppm_pressure_floor(0.0),
   ppm_pressure_free(false),
-  ppm_steepening(false),
   ppm_temperature_floor(0.0),
+  ppm_steepening(false),
   ppm_use_minimum_pressure_support(false),
   ppm_mol_weight(0.0),
   field_gamma(0.0),
   physics_cosmology(false),
   physics_cosmology_hubble_constant_now(0.0),
   physics_cosmology_omega_matter_now(0.0),
-  physics_cosmology_omega_dark_matter_now(0.0),
   physics_cosmology_omega_lamda_now(0.0),
+  physics_cosmology_omega_baryon_now(1.0),
+  physics_cosmology_omega_cdm_now(0.0),
   physics_cosmology_comoving_box_size(0.0),
   physics_cosmology_max_expansion_rate(0.0),
   physics_cosmology_initial_redshift(0.0),
   physics_cosmology_final_redshift(0.0),
-  // EnzoInitialPm
-  initial_pm_field(""),
-  initial_pm_mpp(0.0),
-  initial_pm_level(0),
+  physics_gravity(false),
+  // EnzoInitialCosmology
+  initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
   initial_collapse_rank(0),
   initial_collapse_radius_relative(0.0),
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
+  // EnzoInitialMusic
+  initial_music_field_files(),
+  initial_music_field_datasets(),
+  initial_music_field_names(),
+  initial_music_field_coords(),
+  initial_music_particle_files(),
+  initial_music_particle_datasets(),
+  initial_music_particle_coords(),
+  initial_music_particle_types(),
+  initial_music_particle_attributes(),
+  // EnzoInitialPm
+  initial_pm_field(""),
+  initial_pm_mpp(0.0),
+  initial_pm_level(0),
   // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
@@ -82,15 +97,41 @@ EnzoConfig::EnzoConfig() throw ()
   interpolation_method(""),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
+  // EnzoMethodHydro
+  method_hydro_method(""),
+  method_hydro_dual_energy(false),
+  method_hydro_dual_energy_eta_1(0.0),
+  method_hydro_dual_energy_eta_2(0.0),
+  method_hydro_reconstruct_method(""),
+  method_hydro_reconstruct_conservative(0),
+  method_hydro_reconstruct_positive(0),
+  method_hydro_riemann_solver(""),
   // EnzoMethodNull
   method_null_dt(0.0),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-  // EnzoMethodPmDeposit
+  // EnzoMethodGravity
+  method_gravity_grav_const(0.0),
+  method_gravity_solver(""),
+  method_gravity_order(4),
+  method_gravity_accumulate(false),
+  /// EnzoMethodPmDeposit
   method_pm_deposit_type(""),
-  // EnzoMethodPmUpdate
-  method_pm_update_max_dt(0.0)
+  /// EnzoMethodPmUpdate
+  method_pm_update_max_dt(std::numeric_limits<double>::max()),
+  /// EnzoSolverMg0
+  solver_pre_smooth(),
+  solver_post_smooth(),
+  solver_last_smooth(),
+  solver_coarse_solve(),
+  solver_weight(),
+  solver_restart_cycle(),
+  /// EnzoSolver<Krylov>
+  solver_precondition(),
+  solver_local(),
+  stopping_redshift()
+ 
 {
   for (int i=0; i<3; i++) {
     initial_sedov_array[i] = 0;
@@ -118,7 +159,8 @@ void EnzoConfig::pup (PUP::er &p)
 
   // NOTE: change this function whenever attributes change
 
-  p | ppm_density_floor;
+  p | adapt_mass_type;
+  
   p | ppm_diffusion;
   p | ppm_dual_energy;
   p | ppm_dual_energy_eta_1;
@@ -126,10 +168,11 @@ void EnzoConfig::pup (PUP::er &p)
   p | ppm_flattening;
   p | ppm_minimum_pressure_support_parameter;
   p | ppm_number_density_floor;
+  p | ppm_density_floor;
   p | ppm_pressure_floor;
   p | ppm_pressure_free;
-  p | ppm_steepening;
   p | ppm_temperature_floor;
+  p | ppm_steepening;
   p | ppm_use_minimum_pressure_support;
   p | ppm_mol_weight;
 
@@ -139,12 +182,17 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_hubble_constant_now;
   p | physics_cosmology_omega_lamda_now;
   p | physics_cosmology_omega_matter_now;
-  p | physics_cosmology_omega_dark_matter_now;
+  p | physics_cosmology_omega_baryon_now;
+  p | physics_cosmology_omega_cdm_now;
   p | physics_cosmology_comoving_box_size;
   p | physics_cosmology_max_expansion_rate;
   p | physics_cosmology_initial_redshift;
   p | physics_cosmology_final_redshift;
 
+  p | physics_gravity;
+
+  p | initial_cosmology_temperature;
+  
   p | initial_collapse_rank;
   PUParray(p,initial_collapse_array,3);
   p | initial_collapse_radius_relative;
@@ -173,6 +221,17 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_turbulence_pressure;
   p | initial_turbulence_temperature;
 
+  p | initial_music_field_files;
+  p | initial_music_field_datasets;
+  p | initial_music_field_names;
+  p | initial_music_field_coords;
+
+  p | initial_music_particle_files;
+  p | initial_music_particle_datasets;
+  p | initial_music_particle_coords;
+  p | initial_music_particle_types;
+  p | initial_music_particle_attributes;
+
   p | initial_pm_field;
   p | initial_pm_mpp;
   p | initial_pm_level;
@@ -191,11 +250,22 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_heat_alpha;
 
+  p | method_hydro_method;
+  p | method_hydro_dual_energy;
+  p | method_hydro_dual_energy_eta_1;
+  p | method_hydro_dual_energy_eta_2;
+  p | method_hydro_reconstruct_method;
+  p | method_hydro_reconstruct_conservative;
+  p | method_hydro_reconstruct_positive;
+  p | method_hydro_riemann_solver;
+
   p | method_null_dt;
   p | method_turbulence_edot;
 
   p | method_gravity_grav_const;
   p | method_gravity_solver;
+  p | method_gravity_order;
+  p | method_gravity_accumulate;
 
   p | method_pm_deposit_type;
   p | method_pm_update_max_dt;
@@ -204,8 +274,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | solver_local;
   p | solver_pre_smooth;
   p | solver_post_smooth;
+  p | solver_last_smooth;
   p | solver_coarse_solve;
   p | solver_weight;
+  p | solver_restart_cycle;
+
+  p | stopping_redshift;
 
   p | units_mass;
   p | units_density;
@@ -242,12 +316,26 @@ void EnzoConfig::read(Parameters * p) throw()
 
   ((Config*)this) -> read (p);
 
+  adapt_mass_type.resize(num_adapt);
+  
+  for (int ia=0; ia<num_adapt; ia++) {
+
+    std::string prefix = "Adapt:" + adapt_list[ia] + ":";
+    adapt_mass_type[ia] = p->value_string(prefix+"mass_type","unknown");
+    ASSERT2("EnzoConfig::read()",
+	    "Unknown mass_type %s for parameter %s",
+	    adapt_mass_type[ia].c_str(),(prefix+"mass_type").c_str(),
+	    (adapt_type[ia] != "mass" ||
+	     (adapt_mass_type[ia]=="dark" ||
+	      adapt_mass_type[ia]=="baryon")));
+  }
+
+  solver_precondition.resize(num_solvers);
+
   double floor_default = 1e-6;
 
-  ppm_density_floor = p->value_float
-    ("Method:ppm:density_floor",  floor_default);
-  ppm_diffusion = p->value_logical 
-    ("Method:ppm:diffusion",  false);
+  ppm_diffusion = p->value_logical
+    ("Method:ppm:diffusion", false);
   ppm_dual_energy = p->value_logical 
     ("Method:ppm:dual_energy",false);
   ppm_dual_energy_eta_1 = p->value_float
@@ -260,18 +348,56 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:minimum_pressure_support_parameter",100);
   ppm_number_density_floor = p->value_float
     ("Method:ppm:number_density_floor", floor_default);
+  ppm_density_floor = p->value_float
+    ("Method:ppm:density_floor", floor_default);
   ppm_pressure_floor = p->value_float
     ("Method:ppm:pressure_floor", floor_default);
   ppm_pressure_free = p->value_logical
     ("Method:ppm:pressure_free",false);
-  ppm_steepening = p->value_logical 
-    ("Method:ppm:steepening", false);
   ppm_temperature_floor = p->value_float
     ("Method:ppm:temperature_floor", floor_default);
+  ppm_steepening = p->value_logical 
+    ("Method:ppm:steepening", false);
   ppm_use_minimum_pressure_support = p->value_logical
     ("Method:ppm:use_minimum_pressure_support",false);
   ppm_mol_weight = p->value_float
     ("Method:ppm:mol_weight",0.6);
+
+  // InitialMusic
+
+  std::string name_initial = "Initial:music:";
+  int num_files = p->list_length (name_initial + "file_list");
+  for (int index_file=0; index_file<num_files; index_file++) {
+    std::string file_id = name_initial +
+      p->list_value_string (index_file,name_initial+"file_list") + ":";
+
+    std::string type    = p->value_string (file_id+"type","");
+    std::string name    = p->value_string (file_id+"name","");
+    std::string file    = p->value_string (file_id+"file","");
+    std::string dataset = p->value_string (file_id+"dataset","");
+    std::string coords  = p->value_string (file_id+"coords","xyz");
+
+    if (type == "particle") {
+      std::string attribute = p->value_string (file_id+"attribute","");
+      //      if (name != "") {
+      initial_music_particle_files.     push_back(file);
+      initial_music_particle_datasets.  push_back(dataset);
+      initial_music_particle_coords.    push_back(coords);
+      initial_music_particle_types.     push_back(name);
+      initial_music_particle_attributes.push_back(attribute);
+      //      }
+    } else if (type == "field") {
+
+      initial_music_field_files.        push_back(file);
+      initial_music_field_datasets.     push_back(dataset);
+      initial_music_field_names.        push_back(name);
+      initial_music_field_coords.       push_back(coords);
+    } else {
+      ERROR2 ("EnzoConfig::read",
+	      "Unknown particle type %s for parameter %s",
+	      type.c_str(),(file_id+"type").c_str());
+    }
+  }
 
   // PM method and initialization
 
@@ -279,7 +405,8 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_pm_update_max_dt = p->value_float 
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
-				     
+
+  
   initial_pm_field        = p->value_string  ("Initial:pm:field","density");
   initial_pm_mpp          = p->value_float   ("Initial:pm:mpp",-1.0);
   initial_pm_level        = p->value_integer ("Initial:pm:level",-1);
@@ -351,6 +478,9 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_random_te_multiplier = 
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
 
+  // Cosmology initialization
+  initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
+  
   // Collapse initialization
 
   initial_collapse_rank =  p->value_integer("Initial:collapse:rank",0);
@@ -409,6 +539,28 @@ void EnzoConfig::read(Parameters * p) throw()
   method_heat_alpha = p->value_float 
     ("Method:heat:alpha",1.0);
 
+  method_hydro_method = p->value_string 
+    ("Method:hydro:method","ppm");
+
+  method_hydro_dual_energy = p->value_logical
+    ("Method:hydro:dual_energy",false);
+  method_hydro_dual_energy_eta_1 = p->value_float
+    ("Method:hydro:dual_energy_eta_1",0.001);
+  method_hydro_dual_energy_eta_2 = p->value_float
+    ("Method:hydro:dual_energy_eta_2",0.1);
+
+  method_hydro_reconstruct_method = p->value_string
+    ("Method:hydro:reconstruct_method","ppm");
+
+  method_hydro_reconstruct_conservative = p->value_logical
+    ("Method:hydro:reconstruct_conservative",false);
+
+  method_hydro_reconstruct_positive = p->value_logical
+    ("Method:hydro:reconstruct_positive",false);
+
+  method_hydro_riemann_solver = p->value_string
+    ("Method:hydro:riemann_solver","ppm");
+  
   method_null_dt = p->value_float 
     ("Method:null:dt",std::numeric_limits<double>::max());
 
@@ -418,6 +570,12 @@ void EnzoConfig::read(Parameters * p) throw()
   method_gravity_solver = p->value_string
     ("Method:gravity:solver","unknown");
 
+  method_gravity_order = p->value_integer
+    ("Method:gravity:order",4);
+
+  method_gravity_accumulate = p->value_logical
+    ("Method:gravity:accumulate",true);
+  
   //--------------------------------------------------
   // Physics
   //--------------------------------------------------
@@ -441,9 +599,12 @@ void EnzoConfig::read(Parameters * p) throw()
       physics_cosmology_omega_matter_now = p->value_float
 	(full_name + ":omega_matter_now",   0.279);
 
-      physics_cosmology_omega_dark_matter_now = p->value_float
-	(full_name + ":omega_dark_matter_now",   -1.0);
+      physics_cosmology_omega_baryon_now = p->value_float
+	(full_name + ":omega_baryon_now",   1.0);
 
+      physics_cosmology_omega_cdm_now = p->value_float
+	(full_name + ":omega_cdm_now",   0.0);
+      
       physics_cosmology_omega_lamda_now = p->value_float
 	(full_name + ":omega_lambda_now",   0.721);
 
@@ -462,6 +623,11 @@ void EnzoConfig::read(Parameters * p) throw()
 
     }
 
+    if (physics_list[index_physics] == "gravity") {
+
+      physics_gravity = true;
+
+    }
   }
  
   //======================================================================
@@ -475,7 +641,9 @@ void EnzoConfig::read(Parameters * p) throw()
   solver_pre_smooth.  resize(num_solvers);
   solver_coarse_solve.resize(num_solvers);
   solver_post_smooth. resize(num_solvers);
+  solver_last_smooth. resize(num_solvers);
   solver_weight.      resize(num_solvers);
+  solver_restart_cycle.resize(num_solvers);
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
 
@@ -512,14 +680,30 @@ void EnzoConfig::read(Parameters * p) throw()
       solver_post_smooth[index_solver] = -1;
     }
 
+    solver = p->value_string (solver_name + ":last_smooth","unknown");
+    if (solver_index.find(solver) != solver_index.end()) {
+      solver_last_smooth[index_solver] = solver_index[solver];
+    } else {
+      solver_last_smooth[index_solver] = -1;
+    }
+
     solver_weight[index_solver] =
       p->value_float(solver_name + ":weight",1.0);
 
+    solver_restart_cycle[index_solver] =
+      p->value_integer(solver_name + ":restart_cycle",1);
+    
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
     
   }  
   
+  //======================================================================
+  // STOPPING
+  //======================================================================
+
+  stopping_redshift = p->value_float ("Stopping:redshift",0.0);
+
   //======================================================================
   // GRACKLE 3.0
   //======================================================================

@@ -18,9 +18,10 @@ EnzoMethodHeat::EnzoMethodHeat (const FieldDescr * field_descr, double alpha, do
 {
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			     enzo_sync_id_method_heat);
 
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_field(field_descr->field_id("temperature"));
 }
 
 //----------------------------------------------------------------------
@@ -45,21 +46,14 @@ void EnzoMethodHeat::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
-  Field field = block->data()->field();
+    Field field = block->data()->field();
 
-  const int id_temp = field.field_id ("temperature");
+    enzo_float * T = (enzo_float *) field.values ("temperature");
 
-  void *     t = field.values (id_temp);
-  const int  p = field.precision (id_temp);
-
-  if      (p == precision_single)    compute_ (block,(float *)t);
-  else if (p == precision_double)    compute_ (block,(double*)t);
-  else if (p == precision_quadruple) compute_ (block,(long double*) t);
-  else 
-    ERROR1("EnzoMethodHeat()", "precision %d not recognized", p);
+    compute_ (block,T);
   }
+
   block->compute_done();
-  
 }
 
 //----------------------------------------------------------------------
@@ -77,14 +71,8 @@ double EnzoMethodHeat::timestep ( Block * block ) const throw()
   field.dimensions (id_temp,&mx,&my,&mz);
   const int rank = ((mz == 1) ? ((my == 1) ? 1 : 2) : 3);
 
-  double xm,ym,zm;
-  data->lower(&xm,&ym,&zm);
-  double xp,yp,zp;
-  data->upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  field.cell_width(xm,xp,&hx,
-		   ym,yp,&hy,
-		   zm,zp,&hz);
+  block->cell_width(&hx,&hy,&hz);
 
   double h_min = std::numeric_limits<double>::max();
   if (rank >= 1) h_min = std::min(h_min,hx);
@@ -96,22 +84,18 @@ double EnzoMethodHeat::timestep ( Block * block ) const throw()
 
 //======================================================================
 
-template <class T>
-void EnzoMethodHeat::compute_ (Block * block,T * Unew) const throw()
+void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
 {
   Data * data = block->data();
   Field field   =      data->field();
 
   const int id_temp_ = field.field_id ("temperature");
 
-  int gx,gy,gz;
-  field.ghost_depth (id_temp_,&gx,&gy,&gz);
-
   int mx,my,mz;
-  field.dimensions (id_temp_,&mx,&my,&mz);
+  int gx,gy,gz;
 
-  int nx,ny,nz;
-  field.size (&nx,&ny,&nz);
+  field.dimensions  (id_temp_,&mx,&my,&mz);
+  field.ghost_depth (id_temp_,&gx,&gy,&gz);
 
   // Initialize array increments
   const int idx = 1;
@@ -120,14 +104,8 @@ void EnzoMethodHeat::compute_ (Block * block,T * Unew) const throw()
 
   // Precompute ratios dxi,dyi,dzi
 
-  double xm,ym,zm;
-  data->lower(&xm,&ym,&zm);
-  double xp,yp,zp;
-  data->upper(&xp,&yp,&zp);
   double hx,hy,hz;
-  field.cell_width(xm,xp,&hx,
-		   ym,yp,&hy,
-		   zm,zp,&hz);
+  block->cell_width(&hx,&hy,&hz);
 
   double dxi = 1.0/(hx*hx);
   double dyi = 1.0/(hy*hy);
@@ -139,16 +117,16 @@ void EnzoMethodHeat::compute_ (Block * block,T * Unew) const throw()
 
   const double dt = timestep(block);
 
-  T * U = new T [m];
+  enzo_float * U = new enzo_float [m];
   for (int i=0; i<m; i++) U[i]=Unew[i];
 
   if (rank == 1) {
 
-    for (int ix=gx; ix<nx+gx; ix++) {
+    for (int ix=gx; ix<mx-gx; ix++) {
 
       int i = ix;
 
-      double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
+      enzo_float Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 
       Unew[i] = U[i] + alpha_*dt*(Uxx);
 
@@ -156,13 +134,13 @@ void EnzoMethodHeat::compute_ (Block * block,T * Unew) const throw()
 
   } else if (rank == 2) {
 
-    for (int iy=gy; iy<ny+gy; iy++) {
-      for (int ix=gy; ix<nx+gy; ix++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gy; ix<mx-gy; ix++) {
 
 	int i = ix + mx*iy;
 
-	double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
-	double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
+	enzo_float Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
+	enzo_float Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
 	
 	Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy);
 
@@ -171,15 +149,15 @@ void EnzoMethodHeat::compute_ (Block * block,T * Unew) const throw()
 
   } else if (rank == 3) {
 
-    for (int iz=gz; iz<nz+gz; iz++) {
-      for (int iy=gy; iy<ny+gy; iy++) {
-	for (int ix=gx; ix<nx+gx; ix++) {
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
 
 	  int i = ix + mx*(iy + my*iz);
 
-	  double Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
-	  double Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
-	  double Uzz = dzi*(U[i-idz] - 2*U[i] + U[i+idz]);
+	  enzo_float Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
+	  enzo_float Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
+	  enzo_float Uzz = dzi*(U[i-idz] - 2*U[i] + U[i+idz]);
 
 	  Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy + Uzz);
 

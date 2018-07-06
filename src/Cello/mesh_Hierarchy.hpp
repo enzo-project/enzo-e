@@ -29,11 +29,13 @@ public: // interface
     rank_(0),
     refinement_(0),
     max_level_(0),
-    num_blocks_(0), 
+    num_blocks_(0),
+    num_blocks_level_(),
+    block_vec_(),
     num_particles_(0), 
     num_zones_total_(0), 
     num_zones_real_(0), 
-    block_array_(NULL),
+    block_array_(),
     block_exists_(false)
   {
     for (int axis=0; axis<3; axis++) {
@@ -124,22 +126,51 @@ public: // interface
     return block_exists_;
   }
 
-  /// Return the number of Blocks
-  size_t num_blocks(int * nbx, 
-		    int * nby = 0,
-		    int * nbz = 0) const throw();
-
   /// Deallocate local Blocks
   void deallocate_blocks() throw();
 
   /// Return pointer to the Block CHARM++ chare array
-  CProxy_Block * block_array() const throw()
+  CProxy_Block block_array() const throw()
   { return block_array_;}
 
-  /// Increment (decrement) number of mesh blocks
-  void increment_block_count(int count)
-  { num_blocks_ += count; }
+#ifdef NEW_MSG_REFINE  
+  /// Return pointer to the Block CHARM++ chare array
+  void set_block_array(CProxy_Block block_array) throw()
+  { block_array_ = block_array;}
+#endif  
 
+  /// Increment (decrement) number of mesh blocks
+  void increment_block_count(int count, int level)
+  {
+    num_blocks_ += count;
+    int n=num_blocks_level_.size();
+    if (n < level+1) {
+      num_blocks_level_.resize(level+1);
+      for (int i=n; i<level+1; i++) num_blocks_level_[i] = 0;
+    }
+    num_blocks_level_[level] += count;
+  }
+
+  /// Add Block to the list of blocks (block_vec_ and block_map_)
+  void insert_block (Block * block)
+  {
+    block_vec_.push_back(block);
+  }
+  
+  /// Remove Block from the list of blocks (block_vec_) and return
+  /// true iff Block is found in the list
+  bool delete_block (Block * block)
+  {
+    const int n = block_vec_.size();
+    bool found = false;
+    for (int i=0; i<n; i++) {
+      if (found) block_vec_[i-1] = block_vec_[i];
+      if (block_vec_[i] == block) found=true;
+    }
+    if (found) block_vec_.resize(n-1);
+    return found;
+  }
+  
   /// Increment (decrement) number of particles
   void increment_particle_count(int64_t count)
   { num_particles_ += count; }
@@ -156,6 +187,13 @@ public: // interface
   size_t num_blocks() const throw()
   {  return num_blocks_;  }
 
+  /// Return the number of blocks on this process for the given level
+  size_t num_blocks(int level) const throw()
+  {  return num_blocks_level_.at(level);  }
+
+  Block * block (int index_block)
+  { return block_vec_.at(index_block); }
+
   /// Return the number of particles on this process
   int64_t num_particles() const throw()
   {  return num_particles_;  }
@@ -168,19 +206,21 @@ public: // interface
   int64_t num_zones_total() const throw()
   {  return num_zones_total_;  }
 
+#ifdef NEW_MSG_REFINE
+  CProxy_Block new_block_proxy (FieldDescr   * field_descr,
+				bool allocate_data) throw();
+#endif
+  
+  void create_block_array (FieldDescr   * field_descr,
+			   bool allocate_data) throw();
 
-  void create_forest (FieldDescr   * field_descr,
-		      bool allocate_data,
-		      bool testing          = false) throw();
-
-  void create_subforest (FieldDescr   * field_descr,
-			 bool allocate_data,
-			 int min_level,
-			 bool testing          = false) throw();
+  void create_subblock_array (FieldDescr   * field_descr,
+			      bool allocate_data,
+			      int min_level) throw();
 
 
   /// Return the number of root-level Blocks along each rank
-  void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
+  void root_blocks (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the factory object associated with the Hierarchy
   const Factory * factory () const throw()
@@ -204,7 +244,13 @@ protected: // attributes
   /// Maximum number of refinement levels
 
   /// Current number of blocks on this process
-  int num_blocks_; 
+  int num_blocks_;
+
+  /// Current number of blocks on this process per refinement level
+  std::vector<int> num_blocks_level_;
+  
+  /// Pointers to Blocks on this process
+  std::vector<Block *> block_vec_;
 
   /// Current number of particles on this process
   int64_t num_particles_;
@@ -214,9 +260,9 @@ protected: // attributes
 
   /// Current number of real_zones on this process
   int64_t num_zones_real_; 
-
+  
   /// Array of Blocks 
-  CProxy_Block * block_array_;
+  CProxy_Block block_array_;
   bool           block_exists_;
 
   /// Size of the root grid

@@ -39,7 +39,10 @@ public: // functions
   PUPable_decl(OutputData);
 
   /// Charm++ PUP::able migration constructor
-  OutputData (CkMigrateMessage *m) : Output (m) {}
+  OutputData (CkMigrateMessage *m)
+    : Output (m),
+      text_block_count_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

@@ -78,8 +78,7 @@ public: // interface
       units_(NULL),
       index_refine_(0),
       index_output_(0),
-    index_boundary_(0)
-      
+      index_boundary_(0)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -136,6 +135,17 @@ public: // interface
 
   /// Return the restrict object
   Restrict * restrict() const throw()  { return restrict_; }
+
+  //--------------------------------------------------
+  // NEW OUTPUT
+  //--------------------------------------------------
+
+  /// Process the next output object if any, else proceed with simulation
+  void new_output_next(Simulation * simulation) throw();
+
+  //--------------------------------------------------
+  // OLD OUTPUT
+  //--------------------------------------------------
 
   /// reset output index to 0
   void output_reset() throw()
@@ -233,6 +243,10 @@ protected: // functions
    Parameters * parameters,
    const FieldDescr *) throw ();
 
+  /// Create named stopping object
+  virtual Stopping * create_stopping_ 
+  (std::string type, Config * config) throw ();
+
   /// Create named refine object
   virtual Refine * create_refine_ 
   (std::string type, 
@@ -263,10 +277,6 @@ protected: // functions
    const FieldDescr * field_descr, 
    const ParticleDescr * particle_descr, 
    const Factory * ) throw ();
-
-  /// Create named stopping object
-  virtual Stopping * create_stopping_ 
-  (std::string type, Config * config) throw ();
 
   /// Create named prolongation object
   virtual Prolong * create_prolong_ 

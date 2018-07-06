@@ -10,6 +10,7 @@
 
 class Prolong;
 class Restrict;
+class Refresh;
 
 class FieldFace {
 
@@ -26,10 +27,15 @@ public: // interface
 
   FieldFace () throw()
   : refresh_type_(refresh_unknown),
-    field_list_(),
     prolong_(NULL),
-    restrict_(NULL)
+    restrict_(NULL),
+    refresh_(NULL),
+    new_refresh_(false)
   {
+#ifdef DEBUG_FIELD_FACE    
+    CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+#endif    
     ++counter[cello::index_static()]; 
 
     for (int i=0; i<3; i++) {
@@ -100,7 +106,7 @@ public: // interface
   /// Set refresh type: refresh_fine(prolong),
   /// refresh_coarse(restrict), or refresh_same(copy)
 
-  void set_refresh (int refresh_type)
+  void set_refresh_type (int refresh_type)
   {  refresh_type_ = refresh_type;  }
 
   /// Set Prolong operation (default is Problem::prolong() )
@@ -110,13 +116,20 @@ public: // interface
   /// Set Restrict operation (default is Problem::restrict() )
   void set_restrict (Restrict * restrict)
   { restrict_ = restrict; }
+
+  /// Set the Refresh object 
+  void set_refresh (Refresh * refresh, bool new_refresh)
+  {
+    refresh_ = refresh;
+    new_refresh_ = new_refresh;
+  }
+
+  /// Return the Refresh object
+  Refresh * refresh () const
+  { return refresh_; }
   
-  /// Set the list of fields
-  void set_field_list (std::vector<int> const & field_list)
-  { field_list_ = field_list; }
-
-  std::vector<int> const & field_list () { return field_list_; }
-
+  void set_field_list (std::vector<int> field_list);
+  
   /// Create an array with the field's face data
   void face_to_array(Field field, int * n, char ** array) throw();
 
@@ -134,9 +147,13 @@ public: // interface
 
   int num_bytes_array (Field field) throw();
 
-  /// Compute loop limits for load or store
+  /// Compute loop limits for copy, load, or store if accumulate == false
   void loop_limits
-  (int im3[3], int n3[3], const int nd3[3], const int ng3[3], int refresh_type);
+  (int i3[3], int n3[3], const int m3[3], const int g3[3], int refresh_type);
+
+  /// Compute loop limits for copy, load, or store if accumulate == true
+  void loop_limits_accumulate
+  (int i3[3], int n3[3], const int m3[3], const int g3[3], int refresh_type);
 
   //--------------------------------------------------
 
@@ -153,24 +170,8 @@ public: // interface
   /// serializing multiple objects in one buffer.
   char * load_data (char * buffer);
 
-  void print (const char * message)
-  {
-    // char filename[40];
-    // sprintf (filename,"ff-%02d.debug",CkMyPe());
-    
-    //    FILE * fp = fopen (filename,"a");
-    //    FILE * fp = stdout;
-    CkPrintf (" FieldFace %s %p\n",message,this);
-    CkPrintf ("    face_  %d %d %d\n",face_[0],face_[1],face_[2]);
-    CkPrintf ("    ghost_  %d %d %d\n",ghost_[0],ghost_[1],ghost_[2]);
-    CkPrintf ("    child_  %d %d %d\n",child_[0],child_[1],child_[2]);
-    CkPrintf ("    refresh_type %d\n",refresh_type_);
-    int n;
-    CkPrintf ("    field_list size %d = ",n=field_list_.size());
-    for (int i=0; i<n; i++) CkPrintf (" %d",field_list_[i]);
-    CkPrintf ("\n");
-    //    fclose (fp);
-  }
+  void print (const char * message);
+  
   //--------------------------------------------------
 
 private: // functions
@@ -182,19 +183,27 @@ private: // functions
   /// the field_face array; returns number of bytes copied
   template<class T>
   size_t load_ (T * array_face,  const T * field_face,
-		int nd3[3], int nf3[3], int im3[3]) throw();
+		int nd3[3], int nf3[3], int im3[3],
+		bool accumulate) throw();
 
   /// Precision-agnostic function for copying the field_face array into
   /// the field block ghosts; returns number of bytes copied
   template<class T>
   size_t store_ (T * field_ghosts,  const T * array_ghosts, 
-		 int nd3[3], int nf3[3], int im3[3]) throw();
+		 int nd3[3], int nf3[3], int im3[3],
+		 bool accumulate) throw();
 
   /// Precision-agnostic function for copying a field block face
   /// into another block's ghost zones
   template<class T>
   void copy_ (T       * vd, int md3[3], int nd3[3], int id3[3],
-	      const T * vs, int ms3[3], int ns3[3], int is3[3]) throw();
+	      const T * vs, int ms3[3], int ns3[3], int is3[3],
+	      bool accumulate) throw();
+
+
+  std::vector<int> field_list_src_(Field field) const;
+  std::vector<int> field_list_dst_(Field field) const;
+  bool accumulate_(int index_src, int index_dst) const;
 
 private: // attributes
 
@@ -210,15 +219,18 @@ private: // attributes
   /// Refresh type: fine, coarse, or same
   int refresh_type_;
 
-  /// List of fields (default all)
-  std::vector<int> field_list_;
-
   /// Prolongation object
   Prolong * prolong_;
 
   /// Restriction object
   Restrict * restrict_;
 
+  /// Refresh object for lists of particles and fields to copy,
+  /// and whether to copy or add
+  Refresh * refresh_;
+
+  /// Whether refresh object should be deleted in destructor
+  bool new_refresh_;
 };
 
 #endif /* DATA_FIELD_FACE_HPP */

@@ -18,9 +18,9 @@ class Performance;
 class Problem;
 class Schedule;
 
+#include <errno.h>
 #include "mesh.decl.h"
 #include "simulation.decl.h"
-
 class Simulation : public CBase_Simulation 
 {
   /// @class    Simulation
@@ -44,11 +44,11 @@ public: // interface
   // CHARM
   //==================================================
 
-   /// Initialize an empty Simulation
-   Simulation();
+  /// Initialize an empty Simulation
+  Simulation();
 
-   /// Initialize a migrated Simulation
-   Simulation (CkMigrateMessage *m);
+  /// Initialize a migrated Simulation
+  Simulation (CkMigrateMessage *m);
 
   //==================================================
 
@@ -57,6 +57,18 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   virtual void pup (PUP::er &p);
+
+  //----------------------------------------------------------------------
+  // BLOCK INITIALIZATION WITH MsgRefine
+  //----------------------------------------------------------------------
+
+  /// Request by newly created Block to get its MsgRefine object
+  virtual void p_get_msg_refine(Index index);
+
+  /// Set MsgRefine * for a newly created Block
+  void set_msg_refine (Index index, MsgRefine *);
+  /// Return MsgRefine * for a newly created Block and remove from list
+  MsgRefine * get_msg_refine (Index index);
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -145,9 +157,6 @@ public: // interface
   Schedule * schedule_balance() const throw() 
   { return schedule_balance_; };
 
-  // /// Output Performance information to stdout (root process data only)
-  // virtual void performance_output();
-
   /// Write performance information to disk (all process data)
   void performance_write();
 
@@ -168,7 +177,8 @@ public: // interface
 
 public: // virtual functions
 
-  /// Update Simulation state, including cycle, time, timestep, and stopping criteria
+  /// Update Simulation state, including cycle, time, timestep, and
+  /// stopping criteria
   virtual void update_state(int cycle, double time, double dt, double stop) ;
 
   /// initialize the Simulation given a parameter file
@@ -206,7 +216,7 @@ public: // virtual functions
   }
 
   /// Wait for all Hierarchy to be initialized before creating any Blocks
-  void r_initialize_forest(CkReductionMsg * msg);
+  void r_initialize_block_array(CkReductionMsg * msg);
 
   /// Wait for all local patches to be created before calling run
   void r_initialize_hierarchy(CkReductionMsg * msg);
@@ -216,18 +226,23 @@ public: // virtual functions
   void send_config();
   void r_recv_config(CkReductionMsg * msg);
 
-  /// Call output on Problem list of Output objects
-  void p_begin_output()
-  {
-    performance_->start_region(perf_output);
-    begin_output();
-    performance_->stop_region (perf_output);
-  }
-  void begin_output ();
-  void output_exit();
-  void r_output(CkReductionMsg * msg);
+  //--------------------------------------------------
+  // NEW OUTPUT
+  //--------------------------------------------------
 
-  //  void r_output (CkReductionMsg * msg);
+  void new_output_start ();
+
+  //--------------------------------------------------
+  // OLD OUTPUT
+  //--------------------------------------------------
+
+  /// Call output on Problem list of Output objects
+  void output_enter ();
+  void p_output_start (int index_output)
+  { output_start (index_output); }
+  
+  void output_start (int index_output);
+  void output_exit();
 
   /// Reduce output, using p_output_write to send data to writing processes
   void s_write()
@@ -248,9 +263,15 @@ public: // virtual functions
   /// proceed with next output
   void p_output_write (int n, char * buffer);
 
+  //--------------------------------------------------
+  // Compute
+  //--------------------------------------------------
+  
   void compute ();
 
-  // MONITOR
+  //--------------------------------------------------
+  // Monitor
+  //--------------------------------------------------
 
   void p_monitor();
 
@@ -261,31 +282,28 @@ public: // virtual functions
   void r_monitor_performance (CkReductionMsg * msg);
 
   //--------------------------------------------------
-  // Monitor number of blocks, particles, zones per process
+  // Data
   //--------------------------------------------------
 
+  /// Set block_array proxy on all processes
+  void p_set_block_array(CProxy_Block block_array);
+  
   /// Add a new Block to this local branch
-  void monitor_insert_block(int count=1) ;
+  void data_insert_block(Block *) ;
 
   /// Remove a Block from this local branch
-  void monitor_delete_block(int count=1) ;
-
-  /// Add a new Zones to this local branch
-  void monitor_insert_zones(int64_t count_real, int64_t count_ghost) ;
-
-  /// Remove a Zones from this local branch
-  void monitor_delete_zones(int64_t count_real, int64_t count_ghost) ;
+  void data_delete_block(Block *) ;
 
   /// Add a new Particle to this local branch
-  void monitor_insert_particles(int64_t count) ;
+  void data_insert_particles(int64_t count) ;
 
   /// Remove a Particle from this local branch
-  void monitor_delete_particles(int64_t count) ;
+  void data_delete_particles(int64_t count) ;
 
   virtual void monitor_performance();
 
   void set_checkpoint(char * checkpoint)
-  { strncpy (dir_checkpoint_,checkpoint,256);}
+  { strncpy (dir_checkpoint_,checkpoint,255);}
 
 protected: // functions
 
@@ -310,8 +328,8 @@ protected: // functions
   /// Initialize the hierarchy object
   void initialize_hierarchy_ () throw();
 
-  /// Initialize the forest of octrees
-  void initialize_forest_ () throw();
+  /// Initialize the array of octrees
+  void initialize_block_array_ () throw();
 
   /// Initialize the data object
   void initialize_data_descr_ () throw();
@@ -334,7 +352,10 @@ protected: // functions
 		"Checkpoint");
 
       unlink ("Checkpoint");
-      symlink(dir_checkpoint_,"Checkpoint");
+      if (symlink(dir_checkpoint_,"Checkpoint")) {
+	CkPrintf("Error: symlink(%s,\"Checkpoint\") returned %s\n",
+		 dir_checkpoint_,strerror(errno));
+      }
     }
   }
 protected: // attributes
@@ -419,9 +440,13 @@ protected: // attributes
   Sync sync_output_begin_;
   Sync sync_output_write_;
 
+  Sync sync_new_output_start_;
+  Sync sync_new_output_next_;
+
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
-  
+
+  std::map<Index,MsgRefine *> msg_refine_map_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

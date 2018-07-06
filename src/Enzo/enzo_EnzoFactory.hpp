@@ -33,12 +33,32 @@ public: // interface
   virtual IoBlock * create_io_block () const throw();
 
   /// Create a new CHARM++ Block array [abstract factory design pattern]
+
+#ifdef NEW_MSG_REFINE
+  /// Create a new CHARM++ Block chare array proxy
+  virtual CProxy_Block new_block_proxy
+  (
+   DataMsg * data_msg,
+   int nbx, int nby, int nbz) const throw();
+
+  /// Create a new CHARM++ Block array
+  virtual void create_block_array
+  (
+   DataMsg * data_msg,
+   CProxy_Block block_array,
+   int nbx, int nby, int nbz,
+   int nx, int ny, int nz,
+   int num_field_blocks) const throw();
+#else
+  /// Create a new CHARM++ Block array
   virtual CProxy_Block create_block_array
   (
    DataMsg * data_msg,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks) const throw();
+
+#endif  
 
   /// Create a new coarse blocks under the Block array.  For Multigrid
   ///  solvers.  Arguments are the same as create_block_array(), plus
@@ -47,7 +67,7 @@ public: // interface
   virtual void create_subblock_array
   (
    DataMsg * data_msg,
-   CProxy_Block * block_array,
+   CProxy_Block block_array,
    int min_level,
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
@@ -57,7 +77,7 @@ public: // interface
   virtual Block * create_block
   (
    DataMsg * data_msg,
-   CProxy_Block * block_array,
+   CProxy_Block block_array,
    Index index,
    int nx, int ny, int nz,
    int num_field_blocks,

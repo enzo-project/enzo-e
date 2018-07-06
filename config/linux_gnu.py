@@ -4,16 +4,18 @@ import os
 is_arch_valid = 1
 
 #
+#flags_arch = '-g -fprofile-arcs -ftest-coverage' # gcov
 flags_arch = '-Wall -O3 -g'
 #flags_arch = '-Wall -g'
-#flags_arch = '-O3 -pg'
+#flags_arch = '-O3 -pg -g'
 #flags_arch = '-fprofile-arcs -ftest-coverage'
 #flags_arch = '-Wall -g -fsanitize=address -fno-omit-frame-pointer'
 #flags_arch = '-Wall -O3 -pg'
 
 # rdynamic required for backtraces
 #flags_link_charm = '-rdynamic' 
-#flags_link_charm = '-memory paranoid' 
+#flags_link_charm = '-memory paranoid'
+#flags_link_charm = '-fprofile-arcs' # gcov
 
 cc  = 'gcc '
 f90 = 'gfortran'
@@ -27,6 +29,9 @@ libs_fortran    = ['gfortran']
 home = os.getenv('HOME')
 
 charm_path = os.getenv('CHARM_HOME')
+
+# use Charm++ with randomized message queues for debugging and stress-testing
+# charm_path = home + '/Charm/charm.random'
 
 if charm_path is None:
 	if home is not None:

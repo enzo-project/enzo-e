@@ -21,16 +21,19 @@ public: // interface
 			std::string field_name,
 			ParticleDescr *, 
 			std::string particle_type,
-			std::string particle_attribute);
+			std::string particle_attribute,
+			double dt = 0.0);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeCicInterp);
   
   /// Charm++ PUP::able migration constructor
   EnzoComputeCicInterp (CkMigrateMessage *m)
-    : it_p_(0),
+    : Compute(m),
+      it_p_(0),
       ia_p_(0),
-      if_(0)
+      if_(0),
+      dt_(0.0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -41,7 +44,6 @@ public: // interface
 
 private: // functions
 
-  template <typename TP, typename TF>
   void compute_(Block * block);
 
 private: // attributes
@@ -54,6 +56,9 @@ private: // attributes
 
   /// id of field type
   int if_;
+
+  /// dt at which to apply the interpolation
+  double dt_;
 
 };
 

@@ -29,6 +29,14 @@
 
 //----------------------------------------------------------------------
 
+enum mass_type {
+  mass_unknown,
+  mass_dark,
+  mass_baryon
+};
+
+//----------------------------------------------------------------------
+
 enum {
   index_turbulence_vad,
   index_turbulence_aad,
@@ -57,6 +65,36 @@ enum {
 #   define BASE_ENZO_SIMULATION Simulation
 #endif
 
+//----------------------------------------------------------------------
+
+enum enzo_sync_id {
+  enzo_sync_id_cg = sync_id_last,
+  enzo_sync_id_comoving_expansion,
+  enzo_sync_id_method_cosmology,
+  enzo_sync_id_method_grackle,
+  enzo_sync_id_method_gravity,
+  enzo_sync_id_method_heat,
+  enzo_sync_id_method_null,
+  enzo_sync_id_method_pm_deposit,
+  enzo_sync_id_method_pm_update,
+  enzo_sync_id_method_ppm,
+  enzo_sync_id_method_ppml,
+  enzo_sync_id_method_turbulence,
+  enzo_sync_id_solver_bicgstab,
+  enzo_sync_id_solver_cg,
+  enzo_sync_id_solver_mg0,
+  enzo_sync_id_solver_mg0_coarse,
+  enzo_sync_id_solver_mg0_pre,
+  enzo_sync_id_solver_mg0_post,
+  enzo_sync_id_solver_mg0_last,
+  enzo_sync_id_method_gravity_continue,
+  enzo_sync_id_solver_bicgstab_loop_25,
+  enzo_sync_id_solver_bicgstab_loop_85,
+  enzo_sync_id_solver_cg_loop_0a,
+  enzo_sync_id_solver_cg_loop_2a,
+  enzo_sync_id_solver_cg_loop_0b
+};
+  
 //----------------------------------------------------------------------
 
 // #include "macros_and_parameters.h"
@@ -160,11 +198,13 @@ extern "C" {
 
 #include "enzo_EnzoBoundary.hpp"
 
+#include "enzo_EnzoInitialCollapse.hpp"
+#include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
+#include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
 #include "enzo_EnzoInitialPpmlTest.hpp"
-#include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialSedovArray2.hpp"
 #include "enzo_EnzoInitialSedovArray3.hpp"
 #include "enzo_EnzoInitialSedovRandom.hpp"
@@ -172,10 +212,14 @@ extern "C" {
 #include "enzo_EnzoInitialTurbulence.hpp"
 
 #include "enzo_EnzoRefineShock.hpp"
+#include "enzo_EnzoRefineParticleMass.hpp"
+#include "enzo_EnzoRefineMass.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
+#include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
+#include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodNull.hpp"
 #include "enzo_EnzoMethodPmDeposit.hpp"
@@ -198,6 +242,8 @@ extern "C" {
 #include "enzo_EnzoSolverDiagonal.hpp"
 #include "enzo_EnzoSolverJacobi.hpp"
 #include "enzo_EnzoSolverMg0.hpp"
+
+#include "enzo_EnzoStopping.hpp"
 
 #include "enzo_EnzoProlong.hpp"
 #include "enzo_EnzoProlongMC1.hpp"

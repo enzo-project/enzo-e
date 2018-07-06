@@ -65,7 +65,8 @@ enum phase_type {
   phase_last
 };
 
-#define PHASE_COUNT (phase_exit + 1)
+// #define PHASE_COUNT (phase_exit + 1)
+// #define PHASE_COUNT 100
 extern const char * phase_name[];
 
 /// @enum     adapt_type
@@ -117,10 +118,8 @@ class Tree;
 #include "mesh_Refine.hpp"
 #include "mesh_RefineDensity.hpp"
 #include "mesh_RefineMask.hpp"
-#include "mesh_RefineMass.hpp"
 #include "mesh_RefineShear.hpp"
 #include "mesh_RefineSlope.hpp"
-#include "mesh_RefineParticleMass.hpp"
 #include "mesh_RefineParticleCount.hpp"
 
 #endif /* _MESH_HPP */

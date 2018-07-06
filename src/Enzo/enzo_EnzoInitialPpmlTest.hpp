@@ -2,7 +2,7 @@
 
 /// @file     enzo_EnzoInitialPpmlTest.hpp
 /// @author   First Last (email@address)
-/// @date     yyyy-mm-dd
+/// @date     2017-06-12
 /// @brief    [\ref Enzo] Declaration of the EnzoInitialPpmlTest class
 
 #ifndef ENZO_PPML_TEST_HPP
@@ -39,7 +39,7 @@ public: // interface
     // NOTE: update this member function whenever class attributes change
   }
 
-  ~EnzoInitialPpmlTest() throw()
+  virtual ~EnzoInitialPpmlTest() throw()
   {  } 
 
 public: // virtual functions

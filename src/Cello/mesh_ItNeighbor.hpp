@@ -116,7 +116,7 @@ private: // attributes
   /// Whether domain is periodic along each face & axis
   bool periodic_[3][2];
 
-  /// Size of the hierarchy forest
+  /// Size of the block array
   int n3_[3];
 
   /// Index

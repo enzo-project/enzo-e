@@ -574,7 +574,7 @@ PARALLEL_MAIN_BEGIN
 
   check_parameters(parameters1);
 
-  parameters1->write ( "test1.out" );
+  parameters1->write ( "test1.out", param_write_cello );
 
 
   parameters2->read("test1.out");

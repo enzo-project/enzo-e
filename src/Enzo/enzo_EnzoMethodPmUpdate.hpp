@@ -25,7 +25,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodPmUpdate (CkMigrateMessage *m)
-    : max_dt_(0.0)
+    : Method (m),
+      max_dt_(0.0)
   { }
 
   /// CHARM++ Pack / Unpack function

@@ -35,18 +35,16 @@ public: // functions
   };
 
   /// Destructor
-  ~EnzoSimulation();
+  virtual ~EnzoSimulation();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+  /// Request by newly created EnzoBlock to get its MsgRefine object
+  virtual void p_get_msg_refine(Index index);
+
   /// Barrier after constructor to ensure all EnzoSimulation objects created
   void r_startup_begun (CkReductionMsg *);
-
-public:
-
-  /// Continue on to Problem::output_wait() from checkpoint
-  virtual void r_write_checkpoint();
 
 public: // virtual functions
 

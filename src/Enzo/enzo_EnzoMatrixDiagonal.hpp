@@ -36,7 +36,8 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoMatrixDiagonal(CkMigrateMessage *m)
-    : hx_(0),
+    : Matrix(m),
+      hx_(0),
       hy_(0),
       hz_(0),
       mx_(0),
@@ -66,17 +67,17 @@ public: // virtual functions
 
 protected: // functions
 
-  template <class T>
-  void matvec_ (T * Y, T * X, int g0) const throw();
+  void matvec_ (enzo_float * Y, enzo_float * X, int g0) const throw();
 
-  template <class T>
-  void diagonal_ (T * X, int g0) const throw();
+  void diagonal_ (enzo_float * X, int g0) const throw();
 
   /// Whether the matrix is singular or not
   virtual bool is_singular() const throw()
   { return false; }
 
-protected: // attributes
+  /// How many ghost zones required for matvec
+  virtual int ghost_depth() const throw()
+  { return 0; }
 
   double hx_, hy_, hz_;
   int mx_,my_,mz_;

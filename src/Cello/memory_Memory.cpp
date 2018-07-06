@@ -59,7 +59,7 @@ void * Memory::allocate ( size_t bytes ) throw ()
     void * array[10];
     size_t size = backtrace(array,10);
     backtrace_symbols_fd(array,size,STDERR_FILENO);
-    CkExit();
+    CmiAbort("MEMORY ALLOCATION ERROR");
   }
 
   int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));

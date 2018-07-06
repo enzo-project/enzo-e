@@ -52,8 +52,9 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  /// Initialize the block
+public: // virtual methods
 
+  /// Initialize the block
   virtual void enforce_block
   (
    Block * block,

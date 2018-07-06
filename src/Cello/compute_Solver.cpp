@@ -63,6 +63,20 @@ void Solver::monitor_output_
 
 //----------------------------------------------------------------------
 
+bool Solver::reuse_solution_ (int cycle) const throw()
+{
+  // 0   0 1 1 1 1 1    always restart from previous solution (except cycle 0)
+  // 1   0 0 0 0 0 0    never restart from previous (default)
+  // 2   0 1 0 1 0 1    restart every 2nd
+  // 3   0 1 1 0 1 1    restart every 3rd
+  //      ...           restart every nth
+  return ( ( cycle > 0 ) &&
+	   ( ( restart_cycle_ == 0 ) ||
+	     ( cycle % restart_cycle_) != 0 ) );
+}
+
+//----------------------------------------------------------------------
+
 void Solver::begin_(Block * block)
 {
   block->push_solver(index_);
@@ -92,14 +106,3 @@ bool Solver::is_active_(Block * block)
   return (is_unigrid) ? (in_range) : (is_leaf && in_range);
 }
 
-// ----------------------------------------------------------------------
-
-int Solver::neighbor_type_() const throw() {
-  return (min_level_ == max_level_) ? neighbor_level : neighbor_leaf;
-}
-
-// ----------------------------------------------------------------------
-
-int Solver::sync_type_() const throw() {
-  return (min_level_ == max_level_) ? sync_face : sync_neighbor;
-}

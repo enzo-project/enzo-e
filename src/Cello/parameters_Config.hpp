@@ -37,6 +37,7 @@ public: // interface
       adapt_level_exponent(),
       adapt_include_ghosts(),
       adapt_output(),
+      adapt_schedule_index(),
       balance_schedule_index(0),
       num_boundary(0),
       boundary_list(),
@@ -59,6 +60,7 @@ public: // interface
       initial_list(),
       initial_cycle(0),
       initial_time(0.0),
+      initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
       initial_trace_dx(0),
@@ -70,12 +72,14 @@ public: // interface
       mesh_root_rank(0),
       mesh_min_level(0),
       mesh_max_level(0),
+      mesh_max_initial_level(0),
       num_method(0),
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
       method_courant(),
       method_timestep(),
+      method_trace_name(),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),
@@ -102,7 +106,8 @@ public: // interface
       output_min_level(),
       output_leaf_only(),
       output_dir(),
-      output_stride(),
+      output_stride_write(),
+      output_stride_wait(),
       output_field_list(),
       output_particle_list(),
       output_name(),
@@ -126,6 +131,8 @@ public: // interface
       particle_group_list(),
       performance_papi_counters(),
       performance_warnings(false),
+      performance_on_schedule_index(-1),
+      performance_off_schedule_index(-1),
       num_physics(0),
       physics_list(),
       restart_file(""),
@@ -151,7 +158,7 @@ public: // interface
       units_length(1.0),
       units_time(1.0),
       testing_cycle_final(0),
-      testing_time_final(0.0),
+      testing_time_final(),
       testing_time_tolerance(0.0)
   { }
 
@@ -176,7 +183,8 @@ public: // interface
       adapt_level_exponent(),
       adapt_include_ghosts(),
       adapt_output(),
-      balance_schedule_index(0),
+      adapt_schedule_index(),
+      balance_schedule_index(-1),
       num_boundary(0),
       boundary_list(),
       boundary_type(),
@@ -198,6 +206,7 @@ public: // interface
       initial_list(),
       initial_cycle(0),
       initial_time(0.0),
+      initial_trace_name(""),
       initial_trace_field(""),
       initial_trace_mpp(0.0),
       initial_trace_dx(0),
@@ -209,12 +218,14 @@ public: // interface
       mesh_root_rank(0),
       mesh_min_level(0),
       mesh_max_level(0),
+      mesh_max_initial_level(0),
       num_method(0),
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
       method_courant(),
       method_timestep(),
+      method_trace_name(),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),
@@ -241,11 +252,12 @@ public: // interface
       output_min_level(),
       output_leaf_only(),
       output_dir(),
-      output_stride(),
+      output_stride_write(),
+      output_stride_wait(),
       output_field_list(),
       output_particle_list(),
       output_name(),
-      index_schedule_(0),
+      index_schedule_(-1),
       schedule_list(),
       schedule_type(),
       schedule_var(),
@@ -265,6 +277,8 @@ public: // interface
       particle_group_list(),
       performance_papi_counters(),
       performance_warnings(false),
+      performance_on_schedule_index(-1),
+      performance_off_schedule_index(-1),
       num_physics(0),
       physics_list(),
       restart_file(""),
@@ -290,7 +304,7 @@ public: // interface
       units_length(1.0),
       units_time(1.0),
       testing_cycle_final(0),
-      testing_time_final(0.0),
+      testing_time_final(),
       testing_time_tolerance(0.0)
   {
     for (int axis=0; axis<3; axis++) {
@@ -329,6 +343,7 @@ public: // attributes
   std::vector <double>       adapt_level_exponent;
   std::vector <char>         adapt_include_ghosts;
   std::vector <std::string>  adapt_output;
+  std::vector <int>          adapt_schedule_index;
   
   // Balance (dynamic load balancing)
 
@@ -372,6 +387,7 @@ public: // attributes
   int                        initial_cycle;
   double                     initial_time;
 
+  std::string                initial_trace_name;
   std::string                initial_trace_field;
   double                     initial_trace_mpp;
   int                        initial_trace_dx;
@@ -391,6 +407,7 @@ public: // attributes
   int                        mesh_root_size[3];
   int                        mesh_min_level;
   int                        mesh_max_level;
+  int                        mesh_max_initial_level;
 
   // Method
 
@@ -400,6 +417,7 @@ public: // attributes
   std::vector<int>           method_schedule_index;
   std::vector<double>        method_courant;
   std::vector<double>        method_timestep;
+  std::vector<std::string>   method_trace_name;
 
   // Monitor
 
@@ -432,7 +450,9 @@ public: // attributes
   std::vector < int >         output_min_level;
   std::vector < char >        output_leaf_only;
   std::vector < std::vector <std::string> >  output_dir;
-  std::vector < int >         output_stride;
+  std::string                 output_dir_global;
+  std::vector < int >         output_stride_write;
+  std::vector < int >         output_stride_wait;
   std::vector < std::vector <std::string> >  output_field_list;
   std::vector < std::vector <std::string> > output_particle_list;
   std::vector < std::vector <std::string> >  output_name;
@@ -467,6 +487,8 @@ public: // attributes
 
   std::vector<std::string>   performance_papi_counters;
   bool                       performance_warnings;
+  int                        performance_on_schedule_index;
+  int                        performance_off_schedule_index;
 
   // Physics
   
@@ -509,7 +531,7 @@ public: // attributes
   // Testing
 
   int                        testing_cycle_final;
-  double                     testing_time_final;
+  std::vector<double>        testing_time_final;
   double                     testing_time_tolerance;
 
 protected: // functions

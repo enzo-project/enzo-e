@@ -18,6 +18,7 @@ public: // interface
 
   EnzoSolverCg (FieldDescr * field_descr,
 		int monitor_iter,
+		int restart_cycle,
 		int rank,
 		int iter_max, 
 		double res_tol,
@@ -74,9 +75,6 @@ public: // interface
   /// Assignment operator
   EnzoSolverCg & operator= (const EnzoSolverCg & EnzoSolverCg) throw();
 
-  /// Destructor
-  ~EnzoSolverCg() throw();
-
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
@@ -85,7 +83,8 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
+		       Block * block) throw();
   
   /// Return the name of this solver
   virtual std::string name () const
@@ -96,38 +95,26 @@ public: // virtual functions
 public: // virtual functions
 
   /// Continuation after global reduction
-  template <class T>
   void shift_1(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
-  template <class T>
   void loop_0a(EnzoBlock * enzo_block, CkReductionMsg *) throw();
 
     /// Continuation after global reduction
-  template <class T>
   void loop_0b(EnzoBlock * enzo_block, CkReductionMsg *) throw();
 
   /// Continuation after global reduction
-  template <class T>
   void loop_2a(EnzoBlock * enzo_block) throw();
 
     /// Continuation after global reduction
-  template <class T>
   void loop_2b(EnzoBlock * enzo_block) throw();
 
   /// Continuation after global reduction
-  template <class T>
   void loop_4(EnzoBlock * enzo_block) throw();
 
-  // /// Continuation after global reduction
-  // template <class T>
-  // void shift_2(EnzoBlock * enzo_block) throw();
-
   /// Continuation after global reduction
-  template <class T>
   void loop_6(EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void end (EnzoBlock * enzo_block, int retval) throw();
 
   /// Set rz_ by EnzoBlock after reduction
@@ -157,10 +144,8 @@ public: // virtual functions
 
 protected: // methods
 
-  template <class T>
   void compute_ (EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void begin_1_() throw();
 
   /// Allocate temporary Fields
@@ -182,11 +167,9 @@ protected: // methods
   }
 
   /// Serial CG solver if local_ == true
-  template <class T>
   void local_cg_ (EnzoBlock * enzo_block);
 
   /// Apply boundary conditions for the Field on the local block
-  template <class T>
   void refresh_local_(int ix, EnzoBlock * enzo_block);
   
   void monitor_output_(EnzoBlock *);
@@ -196,7 +179,7 @@ protected: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// Matrix
-  Matrix * A_;
+  std::shared_ptr<Matrix> A_;
 
   /// Solution and right-hand-side fields
   int ix_;
@@ -258,9 +241,6 @@ protected: // attributes
 
   /// count of elements B(i) for singular systems
   long double bc_;
-
-  /// matvec refresh index
-  int id_refresh_matvec_;
 
   /// Whether to solve on a standalone Block, e.g. for MG coarse solver
   bool local_;

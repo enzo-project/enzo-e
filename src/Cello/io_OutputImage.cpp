@@ -11,12 +11,11 @@
 // #define DEBUG_OUTPUT
 
 #ifdef DEBUG_OUTPUT
-#  define TRACE_OUTPUT \
-  CkPrintf ("%s:%d %d %s TRACE_OUTPUT image_mesh_ %p\n",				\
-	    __FILE__,__LINE__,CkMyPe(),block->name().c_str(),image_mesh_);		\
+#  define TRACE_OUTPUT(M)						\
+  CkPrintf ("%d TRACE_OUTPUT %s\n",CkMyPe(),M);				\
   fflush(stdout);
 #else
-#  define TRACE_OUTPUT /* ... */
+#  define TRACE_OUTPUT(M) /* ... */
 #endif
 
 //----------------------------------------------------------------------
@@ -103,8 +102,11 @@ OutputImage::OutputImage(int index,
     nyi_ += 2*nyb*ngy*nl;
   }
   
-  // Override default Output::process_stride_: only root writes
-  set_process_stride(process_count);
+  // Override default Output::stride_write_: only root writes
+  set_stride_write (process_count);
+  // Let all processes contribute data when its available
+  // (wait stride may be helpful for performance?)
+  stride_wait_ = 1;
 
   // Set default color map to be black and white
   map_r_.resize(2);
@@ -219,7 +221,7 @@ void OutputImage::set_colormap
 
 void OutputImage::init () throw()
 {
-  TRACE("OutputImage::init()");
+  TRACE_OUTPUT("OutputImage::init()");
   image_create_();
 }
 
@@ -227,7 +229,7 @@ void OutputImage::init () throw()
 
 void OutputImage::open () throw()
 {
-  TRACE("OutputImage::open()");
+  TRACE_OUTPUT("OutputImage::open()");
   // Open file if writing a single block
 
   if (is_writer()) {
@@ -240,6 +242,11 @@ void OutputImage::open () throw()
     Monitor::instance()->print ("Output","writing image file %s", 
 				(dir_name + "/" + file_name).c_str());
     png_create_(dir_name + "/" + file_name);
+    if (chmod (dir_name.c_str(),0755) == -1) {
+      ERROR2 ("OutputImage::open()",
+	      "chmod() return errno %d: error '%s'",
+	      errno,strerror(errno));
+    };
   }
 }
 
@@ -247,7 +254,7 @@ void OutputImage::open () throw()
 
 void OutputImage::close () throw()
 {
-  TRACE("OutputImage::close()");
+  TRACE_OUTPUT("OutputImage::close()");
   if (is_writer()) image_write_();
   image_close_();
   png_close_();
@@ -499,7 +506,7 @@ void OutputImage::write_block
       particle.attribute_index (it, color_particle_attribute_) : -1;
 
     // get particle attribute stride
-    const int ia_x = particle.attribute_index(it,"x");
+    const int ia_x = particle.attribute_position(it,0);
     const int dp = particle.stride(it,ia_x);
 
     const int nb = particle.num_batches(it);
@@ -575,9 +582,9 @@ void OutputImage::prepare_remote (int * n, char ** buffer) throw()
 
   // Determine buffer size
 
+  size += 2*sizeof(int);        // nxi_, nyi_
   size += nx*ny*sizeof(double); // image_data_
   size += nx*ny*sizeof(double); // image_mesh_
-  size += 2*sizeof(int);        // nxi_, nyi_
   (*n) = size;
 
   // Allocate buffer (deallocated in cleanup_remote())
@@ -614,8 +621,8 @@ void OutputImage::update_remote  ( int m, char * buffer) throw()
 
   p.c = buffer;
 
-  int nx = *p.i++;
-  int ny = *p.i++;
+  const int nx = *p.i++;
+  const int ny = *p.i++;
 
   const int n = nx*ny;
   
@@ -672,9 +679,10 @@ double OutputImage::mesh_color_(int level,int age) const
 bool OutputImage::is_active_ (const Block * block) const
 {
   const int level = block->level();
-  if (leaf_only_ && !block->is_leaf()) {
+
+  if (leaf_only_ && ! block->is_leaf()) {
     return false;
-  } else if (!((min_level_ <= level) && (level <= max_level_))) {
+  } else if (! ((min_level_ <= level) && (level <= max_level_))) {
     return false;
   } else {
     return true;
@@ -779,12 +787,10 @@ void OutputImage::image_write_ () throw()
     }
   }
 
-  if (min_value_ < max_value_) {
+  // Use min/max if specified
 
-    min = min_value_;
-    max = max_value_;
-
-  }
+  min = MIN(min,min_value_);
+  max = MAX(max,max_value_);
 
   size_t n = map_r_.size();
 

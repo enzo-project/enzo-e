@@ -55,8 +55,8 @@ Parameters::~Parameters()
        ++it_param) {
     delete it_param->second;
   }
-  delete parameter_tree_;
 #endif  
+  delete parameter_tree_;
 }
 
 //----------------------------------------------------------------------
@@ -162,7 +162,7 @@ void Parameters::read ( const char * file_name )
 
 //----------------------------------------------------------------------
 
-void Parameters::write ( const char * file_name, bool full_names )
+void Parameters::write ( const char * file_name, int type )
 /// @param  file_name   An opened output parameter file or stdout
 {
   FILE * fp = fopen(file_name,"w");
@@ -171,12 +171,13 @@ void Parameters::write ( const char * file_name, bool full_names )
 	  file_name,
 	  ( fp != NULL ) );
 
-  write (fp,full_names);
+  write (fp,type);
   fclose(fp);
 }
-  //----------------------------------------------------------------------
 
-void Parameters::write ( FILE * fp, bool full_names )
+//----------------------------------------------------------------------
+
+void Parameters::write ( FILE * fp, int type )
 /// @param  file_name   An opened output parameter file or stdout
 {
   // "Previous" groups are empty
@@ -218,7 +219,7 @@ void Parameters::write ( FILE * fp, bool full_names )
       for (int i=i_group; i<n_prev; i++) {
 	--group_depth;
 	indent_string = indent_string.substr(0, indent_string.size()-indent_size);
-	if (!full_names) {
+	if (type != param_write_monitor) {
 	  fprintf (fp, "%s}%c\n",indent_string.c_str(),
 		   (group_depth==0) ? '\n' : ';' );
 	}
@@ -227,8 +228,10 @@ void Parameters::write ( FILE * fp, bool full_names )
       // Begin new groups
 
       for (int i=i_group; i<n_curr; i++) {
-	if (!full_names) {
-	  fprintf (fp,"%s%s {\n",indent_string.c_str(),
+	if (type != param_write_monitor) {
+	  const char * format =
+	    (type==param_write_libconfig) ? "%s%s : {\n" : "%s%s {\n";
+	  fprintf (fp, format ,indent_string.c_str(),
 		   group_curr[i].c_str());
 	}
 	indent_string = indent_string + indent_amount;
@@ -236,7 +239,7 @@ void Parameters::write ( FILE * fp, bool full_names )
       }
 
       // Print parameter
-      if (full_names) {
+      if (type == param_write_monitor) {
 	Monitor monitor;
 	monitor.set_mode(monitor_mode_all);
 	// display Monitor prefix if full_names
@@ -244,12 +247,10 @@ void Parameters::write ( FILE * fp, bool full_names )
 	for (int i=0; i < n_curr; i++) {
 	  fprintf (fp,"%s:",group_curr[i].c_str());
 	}
-	bool no_commas = true;
-	it_param->second->write(fp,it_param->first,no_commas);
       } else {	
 	fprintf (fp,"%s",indent_string.c_str());
-	it_param->second->write(fp,it_param->first);
       }
+      it_param->second->write(fp,it_param->first,type);
 
       // Copy current groups to previous groups (inefficient)
       n_prev = n_curr;
@@ -264,14 +265,13 @@ void Parameters::write ( FILE * fp, bool full_names )
 
   for (int i=0; i<n_prev; i++) {
     indent_string = indent_string.substr(indent_size,std::string::npos);
-    if (!full_names) {
+    if (type != param_write_monitor) {
       fprintf (fp, "%s}\n",indent_string.c_str());
     }
     --group_depth;
   }
 
 }
-
 
 //----------------------------------------------------------------------
 
@@ -951,7 +951,7 @@ void Parameters::monitor_access_
   std::string value;
 
   if ( param != NULL ) {
-    value = param->value_to_string();
+    value = param->value_to_string(param_write_monitor);
   } else {
     value = deflt_string + " [default]";
   }
@@ -978,7 +978,8 @@ void Parameters::monitor_write_ (std::string parameter) throw()
   char buffer[MONITOR_LENGTH];
   sprintf (buffer,"Parameter write %s = %s",
 	   parameter_name_(parameter).c_str(),
-	   param ? param->value_to_string().c_str() : "[undefined]");
+	   param ?
+	   param->value_to_string(param_write_monitor).c_str() : "[undefined]");
 
   if (lmonitor_) monitor_->print_verbatim("Parameters",buffer);
 }
@@ -1008,7 +1009,9 @@ int Parameters::readline_
 
   int c = 0;
   for (i=0; c != EOF && c != '\n' && i < buffer_length-1; i++) {
-    buffer[i] = c = fgetc(fp);
+    c = fgetc(fp);
+    buffer[i] = (std::numeric_limits<char>::min() <= c && 
+		 c <= std::numeric_limits<char>::max()) ? c : '\0';
   }
 
   // Back up i to last character read

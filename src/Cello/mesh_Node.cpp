@@ -10,7 +10,6 @@
 
 Node::Node() throw ()
   : 
-  have_data_(0),
   data_(0),
   child_array_()
 {}
@@ -30,10 +29,13 @@ void Node::pup (PUP::er &p)
   // int *& test2 = test;
   // TRACE1 ("test2 = %d",*test2);
   // Patch *& data_alias = (Patch *) data_;
-  p | have_data_;
-  if (have_data_) {
+  int have_data = (data_ != NULL);
+  p | have_data;
+  if (have_data) {
     if (up) data_ = (void *) new CProxy_Block;
     p | *((CProxy_Block *)data_);
+  } else {
+    data_ = NULL;
   }
   p | child_array_;
 };

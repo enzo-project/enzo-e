@@ -337,8 +337,8 @@ PARALLEL_MAIN_BEGIN
 	  FieldFace face_lower (field_lower);
 	  FieldFace face_upper (field_upper);
 
-	  face_lower.set_refresh(refresh_same);
-	  face_upper.set_refresh(refresh_same);
+	  face_lower.set_refresh_type(refresh_same);
+	  face_upper.set_refresh_type(refresh_same);
 
 	  face_lower.set_ghost(true,true,true);
 	  face_upper.set_ghost(true,true,true);
@@ -351,8 +351,10 @@ PARALLEL_MAIN_BEGIN
 	  field_list.push_back(1);
 	  field_list.push_back(2);
 
-	  face_lower.set_field_list(field_list);
-	  face_upper.set_field_list(field_list);
+	  Refresh refresh;
+	  refresh.set_field_list(field_list);
+	  face_lower.set_refresh(&refresh,false);
+	  face_upper.set_refresh(&refresh,false);
 
 	  int n;
 	  char * array;

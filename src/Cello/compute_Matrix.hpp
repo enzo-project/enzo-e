@@ -24,6 +24,8 @@ public: // interface
   virtual ~Matrix() throw()
   {}
 
+  Matrix(CkMigrateMessage *m) : PUP::able(m) { }
+
   /// Charm++ PUP::able declarations
   PUPable_abstract(Matrix);
 
@@ -47,6 +49,9 @@ public: // virtual functions
 
   /// Whether the matrix is singular or not
   virtual bool is_singular() const throw() = 0;
+
+  /// How many ghost zones required for matvec
+  virtual int ghost_depth() const throw() = 0;
 
 protected: // functions
 

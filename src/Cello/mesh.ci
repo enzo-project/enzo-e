@@ -12,6 +12,10 @@ module mesh {
   initnode void register_sum_long_double_2(void);
   initnode void register_sum_long_double_3(void);
   initnode void register_sum_long_double_4(void);
+  initnode void register_sum_long_double_5(void);
+  initnode void register_sum_long_double_6(void);
+  initnode void register_sum_long_double_7(void);
+  initnode void register_sum_long_double_8(void);
 
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
@@ -49,16 +53,15 @@ module mesh {
   PUPable Refine;
   PUPable RefineDensity;
   PUPable RefineMask;
-  PUPable RefineMass;
-  PUPable RefineParticleMass;
   PUPable RefineParticleCount;
-  PUPable RefineSlope;
   PUPable RefineShear;
-  PUPable Stopping;
+  PUPable RefineSlope;
   PUPable Refresh;
   PUPable RestrictLinear;
-  PUPable ScheduleList;
   PUPable ScheduleInterval;
+  PUPable ScheduleList;
+  PUPable SolverNull;
+  PUPable Stopping;
   PUPable Units;
 
   // depreciated
@@ -72,7 +75,9 @@ module mesh {
 
   array[Index] Block {
 
-    entry Block     (MsgRefine * msg);
+    entry Block (MsgRefine * msg);
+    entry Block (process_type ip_source);
+    entry void p_set_msg_refine(MsgRefine * msg);
     entry Block();
 
     //--------------------------------------------------
@@ -81,6 +86,7 @@ module mesh {
 
     entry void p_initial_exit();
     entry void r_initial_exit(CkReductionMsg *);
+    entry void r_end_initialize(CkReductionMsg *);
 
     //--------------------------------------------------
     // *** OUTPUT ***
@@ -88,22 +94,20 @@ module mesh {
 
     entry void p_output_enter();
     entry void r_output_enter(CkReductionMsg *);
-
     entry void p_output_end();
     entry void p_output_exit();
     entry void r_output_exit(CkReductionMsg *);
 
-    entry void p_output_write (int index_output);
+    entry void p_output_write (int index_output, int step);
 
     //--------------------------------------------------
     // *** COMPUTE ***
     //--------------------------------------------------
 
     entry void p_compute_enter();
-    entry void r_compute_enter(CkReductionMsg *);
 
     entry void p_compute_continue();
-    entry void r_compute_continue(CkReductionMsg *);
+    entry void r_compute_continue();
 
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);

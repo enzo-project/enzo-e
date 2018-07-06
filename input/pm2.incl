@@ -9,7 +9,7 @@
 
    Mesh { 
       root_rank = 2;
-      root_size = [64, 64];
+      root_size = [128, 128];
    }
 
    # Field parameters include those concerning fields as a group, as
@@ -28,8 +28,11 @@
 	"pressure",
 	"potential",
 	"density_total",
+	"density_particle",
+	"density_gas",
+	"density_particle_accumulate",
 	"acceleration_x",
-	"acceleration_y", "B" ] ;
+	"acceleration_y", "B", "R0" ] ;
 
       gamma = 1.4;
 
@@ -52,7 +55,8 @@
                         "ay", "double"];
 
           constants = ["mass", "double", 2e33];
-          position = ["x","y","z"];
+          position = ["x","y"];
+          velocity = ["vx","vy"];
       }
 		    
    }
@@ -113,7 +117,7 @@
       }
    }
 
-   Boundary { type = "reflecting"; }
+   Boundary { type = "periodic"; }
 
    Stopping {        cycle = 10;   } 
    Testing {   cycle_final = 400; }
@@ -211,6 +215,7 @@
       data {
 	type     = "data";
         field_list = ["density_total"];
+	particle_list = ["dark"];
         include "input/schedule_cycle_5.incl"
       }
 

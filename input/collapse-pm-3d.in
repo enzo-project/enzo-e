@@ -4,7 +4,7 @@
 include "input/pm3.incl"
 
 Adapt {
-   max_level = 5; 
+   max_level = 2; 
 #   list = ["slope"];
    list = ["p_any","p_mass"];
    p_any {
@@ -72,7 +72,7 @@ Output {
     data { name = ["collapse-pm-8-%02d-%06d.h5", "proc","cycle"]; }
 }
 
-Stopping { cycle = 1000; }
+Stopping { cycle = 10; }
 
 Method {
    pm_update {

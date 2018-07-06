@@ -23,7 +23,8 @@ FieldData::FieldData
     offsets_(),
     ghosts_allocated_(true),
     history_id_(),
-    history_time_()
+    history_time_(),
+    units_scaling_()
 {
   if (nx != 0) {
     size_[0] = nx;
@@ -45,6 +46,11 @@ FieldData::FieldData
 FieldData::~FieldData() throw()
 {  
   deallocate_permanent();
+  for (int i=0; i<array_temporary_.size(); i++) {
+    delete [] array_temporary_[i];
+    array_temporary_[i] = NULL;
+    temporary_size_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -66,6 +72,9 @@ void FieldData::pup(PUP::er &p)
   for (int i=0; i<nt; i++) {
     int n = temporary_size_[i];
     if (n > 0) {
+      if (p.isUnpacking()) {
+	array_temporary_[i] = new char[n];
+      }
       PUParray(p,array_temporary_[i],n);
     }
   }  
@@ -80,6 +89,7 @@ void FieldData::pup(PUP::er &p)
   p | ghosts_allocated_;
   p | history_id_;
   p | history_time_;
+  p | units_scaling_;
 }
 
 
@@ -126,32 +136,33 @@ char * FieldData::values
 (const FieldDescr * field_descr,
  int id_field, int index_history ) throw ()
 {
-  if (id_field == -1) return NULL;
-
   char * values = 0;
 
-  int nh = field_descr->num_history();
-  if (field_descr->is_permanent(id_field) &&
-      (1 <= index_history && index_history <= nh)) {
+  if (id_field >= 0) {
+
+    int nh = field_descr->num_history();
+    if (field_descr->is_permanent(id_field) &&
+	(1 <= index_history && index_history <= nh)) {
       const int np = field_descr->num_permanent();
       id_field = history_id_[id_field + np*(index_history-1)];
-  }
-  
-  if (field_descr->is_permanent(id_field)) {
-
-    const int num_fields = field_descr->field_count();
-    if (0 <= id_field && id_field < num_fields) {
-      values = &array_permanent_[0] + offsets_[id_field];
     }
+  
+    if (field_descr->is_permanent(id_field)) {
 
-  } else {
+      const int num_fields = field_descr->field_count();
+      if (0 <= id_field && id_field < num_fields) {
+	values = &array_permanent_[0] + offsets_[id_field];
+      }
 
-    // temporary field
+    } else {
 
-    int id_temporary = id_field - field_descr->num_permanent();
+      // temporary field
 
-    if (0 <= id_temporary && id_temporary < int(array_temporary_.size())) {
-      values = array_temporary_[id_temporary];
+      int id_temporary = id_field - field_descr->num_permanent();
+
+      if (0 <= id_temporary && id_temporary < int(array_temporary_.size())) {
+	values = array_temporary_[id_temporary];
+      }
     }
   }
   return values;
@@ -524,207 +535,108 @@ void FieldData::print
 
   int ip=0;
 
-   ip=CkMyPe();
+  ip=CkMyPe();
 
-   char filename [80];
-   sprintf (filename,"%s-%d.debug",message,ip);
-   printf ("DEBUG message = %s\n",message);
-   printf ("DEBUG filename = %s\n",filename);
+  char filename [80];
+  sprintf (filename,"%s-%d.debug",message,ip);
+  printf ("DEBUG message = %s\n",message);
+  printf ("DEBUG filename = %s\n",filename);
 
-   FILE * fp = fopen (filename,"w");
+  FILE * fp = fopen (filename,"w");
 
-   ASSERT("FieldData::print",
-	  "FieldData not allocated",
-	  permanent_allocated());
+  ASSERT("FieldData::print",
+	 "FieldData not allocated",
+	 permanent_allocated());
 
-   int field_count = field_descr->field_count();
-   for (int index_field=0; index_field<field_count; index_field++) {
+  int field_count = field_descr->field_count();
+  for (int index_field=0; index_field<field_count; index_field++) {
 
-     // WARNING: not copying string works on some compilers but not others
-     const char * field_name = strdup(field_descr->field_name(index_field).c_str());
+    // WARNING: not copying string works on some compilers but not others
+    const char * field_name = strdup(field_descr->field_name(index_field).c_str());
 
-     int nxd,nyd,nzd;
-     field_size(field_descr,index_field,&nxd,&nyd,&nzd);
-     int gx,gy,gz;
-     field_descr->ghost_depth(index_field,&gx,&gy,&gz);
+    int nxd,nyd,nzd;
+    field_size(field_descr,index_field,&nxd,&nyd,&nzd);
+    int gx,gy,gz;
+    field_descr->ghost_depth(index_field,&gx,&gy,&gz);
 
-     int ixm,iym,izm;
-     int ixp,iyp,izp;
+    int ixm,iym,izm;
+    int ixp,iyp,izp;
 
-     // Exclude ghost zones
+    // Exclude ghost zones
 
-     // ixm = gx;
-     // iym = gy;
-     // izm = gz;
+    // ixm = gx;
+    // iym = gy;
+    // izm = gz;
 
-     // ixp = nxd - gx;
-     // iyp = nyd - gy;
-     // izp = nzd - gz;
+    // ixp = nxd - gx;
+    // iyp = nyd - gy;
+    // izp = nzd - gz;
 
-     // Include ghost zones
+    // Include ghost zones
 
-     ixm = 0;
-     iym = 0;
-     izm = 0;
+    ixm = 0;
+    iym = 0;
+    izm = 0;
 
-     ixp = nxd;
-     iyp = nyd;
-     izp = nzd;
+    ixp = nxd;
+    iyp = nyd;
+    izp = nzd;
 
-     int nx,ny,nz;
+    int nx,ny,nz;
 
-     nx = (ixp-ixm);
-     ny = (iyp-iym);
-     nz = (izp-izm);
+    nx = (ixp-ixm);
+    ny = (iyp-iym);
+    nz = (izp-izm);
 
-     //     double hx,hy,hz;
+    //     double hx,hy,hz;
 
-     // hx = (upper[0]-lower[0])/(nxd-2*gx);
-     // hy = (upper[1]-lower[1])/(nyd-2*gy);
-     // hz = (upper[2]-lower[2])/(nzd-2*gz);
+    // hx = (upper[0]-lower[0])/(nxd-2*gx);
+    // hy = (upper[1]-lower[1])/(nyd-2*gy);
+    // hz = (upper[2]-lower[2])/(nzd-2*gz);
 
-     const char * array_offset = &array_permanent_[0]+offsets_[index_field];
-     switch (field_descr->precision(index_field)) {
-     case precision_single:
-       print_((const float * ) array_offset,
-	      field_name, message, // lower,
-	      fp,
-	      ixm,iym,izm,
-	      ixp,iyp,izp,
-	      nx, ny, nz,
-	      gx, gy ,gz,
-	      //	      hx, hy ,hz,
-	      nxd,nyd);
-       break;
-     case precision_double:
-       print_((const double * ) array_offset, 
-	      field_name, message, // lower,
-	      fp,
-	      ixm,iym,izm,
-	      ixp,iyp,izp,
-	      nx, ny, nz,
-	      gx, gy ,gz,
-	      //	      hx, hy ,hz,
-	      nxd,nyd);
-       break;
-     case precision_quadruple:
-       print_((const long double * ) array_offset, 
-	      field_name, message, // lower,
-	      fp,
-	      ixm,iym,izm,
-	      ixp,iyp,izp,
-	      nx, ny, nz,
-	      gx, gy ,gz,
-	      //	      hx, hy ,hz,
-	      nxd,nyd);
-       break;
-     default:
-       ERROR("FieldData::print", "Unsupported precision");
-     }
+    const char * array_offset = &array_permanent_[0]+offsets_[index_field];
+    switch (field_descr->precision(index_field)) {
+    case precision_single:
+      print_((const float * ) array_offset,
+	     field_name, message, // lower,
+	     fp,
+	     ixm,iym,izm,
+	     ixp,iyp,izp,
+	     nx, ny, nz,
+	     gx, gy ,gz,
+	     //	      hx, hy ,hz,
+	     nxd,nyd);
+      break;
+    case precision_double:
+      print_((const double * ) array_offset, 
+	     field_name, message, // lower,
+	     fp,
+	     ixm,iym,izm,
+	     ixp,iyp,izp,
+	     nx, ny, nz,
+	     gx, gy ,gz,
+	     //	      hx, hy ,hz,
+	     nxd,nyd);
+      break;
+    case precision_quadruple:
+      print_((const long double * ) array_offset, 
+	     field_name, message, // lower,
+	     fp,
+	     ixm,iym,izm,
+	     ixp,iyp,izp,
+	     nx, ny, nz,
+	     gx, gy ,gz,
+	     //	      hx, hy ,hz,
+	     nxd,nyd);
+      break;
+    default:
+      ERROR("FieldData::print", "Unsupported precision");
+    }
 
-     free ((void *)field_name);
-   }
+    free ((void *)field_name);
+  }
 
 #endif /* ifndef CELLO_DEBUG */
-}
-
-//----------------------------------------------------------------------
-
-// void FieldData::copy
-// (const FieldDescr * field_descr,
-//  int id, int is,
-//  bool ghosts = true ) throw()
-// {
-// }
-
-// //----------------------------------------------------------------------
-
-// void FieldData::axpy
-// (const FieldDescr * field_descr, int iz, double a, int ix, int iy,
-//  bool ghosts = true ) throw()
-// {
-// }
-
-//----------------------------------------------------------------------
-
-// template<class T>
-//   void FieldData::axpy_ (T* Z, double a, const T* X, const T* Y) const throw()
-// {
-//   for (int iz=0; iz<mz_; iz++) 
-//     for (int iy=0; iy<my_; iy++) 
-//       for (int ix=0; ix<mx_; ix++) {
-// 	int i = ix + mx_*(iy + my_*iz);
-// 	Z[i] = a * X[i] + Y[i];
-//       }
-// }
-
-//----------------------------------------------------------------------
-
-void FieldData::axpy
-(const FieldDescr * field_descr,
- int iz, long double a, int ix, int iy, bool ghosts) throw()
-{
-  int mx,my,mz;
-  int nx,ny,nz;
-  int gx,gy,gz;
-
-  size                        (&nx, &ny, &nz);
-  dimensions  (field_descr,ix, &mx, &my, &mz);
-  field_descr->ghost_depth(ix, &gx, &gy, &gz);
-
-  void * x = values(field_descr,ix);
-  void * y = values(field_descr,iy);
-  void * z = values(field_descr,iz);
-
-  switch (field_descr->precision(ix)) {
-  case precision_single:
-    axpy_ ((float*)z,a,(float*)x,(float*)y,ghosts,
-	  mx,my,mz,nx,ny,nz,gx,gy,gz);
-    break;
-  case precision_double:
-    axpy_ ((double*)z,a,(double*)x,(double*)y,ghosts,
-	   mx,my,mz,nx,ny,nz,gx,gy,gz);
-    break;
-  case precision_quadruple:
-    axpy_ ((long double*)z,a,(long double*)x,(long double*)y,ghosts,
-	   mx,my,mz,nx,ny,nz,gx,gy,gz);
-    break;
-  default:
-    ERROR2("FieldData::axpy()",
-	   "Unknown precision %d for field id %d",
-	   field_descr->precision(ix),ix);
-    break;
-  }
-
-}
-
-template<class T>
-void FieldData::axpy_
-(T * Z, long double a, const T * X, const T * Y, bool ghosts,
- int mx, int my, int mz,
- int nx, int ny, int nz,
- int gx, int gy, int gz) const throw()
-{
-  if (ghosts) {
-    for (int iz=0; iz<mz; iz++) {
-      for (int iy=0; iy<my; iy++) {
-	for (int ix=0; ix<mx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  Z[i] = a * X[i] + Y[i];
-	}
-      }
-    }
-  } else {
-    int i0 = gx + mx*(gy + my*gz);
-    for (int iz=0; iz<nx; iz++) {
-      for (int iy=0; iy<ny; iy++) { 
-	for (int ix=0; ix<mx; ix++) {
-	  int i = i0 + ix + mx*(iy + my*iz);
-	  Z[i] = a * X[i] + Y[i];
-	}
-      }
-    }
-  }
 }
 
 //----------------------------------------------------------------------
@@ -783,6 +695,12 @@ void FieldData::scale
 (const FieldDescr * field_descr,
  int iy, long double a, int ix, bool ghosts) throw()
 {
+
+  ASSERT2 ("FieldData::scale()",
+	   "Calling scale on illegal fields: ix=%d iy=%d",
+	   ix,iy,
+	   (ix>=0) && (iy>=0) );
+  
   int mx,my,mz;
   int nx,ny,nz;
   int gx,gy,gz;
@@ -901,6 +819,85 @@ void FieldData::save_history (const FieldDescr * field_descr, double time)
     }
   
     history_time_[0] = time;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::units_scale_cgs
+(const FieldDescr * field_descr, int id, double amount)
+{
+  // Return if scaling by 1.0
+  if (amount == 1.0) return;
+
+  // Allocate units scaling for this field if not allocated
+  units_allocate_(id);
+
+  // Return if already scaled by amount
+  if (units_scaling_[id] == amount) return;
+  
+  // Error if scaling by 0.0
+  ASSERT1("FieldData::units_scale_cgs()",
+	  "Trying to scale field %d by 0.0",
+	  id, (amount != 0.0));
+    
+  // Unscale first if already scaled
+  if (units_scaling_[id] != 1.0) {
+    units_scale_code (field_descr,id, units_scaling_[id]);
+  }
+
+  // Scale by "amount"
+  int precision = field_descr->precision(id);
+  int mx,my,mz;
+  this->dimensions(field_descr,id,&mx,&my,&mz);
+  const int m = mx*my*mz;
+  char * array = values(field_descr,id);
+  if (precision == precision_single) {
+    float * a = (float *) array;
+    for (int i=0; i<m; i++) a[i] *= amount;
+  } else if (precision == precision_double) {
+    double * a = (double *) array;
+    for (int i=0; i<m; i++) a[i] *= amount;
+  } else if (precision == precision_quadruple) {
+    long double * a = (long double *) array;
+    for (int i=0; i<m; i++) a[i] *= amount;
+  }
+  // update units_scaling_ to indicate it's scaled by amount
+  units_scaling_[id] = amount;
+}
+
+//----------------------------------------------------------------------
+
+void FieldData::units_scale_code (const FieldDescr * field_descr, int id, double amount)
+{
+ // Allocate units scaling for this field if not allocated
+  units_allocate_(id);
+
+  if (units_scaling_[id] != 1.0) {
+    // scale by "scale" = 1.0 / [current scaling]
+    double scale = 1.0 / amount;
+    if (units_scaling_[id] != amount) {
+      WARNING3("FieldData::units_scale_code()",
+	       "new scaling factor %g differs from old scaling factor %g for field %d\n",
+	       amount,units_scaling_[id],id);
+    }
+    int precision = field_descr->precision(id);
+    int mx,my,mz;
+    this->dimensions(field_descr,id,&mx,&my,&mz);
+    const int m = mx*my*mz;
+    char * array = values(field_descr,id);
+    if (precision == precision_single) {
+      float * a = (float *) array;
+      for (int i=0; i<m; i++) a[i] *= scale;
+    } else if (precision == precision_double) {
+      double * a = (double *) array;
+      for (int i=0; i<m; i++) a[i] *= scale;
+    } else if (precision == precision_quadruple) {
+      long double * a = (long double *) array;
+      for (int i=0; i<m; i++) a[i] *= scale;
+    }
+
+    units_scaling_[id] = 1.0;
   }
 }
 

@@ -25,6 +25,20 @@ Method::~Method() throw()
 void Method::pup (PUP::er &p)
 { TRACEPUP;
   PUP::able::pup(p);
+
+  bool pk = p.isPacking();
+  bool up = p.isUnpacking();
+
+  int n;
+  if (pk) n=refresh_list_.size();
+  p | n;
+  if (up) refresh_list_.resize(n);
+  for (int i=0; i<n; i++) {
+    p | refresh_list_[i]; // PUP::able
+    CkPrintf ("Method::pup pack %d unpack %d refresh %p\n",
+	      pk,up,refresh_list_[i]);
+  }
+
   p | refresh_list_;
   p | schedule_; // pupable
   p | courant_;

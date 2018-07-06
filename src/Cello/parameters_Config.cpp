@@ -39,6 +39,7 @@ void Config::pup (PUP::er &p)
   p | adapt_level_exponent;
   p | adapt_include_ghosts;
   p | adapt_output;
+  p | adapt_schedule_index;
   
   // Balance
 
@@ -80,6 +81,7 @@ void Config::pup (PUP::er &p)
   p | initial_list;
   p | initial_cycle;
   p | initial_time;
+  p | initial_trace_name;
   p | initial_trace_field;
   p | initial_trace_mpp;
   p | initial_trace_dx;
@@ -99,6 +101,7 @@ void Config::pup (PUP::er &p)
   PUParray(p,mesh_root_size,3);
   p | mesh_min_level;
   p | mesh_max_level;
+  p | mesh_max_initial_level;
 
   // Method
 
@@ -108,6 +111,7 @@ void Config::pup (PUP::er &p)
   p | method_schedule_index;
   p | method_courant;
   p | method_timestep;
+  p | method_trace_name;
 
   // Monitor
 
@@ -140,7 +144,9 @@ void Config::pup (PUP::er &p)
   p | output_leaf_only;
   p | output_schedule_index;
   p | output_dir;
-  p | output_stride;
+  p | output_dir_global;
+  p | output_stride_write;
+  p | output_stride_wait;
   p | output_field_list;
   p | output_particle_list;
   p | output_name;
@@ -172,6 +178,8 @@ void Config::pup (PUP::er &p)
 
   p | performance_papi_counters;
   p | performance_warnings;
+  p | performance_on_schedule_index;
+  p | performance_off_schedule_index;
 
   // Physics
   
@@ -267,6 +275,9 @@ void Config::read_adapt_ (Parameters * p) throw()
   adapt_level_exponent .resize(num_adapt);
   adapt_include_ghosts .resize(num_adapt);
   adapt_output         .resize(num_adapt);
+  adapt_schedule_index .resize(num_adapt);
+
+  adapt_min_face_rank = p->value_integer("Adapt:min_face_rank",0);
 
   for (int ia=0; ia<num_adapt; ia++) {
 
@@ -275,8 +286,6 @@ void Config::read_adapt_ (Parameters * p) throw()
     std::string prefix = "Adapt:" + adapt_list[ia] + ":";
 
     adapt_type[ia] = p->value_string(prefix+"type","unknown");
-
-    adapt_min_face_rank = p->value_integer("Adapt:min_face_rank",0);
 
     std::string param_str = prefix + "field_list";
 
@@ -316,15 +325,29 @@ void Config::read_adapt_ (Parameters * p) throw()
     }
 
     adapt_max_level[ia] = p->value (prefix + "max_level",
-				   std::numeric_limits<int>::max());
+				    std::numeric_limits<int>::max());
 
     adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
     adapt_output[ia] = p->value_string (prefix + "output","");
 
     adapt_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
-						false);
+						 false);
+    const bool adapt_scheduled = 
+      (p->type(prefix+"schedule:var") != parameter_unknown);
 
+    if (adapt_scheduled) {
+      p->group_set(0,"Adapt");
+      p->group_push(adapt_list[ia]);
+      p->group_push("schedule");
+      adapt_schedule_index[ia] = read_schedule_(p, prefix);
+      p->group_pop();
+      p->group_pop();
+    } else {
+      adapt_schedule_index[ia] = -1;
+    }
+
+    
   }
 }
 
@@ -564,7 +587,6 @@ void Config::read_field_ (Parameters * p) throw()
   field_prolong   = p->value_string ("Field:prolong","linear");
 
   field_restrict  = p->value_string ("Field:restrict","linear");
-  
 }
 
 //----------------------------------------------------------------------
@@ -591,6 +613,7 @@ void Config::read_initial_ (Parameters * p) throw()
 
   }
 
+  initial_trace_name = p->value_string ("Initial:trace:name","trace");
   initial_trace_field = p->value_string ("Initial:trace:field","");
   initial_trace_mpp = p->value_float ("Initial:trace:mass_per_particle",0.0);
   initial_trace_dx = p->list_value_integer (0,"Initial:trace:stride",1);
@@ -635,7 +658,7 @@ void Config::read_mesh_ (Parameters * p) throw()
   const int m = mx*my*mz;
 
   if ( ! (m >= CkNumPes()) ) {
-    ERROR4 ("Config::read_mesh_()",
+    WARNING4 ("Config::read_mesh_()",
 	    "Number of root blocks %d x %d x %d cannot be be "
 	    "less than number of processes %d",
 	    mx,my,mz,CkNumPes());
@@ -649,7 +672,10 @@ void Config::read_mesh_ (Parameters * p) throw()
 
   //--------------------------------------------------
 
-  mesh_max_level = p->value_integer("Adapt:max_level",0);
+  mesh_max_level = p->value_integer
+    ("Adapt:max_level",0);
+  mesh_max_initial_level = p->value_integer
+    ("Adapt:max_initial_level",mesh_max_level);
 
   // Note mesh_min_level may be < 0 for multigrid
 
@@ -673,6 +699,7 @@ void Config::read_method_ (Parameters * p) throw()
   method_courant.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
+  method_trace_name.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
   
@@ -706,6 +733,9 @@ void Config::read_method_ (Parameters * p) throw()
     // Read specified timestep, if any (for MethodTrace)
     method_timestep[index_method] = p->value_float  
       (full_name + ":timestep",std::numeric_limits<double>::max());
+
+    method_trace_name[index_method] = p->value_string
+      (full_name + ":name", "trace");
   }
 }
 
@@ -760,10 +790,13 @@ void Config::read_output_ (Parameters * p) throw()
   output_leaf_only.resize(num_output);
   output_schedule_index.resize(num_output);
   output_dir.resize(num_output);
-  output_stride.resize(num_output);
+  output_stride_write.resize(num_output);
+  output_stride_wait.resize(num_output);
   output_field_list.resize(num_output);
   output_particle_list.resize(num_output);
   output_name.resize(num_output);
+
+  output_dir_global = p->value_string("dir_global",".");
 
   for (int index_output=0; index_output<num_output; index_output++) {
 
@@ -782,7 +815,9 @@ void Config::read_output_ (Parameters * p) throw()
 	     output_list[index_output].c_str());
     }
 
-    output_stride[index_output] = p->value_integer("stride",0);
+    output_stride_write[index_output] = p->value_integer("stride_write",0);
+
+    output_stride_wait[index_output] = p->value_integer("stride_wait",0);
 
     if (p->type("dir") == parameter_string) {
       output_dir[index_output].resize(1);
@@ -891,9 +926,9 @@ void Config::read_output_ (Parameters * p) throw()
 	p->value_logical("image_ghost",false);
 
       output_image_min[index_output] =
-	p->value_float("image_min",0.0);
+	p->value_float("image_min",std::numeric_limits<double>::max());
       output_image_max[index_output] =
-	p->value_float("image_max",0.0);
+	p->value_float("image_max",-std::numeric_limits<double>::max());
 
       output_min_level[index_output] = p->value_integer("min_level",0);
       output_max_level[index_output] =
@@ -1136,6 +1171,36 @@ void Config::read_performance_ (Parameters * p) throw()
 
   performance_warnings = p->value_logical("Performance:warnings",false);
 
+#ifdef CONFIG_USE_PROJECTIONS
+  
+  int i_on = -1;
+  int i_off = -1;
+  
+  if (p->type("Performance:projections_on:schedule:var") != parameter_unknown) {
+    p->group_set(0,"Performance");
+    p->group_push("projections_on");
+    p->group_push("schedule");
+    i_on = read_schedule_(p,"projections_on");
+  }
+  if (p->type("Performance:projections_off:schedule:var") != parameter_unknown) {
+    p->group_set(0,"Performance");
+    p->group_push("projections_off");
+    p->group_push("schedule");
+    i_off = read_schedule_(p,"projections_off");
+  }
+
+  // Check that both projections_on and off schedules are defined or undefined together
+  if ((i_on == -1 && i_off == -1) || (i_on != -1 && i_off != -1)) {
+    performance_on_schedule_index  = i_on;
+    performance_off_schedule_index = i_off;
+  } else {
+    ERROR2("Config::read_performance-()",
+	   "Performance:projections_on:schedule [%d] and Performance:projections_off:schedule [%d]\n"
+	   "must be both defined or both undefined",
+	   i_on,i_off);
+  }
+#endif    
+
 }
 
 //----------------------------------------------------------------------
@@ -1264,7 +1329,16 @@ void Config::read_units_ (Parameters * p) throw()
 void Config::read_testing_ (Parameters * p) throw()
 {
   testing_cycle_final = p->value_integer("Testing:cycle_final",0);
-  testing_time_final  = p->value_float  ("Testing:time_final", 0.0);
+  if (p->type("Testing:time_final") == parameter_list) {
+    int length = p->list_length("Testing:time_final");
+    testing_time_final.resize(length);
+    for (int i=0; i<length; i++) {
+      testing_time_final[i] = p->list_value_float (i,"Testing:time_final",0.0);
+    }
+  } else {
+    testing_time_final.resize(1);
+    testing_time_final[0]  = p->value_float  ("Testing:time_final", 0.0);
+  }
   testing_time_tolerance = p->value_float  ("Testing:time_tolerance", 1e-6);
 }
 

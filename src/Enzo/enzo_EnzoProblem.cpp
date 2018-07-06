@@ -47,7 +47,7 @@ Boundary * EnzoProblem::create_boundary_
 /// @param parameters Parameters object (for evaluating expressions)
 {
 
-  Mask * mask = 0;
+  std::shared_ptr<Mask> mask = nullptr;
   if (config->boundary_mask[index]) {
     std::string param_str = "Boundary:" + config->boundary_list[index] + ":mask";
     Param * param = parameters->param(param_str);
@@ -93,7 +93,12 @@ Initial * EnzoProblem::create_initial_
 
   EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
 
-  if (type == "implosion_2d") {
+  if (type == "music") {
+    
+    initial = new EnzoInitialMusic
+      (cycle,time,enzo_config,config->mesh_max_initial_level);
+    
+  } else if (type == "implosion_2d") {
 
     initial = new EnzoInitialImplosion2(cycle,time);
 
@@ -125,7 +130,6 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "collapse") {
-    const int rank = enzo_config->initial_collapse_rank;
     initial = new EnzoInitialCollapse
       (cycle,time,
        enzo_config->initial_collapse_rank,
@@ -134,6 +138,12 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_collapse_particle_ratio,
        enzo_config->initial_collapse_mass,
        enzo_config->initial_collapse_temperature);
+  } else if (type == "cosmology") {
+    initial = new EnzoInitialCosmology 
+      (cycle,time,
+       enzo_config->field_gamma,
+       enzo_config->initial_cosmology_temperature
+       );
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence 
       (cycle,time, 
@@ -181,6 +191,20 @@ Initial * EnzoProblem::create_initial_
 
 //----------------------------------------------------------------------
 
+Stopping * EnzoProblem::create_stopping_ 
+( std::string  type, Config * config ) throw ()
+/// @param type   Type of the stopping criterion to create (ignored)
+/// @param config  Configuration parameter class
+{
+  EnzoConfig * enzo_config = static_cast<EnzoConfig *>(config);
+  return new EnzoStopping(enzo_config->stopping_cycle,
+			  enzo_config->stopping_time,
+			  enzo_config->stopping_seconds,
+			  enzo_config->stopping_redshift);
+}
+
+//----------------------------------------------------------------------
+
 Refine * EnzoProblem::create_refine_
 (
  std::string        type,
@@ -206,6 +230,29 @@ Refine * EnzoProblem::create_refine_
        config->adapt_max_level[index],
        config->adapt_include_ghosts[index],
        config->adapt_output[index]);
+
+  } else if (type == "particle_mass") {
+
+    return new EnzoRefineParticleMass
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_output[index],
+       config->adapt_level_exponent[index] );
+
+  } else if (type == "mass") {
+
+    return new EnzoRefineMass 
+      (config->adapt_min_refine[index],
+       config->adapt_max_coarsen[index],
+       config->adapt_max_level[index],
+       config->adapt_include_ghosts[index],
+       config->adapt_output[index],
+       config->adapt_field_list[index][0],
+       enzo_config->adapt_mass_type[index],
+       config->adapt_level_exponent[index] );
+
   } else {
     return Problem::create_refine_(type,config,parameters,field_descr,index);
   }
@@ -234,6 +281,7 @@ Solver * EnzoProblem::create_solver_
     solver = new EnzoSolverCg
       (field_descr,
        enzo_config->solver_monitor_iter [index_solver],
+       enzo_config->solver_restart_cycle [index_solver],
        rank,
        enzo_config->solver_iter_max     [index_solver],
        enzo_config->solver_res_tol      [index_solver],
@@ -248,6 +296,7 @@ Solver * EnzoProblem::create_solver_
     solver = new EnzoSolverBiCgStab
       (field_descr,
        enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle [index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
@@ -276,11 +325,14 @@ Solver * EnzoProblem::create_solver_
     solver = new EnzoSolverMg0
       (field_descr,
        enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle [index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_res_tol[index_solver],
        enzo_config->solver_pre_smooth[index_solver],
        enzo_config->solver_coarse_solve[index_solver],
        enzo_config->solver_post_smooth[index_solver],
+       enzo_config->solver_last_smooth[index_solver],
        restrict,  prolong,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver]);
@@ -322,35 +374,69 @@ Method * EnzoProblem::create_method_
   TRACE1("EnzoProblem::create_method %s",name.c_str());
   
   if (name == "ppm") {
-    method = new EnzoMethodPpm 
+
+    method = new EnzoMethodPpm (field_descr, enzo_config);
+
+  } else if (name == "hydro") {
+
+    method = new EnzoMethodHydro
       (field_descr,
-       enzo_config);
+       enzo_config->method_hydro_method,
+       enzo_config->field_gamma,
+       enzo_config->physics_gravity,
+       enzo_config->physics_cosmology,
+       enzo_config->method_hydro_dual_energy,
+       enzo_config->method_hydro_dual_energy_eta_1,
+       enzo_config->method_hydro_dual_energy_eta_2,
+       enzo_config->method_hydro_reconstruct_method,
+       enzo_config->method_hydro_reconstruct_conservative,
+       enzo_config->method_hydro_reconstruct_positive,
+       enzo_config->ppm_density_floor,
+       enzo_config->ppm_pressure_floor,
+       enzo_config->ppm_pressure_free,
+       enzo_config->ppm_diffusion,
+       enzo_config->ppm_flattening,
+       enzo_config->ppm_steepening,
+       enzo_config->method_hydro_riemann_solver
+       );
+
   } else if (name == "ppml") {
-    method = new EnzoMethodPpml
-      (field_descr,
-       enzo_config);
+
+    method = new EnzoMethodPpml (field_descr, enzo_config);
+
   } else if (name == "pm_deposit") {
+
     method = new EnzoMethodPmDeposit  
       (field_descr, particle_descr, 
        enzo_config->method_pm_deposit_type, 0.5);
+
   } else if (name == "pm_update") {
+
     method = new EnzoMethodPmUpdate  
       (field_descr, particle_descr, enzo_config->method_pm_update_max_dt);
+
   } else if (name == "heat") {
+
     method = new EnzoMethodHeat
       (field_descr,
        enzo_config->method_heat_alpha,
        config->method_courant[index_method]);
+
   } else if (name == "null") {
+
     method = new EnzoMethodNull
-      (enzo_config->method_null_dt);
+      (field_descr, enzo_config->method_null_dt);
+
 #ifdef CONFIG_USE_GRACKLE
+    //--------------------------------------------------
   } else if (name == "grackle") {
     method = new EnzoMethodGrackle 
       (enzo_config, 
        field_descr);
 #endif /* CONFIG_USE_GRACKLE */
+    
   } else if (name == "turbulence") {
+    
     method = new EnzoMethodTurbulence 
       (field_descr,
        enzo_config->method_turbulence_edot,
@@ -358,6 +444,18 @@ Method * EnzoProblem::create_method_
        enzo_config->initial_turbulence_temperature,
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
+
+  } else if (name == "cosmology") {
+
+    method = new EnzoMethodCosmology(field_descr);
+
+  } else if (name == "comoving_expansion") {
+
+    bool comoving_coordinates = enzo_config->physics_cosmology;
+    
+    method = new EnzoMethodComovingExpansion
+      ( field_descr, comoving_coordinates );
+
   } else if (name == "gravity") {
 
     std::string solver_name = enzo_config->method_gravity_solver;
@@ -371,14 +469,23 @@ Method * EnzoProblem::create_method_
 	     "Cannot find solver \"%s\"",
 	     solver_name.c_str(),
 	     index_solver < enzo_config->num_solvers);
-    
-    method = new EnzoMethodGravity
-      (field_descr, enzo_config->solver_index[solver_name],
-       enzo_config->method_gravity_grav_const);
+
+   // WARNING: method_gravity_accumulate is currently only implemented
+   // for non-AMR problems
+
+  method = new EnzoMethodGravity
+      (field_descr,
+       enzo_config->solver_index[solver_name],
+       enzo_config->method_gravity_grav_const,
+       enzo_config->method_gravity_order,
+       enzo_config->method_gravity_accumulate);
       
   } else {
+
+    // Fallback to Cello method's
     method = Problem::create_method_ 
       (name,config, index_method,field_descr,particle_descr);
+
   }
 
   if (method) {
@@ -430,7 +537,8 @@ Physics * EnzoProblem::create_physics_
       (
        enzo_config->physics_cosmology_hubble_constant_now,
        enzo_config->physics_cosmology_omega_matter_now,
-       enzo_config->physics_cosmology_omega_dark_matter_now,
+       enzo_config->physics_cosmology_omega_baryon_now,
+       enzo_config->physics_cosmology_omega_cdm_now,
        enzo_config->physics_cosmology_omega_lamda_now,
        enzo_config->physics_cosmology_comoving_box_size,
        enzo_config->physics_cosmology_max_expansion_rate,
@@ -451,11 +559,7 @@ Physics * EnzoProblem::create_physics_
 
 //----------------------------------------------------------------------
 
-Units * EnzoProblem::create_units_ 
-( std::string  type,
-   Config * config,
-   Parameters * parameters,
-   const FieldDescr * field_descr) throw ()
+Units * EnzoProblem::create_units_ (  Config * config  ) throw ()
 {
   EnzoUnits * units = new EnzoUnits;
 

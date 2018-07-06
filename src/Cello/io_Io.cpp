@@ -35,7 +35,8 @@ void Io::meta_value
 
 //----------------------------------------------------------------------
 void Io::field_array 
-(int index, 
+(const FieldDescr * field_descr,
+ int index, 
  void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
@@ -45,7 +46,8 @@ void Io::field_array
 //----------------------------------------------------------------------
 
 void Io::particle_array 
-(int it, int ib, int ia,
+(ParticleDescr * particle_descr,
+ int it, int ib, int ia,
  void ** buffer, std::string * name, int * type,
  int * n, int * k) throw()
 {

@@ -280,7 +280,7 @@
       }
       de_hdf5 {
          field_list = ["density"];
-         name = ["doublemach-p%02d-c%04d.h5", "proc","count"]
+         name = ["doublemach-p%02d-c%04d.h5", "proc","count"];
          type     = "data";
          include "input/schedule_cycle_25.incl"
       }

@@ -103,6 +103,12 @@ public: // interface
   /// Initialize the EnzoBlock chare array
   EnzoBlock ( MsgRefine * msg );
 
+  /// Initialize the EnzoBlock chare array
+  EnzoBlock ( process_type ip_source );
+  
+  /// Initialize EnzoBlock using MsgRefine returned by creating process
+  virtual void p_set_msg_refine(MsgRefine * msg);
+
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
@@ -110,7 +116,9 @@ public: // interface
        mg_sync_restrict_(),
        mg_sync_prolong_(),
        mg_msg_(NULL),
-       dt(0),
+       jacobi_iter_(0),
+       dt(0.0),
+       redshift(0.0),
        SubgridFluxes(NULL)
   {
     performance_start_(perf_block);
@@ -134,7 +142,9 @@ public: // interface
       mg_sync_restrict_(),
       mg_sync_prolong_(),
       mg_msg_(NULL),
+      jacobi_iter_(0),
       dt(0.0),
+      redshift(0.0),
       SubgridFluxes(NULL)
   {
     performance_start_(perf_block);
@@ -182,30 +192,30 @@ public: // interface
 
   /// Compute the ratio of specific heats
   int ComputeGammaField(enzo_float *GammaField,
-			int comoving_coordinates);
+			bool comoving_coordinates);
 
   /// Compute the pressure field at the given time) - dual energy
   int ComputePressureDualEnergyFormalism
   ( enzo_float time, 
     enzo_float *pressure,
-    int comoving_coordinates);
+    bool comoving_coordinates);
 
   /// Compute the pressure field at the given time
   int ComputePressure(enzo_float time, enzo_float *pressure, 
-		      int comoving_coordinates);
+		      bool comoving_coordinates);
 
   /// Compute the temperature field
   int ComputeTemperatureField (enzo_float *temperature, 
-			       int comoving_coordinates);
+			       bool comoving_coordinates);
 
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
-			int comoving_coordinates);
+			bool comoving_coordinates);
 
   /// Solve the hydro equations using PPM
   int SolveHydroEquations ( enzo_float time, 
 			    enzo_float dt,
-			    int comoving_coordinates);
+			    bool comoving_coordinates);
 
   /// Solve the hydro equations using Enzo 3.0 PPM
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
@@ -213,11 +223,14 @@ public: // interface
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
   int SolveMHDEquations(const FieldDescr *,  enzo_float dt);
 
-  /// Set EnzoBlock's dt
+  /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();
 
+  /// Set EnzoBlock's time (overloaded to update current time)
+  virtual void set_time (double time) throw();
+  
   /// Set EnzoBlock's stopping criteria
-  virtual void set_stop (bool stop) throw();
+  void set_stop (bool stop) throw();
 
   /// Initialize EnzoBlock
   virtual void initialize () throw();
@@ -233,6 +246,9 @@ public: /// entry methods
   /// Compute sum, min, and max of g values for EnzoMethodTurbulence
   void p_method_turbulence_end(CkReductionMsg *msg);
 
+  /// TEMP
+  double timestep() { return dt; }
+
   //--------------------------------------------------
 
   /// Synchronize after potential solve and before accelerations
@@ -244,27 +260,21 @@ public: /// entry methods
   //--------------------------------------------------
 
   /// EnzoSolverCg entry method: DOT ==> refresh P
-  template <class T>
   void r_solver_cg_loop_0a (CkReductionMsg * msg) ;  
 
   /// EnzoSolverCg entry method: ==> refresh P
-  template <class T>
   void r_solver_cg_loop_0b (CkReductionMsg * msg) ;  
 
   /// EnzoSolverCg entry method: DOT(R,R) after shift
-  template <class T>
   void r_solver_cg_shift_1 (CkReductionMsg * msg) ;
 
   /// EnzoSolverCg entry method
-  template <class T>
   void p_solver_cg_loop_2 () ;
 
   /// EnzoSolverCg entry method: DOT(P,AP)
-  template <class T>
   void r_solver_cg_loop_3 (CkReductionMsg * msg) ;
 
   /// EnzoSolverCg entry method: DOT(R,R)
-  template <class T>
   void r_solver_cg_loop_5 (CkReductionMsg * msg) ;
 
   /// EnzoSolverCg entry method: 
@@ -276,11 +286,9 @@ public: /// entry methods
   //--------------------------------------------------
   
   /// EnzoSolverBiCGStab entry method: SUM(B) and COUNT(B)
-  template <class T>
   void r_solver_bicgstab_start_1(CkReductionMsg* msg);  
 
   /// EnzoSolverBiCGStab entry method: DOT(R,R)
-  template <class T>
   void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
 
   /// EnzoSolverBiCGStab entry method: return from preconditioner
@@ -290,7 +298,6 @@ public: /// entry methods
   void p_solver_bicgstab_loop_3();
 
   /// EnzoSolverBiCGStab entry method: DOT(V,R0), SUM(Y) and SUM(V)
-  template <class T>
   void r_solver_bicgstab_loop_5(CkReductionMsg* msg);  
 
   /// EnzoSolverBiCGStab entry method: return from preconditioner
@@ -300,15 +307,12 @@ public: /// entry methods
   void p_solver_bicgstab_loop_9();
 
   /// EnzoSolverBiCGStab entry method: DOT(U,U), DOT(U,Q), SUM(Y) and SUM(U)
-  template <class T>
   void r_solver_bicgstab_loop_11(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: DOT(R,R) and DOT(R,R0)
-  template <class T>
   void r_solver_bicgstab_loop_13(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: ITER++
-  template <class T>
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
   // EnzoSolverJacobi
@@ -320,9 +324,11 @@ public: /// entry methods
   void p_solver_mg0_pre_smooth();
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
+  void p_solver_mg0_last_smooth();
   void p_solver_mg0_barrier(CkReductionMsg* msg);  
   void p_solver_mg0_shift_b(CkReductionMsg* msg);  
   void p_solver_mg0_prolong_recv(FieldMsg * msg);
+  void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
   void mg_sync_restrict_reset()             { mg_sync_restrict_.reset(); }
@@ -337,6 +343,27 @@ public: /// entry methods
   void mg_iter_increment() { ++mg_iter_; }
   int mg_iter() const {return mg_iter_; }
 
+  void jacobi_iter_clear() { jacobi_iter_ = 0; }
+  void jacobi_iter_increment() { ++jacobi_iter_; }
+  int jacobi_iter() const {return jacobi_iter_; }
+
+  void print() {
+    Block::print();
+    CkPrintf ("mg_iter_ = %d\n",mg_iter_);
+    // CkPrintf ("mg_sync_restrict_ = %d\n",mg_sync_restrict_);
+    // CkPrintf ("mg_sync_prolong_ = %d\n",mg_sync_prolong_);
+    CkPrintf ("mg_msg_ = %p\n",mg_msg_);
+    CkPrintf ("jacobi_iter_ = %d\n",jacobi_iter_);
+    CkPrintf ("dt = %d\n",dt);
+    CkPrintf ("redshift = %d\n",redshift);
+    CkPrintf ("SubgridFluxes = %d\n",SubgridFluxes);
+    CkPrintf ("GridLeftEdge[] = %d %d %d\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
+    CkPrintf ("GridDimension[] = %d %d %d\n",GridDimension[0],GridDimension[1],GridDimension[2]);
+    CkPrintf ("GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
+    CkPrintf ("GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
+    CkPrintf ("CellWidth[] = %g %g %g\n",CellWidth[0],CellWidth[1],CellWidth[2]);
+  }
+  
 protected: // attributes
   
   // MG iteration count
@@ -351,6 +378,9 @@ protected: // attributes
   // Saved FieldMsg for prolong
   FieldMsg * mg_msg_;
 
+  // Jacobi iteration count
+  int jacobi_iter_;
+
   // FieldMsg for prolong if called out of order
 
 public: // attributes (YIKES!)
@@ -360,6 +390,9 @@ public: // attributes (YIKES!)
     enzo_float dtFixed;
   };
 
+  /// Cosmological redshift for the current cycle
+  enzo_float redshift;
+  
   /// Fluxes
   fluxes ** SubgridFluxes;
 

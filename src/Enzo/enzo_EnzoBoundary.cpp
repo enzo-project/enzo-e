@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoBoundary::EnzoBoundary 
-(axis_enum axis, face_enum face, Mask * mask,
+(axis_enum axis, face_enum face, std::shared_ptr<Mask> mask,
  boundary_type type) throw()
   : Boundary(axis,face,mask),
     boundary_type_ (type)
@@ -116,32 +116,13 @@ void EnzoBoundary::enforce_reflecting_
   for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
     field.ghost_depth(index,&gx,&gy,&gz);
-    void * array = field.values(index);
+    enzo_float * array = (enzo_float * ) field.values(index);
     bool vx = (rank >= 1) && (field.field_name(index) == "velocity_x");
     bool vy = (rank >= 2) && (field.field_name(index) == "velocity_y");
     bool vz = (rank >= 3) && (field.field_name(index) == "velocity_z");
-    precision_type precision = field.precision(index);
-    switch (precision) {
-    case precision_single:
-      enforce_reflecting_precision_(face,axis, (float *)array,
-				    nx,ny,nz, gx,gy,gz,  vx,vy,vz,
-				    x,y,z,    xm,ym,zm, xp,yp,zp, t);
-      break;
-    case precision_double:
-      enforce_reflecting_precision_(face,axis, (double *)array,
-				    nx,ny,nz, gx,gy,gz,  vx,vy,vz,
-				    x,y,z,    xm,ym,zm, xp,yp,zp, t);
-      break;
-    case precision_extended80:
-    case precision_extended96:
-    case precision_quadruple:
-      enforce_reflecting_precision_(face,axis, (long double *)array,
-				    nx,ny,nz, gx,gy,gz, vx,vy,vz,
-				    x,y,z,    xm,ym,zm, xp,yp,zp, t);
-      break;
-    default:
-      break;
-    }
+    enforce_reflecting_precision_(face,axis, array,
+				  nx,ny,nz, gx,gy,gz,  vx,vy,vz,
+				  x,y,z,    xm,ym,zm, xp,yp,zp, t);
   }
 
   delete [] x;
@@ -151,12 +132,11 @@ void EnzoBoundary::enforce_reflecting_
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoBoundary::enforce_reflecting_precision_
 (
  face_enum face, 
  axis_enum axis,
- T * array,
+ enzo_float * array,
  int nx,int ny,int nz,
  int gx,int gy,int gz,
  bool vx,bool vy,bool vz,
@@ -171,7 +151,7 @@ void EnzoBoundary::enforce_reflecting_precision_
   int mz = nz + 2*gz;
 
   int ix,iy,iz,ig;
-  T sign;
+  enzo_float sign;
 
   if (nx > 1) {
     if (face == face_lower && axis == axis_x) {
@@ -305,32 +285,16 @@ void EnzoBoundary::enforce_outflow_
   // @@@
   // @@@ BUG: loops through all fields; should only use fields in field_list
   // @@@
+
   for (int index = 0; index < field.field_count(); index++) {
     int gx,gy,gz;
     field.ghost_depth(index,&gx,&gy,&gz);
-    void * array = field.values(index);
-    precision_type precision = field.precision(index);
-    switch (precision) {
-    case precision_single:
-      enforce_outflow_precision_(face,axis, (float *)array,
-				 nx,ny,nz, gx,gy,gz,
-				 x,y,z,    xm,ym,zm, xp,yp,zp, t);
-      break;
-    case precision_double:
-      enforce_outflow_precision_(face,axis, (double *)array,
-				 nx,ny,nz, gx,gy,gz,
-				 x,y,z,    xm,ym,zm, xp,yp,zp, t);
-      break;
-    case precision_extended80:
-    case precision_extended96:
-    case precision_quadruple:
-      enforce_outflow_precision_(face,axis, (long double *)array,
-				 nx,ny,nz, gx,gy,gz,
-				 x,y,z,    xm,ym,zm, xp,yp,zp, t);
-      break;
-    default:
-      break;
-    }
+    enzo_float * array = (enzo_float * ) field.values(index);
+
+    enforce_outflow_precision_(face,axis, array,
+			       nx,ny,nz, gx,gy,gz,
+			       x,y,z,    xm,ym,zm, xp,yp,zp, t);
+    
   }
   delete [] x;
   delete [] y;
@@ -339,12 +303,11 @@ void EnzoBoundary::enforce_outflow_
 
 //----------------------------------------------------------------------
 
-template<class T>
 void EnzoBoundary::enforce_outflow_precision_
 (
  face_enum face, 
  axis_enum axis,
- T * array,
+ enzo_float * array,
  int nx,int ny,int nz,
  int gx,int gy,int gz,
  double * x, double * y, double * z,

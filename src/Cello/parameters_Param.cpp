@@ -229,7 +229,7 @@ void Param::write
 (
  FILE *      file_pointer,
  std::string full_parameter,
- bool no_commas)
+ int         write_type)
 /// @param file_pointer    File pointer to which the parameter is written
 /// @param full_parameter  Name of this parameter including groups
 {
@@ -240,15 +240,15 @@ void Param::write
   std::string parameter = (i_group == std::string::npos) ?
     full_parameter : full_parameter.substr(i_group+1,std::string::npos);
 
-  std::string value = value_to_string();
-  if (no_commas) {
+  std::string value = value_to_string(write_type);
+  if (write_type == param_write_monitor) {
     std::size_t found;
     while ((found=value.find(",")) != std::string::npos ) {
       value.erase(found,1);
     }
     fprintf (file_pointer,"%s = %s\n",
-	     parameter.c_str(),
-	     value.c_str());
+  	     parameter.c_str(),
+  	     value.c_str());
   } else {
     fprintf (file_pointer,"%s = %s;\n",
 	     parameter.c_str(),
@@ -259,27 +259,32 @@ void Param::write
 
 //----------------------------------------------------------------------
 
-std::string Param::value_to_string ()
+std::string Param::value_to_string (int type)
 {
   std::string string_buffer;
   char char_buffer[MAX_BUFFER_LENGTH];
 
+  const std::string list_begin = (type == param_write_libconfig) ? "( " : "[ ";
+  const std::string list_end   = (type == param_write_libconfig) ? " )" : " ]";
+  const std::string expr_begin = (type == param_write_libconfig) ? "\"" : "";
+  const std::string expr_end   = (type == param_write_libconfig) ? "\"" : "";
+  
   switch (type_) {
   case parameter_string: 
     string_buffer = std::string("\"") + value_string_ + "\"";
     break;
   case parameter_list:
-    string_buffer = "[ ";
+    string_buffer = list_begin;
     for (size_t i=0; i<value_list_->size(); i++) {
       if ( i > 0 ) string_buffer += ", ";
-      string_buffer += (*value_list_)[i]->value_to_string();
+      string_buffer += (*value_list_)[i]->value_to_string(type);
     }
-    string_buffer += " ]";
+    string_buffer += list_end;
     break;
   case parameter_logical_expr:
   case parameter_float_expr:
     sprintf_expression(value_expr_,char_buffer);
-    string_buffer = char_buffer;
+    string_buffer = expr_begin + char_buffer + expr_end;
     break;
   case parameter_integer:
     sprintf (char_buffer,"%d",value_integer_);
@@ -338,6 +343,10 @@ void Param::evaluate_float
   int i;
   switch (node->type) {
   case enum_node_operation:
+    ASSERT3("Param::evaluate_float()",
+	    "Error in operation %d: left %p right %p",
+	    node ? node->op_value:-1,left,right,
+	    left != NULL && right != NULL);
     switch (node->op_value) {
     case enum_op_add: for (i=0; i<n; i++) result[i] = left[i] + right[i]; break;
     case enum_op_sub: for (i=0; i<n; i++) result[i] = left[i] - right[i]; break;
@@ -379,6 +388,10 @@ void Param::evaluate_float
     }
     break;
   case enum_node_function:
+    ASSERT2("Param::evaluate_float()",
+	    "Error in function %p: left %p",
+	    node?node->fun_value : NULL, left,
+	    left != NULL);
     for (i=0; i<n; i++) result[i] = (*(node->fun_value))(left[i]);
     break;
   case enum_node_unknown:
@@ -463,7 +476,19 @@ void Param::evaluate_logical
       
   int i;
   if (node->type == enum_node_operation) {
-    switch (node->op_value) {
+    int op = node->op_value;
+    ASSERT3("Param::evaluate_logical()",
+	    "Error in operation %d: left_float %p right_float %p",
+	    op,left_float,right_float,
+	    (op==enum_op_and || op==enum_op_or) ||
+	    (left_float != NULL && right_float != NULL));
+    ASSERT3("Param::evaluate_logical()",
+	    "Error in operation %d: left_logical %p right_logical %p",
+	    op,left_logical,right_logical,
+	    (op!=enum_op_and && op!=enum_op_or) ||
+	    (left_logical != NULL && right_logical != NULL));
+	    
+    switch (op) {
     case enum_op_le:
       for (i=0; i<n; i++) result[i] = left_float[i] <= right_float[i];
       break;

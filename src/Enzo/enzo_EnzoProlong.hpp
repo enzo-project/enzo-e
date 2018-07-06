@@ -26,7 +26,7 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoProlong(CkMigrateMessage *m)
-    : method_(0) 
+    : Prolong(m),method_(0) 
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -36,17 +36,18 @@ public: // interface
   virtual int apply 
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-    const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]);
+    const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    bool accumulate = false);
 
   /// Return the name identifying the prolongation operator
   virtual std::string name () const { return "enzo"; }
 
 private: // functions
 
-  template <class T>
   int apply_
-  ( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-    const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]);
+  ( enzo_float *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+    const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    bool accumulate = false);
   
 private: // attributes
 

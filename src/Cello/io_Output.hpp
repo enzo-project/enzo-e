@@ -8,6 +8,8 @@
 #ifndef IO_OUTPUT_HPP
 #define IO_OUTPUT_HPP
 
+// #define DEBUG_OUTPUT
+
 class Factory;
 class FieldDescr;
 class ParticleDescr;
@@ -46,7 +48,6 @@ public: // functions
     : PUP::able(m),
       file_(0),           // Initialization deferred
       schedule_(0),
-      process_(0),        // initialization below
       sync_write_(1),     // default process-per-stride
       index_(0),
       cycle_(0),
@@ -61,7 +62,8 @@ public: // functions
       io_field_data_(0),
       it_particle_index_(0),        // set_it_index_particle()
       io_particle_data_(0),
-      process_stride_(1) // default one file per process
+      stride_write_(1),// default one file per process
+      stride_wait_(0) // default no synchronization of writes
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -105,36 +107,39 @@ public: // functions
 
   /// Return the File object pointer
   File * file() throw() 
-  { return file_; };
+  { return file_; }
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
-  { return schedule_; };
+  { return schedule_; }
 
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
 
-  int process_stride () const throw () 
-  { return process_stride_; };
-
-  void set_process_stride (int stride) throw () 
-  {
-    process_stride_ = stride; 
-    fflush(stdout);
-    sync_write_.set_stop(process_stride_);
-  };
-
   /// Return whether output is scheduled for this cycle
   bool is_scheduled (int cycle, double time) throw();
 
+  void set_stride_write (int stride) throw () 
+  {
+    stride_write_ = stride; 
+    sync_write_.set_stop(stride_write_);
+  }
+
+  int stride_write () const throw () 
+  { return stride_write_; }
+
+  int stride_wait () const throw () 
+  { return stride_wait_; }
+
   /// Return whether this process is a writer
   bool is_writer () const throw () 
-  { return (process_ == process_writer()); };
+  { return (CkMyPe() == process_writer()); }
 
   /// Return the process id of the writer for this process id
   int process_writer() const throw()
   {
-    return process_ - (process_ % process_stride_);
+    const int ip=CkMyPe();
+    return ip - (ip % stride_write_);
   }
 
   /// Return the updated timestep if time + dt goes past a scheduled output
@@ -149,7 +154,7 @@ public: // functions
   { write_meta_ (meta_type_group, io); }
 
   /// Accessor function for Charm synchronization of writers
-  Sync * sync_write () { return & sync_write_; };
+  Sync * sync_write () { return & sync_write_; }
 
   /// Return the index id in the containing Problem
   int index() const throw() { return index_; }
@@ -175,21 +180,36 @@ public: // virtual functions
 
   /// Write Simulation data to disk
   virtual void write_simulation ( const Simulation * simulation ) throw()
-  { write_simulation_(simulation); }
+  {
+#ifdef DEBUG_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT Output::write_simulation()\n",CkMyPe());
+#endif    
+    write_simulation_(simulation);
+  }
 
   /// Write Hierarchy data to disk
   virtual void write_hierarchy
   ( const Hierarchy * hierarchy, 
     const FieldDescr * field_descr,
     const ParticleDescr * particle_descr ) throw()
-  { write_hierarchy_(hierarchy,field_descr,particle_descr); }
+  {
+#ifdef DEBUG_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT Output::write_hierarchy()\n",CkMyPe());
+#endif    
+    write_hierarchy_(hierarchy,field_descr,particle_descr);
+  }
 
   /// Write local block data to disk
   virtual void write_block
   ( const Block      * block, 
     const FieldDescr * field_descr, 
     const ParticleDescr * particle_descr) throw()
-  { write_block_(block,field_descr,particle_descr); }
+  {
+#ifdef DEBUG_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT Output::write_block()\n",CkMyPe());
+#endif    
+    write_block_(block,field_descr,particle_descr);
+  }
 
   /// Write local field to disk
   virtual void write_field_data
@@ -205,15 +225,15 @@ public: // virtual functions
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw()
-  {};
+  {}
 
   /// Accumulate and write data sent from a remote processes
   virtual void update_remote  ( int n, char * buffer) throw()
-  {};
+  {}
 
   /// Free local array if allocated; NOP if not
   virtual void cleanup_remote (int * n, char ** buffer) throw()
-  {};
+  {}
 
 protected:
 
@@ -227,14 +247,17 @@ protected:
   std::string directory () const
   {
     std::string dir = ".";
-
     std::string name_dir = expand_name_(&dir_name_,&dir_args_);
-    
+
+    // Create subdirectory if any
     if (name_dir != "") {
       dir = name_dir;
-      struct stat st = {0};
-      if (stat(dir.c_str(), &st) == -1) {
-	mkdir(dir.c_str(), 0700);
+      boost::filesystem::path directory(name_dir);
+      if (! boost::filesystem::is_directory(directory)) {
+	ASSERT1 ("Output::directory()",
+		 "Error creating directory %s",
+		 name_dir.c_str(),
+		 (boost::filesystem::create_directory(directory)));
       }
     }
 
@@ -270,9 +293,6 @@ protected: // attributes
 
   /// Scheduler for this output
   Schedule * schedule_;
-
-  /// ID of this process
-  int process_;
 
   /// Sync for waiting for writers
   Sync sync_write_;
@@ -316,9 +336,11 @@ protected: // attributes
   /// I/O ParticleData data accessor
   IoParticleData * io_particle_data_;
 
-  /// Only processes with id's divisible by process_stride_ writes
+  /// Only processes with id's divisible by stride_write_ writes
   /// (1: all processes write; 2: 0,2,4,... write; np: root process writes)
-  int process_stride_;
+  int stride_write_;
+  
+  int stride_wait_;
 
 };
 

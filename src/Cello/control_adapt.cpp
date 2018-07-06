@@ -7,12 +7,19 @@
 /// @ingroup  Control
 ///
 /// This file controls adaptive mesh refinement on a distributed
-/// forest of octrees.
+/// array of octrees.
 
 //--------------------------------------------------
+// #define DEBUG_FACE
 // #define DEBUG_ADAPT
 // #define DEBUG_NEW_REFRESH
 //--------------------------------------------------
+
+#ifdef DEBUG_FACE
+#   define DEBUG_FACES(MSG) /* ... */
+#else
+#   define DEBUG_FACES(MSG) debug_faces_(MSG)
+#endif
 
 #ifdef DEBUG_ADAPT
 
@@ -42,8 +49,10 @@
 #ifdef DEBUG_ADAPT
 
 #   ifdef CELLO_TRACE
-#      define trace(A) CkPrintf ("%s:%d %s TRACE %s\n",			\
-				 __FILE__,__LINE__,name_.c_str(),A); fflush(stdout)
+#      define trace(A) \
+  CkPrintf ("%s:%d %s DEBUG_ADAPT %s\n",				\
+	    __FILE__,__LINE__,name_.c_str(),A);				\
+  fflush(stdout)
 #   else
 #      define trace(A) /*  NULL */
 #   endif
@@ -82,8 +91,8 @@ void Block::adapt_begin_()
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
-  control_sync (CkIndex_Block::p_adapt_called(),sync_neighbor,0);
-
+  control_sync_neighbor (CkIndex_Block::p_adapt_called(),
+			 sync_id_adapt_begin);
 }
 
 //----------------------------------------------------------------------
@@ -99,7 +108,7 @@ void Block::adapt_called_()
 
   adapt_send_level();
 
-  control_sync (CkIndex_Main::p_adapt_next(),sync_quiescence);
+  control_sync_quiescence (CkIndex_Main::p_adapt_next());
 }
 
 //----------------------------------------------------------------------
@@ -113,7 +122,8 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  debug_faces_("adapt_next");
+  DEBUG_FACES("adapt_next");
+
   trace("adapt_next 3");
 
 #ifdef DEBUG_ADAPT
@@ -133,7 +143,7 @@ void Block::adapt_next_()
     if (level() > level_next_) adapt_coarsen_();
   }
 
-  control_sync (CkIndex_Main::p_adapt_end(),sync_quiescence);
+  control_sync_quiescence (CkIndex_Main::p_adapt_end());
 }
 
 //----------------------------------------------------------------------
@@ -150,9 +160,7 @@ void Block::adapt_end_()
 {
   trace("adapt_end 4");
 
-  if (index_.is_root()) {
-    thisProxy.doneInserting();
-  }
+  if (index_.is_root()) thisProxy.doneInserting();
 
   if (delete_) {
 #ifdef DEBUG_ADAPT
@@ -177,9 +185,9 @@ void Block::adapt_end_()
   bool adapt_again = (is_first_cycle && (adapt_step_++ < level_maximum));
 
   if (adapt_again) {
-    control_sync (CkIndex_Main::p_adapt_enter(),sync_quiescence);
+    control_sync_quiescence (CkIndex_Main::p_adapt_enter());
   } else {
-    control_sync (CkIndex_Main::p_adapt_exit(),sync_quiescence);
+    control_sync_quiescence (CkIndex_Main::p_adapt_exit());
   }
 
 }
@@ -222,10 +230,13 @@ int Block::adapt_compute_desired_level_(int level_maximum)
   int index_refine = 0;
   while ((refine = problem->refine(index_refine++))) {
 
-    adapt_ = std::max(adapt_,refine->apply(this));
+    Schedule * schedule = refine->schedule();
+
+    if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
+      adapt_ = std::max(adapt_,refine->apply(this));
+    }
 
   }
-
   const int initial_cycle = simulation()->config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
 
@@ -267,9 +278,7 @@ void Block::adapt_refine_()
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);
 
-  std::vector<int> field_list;
-
-  // First scatter particles to children first to avoid multiple passes
+  // First scatter particles to children to avoid multiple passes
   
   ParticleData * particle_list[8] = {0};
 
@@ -304,9 +313,14 @@ void Block::adapt_refine_()
 
       int if3[3] = {0,0,0};
       bool lg3[3] = {true,true,true};
+      Refresh * refresh = new Refresh;
+      refresh->add_all_data();
       
       FieldFace * field_face = create_face 
-	(if3,ic3,lg3, refresh_fine,field_list);
+	(if3,ic3,lg3, refresh_fine, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
       DataMsg * data_msg = NULL;
 
@@ -330,7 +344,7 @@ void Block::adapt_refine_()
       factory->create_block 
 	(
 	 data_msg,
-	 &thisProxy, index_child,
+	 thisProxy, index_child,
 	 nx,ny,nz,
 	 num_field_data,
 	 adapt_step_,
@@ -361,7 +375,7 @@ void Block::adapt_refine_()
       count += particle.delete_particles (it, ib);
     }
   }
-  simulation()->monitor_delete_particles(count);
+  simulation()->data_delete_particles(count);
   
   is_leaf_ = false;
 #ifdef DEBUG_ADAPT
@@ -470,7 +484,7 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
       count += particle.delete_particles (it,ib,mask);
     }
   }
-  simulation()->monitor_delete_particles(count);
+  simulation()->data_delete_particles(count);
 }
 
 //----------------------------------------------------------------------
@@ -794,9 +808,14 @@ void Block::adapt_coarsen_()
   index_.child(level,&ic3[0],&ic3[1],&ic3[2]);
   int if3[3] = {0,0,0};
   bool lg3[3] = {false,false,false};
-  std::vector<int> field_list;
+  Refresh * refresh = new Refresh;
+  refresh->add_all_data();
+
   FieldFace * field_face = create_face
-    (if3, ic3, lg3, refresh_coarse, field_list);
+    (if3, ic3, lg3, refresh_coarse, refresh, true);
+#ifdef DEBUG_FIELD_FACE  
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face);
+#endif
 
   const Index index_parent = index_.index_parent();
 
@@ -809,13 +828,8 @@ void Block::adapt_coarsen_()
   data_msg -> set_field_data (data()->field_data(),false);
   data_msg -> set_particle_data (data()->particle_data(),false);
 
-  // copy face levels
-  int nf = face_level_curr_.size();
-  int face_level_curr[nf];
-  
-  for (int i=0; i<nf; i++) face_level_curr[i] = face_level_curr_[i];
-
-  MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr,ic3);
+  const int nf = face_level_curr_.size();
+  MsgCoarsen * msg = new MsgCoarsen (nf,face_level_curr_,ic3);
   msg->set_data_msg (data_msg);
 
   thisProxy[index_parent].p_adapt_recv_child (msg);
@@ -829,12 +843,6 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
 {
 
   performance_start_(perf_adapt_update);
-
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d DEBUG p_refresh_store()\n",CkMyPe());
-  fflush(stdout);
-  if (msg->field_face()) msg->field_face()->print("called store");
-#endif
 
   msg->update(data());
 

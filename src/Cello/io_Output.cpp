@@ -9,6 +9,8 @@
 #include "main.hpp"
 #include "io.hpp"
 
+// #define TRACE_OUTPUT
+
 //----------------------------------------------------------------------
 
 Output::Output (int index, const Factory * factory,
@@ -16,7 +18,6 @@ Output::Output (int index, const Factory * factory,
 		const ParticleDescr * particle_descr) throw()
   : file_(0),           // Initialization deferred
     schedule_(0),
-    process_(0),        // initialization below
     sync_write_(1),     // default process-per-stride
     index_(index),
     cycle_(0),
@@ -31,11 +32,10 @@ Output::Output (int index, const Factory * factory,
     io_field_data_(0),
     it_particle_index_(0),        // set_it_index_particle()
     io_particle_data_(0),
-    process_stride_(1) // default one file per process
+    stride_write_(1), // default one file per process
+    stride_wait_(1) // default all can write at once
 
 {
-  process_  = CkMyPe();
-
   io_block_         = factory->create_io_block();
   io_field_data_    = factory->create_io_field_data(field_descr);
   io_particle_data_ = factory->create_io_particle_data(particle_descr);
@@ -68,7 +68,6 @@ void Output::pup (PUP::er &p)
   WARNING ("Output::pup","skipping file_");
   //    p | *file_;
   p | schedule_; // PUP::able
-  p | process_;
   p | sync_write_;
   p | index_;
   p | cycle_;
@@ -82,13 +81,14 @@ void Output::pup (PUP::er &p)
   p | *io_block_;
   p | it_field_index_;  // PUP::able
   WARNING ("Output::pup","skipping io_field_data_");
-  // if (up) io_field_data_ = new IoFieldData;
-  // p | *io_field_data_;
+  if (up) io_field_data_ = new IoFieldData;
+  p | *io_field_data_;
   p | it_particle_index_;  // PUP::able
   WARNING ("Output::pup","skipping io_particle_data_");
-  // if (up) io_particle_data_ = new IoParticleData;
-  // p | *io_particle_data_;
-  p | process_stride_;
+  if (up) io_particle_data_ = new IoParticleData;
+  p | *io_particle_data_;
+  p | stride_write_;
+  p | stride_wait_;
 
 }
 
@@ -193,7 +193,7 @@ std::string Output::expand_name_
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
     else if (arg == "count") { sprintf (buffer_new,buffer, count_); }
-    else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
+    else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
     else if (arg == "flipflop")  { sprintf (buffer_new,buffer, count_%2); }
     else 
       {
@@ -238,9 +238,16 @@ void Output::write_meta_ ( meta_type type_meta, Io * io ) throw ()
 void Output::write_simulation_
 ( const Simulation * simulation ) throw()
 {
+#ifdef TRACE_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT Output::write_simulation_()\n",CkMyPe());
+#endif    
   write_hierarchy(simulation->hierarchy(), 
 		  simulation->field_descr(),
 		  simulation->particle_descr());
+
+  if (CkMyPe() == 0) {
+    simulation->hierarchy()->block_array().p_output_write(index_,0);
+  }
 }
 
 //----------------------------------------------------------------------
@@ -253,15 +260,10 @@ void Output::write_hierarchy_
  ) throw()
 {
 
-  if (CkMyPe() == 0) {
+#ifdef TRACE_OUTPUT
+  CkPrintf ("%d TRACE_OUTPUT Output::write_hierarchy_()\n",CkMyPe());
+#endif    
 
-    // --------------------------------------------------
-    // ENTRY: #1 Output::write_hierarchy_()-> Block::p_output_write()
-    // ENTRY: Block array if Simulation is root
-    // --------------------------------------------------
-    hierarchy->block_array()->p_output_write(index_);
-    // --------------------------------------------------
-  }
 }
 
 //----------------------------------------------------------------------
@@ -273,6 +275,9 @@ void Output::write_block_
  const ParticleDescr * particle_descr
  ) throw()
 {
+#ifdef TRACE_OUTPUT
+    CkPrintf ("%d TRACE_OUTPUT Output::write_block_()\n",CkMyPe());
+#endif    
   // Write fields
 
   ItIndex * it_f = it_field_index_;

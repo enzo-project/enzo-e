@@ -6,6 +6,8 @@
 /// @brief    [\ref Problem] Declaration of the Refresh class
 ///
 
+// #define DEBUG_REFRESH
+
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
@@ -19,18 +21,25 @@ public: // interface
 
   /// empty constructor for charm++ pup()
   Refresh() throw() 
-  : field_list_(),
+  : all_fields_(false),
+    field_list_src_(),
+    field_list_dst_(),
+    all_particles_(false),
     particle_list_(),
     ghost_depth_(0),
     min_face_rank_(0),
     neighbor_type_(neighbor_unknown),
+    accumulate_(false),
     sync_type_   (sync_unknown),
-    sync_load_(),
-    sync_store_(),
-    sync_id_ (0),
+    sync_id_ (-1),
     active_(true),
     callback_(0) 
   {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
+	      CkMyPe(), __FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
   }
 
   /// empty constructor for charm++ pup()
@@ -39,20 +48,27 @@ public: // interface
    int min_face_rank,
    int neighbor_type,
    int sync_type,
-   int sync_id=0,
+   int sync_id,
    bool active=true) throw() 
-  : field_list_(),
-    particle_list_(),
-    ghost_depth_(ghost_depth),
-    min_face_rank_(min_face_rank),
-    neighbor_type_(neighbor_type),
-    sync_type_(sync_type),
-    sync_load_(),
-    sync_store_(),
-    sync_id_(sync_id),
-    active_(active),
-    callback_(0) 
+    : all_fields_(false),
+      field_list_src_(),
+      field_list_dst_(),
+      all_particles_(false),
+      particle_list_(),
+      ghost_depth_(ghost_depth),
+      min_face_rank_(min_face_rank),
+      neighbor_type_(neighbor_type),
+      accumulate_(false),
+      sync_type_(sync_type),
+      sync_id_(sync_id),
+      active_(active),
+      callback_(0) 
   {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
   }
 
   /// CHARM++ PUP::able declaration
@@ -61,33 +77,70 @@ public: // interface
   /// CHARM++ migration constructor for PUP::able
   Refresh (CkMigrateMessage *m)
     : PUP::able(m),
-      field_list_(),
+      all_fields_(false),
+      field_list_src_(),
+      field_list_dst_(),
+      all_particles_(false),
       particle_list_(),
       ghost_depth_(0),
       min_face_rank_(0),
       neighbor_type_(0),
+      accumulate_(false),
       sync_type_(0),
-      sync_load_(),
-      sync_store_(),
-      sync_id_ (0),
+      sync_id_ (-1),
       active_(false),
       callback_(0)
-  {  }
+  {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
+  }
 
+  /// Destructor
+  ~Refresh()
+  {
+#ifdef DEBUG_REFRESH    
+    CkPrintf ("%d %s:%d DEBUG_REFRESH ~Refresh() %p\n",
+	      CkMyPe(),__FILE__,__LINE__,this);
+    fflush(stdout);
+#endif    
+  }
+  
+  bool operator == (const Refresh & refresh)
+  {
+    return (all_fields_      == refresh.all_fields_)
+      &&   (field_list_src_  == refresh.field_list_src_)
+      &&   (field_list_dst_  == refresh.field_list_dst_)
+      &&   (all_particles_  == refresh.all_particles_)
+      &&   (particle_list_  == refresh.particle_list_)
+      &&   (ghost_depth_  == refresh.ghost_depth_)
+      &&   (min_face_rank_  == refresh.min_face_rank_)
+      &&   (neighbor_type_  == refresh.neighbor_type_)
+      &&   (accumulate_  == refresh.accumulate_)
+      // &&   (sync_type_  == refresh.sync_type_)
+      // &&   (sync_id_  == refresh.sync_id_)
+      &&   (active_  == refresh.active_);
+      // &&   (callback_ == refresh.callback_)
+  }
+  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
 
     PUP::able::pup(p);
 
-    p | field_list_;
+    p | all_fields_;
+    p | field_list_src_;
+    p | field_list_dst_;
+    p | all_particles_;
     p | particle_list_;
     p | ghost_depth_;
     p | min_face_rank_;
     p | neighbor_type_;
+    p | accumulate_;
     p | sync_type_;
-    p | sync_load_;
-    p | sync_store_;
     p | sync_id_;
     p | active_;
     p | callback_;
@@ -97,23 +150,50 @@ public: // interface
   // FIELD METHODS
   //--------------------------------------------------
 
-  /// Add the given field to the list
+  /// Add a field to the list of fields to refresh
   void add_field(int id_field) {
-    field_list_.push_back(id_field);
-  }
-
-  /// All fields are refreshed
-  void add_all_fields(int num_fields) {
-    field_list_.clear();
-    for (int i=0; i<num_fields; i++) {
-      field_list_.push_back(i);
+    if (id_field >= 0) {
+      field_list_src_.push_back(id_field);
+      field_list_dst_.push_back(id_field);
     }
   }
 
-  /// Return the list of fields participating in the Refresh operation
-  std::vector<int> & field_list() {
-    return field_list_;
+  /// Add a source and corresponding destination field to refresh
+  void add_field_src_dst(int id_field_src, int id_field_dst) {
+    if (id_field_src >= 0 && id_field_dst >= 0) {
+      field_list_src_.push_back(id_field_src);
+      field_list_dst_.push_back(id_field_dst);
+    }
   }
+  
+  /// All fields are refreshed
+  void add_all_fields() {
+    all_fields_ = true;
+  }
+
+  /// Add specified fields
+  void set_field_list (std::vector<int> field_list)
+  {
+    field_list_src_ = field_list;
+    field_list_dst_ = field_list;
+  }
+  
+  /// Return whether all fields are refreshed
+  bool all_fields() const
+  { return all_fields_; }
+
+  /// Return whether any fields are refreshed
+  bool any_fields() const
+  { return (all_fields_ || (field_list_src_.size() > 0)); }
+
+  /// Return the list of source fields participating in the Refresh operation
+  std::vector<int> & field_list_src()
+  { return field_list_src_; }
+
+  /// Return the list of destination fields participating in the
+  /// Refresh operation
+  std::vector<int> & field_list_dst()
+  { return field_list_dst_; }
 
   //--------------------------------------------------
   // PARTICLE METHODS
@@ -121,23 +201,40 @@ public: // interface
 
   /// Add the given particle type to the list
   void add_particle(int id_particle) {
+    all_particles_ = false;
     particle_list_.push_back(id_particle);
   }
 
   /// All particles types are refreshed
-  void add_all_particles(int num_particles) {
-    particle_list_.clear();
-    for (int i=0; i<num_particles; i++) {
-      particle_list_.push_back(i);
-    }
+  void add_all_particles() {
+    all_particles_ = true;
   }
 
+  /// Return whether all particles are refreshed
+  bool all_particles() const
+  { return all_particles_; }
+
+  /// Return whether any particles are refreshed
+  bool any_particles() const
+  { return (all_particles_ || (particle_list_.size() > 0)); }
+  
   /// Return the list of particles participating in the Refresh operation
   std::vector<int> & particle_list() {
     return particle_list_;
   }
-  /// Whether this Block is participating in the Refresh operation
 
+  /// Add all data
+  void add_all_data()
+  {
+    add_all_fields();
+    add_all_particles();
+  }
+
+  /// Return whether there are any data to be refreshed
+  bool any_data()
+  { return (any_fields() || any_particles()); }
+  
+  /// Whether this particular Block is participating in the Refresh operation
   void set_active (bool active) 
   { active_ = active; }
 
@@ -147,32 +244,54 @@ public: // interface
   /// Callback function after refresh is completed
   int callback() const { return callback_; };
 
+  /// Set the callback function for after the refresh operation is completed
   void set_callback(int callback) 
   { callback_ = callback; }
 
-  /// Return the current minimum rank (dimension) of faces to
-  /// refresh e.g. 0: everything, 1: omit corners, 2: omit corners and
-  /// edges
-
+  /// Return the current minimum rank (dimension) of faces to refresh
+  /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
   int min_face_rank() const 
   { return min_face_rank_; }
 
   /// Return the data field ghost depth
-
   int ghost_depth() const
   { return ghost_depth_; }
 
+  /// Return the type of neighbors to refresh with: neighbor_leaf for
+  /// neighboring leaf node (may be different mesh level) or
+  /// neighbor_level for neighboring block in the same level (may be
+  /// non-leaf)
   int neighbor_type() const 
   { return neighbor_type_; }
+
+  /// Return whether to add neighbor face values to ghost zones or to
+  /// copy them.  NOTE only accumulates if source field is different
+  /// from destination field
+  bool accumulate() const 
+  {
+    return accumulate_;
+  }
+
+  /// Set whether to add neighbor face values to ghost zones instead of
+  /// copying them.
+  void set_accumulate(bool accumulate)
+  {
+    accumulate_ = accumulate;
+  }
+
+  //----------------
+  // Synchronization
+  //----------------
 
   int sync_type() const 
   { return sync_type_; }
 
-  Sync & sync_load() 
-  {  return sync_load_; }
-
-  Sync & sync_store() 
-  {  return sync_store_; }
+  int sync_load() const
+  { return 3*sync_id_; }
+  int sync_store() const
+  { return 3*sync_id_+1; }
+  int sync_exit() const
+  { return 3*sync_id_+2; }
 
   int sync_id() 
   {  return sync_id_; }
@@ -181,10 +300,16 @@ public: // interface
   void print() const 
   {
     CkPrintf ("Refresh %p\n",this);
-    CkPrintf ("Refresh fields:");
-    for (size_t i=0; i<field_list_.size(); i++)
-      CkPrintf (" %d",field_list_[i]);
+    CkPrintf ("Refresh all_fields = %d\n",all_fields_);
+    CkPrintf ("Refresh src fields:");
+    for (size_t i=0; i<field_list_src_.size(); i++)
+      CkPrintf (" %d",field_list_src_[i]);
     CkPrintf ("\n");
+    CkPrintf ("Refresh dst fields:");
+    for (size_t i=0; i<field_list_dst_.size(); i++)
+      CkPrintf (" %d",field_list_dst_[i]);
+    CkPrintf ("\n");
+    CkPrintf ("Refresh all_particles = %d\n",all_particles_);
     CkPrintf ("Refresh particles:");
     for (size_t i=0; i<particle_list_.size(); i++)
       CkPrintf (" %d",particle_list_[i]);
@@ -192,13 +317,8 @@ public: // interface
     CkPrintf ("Refresh ghost_depth = %d\n",ghost_depth_);
     CkPrintf ("Refresh min_face_rank: %d\n",min_face_rank_);
     CkPrintf ("Refresh neighbor_type: %d\n",neighbor_type_);
+    CkPrintf ("Refresh accumulate: %d\n",accumulate_);
     CkPrintf ("Refresh sync_type: %d\n",sync_type_);
-    CkPrintf ("Refresh sync_load: %d/%d\n", 
-	    sync_load_.value(),
-	    sync_load_.stop());
-    CkPrintf ("Refresh sync_store: %d/%d\n",
-	    sync_store_.value(),
-	    sync_store_.stop());
     CkPrintf ("Refresh sync_id: %d\n",sync_id_);
     CkPrintf ("Refresh active: %d\n",active_);
     CkPrintf ("Refresh callback: %d\n",callback_);
@@ -232,7 +352,7 @@ public: // interface
 	  upper[axis] = 4 - ic3[axis];
 	} else {
 	  print();
-	  ERROR1 ("Refresh::loop_limits()",
+	  ERROR1 ("Refresh::index_limits()",
 		  "unknown refresh_type %d",
 		  refresh_type);
 	}
@@ -240,6 +360,23 @@ public: // interface
     }
   }
 
+  //--------------------------------------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (char * buffer);
+
+  //--------------------------------------------------
+  
 private: // functions
 
 
@@ -247,9 +384,21 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// Indicies of fields to include
-  std::vector <int> field_list_;
+  /// Whether to refresh all fields, ignoring field_list_*
+  bool all_fields_;
+  
+  /// Indicies of source fields; assumes all_fields_ == false, and
+  /// size must be equal to field_list_dst_;
+  std::vector <int> field_list_src_;
 
+  /// Indicies of corresponding destination fields; assumes
+  /// all_fields_ == false, and size must be equal to field_list_src_;
+  std::vector <int> field_list_dst_;
+
+  /// Whether to refresh all particle types, ignoring particle_list_
+  bool all_particles_;
+  
+  /// Whether to ignore particle_list_ and refresh all particle types
   /// Indicies of particles to include
   std::vector <int> particle_list_;
 
@@ -262,14 +411,11 @@ private: // attributes
   /// Which subset of adjacent Blocks to refresh with
   int neighbor_type_;
 
+  /// Whether to copy or add values
+  bool accumulate_;
+  
   /// Synchronization type
   int sync_type_;
-
-  /// Counter for synchronization before loading data
-  Sync sync_load_;
-
-  /// Counter for synchronization after storing data
-  Sync sync_store_;
 
   /// Index for refresh synchronization counter
   int sync_id_;

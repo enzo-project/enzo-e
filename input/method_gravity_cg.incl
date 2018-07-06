@@ -40,6 +40,7 @@ Method {
        solver = "cg";    	    
 #       grav_const = 6.67384e-8;
 #       grav_const = 1.0e-1;
+       accumulate = false; # NOT IMPLEMENTED YET
     }
 
     ppm {

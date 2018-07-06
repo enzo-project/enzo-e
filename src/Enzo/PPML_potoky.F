@@ -24,7 +24,7 @@ c     See LICENSE_PPML file for license and copyright information
          Enddo                  
       Enddo                  
 
-      Do i=3,Nx-3
+      Do i=1,Nx-1
          
          Do m=1,7
             

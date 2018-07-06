@@ -33,10 +33,10 @@ public: // interface
   Mask & operator= (const Mask & Mask) throw() {return *this; }
 
   /// Clone the object
-  virtual Mask * clone() const = 0;
+  virtual std::shared_ptr<Mask> make_clone() const = 0;
 
   /// Create a new object of the appropriate subclass
-  static Mask * create(Param * param, Parameters * parameters);
+  static std::shared_ptr<Mask> create(Param * param, Parameters * parameters);
 
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Mask);

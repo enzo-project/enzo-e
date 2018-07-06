@@ -31,9 +31,17 @@ EnzoMethodPpm::EnzoMethodPpm
 {
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
-  refresh(ir)->add_all_fields(field_descr->field_count());
-
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			       enzo_sync_id_method_ppm);
+  refresh(ir)->add_field(field_descr->field_id("density"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
+  refresh(ir)->add_field(field_descr->field_id("total_energy"));
+  refresh(ir)->add_field(field_descr->field_id("internal_energy"));
+  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
+  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
+  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
   // PPM parameters initialized in EnzoBlock::initialize()
 }
 
@@ -58,7 +66,6 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   if (block->is_leaf()) {
-
     TRACE_PPM ("BEGIN SolveHydroEquations");
     enzo_block->SolveHydroEquations 
       ( block->time(), block->dt(), comoving_coordinates_ );
@@ -79,19 +86,19 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  enzo_float a = 1, dadt;
+  enzo_float cosmo_a = 1.0, cosmo_dadt=0.0;
 
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     block->simulation()->problem()->physics("cosmology");
 
   ASSERT ("EnzoMethodPpm::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
   if (comoving_coordinates_) {
 
     cosmology->compute_expansion_factor
-      (&a, &dadt,(enzo_float)enzo_block->time());
+      (&cosmo_a, &cosmo_dadt,(enzo_float)enzo_block->time());
     
   }
 
@@ -133,7 +140,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 			&enzo_block->CellWidth[0], 
 			&enzo_block->CellWidth[1], 
 			&enzo_block->CellWidth[2],
-			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &a,
+			&EnzoBlock::Gamma[in], &EnzoBlock::PressureFree[in], &cosmo_a,
 			density, pressure,
 			velocity_x, 
 			velocity_y, 

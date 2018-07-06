@@ -23,10 +23,16 @@ public: // interface
   Colormap() throw() 
   : min_(- std::numeric_limits<double>::max()),
     max_(std::numeric_limits<double>::max())
-  {}
+  { }
 
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Colormap);
+
+  Colormap (CkMigrateMessage *m)
+    : PUP::able(m),
+      min_(- std::numeric_limits<double>::max()),
+      max_( std::numeric_limits<double>::max())
+  { }
 
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p)

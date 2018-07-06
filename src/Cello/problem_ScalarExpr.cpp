@@ -41,7 +41,7 @@ void ScalarExpr::copy_(const ScalarExpr & scalar_expr) throw()
 //----------------------------------------------------------------------
 
 double ScalarExpr::evaluate (double t, double x, double y, double z, 
-			     Mask * mask, double deflt) const
+			     std::shared_ptr<Mask> mask, double deflt) const
 {
   double value;
   bool m = mask ? mask->evaluate(t,x,y,z) : true;
@@ -63,7 +63,7 @@ void ScalarExpr::evaluate (T * value, double t,
 			   int ndx, int nx, double * xv,
 			   int ndy, int ny, double * yv,
 			   int ndz, int nz, double * zv, 
-			   Mask * mask, T * deflt) const
+			   std::shared_ptr<Mask> mask, T * deflt) const
 {
   ASSERT6("ScalarExpr::evaluate",
 	  "value dimension (%d %d %d) needs to be at least (%d %d %d)",
@@ -136,19 +136,22 @@ void ScalarExpr::evaluate (T * value, double t,
 }
 
 
-template void ScalarExpr::evaluate (float *value, double t,
-	       int ndx, int nx, double * x,
-	       int ndy, int ny, double * y,
-	       int ndz, int nz, double * z, 
-	       Mask * mask, float * deflt) const;
-template void ScalarExpr::evaluate (double *value, double t,
-	       int ndx, int nx, double * x,
-	       int ndy, int ny, double * y,
-	       int ndz, int nz, double * z, 
-	       Mask * mask, double * deflt) const;
-template void ScalarExpr::evaluate (long double *value, double t,
-	       int ndx, int nx, double * x,
-	       int ndy, int ny, double * y,
-	       int ndz, int nz, double * z, 
-	       Mask * mask, long double * deflt) const;
+template void ScalarExpr::evaluate
+(float *value, double t,
+ int ndx, int nx, double * x,
+ int ndy, int ny, double * y,
+ int ndz, int nz, double * z, 
+ std::shared_ptr<Mask> mask, float * deflt) const;
+template void ScalarExpr::evaluate
+(double *value, double t,
+ int ndx, int nx, double * x,
+ int ndy, int ny, double * y,
+ int ndz, int nz, double * z, 
+ std::shared_ptr<Mask> mask, double * deflt) const;
+template void ScalarExpr::evaluate
+(long double *value, double t,
+ int ndx, int nx, double * x,
+ int ndy, int ny, double * y,
+ int ndz, int nz, double * z, 
+ std::shared_ptr<Mask> mask, long double * deflt) const;
 

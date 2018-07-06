@@ -5,8 +5,8 @@
 /// @date     Wed May 24 12:25:56 PDT 2017
 /// @brief    Implements comoving expansion class
 
-#ifndef ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
-#define ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP
+#ifndef ENZO_ENZO_METHOD_COMOVING_EXPANSION_HPP
+#define ENZO_ENZO_METHOD_COMOVING_EXPANSION_HPP
 
 class EnzoMethodComovingExpansion : public Method {
 
@@ -18,19 +18,22 @@ public: // interface
 
   /// Create a new EnzoMethodComovingExpansion object
   EnzoMethodComovingExpansion(const FieldDescr * field_descr,
-                              EnzoConfig * enzo_config);
+                              bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodComovingExpansion);
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodComovingExpansion (CkMigrateMessage *m)
-    : comoving_coordinates_(false)
+    : Method (m),
+      comoving_coordinates_(false)
   {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+public: // virtual methods
+  
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
 
@@ -42,8 +45,8 @@ public: // interface
 
 private: // attributes
 
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 };
 
-#endif /* ENZO_ENZO_METHOD_COMOVINGEXPANSION_HPP */
+#endif /* ENZO_ENZO_METHOD_COMOVING_EXPANSION_HPP */
 

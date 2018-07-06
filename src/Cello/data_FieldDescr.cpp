@@ -70,7 +70,7 @@ int FieldDescr::field_count() const throw()
 
 //----------------------------------------------------------------------
 
-std::string FieldDescr::field_name(size_t id_field) const throw()
+std::string FieldDescr::field_name(int id_field) const throw()
 { 
   return name_.at(id_field);
 }
@@ -107,9 +107,11 @@ void FieldDescr::centering
  int * cz
  ) const throw()
 {
-  if (cx) (*cx) = centering_.at(id_field)[0];
-  if (cy) (*cy) = centering_.at(id_field)[1];
-  if (cz) (*cz) = centering_.at(id_field)[2];
+  if (id_field>=0) {
+    if (cx) (*cx) = centering_.at(id_field)[0];
+    if (cy) (*cy) = centering_.at(id_field)[1];
+    if (cz) (*cz) = centering_.at(id_field)[2];
+  } 
 }
 
 //----------------------------------------------------------------------
@@ -122,16 +124,18 @@ void FieldDescr::ghost_depth
  int * gz
  ) const throw()
 {
-  int g3[3] = {ghost_depth_.at(id_field)[0],
-	       ghost_depth_.at(id_field)[1],
-	       ghost_depth_.at(id_field)[2]};
-  int gd[3] = {ghost_depth_default_[0],
-	       ghost_depth_default_[1],
-	       ghost_depth_default_[2]};
+  if (id_field>=0) {
+    int g3[3] = {ghost_depth_.at(id_field)[0],
+		 ghost_depth_.at(id_field)[1],
+		 ghost_depth_.at(id_field)[2]};
+    int gd[3] = {ghost_depth_default_[0],
+		 ghost_depth_default_[1],
+		 ghost_depth_default_[2]};
 	       
-  if (gx) (*gx) = g3[0] < 0 ? gd[0] : g3[0];
-  if (gy) (*gy) = g3[1] < 0 ? gd[1] : g3[1];
-  if (gz) (*gz) = g3[2] < 0 ? gd[2] : g3[2];
+    if (gx) (*gx) = g3[0] < 0 ? gd[0] : g3[0];
+    if (gy) (*gy) = g3[1] < 0 ? gd[1] : g3[1];
+    if (gz) (*gz) = g3[2] < 0 ? gd[2] : g3[2];
+  }
 }
 
 //----------------------------------------------------------------------
@@ -140,7 +144,7 @@ int FieldDescr::insert_permanent(const std::string & field_name) throw()
 {
 
   bool permanent;
-  
+
   int id = insert_(field_name, permanent = true);
 
   ++ num_permanent_;
@@ -273,12 +277,13 @@ void FieldDescr::set_default_ghost_depth(int gx, int gy, int gz) throw()
 
 void FieldDescr::copy_(const FieldDescr & field_descr) throw()
 {
-  alignment_ = field_descr.alignment_;
-  padding_   = field_descr.padding_;
   name_      = field_descr.name_;
   num_permanent_ = field_descr.num_permanent_;
+  num_temporary_ = field_descr.num_temporary_;
   id_        = field_descr.id_;
   groups_    = field_descr.groups_;
+  alignment_ = field_descr.alignment_;
+  padding_   = field_descr.padding_;
   precision_ = field_descr.precision_;
   for (size_t i=0; i<centering_.size(); i++) {
     delete [] centering_[i];
@@ -300,10 +305,19 @@ void FieldDescr::copy_(const FieldDescr & field_descr) throw()
     ghost_depth_[i][1] = field_descr.ghost_depth_[i][1];
     ghost_depth_[i][2] = field_descr.ghost_depth_[i][2];
   }
+  for (int i=0; i<3; i++) {
+    ghost_depth_default_[i] = field_descr.ghost_depth_default_[i];
+  }
   conserved_.resize(field_descr.conserved_.size());
   for (size_t i=0; i<field_descr.conserved_.size(); i++) {
     conserved_[i] = field_descr.conserved_[i];
   }
+  history_ = field_descr.history_;
+  history_id_.resize(field_descr.history_id_.size());
+  for (size_t i=0; i<field_descr.history_id_.size(); i++) {
+    history_id_[i] = field_descr.history_id_[i];
+  }
+  
 }
 
 

@@ -25,7 +25,7 @@ public: // interface
   PUPable_decl(EnzoProlongPoisson);
 
   /// CHARM++ migration constructor
-  EnzoProlongPoisson(CkMigrateMessage *m) {}
+  EnzoProlongPoisson(CkMigrateMessage *m) : Prolong(m) {}
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
@@ -36,14 +36,15 @@ public: // interface
   virtual int apply
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-    const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]);
+    const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    bool accumulate = false);
 
 private: // functions
 
-  template <class T>  
   int apply_
-  ( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-    const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]);
+  ( enzo_float *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+    const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    bool accumulate = false);
 
   /// Return the name identifying the prolongation operator
   virtual std::string name () const { return "poisson"; }

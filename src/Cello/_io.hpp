@@ -8,11 +8,14 @@
 #ifndef _IO_HPP
 #define _IO_HPP
 
+class FieldDescr;
+class ParticleDescr;
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
 
 #include <limits>
+#include <boost/filesystem.hpp>
 #include "pngwriter.h"
 
 //----------------------------------------------------------------------
@@ -32,9 +35,9 @@ enum meta_type {
 #include "io_ColormapRGB.hpp"
 
 #include "io_Io.hpp"
-#include "io_IoHierarchy.hpp"
 #include "io_IoBlock.hpp"
 #include "io_IoFieldData.hpp"
+#include "io_IoHierarchy.hpp"
 #include "io_IoParticleData.hpp"
 
 #include "io_Input.hpp"

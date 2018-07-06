@@ -15,7 +15,7 @@ EnzoComputeTemperature::EnzoComputeTemperature
 (double density_floor,
  double temperature_floor,
  double mol_weight,
- int comoving_coordinates ) 
+ bool comoving_coordinates ) 
   : Compute(),
     density_floor_(density_floor),
     temperature_floor_(temperature_floor),
@@ -49,18 +49,11 @@ void EnzoComputeTemperature::compute ( Block * block) throw()
 
   if (!block->is_leaf()) return;
 
-  Field field = block->data()->field();
-
-  if (field.precision(0) == precision_single) {
-    compute_<float>(block);
-  } else if (field.precision(0) == precision_double) {
-    compute_<double>(block);
-  }
+  compute_(block);
 }
 
 //----------------------------------------------------------------------
 
-template <typename T>
 void EnzoComputeTemperature::compute_(Block * block)
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
@@ -74,27 +67,19 @@ void EnzoComputeTemperature::compute_(Block * block)
 
   compute_pressure.compute(block);
 
-  T * t = (T*) field.values("temperature");
-  T * d = (T*) field.values("density");
-  T * p = (T*) field.values("pressure");
+  enzo_float * t = (enzo_float*) field.values("temperature");
+  enzo_float * d = (enzo_float*) field.values("density");
+  enzo_float * p = (enzo_float*) field.values("pressure");
 
-  const int rank = block->rank();
+  int mx,my,mz;
+  field.dimensions(0,&mx,&my,&mz);
 
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-
-  int gx,gy,gz;
-  field.ghost_depth (0,&gx,&gy,&gz);
-  if (rank < 1) gx = 0;
-  if (rank < 2) gy = 0;
-  if (rank < 3) gz = 0;
-
-  int m = (nx+2*gx) * (ny+2*gy) * (nz+2*gz);
-
+  const int m = mx*my*mz;
+  
   for (int i=0; i<m; i++) {
-    T density     = std::max(d[i], (T) density_floor_);
-    T temperature = p[i] * mol_weight_ / density;
-    t[i] = std::max(temperature, (T)temperature_floor_);
+    enzo_float density     = std::max(d[i], (enzo_float) density_floor_);
+    enzo_float temperature = p[i] * mol_weight_ / density;
+    t[i] = std::max(temperature, (enzo_float)temperature_floor_);
   }
 }
 

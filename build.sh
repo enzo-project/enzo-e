@@ -5,13 +5,12 @@
 #   CELLO_ARCH
 #   CELLO_PREC
 #
-# Output status files
+# Output status files for ./build.sh test
 #
 #   test/STATUS
 #   test/DATE
 #   test/START
 #   test/STOP
-#   test/TIME
 
 arch=$CELLO_ARCH
 prec=$CELLO_PREC
@@ -60,7 +59,7 @@ if [ "$#" -ge 1 ]; then
    fi
       if [ "$1" == "reset" -o "$1" == "clean" ]; then
 	cd test
-	rm -f STATUS DATE START STOP TIME
+	rm -f STATUS DATE START STOP ARCH PREC
        exit
    elif [ "$1" == "compile" ]; then
       target=install-bin
@@ -89,9 +88,17 @@ else
    # assume enzo-p
    k_switch=""
    target="bin/enzo-p"
-#   rm -f $target
-    echo "Remove $target"
 fi
+
+if [ $target == "bin/enzo-p" ]; then
+   if [ -e $target ]; then
+       echo "Saving existing bin/enzo-p to bin/enzo-p.prev"
+       mv bin/enzo-p bin/enzo-p.prev
+   fi
+fi
+    
+
+echo "Compiling" > test/STATUS
 
 date=`date +"%Y-%m-%d"`
 start=`date +"%H:%M:%S"`
@@ -106,11 +113,6 @@ rm -f "test/*/running.$arch.$prec"
 
 configure=$arch-$prec
 configure_print=`printf "%s %s %s" $arch $prec`
-
-echo "Compiling" > test/STATUS
-echo "$date" > test/DATE
-echo "$start" > test/START
-rm -f test/STOP
 
 # make output directory for compilation and tests
 
@@ -127,6 +129,15 @@ touch "$dir/running.$arch.$prec"
 
 CELLO_ARCH=$arch; export $CELLO_ARCH
 CELLO_PREC=$prec; export $CELLO_PREC
+
+if [ $target == "test" ]; then
+
+    echo "$date"     > test/DATE
+    echo "$start"    > test/START
+    echo "$arch"     > test/ARCH
+    echo "$prec"     > test/PREC
+fi    
+
 
 $python scons.py install-inc    &>  $dir/out.scons
 $python scons.py $k_switch -j $proc -Q $target  2>&1 | tee $dir/out.scons
@@ -148,6 +159,8 @@ printf "done\n" >> $log
 # TESTS
 
 if [ $target == "test" ]; then
+
+    rm -f              test/STOP
 
    # count crashes
 
@@ -180,6 +193,7 @@ if [ $target == "test" ]; then
       fi
    done
 
+   echo "$stop" > test/STOP
 
 fi
 
@@ -190,8 +204,6 @@ if [ x$CELLO_ARCH == "xncsa-bw" ]; then
    mv build/charm/Enzo/enzo-p bin/charm
 
 fi
-
-rm -f test/STATUS
 
 cp test/out.scons out.scons.$arch-$prec
 
@@ -204,8 +216,8 @@ t=`echo "scale=2; (( $S1 - $S0 ) + 60 * ( ( $M1 - $M0 ) + 60 * ( $H1 - $H0) ))/6
 echo "END   Enzo-P/Cello ${0}: arch = $arch  prec = $prec  target = $target time = ${t} min"
 
 d=`date "+%H:%M:%S"`
-echo "$stop" > test/STOP
-echo "${t}" > test/TIME
+
+rm -f test/STATUS
 
 
 

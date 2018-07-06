@@ -5,6 +5,7 @@
 /// @date     2011-08-10
 /// @brief    Implementation of main-level CHARM entry functions in main.ci
 
+#include <boost/filesystem.hpp>
 #include "cello.hpp"
 #include "test.hpp"
 #include "parallel.hpp"
@@ -50,6 +51,7 @@ void Main::exit_()
   if (Monitor::instance()) {
     Monitor::instance()->print ("","END CELLO");
   }
+
   PARALLEL_EXIT;
 }
 
@@ -70,11 +72,8 @@ void Main::p_checkpoint(int count, std::string dir_name)
     simulation->set_checkpoint(dir_checkpoint_);
 #endif    
 
-    // --------------------------------------------------
-    // ENTRY: #1 OutputCheckpoint::write_simulation()-> Simulation::s_write()
-    // ENTRY: checkpoint if Simulation is root
-    // --------------------------------------------------
 #ifdef CHARM_ENZO
+    CkPrintf ("Calling CkStartCheckpoint\n");
     CkCallback callback(CkIndex_EnzoSimulation::r_write_checkpoint(),proxy_simulation);
     CkStartCheckpoint (dir_checkpoint_,callback);
 #endif
@@ -88,7 +87,9 @@ void Main::p_checkpoint(int count, std::string dir_name)
 void Main::p_output_enter()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_output_enter();
+
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_output_enter();
+  
 #endif
 }
 
@@ -97,7 +98,7 @@ void Main::p_output_enter()
 void Main::p_output_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_output_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_output_exit();
 #endif
 }
 
@@ -106,7 +107,7 @@ void Main::p_output_exit()
 void Main::p_compute_enter()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_compute_enter();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_compute_enter();
 #endif
 }
 
@@ -115,7 +116,7 @@ void Main::p_compute_enter()
 void Main::p_compute_continue()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_compute_continue();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_compute_continue();
 #endif
 }
 
@@ -124,7 +125,7 @@ void Main::p_compute_continue()
 void Main::p_compute_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_compute_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_compute_exit();
 #endif
 }
 
@@ -133,7 +134,7 @@ void Main::p_compute_exit()
 void Main::p_stopping_enter()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_stopping_enter();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_stopping_enter();
 #endif
 }
 
@@ -142,23 +143,7 @@ void Main::p_stopping_enter()
 void Main::p_stopping_balance()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_stopping_balance();
-#endif
-}
-
-//----------------------------------------------------------------------
-
-void Main::p_balance()
-{
-#ifdef CHARM_ENZO
-#ifdef TEMP_BALANCE_MANUAL
-  CkPrintf ("%d %p Main Calling CkStartLB()\n",CkMyPe(),this);
-  fflush(stdout);
-
-  //  CkStartLB();
-  CkPrintf ("%d %p Main Called CkStartLB()\n",CkMyPe(),this);
-  fflush(stdout);
-#endif
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_stopping_balance();
 #endif
 }
 
@@ -167,7 +152,7 @@ void Main::p_balance()
 void Main::p_stopping_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_stopping_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_stopping_exit();
 #endif
 }
 
@@ -186,11 +171,13 @@ void Main::p_text_file_write
   
   if (fp_text_[full_file] == NULL) {
 
-    if (dir != ".") {
-      struct stat st = {0};
-      if (stat(dir, &st) == -1) {
-	mkdir(dir, 0700);
-      }
+    // Create subdirectory if any
+    boost::filesystem::path directory(dir);
+    if (! boost::filesystem::is_directory(directory)) {
+      ASSERT1 ("Main::p_text_file_write()",
+	       "Error creating directory %s",
+	       dir,
+	       (boost::filesystem::create_directory(directory)));
     }
     
     fp_text   = fp_text_[full_file] = fopen(full_file.c_str(),"w");
@@ -205,7 +192,7 @@ void Main::p_text_file_write
     sync_text->inc_stop(count-1);
   }
 
-  fprintf (fp_text,line);
+  fprintf (fp_text,"%s",line);
 
   if (sync_text->next()) {
     //    text_file_close_();
@@ -221,7 +208,7 @@ void Main::p_text_file_write
 void Main::p_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_exit();
 #endif
 }
 
@@ -230,7 +217,7 @@ void Main::p_exit()
 void Main::p_adapt_enter()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_adapt_enter();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_adapt_enter();
 #endif
 }
 
@@ -239,7 +226,7 @@ void Main::p_adapt_enter()
 void Main::p_initial_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_initial_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_initial_exit();
 #endif
 }
 
@@ -248,7 +235,7 @@ void Main::p_initial_exit()
 void Main::p_adapt_end()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_adapt_end();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_adapt_end();
 #endif
 }
 
@@ -257,7 +244,7 @@ void Main::p_adapt_end()
 void Main::p_adapt_next()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_adapt_next();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_adapt_next();
 #endif
 }
 
@@ -266,7 +253,7 @@ void Main::p_adapt_next()
 void Main::p_adapt_called()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_adapt_called();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_adapt_called();
 #endif
 }
 
@@ -275,7 +262,7 @@ void Main::p_adapt_called()
 void Main::p_adapt_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_adapt_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_adapt_exit();
 #endif
 }
 
@@ -284,7 +271,7 @@ void Main::p_adapt_exit()
 void Main::p_refresh_exit()
 {
 #ifdef CHARM_ENZO
-  proxy_simulation.ckLocalBranch()->hierarchy()->block_array()->p_refresh_exit();
+  proxy_simulation.ckLocalBranch()->hierarchy()->block_array().p_refresh_exit();
 #endif
 }
 

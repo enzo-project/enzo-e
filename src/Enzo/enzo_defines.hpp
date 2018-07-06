@@ -13,9 +13,10 @@
 #define ENZO_INDEX_UNDEFINED -1
 
 #define MAX_DIMENSION                3
-#define MAX_NUMBER_OF_BARYON_FIELDS 40
+#define MAX_NUMBER_OF_BARYON_FIELDS 50
 
 #define MAX_COLOR                20
+#define COLOR_FLOOR              1.d-35
 #define huge                     1.0e+20
 #define MAX_ANY_SINGLE_DIRECTION (1024+6)
 #define tiny                     1.0e-20

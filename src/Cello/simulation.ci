@@ -15,20 +15,23 @@ module simulation {
 
     entry Simulation (const char filename[n], int n); // [S0]
 
-    entry void r_initialize_forest (CkReductionMsg * msg);    // [SC2]
+    entry void p_get_msg_refine (Index);
+    
+    entry void r_initialize_block_array (CkReductionMsg * msg);    // [SC2]
     entry void r_initialize_hierarchy (CkReductionMsg * msg); // [SC3]
 
     entry void s_write (); // [SC6]
     entry void r_write (CkReductionMsg * msg); // [SC7]
     entry void r_write_checkpoint ();
 
-    entry void p_begin_output();
-    entry void r_output(CkReductionMsg * msg);
     entry void p_output_write (int n, char buffer[n]); // [SC8]
+    entry void p_output_start (int index_output);
 
     entry void p_monitor ();
     entry void p_monitor_performance();
     entry void r_monitor_performance (CkReductionMsg * msg); // [SC9]
+
+    entry void p_set_block_array (CProxy_Block block_array);
 
   };
 

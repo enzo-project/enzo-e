@@ -493,6 +493,7 @@ PARALLEL_MAIN_BEGIN
     const int np = particle.num_particles(it_trace,ib);
     for (int ip=0; ip<np; ip++) {
       index = ip + ib*mp;
+      CkPrintf ("position %lg %ld\n",xp[ip], 3*index);
       if (xp[ip] != 3*index) error_position++;
       if (yp[ip] != 4*index+1) error_position++;
       if (zp[ip] != 1*index+2) error_position++;
@@ -1044,14 +1045,14 @@ PARALLEL_MAIN_BEGIN
   char * buffer_next = p_dst.save_data(buffer);
   unit_assert (buffer_next - buffer == n);
   if (buffer_next - buffer != n)
-    printf ("buffer size mismatch: %d %d\n",buffer_next - buffer,n);
+    printf ("buffer size mismatch: %ld %d\n",buffer_next - buffer,n);
 
   unit_func("load_data()");
   ParticleData new_p_data;
   Particle new_p (particle_descr,&new_p_data);
   buffer_next = new_p.load_data(buffer);
   if (buffer_next - buffer != n)
-    printf ("buffer size mismatch: %d %d\n",buffer_next - buffer,n);
+    printf ("buffer size mismatch: %ld %d\n",buffer_next - buffer,n);
   unit_assert (buffer_next - buffer == n);
   unit_assert (p_dst == new_p);
 

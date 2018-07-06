@@ -20,7 +20,7 @@ class IoParticleData : public Io {
 public: // interface
 
   /// Constructor
-  IoParticleData(const ParticleDescr * particle_descr) throw();
+  IoParticleData() throw();
 
   /// Destructor
   virtual ~IoParticleData() throw()
@@ -37,18 +37,10 @@ public: // interface
   void set_particle_data (ParticleData * particle_data) throw()
   { particle_data_ = particle_data;};
 
-  /// Set ParticleDescr
-  void set_particle_descr (ParticleDescr * particle_descr) throw()
-  { particle_descr_ = particle_descr; };
-
-
 #include "_io_Io_common.hpp"
 
   
 protected: // functions
-
-  /// ParticleDescr for the ParticleData
-  ParticleDescr * particle_descr_;
 
   /// Current ParticleData
   ParticleData * particle_data_;

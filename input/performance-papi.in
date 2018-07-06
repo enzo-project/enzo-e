@@ -10,7 +10,6 @@ Stopping { cycle = 10; }
 
 Performance {
    name = "celloperf-%06d.data";
-   stride = 2;
    papi {
      counters = ["PAPI_FP_INS"];
    }

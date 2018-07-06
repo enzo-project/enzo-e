@@ -39,41 +39,25 @@ void EnzoProlongMC1::pup (PUP::er &p)
 int EnzoProlongMC1::apply 
 ( precision_type precision,
   void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+  const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+  bool accumulate)
 {
-  switch (precision)  {
-
-  case precision_single:
-
-    return apply_( (float *)       values_f, nd3_f, im3_f, n3_f,
-		   (const float *) values_c, nd3_c, im3_c, n3_c);
-
-    break;
-
-  case precision_double:
-
-    return apply_( (double *)       values_f, nd3_f, im3_f, n3_f,
-		   (const double *) values_c, nd3_c, im3_c, n3_c);
-
-    break;
-
-  default:
-
-    ERROR1 ("EnzoProlongMC1::apply()",
-	    "Unknown precision %d",
-	    precision);
-
-    return 0;
-  }
+  return apply_( (enzo_float * )       values_f, nd3_f, im3_f, n3_f,
+		 (const enzo_float * ) values_c, nd3_c, im3_c, n3_c,
+		 accumulate);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
 int EnzoProlongMC1::apply_
-( T *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-  const T * values_c, int nd3_c[3], int im3_c[3], int n3_c[3])
+( enzo_float *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
+  const enzo_float * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+  bool accumulate)
 {
+  ASSERT ("EnzoProlongPoisson::apply_",
+	  "accumulate=true is not implemented yet",
+	  ! accumulate);
+  
   const int dx_c = 1;
   const int dy_c = nd3_c[0];
 
@@ -84,7 +68,7 @@ int EnzoProlongMC1::apply_
 
   const int ndc = nd3_c[0]*nd3_c[1]*nd3_c[2];
 
-  T * work = new T [ ndc ];
+  enzo_float * work = new enzo_float [ ndc ];
 
   for (int i=0; i<rank; i++) {
     const char * xyz = "xyz";
@@ -102,7 +86,7 @@ int EnzoProlongMC1::apply_
 
     delete [] work;
 
-    return (sizeof(T) * n3_c[0]);
+    return (sizeof(enzo_float) * n3_c[0]);
 
 
   } else if (n3_f[2] == 1) {
@@ -129,10 +113,10 @@ int EnzoProlongMC1::apply_
 	int i01_c = i_c +        dy_c;
 	int i11_c = i_c + dx_c + dy_c;
 
-	T fb = values_c[i00_c];
+	enzo_float fb = values_c[i00_c];
 
-	T df0 = std::min(fabs(fb - work[i00_c]),fabs(fb - work[i11_c]));
-	T df1 = std::min(fabs(fb - work[i10_c]),fabs(fb - work[i01_c]));
+	enzo_float df0 = std::min(fabs(fb - work[i00_c]),fabs(fb - work[i11_c]));
+	enzo_float df1 = std::min(fabs(fb - work[i10_c]),fabs(fb - work[i01_c]));
 
 	df0 = (fb-work[i00_c]) < 0.0 ? -df0 : df0;
 	df1 = (fb-work[i10_c]) < 0.0 ? -df1 : df1;
@@ -145,8 +129,8 @@ int EnzoProlongMC1::apply_
 	int i01_f = i_f +        dy_f;
 	int i11_f = i_f + dx_f + dy_f;
 
-	T fx = df0 - df1;
-	T fy = df0 + df1;
+	enzo_float fx = df0 - df1;
+	enzo_float fy = df0 + df1;
 
 	values_f[i00_f]	= fb - 0.5*fx - 0.5*fy;
 	values_f[i10_f]	= fb + 0.5*fx - 0.5*fy;
@@ -158,7 +142,7 @@ int EnzoProlongMC1::apply_
 
     delete [] work;
   
-    return (sizeof(T) * n3_c[0]*n3_c[1]);
+    return (sizeof(enzo_float) * n3_c[0]*n3_c[1]);
 
   } else {
 
@@ -167,7 +151,7 @@ int EnzoProlongMC1::apply_
 
     delete [] work;
 
-    return (sizeof(T) * n3_c[0]*n3_c[1]*n3_c[2]);
+    return (sizeof(enzo_float) * n3_c[0]*n3_c[1]*n3_c[2]);
   }
 
 }  

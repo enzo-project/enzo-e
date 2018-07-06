@@ -33,7 +33,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodHeat (CkMigrateMessage *m)
-    : alpha_(0.0),
+    : Method (m),
+      alpha_(0.0),
       courant_(0.0)
   { }
 
@@ -51,8 +52,7 @@ public: // interface
 
 protected: // methods
 
-  template <class T>
-  void compute_ (Block * block, T * Unew ) const throw();
+  void compute_ (Block * block, enzo_float * Unew ) const throw();
 
 protected: // attributes
 

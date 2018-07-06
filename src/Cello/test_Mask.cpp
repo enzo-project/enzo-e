@@ -61,7 +61,7 @@ PARALLEL_MAIN_BEGIN
 
   double x[nx], y[ny], z[nz];
 
-  Mask * mask = new MaskExpr (parameters.param("Group:value_x_lt_y",1));
+  std::shared_ptr<Mask> mask = std::make_shared<MaskExpr> (parameters.param("Group:value_x_lt_y",1));
 
   unit_func ("Mask()");
   unit_assert (mask != NULL);

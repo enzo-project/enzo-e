@@ -64,7 +64,7 @@ private: // attributes
   std::vector<ScalarExpr *> scalar_expr_list_;
 
   /// List of masks for each scalar expression
-  std::vector<Mask *> mask_list_;
+  std::vector< std::shared_ptr<Mask> > mask_list_;
 
 };
 

@@ -19,7 +19,6 @@ PARALLEL_MAIN_BEGIN
   unit_init(0,1);
 
   unit_class("Refresh");
-
   Refresh * refresh = new Refresh (3,2,neighbor_leaf,sync_neighbor,0,true);
 
   unit_assert (refresh != NULL);
@@ -35,7 +34,7 @@ PARALLEL_MAIN_BEGIN
   refresh->add_field (12);
   refresh->add_field (9);
   refresh->add_field (-2);
-  std::vector <int> field_list = refresh->field_list();
+  std::vector <int> field_list = refresh->field_list_src();
   
   unit_assert (find (field_list.begin(),field_list.end(),12) 
 	       != field_list.end());
@@ -48,7 +47,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (find (field_list.begin(),field_list.end(),0) 
 	       == field_list.end());
   unit_assert (find (field_list.begin(),field_list.end(),-2) 
-	       != field_list.end());
+	       == field_list.end());
 
   //--------------------------------------------------
 

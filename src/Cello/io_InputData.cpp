@@ -93,7 +93,7 @@ void InputData::read_hierarchy
 
   Input::read_meta (&io_hierarchy);
 
-  // Calls read_blocks() on contained forest
+  // Calls read_blocks() on contained octree array
   Input::read_hierarchy (hierarchy, field_descr, particle_descr);
 
 }
@@ -118,7 +118,7 @@ Block * InputData::read_block
   Input::read_meta_group (io_block());
 
   int ibx,iby,ibz;
-  block->index_forest(&ibx,&iby,&ibz);
+  block->index_array(&ibx,&iby,&ibz);
 
   // // Call read_block() on base Input object
 
@@ -138,7 +138,6 @@ void InputData::read_field
  const FieldDescr * field_descr,
  int index_field) throw()
 {
-  io_field_data()->set_field_descr((FieldDescr*)field_descr);
   io_field_data()->set_field_data(field_data);
   io_field_data()->set_field_index(index_field);
 
@@ -157,7 +156,8 @@ void InputData::read_field
     file_->data_close();
 
     // Get ith FieldData data
-    io_field_data()->field_array(i, &buffer, &name, &type, 
+    io_field_data()->field_array(field_descr,
+				 i, &buffer, &name, &type, 
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 

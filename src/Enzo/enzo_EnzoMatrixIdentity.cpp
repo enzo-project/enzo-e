@@ -13,53 +13,32 @@
 void EnzoMatrixIdentity::matvec 
 (int id_y, int id_x, Block * block, int g0) throw()
 {
-  Data * data = block->data();
-  Field field = data->field();
+  Field field = block->data()->field();
 
   field.dimensions(0,&mx_,&my_,&mz_);
 
-  int precision = field.precision(0);
+  enzo_float * X = (enzo_float * ) field.values(id_x);
+  enzo_float * Y = (enzo_float * ) field.values(id_y);
 
-  void * X = field.values(id_x);
-  void * Y = field.values(id_y);
-
-  if      (precision == precision_single)    
-    matvec_((float *)(Y),(float *)(X),g0);
-  else if (precision == precision_double)    
-    matvec_((double *)(Y),(double *)(X),g0);
-  else if (precision == precision_quadruple) 
-    matvec_((long double *)(Y),(long double *)(X),g0);
-  else 
-    ERROR1("EnzoMatrixIdentity::matvec()", "precision %d not recognized", precision);
+  matvec_(Y,X,g0);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMatrixIdentity::diagonal (int id_x, Block * block, int g0) throw()
 {
-  Data * data = block->data();
-  Field field = data->field();
+  Field field = block->data()->field();
 
   field.dimensions(0,&mx_,&my_,&mz_);
 
-  int precision = field.precision(0);
+  enzo_float * X = (enzo_float * ) field.values(id_x);
 
-  void * X = field.values(id_x);
-
-  if      (precision == precision_single)    
-    diagonal_((float *)(X),g0);
-  else if (precision == precision_double)    
-    diagonal_((double *)(X),g0);
-  else if (precision == precision_quadruple) 
-    diagonal_((long double *)(X),g0);
-  else 
-    ERROR1("EnzoMatrixIdentity::diagonal()", "precision %d not recognized", precision);
+  diagonal_ (X,g0);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoMatrixIdentity::matvec_ (T * Y, T * X, int g0) const throw()
+void EnzoMatrixIdentity::matvec_ (enzo_float * Y, enzo_float * X, int g0) const throw()
 {
   const int ix0 = (mx_ > 1) ? g0 : 0;
   const int iy0 = (my_ > 1) ? g0 : 0;
@@ -77,8 +56,7 @@ void EnzoMatrixIdentity::matvec_ (T * Y, T * X, int g0) const throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoMatrixIdentity::diagonal_ (T * X, int g0) const throw()
+void EnzoMatrixIdentity::diagonal_ (enzo_float * X, int g0) const throw()
 {
   const int ix0 = (mx_ > 1) ? g0 : 0;
   const int iy0 = (my_ > 1) ? g0 : 0;

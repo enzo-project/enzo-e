@@ -30,7 +30,7 @@ class EnzoBoundary : public Boundary {
 public: // interface
 
   /// Create a new EnzoBoundary
-  EnzoBoundary(axis_enum axis, face_enum face, Mask * mask, 
+  EnzoBoundary(axis_enum axis, face_enum face, std::shared_ptr<Mask> mask, 
 	       boundary_type type) throw();
 
   /// Charm++ PUP::able declarations
@@ -38,7 +38,8 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoBoundary (CkMigrateMessage *m)
-     : boundary_type_(boundary_type_undefined)
+    : Boundary(m),
+      boundary_type_(boundary_type_undefined)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -63,11 +64,10 @@ protected: // functions
     axis_enum axis) const throw();
 
   /// Template for reflecting boundary conditions on different precisions
-  template<class T>
   void enforce_reflecting_precision_
   ( face_enum face,
     axis_enum axis,
-    T * array,
+    enzo_float * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
     bool vx,bool vy,bool vz,
@@ -85,12 +85,11 @@ protected: // functions
     face_enum face, 
     axis_enum axis) const throw();
 
-  /// Template for outflow boundary conditions on different precisions
-  template<class T>
+  /// Enforce outflow boundary conditions on a boundary face
   void enforce_outflow_precision_
   ( face_enum face,
     axis_enum axis,
-    T * array,
+    enzo_float * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
     double * x, double * y, double * z,

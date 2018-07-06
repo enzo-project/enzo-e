@@ -15,7 +15,6 @@ Input::Input (const Factory * factory,
 	      const FieldDescr * field_descr,
 	      const ParticleDescr * particle_descr) throw()
   : file_(0),           // Initialization deferred
-    process_(0),        // initialization below
     sync_(0),
     index_charm_(0),
     cycle_(0),
@@ -27,11 +26,8 @@ Input::Input (const Factory * factory,
     io_field_data_(0),
     it_particle_index_(0),        // set_it_index_particle()
     io_particle_data_(0),
-    process_stride_(1) // default one file per process
+    stride_reader_(1) // default one file per process
 {
-
-  process_  = CkMyPe();
-
   io_block_         = factory->create_io_block();
   io_field_data_    = factory->create_io_field_data(field_descr);
   io_particle_data_ = factory->create_io_particle_data(particle_descr);
@@ -62,7 +58,6 @@ void Input::pup (PUP::er &p)
 
   WARNING("Input::pup","skipping file_");
   //    p | *file_;
-  p | process_;
   p | sync_;
   p | index_charm_;
   p | cycle_;
@@ -82,7 +77,7 @@ void Input::pup (PUP::er &p)
   // if (up) io_particle_data_ = new IoParticleData;
   // p | *io_particle_data_;
 
-  p | process_stride_;
+  p | stride_reader_;
 }
 
 //----------------------------------------------------------------------
@@ -214,7 +209,7 @@ std::string Input::expand_name_
     
     if      (arg == "cycle") { sprintf (buffer_new,buffer, cycle_); }
     else if (arg == "time")  { sprintf (buffer_new,buffer, time_); }
-    else if (arg == "proc")  { sprintf (buffer_new,buffer, process_); }
+    else if (arg == "proc")  { sprintf (buffer_new,buffer, CkMyPe()); }
     else 
       {
 	ERROR3("Input::expand_name_",

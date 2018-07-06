@@ -25,8 +25,12 @@ public: // interface
   /// CHARM++ PUP::able declaration
   PUPable_abstract(Prolong);
 
-  // /// CHARM++ migration constructor for PUP::able
-  // Prolong (CkMigrateMessage *m) : PUP::able(m) {}
+  /// CHARM++ migration constructor for PUP::able
+  Prolong (CkMigrateMessage *m) :
+    PUP::able(m),
+    monotonic_(false),
+    positive_(false)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) 
@@ -42,7 +46,8 @@ public: // interface
   virtual int apply 
   ( precision_type precision,
     void *       values_f, int nd3_f[3], int im3_f[3], int n3_f[3],
-    const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3]) = 0;
+    const void * values_c, int nd3_c[3], int im3_c[3], int n3_c[3],
+    bool accumulate = false) = 0;
 
   /// Return the name identifying the prolongation operator
   virtual std::string name () const = 0;

@@ -25,11 +25,14 @@ public: // interface
   EnzoSolverMg0
   (FieldDescr * field_descr,
    int monitor_iter,
+   int restart_cycle,
    int rank,
    int iter_max,
+   double res_tol,
    int index_smooth_pre,
    int index_solve_coarse,
    int index_smooth_post,
+   int index_smooth_last,
    Restrict * restrict,
    Prolong * prolong,
    int min_level,
@@ -42,24 +45,26 @@ public: // interface
   
   /// Charm++ PUP::able migration constructor
   EnzoSolverMg0 (CkMigrateMessage *m)
-    :  A_(NULL),
+    :  Solver(m),
+       A_(NULL),
        index_smooth_pre_(-1),
        index_solve_coarse_(-1),
        index_smooth_post_(-1),
+       index_smooth_last_(-1),
        restrict_(NULL),
        prolong_(NULL),
        rank_(0),
-       iter_max_(0), 
-       monitor_iter_(0),
+       iter_max_(0),
+       res_tol_(0),
        ib_(0), ic_(0), ir_(0), ix_(0),
        mx_(0),my_(0),mz_(0),
        nx_(0),ny_(0),nz_(0),
        gx_(0),gy_(0),gz_(0),
-       bs_(0), bc_(0)
+       bs_(0), bc_(0), rr_(0), rr_local_(0), rr0_(0)
   {}
 
   /// Destructor
-  ~EnzoSolverMg0 () throw();
+  virtual ~EnzoSolverMg0 () throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -71,15 +76,16 @@ public: // interface
 
     Solver::pup(p);
 
-    p | A_;
+    //    p | A_;
     p | index_smooth_pre_;
     p | index_solve_coarse_;
     p | index_smooth_post_;
+    p | index_smooth_last_;
     p | restrict_;
     p | prolong_;
     p | rank_;
     p | iter_max_;
-    p | monitor_iter_;
+    p | res_tol_;
 
     p | ib_;
     p | ic_;
@@ -98,10 +104,15 @@ public: // interface
 
     p | bc_;
     p | bs_;
+
+    p | rr_;
+    p | rr_local_;
+    p | rr0_;
   }
 
   /// Solve the linear system 
-  virtual void apply ( Matrix * A, int ix, int ib, Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
+		       Block * block) throw();
 
   virtual std::string name () const
   { return "mg0"; }
@@ -109,13 +120,10 @@ public: // interface
   void compute_correction(EnzoBlock * enzo_block) throw();
 
   /// Apply pre-smoothing on the current level
-  template <class T>
   void pre_smooth(EnzoBlock * enzo_block) throw();
 
   /// Restrict residual to parent
-  template <class T>
   void restrict_send(EnzoBlock * enzo_block) throw();
-  template <class T>
   void restrict_recv(EnzoBlock * enzo_block,
 		     FieldMsg * field_message) throw();
 
@@ -126,39 +134,40 @@ public: // interface
   Prolong * prolong() { return prolong_; }
   
   /// Solve the coarse-grid equation A*C = R
-  template <class T>
   void solve_coarse(EnzoBlock * enzo_block) throw();
 
   /// Prolong the correction C to the next-finer level
-  template <class T>
   void prolong_recv(EnzoBlock * enzo_block,
 		    FieldMsg * field_message) throw();
 
   /// Apply post-smoothing to the current level
-  template <class T>
   void post_smooth(EnzoBlock * enzo_block) throw();
 
   void set_bs(long double bs) throw() { bs_ = bs; }
   void set_bc(long double bc) throw() { bc_ = bc; }
+  void set_rr_local(long double rr) throw() { rr_local_ = rr; }
+  void set_rr(long double rr) throw() { rr_ = rr; }
+  void set_rr0(long double rr0) throw() { rr0_ = rr0; }
 
-  template <class T>
+  long double rr_local() throw() { return rr_local_; }
+  long double rr() throw() { return rr_; }
+
   void begin_solve(EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void end_cycle(EnzoBlock * enzo_block) throw();
   
   void print()
   {
-    CkPrintf (" A_ = %p\n",A_);
+    //    CkPrintf (" A_ = %p\n",A_);
     CkPrintf (" index_smooth_pre_ = %d\n",index_smooth_pre_);
     CkPrintf (" index_solve_coarse_ = %d\n",index_solve_coarse_);
     CkPrintf (" index_smooth_post_ = %d\n",index_smooth_post_);
+    CkPrintf (" index_smooth_last_ = %d\n",index_smooth_last_);
     CkPrintf (" restrict_ = %p\n",restrict_);
     CkPrintf (" prolong_ = %p\n",prolong_);
     CkPrintf (" rank_ = %d\n",rank_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
-    CkPrintf (" monitor_iter_ = %d\n",monitor_iter_);
-    CkPrintf (" rr0_ = %g\n",rr0_);
+    CkPrintf (" res_tol_ = %g\n",res_tol_);
     CkPrintf (" ib_ = %d\n",ib_);
     CkPrintf (" ic_ = %d\n",ic_);
     CkPrintf (" ir_ = %d\n",ir_);
@@ -168,20 +177,25 @@ public: // interface
     CkPrintf (" gx_,gy_,gz_ = %d %d %d\n",gx_,gy_,gz_);
     CkPrintf (" bs_ = %g\n",bs_);
     CkPrintf (" bc_ = %g\n",bc_);
+    CkPrintf (" rr_ = %g\n",rr_);
+    CkPrintf (" rr_local_ = %g\n",rr_local_);
+    CkPrintf (" rr0_ = %g\n",rr0_);
   }
+
+  /// Exit the solver
+  void end(Block * block);
+
 protected: // methods
 
-  template <class T>
   void enter_solver_(EnzoBlock * enzo_block) throw();
 
-  template <class T>
   void begin_cycle_(EnzoBlock * enzo_block) throw();
   
   /// Prolong the correction C to the next-finer level
-  template <class T>
   void prolong_send_(EnzoBlock * enzo_block) throw();
 
   bool is_converged_(EnzoBlock * enzo_block) const;
+  bool is_diverged_(EnzoBlock * enzo_block) const;
 
   /// Allocate temporary Fields
   void allocate_temporary_(Field field, Block * block = NULL)
@@ -197,14 +211,11 @@ protected: // methods
     field.deallocate_temporary(ir_);
     field.deallocate_temporary(ic_);
   }
-
-  /// Exit the solver
-  void end_(Block * block);
   
 protected: // attributes
 
   /// Matrix
-  Matrix * A_;
+  std::shared_ptr<Matrix> A_;
 
   /// Solver for pre-smoother
   int index_smooth_pre_;
@@ -214,6 +225,9 @@ protected: // attributes
 
   /// Solver for post smoother
   int index_smooth_post_;
+
+  /// Solver for final smoothing of solution
+  int index_smooth_last_;
 
   /// Restriction
   Restrict * restrict_;
@@ -227,11 +241,8 @@ protected: // attributes
   /// Maximum number of MG iterations
   int iter_max_;
 
-  /// How often to display progress
-  int monitor_iter_;
-
-  /// Initial residual
-  long double rr0_;
+  /// Convergence tolerance on the residual reduction rr_ / rr0_
+  double res_tol_;
 
   /// MG vector id's
   int ib_;
@@ -247,6 +258,11 @@ protected: // attributes
   /// scalars used for projections of singular systems
   long double bs_;
   long double bc_;
+
+  /// Current and initial residual norm R'*R
+  long double rr_;
+  long double rr_local_;
+  long double rr0_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_GRAVITY_MG0_HPP */

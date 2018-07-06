@@ -23,7 +23,8 @@ public: // interface
   MethodTrace (const FieldDescr * field_descr,
 	       const ParticleDescr * particle_descr,
 	       double courant,
-	       double timestep ) throw() ;
+	       double timestep,
+	       std::string name) throw() ;
 
   /// Destructor
   virtual ~MethodTrace() throw()
@@ -34,7 +35,9 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   MethodTrace (CkMigrateMessage *m)
-    : timestep_(0.0)
+    : Method(m),
+      timestep_(0.0),
+      name_()
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -43,6 +46,7 @@ public: // interface
     TRACEPUP;
     Method::pup(p);
     p | timestep_;
+    p | name_;
   };
 
 public: // virtual functions
@@ -64,6 +68,9 @@ protected: // functions
 protected: // attributes
 
   double timestep_;
+
+  /// Name of the particle type to update
+  std::string name_;
 
 };
 

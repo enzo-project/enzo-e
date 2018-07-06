@@ -37,6 +37,8 @@
 
 #include "pup_stl.h"
 
+// #define DEBUG_CHECK
+
 //----------------------------------------------------------------------
 // TEMPLATE FUNCTIONS
 //----------------------------------------------------------------------
@@ -171,6 +173,10 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
+/// Type for CkMyPe(); used for Block() constructor to differentiate
+/// from Block(int)
+typedef unsigned process_type;
+
 /// Namespace for global constants and functions
 namespace cello {
   
@@ -181,6 +187,8 @@ namespace cello {
   const double k  = 1.3806504e-16;
   // Solar mass in CGS
   const double mass_solar = 1.98855e33;
+  // Hydrogen mass in CGS
+  const double mass_hydrogen = 1.67262171e-24;
   
   // precision functions
   double machine_epsilon     (int);
@@ -198,6 +206,7 @@ namespace cello {
 
   extern bool type_is_float(int type);
   extern bool type_is_int(int type);
+  extern bool type_is_valid(int type);
 
   extern const char * type_name[NUM_TYPES];
   extern const int type_bytes[NUM_TYPES];
@@ -223,12 +232,23 @@ namespace cello {
     }					
     if (std::fpclassify(value) == FP_INFINITE) {
       printf ("WARNING: %s:%d %s inf\n", file,line,message);	
-    }					
+    }
+#ifdef DEBUG_CHECK    
+    if (sizeof(value)==sizeof(float))
+      CkPrintf ("DEBUG_CHECK %s = %25.15g\n",message,value);
+    if (sizeof(value)==sizeof(double))
+      CkPrintf ("DEBUG_CHECK %s = %25.15lg\n",message,value);
+    if (sizeof(value)==sizeof(long double))
+      CkPrintf ("DEBUG_CHECK %s = %25.15Lg\n",message,value);
+#endif    
   }
 
   void backtrace(const char * msg);
 
-  int index_static();
+  inline int index_static()
+  { return CkMyPe() % CONFIG_NODE_SIZE; }
+
+    
 }
 
 #endif /* CELLO_HPP */

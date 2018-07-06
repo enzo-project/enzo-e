@@ -13,6 +13,6 @@ do
     echo $file
     for block in `h5ls $file | awk '{print $1}'`;
     do
-	h5topng -m $min -M $max -o $test-$cycle-$block.png ${file}:"$block/field density"
+	h5topng -m $min -M $max -o $test-$cycle-$block.png ${file}:"$block/field_density"
     done
 done

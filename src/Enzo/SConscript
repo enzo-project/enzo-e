@@ -5,6 +5,7 @@
 Import('env')
 Import('use_papi')
 Import('use_grackle')
+Import('use_jemalloc')
 Import('grackle_path')
 
 Import('bin_path')
@@ -17,8 +18,8 @@ Import('lib_path')
 
 components = []
 
-components.append(['enzo','charm','simulation', 'problem', 'compute',
-	      'control', 'mesh', 'data',
+components.append(['enzo','charm','simulation', 'data','problem', 'compute',
+	      'control', 'mesh', 
 	      'io', 'disk','memory',
 	      'parameters', 
 	      'error', 'monitor', 'parallel','performance',
@@ -30,11 +31,14 @@ if (use_papi):
 
 components.append(['hdf5','z'])
 
-libraries  = ['png','$FORTRANLIBS']
+libraries_external  = ['png','$FORTRANLIBS', 'boost_filesystem', 'boost_system']
 
-includes = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
+if (use_jemalloc):
+   libraries_external.append([ 'jemalloc' ])
 
-if (use_grackle):   libraries.append('grackle')
+includes_enzo = [Glob('*enzo*hpp'),'fortran.h', 'fortran_types.h']
+
+if (use_grackle):   libraries_external.append('grackle')
 
 #------------------------------
 # SOURCE
@@ -45,18 +49,18 @@ sources  = [Glob('enzo_*cpp'),
 	    'calc_dt.F',
 	    'cic_deposit.F',
 	    'cic_interp.F',
+	    'cicinterp.F',
 	    'euler.F',
 	    'expand_terms.F',
+	    'grid_cic.F',
 	    'interp1d.F',
 	    'interp2d.F',
 	    'interp3d.F',
 	    'interpolate.F',
 	    'inteuler.F',
-	    'inteuler.F',
-	    'intvar.F',
 	    'int_lin3d.F',
+	    'intvar.F',
 	    'ngpinterp.F',
-	    'cicinterp.F',
 	    'pgas2d_dual.F',
 	    'pgas2d.F',
 	    'ppm_de.F',
@@ -70,38 +74,69 @@ sources  = [Glob('enzo_*cpp'),
 	    'PPML_Primitive.F',
 	    'PPML_sub.F',
 	    'PPML_TimeStep.F',
+	    'print_slice.F',
 	    'tscint1d.F',
 	    'tscint2d.F',
 	    'tscint3d.F',
+	    'turboinit.F',
+	    'turboinit2d.F',
 	    'twoshock.F',
+    	    'calcdiss_dev.F',
+	    'calc_eigen_dev.F',
+	    'euler_dev.F',
+	    'flux_twoshock_dev.F',
+	    'flux_hll_dev.F',
+	    'inteuler_dev.F',
+	    'intpos_dev.F',
+	    'intprim_dev.F',
+	    'intvar_dev.F',
+	    'pgas2d_dev.F',
+    	    'pgas2d_dual_dev.F',
+	    'pgas2d_dual_dev.F',
+	    'pgas2d_dual_dev.F',
+	    'twoshock_dev.F',
+	    'woc_calcdiss.F',
+	    'woc_calc_eigen.F',
+	    'woc_cic_deposit.F',
+	    'woc_euler.F',
+	    'woc_flux_hllc.F',
+	    'woc_flux_hll.F',
+	    'woc_flux_twoshock.F',
+	    'woc_inteuler.F',
+	    'woc_intpos.F',
+	    'woc_intprim.F',
+	    'woc_intvar.F',
+	    'woc_pgas2d_dual.F',
+	    'woc_pgas2d.F',
+	    'woc_twoshock.F',
 	    'xeuler_sweep.F',
 	    'yeuler_sweep.F',
-	    'zeuler_sweep.F',
-	    'turboinit.F',
-	    'turboinit2d.F']
+	    'zeuler_sweep.F']
 
 
 charm_main = []
-includes.append(['enzo.decl.h','enzo.def.h'])
+includes_enzo.append(['enzo.decl.h','enzo.def.h'])
 charm_main = ['../Cello/main_enzo.cpp']
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components,libraries])
+env = env.Clone(LIBS=[components,libraries_external])
 
 #------------------------------
 # TARGETS
 #------------------------------
 
-libraries   = env.Library ('enzo', sources)
+libraries_enzo   = env.Library ('enzo', sources)
 
 test_enzo_p = env.Program (['enzo-p.cpp', charm_main])
 
+test_enzo_units = env.Program (['test_EnzoUnits.cpp'])
+
 test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
 
-binaries = [test_enzo_p, test_enzo_prolong]
+binaries = [test_enzo_p, test_enzo_prolong, test_enzo_units]
 
 env.CharmBuilder(['enzo.decl.h','enzo.def.h'],'enzo.ci',ARG = 'enzo')
 # env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
@@ -114,8 +149,8 @@ env.CharmBuilder(['enzo.decl.h','enzo.def.h'],'enzo.ci',ARG = 'enzo')
 env.Alias('install-bin',env.Install (bin_path,binaries))
 env.Alias('install-bin',env.Install ('#/bin/',binaries))
 
-env.Alias('install-inc',env.Install (inc_path,includes))
-env.Alias('install-lib',env.Install (lib_path,libraries))
+env.Alias('install-inc',env.Install (inc_path,includes_enzo))
+env.Alias('install-lib',env.Install (lib_path,libraries_enzo))
 
 
 

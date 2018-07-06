@@ -29,6 +29,7 @@
 	"pressure",
 	"potential",
 	"density_total",
+	"density_particle",
 	"acceleration_x",
 	"acceleration_y",
 	"acceleration_z",
@@ -119,7 +120,7 @@
       }
    }
 
-   Boundary { type = "reflecting"; }
+   Boundary { type = "periodic"; }
 
    Stopping {        cycle = 10;   } 
    Testing {   cycle_final = 400; }
@@ -297,6 +298,7 @@
       data {
 	type     = "data";
         field_list = ["potential", "acceleration_x", "acceleration_y", "acceleration_z"];
+	particle_list = ["dark"];
         include "input/schedule_cycle_1.incl"
       }
 

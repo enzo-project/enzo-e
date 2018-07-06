@@ -6,30 +6,19 @@
 /// @brief    Implements the EnzoSolverJacobi class
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
 
-// #define DEBUG_ENTRY
-// #define DEBUG_SMOOTH
-// #define DEBUG_VERBOSE
-// #define DEBUG_SOLVER
+// #define DEBUG_COPY
 
-#if defined(DEBUG_SMOOTH) && defined(DEBUG_VERBOSE)
-#   define PRINT_BDRX				\
-  for (int ix=0; ix<mx; ix++) {			\
-    for (int iy=0; iy<my; iy++) {		\
-      for (int iz=0; iz<mz; iz++) {		\
-	int i = ix + mx*(iy + my*iz);		\
-	CkPrintf ("[%d %d] %d B=%6.3g D=%6.3g R=%6.3g X=%6.3g\n",	\
-		ix,iy,i,B[i],D[i],R[i],X[i]);	\
-      }						\
-    }						\
-  }
-#else 
-#  define PRINT_BDRX ;
+// #define DEBUG_TRACE
+
+#ifdef DEBUG_TRACE
+#  define TRACE_JACOBI(BLOCK,METHOD) \
+  CkPrintf ("%s:%d %s TRACE_JACOBI %s\n", \
+	    __FILE__,__LINE__,BLOCK->name().c_str(),METHOD);
+#else
+#  define TRACE_JACOBI(BLOCK,METHOD) /* empty */
 #endif
-
-#define NEW_REFRESH
 
 //----------------------------------------------------------------------
 
@@ -52,15 +41,11 @@ EnzoSolverJacobi::EnzoSolverJacobi
 //----------------------------------------------------------------------
 
 void EnzoSolverJacobi::apply
-( Matrix * A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
 {
+  TRACE_JACOBI(block,"apply()");
   
   begin_(block);
-
-#ifdef DEBUG_SMOOTH
-    printf ("%s:%d %s DEBUG_SMOOTH apply() called\n",
-	    __FILE__,__LINE__,block->name().c_str());
-#endif
 
   A_ = A;
   ix_ = ix;
@@ -70,35 +55,15 @@ void EnzoSolverJacobi::apply
 
   allocate_temporary_(field,block);
   
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  enzo_block->jacobi_iter_clear();
+    
   // Refresh X
   Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
 
-  const int num_fields = field.field_count();
-
-#ifdef NEW_REFRESH
   refresh.add_field (ix_);
-  //  refresh.add_field (id_);
 
-  //  refresh.add_field (ir_);
-  //  refresh.add_field (ib_);
-#else
-  refresh.add_all_fields(num_fields);
-  refresh.add_field (id_);
-  refresh.add_field (ir_);
-#endif  
-
-  // try refresh.add_field(ix);
-
-#ifdef DEBUG_SMOOTH
-  printf ("%s:%d %s DEBUG_SMOOTH calling p_solver_jacobi_continue() sync_type %d sync_id %d\n",
-	  __FILE__,__LINE__,block->name().c_str(), sync_type_(),sync_id_());
-#endif
-#ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY enter refresh then p_solver_jacobi_continue\n",
-	      CkMyPe(),block->name().c_str(),this);
-#endif
-
-    block->refresh_enter
+  block->refresh_enter
     (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
 }
 
@@ -106,133 +71,118 @@ void EnzoSolverJacobi::apply
 
 void EnzoBlock::p_solver_jacobi_continue()
 {
+  TRACE_JACOBI(this,"p_solver_jacobi_continue()");
+  
   performance_start_(perf_compute,__FILE__,__LINE__);
-#ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY enter p_solver_jacobi_continue\n",
-	      CkMyPe(),name().c_str(),this);
-#endif
-#ifdef DEBUG_SMOOTH
-    printf ("%s:%d %s DEBUG_SMOOTH p_solver_jacobi_continue()\n",
-	    __FILE__,__LINE__,name().c_str());
-#endif
+
   EnzoSolverJacobi * solver = 
     static_cast<EnzoSolverJacobi *> (this->solver());
 
   solver->compute(this);
-#ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY  exit p_solver_jacobi_continue\n",
-	      CkMyPe(),name().c_str(),this);
-#endif
-    performance_stop_(perf_compute,__FILE__,__LINE__);
+
+  performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSolverJacobi::compute(Block * block)
 {
-  
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (block);
-  Field field = enzo_block->data()->field();
-  // assume all fields have same precision
-  int precision = field.precision(0);
+  TRACE_JACOBI(block,"compute()");
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
-  if (precision == precision_single) {
-    apply_<float>(block);
-  } else if (precision == precision_double) {
-    apply_<double>(block);
-  } else if (precision == precision_quadruple) {
-    apply_<long double>(block);
+  Field field = block->data()->field();
+
+  if (enzo_block->jacobi_iter() < n_) {
+
+    apply_(block);
+
+  } else {
+
+    deallocate_temporary_ (field,block);
+
+    Solver::end_(block);
+
+    CkCallback(callback_,
+	       CkArrayIndexIndex(block->index()),
+	       block->proxy_array()).send();
+
   }
-}
+}  
 
 //----------------------------------------------------------------------
 
-template <typename T>
 void EnzoSolverJacobi::apply_(Block * block)
 {
-#ifdef DEBUG_SMOOTH
-    printf ("%s:%d %s DEBUG_SMOOTH apply_ called\n",
-	    __FILE__,__LINE__,block->name().c_str());
-#endif
+  TRACE_JACOBI(block,"apply_()");
+  
   Field field = block->data()->field();
 
   int mx,my,mz;
   field.dimensions(ix_,&mx,&my,&mz);
+  // int gx,gy,gz;
+  // field.ghost_depth(ix_,&gx,&gy,&gz);
 
+  const int ng = A_->ghost_depth();
+  const int gx = (mx > 1) ? ng : 0;
+  const int gy = (my > 1) ? ng : 0;
+  const int gz = (mz > 1) ? ng : 0;
 
-  const int g0 = n_;
+  A_->diagonal (id_, block,ng);
+  A_->residual (ir_, ib_, ix_, block,ng);
 
-  const int ix0 = (mx > 1) ? g0 : 0;
-  const int iy0 = (my > 1) ? g0 : 0;
-  const int iz0 = (mz > 1) ? g0 : 0;
+#ifdef DEBUG_COPY
+    {
+      enzo_float * R = (enzo_float*) field.values(ir_);
+      enzo_float * R_J = (enzo_float*) field.values("R_J");
+      enzo_float * D = (enzo_float*) field.values(id_);
+      enzo_float * D_J = (enzo_float*) field.values("D_J");
+      enzo_float * X = (enzo_float*) field.values(ix_);
+      enzo_float * X_J = (enzo_float*) field.values("X_J");
+      enzo_float * B = (enzo_float*) field.values(ib_);
+      enzo_float * B_J = (enzo_float*) field.values("B_J");
+      double rsum=0.0;
+      double dsum=0.0;
+      double xsum=0.0;
+      double bsum=0.0;
+      for (int i=0; i<mx*my*mz; i++) {
+	R_J[i]=R[i];
+	D_J[i]=D[i];
+	X_J[i]=X[i];
+	B_J[i]=B[i];
+	rsum+=std::abs(R[i]);
+	dsum+=std::abs(D[i]);
+	xsum+=X[i];
+	bsum+=std::abs(B[i]);
+      }
+      CkPrintf ("DEBUG_COPY rsum dsum xsum bsum %g %g %g %g\n",rsum,dsum,xsum,bsum);
+    }
+#endif    
+  enzo_float * X = (enzo_float*) field.values(ix_);
+  enzo_float * R = (enzo_float*) field.values(ir_);
+  enzo_float * D = (enzo_float*) field.values(id_);
 
-  A_->diagonal (id_, block,g0);
-
-  for (int iter=0; iter<n_; iter++) {
-
-    /// Loop bounds minimal given iteration, ending at
-    /// ghost_depth iter=n_-1
-
-    //        const int g0 = MAX(gx - (n_-1-iter), 0);
-
-    // XXXX iter = 0
-#ifdef DEBUG_SMOOTH
-    printf ("%s:%d %s DEBUG_SMOOTH Computing residual %d\n",
-	    __FILE__,__LINE__,block->name().c_str(),iter);
-#endif
-    PRINT_BDRX;
-
-    A_->residual (ir_, ib_, ix_, block,g0);
-
-#ifdef DEBUG_SMOOTH
-    CkPrintf ("%s:%d %s DEBUG_SMOOTH Computing diagonal\n",
-	      __FILE__,__LINE__,block->name().c_str());
-#endif
-    PRINT_BDRX;
-    
-#ifdef DEBUG_SMOOTH
-    CkPrintf ("%s:%d %s DEBUG_SMOOTH Computing X=R/D\n",
-	      __FILE__,__LINE__,block->name().c_str());
-#endif
-    PRINT_BDRX;
-
-#ifdef DEBUG_SMOOTH
-    CkPrintf ("%s:%d DEBUG LOOP LIMITS X=R/D ix=%d:%d iy=%d:%d iz=%d:%d\n",
-	      __FILE__,__LINE__,ix0,mx-ix0,iy0,my-iy0, iz0, mz-iz0);
-#endif
-
-    T * X = (T*) field.values(ix_);
-    T * R = (T*) field.values(ir_);
-    T * D = (T*) field.values(id_);
-
-    for (int iz=iz0; iz<mz-iz0; iz++) {
-      for (int iy=iy0; iy<my-iy0; iy++) {
-	for (int ix=ix0; ix<mx-ix0; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  X[i] += R[i] / D[i];
-	}
+  for (int iz=gz; iz<mz-gz; iz++) {
+    for (int iy=gy; iy<my-gy; iy++) {
+      for (int ix=gx; ix<mx-gx; ix++) {
+	int i = ix + mx*(iy + my*iz);
+	X[i] += R[i] / D[i];
       }
     }
-
-#ifdef DEBUG_SMOOTH
-    CkPrintf ("%s:%d %s DEBUG_SMOOTH  Done with SmoothJacobi\n",
-	      __FILE__,__LINE__,block->name().c_str());
-#endif
-    PRINT_BDRX;
   }
+
+  // Next iteration
+
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  enzo_block->jacobi_iter_increment();
   
-#ifdef DEBUG_SMOOTH
-  CkPrintf ("%s:%d %s DEBUG_SMOOTH  Calling Solver::end_()\n",
-	    __FILE__,__LINE__,block->name().c_str());
-#endif
-  deallocate_temporary_ (field,block);
-  Solver::end_(block);
-#ifdef DEBUG_ENTRY
-    CkPrintf ("%d %s %p jacobi DEBUG_ENTRY calling callback %d\n",
-	      CkMyPe(),name().c_str(),this,callback_);
-#endif
-  CkCallback(callback_,
-	     CkArrayIndexIndex(block->index()),
-	     block->proxy_array()).send();
+  // Refresh X
+  Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
+
+  refresh.add_field (ix_);
+
+  block->refresh_enter
+    (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
+
+
 }
 

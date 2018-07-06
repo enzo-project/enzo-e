@@ -15,7 +15,7 @@ MaskPng::MaskPng
 (std::string file_name, 
  double xm, double xp,
  double ym, double yp) throw()
-  : Mask(), mask_(0), nx_(0),ny_(0),
+  : Mask(), mask_(NULL), nx_(0),ny_(0),
     xm_(xm),xp_(xp),
     ym_(ym),yp_(yp)
 {

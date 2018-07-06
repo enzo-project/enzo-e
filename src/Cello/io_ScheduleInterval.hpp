@@ -24,7 +24,8 @@ public: // functions
 
   /// CHARM++ migration constructor
   ScheduleInterval(CkMigrateMessage *m)
-    :  cycle_start_(0),
+    :  Schedule (m),
+       cycle_start_(0),
        cycle_step_(0),
        cycle_stop_(0),
        time_start_(0),

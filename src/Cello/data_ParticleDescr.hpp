@@ -132,12 +132,24 @@ public: // interface
   /// Return the attribute corresponding to the given position
   /// coordinate, -1 if none
   int attribute_position (int it, int axis)
-  { return attribute_position_[it][axis]; }
+  {
+    ASSERT1("ParticleDescr::attribute_position()",
+	    "Trying to access unknown particle type %d",
+	    it,
+	    check_(it));
+    return attribute_position_[it][axis];
+  }
 
   /// Return the attribute corresponding to the given velocity
   /// coordinate, -1 if none
   int attribute_velocity (int it, int axis)
-  { return attribute_velocity_[it][axis]; }
+  {
+    ASSERT1("ParticleDescr::attribute_velocity()",
+	    "Trying to access unknown particle type %d",
+	    it,
+	    check_(it));
+    return attribute_velocity_[it][axis];
+  }
 
   /// Return the stride of the given attribute if interleaved, otherwise 1.
   /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).

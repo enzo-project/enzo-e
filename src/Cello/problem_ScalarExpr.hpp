@@ -50,7 +50,7 @@ public: // interface
 
   /// Evaluate mask at a point
   double evaluate (double t, double x, double y, double z,
-		   Mask * mask = 0, double deflt = 0) const;
+		   std::shared_ptr<Mask> mask = nullptr, double deflt = 0) const;
 
   /// Return mask values in an array
   template <class T>
@@ -58,7 +58,7 @@ public: // interface
 		 int ndx, int nx, double * x,
 		 int ndy, int ny, double * y,
 		 int ndz, int nz, double * z, 
-		 Mask * mask = 0, T * deflt = 0) const;
+		 std::shared_ptr<Mask> mask = nullptr, T * deflt = 0) const;
 
   /// Return mask values in an array
   template <class T>

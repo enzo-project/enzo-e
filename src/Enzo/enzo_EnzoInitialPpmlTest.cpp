@@ -2,8 +2,8 @@
 
 /// @file     enzo_PpmlTest.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2016-09-10
-/// @brief    Definition of the PpmlTest class for "alphabet soup" test problem
+/// @date     2017-06-12
+/// @brief    Definition of the PpmlTest class
 
 #include "enzo.hpp"
 
@@ -14,7 +14,6 @@ EnzoInitialPpmlTest::EnzoInitialPpmlTest
  const EnzoConfig * enzo_config) throw ()
   : Initial(cycle,time)
 {
-  CkPrintf ("EnzoInitialPpml\n");
 }
 
 //----------------------------------------------------------------------
@@ -34,10 +33,6 @@ void EnzoInitialPpmlTest::enforce_block
   double cz=0.5;
   // ... radius-squared
   double r2 = 0.05;
-  // ... B field
-  double bx = 10.0;
-  double by = 0.0;
-  double bz = 0.0;
 
   Field field = block->data()->field();
 

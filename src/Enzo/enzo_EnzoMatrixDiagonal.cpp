@@ -12,55 +12,35 @@
 
 void EnzoMatrixDiagonal::matvec (int id_y, int id_x, Block * block, int g0) throw()
 {
-  Data * data = block->data();
-  Field field = data->field();
+  Field field = block->data()->field();
 
-  data->field_cell_width(&hx_,&hy_,&hz_);
+  block->cell_width (&hx_,&hy_,&hz_);
   field.dimensions(0,&mx_,&my_,&mz_);
 
-  int precision = field.precision(0);
+  enzo_float * X = (enzo_float * ) field.values(id_x);
+  enzo_float * Y = (enzo_float * ) field.values(id_y);
 
-  void * X = field.values(id_x);
-  void * Y = field.values(id_y);
-
-  if      (precision == precision_single)    
-    matvec_((float *)(Y),(float *)(X),g0);
-  else if (precision == precision_double)    
-    matvec_((double *)(Y),(double *)(X),g0);
-  else if (precision == precision_quadruple) 
-    matvec_((long double *)(Y),(long double *)(X),g0);
-  else 
-    ERROR1("EnzoMatrixDiagonal::matvec()", "precision %d not recognized", precision);
+  matvec_(Y,X,g0);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMatrixDiagonal::diagonal (int id_x, Block * block, int g0) throw()
 {
-  Data * data = block->data();
-  Field field = data->field();
+  Field field = block->data()->field();
 
-  data->field_cell_width(&hx_,&hy_,&hz_);
+  block->cell_width    (&hx_,&hy_,&hz_);
   field.dimensions(id_x,&mx_,&my_,&mz_);
 
-  int precision = field.precision(0);
-
-  void * X = field.values(id_x);
-
-  if (precision == precision_single)
-    diagonal_((float *)(X),g0);
-  else if (precision == precision_double)    
-    diagonal_((double *)(X),g0);
-  else if (precision == precision_quadruple) 
-    diagonal_((long double *)(X),g0);
-  else 
-    ERROR1("EnzoMatrixDiagonal::diagonal()", "precision %d not recognized", precision);
+  enzo_float * X = (enzo_float * ) field.values(id_x);
+  
+  diagonal_ (X,g0);
 }
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoMatrixDiagonal::matvec_ (T * Y, T * X, int g0) const throw()
+// template <class T>
+void EnzoMatrixDiagonal::matvec_ (enzo_float * Y, enzo_float * X, int g0) const throw()
 {
   const double d = hx_*hx_;
 
@@ -80,8 +60,7 @@ void EnzoMatrixDiagonal::matvec_ (T * Y, T * X, int g0) const throw()
 
 //----------------------------------------------------------------------
 
-template <class T>
-void EnzoMatrixDiagonal::diagonal_ (T * X, int g0) const throw()
+void EnzoMatrixDiagonal::diagonal_ (enzo_float * X, int g0) const throw()
 {
   const double d = hx_*hx_;
 

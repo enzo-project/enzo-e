@@ -8,7 +8,7 @@
 #include "data.hpp"
 #include "charm_simulation.hpp"
 
-// #define DEBUG_NEW_REFRESH
+// #define DEBUG_DATA_MSG
 
 long DataMsg::counter[CONFIG_NODE_SIZE] = {0};
 
@@ -45,9 +45,6 @@ int DataMsg::data_size () const
   size += n_fa*sizeof(char);
   size += n_pa*sizeof(char);
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg data_size %d\n",this,size);
-#endif
   return size;
 }
 
@@ -55,6 +52,12 @@ int DataMsg::data_size () const
 
 char * DataMsg::save_data (char * buffer) const
 {
+
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG save_data %p\n",
+	    CkMyPe(),__FILE__,__LINE__,this);
+  fflush(stdout);
+#endif
 
   union {
     char * pc;
@@ -82,31 +85,25 @@ char * DataMsg::save_data (char * buffer) const
   (*pi++) = n_fa;
   (*pi++) = n_pa;
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data n_ff %d\n",this, n_ff);
-#endif
   if (n_ff > 0) {
     pc = ff->save_data (pc);
   }
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data n_fa %d\n",this, n_fa);
-#endif
   if (n_ff > 0 && n_fa > 0) {
     ff->face_to_array(field,pc);
     pc += n_fa;
   }
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data n_pa %d\n",this, n_pa);
-#endif
   if (n_pa > 0) {
     pc = pd->save_data(particle_descr,pc);
   }
 
   // return first byte after filled buffer
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg save_data %d\n",this, (pc-buffer));
-#endif
+
+  //  ASSERT2 ("DataMsg::save_data()",
+  //	   "Expecting buffer size %d actual size %d",
+  //	   data_size(),(pc-buffer),
+  //	   (data_size() == (pc-buffer)));
+  
   return pc;
 }
 
@@ -114,6 +111,12 @@ char * DataMsg::save_data (char * buffer) const
 
 char * DataMsg::load_data (char * buffer)
 {
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG load_data %p\n",
+	    CkMyPe(),__FILE__,__LINE__,this);
+  fflush(stdout);
+#endif
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   ParticleDescr * particle_descr = simulation->particle_descr();
 
@@ -128,23 +131,18 @@ char * DataMsg::load_data (char * buffer)
   pc = buffer;
 
   field_face_ = new FieldFace;
+#ifdef DEBUG_FIELD_FACE
+  CkPrintf ("%d %s:%d DEBUG_FIELD_FACE creating %p\n",CkMyPe(),__FILE__,__LINE__,field_face_);
+#endif  
 
   const int n_ff = (*pi++);
   const int n_fa = (*pi++);
   const int n_pa = (*pi++);
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data n_ff %d\n",this, n_ff);
-  fflush(stdout);
-#endif
   if (n_ff > 0) {
     pc = field_face_->load_data (pc);
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data n_fa %d\n",this, n_fa);
-  fflush(stdout);
-#endif
   if (n_fa > 0) {
     field_array_ = pc;
     pc += n_fa;
@@ -152,22 +150,19 @@ char * DataMsg::load_data (char * buffer)
     field_array_ = NULL;
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data n_pa %d\n",this, n_pa);
-  fflush(stdout);
-#endif
   if (n_pa > 0) {
     ParticleData * pd = particle_data_ = new ParticleData;
-
     pd->allocate(particle_descr);
     pc = pd->load_data(particle_descr,pc);
   } else {
     particle_data_ = NULL;
   }
 
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%p DataMsg load_data %d\n",this, (pc-buffer));
-#endif
+  //  ASSERT2 ("DataMsg::load_data()",
+  //  	   "Expecting buffer size %d actual size %d",
+  //  	   data_size(),(pc-buffer),
+  //  	   (data_size() == (pc-buffer)));
+
   return pc;
 }
 
@@ -175,10 +170,9 @@ char * DataMsg::load_data (char * buffer)
 
 void DataMsg::update (Data * data, bool is_local)
 {
-
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  FieldDescr    *    field_descr = simulation->   field_descr();
+  FieldDescr * field_descr = simulation->field_descr();
  
   Field field_dst = data->field();
  
@@ -186,6 +180,13 @@ void DataMsg::update (Data * data, bool is_local)
   ParticleData * pd = particle_data();
   FieldFace    * ff = field_face();
   char         * fa = field_array();
+
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG update %p (fd:%p pd:%p ff:%p fa:%p local:%d)\n",
+	    CkMyPe(),__FILE__,__LINE__,this,fd,pd,ff,fa,is_local);
+  fflush(stdout);
+#endif
+
 
   if (pd != NULL) {
 
@@ -197,16 +198,21 @@ void DataMsg::update (Data * data, bool is_local)
     for (int it=0; it<particle.num_types(); it++) {
       count += particle.gather (it, 1, &pd);
     }
-    simulation->monitor_insert_particles(count);
+    simulation->data_insert_particles(count);
     
-    delete_particle_data();
-  }
+    delete particle_data_;
+    particle_data_ = NULL; 
 
-  if (fa != NULL) {
+
+  }
+  
+
+  if (ff != NULL && fa != NULL) {
 
     if (is_local) {
 
       Field field_src(field_descr,fd);
+      
       ff->face_to_face(field_src, field_dst);
 
     } else { // ! is_local
@@ -218,8 +224,15 @@ void DataMsg::update (Data * data, bool is_local)
       ff->array_to_face(fa,field_dst);
 
     }
+  }
+#ifdef DEBUG_DATA_MSG
+  CkPrintf ("%d %s:%d DEBUG_DATA_MSG delete? %p (%p %d)\n",
+	    CkMyPe(),__FILE__,__LINE__,this,ff,field_face_delete_);
+  fflush(stdout);
+#endif
+  if (ff != NULL) {
     delete field_face_;
     field_face_ = NULL;
-
   }
+
 }

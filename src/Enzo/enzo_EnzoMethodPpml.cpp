@@ -23,9 +23,10 @@ EnzoMethodPpml::EnzoMethodPpml
 {
   // Initialize the default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+			     enzo_sync_id_method_ppml);
 
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_fields();
 }
 
 //----------------------------------------------------------------------
@@ -82,17 +83,17 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
      set it to one. */
  
-  enzo_float a = 1, dadt;
+  enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
   
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
     block->simulation()->problem()->physics("cosmology");
 
   ASSERT ("EnzoMethodPpml::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
-	  ! (comoving_coordinates_ && (cosmology != NULL)) );
+	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
   if (cosmology) {
-    cosmology->compute_expansion_factor (&a, &dadt,enzo_block->time());
+    cosmology->compute_expansion_factor (&cosmo_a, &cosmo_dadt,enzo_block->time());
   }
   //  float afloat = float(a);
  

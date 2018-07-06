@@ -11,6 +11,7 @@ help:
 	@echo "make clean      Remove object and test files"
 	@echo "make coverity   Compile enzo-p using the coverity static analysis tool"
 	@echo "make diff       Generate org-mode 'diff.org' file from 'hg diff' output"
+	@echo "make gdb        Generate org-mode 'gdb.org' from gdb 'where' output in gdb.out"
 	@echo "make doc        Generate doxygen documentation from source in src-html"
 	@echo "make log        Generate org-mode 'log.org' file from 'hg log' output"
 	@echo "make reset      Clear any settings from an incomplete ./build.sh"
@@ -50,6 +51,10 @@ cccc:
 .PHONY: diff
 diff:
 	./tools/diff-org.sh > diff.org
+#----------------------------------------------------------------------
+.PHONY: gdb
+gdb:
+	awk -f ./tools/awk/gdb-org.awk <gdb.out > gdb.org
 #----------------------------------------------------------------------
 .PHONY: log
 log:

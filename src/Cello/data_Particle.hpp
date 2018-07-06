@@ -207,12 +207,12 @@ public: // interface
   /// Return the attribute corresponding to the given position
   /// coordinate, -1 if none
   int attribute_position (int it, int axis)
-  { return particle_descr_->attribute_position_[it][axis]; }
+  { return particle_descr_->attribute_position(it,axis); }
 
   /// Return the attribute corresponding to the given velocity
   /// coordinate, -1 if none
   int attribute_velocity (int it, int axis)
-  { return particle_descr_->attribute_velocity_[it][axis]; }
+  { return particle_descr_->attribute_velocity(it,axis); }
 
   /// Return the stride of the given attribute if interleaved, otherwise 1.
   /// Computed as attribute\_bytes(it) / attribute\_bytes(it,ia).
@@ -260,6 +260,10 @@ public: // interface
   /// Return the attribute array for the given particle type and batch
 
   char * attribute_array (int it,int ia,int ib)
+  { return particle_data_->attribute_array 
+      (particle_descr_, it,ia,ib); }
+
+  const char * attribute_array (int it,int ia,int ib) const
   { return particle_data_->attribute_array 
       (particle_descr_, it,ia,ib); }
 
@@ -346,14 +350,17 @@ public: // interface
   { return particle_data_->overhead(particle_descr_,it,ib); }
 
   /// Fill a vector of position coordinates for the given type and batch
+  /// Bounds is used when positions are stored relative to the local block
+  /// (e.g. as integers) and used to convert local to global coordinates
   bool position (int it, int ib,
 		 double * x, double * y = 0, double * z = 0)
   { return particle_data_->position(particle_descr_,it,ib,x,y,z); }
 
+  /// Update positions in a batch a given amount.  Only used in refresh for
+  /// updating positions in periodic boundary conditions
   void position_update (int it, int ib, 
 			long double dx, long double dy, long double dz)
   { particle_data_->position_update (particle_descr_,it,ib,dx,dy,dz);  }
-
 
   /// Fill a vector of velocity coordinates for the given type and batch
   bool velocity (int it, int ib,

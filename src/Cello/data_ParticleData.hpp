@@ -29,11 +29,26 @@ public: // interface
   /// Destructor
   ~ParticleData();
 
+  /// Constructor
+  ParticleData(const ParticleData & particle_data)
+  {
+    ++counter[cello::index_static()];
+
+    attribute_array_ = particle_data.attribute_array_;
+    attribute_align_ = particle_data.attribute_align_;
+    particle_count_  = particle_data.particle_count_;
+  }
+  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
   /// Return the attribute array for the given particle type and batch
-  char * attribute_array (ParticleDescr *, int it, int ia, int ib);
+  char * attribute_array (ParticleDescr *pd, int it, int ia, int ib);
+  const char * attribute_array (ParticleDescr *pd, int it, int ia, int ib) const
+  {
+    return (const char *)
+      ((ParticleData*)this) -> attribute_array (pd,it,ia,ib);
+  }
 
   /// Return the number of batches of particles for the given type.
 
@@ -124,12 +139,12 @@ public: // interface
 		 int it, int ib,
 		 double * x, double * y = 0, double * z = 0);
 
-  /// Update positions given an increment
+  /// Update positions in a batch a given amount.  Only used in refresh for
+  /// updating positions in periodic boundary conditions
   void position_update 
   (ParticleDescr * particle_descr,int it, int ib, 
    long double dx, long double dy, long double dz);
 			 
-
   /// Fill a vector of velocity coordinates for the given type and batch
   bool velocity (ParticleDescr * particle_descr,
 		 int it, int ib,

@@ -25,7 +25,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
 #ifdef CONFIG_USE_GRACKLE
 
   /// Initialize default Refresh
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier); //T const?
+  int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+		       enzo_sync_id_method_grackle);
   refresh(ir)->add_all_fields(field_descr->field_count());
 
   /// Initialize parameters

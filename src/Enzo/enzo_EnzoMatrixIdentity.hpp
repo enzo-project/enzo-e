@@ -30,7 +30,8 @@ public: // interface
 
   /// CHARM++ migration constructor
   EnzoMatrixIdentity(CkMigrateMessage *m)
-    : mx_(0), my_(0), mz_(0)
+    : Matrix(m),
+      mx_(0), my_(0), mz_(0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -52,15 +53,17 @@ public: // virtual functions
 
 protected: // functions
 
-  template <class T>
-  void matvec_ (T * Y, T * X, int g0) const throw();
+  void matvec_ (enzo_float * Y, enzo_float * X, int g0) const throw();
 
-  template <class T>
-  void diagonal_ (T * X, int g0) const throw();
+  void diagonal_ (enzo_float * X, int g0) const throw();
 
   bool is_singular() const throw()
   { return false; }
   
+  /// How many ghost zones required for matvec
+  virtual int ghost_depth() const throw()
+  { return 0; }
+
 protected: // attributes
 
   int mx_,my_,mz_;

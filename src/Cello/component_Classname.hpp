@@ -26,7 +26,7 @@ public: // interface
   Classname & operator= (const Classname & classname) throw();
 
   /// Destructor
-  ~Classname() throw();
+  virtual ~Classname() throw();
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);

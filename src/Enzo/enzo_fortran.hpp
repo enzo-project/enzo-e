@@ -76,6 +76,7 @@ extern "C" void FORTRAN_NAME(ppm_de)
    int *rank, int *in, int *jn, int *kn,
    int is[], int ie[],
    int *flatten, int *ipresfree,
+   int * iconsrec, int *iposrec,
    int *diff, int *steepen, int *idual,
    enzo_float *eta1, enzo_float *eta2,
    int *num_subgrids, int leftface[], int rightface[],

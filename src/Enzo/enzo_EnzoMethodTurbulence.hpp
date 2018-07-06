@@ -25,19 +25,19 @@ public: // interface
 		       double density_initial,
 		       double temperature_initial,
 		       double mach_number,
-		       int comoving_coordinates);
+		       bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodTurbulence);
   
   /// Charm++ PUP::able migration constructor
   EnzoMethodTurbulence (CkMigrateMessage *m)
-    :
-    density_initial_(0.0),
-    temperature_initial_(0.0),
-    edot_(0.0),
-    mach_number_(0.0),
-    comoving_coordinates_(false)
+    : Method (m),
+      density_initial_(0.0),
+      temperature_initial_(0.0),
+      edot_(0.0),
+      mach_number_(0.0),
+      comoving_coordinates_(false)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -55,7 +55,6 @@ public: // interface
 
 private: // methods
 
-  template <class T>
   void compute_resume_ (Block * block, CkReductionMsg * msg) throw();
 
 private: // attributes
@@ -73,7 +72,7 @@ private: // attributes
   double mach_number_;
 
   // Comoving Coordinates
-  int comoving_coordinates_;
+  bool comoving_coordinates_;
 };
 
 #endif /* ENZO_ENZO_METHOD_TURBULENCE_HPP */

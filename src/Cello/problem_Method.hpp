@@ -20,7 +20,11 @@ class Method : public PUP::able
 public: // interface
 
   /// Create a new Method
-  Method (double courant = 1.0) throw() : schedule_(NULL), courant_(courant) {}
+  Method (double courant = 1.0) throw()
+    : refresh_list_(),
+      schedule_(NULL),
+      courant_(courant)
+  { }
 
   /// Destructor
   virtual ~Method() throw();
@@ -28,6 +32,13 @@ public: // interface
   /// Charm++ PUP::able declarations
   PUPable_abstract(Method);
   
+  Method (CkMigrateMessage *m)
+    : PUP::able(m),
+      refresh_list_(),
+      schedule_(NULL),
+      courant_(1.0)
+  { }
+      
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
@@ -55,7 +66,7 @@ public: // virtual functions
 		   int min_face_rank, 
 		   int neighbor_type, 
 		   int sync_type,
-		   int id=0)
+		   int id)
   {
     int index=refresh_list_.size();
     refresh_list_.resize(index+1);

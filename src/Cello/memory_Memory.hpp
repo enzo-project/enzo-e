@@ -204,7 +204,7 @@ private: // attributes
   /// deallocate clear value
   char fill_delete_;
 
-  /// Limit on number of bytes to allocate.  Currently not checked.
+  /// Limit on number of bytes to allocate
   std::vector<int64_t> bytes_limit_;
 
   /// Current bytes allocated for different groups

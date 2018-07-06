@@ -4,7 +4,7 @@
 include "input/pm2.incl"
 
 Adapt {
-   max_level = 10; 
+   max_level = 2; 
 #   list = ["slope"];
    list = ["p_any","p_mass"];
    p_any {
@@ -36,7 +36,7 @@ Mesh { root_blocks    = [2,2]; }
 
 Output {
 
-    list = ["de", "dt", "po", "dm", "dmax", "dmay", "mesh",
+    list = ["data", "de", "dt", "po", "dm", "dmax", "dmay", "mesh",
             "ax", "ay" ];
 
     de { name = ["collapse-pm-de-8-%06d.png", "cycle"]; } ;
@@ -51,7 +51,7 @@ Output {
     data { name = ["collapse-pm-8-%02d-%06d.h5", "proc","cycle"]; }
 }
 
-Stopping { cycle = 1000; }
+Stopping { cycle = 10; }
 
 Method {
    pm_update {

@@ -20,7 +20,7 @@ public: // interface
 
   /// Create a new Boundary
   Boundary() throw() 
-  : axis_(axis_all), face_(face_all), mask_(NULL)
+  : axis_(axis_all), face_(face_all), mask_(nullptr)
   {
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
@@ -30,7 +30,7 @@ public: // interface
   }
 
   /// Create a new Boundary
-  Boundary(axis_enum axis, face_enum face, Mask * mask) throw() 
+  Boundary(axis_enum axis, face_enum face, std::shared_ptr<Mask> mask) throw() 
   : axis_(axis), face_(face), mask_(mask)
   {
     for (int axis=0; axis<3; axis++) {
@@ -43,8 +43,6 @@ public: // interface
   /// Destructor
   virtual ~Boundary() throw()
   {
-    delete mask_;
-    mask_ = NULL;
   }
 
   /// Charm++ PUP::able declarations
@@ -53,7 +51,7 @@ public: // interface
   /// CHARM++ migration constructor for PUP::able
   Boundary (CkMigrateMessage *m)
     : PUP::able(m),
-       axis_(axis_all), face_(face_all), mask_(NULL)
+       axis_(axis_all), face_(face_all), mask_(nullptr)
   {
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
@@ -72,7 +70,7 @@ public: // interface
     int face = face_;
     p | face;
     face_ = (face_enum)face;
-    p | mask_;
+    WARNING ("Boundary::pup()", "Skipping p | mask_");
     for (int axis=0; axis<3; axis++) PUParray(p,periodicity_[axis],2);
   };
 
@@ -109,7 +107,7 @@ protected: // protected attributes
   face_enum face_;
 
   /// Mask object for boundary conditions (NULL == true)
-  Mask * mask_;
+  std::shared_ptr<Mask> mask_;
 
   /// Periodicity of boundary condition faces
   bool periodicity_[3][2];

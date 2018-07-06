@@ -17,7 +17,7 @@ EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
 				 double energy_ratio_min_refine,
 				 double energy_ratio_max_coarsen,
 				 double gamma,
-				 int comoving_coordinates,
+				 bool comoving_coordinates,
 				 int max_level,
 				 bool include_ghosts,
 				 std::string output) throw ()
@@ -80,38 +80,20 @@ int EnzoRefineShock::apply ( Block * block ) throw ()
   if (rank < 2) gy = 0;
   if (rank < 3) gz = 0;
 
-  precision_type precision = field.precision(id_velocity);
+  //  precision_type precision = field.precision(id_velocity);
 
   void * output = initialize_output_(field.field_data());
 
   bool any_refine  = false;
   bool all_coarsen = true;
   
-  switch (precision) {
-  case precision_single:
-    evaluate_block_((const float**) v3,
-		    (const float*)  te,
-		    (const float*)  de,
-		    (const float*)  p,
-		    (float*) output,
-		    nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
-		    &any_refine,&all_coarsen, rank);
-    break;
-  case precision_double:
-    evaluate_block_((const double**) v3,
-		    (const double*)  te,
-		    (const double*)  de,
-		    (const double*)  p,
-		    (double*) output,
-		    nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
-		    &any_refine,&all_coarsen, rank);
-    break;
-  default:
-    ERROR2("EnzoRefineShock::apply",
-	   "Unknown precision %d for velocity_x field",
-	   precision,0);
-    break;
-  }
+  evaluate_block_((const enzo_float**) v3,
+		  (const enzo_float*)  te,
+		  (const enzo_float*)  de,
+		  (const enzo_float*)  p,
+		  (enzo_float*) output,
+		  nxd,nyd,nzd,nx,ny,nz,gx,gy,gz,
+		  &any_refine,&all_coarsen, rank);
 
   int adapt_result =  
     any_refine ? adapt_refine : (all_coarsen ? adapt_coarsen : adapt_same) ;
@@ -125,13 +107,12 @@ int EnzoRefineShock::apply ( Block * block ) throw ()
 
 //----------------------------------------------------------------------
 
-template <class T>
 void EnzoRefineShock::evaluate_block_
-(const T * v3[],
- const T * te,
- const T * de,
- const T * p,
- T * output,
+(const enzo_float * v3[],
+ const enzo_float * te,
+ const enzo_float * de,
+ const enzo_float * p,
+ enzo_float * output,
  int ndx, int ndy, int ndz,
  int nx, int ny, int nz,
  int gx, int gy, int gz,
@@ -145,10 +126,10 @@ void EnzoRefineShock::evaluate_block_
   const int d3[3] = {1, ndx, ndx*ndy};
 
 #ifdef DEBUG_ENZO_REFINE_SHOCK
-  T dp_min = std::numeric_limits<T>::max();
-  T dp_max = -std::numeric_limits<T>::max();
-  T er_min = std::numeric_limits<T>::max();
-  T er_max = -std::numeric_limits<T>::max();
+  enzo_float dp_min = std::numeric_limits<enzo_float>::max();
+  enzo_float dp_max = -std::numeric_limits<enzo_float>::max();
+  enzo_float er_min = std::numeric_limits<enzo_float>::max();
+  enzo_float er_max = -std::numeric_limits<enzo_float>::max();
 #endif
   
   for (int axis=0; axis<rank; axis++) {
@@ -160,18 +141,18 @@ void EnzoRefineShock::evaluate_block_
 	  int i = ix + ndx*(iy + ndy*iz);
 	  int id = d3[axis];
 
-	  T dp = fabs    (p[i+id] - p[i-id]) 
+	  enzo_float dp = fabs    (p[i+id] - p[i-id]) 
 	    / (std::min(p[i+id] , p[i-id])) ;
 
-	  T dv = v3[axis][i+id] - v3[axis][i-id];
+	  enzo_float dv = v3[axis][i+id] - v3[axis][i-id];
 
-	  T e = p[i]/(gamma_ - 1.0);
+	  enzo_float e = p[i]/(gamma_ - 1.0);
 
-	  T ep = te[i+id]*de[i+id];
-	  T e0 = te[i]   *de[i];
-	  T em = te[i-id]*de[i-id];
+	  enzo_float ep = te[i+id]*de[i+id];
+	  enzo_float e0 = te[i]   *de[i];
+	  enzo_float em = te[i-id]*de[i-id];
 
-	  T er = e / std::max (std::max(em,e0),ep);
+	  enzo_float er = e / std::max (std::max(em,e0),ep);
 
 	  bool l_refine = (dv < 0.0) && 
 	    (dp > pressure_min_refine_) &&

@@ -20,7 +20,7 @@ InitialValue::InitialValue
     field_descr_(field_descr),
     num_fields_(field_descr->field_count()),
     num_masks_(NULL),
-    mask_(0),
+    mask_(NULL),
     nx_(0),
     ny_(0)
 {
@@ -82,16 +82,16 @@ InitialValue::~InitialValue() throw()
     for (int index_mask = 0; index_mask<num_masks_[index_field]; index_mask++) {
       if (mask_[index_field][index_mask]) {
 	delete [] mask_[index_field][index_mask];
-	mask_[index_field][index_mask] = 0;
+	mask_[index_field][index_mask] = NULL;
       }
     }
-    delete [] mask_[index_field]; mask_[index_field] = 0;
-    delete [] nx_[index_field];   nx_[index_field]   = 0;
-    delete [] ny_[index_field];   ny_[index_field]   = 0;
+    delete [] mask_[index_field]; mask_[index_field] = NULL;
+    delete [] nx_[index_field];   nx_[index_field]   = NULL;
+    delete [] ny_[index_field];   ny_[index_field]   = NULL;
   }
-  delete [] mask_; mask_ = 0;
-  delete [] nx_;   nx_   = 0;
-  delete [] ny_;   ny_   = 0;
+  delete [] mask_; mask_ = NULL;
+  delete [] nx_;   nx_   = NULL;
+  delete [] ny_;   ny_   = NULL;
 }
 //----------------------------------------------------------------------
 
@@ -141,8 +141,8 @@ void InitialValue::enforce_block
 
   FieldData *       field_data = block->data()->field_data();
 
-  double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, t;
-  bool * mask=0, *rdeflt=0;
+  double *value=NULL, *vdeflt=NULL, *x=NULL, *y=NULL, *z=NULL, t;
+  bool * mask=NULL, *rdeflt=NULL;
   int n, nx=0,ny=0,nz=0;
 
   for (int index_field = 0;

@@ -15,18 +15,25 @@ void Main::enzo_finalize (Simulation * simulation)
     monitor->print ("Testing","expected cycle:  %d",cycle_final);
   }
 
-  double time_final     = config->testing_time_final;
   double time_tolerance = config->testing_time_tolerance;
 
   unit_class ("Enzo-P");
   unit_func  ("final time");
-  if (time_final != 0.0) {
-    double err_rel = cello::err_rel(simulation->time(),time_final);
-    unit_assert ( err_rel < time_tolerance);
-    monitor->print ("Testing","actual   time:  %.15g",simulation->time());
-    monitor->print ("Testing","expected time:  %.15g",time_final);
-    monitor->print ("Testing","relative error: %g",err_rel);
-    monitor->print ("Testing","tolerance:      %g",time_tolerance);
+  monitor->print ("Testing","actual   time:  %.15g",simulation->time());
+  monitor->print ("Testing","tolerance:      %g",time_tolerance);
+  
+  if (config->testing_time_final.size() > 0 &&
+      config->testing_time_final[0] > 0.0) {
+    double err_rel_min = std::numeric_limits<double>::max();
+    for (int i=0; i<config->testing_time_final.size(); i++) {
+      double time_final=config->testing_time_final[i];
+      double err_rel = cello::err_rel(simulation->time(),time_final);
+      err_rel_min = std::min(err_rel_min,err_rel);
+      monitor->print ("Testing","expected time:  %.15g",time_final);
+      monitor->print ("Testing","relative error: %g",err_rel);
+    }
+    monitor->print ("Testing","minimum relative error: %g",err_rel_min);
+    unit_assert ( err_rel_min < time_tolerance);
   }
 
   monitor->print ("","END ENZO-P");

@@ -29,7 +29,7 @@ MsgCoarsen::MsgCoarsen()
 
 //----------------------------------------------------------------------
 
-MsgCoarsen::MsgCoarsen(int num_face_level, int face_level[], int ic3[3])
+MsgCoarsen::MsgCoarsen(int num_face_level, std::vector<int> & face_level, int ic3[3])
   : CMessage_MsgCoarsen(),
     is_local_(true),
     data_msg_(NULL),

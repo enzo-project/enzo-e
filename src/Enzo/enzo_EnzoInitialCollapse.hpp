@@ -49,7 +49,9 @@ public: // interface
     : Initial (m),
       rank_(0),
       radius_relative_(0.0),
-      mass_(0.0)
+      particle_ratio_(0.0),
+      mass_(0.0),
+      temperature_(0.0)
   {
     array_[0] = 0;
     array_[1] = 0; 

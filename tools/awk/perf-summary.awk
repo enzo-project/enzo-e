@@ -1,3 +1,5 @@
+#!/usr/bin/awk -f
+
 # parses Enzo-p output and prints the following
 #
 #   number of solver iterations
