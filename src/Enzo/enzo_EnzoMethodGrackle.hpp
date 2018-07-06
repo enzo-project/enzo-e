@@ -16,15 +16,16 @@ class EnzoMethodGrackle : public Method {
 
   /// @class    EnzoMethodGrackle
   /// @ingroup  Enzo
-///
-/// This class interfaces the Grackle primordial chemistry / cooling
-/// library with Cello
+  ///
+  /// This class interfaces the Grackle primordial chemistry / cooling
+  /// library with Cello
 
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(EnzoConfig *,
-		    const FieldDescr * field_descr);
+  EnzoMethodGrackle(EnzoConfig * enzo_config,
+                    const FieldDescr * field_descr);
+
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGrackle);
 
@@ -36,8 +37,9 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p) ;
 
-  /// Destructor
-  virtual ~EnzoMethodGrackle() throw() {};
+  /// Destructor ?
+  // virtual ~EnzoMethodGrackle() throw() {};
+  // virtual ~EnzoMethodGrackle() throw();
 
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();
@@ -50,17 +52,17 @@ public: // interface
 
 
 
-protected: // methods
+//protected: // methods
 
 protected: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
 
   /// Grackle struct defining chemistry data
-  chemistry_data * chemistry_;
+  chemistry_data * chemistry_ = new chemistry_data;
 
   /// Grackle struct defining code units
-  code_units * units_;
+  code_units units_;
 
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
 

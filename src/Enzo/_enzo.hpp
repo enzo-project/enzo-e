@@ -168,7 +168,10 @@ struct fluxes
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-#   include "grackle.h"
+#include <stdlib.h>
+extern "C" {
+  #include <grackle.h>
+}
 #endif
 
 //----------------------------------------------------------------------

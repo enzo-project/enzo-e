@@ -430,7 +430,9 @@ Method * EnzoProblem::create_method_
 #ifdef CONFIG_USE_GRACKLE
     //--------------------------------------------------
   } else if (name == "grackle") {
-    method = new EnzoMethodGrackle (enzo_config,field_descr);
+    method = new EnzoMethodGrackle 
+      (enzo_config, 
+       field_descr);
 #endif /* CONFIG_USE_GRACKLE */
     
   } else if (name == "turbulence") {
