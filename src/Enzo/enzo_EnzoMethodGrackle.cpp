@@ -8,28 +8,30 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-//----------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle 
-(EnzoConfig * config,
- const FieldDescr * field_descr)
+(
+  EnzoConfig * config,
+  const FieldDescr * field_descr
+)
   : Method()
-#ifdef CONFIG_USE_GRACKLE
-  , chemistry_(0),
-    units_(0)
-#endif /* CONFIG_USE_GRACKLE */
+//#ifdef CONFIG_USE_GRACKLE
+//  , chemistry_(0),
+//    units_(0)
+//#endif /* CONFIG_USE_GRACKLE */
 
 {
 #ifdef CONFIG_USE_GRACKLE
 
   /// Initialize default Refresh
-  int ir = add_refresh(4,0,neighbor_leaf,sync_barrier);
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier); //T const?
   refresh(ir)->add_all_fields(field_descr->field_count());
 
   /// Initialize parameters
 
-  units_     = & config->method_grackle_units;
-  chemistry_ = & config->method_grackle_chemistry;
+  units_     = config->method_grackle_units; // references?
+  chemistry_ = config->method_grackle_chemistry;
 
   const gr_float a_value = 
     1. / (1. + config->physics_cosmology_initial_redshift);
@@ -37,10 +39,14 @@ EnzoMethodGrackle::EnzoMethodGrackle
   
   printf ("TRACE %s:%d calling initialize_chemistry_data\n",__FILE__,__LINE__);
 
-  if (initialize_chemistry_data
-      (*chemistry_, *units_, a_value) == 0) {
-    ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
-	  "Error in initialize_chemistry_data");
+  if (initialize_chemistry_data(&units_) == 0) {
+      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
+      "Error in initialize_chemistry_data");
+  }
+
+  if (set_default_chemistry_parameters(chemistry_) == 0) {
+      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
+      "Error in set_default_chemistry_parameters");
   }
   
 #endif /* CONFIG_USE_GRACKLE */
@@ -61,10 +67,10 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
   // p | *chemistry_;
   WARNING ("EnzoMethodGrackle::pup()",
-	   "p | *chemistry_ not called!");
+     "p | *chemistry_ not called!");
   //  p | *units_;
   WARNING ("EnzoMethodGrackle::pup()",
-	   "p | *units_ not called!");
+     "p | *units_ not called!");
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -80,8 +86,8 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 #ifndef CONFIG_USE_GRACKLE
 
   ERROR("EnzoMethodGrackle::compute()",
-	"Trying to use method 'grackle' with "
-	"Grackle configuration turned off!");
+  "Trying to use method 'grackle' with "
+  "Grackle configuration turned off!");
 
 #else /* CONFIG_USE_GRACKLE */
 
@@ -89,9 +95,13 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
   Field field = block->data()->field();
 
+  // Setup Grackle field struct for storing field data
+  grackle_field_data grackle_fields_;
+
   // ASSUMES ALL ARRAYS ARE THE SAME SIZE
+
   gr_int m[3];
-  field.dimensions (0,m,m+1,m+2);
+  field.dimensions (0,(int*)m,(int*)m+1,(int*)m+2);
 
   int gx,gy,gz;
   field.ghost_depth (0,&gx,&gy,&gz);
@@ -107,119 +117,86 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
   gr_int rank = block->rank();
 
-  gr_float * density       = (gr_float *) field.values("density");
-  gr_float * energy        = (gr_float *) field.values("internal_energy");
-  gr_float * velocity_x    = (gr_float *) field.values("velocity_x");
-  gr_float * velocity_y    = (gr_float *) field.values("velocity_y");
-  gr_float * velocity_z    = (gr_float *) field.values("velocity_z");
-  gr_float * HI_density    = (gr_float *) field.values("HI_density");
-  gr_float * HII_density   = (gr_float *) field.values("HII_density");
-  gr_float * HM_density    = (gr_float *) field.values("HM_density");
-  gr_float * HeI_density   = (gr_float *) field.values("HeI_density");
-  gr_float * HeII_density  = (gr_float *) field.values("HeII_density");
-  gr_float * HeIII_density = (gr_float *) field.values("HeIII_density");
-  gr_float * H2I_density   = (gr_float *) field.values("H2I_density");
-  gr_float * H2II_density  = (gr_float *) field.values("H2II_density");
-  gr_float * DI_density    = (gr_float *) field.values("DI_density");
-  gr_float * DII_density   = (gr_float *) field.values("DII_density");
-  gr_float * HDI_density   = (gr_float *) field.values("HDI_density");
-  gr_float * e_density     = (gr_float *) field.values("e_density");
-  gr_float * metal_density = (gr_float *) field.values("metal_density");
-  gr_float * cooling_time  = (gr_float *) field.values("cooling_time");
-  gr_float * temperature   = (gr_float *) field.values("temperature");
-  gr_float * pressure      = (gr_float *) field.values("pressure");
-  gr_float * gamma         = (gr_float *) field.values("gamma");
+  // Grackle grid dimenstion and grid size
+
+  grackle_fields_.grid_rank      = rank;
+  grackle_fields_.grid_dimension = new int[3];
+  grackle_fields_.grid_start     = new int[3];
+  grackle_fields_.grid_end       = new int[3];
+
+  for (int i=0; i<3; i++){
+    grackle_fields_.grid_dimension[i] = 1;
+    grackle_fields_.grid_start[i]     = grid_start[i];
+    grackle_fields_.grid_end[i]       = grid_end[i];
+  }
+
+  //grackle_fields_.grid_dimension[0] = nx;
+  //grackle_fields_.grid_end[0] = nx - 1;
+
+  // Setup all fields
+
+  grackle_fields_.density         = (gr_float *) field.values("density");
+  grackle_fields_.internal_energy = (gr_float *) field.values("internal_energy");
+  grackle_fields_.x_velocity      = (gr_float *) field.values("velocity_x");
+  grackle_fields_.y_velocity      = (gr_float *) field.values("velocity_y");
+  grackle_fields_.z_velocity      = (gr_float *) field.values("velocity_z");
+  grackle_fields_.HI_density      = (gr_float *) field.values("HI_density");
+  grackle_fields_.HII_density     = (gr_float *) field.values("HII_density");
+  grackle_fields_.HM_density      = (gr_float *) field.values("HM_density");
+  grackle_fields_.HeI_density     = (gr_float *) field.values("HeI_density");
+  grackle_fields_.HeII_density    = (gr_float *) field.values("HeII_density");
+  grackle_fields_.HeIII_density   = (gr_float *) field.values("HeIII_density");
+  grackle_fields_.H2I_density     = (gr_float *) field.values("H2I_density");
+  grackle_fields_.H2II_density    = (gr_float *) field.values("H2II_density");
+  grackle_fields_.DI_density      = (gr_float *) field.values("DI_density");
+  grackle_fields_.DII_density     = (gr_float *) field.values("DII_density");
+  grackle_fields_.HDI_density     = (gr_float *) field.values("HDI_density");
+  grackle_fields_.e_density       = (gr_float *) field.values("e_density");
+  grackle_fields_.metal_density   = (gr_float *) field.values("metal_density");
+  //grackle_fields_.cooling_time  = (gr_float *) field.values("cooling_time");
+  //grackle_fields_.temperature   = (gr_float *) field.values("temperature");
+  //grackle_fields_.pressure      = (gr_float *) field.values("pressure");
+  //grackle_fields_.gamma         = (gr_float *) field.values("gamma");
 
   double dt = block->dt();
+  // double dt = 3.15e7 * 1e6 / my_units.time_units;
 
-  if (solve_chemistry
-      (*chemistry_, *units_,
-       a_value, dt,
-       rank, m,
-       grid_start,  grid_end,
-       density,     energy,
-       velocity_x,  velocity_y,   velocity_z,
-       HI_density,  HII_density,
-       HM_density,
-       HeI_density, HeII_density, HeIII_density,
-       H2I_density, H2II_density,
-       DI_density,  DII_density,
-       HDI_density,
-       e_density,
-       metal_density) == 0) {
+  if (solve_chemistry(&units_, &grackle_fields_, dt) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
-	  "Error in solve_chemistry");
+    "Error in solve_chemistry.\n");
   }
 
-  if (calculate_cooling_time
-      (*chemistry_, *units_,
-       a_value,
-       rank, m,
-       grid_start,  grid_end,
-       density,     energy,
-       velocity_x,  velocity_y,   velocity_z,
-       HI_density,  HII_density,
-       HM_density,
-       HeI_density, HeII_density, HeIII_density,
-       H2I_density, H2II_density,
-       DI_density,  DII_density,
-       HDI_density,
-       e_density,
-       metal_density,
-       cooling_time) == 0) {
+  // maybe change to "gr_float * cooling_time = grackle_fields_.cooling_time"
+  gr_float *cooling_time;
+  cooling_time = new gr_float[nx];
+
+  if (calculate_cooling_time(&units_, &grackle_fields_, cooling_time) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
-	  "Error in calculate_cooling_time.\n");
+    "Error in calculate_cooling_time.\n");
   }
 
-  if (calculate_temperature
-      (*chemistry_, *units_,
-       rank, m,
-       density,     energy,
-       HI_density,  HII_density,
-       HM_density,
-       HeI_density, HeII_density, HeIII_density,
-       H2I_density, H2II_density,
-       DI_density,  DII_density,
-       HDI_density,
-       e_density,
-       metal_density,
-       temperature) == 0) {
+  gr_float *temperature;
+  temperature = new gr_float[nx];
+
+  if (calculate_temperature(&units_, &grackle_fields_, temperature) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
-	  "Error in calculate_temperature.\n");
+    "Error in calculate_temperature.\n");
   }
 
-  if (calculate_pressure
-      (*chemistry_, *units_,
-       rank, m,
-       density,     energy,
-       HI_density,  HII_density,
-       HM_density,
-       HeI_density, HeII_density,  HeIII_density,
-       H2I_density, H2II_density,
-       DI_density,  DII_density,
-       HDI_density,
-       e_density,
-       metal_density,
-       pressure) == 0) {
+  gr_float *pressure;
+  pressure = new gr_float[nx];
+
+  if (calculate_pressure(&units_, &grackle_fields_, pressure) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
-	  "Error in calculate_pressure.\n");
+    "Error in calculate_pressure.\n");
   }
 
-  if (calculate_gamma
-      (*chemistry_, *units_,
-       rank, m,
-       density,     energy,
-       HI_density,  HII_density,
-       HM_density,
-       HeI_density, HeII_density,  HeIII_density,
-       H2I_density, H2II_density,
-       DI_density,  DII_density,
-       HDI_density,
-       e_density,
-       metal_density,
-       gamma) == 0) {
+  gr_float *gamma;
+  gamma = new gr_float[nx];
+
+  if (calculate_gamma(&units_, &grackle_fields_, gamma) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
-	  "Error in calculate_gamma.\n");
+    "Error in calculate_gamma.\n");
   }
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -242,4 +219,5 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 }
 
 //======================================================================
+
 

@@ -277,8 +277,9 @@ public: // attributes
 
   /// EnzoMethodGrackle
 
-  code_units      method_grackle_units;
-  chemistry_data  method_grackle_chemistry;
+  code_units       method_grackle_units;
+  chemistry_data * method_grackle_chemistry; // = new chemistry_data;
+  //method_grackle_chemistry = new chemistry_data;
 
 #endif /* CONFIG_USE_GRACKLE */
 
