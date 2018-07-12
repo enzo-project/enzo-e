@@ -406,9 +406,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit  
-      (enzo_config->method_pm_deposit_alpha);
-
+    method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
+    
   } else if (name == "pm_update") {
 
     method = new EnzoMethodPmUpdate  

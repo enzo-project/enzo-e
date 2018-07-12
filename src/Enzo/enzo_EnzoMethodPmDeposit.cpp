@@ -29,20 +29,20 @@ extern "C" void  FORTRAN_NAME(dep_grid_cic)
 
 //----------------------------------------------------------------------
 
-EnzoMethodPmDeposit::EnzoMethodPmDeposit (double alpha)
+EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   : Method(),
     alpha_(alpha)
 {
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,cello::rank()-1,neighbor_leaf,sync_neighbor,
-			     enzo_sync_id_method_pm_deposit);
-
+ 			     enzo_sync_id_method_pm_deposit);
+ 
   refresh(ir)->add_field("density");
   refresh(ir)->add_field("velocity_x");
   refresh(ir)->add_field("velocity_y");
   refresh(ir)->add_field("velocity_z");
-
+			     
 }
 
 //----------------------------------------------------------------------
@@ -62,19 +62,17 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
 
 void EnzoMethodPmDeposit::compute ( Block * block) throw()
 {
+
   if (block->is_leaf()) {
 
     Particle particle (block->data()->particle());
     Field    field    (block->data()->field());
 
-    allocate_temporary_ (block);
-
     int rank = block->rank();
 
-    enzo_float * de_t  = (enzo_float *) field.values("density_total");
-    enzo_float * de_p  = (enzo_float *) field.values("density_particle");
-    enzo_float * de_pa = (enzo_float *) field.values("density_particle_accumulate");
-    
+    enzo_float  * de_t = (enzo_float *) field.values("density_total");
+    enzo_float  * de_p = (enzo_float *) field.values("density_particle");
+    enzo_float  * de_pa = (enzo_float *) field.values("density_particle_accumulate");
     int mx,my,mz;
     field.dimensions(0,&mx,&my,&mz);
     int nx,ny,nz;
@@ -308,10 +306,12 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     }
 
     enzo_float  * de   = (enzo_float *) field.values("density");
+    enzo_float  * de_gas = new enzo_float [mx*my*mz];
+    for (int i=0; i<mx*my*mz; i++) de_gas[i] = 0.0;
     enzo_float * temp = new enzo_float [4*mx*my*mz];
+    for (int i=0; i<4*mx*my*mz; i++) temp[i] = 0.0;
     enzo_float * rfield = new enzo_float[mx*my*mz];
     for (int i=0; i<mx*my*mz; i++) rfield[i] = 0.0;
-    for (int i=0; i<4*mx*my*mz; i++) temp[i] = 0.0;
 
     int gxi=gx;
     int gyi=gy;
@@ -326,10 +326,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float hzf = hz;
     enzo_float dtf = alpha_;
 
-    const int n = nx*ny*nz;
-    enzo_float * de_gas = new enzo_float[n];
-    memset(de_gas,0,n*sizeof(enzo_float));
-    
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
     enzo_float * vyf = (enzo_float *) field.values("velocity_y");
     enzo_float * vzf = (enzo_float *) field.values("velocity_z");
@@ -359,12 +355,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 			       &nx,&ny,&nz,
 			       &i1,&i1,&i1);
 
-    delete [] rfield;
-    delete [] temp;
-    delete [] vx;
-    delete [] vy;
-    delete [] vz;
-
     for (int i=0; i<mx*my*mz; i++) {
       de_t[i] = de_pa[i] = de_p[i];
     }
@@ -379,14 +369,19 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       }
     }
 
+    delete [] rfield;
+    delete [] temp;
+    delete [] vx;
+    delete [] vy;
+    delete [] vz;
+
     delete [] de_gas;
     
     double sum_de_p = 0.0;
     for (int i=0; i<mx*my*mz; i++) sum_de_p += de_p[i];
 
-    deallocate_temporary_ (block);
-
   }
+
     
   block->compute_done(); 
   

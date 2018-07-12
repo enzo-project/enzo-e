@@ -17,7 +17,7 @@ class EnzoMethodPmDeposit : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmDeposit object
-  EnzoMethodPmDeposit(double alpha = 0.0);
+  EnzoMethodPmDeposit(double alpha = 0.5);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmDeposit);
@@ -40,28 +40,11 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-protected: // methods
+protected: // attributes
 
-    /// Allocate temporary Fields
-  void allocate_temporary_(Block * block)
-  {
-    if (block->is_leaf()) {
-      Field field = block->data()->field();
-    }
-  }
-
-  /// Dellocate temporary Fields
-  void deallocate_temporary_(Block * block)
-  {
-    if (block->is_leaf()) {
-      Field field = block->data()->field();
-    }
-  }
-
-protected: // attributes 
-
-  /// Time parameter for when to deposit mass: time + alpha*dt
+  /// Deposit at time + alpha*dt
   double alpha_;
+
 };
 
 #endif /* ENZO_ENZO_METHOD_PM_DEPOSIT_HPP */

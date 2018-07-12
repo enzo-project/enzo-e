@@ -201,31 +201,27 @@ protected: // methods
   /// Allocate temporary Fields
   void allocate_temporary_(Block * block)
   {
-    if (is_active_(block)) {
-      Field field = block->data()->field();
-      field.allocate_temporary(ir_);
-      field.allocate_temporary(ir0_);
-      field.allocate_temporary(ip_);
-      field.allocate_temporary(iy_);
-      field.allocate_temporary(iv_);
-      field.allocate_temporary(iq_);
-      field.allocate_temporary(iu_);
-    }
+    Field field = block->data()->field();
+    field.allocate_temporary(ir_);
+    field.allocate_temporary(ir0_);
+    field.allocate_temporary(ip_);
+    field.allocate_temporary(iy_);
+    field.allocate_temporary(iv_);
+    field.allocate_temporary(iq_);
+    field.allocate_temporary(iu_);
   }
 
   /// Dellocate temporary Fields
   void deallocate_temporary_(Block * block)
   {
-    if (is_active_(block)) {
-      Field field = block->data()->field();
-      field.deallocate_temporary(ir_);
-      field.deallocate_temporary(ir0_);
-      field.deallocate_temporary(ip_);
-      field.deallocate_temporary(iy_);
-      field.deallocate_temporary(iv_);
-      field.deallocate_temporary(iq_);
-      field.deallocate_temporary(iu_);
-    }
+    Field field = block->data()->field();
+    field.deallocate_temporary(ir_);
+    field.deallocate_temporary(ir0_);
+    field.deallocate_temporary(ip_);
+    field.deallocate_temporary(iy_);
+    field.deallocate_temporary(iv_);
+    field.deallocate_temporary(iq_);
+    field.deallocate_temporary(iu_);
   }
   
 protected: // attributes
