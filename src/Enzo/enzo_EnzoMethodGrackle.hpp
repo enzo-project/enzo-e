@@ -1,7 +1,7 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoMethodGrackle.hpp
-/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu May 15 14:32:28 EDT 2014
 /// @brief    [\ref Enzo] Declaration of EnzoMethodGrackle class
 ///
@@ -41,25 +41,23 @@ public: // interface
   // virtual ~EnzoMethodGrackle() throw() {};
   // virtual ~EnzoMethodGrackle() throw();
 
-  /// Apply the method to advance a block one timestep 
+  /// Apply the method to advance a block one timestep
   virtual void compute( Block * block) throw();
 
-  virtual std::string name () throw () 
+  virtual std::string name () throw ()
   { return "grackle"; }
 
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-
+  virtual ~EnzoMethodGrackle() throw() {};
 
 //protected: // methods
 
 protected: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
-
-  /// Grackle struct defining chemistry data
-  chemistry_data * chemistry_ = new chemistry_data;
+  void compute_( EnzoBlock * enzo_block) throw();
 
   /// Grackle struct defining code units
   code_units units_;
@@ -69,4 +67,3 @@ protected: // attributes
 };
 
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
-

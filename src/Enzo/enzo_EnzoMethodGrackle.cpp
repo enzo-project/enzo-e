@@ -7,10 +7,11 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
+extern CProxy_EnzoSimulation proxy_enzo_simulation;
 
 //----------------------------------------------------------------------------
 
-EnzoMethodGrackle::EnzoMethodGrackle 
+EnzoMethodGrackle::EnzoMethodGrackle
 (
   EnzoConfig * config,
   const FieldDescr * field_descr
@@ -27,19 +28,21 @@ EnzoMethodGrackle::EnzoMethodGrackle
   /// Initialize default Refresh
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 		       enzo_sync_id_method_grackle);
-  refresh(ir)->add_all_fields(field_descr->field_count());
+  refresh(ir)->add_all_fields();
 
   /// Initialize parameters
 
-  units_     = config->method_grackle_units; // references?
-  chemistry_ = config->method_grackle_chemistry;
+  units_     = config->method_grackle_units;
+  //chemistry_ = config->method_grackle_chemistry;
 
-  const gr_float a_value = 
-    1. / (1. + config->physics_cosmology_initial_redshift);
+  //const gr_float a_value =
+  //  1. / (1. + config->physics_cosmology_initial_redshift);
 
-  
+
   printf ("TRACE %s:%d calling initialize_chemistry_data\n",__FILE__,__LINE__);
 
+  // AE: Do we really want to do this here? Won't this overwrite settings?
+/*
   if (initialize_chemistry_data(&units_) == 0) {
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
       "Error in initialize_chemistry_data");
@@ -49,7 +52,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
       "Error in set_default_chemistry_parameters");
   }
-  
+*/
 #endif /* CONFIG_USE_GRACKLE */
 }
 
@@ -66,35 +69,48 @@ void EnzoMethodGrackle::pup (PUP::er &p)
 
   Method::pup(p);
 
+  // AE: Not sure why p | *units_ was commented out...
   // p | *chemistry_;
-  WARNING ("EnzoMethodGrackle::pup()",
-     "p | *chemistry_ not called!");
-  //  p | *units_;
-  WARNING ("EnzoMethodGrackle::pup()",
-     "p | *units_ not called!");
+//  WARNING ("EnzoMethodGrackle::pup()",
+//     "p | *chemistry_ not called!");
+  //p | units_;
+  //WARNING ("EnzoMethodGrackle::pup()",
+  //   "p | *units_ not called!");
 
 #endif /* CONFIG_USE_GRACKLE */
 
 }
 
-//----------------------------------------------------------------------
-
 void EnzoMethodGrackle::compute ( Block * block) throw()
 {
-
   if (!block->is_leaf()) return;
 
-#ifndef CONFIG_USE_GRACKLE
+  #ifndef CONFIG_USE_GRACKLE
 
-  ERROR("EnzoMethodGrackle::compute()",
-  "Trying to use method 'grackle' with "
-  "Grackle configuration turned off!");
+    ERROR("EnzoMethodGrackle::compute()",
+    "Trying to use method 'grackle' with "
+    "Grackle configuration turned off!");
 
-#else /* CONFIG_USE_GRACKLE */
+  #else /* CONFIG_USE_GRACKLE */
+    EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
+    this->compute_(enzo_block);
+
+    enzo_block->compute_done();
+    return;
+  #endif
+
+}
+
+//----------------------------------------------------------------------
+#ifdef CONFIG_USE_GRACKLE
+void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
+{
   //  initialize_(block);
 
-  Field field = block->data()->field();
+  Field field = enzo_block->data()->field();
+  EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
+  EnzoUnits * enzo_units = (EnzoUnits *) simulation->problem()->units();
 
   // Setup Grackle field struct for storing field data
   grackle_field_data grackle_fields_;
@@ -116,7 +132,24 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   // ASSUMES COSMOLOGY = false
   double a_value = 1.0;
 
-  gr_int rank = block->rank();
+  units_.density_units   = enzo_units->density();
+  units_.length_units    = enzo_units->length();
+  units_.time_units      = enzo_units->time();
+  units_.velocity_units  = enzo_units->velocity();
+
+
+  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+    simulation->problem()->physics("cosmology");
+
+  if (units_.comoving_coordinates){
+    enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
+
+    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt,
+                                        enzo_block->time());
+    units_.a_value = cosmo_a;
+  }
+
+  gr_int rank = enzo_block->rank();
 
   // Grackle grid dimenstion and grid size
 
@@ -131,11 +164,18 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
     grackle_fields_.grid_end[i]       = grid_end[i];
   }
 
+  double hx, hy, hz;
+  enzo_block->cell_width(&hx,&hy,&hz);
+  grackle_fields_.grid_dx = hx; //
+
   //grackle_fields_.grid_dimension[0] = nx;
   //grackle_fields_.grid_end[0] = nx - 1;
 
   // Setup all fields
-
+  // AE: Not sure what happens when field is called and field doesn't exist
+  //     if NULL is returned, then thats good. If not, may need to do if
+  //     statments here to only ask for fields that do exist, and NULL
+  //     the grackle_fields_ pointers if they don't.
   grackle_fields_.density         = (gr_float *) field.values("density");
   grackle_fields_.internal_energy = (gr_float *) field.values("internal_energy");
   grackle_fields_.x_velocity      = (gr_float *) field.values("velocity_x");
@@ -159,8 +199,10 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   //grackle_fields_.pressure      = (gr_float *) field.values("pressure");
   //grackle_fields_.gamma         = (gr_float *) field.values("gamma");
 
-  double dt = block->dt();
-  // double dt = 3.15e7 * 1e6 / my_units.time_units;
+  grackle_fields_.volumetric_heating_rate = NULL;
+  grackle_fields_.specific_heating_rate   = NULL;
+
+  double dt = enzo_block->dt;
 
   if (solve_chemistry(&units_, &grackle_fields_, dt) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
@@ -168,6 +210,9 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   }
 
   // maybe change to "gr_float * cooling_time = grackle_fields_.cooling_time"
+
+  // AE: Why do we need any of these here:?
+  /*
   gr_float *cooling_time;
   cooling_time = new gr_float[nx];
 
@@ -199,14 +244,11 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
     ERROR("EnzoMethodGrackle::compute()",
     "Error in calculate_gamma.\n");
   }
+  */
 
-#endif /* CONFIG_USE_GRACKLE */
-
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
-  enzo_block->compute_done();
-
+  return;
 }
+#endif // config use grackle
 
 //----------------------------------------------------------------------
 
@@ -220,5 +262,3 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 }
 
 //======================================================================
-
-

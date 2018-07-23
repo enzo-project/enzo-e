@@ -17,9 +17,9 @@ class EnzoInitialGrackleTest : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialGrackleTest() throw() { }
+  //EnzoInitialGrackleTest() throw() { }
   // EnzoInitialGrackleTest() throw();
-  
+
   /// Constructor
   EnzoInitialGrackleTest
   (const EnzoConfig * enzo_config) throw();
@@ -43,16 +43,17 @@ public: // interface
    const Hierarchy * hierarchy
    ) throw();
 
+  virtual ~EnzoInitialGrackleTest() throw() {};
+
 private:
 
 #ifdef CONFIG_USE_GRACKLE
 
   code_units        units_;
-  chemistry_data  * chemistry_;// = new chemistry_data;
+  //chemistry_data  * chemistry_;// = new chemistry_data;
 
 #endif
-  
+
 };
 
 #endif /* ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP */
-
