@@ -88,8 +88,8 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     const int rank = block->rank();
 
-    FieldDescr    * fd = block->data()->field_descr();
-    ParticleDescr * pd = block->data()->particle_descr();
+    FieldDescr    * fd = cello::field_descr();
+    ParticleDescr * pd = cello::particle_descr();
 
     double dt_shift = 0.5*block->dt()/cosmo_a;
     //    double dt_shift = 0.0;

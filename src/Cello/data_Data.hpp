@@ -27,15 +27,6 @@ public: // interface
        double ym, double yp,
        double zm, double zp) throw();
 
-  /// Constructor
-  Data(FieldDescr * field_descr,
-       ParticleDescr * particle_descr,
-       int nx, int ny, int nz,
-       int num_field_data,
-       double xm, double xp,
-       double ym, double yp,
-       double zm, double zp) throw();
-
   /// Destructor
   ~Data() throw();
 
@@ -118,13 +109,9 @@ public: // interface
   FieldData * field_data (size_t i=0) throw()
   { return (i < field_data_.size()) ? field_data_[i] : NULL; }
 
-  // Return the ith Field descriptor
-  FieldDescr * field_descr () throw();
-  const FieldDescr * field_descr () const throw();
-
   /// Return the ith Field
   Field field (size_t i=0) throw()
-  { return Field(field_descr(),field_data(i)); }
+  { return Field(cello::field_descr(),field_data(i)); }
 
   /// Return the x,y,z,t coordinates of field cell centers
   void field_cells (double * x, double * y, double * z,
@@ -153,7 +140,7 @@ public: // interface
 
   /// Return the Particle object
   Particle particle () throw()
-  { return Particle(particle_descr(),
+  { return Particle(cello::particle_descr(),
 		    particle_data_); }
 
   void allocate () throw();

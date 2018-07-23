@@ -360,7 +360,7 @@ Method * EnzoProblem::create_method_
 ( std::string  name,  
   Config * config,
   int index_method,
-  const FieldDescr * field_descr,
+  FieldDescr * field_descr,
   const ParticleDescr * particle_descr) throw ()
 /// @param name   Name of the method to create
 /// @param config Configuration parameters class
@@ -406,10 +406,8 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "pm_deposit") {
 
-    method = new EnzoMethodPmDeposit  
-      (field_descr, particle_descr, 
-       enzo_config->method_pm_deposit_type, 0.5);
-
+    method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
+    
   } else if (name == "pm_update") {
 
     method = new EnzoMethodPmUpdate  

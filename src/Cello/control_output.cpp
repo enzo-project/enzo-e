@@ -205,13 +205,14 @@ void Block::p_output_write (int index_output, int step)
   TRACE_OUTPUT("Simulation::p_output_write()");
   performance_start_ (perf_output);
 
-  FieldDescr * field_descr = simulation()->field_descr();
-  ParticleDescr * particle_descr = simulation()->particle_descr();
-  Output * output = simulation()->problem()->output(index_output);
+  FieldDescr    * field_descr    = cello::field_descr();
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Simulation    * simulation     = cello::simulation();
+  Output        * output         = cello::output(index_output);
 
   output->write_block(this,field_descr,particle_descr);
 
-  simulation()->write_();
+  simulation->write_();
   performance_stop_ (perf_output);
 }
 

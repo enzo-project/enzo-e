@@ -17,10 +17,7 @@ class EnzoMethodPmDeposit : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmDeposit object
-  EnzoMethodPmDeposit(const FieldDescr * ,
-		      const ParticleDescr *,
-		      std::string type,
-		      double alpha = 0.0);
+  EnzoMethodPmDeposit(double alpha = 0.5);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmDeposit);
@@ -28,8 +25,7 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodPmDeposit (CkMigrateMessage *m)
     : Method (m),
-      alpha_(0.0),
-      type_(0)
+      alpha_(0.0)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -44,13 +40,10 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-protected: // interface
+protected: // attributes
 
   /// Deposit at time + alpha*dt
   double alpha_;
-
-  /// Type of PM mass assignment scheme
-  int type_;
 
 };
 

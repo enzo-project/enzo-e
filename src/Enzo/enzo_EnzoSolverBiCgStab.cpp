@@ -100,7 +100,7 @@ void EnzoSolverBiCgStab::apply
 
   Field field = block->data()->field();
 
-  allocate_temporary_(field,block);
+  allocate_temporary_(block);
 
   /// cast input argument to the EnzoBlock associated with this char
 
@@ -1054,9 +1054,8 @@ void EnzoBlock::r_solver_bicgstab_loop_15(CkReductionMsg* msg) {
 
 void EnzoSolverBiCgStab::end (EnzoBlock* block, int retval) throw () {
 
-  Field field = block->data()->field();
 
-  deallocate_temporary_(field,block);
+  deallocate_temporary_(block);
   
   Solver::end_(block);
   

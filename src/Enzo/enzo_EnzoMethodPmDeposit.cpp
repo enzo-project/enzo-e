@@ -13,23 +13,6 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// #define DEBUG_FIELD_FACE
-
-// #define DEBUG_METHOD
-// #define DEBUG_FIELD
-
-// #define WRITE_DENSITY_PARTICLE
-// #define WRITE_DENSITY_GAS
-
-#ifdef DEBUG_METHOD
-#   define TRACE_METHOD(METHOD,BLOCK)					\
-  CkPrintf ("%d %s:%d %s TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__, \
-	    BLOCK->name().c_str(),METHOD,this);			    \
-  fflush(stdout);
-#else
-#   define TRACE_METHOD(METHOD,BLOCK) /*  */ 
-#endif
-
 #define FORTRAN_NAME(NAME) NAME##_
 
 extern "C" void  FORTRAN_NAME(dep_grid_cic)
@@ -46,44 +29,20 @@ extern "C" void  FORTRAN_NAME(dep_grid_cic)
 
 //----------------------------------------------------------------------
 
-EnzoMethodPmDeposit::EnzoMethodPmDeposit 
-(const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- std::string type,
- double alpha)
+EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   : Method(),
-    alpha_(alpha),
-    type_(pm_type_unknown)
+    alpha_(alpha)
 {
-  //  TRACE_METHOD("EnzoMethodPmDeposit()");
-  if (type == "cic") {
-    type_ = pm_type_cic;
-  } else if (type == "ngp") {
-    type_ = pm_type_ngp;
-    WARNING("EnzoMethodPmDeposit()",
-	    "PM deposit type 'ngp' is not implemented yet: using 'cic'");
-  } else if (type == "tsc") {
-    WARNING("EnzoMethodPmDeposit()",
-	    "PM deposit type 'tsc' is not implemented yet: using 'cic'");
-    type_ = pm_type_tsc;
-  } else {
-    ERROR1 ("EnzoMethodPmDeposit()",
-	    "PM deposit type '%s' is not supported: "
-	    "must be 'cic','ngp', or 'tsc'",
-	    type.c_str());
-  }
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
-			     enzo_sync_id_method_pm_deposit);
-
-  refresh(ir)->add_field(field_descr->field_id("density_gas"));
-  refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
-
-  // PM parameters initialized in EnzoBlock::initialize()
+  const int ir = add_refresh(4,cello::rank()-1,neighbor_leaf,sync_neighbor,
+ 			     enzo_sync_id_method_pm_deposit);
+ 
+  refresh(ir)->add_field("density");
+  refresh(ir)->add_field("velocity_x");
+  refresh(ir)->add_field("velocity_y");
+  refresh(ir)->add_field("velocity_z");
+			     
 }
 
 //----------------------------------------------------------------------
@@ -97,14 +56,12 @@ void EnzoMethodPmDeposit::pup (PUP::er &p)
   Method::pup(p);
 
   p | alpha_;
-  p | type_;
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodPmDeposit::compute ( Block * block) throw()
 {
-  TRACE_METHOD("compute()",block);
 
   if (block->is_leaf()) {
 
@@ -116,15 +73,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float  * de_t = (enzo_float *) field.values("density_total");
     enzo_float  * de_p = (enzo_float *) field.values("density_particle");
     enzo_float  * de_pa = (enzo_float *) field.values("density_particle_accumulate");
-#ifdef DEBUG_FIELD_FACE    
-    enzo_float * debug_1 = (enzo_float *) field.values("debug_1");
-    enzo_float * debug_2 = (enzo_float *) field.values("debug_2");
-#endif    
     int mx,my,mz;
-    int nx,ny,nz;
-    int gx,gy,gz;
     field.dimensions(0,&mx,&my,&mz);
+    int nx,ny,nz;
     field.size(&nx,&ny,&nz);
+    int gx,gy,gz;
     field.ghost_depth(0,&gx,&gy,&gz);
 
     // Initialize "density_total" with gas "density"
@@ -152,11 +105,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     for (int i=0; i<mx*my*mz; i++) de_p[i] = 0.0;
     for (int i=0; i<mx*my*mz; i++) de_pa[i] = 0.0;
-
-#ifdef DEBUG_FIELD_FACE    
-    for (int i=0; i<mx*my*mz; i++) debug_1[i] = 1.0;
-    for (int i=0; i<mx*my*mz; i++) debug_2[i] = 0.0;
-#endif    
 
     // check precisions match
     
@@ -356,14 +304,14 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	}
       }
     }
-    TRACE_FIELD("density-particle",de_p,1.0);
 
     enzo_float  * de   = (enzo_float *) field.values("density");
-    enzo_float  * de_gas   = (enzo_float *) field.values("density_gas");
+    enzo_float  * de_gas = new enzo_float [mx*my*mz];
+    for (int i=0; i<mx*my*mz; i++) de_gas[i] = 0.0;
     enzo_float * temp = new enzo_float [4*mx*my*mz];
+    for (int i=0; i<4*mx*my*mz; i++) temp[i] = 0.0;
     enzo_float * rfield = new enzo_float[mx*my*mz];
     for (int i=0; i<mx*my*mz; i++) rfield[i] = 0.0;
-    for (int i=0; i<4*mx*my*mz; i++) temp[i] = 0.0;
 
     int gxi=gx;
     int gyi=gy;
@@ -376,11 +324,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float hxf = hx;
     enzo_float hyf = hy;
     enzo_float hzf = hz;
-    enzo_float dtf = 0.0;
+    enzo_float dtf = alpha_;
 
-    enzo_float * de_gas_0 = de_gas + gx + mx*(gy + my*gz);
-    for (int i=0; i<mx*my*mz; i++) de_gas[i] = 0.0;
-    
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
     enzo_float * vyf = (enzo_float *) field.values("velocity_y");
     enzo_float * vzf = (enzo_float *) field.values("velocity_z");
@@ -399,7 +344,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     if (rank >= 3) for (int i=0; i<m; i++) vz[i] = vzf[i];
     else           for (int i=0; i<m; i++) vz[i] = 0.0;
 
-    FORTRAN_NAME(dep_grid_cic)(de,de_gas_0,temp,
+    FORTRAN_NAME(dep_grid_cic)(de,de_gas,temp,
 			       vx, vy, vz, 
 			       &dtf, rfield, &rank,
 			       &hxf,&hyf,&hzf,
@@ -410,13 +355,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 			       &nx,&ny,&nz,
 			       &i1,&i1,&i1);
 
-    delete [] rfield;
-    delete [] temp;
-    delete [] vx;
-    delete [] vy;
-    delete [] vz;
-    TRACE_FIELD("density-gas",de,1.0);
-
     for (int i=0; i<mx*my*mz; i++) {
       de_t[i] = de_pa[i] = de_p[i];
     }
@@ -426,34 +364,21 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     	for (int ix=gx; ix<mx-gx; ix++) {
 	  int i = ix + mx*(iy + my*iz);
 	  int ig = (ix-gx) + nx*((iy-gy) + ny*(iz-gz));
-	  de_t[i] += de_gas_0[ig];
+	  de_t[i] += de_gas[ig];
     	}
       }
     }
 
+    delete [] rfield;
+    delete [] temp;
+    delete [] vx;
+    delete [] vy;
+    delete [] vz;
+
+    delete [] de_gas;
+    
     double sum_de_p = 0.0;
     for (int i=0; i<mx*my*mz; i++) sum_de_p += de_p[i];
-
-    TRACE_FIELD("density-gas-particle",de_t,1.0);
-
-#ifdef WRITE_DENSITY_GAS  
-
-    char buffer[80];
-    sprintf (buffer,"de-enzop-%03d.data",block->cycle());
-    printf ("DEBUG_GAS cycle=%d\n",block->cycle());
-    FILE * fp = fopen(buffer,"w");
-    field.ghost_depth(0,&gx,&gy,&gz);
-    gx=gy=gz=1;
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-  	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  fprintf (fp,"%d %d %d %20.16g\n",ix-gx,iy-gy,iz-gz,de_gas_0[i]);
-	}
-      }
-    }
-    fclose(fp);
-#endif
 
   }
 
@@ -466,7 +391,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 double EnzoMethodPmDeposit::timestep ( Block * block ) const throw()
 {
-  TRACE_METHOD("timestep()",block);
   double dt = std::numeric_limits<double>::max();
 
   return dt;

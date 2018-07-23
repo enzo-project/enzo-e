@@ -199,8 +199,9 @@ protected: // methods
   void compute_(EnzoBlock * enzo_block) throw();
 
   /// Allocate temporary Fields
-  void allocate_temporary_(Field field, Block * block = NULL)
+  void allocate_temporary_(Block * block)
   {
+    Field field = block->data()->field();
     field.allocate_temporary(ir_);
     field.allocate_temporary(ir0_);
     field.allocate_temporary(ip_);
@@ -211,8 +212,9 @@ protected: // methods
   }
 
   /// Dellocate temporary Fields
-  void deallocate_temporary_(Field field, Block * block = NULL)
+  void deallocate_temporary_(Block * block)
   {
+    Field field = block->data()->field();
     field.deallocate_temporary(ir_);
     field.deallocate_temporary(ir0_);
     field.deallocate_temporary(ip_);

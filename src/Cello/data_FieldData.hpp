@@ -9,7 +9,6 @@
 #define DATA_FIELD_DATA_HPP
 
 class Block;
-class FieldDescr;
 
 class FieldData {
 
@@ -34,7 +33,7 @@ public: // interface
 
   /// Create a new initialized FieldData object
   FieldData(const FieldDescr * = NULL,
-	     int nx=0, int ny=1, int nz=1) throw();
+	    int nx=0, int ny=1, int nz=1) throw();
 
   /// Deconstructor
   ~FieldData() throw();

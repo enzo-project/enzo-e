@@ -216,9 +216,8 @@ void MsgCoarsen::update (Data * data)
 
   if (data_msg_ == NULL) return;
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  FieldDescr    *    field_descr = simulation->   field_descr();
+  Simulation * simulation  = cello::simulation();
+  FieldDescr * field_descr = cello::field_descr();
  
   Field field_dst = data->field();
 

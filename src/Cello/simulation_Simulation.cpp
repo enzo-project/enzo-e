@@ -898,13 +898,13 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   int m = 0;
   int n = counters_reduce[m++];
-  int msg_coarsen = counters_reduce[m++];   // 1
-  int msg_refine  = counters_reduce[m++];   // 2
-  int msg_refresh = counters_reduce[m++];   // 3
-  int data_msg    = counters_reduce[m++];   // 4
-  int field_face  = counters_reduce[m++];   // 5
-  int particle_data = counters_reduce[m++]; // 6
-  int num_particles = counters_reduce[m++]; // 7
+  long long msg_coarsen = counters_reduce[m++];   // 1
+  long long msg_refine  = counters_reduce[m++];   // 2
+  long long msg_refresh = counters_reduce[m++];   // 3
+  long long data_msg    = counters_reduce[m++];   // 4
+  long long field_face  = counters_reduce[m++];   // 5
+  long long particle_data = counters_reduce[m++]; // 6
+  long long num_particles = counters_reduce[m++]; // 7
 
   monitor()->print("Performance","counter num-msg-coarsen %ld", msg_coarsen);
   monitor()->print("Performance","counter num-msg-refine %ld", msg_refine);
@@ -918,11 +918,11 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 
   // compute total blocks and leaf blocks
   int num_total_blocks = 0;
-  int num_leaf_blocks = counters_reduce[m];;
+  long long num_leaf_blocks = counters_reduce[m];;
   int rank = hierarchy_->rank();
   int num_child_blocks = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
   for (int i=0; i<=hierarchy_->max_level(); i++) {
-    long int num_blocks_level = counters_reduce[m++];
+    long long num_blocks_level = counters_reduce[m++];
     monitor()->print("performance","simulation num-blocks-%d %d",
 		     i,num_blocks_level);
     num_total_blocks += num_blocks_level;

@@ -268,7 +268,7 @@ protected: // functions
   (std::string type, 
    Config * config, 
    int index_method,
-   const FieldDescr * field_descr,
+   FieldDescr * field_descr,
    const ParticleDescr * particle_descr) throw ();
 
   /// Create named output object

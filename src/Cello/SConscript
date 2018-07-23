@@ -69,7 +69,7 @@ libs_io          = ['io'] + libs_mesh
 libs_parameters  = ['parameters'] + libs_error + libs_boost + ['cello']
 
 libs_simulation  = ['simulation','problem']
-libs_test        = ['test'] + libs_parallel + ['cello']
+libs_test        = ['test'] + libs_parallel + ['cello', 'data', 'simulation']
 
 libs_all = ['charm','control','simulation','compute','mesh','data','problem','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi + libs_boost
 libs_data   = libs_all

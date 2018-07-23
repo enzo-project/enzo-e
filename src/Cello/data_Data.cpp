@@ -10,34 +10,6 @@
 
 //----------------------------------------------------------------------
 
-Data::Data(FieldDescr * field_descr,
-	   ParticleDescr * particle_descr,
-	   int nx, int ny, int nz,
-	   int num_field_data,
-	   double xm, double xp,
-	   double ym, double yp,
-	   double zm, double zp) throw ()
-  : num_field_data_(num_field_data),
-    field_data_(),
-    particle_data_()
-{
-  // Initialize field_data_[]
-  field_data_.resize(num_field_data);
-  for (size_t i=0; i<field_data_.size(); i++) {
-    field_data_[i] = new FieldData (field_descr,nx,ny,nz);
-  }
-  particle_data_ = new ParticleData;
-  particle_data_->allocate(particle_descr);
-  lower_[0] = xm;
-  lower_[1] = ym;
-  lower_[2] = zm;
-  upper_[0] = xp;
-  upper_[1] = yp;
-  upper_[2] = zp;
-}
-
-//----------------------------------------------------------------------
-
 Data::Data(int nx, int ny, int nz,
 	   int num_field_data,
 	   double xm, double xp,
@@ -50,10 +22,10 @@ Data::Data(int nx, int ny, int nz,
   // Initialize field_data_[]
   field_data_.resize(num_field_data);
   for (size_t i=0; i<field_data_.size(); i++) {
-    field_data_[i] = new FieldData (field_descr(),nx,ny,nz);
+    field_data_[i] = new FieldData (cello::field_descr(),nx,ny,nz);
   }
   particle_data_ = new ParticleData;
-  particle_data_->allocate(particle_descr());
+  particle_data_->allocate(cello::particle_descr());
   lower_[0] = xm;
   lower_[1] = ym;
   lower_[2] = zm;
@@ -146,37 +118,8 @@ void Data::field_cell_width
 void Data::allocate () throw()
 {
   for (size_t i=0; i<field_data_.size(); i++) {
-    field_data_[i]->allocate_permanent(field_descr(),true);
+    field_data_[i]->allocate_permanent(cello::field_descr(),true);
   }
-}
-
-//----------------------------------------------------------------------
-
-FieldDescr * Data::field_descr () throw()
-{
-  return proxy_simulation.ckLocalBranch()->field_descr();  
-}
-
-//----------------------------------------------------------------------
-
-const FieldDescr * Data::field_descr () const throw()
-{
-  return proxy_simulation.ckLocalBranch()->field_descr();  
-}
-
-
-//----------------------------------------------------------------------
-
-ParticleDescr * Data::particle_descr () throw()
-{
-  return proxy_simulation.ckLocalBranch()->particle_descr();  
-}
-
-//----------------------------------------------------------------------
-
-const ParticleDescr * Data::particle_descr () const throw()
-{
-  return proxy_simulation.ckLocalBranch()->particle_descr();  
 }
 
 //======================================================================

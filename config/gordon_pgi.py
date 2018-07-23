@@ -28,7 +28,6 @@ papi_lib = home + '/lib'
 hdf5_path  = os.environ['HDF5HOME']
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
-mpi_path   = os.environ['MPIHOME']
 
 png_path   = '/usr/lib64'
 grackle_path = home + '/Grackle/src/clib'

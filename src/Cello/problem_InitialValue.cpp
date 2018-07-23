@@ -13,12 +13,10 @@
 
 InitialValue::InitialValue
 (Parameters * parameters,
- const FieldDescr * field_descr,
  int cycle, double time) throw ()
   : Initial (cycle, time),
     parameters_(parameters),
-    field_descr_(field_descr),
-    num_fields_(field_descr->field_count()),
+    num_fields_(cello::field_descr()->field_count()),
     num_masks_(NULL),
     mask_(NULL),
     nx_(0),
@@ -42,7 +40,7 @@ InitialValue::InitialValue
 
   for (int index_field = 0; index_field < num_fields_; index_field++) {
 
-    std::string field_name = field_descr->field_name(index_field);
+    std::string field_name = cello::field_descr()->field_name(index_field);
 
     //    parameters_->group_set(1,field_name);
 
@@ -107,8 +105,6 @@ void InitialValue::pup (PUP::er &p)
 
   if (up) parameters_ = new Parameters;
   p | *parameters_;
-  if (up) field_descr_ = new FieldDescr;
-  p | *((FieldDescr *) field_descr_);
   p | num_fields_;
   WARNING("InitialValue::pup","mask_[][] not pupped");
   if (up) num_masks_ = new int[num_fields_];

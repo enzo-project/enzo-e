@@ -458,7 +458,7 @@ void Problem::initialize_method
     std::string name = config->method_list[index_method];
 
     Method * method = create_method_(name, config, index_method, 
-				     field_descr, particle_descr);
+				     (FieldDescr *)field_descr, particle_descr);
 
     if (method) {
 
@@ -633,7 +633,7 @@ Initial * Problem::create_initial_
 			       config->initial_cycle,
 			       config->initial_time);;
   } else if (type == "value") {
-    initial = new InitialValue(parameters,field_descr,
+    initial = new InitialValue(parameters,
 			       config->initial_cycle,
 			       config->initial_time);
   } else if (type == "trace") {
@@ -817,7 +817,7 @@ Method * Problem::create_method_
 ( std::string  name,
   Config * config,
   int index_method,
-  const FieldDescr * field_descr,
+  FieldDescr * field_descr,
   const ParticleDescr * particle_descr) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
