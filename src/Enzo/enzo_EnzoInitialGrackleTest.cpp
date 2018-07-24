@@ -22,7 +22,7 @@ EnzoInitialGrackleTest::EnzoInitialGrackleTest
     //chemistry_ = config->method_grackle_chemistry;
     //units_     = config->method_grackle_units;
 //#endif
-  return; 
+  return;
 }
 
 //----------------------------------------------------------------------
@@ -72,8 +72,8 @@ void EnzoInitialGrackleTest::enforce_block
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
        (enzo_block->simulation()->config());
-  code_units units_;
-  units_ = enzo_config->method_grackle_units;
+  EnzoUnits * enzo_units = (EnzoUnits *) enzo_block->simulation()->problem()->units();
+  // units_ = enzo_config->method_grackle_units;
 
   Field field = block->data()->field();
 
@@ -128,10 +128,11 @@ void EnzoInitialGrackleTest::enforce_block
 
   const double mh     = 1.67262171e-24;
   const double kboltz = 1.3806504e-16;
+  double a_units = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
 
-  gr_float temperature_units =  mh * pow(units_.a_units *
-                                         units_.length_units /
-                                         units_.time_units, 2) / kboltz;
+  gr_float temperature_units =  mh * pow(a_units *
+                                         enzo_units->length()/
+                                         enzo_units->time(), 2) / kboltz;
 
   const double density_out = 1.0;
   const double density_in  = 0.125;

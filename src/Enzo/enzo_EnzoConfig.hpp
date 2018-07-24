@@ -155,7 +155,7 @@ public: // interface
       solver_local(),
       // EnzoStopping
       stopping_redshift()
-      
+
   {
     for (int axis=0; axis<3; axis++) {
       initial_sedov_array[axis] = 0;
@@ -172,7 +172,7 @@ public: // interface
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
-  
+
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -217,7 +217,7 @@ public: // attributes
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
-  
+
   /// EnzoInitialCollapse
   int                        initial_collapse_rank;
   int                        initial_collapse_array[3];
@@ -232,13 +232,13 @@ public: // attributes
   std::vector < std::string > initial_music_field_datasets;
   std::vector < std::string > initial_music_field_names;
   std::vector < std::string > initial_music_field_coords;
-  
+
   std::vector < std::string > initial_music_particle_files;
   std::vector < std::string > initial_music_particle_datasets;
   std::vector < std::string > initial_music_particle_coords;
   std::vector < std::string > initial_music_particle_types;
   std::vector < std::string > initial_music_particle_attributes;
-  
+
   /// EnzoInitialPm
   std::string                initial_pm_field;
   double                     initial_pm_mpp;
@@ -254,7 +254,7 @@ public: // attributes
 
   /// EnzoInitialSedovRandom
   int                        initial_sedov_random_array[3];
-  bool                       initial_sedov_random_half_empty; 
+  bool                       initial_sedov_random_half_empty;
   bool                       initial_sedov_random_grackle_cooling;
   int                        initial_sedov_random_max_blasts;
   double                     initial_sedov_random_radius_relative;
@@ -319,7 +319,7 @@ public: // attributes
   /// EnzoSolverMg0
 
   /// Solver index for multigrid pre-smoother
-  
+
   std::vector<int>           solver_pre_smooth;
 
   /// Solver index for multigrid post-smoother
@@ -331,11 +331,11 @@ public: // attributes
   std::vector<int>           solver_last_smooth;
 
   /// Solver index for multigrid coarse solver
-  
+
   std::vector<int>           solver_coarse_solve;
 
   /// Weighting factor for smoother
-  
+
   std::vector<double>        solver_weight;
 
   /// Whether to start the iterative solver using the previous solution
@@ -343,7 +343,7 @@ public: // attributes
   std::vector<int>           solver_restart_cycle;
 
   /// EnzoSolver<Krylov>
-  
+
   /// Solver index for Krylov solver preconditioner
   std::vector<int>           solver_precondition;
 
@@ -354,12 +354,12 @@ public: // attributes
   /// Stop at specified redshift for cosmology
   double                     stopping_redshift;
 
- 
+
 #ifdef CONFIG_USE_GRACKLE
 
   /// EnzoMethodGrackle
 
-  code_units       method_grackle_units;
+  // code_units       method_grackle_units; // moved to Grackle Method
   chemistry_data * method_grackle_chemistry; // = new chemistry_data;
   //method_grackle_chemistry = new chemistry_data;
 
@@ -370,4 +370,3 @@ public: // attributes
 extern EnzoConfig g_enzo_config;
 
 #endif /* PARAMETERS_ENZO_CONFIG_HPP */
-

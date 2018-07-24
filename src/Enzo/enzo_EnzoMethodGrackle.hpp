@@ -23,7 +23,9 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(const FieldDescr * field_descr);
+  EnzoMethodGrackle(const FieldDescr * field_descr,
+                    const float physics_cosmology_initial_redshift,
+                    const float time);
 
   // Destructor
   virtual ~EnzoMethodGrackle() throw() {}
@@ -69,6 +71,7 @@ protected: // attributes
 #ifdef CONFIG_USE_GRACKLE
   void compute_( EnzoBlock * enzo_block) throw();
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
+  code_units grackle_units_;
 
 };
 

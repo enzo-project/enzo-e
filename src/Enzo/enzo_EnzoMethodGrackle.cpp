@@ -13,7 +13,9 @@ extern CProxy_EnzoSimulation proxy_enzo_simulation;
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
-  const FieldDescr * field_descr
+  const FieldDescr * field_descr,
+  const float physics_cosmology_initial_redshift,
+  const float time
 )
   : Method()
 {
@@ -24,6 +26,13 @@ EnzoMethodGrackle::EnzoMethodGrackle
 		       enzo_sync_id_method_grackle);
   refresh(ir)->add_all_fields();
 
+
+
+  if (initialize_chemistry_data(&grackle_units_) == 0) {
+    ERROR("EnzoConfig::EnzoConfig()",
+    "Error in initialize_chemistry_data");
+  }
+  // method_grackle_units = grackle_units_; // copy over to global
   printf ("TRACE %s:%d calling initialize_chemistry_data\n",__FILE__,__LINE__);
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -59,20 +68,54 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 #ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
+
+
+    EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
+    EnzoUnits * enzo_units = (EnzoUnits *) simulation->problem()->units();
+    const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
+          (simulation->config());
+
+    // grackle_units_ = enzo_config->method_grackle_units;
+
+    grackle_units_.comoving_coordinates = enzo_config->physics_cosmology;
+    // Copy over code units to grackle units struct
+    grackle_units_.density_units = enzo_units->density();
+    grackle_units_.length_units  = enzo_units->length();
+    grackle_units_.time_units    = enzo_units->time();
+    grackle_units_.velocity_units = enzo_units->velocity();
+
+
+    grackle_units_.a_units       = 1.0;
+    grackle_units_.a_value       = 1.0;
+    if (grackle_units_.comoving_coordinates){
+      enzo_float cosmo_a  = 1.0;
+      enzo_float cosmo_dt = 0.0;
+
+      EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+                  simulation->problem()->physics("cosmology");
+      cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
+                                          enzo_block->time());
+      grackle_units_.a_units
+           = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
+      grackle_units_.a_value = cosmo_a;
+
+    }
+
+
   //  initialize_(block);
 
   Field field = enzo_block->data()->field();
-  EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
-  EnzoUnits * enzo_units = (EnzoUnits *) simulation->problem()->units();
+  //EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
+  //EnzoUnits * enzo_units = (EnzoUnits *) simulation->problem()->units();
 
   // Setup Grackle field struct for storing field data
   grackle_field_data grackle_fields_;
 
   // Grackle units struct
-  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-        (enzo_block->simulation()->config());
-  code_units units_;
-  units_ = enzo_config->method_grackle_units;
+  //const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
+  //      (enzo_block->simulation()->config());
+  //code_units grackle_units_;
+  //grackle_units_ = enzo_config->method_grackle_units;
 
   // ASSUMES ALL ARRAYS ARE THE SAME SIZE
 
@@ -91,21 +134,21 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   // ASSUMES COSMOLOGY = false
   double a_value = 1.0;
 
-  units_.density_units   = enzo_units->density();
-  units_.length_units    = enzo_units->length();
-  units_.time_units      = enzo_units->time();
-  units_.velocity_units  = enzo_units->velocity();
+  grackle_units_.density_units   = enzo_units->density();
+  grackle_units_.length_units    = enzo_units->length();
+  grackle_units_.time_units      = enzo_units->time();
+  grackle_units_.velocity_units  = enzo_units->velocity();
 
 
   EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
     simulation->problem()->physics("cosmology");
 
-  if (units_.comoving_coordinates){
+  if (grackle_units_.comoving_coordinates){
     enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
 
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt,
                                         enzo_block->time());
-    units_.a_value = cosmo_a;
+    grackle_units_.a_value = cosmo_a;
   }
 
   gr_int rank = enzo_block->rank();
@@ -163,7 +206,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
   double dt = enzo_block->dt;
 
-  if (solve_chemistry(&units_, &grackle_fields_, dt) == 0) {
+  if (solve_chemistry(&grackle_units_, &grackle_fields_, dt) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
     "Error in solve_chemistry.\n");
   }
@@ -175,7 +218,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   gr_float *cooling_time;
   cooling_time = new gr_float[nx];
 
-  if (calculate_cooling_time(&units_, &grackle_fields_, cooling_time) == 0) {
+  if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
     "Error in calculate_cooling_time.\n");
   }
@@ -183,7 +226,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   gr_float *temperature;
   temperature = new gr_float[nx];
 
-  if (calculate_temperature(&units_, &grackle_fields_, temperature) == 0) {
+  if (calculate_temperature(&grackle_units_, &grackle_fields_, temperature) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
     "Error in calculate_temperature.\n");
   }
@@ -191,7 +234,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   gr_float *pressure;
   pressure = new gr_float[nx];
 
-  if (calculate_pressure(&units_, &grackle_fields_, pressure) == 0) {
+  if (calculate_pressure(&grackle_units_, &grackle_fields_, pressure) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
     "Error in calculate_pressure.\n");
   }

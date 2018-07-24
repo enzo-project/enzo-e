@@ -18,7 +18,7 @@ EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
 #ifdef CONFIG_USE_GRACKLE
-  method_grackle_units(),
+  //method_grackle_units(),
   method_grackle_chemistry(),
 #endif
   ppm_diffusion(false),
@@ -295,8 +295,8 @@ void EnzoConfig::pup (PUP::er &p)
   // Units
 
   //  p | method_grackle_units;
-  WARNING("EnzoConfig::pup",
-	  "p|method_grackle_units not called");
+  //WARNING("EnzoConfig::pup",
+	//  "p|method_grackle_units not called");
   //  p | method_grackle_chemistry;
   WARNING("EnzoConfig::pup",
 	  "p|method_grackle_chemistry not called");
@@ -726,54 +726,15 @@ void EnzoConfig::read(Parameters * p) throw()
   method_grackle_chemistry->use_grackle = uses_grackle;
 
   if (uses_grackle) {
-
+/*
     for (int index_physics=0; index_physics<num_physics; index_physics++) {
       // Check if EnzoPhysicsCosmology object is present
-      if (physics_list[index_physics] == "cosmology") {
-	method_grackle_units.comoving_coordinates = true;
-	break;
-      }
-    }
-    EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
-    EnzoUnits * enzo_units = (EnzoUnits *) simulation->problem()->units();
-
-    // Copy over code units to grackle units struct
-    method_grackle_units.density_units = enzo_units->density();
-    method_grackle_units.length_units  = enzo_units->length();
-    method_grackle_units.time_units    = enzo_units->time();
-
-    method_grackle_units.a_units       = 1.0;
-    method_grackle_units.a_value       = 1.0;
-    if (method_grackle_units.comoving_coordinates){
-      enzo_float cosmo_a  = 1.0;
-   //   enzo_float cosmo_dt = 0.0;
-
-   // this isn't even initialized at this point yet!!!
-   //    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-   //     problem()->physics("cosmology");
-   //
-   //    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
-   //                                       compute_time)
-      method_grackle_units.a_units
-       = 1.0 / (1.0 + physics_cosmology_initial_redshift);
-    //  method_grackle_units.a_value = cosmo_a;
-
-    // AE: It may be O.K. to leave a_value unset properly here,
-    //     as it will ALWAYS need to be updated before any GRACKLE
-    //     calls anyway. If it needs to be computed here, will have to
-    //     figure out how to initialize the cosmology object and
-    //     compute it. Could probably just do a local init of it here,
-    //     and throw that object away??
-      method_grackle_units.velocity_units
-        = method_grackle_units.a_units *
-          (method_grackle_units.length_units / method_grackle_units.a_value) /
-          method_grackle_units.time_units;
-
-    } else{
-      method_grackle_units.velocity_units
-        = method_grackle_units.length_units / method_grackle_units.time_units;
-    }
-
+     if (physics_list[index_physics] == "cosmology") {
+	     comoving_coordinates = true;
+	     break;
+     }
+   }
+*/
     // computed
 
     if (set_default_chemistry_parameters(method_grackle_chemistry) == 0) {
@@ -785,23 +746,23 @@ void EnzoConfig::read(Parameters * p) throw()
     grackle_data->Gamma = field_gamma;
 
     // Set Grackle parameters from parameter file
-    grackle_data->with_radiative_cooling = p->value_logical
+    grackle_data->with_radiative_cooling = p->value_integer
       ("Method:grackle:with_radiative_cooling",
         grackle_data->with_radiative_cooling);
 
-    grackle_data->primordial_chemistry = p->value_logical
+    grackle_data->primordial_chemistry = p->value_integer
       ("Method:grackle:primordial_chemistry",
         grackle_data->primordial_chemistry);
 
-    grackle_data->metal_cooling = p->value_logical
+    grackle_data->metal_cooling = p->value_integer
       ("Method:grackle:metal_cooling",
         grackle_data->metal_cooling);
 
-    grackle_data->h2_on_dust = p->value_logical
+    grackle_data->h2_on_dust = p->value_integer
       ("Method:grackle:h2_on_dust",
         grackle_data->h2_on_dust);
 
-    grackle_data->cmb_temperature_floor = p->value_logical
+    grackle_data->cmb_temperature_floor = p->value_integer
       ("Method:grackle:cmb_temperature_floor",
         grackle_data->cmb_temperature_floor);
 
@@ -884,13 +845,34 @@ void EnzoConfig::read(Parameters * p) throw()
     grackle_data->UVbackground_redshift_drop = p->value_float
      ("Method:grackle:UVbackground_redshift_drop",
       grackle_data->UVbackground_redshift_drop);
+/*
+    // Copy over code units to grackle units struct
+    method_grackle_units.density_units = enzo_units->density();
+    method_grackle_units.length_units  = enzo_units->length();
+    method_grackle_units.time_units    = enzo_units->time();
+    method_grackle_units.velocity_units = enzo_units->velocity();
 
 
+    method_grackle_units.a_units       = 1.0;
+    method_grackle_units.a_value       = 1.0;
+    if (method_grackle_units.comoving_coordinates){
+      enzo_float cosmo_a  = 1.0;
+      enzo_float cosmo_dt = 0.0;
+
+      //EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
+      //            simulation->problem()->physics("cosmology");
+      //cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
+      //                                    time);
+      method_grackle_units.a_units
+           = 1.0 / (1.0 + physics_cosmology_initial_redshift);
+      method_grackle_units.a_value = 1.0; // will be fixed later // cosmo_a;
+    }
 
     if (initialize_chemistry_data(&method_grackle_units) == 0) {
       ERROR("EnzoConfig::EnzoConfig()",
       "Error in initialize_chemistry_data");
     }
+*/
 
   }
 #endif /* CONFIG_USE_GRACKLE */

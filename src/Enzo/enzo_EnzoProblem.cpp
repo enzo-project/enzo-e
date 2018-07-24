@@ -429,7 +429,9 @@ Method * EnzoProblem::create_method_
     //--------------------------------------------------
   } else if (name == "grackle") {
     method = new EnzoMethodGrackle
-      (field_descr);
+      (field_descr,
+       enzo_config->physics_cosmology_initial_redshift,
+       enzo_config->initial_time); // WARNING: Probably should be changed?
 #endif /* CONFIG_USE_GRACKLE */
 
   } else if (name == "turbulence") {

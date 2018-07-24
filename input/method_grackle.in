@@ -7,6 +7,13 @@
      upper = [ 1.0, 1.0 ];
  }
 
+ Units {
+    length   = 3.086E21;      # 1 kpc to cm
+    time     = 3.15575E16;    # 1 Myr to s
+    mass     = 4.918949E40;
+#    density  = 1.6737236E-2; # mass density of pure hydrogen in grams when n = 1 
+ }
+
  Field {
      alignment = 8;
      gamma = 1.400;
@@ -68,7 +75,7 @@
  }
 
  Mesh {
-     root_blocks = [ 2, 4 ];
+     root_blocks = [ 2, 2 ];
      root_rank = 2;
      root_size = [ 400, 400 ];
  }
@@ -78,8 +85,16 @@
 #     list = [ "ppm" ];
 
      grackle {
-        courant = 0.80;
+        courant = 0.40;
         data_file = "CloudyData_UVB=HM2012.h5";
+
+        with_radiative_cooling = 0;
+        primordial_chemistry   = 2;  # 1, 2, or 3
+        metal_cooling          = 1;  # 0 or 1 (off/on)
+        UVbackground           = 1;  # on or off
+        self_shielding_method  = 0;  # 0 - 3 (0 or 3 recommended)
+
+        HydrogenFractionByMass = 0.73;
      }
 
      ppm {
@@ -92,24 +107,24 @@
  }
 
  Output {
-     list = [ "density", "check"];
+     list = [ "density"];
 
-     check {
-        type  = "checkpoint";
-        dir   = ["method_grackle-1-%06d","cycle"];
-        schedule { var = "cycle"; start = 1000; step = 1000; }
-     }
+#     check {
+#        type  = "checkpoint";
+#        dir   = ["method_grackle-1-%06d","cycle"];
+#        schedule { var = "cycle"; start = 1000; step = 1000; }
+#     }
 
 
-     data {
-         field_list = [ "density" ];
-         name = [ "method_grackle-1-%02d-%06d.h5", "proc", "cycle" ];
-         schedule {
-             var = "time";
-             step = 0.1;
-         }
-         type = "data";
-     }
+#     data {
+#         field_list = [ "density" ];
+#         name = [ "method_grackle-1-%02d-%06d.h5", "proc", "cycle" ];
+#         schedule {
+#             var = "time";
+#             step = 0.1;
+#         }
+#         type = "data";
+#     }
      density {
          colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
          field_list = [
