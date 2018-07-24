@@ -687,7 +687,7 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:gravity:accumulate",true);
 
   method_background_acceleration_type = p->value_string
-   ("Method:background_acceleration:potential_type","unknown");
+   ("Method:background_acceleration:type","unknown");
 
   method_background_acceleration_mass = p->value_float
    ("Method:background_acceleration:mass",0.0);
