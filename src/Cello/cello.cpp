@@ -195,6 +195,21 @@ namespace cello {
   }
 
   //---------------------------------------------------------------------- 
+#ifdef NEW_SYNC
+  ScalarDescr * scalar_descr_double()
+  {
+    return simulation() ? simulation()->scalar_descr_double() : new ScalarDescr;
+  }
+  ScalarDescr * scalar_descr_int()
+  {
+    return simulation() ? simulation()->scalar_descr_int() : new ScalarDescr;
+  }
+  ScalarDescr * scalar_descr_sync()
+  {
+    return simulation() ? simulation()->scalar_descr_sync() : new ScalarDescr;
+  }
+#endif  
+  //---------------------------------------------------------------------- 
 
   FieldDescr * field_descr()
   {

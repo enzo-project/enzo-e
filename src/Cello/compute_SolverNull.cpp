@@ -16,6 +16,8 @@ void SolverNull::pup (PUP::er &p)
   Solver::pup(p);
 }
 
+//----------------------------------------------------------------------
+
 void SolverNull::apply ( std::shared_ptr<Matrix> A,
 			 int ix, int ib, Block * block) throw()
 {
@@ -26,5 +28,6 @@ void SolverNull::apply ( std::shared_ptr<Matrix> A,
 	     CkArrayIndexIndex(block->index()),
 	     block->proxy_array()).send();
 }
+
 //======================================================================
 

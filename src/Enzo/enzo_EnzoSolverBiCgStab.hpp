@@ -27,7 +27,7 @@ class EnzoSolverBiCgStab : public Solver {
 public: // interface
 
   /// normal constructor
-  EnzoSolverBiCgStab(FieldDescr* field_descr,
+  EnzoSolverBiCgStab(std::string name,
 		     int monitor_iter,
 		     int reuse_solution,
 		     int rank,
@@ -35,7 +35,8 @@ public: // interface
 		     double res_tol,
 		     int min_level,
 		     int max_level,
-		     int index_precon);
+		     int index_precon,
+		     bool is_unigrid);
 
   /// default constructor
   EnzoSolverBiCgStab()

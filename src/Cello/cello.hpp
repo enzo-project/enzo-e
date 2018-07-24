@@ -41,6 +41,7 @@
 
 class Simulation;
 class FieldDescr;
+class ScalarDescr;
 class ParticleDescr;
 class Output;
 
@@ -256,6 +257,11 @@ namespace cello {
   
   Simulation * simulation();
   FieldDescr * field_descr();
+#ifdef NEW_SYNC  
+  ScalarDescr * scalar_descr_double();
+  ScalarDescr * scalar_descr_int();
+  ScalarDescr * scalar_descr_sync();
+#endif  
   ParticleDescr * particle_descr();
   Output * output (int index);
   int rank ();

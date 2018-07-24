@@ -775,6 +775,8 @@ test_summary("Parameters",
 	     array("test_Parameters"),'test'); 
 test_summary("Particle",array("Particle"),
 	     array("test_Particle"),'test'); 
+test_summary("Scalar",array("Scalar"),
+	     array("test_Scalar"),'test'); 
 test_summary("Performance",array("Papi", "Performance","Timer"),
 	     array("test_Papi","test_Performance","test_Timer"),'test'); 
 test_summary("Problem",array("Mask","Refresh","Value"),
@@ -1507,6 +1509,14 @@ test_group("Prolong");
 begin_hidden("prolong", "ProlongLinear");
 tests("Cello","test_ProlongLinear",  "test_prolong_linear","ProlongLinear","");
 end_hidden("Prolong");
+
+//----------------------------------------------------------------------
+
+test_group("Scalar");
+
+begin_hidden("scalar", "Scalar");
+tests("Cello","test_Scalar","test_Scalar","","");
+end_hidden("scalar");
 
 //----------------------------------------------------------------------
 

@@ -20,11 +20,14 @@ class Solver : public PUP::able
 public: // interface
 
   /// Create a new Solver
-  Solver (int monitor_iter,
+  Solver (std::string name,
+	  int monitor_iter,
 	  int restart_cycle,
 	  int min_level = 0,
-	  int max_level = std::numeric_limits<int>::max()) throw()
+	  int max_level = std::numeric_limits<int>::max(),
+	  bool is_unigrid = false ) throw()
     : PUP::able(),
+      name_(name),
       refresh_list_(),
       monitor_iter_(monitor_iter),
       restart_cycle_(restart_cycle),
@@ -32,12 +35,14 @@ public: // interface
       index_(0),
       min_level_(min_level),
       max_level_(max_level),
-      id_sync_(0)
+      id_sync_(0),
+      is_unigrid_(is_unigrid)
   {}
 
   /// Create an uninitialized Solver
   Solver () throw()
   : PUP::able(),
+    name_(""),
     refresh_list_(),
     monitor_iter_(0),
     restart_cycle_(1),
@@ -45,8 +50,8 @@ public: // interface
     index_(0),
     min_level_(0),
     max_level_(std::numeric_limits<int>::max()),
-    id_sync_(0)
-
+    id_sync_(0),
+    is_unigrid_(false)
   {}
 
   /// Destructor
@@ -57,6 +62,7 @@ public: // interface
 
   Solver (CkMigrateMessage *m)
     : PUP::able (m),
+      name_(""),
       refresh_list_(),
       monitor_iter_(0),
       restart_cycle_(1),
@@ -64,7 +70,8 @@ public: // interface
       index_(0),
       min_level_(- std::numeric_limits<int>::max()),
       max_level_(  std::numeric_limits<int>::max()),
-      id_sync_(0)
+      id_sync_(0),
+      is_unigrid_(false)
   { }
   
   /// CHARM++ Pack / Unpack function
@@ -73,7 +80,8 @@ public: // interface
     TRACEPUP;
     
     PUP::able::pup(p);
-    
+
+    p | name_;
     p | refresh_list_;
     p | monitor_iter_;
     p | restart_cycle_;
@@ -82,6 +90,7 @@ public: // interface
     p | min_level_;
     p | max_level_;
     p | id_sync_;
+    p | is_unigrid_;
   }
 
   Refresh * refresh(size_t index=0) ;
@@ -118,7 +127,13 @@ public: // interface
   }
 
   /// Whether Block is active
-  bool is_active_(Block * block);
+  bool is_active_(Block * block) const;
+
+  /// Whether solution is defined on this Block
+  bool is_finest_(Block * block) const;
+  
+  /// Whether solution is defined on leaf Blocks (false) or a given level (true)
+  bool is_unigrid() const { return is_unigrid_; }
 
 public: // virtual functions
 
@@ -167,6 +182,9 @@ protected: // functions
     
 protected: // attributes
 
+  /// Name of the solver
+  std::string name_;
+  
   ///  Refresh object
   std::vector<Refresh *> refresh_list_;
 
@@ -190,6 +208,10 @@ protected: // attributes
 
   /// Sync id
   int id_sync_;
+
+  /// Whether the solution is defined on leaf Blocks, or Blocks
+  /// in max_level_
+  int is_unigrid_;
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

@@ -117,6 +117,13 @@ void Data::field_cell_width
 
 void Data::allocate () throw()
 {
+  // allocate Block scalar storage
+#ifdef NEW_SYNC  
+  scalar_data_double_.allocate(cello::scalar_descr_double());
+  scalar_data_int_.allocate(cello::scalar_descr_int());
+  scalar_data_sync_.allocate(cello::scalar_descr_sync());
+#endif  
+  // allocate Block Field storage
   for (size_t i=0; i<field_data_.size(); i++) {
     field_data_[i]->allocate_permanent(cello::field_descr(),true);
   }

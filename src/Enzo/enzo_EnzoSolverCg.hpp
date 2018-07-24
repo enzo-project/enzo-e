@@ -16,7 +16,7 @@ class EnzoSolverCg : public Solver {
 
 public: // interface
 
-  EnzoSolverCg (FieldDescr * field_descr,
+  EnzoSolverCg (std::string name,
 		int monitor_iter,
 		int restart_cycle,
 		int rank,
@@ -25,7 +25,8 @@ public: // interface
 		int min_level,
 		int max_level,
 		int index_precon,
-		bool local=false);
+		bool local=false,
+		bool is_unigrid=false);
 
   /// Constructor
   EnzoSolverCg() throw()

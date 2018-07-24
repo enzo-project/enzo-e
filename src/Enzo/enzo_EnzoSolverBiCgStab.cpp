@@ -33,16 +33,19 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
+// #define TRACE_SOLVER_BCG
+
 //----------------------------------------------------------------------
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
-(FieldDescr* field_descr,
+(std::string name,
  int monitor_iter, int restart_cycle, int rank,
  int iter_max, double res_tol,
  int min_level, int max_level,
- int index_precon
+ int index_precon,
+ bool is_unigrid
  ) 
-  : Solver(monitor_iter,restart_cycle,min_level,max_level), 
+  : Solver(name,monitor_iter,restart_cycle,min_level,max_level,is_unigrid), 
     A_(NULL),
     index_precon_(index_precon),
     rank_(rank),
@@ -58,6 +61,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0)
 {
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   ir_ = field_descr->insert_temporary();
   ir0_ = field_descr->insert_temporary();
   ip_ = field_descr->insert_temporary();
@@ -146,7 +151,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
     Y[i] = V[i] = Q[i] =  U[i] = 0.0;
   }
   
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     if ( reuse_solution_ (block->cycle()) ) {
 
@@ -170,7 +175,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
     long double reduce[3] = {0.0};
     long double count = 0.0;
 
-    if (is_active_(block)) {
+    if (is_finest_(block)) {
 
       enzo_float* B = (enzo_float*) field.values(ib_);
       enzo_float* X = (enzo_float*) field.values(ix_);
@@ -246,7 +251,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* block,
 
   long double reduce[3] = {0.0};
 
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     /// access relevant fields
     enzo_float* B  = (enzo_float*) field.values(ib_);
@@ -350,7 +355,7 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
   bool reuse_x = reuse_solution_(cycle);
 
   if (iter_ == 0) {
-    if (is_active_(block)) {
+    if (is_finest_(block)) {
       if (A_->is_singular()) {
 	enzo_float shift = r0s_/c_;
 	
@@ -466,6 +471,10 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
     precon->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_2());
 
     /// LINE 04: Y = M \ P
+#ifdef TRACE_SOLVER_BCG    
+    CkPrintf ("%s %s:%d TRACE_SOLVER_BCG calling preconditioner\n",
+	      block->name().c_str(),__FILE__,__LINE__);
+#endif    
     precon->apply(A_,iy_,ip_,block);
     
   } else { // no preconditioner
@@ -503,7 +512,7 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   Refresh refresh (4,min_face_rank,neighbor_type_(), sync_type_(),
 		   enzo_sync_id_solver_bicgstab_loop_25);
 
-  refresh.set_active(is_active_(block));
+  refresh.set_active(is_finest_(block));
   //  refresh.add_all_fields();
 
   refresh.add_field (ix_);
@@ -543,7 +552,7 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* block) throw() {
 
   /// V = MATVEC(A,Y)
   
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     /// LINE 05: V = A * Y
     
@@ -555,7 +564,7 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* block) throw() {
   
   long double reduce[3] = {0.0};
   
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
     
     enzo_float* R0 = (enzo_float*) field.values(ir0_);
     enzo_float* V  = (enzo_float*) field.values(iv_);
@@ -634,7 +643,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* block,
 
   /// for singular problems, project Y and V into R(A)
   
-  if (is_active_(block) && A_->is_singular()) {
+  if (is_finest_(block) && A_->is_singular()) {
     
     enzo_float* Y = (enzo_float*) field.values(iy_);
     enzo_float* V = (enzo_float*) field.values(iv_);
@@ -656,7 +665,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* block,
 
   /// update vectors (on leaf blocks only)
 
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     /// access relevant fields
     enzo_float* Q = (enzo_float*) field.values(iq_);
@@ -706,6 +715,10 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
 
     /// LINE 10: Y = M \ Q
     
+#ifdef TRACE_SOLVER_BCG    
+    CkPrintf ("%s %s:%d TRACE_SOLVER_BCG calling preconditioner\n",
+	      block->name().c_str(),__FILE__,__LINE__);
+#endif    
     precon->apply(A_,iy_,iq_,block);
     
   } else {
@@ -744,7 +757,7 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
 		   enzo_sync_id_solver_bicgstab_loop_85);
   
 
-  refresh.set_active(is_active_(block));
+  refresh.set_active(is_finest_(block));
 
   refresh.add_field (ix_);
   refresh.add_field (ir_);
@@ -780,7 +793,7 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
 
   Field field = block->data()->field();
 
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     /// LINE 11:     U = A * Y
     
@@ -790,7 +803,7 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
 
   long double reduce[5] = {0.0};
   
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
     
     enzo_float* U  = (enzo_float*) field.values(iu_);
     enzo_float* Q  = (enzo_float*) field.values(iq_);
@@ -883,7 +896,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
     omega_n -= us*qs/c_;
     omega_d -= us*us/c_;
 
-    if (is_active_(block)) {
+    if (is_finest_(block)) {
       enzo_float* Y = (enzo_float*) field.values(iy_);
       enzo_float* U = (enzo_float*) field.values(iu_);
       enzo_float y_shift = ys / c_;
@@ -913,7 +926,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
 
   /// update vectors on leaf blocks
   
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     enzo_float* X = (enzo_float*) field.values(ix_);
     enzo_float* Y = (enzo_float*) field.values(iy_);
@@ -940,7 +953,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
   
   long double reduce[2] = {0.0};
   
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
     
     enzo_float* R  = (enzo_float*) field.values(ir_);
     enzo_float* R0 = (enzo_float*) field.values(ir0_);
@@ -1013,7 +1026,7 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* block,
 
   /// update direction vector
   
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     enzo_float* P = (enzo_float*) field.values(ip_);
     enzo_float* R = (enzo_float*) field.values(ir_);

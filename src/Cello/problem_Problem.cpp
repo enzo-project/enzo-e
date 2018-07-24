@@ -762,19 +762,20 @@ Units * Problem::create_units_
 //----------------------------------------------------------------------
 
 Solver * Problem::create_solver_ 
-( std::string  name,
+( std::string  type,
   Config * config,
   int index_solver,
   FieldDescr * field_descr,
   const ParticleDescr * particle_descr) throw ()
 {
-  TRACE1("Problem::create_solver %s",name.c_str());
+  TRACE1("Problem::create_solver %s",type.c_str());
 
   Solver * solver = NULL;
 
-  if (name == "null") {
+  if (type == "null") {
     solver = new SolverNull
-      (config->solver_monitor_iter [index_solver],
+      (config->solver_list         [index_solver],
+       config->solver_monitor_iter [index_solver],
        config->solver_min_level    [index_solver],
        config->solver_max_level    [index_solver]);
   }

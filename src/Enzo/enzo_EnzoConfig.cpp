@@ -130,6 +130,9 @@ EnzoConfig::EnzoConfig() throw ()
   /// EnzoSolver<Krylov>
   solver_precondition(),
   solver_local(),
+  solver_min_level_coarse(),
+  solver_max_level_coarse(),
+  solver_is_unigrid(),
   stopping_redshift()
  
 {
@@ -271,13 +274,16 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_pm_update_max_dt;
 
   p | solver_precondition;
-  p | solver_local;
   p | solver_pre_smooth;
   p | solver_post_smooth;
   p | solver_last_smooth;
   p | solver_coarse_solve;
   p | solver_weight;
   p | solver_restart_cycle;
+  p | solver_local;
+  p | solver_min_level_coarse;
+  p | solver_max_level_coarse;
+  p | solver_is_unigrid;
 
   p | stopping_redshift;
 
@@ -637,13 +643,16 @@ void EnzoConfig::read(Parameters * p) throw()
   num_solvers = p->list_length("Solver:list");
 
   solver_precondition.resize(num_solvers);
-  solver_local.       resize(num_solvers);
   solver_pre_smooth.  resize(num_solvers);
   solver_coarse_solve.resize(num_solvers);
   solver_post_smooth. resize(num_solvers);
   solver_last_smooth. resize(num_solvers);
   solver_weight.      resize(num_solvers);
   solver_restart_cycle.resize(num_solvers);
+  solver_local.       resize(num_solvers);
+  solver_min_level_coarse.resize(num_solvers);
+  solver_max_level_coarse.resize(num_solvers);
+  solver_is_unigrid.resize(num_solvers);
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
 
@@ -695,7 +704,16 @@ void EnzoConfig::read(Parameters * p) throw()
     
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
-    
+
+    solver_min_level_coarse[index_solver] = 
+      p->value_integer (solver_name + ":min_level_coarse",solver_min_level[index_solver]);
+
+    solver_max_level_coarse[index_solver] = 
+      p->value_integer (solver_name + ":max_level_coarse",solver_min_level[index_solver]);
+
+    solver_is_unigrid[index_solver] = 
+      p->value_logical (solver_name + ":is_unigrid",false);
+
   }  
   
   //======================================================================

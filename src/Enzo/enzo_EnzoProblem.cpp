@@ -279,39 +279,42 @@ Solver * EnzoProblem::create_solver_
   if (solver_type == "cg") {
 
     solver = new EnzoSolverCg
-      (field_descr,
-       enzo_config->solver_monitor_iter [index_solver],
-       enzo_config->solver_restart_cycle [index_solver],
-       rank,
-       enzo_config->solver_iter_max     [index_solver],
-       enzo_config->solver_res_tol      [index_solver],
-       enzo_config->solver_min_level    [index_solver],
-       enzo_config->solver_max_level    [index_solver],
-       enzo_config->solver_precondition [index_solver],
-       enzo_config->solver_local        [index_solver]
-       );
-
-  } else if (solver_type == "bicgstab") {
-
-    solver = new EnzoSolverBiCgStab
-      (field_descr,
+      (enzo_config->solver_list[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
-       enzo_config->solver_restart_cycle [index_solver],
+       enzo_config->solver_restart_cycle[index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
-       enzo_config->solver_precondition[index_solver]) ;
+       enzo_config->solver_precondition[index_solver],
+       enzo_config->solver_local[index_solver],
+       enzo_config->solver_is_unigrid[index_solver] 
+       );
+
+  } else if (solver_type == "bicgstab") {
+
+    solver = new EnzoSolverBiCgStab
+      (enzo_config->solver_list[index_solver],
+       enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle[index_solver],
+       rank,
+       enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_res_tol[index_solver],
+       enzo_config->solver_min_level[index_solver],
+       enzo_config->solver_max_level[index_solver],
+       enzo_config->solver_precondition[index_solver],
+       enzo_config->solver_is_unigrid[index_solver] ) ;
 
   } else if (solver_type == "diagonal") {
 
-    solver = new EnzoSolverDiagonal;
+    solver = new EnzoSolverDiagonal
+      (enzo_config->solver_list[index_solver]);
 
   } else if (solver_type == "jacobi") {
 
     solver = new EnzoSolverJacobi
-      (field_descr,
+      (enzo_config->solver_list[index_solver],
        enzo_config->solver_weight[index_solver],
        enzo_config->solver_iter_max[index_solver]);
 
@@ -323,9 +326,9 @@ Solver * EnzoProblem::create_solver_
       create_prolong_(enzo_config->solver_prolong[index_solver],config);
 
     solver = new EnzoSolverMg0
-      (field_descr,
+      (enzo_config->solver_list[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
-       enzo_config->solver_restart_cycle [index_solver],
+       enzo_config->solver_restart_cycle[index_solver],
        rank,
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
@@ -335,7 +338,10 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_last_smooth[index_solver],
        restrict,  prolong,
        enzo_config->solver_min_level[index_solver],
-       enzo_config->solver_max_level[index_solver]);
+       enzo_config->solver_max_level[index_solver],
+       enzo_config->solver_min_level_coarse[index_solver],
+       enzo_config->solver_max_level_coarse[index_solver],
+       enzo_config->solver_is_unigrid[index_solver] );
 
   } else {
     // Not an Enzo Solver--try base class Cello Solver

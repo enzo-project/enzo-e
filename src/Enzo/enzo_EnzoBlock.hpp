@@ -112,9 +112,12 @@ public: // interface
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
-       mg_iter_(0),
+#ifdef NEW_SYNC
+#else       
        mg_sync_restrict_(),
        mg_sync_prolong_(),
+#endif       
+       mg_iter_(0),
        mg_msg_(NULL),
        jacobi_iter_(0),
        dt(0.0),
@@ -138,9 +141,12 @@ public: // interface
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : BASE_ENZO_BLOCK (m),
-      mg_iter_(0),
+#ifdef NEW_SYNC
+#else       
       mg_sync_restrict_(),
       mg_sync_prolong_(),
+#endif      
+      mg_iter_(0),
       mg_msg_(NULL),
       jacobi_iter_(0),
       dt(0.0),
@@ -325,12 +331,18 @@ public: /// entry methods
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
   void p_solver_mg0_last_smooth();
-  void p_solver_mg0_barrier(CkReductionMsg* msg);  
-  void p_solver_mg0_shift_b(CkReductionMsg* msg);  
+  void r_solver_mg0_barrier(CkReductionMsg* msg);  
+  void r_solver_mg0_shift_b(CkReductionMsg* msg);  
   void p_solver_mg0_prolong_recv(FieldMsg * msg);
   void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
+#ifdef NEW_SYNC
+
+  void mg_set_msg (FieldMsg * msg) { mg_msg_ = msg; }
+  FieldMsg * mg_get_msg () const { return mg_msg_; }
+  
+#else  
   void mg_sync_restrict_reset()             { mg_sync_restrict_.reset(); }
   void mg_sync_restrict_set_stop(int value) { mg_sync_restrict_.set_stop(value); }
   bool mg_sync_restrict_next()        { return mg_sync_restrict_.next(); };
@@ -339,6 +351,7 @@ public: /// entry methods
   void mg_sync_prolong_set_stop(int value) { mg_sync_prolong_.set_stop(value); }
   bool mg_sync_prolong_next()        { return mg_sync_prolong_.next(); };
   
+#endif  
   void mg_iter_clear() { mg_iter_ = 0; }
   void mg_iter_increment() { ++mg_iter_; }
   int mg_iter() const {return mg_iter_; }
@@ -365,15 +378,19 @@ public: /// entry methods
   }
   
 protected: // attributes
-  
-  // MG iteration count
-  int mg_iter_;
 
+#ifdef NEW_SYNC
+#else  
   // MG SOLVER ( EnzoSolverMg0)
   Sync mg_sync_restrict_;
 
   // Synchronize to not call prolong until all children have exited coarse solve
   Sync mg_sync_prolong_;
+
+#endif  
+
+  // MG iteration count
+  int mg_iter_;
 
   // Saved FieldMsg for prolong
   FieldMsg * mg_msg_;
