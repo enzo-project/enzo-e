@@ -17,18 +17,23 @@ class EnzoInitialGrackleTest : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  //EnzoInitialGrackleTest() throw() { }
+  EnzoInitialGrackleTest(const EnzoConfig * enzo_config) throw();
+
+//  EnzoInitialGrackleTest() throw()
+//   : Initial() { }
   // EnzoInitialGrackleTest() throw();
 
   /// Constructor
-  EnzoInitialGrackleTest
-  (const EnzoConfig * enzo_config) throw();
+  //EnzoInitialGrackleTest
+  //(const EnzoConfig * enzo_config) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialGrackleTest);
 
   /// CHARM++ migration constructor
-  EnzoInitialGrackleTest(CkMigrateMessage *m) : Initial (m) {}
+  EnzoInitialGrackleTest(CkMigrateMessage *m)
+     : Initial (m)
+  {  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -36,23 +41,23 @@ public: // interface
   /// Initialize the block
 
   virtual void enforce_block
-  (
-   Block * block,
+  (   Block * block,
    const FieldDescr * field_descr,
    const ParticleDescr * particle_descr,
    const Hierarchy * hierarchy
    ) throw();
 
+  // Destructor
   virtual ~EnzoInitialGrackleTest() throw() {};
 
 private:
 
-#ifdef CONFIG_USE_GRACKLE
+//#ifdef CONFIG_USE_GRACKLE
 
-  code_units        units_;
+  //code_units        units_;
   //chemistry_data  * chemistry_;// = new chemistry_data;
 
-#endif
+//#endif
 
 };
 

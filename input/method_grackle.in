@@ -79,11 +79,11 @@
 
      grackle {
         courant = 0.80;
-        data_file = "input/CloudyData_UVB=HM2012.h5";
+        data_file = "CloudyData_UVB=HM2012.h5";
      }
 
      ppm {
-        courant = 0.80;
+        courant     = 0.40;
         diffusion   = true;
         flattening  = 3;
         steepening  = true;

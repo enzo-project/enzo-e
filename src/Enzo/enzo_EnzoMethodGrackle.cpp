@@ -13,15 +13,9 @@ extern CProxy_EnzoSimulation proxy_enzo_simulation;
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
-  EnzoConfig * config,
   const FieldDescr * field_descr
 )
   : Method()
-//#ifdef CONFIG_USE_GRACKLE
-//  , chemistry_(0),
-//    units_(0)
-//#endif /* CONFIG_USE_GRACKLE */
-
 {
 #ifdef CONFIG_USE_GRACKLE
 
@@ -30,56 +24,15 @@ EnzoMethodGrackle::EnzoMethodGrackle
 		       enzo_sync_id_method_grackle);
   refresh(ir)->add_all_fields();
 
-  /// Initialize parameters
-
-  units_     = config->method_grackle_units;
-  //chemistry_ = config->method_grackle_chemistry;
-
-  //const gr_float a_value =
-  //  1. / (1. + config->physics_cosmology_initial_redshift);
-
-
   printf ("TRACE %s:%d calling initialize_chemistry_data\n",__FILE__,__LINE__);
 
-  // AE: Do we really want to do this here? Won't this overwrite settings?
-/*
-  if (initialize_chemistry_data(&units_) == 0) {
-      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
-      "Error in initialize_chemistry_data");
-  }
-
-  if (set_default_chemistry_parameters(chemistry_) == 0) {
-      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
-      "Error in set_default_chemistry_parameters");
-  }
-*/
 #endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodGrackle::pup (PUP::er &p)
-{
+// void EnzoMethodGrackle::pup (PUP::er &p) - in hpp
 
-  // NOTE: change this function whenever attributes change
-
-#ifdef CONFIG_USE_GRACKLE
-
-  TRACEPUP;
-
-  Method::pup(p);
-
-  // AE: Not sure why p | *units_ was commented out...
-  // p | *chemistry_;
-//  WARNING ("EnzoMethodGrackle::pup()",
-//     "p | *chemistry_ not called!");
-  //p | units_;
-  //WARNING ("EnzoMethodGrackle::pup()",
-  //   "p | *units_ not called!");
-
-#endif /* CONFIG_USE_GRACKLE */
-
-}
 
 void EnzoMethodGrackle::compute ( Block * block) throw()
 {
@@ -114,6 +67,12 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
   // Setup Grackle field struct for storing field data
   grackle_field_data grackle_fields_;
+
+  // Grackle units struct
+  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
+        (enzo_block->simulation()->config());
+  code_units units_;
+  units_ = enzo_config->method_grackle_units;
 
   // ASSUMES ALL ARRAYS ARE THE SAME SIZE
 

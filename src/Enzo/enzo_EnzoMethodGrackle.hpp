@@ -23,8 +23,10 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(EnzoConfig * enzo_config,
-                    const FieldDescr * field_descr);
+  EnzoMethodGrackle(const FieldDescr * field_descr);
+
+  // Destructor
+  virtual ~EnzoMethodGrackle() throw() {}
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGrackle);
@@ -32,14 +34,23 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m)
     : Method (m)
-  {  }
+    {  }
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p) ;
+  void pup (PUP::er &p)
+  {
 
-  /// Destructor ?
-  // virtual ~EnzoMethodGrackle() throw() {};
-  // virtual ~EnzoMethodGrackle() throw();
+    // NOTE: change this function whenever attributes change
+
+  #ifdef CONFIG_USE_GRACKLE
+
+    TRACEPUP;
+
+    Method::pup(p);
+
+  #endif /* CONFIG_USE_GRACKLE */
+
+  }
 
   /// Apply the method to advance a block one timestep
   virtual void compute( Block * block) throw();
@@ -50,7 +61,6 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-  virtual ~EnzoMethodGrackle() throw() {};
 
 //protected: // methods
 
@@ -58,10 +68,6 @@ protected: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
   void compute_( EnzoBlock * enzo_block) throw();
-
-  /// Grackle struct defining code units
-  code_units units_;
-
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
 
 };

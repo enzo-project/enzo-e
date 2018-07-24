@@ -26,7 +26,7 @@ class EnzoBlock : public BASE_ENZO_BLOCK
   friend class EnzoTimestep;
   friend class EnzoTimestepPpm;
   friend class EnzoTimestepPpml;
-  friend class EnzoInitialGrackleTest;
+//  friend class EnzoInitialGrackleTest;
   friend class EnzoInitialImplosion2;
   friend class EnzoInitialSedovArray2;
 

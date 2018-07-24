@@ -14,11 +14,15 @@
 EnzoInitialGrackleTest::EnzoInitialGrackleTest
 (const EnzoConfig * config) throw ()
   : Initial(config->initial_cycle, config->initial_time)
+//  #ifdef CONFIG_USE_GRACKLE
+//    , units_()
+//  #endif
 {
-#ifdef CONFIG_USE_GRACKLE
+//#ifdef CONFIG_USE_GRACKLE
     //chemistry_ = config->method_grackle_chemistry;
-    units_     = config->method_grackle_units;
-#endif
+    //units_     = config->method_grackle_units;
+//#endif
+  return; 
 }
 
 //----------------------------------------------------------------------
@@ -64,6 +68,12 @@ void EnzoInitialGrackleTest::enforce_block
   ASSERT("EnzoInitialGrackleTest",
    "Block does not exist",
    block != NULL);
+
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
+       (enzo_block->simulation()->config());
+  code_units units_;
+  units_ = enzo_config->method_grackle_units;
 
   Field field = block->data()->field();
 
