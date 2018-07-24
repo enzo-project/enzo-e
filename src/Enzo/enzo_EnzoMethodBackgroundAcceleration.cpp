@@ -62,14 +62,12 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
 //-------------------------------------------------------------------
 void EnzoMethodBackgroundAcceleration::compute ( Block * block) throw()
 {
-  std::cout << "Background acceleration compute call\n";
   if (block->is_leaf()){
     this->compute_(block);
   }
 
   // Wait for all blocks to finish before continuing
   block->compute_done();
-  std::cout << "Ending background acceleration compute call \n";
   return;
 }
 
@@ -80,7 +78,6 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
      or can just be tacked into here */
 
   //TRACE_METHOD("compute()",block);
-  std::cout << "Beginning background acceleration leaf compute_ call\n";
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
        (enzo_block->simulation()->config());
@@ -123,11 +120,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
     if (ax){ for(int i = 0; i < m; i ++){ ax[i] = 0.0;}}
     if (ay){ for(int i = 0; i < m; i ++){ ay[i] = 0.0;}}
     if (az){ for(int i = 0; i < m; i ++){ az[i] = 0.0;}}
-    std::cout << "Acceleration will be zeroed\n";
   }
-
-  std::cout << "BackgroundAcceleration: " << enzo_config->method_background_acceleration_type
-            << "     " << "\n";
 
   if (enzo_config->method_background_acceleration_type == "GalaxyModel"){
 
@@ -138,7 +131,6 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
     this->PointMass(ax, ay, az, block->rank(),
                     cosmo_a, enzo_config, units);
   }
-  std::cout << "Ending background acceleration leaf compute_ call\n";
 
   return;
 
@@ -297,7 +289,6 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
      }
   } // end loop over grid cells
 
-  std::cout << "Accelartion Values:" << accel_sph << "   " << accel_R << "   " << accel_z << "\n";
   // Handle particles here - save for later
 
   return;
@@ -313,7 +304,6 @@ double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
   // Use the same timestep check as implemented for gravity. This
   // just goes through the acceleration fields and checkes to make
   // sure they
-  std::cout << "Computing timestep in background acceleration\n";
   Field field = block->data()->field();
   int mx, my, mz;
   int gx, gy, gz;
@@ -375,7 +365,6 @@ double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
     }
   }
 
-  std::cout<<"End computing timestep in background acceleration\n";
   return 0.5*dt;
 }
 
