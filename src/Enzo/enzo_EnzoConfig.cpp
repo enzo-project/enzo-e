@@ -342,7 +342,6 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p,method_background_acceleration_angular_momentum,3);
   PUParray(p,method_background_acceleration_center,3);
 
-  p | method_pm_deposit_type;
   p | method_pm_deposit_alpha;
   p | method_pm_update_max_dt;
 
