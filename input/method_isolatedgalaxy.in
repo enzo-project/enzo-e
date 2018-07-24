@@ -80,7 +80,7 @@
 #  }
 
   Method {
-      list = ["ppm"];
+      list = ["background_acceleration","ppm"];
 #,"gravity_bicgstab"];
       ppm {
             diffusion = true;
@@ -94,6 +94,27 @@
             pressure_floor = 1.0E-30;
             temperature_floor = 1.0E-30;
           };
+
+#     gravity {
+#          solver   = "gravity";
+#          iter_max = 100;
+#          res_tol  = 1e-6;
+#          }
+
+      background_acceleration {
+          type = "GalaxyModel";
+          DM_density     = 3.07199E-25 ;   # cgs - central density for 1E10 Msu$
+          DM_mass        = -1.0 ;# 1.0E10; #
+          DM_mass_radius = 45.0;
+          core_radius    = 3.0;
+          bulge_mass     = 0.0;
+          stellar_mass   = 0.0;  # 1.0E7;
+          stellar_scale_height_r = 1.00;
+          stellar_scale_height_z = 0.70;
+          center = [0.5, 0.5, 0.5];
+          angular_momentum = [0.0, 0.0, 1.0];
+     };
+
 #     gravity_bicgstab {
 #          iter_max = 100;
 #          res_tol  = 1e-6;
@@ -160,7 +181,7 @@ Stopping {
 #   stop time in wall seconds: AE FOR DEBUGGING SANITY ONLY
     seconds  = 3600.0;
 #   AE output interval
-    cycle    = 20;
+    cycle    = 1000;
     interval = 1; 
 }
 
@@ -185,9 +206,9 @@ Output {
         # schedule the output based on 'var' and 'step'
         #   step refers to the interval if 'var' to output on
         schedule {
-             var   = "cycle";
+             var   = "time";
 #            time in code units (Myr)
-             step  = 1;             
+             step  = 0.001;
         }
     };
 }
