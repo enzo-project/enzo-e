@@ -32,7 +32,8 @@ EnzoMethodPpm::EnzoMethodPpm
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			       enzo_sync_id_method_ppm);
+  			       enzo_sync_id_method_ppm);
+
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   refresh(ir)->add_field(field_descr->field_id("velocity_y"));
@@ -42,6 +43,7 @@ EnzoMethodPpm::EnzoMethodPpm
   refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
   refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
   refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+
   // PPM parameters initialized in EnzoBlock::initialize()
 }
 

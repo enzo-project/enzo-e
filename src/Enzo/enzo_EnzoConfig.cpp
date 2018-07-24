@@ -150,7 +150,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_background_acceleration_stellar_scale_height_r(0.0),
   method_background_acceleration_stellar_scale_height_z(0.0),
   /// EnzoMethodPmDeposit
-  method_pm_deposit_type(""),
+  method_pm_deposit_alpha(0.5),
   /// EnzoMethodPmUpdate
   method_pm_update_max_dt(std::numeric_limits<double>::max()),
   /// EnzoSolverMg0
@@ -343,6 +343,7 @@ void EnzoConfig::pup (PUP::er &p)
   PUParray(p,method_background_acceleration_center,3);
 
   p | method_pm_deposit_type;
+  p | method_pm_deposit_alpha;
   p | method_pm_update_max_dt;
 
   p | solver_precondition;
@@ -476,7 +477,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // PM method and initialization
 
-  method_pm_deposit_type = p->value_string ("Method:pm_deposit:type","cic");
+  method_pm_deposit_alpha = p->value_float ("Method:pm_deposit:alpha",0.5);
 
   method_pm_update_max_dt = p->value_float
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());

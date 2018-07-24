@@ -39,6 +39,11 @@
 
 // #define DEBUG_CHECK
 
+class Simulation;
+class FieldDescr;
+class ParticleDescr;
+class Output;
+
 //----------------------------------------------------------------------
 // TEMPLATE FUNCTIONS
 //----------------------------------------------------------------------
@@ -260,7 +265,12 @@ namespace cello {
   inline int index_static()
   { return CkMyPe() % CONFIG_NODE_SIZE; }
 
-    
+  
+  Simulation * simulation();
+  FieldDescr * field_descr();
+  ParticleDescr * particle_descr();
+  Output * output (int index);
+  int rank ();
 }
 
 #endif /* CELLO_HPP */

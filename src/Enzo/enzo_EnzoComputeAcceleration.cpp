@@ -74,10 +74,8 @@ void EnzoComputeAcceleration::compute_(Block * block)
   enzo_float * p  = (enzo_float*) field.values(i_p_);
 
   int mx,my,mz;
-  int nx,ny,nz;
   int gx,gy,gz;
   field.dimensions  (0,&mx,&my,&mz);
-  field.size          (&nx,&ny,&nz);
   field.ghost_depth (0,&gx,&gy,&gz);
 
   int dx,dy,dz;
@@ -212,8 +210,8 @@ void EnzoComputeAcceleration::compute_(Block * block)
   int it_dark = particle.type_index("dark");
   if (particle.num_particles(it_dark) > 0) {
 
-    FieldDescr    * fd = block->data()->field_descr();
-    ParticleDescr * pd = block->data()->particle_descr();
+    FieldDescr    * fd = cello::field_descr();
+    ParticleDescr * pd = cello::particle_descr();
 
     double dt_shift = 0.5*block->dt() / cosmo_a;
     //  double dt_shift = 0.0;

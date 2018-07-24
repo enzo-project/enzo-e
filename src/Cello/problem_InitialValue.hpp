@@ -23,8 +23,7 @@ public: // interface
   
   /// Constructor
   InitialValue(Parameters * parameters, 
-		 const FieldDescr * field_descr,
-		 int cycle, double time) throw();
+	       int cycle, double time) throw();
 
   /// Destructor
   virtual ~InitialValue() throw();
@@ -34,7 +33,6 @@ public: // interface
   InitialValue(CkMigrateMessage *m)
     : Initial (m),
       parameters_(NULL),
-      field_descr_(NULL),
       num_fields_(0),
       num_masks_(NULL),
       mask_(NULL),

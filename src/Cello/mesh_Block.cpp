@@ -578,8 +578,8 @@ void Block::apply_initial_() throw ()
 
   TRACE("Block::apply_initial_()");
 
-  FieldDescr * field_descr = simulation()->field_descr();
-  ParticleDescr * particle_descr = simulation()->particle_descr();
+  FieldDescr    * field_descr    = cello::field_descr();
+  ParticleDescr * particle_descr = cello::particle_descr();
 
   // Apply initial conditions
 

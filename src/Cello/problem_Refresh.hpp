@@ -158,6 +158,9 @@ public: // interface
     }
   }
 
+  /// Add a field to the list of fields to refresh
+  void add_field(std::string field_name);
+
   /// Add a source and corresponding destination field to refresh
   void add_field_src_dst(int id_field_src, int id_field_dst) {
     if (id_field_src >= 0 && id_field_dst >= 0) {

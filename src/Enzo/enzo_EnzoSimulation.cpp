@@ -77,8 +77,7 @@ void EnzoSimulation::pup (PUP::er &p)
   TRACEPUP;
 
   if (p.isUnpacking()) {
-    EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
-			  field_descr());
+    EnzoBlock::initialize(static_cast<EnzoConfig*>(config_));
   }
 }
 
@@ -178,8 +177,7 @@ void EnzoSimulation::initialize() throw()
   Simulation::initialize();
 
   // Initialize EnzoBlock static variables
-  EnzoBlock::initialize(static_cast<EnzoConfig*>(config_),
-			field_descr());
+  EnzoBlock::initialize(static_cast<EnzoConfig*>(config_));
 
 }
 

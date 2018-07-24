@@ -11,6 +11,17 @@
 
 //----------------------------------------------------------------------
 
+void Refresh::add_field(std::string field_name)
+{
+  const int id_field = cello::field_descr()->field_id(field_name);
+  if (id_field >= 0) {
+    field_list_src_.push_back(id_field);
+    field_list_dst_.push_back(id_field);
+  }
+}
+
+//----------------------------------------------------------------------
+
 int Refresh::data_size () const
 {
   int count = 0;

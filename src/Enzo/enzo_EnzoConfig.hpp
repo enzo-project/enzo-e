@@ -167,7 +167,7 @@ public: // interface
       method_background_acceleration_stellar_scale_height_r(0.0),
       method_background_acceleration_stellar_scale_height_z(0.0),
       // EnzoMethodPmDeposit
-      method_pm_deposit_type(""),
+      method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0),
       // EnzoSolverMg0
@@ -375,7 +375,7 @@ public: // attributes
 
   /// EnzoMethodPmDeposit
 
-  std::string                method_pm_deposit_type;
+  double                     method_pm_deposit_alpha;
 
   /// EnzoMethodPmUpdate
 

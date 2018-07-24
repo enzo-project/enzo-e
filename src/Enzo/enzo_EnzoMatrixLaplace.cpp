@@ -103,6 +103,16 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
     const enzo_float dy = (rank_ >= 2) ? 1.0/(12.0*hy_*hy_) : 0.0;
     const enzo_float dz = (rank_ >= 3) ? 1.0/(12.0*hz_*hz_) : 0.0;
 
+    const enzo_float c0x = c0*dx;
+    const enzo_float c1x = c1*dx;
+    const enzo_float c2x = c2*dx;
+    const enzo_float c0y = c0*dy;
+    const enzo_float c1y = c1*dy;
+    const enzo_float c2y = c2*dy;
+    const enzo_float c0z = c0*dz;
+    const enzo_float c1z = c1*dz;
+    const enzo_float c2z = c2*dz;
+
     if (rank_ == 1) {
 
       for (int ix=g0; ix<mx_-g0; ix++) {
@@ -132,15 +142,16 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 	for   (int iy=g0; iy<my_-g0; iy++) {
 	  for (int ix=g0; ix<mx_-g0; ix++) {
 	    const int i = ix + mx_*(iy + my_*iz);
-	    Y[i] = (c0*(X[i]) +
-		    c1*(X[i-idx] +X[i+idx]) +
-		    c2*(X[i-idx2]+X[i+idx2])) * dx
-	      +    (c0*(X[i]) +
-		    c1*(X[i-idy] +X[i+idy]) +
-		    c2*(X[i-idy2]+X[i+idy2])) * dy
-	      +    (c0*(X[i]) +
-		    c1*(X[i-idz] +X[i+idz]) +
-		    c2*(X[i-idz2]+X[i+idz2])) * dz;
+	    enzo_float * xp = X + i;
+	    Y[i] = (c0x*(xp[0]) +
+		    c1x*(xp[-idx] +xp[idx]) +
+		    c2x*(xp[-idx2]+xp[idx2]))
+	      +    (c0y*(xp[0]) +
+		    c1y*(xp[-idy] +xp[idy]) +
+		    c2y*(xp[-idy2]+xp[idy2]))
+	      +    (c0z*(xp[0]) +
+		    c1z*(xp[-idz] +xp[idz]) +
+		    c2z*(xp[-idz2]+xp[idz2]));
 	  }
 	}
       }

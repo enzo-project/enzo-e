@@ -13,8 +13,9 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 
   long long length = ((long long*) (msgs[0]->getData()))[0];
 
-  long long * accum = new long long [length];
-  for (int i=0; i<length; i++) accum[i] = 0.0;
+  std::vector<long long> accum;
+  accum.resize(length);
+  accum.clear();
 
   // save length
   accum [0] = length;
@@ -32,7 +33,7 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
     }
   }
 
-  return CkReductionMsg::buildNew(length*sizeof(long long),accum);
+  return CkReductionMsg::buildNew(length*sizeof(long long),&accum[0]);
 }
 
 
