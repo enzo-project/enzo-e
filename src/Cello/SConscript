@@ -223,7 +223,7 @@ test_colormap    = env.Program (['test_Colormap.cpp', objs_io],
 test_particle  = env.Program (['test_Particle.cpp', objs_data, objs_data0],    
                                  LIBS=[libs_data, libs_test])
 
-test_scalar_data  = env.Program (['test_ScalarData.cpp', objs_data],
+test_scalar_data  = env.Program (['test_Scalar.cpp', objs_data],
                                  LIBS=[libs_data, libs_test])
 test_field_data  = env.Program (['test_FieldData.cpp', objs_data],
                                  LIBS=[libs_data, libs_test])
