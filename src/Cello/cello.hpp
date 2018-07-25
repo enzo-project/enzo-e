@@ -190,10 +190,13 @@ namespace cello {
   const double pi = 3.14159265358979324;
   // Boltzman constant in CGS  
   const double k  = 1.3806504e-16;
+  const double kboltz = 1.3806504e-16;
   // Solar mass in CGS
   const double mass_solar = 1.98855e33;
   // Hydrogen mass in CGS
   const double mass_hydrogen = 1.67262171e-24;
+  // Approximate mean molecular weight of metals
+  const double mu_metal = 16.0;
   
   // precision functions
   double machine_epsilon     (int);

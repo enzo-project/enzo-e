@@ -75,13 +75,13 @@
  }
 
  Mesh {
-     root_blocks = [ 2, 2 ];
+     root_blocks = [ 4, 4];
      root_rank = 2;
-     root_size = [ 400, 400 ];
+     root_size = [ 400, 400];
  }
 
  Method {
-      list = [ "grackle","ppm" ];
+      list = [ "grackle"];
 #     list = [ "ppm" ];
 
      grackle {
@@ -107,7 +107,7 @@
  }
 
  Output {
-     list = [ "density"];
+     list = [ "density", "data"];
 
 #     check {
 #        type  = "checkpoint";
@@ -116,15 +116,40 @@
 #     }
 
 
-#     data {
-#         field_list = [ "density" ];
-#         name = [ "method_grackle-1-%02d-%06d.h5", "proc", "cycle" ];
-#         schedule {
-#             var = "time";
-#             step = 0.1;
-#         }
-#         type = "data";
-#     }
+     data {
+         field_list = [ "density",
+              "internal_energy",
+              "total_energy",
+              "velocity_x",
+              "velocity_y",
+              "velocity_z",
+              "HI_density",
+              "HII_density",
+              "HM_density",
+              "HeI_density",
+              "HeII_density",
+              "HeIII_density",
+              "H2I_density",
+              "H2II_density",
+              "DI_density",
+              "DII_density",
+              "HDI_density",
+              "e_density",
+              "metal_density",
+              "cooling_time",
+              "temperature",
+              "pressure",
+              "gamma"];
+
+         dir   = ["GRACKLE_TEST_%03d","cycle"];
+         name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
+         schedule {
+             var = "time";
+             step = 0.1;
+         }
+         type = "data";
+     }
+
      density {
          colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
          field_list = [

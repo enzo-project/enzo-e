@@ -26,7 +26,69 @@ EnzoMethodGrackle::EnzoMethodGrackle
 		       enzo_sync_id_method_grackle);
   refresh(ir)->add_all_fields();
 
+  if (grackle_data->metal_cooling){
+    ASSERT("EnzoMethodGrackle:Must define metal_density field ",
+           "to use metal cooling with Grackle",
+           field_descr->is_field("metal_density"));
+  }
 
+  if (grackle_data->primordial_chemistry > 0){
+    ASSERT("EnzoMethodGrackle:Must define ",
+           " HI_density field if using primordial_chemistry = 1 with Grackle",
+           field_descr->is_field("HI_density"));
+    ASSERT("EnzoMethodGrackle:Must define ",
+           " HII_density field if using primordial_chemistry = 1 with Grackle",
+           field_descr->is_field("HII_density"));
+    ASSERT("EnzoMethodGrackle:Must define ",
+           " HeI_density field if using primordial_chemistry = 1 with Grackle",
+           field_descr->is_field("HeI_density"));
+    ASSERT("EnzoMethodGrackle:Must define ",
+           " HeII_density field if using primordial_chemistry = 1 with Grackle",
+           field_descr->is_field("HeII_density"));
+    ASSERT("EnzoMethodGrackle:Must define ",
+           " HeIII_density field if using primordial_chemistry = 1 with Grackle",
+           field_descr->is_field("HeIII_density"));
+    ASSERT("EnzoMethodGrackle:Must define ",
+           " e_density field if using primordial_chemistry = 1 with Grackle",
+           field_descr->is_field("e_density"));
+
+    if(grackle_data->primordial_chemistry > 1){
+      ASSERT("EnzoMethodGrackle:Must define ",
+             " HM_density field if using primordial_chemistry = 2 with Grackle",
+             field_descr->is_field("HM_density"));
+      ASSERT("EnzoMethodGrackle:Must define ",
+             " H2I_density field if using primordial_chemistry = 2 with Grackle",
+             field_descr->is_field("H2I_density"));
+      ASSERT("EnzoMethodGrackle:Must define ",
+             " H2II_density field if using primordial_chemistry = 2 with Grackle",
+             field_descr->is_field("H2II_density"));
+      if(grackle_data->primordial_chemistry > 2){
+        ASSERT("EnzoMethodGrackle:Must define ",
+               " DI_density field if using primordial_chemistry = 3 with Grackle",
+               field_descr->is_field("DI_density"));
+        ASSERT("EnzoMethodGrackle:Must define ",
+               " DII_density field if using primordial_chemistry = 3 with Grackle",
+               field_descr->is_field("DII_density"));
+        ASSERT("EnzoMethodGrackle:Must define ",
+               " HDI_density field if using primordial_chemistry = 3 with Grackle",
+               field_descr->is_field("HDI_density"));
+      }
+
+    }
+
+  } // field checks if primordial chemistry is on
+
+  if (grackle_data->use_specific_heating_rate){
+    ASSERT("EnzoMethodGrackle:Must define specific_heating_rate",
+           " if using specific heating rate with Grackle",
+           field_descr->is_field("specific_heating_rate"));
+  }
+
+  if (grackle_data->use_volumetric_heating_rate){
+    ASSERT("EnzoMethodGrackle:Must define volumetric_heating_rate field ",
+           " if using volumetric heating with Grackle",
+           field_descr->is_field("volumetric_heating_rate"));
+  }
 
   if (initialize_chemistry_data(&grackle_units_) == 0) {
     ERROR("EnzoConfig::EnzoConfig()",

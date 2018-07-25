@@ -58,7 +58,7 @@ void EnzoComputePressure::compute_(Block * block)
 
   const int rank = enzo_block->rank();
 
-  enzo_float * v3[3] = 
+  enzo_float * v3[3] =
     { (enzo_float*) (              field.values("velocity_x")),
       (enzo_float*) ((rank >= 2) ? field.values("velocity_y") : NULL),
       (enzo_float*) ((rank >= 3) ? field.values("velocity_z") : NULL) };
@@ -82,5 +82,50 @@ void EnzoComputePressure::compute_(Block * block)
     if (rank >= 3) e -= 0.5*v3[2][i]*v3[2][i];
     p[i] = gm1 * d[i] * e;
   }
-}
 
+
+#ifdef CONFIG_USE_GRACKLE
+  /* Correct pressure for significant amounts of H_2 */
+  if( grackle_data->primordial_chemistry > 1){
+    const EnzoUnits * enzo_units = (const EnzoUnits*)
+         block->simulation()->problem()->units();
+
+    enzo_float * HI_density    = (enzo_float*) field.values("HI_density");
+    enzo_float * HII_density   = (enzo_float*) field.values("HII_density");
+    enzo_float * HeI_density   = (enzo_float*) field.values("HeI_density");
+    enzo_float * HeII_density  = (enzo_float*) field.values("HeII_density");
+    enzo_float * HeIII_density = (enzo_float*) field.values("HeIII_density");
+    enzo_float * H2I_density   = (enzo_float*) field.values("H2I_density");
+    enzo_float * H2II_density  = (enzo_float*) field.values("H2II_density");
+    enzo_float * e_density     = (enzo_float*) field.values("e_density");
+
+    enzo_float temperature_units = cello::mass_hydrogen*
+                             (enzo_units->velocity() * enzo_units->velocity())
+                            / cello::kboltz;
+
+    for(int i=0; i<m; i++){
+      enzo_float number_density
+        = 0.25*(HeI_density[i] + HeII_density[i] + HeIII_density[i]) +
+           HI_density[i] + HII_density[i] + e_density[i];
+
+      enzo_float nH2 = 0.5*(H2I_density[i] + H2II_density[i]);
+
+      enzo_float temperature = std::max(temperature_units * p[i] / (number_density+nH2),1.0);
+
+      enzo_float GammaH2Inverse = 0.5 * 5.0;
+			enzo_float GammaInverse   = 1.0 / ( grackle_data->Gamma - 1.0);
+      if (nH2 / GammaH2Inverse > 1.0E-3){
+        enzo_float x = 6100.0 / temperature;
+        if (x < 10.0){
+          GammaH2Inverse = 0.5*(5.0 + 2.0 *x*x *exp(x)/( (exp(x)-1)*(exp(x)-1)));
+        }
+      }
+      enzo_float Gamma1 = 1.0 + (nH2 + number_density) /
+                                (nH2 + GammaH2Inverse + number_density *GammaInverse);
+
+      // correct pressure
+      p[i] *= (Gamma1 - 1.0) / (grackle_data->Gamma - 1.0);
+    }
+  }
+#endif
+}
