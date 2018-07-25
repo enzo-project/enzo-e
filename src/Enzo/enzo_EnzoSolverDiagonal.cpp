@@ -31,9 +31,9 @@ void EnzoSolverDiagonal::apply
   Solver::begin_(block);
 
   TRACE_SOLVER("apply()");
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
-    TRACE_SOLVER("is_active");
+    TRACE_SOLVER("is_finest");
     Field field = block->data()->field();
 
     // // assumes all fields involved in calculation have same precision
@@ -63,7 +63,7 @@ void EnzoSolverDiagonal::compute_
   int mx,my,mz;
   field.dimensions (ib,&mx,&my,&mz);
 
-  if (is_active_(block)) {
+  if (is_finest_(block)) {
 
     ///   - X = 0
     ///   - R = P = B ( residual with X = 0);

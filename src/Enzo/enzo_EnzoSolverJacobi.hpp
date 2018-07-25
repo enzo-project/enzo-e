@@ -17,7 +17,7 @@ class EnzoSolverJacobi : public Solver {
 public: // interface
 
   /// Constructor
-  EnzoSolverJacobi(FieldDescr * field_descr,
+  EnzoSolverJacobi(std::string name,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 

@@ -17,8 +17,8 @@ class EnzoSolverDiagonal : public Solver {
 public: // interface
 
   /// Constructor
-  EnzoSolverDiagonal() throw()
-  : Solver()
+  EnzoSolverDiagonal(std::string name) throw()
+    : Solver(name,0,0)
   {};
 
   /// Charm++ PUP::able declarations

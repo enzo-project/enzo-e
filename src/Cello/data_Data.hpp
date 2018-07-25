@@ -39,6 +39,11 @@ public: // interface
   /// Empty constructor
   Data()
     : num_field_data_(0),
+#ifdef NEW_SYNC      
+      scalar_data_double_(),
+      scalar_data_int_(),
+      scalar_data_sync_(),
+#endif      
       field_data_(),
       particle_data_(NULL)
   {
@@ -66,6 +71,11 @@ public: // interface
       particle_data_ = new ParticleData;
     }
     p | *particle_data_;
+#ifdef NEW_SYNC      
+    p | scalar_data_double_;
+    p | scalar_data_int_;
+    p | scalar_data_sync_;
+#endif    
     PUParray(p,lower_,3);
     PUParray(p,upper_,3);
     // NOTE: change this function whenever attributes change
@@ -145,6 +155,23 @@ public: // interface
 
   void allocate () throw();
 
+  //----------------------------------------------------------------------
+  // scalars
+  //----------------------------------------------------------------------
+
+#ifdef NEW_SYNC  
+
+  /// Return the scalar_data objects
+  
+  ScalarData<double> * scalar_data_double ()
+  { return &scalar_data_double_; }
+  ScalarData<int> * scalar_data_int ()
+  { return &scalar_data_int_; }
+  ScalarData<Sync> * scalar_data_sync ()
+  { return &scalar_data_sync_; }
+  
+#endif  
+
 private: // functions
 
   void copy_(const Data & data) throw();
@@ -159,6 +186,13 @@ private: // attributes
 
   /// Particle data
   ParticleData * particle_data_;
+
+#ifdef NEW_SYNC      
+  /// Scalar data
+  ScalarData<double> scalar_data_double_;
+  ScalarData<int>    scalar_data_int_;
+  ScalarData<Sync>   scalar_data_sync_;
+#endif  
 
   /// Lower extent of the box associated with the block [computable]
   double lower_[3];

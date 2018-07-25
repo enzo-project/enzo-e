@@ -223,6 +223,8 @@ test_colormap    = env.Program (['test_Colormap.cpp', objs_io],
 test_particle  = env.Program (['test_Particle.cpp', objs_data, objs_data0],    
                                  LIBS=[libs_data, libs_test])
 
+test_scalar_data  = env.Program (['test_Scalar.cpp', objs_data],
+                                 LIBS=[libs_data, libs_test])
 test_field_data  = env.Program (['test_FieldData.cpp', objs_data],
                                  LIBS=[libs_data, libs_test])
 test_field_descr  = env.Program (['test_FieldDescr.cpp', objs_data], 
@@ -305,7 +307,8 @@ binaries_cello = [test_type, test_class_size]
 
 binaries_disk  = [test_FileHdf5]
 binaries_error = [test_error]
-binaries_data = [test_field_data,
+binaries_data = [test_scalar_data,
+                 test_field_data,
                   test_field_descr,
                   test_field,
                   test_grouping,

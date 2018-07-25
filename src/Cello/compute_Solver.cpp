@@ -7,6 +7,10 @@
 
 #include "compute.hpp"
 
+// #define TRACE_SOLVER
+
+#define CYCLE 0
+
 //======================================================================
 
 Solver::~Solver() throw()
@@ -79,6 +83,12 @@ bool Solver::reuse_solution_ (int cycle) const throw()
 
 void Solver::begin_(Block * block)
 {
+#ifdef TRACE_SOLVER  
+  if (block->cycle() >= CYCLE)
+    CkPrintf ("%s TRACE_SOLVER %d Solver::begin_(%s)\n",
+	    block->name().c_str(),index_,name_.c_str());
+#endif  
+	    
   block->push_solver(index_);
 }
 
@@ -87,6 +97,11 @@ void Solver::begin_(Block * block)
 void Solver::end_(Block * block)
 {
   int index = block->pop_solver();
+#ifdef TRACE_SOLVER  
+  if (block->cycle() >= CYCLE)
+    CkPrintf ("%s TRACE_SOLVER %d Solver::end_(%s)\n",
+	      block->name().c_str(),index,name_.c_str());
+#endif  
 
   ASSERT2("Solver::end_()",
 	  "Solver mismatch was %d expected %d",
@@ -96,13 +111,19 @@ void Solver::end_(Block * block)
 
 //----------------------------------------------------------------------
 
-bool Solver::is_active_(Block * block)
+bool Solver::is_active_(Block * block) const
+{
+  const int level = block->level();
+  const bool in_range = (min_level_ <= level && level <= max_level_);
+
+  return (in_range);
+}
+
+//----------------------------------------------------------------------
+
+bool Solver::is_finest_ (Block * block) const
 {
   const int level = block->level();
   const bool is_leaf = block->is_leaf();
-  const bool is_unigrid = (min_level_ == max_level_);
-  const bool in_range = (min_level_ <= level && level <= max_level_);
-
-  return (is_unigrid) ? (in_range) : (is_leaf && in_range);
+  return is_unigrid_ ? (level == max_level_) : is_leaf;
 }
-

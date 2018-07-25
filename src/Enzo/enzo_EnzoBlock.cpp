@@ -167,9 +167,12 @@ void EnzoBlock::initialize(EnzoConfig * enzo_config)
 EnzoBlock::EnzoBlock
 ( MsgRefine * msg )
   : BASE_ENZO_BLOCK ( msg ),
-    mg_iter_(0),
+#ifdef NEW_SYNC    
+#else
     mg_sync_restrict_(),
     mg_sync_prolong_(),
+#endif    
+    mg_iter_(0),
     mg_msg_(NULL),
     jacobi_iter_(0),
     dt(dt_),
@@ -193,9 +196,12 @@ EnzoBlock::EnzoBlock
 EnzoBlock::EnzoBlock
 ( process_type ip_source)
   : BASE_ENZO_BLOCK ( ip_source ),
-    mg_iter_(0),
+#ifdef NEW_SYNC    
+#else
     mg_sync_restrict_(),
     mg_sync_prolong_(),
+#endif
+    mg_iter_(0),
     mg_msg_(NULL),
     jacobi_iter_(0),
     dt(dt_),
@@ -285,15 +291,18 @@ void EnzoBlock::pup(PUP::er &p)
 
   PUParray(p,method_turbulence_data,max_turbulence_array);
 
-  p | mg_iter_;
+#ifdef NEW_SYNC
+#else  
   p | mg_sync_restrict_;
   p | mg_sync_prolong_;
+#endif
+  p | mg_iter_;
   static bool warn2[CONFIG_NODE_SIZE] = {true};
   if (warn2[in]) {
     warn2[in] = false;
     WARNING("EnzoBlock::pup()", "skipping mg_msg_");
   }
-
+  
   p | jacobi_iter_;
   p | redshift;
   TRACE ("END EnzoBlock::pup()");

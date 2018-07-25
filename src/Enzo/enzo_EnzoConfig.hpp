@@ -153,6 +153,9 @@ public: // interface
       // EnzoSolver<Krylov>
       solver_precondition(),
       solver_local(),
+      solver_min_level_coarse(),
+      solver_max_level_coarse(),
+      solver_is_unigrid(),
       // EnzoStopping
       stopping_redshift()
 
@@ -350,6 +353,10 @@ public: // attributes
   /// Whether the solver is for an isolated Block, e.g. for
   /// Mg0 coarse grid solver
   std::vector<int>           solver_local;
+
+  std::vector<int>           solver_min_level_coarse;
+  std::vector<int>           solver_max_level_coarse;
+  std::vector<bool>          solver_is_unigrid;
 
   /// Stop at specified redshift for cosmology
   double                     stopping_redshift;

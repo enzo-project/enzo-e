@@ -47,6 +47,11 @@ Simulation::Simulation
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
+#ifdef NEW_SYNC
+  scalar_descr_int_(NULL),
+  scalar_descr_double_(NULL),
+  scalar_descr_sync_(NULL),
+#endif  
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -103,6 +108,11 @@ Simulation::Simulation()
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
+#ifdef NEW_SYNC
+  scalar_descr_int_(NULL),
+  scalar_descr_double_(NULL),
+  scalar_descr_sync_(NULL),
+#endif  
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -116,6 +126,63 @@ Simulation::Simulation()
   fflush(stdout);
 #endif  
   TRACE("Simulation()");
+}
+
+//----------------------------------------------------------------------
+
+Simulation::Simulation (CkMigrateMessage *m)
+  : CBase_Simulation(m),
+#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
+    fp_debug_(NULL),
+#endif
+    factory_(NULL),
+    parameters_(&g_parameters),
+    parameter_file_(""),
+    rank_(0),
+    cycle_(0),
+    cycle_watch_(-1),
+    time_(0.0),
+    dt_(0),
+    stop_(false),
+    phase_(phase_unknown),
+    config_(&g_config),
+    problem_(NULL),
+    timer_(),
+    performance_(NULL),
+#ifdef CONFIG_USE_PROJECTIONS
+    projections_tracing_(false),
+    projections_schedule_on_(NULL),
+    projections_schedule_off_(NULL),
+#endif
+    schedule_balance_(NULL),
+    monitor_(NULL),
+    hierarchy_(NULL),
+#ifdef NEW_SYNC
+  scalar_descr_int_(NULL),
+  scalar_descr_double_(NULL),
+  scalar_descr_sync_(NULL),
+#endif  
+    field_descr_(NULL),
+    particle_descr_(NULL),
+    sync_output_begin_(),
+    sync_output_write_(),
+    sync_new_output_start_(),
+    sync_new_output_next_()
+
+{
+  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
+#ifdef DEBUG_SIMULATION
+  CkPrintf ("%d DEBUG_SIMULATION Simulation(msg)\n",CkMyPe());
+  fflush(stdout);
+#endif  
+  TRACE("Simulation(CkMigrateMessage)");
+}
+
+//----------------------------------------------------------------------
+
+Simulation::~Simulation()
+{
+  deallocate_();
 }
 
 //----------------------------------------------------------------------
@@ -161,6 +228,15 @@ void Simulation::pup (PUP::er &p)
   if (up) hierarchy_ = new Hierarchy;
   p | *hierarchy_;
 
+#ifdef NEW_SYNC
+  if (up) scalar_descr_int_ = new ScalarDescr;
+  p | *scalar_descr_int_;
+  if (up) scalar_descr_double_ = new ScalarDescr;
+  p | *scalar_descr_double_;
+  if (up) scalar_descr_sync_ = new ScalarDescr;
+  p | *scalar_descr_sync_;
+#endif  
+
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
 
@@ -201,58 +277,6 @@ void Simulation::pup (PUP::er &p)
 	  (msg_refine_map_.size() == 0));
 	  
   //  p | msg_refine_map_;
-}
-
-//----------------------------------------------------------------------
-
-Simulation::Simulation (CkMigrateMessage *m)
-  : CBase_Simulation(m),
-#if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
-    fp_debug_(NULL),
-#endif
-    factory_(NULL),
-    parameters_(&g_parameters),
-    parameter_file_(""),
-    rank_(0),
-    cycle_(0),
-    cycle_watch_(-1),
-    time_(0.0),
-    dt_(0),
-    stop_(false),
-    phase_(phase_unknown),
-    config_(&g_config),
-    problem_(NULL),
-    timer_(),
-    performance_(NULL),
-#ifdef CONFIG_USE_PROJECTIONS
-    projections_tracing_(false),
-    projections_schedule_on_(NULL),
-    projections_schedule_off_(NULL),
-#endif
-    schedule_balance_(NULL),
-    monitor_(NULL),
-    hierarchy_(NULL),
-    field_descr_(NULL),
-    particle_descr_(NULL),
-    sync_output_begin_(),
-    sync_output_write_(),
-    sync_new_output_start_(),
-    sync_new_output_next_()
-
-{
-  for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
-#ifdef DEBUG_SIMULATION
-  CkPrintf ("%d DEBUG_SIMULATION Simulation(msg)\n",CkMyPe());
-  fflush(stdout);
-#endif  
-  TRACE("Simulation(CkMigrateMessage)");
-}
-
-//----------------------------------------------------------------------
-
-Simulation::~Simulation()
-{
-  deallocate_();
 }
 
 //----------------------------------------------------------------------
@@ -447,6 +471,11 @@ void Simulation::initialize_monitor_() throw()
 
 void Simulation::initialize_data_descr_() throw()
 {
+#ifdef NEW_SYNC
+  scalar_descr_int_    = new ScalarDescr;
+  scalar_descr_double_ = new ScalarDescr;
+  scalar_descr_sync_   = new ScalarDescr;
+#endif  
 
   //--------------------------------------------------
   // parameter: Field : list

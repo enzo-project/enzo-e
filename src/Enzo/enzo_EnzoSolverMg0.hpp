@@ -23,7 +23,7 @@ public: // interface
 
   /// Create a new EnzoSolverMg0 object
   EnzoSolverMg0
-  (FieldDescr * field_descr,
+  (std::string name,
    int monitor_iter,
    int restart_cycle,
    int rank,
@@ -36,7 +36,10 @@ public: // interface
    Restrict * restrict,
    Prolong * prolong,
    int min_level,
-   int max_level);
+   int max_level,
+   int min_level_coarse,
+   int max_level_coarse,
+   bool is_unigrid);
 
   EnzoSolverMg0() {};
 
@@ -56,6 +59,9 @@ public: // interface
        rank_(0),
        iter_max_(0),
        res_tol_(0),
+#ifdef NEW_SYNC  
+       isync_restrict_(-1),isync_prolong_(-1),iscalar_iter_(-1),
+#endif       
        ib_(0), ic_(0), ir_(0), ix_(0),
        mx_(0),my_(0),mz_(0),
        nx_(0),ny_(0),nz_(0),
@@ -87,6 +93,12 @@ public: // interface
     p | iter_max_;
     p | res_tol_;
 
+#ifdef NEW_SYNC  
+    p | isync_restrict_;
+    p | isync_prolong_;
+    p | iscalar_iter_;
+#endif
+    
     p | ib_;
     p | ic_;
     p | ir_;
@@ -132,8 +144,11 @@ public: // interface
 
   /// Access the Prolong operator by EnzoBlock
   Prolong * prolong() { return prolong_; }
-  
-  /// Solve the coarse-grid equation A*C = R
+
+  /// Call coarse solver--must be called by all blocks
+  void call_coarse_solver(EnzoBlock * enzo_block) throw();
+
+/// Solve the coarse-grid equation A*C = R
   void solve_coarse(EnzoBlock * enzo_block) throw();
 
   /// Prolong the correction C to the next-finer level
@@ -152,7 +167,8 @@ public: // interface
   long double rr_local() throw() { return rr_local_; }
   long double rr() throw() { return rr_; }
 
-  void begin_solve(EnzoBlock * enzo_block) throw();
+  void begin_solve(EnzoBlock * enzo_block,
+		   CkReductionMsg *msg) throw();
 
   void end_cycle(EnzoBlock * enzo_block) throw();
   
@@ -168,6 +184,11 @@ public: // interface
     CkPrintf (" rank_ = %d\n",rank_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
     CkPrintf (" res_tol_ = %g\n",res_tol_);
+#ifdef NEW_SYNC  
+    CkPrintf (" isync_restrict_ = %g\n",isync_restrict_);
+    CkPrintf (" isync_prolong_ = %g\n",isync_prolong_);
+    CkPrintf (" iscalar_iter_ = %g\n",iscalar_iter_);
+#endif    
     CkPrintf (" ib_ = %d\n",ib_);
     CkPrintf (" ic_ = %d\n",ic_);
     CkPrintf (" ir_ = %d\n",ir_);
@@ -244,6 +265,12 @@ protected: // attributes
   /// Convergence tolerance on the residual reduction rr_ / rr0_
   double res_tol_;
 
+  /// MG scalar id's
+#ifdef NEW_SYNC  
+  int isync_restrict_;
+  int isync_prolong_;
+  int iscalar_iter_;
+#endif  
   /// MG vector id's
   int ib_;
   int ic_;
@@ -263,6 +290,10 @@ protected: // attributes
   long double rr_;
   long double rr_local_;
   long double rr0_;
+
+  /// Min and Max level for coarse-grid solver (in case coarse grid solver is multilevel)
+  int min_level_coarse_;
+  int max_level_coarse_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_GRAVITY_MG0_HPP */

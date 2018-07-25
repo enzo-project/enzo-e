@@ -23,8 +23,8 @@
 //----------------------------------------------------------------------
 
 EnzoSolverJacobi::EnzoSolverJacobi
-( FieldDescr * field_descr, double weight, int iter_max) throw()
-  : Solver(0),
+( std::string name,double weight, int iter_max) throw()
+  : Solver(name,0,0),
     A_ (NULL),
     ix_ (-1),
     ib_ (-1),
@@ -34,6 +34,9 @@ EnzoSolverJacobi::EnzoSolverJacobi
     n_(iter_max)
 {
   // Reserve temporary fields
+
+  FieldDescr * field_descr = cello::field_descr();
+  
   id_ = field_descr->insert_temporary();
   ir_ = field_descr->insert_temporary();
 }
