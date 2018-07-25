@@ -762,6 +762,10 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:h2_on_dust",
         grackle_data->h2_on_dust);
 
+    grackle_data->three_body_rate = p->value_integer
+      ("Method:grackle:three_body_rate",
+        grackle_data->three_body_rate);
+
     grackle_data->cmb_temperature_floor = p->value_integer
       ("Method:grackle:cmb_temperature_floor",
         grackle_data->cmb_temperature_floor);
@@ -785,6 +789,10 @@ void EnzoConfig::read(Parameters * p) throw()
     grackle_data->photoelectric_heating_rate = p->value_float
       ("Method:grackle:photoelectric_heating_rate",
         grackle_data->photoelectric_heating_rate);
+
+    grackle_data->CaseBRecombination = p->value_integer
+      ("Method:grackle:CaseBRecombination",
+       grackle_data->CaseBRecombination);
 
     grackle_data->UVbackground = p->value_integer
       ("Method:grackle:UVbackground",
@@ -845,6 +853,13 @@ void EnzoConfig::read(Parameters * p) throw()
     grackle_data->UVbackground_redshift_drop = p->value_float
      ("Method:grackle:UVbackground_redshift_drop",
       grackle_data->UVbackground_redshift_drop);
+
+    // When radiative transfer is eventually included, make
+    // sure to set the below parameter to match the Enzo-P
+    // parameter for turning RT on / off:
+    //   grackle_data->use_radiative_transfer = ENZO_P_PARAMETER_NAME;
+
+
 /*
     // Copy over code units to grackle units struct
     method_grackle_units.density_units = enzo_units->density();
