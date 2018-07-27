@@ -11,8 +11,6 @@
 
 //----------------------------------------------------------------------
 
-extern CProxy_EnzoSimulation proxy_enzo_simulation;
-
 EnzoInitialCosmology::EnzoInitialCosmology
 (int cycle, double time,
  double gamma,
@@ -33,12 +31,11 @@ void EnzoInitialCosmology::enforce_block
  const Hierarchy * hierarchy
  ) throw()
 {
-  EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
-  EnzoUnits * units = (EnzoUnits *) simulation->problem()->units();
+
+  EnzoUnits * units = enzo::units();
 
   // "If temperature is left unset, set it assuming that T=550 K at z=200"
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-    simulation->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (temperature_ == 0.0) {
     temperature_ = 550.0 *
@@ -49,7 +46,7 @@ void EnzoInitialCosmology::enforce_block
   double r0 = cosmology->initial_redshift();
   double t0 = cosmology->time_from_redshift(r0);
   block->set_time(t0);
-  simulation->set_time(t0);
+  enzo::simulation()->set_time(t0);
   
   const double default_mu = 0.6;
 

@@ -44,7 +44,7 @@ if (use_grackle):   libraries_external.append('grackle')
 # SOURCE
 #------------------------------
 
-sources  = [Glob('enzo_*cpp'),
+sources  = [Glob('enzo*cpp'),
     	    'calcdiss.F',
 	    'calc_dt.F',
 	    'cic_deposit.F',

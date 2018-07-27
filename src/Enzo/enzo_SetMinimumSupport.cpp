@@ -22,8 +22,7 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
  
     enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
 
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-      simulation()->problem()->physics("cosmology");
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
     ASSERT ("EnzoBlock::SetMinimumSupport()",
 	    "comoving_coordinates enabled but missing EnzoPhysicsCosmology",

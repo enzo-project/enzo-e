@@ -121,9 +121,9 @@ void Block::stopping_exit_()
 {
   TRACE_CONTROL("stopping_exit");
 
-  if (simulation()->cycle_changed()) {
+  if (cello::simulation()->cycle_changed()) {
     // if performance counters haven't started yet for this cycle
-    int cycle_initial = simulation()->config()->initial_cycle;
+    int cycle_initial = cello::config()->initial_cycle;
     if (cycle_ > cycle_initial) {
       // stop if any previous cycle
       performance_stop_(perf_cycle,__FILE__,__LINE__);

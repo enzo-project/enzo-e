@@ -85,8 +85,7 @@ double EnzoMethodPpml::timestep (Block * block) const throw()
  
   enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
   
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   ASSERT ("EnzoMethodPpml::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",

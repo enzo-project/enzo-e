@@ -34,7 +34,7 @@ void EnzoMethodCosmology::compute(Block * block) throw()
 #endif  
 
   // Monitor current redshift
-  Monitor * monitor = block->simulation()->monitor();
+  Monitor * monitor = cello::monitor();
   if (block->index().is_root()) {
     monitor->print("Method", "%s redshift %.8f",
 		   this->name().c_str(),

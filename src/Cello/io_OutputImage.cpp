@@ -317,8 +317,8 @@ void OutputImage::write_block
 
   // extents of domain
   double dm3[3],dp3[3];
-  block->simulation()->hierarchy()->lower(dm3,dm3+1,dm3+2);
-  block->simulation()->hierarchy()->upper(dp3,dp3+1,dp3+2);
+  cello::hierarchy()->lower(dm3,dm3+1,dm3+2);
+  cello::hierarchy()->upper(dp3,dp3+1,dp3+2);
 
   // adjust for image_lower / image_upper
 

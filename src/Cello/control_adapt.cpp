@@ -85,9 +85,9 @@ void Block::adapt_begin_()
 {
   trace("adapt_begin 1");
 
-  simulation()->set_phase(phase_adapt);
+  cello::simulation()->set_phase(phase_adapt);
 
-  int level_maximum = simulation()->config()->mesh_max_level;
+  int level_maximum = cello::config()->mesh_max_level;
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
@@ -178,9 +178,9 @@ void Block::adapt_end_()
   sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
 
-  const int initial_cycle = simulation()->config()->initial_cycle;
+  const int initial_cycle = cello::config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
-  const int level_maximum = simulation()->config()->mesh_max_level;
+  const int level_maximum = cello::config()->mesh_max_level;
 
   bool adapt_again = (is_first_cycle && (adapt_step_++ < level_maximum));
 
@@ -197,7 +197,7 @@ void Block::adapt_end_()
 /// @brief Return whether the adapt phase should be called this cycle.
 bool Block::do_adapt_()
 {
-  int adapt_interval = simulation()->config()->adapt_interval;
+  int adapt_interval = cello::config()->adapt_interval;
 
   return ((adapt_interval && ((cycle_ % adapt_interval) == 0)));
 }
@@ -224,7 +224,7 @@ int Block::adapt_compute_desired_level_(int level_maximum)
   int level = this->level();
   int level_desired = level;
 
-  Problem * problem = simulation()->problem();
+  Problem * problem = cello::problem();
   Refine * refine;
 
   int index_refine = 0;
@@ -237,7 +237,7 @@ int Block::adapt_compute_desired_level_(int level_maximum)
     }
 
   }
-  const int initial_cycle = simulation()->config()->initial_cycle;
+  const int initial_cycle = cello::config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
 
   if (adapt_ == adapt_coarsen && level > 0 && ! is_first_cycle) 
@@ -256,7 +256,7 @@ int Block::adapt_compute_desired_level_(int level_maximum)
 
 void Block::adapt_refine_()
 {
-  Monitor * monitor = simulation()->monitor();
+  Monitor * monitor = cello::monitor();
   if (monitor->is_verbose()) {
     char buffer [80];
     int v3[3];
@@ -282,7 +282,7 @@ void Block::adapt_refine_()
   
   ParticleData * particle_list[8] = {0};
 
-  ParticleDescr * p_descr = simulation()->particle_descr();
+  ParticleDescr * p_descr = cello::simulation()->particle_descr();
 
   const int nc = NUM_CHILDREN(rank);
 
@@ -337,7 +337,7 @@ void Block::adapt_refine_()
       ParticleData * p_data = new ParticleData(*particle_list[IC3(ic3)]);
       data_msg -> set_particle_data (p_data,true);
 
-      const Factory * factory = simulation()->factory();
+      const Factory * factory = cello::simulation()->factory();
 
       // Create the child object with interpolated data
 
@@ -351,7 +351,7 @@ void Block::adapt_refine_()
 	 cycle_,time_,dt_,
 	 narray, array, refresh_fine,
 	 27,&child_face_level_curr_[27*IC3(ic3)],
-	 simulation());
+	 cello::simulation());
 
       delete [] array;
       array = 0;
@@ -375,7 +375,7 @@ void Block::adapt_refine_()
       count += particle.delete_particles (it, ib);
     }
   }
-  simulation()->data_delete_particles(count);
+  cello::simulation()->data_delete_particles(count);
   
   is_leaf_ = false;
 #ifdef DEBUG_ADAPT
@@ -484,7 +484,7 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
       count += particle.delete_particles (it,ib,mask);
     }
   }
-  simulation()->data_delete_particles(count);
+  cello::simulation()->data_delete_particles(count);
 }
 
 //----------------------------------------------------------------------
@@ -511,8 +511,7 @@ void Block::adapt_send_level()
   if (!is_leaf()) return;
 
   const int level = this->level();
-  const int min_face_rank = 
-    simulation()->config()->adapt_min_face_rank;
+  const int min_face_rank = cello::config()->adapt_min_face_rank;
   ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
   int of3[3];
 
@@ -556,8 +555,8 @@ void Block::p_adapt_recv_level
       ("%d level mismatch between index_send (%d) and level_face_curr (%d)",
        __LINE__,index_send.level(), level_face_curr);
     int nb3[3] = {2,2,2};
-    index_.print("index_",-1,2,nb3,false,simulation());
-    index_send.print("index_",-1,2,nb3,false,simulation());
+    index_.print("index_",-1,2,nb3,false,cello::simulation());
+    index_send.print("index_",-1,2,nb3,false,cello::simulation());
   }
 
   // note face_level_last_ initialized as -1, in which case won't skip
@@ -702,8 +701,7 @@ void Block::adapt_recv
 {
 
   const int rank = this->rank();
-  const int min_face_rank = 
-    simulation()->config()->adapt_min_face_rank;
+  const int min_face_rank = cello::config()->adapt_min_face_rank;
 
   if (level_relative == 0 || level_relative == +1) {
     // RECV-SAME: Face and level are received from unique
@@ -792,7 +790,8 @@ void Block::adapt_coarsen_()
 	   is_leaf()?"true":"false", level,
 	   is_leaf() && level > 0);
 
-  Monitor * monitor = simulation()->monitor();
+  Monitor * monitor = cello::monitor();
+  
   if (monitor->is_verbose()) {
     char buffer [80];
     int v3[3];
@@ -850,8 +849,7 @@ void Block::p_adapt_recv_child (MsgCoarsen * msg)
   int * child_face_level_curr = msg->face_level();
 
   // copy child face level array
-  const int min_face_rank = 
-    simulation()->config()->adapt_min_face_rank;
+  const int min_face_rank = cello::config()->adapt_min_face_rank;
   Index index_child = index_.index_child(ic3);
   ItFace it_face_child = this->it_face(min_face_rank,index_child);
   int of3[3];
@@ -919,8 +917,7 @@ void Block::initialize_child_face_levels_()
   int ic3[3];
   ItChild it_child(rank);
 
-  const int min_face_rank = 
-    simulation()->config()->adapt_min_face_rank;
+  const int min_face_rank = cello::config()->adapt_min_face_rank;
 
   // For each child
 

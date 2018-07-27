@@ -7,8 +7,6 @@
  
 #include "main.hpp" 
 #include "test.hpp"
-
-#include "cello.hpp"
 #include "disk.hpp"
 
 PARALLEL_MAIN_BEGIN

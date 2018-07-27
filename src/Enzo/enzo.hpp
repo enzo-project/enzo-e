@@ -46,5 +46,22 @@
 
 #include "_enzo.hpp"
 
+class EnzoConfig;
+class EnzoPhysicsCosmology;
+class EnzoProblem;
+class EnzoSimulation;
+class EnzoUnits;
+
+/// Namespace for Enzo global constants and accessor functions
+namespace enzo {
+  EnzoProblem * problem();
+  EnzoSimulation * simulation();
+  EnzoPhysicsCosmology * cosmology();
+  EnzoUnits * units();
+  const EnzoConfig * config();
+};
+
+extern CProxy_EnzoSimulation proxy_enzo_simulation;
+
 #endif /* ENZO_HPP */
 

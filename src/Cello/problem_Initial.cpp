@@ -13,10 +13,6 @@
 
 //----------------------------------------------------------------------
 
-extern CProxy_Simulation  proxy_simulation;
-
-//----------------------------------------------------------------------
-
 void Initial::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change

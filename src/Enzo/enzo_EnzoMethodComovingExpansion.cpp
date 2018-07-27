@@ -64,8 +64,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
        field.field_count() > 0))
     {
 
-      EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-  	block->simulation()->problem()->physics("cosmology");
+      EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
       ASSERT ("EnzoMethodComovingExpansion::compute()",
   	      "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
@@ -199,8 +198,7 @@ double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
   if (!comoving_coordinates_)
     return (double) dtExpansion;
 
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   ASSERT ("EnzoMethodComovingExpansion::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",

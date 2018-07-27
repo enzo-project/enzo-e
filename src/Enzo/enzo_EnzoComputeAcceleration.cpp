@@ -100,8 +100,7 @@ void EnzoComputeAcceleration::compute_(Block * block)
 
   // Update cell widths (hx,hy,hz) if needed for expansion
 
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   enzo_float cosmo_a = 1.0;
   enzo_float cosmo_dadt = 0.0;

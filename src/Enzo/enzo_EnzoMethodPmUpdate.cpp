@@ -74,8 +74,7 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
     double v3sum2[3]={0.0};
 #endif    
     
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-      block->simulation()->problem()->physics("cosmology");
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
     enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
     
@@ -300,8 +299,8 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
     double hz = (zp-zm)/nz;
     
     // Adjust for expansion terms if any
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-      block->simulation()->problem()->physics("cosmology");
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+    
     if (cosmology) {
       enzo_float cosmo_a=1.0,cosmo_dadt=0.0;
       double time = block->time();

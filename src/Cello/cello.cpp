@@ -211,9 +211,44 @@ namespace cello {
 #endif  
   //---------------------------------------------------------------------- 
 
+  CProxy_Block block_array()
+  {
+    return cello::simulation()->hierarchy()->block_array();
+  }
+
+  //---------------------------------------------------------------------- 
+
+  const Config * config()
+  {
+    return simulation() ? simulation()->config() : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Problem * problem()
+  {
+    return simulation() ? simulation()->problem() : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Hierarchy * hierarchy()
+  {
+    return simulation() ? simulation()->hierarchy() : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
   FieldDescr * field_descr()
   {
     return simulation() ? simulation()->field_descr() : new FieldDescr;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Monitor * monitor()
+  {
+    return simulation() ? simulation()->monitor() : Monitor::instance();
   }
 
   //---------------------------------------------------------------------- 
@@ -227,7 +262,14 @@ namespace cello {
 
   Output * output(int index)
   {
-    return simulation() ? simulation()->problem()->output(index) : NULL;
+    return problem() ? problem()->output(index) : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Units * units(int index)
+  {
+    return problem() ? problem()->units() : NULL;
   }
 
   //----------------------------------------------------------------------

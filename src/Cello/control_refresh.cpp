@@ -35,7 +35,7 @@ void Block::refresh_begin_()
 
   check_delete_();
 
-  simulation()->set_phase(phase_refresh);
+  cello::simulation()->set_phase(phase_refresh);
 
   control_sync (CkIndex_Block::p_refresh_continue(),
 		refresh->sync_type(),
@@ -306,8 +306,8 @@ int Block::particle_load_faces_ (int npa,
 
   // Scatter particles among particle_data array
 
-  Particle particle (simulation() -> particle_descr(),
-		     data()       -> particle_data());
+  Particle particle (cello::particle_descr(),
+		     data()->particle_data());
 
   std::vector<int> type_list;
   if (refresh->all_particles()) {
@@ -373,7 +373,7 @@ int Block::particle_create_array_neighbors_
 
     ParticleData * pd = new ParticleData;
 
-    ParticleDescr * p_descr = simulation() -> particle_descr();
+    ParticleDescr * p_descr = cello::particle_descr();
 
     pd->allocate(p_descr);
 
@@ -404,8 +404,8 @@ void Block::particle_determine_periodic_update_
   double dxm,dym,dzm;
   double dxp,dyp,dzp;
 
-  simulation()->hierarchy()->lower(&dxm,&dym,&dzm);
-  simulation()->hierarchy()->upper(&dxp,&dyp,&dzp);
+  cello::hierarchy()->lower(&dxm,&dym,&dzm);
+  cello::hierarchy()->upper(&dxp,&dyp,&dzp);
 
   //     ... periodicity
   bool p32[3][2];
@@ -483,7 +483,7 @@ void Block::particle_apply_periodic_update_
 
   }
 
-  ParticleDescr * p_descr = simulation() -> particle_descr();
+  ParticleDescr * p_descr = cello::particle_descr();
 
   // Apply the updates to the list of particles
 
@@ -610,7 +610,7 @@ void Block::particle_scatter_neighbors_
     }
   }
 
-  simulation()->data_delete_particles(count);
+  cello::simulation()->data_delete_particles(count);
 
 }
 
@@ -620,7 +620,7 @@ void Block::particle_send_
 (int nl,Index index_list[], ParticleData * particle_list[])
 {
 
-  ParticleDescr * p_descr = simulation() -> particle_descr();
+  ParticleDescr * p_descr = cello::particle_descr();
 
   for (int il=0; il<nl; il++) {
 

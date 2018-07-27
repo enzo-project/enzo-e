@@ -28,7 +28,7 @@
 void Block::new_output_begin_ ()
 {
   TRACE_OUTPUT("Block::new_output_begin_()");
-  simulation() -> new_output_start();
+  cello::simulation() -> new_output_start();
 }
 
 //----------------------------------------------------------------------
@@ -110,7 +110,7 @@ void Problem::new_output_next(Simulation * simulation) throw()
 void Block::output_begin_ ()
 {
   TRACE_OUTPUT("output_begin_()");
-  simulation() -> output_enter();
+  cello::simulation() -> output_enter();
 }
 
 //----------------------------------------------------------------------

@@ -83,7 +83,7 @@ void EnzoInitialTurbulence::enforce_block
 
   enzo_float * te = (enzo_float *) field.values("total_energy");
 
-  int rank = block->simulation()->rank();
+  int rank = cello::rank();
 
   ASSERT("EnzoInitializeTurbulence::enforce_block()",
 	 "Missing Field 'density'", d);
@@ -135,7 +135,7 @@ void EnzoInitialTurbulence::enforce_block
   // initialize driving fields using turboinit
 
   int Nx,Ny,Nz;
-  block->simulation()->hierarchy()->root_size (&Nx, &Ny, &Nz);
+  cello::hierarchy()->root_size (&Nx, &Ny, &Nz);
 
   // assumes cubical domain
 

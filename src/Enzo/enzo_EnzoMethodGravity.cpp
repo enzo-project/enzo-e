@@ -154,8 +154,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   TRACE_FIELD("density-total",D,1.0);
 
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
 #ifdef READ_ENZO_DENSITY
   {
@@ -244,8 +243,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   for (int i=0; i<m; i++) B_copy[i] = B[i];
 #endif	
 
-  
-  Solver * solver = block->simulation()->problem()->solver(index_solver_);
+  Solver * solver = enzo::problem()->solver(index_solver_);
   
   // May exit before solve is done...
   solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue());
@@ -304,8 +302,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   enzo_float * potential = (enzo_float*) field.values ("potential");
   TRACE_FIELD("potential",potential,-1.0);
   
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    enzo_block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
   
   if (cosmology) {
 
@@ -475,8 +472,8 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
   
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  
   if (cosmology) {
     const int rank = block->rank();
     enzo_float cosmo_a = 1.0;

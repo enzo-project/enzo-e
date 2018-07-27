@@ -116,7 +116,7 @@ void Factory::create_block_array
 
 	msg->set_data_msg(data_msg);
 #ifdef NEW_MSG_REFRESH
-	proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	cello::simulation()->set_msg_refine (index,msg);
 	proxy_block[index].insert (process_type(CkMyPe()));
 #else	
 	proxy_block[index].insert (msg);
@@ -182,7 +182,7 @@ CProxy_Block Factory::create_block_array
 
 	msg->set_data_msg(data_msg);
 #ifdef NEW_MSG_REFRESH
-	proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	cello::simulation()->set_msg_refine (index,msg);
 	proxy_block[index].insert (process_type(CkMyPe()));
 #else	
 	proxy_block[index].insert (msg);
@@ -260,7 +260,7 @@ void Factory::create_subblock_array
 	  msg->set_data_msg(data_msg);
 
 #ifdef NEW_MSG_REFINE	  
-	  proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	  cello::simulation()->set_msg_refine (index,msg);
 	  block_array[index].insert (process_type(CkMyPe()));
 #else	
 	  block_array[index].insert (msg);
@@ -313,7 +313,7 @@ Block * Factory::create_block
   msg->set_data_msg (data_msg);
 
 #ifdef NEW_MSG_REFINE	  
-  proxy_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+  cello::simulation()->set_msg_refine (index,msg);
   block_array[index].insert (process_type(CkMyPe()));
 #else  
   block_array[index].insert (msg);

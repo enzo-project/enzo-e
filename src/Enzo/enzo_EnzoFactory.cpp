@@ -9,8 +9,6 @@
 
 #include "charm_enzo.hpp"
 
-extern CProxy_EnzoSimulation proxy_enzo_simulation;
-
 // #define CELLO_TRACE
 // #define DEBUG_ENZO_FACTORY
 
@@ -101,7 +99,7 @@ void EnzoFactory::create_block_array
 	CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoFactory::create_block_array(%p)\n",
 		  __FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
 #endif	
-	proxy_enzo_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	enzo::simulation()->set_msg_refine (index,msg);
 	enzo_block_array[index].insert (process_type(CkMyPe()));
 #else	
 	enzo_block_array[index].insert (msg);
@@ -178,7 +176,7 @@ CProxy_Block EnzoFactory::create_block_array
 	CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoFactory::create_block_array(%p)\n",
 		  __FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
 #endif	
-	proxy_enzo_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	enzo::simulation()->set_msg_refine (index,msg);
 	enzo_block_array[index].insert (process_type(CkMyPe()));
 #else	
 	enzo_block_array[index].insert (msg);
@@ -269,7 +267,7 @@ void EnzoFactory::create_subblock_array
 	  CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoFactory::create_subblock_array(%p)\n",
 		    __FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
 #endif	  
-	  proxy_enzo_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+	  enzo::simulation()->set_msg_refine (index,msg);
 	  enzo_block_array[index].insert (process_type(CkMyPe()));
 #else
 	  enzo_block_array[index].insert (msg);
@@ -343,7 +341,7 @@ Block * EnzoFactory::create_block
   CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x EnzoFactory::create_block(%p)\n",
 	    __FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
 #endif  
-  proxy_enzo_simulation.ckLocalBranch()->set_msg_refine (index,msg);
+  enzo::simulation()->set_msg_refine (index,msg);
   enzo_block_array[index].insert ( process_type(CkMyPe()) );
 #else
   enzo_block_array[index].insert ( msg );

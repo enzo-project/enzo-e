@@ -32,7 +32,6 @@ class Particle;
 class ParticleData;
 class Refresh;
 class Solver;
-class Simulation;
 
 //----------------------------------------------------------------------
 
@@ -760,9 +759,6 @@ public: // virtual functions
 
   /// Initialize Block
   virtual void initialize ();
-
-  /// Return the local simulation object
-  Simulation * simulation() const;
 
   /// Return the rank of the Simulation
   int rank() const;

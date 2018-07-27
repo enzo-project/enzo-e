@@ -7,7 +7,6 @@
 
 #include "cello.hpp"
 #include "data.hpp"
-#include "charm_simulation.hpp"
 
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
@@ -204,8 +203,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
       int i3_array[3] = {0,0,0};
 
-      Simulation * simulation = proxy_simulation.ckLocalBranch();
-      Problem * problem   = simulation->problem();
+      Problem * problem   = cello::problem();
       Restrict * restrict = restrict_ ? restrict_ : problem->restrict();
 
       index_array += restrict->apply
@@ -284,8 +282,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       int i3_array[3] = {0,0,0};
 
-      Simulation * simulation = proxy_simulation.ckLocalBranch();
-      Problem * problem   = simulation->problem();
+      Problem * problem = cello::problem();
 
       Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
 
@@ -363,8 +360,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     char * values_src = field_src.values(index_src);
     char * values_dst = field_dst.values(index_dst);
     
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    Problem * problem   = simulation->problem();
+    Problem * problem = cello::problem();
 
     if (refresh_type_ == refresh_fine) {
 

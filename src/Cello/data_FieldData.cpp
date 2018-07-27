@@ -8,8 +8,6 @@
 #include "cello.hpp"
 #include "data.hpp"
 
-#include "charm_simulation.hpp"
-
 //----------------------------------------------------------------------
 
 FieldData::FieldData 

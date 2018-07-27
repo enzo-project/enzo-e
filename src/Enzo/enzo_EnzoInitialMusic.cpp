@@ -257,7 +257,7 @@ void EnzoInitialMusic::enforce_block
     // insert particles if they don't exist yet
     if (particle.num_particles(it) == 0) {
       particle.insert_particles(it,np);
-      block->simulation()->data_insert_particles(np);
+      enzo::simulation()->data_insert_particles(np);
     }
 
     // read particle attribute

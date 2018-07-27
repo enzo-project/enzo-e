@@ -149,7 +149,7 @@ void OutputData::write_block
   if (name_dir != "") {
 
     std::string name_file  = expand_name_(&file_name_,&file_args_);
-    const int num_blocks = block->simulation()->hierarchy()->num_blocks();
+    const int num_blocks = cello::hierarchy()->num_blocks();
     int count = 0;
     
     // Write DIR.parameters file

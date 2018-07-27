@@ -77,8 +77,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
   
   Field field = block->data()->field();
 
-  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-    (enzo_block->simulation()->config());
+  const EnzoConfig * enzo_config = enzo::config();
 
   EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
@@ -305,7 +304,8 @@ void EnzoMethodTurbulence::compute_resume
 
   if (block->index().is_root()) {
 
-    Monitor * monitor = block->simulation()->monitor();
+    Monitor * monitor = cello::monitor();
+    
     monitor->print ("Method","sum v*a*d    " "%.17g", g[index_turbulence_vad]);
     monitor->print ("Method","sum a*a*d    " "%.17g",g[index_turbulence_aad]);
     monitor->print ("Method","sum v*v*d/t  " "%.17g",g[index_turbulence_vvdot]);

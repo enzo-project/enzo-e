@@ -292,8 +292,7 @@ int EnzoBlock::SolveHydroEquations
 
   enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
 
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (comoving_coordinates) {
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt, time+0.5*dt);

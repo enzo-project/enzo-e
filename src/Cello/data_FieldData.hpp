@@ -26,6 +26,7 @@ class FieldData {
   /// are stored in a separate FieldDescr object, for which there is
   /// one per Simulation object (i.e. one per process)
 
+  friend class Data; // required for set_history_()
   friend class Field;
   friend class FieldFace; // required for adjust_alignment_()
 

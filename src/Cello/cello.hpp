@@ -39,11 +39,17 @@
 
 // #define DEBUG_CHECK
 
-class Simulation;
+class Config;
+class CProxy_Block;
 class FieldDescr;
-class ScalarDescr;
-class ParticleDescr;
+class Hierarchy;
+class Monitor;
 class Output;
+class ParticleDescr;
+class Problem;
+class ScalarDescr;
+class Simulation;
+class Units;
 
 //----------------------------------------------------------------------
 // TEMPLATE FUNCTIONS
@@ -255,8 +261,14 @@ namespace cello {
   { return CkMyPe() % CONFIG_NODE_SIZE; }
 
   
-  Simulation * simulation();
-  FieldDescr * field_descr();
+  Simulation  * simulation();
+  CProxy_Block  block_array();
+  Problem     * problem();
+  Hierarchy   * hierarchy();
+  const Config * config();
+  FieldDescr  * field_descr();
+  Monitor *     monitor();
+  Units *     units();
 #ifdef NEW_SYNC  
   ScalarDescr * scalar_descr_double();
   ScalarDescr * scalar_descr_int();

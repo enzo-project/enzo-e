@@ -26,7 +26,7 @@ void SolverNull::apply ( std::shared_ptr<Matrix> A,
   
   CkCallback(callback_,
 	     CkArrayIndexIndex(block->index()),
-	     block->proxy_array()).send();
+	     cello::block_array()).send();
 }
 
 //======================================================================

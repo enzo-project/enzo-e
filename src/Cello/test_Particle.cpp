@@ -11,7 +11,6 @@
 
 #include "data.hpp"
 
-extern CProxy_Simulation proxy_simulation;
 PARALLEL_MAIN_BEGIN
 {
 
@@ -19,8 +18,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(0,1);
 
-  proxy_simulation = CProxy_Simulation::ckNew("",0);
-  
   unit_class("ParticleDescr");
   ParticleDescr * particle_descr = new ParticleDescr;
   particle_descr -> set_batch_size (1024);
@@ -100,46 +97,42 @@ PARALLEL_MAIN_BEGIN
   unit_func ("num_attributes");
   unit_assert (particle.num_attributes(it_dark) == 0);
 
+  
   unit_func ("new_attribute");
-  const int ia_dark_x = particle.new_attribute (it_dark, "position_x", type_single);
-  unit_func ("num_attributes");
+  const int ia_dark_vx = particle.new_attribute (it_dark, "velocity_x", type_double);
   unit_assert (particle.num_attributes(it_dark) == 1);
 
   unit_func ("new_attribute");
-  const int ia_dark_y = particle.new_attribute (it_dark, "position_y", type_single);
-  unit_func ("num_attributes");
+  const int ia_dark_vy = particle.new_attribute (it_dark, "velocity_y", type_double);
   unit_assert (particle.num_attributes(it_dark) == 2);
 
   unit_func ("new_attribute");
-  const int ia_dark_z = particle.new_attribute (it_dark, "position_z", type_single);
-  unit_func ("num_attributes");
+  const int ia_dark_vz = particle.new_attribute (it_dark, "velocity_z", type_double);
   unit_assert (particle.num_attributes(it_dark) == 3);
 
   unit_func ("new_attribute");
-  const int ia_dark_vx = particle.new_attribute (it_dark, "velocity_x", type_double);
-  unit_func ("num_attributes");
+  const int ia_dark_m = particle.new_attribute (it_dark, "mass", type_double);
   unit_assert (particle.num_attributes(it_dark) == 4);
 
-  unit_func ("new_attribute");
-  const int ia_dark_vy = particle.new_attribute (it_dark, "velocity_y", type_double);
-  unit_func ("num_attributes");
+  const int ia_dark_x = particle.new_attribute (it_dark, "position_x", type_single);
   unit_assert (particle.num_attributes(it_dark) == 5);
 
   unit_func ("new_attribute");
-  const int ia_dark_vz = particle.new_attribute (it_dark, "velocity_z", type_double);
-  unit_func ("num_attributes");
+  const int ia_dark_y = particle.new_attribute (it_dark, "position_y", type_single);
   unit_assert (particle.num_attributes(it_dark) == 6);
 
   unit_func ("new_attribute");
-  const int ia_dark_m = particle.new_attribute (it_dark, "mass", type_double);
+  const int ia_dark_z = particle.new_attribute (it_dark, "position_z", type_single);
+  unit_assert (particle.num_attributes(it_dark) == 7);
+
   
   unit_func ("attribute_name()");
-  unit_assert(particle.attribute_name(it_dark,ia_dark_x) == "position_x");
-  unit_assert(particle.attribute_name(it_dark,ia_dark_y) == "position_y");
-  unit_assert(particle.attribute_name(it_dark,ia_dark_z) == "position_z");
   unit_assert(particle.attribute_name(it_dark,ia_dark_vx) == "velocity_x");
   unit_assert(particle.attribute_name(it_dark,ia_dark_vy) == "velocity_y");
   unit_assert(particle.attribute_name(it_dark,ia_dark_vz) == "velocity_z");
+  unit_assert(particle.attribute_name(it_dark,ia_dark_x) == "position_x");
+  unit_assert(particle.attribute_name(it_dark,ia_dark_y) == "position_y");
+  unit_assert(particle.attribute_name(it_dark,ia_dark_z) == "position_z");
 
   particle.set_position(it_dark,ia_dark_x, ia_dark_y, ia_dark_z);
   particle.set_velocity(it_dark,ia_dark_vx,ia_dark_vy,ia_dark_vz);
@@ -239,12 +232,12 @@ PARALLEL_MAIN_BEGIN
   //   Type
   //--------------------------------------------------
 
-  unit_assert(particle.attribute_type(it_dark,ia_dark_x) == type_single);
-  unit_assert(particle.attribute_type(it_dark,ia_dark_y) == type_single);
-  unit_assert(particle.attribute_type(it_dark,ia_dark_z) == type_single);
   unit_assert(particle.attribute_type(it_dark,ia_dark_vx) == type_double);
   unit_assert(particle.attribute_type(it_dark,ia_dark_vy) == type_double);
   unit_assert(particle.attribute_type(it_dark,ia_dark_vz) == type_double);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_x) == type_single);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_y) == type_single);
+  unit_assert(particle.attribute_type(it_dark,ia_dark_z) == type_single);
   unit_assert(particle.attribute_type(it_dark,ia_dark_m) == type_double);
 
   unit_assert(particle.attribute_type(it_trace,ia_trace_x) == type_int32);
@@ -257,12 +250,12 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("attribute_bytes()");
 
-  unit_assert(particle.attribute_bytes(it_dark,ia_dark_x) == 4);
-  unit_assert(particle.attribute_bytes(it_dark,ia_dark_y) == 4);
-  unit_assert(particle.attribute_bytes(it_dark,ia_dark_z) == 4);
   unit_assert(particle.attribute_bytes(it_dark,ia_dark_vx) == 8);
   unit_assert(particle.attribute_bytes(it_dark,ia_dark_vy) == 8);
   unit_assert(particle.attribute_bytes(it_dark,ia_dark_vz) == 8);
+  unit_assert(particle.attribute_bytes(it_dark,ia_dark_x) == 4);
+  unit_assert(particle.attribute_bytes(it_dark,ia_dark_y) == 4);
+  unit_assert(particle.attribute_bytes(it_dark,ia_dark_z) == 4);
   unit_assert(particle.attribute_bytes(it_dark,ia_dark_m) == 8);
 
   unit_assert(particle.particle_bytes(it_dark) == 4+4+4+8+8+8+8);
@@ -282,13 +275,14 @@ PARALLEL_MAIN_BEGIN
   int mp = particle.batch_size();
 
   // not interleaved
-  unit_assert(particle.attribute_offset(it_dark,ia_dark_x) == 0*mp);
-  unit_assert(particle.attribute_offset(it_dark,ia_dark_y) == 4*mp);
-  unit_assert(particle.attribute_offset(it_dark,ia_dark_z) == 8*mp);
-  unit_assert(particle.attribute_offset(it_dark,ia_dark_vx) == 12*mp);
-  unit_assert(particle.attribute_offset(it_dark,ia_dark_vy) == 20*mp);
-  unit_assert(particle.attribute_offset(it_dark,ia_dark_vz) == 28*mp);
-  unit_assert(particle.attribute_offset(it_dark,ia_dark_m) == 36*mp);
+  int k = 0;
+  unit_assert(particle.attribute_offset(it_dark,ia_dark_vx) == k*mp); k+=8;
+  unit_assert(particle.attribute_offset(it_dark,ia_dark_vy) == k*mp); k+=8;
+  unit_assert(particle.attribute_offset(it_dark,ia_dark_vz) == k*mp); k+=8;
+  unit_assert(particle.attribute_offset(it_dark,ia_dark_m) == k*mp);  k+=8;
+  unit_assert(particle.attribute_offset(it_dark,ia_dark_x) == k*mp);  k+=4;
+  unit_assert(particle.attribute_offset(it_dark,ia_dark_y) == k*mp);  k+=4;
+  unit_assert(particle.attribute_offset(it_dark,ia_dark_z) == k*mp);  k+=4;
 
   // interleaved
   unit_assert(particle.attribute_bytes(it_trace,ia_trace_x) == 4);
@@ -299,12 +293,12 @@ PARALLEL_MAIN_BEGIN
   unit_func("stride");
 
   // not interleaved
-  unit_assert (particle.stride(it_dark,ia_dark_x) == 1);
-  unit_assert (particle.stride(it_dark,ia_dark_y) == 1);
-  unit_assert (particle.stride(it_dark,ia_dark_z) == 1);
   unit_assert (particle.stride(it_dark,ia_dark_vx) == 1);
   unit_assert (particle.stride(it_dark,ia_dark_vy) == 1);
   unit_assert (particle.stride(it_dark,ia_dark_vz) == 1);
+  unit_assert (particle.stride(it_dark,ia_dark_x) == 1);
+  unit_assert (particle.stride(it_dark,ia_dark_y) == 1);
+  unit_assert (particle.stride(it_dark,ia_dark_z) == 1);
 
   // interleaved
   unit_assert (particle.stride(it_trace,ia_trace_x) == 16/4);
@@ -379,12 +373,12 @@ PARALLEL_MAIN_BEGIN
 
   for (int ib=0; ib<nb; ib++) {
     int np = particle.num_particles(it_dark,ib);
-    float  *  x = (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
-    float  *  y = (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
-    float  *  z = (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
     double * vx = (double *) particle.attribute_array(it_dark,ia_dark_vx,ib);
     double * vy = (double *) particle.attribute_array(it_dark,ia_dark_vy,ib);
     double * vz = (double *) particle.attribute_array(it_dark,ia_dark_vz,ib);
+    float  *  x = (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
+    float  *  y = (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
+    float  *  z = (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
     int dx = particle.stride(it_dark,ia_dark_x);
     int dv = particle.stride(it_dark,ia_dark_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
@@ -413,12 +407,12 @@ PARALLEL_MAIN_BEGIN
     const int np = particle.num_particles(it_dark,ib);
     for (int ip=0; ip<np; ip++) {
       index = ip + ib*mp;
-      if (xp[ip] != 10*index) error_position++;
-      if (yp[ip] != 10*index+1) error_position++;
-      if (zp[ip] != 10*index+2) error_position++;
       if (vxp[ip] != 10*index+3) error_velocity++;
       if (vyp[ip] != 10*index+4) error_velocity++;
       if (vzp[ip] != 10*index+5) error_velocity++;
+      if (xp[ip] != 10*index) error_position++;
+      if (yp[ip] != 10*index+1) error_position++;
+      if (zp[ip] != 10*index+2) error_position++;
     }
   }
   unit_func("position()");
@@ -433,22 +427,22 @@ PARALLEL_MAIN_BEGIN
   for (int ib=0; ib<nb; ib++) {
     index = ib*mp;
     int np = particle.num_particles(it_dark,ib);
-    float  * x =  (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
-    float  * y =  (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
-    float  * z =  (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
     double * vx = (double *) particle.attribute_array(it_dark,ia_dark_vx,ib);
     double * vy = (double *) particle.attribute_array(it_dark,ia_dark_vy,ib);
     double * vz = (double *) particle.attribute_array(it_dark,ia_dark_vz,ib);
+    float  * x =  (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
+    float  * y =  (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
+    float  * z =  (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
     int dx = particle.stride(it_dark,ia_dark_x);
     int dv = particle.stride(it_dark,ia_dark_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
       index = ip + ib*mp;
-      if (x[ix]  != 10*index ) count_wrong[0]++;
-      if (y[ix]  != 10*index+1) count_wrong[1]++;
-      if (z[ix]  != 10*index+2) count_wrong[2]++;
       if (vx[iv] != 10*index+3) count_wrong[3]++;
       if (vy[iv] != 10*index+4) count_wrong[4]++;
       if (vz[iv] != 10*index+5) count_wrong[5]++;
+      if (x[ix]  != 10*index ) count_wrong[0]++;
+      if (y[ix]  != 10*index+1) count_wrong[1]++;
+      if (z[ix]  != 10*index+2) count_wrong[2]++;
       index++;
     }
   }
@@ -580,23 +574,23 @@ PARALLEL_MAIN_BEGIN
   for (int ib=0; ib<nb; ib++) {
     index = ib*mp;
     int np = particle.num_particles(it_dark,ib);
-    float  * x  = (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
-    float  * y  = (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
-    float  * z  = (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
     double * vx = (double *) particle.attribute_array(it_dark,ia_dark_vx,ib);
     double * vy = (double *) particle.attribute_array(it_dark,ia_dark_vy,ib);
     double * vz = (double *) particle.attribute_array(it_dark,ia_dark_vz,ib);
+    float  * x  = (float  *) particle.attribute_array(it_dark,ia_dark_x, ib);
+    float  * y  = (float  *) particle.attribute_array(it_dark,ia_dark_y, ib);
+    float  * z  = (float  *) particle.attribute_array(it_dark,ia_dark_z, ib);
     int dx = particle.stride(it_dark,ia_dark_x);
     int dv = particle.stride(it_dark,ia_dark_vx);
     for (int ip=0,ix=0,iv=0; ip<np; ip++,ix+=dx,iv+=dv) {
       count_particles ++;
       if (ip % 2 == 0) index++;
-      if (x[ix]  != 10*index ) count_wrong[0]++;
-      if (y[ix]  != 10*index+1) count_wrong[1]++;
-      if (z[ix]  != 10*index+2) count_wrong[2]++;
       if (vx[iv] != 10*index+3) count_wrong[3]++;
       if (vy[iv] != 10*index+4) count_wrong[4]++;
       if (vz[iv] != 10*index+5) count_wrong[5]++;
+      if (x[ix]  != 10*index ) count_wrong[0]++;
+      if (y[ix]  != 10*index+1) count_wrong[1]++;
+      if (z[ix]  != 10*index+2) count_wrong[2]++;
       
       index++;
     }
@@ -842,30 +836,23 @@ PARALLEL_MAIN_BEGIN
   int index_array[mp];
 
   for (int ib=0; ib<nb; ib++) {
-    np = p_src.num_particles(it_dark,ib);
     float * xa = (float *) p_src.attribute_array(it_dark,ia_dark_x,ib);
     float * ya = (float *) p_src.attribute_array(it_dark,ia_dark_y,ib);
     for (int ip=0; ip<mp; ip++) mask[ip] = false;
+    np = p_src.num_particles(it_dark,ib);
     for (int ip=0; ip<np; ip++) {
-      float x = xa[ip*dx]-1;
-      float y = ya[ip*dx]-1;
-      // move particle only if in ghost region
-      //
-      //   gmx-0.5*nx  
-      // < gmx+0.0*nx  0
-      // < gmx+0.5*nx  1
-      // < gmx+1.0*nx  2
-      // < gmx+1.5*nx  3
-      //
-      // +---+---+---+---+
-      //    gmx    gmx+nx
- 
-      int kx = (x-gmx+nx/2) / (0.5*nx);
-      int ky = (y-gmy+ny/2) / (0.5*ny);
+      float x = xa[ip*dx]-0.5;
+      float y = ya[ip*dx]-0.5;
+      int kx = 0;
+      int ky = 0;
+      if (x-(gmx) > 0)      kx++;
+      if (x-(gmx+nx/2) > 0) kx++;
+      if (x-(gmx+nx) > 0)   kx++;
+      if (y-(gmy) > 0)      ky++;
+      if (y-(gmy+ny/2) > 0) ky++;
+      if (y-(gmy+ny) > 0)   ky++;
       mask[ip] = (kx==0 || kx==3 || ky==0 || ky==3);
       index_array[ip] = kx + 4*ky;
-
-      // mask[ip]        = (kx || ky);
     }
 
     p_src.scatter(it_dark,ib,np,mask,index_array,16,pd_array);
@@ -896,10 +883,15 @@ PARALLEL_MAIN_BEGIN
   unit_assert(p_array[1]->num_particles(it_dark) == ca10+ca20+ca30);
   unit_assert(p_array[2]->num_particles(it_dark) == ca10+ca20+ca30);
   unit_assert(p_array[3]->num_particles(it_dark) == ca10+ca20+ca30);
+
   unit_assert(p_array[4]->num_particles(it_dark) == ca01+ca02);
+
   unit_assert(p_array[7]->num_particles(it_dark) == ca31+ca32);
+
   unit_assert(p_array[8]->num_particles(it_dark) == ca01+ca02);
+
   unit_assert(p_array[11]->num_particles(it_dark)== ca31+ca32);
+
   unit_assert(p_array[12]->num_particles(it_dark)== ca03);
   unit_assert(p_array[13]->num_particles(it_dark)== ca13);
   unit_assert(p_array[14]->num_particles(it_dark)== ca23);
@@ -1056,7 +1048,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (buffer_next - buffer == n);
   unit_assert (p_dst == new_p);
 
-
+  delete [] buffer;
   // printf ("error_gather_int %d\n",error_gather_int);
 
   //--------------------------------------------------

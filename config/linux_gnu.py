@@ -5,6 +5,7 @@ is_arch_valid = 1
 
 #
 #flags_arch = '-g -fprofile-arcs -ftest-coverage' # gcov
+#flags_arch = '-Wall -O3 -ffast-math -funroll-loops -g'
 flags_arch = '-Wall -O3 -g'
 #flags_arch = '-Wall -g'
 #flags_arch = '-O3 -pg -g'

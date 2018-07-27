@@ -938,8 +938,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   // Adjust cell widths for cosmological expansion if needed
   
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   enzo_float cosmo_a    = 1.0;
   enzo_float cosmo_dadt = 0.0;
