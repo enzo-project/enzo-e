@@ -14,6 +14,54 @@
 
 class Parameters;
 
+#ifdef CONFIG_USE_GRACKLE
+// Operator to allow Grackle's chemistry data to PUP
+inline void operator|(PUP::er &p, chemistry_data &c){
+ p | c.use_grackle;
+ p | c.with_radiative_cooling;
+ p | c.primordial_chemistry;
+ p | c.metal_cooling;
+ p | c.UVbackground;
+ p | *c.grackle_data_file;
+ p | c.cmb_temperature_floor;
+ p | c.Gamma;
+ p | c.h2_on_dust;
+ p | c.photoelectric_heating;
+ p | c.photoelectric_heating_rate;
+ p | c.use_volumetric_heating_rate;
+ p | c.use_specific_heating_rate;
+ p | c.three_body_rate;
+ p | c.cie_cooling;
+ p | c.h2_optical_depth_approximation;
+ p | c.ih2co;
+ p | c.ipiht;
+ p | c.HydrogenFractionByMass;
+ p | c.DeuteriumToHydrogenRatio;
+ p | c.SolarMetalFractionByMass;
+ p | c.NumberOfTemperatureBins;
+ p | c.CaseBRecombination;
+ p | c.TemperatureStart;
+ p | c.TemperatureEnd;
+ p | c.NumberOfDustTemperatureBins;
+ p | c.DustTemperatureStart;
+ p | c.DustTemperatureEnd;
+ p | c.Compton_xray_heating;
+ p | c.LWbackground_sawtooth_suppression;
+ p | c.LWbackground_intensity;
+ p | c.UVbackground_redshift_on;
+ p | c.UVbackground_redshift_off;
+ p | c.UVbackground_redshift_fullon;
+ p | c.UVbackground_redshift_drop;
+ p | c.cloudy_electron_fraction_factor;
+ p | c.use_radiative_transfer;
+ p | c.radiative_transfer_coupled_rate_solver;
+ p | c.radiative_transfer_intermediate_step;
+ p | c.radiative_transfer_hydrogen_only;
+ p | c.self_shielding_method;
+ p | c.H2_self_shielding;
+}
+#endif
+
 class EnzoConfig : public Config {
 
   /// @class    EnzoConfig
@@ -41,6 +89,9 @@ public: // interface
   EnzoConfig(CkMigrateMessage *m)
     : Config (m),
       adapt_mass_type(),
+      #ifdef CONFIG_USE_GRACKLE
+        method_grackle_chemistry(),
+      #endif
       ppm_diffusion(0),
       ppm_dual_energy(false),
       ppm_dual_energy_eta_1(0.0),
@@ -363,13 +414,7 @@ public: // attributes
 
 
 #ifdef CONFIG_USE_GRACKLE
-
-  /// EnzoMethodGrackle
-
-  // code_units       method_grackle_units; // moved to Grackle Method
-  chemistry_data * method_grackle_chemistry; // = new chemistry_data;
-  //method_grackle_chemistry = new chemistry_data;
-
+  chemistry_data * method_grackle_chemistry;
 #endif /* CONFIG_USE_GRACKLE */
 
 };

@@ -18,7 +18,6 @@ EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
 #ifdef CONFIG_USE_GRACKLE
-  //method_grackle_units(),
   method_grackle_chemistry(),
 #endif
   ppm_diffusion(false),
@@ -145,12 +144,19 @@ EnzoConfig::EnzoConfig() throw ()
     initial_soup_d_size[i] = 0.0;
     initial_collapse_array[i] = 0;
   }
+
+#ifdef CONFIG_USE_GRACKLE
+    method_grackle_chemistry = new chemistry_data;
+#endif
 }
 
 //----------------------------------------------------------------------
 
 EnzoConfig::~EnzoConfig() throw ()
 {
+#ifdef CONFIG_USE_GRACKLE
+  delete method_grackle_chemistry;
+#endif // CONFIG_USE_GRACKLE
 }
 
 //----------------------------------------------------------------------
@@ -295,18 +301,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_time;
 
 #ifdef CONFIG_USE_GRACKLE
-
-  // Grackle cooling parameters
-
-  // Units
-
-  //  p | method_grackle_units;
-  //WARNING("EnzoConfig::pup",
-	//  "p|method_grackle_units not called");
-  //  p | method_grackle_chemistry;
-  WARNING("EnzoConfig::pup",
-	  "p|method_grackle_chemistry not called");
-
+  p | *method_grackle_chemistry;
 #endif /* CONFIG_USE_GRACKLE */
 
 }
@@ -707,13 +702,13 @@ void EnzoConfig::read(Parameters * p) throw()
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
 
-    solver_min_level_coarse[index_solver] = 
+    solver_min_level_coarse[index_solver] =
       p->value_integer (solver_name + ":min_level_coarse",solver_min_level[index_solver]);
 
-    solver_max_level_coarse[index_solver] = 
+    solver_max_level_coarse[index_solver] =
       p->value_integer (solver_name + ":max_level_coarse",solver_min_level[index_solver]);
 
-    solver_is_unigrid[index_solver] = 
+    solver_is_unigrid[index_solver] =
       p->value_logical (solver_name + ":is_unigrid",false);
 
   }
@@ -740,20 +735,10 @@ void EnzoConfig::read(Parameters * p) throw()
   // chemistry_data is a pointer, set values with ->
 
   // Defaults alert PUP::er() to ignore
-  method_grackle_chemistry = new chemistry_data;
+  // method_grackle_chemistry = new chemistry_data;
   method_grackle_chemistry->use_grackle = uses_grackle;
 
   if (uses_grackle) {
-/*
-    for (int index_physics=0; index_physics<num_physics; index_physics++) {
-      // Check if EnzoPhysicsCosmology object is present
-     if (physics_list[index_physics] == "cosmology") {
-	     comoving_coordinates = true;
-	     break;
-     }
-   }
-*/
-    // computed
 
     if (set_default_chemistry_parameters(method_grackle_chemistry) == 0) {
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
@@ -876,36 +861,6 @@ void EnzoConfig::read(Parameters * p) throw()
     // sure to set the below parameter to match the Enzo-P
     // parameter for turning RT on / off:
     //   grackle_data->use_radiative_transfer = ENZO_P_PARAMETER_NAME;
-
-
-/*
-    // Copy over code units to grackle units struct
-    method_grackle_units.density_units = enzo_units->density();
-    method_grackle_units.length_units  = enzo_units->length();
-    method_grackle_units.time_units    = enzo_units->time();
-    method_grackle_units.velocity_units = enzo_units->velocity();
-
-
-    method_grackle_units.a_units       = 1.0;
-    method_grackle_units.a_value       = 1.0;
-    if (method_grackle_units.comoving_coordinates){
-      enzo_float cosmo_a  = 1.0;
-      enzo_float cosmo_dt = 0.0;
-
-      //EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-      //            simulation->problem()->physics("cosmology");
-      //cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
-      //                                    time);
-      method_grackle_units.a_units
-           = 1.0 / (1.0 + physics_cosmology_initial_redshift);
-      method_grackle_units.a_value = 1.0; // will be fixed later // cosmo_a;
-    }
-
-    if (initialize_chemistry_data(&method_grackle_units) == 0) {
-      ERROR("EnzoConfig::EnzoConfig()",
-      "Error in initialize_chemistry_data");
-    }
-*/
 
   }
 #endif /* CONFIG_USE_GRACKLE */

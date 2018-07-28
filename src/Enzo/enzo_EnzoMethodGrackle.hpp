@@ -12,6 +12,23 @@
 #define ENZO_ENZO_METHOD_GRACKLE_HPP
 
 
+#ifdef CONFIG_USE_GRACKLE
+// PUP operator for Grackle's code_units
+inline void operator|(PUP::er &p, code_units &c){
+  // Make sure to change this if code_units ever changes
+
+  p | c.comoving_coordinates;
+  p | c.density_units;
+  p | c.length_units;
+  p | c.time_units;
+  p | c.velocity_units;
+  p | c.a_units;
+  p | c.a_value;
+
+}
+#endif
+
+
 class EnzoMethodGrackle : public Method {
 
   /// @class    EnzoMethodGrackle
@@ -35,7 +52,7 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m)
-    : Method (m)
+    : Method (m), grackle_units_()
     {  }
 
   /// CHARM++ Pack / Unpack function
@@ -49,6 +66,8 @@ public: // interface
     TRACEPUP;
 
     Method::pup(p);
+
+    p | grackle_units_;
 
   #endif /* CONFIG_USE_GRACKLE */
 
@@ -70,8 +89,10 @@ protected: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
   void compute_( EnzoBlock * enzo_block) throw();
-#endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
+
+  
   code_units grackle_units_;
+#endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
 
 };
 
