@@ -17,12 +17,14 @@ class Parameters;
 #ifdef CONFIG_USE_GRACKLE
 // Operator to allow Grackle's chemistry data to PUP
 inline void operator|(PUP::er &p, chemistry_data &c){
+ // all values are single ints, floats, or doubles with the
+ // exception of grackle_data_file
  p | c.use_grackle;
  p | c.with_radiative_cooling;
  p | c.primordial_chemistry;
  p | c.metal_cooling;
  p | c.UVbackground;
- p | *c.grackle_data_file;
+ p | *c.grackle_data_file; // this is a char * grackle_data_file; in the struct
  p | c.cmb_temperature_floor;
  p | c.Gamma;
  p | c.h2_on_dust;

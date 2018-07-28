@@ -16,6 +16,7 @@
 // PUP operator for Grackle's code_units
 inline void operator|(PUP::er &p, code_units &c){
   // Make sure to change this if code_units ever changes
+  // all are just single values (int or float)
 
   p | c.comoving_coordinates;
   p | c.density_units;
@@ -90,7 +91,7 @@ protected: // attributes
 #ifdef CONFIG_USE_GRACKLE
   void compute_( EnzoBlock * enzo_block) throw();
 
-  
+
   code_units grackle_units_;
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
 
