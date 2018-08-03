@@ -356,7 +356,7 @@ public: // attributes
 
   std::vector<int>           solver_min_level_coarse;
   std::vector<int>           solver_max_level_coarse;
-  std::vector<bool>          solver_is_unigrid;
+  std::vector<int>           solver_is_unigrid;
 
   /// Stop at specified redshift for cosmology
   double                     stopping_redshift;
