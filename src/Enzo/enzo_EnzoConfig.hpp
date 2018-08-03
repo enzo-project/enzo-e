@@ -24,7 +24,17 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  p | c.primordial_chemistry;
  p | c.metal_cooling;
  p | c.UVbackground;
- p | *c.grackle_data_file; // this is a char * grackle_data_file; in the struct
+
+ int length = (c.grackle_data_file == NULL) ? 0 : strlen(c.grackle_data_file);
+ p | length;
+ if (length > 0){
+   if (p.isUnpacking())
+     c.grackle_data_file=new char[length+1];
+   p | *c_grackle_data_file;
+ } else {
+   c.grackle_data_file = NULL;
+ }
+
  p | c.cmb_temperature_floor;
  p | c.Gamma;
  p | c.h2_on_dust;
