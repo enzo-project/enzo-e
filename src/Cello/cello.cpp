@@ -195,7 +195,6 @@ namespace cello {
   }
 
   //---------------------------------------------------------------------- 
-#ifdef NEW_SYNC
   ScalarDescr * scalar_descr_double()
   {
     return simulation() ? simulation()->scalar_descr_double() : new ScalarDescr;
@@ -208,7 +207,10 @@ namespace cello {
   {
     return simulation() ? simulation()->scalar_descr_sync() : new ScalarDescr;
   }
-#endif  
+  ScalarDescr * scalar_descr_void()
+  {
+    return simulation() ? simulation()->scalar_descr_void() : new ScalarDescr;
+  }
   //---------------------------------------------------------------------- 
 
   CProxy_Block block_array()
@@ -267,7 +269,14 @@ namespace cello {
 
   //---------------------------------------------------------------------- 
 
-  Units * units(int index)
+  Solver * solver(int index)
+  {
+    return problem() ? problem()->solver(index) : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Units * units()
   {
     return problem() ? problem()->units() : NULL;
   }

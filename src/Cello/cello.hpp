@@ -49,6 +49,7 @@ class ParticleDescr;
 class Problem;
 class ScalarDescr;
 class Simulation;
+class Solver;
 class Units;
 
 //----------------------------------------------------------------------
@@ -261,22 +262,24 @@ namespace cello {
   { return CkMyPe() % CONFIG_NODE_SIZE; }
 
   
-  Simulation  * simulation();
-  CProxy_Block  block_array();
-  Problem     * problem();
-  Hierarchy   * hierarchy();
-  const Config * config();
-  FieldDescr  * field_descr();
-  Monitor *     monitor();
-  Units *     units();
-#ifdef NEW_SYNC  
-  ScalarDescr * scalar_descr_double();
-  ScalarDescr * scalar_descr_int();
-  ScalarDescr * scalar_descr_sync();
-#endif  
+  Simulation *    simulation();
+  CProxy_Block    block_array();
+  Problem *       problem();
+  Hierarchy *     hierarchy();
+  const Config *  config();
+  FieldDescr *    field_descr();
+  Monitor *       monitor();
+  Units *         units();
+  
+  ScalarDescr *   scalar_descr_double();
+  ScalarDescr *   scalar_descr_int();
+  ScalarDescr *   scalar_descr_sync();
+  ScalarDescr *   scalar_descr_void();
+
   ParticleDescr * particle_descr();
-  Output * output (int index);
-  int rank ();
+  Output *        output (int index);
+  Solver *        solver(int index);
+  int             rank ();
 }
 
 #endif /* CELLO_HPP */

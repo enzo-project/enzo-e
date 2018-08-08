@@ -39,6 +39,9 @@ EnzoSolverJacobi::EnzoSolverJacobi
   
   id_ = field_descr->insert_temporary();
   ir_ = field_descr->insert_temporary();
+
+  ScalarDescr * scalar_descr_int = cello::scalar_descr_int();
+  i_iter_ = scalar_descr_int->new_value(name_ + ":iter");  
 }
 
 //----------------------------------------------------------------------
@@ -57,10 +60,9 @@ void EnzoSolverJacobi::apply
   Field field = block->data()->field();
 
   allocate_temporary_(field,block);
+
+  (*piter_(block)) = 0.0;
   
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->jacobi_iter_clear();
-    
   // Refresh X
   Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
 
@@ -95,7 +97,7 @@ void EnzoSolverJacobi::compute(Block * block)
 
   Field field = block->data()->field();
 
-  if (enzo_block->jacobi_iter() < n_) {
+  if (*piter_(block) < n_) {
 
     apply_(block);
 
@@ -175,8 +177,7 @@ void EnzoSolverJacobi::apply_(Block * block)
 
   // Next iteration
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->jacobi_iter_increment();
+  (*piter_(block))++;
   
   // Refresh X
   Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());

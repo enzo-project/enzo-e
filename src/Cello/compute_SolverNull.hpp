@@ -53,7 +53,7 @@ public: // virtual functions
 		       int ix, int ib, Block * block) throw();
 
   /// Return the name of this SolverNull
-  virtual std::string name () const
+  virtual std::string type () const
   { return "null"; }
 
 protected: // functions

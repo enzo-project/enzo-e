@@ -106,11 +106,6 @@ void Monitor::header () const
 #else
   print ("Define","NEW_OUTPUT          %s","no");
 #endif  
-#ifdef NEW_SYNC  
-  print ("Define","NEW_SYNC            %s","Yes");
-#else
-  print ("Define","NEW_SYNC            %s","no");
-#endif  
 #ifdef NEW_MSG_REFINE  
   print ("Define","NEW_MSG_REFINE      %s","Yes");
 #else

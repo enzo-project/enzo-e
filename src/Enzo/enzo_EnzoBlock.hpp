@@ -112,14 +112,6 @@ public: // interface
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
-#ifdef NEW_SYNC
-#else       
-       mg_sync_restrict_(),
-       mg_sync_prolong_(),
-#endif       
-       mg_iter_(0),
-       mg_msg_(NULL),
-       jacobi_iter_(0),
        dt(0.0),
        redshift(0.0),
        SubgridFluxes(NULL)
@@ -141,14 +133,6 @@ public: // interface
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : BASE_ENZO_BLOCK (m),
-#ifdef NEW_SYNC
-#else       
-      mg_sync_restrict_(),
-      mg_sync_prolong_(),
-#endif      
-      mg_iter_(0),
-      mg_msg_(NULL),
-      jacobi_iter_(0),
       dt(0.0),
       redshift(0.0),
       SubgridFluxes(NULL)
@@ -327,46 +311,19 @@ public: /// entry methods
 
   // EnzoSolverMg0
 
-  void p_solver_mg0_pre_smooth();
+  void r_solver_mg0_begin_solve(CkReductionMsg* msg);  
+  void p_solver_mg0_restrict();
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
   void p_solver_mg0_last_smooth();
   void r_solver_mg0_barrier(CkReductionMsg* msg);  
-  void r_solver_mg0_shift_b(CkReductionMsg* msg);  
   void p_solver_mg0_prolong_recv(FieldMsg * msg);
   void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
-#ifdef NEW_SYNC
-
-  void mg_set_msg (FieldMsg * msg) { mg_msg_ = msg; }
-  FieldMsg * mg_get_msg () const { return mg_msg_; }
-  
-#else  
-  void mg_sync_restrict_reset()             { mg_sync_restrict_.reset(); }
-  void mg_sync_restrict_set_stop(int value) { mg_sync_restrict_.set_stop(value); }
-  bool mg_sync_restrict_next()        { return mg_sync_restrict_.next(); };
-
-  void mg_sync_prolong_reset()             { mg_sync_prolong_.reset(); }
-  void mg_sync_prolong_set_stop(int value) { mg_sync_prolong_.set_stop(value); }
-  bool mg_sync_prolong_next()        { return mg_sync_prolong_.next(); };
-  
-#endif  
-  void mg_iter_clear() { mg_iter_ = 0; }
-  void mg_iter_increment() { ++mg_iter_; }
-  int mg_iter() const {return mg_iter_; }
-
-  void jacobi_iter_clear() { jacobi_iter_ = 0; }
-  void jacobi_iter_increment() { ++jacobi_iter_; }
-  int jacobi_iter() const {return jacobi_iter_; }
 
   void print() {
     Block::print();
-    CkPrintf ("mg_iter_ = %d\n",mg_iter_);
-    // CkPrintf ("mg_sync_restrict_ = %d\n",mg_sync_restrict_);
-    // CkPrintf ("mg_sync_prolong_ = %d\n",mg_sync_prolong_);
-    CkPrintf ("mg_msg_ = %p\n",mg_msg_);
-    CkPrintf ("jacobi_iter_ = %d\n",jacobi_iter_);
     CkPrintf ("dt = %d\n",dt);
     CkPrintf ("redshift = %d\n",redshift);
     CkPrintf ("SubgridFluxes = %d\n",SubgridFluxes);
@@ -379,26 +336,6 @@ public: /// entry methods
   
 protected: // attributes
 
-#ifdef NEW_SYNC
-#else  
-  // MG SOLVER ( EnzoSolverMg0)
-  Sync mg_sync_restrict_;
-
-  // Synchronize to not call prolong until all children have exited coarse solve
-  Sync mg_sync_prolong_;
-
-#endif  
-
-  // MG iteration count
-  int mg_iter_;
-
-  // Saved FieldMsg for prolong
-  FieldMsg * mg_msg_;
-
-  // Jacobi iteration count
-  int jacobi_iter_;
-
-  // FieldMsg for prolong if called out of order
 
 public: // attributes (YIKES!)
 

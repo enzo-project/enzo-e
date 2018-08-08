@@ -8,8 +8,6 @@
 #ifndef DATA_SCALARDESCR_HPP
 #define DATA_SCALARDESCR_HPP
 
-#ifdef NEW_SYNC
-
 class ScalarDescr {
 
   /// @class    ScalarDescr
@@ -63,7 +61,4 @@ private: // attributes
 
 };
 
-#endif
-
-#endif /* DATA_SCALARDATA_HPP */
-
+#endif /* DATA_SCALARDESCR_HPP */

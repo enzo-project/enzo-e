@@ -124,7 +124,8 @@ public: // interface
   }
 
   /// Return the ith solver object
-  Solver * solver(size_t i) const throw() ;
+  Solver * solver(size_t i) const throw()
+  { return (i < solver_list_.size()) ? solver_list_[i] : NULL; }
 
   /// Return the ith method object
   Method * method(size_t i) const throw() 
