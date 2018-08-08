@@ -29,7 +29,7 @@ if (use_papi):
 	components.append(['papi'])
 
 
-components.append(['hdf5','z'])
+components.append(['hdf5','z','dl'])
 
 libraries_external  = ['png','$FORTRANLIBS', 'boost_filesystem', 'boost_system']
 
