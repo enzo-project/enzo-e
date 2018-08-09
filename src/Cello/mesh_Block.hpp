@@ -118,6 +118,7 @@ public: // interface
     index_solver_(),
     refresh_()
   {
+    for (int i=0; i<3; i++) array_[i]=0;
   }
 
   /// Initialize a migrated Block
@@ -895,6 +896,9 @@ protected: // attributes
 
   /// Index of this Block in the octree array
   Index index_;
+
+  /// Location in the Mesh root array.  Stored for HDF5 output only.
+  int array_[3];
 
   /// Desired level for the next cycle
   int level_next_;

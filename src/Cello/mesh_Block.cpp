@@ -99,7 +99,6 @@ Block::Block ( MsgRefine * msg )
   msg->print();
 #endif
 
-
   bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
 
   if (is_first_cycle) {
@@ -109,6 +108,8 @@ Block::Block ( MsgRefine * msg )
   }
 
   delete msg;
+
+  index_.array(array_,array_+1,array_+2);
 
   performance_stop_(perf_block);
 
@@ -158,6 +159,8 @@ Block::Block ( process_type ip_source )
 #endif
 #ifdef NEW_MSG_REFINE
   performance_start_(perf_block);
+
+  thisIndex.array(array_,array_+1,array_+2);
 
 #ifdef DEBUG_NEW_MSG_REFINE
   {
@@ -437,6 +440,7 @@ void Block::pup(PUP::er &p)
   }
 
   p | index_;
+  PUParray(p,array_,3);
   p | level_next_;
   p | cycle_;
   p | time_;

@@ -20,6 +20,7 @@ IoBlock::IoBlock() throw ()
   meta_name_.push_back("cycle");
   meta_name_.push_back("time");
   meta_name_.push_back("dt");
+  meta_name_.push_back("array");
 
 }
 
@@ -59,6 +60,10 @@ void IoBlock::meta_value
   } else if (index == count++) {
     *buffer = (void *) & block_->dt_;
     *type   = type_double;
+  } else if (index == count++) {
+    *buffer = (void *) & block_->array_;
+    *type   = type_int;
+    *nxd    = 3;
   }
 }
 
