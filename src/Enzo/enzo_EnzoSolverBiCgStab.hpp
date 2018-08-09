@@ -143,9 +143,8 @@ public: // interface
   virtual void apply (std::shared_ptr<Matrix> A, int ix, int ib,
 		      Block * block) throw();
 
-  /// Name to call the solver within Enzo-P
-  virtual std::string name() const
-  { return "bicgstab"; }
+  /// Type of this solver
+  virtual std::string type() const { return "bicgstab"; }
 
   /// Projects RHS and sets initial vectors R, R0, and P
   void start_2(EnzoBlock* enzo_block,

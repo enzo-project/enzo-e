@@ -8,7 +8,6 @@
 #ifndef DATA_SCALARDATA_HPP
 #define DATA_SCALARDATA_HPP
 
-#ifdef NEW_SYNC
 template <class T>
 class ScalarData {
 
@@ -31,9 +30,9 @@ public: // interface
   { value_.resize(scalar_descr->size()); }
   
   /// Return the specified scalar value
-  T & value (ScalarDescr * scalar_descr, int index)
+  T * value (ScalarDescr * scalar_descr, int index)
   { if (index >= value_.size()) allocate(scalar_descr);
-    return value_[index];
+    return &value_[index];
   }
 
 private: // attributes
@@ -43,7 +42,6 @@ private: // attributes
   /// Vector of values
   std::vector <T> value_;
 };
-#endif /* NEW_SYNC */
 
 #endif /* DATA_SCALARDATA_HPP */
 

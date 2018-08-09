@@ -47,11 +47,10 @@ Simulation::Simulation
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
-#ifdef NEW_SYNC
   scalar_descr_int_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_sync_(NULL),
-#endif  
+  scalar_descr_void_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -108,11 +107,10 @@ Simulation::Simulation()
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
-#ifdef NEW_SYNC
   scalar_descr_int_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_sync_(NULL),
-#endif  
+  scalar_descr_void_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -157,11 +155,10 @@ Simulation::Simulation (CkMigrateMessage *m)
     schedule_balance_(NULL),
     monitor_(NULL),
     hierarchy_(NULL),
-#ifdef NEW_SYNC
-  scalar_descr_int_(NULL),
-  scalar_descr_double_(NULL),
-  scalar_descr_sync_(NULL),
-#endif  
+    scalar_descr_int_(NULL),
+    scalar_descr_double_(NULL),
+    scalar_descr_sync_(NULL),
+    scalar_descr_void_(NULL),
     field_descr_(NULL),
     particle_descr_(NULL),
     sync_output_begin_(),
@@ -228,14 +225,14 @@ void Simulation::pup (PUP::er &p)
   if (up) hierarchy_ = new Hierarchy;
   p | *hierarchy_;
 
-#ifdef NEW_SYNC
   if (up) scalar_descr_int_ = new ScalarDescr;
   p | *scalar_descr_int_;
   if (up) scalar_descr_double_ = new ScalarDescr;
   p | *scalar_descr_double_;
   if (up) scalar_descr_sync_ = new ScalarDescr;
   p | *scalar_descr_sync_;
-#endif  
+  if (up) scalar_descr_void_ = new ScalarDescr;
+  p | *scalar_descr_void_;
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
@@ -471,11 +468,10 @@ void Simulation::initialize_monitor_() throw()
 
 void Simulation::initialize_data_descr_() throw()
 {
-#ifdef NEW_SYNC
   scalar_descr_int_    = new ScalarDescr;
   scalar_descr_double_ = new ScalarDescr;
   scalar_descr_sync_   = new ScalarDescr;
-#endif  
+  scalar_descr_void_   = new ScalarDescr;
 
   //--------------------------------------------------
   // parameter: Field : list

@@ -44,9 +44,8 @@ public: // virtual functions
   virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
 		       Block * block) throw();
   
-  /// Return the name of this solver
-  virtual std::string name () const
-  { return "diagonal"; }
+  /// Type of this solver
+  virtual std::string type() const { return "diagonal"; }
 
   //--------------------------------------------------
   

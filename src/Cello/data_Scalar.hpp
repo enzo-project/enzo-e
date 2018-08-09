@@ -11,8 +11,6 @@
 #ifndef DATA_SCALAR_HPP
 #define DATA_SCALAR_HPP
 
-#ifdef NEW_SYNC
-
 template <class T>
 class Scalar {
 
@@ -97,7 +95,7 @@ public: // interface
   { return scalar_data_->allocate(scalar_descr_); }
     
   /// Return the specified scalar value
-  T & value (int index)
+  T * value (int index)
   { return scalar_data_->value(scalar_descr_,index); }
 
 private: // attributes
@@ -112,5 +110,4 @@ private: // attributes
 
 };
 
-#endif /* NEW_SYNC */
-#endif /* DATA_SCALAR!_HPP */
+#endif /* DATA_SCALAR_HPP */

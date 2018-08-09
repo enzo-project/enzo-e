@@ -135,15 +135,19 @@ public: // interface
   /// Whether solution is defined on leaf Blocks (false) or a given level (true)
   bool is_unigrid() const { return is_unigrid_; }
 
+  /// Return the name of this solver
+  std::string name () const
+  { return name_; }
+
 public: // virtual functions
 
   /// Solve the linear system Ax = b
   virtual void apply ( std::shared_ptr<Matrix> A,
 		       int ix, int ib, Block * block) throw() = 0;
 
-  /// Return the name of this solver
-  virtual std::string name () const
-  { return "UNKNOWN"; }
+  /// Return the type of this solver
+  virtual std::string type () const = 0;
+
 
 protected: // functions
 

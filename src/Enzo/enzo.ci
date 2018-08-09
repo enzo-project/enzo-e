@@ -163,11 +163,11 @@ module enzo {
 
     // EnzoSolverMg0
     
-    entry void p_solver_mg0_pre_smooth();
+    entry void p_solver_mg0_restrict();
     entry void p_solver_mg0_solve_coarse();
     entry void p_solver_mg0_post_smooth();
     entry void p_solver_mg0_last_smooth();
-    entry void r_solver_mg0_shift_b(CkReductionMsg *msg);
+    entry void r_solver_mg0_begin_solve(CkReductionMsg *msg);
     entry void r_solver_mg0_barrier(CkReductionMsg* msg);  
     entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);

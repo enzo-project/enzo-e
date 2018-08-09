@@ -523,17 +523,6 @@ void Problem::initialize_units(Config * config) throw()
 	  units_ != NULL);
 }
 
-//----------------------------------------------------------------------
-
-Solver * Problem::solver(size_t i) const throw()
-{
-  ASSERT2("Problem::solver",
-	  "Solver id %d out of range [0,%d)",
-	  i < solver_list_.size(),
-	  i,solver_list_.size());
-  return solver_list_.at(i);
-}
-
 //======================================================================
 
 void Problem::deallocate_() throw()

@@ -33,6 +33,7 @@ public: // interface
       ir_(0),
       id_(0),
       w_(0),
+      i_iter_(-1),
       n_(0)
   { }
 
@@ -48,6 +49,7 @@ public: // interface
     p | ir_;
     p | id_;
     p | w_;
+    p | i_iter_;
     p | n_;
   }
 
@@ -57,9 +59,8 @@ public: // virtual functions
   virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
 		       Block * block) throw();
 
-  /// Return the name of this solver
-  virtual std::string name () const
-  { return "jacobi"; }
+  /// Type of this solver
+  virtual std::string type() const { return "jacobi"; }
 
 public: // functions
 
@@ -84,7 +85,13 @@ protected: // functions
     field.deallocate_temporary(id_);
     field.deallocate_temporary(ir_);
   }
-  
+
+  /// Return a pointer to the iteration counter on the block
+  int * piter_(Block * block) {
+    ScalarData<int> * scalar_data  = block->data()->scalar_data_int();
+    ScalarDescr *     scalar_descr = cello::scalar_descr_int();
+    return scalar_data->value(scalar_descr,i_iter_);
+  }
 
 protected: // attributes
 
@@ -108,6 +115,9 @@ protected: // attributes
   /// Weighting
   double w_;
 
+  /// Scalar index for current iteration on a Block
+  int i_iter_;
+  
   /// Number of iterations
   int n_;
 };
