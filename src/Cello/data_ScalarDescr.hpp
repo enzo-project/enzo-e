@@ -28,7 +28,6 @@ public: // interface
   int new_value (std::string name)
   {
     int index = name_.size();
-    CkPrintf ("TRACE_DATA_SCALAR %p %d %s\n",this,index,name.c_str());
     name_.push_back(name);
     return index;
   }
