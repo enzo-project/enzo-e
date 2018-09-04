@@ -124,9 +124,6 @@ public: // interface
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
     }
-    for (int i=0; i<max_turbulence_array; i++) {
-      method_turbulence_data [i] = 0;
-    }
     performance_stop_(perf_block);
   }
 
@@ -145,9 +142,6 @@ public: // interface
       GridStartIndex[i] = 0; 
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
-    }
-    for (int i=0; i<max_turbulence_array; i++) {
-      method_turbulence_data [i] = 0;
     }
     performance_stop_(perf_block);
   }
@@ -226,9 +220,6 @@ public: // interface
   virtual void initialize () throw();
 
 public: /// entry methods
-
-  /// Compute sum, min, and max of g values for EnzoMethodTurbulence
-  void method_turbulence_begin();
 
   /// Perform the necessary reductions
   CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
@@ -359,9 +350,6 @@ public: // attributes (YIKES!)
   /// stoping index of the active region
   int GridEndIndex[MAX_DIMENSION]; 
   enzo_float CellWidth[MAX_DIMENSION];
-
-  /// Data for turbulence reductions
-  double method_turbulence_data [max_turbulence_array];
 
 };
 

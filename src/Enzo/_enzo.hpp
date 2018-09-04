@@ -53,6 +53,7 @@ enum {
   index_turbulence_dvy,
   index_turbulence_dvz,
   index_turbulence_dlnd,
+  index_turbulence_zones,
   index_turbulence_mind,
   index_turbulence_maxd,
   max_turbulence_array };
