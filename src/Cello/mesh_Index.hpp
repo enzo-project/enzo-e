@@ -83,10 +83,6 @@ public:
   /// (array (0 0 0), level 0)
   bool is_root() const;
 
-  /// Return whether this is in the "root position" in the array of octrees
-  /// (array (0 0 0), tree (0,0,0), any level)
-  bool is_zero() const;
-  
   /// Return the level of this node
   int level() const;
 

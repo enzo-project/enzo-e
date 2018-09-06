@@ -944,7 +944,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   // compute total blocks and leaf blocks
   int num_total_blocks = 0;
   long long num_leaf_blocks = counters_reduce[m];;
-  int rank = hierarchy_->rank();
+  int rank = cello::rank();
   int num_child_blocks = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
   for (int i=0; i<=hierarchy_->max_level(); i++) {
     long long num_blocks_level = counters_reduce[m++];

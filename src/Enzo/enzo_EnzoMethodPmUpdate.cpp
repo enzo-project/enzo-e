@@ -85,7 +85,7 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
       //      cosmology-> compute_expansion_factor (&av,&dadtv,time+dt);
     }
 
-    const int rank = block->rank();
+    const int rank = cello::rank();
 
     FieldDescr    * fd = cello::field_descr();
     ParticleDescr * pd = cello::particle_descr();
@@ -263,7 +263,7 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 {
   TRACE_PM("timestep()");
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   double dt = std::numeric_limits<double>::max();
 

@@ -41,7 +41,7 @@ int RefineSlope::apply ( Block * block ) throw ()
   bool all_coarsen = true;
   bool any_refine = false;
 
-  int rank = block->rank();
+  int rank = cello::rank();
 
   double h3[3];
   Data * data = block->data();

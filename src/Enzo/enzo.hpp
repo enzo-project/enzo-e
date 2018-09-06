@@ -46,6 +46,7 @@
 
 #include "_enzo.hpp"
 
+class CProxy_EnzoBlock;
 class EnzoConfig;
 class EnzoPhysicsCosmology;
 class EnzoProblem;
@@ -59,6 +60,7 @@ namespace enzo {
   EnzoPhysicsCosmology * cosmology();
   EnzoUnits * units();
   const EnzoConfig * config();
+  CProxy_EnzoBlock block_array();
 };
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;

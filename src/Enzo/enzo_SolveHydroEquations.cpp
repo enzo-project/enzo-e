@@ -129,7 +129,7 @@ int EnzoBlock::SolveHydroEquations
 
   /* Compute size (in enzo_floats) of the current grid. */
 
-  int rank = this->rank();
+  int rank = cello::rank();
 
   size = 1;
   for (dim = 0; dim < rank; dim++)

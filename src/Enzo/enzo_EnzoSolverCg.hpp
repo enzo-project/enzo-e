@@ -118,26 +118,26 @@ public: // virtual functions
   void end (EnzoBlock * enzo_block, int retval) throw();
 
   /// Set rz_ by EnzoBlock after reduction
-  void set_rz(long double rz) throw()    {  rz_ = rz; }
+  void set_rz(double rz) throw()    {  rz_ = rz; }
 
   /// Set rr_ by EnzoBlock after reduction
-  void set_rr(long double rr) throw()    {  rr_ = rr; }
+  void set_rr(double rr) throw()    {  rr_ = rr; }
 
   /// Set rr_new_ by EnzoBlock after reduction
-  void set_rz2(long double rz2) throw()  {  rz2_ = rz2; }
+  void set_rz2(double rz2) throw()  {  rz2_ = rz2; }
 
   /// Set dy_ by EnzoBlock after reduction
-  void set_dy(long double dy) throw()         { dy_ = dy; }
+  void set_dy(double dy) throw()         { dy_ = dy; }
 
   /// Set bs_ (B sum) by EnzoBlock after reduction
-  void set_bs(long double bs) throw()    { bs_ = bs;  }
+  void set_bs(double bs) throw()    { bs_ = bs;  }
   /// Set rs_ (R sum) by EnzoBlock after reduction
-  void set_rs(long double rs) throw()    { rs_ = rs;  }
+  void set_rs(double rs) throw()    { rs_ = rs;  }
   /// Set xs_ (X sum) by EnzoBlock after reduction
-  void set_xs(long double xs) throw()    { xs_ = xs;  }
+  void set_xs(double xs) throw()    { xs_ = xs;  }
 
   /// Set bc_ (B count) by EnzoBlock after reduction
-  void set_bc(long double bc) throw()    { bc_ = bc;  }
+  void set_bc(double bc) throw()    { bc_ = bc;  }
 
   /// Set iter_ by EnzoBlock after reduction
   void set_iter(int iter) throw()        { iter_ = iter; }
@@ -171,6 +171,9 @@ protected: // methods
 
   /// Apply boundary conditions for the Field on the local block
   void refresh_local_(int ix, EnzoBlock * enzo_block);
+
+  /// Shift Field so that sum(x) == 0
+  void shift_local_(int ix, EnzoBlock * enzo_block);
   
   void monitor_output_(EnzoBlock *);
   
@@ -212,35 +215,35 @@ protected: // attributes
   double res_tol_;
 
   /// Initial residual
-  long double rr0_;
+  double rr0_;
 
   /// Minimum residual
-  long double rr_min_;
+  double rr_min_;
 
   /// Maximum residual
-  long double rr_max_;
+  double rr_max_;
 
   /// dot (R_i,R_i)
-  long double rr_;
+  double rr_;
 
   /// dot (R_i,Z_i)
-  long double rz_;
+  double rz_;
 
   /// dot (R_i+1,Z_i+1)
-  long double rz2_;
+  double rz2_;
 
   /// dot (D,Y)
-  long double dy_;
+  double dy_;
 
   /// sum of elements B(i) for singular systems
-  long double bs_;
+  double bs_;
   /// sum of elements R(i) for singular systems
-  long double rs_;
+  double rs_;
   /// sum of elements X(i) for singular systems
-  long double xs_;
+  double xs_;
 
   /// count of elements B(i) for singular systems
-  long double bc_;
+  double bc_;
 
   /// Whether to solve on a standalone Block, e.g. for MG coarse solver
   bool local_;

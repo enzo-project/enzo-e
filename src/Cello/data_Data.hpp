@@ -39,11 +39,11 @@ public: // interface
   /// Empty constructor
   Data()
     : num_field_data_(0),
+      field_data_(),
+      particle_data_(NULL),
       scalar_data_double_(),
       scalar_data_int_(),
-      scalar_data_sync_(),
-      field_data_(),
-      particle_data_(NULL)
+      scalar_data_sync_()
   {
     lower_[0] = 0.0;
     lower_[1] = 0.0;

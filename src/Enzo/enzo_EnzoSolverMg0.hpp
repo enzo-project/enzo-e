@@ -37,8 +37,7 @@ public: // interface
    Prolong * prolong,
    int min_level,
    int max_level,
-   int min_level_coarse,
-   int max_level_coarse,
+   int coarse_level,
    bool is_unigrid);
 
   EnzoSolverMg0() {};
@@ -49,6 +48,8 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverMg0 (CkMigrateMessage *m)
     :  Solver(m),
+       bs_(0), bc_(0), rr_(0), rr_local_(0), rr0_(0),
+       res_tol_(0),
        A_(NULL),
        index_smooth_pre_(-1),
        index_solve_coarse_(-1),
@@ -58,12 +59,10 @@ public: // interface
        prolong_(NULL),
        rank_(0),
        iter_max_(0),
-       res_tol_(0),
        i_sync_restrict_(-1),i_sync_prolong_(-1),i_iter_(-1),i_msg_(-1),
        ib_(0), ic_(0), ir_(0), ix_(0),
        mx_(0),my_(0),mz_(0),
-       gx_(0),gy_(0),gz_(0),
-       bs_(0), bc_(0), rr_(0), rr_local_(0), rr0_(0)
+       gx_(0),gy_(0),gz_(0)
   {}
 
   /// Destructor
@@ -79,6 +78,15 @@ public: // interface
 
     Solver::pup(p);
 
+    p | bc_;
+    p | bs_;
+
+    p | rr_;
+    p | rr_local_;
+    p | rr0_;
+
+    p | res_tol_;
+
     //    p | A_;
     p | index_smooth_pre_;
     p | index_solve_coarse_;
@@ -88,7 +96,6 @@ public: // interface
     p | prolong_;
     p | rank_;
     p | iter_max_;
-    p | res_tol_;
 
     p | i_sync_restrict_;
     p | i_sync_prolong_;
@@ -107,12 +114,6 @@ public: // interface
     p | gy_;
     p | gz_;
 
-    p | bc_;
-    p | bs_;
-
-    p | rr_;
-    p | rr_local_;
-    p | rr0_;
   }
 
   /// Solve the linear system 
@@ -144,18 +145,14 @@ public: // interface
   void restrict_recv(EnzoBlock * enzo_block,
 		     FieldMsg * field_message) throw();
 
-  // /// Access the Restrict operator by EnzoBlock
-  // Restrict * restrict() { return restrict_; }
-
-  // /// Access the Prolong operator by EnzoBlock
-  // Prolong * prolong() { return prolong_; }
-
   /// Call coarse solver--must be called by all blocks
   void call_coarse_solver(EnzoBlock * enzo_block) throw();
   /// Call pre-smoother--must be called by all blocks (or not at all)
   void call_pre_smoother(EnzoBlock * enzo_block) throw();
   /// Call post-smoother--must be called by all blocks (or not at all)
   void call_post_smoother(EnzoBlock * enzo_block) throw();
+  /// Call last-smoother--must be called by all blocks (or not at all)
+  void call_last_smoother(EnzoBlock * enzo_block) throw();
 
   /// Begin the prolongation phase
   void prolong(EnzoBlock * enzo_block) throw();
@@ -167,14 +164,14 @@ public: // interface
   /// Apply post-smoothing to the current level
   void post_smooth(EnzoBlock * enzo_block) throw();
 
-  void set_bs(long double bs) throw() { bs_ = bs; }
-  void set_bc(long double bc) throw() { bc_ = bc; }
-  void set_rr_local(long double rr) throw() { rr_local_ = rr; }
-  void set_rr(long double rr) throw() { rr_ = rr; }
-  void set_rr0(long double rr0) throw() { rr0_ = rr0; }
+  void set_bs(double bs) throw() { bs_ = bs; }
+  void set_bc(double bc) throw() { bc_ = bc; }
+  void set_rr_local(double rr) throw() { rr_local_ = rr; }
+  void set_rr(double rr) throw() { rr_ = rr; }
+  void set_rr0(double rr0) throw() { rr0_ = rr0; }
 
-  long double rr_local() throw() { return rr_local_; }
-  long double rr() throw() { return rr_; }
+  double rr_local() throw() { return rr_local_; }
+  double rr() throw() { return rr_; }
 
   void begin_solve(EnzoBlock * enzo_block,
 		   CkReductionMsg *msg) throw();
@@ -259,24 +256,40 @@ protected: // methods
   bool is_diverged_(EnzoBlock * enzo_block) const;
 
   /// Shift RHS if needed for singular problems
-  void do_shift_b_(EnzoBlock *, CkReductionMsg *) throw();
+  void do_shift_(EnzoBlock *, CkReductionMsg *) throw();
   
   /// Allocate temporary Fields
-  void allocate_temporary_(Field field, Block * block = NULL)
+  void allocate_temporary_(Block * block)
   {
+    Field field = block->data()->field();
     field.allocate_temporary(ir_);
     field.allocate_temporary(ic_);
   }
 	      
   /// Dellocate temporary Fields
 
-  void deallocate_temporary_(Field field, Block * block = NULL)
+  void deallocate_temporary_(Block * block)
   {
+    Field field = block->data()->field();
     field.deallocate_temporary(ir_);
     field.deallocate_temporary(ic_);
   }
+
+  void monitor_output_(EnzoBlock * enzo_block);
   
 protected: // attributes
+
+  /// scalars used for projections of singular systems
+  double bs_;
+  double bc_;
+
+  /// Current and initial residual norm R'*R
+  double rr_;
+  double rr_local_;
+  double rr0_;
+
+  /// Convergence tolerance on the residual reduction rr_ / rr0_
+  double res_tol_;
 
   /// Matrix
   std::shared_ptr<Matrix> A_;
@@ -305,9 +318,6 @@ protected: // attributes
   /// Maximum number of MG iterations
   int iter_max_;
 
-  /// Convergence tolerance on the residual reduction rr_ / rr0_
-  double res_tol_;
-
   /// MG scalar id's
   int i_sync_restrict_;
   int i_sync_prolong_;
@@ -324,18 +334,8 @@ protected: // attributes
   int mx_,my_,mz_;
   int gx_,gy_,gz_;
 
-  /// scalars used for projections of singular systems
-  long double bs_;
-  long double bc_;
-
-  /// Current and initial residual norm R'*R
-  long double rr_;
-  long double rr_local_;
-  long double rr0_;
-
-  /// Min and Max level for coarse-grid solver (in case coarse grid solver is multilevel)
-  int min_level_coarse_;
-  int max_level_coarse_;
+  /// The level of the coarse grid solve
+  int coarse_level_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_GRAVITY_MG0_HPP */

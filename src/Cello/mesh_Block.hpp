@@ -761,8 +761,8 @@ public: // virtual functions
   /// Initialize Block
   virtual void initialize ();
 
-  /// Return the rank of the Simulation
-  int rank() const;
+  // /// Return the rank of the Simulation
+  // int rank() const;
 
   //  int count_neighbors() const;
 

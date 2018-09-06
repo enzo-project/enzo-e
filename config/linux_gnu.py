@@ -5,8 +5,8 @@ is_arch_valid = 1
 
 #
 #flags_arch = '-g -fprofile-arcs -ftest-coverage' # gcov
-#flags_arch = '-Wall -O3 -ffast-math -funroll-loops -g'
-flags_arch = '-Wall -O3 -g'
+flags_arch = '-Wall -O3 -g -ffast-math -funroll-loops -fPIC'
+#flags_arch = '-Wall -O3 -g'
 #flags_arch = '-Wall -g'
 #flags_arch = '-O3 -pg -g'
 #flags_arch = '-fprofile-arcs -ftest-coverage'
@@ -55,8 +55,8 @@ if charm_path is None:
 			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
 
 use_papi=1                
-papi_inc = '/usr/local/include'
-papi_lib = '/usr/local/lib'
+papi_inc = '/usr/include'
+papi_lib = '/usr/lib'
 
 hdf5_inc = os.getenv('HDF5_INC')
 if hdf5_inc is None:

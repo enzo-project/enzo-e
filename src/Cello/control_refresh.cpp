@@ -220,7 +220,7 @@ int Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   //  TRACE_REFRESH("refresh_load_particle_faces()");
   
-  const int rank = this->rank();
+  const int rank = cello::rank();
 
   const int npa = (rank == 1) ? 4 : ((rank == 2) ? 4*4 : 4*4*4);
 
@@ -337,7 +337,7 @@ int Block::particle_create_array_neighbors_
 { 
   //  TRACE_REFRESH("particle_create_array_neighbors()");
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   const int level = this->level();
 
   const int min_face_rank = refresh->min_face_rank();
@@ -415,7 +415,7 @@ void Block::particle_determine_periodic_update_
   bool b32[3][2];
   is_on_boundary (b32);
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
 
   // Update (dpx,dpy,dpz) position correction if periodic domain
   // boundary is crossed
@@ -440,7 +440,7 @@ void Block::particle_apply_periodic_update_
 (int nl, ParticleData * particle_list[], Refresh * refresh)
 {
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   const int level = this->level();
   const int min_face_rank = refresh->min_face_rank();
 
@@ -519,7 +519,7 @@ void Block::particle_scatter_neighbors_
  std::vector<int> & type_list,
  Particle particle)
 {
-  const int rank = this->rank();
+  const int rank = cello::rank();
 
   //     ... get Block bounds 
   double xm,ym,zm;

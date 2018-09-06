@@ -56,7 +56,7 @@ void EnzoComputePressure::compute_(Block * block)
   enzo_float * p = (enzo_float*) field.values("pressure");
   enzo_float * d = (enzo_float*) field.values("density");
 
-  const int rank = enzo_block->rank();
+  const int rank = cello::rank();
 
   enzo_float * v3[3] = 
     { (enzo_float*) (              field.values("velocity_x")),

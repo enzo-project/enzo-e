@@ -174,7 +174,7 @@ void Block::adapt_end_()
   for (size_t i=0; i<face_level_last_.size(); i++)
     face_level_last_[i] = -1;
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
 
@@ -273,7 +273,7 @@ void Block::adapt_refine_()
 
   adapt_ = adapt_unknown;
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);
@@ -393,7 +393,7 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
   CkPrintf ("DEBUG_NEW_REFRESH particle_scatter_children\n");
 #endif
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   const int npa = NUM_CHILDREN(rank);
 
   // get Block bounds 
@@ -700,7 +700,7 @@ void Block::adapt_recv
 ( const int of3[3], const int ic3[3], int level_face_new, int level_relative )
 {
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   const int min_face_rank = cello::config()->adapt_min_face_rank;
 
   if (level_relative == 0 || level_relative == +1) {
@@ -909,7 +909,7 @@ void Block::p_adapt_delete()
 
 void Block::initialize_child_face_levels_()
 {
-  const int  rank         = this->rank();
+  const int  rank = cello::rank();
   const int level = this->level();
 
   if (level < 0) return;

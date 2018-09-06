@@ -795,7 +795,7 @@ Physics * Problem::create_physics_
 
 Physics * Problem::physics (std::string type) const throw()
 {
-  for (int i=0; i<physics_list_.size(); i++) {
+  for (size_t i=0; i<physics_list_.size(); i++) {
     if (physics_list_[i]->type() == type) return physics_list_[i];
   }
   return NULL;

@@ -78,7 +78,7 @@ void EnzoComputeCicInterp::compute_(Block * block)
   const int da =  particle.stride(it_p_,ia_p_);
   const int dv =  particle.stride(it_p_,ia_vx);
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   int mx,my,mz;
   field.dimensions(0,&mx,&my,&mz);

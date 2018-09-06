@@ -20,7 +20,7 @@ void EnzoMatrixLaplace::matvec (int i_y, int i_x, Block * block,
   field.dimensions(0,&mx_,&my_,&mz_);
   block->cell_width (&hx_,&hy_,&hz_);
   
-  rank_ = block->rank();
+  rank_ = cello::rank();
 
   enzo_float * X = (enzo_float * ) field.values(i_x);
   enzo_float * Y = (enzo_float * ) field.values(i_y);
@@ -37,7 +37,7 @@ void EnzoMatrixLaplace::diagonal (int i_x, Block * block, int g0) throw()
   field.dimensions (i_x,&mx_,&my_,&mz_);
   block->cell_width    (&hx_,&hy_,&hz_);
 
-  rank_ = block->rank();
+  rank_ = cello::rank();
 
   enzo_float * X = (enzo_float * ) field.values(i_x);
 

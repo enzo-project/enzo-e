@@ -27,4 +27,9 @@ namespace enzo {
     return (EnzoUnits *) problem()->units();
   }
 
+  CProxy_EnzoBlock block_array()
+  {
+    return (CProxy_EnzoBlock) enzo::simulation()->hierarchy()->block_array();
+  }
+
 }

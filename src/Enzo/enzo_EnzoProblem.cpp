@@ -294,7 +294,7 @@ Solver * EnzoProblem::create_solver_
 
   } else if (solver_type == "bicgstab") {
 
-    solver = new EnzoSolverBiCgStab
+      solver = new EnzoSolverBiCgStab
       (enzo_config->solver_list[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
@@ -339,8 +339,7 @@ Solver * EnzoProblem::create_solver_
        restrict,  prolong,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
-       enzo_config->solver_min_level_coarse[index_solver],
-       enzo_config->solver_max_level_coarse[index_solver],
+       enzo_config->solver_coarse_level[index_solver],
        enzo_config->solver_is_unigrid[index_solver] );
 
   } else {

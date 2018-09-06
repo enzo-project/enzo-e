@@ -41,7 +41,7 @@ int EnzoRefineShock::apply ( Block * block ) throw ()
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
 
-  int rank = block->rank();
+  int rank = cello::rank();
 
   // compute pressure using the EnzoComputePressure class
 

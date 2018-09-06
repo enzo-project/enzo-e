@@ -24,7 +24,7 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
-  const int rank = simulation->rank();
+  const int rank = cello::rank();
   //  refresh(ir)->add_all_fields();
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
@@ -98,7 +98,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       int mx, my, mz, m, rank;
       field.dimensions(0,&mx,&my,&mz);
       m = mx*my*mz;
-      rank = enzo_block->rank();
+      rank = cello::rank();
 
       /* If we can, compute the pressure at the mid-point.
   	 We can, because we will always have an old baryon field now. */

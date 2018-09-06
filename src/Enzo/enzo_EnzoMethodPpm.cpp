@@ -115,7 +115,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   Field field = enzo_block->data()->field();
 
-  int rank = block->rank();
+  int rank = cello::rank();
 
   enzo_float * density    = (enzo_float *)field.values("density");
   enzo_float * velocity_x = (rank >= 1) ? 

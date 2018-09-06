@@ -9,7 +9,7 @@
 #include "enzo.hpp"
 
 // #define DEBUG_COPY
-
+// #define DEBUG_SOLVER
 // #define DEBUG_TRACE
 
 #ifdef DEBUG_TRACE
@@ -18,6 +18,37 @@
 	    __FILE__,__LINE__,BLOCK->name().c_str(),METHOD);
 #else
 #  define TRACE_JACOBI(BLOCK,METHOD) /* empty */
+#endif
+
+
+#ifdef DEBUG_SOLVER
+#   define DEBUG_FIELD(BLOCK,IX,NAME)			\
+  {									\
+    Field field = BLOCK->data()->field();				\
+    int mx,my,mz;							\
+    field.dimensions(IX,&mx,&my,&mz);					\
+    int gx,gy,gz;							\
+    field.ghost_depth(IX,&gx,&gy,&gz);					\
+    enzo_float * X = (enzo_float*) field.values(IX);			\
+    double xx=0.0;							\
+    double yy=0.0;							\
+    for (int i=0; i<mx*my*mz; i++) {					\
+      xx+=X[i]*X[i];							\
+    }									\
+    for (int iz=gz; iz<mz-gz; iz++) {					\
+      for (int iy=gy; iy<my-gy; iy++) {					\
+	for (int ix=gx; ix<mx-gx; ix++) {				\
+	  int i = ix + mx*(iy + my*iz);					\
+	    yy+=X[i]*X[i];						\
+	  }								\
+	}								\
+      }									\
+      CkPrintf ("%-8s %-10s %d DEBUG_FIELD ||%s|| = [%g] (%g)\n",		\
+		BLOCK->name().c_str(),this->name().c_str(),	\
+		__LINE__,NAME,xx,yy);				\
+  }
+#else
+#   define DEBUG_FIELD(BLOCK,IX,NAME) /* ... */
 #endif
 
 //----------------------------------------------------------------------
@@ -83,7 +114,9 @@ void EnzoBlock::p_solver_jacobi_continue()
   EnzoSolverJacobi * solver = 
     static_cast<EnzoSolverJacobi *> (this->solver());
 
+  DEBUG_FIELD(this,39,"X continue 1");
   solver->compute(this);
+  DEBUG_FIELD(this,39,"X continue 2");
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
@@ -100,6 +133,7 @@ void EnzoSolverJacobi::compute(Block * block)
   if (*piter_(block) < n_) {
 
     apply_(block);
+    DEBUG_FIELD (enzo_block,ix_,"X compute 1");
 
   } else {
 
@@ -107,6 +141,7 @@ void EnzoSolverJacobi::compute(Block * block)
 
     Solver::end_(block);
 
+    DEBUG_FIELD (enzo_block,ix_,"X compute 2");
     CkCallback(callback_,
 	       CkArrayIndexIndex(block->index()),
 	       block->proxy_array()).send();
@@ -135,6 +170,8 @@ void EnzoSolverJacobi::apply_(Block * block)
   A_->diagonal (id_, block,ng);
   A_->residual (ir_, ib_, ix_, block,ng);
 
+  DEBUG_FIELD(block,ir_,"R residual");
+  
 #ifdef DEBUG_COPY
     {
       enzo_float * R = (enzo_float*) field.values(ir_);
@@ -174,6 +211,8 @@ void EnzoSolverJacobi::apply_(Block * block)
       }
     }
   }
+
+  DEBUG_FIELD(block,ix_,"X iteration");
 
   // Next iteration
 

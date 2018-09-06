@@ -38,7 +38,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
 
   /* Compute the size of the grid. */
 
-  int rank = this->rank();
+  int rank = cello::rank();
 
   for (int dim = 0; dim < rank; dim++)
     size *= GridDimension[dim];

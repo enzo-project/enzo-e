@@ -406,7 +406,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   /// compute acceleration fields from potential
 
   EnzoComputeAcceleration compute_acceleration(field.field_descr(),
-					       enzo_block->rank(), order_);
+					       cello::rank(), order_);
 
   compute_acceleration.compute(enzo_block);
 
@@ -475,7 +475,7 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
   
   if (cosmology) {
-    const int rank = block->rank();
+    const int rank = cello::rank();
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
     double dt   = block->dt();

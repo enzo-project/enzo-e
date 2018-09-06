@@ -669,7 +669,7 @@ void EnzoMethodHydro::ppm_method_ ( Block * block )
   compute_pressure.compute(block);
 
   const int cycle = block->cycle();
-  const int rank  = block->rank();
+  const int rank  = cello::rank();
 
   for (int i0=0; i0<3; i0++) {
     int i = (i0 + cycle) % rank;
@@ -795,7 +795,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   enzo_float * vz = (enzo_float *) field.values("velocity_z");
   enzo_float * pr = (enzo_float *) field.values("pressure");
 
-  const int rank  = block->rank();
+  const int rank = cello::rank();
   
   for (int iy=0; iy<my; iy++) {
     for (int ix=0; ix<mx; ix++) {

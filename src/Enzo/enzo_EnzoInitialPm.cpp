@@ -62,7 +62,7 @@ void EnzoInitialPm::uniform_placement_
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);
   
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   // Adjust cell widths for difference in block's level from level_
   const int level_block = block->level();
@@ -223,7 +223,7 @@ void EnzoInitialPm::density_placement_
   data->upper(&xp,&yp,&zp);
   field.cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   if (rank < 2) hy = 1.0;
   if (rank < 3) hz = 1.0;

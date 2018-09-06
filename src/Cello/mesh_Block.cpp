@@ -304,7 +304,7 @@ void Block::init
   initialize ();
 #endif  
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   
   sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
@@ -486,7 +486,7 @@ ItFace Block::it_face
  const int * ic3,
  const int * if3) throw()
 {
-  int rank = this->rank();
+  int rank = cello::rank();
   int n3[3];
   size_array(n3,n3+1,n3+2);
   bool periodic[3][2];
@@ -735,16 +735,11 @@ Block::Block (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
-int Block::rank() const
-{ return cello::simulation()->rank(); }
-
-//----------------------------------------------------------------------
-
 std::string Block::name() const throw()
 {
   if (name_ == "") {
 
-    const int rank = this->rank();
+    const int rank = cello::rank();
     int blocking[3] = {1,1,1};
     cello::hierarchy()->root_blocks(blocking,blocking+1,blocking+2);
     const int level = this->level();

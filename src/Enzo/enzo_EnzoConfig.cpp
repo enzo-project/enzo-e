@@ -130,8 +130,7 @@ EnzoConfig::EnzoConfig() throw ()
   /// EnzoSolver<Krylov>
   solver_precondition(),
   solver_local(),
-  solver_min_level_coarse(),
-  solver_max_level_coarse(),
+  solver_coarse_level(),
   solver_is_unigrid(),
   stopping_redshift()
  
@@ -281,8 +280,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | solver_weight;
   p | solver_restart_cycle;
   p | solver_local;
-  p | solver_min_level_coarse;
-  p | solver_max_level_coarse;
+  p | solver_coarse_level;
   p | solver_is_unigrid;
 
   p | stopping_redshift;
@@ -335,8 +333,6 @@ void EnzoConfig::read(Parameters * p) throw()
 	     (adapt_mass_type[ia]=="dark" ||
 	      adapt_mass_type[ia]=="baryon")));
   }
-
-  solver_precondition.resize(num_solvers);
 
   double floor_default = 1e-6;
 
@@ -650,8 +646,7 @@ void EnzoConfig::read(Parameters * p) throw()
   solver_weight.      resize(num_solvers);
   solver_restart_cycle.resize(num_solvers);
   solver_local.       resize(num_solvers);
-  solver_min_level_coarse.resize(num_solvers);
-  solver_max_level_coarse.resize(num_solvers);
+  solver_coarse_level.resize(num_solvers);
   solver_is_unigrid.resize(num_solvers);
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
@@ -705,11 +700,9 @@ void EnzoConfig::read(Parameters * p) throw()
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
 
-    solver_min_level_coarse[index_solver] = 
-      p->value_integer (solver_name + ":min_level_coarse",solver_min_level[index_solver]);
-
-    solver_max_level_coarse[index_solver] = 
-      p->value_integer (solver_name + ":max_level_coarse",solver_min_level[index_solver]);
+    solver_coarse_level[index_solver] = 
+      p->value_integer (solver_name + ":coarse_level",
+			solver_min_level[index_solver]);
 
     solver_is_unigrid[index_solver] = 
       p->value_logical (solver_name + ":is_unigrid",false);

@@ -24,7 +24,7 @@
      }
      hdf5 {
          dir=["Dir_COSMO8-%04d","count"];
-         name = [ "cosmo-222-data-%02d.h5", "count" ];
+         name = [ "cosmo-222-data-%02d-%02d.h5", "proc", "count" ];
      }
      vx {
          dir=["Dir_COSMO8-%04d","count"];

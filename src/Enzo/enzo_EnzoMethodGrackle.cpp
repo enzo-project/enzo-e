@@ -106,7 +106,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   // ASSUMES COSMOLOGY = false
   double a_value = 1.0;
 
-  gr_int rank = block->rank();
+  gr_int rank = cello::rank();
 
   gr_float * density       = (gr_float *) field.values("density");
   gr_float * energy        = (gr_float *) field.values("internal_energy");

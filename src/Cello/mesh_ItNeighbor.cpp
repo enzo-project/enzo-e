@@ -17,7 +17,7 @@ ItNeighbor::ItNeighbor
  int n3[3],
  Index index)
   : block_(block),
-    rank_(block->rank()),
+    rank_(cello::rank()),
     min_face_rank_(min_face_rank),
     index_(index),
     level_(index.level())

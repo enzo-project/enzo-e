@@ -288,7 +288,7 @@ void OutputImage::write_block
 
   Field field = ((Data *)block->data())->field();
   
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   ASSERT("OutputImage::write_block",
 	 "axis_ must be = axis_z (2) for 2D problems",
