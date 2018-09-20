@@ -28,12 +28,6 @@ void Initial::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_block
-(
- Block            * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy  * hierarchy
- ) throw()
+void Initial::enforce_block(Block * block, const Hierarchy * hierarchy) throw()
 {
 }

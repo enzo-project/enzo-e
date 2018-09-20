@@ -64,8 +64,7 @@ void EnzoFactory::create_block_array
  ) const throw()
 {
 
-  CProxy_EnzoBlock enzo_block_array = 
-    static_cast<CProxy_EnzoBlock> (block_array);
+  CProxy_EnzoBlock enzo_block_array = enzo::block_array();
 
   int count_adapt;
 
@@ -213,8 +212,7 @@ void EnzoFactory::create_subblock_array
 	     min_level);
   }
 
-  CProxy_EnzoBlock enzo_block_array = 
-    static_cast<CProxy_EnzoBlock> (block_array);
+  CProxy_EnzoBlock enzo_block_array = enzo::block_array();
 
   for (int level = -1; level >= min_level; level--) {
 

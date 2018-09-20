@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodCosmology::EnzoMethodCosmology(const FieldDescr * field_descr) throw()
+EnzoMethodCosmology::EnzoMethodCosmology() throw()
 : Method ()
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,

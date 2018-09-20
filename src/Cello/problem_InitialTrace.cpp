@@ -30,8 +30,6 @@ void InitialTrace::pup (PUP::er &p)
 
 void InitialTrace::enforce_block
  ( Block            * block, 
-   const FieldDescr * field_descr,
-   const ParticleDescr * particle_descr,
    const Hierarchy  * hierarchy
    ) throw()
 {
@@ -39,8 +37,8 @@ void InitialTrace::enforce_block
 
   if (id0_[in] == -1) id0_[in] = CkMyPe();
 
-  Field    field    (block->data()->field());
-  Particle particle (block->data()->particle());
+  Field    field    = block->data()->field();
+  Particle particle = block->data()->particle();
 
   if (mpp_ == 0.0) {
     uniform_placement_ (block,field,particle);

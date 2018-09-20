@@ -62,16 +62,16 @@
     int ig = 1;								\
     int ix,iy,iz;							\
     int iz0 = gz_;							\
-    int iz1 = gz_-ig;								\
+    int iz1 = gz_-ig;							\
     for (int iy=gy_; iy<my_-gy_; iy++) {				\
       for (int ix=gx_; ix<mx_-gx_; ix++) {				\
 	int i0=ix+mx_*(iy+my_*iz0);					\
 	int i1=ix+mx_*(iy+my_*iz1);					\
 	enzo_float v0 = X[i0];						\
 	enzo_float v1 = X[i1];						\
-	sum_a[ig-1]   += (v0-v1);						\
-	sum_aa[ig-1]  += (v0-v1)*(v0-v1);					\
-	sum_abs[ig-1] += std::abs(v0-v1);					\
+	sum_a[ig-1]   += (v0-v1);					\
+	sum_aa[ig-1]  += (v0-v1)*(v0-v1);				\
+	sum_abs[ig-1] += std::abs(v0-v1);				\
       }									\
     }									\
     iz0 = mz_-gz_-1;							\
@@ -82,13 +82,13 @@
 	int i1=ix+mx_*(iy+my_*iz1);					\
 	enzo_float v0 = X[i0];						\
 	enzo_float v1 = X[i1];						\
-	sum_a[ig-1]   += (v0-v1);						\
-	sum_aa[ig-1]  += (v0-v1)*(v0-v1);					\
-	sum_abs[ig-1] += std::abs(v0-v1);					\
+	sum_a[ig-1]   += (v0-v1);					\
+	sum_aa[ig-1]  += (v0-v1)*(v0-v1);				\
+	sum_abs[ig-1] += std::abs(v0-v1);				\
       }									\
     }									\
     CkPrintf ("%s:%d %s TRACE_GHOST %s layer %d sum(A) sum(A*A) sum(abs(A)) " \
-" %20.15lg %20.15lg %20.15lg\n" \
+	      " %20.15lg %20.15lg %20.15lg\n"				\
 	      ,__FILE__,__LINE__,BLOCK->name().c_str(),NAME,ig,sum_a[0],sum_aa[0],sum_abs[0]); \
   }
 #else
@@ -103,7 +103,7 @@
     enzo_float* X      = (enzo_float*) field.values(ID);		\
     enzo_float* X_bcg  = (enzo_float*) field.values(COPY);		\
     if (X_bcg) for (int i=0; i<m_; i++)  X_bcg[i] = X[i];		\
-    double sum_a=0.0,sum_abs=0.0;			\
+    double sum_a=0.0,sum_abs=0.0;					\
     for (int iz=gz_; iz<mz_-gz_; iz++) {				\
       for (int iy=gy_; iy<my_-gy_; iy++) {				\
 	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
@@ -113,9 +113,9 @@
 	}								\
       }									\
     }									\
-    CkPrintf ("%s:%d %s %s COPY_FIELD %d %s shift %20.15lg %20.15lg\n" \
+    CkPrintf ("%s:%d %s %s COPY_FIELD %d %s shift %20.15lg %20.15lg\n"	\
 	      ,__FILE__,__LINE__,BLOCK->name().c_str(),name().c_str(),ID,COPY,sum_a, sum_abs); \
-    TRACE_GHOST(BLOCK,ID,COPY);					\
+    TRACE_GHOST(BLOCK,ID,COPY);						\
   }
 #else
 #   define COPY_FIELD(BLOCK,ID,COPY) /* ... */
@@ -133,19 +133,19 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
  bool is_unigrid
  ) 
   : Solver(name,monitor_iter,restart_cycle,min_level,max_level,is_unigrid),
-      alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
-      rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
-      rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
+    alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
+    rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
+    rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
     res_tol_(res_tol),
-      A_(NULL),
-      index_precon_(index_precon),
-      iter_max_(iter_max), 
-      ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
-      iy_(0), iv_(0), iq_(0), iu_(0),
-      nx_(0), ny_(0), nz_(0),
-      m_(0), mx_(0), my_(0), mz_(0),
-      gx_(0), gy_(0), gz_(0),
-      iter_(0)
+    A_(NULL),
+    index_precon_(index_precon),
+    iter_max_(iter_max), 
+    ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
+    iy_(0), iv_(0), iq_(0), iu_(0),
+    nx_(0), ny_(0), nz_(0),
+    m_(0), mx_(0), my_(0), mz_(0),
+    gx_(0), gy_(0), gz_(0),
+    iter_(0)
 {
   FieldDescr * field_descr = cello::field_descr();
   
@@ -195,7 +195,7 @@ void EnzoSolverBiCgStab::apply
 
   /// cast input argument to the EnzoBlock associated with this char
 
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock* enzo_block = enzo::block(block);
 
   /// access the field infromation on this block
   

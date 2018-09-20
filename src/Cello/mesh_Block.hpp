@@ -22,7 +22,6 @@ class MsgRefresh;
 class MsgRefine;
 class MsgCoarsen;
 class Factory;
-class FieldDescr;
 class FieldFace;
 class Hierarchy;
 class ItFace;

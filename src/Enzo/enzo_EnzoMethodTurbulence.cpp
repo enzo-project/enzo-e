@@ -23,8 +23,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodTurbulence::EnzoMethodTurbulence 
-(const FieldDescr * field_descr,
- double edot,
+(double edot,
  double density_initial,
  double temperature_initial,
  double mach_number,
@@ -73,7 +72,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 {
   TRACE_TURBULENCE;  
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
   
   Field field = block->data()->field();
 
@@ -364,7 +363,7 @@ void EnzoMethodTurbulence::compute_resume_
   TRACE_TURBULENCE;  
   // Compute normalization
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   Field field = block->data()->field();
 

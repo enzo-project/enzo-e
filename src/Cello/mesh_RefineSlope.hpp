@@ -18,8 +18,7 @@ class RefineSlope : public Refine {
 public: // interface
 
   /// Constructor
-  RefineSlope(const FieldDescr * field_descr,
-	      double min_refine,
+  RefineSlope(double min_refine,
 	      double max_coarsen,
 	      std::vector<std::string> field_name_list,
 	      int    max_level,

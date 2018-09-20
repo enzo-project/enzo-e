@@ -49,7 +49,7 @@ void EnzoComputePressure::compute_(Block * block)
 
   if (!block->is_leaf()) return;
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   Field field = enzo_block->data()->field();
 

@@ -17,9 +17,7 @@ class EnzoComputeCicInterp : public Compute {
 public: // interface
 
   /// Create a new EnzoComputeCicInterp object
-  EnzoComputeCicInterp (FieldDescr *,    
-			std::string field_name,
-			ParticleDescr *, 
+  EnzoComputeCicInterp (std::string field_name,
 			std::string particle_type,
 			std::string particle_attribute,
 			double dt = 0.0);

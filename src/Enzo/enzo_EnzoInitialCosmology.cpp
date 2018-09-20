@@ -24,12 +24,7 @@ EnzoInitialCosmology::EnzoInitialCosmology
 //----------------------------------------------------------------------
 
 void EnzoInitialCosmology::enforce_block
-(
- Block * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy * hierarchy
- ) throw()
+( Block * block, const Hierarchy * hierarchy ) throw()
 {
 
   EnzoUnits * units = enzo::units();

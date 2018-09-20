@@ -49,8 +49,6 @@ void InitialFile::pup (PUP::er &p)
 void InitialFile::enforce_block
 (
  Block            * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  const Hierarchy  * hierarchy
  ) throw()
 {
@@ -59,8 +57,7 @@ void InitialFile::enforce_block
 	  block == 0);
 
   if (! input_) 
-    input_ = new InputData (hierarchy->factory(),
-			    field_descr,particle_descr);
+    input_ = new InputData (hierarchy->factory());
 
   if (! input_->is_open() ) {
 
@@ -73,8 +70,6 @@ void InitialFile::enforce_block
 
   }
 
-  // input_->read_hierarchy(hierarchy,field_descr);
-
   INCOMPLETE("InitialFile::enforce_block");
 
   File * file = input_->file();
@@ -84,7 +79,7 @@ void InitialFile::enforce_block
 
     std::string block_name = file->group_name(i).c_str();
 
-    input_->read_block(0,block_name,field_descr,particle_descr);
+    input_->read_block(0,block_name);
 
   }
 }

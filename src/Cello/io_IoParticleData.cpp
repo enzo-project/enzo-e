@@ -50,8 +50,7 @@ void IoParticleData::meta_value
 //----------------------------------------------------------------------
 
 void IoParticleData::field_array
-(const FieldDescr * field_descr,
- int index,
+(int index,
  void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
@@ -61,12 +60,11 @@ void IoParticleData::field_array
 //----------------------------------------------------------------------
 
 void IoParticleData::particle_array
-(ParticleDescr * particle_descr,
- int it, int ib, int ia,
+(int it, int ib, int ia,
  void ** buffer, std::string * name, int * type,
  int * n, int * k) throw()
 {
-  Particle particle (particle_descr,particle_data_);
+  Particle particle (cello::particle_descr(),particle_data_);
 
   if (buffer) (*buffer) = (void * ) 
    		particle.attribute_array(it,ia,ib);

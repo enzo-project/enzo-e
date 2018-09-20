@@ -22,8 +22,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodPmUpdate::EnzoMethodPmUpdate 
-( const FieldDescr * field_descr,
-  const ParticleDescr * particle_descr, double max_dt ) 
+( double max_dt ) 
   : Method(),
     max_dt_(max_dt)
 {
@@ -33,6 +32,8 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_pm_update);
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   const int ax = field_descr->field_id("acceleration_x");
   const int ay = field_descr->field_id("acceleration_y");
   const int az = field_descr->field_id("acceleration_z");
@@ -41,6 +42,8 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   if (ay >= 0) refresh(ir)->add_field(ay);
   if (az >= 0) refresh(ir)->add_field(az);
 			     
+  ParticleDescr * particle_descr = cello::particle_descr();
+
   refresh(ir)->add_particle(particle_descr->type_index("dark"));
 
   // PM parameters initialized in EnzoBlock::initialize()
@@ -87,26 +90,20 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 
     const int rank = cello::rank();
 
-    FieldDescr    * fd = cello::field_descr();
-    ParticleDescr * pd = cello::particle_descr();
-
     double dt_shift = 0.5*block->dt()/cosmo_a;
     //    double dt_shift = 0.0;
     if (rank >= 1) {
-      EnzoComputeCicInterp interp_x
-    	(fd, "acceleration_x", pd, "dark", "ax", dt_shift);
+      EnzoComputeCicInterp interp_x ("acceleration_x", "dark", "ax", dt_shift);
       interp_x.compute(block);
     }
 
     if (rank >= 2) {
-      EnzoComputeCicInterp interp_y
-    	(fd, "acceleration_y", pd, "dark", "ay", dt_shift);
+      EnzoComputeCicInterp interp_y ("acceleration_y", "dark", "ay", dt_shift);
       interp_y.compute(block);
     }
 
     if (rank >= 3) {
-      EnzoComputeCicInterp interp_z
-    	(fd, "acceleration_z", pd, "dark", "az", dt_shift);
+      EnzoComputeCicInterp interp_z ("acceleration_z", "dark", "az", dt_shift);
       interp_z.compute(block);
     }
 

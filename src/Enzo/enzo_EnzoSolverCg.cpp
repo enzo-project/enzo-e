@@ -183,7 +183,7 @@ void EnzoSolverCg::apply ( std::shared_ptr<Matrix> A, int ix, int ib,
   field.dimensions (ib_,&mx_,&my_,&mz_);
   field.ghost_depth(ib_,&gx_,&gy_,&gz_);
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   // assumes all fields involved in calculation have same precision
   // int precision = field.precision(ib_);
@@ -360,9 +360,7 @@ void EnzoBlock::r_solver_cg_matvec()
   // assumes all fields involved in calculation have same precision
   //  int precision = field.precision(0);
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (this);
-
-  solver->shift_1(enzo_block);
+  solver->shift_1(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }

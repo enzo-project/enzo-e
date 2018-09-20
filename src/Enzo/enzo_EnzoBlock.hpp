@@ -33,7 +33,7 @@ class EnzoBlock : public BASE_ENZO_BLOCK
   //----------------------------------------------------------------------
   // functions
 
-  static void initialize (EnzoConfig * enzo_config);
+  static void initialize (const EnzoConfig * enzo_config);
 
   //----------------------------------------------------------------------
   // variables
@@ -205,7 +205,7 @@ public: // interface
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
-  int SolveMHDEquations(const FieldDescr *,  enzo_float dt);
+  int SolveMHDEquations(enzo_float dt);
 
   /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();

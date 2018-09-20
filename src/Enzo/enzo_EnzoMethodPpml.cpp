@@ -13,13 +13,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpml::EnzoMethodPpml
-(
- const FieldDescr * field_descr,
- EnzoConfig * enzo_config
-) 
+EnzoMethodPpml::EnzoMethodPpml() 
   : Method(),
-    comoving_coordinates_(enzo_config->physics_cosmology)
+    comoving_coordinates_(enzo::config()->physics_cosmology)
 {
   // Initialize the default Refresh object
 
@@ -48,9 +44,9 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 
   if (!block->is_leaf()) return;
 
-  const FieldDescr * field_descr = cello::field_descr();
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  enzo_block->SolveMHDEquations ( field_descr, block->dt() );
+  EnzoBlock * enzo_block = enzo::block(block);
+
+  enzo_block->SolveMHDEquations ( block->dt() );
 
   enzo_block->compute_done();
 
@@ -61,7 +57,7 @@ void EnzoMethodPpml::compute ( Block * block ) throw()
 double EnzoMethodPpml::timestep (Block * block) const throw()
 {
  
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   /* initialize */
  

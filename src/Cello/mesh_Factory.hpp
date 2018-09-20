@@ -47,12 +47,10 @@ public: // interface
   virtual IoBlock * create_io_block ( ) const throw();
 
   /// Create an Input / Output accessor object for a FieldData
-  virtual IoFieldData * create_io_field_data 
-  ( const FieldDescr * field_descr ) const throw();
+  virtual IoFieldData * create_io_field_data () const throw();
 
   /// Create an Input / Output accessor object for a ParticleData
-  virtual IoParticleData * create_io_particle_data 
-  ( const ParticleDescr * particle_descr ) const throw();
+  virtual IoParticleData * create_io_particle_data () const throw();
 
 #ifdef NEW_MSG_REFINE
   /// Create a new CHARM++ Block chare array proxy

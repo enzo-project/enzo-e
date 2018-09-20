@@ -186,6 +186,51 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
+/// Macros for sizing, saving, and restoring data from buffers
+
+#define SIZE_ARRAY(COUNT,LIST)			\
+  {						\
+    (*COUNT) += sizeof(int);			\
+    (*COUNT) += sizeof(int)*LIST.size();	\
+  }
+#define SIZE_VALUE(COUNT,VALUE)			\
+  {						\
+    (*COUNT) += sizeof(int);			\
+  }
+
+#define SAVE_ARRAY(PTR,LIST)				\
+  {							\
+    int length = LIST.size();				\
+    int n;						\
+    memcpy((*PTR),&length, n=sizeof(int));		\
+    (*PTR)+=n;						\
+    memcpy((*PTR),&LIST[0],n=length*sizeof(int));	\
+    (*PTR)+=n;						\
+  }
+#define SAVE_VALUE(PTR,VALUE)			\
+  {						\
+    int n;					\
+    memcpy((*PTR),&VALUE,n=sizeof(int));	\
+    (*PTR)+=n;					\
+  }
+
+#define LOAD_ARRAY(PTR,LIST)				\
+  {							\
+    int length;						\
+    int n;						\
+    memcpy(&length, (*PTR), n=sizeof(int));		\
+    (*PTR)+=n;						\
+    LIST.resize(length);				\
+    memcpy(&LIST[0],(*PTR),n=length*sizeof(int));	\
+    (*PTR)+=n;						\
+  }
+#define LOAD_VALUE(PTR,VALUE)			\
+  {						\
+    int n;					\
+    memcpy(&VALUE,(*PTR),n=sizeof(int));	\
+    (*PTR)+=n;					\
+  }
+
 /// Type for CkMyPe(); used for Block() constructor to differentiate
 /// from Block(int)
 typedef unsigned process_type;

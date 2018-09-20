@@ -25,7 +25,6 @@
 
 class Boundary;
 class Factory;
-class FieldDescr;
 class Initial;
 class Physics;
 class Input;
@@ -174,37 +173,28 @@ public: // interface
 
   /// Initialize the initial conditions object
   void initialize_initial(Config * config,
-			  Parameters * parameters,
-			  const FieldDescr * field_descr) throw();
+			  Parameters * parameters) throw();
 
   /// Initialize any physics-related objects
   void initialize_physics(Config * config,
-			  Parameters * parameters,
-			  const FieldDescr * field_descr) throw();
+			  Parameters * parameters) throw();
 
   /// Initialize the refine object
   void initialize_refine(Config * config,
-			 Parameters * parameters,
-			 const FieldDescr * field_descr) throw();
+			 Parameters * parameters) throw();
 
   /// Initialize the stopping object
   void initialize_stopping(Config * config ) throw();
 
   /// Initialize the output objects
   void initialize_output(Config * config,
-			 const FieldDescr * field_descr,
-			 const ParticleDescr * particle_descr,
 			 const Factory * factory) throw();
 
   /// Initialize the method objects
-  void initialize_method(Config * config, 
-			 const FieldDescr * field_descr,
-			 const ParticleDescr * particle_descr) throw();
+  void initialize_method(Config * config) throw();
 
   /// Initialize Solver objects
-  void initialize_solver(Config * config, 
-			 const FieldDescr * field_descr,
-			 const ParticleDescr * particle_descr) throw();
+  void initialize_solver(Config * config) throw();
   
   /// Initialize the prolong objects
   void initialize_prolong(Config * config) throw();
@@ -233,16 +223,14 @@ protected: // functions
   (std::string type, 
    int index,
    Config * config,
-   Parameters * parameters,
-   const FieldDescr *) throw ();
+   Parameters * parameters) throw ();
 
   /// Create named physics object
   virtual Physics *  create_physics_ 
   (std::string type, 
    int index,
    Config * config,
-   Parameters * parameters,
-   const FieldDescr *) throw ();
+   Parameters * parameters) throw ();
 
   /// Create named stopping object
   virtual Stopping * create_stopping_ 
@@ -253,30 +241,23 @@ protected: // functions
   (std::string type, 
    Config * config, 
    Parameters * parameters,
-   const FieldDescr * field_descr,
    int index) throw ();
 
   /// Create named solver object
   virtual Solver *   create_solver_
   (std::string type, 
    Config * config, 
-   int index_solver,
-   FieldDescr * field_descr,
-   const ParticleDescr * particle_descr) throw ();
+   int index_solver) throw ();
 
   /// Create named method object
   virtual Method *   create_method_
   (std::string type, 
    Config * config, 
-   int index_method,
-   FieldDescr * field_descr,
-   const ParticleDescr * particle_descr) throw ();
+   int index_method) throw ();
 
   /// Create named output object
   virtual Output *   create_output_  
   (std::string type, int index, Config * config,
-   const FieldDescr * field_descr, 
-   const ParticleDescr * particle_descr, 
    const Factory * ) throw ();
 
   /// Create named prolongation object

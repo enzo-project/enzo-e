@@ -38,17 +38,14 @@ void Simulation::initialize() throw()
 
   initialize_data_descr_();
 
-  problem_->initialize_physics (config_,parameters_,field_descr_);
+  problem_->initialize_physics (config_,parameters_);
   problem_->initialize_boundary(config_,parameters_);
-  problem_->initialize_initial (config_,parameters_,field_descr_);
-  problem_->initialize_refine  (config_,parameters_,field_descr_);
+  problem_->initialize_initial (config_,parameters_);
+  problem_->initialize_refine  (config_,parameters_);
   problem_->initialize_stopping(config_);
-  problem_->initialize_output  (config_,
-				field_descr_,
-				particle_descr_,
-				factory());
-  problem_->initialize_method  (config_,field_descr_,particle_descr_);
-  problem_->initialize_solver  (config_,field_descr_,particle_descr_);
+  problem_->initialize_output  (config_,factory());
+  problem_->initialize_method  (config_);
+  problem_->initialize_solver  (config_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
   problem_->initialize_units (config_);
@@ -64,7 +61,7 @@ void Simulation::initialize() throw()
   CProxy_Block block_array;
   if (CkMyPe() == 0) {
     bool allocate_data = true;
-    block_array = hierarchy_->new_block_proxy (field_descr_, allocate_data);
+    block_array = hierarchy_->new_block_proxy (allocate_data);
     thisProxy.p_set_block_array(block_array);
   }
 #endif    

@@ -17,8 +17,7 @@ class EnzoMethodComovingExpansion : public Method {
 public: // interface
 
   /// Create a new EnzoMethodComovingExpansion object
-  EnzoMethodComovingExpansion(const FieldDescr * field_descr,
-                              bool comoving_coordinates);
+  EnzoMethodComovingExpansion(bool comoving_coordinates);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodComovingExpansion);

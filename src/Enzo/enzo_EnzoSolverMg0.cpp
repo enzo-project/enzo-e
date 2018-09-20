@@ -358,7 +358,7 @@ void EnzoSolverMg0::apply
   field.dimensions (ib_,&mx_,&my_,&mz_);
   field.ghost_depth(ib_,&gx_,&gy_,&gz_);
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   // Initialize child counter for restrict synchronization
   
@@ -693,9 +693,7 @@ void EnzoBlock::r_solver_mg0_barrier(CkReductionMsg* msg)
 #endif
   TRACE_MG_BLOCK(this,"EnzoBlock::solver_mg0_coarse_solve()");
   
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-
-  solver->prolong(enzo_block);
+  solver->prolong(this);
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
@@ -715,9 +713,7 @@ void EnzoBlock::p_solver_mg0_restrict()
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-
-  solver->restrict(enzo_block);
+  solver->restrict(this);
 
 #ifdef DEBUG_ENTRY
   if (AFTER_CYCLE(this,CYCLE))
@@ -1129,9 +1125,7 @@ void EnzoBlock::p_solver_mg0_post_smooth()
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-
-  solver->post_smooth(enzo_block);
+  solver->post_smooth(this);
   
 #ifdef DEBUG_ENTRY
   if (AFTER_CYCLE(enzo_block,CYCLE))
@@ -1252,9 +1246,7 @@ void EnzoBlock::p_solver_mg0_last_smooth()
   EnzoSolverMg0 * solver = 
     static_cast<EnzoSolverMg0*> (this->solver());
 
-  EnzoBlock* enzo_block = static_cast<EnzoBlock*> (this);
-
-  solver->end(enzo_block);
+  solver->end(this);
   
 #ifdef DEBUG_ENTRY
   if (AFTER_CYCLE(this,CYCLE))

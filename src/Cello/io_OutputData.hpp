@@ -10,8 +10,6 @@
 
 class Factory;
 class Hierarchy;
-class FieldDescr;
-class ParticleDescr;
 class Config;
 
 class OutputData : public Output {
@@ -28,8 +26,6 @@ public: // functions
   /// Create an uninitialized OutputData object
   OutputData(int index,
 	     const Factory * factory,
-	     const FieldDescr * field_descr,
-	     const ParticleDescr * particle_descr,
 	     Config * config) throw();
 
   /// Close the file if it is open
@@ -63,28 +59,20 @@ public: // virtual functions
   virtual void finalize () throw ();
 
   /// Write hierarchy data to disk
-  virtual void write_hierarchy
-  ( const Hierarchy * hierarchy,
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr) throw();
+  virtual void write_hierarchy ( const Hierarchy * hierarchy) throw();
 
   /// Write block data to disk
-  virtual void write_block
-  ( const Block      * block,
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr) throw();
+  virtual void write_block ( const Block* block) throw();
 
 
   /// Write local field to disk
   virtual void write_field_data
   ( const FieldData * field_data,
-    const FieldDescr * field_descr,
     int index_field) throw();
 
   /// Write local particle to disk
   virtual void write_particle_data
   ( const ParticleData * particle_data,
-    const ParticleDescr * particle_descr,
     int index_particle) throw();
 
 protected:

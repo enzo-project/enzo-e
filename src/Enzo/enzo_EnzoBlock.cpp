@@ -70,7 +70,7 @@ int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];
 //----------------------------------------------------------------------
 
 // STATIC
-void EnzoBlock::initialize(EnzoConfig * enzo_config)
+void EnzoBlock::initialize(const EnzoConfig * enzo_config)
 {
 #ifdef DEBUG_ENZO_BLOCK
   CkPrintf ("%d DEBUG_ENZO_BLOCK EnzoBlock::initialize\n",CkMyPe());

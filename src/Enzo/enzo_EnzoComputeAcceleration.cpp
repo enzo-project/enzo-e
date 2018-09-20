@@ -12,13 +12,14 @@
 //----------------------------------------------------------------------
 
 EnzoComputeAcceleration::EnzoComputeAcceleration 
-(FieldDescr * field_descr,
- int         rank,
+(int         rank,
  int         order)
   : Compute(),
     rank_(rank),
     order_(order)
 {
+  FieldDescr * field_descr = cello::field_descr();
+  
   i_ax_ = (rank_ >= 1) ? field_descr->field_id("acceleration_x") : -1;
   i_ay_ = (rank_ >= 2) ? field_descr->field_id("acceleration_y") : -1;
   i_az_ = (rank_ >= 3) ? field_descr->field_id("acceleration_z") : -1;
@@ -64,7 +65,7 @@ void EnzoComputeAcceleration::compute_(Block * block)
 {
   if (!block->is_leaf()) return;
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   Field field = enzo_block->data()->field();
 
@@ -207,26 +208,24 @@ void EnzoComputeAcceleration::compute_(Block * block)
   Particle particle = block->data()->particle();
 
   int it_dark = particle.type_index("dark");
-  if (particle.num_particles(it_dark) > 0) {
 
-    FieldDescr    * fd = cello::field_descr();
-    ParticleDescr * pd = cello::particle_descr();
+  if (particle.num_particles(it_dark) > 0) {
 
     double dt_shift = 0.5*block->dt() / cosmo_a;
     //  double dt_shift = 0.0;
     if (rank_ >= 1) {
       EnzoComputeCicInterp interp_x
-	(fd, "acceleration_x", pd, "dark", "ax",dt_shift);
+	("acceleration_x", "dark", "ax",dt_shift);
       interp_x.compute(block);
     }
     if (rank_ >= 2) {
       EnzoComputeCicInterp interp_y
-	(fd, "acceleration_y", pd, "dark", "ay",dt_shift);
+	("acceleration_y", "dark", "ay",dt_shift);
       interp_y.compute(block);
     }
     if (rank_ >= 3) {
       EnzoComputeCicInterp interp_z
-	(fd, "acceleration_z", pd, "dark", "az",dt_shift);
+	("acceleration_z", "dark", "az",dt_shift);
       interp_z.compute(block);
     }
   }

@@ -12,10 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
-(
- const FieldDescr * field_descr,
- bool comoving_coordinates
-) 
+( bool comoving_coordinates ) 
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
@@ -26,6 +23,8 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
 
   const int rank = cello::rank();
   //  refresh(ir)->add_all_fields();
+  FieldDescr * field_descr = cello::field_descr();
+  
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
   refresh(ir)->add_field(field_descr->field_id("internal_energy"));
@@ -50,7 +49,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
     block->compute_done(); 
     return;
   }
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
   /* Only do this if
@@ -204,7 +203,7 @@ double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
 	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   cosmology->compute_expansion_timestep(&dtExpansion,
                                         (enzo_float) enzo_block->time());

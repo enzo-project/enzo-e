@@ -61,6 +61,7 @@ namespace enzo {
   EnzoUnits * units();
   const EnzoConfig * config();
   CProxy_EnzoBlock block_array();
+  EnzoBlock * block ( Block * block);
 };
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;

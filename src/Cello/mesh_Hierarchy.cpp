@@ -192,10 +192,7 @@ void Hierarchy::deallocate_blocks() throw()
 //----------------------------------------------------------------------
 
 #ifdef NEW_MSG_REFINE
-CProxy_Block Hierarchy::new_block_proxy
-(
- FieldDescr   * field_descr,
- bool allocate_data) throw()
+CProxy_Block Hierarchy::new_block_proxy ( bool allocate_data) throw()
 {
   TRACE("Creating block_array_");
 
@@ -209,10 +206,7 @@ CProxy_Block Hierarchy::new_block_proxy
 
 //----------------------------------------------------------------------
 
-void Hierarchy::create_block_array
-(
- FieldDescr   * field_descr,
- bool allocate_data) throw()
+void Hierarchy::create_block_array ( bool allocate_data) throw()
 {
   // determine block size
   const int mbx = root_size_[0] / blocking_[0];
@@ -264,10 +258,7 @@ void Hierarchy::create_block_array
 //----------------------------------------------------------------------
 
 void Hierarchy::create_subblock_array
-(
- FieldDescr   * field_descr,
- bool allocate_data,
- int min_level) throw()
+(bool allocate_data, int min_level) throw()
 {
   // determine block size
 

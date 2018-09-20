@@ -14,15 +14,13 @@
 //----------------------------------------------------------------------
 
 EnzoComputeCicInterp::EnzoComputeCicInterp  
-(FieldDescr    * field_descr,
- std::string     field_name,
- ParticleDescr * particle_descr,
+(std::string     field_name,
  std::string     particle_type,
  std::string     particle_attribute,
  double          dt)
-  : it_p_ (particle_descr->type_index (particle_type)),
-    ia_p_ (particle_descr->attribute_index (it_p_,particle_attribute)),
-    if_ (field_descr->field_id (field_name)),
+  : it_p_ (cello::particle_descr()->type_index (particle_type)),
+    ia_p_ (cello::particle_descr()->attribute_index (it_p_,particle_attribute)),
+    if_ (cello::field_descr()->field_id (field_name)),
     dt_(dt)
 {
 }
@@ -59,7 +57,7 @@ void EnzoComputeCicInterp::compute ( Block * block) throw()
 
 void EnzoComputeCicInterp::compute_(Block * block)
 {
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   Field field = enzo_block->data()->field();
   Particle particle = enzo_block->data()->particle();

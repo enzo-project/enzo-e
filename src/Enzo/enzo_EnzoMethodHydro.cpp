@@ -11,8 +11,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodHydro::EnzoMethodHydro 
-( const FieldDescr * field_descr,
-  std::string method,
+( std::string method,
   enzo_float gamma,
   bool gravity,
   bool comoving_coordinates,
@@ -55,6 +54,8 @@ EnzoMethodHydro::EnzoMethodHydro
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_ppm);
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   refresh(ir)->add_field(field_descr->field_id("velocity_y"));

@@ -14,12 +14,10 @@ OutputCheckpoint::OutputCheckpoint
 (
  int index,
  const Factory * factory,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  Config * config,
  int process_count
 ) throw ()
-  : Output(index,factory,field_descr,particle_descr),
+  : Output(index,factory),
     restart_file_("")
 {
 

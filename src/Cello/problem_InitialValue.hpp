@@ -46,8 +46,6 @@ public: // interface
   /// Read initialization values from Initial group in parameter file
 
   virtual void enforce_block (Block * block,
-			      const FieldDescr * field_descr,
-			      const ParticleDescr * particle_descr,
 			      const Hierarchy * hierarchy
 			      ) throw();
 
@@ -56,16 +54,13 @@ private: // functions
   void allocate_xyzt_(Block * block,
 		      int index_field,
 		      const FieldData * field_data,
-		      const FieldDescr * field_descr,
 		      int * mx, int * my, int * mz,
 		      double ** value, double ** vdeflt,
 		      bool ** mask, bool ** rdeflt,
 		      double ** x, double ** y, double ** z,
 		      double * t) throw();
 
-  void copy_values_ (
-		     const FieldDescr * field_descr,
-		     FieldData * field_data,
+  void copy_values_ (FieldData * field_data,
 		     double * value, bool * mask,
 		     int index_field,
 		     int nx, int ny, int nz) throw();
@@ -80,7 +75,6 @@ private: // functions
 		       FieldData * field_data,
 		       int index_field, int index_value,
 		       std::string field_name,
-		       const FieldDescr * field_descr,			
 		       int n, bool * value, bool * vdeflt,
 		       double * x, double * y, double * z, double t) throw();
 
@@ -92,8 +86,7 @@ private: // functions
   void evaluate_mask_png_ ( bool            * mask_block, int nxb, int nyb,
 			    bool            * mask_png,   int nx,  int ny,
 			    const Hierarchy * hierarchy,
-			    const Block     * block,
-			    const FieldDescr * field_descr);
+			    const Block     * block);
 
   template<class T>
   void copy_precision_
@@ -106,9 +99,6 @@ private: // functions
 private: // attributes
 
   Parameters * parameters_;
-
-  /// Field descriptor
-  const FieldDescr * field_descr_;
 
   /// number of fields
   int num_fields_;

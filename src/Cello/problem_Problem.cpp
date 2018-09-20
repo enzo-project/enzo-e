@@ -144,8 +144,7 @@ void Problem::initialize_boundary(Config * config,
 //----------------------------------------------------------------------
 
 void Problem::initialize_initial(Config * config,
-				 Parameters * parameters,
-				 const FieldDescr * field_descr) throw()
+				 Parameters * parameters) throw()
 {
 
   for (int index=0; index < config->num_initial; index++) {
@@ -153,7 +152,7 @@ void Problem::initialize_initial(Config * config,
     std::string type = config->initial_list[index];
 
     Initial * initial = create_initial_
-      (type,index,config,parameters,field_descr);
+      (type,index,config,parameters);
 
     ASSERT1("Problem::initialize_initial",
 	    "Initial type %s not recognized",
@@ -167,8 +166,7 @@ void Problem::initialize_initial(Config * config,
 //----------------------------------------------------------------------
 
 void Problem::initialize_physics(Config * config,
-				 Parameters * parameters,
-				 const FieldDescr * field_descr) throw()
+				 Parameters * parameters) throw()
 {
 
   for (int index=0; index < config->num_physics; index++) {
@@ -176,7 +174,7 @@ void Problem::initialize_physics(Config * config,
     std::string type = config->physics_list[index];
 
     Physics * physics = create_physics_
-      (type,index,config,parameters,field_descr);
+      (type,index,config,parameters);
 
     ASSERT1("Problem::initialize_physics",
 	    "Physics type %s not recognized",
@@ -191,15 +189,14 @@ void Problem::initialize_physics(Config * config,
 //----------------------------------------------------------------------
 
 void Problem::initialize_refine(Config * config,
-				Parameters * parameters,
-				const FieldDescr * field_descr) throw()
+				Parameters * parameters) throw()
 {
   for (int i=0; i<config->num_adapt; i++) {
 
     std::string name = config->adapt_type[i];
 
     Refine * refine = create_refine_ 
-      (name,config,parameters,field_descr,i);
+      (name,config,parameters,i);
 
     if (refine) {
       refine_list_.push_back( refine );
@@ -260,17 +257,15 @@ void Problem::initialize_restrict(Config * config) throw()
 
 void Problem::initialize_output
 (Config * config,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  const Factory * factory) throw()
 {
-
+  FieldDescr * field_descr = cello::field_descr();
+  
   for (int index=0; index < config->num_output; index++) {
 
     std::string type       = config->output_type[index];
 
-    Output * output = create_output_ 
-      (type,index, config,field_descr,particle_descr,factory);
+    Output * output = create_output_ (type,index, config,factory);
 
     if (output == NULL) {
       ERROR2("Problem::initialize_output",
@@ -345,6 +340,8 @@ void Problem::initialize_output
     //--------------------------------------------------
     // particle_list
     //--------------------------------------------------
+
+    ParticleDescr * particle_descr = cello::particle_descr();
 
     const int num_particles = config->output_particle_list[index].size();
 
@@ -442,12 +439,7 @@ void Problem::initialize_output
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_method
-(
- Config * config,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+void Problem::initialize_method ( Config * config ) throw()
 {
   const size_t num_method = config->method_list.size();
 
@@ -457,8 +449,7 @@ void Problem::initialize_method
 
     std::string name = config->method_list[index_method];
 
-    Method * method = create_method_(name, config, index_method, 
-				     (FieldDescr *)field_descr, particle_descr);
+    Method * method = create_method_(name, config, index_method);
 
     if (method) {
 
@@ -485,12 +476,7 @@ void Problem::initialize_method
 
 //----------------------------------------------------------------------
 
-void Problem::initialize_solver
-(
- Config * config,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+void Problem::initialize_solver( Config * config ) throw()
 {
   const size_t num_solver = config->solver_list.size();
 
@@ -498,8 +484,7 @@ void Problem::initialize_solver
 
     std::string type = config->solver_type[index_solver];
 
-    Solver * solver = create_solver_(type, config, index_solver, 
-				     (FieldDescr *)field_descr, particle_descr);
+    Solver * solver = create_solver_(type, config, index_solver);
 
     if (solver) {
 
@@ -606,8 +591,7 @@ Initial * Problem::create_initial_
  std::string  type,
  int index,
  Config * config,
- Parameters * parameters,
- const FieldDescr * field_descr
+ Parameters * parameters
  ) throw ()
 { 
   //--------------------------------------------------
@@ -644,7 +628,6 @@ Refine * Problem::create_refine_
  std::string        type,
  Config *           config,
  Parameters *       parameters,
- const FieldDescr * field_descr,
  int                index
  ) throw ()
 { 
@@ -661,8 +644,7 @@ Refine * Problem::create_refine_
   } else if (type == "slope") {
 
     return new RefineSlope 
-      (field_descr,
-       config->adapt_min_refine[index],
+      (config->adapt_min_refine[index],
        config->adapt_max_coarsen[index],
        config->adapt_field_list[index],
        config->adapt_max_level[index],
@@ -753,9 +735,7 @@ Units * Problem::create_units_
 Solver * Problem::create_solver_ 
 ( std::string  type,
   Config * config,
-  int index_solver,
-  FieldDescr * field_descr,
-  const ParticleDescr * particle_descr) throw ()
+  int index_solver) throw ()
 {
   TRACE1("Problem::create_solver %s",type.c_str());
 
@@ -780,8 +760,7 @@ Physics * Problem::create_physics_
 ( std::string  name,
   int index,
   Config * config,
-  Parameters * parameters,
-  const FieldDescr * field_descr) throw ()
+  Parameters * parameters) throw ()
 {
   TRACE1("Problem::create_physics %s",name.c_str());
 
@@ -806,9 +785,7 @@ Physics * Problem::physics (std::string type) const throw()
 Method * Problem::create_method_ 
 ( std::string  name,
   Config * config,
-  int index_method,
-  FieldDescr * field_descr,
-  const ParticleDescr * particle_descr) throw ()
+  int index_method) throw ()
 {
   TRACE1("Problem::create_method %s",name.c_str());
 
@@ -816,8 +793,7 @@ Method * Problem::create_method_
   Method * method = NULL;
 
   if (name == "trace") {
-    method = new MethodTrace(field_descr, particle_descr,
-			     config->method_courant[index_method],
+    method = new MethodTrace(config->method_courant[index_method],
 			     config->method_timestep[index_method],
 			     config->method_trace_name[index_method]);
   }
@@ -831,15 +807,11 @@ Output * Problem::create_output_
  std::string    name,
  int index,
  Config *  config,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  const Factory * factory
  ) throw ()
 /// @param name           Name of Output object to create
 /// @param index          Index of output object in Object list
 /// @param config         Configuration parameter object
-/// @param field_descr    Field descriptor 
-/// @param particle_descr Particle descriptor 
 /// @param factory        Factory object for creating Io objects of correct type
 { 
 
@@ -892,8 +864,6 @@ Output * Problem::create_output_
     int image_axis = config->output_axis[index][0] - 'x';
 
     output = new OutputImage (index,factory,
-			      field_descr,
-			      particle_descr,
 			      CkNumPes(),
 			      nx,ny,nz, 
 			      nbx,nby,nbz,
@@ -917,15 +887,11 @@ Output * Problem::create_output_
   } else if (name == "data") {
 
     output = new OutputData (index,factory,
-			     field_descr,
-			     particle_descr,
 			     config);
 
   } else if (name == "checkpoint") {
 
     output = new OutputCheckpoint (index,factory,
-				   field_descr,
-				   particle_descr,
 				   config,CkNumPes());
 
   }

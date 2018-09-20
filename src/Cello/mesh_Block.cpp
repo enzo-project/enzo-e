@@ -580,16 +580,12 @@ void Block::apply_initial_() throw ()
 
   TRACE("Block::apply_initial_()");
 
-  FieldDescr    * field_descr    = cello::field_descr();
-  ParticleDescr * particle_descr = cello::particle_descr();
-
   // Apply initial conditions
 
   index_initial_ = 0;
   Problem * problem = cello::problem();
   while (Initial * initial = problem->initial(index_initial_++)) {
-    initial->enforce_block(this,field_descr, particle_descr,
-			   cello::hierarchy());
+    initial->enforce_block(this,cello::hierarchy());
   }
 }
 

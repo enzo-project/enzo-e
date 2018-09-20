@@ -29,12 +29,7 @@ void EnzoInitialPm::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 void EnzoInitialPm::enforce_block 
-(
- Block * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy  * hierarchy
- ) throw()
+( Block * block, const Hierarchy  * hierarchy ) throw()
 
 {
   Field    field    (block->data()->field());

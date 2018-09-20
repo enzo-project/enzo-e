@@ -44,8 +44,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGravity::EnzoMethodGravity
-(const FieldDescr * field_descr,
- int index_solver,
+(int index_solver,
  double grav_const,
  int order,
  bool accumulate)
@@ -54,6 +53,8 @@ EnzoMethodGravity::EnzoMethodGravity
     grav_const_(grav_const),
     order_(order)
 {
+  FieldDescr * field_descr = cello::field_descr();
+  
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
   const int ib  = field_descr->field_id("B");
@@ -405,8 +406,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
   /// compute acceleration fields from potential
 
-  EnzoComputeAcceleration compute_acceleration(field.field_descr(),
-					       cello::rank(), order_);
+  EnzoComputeAcceleration compute_acceleration(cello::rank(), order_);
 
   compute_acceleration.compute(enzo_block);
 

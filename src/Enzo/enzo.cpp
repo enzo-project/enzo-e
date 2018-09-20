@@ -32,4 +32,9 @@ namespace enzo {
     return (CProxy_EnzoBlock) enzo::simulation()->hierarchy()->block_array();
   }
 
+  EnzoBlock * block ( Block * block)
+  {
+    return static_cast<EnzoBlock*> (block);
+  }
+
 }

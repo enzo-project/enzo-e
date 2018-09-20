@@ -210,7 +210,7 @@ void Block::p_output_write (int index_output, int step)
   Simulation    * simulation     = cello::simulation();
   Output        * output         = cello::output(index_output);
 
-  output->write_block(this,field_descr,particle_descr);
+  output->write_block(this);
 
   simulation->write_();
   performance_stop_ (perf_output);

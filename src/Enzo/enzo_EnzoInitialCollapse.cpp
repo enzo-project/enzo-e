@@ -30,12 +30,7 @@ void EnzoInitialCollapse::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 void EnzoInitialCollapse::enforce_block
-(
- Block * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy  * hierarchy
- ) throw()
+( Block * block, const Hierarchy  * hierarchy ) throw()
 
 {
 

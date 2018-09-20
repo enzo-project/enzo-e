@@ -126,14 +126,13 @@ void EnzoBlock::p_solver_jacobi_continue()
 void EnzoSolverJacobi::compute(Block * block)
 {
   TRACE_JACOBI(block,"compute()");
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   Field field = block->data()->field();
 
   if (*piter_(block) < n_) {
 
     apply_(block);
-    DEBUG_FIELD (enzo_block,ix_,"X compute 1");
+    DEBUG_FIELD (block,ix_,"X compute 1");
 
   } else {
 
@@ -141,7 +140,7 @@ void EnzoSolverJacobi::compute(Block * block)
 
     Solver::end_(block);
 
-    DEBUG_FIELD (enzo_block,ix_,"X compute 2");
+    DEBUG_FIELD (block,ix_,"X compute 2");
     CkCallback(callback_,
 	       CkArrayIndexIndex(block->index()),
 	       block->proxy_array()).send();

@@ -77,7 +77,7 @@ void EnzoSimulation::pup (PUP::er &p)
   TRACEPUP;
 
   if (p.isUnpacking()) {
-    EnzoBlock::initialize(static_cast<EnzoConfig*>(config_));
+    EnzoBlock::initialize(enzo::config());
   }
 }
 
@@ -151,13 +151,6 @@ void EnzoSimulation::initialize_config_() throw()
 
   config_ = static_cast<EnzoConfig*>(&g_enzo_config);
 
-  // char buffer[40];
-  // sprintf (buffer,"config-%02d.text",CkMyPe());
-  // FILE * fp = fopen (buffer,"w");
-  // EnzoConfig * enzo_config = static_cast<EnzoConfig*>(config_);
-  //  enzo_config->write(fp);
-  // fclose(fp);
-  
 #ifdef DEBUG_ENZO_SIMULATION
   CkPrintf ("%d DEBUG_ENZO_SIMULATION end initialize_config()\n",CkMyPe());
   fflush(stdout);
@@ -177,7 +170,7 @@ void EnzoSimulation::initialize() throw()
   Simulation::initialize();
 
   // Initialize EnzoBlock static variables
-  EnzoBlock::initialize(static_cast<EnzoConfig*>(config_));
+  EnzoBlock::initialize(enzo::config());
 
 }
 

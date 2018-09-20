@@ -207,15 +207,12 @@ public: // interface
   {  return num_zones_total_;  }
 
 #ifdef NEW_MSG_REFINE
-  CProxy_Block new_block_proxy (FieldDescr   * field_descr,
-				bool allocate_data) throw();
+  CProxy_Block new_block_proxy (bool allocate_data) throw();
 #endif
   
-  void create_block_array (FieldDescr   * field_descr,
-			   bool allocate_data) throw();
+  void create_block_array (bool allocate_data) throw();
 
-  void create_subblock_array (FieldDescr   * field_descr,
-			      bool allocate_data,
+  void create_subblock_array (bool allocate_data,
 			      int min_level) throw();
 
 

@@ -11,8 +11,6 @@
 // #define DEBUG_OUTPUT
 
 class Factory;
-class FieldDescr;
-class ParticleDescr;
 class Hierarchy;
 class ItIndex;
 class ItParticle;
@@ -33,9 +31,7 @@ public: // functions
   Output() throw() { }
 
   /// Create an uninitialized Output object
-  Output(int index, const Factory * factory,
-	 const FieldDescr * field_descr,
-	 const ParticleDescr * particle_descr) throw();
+  Output(int index, const Factory * factory) throw();
 
   /// Delete an Output object
   virtual ~Output() throw();
@@ -188,40 +184,30 @@ public: // virtual functions
   }
 
   /// Write Hierarchy data to disk
-  virtual void write_hierarchy
-  ( const Hierarchy * hierarchy, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr ) throw()
+  virtual void write_hierarchy ( const Hierarchy * hierarchy ) throw()
   {
 #ifdef DEBUG_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT Output::write_hierarchy()\n",CkMyPe());
 #endif    
-    write_hierarchy_(hierarchy,field_descr,particle_descr);
+    write_hierarchy_(hierarchy);
   }
 
   /// Write local block data to disk
-  virtual void write_block
-  ( const Block      * block, 
-    const FieldDescr * field_descr, 
-    const ParticleDescr * particle_descr) throw()
+  virtual void write_block ( const Block * block ) throw()
   {
 #ifdef DEBUG_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT Output::write_block()\n",CkMyPe());
 #endif    
-    write_block_(block,field_descr,particle_descr);
+    write_block_(block);
   }
 
   /// Write local field to disk
-  virtual void write_field_data
-  ( const FieldData * field_data, 
-    const FieldDescr * field_descr,
-    int index_field) throw() = 0;
+  virtual void write_field_data ( const FieldData * field_data,
+				  int index_field) throw() = 0;
 
   /// Write local particle data to disk
-  virtual void write_particle_data
-  ( const ParticleData * particle_data,
-    const ParticleDescr * particle_descr,
-    int particle_index) throw() = 0;
+  virtual void write_particle_data ( const ParticleData * particle_data,
+				     int particle_index) throw() = 0;
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw()
@@ -270,18 +256,10 @@ private:
   void write_simulation_ (const Simulation * simulation ) throw();
 
   /// Loop over writing Blocks in the Hierarchy
-  void write_hierarchy_
-  ( const Hierarchy * hierarchy, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr
-  ) throw();
+  void write_hierarchy_ ( const Hierarchy * hierarchy ) throw();
 
   /// Loop over writing Field data in the Block
-  void write_block_
-  ( const Block      * block, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr
-    ) throw();
+  void write_block_ ( const Block * block ) throw();
 
   /// Implementation of write_meta() and write_meta_group()
   void write_meta_ ( meta_type type, Io * io ) throw();

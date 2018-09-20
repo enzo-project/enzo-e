@@ -12,8 +12,6 @@
 
 MethodTrace::MethodTrace 
 (
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  double courant,
  double timestep,
  std::string name

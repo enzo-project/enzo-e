@@ -21,19 +21,17 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodPpm::EnzoMethodPpm 
-(
- const FieldDescr * field_descr,
- EnzoConfig * enzo_config
-) 
+EnzoMethodPpm::EnzoMethodPpm ()
   : Method(),
-    comoving_coordinates_(enzo_config->physics_cosmology)
+    comoving_coordinates_(enzo::config()->physics_cosmology)
 {
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   			       enzo_sync_id_method_ppm);
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   refresh(ir)->add_field(field_descr->field_id("velocity_y"));
@@ -65,7 +63,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
   TRACE_PPM("compute()");
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   if (block->is_leaf()) {
     TRACE_PPM ("BEGIN SolveHydroEquations");
@@ -86,7 +84,7 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   TRACE_PPM("timestep()");
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   enzo_float cosmo_a = 1.0, cosmo_dadt=0.0;
 

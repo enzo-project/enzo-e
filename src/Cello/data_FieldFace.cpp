@@ -93,20 +93,6 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 
 //----------------------------------------------------------------------
 
-bool FieldFace::operator== (const FieldFace & field_face) throw()
-{
-  for (int i=0; i<3; i++) {
-    if (ghost_[i] != field_face.ghost_[i]) return false;
-    if (face_[i]  != field_face.face_[i])  return false;
-    if (child_[i] != field_face.child_[i]) return false;
-  }
-  if (refresh_type_ != field_face.refresh_type_) return false;
-  if (! (*refresh_ == *field_face.refresh_)) return false;
-  return true;
-}
-
-//----------------------------------------------------------------------
-
 void FieldFace::copy_(const FieldFace & field_face)
 {
   for (int i=0; i<3; i++) {
