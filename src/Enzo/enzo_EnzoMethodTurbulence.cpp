@@ -363,8 +363,6 @@ void EnzoMethodTurbulence::compute_resume_
   TRACE_TURBULENCE;  
   // Compute normalization
 
-  EnzoBlock * enzo_block = enzo::block(block);
-
   Field field = block->data()->field();
 
   int mx,my,mz;
@@ -388,7 +386,7 @@ void EnzoMethodTurbulence::compute_resume_
   double dt0 = dt;
   norm = (dt/dt0)*norm;
 
-  const int rank = (my == 1) ? 1 : ((mz == 1) ? 2 : 3);
+  const int rank = cello::rank();
 
   enzo_float * te = (enzo_float*) field.values ("total_energy");
   enzo_float * v3[3] = {

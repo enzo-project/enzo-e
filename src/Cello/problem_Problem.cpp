@@ -744,6 +744,8 @@ Solver * Problem::create_solver_
   if (type == "null") {
     solver = new SolverNull
       (config->solver_list         [index_solver],
+       config->solver_field_x      [index_solver],
+       config->solver_field_b      [index_solver],
        config->solver_monitor_iter [index_solver],
        config->solver_min_level    [index_solver],
        config->solver_max_level    [index_solver]);

@@ -17,6 +17,8 @@ class EnzoSolverCg : public Solver {
 public: // interface
 
   EnzoSolverCg (std::string name,
+		std::string field_x,
+		std::string field_b,
 		int monitor_iter,
 		int restart_cycle,
 		int rank,
@@ -32,11 +34,10 @@ public: // interface
   EnzoSolverCg() throw()
   : Solver(), 
     A_(NULL),
-    ix_(0),  ib_(0),
     index_precon_(-1),
     rank_(0),
     iter_max_(0), 
-    ir_(0), id_(0), iy_(0), iz_(0),
+    ir_(-1), id_(-1), iy_(-1), iz_(-1),
     nx_(0),ny_(0),nz_(0),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
@@ -56,11 +57,10 @@ public: // interface
   EnzoSolverCg (CkMigrateMessage *m)
     : Solver(m), 
       A_(NULL),
-      ix_(0),  ib_(0),
       index_precon_(-1),
       rank_(0),
       iter_max_(0), 
-      ir_(0), id_(0), iy_(0), iz_(0),
+      ir_(-1), id_(-1), iy_(-1), iz_(-1),
       nx_(0),ny_(0),nz_(0),
       mx_(0),my_(0),mz_(0),
       gx_(0),gy_(0),gz_(0),
@@ -84,8 +84,7 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
-		       Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
   
   /// Type of this solver
   virtual std::string type() const { return "cg"; }
@@ -183,10 +182,6 @@ protected: // attributes
 
   /// Matrix
   std::shared_ptr<Matrix> A_;
-
-  /// Solution and right-hand-side fields
-  int ix_;
-  int ib_;
 
   /// Preconditioner (-1 if none)
   int index_precon_;

@@ -126,13 +126,15 @@
 
 EnzoSolverBiCgStab::EnzoSolverBiCgStab
 (std::string name,
+ std::string field_x, std::string field_b,
  int monitor_iter, int restart_cycle, int rank,
  int iter_max, double res_tol,
  int min_level, int max_level,
  int index_precon,
  bool is_unigrid
  ) 
-  : Solver(name,monitor_iter,restart_cycle,min_level,max_level,is_unigrid),
+  : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
+	   min_level,max_level,is_unigrid),
     alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
     rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
     rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
@@ -140,7 +142,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     A_(NULL),
     index_precon_(index_precon),
     iter_max_(iter_max), 
-    ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
+    ir_(0), ir0_(0), ip_(0), 
     iy_(0), iv_(0), iq_(0), iu_(0),
     nx_(0), ny_(0), nz_(0),
     m_(0), mx_(0), my_(0), mz_(0),
@@ -148,7 +150,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     iter_(0)
 {
   FieldDescr * field_descr = cello::field_descr();
-  
+
   ir_ = field_descr->insert_temporary();
   ir0_ = field_descr->insert_temporary();
   ip_ = field_descr->insert_temporary();
@@ -166,7 +168,7 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 			     enzo_sync_id_solver_bicgstab);
   
   //  refresh(ir)->add_all_fields();
-  refresh(ir)->add_field (field_descr->field_id("potential"));
+  refresh(ir)->add_field (ix_);
   refresh(ir)->add_field (ir_);
   refresh(ir)->add_field (ir0_);
   refresh(ir)->add_field (ip_);
@@ -180,14 +182,12 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
 //----------------------------------------------------------------------
 
 void EnzoSolverBiCgStab::apply
-( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, Block * block) throw()
 {
 
   Solver::begin_(block);
   
   A_ = A;
-  ix_ = ix;
-  ib_ = ib;
 
   Field field = block->data()->field();
 
@@ -579,8 +579,10 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
     
     
     COPY_FIELD(block,ip_,"P0_bcg");
-    
-    precon->apply(A_,iy_,ip_,block);
+
+    precon->set_field_x(iy_);
+    precon->set_field_b(ip_);
+    precon->apply(A_,block);
     COPY_FIELD(block,iy_,"Y0_bcg");
     
   } else { // no preconditioner
@@ -853,7 +855,10 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
     fclose(fp);
 #endif    
 
-    precon->apply(A_,iy_,iq_,block);
+    precon->set_field_x(iy_);
+    precon->set_field_b(iq_);
+
+    precon->apply(A_,block);
     
   } else {
 

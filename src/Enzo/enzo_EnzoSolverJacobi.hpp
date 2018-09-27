@@ -18,6 +18,8 @@ public: // interface
 
   /// Constructor
   EnzoSolverJacobi(std::string name,
+		   std::string field_x,
+		   std::string field_b,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 
@@ -28,10 +30,8 @@ public: // interface
   EnzoSolverJacobi (CkMigrateMessage *m)
     : Solver(m),
       A_(NULL),
-      ix_(0),
-      ib_(0),
-      ir_(0),
-      id_(0),
+      ir_(-1),
+      id_(-1),
       w_(0),
       i_iter_(-1),
       n_(0)
@@ -44,8 +44,6 @@ public: // interface
     Solver::pup(p);
 
     //    p | A_;
-    p | ix_;
-    p | ib_;
     p | ir_;
     p | id_;
     p | w_;
@@ -56,8 +54,7 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
-		       Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
 
   /// Type of this solver
   virtual std::string type() const { return "jacobi"; }
@@ -100,12 +97,6 @@ protected: // attributes
   /// Matrix A for smoothing A*X = B
   std::shared_ptr<Matrix> A_;
   
-  /// Field index for vector X
-  int ix_;
-
-  /// Field index for rhs B
-  int ib_;
-
   /// Field index for residual R
   int ir_;
 

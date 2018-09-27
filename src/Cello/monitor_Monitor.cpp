@@ -132,7 +132,7 @@ void Monitor::header () const
 
 //----------------------------------------------------------------------
 
-bool Monitor::is_active(const char * component) const throw ()
+int Monitor::is_active(const char * component) const throw ()
 {
   if (mode_ == monitor_mode_none)                   
     return false;
@@ -142,7 +142,7 @@ bool Monitor::is_active(const char * component) const throw ()
   
   auto it_active = group_mode_.find(component);
 
-  bool in_list = it_active != group_mode_.end();
+  bool in_list = (it_active != group_mode_.end());
 
   return in_list ? it_active->second : group_default_;
 }

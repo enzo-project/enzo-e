@@ -20,11 +20,13 @@ public: // interface
 
   /// Create a new SolverNull
   SolverNull (std::string name,
+	      std::string field_x,
+	      std::string field_b,
 	      int monitor_iter,
 	      int restart_cycle,
 	      int min_level = 0,
 	      int max_level = std::numeric_limits<int>::max()) throw()
-    : Solver(name,monitor_iter,restart_cycle,min_level,max_level)
+    : Solver(name,field_x,field_b,monitor_iter,restart_cycle,min_level,max_level)
   {}
 
   /// Create an uninitialized SolverNull
@@ -49,8 +51,7 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( std::shared_ptr<Matrix> A,
-		       int ix, int ib, Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
 
   /// Return the name of this SolverNull
   virtual std::string type () const

@@ -28,6 +28,8 @@ public: // interface
 
   /// normal constructor
   EnzoSolverBiCgStab(std::string name,
+		     std::string field_x,
+		     std::string field_b,
 		     int monitor_iter,
 		     int reuse_solution,
 		     int rank,
@@ -48,8 +50,8 @@ public: // interface
       A_(NULL),
       index_precon_(-1),
       iter_max_(0), 
-      ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
-      iy_(0), iv_(0), iq_(0), iu_(0),
+      ir_(-1), ir0_(-1), ip_(-1), 
+      iy_(-1), iv_(-1), iq_(-1), iu_(-1),
       nx_(0), ny_(0), nz_(0),
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
@@ -69,8 +71,8 @@ public: // interface
       A_(NULL),
       index_precon_(-1),
       iter_max_(0), 
-      ib_(0), ix_(0), ir_(0), ir0_(0), ip_(0), 
-      iy_(0), iv_(0), iq_(0), iu_(0),
+      ir_(-1), ir0_(-1), ip_(-1), 
+      iy_(-1), iv_(-1), iq_(-1), iu_(-1),
       nx_(0), ny_(0), nz_(0),
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
@@ -97,8 +99,6 @@ public: // interface
     p | err_min_;
     p | err_max_;
 
-    p | ib_;
-    p | ix_;
     p | ir_;
     p | ir0_;
     p | ip_;
@@ -136,8 +136,7 @@ public: // interface
 
   
   /// Main solver entry routine
-  virtual void apply (std::shared_ptr<Matrix> A, int ix, int ib,
-		      Block * block) throw();
+  virtual void apply (std::shared_ptr<Matrix> A, Block * block) throw();
 
   /// Type of this solver
   virtual std::string type() const { return "bicgstab"; }
@@ -263,8 +262,6 @@ protected: // attributes
   int iter_max_;
 
   /// BiCgStab vector id's
-  int ib_;
-  int ix_;
   int ir_;
   int ir0_;
   int ip_;

@@ -31,8 +31,8 @@ public: // interface
   
   /// Return the specified scalar value
   T * value (ScalarDescr * scalar_descr, int index)
-  { if (index >= value_.size()) allocate(scalar_descr);
-    return &value_[index];
+  { if (index >= int(value_.size())) allocate(scalar_descr);
+    return (index >= 0) ? & value_[index] : NULL;
   }
 
 private: // attributes

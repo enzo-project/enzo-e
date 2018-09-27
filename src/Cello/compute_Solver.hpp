@@ -21,28 +21,19 @@ public: // interface
 
   /// Create a new Solver
   Solver (std::string name,
+	  std::string field_x,
+	  std::string field_b,
 	  int monitor_iter,
 	  int restart_cycle,
 	  int min_level = 0,
 	  int max_level = std::numeric_limits<int>::max(),
-	  bool is_unigrid = false ) throw()
-    : PUP::able(),
-      name_(name),
-      refresh_list_(),
-      monitor_iter_(monitor_iter),
-      restart_cycle_(restart_cycle),
-      callback_(0),
-      index_(0),
-      min_level_(min_level),
-      max_level_(max_level),
-      id_sync_(0),
-      is_unigrid_(is_unigrid)
-  {}
+	  bool is_unigrid = false ) throw();
 
   /// Create an uninitialized Solver
   Solver () throw()
   : PUP::able(),
     name_(""),
+    ix_(-1),ib_(-1),
     refresh_list_(),
     monitor_iter_(0),
     restart_cycle_(1),
@@ -62,16 +53,17 @@ public: // interface
 
   Solver (CkMigrateMessage *m)
     : PUP::able (m),
-      name_(""),
-      refresh_list_(),
-      monitor_iter_(0),
-      restart_cycle_(1),
-      callback_(0),
-      index_(0),
-      min_level_(- std::numeric_limits<int>::max()),
-      max_level_(  std::numeric_limits<int>::max()),
-      id_sync_(0),
-      is_unigrid_(false)
+    name_(""),
+    ix_(-1),ib_(-1),
+    refresh_list_(),
+    monitor_iter_(0),
+    restart_cycle_(1),
+    callback_(0),
+    index_(0),
+    min_level_(- std::numeric_limits<int>::max()),
+    max_level_(  std::numeric_limits<int>::max()),
+    id_sync_(0),
+    is_unigrid_(false)
   { }
   
   /// CHARM++ Pack / Unpack function
@@ -82,6 +74,8 @@ public: // interface
     PUP::able::pup(p);
 
     p | name_;
+    p | ix_;
+    p | ib_;
     p | refresh_list_;
     p | monitor_iter_;
     p | restart_cycle_;
@@ -102,6 +96,9 @@ public: // interface
   { index_ = index; }
 
   int index() const { return index_; }
+
+  void set_field_x (int ix) { ix_ = ix; }
+  void set_field_b (int ib) { ib_ = ib; }
 
   void set_min_level (int min_level)
   { min_level_ = min_level; }
@@ -142,8 +139,7 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( std::shared_ptr<Matrix> A,
-		       int ix, int ib, Block * block) throw() = 0;
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw() = 0;
 
   /// Return the type of this solver
   virtual std::string type () const = 0;
@@ -188,6 +184,12 @@ protected: // attributes
 
   /// Name of the solver
   std::string name_;
+
+  /// Field id for solution
+  int ix_;
+  
+  /// Field id for right-hand side
+  int ib_;
   
   ///  Refresh object
   std::vector<Refresh *> refresh_list_;

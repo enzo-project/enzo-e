@@ -18,8 +18,7 @@ void SolverNull::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void SolverNull::apply ( std::shared_ptr<Matrix> A,
-			 int ix, int ib, Block * block) throw()
+void SolverNull::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
   Solver::begin_(block);
   Solver::end_(block);

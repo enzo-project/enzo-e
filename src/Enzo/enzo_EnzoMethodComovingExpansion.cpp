@@ -19,8 +19,6 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_comoving_expansion);
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
   const int rank = cello::rank();
   //  refresh(ir)->add_all_fields();
   FieldDescr * field_descr = cello::field_descr();

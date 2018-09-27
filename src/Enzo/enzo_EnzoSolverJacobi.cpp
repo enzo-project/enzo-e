@@ -54,11 +54,11 @@
 //----------------------------------------------------------------------
 
 EnzoSolverJacobi::EnzoSolverJacobi
-( std::string name,double weight, int iter_max) throw()
-  : Solver(name,0,0),
+( std::string name,
+  std::string field_x, std::string field_b,
+  double weight, int iter_max) throw()
+  : Solver(name,field_x,field_b,0,0),
     A_ (NULL),
-    ix_ (-1),
-    ib_ (-1),
     ir_ (-1),
     id_ (-1),
     w_(weight),
@@ -67,7 +67,7 @@ EnzoSolverJacobi::EnzoSolverJacobi
   // Reserve temporary fields
 
   FieldDescr * field_descr = cello::field_descr();
-  
+
   id_ = field_descr->insert_temporary();
   ir_ = field_descr->insert_temporary();
 
@@ -78,15 +78,13 @@ EnzoSolverJacobi::EnzoSolverJacobi
 //----------------------------------------------------------------------
 
 void EnzoSolverJacobi::apply
-( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, Block * block) throw()
 {
   TRACE_JACOBI(block,"apply()");
   
   begin_(block);
 
   A_ = A;
-  ix_ = ix;
-  ib_ = ib;
 
   Field field = block->data()->field();
 
@@ -114,9 +112,7 @@ void EnzoBlock::p_solver_jacobi_continue()
   EnzoSolverJacobi * solver = 
     static_cast<EnzoSolverJacobi *> (this->solver());
 
-  DEBUG_FIELD(this,39,"X continue 1");
   solver->compute(this);
-  DEBUG_FIELD(this,39,"X continue 2");
 
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
@@ -132,7 +128,6 @@ void EnzoSolverJacobi::compute(Block * block)
   if (*piter_(block) < n_) {
 
     apply_(block);
-    DEBUG_FIELD (block,ix_,"X compute 1");
 
   } else {
 
@@ -140,7 +135,6 @@ void EnzoSolverJacobi::compute(Block * block)
 
     Solver::end_(block);
 
-    DEBUG_FIELD (block,ix_,"X compute 2");
     CkCallback(callback_,
 	       CkArrayIndexIndex(block->index()),
 	       block->proxy_array()).send();
@@ -169,8 +163,6 @@ void EnzoSolverJacobi::apply_(Block * block)
   A_->diagonal (id_, block,ng);
   A_->residual (ir_, ib_, ix_, block,ng);
 
-  DEBUG_FIELD(block,ir_,"R residual");
-  
 #ifdef DEBUG_COPY
     {
       enzo_float * R = (enzo_float*) field.values(ir_);
@@ -210,8 +202,6 @@ void EnzoSolverJacobi::apply_(Block * block)
       }
     }
   }
-
-  DEBUG_FIELD(block,ix_,"X iteration");
 
   // Next iteration
 

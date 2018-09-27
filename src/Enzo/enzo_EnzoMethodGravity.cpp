@@ -253,7 +253,10 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
 
-  solver->apply (A, ix, ib, block);
+  solver->set_field_x(ix);
+  solver->set_field_b(ib);
+  
+  solver->apply (A, block);
 
 }
 

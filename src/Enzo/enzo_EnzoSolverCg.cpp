@@ -62,6 +62,8 @@
 
 EnzoSolverCg::EnzoSolverCg 
 (std::string name,
+ std::string field_x,
+ std::string field_b,
  int monitor_iter,
  int restart_cycle,
  int rank,
@@ -71,9 +73,9 @@ EnzoSolverCg::EnzoSolverCg
  bool local,
  bool is_unigrid
  )
-  : Solver(name,monitor_iter,restart_cycle,min_level,max_level,is_unigrid), 
+  : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
+	   min_level,max_level,is_unigrid), 
     A_(NULL),
-    ix_(0),  ib_(0),
     index_precon_(index_precon),
     rank_(rank),
     iter_max_(iter_max), 
@@ -90,7 +92,7 @@ EnzoSolverCg::EnzoSolverCg
     local_(local)
 {
   FieldDescr * field_descr = cello::field_descr();
-  
+
   id_ = field_descr->insert_temporary();
   ir_ = field_descr->insert_temporary();
   iy_ = field_descr->insert_temporary();
@@ -106,8 +108,7 @@ EnzoSolverCg::EnzoSolverCg
 			       sync_type_(),
 			       enzo_sync_id_solver_cg);
 
-    refresh(ir)->add_field (field_descr->field_id("potential"));
-    
+    refresh(ir)->add_field (ix_);
     refresh(ir)->add_field (id_);
     refresh(ir)->add_field (ir_);
     refresh(ir)->add_field (iy_);
@@ -125,8 +126,6 @@ void EnzoSolverCg::pup (PUP::er &p)
   Solver::pup(p);
 
   //  p | A_;
-  p | ix_;
-  p | ib_;
 
   p | index_precon_;
   
@@ -166,14 +165,11 @@ void EnzoSolverCg::pup (PUP::er &p)
 
 //======================================================================
 
-void EnzoSolverCg::apply ( std::shared_ptr<Matrix> A, int ix, int ib,
-			   Block * block) throw()
+void EnzoSolverCg::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
   Solver::begin_(block);
 
   A_ = A;
-  ix_ = ix;
-  ib_ = ib;
   
   Field field = block->data()->field();
 

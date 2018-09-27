@@ -13,6 +13,34 @@
 
 //======================================================================
 
+Solver::Solver (std::string name,
+		std::string field_x,
+		std::string field_b,
+		int monitor_iter,
+		int restart_cycle,
+		int min_level,
+		int max_level,
+		bool is_unigrid) throw()
+  : PUP::able(),
+  name_(name),
+  ix_(-1),ib_(-1),
+  refresh_list_(),
+  monitor_iter_(monitor_iter),
+  restart_cycle_(restart_cycle),
+  callback_(0),
+  index_(0),
+  min_level_(min_level),
+  max_level_(max_level),
+  id_sync_(0),
+  is_unigrid_(is_unigrid)
+{
+  FieldDescr * field_descr = cello::field_descr();
+  ix_ = field_descr->field_id(field_x);
+  ib_ = field_descr->field_id(field_b);
+}
+
+//----------------------------------------------------------------------
+
 Solver::~Solver() throw()
 {
   for (size_t i=0; i<refresh_list_.size(); i++) {

@@ -122,6 +122,7 @@ void EnzoInitialPpmlTest::enforce_block
 	dens_rz[i]    = in_z ? 1.0 : 0.1;
 	velox[i]      = 0.0;
 	velox_rx[i]   = 0.0;
+	velox_ry[i]   = 0.0;
 	velox_rz[i]   = 0.0;
 	veloy[i]      = 0.0;
 	veloy_rx[i]   = 0.0;

@@ -72,7 +72,11 @@ public:
   /// Return the index for the given neighbor
   Index index_neighbor (const int if3[3], const int n3[3]) const;
 
-  /// Whether the face is on the domain boundary
+  /// Return the index of the ancestor in the given level_ancestor <= level
+  /// default is root level
+  Index index_ancestor (int level_ancestor = 0, int min_level = 0) const;
+
+/// Whether the face is on the domain boundary
   bool is_on_boundary 
   (int axis, int face, int narray) const;
 

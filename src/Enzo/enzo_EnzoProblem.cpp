@@ -274,6 +274,8 @@ Solver * EnzoProblem::create_solver_
 
     solver = new EnzoSolverCg
       (enzo_config->solver_list[index_solver],
+       enzo_config->solver_field_x[index_solver],
+       enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        rank,
@@ -283,13 +285,15 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_max_level[index_solver],
        enzo_config->solver_precondition[index_solver],
        enzo_config->solver_local[index_solver],
-       enzo_config->solver_is_unigrid[index_solver] 
+       enzo_config->solver_is_unigrid[index_solver]
        );
 
   } else if (solver_type == "bicgstab") {
 
       solver = new EnzoSolverBiCgStab
       (enzo_config->solver_list[index_solver],
+       enzo_config->solver_field_x[index_solver],
+       enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        rank,
@@ -303,12 +307,16 @@ Solver * EnzoProblem::create_solver_
   } else if (solver_type == "diagonal") {
 
     solver = new EnzoSolverDiagonal
-      (enzo_config->solver_list[index_solver]);
+      (enzo_config->solver_list[index_solver],
+       enzo_config->solver_field_x[index_solver],
+       enzo_config->solver_field_b[index_solver]);
 
   } else if (solver_type == "jacobi") {
 
     solver = new EnzoSolverJacobi
       (enzo_config->solver_list[index_solver],
+       enzo_config->solver_field_x[index_solver],
+       enzo_config->solver_field_b[index_solver],
        enzo_config->solver_weight[index_solver],
        enzo_config->solver_iter_max[index_solver]);
 
@@ -321,6 +329,8 @@ Solver * EnzoProblem::create_solver_
 
     solver = new EnzoSolverMg0
       (enzo_config->solver_list[index_solver],
+       enzo_config->solver_field_x[index_solver],
+       enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
        rank,

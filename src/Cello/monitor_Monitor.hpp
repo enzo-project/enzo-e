@@ -81,14 +81,14 @@ public: // interface
   void set_mode(int mode) { mode_ = mode; };
 
   /// Return whether monitoring is active
-  bool mode() const throw () { return mode_; };
+  int mode() const throw () { return mode_; };
 
   /// Set whether to monitor for the given component
   void set_mode(const char * component, int mode) 
   { group_mode_[component] = mode; };
 
   /// Return whether monitoring is active for this component
-  bool is_active(const char *) const throw ();
+  int is_active(const char *) const throw ();
 
   /// Print the Cello header 
   void header () const;
@@ -109,12 +109,12 @@ public: // interface
 
 
 
-  void set_verbose (bool verbose) 
+  void set_verbose (int verbose) 
   { 
     if (CkMyRank() == 0) verbose_ = verbose; 
   }
 
-  bool is_verbose () const { return verbose_; }
+  int is_verbose () const { return verbose_; }
 
   /// Print a message without format specifications to stdout
   void print_verbatim (const char * component, const char * buffer) const;
@@ -134,10 +134,10 @@ private: // attributes
   int mode_;
 
   /// Whether verbose mode is active
-  bool verbose_;
+  int verbose_;
 
   /// Whether default is to output all groups or output no groups
-  bool group_default_;
+  int group_default_;
 
   /// Override default of group_active_ for specific groups
   std::map<std::string,int> group_mode_;

@@ -253,6 +253,8 @@
 
 EnzoSolverMg0::EnzoSolverMg0
 (std::string name,
+ std::string field_x,
+ std::string field_b,
  int monitor_iter,
  int restart_cycle,
  int rank,
@@ -268,7 +270,8 @@ EnzoSolverMg0::EnzoSolverMg0
  int max_level,
  int coarse_level,
    bool is_unigrid) 
-  : Solver(name,monitor_iter,restart_cycle,min_level,max_level,is_unigrid),
+  : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
+	   min_level,max_level,is_unigrid),
     bs_(0), bc_(0),
     rr_(0), rr_local_(0), rr0_(0),
     res_tol_(res_tol),
@@ -281,7 +284,7 @@ EnzoSolverMg0::EnzoSolverMg0
     prolong_(prolong),
     rank_(rank),
     iter_max_(iter_max), 
-    ib_(0), ic_(0), ir_(0), ix_(0),
+    ic_(-1), ir_(-1),
     mx_(0),my_(0),mz_(0),
     gx_(0),gy_(0),gz_(0),
     coarse_level_(coarse_level)
@@ -289,7 +292,7 @@ EnzoSolverMg0::EnzoSolverMg0
   // Initialize temporary fields
 
   FieldDescr * field_descr = cello::field_descr();
-  
+
   ir_ = field_descr->insert_temporary();
   ic_ = field_descr->insert_temporary();
 
@@ -298,6 +301,7 @@ EnzoSolverMg0::EnzoSolverMg0
   add_refresh(4,0,neighbor_level,sync_barrier,
 	      enzo_sync_id_solver_mg0);
 
+  refresh(0)->add_field (ix_);
   refresh(0)->add_field (ir_);
   refresh(0)->add_field (ic_);
 
@@ -326,8 +330,7 @@ EnzoSolverMg0::~EnzoSolverMg0 () throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSolverMg0::apply
-( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
+void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
 
   TRACE_MG(block,"EnzoSolverMg0::apply()");
@@ -335,8 +338,6 @@ void EnzoSolverMg0::apply
   Solver::begin_(block);
 
   A_ = A;
-  ix_ = ix;
-  ib_ = ib;
 
   allocate_temporary_(block);
 
@@ -539,7 +540,7 @@ void EnzoSolverMg0::do_shift_(EnzoBlock * enzo_block,
     SOLVER_CONTROL(enzo_block,"fine","fine", "5 applying shift");
 
     Field field = enzo_block->data()->field();
-    enzo_float* B  = (enzo_float*) field.values(ib_);
+
     double shift = -bs_ / bc_;
 #ifdef DEBUG_SOLVER_MG0      
     if (AFTER_CYCLE(enzo_block,CYCLE))
@@ -759,7 +760,11 @@ void EnzoSolverMg0::call_coarse_solver(EnzoBlock * enzo_block) throw()
   
   DEBUG_FIELD (enzo_block,ib_,"B solve_coarse");
   DEBUG_FIELD (enzo_block,ix_,"X solve_coarse 1");
-  solve_coarse->apply(A_,ix_,ib_,enzo_block);
+
+  solve_coarse->set_field_x (ix_);
+  solve_coarse->set_field_b (ib_);
+
+  solve_coarse->apply(A_,enzo_block);
 }
 
 //----------------------------------------------------------------------
@@ -775,7 +780,12 @@ void EnzoSolverMg0::call_pre_smoother(EnzoBlock * enzo_block) throw()
   smooth_pre->set_callback(CkIndex_EnzoBlock::p_solver_mg0_restrict());
 
   DEBUG_FIELD (enzo_block,ib_,"B pre_smooth");
-  smooth_pre->apply(A_,ix_,ib_,enzo_block);
+
+  smooth_pre->set_field_x(ix_);
+  smooth_pre->set_field_b(ib_);
+  
+  smooth_pre->apply(A_,enzo_block);
+  
   DEBUG_FIELD (enzo_block,ix_,"X pre_smooth");
 }
 
@@ -792,7 +802,12 @@ void EnzoSolverMg0::call_post_smoother(EnzoBlock * enzo_block) throw()
   smooth_post->set_callback(CkIndex_EnzoBlock::p_solver_mg0_post_smooth());
 
   DEBUG_FIELD (enzo_block,ib_,"B post_smooth");
-  smooth_post->apply(A_,ix_,ib_,enzo_block);
+
+  smooth_post->set_field_x(ix_);
+  smooth_post->set_field_b(ib_);
+  
+  smooth_post->apply(A_,enzo_block);
+  
   DEBUG_FIELD (enzo_block,ix_,"X post_smooth");
 }
 
@@ -807,7 +822,12 @@ void EnzoSolverMg0::call_last_smoother(EnzoBlock * enzo_block) throw()
   smooth_last->set_callback(CkIndex_EnzoBlock::p_solver_mg0_last_smooth());
 
   DEBUG_FIELD (enzo_block,ib_,"B last_smooth");
-  smooth_last->apply(A_,ix_,ib_,enzo_block);
+
+  smooth_last->set_field_x(ix_);
+  smooth_last->set_field_b(ib_);
+
+  smooth_last->apply(A_,enzo_block);
+
   DEBUG_FIELD (enzo_block,ix_,"X last_smooth");
 }
 

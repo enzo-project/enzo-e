@@ -161,9 +161,6 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
 
-	int ix1 = ix0 + 1;
-	int iy1 = iy0 + 1;
-
 	enzo_float x0 = 1.0 - (tx - floor(tx));
 	enzo_float y0 = 1.0 - (ty - floor(ty));
 
@@ -210,10 +207,6 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
 	int iz0 = gz + floor(tz);
-
-	int ix1 = ix0 + 1;
-	int iy1 = iy0 + 1;
-	int iz1 = iz0 + 1;
 
 	enzo_float x0 = 1.0 - (tx - floor(tx));
 	enzo_float y0 = 1.0 - (ty - floor(ty));

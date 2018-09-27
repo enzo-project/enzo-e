@@ -24,6 +24,8 @@ public: // interface
   /// Create a new EnzoSolverMg0 object
   EnzoSolverMg0
   (std::string name,
+   std::string field_x,
+   std::string field_b,
    int monitor_iter,
    int restart_cycle,
    int rank,
@@ -60,7 +62,7 @@ public: // interface
        rank_(0),
        iter_max_(0),
        i_sync_restrict_(-1),i_sync_prolong_(-1),i_iter_(-1),i_msg_(-1),
-       ib_(0), ic_(0), ir_(0), ix_(0),
+       ic_(-1), ir_(-1),
        mx_(0),my_(0),mz_(0),
        gx_(0),gy_(0),gz_(0)
   {}
@@ -102,10 +104,8 @@ public: // interface
     p | i_iter_;
     p | i_msg_;
     
-    p | ib_;
     p | ic_;
     p | ir_;
-    p | ix_;
 
     p | mx_;
     p | my_;
@@ -117,8 +117,7 @@ public: // interface
   }
 
   /// Solve the linear system 
-  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
-		       Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
 
   /// Type of this solver
   virtual std::string type() const { return "mg0"; }
@@ -325,10 +324,8 @@ protected: // attributes
   int i_msg_;
 
   /// MG vector id's
-  int ib_;
   int ic_;
   int ir_;
-  int ix_;
 
   /// Block field attributes
   int mx_,my_,mz_;
