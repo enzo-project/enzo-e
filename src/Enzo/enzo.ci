@@ -96,6 +96,7 @@ module enzo {
   PUPable EnzoRestrict;
 
   PUPable EnzoSolverCg;
+  PUPable EnzoSolverDd;
   PUPable EnzoSolverDiagonal;
   PUPable EnzoSolverBiCgStab;
   PUPable EnzoSolverMg0;

@@ -50,7 +50,7 @@ ItFace::~ItFace() throw()
 
 //----------------------------------------------------------------------
 
-bool ItFace::next () throw()
+bool ItFace::next_ () throw()
 {
   do {
     increment_() ;
@@ -61,11 +61,11 @@ bool ItFace::next () throw()
 
 //----------------------------------------------------------------------
 
-void ItFace::face (int if3[3]) const
+void ItFace::face_ (int if3[3]) const
 {
-  if3[0] = rank_ >= 1 ? if3_[0] : 0;
-  if3[1] = rank_ >= 2 ? if3_[1] : 0;
-  if3[2] = rank_ >= 3 ? if3_[2] : 0;
+  if3[0] = (rank_ >= 1) ? if3_[0] : 0;
+  if3[1] = (rank_ >= 2) ? if3_[1] : 0;
+  if3[2] = (rank_ >= 3) ? if3_[2] : 0;
 }
   
 //----------------------------------------------------------------------

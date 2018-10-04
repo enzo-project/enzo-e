@@ -43,11 +43,6 @@ void EnzoSolverDiagonal::apply
   }
   
   Solver::end_(block);
-
-  CkCallback(callback_,
-	     CkArrayIndexIndex(block->index()),
-	     block->proxy_array()).send();
-
 }
 
 //======================================================================

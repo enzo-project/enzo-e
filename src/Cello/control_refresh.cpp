@@ -25,6 +25,25 @@
 
 //----------------------------------------------------------------------
 
+void Block::refresh_enter (int callback, Refresh * refresh) 
+{
+#ifdef DEBUG_REFRESH
+  CkPrintf ("%d %s:%d DEBUG REFRESH %s Block::set_refresh (%p)\n",
+	    CkMyPe(), __FILE__,__LINE__,name().c_str(),refresh);
+  fflush(stdout);
+#endif
+  
+  set_refresh(refresh);
+
+  // Update refresh object for the Block
+
+  refresh_.back()->set_callback(callback);
+
+  refresh_begin_();
+}
+
+//----------------------------------------------------------------------
+
 void Block::refresh_begin_() 
 {
   TRACE_REFRESH("refresh_begin_()");
@@ -121,12 +140,12 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
 
     ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
 
-    while (it_neighbor.next()) {
+    int if3[3];
+    while (it_neighbor.next(if3)) {
 
       Index index_neighbor = it_neighbor.index();
 
-      int if3[3],ic3[3];
-      it_neighbor.face (if3);
+      int ic3[3];
       it_neighbor.child(ic3);
 
       const int level = this->level();
@@ -147,18 +166,16 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
 
     ItFace it_face = this->it_face(min_face_rank,index_);
 
-    while (it_face.next()) {
-
-      Index index_face = it_face.index();
-
-      int if3[3],ic3[3] = {0,0,0};
-      it_face.face(if3);
+    int if3[3];
+    while (it_face.next(if3)) {
 
       // count all faces if not a leaf, else don't count if face level
       // is less than this block's level
       
       if ( ! is_leaf() || face_level(if3) >= level()) {
 	
+	Index index_face = it_face.index();
+	int ic3[3] = {0,0,0};
 	refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
 	++count;
       }
@@ -262,9 +279,9 @@ int Block::particle_load_faces_ (int npa,
   //     +---+---+---+---+
   //     | 03| 13| 23| 33|
   //     +---+===+===+---+
-  //     | 02║   :   ║ 32|
+  //     | 02||  :  || 32|
   //     +---+ - + - +---+
-  //     | 01║   :   ║ 31|
+  //     | 01||  :  || 31|
   //     +---+=======+---+
   //     | 00| 10| 20| 30|
   //     +---+---+---+---+
@@ -276,9 +293,9 @@ int Block::particle_load_faces_ (int npa,
   //     +---+   5   +---+
   //     | 4 |       | 6 |
   // +---+---+===+===+---+
-  // |       ║       ║    
+  // |       ||     ||    
   // |   2   +       +   3
-  // |       ║       ║    
+  // |       ||     ||    
   // +-------+=======+-------+
   //         |            
   //     0   |            
@@ -289,9 +306,9 @@ int Block::particle_load_faces_ (int npa,
   //     +---+---+---+---+
   //     | 4 | 5 | 5 | 6 |
   //     +---+===+===+---+
-  //     | 2 ║   :   ║ 3 |
+  //     | 2 ||  :  || 3 |
   //     +---+ - + - +---+
-  //     | 2 ║   :   ║ 3 |
+  //     | 2 ||  :  || 3 |
   //     +---+=======+---+
   //     | 0 | 1 | 1 | 1 |
   //     +---+---+---+---+
@@ -345,13 +362,12 @@ int Block::particle_create_array_neighbors_
 
   int il = 0;
 
-  for (il=0; it_neighbor.next(); il++) {
+  int if3[3];
+  for (il=0; it_neighbor.next(if3); il++) {
 
     const int level_face = it_neighbor.face_level();
 
-    int if3[3] = {0,0,0} ,ic3[3] = {0,0,0};
-
-    it_neighbor.face(if3);
+    int ic3[3] = {0,0,0};
 
     const int refresh_type = 
       (level_face == level - 1) ? refresh_coarse :
@@ -458,12 +474,12 @@ void Block::particle_apply_periodic_update_
 
   int il=0;
 
-  while (it_neighbor.next()) {
+  int if3[3];
+  while (it_neighbor.next(if3)) {
 
     const int level_face = it_neighbor.face_level();
 
-    int if3[3],ic3[3];
-    it_neighbor.face (if3);
+    int ic3[3];
     it_neighbor.child(ic3);
 
     const int refresh_type = 

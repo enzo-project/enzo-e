@@ -43,43 +43,11 @@ void Block::initial_exit_()
 
 //----------------------------------------------------------------------
 
-void Block::adapt_enter_()
-{
-  TRACE_CONTROL("adapt_enter");
-  
-  if ( do_adapt_()) {
-
-    adapt_begin_();
-    
-  } else {
-
-    adapt_exit_();
-
-  }
-}
-
-//----------------------------------------------------------------------
-
 void Block::adapt_exit_()
 {
   TRACE_CONTROL("adapt_exit");
 
   control_sync_quiescence(CkIndex_Main::p_output_enter());
-}
-
-//----------------------------------------------------------------------
-
-void Block::output_enter_ ()
-{
-  performance_start_(perf_output);
-  TRACE_CONTROL("output_enter");
-
-#ifdef NEW_OUTPUT
-  new_output_begin_();
-#else /* NEW_OUTPUT */
-  output_begin_();
-#endif  
-  performance_stop_(perf_output);
 }
 
 //----------------------------------------------------------------------
@@ -103,16 +71,6 @@ void Block::output_exit_()
 #endif  
   control_sync_barrier (CkIndex_Block::r_stopping_enter(NULL));
 
-}
-
-//----------------------------------------------------------------------
-
-void Block::stopping_enter_()
-{
-
-  TRACE_CONTROL("stopping_enter");
-
-  stopping_begin_();
 }
 
 //----------------------------------------------------------------------
@@ -149,43 +107,11 @@ void Block::stopping_exit_()
 
 //----------------------------------------------------------------------
 
-void Block::compute_enter_ ()
-{
-  performance_start_(perf_compute,__FILE__,__LINE__);
-  TRACE_CONTROL("compute_enter");
-
-  compute_begin_();
-  performance_stop_(perf_compute,__FILE__,__LINE__);
-}
-
-//----------------------------------------------------------------------
-
 void Block::compute_exit_ ()
 {
   TRACE_CONTROL("compute_exit");
 
   adapt_enter_();
-}
-
-//----------------------------------------------------------------------
-
-void Block::refresh_enter (int callback, Refresh * refresh) 
-{
-  TRACE_CONTROL("refresh_enter");
-
-#ifdef DEBUG_REFRESH
-  CkPrintf ("%d %s:%d DEBUG REFRESH %s Block::set_refresh (%p)\n",
-	    CkMyPe(), __FILE__,__LINE__,name().c_str(),refresh);
-  fflush(stdout);
-#endif
-  
-  set_refresh(refresh);
-
-  // Update refresh object for the Block
-
-  refresh_.back()->set_callback(callback);
-
-  refresh_begin_();
 }
 
 //----------------------------------------------------------------------
@@ -287,7 +213,8 @@ void Block::control_sync_neighbor(int entry_point, int id_sync)
 
   ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
 
-  while (it_neighbor.next()) {
+  int of3[3];  // ignored
+  while (it_neighbor.next(of3)) {
 
     ++num_neighbors;
 
@@ -323,11 +250,9 @@ void Block::control_sync_face(int entry_point, int id_sync)
 
   ItFace it_face = this->it_face(min_face_rank,index_);
 
-  while (it_face.next()) {
+  int of3[3];
+  while (it_face.next(of3)) {
 
-    int of3[3];
-    it_face.face(of3);
-    
     // Only count face if a Block exists in the level
     if (face_level(of3) >= level()) {
       ++num_faces;

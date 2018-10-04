@@ -182,11 +182,8 @@ public: // interface
   /// Updates search direction, begins update on iteration counter
   void loop_14(EnzoBlock* enzo_block, CkReductionMsg * ) throw();
 
-  /// End of iteration
+  /// End the solve
   void end(EnzoBlock* enzo_block, int retval) throw();
-
-  /// Exit the solver
-  void exit(EnzoBlock* enzo_block) throw();
 
 protected: // methods
 

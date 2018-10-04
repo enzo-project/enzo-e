@@ -106,19 +106,29 @@ public: // interface
   // FIELD METHODS
   //--------------------------------------------------
 
-  /// Add a field to the list of fields to refresh
+  /// Add a field id to the list of fields to refresh; don't add if it's already
+  /// in the list
   void add_field(int id_field) {
+    all_fields_ = false;
     if (id_field >= 0) {
-      field_list_src_.push_back(id_field);
-      field_list_dst_.push_back(id_field);
+      if (std::find (field_list_src_.begin(), field_list_src_.end(), id_field)
+	  == field_list_src_.end()) {
+	field_list_src_.push_back(id_field);
+      }
+      if (std::find (field_list_dst_.begin(), field_list_dst_.end(), id_field)
+	  == field_list_dst_.end()) {
+	field_list_dst_.push_back(id_field);
+      }
     }
   }
 
-  /// Add a field to the list of fields to refresh
+  /// Add a named field to the list of fields to refresh
   void add_field(std::string field_name);
 
-  /// Add a source and corresponding destination field to refresh
+  /// Add a source and corresponding destination field to refresh;
+  /// does not check if fields are already in the lists
   void add_field_src_dst(int id_field_src, int id_field_dst) {
+    all_fields_ = false;
     if (id_field_src >= 0 && id_field_dst >= 0) {
       field_list_src_.push_back(id_field_src);
       field_list_dst_.push_back(id_field_dst);

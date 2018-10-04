@@ -19,6 +19,15 @@
 
 //======================================================================
 
+void Block::compute_enter_ ()
+{
+  performance_start_(perf_compute,__FILE__,__LINE__);
+  compute_begin_();
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+}
+
+//----------------------------------------------------------------------
+
 void Block::compute_begin_ ()
 {
 #ifdef DEBUG_COMPUTE

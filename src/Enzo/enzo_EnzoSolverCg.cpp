@@ -1067,9 +1067,6 @@ void EnzoSolverCg::end (EnzoBlock * enzo_block,int retval) throw ()
 
   Solver::end_(enzo_block);
   
-  CkCallback(callback_,
-	     CkArrayIndexIndex(enzo_block->index()),
-	     enzo_block->proxy_array()).send();
 }
 
 //----------------------------------------------------------------------

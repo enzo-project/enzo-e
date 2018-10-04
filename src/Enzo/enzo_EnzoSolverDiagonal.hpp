@@ -21,8 +21,7 @@ public: // interface
 		     std::string field_x,
 		     std::string field_b) throw()
     : Solver(name,field_x,field_b,0,0)
-  {
-  };
+  { }
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoSolverDiagonal);

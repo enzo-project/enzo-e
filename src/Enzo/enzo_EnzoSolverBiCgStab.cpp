@@ -33,7 +33,7 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
-#define TRACE_SOLVER_BCG
+// #define TRACE_SOLVER_BCG
 
 // #define DEBUG_FIELD
 // #define DEBUG_GHOST
@@ -166,9 +166,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   const int ir = add_refresh(4, min_face_rank, neighbor_type_(),
 			     sync_type_(),
 			     enzo_sync_id_solver_bicgstab);
-  
-  //  refresh(ir)->add_all_fields();
-  refresh(ir)->add_field (ix_);
+
+  refresh(ir)->add_field (field_x);
   refresh(ir)->add_field (ir_);
   refresh(ir)->add_field (ir0_);
   refresh(ir)->add_field (ip_);
@@ -1218,11 +1217,6 @@ void EnzoSolverBiCgStab::end (EnzoBlock* block, int retval) throw () {
   deallocate_temporary_(block);
   
   Solver::end_(block);
-  
-  CkCallback(callback_,
-	     CkArrayIndexIndex(block->index()),
-	     block->proxy_array()).send();
-
 }
 
 //======================================================================

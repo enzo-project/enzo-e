@@ -1491,14 +1491,7 @@ void EnzoSolverMg0::end(Block * block)
 
   TRACE_MG(block,"EnzoSolverMg0::end");
     
-  Field field = block->data()->field();
-  
   deallocate_temporary_(block);
     
   Solver::end_(block);
-
-  CkCallback(callback_,
-	     CkArrayIndexIndex(block->index()),
-	     enzo::block_array()).send();
-
 }

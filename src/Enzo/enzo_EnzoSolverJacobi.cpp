@@ -135,10 +135,6 @@ void EnzoSolverJacobi::compute(Block * block)
 
     Solver::end_(block);
 
-    CkCallback(callback_,
-	       CkArrayIndexIndex(block->index()),
-	       block->proxy_array()).send();
-
   }
 }  
 
@@ -194,11 +190,22 @@ void EnzoSolverJacobi::apply_(Block * block)
   enzo_float * R = (enzo_float*) field.values(ir_);
   enzo_float * D = (enzo_float*) field.values(id_);
 
-  for (int iz=gz; iz<mz-gz; iz++) {
-    for (int iy=gy; iy<my-gy; iy++) {
-      for (int ix=gx; ix<mx-gx; ix++) {
-	int i = ix + mx*(iy + my*iz);
-	X[i] += R[i] / D[i];
+  if (w_ == 1.0) {
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  X[i] += R[i] / D[i];
+	}
+      }
+    }
+  } else {
+    for (int iz=gz; iz<mz-gz; iz++) {
+      for (int iy=gy; iy<my-gy; iy++) {
+	for (int ix=gx; ix<mx-gx; ix++) {
+	  int i = ix + mx*(iy + my*iz);
+	  X[i] = w_*(R[i] / D[i]) + (1.0-w_)*X[i];
+	}
       }
     }
   }

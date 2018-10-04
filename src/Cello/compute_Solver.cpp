@@ -135,6 +135,10 @@ void Solver::end_(Block * block)
 	  "Solver mismatch was %d expected %d",
 	  index,index_,(index == index_));
 
+  CkCallback(callback_,
+	     CkArrayIndexIndex(block->index()),
+	     block->proxy_array()).send();
+
 }
 
 //----------------------------------------------------------------------

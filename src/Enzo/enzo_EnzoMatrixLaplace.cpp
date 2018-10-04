@@ -20,12 +20,19 @@ void EnzoMatrixLaplace::matvec (int i_y, int i_x, Block * block,
   field.dimensions(0,&mx_,&my_,&mz_);
   block->cell_width (&hx_,&hy_,&hz_);
   
-  rank_ = cello::rank();
-
   enzo_float * X = (enzo_float * ) field.values(i_x);
   enzo_float * Y = (enzo_float * ) field.values(i_y);
   
   matvec_(Y,X,g0);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMatrixLaplace::matvec
+(precision_type precision,
+ void * y, void * x, int g0) throw()
+{
+  matvec_((enzo_float *)(y),(enzo_float *)(x),g0);
 }
 
 //----------------------------------------------------------------------
@@ -37,8 +44,6 @@ void EnzoMatrixLaplace::diagonal (int i_x, Block * block, int g0) throw()
   field.dimensions (i_x,&mx_,&my_,&mz_);
   block->cell_width    (&hx_,&hy_,&hz_);
 
-  rank_ = cello::rank();
-
   enzo_float * X = (enzo_float * ) field.values(i_x);
 
   diagonal_(X,g0);
@@ -46,27 +51,30 @@ void EnzoMatrixLaplace::diagonal (int i_x, Block * block, int g0) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const throw()
+void EnzoMatrixLaplace::matvec_
+(enzo_float * Y, enzo_float * X, int g0) const throw()
 {
   const int idx = 1;
   const int idy = mx_;
   const int idz = mx_*my_;
 
+  const int rank = cello::rank();
+
   if (order_ == 2) {
 
     g0 = std::max(1,g0);
 
-    double dx = (rank_ >= 1) ? 1.0 / (hx_*hx_) : 0.0;
-    double dy = (rank_ >= 2) ? 1.0 / (hy_*hy_) : 0.0;
-    double dz = (rank_ >= 3) ? 1.0 / (hz_*hz_) : 0.0;
+    double dx = (rank >= 1) ? 1.0 / (hx_*hx_) : 0.0;
+    double dy = (rank >= 2) ? 1.0 / (hy_*hy_) : 0.0;
+    double dz = (rank >= 3) ? 1.0 / (hz_*hz_) : 0.0;
 
-    if (rank_ == 1) {
+    if (rank == 1) {
       for (int ix=g0; ix<mx_-g0; ix++) {
 	const int i = ix;
 	Y[i] = ( X[i-idx] - 2.0*X[i] + X[i+idx] ) * dx;
       }
 
-    } else if (rank_ == 2) {
+    } else if (rank == 2) {
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
 	  const int i = ix + mx_*iy;
@@ -75,7 +83,7 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 	}
       }
 
-    } else if (rank_ == 3) {
+    } else if (rank == 3) {
       for     (int iz=g0; iz<mz_-g0; iz++) {
 	for   (int iy=g0; iy<my_-g0; iy++) {
 	  for (int ix=g0; ix<mx_-g0; ix++) {
@@ -99,9 +107,9 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
     const enzo_float c0 = -30.0;
     const enzo_float c1 = 16.0;
     const enzo_float c2 = -1.0;
-    const enzo_float dx = (rank_ >= 1) ? 1.0/(12.0*hx_*hx_) : 0.0;
-    const enzo_float dy = (rank_ >= 2) ? 1.0/(12.0*hy_*hy_) : 0.0;
-    const enzo_float dz = (rank_ >= 3) ? 1.0/(12.0*hz_*hz_) : 0.0;
+    const enzo_float dx = (rank >= 1) ? 1.0/(12.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank >= 2) ? 1.0/(12.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank >= 3) ? 1.0/(12.0*hz_*hz_) : 0.0;
 
     const enzo_float c0x = c0*dx;
     const enzo_float c1x = c1*dx;
@@ -113,7 +121,7 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
     const enzo_float c1z = c1*dz;
     const enzo_float c2z = c2*dz;
 
-    if (rank_ == 1) {
+    if (rank == 1) {
 
       for (int ix=g0; ix<mx_-g0; ix++) {
 	const int i = ix;
@@ -122,7 +130,7 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 		c2*(X[i-idx2]+X[i+idx2])) * dx;
       }
 
-    } else if (rank_ == 2) {
+    } else if (rank == 2) {
 
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
@@ -136,7 +144,7 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 	}
       }
 
-    } else if (rank_ == 3) {
+    } else if (rank == 3) {
 
       for     (int iz=g0; iz<mz_-g0; iz++) {
 	for   (int iy=g0; iy<my_-g0; iy++) {
@@ -171,11 +179,11 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
     const enzo_float c1 = 1455.0;
     const enzo_float c2 = -96.0;
     const enzo_float c3 = 1.0;
-    const enzo_float dx = (rank_ >= 1) ? 1.0/(1080.0*hx_*hx_) : 0.0;
-    const enzo_float dy = (rank_ >= 2) ? 1.0/(1080.0*hy_*hy_) : 0.0;
-    const enzo_float dz = (rank_ >= 3) ? 1.0/(1080.0*hz_*hz_) : 0.0;
+    const enzo_float dx = (rank >= 1) ? 1.0/(1080.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank >= 2) ? 1.0/(1080.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank >= 3) ? 1.0/(1080.0*hz_*hz_) : 0.0;
 
-    if (rank_ == 1) {
+    if (rank == 1) {
 
       for (int ix=g0; ix<mx_-g0; ix++) {
 	const int i = ix;
@@ -185,7 +193,7 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 		c3*(X[i-idx3]+X[i+idx3])) * dx;
       }
 
-    } else if (rank_ == 2) {
+    } else if (rank == 2) {
 
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
@@ -201,7 +209,7 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 	}
       }
 
-    } else if (rank_ == 3) {
+    } else if (rank == 3) {
 
       for     (int iz=g0; iz<mz_-g0; iz++) {
 	for   (int iy=g0; iy<my_-g0; iy++) {
@@ -234,22 +242,24 @@ void EnzoMatrixLaplace::matvec_ (enzo_float * Y, enzo_float * X, int g0) const t
 
 void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
 {
+  const int rank = cello::rank();
+
   if (order_ == 2) {
     
     g0 = std::max(1,g0);
 
     // Second-order 7-point discretization
     
-    double dx = (rank_ >= 1) ? 1.0/(hx_*hx_) : 0.0;
-    double dy = (rank_ >= 2) ? 1.0/(hy_*hy_) : 0.0;
-    double dz = (rank_ >= 3) ? 1.0/(hz_*hz_) : 0.0;
+    double dx = (rank >= 1) ? 1.0/(hx_*hx_) : 0.0;
+    double dy = (rank >= 2) ? 1.0/(hy_*hy_) : 0.0;
+    double dz = (rank >= 3) ? 1.0/(hz_*hz_) : 0.0;
     
-    if (rank_ == 1) {
+    if (rank == 1) {
       for (int ix=g0; ix<mx_-g0; ix++) {
 	int i = ix;
 	X[i] = - 2.0 * dx;
       }
-    } else if (rank_ == 2) {
+    } else if (rank == 2) {
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
 	  int i = ix + mx_*iy;
@@ -257,7 +267,7 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
 	    -      2.0 * dy;
 	}
       }
-    } else if (rank_ == 3) {
+    } else if (rank == 3) {
       for     (int iz=g0; iz<mz_-g0; iz++) {
 	for   (int iy=g0; iy<my_-g0; iy++) {
 	  for (int ix=g0; ix<mx_-g0; ix++) {
@@ -273,20 +283,20 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
   } else if (order_ == 4) {
 
     const enzo_float c0 = -30.0;
-    const enzo_float dx = (rank_ >= 1) ? 1.0/(12.0*hx_*hx_) : 0.0;
-    const enzo_float dy = (rank_ >= 2) ? 1.0/(12.0*hy_*hy_) : 0.0;
-    const enzo_float dz = (rank_ >= 3) ? 1.0/(12.0*hz_*hz_) : 0.0;
+    const enzo_float dx = (rank >= 1) ? 1.0/(12.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank >= 2) ? 1.0/(12.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank >= 3) ? 1.0/(12.0*hz_*hz_) : 0.0;
 
     g0 = std::max(2,g0);
 
     // Fourth-order 13-point discretization
 
-    if (rank_ == 1) {
+    if (rank == 1) {
       for (int ix=g0; ix<mx_-g0; ix++) {
 	int i = ix;
 	X[i] = c0 * dx;
       }
-    } else if (rank_ == 2) {
+    } else if (rank == 2) {
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
 	  int i = ix + mx_*iy;
@@ -294,7 +304,7 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
 	    +    c0 * dy;
 	}
       }
-    } else if (rank_ == 3) {
+    } else if (rank == 3) {
       for     (int iz=g0; iz<mz_-g0; iz++) {
 	for   (int iy=g0; iy<my_-g0; iy++) {
 	  for (int ix=g0; ix<mx_-g0; ix++) {
@@ -314,17 +324,17 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
     // Sixth-order 19-point discretization
 
     const enzo_float c0 = -2720.0;
-    const enzo_float dx = (rank_ >= 1) ? 1.0/(1080.0*hx_*hx_) : 0.0;
-    const enzo_float dy = (rank_ >= 2) ? 1.0/(1080.0*hy_*hy_) : 0.0;
-    const enzo_float dz = (rank_ >= 3) ? 1.0/(1080.0*hz_*hz_) : 0.0;
+    const enzo_float dx = (rank >= 1) ? 1.0/(1080.0*hx_*hx_) : 0.0;
+    const enzo_float dy = (rank >= 2) ? 1.0/(1080.0*hy_*hy_) : 0.0;
+    const enzo_float dz = (rank >= 3) ? 1.0/(1080.0*hz_*hz_) : 0.0;
       
-    if (rank_ == 1) {
+    if (rank == 1) {
       
       for (int ix=g0; ix<mx_-g0; ix++) {
 	int i = ix;
 	X[i] = c0 * dx;
       }
-    } else if (rank_ == 2) {
+    } else if (rank == 2) {
       for   (int iy=g0; iy<my_-g0; iy++) {
 	for (int ix=g0; ix<mx_-g0; ix++) {
 	  int i = ix + mx_*iy;
@@ -332,7 +342,7 @@ void EnzoMatrixLaplace::diagonal_ (enzo_float * X, int g0) const throw()
 	    +    c0 * dy;
 	}
       }
-    } else if (rank_ == 3) {
+    } else if (rank == 3) {
       for     (int iz=g0; iz<mz_-g0; iz++) {
 	for   (int iy=g0; iy<my_-g0; iy++) {
 	  for (int ix=g0; ix<mx_-g0; ix++) {

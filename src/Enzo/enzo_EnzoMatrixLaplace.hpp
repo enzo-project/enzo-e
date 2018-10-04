@@ -27,7 +27,6 @@ public: // interface
       hx_(0.0),
       hy_(0.0),
       hz_(0.0),
-      rank_(0),
       order_(order)
   {}
 
@@ -50,7 +49,6 @@ public: // interface
       hx_(0.0),
       hy_(0.0),
       hz_(0.0),
-      rank_(0),
       order_(0)
   { }
 
@@ -67,14 +65,28 @@ public: // interface
     p | hx_;
     p | hy_;
     p | hz_;
-    p | rank_;
     p | order_;
   }
 
+  /// Set cell widths.  Required for lower-level methods that don't have
+  /// access to the Block
+  void set_cell_width (double hx, double hy, double hz)
+  {
+    hx_ = hx;
+    hy_ = hy;
+    hz_ = hz;
+  }
+  
 public: // virtual functions
 
   /// Apply the matrix to a vector Y <-- A*X
   virtual void matvec (int id_y, int id_x, Block * block, int g0=1) throw();
+
+  /// Low-level matvec, useful for non-Block arrays (e.g. Block-local
+  /// multigrid).  Must call set_cell_width and set_dimensions first
+  /// manually!
+  virtual void matvec (precision_type precision,
+		       void * y, void * x, int g0=1) throw();
 
   /// Extract the diagonal into the given field
   virtual void diagonal (int id_x, Block * block, int g0=1) throw();
@@ -98,7 +110,6 @@ protected: // attributes
   int mx_, my_, mz_;
   int nx_, ny_, nz_;
   double hx_, hy_, hz_;
-  int rank_;
   /// Order of the operator, 2 or 4
   int order_;
 
