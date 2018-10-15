@@ -54,6 +54,16 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
+  // EnzoInitialGrackleTest
+#ifdef CONFIG_USE_GRACKLE
+  initial_grackle_test_minimum_H_number_density(0.1),
+  initial_grackle_test_maximum_H_number_density(1000.0),
+  initial_grackle_test_minimum_metallicity(1.0E-4),
+  initial_grackle_test_maximum_metallicity(1.0),
+  initial_grackle_test_minimum_temperature(10.0),
+  initial_grackle_test_maximum_temperature(1.0E8),
+  initial_grackle_test_reset_energies(1),
+#endif /* CONFIG_USE_GRACKLE */
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -211,6 +221,16 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_collapse_mass;
   p | initial_collapse_temperature;
 
+#ifdef CONFIG_USE_GRACKLE
+  p | initial_grackle_test_minimum_H_number_density;
+  p | initial_grackle_test_maximum_H_number_density;
+  p | initial_grackle_test_minimum_temperature;
+  p | initial_grackle_test_maximum_temperature;
+  p | initial_grackle_test_minimum_metallicity;
+  p | initial_grackle_test_maximum_metallicity;
+  p | initial_grackle_test_reset_energies;
+#endif /* CONFIG_USE_GRACKLE */
+
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
   p | initial_sedov_radius_relative;
@@ -302,6 +322,24 @@ void EnzoConfig::pup (PUP::er &p)
 
 #ifdef CONFIG_USE_GRACKLE
   p | *method_grackle_chemistry;
+  int is_null = (method_grackle_chemistry==NULL);
+  p | is_null;
+  int use_grackle = is_null ? 0 : method_grackle_chemistry->use_grackle;
+  p | use_grackle;
+  if (is_null){
+    method_grackle_chemistry = NULL;
+  } else {
+    if (p.isUnpacking()) {
+      method_grackle_chemistry = new chemistry_data;
+      method_grackle_chemistry->use_grackle = use_grackle;
+      if (set_default_chemistry_parameters(method_grackle_chemistry) == 0){
+        ERROR("EnzoMethodConfig::pup()",
+              "Error in Greackle set_default_chemistry_parameters");
+      }
+    }
+
+    p | *method_grackle_chemistry;
+  }
 #endif /* CONFIG_USE_GRACKLE */
 
 }
@@ -502,6 +540,24 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:collapse:mass",cello::mass_solar);
   initial_collapse_temperature =
     p->value_float("Initial:collapse:temperature",10.0);
+
+  // Grackle test initialization
+#ifdef CONFIG_USE_GRACKLE
+  initial_grackle_test_minimum_H_number_density =
+    p->value_float("Initial:grackle_test:minimum_H_number_density",0.1);
+  initial_grackle_test_maximum_H_number_density =
+    p->value_float("Initial:grackle_test:maximum_H_number_density",1000.0);
+  initial_grackle_test_minimum_temperature =
+    p->value_float("Initial:grackle_test:minimum_temperature",10.0);
+  initial_grackle_test_maximum_temperature =
+    p->value_float("Initial:grackle_test:maximum_temperature",1.0E8);
+  initial_grackle_test_minimum_metallicity =
+    p->value_float("Initial:grackle_test:minimum_metallicity", 1.0E-4);
+  initial_grackle_test_maximum_metallicity =
+    p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
+  initial_grackle_test_reset_energies =
+    p->value_integer("Initial:grackle_test:reset_energies",1);
+#endif /* CONFIG_USE_GRACKLE */
 
   // Turbulence method and initialization
 

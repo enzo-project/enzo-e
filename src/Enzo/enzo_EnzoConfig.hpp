@@ -28,9 +28,10 @@ inline void operator|(PUP::er &p, chemistry_data &c){
  int length = (c.grackle_data_file == NULL) ? 0 : strlen(c.grackle_data_file);
  p | length;
  if (length > 0){
-   if (p.isUnpacking())
+   if (p.isUnpacking()){
      c.grackle_data_file=new char[length+1];
-   p | *c_grackle_data_file;
+   }
+   PUParray(p, c.grackle_data_file,length+1);
  } else {
    c.grackle_data_file = NULL;
  }
@@ -139,6 +140,16 @@ public: // interface
       initial_collapse_particle_ratio(0.0),
       initial_collapse_mass(0.0),
       initial_collapse_temperature(0.0),
+      // EnzoGrackleTest
+#ifdef CONFIG_USE_GRACKLE
+      initial_grackle_test_minimum_H_number_density(0.1),
+      initial_grackle_test_maximum_H_number_density(1000.0),
+      initial_grackle_test_minimum_metallicity(1.0E-4),
+      initial_grackle_test_maximum_metallicity(1.0),
+      initial_grackle_test_minimum_temperature(10.0),
+      initial_grackle_test_maximum_temperature(1.0E8),
+      initial_grackle_test_reset_energies(1),
+#endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -291,6 +302,17 @@ public: // attributes
   double                     initial_collapse_particle_ratio;
   double                     initial_collapse_mass;
   double                     initial_collapse_temperature;
+
+  /// EnzoGrackleTest
+#ifdef CONFIG_USE_GRACKLE
+  double                     initial_grackle_test_minimum_H_number_density;
+  double                     initial_grackle_test_maximum_H_number_density;
+  double                     initial_grackle_test_minimum_temperature;
+  double                     initial_grackle_test_maximum_temperature;
+  double                     initial_grackle_test_minimum_metallicity;
+  double                     initial_grackle_test_maximum_metallicity;
+  double                     initial_grackle_test_reset_energies;
+#endif /* CONFIG_USE_GRACKLE */
 
   /// EnzoInitialMusic
 

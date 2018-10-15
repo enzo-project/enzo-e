@@ -3,15 +3,16 @@
  }
 
  Domain {
-     lower = [ 0.0, 0.0 ];
-     upper = [ 1.0, 1.0 ];
+     lower = [ 0.0, 0.0, 0.0];
+     upper = [ 1.0, 1.0, 1.0];
  }
 
  Units {
-    length   = 3.086E21;      # 1 kpc to cm
-    time     = 3.15575E16;    # 1 Myr to s
-    mass     = 4.918949E40;
-#    density  = 1.6737236E-2; # mass density of pure hydrogen in grams when n = 1 
+    density = 1.6726219E-24;  # m_H in grams... so n = 1.0 cm^-3 for pure hydrogen
+    time    = 3.15576E16;     # 1 Gyr in seconds
+    length  = 3.086E16;       # 1 pc in cm - does not actually matter
+    #    mass    = 1.9891E33;      # 1 solar mass in grams
+    #  length units determined using density and mass
  }
 
  Field {
@@ -72,42 +73,50 @@
 
  Initial {
    list = ["grackle_test"];
+   grackle_test {
+      minimum_H_number_density = 0.1;
+      maximum_H_number_density = 1000.0;
+      minimum_metallicity      = 1.0E-4;
+      maximum_metallicity      = 1.0;
+      minimum_temperature      = 10.0;
+      maximum_temperature      = 1.0E8;
+
+      reset_energies           = 1;
+
+
+     density_out = 1.0;
+     density_in  = 0.1;
+     temperature_out = 1.0E3;
+     temperature_in  = 1.0E5;
+   }
  }
 
  Mesh {
-     root_blocks = [ 4, 4];
-     root_rank = 2;
-     root_size = [ 400, 400];
+     root_blocks = [ 2, 2, 2];
+     root_rank = 3;
+     root_size = [ 32, 32, 32];
  }
 
  Method {
       list = [ "grackle"];
-#     list = [ "ppm" ];
 
      grackle {
         courant = 0.40;
-        data_file = "CloudyData_UVB=HM2012.h5";
+        data_file = "CloudyData_UVB=HM2012_shielded.h5";
 
-        with_radiative_cooling = 0;
+        with_radiative_cooling = 1;
         primordial_chemistry   = 2;  # 1, 2, or 3
         metal_cooling          = 1;  # 0 or 1 (off/on)
         UVbackground           = 1;  # on or off
-        self_shielding_method  = 0;  # 0 - 3 (0 or 3 recommended)
+        self_shielding_method  = 3;  # 0 - 3 (0 or 3 recommended)
 
         HydrogenFractionByMass = 0.73;
      }
 
-     ppm {
-        courant     = 0.40;
-        diffusion   = true;
-        flattening  = 3;
-        steepening  = true;
-        dual_energy = true;
-     }
  }
 
  Output {
-     list = [ "density", "data"];
+     list = ["data"];
 
 #     check {
 #        type  = "checkpoint";
@@ -145,29 +154,18 @@
          name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
          schedule {
              var = "time";
-             step = 0.1;
+             step = 0.001;
+             start = 0.0;
          }
          type = "data";
      }
 
-     density {
-         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
-         field_list = [
-            "density"
-          ];
-         name = [ "method_grackle-1-%06d.png", "cycle" ];
-         schedule {
-             var = "time";
-             step = 0.1;
-         }
-         type = "image";
-     }
  }
 
  Stopping {
-    time = 2.5;
+    time = 0.010;
  }
 
  Testing {
-     time_final = 2.5;
+     time_final = 0.010;
  }

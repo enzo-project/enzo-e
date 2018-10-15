@@ -110,7 +110,8 @@ void EnzoComputePressure::compute_(Block * block)
 
       enzo_float nH2 = 0.5*(H2I_density[i] + H2II_density[i]);
 
-      enzo_float temperature = std::max(temperature_units * p[i] / (number_density+nH2),1.0);
+      enzo_float temperature = std::max(temperature_units * p[i] / (number_density+nH2),
+                                        enzo_float(1.0));
 
       enzo_float GammaH2Inverse = 0.5 * 5.0;
 			enzo_float GammaInverse   = 1.0 / ( grackle_data->Gamma - 1.0);
@@ -121,7 +122,7 @@ void EnzoComputePressure::compute_(Block * block)
         }
       }
       enzo_float Gamma1 = 1.0 + (nH2 + number_density) /
-                                (nH2 + GammaH2Inverse + number_density *GammaInverse);
+                                (nH2 * GammaH2Inverse + number_density *GammaInverse);
 
       // correct pressure
       p[i] *= (Gamma1 - 1.0) / (grackle_data->Gamma - 1.0);

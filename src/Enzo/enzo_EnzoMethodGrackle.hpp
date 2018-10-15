@@ -17,7 +17,7 @@
 inline void operator|(PUP::er &p, code_units &c){
   // Make sure to change this if code_units ever changes
   // all are just single values (int or float)
-
+ 
   p | c.comoving_coordinates;
   p | c.density_units;
   p | c.length_units;

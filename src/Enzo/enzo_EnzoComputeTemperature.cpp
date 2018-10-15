@@ -102,9 +102,12 @@ void EnzoComputeTemperature::compute_(Block * block)
     enzo_float * HeI_density   = (enzo_float*) field.values("HeI_density");
     enzo_float * HeII_density  = (enzo_float*) field.values("HeII_density");
     enzo_float * HeIII_density = (enzo_float*) field.values("HeIII_density");
-    enzo_float * H2I_density   = (enzo_float*) field.values("H2I_density");
-    enzo_float * H2II_density  = (enzo_float*) field.values("H2II_density");
-    enzo_float * HM_density    = (enzo_float*) field.values("HM_density");
+    enzo_float * H2I_density   = field.is_field("H2I_density") ?
+                                   (enzo_float*) field.values("H2I_density") : NULL;
+    enzo_float * H2II_density  = field.is_field("H2II_density") ?
+                                   (enzo_float*) field.values("H2II_density") : NULL;
+    enzo_float * HM_density    = field.is_field("HM_density") ?
+                                   (enzo_float*) field.values("HM_density") : NULL;
     enzo_float * e_density     = (enzo_float*) field.values("e_density");
     enzo_float * metal_density = field.is_field("metal_density") ?
                              (enzo_float*) field.values("metal_density") : NULL;
@@ -125,7 +128,7 @@ void EnzoComputeTemperature::compute_(Block * block)
 
        // use an approximate density floor for number density
        number_density = std::max(number_density,
-                        (enzo_float) density_floor_ / mol_weight_);
+                        enzo_float(density_floor_ / mol_weight_));
        enzo_float temperature = p[i] / number_density;
        t[i] = std::max(temperature, (enzo_float) temperature_floor_);
     }

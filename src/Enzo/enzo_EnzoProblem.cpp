@@ -289,7 +289,7 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_max_level[index_solver],
        enzo_config->solver_precondition[index_solver],
        enzo_config->solver_local[index_solver],
-       enzo_config->solver_is_unigrid[index_solver] 
+       enzo_config->solver_is_unigrid[index_solver]
        );
 
   } else if (solver_type == "bicgstab") {
@@ -582,7 +582,7 @@ Units * EnzoProblem::create_units_ (  Config * config  ) throw ()
   } else {
 
     ERROR("Problem::create_units_",
-	  "Cannot set both Units:density and Units:time parameters");
+	  "Cannot set both Units:density and Units:mass parameters");
   }
 
   return units;
