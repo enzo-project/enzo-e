@@ -71,10 +71,10 @@ EnzoSolverCg::EnzoSolverCg
  int min_level, int max_level,
  int index_precon,
  bool local,
- bool is_unigrid
+ int solve_type
  )
   : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
-	   min_level,max_level,is_unigrid), 
+	   min_level,max_level,solve_type), 
     A_(NULL),
     index_precon_(index_precon),
     rank_(rank),

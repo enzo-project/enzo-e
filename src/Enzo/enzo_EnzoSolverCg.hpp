@@ -28,7 +28,7 @@ public: // interface
 		int max_level,
 		int index_precon,
 		bool local=false,
-		bool is_unigrid=false);
+		int solve_type=solve_leaves);
 
   /// Constructor
   EnzoSolverCg() throw()

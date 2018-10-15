@@ -288,6 +288,27 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_is_unigrid[index_solver]
        );
 
+  } else if (solver_type == "dd") {
+
+    Restrict * restrict =
+      create_restrict_ (enzo_config->solver_restrict[index_solver],config);
+    Prolong * prolong =
+      create_prolong_  (enzo_config->solver_prolong[index_solver],config);
+
+    solver = new EnzoSolverDd
+      (enzo_config->solver_list[index_solver],
+       enzo_config->solver_field_x[index_solver],
+       enzo_config->solver_field_b[index_solver],
+       enzo_config->solver_coarse_solve[index_solver],
+       enzo_config->solver_domain_solve[index_solver],
+       enzo_config->solver_last_smooth[index_solver],
+       restrict,  prolong,
+       enzo_config->solver_min_level[index_solver],
+       enzo_config->solver_max_level[index_solver],
+       enzo_config->solver_coarse_level[index_solver],
+       enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle[index_solver]);
+       
   } else if (solver_type == "bicgstab") {
 
       solver = new EnzoSolverBiCgStab
@@ -322,10 +343,10 @@ Solver * EnzoProblem::create_solver_
 
   } else if (solver_type == "mg0") {
 
-    Restrict * restrict = 
-      create_restrict_(enzo_config->solver_restrict[index_solver],config);
-    Prolong * prolong = 
-      create_prolong_(enzo_config->solver_prolong[index_solver],config);
+    Restrict * restrict =
+      create_restrict_ (enzo_config->solver_restrict[index_solver],config);
+    Prolong * prolong =
+      create_prolong_  (enzo_config->solver_prolong[index_solver],config);
 
     solver = new EnzoSolverMg0
       (enzo_config->solver_list[index_solver],
@@ -357,6 +378,12 @@ Solver * EnzoProblem::create_solver_
 	   solver_type.c_str(),
 	   solver != NULL);
 
+  // Set solve type if not default "on_leaves" (solve_leaves)
+  std::string solve_type=enzo_config->solver_solve_type[index_solver];
+  if (solve_type=="level") solver->set_solve_type(solve_level);
+  if (solve_type=="tree")  solver->set_solve_type(solve_tree);
+  if (solve_type=="block") solver->set_solve_type(solve_block);
+  
   solver->set_index(index_solver);
 
   return solver;

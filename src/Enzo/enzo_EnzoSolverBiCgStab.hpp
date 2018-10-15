@@ -38,7 +38,7 @@ public: // interface
 		     int min_level,
 		     int max_level,
 		     int index_precon,
-		     bool is_unigrid);
+		     int solve_type);
 
   /// default constructor
   EnzoSolverBiCgStab()

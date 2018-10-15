@@ -191,7 +191,6 @@ void Hierarchy::deallocate_blocks() throw()
 
 //----------------------------------------------------------------------
 
-#ifdef NEW_MSG_REFINE
 CProxy_Block Hierarchy::new_block_proxy ( bool allocate_data) throw()
 {
   TRACE("Creating block_array_");
@@ -202,7 +201,6 @@ CProxy_Block Hierarchy::new_block_proxy ( bool allocate_data) throw()
     ( data_msg,  blocking_[0],blocking_[1],blocking_[2]);
   return block_array_;
 }
-#endif
 
 //----------------------------------------------------------------------
 
@@ -237,20 +235,12 @@ void Hierarchy::create_block_array ( bool allocate_data) throw()
 
   DataMsg * data_msg = NULL;
 
-#ifdef NEW_MSG_REFINE  
   factory_->create_block_array
     ( data_msg,
       block_array_,
       blocking_[0],blocking_[1],blocking_[2],
       mbx,mby,mbz,
       num_field_blocks);
-#else
-  block_array_ = factory_->create_block_array
-    ( data_msg,
-      blocking_[0],blocking_[1],blocking_[2],
-      mbx,mby,mbz,
-      num_field_blocks);
-#endif
 
   block_exists_ = allocate_data;
 }

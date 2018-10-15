@@ -148,6 +148,7 @@ public: // interface
       solver_post_smooth(),
       solver_last_smooth(),
       solver_coarse_solve(),
+      solver_domain_solve(),
       solver_weight(),
       solver_restart_cycle(),
       // EnzoSolver<Krylov>
@@ -318,7 +319,9 @@ public: // attributes
 
   double                     method_pm_update_max_dt;
 
+  ///==============
   /// EnzoSolverMg0
+  ///==============
 
   /// Solver index for multigrid pre-smoother
   
@@ -335,6 +338,10 @@ public: // attributes
   /// Solver index for multigrid coarse solver
   
   std::vector<int>           solver_coarse_solve;
+
+  /// Solver index for domain decomposition (dd) domain solver
+  
+  std::vector<int>           solver_domain_solve;
 
   /// Weighting factor for smoother
   

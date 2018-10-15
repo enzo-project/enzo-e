@@ -40,7 +40,7 @@ public: // interface
    int min_level,
    int max_level,
    int coarse_level,
-   bool is_unigrid);
+   int solve_type);
 
   EnzoSolverMg0() {};
 
@@ -61,10 +61,14 @@ public: // interface
        prolong_(NULL),
        rank_(0),
        iter_max_(0),
-       i_sync_restrict_(-1),i_sync_prolong_(-1),i_iter_(-1),i_msg_(-1),
+       i_sync_restrict_(-1),
+       i_sync_prolong_(-1),
+       i_iter_(-1),
+       i_msg_(-1),
        ic_(-1), ir_(-1),
        mx_(0),my_(0),mz_(0),
-       gx_(0),gy_(0),gz_(0)
+       gx_(0),gy_(0),gz_(0),
+       coarse_level_(0)
   {}
 
   /// Destructor
@@ -94,6 +98,7 @@ public: // interface
     p | index_solve_coarse_;
     p | index_smooth_post_;
     p | index_smooth_last_;
+
     p | restrict_;
     p | prolong_;
     p | rank_;
@@ -113,6 +118,8 @@ public: // interface
     p | gx_;
     p | gy_;
     p | gz_;
+
+    p | coarse_level_;
 
   }
 
@@ -199,6 +206,7 @@ public: // interface
     CkPrintf (" ix_ = %d\n",ix_);
     CkPrintf (" mx_,my_,mz_ = %d %d %d\n",mx_,my_,mz_);
     CkPrintf (" gx_,gy_,gz_ = %d %d %d\n",gx_,gy_,gz_);
+    CkPrintf (" coarse_level_ = %d\n",coarse_level_);
     CkPrintf (" bs_ = %g\n",bs_);
     CkPrintf (" bc_ = %g\n",bc_);
     CkPrintf (" rr_ = %g\n",rr_);

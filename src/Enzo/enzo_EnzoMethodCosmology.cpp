@@ -22,9 +22,7 @@ EnzoMethodCosmology::EnzoMethodCosmology() throw()
 
 void EnzoMethodCosmology::compute(Block * block) throw()
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-  EnzoPhysicsCosmology * cosmology = units->cosmology();
+  auto cosmology = enzo::cosmology();
 
 #ifdef DEBUG_COSMO  
   cosmology->print();

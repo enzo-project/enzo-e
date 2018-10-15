@@ -16,7 +16,6 @@
 // #define DEBUG_FACE
 
 // #define DEBUG_NEW_REFRESH
-// #define DEBUG_NEW_MSG_REFINE
 
 #ifdef DEBUG_FACE
 #   define DEBUG_FACES(MSG) debug_faces_(MSG)
@@ -157,42 +156,21 @@ Block::Block ( process_type ip_source )
     v3[0],v3[1],v3[2]);
 }
 #endif
-#ifdef NEW_MSG_REFINE
+
   performance_start_(perf_block);
 
   thisIndex.array(array_,array_+1,array_+2);
 
-#ifdef DEBUG_NEW_MSG_REFINE
-  {
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::Block(%d)\n",
-    __FILE__,__LINE__,v3[0],v3[1],v3[2],ip_source);
-}
-#endif  
   proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
   
   performance_stop_(perf_block);
-#endif  
 }
 
 //----------------------------------------------------------------------
 
 void Block::p_set_msg_refine(MsgRefine * msg)
 {
-#ifdef DEBUG_MSG_REFINE
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE setting %p\n",CkMyPe(),__FILE__,__LINE__,msg);
-#endif  
-  
-#ifdef NEW_MSG_REFINE
   performance_start_(perf_block);
-
-#ifdef DEBUG_NEW_MSG_REFINE  
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::p_set_msg_refine(%p)\n",
-	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
-#endif  
 
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -219,14 +197,10 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   } else {
     msg->update(data());
   }
-#ifdef DEBUG_MSG_REFINE
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE freeing %p\n",CkMyPe(),__FILE__,__LINE__,msg);
-#endif  
   delete msg;
   
   performance_stop_(perf_block);
 
-#endif
 }
 
   //----------------------------------------------------------------------
@@ -242,14 +216,6 @@ void Block::init
  int num_face_level, int * face_level)
 
 {
-#ifdef DEBUG_NEW_MSG_REFINE  
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::init(cycle %d time %g dt %g)\n",
-	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2],
-	    cycle,time,dt);
-#endif  
-  
   index_ = index;
   cycle_ = cycle;
   time_ = time;
@@ -296,13 +262,6 @@ void Block::init
   // Update state
 
   set_state (cycle,time,dt,stop_);
-
-#ifdef NEW_MSG_REFINE
-#else  
-  // Perform any additional initialization for derived class 
-
-  initialize ();
-#endif  
 
   const int rank = cello::rank();
   
@@ -394,13 +353,6 @@ void Block::init
 
 void Block::initialize()
 {
-#ifdef DEBUG_NEW_MSG_REFINE  
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::initialize()\n",
-	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2]);
-#endif
-#ifdef NEW_MSG_REFINE  
   bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
   if (is_first_cycle && level() <= 0) {
     CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
@@ -410,8 +362,6 @@ void Block::initialize()
 #endif    
     contribute(0,0,CkReduction::concat,callback);
   }
-#else
-#endif  
 }
 
 //----------------------------------------------------------------------

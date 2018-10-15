@@ -158,6 +158,14 @@ module enzo {
     entry void p_solver_bicgstab_loop_8();
     entry void p_solver_bicgstab_loop_9();
 
+    // EnzoSolverDd
+    
+    entry void p_solver_dd_restrict_recv(FieldMsg * msg);
+    entry void p_solver_dd_prolong_recv(FieldMsg * msg);
+    entry void p_solver_dd_solve_coarse();
+    entry void p_solver_dd_solve_domain();
+    entry void p_solver_dd_last_smooth();
+    
     // EnzoSolverJacobi
 
     entry void p_solver_jacobi_continue();

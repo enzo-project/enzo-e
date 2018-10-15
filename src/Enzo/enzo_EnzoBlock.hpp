@@ -296,6 +296,15 @@ public: /// entry methods
   /// EnzoSolverBiCGStab entry method: ITER++
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
+  /// EnzoSolverDd
+  
+  void p_solver_dd_restrict_recv(FieldMsg * msg);
+  void p_solver_dd_prolong_recv(FieldMsg * msg);
+  void solver_dd_prolong_recv(FieldMsg * msg);
+  void p_solver_dd_solve_coarse();
+  void p_solver_dd_solve_domain();
+  void p_solver_dd_last_smooth();
+
   // EnzoSolverJacobi
 
   void p_solver_jacobi_continue();

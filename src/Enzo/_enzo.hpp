@@ -93,7 +93,11 @@ enum enzo_sync_id {
   enzo_sync_id_solver_bicgstab_loop_85,
   enzo_sync_id_solver_cg_loop_0a,
   enzo_sync_id_solver_cg_loop_2a,
-  enzo_sync_id_solver_cg_loop_0b
+  enzo_sync_id_solver_cg_loop_0b,
+  enzo_sync_id_solver_dd,
+  enzo_sync_id_solver_dd_coarse,
+  enzo_sync_id_solver_dd_domain,
+  enzo_sync_id_solver_dd_smooth
 };
   
 //----------------------------------------------------------------------

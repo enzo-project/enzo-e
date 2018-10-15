@@ -9,6 +9,18 @@
 #define _COMPUTE_HPP
 
 //----------------------------------------------------------------------
+
+enum solve_enum {
+  solve_unknown,
+  solve_leaves,  // Solve on leaf Blocks (default)
+  solve_level,   // Solve within a level (e.g. for multigrid smoothers)
+  solve_tree,    // Solve in a root-level octree (e.g. for domain decomposition)
+  solve_block    // Solve in a block (e.g. MG coarse solve on a single block)
+};
+
+extern const char * solve_string[];
+
+//----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
 

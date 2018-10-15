@@ -140,6 +140,7 @@ public: // interface
     solver_list(),
     solver_index(),
     solver_type(),
+    solver_solve_type(),
     solver_iter_max(),
     solver_res_tol(),
     solver_diag_precon(),
@@ -287,6 +288,7 @@ public: // interface
       solver_list(),
       solver_index(),
       solver_type(),
+      solver_solve_type(),
       solver_iter_max(),
       solver_res_tol(),
       solver_diag_precon(),
@@ -508,6 +510,7 @@ public: // attributes
   std::vector<std::string>   solver_list;
   std::map<std::string,int>  solver_index;
   std::vector<std::string>   solver_type;
+  std::vector<std::string>   solver_solve_type;
   std::vector<int>           solver_iter_max;
   std::vector<double>        solver_res_tol;
   std::vector<char>          solver_diag_precon;

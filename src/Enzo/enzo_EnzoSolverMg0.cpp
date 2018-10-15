@@ -269,9 +269,9 @@ EnzoSolverMg0::EnzoSolverMg0
  int min_level,
  int max_level,
  int coarse_level,
-   bool is_unigrid) 
+ int solve_type) 
   : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
-	   min_level,max_level,is_unigrid),
+	   min_level,max_level,solve_type),
     bs_(0), bc_(0),
     rr_(0), rr_local_(0), rr0_(0),
     res_tol_(res_tol),
@@ -306,13 +306,14 @@ EnzoSolverMg0::EnzoSolverMg0
   refresh(0)->add_field (ic_);
 
   ScalarDescr * scalar_descr_int  = cello::scalar_descr_int();
+  i_iter_  = scalar_descr_int ->new_value(name + ":iter");
+  
   ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
-  ScalarDescr * scalar_descr_void = cello::scalar_descr_void();
-
-  i_iter_          = scalar_descr_int ->new_value(name + ":iter");
   i_sync_restrict_ = scalar_descr_sync->new_value(name + ":restrict");
   i_sync_prolong_  = scalar_descr_sync->new_value(name + ":prolong");
-  i_msg_           = scalar_descr_void->new_value(name + ":msg");
+
+  ScalarDescr * scalar_descr_void = cello::scalar_descr_void();
+  i_msg_ = scalar_descr_void->new_value(name + ":msg");
 
 }
 
@@ -361,7 +362,7 @@ void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 
   EnzoBlock * enzo_block = enzo::block(block);
 
-  // Initialize child counter for restrict synchronization
+  // Initialize sync counters for restrict and prolong
   
   Sync * sync_restrict = psync_restrict(block);
 

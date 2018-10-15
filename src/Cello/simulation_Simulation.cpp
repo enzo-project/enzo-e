@@ -752,9 +752,7 @@ void Simulation::initialize_block_array_() throw()
 
 void Simulation::p_set_block_array(CProxy_Block block_array)
 {
-#ifdef NEW_MSG_REFINE  
   if (CkMyPe() != 0) hierarchy_->set_block_array(block_array);
-#endif  
 }
 
   //----------------------------------------------------------------------

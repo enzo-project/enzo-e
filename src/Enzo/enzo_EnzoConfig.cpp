@@ -125,6 +125,7 @@ EnzoConfig::EnzoConfig() throw ()
   solver_post_smooth(),
   solver_last_smooth(),
   solver_coarse_solve(),
+  solver_domain_solve(),
   solver_weight(),
   solver_restart_cycle(),
   /// EnzoSolver<Krylov>
@@ -272,13 +273,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_pm_deposit_alpha;
   p | method_pm_update_max_dt;
 
-  p | solver_precondition;
   p | solver_pre_smooth;
   p | solver_post_smooth;
   p | solver_last_smooth;
   p | solver_coarse_solve;
+  p | solver_domain_solve;
   p | solver_weight;
   p | solver_restart_cycle;
+  p | solver_precondition;
   p | solver_local;
   p | solver_coarse_level;
   p | solver_is_unigrid;
@@ -638,13 +640,14 @@ void EnzoConfig::read(Parameters * p) throw()
 
   num_solvers = p->list_length("Solver:list");
 
-  solver_precondition.resize(num_solvers);
   solver_pre_smooth.  resize(num_solvers);
   solver_coarse_solve.resize(num_solvers);
+  solver_domain_solve.resize(num_solvers);
   solver_post_smooth. resize(num_solvers);
   solver_last_smooth. resize(num_solvers);
   solver_weight.      resize(num_solvers);
   solver_restart_cycle.resize(num_solvers);
+  solver_precondition.resize(num_solvers);
   solver_local.       resize(num_solvers);
   solver_coarse_level.resize(num_solvers);
   solver_is_unigrid.resize(num_solvers);
@@ -675,6 +678,13 @@ void EnzoConfig::read(Parameters * p) throw()
       solver_coarse_solve[index_solver] = solver_index[solver];
     } else {
       solver_coarse_solve[index_solver] = -1;
+    }
+    
+    solver = p->value_string (solver_name + ":domain_solve","unknown");
+    if (solver_index.find(solver) != solver_index.end()) {
+      solver_domain_solve[index_solver] = solver_index[solver];
+    } else {
+      solver_domain_solve[index_solver] = -1;
     }
     
     solver = p->value_string (solver_name + ":post_smooth","unknown");

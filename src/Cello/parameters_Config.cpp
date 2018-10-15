@@ -196,6 +196,7 @@ void Config::pup (PUP::er &p)
   p | solver_list;
   p | solver_index;
   p | solver_type;
+  p | solver_solve_type;
   p | solver_iter_max;
   p | solver_res_tol;
   p | solver_diag_precon;
@@ -1248,6 +1249,7 @@ void Config::read_solver_ (Parameters * p) throw()
 
   solver_list         .resize(num_solvers);
   solver_type         .resize(num_solvers);
+  solver_solve_type   .resize(num_solvers);
   solver_iter_max     .resize(num_solvers);
   solver_res_tol      .resize(num_solvers);
   solver_diag_precon  .resize(num_solvers);
@@ -1272,6 +1274,11 @@ void Config::read_solver_ (Parameters * p) throw()
 
     solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
     
+    solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
+
+    solver_solve_type[index_solver] = p->value_string
+      (full_name + ":solve_type","leaves");
+
     solver_iter_max[index_solver] = p->value_integer
       (full_name + ":iter_max",1000);
     

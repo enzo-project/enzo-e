@@ -131,10 +131,10 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
  int iter_max, double res_tol,
  int min_level, int max_level,
  int index_precon,
- bool is_unigrid
+ int solve_type
  ) 
   : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
-	   min_level,max_level,is_unigrid),
+	   min_level,max_level,solve_type),
     alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
     rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
     rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
@@ -552,8 +552,7 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
 
     /// Access the preconditioner for this solver, if any
 
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    Solver * precon = simulation->problem()->solver(index_precon_);
+    Solver * precon = cello::solver(index_precon_);
 
     /// Apply the preconditioner, then return to
     /// p_solver_bicgstab_loop_2()
@@ -829,8 +828,7 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
 
     /// Access the preconditioner for this solver, if any
 
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    Solver * precon = simulation->problem()->solver(index_precon_);
+    Solver * precon = cello::solver(index_precon_);
 
     /// Apply the preconditioner, then return to
     /// p_solver_bicgstab_loop_8()
