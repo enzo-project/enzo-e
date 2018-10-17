@@ -83,13 +83,14 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-
 //protected: // methods
 
 protected: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
   void compute_( EnzoBlock * enzo_block) throw();
+
+  void ResetEnergies ( EnzoBlock * enzo_block) throw();
 
 
   code_units grackle_units_;

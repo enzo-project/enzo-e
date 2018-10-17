@@ -781,6 +781,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
 #ifdef CONFIG_USE_GRACKLE
 
+
   /// Grackle parameters
 
   bool uses_grackle = false;
@@ -788,18 +789,16 @@ void EnzoConfig::read(Parameters * p) throw()
     if (method_list[i] == "grackle") uses_grackle=true;
   }
 
-  // chemistry_data is a pointer, set values with ->
-
   // Defaults alert PUP::er() to ignore
-  // method_grackle_chemistry = new chemistry_data;
-  method_grackle_chemistry->use_grackle = uses_grackle;
-
   if (uses_grackle) {
 
     if (set_default_chemistry_parameters(method_grackle_chemistry) == 0) {
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
       "Error in set_default_chemistry_parameters");
     }
+
+    /* this must be set AFTER default values are set */
+    method_grackle_chemistry->use_grackle = uses_grackle;
 
     // Copy over parameters from Enzo-P to Grackle
     grackle_data->Gamma = field_gamma;

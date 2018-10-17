@@ -67,7 +67,8 @@
               "cooling_time",
               "temperature",
               "pressure",
-              "gamma" ];
+              "gamma" ,
+              "cooling_time"];
     }
  }
 
@@ -102,13 +103,13 @@
 
      grackle {
         courant = 0.40;
-        data_file = "CloudyData_UVB=HM2012_shielded.h5";
+        data_file = "CloudyData_noUVB.h5";
 
         with_radiative_cooling = 1;
         primordial_chemistry   = 2;  # 1, 2, or 3
         metal_cooling          = 1;  # 0 or 1 (off/on)
-        UVbackground           = 1;  # on or off
-        self_shielding_method  = 3;  # 0 - 3 (0 or 3 recommended)
+        UVbackground           = 0;  # on or off
+        self_shielding_method  = 0;  # 0 - 3 (0 or 3 recommended)
 
         HydrogenFractionByMass = 0.73;
      }
@@ -148,7 +149,8 @@
               "cooling_time",
               "temperature",
               "pressure",
-              "gamma"];
+              "gamma"
+               ];
 
          dir   = ["GRACKLE_TEST_%03d","cycle"];
          name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
@@ -163,9 +165,10 @@
  }
 
  Stopping {
-    time = 0.010;
+    time = 0.002;
+    cycle = 2;
  }
 
  Testing {
-     time_final = 0.010;
+     time_final = 0.002;
  }

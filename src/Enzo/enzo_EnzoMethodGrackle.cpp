@@ -273,18 +273,45 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     "Error in solve_chemistry.\n");
   }
 
+  /* if this is a test problem, reset energies */
+  // AE: Need to fix this to only call when in test
+  if (enzo_config->initial_grackle_test_reset_energies){
+    this->ResetEnergies(enzo_block);
+  }
+
+  /* might want to not do it this way */
+  const int in = cello::index_static();
+
+  int comoving_coordinates = enzo_config->physics_cosmology;
+  EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
+                                        comoving_coordinates);
+  compute_pressure.compute(enzo_block);
+
+  EnzoComputeTemperature compute_temperature
+    (enzo_config->ppm_density_floor,
+     enzo_config->ppm_temperature_floor,
+     enzo_config->ppm_mol_weight,
+     comoving_coordinates);
+
+  compute_temperature.compute(enzo_block);
+
   // maybe change to "gr_float * cooling_time = grackle_fields_.cooling_time"
 
   // AE: Why do we need any of these here:?
-  /*
-  gr_float *cooling_time;
-  cooling_time = new gr_float[nx];
 
-  if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == 0) {
-    ERROR("EnzoMethodGrackle::compute()",
-    "Error in calculate_cooling_time.\n");
-  }
 
+
+  gr_float * cooling_time = field.is_field("cooling_time") ?
+                    (gr_float *) field.values("cooling_time") : NULL;
+  if (cooling_time){
+    //  cooling_time = new gr_float[nx];
+
+    if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == 0) {
+      ERROR("EnzoMethodGrackle::compute()",
+      "Error in calculate_cooling_time.\n");
+    }
+ }
+/*
   gr_float *temperature;
   temperature = new gr_float[nx];
 
@@ -319,10 +346,118 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 {
 #ifdef CONFIG_USE_GRACKLE
-  return std::numeric_limits<double>::max();
+  // return std::numeric_limits<double>::max();
+  return 0.0001;
 #else
   return 0.0;
 #endif /* CONFIG_USE_GRACKLE */
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_GRACKLE
+void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
+{
+
+   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
+       (enzo_block->simulation()->config());
+   EnzoUnits * enzo_units = (EnzoUnits *) enzo_block->simulation()->problem()->units();
+
+   /* Only need to do this if tracking chemistry */
+   if (grackle_data->primordial_chemistry < 1)
+     return;
+
+   Field field = enzo_block->data()->field();
+
+   enzo_float * temperature = (enzo_float*) field.values("temperature");
+   enzo_float * density     = (enzo_float*) field.values("density");
+   enzo_float * pressure    = (enzo_float*) field.values("pressure");
+   enzo_float * internal_energy = (enzo_float*) field.values("internal_energy");
+   enzo_float * total_energy    = (enzo_float*) field.values("total_energy");
+
+   enzo_float * HI_density    = (enzo_float*) field.values("HI_density");
+   enzo_float * HII_density   = (enzo_float*) field.values("HII_density");
+   enzo_float * HeI_density   = (enzo_float*) field.values("HeI_density");
+   enzo_float * HeII_density  = (enzo_float*) field.values("HeII_density");
+   enzo_float * HeIII_density = (enzo_float*) field.values("HeIII_density");
+   enzo_float * H2I_density   = field.is_field("H2I_density") ?
+                                  (enzo_float*) field.values("H2I_density") : NULL;
+   enzo_float * H2II_density  = field.is_field("H2II_density") ?
+                                  (enzo_float*) field.values("H2II_density") : NULL;
+   enzo_float * HM_density    = field.is_field("HM_density") ?
+                                  (enzo_float*) field.values("HM_density") : NULL;
+   enzo_float * DI_density      = field.is_field("DI_density") ?
+                                  (enzo_float *) field.values("DI_density") : NULL;
+   enzo_float * DII_density     = field.is_field("DII_density") ?
+                                  (enzo_float *) field.values("DII_density") : NULL;
+   enzo_float * HDI_density     = field.is_field("HDI_density") ?
+                                  (enzo_float *) field.values("HDI_density"): NULL;
+   enzo_float * e_density     = (enzo_float*) field.values("e_density");
+   enzo_float * metal_density = field.is_field("metal_density") ?
+                            (enzo_float*) field.values("metal_density") : NULL;
+
+   int nx,ny,nz;
+   field.size(&nx,&ny,&nz);
+
+   // Cell widths
+   double xm,ym,zm;
+   enzo_block->data()->lower(&xm,&ym,&zm);
+   double xp,yp,zp;
+   enzo_block->data()->upper(&xp,&yp,&zp);
+
+   // Ghost depths
+   int gx,gy,gz;
+   field.ghost_depth(0,&gx,&gy,&gz);
+
+   int mx,my,mz;
+   field.dimensions(0,&mx,&my,&mz);
+
+   const int m = mx*my*mz;
+
+   int ngx = nx + 2*gx;
+   int ngy = ny + 2*gy;
+   int ngz = nz + 2*gz;
+
+
+   double a_units = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
+
+   const double mh = 1.67262171E-24;
+   const double kboltz = 1.3806504E-16;
+
+   gr_float temperature_units =  mh * pow(a_units *
+                                          enzo_units->velocity(), 2) / kboltz;
+
+   double temperature_slope = log10(enzo_config->initial_grackle_test_maximum_temperature/
+                                    enzo_config->initial_grackle_test_minimum_temperature)/
+                                    double(nz);
+
+   for (int iz=gz; iz<nz+gz; iz++){ // Temperature
+     for (int iy=gy; iy<ny+gy; iy++) { // Metallicity
+       for (int ix=gx; ix<nx+gx; ix++) { // H Number Density
+         int i = INDEX(ix,iy,iz,ngx,ngy);
+         enzo_float mu = density[i] + HI_density[i] + HII_density[i] +
+            (HeI_density[i] + HeII_density[i] + HeIII_density[i])*0.25;
+         if (grackle_data->primordial_chemistry > 1){
+           mu += HM_density[i] + 0.5 * (H2I_density[i] + H2II_density[i]);
+         }
+
+         if (grackle_data->primordial_chemistry > 2){
+           mu += (DI_density[i] + DII_density[i])*0.5 + HDI_density[i]/3.0;
+         }
+
+         mu = density[i] / mu;
+
+         internal_energy[i] = pow(10.0, ((temperature_slope * (iz-gz)) +
+                              log10(enzo_config->initial_grackle_test_minimum_temperature)))/
+                              mu / temperature_units / (enzo_config->field_gamma - 1.0);
+         total_energy[i] = internal_energy[i];
+
+       }
+     }
+   }
+
+  return;
+}
+#endif CONFIG_USE_GRACKLE
 
 //======================================================================
