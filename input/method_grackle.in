@@ -83,12 +83,6 @@
       maximum_temperature      = 1.0E8;
 
       reset_energies           = 1;
-
-
-     density_out = 1.0;
-     density_in  = 0.1;
-     temperature_out = 1.0E3;
-     temperature_in  = 1.0E5;
    }
  }
 
@@ -106,7 +100,7 @@
         data_file = "CloudyData_noUVB.h5";
 
         with_radiative_cooling = 1;
-        primordial_chemistry   = 2;  # 1, 2, or 3
+        primordial_chemistry   = 1;  # 1, 2, or 3
         metal_cooling          = 1;  # 0 or 1 (off/on)
         UVbackground           = 0;  # on or off
         self_shielding_method  = 0;  # 0 - 3 (0 or 3 recommended)
@@ -156,7 +150,7 @@
          name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
          schedule {
              var = "time";
-             step = 0.001;
+             step = 0.00001;
              start = 0.0;
          }
          type = "data";
@@ -165,10 +159,9 @@
  }
 
  Stopping {
-    time = 0.002;
-    cycle = 2;
+    time = 0.00001;
  }
 
  Testing {
-     time_final = 0.002;
+     time_final = 0.00001;
  }
