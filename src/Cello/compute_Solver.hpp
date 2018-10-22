@@ -103,8 +103,8 @@ public: // interface
   void set_min_level (int min_level)
   { min_level_ = min_level; }
 
-  const int min_level() { return min_level_; }
-  const int max_level() { return max_level_; }
+  int min_level() { return min_level_; }
+  int max_level() { return max_level_; }
 
   void set_max_level (int max_level)
   { max_level_ = max_level; }
