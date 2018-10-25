@@ -70,9 +70,8 @@ void EnzoInitialGrackleTest::enforce_block
    block != NULL);
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-       (enzo_block->simulation()->config());
-  EnzoUnits * enzo_units = (EnzoUnits *) enzo_block->simulation()->problem()->units();
+  const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits  * enzo_units = enzo::units();
   // units_ = enzo_config->method_grackle_units;
 
   Field field = block->data()->field();

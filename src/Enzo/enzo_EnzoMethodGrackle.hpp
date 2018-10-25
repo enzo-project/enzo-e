@@ -41,7 +41,8 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(const FieldDescr * field_descr,
+  EnzoMethodGrackle(
+//const FieldDescr * field_descr,
                     const float physics_cosmology_initial_redshift,
                     const float time);
 

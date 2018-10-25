@@ -13,7 +13,7 @@ extern CProxy_EnzoSimulation proxy_enzo_simulation;
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
-  const FieldDescr * field_descr,
+//  const FieldDescr * field_descr,
   const float physics_cosmology_initial_redshift,
   const float time
 )
@@ -93,9 +93,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
   }
 
   EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
-  EnzoUnits * enzo_units = (EnzoUnits *) simulation->problem()->units();
-  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-        (simulation->config());
+  EnzoUnits * enzo_units = enzo::units();
+  const EnzoConfig * enzo_config = enzo::config();
 
   grackle_units_.comoving_coordinates = enzo_config->physics_cosmology;
   // Copy over code units to grackle units struct
@@ -163,9 +162,8 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
   EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
-  EnzoUnits * enzo_units = (EnzoUnits *) simulation->problem()->units();
-  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-        (simulation->config());
+  EnzoUnits * enzo_units = enzo::units();
+  const EnzoConfig * enzo_config = enzo::config();
 
   /* Set code units for use in grackle */
 
@@ -223,8 +221,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     grackle_units_.a_value = cosmo_a;
   }
 */
-
-  gr_int rank = enzo_block->rank();
+  const gr_int rank = cello::rank();
 
   // Grackle grid dimenstion and grid size
 
@@ -376,10 +373,8 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 #ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 {
-
-   const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-       (enzo_block->simulation()->config());
-   EnzoUnits * enzo_units = (EnzoUnits *) enzo_block->simulation()->problem()->units();
+   const EnzoConfig * enzo_config = enzo::config();
+   EnzoUnits * enzo_units = enzo::units();
 
    /* Only need to do this if tracking chemistry */
    if (grackle_data->primordial_chemistry < 1)

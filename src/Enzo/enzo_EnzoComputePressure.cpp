@@ -87,8 +87,8 @@ void EnzoComputePressure::compute_(Block * block)
 #ifdef CONFIG_USE_GRACKLE
   /* Correct pressure for significant amounts of H_2 */
   if( grackle_data->primordial_chemistry > 1){
-    const EnzoUnits * enzo_units = (const EnzoUnits*)
-         block->simulation()->problem()->units();
+
+    EnzoUnits * enzo_units = enzo::units();
 
     enzo_float * HI_density    = (enzo_float*) field.values("HI_density");
     enzo_float * HII_density   = (enzo_float*) field.values("HII_density");
