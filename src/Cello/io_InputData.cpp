@@ -10,10 +10,8 @@
 
 //----------------------------------------------------------------------
 
-InputData::InputData(const Factory * factory,
-		     const FieldDescr * field_descr,
-		     const ParticleDescr * particle_descr ) throw ()
-  : Input(factory,field_descr,particle_descr)
+InputData::InputData(const Factory * factory) throw ()
+  : Input(factory)
 {
 }
 
@@ -79,12 +77,7 @@ void InputData::finalize () throw ()
 
 //----------------------------------------------------------------------
 
-void InputData::read_hierarchy 
-(
- Hierarchy  * hierarchy,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+void InputData::read_hierarchy ( Hierarchy  * hierarchy) throw()
 {
 
   IoHierarchy io_hierarchy(hierarchy);
@@ -94,18 +87,14 @@ void InputData::read_hierarchy
   Input::read_meta (&io_hierarchy);
 
   // Calls read_blocks() on contained octree array
-  Input::read_hierarchy (hierarchy, field_descr, particle_descr);
+  Input::read_hierarchy (hierarchy);
 
 }
 
 //----------------------------------------------------------------------
 
 Block * InputData::read_block 
-( 
- Block * block,
- std::string  block_name,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr) throw()
+(  Block * block, std::string  block_name) throw()
 {
 
   file_->group_chdir(block_name);
@@ -132,13 +121,11 @@ Block * InputData::read_block
 
 //----------------------------------------------------------------------
 
-void InputData::read_field
-( 
- FieldData * field_data,
- const FieldDescr * field_descr,
- int index_field) throw()
+void InputData::read_field( Block * block, int index_field) throw()
 {
-  io_field_data()->set_field_data(field_data);
+  Field field = block->data()->field();
+  
+  io_field_data()->set_field_data(field.field_data());
   io_field_data()->set_field_index(index_field);
 
   for (size_t i=0; i<io_field_data()->data_count(); i++) {
@@ -156,8 +143,7 @@ void InputData::read_field
     file_->data_close();
 
     // Get ith FieldData data
-    io_field_data()->field_array(field_descr,
-				 i, &buffer, &name, &type, 
+    io_field_data()->field_array(i, &buffer, &name, &type, 
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 
@@ -168,10 +154,7 @@ void InputData::read_field
 //----------------------------------------------------------------------
 
 void InputData::read_particle
-( 
- ParticleData * particle_data,
- const ParticleDescr * particle_descr,
- int index_particle) throw()
+( Block * block, int index_particle) throw()
 {
   // io_particle_data()->set_particle_descr((ParticleDescr*)particle_descr);
   // io_particle_data()->set_particle_data(particle_data);

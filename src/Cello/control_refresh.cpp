@@ -25,6 +25,25 @@
 
 //----------------------------------------------------------------------
 
+void Block::refresh_enter (int callback, Refresh * refresh) 
+{
+#ifdef DEBUG_REFRESH
+  CkPrintf ("%d %s:%d DEBUG REFRESH %s Block::set_refresh (%p)\n",
+	    CkMyPe(), __FILE__,__LINE__,name().c_str(),refresh);
+  fflush(stdout);
+#endif
+  
+  set_refresh(refresh);
+
+  // Update refresh object for the Block
+
+  refresh_.back()->set_callback(callback);
+
+  refresh_begin_();
+}
+
+//----------------------------------------------------------------------
+
 void Block::refresh_begin_() 
 {
   TRACE_REFRESH("refresh_begin_()");
@@ -35,7 +54,7 @@ void Block::refresh_begin_()
 
   check_delete_();
 
-  simulation()->set_phase(phase_refresh);
+  cello::simulation()->set_phase(phase_refresh);
 
   control_sync (CkIndex_Block::p_refresh_continue(),
 		refresh->sync_type(),
@@ -121,12 +140,12 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
 
     ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
 
-    while (it_neighbor.next()) {
+    int if3[3];
+    while (it_neighbor.next(if3)) {
 
       Index index_neighbor = it_neighbor.index();
 
-      int if3[3],ic3[3];
-      it_neighbor.face (if3);
+      int ic3[3];
       it_neighbor.child(ic3);
 
       const int level = this->level();
@@ -147,18 +166,16 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
 
     ItFace it_face = this->it_face(min_face_rank,index_);
 
-    while (it_face.next()) {
-
-      Index index_face = it_face.index();
-
-      int if3[3],ic3[3] = {0,0,0};
-      it_face.face(if3);
+    int if3[3];
+    while (it_face.next(if3)) {
 
       // count all faces if not a leaf, else don't count if face level
       // is less than this block's level
       
       if ( ! is_leaf() || face_level(if3) >= level()) {
 	
+	Index index_face = it_face.index();
+	int ic3[3] = {0,0,0};
 	refresh_load_field_face_ (refresh_same,index_face,if3,ic3);
 	++count;
       }
@@ -220,7 +237,7 @@ int Block::refresh_load_particle_faces_ (Refresh * refresh)
 
   //  TRACE_REFRESH("refresh_load_particle_faces()");
   
-  const int rank = this->rank();
+  const int rank = cello::rank();
 
   const int npa = (rank == 1) ? 4 : ((rank == 2) ? 4*4 : 4*4*4);
 
@@ -262,9 +279,9 @@ int Block::particle_load_faces_ (int npa,
   //     +---+---+---+---+
   //     | 03| 13| 23| 33|
   //     +---+===+===+---+
-  //     | 02║   :   ║ 32|
+  //     | 02||  :  || 32|
   //     +---+ - + - +---+
-  //     | 01║   :   ║ 31|
+  //     | 01||  :  || 31|
   //     +---+=======+---+
   //     | 00| 10| 20| 30|
   //     +---+---+---+---+
@@ -276,9 +293,9 @@ int Block::particle_load_faces_ (int npa,
   //     +---+   5   +---+
   //     | 4 |       | 6 |
   // +---+---+===+===+---+
-  // |       ║       ║    
+  // |       ||     ||    
   // |   2   +       +   3
-  // |       ║       ║    
+  // |       ||     ||    
   // +-------+=======+-------+
   //         |            
   //     0   |            
@@ -289,9 +306,9 @@ int Block::particle_load_faces_ (int npa,
   //     +---+---+---+---+
   //     | 4 | 5 | 5 | 6 |
   //     +---+===+===+---+
-  //     | 2 ║   :   ║ 3 |
+  //     | 2 ||  :  || 3 |
   //     +---+ - + - +---+
-  //     | 2 ║   :   ║ 3 |
+  //     | 2 ||  :  || 3 |
   //     +---+=======+---+
   //     | 0 | 1 | 1 | 1 |
   //     +---+---+---+---+
@@ -306,8 +323,8 @@ int Block::particle_load_faces_ (int npa,
 
   // Scatter particles among particle_data array
 
-  Particle particle (simulation() -> particle_descr(),
-		     data()       -> particle_data());
+  Particle particle (cello::particle_descr(),
+		     data()->particle_data());
 
   std::vector<int> type_list;
   if (refresh->all_particles()) {
@@ -337,7 +354,7 @@ int Block::particle_create_array_neighbors_
 { 
   //  TRACE_REFRESH("particle_create_array_neighbors()");
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   const int level = this->level();
 
   const int min_face_rank = refresh->min_face_rank();
@@ -345,13 +362,12 @@ int Block::particle_create_array_neighbors_
 
   int il = 0;
 
-  for (il=0; it_neighbor.next(); il++) {
+  int if3[3];
+  for (il=0; it_neighbor.next(if3); il++) {
 
     const int level_face = it_neighbor.face_level();
 
-    int if3[3] = {0,0,0} ,ic3[3] = {0,0,0};
-
-    it_neighbor.face(if3);
+    int ic3[3] = {0,0,0};
 
     const int refresh_type = 
       (level_face == level - 1) ? refresh_coarse :
@@ -373,7 +389,7 @@ int Block::particle_create_array_neighbors_
 
     ParticleData * pd = new ParticleData;
 
-    ParticleDescr * p_descr = simulation() -> particle_descr();
+    ParticleDescr * p_descr = cello::particle_descr();
 
     pd->allocate(p_descr);
 
@@ -404,8 +420,8 @@ void Block::particle_determine_periodic_update_
   double dxm,dym,dzm;
   double dxp,dyp,dzp;
 
-  simulation()->hierarchy()->lower(&dxm,&dym,&dzm);
-  simulation()->hierarchy()->upper(&dxp,&dyp,&dzp);
+  cello::hierarchy()->lower(&dxm,&dym,&dzm);
+  cello::hierarchy()->upper(&dxp,&dyp,&dzp);
 
   //     ... periodicity
   bool p32[3][2];
@@ -415,7 +431,7 @@ void Block::particle_determine_periodic_update_
   bool b32[3][2];
   is_on_boundary (b32);
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
 
   // Update (dpx,dpy,dpz) position correction if periodic domain
   // boundary is crossed
@@ -440,7 +456,7 @@ void Block::particle_apply_periodic_update_
 (int nl, ParticleData * particle_list[], Refresh * refresh)
 {
 
-  const int rank = this->rank();
+  const int rank = cello::rank();
   const int level = this->level();
   const int min_face_rank = refresh->min_face_rank();
 
@@ -458,12 +474,12 @@ void Block::particle_apply_periodic_update_
 
   int il=0;
 
-  while (it_neighbor.next()) {
+  int if3[3];
+  while (it_neighbor.next(if3)) {
 
     const int level_face = it_neighbor.face_level();
 
-    int if3[3],ic3[3];
-    it_neighbor.face (if3);
+    int ic3[3];
     it_neighbor.child(ic3);
 
     const int refresh_type = 
@@ -483,7 +499,7 @@ void Block::particle_apply_periodic_update_
 
   }
 
-  ParticleDescr * p_descr = simulation() -> particle_descr();
+  ParticleDescr * p_descr = cello::particle_descr();
 
   // Apply the updates to the list of particles
 
@@ -519,7 +535,7 @@ void Block::particle_scatter_neighbors_
  std::vector<int> & type_list,
  Particle particle)
 {
-  const int rank = this->rank();
+  const int rank = cello::rank();
 
   //     ... get Block bounds 
   double xm,ym,zm;
@@ -610,7 +626,7 @@ void Block::particle_scatter_neighbors_
     }
   }
 
-  simulation()->data_delete_particles(count);
+  cello::simulation()->data_delete_particles(count);
 
 }
 
@@ -620,7 +636,7 @@ void Block::particle_send_
 (int nl,Index index_list[], ParticleData * particle_list[])
 {
 
-  ParticleDescr * p_descr = simulation() -> particle_descr();
+  ParticleDescr * p_descr = cello::particle_descr();
 
   for (int il=0; il<nl; il++) {
 

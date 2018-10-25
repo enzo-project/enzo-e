@@ -12,20 +12,17 @@
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
-(
- const FieldDescr * field_descr,
- bool comoving_coordinates
-) 
+( bool comoving_coordinates ) 
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_comoving_expansion);
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-
-  const int rank = simulation->rank();
+  const int rank = cello::rank();
   //  refresh(ir)->add_all_fields();
+  FieldDescr * field_descr = cello::field_descr();
+  
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
   refresh(ir)->add_field(field_descr->field_id("internal_energy"));
@@ -50,7 +47,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
     block->compute_done(); 
     return;
   }
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
   /* Only do this if
@@ -64,8 +61,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
        field.field_count() > 0))
     {
 
-      EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-  	block->simulation()->problem()->physics("cosmology");
+      EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
       ASSERT ("EnzoMethodComovingExpansion::compute()",
   	      "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
@@ -99,7 +95,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       int mx, my, mz, m, rank;
       field.dimensions(0,&mx,&my,&mz);
       m = mx*my*mz;
-      rank = enzo_block->rank();
+      rank = cello::rank();
 
       /* If we can, compute the pressure at the mid-point.
   	 We can, because we will always have an old baryon field now. */
@@ -199,14 +195,13 @@ double EnzoMethodComovingExpansion::timestep( Block * block ) const throw()
   if (!comoving_coordinates_)
     return (double) dtExpansion;
 
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   ASSERT ("EnzoMethodComovingExpansion::timestep()",
 	  "comoving_coordinates enabled but missing EnzoPhysicsCosmology",
 	  ! (comoving_coordinates_ && (cosmology == NULL)) );
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   cosmology->compute_expansion_timestep(&dtExpansion,
                                         (enzo_float) enzo_block->time());

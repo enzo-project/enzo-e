@@ -49,14 +49,14 @@ void EnzoComputePressure::compute_(Block * block)
 
   if (!block->is_leaf()) return;
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   Field field = enzo_block->data()->field();
 
   enzo_float * p = (enzo_float*) field.values("pressure");
   enzo_float * d = (enzo_float*) field.values("density");
 
-  const int rank = enzo_block->rank();
+  const int rank = cello::rank();
 
   enzo_float * v3[3] =
     { (enzo_float*) (              field.values("velocity_x")),

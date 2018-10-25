@@ -39,11 +39,18 @@
 
 // #define DEBUG_CHECK
 
-class Simulation;
+class Config;
+class CProxy_Block;
 class FieldDescr;
-class ScalarDescr;
-class ParticleDescr;
+class Hierarchy;
+class Monitor;
 class Output;
+class ParticleDescr;
+class Problem;
+class ScalarDescr;
+class Simulation;
+class Solver;
+class Units;
 
 //----------------------------------------------------------------------
 // TEMPLATE FUNCTIONS
@@ -179,6 +186,51 @@ enum type_enum {
 #   error Multiple CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD] defined
 #endif
 
+/// Macros for sizing, saving, and restoring data from buffers
+
+#define SIZE_ARRAY(COUNT,LIST)			\
+  {						\
+    (*COUNT) += sizeof(int);			\
+    (*COUNT) += sizeof(int)*LIST.size();	\
+  }
+#define SIZE_VALUE(COUNT,VALUE)			\
+  {						\
+    (*COUNT) += sizeof(int);			\
+  }
+
+#define SAVE_ARRAY(PTR,LIST)				\
+  {							\
+    int length = LIST.size();				\
+    int n;						\
+    memcpy((*PTR),&length, n=sizeof(int));		\
+    (*PTR)+=n;						\
+    memcpy((*PTR),&LIST[0],n=length*sizeof(int));	\
+    (*PTR)+=n;						\
+  }
+#define SAVE_VALUE(PTR,VALUE)			\
+  {						\
+    int n;					\
+    memcpy((*PTR),&VALUE,n=sizeof(int));	\
+    (*PTR)+=n;					\
+  }
+
+#define LOAD_ARRAY(PTR,LIST)				\
+  {							\
+    int length;						\
+    int n;						\
+    memcpy(&length, (*PTR), n=sizeof(int));		\
+    (*PTR)+=n;						\
+    LIST.resize(length);				\
+    memcpy(&LIST[0],(*PTR),n=length*sizeof(int));	\
+    (*PTR)+=n;						\
+  }
+#define LOAD_VALUE(PTR,VALUE)			\
+  {						\
+    int n;					\
+    memcpy(&VALUE,(*PTR),n=sizeof(int));	\
+    (*PTR)+=n;					\
+  }
+
 /// Type for CkMyPe(); used for Block() constructor to differentiate
 /// from Block(int)
 typedef unsigned process_type;
@@ -258,16 +310,24 @@ namespace cello {
   { return CkMyPe() % CONFIG_NODE_SIZE; }
 
   
-  Simulation * simulation();
-  FieldDescr * field_descr();
-#ifdef NEW_SYNC  
-  ScalarDescr * scalar_descr_double();
-  ScalarDescr * scalar_descr_int();
-  ScalarDescr * scalar_descr_sync();
-#endif  
+  Simulation *    simulation();
+  CProxy_Block    block_array();
+  Problem *       problem();
+  Hierarchy *     hierarchy();
+  const Config *  config();
+  FieldDescr *    field_descr();
+  Monitor *       monitor();
+  Units *         units();
+  
+  ScalarDescr *   scalar_descr_double();
+  ScalarDescr *   scalar_descr_int();
+  ScalarDescr *   scalar_descr_sync();
+  ScalarDescr *   scalar_descr_void();
+
   ParticleDescr * particle_descr();
-  Output * output (int index);
-  int rank ();
+  Output *        output (int index);
+  Solver *        solver(int index);
+  int             rank ();
 }
 
 #endif /* CELLO_HPP */

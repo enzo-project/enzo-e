@@ -106,16 +106,6 @@ void Monitor::header () const
 #else
   print ("Define","NEW_OUTPUT          %s","no");
 #endif  
-#ifdef NEW_SYNC  
-  print ("Define","NEW_SYNC            %s","Yes");
-#else
-  print ("Define","NEW_SYNC            %s","no");
-#endif  
-#ifdef NEW_MSG_REFINE  
-  print ("Define","NEW_MSG_REFINE      %s","Yes");
-#else
-  print ("Define","NEW_MSG_REFINE      %s","no");
-#endif  
 #ifndef CONFIG_PYTHON_LT_27
   print ("Define","CHARM_VERSION %d",CELLO_CHARM_VERSION);
 #   ifdef CONFIG_HAVE_MERCURIAL  
@@ -137,7 +127,7 @@ void Monitor::header () const
 
 //----------------------------------------------------------------------
 
-bool Monitor::is_active(const char * component) const throw ()
+int Monitor::is_active(const char * component) const throw ()
 {
   if (mode_ == monitor_mode_none)                   
     return false;
@@ -147,7 +137,7 @@ bool Monitor::is_active(const char * component) const throw ()
   
   auto it_active = group_mode_.find(component);
 
-  bool in_list = it_active != group_mode_.end();
+  bool in_list = (it_active != group_mode_.end());
 
   return in_list ? it_active->second : group_default_;
 }

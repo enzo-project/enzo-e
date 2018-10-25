@@ -38,7 +38,7 @@ int EnzoRefineParticleMass::apply ( Block * block ) throw ()
 
   const int level = block->level();
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
   double xm,ym,zm;
   double xp,yp,zp;
   block->lower (&xm,&ym,&zm);

@@ -17,8 +17,7 @@ class EnzoComputeAcceleration : public Compute {
 public: // interface
 
   /// Create a new EnzoComputeAcceleration object
-  EnzoComputeAcceleration(FieldDescr * field_descr,
-			  int rank, int order);
+  EnzoComputeAcceleration(int rank, int order);
 
   /// Create a new EnzoComputeAcceleration object
   EnzoComputeAcceleration() : rank_(0), order_(0) {};

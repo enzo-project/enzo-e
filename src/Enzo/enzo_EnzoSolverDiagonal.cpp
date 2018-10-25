@@ -26,7 +26,7 @@
 //======================================================================
 
 void EnzoSolverDiagonal::apply
-( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, Block * block) throw()
 {
   Solver::begin_(block);
 
@@ -39,21 +39,16 @@ void EnzoSolverDiagonal::apply
     // // assumes all fields involved in calculation have same precision
     // int precision = field.precision(ib);
 
-    compute_(A,ix,ib,block);
+    compute_(A,block);
   }
   
   Solver::end_(block);
-
-  CkCallback(callback_,
-	     CkArrayIndexIndex(block->index()),
-	     block->proxy_array()).send();
-
 }
 
 //======================================================================
 
 void EnzoSolverDiagonal::compute_
-( std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw()
+( std::shared_ptr<Matrix> A, Block * block) throw()
 //     X = B / diag(A)
 {
   TRACE_SOLVER("compute_() ENTER");
@@ -61,7 +56,7 @@ void EnzoSolverDiagonal::compute_
   Field field = block->data()->field();
 
   int mx,my,mz;
-  field.dimensions (ib,&mx,&my,&mz);
+  field.dimensions (ib_,&mx,&my,&mz);
 
   if (is_finest_(block)) {
 
@@ -72,8 +67,8 @@ void EnzoSolverDiagonal::compute_
 
     A->diagonal(id,block);
 
-    enzo_float * X = (enzo_float*) field.values(ix);
-    enzo_float * B = (enzo_float*) field.values(ib);
+    enzo_float * X = (enzo_float*) field.values(ix_);
+    enzo_float * B = (enzo_float*) field.values(ib_);
     enzo_float * D = (enzo_float*) field.values(id);
 
     for (int iz=0; iz<mz; iz++) {

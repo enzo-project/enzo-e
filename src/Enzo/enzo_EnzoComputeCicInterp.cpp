@@ -14,15 +14,13 @@
 //----------------------------------------------------------------------
 
 EnzoComputeCicInterp::EnzoComputeCicInterp  
-(FieldDescr    * field_descr,
- std::string     field_name,
- ParticleDescr * particle_descr,
+(std::string     field_name,
  std::string     particle_type,
  std::string     particle_attribute,
  double          dt)
-  : it_p_ (particle_descr->type_index (particle_type)),
-    ia_p_ (particle_descr->attribute_index (it_p_,particle_attribute)),
-    if_ (field_descr->field_id (field_name)),
+  : it_p_ (cello::particle_descr()->type_index (particle_type)),
+    ia_p_ (cello::particle_descr()->attribute_index (it_p_,particle_attribute)),
+    if_ (cello::field_descr()->field_id (field_name)),
     dt_(dt)
 {
 }
@@ -59,7 +57,7 @@ void EnzoComputeCicInterp::compute ( Block * block) throw()
 
 void EnzoComputeCicInterp::compute_(Block * block)
 {
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   Field field = enzo_block->data()->field();
   Particle particle = enzo_block->data()->particle();
@@ -78,7 +76,7 @@ void EnzoComputeCicInterp::compute_(Block * block)
   const int da =  particle.stride(it_p_,ia_p_);
   const int dv =  particle.stride(it_p_,ia_vx);
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   int mx,my,mz;
   field.dimensions(0,&mx,&my,&mz);
@@ -163,9 +161,6 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
 
-	int ix1 = ix0 + 1;
-	int iy1 = iy0 + 1;
-
 	enzo_float x0 = 1.0 - (tx - floor(tx));
 	enzo_float y0 = 1.0 - (ty - floor(ty));
 
@@ -212,10 +207,6 @@ void EnzoComputeCicInterp::compute_(Block * block)
 	int ix0 = gx + floor(tx);
 	int iy0 = gy + floor(ty);
 	int iz0 = gz + floor(tz);
-
-	int ix1 = ix0 + 1;
-	int iy1 = iy0 + 1;
-	int iz1 = iz0 + 1;
 
 	enzo_float x0 = 1.0 - (tx - floor(tx));
 	enzo_float y0 = 1.0 - (ty - floor(ty));

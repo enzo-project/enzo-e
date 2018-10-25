@@ -20,7 +20,7 @@ public: // interface
   EnzoInitialCollapse
   (int cycle, double time,
    int rank,
-   int array[3],
+   const int array[3],
    double radius_relative,
    double particle_ratio,
    double mass,
@@ -64,10 +64,7 @@ public: // interface
   /// Initialize the block
 
   virtual void enforce_block
-  ( Block * block, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr,
-    const Hierarchy * hierarchy ) throw();
+  ( Block * block, const Hierarchy * hierarchy ) throw();
 
 private: // attributes
 

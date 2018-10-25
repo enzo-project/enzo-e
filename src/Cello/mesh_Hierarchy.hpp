@@ -133,11 +133,9 @@ public: // interface
   CProxy_Block block_array() const throw()
   { return block_array_;}
 
-#ifdef NEW_MSG_REFINE  
   /// Return pointer to the Block CHARM++ chare array
   void set_block_array(CProxy_Block block_array) throw()
   { block_array_ = block_array;}
-#endif  
 
   /// Increment (decrement) number of mesh blocks
   void increment_block_count(int count, int level)
@@ -206,16 +204,11 @@ public: // interface
   int64_t num_zones_total() const throw()
   {  return num_zones_total_;  }
 
-#ifdef NEW_MSG_REFINE
-  CProxy_Block new_block_proxy (FieldDescr   * field_descr,
-				bool allocate_data) throw();
-#endif
+  CProxy_Block new_block_proxy (bool allocate_data) throw();
   
-  void create_block_array (FieldDescr   * field_descr,
-			   bool allocate_data) throw();
+  void create_block_array (bool allocate_data) throw();
 
-  void create_subblock_array (FieldDescr   * field_descr,
-			      bool allocate_data,
+  void create_subblock_array (bool allocate_data,
 			      int min_level) throw();
 
 

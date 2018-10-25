@@ -68,7 +68,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     Particle particle (block->data()->particle());
     Field    field    (block->data()->field());
 
-    int rank = block->rank();
+    int rank = cello::rank();
 
     enzo_float  * de_t = (enzo_float *) field.values("density_total");
     enzo_float  * de_p = (enzo_float *) field.values("density_particle");
@@ -124,8 +124,8 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     enzo_float cosmo_a=1.0;
     enzo_float cosmo_dadt=0.0;
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-      block->simulation()->problem()->physics("cosmology");
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+    
     if (cosmology) {
 
       double time = block->time();

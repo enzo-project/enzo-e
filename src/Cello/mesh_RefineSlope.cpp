@@ -9,8 +9,7 @@
 
 //----------------------------------------------------------------------
 
-RefineSlope::RefineSlope(const FieldDescr * field_descr,
-			 double min_refine,
+RefineSlope::RefineSlope(double min_refine,
 			 double max_coarsen,
 			 std::vector<std::string> field_name_list,
 			 int max_level,
@@ -18,6 +17,7 @@ RefineSlope::RefineSlope(const FieldDescr * field_descr,
 			 std::string output) throw ()
   : Refine (min_refine, max_coarsen, max_level, include_ghosts, output)
 {
+  FieldDescr * field_descr = cello::field_descr();
   if (field_name_list.size() != 0) {
     field_id_list_.resize(field_name_list.size());
     for (size_t i=0; i<field_id_list_.size(); i++) {
@@ -41,7 +41,7 @@ int RefineSlope::apply ( Block * block ) throw ()
   bool all_coarsen = true;
   bool any_refine = false;
 
-  int rank = block->rank();
+  int rank = cello::rank();
 
   double h3[3];
   Data * data = block->data();

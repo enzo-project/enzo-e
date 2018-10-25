@@ -49,12 +49,7 @@ void EnzoInitialSedovArray3::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 void EnzoInitialSedovArray3::enforce_block
-(
- Block * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy  * hierarchy
- ) throw()
+( Block * block, const Hierarchy * hierarchy ) throw()
 
 {
   if (!block->is_leaf()) return;

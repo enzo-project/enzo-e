@@ -20,9 +20,7 @@ class MethodTrace : public Method
 public: // interface
 
   /// Create a new MethodTrace
-  MethodTrace (const FieldDescr * field_descr,
-	       const ParticleDescr * particle_descr,
-	       double courant,
+  MethodTrace (double courant,
 	       double timestep,
 	       std::string name) throw() ;
 

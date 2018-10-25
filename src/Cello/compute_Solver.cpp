@@ -11,7 +11,45 @@
 
 #define CYCLE 0
 
+// NOTE: Update _compute.hpp solve_enum when updating solve_string
+const char * solve_string[] = {
+  "solve_unknown",
+  "solve_leaves",  // Solve on leaf Blocks (default)
+  "solve_level",  // Solve within a level (e.g. for multigrid smoothers)
+  "solve_tree",  // Solve in a root-level octree (e.g. for domain decomposition)
+  "solve_block" // Solve in a block (e.g. MG coarse solve on a single block)
+};
+
+
 //======================================================================
+
+Solver::Solver (std::string name,
+		std::string field_x,
+		std::string field_b,
+		int monitor_iter,
+		int restart_cycle,
+		int min_level,
+		int max_level,
+		int solve_type) throw()
+  : PUP::able(),
+  name_(name),
+  ix_(-1),ib_(-1),
+  refresh_list_(),
+  monitor_iter_(monitor_iter),
+  restart_cycle_(restart_cycle),
+  callback_(0),
+  index_(0),
+  min_level_(min_level),
+  max_level_(max_level),
+  id_sync_(0),
+  solve_type_(solve_leaves)
+{
+  FieldDescr * field_descr = cello::field_descr();
+  ix_ = field_descr->field_id(field_x);
+  ib_ = field_descr->field_id(field_b);
+}
+
+//----------------------------------------------------------------------
 
 Solver::~Solver() throw()
 {
@@ -54,7 +92,7 @@ void Solver::monitor_output_
  double rr_max,
  bool final) throw()
 {
-  Monitor * monitor = block->simulation()->monitor();
+  Monitor * monitor = cello::monitor();
 
   monitor->print("Solver", "%s %s iter %04d  err %.16g [%g %g]",
 		 this->name().c_str(),
@@ -107,6 +145,10 @@ void Solver::end_(Block * block)
 	  "Solver mismatch was %d expected %d",
 	  index,index_,(index == index_));
 
+  CkCallback(callback_,
+	     CkArrayIndexIndex(block->index()),
+	     block->proxy_array()).send();
+
 }
 
 //----------------------------------------------------------------------
@@ -123,7 +165,23 @@ bool Solver::is_active_(Block * block) const
 
 bool Solver::is_finest_ (Block * block) const
 {
-  const int level = block->level();
-  const bool is_leaf = block->is_leaf();
-  return is_unigrid_ ? (level == max_level_) : is_leaf;
+  switch (solve_enum(solve_type_)) {
+  case solve_leaves:
+    return block->is_leaf();
+    break;
+  case solve_level:
+    return (block->level() == max_level_);
+    break;
+  case solve_tree:
+    return block->is_leaf();
+    break;
+  case solve_block:
+    return block->level() == min_level_;
+    break;
+  default:
+    ERROR1("Solver::is_finest_()",
+	   "Unexpected solve_type %d",
+	   solve_type_);
+    return false;
+  }
 }

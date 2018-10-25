@@ -38,7 +38,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
 
   /* Compute the size of the grid. */
 
-  int rank = this->rank();
+  int rank = cello::rank();
 
   for (int dim = 0; dim < rank; dim++)
     size *= GridDimension[dim];
@@ -157,7 +157,7 @@ int EnzoBlock::ComputePressure(enzo_float time,
 
     /* Find the temperature units if we are using comoving coordinates. */
 
-    EnzoUnits * units = (EnzoUnits *) simulation()->problem()->units();
+    EnzoUnits * units = enzo::units();
 
     units->set_current_time (time);
     

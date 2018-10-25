@@ -35,12 +35,19 @@
 
 //----------------------------------------------------------------------
 
+void Block::stopping_enter_()
+{
+  stopping_begin_();
+}
+
+//----------------------------------------------------------------------
+
 void Block::stopping_begin_()
 {
 
   TRACE_STOPPING("Block::stopping_begin_");
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Simulation * simulation = cello::simulation();
 
   simulation->set_phase(phase_stopping);
 
@@ -124,7 +131,7 @@ void Block::r_stopping_compute_timestep(CkReductionMsg * msg)
 
   delete msg;
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Simulation * simulation = cello::simulation();
 
   dt_ *= Method::courant_global;
   
@@ -178,7 +185,7 @@ void Block::stopping_balance_()
 {
   TRACE_STOPPING("Block::stopping_balance_");
 
-  Schedule * schedule = simulation()->schedule_balance();
+  Schedule * schedule = cello::simulation()->schedule_balance();
 
   bool do_balance = (schedule && 
 		     schedule->write_this_cycle(cycle_,time_));
@@ -186,7 +193,7 @@ void Block::stopping_balance_()
   if (do_balance) {
 
     if (index_.is_root())
-      simulation()->monitor()->print ("Balance","staring load balance step");
+      cello::monitor()->print ("Balance","staring load balance step");
     
     control_sync_quiescence (CkIndex_Main::p_stopping_balance());
 
@@ -204,7 +211,7 @@ void Block::p_stopping_balance()
 {
   performance_start_(perf_stopping);
   TRACE_STOPPING("Block::p_stopping_balance");
-  simulation()->set_phase (phase_balance);
+  cello::simulation()->set_phase (phase_balance);
 
   // Monitor * monitor = simulation()->monitor();
   // int mode_saved = monitor->mode();

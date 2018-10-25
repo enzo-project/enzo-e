@@ -21,11 +21,7 @@
 
 #include "enzo.hpp" 
 
-int EnzoBlock::SolveMHDEquations
-(
- const FieldDescr * field_descr,
- enzo_float dt
- )
+int EnzoBlock::SolveMHDEquations( enzo_float dt )
 {
  
   /* exit if not 3D */

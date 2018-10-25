@@ -16,20 +16,6 @@ import socket
 new_output = 0
 
 #----------------------------------------------------------------------
-# Temporary setting for using new Sync implementation
-#----------------------------------------------------------------------
-
-new_sync = 1
-
-#----------------------------------------------------------------------
-# Temporary setting for using new Block and EnzoBlock constructors
-# with MsgRefine objects stored on creating process (to bypass Charm++
-# constructor with packed message argument bug)
-#----------------------------------------------------------------------
-
-new_msg_refine = 1
-
-#----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev
 #----------------------------------------------------------------------
 
@@ -234,8 +220,6 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 # Experimental code defines
 
 define_new_output      = ['NEW_OUTPUT']
-define_new_sync      = ['NEW_SYNC']
-define_new_msg_refine = ['NEW_MSG_REFINE']
 define_new_ppm         = ['NEW_PPM']
 
 # Debugging defines
@@ -314,6 +298,8 @@ elif (arch == "faraday_gnu"):  from faraday_gnu  import *
 elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
 elif (arch == "mf_gnu"):       from mf_gnu       import *
 elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
+elif (arch == "stampede_gnu"): from stampede_gnu import *
+elif (arch == "stampede_intel"): from stampede_intel import *
 elif (arch == "davros_gnu"):   from davros_gnu   import *
 elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
 elif (arch == "darwin_gnu"):   from darwin_gnu   import *
@@ -373,8 +359,6 @@ if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
 if (new_output != 0):    defines = defines + define_new_output
-if (new_sync != 0):    defines = defines + define_new_sync
-if (new_msg_refine != 0): defines = defines + define_new_msg_refine
 if (new_ppm != 0):       defines = defines + define_new_ppm
 
 if (trace != 0):         defines = defines + define_trace

@@ -9,8 +9,6 @@
 #define IO_INPUT_HPP
 
 class Factory;
-class FieldDescr;
-class ParticleDescr;
 class Hierarchy;
 class ItIndex;
 class Simulation;
@@ -30,9 +28,7 @@ public: // functions
   Input() throw() {}
 
   /// Create an uninitialized Input object
-  Input(const Factory * factory,
-	const FieldDescr * field_descr,
-	const ParticleDescr * particle_descr) throw();
+  Input(const Factory * factory) throw();
 
   /// Delete an Input object
   virtual ~Input() throw();
@@ -132,29 +128,16 @@ public:
   virtual void read_simulation ( Simulation * simulation) throw();
 
   /// Read local hierarchy data from disk
-  virtual void read_hierarchy
-  ( Hierarchy * hierarchy, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr) throw();
+  virtual void read_hierarchy ( Hierarchy * hierarchy) throw();
 
   /// Read local data data from disk
-  virtual Block * read_block
-  ( Block * block,
-    std::string block_name,
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr) throw();
+  virtual Block * read_block ( Block * block, std::string block_name) throw();
 
   /// Read local field from disk
-  virtual void read_field
-  ( FieldData * field_data, 
-    const FieldDescr * field_descr,
-    int index_field) throw() = 0;
+  virtual void read_field ( Block * block, int index_field) throw() = 0;
 
   /// Read local particle from disk
-  virtual void read_particle
-  ( ParticleData * particle_data, 
-    const ParticleDescr * particle_descr,
-    int index_particle) throw() = 0;
+  virtual void read_particle ( Block * block, int index_particle) throw() = 0;
 
   /// Prepare local array with data to be sent to remote chare for processing
   virtual void prepare_remote (int * n, char ** buffer) throw()

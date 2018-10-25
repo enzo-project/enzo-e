@@ -56,7 +56,6 @@ void EnzoInitialGrackleTest::enforce_block
  const ParticleDescr * particle_descr,
  const Hierarchy  * hierarchy
  ) throw()
-
 {
 #ifndef CONFIG_USE_GRACKLE
 

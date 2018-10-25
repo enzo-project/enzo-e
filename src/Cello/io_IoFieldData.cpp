@@ -50,12 +50,13 @@ void IoFieldData::meta_value
 //----------------------------------------------------------------------
 
 void IoFieldData::field_array
-(const FieldDescr * field_descr,
- int index, // WARNING: index ignored
+(int index, // WARNING: index ignored
  void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
 {
+  FieldDescr * field_descr = cello::field_descr();
+  
   if (buffer) (*buffer) = (void * ) 
 		field_data_->values(field_descr,field_index_);
   if (name)   (*name) = 
@@ -115,8 +116,7 @@ void IoFieldData::field_array
 //----------------------------------------------------------------------
 
 void IoFieldData::particle_array 
-(ParticleDescr * particle_descr,
- int it, int ib, int ia,
+(int it, int ib, int ia,
  void ** buffer, std::string * name, int * type,
  int * n, int * k) throw()
 {

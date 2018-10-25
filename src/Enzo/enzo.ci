@@ -99,6 +99,7 @@ module enzo {
   PUPable EnzoRestrict;
 
   PUPable EnzoSolverCg;
+  PUPable EnzoSolverDd;
   PUPable EnzoSolverDiagonal;
   PUPable EnzoSolverBiCgStab;
   PUPable EnzoSolverMg0;
@@ -160,17 +161,25 @@ module enzo {
     entry void p_solver_bicgstab_loop_8();
     entry void p_solver_bicgstab_loop_9();
 
+    // EnzoSolverDd
+    
+    entry void p_solver_dd_restrict_recv(FieldMsg * msg);
+    entry void p_solver_dd_prolong_recv(FieldMsg * msg);
+    entry void p_solver_dd_solve_coarse();
+    entry void p_solver_dd_solve_domain();
+    entry void p_solver_dd_last_smooth();
+    
     // EnzoSolverJacobi
 
     entry void p_solver_jacobi_continue();
 
     // EnzoSolverMg0
     
-    entry void p_solver_mg0_pre_smooth();
+    entry void p_solver_mg0_restrict();
     entry void p_solver_mg0_solve_coarse();
     entry void p_solver_mg0_post_smooth();
     entry void p_solver_mg0_last_smooth();
-    entry void r_solver_mg0_shift_b(CkReductionMsg *msg);
+    entry void r_solver_mg0_begin_solve(CkReductionMsg *msg);
     entry void r_solver_mg0_barrier(CkReductionMsg* msg);  
     entry void p_solver_mg0_prolong_recv(FieldMsg * msg);
     entry void p_solver_mg0_restrict_recv(FieldMsg * msg);

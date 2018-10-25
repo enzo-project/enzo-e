@@ -30,7 +30,7 @@ libs_fortran    = ['gfortran']
 
 home = os.environ['HOME']
 
-charm_path = home + '/Charm/charm'
+charm_path = home + '/Charm/charm.682-gni'
 png_path   = '/sw/EasyBuild/software/libpng/1.6.23-CrayGNU-2016.04/'
 use_papi = 1
 papi_inc="/opt/cray/papi/default/include"

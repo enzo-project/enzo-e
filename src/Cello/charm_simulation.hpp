@@ -1,6 +1,6 @@
 
 #include "main.decl.h"
-extern CProxy_Main       proxy_main;
+extern CProxy_Main proxy_main;
 
 #include "cello.hpp"
 #include "mesh_Index.hpp"

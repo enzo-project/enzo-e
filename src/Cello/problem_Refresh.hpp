@@ -6,8 +6,6 @@
 /// @brief    [\ref Problem] Declaration of the Refresh class
 ///
 
-// #define DEBUG_REFRESH
-
 #ifndef PROBLEM_REFRESH_HPP
 #define PROBLEM_REFRESH_HPP
 
@@ -35,11 +33,6 @@ public: // interface
     active_(true),
     callback_(0) 
   {
-#ifdef DEBUG_REFRESH    
-    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
-	      CkMyPe(), __FILE__,__LINE__,this);
-    fflush(stdout);
-#endif    
   }
 
   /// empty constructor for charm++ pup()
@@ -64,11 +57,6 @@ public: // interface
       active_(active),
       callback_(0) 
   {
-#ifdef DEBUG_REFRESH    
-    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
-	      CkMyPe(),__FILE__,__LINE__,this);
-    fflush(stdout);
-#endif    
   }
 
   /// CHARM++ PUP::able declaration
@@ -91,40 +79,8 @@ public: // interface
       active_(false),
       callback_(0)
   {
-#ifdef DEBUG_REFRESH    
-    CkPrintf ("%d %s:%d DEBUG_REFRESH Refresh() %p\n",
-	      CkMyPe(),__FILE__,__LINE__,this);
-    fflush(stdout);
-#endif    
   }
 
-  /// Destructor
-  ~Refresh()
-  {
-#ifdef DEBUG_REFRESH    
-    CkPrintf ("%d %s:%d DEBUG_REFRESH ~Refresh() %p\n",
-	      CkMyPe(),__FILE__,__LINE__,this);
-    fflush(stdout);
-#endif    
-  }
-  
-  bool operator == (const Refresh & refresh)
-  {
-    return (all_fields_      == refresh.all_fields_)
-      &&   (field_list_src_  == refresh.field_list_src_)
-      &&   (field_list_dst_  == refresh.field_list_dst_)
-      &&   (all_particles_  == refresh.all_particles_)
-      &&   (particle_list_  == refresh.particle_list_)
-      &&   (ghost_depth_  == refresh.ghost_depth_)
-      &&   (min_face_rank_  == refresh.min_face_rank_)
-      &&   (neighbor_type_  == refresh.neighbor_type_)
-      &&   (accumulate_  == refresh.accumulate_)
-      // &&   (sync_type_  == refresh.sync_type_)
-      // &&   (sync_id_  == refresh.sync_id_)
-      &&   (active_  == refresh.active_);
-      // &&   (callback_ == refresh.callback_)
-  }
-  
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
@@ -150,19 +106,29 @@ public: // interface
   // FIELD METHODS
   //--------------------------------------------------
 
-  /// Add a field to the list of fields to refresh
+  /// Add a field id to the list of fields to refresh; don't add if it's already
+  /// in the list
   void add_field(int id_field) {
+    all_fields_ = false;
     if (id_field >= 0) {
-      field_list_src_.push_back(id_field);
-      field_list_dst_.push_back(id_field);
+      if (std::find (field_list_src_.begin(), field_list_src_.end(), id_field)
+	  == field_list_src_.end()) {
+	field_list_src_.push_back(id_field);
+      }
+      if (std::find (field_list_dst_.begin(), field_list_dst_.end(), id_field)
+	  == field_list_dst_.end()) {
+	field_list_dst_.push_back(id_field);
+      }
     }
   }
 
-  /// Add a field to the list of fields to refresh
+  /// Add a named field to the list of fields to refresh
   void add_field(std::string field_name);
 
-  /// Add a source and corresponding destination field to refresh
+  /// Add a source and corresponding destination field to refresh;
+  /// does not check if fields are already in the lists
   void add_field_src_dst(int id_field_src, int id_field_dst) {
+    all_fields_ = false;
     if (id_field_src >= 0 && id_field_dst >= 0) {
       field_list_src_.push_back(id_field_src);
       field_list_dst_.push_back(id_field_dst);
@@ -388,7 +354,7 @@ private: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// Whether to refresh all fields, ignoring field_list_*
-  bool all_fields_;
+  int all_fields_;
   
   /// Indicies of source fields; assumes all_fields_ == false, and
   /// size must be equal to field_list_dst_;
@@ -399,7 +365,7 @@ private: // attributes
   std::vector <int> field_list_dst_;
 
   /// Whether to refresh all particle types, ignoring particle_list_
-  bool all_particles_;
+  int all_particles_;
   
   /// Whether to ignore particle_list_ and refresh all particle types
   /// Indicies of particles to include
@@ -415,7 +381,7 @@ private: // attributes
   int neighbor_type_;
 
   /// Whether to copy or add values
-  bool accumulate_;
+  int accumulate_;
   
   /// Synchronization type
   int sync_type_;
@@ -424,7 +390,7 @@ private: // attributes
   int sync_id_;
 
   /// Whether the Refresh object is active for the block (replaces is_leaf())
-  bool active_;
+  int active_;
 
   /// Callback after the refresh operation
   int callback_;

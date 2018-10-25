@@ -56,6 +56,14 @@ PARALLEL_MAIN_BEGIN
     unit_assert (i8[i+1].index_parent() == i8[i]);
   }
 
+  unit_func ("index_parent_level");
+
+  for (int i=0; i<N; i++) {
+    for (int l=0; l<=i; l++) {
+      unit_assert (i8[i+1].index_ancestor(l) == i8[l]);
+    }
+  }
+
   //==================================================
   // Child
   //==================================================

@@ -17,8 +17,7 @@ class EnzoMethodPmUpdate : public Method {
 public: // interface
 
   /// Create a new EnzoMethodPmUpdate object
-  EnzoMethodPmUpdate(const FieldDescr * , 
-		     const ParticleDescr *, double max_dt);
+  EnzoMethodPmUpdate(double max_dt);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodPmUpdate);

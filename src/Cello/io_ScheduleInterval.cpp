@@ -114,7 +114,8 @@ bool ScheduleInterval::write_this_cycle ( int cycle, double time) throw()
   case schedule_type_cycle:
     {
       const bool in_range = (cycle_start_ <= cycle && cycle <= cycle_stop_);
-      const bool write_cycle = ( ((cycle-cycle_start_) % cycle_step_) == 0);
+      const bool write_cycle = cycle_step_ ?
+	( ((cycle-cycle_start_) % cycle_step_) == 0) : false;
 
       result = in_range && write_cycle;
 

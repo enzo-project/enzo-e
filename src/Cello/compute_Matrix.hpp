@@ -44,6 +44,9 @@ public: // virtual functions
   /// Apply the matrix to a vector Y <-- A*X
   virtual void matvec (int iy, int ix, Block * block, int g0=1) throw() = 0;
 
+  virtual void matvec (precision_type precision,
+		       void * y, void * x, int g0=1) throw() = 0;
+  
   /// Extract the diagonal into the given field
   virtual void diagonal (int ix, Block * block, int g0=1) throw() = 0;
 

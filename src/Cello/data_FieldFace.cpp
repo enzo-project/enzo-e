@@ -7,7 +7,6 @@
 
 #include "cello.hpp"
 #include "data.hpp"
-#include "charm_simulation.hpp"
 
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
@@ -90,20 +89,6 @@ FieldFace & FieldFace::operator= (const FieldFace & field_face) throw ()
 #endif  
   copy_(field_face);
   return *this;
-}
-
-//----------------------------------------------------------------------
-
-bool FieldFace::operator== (const FieldFace & field_face) throw()
-{
-  for (int i=0; i<3; i++) {
-    if (ghost_[i] != field_face.ghost_[i]) return false;
-    if (face_[i]  != field_face.face_[i])  return false;
-    if (child_[i] != field_face.child_[i]) return false;
-  }
-  if (refresh_type_ != field_face.refresh_type_) return false;
-  if (! (*refresh_ == *field_face.refresh_)) return false;
-  return true;
 }
 
 //----------------------------------------------------------------------
@@ -204,8 +189,7 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
       int i3_array[3] = {0,0,0};
 
-      Simulation * simulation = proxy_simulation.ckLocalBranch();
-      Problem * problem   = simulation->problem();
+      Problem * problem   = cello::problem();
       Restrict * restrict = restrict_ ? restrict_ : problem->restrict();
 
       index_array += restrict->apply
@@ -284,8 +268,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       int i3_array[3] = {0,0,0};
 
-      Simulation * simulation = proxy_simulation.ckLocalBranch();
-      Problem * problem   = simulation->problem();
+      Problem * problem = cello::problem();
 
       Prolong * prolong = prolong_ ? prolong_ : problem->prolong();
 
@@ -363,8 +346,7 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     char * values_src = field_src.values(index_src);
     char * values_dst = field_dst.values(index_dst);
     
-    Simulation * simulation = proxy_simulation.ckLocalBranch();
-    Problem * problem   = simulation->problem();
+    Problem * problem = cello::problem();
 
     if (refresh_type_ == refresh_fine) {
 

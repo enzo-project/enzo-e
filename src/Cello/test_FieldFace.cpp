@@ -307,20 +307,20 @@ PARALLEL_MAIN_BEGIN
   for (int ia = 0; ia<3; ++ia) {
 
     for (int ibz = 0; ibz < nbz; ibz++) {
+      const int ipz = ((ibz+1)%nbz);
       for (int iby = 0; iby < nby; iby++) {
+	const int ipy = ((iby+1)%nby);
 	for (int ibx = 0; ibx < nbx; ibx++) {
+	  const int ipx = ((ibx+1)%nbx);
 	  axis_enum axis = (axis_enum)(ia);
 	  
 	  int index_lower = ibx + nbx * (iby + nby * ibz);
 	  FieldData * data_lower = field_data[index_lower];
 
 	  int index_upper = 0;
-	  if (axis==0) 
-	    index_upper = ((ibx+1)%nbx) + nbx * (  iby        + nby * ibz);
-	  if (axis==1) 
-	    index_upper = ibx        + nbx * (((iby+1)%nby) + nby * ibz);
-	  if (axis==2) 
-	    index_upper = ibx     + nbx * (  iby        + nby * ((ibz+1)%nbz));
+	  if (axis==0) index_upper = ipx + nbx*(iby + nby*ibz);
+	  if (axis==1) index_upper = ibx + nbx*(ipy + nby*ibz);
+	  if (axis==2) index_upper = ibx + nbx*(iby + nby*ipz );
 
 	  FieldData * data_upper = field_data[index_upper];
 
@@ -383,7 +383,6 @@ PARALLEL_MAIN_BEGIN
 	  FieldFace new_face_lower;
 	  buffer_next = new_face_lower.load_data(buffer);
 	  unit_assert (buffer_next - buffer == nm);
-	  unit_assert (face_lower == new_face_lower);
 
 	}
       }

@@ -113,16 +113,11 @@ void InitialValue::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void InitialValue::enforce_block
-(
- Block        * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy  * hierarchy
- ) throw()
+void InitialValue::enforce_block ( Block * block,
+				   const Hierarchy  * hierarchy ) throw()
 {
 
-  Initial::enforce_block(block,field_descr,particle_descr,hierarchy);
+  Initial::enforce_block(block,hierarchy);
   
   // Initialize Fields according to parameters
 
@@ -141,6 +136,7 @@ void InitialValue::enforce_block
   bool * mask=NULL, *rdeflt=NULL;
   int n, nx=0,ny=0,nz=0;
 
+  FieldDescr * field_descr = cello::field_descr();
   for (int index_field = 0;
        index_field < field_descr->field_count();
        index_field++) {
@@ -174,7 +170,6 @@ void InitialValue::enforce_block
       if (value == NULL) {
 	allocate_xyzt_(block,index_field,
 		       field_data,
-		       field_descr,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
 		       &mask,  &rdeflt,
@@ -188,7 +183,7 @@ void InitialValue::enforce_block
       evaluate_float_ (field_data, list_length-1, field_name, 
 			n, value,vdeflt,x,y,z,t);
 
-      copy_values_ (field_descr,field_data,value, NULL,index_field,nx,ny,nz);
+      copy_values_ (field_data,value, NULL,index_field,nx,ny,nz);
 
       // Evaluate conditional equations in list
 
@@ -199,9 +194,9 @@ void InitialValue::enforce_block
 
 	evaluate_mask_ 
 	  (hierarchy,block,field_data, index_field, index_value+1,
-	   field_name,   field_descr, n, mask,rdeflt,x,y,z,t);
+	   field_name,  n, mask,rdeflt,x,y,z,t);
 
-	copy_values_ (field_descr,field_data,value, mask,index_field,nx,ny,nz);
+	copy_values_ (field_data,value, mask,index_field,nx,ny,nz);
 
       }
 
@@ -236,7 +231,6 @@ void InitialValue::allocate_xyzt_
  Block * block,
  int index_field,
  const FieldData * field_data,
- const FieldDescr * field_descr,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
  bool   ** mask,bool   ** rdeflt,
@@ -248,6 +242,8 @@ void InitialValue::allocate_xyzt_
 
   field_data->size(nx,ny,nz);
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   int gx,gy,gz;
   field_descr->ghost_depth(index_field,&gx,&gy,&gz);
   (*nx) += 2*gx;
@@ -299,7 +295,6 @@ void InitialValue::allocate_xyzt_
 
 void InitialValue::copy_values_ 
 (
- const FieldDescr * field_descr,
  FieldData *       field_data,
  double *           value, 
  bool *             mask,
@@ -307,6 +302,8 @@ void InitialValue::copy_values_
  int nx, int ny, int nz
  ) throw()
 {
+
+  FieldDescr * field_descr = cello::field_descr();
 
   // Copy the floating-point values to the field where mask values are true
 
@@ -427,7 +424,6 @@ void InitialValue::evaluate_mask_
  FieldData * field_data, 
  int index_field,  int index_value,
  std::string field_name, 
- const FieldDescr * field_descr,
  int n, bool * mask, bool * deflt,
  double * x, double * y, double * z, double t) throw ()
 {
@@ -475,7 +471,7 @@ void InitialValue::evaluate_mask_
       evaluate_mask_png_
 	(mask,nxb,nyb,
 	 mask_png,nx_png, ny_png,
-	 hierarchy,block,field_descr);
+	 hierarchy,block);
     }
     break;
 
@@ -490,14 +486,13 @@ void InitialValue::evaluate_mask_
 //----------------------------------------------------------------------
 
 void InitialValue::evaluate_mask_png_
-(
- bool            * mask_block, int nxb, int nyb,
- bool            * mask_png,   int nx,  int ny,
- const Hierarchy * hierarchy,
- const Block * block,
- const FieldDescr * field_descr
- )
+( bool            * mask_block, int nxb, int nyb,
+  bool            * mask_png,   int nx,  int ny,
+  const Hierarchy * hierarchy,
+  const Block * block )
 {
+  const FieldDescr * field_descr = cello::field_descr();
+  
   int gx,gy,gz;
   field_descr->ghost_depth(0,&gx,&gy,&gz);
   nxb += 2*gx;

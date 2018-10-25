@@ -108,7 +108,7 @@ void EnzoBoundary::enforce_reflecting_
 
   double t = block->time();
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   // @@@
   // @@@ BUG: loops through all fields; should only use fields in field_list

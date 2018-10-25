@@ -52,11 +52,7 @@ void EnzoInitialMusic::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 void EnzoInitialMusic::enforce_block
-  ( Block            * block, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr,
-    const Hierarchy  * hierarchy
-    ) throw()
+( Block * block, const Hierarchy * hierarchy ) throw()
 {
 
   if (block->level() != level_) return;
@@ -257,7 +253,7 @@ void EnzoInitialMusic::enforce_block
     // insert particles if they don't exist yet
     if (particle.num_particles(it) == 0) {
       particle.insert_particles(it,np);
-      block->simulation()->data_insert_particles(np);
+      enzo::simulation()->data_insert_particles(np);
     }
 
     // read particle attribute

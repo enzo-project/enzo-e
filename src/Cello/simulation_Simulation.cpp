@@ -47,11 +47,10 @@ Simulation::Simulation
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
-#ifdef NEW_SYNC
   scalar_descr_int_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_sync_(NULL),
-#endif  
+  scalar_descr_void_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -108,11 +107,10 @@ Simulation::Simulation()
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
-#ifdef NEW_SYNC
   scalar_descr_int_(NULL),
   scalar_descr_double_(NULL),
   scalar_descr_sync_(NULL),
-#endif  
+  scalar_descr_void_(NULL),
   field_descr_(NULL),
   particle_descr_(NULL),
   sync_output_begin_(),
@@ -157,11 +155,10 @@ Simulation::Simulation (CkMigrateMessage *m)
     schedule_balance_(NULL),
     monitor_(NULL),
     hierarchy_(NULL),
-#ifdef NEW_SYNC
-  scalar_descr_int_(NULL),
-  scalar_descr_double_(NULL),
-  scalar_descr_sync_(NULL),
-#endif  
+    scalar_descr_int_(NULL),
+    scalar_descr_double_(NULL),
+    scalar_descr_sync_(NULL),
+    scalar_descr_void_(NULL),
     field_descr_(NULL),
     particle_descr_(NULL),
     sync_output_begin_(),
@@ -228,14 +225,14 @@ void Simulation::pup (PUP::er &p)
   if (up) hierarchy_ = new Hierarchy;
   p | *hierarchy_;
 
-#ifdef NEW_SYNC
   if (up) scalar_descr_int_ = new ScalarDescr;
   p | *scalar_descr_int_;
   if (up) scalar_descr_double_ = new ScalarDescr;
   p | *scalar_descr_double_;
   if (up) scalar_descr_sync_ = new ScalarDescr;
   p | *scalar_descr_sync_;
-#endif  
+  if (up) scalar_descr_void_ = new ScalarDescr;
+  p | *scalar_descr_void_;
 
   if (up) field_descr_ = new FieldDescr;
   p | *field_descr_;
@@ -471,11 +468,10 @@ void Simulation::initialize_monitor_() throw()
 
 void Simulation::initialize_data_descr_() throw()
 {
-#ifdef NEW_SYNC
   scalar_descr_int_    = new ScalarDescr;
   scalar_descr_double_ = new ScalarDescr;
   scalar_descr_sync_   = new ScalarDescr;
-#endif  
+  scalar_descr_void_   = new ScalarDescr;
 
   //--------------------------------------------------
   // parameter: Field : list
@@ -739,13 +735,12 @@ void Simulation::initialize_block_array_() throw()
   if (allocate_blocks) {
 
     // Create the root-level blocks for level = 0
-    hierarchy_->create_block_array (field_descr_, allocate_data);
+    hierarchy_->create_block_array (allocate_data);
 
     // Create the "sub-root" blocks if mesh_min_level < 0
     if (config_->mesh_min_level < 0) {
       hierarchy_->create_subblock_array
-	(field_descr_,
-	 allocate_data,
+	(allocate_data,
 	 config_->mesh_min_level);
     }
 
@@ -757,9 +752,7 @@ void Simulation::initialize_block_array_() throw()
 
 void Simulation::p_set_block_array(CProxy_Block block_array)
 {
-#ifdef NEW_MSG_REFINE  
   if (CkMyPe() != 0) hierarchy_->set_block_array(block_array);
-#endif  
 }
 
   //----------------------------------------------------------------------
@@ -948,7 +941,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
   // compute total blocks and leaf blocks
   int num_total_blocks = 0;
   long long num_leaf_blocks = counters_reduce[m];;
-  int rank = hierarchy_->rank();
+  int rank = cello::rank();
   int num_child_blocks = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
   for (int i=0; i<=hierarchy_->max_level(); i++) {
     long long num_blocks_level = counters_reduce[m++];

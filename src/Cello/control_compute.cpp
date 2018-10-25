@@ -19,6 +19,15 @@
 
 //======================================================================
 
+void Block::compute_enter_ ()
+{
+  performance_start_(perf_compute,__FILE__,__LINE__);
+  compute_begin_();
+  performance_stop_(perf_compute,__FILE__,__LINE__);
+}
+
+//----------------------------------------------------------------------
+
 void Block::compute_begin_ ()
 {
 #ifdef DEBUG_COMPUTE
@@ -26,7 +35,7 @@ void Block::compute_begin_ ()
     CkPrintf ("%d %s DEBUG_COMPUTE Block::compute_begin_()\n", CkMyPe(),name().c_str());
 #endif
 
-  simulation()->set_phase(phase_compute);
+  cello::simulation()->set_phase(phase_compute);
 
   index_method_ = 0;
   compute_next_();
@@ -143,8 +152,8 @@ void Block::compute_end_ ()
   set_time  (time_  + dt_);
 
   // Update Simulation cycle and time (redundant)
-  simulation()->set_cycle(cycle_);
-  simulation()->set_time(time_);
+  cello::simulation()->set_cycle(cycle_);
+  cello::simulation()->set_time(time_);
 
   compute_exit_();
 

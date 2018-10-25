@@ -34,6 +34,7 @@ enum neighbor_enum {
 #include <string>
 #include <vector>
 #include <limits>
+#include <algorithm>
 
 #include "pngwriter.h"
 

@@ -22,8 +22,6 @@
 
 OutputImage::OutputImage(int index,
 			 const Factory * factory,
-			 const FieldDescr * field_descr,
-			 const ParticleDescr * particle_descr,
 			 int process_count,
 			 int nx0, int ny0, int nz0,
 			 int nxb, int nyb, int nzb,
@@ -42,7 +40,7 @@ OutputImage::OutputImage(int index,
 			 bool image_abs,
 			 bool ghost,
 			 double min_value, double max_value) throw ()
-: Output(index,factory,field_descr,particle_descr),
+: Output(index,factory),
     image_data_(NULL),
     image_mesh_(NULL),
     color_particle_attribute_(color_particle_attribute),
@@ -95,6 +93,7 @@ OutputImage::OutputImage(int index,
   if (nyi_ == 0) nyi_ = (type_is_mesh_()) ? 2*nl * nyb + 1 : nl * ny0;
 
   int ngx,ngy,ngz;
+  FieldDescr * field_descr = cello::field_descr();
   field_descr->ghost_depth(0,&ngx,&ngy,&ngz);
 
   if (! type_is_mesh_() && ghost_) {
@@ -269,15 +268,8 @@ void OutputImage::finalize () throw()
 
 //----------------------------------------------------------------------
 
-void OutputImage::write_block
-(
- const Block *  block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+void OutputImage::write_block ( const Block *  block ) throw()
 // @param block  Block to write
-// @param field_descr  Field descriptor
-// @param particle_descr  Particle descriptor
 {
 
   // Exit if Block is not participating in output
@@ -288,7 +280,7 @@ void OutputImage::write_block
 
   Field field = ((Data *)block->data())->field();
   
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   ASSERT("OutputImage::write_block",
 	 "axis_ must be = axis_z (2) for 2D problems",
@@ -317,8 +309,8 @@ void OutputImage::write_block
 
   // extents of domain
   double dm3[3],dp3[3];
-  block->simulation()->hierarchy()->lower(dm3,dm3+1,dm3+2);
-  block->simulation()->hierarchy()->upper(dp3,dp3+1,dp3+2);
+  cello::hierarchy()->lower(dm3,dm3+1,dm3+2);
+  cello::hierarchy()->upper(dp3,dp3+1,dp3+2);
 
   // adjust for image_lower / image_upper
 
@@ -485,11 +477,7 @@ void OutputImage::write_block
 
   // WRITE PARTICLES
 
-  ParticleData * particle_data = 
-    (ParticleData *)block->data()->particle_data();
-
-  Particle particle ((ParticleDescr *)particle_descr,particle_data);
-
+  Particle particle = ((Block * )block)->data()->particle();
 
   double xdm = dm3[IX];
   double ydm = dm3[IY];
@@ -550,7 +538,6 @@ void OutputImage::write_block
 void OutputImage::write_field_data
 (
  const FieldData * field_data,  
- const FieldDescr * field_descr,
  int index_field) throw()
 {
   WARNING("OutputImage::write_field_data",
@@ -562,7 +549,6 @@ void OutputImage::write_field_data
 void OutputImage::write_particle_data
 (
  const ParticleData * particle_data,  
- const ParticleDescr * particle_descr,
  int index_particle) throw()
 {
   WARNING("OutputImage::write_particle_data",

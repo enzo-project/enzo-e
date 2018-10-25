@@ -57,9 +57,6 @@ public: // interface
   /// Assignment operator
   FieldFace & operator= (const FieldFace & FieldFace) throw();
 
-  /// Comparison operator
-  bool operator== (const FieldFace & FieldFace) throw();
-
   /// CHARM++ Pack / Unpack function
   inline void pup (PUP::er &p);
 

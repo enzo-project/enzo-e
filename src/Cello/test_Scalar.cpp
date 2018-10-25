@@ -19,8 +19,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("ScalarData");
 
-#ifdef NEW_SYNC      
-
   ScalarData<double> scalar_data;
   ScalarDescr        scalar_descr;
   Scalar<double> scalar (&scalar_descr,&scalar_data);
@@ -35,19 +33,19 @@ PARALLEL_MAIN_BEGIN
   int i3 = scalar.new_value("i3");
   int i4 = scalar.new_value("i4");
 
-  scalar.value(i1) = 1.0;
-  scalar.value(i2) = 2.0;
-  scalar.value(i3) = 3.0;
-  scalar.value(i4) = 4.0;
+  *scalar.value(i1) = 1.0;
+  *scalar.value(i2) = 2.0;
+  *scalar.value(i3) = 3.0;
+  *scalar.value(i4) = 4.0;
 
   unit_assert(scalar.size() == 5);
 
   unit_func ("value()");
-  unit_assert(scalar.value(i0) == 0.0);
-  unit_assert(scalar.value(i1) == 1.0);
-  unit_assert(scalar.value(i2) == 2.0);
-  unit_assert(scalar.value(i3) == 3.0);
-  unit_assert(scalar.value(i4) == 4.0);
+  unit_assert(*scalar.value(i0) == 0.0);
+  unit_assert(*scalar.value(i1) == 1.0);
+  unit_assert(*scalar.value(i2) == 2.0);
+  unit_assert(*scalar.value(i3) == 3.0);
+  unit_assert(*scalar.value(i4) == 4.0);
 
   unit_func ("name()");
   unit_assert(scalar.name(i0) == "i0");
@@ -64,25 +62,25 @@ PARALLEL_MAIN_BEGIN
   unit_assert(scalar.index("i4") == i4);
 
   unit_func ("assignment");
-  scalar.value(i1) = 2.0;
-  unit_assert(scalar.value(i1) == 2.0);
-  scalar.value(i3) = -3.0;
-  unit_assert(scalar.value(i3) == -3.0);
-  scalar.value(i3) = scalar.value(i4);
-  unit_assert(scalar.value(i3) == scalar.value(i4));
+  *scalar.value(i1) = 2.0;
+  unit_assert(*scalar.value(i1) == 2.0);
+  *scalar.value(i3) = -3.0;
+  unit_assert(*scalar.value(i3) == -3.0);
+  *scalar.value(i3) = *scalar.value(i4);
+  unit_assert(*scalar.value(i3) == *scalar.value(i4));
   
-  unit_assert(scalar.value(i0) == 0.0);
-  unit_assert(scalar.value(i1) == 2.0);
-  unit_assert(scalar.value(i2) == 2.0);
-  unit_assert(scalar.value(i3) == 4.0);
-  unit_assert(scalar.value(i4) == 4.0);
+  unit_assert(*scalar.value(i0) == 0.0);
+  unit_assert(*scalar.value(i1) == 2.0);
+  unit_assert(*scalar.value(i2) == 2.0);
+  unit_assert(*scalar.value(i3) == 4.0);
+  unit_assert(*scalar.value(i4) == 4.0);
 
   unit_func ("index() (out of range)");
   unit_assert(scalar.index("i6") == -1);
   //--------------------------------------------------
 
   unit_finalize();
-#endif
+
   exit_();
   
 }

@@ -44,8 +44,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGravity::EnzoMethodGravity
-(const FieldDescr * field_descr,
- int index_solver,
+(int index_solver,
  double grav_const,
  int order,
  bool accumulate)
@@ -54,6 +53,8 @@ EnzoMethodGravity::EnzoMethodGravity
     grav_const_(grav_const),
     order_(order)
 {
+  FieldDescr * field_descr = cello::field_descr();
+  
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
   const int ib  = field_descr->field_id("B");
@@ -154,8 +155,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   TRACE_FIELD("density-total",D,1.0);
 
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
 #ifdef READ_ENZO_DENSITY
   {
@@ -244,8 +244,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   for (int i=0; i<m; i++) B_copy[i] = B[i];
 #endif	
 
-  
-  Solver * solver = block->simulation()->problem()->solver(index_solver_);
+  Solver * solver = enzo::problem()->solver(index_solver_);
   
   // May exit before solve is done...
   solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue());
@@ -254,7 +253,10 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   std::shared_ptr<Matrix> A (std::make_shared<EnzoMatrixLaplace>(order_));
 
-  solver->apply (A, ix, ib, block);
+  solver->set_field_x(ix);
+  solver->set_field_b(ib);
+  
+  solver->apply (A, block);
 
 }
 
@@ -304,8 +306,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   enzo_float * potential = (enzo_float*) field.values ("potential");
   TRACE_FIELD("potential",potential,-1.0);
   
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    enzo_block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
   
   if (cosmology) {
 
@@ -408,8 +409,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
   /// compute acceleration fields from potential
 
-  EnzoComputeAcceleration compute_acceleration(field.field_descr(),
-					       enzo_block->rank(), order_);
+  EnzoComputeAcceleration compute_acceleration(cello::rank(), order_);
 
   compute_acceleration.compute(enzo_block);
 
@@ -475,10 +475,10 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
   
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  
   if (cosmology) {
-    const int rank = block->rank();
+    const int rank = cello::rank();
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
     double dt   = block->dt();

@@ -30,8 +30,6 @@ void InitialTrace::pup (PUP::er &p)
 
 void InitialTrace::enforce_block
  ( Block            * block, 
-   const FieldDescr * field_descr,
-   const ParticleDescr * particle_descr,
    const Hierarchy  * hierarchy
    ) throw()
 {
@@ -39,8 +37,8 @@ void InitialTrace::enforce_block
 
   if (id0_[in] == -1) id0_[in] = CkMyPe();
 
-  Field    field    (block->data()->field());
-  Particle particle (block->data()->particle());
+  Field    field    = block->data()->field();
+  Particle particle = block->data()->particle();
 
   if (mpp_ == 0.0) {
     uniform_placement_ (block,field,particle);
@@ -70,7 +68,7 @@ void InitialTrace::uniform_placement_
   const int npn = nx/dx_*ny/dy_*nz/dz_;
   
   particle.insert_particles (it,npn);
-  block->simulation()->data_insert_particles(npn);
+  cello::simulation()->data_insert_particles(npn);
 
   // Initialize particle positions
 
@@ -185,7 +183,7 @@ void InitialTrace::density_placement_
   data->upper(&xp,&yp,&zp);
   field.cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
   if (rank < 3) hz = 1.0;
   if (rank < 2) hy = 1.0;
 
@@ -227,7 +225,7 @@ void InitialTrace::density_placement_
 
   particle.insert_particles (it,np);
 
-  block->simulation()->data_insert_particles(np);
+  cello::simulation()->data_insert_particles(np);
   
   const int ia_id = particle.attribute_index(it,"id");
   const int ia_x = particle.attribute_index (it,"x");

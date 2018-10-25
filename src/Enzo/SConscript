@@ -29,7 +29,7 @@ if (use_papi):
 	components.append(['papi'])
 
 
-components.append(['hdf5','z'])
+components.append(['hdf5','z','dl'])
 
 libraries_external  = ['png','$FORTRANLIBS', 'boost_filesystem', 'boost_system']
 
@@ -44,7 +44,7 @@ if (use_grackle):   libraries_external.append('grackle')
 # SOURCE
 #------------------------------
 
-sources  = [Glob('enzo_*cpp'),
+sources  = [Glob('enzo*cpp'),
     	    'calcdiss.F',
 	    'calc_dt.F',
 	    'cic_deposit.F',

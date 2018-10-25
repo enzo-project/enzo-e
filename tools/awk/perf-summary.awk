@@ -106,9 +106,9 @@ BEGIN {
 
 /bytes-highest/ {  bytes_highest = $6; }
 
-/num-blocks/ {
-    num_blocks = $6;
+/num-leaf-blocks/ {
     if (num_blocks_start == 0) num_blocks_start = $6;
+    if ($6 > num_blocks) num_blocks = $6;
 }
 
 /num-particles/ {
@@ -175,13 +175,22 @@ END {
 
     zones_per_block       = root_size / root_blocks;
     total_zones_per_block = total_root_size  / root_blocks;
-
-    format = "%20s: %8.2f\n";
-    format_int = "%20s: %8ld\n";
-    format2 = "%20s: %8.2f [%8.2f ]\n";
-    format2_ind = "   %20s: %8.2f [%8.2f ]\n";
-    format3 = "%20s: %8d %d %d\n";
-    format0 = "%20s\n";
+    if (cycle != 0) {
+	time_per_cycle    = (cycle_last-cycle_start)/cycle;
+    }
+    if (time_per_cycle != 0) {
+	zone_rate         = zones_per_block/time_per_cycle*num_blocks;
+    }
+    if (zone_rate != 0) {
+	zone_us           = 1.0e6 / zone_rate*num_processors ;
+    }
+    
+    format = "%25s: %8.4f\n";
+    format_int = "%25s: %8ld\n";
+    format2 = "%25s: %8.4f [%8.4f ]\n";
+    format2_ind = "   %25s: %8.4f [%8.4f ]\n";
+    format3 = "%25s: %4d %d %d\n";
+    format0 = "%25s\n";
 
     if (done == 1) {
 	print ("Run completed");
@@ -191,13 +200,13 @@ END {
 
     print "\nSUMMARY\n"
     
-    printf (format, "Total time",time_final);
+    printf (format, "Total time (s)",time_final);
     printf (format_int, "Processes", num_processors);
     printf (format_int, "Cycles",cycle);
-    printf (format, "Init time",cycle_start);
-    if (cycle != 0) {
-	printf (format, "Time per cycle",(cycle_last-cycle_start)/cycle);
-    }
+    printf (format, "Init time (s)",cycle_start);
+    printf (format, "Zone rate (Mz/s)",1.0e-6*zone_rate);
+    printf (format, "Zone update time (µs/z/p)",zone_us);
+    printf (format, "Time per cycle (s)",time_per_cycle);
     if (fp_ins_simulation > 0) {
 	printf (format_int, "GFlops", fp_ins_simulation);
 	printf (format, "GFlops per cycle", (fp_ins_simulation-fp_ins_simulation_start)/cycle);

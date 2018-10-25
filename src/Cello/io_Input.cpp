@@ -11,9 +11,7 @@
 
 //----------------------------------------------------------------------
 
-Input::Input (const Factory * factory,
-	      const FieldDescr * field_descr,
-	      const ParticleDescr * particle_descr) throw()
+Input::Input (const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     sync_(0),
     index_charm_(0),
@@ -29,8 +27,8 @@ Input::Input (const Factory * factory,
     stride_reader_(1) // default one file per process
 {
   io_block_         = factory->create_io_block();
-  io_field_data_    = factory->create_io_field_data(field_descr);
-  io_particle_data_ = factory->create_io_particle_data(particle_descr);
+  io_field_data_    = factory->create_io_field_data();
+  io_particle_data_ = factory->create_io_particle_data();
 }
 
 //----------------------------------------------------------------------
@@ -102,12 +100,7 @@ void Input::read_simulation
 
 //----------------------------------------------------------------------
 
-void Input::read_hierarchy
-(
- Hierarchy * hierarchy,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
-) throw()
+void Input::read_hierarchy ( Hierarchy * hierarchy) throw()
 {
 
 }
@@ -117,10 +110,7 @@ void Input::read_hierarchy
 Block * Input::read_block
 (
  Block * block,
- std::string block_name,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+ std::string block_name) throw()
 {
   // Read fields
 
@@ -128,8 +118,7 @@ Block * Input::read_block
   if (it_f) {
     for (it_f->first(); ! it_f->done(); it_f->next()  ) {
       int index_field = it_f->value();
-      read_field (block->data()->field_data(), 
-		  field_descr, index_field);
+      read_field (block, index_field);
     }
   }
 
@@ -137,8 +126,7 @@ Block * Input::read_block
   if (it_p) {
     for (it_p->first(); ! it_p->done(); it_p->next()  ) {
       int index_particle = it_p->value();
-      read_particle (block->data()->particle_data(), 
-		     particle_descr, index_particle);
+      read_particle (block, index_particle);
     }
   }
 

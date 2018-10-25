@@ -25,7 +25,7 @@ void Main::enzo_finalize (Simulation * simulation)
   if (config->testing_time_final.size() > 0 &&
       config->testing_time_final[0] > 0.0) {
     double err_rel_min = std::numeric_limits<double>::max();
-    for (int i=0; i<config->testing_time_final.size(); i++) {
+    for (size_t i=0; i<config->testing_time_final.size(); i++) {
       double time_final=config->testing_time_final[i];
       double err_rel = cello::err_rel(simulation->time(),time_final);
       err_rel_min = std::min(err_rel_min,err_rel);

@@ -6,28 +6,23 @@ is_arch_valid = 1
 
 #flags_arch = '-g'
 #flags_arch = '-Ofast' # ERROR: ipo linking
-flags_arch = '-O3'
-flags_link  = ''
+flags_arch = '-O3 -Wall -g'
+flags_link  = '-rdynamic'
 
-cc   = 'icc'
+cc   = 'gcc'
 f90  = 'ifort'
 
-flags_prec_single = '-r4'
-flags_prec_double = '-r8'
+flags_prec_single = '-real-size 32'
+flags_prec_double = '-real-size 64'
 
 libpath_fortran = ''
-libs_fortran    = ['imf','ifcore','ifport','stdc++','intlc']
-
-home = os.environ['HOME']
-
-libpath_fortran = ''
-libs_fortran    = ['ifcore']
+libs_fortran    = ['irc', 'imf','ifcore','ifport','stdc++','intlc','svml']
 
 home = os.environ["HOME"]
-charm_path = home + '/Charm/charm'
+charm_path = '/home/ux452912/Charm/682/intel/net/charm'
 papi_inc = home + '/include'
 papi_lib = home + '/lib'
-hdf5_path  = os.environ['HDF5HOME']
+hdf5_path  = home
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
 

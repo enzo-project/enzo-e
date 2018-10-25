@@ -23,8 +23,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodTurbulence::EnzoMethodTurbulence 
-(const FieldDescr * field_descr,
- double edot,
+(double edot,
  double density_initial,
  double temperature_initial,
  double mach_number,
@@ -73,12 +72,11 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 {
   TRACE_TURBULENCE;  
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
   
   Field field = block->data()->field();
 
-  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-    (enzo_block->simulation()->config());
+  const EnzoConfig * enzo_config = enzo::config();
 
   EnzoComputeTemperature compute_temperature
     (enzo_config->ppm_density_floor,
@@ -106,15 +104,9 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
   int ndx = nx + 2*gx;
   int ndy = ny + 2*gy;
 
-  const int n = sizeof(enzo_block->method_turbulence_data)/sizeof(double);
-  double * g = enzo_block->method_turbulence_data;
+  const int n = max_turbulence_array;
+  double g[n];
   
-  ASSERT2 ("EnzoMethodTurbulence::compute()",
-	   "Size of EnzoBlock::method_turbulence_data array %d "
-	   "must be at least %d",
-	   n, max_turbulence_array, 
-	   (n >= max_turbulence_array));
-
   for (int i=0; i<max_turbulence_array-2; i++) g[i] = 0.0;
 
   g[index_turbulence_mind] = std::numeric_limits<double>::max();
@@ -155,6 +147,7 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
 	  g[index_turbulence_dvy] +=  (rank >= 2) ? d*velocity[1][i] : 0.0;
 	  g[index_turbulence_dvz] +=  (rank >= 3) ? d*velocity[2][i] : 0.0;
 	  g[index_turbulence_dlnd] += d*log(d);
+	  g[index_turbulence_zones] += 1;
 	  g[index_turbulence_mind] =
 	    std::min(g[index_turbulence_mind], (double) d);
 	  g[index_turbulence_maxd] =
@@ -163,28 +156,40 @@ void EnzoMethodTurbulence::compute ( Block * block) throw()
       }
     }
   }
-  enzo_block->method_turbulence_begin();
-}
 
-//----------------------------------------------------------------------
-
-extern CkReduction::reducerType r_method_turbulence_type;
-
-void EnzoBlock::method_turbulence_begin()
-{
-  TRACE_TURBULENCE;  
-  const int n = max_turbulence_array * sizeof(double);
-  double * g = method_turbulence_data;
   CkCallback callback (CkIndex_EnzoBlock::p_method_turbulence_end(NULL),
-		       thisProxy);
-  contribute(n,g,r_method_turbulence_type,callback);
+		       enzo_block->proxy_array());
+  enzo_block->contribute(n*sizeof(double),g,r_method_turbulence_type,callback);
 }
 
 //----------------------------------------------------------------------
 
-// SEE main.cpp for implementation
+CkReduction::reducerType r_method_turbulence_type;
 
-// CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
+void register_method_turbulence(void)
+{ r_method_turbulence_type = CkReduction::addReducer(r_method_turbulence); }
+
+CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs)
+{
+  double accum[max_turbulence_array];
+  for (int i=0; i<max_turbulence_array; i++) {
+    accum[i] = 0.0;
+  }
+  accum[index_turbulence_mind] = std::numeric_limits<double>::max();
+  accum[index_turbulence_maxd] = - std::numeric_limits<double>::max();
+
+  for (int i=0; i<n; i++) {
+    double * values = (double *) msgs[i]->getData();
+    for (int ig=0; ig<max_turbulence_array-2; ig++) {
+      accum [ig] += values[ig];
+    }
+    accum [index_turbulence_mind] = 
+      std::min(accum[index_turbulence_mind],values[index_turbulence_mind]);
+    accum [index_turbulence_maxd] = 
+      std::max(accum[index_turbulence_maxd],values[index_turbulence_maxd]);
+  }
+  return CkReductionMsg::buildNew(max_turbulence_array*sizeof(double),accum);
+}
 
 //----------------------------------------------------------------------
 
@@ -193,7 +198,6 @@ void EnzoBlock::p_method_turbulence_end(CkReductionMsg * msg)
   TRACE_TURBULENCE;  
   performance_start_(perf_compute,__FILE__,__LINE__);
   method()->compute_resume (this,msg);
-  delete msg;
   performance_stop_(perf_compute,__FILE__,__LINE__);
 }
 
@@ -205,16 +209,11 @@ void EnzoMethodTurbulence::compute_resume
 {
   TRACE_TURBULENCE;  
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-
-  double * g = enzo_block->method_turbulence_data;
-  for (int i=0; i<max_turbulence_array; i++) {
-    g[i] = ((double *)msg->getData())[i];
-  }
+  double * g = (double *)msg->getData();
 
   Data * data = block->data();
   Field field = data->field();
-  
+ 
 
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
@@ -305,7 +304,8 @@ void EnzoMethodTurbulence::compute_resume
 
   if (block->index().is_root()) {
 
-    Monitor * monitor = block->simulation()->monitor();
+    Monitor * monitor = cello::monitor();
+    
     monitor->print ("Method","sum v*a*d    " "%.17g", g[index_turbulence_vad]);
     monitor->print ("Method","sum a*a*d    " "%.17g",g[index_turbulence_aad]);
     monitor->print ("Method","sum v*v*d/t  " "%.17g",g[index_turbulence_vvdot]);
@@ -323,6 +323,7 @@ void EnzoMethodTurbulence::compute_resume
     monitor->print ("Method","sum d*vz     " "%.17g",g[index_turbulence_dvz]);
 
     monitor->print ("Method","sum d*ln(d)  " "%.17g",g[index_turbulence_dlnd]);
+    monitor->print ("Method","sum zones    " "%.17g",g[index_turbulence_zones]);
     
     monitor->print ("Method","min d        " "%.17g",g[index_turbulence_mind]);
     monitor->print ("Method","max d        " "%.17g",g[index_turbulence_maxd]);
@@ -348,7 +349,8 @@ void EnzoMethodTurbulence::compute_resume
     compute_resume_(block,msg);
   }
 
-  enzo_block->compute_done();
+  delete msg;
+  block->compute_done();
 
 }
 
@@ -357,12 +359,9 @@ void EnzoMethodTurbulence::compute_resume
 void EnzoMethodTurbulence::compute_resume_ 
 (Block * block, CkReductionMsg * msg) throw()
 {
-  delete msg;
   
   TRACE_TURBULENCE;  
   // Compute normalization
-
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   Field field = block->data()->field();
 
@@ -375,7 +374,7 @@ void EnzoMethodTurbulence::compute_resume_
 
   int n = nx*ny*nz;
 
-  double * g = enzo_block->method_turbulence_data;
+  double * g = (double *)msg->getData();
 
   double dt = block->dt();
 
@@ -387,7 +386,7 @@ void EnzoMethodTurbulence::compute_resume_
   double dt0 = dt;
   norm = (dt/dt0)*norm;
 
-  const int rank = (my == 1) ? 1 : ((mz == 1) ? 2 : 3);
+  const int rank = cello::rank();
 
   enzo_float * te = (enzo_float*) field.values ("total_energy");
   enzo_float * v3[3] = {

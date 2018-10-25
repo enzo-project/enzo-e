@@ -195,7 +195,6 @@ namespace cello {
   }
 
   //---------------------------------------------------------------------- 
-#ifdef NEW_SYNC
   ScalarDescr * scalar_descr_double()
   {
     return simulation() ? simulation()->scalar_descr_double() : new ScalarDescr;
@@ -208,12 +207,50 @@ namespace cello {
   {
     return simulation() ? simulation()->scalar_descr_sync() : new ScalarDescr;
   }
-#endif  
+  ScalarDescr * scalar_descr_void()
+  {
+    return simulation() ? simulation()->scalar_descr_void() : new ScalarDescr;
+  }
+  //---------------------------------------------------------------------- 
+
+  CProxy_Block block_array()
+  {
+    return cello::simulation()->hierarchy()->block_array();
+  }
+
+  //---------------------------------------------------------------------- 
+
+  const Config * config()
+  {
+    return simulation() ? simulation()->config() : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Problem * problem()
+  {
+    return simulation() ? simulation()->problem() : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Hierarchy * hierarchy()
+  {
+    return simulation() ? simulation()->hierarchy() : NULL;
+  }
+
   //---------------------------------------------------------------------- 
 
   FieldDescr * field_descr()
   {
     return simulation() ? simulation()->field_descr() : new FieldDescr;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Monitor * monitor()
+  {
+    return simulation() ? simulation()->monitor() : Monitor::instance();
   }
 
   //---------------------------------------------------------------------- 
@@ -227,7 +264,21 @@ namespace cello {
 
   Output * output(int index)
   {
-    return simulation() ? simulation()->problem()->output(index) : NULL;
+    return problem() ? problem()->output(index) : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Solver * solver(int index)
+  {
+    return problem() ? problem()->solver(index) : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
+  Units * units()
+  {
+    return problem() ? problem()->units() : NULL;
   }
 
   //----------------------------------------------------------------------

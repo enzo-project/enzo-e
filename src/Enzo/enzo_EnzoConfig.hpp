@@ -222,13 +222,13 @@ public: // interface
       solver_post_smooth(),
       solver_last_smooth(),
       solver_coarse_solve(),
+      solver_domain_solve(),
       solver_weight(),
       solver_restart_cycle(),
       // EnzoSolver<Krylov>
       solver_precondition(),
       solver_local(),
-      solver_min_level_coarse(),
-      solver_max_level_coarse(),
+      solver_coarse_level(),
       solver_is_unigrid(),
       // EnzoStopping
       stopping_redshift()
@@ -404,7 +404,9 @@ public: // attributes
 
   double                     method_pm_update_max_dt;
 
+  ///==============
   /// EnzoSolverMg0
+  ///==============
 
   /// Solver index for multigrid pre-smoother
 
@@ -421,6 +423,10 @@ public: // attributes
   /// Solver index for multigrid coarse solver
 
   std::vector<int>           solver_coarse_solve;
+
+  /// Solver index for domain decomposition (dd) domain solver
+  
+  std::vector<int>           solver_domain_solve;
 
   /// Weighting factor for smoother
 
@@ -439,9 +445,8 @@ public: // attributes
   /// Mg0 coarse grid solver
   std::vector<int>           solver_local;
 
-  std::vector<int>           solver_min_level_coarse;
-  std::vector<int>           solver_max_level_coarse;
-  std::vector<bool>          solver_is_unigrid;
+  std::vector<int>           solver_coarse_level;
+  std::vector<int>           solver_is_unigrid;
 
   /// Stop at specified redshift for cosmology
   double                     stopping_redshift;

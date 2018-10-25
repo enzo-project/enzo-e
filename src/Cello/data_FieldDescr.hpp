@@ -129,7 +129,7 @@ public: // functions
   {
     const int np = num_permanent();
     const int nh = history;
-    
+
     if (history > history_) {
       history_id_.resize(np*nh);
       for (int ih=0; ih<nh; ih++) {

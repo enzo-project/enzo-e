@@ -12,8 +12,6 @@
 
 MethodTrace::MethodTrace 
 (
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  double courant,
  double timestep,
  std::string name
@@ -46,7 +44,7 @@ void MethodTrace::compute ( Block * block) throw()
 
     const int dp =  particle.stride(it,ia_x);
 
-    const int rank = block->rank();
+    const int rank = cello::rank();
 
     // get velocity field arrays
 
@@ -264,7 +262,7 @@ void MethodTrace::compute ( Block * block) throw()
 
 double MethodTrace::timestep (Block * block) const throw()
 {
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   double dt = std::numeric_limits<double>::max();
 

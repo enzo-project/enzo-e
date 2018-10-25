@@ -16,7 +16,6 @@
 // #define DEBUG_FACE
 
 // #define DEBUG_NEW_REFRESH
-// #define DEBUG_NEW_MSG_REFINE
 
 #ifdef DEBUG_FACE
 #   define DEBUG_FACES(MSG) debug_faces_(MSG)
@@ -99,9 +98,7 @@ Block::Block ( MsgRefine * msg )
   msg->print();
 #endif
 
-
-  bool is_first_cycle = 
-    (cycle_ == simulation()->config()->initial_cycle);
+  bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
 
   if (is_first_cycle) {
     apply_initial_();
@@ -110,6 +107,8 @@ Block::Block ( MsgRefine * msg )
   }
 
   delete msg;
+
+  index_.array(array_,array_+1,array_+2);
 
   performance_stop_(perf_block);
 
@@ -157,40 +156,21 @@ Block::Block ( process_type ip_source )
     v3[0],v3[1],v3[2]);
 }
 #endif
-#ifdef NEW_MSG_REFINE
+
   performance_start_(perf_block);
 
-#ifdef DEBUG_NEW_MSG_REFINE
-  {
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::Block(%d)\n",
-    __FILE__,__LINE__,v3[0],v3[1],v3[2],ip_source);
-}
-#endif  
+  thisIndex.array(array_,array_+1,array_+2);
+
   proxy_simulation[ip_source].p_get_msg_refine(thisIndex);
   
   performance_stop_(perf_block);
-#endif  
 }
 
 //----------------------------------------------------------------------
 
 void Block::p_set_msg_refine(MsgRefine * msg)
 {
-#ifdef DEBUG_MSG_REFINE
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE setting %p\n",CkMyPe(),__FILE__,__LINE__,msg);
-#endif  
-  
-#ifdef NEW_MSG_REFINE
   performance_start_(perf_block);
-
-#ifdef DEBUG_NEW_MSG_REFINE  
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::p_set_msg_refine(%p)\n",
-	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2],msg);
-#endif  
 
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -210,22 +190,17 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   }
 #endif
 
-  bool is_first_cycle = 
-    (cycle_ == simulation()->config()->initial_cycle);
+  bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
 
   if (is_first_cycle) {
     apply_initial_();
   } else {
     msg->update(data());
   }
-#ifdef DEBUG_MSG_REFINE
-  CkPrintf ("%d %s:%d DEBUG_MSG_REFINE freeing %p\n",CkMyPe(),__FILE__,__LINE__,msg);
-#endif  
   delete msg;
   
   performance_stop_(perf_block);
 
-#endif
 }
 
   //----------------------------------------------------------------------
@@ -241,14 +216,6 @@ void Block::init
  int num_face_level, int * face_level)
 
 {
-#ifdef DEBUG_NEW_MSG_REFINE  
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::init(cycle %d time %g dt %g)\n",
-	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2],
-	    cycle,time,dt);
-#endif  
-  
   index_ = index;
   cycle_ = cycle;
   time_ = time;
@@ -258,7 +225,7 @@ void Block::init
 
   // Enable Charm++ AtSync() dynamic load balancing
 
-  Simulation * simulation = this->simulation();
+  Simulation * simulation = cello::simulation();
 
 #ifdef CELLO_DEBUG
   index_.print("Block()",-1,2,false,simulation);
@@ -296,14 +263,7 @@ void Block::init
 
   set_state (cycle,time,dt,stop_);
 
-#ifdef NEW_MSG_REFINE
-#else  
-  // Perform any additional initialization for derived class 
-
-  initialize ();
-#endif  
-
-  const int rank = this->rank();
+  const int rank = cello::rank();
   
   sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
@@ -393,15 +353,7 @@ void Block::init
 
 void Block::initialize()
 {
-#ifdef DEBUG_NEW_MSG_REFINE  
-  int v3[3];
-  thisIndex.values(v3);
-  CkPrintf ("%d %s:%d DEBUG_NEW_MSG_REFINE %08x %08x %08x Block::initialize()\n",
-	    CkMyPe(),__FILE__,__LINE__,v3[0],v3[1],v3[2]);
-#endif
-#ifdef NEW_MSG_REFINE  
-  bool is_first_cycle = 
-    (cycle_ == simulation()->config()->initial_cycle);
+  bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
   if (is_first_cycle && level() <= 0) {
     CkCallback callback (CkIndex_Block::r_end_initialize(NULL), thisProxy);
 #ifdef TRACE_CONTRIBUTE    
@@ -410,8 +362,6 @@ void Block::initialize()
 #endif    
     contribute(0,0,CkReduction::concat,callback);
   }
-#else
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -440,6 +390,7 @@ void Block::pup(PUP::er &p)
   }
 
   p | index_;
+  PUParray(p,array_,3);
   p | level_next_;
   p | cycle_;
   p | time_;
@@ -471,7 +422,8 @@ void Block::pup(PUP::er &p)
   if (up) DEBUG_FACES("PUP");
 
   if (up) {
-    if (simulation()) simulation()->data_insert_block(this);    
+    Simulation * simulation = cello::simulation();
+    if (simulation != NULL) simulation->data_insert_block(this);    
   }
   
 }
@@ -484,7 +436,7 @@ ItFace Block::it_face
  const int * ic3,
  const int * if3) throw()
 {
-  int rank = this->rank();
+  int rank = cello::rank();
   int n3[3];
   size_array(n3,n3+1,n3+2);
   bool periodic[3][2];
@@ -507,7 +459,7 @@ ItNeighbor Block::it_neighbor (int min_face_rank, Index index) throw()
 
 Method * Block::method () throw ()
 {
-  Problem * problem = simulation()->problem();
+  Problem * problem = cello::problem();
   Method * method = problem->method(index_method_);
   return method;
 }
@@ -516,7 +468,7 @@ Method * Block::method () throw ()
 
 Solver * Block::solver () throw ()
 {
-  Problem * problem = simulation()->problem();
+  Problem * problem = cello::problem();
   Solver * solver = problem->solver(index_solver());
   return solver;
 }
@@ -531,7 +483,7 @@ void Block::periodicity (bool p32[3][2]) const
     }
   }
   int index_boundary = 0;
-  Problem * problem = simulation()->problem();
+  Problem * problem = cello::problem();
   Boundary * boundary;
   while ( (boundary = problem->boundary(index_boundary++)) ) {
     boundary->periodicity(p32);
@@ -578,16 +530,12 @@ void Block::apply_initial_() throw ()
 
   TRACE("Block::apply_initial_()");
 
-  FieldDescr    * field_descr    = cello::field_descr();
-  ParticleDescr * particle_descr = cello::particle_descr();
-
   // Apply initial conditions
 
   index_initial_ = 0;
-  Problem * problem = simulation()->problem();
+  Problem * problem = cello::problem();
   while (Initial * initial = problem->initial(index_initial_++)) {
-    initial->enforce_block(this,field_descr, particle_descr,
-			   simulation()->hierarchy());
+    initial->enforce_block(this,cello::hierarchy());
   }
 }
 
@@ -595,7 +543,7 @@ void Block::apply_initial_() throw ()
 
 Block::~Block()
 { 
-  Simulation * simulation = this->simulation();
+  Simulation * simulation = cello::simulation();
 
 #ifdef TRACE_BLOCK
   CkPrintf ("%d %s TRACE_BLOCK Block::~Block())\n",  CkMyPe(),name_.c_str());
@@ -733,23 +681,13 @@ Block::Block (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
-Simulation * Block::simulation() const
-{ return proxy_simulation.ckLocalBranch(); }
-
-//----------------------------------------------------------------------
-
-int Block::rank() const
-{ return simulation()->rank(); }
-
-//----------------------------------------------------------------------
-
 std::string Block::name() const throw()
 {
   if (name_ == "") {
 
-    const int rank = this->rank();
+    const int rank = cello::rank();
     int blocking[3] = {1,1,1};
-    simulation()->hierarchy()->root_blocks(blocking,blocking+1,blocking+2);
+    cello::hierarchy()->root_blocks(blocking,blocking+1,blocking+2);
     const int level = this->level();
     for (int i=-1; i>=level; i--) {
       blocking[0] /= 2;
@@ -776,7 +714,7 @@ std::string Block::name() const throw()
 
 void Block::size_array (int * nx, int * ny, int * nz) const throw ()
 {
-  simulation()->hierarchy()->root_blocks(nx,ny,nz);
+  cello::hierarchy()->root_blocks(nx,ny,nz);
 }
 
 //----------------------------------------------------------------------
@@ -789,7 +727,7 @@ void Block::lower
 
   index_global (&ix,&iy,&iz,&nx,&ny,&nz);
 
-  Hierarchy * hierarchy = simulation()->hierarchy();
+  Hierarchy * hierarchy = cello::hierarchy();
   double xdm, ydm, zdm;
   hierarchy->lower(&xdm,&ydm,&zdm);
   double xdp, ydp, zdp;
@@ -818,7 +756,7 @@ void Block::upper
 
   index_global (&ix,&iy,&iz,&nx,&ny,&nz);
 
-  Hierarchy * hierarchy = simulation()->hierarchy();
+  Hierarchy * hierarchy = cello::hierarchy();
   double xdm, ydm, zdm;
   hierarchy->lower(&xdm,&ydm,&zdm);
   double xdp, ydp, zdp;
@@ -971,7 +909,7 @@ void Block::update_boundary_ ()
   determine_boundary_(is_boundary,&fxm,&fxp,&fym,&fyp,&fzm,&fzp);
 
   int index = 0;
-  Problem * problem = simulation()->problem();
+  Problem * problem = cello::problem();
   Boundary * boundary;
 
   while ((boundary = problem->boundary(index++))) {
@@ -1035,8 +973,9 @@ Index Block::neighbor_
 void Block::performance_start_
 (int index_region, std::string file, int line)
 {
-  if (simulation())
-    simulation()->performance()->start_region(index_region,file,line);
+  Simulation * simulation = cello::simulation();
+  if (simulation)
+    simulation->performance()->start_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------
@@ -1044,8 +983,9 @@ void Block::performance_start_
 void Block::performance_stop_
 (int index_region, std::string file, int line)
 {
-  if (simulation())
-    simulation()->performance()->stop_region(index_region,file,line);
+  Simulation * simulation = cello::simulation();
+  if (simulation)
+    simulation->performance()->stop_region(index_region,file,line);
 }
 
 //----------------------------------------------------------------------

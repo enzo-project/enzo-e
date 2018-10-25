@@ -17,7 +17,7 @@ class EnzoMethodCosmology : public Method {
 public: // interface
 
   /// Constructor
-  EnzoMethodCosmology(const FieldDescr *) throw();
+  EnzoMethodCosmology() throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodCosmology);

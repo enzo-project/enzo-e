@@ -95,7 +95,7 @@ int EnzoBlock::ComputeTemperatureField
  
   /* Find the temperature units if we are using comoving coordinates. */
  
-  EnzoUnits * units = (EnzoUnits *) simulation()->problem()->units();
+  EnzoUnits * units = enzo::units();
 
   units->set_current_time (time());
 

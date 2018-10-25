@@ -21,6 +21,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
 {
 #ifdef CONFIG_USE_GRACKLE
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   /// Initialize default Refresh
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 		       enzo_sync_id_method_grackle);
