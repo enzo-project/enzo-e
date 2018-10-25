@@ -1,3 +1,14 @@
+#
+#  Grackle Test Problem:
+#
+#  Sets up a cooling test without hyrdodynamics to run many
+#  one-zone models in Grackle, fully sampling the density,
+#  temperature, and metallicity parameter space over which 
+#  the chemistry and cooling/heating tables are valid.
+#
+#   
+#
+
  Boundary {
      type = "reflecting";
  }
@@ -9,10 +20,8 @@
 
  Units {
     density = 1.6726219E-24;  # m_H in grams... so n = 1.0 cm^-3 for pure hydrogen
-    time    = 3.15576E16;     # 1 Gyr in seconds
+    time    = 3.15576E13;     # 1 Myr in seconds
     length  = 3.086E16;       # 1 pc in cm - does not actually matter
-    #    mass    = 1.9891E33;      # 1 solar mass in grams
-    #  length units determined using density and mass
  }
 
  Field {
@@ -75,13 +84,14 @@
  Initial {
    list = ["grackle_test"];
    grackle_test {
-      minimum_H_number_density = 0.1;
+      minimum_H_number_density = 0.001;
       maximum_H_number_density = 1000.0;
       minimum_metallicity      = 1.0E-4;
       maximum_metallicity      = 1.0;
       minimum_temperature      = 10.0;
       maximum_temperature      = 1.0E8;
 
+      # Keep temperature constant with changing mu?
       reset_energies           = 1;
    }
  }
@@ -112,13 +122,6 @@
 
  Output {
      list = ["data"];
-
-#     check {
-#        type  = "checkpoint";
-#        dir   = ["method_grackle-1-%06d","cycle"];
-#        schedule { var = "cycle"; start = 1000; step = 1000; }
-#     }
-
 
      data {
          field_list = [ "density",
