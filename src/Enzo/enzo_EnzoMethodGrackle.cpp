@@ -461,7 +461,7 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
        for (int ix=gx; ix<nx+gx; ix++) { // H Number Density
          int i = INDEX(ix,iy,iz,ngx,ngy);
 
-         enzo_float mu = density[i] + HI_density[i] + HII_density[i] +
+         enzo_float mu = e_density[i] + HI_density[i] + HII_density[i] +
             (HeI_density[i] + HeII_density[i] + HeIII_density[i])*0.25;
 
          if (grackle_data->primordial_chemistry > 1){

@@ -171,7 +171,7 @@ void EnzoInitialGrackleTest::enforce_block
                                    double(nz);
 
 
-  double tiny_number = 1e-20;
+  double tiny_number = 1e-10;
 
   for (int iz=gz; iz<nz+gz; iz++){ // Temperature
     for (int iy=gy; iy<ny+gy; iy++) { // Metallicity
@@ -224,15 +224,15 @@ void EnzoInitialGrackleTest::enforce_block
         /* calculate mu if following species */
         if (grackle_data->primordial_chemistry > 0){
 
-          mu = grackle_fields_.density[i] + grackle_fields_.HI_density[i] +
-                      grackle_fields_.HeII_density[i] +
+          mu = grackle_fields_.e_density[i] + grackle_fields_.HI_density[i] +
+                      grackle_fields_.HII_density[i] +
                       (grackle_fields_.HeI_density[i] +
                        grackle_fields_.HeII_density[i] +
                        grackle_fields_.HeIII_density[i])*0.25;
 
           if (grackle_data->primordial_chemistry > 1){
 
-            mu += (grackle_fields_.HM_density[i] + grackle_fields_.H2I_density[i] +
+            mu += grackle_fields_.HM_density[i] + (grackle_fields_.H2I_density[i] +
                    grackle_fields_.H2II_density[i])*0.5;
           }
           if (grackle_data->primordial_chemistry > 2){
