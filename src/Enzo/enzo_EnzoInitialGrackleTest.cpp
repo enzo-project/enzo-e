@@ -6,7 +6,6 @@
 /// @brief    [\ref Enzo] Grackle chemistry/cooling library initial conditions
 
 #include "cello.hpp"
-
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
@@ -14,15 +13,7 @@
 EnzoInitialGrackleTest::EnzoInitialGrackleTest
 (const EnzoConfig * config) throw ()
   : Initial(config->initial_cycle, config->initial_time)
-//  #ifdef CONFIG_USE_GRACKLE
-//    , units_()
-//  #endif
 {
-
-//#ifdef CONFIG_USE_GRACKLE
-    //chemistry_ = config->method_grackle_chemistry;
-    //units_     = config->method_grackle_units;
-//#endif
   return;
 }
 
@@ -36,15 +27,7 @@ void EnzoInitialGrackleTest::pup (PUP::er &p)
 
   Initial::pup(p);
 
-#ifdef CONFIG_USE_GRACKLE
-  //p | units_;
-  /*
-  WARNING("EnzoInitialGrackleTest::pup()","Skipping units_");
-    code_units        units_;
-  WARNING("EnzoInitialGrackleTest::pup()", "Skipping chemistry_");
-    chemistry_data  * chemistry_;
-  */
-#endif
+  return;
 }
 
 //----------------------------------------------------------------------
@@ -68,7 +51,6 @@ void EnzoInitialGrackleTest::enforce_block
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits  * enzo_units = enzo::units();
-  // units_ = enzo_config->method_grackle_units;
 
   Field field = block->data()->field();
 
@@ -81,40 +63,41 @@ void EnzoInitialGrackleTest::enforce_block
   grackle_fields_.z_velocity      = (gr_float *) field.values("velocity_z");
 
   grackle_fields_.HI_density      = field.is_field("HI_density") ?
-                       (gr_float *) field.values("HI_density")     : NULL;
+                                    (gr_float *) field.values("HI_density")    : NULL;
   grackle_fields_.HII_density     = field.is_field("HII_density") ?
-                       (gr_float *) field.values("HII_density")    : NULL;
-  grackle_fields_.HM_density      = field.is_field("HM_density") ?
-                       (gr_float *) field.values("HM_density")     : NULL;
+                                    (gr_float *) field.values("HII_density")   : NULL;
   grackle_fields_.HeI_density     = field.is_field("HeI_density") ?
-                       (gr_float *) field.values("HeI_density")    : NULL;
+                                    (gr_float *) field.values("HeI_density")   : NULL;
   grackle_fields_.HeII_density    = field.is_field("HeII_density") ?
-                       (gr_float *) field.values("HeII_density")   : NULL;
+                                    (gr_float *) field.values("HeII_density")  : NULL;
   grackle_fields_.HeIII_density   = field.is_field("HeIII_density") ?
-                       (gr_float *) field.values("HeIII_density")  : NULL;
+                                    (gr_float *) field.values("HeIII_density") : NULL;
   grackle_fields_.e_density       = field.is_field("e_density") ?
-                       (gr_float *) field.values("e_density")      : NULL;
+                                    (gr_float *) field.values("e_density")     : NULL;
 
 
+  grackle_fields_.HM_density      = field.is_field("HM_density") ?
+                                    (gr_float *) field.values("HM_density")    : NULL;
   grackle_fields_.H2I_density     = field.is_field("H2I_density") ?
-                       (gr_float *) field.values("H2I_density") : NULL;
+                                    (gr_float *) field.values("H2I_density")   : NULL;
   grackle_fields_.H2II_density    = field.is_field("H2II_density") ?
-                       (gr_float *) field.values("H2II_density") : NULL;
+                                    (gr_float *) field.values("H2II_density")  : NULL;
+
   grackle_fields_.DI_density      = field.is_field("DI_density") ?
-                       (gr_float *) field.values("DI_density") : NULL;
+                                    (gr_float *) field.values("DI_density")    : NULL;
   grackle_fields_.DII_density     = field.is_field("DII_density") ?
-                       (gr_float *) field.values("DII_density") : NULL;
+                                    (gr_float *) field.values("DII_density")   : NULL;
   grackle_fields_.HDI_density     = field.is_field("HDI_density") ?
-                       (gr_float *) field.values("HDI_density") : NULL;
+                                    (gr_float *) field.values("HDI_density")   : NULL;
+
   grackle_fields_.metal_density   = field.is_field("metal_density") ?
-                       (gr_float *) field.values("metal_density") : NULL;
-  //grackle_fields_.cooling_time  = (gr_float *) field.values("cooling_time");
-  //grackle_fields_.temperature   = (gr_float *) field.values("temperature");
-  //grackle_fields_.pressure      = (gr_float *) field.values("pressure");
-  //grackle_fields_.gamma         = (gr_float *) field.values("gamma");
+                                    (gr_float *) field.values("metal_density") : NULL;
+
 
   gr_float * total_energy  = (gr_float *) field.values("total_energy");
+
   gr_float * gamma         = (gr_float *) field.values("gamma");
+
   enzo_float * pressure    = field.is_field("pressure") ?
                (enzo_float*) field.values("pressure") : NULL;
   enzo_float * temperature = field.is_field("temperature") ?

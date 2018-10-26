@@ -7,13 +7,11 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
-extern CProxy_EnzoSimulation proxy_enzo_simulation;
 
 //----------------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
-//  const FieldDescr * field_descr,
   const float physics_cosmology_initial_redshift,
   const float time
 )
@@ -64,6 +62,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
       ASSERT("EnzoMethodGrackle:Must define ",
              " H2II_density field if using primordial_chemistry = 2 with Grackle",
              field_descr->is_field("H2II_density"));
+
       if(grackle_data->primordial_chemistry > 2){
         ASSERT("EnzoMethodGrackle:Must define ",
                " DI_density field if using primordial_chemistry = 3 with Grackle",
@@ -74,11 +73,11 @@ EnzoMethodGrackle::EnzoMethodGrackle
         ASSERT("EnzoMethodGrackle:Must define ",
                " HDI_density field if using primordial_chemistry = 3 with Grackle",
                field_descr->is_field("HDI_density"));
-      }
+      } // endif primordial_chemistry > 2
 
-    }
+    } // endif primordial_chemistry > 1
 
-  } // field checks if primordial chemistry is on
+  } // endif primordial chemistry is on
 
   if (grackle_data->use_specific_heating_rate){
     ASSERT("EnzoMethodGrackle:Must define specific_heating_rate",
@@ -92,11 +91,11 @@ EnzoMethodGrackle::EnzoMethodGrackle
            field_descr->is_field("volumetric_heating_rate"));
   }
 
-  EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
 
   grackle_units_.comoving_coordinates = enzo_config->physics_cosmology;
+
   // Copy over code units to grackle units struct
   grackle_units_.density_units = enzo_units->density();
   grackle_units_.length_units  = enzo_units->length();
@@ -111,8 +110,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
     enzo_float cosmo_a  = 1.0;
     enzo_float cosmo_dt = 0.0;
 
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-                simulation->problem()->physics("cosmology");
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
                                         time);
     grackle_units_.a_units
@@ -121,20 +120,18 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   }
 
+  // Initialize grackle units and data
   if (initialize_chemistry_data(&grackle_units_) == 0) {
     ERROR("EnzoConfig::EnzoConfig()",
     "Error in initialize_chemistry_data");
   }
-  // method_grackle_units = grackle_units_; // copy over to global
+
   printf ("TRACE %s:%d calling initialize_chemistry_data\n",__FILE__,__LINE__);
 
 #endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------
-
-// void EnzoMethodGrackle::pup (PUP::er &p) - in hpp
-
 
 void EnzoMethodGrackle::compute ( Block * block) throw()
 {
@@ -161,7 +158,6 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 #ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
-  EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -179,8 +175,8 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     enzo_float cosmo_a  = 1.0;
     enzo_float cosmo_dt = 0.0;
 
-    EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-                simulation->problem()->physics("cosmology");
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
                                         enzo_block->time());
     grackle_units_.a_units
@@ -209,22 +205,9 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   gr_int grid_start[3]     = {gx,      gy,      gz};
   gr_int grid_end[3]       = {gx+nx-1, gy+ny-1, gz+nz-1} ;
 
-/*
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology *)
-    simulation->problem()->physics("cosmology");
-
-  if (grackle_units_.comoving_coordinates){
-    enzo_float cosmo_a = 1.0, cosmo_dadt = 0.0;
-
-    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dadt,
-                                        enzo_block->time());
-    grackle_units_.a_value = cosmo_a;
-  }
-*/
   const gr_int rank = cello::rank();
 
   // Grackle grid dimenstion and grid size
-
   grackle_fields_.grid_rank      = rank;
   grackle_fields_.grid_dimension = new int[3];
   grackle_fields_.grid_start     = new int[3];
@@ -247,12 +230,13 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   grackle_fields_.y_velocity      = (gr_float *) field.values("velocity_y");
   grackle_fields_.z_velocity      = (gr_float *) field.values("velocity_z");
 
+  // Get chemical species fields if they exist
+
+  // primordial_chemistry == 0 fields
   grackle_fields_.HI_density      = field.is_field("HI_density") ?
                        (gr_float *) field.values("HI_density")     : NULL;
   grackle_fields_.HII_density     = field.is_field("HII_density") ?
-                       (gr_float *) field.values("HII_density")    : NULL;
-  grackle_fields_.HM_density      = field.is_field("HM_density") ?
-                       (gr_float *) field.values("HM_density")     : NULL;
+                       (gr_float *) field.values("HII_density")    : NULL;;
   grackle_fields_.HeI_density     = field.is_field("HeI_density") ?
                        (gr_float *) field.values("HeI_density")    : NULL;
   grackle_fields_.HeII_density    = field.is_field("HeII_density") ?
@@ -262,35 +246,41 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   grackle_fields_.e_density       = field.is_field("e_density") ?
                        (gr_float *) field.values("e_density")      : NULL;
 
-
+  // primordial_chemistry == 1 fields
+  grackle_fields_.HM_density      = field.is_field("HM_density") ?
+                       (gr_float *) field.values("HM_density")     : NULL
   grackle_fields_.H2I_density     = field.is_field("H2I_density") ?
                        (gr_float *) field.values("H2I_density") : NULL;
   grackle_fields_.H2II_density    = field.is_field("H2II_density") ?
                        (gr_float *) field.values("H2II_density") : NULL;
+
+  // primordial_chemistry == 2 fields
   grackle_fields_.DI_density      = field.is_field("DI_density") ?
                        (gr_float *) field.values("DI_density") : NULL;
   grackle_fields_.DII_density     = field.is_field("DII_density") ?
                        (gr_float *) field.values("DII_density") : NULL;
   grackle_fields_.HDI_density     = field.is_field("HDI_density") ?
                        (gr_float *) field.values("HDI_density") : NULL;
+
   grackle_fields_.metal_density   = field.is_field("metal_density") ?
                        (gr_float *) field.values("metal_density") : NULL;
 
+  /* Leave these as NULL for now and save for future development */
   gr_float * volumetric_heating_rate = NULL;
   gr_float * specific_heating_rate = NULL;
 
   grackle_fields_.volumetric_heating_rate = volumetric_heating_rate;
   grackle_fields_.specific_heating_rate   = specific_heating_rate;
 
+  // Solve chemistry
   double dt = enzo_block->dt;
-
   if (solve_chemistry(&grackle_units_, &grackle_fields_, dt) == 0) {
     ERROR("EnzoMethodGrackle::compute()",
     "Error in solve_chemistry.\n");
   }
 
+  /* Correct total energy for changes in internal energy */
   enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
-
   for (int i = 0; i < ngx*ngy*ngz; i++){
     total_energy[i] = grackle_fields_.internal_energy[i] +
             0.5 * grackle_fields_.x_velocity[i] * grackle_fields_.x_velocity[i];
@@ -298,18 +288,19 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     if (rank > 2) total_energy[i] += 0.5 * grackle_fields_.z_velocity[i] * grackle_fields_.z_velocity[i];
   }
 
-  // if this is a test problem, reset energies
-  // AE: Need to fix this to only call when in test
+  // For testing purposes - reset internal energies with changes in mu
   if (enzo_config->initial_grackle_test_reset_energies){
     this->ResetEnergies(enzo_block);
   }
 
-  // might want to not do it this way
+  /* Re-compute temperature and pressure if they are being tracked */
+
   const int in = cello::index_static();
   int comoving_coordinates = enzo_config->physics_cosmology;
   enzo_float * pressure    = field.is_field("pressure") ?
                (enzo_float*) field.values("pressure") : NULL;
   enzo_float * temperature = field.is_field("temperature") ?
+
                (enzo_float*) field.values("temperature") : NULL;
   if (pressure){
     EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
@@ -327,6 +318,8 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     compute_temperature.compute(enzo_block);
   }
 
+  /* Compute cooling time if it is being tracked */
+
   enzo_float * cooling_time = field.is_field("cooling_time") ?
                     (enzo_float *) field.values("cooling_time") : NULL;
   if (cooling_time){
@@ -335,32 +328,6 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
       "Error in calculate_cooling_time.\n");
     }
  }
-
-/*
-  gr_float *temperature;
-  temperature = new gr_float[nx];
-
-  if (calculate_temperature(&grackle_units_, &grackle_fields_, temperature) == 0) {
-    ERROR("EnzoMethodGrackle::compute()",
-    "Error in calculate_temperature.\n");
-  }
-
-  gr_float *pressure;
-  pressure = new gr_float[nx];
-
-  if (calculate_pressure(&grackle_units_, &grackle_fields_, pressure) == 0) {
-    ERROR("EnzoMethodGrackle::compute()",
-    "Error in calculate_pressure.\n");
-  }
-
-  gr_float *gamma;
-  gamma = new gr_float[nx];
-
-  if (calculate_gamma(&units_, &grackle_fields_, gamma) == 0) {
-    ERROR("EnzoMethodGrackle::compute()",
-    "Error in calculate_gamma.\n");
-  }
-  */
 
   return;
 }
@@ -373,10 +340,9 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
   const EnzoConfig * config = enzo::config();
 
 #ifdef CONFIG_USE_GRACKLE
-  // return std::numeric_limits<double>::max();
   return config->initial_grackle_test_dt;
 #else
-  return 0.0;
+  return std::numeric_limits<double>::max();
 #endif /* CONFIG_USE_GRACKLE */
 }
 
@@ -404,32 +370,37 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
                 (enzo_float*) field.values("temperature") : NULL;
 
    enzo_float * HI_density    = field.is_field("HI_density") ?
-                  (enzo_float*) field.values("HI_density") : NULL;
+                                (enzo_float*) field.values("HI_density")    : NULL;
    enzo_float * HII_density   = field.is_field("HII_density") ?
-                  (enzo_float*) field.values("HII_density") : NULL;
+                                (enzo_float*) field.values("HII_density")   : NULL;
    enzo_float * HeI_density   = field.is_field("HeI_density") ?
-                  (enzo_float*) field.values("HeI_density") : NULL;
+                                (enzo_float*) field.values("HeI_density")   : NULL;
    enzo_float * HeII_density  = field.is_field("HeII_density") ?
-                  (enzo_float*) field.values("HeII_density") : NULL;
+                                (enzo_float*) field.values("HeII_density")  : NULL;
    enzo_float * HeIII_density = field.is_field("HeIII_density") ?
                                 (enzo_float*) field.values("HeIII_density") : NULL;
-   enzo_float * H2I_density   = field.is_field("H2I_density") ?
-                                  (enzo_float*) field.values("H2I_density") : NULL;
-   enzo_float * H2II_density  = field.is_field("H2II_density") ?
-                                  (enzo_float*) field.values("H2II_density") : NULL;
-   enzo_float * HM_density    = field.is_field("HM_density") ?
-                                  (enzo_float*) field.values("HM_density") : NULL;
-   enzo_float * DI_density      = field.is_field("DI_density") ?
-                                  (enzo_float *) field.values("DI_density") : NULL;
-   enzo_float * DII_density     = field.is_field("DII_density") ?
-                                  (enzo_float *) field.values("DII_density") : NULL;
-   enzo_float * HDI_density     = field.is_field("HDI_density") ?
-                                  (enzo_float *) field.values("HDI_density"): NULL;
    enzo_float * e_density     = field.is_field("e_density") ?
-                  (enzo_float*) field.values("e_density") : NULL;
-   enzo_float * metal_density = field.is_field("metal_density") ?
-                            (enzo_float*) field.values("metal_density") : NULL;
+                                (enzo_float*) field.values("e_density")     : NULL;
 
+   enzo_float * H2I_density   = field.is_field("H2I_density") ?
+                                (enzo_float*) field.values("H2I_density")   : NULL;
+   enzo_float * H2II_density  = field.is_field("H2II_density") ?
+                                (enzo_float*) field.values("H2II_density")  : NULL;
+   enzo_float * HM_density    = field.is_field("HM_density") ?
+                                (enzo_float*) field.values("HM_density")    : NULL;
+
+   enzo_float * DI_density    = field.is_field("DI_density") ?
+                               (enzo_float *) field.values("DI_density")    : NULL;
+   enzo_float * DII_density   = field.is_field("DII_density") ?
+                               (enzo_float *) field.values("DII_density")   : NULL;
+   enzo_float * HDI_density   = field.is_field("HDI_density") ?
+                               (enzo_float *) field.values("HDI_density")   : NULL;
+
+
+   enzo_float * metal_density = field.is_field("metal_density") ?
+                                (enzo_float*) field.values("metal_density") : NULL;
+
+   // Field size
    int nx,ny,nz;
    field.size(&nx,&ny,&nz);
 

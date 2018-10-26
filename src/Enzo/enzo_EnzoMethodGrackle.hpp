@@ -17,7 +17,7 @@
 inline void operator|(PUP::er &p, code_units &c){
   // Make sure to change this if code_units ever changes
   // all are just single values (int or float)
- 
+
   p | c.comoving_coordinates;
   p | c.density_units;
   p | c.length_units;
@@ -42,7 +42,6 @@ public: // interface
 
   /// Create a new EnzoMethodGrackle object
   EnzoMethodGrackle(
-//const FieldDescr * field_descr,
                     const float physics_cosmology_initial_redshift,
                     const float time);
 
@@ -84,18 +83,21 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-//protected: // methods
+protected: // methods
 
-protected: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
   void compute_( EnzoBlock * enzo_block) throw();
 
   void ResetEnergies ( EnzoBlock * enzo_block) throw();
 
+// protected: // attributes
+
 
   code_units grackle_units_;
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
+
+
 
 };
 
