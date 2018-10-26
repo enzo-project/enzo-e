@@ -22,7 +22,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 #ifdef CONFIG_USE_GRACKLE
 
   FieldDescr * field_descr = cello::field_descr();
-  
+
   /// Initialize default Refresh
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 		       enzo_sync_id_method_grackle);
@@ -199,7 +199,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
   field.ghost_depth (0,&gx,&gy,&gz);
 
   int nx,ny,nz;
-  field.field_size (0,&nx,&ny,&nz);
+  field.size (&nx,&ny,&nz);
 
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
@@ -271,7 +271,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
                        (gr_float *) field.values("DI_density") : NULL;
   grackle_fields_.DII_density     = field.is_field("DII_density") ?
                        (gr_float *) field.values("DII_density") : NULL;
-  grackle_fields_.HDI_density     = field.is_field("HDI_Density") ?
+  grackle_fields_.HDI_density     = field.is_field("HDI_density") ?
                        (gr_float *) field.values("HDI_density") : NULL;
   grackle_fields_.metal_density   = field.is_field("metal_density") ?
                        (gr_float *) field.values("metal_density") : NULL;
@@ -289,13 +289,22 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     "Error in solve_chemistry.\n");
   }
 
-  /* if this is a test problem, reset energies */
+  enzo_float * total_energy    = (enzo_float *) field.values("total_energy");
+
+  for (int i = 0; i < ngx*ngy*ngz; i++){
+    total_energy[i] = grackle_fields_.internal_energy[i] +
+            0.5 * grackle_fields_.x_velocity[i] * grackle_fields_.x_velocity[i];
+    if (rank > 1) total_energy[i] += 0.5 * grackle_fields_.y_velocity[i] * grackle_fields_.y_velocity[i];
+    if (rank > 2) total_energy[i] += 0.5 * grackle_fields_.z_velocity[i] * grackle_fields_.z_velocity[i];
+  }
+
+  // if this is a test problem, reset energies
   // AE: Need to fix this to only call when in test
   if (enzo_config->initial_grackle_test_reset_energies){
     this->ResetEnergies(enzo_block);
   }
 
-  /* might want to not do it this way */
+  // might want to not do it this way
   const int in = cello::index_static();
   int comoving_coordinates = enzo_config->physics_cosmology;
   enzo_float * pressure    = field.is_field("pressure") ?
@@ -318,14 +327,15 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     compute_temperature.compute(enzo_block);
   }
 
-  gr_float * cooling_time = field.is_field("cooling_time") ?
-                    (gr_float *) field.values("cooling_time") : NULL;
+  enzo_float * cooling_time = field.is_field("cooling_time") ?
+                    (enzo_float *) field.values("cooling_time") : NULL;
   if (cooling_time){
     if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == 0) {
       ERROR("EnzoMethodGrackle::compute()",
       "Error in calculate_cooling_time.\n");
     }
  }
+
 /*
   gr_float *temperature;
   temperature = new gr_float[nx];
@@ -360,9 +370,11 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
 double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 {
+  const EnzoConfig * config = enzo::config();
+
 #ifdef CONFIG_USE_GRACKLE
   // return std::numeric_limits<double>::max();
-  return 1.0E-6;
+  return config->initial_grackle_test_dt;
 #else
   return 0.0;
 #endif /* CONFIG_USE_GRACKLE */
@@ -397,7 +409,7 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
                   (enzo_float*) field.values("HII_density") : NULL;
    enzo_float * HeI_density   = field.is_field("HeI_density") ?
                   (enzo_float*) field.values("HeI_density") : NULL;
-   enzo_float * HeII_density  = field.is_field("H2II_density") ?
+   enzo_float * HeII_density  = field.is_field("HeII_density") ?
                   (enzo_float*) field.values("HeII_density") : NULL;
    enzo_float * HeIII_density = field.is_field("HeIII_density") ?
                                 (enzo_float*) field.values("HeIII_density") : NULL;

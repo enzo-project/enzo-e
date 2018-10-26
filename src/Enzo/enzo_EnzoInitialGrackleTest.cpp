@@ -104,7 +104,7 @@ void EnzoInitialGrackleTest::enforce_block
                        (gr_float *) field.values("DI_density") : NULL;
   grackle_fields_.DII_density     = field.is_field("DII_density") ?
                        (gr_float *) field.values("DII_density") : NULL;
-  grackle_fields_.HDI_density     = field.is_field("HDI_Density") ?
+  grackle_fields_.HDI_density     = field.is_field("HDI_density") ?
                        (gr_float *) field.values("HDI_density") : NULL;
   grackle_fields_.metal_density   = field.is_field("metal_density") ?
                        (gr_float *) field.values("metal_density") : NULL;
@@ -167,9 +167,9 @@ void EnzoInitialGrackleTest::enforce_block
 
   double tiny_number = 1e-10;
 
-  for (int iz=gz; iz<nz+gz; iz++){ // Temperature
-    for (int iy=gy; iy<ny+gy; iy++) { // Metallicity
-      for (int ix=gx; ix<nx+gx; ix++) { // H Number Density
+  for (int iz=0; iz<nz+gz; iz++){ // Temperature
+    for (int iy=0; iy<ny+gy; iy++) { // Metallicity
+      for (int ix=0; ix<nx+gx; ix++) { // H Number Density
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
 // AE NEED TO FIX
@@ -210,9 +210,9 @@ void EnzoInitialGrackleTest::enforce_block
   /* Set internal energy and temperature */
   enzo_float mu = enzo_config->ppm_mol_weight;
 
-  for (int iz=gz; iz<nz+gz; iz++){ // Temperature
-    for (int iy=gy; iy<ny+gy; iy++) { // Metallicity
-      for (int ix=gx; ix<nx+gx; ix++) { // H Number Density
+  for (int iz=0; iz<nz+gz; iz++){ // Temperature
+    for (int iy=0; iy<ny+gy; iy++) { // Metallicity
+      for (int ix=0; ix<nx+gx; ix++) { // H Number Density
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
         /* calculate mu if following species */
@@ -267,6 +267,6 @@ void EnzoInitialGrackleTest::enforce_block
     compute_temperature.compute(enzo_block);
   }
 
-
+  return;
 #endif /* CONFIG_USE_GRACKLE */
 }
