@@ -131,11 +131,8 @@ void EnzoInitialGrackleTest::enforce_block
 
   double a_units = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
 
-  const double mh = 1.67262171E-24;
-  const double kboltz = 1.3806504E-16;
-
-  gr_float temperature_units =  mh * pow(a_units *
-                                         enzo_units->velocity(), 2) / kboltz;
+  gr_float temperature_units =  cello::mass_hydrogen * pow(a_units *
+                                         enzo_units->velocity(), 2) / cello::kboltz;
 
   double H_n_slope = log10(enzo_config->initial_grackle_test_maximum_H_number_density /
                            enzo_config->initial_grackle_test_minimum_H_number_density) /

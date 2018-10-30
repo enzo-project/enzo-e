@@ -248,7 +248,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
   // primordial_chemistry == 1 fields
   grackle_fields_.HM_density      = field.is_field("HM_density") ?
-                       (gr_float *) field.values("HM_density")     : NULL
+                       (gr_float *) field.values("HM_density")     : NULL;
   grackle_fields_.H2I_density     = field.is_field("H2I_density") ?
                        (gr_float *) field.values("H2I_density") : NULL;
   grackle_fields_.H2II_density    = field.is_field("H2II_density") ?
@@ -426,11 +426,8 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 
    double a_units = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
 
-   const double mh = 1.67262171E-24;
-   const double kboltz = 1.3806504E-16;
-
-   gr_float temperature_units =  mh * pow(a_units *
-                                          enzo_units->velocity(), 2) / kboltz;
+   gr_float temperature_units =  cello::mass_hydrogen * pow(a_units *
+                                          enzo_units->velocity(), 2) / cello::kboltz;
 
    double temperature_slope = log10(enzo_config->initial_grackle_test_maximum_temperature/
                                     enzo_config->initial_grackle_test_minimum_temperature)/
