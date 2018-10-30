@@ -47,7 +47,7 @@
               "HDI_density",
               "e_density",
               "metal_density",
-              "cooling_time",
+              "cooling_time",  
               "temperature",
               "pressure",
               "gamma"
@@ -76,15 +76,14 @@
               "cooling_time",
               "temperature",
               "pressure",
-              "gamma" ,
-              "cooling_time"];
+              "gamma" ];
     }
  }
 
  Initial {
    list = ["grackle_test"];
    grackle_test {
-      minimum_H_number_density = 0.001;
+      minimum_H_number_density = 0.0001;
       maximum_H_number_density = 1000.0;
       minimum_metallicity      = 1.0E-4;
       maximum_metallicity      = 1.0;
@@ -92,14 +91,16 @@
       maximum_temperature      = 1.0E8;
 
       # Keep temperature constant with changing mu?
-      reset_energies           = 1;
+      reset_energies           = 0;
+
+      dt = 1.0;
    }
  }
 
  Mesh {
-     root_blocks = [ 2, 2, 2];
+     root_blocks = [ 4, 4, 4];
      root_rank = 3;
-     root_size = [ 32, 32, 32];
+     root_size = [ 128, 128, 128];
  }
 
  Method {
@@ -110,7 +111,7 @@
         data_file = "CloudyData_noUVB.h5";
 
         with_radiative_cooling = 1;
-        primordial_chemistry   = 1;  # 1, 2, or 3
+        primordial_chemistry   = 3;  # 1, 2, or 3
         metal_cooling          = 1;  # 0 or 1 (off/on)
         UVbackground           = 0;  # on or off
         self_shielding_method  = 0;  # 0 - 3 (0 or 3 recommended)
@@ -153,7 +154,7 @@
          name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
          schedule {
              var = "time";
-             step = 0.00001;
+             step = 100.0;
              start = 0.0;
          }
          type = "data";
@@ -162,9 +163,9 @@
  }
 
  Stopping {
-    time = 0.00001;
+    time = 10.0;
  }
 
  Testing {
-     time_final = 0.00001;
+     time_final = 10.0;
  }
