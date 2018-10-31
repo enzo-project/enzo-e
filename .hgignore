@@ -18,4 +18,4 @@ bin/enzo-p
 charmrun
 config.log
 errors.org
-
+*.orig
