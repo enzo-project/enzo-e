@@ -137,27 +137,29 @@ void EnzoInitialGrackleTest::enforce_block
   double H_n_slope = log10(enzo_config->initial_grackle_test_maximum_H_number_density /
                            enzo_config->initial_grackle_test_minimum_H_number_density) /
                            double(nx);
-  double metallicity_slope = log10(enzo_config->initial_grackle_test_maximum_metallicity/
-                                   enzo_config->initial_grackle_test_minimum_metallicity)/
-                                   double(ny);
+
   double temperature_slope = log10(enzo_config->initial_grackle_test_maximum_temperature/
                                    enzo_config->initial_grackle_test_minimum_temperature)/
+                                   double(ny);
+
+  double metallicity_slope = log10(enzo_config->initial_grackle_test_maximum_metallicity/
+                                   enzo_config->initial_grackle_test_minimum_metallicity)/
                                    double(nz);
 
 
   double tiny_number = 1e-10;
 
-  for (int iz=0; iz<nz+gz; iz++){ // Temperature
-    for (int iy=0; iy<ny+gy; iy++) { // Metallicity
+  for (int iz=0; iz<nz+gz; iz++){ // Metallicity
+    for (int iy=0; iy<ny+gy; iy++) { // Temperature
       for (int ix=0; ix<nx+gx; ix++) { // H Number Density
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
-// AE NEED TO FIX
         grackle_fields_.density[i] = cello::mass_hydrogen *
                      pow(10.0, ((H_n_slope * (ix-gx)) + log10(enzo_config->initial_grackle_test_minimum_H_number_density)))/
                      grackle_data->HydrogenFractionByMass / enzo_units->density();
+
         // solar metallicity
-        grackle_fields_.metal_density[i] = pow(10.0,((metallicity_slope * (iy-gy)) +
+        grackle_fields_.metal_density[i] = pow(10.0,((metallicity_slope * (iz-gz)) +
                                           log10(enzo_config->initial_grackle_test_minimum_metallicity))) *
                                           grackle_data->SolarMetalFractionByMass * grackle_fields_.density[i];
         grackle_fields_.x_velocity[i] = 0.0;
@@ -190,8 +192,8 @@ void EnzoInitialGrackleTest::enforce_block
   /* Set internal energy and temperature */
   enzo_float mu = enzo_config->ppm_mol_weight;
 
-  for (int iz=0; iz<nz+gz; iz++){ // Temperature
-    for (int iy=0; iy<ny+gy; iy++) { // Metallicity
+  for (int iz=0; iz<nz+gz; iz++){ // Metallicity
+    for (int iy=0; iy<ny+gy; iy++) { // Temperature
       for (int ix=0; ix<nx+gx; ix++) { // H Number Density
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
@@ -217,7 +219,7 @@ void EnzoInitialGrackleTest::enforce_block
           mu = grackle_fields_.density[i] / mu;
         } // end primordial_chemistry > 0
 
-        grackle_fields_.internal_energy[i] = pow(10.0, ((temperature_slope * (iz-gz)) +
+        grackle_fields_.internal_energy[i] = pow(10.0, ((temperature_slope * (iy-gy)) +
                                       log10(enzo_config->initial_grackle_test_minimum_temperature)))/
                              mu / temperature_units / (enzo_config->field_gamma - 1.0);
         total_energy[i]    = grackle_fields_.internal_energy[i];

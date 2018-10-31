@@ -83,9 +83,11 @@
  Initial {
    list = ["grackle_test"];
    grackle_test {
+      # See note in "Mesh" on running in < 3D
+
       minimum_H_number_density = 0.0001;
       maximum_H_number_density = 1000.0;
-      minimum_metallicity      = 1.0E-4;
+      minimum_metallicity      = 1.0;
       maximum_metallicity      = 1.0;
       minimum_temperature      = 10.0;
       maximum_temperature      = 1.0E8;
@@ -93,14 +95,24 @@
       # Keep temperature constant with changing mu?
       reset_energies           = 0;
 
-      dt = 1.0;
+      dt = 1000.0
    }
  }
 
  Mesh {
-     root_blocks = [ 4, 4, 4];
-     root_rank = 3;
-     root_size = [ 128, 128, 128];
+     #   This test problem varies density, temperature,
+     #   and metallicity over x, y, and z dimensions 
+     #   respectively. For smaller problems you can 
+     #   run in 1 or 2 dimensions by changing the below
+     #   accordingly and setting the min/max values in
+     #   initialization to be the same. Currently cannot
+     #   pick which value goes in which dimension,
+     #   so 2D can only be density and temperature,
+     #   1D can only vary density.
+     
+     root_blocks = [ 4, 4];
+     root_rank = 2;
+     root_size = [16, 16];
  }
 
  Method {
@@ -108,13 +120,13 @@
 
      grackle {
         courant = 0.40;
-        data_file = "CloudyData_noUVB.h5";
+        data_file = "CloudyData_UVB=HM2012_shielded.h5";
 
         with_radiative_cooling = 1;
-        primordial_chemistry   = 3;  # 1, 2, or 3
+        primordial_chemistry   = 2;  # 1, 2, or 3
         metal_cooling          = 1;  # 0 or 1 (off/on)
-        UVbackground           = 0;  # on or off
-        self_shielding_method  = 0;  # 0 - 3 (0 or 3 recommended)
+        UVbackground           = 1;  # on or off
+        self_shielding_method  = 3;  # 0 - 3 (0 or 3 recommended)
 
         HydrogenFractionByMass = 0.73;
      }
@@ -154,7 +166,7 @@
          name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
          schedule {
              var = "time";
-             step = 100.0;
+             step = 10000.0;
              start = 0.0;
          }
          type = "data";
@@ -163,9 +175,9 @@
  }
 
  Stopping {
-    time = 10.0;
+    time = 10000.0;
  }
 
  Testing {
-     time_final = 10.0;
+     time_final = 1000.0;
  }
