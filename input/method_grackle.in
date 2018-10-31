@@ -95,7 +95,7 @@
       # Keep temperature constant with changing mu?
       reset_energies           = 0;
 
-      dt = 1000.0
+      dt = 100.0;
    }
  }
 
@@ -112,7 +112,13 @@
      
      root_blocks = [ 4, 4];
      root_rank = 2;
-     root_size = [16, 16];
+     root_size = [128, 128];
+
+     # 3D test example:
+     # root_blocks = [ 4, 4, 4];
+     # root_rank = 3;
+     # root_size = [32, 32, 32];
+
  }
 
  Method {
@@ -123,7 +129,7 @@
         data_file = "CloudyData_UVB=HM2012_shielded.h5";
 
         with_radiative_cooling = 1;
-        primordial_chemistry   = 2;  # 1, 2, or 3
+        primordial_chemistry   = 3;  # 1, 2, or 3
         metal_cooling          = 1;  # 0 or 1 (off/on)
         UVbackground           = 1;  # on or off
         self_shielding_method  = 3;  # 0 - 3 (0 or 3 recommended)
@@ -166,7 +172,7 @@
          name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
          schedule {
              var = "time";
-             step = 10000.0;
+             step = 1000.0;
              start = 0.0;
          }
          type = "data";
@@ -175,7 +181,7 @@
  }
 
  Stopping {
-    time = 10000.0;
+    time = 1000.0;
  }
 
  Testing {
