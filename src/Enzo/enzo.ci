@@ -85,6 +85,7 @@ module enzo {
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodGravity;
+  PUPable EnzoMethodVlct;
 
   PUPable EnzoPhysicsCosmology;
 

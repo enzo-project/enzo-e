@@ -81,6 +81,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_ppm,
   enzo_sync_id_method_ppml,
   enzo_sync_id_method_turbulence,
+  enzo_sync_id_method_vlct,
   enzo_sync_id_solver_bicgstab,
   enzo_sync_id_solver_cg,
   enzo_sync_id_solver_mg0,
@@ -229,6 +230,7 @@ struct fluxes
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
+#include "enzo_EnzoMethodVlct.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

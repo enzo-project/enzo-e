@@ -498,6 +498,10 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate);
       
+  } else if (name == "vlct") {
+
+    method = new EnzoMethodVlct;
+
   } else {
 
     // Fallback to Cello method's
