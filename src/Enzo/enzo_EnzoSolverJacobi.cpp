@@ -55,9 +55,18 @@
 
 EnzoSolverJacobi::EnzoSolverJacobi
 ( std::string name,
-  std::string field_x, std::string field_b,
+  std::string field_x,
+  std::string field_b,
+  int monitor_iter,
+  int restart_cycle,
+  int solve_type,
   double weight, int iter_max) throw()
-  : Solver(name,field_x,field_b,0,0),
+  : Solver(name,
+	   field_x,
+	   field_b,
+	   monitor_iter,
+	   restart_cycle,
+	   solve_type),
     A_ (NULL),
     ir_ (-1),
     id_ (-1),
@@ -81,24 +90,32 @@ void EnzoSolverJacobi::apply
 ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
   TRACE_JACOBI(block,"apply()");
-  
+
   begin_(block);
 
-  A_ = A;
+  if (! is_finest_(block)) {
+    // Exit if block does not participate in the solve
+    TRACE_JACOBI(block,"end()");
+    Solver::end_(block);
 
-  Field field = block->data()->field();
+  } else {
+ 
+    A_ = A;
 
-  allocate_temporary_(field,block);
+    Field field = block->data()->field();
 
-  (*piter_(block)) = 0.0;
+    allocate_temporary_(field,block);
+
+    (*piter_(block)) = 0.0;
   
-  // Refresh X
-  Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
+    // Refresh X
+    Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
 
-  refresh.add_field (ix_);
-
-  block->refresh_enter
-    (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
+    refresh.add_field (ix_);
+    
+    block->refresh_enter
+      (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
+  }
 }
 
 //----------------------------------------------------------------------

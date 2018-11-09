@@ -158,6 +158,13 @@ module enzo {
     entry void p_solver_bicgstab_loop_8();
     entry void p_solver_bicgstab_loop_9();
 
+    entry void p_dot_recv_parent(int n, long double dot[n],
+				 std::vector<int> isa,
+				 CkCallback cb);
+    entry void p_dot_recv_children(int n, long double dot[n],
+				   std::vector<int> isa,
+				   CkCallback cb);
+
     // EnzoSolverDd
     
     entry void p_solver_dd_restrict_recv(FieldMsg * msg);

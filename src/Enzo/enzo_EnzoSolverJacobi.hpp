@@ -20,6 +20,9 @@ public: // interface
   EnzoSolverJacobi(std::string name,
 		   std::string field_x,
 		   std::string field_b,
+		   int monitor_iter,
+		   int restart_cycle,
+		   int solve_type,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 

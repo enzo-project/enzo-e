@@ -47,8 +47,9 @@ Simulation::Simulation
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
-  scalar_descr_int_(NULL),
+  scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
+  scalar_descr_int_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
   field_descr_(NULL),
@@ -107,8 +108,8 @@ Simulation::Simulation()
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
+  scalar_descr_long_double_(NULL),
   scalar_descr_int_(NULL),
-  scalar_descr_double_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
   field_descr_(NULL),
@@ -155,8 +156,8 @@ Simulation::Simulation (CkMigrateMessage *m)
     schedule_balance_(NULL),
     monitor_(NULL),
     hierarchy_(NULL),
+    scalar_descr_long_double_(NULL),
     scalar_descr_int_(NULL),
-    scalar_descr_double_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
     field_descr_(NULL),
@@ -225,10 +226,12 @@ void Simulation::pup (PUP::er &p)
   if (up) hierarchy_ = new Hierarchy;
   p | *hierarchy_;
 
-  if (up) scalar_descr_int_ = new ScalarDescr;
-  p | *scalar_descr_int_;
+  if (up) scalar_descr_long_double_ = new ScalarDescr;
+  p | *scalar_descr_long_double_;
   if (up) scalar_descr_double_ = new ScalarDescr;
   p | *scalar_descr_double_;
+  if (up) scalar_descr_int_ = new ScalarDescr;
+  p | *scalar_descr_int_;
   if (up) scalar_descr_sync_ = new ScalarDescr;
   p | *scalar_descr_sync_;
   if (up) scalar_descr_void_ = new ScalarDescr;
@@ -468,10 +471,11 @@ void Simulation::initialize_monitor_() throw()
 
 void Simulation::initialize_data_descr_() throw()
 {
-  scalar_descr_int_    = new ScalarDescr;
-  scalar_descr_double_ = new ScalarDescr;
-  scalar_descr_sync_   = new ScalarDescr;
-  scalar_descr_void_   = new ScalarDescr;
+  scalar_descr_long_double_ = new ScalarDescr;
+  scalar_descr_double_      = new ScalarDescr;
+  scalar_descr_int_         = new ScalarDescr;
+  scalar_descr_sync_        = new ScalarDescr;
+  scalar_descr_void_        = new ScalarDescr;
 
   //--------------------------------------------------
   // parameter: Field : list
@@ -672,7 +676,7 @@ void Simulation::initialize_hierarchy_() throw()
   const int refinement = 2;
 
   hierarchy_ = factory()->create_hierarchy 
-    (rank_,refinement,config_->mesh_max_level);
+    (refinement,config_->mesh_max_level);
 
   // Domain extents
 

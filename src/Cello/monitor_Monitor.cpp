@@ -106,6 +106,11 @@ void Monitor::header () const
 #else
   print ("Define","NEW_OUTPUT          %s","no");
 #endif  
+#ifdef NEW_CONTRIBUTE  
+  print ("Define","NEW_CONTRIBUTE      %s","Yes");
+#else
+  print ("Define","NEW_CONTRIBUTE      %s","no");
+#endif  
 #ifndef CONFIG_PYTHON_LT_27
   print ("Define","CHARM_VERSION %d",CELLO_CHARM_VERSION);
 #   ifdef CONFIG_HAVE_MERCURIAL  

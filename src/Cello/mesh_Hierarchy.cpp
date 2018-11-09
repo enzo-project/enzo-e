@@ -18,11 +18,10 @@
 Hierarchy::Hierarchy 
 (
  const Factory * factory,
- int rank, int refinement,
+ int refinement,
  int max_level) throw ()
   :
   factory_((Factory *)factory),
-  rank_(rank),
   refinement_(refinement),
   max_level_(max_level),
   num_blocks_(0),
@@ -65,7 +64,6 @@ void Hierarchy::pup (PUP::er &p)
 
   if (up) factory_ = new Factory;
   p | *factory_;
-  p | rank_;
   p | refinement_;
   p | max_level_;
 
@@ -139,13 +137,6 @@ void Hierarchy::set_blocking(int nx, int ny, int nz) throw ()
   blocking_[1] = ny;
   blocking_[2] = nz;
 
-}
-
-//----------------------------------------------------------------------
-
-int Hierarchy::rank() const throw ()
-{ 
-  return rank_; 
 }
 
 //----------------------------------------------------------------------

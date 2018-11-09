@@ -112,6 +112,7 @@ Index Index::index_child (int icx, int icy, int icz, int min_level) const
 }
 
 //----------------------------------------------------------------------
+
 bool Index::is_on_boundary (int axis, int face, int narray) const
 {
 

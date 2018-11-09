@@ -41,6 +41,7 @@ public: // interface
     : num_field_data_(0),
       field_data_(),
       particle_data_(NULL),
+      scalar_data_long_double_(),
       scalar_data_double_(),
       scalar_data_int_(),
       scalar_data_sync_()
@@ -69,6 +70,7 @@ public: // interface
       particle_data_ = new ParticleData;
     }
     p | *particle_data_;
+    p | scalar_data_long_double_;
     p | scalar_data_double_;
     p | scalar_data_int_;
     p | scalar_data_sync_;
@@ -132,11 +134,11 @@ public: // interface
   // particles
   //----------------------------------------------------------------------
 
-  /// Return the ith Particle data
+  /// Return the constant Particle data
   const ParticleData * particle_data () const throw()
   { return particle_data_; }
 
-  /// Return the ith Particle data
+  /// Return the Particle data
   ParticleData * particle_data () throw()
   { return particle_data_; }
 
@@ -159,12 +161,20 @@ public: // interface
   
   ScalarData<double> * scalar_data_double ()
   { return &scalar_data_double_; }
+  ScalarData<long double> * scalar_data_long_double ()
+  { return &scalar_data_long_double_; }
   ScalarData<int> * scalar_data_int ()
   { return &scalar_data_int_; }
   ScalarData<Sync> * scalar_data_sync ()
   { return &scalar_data_sync_; }
   ScalarData<void *> * scalar_data_void ()
   { return &scalar_data_void_; }
+
+  /// Return the Scalar objects
+  Scalar<long double> scalar_long_double()
+  { return Scalar<long double>
+      (cello::scalar_descr_long_double(),
+       &scalar_data_long_double_); }
 
 private: // functions
 
@@ -182,10 +192,11 @@ private: // attributes
   ParticleData * particle_data_;
 
   /// Scalar data
-  ScalarData<double> scalar_data_double_;
-  ScalarData<int>    scalar_data_int_;
-  ScalarData<Sync>   scalar_data_sync_;
-  ScalarData<void *> scalar_data_void_;
+  ScalarData<long double> scalar_data_long_double_;
+  ScalarData<double>      scalar_data_double_;
+  ScalarData<int>         scalar_data_int_;
+  ScalarData<Sync>        scalar_data_sync_;
+  ScalarData<void *>      scalar_data_void_;
 
   /// Lower extent of the box associated with the block [computable]
   double lower_[3];

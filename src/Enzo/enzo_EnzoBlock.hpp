@@ -296,7 +296,12 @@ public: /// entry methods
   /// EnzoSolverBiCGStab entry method: ITER++
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
-  /// EnzoSolverDd
+  void p_dot_recv_parent  (int n, long double * dot_block,
+			   std::vector<int> is_array,  CkCallback cb);
+  void p_dot_recv_children(int n, long double * dot_block,
+			   std::vector<int> is_array,  CkCallback cb);
+
+/// EnzoSolverDd
   
   void p_solver_dd_restrict_recv(FieldMsg * msg);
   void p_solver_dd_prolong_recv(FieldMsg * msg);

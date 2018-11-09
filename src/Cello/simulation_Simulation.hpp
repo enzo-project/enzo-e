@@ -96,6 +96,8 @@ public: // interface
   { return config_; }
 
   /// Return the scalar descriptors
+  ScalarDescr * scalar_descr_long_double() throw()
+  { return scalar_descr_long_double_; }
   ScalarDescr * scalar_descr_double() throw()
   { return scalar_descr_double_; }
   ScalarDescr * scalar_descr_int() throw()
@@ -443,6 +445,7 @@ protected: // attributes
   Hierarchy * hierarchy_;
 
   /// Scalar descriptors
+  ScalarDescr * scalar_descr_long_double_;
   ScalarDescr * scalar_descr_double_;
   ScalarDescr * scalar_descr_int_;
   ScalarDescr * scalar_descr_sync_;
