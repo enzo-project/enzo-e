@@ -29,6 +29,12 @@ EnzoMethodVlct::EnzoMethodVlct ()
   refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
   refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
   refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+
+  // Temporarilly will set member variables to NULL
+  eos_ = NULL;
+  half_dt_recon_ = NULL;
+  full_dt_recon_ = NULL;
+  riemann_solver_ = NULL;
 }
 
 //----------------------------------------------------------------------
@@ -40,6 +46,13 @@ void EnzoMethodVlct::pup (PUP::er &p)
   TRACEPUP;
 
   Method::pup(p);
+
+  // I think this is appropriate, but not totally sure
+  // need to initialize to NULL
+  //p|eos_;
+  //p|half_dt_recon_;
+  //p|full_dt_recon_;
+  //p|riemann_solver_;
 }
 
 //----------------------------------------------------------------------
@@ -49,10 +62,163 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
+    
     // To be filled in!
+
+    
+
+    
+
+    // declaring vectors that track temporary field ids used for scratch space
+    // Can be optimized by declaring size right off the bat
+    // Not currently tracking arrays of field ids for 2 reasons:
+    //   1. Transparency (More obvious which method uses which fields)
+    //   2. Avoiding hassle of migrating attributes around
+    
+    // primitive cell-centered quantities
+    std::vector<int> prim_ids;
+
+    // left and right reconstructed primitives
+    std::vector<int> priml_ids; std::vector<int> primr_ids;
+
+    // flux ids
+    std::vector<int> flux_ids;
+
+    // edge-centered electric fields
+    std::vector<int> efield_ids;
+
+    // Temporary field to store the central E-field (can reuse it to store
+    // different components of the field at different times)
+    int center_efield_id;
+    // conserved ids at the half time-step
+    std::vector<int> temp_cons_ids;
+
+    // allocate the temporary fields (as necessary) and fill in the field_ids
+    allocate_temp_fields_(block, prim_ids, priml_ids, primr_ids, flux_ids,
+			  efield_ids, center_efield_id, temp_cons_ids);
+    
+    // the tracked conserved ids:
+    std::vector<int> cons_ids;
+
+    // Fill in the conserved ids
+
+    // Compute the primitive quantities with the EOS
+
+
+    // First Half-ts:
+    //   Compute the Conserved Quantites with Equation of State
+    //   Then, for each dimension, call compute_flux_ method, for each dimension
+    //   to compute the fluxes
+    //   After that, compute_efields
+    //   Update quantities
+    //   Possibly handle the CRs
+
+    // Repeat the operations of the First Half-ts, but now for the full timestep
+
+    // Deallocate Temporary Fields
+    deallocate_temp_fields_(block, prim_ids, priml_ids, primr_ids, flux_ids,
+			    efield_ids, center_efield_id, temp_cons_ids);
   }
 
   block->compute_done();
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodVlct::compute_flux_(Block *block, int flux_id, int dim,
+				   const std::vector<int> &prim_ids,
+				   EnzoReconstructor *reconstructor)
+{
+  // To be filled in
+
+  // we need to construct a list 
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodVlct::compute_efields_(Block *block,
+				      const std::vector<int> &flux_ids,
+				      int center_efield_id,
+				      const std::vector<int> &efield_ids,
+				      const std::vector<int> &prim_ids)
+{
+  // To be filled in
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodVlct::update_quantities_(Block *block,
+					const std::vector<int> &flux_ids,
+					const std::vector<int> &efield_ids,
+					const std::vector<int> &cur_cons_ids,
+					const std::vector<int> &out_cons_ids,
+					double dt)
+{
+  // To be filled in
+  // Should probably pass in the reference conserved ids
+  // Also pass in the output conserved ids (can optionally be the same as above)
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodVlct::allocate_temp_fields_(Block *block,
+					   std::vector<int> &prim_ids,
+					   std::vector<int> &priml_ids,
+					   std::vector<int> &primr_ids,
+					   std::vector<int> &flux_ids,
+					   std::vector<int> &efield_ids,
+					   int &center_efield_id,
+					   std::vector<int> &temp_cons_ids)
+{
+  // we could get clever here and take advantage of the fact that certain
+  // quantities are both conserved and primitives (e.g. density and B-field)
+  // But, special care needs to be taken. (If we match the primitive density to
+  // the conserved density, we will need to modify our definition of primitive
+  // density at the half-time step to refer to the temporary density)
+
+  // First get the conserved ids
+  
+
+  
+  // primitive cell-centered fields:
+  //     velocity_x, velocity_y, velocity_z, pressure (thermal)
+  // half-timestep cell-centered conserved quantities
+  //     temp_density, temp_momentum, temp_energy, temp_B-field
+  // half-timestep face-centered longitudinal B-field
+
+  // For each dimension, construct temporary flux fields centered along the
+  // faces in the given dimension
+  // -- For each dimension, save 1 field for each conserved quantity
+  //    (nominally 8 fields)
+  // -- We could cheat a little and create a dummy field that is used to
+  //    represent the flux along the longitudinal bfield component
+
+  // Allocate the temporary l/r primitive face-centered fields:
+  // -- density_l/r, velocity_x_l/r, velocity_y_l/r, velocity_z_l/r,
+  //    pressure_l/r bfield_y_l/r, bfield_z_l/r
+  // -- We are going to cheat a little and say that the fields are
+  //    face-centered along every dimension (so we can reuse the
+  //    temporary fields)
+
+
+  // Allocate the 3 temporary fields for the cell-centered electric fields
+  // and the edge-centered Electric fields
+
+  // implement
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
+					     std::vector<int> &prim_ids,
+					     std::vector<int> &priml_ids,
+					     std::vector<int> &primr_ids,
+					     std::vector<int> &flux_ids,
+					     std::vector<int> &efield_ids,
+					     int &center_efield_id,
+					     std::vector<int> &temp_cons_ids)
+{
+  // To be filled in
 }
 
 //----------------------------------------------------------------------
