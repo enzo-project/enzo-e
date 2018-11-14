@@ -62,12 +62,27 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
-    
-    // To be filled in!
+    // declare vectors of the tracked conserved and face-centered B-fields:
+    std::vector<int> cons_ids;
+    std::vector<int> bface_ids;
 
-    
+    // Fill in cons_ids and bface_ids
+    EnzoBlock * enzo_block = enzo::block(block);
+    Field field = enzo_block->data()->field();
 
-    
+    // this might be an attribute worth storing:
+    std::string cons_names[8] = {"density", "momentum_x", "momentum_y",
+				 "momentum_z", "total_energy", "bfieldc_x",
+				 "bfieldc_y", "bfieldc_z"};
+
+    for (int i=0;i<8;i++){
+	cons_ids.push_back( field.field_id(cons_names[i]) );
+    }
+
+    bface_ids.push_back(field.field_id("bfieldi_x"));
+    bface_ids.push_back(field.field_id("bfieldi_y"));
+    bface_ids.push_back(field.field_id("bfieldi_z"));
+
 
     // declaring vectors that track temporary field ids used for scratch space
     // Can be optimized by declaring size right off the bat
@@ -82,7 +97,9 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     std::vector<int> priml_ids; std::vector<int> primr_ids;
 
     // flux ids
-    std::vector<int> flux_ids;
+    std::vector<int> xflux_ids;
+    std::vector<int> yflux_ids;
+    std::vector<int> zflux_ids;
 
     // edge-centered electric fields
     std::vector<int> efield_ids;
@@ -90,34 +107,77 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // Temporary field to store the central E-field (can reuse it to store
     // different components of the field at different times)
     int center_efield_id;
-    // conserved ids at the half time-step
+
+    // cell-centered conserved ids at the half time-step
     std::vector<int> temp_cons_ids;
 
+    // face-centered B-fields at the half time-step
+    std::vector<int> temp_bface_ids;
+
     // allocate the temporary fields (as necessary) and fill in the field_ids
-    allocate_temp_fields_(block, prim_ids, priml_ids, primr_ids, flux_ids,
-			  efield_ids, center_efield_id, temp_cons_ids);
+    // need to update to allocate fluxes along each dimension!!!
+    allocate_temp_fields_(block, prim_ids, priml_ids, primr_ids, xflux_ids,
+			  yflux_ids, zflux_ids, efield_ids, center_efield_id,
+			  temp_cons_ids, temp_bface_ids, cons_ids);
+
+    // the following line is copied from EnzoMethodPpm & EnzoMethodHydro
+    double dt = block->dt();
+
+    // repeat the following twice (for half time-step and full time-step
+    for (int i=0;i<2;i++){
+      double cur_dt;
+      std::vector<int> *out_cons_ids;
+      std::vector<int> *out_bface_ids;
+      if (i == 0){
+	cur_dt = dt/2.;
+	out_cons_ids = &temp_cons_ids;
+	out_bface_ids = &temp_bface_ids;
+
+	// By Default, prim_ids points to the density and cell-centered B-field
+	// field ids stored in cons_ids - this is correct for first half ts
+
+	// Compute the primitive Quantites with Equation of State
+	eos_->primitive_from_conservative (block, cons_ids, prim_ids);
+
+      } else {
+	cur_dt = dt;
+	out_cons_ids = &cons_ids;
+	out_bface_ids = &bface_ids;
+
+	// prim_ids needs to point to the density and cell-centered B-field
+	// field ids stored in temp_cons_ids
+	prim_ids[0] = temp_cons_ids[0]; // density
+	for (int i=0;i<3;i++){
+	  prim_ids[i+5] = temp_cons_ids[i+5]; // mag field
+	}
+	// Compute the primitive Quantites with Equation of State
+	eos_->primitive_from_conservative (block, temp_cons_ids, prim_ids);
+      }
+
+      // Compute flux along each dimension
+      compute_flux_(block, 0, prim_ids, bface_ids, priml_ids, primr_ids,
+		    xflux_ids,half_dt_recon_);
+      compute_flux_(block, 1, prim_ids, bface_ids, priml_ids, primr_ids,
+		    yflux_ids,half_dt_recon_);
+      compute_flux_(block, 2, prim_ids, bface_ids, priml_ids, primr_ids,
+		    zflux_ids,half_dt_recon_);
     
-    // the tracked conserved ids:
-    std::vector<int> cons_ids;
-
-    // Fill in the conserved ids
-
-    // Compute the primitive quantities with the EOS
-
-
-    // First Half-ts:
-    //   Compute the Conserved Quantites with Equation of State
-    //   Then, for each dimension, call compute_flux_ method, for each dimension
-    //   to compute the fluxes
-    //   After that, compute_efields
-    //   Update quantities
-    //   Possibly handle the CRs
-
-    // Repeat the operations of the First Half-ts, but now for the full timestep
+      // Compute_efields
+      compute_efields_(block, xflux_ids, yflux_ids, zflux_ids,
+		       center_efield_id, efield_ids, prim_ids);
+      // Possibly handle the CR source terms (and other hydro source terms)
+      // right here
+      
+      // Update quantities
+      update_quantities_(block, xflux_ids, yflux_ids, zflux_ids,
+			 efield_ids, cons_ids, *out_cons_ids, bface_ids,
+			 *out_bface_ids, cur_dt);
+    }
 
     // Deallocate Temporary Fields
-    deallocate_temp_fields_(block, prim_ids, priml_ids, primr_ids, flux_ids,
-			    efield_ids, center_efield_id, temp_cons_ids);
+    deallocate_temp_fields_(block, prim_ids, priml_ids, primr_ids, xflux_ids,
+			    yflux_ids, zflux_ids, efield_ids, center_efield_id,
+			    temp_cons_ids, temp_bface_ids);
   }
 
   block->compute_done();
@@ -125,8 +185,12 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::compute_flux_(Block *block, int flux_id, int dim,
+void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 				   const std::vector<int> &prim_ids,
+				   const std::vector<int> &bface_ids,
+				   std::vector<int> &priml_ids,
+				   std::vector<int> &primr_ids,
+				   std::vector<int> &flux_ids,
 				   EnzoReconstructor *reconstructor)
 {
   // To be filled in
@@ -137,7 +201,9 @@ void EnzoMethodVlct::compute_flux_(Block *block, int flux_id, int dim,
 //----------------------------------------------------------------------
 
 void EnzoMethodVlct::compute_efields_(Block *block,
-				      const std::vector<int> &flux_ids,
+				      const std::vector<int> &xflux_ids,
+				      const std::vector<int> &yflux_ids,
+				      const std::vector<int> &zflux_ids,
 				      int center_efield_id,
 				      const std::vector<int> &efield_ids,
 				      const std::vector<int> &prim_ids)
@@ -148,10 +214,14 @@ void EnzoMethodVlct::compute_efields_(Block *block,
 //----------------------------------------------------------------------
 
 void EnzoMethodVlct::update_quantities_(Block *block,
-					const std::vector<int> &flux_ids,
+					const std::vector<int> &xflux_ids,
+					const std::vector<int> &yflux_ids,
+					const std::vector<int> &zflux_ids,
 					const std::vector<int> &efield_ids,
 					const std::vector<int> &cur_cons_ids,
 					const std::vector<int> &out_cons_ids,
+					const std::vector<int> &cur_bface_ids,
+					const std::vector<int> &out_bface_ids,
 					double dt)
 {
   // To be filled in
@@ -165,46 +235,119 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   std::vector<int> &prim_ids,
 					   std::vector<int> &priml_ids,
 					   std::vector<int> &primr_ids,
-					   std::vector<int> &flux_ids,
+					   std::vector<int> &xflux_ids,
+					   std::vector<int> &yflux_ids,
+					   std::vector<int> &zflux_ids,
 					   std::vector<int> &efield_ids,
 					   int &center_efield_id,
-					   std::vector<int> &temp_cons_ids)
+					   std::vector<int> &temp_cons_ids,
+					   std::vector<int> &temp_bface_ids,
+					   const std::vector<int> &cons_ids)
 {
-  // we could get clever here and take advantage of the fact that certain
-  // quantities are both conserved and primitives (e.g. density and B-field)
-  // But, special care needs to be taken. (If we match the primitive density to
-  // the conserved density, we will need to modify our definition of primitive
-  // density at the half-time step to refer to the temporary density)
+  // This will need to be modified when we add on more physics (e.g. CRs)
 
-  // First get the conserved ids
-  
+  FieldDescr * field_descr = cello::field_descr();
+  EnzoBlock * enzo_block = enzo::block(block);
+  Field field = enzo_block->data()->field();
 
-  
-  // primitive cell-centered fields:
-  //     velocity_x, velocity_y, velocity_z, pressure (thermal)
-  // half-timestep cell-centered conserved quantities
-  //     temp_density, temp_momentum, temp_energy, temp_B-field
-  // half-timestep face-centered longitudinal B-field
-
-  // For each dimension, construct temporary flux fields centered along the
-  // faces in the given dimension
-  // -- For each dimension, save 1 field for each conserved quantity
-  //    (nominally 8 fields)
-  // -- We could cheat a little and create a dummy field that is used to
-  //    represent the flux along the longitudinal bfield component
-
-  // Allocate the temporary l/r primitive face-centered fields:
-  // -- density_l/r, velocity_x_l/r, velocity_y_l/r, velocity_z_l/r,
-  //    pressure_l/r bfield_y_l/r, bfield_z_l/r
-  // -- We are going to cheat a little and say that the fields are
-  //    face-centered along every dimension (so we can reuse the
-  //    temporary fields)
+  // First, reserve/allocate temporary conserved cell-centered fields
+  for (int i=0;i<8;i++){
+    // Reserve a temporary field
+    int ir_ = field_descr->insert_temporary();
+    // Allocate the field
+    field.allocate_temporary(ir_);
+    temp_cons_ids.push_back(ir_);
+  }
 
 
-  // Allocate the 3 temporary fields for the cell-centered electric fields
-  // and the edge-centered Electric fields
+  // Next, reserve/allocate temporary Face-Centered B-fields fields
+  for (int i=0;i<3;i++){
+    // Reserve a temporary field
+    int ir_ = field_descr->insert_temporary();
+    // Specify that the field is face-centered
+    int cx = (i == 0) ? 1 : 0;
+    int cy = (i == 1) ? 1 : 0;
+    int cz = (i == 2) ? 1 : 0;
+    field_descr->set_centering(ir_,cx,cy,cz);
+    // Allocate the field
+    field.allocate_temporary(ir_);
+    temp_bface_ids.push_back(ir_);
+  }
 
-  // implement
+  // deal with cell-centered primitives
+  // reuse density and cell-centered B-fields from cons_ids
+  // need to take special care to swap density and cell-centered B-field
+  // field ids after the half time step.
+  for (int i=0;i<8;i++){
+    if ((i > 0) && (i<5)) {
+      // Reserve a temporary field
+      int ir_ = field_descr->insert_temporary();
+      // Allocate the field
+      field.allocate_temporary(ir_);
+      prim_ids.push_back(ir_);
+    } else {
+      // set the primitive id equal to that of the corresponding field
+      prim_ids.push_back(cons_ids[i]);
+    }
+  }
+
+  // reserve/allocate fields for reconstructed left/right interface primitives
+  // we "cheat" here and say fields are corner-centered (so we can reuse the
+  // temporary fields for each dimension)
+
+  for (int i=0;i<2;i++){
+    for (int j=0;i<8;j++){
+      // Reserve a temporary field
+      int ir_ = field_descr->insert_temporary();
+      // Specify that the field is corner-centered
+      field_descr->set_centering(ir_,1,1,1);
+      // Allocate the field
+      field.allocate_temporary(ir_);
+      switch(i) {
+      case 0 : priml_ids.push_back(ir_);
+      case 1 : primr_ids.push_back(ir_);
+      }
+    }
+  }
+
+  // reserve/allocate fields for reconstructed for fluxes
+  for (int i=0;i<3;i++){
+    int cx = (i == 0) ? 1 : 0;
+    int cy = (i == 1) ? 1 : 0;
+    int cz = (i == 2) ? 1 : 0;
+    for (int j=0;j<8;j++){
+      // Reserve a temporary field
+      int ir_ = field_descr->insert_temporary();
+      // Specify that the field is face-centered
+      field_descr->set_centering(ir_,cx,cy,cz);
+      // Allocate the field
+      field.allocate_temporary(ir_);
+
+      switch(i) {
+      case 0 : xflux_ids.push_back(ir_);
+      case 1 : yflux_ids.push_back(ir_);
+      case 2 : zflux_ids.push_back(ir_);
+      }
+    }
+  }
+
+  // reserve/allocate fields for edge-centered electric fields
+  for (int i=0;i<3;i++){
+    // Reserve a temporary field
+    int ir_ = field_descr->insert_temporary();
+    // Specify that the field is edge-centered
+    int cx = (i == 0) ? 0 : 1;
+    int cy = (i == 1) ? 0 : 1;
+    int cz = (i == 2) ? 0 : 1;
+    field_descr->set_centering(ir_,cx,cy,cz);
+    // Allocate the field
+    field.allocate_temporary(ir_);
+    temp_bface_ids.push_back(ir_);
+  }
+
+  // reserve/allocate field for face-centered electric field
+  center_efield_id = field_descr->insert_temporary();
+  field.allocate_temporary(center_efield_id);
 }
 
 //----------------------------------------------------------------------
@@ -213,12 +356,64 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 					     std::vector<int> &prim_ids,
 					     std::vector<int> &priml_ids,
 					     std::vector<int> &primr_ids,
-					     std::vector<int> &flux_ids,
+					     std::vector<int> &xflux_ids,
+					     std::vector<int> &yflux_ids,
+					     std::vector<int> &zflux_ids,
 					     std::vector<int> &efield_ids,
 					     int &center_efield_id,
-					     std::vector<int> &temp_cons_ids)
+					     std::vector<int> &temp_cons_ids,
+					     std::vector<int> &temp_bface_ids)
 {
-  // To be filled in
+  EnzoBlock * enzo_block = enzo::block(block);
+  Field field = enzo_block->data()->field();
+
+  for (int i=0;i<8;i++){
+    field.deallocate_temporary(temp_cons_ids[i]);
+  }
+  temp_cons_ids.clear();
+
+  for (int i=0;i<3;i++){
+    field.deallocate_temporary(temp_bface_ids[i]);
+  }
+  temp_bface_ids.clear();
+
+  
+  // need to be careful with prim_ids
+  // we already deallocated the other temporary fields with temp_cons_ids
+  for (int i=1;i<5;i++){
+    field.deallocate_temporary(prim_ids[i]);
+  }
+  prim_ids.clear();
+
+  for (int i=0;i<8;i++){
+    field.deallocate_temporary(priml_ids[i]);
+  }
+  priml_ids.clear();
+
+  for (int i=0;i<8;i++){
+    field.deallocate_temporary(primr_ids[i]);
+  }
+  primr_ids.clear();
+
+  for (int i=0;i<3;i++){
+    std::vector<int> *flux_ids;
+    switch(i){
+    case 0 : flux_ids = &xflux_ids;
+    case 1 : flux_ids = &yflux_ids;
+    case 2 : flux_ids = &zflux_ids;
+    }
+    for (int i=0;i<8;i++){
+      field.deallocate_temporary((*flux_ids)[i]);
+    }
+    flux_ids->clear();
+  }
+
+  for (int i=0;i<3;i++){
+    field.deallocate_temporary(efield_ids[i]);
+  }
+  efield_ids.clear();
+
+  field.deallocate_temporary(center_efield_id);
 }
 
 //----------------------------------------------------------------------

@@ -48,13 +48,18 @@ protected: // methods
 
   // not sure if I will pass field_ids and blocks or arrays
   // not sure if this should be static
-  void compute_flux_(Block *block, int flux_id, int dim,
-		     const std::vector<int> &prim_ids,
+  void compute_flux_(Block *block, int dim, const std::vector<int> &prim_ids,
+		     const std::vector<int> &bface_ids,
+		     std::vector<int> &priml_ids,
+		     std::vector<int> &primr_ids,
+		     std::vector<int> &flux_ids,
 		     EnzoReconstructor *reconstructor);
 
   // compute the Electric fields using the fluxes and cell-centered
   // primitives
-  void compute_efields_(Block *block, const std::vector<int> &flux_ids,
+  void compute_efields_(Block *block, const std::vector<int> &xflux_ids,
+			const std::vector<int> &yflux_ids,
+			const std::vector<int> &zflux_ids,
 			int center_efield_id,
 			const std::vector<int> &efield_ids,
 			const std::vector<int> &prim_ids);
@@ -63,10 +68,14 @@ protected: // methods
   // cur_cons_ids indicates the values of the conserved ids to add flux to
   // out_cons_ids indicates the place to update the conserved ids (this can be
   // identical to cur_cons_ids)
-  void update_quantities_(Block *block, const std::vector<int> &flux_ids,
+  void update_quantities_(Block *block, const std::vector<int> &xflux_ids,
+			  const std::vector<int> &yflux_ids,
+			  const std::vector<int> &zflux_ids,
 			  const std::vector<int> &efield_ids,
 			  const std::vector<int> &cur_cons_ids,
 			  const std::vector<int> &out_cons_ids,
+			  const std::vector<int> &cur_bface_ids,
+			  const std::vector<int> &out_bface_ids,
 			  double dt);
 
   // allocate the temporary fields needed for scratch space and store their ids
@@ -74,19 +83,26 @@ protected: // methods
   void allocate_temp_fields_(Block *block, std::vector<int> &prim_ids,
 			     std::vector<int> &priml_ids,
 			     std::vector<int> &primr_ids,
-			     std::vector<int> &flux_ids,
+			     std::vector<int> &xflux_ids,
+			     std::vector<int> &yflux_ids,
+			     std::vector<int> &zflux_ids,
 			     std::vector<int> &efield_ids,
 			     int &center_efield_id,
-			     std::vector<int> &temp_cons_ids);
+			     std::vector<int> &temp_cons_ids,
+			     std::vector<int> &temp_bface_ids,
+			     const std::vector<int> &cons_ids);
 
   // deallocate the temporary fields used for scratch space
   void deallocate_temp_fields_(Block *block, std::vector<int> &prim_ids,
 			       std::vector<int> &priml_ids,
 			       std::vector<int> &primr_ids,
-			       std::vector<int> &flux_ids,
+			       std::vector<int> &xflux_ids,
+			       std::vector<int> &yflux_ids,
+			       std::vector<int> &zflux_ids,
 			       std::vector<int> &efield_ids,
 			       int &center_efield_id,
-			       std::vector<int> &temp_cons_ids);
+			       std::vector<int> &temp_cons_ids,
+			       std::vector<int> &temp_bface_ids);
 
 protected: // attributes
 
