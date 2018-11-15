@@ -221,6 +221,7 @@ struct fluxes
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoReconstructor.hpp"
 #include "enzo_EnzoRiemannSolver.hpp"
+#include "enzo_EnzoConstrainedTransport.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"

@@ -19,6 +19,7 @@ EnzoMethodVlct::EnzoMethodVlct ()
   refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   refresh(ir)->add_field(field_descr->field_id("velocity_y"));
   refresh(ir)->add_field(field_descr->field_id("velocity_z"));
+  // total energy should be specific energy
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
   refresh(ir)->add_field(field_descr->field_id("bfieldc_x"));
   refresh(ir)->add_field(field_descr->field_id("bfieldc_y"));
@@ -83,7 +84,6 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     bface_ids.push_back(field.field_id("bfieldi_y"));
     bface_ids.push_back(field.field_id("bfieldi_z"));
 
-
     // declaring vectors that track temporary field ids used for scratch space
     // Can be optimized by declaring size right off the bat
     // Not currently tracking arrays of field ids for 2 reasons:
@@ -118,23 +118,27 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // need to update to allocate fluxes along each dimension!!!
     allocate_temp_fields_(block, prim_ids, priml_ids, primr_ids, xflux_ids,
 			  yflux_ids, zflux_ids, efield_ids, center_efield_id,
-			  temp_cons_ids, temp_bface_ids, cons_ids);
+			  temp_cons_ids, temp_bface_ids);
 
+    // allocate constrained transport object
+    EnzoConstrainedTransport ct = EnzoConstrainedTransport();
+    
     // the following line is copied from EnzoMethodPpm & EnzoMethodHydro
     double dt = block->dt();
 
-    // repeat the following twice (for half time-step and full time-step
+    // repeat the following twice (for half time-step and full time-step)
     for (int i=0;i<2;i++){
       double cur_dt;
       std::vector<int> *out_cons_ids;
+      std::vector<int> *cur_bface_ids;
       std::vector<int> *out_bface_ids;
+      EnzoReconstructor *reconstructor;
       if (i == 0){
 	cur_dt = dt/2.;
 	out_cons_ids = &temp_cons_ids;
+	cur_bface_ids = &bface_ids;
 	out_bface_ids = &temp_bface_ids;
-
-	// By Default, prim_ids points to the density and cell-centered B-field
-	// field ids stored in cons_ids - this is correct for first half ts
+	reconstructor = half_dt_recon_;
 
 	// Compute the primitive Quantites with Equation of State
 	eos_->primitive_from_conservative (block, cons_ids, prim_ids);
@@ -142,36 +146,32 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       } else {
 	cur_dt = dt;
 	out_cons_ids = &cons_ids;
+	cur_bface_ids = &temp_bface_ids;
 	out_bface_ids = &bface_ids;
+	reconstructor = full_dt_recon_;
 
-	// prim_ids needs to point to the density and cell-centered B-field
-	// field ids stored in temp_cons_ids
-	prim_ids[0] = temp_cons_ids[0]; // density
-	for (int i=0;i<3;i++){
-	  prim_ids[i+5] = temp_cons_ids[i+5]; // mag field
-	}
 	// Compute the primitive Quantites with Equation of State
 	eos_->primitive_from_conservative (block, temp_cons_ids, prim_ids);
       }
 
       // Compute flux along each dimension
-      compute_flux_(block, 0, prim_ids, bface_ids, priml_ids, primr_ids,
-		    xflux_ids,half_dt_recon_);
-      compute_flux_(block, 1, prim_ids, bface_ids, priml_ids, primr_ids,
-		    yflux_ids,half_dt_recon_);
-      compute_flux_(block, 2, prim_ids, bface_ids, priml_ids, primr_ids,
-		    zflux_ids,half_dt_recon_);
+      compute_flux_(block, 0, prim_ids, *cur_bface_ids, priml_ids, primr_ids,
+		    xflux_ids,*reconstructor);
+      compute_flux_(block, 1, prim_ids, *cur_bface_ids, priml_ids, primr_ids,
+		    yflux_ids,*reconstructor);
+      compute_flux_(block, 2, prim_ids, *cur_bface_ids, priml_ids, primr_ids,
+		    zflux_ids,*reconstructor);
     
       // Compute_efields
       compute_efields_(block, xflux_ids, yflux_ids, zflux_ids,
-		       center_efield_id, efield_ids, prim_ids);
-      // Possibly handle the CR source terms (and other hydro source terms)
-      // right here
-      
+		       center_efield_id, efield_ids, prim_ids, ct);
+
       // Update quantities
       update_quantities_(block, xflux_ids, yflux_ids, zflux_ids,
 			 efield_ids, cons_ids, *out_cons_ids, bface_ids,
 			 *out_bface_ids, cur_dt);
+
+      // Add source Terms
     }
 
     // Deallocate Temporary Fields
@@ -186,42 +186,69 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 //----------------------------------------------------------------------
 
 void EnzoMethodVlct::compute_flux_(Block *block, int dim,
-				   const std::vector<int> &prim_ids,
-				   const std::vector<int> &bface_ids,
+				   std::vector<int> &prim_ids,
+				   std::vector<int> &bface_ids,
 				   std::vector<int> &priml_ids,
 				   std::vector<int> &primr_ids,
 				   std::vector<int> &flux_ids,
-				   EnzoReconstructor *reconstructor)
+				   EnzoReconstructor &reconstructor)
 {
-  // To be filled in
+  // First, let's reconstruct the left and right interface values
+  reconstructor.reconstruct_interface(block, prim_ids, priml_ids, primr_ids,
+				      dim);
 
-  // we need to construct a list 
+  // Need to set the reconstructed values equal to the bface_ids
+  
+
+  // Next, compute the fluxes
+  riemann_solver_->solve(block, priml_ids, primr_ids, flux_ids, dim, eos_);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodVlct::compute_efields_(Block *block,
-				      const std::vector<int> &xflux_ids,
-				      const std::vector<int> &yflux_ids,
-				      const std::vector<int> &zflux_ids,
+				      std::vector<int> &xflux_ids,
+				      std::vector<int> &yflux_ids,
+				      std::vector<int> &zflux_ids,
 				      int center_efield_id,
-				      const std::vector<int> &efield_ids,
-				      const std::vector<int> &prim_ids)
+				      std::vector<int> &efield_ids,
+				      std::vector<int> &prim_ids,
+				      EnzoConstrainedTransport &ct)
 {
-  // To be filled in
+
+  // Maybe the following should be handled internally by ct?
+  for (int i = 0; i <3; i++){
+    ct.compute_cell_center_efield (block, i, center_efield_id,
+				   prim_ids);
+    std::vector<int> *jflux_ids;
+    std::vector<int> *kflux_ids;
+    if (i == 0){
+      jflux_ids = &yflux_ids;
+      kflux_ids = &zflux_ids;
+    } else if (i==1){
+      jflux_ids = &zflux_ids;
+      kflux_ids = &xflux_ids;
+    } else {
+      jflux_ids = &xflux_ids;
+      kflux_ids = &yflux_ids;
+    }
+
+    ct.compute_edge_efield (block, i,efield_ids[i], center_efield_id,
+			    *jflux_ids, *kflux_ids, prim_ids);
+  }
 }
 
 //----------------------------------------------------------------------
 
 void EnzoMethodVlct::update_quantities_(Block *block,
-					const std::vector<int> &xflux_ids,
-					const std::vector<int> &yflux_ids,
-					const std::vector<int> &zflux_ids,
-					const std::vector<int> &efield_ids,
-					const std::vector<int> &cur_cons_ids,
-					const std::vector<int> &out_cons_ids,
-					const std::vector<int> &cur_bface_ids,
-					const std::vector<int> &out_bface_ids,
+					std::vector<int> &xflux_ids,
+					std::vector<int> &yflux_ids,
+					std::vector<int> &zflux_ids,
+					std::vector<int> &efield_ids,
+					std::vector<int> &cur_cons_ids,
+					std::vector<int> &out_cons_ids,
+					std::vector<int> &cur_bface_ids,
+					std::vector<int> &out_bface_ids,
 					double dt)
 {
   // To be filled in
@@ -241,8 +268,7 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   std::vector<int> &efield_ids,
 					   int &center_efield_id,
 					   std::vector<int> &temp_cons_ids,
-					   std::vector<int> &temp_bface_ids,
-					   const std::vector<int> &cons_ids)
+					   std::vector<int> &temp_bface_ids)
 {
   // This will need to be modified when we add on more physics (e.g. CRs)
 
@@ -275,21 +301,14 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   }
 
   // deal with cell-centered primitives
-  // reuse density and cell-centered B-fields from cons_ids
-  // need to take special care to swap density and cell-centered B-field
-  // field ids after the half time step.
   for (int i=0;i<8;i++){
-    if ((i > 0) && (i<5)) {
-      // Reserve a temporary field
-      int ir_ = field_descr->insert_temporary();
-      // Allocate the field
-      field.allocate_temporary(ir_);
-      prim_ids.push_back(ir_);
-    } else {
-      // set the primitive id equal to that of the corresponding field
-      prim_ids.push_back(cons_ids[i]);
-    }
+    // Reserve a temporary field
+    int ir_ = field_descr->insert_temporary();
+    // Allocate the field
+    field.allocate_temporary(ir_);
+    prim_ids.push_back(ir_);
   }
+
 
   // reserve/allocate fields for reconstructed left/right interface primitives
   // we "cheat" here and say fields are corner-centered (so we can reuse the
@@ -360,7 +379,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 					     std::vector<int> &yflux_ids,
 					     std::vector<int> &zflux_ids,
 					     std::vector<int> &efield_ids,
-					     int &center_efield_id,
+					     int center_efield_id,
 					     std::vector<int> &temp_cons_ids,
 					     std::vector<int> &temp_bface_ids)
 {
@@ -380,7 +399,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   
   // need to be careful with prim_ids
   // we already deallocated the other temporary fields with temp_cons_ids
-  for (int i=1;i<5;i++){
+  for (int i=0;i<8;i++){
     field.deallocate_temporary(prim_ids[i]);
   }
   prim_ids.clear();

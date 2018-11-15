@@ -33,11 +33,13 @@ public: // interface
   //}
 
   // Reconstructs the interface values
-  // (May want to avoid reconstructing longitudinal values)
-  virtual void reconstruct_interface (Block *block,
-				      const std::vector<int> &prim_ids,
-				      const std::vector<int> &priml_ids,
-				      const std::vector<int> &primr_ids)=0;
+  // priml and primr are formally defined as corner-centered. However all
+  // operations assume that they are face-centered along only 1 dimension.
+  // This amounts to having some extra space at the end of the array
+  virtual void reconstruct_interface (Block *block, std::vector<int> &prim_ids,
+				      std::vector<int> &priml_ids,
+				      std::vector<int> &primr_ids,
+				      int dim)=0;
 };
 
 #endif /* ENZO_ENZO_RECONSTRUCTOR_HPP */

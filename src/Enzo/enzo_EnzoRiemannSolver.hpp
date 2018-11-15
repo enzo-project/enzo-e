@@ -33,8 +33,8 @@ public: // interface
   /// Probably want to make dim, an enum (x,y or z) Current plan: [0, 1, 2]
   /// dim tells the solver which dimension to compute fluxes and indicates the
   /// dimension along which the reconstructed primitive values are face-centered
-  virtual void solve (Block *block, const std::vector<int> &priml_ids,
-		      const std::vector<int> &primr_ids,
+  virtual void solve (Block *block, std::vector<int> &priml_ids,
+		      std::vector<int> &primr_ids,
 		      std::vector<int> &flux_ids, int dim,
 		      EnzoEquationOfState *eos)=0;
 };
