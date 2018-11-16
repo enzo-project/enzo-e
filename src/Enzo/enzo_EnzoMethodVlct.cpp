@@ -33,6 +33,7 @@ EnzoMethodVlct::EnzoMethodVlct ()
 
   // Temporarilly will set member variables to NULL
   eos_ = NULL;
+  // Need to switch the half dt reconstructor to the nearest neighbor.
   half_dt_recon_ = NULL;
   full_dt_recon_ = NULL;
   riemann_solver_ = NULL;
@@ -198,7 +199,40 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 				      dim);
 
   // Need to set the reconstructed values equal to the bface_ids
-  
+  // This should be handled internally by reconstructor
+  // NEED TO CHECK THAT THE DIMENSIONS GIVEN FOR THE FLUX IDS ARE TRULY
+  // FACE-CENTERED
+
+  Field field = block->data()->field();
+  const int id = bface_ids[dim];
+
+  // iteration dimensions
+  int mx, my, mz;
+  field.dimensions (id,&mx,&my,&mz);
+
+  // size of active zone
+  int nx,ny,nz;
+  field.size(&nx,&ny,&nz);
+
+  // size of the ghost zones
+  int gx,gy,gz;
+  field.ghost_depth(id,&gx,&gy,&gz);
+
+  // Get the field data
+
+  enzo_float *bfield = (enzo_float *) field.values(id);
+  enzo_float *l_bfield = (enzo_float *) field.values(priml_ids[5+dim]);
+  enzo_float *r_bfield = (enzo_float *) field.values(primr_ids[5+dim]);
+
+  for (int iz=1; iz<mz-1; iz++) {
+    for (int iy=1; iy<my-1; iy++) {
+      for (int ix=1; ix<mx-1; ix++) {
+	int i = ix + mx*(iy + my*iz);
+	l_bfield[i] = bfield[i];
+	r_bfield[i] = bfield[i];
+      }
+    }
+  }
 
   // Next, compute the fluxes
   riemann_solver_->solve(block, priml_ids, primr_ids, flux_ids, dim, eos_);
@@ -309,7 +343,21 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
     prim_ids.push_back(ir_);
   }
 
-
+  // Fluxes, reconstructed left/right interface primitives can be better
+  // and efields can be better optimized. Currently, they are constructed so
+  // that they will have the exact memory layout expected for a face-centered
+  // field (including the ghost zones). We are using this for right now, for
+  // simplicity. (This is primarily useful for going between face-centered
+  // B fields and these temporary fields).
+  //
+  // In fact this is not necessary. Consider the ith dimension of a field with
+  // N cells. If we had face-centered values along that field we would have
+  // need to have N+1 elements along that dimension.
+  //
+  // When we are computing values at the interfaces between cells, we only need
+  // N-1 elements along that dimension (we don't calculate anything for
+  // outermost faces)
+  //
   // reserve/allocate fields for reconstructed left/right interface primitives
   // we "cheat" here and say fields are corner-centered (so we can reuse the
   // temporary fields for each dimension)

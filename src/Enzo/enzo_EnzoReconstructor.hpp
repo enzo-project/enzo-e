@@ -1,6 +1,7 @@
 
 #ifndef ENZO_ENZO_RECONSTRUCTOR_HPP
 #define ENZO_ENZO_RECONSTRUCTOR_HPP
+
 class EnzoReconstructor : public PUP::able
 {
   /// @class    EnzoReconstructor

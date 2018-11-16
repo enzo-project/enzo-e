@@ -220,6 +220,7 @@ struct fluxes
 
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoReconstructor.hpp"
+#include "enzo_EnzoReconstructorPLM.hpp"
 #include "enzo_EnzoRiemannSolver.hpp"
 #include "enzo_EnzoConstrainedTransport.hpp"
 
