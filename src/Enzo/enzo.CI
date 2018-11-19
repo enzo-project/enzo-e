@@ -38,15 +38,12 @@ module enzo {
   //==================================================
   // WARNING: Enable the following two lines iff use_grackle = 1
   // in top-level SConstruct file
-  //    AE: Currently the ifdef does not work properly
-  //        Sympotom of this being set incorrectly are
-  //        vtable errors in linking step of compilation
   // ==================================================
 
-  // #ifdef CONFIG_USE_GRACKLE
+#ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
   PUPable EnzoMethodGrackle;
-  // #endif
+#endif
 
   PUPable EnzoBoundary;
   PUPable EnzoConfig;
