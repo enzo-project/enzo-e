@@ -147,7 +147,7 @@ double ScheduleInterval::update_timestep ( double time, double dt)
     // time_interval_
     {
 
-      bool in_range = (time_start_ < time && time < time_stop_);
+      bool in_range = (time_start_ <= time && time < time_stop_);
 
       if (in_range) {
 
