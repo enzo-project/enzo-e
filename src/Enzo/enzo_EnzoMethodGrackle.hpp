@@ -53,7 +53,10 @@ public: // interface
 
   /// Charm++ PUP::able migration constructor
   EnzoMethodGrackle (CkMigrateMessage *m)
-    : Method (m), grackle_units_()
+    : Method (m)
+#ifdef CONFIG_USE_GRACKLE
+      , grackle_units_()
+#endif
     {  }
 
   /// CHARM++ Pack / Unpack function
@@ -85,7 +88,6 @@ public: // interface
 
 protected: // methods
 
-
 #ifdef CONFIG_USE_GRACKLE
   void compute_( EnzoBlock * enzo_block) throw();
 
@@ -93,10 +95,8 @@ protected: // methods
 
 // protected: // attributes
 
-
   code_units grackle_units_;
 #endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
-
 
 
 };
