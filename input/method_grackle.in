@@ -122,7 +122,7 @@
  }
 
  Method {
-      list = [ "grackle"];
+      list = [ "grackle", "null"];
 
      grackle {
         courant = 0.40;
@@ -136,6 +136,12 @@
 
         HydrogenFractionByMass = 0.73;
      }
+
+     # use this to limit maximum timestep if
+     # Grackle crashes due to iteration limit - this is not
+     # needed generally in a real simulation as hydro timestep will
+     # be small (usually)
+     null { dt = 100.0; }
 
  }
 

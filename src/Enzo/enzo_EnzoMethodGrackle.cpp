@@ -339,11 +339,7 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 {
   const EnzoConfig * config = enzo::config();
 
-#ifdef CONFIG_USE_GRACKLE
-  return config->initial_grackle_test_dt;
-#else
   return std::numeric_limits<double>::max();
-#endif /* CONFIG_USE_GRACKLE */
 }
 
 //----------------------------------------------------------------------

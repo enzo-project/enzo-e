@@ -63,7 +63,6 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_minimum_temperature(10.0),
   initial_grackle_test_maximum_temperature(1.0E8),
   initial_grackle_test_reset_energies(0),
-  initial_grackle_test_dt(0.1),
 #endif /* CONFIG_USE_GRACKLE */
   // EnzoInitialMusic
   initial_music_field_files(),
@@ -230,7 +229,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_grackle_test_minimum_metallicity;
   p | initial_grackle_test_maximum_metallicity;
   p | initial_grackle_test_reset_energies;
-  p | initial_grackle_test_dt;
 #endif /* CONFIG_USE_GRACKLE */
 
   p | initial_sedov_rank;
@@ -557,8 +555,6 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
   initial_grackle_test_reset_energies =
     p->value_integer("Initial:grackle_test:reset_energies",0);
-  initial_grackle_test_dt =
-    p->value_float("Initial:grackle_test:dt",0.1);
 #endif /* CONFIG_USE_GRACKLE */
 
   // Turbulence method and initialization
