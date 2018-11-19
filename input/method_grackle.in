@@ -190,6 +190,3 @@
     time = 1000.0;
  }
 
- Testing {
-     time_final = 1000.0;
- }
