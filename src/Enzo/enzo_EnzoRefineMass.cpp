@@ -42,17 +42,16 @@ EnzoRefineMass::EnzoRefineMass
   //	  (DomainRightEdge[dim]-DomainLeftEdge[dim])/
   //	  float(MetaData.TopGridDims[dim]);
 {
-  EnzoSimulation * simulation =
-    (EnzoSimulation * ) proxy_simulation.ckLocalBranch();
 
-  EnzoPhysicsCosmology * cosmology =
-    (EnzoPhysicsCosmology *) simulation->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (cosmology) {
     if (mass_type == "dark") {
-      mass_ratio_ = cosmology->omega_cdm_now()   /cosmology->omega_matter_now();
+      mass_ratio_ = cosmology->omega_cdm_now()
+	/           cosmology->omega_matter_now();
     } else if (mass_type == "baryon") {
-      mass_ratio_ = cosmology->omega_baryon_now()/cosmology->omega_matter_now();
+      mass_ratio_ = cosmology->omega_baryon_now()
+	/           cosmology->omega_matter_now();
     } else {
       ERROR1 ("EnzoRefineMass::EnzoRefineMass()",
 	      "Unknown mass_type %s",  mass_type.c_str());

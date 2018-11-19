@@ -25,6 +25,15 @@ void EnzoMatrixIdentity::matvec
 
 //----------------------------------------------------------------------
 
+void EnzoMatrixIdentity::matvec
+(precision_type precision,
+ void * y, void * x, int g0) throw()
+{
+  matvec_((enzo_float *)(y),(enzo_float *)(x),g0);
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMatrixIdentity::diagonal (int id_x, Block * block, int g0) throw()
 {
   Field field = block->data()->field();

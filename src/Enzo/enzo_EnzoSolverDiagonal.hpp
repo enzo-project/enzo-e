@@ -17,9 +17,14 @@ class EnzoSolverDiagonal : public Solver {
 public: // interface
 
   /// Constructor
-  EnzoSolverDiagonal() throw()
-  : Solver()
-  {};
+  EnzoSolverDiagonal(std::string name,
+		     std::string field_x,
+		     std::string field_b,
+		     int monitor_iter,
+		     int restart_cycle,
+		     int solve_type) throw()
+    : Solver(name,field_x,field_b,monitor_iter,restart_cycle,solve_type)
+  { }
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoSolverDiagonal);
@@ -41,12 +46,10 @@ public: // interface
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
-		       Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
   
-  /// Return the name of this solver
-  virtual std::string name () const
-  { return "diagonal"; }
+  /// Type of this solver
+  virtual std::string type() const { return "diagonal"; }
 
   //--------------------------------------------------
   
@@ -54,7 +57,7 @@ public: // virtual functions
 
 protected: // methods
 
-  void compute_ (std::shared_ptr<Matrix> A, int ix, int ib, Block * block) throw();
+  void compute_ (std::shared_ptr<Matrix> A, Block * block) throw();
 
 protected: // attributes
 

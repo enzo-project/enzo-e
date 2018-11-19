@@ -11,8 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoRefineShock::EnzoRefineShock(const FieldDescr * field_descr,
-				 double pressure_min_refine,
+EnzoRefineShock::EnzoRefineShock(double pressure_min_refine,
 				 double pressure_max_coarsen,
 				 double energy_ratio_min_refine,
 				 double energy_ratio_max_coarsen,
@@ -41,7 +40,7 @@ int EnzoRefineShock::apply ( Block * block ) throw ()
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
 
-  int rank = block->rank();
+  int rank = cello::rank();
 
   // compute pressure using the EnzoComputePressure class
 

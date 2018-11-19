@@ -19,11 +19,7 @@ EnzoInitialPpmlTest::EnzoInitialPpmlTest
 //----------------------------------------------------------------------
 
 void EnzoInitialPpmlTest::enforce_block
-( Block            * block, 
-  const FieldDescr * field_descr,
-  const ParticleDescr * particle_descr,
-  const Hierarchy  * hierarchy
-  ) throw()
+( Block * block, const Hierarchy * hierarchy ) throw()
 {
 
   // Problem parameters
@@ -83,45 +79,59 @@ void EnzoInitialPpmlTest::enforce_block
   double dx,dy,dz;
   block->cell_width (&dx,&dy,&dz);
 
+  /// NOTE: assumes face densities are on lower faces
+  double dx2=0.5*dx;
+  double dy2=0.5*dy;
+  double dz2=0.5*dz;
+  
   for (int iz=0; iz<mz; iz++) {
     double z = zm + (iz - gz + 0.5)*dz;
+    double zd  = (z-cz)    *(z-cz);
+    double zd2 = (z-cz-dz2)*(z-cz-dz2);
     for (int iy=0; iy<my; iy++) {
       double y = ym + (iy - gy + 0.5)*dy;
+      double yd  = (y-cy)    *(y-cy);
+      double yd2 = (y-cy-dy2)*(y-cy-dy2);
       for (int ix=0; ix<mx; ix++) {
 	double x = xm + (ix - gx + 0.5)*dx;
+	double xd  = (x-cx)    *(x-cx);
+	double xd2 = (x-cx-dx2)*(x-cx-dx2);
 
-	bool in_sphere = (x-cx)*(x-cx)+(y-cy)*(y-cy)+(z-cz)*(z-cz) < r2;
+	bool in   = xd + yd + zd  < r2;
+	bool in_x = xd2+ yd + zd  < r2;
+	bool in_y = xd + yd2+ zd  < r2;
+	bool in_z = xd + yd + zd2 < r2;
 	
 	int i=ix + mx*(iy + my*iz);
 
-	density[i]    = in_sphere ? 1.0 : 0.1;
-	velox[i]      = 0.0;
-	veloy[i]      = 0.0;
-	veloz[i]      = 0.0;
 	bfieldx[i]    = 10.0;
-	bfieldy[i]    = 0.0;
-	bfieldz[i]    = 0.0;
-	dens_rx[i]    = 0.0;
-	velox_rx[i]   = 0.0;
-	veloy_rx[i]   = 0.0;
-	veloz_rx[i]   = 0.0;
 	bfieldx_rx[i] = 10.0;
-	bfieldy_rx[i] = 0.0;
-	bfieldz_rx[i] = 0.0;
-	dens_ry[i]    = 0.0;
-	velox_ry[i]   = 0.0;
-	veloy_ry[i]   = 0.0;
-	veloz_ry[i]   = 0.0;
 	bfieldx_ry[i] = 10.0;
-	bfieldy_ry[i] = 0.0;
-	bfieldz_ry[i] = 0.0;
-	dens_rz[i]    = 0.0;
-	velox_rz[i]   = 0.0;
-	veloy_rz[i]   = 0.0;
-	veloz_rz[i]   = 0.0;
 	bfieldx_rz[i] = 10.0;
+	bfieldy[i]    = 0.0;
+	bfieldy_rx[i] = 0.0;
+	bfieldy_ry[i] = 0.0;
 	bfieldy_rz[i] = 0.0;
+	bfieldz[i]    = 0.0;
+	bfieldz_rx[i] = 0.0;
+	bfieldz_ry[i] = 0.0;
 	bfieldz_rz[i] = 0.0;
+	density[i]    = in   ? 1.0 : 0.1;
+	dens_rx[i]    = in_x ? 1.0 : 0.1;
+	dens_ry[i]    = in_y ? 1.0 : 0.1;
+	dens_rz[i]    = in_z ? 1.0 : 0.1;
+	velox[i]      = 0.0;
+	velox_rx[i]   = 0.0;
+	velox_ry[i]   = 0.0;
+	velox_rz[i]   = 0.0;
+	veloy[i]      = 0.0;
+	veloy_rx[i]   = 0.0;
+	veloy_ry[i]   = 0.0;
+	veloy_rz[i]   = 0.0;
+	veloz[i]      = 0.0;
+	veloz_rx[i]   = 0.0;
+	veloz_ry[i]   = 0.0;
+	veloz_rz[i]   = 0.0;
       }
     }
   }

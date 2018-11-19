@@ -21,6 +21,19 @@
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
 
+//----------------------------------------------------------------------
+
+void Block::output_enter_ ()
+{
+  performance_start_(perf_output);
+#ifdef NEW_OUTPUT
+  new_output_begin_();
+#else /* NEW_OUTPUT */
+  output_begin_();
+#endif  
+  performance_stop_(perf_output);
+}
+
 //======================================================================
 // NEW OUTPUT
 //======================================================================
@@ -28,7 +41,7 @@
 void Block::new_output_begin_ ()
 {
   TRACE_OUTPUT("Block::new_output_begin_()");
-  simulation() -> new_output_start();
+  cello::simulation() -> new_output_start();
 }
 
 //----------------------------------------------------------------------
@@ -110,7 +123,7 @@ void Problem::new_output_next(Simulation * simulation) throw()
 void Block::output_begin_ ()
 {
   TRACE_OUTPUT("output_begin_()");
-  simulation() -> output_enter();
+  cello::simulation() -> output_enter();
 }
 
 //----------------------------------------------------------------------
@@ -210,7 +223,7 @@ void Block::p_output_write (int index_output, int step)
   Simulation    * simulation     = cello::simulation();
   Output        * output         = cello::output(index_output);
 
-  output->write_block(this,field_descr,particle_descr);
+  output->write_block(this);
 
   simulation->write_();
   performance_stop_ (perf_output);

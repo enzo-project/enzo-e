@@ -48,16 +48,14 @@ private: // functions
   (std::string type, 
    int index,
    Config * config,
-   Parameters * parameters,
-   const FieldDescr *) throw ();
+   Parameters * parameters) throw ();
 
   /// Create named physics object
   virtual Physics *  create_physics_ 
   (std::string type, 
    int index,
    Config * config,
-   Parameters * parameters,
-   const FieldDescr *) throw ();
+   Parameters * parameters) throw ();
 
   /// Create stopping criteria
   virtual Stopping * create_stopping_ 
@@ -72,24 +70,19 @@ private: // functions
   (std::string type, 
    Config * config, 
    Parameters * parameters,
-   const FieldDescr * field_descr,
    int index) throw ();
 
   /// Create named solver object
   virtual Solver * create_solver_ 
   (std::string type, 
    Config * config,
-   int index_solver,
-   FieldDescr *,
-   const ParticleDescr *) throw ();
+   int index_solver) throw ();
 
   /// Create named method object
   virtual Method * create_method_ 
   (std::string type, 
    Config * config,
-   int index_method,
-   FieldDescr *,
-   const ParticleDescr *) throw ();
+   int index_method) throw ();
 
   /// Create named interpolation object
   virtual Prolong * create_prolong_

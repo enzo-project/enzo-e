@@ -143,7 +143,7 @@ $python scons.py install-inc    &>  $dir/out.scons
 $python scons.py $k_switch -j $proc -Q $target  2>&1 | tee $dir/out.scons
 
 ./tools/awk/error-org.awk   < $dir/out.scons >  errors.org
-./tools/awk/warning-org.awk < $dir/out.scons >> errors.org
+./tools/awk/warning-org.awk < $dir/out.scons >  warnings.org
 
 if [ -e $target ]; then
    echo "Success"

@@ -8,20 +8,16 @@
 #include "io.hpp"
 #include "main.hpp"
 
-extern CProxy_Simulation  proxy_simulation;
-
 //----------------------------------------------------------------------
 
 OutputCheckpoint::OutputCheckpoint
 (
  int index,
  const Factory * factory,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  Config * config,
  int process_count
 ) throw ()
-  : Output(index,factory,field_descr,particle_descr),
+  : Output(index,factory),
     restart_file_("")
 {
 
@@ -50,7 +46,7 @@ void OutputCheckpoint::pup (PUP::er &p)
 
   p | restart_file_;
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Simulation * simulation = cello::simulation();
   const bool l_unpacking = p.isUnpacking();
   const bool l_restarting = simulation && simulation->phase()==phase_restart;
   const bool l_restart_file = (restart_file_ != "");
@@ -63,11 +59,10 @@ void OutputCheckpoint::pup (PUP::er &p)
 
 void OutputCheckpoint::update_config_()
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  Parameters p (simulation->monitor());
+  Parameters p (cello::monitor());
   p.read(restart_file_.c_str());
 
-  Config * config = (Config *) simulation->config();
+  Config * config = (Config *) cello::config();
 
   // Testing:time_final
 

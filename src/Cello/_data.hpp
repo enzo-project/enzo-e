@@ -64,6 +64,10 @@ class FieldFace;
 
 #include "data_Grouping.hpp"
 
+#include "data_ScalarDescr.hpp"
+#include "data_ScalarData.hpp"
+#include "data_Scalar.hpp"
+
 #include "data_FieldDescr.hpp"
 #include "data_FieldData.hpp"
 #include "data_Field.hpp"

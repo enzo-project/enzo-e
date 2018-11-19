@@ -46,10 +46,13 @@ public: // interface
     p | index_;
   }
 
-  /// Reduce another value
-  bool next () throw();
-
-  void face (int of3[3]) const ;
+  /// Go to the next face if any and return it through of3[]
+  bool next (int of3[3]) throw()
+  {
+    const bool retval = next_();
+    if (retval) face_(of3);
+    return retval;
+  }
 
   Index index() const ;
 
@@ -59,6 +62,12 @@ public: // interface
   bool is_reset() const;
 
 private: // functions
+
+  /// Go to the next face if any
+  bool next_ () throw();
+
+  /// Return the current face through of3[]
+  void face_ (int of3[3]) const ;
 
   /// go to the next face
   void increment_();

@@ -11,8 +11,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodHydro::EnzoMethodHydro 
-( const FieldDescr * field_descr,
-  std::string method,
+( std::string method,
   enzo_float gamma,
   bool gravity,
   bool comoving_coordinates,
@@ -55,6 +54,8 @@ EnzoMethodHydro::EnzoMethodHydro
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_ppm);
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   refresh(ir)->add_field(field_descr->field_id("velocity_y"));
@@ -669,7 +670,7 @@ void EnzoMethodHydro::ppm_method_ ( Block * block )
   compute_pressure.compute(block);
 
   const int cycle = block->cycle();
-  const int rank  = block->rank();
+  const int rank  = cello::rank();
 
   for (int i0=0; i0<3; i0++) {
     int i = (i0 + cycle) % rank;
@@ -795,7 +796,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   enzo_float * vz = (enzo_float *) field.values("velocity_z");
   enzo_float * pr = (enzo_float *) field.values("pressure");
 
-  const int rank  = block->rank();
+  const int rank = cello::rank();
   
   for (int iy=0; iy<my; iy++) {
     for (int ix=0; ix<mx; ix++) {
@@ -938,8 +939,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   // Adjust cell widths for cosmological expansion if needed
   
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   enzo_float cosmo_a    = 1.0;
   enzo_float cosmo_dadt = 0.0;

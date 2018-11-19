@@ -29,7 +29,7 @@ if (use_papi):
 	components.append(['papi'])
 
 
-components.append(['hdf5','z'])
+components.append(['hdf5','z','dl'])
 
 libraries_external  = ['png','$FORTRANLIBS', 'boost_filesystem', 'boost_system']
 
@@ -44,7 +44,7 @@ if (use_grackle):   libraries_external.append('grackle')
 # SOURCE
 #------------------------------
 
-sources  = [Glob('enzo_*cpp'),
+sources  = [Glob('enzo*cpp'),
     	    'calcdiss.F',
 	    'calc_dt.F',
 	    'cic_deposit.F',
@@ -139,8 +139,7 @@ test_enzo_prolong = env.Program (['test_Prolong.cpp', charm_main])
 binaries = [test_enzo_p, test_enzo_prolong, test_enzo_units]
 
 env.CharmBuilder(['enzo.decl.h','enzo.def.h'],'enzo.ci',ARG = 'enzo')
-# env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
-# 	'main_enzo.ci',ARG = 'main_enzo')
+env.CppBuilder('enzo.ci','enzo.CI',ARG = 'enzo')
 
 #------------------------------
 # INSTALL

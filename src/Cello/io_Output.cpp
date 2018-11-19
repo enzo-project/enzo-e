@@ -13,9 +13,7 @@
 
 //----------------------------------------------------------------------
 
-Output::Output (int index, const Factory * factory,
-		const FieldDescr * field_descr,
-		const ParticleDescr * particle_descr) throw()
+Output::Output (int index, const Factory * factory) throw()
   : file_(0),           // Initialization deferred
     schedule_(0),
     sync_write_(1),     // default process-per-stride
@@ -37,8 +35,8 @@ Output::Output (int index, const Factory * factory,
 
 {
   io_block_         = factory->create_io_block();
-  io_field_data_    = factory->create_io_field_data(field_descr);
-  io_particle_data_ = factory->create_io_particle_data(particle_descr);
+  io_field_data_    = factory->create_io_field_data();
+  io_particle_data_ = factory->create_io_particle_data();
 }
 
 //----------------------------------------------------------------------
@@ -241,9 +239,7 @@ void Output::write_simulation_
 #ifdef TRACE_OUTPUT
   CkPrintf ("%d TRACE_OUTPUT Output::write_simulation_()\n",CkMyPe());
 #endif    
-  write_hierarchy(simulation->hierarchy(), 
-		  simulation->field_descr(),
-		  simulation->particle_descr());
+  write_hierarchy(simulation->hierarchy());
 
   if (CkMyPe() == 0) {
     simulation->hierarchy()->block_array().p_output_write(index_,0);
@@ -252,12 +248,7 @@ void Output::write_simulation_
 
 //----------------------------------------------------------------------
 
-void Output::write_hierarchy_
-(
- const Hierarchy * hierarchy,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+void Output::write_hierarchy_ ( const Hierarchy * hierarchy ) throw()
 {
 
 #ifdef TRACE_OUTPUT
@@ -268,12 +259,7 @@ void Output::write_hierarchy_
 
 //----------------------------------------------------------------------
 
-void Output::write_block_
-(
- const Block * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+void Output::write_block_ ( const Block * block ) throw()
 {
 #ifdef TRACE_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT Output::write_block_()\n",CkMyPe());
@@ -284,7 +270,7 @@ void Output::write_block_
   if (it_f) {
     for (it_f->first(); ! it_f->done();  it_f->next()  ) {
       const FieldData * field_data = block->data()->field_data();
-      write_field_data (field_data,  field_descr, it_f->value());
+      write_field_data (field_data, it_f->value());
     }
   }
 
@@ -294,7 +280,7 @@ void Output::write_block_
   if (it_p) {
     for (it_p->first(); ! it_p->done();  it_p->next()  ) {
       const ParticleData * particle_data = block->data()->particle_data();
-      write_particle_data (particle_data,  particle_descr, it_p->value());
+      write_particle_data (particle_data, it_p->value());
     }
   }
 

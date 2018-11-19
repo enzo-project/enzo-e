@@ -72,6 +72,10 @@ public:
   /// Return the index for the given neighbor
   Index index_neighbor (const int if3[3], const int n3[3]) const;
 
+  /// Return the index of the ancestor in the given level_ancestor <= level
+  /// default is root level
+  Index index_ancestor (int level_ancestor = 0, int min_level = 0) const;
+
   /// Whether the face is on the domain boundary
   bool is_on_boundary 
   (int axis, int face, int narray) const;
@@ -83,10 +87,6 @@ public:
   /// (array (0 0 0), level 0)
   bool is_root() const;
 
-  /// Return whether this is in the "root position" in the array of octrees
-  /// (array (0 0 0), tree (0,0,0), any level)
-  bool is_zero() const;
-  
   /// Return the level of this node
   int level() const;
 

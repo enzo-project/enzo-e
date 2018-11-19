@@ -22,7 +22,6 @@ class MsgRefresh;
 class MsgRefine;
 class MsgCoarsen;
 class Factory;
-class FieldDescr;
 class FieldFace;
 class Hierarchy;
 class ItFace;
@@ -32,7 +31,6 @@ class Particle;
 class ParticleData;
 class Refresh;
 class Solver;
-class Simulation;
 
 //----------------------------------------------------------------------
 
@@ -119,6 +117,7 @@ public: // interface
     index_solver_(),
     refresh_()
   {
+    for (int i=0; i<3; i++) array_[i]=0;
   }
 
   /// Initialize a migrated Block
@@ -761,11 +760,8 @@ public: // virtual functions
   /// Initialize Block
   virtual void initialize ();
 
-  /// Return the local simulation object
-  Simulation * simulation() const;
-
-  /// Return the rank of the Simulation
-  int rank() const;
+  // /// Return the rank of the Simulation
+  // int rank() const;
 
   //  int count_neighbors() const;
 
@@ -899,6 +895,9 @@ protected: // attributes
 
   /// Index of this Block in the octree array
   Index index_;
+
+  /// Location in the Mesh root array.  Stored for HDF5 output only.
+  int array_[3];
 
   /// Desired level for the next cycle
   int level_next_;

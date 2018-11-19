@@ -7,7 +7,49 @@
 
 #include "compute.hpp"
 
+// #define TRACE_SOLVER
+
+#define CYCLE 0
+
+// NOTE: Update _compute.hpp solve_enum when updating solve_string
+const char * solve_string[] = {
+  "solve_unknown",
+  "solve_leaf",  // Solve on leaf Blocks (default)
+  "solve_level", // Solve within a level (e.g. for multigrid smoothers)
+  "solve_tree",  // Solve in a root-level octree (e.g. for domain decomposition)
+  "solve_block" // Solve in a block (e.g. MG coarse solve on a single block)
+};
+
+
 //======================================================================
+
+Solver::Solver (std::string name,
+		std::string field_x,
+		std::string field_b,
+		int monitor_iter,
+		int restart_cycle,
+		int solve_type,
+		int min_level,
+		int max_level) throw()
+  : PUP::able(),
+  name_(name),
+  ix_(-1),ib_(-1),
+  refresh_list_(),
+  monitor_iter_(monitor_iter),
+  restart_cycle_(restart_cycle),
+  callback_(0),
+  index_(0),
+  min_level_(min_level),
+  max_level_(max_level),
+  id_sync_(0),
+  solve_type_(solve_type)
+{
+  FieldDescr * field_descr = cello::field_descr();
+  ix_ = field_descr->field_id(field_x);
+  ib_ = field_descr->field_id(field_b);
+}
+
+//----------------------------------------------------------------------
 
 Solver::~Solver() throw()
 {
@@ -50,7 +92,7 @@ void Solver::monitor_output_
  double rr_max,
  bool final) throw()
 {
-  Monitor * monitor = block->simulation()->monitor();
+  Monitor * monitor = cello::monitor();
 
   monitor->print("Solver", "%s %s iter %04d  err %.16g [%g %g]",
 		 this->name().c_str(),
@@ -79,6 +121,12 @@ bool Solver::reuse_solution_ (int cycle) const throw()
 
 void Solver::begin_(Block * block)
 {
+#ifdef TRACE_SOLVER  
+  if (block->cycle() >= CYCLE)
+    CkPrintf ("%s TRACE_SOLVER %d Solver::begin_(%s)\n",
+	    block->name().c_str(),index_,name_.c_str());
+#endif  
+	    
   block->push_solver(index_);
 }
 
@@ -87,22 +135,53 @@ void Solver::begin_(Block * block)
 void Solver::end_(Block * block)
 {
   int index = block->pop_solver();
+#ifdef TRACE_SOLVER  
+  if (block->cycle() >= CYCLE)
+    CkPrintf ("%s TRACE_SOLVER %d Solver::end_(%s)\n",
+	      block->name().c_str(),index,name_.c_str());
+#endif  
 
   ASSERT2("Solver::end_()",
 	  "Solver mismatch was %d expected %d",
 	  index,index_,(index == index_));
 
+  CkCallback(callback_,
+	     CkArrayIndexIndex(block->index()),
+	     block->proxy_array()).send();
+
 }
 
 //----------------------------------------------------------------------
 
-bool Solver::is_active_(Block * block)
+bool Solver::is_active_(Block * block) const
 {
   const int level = block->level();
-  const bool is_leaf = block->is_leaf();
-  const bool is_unigrid = (min_level_ == max_level_);
   const bool in_range = (min_level_ <= level && level <= max_level_);
 
-  return (is_unigrid) ? (in_range) : (is_leaf && in_range);
+  return (in_range);
 }
 
+//----------------------------------------------------------------------
+
+bool Solver::is_finest_ (Block * block) const
+{
+  switch (solve_enum(solve_type_)) {
+  case solve_leaf:
+    return block->is_leaf();
+    break;
+  case solve_level:
+    return (block->level() == max_level_);
+    break;
+  case solve_tree:
+    return block->is_leaf();
+    break;
+  case solve_block:
+    return block->level() == min_level_;
+    break;
+  default:
+    ERROR1("Solver::is_finest_()",
+	   "Unexpected solve_type %d",
+	   solve_type_);
+    return false;
+  }
+}

@@ -6,14 +6,12 @@
 
   /// Return the ith data item associated with the object
   virtual void field_array 
-  (const FieldDescr *,
-   int index, 
+  (int index, 
    void ** buffer, std::string * name, int * type,
    int * nxd=0, int * nyd=0, int * nzd=0,
    int * nx=0,  int * ny=0,  int * nz=0) throw();
 
    virtual void particle_array 
-   (ParticleDescr *,
-    int it, int ib, int ia,
+   (int it, int ib, int ia,
     void ** buffer, std::string * name, int * type,
     int * n, int * k) throw();

@@ -24,8 +24,7 @@ class EnzoMethodGravity : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGravity object
-  EnzoMethodGravity(const FieldDescr * field_descr,
-		    int index_solver,
+  EnzoMethodGravity(int index_solver,
 		    double grav_const,
 		    int order,
 		    bool accumulate);

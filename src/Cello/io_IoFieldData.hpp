@@ -9,7 +9,6 @@
 #define IO_IO_FIELD_DATA_HPP
 
 class FieldData;
-class FieldDescr;
 
 class IoFieldData : public Io {
 

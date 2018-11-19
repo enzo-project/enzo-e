@@ -26,7 +26,8 @@ PARALLEL_MAIN_BEGIN
     WARNING("Papi::init","PAPI initialization error!");
   }
 
-  Papi papi;
+  const bool warnings = true;
+  Papi papi(warnings);
 
   papi.init();
 
@@ -73,9 +74,10 @@ PARALLEL_MAIN_BEGIN
 	      values_stop[ie],b);
     }
 
-    if (count_array[index_count] > 0) 
-      unit_assert (fabs(values_stop[0] - count)/(count) < 0.05);
-    else
+    if (count_array[index_count] > 0) {
+      unit_assert ((b - count)/(count) < 0.05);
+      CkPrintf ("value %lld count %lld\n",b,count);
+    }  else
       unit_assert (values_stop[0] == 0);
 
   }

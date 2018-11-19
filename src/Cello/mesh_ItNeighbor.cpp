@@ -17,7 +17,7 @@ ItNeighbor::ItNeighbor
  int n3[3],
  Index index)
   : block_(block),
-    rank_(block->rank()),
+    rank_(cello::rank()),
     min_face_rank_(min_face_rank),
     index_(index),
     level_(index.level())
@@ -44,10 +44,10 @@ ItNeighbor::~ItNeighbor()
 
 //----------------------------------------------------------------------
 
-bool ItNeighbor::next ()
+bool ItNeighbor::next_ ()
 {
   do {
-    next_();
+    increment_();
   } while ( ! valid_() );
 
   return (! is_reset()) ;
@@ -75,7 +75,7 @@ Index ItNeighbor::index() const
 
 //----------------------------------------------------------------------
 
-void ItNeighbor::face(int of3[3]) const
+void ItNeighbor::face_(int of3[3]) const
 {
   of3[0] = (rank_ > 0) ? of3_[0] : 0;
   of3[1] = (rank_ > 1) ? of3_[1] : 0;
@@ -134,7 +134,7 @@ bool ItNeighbor::is_reset_child_() const
 
 //----------------------------------------------------------------------
 
-void ItNeighbor::next_()
+void ItNeighbor::increment_()
 {
   if (is_reset()) {
     set_first_();

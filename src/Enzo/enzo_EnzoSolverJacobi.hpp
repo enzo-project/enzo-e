@@ -17,7 +17,12 @@ class EnzoSolverJacobi : public Solver {
 public: // interface
 
   /// Constructor
-  EnzoSolverJacobi(FieldDescr * field_descr,
+  EnzoSolverJacobi(std::string name,
+		   std::string field_x,
+		   std::string field_b,
+		   int monitor_iter,
+		   int restart_cycle,
+		   int solve_type,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 
@@ -28,11 +33,10 @@ public: // interface
   EnzoSolverJacobi (CkMigrateMessage *m)
     : Solver(m),
       A_(NULL),
-      ix_(0),
-      ib_(0),
-      ir_(0),
-      id_(0),
+      ir_(-1),
+      id_(-1),
       w_(0),
+      i_iter_(-1),
       n_(0)
   { }
 
@@ -43,23 +47,20 @@ public: // interface
     Solver::pup(p);
 
     //    p | A_;
-    p | ix_;
-    p | ib_;
     p | ir_;
     p | id_;
     p | w_;
+    p | i_iter_;
     p | n_;
   }
 
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( std::shared_ptr<Matrix> A, int ix, int ib,
-		       Block * block) throw();
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
 
-  /// Return the name of this solver
-  virtual std::string name () const
-  { return "jacobi"; }
+  /// Type of this solver
+  virtual std::string type() const { return "jacobi"; }
 
 public: // functions
 
@@ -84,7 +85,13 @@ protected: // functions
     field.deallocate_temporary(id_);
     field.deallocate_temporary(ir_);
   }
-  
+
+  /// Return a pointer to the iteration counter on the block
+  int * piter_(Block * block) {
+    ScalarData<int> * scalar_data  = block->data()->scalar_data_int();
+    ScalarDescr *     scalar_descr = cello::scalar_descr_int();
+    return scalar_data->value(scalar_descr,i_iter_);
+  }
 
 protected: // attributes
 
@@ -93,12 +100,6 @@ protected: // attributes
   /// Matrix A for smoothing A*X = B
   std::shared_ptr<Matrix> A_;
   
-  /// Field index for vector X
-  int ix_;
-
-  /// Field index for rhs B
-  int ib_;
-
   /// Field index for residual R
   int ir_;
 
@@ -108,6 +109,9 @@ protected: // attributes
   /// Weighting
   double w_;
 
+  /// Scalar index for current iteration on a Block
+  int i_iter_;
+  
   /// Number of iterations
   int n_;
 };

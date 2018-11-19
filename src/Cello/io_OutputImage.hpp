@@ -9,9 +9,6 @@
 #define IO_OUTPUT_IMAGE_HPP
 
 class Factory;
-class FieldDescr;
-class ParticleDescr;
-
 
 enum mesh_color_type {
   mesh_color_unknown,
@@ -35,8 +32,6 @@ public: // functions
   /// Create an uninitialized OutputImage object
   OutputImage(int index,
 	      const Factory * factory,
-	      const FieldDescr * field_descr,
-	      const ParticleDescr * particle_descr,
 	      int process_count,
 	      int nx0, int ny0, int nz0,
 	      int nxb, int nyb, int nzb,
@@ -116,22 +111,16 @@ public: // virtual functions
   virtual void finalize () throw();
 
   /// Write block-related field and particle data
-  virtual void write_block
-  ( const Block * block,
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr
-    ) throw();
+  virtual void write_block ( const Block * block ) throw();
 
   /// Write fields
   virtual void write_field_data
   ( const FieldData * field_data, 
-    const FieldDescr * field_descr,
     int index_field) throw();
 
   /// Write particles
   virtual void write_particle_data
   ( const ParticleData * particle_data, 
-    const ParticleDescr * particle_descr,
     int index_particle) throw();
 
   /// Prepare local array with data to be sent to remote chare for processing

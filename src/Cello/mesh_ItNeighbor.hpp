@@ -51,13 +51,16 @@ public: // interface
   }
 
   /// Reduce another value
-  bool next ();
+  bool next (int of3[3])
+  {
+    const bool retval = next_();
+    if (retval) face_(of3);
+    return retval;
+  }
 
   /// Return the level of the current face
   int face_level () const  throw () 
   { return block_->face_level(of3_); }
-
-  void face(int of3[3]) const ;
 
   void child(int ic3[3]) const ;
 
@@ -70,8 +73,13 @@ public: // interface
 
 private: // functions
 
+  void face_(int of3[3]) const ;
+
   /// go to the next face / child
-  void next_();
+  bool next_();
+
+  /// go to the next face / child
+  void increment_();
 
   /// go to the next child
   void next_child_();

@@ -19,11 +19,7 @@ class EnzoMethodNull : public Method {
 public: // interface
 
   /// Create a new EnzoMethodNull object
-  EnzoMethodNull
-  (
-   const FieldDescr * field_descr,
-   double dt
-   ) : Method(), dt_(dt) {
+  EnzoMethodNull ( double dt ) : Method(), dt_(dt) {
     const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			       enzo_sync_id_method_null);
     refresh(ir)->add_all_fields();

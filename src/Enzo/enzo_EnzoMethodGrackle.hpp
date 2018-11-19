@@ -23,8 +23,7 @@ class EnzoMethodGrackle : public Method {
 public: // interface
 
   /// Create a new EnzoMethodGrackle object
-  EnzoMethodGrackle(EnzoConfig *,
-		    const FieldDescr * field_descr);
+  EnzoMethodGrackle(EnzoConfig *);
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodGrackle);
 

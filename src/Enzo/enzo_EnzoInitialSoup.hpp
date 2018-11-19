@@ -88,11 +88,7 @@ public: // virtual functions
 
   /// Initialize a Block
   virtual void enforce_block
-  ( Block            * block, 
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr,
-    const Hierarchy  * hierarchy
-    ) throw();
+  ( Block * block, const Hierarchy * hierarchy ) throw();
 
   /// Return whether enforce() expects block != NULL
   virtual bool expects_blocks_allocated() const throw()

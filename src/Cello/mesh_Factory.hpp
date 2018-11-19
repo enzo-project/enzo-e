@@ -41,20 +41,17 @@ public: // interface
 
   /// Create a new Hierarchy [abstract factory design pattern]
   virtual Hierarchy * create_hierarchy 
-  ( int rank, int refinement, int max_level) const throw ();
+  ( int refinement, int max_level) const throw ();
 
   /// Create an Input / Output accessor object for Block
   virtual IoBlock * create_io_block ( ) const throw();
 
   /// Create an Input / Output accessor object for a FieldData
-  virtual IoFieldData * create_io_field_data 
-  ( const FieldDescr * field_descr ) const throw();
+  virtual IoFieldData * create_io_field_data () const throw();
 
   /// Create an Input / Output accessor object for a ParticleData
-  virtual IoParticleData * create_io_particle_data 
-  ( const ParticleDescr * particle_descr ) const throw();
+  virtual IoParticleData * create_io_particle_data () const throw();
 
-#ifdef NEW_MSG_REFINE
   /// Create a new CHARM++ Block chare array proxy
   virtual CProxy_Block new_block_proxy
   (
@@ -69,16 +66,7 @@ public: // interface
    int nbx, int nby, int nbz,
    int nx, int ny, int nz,
    int num_field_blocks) const throw();
-#else
-  /// Create a new CHARM++ Block array
-  virtual CProxy_Block create_block_array
-  (
-   DataMsg * data_msg,
-   int nbx, int nby, int nbz,
-   int nx, int ny, int nz,
-   int num_field_blocks) const throw();
 
-#endif  
   /// Create a new coarse blocks under the Block array.  For Multigrid
   ///  solvers.  Arguments are the same as create_block_array(), plus
   ///  minimal level min_level < 0
@@ -92,7 +80,7 @@ public: // interface
    int num_field_blocks) const throw();
 
   /// Create a new Block
-  virtual Block * create_block
+  virtual void create_block
   (
    DataMsg * data_msg,
    CProxy_Block block_array,
@@ -104,7 +92,7 @@ public: // interface
    int narray, char * array, int refresh_type,
    int num_face_level, int * face_level,
    Simulation * simulation = 0
-) const throw();
+   ) const throw();
 
 // NEW CODE: See 161206 notes: implementing data objects bound with
 // block_array elements

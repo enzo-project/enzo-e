@@ -11,6 +11,7 @@
 class Factory;
 class FieldDescr;
 class ParticleDescr;
+class ScalarDescr;
 class Hierarchy;
 class Monitor;
 class Parameters;
@@ -93,7 +94,19 @@ public: // interface
   /// Return the Config
   const Config * config() const throw()
   { return config_; }
-  
+
+  /// Return the scalar descriptors
+  ScalarDescr * scalar_descr_long_double() throw()
+  { return scalar_descr_long_double_; }
+  ScalarDescr * scalar_descr_double() throw()
+  { return scalar_descr_double_; }
+  ScalarDescr * scalar_descr_int() throw()
+  { return scalar_descr_int_; }
+  ScalarDescr * scalar_descr_sync() throw()
+  { return scalar_descr_sync_; }
+  ScalarDescr * scalar_descr_void() throw()
+  { return scalar_descr_void_; }
+
   /// Return the field descriptor
   FieldDescr * field_descr() const throw()
   { return field_descr_; }
@@ -430,6 +443,13 @@ protected: // attributes
 
   /// AMR hierarchy
   Hierarchy * hierarchy_;
+
+  /// Scalar descriptors
+  ScalarDescr * scalar_descr_long_double_;
+  ScalarDescr * scalar_descr_double_;
+  ScalarDescr * scalar_descr_int_;
+  ScalarDescr * scalar_descr_sync_;
+  ScalarDescr * scalar_descr_void_;
   
   /// Field descriptor
   FieldDescr * field_descr_;

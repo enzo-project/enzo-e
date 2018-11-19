@@ -6,7 +6,6 @@
 /// @brief    Implementation of Data class
 
 #include "data.hpp"
-#include "charm_simulation.hpp"
 
 //----------------------------------------------------------------------
 
@@ -21,11 +20,13 @@ Data::Data(int nx, int ny, int nz,
 {
   // Initialize field_data_[]
   field_data_.resize(num_field_data);
+  FieldDescr * field_descr = new FieldDescr;
   for (size_t i=0; i<field_data_.size(); i++) {
-    field_data_[i] = new FieldData (cello::field_descr(),nx,ny,nz);
+    field_data_[i] = new FieldData (field_descr,nx,ny,nz);
   }
+  ParticleDescr * particle_descr = new ParticleDescr;
   particle_data_ = new ParticleData;
-  particle_data_->allocate(cello::particle_descr());
+  particle_data_->allocate(particle_descr);
   lower_[0] = xm;
   lower_[1] = ym;
   lower_[2] = zm;
@@ -117,7 +118,15 @@ void Data::field_cell_width
 
 void Data::allocate () throw()
 {
+  // allocate Block scalar storage
+  scalar_data_long_double_.allocate(cello::scalar_descr_long_double());
+  scalar_data_double_     .allocate(cello::scalar_descr_double());
+  scalar_data_int_        .allocate(cello::scalar_descr_int());
+  scalar_data_sync_       .allocate(cello::scalar_descr_sync());
+  scalar_data_void_       .allocate(cello::scalar_descr_void());
+  // allocate Block Field storage
   for (size_t i=0; i<field_data_.size(); i++) {
+    field_data_[i]->set_history_(cello::field_descr());
     field_data_[i]->allocate_permanent(cello::field_descr(),true);
   }
 }

@@ -6,7 +6,6 @@
 /// @brief    
 
 #include "data.hpp"
-#include "charm_simulation.hpp"
 
 // #define DEBUG_DATA_MSG
 

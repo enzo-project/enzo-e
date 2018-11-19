@@ -53,8 +53,7 @@ void IoHierarchy::meta_value
 //----------------------------------------------------------------------
 
 void IoHierarchy::field_array
-(const FieldDescr * field_descr,
- int index,
+(int index,
  void ** buffer, std::string * name, int * type,
  int * nxd, int * nyd, int * nzd,
  int * nx,  int * ny,  int * nz) throw()
@@ -64,8 +63,7 @@ void IoHierarchy::field_array
 //----------------------------------------------------------------------
 
 void IoHierarchy::particle_array 
-(ParticleDescr * particle_descr,
- int it, int ib, int ia,
+(int it, int ib, int ia,
  void ** buffer, std::string * name, int * type,
  int * n, int * k) throw()
 {

@@ -60,12 +60,7 @@ public: // interface
   /// Initialize the block
 
   virtual void enforce_block
-  (
-   Block * block,
-   const FieldDescr * field_descr,
-   const ParticleDescr * particle_descr,
-   const Hierarchy * hierarchy
-   ) throw();
+  ( Block * block, const Hierarchy * hierarchy ) throw();
 
 protected: // functions
 

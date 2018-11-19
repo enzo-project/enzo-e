@@ -11,8 +11,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle 
-(EnzoConfig * config,
- const FieldDescr * field_descr)
+(EnzoConfig * config)
   : Method()
 #ifdef CONFIG_USE_GRACKLE
   , chemistry_(0),
@@ -22,6 +21,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
 {
 #ifdef CONFIG_USE_GRACKLE
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   /// Initialize default Refresh
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 		       enzo_sync_id_method_grackle);
@@ -106,7 +107,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   // ASSUMES COSMOLOGY = false
   double a_value = 1.0;
 
-  gr_int rank = block->rank();
+  gr_int rank = cello::rank();
 
   gr_float * density       = (gr_float *) field.values("density");
   gr_float * energy        = (gr_float *) field.values("internal_energy");
@@ -225,7 +226,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 #endif /* CONFIG_USE_GRACKLE */
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
 
   enzo_block->compute_done();
 

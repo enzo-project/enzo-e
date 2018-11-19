@@ -41,6 +41,17 @@ env_rm_png  = env.Clone(COPY = 'rm `ls *.png`')
 # h5topng
 
 #----------------------------------------------------------------------
+# DATA COMPONENT         
+#----------------------------------------------------------------------
+env.RunSerial('test_Scalar.unit',    bin_path + '/test_Scalar')
+env.RunSerial('test_FieldData.unit',bin_path + '/test_FieldData')
+env.RunSerial('test_FieldDescr.unit',bin_path + '/test_FieldDescr')
+env.RunSerial('test_Field.unit',     bin_path + '/test_Field')
+env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
+env.RunSerial('test_ItIndex.unit',   bin_path + '/test_ItIndex')
+env.RunSerial('test_Grouping.unit',  bin_path + '/test_Grouping')
+env.RunSerial('test_Particle.unit',      bin_path + '/test_Particle')
+#----------------------------------------------------------------------
 # DISK COMPONENT          
 #----------------------------------------------------------------------
 Clean(env.RunSerial
@@ -54,15 +65,6 @@ Clean(env.RunSerial
 # ERROR COMPONENT         
 #----------------------------------------------------------------------
 env.RunSerial('test_Error.unit',       bin_path + '/test_Error')
-#----------------------------------------------------------------------
-# FIELD COMPONENT         
-#----------------------------------------------------------------------
-env.RunSerial('test_FieldData.unit',bin_path + '/test_FieldData')
-env.RunSerial('test_FieldDescr.unit',bin_path + '/test_FieldDescr')
-env.RunSerial('test_Field.unit',     bin_path + '/test_Field')
-env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
-env.RunSerial('test_ItIndex.unit',   bin_path + '/test_ItIndex')
-env.RunSerial('test_Grouping.unit',  bin_path + '/test_Grouping')
 #----------------------------------------------------------------------
 # INITIAL COMPONENT
 #----------------------------------------------------------------------
@@ -143,10 +145,6 @@ env.RunSerial('test_Monitor.unit',      bin_path + '/test_Monitor')
 Clean(env_mv_test.RunSerial
       ('test_Parameters.unit',  bin_path + '/test_Parameters'),
       ['#/test.in','#/test1.out','#/test2.out'])
-#----------------------------------------------------------------------
-# PARTICLE COMPONENT
-#----------------------------------------------------------------------
-env.RunSerial('test_Particle.unit',      bin_path + '/test_Particle')
 #----------------------------------------------------------------------
 # PERFORMANCE COMPONENT   
 #----------------------------------------------------------------------

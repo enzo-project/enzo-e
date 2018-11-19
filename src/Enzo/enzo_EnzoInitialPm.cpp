@@ -29,12 +29,7 @@ void EnzoInitialPm::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 void EnzoInitialPm::enforce_block 
-(
- Block * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy  * hierarchy
- ) throw()
+( Block * block, const Hierarchy  * hierarchy ) throw()
 
 {
   Field    field    (block->data()->field());
@@ -62,7 +57,7 @@ void EnzoInitialPm::uniform_placement_
   int nx,ny,nz;
   field.size (&nx,&ny,&nz);
   
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   // Adjust cell widths for difference in block's level from level_
   const int level_block = block->level();
@@ -139,7 +134,7 @@ void EnzoInitialPm::uniform_placement_
   // ... insert uninitialized dark matter particles
 
   particle.insert_particles (it,np);
-  block->simulation()->data_insert_particles(np);
+  enzo::simulation()->data_insert_particles(np);
   
   const int npb = particle.batch_size();
 
@@ -223,7 +218,7 @@ void EnzoInitialPm::density_placement_
   data->upper(&xp,&yp,&zp);
   field.cell_width(xm,xp,&hx, ym,yp,&hy, zm,zp,&hz);
 
-  const int rank = block->rank();
+  const int rank = cello::rank();
 
   if (rank < 2) hy = 1.0;
   if (rank < 3) hz = 1.0;
@@ -272,7 +267,7 @@ void EnzoInitialPm::density_placement_
   const int it = particle.type_index("dark");
 
   particle.insert_particles (it,np);
-  block->simulation()->data_insert_particles(np);
+  enzo::simulation()->data_insert_particles(np);
 
   const int ia_x = particle.attribute_index (it,"x");
   const int ia_y = particle.attribute_index (it,"y");

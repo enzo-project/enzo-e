@@ -65,14 +65,37 @@ Index Index::index_parent (int min_level) const
 {
   Index index = *this;
   int level = index.level();
-  if (level > min_level) {
+  ASSERT2 ("Index::index_parent",
+	  "level of parent %d is less than min_level %d",
+	   level-1,min_level,
+	   (level > min_level));
+
+  index.set_child (level,0,0,0,min_level);
+  index.set_level(level - 1);
+  
+  return index;
+}
+
+//----------------------------------------------------------------------
+
+Index Index::index_ancestor (int level_ancestor, int min_level) const
+{
+  Index index = *this;
+  int level_begin = index.level();
+  ASSERT2 ("Index::index_ancestor_level",
+	  "level %d is greater than ancestor level %d",
+	   level_begin,level_ancestor,
+	   (level_begin >= level_ancestor));
+  ASSERT2 ("Index::index_ancestor_level",
+	  "ancestor level %d is less than min_level %d",
+	   level_ancestor,min_level,
+	   (level_ancestor >= min_level));
+
+  for (int level=level_begin; level>level_ancestor; level--) {
     index.set_child (level,0,0,0,min_level);
-    index.set_level(level - 1);
-  } else {
-    ERROR2 ("Index::index_parent",
-	    "level %d is less than min_level %d",
-	    level,min_level);
+    index.set_level(level-1);
   }
+  
   return index;
 }
 
@@ -89,6 +112,7 @@ Index Index::index_child (int icx, int icy, int icz, int min_level) const
 }
 
 //----------------------------------------------------------------------
+
 bool Index::is_on_boundary (int axis, int face, int narray) const
 {
 
@@ -200,18 +224,6 @@ bool Index::is_root() const
 
 //----------------------------------------------------------------------
 
-bool Index::is_zero() const
-{ return (a_[0].array == 0 &&
-	  a_[1].array == 0 &&
-	  a_[2].array == 0 &&
-	  a_[0].tree == 0 &&
-	  a_[1].tree == 0 &&
-	  a_[2].tree == 0);
-}
-	  
-
-//----------------------------------------------------------------------
-
 void Index::array (int * ix, int *iy, int *iz) const
 { 
   if (ix) (*ix) = a_[0].array;
@@ -219,7 +231,7 @@ void Index::array (int * ix, int *iy, int *iz) const
   if (iz) (*iz) = a_[2].array;
   const int level = this->level();
   if (level < 0) {
-    // adjust array index for level
+    // adjust array index if level < 0
     int shift = - level;
     if (ix) (*ix) = (*ix) >> shift;
     if (iy) (*iy) = (*iy) >> shift;

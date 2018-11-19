@@ -33,7 +33,7 @@ class EnzoBlock : public BASE_ENZO_BLOCK
   //----------------------------------------------------------------------
   // functions
 
-  static void initialize (EnzoConfig * enzo_config);
+  static void initialize (const EnzoConfig * enzo_config);
 
   //----------------------------------------------------------------------
   // variables
@@ -112,11 +112,6 @@ public: // interface
   /// Initialize an empty EnzoBlock
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
-       mg_iter_(0),
-       mg_sync_restrict_(),
-       mg_sync_prolong_(),
-       mg_msg_(NULL),
-       jacobi_iter_(0),
        dt(0.0),
        redshift(0.0),
        SubgridFluxes(NULL)
@@ -129,20 +124,12 @@ public: // interface
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
     }
-    for (int i=0; i<max_turbulence_array; i++) {
-      method_turbulence_data [i] = 0;
-    }
     performance_stop_(perf_block);
   }
 
   /// Initialize a migrated EnzoBlock
   EnzoBlock (CkMigrateMessage *m) 
     : BASE_ENZO_BLOCK (m),
-      mg_iter_(0),
-      mg_sync_restrict_(),
-      mg_sync_prolong_(),
-      mg_msg_(NULL),
-      jacobi_iter_(0),
       dt(0.0),
       redshift(0.0),
       SubgridFluxes(NULL)
@@ -155,9 +142,6 @@ public: // interface
       GridStartIndex[i] = 0; 
       GridEndIndex[i] = 0; 
       CellWidth[i] = 0.0;
-    }
-    for (int i=0; i<max_turbulence_array; i++) {
-      method_turbulence_data [i] = 0;
     }
     performance_stop_(perf_block);
   }
@@ -221,7 +205,7 @@ public: // interface
   int SolveHydroEquations3 ( enzo_float time, enzo_float dt);
 
   /// Solve the mhd equations (with ppml), saving subgrid fluxes
-  int SolveMHDEquations(const FieldDescr *,  enzo_float dt);
+  int SolveMHDEquations(enzo_float dt);
 
   /// Set EnzoBlock's dt (overloaded to update EnzoBlock::dt)
   virtual void set_dt (double dt) throw();
@@ -236,9 +220,6 @@ public: // interface
   virtual void initialize () throw();
 
 public: /// entry methods
-
-  /// Compute sum, min, and max of g values for EnzoMethodTurbulence
-  void method_turbulence_begin();
 
   /// Perform the necessary reductions
   CkReductionMsg * r_method_turbulence(int n, CkReductionMsg ** msgs);
@@ -315,45 +296,39 @@ public: /// entry methods
   /// EnzoSolverBiCGStab entry method: ITER++
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
+  void p_dot_recv_parent  (int n, long double * dot_block,
+			   std::vector<int> is_array,  CkCallback cb);
+  void p_dot_recv_children(int n, long double * dot_block,
+			   std::vector<int> is_array,  CkCallback cb);
+
+/// EnzoSolverDd
+  
+  void p_solver_dd_restrict_recv(FieldMsg * msg);
+  void p_solver_dd_prolong_recv(FieldMsg * msg);
+  void solver_dd_prolong_recv(FieldMsg * msg);
+  void p_solver_dd_solve_coarse();
+  void p_solver_dd_solve_domain();
+  void p_solver_dd_last_smooth();
+
   // EnzoSolverJacobi
 
   void p_solver_jacobi_continue();
 
   // EnzoSolverMg0
 
-  void p_solver_mg0_pre_smooth();
+  void r_solver_mg0_begin_solve(CkReductionMsg* msg);  
+  void p_solver_mg0_restrict();
   void p_solver_mg0_solve_coarse();
   void p_solver_mg0_post_smooth();
   void p_solver_mg0_last_smooth();
-  void p_solver_mg0_barrier(CkReductionMsg* msg);  
-  void p_solver_mg0_shift_b(CkReductionMsg* msg);  
+  void r_solver_mg0_barrier(CkReductionMsg* msg);  
   void p_solver_mg0_prolong_recv(FieldMsg * msg);
   void solver_mg0_prolong_recv(FieldMsg * msg);
   void p_solver_mg0_restrict_recv(FieldMsg * msg);
 
-  void mg_sync_restrict_reset()             { mg_sync_restrict_.reset(); }
-  void mg_sync_restrict_set_stop(int value) { mg_sync_restrict_.set_stop(value); }
-  bool mg_sync_restrict_next()        { return mg_sync_restrict_.next(); };
-
-  void mg_sync_prolong_reset()             { mg_sync_prolong_.reset(); }
-  void mg_sync_prolong_set_stop(int value) { mg_sync_prolong_.set_stop(value); }
-  bool mg_sync_prolong_next()        { return mg_sync_prolong_.next(); };
-  
-  void mg_iter_clear() { mg_iter_ = 0; }
-  void mg_iter_increment() { ++mg_iter_; }
-  int mg_iter() const {return mg_iter_; }
-
-  void jacobi_iter_clear() { jacobi_iter_ = 0; }
-  void jacobi_iter_increment() { ++jacobi_iter_; }
-  int jacobi_iter() const {return jacobi_iter_; }
 
   void print() {
     Block::print();
-    CkPrintf ("mg_iter_ = %d\n",mg_iter_);
-    // CkPrintf ("mg_sync_restrict_ = %d\n",mg_sync_restrict_);
-    // CkPrintf ("mg_sync_prolong_ = %d\n",mg_sync_prolong_);
-    CkPrintf ("mg_msg_ = %p\n",mg_msg_);
-    CkPrintf ("jacobi_iter_ = %d\n",jacobi_iter_);
     CkPrintf ("dt = %d\n",dt);
     CkPrintf ("redshift = %d\n",redshift);
     CkPrintf ("SubgridFluxes = %d\n",SubgridFluxes);
@@ -365,23 +340,7 @@ public: /// entry methods
   }
   
 protected: // attributes
-  
-  // MG iteration count
-  int mg_iter_;
 
-  // MG SOLVER ( EnzoSolverMg0)
-  Sync mg_sync_restrict_;
-
-  // Synchronize to not call prolong until all children have exited coarse solve
-  Sync mg_sync_prolong_;
-
-  // Saved FieldMsg for prolong
-  FieldMsg * mg_msg_;
-
-  // Jacobi iteration count
-  int jacobi_iter_;
-
-  // FieldMsg for prolong if called out of order
 
 public: // attributes (YIKES!)
 
@@ -405,9 +364,6 @@ public: // attributes (YIKES!)
   /// stoping index of the active region
   int GridEndIndex[MAX_DIMENSION]; 
   enzo_float CellWidth[MAX_DIMENSION];
-
-  /// Data for turbulence reductions
-  double method_turbulence_data [max_turbulence_array];
 
 };
 

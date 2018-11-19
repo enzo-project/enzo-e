@@ -20,24 +20,20 @@ class Solver : public PUP::able
 public: // interface
 
   /// Create a new Solver
-  Solver (int monitor_iter,
+  Solver (std::string name,
+	  std::string field_x,
+	  std::string field_b,
+	  int monitor_iter,
 	  int restart_cycle,
+	  int solve_type,
 	  int min_level = 0,
-	  int max_level = std::numeric_limits<int>::max()) throw()
-    : PUP::able(),
-      refresh_list_(),
-      monitor_iter_(monitor_iter),
-      restart_cycle_(restart_cycle),
-      callback_(0),
-      index_(0),
-      min_level_(min_level),
-      max_level_(max_level),
-      id_sync_(0)
-  {}
+	  int max_level = std::numeric_limits<int>::max()) throw();
 
   /// Create an uninitialized Solver
   Solver () throw()
   : PUP::able(),
+    name_(""),
+    ix_(-1),ib_(-1),
     refresh_list_(),
     monitor_iter_(0),
     restart_cycle_(1),
@@ -45,8 +41,8 @@ public: // interface
     index_(0),
     min_level_(0),
     max_level_(std::numeric_limits<int>::max()),
-    id_sync_(0)
-
+    id_sync_(0),
+    solve_type_(solve_leaf)
   {}
 
   /// Destructor
@@ -57,14 +53,17 @@ public: // interface
 
   Solver (CkMigrateMessage *m)
     : PUP::able (m),
-      refresh_list_(),
-      monitor_iter_(0),
-      restart_cycle_(1),
-      callback_(0),
-      index_(0),
-      min_level_(- std::numeric_limits<int>::max()),
-      max_level_(  std::numeric_limits<int>::max()),
-      id_sync_(0)
+    name_(""),
+    ix_(-1),ib_(-1),
+    refresh_list_(),
+    monitor_iter_(0),
+    restart_cycle_(1),
+    callback_(0),
+    index_(0),
+    min_level_(- std::numeric_limits<int>::max()),
+    max_level_(  std::numeric_limits<int>::max()),
+    id_sync_(0),
+    solve_type_(solve_leaf)
   { }
   
   /// CHARM++ Pack / Unpack function
@@ -73,7 +72,10 @@ public: // interface
     TRACEPUP;
     
     PUP::able::pup(p);
-    
+
+    p | name_;
+    p | ix_;
+    p | ib_;
     p | refresh_list_;
     p | monitor_iter_;
     p | restart_cycle_;
@@ -82,6 +84,7 @@ public: // interface
     p | min_level_;
     p | max_level_;
     p | id_sync_;
+    p | solve_type_;
   }
 
   Refresh * refresh(size_t index=0) ;
@@ -92,13 +95,23 @@ public: // interface
   void set_index (int index)
   { index_ = index; }
 
-  int index() const { return index_; }
+  int index() const
+  { return index_; }
+
+  void set_field_x (int ix)
+  { ix_ = ix;  }
+  
+  void set_field_b (int ib)
+  { ib_ = ib;  }
 
   void set_min_level (int min_level)
   { min_level_ = min_level; }
 
-  const int min_level() { return min_level_; }
-  const int max_level() { return max_level_; }
+  int min_level()
+  { return min_level_; }
+  
+  int max_level()
+  { return max_level_; }
 
   void set_max_level (int max_level)
   { max_level_ = max_level; }
@@ -108,27 +121,44 @@ public: // interface
   
   /// Type of neighbor: level if min_level == max_level, else leaf
   int neighbor_type_() const throw() {
-    return (min_level_ == max_level_) ? neighbor_level : neighbor_leaf;
+    return (solve_type_ == solve_level) ? neighbor_level : neighbor_leaf;
   }
 
   /// Type of synchronization: sync_face if min_level == max_level,
   /// else sync_neighbor
   int sync_type_() const throw() {
-    return (min_level_ == max_level_) ? sync_face : sync_neighbor;
+    int retval;
+    switch (solve_type_) {
+    case solve_leaf:  retval = sync_face; break;
+    case solve_level: retval = sync_neighbor; break;
+    case solve_tree:  retval = sync_neighbor; break;
+    default:          retval = sync_unknown; break;
+    }
+    return retval;
   }
 
   /// Whether Block is active
-  bool is_active_(Block * block);
+  bool is_active_(Block * block) const;
+
+  /// Whether solution is defined on this Block
+  bool is_finest_(Block * block) const;
+  
+  /// Which subset of Blocks the solver is defined on; see enum solve_type
+  /// for supported types
+  int solve_type() const
+  { return solve_type_; }
+
+  /// Return the name of this solver
+  std::string name () const
+  { return name_; }
 
 public: // virtual functions
 
   /// Solve the linear system Ax = b
-  virtual void apply ( std::shared_ptr<Matrix> A,
-		       int ix, int ib, Block * block) throw() = 0;
+  virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw() = 0;
 
-  /// Return the name of this solver
-  virtual std::string name () const
-  { return "UNKNOWN"; }
+  /// Return the type of this solver
+  virtual std::string type () const = 0;
 
 protected: // functions
 
@@ -167,6 +197,15 @@ protected: // functions
     
 protected: // attributes
 
+  /// Name of the solver
+  std::string name_;
+
+  /// Field id for solution
+  int ix_;
+  
+  /// Field id for right-hand side
+  int ib_;
+  
   ///  Refresh object
   std::vector<Refresh *> refresh_list_;
 
@@ -190,6 +229,9 @@ protected: // attributes
 
   /// Sync id
   int id_sync_;
+
+  /// Type of solver; see enum solve_type for supported types
+  int solve_type_;
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

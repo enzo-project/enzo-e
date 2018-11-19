@@ -18,11 +18,9 @@ OutputData::OutputData
 (
  int index,
  const Factory * factory,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  Config * config
 ) throw ()
-  : Output(index,factory,field_descr,particle_descr),
+  : Output(index,factory),
     text_block_count_(0)
 {
   // Set process stride, with default = 1
@@ -108,12 +106,7 @@ void OutputData::finalize () throw ()
 
 //----------------------------------------------------------------------
 
-void OutputData::write_hierarchy
-(
- const Hierarchy  * hierarchy,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr
- ) throw()
+void OutputData::write_hierarchy ( const Hierarchy  * hierarchy ) throw()
 {
 #ifdef TRACE_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT OutputData::write_hierarchy()\n",CkMyPe());
@@ -122,17 +115,13 @@ void OutputData::write_hierarchy
 
   write_meta (&io_hierarchy);
 
-  Output::write_hierarchy(hierarchy, field_descr, particle_descr);
+  Output::write_hierarchy(hierarchy);
   
 }
 
 //----------------------------------------------------------------------
 
-void OutputData::write_block
-( 
-  const Block * block,
-  const FieldDescr * field_descr,
-  const ParticleDescr * particle_descr) throw()
+void OutputData::write_block (  const Block * block ) throw()
 {
 #ifdef TRACE_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT OutputData::write_block()\n",CkMyPe());
@@ -149,7 +138,7 @@ void OutputData::write_block
   if (name_dir != "") {
 
     std::string name_file  = expand_name_(&file_name_,&file_args_);
-    const int num_blocks = block->simulation()->hierarchy()->num_blocks();
+    const int num_blocks = cello::hierarchy()->num_blocks();
     int count = 0;
     
     // Write DIR.parameters file
@@ -212,7 +201,7 @@ void OutputData::write_block
 
   // Call write(block) on base Output object
 
-  Output::write_block(block,field_descr,particle_descr);
+  Output::write_block(block);
 
   file_->group_close();
 
@@ -223,12 +212,13 @@ void OutputData::write_block
 void OutputData::write_field_data
 ( 
   const FieldData * field_data,
-  const FieldDescr * field_descr,
   int index_field) throw()
 {
   io_field_data()->set_field_data((FieldData*)field_data);
   io_field_data()->set_field_index(index_field);
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   for (size_t i=0; i<io_field_data()->data_count(); i++) {
 
     void * buffer;
@@ -238,8 +228,7 @@ void OutputData::write_field_data
     int nx,ny,nz;     // Array size
 
     // Get ith FieldData data
-    io_field_data()->field_array(field_descr,
-				 i, &buffer, &name, &type, 
+    io_field_data()->field_array(i, &buffer, &name, &type, 
 				 &nxd,&nyd,&nzd,
 				 &nx, &ny, &nz);
 
@@ -262,11 +251,11 @@ void OutputData::write_field_data
 //----------------------------------------------------------------------
 
 void OutputData::write_particle_data
-( 
-  const ParticleData * particle_data,
-  const ParticleDescr * particle_descr,
+( const ParticleData * particle_data,
   int it) throw()
 {
+  ParticleDescr * particle_descr = cello::particle_descr();
+  
   const Particle particle ( (ParticleDescr*) particle_descr,
 			    (ParticleData*)  particle_data);
 

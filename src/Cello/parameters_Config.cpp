@@ -196,6 +196,7 @@ void Config::pup (PUP::er &p)
   p | solver_list;
   p | solver_index;
   p | solver_type;
+  p | solver_solve_type;
   p | solver_iter_max;
   p | solver_res_tol;
   p | solver_diag_precon;
@@ -204,6 +205,8 @@ void Config::pup (PUP::er &p)
   p | solver_prolong;
   p | solver_min_level;
   p | solver_max_level;
+  p | solver_field_x;
+  p | solver_field_b;
   
   // Stopping
 
@@ -1246,6 +1249,7 @@ void Config::read_solver_ (Parameters * p) throw()
 
   solver_list         .resize(num_solvers);
   solver_type         .resize(num_solvers);
+  solver_solve_type   .resize(num_solvers);
   solver_iter_max     .resize(num_solvers);
   solver_res_tol      .resize(num_solvers);
   solver_diag_precon  .resize(num_solvers);
@@ -1254,7 +1258,8 @@ void Config::read_solver_ (Parameters * p) throw()
   solver_prolong      .resize(num_solvers);
   solver_min_level    .resize(num_solvers);
   solver_max_level    .resize(num_solvers);
-
+  solver_field_x      .resize(num_solvers);
+  solver_field_b      .resize(num_solvers);
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
 
@@ -1269,6 +1274,11 @@ void Config::read_solver_ (Parameters * p) throw()
 
     solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
     
+    solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
+
+    solver_solve_type[index_solver] = p->value_string
+      (full_name + ":solve_type","leaf");
+
     solver_iter_max[index_solver] = p->value_integer
       (full_name + ":iter_max",1000);
     
@@ -1292,9 +1302,13 @@ void Config::read_solver_ (Parameters * p) throw()
 
     solver_max_level[index_solver] = p->value_integer
       (full_name + ":max_level",mesh_max_level);
-    
-  }  
 
+    solver_field_x[index_solver] = p->value_string
+      (full_name + ":field_x","unknown");
+
+    solver_field_b[index_solver] = p->value_string
+      (full_name + ":field_b","unknown");
+  }  
 }
 
 //----------------------------------------------------------------------

@@ -38,17 +38,14 @@ void Simulation::initialize() throw()
 
   initialize_data_descr_();
 
-  problem_->initialize_physics (config_,parameters_,field_descr_);
+  problem_->initialize_physics (config_,parameters_);
   problem_->initialize_boundary(config_,parameters_);
-  problem_->initialize_initial (config_,parameters_,field_descr_);
-  problem_->initialize_refine  (config_,parameters_,field_descr_);
+  problem_->initialize_initial (config_,parameters_);
+  problem_->initialize_refine  (config_,parameters_);
   problem_->initialize_stopping(config_);
-  problem_->initialize_output  (config_,
-				field_descr_,
-				particle_descr_,
-				factory());
-  problem_->initialize_method  (config_,field_descr_,particle_descr_);
-  problem_->initialize_solver  (config_,field_descr_,particle_descr_);
+  problem_->initialize_output  (config_,factory());
+  problem_->initialize_method  (config_);
+  problem_->initialize_solver  (config_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
   problem_->initialize_units (config_);
@@ -59,15 +56,13 @@ void Simulation::initialize() throw()
   // using QD to ensure that initialize_hierarchy() is called
   // on all processors before Blocks are created
 
-#ifdef NEW_MSG_REFINE
   // Create the Block chare array
   CProxy_Block block_array;
   if (CkMyPe() == 0) {
     bool allocate_data = true;
-    block_array = hierarchy_->new_block_proxy (field_descr_, allocate_data);
+    block_array = hierarchy_->new_block_proxy (allocate_data);
     thisProxy.p_set_block_array(block_array);
   }
-#endif    
 
   CkCallback callback 
     (CkIndex_Simulation::r_initialize_block_array(NULL), thisProxy);
@@ -89,20 +84,6 @@ void Simulation::r_initialize_block_array(CkReductionMsg * msg)
   delete msg;
   
   initialize_block_array_();
-
-#ifdef NEW_MSG_REFINE
-#else  
-
-  CkCallback callback
-    (CkIndex_Simulation::r_initialize_hierarchy(NULL), thisProxy);
-#ifdef TRACE_CONTRIBUTE
-  CkPrintf ("%s:%d DEBUG_CONTRIBUTE r_initialize_hierarchy()\n",__FILE__,__LINE__); fflush(stdout);
-#endif  
-  contribute(0,0,CkReduction::concat,callback);
-  
-  performance_->stop_region(perf_initial);
-#endif
-  
 }
 
 //----------------------------------------------------------------------

@@ -10,18 +10,16 @@ import socket
 
 
 #----------------------------------------------------------------------
+# Temporary setting for using new contribute in EnzoSolverBiCgStab
+#----------------------------------------------------------------------
+
+new_contribute = 1
+
+#----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
 
 new_output = 0
-
-#----------------------------------------------------------------------
-# Temporary setting for using new Block and EnzoBlock constructors
-# with MsgRefine objects stored on creating process (to bypass Charm++
-# constructor with packed message argument bug)
-#----------------------------------------------------------------------
-
-new_msg_refine = 1
 
 #----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev
@@ -227,8 +225,8 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Experimental code defines
 
+define_new_contribute  = ['NEW_CONTRIBUTE']
 define_new_output      = ['NEW_OUTPUT']
-define_new_msg_refine = ['NEW_MSG_REFINE']
 define_new_ppm         = ['NEW_PPM']
 
 # Debugging defines
@@ -307,6 +305,8 @@ elif (arch == "faraday_gnu"):  from faraday_gnu  import *
 elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
 elif (arch == "mf_gnu"):       from mf_gnu       import *
 elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
+elif (arch == "stampede_gnu"): from stampede_gnu import *
+elif (arch == "stampede_intel"): from stampede_intel import *
 elif (arch == "davros_gnu"):   from davros_gnu   import *
 elif (arch == "davros_gnu_debug"):  from davros_gnu_debug  import *
 elif (arch == "darwin_gnu"):   from darwin_gnu   import *
@@ -365,8 +365,8 @@ if (use_jemalloc == 1):
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
+if (new_contribute != 0):defines = defines + define_new_contribute
 if (new_output != 0):    defines = defines + define_new_output
-if (new_msg_refine != 0): defines = defines + define_new_msg_refine
 if (new_ppm != 0):       defines = defines + define_new_ppm
 
 if (trace != 0):         defines = defines + define_trace
@@ -619,7 +619,9 @@ cello_def.close()
 #======================================================================
 
 charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
+cpp_builder = Builder (action="/usr/bin/cpp -E $_CPPDEFFLAGS $SOURCE > $TARGET")
 env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+env.Append(BUILDERS = { 'CppBuilder'   : cpp_builder })
 
 Export('env')
 Export('parallel_run')

@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHeat::EnzoMethodHeat (const FieldDescr * field_descr, double alpha, double courant) 
+EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant) 
   : Method(),
     alpha_(alpha),
     courant_(courant)
@@ -21,6 +21,8 @@ EnzoMethodHeat::EnzoMethodHeat (const FieldDescr * field_descr, double alpha, do
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_heat);
 
+  FieldDescr * field_descr = cello::field_descr();
+  
   refresh(ir)->add_field(field_descr->field_id("temperature"));
 }
 

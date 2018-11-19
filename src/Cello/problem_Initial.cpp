@@ -13,10 +13,6 @@
 
 //----------------------------------------------------------------------
 
-extern CProxy_Simulation  proxy_simulation;
-
-//----------------------------------------------------------------------
-
 void Initial::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
@@ -32,12 +28,6 @@ void Initial::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void Initial::enforce_block
-(
- Block            * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
- const Hierarchy  * hierarchy
- ) throw()
+void Initial::enforce_block(Block * block, const Hierarchy * hierarchy) throw()
 {
 }

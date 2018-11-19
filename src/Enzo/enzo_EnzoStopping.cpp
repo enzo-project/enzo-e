@@ -17,9 +17,7 @@ bool EnzoStopping::complete (int    curr_cycle,
 
   // check for stopping on redshift
 
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
-  EnzoUnits * units = (EnzoUnits * )simulation->problem()->units();
-  EnzoPhysicsCosmology * cosmology = units->cosmology();
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
   if (cosmology) {
     cosmology->set_current_time(curr_time);
