@@ -17,12 +17,10 @@
 // #include "enzo.def.h"
 // #undef CK_TEMPLATES_ONLY
 
-extern CProxy_EnzoSimulation proxy_enzo_simulation;
-
 //---------------------------------------------------------------------
 
 EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
-(const FieldDescr * field_descr, bool zero_acceleration) // do need
+(bool zero_acceleration) // do need
  : Method(),
    zero_acceleration_(zero_acceleration),
    mx_(0), my_(0), mz_(0),
@@ -78,11 +76,10 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
      or can just be tacked into here */
 
   //TRACE_METHOD("compute()",block);
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  const EnzoConfig * enzo_config = static_cast<const EnzoConfig*>
-       (enzo_block->simulation()->config());
-  EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch();
-  EnzoUnits * units = (EnzoUnits *) simulation->problem()->units();
+  EnzoBlock * enzo_block = enzo::block(block);
+  const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
+
   Field field = block->data()->field();
 
   // Obtain grid sizes and ghost sizes
@@ -96,11 +93,12 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   // We will probably never be in the situation of constant acceleration
   // and cosmology, but just in case.....
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
   enzo_float cosmo_a = 1.0;
+
+  const int rank = cello::rank();
+
   if (cosmology) {
-    const int rank = block->rank();
     enzo_float cosmo_dadt = 0.0;
     double dt    = block->dt();
     double time  = block->time();
@@ -124,12 +122,12 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 
   if (enzo_config->method_background_acceleration_type == "GalaxyModel"){
 
-    this->GalaxyModel(ax, ay, az, block->rank(),
-                      cosmo_a, enzo_config, units);
+    this->GalaxyModel(ax, ay, az, rank,
+                      cosmo_a, enzo_config, enzo_units);
 
   } else if (enzo_config->method_background_acceleration_type == "PointMass"){
-    this->PointMass(ax, ay, az, block->rank(),
-                    cosmo_a, enzo_config, units);
+    this->PointMass(ax, ay, az, rank,
+                    cosmo_a, enzo_config, enzo_units);
   }
 
   return;
@@ -142,17 +140,17 @@ void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
                                                  const int rank,
                                                  const enzo_float cosmo_a,
                                                  const EnzoConfig * enzo_config,
-                                                 const EnzoUnits * units)
+                                                 const EnzoUnits * enzo_units)
                                                  throw() {
 
   // just need to define position of each cell
 
   double mass = enzo_config->method_background_acceleration_mass *
-                cello::mass_solar / units->mass();
+                cello::mass_solar / enzo_units->mass();
   double rcore = std::max(0.1*hx_,
-                     enzo_config->method_background_acceleration_core_radius/units->length());
+                     enzo_config->method_background_acceleration_core_radius/enzo_units->length());
   double G = this->G_four_pi_ *
-            units->density() * units->time() * units->time();
+            enzo_units->density() * enzo_units->time() * enzo_units->time();
 
   double x = 0.0, y = 0.0, z = 0.0;
 
@@ -194,32 +192,32 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
                                                    const int rank,
                                                    const enzo_float cosmo_a,
                                                    const EnzoConfig * enzo_config,
-                                                   const EnzoUnits * units)
+                                                   const EnzoUnits * enzo_units)
                                                    throw() {
 
   double DM_mass     = enzo_config->method_background_acceleration_DM_mass *
-                         cello::mass_solar / units->mass();
+                         cello::mass_solar / enzo_units->mass();
   double DM_mass_radius = enzo_config->method_background_acceleration_DM_mass_radius *
-                          cello::kpc / units->length();
+                          cello::kpc / enzo_units->length();
   double DM_density  = enzo_config->method_background_acceleration_DM_density /
-                         units->density();
+                         enzo_units->density();
   double stellar_r   = enzo_config->method_background_acceleration_stellar_scale_height_r *
-                         cello::kpc / units->length();
+                         cello::kpc / enzo_units->length();
   double stellar_z   = enzo_config->method_background_acceleration_stellar_scale_height_z *
-                         cello::kpc / units->length();
+                         cello::kpc / enzo_units->length();
   double stellar_mass = enzo_config->method_background_acceleration_stellar_mass *
-                        cello::mass_solar / units->mass();
+                        cello::mass_solar / enzo_units->mass();
   double bulge_mass   = enzo_config->method_background_acceleration_bulge_mass *
-                        cello::mass_solar / units->mass();
+                        cello::mass_solar / enzo_units->mass();
   double bulgeradius = enzo_config->method_background_acceleration_bulge_radius *
-                        cello::kpc / units->length();
+                        cello::kpc / enzo_units->length();
   const double * amom = enzo_config->method_background_acceleration_angular_momentum;
 
   double G = this->G_four_pi_ *
-             units->density() * units->time() * units->time();
+             enzo_units->density() * enzo_units->time() * enzo_units->time();
 
   double rcore = enzo_config->method_background_acceleration_core_radius *
-                 cello::kpc / units->length();
+                 cello::kpc / enzo_units->length();
 
   //
   if (DM_mass > 0.0){
@@ -320,10 +318,9 @@ double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
 
-  EnzoPhysicsCosmology * cosmology = (EnzoPhysicsCosmology * )
-    block->simulation()->problem()->physics("cosmology");
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  const int rank = cello::rank();
   if (cosmology) {
-    const int rank = block->rank();
     enzo_float cosmo_a = 1.0;
     enzo_float cosmo_dadt = 0.0;
     double dt   = block->dt();

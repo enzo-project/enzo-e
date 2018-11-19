@@ -17,11 +17,6 @@
 #define DEBUG_PERFORMANCE
 //----------------------------------------------------------------------
 
-// AE: used below to access units object: not sure what else this does
-//     and what it can do (or what it really is in first place)
-extern CProxy_EnzoSimulation proxy_enzo_simulation;
-
-
 EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 (const EnzoConfig * config) throw()
 : Initial(config->initial_cycle, config->initial_time)
@@ -68,14 +63,13 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 
 //----------------------------------------------------------------------
 
-/* I do not know what this does: */
 void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
 
-  TRACEPUP; // ?
+  TRACEPUP; // 
 
-  Initial::pup(p); // ?
+  Initial::pup(p); //
 
   PUParray(p,center_position_,3);
   PUParray(p, bfield_,3);
@@ -94,15 +88,12 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
   p | dual_energy_;
   p | gamma_;
   p | mu_;
-  // not actually sure what this function does and how to do things here
 
 }
 
 void EnzoInitialIsolatedGalaxy::enforce_block
 (
  Block * block,
- const FieldDescr * field_descr,
- const ParticleDescr * particle_descr,
  const Hierarchy * hierarchy
  ) throw()
 {
@@ -119,9 +110,10 @@ void EnzoInitialIsolatedGalaxy::enforce_block
          "Block does not exist",
          block != NULL);
 
+  EnzoUnits * enzo_units = enzo::units();
+
   Field field = block->data()->field();
-  EnzoSimulation * simulation = proxy_enzo_simulation.ckLocalBranch(); // AE: not sure??? based on IC cosmology
-  EnzoUnits * units = (EnzoUnits *) simulation->problem()->units();    // units
+
 
   //
   // Get Grid and Field parameters
@@ -175,10 +167,10 @@ void EnzoInitialIsolatedGalaxy::enforce_block
       (pow((this->scale_length_),2)*(this->scale_height_));
 
   double halo_gas_energy = this->gas_halo_temperature_ / this->mu_ / (this->gamma_ -1) /
-         units->temperature();
+         enzo_units->temperature();
 
   double disk_gas_energy = this->disk_temperature_ / this->mu_ / (this->gamma_ -1)/
-         units->temperature();
+         enzo_units->temperature();
 
   // initialize fields to something
   for (int iz=0; iz<mz; iz++){
@@ -209,15 +201,15 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   for (int iz=0; iz<mz; iz++){
     // compute z coordinate of cell center
     double z = zm + (iz - gz + 0.5)*hz - this->center_position_[2];
-    z *= units->length(); // convert to cgs units
+    z *= enzo_units->length(); // convert to cgs units
 
     for (int iy=0; iy<my; iy++){
       double y = ym + (iy - gy + 0.5)*hy - this->center_position_[1];
-      y *= units->length();
+      y *= enzo_units->length();
 
       for (int ix=0; ix<mx; ix++){
         double x = xm + (ix - gx + 0.5)*hx - this->center_position_[0];
-        x *= units->length();
+        x *= enzo_units->length();
 
         // 1D index of current cell
         int i = INDEX(ix,iy,iz,mx,my);
@@ -227,15 +219,15 @@ void EnzoInitialIsolatedGalaxy::enforce_block
         double r_cyl  = sqrt(x*x + y*y);
 
         // compute the disk density (in code units)
-        double disk_density = this->gauss_mass(rho_zero, x/units->length(), y/units->length(),
-                                              z/units->length(), hx) / (hx*hx*hx);
+        double disk_density = this->gauss_mass(rho_zero, x/enzo_units->length(), y/enzo_units->length(),
+                                              z/enzo_units->length(), hx) / (hx*hx*hx);
 
 //        if (outcount < 100){
 //            std::cout << disk_density << "   " << radius << "   " << r_cyl << "\n";
 //            outcount++;
 //        }
         if ((this->gas_halo_density_ * this->gas_halo_temperature_ > disk_density*this->disk_temperature_) &&
-            (radius < this->gas_halo_radius_*units->length())){
+            (radius < this->gas_halo_radius_*enzo_units->length())){
           // in the halo, set the halo properties
           d[i]  = this->gas_halo_density_;
           te[i] = halo_gas_energy;
@@ -250,15 +242,15 @@ void EnzoInitialIsolatedGalaxy::enforce_block
           //
 
         }
-        else if ( radius < this->gas_halo_radius_*units->length() ) // we are in the disk
+        else if ( radius < this->gas_halo_radius_*enzo_units->length() ) // we are in the disk
         {
           // in the disk, set the disk properties
           d[i]   = disk_density;
 
           double vcirc = this->InterpolateVcircTable(r_cyl);
 
-          v3[0][i] = -(vcirc*(y/r_cyl))/units->velocity();
-          v3[1][i] = -(vcirc*(x/r_cyl))/units->velocity();
+          v3[0][i] = -(vcirc*(y/r_cyl))/enzo_units->velocity();
+          v3[1][i] = -(vcirc*(x/r_cyl))/enzo_units->velocity();
           v3[2][i] = 0.0;
 
           te[i]  = disk_gas_energy;

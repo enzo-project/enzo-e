@@ -22,8 +22,6 @@ public: // interface
   /// Initialize block
   virtual void enforce_block
   ( Block * block,
-    const FieldDescr * field_descr,
-    const ParticleDescr * particle_descr,
     const Hierarchy * hierarchy ) throw();
 
   /// Read in particle data (DM and stars)

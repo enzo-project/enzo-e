@@ -527,7 +527,7 @@ Method * EnzoProblem::create_method_
     }
 
     method = new EnzoMethodBackgroundAcceleration
-          (field_descr, zero_acceleration);
+          (zero_acceleration);
 
   } else {
 

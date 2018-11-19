@@ -20,8 +20,7 @@ class EnzoMethodBackgroundAcceleration : public Method {
 public: // interface
 
   /// Create a new EnzoMethodBackgroundAcceleration object
-  EnzoMethodBackgroundAcceleration(const FieldDescr * field_descr,
-                                   bool zero_acceleration);
+  EnzoMethodBackgroundAcceleration(bool zero_acceleration);
 
   EnzoMethodBackgroundAcceleration() : zero_acceleration_(false),
                                        mx_(0), my_(0), mz_(0),
@@ -87,7 +86,7 @@ public: // interface
                           const int rank,
                           const enzo_float cosmo_a,
                           const EnzoConfig * enzo_config,
-                          const EnzoUnits * units) throw() ;
+                          const EnzoUnits * enzo_units) throw() ;
 
   virtual void GalaxyModel( enzo_float * ax,
                           enzo_float * ay,
@@ -95,7 +94,7 @@ public: // interface
                           const int rank,
                           const enzo_float cosmo_a,
                           const EnzoConfig * enzo_config,
-                          const EnzoUnits * units) throw() ;
+                          const EnzoUnits * enzo_units) throw() ;
 
 protected: // methods
 
