@@ -144,7 +144,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
     "Grackle configuration turned off!");
 
   #else /* CONFIG_USE_GRACKLE */
-    EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+    EnzoBlock * enzo_block = enzo::block(block);
 
     this->compute_(enzo_block);
 

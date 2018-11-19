@@ -48,7 +48,7 @@ void EnzoInitialGrackleTest::enforce_block
    "Block does not exist",
    block != NULL);
 
-  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+  EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits  * enzo_units = enzo::units();
 
