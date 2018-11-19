@@ -107,7 +107,7 @@ protected: // attributes
   EnzoEquationOfState *eos_;
   EnzoReconstructor *half_dt_recon_;
   EnzoReconstructor *full_dt_recon_;
-  EnzoRiemannSolver *riemann_solver_;
+  EnzoRiemann *riemann_solver_;
   
 };
 

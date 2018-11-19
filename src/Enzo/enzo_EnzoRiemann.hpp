@@ -1,21 +1,21 @@
 
-#ifndef ENZO_ENZO_RIEMANNSOLVER_HPP
-#define ENZO_ENZO_RIEMANNSOLVER_HPP
-class EnzoRiemannSolver : public PUP::able
+#ifndef ENZO_ENZO_RIEMANN_HPP
+#define ENZO_ENZO_RIEMANN_HPP
+class EnzoRiemann : public PUP::able
 {
 
-  /// @class    EnzoRiemannSolver
+  /// @class    EnzoRiemann
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulate Approximate Riemann Solvers
+  /// @brief    [\ref Enzo] Encapsulate approximate Riemann Solvers
 
 public: // interface
 
-  /// Create a new EnzoRiemannSolver object
-  EnzoRiemannSolver() throw()
+  /// Create a new EnzoRiemann object
+  EnzoRiemann() throw()
   {}
 
   /// CHARM++ PUP::able declaration
-  //PUPable_abstract(EnzoRiemannSolver);
+  //PUPable_abstract(EnzoRiemann);
 
   /// CHARM++ migration constructor for PUP::able
   //EnzoEquationOfState (CkMigrateMessage *m)
@@ -23,7 +23,7 @@ public: // interface
   //{  }
 
   /// Virtual destructor
-  virtual ~EnzoRiemannSolver()
+  virtual ~EnzoRiemann()
   {  }
 
   /// CHARM++ Pack / Unpack function
@@ -39,4 +39,4 @@ public: // interface
 		      EnzoEquationOfState *eos)=0;
 };
 
-#endif /* ENZO_ENZO_RIEMANNSOLVER_HPP */
+#endif /* ENZO_ENZO_RIEMANN_HPP */
