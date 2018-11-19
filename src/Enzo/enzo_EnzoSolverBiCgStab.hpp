@@ -31,20 +31,19 @@ public: // interface
 		     std::string field_x,
 		     std::string field_b,
 		     int monitor_iter,
-		     int reuse_solution,
-		     int rank,
-		     int iter_max, 
-		     double res_tol,
+		     int restart_cycle,
+		     int solve_type,
 		     int min_level,
 		     int max_level,
-		     int index_precon,
-		     int solve_type);
+		     int iter_max, 
+		     double res_tol,
+		     int index_precon);
 
   /// default constructor
   EnzoSolverBiCgStab()
     : Solver(),
       alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
-      rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
+      rr_(0), r0s_(0.0), bs_(0.0), xs_(0.0), c_(0.0), bnorm_(0.0),
       rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
       res_tol_(0.0),
       A_(NULL),
@@ -65,7 +64,7 @@ public: // interface
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
       alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
-      rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
+      rr_(0), r0s_(0.0), c_(0.0), bs_(0.0), xs_(0.0), bnorm_(0.0),
       rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
       res_tol_(0.0),
       A_(NULL),
@@ -126,12 +125,31 @@ public: // interface
     p | beta_n_;
     p | beta_d_;
     p | omega_;
-
     p | rr_;
     p | r0s_;
     p | c_;
+    p | bs_;
+    p | xs_;
     p | bnorm_;
 
+    p | is_alpha_;
+    p | is_beta_n_;
+    p | is_beta_d_;
+    p | is_omega_;
+    p | is_rr_;
+    p | is_r0s_;
+    p | is_c_;
+    p | is_bs_;
+    p | is_xs_;
+    p | is_bnorm_;
+    p | is_vr0_;
+    p | is_ys_;
+    p | is_vs_;
+    p | is_omega_n_;
+    p | is_omega_d_;
+    p | is_us_;
+    p | is_qs_;
+    
   }
 
   
@@ -216,6 +234,33 @@ protected: // methods
     field.deallocate_temporary(iu_);
   }
   
+  void inner_product_    (EnzoBlock *, int, long double *,
+			  const std::vector<int> & isa,
+			  CkCallback  callback);
+  void dot_compute_tree_ (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  CkCallback  callback);
+  void dot_send_parent_  (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  CkCallback  callback);
+  void dot_send_children_(EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  CkCallback  callback);
+  void dot_copy_         (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array);
+  void dot_clear_        (EnzoBlock *, int, const std::vector<int> & is_array);
+  void dot_done_         (EnzoBlock *, CkCallback  callback);
+  
+  long double * s_c_(Block * block) {
+    return block->data()->scalar_long_double().value(is_c_);
+  }
+  long double * s_xs_(Block * block) {
+    return block->data()->scalar_long_double().value(is_xs_);
+  }
+  long double * s_bs_(Block * block) {
+    return block->data()->scalar_long_double().value(is_bs_);
+  }
+
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -229,7 +274,28 @@ protected: // attributes
   double rr_;
   double r0s_; // sum (R0[i])
   double c_;  // B.length() ("count")
+  double bs_;
+  double xs_;
   double bnorm_; // used when reuse_solution
+
+  /// Corresponding ScalarData id's for solve_type == solve_tree
+  int is_alpha_;
+  int is_beta_n_;
+  int is_beta_d_;
+  int is_omega_;
+  int is_rr_;
+  int is_r0s_;
+  int is_c_;
+  int is_bs_;
+  int is_xs_;
+  int is_bnorm_;
+  int is_vr0_;
+  int is_ys_;
+  int is_vs_;
+  int is_omega_n_;
+  int is_omega_d_;
+  int is_us_;
+  int is_qs_;
 
   /// Initial residual
   double rho0_;
@@ -275,7 +341,6 @@ protected: // attributes
 
   /// Current BiCgStab iteration
   int iter_;
-
 };
 
 #endif /* ENZO_ENZO_SOLVER_BICGSTAB_HPP */

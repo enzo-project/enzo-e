@@ -76,7 +76,7 @@ public:
   /// default is root level
   Index index_ancestor (int level_ancestor = 0, int min_level = 0) const;
 
-/// Whether the face is on the domain boundary
+  /// Whether the face is on the domain boundary
   bool is_on_boundary 
   (int axis, int face, int narray) const;
 

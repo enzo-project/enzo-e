@@ -19,8 +19,11 @@ public: // interface
   /// Constructor
   EnzoSolverDiagonal(std::string name,
 		     std::string field_x,
-		     std::string field_b) throw()
-    : Solver(name,field_x,field_b,0,0)
+		     std::string field_b,
+		     int monitor_iter,
+		     int restart_cycle,
+		     int solve_type) throw()
+    : Solver(name,field_x,field_b,monitor_iter,restart_cycle,solve_type)
   { }
 
   /// Charm++ PUP::able declarations

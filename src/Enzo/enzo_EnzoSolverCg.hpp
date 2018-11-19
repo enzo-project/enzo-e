@@ -21,21 +21,18 @@ public: // interface
 		std::string field_b,
 		int monitor_iter,
 		int restart_cycle,
-		int rank,
-		int iter_max, 
-		double res_tol,
+		int solve_type,
 		int min_level,
 		int max_level,
-		int index_precon,
-		bool local=false,
-		int solve_type=solve_leaves);
+		int iter_max, 
+		double res_tol,
+		int index_precon);
 
   /// Constructor
   EnzoSolverCg() throw()
   : Solver(), 
     A_(NULL),
     index_precon_(-1),
-    rank_(0),
     iter_max_(0), 
     ir_(-1), id_(-1), iy_(-1), iz_(-1),
     nx_(0),ny_(0),nz_(0),
@@ -58,7 +55,6 @@ public: // interface
     : Solver(m), 
       A_(NULL),
       index_precon_(-1),
-      rank_(0),
       iter_max_(0), 
       ir_(-1), id_(-1), iy_(-1), iz_(-1),
       nx_(0),ny_(0),nz_(0),
@@ -185,9 +181,6 @@ protected: // attributes
 
   /// Preconditioner (-1 if none)
   int index_precon_;
-
-  /// Dimensionality of the problem
-  int rank_;
 
   /// Maximum number of Cg iterations
   int iter_max_;

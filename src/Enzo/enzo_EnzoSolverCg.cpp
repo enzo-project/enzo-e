@@ -66,18 +66,21 @@ EnzoSolverCg::EnzoSolverCg
  std::string field_b,
  int monitor_iter,
  int restart_cycle,
- int rank,
- int iter_max, double res_tol,
+ int solve_type,
  int min_level, int max_level,
- int index_precon,
- bool local,
- int solve_type
+ int iter_max, double res_tol,
+ int index_precon
  )
-  : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
-	   min_level,max_level,solve_type), 
+  : Solver(name,
+	   field_x,
+	   field_b,
+	   monitor_iter,
+	   restart_cycle,
+	   solve_type,
+	   min_level,
+	   max_level),
     A_(NULL),
     index_precon_(index_precon),
-    rank_(rank),
     iter_max_(iter_max), 
     ir_(0), id_(0), iy_(0), iz_(0),
     nx_(0),ny_(0),nz_(0),
@@ -89,7 +92,7 @@ EnzoSolverCg::EnzoSolverCg
     rr_min_(0.0),rr_max_(0.0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
     bc_(0.0),
-    local_(local)
+    local_(solve_type==solve_block)
 {
   FieldDescr * field_descr = cello::field_descr();
 
@@ -129,7 +132,6 @@ void EnzoSolverCg::pup (PUP::er &p)
 
   p | index_precon_;
   
-  p | rank_;
   p | iter_max_;
   p | ir_;
   p | id_;
@@ -198,7 +200,6 @@ void EnzoSolverCg::compute_ (EnzoBlock * enzo_block) throw()
 //     D = Z
 //     shift (B)
 {
-
   COPY_FIELD(enzo_block,ix_,"X_cg");
   COPY_FIELD(enzo_block,ib_,"B_cg");
   // If local, call serial CG solver
@@ -859,13 +860,13 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
       }
     }
 
-    if (is_finest_(enzo_block)) cello::check(rr_,"CG::rr_",__FILE__,__LINE__);
-    if (is_finest_(enzo_block)) cello::check(rz_,"CG::rz_",__FILE__,__LINE__);
-    if (is_finest_(enzo_block)) cello::check(dy_,"CG::dy_",__FILE__,__LINE__);
+    cello::check(rr_,"CG::rr_",__FILE__,__LINE__);
+    cello::check(rz_,"CG::rz_",__FILE__,__LINE__);
+    cello::check(dy_,"CG::dy_",__FILE__,__LINE__);
 
     enzo_float a = rz_ / dy_;
 
-    if (is_finest_(enzo_block)) cello::check(a,"CG::a",__FILE__,__LINE__);
+    cello::check(a,"CG::a",__FILE__,__LINE__);
 
     for (int i=0; i<mx_*my_*mz_; i++) {
       X[i] += a * D[i];
@@ -887,9 +888,9 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
       }
     }
 
-    if (is_finest_(enzo_block)) cello::check(rz2_,"CG::rz2_",__FILE__,__LINE__);
-    if (is_finest_(enzo_block)) cello::check(rs_,"CG::rs_",__FILE__,__LINE__);
-    if (is_finest_(enzo_block)) cello::check(xs_,"CG::xs_",__FILE__,__LINE__);
+    cello::check(rz2_,"CG::rz2_",__FILE__,__LINE__);
+    cello::check(rs_,"CG::rs_",__FILE__,__LINE__);
+    cello::check(xs_,"CG::xs_",__FILE__,__LINE__);
     
     if (A_->is_singular()) {
       for (int i=0; i<mx_*my_*mz_; i++) {
@@ -901,7 +902,7 @@ void EnzoSolverCg::local_cg_(EnzoBlock * enzo_block)
 
     enzo_float b = rz2_ / rz_;
 
-    if (is_finest_(enzo_block)) cello::check(b,"CG::b",__FILE__,__LINE__);
+    cello::check(b,"CG::b",__FILE__,__LINE__);
 
     for (int i=0; i<mx_*my_*mz_; i++) {
       D[i] = Z[i] + b * D[i];

@@ -1,3 +1,4 @@
+
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoSolverDd.cpp
@@ -22,7 +23,37 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-#define TRACE_SOLVER_DD
+// #define TRACE_SOLVER_DD
+// #define DEBUG_COPY_FIELD
+
+#ifdef DEBUG_COPY_FIELD
+#   define COPY_FIELD(BLOCK,FIELD_SRC,FIELD_DST)			\
+  {									\
+    Data * data = BLOCK->data();					\
+    Field field = data->field();					\
+    enzo_float * x_src = (enzo_float*) field.values(FIELD_SRC);		\
+    enzo_float * x_dst = (enzo_float*) field.values(FIELD_DST);		\
+    ASSERT1("COPY_FIELD","X_DST field %s does not exist",FIELD_DST,x_dst!=NULL); \
+    double sum_a=0.0;							\
+    double sum_abs=0.0;							\
+    for (int iz=gz_; iz<mz_-gz_; iz++) {				\
+      for (int iy=gy_; iy<my_-gy_; iy++) {				\
+	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
+	  int i = ix + mx_*(iy + my_*iz);				\
+	  sum_a+=x_src[i];						\
+	  sum_abs+=std::abs(x_src[i]);					\
+	  x_dst[i] = x_src[i];						\
+	}								\
+      }									\
+    }									\
+    CkPrintf ("%s:%d %s %s COPY_FIELD %s->%s %20.15lg %20.15lg\n", \
+	      __FILE__,__LINE__,BLOCK->name().c_str(),name().c_str(), \
+	      FIELD_SRC,FIELD_DST,sum_a, sum_abs);		      \
+  }
+#else
+#   define COPY_FIELD(BLOCK,ID,NAME) /* ... */
+#endif
+
 
 #ifdef TRACE_SOLVER_DD
 #  define TRACE_DD(BLOCK,SOLVER,msg)					\
@@ -42,18 +73,25 @@ EnzoSolverDd::EnzoSolverDd
   (std::string name,
    std::string field_x,
    std::string field_b,
+   int monitor_iter,
+   int restart_cycle,
+   int solve_type,
+   int min_level,
+   int max_level,
    int index_solve_coarse,
    int index_solve_domain,
    int index_solve_smooth,
    Restrict * restrict,
-   Prolong * prolong,
-   int min_level,
-   int max_level,
-   int coarse_level,
-   int monitor_iter,
-   int restart_cycle)
-    : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
-	     min_level,max_level),
+     Prolong * prolong,
+     int coarse_level)
+    : Solver(name,
+	     field_x,
+	     field_b,
+	     monitor_iter,
+	     restart_cycle,
+	     solve_type,
+	     min_level,
+	     max_level),
       index_solve_coarse_(index_solve_coarse),
       index_solve_domain_(index_solve_domain),
       index_solve_smooth_(index_solve_smooth),
@@ -122,6 +160,8 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   
   if (block->is_leaf()) {
 
+    COPY_FIELD(block,"potential","DD_po_1");
+    COPY_FIELD(block,"B","DD_B");
     begin_solve(enzo::block(block));
 
   } else if ( ! in_range ) {
@@ -382,6 +422,7 @@ void EnzoBlock::p_solver_dd_last_smooth()
 void EnzoSolverDd::continue_after_last_smooth(EnzoBlock * enzo_block) throw()
 {
   TRACE_DD(enzo_block,this,"continue_after_last_smooth");
+  end(enzo_block);
 }
 
 //----------------------------------------------------------------------

@@ -14,8 +14,8 @@
 // NOTE: Update _compute.hpp solve_enum when updating solve_string
 const char * solve_string[] = {
   "solve_unknown",
-  "solve_leaves",  // Solve on leaf Blocks (default)
-  "solve_level",  // Solve within a level (e.g. for multigrid smoothers)
+  "solve_leaf",  // Solve on leaf Blocks (default)
+  "solve_level", // Solve within a level (e.g. for multigrid smoothers)
   "solve_tree",  // Solve in a root-level octree (e.g. for domain decomposition)
   "solve_block" // Solve in a block (e.g. MG coarse solve on a single block)
 };
@@ -28,9 +28,9 @@ Solver::Solver (std::string name,
 		std::string field_b,
 		int monitor_iter,
 		int restart_cycle,
+		int solve_type,
 		int min_level,
-		int max_level,
-		int solve_type) throw()
+		int max_level) throw()
   : PUP::able(),
   name_(name),
   ix_(-1),ib_(-1),
@@ -42,7 +42,7 @@ Solver::Solver (std::string name,
   min_level_(min_level),
   max_level_(max_level),
   id_sync_(0),
-  solve_type_(solve_leaves)
+  solve_type_(solve_type)
 {
   FieldDescr * field_descr = cello::field_descr();
   ix_ = field_descr->field_id(field_x);
@@ -166,7 +166,7 @@ bool Solver::is_active_(Block * block) const
 bool Solver::is_finest_ (Block * block) const
 {
   switch (solve_enum(solve_type_)) {
-  case solve_leaves:
+  case solve_leaf:
     return block->is_leaf();
     break;
   case solve_level:

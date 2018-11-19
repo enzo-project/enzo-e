@@ -24,7 +24,8 @@ enum sync_enum {
 enum neighbor_enum {
   neighbor_unknown, // Unknown neighbor type
   neighbor_leaf,    // neighbors that are leaves, maybe different level
-  neighbor_level    // neighbors is in same level, maybe not leaves
+  neighbor_level,   // neighbors is in same level, maybe not leaves
+  neighbor_tree     // neighbors that are leaves, but only if in same octree
 };
   
 //----------------------------------------------------------------------
