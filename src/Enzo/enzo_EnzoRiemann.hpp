@@ -18,7 +18,7 @@ public: // interface
   //PUPable_abstract(EnzoRiemann);
 
   /// CHARM++ migration constructor for PUP::able
-  //EnzoEquationOfState (CkMigrateMessage *m)
+  //EnzoRiemann (CkMigrateMessage *m)
   //  : PUP::able(m)
   //{  }
 
@@ -29,10 +29,9 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   //void pup (PUP::er &p);
 
-  /// Solve the Riemann Problem
-  /// Probably want to make dim, an enum (x,y or z) Current plan: [0, 1, 2]
-  /// dim tells the solver which dimension to compute fluxes and indicates the
-  /// dimension along which the reconstructed primitive values are face-centered
+  /// Solve the Riemann Problem - dim (0, 1, or 2) tells the solver which
+  /// dimension to compute fluxes along and indicates the dimension along which
+  /// the reconstructed primitive values are face-centered
   virtual void solve (Block *block, std::vector<int> &priml_ids,
 		      std::vector<int> &primr_ids,
 		      std::vector<int> &flux_ids, int dim,

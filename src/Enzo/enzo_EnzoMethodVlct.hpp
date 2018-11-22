@@ -12,14 +12,6 @@ public: // interface
   /// Create a new EnzoMethodVlct object
   EnzoMethodVlct();
 
-  //EnzoMethodVlct()
-  //  : Method(),
-  //    eos_(NULL),
-  //    half_dt_recon_(NULL),
-  //    full_dt_recon_(NULL),
-  //    riemann_solver_(NULL)
-  //{ }
-
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodVlct);
   
@@ -102,8 +94,18 @@ protected: // methods
 			       std::vector<int> &temp_cons_ids,
 			       std::vector<int> &temp_bface_ids);
 
+  // Prepare the group
+  //void setup_groups_(Block *block, Grouping *group);
+
 protected: // attributes
 
+  // tracked_quan_ and temp_quan_ are the same, except that tracked_quan_
+  // includes conserved fields tracked over time steps while temp_quan_
+  // includes temporary fields temporarily allocated for a single timestep
+  // In a lot of senses, these will serve as aliases
+  //Grouping *tracked_quan_;
+  //Grouping *temp_quan_;
+  
   EnzoEquationOfState *eos_;
   EnzoReconstructor *half_dt_recon_;
   EnzoReconstructor *full_dt_recon_;

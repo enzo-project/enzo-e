@@ -37,14 +37,13 @@ public: // interface
   //}
 
   // Converts the cell-centered conservative quantities to primitive quantites
-  virtual void conservative_from_primitive (Block * block,
-					    std::vector<int> &cons_ids,
-  					    std::vector<int> &prim_ids)=0;
-	    
-  // Converts primative quantities to conservative quantites
   virtual void primitive_from_conservative (Block * block,
 					    std::vector<int> &cons_ids,
   					    std::vector<int> &prim_ids)=0;
+
+  // Converts primative quantities to conservative quantites
+  virtual void conservative_from_primitive (enzo_float *prim_vals,
+					    enzo_float *cons_vals)=0;
 
   // Computes the thermal sound speed
   virtual enzo_float sound_speed ()=0;

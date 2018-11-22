@@ -77,7 +77,7 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 
   // In the current implementation that follows, unecessary values are computed
   // for face just interior to the outermost ghost zone
-  for (int field_ind; field_ind<nfields; field_ind++){
+  for (int field_ind=0; field_ind<nfields; field_ind++){
 
     // Load in the primitives
     enzo_float *w = (enzo_float *) field.values(prim_ids[field_ind]);
