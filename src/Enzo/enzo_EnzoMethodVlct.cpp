@@ -116,7 +116,6 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
-    // Fill in cons_ids and bface_ids
     EnzoBlock * enzo_block = enzo::block(block);
     Field field = enzo_block->data()->field();
 
@@ -140,8 +139,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // temp conserved group for storing values at the half time-step
     Grouping* temp_conserved_group;
 
-    // allocate the temporary fields (as necessary) and fill in the field_ids
-    // need to update to allocate fluxes along each dimension!!!
+    // allocate the temporary fields (as necessary) and fill the field groupings
     allocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			  yflux_group, zflux_group, efield_group,
 			  center_efield_id, temp_conserved_group);
@@ -156,48 +154,40 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // repeat the following twice (for half time-step and full time-step)
     for (int i=0;i<2;i++){
       double cur_dt;
-      std::vector<int> *out_cons_ids;
-      std::vector<int> *cur_bface_ids;
-      std::vector<int> *out_bface_ids;
+      Grouping* cur_cons_group;
+      Grouping* out_cons_group;
       EnzoReconstructor *reconstructor;
       if (i == 0){
 	cur_dt = dt/2.;
-	out_cons_ids = &temp_cons_ids;
-	cur_bface_ids = &bface_ids;
-	out_bface_ids = &temp_bface_ids;
+	out_cons_group = &temp_conserved_group;
+	cur_cons_group = conserved_group_;
 	reconstructor = half_dt_recon_;
-
-	// Compute the primitive Quantites with Equation of State
-	eos_->primitive_from_conservative (block, cons_ids, prim_ids);
-
       } else {
 	cur_dt = dt;
-	out_cons_ids = &cons_ids;
-	cur_bface_ids = &temp_bface_ids;
-	out_bface_ids = &bface_ids;
+	out_cons_group = conserved_group_;
+	cur_cons_group = temp_conserved_group;
 	reconstructor = full_dt_recon_;
-
-	// Compute the primitive Quantites with Equation of State
-	eos_->primitive_from_conservative (block, *conserved_group_,
-					   *primitive_group_);
       }
 
+      // Compute the primitive Quantites with Equation of State
+      eos_->primitive_from_conservative (block, *cur_cons_group,
+					 *primitive_group_);
+
       // Compute flux along each dimension
-      compute_flux_(block, 0, prim_ids, *cur_bface_ids, priml_ids, primr_ids,
-		    xflux_ids,*reconstructor);
-      compute_flux_(block, 1, prim_ids, *cur_bface_ids, priml_ids, primr_ids,
-		    yflux_ids,*reconstructor);
-      compute_flux_(block, 2, prim_ids, *cur_bface_ids, priml_ids, primr_ids,
-		    zflux_ids,*reconstructor);
-    
+      compute_flux_(block, 0, *cur_cons_group, priml_group, primr_group,
+		    xflux_group, *reconstructor);
+      compute_flux_(block, 1, *cur_cons_group, priml_group, primr_group,
+		    yflux_group, *reconstructor);
+      compute_flux_(block, 2, *cur_cons_group, priml_group, primr_group,
+		    zflux_group, *reconstructor);
+
       // Compute_efields
-      compute_efields_(block, xflux_ids, yflux_ids, zflux_ids,
-		       center_efield_id, efield_ids, prim_ids, ct);
+      compute_efields_(block, xflux_group, yflux_group, zflux_group,
+		       center_efield_id, efield_group, ct);
 
       // Update quantities
-      update_quantities_(block, xflux_ids, yflux_ids, zflux_ids,
-			 efield_ids, cons_ids, *out_cons_ids, bface_ids,
-			 *out_bface_ids, cur_dt);
+      update_quantities_(block, xflux_group, yflux_group, zflux_group,
+			 *out_cons_group, cur_dt);
 
       // Add source Terms
     }
@@ -224,32 +214,26 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   reconstructor.reconstruct_interface(block, *primitive_group_, priml_group,
 				      primr_group, dim);
 
-  // Need to set the reconstructed values equal to the bface_ids
-  // This should be handled internally by reconstructor
+  // Need to set the component of reconstructed B-field along dim, equal to
+  // the corresponding longitudinal component of the B-field tracked at cell
+  // interfaces
+  // This should probably be handled internally by reconstructor
   // NEED TO CHECK THAT THE DIMENSIONS GIVEN FOR THE FLUX IDS ARE TRULY
   // FACE-CENTERED
 
   Field field = block->data()->field();
-  const int id = bface_ids[dim];
+  const int id = field.field_id(cur_cons_group.item("bfieldi",dim));;
 
-  // iteration dimensions
+  // iteration dimensions (includes ghost zones)
   int mx, my, mz;
   field.dimensions (id,&mx,&my,&mz);
 
-  // size of active zone
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-
-  // size of the ghost zones
-  int gx,gy,gz;
-  field.ghost_depth(id,&gx,&gy,&gz);
-
   // Get the field data
-  enzo_float *bfield = load_grouping_field_(field, &cur_cons_group, "bfieldi",
+  enzo_float *bfield = load_grouping_field_(&field, &cur_cons_group, "bfieldi",
 					    dim);
-  enzo_float *l_bfield = load_grouping_field_(field, &priml_group, "bfield",
+  enzo_float *l_bfield = load_grouping_field_(&field, &priml_group, "bfield",
 					      dim);
-  enzo_float *r_bfield = load_grouping_field_(field, &primr_group, "bfield",
+  enzo_float *r_bfield = load_grouping_field_(&field, &primr_group, "bfield",
 					      dim);
 
   for (int iz=1; iz<mz-1; iz++) {
@@ -263,40 +247,43 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   }
 
   // Next, compute the fluxes
-  riemann_solver_->solve(block, priml_ids, primr_ids, flux_ids, dim, eos_);
+  riemann_solver_->solve(block, priml_group, primr_group, flux_group, dim,
+			 eos_);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::compute_efields_(Block *block,
-				      std::vector<int> &xflux_ids,
-				      std::vector<int> &yflux_ids,
-				      std::vector<int> &zflux_ids,
+void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
+				      Grouping &yflux_group,
+				      Grouping &zflux_group,
 				      int center_efield_id,
-				      std::vector<int> &efield_ids,
-				      std::vector<int> &prim_ids,
+				      Grouping &efield_group,
 				      EnzoConstrainedTransport &ct)
 {
+  EnzoBlock * enzo_block = enzo::block(block);
+  Field field = enzo_block->data()->field();
 
   // Maybe the following should be handled internally by ct?
   for (int i = 0; i <3; i++){
     ct.compute_cell_center_efield (block, i, center_efield_id,
-				   prim_ids);
-    std::vector<int> *jflux_ids;
-    std::vector<int> *kflux_ids;
+				   *primitive_group_);
+    Grouping *jflux_group;
+    Grouping *kflux_group;
     if (i == 0){
-      jflux_ids = &yflux_ids;
-      kflux_ids = &zflux_ids;
+      jflux_group = &yflux_group;
+      kflux_group = &zflux_group;
     } else if (i==1){
-      jflux_ids = &zflux_ids;
-      kflux_ids = &xflux_ids;
+      jflux_group = &zflux_group;
+      kflux_group = &xflux_group;
     } else {
-      jflux_ids = &xflux_ids;
-      kflux_ids = &yflux_ids;
+      jflux_group = &xflux_group;
+      kflux_group = &yflux_group;
     }
 
-    ct.compute_edge_efield (block, i,efield_ids[i], center_efield_id,
-			    *jflux_ids, *kflux_ids, prim_ids);
+    int efield_id = field.field_id(efield_group.item("efield",i));
+
+    ct.compute_edge_efield (block, i, efield_id, center_efield_id, *jflux_group,
+			    *kflux_group, *primitive_group_);
   }
 }
 

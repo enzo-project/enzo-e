@@ -170,12 +170,9 @@ protected: // methods
 
   // compute the Electric fields using the fluxes and cell-centered
   // primitives
-  void compute_efields_(Block *block, std::vector<int> &xflux_ids,
-			std::vector<int> &yflux_ids,
-			std::vector<int> &zflux_ids,
-			int center_efield_id,
-			std::vector<int> &efield_ids,
-			std::vector<int> &prim_ids,
+  void compute_efields_(Block *block, Grouping &xflux_group,
+			Grouping &yflux_group, Grouping &zflux_group,
+			int center_efield_id, Grouping &efield_group,
 			EnzoConstrainedTransport &ct);
 
   // adds flux divergence to the fields listed in conserved_group_ and stores

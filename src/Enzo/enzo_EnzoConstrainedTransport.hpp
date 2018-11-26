@@ -18,7 +18,7 @@ public: // interface
   {  }
 
   void compute_cell_center_efield (Block *block, int dim, int center_efield_id,
-				   std::vector<int> &prim_ids)
+				   Grouping &prim_group)
   { }
 
   // Computes the edge-centered E-fields pointing in the ith direction
@@ -28,10 +28,8 @@ public: // interface
   // kflux_ids. dim points along i.
   // i, j, and k are any cyclic permutation of x, y, z
   void compute_edge_efield (Block *block, int dim, int efield_id,
-			    int center_efield_id,
-			    std::vector<int> &jflux_ids,
-			    std::vector<int> &kflux_ids,
-			    std::vector<int> &prim_ids)
+			    int center_efield_id, Grouping &jflux_group,
+			    Grouping &kflux_group, Grouping &prim_group)
   { }
 };
 
