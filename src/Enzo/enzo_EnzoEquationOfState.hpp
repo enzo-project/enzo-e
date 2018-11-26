@@ -50,6 +50,12 @@ public: // interface
   // computes the fast magnetosonic speed
   virtual enzo_float fast_magnetosonic_speed () =0;
 
+  // returns the density floor
+  virtual enzo_float get_density_floor()=0;
+
+  // returns the pressure floor
+  virtual enzo_float get_pressure_floor()=0;
+
   /// Name of this equation of state type
   virtual std::string type () const
   { return "undefined"; }

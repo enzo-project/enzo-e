@@ -52,7 +52,7 @@ public: // interface
   // This amounts to having some extra space at the end of the array
   void reconstruct_interface (Block *block, Grouping &prim_group,
 			      Grouping &priml_group, Grouping &primr_ids,
-			      int dim);
+			      int dim, EnzoEquationOfState *eos);
 };
 
 #endif /* ENZO_ENZO_RECONSTRUCTOR_PLM_HPP */

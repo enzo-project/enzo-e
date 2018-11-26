@@ -42,7 +42,8 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 						  Grouping &prim_group,
 						  Grouping &priml_group,
-						  Grouping &primr_ids, int dim)
+						  Grouping &primr_ids, int dim,
+						  EnzoEquationOfState *eos)
 {
   Field field = block->data()->field();
 
@@ -74,6 +75,8 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
   // number of fields for which we will perform reconstruction
   int nfields = prim_ids.size();
 
+  
+  
   // In the current implementation that follows, unecessary values are computed
   // for face just interior to the outermost ghost zone
   for (int group_ind=0; group_ind<num_cons_names; group_ind++){
@@ -81,6 +84,19 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
     // load group name and number of fields in the group
     std::string group_name = prim_group_names[group_ind];
     int num_fields = prim_group.size(group_name);
+
+
+    // Handle possibility of having a density/pressure floor
+    enzo_float prim_floor =0;
+    bool use_floor = false;
+    if (group_name == "density"){
+      prim_floor = eos->get_density_floor();
+      use_floor=true;
+    } else if (group_name == "pressure"){
+      prim_floor = eos->get_pressure_floor();
+      use_floor=true;
+    }
+
 
     // iterate over the fields in the group
     for (int field_ind=0; field_ind<num_fields; field_ind++){
@@ -124,9 +140,13 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 
 	    // for face centered values, index i corresponds to the value at
 	    // i-1/2
-	    wr[fc_i] = val-dv;
-	    wl[fc_i+offset] = val+dv;
-	  
+	    if (use_floor){
+	      wr[fc_i] = std::max(val-dv,prim_floor);
+	      wl[fc_i+offset] = std::max(val+dv,prim_floor);
+	    } else {
+	      wr[fc_i] = val-dv;
+	      wl[fc_i+offset] = val+dv;
+	    }
 	  }
 	}
       }
