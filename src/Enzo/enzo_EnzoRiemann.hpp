@@ -32,9 +32,8 @@ public: // interface
   /// Solve the Riemann Problem - dim (0, 1, or 2) tells the solver which
   /// dimension to compute fluxes along and indicates the dimension along which
   /// the reconstructed primitive values are face-centered
-  virtual void solve (Block *block, std::vector<int> &priml_ids,
-		      std::vector<int> &primr_ids,
-		      std::vector<int> &flux_ids, int dim,
+  virtual void solve (Block *block, Grouping &priml_group,
+		      Grouping &primr_group, Grouping &flux_group, int dim,
 		      EnzoEquationOfState *eos)=0;
 };
 

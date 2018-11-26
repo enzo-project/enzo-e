@@ -8,11 +8,12 @@
 
 //----------------------------------------------------------------------
 
-void EnzoRiemannHLLE::solve (Block *block, std::vector<int> &priml_ids,
-			     std::vector<int> &primr_ids,
-			     std::vector<int> &flux_ids, int dim,
-			     EnzoEquationOfState *eos)
+void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
+			     Grouping &primr_group, Grouping &flux_group,
+			     int dim, EnzoEquationOfState *eos)
 {
+  // Need to update to use groupings!
+  
   // Do stuff!
   const int length = primr_ids->size();
   // The following may not be legal

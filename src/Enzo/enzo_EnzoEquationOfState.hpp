@@ -37,9 +37,8 @@ public: // interface
   //}
 
   // Converts the cell-centered conservative quantities to primitive quantites
-  virtual void primitive_from_conservative (Block * block,
-					    std::vector<int> &cons_ids,
-  					    std::vector<int> &prim_ids)=0;
+  virtual void primitive_from_conservative (Block * block, Grouping &cons_group,
+  					    Grouping &prim_group)=0;
 
   // Converts primative quantities to conservative quantites
   virtual void conservative_from_primitive (enzo_float *prim_vals,

@@ -37,10 +37,9 @@ public: // interface
   // priml and primr are formally defined as corner-centered. However all
   // operations assume that they are face-centered along only 1 dimension.
   // This amounts to having some extra space at the end of the array
-  virtual void reconstruct_interface (Block *block, std::vector<int> &prim_ids,
-				      std::vector<int> &priml_ids,
-				      std::vector<int> &primr_ids,
-				      int dim)=0;
+  virtual void reconstruct_interface (Block *block, Grouping &prim_group,
+				      Grouping &priml_group,
+				      Grouping &primr_ids, int dim)=0;
 };
 
 #endif /* ENZO_ENZO_RECONSTRUCTOR_HPP */

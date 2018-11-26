@@ -40,10 +40,9 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 // Need to place Floor Values!
 
 void EnzoReconstructorPLM::reconstruct_interface (Block *block,
-						  std::vector<int> &prim_ids,
-						  std::vector<int> &priml_ids,
-						  std::vector<int> &primr_ids,
-						  int dim)
+						  Grouping &prim_group,
+						  Grouping &priml_group,
+						  Grouping &primr_ids, int dim)
 {
   Field field = block->data()->field();
 
@@ -77,31 +76,58 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 
   // In the current implementation that follows, unecessary values are computed
   // for face just interior to the outermost ghost zone
-  for (int field_ind=0; field_ind<nfields; field_ind++){
+  for (int group_ind=0; group_ind<num_cons_names; group_ind++){
 
-    // Load in the primitives
-    enzo_float *w = (enzo_float *) field.values(prim_ids[field_ind]);
-    enzo_float *wl = (enzo_float *) field.values(priml_ids[field_ind]);
-    enzo_float *wr = (enzo_float *) field.values(primr_ids[field_ind]);
+    // load group name and number of fields in the group
+    std::string group_name = prim_group_names[group_ind];
+    int num_fields = prim_group.size(group_name);
 
-    for (int iz=1; iz<fc_mx-1; iz++) {
-      for (int iy=1; iy<fc_my-1; iy++) {
-	for (int ix=1; ix<fc_mz-1; ix++) {
-	  // compute the indices of the cell-centered and face-centered
-	  // quantities
-	  int cc_i = ix + mx*(iy + my*iz);
-	  int fc_i = ix + fc_mx*(iy + fc_my*iz);
+    // iterate over the fields in the group
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
 
-	  enzo_float val = w[cc_i];
+      // Load in the primitives
+      enzo_float *w = load_grouping_field_(field, &prim_group, group_name,
+					   field_ind);
+      enzo_float *wl = load_grouping_field_(field, &priml_group, group_name,
+					    field_ind);
+      enzo_float *wr = load_grouping_field_(field, &primr_group, group_name,
+					   field_ind);
 
-	  // compute monotized difference
-	  enzo_float dv = monotized_difference(w[cc_i-offset], val,
-					       w[cc_i+offset]);
+      for (int iz=0; iz<fc_mz; iz++) {
+	for (int iy=0; iy<fc_my; iy++) {
+	  for (int ix=0; ix<fc_mx; ix++) {
 
-	  // for face centered values, index i corresponds to the value at i-1/2
-	  wr[fc_i] = val-dv;
-	  wl[fc_i+offset] = val+dv;
+	    // compute the index of the cell-centered and face-centered
+	    int fc_i = ix + fc_mx*(iy + fc_my*iz);
+
+	    if ((ix == 0) || (iy == 0) || (iz == 0)){
+	      // At the interface between the first and second cell along a
+	      // given axis, set the reconstructed left interface value to 0
+	      wl[fc_i+offset] = 0;
+	      continue;
+	    } else if ((ix == fc_mx-1) || (ix == fc_mx-1) || (ix == fc_mx-1)){
+	      // At the interface between the second-to-last and last cell
+	      // along a given axis, set the reconstructed right interface
+	      // value to 0
+	      wr[fc_i] = 0;
+	      continue;
+	    }
+	    
+	    // compute the index of the cell-centered quantity
+	    int cc_i = ix + mx*(iy + my*iz);
+
+	    enzo_float val = w[cc_i];
+
+	    // compute monotized difference
+	    enzo_float dv = monotized_difference(w[cc_i-offset], val,
+						 w[cc_i+offset]);
+
+	    // for face centered values, index i corresponds to the value at
+	    // i-1/2
+	    wr[fc_i] = val-dv;
+	    wl[fc_i+offset] = val+dv;
 	  
+	  }
 	}
       }
     }
