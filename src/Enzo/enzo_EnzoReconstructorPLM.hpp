@@ -51,7 +51,7 @@ public: // interface
   // operations assume that they are face-centered along only 1 dimension.
   // This amounts to having some extra space at the end of the array
   void reconstruct_interface (Block *block, Grouping &prim_group,
-			      Grouping &priml_group, Grouping &primr_ids,
+			      Grouping &priml_group, Grouping &primr_group,
 			      int dim, EnzoEquationOfState *eos);
 };
 

@@ -1,6 +1,12 @@
 
 #ifndef ENZO_ENZO_RIEMANN_HPP
 #define ENZO_ENZO_RIEMANN_HPP
+
+// All Riemann solvers are expected to calculate fluxes at all cell faces that
+// that are not on the outermost edges. If there are N cells along the
+// direction of flux calculations, the only 2 faces where flux is not computed
+// is at i=-1/2 and i=N+1/2 (the index of the first cell-center is i=0)
+
 class EnzoRiemann : public PUP::able
 {
 

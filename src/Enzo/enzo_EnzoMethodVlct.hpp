@@ -54,65 +54,10 @@ class EnzoReconstructor;
 class EnzoRiemann;
 class EnzoConstrainedTransport;
 
-// Define the lists of groups in Grouping - these lists need to be updated as
-// more physics are added (e.g. dual energy formalism, CR Energy & Flux,
-// Species, colors)
 
-// The following list only contains cell-centered conserved quantities
-// conserved_group_, temp_conserved_group, xflux_group, yflux_group, and
-// zflux_group all will include a single subset of groups in the following list
-std::string cons_group_names[4] = {"density", "momentum", "total_energy",
-				   "bfield"};
-int num_cons_names = 4;
-// Note: conserved_group_, temp_conserved_group will always have an additional
-// group: "bfieldi" (stores the longitudinal Bfields at the interface of cells)
-
-// The following list contains the names of groups of primitive quantities
-// primitive_group_, priml_group, and primr_group all will have the same subset
-// of 
-std::string prim_group_names[4] = {"density", "velocity", "pressure",
-				   "bfield"};
-int num_prim_names = 4;
-
-
-
-// define 2 helper functions for reading in Grouping fields
+// define helper function for reading in Grouping fields
 enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
-				 std::string group_name, int index)
-{
-  int size = grouping->size(group_name);
-  if ((size == 0) || (size>=index)){
-    return NULL;
-  }
-  return (enzo_float *) field->values(grouping->item(group_name,i));
-}
-
-// Load fields with 3 dimensions. If there are not 3 dimensions, does not
-// load anything. field_i, field_j, and field_k are a cyclic permutation of
-// dimensions x, y, and z. The value of ith_dim sets the dimension of field_i
-// (0 <-> x, 1 <-> y, 2 <-> z)
-void load_dimensional_group_fields_(Field *field, Grouping *grouping,
-				    std::string group_name, int ith_dim,
-				    enzo_float **field_i, enzo_float **field_j,
-				    enzo_float **field_k)
-{
-  int size = grouping->size(group_name);
-  if ((size == 0) || (size>3)){
-    return;
-  } else if ((ith_dim < 0) || (ith_dim>2)) {
-    return;
-  }
-
-  int i = ith_dim;
-  int j = (i+1)%3;
-  int k = (i+2)%3;
-
-  *field_i = (enzo_float *) field->values(grouping->item(group_name,i));
-  *field_j = (enzo_float *) field->values(grouping->item(group_name,j));
-  *field_k = (enzo_float *) field->values(grouping->item(group_name,k));
-}
-
-
+				 std::string group_name, int index);
 
 class EnzoMethodVlct : public Method {
 
@@ -127,7 +72,7 @@ public: // interface
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodVlct);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoMethodVlct (CkMigrateMessage *m)
     : Method (m),
@@ -157,6 +102,9 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
+
+  static std::vector<std::string> cons_group_names;
+  static std::vector<std::string> prim_group_names;
 protected: // methods
 
   // Prepare the group
@@ -204,7 +152,7 @@ protected: // attributes
   // In a lot of senses, these will serve as aliases
   Grouping *conserved_group_;
   Grouping *primitive_group_;
-  
+
   EnzoEquationOfState *eos_;
   EnzoReconstructor *half_dt_recon_;
   EnzoReconstructor *full_dt_recon_;

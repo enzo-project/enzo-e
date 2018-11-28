@@ -39,7 +39,7 @@ public: // interface
   // This amounts to having some extra space at the end of the array
   virtual void reconstruct_interface (Block *block, Grouping &prim_group,
 				      Grouping &priml_group,
-				      Grouping &primr_ids, int dim,
+				      Grouping &primr_group, int dim,
 				      EnzoEquationOfState *eos)=0;
 };
 

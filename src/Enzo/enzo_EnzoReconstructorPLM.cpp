@@ -37,18 +37,18 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 
 //----------------------------------------------------------------------
 
-// Need to place Floor Values!
-
 void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 						  Grouping &prim_group,
 						  Grouping &priml_group,
-						  Grouping &primr_ids, int dim,
+						  Grouping &primr_group,
+						  int dim,
 						  EnzoEquationOfState *eos)
 {
+  std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
   Field field = block->data()->field();
 
   // Retrieve iteration limits
-  const int id = prim_ids[0];
+  const int id = field.field_id(prim_group.item("density",0));
 
   // cell-centered iteration dimensions
   int mx, my, mz;
@@ -73,13 +73,16 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
   }
 
   // number of fields for which we will perform reconstruction
-  int nfields = prim_ids.size();
+  int nfields = 0;
 
-  
-  
+  for (unsigned int i=0;i<prim_group_names.size();i++){
+    std::string group_name = prim_group_names[i];
+    nfields += prim_group.size(group_name);
+  }
+
   // In the current implementation that follows, unecessary values are computed
   // for face just interior to the outermost ghost zone
-  for (int group_ind=0; group_ind<num_cons_names; group_ind++){
+  for (unsigned int group_ind=0;group_ind<prim_group_names.size(); group_ind++){
 
     // load group name and number of fields in the group
     std::string group_name = prim_group_names[group_ind];
@@ -102,12 +105,12 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
     for (int field_ind=0; field_ind<num_fields; field_ind++){
 
       // Load in the primitives
-      enzo_float *w = load_grouping_field_(field, &prim_group, group_name,
+      enzo_float *w = load_grouping_field_(&field, &prim_group, group_name,
 					   field_ind);
-      enzo_float *wl = load_grouping_field_(field, &priml_group, group_name,
+      enzo_float *wl = load_grouping_field_(&field, &priml_group, group_name,
 					    field_ind);
-      enzo_float *wr = load_grouping_field_(field, &primr_group, group_name,
-					   field_ind);
+      enzo_float *wr = load_grouping_field_(&field, &primr_group, group_name,
+					    field_ind);
 
       for (int iz=0; iz<fc_mz; iz++) {
 	for (int iy=0; iy<fc_my; iy++) {

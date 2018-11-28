@@ -3,6 +3,10 @@
 // equations of state (e.g. ideal gas, polytropic EOS, isothermal, etc.)
 //
 // Current plan: track instances within the hydro method.
+//
+// Several of the methods, are expecting C-style arrays. Current plan is that
+// the EquationOfState will know how many variables to expect (e.g. if using
+// dual energy formalism)
 
 #ifndef ENZO_ENZO_EQUATIONOFSTATE_HPP
 #define ENZO_ENZO_EQUATIONOFSTATE_HPP
@@ -37,23 +41,27 @@ public: // interface
   //}
 
   // Converts the cell-centered conservative quantities to primitive quantites
-  virtual void primitive_from_conservative (Block * block, Grouping &cons_group,
-  					    Grouping &prim_group)=0;
+  virtual void primitive_from_conservative(Block * block, Grouping &cons_group,
+  					   Grouping &prim_group)=0;
 
-  // Converts primative quantities to conservative quantites
-  virtual void conservative_from_primitive (enzo_float *prim_vals,
-					    enzo_float *cons_vals)=0;
+  virtual void conservative_from_primitive(enzo_float *prim, enzo_float *cons);
 
+  // Computes magnetic pressure from primitives
+  virtual enzo_float mag_pressure_from_primitive(enzo_float *prim_vals)=0;
+  
   // Computes the thermal sound speed
-  virtual enzo_float sound_speed ()=0;
+  virtual enzo_float sound_speed (enzo_float *prim_vals)=0;
 
   // computes the fast magnetosonic speed
-  virtual enzo_float fast_magnetosonic_speed () =0;
+  virtual enzo_float fast_magnetosonic_speed (enzo_float *prim_vals) =0;
+
+  // returns adiabatic index
+  virtual enzo_float get_gamma() = 0;
 
   // returns the density floor
   virtual enzo_float get_density_floor()=0;
 
-  // returns the pressure floor
+  // returns the thermal pressure floor
   virtual enzo_float get_pressure_floor()=0;
 
   /// Name of this equation of state type
