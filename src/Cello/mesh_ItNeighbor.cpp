@@ -15,7 +15,8 @@ ItNeighbor::ItNeighbor
  int min_face_rank,
  bool periodic[3][2],
  int n3[3],
- Index index)
+ Index index,
+ int neighbor_type)
   : block_(block),
     rank_(cello::rank()),
     min_face_rank_(min_face_rank),

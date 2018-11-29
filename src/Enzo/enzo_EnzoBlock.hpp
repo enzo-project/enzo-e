@@ -267,7 +267,7 @@ public: /// entry methods
   //--------------------------------------------------
   
   /// EnzoSolverBiCGStab entry method: SUM(B) and COUNT(B)
-  void r_solver_bicgstab_start_1(CkReductionMsg* msg);  
+  void r_solver_bicgstab_start_1(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: DOT(R,R)
   void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
@@ -297,9 +297,11 @@ public: /// entry methods
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
   void p_dot_recv_parent  (int n, long double * dot_block,
-			   std::vector<int> is_array,  CkCallback cb);
+			   std::vector<int> is_array,
+			   int i_function);
   void p_dot_recv_children(int n, long double * dot_block,
-			   std::vector<int> is_array,  CkCallback cb);
+			   std::vector<int> is_array,
+			   int i_function);
 
 /// EnzoSolverDd
   
