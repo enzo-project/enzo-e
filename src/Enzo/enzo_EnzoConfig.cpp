@@ -157,6 +157,8 @@ EnzoConfig::EnzoConfig() throw ()
 
 #ifdef CONFIG_USE_GRACKLE
     method_grackle_chemistry = new chemistry_data;
+#else
+    method_grackle_chemistry = NULL;
 #endif
 }
 
@@ -332,9 +334,9 @@ void EnzoConfig::pup (PUP::er &p)
     if (p.isUnpacking()) {
       method_grackle_chemistry = new chemistry_data;
       method_grackle_chemistry->use_grackle = use_grackle;
-      if (set_default_chemistry_parameters(method_grackle_chemistry) == 0){
+      if (set_default_chemistry_parameters(method_grackle_chemistry) == FAIL){
         ERROR("EnzoMethodConfig::pup()",
-              "Error in Greackle set_default_chemistry_parameters");
+              "Error in Grackle set_default_chemistry_parameters");
       }
     }
 
@@ -795,7 +797,7 @@ void EnzoConfig::read(Parameters * p) throw()
   // Defaults alert PUP::er() to ignore
   if (uses_grackle) {
 
-    if (set_default_chemistry_parameters(method_grackle_chemistry) == 0) {
+    if (set_default_chemistry_parameters(method_grackle_chemistry) == FAIL) {
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
       "Error in set_default_chemistry_parameters");
     }
