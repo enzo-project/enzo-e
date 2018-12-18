@@ -27,7 +27,8 @@
 //       7 <-> b-field_k
 //    Subclasses will probably do the same but add in extra fields at the end
 //  - If the need arises, have to modify to handle dual energy formalism
-//    
+//  - Going to replace the above with some kind of map (probably an unordered
+//    map?)
 
 void load_fluid_fields_(Field *field, std::vector<enzo_float*> *field_arrays,
 			Grouping *grouping, bool primitive, int dim)
@@ -102,9 +103,9 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 
   // For PLM we only care about fluxes for the third cell in
   // For Nearest-Neighbor, we care about the second cell in
-  for (int iz=1; iz<mz-1; iz++) {
-    for (int iy=1; iy<my-1; iy++) {
-      for (int ix=1; ix<mx-1; ix++) {
+  for (int iz=1; iz<mz; iz++) {
+    for (int iy=1; iy<my; iy++) {
+      for (int ix=1; ix<mx; ix++) {
 	// compute the index
 	int i = ix + mx*(iy + my*iz);
 

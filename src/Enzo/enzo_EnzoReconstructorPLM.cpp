@@ -69,7 +69,8 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
     offset = mx;
   } else {
     fc_mz++;
-    offset = mx+my;
+    // Originally, the following was mx*my - I think I currently have it correct
+    offset = mx*my;
   }
 
   // number of fields for which we will perform reconstruction

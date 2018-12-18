@@ -309,8 +309,9 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
 
     int efield_id = field.field_id(efield_group.item("efield",i));
 
-    ct.compute_edge_efield (block, i, efield_id, center_efield_id, *jflux_group,
-			    *kflux_group, *primitive_group_);
+    // Need to implement the weight field.
+    //ct.compute_edge_efield (block, i, efield_id, center_efield_id, *jflux_group,
+    //                        *kflux_group, *primitive_group_);
   }
 }
 
