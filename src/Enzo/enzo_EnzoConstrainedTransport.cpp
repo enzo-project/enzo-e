@@ -1,8 +1,10 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-void compute_cell_center_efield (Block *block, int dim, int center_efield_id,
-				   Grouping &prim_group)
+void EnzoConstrainedTransport::compute_cell_center_efield (Block *block,
+							   int dim,
+							   int center_efield_id,
+							   Grouping &prim_group)
 {
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
@@ -215,10 +217,13 @@ enzo_float compute_edge_(int c_ind, int jfc_ind, int kfc_ind, int c_off_j,
 //     down the x, y, and z direction. Currently, it expects values of 1 and 0
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
-void compute_edge_efield (Block *block, int dim, int efield_id,
-			  int center_efield_id, Grouping &jflux_group,
-			  Grouping &kflux_group, Grouping &prim_group,
-			  Grouping &weight_group)
+void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
+						    int efield_id,
+						    int center_efield_id,
+						    Grouping &jflux_group,
+						    Grouping &kflux_group,
+						    Grouping &prim_group,
+						    Grouping &weight_group)
 {
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
