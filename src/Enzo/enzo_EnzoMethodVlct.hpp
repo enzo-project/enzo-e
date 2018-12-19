@@ -23,11 +23,12 @@
 //          different physical quantities (e.g. Groupings of fluxes and
 //          conserved variables each have a "momentum" group)
 //
-//    Presently we track 9 different groupings:
+//    Presently we track 10 different groupings:
 //        - conserved quantities, primitive quantities, reconstructed left/right
-//          primitive fields, fluxes in the x/y/z direction, (edge centered
-//          electric fields, and temp conserved quantities (to store values at
-//          the half timestep)
+//          primitive fields, fluxes in the x/y/z direction, face centered
+//          fields in the x/y/z direction (identifying which way is upwind),
+//          edge centered electric fields, and temp conserved quantities (to
+//          store values at the half timestep)
 //        - several groups only contain 1 field (e.g. the "density" and
 //          "total_energy" groups). In effect, they serve as alias names for
 //          the fields
@@ -114,13 +115,15 @@ protected: // methods
   // not sure if this should be static
   void compute_flux_(Block *block, int dim, Grouping &cur_cons_group,
 		     Grouping &priml_group, Grouping &primr_group,
-		     Grouping &flux_group, EnzoReconstructor &reconstructor);
+		     Grouping &flux_group, Grouping &weight_group,
+		     EnzoReconstructor &reconstructor);
 
   // compute the Electric fields using the fluxes and cell-centered
   // primitives
   void compute_efields_(Block *block, Grouping &xflux_group,
 			Grouping &yflux_group, Grouping &zflux_group,
 			int center_efield_id, Grouping &efield_group,
+			Grouping &weight_group,
 			EnzoConstrainedTransport &ct);
 
   // adds flux divergence to the fields listed in conserved_group_ and stores
@@ -135,6 +138,7 @@ protected: // methods
 			     Grouping &primr_group, Grouping &xflux_group,
 			     Grouping &yflux_group, Grouping &zflux_group,
 			     Grouping &efield_group, int &center_efield_id,
+			     Grouping &weight_group,
 			     Grouping &temp_conserved_group);
 
   // deallocate the temporary fields used for scratch space
@@ -142,6 +146,7 @@ protected: // methods
 			       Grouping &primr_group, Grouping &xflux_group,
 			       Grouping &yflux_group, Grouping &zflux_group,
 			       Grouping &efield_group, int center_efield_id,
+			       Grouping &weight_group,
 			       Grouping &temp_conserved_group);
 
 protected: // attributes

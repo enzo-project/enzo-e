@@ -16,13 +16,13 @@ void EnzoConstrainedTransport::compute_cell_center_efield (Block *block,
   int k = (dim+2)%3;
 
   // Load the jth and kth components of the velocity and cell-centered bfield
-  enzo_float* velocity_j = load_grouping_field_(field, &prim_group,
+  enzo_float* velocity_j = load_grouping_field_(&field, &prim_group,
 						"velocity", j);
-  enzo_float* velocity_k = load_grouping_field_(field, &prim_group,
+  enzo_float* velocity_k = load_grouping_field_(&field, &prim_group,
 						"velocity", k);
-  enzo_float* bfield_j = load_grouping_field_(field, &prim_group,
+  enzo_float* bfield_j = load_grouping_field_(&field, &prim_group,
 					      "bfield", j);
-  enzo_float* bfield_k = load_grouping_field_(field, &prim_group,
+  enzo_float* bfield_k = load_grouping_field_(&field, &prim_group,
 					      "bfield", k);
 
   // get interation limits - it includes the ghost zones
@@ -115,7 +115,7 @@ void compute_sizes_and_offsets_(int dim, int mx, int my, int mz,
 enzo_float compute_edge_(int c_ind, int jfc_ind, int kfc_ind, int c_off_j,
 			 int c_off_k, int jfc_off_k, int kfc_off_j,
 			 enzo_float* E_cen, enzo_float* E_j,
-			 enzo_float* E_k, enzo_float* w_j, enzo_float w_k)
+			 enzo_float* E_k, enzo_float* W_j, enzo_float* W_k)
 {
   // helper function that actually computes the component of the edge-centered
   // E-field along dimension i at location (i,j-1/2,k-1/2)
@@ -193,8 +193,8 @@ enzo_float compute_edge_(int c_ind, int jfc_ind, int kfc_ind, int c_off_j,
     + (1.-W_j[jfc_ind-jfc_off_k])*(E_k[kfc_ind]                    //j,k-1/2
 				  - E_cen[c_ind-c_off_k]);         //j,k-1
 
-  return 0.25*((E_j[jfc_i] + E_j[jfc_i-jflux_off_k] +
-		E_k[kfc_i] + E_k[kfc_i-kflux_off_j]) +
+  return 0.25*((E_j[jfc_ind] + E_j[jfc_ind-jfc_off_k] +
+		E_k[kfc_ind] + E_k[kfc_ind-kfc_off_j]) +
 	       (dEdj_h - dEdj_l) + (dEdk_h - dEdk_l));
 }
 

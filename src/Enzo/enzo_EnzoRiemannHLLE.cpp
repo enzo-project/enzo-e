@@ -103,9 +103,10 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 
   // For PLM we only care about fluxes for the third cell in
   // For Nearest-Neighbor, we care about the second cell in
-  for (int iz=1; iz<mz; iz++) {
-    for (int iy=1; iy<my; iy++) {
-      for (int ix=1; ix<mx; ix++) {
+  // since mx, my, and mz are face-centered, the following should be correct
+  for (int iz=1; iz<mz-1; iz++) {
+    for (int iy=1; iy<my-1; iy++) {
+      for (int ix=1; ix<mx-1; ix++) {
 	// compute the index
 	int i = ix + mx*(iy + my*iz);
 

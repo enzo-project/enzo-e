@@ -30,5 +30,5 @@ public: // interface
 			    int center_efield_id, Grouping &jflux_group,
 			    Grouping &kflux_group, Grouping &prim_group,
 			    Grouping &weight_group);
-
+};
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */

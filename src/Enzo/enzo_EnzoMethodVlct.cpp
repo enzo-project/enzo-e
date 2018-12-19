@@ -163,13 +163,16 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // different components of the field at different times)
     int center_efield_id;
 
+    // face-centered weight fields - Track the x/y/z upwind direction
+    Grouping weight_group;
+
     // temp conserved group for storing values at the half time-step
     Grouping temp_conserved_group;
 
     // allocate the temporary fields (as necessary) and fill the field groupings
     allocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			  yflux_group, zflux_group, efield_group,
-			  center_efield_id, temp_conserved_group);
+			  center_efield_id, weight_group, temp_conserved_group);
 
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
@@ -202,15 +205,15 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
       // Compute flux along each dimension
       compute_flux_(block, 0, *cur_cons_group, priml_group, primr_group,
-		    xflux_group, *reconstructor);
+		    xflux_group, weight_group, *reconstructor);
       compute_flux_(block, 1, *cur_cons_group, priml_group, primr_group,
-		    yflux_group, *reconstructor);
+		    yflux_group, weight_group, *reconstructor);
       compute_flux_(block, 2, *cur_cons_group, priml_group, primr_group,
-		    zflux_group, *reconstructor);
+		    zflux_group, weight_group, *reconstructor);
 
       // Compute_efields
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
-		       center_efield_id, efield_group, ct);
+		       center_efield_id, efield_group, weight_group, ct);
 
       // Update quantities
       update_quantities_(block, xflux_group, yflux_group, zflux_group,
@@ -222,7 +225,8 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			    yflux_group, zflux_group, efield_group,
-			    center_efield_id, temp_conserved_group);
+			    center_efield_id, weight_group,
+			    temp_conserved_group);
   }
 
   block->compute_done();
@@ -235,6 +239,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 				   Grouping &priml_group,
 				   Grouping &primr_group,
 				   Grouping &flux_group,
+				   Grouping &weight_group,
 				   EnzoReconstructor &reconstructor)
 {
   // First, let's reconstruct the left and right interface values
@@ -252,8 +257,8 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   const int id = field.field_id(cur_cons_group.item("bfieldi",dim));;
 
   // iteration dimensions (includes ghost zones)
-  int mx, my, mz;
-  field.dimensions (id,&mx,&my,&mz);
+  int fc_mx, fc_my, fc_mz;
+  field.dimensions (id,&fc_mx,&fc_my,&fc_mz);
 
   // Get the field data
   enzo_float *bfield = load_grouping_field_(&field, &cur_cons_group, "bfieldi",
@@ -262,11 +267,13 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 					      dim);
   enzo_float *r_bfield = load_grouping_field_(&field, &primr_group, "bfield",
 					      dim);
-
-  for (int iz=1; iz<mz-1; iz++) {
-    for (int iy=1; iy<my-1; iy++) {
-      for (int ix=1; ix<mx-1; ix++) {
-	int i = ix + mx*(iy + my*iz);
+  // Don't really care about the faces in the edge rows
+  // (e.g. if dim = 0, we don't really care about the interface values for
+  //  iy=0, iz=0, iy = my-1, or iz = mz-1
+  for (int iz=1; iz<fc_mz-1; iz++) {
+    for (int iy=1; iy<fc_my-1; iy++) {
+      for (int ix=1; ix<fc_mx-1; ix++) {
+	int i = ix + fc_mx*(iy + fc_my*iz);
 	l_bfield[i] = bfield[i];
 	r_bfield[i] = bfield[i];
       }
@@ -276,6 +283,39 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // Next, compute the fluxes
   riemann_solver_->solve(block, priml_group, primr_group, flux_group, dim,
 			 eos_);
+
+  // Finally, need to handle weights
+  //  - Currently, weight is set to 1.0 if upwind is in positive direction of
+  //    the current dimension, 0 if upwind is in the negative direction of the
+  //    current dimension, or 0.5 if there is no upwind direction
+  //  - At present, the weights are unnecessary (the same information is
+  //    encoded in density flux to figure out this information). However, this
+  //    functionallity is implemented in case we decide to adopt
+  //    the weighting scheme from Athena++, which requires knowledge of the
+  //    reconstructed densities.
+
+  enzo_float *density_fluxes = load_grouping_field_(&field, &flux_group,
+						    "density", 0);
+  enzo_float *weight_field = load_grouping_field_(&field, &weight_group,
+						  "weight", dim);
+  for (int iz=1; iz<fc_mz-1; iz++) {
+    for (int iy=1; iy<fc_my-1; iy++) {
+      for (int ix=1; ix<fc_mx-1; ix++) {
+	int i = ix + fc_mx*(iy + fc_my*iz);
+
+	// density flux is the face-centered density times the face-centered
+	// velocity along dim
+
+	if (density_fluxes[i] > 0){
+	  weight_field[i] = 1.0;
+	} else if (weight_field[i] < 0){
+	  weight_field[i] = 0.0;
+	} else {
+	  weight_field[i] = 0.5;
+	}
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -285,6 +325,7 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
 				      Grouping &zflux_group,
 				      int center_efield_id,
 				      Grouping &efield_group,
+				      Grouping &weight_group,
 				      EnzoConstrainedTransport &ct)
 {
   EnzoBlock * enzo_block = enzo::block(block);
@@ -309,9 +350,8 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
 
     int efield_id = field.field_id(efield_group.item("efield",i));
 
-    // Need to implement the weight field.
-    //ct.compute_edge_efield (block, i, efield_id, center_efield_id, *jflux_group,
-    //                        *kflux_group, *primitive_group_);
+    ct.compute_edge_efield (block, i, efield_id, center_efield_id, *jflux_group,
+                            *kflux_group, *primitive_group_, weight_group);
   }
 }
 
@@ -365,6 +405,58 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
   }
 }
 
+// Helper function used to prepare groupings of temporary fields. These
+// groupings only contain 3 fields - corresponding to vector components
+//  - These vectors are all expected to be face-centered or edge centered.
+//    (with the direction of centering depending on the dimension of the
+//     component)
+//  - face-centered: [face_center = True] fields are all centered on the face
+//    corresponding to the direction of the vector component (e.g. x component
+//    of weights is centered on the faces along the x dimension)
+//  - edge-centered: [face_center = False] fields are centered on the edge
+//    corresponding to the direction not pointed to by the vector component
+//    (e.g. z-component of edge E-field is centered on the x and y edges)
+//  - the names of the temporary fields are given by field_prefix + x,
+//    field_prefix + y and field_prefix + z
+
+void prep_temp_vector_grouping_(Field &field, std::string group_name,
+				Grouping &grouping, std::string field_prefix,
+				bool face_center)
+{
+  FieldDescr *field_descr = field.field_descr();
+  for (int i=0;i<3;i++){
+    // prepare field name and field/mesh-centered info
+    std::string field_name;
+    int cx, cy, cz, delta;
+    if (face_center) {
+      cx = 0; cy = 0; cz = 0;
+      delta = 1;
+    } else {
+      cx = 1; cy = 1; cz = 1;
+      delta = -1;
+    }
+
+    if (i == 0){
+      cx += delta;
+      field_name = field_prefix + "x";
+    } else if (i == 1) {
+      cy += delta;
+      field_name = field_prefix + "y";
+    } else {
+      cz += delta;
+      field_name = field_prefix + "z";
+    }
+
+    // Reserve a temporary field
+    int ir_ = field_descr->insert_temporary(field_name);
+    field_descr->set_centering(ir_,cx,cy,cz);
+    // Allocate the field
+    field.allocate_temporary(ir_);
+
+    grouping.add(group_name,field_name);
+  }
+}
+
 void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   Grouping &priml_group,
 					   Grouping &primr_group,
@@ -373,6 +465,7 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   Grouping &zflux_group,
 					   Grouping &efield_group,
 					   int &center_efield_id,
+					   Grouping &weight_group,
 					   Grouping &temp_conserved_group)
 {
   std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
@@ -420,7 +513,7 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 			    yflux_group, "yflux_", 0, 1, 0);
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
 			    zflux_group, "zflux_", 0, 0, 1);
-  
+
   // allocate applicable temporary fields in primitive_group_
   for (unsigned int i=0;i<prim_group_names.size();i++){
     std::string group_name = prim_group_names[i];
@@ -468,33 +561,18 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   // (we don't calculate anything for outermost faces)
 
   // reserve/allocate fields for edge-centered electric fields
-  for (int i=0;i<3;i++){
-    // get field_name and prepare edge-centered info
-    std::string field_name;
-    int cx=1; int cy=1; int cz = 1;
-    if (i == 0){
-      cx = 0;
-      field_name = "temp_efield_x";
-    } else if (i == 1) {
-      cy = 0;
-      field_name = "temp_efield_y";
-    } else {
-      cz = 0;
-      field_name = "temp_efield_z";
-    }
-
-    // Reserve a temporary field
-    int ir_ = field_descr->insert_temporary(field_name);
-    field_descr->set_centering(ir_,cx,cy,cz);
-    // Allocate the field
-    field.allocate_temporary(ir_);
-
-    efield_group.add("efieldi",field_name);
-  }
+  prep_temp_vector_grouping_(field, "efield", efield_group,
+			     "temp_efield_", false);
 
   // reserve/allocate field for face-centered electric field
   center_efield_id = field_descr->insert_temporary();
   field.allocate_temporary(center_efield_id);
+
+
+  // reserve/allocate fields for weight fields
+  // these are face-centered fields that store the upwind/downwind direction
+  prep_temp_vector_grouping_(field, "weight", weight_group, "temp_weight_",
+			     true);
 }
 
 //----------------------------------------------------------------------
@@ -531,6 +609,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 					     Grouping &zflux_group,
 					     Grouping &efield_group,
 					     int center_efield_id,
+					     Grouping &weight_group,
 					     Grouping &temp_conserved_group)
 {
   std::vector<std::string> cons_group_names= EnzoMethodVlct::cons_group_names;
@@ -559,6 +638,10 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   deallocate_grouping_fields_(field, efield_group_names, efield_group);
 
   field.deallocate_temporary(center_efield_id);
+
+  // deallocate weights
+  std::vector<std::string> weight_group_names{"weight"};
+  deallocate_grouping_fields_(field, weight_group_names, weight_group);
 }
 
 //----------------------------------------------------------------------
