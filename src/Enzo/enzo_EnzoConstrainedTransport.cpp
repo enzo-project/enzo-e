@@ -1,10 +1,9 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-void EnzoConstrainedTransport::compute_cell_center_efield (Block *block,
-							   int dim,
-							   int center_efield_id,
-							   Grouping &prim_group)
+void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
+						      int center_efield_id,
+						      Grouping &prim_group)
 {
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
@@ -243,12 +242,10 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   enzo_float *W_kface = load_grouping_field_(&field, &weight_group, "weight",
 					     (dim+2)%3);
 
-  // Retrieve iteration limits
-  const int id = field.field_id(prim_group.item("density",0));
-
   // cell-centered iteration dimensions
-  int mx, my, mz;
-  field.dimensions (id,&mx,&my,&mz);
+  int mx = enzo_block->GridDimension[0];
+  int my = enzo_block->GridDimension[1];
+  int mz = enzo_block->GridDimension[2];
 
   // compute edge-centered dimensions and offset between neigboring elements
   // along j and k dimensions for face-centered and cell-centered quantites
@@ -300,3 +297,90 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
     }
   }
 };
+
+void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
+					     Grouping &efield_group,
+					     Grouping &cur_cons_group,
+					     Grouping &out_cons_group,
+					     enzo_float dt)
+{
+  // computing the face-centered B-field component along the ith dimension
+  Field field = block->data()->field();
+  EnzoBlock * enzo_block = enzo::block(block);
+
+  // cell-centered iteration dimensions
+  int mx = enzo_block->GridDimension[0];
+  int my = enzo_block->GridDimension[1];
+  int mz = enzo_block->GridDimension[2];
+
+  // load the fields
+  enzo_float *cur_bfield = load_grouping_field_(&field, &cur_cons_group,
+						"bfieldi", dim);
+  enzo_float *out_bfield = load_grouping_field_(&field, &out_cons_group,
+						"bfieldi", dim);
+  // Load e-fields
+  enzo_float *E_j = load_grouping_field_(&field, &efield_group,
+					 "efield", (dim+1)%3);
+  enzo_float *E_k = load_grouping_field_(&field, &efield_group,
+					 "efield", (dim+2)%3);
+
+  // widths of cells along j and k directions
+  enzo_float dtdj = dt/enzo_block->CellWidth[(dim+1)%3];
+  enzo_float dtdk = dt/enzo_block->CellWidth[(dim+2)%3];
+
+  // face-centered and edge-centered dimensions and edge-centered offsets
+  int fc_mx = mx; int fc_my = my; int fc_mz = mz;
+  // all edge-centered fields share one edge with the face in i direction
+  int ecij_mx = mx+1; int ecij_my = my + 1; int ecij_mz = mz + 1;
+  int ecik_mx = mx+1; int ecik_my = my + 1; int ecik_mz = mz + 1;
+  // the offset of the edge-centered efield on the edge of the j/k direction
+  // shifts the j/k index
+  int ecij_offset, ecik_offset;
+
+  if (dim == 0){
+    // dim points in x-direction
+    fc_mx++; ecij_mz--; ecik_my--;
+    ecij_offset = ecij_mx;
+    ecik_offset = ecik_mx * ecik_my;
+  } else if (dim == 1){
+    fc_my++; ecij_mx--; ecik_mz--;
+    ecij_offset = ecij_mx*ecij_my;
+    ecik_offset = 1;
+  } else {
+    fc_mz++; ecij_my--; ecik_mx--;
+    ecij_offset = 1;
+    ecik_offset = ecik_mx;
+  }
+
+  for (int iz=1; iz<fc_mz-1; iz++) {
+    for (int iy=1; iy<fc_my-1; iy++) {
+      for (int ix=1; ix<fc_mx-1; ix++) {
+	// bfield is centered on face in the i direction
+	int fc_ind = ix + fc_mx*(iy + fc_my*iz);
+
+	// E-field in k direction centered on edges joining the i and j faces
+	int ecij_ind = ix + ecij_mx*(iy + ecij_my*iz);
+
+	// E-field in j direction centered on edges joining the i and k faces
+	int ecik_ind = ix + ecik_mx*(iy + ecik_my*iz);
+
+	// if dim were equal to zero, then we would compute:
+	//   Bnew_x(i-1/2, j, k) = Bold_x(i-1/2,j,k)
+	//     - dt/dy*(E_z(i-1/2,j+1/2,    k) - E_z(i-1/2,j-1/2,    k))
+	//     + dt/dz*(E_y(i-1/2,    j,k+1/2) - E_z(i-1/2,    j,k-1/2))
+
+	out_bfield[fc_ind] = cur_bfield[fc_ind]
+	  - dtdj*(E_k[ecij_ind + ecij_offset] - E_k[ecij_ind])
+	  + dtdk*(E_j[ecik_ind + ecik_offset] - E_j[ecik_ind]);
+      }
+    }
+  }
+}
+
+void EnzoConstrainedTransport::compute_center_bfield(Block *block,
+						     Grouping &cur_cons_group,
+						     Grouping &out_cons_group,
+						     enzo_float dt)
+{
+  // do stuff
+}

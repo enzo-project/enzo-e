@@ -333,8 +333,7 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
 
   // Maybe the following should be handled internally by ct?
   for (int i = 0; i <3; i++){
-    ct.compute_cell_center_efield (block, i, center_efield_id,
-				   *primitive_group_);
+    ct.compute_center_efield (block, i, center_efield_id, *primitive_group_);
     Grouping *jflux_group;
     Grouping *kflux_group;
     if (i == 0){

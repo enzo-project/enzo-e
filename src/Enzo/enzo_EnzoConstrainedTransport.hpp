@@ -17,8 +17,8 @@ public: // interface
   virtual ~EnzoConstrainedTransport()
   {  }
 
-  void compute_cell_center_efield (Block *block, int dim, int center_efield_id,
-				   Grouping &prim_group);
+  void compute_center_efield (Block *block, int dim, int center_efield_id,
+			      Grouping &prim_group);
   
   // Computes the edge-centered E-fields pointing in the ith direction
   // It uses the component of the cell-centered E-field pointing in that
@@ -30,5 +30,13 @@ public: // interface
 			    int center_efield_id, Grouping &jflux_group,
 			    Grouping &kflux_group, Grouping &prim_group,
 			    Grouping &weight_group);
+
+  void update_bfield(Block *block, int dim, Grouping &efield_group,
+		     Grouping &cur_cons_group, Grouping &out_cons_group,
+		     enzo_float dt);
+
+  void compute_center_bfield(Block *block, Grouping &cur_cons_group,
+			     Grouping &out_cons_group, enzo_float dt);
+
 };
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */

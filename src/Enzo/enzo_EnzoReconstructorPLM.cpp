@@ -69,7 +69,7 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
     offset = mx;
   } else {
     fc_mz++;
-    // Originally, the following was mx*my - I think I currently have it correct
+    // Originally, the following was mx+my - I think I currently have it correct
     offset = mx*my;
   }
 
