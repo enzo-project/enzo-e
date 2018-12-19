@@ -215,11 +215,19 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
 		       center_efield_id, efield_group, weight_group, ct);
 
-      // Update quantities
+      // Update quantities - add flux divergence
       update_quantities_(block, xflux_group, yflux_group, zflux_group,
 			 *out_cons_group, cur_dt);
 
-      // Add source Terms
+      // Update B-field - doesn't matter if done before/after adding flux
+      for (int dim = 0; dim<3; dim++){
+	ct.update_bfield(block, dim, efield_group, *conserved_group_,
+			 *out_cons_group, dt);
+	ct.compute_center_bfield(block, dim, *out_cons_group, dt);
+      }
+
+      // Add source terms?
+
     }
 
     // Deallocate Temporary Fields
@@ -250,8 +258,6 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // the corresponding longitudinal component of the B-field tracked at cell
   // interfaces
   // This should probably be handled internally by reconstructor
-  // NEED TO CHECK THAT THE DIMENSIONS GIVEN FOR THE FLUX IDS ARE TRULY
-  // FACE-CENTERED
 
   Field field = block->data()->field();
   const int id = field.field_id(cur_cons_group.item("bfieldi",dim));;
@@ -361,7 +367,63 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					Grouping &zflux_group,
 					Grouping &out_cons_group, double dt)
 {
-  // To be filled in
+  // Need to address placing floors on density and energy_density
+  std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
+
+  EnzoBlock * enzo_block = enzo::block(block);
+  Field field = enzo_block->data()->field();
+
+  // cell-centered iteration dimensions
+  int mx = enzo_block->GridDimension[0];
+  int my = enzo_block->GridDimension[1];
+  int mz = enzo_block->GridDimension[2];
+
+  // widths of cells
+  enzo_float dtdx = dt/enzo_block->CellWidth[0];
+  enzo_float dtdy = dt/enzo_block->CellWidth[1];
+  enzo_float dtdz = dt/enzo_block->CellWidth[2];
+
+  for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
+    // load group name and number of fields in the group
+    std::string group_name = prim_group_names[group_ind];
+    if (group_name == "bfield"){
+      continue;
+    }
+    int num_fields = conserved_group_->size(group_name);
+
+
+    // iterate over the fields in the group
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+
+      // load in the quantities
+      enzo_float *cur_cons = load_grouping_field_(&field, conserved_group_,
+						  group_name, field_ind);
+      enzo_float *out_cons = load_grouping_field_(&field, &out_cons_group,
+						  group_name, field_ind);
+      enzo_float *xflux = load_grouping_field_(&field, &xflux_group,
+					       group_name, field_ind);
+      enzo_float *yflux = load_grouping_field_(&field, &yflux_group,
+					       group_name, field_ind);
+      enzo_float *zflux = load_grouping_field_(&field, &zflux_group,
+					       group_name, field_ind);
+
+      for (int iz=1; iz<mz-1; iz++) {
+	for (int iy=1; iy<my-1; iy++) {
+	  for (int ix=1; ix<mx-1; ix++) {
+	    int c_ind = ix + mx*(iy + my*iz);
+
+	    out_cons[c_ind] = cur_cons[c_ind]
+	      - dtdx * (xflux[ix+1 + (mx+1)*(iy + my*iz)]
+			- xflux[ix + (mx+1)*(iy + my*iz)])
+	      - dtdy * (yflux[ix + mx*(iy+1 + (my+1)*iz)]
+			- yflux[ix + mx*(iy + (my+1)*iz)])
+	      - dtdz * (zflux[ix + mx*(iy + my*(iz+1))]
+			- zflux[ix + mx*(iy + my*iz)]);
+	  }
+	}
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -647,6 +709,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 
 double EnzoMethodVlct::timestep ( Block * block ) const throw()
 {
+  // NEED TO UPDATE TO BE CONSISTENT WITH REST OF FUNCTION
   /* Points to address:
    *  1. Make sure the overloading of std::sqrt works correctly [and always 
    *     returns the precision of enzo_float

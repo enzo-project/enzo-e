@@ -377,10 +377,49 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
   }
 }
 
-void EnzoConstrainedTransport::compute_center_bfield(Block *block,
-						     Grouping &cur_cons_group,
-						     Grouping &out_cons_group,
+void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
+						     Grouping &cons_group,
 						     enzo_float dt)
 {
-  // do stuff
+  Field field = block->data()->field();
+
+  EnzoBlock * enzo_block = enzo::block(block);
+
+  // cell-centered iteration dimensions
+  int mx = enzo_block->GridDimension[0];
+  int my = enzo_block->GridDimension[1];
+  int mz = enzo_block->GridDimension[2];
+
+  // compute face-centered dimensions and offset between neigboring elements
+  // along dim (offset is the same for cell-centered and face-centered arrays)
+  int fc_mx = mx; int fc_my = my; int fc_mz = mz;
+
+  int offset;
+  if (dim == 0) {
+    fc_mx++;
+    offset = 1;
+  } else if (dim == 1) {
+    fc_my++;
+    offset = mx;
+  } else {
+    fc_mz++;
+    offset = mx*my;
+  }
+
+  enzo_float *bfield = load_grouping_field_(&field, &cons_group,
+					    "bfieldi", dim);
+  enzo_float *bfield_center = load_grouping_field_(&field, &cons_group,
+						   "bfield", dim);
+
+  for (int iz=1; iz<mz-1; iz++) {
+    for (int iy=1; iy<my-1; iy++) {
+      for (int ix=1; ix<mx-1; ix++) {
+	// compute the index of the cell-centered and face-centered
+	int fc_ind = ix + fc_mx*(iy + fc_my*iz);    
+	int c_ind = ix + mx*(iy + my*iz);
+
+	bfield_center[c_ind] = 0.5*(bfield[fc_ind+offset] + bfield[fc_ind]);
+      }
+    }
+  }
 }

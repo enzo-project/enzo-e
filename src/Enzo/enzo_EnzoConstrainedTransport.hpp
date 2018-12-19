@@ -35,8 +35,8 @@ public: // interface
 		     Grouping &cur_cons_group, Grouping &out_cons_group,
 		     enzo_float dt);
 
-  void compute_center_bfield(Block *block, Grouping &cur_cons_group,
-			     Grouping &out_cons_group, enzo_float dt);
+  void compute_center_bfield(Block *block, int dim, Grouping &cons_group,
+			     enzo_float dt);
 
 };
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */
