@@ -27,7 +27,7 @@ public: // interface
   /// Virtual destructor
   virtual ~Units ()
   { }
-  
+
   /// CHARM++ PUP::able declaration
   PUPable_decl(Units);
 
@@ -96,15 +96,15 @@ public: // virtual methods
   /// Return length units scaling factor (virtual)
   virtual double length() const
   { return length_; }
-  
+
   /// Return temperature units scaling factor (derived)
   virtual double temperature() const
-  { return (cello::mass_hydrogen)*std::pow(length()/time(),2)/(cello::kboltz); }
+  { return (cello::mass_hydrogen)*std::pow(velocity(),2)/(cello::kboltz); }
 
   /// Return velocity units scaling factor (derived)
   virtual double velocity() const
   { return length() / time(); }
-  
+
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
