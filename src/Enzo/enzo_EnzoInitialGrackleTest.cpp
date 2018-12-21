@@ -56,43 +56,7 @@ void EnzoInitialGrackleTest::enforce_block
 
   grackle_field_data grackle_fields_;
 
-  grackle_fields_.density         = (gr_float *) field.values("density");
-  grackle_fields_.internal_energy = (gr_float *) field.values("internal_energy");
-  grackle_fields_.x_velocity      = (gr_float *) field.values("velocity_x");
-  grackle_fields_.y_velocity      = (gr_float *) field.values("velocity_y");
-  grackle_fields_.z_velocity      = (gr_float *) field.values("velocity_z");
-
-  grackle_fields_.HI_density      = field.is_field("HI_density") ?
-                                    (gr_float *) field.values("HI_density")    : NULL;
-  grackle_fields_.HII_density     = field.is_field("HII_density") ?
-                                    (gr_float *) field.values("HII_density")   : NULL;
-  grackle_fields_.HeI_density     = field.is_field("HeI_density") ?
-                                    (gr_float *) field.values("HeI_density")   : NULL;
-  grackle_fields_.HeII_density    = field.is_field("HeII_density") ?
-                                    (gr_float *) field.values("HeII_density")  : NULL;
-  grackle_fields_.HeIII_density   = field.is_field("HeIII_density") ?
-                                    (gr_float *) field.values("HeIII_density") : NULL;
-  grackle_fields_.e_density       = field.is_field("e_density") ?
-                                    (gr_float *) field.values("e_density")     : NULL;
-
-
-  grackle_fields_.HM_density      = field.is_field("HM_density") ?
-                                    (gr_float *) field.values("HM_density")    : NULL;
-  grackle_fields_.H2I_density     = field.is_field("H2I_density") ?
-                                    (gr_float *) field.values("H2I_density")   : NULL;
-  grackle_fields_.H2II_density    = field.is_field("H2II_density") ?
-                                    (gr_float *) field.values("H2II_density")  : NULL;
-
-  grackle_fields_.DI_density      = field.is_field("DI_density") ?
-                                    (gr_float *) field.values("DI_density")    : NULL;
-  grackle_fields_.DII_density     = field.is_field("DII_density") ?
-                                    (gr_float *) field.values("DII_density")   : NULL;
-  grackle_fields_.HDI_density     = field.is_field("HDI_density") ?
-                                    (gr_float *) field.values("HDI_density")   : NULL;
-
-  grackle_fields_.metal_density   = field.is_field("metal_density") ?
-                                    (gr_float *) field.values("metal_density") : NULL;
-
+  EnzoMethodGrackle::setup_grackle_fields(enzo_block, & grackle_fields_);
 
   gr_float * total_energy  = (gr_float *) field.values("total_energy");
 
@@ -128,11 +92,6 @@ void EnzoInitialGrackleTest::enforce_block
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
   int ngz = nz + 2*gz;
-
-  double a_units = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
-
-  gr_float temperature_units =  cello::mass_hydrogen * pow(a_units *
-                                         enzo_units->velocity(), 2) / cello::kboltz;
 
   double H_n_slope = log10(enzo_config->initial_grackle_test_maximum_H_number_density /
                            enzo_config->initial_grackle_test_minimum_H_number_density) /
@@ -221,7 +180,7 @@ void EnzoInitialGrackleTest::enforce_block
 
         grackle_fields_.internal_energy[i] = pow(10.0, ((temperature_slope * (iy-gy)) +
                                       log10(enzo_config->initial_grackle_test_minimum_temperature)))/
-                             mu / temperature_units / (enzo_config->field_gamma - 1.0);
+                             mu / enzo_units->temperature() / (enzo_config->field_gamma - 1.0);
         total_energy[i]    = grackle_fields_.internal_energy[i];
         gamma[i]           = enzo_config->field_gamma;
       }
@@ -236,7 +195,9 @@ void EnzoInitialGrackleTest::enforce_block
   if (pressure){
     EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
                                           comoving_coordinates);
-    compute_pressure.compute(enzo_block);
+    compute_pressure.compute_(enzo_block,
+                              NULL,
+                              &grackle_fields_);
   }
 
   if (temperature){
@@ -246,7 +207,10 @@ void EnzoInitialGrackleTest::enforce_block
        enzo_config->ppm_mol_weight,
        comoving_coordinates);
 
-    compute_temperature.compute(enzo_block);
+    compute_temperature.compute_(enzo_block,
+                                 false, // do not re-compute pressure field
+                                 NULL, &grackle_fields_
+                                 );
   }
 
   return;

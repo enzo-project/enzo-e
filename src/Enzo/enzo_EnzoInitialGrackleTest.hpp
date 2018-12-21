@@ -19,14 +19,6 @@ public: // interface
   /// CHARM++ constructor
   EnzoInitialGrackleTest(const EnzoConfig * enzo_config) throw();
 
-//  EnzoInitialGrackleTest() throw()
-//   : Initial() { }
-  // EnzoInitialGrackleTest() throw();
-
-  /// Constructor
-  //EnzoInitialGrackleTest
-  //(const EnzoConfig * enzo_config) throw();
-
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialGrackleTest);
 
@@ -47,13 +39,6 @@ public: // interface
   virtual ~EnzoInitialGrackleTest() throw() {};
 
 private:
-
-//#ifdef CONFIG_USE_GRACKLE
-
-  //code_units        units_;
-  //chemistry_data  * chemistry_;// = new chemistry_data;
-
-//#endif
 
 };
 
