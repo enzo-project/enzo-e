@@ -24,7 +24,8 @@ public: // interface
    int min_face_rank,
    bool periodic[3][2],
    int n3[3],
-   Index index);
+   Index index,
+   int neighbor_type);
 
   /// Destructor
   ~ItNeighbor();

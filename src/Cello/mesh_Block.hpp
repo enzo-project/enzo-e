@@ -263,7 +263,8 @@ public: // interface
 
   /// Return an iterator over neighbors
 
-  ItNeighbor it_neighbor(int min_face_rank, Index index) throw();
+  ItNeighbor it_neighbor(int min_face_rank, Index index,
+			 int neighbor_type = neighbor_leaf) throw();
 
   //--------------------------------------------------
   // Charm++ virtual

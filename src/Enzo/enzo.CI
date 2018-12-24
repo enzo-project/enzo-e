@@ -160,10 +160,10 @@ module enzo {
 
     entry void p_dot_recv_parent(int n, long double dot[n],
 				 std::vector<int> isa,
-				 CkCallback cb);
+				 int i_function);
     entry void p_dot_recv_children(int n, long double dot[n],
 				   std::vector<int> isa,
-				   CkCallback cb);
+				   int i_function);
 
     // EnzoSolverDd
     

@@ -179,9 +179,9 @@ bool Solver::is_finest_ (Block * block) const
     return block->level() == min_level_;
     break;
   default:
-    ERROR1("Solver::is_finest_()",
-	   "Unexpected solve_type %d",
-	   solve_type_);
+    ERROR2("Solver::is_finest_()",
+	   "Unexpected solve_type %d in Solver %s",
+	   solve_type_,name_.c_str());
     return false;
   }
 }

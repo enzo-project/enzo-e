@@ -63,8 +63,13 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    WARNING ("Particle::pup()",
-	     "Skipping since Particle is intended as transient object");
+    static bool warn[CONFIG_NODE_SIZE] = {false};
+    const int in = cello::index_static();
+    if (! warn[in]) {
+      WARNING ("Particle::pup()",
+	       "Skipping since Particle is intended as transient object");
+      warn[in] = true;
+    }
   };
   
   /// Return the particle descriptor for this particle

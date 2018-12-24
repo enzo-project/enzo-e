@@ -58,7 +58,12 @@ public: // interface
     p | fill_delete_;
     p | bytes_limit_;
 #endif
-    WARNING ("Memory::pup()","Skipping index_group_");
+    static bool warn[CONFIG_NODE_SIZE] = {false};
+    const int in = cello::index_static();
+    if (! warn[in]) {
+      WARNING ("Memory::pup()","Skipping index_group_");
+      warn[in] = true;
+    } 
     p | group_name_;
     if (p.isUnpacking()) {
       WARNING ("Memory::pup()","Calling Memory::reset()");

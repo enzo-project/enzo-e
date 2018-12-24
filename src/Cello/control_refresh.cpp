@@ -106,7 +106,7 @@ void Block::refresh_continue()
 void Block::p_refresh_store (MsgRefresh * msg)
 {
 
-  //  TRACE_REFRESH("p_refresh_store()");
+  TRACE_REFRESH("p_refresh_store()");
   
   performance_start_(perf_refresh_store);
 

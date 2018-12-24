@@ -367,6 +367,7 @@ namespace cello {
   Output *        output (int index);
   Solver *        solver(int index);
   int             rank ();
+  int             num_children();
 }
 
 #endif /* CELLO_HPP */

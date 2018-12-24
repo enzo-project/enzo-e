@@ -49,8 +49,13 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    WARNING ("Scalar::pup()",
-	     "Skipping since Scalar is intended as transient objects");
+    static bool warn[CONFIG_NODE_SIZE] = {false};
+    const int in = cello::index_static();
+    if (! warn[in]) {
+      WARNING ("Scalar::pup()",
+	       "Skipping since Scalar is intended as transient objects");
+      warn[in] = true;
+    }
   };
   
   /// Return the scalar descriptor for this scalar

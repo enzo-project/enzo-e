@@ -10,12 +10,6 @@ import socket
 
 
 #----------------------------------------------------------------------
-# Temporary setting for using new contribute in EnzoSolverBiCgStab
-#----------------------------------------------------------------------
-
-new_contribute = 1
-
-#----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
 
@@ -225,7 +219,6 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Experimental code defines
 
-define_new_contribute  = ['NEW_CONTRIBUTE']
 define_new_output      = ['NEW_OUTPUT']
 define_new_ppm         = ['NEW_PPM']
 
@@ -365,7 +358,6 @@ if (use_jemalloc == 1):
 if (use_papi != 0):      defines = defines + define_papi
 if (use_grackle != 0):   defines = defines + define_grackle
 
-if (new_contribute != 0):defines = defines + define_new_contribute
 if (new_output != 0):    defines = defines + define_new_output
 if (new_ppm != 0):       defines = defines + define_new_ppm
 

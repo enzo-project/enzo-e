@@ -40,7 +40,7 @@ Field {
    ghost_depth = 4;
 }
 
-Method { list = ["null"]; null { time_step_max = 0.01; }}
+Method { list = ["null"]; null { dt = 0.01; }}
 
 Output {
    list = ["MESH"];

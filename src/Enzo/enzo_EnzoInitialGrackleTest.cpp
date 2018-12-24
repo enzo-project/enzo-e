@@ -27,7 +27,17 @@ void EnzoInitialGrackleTest::pup (PUP::er &p)
 
   Initial::pup(p);
 
-  return;
+#ifdef CONFIG_USE_GRACKLE
+  static bool warn[CONFIG_NODE_SIZE] = {false};
+  const int in = cello::index_static();
+  if (! warn[in]) {
+    WARNING("EnzoInitialGrackleTest::pup()","Skipping units_");
+    //  const code_units      * units_;
+    WARNING("EnzoInitialGrackleTest::pup()", "Skipping chemistry_");
+    //  const chemistry_data  * chemistry_;
+    warn[in] = true;
+  }
+#endif
 }
 
 //----------------------------------------------------------------------
