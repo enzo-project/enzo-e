@@ -150,6 +150,7 @@ void EnzoSolverJacobi::compute(Block * block)
 
     deallocate_temporary_ (field,block);
 
+    TRACE_JACOBI(block,"end()");
     Solver::end_(block);
 
   }

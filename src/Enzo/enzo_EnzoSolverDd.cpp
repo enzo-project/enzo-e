@@ -355,7 +355,7 @@ void EnzoSolverDd::prolong_recv
   msg = *pmsg(enzo_block);
   *pmsg(enzo_block) = NULL;
 
-  unpack_field_(enzo_block,msg,ix_,refresh_fine);
+  unpack_field_(enzo_block,msg,ixc_,refresh_fine);
   
   call_domain_solver(enzo_block);
 }
@@ -369,7 +369,7 @@ void EnzoSolverDd::call_domain_solver(EnzoBlock * enzo_block) throw()
 
   solve_domain->set_sync_id (enzo_sync_id_solver_dd_domain);
   solve_domain->set_callback(CkIndex_EnzoBlock::p_solver_dd_solve_domain());
-  
+
   solve_domain->set_field_x (ix_);
   solve_domain->set_field_b (ib_);
 

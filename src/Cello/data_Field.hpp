@@ -48,8 +48,14 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    WARNING ("Field::pup()",
-	     "Skipping since Field is intended as transient objects");
+    static bool warn[CONFIG_NODE_SIZE] = {false};
+    const int in = cello::index_static();
+    if (! warn[in]) {
+    
+      WARNING ("Field::pup()",
+	       "Skipping since Field is intended as transient objects");
+      warn[in]=true;
+    }
   };
   
   /// Return the field descriptor for this field

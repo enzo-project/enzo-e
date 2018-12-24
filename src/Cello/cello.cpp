@@ -296,6 +296,14 @@ namespace cello {
   {
     return simulation() ? simulation()->rank() : 0;
   }
+
+  //----------------------------------------------------------------------
+
+  int num_children()
+  {
+    int r = rank();
+    return (r==1) ? 2 : ( (r==2) ? 4 : 8 );
+  }
   
 
 }

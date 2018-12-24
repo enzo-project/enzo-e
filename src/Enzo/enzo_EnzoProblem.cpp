@@ -473,7 +473,11 @@ Method * EnzoProblem::create_method_
 #ifdef CONFIG_USE_GRACKLE
     //--------------------------------------------------
   } else if (name == "grackle") {
-    method = new EnzoMethodGrackle (enzo_config);
+
+    method = new EnzoMethodGrackle
+      (enzo_config->physics_cosmology_initial_redshift,
+       enzo_config->initial_time);
+
 #endif /* CONFIG_USE_GRACKLE */
 
   } else if (name == "turbulence") {
@@ -623,7 +627,7 @@ Units * EnzoProblem::create_units_ (  Config * config  ) throw ()
   } else {
 
     ERROR("Problem::create_units_",
-	  "Cannot set both Units:density and Units:time parameters");
+	  "Cannot set both Units:density and Units:mass parameters");
   }
 
   return units;

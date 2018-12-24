@@ -38,6 +38,7 @@ void Simulation::initialize() throw()
 
   initialize_data_descr_();
 
+  problem_->initialize_units (config_);
   problem_->initialize_physics (config_,parameters_);
   problem_->initialize_boundary(config_,parameters_);
   problem_->initialize_initial (config_,parameters_);
@@ -48,7 +49,6 @@ void Simulation::initialize() throw()
   problem_->initialize_solver  (config_);
   problem_->initialize_prolong (config_);
   problem_->initialize_restrict (config_);
-  problem_->initialize_units (config_);
 
   initialize_hierarchy_();
 

@@ -44,7 +44,8 @@ public: // interface
       scalar_data_long_double_(),
       scalar_data_double_(),
       scalar_data_int_(),
-      scalar_data_sync_()
+      scalar_data_sync_(),
+      scalar_data_void_()
   {
     lower_[0] = 0.0;
     lower_[1] = 0.0;
@@ -74,6 +75,13 @@ public: // interface
     p | scalar_data_double_;
     p | scalar_data_int_;
     p | scalar_data_sync_;
+    //    p | scalar_data_void_;
+    static bool warn[CONFIG_NODE_SIZE] = {false};
+    const int in = cello::index_static();
+    if (! warn[in]) {
+      WARNING("Data::pup()","Skipping scalar_data_void_");
+      warn[in]=true;
+    }
     PUParray(p,lower_,3);
     PUParray(p,upper_,3);
     // NOTE: change this function whenever attributes change
@@ -175,7 +183,20 @@ public: // interface
   { return Scalar<long double>
       (cello::scalar_descr_long_double(),
        &scalar_data_long_double_); }
+  Scalar<int> scalar_int()
+  { return Scalar<int>
+      (cello::scalar_descr_int(),
+       &scalar_data_int_); }
+  Scalar<Sync> scalar_sync()
+  { return Scalar<Sync>
+      (cello::scalar_descr_sync(),
+       &scalar_data_sync_); }
+  Scalar<void *> scalar_void()
+  { return Scalar<void *>
+      (cello::scalar_descr_void (),
+       &scalar_data_void_); }
 
+  
 private: // functions
 
   void copy_(const Data & data) throw();

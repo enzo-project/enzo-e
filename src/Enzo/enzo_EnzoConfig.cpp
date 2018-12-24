@@ -8,6 +8,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+extern CProxy_EnzoSimulation proxy_enzo_simulation;
+
 //----------------------------------------------------------------------
 
 EnzoConfig g_enzo_config;
@@ -16,7 +18,6 @@ EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
 #ifdef CONFIG_USE_GRACKLE
-  method_grackle_units(),
   method_grackle_chemistry(),
 #endif
   ppm_diffusion(false),
@@ -54,6 +55,16 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
+  // EnzoInitialGrackleTest
+#ifdef CONFIG_USE_GRACKLE
+  initial_grackle_test_minimum_H_number_density(0.1),
+  initial_grackle_test_maximum_H_number_density(1000.0),
+  initial_grackle_test_minimum_metallicity(1.0E-4),
+  initial_grackle_test_maximum_metallicity(1.0),
+  initial_grackle_test_minimum_temperature(10.0),
+  initial_grackle_test_maximum_temperature(1.0E8),
+  initial_grackle_test_reset_energies(0),
+#endif /* CONFIG_USE_GRACKLE */
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -180,13 +191,23 @@ EnzoConfig::EnzoConfig() throw ()
     method_background_acceleration_center[i] = 0.5;
     method_background_acceleration_angular_momentum[i] = 0;
   }
+
   method_background_acceleration_angular_momentum[2] = 1;
+
+#ifdef CONFIG_USE_GRACKLE
+    method_grackle_chemistry = new chemistry_data;
+#else
+    method_grackle_chemistry = NULL;
+#endif
 }
 
 //----------------------------------------------------------------------
 
 EnzoConfig::~EnzoConfig() throw ()
 {
+#ifdef CONFIG_USE_GRACKLE
+  delete method_grackle_chemistry;
+#endif // CONFIG_USE_GRACKLE
 }
 
 //----------------------------------------------------------------------
@@ -241,6 +262,16 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_collapse_particle_ratio;
   p | initial_collapse_mass;
   p | initial_collapse_temperature;
+
+#ifdef CONFIG_USE_GRACKLE
+  p | initial_grackle_test_minimum_H_number_density;
+  p | initial_grackle_test_maximum_H_number_density;
+  p | initial_grackle_test_minimum_temperature;
+  p | initial_grackle_test_maximum_temperature;
+  p | initial_grackle_test_minimum_metallicity;
+  p | initial_grackle_test_maximum_metallicity;
+  p | initial_grackle_test_reset_energies;
+#endif /* CONFIG_USE_GRACKLE */
 
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
@@ -368,18 +399,25 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_time;
 
 #ifdef CONFIG_USE_GRACKLE
+  p | *method_grackle_chemistry;
+  int is_null = (method_grackle_chemistry==NULL);
+  p | is_null;
+  int use_grackle = is_null ? 0 : method_grackle_chemistry->use_grackle;
+  p | use_grackle;
+  if (is_null){
+    method_grackle_chemistry = NULL;
+  } else {
+    if (p.isUnpacking()) {
+      method_grackle_chemistry = new chemistry_data;
+      method_grackle_chemistry->use_grackle = use_grackle;
+      if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
+        ERROR("EnzoMethodConfig::pup()",
+              "Error in Grackle set_default_chemistry_parameters");
+      }
+    }
 
-  // Grackle cooling parameters
-
-  // Units
-
-  //  p | method_grackle_units;
-  WARNING("EnzoConfig::pup",
-	  "p|method_grackle_units not called");
-  //  p | method_grackle_chemistry;
-  WARNING("EnzoConfig::pup",
-	  "p|method_grackle_chemistry not called");
-
+    p | *method_grackle_chemistry;
+  }
 #endif /* CONFIG_USE_GRACKLE */
 
 }
@@ -580,6 +618,24 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:collapse:mass",cello::mass_solar);
   initial_collapse_temperature =
     p->value_float("Initial:collapse:temperature",10.0);
+
+  // Grackle test initialization
+#ifdef CONFIG_USE_GRACKLE
+  initial_grackle_test_minimum_H_number_density =
+    p->value_float("Initial:grackle_test:minimum_H_number_density",0.1);
+  initial_grackle_test_maximum_H_number_density =
+    p->value_float("Initial:grackle_test:maximum_H_number_density",1000.0);
+  initial_grackle_test_minimum_temperature =
+    p->value_float("Initial:grackle_test:minimum_temperature",10.0);
+  initial_grackle_test_maximum_temperature =
+    p->value_float("Initial:grackle_test:maximum_temperature",1.0E8);
+  initial_grackle_test_minimum_metallicity =
+    p->value_float("Initial:grackle_test:minimum_metallicity", 1.0E-4);
+  initial_grackle_test_maximum_metallicity =
+    p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
+  initial_grackle_test_reset_energies =
+    p->value_integer("Initial:grackle_test:reset_energies",0);
+#endif /* CONFIG_USE_GRACKLE */
 
   // Turbulence method and initialization
 
@@ -867,11 +923,11 @@ void EnzoConfig::read(Parameters * p) throw()
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
 
-    solver_coarse_level[index_solver] = 
+    solver_coarse_level[index_solver] =
       p->value_integer (solver_name + ":coarse_level",
 			solver_min_level[index_solver]);
 
-    solver_is_unigrid[index_solver] = 
+    solver_is_unigrid[index_solver] =
       p->value_logical (solver_name + ":is_unigrid",false);
 
   }
@@ -883,10 +939,11 @@ void EnzoConfig::read(Parameters * p) throw()
   stopping_redshift = p->value_float ("Stopping:redshift",0.0);
 
   //======================================================================
-  // GRACKLE
+  // GRACKLE 3.0
   //======================================================================
 
 #ifdef CONFIG_USE_GRACKLE
+
 
   /// Grackle parameters
 
@@ -896,42 +953,55 @@ void EnzoConfig::read(Parameters * p) throw()
   }
 
   // Defaults alert PUP::er() to ignore
-  method_grackle_chemistry.use_grackle = uses_grackle;
-
   if (uses_grackle) {
 
-    method_grackle_units.comoving_coordinates = false;
-
-    for (int index_physics=0; index_physics<num_physics; index_physics++) {
-      // Check if EnzoPhysicsCosmology object is present
-      if (physics_list[index_physics] == "cosmology") {
-	method_grackle_units.comoving_coordinates = true;
-	break;
-      }
+    if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL) {
+      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
+      "Error in set_default_chemistry_parameters");
     }
 
-    method_grackle_units.density_units             // 1 m_H/cc
-      = p->value_float("Method:grackle:density_units",1.67e-24);
+    /* this must be set AFTER default values are set */
+    method_grackle_chemistry->use_grackle = uses_grackle;
 
-    method_grackle_units.length_units              // 1 kpc
-      = p->value_float("Method:grackle:length_units",3.086e21);
+    // Copy over parameters from Enzo-P to Grackle
+    grackle_data->Gamma = field_gamma;
 
-    method_grackle_units.time_units                // 1 Myr
-      = p->value_float("Method:grackle:time_units",3.15569e13);
+    // Set Grackle parameters from parameter file
+    grackle_data->with_radiative_cooling = p->value_integer
+      ("Method:grackle:with_radiative_cooling",
+        grackle_data->with_radiative_cooling);
 
-    method_grackle_units.a_units   // units for the expansion factor
-      = p->value_float("Method:grackle:a_units",1.0);
+    grackle_data->primordial_chemistry = p->value_integer
+      ("Method:grackle:primordial_chemistry",
+        grackle_data->primordial_chemistry);
 
-    // computed
-    method_grackle_units.velocity_units
-      = method_grackle_units.length_units / method_grackle_units.time_units;
+    grackle_data->metal_cooling = p->value_integer
+      ("Method:grackle:metal_cooling",
+        grackle_data->metal_cooling);
 
-    method_grackle_units.velocity_units =
-      method_grackle_units.length_units / method_grackle_units.time_units;
+    grackle_data->h2_on_dust = p->value_integer
+      ("Method:grackle:h2_on_dust",
+        grackle_data->h2_on_dust);
 
+    grackle_data->three_body_rate = p->value_integer
+      ("Method:grackle:three_body_rate",
+        grackle_data->three_body_rate);
 
-    //method_grackle_chemistry.set_default_chemistry_parameters();
-    chemistry_data chemistry = set_default_chemistry_parameters();
+    grackle_data->cmb_temperature_floor = p->value_integer
+      ("Method:grackle:cmb_temperature_floor",
+        grackle_data->cmb_temperature_floor);
+
+    grackle_data->grackle_data_file = strdup(p->value_string
+      ("Method:grackle:data_file",
+        grackle_data->grackle_data_file).c_str());
+
+    grackle_data->cie_cooling = p->value_integer
+      ("Method:grackle:cie_cooling",
+        grackle_data->cie_cooling);
+
+    grackle_data->h2_optical_depth_approximation = p->value_integer
+      ("Method:grackle:h2_optical_depth_approximation",
+        grackle_data->h2_optical_depth_approximation);
 
     method_grackle_chemistry.Gamma = p->value_float
       ("Method:grackle:gamma",method_grackle_chemistry.Gamma);
@@ -940,53 +1010,82 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:with_radiative_cooling",
        method_grackle_chemistry.with_radiative_cooling);
 
-    method_grackle_chemistry.primordial_chemistry = p->value_logical
-      ("Method:grackle:primordial_chemistry",
-       method_grackle_chemistry.primordial_chemistry);
-
-    method_grackle_chemistry.metal_cooling = p->value_logical
-      ("Method:grackle:metal_cooling",method_grackle_chemistry.metal_cooling);
-
-    method_grackle_chemistry.h2_on_dust = p->value_logical
-      ("Method:grackle:h2_on_dust",method_grackle_chemistry.h2_on_dust);
-
-    method_grackle_chemistry.cmb_temperature_floor = p->value_logical
-      ("Method:grackle:cmb_temperature_floor",
-       method_grackle_chemistry.cmb_temperature_floor);
-
-    method_grackle_chemistry.grackle_data_file
-      = strdup(p->value_string
-	       ("Method:grackle:data_file",
-		method_grackle_chemistry.grackle_data_file).c_str());
-
-    method_grackle_chemistry.cie_cooling = p->value_integer
-      ("Method:grackle:cie_cooling",method_grackle_chemistry.cie_cooling);
-
-    method_grackle_chemistry.h2_optical_depth_approximation = p->value_integer
-      ("Method:grackle:h2_optical_depth_approximation",
-       method_grackle_chemistry.h2_optical_depth_approximation);
-
-    method_grackle_chemistry.photoelectric_heating = p->value_integer
+    grackle_data->photoelectric_heating = p->value_integer
       ("Method:grackle:photoelectric_heating",
-       method_grackle_chemistry.photoelectric_heating);
+        grackle_data->photoelectric_heating);
 
-    method_grackle_chemistry.photoelectric_heating_rate = p->value_float
+    grackle_data->photoelectric_heating_rate = p->value_float
       ("Method:grackle:photoelectric_heating_rate",
-       method_grackle_chemistry.photoelectric_heating_rate);
+        grackle_data->photoelectric_heating_rate);
 
-    method_grackle_chemistry.UVbackground = p->value_integer
-      ("Method:grackle:UVbackground",method_grackle_chemistry.UVbackground);
+    grackle_data->CaseBRecombination = p->value_integer
+      ("Method:grackle:CaseBRecombination",
+       grackle_data->CaseBRecombination);
 
-    // initialize chemistry data: required here since EnzoMethodGrackle may not be used
+    grackle_data->UVbackground = p->value_integer
+      ("Method:grackle:UVbackground",
+        grackle_data->UVbackground);
 
-    const gr_float a_value =
-      1. / (1. + physics_cosmology_initial_redshift);
+    grackle_data->use_volumetric_heating_rate = p->value_integer
+      ("Method:grackle:use_volumetric_heating_rate",
+      grackle_data->use_volumetric_heating_rate);
 
-    if (initialize_chemistry_data
-	(method_grackle_chemistry, method_grackle_units, a_value) == 0) {
-      ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
-	    "Error in initialize_chemistry_data");
-    }
+    grackle_data->use_specific_heating_rate = p->value_integer
+      ("Method:grackle:use_specific_heating_rate",
+       grackle_data->use_specific_heating_rate);
+
+    grackle_data->self_shielding_method = p->value_integer
+      ("Method:grackle:self_shielding_method",
+       grackle_data->self_shielding_method);
+
+    grackle_data->H2_self_shielding = p->value_integer
+      ("Method:grackle:H2_self_shielding",
+       grackle_data->H2_self_shielding);
+
+    grackle_data->HydrogenFractionByMass = p->value_float
+      ("Method:grackle:HydrogenFractionByMass",
+        grackle_data->HydrogenFractionByMass);
+
+    grackle_data->DeuteriumToHydrogenRatio = p->value_float
+      ("Method:grackle:DeuteriumToHydrogenRatio",
+       grackle_data->DeuteriumToHydrogenRatio);
+
+    grackle_data->SolarMetalFractionByMass = p->value_float
+      ("Method:grackle:SolarMetalFractionByMass",
+       grackle_data->SolarMetalFractionByMass);
+
+    grackle_data->Compton_xray_heating = p->value_integer
+      ("Method:grackle:Compton_xray_heating",
+       grackle_data->Compton_xray_heating);
+
+    grackle_data->LWbackground_sawtooth_suppression = p->value_integer
+      ("Method:grackle:LWbackground_sawtooth_suppression",
+       grackle_data->LWbackground_sawtooth_suppression);
+
+    grackle_data->LWbackground_intensity = p->value_float
+      ("Method:grackle:LWbackground_intensity",
+       grackle_data->LWbackground_intensity);
+
+    grackle_data->UVbackground_redshift_on = p->value_float
+      ("Method:grackle:UVbackground_redshift_on",
+       grackle_data->UVbackground_redshift_on);
+
+    grackle_data->UVbackground_redshift_off = p->value_float
+      ("Method:grackle:UVbackground_redshift_off",
+       grackle_data->UVbackground_redshift_off);
+
+    grackle_data->UVbackground_redshift_fullon = p->value_float
+      ("Method:grackle:UVbackground_redshift_fullon",
+        grackle_data->UVbackground_redshift_fullon);
+
+    grackle_data->UVbackground_redshift_drop = p->value_float
+     ("Method:grackle:UVbackground_redshift_drop",
+      grackle_data->UVbackground_redshift_drop);
+
+    // When radiative transfer is eventually included, make
+    // sure to set the below parameter to match the Enzo-P
+    // parameter for turning RT on / off:
+    //   grackle_data->use_radiative_transfer = ENZO_P_PARAMETER_NAME;
   }
 #endif /* CONFIG_USE_GRACKLE */
 

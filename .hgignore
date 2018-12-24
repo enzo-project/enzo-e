@@ -20,3 +20,4 @@ config.log
 errors.org
 _ignore
 _test_runs
+*.orig

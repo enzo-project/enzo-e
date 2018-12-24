@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoComputePressure::EnzoComputePressure (double gamma,
-					  bool comoving_coordinates)
+					                                bool comoving_coordinates)
   : Compute(),
     gamma_(gamma),
     comoving_coordinates_(comoving_coordinates)
@@ -44,7 +44,12 @@ void EnzoComputePressure::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoComputePressure::compute_(Block * block)
+void EnzoComputePressure::compute_(Block * block
+#ifdef CONFIG_USE_GRACKLE
+                                    , code_units * grackle_units /*NULL*/,
+																	   	grackle_field_data * grackle_fields /*NULL*/
+#endif
+                                   )
 {
 
   if (!block->is_leaf()) return;
@@ -54,11 +59,31 @@ void EnzoComputePressure::compute_(Block * block)
   Field field = enzo_block->data()->field();
 
   enzo_float * p = (enzo_float*) field.values("pressure");
-  enzo_float * d = (enzo_float*) field.values("density");
 
+#ifdef CONFIG_USE_GRACKLE
+  // if grackle units are not already defined, define them
+  if (!grackle_units){
+	  EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units);
+	}
+
+  // if grackle fields are not provided, define them
+	if (!grackle_fields){
+	  EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields);
+	}
+
+  // Compute pressure in Grackle
+  if (calculate_pressure(grackle_units, grackle_fields, p) == ENZO_FAIL){
+		ERROR("EnzoComputePressure::compute_()",
+	        "Error in call to Grackle's calculate_pressure routine.\n");
+	}
+
+
+#else
   const int rank = cello::rank();
 
-  enzo_float * v3[3] = 
+	enzo_float * d = (enzo_float*) field.values("density");
+
+  enzo_float * v3[3] =
     { (enzo_float*) (              field.values("velocity_x")),
       (enzo_float*) ((rank >= 2) ? field.values("velocity_y") : NULL),
       (enzo_float*) ((rank >= 3) ? field.values("velocity_z") : NULL) };
@@ -82,5 +107,12 @@ void EnzoComputePressure::compute_(Block * block)
     if (rank >= 3) e -= 0.5*v3[2][i]*v3[2][i];
     p[i] = gm1 * d[i] * e;
   }
-}
+#endif
 
+  // Place any additional pressure computation here:
+	//    Note: if adding more here, may need to also change
+	//          location of field pointer declarations above
+	//          (inside / outside of Grackle ifdef)
+
+ return;
+}
