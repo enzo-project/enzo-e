@@ -87,6 +87,9 @@ module enzo {
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodVlct;
 
+  PUPable EnzoReconstructorPLM;
+  PUPable EnzoRiemannHLLE;
+
   PUPable EnzoPhysicsCosmology;
 
   PUPable EnzoProblem;

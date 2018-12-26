@@ -22,23 +22,23 @@ public: // interface
   EnzoEquationOfState() throw()
   {}
 
-  /// CHARM++ PUP::able declaration
-  //PUPable_abstract(EnzoEquationOfState);
-
-  /// CHARM++ migration constructor for PUP::able
-  //EnzoEquationOfState (CkMigrateMessage *m)
-  //  : PUP::able(m)
-  //{  }
-
   /// Virtual destructor
   virtual ~EnzoEquationOfState()
+  { }
+
+  /// CHARM++ PUP::able declaration
+  PUPable_abstract(EnzoEquationOfState);
+
+  /// CHARM++ migration constructor for PUP::able
+  EnzoEquationOfState (CkMigrateMessage *m)
+    : PUP::able(m)
   {  }
 
   /// CHARM++ Pack / Unpack function
-  //void pup (PUP::er &p)
-  //{
-  //  PUP::able::pup(p);
-  //}
+  void pup (PUP::er &p)
+  {
+    PUP::able::pup(p);
+  }
 
   // Converts the cell-centered conservative quantities to primitive quantites
   virtual void primitive_from_conservative(Block * block, Grouping &cons_group,

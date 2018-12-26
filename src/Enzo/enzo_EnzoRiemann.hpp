@@ -20,20 +20,23 @@ public: // interface
   EnzoRiemann() throw()
   {}
 
-  /// CHARM++ PUP::able declaration
-  //PUPable_abstract(EnzoRiemann);
-
-  /// CHARM++ migration constructor for PUP::able
-  //EnzoRiemann (CkMigrateMessage *m)
-  //  : PUP::able(m)
-  //{  }
-
   /// Virtual destructor
   virtual ~EnzoRiemann()
   {  }
 
+  /// CHARM++ PUP::able declaration
+  PUPable_abstract(EnzoRiemann);
+
+  /// CHARM++ migration constructor for PUP::able
+  EnzoRiemann (CkMigrateMessage *m)
+    : PUP::able(m)
+  {  }
+
   /// CHARM++ Pack / Unpack function
-  //void pup (PUP::er &p);
+  void pup (PUP::er &p)
+  {
+    PUP::able::pup(p);
+  }
 
   /// Solve the Riemann Problem - dim (0, 1, or 2) tells the solver which
   /// dimension to compute fluxes along and indicates the dimension along which

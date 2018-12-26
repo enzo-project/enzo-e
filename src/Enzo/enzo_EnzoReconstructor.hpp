@@ -15,23 +15,23 @@ public: // interface
   EnzoReconstructor() throw()
   {}
 
-  /// CHARM++ PUP::able declaration
-  //PUPable_abstract(EnzoReconstructor);
-
-  /// CHARM++ migration constructor for PUP::able
-  //EnzoReconstructor (CkMigrateMessage *m)
-  //  : PUP::able(m)
-  //{  }
-
   /// Virtual destructor
   virtual ~EnzoReconstructor()
   {  }
 
+  /// CHARM++ PUP::able declaration
+  PUPable_abstract(EnzoReconstructor);
+
+  /// CHARM++ migration constructor for PUP::able
+  EnzoReconstructor (CkMigrateMessage *m)
+    : PUP::able(m)
+  {  }
+
   /// CHARM++ Pack / Unpack function
-  //void pup (PUP::er &p)
-  //{
-  //  PUP::able::pup(p);
-  //}
+  void pup (PUP::er &p)
+  {
+    PUP::able::pup(p);
+  }
 
   // Reconstructs the interface values
   // priml and primr are formally defined as corner-centered. However all

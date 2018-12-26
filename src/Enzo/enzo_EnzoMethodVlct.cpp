@@ -65,9 +65,9 @@ EnzoMethodVlct::EnzoMethodVlct ()
   setup_groups_();
   // Temporarilly will set member variables to NULL
   eos_ = NULL;
-  half_dt_recon_ = NULL;
-  full_dt_recon_ = NULL;
-  riemann_solver_ = NULL;
+  half_dt_recon_ = new EnzoReconstructorPLM;
+  full_dt_recon_ = new EnzoReconstructorPLM;
+  riemann_solver_ = new EnzoRiemannHLLE;
 }
 
 //----------------------------------------------------------------------
@@ -113,6 +113,9 @@ EnzoMethodVlct::~EnzoMethodVlct()
 {
   delete conserved_group_;
   delete primitive_group_;
+  delete half_dt_recon_;
+  delete full_dt_recon_;
+  delete riemann_solver_;
 }
 
 //----------------------------------------------------------------------
@@ -128,9 +131,9 @@ void EnzoMethodVlct::pup (PUP::er &p)
   // I think this is appropriate, but not totally sure
   // need to initialize to NULL
   //p|eos_;
-  //p|half_dt_recon_;
-  //p|full_dt_recon_;
-  //p|riemann_solver_;
+  p|half_dt_recon_;
+  p|full_dt_recon_;
+  p|riemann_solver_;
 
   // Currently rebuilding the groups every time. Need to pup conserved_group
   // and primitive_group_ in the future

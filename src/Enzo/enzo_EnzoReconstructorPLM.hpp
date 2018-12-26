@@ -30,21 +30,21 @@ public: // interface
   /// Create a new EnzoReconstructorPLM
   EnzoReconstructorPLM()
     : EnzoReconstructor()
-  { };
+  { }
 
   /// CHARM++ PUP::able declaration
-  //PUPable_decl(EnzoReconstructorPLM);
+  PUPable_decl(EnzoReconstructorPLM);
 
   /// CHARM++ migration constructor for PUP::able
-  //EnzoReconstructorPLM (CkMigrateMessage *m)
-  //  : EnzoReconstructor(m)
-  //{  }
+  EnzoReconstructorPLM (CkMigrateMessage *m)
+    : EnzoReconstructor(m)
+  {  }
 
   /// CHARM++ Pack / Unpack function
-  //void pup (PUP::er &p)
-  //{
-  //  PUP::able::pup(p);
-  //}
+  void pup (PUP::er &p)
+  {
+    PUP::able::pup(p);
+  };
 
   // Reconstructs the interface values
   // priml and primr are formally defined as corner-centered. However all
