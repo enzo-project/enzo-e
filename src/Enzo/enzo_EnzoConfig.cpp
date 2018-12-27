@@ -157,8 +157,6 @@ EnzoConfig::EnzoConfig() throw ()
 
 #ifdef CONFIG_USE_GRACKLE
     method_grackle_chemistry = new chemistry_data;
-#else
-    method_grackle_chemistry = NULL;
 #endif
 }
 
