@@ -40,12 +40,12 @@ protected: // methods
 
   // Computes the Wave Speeds bp and bm
   // The interface is subject to change
-  void wave_speeds_ (enzo_float *wl, enzo_float *wr, enzo_float *Ul,
-		     enzo_float *Ur, enzo_float mag_p_l, enzo_float mag_p_r,
+  void wave_speeds_ (flt_map &wl, flt_map &wr, flt_map &Ul, flt_map &Ur,
+		     enzo_float mag_p_l, enzo_float mag_p_r,
 		     EnzoEquationOfState *eos, enzo_float *bp, enzo_float *bm);
 
   // Compute the flux at an interface
-  void interface_flux_ (enzo_float *prim, enzo_float *cons, enzo_float *fluxes,
+  void interface_flux_ (flt_map &prim, flt_map &cons, flt_map &fluxes,
 			enzo_float mag_pressure);
 };
 

@@ -7,7 +7,7 @@
 //    EnzoConstrainedTransport:  Performs constrained transport
 //
 // Some notes on implementation
-//    - this Method tracks energy density, (referred to as energy density)
+//    - this Method tracks total energy density, (referred to as total_energy)
 //
 //    Grouping Objects
 //    ----------------
@@ -46,6 +46,25 @@
 //    The number of tracked Groupings could be reduced drastically if we could
 //    track histories of fields temporarily, and if we could easily search for
 //    fields by specifying multiple group tags.
+//
+//    Mapping
+//    -------
+//    Current implementation relies on EnzoEquationOfState converting the
+//    entire grid of conserved quantities to primitives. Within the Riemann
+//    Solver and the instance methods of EnzoMethodVlct (to compute timestep and
+//    to add add flux divergence), subclasses of EnzoEquationOfState are used
+//    to compute properties of individual cells. These values are passed via a
+//    map. We alias maps of arrays, as array_map and a map of values for a
+//    single cell, as a cell map. The current map implementation is an
+//    unordered_map
+//        - There is an inconsistency between the maps and groupings. Groupings
+//          for vector quantites (i.e. velocity/momentum/bfields) only have a
+//          single name, which then corresponds to collection of components. In
+//          contrast, the map has an individual key for each component.
+//          (e.g. velocity_i, velocity_j, velocity_k)
+//        - Can probably come up with a more elegant solution for Mapping and
+//          Grouping (the obvious choice is to do away with Mapping completely
+//          and just apply operations on Groupings)
 
 #ifndef ENZO_ENZO_METHOD_VLCT_HPP
 #define ENZO_ENZO_METHOD_VLCT_HPP
@@ -54,6 +73,11 @@ class EnzoEquationOfState;
 class EnzoReconstructor;
 class EnzoRiemann;
 class EnzoConstrainedTransport;
+
+// for brevity, and convenience (in case the choice of map is altered)
+// we define an alias for our choice of map
+typedef std::unordered_map<std::string,enzo_float*> array_map;
+typedef std::unordered_map<std::string,enzo_float> flt_map;
 
 
 // define helper function for reading in Grouping fields

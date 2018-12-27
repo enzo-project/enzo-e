@@ -14,23 +14,10 @@
 //                 Probably could reuse code in a Roe Solver
 //   - This class is primarily implemented to allow for easy extension to
 //     incorporate CRs (just need to swap out the wave_speeds_ helper method)
-//   - Unless otherwise noted, the indices in wl, wr, Fl, and Fr are
-//     associated with quantities as follows (values in parenthesis indicate
-//     the conserved quantity associated with flux values):
-//       0 <-> density
-//       1 <-> velocity_i (momentum_i)
-//       2 <-> velocity_j (momentum_j)
-//       3 <-> velocity_k (momentum_k)
-//       4 <-> pressure   (fluid total energy density)
-//       5 <-> b-field_i
-//       6 <-> b-field_j
-//       7 <-> b-field_k
-//    Subclasses will probably do the same but add in extra fields at the end
 //  - If the need arises, have to modify to handle dual energy formalism
-//  - Going to replace the above with some kind of map (probably an unordered
-//    map?)
 
-void load_fluid_fields_(Field *field, std::vector<enzo_float*> *field_arrays,
+void load_fluid_fields_(Field *field,
+			array_map &arrays,
 			Grouping *grouping, bool primitive, int dim)
 {
   int i = dim;
@@ -38,22 +25,25 @@ void load_fluid_fields_(Field *field, std::vector<enzo_float*> *field_arrays,
   int k = (dim+2)%3;
 
   // Load density
-  field_arrays->push_back(load_grouping_field_(field, grouping, "density", 0));
+  arrays["density"] = load_grouping_field_(field, grouping, "density", 0);
 
-  // load velocity/momentum
-  std::string group_name = (primitive) ? "velocity" : "momentum";
-  field_arrays->push_back(load_grouping_field_(field, grouping, group_name, i));
-  field_arrays->push_back(load_grouping_field_(field, grouping, group_name, j));
-  field_arrays->push_back(load_grouping_field_(field, grouping, group_name, k));
+  // load velocity/momentum and pressure/total energy
+  if (primitive){
+    arrays["velocity_i"] = load_grouping_field_(field, grouping, "velocity", i);
+    arrays["velocity_j"] = load_grouping_field_(field, grouping, "velocity", j);
+    arrays["velocity_k"] = load_grouping_field_(field, grouping, "velocity", k);
+    arrays["pressure"] = load_grouping_field_(field, grouping, "pressure", 0);
+  } else {
+    arrays["momentum_i"] = load_grouping_field_(field, grouping, "velocity", i);
+    arrays["momentum_j"] = load_grouping_field_(field, grouping, "velocity", j);
+    arrays["momentum_k"] = load_grouping_field_(field, grouping, "velocity", k);
+    arrays["total_energy"] = load_grouping_field_(field, grouping,
+						  "total_energy", 0);
+  }
 
-  // load pressure/total_energy
-  group_name = (primitive) ? "pressure" : "total_energy";
-  field_arrays->push_back(load_grouping_field_(field, grouping, group_name, 0));
-
-  // load bfields
-  field_arrays->push_back(load_grouping_field_(field, grouping, "bfield", i));
-  field_arrays->push_back(load_grouping_field_(field, grouping, "bfield", j));
-  field_arrays->push_back(load_grouping_field_(field, grouping, "bfield", k));
+  arrays["bfield_i"] = load_grouping_field_(field, grouping, "bfield", i);
+  arrays["bfield_j"] = load_grouping_field_(field, grouping, "bfield", j);
+  arrays["bfield_k"] = load_grouping_field_(field, grouping, "bfield", k);
 }
 
 
@@ -64,12 +54,18 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 			     int dim, EnzoEquationOfState *eos)
 {
 
-  // it would probably make sense for length to be an instance variable of
-  // Riemann object
-  const int length = 8;
-  // The following may not be legal
-  enzo_float wl[length], wr[length], Ul[length], Ur[length];
-  enzo_float Fl[length], Fr[length];
+  // it would probably make sense for prim_keys and cons_keys to be instance
+  // variables of the Riemann object
+  std::vector<std::string> prim_keys{"density", "velocity_i", "velocity_j",
+      "velocity_k", "pressure", "bfield_i", "bfield_j", "bfield_k"};
+  std::vector<std::string> cons_keys{"density", "momentum_i", "momentum_j",
+      "momentum_k", "total_energy", "bfield_i", "bfield_j", "bfield_k"};
+  int length = 8;
+
+  flt_map wl, wr, Ul, Ur, Fl, Fr;
+  wl.reserve(length); wr.reserve(length);
+  Ul.reserve(length); Ur.reserve(length);
+  Fl.reserve(length); Fr.reserve(length);
   enzo_float bp, bm;
 
   //int nspecies = priml_groups.size("species");
@@ -80,13 +76,13 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
   Field field = enzo_block->data()->field();
 
   // Load in the fields
-  std::vector<enzo_float*> wl_arrays;
-  std::vector<enzo_float*> wr_arrays;
-  std::vector<enzo_float*> flux_arrays;
+  array_map wl_arrays, wr_arrays, flux_arrays;
+  wl_arrays.reserve(length); wr_arrays.reserve(length);
+  flux_arrays.reserve(length);
 
-  load_fluid_fields_(&field, &wl_arrays, &priml_group, true, dim);
-  load_fluid_fields_(&field, &wr_arrays, &primr_group, true, dim);
-  load_fluid_fields_(&field, &flux_arrays, &flux_group, false, dim);
+  load_fluid_fields_(&field, wl_arrays, &priml_group, true, dim);
+  load_fluid_fields_(&field, wr_arrays, &primr_group, true, dim);
+  load_fluid_fields_(&field, flux_arrays, &flux_group, false, dim);
 
   // get integration limits 
   int mx = enzo_block->GridDimension[0];
@@ -100,7 +96,7 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
   case(1): my++;
   case(2): mz++;
   }
-
+  
   // For PLM we only care about fluxes for the third cell in
   // For Nearest-Neighbor, we care about the second cell in
   // since mx, my, and mz are face-centered, the following should be correct
@@ -112,8 +108,9 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 
 	// get the primitive fields
 	for (int field_ind=0; field_ind<length; field_ind++){
-	  wl[field_ind] = wl_arrays[field_ind][i];
-	  wr[field_ind] = wr_arrays[field_ind][i];
+	  std::string key = prim_keys[field_ind];
+	  wl[key] = wl_arrays[key][i];
+	  wr[key] = wr_arrays[key][i];
 	}
 
 	// compute the conservatives
@@ -135,11 +132,10 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 
 	// Now compute the Riemann Flux
 	for (int field_ind=0; field_ind<length; field_ind++){
+	  std::string key = cons_keys[field_ind];
 	  // fill in the following line properly
-	  flux_arrays[field_ind][i] = (((bp*Fl[field_ind] - bm*Fr[field_ind])
-				        / (bp - bm)) +
-				       ((Ul[field_ind] - Ur[field_ind])*bp*bm
-					/(bp - bm)));
+	  flux_arrays[key][i] = (((bp*Fl[key] - bm*Fr[key]) / (bp - bm)) +
+				 ((Ul[key] - Ur[key])*bp*bm /(bp - bm)));
 	}
 
 	// Deal with Species and colors
@@ -150,11 +146,11 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 
 //----------------------------------------------------------------------
 
-void EnzoRiemannHLLE::wave_speeds_ (enzo_float *wl, enzo_float *wr,
-				    enzo_float *Ul, enzo_float *Ur,
-				    enzo_float mag_p_l, enzo_float mag_p_r,
-				    EnzoEquationOfState *eos,
-				    enzo_float *bp, enzo_float *bm)
+void EnzoRiemannHLLE::wave_speeds_(flt_map &wl, flt_map &wr, flt_map &Ul,
+				   flt_map &Ur, enzo_float mag_p_l,
+				   enzo_float mag_p_r,
+				   EnzoEquationOfState *eos,
+				   enzo_float *bp, enzo_float *bm)
 {
   // Calculate wavespeeds as specified by S4.3.1 of Stone+08
   // if LM and L0 are max/min eigenvalues of Roe's matrix:
@@ -165,40 +161,49 @@ void EnzoRiemannHLLE::wave_speeds_ (enzo_float *wl, enzo_float *wr,
 
   // First, compute left and right speeds
   //    left_speed = vi_l - cf_l;      right_speed = vi_r + cf_r
-  enzo_float left_speed = wl[1] - eos->fast_magnetosonic_speed(wl);
-  enzo_float right_speed = wr[1] + eos->fast_magnetosonic_speed(wr);
+  enzo_float left_speed = wl["velocity_i"] - eos->fast_magnetosonic_speed(wl);
+  enzo_float right_speed = wr["velocity_i"] + eos->fast_magnetosonic_speed(wr);
 
 
   // Next, compute min max eigenvalues
   //     - per eqn B17 these are Roe averaged velocity in the ith direction
   //       minus/plus Roe averaged fast magnetosonic wavespeed
   //     - Will probably offload this to a method of EnzoEquationOfState
-  enzo_float sqrtrho_l = std::sqrt(wl[0]);
-  enzo_float sqrtrho_r = std::sqrt(wr[0]);
+  enzo_float sqrtrho_l = std::sqrt(wl["density"]);
+  enzo_float sqrtrho_r = std::sqrt(wr["density"]);
   enzo_float coef = 1.0/(sqrtrho_l + sqrtrho_r);
 
   // density and velocity
   enzo_float rho_roe = sqrtrho_l*sqrtrho_r;
-  enzo_float vi_roe = (sqrtrho_l * wl[1] + sqrtrho_r * wr[1])*coef;
-  enzo_float vj_roe = (sqrtrho_l * wl[2] + sqrtrho_r * wr[2])*coef;
-  enzo_float vk_roe = (sqrtrho_l * wl[3] + sqrtrho_r * wr[3])*coef;
+  enzo_float vi_roe = (sqrtrho_l * wl["velocity_i"] +
+		       sqrtrho_r * wr["veloctiy_x"])*coef;
+  enzo_float vj_roe = (sqrtrho_l * wl["velocity_j"] +
+		       sqrtrho_r * wr["velocity_j"])*coef;
+  enzo_float vk_roe = (sqrtrho_l * wl["velocity_k"] +
+		       sqrtrho_r * wr["velocity_k"])*coef;
 
   // enthalpy:  h = (etot + thermal pressure + magnetic pressure) / rho
-  enzo_float h_l = (Ul[4] + wl[4] + mag_p_l)/wl[0];
-  enzo_float h_r = (Ur[4] + wr[4] + mag_p_r)/wr[0];
+  enzo_float h_l = ((Ul["total_energy"] + wl["pressure"] + mag_p_l) /
+		    wl["density"]);
+  enzo_float h_r = ((Ur["total_energy"] + wr["pressure"] + mag_p_r) /
+		    wr["density"]);
   enzo_float h_roe = (sqrtrho_l * h_l + sqrtrho_r * h_r) * coef;
 
   // Magnetic Fields (formulas are different pattern from above)
-  enzo_float bi_roe = wl[5]; // equal to wr[5]
-  enzo_float bj_roe = (sqrtrho_l * wr[6] + sqrtrho_r * wl[6])*coef;
-  enzo_float bk_roe = (sqrtrho_l * wr[7] + sqrtrho_r * wl[7])*coef;
+  enzo_float bi_roe = wl["bfield_i"]; // equal to wr["bfield_i"]
+  enzo_float bj_roe = (sqrtrho_l * wr["bfield_j"] +
+		       sqrtrho_r * wl["bfield_j"])*coef;
+  enzo_float bk_roe = (sqrtrho_l * wr["bfield_k"] +
+		       sqrtrho_r * wl["bfield_k"])*coef;
 
-  
+
   // Calculate fast magnetosonic speed for Roe-averaged quantities (eqn B18)
   enzo_float gamma_prime = eos->get_gamma()-1.;
-  enzo_float x_prime = ((std::pow(wl[6]-wr[6],2) + std::pow(wl[7]-wr[7],2) )
+  enzo_float x_prime = ((std::pow(wl["bfield_j"]-wr["bfield_j"],2) +
+			 std::pow(wl["bfield_k"]-wr["bfield_k"],2) )
 			* 0.5 * (gamma_prime-1) * coef);
-  enzo_float y_prime = (gamma_prime-1)*(wl[0]+wr[0])*0.5/rho_roe;
+  enzo_float y_prime = ((gamma_prime-1)*(wl["density"]+wr["density"])
+			*0.5/rho_roe);
 
   enzo_float v_roe2 = vi_roe*vi_roe + vj_roe*vj_roe + vk_roe*vk_roe;
   enzo_float b_roe2 = bi_roe*bi_roe + bj_roe*bj_roe + bk_roe*bk_roe;
@@ -222,9 +227,8 @@ void EnzoRiemannHLLE::wave_speeds_ (enzo_float *wl, enzo_float *wr,
 
 
 
-void EnzoRiemannHLLE::interface_flux_ (enzo_float *prim, enzo_float *cons,
-				       enzo_float *fluxes,
-				       enzo_float mag_pressure)
+void EnzoRiemannHLLE::interface_flux_(flt_map &prim, flt_map &cons,
+				      flt_map &fluxes, enzo_float mag_pressure)
 {
   // can simplify things, like in Athena++ (described in Toro)
   // they use a modified interface flux form (it involves fewer steps)
@@ -232,33 +236,34 @@ void EnzoRiemannHLLE::interface_flux_ (enzo_float *prim, enzo_float *cons,
   // This assumes that MHD is included
   // This may be better handled by the EquationOfState
   enzo_float rho, vi, vj, vk, p, Bi, Bj, Bk, B2, etot, momentum_i;
-  rho = prim[0];
-  vi = prim[1];
-  vj = prim[2];
-  vk = prim[3];
-  p  = prim[4];
-  Bi = prim[5];
-  Bj = prim[6];
-  Bk = prim[7];
+  rho = prim["density"];
+  vi = prim["velocity_i"];
+  vj = prim["velocity_j"];
+  vk = prim["velocity_k"];
+  p  = prim["pressure"];
+  Bi = prim["bfield_i"];
+  Bj = prim["bfield_j"];
+  Bk = prim["bfield_k"];
 
   B2 = Bi*Bi + Bj*Bj + Bk*Bk;
 
   momentum_i = rho*vi;
   // Compute Fluxes
-  fluxes[0] = cons[1];
+  fluxes["density"] = cons["momentum_i"];
 
   // Fluxes for Mx, My, Mz
-  fluxes[1] = cons[1]*vi - Bi*Bi + p + mag_pressure;
-  fluxes[2] = cons[2]*vi - Bj*Bi;
-  fluxes[3] = cons[3]*vi - Bk*Bi;
+  fluxes["momentum_i"] = cons["momentum_i"]*vi - Bi*Bi + p + mag_pressure;
+  fluxes["momentum_j"] = cons["momentum_j"]*vi - Bj*Bi;
+  fluxes["momentum_k"] = cons["momentum_k"]*vi - Bk*Bi;
 
   // Flux for etot
-  etot = cons[4];
-  fluxes[4] = (etot + p + mag_pressure)*vi - (Bi*vi + Bj*vj + Bk*vk)*Bi;
+  etot = cons["total_energy"];
+  fluxes["total_energy"] = ((etot + p + mag_pressure)*vi
+			    - (Bi*vi + Bj*vj + Bk*vk)*Bi);
 
   // Fluxes for Bi,Bj,Bk
-  fluxes[5] = 0;
-  fluxes[6] = Bj*vi - Bi*vj;
-  fluxes[7] = Bk*vi - Bi*vk;
+  fluxes["bfield_i"] = 0;
+  fluxes["bfield_j"] = Bj*vi - Bi*vj;
+  fluxes["bfield_k"] = Bk*vi - Bi*vk;
   
 }
