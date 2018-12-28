@@ -152,6 +152,12 @@ void EnzoMethodVlct::compute ( Block * block) throw()
   if (block->is_leaf()) {
 
     EnzoBlock * enzo_block = enzo::block(block);
+    int ndim;
+    if (enzo_block->GridDimension[2] == 1){
+      ndim = 2;
+    } else {
+      ndim = 3;
+    }
     Field field = enzo_block->data()->field();
 
     // declaring Grouping that track temporary fields used for scratch space
@@ -216,8 +222,10 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 		    xflux_group, weight_group, *reconstructor);
       compute_flux_(block, 1, *cur_cons_group, priml_group, primr_group,
 		    yflux_group, weight_group, *reconstructor);
-      compute_flux_(block, 2, *cur_cons_group, priml_group, primr_group,
-		    zflux_group, weight_group, *reconstructor);
+      if (ndim == 3){
+	compute_flux_(block, 2, *cur_cons_group, priml_group, primr_group,
+		      zflux_group, weight_group, *reconstructor);
+      }
 
       // Compute_efields
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
@@ -276,6 +284,17 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   int fc_mx, fc_my, fc_mz;
   field.dimensions (id,&fc_mx,&fc_my,&fc_mz);
 
+  // Allow for 2 dimensions
+  int zstart, zstop;
+  if (fc_mz == 1){
+    // This method will never be called if we are handling the 2D case
+    zstart = 0;
+    zstop = 1;
+  } else {
+    zstart = 1;
+    zstop = fc_mz-1;
+  }
+
   // Get the field data
   enzo_float *bfield = load_grouping_field_(&field, &cur_cons_group, "bfieldi",
 					    dim);
@@ -286,7 +305,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // Don't really care about the faces in the edge rows
   // (e.g. if dim = 0, we don't really care about the interface values for
   //  iy=0, iz=0, iy = my-1, or iz = mz-1
-  for (int iz=1; iz<fc_mz-1; iz++) {
+  for (int iz=zstart; iz<zstop; iz++) {
     for (int iy=1; iy<fc_my-1; iy++) {
       for (int ix=1; ix<fc_mx-1; ix++) {
 	int i = ix + fc_mx*(iy + fc_my*iz);
@@ -314,7 +333,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 						    "density", 0);
   enzo_float *weight_field = load_grouping_field_(&field, &weight_group,
 						  "weight", dim);
-  for (int iz=1; iz<fc_mz-1; iz++) {
+  for (int iz=zstart; iz<zstop; iz++) {
     for (int iy=1; iy<fc_my-1; iy++) {
       for (int ix=1; ix<fc_mx-1; ix++) {
 	int i = ix + fc_mx*(iy + fc_my*iz);
@@ -347,8 +366,14 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
+  int start_dim = 0;
+  if (enzo_block->GridDimension[2] == 1) {
+    // handling a 2D setup
+    start_dim = 2;
+  }
+
   // Maybe the following should be handled internally by ct?
-  for (int i = 0; i <3; i++){
+  for (int i = start_dim; i < 3; i++){
     ct.compute_center_efield (block, i, center_efield_id, *primitive_group_);
     Grouping *jflux_group;
     Grouping *kflux_group;
