@@ -63,8 +63,12 @@ EnzoMethodVlct::EnzoMethodVlct ()
   primitive_group_ = new Grouping;
   // need a more sophisticated way to setup groups in the future
   setup_groups_();
-  // Temporarilly will set member variables to NULL
-  eos_ = NULL;
+  // Temporarilly use following default values
+  double gamma = 5./3.;
+  double density_floor = 0;
+  double pressure_floor = 0;
+  
+  eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
   half_dt_recon_ = new EnzoReconstructorPLM;
   full_dt_recon_ = new EnzoReconstructorPLM;
   riemann_solver_ = new EnzoRiemannHLLE;
@@ -116,6 +120,7 @@ EnzoMethodVlct::~EnzoMethodVlct()
   delete half_dt_recon_;
   delete full_dt_recon_;
   delete riemann_solver_;
+  delete eos_;
 }
 
 //----------------------------------------------------------------------
@@ -130,7 +135,7 @@ void EnzoMethodVlct::pup (PUP::er &p)
 
   // I think this is appropriate, but not totally sure
   // need to initialize to NULL
-  //p|eos_;
+  p|eos_;
   p|half_dt_recon_;
   p|full_dt_recon_;
   p|riemann_solver_;
@@ -253,6 +258,8 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 				   Grouping &weight_group,
 				   EnzoReconstructor &reconstructor)
 {
+  // Need to apply pressure and density floors
+  
   // First, let's reconstruct the left and right interface values
   reconstructor.reconstruct_interface(block, *primitive_group_, priml_group,
 				      primr_group, dim, eos_);
@@ -783,10 +790,12 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
 			      bfieldc_z[i] * bfieldc_z[i]);
 
 	/* analogous to ppm timestep calulation, probably want to require that
-	 * cfast is no smaller than some tiny positive number. */
+	 * cfast is no smaller than some tiny positive number. 
+	 * 
+	 * Assuming that we are using Gaussian units*/
 	enzo_float cfast = std::sqrt(gamma * pressure[i] / density[i]  + 
-				     bmag_sq /(4 * cello::pi * density[i]));
-
+				     bmag_sq /(density[i]));
+ 
 	dtBaryons = std::min(dtBaryons, dx/(std::fabs(velocity_x[i]) + cfast));
 	dtBaryons = std::min(dtBaryons, dy/(std::fabs(velocity_y[i]) + cfast));
 	dtBaryons = std::min(dtBaryons, dz/(std::fabs(velocity_z[i]) + cfast));

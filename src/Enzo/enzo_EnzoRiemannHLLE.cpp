@@ -235,7 +235,7 @@ void EnzoRiemannHLLE::interface_flux_(flt_map &prim, flt_map &cons,
 
   // This assumes that MHD is included
   // This may be better handled by the EquationOfState
-  enzo_float rho, vi, vj, vk, p, Bi, Bj, Bk, B2, etot, momentum_i;
+  enzo_float rho, vi, vj, vk, p, Bi, Bj, Bk, etot;
   rho = prim["density"];
   vi = prim["velocity_i"];
   vj = prim["velocity_j"];
@@ -245,9 +245,6 @@ void EnzoRiemannHLLE::interface_flux_(flt_map &prim, flt_map &cons,
   Bj = prim["bfield_j"];
   Bk = prim["bfield_k"];
 
-  B2 = Bi*Bi + Bj*Bj + Bk*Bk;
-
-  momentum_i = rho*vi;
   // Compute Fluxes
   fluxes["density"] = cons["momentum_i"];
 

@@ -3,10 +3,6 @@
 // equations of state (e.g. ideal gas, polytropic EOS, isothermal, etc.)
 //
 // Current plan: track instances within the hydro method.
-//
-// Several of the methods, are expecting C-style arrays. Current plan is that
-// the EquationOfState will know how many variables to expect (e.g. if using
-// dual energy formalism)
 
 #ifndef ENZO_ENZO_EQUATIONOFSTATE_HPP
 #define ENZO_ENZO_EQUATIONOFSTATE_HPP
@@ -22,8 +18,7 @@ public: // interface
   EnzoEquationOfState() throw()
   {}
 
-  /// Virtual destructor
-  virtual ~EnzoEquationOfState()
+  ~EnzoEquationOfState()
   { }
 
   /// CHARM++ PUP::able declaration
@@ -44,7 +39,7 @@ public: // interface
   virtual void primitive_from_conservative(Block *block, Grouping &cons_group,
   					   Grouping &prim_group)=0;
 
-  virtual void conservative_from_primitive(flt_map &prim, flt_map &cons);
+  virtual void conservative_from_primitive(flt_map &prim, flt_map &cons)=0;
 
   // Computes magnetic pressure from primitives
   virtual enzo_float mag_pressure_from_primitive(flt_map &prim_vals)=0;
@@ -63,10 +58,6 @@ public: // interface
 
   // returns the thermal pressure floor
   virtual enzo_float get_pressure_floor()=0;
-
-  /// Name of this equation of state type
-  virtual std::string type () const
-  { return "undefined"; }
 
 };
 

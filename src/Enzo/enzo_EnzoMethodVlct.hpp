@@ -65,6 +65,9 @@
 //        - Can probably come up with a more elegant solution for Mapping and
 //          Grouping (the obvious choice is to do away with Mapping completely
 //          and just apply operations on Groupings)
+//
+//  Issue: Concerned about the units of the magnetic field (especially during
+//  Alfven Velocity)
 
 #ifndef ENZO_ENZO_METHOD_VLCT_HPP
 #define ENZO_ENZO_METHOD_VLCT_HPP
@@ -175,9 +178,6 @@ protected: // methods
 
 protected: // attributes
 
-  // tracked_quan_ and temp_quan_ are the same, except that tracked_quan_
-  // includes conserved fields tracked over time steps while temp_quan_
-  // includes temporary fields temporarily allocated for a single timestep
   // In a lot of senses, these will serve as aliases
   Grouping *conserved_group_;
   Grouping *primitive_group_;

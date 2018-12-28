@@ -233,6 +233,7 @@ struct fluxes
 #include "enzo_EnzoMethodVlct.hpp"
 
 #include "enzo_EnzoEquationOfState.hpp"
+#include "enzo_EnzoEOSIdeal.hpp"
 #include "enzo_EnzoReconstructor.hpp"
 #include "enzo_EnzoReconstructorPLM.hpp"
 #include "enzo_EnzoRiemann.hpp"
