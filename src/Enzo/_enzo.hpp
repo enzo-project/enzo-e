@@ -205,6 +205,7 @@ struct fluxes
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
+#include "enzo_EnzoInitialLinearWave.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
 #include "enzo_EnzoInitialPpmlTest.hpp"

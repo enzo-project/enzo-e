@@ -52,6 +52,7 @@ module enzo {
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
   PUPable EnzoInitialImplosion2;
+  PUPable EnzoInitialLinearWave;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
   PUPable EnzoInitialPpmlTest;
