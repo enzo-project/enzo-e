@@ -199,6 +199,8 @@ struct fluxes
 
 #include "enzo_IoEnzoBlock.hpp"
 
+#include "enzo_EnzoArray.hpp"
+
 #include "enzo_EnzoBoundary.hpp"
 
 #include "enzo_EnzoInitialCollapse.hpp"
