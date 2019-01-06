@@ -16,9 +16,8 @@ void initialize_field_array(Block *block, EnzoArray<enzo_float> &array,
   array.initialize_wrapper(data, mz, my, mx);
 }
 
-// Class to be used for rotating axes.
-// This class will be slightly extended and reused for implementing cosmic rays
-// Using the coordinate systems given by eqn 68 of Gardiner & Stone
+
+// Using the coordinate systems given by eqn 68 of Gardiner & Stone (2008)
 // (except that index numbers start at 0)
 // The system of the mesh are x,y,z
 // The system of the linear wave is x0, x1, x2
@@ -80,24 +79,24 @@ private:
 //   - for scalars: density, total energy density
 //   - for vectors: momentum, magnetic vector potential
 // These functors are most frequently most easily defined along axes that are
-// rotated with respect to the grid. RotatedScalarInitializer and
-// RotatedVectorInitializer are defined wrap around such initializers
-// There are large similarities between Scalar and Vector Initializers, there
+// rotated with respect to the grid. RotatedScalarInit and
+// RotatedVectorInit are defined wrap around such initializers
+// There are large similarities between Scalar and Vector Inits, there
 // may be a way to consolidate
 
-class ScalarInitializer{
+class ScalarInit{
 public:
-  virtual ~ScalarInitializer()
+  virtual ~ScalarInit()
   {}
 
   virtual enzo_float operator() (enzo_float x0, enzo_float x1, enzo_float x2)=0;
 };
 
-class LinearScalarInitializer : public ScalarInitializer{
+class LinearScalarInit : public ScalarInit{
 
 public:
-  LinearScalarInitializer(enzo_float background, enzo_float eigenvalue,
-			  enzo_float amplitude, enzo_float lambda)
+  LinearScalarInit(enzo_float background, enzo_float eigenvalue,
+		   enzo_float amplitude, enzo_float lambda)
     : background_(background),
       eigenvalue_(eigenvalue),
       amplitude_(amplitude),
@@ -121,15 +120,15 @@ protected:
 };
 
 
-class RotatedScalarInitializer : public ScalarInitializer {
+class RotatedScalarInit : public ScalarInit {
 public:
-  RotatedScalarInitializer(Rotation *rot, ScalarInitializer *inner)
-    : ScalarInitializer(),
+  RotatedScalarInit(Rotation *rot, ScalarInit *inner)
+    : ScalarInit(),
       rot_(rot),
       inner_(inner)
   {}
 
-  ~RotatedScalarInitializer()
+  ~RotatedScalarInit()
   {
     delete inner_;
     rot_ = NULL;
@@ -144,28 +143,28 @@ public:
 
 private:
   Rotation *rot_;
-  ScalarInitializer *inner_;
+  ScalarInit *inner_;
 };
 
 
 
 
-class VectorInitializer {
+class VectorInit {
 public:
-  virtual ~VectorInitializer()
+  virtual ~VectorInit()
   {}
 
   virtual void operator() (enzo_float x0, enzo_float x1, enzo_float x2,
 			   enzo_float &v0, enzo_float &v1, enzo_float &v2)=0;
 };
 
-class LinearVectorInitializer : public VectorInitializer {
+class LinearVectorInit : public VectorInit {
 
 public:
-  LinearVectorInitializer(enzo_float back0, enzo_float back1, enzo_float back2,
+  LinearVectorInit(enzo_float back0, enzo_float back1, enzo_float back2,
 			  enzo_float ev0, enzo_float ev1, enzo_float ev2,
 			  enzo_float amplitude, enzo_float lambda)
-    : VectorInitializer(),
+    : VectorInit(),
       back0_(back0), back1_(back1), back2_(back2),
       ev0_(ev0), ev1_(ev1), ev2_(ev2),
       amplitude_(amplitude),
@@ -191,16 +190,15 @@ protected:
   enzo_float lambda_;
 };
 
-
-class RotatedVectorInitializer : public VectorInitializer {
+class RotatedVectorInit : public VectorInit {
 public:
-  RotatedVectorInitializer(Rotation *rot, VectorInitializer *inner)
-    : VectorInitializer(),
+  RotatedVectorInit(Rotation *rot, VectorInit *inner)
+    : VectorInit(),
       rot_(rot),
       inner_(inner)
   {}
 
-  ~RotatedVectorInitializer()
+  ~RotatedVectorInit()
   {
     delete inner_;
     rot_ = NULL;
@@ -217,7 +215,22 @@ public:
 
 private:
   Rotation *rot_;
-  VectorInitializer *inner_;
+  VectorInit *inner_;
+};
+
+class LinearVectorPotentialInit : public VectorInit {
+public:
+  LinearVectorPotentialInit()
+    :VectorInit()
+  {}
+
+  void operator() (enzo_float x0, enzo_float x1, enzo_float x2,
+		   enzo_float &v0, enzo_float &v1, enzo_float &v2)
+  {
+    v0 = 0;
+    v1 = 0;
+    v2 = 0;
+  }
 };
 
 
@@ -325,7 +338,7 @@ void bfieldi_helper_(EnzoArray<enzo_float> &bfield, EnzoArray<enzo_float> &Aj,
 //    ( Ay(k-1/2,     j, i+1/2) - Ay(k-1/2,     j, i-1/2) )/dx -
 //    ( Ax(k-1/2, j+1/2,     i) - Ax(k-1/2, j-1/2,     i) )/dy
   
-void setup_bfield(Block * block, VectorInitializer &a, MeshPos &pos,
+void setup_bfield(Block * block, VectorInit &a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
   EnzoBlock * enzo_block = enzo::block(block);
@@ -378,9 +391,9 @@ void setup_bfield(Block * block, VectorInitializer &a, MeshPos &pos,
 }
 
 
-void setup_fluid(Block *block, ScalarInitializer &density_init,
-		 ScalarInitializer &total_energy_init, 
-		 VectorInitializer &momentum_init,
+void setup_fluid(Block *block, ScalarInit &density_init,
+		 ScalarInit &total_energy_init, 
+		 VectorInit &momentum_init,
 		 MeshPos &pos, int mx, int my, int mz)
 {
   EnzoArray<enzo_float> density, total_energy;
@@ -414,13 +427,18 @@ void setup_fluid(Block *block, ScalarInitializer &density_init,
 EnzoInitialLinearWave::EnzoInitialLinearWave(int cycle, double time,
 					     double alpha, double beta,
 					     double gamma,
-					     int wave_type) throw()
+					     std::string wave_type) throw()
   : Initial (cycle,time),
     alpha_(alpha),
     beta_(beta),
     gamma_(gamma),
     wave_type_(wave_type)
-{}
+{
+  if (!valid_wave_type_()) {
+	printf("Invalid wave_type specified - no values will be specified.\n"
+	       "Valid values include: 'fast', 'slow', 'alfven' and 'entropy\n");
+  }
+}
 
 //----------------------------------------------------------------------
 
@@ -430,32 +448,126 @@ void EnzoInitialLinearWave::enforce_block(Block * block,
   // Set up the test problem
   // This will only work for the VLCT method for an adiabatic fluid
   // does NOT support AMR
-  
   // (PPML initial conditions are much more complicated)
-  // Maybe don't pre-calculate alpha and beta
 
-  Rotation rot(alpha_,beta_);
+  if (valid_wave_type_()){
+    ScalarInit *density_init = NULL;
+    ScalarInit *total_energy_init = NULL;
+    VectorInit *momentum_init = NULL;
+    VectorInit *a_init = NULL;
 
-  EnzoBlock * enzo_block = enzo::block(block);
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
+    Rotation rot(alpha_,beta_);
 
-  // Initialize object to compute positions
-  MeshPos pos(enzo_block);
+    prepare_initializers_(density_init, total_energy_init, momentum_init,
+			  a_init, rot);
 
-  // based on the wave type, setup the above scalar and vector initializers
-  //RotatedScalarInitializer density(&rot;
-  //				   new LinearScalarInitializer(backgroud,
-  //							       eigenvalue,
-  // 							       amplitude,
-  //							       lambda));
-  //RotatedVectorInitializer momentum(&rot;
-  //				    new LinearVectorInitializer(back0, back1,
-  //								back2, ev0, ev1,
-  //								ev2, amplitude,
-  //								lambda));
+    EnzoBlock * enzo_block = enzo::block(block);
+    int mx = enzo_block->GridDimension[0];
+    int my = enzo_block->GridDimension[1];
+    int mz = enzo_block->GridDimension[2];
 
-  // setup_bfield
-  // setup_fluid
+    // Initialize object to compute positions
+    MeshPos pos(enzo_block);
+
+    setup_fluid(block, *density_init, *total_energy_init, *momentum_init,
+		pos, mx, my, mz);
+    setup_bfield(block, *a_init, pos, mx, my, mz);
+
+    delete density_init;
+    delete total_energy_init;
+    delete momentum_init;
+    delete a_init;
+  }
 }
+
+//----------------------------------------------------------------------
+
+void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
+						  ScalarInit *total_energy_init,
+						  VectorInit *momentum_init,
+						  VectorInit *a_init,
+						  Rotation &rot)
+{
+
+  // wsign indicates direction of propogation. May allow for it to change later
+  enzo_float wsign = 1.;
+
+  // initialize the background values:
+  // density = 1, pressure = 1/gamma, mom1 = 0, mom2 = 0, B0 = 1, B1=1.5, B2=0
+  // For entropy wave, mom0 = 1. Otherwise, mom0 = 0.
+  enzo_float density_back = 1;
+  enzo_float mom0_back = 0;
+  enzo_float mom1_back = 0;
+  enzo_float mom2_back = 0;
+  // etot = pressure/(gamma-1)+0.5*rho*v^2+.5*B^2
+  enzo_float etot_back = (1./gamma_)/(gamma_-1.)+1.625;
+  if (wave_type_ == "entropy"){
+    mom0_back = 1;
+    etot_back += 0.5;
+  }
+
+
+  // Get the eigenvalues for density momentum and pressure
+  enzo_float density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev;
+
+  if (wave_type_ == "fast"){
+    enzo_float coef = 0.5/std::sqrt(5.);
+    density_ev = 2. *coef;
+    mom0_ev = wsign*4. * coef;
+    mom1_ev = -1.*wsign*2. * coef;
+    mom2_ev = 0;
+    etot_ev = 9. * coef;
+  } else if (wave_type_ == "alfven") {
+    density_ev = 0;
+    mom0_ev = 0;
+    mom1_ev = -1.*wsign*1;
+    mom2_ev = 0;
+    etot_ev = 0;
+  } else if (wave_type_ == "slow") {
+    enzo_float coef = 0.5/std::sqrt(5.);
+    density_ev = 4. *coef;
+    mom0_ev = wsign*2. * coef;
+    mom1_ev = wsign*4. * coef;
+    mom2_ev = 0;
+    etot_ev = 3. * coef;
+  } else if (wave_type_ == "entropy") {
+    enzo_float coef = 0.5;
+    density_ev = 2. *coef;
+    mom0_ev = 2. * coef;
+    mom1_ev = 0;
+    mom2_ev = 0;
+    etot_ev = 1. * coef;
+  }
+
+  enzo_float lambda = 1.;
+  enzo_float amplitude = 1.e-6;
+  // Now allocate the actual Initializers
+  density_init = new RotatedScalarInit(&rot,
+				       new LinearScalarInit(density_back,
+							    density_ev,
+							    amplitude,
+							    lambda));
+  total_energy_init = new RotatedScalarInit(&rot,
+					    new LinearScalarInit(etot_back,
+								 etot_ev,
+								 amplitude,
+								 lambda));
+  momentum_init = new RotatedVectorInit(&rot,
+					new LinearVectorInit(mom0_back,
+							     mom1_back,
+							     mom2_back,
+							     mom0_ev,
+							     mom1_ev,
+							     mom2_ev,
+							     amplitude,
+							     lambda));
+  
+  a_init = new RotatedVectorInit(&rot,
+				 new LinearVectorPotentialInit());
+}
+
+//----------------------------------------------------------------------
+
+bool EnzoInitialLinearWave::valid_wave_type_()
+{return ((wave_type_ == "fast") || (wave_type_ == "alfven") ||
+	 (wave_type_ == "slow") || (wave_type_ == "entropy"));}

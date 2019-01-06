@@ -1,17 +1,25 @@
 #ifndef ENZO_ENZO_INITIAL_LINEAR_WAVE_HPP
 #define ENZO_ENZO_INITIAL_LINEAR_WAVE_HPP
 
+// classes for initializing initial conditions
+class ScalarInit;
+class VectorInit;
+
+// Rotation is responsible for rotating axes.
+// This class will be slightly extended and reused for implementing cosmic rays
+class Rotation;
+
 class EnzoInitialLinearWave : public Initial {
   /// @class    EnzoInitialLinearWave
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Initializer for the Linear Wave test problem for
-  /// the VLCT method
+  /// the VLCT method. Assumes adiabatic gas.
 
 public: // interface
-  
+
   /// Constructor
   EnzoInitialLinearWave(int cycle, double time, double alpha, double beta,
-			double gamma, int wave_type) throw();
+			double gamma, std::string wave_type) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialLinearWave);
@@ -22,7 +30,7 @@ public: // interface
       alpha_(0.0),
       beta_(0.0),
       gamma_(0.0),
-      wave_type_(0)
+      wave_type_("")
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -46,6 +54,13 @@ public: // virtual methods
 
 private: // functions
 
+  void prepare_initializers_(ScalarInit *density_init,
+			     ScalarInit *total_energy_init, 
+			     VectorInit *momentum_init,
+			     VectorInit *a_init,
+			     Rotation &rot);
+
+  bool valid_wave_type_();
 
 private: // attributes
 
@@ -60,7 +75,7 @@ private: // attributes
   double gamma_;
 
   /// Determines initial values of the wave
-  int wave_type_;
+  std::string wave_type_;
 };
 
 #endif /* ENZO_ENZO_INITIAL_Linear_Wave_HPP */
