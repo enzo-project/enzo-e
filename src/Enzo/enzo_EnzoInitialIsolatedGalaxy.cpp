@@ -67,7 +67,7 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
 {
   // NOTE: update whenever attributes change
 
-  TRACEPUP; // 
+  TRACEPUP; //
 
   Initial::pup(p); //
 
@@ -309,7 +309,7 @@ void EnzoInitialIsolatedGalaxy::ReadInVcircData(void)
 
     inFile >> this->vcirc_radius[i] >> this->vcirc_velocity[i];
 
-    this->vcirc_radius[i]   *= cello::kpc;   // kpc  -> cm
+    this->vcirc_radius[i]   *= cello::kpc_cm;   // kpc  -> cm
     this->vcirc_velocity[i] *= 1.0E5; // km/s -> cm/s
     i++;
   }
