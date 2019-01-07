@@ -301,13 +301,13 @@ void EnzoInitialIsolatedGalaxy::ReadInVcircData(void)
          inFile.is_open());
 
   int i = 0;
-  while(!inFile.eof())
+  while(inFile >> this->vcirc_radius[i] >> this->vcirc_velocity[i])
   {
     ASSERT("EnzoInitialIsolatedGalaxy",
            "Too many lines in circular velocity file",
            i < this->VCIRC_TABLE_LENGTH);
 
-    inFile >> this->vcirc_radius[i] >> this->vcirc_velocity[i];
+//    inFile >> this->vcirc_radius[i] >> this->vcirc_velocity[i];
 
     this->vcirc_radius[i]   *= cello::kpc_cm;   // kpc  -> cm
     this->vcirc_velocity[i] *= 1.0E5; // km/s -> cm/s
