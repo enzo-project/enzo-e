@@ -162,8 +162,8 @@ class LinearVectorInit : public VectorInit {
 
 public:
   LinearVectorInit(enzo_float back0, enzo_float back1, enzo_float back2,
-			  enzo_float ev0, enzo_float ev1, enzo_float ev2,
-			  enzo_float amplitude, enzo_float lambda)
+		   enzo_float ev0, enzo_float ev1, enzo_float ev2,
+		   enzo_float amplitude, enzo_float lambda)
     : VectorInit(),
       back0_(back0), back1_(back1), back2_(back2),
       ev0_(ev0), ev1_(ev1), ev2_(ev2),
@@ -220,17 +220,36 @@ private:
 
 class LinearVectorPotentialInit : public VectorInit {
 public:
-  LinearVectorPotentialInit()
-    :VectorInit()
+  // The absence of ev_B0 is intentional
+  LinearVectorPotentialInit(enzo_float back_B0, enzo_float back_B1,
+			    enzo_float back_B2, enzo_float ev_B1,
+			    enzo_float ev_B2, enzo_float amplitude,
+			    enzo_float lambda)
+    :VectorInit(),
+     back_B0_(back_B0), back_B1_(back_B1), back_B2_(back_B2),
+     ev_B1_(ev_B1), ev_B2_(ev_B2),
+     amplitude_(amplitude),
+     lambda_(lambda)
   {}
 
   void operator() (enzo_float x0, enzo_float x1, enzo_float x2,
 		   enzo_float &v0, enzo_float &v1, enzo_float &v2)
   {
-    v0 = 0;
-    v1 = 0;
-    v2 = 0;
+    v0 = (x2 * amplitude_ * ev_B1_ * std::cos(2. * cello::pi * x0/ lambda_) -
+	  x1 * amplitude_ * ev_B2_ * std::cos(2. * cello::pi * x0/ lambda_));
+    v1 = back_B2_ * x0; // For Gardiner & Stone (2008) setup, should be 0
+    v2 = back_B0_ * x1 - back_B1_ * x0;
   }
+
+protected:
+  // value of the magnetic field background state
+  enzo_float back_B0_, back_B1_, back_B2_;
+  // magnetic field eigenvalue for a given mode (its always 0, along dim 0)
+  enzo_float ev_B1_, ev_B2_;
+  // perturbation amplitude
+  enzo_float amplitude_;
+  // wavelength
+  enzo_float lambda_;
 };
 
 
@@ -426,12 +445,16 @@ void setup_fluid(Block *block, ScalarInit &density_init,
 
 EnzoInitialLinearWave::EnzoInitialLinearWave(int cycle, double time,
 					     double alpha, double beta,
-					     double gamma,
+					     double gamma, double amplitude,
+					     double lambda, bool pos_vel,
 					     std::string wave_type) throw()
   : Initial (cycle,time),
     alpha_(alpha),
     beta_(beta),
     gamma_(gamma),
+    amplitude_(amplitude),
+    lambda_(lambda),
+    pos_vel_(pos_vel),
     wave_type_(wave_type)
 {
   if (!valid_wave_type_()) {
@@ -491,6 +514,9 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
 
   // wsign indicates direction of propogation. May allow for it to change later
   enzo_float wsign = 1.;
+  if (!pos_vel_){
+    wsign = -1;
+  }
 
   // initialize the background values:
   // density = 1, pressure = 1/gamma, mom1 = 0, mom2 = 0, B0 = 1, B1=1.5, B2=0
@@ -499,6 +525,9 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
   enzo_float mom0_back = 0;
   enzo_float mom1_back = 0;
   enzo_float mom2_back = 0;
+  enzo_float b0_back = 1.;
+  enzo_float b1_back = 1.5;
+  enzo_float b2_back = 0;
   // etot = pressure/(gamma-1)+0.5*rho*v^2+.5*B^2
   enzo_float etot_back = (1./gamma_)/(gamma_-1.)+1.625;
   if (wave_type_ == "entropy"){
@@ -508,7 +537,8 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
 
 
   // Get the eigenvalues for density momentum and pressure
-  enzo_float density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev;
+  enzo_float density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev, b1_ev, b2_ev;
+  // intentionally omit b0_ev
 
   if (wave_type_ == "fast"){
     enzo_float coef = 0.5/std::sqrt(5.);
@@ -517,12 +547,16 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
     mom1_ev = -1.*wsign*2. * coef;
     mom2_ev = 0;
     etot_ev = 9. * coef;
+    b1_ev = 4. * coef;
+    b2_ev = 0;
   } else if (wave_type_ == "alfven") {
     density_ev = 0;
     mom0_ev = 0;
     mom1_ev = -1.*wsign*1;
     mom2_ev = 0;
     etot_ev = 0;
+    b1_ev = 0;
+    b2_ev = 1.;
   } else if (wave_type_ == "slow") {
     enzo_float coef = 0.5/std::sqrt(5.);
     density_ev = 4. *coef;
@@ -530,6 +564,8 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
     mom1_ev = wsign*4. * coef;
     mom2_ev = 0;
     etot_ev = 3. * coef;
+    b1_ev = -2. * coef;
+    b2_ev = 0;
   } else if (wave_type_ == "entropy") {
     enzo_float coef = 0.5;
     density_ev = 2. *coef;
@@ -537,10 +573,12 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
     mom1_ev = 0;
     mom2_ev = 0;
     etot_ev = 1. * coef;
+    b1_ev = 0;
+    b2_ev = 0;
   }
 
-  enzo_float lambda = 1.;
-  enzo_float amplitude = 1.e-6;
+  enzo_float lambda = lambda_;
+  enzo_float amplitude = amplitude_;
   // Now allocate the actual Initializers
   density_init = new RotatedScalarInit(&rot,
 				       new LinearScalarInit(density_back,
@@ -563,7 +601,13 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
 							     lambda));
   
   a_init = new RotatedVectorInit(&rot,
-				 new LinearVectorPotentialInit());
+				 new LinearVectorPotentialInit(b0_back,
+							       b1_back,
+							       b2_back,
+							       b1_ev,
+							       b2_ev,
+							       amplitude,
+							       lambda));
 }
 
 //----------------------------------------------------------------------

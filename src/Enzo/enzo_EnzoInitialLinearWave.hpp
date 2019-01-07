@@ -19,7 +19,8 @@ public: // interface
 
   /// Constructor
   EnzoInitialLinearWave(int cycle, double time, double alpha, double beta,
-			double gamma, std::string wave_type) throw();
+			double gamma, double amplitude, double lambda,
+			bool pos_vel, std::string wave_type) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialLinearWave);
@@ -73,6 +74,15 @@ private: // attributes
 
   /// Ideal gas law constant
   double gamma_;
+
+  /// Amplitude of the perturbation
+  double amplitude_;
+
+  /// wavelength
+  double lambda_;
+
+  /// If the wave speed is in the positive direction
+  bool pos_vel_;
 
   /// Determines initial values of the wave
   std::string wave_type_;
