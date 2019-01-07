@@ -227,6 +227,10 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       }
 
       // Compute_efields
+      //   - The first time, this implictly use the cell-centered primitives
+      //     computed before the half timestep
+      //   - The second time, it uses uses the the cell-centered primitives
+      //     computed after the half timestep
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
 		       center_efield_id, efield_group, weight_group, ct);
 
