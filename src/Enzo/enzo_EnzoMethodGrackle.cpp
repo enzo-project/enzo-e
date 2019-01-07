@@ -154,6 +154,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 }
 
+#ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
                                              code_units * grackle_units) throw()
 {
@@ -280,7 +281,6 @@ void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
 }
 
 //----------------------------------------------------------------------
-#ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
   EnzoUnits * enzo_units = enzo::units();
