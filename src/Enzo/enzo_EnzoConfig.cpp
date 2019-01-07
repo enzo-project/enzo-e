@@ -132,14 +132,14 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_riemann_solver(""),
   // EnzoMethodNull
   method_null_dt(0.0),
-  /*
   // EnzoMethodStarMaker,
-  star_maker_use_density_threshold(1),           // check above density threshold before SF
-  star_maker_use_velocity_divergence(1),         // check for converging flow before SF
-  star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
-  star_maker_efficiency(0.01),            // star maker efficiency
-  star_maker_minimum_star_mass(1.0E4),    // star particle mass (if fixed) in solar masses
-  */
+  method_star_maker_type(""),                             // star maker type to use
+  method_star_maker_use_density_threshold(true),           // check above density threshold before SF
+  method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
+  method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
+  method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
+  method_star_maker_efficiency(0.01),            // star maker efficiency
+  method_star_maker_minimum_star_mass(1.0E4),    // star particle mass (if fixed) in solar masses
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -196,8 +196,8 @@ EnzoConfig::EnzoConfig() throw ()
 
 #ifdef CONFIG_USE_GRACKLE
     method_grackle_chemistry = new chemistry_data;
-#else
-    method_grackle_chemistry = NULL;
+//#else
+//    method_grackle_chemistry = NULL;
 #endif
 }
 
@@ -347,14 +347,15 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_riemann_solver;
 
   p | method_null_dt;
-  /*
-  p | star_maker_use_density_threshold;
-  p | star_maker_use_velocity_divergence;
-  p | star_maker_number_density_threshold;
-  p | star_maker_maximum_mass_fraction;
-  p | star_maker_efficiency;
-  p | star_maker_minimum_star_mass;
- */
+
+  p | method_star_maker_type;
+  p | method_star_maker_use_density_threshold;
+  p | method_star_maker_use_velocity_divergence;
+  p | method_star_maker_number_density_threshold;
+  p | method_star_maker_maximum_mass_fraction;
+  p | method_star_maker_efficiency;
+  p | method_star_maker_minimum_star_mass;
+
   p | method_turbulence_edot;
 
   p | method_gravity_grav_const;
@@ -728,6 +729,27 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");
+
+  method_star_maker_type = p->value_string
+    ("Method:star_maker:type","stochastic");
+
+  method_star_maker_use_density_threshold = p->value_logical
+    ("Method:star_maker:use_density_threshold",true);
+
+  method_star_maker_use_velocity_divergence = p->value_logical
+    ("Method:star_maker:use_velocity_divergence",true);
+
+  method_star_maker_number_density_threshold = p->value_float
+    ("Method:star_maker:number_density_threshold",0.0);
+
+  method_star_maker_maximum_mass_fraction = p->value_float
+    ("Method:star_maker:maximum_mass_fraction",0.5);
+
+  method_star_maker_efficiency = p->value_float
+    ("Method:star_maker:efficiency",0.01);
+
+  method_star_maker_minimum_star_mass = p->value_float
+    ("Method:star_maker:minimum_star_mass",1.0E4);
 
   method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());

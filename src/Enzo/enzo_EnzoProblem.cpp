@@ -219,7 +219,7 @@ Refine * EnzoProblem::create_refine_
 
   if (type == "shock") {
 
-    return new EnzoRefineShock 
+    return new EnzoRefineShock
       (config->adapt_min_refine[index],
        config->adapt_max_coarsen[index],
        config->adapt_min_refine2[index],
@@ -326,7 +326,7 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_last_smooth[index_solver],
        restrict,  prolong,
        enzo_config->solver_coarse_level[index_solver]);
-       
+
   } else if (solver_type == "bicgstab") {
 
       solver = new EnzoSolverBiCgStab
@@ -504,7 +504,7 @@ Method * EnzoProblem::create_method_
     std::string solver_name = enzo_config->method_gravity_solver;
 
     int index_solver = enzo_config->solver_index.at(solver_name);
-    
+
     ASSERT1 ("EnzoProblem::create_solver_()",
 	     "Cannot find solver \"%s\"",
 	     solver_name.c_str(),
@@ -532,6 +532,14 @@ Method * EnzoProblem::create_method_
 
     method = new EnzoMethodBackgroundAcceleration
           (zero_acceleration);
+
+  } else if (name == "star_maker") {
+
+    if (enzo_config->method_star_maker_type == "stochastic"){
+      method = new EnzoMethodStarMakerStochasticSF();
+    } else{ // does not do anything
+      method = new EnzoMethodStarMaker();
+    }
 
   } else {
 

@@ -218,6 +218,14 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
+      /// EnzoMethodStarMaker
+      method_star_maker_type(""),
+      method_star_maker_use_density_threshold(true),           // check above density threshold before SF
+      method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
+      method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
+      method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
+      method_star_maker_efficiency(0.01),            // star maker efficiency
+      method_star_maker_minimum_star_mass(1.0E4),    // star particle mass (if fixed) in solar masses
       // EnzoMethodNull
       method_null_dt(0.0),
       // EnzoMethodTurbulence
@@ -431,6 +439,16 @@ public: // attributes
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
 
+  /// EnzoMethodStarMaker
+
+  std::string               method_star_maker_type;
+  bool                      method_star_maker_use_density_threshold;
+  bool                      method_star_maker_use_velocity_divergence;
+  double                    method_star_maker_number_density_threshold;
+  double                    method_star_maker_maximum_mass_fraction;
+  double                    method_star_maker_efficiency;
+  double                    method_star_maker_minimum_star_mass;
+
   /// EnzoMethodNull
   double                     method_null_dt;
 
@@ -490,7 +508,7 @@ public: // attributes
   std::vector<int>           solver_coarse_solve;
 
   /// Solver index for domain decomposition (dd) domain solver
-  
+
   std::vector<int>           solver_domain_solve;
 
   /// Weighting factor for smoother

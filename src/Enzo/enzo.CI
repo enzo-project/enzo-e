@@ -87,6 +87,8 @@ module enzo {
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodBackgroundAcceleration;
+  PUPable EnzoMethodStarMaker;
+  PUPable EnzoMethodStarMakerStochasticSF;
 
   PUPable EnzoPhysicsCosmology;
 

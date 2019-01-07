@@ -77,6 +77,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_heat,
   enzo_sync_id_method_null,
+  enzo_sync_id_method_star_maker,
   enzo_sync_id_method_pm_deposit,
   enzo_sync_id_method_pm_update,
   enzo_sync_id_method_ppm,
@@ -237,6 +238,8 @@ extern "C" {
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
+#include "enzo_EnzoMethodStarMaker.hpp"
+#include "enzo_EnzoMethodStarMakerStochasticSF.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"
