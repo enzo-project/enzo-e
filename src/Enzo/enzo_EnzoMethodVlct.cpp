@@ -32,7 +32,7 @@ std::vector<std::string> EnzoMethodVlct::prim_group_names={"density","velocity",
 
 //----------------------------------------------------------------------
 
-EnzoMethodVlct::EnzoMethodVlct ()
+EnzoMethodVlct::EnzoMethodVlct (double gamma)
   : Method()
 {
   // Initialize the default Refresh object
@@ -64,7 +64,6 @@ EnzoMethodVlct::EnzoMethodVlct ()
   // need a more sophisticated way to setup groups in the future
   setup_groups_();
   // Temporarilly use following default values
-  double gamma = 5./3.;
   double density_floor = 0;
   double pressure_floor = 0;
   

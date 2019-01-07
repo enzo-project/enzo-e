@@ -143,6 +143,16 @@ Initial * EnzoProblem::create_initial_
        enzo_config->field_gamma,
        enzo_config->initial_cosmology_temperature
        );
+  } else if (type == "linear_wave") {
+    initial = new EnzoInitialLinearWave
+      (cycle, time,
+       enzo_config->initial_linearwave_alpha,
+       enzo_config->initial_linearwave_beta,
+       enzo_config->field_gamma,
+       enzo_config->initial_linearwave_amplitude,
+       enzo_config->initial_linearwave_lambda,
+       enzo_config->initial_linearwave_positive_vel,
+       enzo_config->initial_linearwave_wave_type);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence 
       (cycle,time, 
@@ -500,7 +510,8 @@ Method * EnzoProblem::create_method_
       
   } else if (name == "vlct") {
 
-    method = new EnzoMethodVlct;
+    method = new EnzoMethodVlct
+      (enzo_config->field_gamma);
 
   } else {
 

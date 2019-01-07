@@ -53,6 +53,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
+  // EnzoInitialLinearWave
+  initial_linearwave_alpha(0.0),
+  initial_linearwave_beta(0.0),
+  initial_linearwave_amplitude(0.0),
+  initial_linearwave_lambda(0.0),
+  initial_linearwave_positive_vel(true),
+  initial_linearwave_wave_type(""),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -202,6 +209,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_collapse_particle_ratio;
   p | initial_collapse_mass;
   p | initial_collapse_temperature;
+
+  p | initial_linearwave_alpha;
+  p | initial_linearwave_beta;
+  p | initial_linearwave_amplitude;
+  p | initial_linearwave_lambda;
+  p | initial_linearwave_positive_vel;
+  p | initial_linearwave_wave_type;
 
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
@@ -416,6 +430,21 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_pm_level        = p->value_integer ("Initial:pm:level",-1);
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
+
+  // InitialLinearWave initialization
+  
+  initial_linearwave_alpha          = p->value_float
+    ("Initial:linear_wave:lambda",0.0);
+  initial_linearwave_beta           = p->value_float
+    ("Initial:linear_wave:beta",0.0);
+  initial_linearwave_amplitude      = p->value_float
+    ("Initial:linear_wave:amplitude",1.e-6);
+  initial_linearwave_lambda         = p->value_float
+    ("Initial:linear_wave:lambda",1.0);
+  initial_linearwave_positive_vel   = p->value_logical
+    ("Initial:linear_wave:positive_vel",true);
+  initial_linearwave_wave_type      = p->value_string
+    ("Initial:linear_wave:wave_type","alfven");
 
   // InitialSoup initialization
 

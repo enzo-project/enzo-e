@@ -96,7 +96,7 @@ class EnzoMethodVlct : public Method {
 public: // interface
 
   /// Create a new EnzoMethodVlct object
-  EnzoMethodVlct();
+  EnzoMethodVlct(double gamma);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodVlct);

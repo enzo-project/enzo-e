@@ -76,6 +76,13 @@ public: // interface
       initial_collapse_particle_ratio(0.0),
       initial_collapse_mass(0.0),
       initial_collapse_temperature(0.0),
+      // EnzoInitialLinearWave
+      initial_linearwave_alpha(0.0),
+      initial_linearwave_beta(0.0),
+      initial_linearwave_amplitude(0.0),
+      initial_linearwave_lambda(0.0),
+      initial_linearwave_positive_vel(true),
+      initial_linearwave_wave_type(""),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -229,6 +236,14 @@ public: // attributes
   double                     initial_collapse_mass;
   double                     initial_collapse_temperature;
 
+  /// EnzoInitialLinearWave
+  double                     initial_linearwave_alpha;
+  double                     initial_linearwave_beta;
+  double                     initial_linearwave_amplitude;
+  double                     initial_linearwave_lambda;
+  bool                       initial_linearwave_positive_vel;
+  std::string                initial_linearwave_wave_type;
+  
   /// EnzoInitialMusic
 
   std::vector < std::string > initial_music_field_files;
