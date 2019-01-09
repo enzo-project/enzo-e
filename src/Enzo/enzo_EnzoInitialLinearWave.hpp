@@ -31,6 +31,9 @@ public: // interface
       alpha_(0.0),
       beta_(0.0),
       gamma_(0.0),
+      amplitude_(0.0),
+      lambda_(0.0),
+      pos_vel_(true),
       wave_type_("")
   {}
 
@@ -45,6 +48,9 @@ public: // interface
     p | alpha_;
     p | beta_;
     p | gamma_;
+    p | amplitude_;
+    p | lambda_;
+    p | pos_vel_;
     p | wave_type_;
   }
 public: // virtual methods
@@ -58,8 +64,7 @@ private: // functions
   void prepare_initializers_(ScalarInit *density_init,
 			     ScalarInit *total_energy_init, 
 			     VectorInit *momentum_init,
-			     VectorInit *a_init,
-			     Rotation &rot);
+			     VectorInit *a_init);
 
   bool valid_wave_type_();
 

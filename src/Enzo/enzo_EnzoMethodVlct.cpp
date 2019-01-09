@@ -2,6 +2,11 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+#define TRACE_VLCT(MESSAGE)                                       \
+ CkPrintf ("%s:%d TRACE_VLCT %s %s\n",                            \
+           __FILE__,__LINE__, block->name().c_str(), MESSAGE);	  \
+ fflush (stdout);
+
 enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
 				 std::string group_name, int index)
 {
@@ -71,6 +76,7 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   half_dt_recon_ = new EnzoReconstructorPLM;
   full_dt_recon_ = new EnzoReconstructorPLM;
   riemann_solver_ = new EnzoRiemannHLLE;
+
 }
 
 //----------------------------------------------------------------------
@@ -747,6 +753,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 
 double EnzoMethodVlct::timestep ( Block * block ) const throw()
 {
+  TRACE_VLCT("timestep()");
   // NEED TO UPDATE TO BE CONSISTENT WITH REST OF FUNCTION
   /* Points to address:
    *  1. Make sure the overloading of std::sqrt works correctly [and always 

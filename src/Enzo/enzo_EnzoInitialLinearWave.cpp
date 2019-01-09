@@ -122,16 +122,17 @@ protected:
 
 class RotatedScalarInit : public ScalarInit {
 public:
-  RotatedScalarInit(Rotation *rot, ScalarInit *inner)
-    : ScalarInit(),
-      rot_(rot),
-      inner_(inner)
-  {}
+  RotatedScalarInit(enzo_float a, enzo_float b, ScalarInit *inner)
+    : ScalarInit()
+  {
+    rot_ = new Rotation(a,b);
+    inner_ = inner;
+  }
 
   ~RotatedScalarInit()
   {
     delete inner_;
-    rot_ = NULL;
+    delete rot_;
   }
 
   enzo_float operator() (enzo_float x, enzo_float y, enzo_float z)
@@ -192,16 +193,17 @@ protected:
 
 class RotatedVectorInit : public VectorInit {
 public:
-  RotatedVectorInit(Rotation *rot, VectorInit *inner)
-    : VectorInit(),
-      rot_(rot),
-      inner_(inner)
-  {}
+  RotatedVectorInit(enzo_float a, enzo_float b, VectorInit *inner)
+    : VectorInit()
+  {
+    rot_ = new Rotation(a,b);
+    inner_ = inner_;
+  }
 
   ~RotatedVectorInit()
   {
     delete inner_;
-    rot_ = NULL;
+    delete rot_;
   }
 
   void operator() (enzo_float x, enzo_float y, enzo_float z,
@@ -479,10 +481,8 @@ void EnzoInitialLinearWave::enforce_block(Block * block,
     VectorInit *momentum_init = NULL;
     VectorInit *a_init = NULL;
 
-    Rotation rot(alpha_,beta_);
-
     prepare_initializers_(density_init, total_energy_init, momentum_init,
-			  a_init, rot);
+			  a_init);
 
     EnzoBlock * enzo_block = enzo::block(block);
     int mx = enzo_block->GridDimension[0];
@@ -508,8 +508,7 @@ void EnzoInitialLinearWave::enforce_block(Block * block,
 void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
 						  ScalarInit *total_energy_init,
 						  VectorInit *momentum_init,
-						  VectorInit *a_init,
-						  Rotation &rot)
+						  VectorInit *a_init)
 {
 
   // wsign indicates direction of propogation. May allow for it to change later
@@ -580,17 +579,17 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
   enzo_float lambda = lambda_;
   enzo_float amplitude = amplitude_;
   // Now allocate the actual Initializers
-  density_init = new RotatedScalarInit(&rot,
+  density_init = new RotatedScalarInit(alpha_, beta_,
 				       new LinearScalarInit(density_back,
 							    density_ev,
 							    amplitude,
 							    lambda));
-  total_energy_init = new RotatedScalarInit(&rot,
+  total_energy_init = new RotatedScalarInit(alpha_, beta_,
 					    new LinearScalarInit(etot_back,
 								 etot_ev,
 								 amplitude,
 								 lambda));
-  momentum_init = new RotatedVectorInit(&rot,
+  momentum_init = new RotatedVectorInit(alpha_, beta_,
 					new LinearVectorInit(mom0_back,
 							     mom1_back,
 							     mom2_back,
@@ -600,7 +599,7 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
 							     amplitude,
 							     lambda));
   
-  a_init = new RotatedVectorInit(&rot,
+  a_init = new RotatedVectorInit(alpha_, beta_,
 				 new LinearVectorPotentialInit(b0_back,
 							       b1_back,
 							       b2_back,
