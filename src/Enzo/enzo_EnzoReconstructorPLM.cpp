@@ -96,11 +96,11 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	    // left (right) interface value to 0
 	    if ( (ix == dix) ||
 		 (iy == diy) ||
-		 ((iz == diz) && (zstop>1))){
+		 ((iz == diz) && (zstart>0))){
 	      wl(iz,iy,ix) = 0;
 	    } else if ( (ix+dix == xstop) ||
 		        (iy+diy == ystop) ||
-			((iz+diz == zstop) && (zstop>1))){
+			((iz+diz == zstop) && (zstart>0))){
 	      wr(iz-diz,iy-diy,ix-dix) = 0;
 	    }
 
