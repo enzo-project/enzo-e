@@ -86,6 +86,16 @@ typedef std::unordered_map<std::string,enzo_float> flt_map;
 // define helper function for reading in Grouping fields
 enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
 				 std::string group_name, int index);
+// we will phase out the preceeding helper function for the following
+void load_grouping_field_(Block *block, Grouping &grouping,
+			  std::string group_name, int index,
+			  EnzoArray<enzo_float> &array);
+// Because the left and right primitive values have more values allocated than
+// necessary, special care must be taken when wrapping it with an EnzoArray
+void load_interface_prim_field_(Block *block, Grouping &grouping,
+				std::string group_name, int index,
+				EnzoArray<enzo_float> &array, int dim);
+
 
 class EnzoMethodVlct : public Method {
 

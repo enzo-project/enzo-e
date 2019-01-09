@@ -17,6 +17,51 @@ enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
   return (enzo_float *) field->values(grouping->item(group_name,index));
 }
 
+// The idea is to completely replace the previous helper function with the
+// following
+void load_grouping_field_(Block *block, Grouping &grouping,
+			  std::string group_name, int index,
+			  EnzoArray<enzo_float> &array)
+{
+  Field field = block->data()->field();
+  int size = grouping.size(group_name);
+  if ((size == 0) || (size>=index)){
+    return;
+  }
+  std::string field_name = grouping.item(group_name,index);
+  enzo_float *data = (enzo_float *) field.values(field_name);
+  int id = field.field_id(field_name);
+  int mx, my, mz;
+  field.dimensions (id,&mx,&my,&mz);
+  array.initialize_wrapper(data,mz,my,mx);
+}
+
+// Because the left an right primitive values have more values allocated than
+// necessary, special care must be taken when wrapping it with an EnzoArray
+void load_interface_prim_field_(Block *block, Grouping &grouping,
+				std::string group_name, int index,
+				EnzoArray<enzo_float> &array, int dim)
+{
+  int size = grouping.size(group_name);
+  if ((size == 0) || (size>=index)){
+    return;
+  }
+  EnzoBlock * enzo_block = enzo::block(block);
+  Field field = enzo_block->data()->field();
+  enzo_float *data =(enzo_float *)field.values(grouping.item(group_name,index));
+  int mx = enzo_block->GridDimension[0];
+  int my = enzo_block->GridDimension[1];
+  int mz = enzo_block->GridDimension[2];
+  if (dim == 0){
+    mx++;
+  } else if (dim == 1){
+    my++;
+  } else {
+    mz++;
+  }
+  array.initialize_wrapper(data,mz,my,mx);
+}
+
 // These 2 vectors need to be updated as more physics are added (e.g. dual
 // energy formalism, CR Energy & Flux, species, colors)
 
