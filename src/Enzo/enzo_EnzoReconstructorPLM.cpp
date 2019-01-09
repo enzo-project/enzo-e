@@ -80,30 +80,30 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       load_interface_prim_field_(block, priml_group, group_name, field_ind, wr,
 				 dim);
 
-      // Get iteration limits
-      int zstop = wl.length_dim2();
-      int ystop = wl.length_dim1();
-      int xstop = wl.length_dim0();
+      
+      // Get iteration limits (Allow for use in 2D problems):
+      int zstart = (wl.length_dim2() == 1) ? 0 : 1;
+      int zstop = w.length_dim2()-zstart;
+      int ystop = w.length_dim1()-1;
+      int xstop = w.length_dim0()-1;
 
-      // if dim points along direction x. Then the following unecessarily sets
-      // interface values to 0 when y = 0 || ystop-1. ALSO unecessarily sets
-      // interface values to 0 when z = 0 || zmax-1.
-      for (int iz=0; iz<zstop; iz++) {
-	for (int iy=0; iy<ystop; iy++) {
-	  for (int ix=0; ix<xstop; ix++) {
+      for (int iz=zstart; iz<zstop; iz++) {
+	for (int iy=1; iy<ystop; iy++) {
+	  for (int ix=1; ix<xstop; ix++) {
 
 	    // At the interfaces between the first and second cell (second-to-
 	    // last and last cell), along a given axis, set the reconstructed
 	    // left (right) interface value to 0
-	    // (we also set interfaces between cells in the first and last rows
-	    //  to zero - this is ok, but unecessary)
-	    if ((ix == 0) || (iy == 0) || (iz == 0)){
-	      wl(iz+diz,iy+diy,ix+dix) = 0;
-	      continue;
-	    } else if ((iz == zstop-1) || (iy == ystop-1) || (ix == xstop-1)){
-	      wr(iz,iy,ix) = 0;
-	      continue;
+	    if ( (ix == dix) ||
+		 (iy == diy) ||
+		 ((iz == diz) && (zstop>1))){
+	      wl(iz,iy,ix) = 0;
+	    } else if ( (ix+dix == xstop) ||
+		        (iy+diy == ystop) ||
+			((iz+diz == zstop) && (zstop>1))){
+	      wr(iz-diz,iy-diy,ix-dix) = 0;
 	    }
+
 
 	    // compute the index of the cell-centered quantity
 	    enzo_float val = w(iz,iy,ix);
