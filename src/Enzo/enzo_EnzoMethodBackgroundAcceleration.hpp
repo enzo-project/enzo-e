@@ -80,13 +80,15 @@ public: // interface
 
   virtual double timestep (Block * block) const throw();
 
+  // these don't need to be virtual
   virtual void PointMass( enzo_float * ax,
                           enzo_float * ay,
                           enzo_float * az,
                           const int rank,
                           const enzo_float cosmo_a,
                           const EnzoConfig * enzo_config,
-                          const EnzoUnits * enzo_units) throw() ;
+                          const EnzoUnits * enzo_units,
+                          const double dt) throw() ;
 
   virtual void GalaxyModel( enzo_float * ax,
                           enzo_float * ay,
@@ -94,7 +96,8 @@ public: // interface
                           const int rank,
                           const enzo_float cosmo_a,
                           const EnzoConfig * enzo_config,
-                          const EnzoUnits * enzo_units) throw() ;
+                          const EnzoUnits * enzo_units,
+                          const double dt) throw() ;
 
 protected: // methods
 
@@ -109,5 +112,8 @@ protected: // attributes
    int    mx_, my_, mz_, gx_, gy_, gz_;
    double xm_, ym_, zm_, hx_, hy_, hz_;
 };
+
+// make a new class here of acceleration models
+// to simplify computation a little bit
 
 #endif /*  ENZO_ENZO_METHOD_BACKGROUND_ACCELERATION_HPP */
