@@ -21,9 +21,9 @@
 //           EnzoConstrainedTransport
 //         - EnzoRiemann and subclasses
 //         - EnzoEquationOfState and subclasses
-//         - EnzoReconstructor and subclasses
 //         - Allocation/deallocation of temporary fields and groupings
 //         - Copying interface B-fields into reconstructed primitives
+//         - the compute_flux_ instance method of EnzoMethodVlct
 //         - Applying flux divergence
 //
 //    Grouping Objects
