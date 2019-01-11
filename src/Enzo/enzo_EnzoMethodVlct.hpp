@@ -8,6 +8,23 @@
 //
 // Some notes on implementation
 //    - this Method tracks total energy density, (referred to as total_energy)
+//    - things are presently in flux. It turns out that temporary fields must
+//      be allocated as cell-centered fields. Originally all face-centered
+//      temporary fields were assumed to be allocated having (mi+1,mj,mk)
+//      values, if the field is face-centered along dimension i. Going forward,
+//      it will be assumed that each temporary face-centered field holds
+//      (mi-1, mj, mk) entries (even though slightly more memory is allocated).
+//      - At present, unclear how we will handle the temporary interface
+//        B-fields. (May possibly track histories of those fields)
+//      - Need to Propogate Changes to:
+//         - Calculation of interface and cell-centered bfield by
+//           EnzoConstrainedTransport
+//         - EnzoRiemann and subclasses
+//         - EnzoEquationOfState and subclasses
+//         - EnzoReconstructor and subclasses
+//         - Allocation/deallocation of temporary fields and groupings
+//         - Copying interface B-fields into reconstructed primitives
+//         - Applying flux divergence
 //
 //    Grouping Objects
 //    ----------------
@@ -90,12 +107,15 @@ enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
 void load_grouping_field_(Block *block, Grouping &grouping,
 			  std::string group_name, int index,
 			  EnzoArray<enzo_float> &array);
-// Because the left and right primitive values have more values allocated than
-// necessary, special care must be taken when wrapping it with an EnzoArray
-void load_interface_prim_field_(Block *block, Grouping &grouping,
-				std::string group_name, int index,
-				EnzoArray<enzo_float> &array, int dim);
-
+// Because temporary fields must be allocated as cell-centered, we do not
+// have FieldDescr internally track the centering of the fields. Consequently,
+// we must specify the centering of the EnzoArray. Setting c{dim} to true
+// indicates that values are cell-centered along {dim}. Face-centered temporary
+// fields do not have values at the exterior of the mesh.
+void load_temp_interface_grouping_field_(Block *block, Grouping &grouping,
+					 std::string group_name, int index,
+					 EnzoArray<enzo_float> &array,
+					 bool cx, bool cy, bool cz);
 
 class EnzoMethodVlct : public Method {
 

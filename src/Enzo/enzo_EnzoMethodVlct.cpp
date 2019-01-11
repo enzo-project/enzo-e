@@ -36,11 +36,15 @@ void load_grouping_field_(Block *block, Grouping &grouping,
   array.initialize_wrapper(data,mz,my,mx);
 }
 
-// Because the left an right primitive values have more values allocated than
-// necessary, special care must be taken when wrapping it with an EnzoArray
-void load_interface_prim_field_(Block *block, Grouping &grouping,
-				std::string group_name, int index,
-				EnzoArray<enzo_float> &array, int dim)
+// Because temporary fields must be allocated as cell-centered, we do not
+// have FieldDescr internally track the centering of the fields. Consequently,
+// we must specify the centering of the EnzoArray. Setting c{dim} to true
+// indicates that values are cell-centered along {dim}. Face-centered temporary
+// fields do not have values at the exterior of the mesh.
+void load_temp_interface_grouping_field_(Block *block, Grouping &grouping,
+					 std::string group_name, int index,
+					 EnzoArray<enzo_float> &array,
+					 bool cx, bool cy, bool cz)
 {
   int size = grouping.size(group_name);
   if ((size == 0) || (size>=index)){
@@ -52,12 +56,14 @@ void load_interface_prim_field_(Block *block, Grouping &grouping,
   int mx = enzo_block->GridDimension[0];
   int my = enzo_block->GridDimension[1];
   int mz = enzo_block->GridDimension[2];
-  if (dim == 0){
-    mx++;
-  } else if (dim == 1){
-    my++;
-  } else {
-    mz++;
+  if (!cx) {
+    mx--;
+  }
+  if (!cy) {
+    my--;
+  }
+  if (!cz) {
+    mz--;
   }
   array.initialize_wrapper(data,mz,my,mx);
 }
@@ -442,10 +448,9 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
       kflux_group = &yflux_group;
     }
 
-    int efield_id = field.field_id(efield_group.item("efield",i));
-
-    ct.compute_edge_efield (block, i, efield_id, center_efield_id, *jflux_group,
-                            *kflux_group, *primitive_group_, weight_group);
+    ct.compute_edge_efield (block, i, center_efield_id, efield_group,
+			    *jflux_group, *kflux_group, *primitive_group_,
+			    weight_group);
   }
 }
 

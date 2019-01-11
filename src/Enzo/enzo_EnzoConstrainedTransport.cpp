@@ -1,200 +1,184 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+void initialize_field_array_(Block *block, EnzoArray<enzo_float> &array,
+			     int field_id)
+{
+  Field field = block->data()->field();
+  int mx, my, mz;
+  field.dimensions (field_id,&mx,&my,&mz);
+  enzo_float *data = (enzo_float *) field.values(field_id);
+  array.initialize_wrapper(data, mz, my, mx);
+}
+
+
 void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
 						      int center_efield_id,
 						      Grouping &prim_group)
 {
-  EnzoBlock * enzo_block = enzo::block(block);
-  Field field = enzo_block->data()->field();
-
   // Load the E-field
-  enzo_float* efield = (enzo_float *) field.values(center_efield_id);
+  EnzoArray<enzo_float> efield;
+  initialize_field_array_(block, efield, center_efield_id);
 
   int j = (dim+1)%3;
   int k = (dim+2)%3;
 
   // Load the jth and kth components of the velocity and cell-centered bfield
-  enzo_float* velocity_j = load_grouping_field_(&field, &prim_group,
-						"velocity", j);
-  enzo_float* velocity_k = load_grouping_field_(&field, &prim_group,
-						"velocity", k);
-  enzo_float* bfield_j = load_grouping_field_(&field, &prim_group,
-					      "bfield", j);
-  enzo_float* bfield_k = load_grouping_field_(&field, &prim_group,
-					      "bfield", k);
+  EnzoArray<enzo_float> velocity_j, velocity_k, bfield_j, bfield_k;
+  load_grouping_field_(block, prim_group, "velocity", j, velocity_j);
+  load_grouping_field_(block, prim_group, "velocity", j, velocity_k);
+  load_grouping_field_(block, prim_group, "bfield", j, bfield_j);
+  load_grouping_field_(block, prim_group, "bfield", k, bfield_k);
 
-  // get interation limits - it includes the ghost zones
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
-
-  for (int iz=0; iz<mz; iz++) {
-    for (int iy=0; iy<my; iy++) {
-      for (int ix=0; ix<mx; ix++) {
-	// compute the index
-	int i = ix + mx*(iy + my*iz);
-	efield[i] = velocity_j[i] * bfield_k[i] - velocity_k[i] * bfield_j[i];
+  for (int iz=0; iz<efield.length_dim2(); iz++) {
+    for (int iy=0; iy<efield.length_dim1(); iy++) {
+      for (int ix=0; ix<efield.length_dim0(); ix++) {
+	efield(iz,iy,ix) = (velocity_j(iz,iy,ix) * bfield_k(iz,iy,ix) -
+			    velocity_k(iz,iy,ix) * bfield_j(iz,iy,ix));
       }
     }
   }
 }
 
+// The following is a helper function that actually computes the component of
+// the edge-centered E-field along dimension i.
+//
+// First, a note on weight arrays:
+//   If the i-direction poins along z, we would need to compute
+//   dEzdx(ix-1/4,iy-1/2)
+//
+//   if upwind in positive y direction
+//     dEdx(ix-1/4,iy-1/2) = 2.(E(ix,iy-1) - E(ix-1/2,iy-1))/dx
+//   if upwind in negative y direction
+//     dEdx(ix-1/4,iy-1/2) = 2.(E(ix,iy) - E(ix-1/2,iy))/dx
+//   otherwise:
+//     dEdx(ix-1/4,iy-1/2) = [(E(ix,iy-1) - E(ix-1/2,iy-1))/dx
+//                            + (E(ix,iy) - E(ix-1/2,iy))/dx ]
+//   We pulled out a factor of 2 and dx from the derivatives (they cancel)
+//  
+//   If upwind is in the positive y direction W_y = 1, if downwind W_y = 0,
+//     and otherwise W_y = 0.5 (W_y is centered on faces along y-direction)
+//
+// The form of equations from Stone & Gardiner 09 are as follows. This is
+// all necessary to compute Ez(ix-1/2, iy-1/2, iz): 
+//  dEdj_h = dEdx(ix-1/4,iy-1/2) =
+//       W_y(    ix,iy-1/2)  * (E(    ix,  iy-1) - E(ix-1/2,  iy-1)) +
+//    (1-W_y(    ix,iy-1/2)) * (E(    ix,    iy) - E(ix-1/2,    iy))
+//  dEdj_l = dEdx(ix-3/4,iy-1/2) =
+//       W_y(  ix-1,iy-1/2)  * (E(ix-1/2,  iy-1) - E(  ix-1,  iy-1)) +
+//    (1-W_y(  ix-1,iy-1/2)) * (E(ix-1/2,    iy) - E(  ix-1,    iy))
+//  dEdk_h = dEdy(ix-1/2,iy-1/4) =
+//       W_x(ix-1/2,   iy)  * (E(   ix-1,    iy) - E(  ix-1,iy-1/2)) +
+//    (1-W_x(ix-1/2,   iy)) * (E(     ix,    iy) - E(    ix,iy-1/2))
+//  dEdk_l = dEdy(ix-1/2,iy-3/4) =
+//       W_x(ix-1/2, iy-1)  * (E(   ix-1,iy-1/2) - E(  ix-1,  iy-1)) +
+//    (1-W_x(ix-1/2, iy-1)) * (E(     ix,iy-1/2) - E(    ix,  iy-1))
+//
+// This solution to the problem is easier to program if we reframe it as the
+// calculation of Ez(ix+1/2, iy+1/2, iz). The above equations are then
+// rewritten as:
+//  dEdj_h = dEdx(ix+3/4,iy+1/2) =
+//       W_y(  ix+1,iy+1/2)  * (E(  ix+1,    iy) - E(ix+1/2,    iy)) +
+//    (1-W_y(  ix+1,iy+1/2)) * (E(  ix+1,  iy+1) - E(ix+1/2,  iy+1))
+//  dEdj_l = dEdx(ix+1/4,iy+1/2) =
+//       W_y(    ix,iy+1/2)  * (E(ix+1/2,    iy) - E(    ix,    iy)) +
+//    (1-W_y(    ix,iy+1/2)) * (E(ix+1/2,  iy+1) - E(    ix,  iy+1))
+//  dEdk_h = dEdy(ix+1/2,iy+3/4) =
+//       W_x(ix+1/2,  iy+1)  * (E(     ix,  iy+1) - E(    ix,iy+1/2)) +
+//    (1-W_x(ix+1/2,  iy+1)) * (E(   ix+1,  iy+1) - E(  ix+1,iy+1/2))
+//  dEdk_l = dEdy(ix+1/2,iy+1/4) =
+//       W_x(ix+1/2,   iy)  * (E(     ix,iy+1/2) - E(    ix,    iy)) +
+//    (1-W_x(ix+1/2,   iy)) * (E(   ix+1,iy+1/2) - E(  ix+1,    iy))
+//
+// Now let's rewrite in totally Generalized notation:  [z->i, x->j, y->k] 
+//  dEdj_h = dEdj(k+1/2,j+3/4,i) =
+//       W_k(k+1/2,  j+1)  * (E(    k,  j+1) - E(    k,j+1/2)) +
+//    (1-W_k(k+1/2,  j+1)) * (E(  k+1,  j+1) - E(  k+1,j+1/2))
+//  dEdj_l = dEdj(k+1/2,j+1/4,i) =
+//       W_k(k+1/2,    j)  * (E(    k,j+1/2) - E(    k,    j)) +
+//    (1-W_k(k+1/2,    j)) * (E(  k+1,j+1/2) - E(  k+1,    j))
+//  dEdk_h = dEdk(k+3/4,j+1/2,i) =
+//       W_j(  k+1,j+1/2)  * (E(  k+1,    j) - E(k+1/2,    j)) +
+//    (1-W_j(  k+1,j+1/2)) * (E(  k+1,  j+1) - E(k+1/2,  j+1))
+//  dEdk_l = dEdk(k+1/4,j+1/2,i) =
+//       W_j(    k,j+1/2)  * (E(k+1/2,     j) - E(    k,    j)) +
+//    (1-W_j(    k,j+1/2)) * (E(k+1/2,   j+1) - E(    k,  j+1))
+//
+//
+// Define subarrays of W_j, W_k, E_cen, E_j, and E_k
+//   Weights:
+//     Wj(k,j,i)       =   W_j(    k,j+1/2,i)
+//     Wj_kp1(k,j,i)   =   W_j(  k+1,j+1/2,i)
+//     Wk(k,j,i)       =   W_k(k+1/2,    j,i)
+//     Wk_jp1(k,j,i)   =   W_k(k+1/2,  j+1,i)
+//
+//   Cell-Centered Efield (i-component):
+//     Ec(k,j,i)       =     E(    k,    j,i)
+//     Ec_jp1(k,j,i)   =     E(    1,  j+1,i)
+//     Ec_kp1(k,j,i)   =     E(  k+1,    j,i)
+//     Ec_jkp1(k,j,i)  =     E(  k+1,  j+1,i)
+//
+//   face-centered E-field (i-component):
+//     Ej(k,j,i)       =     E(    k,j+1/2,i)
+//     Ej_kp1(k,j,i)   =     E(  k+1,j+1/2,i)
+//     Ek(k,j,i)       =     E(k+1/2,    j,i)
+//     Ek_jp1(k,j,i)   =     E(k+1/2,  j+1,i)
+//
+//   edge-centered E-field (i-component):
+//     Eedge(k,j,i)    =     E(k+1/2,j+1/2,i)
+// To be independent of reconstruction method, compute E-field at all edges
+// that lie within the mesh.
 
-// helper function that computes sizes and offsets of the arrays
-// used to compute the edge-centered E-fields
-void compute_sizes_and_offsets_(int dim, int mx, int my, int mz,
-				int &ec_mz, int &ec_my, int &ec_mx,
-				int &jfc_mz, int &jfc_my, int &jfc_mx,
-				int &kfc_mz, int &kfc_my, int &kfc_mx,
-				int &c_off_j, int &c_off_k,
-				int &jflux_off_k, int &kflux_off_j)
+void compute_edge_(int xstart, int ystart, int zstart,
+		   int xstop, int ystop, int zstop,
+		   EnzoArray<enzo_float> &Eedge,
+		   EnzoArray<enzo_float> &Wj, EnzoArray<enzo_float> &Wj_kp1,
+		   EnzoArray<enzo_float> &Wk, EnzoArray<enzo_float> &Wk_jp1,
+		   EnzoArray<enzo_float> &Ec, EnzoArray<enzo_float> &Ec_jkp1,
+		   EnzoArray<enzo_float> &Ec_jp1, EnzoArray<enzo_float> &Ec_kp1,
+		   EnzoArray<enzo_float> &Ej, EnzoArray<enzo_float> &Ej_kp1,
+		   EnzoArray<enzo_float> &Ek, EnzoArray<enzo_float> &Ek_jp1)
 {
-  // dim is an integer corresponding to the ith direction
-  // -- ec_mz, ec_my, ec_mx are the dimensions of an array of values
-  //    centered on edges. Specifically, the values are on the faces of
-  //    dimensions j and k
-  // -- jfc_mz, jfc_my, jfc_mx are the dimensions of an array of values
-  //    centered on the faces of the mesh along dimension j
-  // -- kfc_mz, kfc_my, kfc_mx are the dimensions of an array of values
-  //    centered on the faces of the mesh along dimension k
-  // -- c_off_j and c_off_k are the offsets for the cell centered field to
-  //    access the next value in the positive j and k directions.
-  // -- jflux_off_k is the offset (in array index) required to access
-  //    the next value of the flux field, centered on faces along dimension j,
-  //    in the positive k direction.
-  // -- kflux_off_j is the offset (in array index) required to access
-  //    the next value of the flux field, centered on faces along dimension k,
-  //    in the positive j direction.
+  for (int iz = zstart; iz < zstop; iz++){
+    for (int iy = ystart; iy < ystop; iy++){
+      for (int ix = xstart; ix < xstop; ix++){
 
-  ec_mx = mx; ec_my = my; ec_mz = mz;
-  jfc_mx = mx; jfc_my = my; jfc_mz = mz;
-  kfc_mx = mx; kfc_my = my; kfc_mz = mz;
-  
-  if (dim == 0) {
-    ec_my++;
-    ec_mz++;
+	enzo_float dEdj_l, dEdj_h, dEdk_l, dEdk_h;
 
-    jfc_my++;
-    kfc_mz++;
+	//  dEdj(k+1/2,j+3/4,i) =
+	//       W_k(k+1/2,  j+1)  * (E(    k,  j+1) - E(    k,j+1/2)) +
+	//    (1-W_k(k+1/2,  j+1)) * (E(  k+1,  j+1) - E(  k+1,j+1/2))
+	dEdj_h =
+	       Wk_jp1(iz,iy,ix)  * ( Ec_jp1(iz,iy,ix) -     Ej(iz,iy,ix)) +
+	  (1 - Wk_jp1(iz,iy,ix)) * (Ec_jkp1(iz,iy,ix) - Ej_kp1(iz,iy,ix));
 
-    c_off_j = mx;
-    c_off_k = mx*my;
+	//  dEdj(k+1/2,j+1/4,i) =
+	//       W_k(k+1/2,    j)  * (E(    k,j+1/2) - E(    k,    j)) +
+	//    (1-W_k(k+1/2,    j)) * (E(  k+1,j+1/2) - E(  k+1,    j))
+	dEdj_l =
+	           Wk(iz,iy,ix)  * (     Ej(iz,iy,ix) -     Ec(iz,iy,ix)) +
+	  (1 -     Wk(iz,iy,ix)) * ( Ej_kp1(iz,iy,ix) - Ec_kp1(iz,iy,ix));
 
-    jflux_off_k = jfc_mx*jfc_my;
-    kflux_off_j = kfc_mx;    
-  } else if (dim == 1) {
-    ec_mx++;
-    ec_mz++;
+	//  dEdk(k+3/4,j+1/2,i) =
+	//       W_j(  k+1,j+1/2)  * (E(  k+1,    j) - E(k+1/2,    j)) +
+	//    (1-W_j(  k+1,j+1/2)) * (E(  k+1,  j+1) - E(k+1/2,  j+1))
+	dEdk_h =
+	       Wj_kp1(iz,iy,ix)  * ( Ec_kp1(iz,iy,ix) -     Ek(iz,iy,ix)) +
+	  (1 - Wj_kp1(iz,iy,ix)) * (Ec_jkp1(iz,iy,ix) - Ek_jp1(iz,iy,ix));
 
-    jfc_mz++;
-    kfc_mz++;
+	//  dEdk(k+1/4,j+1/2,i) =
+	//       W_j(    k,j+1/2)  * (E(k+1/2,     j) - E(    k,    j)) +
+	//    (1-W_j(    k,j+1/2)) * (E(k+1/2,   j+1) - E(    k,  j+1))
+	dEdk_l =
+	           Wj(iz,iy,ix)  * (     Ek(iz,iy,ix) -     Ec(iz,iy,ix)) +
+	  (1 -     Wj(iz,iy,ix)) * ( Ek_jp1(iz,iy,ix) - Ec_jp1(iz,iy,ix));
 
-    c_off_j = mx*my;
-    c_off_k = 1;
-
-    jflux_off_k = 1;
-    kflux_off_j = kfc_mx*kfc_my;
-  } else {
-    ec_mx++;
-    ec_my++;
-
-    jfc_mx++;
-    kfc_my++;
-
-    c_off_j = 1;
-    c_off_k = mx;
-
-    jflux_off_k = jfc_mx;
-    kflux_off_j = 1;
+	Eedge(iz,iy,ix) = 0.25*(Ej(iz,iy,ix) + Ej_kp1(iz,iy,ix) +
+				Ek(iz,iy,ix) + Ek_jp1(iz,iy,ix) +
+				(dEdj_h - dEdj_l) + (dEdk_h - dEdk_l));		
+      }
+    }
   }
-}
-
-
-enzo_float compute_edge_(int c_ind, int jfc_ind, int kfc_ind, int c_off_j,
-			 int c_off_k, int jfc_off_k, int kfc_off_j,
-			 enzo_float* E_cen, enzo_float* E_j,
-			 enzo_float* E_k, enzo_float* W_j, enzo_float* W_k)
-{
-  // helper function that actually computes the component of the edge-centered
-  // E-field along dimension i at location (i,j-1/2,k-1/2)
-  
-  // All E-field components used in this function point in the i-direction
-  // -- c_ind is the index of cell-centered fields that corresponds to location
-  //    (i, j, k)
-  // -- jfc_ind/kfc_ind is the index of the fields centered in on the faces of
-  //    dimension j/k that corresponds to location (i, j-1/2,k)/(i,j,k-1/2)
-  // -- c_off_j/c_off_k is the offset in the array index required to incrament
-  //    the j/k index of the cell-centered field
-  // -- jfc_off_k is the offset (in the array index) required to access
-  //    the next value of the field, centered on faces along dimension j,
-  //    in the positive k direction (e.g. jfc_ind-jfc_off_k corresponds to
-  //    the location (i, j-1/2,k-1))
-  // -- kfc_off_j is the offset (in the array index) required to access
-  //    the next value of the field, centered on faces along dimension k,
-  //    in the positive j direction (e.g. kfc_ind-kfc_off_j corresponds to
-  //    the location (i, j-1,k-1/2))
-  // -- E_center corresponds to the cell-centered E-field component
-  // -- E_j/E_k corresponds to the E-field component centered on faces along
-  //    the j/k direction
-  // -- w_j/w_k corresponds to the weight field centered on faces along the j/k
-  //    direction. It can have values of 1, 0.5, and 0 (indicating that it can
-  //    the upwind direction is to the positive j/k direction, there is no
-  //    upwind direction, or the upwind direction is to the negative j/k
-  //    direction). These weight values can use the same more sophisticated
-  //    weighting scheme as Athena++
-
-  enzo_float dEdj_l, dEdj_h, dEdk_l, dEdk_h;
-
-  // If the i-direction poins along z:
-  //  Computing dEzdx(ix-1/4,iy-1/2)
-  //  if upwind in positive y direction
-  //    dEdx(ix-1/4,iy-1/2) = 2.(E(ix,iy-1) - E(ix-1/2,iy-1))/dx
-  //  if upwind in negative y direction
-  //    dEdx(ix-1/4,iy-1/2) = 2.(E(ix,iy) - E(ix-1/2,iy))/dx
-  //  otherwise:
-  //    dEdx(ix-1/4,iy-1/2) = [(E(ix,iy-1) - E(ix-1/2,iy-1))/dx
-  //                           + (E(ix,iy) - E(ix-1/2,iy))/dx ]
-  //  We pull out a factor of 2 and dx from the derivatives (they cancel)
-  //
-  //  If upwind is in the positive y direction W_y = 1, if downwind W_y = 0,
-  //    and otherwise W_y = 0.5 (W_y is centered on faces along y-direction)
-
-  //  dEdj_h = dEdx(ix-1/4,iy-1/2) =
-  //       W_y(    ix,iy-1/2)  * (E(    ix,  iy-1) - E(ix-1/2,  iy-1)) +
-  //    (1-W_y(    ix,iy-1/2)) * (E(    ix,    iy) - E(ix-1/2,    iy))
-  dEdj_h = W_k[kfc_ind]*(E_cen[c_ind-c_off_k]                      //j,k-1
-			 - E_j[jfc_ind-jfc_off_k])                 //j-1/2,k-1
-    + (1.-W_k[kfc_ind])*(E_cen[c_ind]                              //j,k
-			 - E_j[jfc_ind]);                          //j-1/2,k
-
-  //  dEdj_l = dEdx(ix-3/4,iy-1/2) =
-  //       W_y(  ix-1,iy-1/2)  * (E(ix-1/2,  iy-1) - E(  ix-1,  iy-1)) +
-  //    (1-W_y(  ix-1,iy-1/2)) * (E(ix-1/2,    iy) - E(  ix-1,    iy))
-  dEdj_l = W_k[kfc_ind-kfc_off_j]*(E_j[jfc_ind-jfc_off_k]          //j-1/2,k-1
-				   - E_cen[c_ind-c_off_j-c_off_k]) //j-1,k-1
-    + (1.-W_k[kfc_ind-kfc_off_j])*(E_j[jfc_ind]                    //j-1/2,k
-				  - E_cen[c_ind-c_off_j]);         //j-1,k
-
-  //  dEdk_h = dEdy(ix-1/2,iy-1/4) =
-  //       W_x(ix-1/2,   iy)  * (E(   ix-1,    iy) - E(  ix-1,iy-1/2)) +
-  //    (1-W_x(ix-1/2,   iy)) * (E(     ix,    iy) - E(    ix,iy-1/2))
-  dEdk_h = W_j[jfc_ind]*(E_cen[c_ind-c_off_j]                      //j-1,k
-			 - E_k[kfc_ind-kfc_off_j])                 //j-1,k-1/2
-    + (1.-W_j[jfc_ind])*(E_cen[c_ind]                              //j,k
-			 - E_k[kfc_ind]);                          //j,k-1/2
-
-  //  dEdk_l = dEdy(ix-1/2,iy-3/4) =
-  //       W_x(ix-1/2, iy-1)  * (E(   ix-1,iy-1/2) - E(  ix-1,  iy-1)) +
-  //    (1-W_x(ix-1/2, iy-1)) * (E(     ix,iy-1/2) - E(    ix,  iy-1))
-  dEdk_l = W_j[jfc_ind-jfc_off_k]*(E_k[kfc_ind-kfc_off_j]          //j-1,k-1/2
-				   - E_cen[c_ind-c_off_j-c_off_k]) //j-1,k-1
-    + (1.-W_j[jfc_ind-jfc_off_k])*(E_k[kfc_ind]                    //j,k-1/2
-				  - E_cen[c_ind-c_off_k]);         //j,k-1
-
-  return 0.25*((E_j[jfc_ind] + E_j[jfc_ind-jfc_off_k] +
-		E_k[kfc_ind] + E_k[kfc_ind-kfc_off_j]) +
-	       (dEdj_h - dEdj_l) + (dEdk_h - dEdk_l));
 }
 
 // Computes the edge-centered E-fields pointing in the ith direction
@@ -204,8 +188,9 @@ enzo_float compute_edge_(int c_ind, int jfc_ind, int kfc_ind, int c_off_j,
 // kflux_ids. dim points along i.
 // i, j, and k are any cyclic permutation of x, y, z
 //
-// Not thrilled with how complicated this is, may rewrite the function more
-// explicitly (having code devoted to different directions)
+// This Method is applicable for:
+//    - 2D array (z-axis only has 1 entry), with dim = 2
+// 
 //
 // The Athena++ code calculates a quantity they refer to as v_over_c at all
 // cell-faces.
@@ -217,85 +202,108 @@ enzo_float compute_edge_(int c_ind, int jfc_ind, int kfc_ind, int c_off_j,
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
 void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
-						    int efield_id,
 						    int center_efield_id,
+						    Grouping &efield_group,
 						    Grouping &jflux_group,
 						    Grouping &kflux_group,
 						    Grouping &prim_group,
 						    Grouping &weight_group)
 {
-  EnzoBlock * enzo_block = enzo::block(block);
-  Field field = enzo_block->data()->field();
-
-  // Load the E-fields - only looking at the component along i-direction
-  enzo_float* E_edge = (enzo_float *) field.values(efield_id);
-  // E_edge points along i dimension with shape (nk+1, nj+1, ni)
-  // technically, only need to track (nk-1,nj-1,ni)
-  enzo_float* E_center = (enzo_float *) field.values(center_efield_id);
-  enzo_float *E_jface = load_grouping_field_(&field, &jflux_group, "bfield",
-					     dim);
-  enzo_float *E_kface = load_grouping_field_(&field, &kflux_group, "bfield",
-					     dim);
-  // Load the weights
-  enzo_float *W_jface = load_grouping_field_(&field, &weight_group, "weight",
-					     (dim+1)%3);
-  enzo_float *W_kface = load_grouping_field_(&field, &weight_group, "weight",
-					     (dim+2)%3);
-
-  // cell-centered iteration dimensions
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
-
-  // compute edge-centered dimensions and offset between neigboring elements
-  // along j and k dimensions for face-centered and cell-centered quantites
-  // (the initial values at declaration don't really matter)
-  int ec_mx = mx; int ec_my = my; int ec_mz = mz;
-  int jfc_mx = mx; int jfc_my = my; int jfc_mz = mz;
-  int kfc_mx = mx; int kfc_my = my; int kfc_mz = mz;
-  int c_off_j=0; int c_off_k = 0; int jfc_off_k =0; int kfc_off_j = 0;
-
-  compute_sizes_and_offsets_(dim, mx, my, mz, ec_mz, ec_my, ec_mx,
-			     jfc_mz, jfc_my, jfc_mx,
-			     kfc_mz, kfc_my, kfc_mx,
-			     c_off_j, c_off_k,
-			     jfc_off_k, kfc_off_j);
-
-  // If computing the edge E-field along z-direction, there is no point in
-  // computing it anywhere with iz=1/2 or iz=mz-1/2 since it wouldn't be used
-  // for anything. The relevant centered B-fields would also requre
-  // edge-centered E-fields on the exterior of the mesh. The same logic applies
-  // for other dimensions
-  // To be independent of reconstruction method, compute E-field at all edges
-  // that lie within the mesh.
-
-  for (int iz=1; iz<mz; iz++) {
-    for (int iy=1; iy<my; iy++) {
-      for (int ix=1; ix<mx; ix++) {
-	  
-	// for edge-centered quantities
-	//  -dim = 2: iz,iy,ix corresponds to (    iz, iy-1/2, ix-1/2)
-	//  -dim = 1: iz,iy,ix corresponds to (iz-1/2,     iy, ix-1/2)
-	//  -dim = 0: iz,iy,ix corresponds to (iz-1/2, iy-1/2,     ix)
-
-	// face-centered quantities - centered along
-	//  -dim = 2: iz,iy,ix corresponds to (iz-1/2,     iy,     ix)
-	//  -dim = 1: iz,iy,ix corresponds to (    iz, iy-1/2,     ix)
-	//  -dim = 0: iz,iy,ix corresponds to (    iz,     iy, ix-1/2)
-
-	// compute the indices of the face-centered, cell-centered, and
-	// edge-centered fields
-	int jfc_ind = ix + jfc_mx*(iy + jfc_my*iz);
-	int kfc_ind = ix + kfc_mx*(iy + kfc_my*iz);
-	int c_ind = ix + mx*(iy + my*iz);
-	int ec_ind = ix + ec_mx*(iy + ec_my*iz);
-
-	E_edge[ec_ind] = compute_edge_(c_ind, jfc_ind, kfc_ind, c_off_j,
-				       c_off_k, jfc_off_k, kfc_off_j, E_center,
-				       E_jface, E_kface, W_jface, W_kface);
-      }
-    }
+  // determine alignment of j,k axes with respect to x,y, and z
+  int dxdj = 0; int dydj = 0; int dzdj=0;
+  int dxdk = 0; int dydk = 0; int dzdk=0;
+  if (dim == 0){
+    dydj = 1;
+    dzdk = 1;
+  } else if (dim == 1){
+    dzdj = 1;
+    dxdk = 1;
+  } else {
+    dxdj = 1;
+    dydk = 1;
   }
+
+  // Initialize Cell-Centered E-fields
+  EnzoArray<enzo_float> Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
+  initialize_field_array_(block, Ec, center_efield_id);
+  Ec_jp1.initialize_subarray(Ec, dzdj, Ec.length_dim2(),  //zstart : zstop
+			         dydj, Ec.length_dim1(),  //ystart : ystop
+			         dxdj, Ec.length_dim0()); //xstart : xstop
+  Ec_kp1.initialize_subarray(Ec, dzdk, Ec.length_dim2(),
+			         dydk, Ec.length_dim1(),
+			         dxdk, Ec.length_dim0());
+  Ec_jkp1.initialize_subarray(Ec, dzdj+dzdk, Ec.length_dim2(),
+			          dydj+dydk, Ec.length_dim1(),
+			          dxdj+dxdk, Ec.length_dim0());
+
+  // Initialize edge-centered Efield [it maps (k,j,i) -> (k+1/2,j+1/2,i)]
+  EnzoArray<enzo_float> Eedge;
+  load_temp_interface_grouping_field_(block, efield_group, "efield", dim,
+				      Eedge, dim == 0, dim == 1, dim == 2);
+
+  // Initialize face-centered E-fields
+  EnzoArray<enzo_float> Ej, Ej_kp1, Ek, Ek_jp1;
+  load_temp_interface_grouping_field_(block, jflux_group, "bfield", dim,
+				      Ej, dxdj==0, dydj==0, dzdj==0);
+  Ej_kp1.initialize_subarray(Ej, dzdk, Ej.length_dim2(),
+			         dydk, Ej.length_dim1(),
+			         dxdk, Ej.length_dim0());
+  load_temp_interface_grouping_field_(block, kflux_group, "bfield", dim,
+				      Ek, dxdk==0, dydk==0, dzdk==0);
+  Ek_jp1.initialize_subarray(Ek, dzdj, Ek.length_dim2(),
+			         dydj, Ek.length_dim1(),
+			         dxdj, Ek.length_dim0());
+
+  // Initialize the weight arrays
+  EnzoArray<enzo_float> Wj, Wj_kp1, Wk, Wk_jp1;
+  load_temp_interface_grouping_field_(block, weight_group, "weight", (dim+1)%3,
+				      Wj, dxdj==0, dydj==0, dzdj==0);
+  Wj_kp1.initialize_subarray(Wj, dzdk, Wj.length_dim2(),
+			         dydk, Wj.length_dim1(),
+			         dxdk, Wj.length_dim0());
+  load_temp_interface_grouping_field_(block, weight_group, "weight", (dim+2)%3,
+				      Wk, dxdk==0, dydk==0, dzdk==0);
+  Wk_jp1.initialize_subarray(Wj, dzdj, Wk.length_dim2(),
+			         dydj, Wk.length_dim1(),
+			         dxdj, Wk.length_dim0());
+
+  // Integration limits
+  //
+  // If computing the edge E-field along z-direction:
+  //    - If grid is 2D (the grid only has 1 cell along z-component),
+  //      need to iterate from 0 to 1 for z. (Will never compute E-field
+  //      along any other dimension for a 2D grid).
+  //    - If grid is 3D (the grid has more than 1 cell along the z-component),
+  //      there is no need to compute the e-field at iz=0 or iz= mz-1 since
+  //      we have E-fields on the exterior of the mesh. (This logic applies to
+  //      components of other dimensions). Generalizing to computing
+  //      E-field along dimension i, then we need to compute it at i=1 up to
+  //      (but not including imax-1)
+  // For all cases, if we are computing the E-field along dimension i, then we
+  // need to compute it at:  j = 1/2 up to (but not including) j = jmax-1/2
+  //                         k = 1/2 up to (but not including) k = kmax-1/2
+  //
+  // Note if an quantitiy is face-centered along dimension dim:
+  //    idim maps to idim+1/2
+  //
+  // To summarize:
+  //    2D grid with i aligned along z:  istart = 0     istop = imax = 1
+  //    3D grid:                         istart = 1     istop = imax - 1
+  //    In all cases:                    jstart = 0     jstop = jmax - 1
+  //                                     kstart = 0     kstop = kmax - 1
+
+  int xstart = 1 - dxdj - dxdk; // if dim==0: 1, otherwise: 0
+  int ystart = 1 - dydj - dydk;
+  int zstart = (Ec.length_dim2() == 1) ? 0 : 1 - dzdj - dzdk;
+
+  int xstop = Ec.length_dim0() - 1;
+  int ystop = Ec.length_dim1() - 1;
+  int zstop = (Ec.length_dim2() == 1) ? 1 : Ec.length_dim2() - 1;
+
+  compute_edge_(xstart, ystart, zstart, xstop, ystop, zstop,
+		Eedge, Wj, Wj_kp1, Wk, Wk_jp1, Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
+		Ej, Ej_kp1, Ek, Ek_jp1);
+
 };
 
 void EnzoConstrainedTransport::update_bfield(Block *block, int dim,

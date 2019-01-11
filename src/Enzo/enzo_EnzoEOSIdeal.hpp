@@ -1,5 +1,8 @@
 #ifndef ENZO_ENZO_EOS_IDEAL_HPP
 #define ENZO_ENZO_EOS_IDEAL_HPP
+
+// This should almost certainly wrap an instance of ComputePressure (and
+// presumably Compute Temperature)
 class EnzoEOSIdeal : public EnzoEquationOfState
 {
 

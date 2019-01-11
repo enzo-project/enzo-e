@@ -26,8 +26,8 @@ public: // interface
   // the face-centered E-fields are given by elements of jflux_ids and
   // kflux_ids. dim points along i.
   // i, j, and k are any cyclic permutation of x, y, z
-  void compute_edge_efield (Block *block, int dim, int efield_id,
-			    int center_efield_id, Grouping &jflux_group,
+  void compute_edge_efield (Block *block, int dim, int center_efield_id,
+			    Grouping &efield_group, Grouping &jflux_group,
 			    Grouping &kflux_group, Grouping &prim_group,
 			    Grouping &weight_group);
 

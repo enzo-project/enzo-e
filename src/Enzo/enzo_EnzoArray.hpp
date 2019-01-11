@@ -3,6 +3,23 @@
 #define ENZO_ENZO_ARRAY_HPP
 #include <stdio.h>
 
+// NEED TO ADDRESS:
+//   - Behavior of operator() if fewer arguments are specified than the number
+//     of dimensions. The current behavior is problematic if EnzoArray is a
+//     view of a subarray of a different array. The overhead from handling it
+//     all safely may be problematic. In that case, the problem can be overcome
+//     by either providing a separate class for array vies OR statically
+//     defining the number of dimensions as a Template Argument
+
+
+// Disclaimer:
+//   - Unclear that current behavior of having a reusable array is desirable.
+//     It may make more sense to only ever have an individual instance
+//     represent an individual array. This would entail performing
+//     intialization and construction together. Consequently, all current use
+//     of EnzoArray, never reuses the same instance to represent different
+//     arrays [But construction and initialization would need to be fixed]
+
 // Implementation Notes:
 //   - Main motivation: use overloaded operator() for multi-dimensional access
 //     of C style arrays
@@ -18,6 +35,8 @@
 //       - For EnzoArrays: array(j,i) is equivalent to index (j*mx + i)
 //                         array(i) is equivalent to index i
 //         Both of these cases would return subarrays for numpy style arrays
+//       - Users should avoid this behavior. If EnzoArray is a view of a
+//         subarray, unexpected behavior will occur.
 //   - dimensions are ordered by increasing indexing speed of each axis. A 4d
 //     array has dimensions: (dim3, dim2, dim1, dim0)
 //   - To allow for writing functions performing directional grid operations
@@ -99,24 +118,24 @@ public:
 			0, array.shape_[1], dim0_start, dim0_stop);}
 
   // Access array Elements
-  T &operator() (int i){
+  T &operator() (const int i){
     return data_[offset_+i]; }
-  T operator() (int i) const{
+  T operator() (const int i) const{
     return data_[offset_+i]; }
 
-  T &operator() (int j,int i){
+  T &operator() (const int j, const int i){
     return data_[offset_ + i + j*stride_[0]]; }
-  T operator() (int j, int i) const{
+  T operator() (const int j, const int i) const{
     return data_[offset_ + i + j*stride_[0]];}
 
-  T &operator() (int k, int j, int i){
+  T &operator() (const int k, const int j, const int i){
     return data_[offset_ + i + j*stride_[0] + k*stride_[1]]; }
-  T operator() (int k, int j, int i) const{
+  T operator() (const int k, const int j, const int i) const{
     return data_[offset_ + i + j*stride_[0] + k*stride_[1]]; }
 
-  T &operator() (int l, int k, int j, int i){
+  T &operator() (const int l, const int k, const int j, const int i){
     return data_[offset_ + i + j*stride_[0] + k*stride_[1] + l*stride_[2]]; }
-  T operator() (int l, int k, int j, int i) const{
+  T operator() (const int l, const int k, const int j, const int i) const{
     return data_[offset_ + i + j*stride_[0] + k*stride_[1] + l*stride_[2]]; }
 
   int length_dim0() {return shape_[0];}
