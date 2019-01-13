@@ -32,11 +32,11 @@ public: // interface
 			    Grouping &weight_group);
 
   void update_bfield(Block *block, int dim, Grouping &efield_group,
-		     Grouping &cur_cons_group, Grouping &out_cons_group,
+		     Grouping &cur_bfieldi_group, Grouping &out_bfieldi_group,
 		     enzo_float dt);
 
   void compute_center_bfield(Block *block, int dim, Grouping &cons_group,
-			     enzo_float dt);
+			     Grouping &bfieldi_group, enzo_float dt);
 
 };
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */

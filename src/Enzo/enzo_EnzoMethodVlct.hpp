@@ -11,19 +11,19 @@
 //    - things are presently in flux. It turns out that temporary fields must
 //      be allocated as cell-centered fields. Originally all face-centered
 //      temporary fields were assumed to be allocated having (mi+1,mj,mk)
-//      values, if the field is face-centered along dimension i. Going forward,
-//      it will be assumed that each temporary face-centered field holds
-//      (mi-1, mj, mk) entries (even though slightly more memory is allocated).
-//      - At present, unclear how we will handle the temporary interface
-//        B-fields. (May possibly track histories of those fields)
+//      values, if the field is face-centered along dimension i.
+//      - Going forward, it will be assumed that each temporary face-centered
+//        field holds (mi-1, mj, mk) entries (even though slightly more memory
+//        is allocated).
+//      - The temporary fields for the interface b-fields have fundamentally
+//        different shape than the permanent interface b-fields. The
+//        load_interior_bfieldi_field_ helper function addresses this problem.
+//        It initializes EnzoArrays for both permanent and temporary interface
+//        b-fields that only include face-centered values on the interior of
+//        the grid
 //      - Need to Propogate Changes to:
-//         - Calculation of interface and cell-centered bfield by
-//           EnzoConstrainedTransport
 //         - EnzoRiemann and subclasses
 //         - EnzoEquationOfState and subclasses
-//         - Allocation/deallocation of temporary fields and groupings
-//         - Copying interface B-fields into reconstructed primitives
-//         - the compute_flux_ instance method of EnzoMethodVlct
 //         - Applying flux divergence
 //
 //    Grouping Objects
@@ -40,12 +40,23 @@
 //          different physical quantities (e.g. Groupings of fluxes and
 //          conserved variables each have a "momentum" group)
 //
-//    Presently we track 10 different groupings:
-//        - conserved quantities, primitive quantities, reconstructed left/right
-//          primitive fields, fluxes in the x/y/z direction, face centered
-//          fields in the x/y/z direction (identifying which way is upwind),
-//          edge centered electric fields, and temp conserved quantities (to
-//          store values at the half timestep)
+//    Notes about current groupings:
+//        - Currently track 12 different groupings:
+//            1. conserved quantities
+//            2. interface b-fields (longitudinal B-fields centered at
+//               interface between cells)
+//            3. primitive quantities
+//            4. reconstructed left primitive fields
+//            5. reconstructed right primitive fields
+//            6. fluxes in the x-direction
+//            7. fluxes in the y-direction
+//            8. fluxes in the z-direction
+//            9. face centered fields along x,y,z direction that identify which
+//               direction is upwind. (known as weight_group)
+//           10. edge centered electric fields
+//           11. temp conserved quantities (to store values at the half
+//               timestep)
+//           12. temp interface b-fields (to store values at the half timestep)
 //        - several groups only contain 1 field (e.g. the "density" and
 //          "total_energy" groups). In effect, they serve as alias names for
 //          the fields
@@ -53,16 +64,25 @@
 //          Grouping are sorted alphabetically (in this way the fields in the
 //          "momentum" group are always ordered "momentum_x","momentum_y",
 //          "momentum_z"
-//        - The conserved quantities grouping and temp conserved quantities
-//          grouping each always contain groups called "density", "momentum",
-//          "total_energy", "bfield" (cell-centered B-fields), "bfieldi"
-//          (longitudinal B-fields centered at interface between cells). The
-//          x/y/z flux groupings contain the same groups except it does not
-//          have a "bfieldi" group.
+//        - The conserved quantities grouping, x/y/z flux groupings, and
+//          temp conserved quantities grouping each always contain groups
+//          called "density", "momentum", "total_energy", "bfield"
+//        - All values within the conserved quanties and temp conserved
+//          quantities are all face-centered.
+//        - Because temporary fields do not support face-centered fields with
+//          values on the exterior of the grid, the shapes of the fields in
+//          temp interface b-fields and interface b-fields are different.
+//          For example, if we are interested in the x-component, the shapes of
+//          the permenant and temporary fields are:
+//                   temporary:    (mx-1, my, mz)
+//                   permenant:    (mx+1, my, mz)
+//          The load_interior_bfieldi_field_ helper function addresses this
+//          problem. It initializes arrays for both groupings that only
+//          include face-centered values on the interior of the grid.
 //
 //    The number of tracked Groupings could be reduced drastically if we could
-//    track histories of fields temporarily, and if we could easily search for
-//    fields by specifying multiple group tags.
+//    track histories of a subset of fields temporarily, and if we could easily
+//    search for fields by specifying multiple group tags.
 //
 //    Mapping
 //    -------
@@ -84,7 +104,7 @@
 //          and just apply operations on Groupings)
 //
 //  Issue: Concerned about the units of the magnetic field (especially during
-//  Alfven Velocity)
+//  calculations of the Alfven Velocity)
 
 #ifndef ENZO_ENZO_METHOD_VLCT_HPP
 #define ENZO_ENZO_METHOD_VLCT_HPP
@@ -109,13 +129,22 @@ void load_grouping_field_(Block *block, Grouping &grouping,
 			  EnzoArray<enzo_float> &array);
 // Because temporary fields must be allocated as cell-centered, we do not
 // have FieldDescr internally track the centering of the fields. Consequently,
-// we must specify the centering of the EnzoArray. Setting c{dim} to true
-// indicates that values are cell-centered along {dim}. Face-centered temporary
-// fields do not have values at the exterior of the mesh.
+// we must specify the centering of the EnzoArray. Setting cell_centered_{dim}
+// to true, it indicates that values are cell-centered along {dim}. Face
+// -centered temporary fields do not have values at the exterior of the mesh.
 void load_temp_interface_grouping_field_(Block *block, Grouping &grouping,
 					 std::string group_name, int index,
 					 EnzoArray<enzo_float> &array,
-					 bool cx, bool cy, bool cz);
+					 bool cell_centered_x,
+					 bool cell_centered_y,
+					 bool cell_centered_z);
+// Helper function designed to help initialize an EnzoArray representing a
+// component of the interface B-fields. This function accepts both the grouping
+// of permanent and temporary fields, and in each case yields an array that
+// does not include values for the exterior face of the grid. For example,
+// dim=0, the dimension of the resulting EnzoArray is (mz, my-1, mx)
+void load_interior_bfieldi_field_(Block *block, Grouping &grouping,
+				  int dim, EnzoArray<enzo_float> &array);
 
 class EnzoMethodVlct : public Method {
 
@@ -141,6 +170,7 @@ public: // interface
   {
     // We want to pack/unpack Groupings in the future.
     conserved_group_ = new Grouping;
+    bfieldi_group_ = new Grouping;
     primitive_group_ = new Grouping;
     setup_groups_();
   }
@@ -171,9 +201,9 @@ protected: // methods
   // not sure if I will pass field_ids and blocks or arrays
   // not sure if this should be static
   void compute_flux_(Block *block, int dim, Grouping &cur_cons_group,
-		     Grouping &priml_group, Grouping &primr_group,
-		     Grouping &flux_group, Grouping &weight_group,
-		     EnzoReconstructor &reconstructor);
+		     Grouping &cur_bfieldi_group, Grouping &priml_group,
+		     Grouping &primr_group, Grouping &flux_group,
+		     Grouping &weight_group, EnzoReconstructor &reconstructor);
 
   // compute the Electric fields using the fluxes and cell-centered
   // primitives
@@ -196,7 +226,8 @@ protected: // methods
 			     Grouping &yflux_group, Grouping &zflux_group,
 			     Grouping &efield_group, int &center_efield_id,
 			     Grouping &weight_group,
-			     Grouping &temp_conserved_group);
+			     Grouping &temp_conserved_group,
+			     Grouping &temp_bfieldi_group);
 
   // deallocate the temporary fields used for scratch space
   void deallocate_temp_fields_(Block *block, Grouping &priml_group,
@@ -204,12 +235,14 @@ protected: // methods
 			       Grouping &yflux_group, Grouping &zflux_group,
 			       Grouping &efield_group, int center_efield_id,
 			       Grouping &weight_group,
-			       Grouping &temp_conserved_group);
+			       Grouping &temp_conserved_group,
+			       Grouping &temp_bfieldi_group);
 
 protected: // attributes
 
   // In a lot of senses, these will serve as aliases
   Grouping *conserved_group_;
+  Grouping *bfieldi_group_;
   Grouping *primitive_group_;
 
   EnzoEquationOfState *eos_;

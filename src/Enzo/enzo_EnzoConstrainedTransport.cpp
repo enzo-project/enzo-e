@@ -181,6 +181,28 @@ void compute_edge_(int xstart, int ystart, int zstart,
   }
 }
 
+// Helper function to computes derives of x, y, and z with respect to r_{dim}.
+// r_{dim} maps to x, y, and z for dim = 0, 1, 2
+// The helper function computes dx/dr_{dim}, dy/dr_{dim}, dz/dr_{dim}
+// We represent these with the shorthand dxddim, dyddim, dzddim
+void aligned_dim_derivatives_(int dim, int &dxddim, int &dyddim, int &dzddim)
+{
+  if (dim == 0){
+    dxddim = 1;
+    dyddim = 0;
+    dzddim = 0;
+  } else if (dim == 1){
+    dyddim = 1;
+    dzddim = 0;
+    dzddim = 0;
+  } else {
+    dzddim = 1;
+    dxddim = 0;
+    dyddim = 0;
+  }
+}
+
+
 // Computes the edge-centered E-fields pointing in the ith direction
 // It uses the component of the cell-centered E-field pointing in that
 // direction, and the face-centered E-field pointed in that direction
@@ -210,18 +232,9 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 						    Grouping &weight_group)
 {
   // determine alignment of j,k axes with respect to x,y, and z
-  int dxdj = 0; int dydj = 0; int dzdj=0;
-  int dxdk = 0; int dydk = 0; int dzdk=0;
-  if (dim == 0){
-    dydj = 1;
-    dzdk = 1;
-  } else if (dim == 1){
-    dzdj = 1;
-    dxdk = 1;
-  } else {
-    dxdj = 1;
-    dydk = 1;
-  }
+  int dxdj, dydj, dzdj, dxdk, dydk, dzdk;
+  aligned_dim_derivatives_((dim+1)%2, dxdj, dydj, dzdj);
+  aligned_dim_derivatives_((dim+2)%2, dxdk, dydk, dzdk);
 
   // Initialize Cell-Centered E-fields
   EnzoArray<enzo_float> Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
@@ -306,127 +319,140 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 
 };
 
+
+// Compute the face-centered B-field component along the ith dimension
+//
+// Bnew_i(k, j, i+1/2) = Bold_i(k, j, i+1/2) -
+//     dt/dj*(E_k(    k,j+1/2,i+1/2) - E_k(    k,j-1/2,i+1/2) +
+//     dt/dk*(E_j(k+1/2,    j,i+1/2) - E_j(k-1/2,    j,i+1/2)
+// [The positioning of dt/dj with respect to E_k is correct]
+//
+// Rewrite equation (to allow for handling of 2d and 3d grids):
+// Bnew_i(k, j, i-1/2) =
+//   Bold_i(k, j, i-1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
+//
+//   if (3D mesh || (2D mesh && dim==0)):
+//     E_k_term(k,j,i+1/2) = dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
+//   else:
+//     E_k_term(k,j,i+1/2)  = 0
+//
+//   if (3D mesh || (2D mesh && dim==1)):
+//     E_j_term(k,j,i+1/2) = dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
+//   else:
+//     E_j_term= 0
+//
 void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 					     Grouping &efield_group,
-					     Grouping &cur_cons_group,
-					     Grouping &out_cons_group,
+					     Grouping &cur_bfieldi_group,
+					     Grouping &out_bfieldi_group,
 					     enzo_float dt)
 {
-  // computing the face-centered B-field component along the ith dimension
-  Field field = block->data()->field();
-  EnzoBlock * enzo_block = enzo::block(block);
+  // determine alignment of j,k axes with respect to x,y, and z
+  int  dxdj, dydj, dzdj, dxdk, dydk, dzdk;
+  aligned_dim_derivatives_((dim+1)%3, dxdj, dydj, dzdj);
+  aligned_dim_derivatives_((dim+2)%3, dxdk, dydk, dzdk);
 
-  // cell-centered iteration dimensions
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
-
-  // load the fields
-  enzo_float *cur_bfield = load_grouping_field_(&field, &cur_cons_group,
-						"bfieldi", dim);
-  enzo_float *out_bfield = load_grouping_field_(&field, &out_cons_group,
-						"bfieldi", dim);
-  // Load e-fields
-  enzo_float *E_j = load_grouping_field_(&field, &efield_group,
-					 "efield", (dim+1)%3);
-  enzo_float *E_k = load_grouping_field_(&field, &efield_group,
-					 "efield", (dim+2)%3);
-
+  // determine if grid is 2D or 3D AND compute the ratios of dt to the 
   // widths of cells along j and k directions
+  EnzoBlock *enzo_block = enzo::block(block);
+  bool three_dim = enzo_block->GridDimension[2]>1;
   enzo_float dtdj = dt/enzo_block->CellWidth[(dim+1)%3];
   enzo_float dtdk = dt/enzo_block->CellWidth[(dim+2)%3];
 
-  // face-centered and edge-centered dimensions and edge-centered offsets
-  int fc_mx = mx; int fc_my = my; int fc_mz = mz;
-  // all edge-centered fields share one edge with the face in i direction
-  int ecij_mx = mx+1; int ecij_my = my + 1; int ecij_mz = mz + 1;
-  int ecik_mx = mx+1; int ecik_my = my + 1; int ecik_mz = mz + 1;
-  // the offset of the edge-centered efield on the edge of the j/k direction
-  // shifts the j/k index
-  int ecij_offset, ecik_offset;
+  // Load interface bfields
+  EnzoArray<enzo_float> cur_bfield, out_bfield;
+  load_interior_bfieldi_field_(block, cur_bfieldi_group, dim, cur_bfield);
+  load_interior_bfieldi_field_(block, out_bfieldi_group, dim, out_bfield);
 
-  if (dim == 0){
-    // dim points in x-direction
-    fc_mx++; ecij_mz--; ecik_my--;
-    ecij_offset = ecij_mx;
-    ecik_offset = ecik_mx * ecik_my;
-  } else if (dim == 1){
-    fc_my++; ecij_mx--; ecik_mz--;
-    ecij_offset = ecij_mx*ecij_my;
-    ecik_offset = 1;
-  } else {
-    fc_mz++; ecij_my--; ecik_mx--;
-    ecij_offset = 1;
-    ecik_offset = ecik_mx;
+  // Load edge centered efields
+  EnzoArray<enzo_float> E_j, E_k;
+  const bool use_E_j = (three_dim || dim == 1);
+  // For 2d grid, only need to load E_k when dim == 1 (in that case E_j = E_z)
+  if (use_E_j){
+    load_temp_interface_grouping_field_(block, efield_group, "efield",
+					(dim+1)%3, E_j, dxdj == 0, dydj == 0,
+					dzdj == 0);
+  }
+  const bool use_E_k = (three_dim || dim == 0);
+  // For 2d grid, only need to load E_k when dim == 0 (in that case E_k = E_z)
+  if (use_E_k){
+    load_temp_interface_grouping_field_(block, efield_group, "efield",
+					(dim+2)%3, E_k, dxdk == 0, dydk == 0,
+					dzdk == 0);
   }
 
-  for (int iz=1; iz<fc_mz-1; iz++) {
-    for (int iy=1; iy<fc_my-1; iy++) {
-      for (int ix=1; ix<fc_mx-1; ix++) {
-	// bfield is centered on face in the i direction
-	int fc_ind = ix + fc_mx*(iy + fc_my*iz);
+  // Integration limits are compatible with 2D and 3D grids
+  for (int iz=0; iz<out_bfield.length_dim2(); iz++) {
+    for (int iy=0; iy<out_bfield.length_dim1(); iy++) {
+      for (int ix=0; ix<out_bfield.length_dim0(); ix++) {
 
-	// E-field in k direction centered on edges joining the i and j faces
-	int ecij_ind = ix + ecij_mx*(iy + ecij_my*iz);
+	enzo_float E_k_term, E_j_term;
+	if (use_E_k){
+	  // E_k_term(k,j,i+1/2) =
+	  //   dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
+	  E_k_term = dtdj*(E_k(iz,iy,ix) - E_k(iz-dzdj,iy-dydj,ix-dxdj));
+	} else {
+	  E_k_term = 0.;
+	}
 
-	// E-field in j direction centered on edges joining the i and k faces
-	int ecik_ind = ix + ecik_mx*(iy + ecik_my*iz);
+	if (use_E_j){
+	  // E_j_term(k,j,i+1/2) =
+	  //   dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
+	  E_j_term = dtdk*(E_j(iz,iy,ix) - E_j(iz-dzdk,iy-dydk,ix-dxdk)); 
+	} else {
+	  E_j_term = 0.;
+	}
 
-	// if dim were equal to zero, then we would compute:
-	//   Bnew_x(i-1/2, j, k) = Bold_x(i-1/2,j,k)
-	//     - dt/dy*(E_z(i-1/2,j+1/2,    k) - E_z(i-1/2,j-1/2,    k))
-	//     + dt/dz*(E_y(i-1/2,    j,k+1/2) - E_z(i-1/2,    j,k-1/2))
-
-	out_bfield[fc_ind] = cur_bfield[fc_ind]
-	  - dtdj*(E_k[ecij_ind + ecij_offset] - E_k[ecij_ind])
-	  + dtdk*(E_j[ecik_ind + ecik_offset] - E_j[ecik_ind]);
+	// Bnew_i(k, j, i-1/2) =
+	//   Bold_i(k, j, i-1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
+	out_bfield(iz,iy,ix) = cur_bfield(iz,iy,ix) - E_k_term + E_j_term;
       }
     }
   }
 }
 
+
+// Compute cell-centered bfield along dimension i
+//   B_i(k,j,i) = 0.5*(B_i(k,j,i+1/2) + B_i(k,j,i-1/2))
+// For a simpler implementation, we will rewrite this as:
+//   B_i(k,j,i+1) = 0.5*(B_i(k,j,i+3/2) + B_i(k,j,i+1/2))
+// We define:
+//   B_center(k,j,i)   ->  B_i(k,j,i+1)
+//   Bi_left(k,j,i)    ->  B_i(k,j,i+1/2)
+//   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
 						     Grouping &cons_group,
+						     Grouping &bfieldi_group,
 						     enzo_float dt)
 {
-  Field field = block->data()->field();
+  // Identify which axis dimension i is aligned with
+  int  dxdi, dydi, dzdi;
+  aligned_dim_derivatives_(dim, dxdi, dydi, dzdi);
 
-  EnzoBlock * enzo_block = enzo::block(block);
+  // Load interface B-field
+  EnzoArray<enzo_float> bfield, b_center, bi_left, bi_right;
+  // cell-centered field
+  load_grouping_field_(block, cons_group, "bfield", dim, bfield);
+  b_center.initialize_subarray(bfield, dzdi, bfield.length_dim2(),
+			       dydi, bfield.length_dim1(),
+			       dxdi, bfield.length_dim0());
+  // face-centered field
+  load_interior_bfieldi_field_(block, bfieldi_group, dim, bi_left);
+  bi_right.initialize_subarray(bi_left, dzdi, bi_left.length_dim2(),
+			       dydi, bi_left.length_dim1(),
+			       dxdi, bi_left.length_dim0());
 
-  // cell-centered iteration dimensions
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
+  // Get grid size
+  int mz = bfield.length_dim2();
+  int my = bfield.length_dim1();
+  int mx = bfield.length_dim0();
 
-  // compute face-centered dimensions and offset between neigboring elements
-  // along dim (offset is the same for cell-centered and face-centered arrays)
-  int fc_mx = mx; int fc_my = my; int fc_mz = mz;
+  // iteration limits are compatible with a 2D grid and 3D grid
+  for (int iz=0; iz<std::max(mz-1,1); iz++) {
+    for (int iy=0; iy<(my-1); iy++) {
+      for (int ix=0; ix<(mx-1); ix++) {
 
-  int offset;
-  if (dim == 0) {
-    fc_mx++;
-    offset = 1;
-  } else if (dim == 1) {
-    fc_my++;
-    offset = mx;
-  } else {
-    fc_mz++;
-    offset = mx*my;
-  }
-
-  enzo_float *bfield = load_grouping_field_(&field, &cons_group,
-					    "bfieldi", dim);
-  enzo_float *bfield_center = load_grouping_field_(&field, &cons_group,
-						   "bfield", dim);
-
-  for (int iz=1; iz<mz-1; iz++) {
-    for (int iy=1; iy<my-1; iy++) {
-      for (int ix=1; ix<mx-1; ix++) {
-	// compute the index of the cell-centered and face-centered
-	int fc_ind = ix + fc_mx*(iy + fc_my*iz);    
-	int c_ind = ix + mx*(iy + my*iz);
-
-	bfield_center[c_ind] = 0.5*(bfield[fc_ind+offset] + bfield[fc_ind]);
+	b_center(iz,iy,ix) = 0.5*(bi_left(iz,iy,ix) + bi_right(iz,iy,ix));
       }
     }
   }
