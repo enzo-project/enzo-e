@@ -56,7 +56,7 @@
  }
 
  Field {
-      history     = 1; # what?
+      history     = 1;
       alignment   = 8; # what?
       gamma       = 1.6667; 
       ghost_depth = 4;      # better way to set?
