@@ -276,7 +276,7 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
                                    * (stellar_z * sqrt(pow(zheight,2) + pow(stellar_z,2)));
 
          accel_sph = (radius  == 0.0 ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a));
-         accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (radius*cosmo_a));
+         accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a));
          accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
 
          // now apply accelerations in cartesian (grid) coordinates
