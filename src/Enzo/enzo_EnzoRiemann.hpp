@@ -42,7 +42,8 @@ public: // interface
   /// dimension to compute fluxes along and indicates the dimension along which
   /// the reconstructed primitive values are face-centered
   virtual void solve (Block *block, Grouping &priml_group,
-		      Grouping &primr_group, Grouping &flux_group, int dim,
+		      Grouping &primr_group, Grouping &flux_group,
+		      Grouping &consl_group, Grouping &consr_group, int dim,
 		      EnzoEquationOfState *eos)=0;
 };
 

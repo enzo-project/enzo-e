@@ -39,11 +39,16 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+  // Computes thermal pressure
+  void compute_pressure(Block *block, Grouping &cons_group,
+			Grouping &prim_group);
+
   // Converts the cell-centered conservative quantities to primitive quantites
   void primitive_from_conservative(Block *block, Grouping &cons_group,
 				   Grouping &prim_group);
 
-  void conservative_from_primitive(flt_map &prim, flt_map &cons);
+  void conservative_from_primitive(Block *block, Grouping &prim_group,
+				   Grouping &cons_group);
 
   // Computes magnetic pressure from primitives
   enzo_float mag_pressure_from_primitive(flt_map &prim_vals){
@@ -69,6 +74,9 @@ public: // interface
   // returns the thermal pressure floor
   enzo_float get_pressure_floor(){
     return pressure_floor_;}
+
+  // apply the pressure floor to total_energy field
+  void apply_floor_to_energy(Block *block, Grouping &cons_group);
 
 protected: // attributes
   enzo_float gamma_; // adiabatic index

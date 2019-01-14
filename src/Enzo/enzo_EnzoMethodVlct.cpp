@@ -273,11 +273,15 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // temp interface b-fileds
     Grouping temp_bfieldi_group;
 
+    // left and right reconstructed conserved values
+    // these are not strictly necessary
+    Grouping consl_group, consr_group;
+
     // allocate the temporary fields (as necessary) and fill the field groupings
     allocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			  yflux_group, zflux_group, efield_group,
 			  center_efield_id, weight_group, temp_conserved_group,
-			  temp_bfieldi_group);
+			  temp_bfieldi_group, consl_group, consr_group);
 
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
@@ -316,13 +320,15 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
       // Compute flux along each dimension
       compute_flux_(block, 0, *cur_cons_group, *cur_bfieldi_group, priml_group,
-		    primr_group, xflux_group, weight_group, *reconstructor);
+		    primr_group, xflux_group, consl_group, consr_group,
+		    weight_group, *reconstructor);
       compute_flux_(block, 1, *cur_cons_group, *cur_bfieldi_group, priml_group,
-		    primr_group, yflux_group, weight_group, *reconstructor);
+		    primr_group, yflux_group, consl_group, consr_group,
+		    weight_group, *reconstructor);
       if (ndim == 3){
 	compute_flux_(block, 2, *cur_cons_group, *cur_bfieldi_group,
-		      priml_group, primr_group, zflux_group, weight_group,
-		      *reconstructor);
+		      priml_group, primr_group, zflux_group, consl_group,
+		      consr_group, weight_group, *reconstructor);
       }
 
       // Compute_efields
@@ -357,7 +363,8 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			    yflux_group, zflux_group, efield_group,
 			    center_efield_id, weight_group,
-			    temp_conserved_group, temp_bfieldi_group);
+			    temp_conserved_group, temp_bfieldi_group,
+			    consl_group, consr_group);
   }
 
   block->compute_done();
@@ -371,6 +378,8 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 				   Grouping &priml_group,
 				   Grouping &primr_group,
 				   Grouping &flux_group,
+				   Grouping &consl_group,
+				   Grouping &consr_group,
 				   Grouping &weight_group,
 				   EnzoReconstructor &reconstructor)
 {
@@ -400,9 +409,13 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
     }
   }
 
+  // Calculate reconstructed conserved values
+  eos_->conservative_from_primitive(block,priml_group,consl_group);
+  eos_->conservative_from_primitive(block,primr_group,consr_group);
+
   // Next, compute the fluxes
-  riemann_solver_->solve(block, priml_group, primr_group, flux_group, dim,
-			 eos_);
+  riemann_solver_->solve(block, priml_group, primr_group, flux_group,
+			 consl_group, consr_group, dim, eos_);
 
   // Finally, need to handle weights
   //  - Currently, weight is set to 1.0 if upwind is in positive direction of
@@ -626,7 +639,9 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   int &center_efield_id,
 					   Grouping &weight_group,
 					   Grouping &temp_conserved_group,
-					   Grouping &temp_bfieldi_group)
+					   Grouping &temp_bfieldi_group,
+					   Grouping &consl_group,
+					   Grouping &consr_group)
 {
   std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
   std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
@@ -648,6 +663,12 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 			    yflux_group, "yflux_");
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
 			    zflux_group, "zflux_");
+
+  // Prepare left and right reconstructed conserved fields
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+			    consl_group, "cleft_");
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+			    consr_group, "cright_");
 
   // Next, reserve/allocate temporary primitive-related fields
   // allocate applicable temporary fields in primitive_group_
@@ -739,7 +760,9 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 					     int center_efield_id,
 					     Grouping &weight_group,
 					     Grouping &temp_conserved_group,
-					     Grouping &temp_bfieldi_group)
+					     Grouping &temp_bfieldi_group,
+					     Grouping &consl_group,
+					     Grouping &consr_group)
 {
   std::vector<std::string> cons_group_names= EnzoMethodVlct::cons_group_names;
   std::vector<std::string> prim_group_names= EnzoMethodVlct::prim_group_names;
@@ -752,6 +775,8 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   deallocate_grouping_fields_(field, cons_group_names, xflux_group);
   deallocate_grouping_fields_(field, cons_group_names, yflux_group);
   deallocate_grouping_fields_(field, cons_group_names, zflux_group);
+  deallocate_grouping_fields_(field, cons_group_names, consl_group);
+  deallocate_grouping_fields_(field, cons_group_names, consr_group);
 
   // deallocate the (relevant) primitive primitive quantity fields
   deallocate_grouping_fields_(field, prim_group_names, *primitive_group_);
@@ -778,91 +803,84 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 double EnzoMethodVlct::timestep ( Block * block ) const throw()
 {
   TRACE_VLCT("timestep()");
-  // NEED TO UPDATE TO BE CONSISTENT WITH REST OF IMPLEMENTATION
-  /* Points to address:
-   *  1. Make sure the overloading of std::sqrt works correctly [and always 
-   *     returns the precision of enzo_float
-   *  2. Possibly rename the fields 
-   *  3. Guarantee that cfast is positive */
+  // Implicitly assumes that "pressure" is a permanent field
+  // analogous to ppm timestep calulation, probably want to require that cfast
+  // is no smaller than some tiny positive number. 
 
-  // initialize
+  // Compute the pressure (assumes that "pressure" is a permanent field)
+  eos_->compute_pressure(block, *conserved_group_, *primitive_group_);
+  enzo_float gamma = eos_->get_gamma();
 
-  enzo_float dtBaryons = ENZO_HUGE_VAL;
+  EnzoArray<enzo_float> density, momentum_x, momentum_y, momentum_z;
+  EnzoArray<enzo_float> bfieldc_x, bfieldc_y, bfieldc_z;
+  load_grouping_field_(block, *conserved_group_, "density", 0, density);
+  load_grouping_field_(block, *conserved_group_, "momentum", 0, momentum_x);
+  load_grouping_field_(block, *conserved_group_, "momentum", 1, momentum_y);
+  load_grouping_field_(block, *conserved_group_, "momentum", 2, momentum_z);
+  load_grouping_field_(block, *conserved_group_, "bfield", 0, bfieldc_x);
+  load_grouping_field_(block, *conserved_group_, "bfield", 1, bfieldc_y);
+  load_grouping_field_(block, *conserved_group_, "bfield", 2, bfieldc_z);
 
-  /* Compute the pressure. */
+  EnzoArray<enzo_float> pressure;
+  load_grouping_field_(block, *conserved_group_, "pressure", 0, pressure);
 
+  // Get iteration limits
+  // Like ppm and ppml, access active region info from enzo_block attributes
   EnzoBlock * enzo_block = enzo::block(block);
 
-  const int in = cello::index_static();
+  // The start index of the active region
+  int ix_start = enzo_block->GridStartIndex[0];
+  int iy_start = enzo_block->GridStartIndex[1];
+  int iz_start = enzo_block->GridStartIndex[2];
 
-  enzo_float gamma = EnzoBlock::Gamma[in];
-  EnzoComputePressure compute_pressure (gamma, false);
-  compute_pressure.compute(enzo_block);
+  // The end index (final valid index) of the active region
+  int ix_end = enzo_block->GridEndIndex[0];
+  int iy_end = enzo_block->GridEndIndex[1];
+  int iz_end = enzo_block->GridEndIndex[2];
 
-  Field field = enzo_block->data()->field();
+  // widths of cells
+  double dx = enzo_block->CellWidth[0];
+  double dy = enzo_block->CellWidth[1];
+  double dz = enzo_block->CellWidth[2];
 
-  enzo_float * density    = (enzo_float *) field.values("density");
-  enzo_float * velocity_x = (enzo_float *) field.values("velocity_x");
-  enzo_float * velocity_y = (enzo_float *) field.values("velocity_y");
-  enzo_float * velocity_z = (enzo_float *) field.values("velocity_z");
-  enzo_float * bfieldc_x = (enzo_float *) field.values("bfieldc_x");
-  enzo_float * bfieldc_y = (enzo_float *) field.values("bfieldc_y");
-  enzo_float * bfieldc_z = (enzo_float *) field.values("bfieldc_z");
-  enzo_float * pressure = (enzo_float *) field.values("pressure");
+  // initialize
+  enzo_float dtBaryons = ENZO_HUGE_VAL;
 
-  /* Like ppm and ppml, access active region info from enzo_block attributes
-   * In these attributes 0,1,2 correspond to x,y,z */
-
-  /* x and y dimensions */
-  int xdim, ydim;
-  xdim = enzo_block->GridDimension[0]; ydim = enzo_block->GridDimension[1];
-
-  /* The start index of the active region */
-  int ix_start, iy_start, iz_start;
-  ix_start = enzo_block->GridStartIndex[0];
-  iy_start = enzo_block->GridStartIndex[1];
-  iz_start = enzo_block->GridStartIndex[2];
-
-  /* The end index (final valid index) of the active region */
-  int ix_end, iy_end, iz_end;
-  ix_end = enzo_block->GridEndIndex[0];
-  iy_end = enzo_block->GridEndIndex[1];
-  iz_end = enzo_block->GridEndIndex[2];
-
-  /* widths of cells */
-  double dx,dy,dz;
-  dx = enzo_block->CellWidth[0];
-  dy = enzo_block->CellWidth[1];
-  dz = enzo_block->CellWidth[2];
-
-  /* timestep is the minimum of 0.5 * dw/(abs(vw)+cfast) for all dimensions.
-   * hw and vw are the the width of the cell and velocity along dimension w.
-   * cfast = fast magnetosonic speed [Convention is to use max value: 
-   * cfast = (va^2+cs^2) ] */
+  // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+cfast) for all dimensions.
+  // dr_i and v_i are the the width of the cell and velocity along dimension i.
+  // cfast = fast magnetosonic speed (Convention is to use max value:
+  // cfast = (va^2+cs^2)
 
   for (int iz=iz_start; iz<=iz_end; iz++) {
     for (int iy=iy_start; iy<=iy_end; iy++) {
       for (int ix=ix_start; ix<=ix_end; ix++) {
-	int i = ix + xdim*(iy + ydim*iz);
-	enzo_float bmag_sq = (bfieldc_x[i] * bfieldc_x[i] +
-			      bfieldc_y[i] * bfieldc_y[i] +
-			      bfieldc_z[i] * bfieldc_z[i]);
+	enzo_float bmag_sq = (bfieldc_x(iz,iy,ix) * bfieldc_x(iz,iy,ix) +
+			      bfieldc_y(iz,iy,ix) * bfieldc_y(iz,iy,ix) +
+			      bfieldc_z(iz,iy,ix) * bfieldc_z(iz,iy,ix));
 
-	/* analogous to ppm timestep calulation, probably want to require that
-	 * cfast is no smaller than some tiny positive number. 
-	 * 
-	 * Assuming that we are using Gaussian units*/
-	enzo_float cfast = std::sqrt(gamma * pressure[i] / density[i]  + 
-				     bmag_sq /(density[i]));
+	// Using Gaussian units (where the magnetic permeability is mu=1)
+	enzo_float inv_dens= 1./density(iz,iy,ix);
+	enzo_float cfast = std::sqrt(gamma * pressure(iz,iy,ix) * inv_dens + 
+				     bmag_sq * inv_dens);
  
-	dtBaryons = std::min(dtBaryons, dx/(std::fabs(velocity_x[i]) + cfast));
-	dtBaryons = std::min(dtBaryons, dy/(std::fabs(velocity_y[i]) + cfast));
-	dtBaryons = std::min(dtBaryons, dz/(std::fabs(velocity_z[i]) + cfast));
+	dtBaryons = std::min(dtBaryons,
+			     dx/(std::fabs(inv_dens * momentum_x(iz,iy,ix)
+					   + cfast)));
+	dtBaryons = std::min(dtBaryons,
+			     dy/(std::fabs(inv_dens * momentum_y(iz,iy,ix)
+					   + cfast)));
+	dtBaryons = std::min(dtBaryons,
+			     dz/(std::fabs(inv_dens * momentum_z(iz,iy,ix)
+					   + cfast)));
       }
     }
   }
 
   /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
   dtBaryons *= 0.5*courant_;
+  //if (dtBaryon <= 0){
+  //  ERROR2("EnzoMethodVlct's timestep method() yields an invalid value (%lf) "
+  //	   "for %s\n", (double)dtBaryon, block->name().c_str());
+  //}
   return dtBaryons;
 }

@@ -22,8 +22,6 @@
 //        b-fields that only include face-centered values on the interior of
 //        the grid
 //      - Need to Propogate Changes to:
-//         - EnzoRiemann and subclasses
-//         - EnzoEquationOfState and subclasses
 //         - Applying flux divergence
 //
 //    Grouping Objects
@@ -41,7 +39,7 @@
 //          conserved variables each have a "momentum" group)
 //
 //    Notes about current groupings:
-//        - Currently track 12 different groupings:
+//        - Currently track 14 different groupings:
 //            1. conserved quantities
 //            2. interface b-fields (longitudinal B-fields centered at
 //               interface between cells)
@@ -57,6 +55,8 @@
 //           11. temp conserved quantities (to store values at the half
 //               timestep)
 //           12. temp interface b-fields (to store values at the half timestep)
+//           13. reconstructed left conserved fields
+//           14. reconstructed right conserved fields
 //        - several groups only contain 1 field (e.g. the "density" and
 //          "total_energy" groups). In effect, they serve as alias names for
 //          the fields
@@ -79,6 +79,19 @@
 //          The load_interior_bfieldi_field_ helper function addresses this
 //          problem. It initializes arrays for both groupings that only
 //          include face-centered values on the interior of the grid.
+//        - reconstructed left and right conserved fields are entirely
+//          non-essential. They only exist to allow for symmetry between the
+//          EquationOfState interface methods: primitive_from_conservative and
+//          conservative_from_primitive. (They both operate on groupings of
+//          fields). There are three main alternatives to using these groupings:
+//             1. Adapt Riemann Solver to use modified flux formulas that don't
+//                explicitly require knowledge of the interface flux values
+//                (This may couple the RiemannSolver to the gas physics)
+//             2. Come up with an elegant and easily extendible way for the
+//                EquationOfState to convert primitives to conserved quantities
+//                at a single location.
+//             3. Completely couple RiemannSolvers to the gas physics and have
+//                write out the conversion within the function.
 //
 //    The number of tracked Groupings could be reduced drastically if we could
 //    track histories of a subset of fields temporarily, and if we could easily
@@ -91,8 +104,8 @@
 //    Solver and the instance methods of EnzoMethodVlct (to compute timestep and
 //    to add add flux divergence), subclasses of EnzoEquationOfState are used
 //    to compute properties of individual cells. These values are passed via a
-//    map. We alias maps of arrays, as array_map and a map of values for a
-//    single cell, as a cell map. The current map implementation is an
+//    map. We alias the map of values at a single location as a flt_map. The
+//     current map implementation is an
 //    unordered_map
 //        - There is an inconsistency between the maps and groupings. Groupings
 //          for vector quantites (i.e. velocity/momentum/bfields) only have a
@@ -102,7 +115,6 @@
 //        - Can probably come up with a more elegant solution for Mapping and
 //          Grouping (the obvious choice is to do away with Mapping completely
 //          and just apply operations on Groupings)
-//
 //  Issue: Concerned about the units of the magnetic field (especially during
 //  calculations of the Alfven Velocity)
 
@@ -116,9 +128,7 @@ class EnzoConstrainedTransport;
 
 // for brevity, and convenience (in case the choice of map is altered)
 // we define an alias for our choice of map
-typedef std::unordered_map<std::string,enzo_float*> array_map;
 typedef std::unordered_map<std::string,enzo_float> flt_map;
-
 
 // define helper function for reading in Grouping fields
 enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
@@ -203,6 +213,7 @@ protected: // methods
   void compute_flux_(Block *block, int dim, Grouping &cur_cons_group,
 		     Grouping &cur_bfieldi_group, Grouping &priml_group,
 		     Grouping &primr_group, Grouping &flux_group,
+		     Grouping &consl_group, Grouping &consr_group, 
 		     Grouping &weight_group, EnzoReconstructor &reconstructor);
 
   // compute the Electric fields using the fluxes and cell-centered
@@ -227,7 +238,8 @@ protected: // methods
 			     Grouping &efield_group, int &center_efield_id,
 			     Grouping &weight_group,
 			     Grouping &temp_conserved_group,
-			     Grouping &temp_bfieldi_group);
+			     Grouping &temp_bfieldi_group,
+			     Grouping &consl_group, Grouping &consr_group);
 
   // deallocate the temporary fields used for scratch space
   void deallocate_temp_fields_(Block *block, Grouping &priml_group,
@@ -236,7 +248,8 @@ protected: // methods
 			       Grouping &efield_group, int center_efield_id,
 			       Grouping &weight_group,
 			       Grouping &temp_conserved_group,
-			       Grouping &temp_bfieldi_group);
+			       Grouping &temp_bfieldi_group,
+			       Grouping &consl_group, Grouping &consr_group);
 
 protected: // attributes
 

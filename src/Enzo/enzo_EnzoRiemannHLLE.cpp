@@ -16,41 +16,63 @@
 //     incorporate CRs (just need to swap out the wave_speeds_ helper method)
 //  - If the need arises, have to modify to handle dual energy formalism
 
-void load_fluid_fields_(Field *field,
-			array_map &arrays,
-			Grouping *grouping, bool primitive, int dim)
+typedef std::unordered_map<std::string,EnzoArray<enzo_float>*> array_map;
+
+void add_entry_(Block *block, array_map &arrays, std::string key,
+		Grouping &grouping, std::string group_name, int index,
+		int dim)
+{
+  arrays[key] = new EnzoArray<enzo_float>();
+  load_temp_interface_grouping_field_(block, grouping, group_name, index,
+				      *(arrays[key]), (dim != 0),
+				      (dim != 1), (dim != 2));
+}
+
+void load_fluid_fields_(Block *block, array_map &arrays, Grouping &grouping,
+			bool primitive, int dim)
 {
   int i = dim;
   int j = (dim+1)%3;
   int k = (dim+2)%3;
 
+  
+  
   // Load density
-  arrays["density"] = load_grouping_field_(field, grouping, "density", 0);
+  add_entry_(block, arrays, "density", grouping, "density", 0, dim);
 
   // load velocity/momentum and pressure/total energy
   if (primitive){
-    arrays["velocity_i"] = load_grouping_field_(field, grouping, "velocity", i);
-    arrays["velocity_j"] = load_grouping_field_(field, grouping, "velocity", j);
-    arrays["velocity_k"] = load_grouping_field_(field, grouping, "velocity", k);
-    arrays["pressure"] = load_grouping_field_(field, grouping, "pressure", 0);
+    add_entry_(block, arrays, "velocity_i", grouping, "velocity", i, dim);
+    add_entry_(block, arrays, "velocity_j", grouping, "velocity", j, dim);
+    add_entry_(block, arrays, "velocity_k", grouping, "velocity", k, dim);
+    add_entry_(block, arrays, "pressure", grouping, "pressure", 0, dim);
   } else {
-    arrays["momentum_i"] = load_grouping_field_(field, grouping, "velocity", i);
-    arrays["momentum_j"] = load_grouping_field_(field, grouping, "velocity", j);
-    arrays["momentum_k"] = load_grouping_field_(field, grouping, "velocity", k);
-    arrays["total_energy"] = load_grouping_field_(field, grouping,
-						  "total_energy", 0);
+    add_entry_(block, arrays, "momentum_i", grouping, "momentum", i, dim);
+    add_entry_(block, arrays, "momentum_j", grouping, "momentum", j, dim);
+    add_entry_(block, arrays, "momentum_k", grouping, "momentum", k, dim);
+    add_entry_(block, arrays, "total_energy", grouping, "total_energy", 0, dim);
   }
 
-  arrays["bfield_i"] = load_grouping_field_(field, grouping, "bfield", i);
-  arrays["bfield_j"] = load_grouping_field_(field, grouping, "bfield", j);
-  arrays["bfield_k"] = load_grouping_field_(field, grouping, "bfield", k);
+  add_entry_(block, arrays, "bfield_i", grouping, "bfield", i, dim);
+  add_entry_(block, arrays, "bfield_j", grouping, "bfield", j, dim);
+  add_entry_(block, arrays, "bfield_k", grouping, "bfield", k, dim);
 }
+
+void cleanup_array_map_(array_map &arrays, std::vector<std::string> &keys)
+{
+  for (int i=0; i < keys.size();i++){
+    std::string key = keys[i];
+    delete arrays[key];
+  }
+}
+
 
 
 //----------------------------------------------------------------------
 
 void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 			     Grouping &primr_group, Grouping &flux_group,
+			     Grouping &consl_group, Grouping &consr_group,
 			     int dim, EnzoEquationOfState *eos)
 {
 
@@ -67,55 +89,41 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
   Ul.reserve(length); Ur.reserve(length);
   Fl.reserve(length); Fr.reserve(length);
   enzo_float bp, bm;
-
+  
   //int nspecies = priml_groups.size("species");
   //int ncolors = priml_groups.size("colors");
 
-  // Declare the block and get field object
-  EnzoBlock * enzo_block = enzo::block(block);
-  Field field = enzo_block->data()->field();
-
   // Load in the fields
-  array_map wl_arrays, wr_arrays, flux_arrays;
+  array_map wl_arrays, wr_arrays, ul_arrays, ur_arrays, flux_arrays;
   wl_arrays.reserve(length); wr_arrays.reserve(length);
+  ul_arrays.reserve(length); ur_arrays.reserve(length);
   flux_arrays.reserve(length);
 
-  load_fluid_fields_(&field, wl_arrays, &priml_group, true, dim);
-  load_fluid_fields_(&field, wr_arrays, &primr_group, true, dim);
-  load_fluid_fields_(&field, flux_arrays, &flux_group, false, dim);
+  load_fluid_fields_(block, wl_arrays, priml_group, true, dim);
+  load_fluid_fields_(block, wr_arrays, primr_group, true, dim);
+  load_fluid_fields_(block, ul_arrays, consl_group, false, dim);
+  load_fluid_fields_(block, ur_arrays, consr_group, false, dim);
+  load_fluid_fields_(block, flux_arrays, flux_group, false, dim);
 
-  // get integration limits 
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
+  // For Nearest-Neighbor, we care about interfaces starting at i+1/2
+  // For PLM we only care about interfaces starting at i+3/2.
+  //    (left interface value at i+1/2 is set to 0)
+  // For consistency, always start at i+1/2
+  // Iteration limits are generalized for 2D and 3D arrays
+  for (int iz=0; iz<flux_arrays["density"]->length_dim2(); iz++) {
+    for (int iy=0; iy<flux_arrays["density"]->length_dim1(); iy++) {
+      for (int ix=0; ix<flux_arrays["density"]->length_dim0(); ix++) {
 
-  // these values are for cell-centered grids. The need to be modified so that
-  // along dim, the integration limits are face-centered
-  switch(dim){
-  case(0): mx++;
-  case(1): my++;
-  case(2): mz++;
-  }
-  
-  // For PLM we only care about fluxes for the third cell in
-  // For Nearest-Neighbor, we care about the second cell in
-  // since mx, my, and mz are face-centered, the following should be correct
-  for (int iz=1; iz<mz-1; iz++) {
-    for (int iy=1; iy<my-1; iy++) {
-      for (int ix=1; ix<mx-1; ix++) {
-	// compute the index
-	int i = ix + mx*(iy + my*iz);
-
-	// get the primitive fields
+	// get the fluid fields
 	for (int field_ind=0; field_ind<length; field_ind++){
 	  std::string key = prim_keys[field_ind];
-	  wl[key] = wl_arrays[key][i];
-	  wr[key] = wr_arrays[key][i];
-	}
+	  wl[key] = (*(wl_arrays[key]))(iz,iy,ix);
+	  wr[key] = (*(wr_arrays[key]))(iz,iy,ix);
 
-	// compute the conservatives
-	eos->conservative_from_primitive(wl, Ul);
-	eos->conservative_from_primitive(wr, Ur);
+	  key = cons_keys[field_ind];
+	  Ul[key] = (*(ul_arrays[key]))(iz,iy,ix);
+	  Ur[key] = (*(ur_arrays[key]))(iz,iy,ix);
+	}
 
 	// Compute magnetic pressure
 	enzo_float mag_pressure_l, mag_pressure_r;
@@ -133,15 +141,21 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 	// Now compute the Riemann Flux
 	for (int field_ind=0; field_ind<length; field_ind++){
 	  std::string key = cons_keys[field_ind];
-	  // fill in the following line properly
-	  flux_arrays[key][i] = (((bp*Fl[key] - bm*Fr[key]) / (bp - bm)) +
-				 ((Ul[key] - Ur[key])*bp*bm /(bp - bm)));
+
+	  (*(flux_arrays[key]))(iz,iy,ix) =
+	    (((bp*Fl[key] - bm*Fr[key]) / (bp - bm)) +
+	     ((Ul[key] - Ur[key])*bp*bm /(bp - bm)));
 	}
 
 	// Deal with Species and colors
       }
     }
   }
+  cleanup_array_map_(wl_arrays, prim_keys);
+  cleanup_array_map_(wr_arrays, prim_keys);
+  cleanup_array_map_(ul_arrays, cons_keys);
+  cleanup_array_map_(ur_arrays, cons_keys);
+  cleanup_array_map_(flux_arrays, cons_keys);
 }
 
 //----------------------------------------------------------------------
@@ -235,8 +249,7 @@ void EnzoRiemannHLLE::interface_flux_(flt_map &prim, flt_map &cons,
 
   // This assumes that MHD is included
   // This may be better handled by the EquationOfState
-  enzo_float rho, vi, vj, vk, p, Bi, Bj, Bk, etot;
-  rho = prim["density"];
+  enzo_float vi, vj, vk, p, Bi, Bj, Bk, etot;
   vi = prim["velocity_i"];
   vj = prim["velocity_j"];
   vk = prim["velocity_k"];

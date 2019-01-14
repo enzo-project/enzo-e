@@ -35,11 +35,16 @@ public: // interface
     PUP::able::pup(p);
   }
 
+  // Computes thermal pressure - will ideally wrap EnzoComputePressure
+  virtual void compute_pressure(Block *block, Grouping &cons_group,
+				Grouping &prim_group)=0;
+
   // Converts the cell-centered conservative quantities to primitive quantites
   virtual void primitive_from_conservative(Block *block, Grouping &cons_group,
   					   Grouping &prim_group)=0;
 
-  virtual void conservative_from_primitive(flt_map &prim, flt_map &cons)=0;
+  virtual void conservative_from_primitive(Block *block, Grouping &prim_group,
+  					   Grouping &cons_group)=0;
 
   // Computes magnetic pressure from primitives
   virtual enzo_float mag_pressure_from_primitive(flt_map &prim_vals)=0;
@@ -58,6 +63,9 @@ public: // interface
 
   // returns the thermal pressure floor
   virtual enzo_float get_pressure_floor()=0;
+
+  // apply the pressure floor to total_energy field
+  virtual void apply_floor_to_energy(Block *block, Grouping &cons_group)=0;
 
 };
 
