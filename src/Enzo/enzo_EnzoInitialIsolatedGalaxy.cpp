@@ -139,7 +139,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   double xm, ym, zm, xp, yp, zp, hx, hy, hz;
   block->data()->lower(&xm,&ym,&zm);
   block->data()->upper(&xp,&yp,&zp);
-  field.cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+  block->cell_width(&hx,&hy,&hz);
 
   // Get Fields
   enzo_float * d = (enzo_float *) field.values ("density");
@@ -180,7 +180,8 @@ void EnzoInitialIsolatedGalaxy::enforce_block
         d[i]   = this->uniform_density_;
         te[i]  = halo_gas_energy;
         p[i]   = (this->gamma_ - 1.0) * te[i] * d[i];
-        pot[i] = 0.0;
+
+        if(pot) pot[i] = 0.0;
 
         if (this->dual_energy_)
         {
@@ -254,6 +255,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
           v3[2][i] = 0.0;
 
           te[i]  = disk_gas_energy;
+          p[i]   = (this->gamma_ - 1.0) * te[i] * d[i];
 
           for (int dim = 0; dim < 3; dim++) // AE: do I need a check for not ppm?
           {
@@ -264,6 +266,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
           {
             ge[i] = disk_gas_energy;
           }
+
 
         } // end disk / halo check
 //        else
@@ -281,6 +284,8 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   // do particle initialization here (not sure what this does)
   // Particle particle = block->data()->particle();
 
+
+  return;
 }
 
 void EnzoInitialIsolatedGalaxy::ReadInParticleData(void)
