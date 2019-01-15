@@ -118,13 +118,15 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
     if (az){ for(int i = 0; i < m; i ++){ az[i] = 0.0;}}
   }
 
+  Particle particle = enzo_block->data()->particle();
+
   if (enzo_config->method_background_acceleration_type == "GalaxyModel"){
 
-    this->GalaxyModel(ax, ay, az, rank,
+    this->GalaxyModel(ax, ay, az, &particle, rank,
                       cosmo_a, enzo_config, enzo_units, enzo_block->dt);
 
   } else if (enzo_config->method_background_acceleration_type == "PointMass"){
-    this->PointMass(ax, ay, az, rank,
+    this->PointMass(ax, ay, az, &particle, rank,
                     cosmo_a, enzo_config, enzo_units, enzo_block->dt);
   }
 
@@ -136,6 +138,7 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
 void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
                                                  enzo_float * ay,
                                                  enzo_float * az,
+                                                 Particle * particle,
                                                  const int rank,
                                                  const enzo_float cosmo_a,
                                                  const EnzoConfig * enzo_config,
@@ -189,6 +192,7 @@ void EnzoMethodBackgroundAcceleration::PointMass(enzo_float * ax,
 void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
                                                    enzo_float * ay,
                                                    enzo_float * az,
+                                                   Particle * particle,
                                                    const int rank,
                                                    const enzo_float cosmo_a,
                                                    const EnzoConfig * enzo_config,
@@ -289,104 +293,106 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
   } // end loop over grid cells
 
   // Update particle accelerations
-/*
-  Particle particle = enzo_block->data()->particle();
 
-  int it_dark = particle.type_index("dark");
-  int it_star = particle.type_index("star");
+//   Particle particle = enzo_block->data()->particle();
+
+  int it_dark = particle->type_index("dark");
+  int it_star = particle->type_index("star");
+  int it_vals[] = {it_dark, it_star};
+  const int num_it = 2;
 
   double dt_shift = 0.5 * dt;
 
-  if (particle.num_particles(it_dark) > 0){
-    int it = it_dark;
+  // Loop through particles to apply this to
+  for (int i = 0; i < num_it; i++){
+    int it = it_vals[i];
 
-    const int ia_x = (rank >= 1) ? particle.attribute_index (it, "x") : -1;
-    const int ia_y = (rank >= 2) ? particle.attribute_index (it, "y") : -1;
-    const int ia_z = (rank >= 3) ? particle.attribute_index (it, "z") : -1;
+    if (particle->num_particles(it) > 0){
 
-    const int ia_ax = (rank >= 1) ? particle.attribute_index (it, "ax") : -1;
-    const int ia_ay = (rank >= 2) ? particle.attribute_index (it, "ay") : -1;
-    const int ia_az = (rank >= 3) ? particle.attribute_index (it, "az") : -1;
+      const int ia_x = (rank >= 1) ? particle->attribute_index (it, "x") : -1;
+      const int ia_y = (rank >= 2) ? particle->attribute_index (it, "y") : -1;
+      const int ia_z = (rank >= 3) ? particle->attribute_index (it, "z") : -1;
 
-    const int dp = particle.stride(it, ia_x);
-    const int da = particle.stride(it, ia_ax);
+      const int ia_ax = (rank >= 1) ? particle->attribute_index (it, "ax") : -1;
+      const int ia_ay = (rank >= 2) ? particle->attribute_index (it, "ay") : -1;
+      const int ia_az = (rank >= 3) ? particle->attribute_index (it, "az") : -1;
 
-    const int nb = particle.num_batches (it);
+      const int dp = particle->stride(it, ia_x);
+      const int da = particle->stride(it, ia_ax);
 
-    for (int ib=0; ib<nb; ib++){
-      enzo_float *px=0, *py=0, *pz=0;
-      enzo_float *pax=0, *pay=0, *paz=0;
+      const int nb = particle->num_batches (it);
 
-      px  = (enzo_float *) particle.attribute_array (it, ia_x, ib);
-      pax = (enzo_float *) particle.attribute_array (it, ia_ax, ib);
-      py  = (enzo_float *) particle.attribute_array (it, ia_y, ib);
-      pay = (enzo_float *) particle.attribute_array (it, ia_ay, ib);
-      pz  = (enzo_float *) particle.attribute_array (it, ia_z, ib);
-      paz = (enzo_float *) particle.attribute_array (it, ia_az, ib);
+      for (int ib=0; ib<nb; ib++){
+        enzo_float *px=0, *py=0, *pz=0;
+        enzo_float *pax=0, *pay=0, *paz=0;
 
-      const int np = particle.num_particles(it,ib);
+        px  = (enzo_float *) particle->attribute_array (it, ia_x, ib);
+        pax = (enzo_float *) particle->attribute_array (it, ia_ax, ib);
+        py  = (enzo_float *) particle->attribute_array (it, ia_y, ib);
+        pay = (enzo_float *) particle->attribute_array (it, ia_ay, ib);
+        pz  = (enzo_float *) particle->attribute_array (it, ia_z, ib);
+        paz = (enzo_float *) particle->attribute_array (it, ia_az, ib);
 
-      for (int ip = 0; ip<np; ip++){
-        const int ipdp = ip*dp;
-        const int ipda = ip*da;
+        const int np = particle->num_particles(it,ib);
 
-        x = px[ipdp] - enzo_config->method_background_acceleration_center[0];
-        y = py[ipdp] - enzo_config->method_background_acceleration_center[1];
-        z = pz[ipdp] - enzo_config->method_background_acceleration_center[2];
+        for (int ip = 0; ip<np; ip++){
+          const int ipdp = ip*dp;
+          const int ipda = ip*da;
 
-        double zheight = amom[0]*x + amom[1]*y + amom[2]*z; // height above disk
+          x = px[ipdp] - enzo_config->method_background_acceleration_center[0];
+          y = py[ipdp] - enzo_config->method_background_acceleration_center[1];
+          z = pz[ipdp] - enzo_config->method_background_acceleration_center[2];
 
-        // projected positions in plane of the disk
-        double xplane = x - zheight*amom[0];
-        double yplane = y - zheight*amom[1];
-        double zplane = z - zheight*amom[2];
+          double zheight = amom[0]*x + amom[1]*y + amom[2]*z; // height above disk
 
-        double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
-        double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
+          // projected positions in plane of the disk
+          double xplane = x - zheight*amom[0];
+          double yplane = y - zheight*amom[1];
+          double zplane = z - zheight*amom[2];
 
-        // need to multiple all of the below by the gravitational constants
-        double xtemp     = radius/rcore;
-        //double
-        accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                           G * DM_density * pow(rcore,3) *
-                           (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
-                           (radius * radius); // NFW DM profile
+          double radius = sqrt(xplane*xplane + yplane*yplane + zplane*zplane + zheight*zheight);
+          double rcyl   = sqrt(xplane*xplane + yplane*yplane + zplane*zplane);
 
-        accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
-                            + pow(stellar_r + sqrt( pow(zheight,2)
-                           + pow(stellar_z,2)),2),3));
-        //double
-        accel_z   = G * stellar_mass / sqrt(pow(zheight,2)
-                              + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
-                              + pow(stellar_r + sqrt(pow(zheight,2)
-                              + pow(stellar_z,2)),2),3))
-                                  * (stellar_z * sqrt(pow(zheight,2) + pow(stellar_z,2)));
+          // need to multiple all of the below by the gravitational constants
+          double xtemp     = radius/rcore;
+          //double
+          accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
+                             G * DM_density * pow(rcore,3) *
+                             (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
+                             (radius * radius); // NFW DM profile
 
-        accel_sph = (radius  == 0.0 ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a));
-        accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (radius*cosmo_a));
-        accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
+          accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
+                              + pow(stellar_r + sqrt( pow(zheight,2)
+                             + pow(stellar_z,2)),2),3));
+          //double
+          accel_z   = G * stellar_mass / sqrt(pow(zheight,2)
+                                + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
+                                + pow(stellar_r + sqrt(pow(zheight,2)
+                                + pow(stellar_z,2)),2),3))
+                                    * (stellar_z * sqrt(pow(zheight,2) + pow(stellar_z,2)));
 
-        // now apply accelerations in cartesian (grid) coordinates
-        if (pax) pax[ipda] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
-        if (pay) pay[ipda] -= (accel_sph * y + accel_R*yplane + accel_z*amom[1]);
-        if (paz) paz[ipda] -= (accel_sph * z + accel_R*zplane + accel_z*amom[2]);
+          accel_sph = (radius  == 0.0 ? 0.0 : std::fabs(accel_sph) / (radius*cosmo_a));
+          accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a));
+          accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
+
+          // now apply accelerations in cartesian (grid) coordinates
+          if (pax) pax[ipda] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
+          if (pay) pay[ipda] -= (accel_sph * y + accel_R*yplane + accel_z*amom[1]);
+          if (paz) paz[ipda] -= (accel_sph * z + accel_R*zplane + accel_z*amom[2]);
 
 
-      } // end loop over particles
+        } // end loop over particles
 
-    } // end loop over batch
+      } // end loop over batch
 
-  } // end if dm particles
+    } // end if particles exist
 
-*/
+  } // end loop over particles
+
+
   return;
 }
-/*
-double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
-{
-  return timestep_(block);
-}
-*/
+
 double EnzoMethodBackgroundAcceleration::timestep (Block * block) const throw()
 {
   // Use the same timestep check as implemented for gravity. This
