@@ -40,7 +40,7 @@ public:
 
   /// Name
   virtual std::string name () throw()
-   { return "star_maker_stochastic";}
+   { return "star_maker";}
 
   virtual ~EnzoMethodStarMakerStochasticSF() throw() {};
 

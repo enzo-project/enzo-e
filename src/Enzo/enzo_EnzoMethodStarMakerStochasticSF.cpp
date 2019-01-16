@@ -44,7 +44,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   // Are we at the highest level?
   if (block->is_leaf()) {
 
-    Particle particle (block->data()->particle());
+    Particle particle = enzo_block->data()->particle();
     Field field = enzo_block->data()->field();
 
     double dx, dy, dz;
