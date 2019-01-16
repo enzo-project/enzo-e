@@ -1,5 +1,6 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
+#include "cello.hpp"
 
 
 // This is a helper function for initializing the array from fields
@@ -176,8 +177,8 @@ public:
 		   enzo_float &v0, enzo_float &v1, enzo_float &v2)
   {
     v0 = (back0_ + amplitude_ * ev0_* std::cos(x0*2.*cello::pi/lambda_));
-    v1 = (back1_ + amplitude_ * ev1_* std::cos(x1*2.*cello::pi/lambda_));
-    v2 = (back2_ + amplitude_ * ev2_* std::cos(x2*2.*cello::pi/lambda_));
+    v1 = (back1_ + amplitude_ * ev1_* std::cos(x0*2.*cello::pi/lambda_));
+    v2 = (back2_ + amplitude_ * ev2_* std::cos(x0*2.*cello::pi/lambda_));
   }
 
 protected:
@@ -197,7 +198,7 @@ public:
     : VectorInit()
   {
     rot_ = new Rotation(a,b);
-    inner_ = inner_;
+    inner_ = inner;
   }
 
   ~RotatedVectorInit()
@@ -258,22 +259,32 @@ protected:
 class MeshPos {
 
 public:
-  MeshPos(EnzoBlock *block)
+  MeshPos(Block *block)
   {
-    EnzoBlock * enzo_block = enzo::block(block);
-    x_left_edge_ = block->GridLeftEdge[0];
-    y_left_edge_ = block->GridLeftEdge[1];
-    z_left_edge_ = block->GridLeftEdge[2];
+    Field field  = block->data()->field();
 
-    // ghost depth 
-    gx_ = enzo_block->GridStartIndex[0];
-    gy_ = enzo_block->GridStartIndex[1];
-    gz_ = enzo_block->GridStartIndex[2];
+    // lower left edge of active region
+    double xmb,ymb,zmb;
+    block->data()->lower(&xmb,&ymb,&zmb);
+
+    x_left_edge_ = (enzo_float)xmb;
+    y_left_edge_ = (enzo_float)ymb;
+    z_left_edge_ = (enzo_float)zmb;
 
     // cell widths
-    dx_ = enzo_block->CellWidth[0];
-    dy_ = enzo_block->CellWidth[1];
-    dz_ = enzo_block->CellWidth[2];
+    double xpb,ypb,zpb,hx,hy,hz;
+    block->data()->upper(&xpb,&ypb,&zpb);
+    field.cell_width(xmb,xpb,&hx,
+		     ymb,ypb,&hy,
+		     zmb,zpb,&hz);
+
+
+    dx_ = (enzo_float) hx;
+    dy_ = (enzo_float) hy;
+    dz_ = (enzo_float) hz;
+
+    // ghost depth 
+    field.ghost_depth(0,&gx_,&gy_,&gz_);
   }
 
   // compute positions at cell-centers
@@ -292,6 +303,10 @@ public:
     return y_left_edge_ + dy_* (enzo_float)(j-gy_);}
   enzo_float z_face(int k, int j, int i){
     return z_left_edge_ + dz_* (enzo_float)(k-gz_);}
+
+  enzo_float dx() {return dx_;}
+  enzo_float dy() {return dy_;}
+  enzo_float dz() {return dz_;}
   
 private:
   // the starting position of the edge of the active grid
@@ -379,7 +394,6 @@ void bfieldc_helper_(Block *block, bool three_dim)
       }
     }
   }
-
 }
 
 
@@ -394,20 +408,18 @@ void bfieldc_helper_(Block *block, bool three_dim)
 //    ( Ay(k-1/2,     j, i+1/2) - Ay(k-1/2,     j, i-1/2) )/dx -
 //    ( Ax(k-1/2, j+1/2,     i) - Ax(k-1/2, j-1/2,     i) )/dy
   
-void setup_bfield(Block * block, VectorInit &a, MeshPos &pos,
+void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
-  EnzoBlock * enzo_block = enzo::block(block);
-
   EnzoArray<enzo_float> bfieldi_x, bfieldi_y, bfieldi_z;
   initialize_field_array(block, bfieldi_x, "bfieldi_x");
   initialize_field_array(block, bfieldi_y, "bfieldi_y");
   initialize_field_array(block, bfieldi_z, "bfieldi_z");
 
   // cell widths
-  enzo_float dx = enzo_block->CellWidth[0];
-  enzo_float dy = enzo_block->CellWidth[1];
-  enzo_float dz = enzo_block->CellWidth[2];
+  enzo_float dx = pos.dx();
+  enzo_float dy = pos.dy();
+  enzo_float dz = pos.dz();
 
   // allocate corner-centered arrays for the magnetic vector potentials
   // Ax, Ay, and Az are always cell-centered along the x, y, and z dimensions,
@@ -416,7 +428,7 @@ void setup_bfield(Block * block, VectorInit &a, MeshPos &pos,
   Ax.initialize(mz+1,my+1,mx);
   Ay.initialize(mz+1,my,mx+1);
   Az.initialize(mz,my+1,mx+1);
-  
+
   // Compute the Magnetic Vector potential at all points on the grid
   for (int iz=0; iz<mz+1; iz++){
     for (int iy=0; iy<my+1; iy++){
@@ -424,17 +436,19 @@ void setup_bfield(Block * block, VectorInit &a, MeshPos &pos,
 
 	enzo_float temp_ax, temp_ay, temp_az;
 
+	
+
 	if (ix != mx){
-	  a(pos.x(iz,iy,ix),  pos.y_face(iz,iy,ix),  pos.z_face(iz,iy,ix),
-	    Ax(iz,iy,ix), temp_ay, temp_az);
+	  (*a)(pos.x(iz,iy,ix),  pos.y_face(iz,iy,ix),  pos.z_face(iz,iy,ix),
+	       Ax(iz,iy,ix), temp_ay, temp_az);
 	}
 	if (iy != my){
-	  a(pos.x_face(iz,iy,ix),  pos.y(iz,iy,ix),  pos.z_face(iz,iy,ix),
-	    temp_ay, Ay(iz,iy,ix), temp_az);
+	  (*a)(pos.x_face(iz,iy,ix),  pos.y(iz,iy,ix),  pos.z_face(iz,iy,ix),
+	       temp_ay, Ay(iz,iy,ix), temp_az);
 	}
 	if (iz != mz){
-	  a(pos.x_face(iz,iy,ix),  pos.y_face(iz,iy,ix),  pos.z(iz,iy,ix),
-	    temp_ax, temp_ay, Az(iz,iy,ix));
+	  (*a)(pos.x_face(iz,iy,ix),  pos.y_face(iz,iy,ix),  pos.z(iz,iy,ix),
+	       temp_ax, temp_ay, Az(iz,iy,ix));
 	}
       }
     }
@@ -453,9 +467,9 @@ void setup_bfield(Block * block, VectorInit &a, MeshPos &pos,
 }
 
 
-void setup_fluid(Block *block, ScalarInit &density_init,
-		 ScalarInit &total_energy_init, 
-		 VectorInit &momentum_init,
+void setup_fluid(Block *block, ScalarInit *density_init,
+		 ScalarInit *total_energy_init, 
+		 VectorInit *momentum_init,
 		 MeshPos &pos, int mx, int my, int mz)
 {
   EnzoArray<enzo_float> density, total_energy;
@@ -467,17 +481,16 @@ void setup_fluid(Block *block, ScalarInit &density_init,
   initialize_field_array(block, momentum[1], "momentum_y");
   initialize_field_array(block, momentum[2], "momentum_z");
 
-  for (int iz=0;iz<mz;iz++){
+  for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
       for (int ix=0; ix<mx; ix++){
 	enzo_float x,y,z;
 	x = pos.x(iz,iy,ix); y = pos.y(iz,iy,ix); z = pos.z(iz,iy,ix);
 
-	density(iz,iy,ix) = density_init(x,y,z);
-	total_energy(iz,iy,ix) = total_energy_init(x,y,z);
-
-	momentum_init(x,y,z,momentum[0](iz,iy,ix), momentum[1](iz,iy,ix),
-		      momentum[2](iz,iy,ix));
+	density(iz,iy,ix) = (*density_init)(x,y,z);
+	total_energy(iz,iy,ix) = (*total_energy_init)(x,y,z);
+	(*momentum_init)(x,y,z,momentum[0](iz,iy,ix), momentum[1](iz,iy,ix),
+			 momentum[2](iz,iy,ix));
       }
     }
   }
@@ -500,10 +513,11 @@ EnzoInitialLinearWave::EnzoInitialLinearWave(int cycle, double time,
     pos_vel_(pos_vel),
     wave_type_(wave_type)
 {
-  if (!valid_wave_type_()) {
-	printf("Invalid wave_type specified - no values will be specified.\n"
-	       "Valid values include: 'fast', 'slow', 'alfven' and 'entropy\n");
-  }
+  ASSERT("EnzoInitialLinearWave",
+	 ("(Invalid wave_type specified (must be 'fast', 'slow', 'alfven' or"
+	  "'entropy'"),
+	 (wave_type_ == "fast") || (wave_type_ == "alfven") ||
+	 (wave_type_ == "slow") || (wave_type_ == "entropy"));
 }
 
 //----------------------------------------------------------------------
@@ -516,40 +530,43 @@ void EnzoInitialLinearWave::enforce_block(Block * block,
   // does NOT support AMR
   // (PPML initial conditions are much more complicated)
 
-  if (valid_wave_type_()){
-    ScalarInit *density_init = NULL;
-    ScalarInit *total_energy_init = NULL;
-    VectorInit *momentum_init = NULL;
-    VectorInit *a_init = NULL;
+  Field field  = block->data()->field();
+  ASSERT("EnzoInitialLinearWave",
+	 "Insufficient number of fields",
+	 field.field_count() >= 8);
+  
+  ScalarInit *density_init = NULL;
+  ScalarInit *total_energy_init = NULL;
+  VectorInit *momentum_init = NULL;
+  VectorInit *a_init = NULL;
 
-    prepare_initializers_(density_init, total_energy_init, momentum_init,
-			  a_init);
+  prepare_initializers_(&density_init, &total_energy_init, &momentum_init,
+			&a_init);
 
-    EnzoBlock * enzo_block = enzo::block(block);
-    int mx = enzo_block->GridDimension[0];
-    int my = enzo_block->GridDimension[1];
-    int mz = enzo_block->GridDimension[2];
+  // Try to load the dimensions, again
+  int mx,my,mz;
+  const int id = field.field_id ("density");
+  field.dimensions (id,&mx,&my,&mz);
+  
+  // Initialize object to compute positions
+  MeshPos pos(block);
 
-    // Initialize object to compute positions
-    MeshPos pos(enzo_block);
+  setup_fluid(block, density_init, total_energy_init, momentum_init,
+	      pos, mx, my, mz);
+  setup_bfield(block, a_init, pos, mx, my, mz);
 
-    setup_fluid(block, *density_init, *total_energy_init, *momentum_init,
-		pos, mx, my, mz);
-    setup_bfield(block, *a_init, pos, mx, my, mz);
-
-    delete density_init;
-    delete total_energy_init;
-    delete momentum_init;
-    delete a_init;
-  }
+  delete density_init;
+  delete total_energy_init;
+  delete momentum_init;
+  delete a_init;
 }
 
 //----------------------------------------------------------------------
 
-void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
-						  ScalarInit *total_energy_init,
-						  VectorInit *momentum_init,
-						  VectorInit *a_init)
+void EnzoInitialLinearWave::prepare_initializers_(ScalarInit **density_init,
+						  ScalarInit **etot_init,
+						  VectorInit **momentum_init,
+						  VectorInit **a_init)
 {
 
   // wsign indicates direction of propogation. May allow for it to change later
@@ -621,38 +638,35 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
   enzo_float lambda = lambda_;
   enzo_float amplitude = amplitude_;
   // Now allocate the actual Initializers
-  density_init = new RotatedScalarInit(alpha_, beta_,
-				       new LinearScalarInit(density_back,
-							    density_ev,
-							    amplitude,
-							    lambda));
-  total_energy_init = new RotatedScalarInit(alpha_, beta_,
-					    new LinearScalarInit(etot_back,
-								 etot_ev,
-								 amplitude,
-								 lambda));
-  momentum_init = new RotatedVectorInit(alpha_, beta_,
-					new LinearVectorInit(mom0_back,
-							     mom1_back,
-							     mom2_back,
-							     mom0_ev,
-							     mom1_ev,
-							     mom2_ev,
+  
+  *density_init = new RotatedScalarInit(alpha_, beta_,
+					new LinearScalarInit(density_back,
+							     density_ev,
 							     amplitude,
 							     lambda));
-  
-  a_init = new RotatedVectorInit(alpha_, beta_,
-				 new LinearVectorPotentialInit(b0_back,
-							       b1_back,
-							       b2_back,
-							       b1_ev,
-							       b2_ev,
-							       amplitude,
-							       lambda));
+
+  *etot_init = new RotatedScalarInit(alpha_, beta_,
+				     new LinearScalarInit(etot_back,
+							  etot_ev,
+							  amplitude,
+							  lambda));
+
+  *momentum_init = new RotatedVectorInit(alpha_, beta_,
+					 new LinearVectorInit(mom0_back,
+							      mom1_back,
+							      mom2_back,
+							      mom0_ev,
+							      mom1_ev,
+							      mom2_ev,
+							      amplitude,
+							      lambda));
+
+  *a_init = new RotatedVectorInit(alpha_, beta_,
+				  new LinearVectorPotentialInit(b0_back,
+								b1_back,
+								b2_back,
+								b1_ev,
+								b2_ev,
+								amplitude,
+								lambda));
 }
-
-//----------------------------------------------------------------------
-
-bool EnzoInitialLinearWave::valid_wave_type_()
-{return ((wave_type_ == "fast") || (wave_type_ == "alfven") ||
-	 (wave_type_ == "slow") || (wave_type_ == "entropy"));}

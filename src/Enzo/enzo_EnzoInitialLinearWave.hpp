@@ -61,12 +61,10 @@ public: // virtual methods
 
 private: // functions
 
-  void prepare_initializers_(ScalarInit *density_init,
-			     ScalarInit *total_energy_init, 
-			     VectorInit *momentum_init,
-			     VectorInit *a_init);
-
-  bool valid_wave_type_();
+  void prepare_initializers_(ScalarInit **density_init,
+			     ScalarInit **etot_init, 
+			     VectorInit **momentum_init,
+			     VectorInit **a_init);
 
 private: // attributes
 

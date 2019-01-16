@@ -25,6 +25,22 @@ void load_grouping_field_(Block *block, Grouping &grouping,
   array.initialize_wrapper(data,mz,my,mx);
 }
 
+// Helper function that returns the dimensions of the cell-centered grid
+// This doesn't take dimensions from EnzoBlock because the functions may be
+// called while setting initial values (when EnzoBlock has not yet been set up)
+void cell_centered_dim_(Field &field, int id, int *mx, int *my, int *mz)
+{
+  int nx,ny,nz;
+  field.size(&nx,&ny,&nz);
+  int gx,gy,gz;
+  field.ghost_depth(id,&gx,&gy,&gz);
+
+  *mx = nx + 2*gx;
+  *my = ny + 2*gx;
+  *mz = nz + 2*gx;
+  
+}
+
 // Because temporary fields must be allocated as cell-centered, we do not
 // have FieldDescr internally track the centering of the fields. Consequently,
 // we must specify the centering of the EnzoArray. Setting cell_centered_{dim}
@@ -41,12 +57,13 @@ void load_temp_interface_grouping_field_(Block *block, Grouping &grouping,
   if ((size == 0) || (size>=index)){
     return;
   }
-  EnzoBlock * enzo_block = enzo::block(block);
-  Field field = enzo_block->data()->field();
-  enzo_float *data =(enzo_float *)field.values(grouping.item(group_name,index));
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
+
+  Field field = block->data()->field();
+  std::string field_name = grouping.item(group_name,index);
+  enzo_float *data =(enzo_float *)field.values(field_name);
+
+  int mx, my, mz;
+  cell_centered_dim_(field, field.field_id(field_name), &mx, &my, &mz);
   if (!cell_centered_x) {
     mx--;
   }
@@ -68,17 +85,17 @@ void load_interior_bfieldi_field_(Block *block, Grouping &grouping,
   if ((size == 0) || (size>=dim)){
     return;
   }
-  EnzoBlock * enzo_block = enzo::block(block);
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
+
   int dix = (dim == 0) ? 1 : 0;
   int diy = (dim == 1) ? 1 : 0;
   int diz = (dix == diy) ? 1 : 0;
 
-  Field field = enzo_block->data()->field();
+  Field field = block->data()->field();
   std::string field_name = grouping.item("bfield",dim);
   enzo_float *data =(enzo_float *)field.values(field_name);
+
+  int mx,my,mz;
+  cell_centered_dim_(field, field.field_id(field_name), &mx, &my, &mz);
   
   if (field.is_permanent(field.field_id(field_name))){
     EnzoArray<enzo_float> temp_array;
