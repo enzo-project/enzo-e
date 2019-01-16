@@ -8,21 +8,6 @@
 //
 // Some notes on implementation
 //    - this Method tracks total energy density, (referred to as total_energy)
-//    - things are presently in flux. It turns out that temporary fields must
-//      be allocated as cell-centered fields. Originally all face-centered
-//      temporary fields were assumed to be allocated having (mi+1,mj,mk)
-//      values, if the field is face-centered along dimension i.
-//      - Going forward, it will be assumed that each temporary face-centered
-//        field holds (mi-1, mj, mk) entries (even though slightly more memory
-//        is allocated).
-//      - The temporary fields for the interface b-fields have fundamentally
-//        different shape than the permanent interface b-fields. The
-//        load_interior_bfieldi_field_ helper function addresses this problem.
-//        It initializes EnzoArrays for both permanent and temporary interface
-//        b-fields that only include face-centered values on the interior of
-//        the grid
-//      - Need to Propogate Changes to:
-//         - Applying flux divergence
 //
 //    Grouping Objects
 //    ----------------
@@ -92,6 +77,8 @@
 //                at a single location.
 //             3. Completely couple RiemannSolvers to the gas physics and have
 //                write out the conversion within the function.
+//        - The current implementation of Groupings will not scale once colors
+//          and species are implemented.
 //
 //    The number of tracked Groupings could be reduced drastically if we could
 //    track histories of a subset of fields temporarily, and if we could easily
@@ -131,9 +118,6 @@ class EnzoConstrainedTransport;
 typedef std::unordered_map<std::string,enzo_float> flt_map;
 
 // define helper function for reading in Grouping fields
-enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
-				 std::string group_name, int index);
-// we will phase out the preceeding helper function for the following
 void load_grouping_field_(Block *block, Grouping &grouping,
 			  std::string group_name, int index,
 			  EnzoArray<enzo_float> &array);

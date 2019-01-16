@@ -13,7 +13,7 @@ import socket
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
 
-new_output = 0
+new_output = 1
 
 #----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev
@@ -76,7 +76,7 @@ check = 0
 # src/Field/field_FieldBlock.cpp
 #----------------------------------------------------------------------
 
-debug_verbose = 0
+debug_verbose = 1
 
 #----------------------------------------------------------------------
 # Whether to track dynamic memory statistics.  Can be useful, but can
@@ -96,7 +96,7 @@ new_charm = 1
 # Enable charm++ dynamic load balancing
 #----------------------------------------------------------------------
 
-balance = 1
+balance = 0
 
 balancer = ['CommonLBs']
 

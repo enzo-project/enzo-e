@@ -7,18 +7,7 @@
            __FILE__,__LINE__, block->name().c_str(), MESSAGE);	  \
  fflush (stdout);
 
-enzo_float* load_grouping_field_(Field *field, Grouping *grouping,
-				 std::string group_name, int index)
-{
-  int size = grouping->size(group_name);
-  if ((size == 0) || (size>=index)){
-    return NULL;
-  }
-  return (enzo_float *) field->values(grouping->item(group_name,index));
-}
 
-// The idea is to completely replace the previous helper function with the
-// following
 void load_grouping_field_(Block *block, Grouping &grouping,
 			  std::string group_name, int index,
 			  EnzoArray<enzo_float> &array)
@@ -503,15 +492,33 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					Grouping &out_cons_group, double dt)
 {
   // Need to address placing floors on density and energy_density
+
+  // Applying the density floor seems non-trivial
+  //   - If we place the floor, then how do we modify the momentum and
+  //     (consequently) the total energy since they are tied to the density
+  // Placing a floor on the total energy density is (relatively) simple
+  // Just call eos_->apply_floor_to_energy(block, out_cons_group) 
   std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
 
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
-  // cell-centered iteration dimensions
+  // cell-centered grid dimensions
   int mx = enzo_block->GridDimension[0];
   int my = enzo_block->GridDimension[1];
   int mz = enzo_block->GridDimension[2];
+
+  const bool three_dim = (mz!=1);
+  
+  // Come up with iteration limits that are generalized for 2D grids
+  int zstart, zstop;
+  if (three_dim){
+    zstart = 1;
+    zstop = mz-1;
+  } else {
+    zstart = 0;
+    zstop = mz;
+  }
 
   // widths of cells
   enzo_float dtdx = dt/enzo_block->CellWidth[0];
@@ -531,29 +538,40 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
     for (int field_ind=0; field_ind<num_fields; field_ind++){
 
       // load in the quantities
-      enzo_float *cur_cons = load_grouping_field_(&field, conserved_group_,
-						  group_name, field_ind);
-      enzo_float *out_cons = load_grouping_field_(&field, &out_cons_group,
-						  group_name, field_ind);
-      enzo_float *xflux = load_grouping_field_(&field, &xflux_group,
-					       group_name, field_ind);
-      enzo_float *yflux = load_grouping_field_(&field, &yflux_group,
-					       group_name, field_ind);
-      enzo_float *zflux = load_grouping_field_(&field, &zflux_group,
-					       group_name, field_ind);
+      EnzoArray<enzo_float> cur_cons, out_cons, xflux, yflux, zflux;
+      load_grouping_field_(block, *conserved_group_, group_name, field_ind,
+			   cur_cons);
+      load_grouping_field_(block, out_cons_group, group_name, field_ind,
+			   out_cons);
+      load_temp_interface_grouping_field_(block, xflux_group, group_name,
+					  field_ind, xflux, false, true, true);
+      load_temp_interface_grouping_field_(block, yflux_group, group_name,
+					  field_ind, yflux, true, false, true);
+      if (three_dim){
+	// only load if the grid is 3D
+	load_temp_interface_grouping_field_(block, zflux_group, group_name,
+					    field_ind, zflux, true, true,
+					    false);
+      }
 
-      for (int iz=1; iz<mz-1; iz++) {
+      for (int iz=zstart; iz<zstop; iz++) {
 	for (int iy=1; iy<my-1; iy++) {
 	  for (int ix=1; ix<mx-1; ix++) {
-	    int c_ind = ix + mx*(iy + my*iz);
 
-	    out_cons[c_ind] = cur_cons[c_ind]
-	      - dtdx * (xflux[ix+1 + (mx+1)*(iy + my*iz)]
-			- xflux[ix + (mx+1)*(iy + my*iz)])
-	      - dtdy * (yflux[ix + mx*(iy+1 + (my+1)*iz)]
-			- yflux[ix + mx*(iy + (my+1)*iz)])
-	      - dtdz * (zflux[ix + mx*(iy + my*(iz+1))]
-			- zflux[ix + mx*(iy + my*iz)]);
+	    enzo_float new_val;
+
+	    if (three_dim){
+	      new_val = (cur_cons(iz,iy,ix)
+			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
+			 - dtdy * (yflux(iz,iy,ix) - xflux(iz,iy-1,ix))
+			 - dtdz * (zflux(iz,iy,ix) - xflux(iz-1,iy,ix)));
+	    } else {
+	      new_val = (cur_cons(iz,iy,ix)
+			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
+			 - dtdy * (yflux(iz,iy,ix) - xflux(iz,iy-1,ix)));
+	    }
+	    // Can nominally place a floor on new_val here
+	    out_cons(iz,iy,ix) = new_val;
 	  }
 	}
       }
