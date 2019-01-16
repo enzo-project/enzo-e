@@ -344,7 +344,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       // Finally, update cell-centered B-field 
       for (int dim = 0; dim<ndim; dim++){
 	ct.compute_center_bfield(block, dim, *out_cons_group,
-				 *out_bfieldi_group, dt);
+				 *out_bfieldi_group);
       }
     }
 

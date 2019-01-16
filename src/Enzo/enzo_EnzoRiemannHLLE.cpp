@@ -60,7 +60,7 @@ void load_fluid_fields_(Block *block, array_map &arrays, Grouping &grouping,
 
 void cleanup_array_map_(array_map &arrays, std::vector<std::string> &keys)
 {
-  for (int i=0; i < keys.size();i++){
+  for (unsigned int i=0; i < keys.size();i++){
     std::string key = keys[i];
     delete arrays[key];
   }
@@ -82,7 +82,7 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
       "velocity_k", "pressure", "bfield_i", "bfield_j", "bfield_k"};
   std::vector<std::string> cons_keys{"density", "momentum_i", "momentum_j",
       "momentum_k", "total_energy", "bfield_i", "bfield_j", "bfield_k"};
-  int length = 8;
+  unsigned int length = 8;
 
   flt_map wl, wr, Ul, Ur, Fl, Fr;
   wl.reserve(length); wr.reserve(length);
@@ -115,7 +115,7 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
       for (int ix=0; ix<flux_arrays["density"]->length_dim0(); ix++) {
 
 	// get the fluid fields
-	for (int field_ind=0; field_ind<length; field_ind++){
+	for (unsigned int field_ind=0; field_ind<length; field_ind++){
 	  std::string key = prim_keys[field_ind];
 	  wl[key] = (*(wl_arrays[key]))(iz,iy,ix);
 	  wr[key] = (*(wr_arrays[key]))(iz,iy,ix);
@@ -139,7 +139,7 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 	interface_flux_(wr, Ur, Fr, mag_pressure_r);
 
 	// Now compute the Riemann Flux
-	for (int field_ind=0; field_ind<length; field_ind++){
+	for (unsigned int field_ind=0; field_ind<length; field_ind++){
 	  std::string key = cons_keys[field_ind];
 
 	  (*(flux_arrays[key]))(iz,iy,ix) =

@@ -348,6 +348,41 @@ void bfieldi_helper_(EnzoArray<enzo_float> &bfield, EnzoArray<enzo_float> &Aj,
   }
 }
 
+// Helps compute the cell-centered B-fields
+void bfieldc_helper_(Block *block, bool three_dim)
+{
+  EnzoConstrainedTransport ct;
+  Grouping bfieldc_group, bfieldi_group;
+  bfieldc_group.add("bfield", "bfieldc_x");
+  bfieldc_group.add("bfield", "bfieldc_y");
+  bfieldc_group.add("bfield", "bfieldc_z");
+
+  bfieldi_group.add("bfield", "bfieldi_x");
+  bfieldi_group.add("bfield", "bfieldi_y");
+  bfieldi_group.add("bfield", "bfieldi_z");
+  ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group);
+  ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group);
+  if (three_dim){
+    ct.compute_center_bfield(block, 2, bfieldc_group, bfieldi_group);
+  } else {
+    // For a 2D grid, still need to set up the cell-centered B-field in
+    // z-direction. EnzoConstraintedTransport is not designed to compute the
+    // cell-center B-field in this case.
+
+    EnzoArray<enzo_float> bfieldi_z, bfieldc_z;
+    initialize_field_array(block, bfieldi_z, "bfieldi_z");
+    initialize_field_array(block, bfieldc_z, "bfieldc_z");
+
+    for (int iy = 0; iy<bfieldc_z.length_dim1(); iy++){
+      for (int ix = 0; ix<bfieldc_z.length_dim0(); ix++){
+	bfieldc_z(0,iy,ix) = 0.5 * (bfieldi_z(1,iy,ix) - bfieldi_z(0,iy,ix));
+      }
+    }
+  }
+
+}
+
+
 // Components of the magnetic field from the vector potential
 // Bx(k, j, i-1/2) =
 //    ( Az(    k, j+1/2, i-1/2) - Az(    k, j-1/2, i-1/2) )/dy -
@@ -409,6 +444,12 @@ void setup_bfield(Block * block, VectorInit &a, MeshPos &pos,
   bfieldi_helper_(bfieldi_x, Ay, Az, 0, dy,dz);
   bfieldi_helper_(bfieldi_y, Az, Ax, 1, dz,dx);
   bfieldi_helper_(bfieldi_z, Ax, Ay, 2, dx,dy);
+
+  // Compute the Cell-Centered B-fields
+  // This is not strictly necessary to run the simulation forward in time.
+  // However, it is necessary if we want to know the initial values.
+  bfieldc_helper_(block, mz != 1);
+
 }
 
 
@@ -565,7 +606,8 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit *density_init,
     etot_ev = 3. * coef;
     b1_ev = -2. * coef;
     b2_ev = 0;
-  } else if (wave_type_ == "entropy") {
+  } else {
+    // wave_type_ == "entropy"
     enzo_float coef = 0.5;
     density_ev = 2. *coef;
     mom0_ev = 2. * coef;

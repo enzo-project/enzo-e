@@ -422,8 +422,7 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
 						     Grouping &cons_group,
-						     Grouping &bfieldi_group,
-						     enzo_float dt)
+						     Grouping &bfieldi_group)
 {
   // Identify which axis dimension i is aligned with
   int  dxdi, dydi, dzdi;

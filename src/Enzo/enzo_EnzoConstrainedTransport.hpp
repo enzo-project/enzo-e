@@ -36,7 +36,7 @@ public: // interface
 		     enzo_float dt);
 
   void compute_center_bfield(Block *block, int dim, Grouping &cons_group,
-			     Grouping &bfieldi_group, enzo_float dt);
+			     Grouping &bfieldi_group);
 
 };
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */
