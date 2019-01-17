@@ -218,6 +218,7 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
+      /// EnzoMethodFeedback
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -438,6 +439,8 @@ public: // attributes
   bool                       method_hydro_reconstruct_conservative;
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
+
+  /// EnzoMethodFeedback
 
   /// EnzoMethodStarMaker
 

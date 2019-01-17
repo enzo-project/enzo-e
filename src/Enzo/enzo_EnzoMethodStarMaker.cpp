@@ -95,18 +95,18 @@ int EnzoMethodStarMaker::check_velocity_divergence(
       return 1.0;
     }
 
-    int result = 0.0;
+    int result = 0;
 
     if(vx){
-      result += vx[index+dix] - vx[index-dix];
+      result = (vx[index+dix] - vx[index-dix] < 0) ? 1 : 0;
     }
 
-    if(vy){
-      result += vy[index+diy] - vy[index-diy];
+    if(vy && result){
+      result = (vy[index+diy] - vy[index-diy] < 0) ? 1 : 0;
     }
 
-    if(vz){
-      result += vz[index+diz] - vz[index-diz];
+    if(vz && result){
+      result = (vz[index+diz] - vz[index-diz] < 0) ? 1 : 0;
     }
 
     return result;

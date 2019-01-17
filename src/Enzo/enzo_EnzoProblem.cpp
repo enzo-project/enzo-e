@@ -535,11 +535,17 @@ Method * EnzoProblem::create_method_
 
   } else if (name == "star_maker") {
 
+    // should generalize this to enable multiple maker types
     if (enzo_config->method_star_maker_type == "stochastic"){
       method = new EnzoMethodStarMakerStochasticSF();
     } else{ // does not do anything
       method = new EnzoMethodStarMaker();
     }
+
+  } else if (name == "feedback") {
+
+    // need a similar type swtich as in star maker
+    method = new EnzoMethodFeedback();
 
   } else {
 

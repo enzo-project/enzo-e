@@ -132,6 +132,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_riemann_solver(""),
   // EnzoMethodNull
   method_null_dt(0.0),
+  // EnzoMethodFeedback
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                             // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF

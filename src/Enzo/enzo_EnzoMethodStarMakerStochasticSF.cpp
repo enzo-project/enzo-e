@@ -27,7 +27,7 @@ void EnzoMethodStarMakerStochasticSF::pup (PUP::er &p)
 
   TRACEPUP;
 
-  Method::pup(p);
+  EnzoMethodStarMaker::pup(p); // call parent class pup
 
 }
 
@@ -40,6 +40,8 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
+
+  int count = 0;
 
   // Are we at the highest level?
   if (block->is_leaf()) {
@@ -118,9 +120,13 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
           // Apply the criteria for star formation
           if (! this->check_number_density_threshold(ndens)) continue;
+
+
           if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                                velocity_z, i,
                                                1, my, my*mz)) continue;
+
+
           if (! this->check_minimum_mass(mass)) continue;
 
           // compute SF
@@ -162,11 +168,17 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
           if (velocity_y) pvy[ipp*ps] = velocity_y[i];
           if (velocity_z) pvz[ipp*ps] = velocity_z[i];
 
+          count++;
+
         }
       }
     } // end loop iz
 
   } // end leaf check
+
+  if (count > 0){
+      std::cout << "Number of particles formed:   " << count << "\n";
+  }
 
   enzo_block->compute_done();
 

@@ -75,8 +75,10 @@ module enzo {
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
 
+  PUPable EnzoMethodBackgroundAcceleration;
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
+  PUPable EnzoMethodFeedback;
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
@@ -86,7 +88,6 @@ module enzo {
   PUPable EnzoMethodPmUpdate;
   PUPable EnzoMethodTurbulence;
   PUPable EnzoMethodGravity;
-  PUPable EnzoMethodBackgroundAcceleration;
   PUPable EnzoMethodStarMaker;
   PUPable EnzoMethodStarMakerStochasticSF;
 

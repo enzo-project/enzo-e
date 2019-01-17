@@ -71,17 +71,18 @@ enum {
 enum enzo_sync_id {
   enzo_sync_id_cg = sync_id_last,
   enzo_sync_id_comoving_expansion,
+  enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_cosmology,
+  enzo_sync_id_method_feedback,
   enzo_sync_id_method_grackle,
   enzo_sync_id_method_gravity,
-  enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_heat,
   enzo_sync_id_method_null,
-  enzo_sync_id_method_star_maker,
   enzo_sync_id_method_pm_deposit,
   enzo_sync_id_method_pm_update,
   enzo_sync_id_method_ppm,
   enzo_sync_id_method_ppml,
+  enzo_sync_id_method_star_maker,
   enzo_sync_id_method_turbulence,
   enzo_sync_id_solver_bicgstab,
   enzo_sync_id_solver_cg,
@@ -225,11 +226,12 @@ extern "C" {
 #include "enzo_EnzoRefineParticleMass.hpp"
 #include "enzo_EnzoRefineMass.hpp"
 
+#include "enzo_EnzoMethodBackgroundAcceleration.hpp"
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
+#include "enzo_EnzoMethodFeedback.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
-#include "enzo_EnzoMethodBackgroundAcceleration.hpp"
 #include "enzo_EnzoMethodHydro.hpp"
 #include "enzo_EnzoMethodHeat.hpp"
 #include "enzo_EnzoMethodNull.hpp"
