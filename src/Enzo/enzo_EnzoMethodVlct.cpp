@@ -1,6 +1,7 @@
 
 #include "cello.hpp"
 #include "enzo.hpp"
+#include "charm_enzo.hpp"
 
 #define TRACE_VLCT(MESSAGE)                                       \
  CkPrintf ("%s:%d TRACE_VLCT %s %s\n",                            \
@@ -14,14 +15,22 @@ void load_grouping_field_(Block *block, Grouping &grouping,
 {
   Field field = block->data()->field();
   int size = grouping.size(group_name);
-  if ((size == 0) || (size>=index)){
+
+  //ASSERT1("load_grouping_field_ - %s is not the name of a real group\n",
+  //group_name.c_str(), (size != 0));
+  //ASSERT("load_grouping_field_ - index is too large\n",(size>index));
+  if (size <= index){
+    CkPrintf ("index is too big\n");
+    fflush (stdout);
     return;
   }
   std::string field_name = grouping.item(group_name,index);
+  
   enzo_float *data = (enzo_float *) field.values(field_name);
   int id = field.field_id(field_name);
   int mx, my, mz;
   field.dimensions (id,&mx,&my,&mz);
+
   array.initialize_wrapper(data,mz,my,mx);
 }
 
@@ -54,7 +63,13 @@ void load_temp_interface_grouping_field_(Block *block, Grouping &grouping,
 					 bool cell_centered_z)
 {
   int size = grouping.size(group_name);
-  if ((size == 0) || (size>=index)){
+  //ASSERT1("load_grouping_field_ - %s is not the name of a real group\n",
+  //group_name.c_str(), (size != 0));
+  //ASSERT("load_grouping_field_ - index is too large\n",(size>index));
+
+  if (size <= index){
+    CkPrintf ("index is too big\n");
+    fflush (stdout);
     return;
   }
 
@@ -82,7 +97,12 @@ void load_interior_bfieldi_field_(Block *block, Grouping &grouping,
 				  int dim, EnzoArray<enzo_float> &array)
 {
   int size = grouping.size("bfield");
-  if ((size == 0) || (size>=dim)){
+  //ASSERT("load_interior_bfieldi_field_ - dim must be less than 3\n.",
+  //        dim<size);
+
+  if (size <= dim){
+    CkPrintf ("dim is too big\n");
+    fflush (stdout);
     return;
   }
 
@@ -178,29 +198,29 @@ void EnzoMethodVlct::setup_groups_()
   // In the future, this may also incorporate species, colors, and CRs
 
   conserved_group_->add("density", "density");
-  conserved_group_->add("momentum", "momentum_x");
-  conserved_group_->add("momentum", "momentum_y");
-  conserved_group_->add("momentum", "momentum_z");
+  conserved_group_->add("momentum_x","momentum");
+  conserved_group_->add("momentum_y","momentum");
+  conserved_group_->add("momentum_z","momentum");
   conserved_group_->add("total_energy", "total_energy");
-  conserved_group_->add("bfield", "bfieldc_x");
-  conserved_group_->add("bfield", "bfieldc_y");
-  conserved_group_->add("bfield", "bfieldc_y");
+  conserved_group_->add("bfieldc_x", "bfield");
+  conserved_group_->add("bfieldc_y", "bfield");
+  conserved_group_->add("bfieldc_z", "bfield");
 
-  bfieldi_group_->add("bfield", "bfieldi_x");
-  bfieldi_group_->add("bfield", "bfieldi_y");
-  bfieldi_group_->add("bfield", "bfieldi_z");
+  bfieldi_group_->add("bfieldi_x", "bfield");
+  bfieldi_group_->add("bfieldi_y", "bfield");
+  bfieldi_group_->add("bfieldi_z", "bfield");
 
   // For transparency we will create secondary "primitive" density and magnetic
   // fields
-  primitive_group_->add("density", "prim_density");
-  primitive_group_->add("velocity", "velocity_x");
-  primitive_group_->add("velocity", "velocity_y");
-  primitive_group_->add("velocity", "velocity_z");
+  primitive_group_->add("prim_density", "density");
+  primitive_group_->add("velocity_x", "velocity");
+  primitive_group_->add("velocity_y", "velocity");
+  primitive_group_->add("velocity_z", "velocity");
   primitive_group_->add("pressure", "pressure");
   // The following are cell-centered
-  primitive_group_->add("bfield", "prim_bfield_x");
-  primitive_group_->add("bfield", "prim_bfield_y");
-  primitive_group_->add("bfield", "prim_bfield_y");
+  primitive_group_->add("prim_bfield_x", "bfield");
+  primitive_group_->add("prim_bfield_y", "bfield");
+  primitive_group_->add("prim_bfield_z", "bfield");
 
 }
 
@@ -872,6 +892,9 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   int ix_end = enzo_block->GridEndIndex[0];
   int iy_end = enzo_block->GridEndIndex[1];
   int iz_end = enzo_block->GridEndIndex[2];
+
+  CkPrintf ("%s:%d TRACE_VLCT");
+  fflush (stdout);
 
   // widths of cells
   double dx = enzo_block->CellWidth[0];

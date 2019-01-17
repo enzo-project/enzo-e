@@ -151,6 +151,9 @@ public:
     return out;
   }
 
+  // This function exists for debugging.
+  const T* get_ptr(){return data_;}
+
 protected: // methods
   void init_helper_(T* array, int dim3, int dim2, int dim1, int dim0,
 		    int offset, bool owns_ptr);

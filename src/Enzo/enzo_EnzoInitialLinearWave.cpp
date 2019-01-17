@@ -368,13 +368,13 @@ void bfieldc_helper_(Block *block, bool three_dim)
 {
   EnzoConstrainedTransport ct;
   Grouping bfieldc_group, bfieldi_group;
-  bfieldc_group.add("bfield", "bfieldc_x");
-  bfieldc_group.add("bfield", "bfieldc_y");
-  bfieldc_group.add("bfield", "bfieldc_z");
+  bfieldc_group.add("bfieldc_x","bfield");
+  bfieldc_group.add("bfieldc_y","bfield");
+  bfieldc_group.add("bfieldc_z","bfield");
 
-  bfieldi_group.add("bfield", "bfieldi_x");
-  bfieldi_group.add("bfield", "bfieldi_y");
-  bfieldi_group.add("bfield", "bfieldi_z");
+  bfieldi_group.add("bfieldi_x", "bfield");
+  bfieldi_group.add("bfieldi_y", "bfield");
+  bfieldi_group.add("bfieldi_z", "bfield");
   ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group);
   ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group);
   if (three_dim){
@@ -460,8 +460,6 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
   bfieldi_helper_(bfieldi_z, Ax, Ay, 2, dx,dy);
 
   // Compute the Cell-Centered B-fields
-  // This is not strictly necessary to run the simulation forward in time.
-  // However, it is necessary if we want to know the initial values.
   bfieldc_helper_(block, mz != 1);
 
 }

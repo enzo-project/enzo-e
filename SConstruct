@@ -13,7 +13,7 @@ import socket
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
 
-new_output = 1
+new_output = 0
 
 #----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev
