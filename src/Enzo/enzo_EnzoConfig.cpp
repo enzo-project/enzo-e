@@ -434,7 +434,7 @@ void EnzoConfig::read(Parameters * p) throw()
   // InitialLinearWave initialization
   
   initial_linearwave_alpha          = p->value_float
-    ("Initial:linear_wave:lambda",0.0);
+    ("Initial:linear_wave:alpha",0.0);
   initial_linearwave_beta           = p->value_float
     ("Initial:linear_wave:beta",0.0);
   initial_linearwave_amplitude      = p->value_float

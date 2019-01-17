@@ -23,21 +23,22 @@ void initialize_field_array(Block *block, EnzoArray<enzo_float> &array,
 // The system of the mesh are x,y,z
 // The system of the linear wave is x0, x1, x2
 // The linear waves are defined along x0
-// {{x0},   {{cos(a), 0, -sin(a)},   {{ cos(b), sin(b), 0},   {{x},
-//  {x1}, =  {     0, 1,       0}, .  {-sin(b), cos(b), 0}, .  {y},
-//  {x2}}    {sin(a), 0,  cos(a)}}    {      0,      0, 1}}    {z}}
+// {{x0},   {{ cos(a), 0, sin(a)},   {{ cos(b), sin(b), 0},   {{x},
+//  {x1}, =  {     0,  1,      0}, .  {-sin(b), cos(b), 0}, .  {y},
+//  {x2}}    {-sin(a), 0, cos(a)}}    {      0,      0, 1}}    {z}}
 //                    R2                          R1
 //  R1, the second matix, rotates a 3D vector about it's third dimension by
 //  angle -b. In this case, if z-axis points out of the page, then rotate
 //  axes clockwise. The rotated y-axis now points along the x1 dimension
 //
 //  R2, the first matrix, rotates a 3D vector about it's second axis by angle
-//  a. In this case, if the axis along the second dimension (x1) points out of
-//  the page, then rotate the other axes counter clockwise.
+//  -a. In this case, if the axis along the second dimension (x1) points out of
+//  the page, then rotate the other axes clockwise. The rotated x- and z- axes
+//  now point along the x0- and x2- axes
 //
 //  Note that they give transformation of x0,x1,x2 -> x,y,z while the
-//  calculations primarily use x,y,z -> x0,x1,x2 (since the the rotation is
-//  easier to visualize
+//  implementation primarily use x,y,z -> x0,x1,x2 (since the the rotation is
+//  easier to visualize)
 
 class Rotation {
 public:
@@ -58,9 +59,9 @@ public:
   void rot(enzo_float v0, enzo_float v1, enzo_float v2,
 	      enzo_float &rot0, enzo_float &rot1, enzo_float &rot2)
   {
-    rot0 = matrix_[0][0]*v0 + matrix_[0][1]*v1 + matrix_[0][2];
-    rot1 = matrix_[1][0]*v0 + matrix_[1][1]*v1 + matrix_[1][2];
-    rot2 = matrix_[2][0]*v0 + matrix_[2][1]*v1 + matrix_[2][2];
+    rot0 = matrix_[0][0]*v0 + matrix_[0][1]*v1 + matrix_[0][2]*v2;
+    rot1 = matrix_[1][0]*v0 + matrix_[1][1]*v1 + matrix_[1][2]*v2;
+    rot2 = matrix_[2][0]*v0 + matrix_[2][1]*v1 + matrix_[2][2]*v2;
   }
 
   // rotates vector {rot0, rot1, rot2} to {v0, v1, v2}
@@ -70,6 +71,25 @@ public:
     v0 = matrix_[0][0]*rot0 + matrix_[1][0]*rot1 + matrix_[2][0]*rot2;
     v1 = matrix_[0][1]*rot0 + matrix_[1][1]*rot1 + matrix_[2][1]*rot2;
     v2 = matrix_[0][2]*rot0 + matrix_[1][2]*rot1 + matrix_[2][2]*rot2;
+  }
+
+  // For debugging
+  void print_matrix()
+  {
+    for (int j = 0; j<3; j++){
+      if (j == 0){
+	CkPrintf("{");
+      } else {
+	CkPrintf(" ");
+      }
+      CkPrintf(" %.5g, %.5g, %.5g}",
+	       matrix_[j][0], matrix_[j][1], matrix_[j][2]);
+      if (j == 2){
+	CkPrintf("}\n");
+      } else {
+	CkPrintf("\n");
+      }
+    }
   }
 
 private:
