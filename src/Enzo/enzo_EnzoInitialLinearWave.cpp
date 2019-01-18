@@ -384,7 +384,10 @@ void bfieldi_helper_(EnzoArray<enzo_float> &bfield, EnzoArray<enzo_float> &Aj,
 }
 
 // Helps compute the cell-centered B-fields
-void bfieldc_helper_(Block *block, bool three_dim)
+// Probably should not be using the constrained transport object since it is
+// not equipped to compute the B-field for cells on the outermost layer of the
+// grid.
+void bfieldc_helper_(Block *block)
 {
   EnzoConstrainedTransport ct;
   Grouping bfieldc_group, bfieldi_group;
@@ -395,25 +398,9 @@ void bfieldc_helper_(Block *block, bool three_dim)
   bfieldi_group.add("bfieldi_x", "bfield");
   bfieldi_group.add("bfieldi_y", "bfield");
   bfieldi_group.add("bfieldi_z", "bfield");
-  ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group);
-  ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group);
-  if (three_dim){
-    ct.compute_center_bfield(block, 2, bfieldc_group, bfieldi_group);
-  } else {
-    // For a 2D grid, still need to set up the cell-centered B-field in
-    // z-direction. EnzoConstraintedTransport is not designed to compute the
-    // cell-center B-field in this case.
-
-    EnzoArray<enzo_float> bfieldi_z, bfieldc_z;
-    initialize_field_array(block, bfieldi_z, "bfieldi_z");
-    initialize_field_array(block, bfieldc_z, "bfieldc_z");
-
-    for (int iy = 0; iy<bfieldc_z.length_dim1(); iy++){
-      for (int ix = 0; ix<bfieldc_z.length_dim0(); ix++){
-	bfieldc_z(0,iy,ix) = 0.5 * (bfieldi_z(1,iy,ix) - bfieldi_z(0,iy,ix));
-      }
-    }
-  }
+  ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group, true);
+  ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group, true);
+  ct.compute_center_bfield(block, 2, bfieldc_group, bfieldi_group, true);
 }
 
 
@@ -427,7 +414,11 @@ void bfieldc_helper_(Block *block, bool three_dim)
 // Bz(k-1/2, j, i) =
 //    ( Ay(k-1/2,     j, i+1/2) - Ay(k-1/2,     j, i-1/2) )/dx -
 //    ( Ax(k-1/2, j+1/2,     i) - Ax(k-1/2, j-1/2,     i) )/dy
-  
+//
+// NEED TO ADDRESS
+// ---------------
+// The resulting cell-centered B-fields are offset to the right from where
+// they should be, by half of a cell-length
 void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
@@ -456,8 +447,6 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 
 	enzo_float temp_ax, temp_ay, temp_az;
 
-	
-
 	if (ix != mx){
 	  (*a)(pos.x(iz,iy,ix),  pos.y_face(iz,iy,ix),  pos.z_face(iz,iy,ix),
 	       Ax(iz,iy,ix), temp_ay, temp_az);
@@ -480,7 +469,7 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
   bfieldi_helper_(bfieldi_z, Ax, Ay, 2, dx,dy);
 
   // Compute the Cell-Centered B-fields
-  bfieldc_helper_(block, mz != 1);
+  bfieldc_helper_(block);
 
 }
 

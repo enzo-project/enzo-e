@@ -422,34 +422,66 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
 						     Grouping &cons_group,
-						     Grouping &bfieldi_group)
+						     Grouping &bfieldi_group,
+						     bool compute_outer)
 {
   // Identify which axis dimension i is aligned with
   int  dxdi, dydi, dzdi;
   aligned_dim_derivatives_(dim, dxdi, dydi, dzdi);
 
-  // Load interface B-field
-  EnzoArray<enzo_float> bfield, b_center, bi_left, bi_right;
-  // cell-centered field
-  load_grouping_field_(block, cons_group, "bfield", dim, bfield);
-  b_center.initialize_subarray(bfield, dzdi, bfield.length_dim2(),
-			       dydi, bfield.length_dim1(),
-			       dxdi, bfield.length_dim0());
-  // face-centered field
-  load_interior_bfieldi_field_(block, bfieldi_group, dim, bi_left);
+
+  EnzoArray<enzo_float> b_center, bi_left, bi_right;
+  int zstop, ystop, xstop;
+  
+  if (compute_outer){
+    // In this case, compute the centered B-field for all cells in the grid
+    // including cells at i = 0 and i = imax-1, where i is the index for the
+    // axis aligned with dim.
+
+    // Load face centered-fields
+    load_grouping_field_(block, cons_group, "bfield", dim, b_center);
+
+    // If we include the exterior interface b-fields, then we want to iterate
+    // over the entire grid
+    zstop = b_center.length_dim2();
+    ystop = b_center.length_dim1();
+    xstop = b_center.length_dim0();
+
+    // Load Face-centered-field - including values on the exterior faces
+    load_grouping_field_(block, bfieldi_group, "bfield", dim, bi_left);
+
+  } else {
+    // In this case, compute the centered B-field for all cells in the grid
+    // except cells at i = 0 and i = imax-1, where i is the index for the
+    // axis aligned with dim.
+    
+    // Load cell-centered B-field
+    // b_center should not include any cells with ix=0, iy=0, or iz =0
+    // since we do not have interface values at i-1/2 and don't need values
+    // along the outmost layer
+    EnzoArray<enzo_float> bfield;
+    load_grouping_field_(block, cons_group, "bfield", dim, bfield);
+    b_center.initialize_subarray(bfield, dzdi, bfield.length_dim2(),
+				 dydi, bfield.length_dim1(),
+				 dxdi, bfield.length_dim0());
+    // Iteration Limits - need to stop when on the last index along dim i
+    zstop = b_center.length_dim2() - dzdi;
+    ystop = b_center.length_dim1() - dydi;
+    xstop = b_center.length_dim0() - dxdi;
+    
+    // Load Face-centered field - excluding values on the exterior faces
+    load_interior_bfieldi_field_(block, bfieldi_group, dim, bi_left);
+  }
+
+  // Get the view of the Face-center field that starting from i=1
   bi_right.initialize_subarray(bi_left, dzdi, bi_left.length_dim2(),
 			       dydi, bi_left.length_dim1(),
 			       dxdi, bi_left.length_dim0());
 
-  // Get grid size
-  int mz = bfield.length_dim2();
-  int my = bfield.length_dim1();
-  int mx = bfield.length_dim0();
-
   // iteration limits are compatible with a 2D grid and 3D grid
-  for (int iz=0; iz<std::max(mz-1,1); iz++) {
-    for (int iy=0; iy<(my-1); iy++) {
-      for (int ix=0; ix<(mx-1); ix++) {
+  for (int iz=0; iz<zstop; iz++) {
+    for (int iy=0; iy<ystop; iy++) {
+      for (int ix=0; ix<xstop; ix++) {
 
 	b_center(iz,iy,ix) = 0.5*(bi_left(iz,iy,ix) + bi_right(iz,iy,ix));
       }
