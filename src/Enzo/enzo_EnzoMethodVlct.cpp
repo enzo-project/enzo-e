@@ -564,7 +564,7 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 
   for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
     // load group name and number of fields in the group
-    std::string group_name = prim_group_names[group_ind];
+    std::string group_name = cons_group_names[group_ind];
     if (group_name == "bfield"){
       continue;
     }
