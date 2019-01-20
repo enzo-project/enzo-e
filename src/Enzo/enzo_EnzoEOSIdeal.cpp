@@ -129,7 +129,9 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
   load_grouping_field_(block, cons_group, "bfield", 2, cons_bz);
 
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
-  
+
+  // It should be okay that this function is being primarily used for
+  // face-centered temporary interior fields
   for (int iz=0; iz<cons_density.length_dim2(); iz++) {
     for (int iy=0; iy<cons_density.length_dim1(); iy++) {
       for (int ix=0; ix<cons_density.length_dim0(); ix++) {

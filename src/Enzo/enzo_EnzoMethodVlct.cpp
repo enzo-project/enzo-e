@@ -3,9 +3,9 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-#define TRACE_VLCT(MESSAGE)                                       \
- CkPrintf ("%s:%d TRACE_VLCT %s %s\n",                            \
-           __FILE__,__LINE__, block->name().c_str(), MESSAGE);	  \
+#define TRACE_VLCT(MESSAGE)					  \
+ CkPrintf ("%s:%d TRACE_VLCT %s %s\n",			  \
+           __FILE__,__LINE__, block->name().c_str(), MESSAGE);  \
  fflush (stdout);
 
 
@@ -16,14 +16,12 @@ void load_grouping_field_(Block *block, Grouping &grouping,
   Field field = block->data()->field();
   int size = grouping.size(group_name);
 
-  //ASSERT1("load_grouping_field_ - %s is not the name of a real group\n",
-  //group_name.c_str(), (size != 0));
-  //ASSERT("load_grouping_field_ - index is too large\n",(size>index));
-  if (size <= index){
-    CkPrintf ("index is too big\n");
-    fflush (stdout);
-    return;
-  }
+  ASSERT1("load_grouping_field_",
+	  "\"%s\" is not the name of a real group\n",
+	  group_name.c_str(), (size != 0));
+  ASSERT3("load_grouping_field_",
+	  "index=%d is larger than %d, the size of group \"%s\"\n",
+	  index, size, group_name.c_str(),(size>index));
   std::string field_name = grouping.item(group_name,index);
   
   enzo_float *data = (enzo_float *) field.values(field_name);
@@ -63,15 +61,12 @@ void load_temp_interface_grouping_field_(Block *block, Grouping &grouping,
 					 bool cell_centered_z)
 {
   int size = grouping.size(group_name);
-  //ASSERT1("load_grouping_field_ - %s is not the name of a real group\n",
-  //group_name.c_str(), (size != 0));
-  //ASSERT("load_grouping_field_ - index is too large\n",(size>index));
-
-  if (size <= index){
-    CkPrintf ("index is too big\n");
-    fflush (stdout);
-    return;
-  }
+  ASSERT1("load_temp_interface_grouping_field_",
+	  "\"%s\" is not the name of a real group\n",
+	  group_name.c_str(), (size != 0));
+  ASSERT3("load_temp_interface_grouping_field_",
+	  "index=%d is larger than %d, the size of group \"%s\"\n",
+	  index, size, group_name.c_str(),(size>index));
 
   Field field = block->data()->field();
   std::string field_name = grouping.item(group_name,index);
@@ -97,14 +92,12 @@ void load_interior_bfieldi_field_(Block *block, Grouping &grouping,
 				  int dim, EnzoArray<enzo_float> &array)
 {
   int size = grouping.size("bfield");
-  //ASSERT("load_interior_bfieldi_field_ - dim must be less than 3\n.",
-  //        dim<size);
-
-  if (size <= dim){
-    CkPrintf ("dim is too big\n");
-    fflush (stdout);
-    return;
-  }
+  ASSERT("load_interior_bfieldi_field_",
+	 "grouping must contain a bfield group.",
+	 size>0);
+  ASSERT2("load_interior_bfieldi_field_",
+	  "dim=%d is larger than %d, the size of group \"bfield\"\n",
+	  dim, size,(size>dim));
 
   int dix = (dim == 0) ? 1 : 0;
   int diy = (dim == 1) ? 1 : 0;
@@ -167,9 +160,6 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   refresh(ir)->add_field(field_descr->field_id("bfieldi_x"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
 
   conserved_group_ = new Grouping;
   bfieldi_group_ = new Grouping;
@@ -264,14 +254,22 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
   if (block->is_leaf()) {
 
+
+ 
     EnzoBlock * enzo_block = enzo::block(block);
+    Field field = enzo_block->data()->field();
+
+    int nx,ny,nz;
+    field.size(&nx,&ny,&nz);
+    // Make assertions about the size of the mesh
+	   
     int ndim;
     if (enzo_block->GridDimension[2] == 1){
       ndim = 2;
     } else {
       ndim = 3;
     }
-    Field field = enzo_block->data()->field();
+    
 
     // declaring Grouping that track temporary fields used for scratch space
     // Groupings of conserved fields and primitive fields are tracked as members
@@ -421,7 +419,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   load_interior_bfieldi_field_(block, cur_bfieldi_group, dim, bfield);
   load_temp_interface_grouping_field_(block, priml_group, "bfield", dim,
 				      l_bfield, dim == 0, dim == 1, dim == 2);
-  load_temp_interface_grouping_field_(block, priml_group, "bfield", dim,
+  load_temp_interface_grouping_field_(block, primr_group, "bfield", dim,
 				      r_bfield, dim == 0, dim == 1, dim == 2);
 
   // All 3 array objects are the same shape
@@ -643,12 +641,19 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
       // Determine field_name
       std::string field_name = field_prefix + (ref_grouping.item(group_name,j));
 
+      int id;
+      if (field.is_field(field_name)){
+	// the temporary field was added in a previous time-step
+	id = field.field_id(field_name);
+      } else {
+	// Reserve a temporary field
+	id = field_descr->insert_temporary(field_name);
+      }
       // allocate temporary field
-      int ir_ = field_descr->insert_temporary(field_name);
-      field.allocate_temporary(ir_);
+      field.allocate_temporary(id);
 
       // add the temporary field to grouping
-      grouping.add(group_name,field_name);
+      grouping.add(field_name,group_name);
 
     }
   }
@@ -675,12 +680,18 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
       field_name = field_prefix + "z";
     }
 
-    // Reserve a temporary field
-    int ir_ = field_descr->insert_temporary(field_name);
+    int id;
+    if (field.is_field(field_name)){
+      // the temporary field was added in a previous time-step
+      id = field.field_id(field_name);
+    } else {
+      // Reserve a temporary field
+      id = field_descr->insert_temporary(field_name);
+    }
     // Allocate the field
-    field.allocate_temporary(ir_);
+    field.allocate_temporary(id);
 
-    grouping.add(group_name,field_name);
+    grouping.add(field_name,group_name);
   }
 }
 
@@ -740,7 +751,8 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 
       // slightly unsure if the field_id will return -1 if the temporary field
       // was used and deallocated in a prior timestep
-      if (field.field_id(field_name) != -1){
+      if (field.is_field(field_name) &&
+	  field.is_permanent(field.field_id(field_name))){
 	continue;
       }
 
@@ -857,10 +869,12 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 
 double EnzoMethodVlct::timestep ( Block * block ) const throw()
 {
-  TRACE_VLCT("timestep()");
   // Implicitly assumes that "pressure" is a permanent field
   // analogous to ppm timestep calulation, probably want to require that cfast
   // is no smaller than some tiny positive number. 
+
+
+  TRACE_VLCT("timestep()");
 
   // Compute the pressure (assumes that "pressure" is a permanent field)
   eos_->compute_pressure(block, *conserved_group_, *primitive_group_);
@@ -877,7 +891,7 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   load_grouping_field_(block, *conserved_group_, "bfield", 2, bfieldc_z);
 
   EnzoArray<enzo_float> pressure;
-  load_grouping_field_(block, *conserved_group_, "pressure", 0, pressure);
+  load_grouping_field_(block, *primitive_group_, "pressure", 0, pressure);
 
   // Get iteration limits
   // Like ppm and ppml, access active region info from enzo_block attributes
@@ -892,9 +906,6 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   int ix_end = enzo_block->GridEndIndex[0];
   int iy_end = enzo_block->GridEndIndex[1];
   int iz_end = enzo_block->GridEndIndex[2];
-
-  CkPrintf ("%s:%d TRACE_VLCT");
-  fflush (stdout);
 
   // widths of cells
   double dx = enzo_block->CellWidth[0];
@@ -936,9 +947,14 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
 
   /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
   dtBaryons *= 0.5*courant_;
-  //if (dtBaryon <= 0){
-  //  ERROR2("EnzoMethodVlct's timestep method() yields an invalid value (%lf) "
-  //	   "for %s\n", (double)dtBaryon, block->name().c_str());
-  //}
+
+  CkPrintf("dt = %lf\n",dtBaryons);
+  fflush(stdout);
+
+  ASSERT2("EnzoMethodVlct::timestep",
+	  "Invalid timestep, %g, was calculated for %s.",
+	  (double)dtBaryons, block->name().c_str(),
+	  dtBaryons>0);
+
   return dtBaryons;
 }
