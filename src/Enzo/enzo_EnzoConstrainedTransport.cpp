@@ -194,7 +194,7 @@ void aligned_dim_derivatives_(int dim, int &dxddim, int &dyddim, int &dzddim)
   } else if (dim == 1){
     dyddim = 1;
     dzddim = 0;
-    dzddim = 0;
+    dxddim = 0;
   } else {
     dzddim = 1;
     dxddim = 0;
@@ -438,7 +438,7 @@ void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
     // including cells at i = 0 and i = imax-1, where i is the index for the
     // axis aligned with dim.
 
-    // Load face centered-fields
+    // Load cell-centerd field
     load_grouping_field_(block, cons_group, "bfield", dim, b_center);
 
     // If we include the exterior interface b-fields, then we want to iterate
@@ -447,7 +447,7 @@ void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
     ystop = b_center.length_dim1();
     xstop = b_center.length_dim0();
 
-    // Load Face-centered-field - including values on the exterior faces
+    // Load Face-centered field - including values on the exterior faces
     load_grouping_field_(block, bfieldi_group, "bfield", dim, bi_left);
 
   } else {

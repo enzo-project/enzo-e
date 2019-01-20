@@ -356,14 +356,17 @@ void bfieldi_helper_(EnzoArray<enzo_float> &bfield, EnzoArray<enzo_float> &Aj,
   EnzoArray<enzo_float> Ak_left, Ak_right,Aj_right, Aj_left;
 
   if (dim == 0){
+    // Aj_right = Ay(iz+1/2,iy,ix-1/2), Ak_right = Az(iz, iy+1/2,ix-1/2)
     Aj_right.initialize_subarray(Aj, 1, fc_mz+1, 0, fc_my, 0, fc_mx);
     Ak_right.initialize_subarray(Ak, 0, fc_mz, 1, fc_my+1, 0, fc_mx);
   } else if (dim == 1){
+    // Aj_right = Az(iz,iy-1/2,ix+1/2), Ak_right = Ax(iz+1/2,iy-1/2,ix)
     Aj_right.initialize_subarray(Aj, 0, fc_mz, 0, fc_my, 1, fc_mx+1);
     Ak_right.initialize_subarray(Ak, 1, fc_mz+1, 0, fc_my, 0, fc_mx);
   } else {
+    // Aj_right = Ax(iz-1/2,iy+1/2,ix), Ak_right = Ay(iz-1/2,iy,ix+1/2)
     Aj_right.initialize_subarray(Aj, 0, fc_mz, 1, fc_my+1, 0, fc_mx);
-    Ak_right.initialize_subarray(Ak, 0, fc_mz, 0, fc_my, 0, fc_mx+1);
+    Ak_right.initialize_subarray(Ak, 0, fc_mz, 0, fc_my, 1, fc_mx+1);
   }
 
   Aj_left.initialize_subarray(Aj,  0,   fc_mz, 0, fc_my, 0, fc_mx);
@@ -384,9 +387,6 @@ void bfieldi_helper_(EnzoArray<enzo_float> &bfield, EnzoArray<enzo_float> &Aj,
 }
 
 // Helps compute the cell-centered B-fields
-// Probably should not be using the constrained transport object since it is
-// not equipped to compute the B-field for cells on the outermost layer of the
-// grid.
 void bfieldc_helper_(Block *block)
 {
   EnzoConstrainedTransport ct;
