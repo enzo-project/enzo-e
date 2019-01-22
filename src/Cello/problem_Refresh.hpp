@@ -26,7 +26,7 @@ public: // interface
     particle_list_(),
     ghost_depth_(0),
     min_face_rank_(0),
-    neighbor_type_(neighbor_unknown),
+    neighbor_type_(neighbor_leaf),
     accumulate_(false),
     sync_type_   (sync_unknown),
     sync_id_ (-1),

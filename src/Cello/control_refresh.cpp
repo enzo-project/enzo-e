@@ -115,7 +115,8 @@ void Block::p_refresh_store (MsgRefresh * msg)
   delete msg;
 
   Refresh * refresh = this->refresh();
-  
+
+  //  CkPrintf ("refresh = %p\n",refresh);
   control_sync_count(CkIndex_Block::p_refresh_exit(),
 		     refresh->sync_store(),0);
   
@@ -134,11 +135,13 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
   const int min_face_rank = refresh->min_face_rank();
   const int neighbor_type = refresh->neighbor_type();
 
-  if (neighbor_type == neighbor_leaf) {
+  if (neighbor_type == neighbor_leaf ||
+      neighbor_type == neighbor_tree) {
 
     // Loop over neighbor leaf Blocks (not necessarily same level)
 
-    ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+    ItNeighbor it_neighbor =
+      this->it_neighbor(min_face_rank,index_,neighbor_type);
 
     int if3[3];
     while (it_neighbor.next(if3)) {

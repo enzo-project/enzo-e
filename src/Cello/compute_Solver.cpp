@@ -8,6 +8,7 @@
 #include "compute.hpp"
 
 // #define TRACE_SOLVER
+// #define  DEBUG_SOLVER_CG
 
 #define CYCLE 0
 
@@ -94,7 +95,8 @@ void Solver::monitor_output_
 {
   Monitor * monitor = cello::monitor();
 
-  monitor->print("Solver", "%s %s iter %04d  err %.16g [%g %g]",
+  monitor->print("Solver", "%s %s %s iter %04d  err %.16g [%g %g]",
+		 block->name().c_str(),
 		 this->name().c_str(),
 		 final ? "final" : "",
 		 iter,
@@ -170,6 +172,10 @@ bool Solver::is_finest_ (Block * block) const
     return block->is_leaf();
     break;
   case solve_level:
+#ifdef DEBUG_SOLVER_CG
+    CkPrintf ("DEBUG_SOLVER_CG level max_level %d %d\n",
+	      block->level() , max_level_);
+#endif    
     return (block->level() == max_level_);
     break;
   case solve_tree:

@@ -49,6 +49,7 @@ public: // interface
     PUParray (p,n3_,3);
     p | index_;
     p | level_;
+    p | neighbor_type_;
   }
 
   /// Reduce another value
@@ -133,6 +134,9 @@ private: // attributes
 
   /// Level of this block
   int level_;
+
+  /// Neighbor type (neighbor_leaf or neighbor_tree)
+  int neighbor_type_;
 
 };
 

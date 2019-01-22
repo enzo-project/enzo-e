@@ -134,9 +134,10 @@ void Block::refresh_exit_()
   fflush(stdout);
       
 #endif
-  //  Refresh * refresh = refresh_.back();
-  //  delete refresh;
-  //  refresh_.pop_back();
+  
+   Refresh * refresh = refresh_.back();
+   delete refresh;
+   refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
