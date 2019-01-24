@@ -117,29 +117,6 @@ class EnzoConstrainedTransport;
 // we define an alias for our choice of map
 typedef std::unordered_map<std::string,enzo_float> flt_map;
 
-// define helper function for reading in Grouping fields
-void load_grouping_field_(Block *block, Grouping &grouping,
-			  std::string group_name, int index,
-			  EnzoArray<enzo_float> &array);
-// Because temporary fields must be allocated as cell-centered, we do not
-// have FieldDescr internally track the centering of the fields. Consequently,
-// we must specify the centering of the EnzoArray. Setting cell_centered_{dim}
-// to true, it indicates that values are cell-centered along {dim}. Face
-// -centered temporary fields do not have values at the exterior of the mesh.
-void load_temp_interface_grouping_field_(Block *block, Grouping &grouping,
-					 std::string group_name, int index,
-					 EnzoArray<enzo_float> &array,
-					 bool cell_centered_x,
-					 bool cell_centered_y,
-					 bool cell_centered_z);
-// Helper function designed to help initialize an EnzoArray representing a
-// component of the interface B-fields. This function accepts both the grouping
-// of permanent and temporary fields, and in each case yields an array that
-// does not include values for the exterior face of the grid. For example,
-// dim=0, the dimension of the resulting EnzoArray is (mz, my-1, mx)
-void load_interior_bfieldi_field_(Block *block, Grouping &grouping,
-				  int dim, EnzoArray<enzo_float> &array);
-
 class EnzoMethodVlct : public Method {
 
   /// @class    EnzoMethodVlct

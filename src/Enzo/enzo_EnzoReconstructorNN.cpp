@@ -11,6 +11,8 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
 {
   std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
 
+  EnzoFieldArrayFactory array_factory;
+
   // compute which index needs to be changed to advance in direction of dim
   int dix = (dim == 0) ? 1 : 0;
   int diy = (dim == 1) ? 1 : 0;
@@ -31,19 +33,22 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
 
       // define wc_offset(k,j,i) -> wc(k,j,i+1)
       EnzoArray<enzo_float> wc, wc_offset;
-      load_grouping_field_(block, prim_group, group_name, field_ind, wc);
+      array_factory.load_grouping_field(block, prim_group, group_name,
+					field_ind, wc);
       wc_offset.initialize_subarray(wc, diz, wc.length_dim2(),
 				    diy, wc.length_dim1(),
 				    dix, wc.length_dim0());
 
       EnzoArray<enzo_float> wr, wl;
       // face centered: (k,j,i) -> (k,j,i+1/2)
-      load_temp_interface_grouping_field_(block, primr_group, group_name,
-					  field_ind, wr,
-					  dim == 0, dim == 1, dim == 2);
-      load_temp_interface_grouping_field_(block, priml_group, group_name,
-					  field_ind, wl,
-					  dim == 0, dim == 1, dim == 2);
+      array_factory.load_temp_interface_grouping_field(block, primr_group,
+						       group_name, field_ind,
+						       wr, dim == 0, dim == 1,
+						       dim == 2);
+      array_factory.load_temp_interface_grouping_field(block, priml_group,
+						       group_name, field_ind,
+						       wl, dim == 0, dim == 1,
+						       dim == 2);
 
       // Could be more efficient
       for (int iz=0; iz<wc.length_dim2()-diz; iz++) {

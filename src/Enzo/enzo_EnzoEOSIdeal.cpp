@@ -20,18 +20,19 @@ void EnzoEOSIdeal::compute_pressure(Block *block,
 				    Grouping &cons_group,
 				    Grouping &prim_group)
 {
+  EnzoFieldArrayFactory array_factory;
   EnzoArray<enzo_float> density, p_x, p_y, p_z, etot, b_x, b_y, b_z;
-  load_grouping_field_(block, cons_group, "density", 0, density);
-  load_grouping_field_(block, cons_group, "momentum", 0, p_x);
-  load_grouping_field_(block, cons_group, "momentum", 1, p_y);
-  load_grouping_field_(block, cons_group, "momentum", 2, p_z);
-  load_grouping_field_(block, cons_group, "total_energy", 0, etot);
-  load_grouping_field_(block, cons_group, "bfield", 0, b_x);
-  load_grouping_field_(block, cons_group, "bfield", 1, b_y);
-  load_grouping_field_(block, cons_group, "bfield", 2, b_z);
+  array_factory.load_grouping_field(block, cons_group, "density", 0, density);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 0, p_x);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 1, p_y);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 2, p_z);
+  array_factory.load_grouping_field(block, cons_group, "total_energy", 0, etot);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 0, b_x);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 1, b_y);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 2, b_z);
 
   EnzoArray<enzo_float> pressure;
-  load_grouping_field_(block, prim_group, "pressure", 0, pressure);
+  array_factory.load_grouping_field(block, prim_group, "pressure", 0, pressure);
 
   enzo_float gm1 = get_gamma() - 1.;
   // No good way to tell if fields are face-centered
@@ -63,24 +64,26 @@ void EnzoEOSIdeal::primitive_from_conservative(Block *block,
 					       Grouping &prim_group)
 {
   compute_pressure(block, cons_group, prim_group);
+  EnzoFieldArrayFactory array_factory;
   EnzoArray<enzo_float> cons_density, px, py, pz, cons_bx, cons_by, cons_bz;
-  load_grouping_field_(block, cons_group, "density", 0, cons_density);
-  load_grouping_field_(block, cons_group, "momentum", 0, px);
-  load_grouping_field_(block, cons_group, "momentum", 1, py);
-  load_grouping_field_(block, cons_group, "momentum", 2, pz);
-  load_grouping_field_(block, cons_group, "bfield", 0, cons_bx);
-  load_grouping_field_(block, cons_group, "bfield", 1, cons_by);
-  load_grouping_field_(block, cons_group, "bfield", 2, cons_bz);
+  array_factory.load_grouping_field(block, cons_group, "density", 0,
+				    cons_density);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 0, px);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 1, py);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 2, pz);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 0, cons_bx);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 1, cons_by);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 2, cons_bz);
 
   EnzoArray<enzo_float> prim_density, vx, vy, vz, prim_bx, prim_by, prim_bz;
-  load_grouping_field_(block, prim_group, "density", 0, prim_density);
-  load_grouping_field_(block, prim_group, "velocity", 0, vx);
-  load_grouping_field_(block, prim_group, "velocity", 1, vy);
-  load_grouping_field_(block, prim_group, "velocity", 2, vz);
-  load_grouping_field_(block, prim_group, "bfield", 0, prim_bx);
-  load_grouping_field_(block, prim_group, "bfield", 1, prim_by);
-  load_grouping_field_(block, prim_group, "bfield", 2, prim_bz);
-  
+  array_factory.load_grouping_field(block, prim_group, "density", 0,
+				    prim_density);
+  array_factory.load_grouping_field(block, prim_group, "velocity", 0, vx);
+  array_factory.load_grouping_field(block, prim_group, "velocity", 1, vy);
+  array_factory.load_grouping_field(block, prim_group, "velocity", 2, vz);
+  array_factory.load_grouping_field(block, prim_group, "bfield", 0, prim_bx);
+  array_factory.load_grouping_field(block, prim_group, "bfield", 1, prim_by);
+  array_factory.load_grouping_field(block, prim_group, "bfield", 2, prim_bz);
 
   for (int iz=0; iz<cons_density.length_dim2(); iz++) {
     for (int iy=0; iy<cons_density.length_dim1(); iy++) {
@@ -106,27 +109,30 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
 					       Grouping &prim_group,
 					       Grouping &cons_group)
 {
+  EnzoFieldArrayFactory array_factory;
   EnzoArray<enzo_float> prim_density, vx, vy, vz, pressure;
   EnzoArray<enzo_float> prim_bx, prim_by, prim_bz;
-  load_grouping_field_(block, prim_group, "density", 0, prim_density);
-  load_grouping_field_(block, prim_group, "velocity", 0, vx);
-  load_grouping_field_(block, prim_group, "velocity", 1, vy);
-  load_grouping_field_(block, prim_group, "velocity", 2, vz);
-  load_grouping_field_(block, prim_group, "pressure", 0, pressure);
-  load_grouping_field_(block, prim_group, "bfield", 0, prim_bx);
-  load_grouping_field_(block, prim_group, "bfield", 1, prim_by);
-  load_grouping_field_(block, prim_group, "bfield", 2, prim_bz);
+  array_factory.load_grouping_field(block, prim_group, "density", 0,
+				    prim_density);
+  array_factory.load_grouping_field(block, prim_group, "velocity", 0, vx);
+  array_factory.load_grouping_field(block, prim_group, "velocity", 1, vy);
+  array_factory.load_grouping_field(block, prim_group, "velocity", 2, vz);
+  array_factory.load_grouping_field(block, prim_group, "pressure", 0, pressure);
+  array_factory.load_grouping_field(block, prim_group, "bfield", 0, prim_bx);
+  array_factory.load_grouping_field(block, prim_group, "bfield", 1, prim_by);
+  array_factory.load_grouping_field(block, prim_group, "bfield", 2, prim_bz);
 
   EnzoArray<enzo_float> cons_density, px, py, pz, etot;
   EnzoArray<enzo_float> cons_bx, cons_by, cons_bz;
-  load_grouping_field_(block, cons_group, "density", 0, cons_density);
-  load_grouping_field_(block, cons_group, "momentum", 0, px);
-  load_grouping_field_(block, cons_group, "momentum", 1, py);
-  load_grouping_field_(block, cons_group, "momentum", 2, pz);
-  load_grouping_field_(block, cons_group, "total_energy", 0, etot);
-  load_grouping_field_(block, cons_group, "bfield", 0, cons_bx);
-  load_grouping_field_(block, cons_group, "bfield", 1, cons_by);
-  load_grouping_field_(block, cons_group, "bfield", 2, cons_bz);
+  array_factory.load_grouping_field(block, cons_group, "density", 0,
+				    cons_density);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 0, px);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 1, py);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 2, pz);
+  array_factory.load_grouping_field(block, cons_group, "total_energy", 0, etot);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 0, cons_bx);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 1, cons_by);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 2, cons_bz);
 
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
 
@@ -179,15 +185,16 @@ enzo_float EnzoEOSIdeal::fast_magnetosonic_speed(flt_map &prim_vals)
 // Applies the pressure_floor to total_energy
 void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group)
 {
+  EnzoFieldArrayFactory array_factory;
   EnzoArray<enzo_float> density, px, py, pz, etot, bx, by, bz;
-  load_grouping_field_(block, cons_group, "density", 0, density);
-  load_grouping_field_(block, cons_group, "momentum", 0, px);
-  load_grouping_field_(block, cons_group, "momentum", 1, py);
-  load_grouping_field_(block, cons_group, "momentum", 2, pz);
-  load_grouping_field_(block, cons_group, "total_energy", 0, etot);
-  load_grouping_field_(block, cons_group, "bfield", 0, bx);
-  load_grouping_field_(block, cons_group, "bfield", 1, by);
-  load_grouping_field_(block, cons_group, "bfield", 2, bz);
+  array_factory.load_grouping_field(block, cons_group, "density", 0, density);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 0, px);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 1, py);
+  array_factory.load_grouping_field(block, cons_group, "momentum", 2, pz);
+  array_factory.load_grouping_field(block, cons_group, "total_energy", 0, etot);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 0, bx);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 1, by);
+  array_factory.load_grouping_field(block, cons_group, "bfield", 2, bz);
 
   enzo_float pressure = get_pressure_floor();
   enzo_float inv_gm1 = 1./(get_gamma()-1.);

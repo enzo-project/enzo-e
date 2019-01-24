@@ -23,9 +23,11 @@ void add_entry_(Block *block, array_map &arrays, std::string key,
 		int dim)
 {
   arrays[key] = new EnzoArray<enzo_float>();
-  load_temp_interface_grouping_field_(block, grouping, group_name, index,
-				      *(arrays[key]), (dim != 0),
-				      (dim != 1), (dim != 2));
+  EnzoFieldArrayFactory array_factory;
+  array_factory.load_temp_interface_grouping_field(block, grouping, group_name,
+						   index, *(arrays[key]),
+						   (dim != 0), (dim != 1),
+						   (dim != 2));
 }
 
 void load_fluid_fields_(Block *block, array_map &arrays, Grouping &grouping,

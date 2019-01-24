@@ -2,22 +2,6 @@
 #include "charm_enzo.hpp"
 #include "cello.hpp"
 
-
-// This is a helper function for initializing the array from fields
-void initialize_field_array(Block *block, EnzoArray<enzo_float> &array,
-			    std::string field_name)
-{
-  Field field = block->data()->field();
-  const int id = field.field_id(field_name);
-
-  // get the field dimensions
-  int mx, my, mz;
-  field.dimensions (id,&mx,&my,&mz);
-  enzo_float *data = (enzo_float *) field.values(field_name);
-  array.initialize_wrapper(data, mz, my, mx);
-}
-
-
 // Using the coordinate systems given by eqn 68 of Gardiner & Stone (2008)
 // (except that index numbers start at 0)
 // The system of the mesh are x,y,z
@@ -423,9 +407,10 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
   EnzoArray<enzo_float> bfieldi_x, bfieldi_y, bfieldi_z;
-  initialize_field_array(block, bfieldi_x, "bfieldi_x");
-  initialize_field_array(block, bfieldi_y, "bfieldi_y");
-  initialize_field_array(block, bfieldi_z, "bfieldi_z");
+  EnzoFieldArrayFactory array_factory;
+  array_factory.initialize_field_array(block, bfieldi_x, "bfieldi_x");
+  array_factory.initialize_field_array(block, bfieldi_y, "bfieldi_y");
+  array_factory.initialize_field_array(block, bfieldi_z, "bfieldi_z");
 
   // cell widths
   enzo_float dx = pos.dx();
@@ -480,13 +465,14 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 		 MeshPos &pos, int mx, int my, int mz)
 {
   EnzoArray<enzo_float> density, total_energy;
-  initialize_field_array(block, density, "density");
-  initialize_field_array(block, total_energy, "total_energy");
+  EnzoFieldArrayFactory array_factory;
+  array_factory.initialize_field_array(block, density, "density");
+  array_factory.initialize_field_array(block, total_energy, "total_energy");
 
   std::vector<EnzoArray<enzo_float>> momentum(3);
-  initialize_field_array(block, momentum[0], "momentum_x");
-  initialize_field_array(block, momentum[1], "momentum_y");
-  initialize_field_array(block, momentum[2], "momentum_z");
+  array_factory.initialize_field_array(block, momentum[0], "momentum_x");
+  array_factory.initialize_field_array(block, momentum[1], "momentum_y");
+  array_factory.initialize_field_array(block, momentum[2], "momentum_z");
 
   for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
