@@ -89,6 +89,7 @@ module enzo {
   PUPable EnzoMethodVlct;
 
   PUPable EnzoEOSIdeal;
+  PUPable EnzoReconstructorNN;
   PUPable EnzoReconstructorPLM;
   PUPable EnzoRiemannHLLE;
 

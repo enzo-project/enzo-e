@@ -79,6 +79,19 @@ void zero_edge_values_(EnzoArray<enzo_float> &wl, EnzoArray<enzo_float> &wr,
       }
     }
   }
+
+
+  // The above may is missing values
+  // Once it is fixed, the following can be removed.
+  for (int iz=0; iz<wl.length_dim2(); iz++) {
+    for (int iy=0; iy<wl.length_dim1(); iy++) {
+      for (int ix=0; ix<wl.length_dim0(); ix++) {
+        wl(iz,iy,ix) = prim_floor;
+  	wr(iz,iy,ix) = prim_floor;
+      }
+    }
+  }
+  
 }
 
 //----------------------------------------------------------------------
@@ -169,8 +182,8 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	    enzo_float dv = monotized_difference(wc_left(iz,iy,ix), val,
 						 wc_right(iz,iy,ix));
 	    enzo_float left_val, right_val;
-	    right_val = use_floor ? val-dv : std::max(val-dv,prim_floor);
-	    left_val = use_floor ? val+dv : std::max(val+dv,prim_floor);
+	    right_val = use_floor ? std::max(val-dv,prim_floor) : val-dv;
+	    left_val = use_floor ? std::max(val+dv,prim_floor) : val+dv;
 
 	    // face centered fields: index i corresponds to the value at i-1/2
 	    wr(iz,iy,ix) = left_val;

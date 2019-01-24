@@ -2,7 +2,7 @@
 #include "enzo.hpp"
 
 // Some Notes
-// Stone+ (08) has a typo in eqn 52: (q_i-q_{i-q}) should be (q_R-q_L)
+// Stone+ (08) has a typo in eqn 52: (q_i-q_{i-1}) should be (q_R-q_L)
 //    The modified formula is actually used in Athena++
 
 // Implementation Notes:
@@ -34,8 +34,6 @@ void load_fluid_fields_(Block *block, array_map &arrays, Grouping &grouping,
   int i = dim;
   int j = (dim+1)%3;
   int k = (dim+2)%3;
-
-  
   
   // Load density
   add_entry_(block, arrays, "density", grouping, "density", 0, dim);
@@ -110,6 +108,11 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
   //    (left interface value at i+1/2 is set to 0)
   // For consistency, always start at i+1/2
   // Iteration limits are generalized for 2D and 3D arrays
+  CkPrintf("(zstop,ystop,xstop) = (%d, %d, %d)\n",
+	   flux_arrays["density"]->length_dim2(),
+	   flux_arrays["density"]->length_dim1(),
+	   flux_arrays["density"]->length_dim0());
+  fflush(stdout);
   for (int iz=0; iz<flux_arrays["density"]->length_dim2(); iz++) {
     for (int iy=0; iy<flux_arrays["density"]->length_dim1(); iy++) {
       for (int ix=0; ix<flux_arrays["density"]->length_dim0(); ix++) {
@@ -145,6 +148,10 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 	  (*(flux_arrays[key]))(iz,iy,ix) =
 	    (((bp*Fl[key] - bm*Fr[key]) / (bp - bm)) +
 	     ((Ul[key] - Ur[key])*bp*bm /(bp - bm)));
+
+	  ASSERT("EnzoRiemannHLLE",
+		 "There is a NaN or inf\n",
+		 std::isfinite((*(flux_arrays[key]))(iz,iy,ix)));
 	}
 
 	// Deal with Species and colors

@@ -1,18 +1,12 @@
 // Right now, the primitive left and right fields are large enough that they
-// can be treated as ordinary face-centered centered fields (with N+1 values)
-// (Strictly speaking, only N-1 fields are needed along the dimension of
-//  reconstruction)
+// can be treated as ordinary face-centered centered fields
 // For the face-centered quantities, the ith element corresponds to the value
-// of the face at i-1/2
+// of the face at i+1/2
 // Additionally, reconstruction is performed so that fluxes can be computed for
 // every cell (except the outermost faces)
 
 // If this reconstructor is used N times for a single time step, then there
 // must be at least N+1 ghost zones
-
-// Still Need to implement limiters and primitive value floors (to ensure
-// values don't
-// get too small).
 
 
 
@@ -20,7 +14,7 @@
 #define ENZO_ENZO_RECONSTRUCTOR_PLM_HPP
 class EnzoReconstructorPLM : public EnzoReconstructor
 {
-  /// @class    EnzoReconstructor
+  /// @class    EnzoReconstructorPLM
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates piecwise linear reconstruction of
   //            primitives at interface

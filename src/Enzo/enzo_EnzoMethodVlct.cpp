@@ -8,6 +8,68 @@
            __FILE__,__LINE__, block->name().c_str(), MESSAGE);  \
  fflush (stdout);
 
+// helper function for debugging. Checks to see if an array contains NaNs
+bool not_all_finite_(EnzoArray<enzo_float> array)
+{
+  for (int iz = 0; iz<array.length_dim2(); iz++){
+    for (int iy = 0; iy<array.length_dim1(); iy++){
+      for (int ix = 0; ix<array.length_dim0(); ix++){
+	enzo_float val = array(iz,iy,ix);
+	if (!std::isfinite(val)){
+	  return true;
+	}
+      }
+    }
+  }
+  return false;
+}
+
+// helper function for debugging - Checks that values contained by a bunch of
+// fields are all finite
+
+void check_fields_(Block *block, Grouping &grouping,
+		   std::vector<std::string> group_names)
+{
+  Field field = block->data()->field();
+  for (unsigned int i=0;i<group_names.size();i++){
+    std::string group_name = group_names[i];
+    int num_fields = grouping.size(group_name);
+    if (num_fields == 0) {
+      continue; // This group is not tracked by ref_grouping
+    }
+
+    for (int j=0;j<num_fields;j++){
+      // Determine field_name
+      EnzoArray<enzo_float> data;
+      load_grouping_field_(block, grouping, group_name, j, data);
+      if (not_all_finite_(data)){
+	std::string field_name = grouping.item(group_name,j);
+	CkPrintf("%s has at least 1 NaN or inf\n", field_name.c_str());
+      }
+    }
+  }
+  fflush(stdout);
+}
+
+// for debugging purposes
+void print_array_vals_(Block* block, Grouping &grouping,
+		       std::string group_name, int index,
+		       int iz, int iy, bool cell_centered_x,
+		       bool cell_centered_y, bool cell_centered_z){
+  Field field = block->data()->field();
+  EnzoArray<enzo_float> data;
+  load_temp_interface_grouping_field_(block, grouping, group_name,index,
+				      data, cell_centered_x, cell_centered_y,
+				      cell_centered_z);
+  std::string field_name = grouping.item(group_name,index);
+  CkPrintf("field(\"%s\") = \n", field_name.c_str());
+  CkPrintf("[% .16g", data(iz,iy,0));
+  for (int i=1; i<data.length_dim0();i++){
+    CkPrintf(", % .16g", data(iz,iy,i));
+  }
+  CkPrintf("]\n");
+  fflush(stdout);
+}
 
 void load_grouping_field_(Block *block, Grouping &grouping,
 			  std::string group_name, int index,
@@ -167,12 +229,12 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   // need a more sophisticated way to setup groups in the future
   setup_groups_();
   // Temporarilly use following default values
-  double density_floor = 0;
-  double pressure_floor = 0;
+  double density_floor = 1.e-10;
+  double pressure_floor = 1.e-10;
   
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
-  half_dt_recon_ = new EnzoReconstructorPLM;
-  full_dt_recon_ = new EnzoReconstructorPLM;
+  half_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
+  full_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
   riemann_solver_ = new EnzoRiemannHLLE;
 
 }
@@ -251,11 +313,9 @@ void EnzoMethodVlct::pup (PUP::er &p)
 
 void EnzoMethodVlct::compute ( Block * block) throw()
 {
-
+  TRACE_VLCT("compute()");
   if (block->is_leaf()) {
 
-
- 
     EnzoBlock * enzo_block = enzo::block(block);
     Field field = enzo_block->data()->field();
 
@@ -341,7 +401,11 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       // Compute the primitive Quantites with Equation of State
       eos_->primitive_from_conservative (block, *cur_cons_group,
 					 *primitive_group_);
+      CkPrintf("\n\nChecking Primitives.\n");
+      check_fields_(block, *primitive_group_, EnzoMethodVlct::prim_group_names);
 
+      
+      
       // Compute flux along each dimension
       compute_flux_(block, 0, *cur_cons_group, *cur_bfieldi_group, priml_group,
 		    primr_group, xflux_group, consl_group, consr_group,
@@ -354,6 +418,10 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 		      priml_group, primr_group, zflux_group, consl_group,
 		      consr_group, weight_group, *reconstructor);
       }
+      CkPrintf("Checking Fluxes.\n");
+      check_fields_(block, xflux_group, EnzoMethodVlct::cons_group_names);
+      check_fields_(block, yflux_group, EnzoMethodVlct::cons_group_names);
+      check_fields_(block, zflux_group, EnzoMethodVlct::cons_group_names);
 
       // Compute_efields
       //   - The first time, this implictly use the cell-centered primitives
@@ -410,7 +478,10 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(block, *primitive_group_, priml_group,
 				      primr_group, dim, eos_);
-
+  CkPrintf("Checking Reconstructed primitives along dim %d.\n", dim);
+  check_fields_(block, priml_group, EnzoMethodVlct::prim_group_names);
+  check_fields_(block, primr_group, EnzoMethodVlct::prim_group_names);
+  
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
   // interfaces (should probably be handled internally by reconstructor)
@@ -436,10 +507,67 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // Calculate reconstructed conserved values
   eos_->conservative_from_primitive(block,priml_group,consl_group);
   eos_->conservative_from_primitive(block,primr_group,consr_group);
+  CkPrintf("Checking Reconstructed conserved quantites along dim %d.\n", dim);
+  check_fields_(block, consl_group, EnzoMethodVlct::cons_group_names);
+  check_fields_(block, consr_group, EnzoMethodVlct::cons_group_names);
 
+  /*
+  print_array_vals_(block, consl_group, "density", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consl_group, "momentum", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consl_group, "momentum", 1, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consl_group, "momentum", 2, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consl_group, "total_energy", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consl_group, "bfield", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consl_group, "bfield", 1, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consl_group, "bfield", 2, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+
+  print_array_vals_(block, consr_group, "density", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consr_group, "momentum", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consr_group, "momentum", 1, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consr_group, "momentum", 2, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consr_group, "total_energy", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consr_group, "bfield", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consr_group, "bfield", 1, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, consr_group, "bfield", 2, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  */
+
+
+  
   // Next, compute the fluxes
   riemann_solver_->solve(block, priml_group, primr_group, flux_group,
 			 consl_group, consr_group, dim, eos_);
+  print_array_vals_(block, flux_group, "density", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, flux_group, "momentum", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, flux_group, "momentum", 1, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, flux_group, "momentum", 2, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, flux_group, "total_energy", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, flux_group, "bfield", 0, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, flux_group, "bfield", 1, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
+  print_array_vals_(block, flux_group, "bfield", 2, 8, 8,
+		    dim != 0, dim != 1, dim != 2);
 
   // Finally, need to handle weights
   //  - Currently, weight is set to 1.0 if upwind is in positive direction of
@@ -526,13 +654,7 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					Grouping &zflux_group,
 					Grouping &out_cons_group, double dt)
 {
-  // Need to address placing floors on density and energy_density
-
-  // Applying the density floor seems non-trivial
-  //   - If we place the floor, then how do we modify the momentum and
-  //     (consequently) the total energy since they are tied to the density
-  // Placing a floor on the total energy density is (relatively) simple
-  // Just call eos_->apply_floor_to_energy(block, out_cons_group) 
+  // For now, not having density floor affect momentum or total energy density
   std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
 
   EnzoBlock * enzo_block = enzo::block(block);
@@ -559,6 +681,9 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
   enzo_float dtdx = dt/enzo_block->CellWidth[0];
   enzo_float dtdy = dt/enzo_block->CellWidth[1];
   enzo_float dtdz = dt/enzo_block->CellWidth[2];
+  CkPrintf("dtdx,dtdy, dtdz = %lf, %lf, %lf\n",
+	   dtdx, dtdy, dtdz);
+  fflush(stdout);
 
   for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
     // load group name and number of fields in the group
@@ -568,6 +693,12 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
     }
     int num_fields = conserved_group_->size(group_name);
 
+    enzo_float floor_val =0;
+    bool use_floor = false;
+    if (group_name == "density"){
+      floor_val = eos_->get_density_floor();
+      use_floor=true;
+    }
 
     // iterate over the fields in the group
     for (int field_ind=0; field_ind<num_fields; field_ind++){
@@ -598,20 +729,26 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 	    if (three_dim){
 	      new_val = (cur_cons(iz,iy,ix)
 			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
-			 - dtdy * (yflux(iz,iy,ix) - xflux(iz,iy-1,ix))
-			 - dtdz * (zflux(iz,iy,ix) - xflux(iz-1,iy,ix)));
+			 - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix))
+			 - dtdz * (zflux(iz,iy,ix) - zflux(iz-1,iy,ix)));
 	    } else {
 	      new_val = (cur_cons(iz,iy,ix)
 			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
-			 - dtdy * (yflux(iz,iy,ix) - xflux(iz,iy-1,ix)));
+			 - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix)));
 	    }
-	    // Can nominally place a floor on new_val here
+	    
+	    if (use_floor){
+	      new_val = std::max(new_val, floor_val);
+	    }
+
 	    out_cons(iz,iy,ix) = new_val;
 	  }
 	}
       }
     }
   }
+  // Place floor on energy
+  eos_->apply_floor_to_energy(block, out_cons_group);
 }
 
 //----------------------------------------------------------------------
@@ -897,6 +1034,13 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   // Like ppm and ppml, access active region info from enzo_block attributes
   EnzoBlock * enzo_block = enzo::block(block);
 
+  int ndim;
+  if (enzo_block->GridDimension[2] == 1){
+    ndim = 2;
+  } else {
+    ndim = 3;
+  }
+
   // The start index of the active region
   int ix_start = enzo_block->GridStartIndex[0];
   int iy_start = enzo_block->GridStartIndex[1];
@@ -915,6 +1059,8 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   // initialize
   enzo_float dtBaryons = ENZO_HUGE_VAL;
 
+  
+  
   // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+cfast) for all dimensions.
   // dr_i and v_i are the the width of the cell and velocity along dimension i.
   // cfast = fast magnetosonic speed (Convention is to use max value:
@@ -938,23 +1084,25 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
 	dtBaryons = std::min(dtBaryons,
 			     dy/(std::fabs(inv_dens * momentum_y(iz,iy,ix)
 					   + cfast)));
-	dtBaryons = std::min(dtBaryons,
-			     dz/(std::fabs(inv_dens * momentum_z(iz,iy,ix)
-					   + cfast)));
+	if (ndim == 3){
+	  dtBaryons = std::min(dtBaryons,
+			       dz/(std::fabs(inv_dens * momentum_z(iz,iy,ix)
+					     + cfast)));
+	}
       }
     }
   }
-
   /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
   dtBaryons *= 0.5*courant_;
 
-  CkPrintf("dt = %lf\n",dtBaryons);
-  fflush(stdout);
-
+  CkPrintf("EnzoMethodVlct::timestep  -  dt = %e\n",dtBaryons);
   ASSERT2("EnzoMethodVlct::timestep",
 	  "Invalid timestep, %g, was calculated for %s.",
 	  (double)dtBaryons, block->name().c_str(),
-	  dtBaryons>0);
+	  ((dtBaryons>0) && (std::isfinite(dtBaryons))));
+  fflush(stdout);
+
+  
 
   return dtBaryons;
 }
