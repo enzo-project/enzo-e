@@ -478,13 +478,10 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   //    densities.
 
   EnzoArray<enzo_float> density_flux, weight_field;
-  array_factory.load_temp_interface_grouping_field(block, flux_group, "density",
-						   dim, density_flux, dim == 0,
-						   dim == 1, dim == 2);
-  array_factory.load_temp_interface_grouping_field(block, weight_group,
-						   "weight", dim, weight_field,
-						   dim == 0, dim == 1,
-						   dim == 2);
+  array_factory.load_grouping_field(block, flux_group, "density", 0,
+				    density_flux);
+  array_factory.load_grouping_field(block, weight_group, "weight", dim,
+				    weight_field);
 
   // Iteration limits compatible with both 2D and 3D grids
   for (int iz=0; iz<density_flux.length_dim2(); iz++) {
@@ -608,20 +605,14 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					field_ind, cur_cons);
       array_factory.load_grouping_field(block, out_cons_group, group_name,
 					field_ind, out_cons);
-      array_factory.load_temp_interface_grouping_field(block, xflux_group,
-						       group_name, field_ind,
-						       xflux, false, true,
-						       true);
-      array_factory.load_temp_interface_grouping_field(block, yflux_group,
-						       group_name, field_ind,
-						       yflux, true, false,
-						       true);
+      array_factory.load_grouping_field(block, xflux_group, group_name,
+					field_ind, xflux);
+      array_factory.load_grouping_field(block, yflux_group, group_name,
+					field_ind, yflux);
       if (three_dim){
 	// only load if the grid is 3D
-	array_factory.load_temp_interface_grouping_field(block, zflux_group,
-							 group_name, field_ind,
-							 zflux, true, true,
-							 false);
+	array_factory.load_grouping_field(block, zflux_group, group_name,
+					  field_ind, zflux);
       }
 
       for (int iz=zstart; iz<zstop; iz++) {
@@ -668,7 +659,8 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 // fields added to grouping are allocated with centering given by cx, cy, cz.
 void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
 			       std::vector<std::string> &group_names,
-			       Grouping &grouping, std::string field_prefix)
+			       Grouping &grouping, std::string field_prefix,
+			       int cx, int cy, int cz)
 {
   FieldDescr *field_descr = field.field_descr();
   for (unsigned int i=0;i<group_names.size();i++){
@@ -689,6 +681,7 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
       } else {
 	// Reserve a temporary field
 	id = field_descr->insert_temporary(field_name);
+	field_descr->set_centering(id,cx,cy,cz);
       }
       // allocate temporary field
       field.allocate_temporary(id);
@@ -702,22 +695,51 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
 
 // Helper function used to prepare groupings of temporary fields. These
 // groupings only contain 3 fields - corresponding to vector components
+//  - These vectors are all expected to be face-centered or edge centered.
+//    (with the direction of centering depending on the dimension of the
+//     component)
+//  - face-centered: [face_center = True] fields are all centered on the face
+//    corresponding to the direction of the vector component (e.g. x component
+//    of weights is centered on the faces along the x dimension)
+//  - edge-centered: [face_center = False] fields are centered on the edge
+//    corresponding to the direction not pointed to by the vector component
+//    (e.g. z-component of edge E-field is centered on the x and y edges)
+//  - If exterior_faces is true, then the field will include space for the
+//    exterior faces. If it is false, then the field will not include space for
+//    the exterior faces.
 //  - the names of the temporary fields are given by field_prefix + x,
 //    field_prefix + y and field_prefix + z
 
 void prep_temp_vector_grouping_(Field &field, std::string group_name,
-				Grouping &grouping, std::string field_prefix)
+				Grouping &grouping, std::string field_prefix,
+				bool face_center, bool exterior_faces)
 {
   FieldDescr *field_descr = field.field_descr();
   for (int i=0;i<3;i++){
     // prepare field name
     std::string field_name;
+    int cx, cy, cz, delta;
+    if (face_center) {
+      cx = 0; cy = 0; cz = 0;
+      delta = (exterior_faces) ? 1 : -1;
+    } else {
+      if (exterior_faces){
+	cx = 1; cy = 1; cz = 1;
+	delta = -1;
+      } else {
+	cx = -1; cy = -1; cz = -1;
+	delta = 1;
+      }
+    }
 
     if (i == 0){
+      cx += delta;
       field_name = field_prefix + "x";
     } else if (i == 1) {
+      cy += delta;
       field_name = field_prefix + "y";
     } else {
+      cz += delta;
       field_name = field_prefix + "z";
     }
 
@@ -728,6 +750,7 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
     } else {
       // Reserve a temporary field
       id = field_descr->insert_temporary(field_name);
+      field_descr->set_centering(id,cx,cy,cz);
     }
     // Allocate the field
     field.allocate_temporary(id);
@@ -761,21 +784,21 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 
   // Prepare the temporary conserved fields (used to store values at half dt)
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
-			    temp_conserved_group, "temp_");
+			    temp_conserved_group, "temp_",0,0,0);
 
   // Prepare temporary flux fields
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
-			    xflux_group, "xflux_");
+			    xflux_group, "xflux_",-1,0,0);
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
-			    yflux_group, "yflux_");
+			    yflux_group, "yflux_",0,-1,0);
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
-			    zflux_group, "zflux_");
+			    zflux_group, "zflux_",0,0,-1);
 
   // Prepare left and right reconstructed conserved fields
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
-			    consl_group, "cleft_");
+			    consl_group, "cleft_",0,0,0);
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
-			    consr_group, "cright_");
+			    consr_group, "cright_",0,0,0);
 
   // Next, reserve/allocate temporary primitive-related fields
   // allocate applicable temporary fields in primitive_group_
@@ -809,14 +832,14 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   //   - y and have shape (  mz,my-1,  mx)
   //   - x and have shape (  mz,  my,mx-1)
   prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
-			    priml_group, "left_");
+			    priml_group, "left_",0,0,0);
   prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
-			    primr_group, "right_");
+			    primr_group, "right_",0,0,0);
 
   // allocate temporary efield fields
   // reserve/allocate fields for edge-centered electric fields
   prep_temp_vector_grouping_(field, "efield", efield_group,
-			     "temp_efield_");
+			     "temp_efield_",false,false);
 
   // reserve/allocate field for face-centered electric field
   center_efield_id = field_descr->insert_temporary();
@@ -825,11 +848,14 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 
   // reserve/allocate fields for weight fields
   // these are face-centered fields that store the upwind/downwind direction
-  prep_temp_vector_grouping_(field, "weight", weight_group, "temp_weight_");
+  prep_temp_vector_grouping_(field, "weight", weight_group,
+			     "temp_weight_", true, false);
 
   // reserve allocate temporary interface bfields fields
+  // eventually we want to make the temporary interface bfields include
+  // exterior faces just like the permanent interface bfields.
   prep_temp_vector_grouping_(field, "bfield", temp_bfieldi_group,
-			     "temp_bfieldi_");
+			     "temp_bfieldi_",true, false);
 }
 
 //----------------------------------------------------------------------

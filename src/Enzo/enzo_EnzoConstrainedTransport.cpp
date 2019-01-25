@@ -244,37 +244,28 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 
   // Initialize edge-centered Efield [it maps (k,j,i) -> (k+1/2,j+1/2,i)]
   EnzoArray<enzo_float> Eedge;
-  array_factory.load_temp_interface_grouping_field(block, efield_group,
-						   "efield", dim, Eedge,
-						   dim == 0, dim == 1,
-						   dim == 2);
+  array_factory.load_grouping_field(block, efield_group, "efield", dim, Eedge);
 
   // Initialize face-centered E-fields
   EnzoArray<enzo_float> Ej, Ej_kp1, Ek, Ek_jp1;
-  array_factory.load_temp_interface_grouping_field(block, jflux_group, "bfield",
-						   dim, Ej, dxdj==0, dydj==0,
-						   dzdj==0);
+  array_factory.load_grouping_field(block, jflux_group, "bfield", dim, Ej);
   Ej_kp1.initialize_subarray(Ej, dzdk, Ej.length_dim2(),
 			         dydk, Ej.length_dim1(),
 			         dxdk, Ej.length_dim0());
-  array_factory.load_temp_interface_grouping_field(block, kflux_group, "bfield",
-						   dim, Ek, dxdk==0, dydk==0,
-						   dzdk==0);
+  array_factory.load_grouping_field(block, kflux_group, "bfield", dim, Ek);
   Ek_jp1.initialize_subarray(Ek, dzdj, Ek.length_dim2(),
 			         dydj, Ek.length_dim1(),
 			         dxdj, Ek.length_dim0());
 
   // Initialize the weight arrays
   EnzoArray<enzo_float> Wj, Wj_kp1, Wk, Wk_jp1;
-  array_factory.load_temp_interface_grouping_field(block, weight_group,
-						   "weight", (dim+1)%3, Wj,
-						   dxdj==0, dydj==0, dzdj==0);
+  array_factory.load_grouping_field(block, weight_group, "weight", (dim+1)%3,
+				    Wj);
   Wj_kp1.initialize_subarray(Wj, dzdk, Wj.length_dim2(),
 			         dydk, Wj.length_dim1(),
 			         dxdk, Wj.length_dim0());
-  array_factory.load_temp_interface_grouping_field(block, weight_group,
-						   "weight", (dim+2)%3, Wk,
-						   dxdk==0, dydk==0, dzdk==0);
+  array_factory.load_grouping_field(block, weight_group, "weight", (dim+2)%3,
+				    Wk);
   Wk_jp1.initialize_subarray(Wj, dzdj, Wk.length_dim2(),
 			         dydj, Wk.length_dim1(),
 			         dxdj, Wk.length_dim0());
@@ -369,20 +360,16 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
   // Load edge centered efields
   EnzoArray<enzo_float> E_j, E_k;
   const bool use_E_j = (three_dim || dim == 1);
-  // For 2d grid, only need to load E_k when dim == 1 (in that case E_j = E_z)
+  // For 2D grid, only need to load E_k when dim == 1 (in that case E_j = E_z)
   if (use_E_j){
-    array_factory.load_temp_interface_grouping_field(block, efield_group,
-						     "efield", (dim+1)%3, E_j,
-						     dxdj == 0, dydj == 0,
-						     dzdj == 0);
+    array_factory.load_grouping_field(block, efield_group, "efield", (dim+1)%3,
+				      E_j);
   }
   const bool use_E_k = (three_dim || dim == 0);
-  // For 2d grid, only need to load E_k when dim == 0 (in that case E_k = E_z)
+  // For 2D grid, only need to load E_k when dim == 0 (in that case E_k = E_z)
   if (use_E_k){
-    array_factory.load_temp_interface_grouping_field(block, efield_group,
-						     "efield", (dim+2)%3, E_k,
-						     dxdk == 0, dydk == 0,
-						     dzdk == 0);
+    array_factory.load_grouping_field(block, efield_group, "efield", (dim+2)%3,
+				      E_k);
   }
 
   // Integration limits are compatible with 2D and 3D grids

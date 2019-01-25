@@ -89,7 +89,9 @@ void EnzoFieldArrayFactory::load_temp_interface_grouping_field(
   enzo_float *data =(enzo_float *)field.values(field_name);
 
   int mx, my, mz;
-  cell_centered_dim_(field, field.field_id(field_name), &mx, &my, &mz);
+  // This is a very hacky short term solution to be used while making temporary
+  // fields face-centered, again.
+  cell_centered_dim_(field, field.field_id("density"), &mx, &my, &mz);
   if (!cell_centered_x) {
     mx--;
   }

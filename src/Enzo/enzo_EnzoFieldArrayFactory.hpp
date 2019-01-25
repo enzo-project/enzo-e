@@ -34,11 +34,10 @@ public:
 			   std::string group_name, int index,
 			   EnzoArray<enzo_float> &array);
 
-  // Because temporary fields must be allocated as cell-centered, we do not
-  // have FieldDescr internally track the centering of the fields. Consequently,
-  // we must specify the centering of the EnzoArray. Setting cell_centered_{dim}
-  // to true, it indicates that values are cell-centered along {dim}. Face
-  // -centered temporary fields do not have values at the exterior of the mesh.
+  // This is only used to load in reconstructed arrays (name is a relic from
+  // a period when I incorrectly believed that temporary arrays could not be
+  // face-centered) Setting cell_centered_{dim} to true indicates that values
+  // are cell-centered along {dim}
   void load_temp_interface_grouping_field(Block *block, Grouping &grouping,
 					  std::string group_name, int index,
 					  EnzoArray<enzo_float> &array,
