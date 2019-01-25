@@ -445,7 +445,6 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 		    dim != 0, dim != 1, dim != 2);
   */
 
-
   
   // Next, compute the fluxes
   riemann_solver_->solve(block, priml_group, primr_group, flux_group,
@@ -467,6 +466,8 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   print_array_vals_(block, flux_group, "bfield", 2, 8, 8,
 		    dim != 0, dim != 1, dim != 2);
 
+  //ASSERT("EnzoMethodVlct", "This is to stop the code!",false);
+  
   // Finally, need to handle weights
   //  - Currently, weight is set to 1.0 if upwind is in positive direction of
   //    the current dimension, 0 if upwind is in the negative direction of the
@@ -615,6 +616,8 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					  field_ind, zflux);
       }
 
+      CkPrintf("\nPrinting flux divergence for group %s, index %d\n",
+	       group_name.c_str(), field_ind);
       for (int iz=zstart; iz<zstop; iz++) {
 	for (int iy=1; iy<my-1; iy++) {
 	  for (int ix=1; ix<mx-1; ix++) {
@@ -630,6 +633,21 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 	      new_val = (cur_cons(iz,iy,ix)
 			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
 			 - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix)));
+	    }
+
+	    if (iz == 8 && iy == 8){
+	      if (ix == 0){
+		CkPrintf("[");
+	      } else {
+		CkPrintf(", ");
+	      }
+	      CkPrintf("%e",new_val - cur_cons(iz,iy,ix));
+	      
+	      if (ix == mx-2){
+		CkPrintf("]\n");
+		fflush(stdout);
+	      }
+
 	    }
 	    
 	    if (use_floor){

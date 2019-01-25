@@ -102,6 +102,8 @@
 //        - Can probably come up with a more elegant solution for Mapping and
 //          Grouping (the obvious choice is to do away with Mapping completely
 //          and just apply operations on Groupings)
+//    The Mapping is hard to debug. If you attempt to access a field that does
+//    not already exist, a default value will be returned. (0.0 for a float)
 //  Issue: Concerned about the units of the magnetic field (especially during
 //  calculations of the Alfven Velocity)
 

@@ -110,11 +110,7 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
   //    (left interface value at i+1/2 is set to 0)
   // For consistency, always start at i+1/2
   // Iteration limits are generalized for 2D and 3D arrays
-  CkPrintf("(zstop,ystop,xstop) = (%d, %d, %d)\n",
-	   flux_arrays["density"]->length_dim2(),
-	   flux_arrays["density"]->length_dim1(),
-	   flux_arrays["density"]->length_dim0());
-  fflush(stdout);
+
   for (int iz=0; iz<flux_arrays["density"]->length_dim2(); iz++) {
     for (int iy=0; iy<flux_arrays["density"]->length_dim1(); iy++) {
       for (int ix=0; ix<flux_arrays["density"]->length_dim0(); ix++) {
@@ -148,12 +144,12 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 	  std::string key = cons_keys[field_ind];
 
 	  (*(flux_arrays[key]))(iz,iy,ix) =
-	    (((bp*Fl[key] - bm*Fr[key]) / (bp - bm)) +
-	     ((Ul[key] - Ur[key])*bp*bm /(bp - bm)));
+	    ((bp*Fl[key] - bm*Fr[key]  +
+	      (Ur[key] - Ul[key])*bp*bm)/ (bp - bm));
 
 	  ASSERT("EnzoRiemannHLLE",
-		 "There is a NaN or inf\n",
-		 std::isfinite((*(flux_arrays[key]))(iz,iy,ix)));
+	  	 "There is a NaN or inf\n",
+	  	 std::isfinite((*(flux_arrays[key]))(iz,iy,ix)));
 	}
 
 	// Deal with Species and colors
@@ -187,7 +183,6 @@ void EnzoRiemannHLLE::wave_speeds_(flt_map &wl, flt_map &wr, flt_map &Ul,
   enzo_float left_speed = wl["velocity_i"] - eos->fast_magnetosonic_speed(wl);
   enzo_float right_speed = wr["velocity_i"] + eos->fast_magnetosonic_speed(wr);
 
-
   // Next, compute min max eigenvalues
   //     - per eqn B17 these are Roe averaged velocity in the ith direction
   //       minus/plus Roe averaged fast magnetosonic wavespeed
@@ -199,7 +194,7 @@ void EnzoRiemannHLLE::wave_speeds_(flt_map &wl, flt_map &wr, flt_map &Ul,
   // density and velocity
   enzo_float rho_roe = sqrtrho_l*sqrtrho_r;
   enzo_float vi_roe = (sqrtrho_l * wl["velocity_i"] +
-		       sqrtrho_r * wr["veloctiy_x"])*coef;
+		       sqrtrho_r * wr["velocity_i"])*coef;
   enzo_float vj_roe = (sqrtrho_l * wl["velocity_j"] +
 		       sqrtrho_r * wr["velocity_j"])*coef;
   enzo_float vk_roe = (sqrtrho_l * wl["velocity_k"] +
@@ -238,14 +233,25 @@ void EnzoRiemannHLLE::wave_speeds_(flt_map &wl, flt_map &wr, flt_map &Ul,
   // Need Roe averaged square Alfven speed (along ith dim and total magnitude)
   enzo_float tilde_vai2 = bi_roe * bi_roe / rho_roe;
   enzo_float tilde_va2 = (tilde_vai2 + (gamma_prime - y_prime) *
-			  (bj_roe * bj_roe + bk_roe * bk_roe));
+			  (bj_roe * bj_roe + bk_roe * bk_roe) / rho_roe);
+  //CkPrintf("roe_cs2 = %.15lf\n",tilde_a2);
+  //CkPrintf("roe_va_i2 = %.15lf, roe_va2 = %.15lf\n",tilde_vai2, tilde_va2);
 
-  enzo_float cfast = std::sqrt(0.5 * (tilde_a2 + tilde_va2)
-			       + std::sqrt(std::pow(tilde_a2 + tilde_va2, 2)
-					   - 4 * tilde_a2 * tilde_vai2));
+  enzo_float cfast = std::sqrt(0.5 * (tilde_a2 + tilde_va2 +
+				      std::sqrt(std::pow(tilde_a2 + tilde_va2,
+							 2) -
+						4 * tilde_a2 * tilde_vai2)));
+
+  //CkPrintf("vi_roe = %.15lf, cfast = %.15lf\n",vi_roe, cfast);
+  //CkPrintf("left_speed = %.15lf, right_speed = %.15lf\n",
+  //left_speed, right_speed);
 
   *bp = std::fmax(std::fmax(vi_roe + cfast, right_speed), 0.);
   *bm = std::fmin(std::fmin(vi_roe - cfast, left_speed),  0.);
+
+  //CkPrintf("bp = %.15lf, bm = %.15lf\n",*bp,*bm);
+  //fflush(stdout);
+  //ASSERT("EnzoRiemannHLLE", "This is to stop the code!",false);
 }
 
 
@@ -271,9 +277,9 @@ void EnzoRiemannHLLE::interface_flux_(flt_map &prim, flt_map &cons,
   fluxes["density"] = cons["momentum_i"];
 
   // Fluxes for Mx, My, Mz
-  fluxes["momentum_i"] = cons["momentum_i"]*vi - Bi*Bi + p + mag_pressure;
-  fluxes["momentum_j"] = cons["momentum_j"]*vi - Bj*Bi;
-  fluxes["momentum_k"] = cons["momentum_k"]*vi - Bk*Bi;
+  fluxes["momentum_i"] = fluxes["density"]*vi - Bi*Bi + p + mag_pressure;
+  fluxes["momentum_j"] = fluxes["density"]*vj - Bj*Bi;
+  fluxes["momentum_k"] = fluxes["density"]*vk - Bk*Bi;
 
   // Flux for etot
   etot = cons["total_energy"];
