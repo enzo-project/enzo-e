@@ -26,8 +26,6 @@ public:
   // get a field as an array
   void initialize_field_array(Block *block, EnzoArray<enzo_float> &array,
 			      std::string field_name);
-  void initialize_field_array(Block *block, EnzoArray<enzo_float> &array,
-			      int field_id);
 
   // reading in Grouping fields
   void load_grouping_field(Block *block, Grouping &grouping,

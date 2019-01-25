@@ -239,7 +239,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
     // Temporary field to store the central E-field (can reuse it to store
     // different components of the field at different times)
-    int center_efield_id;
+    std::string center_efield_name;
 
     // face-centered weight fields - Track the x/y/z upwind direction
     Grouping weight_group;
@@ -257,8 +257,9 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // allocate the temporary fields (as necessary) and fill the field groupings
     allocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			  yflux_group, zflux_group, efield_group,
-			  center_efield_id, weight_group, temp_conserved_group,
-			  temp_bfieldi_group, consl_group, consr_group);
+			  center_efield_name, weight_group,
+			  temp_conserved_group, temp_bfieldi_group,
+			  consl_group, consr_group);
 
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
@@ -324,7 +325,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       //   - The second time, it uses uses the the cell-centered primitives
       //     computed after the half timestep
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
-      	       center_efield_id, efield_group, weight_group, ct);
+		       center_efield_name, efield_group, weight_group, ct);
 
       // Update quantities - add flux divergence
       update_quantities_(block, xflux_group, yflux_group, zflux_group,
@@ -351,7 +352,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			    yflux_group, zflux_group, efield_group,
-			    center_efield_id, weight_group,
+			    center_efield_name, weight_group,
 			    temp_conserved_group, temp_bfieldi_group,
 			    consl_group, consr_group);
   }
@@ -512,7 +513,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
 				      Grouping &yflux_group,
 				      Grouping &zflux_group,
-				      int center_efield_id,
+				      std::string center_efield_name,
 				      Grouping &efield_group,
 				      Grouping &weight_group,
 				      EnzoConstrainedTransport &ct)
@@ -528,7 +529,7 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
 
   // Maybe the following should be handled internally by ct?
   for (int i = start_dim; i < 3; i++){
-    ct.compute_center_efield (block, i, center_efield_id, *primitive_group_);
+    ct.compute_center_efield (block, i, center_efield_name, *primitive_group_);
     Grouping *jflux_group;
     Grouping *kflux_group;
     if (i == 0){
@@ -542,7 +543,7 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
       kflux_group = &yflux_group;
     }
 
-    ct.compute_edge_efield (block, i, center_efield_id, efield_group,
+    ct.compute_edge_efield (block, i, center_efield_name, efield_group,
 			    *jflux_group, *kflux_group, *primitive_group_,
 			    weight_group);
   }
@@ -672,6 +673,23 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 
 //----------------------------------------------------------------------
 
+// Helper function to prepare temporary fields that are reused each cycle
+void prep_reused_temp_field_(Field &field, std::string field_name,
+			     int cx, int cy, int cz)
+{
+  FieldDescr * field_descr = field.field_descr();
+  int id;
+  if (field.is_field(field_name)){
+    // the temporary field was added in a previous time-step
+    id = field.field_id(field_name);
+  } else {
+    // Reserve a temporary field
+    id = field_descr->insert_temporary(field_name);
+    field_descr->set_centering(id,cx,cy,cz);
+  }
+  // allocate temporary field
+  field.allocate_temporary(id);
+}
 
 // Helper function used to prepare groupings of temporary fields
 // 
@@ -686,7 +704,6 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
 			       Grouping &grouping, std::string field_prefix,
 			       int cx, int cy, int cz)
 {
-  FieldDescr *field_descr = field.field_descr();
   for (unsigned int i=0;i<group_names.size();i++){
     std::string group_name = group_names[i];
     int num_fields = ref_grouping.size(group_name);
@@ -697,18 +714,8 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
     for (int j=0;j<num_fields;j++){
       // Determine field_name
       std::string field_name = field_prefix + (ref_grouping.item(group_name,j));
-
-      int id;
-      if (field.is_field(field_name)){
-	// the temporary field was added in a previous time-step
-	id = field.field_id(field_name);
-      } else {
-	// Reserve a temporary field
-	id = field_descr->insert_temporary(field_name);
-	field_descr->set_centering(id,cx,cy,cz);
-      }
-      // allocate temporary field
-      field.allocate_temporary(id);
+      // reserve/allocate field
+      prep_reused_temp_field_(field, field_name, cx, cy, cz);
 
       // add the temporary field to grouping
       grouping.add(field_name,group_name);
@@ -738,7 +745,6 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
 				Grouping &grouping, std::string field_prefix,
 				bool face_center, bool exterior_faces)
 {
-  FieldDescr *field_descr = field.field_descr();
   for (int i=0;i<3;i++){
     // prepare field name
     std::string field_name;
@@ -767,17 +773,8 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
       field_name = field_prefix + "z";
     }
 
-    int id;
-    if (field.is_field(field_name)){
-      // the temporary field was added in a previous time-step
-      id = field.field_id(field_name);
-    } else {
-      // Reserve a temporary field
-      id = field_descr->insert_temporary(field_name);
-      field_descr->set_centering(id,cx,cy,cz);
-    }
-    // Allocate the field
-    field.allocate_temporary(id);
+    // reserve/allocate field
+    prep_reused_temp_field_(field, field_name, cx, cy, cz);
 
     grouping.add(field_name,group_name);
   }
@@ -790,7 +787,7 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   Grouping &yflux_group,
 					   Grouping &zflux_group,
 					   Grouping &efield_group,
-					   int &center_efield_id,
+					   std::string &center_efield_name,
 					   Grouping &weight_group,
 					   Grouping &temp_conserved_group,
 					   Grouping &temp_bfieldi_group,
@@ -802,12 +799,7 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
-  FieldDescr * field_descr = field.field_descr();  
-
-  
-  // reserve/allocate field for face-centered electric field
-  center_efield_id = field_descr->insert_temporary();
-  field.allocate_temporary(center_efield_id);
+  FieldDescr * field_descr = field.field_descr();
   
   // First, reserve/allocate temporary conserved-related fields
 
@@ -875,10 +867,15 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   // exterior faces just like the permanent interface bfields.
   prep_temp_vector_grouping_(field, "bfield", temp_bfieldi_group,
 			     "temp_bfieldi_",true, false);
+
   // allocate temporary efield fields
   // reserve/allocate fields for edge-centered electric fields
   prep_temp_vector_grouping_(field, "efield", efield_group,
 			     "temp_efield_",false,false);
+
+  // reserve/allocate cell-centered e-field
+  center_efield_name = "center_efield";
+  prep_reused_temp_field_(field, center_efield_name, 0, 0, 0);
 }
 
 //----------------------------------------------------------------------
@@ -914,7 +911,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 					     Grouping &yflux_group,
 					     Grouping &zflux_group,
 					     Grouping &efield_group,
-					     int center_efield_id,
+					     std::string center_efield_name,
 					     Grouping &weight_group,
 					     Grouping &temp_conserved_group,
 					     Grouping &temp_bfieldi_group,
@@ -926,8 +923,6 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
-
-  field.allocate_temporary(center_efield_id);
 
   // deallocate cell-centered conservative quantity fields
   deallocate_grouping_fields_(field, cons_group_names, temp_conserved_group);
@@ -945,8 +940,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   // deallocate electric fields
   std::vector<std::string> efield_group_names{"efield"};
   deallocate_grouping_fields_(field, efield_group_names, efield_group);
-
-  
+  field.deallocate_temporary(field.field_id(center_efield_name));
 
   // deallocate weights
   std::vector<std::string> weight_group_names{"weight"};

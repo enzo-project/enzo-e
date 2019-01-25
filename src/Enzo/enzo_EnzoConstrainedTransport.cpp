@@ -2,13 +2,13 @@
 #include "enzo.hpp"
 
 void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
-						      int center_efield_id,
+						      std::string center_efield_name,
 						      Grouping &prim_group)
 {
   // Load the E-field
   EnzoArray<enzo_float> efield;
   EnzoFieldArrayFactory array_factory;
-  array_factory.initialize_field_array(block, efield, center_efield_id);
+  array_factory.initialize_field_array(block, efield, center_efield_name);
 
   int j = (dim+1)%3;
   int k = (dim+2)%3;
@@ -216,7 +216,7 @@ void aligned_dim_derivatives_(int dim, int &dxddim, int &dyddim, int &dzddim)
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
 void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
-						    int center_efield_id,
+						    std::string center_efield_name,
 						    Grouping &efield_group,
 						    Grouping &jflux_group,
 						    Grouping &kflux_group,
@@ -231,7 +231,7 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   // Initialize Cell-Centered E-fields
   EnzoArray<enzo_float> Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
   EnzoFieldArrayFactory array_factory;
-  array_factory.initialize_field_array(block, Ec, center_efield_id);
+  array_factory.initialize_field_array(block, Ec, center_efield_name);
   Ec_jp1.initialize_subarray(Ec, dzdj, Ec.length_dim2(),  //zstart : zstop
 			         dydj, Ec.length_dim1(),  //ystart : ystop
 			         dxdj, Ec.length_dim0()); //xstart : xstop

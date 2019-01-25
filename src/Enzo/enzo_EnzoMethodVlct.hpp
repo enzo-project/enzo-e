@@ -183,7 +183,7 @@ protected: // methods
   // primitives
   void compute_efields_(Block *block, Grouping &xflux_group,
 			Grouping &yflux_group, Grouping &zflux_group,
-			int center_efield_id, Grouping &efield_group,
+			std::string center_efield_name, Grouping &efield_group,
 			Grouping &weight_group,
 			EnzoConstrainedTransport &ct);
 
@@ -198,7 +198,8 @@ protected: // methods
   void allocate_temp_fields_(Block *block, Grouping &priml_group,
 			     Grouping &primr_group, Grouping &xflux_group,
 			     Grouping &yflux_group, Grouping &zflux_group,
-			     Grouping &efield_group, int &center_efield_id,
+			     Grouping &efield_group,
+			     std::string &center_efield_name,
 			     Grouping &weight_group,
 			     Grouping &temp_conserved_group,
 			     Grouping &temp_bfieldi_group,
@@ -208,7 +209,8 @@ protected: // methods
   void deallocate_temp_fields_(Block *block, Grouping &priml_group,
 			       Grouping &primr_group, Grouping &xflux_group,
 			       Grouping &yflux_group, Grouping &zflux_group,
-			       Grouping &efield_group, int center_efield_id,
+			       Grouping &efield_group,
+			       std::string center_efield_name,
 			       Grouping &weight_group,
 			       Grouping &temp_conserved_group,
 			       Grouping &temp_bfieldi_group,

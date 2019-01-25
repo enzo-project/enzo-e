@@ -17,7 +17,8 @@ public: // interface
   virtual ~EnzoConstrainedTransport()
   {  }
 
-  void compute_center_efield (Block *block, int dim, int center_efield_id,
+  void compute_center_efield (Block *block, int dim,
+			      std::string center_efield_name,
 			      Grouping &prim_group);
   
   // Computes the edge-centered E-fields pointing in the ith direction
@@ -26,7 +27,8 @@ public: // interface
   // the face-centered E-fields are given by elements of jflux_ids and
   // kflux_ids. dim points along i.
   // i, j, and k are any cyclic permutation of x, y, z
-  void compute_edge_efield (Block *block, int dim, int center_efield_id,
+  void compute_edge_efield (Block *block, int dim,
+			    std::string center_efield_name,
 			    Grouping &efield_group, Grouping &jflux_group,
 			    Grouping &kflux_group, Grouping &prim_group,
 			    Grouping &weight_group);

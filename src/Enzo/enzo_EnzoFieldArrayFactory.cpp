@@ -17,19 +17,6 @@ void EnzoFieldArrayFactory::initialize_field_array(Block *block,
   array.initialize_wrapper(data, mz, my, mx);
 }
 
-void EnzoFieldArrayFactory::initialize_field_array(Block *block,
-						   EnzoArray<enzo_float> &array,
-						   int field_id)
-{
-  Field field = block->data()->field();
-
-  // get the field dimensions
-  int mx, my, mz;
-  field.dimensions (field_id,&mx,&my,&mz);
-  enzo_float *data = (enzo_float *) field.values(field.field_name(field_id));
-  array.initialize_wrapper(data, mz, my, mx);
-}
-
 void EnzoFieldArrayFactory::load_grouping_field(Block *block,
 						Grouping &grouping,
 						std::string group_name,
