@@ -225,8 +225,8 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 {
   // determine alignment of j,k axes with respect to x,y, and z
   int dxdj, dydj, dzdj, dxdk, dydk, dzdk;
-  aligned_dim_derivatives_((dim+1)%2, dxdj, dydj, dzdj);
-  aligned_dim_derivatives_((dim+2)%2, dxdk, dydk, dzdk);
+  aligned_dim_derivatives_((dim+1)%3, dxdj, dydj, dzdj);
+  aligned_dim_derivatives_((dim+2)%3, dxdk, dydk, dzdk);
 
   // Initialize Cell-Centered E-fields
   EnzoArray<enzo_float> Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
@@ -266,7 +266,7 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 			         dxdk, Wj.length_dim0());
   array_factory.load_grouping_field(block, weight_group, "weight", (dim+2)%3,
 				    Wk);
-  Wk_jp1.initialize_subarray(Wj, dzdj, Wk.length_dim2(),
+  Wk_jp1.initialize_subarray(Wk, dzdj, Wk.length_dim2(),
 			         dydj, Wk.length_dim1(),
 			         dxdj, Wk.length_dim0());
 
@@ -290,7 +290,7 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   //    idim maps to idim+1/2
   //
   // To summarize:
-  //    2D grid with i aligned along z:  istart = 0     istop = imax = 1
+  //    2D grid with i aligned along z:  istart = 0     istop = imax - 1
   //    3D grid:                         istart = 1     istop = imax - 1
   //    In all cases:                    jstart = 0     jstop = jmax - 1
   //                                     kstart = 0     kstop = kmax - 1
@@ -372,10 +372,16 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 				      E_k);
   }
 
-  // Integration limits are compatible with 2D and 3D grids
-  for (int iz=0; iz<out_bfield.length_dim2(); iz++) {
-    for (int iy=0; iy<out_bfield.length_dim1(); iy++) {
-      for (int ix=0; ix<out_bfield.length_dim0(); ix++) {
+  int zstart = 0;
+  int zstop = 1;
+  if (three_dim){
+    zstart = dzdj + dzdk;
+    zstop = out_bfield.length_dim2()-dzdj-dzdk;
+  }
+
+  for (int iz=zstart; iz<zstop; iz++) {
+    for (int iy=dydj+dydk; iy<out_bfield.length_dim1()-dydj-dydk; iy++) {
+      for (int ix=dxdj+dxdk; ix<out_bfield.length_dim0()-dxdj-dxdk; ix++) {
 
 	enzo_float E_k_term, E_j_term;
 	if (use_E_k){

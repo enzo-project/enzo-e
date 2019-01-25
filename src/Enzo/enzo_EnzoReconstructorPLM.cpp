@@ -154,12 +154,12 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       EnzoArray<enzo_float> wr, wl, wl_offset;
       array_factory.load_temp_interface_grouping_field(block, primr_group,
 						       group_name, field_ind,
-						       wr, dim == 0, dim == 1,
-						       dim == 2);
+						       wr, dim != 0, dim != 1,
+						       dim != 2);
       array_factory.load_temp_interface_grouping_field(block, priml_group,
 						       group_name, field_ind,
-						       wl, dim == 0, dim == 1,
-						       dim == 2);
+						       wl, dim != 0, dim != 1,
+						       dim != 2);
       wl_offset.initialize_subarray(wl, diz, wl.length_dim2(),
 				    diy, wl.length_dim1(),
 				    dix, wl.length_dim0());

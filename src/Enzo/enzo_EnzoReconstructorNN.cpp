@@ -43,12 +43,12 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
       // face centered: (k,j,i) -> (k,j,i+1/2)
       array_factory.load_temp_interface_grouping_field(block, primr_group,
 						       group_name, field_ind,
-						       wr, dim == 0, dim == 1,
-						       dim == 2);
+						       wr, dim != 0, dim != 1,
+						       dim != 2);
       array_factory.load_temp_interface_grouping_field(block, priml_group,
 						       group_name, field_ind,
-						       wl, dim == 0, dim == 1,
-						       dim == 2);
+						       wl, dim != 0, dim != 1,
+						       dim != 2);
 
       // Could be more efficient
       for (int iz=0; iz<wc.length_dim2()-diz; iz++) {

@@ -324,7 +324,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       //   - The second time, it uses uses the the cell-centered primitives
       //     computed after the half timestep
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
-		       center_efield_id, efield_group, weight_group, ct);
+      	       center_efield_id, efield_group, weight_group, ct);
 
       // Update quantities - add flux divergence
       update_quantities_(block, xflux_group, yflux_group, zflux_group,
@@ -332,10 +332,12 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
       // Add source terms - doesn't matter if done before/after adding flux
       // Update longitudinal B-field (add source terms of constrained transport)
+      
       for (int dim = 0; dim<ndim; dim++){
 	ct.update_bfield(block, dim, efield_group, *bfieldi_group_,
 			 *out_bfieldi_group, dt);
       }
+
       // Add other source terms?
 
 
@@ -385,11 +387,11 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   array_factory.load_interior_bfieldi_field(block, cur_bfieldi_group, dim,
 					    bfield);
   array_factory.load_temp_interface_grouping_field(block, priml_group, "bfield",
-						   dim, l_bfield, dim == 0,
-						   dim == 1, dim == 2);
+						   dim, l_bfield, dim != 0,
+						   dim != 1, dim != 2);
   array_factory.load_temp_interface_grouping_field(block, primr_group, "bfield",
-						   dim, r_bfield, dim == 0,
-						   dim == 1, dim == 2);
+						   dim, r_bfield, dim != 0,
+						   dim != 1, dim != 2);
 
   // All 3 array objects are the same shape
   // Iteration limits are generalized for 2D and 3D grids
@@ -449,6 +451,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // Next, compute the fluxes
   riemann_solver_->solve(block, priml_group, primr_group, flux_group,
 			 consl_group, consr_group, dim, eos_);
+  /*
   print_array_vals_(block, flux_group, "density", 0, 8, 8,
 		    dim != 0, dim != 1, dim != 2);
   print_array_vals_(block, flux_group, "momentum", 0, 8, 8,
@@ -465,6 +468,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 		    dim != 0, dim != 1, dim != 2);
   print_array_vals_(block, flux_group, "bfield", 2, 8, 8,
 		    dim != 0, dim != 1, dim != 2);
+  */
 
   //ASSERT("EnzoMethodVlct", "This is to stop the code!",false);
   
@@ -636,12 +640,14 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 	    }
 
 	    if (iz == 8 && iy == 8){
-	      if (ix == 0){
+	      if (ix == 1){
 		CkPrintf("[");
 	      } else {
 		CkPrintf(", ");
 	      }
-	      CkPrintf("%e",new_val - cur_cons(iz,iy,ix));
+	      CkPrintf("%e", -dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
+		       - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix))
+		       - dtdz * (zflux(iz,iy,ix) - zflux(iz-1,iy,ix)));
 	      
 	      if (ix == mx-2){
 		CkPrintf("]\n");
@@ -798,6 +804,11 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   Field field = enzo_block->data()->field();
   FieldDescr * field_descr = field.field_descr();  
 
+  
+  // reserve/allocate field for face-centered electric field
+  center_efield_id = field_descr->insert_temporary();
+  field.allocate_temporary(center_efield_id);
+  
   // First, reserve/allocate temporary conserved-related fields
 
   // Prepare the temporary conserved fields (used to store values at half dt)
@@ -854,16 +865,6 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
 			    primr_group, "right_",0,0,0);
 
-  // allocate temporary efield fields
-  // reserve/allocate fields for edge-centered electric fields
-  prep_temp_vector_grouping_(field, "efield", efield_group,
-			     "temp_efield_",false,false);
-
-  // reserve/allocate field for face-centered electric field
-  center_efield_id = field_descr->insert_temporary();
-  field.allocate_temporary(center_efield_id);
-
-
   // reserve/allocate fields for weight fields
   // these are face-centered fields that store the upwind/downwind direction
   prep_temp_vector_grouping_(field, "weight", weight_group,
@@ -874,6 +875,10 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   // exterior faces just like the permanent interface bfields.
   prep_temp_vector_grouping_(field, "bfield", temp_bfieldi_group,
 			     "temp_bfieldi_",true, false);
+  // allocate temporary efield fields
+  // reserve/allocate fields for edge-centered electric fields
+  prep_temp_vector_grouping_(field, "efield", efield_group,
+			     "temp_efield_",false,false);
 }
 
 //----------------------------------------------------------------------
@@ -922,6 +927,8 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
+  field.allocate_temporary(center_efield_id);
+
   // deallocate cell-centered conservative quantity fields
   deallocate_grouping_fields_(field, cons_group_names, temp_conserved_group);
   deallocate_grouping_fields_(field, cons_group_names, xflux_group);
@@ -939,7 +946,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   std::vector<std::string> efield_group_names{"efield"};
   deallocate_grouping_fields_(field, efield_group_names, efield_group);
 
-  field.deallocate_temporary(center_efield_id);
+  
 
   // deallocate weights
   std::vector<std::string> weight_group_names{"weight"};

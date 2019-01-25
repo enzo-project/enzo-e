@@ -3,22 +3,24 @@
 #define ENZO_ENZO_ARRAY_HPP
 #include <stdio.h>
 
-// NEED TO ADDRESS:
+// Planned changes:
 //   - Behavior of operator() if fewer arguments are specified than the number
 //     of dimensions. The current behavior is problematic if EnzoArray is a
-//     view of a subarray of a different array. The overhead from handling it
-//     all safely may be problematic. In that case, the problem can be overcome
-//     by either providing a separate class for array vies OR statically
-//     defining the number of dimensions as a Template Argument
-
-
-// Disclaimer:
-//   - Unclear that current behavior of having a reusable array is desirable.
-//     It may make more sense to only ever have an individual instance
-//     represent an individual array. This would entail performing
-//     intialization and construction together. Consequently, all current use
-//     of EnzoArray, never reuses the same instance to represent different
-//     arrays [But construction and initialization would need to be fixed]
+//     view of a subarray of a different array. This will ultimately be
+//     addressed by declaring the number of dimensions as a template argument
+//     and then comparing the number of indices to the number of dimensions
+//     (this should be done at compile time)
+//   - Memory can leak for a view of an EnzoArray if the original owns the
+//     underlying pointer and is deallocated. To address this we start tracking
+//     views of other EnzoArrays that own pointers, and reorganizing ownership
+//     of the pointer upon deallocation. This does not address lack of memory
+//     safety for EnzoArrays wrapping arbitrary pointers (the only possible way
+//     to fix that would be to restrict EnzoArrays to wrap pointers from Field
+//     or a subclass and then have field notify the EnzoArray if a pointer is
+//     deallocated - Going to avoid doing this).
+//   - Probably going to make initialization and Construction occur in one
+//     step, rather than 2 steps. To help facillitate this, move and copy
+//     constructors will be implemented
 
 // Implementation Notes:
 //   - Main motivation: use overloaded operator() for multi-dimensional access
@@ -57,8 +59,28 @@
 //           2. A fast implementation would be more complicated and a secondary
 //              class definition may be necessary for speed.
 
-// Need to be more careful about memory management in the cases where we
-// actually initialize the array.
+
+// Defining the following macro means that the bounds of an EnzoArray, are
+// checked everytime operator() is called or a subarray is initialized.
+#define CHECK_BOUNDS
+
+#ifdef CHECK_BOUNDS
+#  define CHECK_BOUND1D(i,shape_)                                             \
+  ASSERT("EnzoArray","Invalid index", i<shape_[0]);
+#  define CHECK_BOUND2D(j,i,shape_)					      \
+  ASSERT("EnzoArray", "Invalid index", i<shape_[0] && j<shape_[1]);
+#  define CHECK_BOUND3D(k,j,i,shape_)                                         \
+  ASSERT("EnzoArray", "Invalid index",                                        \
+	 i<shape_[0] && j<shape_[1] && k<shape_[2]);
+#  define CHECK_BOUND4D(l,k,j,i,shape_)					\
+  ASSERT("EnzoArray", "Invalid index",                                        \
+	 i<shape_[0] && j<shape_[1] && k<shape_[2] && l<shape_[3]);
+#else
+#  define CHECK_BOUND1D(i,shape_)       /* ... */
+#  define CHECK_BOUND2D(j,i,shape_)     /* ... */
+#  define CHECK_BOUND3D(k,j,i,shape_)   /* ... */
+#  define CHECK_BOUND4D(l,k,j,i,shape_) /* ... */
+#endif
 
 template<typename T>
 class EnzoArray
@@ -119,23 +141,31 @@ public:
 
   // Access array Elements
   T &operator() (const int i){
+    CHECK_BOUND1D(i,shape_);
     return data_[offset_+i]; }
   T operator() (const int i) const{
+    CHECK_BOUND1D(i,shape_);
     return data_[offset_+i]; }
 
   T &operator() (const int j, const int i){
+    CHECK_BOUND2D(j,i,shape_);
     return data_[offset_ + i + j*stride_[0]]; }
   T operator() (const int j, const int i) const{
+    CHECK_BOUND2D(j,i,shape_);
     return data_[offset_ + i + j*stride_[0]];}
 
   T &operator() (const int k, const int j, const int i){
+    CHECK_BOUND3D(k,j,i,shape_);
     return data_[offset_ + i + j*stride_[0] + k*stride_[1]]; }
   T operator() (const int k, const int j, const int i) const{
+    CHECK_BOUND3D(k,j,i,shape_);
     return data_[offset_ + i + j*stride_[0] + k*stride_[1]]; }
 
   T &operator() (const int l, const int k, const int j, const int i){
+    CHECK_BOUND4D(l,k,j,i,shape_);
     return data_[offset_ + i + j*stride_[0] + k*stride_[1] + l*stride_[2]]; }
   T operator() (const int l, const int k, const int j, const int i) const{
+    CHECK_BOUND4D(l,k,j,i,shape_);
     return data_[offset_ + i + j*stride_[0] + k*stride_[1] + l*stride_[2]]; }
 
   int length_dim0() {return shape_[0];}
@@ -247,6 +277,9 @@ void EnzoArray<T>::initialize_subarray(EnzoArray<T> &array,
 				       int dim1_start, int dim1_stop,
 				       int dim0_start, int dim0_stop)
 {
+  CHECK_BOUND4D(dim3_start,dim2_start,dim1_start,dim0_start,array.shape_);
+  CHECK_BOUND4D(dim3_stop-1,dim2_stop-1,dim1_stop-1,dim0_stop-1,array.shape_);
+  
   int offset = (array.offset_ + dim0_start +
 		dim1_start*array.stride_[0] +
 		dim2_start*array.stride_[1] +
