@@ -95,7 +95,8 @@ std::vector<std::string> EnzoMethodVlct::prim_group_names={"density","velocity",
 EnzoMethodVlct::EnzoMethodVlct (double gamma)
   : Method()
 {
-  // Initialize the default Refresh object
+  // Initialize the default Refresh object - eventually may want to adjust
+  // number of ghost zones based on reconstructor choice.
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   			       enzo_sync_id_method_vlct);
@@ -104,9 +105,9 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   FieldDescr * field_descr = cello::field_descr();
   
   refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
+  refresh(ir)->add_field(field_descr->field_id("momentum_x"));
+  refresh(ir)->add_field(field_descr->field_id("momentum_y"));
+  refresh(ir)->add_field(field_descr->field_id("momentum_z"));
   // total energy is the energy density
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
   refresh(ir)->add_field(field_descr->field_id("bfieldc_x"));
@@ -204,6 +205,51 @@ void EnzoMethodVlct::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
+
+// The temporary conserved fields have arbitrary initial values
+// The calculation at the first half timestep fills in the inner cells in of
+// the temporary fields. The outermost layer of cells on the grid are
+// uninitialized. This can lead to NaNs or inf. To avoid this, the following
+// helper function makes sure that the exterior layer has reasonable values.
+// We could probably accomplish the same thing by setting the values to 0 or
+// prim_floor. We also don't need to iterate over the full grid. None of this
+// is strictly necessary since it will only be messing up the ghost zone - but
+// if we want the calculation to be free of ever having nans/inf something like
+// this is necessary.
+// This should probably be a private method
+void copy_grouping_fields_(Block *block, Grouping &conserved_group,
+			   Grouping &temp_cons_group){
+  // This is a stop gap solution to try to fix things
+  // This should be further explored!
+
+  std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
+  EnzoFieldArrayFactory array_factory;
+  
+  for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
+    // load group name and number of fields in the group
+    std::string group_name = cons_group_names[group_ind];
+    int num_fields = conserved_group.size(group_name);
+     // iterate over the fields in the group
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+
+      // load in the quantities
+      EnzoArray<enzo_float> cur_cons, out_cons;
+      array_factory.load_grouping_field(block, conserved_group, group_name,
+					field_ind, cur_cons);
+      array_factory.load_grouping_field(block, temp_cons_group, group_name,
+					field_ind, out_cons);
+      for (int iz=0; iz<cur_cons.length_dim2(); iz++) {
+	for (int iy=0; iy<cur_cons.length_dim1(); iy++) {
+	  for (int ix=0; ix<cur_cons.length_dim0(); ix++) {
+	    out_cons(iz,iy,ix) = cur_cons(iz,iy,ix);
+	  }
+	}
+      }
+    }
+  }
+}
+
+
 void EnzoMethodVlct::compute ( Block * block) throw()
 {
   TRACE_VLCT("compute()");
@@ -260,6 +306,9 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 			  center_efield_name, weight_group,
 			  temp_conserved_group, temp_bfieldi_group,
 			  consl_group, consr_group);
+
+    // initialize values of the temporary conserved group
+    copy_grouping_fields_(block, *conserved_group_, temp_conserved_group);
 
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
@@ -583,9 +632,6 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
   enzo_float dtdx = dt/enzo_block->CellWidth[0];
   enzo_float dtdy = dt/enzo_block->CellWidth[1];
   enzo_float dtdz = dt/enzo_block->CellWidth[2];
-  CkPrintf("dtdx,dtdy, dtdz = %lf, %lf, %lf\n",
-	   dtdx, dtdy, dtdz);
-  fflush(stdout);
 
   for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
     // load group name and number of fields in the group

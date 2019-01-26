@@ -147,9 +147,9 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 	    ((bp*Fl[key] - bm*Fr[key]  +
 	      (Ur[key] - Ul[key])*bp*bm)/ (bp - bm));
 
-	  //ASSERT("EnzoRiemannHLLE",
-	  //	 "There is a NaN or inf\n",
-	  //	 std::isfinite((*(flux_arrays[key]))(iz,iy,ix)));
+	  ASSERT("EnzoRiemannHLLE",
+	  	 "There is a NaN or inf\n",
+	  	 std::isfinite((*(flux_arrays[key]))(iz,iy,ix)));
 	}
 
 	// Deal with Species and colors

@@ -60,9 +60,9 @@
 //              class definition may be necessary for speed.
 
 
-// Defining the following macro means that the bounds of an EnzoArray, are
-// checked everytime operator() is called or a subarray is initialized.
-#define CHECK_BOUNDS
+// Defining the macro called CHECK_BOUNDS macro means that the bounds of an
+// EnzoArray, are checked everytime operator() is called or a subarray is
+// initialized.
 
 #ifdef CHECK_BOUNDS
 #  define CHECK_BOUND1D(i,shape_)                                             \
