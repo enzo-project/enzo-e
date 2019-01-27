@@ -189,11 +189,15 @@ void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
 }
 
 void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
-                                             grackle_field_data * grackle_fields_)
-                                              throw()
-  {
+                                             grackle_field_data * grackle_fields_,
+                                             bool initialize_fields = false)
+                                             throw()
+{
+  // Setup Grackle field struct for storing field data that will be passed
+  // into Grackle. Initialize fields, if true, will also assign values to
+  // the fields (equal to uniform background values). This is meant to be
+  // used at initialization, and is by default false.
 
-  // Setup Grackle field struct for storing field data
   Field field = enzo_block->data()->field();
 
   int gx,gy,gz;
@@ -278,6 +282,94 @@ void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
   grackle_fields_->specific_heating_rate   = specific_heating_rate;
 
 
+  /* Initialize the fields - this ONLY touches grackle specific fields*/
+  if (initialize_fields){
+    double tiny_number = 1.0E-10;
+
+    for (int iz = 0; iz<ngz; iz++){
+      for (int iy=0; iy<ngy; iy++){
+        for (int ix=0; ix<ngx; ix++){
+          int i = INDEX(ix,iy,iz,ngx,ngy);
+
+          grackle_fields_->density[i] = config->field_uniform_density;
+
+          if(grackle_data->primordial_chemistry > 1){
+            grackle_fields_->HI_density[i]   = grackle_fields_->density[i] * grackle_data->HydrogenFractionByMass;
+            grackle_fields_->HII_density[i]   = grackle_fields_->density[i] * tiny_number;
+            grackle_fields_->HeI_density[i]   = grackle_fields_->density[i] * (1.0 - grackle_data->HydrogenFractionByMass);
+            grackle_fields_->HeII_density[i]  = grackle_fields_->density[i] * tiny_number;
+            grackle_fields_->HeIII_density[i] = grackle_fields_->density[i] * tiny_number;
+            grackle_fields_->e_density[i]     = grackle_fields_->density[i] * tiny_number;
+          }
+
+          if (grackle_data->primordial_chemistry > 1){
+            grackle_fields_->HM_density[i]    = grackle_fields_->density[i] * tiny_number;
+            grackle_fields_->H2I_density[i]   = grackle_fields_->density[i] * tiny_number;
+            grackle_fields_->H2II_density[i]  = grackle_fields_->density[i] * tiny_number;
+          }
+
+          if (grackle_data->primordial_chemistry > 2){
+            grackle_fields_->DI_density[i]    = grackle_fields_->density[i] * grackle_data->DeuteriumToHydrogenRatio;
+            grackle_fields_->DII_density[i]   = grackle_fields_->density[i] * tiny_number;
+            grackle_fields_->HDI_density[i]   = grackle_fields_->density[i] * tiny_number;
+          }
+
+        }
+      }
+    }
+  } // end if initialize fields
+
+  return;
+}
+
+void EnzoMethodGrackle::update_grackle_density_fields(EnzoBlock * enzo_block,
+                              grackle_field_data * grackle_fields_) throw () {
+
+  Field field = enzo_block->data()->field();
+
+  int gx,gy,gz;
+  field.ghost_depth (0,&gx,&gy,&gz);
+
+  int nx,ny,nz;
+  field.size (&nx,&ny,&nz);
+
+  int ngx = nx + 2*gx;
+  int ngy = ny + 2*gy;
+  int ngz = nz + 2*gz;
+
+  double tiny_number = 1.0E-10;
+
+  for (int iz = 0; iz<ngz; iz++){
+    for (int iy=0; iy<ngy; iy++){
+      for (int ix=0; ix<ngx; ix++){
+        int i = INDEX(ix,iy,iz,ngx,ngy);
+
+        if(grackle_data->primordial_chemistry > 1){
+          grackle_fields_->HI_density[i]   = grackle_fields_->density[i] * grackle_data->HydrogenFractionByMass;
+          grackle_fields_->HII_density[i]   = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->HeI_density[i]   = grackle_fields_->density[i] * (1.0 - grackle_data->HydrogenFractionByMass);
+          grackle_fields_->HeII_density[i]  = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->HeIII_density[i] = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->e_density[i]     = grackle_fields_->density[i] * tiny_number;
+        }
+
+        if (grackle_data->primordial_chemistry > 1){
+          grackle_fields_->HM_density[i]    = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->H2I_density[i]   = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->H2II_density[i]  = grackle_fields_->density[i] * tiny_number;
+        }
+
+        if (grackle_data->primordial_chemistry > 2){
+          grackle_fields_->DI_density[i]    = grackle_fields_->density[i] * grackle_data->DeuteriumToHydrogenRatio;
+          grackle_fields_->DII_density[i]   = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->HDI_density[i]   = grackle_fields_->density[i] * tiny_number;
+        }
+
+      }
+    }
+  }
+
+  return;
 }
 
 //----------------------------------------------------------------------

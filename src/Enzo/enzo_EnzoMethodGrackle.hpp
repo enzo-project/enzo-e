@@ -91,6 +91,10 @@ public: // interface
                                   code_units * grackle_units) throw();
 
   static void setup_grackle_fields(EnzoBlock * enzo_block,
+                                   grackle_field_data * grackle_fields,
+                                   bool initialize_fields = false) throw();
+
+  static void update_grackle_density_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields) throw();
 #endif
 
