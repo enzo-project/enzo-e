@@ -17,6 +17,20 @@
 #define DEBUG_PERFORMANCE
 //----------------------------------------------------------------------
 
+int nlines(std::string fname) {
+
+  int n = 0;
+  std::string line;
+  std::ifstream inFile(fname);
+
+  while (std::getline(inFile, line))
+    ++n;
+
+  inFile.close();
+
+  return n;
+}
+
 EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 (const EnzoConfig * config) throw()
 : Initial(config->initial_cycle, config->initial_time)
@@ -32,12 +46,16 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   this->disk_mass_            = config->initial_IG_disk_mass;
   this->gas_fraction_         = config->initial_IG_gas_fraction;
   this->disk_temperature_     = config->initial_IG_disk_temperature;
-  this->disk_metallicity_     = config->initial_IG_disk_metallicity;
+  this->disk_metal_fraction_     = config->initial_IG_disk_metal_fraction;
   this->gas_halo_mass_        = config->initial_IG_gas_halo_mass;
   this->gas_halo_temperature_ = config->initial_IG_gas_halo_temperature;
-  this->gas_halo_metallicity_ = config->initial_IG_gas_halo_metallicity;
+  this->gas_halo_metal_fraction_ = config->initial_IG_gas_halo_metal_fraction;
   this->gas_halo_density_     = config->initial_IG_gas_halo_density;
   this->gas_halo_radius_      = config->initial_IG_gas_halo_radius;
+
+  this->live_dm_halo_         = config->initial_IG_live_dm_halo;
+  this->stellar_disk_         = config->initial_IG_stellar_disk;
+  this->stellar_bulge_        = config->initial_IG_stellar_bulge;
 
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)
   {
@@ -57,8 +75,12 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   this->mu_                 = config->ppm_mol_weight;
 
   // read in data for initialization
-  this->ReadInVcircData();
-  this->ReadInParticleData(); // AE: Does nothing at the moment
+  this->ntypes_            = 0;
+  this->ndim_              = cello::rank();
+  this->nparticles_        = 0;
+
+  this->ReadInVcircData();        // circular velocity curve
+  this->ReadParticles();     // IC particles - only if available
 }
 
 //----------------------------------------------------------------------
@@ -77,10 +99,10 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
   p | disk_mass_;
   p | gas_fraction_;
   p | disk_temperature_;
-  p | disk_metallicity_;
+  p | disk_metal_fraction_;
   p | gas_halo_mass_;
   p | gas_halo_temperature_;
-  p | gas_halo_metallicity_;
+  p | gas_halo_metal_fraction_;
   p | gas_halo_density_;
   p | gas_halo_radius_;
 
@@ -89,6 +111,33 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
   p | gamma_;
   p | mu_;
 
+  p | live_dm_halo_;
+  p | stellar_bulge_;
+  p | stellar_disk_;
+
+  p | ntypes_;
+  p | ndim_;
+  p | nparticles_;
+
+  if (p.isUnpacking()){
+    // we know aboutntype, ndim, and nparticles..
+    // allocate particle IC arrays
+    allocateParticles();
+  }
+
+  // Pup grid values element-by-element
+  for (int k = 0; k < ntypes_; k++){
+    for (int j = 0; j < ndim_; j ++){
+      PUParray(p, particleIcPosition[k][j], nparticles_);
+      PUParray(p, particleIcVelocity[k][j], nparticles_);
+    }
+    PUParray(p, particleIcMass[k], nparticles_);
+  }
+  PUParray(p, particleIcTypes, ntypes_);
+
+  p | particleIcFileNames;
+
+  return;
 }
 
 void EnzoInitialIsolatedGalaxy::enforce_block
@@ -111,9 +160,14 @@ void EnzoInitialIsolatedGalaxy::enforce_block
          block != NULL);
 
   EnzoUnits * enzo_units = enzo::units();
-
+  const EnzoConfig * enzo_config = enzo::config();
   Field field = block->data()->field();
 
+
+#ifdef CONFIG_USE_GRACKLE
+   grackle_field_data grackle_fields_;
+   EnzoMethodGrackle::setup_grackle_fields(enzo_block, &grackle_fields_);
+#endif
 
   //
   // Get Grid and Field parameters
@@ -143,7 +197,10 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
   // Get Fields
   enzo_float * d = (enzo_float *) field.values ("density");
-  enzo_float * p = (enzo_float *) field.values ("pressure");
+  enzo_float * temperature = field.is_field("temperature") ?
+                   (enzo_float*) field.values("temperature") : NULL;
+  enzo_float * p = field.is_field("pressure") ?
+                   (enzo_float *) field.values ("pressure") : NULL;
   enzo_float * a3[3] = { (enzo_float *) field.values("acceleration_x"),
                          (enzo_float *) field.values("acceleration_y"),
                          (enzo_float *) field.values("acceleration_z")};
@@ -154,6 +211,9 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   enzo_float * te  = (enzo_float *) field.values("total_energy");
   enzo_float * ge  = (enzo_float *) field.values("internal_energy");
   enzo_float * pot = (enzo_float *) field.values("potential");
+
+  enzo_float * metal = field.is_field("metal_density") ?
+                      (enzo_float *) field.values("metal_density") : NULL;
 
 
   // double velocity_units = this->length_units_ / this->time_units_;
@@ -171,6 +231,8 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
   double disk_gas_energy = this->disk_temperature_ / this->mu_ / (this->gamma_ -1)/
          enzo_units->temperature();
+
+  double tiny_number = 1.0E-10;
 
   // initialize fields to something
   for (int iz=0; iz<mz; iz++){
@@ -192,13 +254,14 @@ void EnzoInitialIsolatedGalaxy::enforce_block
           a3[dim][i] = 0.0;
           v3[dim][i] = 0.0;
         }
+
+        if(metal) metal[i] = tiny_number * d[i];
+
       }
     }
   } // end loop over all cells for background values
 
 
-  //
-  // int outcount = 0;
   for (int iz=0; iz<mz; iz++){
     // compute z coordinate of cell center
     double z = zm + (iz - gz + 0.5)*hz - this->center_position_[2];
@@ -223,10 +286,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
         double disk_density = this->gauss_mass(rho_zero, x/enzo_units->length(), y/enzo_units->length(),
                                               z/enzo_units->length(), hx) / (hx*hx*hx);
 
-//        if (outcount < 100){
-//            std::cout << disk_density << "   " << radius << "   " << r_cyl << "\n";
-//            outcount++;
-//        }
+
         if ((this->gas_halo_density_ * this->gas_halo_temperature_ > disk_density*this->disk_temperature_) &&
             (radius < this->gas_halo_radius_*enzo_units->length())){
           // in the halo, set the halo properties
@@ -239,8 +299,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
           }
 
           // set metal fraction here
-
-          //
+          if(metal) metal[i] = this->gas_halo_metal_fraction_ * d[i];
 
         }
         else if ( radius < this->gas_halo_radius_*enzo_units->length() ) // we are in the disk
@@ -267,31 +326,202 @@ void EnzoInitialIsolatedGalaxy::enforce_block
             ge[i] = disk_gas_energy;
           }
 
+          if(metal) metal[i] = this->disk_metal_fraction_ * d[i];
 
         } // end disk / halo check
-//        else
-//        {
-//        Not needed. Taken care of with initial loop over all cells
-//        }
 
-        /* Set multispecies information here */
-
-        /*                                   */
       }
     }
   } // end loop over all cells
 
-  // do particle initialization here (not sure what this does)
-  // Particle particle = block->data()->particle();
+#ifdef CONFIG_USE_GRACKLE
+  /* Assign grackle chemistry fields to default fractions based on density */
+  EnzoMethodGrackle::update_grackle_density_fields(&grackle_data);
+#endif
+
+  if (temperature) {
+
+    EnzoComputeTemperature compute_temperature
+      (enzo_config->ppm_density_floor,
+       enzo_config->ppm_temperature_floor,
+       enzo_config->ppm_mol_weight,
+       enzo_config->physics_cosmology);
+
+    compute_temperature.compute(block);
+
+  }
+
+
+  // now initialize particles
+  // Particle particle = enzo_block->data()->particle();
+  // InitializeParticles(&particle);
+
+  return;
+}
+
+void EnzoInitialIsolatedGalaxy::InitializeParticles(Particle * particle){
+
+  if (this->ntypes_ == 0) return;
+
+  int rank = cello::rank();
+
+  // Loop over all particle types and initialize
+  for(int ipt = 0; ipt < ntypes_; ipt++){
+
+    int it   = particleIcTypes[ipt];
+    int np   = nlines(particleIcFileNames[ipt]);
+
+    //
+    // Now create the particles and assign values
+    //    There is likely a better way of doing this that is both cleaner
+    //    and more efficient, but this is likely the most readable
+    //
+
+    // obtain particle attribute indexes for this type
+    int ia_m = particle->attribute_index (it, "mass");
+    int ia_x = particle->attribute_index (it, "x");
+    int ia_y = particle->attribute_index (it, "y");
+    int ia_z = particle->attribute_index (it, "z");
+    int ia_vx = particle->attribute_index (it, "vx");
+    int ia_vy = particle->attribute_index (it, "vy");
+    int ia_vz = particle->attribute_index (it, "vz");
+
+    int ib  = 0; // batch counter
+    int ipp = 0; // counter
+
+    // this will point to the particular value in the
+    // particle attribute array
+    enzo_float * pmass = 0;
+    enzo_float * px   = 0;
+    enzo_float * py   = 0;
+    enzo_float * pz   = 0;
+    enzo_float * pvx  = 0;
+    enzo_float * pvy  = 0;
+    enzo_float * pvz  = 0;
+
+    // now loop over all particles
+
+    // Should I do an "if on grid" check??
+
+    for (int i = 0; i < np; i ++){
+      ASSERT("EnzoInitialIsolatedGalaxy",
+             "Attempting to initialize a particle with negative mass",
+              particleIcMass[ipt][i] > 0);
+
+      int new_particle = particle->insert_particles(it, 1);
+      particle->index(new_particle,&ib,&ipp);
+
+      pmass = (enzo_float *) particle->attribute_array(it, ia_m, ib);
+      px    = (enzo_float *) particle->attribute_array(it, ia_x, ib);
+      py    = (enzo_float *) particle->attribute_array(it, ia_y, ib);
+      pz    = (enzo_float *) particle->attribute_array(it, ia_z, ib);
+      pvx   = (enzo_float *) particle->attribute_array(it, ia_vx, ib);
+      pvy   = (enzo_float *) particle->attribute_array(it, ia_vy, ib);
+      pvz   = (enzo_float *) particle->attribute_array(it, ia_vz, ib);
+
+      pmass[ipp] = particleIcMass[ipt][i];
+      px[ipp]    = particleIcPosition[ipt][0][i];
+      py[ipp]    = particleIcPosition[ipt][1][i];
+      pz[ipp]    = particleIcPosition[ipt][2][i];
+      pvx[ipp]   = particleIcVelocity[ipt][0][i];
+      pvy[ipp]   = particleIcVelocity[ipt][1][i];
+      pvz[ipp]   = particleIcVelocity[ipt][2][i];
+    } // end loop over particles
+
+  } // end loop over particle types
 
 
   return;
 }
 
-void EnzoInitialIsolatedGalaxy::ReadInParticleData(void)
-{
+void EnzoInitialIsolatedGalaxy::ReadParticles(void){
+
+  if (!(this->live_dm_halo_ || this->stellar_disk_ || this->stellar_bulge_)){
+    // do not load initial particles
+    return ;
+  } {
+    ntypes_ = int(this->live_dm_halo_) + int(this->stellar_disk_) +
+             int(this->stellar_bulge_);
+  }
+
+  ParticleDescr * particle_descr = cello::particle_descr();
+
+  particleIcTypes = new int[ntypes_];
+
+  int ipt = 0;
+  if (this->live_dm_halo_){
+    particleIcTypes[ipt] = particle_descr->type_index("dark");
+    particleIcFileNames.push_back("halo.dat");
+    ipt++;
+  }
+  if (this->stellar_disk_){
+    particleIcTypes[ipt] = particle_descr->type_index("star");
+    particleIcFileNames.push_back("disk.dat");
+    ipt++;
+  }
+  if (this->stellar_bulge_){
+    particleIcTypes[ipt] = particle_descr->type_index("star");
+    particleIcFileNames.push_back("bulge.dat");
+    ipt++;
+  }
+
+  allocateParticles();
+
+  // make arrays to store particle values
+  for (ipt = 0; ipt < ntypes_; ipt++){
+      int num_lines = nlines(particleIcFileNames[ipt]);
+
+      ReadParticlesFromFile(num_lines, particleIcPosition[ipt],
+                                particleIcVelocity[ipt],
+                                particleIcMass[ipt],
+                                particleIcFileNames[ipt]);
+  }
+
   return;
 }
+
+
+void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
+                                                      enzo_float ** position,
+                                                      enzo_float ** velocity,
+                                                      enzo_float * mass,
+                                                      const std::string& filename){
+
+  EnzoUnits * enzo_units = enzo::units();
+
+  std::fstream inFile;
+  inFile.open(filename, std::ios::in);
+
+  ASSERT("EnzoInitialIsolatedGalaxy",
+         "ParticleFile not found", inFile.is_open());
+
+  int i = 0;
+  while(inFile >>
+        position[0][i] >> position[1][i] >> position[2][i] >>
+        velocity[0][i] >> velocity[1][i] >> velocity[2][i] >>
+        mass[i]){
+    ASSERT("EnzoInitialIsolatedGalaxy",
+           "Too many lines in particle file",
+            i < nl);
+    // positions are in pc
+    // velocities in km / s
+    // mass in Msun
+
+    for (int dim = 0; dim < cello::rank(); dim++){
+
+      position[dim][i] = position[dim][i] * cello::kpc_cm /
+                               enzo_units->length() + this->center_position_[dim];
+      velocity[dim][i] = velocity[dim][i] * 1000.0 /
+                               enzo_units->velocity();
+      mass[i]          = mass[i] * cello::mass_solar /
+                               enzo_units->mass();
+    }
+  }
+
+  inFile.close();
+
+  return;
+ }
 
 void EnzoInitialIsolatedGalaxy::ReadInVcircData(void)
 {

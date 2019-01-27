@@ -111,12 +111,15 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
   initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
   initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
-  initial_IG_disk_metallicity(0.0),         // Gas disk metal fraction
+  initial_IG_disk_metal_fraction(0.0),         // Gas disk metal fraction
   initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
   initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
-  initial_IG_gas_halo_metallicity(0.0),      // Gas halo metal fraction
+  initial_IG_gas_halo_metal_fraction(0.0),      // Gas halo metal fraction
   initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
   initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
+  initial_IG_live_dm_halo(false),
+  initial_IG_stellar_disk(false),
+  initial_IG_stellar_bulge(false),
   // EnzoProlong
   interpolation_method(""),
   // EnzoMethodHeat
@@ -137,6 +140,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_star_maker_type(""),                             // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
   method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
+  method_star_maker_use_dynamical_time(true),              // compute t_ff / t_dyn. Otherwise take as 1.0
   method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
   method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
   method_star_maker_efficiency(0.01),            // star maker efficiency
@@ -317,12 +321,15 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_disk_mass;
   p | initial_IG_gas_fraction;
   p | initial_IG_disk_temperature;
-  p | initial_IG_disk_metallicity;
+  p | initial_IG_disk_metal_fraction;
   p | initial_IG_gas_halo_mass;
   p | initial_IG_gas_halo_temperature;
-  p | initial_IG_gas_halo_metallicity;
+  p | initial_IG_gas_halo_metal_fraction;
   p | initial_IG_gas_halo_density;
   p | initial_IG_gas_halo_radius;
+  p | initial_IG_live_dm_halo;
+  p | initial_IG_stellar_disk;
+  p | initial_IG_stellar_bulge;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -352,6 +359,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
   p | method_star_maker_use_velocity_divergence;
+  p | method_star_maker_use_dynamical_time;
   p | method_star_maker_number_density_threshold;
   p | method_star_maker_maximum_mass_fraction;
   p | method_star_maker_efficiency;
@@ -686,8 +694,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:isolated_galaxy:gas_fraction", 0.2);
   initial_IG_disk_temperature = p->value_float
     ("Initial:isolated_galaxy:disk_temperature", 1.0E4);
-  initial_IG_disk_metallicity = p->value_float
-    ("Initial:isolated_galaxy:disk_metallicity", 0.0);
+  initial_IG_disk_metal_fraction = p->value_float
+    ("Initial:isolated_galaxy:disk_metal_fraction", 0.0);
   initial_IG_gas_halo_mass = p->value_float
     ("Initial:isolated_galaxy:gas_halo_mass", 0.1);
   initial_IG_gas_halo_temperature = p->value_float
@@ -696,8 +704,14 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:isolated_galaxy:gas_halo_density", 0.0);
   initial_IG_gas_halo_radius = p->value_float
     ("Initial:isolated_galaxy:gas_halo_radius", 1.0);
-  initial_IG_gas_halo_metallicity = p->value_float
-    ("Initial:isolated_galaxy:gas_halo_metallicity", 0.0);
+  initial_IG_gas_halo_metal_fraction = p->value_float
+    ("Initial:isolated_galaxy:gas_halo_metal_fraction", 0.0);
+  initial_IG_live_dm_halo = p->value_logical
+    ("Initial:isolated_galaxy:live_dm_halo",false);
+  initial_IG_stellar_disk = p->value_logical
+    ("Initial:isolated_galaxy:stellar_disk", false);
+  initial_IG_stellar_bulge = p->value_logical
+    ("Initial:isolated_galaxy:stellar_bulge", false);
 
   for (int axis=0; axis<3; axis++) {
     initial_IG_center_position[axis]  = p->list_value_float
@@ -739,6 +753,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_star_maker_use_velocity_divergence = p->value_logical
     ("Method:star_maker:use_velocity_divergence",true);
+
+  method_star_maker_use_dynamical_time = p->value_logical
+    ("Method:star_maker:use_dynamical_time",true);
 
   method_star_maker_number_density_threshold = p->value_float
     ("Method:star_maker:number_density_threshold",0.0);

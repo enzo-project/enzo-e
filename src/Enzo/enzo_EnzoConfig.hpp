@@ -199,12 +199,15 @@ public: // interface
       initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
       initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
       initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
-      initial_IG_disk_metallicity(0.0),         // Gas disk metal fraction
+      initial_IG_disk_metal_fraction(0.0),         // Gas disk metal fraction
       initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
       initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
-      initial_IG_gas_halo_metallicity(0.0),      // Gas halo metal fraction
+      initial_IG_gas_halo_metal_fraction(0.0),      // Gas halo metal fraction
       initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
       initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
+      initial_IG_live_dm_halo(false),
+      initial_IG_stellar_disk(false),
+      initial_IG_stellar_bulge(false),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -223,6 +226,7 @@ public: // interface
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
       method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
+      method_star_maker_use_dynamical_time(true),              //
       method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
       method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
       method_star_maker_efficiency(0.01),            // star maker efficiency
@@ -417,12 +421,15 @@ public: // attributes
   double                     initial_IG_disk_mass;
   double                     initial_IG_gas_fraction;
   double                     initial_IG_disk_temperature;
-  double                     initial_IG_disk_metallicity;
+  double                     initial_IG_disk_metal_fraction;
   double                     initial_IG_gas_halo_mass;
   double                     initial_IG_gas_halo_temperature;
-  double                     initial_IG_gas_halo_metallicity;
+  double                     initial_IG_gas_halo_metal_fraction;
   double                     initial_IG_gas_halo_density;
   double                     initial_IG_gas_halo_radius;
+  bool                       initial_IG_live_dm_halo;
+  bool                       initial_IG_stellar_bulge;
+  bool                       initial_IG_stellar_disk;
 
   /// EnzoProlong
   std::string                interpolation_method;
@@ -447,6 +454,7 @@ public: // attributes
   std::string               method_star_maker_type;
   bool                      method_star_maker_use_density_threshold;
   bool                      method_star_maker_use_velocity_divergence;
+  bool                      method_star_maker_use_dynamical_time;
   double                    method_star_maker_number_density_threshold;
   double                    method_star_maker_maximum_mass_fraction;
   double                    method_star_maker_efficiency;
