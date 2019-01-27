@@ -50,7 +50,6 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     Field field = enzo_block->data()->field();
 
     double dx, dy, dz;
-
     block->cell_width(&dx, &dy, &dz);
 
     double lx, ly, lz;
@@ -72,13 +71,14 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     int ib  = 0; // batch counter
     int ipp = 0; // counter
 
-    double * pmass = 0;
-    double * px   = 0;
-    double * py   = 0;
-    double * pz   = 0;
-    double * pvx  = 0;
-    double * pvy  = 0;
-    double * pvz  = 0;
+    /// should these be set to double????
+    enzo_float * pmass = 0;
+    enzo_float * px   = 0;
+    enzo_float * py   = 0;
+    enzo_float * pz   = 0;
+    enzo_float * pvx  = 0;
+    enzo_float * pvy  = 0;
+    enzo_float * pvz  = 0;
 
     //std::mt19937 generator(12345);
     //std::uniform_real_distribution<double> generate_rnum(0.0, 1.0);
@@ -88,14 +88,6 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
     int rank = cello::rank();
 
-    enzo_float * density     = (enzo_float *) field.values("density");
-    enzo_float * velocity_x = (rank >= 1) ?
-      (enzo_float *)field.values("velocity_x") : NULL;
-    enzo_float * velocity_y = (rank >= 2) ?
-      (enzo_float *)field.values("velocity_y") : NULL;
-    enzo_float * velocity_z = (rank >= 3) ?
-      (enzo_float *)field.values("velocity_z") : NULL;
-
     int gx,gy,gz;
     field.ghost_depth (0, &gx, &gy, &gz);
 
@@ -104,6 +96,26 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
     int nx, ny, nz;
     field.size ( &nx, &ny, &nz);
+
+
+    enzo_float * density     = (enzo_float *) field.values("density");
+    enzo_float * temperature = (enzo_float *) field.values("temperature");
+
+    enzo_float * velocity_x = (rank >= 1) ?
+      (enzo_float *)field.values("velocity_x") : NULL;
+    enzo_float * velocity_y = (rank >= 2) ?
+      (enzo_float *)field.values("velocity_y") : NULL;
+    enzo_float * velocity_z = (rank >= 3) ?
+      (enzo_float *)field.values("velocity_z") : NULL;
+
+    // compute the temperature
+    EnzoComputeTemperature compute_temperature
+      (enzo_config->ppm_density_floor,
+       enzo_config->ppm_temperature_floor,
+       enzo_config->ppm_mol_weight,
+       enzo_config->physics_cosmology);
+
+    compute_temperature.compute(enzo_block);
 
     // iterate over all cells
     for (int iz=gz; iz<nz+gz; iz++){
@@ -129,9 +141,16 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
           if (! this->check_minimum_mass(mass)) continue;
 
+          double tdyn = sqrt(3.0 * cello::pi / 32.0 / cello::grav_constant / (density[i] * enzo_units->density()));
+
+//          double isothermal_sound_speed2 = 1.3095E8 * temperature[i] * enzo_units->temperature();
+
           // compute SF
-          double star_fraction = 0.0;
-          if ( this->efficiency_*mass < this->star_particle_mass_){
+          double star_fraction =  use_dynamical_time_ ?
+                                         std::min(this->efficiency_ * enzo_block->dt * enzo_units->time() / tdyn, 1.0) :
+                                         this->efficiency_ ;
+
+          if ( star_fraction * mass < this->star_particle_mass_){
             // get a random number
             double rnum = (double(rand())) / (double(RAND_MAX));
             double probability = this->efficiency_*mass/this->star_particle_mass_;
@@ -142,34 +161,44 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
             }
           }
 
+          count++;
           // now create a star particle
+          //    insert_particles( particle_type, number_of_particles )
           int my_particle = particle.insert_particles(it, 1);
 
-          //
+          // For the inserted particle, obtain the batch number (ib)
+          //  and the particle index (ipp)
           particle.index(my_particle, &ib, &ipp);
 
+          int io = ipp; // ipp*ps
           // pointer to mass array in block
-          pmass = (double *) particle.attribute_array(it, ia_m, ib);
+          pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
 
-          pmass[ipp*ps] = star_fraction * density[i];
-          px = (double *) particle.attribute_array(it, ia_x, ib);
-          py = (double *) particle.attribute_array(it, ia_y, ib);
-          pz = (double *) particle.attribute_array(it, ia_z, ib);
+          pmass[io] = star_fraction * density[i];
+          px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
+          py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
+          pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
 
-          px[ipp*ps] = lx + (ix + 0.5) * dx;
-          py[ipp*ps] = ly + (iy + 0.5) * dy;
-          pz[ipp*ps] = lz + (iz + 0.5) * dz;
+          px[io] = lx + (ix + 0.5) * dx;
+          py[io] = ly + (iy + 0.5) * dy;
+          pz[io] = lz + (iz + 0.5) * dz;
 
-          pvx = (double *) particle.attribute_array(it, ia_vx, ib);
-          pvy = (double *) particle.attribute_array(it, ia_vy, ib);
-          pvz = (double *) particle.attribute_array(it, ia_vz, ib);
+          pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
+          pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
+          pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
 
-          pvx[ipp*ps] = velocity_x[i];
-          if (velocity_y) pvy[ipp*ps] = velocity_y[i];
-          if (velocity_z) pvz[ipp*ps] = velocity_z[i];
+          pvx[io] = velocity_x[i];
+          if (velocity_y) pvy[io] = velocity_y[i];
+          if (velocity_z) pvz[io] = velocity_z[i];
 
-          count++;
+          // Adjust density and density dependent fields
 
+          density[i] = (1.0 - star_fraction) * density[i];
+          double scale = 1.0 / (1.0 - star_fraction);
+
+          // rescale tracer fields to maintain constant mass fraction
+          // with the corresponding new density
+          rescale_densities(enzo_block, i, scale);
         }
       }
     } // end loop iz

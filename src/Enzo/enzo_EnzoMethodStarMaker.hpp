@@ -56,6 +56,13 @@ public:
   // Compute the maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
+//  static void convert_densities_to_fraction(EnzoBlock * enzo_block,
+//                                            int direction) throw();
+
+  void rescale_densities(EnzoBlock * enzo_block,
+                         const int index,
+                         const double density_ratio) throw();
+
 protected: // methods
 
   // Routine functions for checking certain conditions
@@ -70,6 +77,7 @@ protected: // attributes
 
   bool use_density_threshold_;
   bool use_velocity_divergence_;
+  bool use_dynamical_time_;
   double number_density_threshold_;
   double efficiency_;
   double maximum_star_fraction_;
