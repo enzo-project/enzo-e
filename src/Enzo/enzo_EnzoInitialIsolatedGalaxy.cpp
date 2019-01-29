@@ -509,13 +509,14 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
 
     for (int dim = 0; dim < cello::rank(); dim++){
 
-      position[dim][i] = position[dim][i] * cello::kpc_cm /
+      position[dim][i] = position[dim][i] * cello::pc_cm /
                                enzo_units->length() + this->center_position_[dim];
       velocity[dim][i] = velocity[dim][i] * 1000.0 /
                                enzo_units->velocity();
       mass[i]          = mass[i] * cello::mass_solar /
                                enzo_units->mass();
     }
+    i++;
   }
 
   inFile.close();
