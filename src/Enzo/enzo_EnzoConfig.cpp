@@ -706,7 +706,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
     solver_restart_cycle[index_solver] =
       p->value_integer(solver_name + ":restart_cycle",1);
-    
+
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
 

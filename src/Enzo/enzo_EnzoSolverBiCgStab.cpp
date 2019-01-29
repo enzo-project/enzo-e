@@ -293,9 +293,12 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
 
   if (is_finest_(block)) {
 
-    if ( reuse_solution_ (block->cycle()) ) {
+    const bool reuse_x = reuse_solution_ (block->cycle());
+    
+    if ( reuse_x ) {
 
       enzo_float* X_copy  = (enzo_float*) field.values("X_copy");
+
       for (int i=0; i<m_; i++) X[i] = X_copy[i];
 
       A_->residual (ir_, ib_, ix_, block);
@@ -522,7 +525,7 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
   /// initialize/update current error, store error statistics
   
   const int cycle = block->cycle();
-  bool reuse_x = reuse_solution_(cycle);
+  const bool reuse_x = reuse_solution_ (cycle);
 
   const int iter = (s_iter_(block));
   if (iter == 0) {
@@ -603,7 +606,7 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
 
     /// Save copy of X if it will be used as initial guess next cycle
 
-    bool reuse_next_x = reuse_solution_(cycle + 1);
+    const bool reuse_next_x = reuse_solution_ (cycle + 1);
 
     if (reuse_next_x) {
 

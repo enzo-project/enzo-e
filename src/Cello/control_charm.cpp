@@ -135,9 +135,9 @@ void Block::refresh_exit_()
       
 #endif
   
-   Refresh * refresh = refresh_.back();
-   delete refresh;
-   refresh_.pop_back();
+  //   Refresh * refresh = refresh_.back();
+  //   delete refresh;
+  //   refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------

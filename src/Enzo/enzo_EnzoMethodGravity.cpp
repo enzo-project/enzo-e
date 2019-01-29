@@ -382,7 +382,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   const int m = mx*my*mz;
   enzo_float * potential = (enzo_float*) field.values ("potential");
   TRACE_FIELD("potential",potential,-1.0);
-  
+
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
   
   if (cosmology) {
