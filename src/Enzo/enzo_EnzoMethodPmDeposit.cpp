@@ -97,28 +97,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // declare particle position arrays
 
-    const int it = particle.type_index ("dark");
+    ParticleDescr * particle_descr = cello::particle_descr();
+    Grouping * particle_groups = particle_descr->groups();
 
-    const int ic_mass = particle.constant_index (it,"mass");
-
-    enzo_float dens = *((enzo_float *)(particle.constant_value (it,ic_mass)));
+    int num_mass = particle_groups->size("has_mass");
 
     for (int i=0; i<mx*my*mz; i++) de_p[i] = 0.0;
     for (int i=0; i<mx*my*mz; i++) de_pa[i] = 0.0;
-
-    // check precisions match
-    
-    int ia = particle.attribute_index(it,"x");
-    int ba = particle.attribute_bytes(it,ia); // "bytes (actual)"
-    int be = sizeof(enzo_float);                // "bytes (expected)"
-
-    ASSERT4 ("EnzoMethodPmUpdate::compute()",
-	     "Particle type %s attribute %s defined as %s but expecting %s",
-	     particle.type_name(it).c_str(),
-	     particle.attribute_name(it,ia).c_str(),
-	     ((ba == 4) ? "single" : ((ba == 8) ? "double" : "quadruple")),
-	     ((be == 4) ? "single" : ((be == 8) ? "double" : "quadruple")),
-	     (ba == be));
 
     // Accumulate particle density using CIC
 
@@ -139,171 +124,219 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     
     const double dt = alpha_ * block->dt() / cosmo_a;
 
-    // Scale mass by volume if particle value is mass instead of density
-
     int level = block->level();
 
-    dens *= std::pow(2.0,rank*level);
+    // Loop over all particles that have mass
+    for (int ipt = 0; ipt < num_mass; ipt++){
+      // Scale mass by volume if particle value is mass instead of density
 
-    // Accumulated single velocity array for Baryon deposit
+      int it = particle.type_index( particle_groups->item("has_mass",ipt));
 
-    for (int ib=0; ib<particle.num_batches(it); ib++) {
+      // check precisions match
 
-      const int np = particle.num_particles(it,ib);
+      int ia = particle.attribute_index(it,"x");
+      int ba = particle.attribute_bytes(it,ia); // "bytes (actual)"
+      int be = sizeof(enzo_float);                // "bytes (expected)"
 
-      if (rank == 1) {
+      ASSERT4 ("EnzoMethodPmUpdate::compute()",
+               "Particle type %s attribute %s defined as %s but expecting %s",
+               particle.type_name(it).c_str(),
+               particle.attribute_name(it,ia).c_str(),
+               ((ba == 4) ? "single" : ((ba == 8) ? "double" : "quadruple")),
+               ((be == 4) ? "single" : ((be == 8) ? "double" : "quadruple")),
+               (ba == be));
 
-	const int ia_x  = particle.attribute_index(it,"x");
-	const int ia_vx = particle.attribute_index(it,"vx");
 
-	enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
-	enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+      enzo_float dens = 0.0;
+      int ia_m = -1;
 
-	const int dp =  particle.stride(it,ia_x);
-	const int dv =  particle.stride(it,ia_vx);
+      if (particle.has_constant (it,"mass")){
 
-	for (int ip=0; ip<np; ip++) {
-
-	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
-
-	  double tx = nx*(x - xm) / (xp - xm) - 0.5;
-
-	  int ix0 = gx + floor(tx);
-
-	  int ix1 = ix0 + 1;
-
-	  double x0 = 1.0 - (tx - floor(tx));
-	  double x1 = 1.0 - x0;
-
-	  de_p[ix0] += dens*x0;
-	  de_p[ix1] += dens*x1;
-
-	}
-
-      } else if (rank == 2) {
-
-	const int ia_x  = particle.attribute_index(it,"x");
-	const int ia_y  = particle.attribute_index(it,"y");
-	const int ia_vx = particle.attribute_index(it,"vx");
-	const int ia_vy = particle.attribute_index(it,"vy");
-
-	// Batch arrays
-	enzo_float * xa  = (enzo_float *)particle.attribute_array (it,ia_x,ib);
-	enzo_float * ya  = (enzo_float *)particle.attribute_array (it,ia_y,ib);
-	enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
-	enzo_float * vya = (enzo_float *)particle.attribute_array (it,ia_vy,ib);
-
-	const int dp =  particle.stride(it,ia_x);
-	const int dv =  particle.stride(it,ia_vx);
-
-	for (int ip=0; ip<np; ip++) {
-
-	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
-	  double y = ya[ip*dp] + vya[ip*dv]*dt;
-
-	  double tx = nx*(x - xm) / (xp - xm) - 0.5;
-	  double ty = ny*(y - ym) / (yp - ym) - 0.5;
-
-	  int ix0 = gx + floor(tx);
-	  int iy0 = gy + floor(ty);
-
-	  int ix1 = ix0 + 1;
-	  int iy1 = iy0 + 1;
-
-	  double x0 = 1.0 - (tx - floor(tx));
-	  double y0 = 1.0 - (ty - floor(ty));
-
-	  double x1 = 1.0 - x0;
-	  double y1 = 1.0 - y0;
-
-	  if ( dens < 0.0) {
-	    CkPrintf ("%s:%d ERROR: dens = %f\n", __FILE__,__LINE__,dens);
-	  }
-
-	  de_p[ix0+mx*iy0] += dens*x0*y0;
-	  de_p[ix1+mx*iy0] += dens*x1*y0;
-	  de_p[ix0+mx*iy1] += dens*x0*y1;
-	  de_p[ix1+mx*iy1] += dens*x1*y1;
-
-	  if ( de_p[ix0+mx*iy0] < 0.0) {
-	    CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-		      __FILE__,__LINE__,ix0,iy0,dens);
-	  }
-	  if ( de_p[ix1+mx*iy0] < 0.0) {
-	    CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-		      __FILE__,__LINE__,ix1,iy0,dens);
-	  }
-	  if ( de_p[ix0+mx*iy1] < 0.0) {
-	    CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-		      __FILE__,__LINE__,ix0,iy1,dens);
-	  }
-	  if ( de_p[ix1+mx*iy1] < 0.0) {
-	    CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
-		      __FILE__,__LINE__,ix1,iy1,dens);
-	  }
-	}
-
-      } else if (rank == 3) {
-
-	const int ia_x  = particle.attribute_index(it,"x");
-	const int ia_y  = particle.attribute_index(it,"y");
-	const int ia_z  = particle.attribute_index(it,"z");
-	const int ia_vx = particle.attribute_index(it,"vx");
-	const int ia_vy = particle.attribute_index(it,"vy");
-	const int ia_vz = particle.attribute_index(it,"vz");
-
-	enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
-	enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
-	enzo_float * za  = (enzo_float *) particle.attribute_array (it,ia_z,ib);
-
-	// Particle batch velocities
-	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
-	enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
-	enzo_float * vza = (enzo_float *) particle.attribute_array (it,ia_vz,ib);
-
-	const int dp =  particle.stride(it,ia_x);
-	const int dv =  particle.stride(it,ia_vx);
-
-	for (int ip=0; ip<np; ip++) {
-
-	  // Copy batch particle velocities to temporary block field velocities
-	  
-	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
-	  double y = ya[ip*dp] + vya[ip*dv]*dt;
-	  double z = za[ip*dp] + vza[ip*dv]*dt;
-
-	  double tx = nx*(x - xm) / (xp - xm) - 0.5;
-	  double ty = ny*(y - ym) / (yp - ym) - 0.5;
-	  double tz = nz*(z - zm) / (zp - zm) - 0.5;
-
-	  int ix0 = gx + floor(tx);
-	  int iy0 = gy + floor(ty);
-	  int iz0 = gz + floor(tz);
-
-	  int ix1 = ix0 + 1;
-	  int iy1 = iy0 + 1;
-	  int iz1 = iz0 + 1;
-
-	  double x0 = 1.0 - (tx - floor(tx));
-	  double y0 = 1.0 - (ty - floor(ty));
-	  double z0 = 1.0 - (tz - floor(tz));
-
-	  double x1 = 1.0 - x0;
-	  double y1 = 1.0 - y0;
-	  double z1 = 1.0 - z0;
-
-	  de_p[ix0+mx*(iy0+my*iz0)] += dens*x0*y0*z0;
-	  de_p[ix1+mx*(iy0+my*iz0)] += dens*x1*y0*z0;
-	  de_p[ix0+mx*(iy1+my*iz0)] += dens*x0*y1*z0;
-	  de_p[ix1+mx*(iy1+my*iz0)] += dens*x1*y1*z0;
-	  de_p[ix0+mx*(iy0+my*iz1)] += dens*x0*y0*z1;
-	  de_p[ix1+mx*(iy0+my*iz1)] += dens*x1*y0*z1;
-	  de_p[ix0+mx*(iy1+my*iz1)] += dens*x0*y1*z1;
-	  de_p[ix1+mx*(iy1+my*iz1)] += dens*x1*y1*z1;
-
-	}
+        const int ic_mass = particle.constant_index (it, "mass");
+        dens = *((enzo_float *)(particle.constant_value (it,ic_mass)));
+      } else {
+        dens = 1.0;
+        ia_m = particle.attribute_index(it, "mass");
       }
-    }
+
+      dens *= std::pow(2.0,rank*level);
+
+      // Accumulated single velocity array for Baryon deposit
+
+      for (int ib=0; ib<particle.num_batches(it); ib++) {
+
+        int np = particle.num_particles(it,ib);
+
+        // Find the mass of each particle. If cosntant generate array of
+        // constant values in order to simply code below
+        enzo_float * pdens = new enzo_float[np];
+        if (ia_m > 0){
+          pdens = (enzo_float *) particle.attribute_array( it, ia_m, ib);
+        } else {
+          pdens = new enzo_float[np];
+          for (int ip = 0; ip<np; ip++) pdens[ip] = 1.0;
+        }
+
+
+        if (rank == 1) {
+
+    	  int ia_x  = particle.attribute_index(it,"x");
+	  int ia_vx = particle.attribute_index(it,"vx");
+
+	  enzo_float * xa =  (enzo_float *)particle.attribute_array (it,ia_x,ib);
+	  enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+
+	  int dp =  particle.stride(it,ia_x);
+	  int dv =  particle.stride(it,ia_vx);
+
+	  for (int ip=0; ip<np; ip++) {
+
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
+
+	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
+
+  	    int ix0 = gx + floor(tx);
+
+	    int ix1 = ix0 + 1;
+
+	    double x0 = 1.0 - (tx - floor(tx));
+	    double x1 = 1.0 - x0;
+
+	    de_p[ix0] += pdens[ip]*dens*x0;
+	    de_p[ix1] += pdens[ip]*dens*x1;
+
+	  }
+
+        } else if (rank == 2) {
+
+	  int ia_x  = particle.attribute_index(it,"x");
+	  int ia_y  = particle.attribute_index(it,"y");
+	  int ia_vx = particle.attribute_index(it,"vx");
+	  int ia_vy = particle.attribute_index(it,"vy");
+
+	  // Batch arrays
+	  enzo_float * xa  = (enzo_float *)particle.attribute_array (it,ia_x,ib);
+	  enzo_float * ya  = (enzo_float *)particle.attribute_array (it,ia_y,ib);
+	  enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+	  enzo_float * vya = (enzo_float *)particle.attribute_array (it,ia_vy,ib);
+
+	  int dp =  particle.stride(it,ia_x);
+	  int dv =  particle.stride(it,ia_vx);
+
+	  for (int ip=0; ip<np; ip++) {
+
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
+	    double y = ya[ip*dp] + vya[ip*dv]*dt;
+
+	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
+	    double ty = ny*(y - ym) / (yp - ym) - 0.5;
+
+	    int ix0 = gx + floor(tx);
+	    int iy0 = gy + floor(ty);
+
+	    int ix1 = ix0 + 1;
+	    int iy1 = iy0 + 1;
+
+	    double x0 = 1.0 - (tx - floor(tx));
+	    double y0 = 1.0 - (ty - floor(ty));
+
+	    double x1 = 1.0 - x0;
+	    double y1 = 1.0 - y0;
+
+	    if ( dens < 0.0) {
+	      CkPrintf ("%s:%d ERROR: dens = %f\n", __FILE__,__LINE__,dens);
+	    }
+
+	    de_p[ix0+mx*iy0] += pdens[ip]*dens*x0*y0;
+	    de_p[ix1+mx*iy0] += pdens[ip]*dens*x1*y0;
+	    de_p[ix0+mx*iy1] += pdens[ip]*dens*x0*y1;
+	    de_p[ix1+mx*iy1] += pdens[ip]*dens*x1*y1;
+
+	    if ( de_p[ix0+mx*iy0] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
+	   	        __FILE__,__LINE__,ix0,iy0,dens);
+	    }
+	    if ( de_p[ix1+mx*iy0] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
+		        __FILE__,__LINE__,ix1,iy0,dens);
+	    }
+	    if ( de_p[ix0+mx*iy1] < 0.0) {
+	    CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
+		        __FILE__,__LINE__,ix0,iy1,dens);
+	    }
+	    if ( de_p[ix1+mx*iy1] < 0.0) {
+	      CkPrintf ("%s:%d ERROR: de_p %d %d = %f\n",
+		        __FILE__,__LINE__,ix1,iy1,dens);
+	    }
+	  }
+
+        } else if (rank == 3) {
+
+	  int ia_x  = particle.attribute_index(it,"x");
+	  int ia_y  = particle.attribute_index(it,"y");
+	  int ia_z  = particle.attribute_index(it,"z");
+	  int ia_vx = particle.attribute_index(it,"vx");
+	  int ia_vy = particle.attribute_index(it,"vy");
+	  int ia_vz = particle.attribute_index(it,"vz");
+
+	  enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
+	  enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
+	  enzo_float * za  = (enzo_float *) particle.attribute_array (it,ia_z,ib);
+
+	  // Particle batch velocities
+	  enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
+	  enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
+	  enzo_float * vza = (enzo_float *) particle.attribute_array (it,ia_vz,ib);
+
+	  int dp =  particle.stride(it,ia_x);
+	  int dv =  particle.stride(it,ia_vx);
+
+	  for (int ip=0; ip<np; ip++) {
+
+	    // Copy batch particle velocities to temporary block field velocities
+	  
+	    double x = xa[ip*dp] + vxa[ip*dv]*dt;
+	    double y = ya[ip*dp] + vya[ip*dv]*dt;
+	    double z = za[ip*dp] + vza[ip*dv]*dt;
+
+	    double tx = nx*(x - xm) / (xp - xm) - 0.5;
+	    double ty = ny*(y - ym) / (yp - ym) - 0.5;
+	    double tz = nz*(z - zm) / (zp - zm) - 0.5;
+
+	    int ix0 = gx + floor(tx);
+	    int iy0 = gy + floor(ty);
+	    int iz0 = gz + floor(tz);
+
+	    int ix1 = ix0 + 1;
+	    int iy1 = iy0 + 1;
+	    int iz1 = iz0 + 1;
+
+	    double x0 = 1.0 - (tx - floor(tx));
+	    double y0 = 1.0 - (ty - floor(ty));
+	    double z0 = 1.0 - (tz - floor(tz));
+
+	    double x1 = 1.0 - x0;
+	    double y1 = 1.0 - y0;
+	    double z1 = 1.0 - z0;
+
+	    de_p[ix0+mx*(iy0+my*iz0)] += pdens[ip]*dens*x0*y0*z0;
+	    de_p[ix1+mx*(iy0+my*iz0)] += pdens[ip]*dens*x1*y0*z0;
+	    de_p[ix0+mx*(iy1+my*iz0)] += pdens[ip]*dens*x0*y1*z0;
+	    de_p[ix1+mx*(iy1+my*iz0)] += pdens[ip]*dens*x1*y1*z0;
+	    de_p[ix0+mx*(iy0+my*iz1)] += pdens[ip]*dens*x0*y0*z1;
+	    de_p[ix1+mx*(iy0+my*iz1)] += pdens[ip]*dens*x1*y0*z1;
+	    de_p[ix0+mx*(iy1+my*iz1)] += pdens[ip]*dens*x0*y1*z1;
+	    de_p[ix1+mx*(iy1+my*iz1)] += pdens[ip]*dens*x1*y1*z1;
+
+	  }
+        }
+
+        if (ia_m < 0){
+          delete [] pdens;
+        }
+
+      } // end loop over batches
+    } // end loop over particle types
 
     enzo_float  * de   = (enzo_float *) field.values("density");
     enzo_float  * de_gas = new enzo_float [mx*my*mz];

@@ -371,8 +371,25 @@ int ParticleDescr::constant_offset (int it, int ic) const
 	  "Trying to access unknown particle constant %d in type %d",
 	  ic,it,
 	  check_ic_(it,ic));
-  return constant_offset_[it][ic]; 
+  return constant_offset_[it][ic];
 }
+
+//----------------------------------------------------------------------
+
+bool ParticleDescr::has_constant(int it, std::string constant_name) const
+{
+  ASSERT1("ParticleDescr::constant_index",
+          "Trying to access unknown particle type %d",
+          it,
+          check_(it));
+
+  auto iter=constant_index_[it].find(constant_name);
+
+  bool check = (iter != constant_index_[it].end()) ? true : false;
+
+  return check;
+}
+
 
 //----------------------------------------------------------------------
 // Bytes

@@ -78,6 +78,10 @@ public: // interface
    /// Return a pointer to the given constant for the given type
   char * constant_value (int it, int ic);
 
+  /// Check if given constant exists for the given particle type
+
+  bool has_constant (int it, std::string constant) const;
+
   //--------------------------------------------------
   // ATTRIBUTES
   //--------------------------------------------------

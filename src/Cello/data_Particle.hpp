@@ -192,6 +192,11 @@ public: // interface
   int constant_offset(int it, int ic) const
   { return particle_descr_->constant_offset(it,ic); }
 
+  /// Check if given constant exists
+
+  bool has_constant(int it, std::string constant) const
+  { return particle_descr_->has_constant(it,constant); }
+
 
   //--------------------------------------------------
   // BYTES

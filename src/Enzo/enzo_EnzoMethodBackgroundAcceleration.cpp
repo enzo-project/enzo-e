@@ -292,20 +292,20 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
      }
   } // end loop over grid cells
 
-  // Update particle accelerations
+  // Update particle accelerations for particles with mass
 
-//   Particle particle = enzo_block->data()->particle();
+  ParticleDescr * particle_descr = cello::particle_descr();
+  Grouping * particle_groups = particle_descr->groups();
 
-  int it_dark = particle->type_index("dark");
-  int it_star = particle->type_index("star");
-  int it_vals[] = {it_dark, it_star};
-  const int num_it = 2;
+  int num_mass = particle_groups->size("has_mass");
 
   double dt_shift = 0.5 * dt;
 
   // Loop through particles to apply this to
-  for (int i = 0; i < num_it; i++){
-    int it = it_vals[i];
+  for (int ipt = 0; ipt < num_mass; ipt++){
+
+    std::string particle_type = particle_groups->item("has_mass",ipt);
+    int it = particle->type_index(particle_type);
 
     if (particle->num_particles(it) > 0){
 
