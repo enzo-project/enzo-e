@@ -1019,6 +1019,26 @@ void Block::check_delete_()
 
 //----------------------------------------------------------------------
 
+bool Block::check_position_in_block(const double &x, const double &y,
+                                    const double &z)
+{
+
+  double xm,ym,zm;
+  lower(&xm,&ym,&zm);
+  double xp,yp,zp;
+  upper(&xp,&yp,&zp);
+
+  bool result = false;
+
+  if (  ((x >= xm) && (x <= xp)) &&
+        ((y >= ym) && (y <= yp)) &&
+        ((z >= zm) && (z <= zp))) result = true;
+
+  return result;
+}
+
+//----------------------------------------------------------------------
+
 void Block::debug_faces_(const char * mesg)
 {
 #ifndef DEBUG_ADAPT
