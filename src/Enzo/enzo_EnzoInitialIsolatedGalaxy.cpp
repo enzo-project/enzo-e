@@ -41,21 +41,35 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
     center_position_[i] = config->initial_IG_center_position[i];
     bfield_[i] = config->initial_IG_bfield[i];
   }
-  this->scale_height_         = config->initial_IG_scale_height;
-  this->scale_length_	        = config->initial_IG_scale_length;
-  this->disk_mass_            = config->initial_IG_disk_mass;
+
+  EnzoUnits * enzo_units = enzo::units();
+  // Store variables locally with code units
+
+  this->scale_height_         = config->initial_IG_scale_height * cello::kpc_cm /
+                                enzo_units->length();
+  this->scale_length_	      = config->initial_IG_scale_length * cello::kpc_cm /
+                                enzo_units->length();
+  this->disk_mass_            = config->initial_IG_disk_mass * cello::mass_solar /
+                                enzo_units->mass();
   this->gas_fraction_         = config->initial_IG_gas_fraction;
-  this->disk_temperature_     = config->initial_IG_disk_temperature;
-  this->disk_metal_fraction_     = config->initial_IG_disk_metal_fraction;
-  this->gas_halo_mass_        = config->initial_IG_gas_halo_mass;
-  this->gas_halo_temperature_ = config->initial_IG_gas_halo_temperature;
+  this->disk_temperature_     = config->initial_IG_disk_temperature /
+                                enzo_units->temperature();
+  this->disk_metal_fraction_  = config->initial_IG_disk_metal_fraction;
+  this->gas_halo_mass_        = config->initial_IG_gas_halo_mass * cello::mass_solar /
+                                enzo_units->mass();
+  this->gas_halo_temperature_ = config->initial_IG_gas_halo_temperature /
+                                enzo_units->temperature();
   this->gas_halo_metal_fraction_ = config->initial_IG_gas_halo_metal_fraction;
-  this->gas_halo_density_     = config->initial_IG_gas_halo_density;
-  this->gas_halo_radius_      = config->initial_IG_gas_halo_radius;
+  this->gas_halo_density_     = config->initial_IG_gas_halo_density /
+                                enzo_units->density();
+  this->gas_halo_radius_      = config->initial_IG_gas_halo_radius * cello::kpc_cm /
+                                enzo_units->length();
 
   this->live_dm_halo_         = config->initial_IG_live_dm_halo;
   this->stellar_disk_         = config->initial_IG_stellar_disk;
   this->stellar_bulge_        = config->initial_IG_stellar_bulge;
+
+  this->analytic_velocity_    = config->initial_IG_analytic_velocity;
 
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)
   {
@@ -114,6 +128,7 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
   p | live_dm_halo_;
   p | stellar_bulge_;
   p | stellar_disk_;
+  p | analytic_velocity_;
 
   p | ntypes_;
   p | ndim_;
@@ -226,11 +241,9 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   double rho_zero = this->disk_mass_ * this->gas_fraction_ / (4.0 * cello::pi)/
       (pow((this->scale_length_),2)*(this->scale_height_));
 
-  double halo_gas_energy = this->gas_halo_temperature_ / this->mu_ / (this->gamma_ -1) /
-         enzo_units->temperature();
+  double halo_gas_energy = this->gas_halo_temperature_ / this->mu_ / (this->gamma_ -1);
 
-  double disk_gas_energy = this->disk_temperature_ / this->mu_ / (this->gamma_ -1)/
-         enzo_units->temperature();
+  double disk_gas_energy = this->disk_temperature_ / this->mu_ / (this->gamma_ -1) ;
 
   double tiny_number = 1.0E-10;
 
@@ -307,7 +320,26 @@ void EnzoInitialIsolatedGalaxy::enforce_block
           // in the disk, set the disk properties
           d[i]   = disk_density;
 
-          double vcirc = this->InterpolateVcircTable(r_cyl);
+          double vcirc = 0.0;
+          if (this->analytic_velocity_){
+            double rhodm = enzo_config->method_background_acceleration_DM_density;
+            double rcore = enzo_config->method_background_acceleration_core_radius;
+            double rvir  = enzo_config->method_background_acceleration_DM_mass_radius;
+
+            rcore = rcore * cello::kpc_cm;
+            rvir  = rvir  * cello::kpc_cm;
+
+            double conc = rcore / rvir;
+            double    x = r_cyl / rvir;
+            
+
+            vcirc = (std::log(1.0 + conc*x) - (conc*x)/(1.0+conc*x))/
+                      (std::log(1.0 + conc) - (conc / (1.0 + conc))) / x;
+            vcirc = std::sqrt(vcirc * cello::grav_constant * 1.0E10 * cello::mass_solar / rvir);
+
+          } else {
+            vcirc = this->InterpolateVcircTable(r_cyl);
+          }
 
           v3[0][i] = -(vcirc*(y/r_cyl))/enzo_units->velocity();
           v3[1][i] = -(vcirc*(x/r_cyl))/enzo_units->velocity();
@@ -353,13 +385,14 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
 
   // now initialize particles
-  // Particle particle = enzo_block->data()->particle();
-  // InitializeParticles(&particle);
+  Particle particle = block->data()->particle();
+  InitializeParticles(block, &particle);
 
   return;
 }
 
-void EnzoInitialIsolatedGalaxy::InitializeParticles(Particle * particle){
+void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
+                                                    Particle * particle){
 
   if (this->ntypes_ == 0) return;
 
@@ -408,6 +441,12 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Particle * particle){
              "Attempting to initialize a particle with negative mass",
               particleIcMass[ipt][i] > 0);
 
+      if (!(block->check_position_in_block(particleIcPosition[ipt][0][i],
+                                           particleIcPosition[ipt][1][i],
+                                           particleIcPosition[ipt][2][i]))){
+        continue;
+      }
+
       int new_particle = particle->insert_particles(it, 1);
       particle->index(new_particle,&ib,&ipp);
 
@@ -452,16 +491,19 @@ void EnzoInitialIsolatedGalaxy::ReadParticles(void){
   if (this->live_dm_halo_){
     particleIcTypes[ipt] = particle_descr->type_index("dark");
     particleIcFileNames.push_back("halo.dat");
+    nparticles_ = std::max(nparticles_, nlines("halo.dat"));
     ipt++;
   }
   if (this->stellar_disk_){
     particleIcTypes[ipt] = particle_descr->type_index("star");
     particleIcFileNames.push_back("disk.dat");
+    nparticles_ = std::max(nparticles_, nlines("disk.dat"));
     ipt++;
   }
   if (this->stellar_bulge_){
     particleIcTypes[ipt] = particle_descr->type_index("star");
     particleIcFileNames.push_back("bulge.dat");
+    nparticles_ = std::max(nparticles_, nlines("bulge.dat"));
     ipt++;
   }
 
@@ -513,9 +555,11 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
                                enzo_units->length() + this->center_position_[dim];
       velocity[dim][i] = velocity[dim][i] * 1000.0 /
                                enzo_units->velocity();
-      mass[i]          = mass[i] * cello::mass_solar /
-                               enzo_units->mass();
     }
+
+    mass[i]          = mass[i] * cello::mass_solar /
+                       enzo_units->mass();
+
     i++;
   }
 

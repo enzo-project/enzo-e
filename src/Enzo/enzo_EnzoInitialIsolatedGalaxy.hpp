@@ -103,7 +103,8 @@ public: // interface
   ( Block * block,
     const Hierarchy * hierarchy ) throw();
 
-  void InitializeParticles(Particle * particle);
+  void InitializeParticles(Block * block,
+                           Particle * particle);
 
   void ReadParticles(void);
 
@@ -152,6 +153,8 @@ private: // attributes
   double gamma_;
   double mu_;
 
+  bool analytic_velocity_;
+  
   bool live_dm_halo_;
   bool stellar_bulge_;
   bool stellar_disk_;

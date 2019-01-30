@@ -208,6 +208,7 @@ public: // interface
       initial_IG_live_dm_halo(false),
       initial_IG_stellar_disk(false),
       initial_IG_stellar_bulge(false),
+      initial_IG_analytic_velocity(false),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -430,6 +431,7 @@ public: // attributes
   bool                       initial_IG_live_dm_halo;
   bool                       initial_IG_stellar_bulge;
   bool                       initial_IG_stellar_disk;
+  bool                       initial_IG_analytic_velocity;
 
   /// EnzoProlong
   std::string                interpolation_method;

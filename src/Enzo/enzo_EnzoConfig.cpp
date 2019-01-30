@@ -120,6 +120,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_live_dm_halo(false),
   initial_IG_stellar_disk(false),
   initial_IG_stellar_bulge(false),
+  initial_IG_analytic_velocity(false),
   // EnzoProlong
   interpolation_method(""),
   // EnzoMethodHeat
@@ -330,6 +331,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_live_dm_halo;
   p | initial_IG_stellar_disk;
   p | initial_IG_stellar_bulge;
+  p | initial_IG_analytic_velocity;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -712,6 +714,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:isolated_galaxy:stellar_disk", false);
   initial_IG_stellar_bulge = p->value_logical
     ("Initial:isolated_galaxy:stellar_bulge", false);
+  initial_IG_analytic_velocity = p->value_logical
+    ("Initial:isolated_galaxy:analytic_velocity", false);
 
   for (int axis=0; axis<3; axis++) {
     initial_IG_center_position[axis]  = p->list_value_float
