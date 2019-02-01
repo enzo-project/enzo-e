@@ -25,7 +25,7 @@ void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
   for (int iz=0; iz<efield.length_dim2(); iz++) {
     for (int iy=0; iy<efield.length_dim1(); iy++) {
       for (int ix=0; ix<efield.length_dim0(); ix++) {
-	efield(iz,iy,ix) = (velocity_j(iz,iy,ix) * bfield_k(iz,iy,ix) -
+	efield(iz,iy,ix) = (-velocity_j(iz,iy,ix) * bfield_k(iz,iy,ix) +
 			    velocity_k(iz,iy,ix) * bfield_j(iz,iy,ix));
       }
     }
@@ -195,6 +195,16 @@ void aligned_dim_derivatives_(int dim, int &dxddim, int &dyddim, int &dzddim)
 }
 
 
+void inplace_entry_multiply_(EnzoArray<enzo_float> &array, enzo_float val){
+  for (int iz = 0; iz < array.length_dim2(); iz++){
+    for (int iy = 0; iy < array.length_dim1(); iy++){
+      for (int ix = 0; ix < array.length_dim0(); ix++){
+	array(iz,iy,ix)*=val;
+      }
+    }
+  }
+}
+
 // Computes the edge-centered E-fields pointing in the ith direction
 // It uses the component of the cell-centered E-field pointing in that
 // direction, and the face-centered E-field pointed in that direction
@@ -248,11 +258,18 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 
   // Initialize face-centered E-fields
   EnzoArray<enzo_float> Ej, Ej_kp1, Ek, Ek_jp1;
-  array_factory.load_grouping_field(block, jflux_group, "bfield", dim, Ej);
+
+  // Ex(k,j+1/2,i) = -1.*yflux(Bz)
+  array_factory.load_grouping_field(block, jflux_group, "bfield",
+				    (dim+2)%3, Ej);
+  inplace_entry_multiply_(Ej,-1.);
   Ej_kp1.initialize_subarray(Ej, dzdk, Ej.length_dim2(),
 			         dydk, Ej.length_dim1(),
 			         dxdk, Ej.length_dim0());
-  array_factory.load_grouping_field(block, kflux_group, "bfield", dim, Ek);
+  // Ex(k+1/2,j,i) = zflux(By)
+  array_factory.load_grouping_field(block, kflux_group, "bfield",
+				    (dim+1)%3, Ek);
+  // No need to multiply entries by minus 1
   Ek_jp1.initialize_subarray(Ek, dzdj, Ek.length_dim2(),
 			         dydj, Ek.length_dim1(),
 			         dxdj, Ek.length_dim0());
