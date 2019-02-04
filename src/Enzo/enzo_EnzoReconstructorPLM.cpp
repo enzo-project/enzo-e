@@ -51,8 +51,8 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 //  - di{dim}, where {dim} is x,y,z indicates the amount by which i{dim}
 //    changes if we move in the i direction. For example, if the ith
 //    dimension aligns with z: dix=0, diy=0, diz = 1
-void zero_edge_values_(EnzoArray<enzo_float> &wl, EnzoArray<enzo_float> &wr,
-		       int diz, int diy, int dix, enzo_float prim_floor)
+void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, int diz, int diy,
+		       int dix, enzo_float prim_floor)
 {
   // Number of cells in the grid along each dimension
   int mz = wl.length_dim2() + diz;
@@ -103,7 +103,7 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 						  EnzoEquationOfState *eos)
 {
   std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
-  EnzoFieldArrayFactory array_factory;
+  EnzoFieldArrayFactory array_factory(block);
 
   // compute which index needs to be changed to advance in direction of dim
   int dix = (dim == 0) ? 1 : 0;
@@ -137,32 +137,31 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       // define:   wc_left(k,j,i)   -> w(k,j,i)
       //           wc_center(k,j,i) -> w(k,j,i+1)
       //           wc_right(k,j,i)  -> w(k,j,i+2)
-      EnzoArray<enzo_float> wc_left, wc_center, wc_right;
-      array_factory.load_grouping_field(block, prim_group, group_name,
-					field_ind, wc_left);
-      wc_center.initialize_subarray(wc_left, diz, wc_left.length_dim2(),
-				    diy, wc_left.length_dim1(),
-				    dix, wc_left.length_dim0());
-      wc_right.initialize_subarray(wc_left, 2*diz, wc_left.length_dim2(),
-				   2*diy, wc_left.length_dim1(),
-				   2*dix, wc_left.length_dim0());
+      EFlt3DArray wc_left, wc_center, wc_right;
+      wc_left = array_factory.from_grouping(prim_group, group_name, field_ind);
+      wc_center = wc_left.subarray(diz, wc_left.length_dim2(),
+				   diy, wc_left.length_dim1(),
+				   dix, wc_left.length_dim0());
+      wc_right = wc_left.subarray(2*diz, wc_left.length_dim2(),
+				  2*diy, wc_left.length_dim1(),
+				  2*dix, wc_left.length_dim0());
 
       
       // Prepare face-centered arrays
       // define:   wl_offset(k,j,i)-> wl(k,j,i+3/2)
       //           wr(k,j,i)       -> wr(k,j,i+1/2)
-      EnzoArray<enzo_float> wr, wl, wl_offset;
-      array_factory.load_temp_interface_grouping_field(block, primr_group,
-						       group_name, field_ind,
-						       wr, dim != 0, dim != 1,
-						       dim != 2);
-      array_factory.load_temp_interface_grouping_field(block, priml_group,
-						       group_name, field_ind,
-						       wl, dim != 0, dim != 1,
-						       dim != 2);
-      wl_offset.initialize_subarray(wl, diz, wl.length_dim2(),
-				    diy, wl.length_dim1(),
-				    dix, wl.length_dim0());
+      EFlt3DArray wr, wl, wl_offset;
+      wr = array_factory.load_temp_interface_grouping_field(primr_group,
+							    group_name,
+							    field_ind, dim != 0,
+							    dim != 1, dim != 2);
+      wl = array_factory.load_temp_interface_grouping_field(priml_group,
+							    group_name,
+							    field_ind, dim != 0,
+							    dim != 1, dim != 2);
+      wl_offset = wl.subarray(diz, wl.length_dim2(),
+			      diy, wl.length_dim1(),
+			      dix, wl.length_dim0());
 
       // At the interfaces between the first and second cell (second-to-
       // last and last cell), along a given axis, set the reconstructed

@@ -16,18 +16,15 @@
 //     incorporate CRs (just need to swap out the wave_speeds_ helper method)
 //  - If the need arises, have to modify to handle dual energy formalism
 
-typedef std::unordered_map<std::string,EnzoArray<enzo_float>*> array_map;
+typedef std::unordered_map<std::string,EFlt3DArray> array_map;
 
-void add_entry_(Block *block, array_map &arrays, std::string key,
-		Grouping &grouping, std::string group_name, int index,
-		int dim)
+void add_entry_(EnzoFieldArrayFactory &af, array_map &arrays,
+		std::string key, Grouping &grouping, std::string group_name,
+		int index, int dim)
 {
-  arrays[key] = new EnzoArray<enzo_float>();
-  EnzoFieldArrayFactory array_factory;
-  array_factory.load_temp_interface_grouping_field(block, grouping, group_name,
-						   index, *(arrays[key]),
-						   (dim != 0), (dim != 1),
-						   (dim != 2));
+  arrays[key] = af.load_temp_interface_grouping_field(grouping, group_name,
+						      index, dim != 0,
+						      dim != 1, dim != 2);
 }
 
 void load_fluid_fields_(Block *block, array_map &arrays, Grouping &grouping,
@@ -36,34 +33,28 @@ void load_fluid_fields_(Block *block, array_map &arrays, Grouping &grouping,
   int i = dim;
   int j = (dim+1)%3;
   int k = (dim+2)%3;
+
+  EnzoFieldArrayFactory af(block);
   
   // Load density
-  add_entry_(block, arrays, "density", grouping, "density", 0, dim);
+  add_entry_(af, arrays, "density", grouping, "density", 0, dim);
 
   // load velocity/momentum and pressure/total energy
   if (primitive){
-    add_entry_(block, arrays, "velocity_i", grouping, "velocity", i, dim);
-    add_entry_(block, arrays, "velocity_j", grouping, "velocity", j, dim);
-    add_entry_(block, arrays, "velocity_k", grouping, "velocity", k, dim);
-    add_entry_(block, arrays, "pressure", grouping, "pressure", 0, dim);
+    add_entry_(af, arrays, "velocity_i", grouping, "velocity", i, dim);
+    add_entry_(af, arrays, "velocity_j", grouping, "velocity", j, dim);
+    add_entry_(af, arrays, "velocity_k", grouping, "velocity", k, dim);
+    add_entry_(af, arrays, "pressure", grouping, "pressure", 0, dim);
   } else {
-    add_entry_(block, arrays, "momentum_i", grouping, "momentum", i, dim);
-    add_entry_(block, arrays, "momentum_j", grouping, "momentum", j, dim);
-    add_entry_(block, arrays, "momentum_k", grouping, "momentum", k, dim);
-    add_entry_(block, arrays, "total_energy", grouping, "total_energy", 0, dim);
+    add_entry_(af, arrays, "momentum_i", grouping, "momentum", i, dim);
+    add_entry_(af, arrays, "momentum_j", grouping, "momentum", j, dim);
+    add_entry_(af, arrays, "momentum_k", grouping, "momentum", k, dim);
+    add_entry_(af, arrays, "total_energy", grouping, "total_energy", 0, dim);
   }
 
-  add_entry_(block, arrays, "bfield_i", grouping, "bfield", i, dim);
-  add_entry_(block, arrays, "bfield_j", grouping, "bfield", j, dim);
-  add_entry_(block, arrays, "bfield_k", grouping, "bfield", k, dim);
-}
-
-void cleanup_array_map_(array_map &arrays, std::vector<std::string> &keys)
-{
-  for (unsigned int i=0; i < keys.size();i++){
-    std::string key = keys[i];
-    delete arrays[key];
-  }
+  add_entry_(af, arrays, "bfield_i", grouping, "bfield", i, dim);
+  add_entry_(af, arrays, "bfield_j", grouping, "bfield", j, dim);
+  add_entry_(af, arrays, "bfield_k", grouping, "bfield", k, dim);
 }
 
 
@@ -111,19 +102,19 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
   // For consistency, always start at i+1/2
   // Iteration limits are generalized for 2D and 3D arrays
 
-  for (int iz=0; iz<flux_arrays["density"]->length_dim2(); iz++) {
-    for (int iy=0; iy<flux_arrays["density"]->length_dim1(); iy++) {
-      for (int ix=0; ix<flux_arrays["density"]->length_dim0(); ix++) {
+  for (int iz=0; iz<flux_arrays["density"].length_dim2(); iz++) {
+    for (int iy=0; iy<flux_arrays["density"].length_dim1(); iy++) {
+      for (int ix=0; ix<flux_arrays["density"].length_dim0(); ix++) {
 
 	// get the fluid fields
 	for (unsigned int field_ind=0; field_ind<length; field_ind++){
 	  std::string key = prim_keys[field_ind];
-	  wl[key] = (*(wl_arrays[key]))(iz,iy,ix);
-	  wr[key] = (*(wr_arrays[key]))(iz,iy,ix);
+	  wl[key] = wl_arrays[key](iz,iy,ix);
+	  wr[key] = wr_arrays[key](iz,iy,ix);
 
 	  key = cons_keys[field_ind];
-	  Ul[key] = (*(ul_arrays[key]))(iz,iy,ix);
-	  Ur[key] = (*(ur_arrays[key]))(iz,iy,ix);
+	  Ul[key] = ul_arrays[key](iz,iy,ix);
+	  Ur[key] = ur_arrays[key](iz,iy,ix);
 	}
 
 	// Compute magnetic pressure
@@ -143,24 +134,19 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
 	for (unsigned int field_ind=0; field_ind<length; field_ind++){
 	  std::string key = cons_keys[field_ind];
 
-	  (*(flux_arrays[key]))(iz,iy,ix) =
+	  flux_arrays[key](iz,iy,ix) =
 	    ((bp*Fl[key] - bm*Fr[key]  +
 	      (Ur[key] - Ul[key])*bp*bm)/ (bp - bm));
 
 	  ASSERT("EnzoRiemannHLLE",
 	  	 "There is a NaN or inf\n",
-	  	 std::isfinite((*(flux_arrays[key]))(iz,iy,ix)));
+	  	 std::isfinite(flux_arrays[key](iz,iy,ix)));
 	}
 
 	// Deal with Species and colors
       }
     }
   }
-  cleanup_array_map_(wl_arrays, prim_keys);
-  cleanup_array_map_(wr_arrays, prim_keys);
-  cleanup_array_map_(ul_arrays, cons_keys);
-  cleanup_array_map_(ur_arrays, cons_keys);
-  cleanup_array_map_(flux_arrays, cons_keys);
 }
 
 //----------------------------------------------------------------------

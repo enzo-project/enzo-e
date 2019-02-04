@@ -322,8 +322,9 @@ private:
 
 
 
-void bfieldi_helper_(EnzoArray<enzo_float> &bfield, EnzoArray<enzo_float> &Aj,
-		     EnzoArray<enzo_float> &Ak, int dim, enzo_float dj,
+void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
+		     EnzoArray<enzo_float,3> &Aj,
+		     EnzoArray<enzo_float,3> &Ak, int dim, enzo_float dj,
 		     enzo_float dk)
 {
 
@@ -337,24 +338,24 @@ void bfieldi_helper_(EnzoArray<enzo_float> &bfield, EnzoArray<enzo_float> &Aj,
   int fc_my = bfield.length_dim1();
   int fc_mz = bfield.length_dim2();
 
-  EnzoArray<enzo_float> Ak_left, Ak_right,Aj_right, Aj_left;
+  EnzoArray<enzo_float,3> Ak_left, Ak_right,Aj_right, Aj_left;
 
   if (dim == 0){
     // Aj_right = Ay(iz+1/2,iy,ix-1/2), Ak_right = Az(iz, iy+1/2,ix-1/2)
-    Aj_right.initialize_subarray(Aj, 1, fc_mz+1, 0, fc_my, 0, fc_mx);
-    Ak_right.initialize_subarray(Ak, 0, fc_mz, 1, fc_my+1, 0, fc_mx);
+    Aj_right = Aj.subarray(1, fc_mz+1, 0, fc_my, 0, fc_mx);
+    Ak_right = Ak.subarray(0, fc_mz, 1, fc_my+1, 0, fc_mx);
   } else if (dim == 1){
     // Aj_right = Az(iz,iy-1/2,ix+1/2), Ak_right = Ax(iz+1/2,iy-1/2,ix)
-    Aj_right.initialize_subarray(Aj, 0, fc_mz, 0, fc_my, 1, fc_mx+1);
-    Ak_right.initialize_subarray(Ak, 1, fc_mz+1, 0, fc_my, 0, fc_mx);
+    Aj_right = Aj.subarray(0, fc_mz, 0, fc_my, 1, fc_mx+1);
+    Ak_right = Ak.subarray(1, fc_mz+1, 0, fc_my, 0, fc_mx);
   } else {
     // Aj_right = Ax(iz-1/2,iy+1/2,ix), Ak_right = Ay(iz-1/2,iy,ix+1/2)
-    Aj_right.initialize_subarray(Aj, 0, fc_mz, 1, fc_my+1, 0, fc_mx);
-    Ak_right.initialize_subarray(Ak, 0, fc_mz, 0, fc_my, 1, fc_mx+1);
+    Aj_right = Aj.subarray(0, fc_mz, 1, fc_my+1, 0, fc_mx);
+    Ak_right = Ak.subarray(0, fc_mz, 0, fc_my, 1, fc_mx+1);
   }
 
-  Aj_left.initialize_subarray(Aj,  0,   fc_mz, 0, fc_my, 0, fc_mx);
-  Ak_left.initialize_subarray(Ak,  0,   fc_mz, 0, fc_my, 0, fc_mx);
+  Aj_left = Aj.subarray(0,   fc_mz, 0, fc_my, 0, fc_mx);
+  Ak_left = Ak.subarray(0,   fc_mz, 0, fc_my, 0, fc_mx);
 
   for (int iz=0;iz<fc_mz;iz++){
     for (int iy=0; iy<fc_my; iy++){
@@ -406,11 +407,11 @@ void bfieldc_helper_(Block *block)
 void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
-  EnzoArray<enzo_float> bfieldi_x, bfieldi_y, bfieldi_z;
-  EnzoFieldArrayFactory array_factory;
-  array_factory.initialize_field_array(block, bfieldi_x, "bfieldi_x");
-  array_factory.initialize_field_array(block, bfieldi_y, "bfieldi_y");
-  array_factory.initialize_field_array(block, bfieldi_z, "bfieldi_z");
+  EnzoArray<enzo_float,3> bfieldi_x, bfieldi_y, bfieldi_z;
+  EnzoFieldArrayFactory array_factory(block);
+  bfieldi_x = array_factory.from_name("bfieldi_x");
+  bfieldi_y = array_factory.from_name("bfieldi_y");
+  bfieldi_z = array_factory.from_name("bfieldi_z");
 
   // cell widths
   enzo_float dx = pos.dx();
@@ -420,10 +421,9 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
   // allocate corner-centered arrays for the magnetic vector potentials
   // Ax, Ay, and Az are always cell-centered along the x, y, and z dimensions,
   // respectively
-  EnzoArray<enzo_float> Ax, Ay, Az;
-  Ax.initialize(mz+1,my+1,mx);
-  Ay.initialize(mz+1,my,mx+1);
-  Az.initialize(mz,my+1,mx+1);
+  EnzoArray<enzo_float,3> Ax(mz+1,my+1,mx);
+  EnzoArray<enzo_float,3> Ay(mz+1,my,mx+1);
+  EnzoArray<enzo_float,3> Az(mz,my+1,mx+1);
 
   // Compute the Magnetic Vector potential at all points on the grid
   for (int iz=0; iz<mz+1; iz++){
@@ -464,16 +464,16 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 		 VectorInit *momentum_init,
 		 MeshPos &pos, int mx, int my, int mz)
 {
-  EnzoArray<enzo_float> density, total_energy;
-  EnzoFieldArrayFactory array_factory;
-  array_factory.initialize_field_array(block, density, "density");
-  array_factory.initialize_field_array(block, total_energy, "total_energy");
+  EnzoArray<enzo_float,3> density, total_energy;
+  EnzoFieldArrayFactory array_factory(block);
+  density = array_factory.from_name("density");
+  total_energy = array_factory.from_name("total_energy");
 
-  std::vector<EnzoArray<enzo_float>> momentum(3);
-  array_factory.initialize_field_array(block, momentum[0], "momentum_x");
-  array_factory.initialize_field_array(block, momentum[1], "momentum_y");
-  array_factory.initialize_field_array(block, momentum[2], "momentum_z");
-
+  std::vector<EnzoArray<enzo_float,3>> momentum(3);
+  momentum[0] = array_factory.from_name("momentum_x");
+  momentum[1] = array_factory.from_name("momentum_y");
+  momentum[2] = array_factory.from_name("momentum_z");
+  
   for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
       for (int ix=0; ix<mx; ix++){
@@ -485,6 +485,7 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 	(*momentum_init)(x,y,z,momentum[0](iz,iy,ix), momentum[1](iz,iy,ix),
 			 momentum[2](iz,iy,ix));
       }
+      fflush(stdout);
     }
   }
 }

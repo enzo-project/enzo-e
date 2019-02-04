@@ -9,7 +9,7 @@
  fflush (stdout);
 
 // helper function for debugging. Checks to see if an array contains NaNs
-bool not_all_finite_(EnzoArray<enzo_float> array)
+bool not_all_finite_(EFlt3DArray &array)
 {
   for (int iz = 0; iz<array.length_dim2(); iz++){
     for (int iy = 0; iy<array.length_dim1(); iy++){
@@ -30,7 +30,7 @@ bool not_all_finite_(EnzoArray<enzo_float> array)
 void check_fields_(Block *block, Grouping &grouping,
 		   std::vector<std::string> group_names)
 {
-  EnzoFieldArrayFactory array_factory;
+  EnzoFieldArrayFactory array_factory(block);
   Field field = block->data()->field();
   for (unsigned int i=0;i<group_names.size();i++){
     std::string group_name = group_names[i];
@@ -40,9 +40,7 @@ void check_fields_(Block *block, Grouping &grouping,
     }
 
     for (int j=0;j<num_fields;j++){
-      // Determine field_name
-      EnzoArray<enzo_float> data;
-      array_factory.load_grouping_field(block, grouping, group_name, j, data);
+      EFlt3DArray data = array_factory.from_grouping(grouping, group_name, j);
       if (not_all_finite_(data)){
 	std::string field_name = grouping.item(group_name,j);
 	CkPrintf("%s has at least 1 NaN or inf\n", field_name.c_str());
@@ -57,13 +55,14 @@ void print_array_vals_(Block* block, Grouping &grouping,
 		       std::string group_name, int index,
 		       int iz, int iy, bool cell_centered_x,
 		       bool cell_centered_y, bool cell_centered_z){
-  EnzoFieldArrayFactory array_factory;
+  EnzoFieldArrayFactory array_factory(block);
   Field field = block->data()->field();
-  EnzoArray<enzo_float> data;
-  array_factory.load_temp_interface_grouping_field(block, grouping, group_name,
-						   index, data, cell_centered_x,
-						   cell_centered_y,
-						   cell_centered_z);
+  EFlt3DArray data;
+  data = array_factory.load_temp_interface_grouping_field(grouping, group_name,
+							  index,
+							  cell_centered_x,
+							  cell_centered_y,
+							  cell_centered_z);
   std::string field_name = grouping.item(group_name,index);
   CkPrintf("field(\"%s\") = \n", field_name.c_str());
   CkPrintf("[% .16g", data(iz,iy,0));
@@ -223,7 +222,7 @@ void copy_grouping_fields_(Block *block, Grouping &conserved_group,
   // This should be further explored!
 
   std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
-  EnzoFieldArrayFactory array_factory;
+  EnzoFieldArrayFactory array_factory(block);
   
   for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
     // load group name and number of fields in the group
@@ -233,11 +232,11 @@ void copy_grouping_fields_(Block *block, Grouping &conserved_group,
     for (int field_ind=0; field_ind<num_fields; field_ind++){
 
       // load in the quantities
-      EnzoArray<enzo_float> cur_cons, out_cons;
-      array_factory.load_grouping_field(block, conserved_group, group_name,
-					field_ind, cur_cons);
-      array_factory.load_grouping_field(block, temp_cons_group, group_name,
-					field_ind, out_cons);
+      EFlt3DArray cur_cons, out_cons;
+      cur_cons = array_factory.from_grouping(conserved_group, group_name,
+					     field_ind);
+      out_cons = array_factory.from_grouping(temp_cons_group, group_name,
+					     field_ind);
       for (int iz=0; iz<cur_cons.length_dim2(); iz++) {
 	for (int iy=0; iy<cur_cons.length_dim1(); iy++) {
 	  for (int ix=0; ix<cur_cons.length_dim0(); ix++) {
@@ -313,7 +312,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
 
-    EnzoFieldArrayFactory array_factory;
+    EnzoFieldArrayFactory array_factory(block);
 
     // the following line is copied from EnzoMethodPpm & EnzoMethodHydro
     double dt = block->dt();
@@ -432,16 +431,19 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
   // interfaces (should probably be handled internally by reconstructor)
-  EnzoFieldArrayFactory array_factory;
-  EnzoArray<enzo_float> bfield, l_bfield,r_bfield;
-  array_factory.load_interior_bfieldi_field(block, cur_bfieldi_group, dim,
-					    bfield);
-  array_factory.load_temp_interface_grouping_field(block, priml_group, "bfield",
-						   dim, l_bfield, dim != 0,
-						   dim != 1, dim != 2);
-  array_factory.load_temp_interface_grouping_field(block, primr_group, "bfield",
-						   dim, r_bfield, dim != 0,
-						   dim != 1, dim != 2);
+  EnzoFieldArrayFactory array_factory(block);
+  EFlt3DArray bfield, l_bfield,r_bfield;
+  bfield = array_factory.load_interior_bfieldi_field(cur_bfieldi_group, dim);
+  l_bfield = array_factory.load_temp_interface_grouping_field(priml_group,
+							      "bfield", dim,
+							      dim != 0,
+							      dim != 1,
+							      dim != 2);
+  r_bfield = array_factory.load_temp_interface_grouping_field(primr_group,
+							      "bfield", dim,
+							      dim != 0,
+							      dim != 1,
+							      dim != 2);
 
   // All 3 array objects are the same shape
   // Iteration limits are generalized for 2D and 3D grids
@@ -532,11 +534,9 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   //    scheme from Athena++, which requires knowledge of the reconstructed
   //    densities.
 
-  EnzoArray<enzo_float> density_flux, weight_field;
-  array_factory.load_grouping_field(block, flux_group, "density", 0,
-				    density_flux);
-  array_factory.load_grouping_field(block, weight_group, "weight", dim,
-				    weight_field);
+  EFlt3DArray density_flux, weight_field;
+  density_flux = array_factory.from_grouping(flux_group, "density", 0);
+  weight_field = array_factory.from_grouping(weight_group, "weight", dim);
 
   // Iteration limits compatible with both 2D and 3D grids
   for (int iz=0; iz<density_flux.length_dim2(); iz++) {
@@ -544,7 +544,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
       for (int ix=0; ix<density_flux.length_dim0(); ix++) {
 	// density flux is the face-centered density times the face-centered
 	// velocity along dim
-	
+
 	if ( density_flux(iz,iy,ix) > 0){
 	  weight_field(iz,iy,ix) = 1.0;
 	} else if ( density_flux(iz,iy,ix) < 0){
@@ -607,7 +607,7 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 {
   // For now, not having density floor affect momentum or total energy density
   std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
-  EnzoFieldArrayFactory array_factory;
+  EnzoFieldArrayFactory array_factory(block);
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
@@ -652,19 +652,16 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
     for (int field_ind=0; field_ind<num_fields; field_ind++){
 
       // load in the quantities
-      EnzoArray<enzo_float> cur_cons, out_cons, xflux, yflux, zflux;
-      array_factory.load_grouping_field(block, *conserved_group_, group_name,
-					field_ind, cur_cons);
-      array_factory.load_grouping_field(block, out_cons_group, group_name,
-					field_ind, out_cons);
-      array_factory.load_grouping_field(block, xflux_group, group_name,
-					field_ind, xflux);
-      array_factory.load_grouping_field(block, yflux_group, group_name,
-					field_ind, yflux);
+      EFlt3DArray cur_cons, out_cons, xflux, yflux, zflux;
+      cur_cons = array_factory.from_grouping(*conserved_group_, group_name,
+					     field_ind);
+      out_cons = array_factory.from_grouping(out_cons_group, group_name,
+					     field_ind);
+      xflux = array_factory.from_grouping(xflux_group, group_name, field_ind);
+      yflux = array_factory.from_grouping(yflux_group, group_name, field_ind);
       if (three_dim){
 	// only load if the grid is 3D
-	array_factory.load_grouping_field(block, zflux_group, group_name,
-					  field_ind, zflux);
+	zflux = array_factory.from_grouping(zflux_group, group_name, field_ind);
       }
 
       CkPrintf("\nPrinting flux divergence for group %s, index %d\n",
@@ -1012,27 +1009,19 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   eos_->compute_pressure(block, *conserved_group_, *primitive_group_);
   enzo_float gamma = eos_->get_gamma();
 
-  EnzoFieldArrayFactory array_factory;
-  EnzoArray<enzo_float> density, momentum_x, momentum_y, momentum_z;
-  EnzoArray<enzo_float> bfieldc_x, bfieldc_y, bfieldc_z;
-  array_factory.load_grouping_field(block, *conserved_group_, "density", 0,
-				    density);
-  array_factory.load_grouping_field(block, *conserved_group_, "momentum", 0,
-				    momentum_x);
-  array_factory.load_grouping_field(block, *conserved_group_, "momentum", 1,
-				    momentum_y);
-  array_factory.load_grouping_field(block, *conserved_group_, "momentum", 2,
-				    momentum_z);
-  array_factory.load_grouping_field(block, *conserved_group_, "bfield", 0,
-				    bfieldc_x);
-  array_factory.load_grouping_field(block, *conserved_group_, "bfield", 1,
-				    bfieldc_y);
-  array_factory.load_grouping_field(block, *conserved_group_, "bfield", 2,
-				    bfieldc_z);
+  EnzoFieldArrayFactory array_factory(block);
+  EFlt3DArray density, momentum_x, momentum_y, momentum_z;
+  EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
+  density = array_factory.from_grouping(*conserved_group_, "density", 0);
+  momentum_x = array_factory.from_grouping(*conserved_group_, "momentum", 0);
+  momentum_y = array_factory.from_grouping(*conserved_group_, "momentum", 1);
+  momentum_z = array_factory.from_grouping(*conserved_group_, "momentum", 2);
+  bfieldc_x = array_factory.from_grouping(*conserved_group_, "bfield", 0);
+  bfieldc_y = array_factory.from_grouping(*conserved_group_, "bfield", 1);
+  bfieldc_z = array_factory.from_grouping(*conserved_group_, "bfield", 2);
 
-  EnzoArray<enzo_float> pressure;
-  array_factory.load_grouping_field(block, *primitive_group_, "pressure", 0,
-				    pressure);
+  EFlt3DArray pressure = array_factory.from_grouping(*primitive_group_,
+						     "pressure", 0);
 
   // Get iteration limits
   // Like ppm and ppml, access active region info from enzo_block attributes
