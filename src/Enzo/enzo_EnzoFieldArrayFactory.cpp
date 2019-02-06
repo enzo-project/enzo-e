@@ -1,8 +1,6 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// There is redundancy, this can be condensed!
-
 EFlt3DArray EnzoFieldArrayFactory::from_name(std::string field_name)
 {
   Field field = block_->data()->field();
@@ -12,21 +10,61 @@ EFlt3DArray EnzoFieldArrayFactory::from_name(std::string field_name)
   return EFlt3DArray((enzo_float *) field.values(field_name), mz, my, mx);
 }
 
-EFlt3DArray EnzoFieldArrayFactory::from_grouping(Grouping &grouping,
-						 std::string group_name,
-						 int index)
+void check_grouping_details_(Grouping &grouping, std::string group_name,
+			     int index)
 {
-  Field field = block_->data()->field();
   int size = grouping.size(group_name);
-
   ASSERT1("EnzoFieldArrayFactory",
 	  "\"%s\" is not the name of a real group\n",
 	  group_name.c_str(), (size != 0));
   ASSERT3("EnzoFieldArrayFactory",
 	  "index=%d is larger than %d, the size of group \"%s\"\n",
 	  index, size, group_name.c_str(),(size>index));
+}
 
+EFlt3DArray EnzoFieldArrayFactory::from_grouping(Grouping &grouping,
+						 std::string group_name,
+						 int index)
+{
+  check_grouping_details_(grouping, group_name, index);
   return from_name(grouping.item(group_name,index));
+}
+
+EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
+						       std::string group_name,
+						       int index, int dim)
+{
+  check_grouping_details_(grouping, group_name, index);
+  ASSERT("EnzoFieldArrayFactory",
+	 "reconstructed fields can only be face-centered along dim = 0, 1 or 2",
+	 dim>-1 && dim <3);
+
+  Field field = block_->data()->field();
+  std::string field_name = grouping.item(group_name,index);
+  const int id = field.field_id(field_name);
+  int mx, my, mz;
+  field.dimensions(id,&mx,&my,&mz);
+
+  if (dim == 0){
+    mx++;
+  } else if (dim == 1){
+    my++;
+  } else {
+    mz++;
+  }
+  return EFlt3DArray((enzo_float *) field.values(field_name), mz, my, mx);
+}
+
+EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
+{
+  EFlt3DArray t = from_grouping(grouping,"bfield",dim);
+  if (dim == 0){
+    return t.subarray(0, t.dim_size(2), 0, t.dim_size(1), 1, t.dim_size(0) - 1);
+  } else if (dim == 1){
+    return t.subarray(0, t.dim_size(2), 1, t.dim_size(1) - 1, 0, t.dim_size(0));
+  } else {
+    return t.subarray(1, t.dim_size(2) - 1, 1, t.dim_size(1), 0, t.dim_size(0));
+  }
 }
 
 // Helper function that returns the dimensions of the cell-centered grid
@@ -42,7 +80,6 @@ void cell_centered_dim_(Field &field, int id, int *mx, int *my, int *mz)
   *mx = nx + 2*gx;
   *my = ny + 2*gx;
   *mz = nz + 2*gx;
-  
 }
 
 EFlt3DArray  EnzoFieldArrayFactory::load_temp_interface_grouping_field(
@@ -74,37 +111,4 @@ EFlt3DArray  EnzoFieldArrayFactory::load_temp_interface_grouping_field(
     mz--;
   }
   return EFlt3DArray((enzo_float *)field.values(field_name),mz,my,mx);
-}
-
-EFlt3DArray EnzoFieldArrayFactory::load_interior_bfieldi_field(
-      Grouping &grouping, int dim)
-{
-  Field field = block_->data()->field();
-  int size = grouping.size("bfield");
-  ASSERT("EnzoFieldArrayFactory",
-	 "grouping must contain a bfield group.",
-	 size>0);
-  ASSERT2("EnzoFieldArrayFactory",
-	  "dim=%d is larger than %d, the size of group \"bfield\"\n",
-	  dim, size,(size>dim));
-
-  int dix = (dim == 0) ? 1 : 0;
-  int diy = (dim == 1) ? 1 : 0;
-  int diz = (dix == diy) ? 1 : 0;
-
-  std::string field_name = grouping.item("bfield",dim);
-  enzo_float *data =(enzo_float *)field.values(field_name);
-
-  int mx,my,mz;
-  cell_centered_dim_(field, field.field_id(field_name), &mx, &my, &mz);
-
-  EFlt3DArray array;
-
-  if (field.is_permanent(field.field_id(field_name))){
-    EFlt3DArray temp_array(data,mz+diz,my+diy,mx+dix);
-    array = temp_array.subarray(diz, mz, diy, my, dix, mx);
-  } else {
-    array = EFlt3DArray(data, mz-diz, my-diy, mx-dix);
-  }
-  return array;
 }

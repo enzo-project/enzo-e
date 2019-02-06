@@ -52,18 +52,16 @@
 //        - The conserved quantities grouping, x/y/z flux groupings, and
 //          temp conserved quantities grouping each always contain groups
 //          called "density", "momentum", "total_energy", "bfield"
-//        - All values within the conserved quanties and temp conserved
-//          quantities are all face-centered.
-//        - Because temporary fields do not support face-centered fields with
-//          values on the exterior of the grid, the shapes of the fields in
-//          temp interface b-fields and interface b-fields are different.
-//          For example, if we are interested in the x-component, the shapes of
-//          the permenant and temporary fields are:
-//                   temporary:    (mx-1, my, mz)
-//                   permenant:    (mx+1, my, mz)
-//          The load_interior_bfieldi_field_ helper function addresses this
-//          problem. It initializes arrays for both groupings that only
-//          include face-centered values on the interior of the grid.
+//        - All fields within the primitive quantites, conserved quanties, and
+//          temp conserved quantities are all cell-centered.
+//        - All face-centered fields with the exception of (temporary)
+//          interface b-fields only include space for the interior of the grid.
+//          The (temporary) interface bfields all include space for values on
+//          the exterior of the grid.
+//        - All reconstructed fields are not technically registered as
+//          cell-centered fields. They are reused to store reconstructed values
+//          along different axes. Consequently, they are formally registerred as
+//          cell-centered fields (to guaruntee that they have enough space).
 //        - reconstructed left and right conserved fields are entirely
 //          non-essential. They only exist to allow for symmetry between the
 //          EquationOfState interface methods: primitive_from_conservative and
@@ -114,6 +112,9 @@ class EnzoEquationOfState;
 class EnzoReconstructor;
 class EnzoRiemann;
 class EnzoConstrainedTransport;
+
+// Frequently used Helper class:
+class EnzoPermutedCoordinates;
 
 // for brevity, and convenience (in case the choice of map is altered)
 // we define an alias for our choice of map

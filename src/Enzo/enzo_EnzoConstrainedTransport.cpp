@@ -9,8 +9,9 @@ void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
   EnzoFieldArrayFactory array_factory(block);
   EFlt3DArray efield = array_factory.from_name(center_efield_name);
 
-  int j = (dim+1)%3;
-  int k = (dim+2)%3;
+  EnzoPermutedCoordinates coord(dim);
+  int j = coord.j_axis();
+  int k = coord.k_axis();
 
   // Load the jth and kth components of the velocity and cell-centered bfield
   EFlt3DArray velocity_j, velocity_k, bfield_j, bfield_k;
@@ -19,9 +20,9 @@ void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
   bfield_j = array_factory.from_grouping(prim_group, "bfield", j);
   bfield_k = array_factory.from_grouping(prim_group, "bfield", k);
 
-  for (int iz=0; iz<efield.length_dim2(); iz++) {
-    for (int iy=0; iy<efield.length_dim1(); iy++) {
-      for (int ix=0; ix<efield.length_dim0(); ix++) {
+  for (int iz=0; iz<efield.dim_size(2); iz++) {
+    for (int iy=0; iy<efield.dim_size(1); iy++) {
+      for (int ix=0; ix<efield.dim_size(0); ix++) {
 	efield(iz,iy,ix) = (-velocity_j(iz,iy,ix) * bfield_k(iz,iy,ix) +
 			    velocity_k(iz,iy,ix) * bfield_j(iz,iy,ix));
       }
@@ -168,32 +169,11 @@ void compute_edge_(int xstart, int ystart, int zstart,
   }
 }
 
-// Helper function to computes derives of x, y, and z with respect to r_{dim}.
-// r_{dim} maps to x, y, and z for dim = 0, 1, 2
-// The helper function computes dx/dr_{dim}, dy/dr_{dim}, dz/dr_{dim}
-// We represent these with the shorthand dxddim, dyddim, dzddim
-void aligned_dim_derivatives_(int dim, int &dxddim, int &dyddim, int &dzddim)
-{
-  if (dim == 0){
-    dxddim = 1;
-    dyddim = 0;
-    dzddim = 0;
-  } else if (dim == 1){
-    dyddim = 1;
-    dzddim = 0;
-    dxddim = 0;
-  } else {
-    dzddim = 1;
-    dxddim = 0;
-    dyddim = 0;
-  }
-}
-
 
 void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
-  for (int iz = 0; iz < array.length_dim2(); iz++){
-    for (int iy = 0; iy < array.length_dim1(); iy++){
-      for (int ix = 0; ix < array.length_dim0(); ix++){
+  for (int iz = 0; iz < array.dim_size(2); iz++){
+    for (int iy = 0; iy < array.dim_size(1); iy++){
+      for (int ix = 0; ix < array.dim_size(0); ix++){
 	array(iz,iy,ix)*=val;
       }
     }
@@ -228,24 +208,20 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 						    Grouping &prim_group,
 						    Grouping &weight_group)
 {
-  // determine alignment of j,k axes with respect to x,y, and z
-  int dxdj, dydj, dzdj, dxdk, dydk, dzdk;
-  aligned_dim_derivatives_((dim+1)%3, dxdj, dydj, dzdj);
-  aligned_dim_derivatives_((dim+2)%3, dxdk, dydk, dzdk);
+
+  EnzoPermutedCoordinates coord(dim);
+  // determine components of j and k unit vectors:
+  int j_x, j_y, j_z, k_x, k_y, k_z;
+  coord.j_unit_vector(j_x, j_y, j_z);
+  coord.k_unit_vector(k_x, k_y, k_z);
 
   // Initialize Cell-Centered E-fields
   EFlt3DArray Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
   EnzoFieldArrayFactory array_factory(block);
   Ec = array_factory.from_name(center_efield_name);
-  Ec_jp1 = Ec.subarray(dzdj, Ec.length_dim2(),  //zstart : zstop
-		       dydj, Ec.length_dim1(),  //ystart : ystop
-		       dxdj, Ec.length_dim0()); //xstart : xstop
-  Ec_kp1 = Ec.subarray(dzdk, Ec.length_dim2(),
-		       dydk, Ec.length_dim1(),
-		       dxdk, Ec.length_dim0());
-  Ec_jkp1 = Ec.subarray(dzdj+dzdk, Ec.length_dim2(),
-			dydj+dydk, Ec.length_dim1(),
-			dxdj+dxdk, Ec.length_dim0());
+  Ec_jp1  = coord.left_edge_offset(Ec, 0, 1, 0);
+  Ec_kp1  = coord.left_edge_offset(Ec, 1, 0, 0);
+  Ec_jkp1 = coord.left_edge_offset(Ec, 1, 1, 0);
 
   // Initialize edge-centered Efield [it maps (k,j,i) -> (k+1/2,j+1/2,i)]
   EFlt3DArray Eedge = array_factory.from_grouping(efield_group, "efield", dim);
@@ -254,28 +230,21 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   EFlt3DArray Ej, Ej_kp1, Ek, Ek_jp1;
 
   // Ex(k,j+1/2,i) = -1.*yflux(Bz)
-  Ej = array_factory.from_grouping(jflux_group, "bfield", (dim+2)%3);
+  Ej = array_factory.from_grouping(jflux_group, "bfield", coord.k_axis());
   inplace_entry_multiply_(Ej,-1.);
-  Ej_kp1 = Ej.subarray(dzdk, Ej.length_dim2(),
-		       dydk, Ej.length_dim1(),
-		       dxdk, Ej.length_dim0());
+  Ej_kp1 = coord.left_edge_offset(Ej, 1, 0, 0);
+
   // Ex(k+1/2,j,i) = zflux(By)
-  Ek = array_factory.from_grouping(kflux_group, "bfield", (dim+1)%3);
+  Ek = array_factory.from_grouping(kflux_group, "bfield", coord.j_axis());
   // No need to multiply entries by minus 1
-  Ek_jp1 = Ek.subarray(dzdj, Ek.length_dim2(),
-		       dydj, Ek.length_dim1(),
-		       dxdj, Ek.length_dim0());
+  Ek_jp1 = coord.left_edge_offset(Ek, 0, 1, 0);
 
   // Initialize the weight arrays
   EFlt3DArray Wj, Wj_kp1, Wk, Wk_jp1;
-  Wj = array_factory.from_grouping(weight_group, "weight", (dim+1)%3);
-  Wj_kp1 = Wj.subarray(dzdk, Wj.length_dim2(),
-		       dydk, Wj.length_dim1(),
-		       dxdk, Wj.length_dim0());
-  Wk = array_factory.from_grouping(weight_group, "weight", (dim+2)%3);
-  Wk_jp1 = Wk.subarray(dzdj, Wk.length_dim2(),
-		       dydj, Wk.length_dim1(),
-		       dxdj, Wk.length_dim0());
+  Wj = array_factory.from_grouping(weight_group, "weight", coord.j_axis());
+  Wj_kp1 = coord.left_edge_offset(Wj, 1, 0, 0);
+  Wk = array_factory.from_grouping(weight_group, "weight", coord.k_axis());
+  Wk_jp1 = coord.left_edge_offset(Wj, 0, 1, 0);
 
   // Integration limits
   //
@@ -302,20 +271,17 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   //    In all cases:                    jstart = 0     jstop = jmax - 1
   //                                     kstart = 0     kstop = kmax - 1
 
-  int xstart = 1 - dxdj - dxdk; // if dim==0: 1, otherwise: 0
-  int ystart = 1 - dydj - dydk;
-  int zstart = (Ec.length_dim2() == 1) ? 0 : 1 - dzdj - dzdk;
+  int xstart = 1 - j_x - k_x; // if dim==0: 1, otherwise: 0
+  int ystart = 1 - j_y - k_y;
+  int zstart = (Ec.dim_size(2) == 1) ? 0 : 1 - j_z - k_z;
 
-  int xstop = Ec.length_dim0() - 1;
-  int ystop = Ec.length_dim1() - 1;
-  int zstop = (Ec.length_dim2() == 1) ? 1 : Ec.length_dim2() - 1;
+  int zstop = (Ec.dim_size(2) == 1) ? 1 : Ec.dim_size(2) - 1;
 
-  compute_edge_(xstart, ystart, zstart, xstop, ystop, zstop,
+  compute_edge_(xstart, ystart, zstart,
+		Ec.dim_size(0) - 1, Ec.dim_size(1) - 1, zstop,
 		Eedge, Wj, Wj_kp1, Wk, Wk_jp1, Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
 		Ej, Ej_kp1, Ek, Ek_jp1);
-
 };
-
 
 // Compute the face-centered B-field component along the ith dimension
 //
@@ -344,55 +310,54 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 					     Grouping &out_bfieldi_group,
 					     enzo_float dt)
 {
-  // determine alignment of j,k axes with respect to x,y, and z
-  int  dxdj, dydj, dzdj, dxdk, dydk, dzdk;
-  aligned_dim_derivatives_((dim+1)%3, dxdj, dydj, dzdj);
-  aligned_dim_derivatives_((dim+2)%3, dxdk, dydk, dzdk);
+  EnzoPermutedCoordinates coord(dim);
+  // determine components of j and k unit vectors:
+  int j_x, j_y, j_z, k_x, k_y, k_z;
+  coord.j_unit_vector(j_x, j_y, j_z);
+  coord.k_unit_vector(k_x, k_y, k_z);
 
   // determine if grid is 2D or 3D AND compute the ratios of dt to the 
   // widths of cells along j and k directions
   EnzoBlock *enzo_block = enzo::block(block);
   bool three_dim = enzo_block->GridDimension[2]>1;
-  enzo_float dtdj = dt/enzo_block->CellWidth[(dim+1)%3];
-  enzo_float dtdk = dt/enzo_block->CellWidth[(dim+2)%3];
+  enzo_float dtdj = dt/enzo_block->CellWidth[coord.j_axis()];
+  enzo_float dtdk = dt/enzo_block->CellWidth[coord.k_axis()];
 
   // Load interface bfields
   EnzoFieldArrayFactory array_factory(block);
   EFlt3DArray cur_bfield, out_bfield;
-  cur_bfield = array_factory.load_interior_bfieldi_field(cur_bfieldi_group,
-							 dim);
-  out_bfield = array_factory.load_interior_bfieldi_field(out_bfieldi_group,
-							 dim);
+  cur_bfield = array_factory.interior_bfieldi(cur_bfieldi_group, dim);
+  out_bfield = array_factory.interior_bfieldi(out_bfieldi_group, dim);
 
   // Load edge centered efields
   EFlt3DArray E_j, E_k;
+  // For 2D grid: only need to load E_k when dim == 1 (in that case E_j = E_z)
+  //              only need to load E_k when dim == 0 (in that case E_k = E_z)
   const bool use_E_j = (three_dim || dim == 1);
-  // For 2D grid, only need to load E_k when dim == 1 (in that case E_j = E_z)
-  if (use_E_j){
-    E_j = array_factory.from_grouping(efield_group, "efield", (dim+1)%3);
-  }
   const bool use_E_k = (three_dim || dim == 0);
-  // For 2D grid, only need to load E_k when dim == 0 (in that case E_k = E_z)
+  if (use_E_j){
+    E_j = array_factory.from_grouping(efield_group, "efield", coord.j_axis());
+  }
   if (use_E_k){
-    E_k = array_factory.from_grouping(efield_group, "efield", (dim+2)%3);
+    E_k = array_factory.from_grouping(efield_group, "efield", coord.k_axis());
   }
 
   int zstart = 0;
   int zstop = 1;
   if (three_dim){
-    zstart = dzdj + dzdk;
-    zstop = out_bfield.length_dim2()-dzdj-dzdk;
+    zstart = j_z + k_z;
+    zstop = out_bfield.dim_size(2)-j_z-k_z;
   }
 
   for (int iz=zstart; iz<zstop; iz++) {
-    for (int iy=dydj+dydk; iy<out_bfield.length_dim1()-dydj-dydk; iy++) {
-      for (int ix=dxdj+dxdk; ix<out_bfield.length_dim0()-dxdj-dxdk; ix++) {
+    for (int iy=j_y+k_y; iy<out_bfield.dim_size(1)-j_y-k_y; iy++) {
+      for (int ix=j_x+k_x; ix<out_bfield.dim_size(0)-j_x-k_x; ix++) {
 
 	enzo_float E_k_term, E_j_term;
 	if (use_E_k){
 	  // E_k_term(k,j,i+1/2) =
 	  //   dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
-	  E_k_term = dtdj*(E_k(iz,iy,ix) - E_k(iz-dzdj,iy-dydj,ix-dxdj));
+	  E_k_term = dtdj*(E_k(iz,iy,ix) - E_k(iz-j_z,iy-j_y,ix-j_x));
 	} else {
 	  E_k_term = 0.;
 	}
@@ -400,7 +365,7 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 	if (use_E_j){
 	  // E_j_term(k,j,i+1/2) =
 	  //   dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
-	  E_j_term = dtdk*(E_j(iz,iy,ix) - E_j(iz-dzdk,iy-dydk,ix-dxdk)); 
+	  E_j_term = dtdk*(E_j(iz,iy,ix) - E_j(iz-k_z,iy-k_y,ix-k_x)); 
 	} else {
 	  E_j_term = 0.;
 	}
@@ -413,7 +378,9 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
   }
 }
 
-
+// This method also intentionally includes calculation of bfields in the
+// outermost cells so that it can be used to initially setup the bfield.
+//
 // Compute cell-centered bfield along dimension i
 //   B_i(k,j,i) = 0.5*(B_i(k,j,i+1/2) + B_i(k,j,i-1/2))
 // For a simpler implementation, we will rewrite this as:
@@ -424,65 +391,24 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
 						     Grouping &cons_group,
-						     Grouping &bfieldi_group,
-						     bool compute_outer)
+						     Grouping &bfieldi_group)
 {
-  // Identify which axis dimension i is aligned with
-  int  dxdi, dydi, dzdi;
-  aligned_dim_derivatives_(dim, dxdi, dydi, dzdi);
-
+  EnzoPermutedCoordinates coord(dim);
   EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray b_center, bi_left, bi_right;
-  int zstop, ystop, xstop;
-  
-  if (compute_outer){
-    // In this case, compute the centered B-field for all cells in the grid
-    // including cells at i = 0 and i = imax-1, where i is the index for the
-    // axis aligned with dim.
 
-    // Load cell-centerd field
-    b_center = array_factory.from_grouping(cons_group, "bfield", dim);
-
-    // If we include the exterior interface b-fields, then we want to iterate
-    // over the entire grid
-    zstop = b_center.length_dim2();
-    ystop = b_center.length_dim1();
-    xstop = b_center.length_dim0();
-
-    // Load Face-centered field - including values on the exterior faces
-    bi_left = array_factory.from_grouping(bfieldi_group, "bfield", dim);
-
-  } else {
-    // In this case, compute the centered B-field for all cells in the grid
-    // except cells at i = 0 and i = imax-1, where i is the index for the
-    // axis aligned with dim.
-    
-    // Load cell-centered B-field
-    // b_center should not include any cells with ix=0, iy=0, or iz =0
-    // since we do not have interface values at i-1/2 and don't need values
-    // along the outmost layer
-    EFlt3DArray bfield = array_factory.from_grouping(cons_group, "bfield", dim);
-    b_center = bfield.subarray(dzdi, bfield.length_dim2(),
-			       dydi, bfield.length_dim1(),
-			       dxdi, bfield.length_dim0());
-    // Iteration Limits - need to stop when on the last index along dim i
-    zstop = b_center.length_dim2() - dzdi;
-    ystop = b_center.length_dim1() - dydi;
-    xstop = b_center.length_dim0() - dxdi;
-    
-    // Load Face-centered field - excluding values on the exterior faces
-    bi_left = array_factory.load_interior_bfieldi_field(bfieldi_group, dim);
-  }
-
+  // Load cell-centerd field
+  EFlt3DArray b_center = array_factory.from_grouping(cons_group, "bfield",
+						     coord.i_axis());
+  // Load Face-centered fields
+  EFlt3DArray bi_left = array_factory.from_grouping(bfieldi_group, "bfield",
+						    coord.i_axis());
   // Get the view of the Face-center field that starting from i=1
-  bi_right = bi_left.subarray(dzdi, bi_left.length_dim2(),
-			      dydi, bi_left.length_dim1(),
-			      dxdi, bi_left.length_dim0());
+  EFlt3DArray bi_right = coord.left_edge_offset(bi_left,0,0,1);
 
   // iteration limits are compatible with a 2D grid and 3D grid
-  for (int iz=0; iz<zstop; iz++) {
-    for (int iy=0; iy<ystop; iy++) {
-      for (int ix=0; ix<xstop; ix++) {
+  for (int iz=0; iz<b_center.dim_size(2); iz++) {
+    for (int iy=0; iy<b_center.dim_size(1); iy++) {
+      for (int ix=0; ix<b_center.dim_size(0); ix++) {
 	b_center(iz,iy,ix) = 0.5*(bi_left(iz,iy,ix) + bi_right(iz,iy,ix));
       }
     }

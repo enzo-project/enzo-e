@@ -383,9 +383,9 @@ void bfieldc_helper_(Block *block)
   bfieldi_group.add("bfieldi_x", "bfield");
   bfieldi_group.add("bfieldi_y", "bfield");
   bfieldi_group.add("bfieldi_z", "bfield");
-  ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group, true);
-  ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group, true);
-  ct.compute_center_bfield(block, 2, bfieldc_group, bfieldi_group, true);
+  ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group);
+  ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group);
+  ct.compute_center_bfield(block, 2, bfieldc_group, bfieldi_group);
 }
 
 

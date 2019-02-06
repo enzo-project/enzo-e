@@ -31,29 +31,38 @@ public:
   // get a field as an array
   EFlt3DArray from_name(std::string field_name);
 
-  // reading in Grouping fields
+  // read in Grouping fields
   EFlt3DArray from_grouping(Grouping &grouping, std::string group_name,
 			    int index);
 
-  // This is only used to load in reconstructed arrays (name is a relic from
-  // a period when I incorrectly believed that temporary arrays could not be
-  // face-centered) Setting cell_centered_{dim} to true indicates that values
+  // read in fields from Grouping represented reconstructed quantities
+  //
+  // Reconstructed fields are cell-centered fields that do not include faces on
+  // the exterior of the grid. Because the reconstructed fields are reused for
+  // different dimensions, they are not registerred internally as being
+  // face-centered. The dim argument indicates the direction along which the
+  // field should be face-centered.
+  EFlt3DArray reconstructed_field(Grouping &grouping, std::string group_name,
+				  int index, int dim);
+
+  // read in field from Grouping of face-centered interface B-fields. The
+  // resulting view does not include face-centered values on the exterior of
+  // the grid.
+  EFlt3DArray interior_bfieldi(Grouping &grouping, int dim);
+
+  // Depreciated.
+  //
+  // The interface was written this way due to a misconception.
+  // Most recently this was used for debugging and for reconstructed fields.
+  //
+  // Setting cell_centered_{dim} to true indicates that values
   // are cell-centered along {dim}
-  // Going to rename this and simplify the function signature. For
-  // reconstructed data, we only need to indicate the face-centered direction
   EFlt3DArray load_temp_interface_grouping_field(Grouping &grouping,
 						 std::string group_name,
 						 int index,
 						 bool cell_centered_x,
 						 bool cell_centered_y,
 						 bool cell_centered_z);
-  
-  // Initialize an EnzoArray representing a component of the interface B-fields.
-  // This function accepts both the grouping of permanent and temporary fields,
-  // and in each case yields an array that does not include values for the
-  // exterior face of the grid. For example, dim=0, the dimension of the
-  // resulting EnzoArray is (mz, my-1, mx)
-  EFlt3DArray load_interior_bfieldi_field(Grouping &grouping, int dim);
 
 private:
   Block* block_;

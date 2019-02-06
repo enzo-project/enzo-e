@@ -244,6 +244,7 @@ struct fluxes
 #include "enzo_EnzoRiemann.hpp"
 #include "enzo_EnzoRiemannHLLE.hpp"
 #include "enzo_EnzoConstrainedTransport.hpp"
+#include "enzo_EnzoPermutedCoordinates.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

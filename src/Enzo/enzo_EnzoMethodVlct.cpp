@@ -204,51 +204,6 @@ void EnzoMethodVlct::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-
-// The temporary conserved fields have arbitrary initial values
-// The calculation at the first half timestep fills in the inner cells in of
-// the temporary fields. The outermost layer of cells on the grid are
-// uninitialized. This can lead to NaNs or inf. To avoid this, the following
-// helper function makes sure that the exterior layer has reasonable values.
-// We could probably accomplish the same thing by setting the values to 0 or
-// prim_floor. We also don't need to iterate over the full grid. None of this
-// is strictly necessary since it will only be messing up the ghost zone - but
-// if we want the calculation to be free of ever having nans/inf something like
-// this is necessary.
-// This should probably be a private method
-void copy_grouping_fields_(Block *block, Grouping &conserved_group,
-			   Grouping &temp_cons_group){
-  // This is a stop gap solution to try to fix things
-  // This should be further explored!
-
-  std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
-  EnzoFieldArrayFactory array_factory(block);
-  
-  for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
-    // load group name and number of fields in the group
-    std::string group_name = cons_group_names[group_ind];
-    int num_fields = conserved_group.size(group_name);
-     // iterate over the fields in the group
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-
-      // load in the quantities
-      EFlt3DArray cur_cons, out_cons;
-      cur_cons = array_factory.from_grouping(conserved_group, group_name,
-					     field_ind);
-      out_cons = array_factory.from_grouping(temp_cons_group, group_name,
-					     field_ind);
-      for (int iz=0; iz<cur_cons.length_dim2(); iz++) {
-	for (int iy=0; iy<cur_cons.length_dim1(); iy++) {
-	  for (int ix=0; ix<cur_cons.length_dim0(); ix++) {
-	    out_cons(iz,iy,ix) = cur_cons(iz,iy,ix);
-	  }
-	}
-      }
-    }
-  }
-}
-
-
 void EnzoMethodVlct::compute ( Block * block) throw()
 {
   TRACE_VLCT("compute()");
@@ -306,9 +261,6 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 			  temp_conserved_group, temp_bfieldi_group,
 			  consl_group, consr_group);
 
-    // initialize values of the temporary conserved group
-    copy_grouping_fields_(block, *conserved_group_, temp_conserved_group);
-
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
 
@@ -345,8 +297,8 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       // Compute the primitive Quantites with Equation of State
       eos_->primitive_from_conservative (block, *cur_cons_group,
 					 *primitive_group_);
-      CkPrintf("\n\nChecking Primitives.\n");
-      check_fields_(block, *primitive_group_, EnzoMethodVlct::prim_group_names);
+      //CkPrintf("\n\nChecking Primitives.\n");
+      //check_fields_(block, *primitive_group_, EnzoMethodVlct::prim_group_names);
 
       
       
@@ -362,10 +314,10 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 		      priml_group, primr_group, zflux_group, consl_group,
 		      consr_group, weight_group, *reconstructor);
       }
-      CkPrintf("Checking Fluxes.\n");
-      check_fields_(block, xflux_group, EnzoMethodVlct::cons_group_names);
-      check_fields_(block, yflux_group, EnzoMethodVlct::cons_group_names);
-      check_fields_(block, zflux_group, EnzoMethodVlct::cons_group_names);
+      //CkPrintf("Checking Fluxes.\n");
+      //check_fields_(block, xflux_group, EnzoMethodVlct::cons_group_names);
+      //check_fields_(block, yflux_group, EnzoMethodVlct::cons_group_names);
+      //check_fields_(block, zflux_group, EnzoMethodVlct::cons_group_names);
 
       // Compute_efields
       //   - The first time, this implictly use the cell-centered primitives
@@ -393,7 +345,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       // Finally, update cell-centered B-field 
       for (int dim = 0; dim<ndim; dim++){
 	ct.compute_center_bfield(block, dim, *out_cons_group,
-				 *out_bfieldi_group, false);
+				 *out_bfieldi_group);
       }
     }
 
@@ -424,16 +376,16 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(block, *primitive_group_, priml_group,
 				      primr_group, dim, eos_);
-  CkPrintf("Checking Reconstructed primitives along dim %d.\n", dim);
-  check_fields_(block, priml_group, EnzoMethodVlct::prim_group_names);
-  check_fields_(block, primr_group, EnzoMethodVlct::prim_group_names);
+  //CkPrintf("Checking Reconstructed primitives along dim %d.\n", dim);
+  //check_fields_(block, priml_group, EnzoMethodVlct::prim_group_names);
+  //check_fields_(block, primr_group, EnzoMethodVlct::prim_group_names);
   
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
   // interfaces (should probably be handled internally by reconstructor)
   EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray bfield, l_bfield,r_bfield;
-  bfield = array_factory.load_interior_bfieldi_field(cur_bfieldi_group, dim);
+  EFlt3DArray temp,bfield, l_bfield,r_bfield;
+  bfield = array_factory.interior_bfieldi(cur_bfieldi_group, dim);
   l_bfield = array_factory.load_temp_interface_grouping_field(priml_group,
 							      "bfield", dim,
 							      dim != 0,
@@ -459,9 +411,9 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // Calculate reconstructed conserved values
   eos_->conservative_from_primitive(block,priml_group,consl_group);
   eos_->conservative_from_primitive(block,primr_group,consr_group);
-  CkPrintf("Checking Reconstructed conserved quantites along dim %d.\n", dim);
-  check_fields_(block, consl_group, EnzoMethodVlct::cons_group_names);
-  check_fields_(block, consr_group, EnzoMethodVlct::cons_group_names);
+  //CkPrintf("Checking Reconstructed conserved quantites along dim %d.\n", dim);
+  //check_fields_(block, consl_group, EnzoMethodVlct::cons_group_names);
+  //check_fields_(block, consr_group, EnzoMethodVlct::cons_group_names);
 
   /*
   print_array_vals_(block, consl_group, "density", 0, 8, 8,
@@ -664,8 +616,6 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 	zflux = array_factory.from_grouping(zflux_group, group_name, field_ind);
       }
 
-      CkPrintf("\nPrinting flux divergence for group %s, index %d\n",
-	       group_name.c_str(), field_ind);
       for (int iz=zstart; iz<zstop; iz++) {
 	for (int iy=1; iy<my-1; iy++) {
 	  for (int ix=1; ix<mx-1; ix++) {
@@ -681,23 +631,6 @@ void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
 	      new_val = (cur_cons(iz,iy,ix)
 			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
 			 - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix)));
-	    }
-
-	    if (iz == 8 && iy == 8){
-	      if (ix == 1){
-		CkPrintf("[");
-	      } else {
-		CkPrintf(", ");
-	      }
-	      CkPrintf("%e", -dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
-		       - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix))
-		       - dtdz * (zflux(iz,iy,ix) - zflux(iz-1,iy,ix)));
-	      
-	      if (ix == mx-2){
-		CkPrintf("]\n");
-		fflush(stdout);
-	      }
-
 	    }
 	    
 	    if (use_floor){
@@ -823,6 +756,96 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
   }
 }
 
+// The temporary conserved fields have arbitrary initial values
+// The calculation at the first half timestep fills in the inner cells in of
+// the temporary fields. The outermost layer of cells on the grid are
+// uninitialized. This can lead to NaNs or inf. To avoid this, the following
+// helper function makes sure that the exterior layer has reasonable values.
+// We could probably accomplish the same thing by setting the values to 0 or
+// prim_floor. We also don't need to iterate over the full grid. None of this
+// is strictly necessary since it will only be messing up the ghost zone - but
+// if we want the calculation to be free of ever having nans/inf something like
+// this is necessary.
+//
+// This is a quick solution - really only need to initalize values in the outer
+// ghost zones
+void copy_grouping_fields_(Block *block, Grouping &conserved_group,
+			   Grouping &temp_cons_group){
+
+  std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
+  EnzoFieldArrayFactory array_factory(block);
+  
+  for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
+    // load group name and number of fields in the group
+    std::string group_name = cons_group_names[group_ind];
+    int num_fields = conserved_group.size(group_name);
+     // iterate over the fields in the group
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+
+      // load in the quantities
+      EFlt3DArray cur_cons, out_cons;
+      cur_cons = array_factory.from_grouping(conserved_group, group_name,
+					     field_ind);
+      out_cons = array_factory.from_grouping(temp_cons_group, group_name,
+					     field_ind);
+      for (int iz=0; iz<cur_cons.dim_size(2); iz++) {
+	for (int iy=0; iy<cur_cons.dim_size(1); iy++) {
+	  for (int ix=0; ix<cur_cons.dim_size(0); ix++) {
+	    out_cons(iz,iy,ix) = cur_cons(iz,iy,ix);
+	  }
+	}
+      }
+    }
+  }
+}
+
+// helper function to initialize values of reconstructed primitives to floor
+// that will never be initialized by reconstruction. This is necessary to avoid
+// NaNs/inf because when EOS calculates reconstructed conserved quantites, EOS
+// assumes that the reconstructed primitives are cell-centered (since they are
+// not registered as face-centered) which means it will try to convert otherwise
+// uninitialized values to conservatives.
+//
+// Really only need to initialize values at the end of the allocated blocks of
+// memory.
+void initialize_recon_prim_to_floor_(Block *block, Grouping &grouping,
+				     EnzoEquationOfState &eos){
+  
+  std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
+  int start = -1;
+  int stop = -1;
+  Field field = block->data()->field();
+
+  for (unsigned int group_ind=0;group_ind<prim_group_names.size(); group_ind++){
+    // load group name and number of fields in the group
+    std::string group_name = prim_group_names[group_ind];
+    int num_fields = grouping.size(group_name);
+
+    // Handle possibility of having a density/pressure floor
+    enzo_float prim_floor = 0.;
+    if (group_name == "density"){
+      prim_floor = eos.get_density_floor();
+    } else if (group_name == "pressure"){
+      prim_floor = eos.get_pressure_floor();
+    }
+
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      std::string field_name = grouping.item(group_name,field_ind);
+      if (start == -1){
+	int id = field.field_id(field_name);
+	int mx, my, mz;
+	field.dimensions(id,&mx,&my,&mz);
+	stop = mz*my*mx;
+	start = std::min(std::min(mz*my*(mx-1), mz*(my-1)*mx),(mz-1)*my*mx);
+      }
+      enzo_float* data = (enzo_float *) field.values(field_name);
+      for (int i=start; i<stop; i++) {
+	data[i] = prim_floor;
+      }
+    }
+  }
+}
+
 void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   Grouping &priml_group,
 					   Grouping &primr_group,
@@ -919,6 +942,24 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   // reserve/allocate cell-centered e-field
   center_efield_name = "center_efield";
   prep_reused_temp_field_(field, center_efield_name, 0, 0, 0);
+
+
+  // Initialize Values (that would not otherwise be initialized) in order to
+  // avoid NaN/Inf during calculations.
+
+  // initialize values of the temporary conserved group (out in the ghost
+  // zones to avoid NaNs during conversion to primitives  - these would
+  // propogate through to the flux calculation)
+  copy_grouping_fields_(block, *conserved_group_, temp_conserved_group);
+  // initialize exterior face values of the temporary interface B-field
+  // (this is just to avoid NaNs while computing the cell-centered B-fields
+  // out in the ghost zone - this is NOT necessary if the underlying fields
+  // are guarunteed to be set to 0 at start)
+  copy_grouping_fields_(block, *bfieldi_group_, temp_bfieldi_group);
+
+  // initialize values of reconstructed primitives
+  initialize_recon_prim_to_floor_(block, priml_group, *eos_);
+  initialize_recon_prim_to_floor_(block, primr_group, *eos_);
 }
 
 //----------------------------------------------------------------------
@@ -1094,8 +1135,6 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
 	  (double)dtBaryons, block->name().c_str(),
 	  ((dtBaryons>0) && (std::isfinite(dtBaryons))));
   fflush(stdout);
-
-  
 
   return dtBaryons;
 }

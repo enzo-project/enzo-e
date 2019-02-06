@@ -37,20 +37,8 @@ public: // interface
 		     Grouping &cur_bfieldi_group, Grouping &out_bfieldi_group,
 		     enzo_float dt);
 
-  // if compute_outer is false, then the centered B-field is computed for all
-  // cells in the grid except at i = 0 and i = imax-1, where i is the index for
-  // the axis aligned with dim. If true, then computes the values at all cells,
-  // including the cells at i = 0 and i = imax-1. If ture, bfieldi_group is
-  // assumed to include interface bfields with values for the exterior of the
-  // grid.
-  //
-  // compute_outer should only be set to true when calculating the cell-
-  // centered magnetic fields for the first time. During the updates from
-  // Constrained Transport, it should always be false ( since the temporary
-  // bfields at the half time-step do not include values for the exterior
-  // faces of the grid).
   void compute_center_bfield(Block *block, int dim, Grouping &cons_group,
-			     Grouping &bfieldi_group, bool compute_outer);
+			     Grouping &bfieldi_group);
 
 };
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */
