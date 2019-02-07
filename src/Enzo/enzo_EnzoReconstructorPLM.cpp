@@ -50,31 +50,31 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 //    include faces on the exterior of the grid.
 //  - di{dim}, where {dim} is x,y,z indicates the amount by which i{dim}
 //    changes if we move in the i direction. For example, if the ith
-//    dimension aligns with z: dix=0, diy=0, diz = 1
-void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, int diz, int diy,
-		       int dix, enzo_float prim_floor)
+//    dimension aligns with z: i_x=0, i_y=0, i_z = 1
+void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, int i_z, int i_y,
+		       int i_x, enzo_float prim_floor)
 {
   // Number of cells in the grid along each dimension
-  int mz = wl.length_dim2() + diz;
-  int my = wl.length_dim1() + diy;
-  int mx = wl.length_dim0() + dix;
+  int mz = wl.dim_size(2) + i_z;
+  int my = wl.dim_size(1) + i_y;
+  int mx = wl.dim_size(0) + i_x;
 
   // mk,mj equal number of grid cells along k,j directions 
   // In both cases, iterate: k = 0  to (but not including) k = mk
   //                         j = 0  to (but not including) j = mj 
   // For wl, iterate:        i = 0  to (but not including) i = 1
-  for (int iz=0; iz<(mz*(1-diz) + diz); iz++) {
-    for (int iy=0; iy<(my*(1-diy) + diy); iy++) {
-      for (int ix=0; ix<(mx*(1-dix) + dix); ix++) {
+  for (int iz=0; iz<(mz*(1-i_z) + i_z); iz++) {
+    for (int iy=0; iy<(my*(1-i_y) + i_y); iy++) {
+      for (int ix=0; ix<(mx*(1-i_x) + i_x); ix++) {
         wl(iz,iy,ix) = prim_floor;
       }
     }
   }
 
   // For wr, iterate:        i = (mi-2) up to (but not including) i = (mi-1)
-  for (int iz=(diz*(mz-2)); iz<(mz-diz); iz++) {
-    for (int iy=(diy*(my-2)); iy<(my-diy); iy++) {
-      for (int ix=(dix*(mx-2)); ix<(mx-dix); ix++) {
+  for (int iz=(i_z*(mz-2)); iz<(mz-i_z); iz++) {
+    for (int iy=(i_y*(my-2)); iy<(my-i_y); iy++) {
+      for (int ix=(i_x*(mx-2)); ix<(mx-i_x); ix++) {
         wr(iz,iy,ix) = prim_floor;
       }
     }
@@ -83,9 +83,9 @@ void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, int diz, int diy,
 
   // The above may is missing values
   // Once it is fixed, the following can be removed.
-  for (int iz=0; iz<wl.length_dim2(); iz++) {
-    for (int iy=0; iy<wl.length_dim1(); iy++) {
-      for (int ix=0; ix<wl.length_dim0(); ix++) {
+  for (int iz=0; iz<wl.dim_size(2); iz++) {
+    for (int iy=0; iy<wl.dim_size(1); iy++) {
+      for (int ix=0; ix<wl.dim_size(0); ix++) {
         wl(iz,iy,ix) = prim_floor;
   	wr(iz,iy,ix) = prim_floor;
       }
@@ -105,10 +105,10 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
   std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
   EnzoFieldArrayFactory array_factory(block);
 
-  // compute which index needs to be changed to advance in direction of dim
-  int dix = (dim == 0) ? 1 : 0;
-  int diy = (dim == 1) ? 1 : 0;
-  int diz = (dix == diy) ? 1 : 0;
+  // determine components of i unit vector
+  EnzoPermutedCoordinates coord(dim);
+  int i_x, i_y, i_z;
+  coord.i_unit_vector(i_x,i_y,i_z);
 
   // unecessary values are computed for the inside faces of outermost ghost zone
   for (unsigned int group_ind=0;group_ind<prim_group_names.size(); group_ind++){
@@ -139,35 +139,24 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       //           wc_right(k,j,i)  -> w(k,j,i+2)
       EFlt3DArray wc_left, wc_center, wc_right;
       wc_left = array_factory.from_grouping(prim_group, group_name, field_ind);
-      wc_center = wc_left.subarray(diz, wc_left.length_dim2(),
-				   diy, wc_left.length_dim1(),
-				   dix, wc_left.length_dim0());
-      wc_right = wc_left.subarray(2*diz, wc_left.length_dim2(),
-				  2*diy, wc_left.length_dim1(),
-				  2*dix, wc_left.length_dim0());
+      wc_center = coord.left_edge_offset(wc_left, 0, 0, 1);
+      wc_right  = coord.left_edge_offset(wc_left, 0, 0, 2);
 
-      
       // Prepare face-centered arrays
       // define:   wl_offset(k,j,i)-> wl(k,j,i+3/2)
       //           wr(k,j,i)       -> wr(k,j,i+1/2)
       EFlt3DArray wr, wl, wl_offset;
-      wr = array_factory.load_temp_interface_grouping_field(primr_group,
-							    group_name,
-							    field_ind, dim != 0,
-							    dim != 1, dim != 2);
-      wl = array_factory.load_temp_interface_grouping_field(priml_group,
-							    group_name,
-							    field_ind, dim != 0,
-							    dim != 1, dim != 2);
-      wl_offset = wl.subarray(diz, wl.length_dim2(),
-			      diy, wl.length_dim1(),
-			      dix, wl.length_dim0());
+      wr = array_factory.reconstructed_field(primr_group, group_name, field_ind,
+					     dim);
+      wl = array_factory.reconstructed_field(priml_group, group_name, field_ind,
+					     dim);
+      wl_offset = coord.left_edge_offset(wl, 0, 0, 1);
 
       // At the interfaces between the first and second cell (second-to-
       // last and last cell), along a given axis, set the reconstructed
       // left (right) interface value to prim_floor (or 0)
       // (the use of wl instead of wl_offset is intentional)
-      zero_edge_values_(wl, wr, diz, diy, dix, prim_floor);
+      zero_edge_values_(wl, wr, i_z, i_y, i_x, prim_floor);
       
       // Iteration Limits are compatible with a 2D and 3D grid
       // Need to reconstruct and compute fluxes at k=j=0 and k=kmax-1, j=jmax-1
@@ -176,9 +165,9 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       //               j = 0, 1, ..., jmax - 1
       //               i = 0, 1, ..., imax - 3
 
-      for (int iz=0; iz<wc_left.length_dim2()-2*diz; iz++) {
-	for (int iy=0; iy<wc_left.length_dim1()-2*diy; iy++) {
-	  for (int ix=0; ix<wc_left.length_dim0()-2*dix; ix++) {
+      for (int iz=0; iz<wc_left.dim_size(2)-2*i_z; iz++) {
+	for (int iy=0; iy<wc_left.dim_size(1)-2*i_y; iy++) {
+	  for (int ix=0; ix<wc_left.dim_size(0)-2*i_x; ix++) {
 
 	    // compute monotized difference
 	    enzo_float val = wc_center(iz,iy,ix);

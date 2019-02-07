@@ -44,6 +44,7 @@ void check_fields_(Block *block, Grouping &grouping,
       if (not_all_finite_(data)){
 	std::string field_name = grouping.item(group_name,j);
 	CkPrintf("%s has at least 1 NaN or inf\n", field_name.c_str());
+	ASSERT("CHECKING_FIELDS","NaN or inf",false);
       }
     }
   }
@@ -770,14 +771,14 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
 // This is a quick solution - really only need to initalize values in the outer
 // ghost zones
 void copy_grouping_fields_(Block *block, Grouping &conserved_group,
-			   Grouping &temp_cons_group){
+			   Grouping &temp_cons_group,
+			   std::vector<std::string> &group_names){
 
-  std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
   EnzoFieldArrayFactory array_factory(block);
   
-  for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
+  for (unsigned int group_ind=0;group_ind<group_names.size();group_ind++){
     // load group name and number of fields in the group
-    std::string group_name = cons_group_names[group_ind];
+    std::string group_name = group_names[group_ind];
     int num_fields = conserved_group.size(group_name);
      // iterate over the fields in the group
     for (int field_ind=0; field_ind<num_fields; field_ind++){
@@ -928,11 +929,10 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   prep_temp_vector_grouping_(field, "weight", weight_group,
 			     "temp_weight_", true, false);
 
-  // reserve allocate temporary interface bfields fields
-  // eventually we want to make the temporary interface bfields include
-  // exterior faces just like the permanent interface bfields.
+  // reserve allocate temporary interface bfields fields (includes the exterior
+  // faces of the grid)
   prep_temp_vector_grouping_(field, "bfield", temp_bfieldi_group,
-			     "temp_bfieldi_",true, false);
+			     "temp_bfieldi_",true, true);
 
   // allocate temporary efield fields
   // reserve/allocate fields for edge-centered electric fields
@@ -950,12 +950,15 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   // initialize values of the temporary conserved group (out in the ghost
   // zones to avoid NaNs during conversion to primitives  - these would
   // propogate through to the flux calculation)
-  copy_grouping_fields_(block, *conserved_group_, temp_conserved_group);
+  copy_grouping_fields_(block, *conserved_group_, temp_conserved_group,
+			cons_group_names);
   // initialize exterior face values of the temporary interface B-field
   // (this is just to avoid NaNs while computing the cell-centered B-fields
   // out in the ghost zone - this is NOT necessary if the underlying fields
   // are guarunteed to be set to 0 at start)
-  copy_grouping_fields_(block, *bfieldi_group_, temp_bfieldi_group);
+  std::vector<std::string> bfieldi_group_names{"bfield"};
+  copy_grouping_fields_(block, *bfieldi_group_, temp_bfieldi_group,
+			bfieldi_group_names);
 
   // initialize values of reconstructed primitives
   initialize_recon_prim_to_floor_(block, priml_group, *eos_);
@@ -1127,7 +1130,7 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
     }
   }
   /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
-  dtBaryons *= 0.5*courant_;
+  dtBaryons *= courant_;
 
   CkPrintf("EnzoMethodVlct::timestep  -  dt = %e\n",dtBaryons);
   ASSERT2("EnzoMethodVlct::timestep",

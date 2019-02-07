@@ -163,7 +163,7 @@ void compute_edge_(int xstart, int ystart, int zstart,
 
 	Eedge(iz,iy,ix) = 0.25*(Ej(iz,iy,ix) + Ej_kp1(iz,iy,ix) +
 				Ek(iz,iy,ix) + Ek_jp1(iz,iy,ix) +
-				(dEdj_h - dEdj_l) + (dEdk_h - dEdk_l));		
+				(dEdj_h - dEdj_l) + (dEdk_h - dEdk_l));
       }
     }
   }
@@ -244,7 +244,7 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   Wj = array_factory.from_grouping(weight_group, "weight", coord.j_axis());
   Wj_kp1 = coord.left_edge_offset(Wj, 1, 0, 0);
   Wk = array_factory.from_grouping(weight_group, "weight", coord.k_axis());
-  Wk_jp1 = coord.left_edge_offset(Wj, 0, 1, 0);
+  Wk_jp1 = coord.left_edge_offset(Wk, 0, 1, 0);
 
   // Integration limits
   //

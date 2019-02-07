@@ -46,11 +46,11 @@ EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
   field.dimensions(id,&mx,&my,&mz);
 
   if (dim == 0){
-    mx++;
+    mx--;
   } else if (dim == 1){
-    my++;
+    my--;
   } else {
-    mz++;
+    mz--;
   }
   return EFlt3DArray((enzo_float *) field.values(field_name), mz, my, mx);
 }
