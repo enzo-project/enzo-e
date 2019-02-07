@@ -106,6 +106,8 @@ public: // interface
   void InitializeParticles(Block * block,
                            Particle * particle);
 
+  void InitializeGasFromParticles(Block * block);
+
   void ReadParticles(void);
 
   /// Read in particle data (DM and stars)

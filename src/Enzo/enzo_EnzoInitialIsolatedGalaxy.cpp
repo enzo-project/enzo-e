@@ -322,20 +322,23 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
           double vcirc = 0.0;
           if (this->analytic_velocity_){
-            double rhodm = enzo_config->method_background_acceleration_DM_density;
+//            double rhodm = enzo_config->method_background_acceleration_DM_density;
             double rcore = enzo_config->method_background_acceleration_core_radius;
             double rvir  = enzo_config->method_background_acceleration_DM_mass_radius;
 
+            double Mvir  = enzo_config->method_background_acceleration_DM_mass;
+
             rcore = rcore * cello::kpc_cm;
             rvir  = rvir  * cello::kpc_cm;
+            Mvir  = Mvir  * cello::mass_solar;
 
-            double conc = rcore / rvir;
+            double conc = rvir  / rcore;
             double    x = r_cyl / rvir;
             
 
             vcirc = (std::log(1.0 + conc*x) - (conc*x)/(1.0+conc*x))/
                       (std::log(1.0 + conc) - (conc / (1.0 + conc))) / x;
-            vcirc = std::sqrt(vcirc * cello::grav_constant * 1.0E10 * cello::mass_solar / rvir);
+            vcirc = std::sqrt(vcirc * cello::grav_constant * Mvir / rvir);
 
           } else {
             vcirc = this->InterpolateVcircTable(r_cyl);
@@ -387,6 +390,12 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   // now initialize particles
   Particle particle = block->data()->particle();
   InitializeParticles(block, &particle);
+
+  return;
+}
+
+void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
+
 
   return;
 }
