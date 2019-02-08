@@ -1020,7 +1020,9 @@ void Block::check_delete_()
 //----------------------------------------------------------------------
 
 bool Block::check_position_in_block(const double &x, const double &y,
-                                    const double &z)
+                                    const double &z,
+                                    bool include_ghost // default - false
+                                   )
 {
 
   double xm,ym,zm;
@@ -1029,6 +1031,20 @@ bool Block::check_position_in_block(const double &x, const double &y,
   upper(&xp,&yp,&zp);
 
   bool result = false;
+
+  if (include_ghost){
+    int gx, gy, gz;
+    double hx,hy,hz;
+    data()->field().ghost_depth(0,&gx,&gy,&gz);
+    cell_width(&hx,&hy,&hz);
+
+    xm -= gx*hx;
+    ym -= gy*hy;
+    zm -= gz*hz;
+    xp += gx*hx;
+    yp += gy*hy;
+    zp += gz*hz;
+  }
 
   if (  ((x >= xm) && (x <= xp)) &&
         ((y >= ym) && (y <= yp)) &&

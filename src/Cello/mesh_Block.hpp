@@ -735,7 +735,7 @@ public: // virtual functions
 
   /// Check if given 3D coordinates are within the block domain
   bool check_position_in_block(const double& x, const double &y,
-                               const double& z);
+                               const double& z, bool include_ghost = false);
 
   /// Set state
   void set_state (int cycle, double time, double dt, bool stop)
