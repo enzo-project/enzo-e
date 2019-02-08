@@ -1,9 +1,16 @@
 /// See LICENSE_CELLO file for license and copyright information
 
+/// @file	enzo_EnzoMethodStarMaker.cpp
+/// @author     Andrew Emerick (aemerick11@gmail.com)
+/// @date
+/// @brief  Implements a star maker class
 ///
-///
-///
-///
+///       This is supposed to be a general class for star formation routines
+///       where individual SF routines can be created as derived classes.
+///       The intention is to try and improve upon the clutter / mess
+///       in Enzo's Grid_StarParticleHandler. This will do this, but
+///       will still require quite a bit of repeated code across
+///       individual SF (the derived classes) routines... so not perfect...
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -23,15 +30,14 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
                              enzo_sync_id_method_star_maker);
   refresh(ir)->add_all_fields();
 
-  // Keep parametrers that will likely be relevant to all star
-  // formation routines here
-  use_density_threshold_ = enzo_config->method_star_maker_use_density_threshold;
-  use_velocity_divergence_ = enzo_config->method_star_maker_use_velocity_divergence;
-  use_dynamical_time_      = enzo_config->method_star_maker_use_dynamical_time;
-  number_density_threshold_ = enzo_config->method_star_maker_number_density_threshold;
-  efficiency_ = enzo_config->method_star_maker_efficiency;
-  maximum_star_fraction_ = enzo_config->method_star_maker_maximum_mass_fraction;
-  star_particle_mass_ = enzo_config->method_star_maker_minimum_star_mass;
+  // Copy over parameters from config to local names here for convenience
+  use_density_threshold_     = enzo_config->method_star_maker_use_density_threshold;
+  use_velocity_divergence_   = enzo_config->method_star_maker_use_velocity_divergence;
+  use_dynamical_time_        = enzo_config->method_star_maker_use_dynamical_time;
+  number_density_threshold_  = enzo_config->method_star_maker_number_density_threshold;
+  efficiency_                = enzo_config->method_star_maker_efficiency;
+  maximum_star_fraction_     = enzo_config->method_star_maker_maximum_mass_fraction;
+  star_particle_mass_        = enzo_config->method_star_maker_minimum_star_mass;
 }
 
 //-------------------------------------------------------------------
@@ -55,7 +61,8 @@ void EnzoMethodStarMaker::pup (PUP::er &p)
 }
 
 //------------------------------------------------------------------
-// REMOVE THIS COMPUTE ---- THIS IS JUST THE CLASS TEMPLATE
+//   This does nothing at the moment - business is done in derived
+//   class (Currently EnzoMethodStarMakerStochasticSF)
 void EnzoMethodStarMaker::compute ( Block *block) throw()
 {
   EnzoBlock * enzo_block = enzo::block(block);
@@ -65,6 +72,7 @@ void EnzoMethodStarMaker::compute ( Block *block) throw()
   return;
 }
 
+// Required
 double EnzoMethodStarMaker::timestep ( Block *block) const throw()
 {
   return std::numeric_limits<double>::max();
@@ -76,8 +84,15 @@ void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
 
   // Loop through all passive scalars (colour fields)
   // which are mass fractions stored as densities, and rescale
-  // to the new density after star formation
-  // 
+  // to the new density after star formation.
+  //
+  // AE: NOTE: Change this routine if / whenever there needs to be
+  //           fraction fields that are not labelled as colour
+  //           Obviously requires these fields to be declared as colour
+  //           in input file to work.
+  //           This can / should likely get moved to be a more general
+  //           function of the block / data / field class (one of those)
+  //
   //    density_ratio = old_density / new_density
   //
 

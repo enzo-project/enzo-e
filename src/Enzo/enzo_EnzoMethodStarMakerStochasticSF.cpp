@@ -1,9 +1,12 @@
 /// See LICENSE_CELLO file for license and copyright information
 
+/// @file	enzo_EnzoMethodStarMakerStochasticSF.cpp
+/// @author     Andrew Emerick (aemerick11@gmail.com)
+/// @date
+/// @brief  Implements the star maker stochastic star formation clas
 ///
-///
-///
-///
+///     Derived star maker class that actually makes stars. This is
+///     adapted after the star_maker_ssn method from Enzo
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -15,7 +18,8 @@ EnzoMethodStarMakerStochasticSF::EnzoMethodStarMakerStochasticSF
 ()
   : EnzoMethodStarMaker()
 {
-  srand(time(NULL));
+  // To Do: Make the seed an input parameter
+  srand(time(NULL)); // need randum number generator for later
   return;
 }
 
@@ -29,6 +33,7 @@ void EnzoMethodStarMakerStochasticSF::pup (PUP::er &p)
 
   EnzoMethodStarMaker::pup(p); // call parent class pup
 
+  return;
 }
 
 //------------------------------------------------------------------
@@ -36,6 +41,8 @@ void EnzoMethodStarMakerStochasticSF::pup (PUP::er &p)
 void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 {
 
+  // Loop through the grid and check star formation criteria
+  // stochastically form stars if zone meets these criteria
 
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
@@ -71,7 +78,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     int ib  = 0; // batch counter
     int ipp = 0; // counter
 
-    /// should these be set to double????
+    /// pointers for particle attribut arrays (later)
     enzo_float * pmass = 0;
     enzo_float * px   = 0;
     enzo_float * py   = 0;
@@ -79,9 +86,6 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     enzo_float * pvx  = 0;
     enzo_float * pvy  = 0;
     enzo_float * pvz  = 0;
-
-    //std::mt19937 generator(12345);
-    //std::uniform_real_distribution<double> generate_rnum(0.0, 1.0);
 
     // obtain the particle stride length
     const int ps = particle.stride(it, ia_m);
@@ -108,7 +112,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     enzo_float * velocity_z = (rank >= 3) ?
       (enzo_float *)field.values("velocity_z") : NULL;
 
-    // compute the temperature
+    // compute the temperature (we need it here)
     EnzoComputeTemperature compute_temperature
       (enzo_config->ppm_density_floor,
        enzo_config->ppm_temperature_floor,
@@ -117,39 +121,47 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
     compute_temperature.compute(enzo_block);
 
-    // iterate over all cells
-    for (int iz=gz; iz<nz+gz; iz++){
-      for (int iy=gy; iy<ny+gy; iy++){
-        for (int ix=gx; ix<nx+gx; ix++){
+    // iterate over all cells (not including ghost zones)
+    //
+    //   To Do: Allow for multi-zone star formation by adding mass in
+    //          surrounding cells if needed to accumulte enough mass
+    //          to hit target star particle mass ()
+    for (int iz=gz; iz<nz; iz++){
+      for (int iy=gy; iy<ny; iy++){
+        for (int ix=gx; ix<nx; ix++){
 
           int i = ix + mx*(iy + my*iz);
 
-
+          // need to compute this better for Grackle fields (on to-do list)
           double ndens = density[i] * enzo_units->density() /
                          (enzo_config->ppm_mol_weight * cello::mass_hydrogen);
 
           double mass  = density[i] *dx*dy*dz * enzo_units->mass() / cello::mass_solar;
 
+          //
           // Apply the criteria for star formation
+          //
           if (! this->check_number_density_threshold(ndens)) continue;
 
-
           if (! this->check_velocity_divergence(velocity_x, velocity_y,
-                                               velocity_z, i,
-                                               1, my, my*mz)) continue;
-
+                                                velocity_z, i,
+                                                1, my, my*mz)) continue;
 
           if (! this->check_minimum_mass(mass)) continue;
 
-          double tdyn = sqrt(3.0 * cello::pi / 32.0 / cello::grav_constant / (density[i] * enzo_units->density()));
+          double tdyn = sqrt(3.0 * cello::pi / 32.0 / cello::grav_constant /
+                        (density[i] * enzo_units->density()));
 
-//          double isothermal_sound_speed2 = 1.3095E8 * temperature[i] * enzo_units->temperature();
+          //
+          // compute fraction that can / will be converted to stars this step
+          // (just set to efficiency if dynamical time is ignored)
+          //
+          double star_fraction =  this->use_dynamical_time_ ?
+                                  std::min(this->efficiency_ * enzo_block->dt * enzo_units->time() / tdyn, 1.0) :
+                                           this->efficiency_ ;
 
-          // compute SF
-          double star_fraction =  use_dynamical_time_ ?
-                                         std::min(this->efficiency_ * enzo_block->dt * enzo_units->time() / tdyn, 1.0) :
-                                         this->efficiency_ ;
-
+          // if this is less than the mass of a single particle,
+          // use a random number draw to generate the particle
           if ( star_fraction * mass < this->star_particle_mass_){
             // get a random number
             double rnum = (double(rand())) / (double(RAND_MAX));
@@ -159,9 +171,10 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
             } else{
               star_fraction = this->star_particle_mass_ / mass;
             }
-          }
+          } // (else, leave star fraction alone )
 
-          count++;
+          count++; //
+
           // now create a star particle
           //    insert_particles( particle_type, number_of_particles )
           int my_particle = particle.insert_particles(it, 1);
@@ -179,9 +192,13 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
           py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
           pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
 
-          px[io] = lx + (ix + 0.5) * dx;
-          py[io] = ly + (iy + 0.5) * dy;
-          pz[io] = lz + (iz + 0.5) * dz;
+          // need to double check that these are correctly handling ghost zones
+          //   I believe lx is lower coordinates of active region, but
+          //   ix is integer index of whole grid (active + ghost)
+          //
+          px[io] = lx + (ix - gx + 0.5) * dx;
+          py[io] = ly + (iy - gy + 0.5) * dy;
+          pz[io] = lz + (iz - gz + 0.5) * dz;
 
           pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
           pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
@@ -191,8 +208,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
           if (velocity_y) pvy[io] = velocity_y[i];
           if (velocity_z) pvz[io] = velocity_z[i];
 
-          // Adjust density and density dependent fields
-
+          // Remove mass from grid and rescale fraction fields
           density[i] = (1.0 - star_fraction) * density[i];
           double scale = 1.0 / (1.0 - star_fraction);
 
@@ -214,6 +230,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   return;
 }
 /*
+   Defaults to parent class timestep if nothing declared here 
 double EnzoMethodStarMakerStochasticSF::timestep ( Block *block) const throw()
 {
   return std::numeric_limits<double>::max();

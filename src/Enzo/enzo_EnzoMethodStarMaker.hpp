@@ -59,6 +59,9 @@ public:
 //  static void convert_densities_to_fraction(EnzoBlock * enzo_block,
 //                                            int direction) throw();
 
+  // Function to rescale fraction fields to new density -
+  //   AE: NOTE: This could likely be moved to be a function of
+  //             a more general class, not specific to star maker
   void rescale_densities(EnzoBlock * enzo_block,
                          const int index,
                          const double density_ratio) throw();
@@ -66,6 +69,7 @@ public:
 protected: // methods
 
   // Routine functions for checking certain conditions
+  //
   int check_number_density_threshold(const double &d);
   int check_velocity_divergence(
                 double *vx, double *vy, double *vz,
