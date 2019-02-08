@@ -1,0 +1,292 @@
+#======================================================================
+#
+#  File        : 
+#  Author      : Andrew Emerick (aemerick11@gmail.com)
+#  Date        : 2018-05-16
+#  Brief       : File for initializing an isolated galaxy
+#
+#  Description : 
+#
+#  REQUIRES root_blocks
+#
+#======================================================================
+
+# The domain is (x,y) such that 0 < x,y < 1
+
+  Domain {
+     lower = [0.0, 0.0, 0.0];
+     upper = [1.0, 1.0, 1.0];
+  }
+
+# The root-level mesh 32x32x32
+
+  Mesh {
+    root_rank = 3;
+    root_size = [32, 32, 32];
+#    root_size = [64, 64, 64];
+#
+#   AE: I had to specify this to get the data output working
+    root_blocks = [4, 4, 4];
+  }
+
+# Isolated bounary conditions with outflow
+
+  Boundary {
+      type = "outflow";
+  }
+
+# Refine by (relative) slope of density
+#    this needs to be played with to refine by mass
+
+ #Adapt {
+ #    list = ["mass"];
+ #    mass {
+# AE: For mass, field should be thefield used to compute the mass
+#     (i.e. mass is computed as field * volume)
+#     max and min are in code units
+#         field_list = [ "density" ];
+#         max_coarsen = 1.0E-4; # 1.0E4 solar masses
+#         min_refine  = 1.0E-4;  # 1.0E4 solar masses
+#         type = "mass";
+# options for mass type are 'dark' and 'baryon'. AE: This should
+#        be specified in documentation, but does not seem to be
+#
+#         mass_type = "baryon"; # options are currently dark and baryon
+#     };
+#     max_level = 4;
+# }
+
+ Field {
+      history     = 1;
+      alignment   = 8; # what?
+      gamma       = 1.4;
+      ghost_depth = 4;      # better way to set?
+      list = ["density", "velocity_x", "velocity_y", "velocity_z",
+              "acceleration_x", "acceleration_y", "acceleration_z",
+              "total_energy", "internal_energy", "pressure", "temperature", 
+              "potential","B","density_total","density_particle",
+              "density_particle_accumulate"];
+# "potential"];
+      padding = 0;
+      uniform_density = 1.0E-5;
+  }
+
+  # This is actually where units should go
+  Units {
+     length  = 7.405626262E22;
+#7.4056262E22;
+#9.2570327404E22;
+#7.40562619321E23;
+#6.17135516E21;
+# 3.08567758E22;
+#    7.40562619321E23;
+     time    = 3.15576E16;
+     mass    = 1.9891E41;     
+#     density = 4.89746405317508E-31; do not specify if mass + length are specified
+  }
+
+#  Solver {
+#    list = ["ppm"];
+#  }
+
+
+
+  Method { 
+      list = [
+              "pm_deposit",
+              "gravity",
+              "background_acceleration",
+              "ppm",
+              "pm_update",
+              "star_maker"];
+
+      star_maker {
+                  type = "stochastic";
+                  use_density_threshold    = true;
+                  use_velocity_divergence  = false;
+                  use_dynamical_time       = false;
+                  number_density_threshold = 1000.0;
+                  maximum_mass_fraction    = 0.8;
+                  efficiency               = 0.01;
+                  minimum_star_mass        = 10.0;
+                 };
+#,"ppm"];
+#,"wgravity_bicgstab"];
+      ppm {
+            diffusion = true;
+            riemann_solver = "two_shock";
+            dual_energy = true;
+            flattening = 3;
+            steepening = true;
+            mol_weight = 1.2;
+            courant = 0.4;
+            density_floor = 1.0E-30;
+            number_density_floor = 1.0E-30;
+            pressure_floor = 1.0E-30;
+            temperature_floor = 1.0E-30;
+          };
+
+      gravity {
+          solver   = "cg";
+          #iter_max = 100;
+          #res_tol  = 1e-6;
+          }
+
+      background_acceleration {
+          type = "GalaxyModel";
+          DM_density     = -1.0   ;  # specify this OR mass - not both - mass_radius must be virial if this is used
+          DM_mass        = 1.0E10;   # mass interior to below radius (this is virial)
+          DM_mass_radius = 45.0;     # radius corresponding to above mass (this is virial)
+          core_radius    = 3.0;      # r_c in kpc  (c = r_c / R_vir)
+          bulge_mass     = 0.0;
+          stellar_mass   = 0.0;      # 1.0E7;
+          stellar_scale_height_r = 1.00;
+          stellar_scale_height_z = 0.70;
+          center = [0.5, 0.5, 0.5];
+          angular_momentum = [0.0, 0.0, 1.0];
+          apply_acceleration = true;              # for debugging
+      };
+
+#     gravity_bicgstab {
+#          iter_max = 100;
+#          res_tol  = 1e-6;
+#          }
+
+  }
+
+Solver {
+  list = ["cg"];
+  cg {
+       type = "cg";
+       iter_max = 100;
+#       res_tol = 1E-6;
+#       moniter_iter = 10;
+     }
+}
+
+#Solver {
+#  list = ["gravity"];
+#  gravity {
+#     type = "bicgstab";
+#     iter_max = 500;
+#     monitor_iter = 10;
+#  }
+#}
+
+
+
+ Particle {
+     list = ["star"];
+#     dark {
+#         attributes = [ "x", "single",
+#                        "y", "single",
+#                        "z", "single",
+#                        "vx", "single",
+#                        "vy", "single",
+#                        "vz", "single",
+#                        "ax", "single",
+#                        "ay", "single",
+#                        "az", "single" ];
+#         position = [ "x", "y", "z" ];
+#         velocity = [ "vx", "vy", "vz" ];
+#         groups = ["has_mass"];
+#         constants = [ "mass", "single", .8382456140 ];
+#
+#     }
+
+    star {
+         attributes = [ "x", "double",
+                        "y", "double",
+                        "z", "double",
+                        "vx", "double",
+                        "vy", "double",
+                        "vz", "double",
+                        "ax", "double",
+                        "ay", "double",
+                        "az", "double",
+                        "mass", "double" ];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+         groups = ["has_mass"];
+#         constants = [ "mass", "single", .8382456140 ];
+         
+      }
+  }
+
+  Initial {
+# units in kpc and Msun now - density in cgs
+    list = ["isolated_galaxy"];
+    isolated_galaxy {
+        center_position  = [0.5, 0.5, 0.5];
+        scale_length     = 1.0;
+# 0.00416666667;
+# 0.09999864;
+#0.004166666667;
+        scale_height     = 0.7;
+#0.00291666667;
+#0.06999905;
+#w0.002916666667;
+        disk_mass            = 8.0E7;
+        gas_fraction         = 0.875;
+        disk_temperature     = 1.0E4;
+        gas_halo_mass        = 8.0E5;
+        gas_halo_temperature = 1.0E6;
+        gas_halo_radius      = 45.00;
+# 0.18745;
+# 4.49873864;
+# 0.18745;
+        live_dm_halo   = false;
+        stellar_disk   = true;
+        stellar_bulge  = false;
+        use_gas_particles = true;
+# set gas circulare velocity using analytic function;
+        analytic_velocity = false;
+
+       }
+   }
+
+
+Stopping {
+#   stop time in code units - 10 Myr
+    time     = 0.010;
+#   stop time in wall seconds: AE FOR DEBUGGING SANITY ONLY
+    seconds  = 36000.0;
+#   AE output interval
+    cycle    = 10000;
+    interval = 1; 
+}
+
+#
+# AE: This schedules the output. Must specify what fields you want
+#     to be output. items under "list" correspond to named items
+#     that start the bracketed regions. I *think* these names are
+#     arbitrary... it is the stuff inside the brackets that 
+#     determines the function (particularly the 'type' value)
+#
+Output {
+    list = [ "data" ];
+    data {
+        field_list = [ "density" , "total_energy" , "internal_energy",
+                       "velocity_x", "velocity_y", "velocity_z",
+                       "pressure", "acceleration_x", "acceleration_y",
+                       "acceleration_z", "temperature", "potential", "B",
+                       "density_particle_accumulate", "density_particle",
+                       "density_total"]; 
+
+        particle_list = ["star"];
+
+        dir   = ["ISOLATED_GALAXY_%04d","cycle"];
+        name = [ "isolated-galaxy-data-%04d-%03d.h5", "cycle", "proc" ];
+        type = "data";
+
+        # schedule the output based on 'var' and 'step'
+        #   step refers to the interval if 'var' to output on
+        schedule {
+             var   = "time";
+             step  = 0.001; #            time in code units (Myr)
+        }
+    };
+
+#, "potential"];
+
+}
