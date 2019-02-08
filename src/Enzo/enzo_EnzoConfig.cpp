@@ -117,6 +117,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_gas_halo_metal_fraction(0.0),      // Gas halo metal fraction
   initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
   initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
+  initial_IG_use_gas_particles(false),      // Set up gas by depositing baryonic particles to grid
   initial_IG_live_dm_halo(false),
   initial_IG_stellar_disk(false),
   initial_IG_stellar_bulge(false),
@@ -166,6 +167,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_background_acceleration_DM_mass_radius(0.0),
   method_background_acceleration_stellar_scale_height_r(0.0),
   method_background_acceleration_stellar_scale_height_z(0.0),
+  method_background_acceleration_apply_acceleration(true), // for debugging
   /// EnzoMethodPmDeposit
   method_pm_deposit_alpha(0.5),
   /// EnzoMethodPmUpdate
@@ -328,6 +330,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_gas_halo_metal_fraction;
   p | initial_IG_gas_halo_density;
   p | initial_IG_gas_halo_radius;
+  p | initial_IG_use_gas_particles;
   p | initial_IG_live_dm_halo;
   p | initial_IG_stellar_disk;
   p | initial_IG_stellar_bulge;
@@ -385,6 +388,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_background_acceleration_DM_mass_radius;
   p | method_background_acceleration_stellar_scale_height_r;
   p | method_background_acceleration_stellar_scale_height_z;
+  p | method_background_acceleration_apply_acceleration;
   PUParray(p,method_background_acceleration_angular_momentum,3);
   PUParray(p,method_background_acceleration_center,3);
 
@@ -708,6 +712,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:isolated_galaxy:gas_halo_radius", 1.0);
   initial_IG_gas_halo_metal_fraction = p->value_float
     ("Initial:isolated_galaxy:gas_halo_metal_fraction", 0.0);
+  initial_IG_use_gas_particles = p->value_logical
+    ("Initial:isolated_galaxy:use_gas_particles", false);
   initial_IG_live_dm_halo = p->value_logical
     ("Initial:isolated_galaxy:live_dm_halo",false);
   initial_IG_stellar_disk = p->value_logical
@@ -822,6 +828,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_background_acceleration_stellar_scale_height_z = p->value_float
    ("Method:background_acceleration:stellar_scale_height_z", 0.0);
+
+  method_background_acceleration_apply_acceleration = p->value_logical
+    ("Method:background_acceleration:apply_acceleration", true);
 
   for (int axis = 0; axis < 3; axis++){
     method_background_acceleration_center[axis] = p->list_value_float

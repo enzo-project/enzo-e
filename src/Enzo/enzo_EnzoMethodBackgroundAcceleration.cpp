@@ -31,12 +31,14 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
 
   this->G_four_pi_ = 4.0 * cello::pi * cello::grav_constant;
 
-  //const int id =  field_descr->field_id("density");
-  //const int iax = field_descr->field_id("acceleration_x");
-  //const int iay = field_descr->field_id("acceleration_y");
-  //const int iaz = field_descr->field_id("acceleration_z");
+  FieldDescr * field_descr = cello::field_descr();
 
-/*
+  //const int id =  field_descr->field_id("density");
+  const int iax = field_descr->field_id("acceleration_x");
+  const int iay = field_descr->field_id("acceleration_y");
+  const int iaz = field_descr->field_id("acceleration_z");
+
+
   // Do not need to refresh acceleration fields in this method
   // since we do not need to know any ghost zone information
   //
@@ -46,8 +48,8 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
   refresh(ir)->add_field(iax);
   refresh(ir)->add_field(iay);
   refresh(ir)->add_field(iaz);
-*/
-  //refresh(ir)->add_field(id);
+
+  // refresh(ir)->add_field(id);
   // iax iay and iax are used in method gravity to do
   // refreshing of fields.... Do I need ot do this here? If so
   // why do I need it..... otherwise I can just worry about field
@@ -77,6 +79,8 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
+
+  if (!(enzo_config->method_background_acceleration_apply_acceleration)) return;
 
   Field field = block->data()->field();
 
@@ -220,6 +224,7 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
   double G = this->G_four_pi_ *
              enzo_units->density() * enzo_units->time() * enzo_units->time();
+  double G_code = cello::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
 
   double rcore = enzo_config->method_background_acceleration_core_radius *
                  cello::kpc_cm / enzo_units->length();
@@ -227,9 +232,20 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
   //
   if (DM_mass > 0.0){
     double xtemp = DM_mass_radius / rcore;
-    DM_density = DM_mass / ( (2.0 * cello::pi * pow(DM_mass_radius,3.0)) *
-                              (0.5 * log(1.0 * xtemp * xtemp) + log(1.0 + xtemp) - atan(xtemp)));
+//    DM_density = DM_mass / ( (2.0 * cello::pi * pow(DM_mass_radius,3.0)) *
+//                              (0.5 * log(1.0 + xtemp * xtemp) + log(1.0 + xtemp) - atan(xtemp)));
+    DM_density = 3.0 * DM_mass / (4.0 * cello::pi * std::pow(rcore,3)) /
+                       (3.0 * (std::log(1.0+xtemp)-xtemp/(1.0+xtemp)));
+  } else {
+    double xtemp = DM_mass_radius / rcore;
+    DM_mass = 4.0 * cello::pi / 3.0 * (std::pow(rcore,3) * DM_density) *
+                 3.0 * (std::log(1.0 + xtemp) - xtemp/(1.0+xtemp));
   }
+
+
+//  DM_density * ( ( 2.0 * cello::pi * pow(DM_mass_radius,3.0)) *
+//                               (0.5 * log(1.0 + xtemp * xtemp) + log(1.0 + xtemp) - atan(xtemp)));
+//  }
 
   double x = 0.0, y = 0.0, z = 0.0;
 
@@ -259,11 +275,17 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
          // need to multiple all of the below by the gravitational constants
          double xtemp     = radius/rcore;
+         double Rtemp     = DM_mass_radius / rcore;
          //double
          accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                            G * DM_density * pow(rcore,3) *
-                            (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
-                            (radius * radius); // NFW DM profile
+                            G_code * DM_mass * (std::log(1.0+xtemp) - xtemp/(1.0+xtemp)) /
+                              (4.0 * cello::pi * (std::log(1.0+Rtemp) - Rtemp/(1.0+Rtemp))) / (radius * radius);
+
+//                            G * DM_density * pow(rcore,3) *
+//                            (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
+//                            (radius * radius); // NFW DM profile
+
+// G * mass * ((log(1.0 + xtemp) - xtemp / (1.0 + xtemp)) / (log(1.0+1.0)-1.0/(1.0+1.0))) / (radius*radius)
 
 //                            cello::pi * G * DM_density * pow(rcore,3) / pow(radius,2)*
 //                            (-2.0*atan(radius/rcore) + 2.0*log(1.0+radius/rcore)) +
@@ -283,6 +305,7 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
          accel_R   = (rcyl    == 0.0 ? 0.0 : std::fabs(accel_R)   / (rcyl*cosmo_a));
          accel_z   = (zheight == 0.0 ? 0.0 : std::fabs(accel_z)*zheight/std::fabs(zheight) / cosmo_a);
 
+         accel_R = 0.0; accel_z = 0.0;
          // now apply accelerations in cartesian (grid) coordinates
          int i = INDEX(ix,iy,iz,mx_,my_);
          if (ax) ax[i] -= (accel_sph * x + accel_R*xplane + accel_z*amom[0]);
@@ -355,11 +378,16 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
           // need to multiple all of the below by the gravitational constants
           double xtemp     = radius/rcore;
+          double Rtemp     = DM_mass_radius / rcore;
+
           //double
           accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                             G * DM_density * pow(rcore,3) *
-                             (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
-                             (radius * radius); // NFW DM profile
+                            G_code * DM_mass * (std::log(1.0+xtemp) - xtemp/(1.0+xtemp)) /
+                              (4.0 * cello::pi * (std::log(1.0+Rtemp) - Rtemp/(1.0+Rtemp))) / (radius * radius);
+
+//                             G * DM_density * pow(rcore,3) *
+//                             (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
+//                             (radius * radius); // NFW DM profile
 
           accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
                               + pow(stellar_r + sqrt( pow(zheight,2)

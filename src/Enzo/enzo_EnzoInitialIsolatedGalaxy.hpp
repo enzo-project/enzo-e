@@ -106,6 +106,7 @@ public: // interface
   void InitializeParticles(Block * block,
                            Particle * particle);
 
+  void InitializeExponentialGasDistribution(Block * block);
   void InitializeGasFromParticles(Block * block);
 
   void ReadParticles(void);
@@ -156,7 +157,8 @@ private: // attributes
   double mu_;
 
   bool analytic_velocity_;
-  
+
+  bool use_gas_particles_;
   bool live_dm_halo_;
   bool stellar_bulge_;
   bool stellar_disk_;

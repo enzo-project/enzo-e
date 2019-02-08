@@ -205,6 +205,7 @@ public: // interface
       initial_IG_gas_halo_metal_fraction(0.0),      // Gas halo metal fraction
       initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
       initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
+      initial_IG_use_gas_particles(false),       // 
       initial_IG_live_dm_halo(false),
       initial_IG_stellar_disk(false),
       initial_IG_stellar_bulge(false),
@@ -254,6 +255,7 @@ public: // interface
       method_background_acceleration_DM_mass_radius(0.0),
       method_background_acceleration_stellar_scale_height_r(0.0),
       method_background_acceleration_stellar_scale_height_z(0.0),
+      method_background_acceleration_apply_acceleration(true),
       // EnzoMethodPmDeposit
       method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
@@ -428,6 +430,7 @@ public: // attributes
   double                     initial_IG_gas_halo_metal_fraction;
   double                     initial_IG_gas_halo_density;
   double                     initial_IG_gas_halo_radius;
+  bool                       initial_IG_use_gas_particles;
   bool                       initial_IG_live_dm_halo;
   bool                       initial_IG_stellar_bulge;
   bool                       initial_IG_stellar_disk;
@@ -490,6 +493,7 @@ public: // attributes
   double                     method_background_acceleration_stellar_scale_height_z;
   double                     method_background_acceleration_center[3];
   double                     method_background_acceleration_angular_momentum[3];
+  bool                       method_background_acceleration_apply_acceleration;
 
 
   /// EnzoMethodPmDeposit
