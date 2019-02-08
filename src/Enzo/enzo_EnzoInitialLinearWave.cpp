@@ -578,7 +578,7 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit **density_init,
   enzo_float mom2_back = 0;
   enzo_float b0_back = 1.;
   enzo_float b1_back = 1.5;
-  enzo_float b2_back = 0;
+  enzo_float b2_back = 0.0;
   // etot = pressure/(gamma-1)+0.5*rho*v^2+.5*B^2
   enzo_float etot_back = (1./gamma_)/(gamma_-1.)+1.625;
   if (wave_type_ == "entropy"){
@@ -603,8 +603,8 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit **density_init,
   } else if (wave_type_ == "alfven") {
     density_ev = 0;
     mom0_ev = 0;
-    mom1_ev = -1.*wsign*1;
-    mom2_ev = 0;
+    mom1_ev = 0;
+    mom2_ev = -1.*wsign*1;
     etot_ev = 0;
     b1_ev = 0;
     b2_ev = 1.;
