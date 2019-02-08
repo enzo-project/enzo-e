@@ -5,7 +5,24 @@
 /// @date	Tue May 8
 /// @brief	Implementation of an isolated galaxy simulation
 ///
-/// More explanation here
+/// This sets up an isolated galaxy with either an analytic
+/// (double exponential) isothermal gas profile, as is done in
+/// the AGORA simulations, or by depositing baryon particles
+/// from a list directly onto the grid. In addition, options to
+/// include particles for a DM halo component, stellar bulge,
+/// and / or stellar disk (latter two are only different in their
+/// file names... not in practice).
+///
+/// If no live DM halo is used,
+/// galaxy is set up assigning gas velocities with a circular velocity
+/// input file (if provided). Otherwise if desired, an analytic
+/// NFW circular velocity function is used. Runs without
+/// live DM are intended to be used
+/// with the BackgroundAcceleration method to actually apply the
+/// NFW halo accelerations after initialization, but currently no check
+/// exists to ensure this. This uses parameters from this method
+/// to set the gas properties.
+///
 ///
 
 #include <fstream>
@@ -21,6 +38,8 @@
 #define GAS_PARTICLE_FLAG -999
 
 int nlines(std::string fname) {
+
+  // count the number of lines in a given file
 
   int n = 0;
   std::string line;
@@ -46,36 +65,38 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   }
 
   EnzoUnits * enzo_units = enzo::units();
-  // Store variables locally with code units
 
-  this->scale_height_         = config->initial_IG_scale_height * cello::kpc_cm /
-                                enzo_units->length();
-  this->scale_length_	      = config->initial_IG_scale_length * cello::kpc_cm /
-                                enzo_units->length();
-  this->disk_mass_            = config->initial_IG_disk_mass * cello::mass_solar /
-                                enzo_units->mass();
-  this->gas_fraction_         = config->initial_IG_gas_fraction;
-  this->disk_temperature_     = config->initial_IG_disk_temperature /
-                                enzo_units->temperature();
-  this->disk_metal_fraction_  = config->initial_IG_disk_metal_fraction;
-  this->gas_halo_mass_        = config->initial_IG_gas_halo_mass * cello::mass_solar /
-                                enzo_units->mass();
-  this->gas_halo_temperature_ = config->initial_IG_gas_halo_temperature /
-                                enzo_units->temperature();
+  // Store variables locally with code units for convenience
+  //     this is not strictly necessary, but makes routine a little cleaner
+
+  this->scale_height_            = config->initial_IG_scale_height * cello::kpc_cm /
+                                   enzo_units->length();
+  this->scale_length_	           = config->initial_IG_scale_length * cello::kpc_cm /
+                                   enzo_units->length();
+  this->disk_mass_               = config->initial_IG_disk_mass * cello::mass_solar /
+                                   enzo_units->mass();
+  this->gas_fraction_            = config->initial_IG_gas_fraction;
+  this->disk_temperature_        = config->initial_IG_disk_temperature /
+                                   enzo_units->temperature();
+  this->disk_metal_fraction_     = config->initial_IG_disk_metal_fraction;
+  this->gas_halo_mass_           = config->initial_IG_gas_halo_mass * cello::mass_solar /
+                                   enzo_units->mass();
+  this->gas_halo_temperature_    = config->initial_IG_gas_halo_temperature /
+                                   enzo_units->temperature();
   this->gas_halo_metal_fraction_ = config->initial_IG_gas_halo_metal_fraction;
-  this->gas_halo_density_     = config->initial_IG_gas_halo_density /
-                                enzo_units->density();
-  this->gas_halo_radius_      = config->initial_IG_gas_halo_radius * cello::kpc_cm /
-                                enzo_units->length();
+  this->gas_halo_density_        = config->initial_IG_gas_halo_density /
+                                   enzo_units->density();
+  this->gas_halo_radius_         = config->initial_IG_gas_halo_radius * cello::kpc_cm /
+                                   enzo_units->length();
 
-  this->use_gas_particles_ = config->initial_IG_use_gas_particles;
+  // on / off settings for IC
+  this->use_gas_particles_       = config->initial_IG_use_gas_particles;
+  this->live_dm_halo_            = config->initial_IG_live_dm_halo;
+  this->stellar_disk_            = config->initial_IG_stellar_disk;
+  this->stellar_bulge_           = config->initial_IG_stellar_bulge;
+  this->analytic_velocity_       = config->initial_IG_analytic_velocity;
 
-  this->live_dm_halo_         = config->initial_IG_live_dm_halo;
-  this->stellar_disk_         = config->initial_IG_stellar_disk;
-  this->stellar_bulge_        = config->initial_IG_stellar_bulge;
-
-  this->analytic_velocity_    = config->initial_IG_analytic_velocity;
-
+  // Compute halo density / mass
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)
   {
     if (this->gas_halo_radius_ > 0.0)
@@ -87,19 +108,23 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
     }
   } // AE: Need an error check to make sure these are set correctly
 
-
+  // gather other parameters not associated with this IC
   this->uniform_density_    = config->field_uniform_density;
   this->dual_energy_        = config->ppm_dual_energy; // or ppm? which one?
   this->gamma_              = config->field_gamma;
   this->mu_                 = config->ppm_mol_weight;
 
   // read in data for initialization
-  this->ntypes_            = 0;
-  this->ndim_              = cello::rank();
-  this->nparticles_        = 0;
+  this->ntypes_            = 0;              // num of IC particle types
+  this->ndim_              = cello::rank();  //
+  this->nparticles_        = 0;              // max num of IC particles per type
+
+  this->tiny_number_       = 1.0E-10;
 
   this->ReadInVcircData();        // circular velocity curve
-  this->ReadParticles();     // IC particles - only if available
+  this->ReadParticles();          // IC particles - only if available / used
+
+  return;
 }
 
 //----------------------------------------------------------------------
@@ -129,6 +154,7 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
   p | dual_energy_;
   p | gamma_;
   p | mu_;
+  p | tiny_number_;
 
   p | use_gas_particles_;
   p | live_dm_halo_;
@@ -146,7 +172,7 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
     allocateParticles();
   }
 
-  // Pup grid values element-by-element
+  // Pup particle IC arrays element by element
   for (int k = 0; k < ntypes_; k++){
     for (int j = 0; j < ndim_; j ++){
       PUParray(p, particleIcPosition[k][j], nparticles_);
@@ -156,6 +182,7 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
   }
   PUParray(p, particleIcTypes, ntypes_);
 
+  // vector can just be used without anything special
   p | particleIcFileNames;
 
   return;
@@ -191,7 +218,6 @@ void EnzoInitialIsolatedGalaxy::enforce_block
     this->InitializeExponentialGasDistribution(block);
   }
 
-
 #ifdef CONFIG_USE_GRACKLE
   /* Assign grackle chemistry fields to default fractions based on density */
   EnzoMethodGrackle::update_grackle_density_fields(&grackle_data);
@@ -222,7 +248,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
 void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * block){
 
-  // Initialize gas distribution using a double exponential
+  // Initialize gas distribution using a double exponential (like AGORA)
 
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
@@ -246,7 +272,7 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
   int mz = nz + 2*gz;
 
   // Grab information about grid properties
-  //     Cell min coords (xm,ym,zm)
+  //     Cell min coords (xm,ym,zm)  - of min active zone cell (not ghost)
   //     Cell max coords (xp,yp,zp)
   //     Cell widths (hx,hy,hz)
   double xm, ym, zm, xp, yp, zp, hx, hy, hz;
@@ -255,29 +281,24 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
   block->cell_width(&hx,&hy,&hz);
 
   // Get Fields
-  enzo_float * d = (enzo_float *) field.values ("density");
+  enzo_float * d           = (enzo_float *) field.values ("density");
   enzo_float * temperature = field.is_field("temperature") ?
-                   (enzo_float*) field.values("temperature") : NULL;
-  enzo_float * p = field.is_field("pressure") ?
-                   (enzo_float *) field.values ("pressure") : NULL;
-  enzo_float * a3[3] = { (enzo_float *) field.values("acceleration_x"),
-                         (enzo_float *) field.values("acceleration_y"),
-                         (enzo_float *) field.values("acceleration_z")};
-  enzo_float * v3[3] = { (enzo_float *) field.values("velocity_x"),
-                         (enzo_float *) field.values("velocity_y"),
-                         (enzo_float *) field.values("velocity_z")};
+                             (enzo_float*) field.values("temperature") : NULL;
+  enzo_float * p           = field.is_field("pressure") ?
+                             (enzo_float *) field.values ("pressure") : NULL;
+  enzo_float * a3[3]       = { (enzo_float *) field.values("acceleration_x"),
+                               (enzo_float *) field.values("acceleration_y"),
+                               (enzo_float *) field.values("acceleration_z")};
+  enzo_float * v3[3]       = { (enzo_float *) field.values("velocity_x"),
+                               (enzo_float *) field.values("velocity_y"),
+                               (enzo_float *) field.values("velocity_z")};
 
-  enzo_float * te  = (enzo_float *) field.values("total_energy");
-  enzo_float * ge  = (enzo_float *) field.values("internal_energy");
-  enzo_float * pot = (enzo_float *) field.values("potential");
+  enzo_float * te          = (enzo_float *) field.values("total_energy");
+  enzo_float * ge          = (enzo_float *) field.values("internal_energy");
+  enzo_float * pot         = (enzo_float *) field.values("potential");
 
-  enzo_float * metal = field.is_field("metal_density") ?
-                      (enzo_float *) field.values("metal_density") : NULL;
-
-
-  // double velocity_units = this->length_units_ / this->time_units_;
-  // double temperature_units = cello::mass_hydrogen *
-  //                           pow(velocity_units, 2) / cello::k;
+  enzo_float * metal       = field.is_field("metal_density") ?
+                             (enzo_float *) field.values("metal_density") : NULL;
 
   //
   // Now lets calculate some physical properties of the galaxy and halo
@@ -288,8 +309,6 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
   double halo_gas_energy = this->gas_halo_temperature_ / this->mu_ / (this->gamma_ -1);
 
   double disk_gas_energy = this->disk_temperature_ / this->mu_ / (this->gamma_ -1) ;
-
-  double tiny_number = 1.0E-10;
 
   // initialize fields to something
   for (int iz=0; iz<mz; iz++){
@@ -312,7 +331,7 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
           v3[dim][i] = 0.0;
         }
 
-        if(metal) metal[i] = tiny_number * d[i];
+        if(metal) metal[i] = this->tiny_number_ * d[i];
 
       }
     }
@@ -458,7 +477,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
   int mz = nz + 2*gz;
 
   // Grab information about grid properties
-  //     Cell min coords (xm,ym,zm)
+  //     Cell min coords (xm,ym,zm) - (of active region)
   //     Cell max coords (xp,yp,zp)
   //     Cell widths (hx,hy,hz)
   double xm, ym, zm, xp, yp, zp, hx, hy, hz;
@@ -489,7 +508,6 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
 
   double disk_gas_energy = this->disk_temperature_ / this->mu_ / (this->gamma_ - 1);
   double halo_gas_energy = this->gas_halo_temperature_ / this->mu_ / (this->gamma_ - 1);
-  double tiny_number = 1.0E-10;
 
   // Initialize the full grid to either CGM properties or
   // IGM properties (if beyond virial radius)
@@ -512,7 +530,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
         double  radius = std::sqrt(x*x + y*y + z*z);
 
         // set everywhere internal to Rvir to CGM properties
-        double metal_fraction = tiny_number;
+        double metal_fraction = this->tiny_number_;
         if (radius < this->gas_halo_radius_*enzo_units->length()){
           // in the halo
           d[i]  = this->gas_halo_density_;
@@ -579,7 +597,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
     }
 
     iflag[i] = 1;
-  }
+  } // end loop over particles
 
   // re-adjust velocities and set energies
   for (int iz=0; iz<mz; iz++){
@@ -602,7 +620,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
 
       }
     }
-  }
+  } // end loop over grid adjusting vel and energy
 
   // finally, average velocity of cells adjcent to deposit cells
   // to reduce shocks.
@@ -648,7 +666,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
 
       }
     }
-  }
+  } // end loop over grid adjusting adjacent, non-deposit cells
 
   delete [] iflag;
   iflag = NULL;
@@ -658,6 +676,11 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
 
 void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
                                                     Particle * particle){
+
+  //
+  // Loop through all particle types and initialize thier positions and
+  // velocities.
+  //
 
   if (this->ntypes_ == 0) return;
 
@@ -675,7 +698,8 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
     //
     // Now create the particles and assign values
     //    There is likely a better way of doing this that is both cleaner
-    //    and more efficient, but this is likely the most readable
+    //    and more efficient. I'm not actually sure if this puts the
+    //    particles in the batches in the most efficient way
     //
 
     // obtain particle attribute indexes for this type
@@ -688,7 +712,7 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
     int ia_vz = particle->attribute_index (it, "vz");
 
     int ib  = 0; // batch counter
-    int ipp = 0; // counter
+    int ipp = 0; // particle counter
 
     // this will point to the particular value in the
     // particle attribute array
@@ -709,7 +733,7 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
       // make sure particle exists on this grid before depositing
       //    AE:  Note, I'm not sure if this is needed (it is in Enzo),
       //         but there may be a smarter way to do this for Enzo-E
-      //
+      //   - only check for active region (no need to check ghost)
       if (!(block->check_position_in_block(particleIcPosition[ipt][0][i],
                                            particleIcPosition[ipt][1][i],
                                            particleIcPosition[ipt][2][i]))){
@@ -719,6 +743,7 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
       int new_particle = particle->insert_particles(it, 1);
       particle->index(new_particle,&ib,&ipp);
 
+      // get pointers to each of the associated arrays
       pmass = (enzo_float *) particle->attribute_array(it, ia_m, ib);
       px    = (enzo_float *) particle->attribute_array(it, ia_x, ib);
       py    = (enzo_float *) particle->attribute_array(it, ia_y, ib);
@@ -727,6 +752,7 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
       pvy   = (enzo_float *) particle->attribute_array(it, ia_vy, ib);
       pvz   = (enzo_float *) particle->attribute_array(it, ia_vz, ib);
 
+      // set the particle values
       pmass[ipp] = particleIcMass[ipt][i];
       px[ipp]    = particleIcPosition[ipt][0][i];
       py[ipp]    = particleIcPosition[ipt][1][i];

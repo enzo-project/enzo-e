@@ -155,6 +155,7 @@ private: // attributes
   double uniform_density_;
   double gamma_;
   double mu_;
+  double tiny_number_;
 
   bool analytic_velocity_;
 
