@@ -378,7 +378,7 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 
             double conc = rvir  / rcore;
             double    x = r_cyl / rvir;
-            
+
 
             vcirc = (std::log(1.0 + conc*x) - (conc*x)/(1.0+conc*x))/
                       (std::log(1.0 + conc) - (conc / (1.0 + conc))) / x;
@@ -417,6 +417,15 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
 }
 
 void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
+
+  //
+  // Initialize gas distribution directly from MakeDiskGalaxy particle output
+  // by doing the very simple thing of depositing the particle masses
+  // directly into their corresponding cells. This *may* require some fine
+  // tuning when used with deep AMR hierarchies. Some care should be taken
+  // doing this method as the hydro solver can be a bit grumpy for the first
+  // few cycles after IC with sharp density contrasts.
+  //
 
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
@@ -544,19 +553,22 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
 
     if ( !(block->check_position_in_block(particleIcPosition[ipt][0][ip],
                                           particleIcPosition[ipt][1][ip],
-                                          particleIcPosition[ipt][2][ip]))){
+                                          particleIcPosition[ipt][2][ip],
+                                          true ))){
       continue;
     }
 
-    // get corresponding grid position
+    // get corresponding grid position (as a float)
     double xp = (particleIcPosition[ipt][0][ip] - xm) / hx;
     double yp = (particleIcPosition[ipt][1][ip] - ym) / hy;
     double zp = (particleIcPosition[ipt][2][ip] - zm) / hz;
 
-    int ix = ((int) std::floor(xp));
-    int iy = ((int) std::floor(yp));
-    int iz = ((int) std::floor(zp));
+    // get 3D grid index for particle - account for ghost zones!!
+    int ix = ((int) std::floor(xp))  + gx;
+    int iy = ((int) std::floor(yp))  + gy;
+    int iz = ((int) std::floor(zp))  + gz;
 
+    // corresponding 1D grid position
     int i  = INDEX(ix,iy,iz,mx,my);
 
     d[i]    = d[i]*iflag[i] + (particleIcMass[ipt][ip] / (hx*hx*hx));
@@ -576,7 +588,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
         // 1D index of current cell
         int i = INDEX(ix,iy,iz,mx,my);
 
-        if (iflag[i] == 0) continue;
+        if (iflag[i] == 0) continue; // skip cells with no deposited particles
 
         te[i] = disk_gas_energy;
         for (int dim = 0; dim < 3; dim++){
@@ -593,7 +605,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
   }
 
   // finally, average velocity of cells adjcent to deposit cells
-  // to reduce shocks. 
+  // to reduce shocks.
   int xo = 1;
   int yo = mx;
   int zo = mx*my;
@@ -605,7 +617,7 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
 
         if (iflag[i]) continue; // skip deposit cells
 
-        // get indeces of all adjecent cells
+        // get indeces of all adjecent cells in cardinal direction
         int xl, xh, yl, yh, zl, zh;
         xl = std::max(i - xo, 0);
         xh = std::min(i + xo, mx*my*mz - 1);
@@ -626,13 +638,13 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
         if (mass_deposit > 0){
           for (int dim=0; dim<3; dim++){
             v3[dim][i] = ( iflag[xh]*v3[dim][xh]*d[xh] + iflag[xl]*v3[dim][xl]*d[xl] +
-                          iflag[yh]*v3[dim][yh]*d[yh] + iflag[yl]*v3[dim][yl]*d[yl] +
-                          iflag[zh]*v3[dim][zh]*d[zh] + iflag[zl]*v3[dim][zl]*d[zl]
+                           iflag[yh]*v3[dim][yh]*d[yh] + iflag[yl]*v3[dim][yl]*d[yl] +
+                           iflag[zh]*v3[dim][zh]*d[zh] + iflag[zl]*v3[dim][zl]*d[zl]
                              ) / mass_deposit ;
           }
         }
 
-        // 
+        //
 
       }
     }
