@@ -96,6 +96,19 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   this->stellar_bulge_           = config->initial_IG_stellar_bulge;
   this->analytic_velocity_       = config->initial_IG_analytic_velocity;
 
+  // AE: NOTE: This is a bit of a hack at the moment -
+  //           this grouping should be registered elsewhere (I think??)
+  //           but is apparently not - hard coding this for now
+  //
+  //           This likely means this will need to be done for
+  //           colour fields as well, but maybe that is taken care of
+  //           properly
+  ParticleDescr * particle_descr = cello::particle_descr();
+  if (this-stellar_disk_ || this->stellar_bulge)
+      particle_descr->groups()->add("star","has_mass"); // hack 
+  if (this->live_dm_halo_)
+      particle_descr->groups()->add("dark","has_mass");
+
   // Compute halo density / mass
   if ((this->gas_halo_density_ == 0.0) && this->gas_halo_mass_ > 0)
   {
