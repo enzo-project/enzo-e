@@ -83,6 +83,10 @@ public:
   /// Whether the face is on the domain boundary
   bool is_on_boundary (const int if3[3], const int n3[3]) const;
 
+  /// Whether an index is in the same subtree relative to a given
+  /// root level
+  bool is_in_same_subtree (Index index, int min_level = 0, int root_level = 0);
+  
   /// Return whether this is the "root" node in the array of octrees
   /// (array (0 0 0), level 0)
   bool is_root() const;
@@ -127,6 +131,7 @@ public:
   /// Set the child indicies of this node in the parent
   void set_child(int level, int ix, int iy=0, int iz=0, int min_level = 0);
 
+
   /// Return the lower or upper extent of the corresponding node relative to 0:1
   void lower (double bm3[3], int a3[3], int max_level) const;
   void upper (double bp3[3], int a3[3], int max_level) const;
@@ -156,7 +161,7 @@ public:
     return  (x.v_[0] < y.v_[0]);
   }
 
-private: // functions
+private: // methods
 
   /// Clear tree bits that are associated with levels higher than
   /// the actual level

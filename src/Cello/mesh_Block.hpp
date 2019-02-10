@@ -264,7 +264,9 @@ public: // interface
   /// Return an iterator over neighbors
 
   ItNeighbor it_neighbor(int min_face_rank, Index index,
-			 int neighbor_type = neighbor_leaf) throw();
+			 int neighbor_type,
+			 int min_level,
+			 int root_level) throw();
 
   //--------------------------------------------------
   // Charm++ virtual
@@ -314,8 +316,7 @@ public: // interface
 
   /// Start a new solver
   void push_solver(int index_solver) throw()
-  {
-    index_solver_.push_back(index_solver); }
+  { index_solver_.push_back(index_solver); }
 
   /// Return from a solver
   int pop_solver() throw()
@@ -516,7 +517,8 @@ public:
   //--------------------------------------------------
 
   /// Syncronize before continuing with next callback
-  void control_sync (int entry_point, int sync_type, int id);
+  void control_sync (int entry_point, int sync_type, int id, int min_face_rank,
+		     int neighbor_type,int root_level);
 
   /// synchronize with count other chares; count only needs to be
   /// supplied once with others count arguments 0.  
@@ -527,11 +529,12 @@ public:
     performance_stop_(perf_control);
   }
 
-  void control_sync_neighbor   (int entry_point, int id);
-  void control_sync_face       (int entry_point, int id);
-  void control_sync_barrier    (int entry_point);
+  void control_sync_neighbor (int entry_point, int id,
+			      int neighbor_type,int min_face_rank,int root_level);
+  void control_sync_face     (int entry_point, int id, int min_face_rank);
+  void control_sync_barrier  (int entry_point);
   void control_sync_quiescence (int entry_point);
-  void control_sync_count      (int entry_point, int id, int count);
+  void control_sync_count    (int entry_point, int id, int count);
   
 public:
 

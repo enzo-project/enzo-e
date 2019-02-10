@@ -172,6 +172,8 @@ module enzo {
     entry void p_solver_dd_solve_coarse();
     entry void p_solver_dd_solve_domain();
     entry void p_solver_dd_last_smooth();
+    entry void r_solver_dd_barrier(CkReductionMsg *msg);
+    entry void r_solver_dd_end(CkReductionMsg *msg);
     
     // EnzoSolverJacobi
 

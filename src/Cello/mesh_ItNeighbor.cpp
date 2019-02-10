@@ -16,13 +16,17 @@ ItNeighbor::ItNeighbor
  bool periodic[3][2],
  int n3[3],
  Index index,
- int neighbor_type)
+ int neighbor_type,
+ int min_level,
+ int root_level)
   : block_(block),
     rank_(cello::rank()),
     min_face_rank_(min_face_rank),
     index_(index),
     level_(index.level()),
-    neighbor_type_(neighbor_type)
+    neighbor_type_(neighbor_type),
+    min_level_(min_level),
+    root_level_(root_level)
 {
   if (!block->is_leaf()) {
     WARNING1("ItNeighbor::ItNeighbor",
@@ -218,13 +222,10 @@ bool ItNeighbor::valid_()
   if (! in_range) return false;
 
   // Return false if neighbor_tree type and in different root-level tree
-  
-  if (neighbor_type_ == neighbor_tree) {
-    int a1x,a1y,a1z;
-    int a2x,a2y,a2z;
-    index_. array(&a1x,&a1y,&a1z);
-    index().array(&a2x,&a2y,&a2z);
-    if ((a1x != a2x) || (a1y != a2y) || (a1z != a2z)) return false;
+
+  if ((neighbor_type_ == neighbor_tree) &&
+      (! index().is_in_same_subtree(index_,min_level_,root_level_))) {
+      return false;
   }
   
   // Return false if on boundary and not periodic

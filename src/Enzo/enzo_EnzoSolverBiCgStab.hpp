@@ -37,7 +37,8 @@ public: // interface
 		     int max_level,
 		     int iter_max, 
 		     double res_tol,
-		     int index_precon);
+		     int index_precon,
+		     int coarse_level);
 
   /// default constructor
   EnzoSolverBiCgStab()
@@ -49,7 +50,8 @@ public: // interface
       ir_(-1), ir0_(-1), ip_(-1), 
       iy_(-1), iv_(-1), iq_(-1), iu_(-1),
       m_(0), mx_(0), my_(0), mz_(0),
-      gx_(0), gy_(0), gz_(0)
+      gx_(0), gy_(0), gz_(0),
+      coarse_level_(0)
   {};
 
   /// Charm++ PUP::able declarations
@@ -65,7 +67,8 @@ public: // interface
       ir_(-1), ir0_(-1), ip_(-1), 
       iy_(-1), iv_(-1), iq_(-1), iu_(-1),
       m_(0), mx_(0), my_(0), mz_(0),
-      gx_(0), gy_(0), gz_(0)
+      gx_(0), gy_(0), gz_(0),
+       coarse_level_(0)
   {}
 
   /// Charm++ Pack / Unpack function
@@ -122,7 +125,7 @@ public: // interface
     p | is_qs_;
     p | is_dot_sync_;
     p | is_iter_;
-    
+    p | coarse_level_;
   }
 
   
@@ -320,6 +323,10 @@ protected: // attributes
   int m_;              /// product mx_*my_*mz_ for convenience
   int mx_, my_, mz_;   /// total block size
   int gx_, gy_, gz_;   /// ghost zones
+
+  /// The level of the tree solve if solve_type == solve_tree
+  int coarse_level_;
+
 };
 
 #endif /* ENZO_ENZO_SOLVER_BICGSTAB_HPP */

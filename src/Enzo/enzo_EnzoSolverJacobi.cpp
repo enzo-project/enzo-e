@@ -11,11 +11,14 @@
 // #define DEBUG_COPY
 // #define DEBUG_SOLVER
 // #define DEBUG_TRACE
+// #define DEBUG_TRACE_CYCLE 100
 
 #ifdef DEBUG_TRACE
-#  define TRACE_JACOBI(BLOCK,METHOD) \
-  CkPrintf ("%s:%d %s TRACE_JACOBI %s\n", \
-	    __FILE__,__LINE__,BLOCK->name().c_str(),METHOD);
+#  define TRACE_JACOBI(BLOCK,METHOD)				\
+  if (BLOCK->cycle() >= DEBUG_TRACE_CYCLE) {			\
+    CkPrintf ("%s:%d %s TRACE_JACOBI %s\n",			\
+	      __FILE__,__LINE__,BLOCK->name().c_str(),METHOD);	\
+  }
 #else
 #  define TRACE_JACOBI(BLOCK,METHOD) /* empty */
 #endif
@@ -93,29 +96,19 @@ void EnzoSolverJacobi::apply
 
   begin_(block);
 
+  A_ = A;
+
+  Field field = block->data()->field();
+
   if (! is_finest_(block)) {
-    // Exit if block does not participate in the solve
-    TRACE_JACOBI(block,"end()");
-    Solver::end_(block);
-
-  } else {
- 
-    A_ = A;
-
-    Field field = block->data()->field();
-
     allocate_temporary_(field,block);
-
-    (*piter_(block)) = 0.0;
-  
-    // Refresh X
-    Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
-
-    refresh.add_field (ix_);
-    
-    block->refresh_enter
-      (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
   }
+
+  (*piter_(block)) = 0.0;
+  
+  // Refresh X
+
+  do_refresh_(block);
 }
 
 //----------------------------------------------------------------------
@@ -174,8 +167,9 @@ void EnzoSolverJacobi::apply_(Block * block)
   const int gy = (my > 1) ? ng : 0;
   const int gz = (mz > 1) ? ng : 0;
 
-  A_->diagonal (id_, block,ng);
-  A_->residual (ir_, ib_, ix_, block,ng);
+  if (! is_finest_(block)) {
+    A_->diagonal (id_, block,ng);
+    A_->residual (ir_, ib_, ix_, block,ng);
 
 #ifdef DEBUG_COPY
     {
@@ -204,42 +198,54 @@ void EnzoSolverJacobi::apply_(Block * block)
       CkPrintf ("DEBUG_COPY rsum dsum xsum bsum %g %g %g %g\n",rsum,dsum,xsum,bsum);
     }
 #endif    
-  enzo_float * X = (enzo_float*) field.values(ix_);
-  enzo_float * R = (enzo_float*) field.values(ir_);
-  enzo_float * D = (enzo_float*) field.values(id_);
+    enzo_float * X = (enzo_float*) field.values(ix_);
+    enzo_float * R = (enzo_float*) field.values(ir_);
+    enzo_float * D = (enzo_float*) field.values(id_);
 
-  if (w_ == 1.0) {
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  X[i] += R[i] / D[i];
+    if (w_ == 1.0) {
+      for (int iz=gz; iz<mz-gz; iz++) {
+	for (int iy=gy; iy<my-gy; iy++) {
+	  for (int ix=gx; ix<mx-gx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    X[i] += R[i] / D[i];
+	  }
 	}
       }
-    }
-  } else {
-    for (int iz=gz; iz<mz-gz; iz++) {
-      for (int iy=gy; iy<my-gy; iy++) {
-	for (int ix=gx; ix<mx-gx; ix++) {
-	  int i = ix + mx*(iy + my*iz);
-	  X[i] = w_*(R[i] / D[i]) + (1.0-w_)*X[i];
+    } else {
+      for (int iz=gz; iz<mz-gz; iz++) {
+	for (int iy=gy; iy<my-gy; iy++) {
+	  for (int ix=gx; ix<mx-gx; ix++) {
+	    int i = ix + mx*(iy + my*iz);
+	    X[i] = w_*(R[i] / D[i]) + (1.0-w_)*X[i];
+	  }
 	}
       }
     }
   }
-
   // Next iteration
 
   (*piter_(block))++;
   
   // Refresh X
-  Refresh refresh (4,0,neighbor_type_(), sync_type_(), sync_id_());
 
-  refresh.add_field (ix_);
-
-  block->refresh_enter
-    (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
-
+  do_refresh_(block);
 
 }
 
+//----------------------------------------------------------------------
+
+void EnzoSolverJacobi::do_refresh_(Block * block)
+{
+  const int min_face_rank = cello::rank() - 1;
+
+  Refresh refresh (4,min_face_rank,neighbor_type_(),
+		   sync_type_(), sync_id_());
+
+  refresh.set_active(is_finest_(block));
+  refresh.add_field (ix_);
+    
+  block->refresh_enter
+    (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
+}
+
+//----------------------------------------------------------------------

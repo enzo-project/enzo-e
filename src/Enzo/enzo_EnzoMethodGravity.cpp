@@ -11,6 +11,10 @@
 
 #include "enzo.decl.h"
 
+// #define DEBUG_FIELD
+
+#ifdef DEBUG_FIELD
+
 #   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,PLOT)	\
   {									\
     int gx=3,gy=3,gz=3;							\
@@ -88,6 +92,20 @@
     }									\
     CkPrintf ("DEBUG_PARTICLE %s %20.18g\n",  ATTRIBUTE,sum_abs);		\
   }
+#else
+#   define TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,PLOT)	\
+  /* ... */
+#   define TRACE_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,false) \	/* ... */
+#   define TRACE_FIELD(NAME,FIELD,SCALE)  TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,false) \
+  /* ... */
+#   define PRINT_FIELD_(NAME,FIELD,SCALE) TRACE_FIELD_GM(NAME,FIELD,SCALE,gx_,gy_,gz_,mx_,my_,mz_,true) \
+  /* ... */
+#   define PRINT_FIELD(NAME,FIELD,SCALE)  TRACE_FIELD_GM(NAME,FIELD,SCALE,gx,gy,gz,mx,my,mz,true) \
+  /* ... */
+#define TRACE_PARTICLE(ATTRIBUTE,particle,TYPE_NAME,ATTR_NAME)	\
+  /* ... */
+#endif
+
 // #define DEBUG_FIELD_FACE
 // #define DEBUG_COPY_DENSITY
 #define DEBUG_COPY_POTENTIAL

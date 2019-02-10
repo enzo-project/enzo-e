@@ -31,7 +31,8 @@ public: // interface
     sync_type_   (sync_unknown),
     sync_id_ (-1),
     active_(true),
-    callback_(0) 
+    callback_(0) ,
+    root_level_(0)
   {
   }
 
@@ -55,7 +56,8 @@ public: // interface
       sync_type_(sync_type),
       sync_id_(sync_id),
       active_(active),
-      callback_(0) 
+      callback_(0),
+      root_level_(0)
   {
   }
 
@@ -65,19 +67,20 @@ public: // interface
   /// CHARM++ migration constructor for PUP::able
   Refresh (CkMigrateMessage *m)
     : PUP::able(m),
-      all_fields_(false),
-      field_list_src_(),
-      field_list_dst_(),
-      all_particles_(false),
-      particle_list_(),
-      ghost_depth_(0),
-      min_face_rank_(0),
-      neighbor_type_(0),
-      accumulate_(false),
-      sync_type_(0),
-      sync_id_ (-1),
-      active_(false),
-      callback_(0)
+    all_fields_(false),
+    field_list_src_(),
+    field_list_dst_(),
+    all_particles_(false),
+    particle_list_(),
+    ghost_depth_(0),
+    min_face_rank_(0),
+    neighbor_type_(0),
+    accumulate_(false),
+    sync_type_(0),
+    sync_id_ (-1),
+    active_(false),
+    callback_(0),
+    root_level_(0)
   {
   }
 
@@ -100,6 +103,7 @@ public: // interface
     p | sync_id_;
     p | active_;
     p | callback_;
+    p | root_level_;
   }
 
   //--------------------------------------------------
@@ -217,6 +221,13 @@ public: // interface
   void set_callback(int callback) 
   { callback_ = callback; }
 
+  /// Coarse level for neighbor_tree neighbor type
+  int root_level() const { return root_level_; };
+
+  /// Set the coarse level for  neighbor_tree neighbor type
+  void set_root_level(int root_level) 
+  { root_level_ = root_level; }
+
   /// Return the current minimum rank (dimension) of faces to refresh
   /// e.g. 0: everything, 1: omit corners, 2: omit corners and edges
   int min_face_rank() const 
@@ -269,28 +280,29 @@ public: // interface
   void print() const 
   {
     CkPrintf ("Refresh %p\n",this);
-    CkPrintf ("Refresh all_fields = %d\n",all_fields_);
-    CkPrintf ("Refresh src fields:");
+    CkPrintf ("Refresh %p all_fields = %d\n",this,all_fields_);
+    CkPrintf ("Refresh %p src fields:",this);
     for (size_t i=0; i<field_list_src_.size(); i++)
       CkPrintf (" %d",field_list_src_[i]);
     CkPrintf ("\n");
-    CkPrintf ("Refresh dst fields:");
+    CkPrintf ("Refresh %p dst fields:",this);
     for (size_t i=0; i<field_list_dst_.size(); i++)
       CkPrintf (" %d",field_list_dst_[i]);
     CkPrintf ("\n");
-    CkPrintf ("Refresh all_particles = %d\n",all_particles_);
-    CkPrintf ("Refresh particles:");
+    CkPrintf ("Refresh %p all_particles = %d\n",this,all_particles_);
+    CkPrintf ("Refresh %p particles:",this);
     for (size_t i=0; i<particle_list_.size(); i++)
       CkPrintf (" %d",particle_list_[i]);
     CkPrintf ("\n");
-    CkPrintf ("Refresh ghost_depth = %d\n",ghost_depth_);
-    CkPrintf ("Refresh min_face_rank: %d\n",min_face_rank_);
-    CkPrintf ("Refresh neighbor_type: %d\n",neighbor_type_);
-    CkPrintf ("Refresh accumulate: %d\n",accumulate_);
-    CkPrintf ("Refresh sync_type: %d\n",sync_type_);
-    CkPrintf ("Refresh sync_id: %d\n",sync_id_);
-    CkPrintf ("Refresh active: %d\n",active_);
-    CkPrintf ("Refresh callback: %d\n",callback_);
+    CkPrintf ("Refresh %p ghost_depth = %d\n",this,ghost_depth_);
+    CkPrintf ("Refresh %p min_face_rank: %d\n",this,min_face_rank_);
+    CkPrintf ("Refresh %p neighbor_type: %d\n",this,neighbor_type_);
+    CkPrintf ("Refresh %p accumulate: %d\n",this,accumulate_);
+    CkPrintf ("Refresh %p sync_type: %d\n",this,sync_type_);
+    CkPrintf ("Refresh %p sync_id: %d\n",this,sync_id_);
+    CkPrintf ("Refresh %p active: %d\n",this,active_);
+    CkPrintf ("Refresh %p callback: %d\n",this,callback_);
+    CkPrintf ("Refresh %p root_level: %d\n",this,root_level_);
     fflush(stdout);
   }
 
@@ -395,6 +407,8 @@ private: // attributes
   /// Callback after the refresh operation
   int callback_;
 
+  /// Coarse level for neighbor_tree type
+  int root_level_;
 };
 
 #endif /* PROBLEM_REFRESH_HPP */
