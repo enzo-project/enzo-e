@@ -104,7 +104,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           colour fields as well, but maybe that is taken care of
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
-  if (this-stellar_disk_ || this->stellar_bulge)
+  if (this-stellar_disk_ || this->stellar_bulge_)
       particle_descr->groups()->add("star","has_mass"); // hack 
   if (this->live_dm_halo_)
       particle_descr->groups()->add("dark","has_mass");
