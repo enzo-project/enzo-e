@@ -5,6 +5,11 @@
 #  Date        : 2018-05-16
 #  Brief       : File for initializing an isolated galaxy
 #
+#    Sets up a WLM-like isolated dwarf galaxy with ICs generated from
+#    MakeDiskGalaxy output (not included in repo). Can use live
+#    particle distributions or analytic halo background
+#
+#
 #  Description : 
 #
 #  REQUIRES root_blocks
@@ -58,7 +63,7 @@
 
  Field {
       history     = 1;
-      alignment   = 8; # what?
+      alignment   = 8;
       gamma       = 1.4;
       ghost_depth = 4;      # better way to set?
       list = ["density", "velocity_x", "velocity_y", "velocity_z",
@@ -66,32 +71,23 @@
               "total_energy", "internal_energy", "pressure", "temperature", 
               "potential","B","density_total","density_particle",
               "density_particle_accumulate"];
-# "potential"];
       padding = 0;
       uniform_density = 1.0E-5;
   }
 
-  # This is actually where units should go
+  # Simulation code units
   Units {
      length  = 7.405626262E22;
-#7.4056262E22;
-#9.2570327404E22;
-#7.40562619321E23;
-#6.17135516E21;
-# 3.08567758E22;
-#    7.40562619321E23;
      time    = 3.15576E16;
      mass    = 1.9891E41;     
 #     density = 4.89746405317508E-31; do not specify if mass + length are specified
   }
 
-#  Solver {
-#    list = ["ppm"];
-#  }
-
-
 
   Method { 
+      # Background acceleration MUST occur after 
+      #   gravity if gravity is used (otherwise gravity method 
+      #   overwrites accelerations computed in background acceleration method)
       list = [
               "pm_deposit",
               "gravity",
@@ -105,13 +101,13 @@
                   use_density_threshold    = true;
                   use_velocity_divergence  = false;
                   use_dynamical_time       = false;
-                  number_density_threshold = 1000.0;
+                  # set to a large number for now for testing
+                  number_density_threshold = 1000.0; 
                   maximum_mass_fraction    = 0.8;
                   efficiency               = 0.01;
                   minimum_star_mass        = 10.0;
                  };
-#,"ppm"];
-#,"wgravity_bicgstab"];
+
       ppm {
             diffusion = true;
             riemann_solver = "two_shock";
@@ -132,25 +128,23 @@
           #res_tol  = 1e-6;
           }
 
+
+      # values for the background NFW potential
+      #    also can have background stellar bulge and / or stellar disk potential
       background_acceleration {
           type = "GalaxyModel";
           DM_density     = -1.0   ;  # specify this OR mass - not both - mass_radius must be virial if this is used
-          DM_mass        = 1.0E10;   # mass interior to below radius (this is virial)
-          DM_mass_radius = 45.0;     # radius corresponding to above mass (this is virial)
+          DM_mass        = 1.0E10;   # mass interior to below radius (in Msun) -  (this particular value is virial mass)
+          DM_mass_radius = 45.0;     # radius (kpc) corresponding to above mass (this is virial)
           core_radius    = 3.0;      # r_c in kpc  (c = r_c / R_vir)
-          bulge_mass     = 0.0;
-          stellar_mass   = 0.0;      # 1.0E7;
+          bulge_mass     = 0.0;      # mass of stellar bulge (Msun)
+          stellar_mass   = 0.0;      # disk (Msun)
           stellar_scale_height_r = 1.00;
           stellar_scale_height_z = 0.70;
           center = [0.5, 0.5, 0.5];
           angular_momentum = [0.0, 0.0, 1.0];
-          apply_acceleration = true;              # for debugging
+          apply_acceleration = true;              # for debugging - leave ON
       };
-
-#     gravity_bicgstab {
-#          iter_max = 100;
-#          res_tol  = 1e-6;
-#          }
 
   }
 
@@ -164,19 +158,10 @@ Solver {
      }
 }
 
-#Solver {
-#  list = ["gravity"];
-#  gravity {
-#     type = "bicgstab";
-#     iter_max = 500;
-#     monitor_iter = 10;
-#  }
-#}
-
-
-
  Particle {
      list = ["star"];
+
+#     Turn this on if using live DM
 #     dark {
 #         attributes = [ "x", "single",
 #                        "y", "single",
@@ -207,9 +192,14 @@ Solver {
                         "mass", "double" ];
          position = [ "x", "y", "z" ];
          velocity = [ "vx", "vy", "vz" ];
+#
+#        AE: Note - as of Feb 11 2019 I'm not sure if this grouping
+#                   works when set here. I had to force this grouping
+#                   property by hard coding in the isolated galaxy
+#                   IC routine to get star particles registered
+#                   in this group
+#
          groups = ["has_mass"];
-#         constants = [ "mass", "single", .8382456140 ];
-         
       }
   }
 
@@ -217,30 +207,21 @@ Solver {
 # units in kpc and Msun now - density in cgs
     list = ["isolated_galaxy"];
     isolated_galaxy {
+#       double exponential disk 
         center_position  = [0.5, 0.5, 0.5];
-        scale_length     = 1.0;
-# 0.00416666667;
-# 0.09999864;
-#0.004166666667;
-        scale_height     = 0.7;
-#0.00291666667;
-#0.06999905;
-#w0.002916666667;
-        disk_mass            = 8.0E7;
-        gas_fraction         = 0.875;
-        disk_temperature     = 1.0E4;
-        gas_halo_mass        = 8.0E5;
-        gas_halo_temperature = 1.0E6;
-        gas_halo_radius      = 45.00;
-# 0.18745;
-# 4.49873864;
-# 0.18745;
-        live_dm_halo   = false;
-        stellar_disk   = true;
-        stellar_bulge  = false;
-        use_gas_particles = true;
-# set gas circulare velocity using analytic function;
-        analytic_velocity = false;
+        scale_length     = 1.0;         # kpc  (only used if gas.dat not used -see below)
+        scale_height     = 0.7;         # kpc  (only used if gas.dat not used -see below)
+        disk_mass            = 8.0E7;   # total disk mass (gas+stars)
+        gas_fraction         = 0.875;   # gas fraction of disk (only used if gas.dat not used - see below)
+        disk_temperature     = 1.0E4;   # disk gas temperature (K)
+        gas_halo_mass        = 8.0E5;   # total mass of CGM
+        gas_halo_temperature = 1.0E6;   # CGM / halo temperature (K)
+        gas_halo_radius      = 45.00;   # set to virial radius (kpc) - CGM limit
+        live_dm_halo   = false;         # live DM halo (needs big box)
+        stellar_disk   = true;          # start with disk component (disk.dat)?
+        stellar_bulge  = false;         # star with bulge component (bulge.dat)?
+        use_gas_particles = true;       # use gas.dat  for gas ICs
+        analytic_velocity = false;      # turn ON if not using gas particle IC's (requires output file)
 
        }
    }
@@ -249,15 +230,14 @@ Solver {
 Stopping {
 #   stop time in code units - 10 Myr
     time     = 0.010;
-#   stop time in wall seconds: AE FOR DEBUGGING SANITY ONLY
+#   stop time in wall seconds
     seconds  = 36000.0;
-#   AE output interval
     cycle    = 10000;
     interval = 1; 
 }
 
 #
-# AE: This schedules the output. Must specify what fields you want
+# AE: (note to self) This schedules the output. Must specify what fields you want
 #     to be output. items under "list" correspond to named items
 #     that start the bracketed regions. I *think* these names are
 #     arbitrary... it is the stuff inside the brackets that 
@@ -287,6 +267,5 @@ Output {
         }
     };
 
-#, "potential"];
 
 }
