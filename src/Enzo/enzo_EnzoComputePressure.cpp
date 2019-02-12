@@ -62,16 +62,17 @@ void EnzoComputePressure::compute_(Block * block
 
 #ifdef CONFIG_USE_GRACKLE
 
+  code_units grackle_units_;
+  grackle_field_data grackle_fields_;
+
   // setup grackle units if they are not already provided
   if (!grackle_units){
-    code_units grackle_units_;
     grackle_units = &grackle_units_;
     EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units);
   }
 
   // if grackle fields are not provided, define them
   if (!grackle_fields){
-    grackle_field_data grackle_fields_;
     grackle_fields  = &grackle_fields_;
     EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields);
   }
