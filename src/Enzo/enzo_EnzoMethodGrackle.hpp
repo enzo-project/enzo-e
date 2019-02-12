@@ -98,10 +98,6 @@ public: // interface
                                    grackle_field_data * grackle_fields) throw();
 #endif
 
-  static void update_grackle_density_fields(EnzoBlock * enzo_block,
-                                   grackle_field_data * grackle_fields) throw();
-#endif
-
 protected: // methods
 
 #ifdef CONFIG_USE_GRACKLE
