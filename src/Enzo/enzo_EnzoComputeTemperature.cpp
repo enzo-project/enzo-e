@@ -95,13 +95,18 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   // setup grackle units if they are not already provided
   if (!grackle_units){
+    code_units grackle_units_;
+    grackle_units = &grackle_units_;
     EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units);
   }
 
-  // setup grackle fields if they are not provided
+  // if grackle fields are not provided, define them
   if (!grackle_fields){
+    grackle_field_data grackle_fields_;
+    grackle_fields  = &grackle_fields_;
     EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields);
   }
+
 
   // only compute pressure again if we need to
   if (recompute_pressure) compute_pressure.compute_(block,

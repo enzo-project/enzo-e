@@ -61,15 +61,20 @@ void EnzoComputePressure::compute_(Block * block
   enzo_float * p = (enzo_float*) field.values("pressure");
 
 #ifdef CONFIG_USE_GRACKLE
-  // if grackle units are not already defined, define them
+
+  // setup grackle units if they are not already provided
   if (!grackle_units){
-	  EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units);
-	}
+    code_units grackle_units_;
+    grackle_units = &grackle_units_;
+    EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units);
+  }
 
   // if grackle fields are not provided, define them
-	if (!grackle_fields){
-	  EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields);
-	}
+  if (!grackle_fields){
+    grackle_field_data grackle_fields_;
+    grackle_fields  = &grackle_fields_;
+    EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields);
+  }
 
   // Compute pressure in Grackle
   if (calculate_pressure(grackle_units, grackle_fields, p) == ENZO_FAIL){
