@@ -220,9 +220,11 @@ void EnzoInitialIsolatedGalaxy::enforce_block
          "Block does not exist",
          block != NULL);
 
+   EnzoBlock * enzo_block = enzo::block(block);
+
 #ifdef CONFIG_USE_GRACKLE
    grackle_field_data grackle_fields_;
-   EnzoMethodGrackle::setup_grackle_fields(block, &grackle_fields_);
+   EnzoMethodGrackle::setup_grackle_fields(enzo_block, &grackle_fields_);
 #endif
 
   if (this->use_gas_particles_){
@@ -231,14 +233,17 @@ void EnzoInitialIsolatedGalaxy::enforce_block
     this->InitializeExponentialGasDistribution(block);
   }
 
-#ifdef CONFIG_USE_GRACKLE
-  /* Assign grackle chemistry fields to default fractions based on density */
-  EnzoMethodGrackle::update_grackle_density_fields(&grackle_data);
-#endif
 
   // Update temperature field if it exists
-  Field field = block->data()->field();
+  Field field = enzo_block->data()->field();
   const EnzoConfig * enzo_config = enzo::config();
+
+#ifdef CONFIG_USE_GRACKLE
+  /* Assign grackle chemistry fields to default fractions based on density */
+  EnzoMethodGrackle::update_grackle_density_fields(enzo_block,
+                                                   &grackle_fields_);
+#endif
+
   enzo_float * temperature = field.is_field("temperature") ?
                    (enzo_float*) field.values("temperature") : NULL;
 
