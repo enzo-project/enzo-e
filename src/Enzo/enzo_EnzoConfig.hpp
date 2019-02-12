@@ -208,6 +208,10 @@ public: // interface
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
+      // EnzoMethodGrackle
+#ifdef CONFIG_USE_GRACKLE
+      method_grackle_use_cooling_timestep(false),
+#endif
       // EnzoMethodGravity
       method_gravity_grav_const(0.0),
       method_gravity_solver(""),
@@ -454,6 +458,7 @@ public: // attributes
 
 #ifdef CONFIG_USE_GRACKLE
   chemistry_data * method_grackle_chemistry;
+  bool             method_grackle_use_cooling_timestep;
 #endif /* CONFIG_USE_GRACKLE */
 
 };

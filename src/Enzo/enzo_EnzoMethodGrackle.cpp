@@ -280,6 +280,64 @@ void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
 
 }
 
+void EnzoMethodGrackle::update_grackle_density_fields(
+                               EnzoBlock * enzo_block,
+                               grackle_field_data * grackle_fields_
+                               ) throw() {
+
+  // Intended for use at problem initialization. Scale species
+  // density fields to be sensible mass fractions of the initial
+  // density field. Problem types that require finer-tuned control
+  // over individual species fields should adapt this function
+  // in their initialization routines.
+
+  Field field = enzo_block->data()->field();
+
+  int gx,gy,gz;
+  field.ghost_depth (0,&gx,&gy,&gz);
+
+  int nx,ny,nz;
+  field.size (&nx,&ny,&nz);
+
+  int ngx = nx + 2*gx;
+  int ngy = ny + 2*gy;
+  int ngz = nz + 2*gz;
+
+  double tiny_number = 1.0E-10;
+
+  for (int iz = 0; iz<ngz; iz++){
+    for (int iy=0; iy<ngy; iy++){
+      for (int ix=0; ix<ngx; ix++){
+        int i = INDEX(ix,iy,iz,ngx,ngy);
+
+        if(grackle_data->primordial_chemistry > 1){
+          grackle_fields_->HI_density[i]   = grackle_fields_->density[i] * grackle_data->HydrogenFractionByMass;
+          grackle_fields_->HII_density[i]   = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->HeI_density[i]   = grackle_fields_->density[i] * (1.0 - grackle_data->HydrogenFractionByMass);
+          grackle_fields_->HeII_density[i]  = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->HeIII_density[i] = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->e_density[i]     = grackle_fields_->density[i] * tiny_number;
+        }
+
+        if (grackle_data->primordial_chemistry > 1){
+          grackle_fields_->HM_density[i]    = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->H2I_density[i]   = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->H2II_density[i]  = grackle_fields_->density[i] * tiny_number;
+        }
+
+        if (grackle_data->primordial_chemistry > 2){
+          grackle_fields_->DI_density[i]    = grackle_fields_->density[i] * grackle_data->DeuteriumToHydrogenRatio;
+          grackle_fields_->DII_density[i]   = grackle_fields_->density[i] * tiny_number;
+          grackle_fields_->HDI_density[i]   = grackle_fields_->density[i] * tiny_number;
+        }
+
+      }
+    }
+  }
+
+  return;
+}
+
 //----------------------------------------------------------------------
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
@@ -369,11 +427,59 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGrackle::timestep ( Block * block ) const throw()
+double EnzoMethodGrackle::timestep ( Block * block ) throw()
 {
   const EnzoConfig * config = enzo::config();
 
-  return std::numeric_limits<double>::max();
+  double dt = std::numeric_limits<double>::max();;
+
+#ifdef CONFIG_USE_GRACKLE
+  if (config->method_grackle_use_cooling_timestep){
+    EnzoBlock * enzo_block = enzo::block(block);
+    Field field = enzo_block->data()->field();
+
+    enzo_float * cooling_time = field.is_field("cooling_time") ?
+                        (enzo_float *) field.values("cooling_time") : NULL;
+
+    // make it if it doesn't exist
+    bool delete_cooling_time = false;
+    int gx,gy,gz;
+    field.ghost_depth (0,&gx,&gy,&gz);
+
+    int nx,ny,nz;
+    field.size (&nx,&ny,&nz);
+
+    int ngx = nx + 2*gx;
+    int ngy = ny + 2*gy;
+    int ngz = nz + 2*gz;
+
+    int size = ngx*ngy*ngz;
+
+    if (!(cooling_time)){
+      cooling_time = new enzo_float [size];
+      delete_cooling_time = true;
+    }
+
+    grackle_field_data grackle_fields_;
+
+    setup_grackle_units(enzo_block,  &grackle_units_);
+    setup_grackle_fields(enzo_block, &grackle_fields_);
+
+    if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == ENZO_FAIL) {
+      ERROR("EnzoMethodGrackle::compute()",
+      "Error in calculate_cooling_time.\n");
+    }
+
+    for (int i = 0; i < size; i++) dt = std::min(dt, cooling_time[i]);
+
+    if (delete_cooling_time){
+      delete [] cooling_time;
+    }
+
+  }
+#endif
+
+  return dt;
 }
 
 //----------------------------------------------------------------------
