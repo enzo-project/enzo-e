@@ -150,6 +150,9 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
+#ifdef CONFIG_USE_GRACKLE
+  method_grackle_use_cooling_timestep(false),
+#endif
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
   method_gravity_solver(""),
@@ -204,8 +207,6 @@ EnzoConfig::EnzoConfig() throw ()
 
 #ifdef CONFIG_USE_GRACKLE
     method_grackle_chemistry = new chemistry_data;
-//#else
-//    method_grackle_chemistry = NULL;
 #endif
 }
 
@@ -371,6 +372,10 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_star_maker_minimum_star_mass;
 
   p | method_turbulence_edot;
+
+#ifdef CONFIG_USE_GRACKLE
+ p  | method_grackle_use_cooling_timestep;
+#endif
 
   p | method_gravity_grav_const;
   p | method_gravity_solver;
@@ -1018,6 +1023,10 @@ void EnzoConfig::read(Parameters * p) throw()
 
     // Copy over parameters from Enzo-P to Grackle
     grackle_data->Gamma = field_gamma;
+
+    //
+    method_grackle_use_cooling_timestep = p->value_logical
+      ("Method:grackle:use_cooling_timestep", false);
 
     // Set Grackle parameters from parameter file
     grackle_data->with_radiative_cooling = p->value_integer

@@ -84,7 +84,7 @@ public: // interface
   { return "grackle"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) const throw();
+  virtual double timestep ( Block * block) throw();
 
 #ifdef CONFIG_USE_GRACKLE
   static void setup_grackle_units(EnzoBlock * enzo_block,
@@ -93,6 +93,10 @@ public: // interface
   static void setup_grackle_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields,
                                    bool initialize_fields = false) throw();
+
+  static void update_grackle_density_fields(EnzoBlock * enzo_block,
+                                   grackle_field_data * grackle_fields) throw();
+#endif
 
   static void update_grackle_density_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields) throw();
