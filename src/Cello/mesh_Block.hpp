@@ -386,14 +386,20 @@ public:
   void p_output_enter()
   {      output_enter_();  }
   void r_output_enter(CkReductionMsg * msg)
-  {      output_enter_();  delete msg;  }
+  {
+    delete msg;
+    output_enter_();
+  }
 
   void p_output_end();
 
   void p_output_exit()
   {      output_exit_();  }
   void r_output_exit(CkReductionMsg * msg)
-  {      output_exit_();  delete msg; }
+  {
+    delete msg;
+    output_exit_();
+  }
 
   /// Contribute block data to ith output object in the simulation
   void p_output_write (int index_output, int step);
