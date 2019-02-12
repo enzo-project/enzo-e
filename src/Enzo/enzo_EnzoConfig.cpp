@@ -1056,13 +1056,6 @@ void EnzoConfig::read(Parameters * p) throw()
       ("Method:grackle:h2_optical_depth_approximation",
         grackle_data->h2_optical_depth_approximation);
 
-    method_grackle_chemistry.Gamma = p->value_float
-      ("Method:grackle:gamma",method_grackle_chemistry.Gamma);
-
-    method_grackle_chemistry.with_radiative_cooling =p->value_logical
-      ("Method:grackle:with_radiative_cooling",
-       method_grackle_chemistry.with_radiative_cooling);
-
     grackle_data->photoelectric_heating = p->value_integer
       ("Method:grackle:photoelectric_heating",
         grackle_data->photoelectric_heating);
