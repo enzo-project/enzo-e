@@ -118,6 +118,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
          = 1.0 / (1.0 + physics_cosmology_initial_redshift);
     grackle_units_.a_value = cosmo_a;
 
+  } else if (enzo_config->method_grackle_radiation_redshift > -1){
+    grackle_units_.a_value = 1.0 / (1.0 + enzo_config->method_grackle_radiation_redshift);
   }
 
   // Initialize grackle units and data
@@ -183,6 +185,8 @@ void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
     grackle_units->a_value = cosmo_a;
 
+  } else if (enzo_config->method_grackle_radiation_redshift > -1){
+    grackle_units->a_value = 1.0 / (1.0 + enzo_config->method_grackle_radiation_redshift);
   }
 
   return;
