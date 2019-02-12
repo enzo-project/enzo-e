@@ -904,6 +904,12 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
 
 void EnzoInitialIsolatedGalaxy::ReadInVcircData(void)
 {
+
+
+  // we do not need this file if initializing with gas output
+  // or analytic circular velocity curve
+  if (this->use_gas_particles_ || this->analytic_velocity_) return;
+
   //
   // Read in circular velocity data from file. Units
   // are assumed to be kpc (radius) and km/s (velocity)
