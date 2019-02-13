@@ -241,6 +241,7 @@ public: // interface
       // EnzoMethodGrackle
 #ifdef CONFIG_USE_GRACKLE
       method_grackle_use_cooling_timestep(false),
+      method_grackle_radiation_redshift(-1.0),
 #endif
       // EnzoMethodGravity
       method_gravity_grav_const(0.0),
@@ -559,6 +560,7 @@ public: // attributes
 #ifdef CONFIG_USE_GRACKLE
   chemistry_data * method_grackle_chemistry;
   bool             method_grackle_use_cooling_timestep;
+  double           method_grackle_radiation_redshift;
 #endif /* CONFIG_USE_GRACKLE */
 
 };
