@@ -378,7 +378,7 @@ if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
 if (new_charm != 0):     defines = defines + define_new_charm
 if (python_lt_27 != 0):  defines = defines + define_python_lt_27
-if (have_git != 0 || have_mercurial != 0 ):defines = defines + define_have_version_control
+if (have_git != 0 or have_mercurial != 0 ):defines = defines + define_have_version_control
 
 defines = defines + define_charm
 defines = defines + define_cello
