@@ -108,7 +108,7 @@ void Monitor::header () const
 #endif  
 #ifndef CONFIG_PYTHON_LT_27
   print ("Define","CHARM_VERSION %d",CELLO_CHARM_VERSION);
-#   ifdef CONFIG_HAVE_MERCURIAL  
+#   ifdef CONFIG_HAVE_GIT  
   print ("Define","CHANGESET     %s",CELLO_CHANGESET);
 #   endif
 #endif
