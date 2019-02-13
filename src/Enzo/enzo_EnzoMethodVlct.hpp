@@ -90,8 +90,7 @@
 //    to add add flux divergence), subclasses of EnzoEquationOfState are used
 //    to compute properties of individual cells. These values are passed via a
 //    map. We alias the map of values at a single location as a flt_map. The
-//     current map implementation is an
-//    unordered_map
+//    current map implementation is an unordered_map
 //        - There is an inconsistency between the maps and groupings. Groupings
 //          for vector quantites (i.e. velocity/momentum/bfields) only have a
 //          single name, which then corresponds to collection of components. In
@@ -102,8 +101,6 @@
 //          and just apply operations on Groupings)
 //    The Mapping is hard to debug. If you attempt to access a field that does
 //    not already exist, a default value will be returned. (0.0 for a float)
-//  Issue: Concerned about the units of the magnetic field (especially during
-//  calculations of the Alfven Velocity)
 
 #ifndef ENZO_ENZO_METHOD_VLCT_HPP
 #define ENZO_ENZO_METHOD_VLCT_HPP

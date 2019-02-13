@@ -337,7 +337,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
       
       for (int dim = 0; dim<ndim; dim++){
 	ct.update_bfield(block, dim, efield_group, *bfieldi_group_,
-			 *out_bfieldi_group, dt);
+			 *out_bfieldi_group, cur_dt);
       }
 
       // Add other source terms?
@@ -349,6 +349,8 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 				 *out_bfieldi_group);
       }
     }
+
+    //ASSERT("EnzoMethodVlct","Early Exit",false);
 
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
@@ -1131,8 +1133,9 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   }
   /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
   dtBaryons *= courant_;
-
+  
   CkPrintf("EnzoMethodVlct::timestep  -  dt = %e\n",dtBaryons);
+
   ASSERT2("EnzoMethodVlct::timestep",
 	  "Invalid timestep, %g, was calculated for %s.",
 	  (double)dtBaryons, block->name().c_str(),

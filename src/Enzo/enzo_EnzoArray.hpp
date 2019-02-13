@@ -25,17 +25,12 @@
 //     better to define this object in the Cello Directory
 //   - This should not be confused with the EnzoArray in the original enzo code.
 //     It may be better to rename this CelloArray.
-//   - Like Athena++ arrays (and unlike numpy style arrays) EnzoArrays will
-//     always return a single value. Imagine a 3D array with shape {mz,my,mx}
+//   - Like arrays in Athena++, the indices are list in order of increasing
+//     access speed. Imagine a 3D array with shape {mz,my,mx}
 //       - For both types of arrays: array(k,j,i) is equivalent to accessing 
 //         index ((k*my + j)*mx + i) of a contiguous array
-//       - For EnzoArrays: array(j,i) is equivalent to index (j*mx + i)
-//                         array(i) is equivalent to index i
-//         Both of these cases would return subarrays for numpy style arrays
-//       - Users should avoid this behavior. If EnzoArray is a view of a
-//         subarray, unexpected behavior will occur.
-//   - dimensions are ordered by increasing indexing speed of each axis. A 4d
-//     array has dimensions: (dim3, dim2, dim1, dim0)
+//   - dimensions are numbered with decreasing indexing speed. A 4d array has
+//     dimensions: (dim3, dim2, dim1, dim0)
 //   - To allow for writing functions performing directional grid operations
 //     that can be generalized to arbitrary grid direction, EnzoArray is
 //     allowed to represent a subsection of another array. This is equivalent
