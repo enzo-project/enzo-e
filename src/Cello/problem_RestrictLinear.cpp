@@ -142,7 +142,7 @@ int RestrictLinear::apply_
 	  int iy_f = iy_c*2;
 	  for (int iz_c=0; iz_c<n3_c[2]; iz_c++) {
 	    int iz_f = iz_c*2;
-
+	    
 	    int i_c = (im3_c[0]+ix_c) + nd3_c[0]*
 	      (       (im3_c[1]+iy_c) + nd3_c[1]*
 		      (im3_c[2]+iz_c));

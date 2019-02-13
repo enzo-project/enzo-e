@@ -310,6 +310,8 @@ public: /// entry methods
   void p_solver_dd_solve_coarse();
   void p_solver_dd_solve_domain();
   void p_solver_dd_last_smooth();
+  void r_solver_dd_barrier(CkReductionMsg* msg);
+  void r_solver_dd_end(CkReductionMsg* msg);
 
   // EnzoSolverJacobi
 

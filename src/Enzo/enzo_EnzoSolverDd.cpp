@@ -23,45 +23,72 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-// #define TRACE_SOLVER_DD
+// #define TRACE_DD
+// #define TRACE_DD_CYCLE 100
+
+// #define DEBUG_FIELD
 // #define DEBUG_COPY_FIELD
 
-#ifdef DEBUG_COPY_FIELD
-#   define COPY_FIELD(BLOCK,FIELD_SRC,FIELD_DST)			\
+#ifdef DEBUG_FIELD
+
+#  define TRACE_FIELD(BLOCK,MSG,ID)					\
   {									\
-    Data * data = BLOCK->data();					\
-    Field field = data->field();					\
-    enzo_float * x_src = (enzo_float*) field.values(FIELD_SRC);		\
-    enzo_float * x_dst = (enzo_float*) field.values(FIELD_DST);		\
-    ASSERT1("COPY_FIELD","X_DST field %s does not exist",FIELD_DST,x_dst!=NULL); \
-    double sum_a=0.0;							\
+    Field field = BLOCK->data()->field();				\
     double sum_abs=0.0;							\
+    int count = 0;							\
+    auto X = (enzo_float*) field.values(ID);				\
     for (int iz=gz_; iz<mz_-gz_; iz++) {				\
       for (int iy=gy_; iy<my_-gy_; iy++) {				\
 	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
 	  int i = ix + mx_*(iy + my_*iz);				\
-	  sum_a+=x_src[i];						\
-	  sum_abs+=std::abs(x_src[i]);					\
-	  x_dst[i] = x_src[i];						\
+	  sum_abs+=std::abs(X[i]);					\
+	  count++;							\
 	}								\
       }									\
     }									\
-    CkPrintf ("%s:%d %s %s COPY_FIELD %s->%s %20.15lg %20.15lg\n", \
-	      __FILE__,__LINE__,BLOCK->name().c_str(),name().c_str(), \
-	      FIELD_SRC,FIELD_DST,sum_a, sum_abs);		      \
+    CkPrintf ("%s:%d %s TRACE_FIELD level %d field %d %s %lg count %d\n",		\
+	      __FILE__,__LINE__,BLOCK->name().c_str(),BLOCK->level(),ID,MSG,sum_abs,count); \
   }
 #else
-#   define COPY_FIELD(BLOCK,ID,NAME) /* ... */
+#  define TRACE_FIELD(BLOCK,MSG,ID) /* ... */
+#endif
+
+#ifdef DEBUG_COPY_FIELD
+#   define COPY_FIELD(BLOCK,ID,COPY)					\
+  {									\
+    Field field = BLOCK->data()->field();				\
+    enzo_float* X      = (enzo_float*) field.values(ID);		\
+    enzo_float* X_bcg  = (enzo_float*) field.values(COPY);		\
+    if (X_bcg) for (int i=0; i<mx_*my_*mz_; i++)  X_bcg[i] = X[i];		\
+    long double sum_a=0.0,sum_abs=0.0;					\
+    for (int iz=gz_; iz<mz_-gz_; iz++) {				\
+      for (int iy=gy_; iy<my_-gy_; iy++) {				\
+	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
+	  int i=ix+mx_*(iy+my_*iz);					\
+	  sum_a+=X[i];							\
+	  sum_abs+=std::abs(X[i]);					\
+	}								\
+      }									\
+    }									\
+    CkPrintf ("%s:%d %s %s COPY_FIELD %d %s shift %Lg %Lg\n"	\
+	      ,__FILE__,__LINE__,BLOCK->name().c_str(),name().c_str(),ID,COPY,sum_a, sum_abs); \
+  }
+#else
+#   define COPY_FIELD(BLOCK,ID,COPY) /* ... */
 #endif
 
 
-#ifdef TRACE_SOLVER_DD
+#ifdef TRACE_DD
+#  undef TRACE_DD
 #  define TRACE_DD(BLOCK,SOLVER,msg)					\
-  CkPrintf ("%d %s TRACE_SOLVER_DD %s %s level %d\n",			\
-	    CkMyPe(), (BLOCK!=NULL) ? BLOCK->name().c_str():"no block",	\
-	    (SOLVER!=NULL) ? SOLVER->name().c_str():"no solver",msg,	\
-	    (BLOCK!=NULL) ? BLOCK->level() : -99);			\
-  fflush(stdout);
+  if (BLOCK->cycle() >= TRACE_DD_CYCLE) {				\
+    CkPrintf ("%d %s %s:%d TRACE_DD %s %s level %d\n",			\
+	      CkMyPe(), (BLOCK!=NULL) ? BLOCK->name().c_str():"no block", \
+	      __FILE__,__LINE__,					\
+	      (SOLVER!=NULL) ? SOLVER->name().c_str():"no solver",msg,	\
+	      (BLOCK!=NULL) ? BLOCK->level() : -99);			\
+    fflush(stdout);							\
+  }
 #else
 #  define TRACE_DD(BLOCK,SOLVER,msg) /* ... */
 #endif
@@ -104,14 +131,13 @@ EnzoSolverDd::EnzoSolverDd
 {
   // Initialize temporary fields
   Block * block = NULL;
-  TRACE_DD(block,this,"EnzoSolverDd");
 
   FieldDescr * field_descr = cello::field_descr();
   ixc_ = field_descr->insert_temporary();
 
   /// Initialize default Refresh
 
-  add_refresh(4,0,neighbor_level,sync_barrier,
+  add_refresh(4,0,neighbor_leaf,sync_barrier,
 	      enzo_sync_id_solver_dd);
 
   refresh(0)->add_field (ix_);
@@ -122,7 +148,6 @@ EnzoSolverDd::EnzoSolverDd
 
   ScalarDescr * scalar_descr_void = cello::scalar_descr_void();
   i_msg_ = scalar_descr_void->new_value(name + ":msg");
-
 }
 
 //----------------------------------------------------------------------
@@ -132,6 +157,13 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   TRACE_DD(block,this,"apply");
 
   Solver::begin_(block);
+
+  Field field = block->data()->field();
+
+  field.dimensions (ib_,&mx_,&my_,&mz_);
+  field.ghost_depth(ib_,&gx_,&gy_,&gz_);
+
+  TRACE_FIELD(block,"apply B",ib_);
 
   A_ = A;
 
@@ -158,16 +190,34 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 
   const bool in_range = (coarse_level_ <= level && level <= max_level_);
   
+  enzo_float * B = (enzo_float*) field.values(ib_);
+  enzo_float * X = (enzo_float*) field.values(ix_);
+  enzo_float * XC = (enzo_float*) field.values(ixc_);
+    
+  // clear non-leaf fields
+  if ( ! block->is_leaf()) {
+    for (int i=0; i<mx_*my_*mz_; i++) {
+      B[i] = 0.0;
+    }
+  }
+
+  for (int i=0; i<mx_*my_*mz_; i++) {
+    X[i] = 0.0;
+    XC[i] = 0.0;
+  }
+	  
   if (block->is_leaf()) {
 
-    COPY_FIELD(block,"potential","DD_po_1");
-    COPY_FIELD(block,"B","DD_B");
+    COPY_FIELD(block,ib_,"B1_dd");
     begin_solve(enzo::block(block));
 
-  } else if ( ! in_range ) {
+  } else {
+
+    if ( ! in_range ) {
     
-    call_coarse_solver(enzo::block(block));
+      call_coarse_solver(enzo::block(block));
     
+    }
   }
 }
 
@@ -176,7 +226,7 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 void EnzoSolverDd::begin_solve(EnzoBlock * enzo_block) throw()
 {
   TRACE_DD(enzo_block,this,"begin_solve");
-
+  TRACE_FIELD(enzo_block,"begin_solve B",ib_);
 
   if (enzo_block->level() == coarse_level_) {
 
@@ -211,15 +261,14 @@ void EnzoSolverDd::restrict_send(EnzoBlock * enzo_block) throw()
   int level   = index.level();  
   int ic3[3];
   index.child(level,&ic3[0],&ic3[1],&ic3[2],min_level_);
+
+  TRACE_FIELD(enzo_block,"restrict_send B",ib_);
   
   FieldMsg * msg = pack_field_(enzo_block,ib_,refresh_coarse,ic3);
 
   // Send packed field to parent
-  CkPrintf ("min_level_ = %d\n",min_level_);
-  CkPrintf ("index level = %d\n",enzo_block->level());
   Index index_parent = enzo_block->index().index_parent(min_level_);
   enzo::block_array()[index_parent].p_solver_dd_restrict_recv(msg);
-
 }
 
 //----------------------------------------------------------------------
@@ -240,11 +289,11 @@ void EnzoSolverDd::restrict_recv
 
   TRACE_DD(enzo_block,this,"restrict_recv");
   unpack_field_(enzo_block,msg,ib_,refresh_coarse);
+  TRACE_FIELD(enzo_block,"restrict_recv B",ib_);
   
   if (psync_restrict(enzo_block)->next())  {
     begin_solve(enzo_block);
   }
-
 }
 
 //----------------------------------------------------------------------
@@ -254,11 +303,11 @@ void EnzoSolverDd::call_coarse_solver(EnzoBlock * enzo_block) throw()
   TRACE_DD(enzo_block,this,"call_coarse_solver");
   Solver * solve_coarse = cello::solver(index_solve_coarse_);
 
-  solve_coarse->set_min_level(min_level_);
-  solve_coarse->set_max_level(coarse_level_);
   solve_coarse->set_sync_id (enzo_sync_id_solver_dd_coarse);
   solve_coarse->set_callback(CkIndex_EnzoBlock::p_solver_dd_solve_coarse());
   
+  COPY_FIELD(enzo_block,ib_,"B2_dd");
+  TRACE_FIELD(enzo_block,"coarse_solve B",ib_);
   solve_coarse->set_field_x (ixc_);
   solve_coarse->set_field_b (ib_);
 
@@ -271,16 +320,28 @@ void EnzoSolverDd::call_coarse_solver(EnzoBlock * enzo_block) throw()
 void EnzoBlock::p_solver_dd_solve_coarse()
 {
   TRACE_DD(this,solver(),"p_solver_dd_solve_coarse");
-  static_cast<EnzoSolverDd*> (solver())->continue_after_coarse_solve(this);
+
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_dd_barrier(NULL), 
+		      enzo::block_array());
+  contribute(callback);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSolverDd::continue_after_coarse_solve(EnzoBlock * enzo_block) throw()
 {
+  TRACE_FIELD(enzo_block,"coarse_solve XC",ixc_);
   TRACE_DD(enzo_block,this,"continue_after_coarse_solve");
+  COPY_FIELD(enzo_block,ixc_,"XC1_dd");
 
   prolong(enzo_block);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::r_solver_dd_barrier(CkReductionMsg * msg)
+{
+  static_cast<EnzoSolverDd*> (solver())->prolong(this);
 }
 
 //----------------------------------------------------------------------
@@ -302,8 +363,10 @@ void EnzoSolverDd::prolong(EnzoBlock * enzo_block) throw()
   }
 
   if (coarse_level_ < level && level <= max_level_) {
+    TRACE_DD(enzo_block,this,"call_solver_dd_prolong_recv_A");
     enzo_block->solver_dd_prolong_recv(NULL);
   } else {
+    TRACE_DD(enzo_block,this,"call_call_domain_solver_A");
     call_domain_solver (enzo_block);
   }
 }
@@ -319,10 +382,12 @@ void EnzoSolverDd::prolong_send_(EnzoBlock * enzo_block) throw()
 
   while (it_child.next(ic3)) {
 
+    TRACE_FIELD(enzo_block,"prolong_send XC",ixc_);
     FieldMsg * msg = pack_field_(enzo_block,ixc_,refresh_fine,ic3);
     
     Index index_child = enzo_block->index().index_child(ic3,min_level_);
 
+    TRACE_DD(enzo_block,this,"call_solver_dd_prolong_recv_B");
     enzo::block_array()[index_child].p_solver_dd_prolong_recv(msg);
 
   }
@@ -344,20 +409,44 @@ void EnzoBlock::solver_dd_prolong_recv(FieldMsg * msg)
 void EnzoSolverDd::prolong_recv
 (EnzoBlock * enzo_block, FieldMsg * msg) throw()
 {
-  TRACE_DD(enzo_block,this,"prolong_recv");
+  
+  TRACE_DD(enzo_block,this,"prolong_recv_1");
   // Save message
   if (msg != NULL) *pmsg(enzo_block) = msg;
+  TRACE_DD(enzo_block,this,"prolong_recv_2");
 
   // Return if not ready yet
   if (! psync_prolong(enzo_block)->next() ) return;
+  TRACE_DD(enzo_block,this,"prolong_recv_3");
 
   // Restore saved message then clear
   msg = *pmsg(enzo_block);
   *pmsg(enzo_block) = NULL;
 
   unpack_field_(enzo_block,msg,ixc_,refresh_fine);
-  
+  TRACE_FIELD(enzo_block,"prolong_recv XC",ixc_);
+
+  // copy X = XC
+  // copy X_copy = XC (using Solver::reuse_solution_(cycle) )
+  Field field = enzo_block->data()->field();
+  enzo_float * x = (enzo_float *) field.values(ix_);
+  enzo_float * xc =  (enzo_float *) field.values(ixc_);
+  enzo_float * x_copy = (enzo_float *) field.values("X_copy");
+  for (int i=0; i<mx_*my_*mz_; i++) x[i] = xc[i];
+  for (int i=0; i<mx_*my_*mz_; i++) x_copy[i] = xc[i];
+  TRACE_FIELD(enzo_block,"prolong_recv X",ix_);
+
+  COPY_FIELD(enzo_block,ixc_,"XC2_dd");
+  TRACE_DD(enzo_block,this,"call_call_domain_solver_B");
   call_domain_solver(enzo_block);
+
+  if ( ! is_finest_(enzo_block) ) {
+
+    TRACE_DD(enzo_block,this,"call_call_domain_solver_C");
+    prolong_send_ (enzo_block);
+      
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -373,6 +462,8 @@ void EnzoSolverDd::call_domain_solver(EnzoBlock * enzo_block) throw()
   solve_domain->set_field_x (ix_);
   solve_domain->set_field_b (ib_);
 
+  COPY_FIELD(enzo_block,ib_,"B3_dd");
+  COPY_FIELD(enzo_block,ix_,"X1_dd");
   solve_domain->apply(A_,enzo_block);
 }
 
@@ -388,15 +479,28 @@ void EnzoBlock::p_solver_dd_solve_domain()
 
 void EnzoSolverDd::continue_after_domain_solve(EnzoBlock * enzo_block) throw()
 {
+  TRACE_FIELD(enzo_block,"domain_solve XC",ixc_);
+  TRACE_FIELD(enzo_block,"domain_solve X",ix_);
   TRACE_DD(enzo_block,this,"continue_after_domain_solve");
-  call_last_smoother(enzo_block);
+  COPY_FIELD(enzo_block,ix_,"X2_dd");
+  CkCallback callback(CkIndex_EnzoBlock::r_solver_dd_end(NULL), 
+		      enzo::block_array());
+  enzo_block->contribute(callback);
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::r_solver_dd_end(CkReductionMsg * msg)
+{
+  static_cast<EnzoSolverDd*> (solver())->call_last_smoother(this);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSolverDd::call_last_smoother(EnzoBlock * enzo_block) throw()
 {
-  TRACE_DD(enzo_block,this,"call_last_solver");
+  TRACE_DD(enzo_block,this,"call_last_smoother");
   Solver * smooth_last = cello::solver(index_solve_smooth_);
 
   smooth_last->set_sync_id (enzo_sync_id_solver_dd_smooth);
@@ -404,7 +508,9 @@ void EnzoSolverDd::call_last_smoother(EnzoBlock * enzo_block) throw()
 
   smooth_last->set_field_x(ix_);
   smooth_last->set_field_b(ib_);
+  COPY_FIELD(enzo_block,ib_,"B4_dd");
 
+  TRACE_FIELD(enzo_block,"end",ix_);
   smooth_last->apply(A_,enzo_block);
 
 }
@@ -421,7 +527,11 @@ void EnzoBlock::p_solver_dd_last_smooth()
 
 void EnzoSolverDd::continue_after_last_smooth(EnzoBlock * enzo_block) throw()
 {
+  TRACE_FIELD(enzo_block,"last_smooth XC",ixc_);
+  TRACE_FIELD(enzo_block,"last_smooth X",ix_);
   TRACE_DD(enzo_block,this,"continue_after_last_smooth");
+  COPY_FIELD(enzo_block,ix_,"X3_dd");
+
   end(enzo_block);
 }
 
@@ -429,6 +539,7 @@ void EnzoSolverDd::continue_after_last_smooth(EnzoBlock * enzo_block) throw()
 
 void EnzoSolverDd::end (Block* block) throw ()
 {
+  TRACE_FIELD(block,"end",ix_);
   TRACE_DD(block,this,"end");
   deallocate_temporary_(block);
   
@@ -442,9 +553,6 @@ FieldMsg * EnzoSolverDd::pack_field_(EnzoBlock * enzo_block,
 				     int refresh_type,
 				     int * ic3)
 {
-  Index index     = enzo_block->index();
-  const int level = index.level();  
-
   int  if3[3] = {0,0,0};
   bool lg3[3];
   for (int i=0; i<3; i++) lg3[i] = (refresh_type == refresh_fine);
@@ -490,7 +598,8 @@ void EnzoSolverDd::unpack_field_
  int refresh_type)
 {
   int if3[3] = {0,0,0};
-  bool lg3[3] = {true,true,true};
+  bool lg3[3];
+  for (int i=0; i<3; i++) lg3[i] = (refresh_type == refresh_fine);
   Refresh * refresh = new Refresh;
   refresh->add_field(index_field);
 

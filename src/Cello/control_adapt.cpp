@@ -102,12 +102,16 @@ void Block::adapt_begin_()
 
   cello::simulation()->set_phase(phase_adapt);
 
-  int level_maximum = cello::config()->mesh_max_level;
+  const int level_maximum = cello::config()->mesh_max_level;
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
 
+  const int min_face_rank = cello::config()->adapt_min_face_rank;
+  
   control_sync_neighbor (CkIndex_Block::p_adapt_called(),
-			 sync_id_adapt_begin);
+			 sync_id_adapt_begin,
+			 min_face_rank,
+			 neighbor_leaf,0);
 }
 
 //----------------------------------------------------------------------
@@ -527,7 +531,9 @@ void Block::adapt_send_level()
 
   const int level = this->level();
   const int min_face_rank = cello::config()->adapt_min_face_rank;
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+  const int min_level     = cello::config()->mesh_min_level;
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,
+					     neighbor_leaf,min_level,0);
   int of3[3];
 
   while (it_neighbor.next(of3)) {

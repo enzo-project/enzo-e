@@ -121,7 +121,22 @@ public: // interface
   
   /// Type of neighbor: level if min_level == max_level, else leaf
   int neighbor_type_() const throw() {
-    return (solve_type_ == solve_level) ? neighbor_level : neighbor_leaf;
+    int retval;
+    switch (solve_type_) {
+    case solve_level:
+      retval = neighbor_level;
+      break;
+    case solve_leaf:
+      retval = neighbor_leaf;
+      break;
+    case solve_tree:
+      retval = neighbor_tree;
+      break;
+    default:
+      retval = neighbor_unknown;
+      break;
+    }
+    return retval;
   }
 
   /// Type of synchronization: sync_face if min_level == max_level,
@@ -129,10 +144,18 @@ public: // interface
   int sync_type_() const throw() {
     int retval;
     switch (solve_type_) {
-    case solve_leaf:  retval = sync_face; break;
-    case solve_level: retval = sync_neighbor; break;
-    case solve_tree:  retval = sync_neighbor; break;
-    default:          retval = sync_unknown; break;
+    case solve_leaf:
+      retval = sync_face;
+      break;
+    case solve_level:
+      retval = sync_neighbor;
+      break;
+    case solve_tree:
+      retval = sync_neighbor;
+      break;
+    default:
+      retval = sync_unknown;
+      break;
     }
     return retval;
   }

@@ -57,7 +57,8 @@ Simulation::Simulation
   sync_output_begin_(),
   sync_output_write_(),
   sync_new_output_start_(),
-  sync_new_output_next_()
+  sync_new_output_next_(),
+  index_output_(-1)
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -117,7 +118,8 @@ Simulation::Simulation()
   sync_output_begin_(),
   sync_output_write_(),
   sync_new_output_start_(),
-  sync_new_output_next_()
+  sync_new_output_next_(),
+  index_output_(-1)
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -165,7 +167,8 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_begin_(),
     sync_output_write_(),
     sync_new_output_start_(),
-    sync_new_output_next_()
+    sync_new_output_next_(),
+    index_output_(-1)
 
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
@@ -277,6 +280,8 @@ void Simulation::pup (PUP::er &p)
 	  (msg_refine_map_.size() == 0));
 	  
   //  p | msg_refine_map_;
+  p | index_output_;
+  
 }
 
 //----------------------------------------------------------------------
