@@ -37,8 +37,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
     if (! (field_descr->is_field("metal_density"))){
       fields_to_define.push_back("metal_density");
 
-      WARNING("EnzoMethodGrackle: ",
-              "Must define metal_density to use metal cooling with Grackle. Defining");
+//      WARNING("EnzoMethodGrackle: ",
+//              "Must define metal_density to use metal cooling with Grackle. Defining");
     }
   }
 
@@ -46,15 +46,14 @@ EnzoMethodGrackle::EnzoMethodGrackle
     std::string pc1_fields[6] = {"HI_density","HII_density",
                                   "HeI_density","HeII_density","HeIII_density",
                                   "e_density"};
-    numfields = 6;
+    int numfields = 6;
 
     for(int ifield = 0; ifield < numfields; ifield++){
       if (! (field_descr->is_field( pc1_fields[ifield] ))){
         fields_to_define.push_back( pc1_fields[ifield] );
 
-        WARNING("EnzoMethodGrackle: ",
-                "Must define " + pc1_fields[ifield],
-                "if using primordial_chemistry = 1 with Grackle. Defining"); 
+//        WARNING("EnzoMethodGrackle: ",
+//                "Must define " + pc1_fields[ifield] + "if using primordial_chemistry = 1 with Grackle. Defining"); 
       }
     }
 
@@ -67,9 +66,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
         if (! (field_descr->is_field( pc2_fields[ifield] ))){
           fields_to_define.push_back( pc2_fields[ifield] );
 
-          WARNING("EnzoMethodGrackle: ",
-                  "Must define " + pc2_fields[ifield],
-                  "if using primordial_chemistry = 2 with Grackle. Defining");
+//          WARNING("EnzoMethodGrackle: ",
+//                  "Must define " + pc2_fields[ifield] + "if using primordial_chemistry = 2 with Grackle. Defining");
         }
       }
 
@@ -81,9 +79,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
           if (! (field_descr->is_field( pc3_fields[ifield] ))){
             fields_to_define.push_back( pc3_fields[ifield] );
 
-            WARNING("EnzoMethodGrackle: ",
-                    "Must define " + pc3_fields[ifield],
-                    "if using primordial_chemistry = 3 with Grackle. Defining");
+//            WARNING("EnzoMethodGrackle: ",
+ //                   "Must define " + pc3_fields[ifield] +  "if using primordial_chemistry = 3 with Grackle. Defining");
           }
         }
 
@@ -98,9 +95,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
     if ( !(field_descr->is_field("specific_heating_rate"))){
       fields_to_define.push_back("specific_heating_rate");
 
-      WARNING("EnzoMethodGrackle : ",
-             " Must define specific_heating_rate",
-             " if using specific heating rate with Grackle. Defining")
+//      WARNING("EnzoMethodGrackle : ",
+//             " Must define specific_heating_rate if using specific heating rate with Grackle. Defining")
     }
   }
 
@@ -108,15 +104,14 @@ EnzoMethodGrackle::EnzoMethodGrackle
     if ( !(field_descr->is_field("volumetric_heating_rate"))){
       fields_to_define.push_back("volumetric_heating_rate");
 
-      WARNING("EnzoMethodGrackle: ",
-             "Must define volumetric_heating_rate field ",
-             "if using volumetric heating with Grackle. Defining.");
+//      WARNING("EnzoMethodGrackle: ",
+//             "Must define volumetric_heating_rate field if using volumetric heating with Grackle. Defining.");
     }
   }
 
   // now define the fields
   for (int ifield = 0; ifield < fields_to_define.size(); ifield++){
-    field_descr->insert_permanant( fields_to_define[ifield] );
+    field_descr->insert_permanent( fields_to_define[ifield] );
   }
 
   EnzoUnits * enzo_units = enzo::units();
@@ -466,7 +461,7 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
       "Error in calculate_cooling_time.\n");
     }
 
-    for (int i = 0; i < size; i++) dt = std::min(dt, cooling_time[i]);
+    for (int i = 0; i < size; i++) dt = std::min(dt, std::abs(cooling_time[i]));
 
     if (delete_cooling_time){
       delete [] cooling_time;
