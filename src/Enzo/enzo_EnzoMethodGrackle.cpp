@@ -389,42 +389,6 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     this->ResetEnergies(enzo_block);
   }
 
-  /* Re-compute temperature and pressure if they are being tracked */
-
-  const int in = cello::index_static();
-  int comoving_coordinates = enzo_config->physics_cosmology;
-
-  if (field.is_field("pressure")){
-    EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
-                                          comoving_coordinates);
-    compute_pressure.compute_(enzo_block, &grackle_units_,
-                             &grackle_fields_);
-  }
-
-  if (field.is_field("temperature")){
-    EnzoComputeTemperature compute_temperature
-      (enzo_config->ppm_density_floor,
-       enzo_config->ppm_temperature_floor,
-       enzo_config->ppm_mol_weight,
-       comoving_coordinates);
-
-    // compute temperature, and note that
-    // we already computed pressure above - do not do this again
-    compute_temperature.compute_(enzo_block, false,
-                                &grackle_units_, &grackle_fields_);
-  }
-
-  /* Compute cooling time if it is being tracked */
-
-  enzo_float * cooling_time = field.is_field("cooling_time") ?
-                    (enzo_float *) field.values("cooling_time") : NULL;
-  if (cooling_time){
-    if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == ENZO_FAIL) {
-      ERROR("EnzoMethodGrackle::compute()",
-      "Error in calculate_cooling_time.\n");
-    }
- }
-
   return;
 }
 #endif // config use grackle
