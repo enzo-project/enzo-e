@@ -877,6 +877,14 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
          "ParticleFile not found", inFile.is_open());
 
   int i = 0;
+  double lu = cello::pc_cm;
+  double mu = cello::mass_solar / enzo_units->mass();
+  if (this->gas_fraction_ <= 0.2){
+    lu = cello::kpc_cm; // HACK AT THE MOMENT - use old units for MW-size galaxy
+    mu = 1.0;
+  }
+
+
   while(inFile >>
         position[0][i] >> position[1][i] >> position[2][i] >>
         velocity[0][i] >> velocity[1][i] >> velocity[2][i] >>
@@ -888,16 +896,17 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
     // velocities in km / s
     // mass in Msun
 
+    
+
     for (int dim = 0; dim < cello::rank(); dim++){
 
-      position[dim][i] = position[dim][i] * cello::pc_cm /
+      position[dim][i] = position[dim][i] * lu  /
                                enzo_units->length() + this->center_position_[dim];
       velocity[dim][i] = velocity[dim][i] * 1000.0 /
                                enzo_units->velocity();
     }
 
-    mass[i]          = mass[i] * cello::mass_solar /
-                       enzo_units->mass();
+    mass[i]          = mass[i] * mu;
 
     i++;
   }
