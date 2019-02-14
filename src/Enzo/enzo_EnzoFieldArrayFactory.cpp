@@ -63,7 +63,7 @@ EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
   } else if (dim == 1){
     return t.subarray(0, t.dim_size(2), 1, t.dim_size(1) - 1, 0, t.dim_size(0));
   } else {
-    return t.subarray(1, t.dim_size(2) - 1, 1, t.dim_size(1), 0, t.dim_size(0));
+    return t.subarray(1, t.dim_size(2) - 1, 0, t.dim_size(1), 0, t.dim_size(0));
   }
 }
 
