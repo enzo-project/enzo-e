@@ -240,10 +240,15 @@ protected:
       dir = name_dir;
       boost::filesystem::path directory(name_dir);
       if (! boost::filesystem::is_directory(directory)) {
+
+        // When running in parallel, need to double check and make sure
+        // directory wasn't created before failing
+        bool result  = (boost::filesystem::create_directory(directory));
+        result = result || boost::filesystem::is_directory(directory);
+
 	ASSERT1 ("Output::directory()",
 		 "Error creating directory %s",
-		 name_dir.c_str(),
-		 (boost::filesystem::create_directory(directory)));
+		 name_dir.c_str(), result);
       }
     }
 
