@@ -239,11 +239,15 @@ protected:
     if (name_dir != "") {
       dir = name_dir;
       boost::filesystem::path directory(name_dir);
+
       if (! boost::filesystem::is_directory(directory)) {
+
+        bool result  = (boost::filesystem::create_directory(directory));
+        result = result || boost::filesystem::is_directory(directory);
+
 	ASSERT1 ("Output::directory()",
 		 "Error creating directory %s",
-		 name_dir.c_str(),
-		 (boost::filesystem::create_directory(directory)));
+		 name_dir.c_str(), result);
       }
     }
 
