@@ -112,7 +112,7 @@ use_gprof = 0
 # WARNING: must update grackle-related lines in src/Enzo/enzo.ci
 #----------------------------------------------------------------------
 
-use_grackle = 0
+use_grackle = 1
 
 #----------------------------------------------------------------------
 # Whether to run the test programs using valgrind to check for memory leaks
@@ -145,7 +145,7 @@ ip_charm = '4'
 # Whether this is a Mercurial repository
 #----------------------------------------------------------------------
 
-have_mercurial = 1
+have_mercurial = 0
 
 #----------------------------------------------------------------------
 # Whether to use the jemalloc library for memory allocation
