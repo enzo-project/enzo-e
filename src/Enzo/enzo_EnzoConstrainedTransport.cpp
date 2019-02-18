@@ -365,7 +365,6 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 
   // We could simplify this iteration by using subarrays - However, it would be
   // more complicated
-  CkPrintf("Dim = %d - Delta B:\n",dim);
   for (int iz=zstart; iz<zstop; iz++) {
     for (int iy=j_y+k_y; iy<out_bfield.dim_size(1)-j_y-k_y; iy++) {
       for (int ix=j_x+k_x; ix<out_bfield.dim_size(0)-j_x-k_x; ix++) {
@@ -387,22 +386,12 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 	  E_j_term = 0.;
 	}
 
-	if (iy == 1 && iz == 1){
-	  CkPrintf("%.15g, %.15g, %.15g\n", -E_k_term + E_j_term,
-		   cur_bfield(iz,iy,ix),
-		   cur_bfield(iz,iy,ix) - E_k_term + E_j_term);
-	}
-
 	// Bnew_i(k, j, i-1/2) =
 	//   Bold_i(k, j, i-1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
 	out_bfield(iz,iy,ix) = cur_bfield(iz,iy,ix) - E_k_term + E_j_term;
       }
     }
   }
-  fflush(stdout);
-  //if (dim == 2){
-  //  ASSERT("EnzoConstrainedTransport","EARLY EXIT",false);
-  //}
 }
 
 // This method also intentionally includes calculation of bfields in the
@@ -431,18 +420,13 @@ void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
 						    coord.i_axis());
   // Get the view of the Face-center field that starting from i=1
   EFlt3DArray bi_right = coord.left_edge_offset(bi_left,0,0,1);
-  CkPrintf("Dim = %d - Bcenter:\n",dim);
+
   // iteration limits are compatible with a 2D grid and 3D grid
   for (int iz=0; iz<b_center.dim_size(2); iz++) {
     for (int iy=0; iy<b_center.dim_size(1); iy++) {
       for (int ix=0; ix<b_center.dim_size(0); ix++) {
 	b_center(iz,iy,ix) = 0.5*(bi_left(iz,iy,ix) + bi_right(iz,iy,ix));
-
-	if (iy == 1 && iz == 1){
-	  CkPrintf("%.15g\n", b_center(iz,iy,ix));
-	}
       }
     }
   }
-  fflush(stdout);
 }

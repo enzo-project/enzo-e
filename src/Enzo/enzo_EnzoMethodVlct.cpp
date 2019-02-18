@@ -389,16 +389,8 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   EnzoFieldArrayFactory array_factory(block);
   EFlt3DArray temp,bfield, l_bfield,r_bfield;
   bfield = array_factory.interior_bfieldi(cur_bfieldi_group, dim);
-  l_bfield = array_factory.load_temp_interface_grouping_field(priml_group,
-							      "bfield", dim,
-							      dim != 0,
-							      dim != 1,
-							      dim != 2);
-  r_bfield = array_factory.load_temp_interface_grouping_field(primr_group,
-							      "bfield", dim,
-							      dim != 0,
-							      dim != 1,
-							      dim != 2);
+  l_bfield = array_factory.reconstructed_field(priml_group, "bfield", dim, dim);
+  r_bfield = array_factory.reconstructed_field(primr_group, "bfield", dim, dim);
 
   // All 3 array objects are the same shape
   // Iteration limits are generalized for 2D and 3D grids
@@ -666,8 +658,14 @@ void prep_reused_temp_field_(Field &field, std::string field_name,
     id = field_descr->insert_temporary(field_name);
     field_descr->set_centering(id,cx,cy,cz);
   }
+
+  
   // allocate temporary field
-  field.allocate_temporary(id);
+  // this last check allows us to make temporary field "permanent" for debugging
+  // purposes
+  if (!field.is_permanent(id)){
+    field.allocate_temporary(id);
+  }
 }
 
 // Helper function used to prepare groupings of temporary fields
