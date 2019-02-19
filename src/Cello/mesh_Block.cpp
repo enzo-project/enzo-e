@@ -446,13 +446,18 @@ ItFace Block::it_face
 
 //----------------------------------------------------------------------
 
-ItNeighbor Block::it_neighbor (int min_face_rank, Index index) throw()
+ItNeighbor Block::it_neighbor (int min_face_rank, Index index,
+			       int neighbor_type,
+			       int min_level, int coarse_level) throw()
 {
   int n3[3];
   size_array(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
-  return ItNeighbor (this,min_face_rank,periodic,n3,index);
+
+  return ItNeighbor
+    (this,min_face_rank,periodic,n3,index,
+     neighbor_type,min_level,coarse_level);
 }
 
 //----------------------------------------------------------------------
@@ -996,7 +1001,7 @@ void Block::check_leaf_()
       ((  is_leaf() && children_.size() != 0) ||
        (! is_leaf() && children_.size() == 0))) {
 
-    WARNING3("Block::refresh_begin_()",
+    WARNING3("Block::check_leaf_()",
 	     "%s: is_leaf() == %s && children_.size() == %d",
 	     name_.c_str(), is_leaf()?"true":"false",
 	     children_.size());
@@ -1009,8 +1014,8 @@ void Block::check_leaf_()
 void Block::check_delete_()
 {
   if (delete_) {
-    WARNING1("refresh_begin_()",
-	     "%s: refresh called on deleted Block",
+    WARNING1("Block::check_delete_()",
+	     "%s: Block exists but is marked for deletion",
 	     name_.c_str());
     return;
   }

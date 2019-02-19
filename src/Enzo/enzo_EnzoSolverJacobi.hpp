@@ -20,6 +20,9 @@ public: // interface
   EnzoSolverJacobi(std::string name,
 		   std::string field_x,
 		   std::string field_b,
+		   int monitor_iter,
+		   int restart_cycle,
+		   int solve_type,
 		   double weight=1.0,
 		   int iter_max = 1) throw();
 
@@ -51,7 +54,7 @@ public: // interface
     p | n_;
   }
 
-public: // virtual functions
+public: // virtual methods
 
   /// Solve the linear system Ax = b
   virtual void apply ( std::shared_ptr<Matrix> A, Block * block) throw();
@@ -59,15 +62,18 @@ public: // virtual functions
   /// Type of this solver
   virtual std::string type() const { return "jacobi"; }
 
-public: // functions
+public: // methods
 
   /// Continue after refresh to perform Jacobi update
   void compute (Block * block);
   
-protected: // functions
+protected: // methods
 
   /// Implementation of solver() for given precision 
   void apply_(Block * block);
+
+  /// Refresh after computing
+  void do_refresh_(Block * block);
 
   /// Allocate temporary Fields
   void allocate_temporary_(Field field, Block * block = NULL)

@@ -142,10 +142,16 @@ use_projections = 0
 ip_charm = '4'
 
 #----------------------------------------------------------------------
+# Whether this is a Git repository
+#----------------------------------------------------------------------
+
+have_git = 1
+
+#----------------------------------------------------------------------
 # Whether this is a Mercurial repository
 #----------------------------------------------------------------------
 
-have_mercurial = 1
+have_mercurial = 0
 
 #----------------------------------------------------------------------
 # Whether to use the jemalloc library for memory allocation
@@ -248,9 +254,9 @@ define_charm =        ['CONFIG_USE_CHARM']  # used for Grackle
 
 define_python_lt_27 = ['CONFIG_PYTHON_LT_27']
 
-# Mercurial defines
+# Version control defines (Git or Mercurial)
 
-define_have_mercurial = ['CONFIG_HAVE_MERCURIAL']
+define_have_version_control = ['CONFIG_HAVE_VERSION_CONTROL']
 
 
 #======================================================================
@@ -371,7 +377,7 @@ if (debug_verbose != 0): defines = defines + define_debug_verbose
 if (memory != 0):        defines = defines + define_memory
 if (new_charm != 0):     defines = defines + define_new_charm
 if (python_lt_27 != 0):  defines = defines + define_python_lt_27
-if (have_mercurial != 0):defines = defines + define_have_mercurial
+if (have_git != 0 or have_mercurial != 0 ):defines = defines + define_have_version_control
 
 defines = defines + define_charm
 defines = defines + define_cello
@@ -579,13 +585,20 @@ else:
 cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
 
 #----------
-# Both Python version 2.7 is required, and Mercurial must be installed
+# Both Python version 2.7 is required, and git must be installed
 
-if (python_lt_27 == 0 and have_mercurial):
+if (python_lt_27 == 0 and have_git):
 
      cello_def.write ("#define CELLO_CHANGESET "
-   		      "\""+subprocess.check_output
-		      (["hg", "id", "-n"]).rstrip()+"\"\n" )
+		      "\""+subprocess.check_output
+		      (["git", "rev-parse", "HEAD"]).rstrip()+"\"\n" )
+
+elif (python_lt_27 == 0 and have_mercurial):
+
+     cello_def.write ("#define CELLO_CHANGESET "
+                      "\""+subprocess.check_output
+                      (["hg","id","-n"]).rstrip()+"\"\n" )
+
 else:
      cello_def.write ("#define CELLO_CHANGESET \"unknown\"\n" )
 
@@ -610,7 +623,9 @@ cello_def.close()
 #======================================================================
 
 charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
+cpp_builder = Builder (action="/usr/bin/cpp -E $_CPPDEFFLAGS $SOURCE > $TARGET")
 env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+env.Append(BUILDERS = { 'CppBuilder'   : cpp_builder })
 
 Export('env')
 Export('parallel_run')

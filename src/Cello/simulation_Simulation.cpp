@@ -47,8 +47,9 @@ Simulation::Simulation
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
-  scalar_descr_int_(NULL),
+  scalar_descr_long_double_(NULL),
   scalar_descr_double_(NULL),
+  scalar_descr_int_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
   field_descr_(NULL),
@@ -56,7 +57,8 @@ Simulation::Simulation
   sync_output_begin_(),
   sync_output_write_(),
   sync_new_output_start_(),
-  sync_new_output_next_()
+  sync_new_output_next_(),
+  index_output_(-1)
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -107,8 +109,8 @@ Simulation::Simulation()
   schedule_balance_(NULL),
   monitor_(NULL),
   hierarchy_(NULL),
+  scalar_descr_long_double_(NULL),
   scalar_descr_int_(NULL),
-  scalar_descr_double_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
   field_descr_(NULL),
@@ -116,7 +118,8 @@ Simulation::Simulation()
   sync_output_begin_(),
   sync_output_write_(),
   sync_new_output_start_(),
-  sync_new_output_next_()
+  sync_new_output_next_(),
+  index_output_(-1)
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -155,8 +158,8 @@ Simulation::Simulation (CkMigrateMessage *m)
     schedule_balance_(NULL),
     monitor_(NULL),
     hierarchy_(NULL),
+    scalar_descr_long_double_(NULL),
     scalar_descr_int_(NULL),
-    scalar_descr_double_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
     field_descr_(NULL),
@@ -164,7 +167,8 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_begin_(),
     sync_output_write_(),
     sync_new_output_start_(),
-    sync_new_output_next_()
+    sync_new_output_next_(),
+    index_output_(-1)
 
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
@@ -225,10 +229,12 @@ void Simulation::pup (PUP::er &p)
   if (up) hierarchy_ = new Hierarchy;
   p | *hierarchy_;
 
-  if (up) scalar_descr_int_ = new ScalarDescr;
-  p | *scalar_descr_int_;
+  if (up) scalar_descr_long_double_ = new ScalarDescr;
+  p | *scalar_descr_long_double_;
   if (up) scalar_descr_double_ = new ScalarDescr;
   p | *scalar_descr_double_;
+  if (up) scalar_descr_int_ = new ScalarDescr;
+  p | *scalar_descr_int_;
   if (up) scalar_descr_sync_ = new ScalarDescr;
   p | *scalar_descr_sync_;
   if (up) scalar_descr_void_ = new ScalarDescr;
@@ -274,6 +280,8 @@ void Simulation::pup (PUP::er &p)
 	  (msg_refine_map_.size() == 0));
 	  
   //  p | msg_refine_map_;
+  p | index_output_;
+  
 }
 
 //----------------------------------------------------------------------
@@ -468,10 +476,11 @@ void Simulation::initialize_monitor_() throw()
 
 void Simulation::initialize_data_descr_() throw()
 {
-  scalar_descr_int_    = new ScalarDescr;
-  scalar_descr_double_ = new ScalarDescr;
-  scalar_descr_sync_   = new ScalarDescr;
-  scalar_descr_void_   = new ScalarDescr;
+  scalar_descr_long_double_ = new ScalarDescr;
+  scalar_descr_double_      = new ScalarDescr;
+  scalar_descr_int_         = new ScalarDescr;
+  scalar_descr_sync_        = new ScalarDescr;
+  scalar_descr_void_        = new ScalarDescr;
 
   //--------------------------------------------------
   // parameter: Field : list
@@ -672,7 +681,7 @@ void Simulation::initialize_hierarchy_() throw()
   const int refinement = 2;
 
   hierarchy_ = factory()->create_hierarchy 
-    (rank_,refinement,config_->mesh_max_level);
+    (refinement,config_->mesh_max_level);
 
   // Domain extents
 

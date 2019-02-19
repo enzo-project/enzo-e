@@ -22,8 +22,14 @@
 	    CkMyPe(),__FILE__,__LINE__,					\
 	    name_.c_str(), A);						\
   fflush(stdout);						
+# define TRACE_SYNC(A)							\
+  CkPrintf ("%d %s:%d %s TRACE_CONTROL %s entry %d id %d\n",	\
+	    CkMyPe(),__FILE__,__LINE__,					\
+	    name_.c_str(), A,entry_point,id_sync);			\
+  fflush(stdout);						
 #else
 # define TRACE_CONTROL(A) ;
+# define TRACE_SYNC(A) ;
 #endif
 
 //----------------------------------------------------------------------
@@ -126,7 +132,10 @@ void Block::refresh_exit_()
 
   control_sync (refresh_.back()->callback(),
 		refresh_.back()->sync_type(),
-		refresh_.back()->sync_exit());
+		refresh_.back()->sync_exit(),
+		refresh_.back()->min_face_rank(),
+		refresh_.back()->neighbor_type(),
+		refresh_.back()->root_level());
     
 #ifdef DEBUG_REFRESH 
  printf ("%d DEBUG_REFRESH Calling Block %s refresh_pop_back(%p)\n",
@@ -134,36 +143,42 @@ void Block::refresh_exit_()
   fflush(stdout);
       
 #endif
-  //  Refresh * refresh = refresh_.back();
-  //  delete refresh;
-  //  refresh_.pop_back();
+  
+  //   Refresh * refresh = refresh_.back();
+  //   delete refresh;
+  //   refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
 
-void Block::control_sync (int entry_point, int sync, int id)
+void Block::control_sync (int entry_point, int sync_type, int id_sync,
+			  int min_face_rank, int neighbor_type, int root_level)
 {
   TRACE_CONTROL("control_sync()");
+  TRACE_SYNC("control_sync()");
 
-  if (sync == sync_quiescence) {
+  if (sync_type == sync_quiescence) {
 
     control_sync_quiescence (entry_point);
 
-  } else if (sync == sync_neighbor) {
+  } else if (sync_type == sync_neighbor) {
 
-    control_sync_neighbor (entry_point,id);
+    control_sync_neighbor
+      (entry_point,id_sync,min_face_rank, neighbor_type,root_level);
 
-  } else if (sync == sync_face) {
+  } else if (sync_type == sync_face) {
  
-    control_sync_face (entry_point,id);
+    control_sync_face (entry_point,id_sync,min_face_rank);
 
-  } else if (sync == sync_barrier) {
+  } else if (sync_type == sync_barrier) {
 
     control_sync_barrier (entry_point);
 
   } else {
 
-     ERROR1 ("Block::control_sync()",  "Unknown sync type %d", sync);    
+     ERROR2 ("Block::control_sync()",
+	     "Unknown sync type %d neighbor type %d",
+	     sync_type,neighbor_type);    
 
   }
 }
@@ -185,9 +200,13 @@ void Block::control_sync_barrier (int entry_point)
 
 //----------------------------------------------------------------------
 
-void Block::control_sync_neighbor(int entry_point, int id_sync)
+void Block::control_sync_neighbor(int entry_point, int id_sync,
+				  int min_face_rank,
+				  int neighbor_type,
+				  int root_level)
 {
   TRACE_CONTROL("control_sync_neighbor");
+  TRACE_SYNC("control_sync_neighbhor()");
 
   if ( ! is_leaf() ) {
 
@@ -207,11 +226,11 @@ void Block::control_sync_neighbor(int entry_point, int id_sync)
 	    CkMyPe(), name().c_str(),id_sync);
 #endif    
 
-  const int min_face_rank = 0;
-
   int num_neighbors = 0;
 
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+  const int min_level = cello::config()->mesh_min_level;
+  
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,neighbor_type,min_level,root_level);
 
   int of3[3];  // ignored
   while (it_neighbor.next(of3)) {
@@ -221,7 +240,7 @@ void Block::control_sync_neighbor(int entry_point, int id_sync)
     Index index_neighbor = it_neighbor.index();
 
 #ifdef DEBUG_CONTROL
-    CkPrintf ("%s calling p_control_sync_count (%d %d 0)\n",
+    CkPrintf ("%s DEBUG_CONTROL calling p_control_sync_count (%d %d 0)\n",
 	      name().c_str(),entry_point,id_sync);
     fflush(stdout);
 #endif    
@@ -229,8 +248,8 @@ void Block::control_sync_neighbor(int entry_point, int id_sync)
 
   }
 #ifdef DEBUG_CONTROL
-    CkPrintf ("%s calling p_control_sync_count (%d %d 0)\n",
-	      name().c_str(), entry_point,id_sync);
+    CkPrintf ("%s DEBUG_CONTROL calling p_control_sync_count count %d (%d %d 0)\n",
+	      name().c_str(), num_neighbors, entry_point,id_sync);
     fflush(stdout);
 #endif    
   control_sync_count (entry_point,id_sync,num_neighbors + 1);
@@ -239,12 +258,11 @@ void Block::control_sync_neighbor(int entry_point, int id_sync)
 
 //----------------------------------------------------------------------
 
-void Block::control_sync_face(int entry_point, int id_sync)
+void Block::control_sync_face(int entry_point, int id_sync, int min_face_rank)
 {
 
   TRACE_CONTROL("control_sync_face");
-
-  const int min_face_rank = 0;
+  TRACE_SYNC("control_sync_face()");
 
   int num_faces = 0;
 
@@ -277,7 +295,7 @@ void Block::control_sync_count (int entry_point, int id_sync, int count)
     sync_max_[id_sync] = 0;
   }
 #ifdef DEBUG_CONTROL
-  CkPrintf ("%s control_sync_count %d %d %d/%d\n",
+  CkPrintf ("%s DEBUG_CONTROL control_sync_count %d %d %d/%d\n",
 	    name().c_str(),entry_point,id_sync,count,sync_max_[id_sync]);
   fflush(stdout);
 #endif

@@ -12,15 +12,16 @@
 
 #include "charm_simulation.hpp"
 #include "charm_mesh.hpp"
+
 // #define DEBUG_REFRESH
 
 #ifdef DEBUG_REFRESH
-#  define TRACE_REFRESH(msg) \
-  printf ("%d %s:%d %s TRACE_REFRESH %s\n",CkMyPe(),	\
-	  __FILE__,__LINE__,name().c_str(),msg);	\
+#  define TRACE_REFRESH(msg,REFRESH)				\
+  printf ("%d %s:%d %s TRACE_REFRESH %s type %d\n",CkMyPe(),	\
+	  __FILE__,__LINE__,name().c_str(),msg,REFRESH->sync_type());	\
   fflush(stdout);
 #else
-#  define TRACE_REFRESH(msg) /* NOTHING */
+#  define TRACE_REFRESH(msg,REFRESH) /* NOTHING */
 #endif
 
 //----------------------------------------------------------------------
@@ -28,8 +29,8 @@
 void Block::refresh_enter (int callback, Refresh * refresh) 
 {
 #ifdef DEBUG_REFRESH
-  CkPrintf ("%d %s:%d DEBUG REFRESH %s Block::set_refresh (%p)\n",
-	    CkMyPe(), __FILE__,__LINE__,name().c_str(),refresh);
+  CkPrintf ("%d %s:%d DEBUG REFRESH %s Block::refresh_enter(%p) callback %d refresh callback %d\n",
+	    CkMyPe(), __FILE__,__LINE__,name().c_str(),refresh,callback,refresh->callback());
   fflush(stdout);
 #endif
   
@@ -46,9 +47,9 @@ void Block::refresh_enter (int callback, Refresh * refresh)
 
 void Block::refresh_begin_() 
 {
-  TRACE_REFRESH("refresh_begin_()");
 
   Refresh * refresh = this->refresh();
+  TRACE_REFRESH("refresh_begin_()",refresh);
 
   check_leaf_();
 
@@ -58,18 +59,21 @@ void Block::refresh_begin_()
 
   control_sync (CkIndex_Block::p_refresh_continue(),
 		refresh->sync_type(),
-		refresh->sync_load());
+		refresh->sync_load(),
+		refresh->min_face_rank(),
+		refresh->neighbor_type(),
+		refresh->root_level());
 }
 
 //----------------------------------------------------------------------
 
 void Block::refresh_continue()
 {
-  TRACE_REFRESH("refresh_continue_()");
 
   // Refresh if Refresh object exists and have data
 
   Refresh * refresh = this->refresh();
+  TRACE_REFRESH("refresh_continue_()",refresh);
 
   if ( refresh && refresh->active() ) {
 
@@ -106,7 +110,6 @@ void Block::refresh_continue()
 void Block::p_refresh_store (MsgRefresh * msg)
 {
 
-  //  TRACE_REFRESH("p_refresh_store()");
   
   performance_start_(perf_refresh_store);
 
@@ -115,7 +118,8 @@ void Block::p_refresh_store (MsgRefresh * msg)
   delete msg;
 
   Refresh * refresh = this->refresh();
-  
+  TRACE_REFRESH("p_refresh_store()",refresh);
+
   control_sync_count(CkIndex_Block::p_refresh_exit(),
 		     refresh->sync_store(),0);
   
@@ -134,11 +138,16 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
   const int min_face_rank = refresh->min_face_rank();
   const int neighbor_type = refresh->neighbor_type();
 
-  if (neighbor_type == neighbor_leaf) {
+  if (neighbor_type == neighbor_leaf ||
+      neighbor_type == neighbor_tree) {
 
     // Loop over neighbor leaf Blocks (not necessarily same level)
 
-    ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+    const int min_level = cello::config()->mesh_min_level;
+    
+    ItNeighbor it_neighbor =
+      this->it_neighbor(min_face_rank,index_,
+			neighbor_type,min_level,refresh->root_level());
 
     int if3[3];
     while (it_neighbor.next(if3)) {
@@ -358,7 +367,7 @@ int Block::particle_create_array_neighbors_
   const int level = this->level();
 
   const int min_face_rank = refresh->min_face_rank();
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,neighbor_leaf,0,0);
 
   int il = 0;
 
@@ -470,7 +479,7 @@ void Block::particle_apply_periodic_update_
 
   // Compute position updates for particles crossing periodic boundaries
 
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_);
+  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,neighbor_leaf,0,0);
 
   int il=0;
 

@@ -48,8 +48,14 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    WARNING ("Field::pup()",
-	     "Skipping since Field is intended as transient objects");
+    static bool warn[CONFIG_NODE_SIZE] = {false};
+    const int in = cello::index_static();
+    if (! warn[in]) {
+    
+      WARNING ("Field::pup()",
+	       "Skipping since Field is intended as transient objects");
+      warn[in]=true;
+    }
   };
   
   /// Return the field descriptor for this field
@@ -156,13 +162,29 @@ public: // interface
   int bytes_per_element(int id) const throw()
   { return field_descr_->bytes_per_element(id); }
 
-  /// Whether the field is permanent or temporary
+  /// Whether the field is permanent
+  bool is_permanent (std::string field) const throw()
+  { return field_descr_->is_permanent(field_descr_->field_id(field)); }
+
+  /// Whether the field is permanent
   bool is_permanent (int id_field) const throw()
   { return field_descr_->is_permanent(id_field); }
 
   /// Return the number of permanent fields
   int num_permanent() const throw()
   { return field_descr_->num_permanent(); }
+
+  /// Whether the field is temporary
+  bool is_temporary (std::string field) const throw()
+  { return field_descr_->is_temporary(field_descr_->field_id(field)); }
+
+  /// Whether the field is temporary
+  bool is_temporary (int id_field) const throw()
+  { return field_descr_->is_temporary(id_field); }
+
+  /// Return the number of temporary fields
+  int num_temporary() const throw()
+  { return field_descr_->num_temporary(); }
 
   //--------------------------------------------------
   // History operations
@@ -285,10 +307,14 @@ public: // interface
   { field_data_->allocate_permanent(field_descr_,ghosts_allocated); }
 
   /// Allocate storage for the temporary fields
+  void allocate_temporary(std::string field) throw ()
+  { allocate_temporary(field_id(field)); }
   void allocate_temporary(int id) throw ()
   { field_data_->allocate_temporary(field_descr_,id); }
 
   /// Deallocate storage for the temporary fields
+  void deallocate_temporary(std::string field) throw ()
+  { deallocate_temporary(field_id(field)); }
   void deallocate_temporary(int id) throw ()
   { field_data_->deallocate_temporary(field_descr_,id); }
 

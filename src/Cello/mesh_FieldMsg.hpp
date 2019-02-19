@@ -10,7 +10,8 @@
 
 class FieldMsg : public CMessage_FieldMsg {
 
-public:
+public: // attributes
+  
   /// Array length
   int n;
 

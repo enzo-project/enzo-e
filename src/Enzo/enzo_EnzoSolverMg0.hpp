@@ -28,7 +28,9 @@ public: // interface
    std::string field_b,
    int monitor_iter,
    int restart_cycle,
-   int rank,
+   int solve_type,
+   int min_level,
+   int max_level,
    int iter_max,
    double res_tol,
    int index_smooth_pre,
@@ -37,10 +39,7 @@ public: // interface
    int index_smooth_last,
    Restrict * restrict,
    Prolong * prolong,
-   int min_level,
-   int max_level,
-   int coarse_level,
-   int solve_type);
+   int coarse_level);
 
   EnzoSolverMg0() {};
 
@@ -59,7 +58,6 @@ public: // interface
        index_smooth_last_(-1),
        restrict_(NULL),
        prolong_(NULL),
-       rank_(0),
        iter_max_(0),
        i_sync_restrict_(-1),
        i_sync_prolong_(-1),
@@ -101,7 +99,6 @@ public: // interface
 
     p | restrict_;
     p | prolong_;
-    p | rank_;
     p | iter_max_;
 
     p | i_sync_restrict_;
@@ -193,7 +190,6 @@ public: // interface
     CkPrintf (" index_smooth_last_ = %d\n",index_smooth_last_);
     CkPrintf (" restrict_ = %p\n",restrict_);
     CkPrintf (" prolong_ = %p\n",prolong_);
-    CkPrintf (" rank_ = %d\n",rank_);
     CkPrintf (" iter_max_ = %d\n",iter_max_);
     CkPrintf (" res_tol_ = %g\n",res_tol_);
     CkPrintf (" i_sync_restrict_ = %g\n",i_sync_restrict_);
@@ -318,9 +314,6 @@ protected: // attributes
 
   /// Prolongation
   Prolong * prolong_;
-
-  /// Dimensionality of the problem
-  int rank_;
 
   /// Maximum number of MG iterations
   int iter_max_;

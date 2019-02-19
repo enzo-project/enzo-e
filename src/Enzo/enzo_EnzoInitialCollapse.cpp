@@ -12,7 +12,9 @@
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
-#define DEBUG_PERFORMANCE
+
+// #define DEBUG_PERFORMANCE
+
 //----------------------------------------------------------------------
 
 void EnzoInitialCollapse::pup (PUP::er &p)

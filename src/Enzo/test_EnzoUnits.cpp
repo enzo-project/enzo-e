@@ -49,7 +49,6 @@ PARALLEL_MAIN_BEGIN
 
   enzo_float t0 = cosmology->time_from_redshift(cosmology->initial_redshift());
   unit_func ("time_from_redshift()");
-  CkPrintf ("rel err = %25.15e\n",cello::err_rel(t0,(enzo_float)0.81650250388244));
   unit_assert (cello::err_rel(t0,(enzo_float)0.81650250388244) <= 1e-15);
   cosmology->set_current_time(0.0);
 

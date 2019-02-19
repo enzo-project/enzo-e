@@ -197,19 +197,28 @@ namespace cello {
   //---------------------------------------------------------------------- 
   ScalarDescr * scalar_descr_double()
   {
-    return simulation() ? simulation()->scalar_descr_double() : new ScalarDescr;
+    return simulation() ?
+      simulation()->scalar_descr_double() : new ScalarDescr;
+  }
+  ScalarDescr * scalar_descr_long_double()
+  {
+    return simulation() ?
+      simulation()->scalar_descr_long_double() : new ScalarDescr;
   }
   ScalarDescr * scalar_descr_int()
   {
-    return simulation() ? simulation()->scalar_descr_int() : new ScalarDescr;
+    return simulation() ?
+      simulation()->scalar_descr_int() : new ScalarDescr;
   }
   ScalarDescr * scalar_descr_sync()
   {
-    return simulation() ? simulation()->scalar_descr_sync() : new ScalarDescr;
+    return simulation() ?
+      simulation()->scalar_descr_sync() : new ScalarDescr;
   }
   ScalarDescr * scalar_descr_void()
   {
-    return simulation() ? simulation()->scalar_descr_void() : new ScalarDescr;
+    return simulation() ?
+      simulation()->scalar_descr_void() : new ScalarDescr;
   }
   //---------------------------------------------------------------------- 
 
@@ -286,6 +295,14 @@ namespace cello {
   int rank()
   {
     return simulation() ? simulation()->rank() : 0;
+  }
+
+  //----------------------------------------------------------------------
+
+  int num_children()
+  {
+    int r = rank();
+    return (r==1) ? 2 : ( (r==2) ? 4 : 8 );
   }
   
 

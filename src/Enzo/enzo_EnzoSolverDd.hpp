@@ -27,16 +27,17 @@ public: // interface
   (std::string name,
    std::string field_x,
    std::string field_b,
+   int monitor_iter,
+   int restart_cycle,
+   int solve_type,
+   int min_level,
+   int max_level,
    int index_solve_coarse,
    int index_solve_domain,
    int index_solve_smooth,
    Restrict * restrict,
    Prolong * prolong,
-   int min_level,
-   int max_level,
-   int coarse_level,
-   int monitor_iter,
-   int restart_cycle);
+   int coarse_level) ;
 
   EnzoSolverDd() {};
 

@@ -316,6 +316,7 @@ namespace cello {
   Monitor *       monitor();
   Units *         units();
   
+  ScalarDescr *   scalar_descr_long_double();
   ScalarDescr *   scalar_descr_double();
   ScalarDescr *   scalar_descr_int();
   ScalarDescr *   scalar_descr_sync();
@@ -325,6 +326,7 @@ namespace cello {
   Output *        output (int index);
   Solver *        solver(int index);
   int             rank ();
+  int             num_children();
 }
 
 #endif /* CELLO_HPP */

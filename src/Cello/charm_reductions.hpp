@@ -34,3 +34,7 @@ extern CkReductionMsg * sum_long_double_8(int n, CkReductionMsg ** msgs);
 extern CkReduction::reducerType sum_long_double_8_type;
 extern void register_sum_long_double_8(void);
 
+extern CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs);
+extern CkReduction::reducerType sum_long_double_n_type;
+extern void register_sum_long_double_n(void);
+

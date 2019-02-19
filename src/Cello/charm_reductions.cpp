@@ -69,14 +69,18 @@ void register_sum_long_double_2(void)
 
 CkReductionMsg * sum_long_double_2(int n, CkReductionMsg ** msgs)
 {
-  long double accum[2] = {0.0};
+  long double accum[2];
+  std::fill_n(accum,2,0.0);
 
   for (int i=0; i<n; i++) {
+
     ASSERT2("sum_long_double_2()",
 	    "CkReductionMsg actual size %d is different from expected %d",
 	    msgs[i]->getSize(),2*sizeof(long double),
 	    (msgs[i]->getSize() == 2*sizeof(long double)));
+
     long double * values = (long double *) msgs[i]->getData();
+
     accum [0] += values[0];
     accum [1] += values[1];
   }
@@ -93,14 +97,18 @@ void register_sum_long_double_3(void)
 
 CkReductionMsg * sum_long_double_3(int n, CkReductionMsg ** msgs)
 {
-  long double accum[3] = {0.0};
+  long double accum[3];
+  std::fill_n(accum,3,0.0);
   
   for (int i=0; i<n; i++) {
+
     ASSERT2("sum_long_double_3()",
 	    "CkReductionMsg actual size %d is different from expected %d",
 	    msgs[i]->getSize(),3*sizeof(long double),
 	    (msgs[i]->getSize() == 3*sizeof(long double)));
+
     long double * values = (long double *) msgs[i]->getData();
+
     accum [0] += values[0];
     accum [1] += values[1];
     accum [2] += values[2];
@@ -117,7 +125,8 @@ void register_sum_long_double_4(void)
 
 CkReductionMsg * sum_long_double_4(int n, CkReductionMsg ** msgs)
 {
-  long double accum[4] = {0.0};
+  long double accum[4];
+  std::fill_n(accum,4,0.0);
 
   for (int i=0; i<n; i++) {
 
@@ -145,7 +154,8 @@ void register_sum_long_double_5(void)
 
 CkReductionMsg * sum_long_double_5(int n, CkReductionMsg ** msgs)
 {
-  long double accum[5] = {0.0};
+  long double accum[5];
+  std::fill_n(accum,5,0.0);
 
   for (int i=0; i<n; i++) {
 
@@ -174,7 +184,8 @@ void register_sum_long_double_6(void)
 
 CkReductionMsg * sum_long_double_6(int n, CkReductionMsg ** msgs)
 {
-  long double accum[6] = {0.0};
+  long double accum[6];
+  std::fill_n(accum,6,0.0);
 
   for (int i=0; i<n; i++) {
 
@@ -204,7 +215,8 @@ void register_sum_long_double_7(void)
 
 CkReductionMsg * sum_long_double_7(int n, CkReductionMsg ** msgs)
 {
-  long double accum[7] = {0.0};
+  long double accum[7];
+  std::fill_n(accum,7,0.0);
 
   for (int i=0; i<n; i++) {
 
@@ -235,7 +247,8 @@ void register_sum_long_double_8(void)
 
 CkReductionMsg * sum_long_double_8(int n, CkReductionMsg ** msgs)
 {
-  long double accum[8] = {0.0};
+  long double accum[8];
+  std::fill_n(accum,8,0.0);
 
   for (int i=0; i<n; i++) {
 
@@ -256,6 +269,37 @@ CkReductionMsg * sum_long_double_8(int n, CkReductionMsg ** msgs)
     accum [7] += values[7];
   }
   return CkReductionMsg::buildNew(8*sizeof(long double),accum);
+}
+
+//----------------------------------------------------------------------
+
+CkReduction::reducerType sum_long_double_n_type;
+
+void register_sum_long_double_n(void)
+{ sum_long_double_n_type = CkReduction::addReducer(sum_long_double_n); }
+
+CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs)
+{
+
+  const int N = int(*((long double *) msgs[0]->getData()));
+  long double accum[N+1];
+  std::fill_n(accum,N+1,0.0);
+
+  for (int i=0; i<n; i++) {
+
+    ASSERT2("sum_long_double_n()",
+	    "CkReductionMsg actual size %d is different from expected %d",
+	    msgs[i]->getSize(),(N+1)*sizeof(long double),
+	    (msgs[i]->getSize() == (N+1)*sizeof(long double)));
+    
+    long double * values = (long double *) msgs[i]->getData();
+
+    accum[0] = values[0];
+    for (int i=1; i<=N; i++) {
+      accum[i] += values[i];
+    }
+  }
+  return CkReductionMsg::buildNew((N+1)*sizeof(long double),accum);
 }
 
 //======================================================================

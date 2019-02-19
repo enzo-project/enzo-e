@@ -116,6 +116,33 @@
 // #define DEBUG_FIELD_MESSAGE
 // #define DEBUG_PROLONG
 
+// #define TRACE_FIELD
+
+
+#ifdef TRACE_FIELD
+#  undef TRACE_FIELD
+#  define TRACE_FIELD(BLOCK,MSG,ID)					\
+  {									\
+    Field field = BLOCK->data()->field();				\
+    double sum_abs=0.0;							\
+    int count = 0;							\
+    auto X = (enzo_float*) field.values(ID);				\
+    for (int iz=gz_; iz<mz_-gz_; iz++) {				\
+      for (int iy=gy_; iy<my_-gy_; iy++) {				\
+	for (int ix=gx_; ix<mx_-gx_; ix++) {				\
+	  int i = ix + mx_*(iy + my_*iz);				\
+	  sum_abs+=std::abs(X[i]);					\
+	  count++;							\
+	}								\
+      }									\
+    }									\
+    CkPrintf ("%s:%d %s TRACE_FIELD %d %s %lg count %d\n",				\
+	      __FILE__,__LINE__,BLOCK->name().c_str(),ID,MSG,sum_abs,count);	\
+  }
+#else
+#  define TRACE_FIELD(BLOCK,MSG,ID) /* ... */
+#endif
+
 #define AFTER_CYCLE(BLOCK,CYCLE) (BLOCK->cycle() >= CYCLE)
 #define CYCLE 000
 
@@ -257,7 +284,9 @@ EnzoSolverMg0::EnzoSolverMg0
  std::string field_b,
  int monitor_iter,
  int restart_cycle,
- int rank,
+ int solve_type,
+ int min_level,
+ int max_level,
  int iter_max,
  double res_tol,
  int index_smooth_pre,
@@ -266,12 +295,15 @@ EnzoSolverMg0::EnzoSolverMg0
  int index_smooth_last,
  Restrict * restrict,
  Prolong * prolong,
- int min_level,
- int max_level,
- int coarse_level,
- int solve_type) 
-  : Solver(name,field_x,field_b,monitor_iter,restart_cycle,
-	   min_level,max_level,solve_type),
+ int coarse_level) 
+  : Solver(name,
+	   field_x,
+	   field_b,
+	   monitor_iter,
+	   restart_cycle,
+	   solve_type,
+	   min_level,
+	   max_level),
     bs_(0), bc_(0),
     rr_(0), rr_local_(0), rr0_(0),
     res_tol_(res_tol),
@@ -282,7 +314,6 @@ EnzoSolverMg0::EnzoSolverMg0
     index_smooth_last_(index_smooth_last),
     restrict_(restrict),
     prolong_(prolong),
-    rank_(rank),
     iter_max_(iter_max), 
     ic_(-1), ir_(-1),
     mx_(0),my_(0),mz_(0),
@@ -333,10 +364,11 @@ EnzoSolverMg0::~EnzoSolverMg0 () throw()
 
 void EnzoSolverMg0::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
-
   TRACE_MG(block,"EnzoSolverMg0::apply()");
 
   Solver::begin_(block);
+
+  TRACE_FIELD(block,"apply B",ib_);
 
   A_ = A;
 

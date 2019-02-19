@@ -22,7 +22,12 @@ void EnzoInitialPm::pup (PUP::er &p)
   p | field_;
   p | mpp_;
   p | level_;
-  WARNING("EnzoInitialPm::pup", "Skipping p | mask_");
+  static bool warn[CONFIG_NODE_SIZE] = {false};
+  const int in = cello::index_static();
+  if (! warn[in]) {
+    WARNING("EnzoInitialPm::pup", "Skipping p | mask_");
+    warn[in] = true;
+  }
 
 }
 

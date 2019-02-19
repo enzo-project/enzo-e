@@ -280,6 +280,24 @@ Solver * EnzoProblem::create_solver_
   
   int rank = config->mesh_root_rank;
 
+  // Set solve type if not default "on_leaves" (solve_leaf)
+
+  std::string solve_type_name=enzo_config->solver_solve_type[index_solver];
+
+  int solve_type;
+
+  if (solve_type_name=="leaf") {
+    solve_type = solve_leaf;
+  } else if (solve_type_name=="level") {
+    solve_type = solve_level;
+  } else if (solve_type_name=="tree") {
+    solve_type = solve_tree;
+  } else if (solve_type_name=="block") {
+    solve_type = solve_block;
+  } else {
+    solve_type = solve_unknown;
+  }
+
   if (solver_type == "cg") {
 
     solver = new EnzoSolverCg
@@ -288,15 +306,12 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
-       rank,
-       enzo_config->solver_iter_max[index_solver],
-       enzo_config->solver_res_tol[index_solver],
+       solve_type,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
-       enzo_config->solver_precondition[index_solver],
-       enzo_config->solver_local[index_solver],
-       enzo_config->solver_is_unigrid[index_solver]
-       );
+       enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_res_tol[index_solver],
+       enzo_config->solver_precondition[index_solver]);
 
   } else if (solver_type == "dd") {
 
@@ -309,15 +324,16 @@ Solver * EnzoProblem::create_solver_
       (enzo_config->solver_list[index_solver],
        enzo_config->solver_field_x[index_solver],
        enzo_config->solver_field_b[index_solver],
+       enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle[index_solver],
+       solve_type,
+       enzo_config->solver_min_level[index_solver],
+       enzo_config->solver_max_level[index_solver],
        enzo_config->solver_coarse_solve[index_solver],
        enzo_config->solver_domain_solve[index_solver],
        enzo_config->solver_last_smooth[index_solver],
        restrict,  prolong,
-       enzo_config->solver_min_level[index_solver],
-       enzo_config->solver_max_level[index_solver],
-       enzo_config->solver_coarse_level[index_solver],
-       enzo_config->solver_monitor_iter[index_solver],
-       enzo_config->solver_restart_cycle[index_solver]);
+       enzo_config->solver_coarse_level[index_solver]);
        
   } else if (solver_type == "bicgstab") {
 
@@ -327,20 +343,23 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
-       rank,
-       enzo_config->solver_iter_max[index_solver],
-       enzo_config->solver_res_tol[index_solver],
+       solve_type,
        enzo_config->solver_min_level[index_solver],
        enzo_config->solver_max_level[index_solver],
+       enzo_config->solver_iter_max[index_solver],
+       enzo_config->solver_res_tol[index_solver],
        enzo_config->solver_precondition[index_solver],
-       enzo_config->solver_is_unigrid[index_solver] ) ;
+       enzo_config->solver_coarse_level[index_solver]);
 
   } else if (solver_type == "diagonal") {
 
     solver = new EnzoSolverDiagonal
       (enzo_config->solver_list[index_solver],
        enzo_config->solver_field_x[index_solver],
-       enzo_config->solver_field_b[index_solver]);
+       enzo_config->solver_field_b[index_solver],
+       enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle[index_solver],
+       solve_type);
 
   } else if (solver_type == "jacobi") {
 
@@ -348,6 +367,9 @@ Solver * EnzoProblem::create_solver_
       (enzo_config->solver_list[index_solver],
        enzo_config->solver_field_x[index_solver],
        enzo_config->solver_field_b[index_solver],
+       enzo_config->solver_monitor_iter[index_solver],
+       enzo_config->solver_restart_cycle[index_solver],
+       solve_type,
        enzo_config->solver_weight[index_solver],
        enzo_config->solver_iter_max[index_solver]);
 
@@ -364,7 +386,9 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_field_b[index_solver],
        enzo_config->solver_monitor_iter[index_solver],
        enzo_config->solver_restart_cycle[index_solver],
-       rank,
+       solve_type,
+       enzo_config->solver_min_level[index_solver],
+       enzo_config->solver_max_level[index_solver],
        enzo_config->solver_iter_max[index_solver],
        enzo_config->solver_res_tol[index_solver],
        enzo_config->solver_pre_smooth[index_solver],
@@ -372,10 +396,7 @@ Solver * EnzoProblem::create_solver_
        enzo_config->solver_post_smooth[index_solver],
        enzo_config->solver_last_smooth[index_solver],
        restrict,  prolong,
-       enzo_config->solver_min_level[index_solver],
-       enzo_config->solver_max_level[index_solver],
-       enzo_config->solver_coarse_level[index_solver],
-       enzo_config->solver_is_unigrid[index_solver] );
+       enzo_config->solver_coarse_level[index_solver]);
 
   } else {
     // Not an Enzo Solver--try base class Cello Solver
@@ -388,12 +409,6 @@ Solver * EnzoProblem::create_solver_
 	   solver_type.c_str(),
 	   solver != NULL);
 
-  // Set solve type if not default "on_leaves" (solve_leaves)
-  std::string solve_type=enzo_config->solver_solve_type[index_solver];
-  if (solve_type=="level") solver->set_solve_type(solve_level);
-  if (solve_type=="tree")  solver->set_solve_type(solve_tree);
-  if (solve_type=="block") solver->set_solve_type(solve_block);
-  
   solver->set_index(index_solver);
 
   return solver;

@@ -3,7 +3,8 @@
 /// @file     mesh_Index.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2013-05-06
-/// @brief    Implementation of Index class for indexing nodes in a array of octrees
+///
+/// @brief Implementation of Index class for indexing an array of octrees
 
 #include "mesh.hpp"
 
@@ -112,6 +113,7 @@ Index Index::index_child (int icx, int icy, int icz, int min_level) const
 }
 
 //----------------------------------------------------------------------
+
 bool Index::is_on_boundary (int axis, int face, int narray) const
 {
 
@@ -155,6 +157,14 @@ bool Index::is_on_boundary
   return is_on_boundary(0,if3[0],n3[0]) 
     ||   is_on_boundary(1,if3[1],n3[1])
     ||   is_on_boundary(2,if3[2],n3[2]);
+}
+
+//----------------------------------------------------------------------
+
+bool Index::is_in_same_subtree (Index index, int min_level, int root_level)
+{
+  return (index.index_ancestor (root_level,min_level)
+	  ==    index_ancestor (root_level,min_level));
 }
 
 //----------------------------------------------------------------------
@@ -323,9 +333,10 @@ void Index::set_child(int level, int ix, int iy, int iz, int min_level)
 //----------------------------------------------------------------------
 void Index::lower (double v3[3], int array[3], int max_level) const
 {
-  int ix = (a_[0].array << max_level) + (a_[0].tree >> (INDEX_BITS_TREE-max_level));
-  int iy = (a_[1].array << max_level) + (a_[1].tree >> (INDEX_BITS_TREE-max_level));
-  int iz = (a_[2].array << max_level) + (a_[2].tree >> (INDEX_BITS_TREE-max_level));
+  const int shift_tree = (INDEX_BITS_TREE-max_level);
+  int ix = (a_[0].array << max_level) + (a_[0].tree >> shift_tree );
+  int iy = (a_[1].array << max_level) + (a_[1].tree >> shift_tree);
+  int iz = (a_[2].array << max_level) + (a_[2].tree >> shift_tree);
 
   int kx = array[0] << max_level;
   int ky = array[1] << max_level;
@@ -341,9 +352,11 @@ void Index::lower (double v3[3], int array[3], int max_level) const
 void Index::upper (double v3[3], int a3[3], int max_level) const
 {
 
-  int ix = (a_[0].array << max_level) + (a_[0].tree >> (INDEX_BITS_TREE-max_level));
-  int iy = (a_[1].array << max_level) + (a_[1].tree >> (INDEX_BITS_TREE-max_level));
-  int iz = (a_[2].array << max_level) + (a_[2].tree >> (INDEX_BITS_TREE-max_level));
+  const int shift_tree = (INDEX_BITS_TREE-max_level);
+
+  int ix = (a_[0].array << max_level) + (a_[0].tree >> shift_tree);
+  int iy = (a_[1].array << max_level) + (a_[1].tree >> shift_tree);
+  int iz = (a_[2].array << max_level) + (a_[2].tree >> shift_tree);
 
   const int ip = 1 << (max_level - level());
 

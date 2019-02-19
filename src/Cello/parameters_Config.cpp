@@ -1277,7 +1277,7 @@ void Config::read_solver_ (Parameters * p) throw()
     solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
 
     solver_solve_type[index_solver] = p->value_string
-      (full_name + ":solve_type","leaves");
+      (full_name + ":solve_type","leaf");
 
     solver_iter_max[index_solver] = p->value_integer
       (full_name + ":iter_max",1000);

@@ -74,6 +74,7 @@ enum enzo_sync_id {
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_grackle,
   enzo_sync_id_method_gravity,
+  enzo_sync_id_method_gravity_continue,
   enzo_sync_id_method_heat,
   enzo_sync_id_method_null,
   enzo_sync_id_method_pm_deposit,
@@ -83,22 +84,21 @@ enum enzo_sync_id {
   enzo_sync_id_method_turbulence,
   enzo_sync_id_method_vlct,
   enzo_sync_id_solver_bicgstab,
-  enzo_sync_id_solver_cg,
-  enzo_sync_id_solver_mg0,
-  enzo_sync_id_solver_mg0_coarse,
-  enzo_sync_id_solver_mg0_pre,
-  enzo_sync_id_solver_mg0_post,
-  enzo_sync_id_solver_mg0_last,
-  enzo_sync_id_method_gravity_continue,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,
+  enzo_sync_id_solver_cg,
   enzo_sync_id_solver_cg_loop_0a,
-  enzo_sync_id_solver_cg_loop_2a,
   enzo_sync_id_solver_cg_loop_0b,
+  enzo_sync_id_solver_cg_loop_2a,
   enzo_sync_id_solver_dd,
   enzo_sync_id_solver_dd_coarse,
   enzo_sync_id_solver_dd_domain,
-  enzo_sync_id_solver_dd_smooth
+  enzo_sync_id_solver_dd_smooth,
+  enzo_sync_id_solver_mg0,
+  enzo_sync_id_solver_mg0_coarse,
+  enzo_sync_id_solver_mg0_last,
+  enzo_sync_id_solver_mg0_post,
+  enzo_sync_id_solver_mg0_pre
 };
   
 //----------------------------------------------------------------------

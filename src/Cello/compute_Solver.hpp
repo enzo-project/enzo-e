@@ -25,9 +25,9 @@ public: // interface
 	  std::string field_b,
 	  int monitor_iter,
 	  int restart_cycle,
+	  int solve_type,
 	  int min_level = 0,
-	  int max_level = std::numeric_limits<int>::max(),
-	  int solve_type = solve_leaves) throw();
+	  int max_level = std::numeric_limits<int>::max()) throw();
 
   /// Create an uninitialized Solver
   Solver () throw()
@@ -42,7 +42,7 @@ public: // interface
     min_level_(0),
     max_level_(std::numeric_limits<int>::max()),
     id_sync_(0),
-    solve_type_(solve_leaves)
+    solve_type_(solve_leaf)
   {}
 
   /// Destructor
@@ -63,7 +63,7 @@ public: // interface
     min_level_(- std::numeric_limits<int>::max()),
     max_level_(  std::numeric_limits<int>::max()),
     id_sync_(0),
-    solve_type_(solve_leaves)
+    solve_type_(solve_leaf)
   { }
   
   /// CHARM++ Pack / Unpack function
@@ -95,16 +95,23 @@ public: // interface
   void set_index (int index)
   { index_ = index; }
 
-  int index() const { return index_; }
+  int index() const
+  { return index_; }
 
-  void set_field_x (int ix) { ix_ = ix; }
-  void set_field_b (int ib) { ib_ = ib; }
+  void set_field_x (int ix)
+  { ix_ = ix;  }
+  
+  void set_field_b (int ib)
+  { ib_ = ib;  }
 
   void set_min_level (int min_level)
   { min_level_ = min_level; }
 
-  int min_level() { return min_level_; }
-  int max_level() { return max_level_; }
+  int min_level()
+  { return min_level_; }
+  
+  int max_level()
+  { return max_level_; }
 
   void set_max_level (int max_level)
   { max_level_ = max_level; }
@@ -114,13 +121,43 @@ public: // interface
   
   /// Type of neighbor: level if min_level == max_level, else leaf
   int neighbor_type_() const throw() {
-    return (solve_type_ == solve_level) ? neighbor_level : neighbor_leaf;
+    int retval;
+    switch (solve_type_) {
+    case solve_level:
+      retval = neighbor_level;
+      break;
+    case solve_leaf:
+      retval = neighbor_leaf;
+      break;
+    case solve_tree:
+      retval = neighbor_tree;
+      break;
+    default:
+      retval = neighbor_unknown;
+      break;
+    }
+    return retval;
   }
 
   /// Type of synchronization: sync_face if min_level == max_level,
   /// else sync_neighbor
   int sync_type_() const throw() {
-    return (min_level_ == max_level_) ? sync_face : sync_neighbor;
+    int retval;
+    switch (solve_type_) {
+    case solve_leaf:
+      retval = sync_face;
+      break;
+    case solve_level:
+      retval = sync_neighbor;
+      break;
+    case solve_tree:
+      retval = sync_neighbor;
+      break;
+    default:
+      retval = sync_unknown;
+      break;
+    }
+    return retval;
   }
 
   /// Whether Block is active
@@ -133,11 +170,6 @@ public: // interface
   /// for supported types
   int solve_type() const
   { return solve_type_; }
-
-  /// Set which subset of Blocks the solver is defined on; see enum
-  /// solve_type for supported types
-  void set_solve_type(int solve_type)
-  { solve_type_ = solve_type; }
 
   /// Return the name of this solver
   std::string name () const

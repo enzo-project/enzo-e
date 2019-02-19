@@ -70,7 +70,12 @@ public: // interface
     int face = face_;
     p | face;
     face_ = (face_enum)face;
-    WARNING ("Boundary::pup()", "Skipping p | mask_");
+    static bool warn[CONFIG_NODE_SIZE] = {false};
+    const int in = cello::index_static();
+    if (! warn[in]) {
+      WARNING ("Boundary::pup()", "Skipping p | mask_");
+      warn[in] = true;
+    }
     for (int axis=0; axis<3; axis++) PUParray(p,periodicity_[axis],2);
   };
 

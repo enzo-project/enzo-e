@@ -31,31 +31,27 @@ public: // interface
 		     std::string field_x,
 		     std::string field_b,
 		     int monitor_iter,
-		     int reuse_solution,
-		     int rank,
-		     int iter_max, 
-		     double res_tol,
+		     int restart_cycle,
+		     int solve_type,
 		     int min_level,
 		     int max_level,
+		     int iter_max, 
+		     double res_tol,
 		     int index_precon,
-		     int solve_type);
+		     int coarse_level);
 
   /// default constructor
   EnzoSolverBiCgStab()
     : Solver(),
-      alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
-      rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
-      rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
       res_tol_(0.0),
       A_(NULL),
       index_precon_(-1),
       iter_max_(0), 
       ir_(-1), ir0_(-1), ip_(-1), 
       iy_(-1), iv_(-1), iq_(-1), iu_(-1),
-      nx_(0), ny_(0), nz_(0),
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
-      iter_(0)
+      coarse_level_(0)
   {};
 
   /// Charm++ PUP::able declarations
@@ -64,19 +60,15 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
-      alpha_(0), beta_n_(0), beta_d_(0),   omega_(0),
-      rr_(0), r0s_(0.0), c_(0.0), bnorm_(0.0),
-      rho0_(0), err_(0), err0_(0), err_min_(0), err_max_(0),
       res_tol_(0.0),
       A_(NULL),
       index_precon_(-1),
       iter_max_(0), 
       ir_(-1), ir0_(-1), ip_(-1), 
       iy_(-1), iv_(-1), iq_(-1), iu_(-1),
-      nx_(0), ny_(0), nz_(0),
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
-      iter_(0)
+       coarse_level_(0)
   {}
 
   /// Charm++ Pack / Unpack function
@@ -93,12 +85,6 @@ public: // interface
     p | iter_max_;
     p | res_tol_;
 
-    p | rho0_;
-    p | err_;
-    p | err0_;
-    p | err_min_;
-    p | err_max_;
-
     p | ir_;
     p | ir0_;
     p | ip_;
@@ -106,10 +92,6 @@ public: // interface
     p | iv_;
     p | iq_;
     p | iu_;
-
-    p | nx_;
-    p | ny_;
-    p | nz_;
 
     p | m_;
     p | mx_;
@@ -120,18 +102,30 @@ public: // interface
     p | gy_;
     p | gz_;
 
-    p | iter_;
-
-    p | alpha_;
-    p | beta_n_;
-    p | beta_d_;
-    p | omega_;
-
-    p | rr_;
-    p | r0s_;
-    p | c_;
-    p | bnorm_;
-
+    p | is_alpha_;
+    p | is_beta_n_;
+    p | is_beta_d_;
+    p | is_omega_;
+    p | is_omega_n_;
+    p | is_omega_d_;
+    p | is_err_;
+    p | is_err0_;
+    p | is_err_min_;
+    p | is_err_max_;
+    p | is_rr_;
+    p | is_r0s_;
+    p | is_c_;
+    p | is_bs_;
+    p | is_xs_;
+    p | is_bnorm_;
+    p | is_vr0_;
+    p | is_ys_;
+    p | is_vs_;
+    p | is_us_;
+    p | is_qs_;
+    p | is_dot_sync_;
+    p | is_iter_;
+    p | coarse_level_;
   }
 
   
@@ -185,7 +179,14 @@ public: // interface
   /// End the solve
   void end(EnzoBlock* enzo_block, int retval) throw();
 
-protected: // methods
+  void dot_recv_parent   (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  int i_function);
+  void dot_recv_children   (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  int i_function);
+
+  protected: // methods
 
   /// internal routine to handle actual start to solver
   void compute_(EnzoBlock * enzo_block) throw();
@@ -216,38 +217,89 @@ protected: // methods
     field.deallocate_temporary(iu_);
   }
   
+  // Inner product methods
+
+  void inner_product_    (EnzoBlock *, int, long double *,
+			  const std::vector<int> & isa,
+			  CkCallback callback,
+			  int i_function);
+  void dot_compute_tree_ (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  int i_function);
+  void dot_send_parent_  (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  int i_function);
+  void dot_send_children_(EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array,
+			  int i_function);
+  void dot_save_         (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array);
+  void dot_load_         (EnzoBlock *, int, long double *,
+			  const std::vector<int> & is_array);
+  void dot_clear_        (EnzoBlock *, int, const std::vector<int> & is_array);
+  void dot_clear_        (EnzoBlock *, int, long double *);
+  void dot_done_         (EnzoBlock *, int i_function,
+			  const char * file, int line);
+  void dot_increment_    (EnzoBlock *,
+			  int,
+			  const std::vector<int> & is_array,
+			  long double * dot_block);
+protected:
+  
+  inline long double & scalar_ (Block *block, int i_scalar)
+  {
+    ASSERT("EnzoSolverBiCgStab::scalar_",
+	   "Scalar long double index is 0",
+	   (i_scalar != 0));
+    
+    return *block->data()->scalar_long_double().value(i_scalar);
+  }
+
+  bool is_singular_()
+  { return (A_->is_singular() && solve_type_ != solve_tree);}
+  
+  Sync & s_dot_sync_(EnzoBlock * block)
+  { return *block->data()->scalar_sync().value(is_dot_sync_); }
+
+  int & s_iter_(EnzoBlock * block)
+  { return *block->data()->scalar_int().value(is_iter_); }
+  
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
-  /// scalars used within BiCgStab iteration
+  /// Corresponding ScalarData id's for solve_type == solve_tree
+  int is_alpha_;  // [*]
+  int is_beta_n_; // [*]
+  int is_beta_d_; // [*]
+  int is_rho0_;   // [*]
+  int is_err_;
+  int is_err0_;
+  int is_err_min_;
+  int is_err_max_;
+  int is_omega_;  // [ ]
+  int is_omega_n_;// [ ]
+  int is_omega_d_;// [ ]
+  int is_rr_;     // [ ]
+  int is_r0s_;    // [ ]
+  int is_c_;      // [ ]
+  int is_bs_;     // [ ]
+  int is_xs_;     // [ ]
+  int is_bnorm_;  // [ ]
+  int is_vr0_;    // [ ]
+  int is_ys_;     // [ ]
+  int is_vs_;     // [ ]
+  int is_us_;     // [ ]
+  int is_qs_;     // [ ]
+  int is_dot_sync_;
+  int is_iter_;
 
-  double alpha_;
-  double beta_n_;
-  double beta_d_;
-  double omega_;
-  double rr_;
-  double r0s_; // sum (R0[i])
-  double c_;  // B.length() ("count")
-  double bnorm_; // used when reuse_solution
-
-  /// Initial residual
-  double rho0_;
-
-  /// Current error
-  double err_;
-
-  /// Initial error
-  double err0_;
-
-  /// Minimum error (all iterations so far)
-  double err_min_;
-
-  /// Maximum error (all iterations so far)
-  double err_max_;
-
+  typedef void (EnzoSolverBiCgStab::*enzo_solver_bicgstab_member)(EnzoBlock *, CkReductionMsg *) ;
+  
+  std::vector<enzo_solver_bicgstab_member> function_;
+  
   /// Convergence tolerance on the relative residual
-  double res_tol_;
+  long double res_tol_;
 
   /// Matrix
   std::shared_ptr<Matrix> A_;
@@ -268,13 +320,12 @@ protected: // attributes
   int iu_;
 
   /// Block field attributes
-  int nx_, ny_, nz_;   /// active block size
   int m_;              /// product mx_*my_*mz_ for convenience
   int mx_, my_, mz_;   /// total block size
   int gx_, gy_, gz_;   /// ghost zones
 
-  /// Current BiCgStab iteration
-  int iter_;
+  /// The level of the tree solve if solve_type == solve_tree
+  int coarse_level_;
 
 };
 

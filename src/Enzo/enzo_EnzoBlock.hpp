@@ -267,7 +267,7 @@ public: /// entry methods
   //--------------------------------------------------
   
   /// EnzoSolverBiCGStab entry method: SUM(B) and COUNT(B)
-  void r_solver_bicgstab_start_1(CkReductionMsg* msg);  
+  void r_solver_bicgstab_start_1(CkReductionMsg* msg);
 
   /// EnzoSolverBiCGStab entry method: DOT(R,R)
   void r_solver_bicgstab_start_3(CkReductionMsg* msg);  
@@ -296,7 +296,14 @@ public: /// entry methods
   /// EnzoSolverBiCGStab entry method: ITER++
   void r_solver_bicgstab_loop_15(CkReductionMsg* msg);
 
-  /// EnzoSolverDd
+  void p_dot_recv_parent  (int n, long double * dot_block,
+			   std::vector<int> is_array,
+			   int i_function);
+  void p_dot_recv_children(int n, long double * dot_block,
+			   std::vector<int> is_array,
+			   int i_function);
+
+/// EnzoSolverDd
   
   void p_solver_dd_restrict_recv(FieldMsg * msg);
   void p_solver_dd_prolong_recv(FieldMsg * msg);
@@ -304,6 +311,8 @@ public: /// entry methods
   void p_solver_dd_solve_coarse();
   void p_solver_dd_solve_domain();
   void p_solver_dd_last_smooth();
+  void r_solver_dd_barrier(CkReductionMsg* msg);
+  void r_solver_dd_end(CkReductionMsg* msg);
 
   // EnzoSolverJacobi
 
