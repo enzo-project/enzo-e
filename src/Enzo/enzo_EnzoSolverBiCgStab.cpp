@@ -250,10 +250,11 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   /// Initialize default Refresh (called before entry to compute())
 
   const int min_face_rank = cello::rank() - 1;
+  const int ghost_depth = 3; // maximum of possible A_
 
-  const int ir = add_refresh(4, min_face_rank, neighbor_type_(),
-			     sync_type_(),
-			     enzo_sync_id_solver_bicgstab);
+  const int ir = add_refresh
+    (ghost_depth, min_face_rank, neighbor_type_(),
+     sync_type_(), enzo_sync_id_solver_bicgstab);
 
   if (solve_type_ == solve_tree)
     refresh(ir) -> set_root_level (coarse_level_);
@@ -793,8 +794,10 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   
   const int min_face_rank = cello::rank() - 1;
 
-  Refresh refresh (4,min_face_rank,neighbor_type_(), sync_type_(),
-		   enzo_sync_id_solver_bicgstab_loop_25);
+  const int ghost_depth = A_->ghost_depth();
+  Refresh refresh
+    (ghost_depth,min_face_rank,neighbor_type_(),
+     sync_type_(), enzo_sync_id_solver_bicgstab_loop_25);
 
   if (solve_type_ == solve_tree)
     refresh.set_root_level (coarse_level_);
@@ -1112,9 +1115,11 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
 
   // Refresh field faces then call p_solver_bicgstab_loop_85()
 
+  const int ghost_depth = A_->ghost_depth();  
   const int min_face_rank = cello::rank() - 1;
-  Refresh refresh (4,min_face_rank,neighbor_type_(), sync_type_(),
-		   enzo_sync_id_solver_bicgstab_loop_85);
+  Refresh refresh
+    (ghost_depth,min_face_rank,neighbor_type_(), sync_type_(),
+     enzo_sync_id_solver_bicgstab_loop_85);
   
   if (solve_type_ == solve_tree)
     refresh.set_root_level (coarse_level_);

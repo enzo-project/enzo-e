@@ -11,28 +11,28 @@
 // #define DEBUG_COPY
 // #define DEBUG_SOLVER
 // #define DEBUG_TRACE
-// #define DEBUG_TRACE_CYCLE 100
+// #define DEBUG_TRACE_CYCLE 0
 
 #ifdef DEBUG_TRACE
-#  define TRACE_JACOBI(BLOCK,METHOD)				\
+#  define TRACE_JACOBI(BLOCK,SOLVER,METHOD)			\
   if (BLOCK->cycle() >= DEBUG_TRACE_CYCLE) {			\
-    CkPrintf ("%s:%d %s TRACE_JACOBI %s\n",			\
-	      __FILE__,__LINE__,BLOCK->name().c_str(),METHOD);	\
+    CkPrintf ("%s:%d %s %s TRACE_JACOBI %s\n",			\
+	      __FILE__,__LINE__,BLOCK->name().c_str(),SOLVER->name().c_str(),METHOD); \
   }
 #else
-#  define TRACE_JACOBI(BLOCK,METHOD) /* empty */
+#  define TRACE_JACOBI(BLOCK,SOLVER,METHOD) /* empty */
 #endif
 
 
 #ifdef DEBUG_SOLVER
-#   define DEBUG_FIELD(BLOCK,IX,NAME)			\
+#   define DEBUG_FIELD(BLOCK,IX,NAME)					\
   {									\
-    Field field = BLOCK->data()->field();				\
-    int mx,my,mz;							\
-    field.dimensions(IX,&mx,&my,&mz);					\
-    int gx,gy,gz;							\
-    field.ghost_depth(IX,&gx,&gy,&gz);					\
-    enzo_float * X = (enzo_float*) field.values(IX);			\
+    Field field = BLOCK->data()->field();		\
+  int mx,my,mz;								\
+  field.dimensions(IX,&mx,&my,&mz);					\
+  int gx,gy,gz;								\
+  field.ghost_depth(IX,&gx,&gy,&gz);					\
+  enzo_float * X = (enzo_float*) field.values(IX);			\
     double xx=0.0;							\
     double yy=0.0;							\
     for (int i=0; i<mx*my*mz; i++) {					\
@@ -77,7 +77,6 @@ EnzoSolverJacobi::EnzoSolverJacobi
     n_(iter_max)
 {
   // Reserve temporary fields
-
   FieldDescr * field_descr = cello::field_descr();
 
   id_ = field_descr->insert_temporary();
@@ -92,17 +91,18 @@ EnzoSolverJacobi::EnzoSolverJacobi
 void EnzoSolverJacobi::apply
 ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
-  TRACE_JACOBI(block,"apply()");
+  TRACE_JACOBI(block,this,"apply()");
 
   begin_(block);
+
+  if (solve_type_ != solve_level && ! is_finest_(block))
+    Solver::end_(block);
 
   A_ = A;
 
   Field field = block->data()->field();
 
-  if (! is_finest_(block)) {
-    allocate_temporary_(field,block);
-  }
+  allocate_temporary_(field,block);
 
   (*piter_(block)) = 0.0;
   
@@ -115,12 +115,13 @@ void EnzoSolverJacobi::apply
 
 void EnzoBlock::p_solver_jacobi_continue()
 {
-  TRACE_JACOBI(this,"p_solver_jacobi_continue()");
-  
+ 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
   EnzoSolverJacobi * solver = 
     static_cast<EnzoSolverJacobi *> (this->solver());
+
+  TRACE_JACOBI(this,solver,"p_solver_jacobi_continue()");
 
   solver->compute(this);
 
@@ -131,9 +132,7 @@ void EnzoBlock::p_solver_jacobi_continue()
 
 void EnzoSolverJacobi::compute(Block * block)
 {
-  TRACE_JACOBI(block,"compute()");
-
-  Field field = block->data()->field();
+  TRACE_JACOBI(block,this,"compute()");
 
   if (*piter_(block) < n_) {
 
@@ -141,9 +140,10 @@ void EnzoSolverJacobi::compute(Block * block)
 
   } else {
 
+    Field field = block->data()->field();
     deallocate_temporary_ (field,block);
 
-    TRACE_JACOBI(block,"end()");
+    TRACE_JACOBI(block,this,"end()");
     Solver::end_(block);
 
   }
@@ -153,7 +153,7 @@ void EnzoSolverJacobi::compute(Block * block)
 
 void EnzoSolverJacobi::apply_(Block * block)
 {
-  TRACE_JACOBI(block,"apply_()");
+  TRACE_JACOBI(block,this,"apply_()");
   
   Field field = block->data()->field();
 
@@ -167,7 +167,8 @@ void EnzoSolverJacobi::apply_(Block * block)
   const int gy = (my > 1) ? ng : 0;
   const int gz = (mz > 1) ? ng : 0;
 
-  if (! is_finest_(block)) {
+  if (is_finest_(block)) {
+
     A_->diagonal (id_, block,ng);
     A_->residual (ir_, ib_, ix_, block,ng);
 
@@ -236,10 +237,14 @@ void EnzoSolverJacobi::apply_(Block * block)
 
 void EnzoSolverJacobi::do_refresh_(Block * block)
 {
+  const int ghost_depth   = A_->ghost_depth();
   const int min_face_rank = cello::rank() - 1;
 
-  Refresh refresh (4,min_face_rank,neighbor_type_(),
-		   sync_type_(), sync_id_());
+  const int id_sync = 2*sync_id_()+(*piter_(block))%2;
+  
+  Refresh refresh
+    (ghost_depth,min_face_rank,neighbor_type_(),
+     sync_type_(), id_sync);
 
   refresh.set_active(is_finest_(block));
   refresh.add_field (ix_);
