@@ -342,6 +342,14 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
+  //==================================================
+  // Subtree
+  //==================================================
+
+  //  unit_func ("is_in_same_subtree");
+
+  //  unit_assert(false);
+
   unit_finalize();
 
   exit_();

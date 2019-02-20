@@ -198,6 +198,16 @@ void Simulation::output_start(int index_output)
   Output * output = problem()->output(index_output);
   output->init();
   output->open();
+  index_output_ = index_output;
+  contribute(CkCallback (CkIndex_Simulation::r_output_barrier(NULL),thisProxy));
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::r_output_barrier(CkReductionMsg * msg)
+{
+  delete msg;
+  Output * output = problem()->output(index_output_);
   output->write_simulation(this);
 
   //  ERROR if this is moved here from Output::write_hierarchy()

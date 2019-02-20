@@ -217,20 +217,30 @@ public: // functions
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
 
+  /// Whether the field refers to a valid permanent field
+  bool is_permanent (std::string field) const throw()
+  { return is_permanent(field_id(field)); }
   /// Whether the field id refers to a valid permanent field
   bool is_permanent (int id_field) const throw()
   {
     return ( (0 <= id_field) &&
 	     (id_field < num_permanent_)); }
 
-    /// Whether the field id refers to a valid temporary field
+  /// Return the number of permanent fields
+  int num_permanent() const throw()
+  { return num_permanent_; }
+
+  /// Whether the field refers to a valid temporary field
+  bool is_temporary (std::string field) const throw()
+  {  return is_temporary(field_id(field));  }
+  /// Whether the field id refers to a valid temporary field
   bool is_temporary (int id_field) const throw()
   { return ((num_permanent_ <= id_field) &&
 	    (id_field < num_permanent_ + num_temporary_)); }
 
-  /// Return the number of permanent fields
-  int num_permanent() const throw()
-  { return num_permanent_; }
+  /// Return the number of temporary fields
+  int num_temporary() const throw()
+  { return num_temporary_; }
 
 private: // functions
 
