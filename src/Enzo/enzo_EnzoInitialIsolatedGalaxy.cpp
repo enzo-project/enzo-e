@@ -670,14 +670,23 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
                         iflag[zh]*d[zh] + iflag[zl]*d[zl];
 
         // if adjcent to deposit cells, set velocity to
-        // mass-weighted average
+        // mass-weighted average of deposited cells and
+        // set energies to disk energy (these cells are within the
+        // disk but are 'empty' regions)
         if (mass_deposit > 0){
+
+          te[i] = disk_gas_energy;
+
           for (int dim=0; dim<3; dim++){
             v3[dim][i] = ( iflag[xh]*v3[dim][xh]*d[xh] + iflag[xl]*v3[dim][xl]*d[xl] +
                            iflag[yh]*v3[dim][yh]*d[yh] + iflag[yl]*v3[dim][yl]*d[yl] +
                            iflag[zh]*v3[dim][zh]*d[zh] + iflag[zl]*v3[dim][zl]*d[zl]
                              ) / mass_deposit ;
+
+            te[i] +=  0.5*v3[dim][i]*v3[dim][i];
           }
+
+          if(this->dual_energy_) ge[i] = disk_gas_energy;
         }
 
         //
