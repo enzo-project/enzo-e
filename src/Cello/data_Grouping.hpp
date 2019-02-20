@@ -71,6 +71,7 @@ public: // interface
     return count;
   }
 
+  /// Return the nth item in the group
   std::string item (std::string group, int index)
   {
     int count = 0;

@@ -25,7 +25,9 @@ public: // interface
    bool periodic[3][2],
    int n3[3],
    Index index,
-   int neighbor_type);
+   int neighbor_type,
+   int min_level,
+   int root_level);
 
   /// Destructor
   ~ItNeighbor();
@@ -49,6 +51,9 @@ public: // interface
     PUParray (p,n3_,3);
     p | index_;
     p | level_;
+    p | neighbor_type_;
+    p | min_level_;
+    p | root_level_;
   }
 
   /// Reduce another value
@@ -133,6 +138,15 @@ private: // attributes
 
   /// Level of this block
   int level_;
+
+  /// Neighbor type (neighbor_leaf or neighbor_tree)
+  int neighbor_type_;
+
+  /// Minimum level of the Mesh (may be negative)
+  int min_level_;
+  
+  /// Level of coarse grid when neighbor_type_ == neighbor_leaf
+  int root_level_;
 
 };
 

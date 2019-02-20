@@ -54,7 +54,7 @@ PARALLEL_MAIN_BEGIN
 
     int j1 = field.insert_temporary();
     int j2 = field.insert_temporary();
-    int j3 = field.insert_temporary();
+    int j3 = field.insert_temporary("j3");
 
     // set precision
 
@@ -68,6 +68,12 @@ PARALLEL_MAIN_BEGIN
     field.set_precision(j2,precision_double);
     field.set_precision(j3,precision_quadruple);
 
+    unit_class("Field");
+    unit_func("num_permanent");
+    unit_assert(field.num_permanent() == 5);
+    unit_func("num_temporary");
+    unit_assert(field.num_temporary() == 3);
+    
     unit_class ("Cello");
 
     unit_func ("32-bit floating-point");
@@ -566,7 +572,7 @@ PARALLEL_MAIN_BEGIN
 
     t1 = (float *) field.values(j1);
     t2 = (double *) field.values(j2);
-    t3 = (long double *) field.values(j3);
+    t3 = (long double *) field.values("j3");
 
     unit_assert (t1 == NULL);
     unit_assert (t2 == NULL);
@@ -576,11 +582,11 @@ PARALLEL_MAIN_BEGIN
 
     field.allocate_temporary(j1);    
     field.allocate_temporary(j2);    
-    field.allocate_temporary(j3);
+    field.allocate_temporary("j3");
 
     t1 = (float *)       field.values(j1);
     t2 = (double *)      field.values(j2);
-    t3 = (long double *) field.values(j3);
+    t3 = (long double *) field.values("j3");
 
     t1[0] = -1.00;
     t2[0] = -2.00;
@@ -926,11 +932,11 @@ PARALLEL_MAIN_BEGIN
 
     field.deallocate_temporary(j1);    
     field.deallocate_temporary(j2);    
-    field.deallocate_temporary(j3);
+    field.deallocate_temporary("j3");
 
     t1 = (float *) field.values(j1);
     t2 = (double *) field.values(j2);
-    t3 = (long double *) field.values(j3);
+    t3 = (long double *) field.values("j3");
 
     unit_assert (t1 == NULL);
     unit_assert (t2 == NULL);

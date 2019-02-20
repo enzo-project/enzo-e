@@ -447,13 +447,17 @@ ItFace Block::it_face
 //----------------------------------------------------------------------
 
 ItNeighbor Block::it_neighbor (int min_face_rank, Index index,
-			       int neighbor_type) throw()
+			       int neighbor_type,
+			       int min_level, int coarse_level) throw()
 {
   int n3[3];
   size_array(&n3[0],&n3[1],&n3[2]);
   bool periodic[3][2];
   periodicity(periodic);
-  return ItNeighbor (this,min_face_rank,periodic,n3,index,neighbor_type);
+
+  return ItNeighbor
+    (this,min_face_rank,periodic,n3,index,
+     neighbor_type,min_level,coarse_level);
 }
 
 //----------------------------------------------------------------------

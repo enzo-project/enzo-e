@@ -10,6 +10,7 @@
 
 //----------------------------------------------------------------------
 
+// NOTE: Update compute_Solver.cpp solve_string when updating solve_enum
 enum solve_enum {
   solve_unknown,
   solve_leaf,   // Solve on leaf Blocks (default)

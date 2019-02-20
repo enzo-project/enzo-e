@@ -253,6 +253,8 @@ public: // virtual functions
   void output_enter ();
   void p_output_start (int index_output)
   { output_start (index_output); }
+  /// Barrier between creating file(s) and writing to them
+  void r_output_barrier(CkReductionMsg * msg);
   
   void output_start (int index_output);
   void output_exit();
@@ -467,6 +469,9 @@ protected: // attributes
   char dir_checkpoint_[256];
 
   std::map<Index,MsgRefine *> msg_refine_map_;
+
+  /// Currently active output object
+  int index_output_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */
