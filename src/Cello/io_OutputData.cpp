@@ -12,7 +12,7 @@
 
 //----------------------------------------------------------------------
 
-// #define TRACE_OUTPUT
+//#define TRACE_OUTPUT
 
 OutputData::OutputData
 (
@@ -309,7 +309,7 @@ void OutputData::write_particle_data
       // write the batch to disk
       file_->data_write(buffer);
       
-      if (mb > 0) file_->mem_close();
+      file_->mem_close();
     }
 
     // check that the number of particles equals the number written
@@ -320,7 +320,7 @@ void OutputData::write_particle_data
 	     np == i0);
 
     // close the attribute dataset
-    if (np > 0) file_->data_close();
+    file_->data_close();
   }
 
 }
