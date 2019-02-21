@@ -337,7 +337,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
       for (int ix=0; ix<ngx; ix++){
         int i = INDEX(ix,iy,iz,ngx,ngy);
 
-        if(grackle_data->primordial_chemistry > 1){
+        if(grackle_data->primordial_chemistry > 0){
           grackle_fields_->HI_density[i]   = grackle_fields_->density[i] * grackle_data->HydrogenFractionByMass;
           grackle_fields_->HII_density[i]   = grackle_fields_->density[i] * tiny_number;
           grackle_fields_->HeI_density[i]   = grackle_fields_->density[i] * (1.0 - grackle_data->HydrogenFractionByMass);
