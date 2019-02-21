@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoComputePressure::EnzoComputePressure (double gamma,
-					                                bool comoving_coordinates)
+					  bool comoving_coordinates)
   : Compute(),
     gamma_(gamma),
     comoving_coordinates_(comoving_coordinates)
@@ -46,8 +46,8 @@ void EnzoComputePressure::compute ( Block * block) throw()
 
 void EnzoComputePressure::compute_(Block * block
 #ifdef CONFIG_USE_GRACKLE
-                                    , code_units * grackle_units /*NULL*/,
-																	   	grackle_field_data * grackle_fields /*NULL*/
+                                    , code_units * grackle_units, /*NULL*/
+                                      grackle_field_data * grackle_fields /*NULL*/
 #endif
                                    )
 {
@@ -87,7 +87,7 @@ void EnzoComputePressure::compute_(Block * block
 #else
   const int rank = cello::rank();
 
-	enzo_float * d = (enzo_float*) field.values("density");
+  enzo_float * d = (enzo_float*) field.values("density");
 
   enzo_float * v3[3] =
     { (enzo_float*) (              field.values("velocity_x")),
