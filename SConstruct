@@ -582,6 +582,8 @@ else:
      fp_charm_version.write("unknown\n");
      fp_charm_version.close()
 
+Clean('.','test/CHARM_VERSION')
+
 cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
 
 #----------
@@ -616,8 +618,9 @@ cello_def.write ("#define CHARM_BUILD \"" + charm_build + "\"\n")
 fp_charm_build = open ("test/CHARM_BUILD", "w")
 fp_charm_build.write(charm_build + "\n");
 fp_charm_build.close()
-
 cello_def.close()
+Clean('.','test/CHARM_BUILD')
+
 #======================================================================
 # BUILDERS
 #======================================================================
@@ -639,14 +642,17 @@ SConscript('test/SConscript')
 # CLEANING
 #======================================================================
 
+# non-permanent directories
 Clean('.','bin')
 Clean('.','lib')
+Clean('.','src-html')
+Clean('.','src-latex')
+Clean('.','src-xml')
 
-if (use_projections == 1):
-   Clean('.',Glob('bin/*.projrc'))
-   Clean('.',Glob('bin/*.log'))
-   Clean('.',Glob('bin/*.sts'))
-   Clean('.','charmrun')
+# files left behind by enzo-p
+Clean('.','Checkpoint')
+Clean('.','parameters.out')
+Clean('.','parameters.libconfig')
 
 #======================================================================
 # PACKAGING

@@ -211,7 +211,7 @@ void Block::control_sync_neighbor(int entry_point, int id_sync,
   if ( ! is_leaf() ) {
 
     TRACE_CONTROL("control_sync_neighbor ! is_leaf()");
-    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send();
+    CkCallback(entry_point,CkArrayIndexIndex(index_),thisProxy).send(NULL);
 
     return;
   }
@@ -296,7 +296,7 @@ void Block::control_sync_count (int entry_point, int id_sync, int count)
   }
 #ifdef DEBUG_CONTROL
   CkPrintf ("%s DEBUG_CONTROL control_sync_count %d %d %d/%d\n",
-	    name().c_str(),entry_point,id_sync,count,sync_max_[id_sync]);
+	    name().c_str(),entry_point,id_sync,sync_count[id_sync],sync_max_[id_sync]);
   fflush(stdout);
 #endif
   

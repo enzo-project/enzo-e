@@ -95,7 +95,7 @@ void EnzoSolverJacobi::apply
 
   begin_(block);
 
-  if (solve_type_ != solve_level && ! is_finest_(block))
+  if (solve_type_ == solve_level && ! is_finest_(block))
     Solver::end_(block);
 
   A_ = A;
