@@ -240,8 +240,17 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
 #ifdef CONFIG_USE_GRACKLE
   /* Assign grackle chemistry fields to default fractions based on density */
-  EnzoMethodGrackle::update_grackle_density_fields(enzo_block,
-                                                   &grackle_fields_);
+  const size_t num_method = enzo_config->method_list.size();
+
+  for (size_t index_method=0; index_method < num_method ; index_method++) {
+    std::string name = enzo_config->method_list[index_method];
+
+    if (name == "grackle"){
+
+      EnzoMethodGrackle::update_grackle_density_fields(enzo_block,
+                                                     &grackle_fields_);
+    }
+  }
 #endif
 
   enzo_float * temperature = field.is_field("temperature") ?
@@ -414,19 +423,20 @@ void EnzoInitialIsolatedGalaxy::InitializeExponentialGasDistribution(Block * blo
             Mvir  = Mvir  * cello::mass_solar;
 
             double conc = rvir  / rcore;
-            double    x = r_cyl / rvir;
+            double   rx = r_cyl / rvir;
 
 
-            vcirc = (std::log(1.0 + conc*x) - (conc*x)/(1.0+conc*x))/
-                      (std::log(1.0 + conc) - (conc / (1.0 + conc))) / x;
+            vcirc = (std::log(1.0 + conc*rx) - (conc*rx)/(1.0+conc*rx))/
+                      (std::log(1.0 + conc) - (conc / (1.0 + conc))) / rx;
             vcirc = std::sqrt(vcirc * cello::grav_constant * Mvir / rvir);
 
           } else {
             vcirc = this->InterpolateVcircTable(r_cyl);
           }
 
+          /* Assume counter-clockwise rotation */
           v3[0][i] = -(vcirc*(y/r_cyl))/enzo_units->velocity();
-          v3[1][i] = -(vcirc*(x/r_cyl))/enzo_units->velocity();
+          v3[1][i] =  (vcirc*(x/r_cyl))/enzo_units->velocity();
           v3[2][i] = 0.0;
 
           te[i]  = disk_gas_energy;
