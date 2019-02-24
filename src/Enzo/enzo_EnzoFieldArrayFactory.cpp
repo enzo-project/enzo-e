@@ -59,11 +59,14 @@ EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
 {
   EFlt3DArray t = from_grouping(grouping,"bfield",dim);
   if (dim == 0){
-    return t.subarray(0, t.dim_size(2), 0, t.dim_size(1), 1, t.dim_size(0) - 1);
+    return t.subarray(ESlice(0, t.shape(0)), ESlice(0, t.shape(1)),
+		      ESlice(1, t.shape(2) - 1));
   } else if (dim == 1){
-    return t.subarray(0, t.dim_size(2), 1, t.dim_size(1) - 1, 0, t.dim_size(0));
+    return t.subarray(ESlice(0, t.shape(0)), ESlice(1, t.shape(1) - 1),
+		      ESlice(0, t.shape(2)));
   } else {
-    return t.subarray(1, t.dim_size(2) - 1, 0, t.dim_size(1), 0, t.dim_size(0));
+    return t.subarray(ESlice(1, t.shape(0) - 1), ESlice(0, t.shape(1)),
+		      ESlice(0, t.shape(2)));
   }
 }
 

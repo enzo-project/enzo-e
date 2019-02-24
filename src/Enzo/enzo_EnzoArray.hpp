@@ -1,127 +1,134 @@
-
 #ifndef ENZO_ENZO_ARRAY_HPP
 #define ENZO_ENZO_ARRAY_HPP
 
 #include <stdio.h>
 #include <cstddef>
-#include <list>
 #include <type_traits>
 #include <memory>
 
-// Planned changes:
-//   - adding EnzoArray<T,D>::copy() to produce deep copies
-// Possible changes:
-//   - making a special TempArray class that represents the view that is
-//     returned each time. These objects are meant to be deleted immediately
-//     after use (and should not be constructable through normal means). The
-//     idea would be to overload the operator= operation to allow for setting
-//     many elements equal to one value AND for copying values values between
-//     arrays.
+// EnzoArray
+// Like arrays in Athena++, the indices are listed in order of increasing
+//   access speed. Imagine a 3D array with shape {mz,my,mx} array(k,j,i) is
+//   equivalent to accessing index ((k*my + j)*mx + i) of the pointer
+// Dimensions are numbered with increasing indexing speed (dim0, dim1, ...)
+// Should not be confused with the EnzoArray in the original Enzo. (Maybe it
+//   it should be renamed CelloArray?)
 
-// Implementation Notes:
-//   - Main motivation: use overloaded operator() for multi-dimensional access
-//     of C style arrays
-//   - If this object is adopted for use on a larger scale, then it may be
-//     better to define this object in the Cello Directory
-//   - This should not be confused with the EnzoArray in the original enzo code.
-//     It may be better to rename this CelloArray.
-//   - Like arrays in Athena++, the indices are list in order of increasing
-//     access speed. Imagine a 3D array with shape {mz,my,mx}
-//       - For both types of arrays: array(k,j,i) is equivalent to accessing 
-//         index ((k*my + j)*mx + i) of a contiguous array
-//   - dimensions are numbered with decreasing indexing speed. A 4d array has
-//     dimensions: (dim3, dim2, dim1, dim0)
-//   - To allow for writing functions performing directional grid operations
-//     that can be generalized to arbitrary grid direction, EnzoArray is
-//     allowed to represent a subsection of another array. This is equivalent
-//     to saying a[1:3,0:4,0:4] for a numpy array.
-//       - For example, separate EnzoArrays may be used to represent the left
-//         and right interface states that are centered on cell faces along an
-//         arbitrary axis. In this case, the for-loop body could remain the
-//         same and different subarrays could be operated on. 
-//       - This means that the EnzoArray will have a slightly larger memory
-//         footprint
-//       - The alternative would be to permute the axes order of the array.
-//         This is undesirable for 2 reasons:
-//           1. Generalizing functions to arbitrary dimensions would be more
-//              difficult. The simplest way to do so would involve iterating
-//              over indices in different orders
-//           2. A fast implementation would be more complicated and a secondary
-//              class definition may be necessary for speed.
+// Going to define an indexing type (borrowing naming convention from numpy)
+using intp = std::ptrdiff_t;
+
+class ESlice
+{
+  // Represents a slice
+public:
+  // Exists only to allow for construction of arrays of slices
+  ESlice() : start(0), stop(0) {}
+
+  // Include values from start through stop-1
+  ESlice(intp start, intp stop) : start(start), stop(stop)
+  { ASSERT("ESlice", "start must be less than stop.", stop>start); }
+
+  ESlice(int start, int stop) : start((intp)start), stop((intp)stop)
+  { ASSERT("ESlice", "start must be less than stop.", stop>start); }
+
+public:
+  // Locations of start and stop values
+  intp start;
+  intp stop;
+};
 
 // Defining the macro called CHECK_BOUNDS macro means that the bounds of an
-// EnzoArray, are checked everytime operator() is called or a subarray is
-// initialized.
-inline void check_bound_ND_(std::size_t N, int* indices, int* shape){
-  // indices lists indices in order of decreasing dimension:
-  //   (idim2, idim1, idim0)
-  // shape_ list values in order of increasing dimensions:
-  //   (dim0, dim1, dim2)
-  for (std::size_t i=0; i<N; i++){
-    ASSERT("EnzoArray", "Invalid index",  indices[i]<shape[N-i-1]);
-  }
+// EnzoArray, are checked everytime operator() is called
+template<typename T>
+bool check_bounds_(std::size_t *shape, T first) {return *shape > first;}
+template<typename T, typename... Rest>
+bool check_bounds_(std::size_t *shape, T first, Rest... rest){
+  //(get's unrolled at compile time)
+  return (*shape > first) && check_bounds_(++shape, rest...);
 }
 
 #ifdef CHECK_BOUNDS
-#  define CHECK_BOUND1D(i,shape_)                                             \
-  ASSERT("EnzoArray","Invalid index", i<shape_[0]);
-#  define CHECK_BOUND2D(j,i,shape_)					      \
-  ASSERT("EnzoArray", "Invalid index", i<shape_[0] && j<shape_[1]);
-#  define CHECK_BOUND3D(k,j,i,shape_)                                         \
-  ASSERT("EnzoArray", "Invalid index",                                        \
-	 i<shape_[0] && j<shape_[1] && k<shape_[2]);
-#  define CHECK_BOUNDND(N,ind,shape_) check_bound_ND_(N, ind, shape_);
-  
+#  define CHECK_BOUND3D(shape, k, j, i)                                       \
+  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape,k,j,i));
+#  define CHECK_BOUNDND(shape, ARGS)                                          \
+  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape, ARGS...));
 #else
-#  define CHECK_BOUND1D(i,shape_)       /* ... */
-#  define CHECK_BOUND2D(j,i,shape_)     /* ... */
-#  define CHECK_BOUND3D(k,j,i,shape_)   /* ... */
-#  define CHECK_BOUNDND(N,ind,shape_)   /* ... */
+#  define CHECK_BOUND3D(shape, k, j, i)   /* ... */
+#  define CHECK_BOUNDND(shape, ARGS)      /* ... */
 #endif
 
-// To define EnzoArray to have arbitrary dimension we need to accept a variable
+// To define EnzoArray to have arbitrary dimensions we need to accept a variable
 // number of arguments to indicate shape during construction, to produce a
-// subarray, and to access elements. In each case, it would be optimal to
-// check that the appropriate the number of variables are specified at compile
-// time. Consequently, we specify the number of dimensions of the array as a
-// template argument, and in each case will use variadic template arguments.
-// 
-// We need to guaruntee that in each of the above functions that the arguments
-// are all integers (or other appropriate types for indexing). The solution is
-// based on:
+// subarray, and to access elements. We specify the number of dimensions of the
+// array as a template argument and accept values with variadic template
+// arguments to check that the appropriate the number of values are specified
+// at compile time. In each case, we need to guaruntee that all arguments
+// are a given type. The solution is based on:
 //   - https://stackoverflow.com/a/28253503
 //   - https://stackoverflow.com/a/31767710
-
-// Use REQUIRE_INT_DECL(T) when declaring the class method.
 template <bool...> struct bool_pack;
 template <bool... vals> using all_true = std::is_same<bool_pack<true, vals...>,
 						      bool_pack<vals..., true>>;
 // May want to add more possible int types (e.g. long,short,etc.)
-#define REQUIRE_INT(T)                                                     \
-  class = std::enable_if<all_true<(std::is_same<T,std::size_t>::value ||   \
-				   std::is_same<T,int>::value)...>::value>
+#define REQUIRE_TYPE(T,type1)                                                \
+  class = std::enable_if<all_true<(std::is_same<T,type1>::value)...>::value>
+#define REQUIRE_TYPE2(T,type1,type2)					     \
+  class = std::enable_if<all_true<(std::is_same<T,type1>::value ||           \
+				   std::is_same<T,type2>::value)...>::value>
+#define REQUIRE_INT(T) REQUIRE_TYPE2(T,intp,int)
 
 
+// Helper function to compute pointer index
+// T is expected to be intp or int
+template<typename T>
+intp calc_index_(intp* stride, T first){return first;}
 
+template<typename T>
+intp calc_index_(intp* stride, T first, T last){
+  return (*stride)*first + last;
+}
 
+template<typename T, typename... Rest>
+intp calc_index_(intp* stride, T first, Rest... rest){
+  // gets unrolled at compile time
+  return (*stride)*first + calc_index_(++stride, rest...);
+}
 
-// dataWrapper tracks the underlying EnzoArray pointer and tracks ownership
-// Since this is written with C++11 in mind - can't make a shared_ptr directly
-// represent an array pointer
+// The following 2 functions are helpful while dynamically iterating
+template<typename T>
+intp calc_index_(const std::size_t D, const intp offset,
+		 const intp* stride, const T* indices){
+  std::size_t out = offset + indices[D-1];
+  for (std::size_t i = 0; i+1<D;i++){
+    out += stride[i]*indices[i];
+  }
+  return out;
+}
+
+// outer means indices for "outer" loops
+inline void increment_outer_indices_(std::size_t D, intp *indices, intp *shape,
+				     bool &continue_outer_iter){
+  std::size_t i = D-1;
+  while (0 != (i--)){
+    indices[i]+=1;
+    if (indices[i] != shape[i]){
+      return;
+    } else if (i > 0){
+      indices[i] = 0;
+    }
+  }
+  continue_outer_iter = false;
+}
+
 
 template<typename T>
 class dataWrapper
 {
+  // tracks the underlying EnzoArray pointer and ownership of it
 public:
 
   dataWrapper(T* data, bool owns_ptr) : data_(data), owns_ptr_(owns_ptr) { };
-
-  ~dataWrapper(){
-    if (owns_ptr_){
-      delete[] data_;
-    }
-  }
-
+  ~dataWrapper() {if (owns_ptr_) { delete[] data_; }}
   T* get() const noexcept { return data_; }
 
 private:
@@ -130,15 +137,85 @@ private:
 };
 
 
-// Here we use dataWrapper to wrap the pointer
-// D is the number of dimensions of EnzoArray
 
 template<typename T, std::size_t D>
-class EnzoArray
+class EnzoArray;
+
+template<typename T, std::size_t D>
+class TempArray_;
+
+template<typename T, std::size_t D>
+class FixedDimArray_
 {
 public:
-  // Default constructor. Constructs an unallocated EnzoArray.
-  EnzoArray()
+
+  // Destructor
+  ~FixedDimArray_() { cleanup_helper_();}
+
+  // operator() - used to access array Elements
+  template<typename... Args, REQUIRE_INT(Args)>
+  T &operator() (Args... args) {
+    static_assert(D==sizeof...(args),
+		  "Number of indices don't match number of dimensions");
+    CHECK_BOUNDND(shape, args)
+    return data_[offset_ + calc_index_(stride_,args...)];
+  }
+  template<typename... Args, REQUIRE_INT(Args)>
+  T operator() (Args... args) const {
+    static_assert(D==sizeof...(args),
+		  "Number of indices don't match number of dimensions");
+    CHECK_BOUNDND(shape, args)
+    return data_[offset_ + calc_index_(stride_,args...)];
+  }
+
+  // Specialized implementation for 3D arrays (reduces compile time)
+  T &operator() (const int k, const int j, const int i){
+    static_assert(D==3, "3 indices should only be specified for 3D arrays");
+    CHECK_BOUND3D(shape, k, j, i)
+    return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
+  }
+  T operator() (const int k, const int j, const int i) const{
+    static_assert(D==3, "3 indices should only be specified for 3D arrays");
+    CHECK_BOUND3D(shape, k, j, i)
+    return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
+  }
+
+
+  // Produce a copy of the array.
+  TempArray_<T,D> deepcopy();
+  
+  // Returns a subarraywith same D. Expects an instance of ESlice for each
+  // dimension. For a 3D EnzoArray, the function declaration might look like:
+  // EnzoArray<T,3> subarray(ESlice k_slice, ESlice j_slice, ESlice i_slice);
+  template<typename... Args, REQUIRE_TYPE(Args,ESlice)>
+  TempArray_<T,D> subarray(Args... args);
+
+  int shape(unsigned int dim){
+    ASSERT1("FixedDimArray_", "%ui is greater than the number of dimensions",
+	    dim, dim<D);
+    return (int)shape_[dim];
+  }
+
+  intp size(){
+    intp out = 1;
+    for (std::size_t i=0; i<D; i++){
+      out*=shape_[i];
+    }
+    return out;
+  }
+
+  // Only arrays with the same numbers of dimensions can be swapped
+  friend void swap(FixedDimArray_<T,D> &first, FixedDimArray_<T,D> &second){
+    std::swap(first.dataMgr_, second.dataMgr_);
+    std::swap(first.data_, second.data_);
+    std::swap(first.offset_, second.offset_);
+    std::swap(first.shape_, second.shape_);
+    std::swap(first.stride_, second.stride_);
+  }
+
+protected: // methods to be reused by subclasses
+
+  FixedDimArray_()
     : dataMgr_(),
       data_(NULL),
       offset_(0),
@@ -149,297 +226,247 @@ public:
   // Construct a numeric array that allocates its own data
   // args expects an integer for each dimension
   template<typename... Args, REQUIRE_INT(Args)>
-  EnzoArray(Args... args);
+  FixedDimArray_(Args... args);
 
   // Construct a numeric array that wraps an existing pointer
   // args expects an integer for each dimension
   template<typename... Args, REQUIRE_INT(Args)>
-  EnzoArray(T* array, Args... args);
+  FixedDimArray_(T* array, Args... args);
+  
+  void init_helper_(std::shared_ptr<dataWrapper<T>> &dataMgr, intp shape[D],
+		    intp offset){
+    data_ = dataMgr->get();
+    dataMgr_ = dataMgr;
+    offset_ = offset;
 
-  // Copy constructor. Constructs a shallow copy of other.
-  EnzoArray(const EnzoArray<T,D>& other){
-    init_helper_(other.dataMgr_, other.shape_, other.offset_);
-  }
-
-  // Move constructor. Constructs the array with the contents of other using
-  // move semantics
-  EnzoArray(EnzoArray<T,D>&& other) : EnzoArray() {swap(*this,other);}
-
-  // Destructor
-  ~EnzoArray() { cleanup_helper_();}
-
-  // Copy assignment operator. Makes *this a shallow copy of other. Data
-  // previously owned by *this is forfeited before making the copy (the
-  // contents of shallow copies and subarrays of *this are unaffected)
-  EnzoArray<T,D>& operator=(const EnzoArray<T,D>& other){
-    cleanup_helper_();
-    init_helper_(other.dataMgr_, other.shape_, other.offset_);
-    return *this;
-  }
-
-  // Move assignment operator. Replaces the contents of *this with those of
-  // other. Data previously owned by *this is forfeited before making the copy
-  // the contents of shallow copies and subarrays of *this are unaffected)
-  EnzoArray<T,D>& operator=(EnzoArray<T,D>&& other) {
-    swap(*this,other);
-    return *this;
-  }
-
-  // operator() - used to access array Elements
-  // General implementation
-
-  template<typename... Args, REQUIRE_INT(Args)>
-  T &operator() (Args... args) {
-    return data_[calc_index_(args...)];}
-  template<typename... Args, REQUIRE_INT(Args)>
-  T operator() (Args... args) const {
-    return data_[calc_index_(args...)];}
-
-
-  // Specialized implementation for 1D, 2D, and 3D arrays
-  T &operator() (const int i){
-    static_assert(D==1, "1 index should only be specified for 1D arrays");
-    CHECK_BOUND1D(i,shape_);
-    return data_[offset_+i]; }
-  T operator() (const int i) const{
-    static_assert(D==1, "1 index should only be specified for 1D arrays");
-    CHECK_BOUND1D(i,shape_);
-    return data_[offset_+i]; }
-
-  T &operator() (const int j, const int i){
-    static_assert(D==2, "2 indices should only be specified for 2D arrays");
-    CHECK_BOUND2D(j,i,shape_);
-    return data_[offset_ + i + j*stride_[0]]; }
-  T operator() (const int j, const int i) const{
-    static_assert(D==2, "2 indices should only be specified for 2D arrays");
-    CHECK_BOUND2D(j,i,shape_);
-    return data_[offset_ + i + j*stride_[0]];}
-
-  T &operator() (const int k, const int j, const int i){
-    static_assert(D==3, "3 indices should only be specified for 3D arrays");
-    CHECK_BOUND3D(k,j,i,shape_);
-    return data_[offset_ + i + j*stride_[0] + k*stride_[1]]; }
-  T operator() (const int k, const int j, const int i) const{
-    static_assert(D==3, "3 indices should only be specified for 3D arrays");
-    CHECK_BOUND3D(k,j,i,shape_);
-    return data_[offset_ + i + j*stride_[0] + k*stride_[1]]; }
-
-
-  // Return a subarray of the same dimension. Expects twice as many arguments
-  // as there are dimensions (specifying the start and stop values along each
-  // dimension)
-  // 
-  // For a 3D EnzoArray, the function declaration would look like:
-  // EnzoArray<T,3> subarray(int dim2_start, int dim2_stop,
-  //                         int dim1_start, int dim1_stop,
-  //                         int dim0_start, int dim0_stop);
-  template<typename... Args, REQUIRE_INT(Args)>
-  EnzoArray<T, D> subarray(Args... args);
-
-  int dim_size(unsigned int num){
-    ASSERT("EnzoArray",
-	   "get_dim should for dimension numbers less than dim.",
-	   num<D);
-    return shape_[num];
-  }
-
-  // Depreciated - the following needs to be removed
-  int length_dim0() {return shape_[0];}
-  int length_dim1() {return shape_[1];}
-  int length_dim2() {return shape_[2];}
-  int length_dim3() {return shape_[3];}
-
-  int size(){
-    int out = 1;
-    for (int i=0; i<D; i++){
-      out*=shape_[i];
+    std::size_t i = D;
+    while (i>0){
+      --i;
+      shape_[i] = shape[i];
+      if (i + 1 == D){
+	stride_[i] = 1;
+      } else {
+	stride_[i] = shape_[i+1] * stride_[i+1];
+      }
     }
-    return out;
   }
 
-  // I believe this means that only arrays with the same numbers of dimensions
-  // can be swapped
-  friend void swap(EnzoArray<T,D> &first, EnzoArray<T,D> &second){
-    std::swap(first.dataMgr_, second.dataMgr_);
-    std::swap(first.data_, second.data_);
-    std::swap(first.offset_, second.offset_);
-    std::swap(first.shape_, second.shape_);
-    std::swap(first.stride_, second.stride_);
-  }
-
-private: // methods
-  // Helps initialize function
-  void init_helper_(std::shared_ptr<dataWrapper<T>> &dataMgr, int shape[D],
-		    int offset);
-
-  // Deallocates memory if necessary
-  void cleanup_helper_();
-
-  // helps compute the index of underlying pointer
-  template<typename... Args>
-  int calc_index_(Args... args);
+  void cleanup_helper_(){ data_ = NULL; }
 
 protected: // attributes
-
-  // manages ownership of data_ pointer
-  std::shared_ptr<dataWrapper<T>> dataMgr_;
-
-  // pointer to array data
+  std::shared_ptr<dataWrapper<T>> dataMgr_; // manages ownership of data_
+  // pointer to data (copied from dataMgr to provide faster access to elements)
   T* data_;
-
-  // offset of the first element from the start of the pointer
-  int offset_;
-
-  // shape_ lists values as dim0, dim1,...
-  // dim0 is the length of the axis of fastest indexing.
-  // Indices are listed in reverse Order: (...,dim2,dim1,dim0)
-  int shape_[D];
-
-  // stride_ lists values as dim1, dim2,...
-  // length of the stride for dim0 is always 1.
-  int stride_[D-1];
+  intp offset_; // offset of the first element from the start of the pointer
+  intp shape_[D]; // lists dimensions with increasing indexing speed
+  intp stride_[D]; // stride_[D-1] is always 1
 };
-
-
-template<typename T, std::size_t D>
-void EnzoArray<T,D>::cleanup_helper_()
-{
-  data_ = NULL;
-}
-
-template<typename T, std::size_t D>
-void EnzoArray<T,D>::init_helper_(std::shared_ptr<dataWrapper<T>> &dataMgr,
-				  int shape[D], int offset)
-{
-  data_ = dataMgr->get();
-  dataMgr_ = dataMgr;
-  offset_ = offset;
-
-  for (std::size_t i=0; i<D;i++){
-    shape_[i] = shape[i];
-    if (i == 1){
-      stride_[0] = shape_[0];
-    } else if (i > 1){
-      stride_[i-1] = shape_[i-1]*stride_[i-2];
-    }
-  }
-}
 
 
 // Constructor of EnzoArray by allocating new data
 template<typename T, std::size_t D>
 template<typename... Args, class>
-EnzoArray<T,D>::EnzoArray(Args... args)
+FixedDimArray_<T,D>::FixedDimArray_(Args... args)
 {
-  static_assert(D==sizeof...(args),
-		"The specified shape has a different number of dimensions "
-		"than the template value.");
-  int temp_shape[D] = {((int)args)...};
-  int shape[D];
+  static_assert(D==sizeof...(args), "Incorrect number of dimensions");
+  intp shape[D] = {((intp)args)...};
+  intp size = 1;
   for (std::size_t i=0; i < D; i++){
-    ASSERT("EnzoArray", "The array shape must consis of positive elements.",
-	   temp_shape[D-i-1]>0);
-    shape[i] = temp_shape[D-i-1];
-  }
-
-  int size = 1;
-  for (std::size_t i=0; i < D; i++){
+    ASSERT("FixedDimArray_", "Positive dimensions are required.", shape[i]>0);
     size *= shape[i];
   }
-  
   T* data = new T[size](); // allocate and set entries to 0
-
   std::shared_ptr<dataWrapper<T>> dataMgr;
   dataMgr = std::make_shared<dataWrapper<T>>(data,true);
   init_helper_(dataMgr, shape, 0);
 }
 
 
-// Constructor of EnzoArray that wraps an existing c-style array
+// Constructor of array that wraps an existing c-style array
 template<typename T, std::size_t D>
 template<typename... Args, class>
-EnzoArray<T,D>::EnzoArray(T* array, Args... args){
-
-  static_assert(D==sizeof...(args),
-		"The specified shape has a different number of dimensions "
-		"than the template value.");
-  int temp_shape[D] = {((int)args)...};
-  int shape[D];
+FixedDimArray_<T,D>::FixedDimArray_(T* array, Args... args)
+{
+  static_assert(D==sizeof...(args), "Incorrect number of dimensions");
+  intp shape[D] = {((intp)args)...};
   for (std::size_t i=0; i < D; i++){
-    ASSERT("EnzoArray", "The array shape must consis of positive elements.",
-	   temp_shape[D-i-1]>0);
-    shape[i] = temp_shape[D-i-1];
+    ASSERT("FixedDimArray_", "Positive dimensions are required.", shape[i]>0);
   }
-
   std::shared_ptr<dataWrapper<T>> dataMgr;
   dataMgr = std::make_shared<dataWrapper<T>>(array,false);
   init_helper_(dataMgr, shape, 0);
 }
 
-// Returnd an EnzoArray that represents a view of a subarray of the
-// current instance
+
+// Prepares an array of slices that refer to absolute start and stop values
+// along each dimension. Also checks that the slices are valid
+inline void prep_slices_(const ESlice* slices, const intp shape[],
+			 const std::size_t D, ESlice* out_slices)
+{
+   for (std::size_t i=0; i<D; i++){
+     intp start, stop;
+     start = (slices[i].start<0) ? slices[i].start+shape[i] : slices[i].start;
+     stop  = (slices[i].stop<0 ) ? slices[i].stop+shape[i]  : slices[i].stop;
+     ASSERT3("FixedDimArray_",
+	     "slice.start of %ld doesn't lie in bound of dim %ld of size %ld.",
+	     (long)slices[i].start, (long)i, (long)shape[i], start < shape[i]);
+     ASSERT3("FixedDimArray_",
+	     "slice.stop of %d doesn't lie in bound of dim %ld of size %ld.",
+	     (long)slices[i].stop, (long)i, (long)shape[i], stop <= shape[i]);
+     ASSERT4("FixedDimArray_", ("slice.stop (%ld) doesn't exceed slice.start "
+				"(%ld) must for dim %ld of size %ld."),
+	     (long)slices[i].start, (long)slices[i].stop, (long)i,
+	     (long)shape[i], stop>start);
+     out_slices[i] = ESlice(start,stop);
+  }
+}
+
+// Returnd TempArray_ representing a view of a subarray of the current instance
 template<typename T, std::size_t D>
 template<typename... Args, class>
-EnzoArray<T,D> EnzoArray<T,D>::subarray(Args... args){
-  static_assert(D+D == sizeof...(args),
-		"subarray expects the number of arguments to equal twice the "
-		"array's dimension.");
-  int vals[2*D] = {((int)args)...};
-  // vals lists values in order of decreasing dimension:
-  //   (dim2_start,dim2_stop, dim1_start, dim1_stop, dim0_start, dim0_stop)
-  // shape_ list values in order of increasing dimensions:
-  //   (dim0, dim1, dim2)
-  for (std::size_t i=0; i<D; i++){
-    ASSERT2("EnzoArray<T,D>::subarray",
-	    "The start value, %d, along dimension, %d, can't be negative.",
-	    vals[2*i], (int)(D-1-i),vals[2*i]>=0);
-    ASSERT3("EnzoArray<T,D>::subarray",
-	    ("The start value, %d, must be less than the stop value, %d, along "
-	     "dimension %d."), vals[2*i], vals[2*i+1], (int)(D-1-i),
-	    vals[2*i]<vals[2*i+1]);
-    ASSERT3("EnzoArray<T,D>::subarray",
-	    "The stop value, %d, along dimension, %d, must be <= %d.",
-	    vals[2*i+1], (int)(D-1-i),shape_[D-i-1],vals[2*i+1]<=shape_[D-i-1]);
-  }
+TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args){
+  static_assert(D == sizeof...(args),
+		"Number of slices don't match number of dimensions");
+  ESlice in_slices[] = {args...};
+  ESlice slices[D];
+  prep_slices_(in_slices, shape_, D, slices);
 
-
-  int new_shape[D];
-  int new_offset = offset_;
+  intp new_shape[D];
+  intp new_offset = offset_;
   for (std::size_t dim=0; dim<D; dim++){
-    int shape_ind = (int)dim;
-    int slice_start_ind = (int)(D-dim-1)*2;
-    int slice_stop_ind = (int)(D-dim-1)*2+1;
-    if (dim == 0){
-      new_offset += vals[slice_start_ind];
-    } else {
-      new_offset += vals[slice_start_ind] * stride_[shape_ind-1];
-    }
-    new_shape[shape_ind] = vals[slice_stop_ind] - vals[slice_start_ind];
+    new_shape[dim] = slices[dim].stop - slices[dim].start;
+    new_offset += slices[dim].start * stride_[dim];
   }
 
-  EnzoArray<T,D> subarray;
-
+  TempArray_<T,D> subarray;
   subarray.init_helper_(dataMgr_,new_shape,new_offset);
-  for (std::size_t dim=0; dim<D-1; dim++){
+  for (std::size_t dim=0; dim<D; dim++){
     subarray.stride_[dim] = stride_[dim];
   }
   return subarray;
 }
 
-// Helper function that computes the index of the underlying pointer
 template<typename T, std::size_t D>
-template<typename... Args>
-int EnzoArray<T,D>::calc_index_(Args ...args)
+TempArray_<T,D> FixedDimArray_<T,D>::deepcopy()
 {
-  static_assert(D==sizeof...(args),
-		"D indices are expected for a D-dimensional array.");
-  int indices[D] = {((int)args)...};
-  CHECK_BOUNDND(D,indices,shape_)
-  int index = offset_ + indices[D-1]; 
-  for (std::size_t dim = 1; dim<D; dim++){
-    index += indices[D-1-dim] * stride_[dim-1];
-  }
-  return index;
+  T* data = new T[size()]; // allocate but don't initialize values
+  std::shared_ptr<dataWrapper<T>> dataMgr;
+  dataMgr = std::make_shared<dataWrapper<T>>(data,true);
+  TempArray_<T,D> out;
+  out.init_helper_(dataMgr, shape_, 0);
+  out = *this;
+  return out;
 }
+
+
+
+template<typename T, std::size_t D>
+class TempArray_ : public FixedDimArray_<T,D>
+{
+  friend class FixedDimArray_<T,D>;
+  friend class EnzoArray<T,D>;
+
+public:
+  // Assigns to each element of *this the value of val
+  TempArray_<T,D>& operator=(const T& val);
+  
+  // Assigns to each element of *this the value of the corresponding element in
+  // other. Sizes must match
+  TempArray_<T,D>& operator=(const TempArray_<T,D>& other){
+    assign_helper_(other.offset_,other.stride_,other.shape_, other.data_);
+    return *this;
+  }
+
+  TempArray_<T,D>& operator=(const EnzoArray<T,D>& other){
+    assign_helper_(other.offset_,other.stride_, other.shape_, other.data_);
+    return *this;
+  }
+
+private:
+  TempArray_() : FixedDimArray_<T,D>() { }
+
+  void assign_helper_(const intp o_offset, const intp *o_stride,
+		      const intp *o_shape, const T* o_data){
+    for (std::size_t i = 0; i<D; i++){
+      ASSERT("TempArray_","shapes aren't the same.",this->shape_[i]==o_shape[i]);
+    }
+    bool continue_outer_iter = true;
+    intp indices[D] = {}; // all elements to 0
+    while (continue_outer_iter){
+      intp index = calc_index_(D, this->offset_, this->stride_, indices);
+      intp o_index = calc_index_(D, o_offset, o_stride, indices);
+      for (intp i = 0; i<this->shape_[D-1]; i++){
+	this->data_[index] = o_data[o_index];
+	index++; o_index++;
+      }
+      increment_outer_indices_(D, indices, this->shape_, continue_outer_iter);
+    }
+  }
+
+};
+
+
+template<typename T, std::size_t D>
+TempArray_<T,D>& TempArray_<T,D>::operator=(const T& val)
+{
+  bool continue_outer_iter = true;
+  intp indices[D] = {}; // all elements to 0
+  while (continue_outer_iter){
+    intp index = calc_index_(D, this->offset_, this->stride_, indices);
+    for (intp i = 0; i<this->shape_[D-1]; i++){
+      this->data_[index] = val;
+      index++;
+    }
+    increment_outer_indices_(D, indices, this->shape_,continue_outer_iter);
+  }
+  return *this;
+}
+
+
+template<typename T, std::size_t D>
+class EnzoArray : public FixedDimArray_<T,D>
+{
+public:
+  // Default constructor. Constructs an unallocated EnzoArray.
+  EnzoArray() : FixedDimArray_<T,D>() { }
+
+  // Construct a numeric array that allocates its own data
+  // args expects an integer for each dimension
+  template<typename... Args, REQUIRE_INT(Args)>
+  EnzoArray(Args... args) : FixedDimArray_<T,D>(args...) { }
+
+  // Construct a numeric array that wraps an existing pointer
+  // args expects an integer for each dimension
+  template<typename... Args, REQUIRE_INT(Args)>
+  EnzoArray(T* array, Args... args) : FixedDimArray_<T,D>(array, args...) { }
+
+  // Copy constructor. Constructs a shallow copy of other.
+  EnzoArray(const EnzoArray<T,D>& other){
+    this->init_helper_(other.dataMgr_, other.shape_, other.offset_);
+  }
+
+  // Move constructor. Constructs the array with the contents of other
+  EnzoArray(EnzoArray<T,D>&& other) : EnzoArray() {swap(*this,other);}
+  EnzoArray(TempArray_<T,D>&& other) : EnzoArray() {swap(*this,other);}
+
+  // Copy assignment operator. Makes *this a shallow copy of other. (Contents
+  // of shallow copies and subarrays of *this are unaffected)
+  EnzoArray<T,D>& operator=(const EnzoArray<T,D>& other){
+    this->cleanup_helper_();
+    init_helper_(other.dataMgr_, other.shape_, other.offset_);
+    return *this;
+  }
+
+  // Move assignment operator. Replaces the contents of *this with those of
+  // other. (Contents of shallow copies and subarrays of *this are unaffected)
+  EnzoArray<T,D>& operator=(EnzoArray<T,D>&& other) {
+    swap(*this,other);
+    return *this;
+  }
+  EnzoArray<T,D>& operator=(TempArray_<T,D>&& other) {
+    swap(*this,other);
+    return *this;
+  }
+};
 
 #endif /* ENZO_ENZO_ARRAY_HPP */

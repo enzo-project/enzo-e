@@ -20,9 +20,9 @@ void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
   bfield_j = array_factory.from_grouping(prim_group, "bfield", j);
   bfield_k = array_factory.from_grouping(prim_group, "bfield", k);
 
-  for (int iz=0; iz<efield.dim_size(2); iz++) {
-    for (int iy=0; iy<efield.dim_size(1); iy++) {
-      for (int ix=0; ix<efield.dim_size(0); ix++) {
+  for (int iz=0; iz<efield.shape(0); iz++) {
+    for (int iy=0; iy<efield.shape(1); iy++) {
+      for (int ix=0; ix<efield.shape(2); ix++) {
 	efield(iz,iy,ix) = (-velocity_j(iz,iy,ix) * bfield_k(iz,iy,ix) +
 			    velocity_k(iz,iy,ix) * bfield_j(iz,iy,ix));
       }
@@ -185,9 +185,9 @@ void compute_edge_(int xstart, int ystart, int zstart,
 
 
 void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
-  for (int iz = 0; iz < array.dim_size(2); iz++){
-    for (int iy = 0; iy < array.dim_size(1); iy++){
-      for (int ix = 0; ix < array.dim_size(0); ix++){
+  for (int iz = 0; iz < array.shape(0); iz++){
+    for (int iy = 0; iy < array.shape(1); iy++){
+      for (int ix = 0; ix < array.shape(2); ix++){
 	array(iz,iy,ix)*=val;
       }
     }
@@ -287,12 +287,12 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 
   int xstart = 1 - j_x - k_x; // if dim==0: 1, otherwise: 0
   int ystart = 1 - j_y - k_y;
-  int zstart = (Ec.dim_size(2) == 1) ? 0 : 1 - j_z - k_z;
+  int zstart = (Ec.shape(0) == 1) ? 0 : 1 - j_z - k_z;
 
-  int zstop = (Ec.dim_size(2) == 1) ? 1 : Ec.dim_size(2) - 1;
+  int zstop = (Ec.shape(0) == 1) ? 1 : Ec.shape(0) - 1;
 
   compute_edge_(xstart, ystart, zstart,
-		Ec.dim_size(0) - 1, Ec.dim_size(1) - 1, zstop,
+		Ec.shape(2) - 1, Ec.shape(1) - 1, zstop,
 		Eedge, Wj, Wj_kp1, Wk, Wk_jp1, Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
 		Ej, Ej_kp1, Ek, Ek_jp1);
 };
@@ -360,14 +360,14 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
   int zstop = 1;
   if (three_dim){
     zstart = j_z + k_z;
-    zstop = out_bfield.dim_size(2)-j_z-k_z;
+    zstop = out_bfield.shape(0)-j_z-k_z;
   }
 
   // We could simplify this iteration by using subarrays - However, it would be
   // more complicated
   for (int iz=zstart; iz<zstop; iz++) {
-    for (int iy=j_y+k_y; iy<out_bfield.dim_size(1)-j_y-k_y; iy++) {
-      for (int ix=j_x+k_x; ix<out_bfield.dim_size(0)-j_x-k_x; ix++) {
+    for (int iy=j_y+k_y; iy<out_bfield.shape(1)-j_y-k_y; iy++) {
+      for (int ix=j_x+k_x; ix<out_bfield.shape(2)-j_x-k_x; ix++) {
 
 	enzo_float E_k_term, E_j_term;
 	if (use_E_k){
@@ -422,9 +422,9 @@ void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
   EFlt3DArray bi_right = coord.left_edge_offset(bi_left,0,0,1);
 
   // iteration limits are compatible with a 2D grid and 3D grid
-  for (int iz=0; iz<b_center.dim_size(2); iz++) {
-    for (int iy=0; iy<b_center.dim_size(1); iy++) {
-      for (int ix=0; ix<b_center.dim_size(0); ix++) {
+  for (int iz=0; iz<b_center.shape(0); iz++) {
+    for (int iy=0; iy<b_center.shape(1); iy++) {
+      for (int ix=0; ix<b_center.shape(2); ix++) {
 	b_center(iz,iy,ix) = 0.5*(bi_left(iz,iy,ix) + bi_right(iz,iy,ix));
       }
     }

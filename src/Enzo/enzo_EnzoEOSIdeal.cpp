@@ -39,9 +39,9 @@ void EnzoEOSIdeal::compute_pressure(Block *block,
   // Since, fields are the same size, this just means that some unnecessary
   // values are calculated
   // Iteration limits compatible with both 2D and 3D grids
-  for (int iz=0; iz<density.length_dim2(); iz++) {
-    for (int iy=0; iy<density.length_dim1(); iy++) {
-      for (int ix=0; ix<density.length_dim0(); ix++) {
+  for (int iz=0; iz<density.shape(0); iz++) {
+    for (int iy=0; iy<density.shape(1); iy++) {
+      for (int ix=0; ix<density.shape(2); ix++) {
 
 	enzo_float magnetic, kinetic;
 	magnetic = 0.5*(b_x(iz,iy,ix) * b_x(iz,iy,ix) +
@@ -83,9 +83,9 @@ void EnzoEOSIdeal::primitive_from_conservative(Block *block,
   prim_by = array_factory.from_grouping(prim_group, "bfield", 1);
   prim_bz = array_factory.from_grouping(prim_group, "bfield", 2);
 
-  for (int iz=0; iz<cons_density.length_dim2(); iz++) {
-    for (int iy=0; iy<cons_density.length_dim1(); iy++) {
-      for (int ix=0; ix<cons_density.length_dim0(); ix++) {
+  for (int iz=0; iz<cons_density.shape(0); iz++) {
+    for (int iy=0; iy<cons_density.shape(1); iy++) {
+      for (int ix=0; ix<cons_density.shape(2); ix++) {
 
 	enzo_float density = cons_density(iz,iy,ix);
 	prim_density(iz,iy,ix) = density;
@@ -134,9 +134,9 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
 
   // It should be okay that this function is being primarily used for
   // face-centered temporary interior fields
-  for (int iz=0; iz<cons_density.length_dim2(); iz++) {
-    for (int iy=0; iy<cons_density.length_dim1(); iy++) {
-      for (int ix=0; ix<cons_density.length_dim0(); ix++) {
+  for (int iz=0; iz<cons_density.shape(0); iz++) {
+    for (int iy=0; iy<cons_density.shape(1); iy++) {
+      for (int ix=0; ix<cons_density.shape(2); ix++) {
 
 	enzo_float density = prim_density(iz,iy,ix);
 
@@ -195,9 +195,9 @@ void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group)
   enzo_float pressure = get_pressure_floor();
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
   
-  for (int iz=0; iz<density.length_dim2(); iz++) {
-    for (int iy=0; iy<density.length_dim1(); iy++) {
-      for (int ix=0; ix<density.length_dim0(); ix++) {
+  for (int iz=0; iz<density.shape(0); iz++) {
+    for (int iy=0; iy<density.shape(1); iy++) {
+      for (int ix=0; ix<density.shape(2); ix++) {
 
 	enzo_float kinetic, magnetic;
 	kinetic = 0.5*(px(iz,iy,ix) * px(iz,iy,ix) +

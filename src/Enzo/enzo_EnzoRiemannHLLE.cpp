@@ -102,9 +102,9 @@ void EnzoRiemannHLLE::solve (Block *block, Grouping &priml_group,
   // For consistency, always start at i+1/2
   // Iteration limits are generalized for 2D and 3D arrays
 
-  for (int iz=0; iz<flux_arrays["density"].length_dim2(); iz++) {
-    for (int iy=0; iy<flux_arrays["density"].length_dim1(); iy++) {
-      for (int ix=0; ix<flux_arrays["density"].length_dim0(); ix++) {
+  for (int iz=0; iz<flux_arrays["density"].shape(0); iz++) {
+    for (int iy=0; iy<flux_arrays["density"].shape(1); iy++) {
+      for (int ix=0; ix<flux_arrays["density"].shape(2); ix++) {
 
 	// get the fluid fields
 	for (unsigned int field_ind=0; field_ind<length; field_ind++){

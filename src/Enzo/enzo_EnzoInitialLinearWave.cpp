@@ -334,28 +334,34 @@ void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
   // Ak_right(k,j,i) = Ak(k,j+1/2,i-1/2)    Ak_left(k,j,i) = Ak(k,j-1/2,i-1/2)
 
   // get dimensions of interface field
-  int fc_mx = bfield.length_dim0();
-  int fc_my = bfield.length_dim1();
-  int fc_mz = bfield.length_dim2();
+  int fc_mx = bfield.shape(2);
+  int fc_my = bfield.shape(1);
+  int fc_mz = bfield.shape(0);
 
   EnzoArray<enzo_float,3> Ak_left, Ak_right,Aj_right, Aj_left;
 
   if (dim == 0){
     // Aj_right = Ay(iz+1/2,iy,ix-1/2), Ak_right = Az(iz, iy+1/2,ix-1/2)
-    Aj_right = Aj.subarray(1, fc_mz+1, 0, fc_my, 0, fc_mx);
-    Ak_right = Ak.subarray(0, fc_mz, 1, fc_my+1, 0, fc_mx);
+    Aj_right = Aj.subarray(ESlice(1, fc_mz+1), ESlice(0, fc_my),
+			   ESlice(0, fc_mx));
+    Ak_right = Ak.subarray(ESlice(0, fc_mz), ESlice(1, fc_my+1),
+			   ESlice(0, fc_mx));
   } else if (dim == 1){
     // Aj_right = Az(iz,iy-1/2,ix+1/2), Ak_right = Ax(iz+1/2,iy-1/2,ix)
-    Aj_right = Aj.subarray(0, fc_mz, 0, fc_my, 1, fc_mx+1);
-    Ak_right = Ak.subarray(1, fc_mz+1, 0, fc_my, 0, fc_mx);
+    Aj_right = Aj.subarray(ESlice(0, fc_mz), ESlice(0, fc_my),
+			   ESlice(1, fc_mx+1));
+    Ak_right = Ak.subarray(ESlice(1, fc_mz+1), ESlice(0, fc_my),
+			   ESlice(0, fc_mx));
   } else {
     // Aj_right = Ax(iz-1/2,iy+1/2,ix), Ak_right = Ay(iz-1/2,iy,ix+1/2)
-    Aj_right = Aj.subarray(0, fc_mz, 1, fc_my+1, 0, fc_mx);
-    Ak_right = Ak.subarray(0, fc_mz, 0, fc_my, 1, fc_mx+1);
+    Aj_right = Aj.subarray(ESlice(0, fc_mz), ESlice(1, fc_my+1),
+			   ESlice(0, fc_mx));
+    Ak_right = Ak.subarray(ESlice(0, fc_mz), ESlice(0, fc_my),
+			   ESlice(1, fc_mx+1));
   }
 
-  Aj_left = Aj.subarray(0,   fc_mz, 0, fc_my, 0, fc_mx);
-  Ak_left = Ak.subarray(0,   fc_mz, 0, fc_my, 0, fc_mx);
+  Aj_left = Aj.subarray(ESlice(0, fc_mz), ESlice(0, fc_my), ESlice(0, fc_mx));
+  Ak_left = Ak.subarray(ESlice(0, fc_mz), ESlice(0, fc_my), ESlice(0, fc_mx));
 
   for (int iz=0;iz<fc_mz;iz++){
     for (int iy=0; iy<fc_my; iy++){

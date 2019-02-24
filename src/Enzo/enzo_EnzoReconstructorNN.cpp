@@ -42,9 +42,9 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
 					     dim);
 
       // Could be more efficient
-      for (int iz=0; iz<wc.dim_size(2)-i_z; iz++) {
-	for (int iy=0; iy<wc.dim_size(1)-i_y; iy++) {
-	  for (int ix=0; ix<wc.dim_size(0)-i_x; ix++) {
+      for (int iz=0; iz<wc.shape(0)-i_z; iz++) {
+	for (int iy=0; iy<wc.shape(1)-i_y; iy++) {
+	  for (int ix=0; ix<wc.shape(2)-i_x; ix++) {
 	      wl(iz,iy,ix) = wc(iz,iy,ix);
 	      wr(iz,iy,ix) = wc_offset(iz,iy,ix);
 	      ASSERT("EnzoReconstructorNN", "There is a NaN or inf\n",

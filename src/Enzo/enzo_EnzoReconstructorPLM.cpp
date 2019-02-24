@@ -55,9 +55,9 @@ void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, int i_z, int i_y,
 		       int i_x, enzo_float prim_floor)
 {
   // Number of cells in the grid along each dimension
-  int mz = wl.dim_size(2) + i_z;
-  int my = wl.dim_size(1) + i_y;
-  int mx = wl.dim_size(0) + i_x;
+  int mz = wl.shape(0) + i_z;
+  int my = wl.shape(1) + i_y;
+  int mx = wl.shape(2) + i_x;
 
   // mk,mj equal number of grid cells along k,j directions 
   // In both cases, iterate: k = 0  to (but not including) k = mk
@@ -83,9 +83,9 @@ void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, int i_z, int i_y,
 
   // The above may is missing values
   // Once it is fixed, the following can be removed.
-  for (int iz=0; iz<wl.dim_size(2); iz++) {
-    for (int iy=0; iy<wl.dim_size(1); iy++) {
-      for (int ix=0; ix<wl.dim_size(0); ix++) {
+  for (int iz=0; iz<wl.shape(0); iz++) {
+    for (int iy=0; iy<wl.shape(1); iy++) {
+      for (int ix=0; ix<wl.shape(2); ix++) {
         wl(iz,iy,ix) = prim_floor;
   	wr(iz,iy,ix) = prim_floor;
       }
@@ -165,9 +165,9 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       //               j = 0, 1, ..., jmax - 1
       //               i = 0, 1, ..., imax - 3
 
-      for (int iz=0; iz<wc_left.dim_size(2)-2*i_z; iz++) {
-	for (int iy=0; iy<wc_left.dim_size(1)-2*i_y; iy++) {
-	  for (int ix=0; ix<wc_left.dim_size(0)-2*i_x; ix++) {
+      for (int iz=0; iz<wc_left.shape(0)-2*i_z; iz++) {
+	for (int iy=0; iy<wc_left.shape(1)-2*i_y; iy++) {
+	  for (int ix=0; ix<wc_left.shape(2)-2*i_x; ix++) {
 
 	    // compute monotized difference
 	    enzo_float val = wc_center(iz,iy,ix);

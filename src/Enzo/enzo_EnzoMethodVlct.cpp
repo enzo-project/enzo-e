@@ -11,9 +11,9 @@
 // helper function for debugging. Checks to see if an array contains NaNs
 bool not_all_finite_(EFlt3DArray &array)
 {
-  for (int iz = 0; iz<array.length_dim2(); iz++){
-    for (int iy = 0; iy<array.length_dim1(); iy++){
-      for (int ix = 0; ix<array.length_dim0(); ix++){
+  for (int iz = 0; iz<array.shape(0); iz++){
+    for (int iy = 0; iy<array.shape(1); iy++){
+      for (int ix = 0; ix<array.shape(2); ix++){
 	enzo_float val = array(iz,iy,ix);
 	if (!std::isfinite(val)){
 	  return true;
@@ -67,7 +67,7 @@ void print_array_vals_(Block* block, Grouping &grouping,
   std::string field_name = grouping.item(group_name,index);
   CkPrintf("field(\"%s\") = \n", field_name.c_str());
   CkPrintf("[% .16g", data(iz,iy,0));
-  for (int i=1; i<data.length_dim0();i++){
+  for (int i=1; i<data.shape(2);i++){
     CkPrintf(", % .16g", data(iz,iy,i));
   }
   CkPrintf("]\n");
@@ -394,9 +394,9 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 
   // All 3 array objects are the same shape
   // Iteration limits are generalized for 2D and 3D grids
-  for (int iz=0; iz<bfield.length_dim2(); iz++) {
-    for (int iy=0; iy<bfield.length_dim1(); iy++) {
-      for (int ix=0; ix<bfield.length_dim0(); ix++) {
+  for (int iz=0; iz<bfield.shape(0); iz++) {
+    for (int iy=0; iy<bfield.shape(1); iy++) {
+      for (int ix=0; ix<bfield.shape(2); ix++) {
 	l_bfield(iz,iy,ix) = bfield(iz,iy,ix);
 	r_bfield(iz,iy,ix) = bfield(iz,iy,ix);
       }
@@ -486,9 +486,9 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   weight_field = array_factory.from_grouping(weight_group, "weight", dim);
 
   // Iteration limits compatible with both 2D and 3D grids
-  for (int iz=0; iz<density_flux.length_dim2(); iz++) {
-    for (int iy=0; iy<density_flux.length_dim1(); iy++) {
-      for (int ix=0; ix<density_flux.length_dim0(); ix++) {
+  for (int iz=0; iz<density_flux.shape(0); iz++) {
+    for (int iy=0; iy<density_flux.shape(1); iy++) {
+      for (int ix=0; ix<density_flux.shape(2); ix++) {
 	// density flux is the face-centered density times the face-centered
 	// velocity along dim
 
@@ -789,9 +789,9 @@ void copy_grouping_fields_(Block *block, Grouping &conserved_group,
 					     field_ind);
       out_cons = array_factory.from_grouping(temp_cons_group, group_name,
 					     field_ind);
-      for (int iz=0; iz<cur_cons.dim_size(2); iz++) {
-	for (int iy=0; iy<cur_cons.dim_size(1); iy++) {
-	  for (int ix=0; ix<cur_cons.dim_size(0); ix++) {
+      for (int iz=0; iz<cur_cons.shape(0); iz++) {
+	for (int iy=0; iy<cur_cons.shape(1); iy++) {
+	  for (int ix=0; ix<cur_cons.shape(2); ix++) {
 	    out_cons(iz,iy,ix) = cur_cons(iz,iy,ix);
 	  }
 	}
