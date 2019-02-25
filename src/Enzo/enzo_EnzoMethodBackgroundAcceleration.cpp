@@ -132,6 +132,11 @@ void EnzoMethodBackgroundAcceleration::compute_ (Block * block) throw()
   } else if (enzo_config->method_background_acceleration_type == "PointMass"){
     this->PointMass(ax, ay, az, &particle, rank,
                     cosmo_a, enzo_config, enzo_units, enzo_block->dt);
+  } else {
+
+    ERROR("EnzoMethodBackgroundAcceleration::compute_()",
+          "Background acceleration type not recognized");
+
   }
 
 
@@ -229,23 +234,20 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
   double rcore = enzo_config->method_background_acceleration_core_radius *
                  cello::kpc_cm / enzo_units->length();
 
-  //
   if (DM_mass > 0.0){
     double xtemp = DM_mass_radius / rcore;
-//    DM_density = DM_mass / ( (2.0 * cello::pi * pow(DM_mass_radius,3.0)) *
-//                              (0.5 * log(1.0 + xtemp * xtemp) + log(1.0 + xtemp) - atan(xtemp)));
-    DM_density = 3.0 * DM_mass / (4.0 * cello::pi * std::pow(rcore,3)) /
-                       (3.0 * (std::log(1.0+xtemp)-xtemp/(1.0+xtemp)));
+
+    // compute the density constant for an NFW halo (rho_o)
+    DM_density = (DM_mass / (4.0 * cello::pi * std::pow(rcore,3))) /
+                       (std::log(1.0+xtemp)-xtemp/(1.0+xtemp));
+
   } else {
     double xtemp = DM_mass_radius / rcore;
+
     DM_mass = 4.0 * cello::pi / 3.0 * (std::pow(rcore,3) * DM_density) *
                  3.0 * (std::log(1.0 + xtemp) - xtemp/(1.0+xtemp));
   }
 
-
-//  DM_density * ( ( 2.0 * cello::pi * pow(DM_mass_radius,3.0)) *
-//                               (0.5 * log(1.0 + xtemp * xtemp) + log(1.0 + xtemp) - atan(xtemp)));
-//  }
 
   double x = 0.0, y = 0.0, z = 0.0;
 
@@ -276,20 +278,12 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
          // need to multiple all of the below by the gravitational constants
          double xtemp     = radius/rcore;
          double Rtemp     = DM_mass_radius / rcore;
+
          //double
          accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                            G_code * DM_mass * (std::log(1.0+xtemp) - xtemp/(1.0+xtemp)) /
-                              (4.0 * cello::pi * (std::log(1.0+Rtemp) - Rtemp/(1.0+Rtemp))) / (radius * radius);
+                     + 4.0 * G_code * cello::pi * DM_density * rcore *
+                          (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
 
-//                            G * DM_density * pow(rcore,3) *
-//                            (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
-//                            (radius * radius); // NFW DM profile
-
-// G * mass * ((log(1.0 + xtemp) - xtemp / (1.0 + xtemp)) / (log(1.0+1.0)-1.0/(1.0+1.0))) / (radius*radius)
-
-//                            cello::pi * G * DM_density * pow(rcore,3) / pow(radius,2)*
-//                            (-2.0*atan(radius/rcore) + 2.0*log(1.0+radius/rcore)) +
-//                               log(1.0+pow(radius/rcore,2));
          //double
          accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
                              + pow(stellar_r + sqrt( pow(zheight,2)
@@ -382,8 +376,8 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
           //double
           accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
-                            G_code * DM_mass * (std::log(1.0+xtemp) - xtemp/(1.0+xtemp)) /
-                              (4.0 * cello::pi * (std::log(1.0+Rtemp) - Rtemp/(1.0+Rtemp))) / (radius * radius);
+                     + 4.0 * G_code * cello::pi * DM_density * rcore *
+                          (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
 
 //                             G * DM_density * pow(rcore,3) *
 //                             (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
