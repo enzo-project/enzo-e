@@ -165,12 +165,12 @@ EnzoConfig::EnzoConfig() throw ()
   method_background_acceleration_DM_mass(0.0),
   method_background_acceleration_DM_density(0.0),
   method_background_acceleration_bulge_mass(0.0),
-  method_background_acceleration_core_radius(0.0),
-  method_background_acceleration_bulge_radius(0.0),
+  method_background_acceleration_core_radius(1.0E-10),
+  method_background_acceleration_bulge_radius(1.0E-10),
   method_background_acceleration_stellar_mass(0.0),
   method_background_acceleration_DM_mass_radius(0.0),
-  method_background_acceleration_stellar_scale_height_r(0.0),
-  method_background_acceleration_stellar_scale_height_z(0.0),
+  method_background_acceleration_stellar_scale_height_r(1.0E-10),
+  method_background_acceleration_stellar_scale_height_z(1.0E-10),
   method_background_acceleration_apply_acceleration(true), // for debugging
   /// EnzoMethodPmDeposit
   method_pm_deposit_alpha(0.5),
@@ -819,10 +819,10 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:background_acceleration:bulge_mass", 0.0);
 
   method_background_acceleration_core_radius = p->value_float
-    ("Method:background_acceleration:core_radius", 0.0);
+    ("Method:background_acceleration:core_radius", 1.0E-10);
 
   method_background_acceleration_bulge_radius = p->value_float
-    ("Method:background_acceleration:bulge_radius", 0.0);
+    ("Method:background_acceleration:bulge_radius", 1.0E-10);
 
   method_background_acceleration_stellar_mass = p->value_float
     ("Method:background_acceleration:stellar_mass", 0.0);
@@ -831,10 +831,10 @@ void EnzoConfig::read(Parameters * p) throw()
    ("Method:background_acceleration:DM_mass_radius", 0.0);
 
   method_background_acceleration_stellar_scale_height_r = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_r",0.0);
+   ("Method:background_acceleration:stellar_scale_height_r", 1.0E-10);
 
   method_background_acceleration_stellar_scale_height_z = p->value_float
-   ("Method:background_acceleration:stellar_scale_height_z", 0.0);
+   ("Method:background_acceleration:stellar_scale_height_z", 1.0E-10);
 
   method_background_acceleration_apply_acceleration = p->value_logical
     ("Method:background_acceleration:apply_acceleration", true);
