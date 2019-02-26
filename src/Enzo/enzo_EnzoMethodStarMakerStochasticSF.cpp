@@ -189,7 +189,10 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
             } else{
               star_fraction = this->star_particle_mass_ / mass;
             }
-          } // (else, leave star fraction alone )
+          } else {
+            // (else, leave star fraction alone )
+            star_fraction = this->star_particle_mass_ / mass;
+          }
 
           count++; //
 
@@ -205,7 +208,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
           // pointer to mass array in block
           pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
 
-          pmass[io] = star_fraction * density[i];
+          pmass[io] = star_fraction * (density[i] * dx * dy * dz);
           px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
           py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
           pz = (enzo_float *) particle.attribute_array(it, ia_z, ib);
