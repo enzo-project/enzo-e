@@ -813,15 +813,15 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
       pvz[ipp]   = particleIcVelocity[ipt][2][i];
 
       // set particle attributes for fields that may not always exist
-      if (ia_metal > 0){
+      if (ia_metal >= 0){
         pmetal      = (enzo_float *) particle->attribute_array(it, ia_metal, ib);
         pmetal[ipp] = this->disk_metal_fraction_;
       }
-      if (ia_l > 0){
+      if (ia_l >= 0){
         plifetime  = (enzo_float *) particle->attribute_array(it, ia_l, ib);
         plifetime[ipp] = -999999.0; // flag
       }
-      if (ia_to > 0){
+      if (ia_to >= 0){
         pform      = (enzo_float *) particle->attribute_array(it, ia_to, ib);
         pform[ipp] =  0.0; //
       }
