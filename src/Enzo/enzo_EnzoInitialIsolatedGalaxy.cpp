@@ -105,7 +105,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   //           properly
   ParticleDescr * particle_descr = cello::particle_descr();
   if (this-stellar_disk_ || this->stellar_bulge_)
-      particle_descr->groups()->add("star","has_mass"); // hack 
+      particle_descr->groups()->add("star","has_mass"); // hack
   if (this->live_dm_halo_)
       particle_descr->groups()->add("dark","has_mass");
 
@@ -748,6 +748,15 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
     int ia_vy = particle->attribute_index (it, "vy");
     int ia_vz = particle->attribute_index (it, "vz");
 
+    int ia_to    = particle->is_attribute(it,"creation_time") ?
+                   particle->attribute_index(it,"creation_time") : -1;
+
+    int ia_l     = particle->is_attribute(it,"lifetime") ?
+                   particle->attribute_index(it,"lifetime") : -1;
+
+    int ia_metal = particle->is_attribute(it,"metal_fraction") ?
+                   particle->attribute_index(it,"metal_fraction") : -1;
+
     int ib  = 0; // batch counter
     int ipp = 0; // particle counter
 
@@ -760,6 +769,10 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
     enzo_float * pvx  = 0;
     enzo_float * pvy  = 0;
     enzo_float * pvz  = 0;
+
+    enzo_float * pmetal = 0;
+    enzo_float * plifetime = 0;
+    enzo_float * pform     = 0;
 
     // now loop over all particles
     for (int i = 0; i < np; i ++){
@@ -789,6 +802,7 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
       pvy   = (enzo_float *) particle->attribute_array(it, ia_vy, ib);
       pvz   = (enzo_float *) particle->attribute_array(it, ia_vz, ib);
 
+
       // set the particle values
       pmass[ipp] = particleIcMass[ipt][i];
       px[ipp]    = particleIcPosition[ipt][0][i];
@@ -797,6 +811,21 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
       pvx[ipp]   = particleIcVelocity[ipt][0][i];
       pvy[ipp]   = particleIcVelocity[ipt][1][i];
       pvz[ipp]   = particleIcVelocity[ipt][2][i];
+
+      // set particle attributes for fields that may not always exist
+      if (ia_metal > 0){
+        pmetal      = (enzo_float *) particle->attribute_array(it, ia_metal, ib);
+        pmetal[ipp] = this->disk_metal_fraction_;
+      }
+      if (ia_l > 0){
+        plifetime  = (enzo_float *) particle->attribute_array(it, ia_l, ib);
+        plifetime[ipp] = -999999.0; // flag
+      }
+      if (ia_to > 0){
+        pform      = (enzo_float *) particle->attribute_array(it, ia_to, ib);
+        pform[ipp] =  0.0; //
+      }
+
     } // end loop over particles
 
   } // end loop over particle types
@@ -915,7 +944,7 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
     // velocities in km / s
     // mass in Msun
 
-    
+
 
     for (int dim = 0; dim < cello::rank(); dim++){
 
