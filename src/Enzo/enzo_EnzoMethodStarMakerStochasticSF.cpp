@@ -75,6 +75,11 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     const int ia_vy = particle.attribute_index (it, "vy");
     const int ia_vz = particle.attribute_index (it, "vz");
 
+    // additional particle attributes
+    const int ia_metal = particle.attribute_index (it, "metal_fraction");
+    const int ia_to    = particle.attribute_index (it, "creation_time");
+    const int ia_l     = particle.attribute_index (it, "lifetime");
+
     int ib  = 0; // batch counter
     int ipp = 0; // counter
 
@@ -86,6 +91,11 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     enzo_float * pvx  = 0;
     enzo_float * pvy  = 0;
     enzo_float * pvz  = 0;
+
+    ///
+    enzo_float * pmetal = 0;
+    enzo_float * pform  = 0;
+    enzo_float * plifetime = 0;
 
     // obtain the particle stride length
     const int ps = particle.stride(it, ia_m);
@@ -111,6 +121,14 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
       (enzo_float *)field.values("velocity_y") : NULL;
     enzo_float * velocity_z = (rank >= 3) ?
       (enzo_float *)field.values("velocity_z") : NULL;
+
+    enzo_float * metal = field.is_field("metal_density") ?
+      (enzo_float *) field.values("metal_density") : NULL;
+
+    // Idea for multi-metal species - group these using 'group'
+    // class in IC parameter file and in SF / Feedback routines simply
+    // check if this group exists, and if it does, loop over all of these
+    // fields to assign particle chemical tags and deposit yields
 
     // compute the temperature (we need it here)
     EnzoComputeTemperature compute_temperature
@@ -208,12 +226,25 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
           if (velocity_y) pvy[io] = velocity_y[i];
           if (velocity_z) pvz[io] = velocity_z[i];
 
+          // finalize attributes
+          plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
+          pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
+
+          pform[io]     =  enzo_block->time();   // formation time
+          plifetime[io] =  10.0 * cello::Myr_s / enzo_units->time() ; // lifetime
+
+          if (metal){
+            pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
+            pmetal[io] = metal[i] / density[i];
+          }
+
           // Remove mass from grid and rescale fraction fields
           density[i] = (1.0 - star_fraction) * density[i];
-          double scale = 1.0 / (1.0 - star_fraction);
+          double scale = (1.0 - star_fraction) / 1.0;
 
           // rescale tracer fields to maintain constant mass fraction
-          // with the corresponding new density
+          // with the corresponding new density...
+          //    scale = new_density / old_density
           rescale_densities(enzo_block, i, scale);
         }
       }
@@ -230,7 +261,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   return;
 }
 /*
-   Defaults to parent class timestep if nothing declared here 
+   Defaults to parent class timestep if nothing declared here
 double EnzoMethodStarMakerStochasticSF::timestep ( Block *block) const throw()
 {
   return std::numeric_limits<double>::max();
