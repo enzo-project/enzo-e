@@ -62,9 +62,9 @@ public:
   // Function to rescale fraction fields to new density -
   //   AE: NOTE: This could likely be moved to be a function of
   //             a more general class, not specific to star maker
-  void rescale_densities(EnzoBlock * enzo_block,
-                         const int index,
-                         const double density_ratio) throw();
+  static void rescale_densities(EnzoBlock * enzo_block,
+                                const int index,
+                                const double density_ratio) throw();
 
 protected: // methods
 

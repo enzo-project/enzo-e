@@ -93,7 +93,7 @@ void EnzoMethodStarMaker::rescale_densities(EnzoBlock * enzo_block,
   //           This can / should likely get moved to be a more general
   //           function of the block / data / field class (one of those)
   //
-  //    density_ratio = old_density / new_density
+  //    density_ratio = new_density / old_density
   //
 
   Field field = enzo_block->data()->field();
