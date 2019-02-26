@@ -94,6 +94,10 @@ public: // interface
 
   int num_attributes(int it) const;
 
+  /// Check if attribute exists
+
+  bool is_attribute (int it, std::string attribute) const;
+
   /// Return the index for the given attribute
 
   int attribute_index (int it, std::string attribute) const;

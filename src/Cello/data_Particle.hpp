@@ -120,6 +120,11 @@ public: // interface
   int num_attributes(int it) const
   { return particle_descr_->num_attributes(it); }
 
+  /// Check if attribute exists
+
+  bool is_attribute (int it, std::string attribute) const
+  { return particle_descr_->is_attribute(it,attribute); }
+
   /// Return the index for the given attribute
 
   int attribute_index (int it, std::string attribute) const
