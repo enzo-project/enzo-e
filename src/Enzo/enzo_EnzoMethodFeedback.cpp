@@ -110,8 +110,11 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
   // for now, just do this for all star particles
 
   int it = particle.type_index("star");
+  int count = 0;
 
   if (particle.num_particles(it) > 0 ){
+
+    const int ia_m = particle.attribute_index (it, "mass");
 
     const int ia_x = (rank >= 1) ? particle.attribute_index (it, "x") : -1;
     const int ia_y = (rank >= 2) ? particle.attribute_index (it, "y") : -1;
@@ -120,6 +123,7 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
     const int ia_l = particle.attribute_index (it, "lifetime");
     const int ia_c = particle.attribute_index (it, "creation_time");
 
+    const int dm = particle.stride(it, ia_m);
     const int dp = particle.stride(it, ia_x);
     const int dl = particle.stride(it, ia_l);
     const int dc = particle.stride(it, ia_c);
@@ -128,7 +132,9 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
 
     for (int ib=0; ib<nb; ib++){
       enzo_float *px=0, *py=0, *pz=0;
-      enzo_float *plifetime=0, *pcreation=0;
+      enzo_float *plifetime=0, *pcreation=0, *pmass=0;
+
+      pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
 
       px = (enzo_float *) particle.attribute_array(it, ia_x, ib);
       py = (enzo_float *) particle.attribute_array(it, ia_y, ib);
@@ -142,6 +148,7 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
       for (int ip=0; ip<np; ip++){
         // AE: Check and see if these differ....
         int ipdp = ip*dp;
+        int ipdm = ip*dm;
         int ipdl = ip*dl;
         int ipdc = ip*dc;
 
@@ -150,6 +157,9 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
         // only go SN if age >= lifetime
         if ( (plifetime[ipdl] <= 0.0) || (pcreation[ipdc] <= 0.0) ||
              (current_time - pcreation[ipdc]) < plifetime[ipdl]) continue;
+
+        plifetime[ipdl] *= -1.0;                  // set to negative - flag for already gone SNe
+        pmass[ipdm] = pmass[ipdm] - ejecta_mass_; // subtract mass from particle
 
         // get corresponding grid position
         double xp = (px[ipdp] - xm) / hx;
@@ -179,11 +189,17 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
         te[i] += ejecta_energy_ * inv_vol;
         if (enzo_config->ppm_dual_energy) ge[i] += ejecta_energy_ * inv_vol;
 
+        count++;
       } // end loop over particles
     } // end loop over batches
 
 
   }
+
+  if (count > 0){
+      std::cout << "Number of feedback particles:   " << count << "\n";
+  }
+
 
   return;
 }
