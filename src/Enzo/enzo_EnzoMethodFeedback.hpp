@@ -35,6 +35,8 @@ public:
   /// Apply the method
   virtual void compute (Block * block) throw();
 
+  void compute_ (Block * block) throw();
+
   /// name
   virtual std::string name() throw()
   { return "feedback"; }
@@ -42,7 +44,11 @@ public:
   // Compute the maximum timestep for this method
   virtual double timestep (Block * block) const throw();
 
-// protected::
+protected:
+
+  double ejecta_mass_;
+  double ejecta_energy_;
+  double ejecta_metal_fraction_;
 
 };
 

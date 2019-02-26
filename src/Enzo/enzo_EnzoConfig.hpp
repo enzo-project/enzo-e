@@ -205,7 +205,7 @@ public: // interface
       initial_IG_gas_halo_metal_fraction(0.0),      // Gas halo metal fraction
       initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
       initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
-      initial_IG_use_gas_particles(false),       // 
+      initial_IG_use_gas_particles(false),       //
       initial_IG_live_dm_halo(false),
       initial_IG_stellar_disk(false),
       initial_IG_stellar_bulge(false),
@@ -224,6 +224,9 @@ public: // interface
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
       /// EnzoMethodFeedback
+      method_feedback_ejecta_mass(0.0),
+      method_feedback_supernova_energy(1.0),
+      method_feedback_ejecta_metal_fraction(0.0),
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -458,6 +461,10 @@ public: // attributes
   std::string                method_hydro_riemann_solver;
 
   /// EnzoMethodFeedback
+
+  double                    method_feedback_ejecta_mass;
+  double                    method_feedback_supernova_energy;
+  double                    method_feedback_ejecta_metal_fraction;
 
   /// EnzoMethodStarMaker
 

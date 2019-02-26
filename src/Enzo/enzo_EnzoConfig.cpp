@@ -137,7 +137,10 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_riemann_solver(""),
   // EnzoMethodNull
   method_null_dt(0.0),
-  // EnzoMethodFeedback
+  // EnzoMethodFeedback,
+  method_feedback_ejecta_mass(0.0),
+  method_feedback_supernova_energy(1.0),
+  method_feedback_ejecta_metal_fraction(0.0),
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                             // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -362,6 +365,10 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_riemann_solver;
 
   p | method_null_dt;
+
+  p | method_feedback_ejecta_mass;
+  p | method_feedback_supernova_energy;
+  p | method_feedback_ejecta_metal_fraction;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -761,6 +768,15 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");
+
+  method_feedback_ejecta_mass = p->value_float
+    ("Method:feedback:ejecta_mass",0.0);
+
+  method_feedback_supernova_energy = p->value_float
+    ("Method:feedback:supernova_energy",1.0);
+
+  method_feedback_ejecta_metal_fraction = p->value_float
+    ("Method:feedback:ejecta_metal_fraction",0.1);
 
   method_star_maker_type = p->value_string
     ("Method:star_maker:type","stochastic");
