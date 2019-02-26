@@ -326,18 +326,18 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
 
     if (particle->num_particles(it) > 0){
 
-      const int ia_x = (rank >= 1) ? particle->attribute_index (it, "x") : -1;
-      const int ia_y = (rank >= 2) ? particle->attribute_index (it, "y") : -1;
-      const int ia_z = (rank >= 3) ? particle->attribute_index (it, "z") : -1;
+      int ia_x = (rank >= 1) ? particle->attribute_index (it, "x") : -1;
+      int ia_y = (rank >= 2) ? particle->attribute_index (it, "y") : -1;
+      int ia_z = (rank >= 3) ? particle->attribute_index (it, "z") : -1;
 
-      const int ia_ax = (rank >= 1) ? particle->attribute_index (it, "ax") : -1;
-      const int ia_ay = (rank >= 2) ? particle->attribute_index (it, "ay") : -1;
-      const int ia_az = (rank >= 3) ? particle->attribute_index (it, "az") : -1;
+      int ia_ax = (rank >= 1) ? particle->attribute_index (it, "ax") : -1;
+      int ia_ay = (rank >= 2) ? particle->attribute_index (it, "ay") : -1;
+      int ia_az = (rank >= 3) ? particle->attribute_index (it, "az") : -1;
 
-      const int dp = particle->stride(it, ia_x);
-      const int da = particle->stride(it, ia_ax);
+      int dp = particle->stride(it, ia_x);
+      int da = particle->stride(it, ia_ax);
 
-      const int nb = particle->num_batches (it);
+      int nb = particle->num_batches (it);
 
       for (int ib=0; ib<nb; ib++){
         enzo_float *px=0, *py=0, *pz=0;
@@ -350,11 +350,11 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
         pz  = (enzo_float *) particle->attribute_array (it, ia_z, ib);
         paz = (enzo_float *) particle->attribute_array (it, ia_az, ib);
 
-        const int np = particle->num_particles(it,ib);
+        int np = particle->num_particles(it,ib);
 
         for (int ip = 0; ip<np; ip++){
-          const int ipdp = ip*dp;
-          const int ipda = ip*da;
+          int ipdp = ip*dp;
+          int ipda = ip*da;
 
           x = px[ipdp] - enzo_config->method_background_acceleration_center[0];
           y = py[ipdp] - enzo_config->method_background_acceleration_center[1];
@@ -378,10 +378,6 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
           accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
                      + 4.0 * G_code * cello::pi * DM_density * rcore *
                           (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
-
-//                             G * DM_density * pow(rcore,3) *
-//                             (log(1.0+xtemp) - xtemp / (1.0+xtemp)) /
-//                             (radius * radius); // NFW DM profile
 
           accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
                               + pow(stellar_r + sqrt( pow(zheight,2)
