@@ -254,7 +254,7 @@ bool ParticleDescr::is_attribute(int it, std::string attribute_name) const
 
   static int count[CONFIG_NODE_SIZE] = {0};
 
-  return ((index != -1) && (count[cello::index_static()]++ < 10));
+  return !((index == -1) && (count[cello::index_static()]++ < 10));
 }
 //----------------------------------------------------------------------
 
