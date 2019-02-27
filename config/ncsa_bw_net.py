@@ -30,8 +30,8 @@ libs_fortran    = ['gfortran']
 
 home = os.environ['HOME']
 
-charm_path = home + '/Charm/charm.682-gni'
-png_path   = '/sw/EasyBuild/software/libpng/1.6.23-CrayGNU-2016.04/'
+charm_path = home + '/Charm/690/gnu/net/charm'
+png_path   = home
 use_papi = 1
 papi_inc="/opt/cray/papi/default/include"
 papi_lib="/opt/cray/papi/default/lib64"
@@ -40,5 +40,12 @@ hdf5_path  = os.environ["HDF5_DIR"]
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
 
-if (type == "mpi"):
-   parallel_run = "aprun -n 8"
+boost_path = os.environ["BOOST_ROOT"]
+boost_inc = boost_path + '/include'
+boost_lib = boost_path + '/lib'
+
+serial_run   = 'aprun -n 1 '
+parallel_run = 'aprun -n 4 -N 4 -d 2 '
+parallel_arg = ''
+
+smp = 0

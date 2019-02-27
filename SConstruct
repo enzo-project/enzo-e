@@ -34,12 +34,6 @@ node_size = 64
 trace = 0
 
 #----------------------------------------------------------------------
-# Whether Charm++ is compiled using SMP mode
-#----------------------------------------------------------------------
-
-smp = 0
-
-#----------------------------------------------------------------------
 # Whether to trace main phases
 #----------------------------------------------------------------------
 
@@ -288,6 +282,10 @@ flags_fc_charm = ''
 flags_link_charm = ''
 boost_inc = ''
 boost_lib = ''
+serial_run   = ""
+serial_arg   = ""
+parallel_run = ""
+parallel_arg = ""
 
 if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
@@ -398,11 +396,11 @@ if (balance == 1):
 # UNIT TEST SETTINGS
 #======================================================================
 
-serial_run   = ""
-if (smp == 1):
-   parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
-else:
-   parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
+if (parallel_run == ''):
+   if (smp == 1):
+      parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
+   else:
+      parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"
@@ -426,6 +424,7 @@ Export('lib_path')
 Export('inc_path')
 Export('test_path')
 Export('ip_charm')
+Export('smp')
 
 
 cpppath     = [inc_path]
@@ -632,7 +631,9 @@ env.Append(BUILDERS = { 'CppBuilder'   : cpp_builder })
 
 Export('env')
 Export('parallel_run')
+Export('parallel_arg')
 Export('serial_run')
+Export('serial_arg')
 Export('use_papi')
 
 SConscript( 'src/SConscript',variant_dir='build')
