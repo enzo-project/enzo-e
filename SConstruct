@@ -636,7 +636,15 @@ Export('serial_run')
 Export('serial_arg')
 Export('use_papi')
 
-SConscript( 'src/SConscript',variant_dir='build')
+# Build in build-<branch> directory if this is a git repository
+
+if (have_git == 1):
+   branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
+   build_dir = 'build-' + branch
+else:     
+   build_dir = 'build'
+   
+SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
 
 #======================================================================
