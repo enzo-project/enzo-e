@@ -297,7 +297,8 @@ elif (arch == "linux_yt"):     from linux_yt     import *
 elif (arch == "linux_gprof"):  from linux_gprof  import *
 elif (arch == "linux_mpe"):    from linux_mpe    import *
 elif (arch == "linux_tau"):    from linux_tau    import *
-elif (arch == "ncsa_bw"):      from ncsa_bw      import *
+elif (arch == "ncsa_bw_net"):   from ncsa_bw_net import *
+elif (arch == "ncsa_bw_smp"):   from ncsa_bw_smp import *
 elif (arch == "faraday_gnu"):  from faraday_gnu  import *
 elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
 elif (arch == "mf_gnu"):       from mf_gnu       import *
