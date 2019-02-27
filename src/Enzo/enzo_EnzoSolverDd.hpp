@@ -118,7 +118,6 @@ public: // methods
 
   /// Call coarse solver--must be called by all blocks
   void call_coarse_solver(EnzoBlock * enzo_block) throw();
-  void continue_after_coarse_solve(EnzoBlock * enzo_block) throw();
   
   /// Begin the prolongation phase
   void prolong(EnzoBlock * enzo_block) throw();
@@ -180,8 +179,11 @@ protected: // methods
 
   FieldMsg * pack_field_
   (EnzoBlock *, int index_field, int refresh_type, int ic3[3]);
+
   void unpack_field_
   (EnzoBlock *, FieldMsg *, int index_field, int refresh_type);
+
+  void copy_xc_to_x_(EnzoBlock *) throw();
 
 protected: // attributes
 

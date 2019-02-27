@@ -45,7 +45,7 @@ if [ "$#" -ge 1 ]; then
       done
       rm -rf include >& /dev/null
       rm -f input/*.in.out >& /dev/null
-      rm -rf build
+      rm -rf build build-*
       rm -rf test/*.h5
       rm -rf template_defs.def.h template_defs.decl.h
       rm -rf .sconf_temp/conftest_0.c .sconsign.dblite 
@@ -200,10 +200,11 @@ if [ $target == "test" ]; then
 fi
 
 if [ x$CELLO_ARCH == "xncsa-bw" ]; then
-   echo "Relinking with static libpng15.a..."
-   /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o build/charm/Enzo/enzo-p -g -g build/charm/Enzo/enzo-p.o build/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
+    echo "Relinking with static libpng15.a..."
+    build_dir="build"
+   /u/sciteam/bordner/Charm/charm/bin/charmc -language charm++ -tracemode projections -o $build_dir/charm/Enzo/enzo-p -g -g $build_dir/charm/Enzo/enzo-p.o $build_dir/charm/Cello/main_enzo.o -Llib/charm -L/opt/cray/hdf5/default/cray/74/lib -lcharm -lenzo -lsimulation -lproblem -lcomm -lmesh -lfield -lio -ldisk -lmemory -lparameters -lerror -lmonitor -lparallel -lperformance -ltest -lcello -lexternal -lhdf5 -lz /u/sciteam/bordner/lib/libpng15.a -lgfortran
 
-   mv build/charm/Enzo/enzo-p bin/charm
+   mv $build_dir/charm/Enzo/enzo-p bin/charm
 
 fi
 
