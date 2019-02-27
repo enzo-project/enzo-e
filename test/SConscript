@@ -144,7 +144,7 @@ env.RunSerial('test_Monitor.unit',      bin_path + '/test_Monitor')
 #----------------------------------------------------------------------
 Clean(env_mv_test.RunSerial
       ('test_Parameters.unit',  bin_path + '/test_Parameters'),
-      ['#/test/test.in','#/test/test1.out','#/test/test2.out'])
+      ['#/test.in','#/test/test.in','#/test/test1.out','#/test/test2.out'])
 #----------------------------------------------------------------------
 # PERFORMANCE COMPONENT   
 #----------------------------------------------------------------------
