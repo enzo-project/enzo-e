@@ -286,6 +286,7 @@ serial_run   = ""
 serial_arg   = ""
 parallel_run = ""
 parallel_arg = ""
+smp = 0
 
 if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
