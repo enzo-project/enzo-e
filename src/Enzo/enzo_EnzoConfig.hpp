@@ -229,6 +229,7 @@ public: // interface
       method_feedback_ejecta_metal_fraction(0.0),
       method_feedback_stencil(3),
       method_feedback_shift_cell_center(true),
+      method_feedback_ke_fraction(0.0),
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -298,6 +299,8 @@ public: // interface
       initial_IG_bfield[axis]         = 0.0;
       method_background_acceleration_center[axis] = 0.5;
       method_background_acceleration_angular_momentum[axis] = 0;
+
+      initial_feedback_test_position[axis] = 0.5;
     }
     method_background_acceleration_angular_momentum[2] = 1;
   }
@@ -426,6 +429,10 @@ public: // attributes
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 
+  /// EnzoInitialFeedbackTest
+
+  double                     initial_feedback_test_position[3];
+  
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];
   double                     initial_IG_bfield[3];
@@ -467,6 +474,7 @@ public: // attributes
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
+  double                    method_feedback_ke_fraction;
   int                       method_feedback_stencil;
   bool                      method_feedback_shift_cell_center;
 

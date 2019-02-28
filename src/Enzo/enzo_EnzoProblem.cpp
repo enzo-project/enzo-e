@@ -128,6 +128,8 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "grackle_test") {
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
+  } else if (type == "feedback_test") {
+    initial = new EnzoInitialFeedbackTest(enzo_config);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,
@@ -546,7 +548,7 @@ Method * EnzoProblem::create_method_
   } else if (name == "feedback") {
 
     // need a similar type swtich as in star maker
-    method = new EnzoMethodFeedback();
+    method = new EnzoMethodDistributedFeedback();
 
   } else {
 

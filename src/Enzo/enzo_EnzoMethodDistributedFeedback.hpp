@@ -39,34 +39,53 @@ public:
 
   /// name
   virtual std::string name() throw()
-  { return "distributed_feedback"; }
+  { return "feedback"; }
 
   // Compute the maximum timestep for this method
   virtual double timestep (Block * block) const throw();
 
-  void convert_momentum( double *vx, double *vy, double *vz,
-                        const double &up, const double &vp, const double &wp,
-                        const int &nx const int &ny, const int &nz,
+  void convert_momentum( enzo_float *vx, enzo_float *vy, enzo_float *vz, enzo_float *d,
+                        const enzo_float &up, const enzo_float &vp, const enzo_float &wp,
+                        const int &nx, const int &ny, const int &nz,
                         const int &ix, const int &iy, const int &iz, int idir);
 
-  void sum_mass_energy( double *px, double *py, double *pz, double * d,
-                        double *ge, double *te,
+  void sum_mass_energy( enzo_float *px, enzo_float *py, enzo_float *pz, enzo_float * d,
+                        enzo_float *ge, enzo_float *te,
                         const int &nx, const int& ny, const int &nz,
                         const int &ix, const int& iy, const int &iz,
                         double &sum_mass, double &sum_energy, double & sum_ke);
 
-  void add_feedback_to_grid( double * px, double * py, double *pz,
-                             double * d, double *ge, double *te,
+
+  // AE NOTE: In final version, change metal field to something like
+  //          double ** species, and have it contain all of the species fields
+  //          that may exist in the simulation (metal, H, He, etc.) such that
+  //          mass is deposited consistently over all of these fields. May
+  //          need to also provide a M-dimensional array (M = num_species)
+  //          containing the fraction of the ejecta mass that should go into
+  //          each spcies. For example, if we have metal and multi species = 1:
+  //              species   = {metal, HI, HII, HeI, HeII, HeIII, e};
+  //              spec_frac = {ejecta_metal_frac,
+  //                           0.0,
+  //                           (1.0 - ejecta_metal_frac)*0.73,
+  //                           0.0,
+  //                           0.0,
+  //                           (1.0 - ejecta_metal_frac)*(1.0-0.73),
+  //                           electron_value};
+  //            or soemthing like that to make sure we have proper conservation
+  //            of species fields. Maybe just make these all vectors to
+  //            make life easy.
+  void add_feedback_to_grid( enzo_float * px, enzo_float * py, enzo_float *pz,
+                             enzo_float * d, enzo_float *ge, enzo_float *te, enzo_float * metal,
                              const int &nx, const int &ny, const int &nz,
                              const int &ix, const int &iy, const int &iz,
                              const double &dxc, const double &dyc, const double &dzc,
                              const double & mass_per_cell, const double & mom_per_cell,
                              const double & therm_per_cell);
 
-  void compute_coefficients( double *px, double *py, double *pz, double *d,
-                             double *ge, double* px_l, double* py_l, double *pz_l,
-                             double *d_l, const int &nx, const int &ny, const int &nz,
-                             const int &ix, const int *iy, const int &iz,
+  void compute_coefficients( enzo_float *px, enzo_float *py, enzo_float *pz, enzo_float *d,
+                             enzo_float *ge, enzo_float* px_l, enzo_float* py_l, enzo_float *pz_l,
+                             enzo_float *d_l, const int &nx, const int &ny, const int &nz,
+                             const int &ix, const int &iy, const int &iz,
                              double &A, double &B, double &C);
 
 protected:
@@ -74,12 +93,15 @@ protected:
   double total_ejecta_mass_;
   double total_ejecta_energy_;
   double ejecta_metal_fraction_;
+  double kinetic_fraction_;
 
-  int stencil_size_;
-  int istencil_;
+  int stencil_;
+  int stencil_rad_;
   int number_of_feedback_cells_;
+  int dual_energy_;
 
-  double m_eject_;
+  double mass_per_cell_;
+  double energy_per_cell_;
 
 };
 
