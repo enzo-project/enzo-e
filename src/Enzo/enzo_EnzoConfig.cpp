@@ -141,6 +141,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ejecta_mass(0.0),
   method_feedback_supernova_energy(1.0),
   method_feedback_ejecta_metal_fraction(0.0),
+  method_feedback_stencil(3),
+  method_feedback_shift_cell_center(true),
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                             // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -369,6 +371,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_ejecta_mass;
   p | method_feedback_supernova_energy;
   p | method_feedback_ejecta_metal_fraction;
+  p | method_feedback_stencil;
+  p | method_feedback_shift_cell_center;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -777,6 +781,12 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_feedback_ejecta_metal_fraction = p->value_float
     ("Method:feedback:ejecta_metal_fraction",0.1);
+
+  method_feedback_stencil = p->value_int
+    ("Method:feedback:stencil",3);
+
+  method_feedback_shift_cell_center = p->value_logical
+    ("Method:feedback:shift_cell_center", true);
 
   method_star_maker_type = p->value_string
     ("Method:star_maker:type","stochastic");

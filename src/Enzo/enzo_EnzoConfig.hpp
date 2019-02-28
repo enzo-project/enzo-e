@@ -227,6 +227,8 @@ public: // interface
       method_feedback_ejecta_mass(0.0),
       method_feedback_supernova_energy(1.0),
       method_feedback_ejecta_metal_fraction(0.0),
+      method_feedback_stencil(3),
+      method_feedback_shift_cell_center(true),
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -465,6 +467,8 @@ public: // attributes
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
+  int                       method_feedback_stencil;
+  bool                      method_feedback_shift_cell_center;
 
   /// EnzoMethodStarMaker
 
