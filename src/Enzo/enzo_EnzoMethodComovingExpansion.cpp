@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
-( bool comoving_coordinates ) 
+( bool comoving_coordinates )
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
@@ -22,14 +22,14 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   const int rank = cello::rank();
   //  refresh(ir)->add_all_fields();
   FieldDescr * field_descr = cello::field_descr();
-  
+
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
   refresh(ir)->add_field(field_descr->field_id("internal_energy"));
   if (rank >= 1) refresh(ir)->add_field(field_descr->field_id("velocity_x"));
   if (rank >= 2) refresh(ir)->add_field(field_descr->field_id("velocity_y"));
   if (rank >= 3) refresh(ir)->add_field(field_descr->field_id("velocity_z"));
-					
+
   if ( ! comoving_coordinates_ ) {
     WARNING
       ("EnzoMethodComovingExpansion::EnzoMethodComovingExpansion()",
@@ -44,7 +44,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
   if (block->cycle() == 0) {
     // skip first cycle
-    block->compute_done(); 
+    block->compute_done();
     return;
   }
   EnzoBlock * enzo_block = enzo::block(block);
@@ -89,7 +89,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       //      double dt = block->dt();
       enzo_float Coefficient = dt*cosmo_dadt/cosmo_a;
 
-      
+
       /* Determine the size of the block. */
 
       int mx, my, mz, m, rank;
@@ -98,25 +98,13 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       rank = cello::rank();
 
       /* If we can, compute the pressure at the mid-point.
-  	 We can, because we will always have an old baryon field now. */
+      	 We can, because we will always have an old baryon field now. */
       const int in = cello::index_static();
-      enzo_float * pressure = new enzo_float[m];
-      int rval;
+      enzo_float * pressure = (enzo_float *) field.values("pressure");
 
-      if (EnzoBlock::DualEnergyFormalism[in]) {
-  	rval = enzo_block->ComputePressureDualEnergyFormalism
-	  (compute_time, pressure, comoving_coordinates_);
-      }
-      else{
-  	rval = enzo_block->ComputePressure
-	  (compute_time, pressure, comoving_coordinates_);
-      }
-      if (rval == ENZO_FAIL) {
-  	fprintf(stderr,
-  		"Error in ComputePressureDualEnergyFormalism or "
-		"ComputePressure.\n");
-  	exit(ENZO_FAIL);
-      }
+      EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
+                                            comoving_coordinates_);
+      compute_pressure.compute(block);
 
       // hard-code hydromethod for PPM for now
       int HydroMethod = 0;
@@ -182,7 +170,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
          pressure = NULL;
     }
 
-  block->compute_done(); 
+  block->compute_done();
 }
 
 //----------------------------------------------------------------------

@@ -74,6 +74,10 @@ void EnzoComputePressure::compute_(Block * block
   // if grackle fields are not provided, define them
   if (!grackle_fields){
     grackle_fields  = &grackle_fields_;
+		// NOTE: Add option here to pass history index to setup to
+		//       allow for computation of old baryon fields ....
+		//       this way we can facilitate computation of
+		//       interpolated (in time) fields 
     EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields);
   }
 
