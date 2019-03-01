@@ -2,25 +2,25 @@
 
 
 ----------------------------
-Getting started using Enzo-P
+Getting started using Enzo-E
 ----------------------------
 
-This page will help you get Enzo-P and Cello up and running.  It
+This page will help you get Enzo-E and Cello up and running.  It
 covers downloading the source code, porting the code to new platforms,
 configuring and compiling the code, and running a sample test problem.
 
 Downloading
 ===========
 
-``Enzo-P / Cello`` is currently in beta-testing.  To obtain the latest
+``Enzo-E / Cello`` is currently in beta-testing.  To obtain the latest
 version of the source code, you may clone it from the Bitbucket
-repository `Enzo-P / Cello bitbucket repository
+repository `Enzo-E / Cello bitbucket repository
 <https://bitbucket.org/cello-project/cello-src/>`_:
 
    ``hg clone https://bitbucket.org/cello-project/cello-src``
 
 
-Before compiling ``Enzo-P / Cello``, you will also need to download
+Before compiling ``Enzo-E / Cello``, you will also need to download
 and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, and 3.``libboost``:
 
 1. Install ``Charm++``
@@ -44,18 +44,18 @@ be used to configure and install ``Charm++`` on numerous other platforms.
 
 "`HDF5 <http://www.hdfgroup.org/HDF5/>`_ is a "data model, library, and
 file format for storing and managing data", and is the primary library
-used by Enzo-P / Cello for data output.
+used by Enzo-E / Cello for data output.
 
 If HDF5 is not already installed on your machine, it may be available
 through your operating system distribution, otherwise it can be
 downloaded from the `HDF5 <http://www.hdfgroup.org/HDF5/>`_ website.
-Enzo-P / Cello currently uses the "serial" (non-MPI) version of HDF5.
+Enzo-E / Cello currently uses the "serial" (non-MPI) version of HDF5.
 
 3. Install ``libpng``
 ---------------------
 
 "`libpng <http://www.libpng.org/pub/png/libpng.html>`_ is the official
-PNG reference library", and is the image format used by Enzo-P / Cello.
+PNG reference library", and is the image format used by Enzo-E / Cello.
 
 If ``libpng`` is not already installed on your machine, it may be
 available through your operating system distribution, otherwise it can
@@ -75,7 +75,7 @@ Configuring
 ===========
 
 There are currently two configuration settings that must be set before
-building Enzo-P and Cello: ``CELLO_ARCH`` to specify the computer platform,
+building Enzo-E and Cello: ``CELLO_ARCH`` to specify the computer platform,
 and ``CELLO_PREC`` to specify the floating-point precision.
 
 Other optional settings are available as well.  These are initialized
@@ -86,7 +86,7 @@ these optional settings.
 1. Specify machine
 ------------------
 
-Before compiling Enzo-P/Cello, you first have to define which set of
+Before compiling Enzo-E / Cello, you first have to define which set of
 available machine-dependent configuration settings to use via the
 ``CELLO_ARCH`` environment variable.  Some examples include the
 following:
@@ -110,8 +110,8 @@ the list, or how to modify the settings for these machines.
 2. Specify precision
 --------------------
 
-Enzo-P must be compiled either using single-precision or
-double-precision.  To specify the precision to use in Enzo-P, set the
+Enzo-E must be compiled either using single-precision or
+double-precision.  To specify the precision to use in Enzo-E, set the
 ``CELLO_PREC`` environment variable:
 
   =====================  ======================
@@ -164,9 +164,9 @@ and editing it.  Configuration variables include the following:
 2. Edit ``SConstruct``
 ----------------------
 
-To incorporate your new machine configuration file into the ``Enzo-P /
+To incorporate your new machine configuration file into the ``Enzo-E /
 Cello`` build system, insert a new line to the following list in the
-``SConstruct`` file in the top-level ``Enzo-P / Cello`` directory:
+``SConstruct`` file in the top-level ``Enzo-E / Cello`` directory:
 
   ::   
 
@@ -183,7 +183,7 @@ Building
 ========
 
 After configuring Cello for your computer, the Cello framework and
-Enzo-P application can be compiled using "make", which in turn calls
+Enzo-E application can be compiled using "make", which in turn calls
 the included ``./build.sh`` script.  Other options are available for
 generating useful `http://orgmode.org/ <org-mode>`_ files, generating
 doxygen documentation, running
@@ -191,7 +191,7 @@ regression tests, and running code analysis tools.
 
         ==================  ===============================================================
         ==================  ===============================================================
-	``make``            *Compile Enzo-P as* ``./bin/enzo-p``
+	``make``            *Compile Enzo-E as* ``./bin/enzo-p``
 	``make clean``      *Remove object and test files*
 	``make reset``      *Clear any settings from an incomplete build*
 	``make doc``        *Generate doxygen documentation from source in* ``src-html`` *(requires* ``doxygen`` *)*
@@ -200,16 +200,16 @@ regression tests, and running code analysis tools.
 	``make log``        *Generate org-mode* ``'log.org'`` *file from* ``'hg log'`` *output*
 	``make gdb``        *Generate org-mode* ``'gdb.org'`` *from gdb* ``'where'`` *output in* ``gdb.out``
         ``make cccc``       *Compute code quality metrics in* ``src/.cccc/cccc.html``
-	``make coverity``   *Compile Enzo-P/Cello using the Coverity static analysis tool*
+	``make coverity``   *Compile Enzo-E / Cello using the Coverity static analysis tool*
         ==================  ===============================================================
 
 Running
 =======
 
-In this section we run Enzo-P on a simple "Hello World" test program
-and take a look at Enzo-P's output.
+In this section we run Enzo-E on a simple "Hello World" test program
+and take a look at Enzo-E's output.
 
-1. Run Enzo-P
+1. Run Enzo-E
 -------------
 
 An included "Hello World" problem can be run using the following
@@ -222,7 +222,7 @@ is not, then you will need to include the path name as well, e.g.:
 
      ``~/Charm/bin/charmrun +p4 bin/enzo-p input/Hi.in``
 
-If all goes well, Enzo-P will run the Hello World problem.  Below are
+If all goes well, Enzo-E will run the Hello World problem.  Below are
 some of the generated images from the longer-running "HelloWorld.in"
 problem (note "HelloWorld.in" runs for about an hour, compared to a
 couple minutes for the shorter "Hi.in" input parameter file).  These
@@ -269,10 +269,10 @@ Time = 0.10
    :scale: 40 %
 
 
-If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-P / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-P / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
+If you look at the ``Hi.in`` parameter file contents, you will notice that there are some ``"include"`` directives that include other files.  When Enzo-E / Cello runs, it will generate a ``"parameters.out"`` file, which is the input file but with the included files inlined.  This ``"parameters.out"`` file is itself a valid Enzo-E / Cello parameter file (though you may wish to rename it before using it as a parameter file to avoid it being overwritten.)
 
-If you encounter any problems in getting Enzo-P to compile or run,
-please contact the Enzo-P/Cello community at cello-l@ucsd.edu, and
+If you encounter any problems in getting Enzo-E to compile or run,
+please contact the Enzo-E / Cello community at cello-l@ucsd.edu, and
 someone will be happy to help resolve the problems.
 
 	   

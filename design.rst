@@ -2,7 +2,7 @@
 Design
 ======
 
-The software design of Enzo-P / ``Cello`` is based on object-oriented
+The software design of Enzo-E / ``Cello`` is based on object-oriented
 programming (OOP), a proven software design and implementation
 paradigm that helps reduce software complexity and improves code
 maintainability.
@@ -10,7 +10,7 @@ maintainability.
 .. image:: components.png
 
 The ``Cello`` framework is functionally decomposed into a collection
-of software components.  The ``Enzo-P`` application is implemented on
+of software components.  The ``Enzo-E`` application is implemented on
 top of Cello, which is comprised of the components within the central
 boxed region.  ``Cello`` is in turn implemented using the Charm++
 parallel programming system.  Components in ``Cello`` are organized
@@ -19,18 +19,18 @@ downwards; cross-cutting software concerns are also implemented as
 components.  Each component is composed of one or more inter-operating
 C++ classes.
 
-Enzo-P
+Enzo-E
 ======
 
-``Enzo-P`` is the astrophysics and cosmology application built on top
-of the ``Cello`` scalable AMR framework.  ``Enzo-P`` interfaces with
+``Enzo-E`` is the astrophysics and cosmology application built on top
+of the ``Cello`` scalable AMR framework.  ``Enzo-E`` interfaces with
 ``Cello`` primarily through C++ class inheritance of ``Cello`` classes
 in the ``Simulation``, ``Problem``, ``Method``, and ``Mesh``
-components.  Due to the separation of concerns between ``Enzo-P`` and
-Cello, development of ``Enzo-P`` requires no knowledge or awareness of
+components.  Due to the separation of concerns between ``Enzo-E`` and
+Cello, development of ``Enzo-E`` requires no knowledge or awareness of
 parallel programming, and development of ``Cello`` requires no
 knowledge of specific numerical methods.  This allows relatively
-independent software development of ``Enzo-P`` by physical science and
+independent software development of ``Enzo-E`` by physical science and
 numerical methods experts, and of ``Cello`` by computer science and
 parallel programming experts.
 
@@ -104,7 +104,7 @@ Interface components
 Interface components include ``Monitor`` (current) and ``Portal``
 (proposed).  The ``Monitor`` component controls the user-readable
 summary of progress to stdout, and the proposed ``Portal`` component
-will control the interaction of ``Enzo-P`` with external applications
+will control the interaction of ``Enzo-E`` with external applications
 running concurrently, such as inline analysis or real-time
 visualization.  One particular such analysis and visualization
 application is yt, which we will use to help drive the design and
@@ -116,7 +116,7 @@ Cross-cutting components
 Some ``Cello`` components can in principle be called from any software
 layer---these include ``Performance`` and ``Error``. The
 ``Performance`` component dynamically collects performance data for
-the running ``Enzo-P`` simulation, and provides a holistic summary of
+the running ``Enzo-E`` simulation, and provides a holistic summary of
 performance data to the user, as well as to software components that
 can adapt to optimize desired performance metrics.  Current metrics
 measured include memory usage (via the ``Memory`` component), and

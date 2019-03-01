@@ -144,6 +144,28 @@ PPML ideal MHD solver
 
 Particle-mesh ("PM") method component to deposit of field and particle
 mass into a "total density" field
+
+parameters
+----------
+
+.. list-table:: Method ``ppm`` parameters
+   :widths: 10 5 1 30
+   :header-rows: 1
+   
+   * - Parameter
+     - Type
+     - Default
+     - Description
+   * - ``"alpha"``
+     - `float`
+     - `0.5`
+     - `Deposit mass at time t + alpha * dt`
+
+fields
+------
+
+particles
+---------
    
 ``"pm_update"``: particle-mesh
 ==============================
