@@ -1,0 +1,121 @@
+  Domain {
+     lower = [0.0, 0.0, 0.0];
+     upper = [1.0, 1.0, 1.0];
+  }
+
+  Mesh {
+    root_rank   = 3;
+    root_blocks = [2,2,2];
+    root_size   = [32, 32, 32];
+  }
+
+Boundary {
+  type = "outflow";
+ }
+
+Field {
+  history     = 1;
+  alignment   = 8;
+  gamma       = 1.4;
+  ghost_depth = 3;
+  list = ["density", "velocity_x", "velocity_y", "velocity_z", "metal_density",
+              "total_energy", "internal_energy", "pressure", "temperature"];
+  uniform_density = 1.0E-10;
+  }
+
+Units {
+    length = 7.899E20;    # 256 pc
+    time   = 3.15576E10;
+    mass   = 1.9891E36;
+  }
+
+Method {
+  list = ["ppm","feedback"];
+
+      ppm {
+            diffusion = true;
+            riemann_solver = "two_shock";
+            dual_energy = true;
+            flattening = 3;
+            steepening = true;
+            mol_weight = 1.2;
+            courant = 0.4;
+            density_floor = 1.0E-30;
+            number_density_floor = 1.0E-30;
+            pressure_floor = 1.0E-30;
+            temperature_floor = 1.0E-30;
+          };
+
+  feedback {
+    ejecta_mass = 8.0;
+    supernova_energy = 1.0;
+    ke_fraction = 0.0;
+    metal_fraction = 0.5;
+    stencil = 3;
+  }
+  
+
+ }
+
+Particle{
+  list = ["star"];
+
+    star {
+         attributes = [ "x", "double",
+                        "y", "double",
+                        "z", "double",
+                        "vx", "double",
+                        "vy", "double",
+                        "vz", "double",
+                        "ax", "double",
+                        "ay", "double",
+                        "az", "double",
+                        "mass", "double",
+                        "creation_time","double",  
+                        "metal_fraction","double",
+                        "lifetime","double" ];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+         groups = ["has_mass"];
+     }
+}
+
+Initial {
+
+  list = ["feedback_test"];
+
+  feedback_test {
+    position = [0.5, 0.5, 0.25];
+  }
+}
+
+Output {
+    list = [ "data" ];
+    data {
+        field_list = [ "density" , "total_energy" , "internal_energy", "metal_density",
+                       "velocity_x", "velocity_y", "velocity_z",
+                       "pressure", "temperature"];
+
+        particle_list = ["star"];
+
+        dir   = ["ISOLATED_GALAXY_%04d","count"];
+        name = [ "isolated-galaxy-data-%04d-%03d.h5", "count", "proc" ];
+        type = "data";
+
+        # schedule the output based on 'var' and 'step'
+        #   step refers to the interval if 'var' to output on
+        schedule {
+             var   = "cycle";
+             step  = 1; #            time in code units (Myr)
+        }
+    };
+
+
+}
+
+Stopping {
+    time = 1000.0;
+    cycle = 10;
+    seconds = 600.0;
+    interval = 1;
+}
