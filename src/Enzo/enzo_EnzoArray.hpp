@@ -184,9 +184,11 @@ public:
   // Produce a copy of the array.
   TempArray_<T,D> deepcopy();
   
-  // Returns a subarraywith same D. Expects an instance of ESlice for each
+  // Returns a subarray with same D. Expects an instance of ESlice for each
   // dimension. For a 3D EnzoArray, the function declaration might look like:
   // EnzoArray<T,3> subarray(ESlice k_slice, ESlice j_slice, ESlice i_slice);
+  //
+  // The Special Case of no arguments returns the full array
   template<typename... Args, REQUIRE_TYPE(Args,ESlice)>
   TempArray_<T,D> subarray(Args... args);
 
@@ -325,26 +327,32 @@ inline void prep_slices_(const ESlice* slices, const intp shape[],
 template<typename T, std::size_t D>
 template<typename... Args, class>
 TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args){
-  static_assert(D == sizeof...(args),
+  static_assert(D == sizeof...(args) || 0 == sizeof...(args),
 		"Number of slices don't match number of dimensions");
-  ESlice in_slices[] = {args...};
-  ESlice slices[D];
-  prep_slices_(in_slices, shape_, D, slices);
-
-  intp new_shape[D];
-  intp new_offset = offset_;
-  for (std::size_t dim=0; dim<D; dim++){
-    new_shape[dim] = slices[dim].stop - slices[dim].start;
-    new_offset += slices[dim].start * stride_[dim];
-  }
-
   TempArray_<T,D> subarray;
-  subarray.init_helper_(dataMgr_,new_shape,new_offset);
-  for (std::size_t dim=0; dim<D; dim++){
-    subarray.stride_[dim] = stride_[dim];
+  if (sizeof...(args) == 0) {
+    subarray.init_helper_(dataMgr_,shape_,offset_);
+  } else {
+    ESlice in_slices[] = {args...};
+    ESlice slices[D];
+    prep_slices_(in_slices, shape_, D, slices);
+
+    intp new_shape[D];
+    intp new_offset = offset_;
+    for (std::size_t dim=0; dim<D; dim++){
+      new_shape[dim] = slices[dim].stop - slices[dim].start;
+      new_offset += slices[dim].start * stride_[dim];
+    }
+
+    subarray.init_helper_(dataMgr_,new_shape,new_offset);
+    for (std::size_t dim=0; dim<D; dim++){
+      subarray.stride_[dim] = stride_[dim];
+    }
   }
   return subarray;
 }
+
+
 
 template<typename T, std::size_t D>
 TempArray_<T,D> FixedDimArray_<T,D>::deepcopy()
