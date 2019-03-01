@@ -35,7 +35,7 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   ejecta_metal_fraction_ = enzo_config->method_feedback_ejecta_metal_fraction;
 
   stencil_             = enzo_config->method_feedback_stencil;
-  stencil_rad_                 = ( (int) (stencil_ - 1 / 2.0));
+  stencil_rad_                 = ( (int) ((stencil_ - 1) / 2.0));
   number_of_feedback_cells_ = stencil_ * stencil_ * stencil_;
 
 
@@ -87,7 +87,7 @@ void EnzoMethodDistributedFeedback::compute (Block * block) throw()
   return;
 }
 
-void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
+void EnzoMethodDistributedFeedback::compute_ (Block * block)
 {
 
   EnzoBlock * enzo_block = enzo::block(block);
@@ -168,11 +168,24 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
 
     const int nb = particle.num_batches(it);
 
+    double density_per_cell = mass_per_cell_ / (hx*hy*hz);
+    double energy_density_per_cell = energy_per_cell_ / (hx*hy*hz);
+
     // allocate local fields to keep track of energy
     // and momentum for conservation
-    double *u_local=0, *v_local=0, *w_local=0, *d_local=0, *ge_local=0, *te_local=0;
-    double *ke_before=0, *metal_local=0;
-
+    //double *u_local=NULL, *v_local=NULL, *w_local=NULL, *d_local=NULL, *ge_local=NULL, *te_local=NULL;
+    //double *ke_before=NULL, *metal_local=NULL;
+        // number of feedback cells + 1 cell in each dimension
+    int num_loc = (stencil_ + 1) * (stencil_ + 1) * (stencil_ + 1);
+    enzo_float *u_local     = new enzo_float[num_loc];
+    enzo_float *v_local     = new enzo_float[num_loc];
+    enzo_float *w_local     = new enzo_float[num_loc];
+    enzo_float *d_local     = new enzo_float[num_loc];
+    enzo_float *ge_local    = new enzo_float[num_loc];
+    enzo_float *te_local    = new enzo_float[num_loc];
+    enzo_float *metal_local = new enzo_float[num_loc];
+    enzo_float *ke_before   = new enzo_float[num_loc];
+    
 
     for (int ib=0; ib<nb; ib++){
       enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
@@ -205,6 +218,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
         // only go SN if age >= lifetime
         if ( (plifetime[ipdl] <= 0.0) || (pcreation[ipdc] <= 0.0) ||
              (current_time - pcreation[ipdc]) < plifetime[ipdl]) continue;
+        count++;
 
         // Update particle properties here if needed
         plifetime[ipdl] *= -1.0;                  // set to negative - flag for alreahy gone SNe
@@ -233,7 +247,6 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
             zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
                              zp - (stencil_rad_ + 1 + 0.5)*hz);
 
-            return;
         }
 
 
@@ -250,19 +263,6 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
         double dxc   = ix + 0.5 - xcell;
         double dyc   = iy + 0.5 - ycell;
         double dzc   = iz + 0.5 - zcell;
-
-        // number of feedback cells + 1 cell in each dimension
-        int num_loc = (stencil_ + 1) * (stencil_ + 1) * (stencil_ + 1);
-        if (!u_local){
-          u_local     = new double[num_loc];
-          v_local     = new double[num_loc];
-          w_local     = new double[num_loc];
-          d_local     = new double[num_loc];
-          ge_local    = new double[num_loc];
-          te_local    = new double[num_loc];
-          metal_local = new double[num_loc];
-          ke_before   = new double[num_loc];
-        }
 
         // assign initial values to these
         for (int i = 0; i < num_loc; i++){
@@ -358,7 +358,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
         // apply kinetic energy fraction floor
         ke_f = ke_f < 1.0E-10 ? 0.0 : ke_f;
 
-        double E_therm = (1.0 - ke_f) * energy_per_cell_;
+        double E_therm = (1.0 - ke_f) * energy_density_per_cell;
 
         // compute kinetic energy in the localized region on the grid before
         // the explosion
@@ -369,7 +369,10 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
 
               int index = INDEX(i,j,k,mx,my);
 
-              if ( (index < 0) || (index > nx*ny*nz)) continue;
+              if ( (index < 0) || (index > nx*ny*nz)){
+                loc_index++;
+                continue;
+              }
 
               ke_before[loc_index] = 0.5 * d[index] * ( v3[0][index] * v3[0][index] +
                                                         v3[1][index] * v3[1][index] +
@@ -402,17 +405,17 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
                                    stencil_+1, stencil_+1, stencil_+1,          // nx,ny,nz for local grid
                                    stencil_rad_, stencil_rad_, stencil_rad_, // local grid cell center  - should be 1 for 3x3x3 stencil (0,1,2) - 2 for 5x5x5 stencil (0,1, 2, 3,4)
                                    dxc, dyc, dzc,
-                                   mass_per_cell_, 1.0, 0.0);
+                                   density_per_cell, 1.0, 0.0);
 
         // momenum injection - compute coefficients for injection
         double mom_per_cell = 0.0;
         if (ke_f > 0){
-          double A, B, C;
+          double A=0.0, B=0.0, C=0.0;
           this->compute_coefficients( v3[0], v3[1], v3[2], d, ge,
                                       u_local, v_local, w_local, d_local,
                                       nx, ny, nz, ix, iy, iz, A, B, C);
 
-          A            = A - (sum_ke_init + ke_f*energy_per_cell_);
+          A            = A - (sum_ke_init + ke_f*energy_density_per_cell);
           mom_per_cell = (-B + std::sqrt(B*B - 4.0 * A * C)) / (2.0 * C);
 
         } // add switch here? to do just momentum injection but no KE
@@ -421,7 +424,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
 
         this->add_feedback_to_grid(v3[0], v3[1], v3[2], d, ge, te, metal,
                                    nx, ny, nz, ix, iy, iz, dxc, dyc, dzc,
-                                   mass_per_cell_, mom_per_cell, E_therm);
+                                   density_per_cell, mom_per_cell, E_therm);
 
         double sum_mass_final, sum_energy_final, sum_ke_final;
 
@@ -450,7 +453,10 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
 
               int index = (i + (j + k*ny)*nx);
 
-              if (index < 0 || index >= nx*ny*nz) continue;
+              if (index < 0 || index >= nx*ny*nz){
+                loc_index++;
+                continue;
+              }
 
               ke_after = 0.5 * d[index] * ( v3[0][index] * v3[0][index] +
                                             v3[1][index] * v3[1][index] +
@@ -467,26 +473,28 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
           }
         }
 
-        count++;
       } // end loop over particles
     } // end loop over batches
 
     if (count > 0){
 
-      delete [] u_local;
-      delete [] v_local;
-      delete [] w_local;
-      delete [] d_local;
-      delete [] ge_local;
-      delete [] te_local;
-      delete [] metal_local;
-      delete [] ke_before;
-
       std::cout << "Number of feedback particles:   " << count << "\n";
     }
 
-  } // end particle check
 
+
+      delete[] u_local; u_local = NULL;
+      delete[] v_local; w_local = NULL;
+      delete[] w_local; v_local = NULL;
+      delete[] d_local; d_local = NULL;
+      delete[] ge_local; ge_local = NULL;
+      delete[] te_local; te_local = NULL;
+      delete[] metal_local; metal_local = NULL;
+      delete[] ke_before; ke_before = NULL;
+
+
+
+  } // end particle check
 
 
 
@@ -597,22 +605,22 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
 
         for (int i1 = i; i1 <= i + 1; i1++){
           double dxc1 = dxc;
-          if (i1 == i + 1) dxc1 = 1.0 - dxc;
+          if (i1 == (i + 1)) dxc1 = 1.0 - dxc;
 
           for (int j1 = j; j1 <= j + 1; j1++){
             double dyc1 = dyc;
-            if (j1 == j + 1) dyc1 = 1.0 - dyc;
+            if (j1 == (j + 1)) dyc1 = 1.0 - dyc;
 
             for (int k1 = k; k1 <= k + 1; k1++){
               double dzc1 = dzc;
-              if (k1 == k + 1) dzc1 = 1.0 - dzc;
+              if (k1 == (k + 1)) dzc1 = 1.0 - dzc;
 
               double delta_mass =    mass_per_cell * dxc1 * dyc1 * dzc1;
               // use sign of i,j,k to assign direction. No momentum in cener
               // cell
-              double delta_pu = ( (i > 0) ? 1 : (i < 0 ? -1 : 0)) * delta_mass;
-              double delta_pv = ( (j > 0) ? 1 : (j < 0 ? -1 : 0)) * delta_mass;
-              double delta_pw = ( (k > 0) ? 1 : (k < 0 ? -1 : 0)) * delta_mass;
+              double delta_pu = ( (i > 0) ? 1 : (i < 0 ? -1 : 0)) * mom_per_cell * dxc1 * dyc1 * dzc1;
+              double delta_pv = ( (j > 0) ? 1 : (j < 0 ? -1 : 0)) * mom_per_cell * dxc1 * dyc1 * dzc1;
+              double delta_pw = ( (k > 0) ? 1 : (k < 0 ? -1 : 0)) * mom_per_cell * dxc1 * dyc1 * dzc1;
 
               double delta_therm = therm_per_cell * dxc1 * dyc1 * dzc1;
 
@@ -634,7 +642,7 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
               // but set to 1 if in center cell since delta's above are zero
               // already and we don't want to divide by zero below
               mom_norm = (mom_norm == 0) ? 1 : mom_norm;
-              double mom_scale = 1.0 / ( (double) mom_norm);
+              double mom_scale = 1.0 / ( sqrt((double) mom_norm));
 
               px[index] +=  delta_pu * mom_scale;
               py[index] +=  delta_pv * mom_scale;
@@ -686,7 +694,10 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
 
         int index = (ix + i) + ( (iy + j) + (iz + k)*ny)*nx;
 
-        if ( (index < 0) || (index >= nx*ny*nz)) continue;
+        if ( (index < 0) || (index >= nx*ny*nz)){
+          loc_index++;
+          continue;
+        }
 
         double mass_term = d[index];
         double mom_term  = px[index]*px[index] + py[index]*py[index] +

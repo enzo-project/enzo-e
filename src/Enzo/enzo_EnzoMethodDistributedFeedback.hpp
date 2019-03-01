@@ -35,7 +35,7 @@ public:
   /// Apply the method
   virtual void compute (Block * block) throw();
 
-  void compute_ (Block * block) throw();
+  void compute_ (Block * block);
 
   /// name
   virtual std::string name() throw()

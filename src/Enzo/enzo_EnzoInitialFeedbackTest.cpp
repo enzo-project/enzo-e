@@ -88,7 +88,8 @@ void EnzoInitialFeedbackTest::enforce_block
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
-         ge[i] = 1.0E4 / enzo_config->ppm_mol_weight / (enzo_config->field_gamma - 1.0);
+         ge[i] = 1.0E4 / enzo_config->ppm_mol_weight / enzo_units->temperature() /
+                         (enzo_config->field_gamma - 1.0);
 
          for (int dim = 0; dim < 3; dim ++)
              te[i] = ge[i] + 0.5 * v3[dim][i] * v3[dim][i];
@@ -141,31 +142,37 @@ void EnzoInitialFeedbackTest::enforce_block
 
   // just one particle for now
 
-  int new_particle = particle.insert_particles(it, 1);
-  particle.index(new_particle,&ib,&ipp);
+  if (   block->check_position_in_block(enzo_config->initial_feedback_test_position[0],
+                                          enzo_config->initial_feedback_test_position[1],
+                                          enzo_config->initial_feedback_test_position[2]) ){
+    int new_particle = particle.insert_particles(it, 1);
+    particle.index(new_particle,&ib,&ipp);
 
-  pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
-  px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
-  py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
-  pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
-  pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
-  pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
-  pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-  pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
-  plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
-  pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
+    pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+    px    = (enzo_float *) particle.attribute_array(it, ia_x, ib);
+    py    = (enzo_float *) particle.attribute_array(it, ia_y, ib);
+    pz    = (enzo_float *) particle.attribute_array(it, ia_z, ib);
+    pvx   = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
+    pvy   = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
+    pvz   = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
+    pmetal      = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
+    plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
+    pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
 
-  pmass[ipp] = 10.0 * cello::mass_solar / enzo_units->mass();
-  px[ipp]    = enzo_config->initial_feedback_test_position[0];
-  py[ipp]    = enzo_config->initial_feedback_test_position[1];
-  pz[ipp]    = enzo_config->initial_feedback_test_position[2];
-  pvx[ipp]   = 0.0;
-  pvy[ipp]   = 0.0;
-  pvz[ipp]   = 0.0;
+    pmass[ipp] = 10.0 * cello::mass_solar / enzo_units->mass();
+    px[ipp]    = enzo_config->initial_feedback_test_position[0];
+    py[ipp]    = enzo_config->initial_feedback_test_position[1];
+    pz[ipp]    = enzo_config->initial_feedback_test_position[2];
+    pvx[ipp]   = 0.0;
+    pvy[ipp]   = 0.0;
+    pvz[ipp]   = 0.0;
 
-  pmetal[ipp]    = 0.01;
-  plifetime[ipp] = 1.001E3 * cello::yr_s / enzo_units->time();
-  pform[ipp]     = 1.0 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
+    pmetal[ipp]    = 0.01;
+    plifetime[ipp] = 1.001E3 * cello::yr_s / enzo_units->time();
+    pform[ipp]     = 1.0 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
+
+
+  }
 
   return;
 }
