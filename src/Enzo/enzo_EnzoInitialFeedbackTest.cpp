@@ -37,6 +37,8 @@ void EnzoInitialFeedbackTest::enforce_block
 
   ASSERT("EnzoInitialFeedbackTest","Block does not exist", block != NULL);
 
+  if( !(block->is_leaf())) return;
+
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
@@ -83,8 +85,7 @@ void EnzoInitialFeedbackTest::enforce_block
 
          int i = INDEX(ix,iy,iz,ngx,ngy);
 
-         d[i]  = enzo_config->ppm_mol_weight * cello::mass_hydrogen /
-                    enzo_units->density();
+         d[i]  = enzo_config->initial_feedback_test_density / enzo_units->density();
 
          for (int dim = 0; dim < 3; dim++) v3[dim][i] = 0.0;
 
