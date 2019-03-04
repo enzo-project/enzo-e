@@ -254,15 +254,15 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
 
         // compute coordinates of central feedback cell
-        //    this must account for ghost zones
-        double xcell = (xpos - xm) / hx + gx - 0.5;
-        double ycell = (ypos - ym) / hy + gy - 0.5;
-        double zcell = (zpos - zm) / hz + gz - 0.5;
+        //    this must account for ghost zones 
+        double xcell = (xpos - xm) / hx  + gx - 0.5;
+        double ycell = (ypos - ym) / hy  + gy - 0.5;
+        double zcell = (zpos - zm) / hz  + gz - 0.5;
 
         // I believe -1's are needed (added from Fortran code due to index start differences )
-        int ix       = ((int) floor(xcell + 0.5)) + gx - 1;
-        int iy       = ((int) floor(ycell + 0.5)) + gy - 1;
-        int iz       = ((int) floor(zcell + 0.5)) + gz - 1;
+        int ix       = ((int) floor(xcell + 0.5));
+        int iy       = ((int) floor(ycell + 0.5));
+        int iz       = ((int) floor(zcell + 0.5));
 
         double dxc   = ix + 0.5 - xcell;
         double dyc   = iy + 0.5 - ycell;
@@ -463,7 +463,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           for (int j = iy - stencil_rad_; j <= iy + stencil_rad_ + 1; j++){
             for (int i = ix - stencil_rad_; i <= ix + stencil_rad_ + 1; i++){
 
-              int index = (i + (j + k*ny)*nx);
+              int index = (i + (j + k*my)*mx);
 
               if (index < 0 || index >= mx*my*mz){
                 loc_index++;
@@ -529,7 +529,7 @@ void EnzoMethodDistributedFeedback::convert_momentum(
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
 
-        int index = (ix + 1) + ( (iy + j) + (iz + k)*my)*mx;
+        int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
 
         if ( (index < 0) || (index > mx*my*mz)) continue;
 
@@ -636,7 +636,7 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
 
               double delta_therm = therm_per_cell * dxc1 * dyc1 * dzc1;
 
-              int index = ( ix + i1 ) + ( (iy + j1) * (iz + k1)*my)*mx;
+              int index = ( ix + i1 ) + ( (iy + j1) + (iz + k1)*my)*mx;
 
               if ( (index < 0) || (index > mx*my*mz)) continue;
 
@@ -667,8 +667,8 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
 
               d[index] = d[index] + delta_mass;
 
-              if(metal) metal[index] = (metal[index]*d[index] +
-                                       delta_mass * ejecta_metal_fraction_) * inv_dens;
+              if(metal) metal[index] = (metal[index] +
+                                       delta_mass * ejecta_metal_fraction_);
 
               // account for multi-species (H,He,etc.) here, along with additional
               // metal species fields if they are present
