@@ -1050,9 +1050,9 @@ bool Block::check_position_in_block(const double &x, const double &y,
     zp += gz*hz;
   }
 
-  if (  ((x >= xm) && (x <= xp)) &&
-        ((y >= ym) && (y <= yp)) &&
-        ((z >= zm) && (z <= zp))) result = true;
+  if (  ((x >= xm) && (x < xp)) &&
+        ((y >= ym) && (y < yp)) &&
+        ((z >= zm) && (z < zp))) result = true;
 
   return result;
 }
