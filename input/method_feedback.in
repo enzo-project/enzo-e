@@ -5,9 +5,24 @@
 
   Mesh {
     root_rank   = 3;
-    root_blocks = [2,2,2];
+    root_blocks = [1,1,1];
     root_size   = [32, 32, 32];
   }
+
+
+#Adapt {
+#     list = ["mass"];
+#     mass {
+#         field_list = [ "density" ];
+#         max_coarsen = 1.0E-4; # 1.0E4 solar masses
+#         min_refine  = 1.0E-4;  # 1.0E4 solar masses
+#         type = "mass";
+#
+#         mass_type = "baryon"; # options are currently dark and baryon
+#     };
+#     max_level = 1;
+#}
+
 
 Boundary {
   type = "outflow";
@@ -86,7 +101,7 @@ Initial {
   list = ["feedback_test"];
 
   feedback_test {
-    density  = 1.0E-29;
+    density  = 1.0E-23;
     position = [0.25, 0.25, 0.5];
   }
 }
@@ -100,15 +115,15 @@ Output {
 
         particle_list = ["star"];
 
-        dir   = ["ISOLATED_GALAXY_%04d","count"];
-        name = [ "isolated-galaxy-data-%04d-%03d.h5", "count", "proc" ];
+        dir   = ["FEEDBACK_TEST_%04d","count"];
+        name = [ "feedback-test-data-%04d-%03d.h5", "count", "proc" ];
         type = "data";
 
         # schedule the output based on 'var' and 'step'
         #   step refers to the interval if 'var' to output on
         schedule {
-             var   = "cycle";
-             step  = 1; #            time in code units (Myr)
+             var   = "time";
+             step  = 10.0; #            time in code units (Myr)
         }
     };
 
@@ -117,7 +132,7 @@ Output {
 
 Stopping {
     time = 1000.0;
-    cycle = 10;
+    cycle = 10000;
     seconds = 600.0;
     interval = 1;
 }
