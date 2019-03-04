@@ -50,9 +50,10 @@ Method {
     ejecta_mass = 8.0;
     supernova_energy = 1.0;
     ke_fraction = 0.0;
-    metal_fraction = 0.5;
+    ejecta_metal_fraction = 0.5;
     stencil = 3;
-  }
+    shift_cell_center = true;
+  };
   
 
  }
@@ -85,7 +86,8 @@ Initial {
   list = ["feedback_test"];
 
   feedback_test {
-    position = [0.5, 0.5, 0.25];
+    density  = 1.0E-29;
+    position = [0.25, 0.25, 0.5];
   }
 }
 
