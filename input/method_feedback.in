@@ -5,8 +5,8 @@
 
   Mesh {
     root_rank   = 3;
-    root_blocks = [1,1,1];
-    root_size   = [32, 32, 32];
+    root_blocks = [4,4,4]; # [1,1,1];
+    root_size   = [64,64,64];
   }
 
 
@@ -39,7 +39,7 @@ Field {
   }
 
 Units {
-    length = 7.899E20;    # 256 pc
+    length = 1.5798E21; # # 7.899E20;    # 256 pc
     time   = 3.15576E10;
     mass   = 1.9891E36;
   }
@@ -62,9 +62,9 @@ Method {
           };
 
   feedback {
-    ejecta_mass = 8.0;
+    ejecta_mass = 10.0;
     supernova_energy = 1.0;
-    ke_fraction = 0.0;
+    ke_fraction = 0.8;
     ejecta_metal_fraction = 0.5;
     stencil = 3;
     shift_cell_center = true;
@@ -101,8 +101,8 @@ Initial {
   list = ["feedback_test"];
 
   feedback_test {
-    density  = 1.0E-23;
-    position = [0.25, 0.25, 0.5];
+    density  = 1.2E-25;
+    position = [0.5, 0.5, 0.5];
   }
 }
 
@@ -133,6 +133,6 @@ Output {
 Stopping {
     time = 1000.0;
     cycle = 10000;
-    seconds = 600.0;
+    seconds = 3600.0;
     interval = 1;
 }
