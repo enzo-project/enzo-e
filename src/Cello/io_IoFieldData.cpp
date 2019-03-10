@@ -83,11 +83,14 @@ void IoFieldData::field_array
 
   field_descr->ghost_depth(field_index_,&ngx,&ngy,&ngz);
 
+  int cx=0,cy=0,cz=0;
+  field_descr->centering(field_index_,&cx,&cy,&cz);
+
   if (field_data_->ghosts_allocated()) {
 
-    if (nxd) (*nxd) = nbx + 2*ngx;
-    if (nyd) (*nyd) = nby + 2*ngy;
-    if (nzd) (*nzd) = nbz + 2*ngz;
+    if (nxd) (*nxd) = nbx + 2*ngx + cx;
+    if (nyd) (*nyd) = nby + 2*ngy + cy;
+    if (nzd) (*nzd) = nbz + 2*ngz + cz;
 
     // Exclude ghosts when writing
 
@@ -97,19 +100,19 @@ void IoFieldData::field_array
 
     // Include ghosts when writing
 
-     if (nx) (*nx) = nbx + 2*ngx;
-     if (ny) (*ny) = nby + 2*ngy;
-     if (nz) (*nz) = nbz + 2*ngz;
+     if (nx) (*nx) = nbx + 2*ngx + cx;
+     if (ny) (*ny) = nby + 2*ngy + cy;
+     if (nz) (*nz) = nbz + 2*ngz + cz;
 
   } else {
 
-    if (nxd) (*nxd) = nbx;
-    if (nyd) (*nyd) = nby;
-    if (nzd) (*nzd) = nbz;
+    if (nxd) (*nxd) = nbx + cx;
+    if (nyd) (*nyd) = nby + cy;
+    if (nzd) (*nzd) = nbz + cz;
 
-    if (nx) (*nx) = nbx;
-    if (ny) (*ny) = nby;
-    if (nz) (*nz) = nbz;
+    if (nx) (*nx) = nbx + cx;
+    if (ny) (*ny) = nby + cy;
+    if (nz) (*nz) = nbz + cz;
 
   }
 }
