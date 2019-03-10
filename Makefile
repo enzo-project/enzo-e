@@ -48,9 +48,24 @@ coverity:
 cccc:
 	$(MAKE) -C src cccc
 #----------------------------------------------------------------------
-.PHONY: diff
-diff:
-	./tools/diff-org.sh > diff.org
+.PHONE: diff
+diff: diff-unstaged diff-staged diff-full
+
+
+.PHONY: diff-unstaged
+# differences between work files and staged files
+diff-unstaged:
+	git diff -b |./tools/awk/diff-org.awk > diff-unstaged.org
+#----------------------------------------------------------------------
+.PHONY: diff-staged
+# differences between staged files and HEAD
+diff-staged:
+	git diff --cached HEAD -b | ./tools/awk/diff-org.awk > diff-staged.org
+#----------------------------------------------------------------------
+.PHONY: diff-full
+# differences between work files and HEAD (unstaged + staged)
+diff-full:
+	git diff HEAD -b | ./tools/awk/diff-org.awk > diff-full.org
 #----------------------------------------------------------------------
 .PHONY: gdb
 gdb:
