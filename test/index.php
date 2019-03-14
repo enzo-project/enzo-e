@@ -666,8 +666,8 @@ test_summary("Method: gravity",
 	     array("enzo-p",  "enzo-p"),'test');
 
 test_summary("Problem: cosmology",
-         array("cosmo-cg","cosmo-bcg","cosmo-mg"),
-         array("enzo-p",  "enzo-p",   "enzo-p"),'test');
+         array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-ddmg"),
+         array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p"),'test');
 
 test_summary("Checkpoint",
 	     array("checkpoint_ppm-1","checkpoint_ppm-8","restart_ppm-1","restart_ppm-8"),
@@ -1077,6 +1077,7 @@ test_table ("_","Dir_COSMO_MG",
 
 end_hidden("cosmo-mg");
 
+
   test_subgroup ("AMR Cosmology");
 
 begin_hidden("cosmo-bcg", "COSMOLOGY (BCG solver)");
@@ -1122,7 +1123,51 @@ test_table ("_","Dir_COSMO_BCG",
 
 end_hidden("cosmo-bcg");
 
-  //======================================================================
+begin_hidden("cosmo-ddmg", "COSMOLOGY (DD-MG solver)");
+
+tests("Enzo","enzo-p","test_cosmo-ddmg","COSMOLOGY_DD-MG","");
+
+test_table ("_","Dir_COSMO_DDMG",
+      array("0020/dark-01",
+            "0040/dark-02",
+            "0060/dark-03",
+            "0080/dark-04",
+            "0100/dark-05",
+            "0120/dark-06",
+            "0140/dark-07",
+            "0160/dark-08"),$types);
+test_table ("_","Dir_COSMO_DDMG",
+      array("0020/po-01",
+            "0040/po-02",
+            "0060/po-03",
+            "0080/po-04",
+            "0100/po-05",
+            "0120/po-06",
+            "0140/po-07",
+            "0160/po-08"),$types);
+test_table ("_","Dir_COSMO_DDMG",
+      array("0020/ax-01",
+            "0040/ax-02",
+            "0060/ax-03",
+            "0080/ax-04",
+            "0100/ax-05",
+            "0120/ax-06",
+            "0140/ax-07",
+            "0160/ax-08"),$types);
+test_table ("_","Dir_COSMO_DDMG",
+      array("0020/mesh-01",
+            "0040/mesh-02",
+            "0060/mesh-03",
+            "0080/mesh-04",
+            "0100/mesh-05",
+            "0120/mesh-06",
+            "0140/mesh-07",
+            "0160/mesh-08"),$types);
+
+
+end_hidden("cosmo-ddmg");
+
+//======================================================================
 
 test_group("Checkpoint");
 

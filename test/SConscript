@@ -270,6 +270,10 @@ Clean(env_mv_out.RunParallel ('test_cosmo-mg.unit',bin_path + '/enzo-p',
 		ARGS='input/test_cosmo-mg.in'),
       [Glob('#/' + test_path + '/Dir_COSMO_MG_*'),
        Glob('#/' + test_path + '/Dir_COSMO_MG_*')])
+Clean(env_mv_out.RunParallel ('test_cosmo-ddmg.unit',bin_path + '/enzo-p', 
+		ARGS='input/test_cosmo-ddmg.in'),
+      [Glob('#/' + test_path + '/Dir_COSMO_DDMG_*'),
+       Glob('#/' + test_path + '/Dir_COSMO_DDMG_*')])
 
 #----------------------------------------------------------------------
 # MethodHeat tests
