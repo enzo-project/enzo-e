@@ -1,5 +1,16 @@
 #ifndef ENZO_ENZO_RIEMANN_HLLE_HPP
 #define ENZO_ENZO_RIEMANN_HLLE_HPP
+
+// Some Notes
+// Stone+ (08) has a typo in eqn 52: (q_i-q_{i-1}) should be (q_R-q_L)
+//    The modified formula is actually used in Athena++
+
+// Implementation Notes:
+//   - Based off of the HLLE Riemann Solver described in Stone+08
+//   - Currently only supports adiabatic fluids
+//   - This class is primarily implemented to allow for easy extension to
+//     incorporate CRs (just subclass and overwrite the wave_speeds_ method)
+
 class EnzoRiemannHLLE : public EnzoRiemann
 {
 
@@ -10,7 +21,17 @@ class EnzoRiemannHLLE : public EnzoRiemann
 public: // interface
   /// Create a new EnzoRiemannHLLE object
   EnzoRiemannHLLE() throw()
-  {}
+  : EnzoRiemann(std::vector<std::string>(), std::vector<std::string>(),
+		std::vector<std::string>(), NULL, 0)
+  { }
+
+  EnzoRiemannHLLE(std::vector<std::string> &extra_scalar_groups,
+		  std::vector<std::string> &extra_vector_groups,
+		  std::vector<std::string> &extra_passive_groups,
+		  FluxFunctor** flux_funcs, int n_funcs)
+    : EnzoRiemann(extra_scalar_groups, extra_vector_groups,
+		  extra_passive_groups, flux_funcs, n_funcs)
+  { }
 
   /// Virtual destructor
   virtual ~EnzoRiemannHLLE()
@@ -27,27 +48,124 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    PUP::able::pup(p);
+    EnzoRiemann::pup(p);
   };
 
-  /// Solve the Riemann Problem - dim (0, 1, or 2) tells the solver which
-  /// dimension to compute fluxes along and indicates the dimension along which
-  /// the reconstructed primitive values are face-centered
-  void solve (Block *block, Grouping &priml_group, Grouping &primr_group,
-	      Grouping &flux_group, Grouping &consl_group,
-	      Grouping &consr_group, int dim, EnzoEquationOfState *eos);
-  
-protected: // methods
+  // This function is overwritable (it's necessary to provide cosmic ray
+  // transport)
+  virtual void wave_speeds_ (const flt_map &wl, const flt_map &wr,
+			     const flt_map &Ul, const flt_map &Ur,
+			     const EnzoEquationOfState *eos,
+			     enzo_float *bp, enzo_float *bm)
+  {
+    // Calculate wavespeeds as specified by S4.3.1 of Stone+08
+    // if LM and L0 are max/min eigenvalues of Roe's matrix:
+    //       bp = max(LM, vi_r + cf_r, 0) (eqn 53)
+    //       bm = max(L0, vi_l - cf_l, 0) (eqn 54)
+    // vi_r and vi_l are velocities of left and right states along ith dimension
+    // cf_r and cf_l are the fast magnetosonic speeds in the left and right
+    // states
 
-  // Computes the Wave Speeds bp and bm
-  // The interface is subject to change
-  void wave_speeds_ (flt_map &wl, flt_map &wr, flt_map &Ul, flt_map &Ur,
-		     enzo_float mag_p_l, enzo_float mag_p_r,
-		     EnzoEquationOfState *eos, enzo_float *bp, enzo_float *bm);
+    // First, compute left and right speeds
+    //    left_speed = vi_l - cf_l;      right_speed = vi_r + cf_r
+    enzo_float left_speed = wl["velocity_i"] - fast_magnetosonic_speed_(wl);
+    enzo_float right_speed = wr["velocity_i"] + fast_magnetosonic_speed_(wr);
 
-  // Compute the flux at an interface
-  void interface_flux_ (flt_map &prim, flt_map &cons, flt_map &fluxes,
-			enzo_float mag_pressure);
+    // Next, compute min max eigenvalues
+    //     - per eqn B17 these are Roe averaged velocity in the ith direction
+    //       minus/plus Roe averaged fast magnetosonic wavespeed
+    //     - Will probably offload this to a method of EnzoEquationOfState
+    enzo_float sqrtrho_l = std::sqrt(wl["density"]);
+    enzo_float sqrtrho_r = std::sqrt(wr["density"]);
+    enzo_float coef = 1.0/(sqrtrho_l + sqrtrho_r);
+
+    // density and velocity
+    enzo_float rho_roe = sqrtrho_l*sqrtrho_r;
+    enzo_float vi_roe = (sqrtrho_l * wl["velocity_i"] +
+			 sqrtrho_r * wr["velocity_i"])*coef;
+    enzo_float vj_roe = (sqrtrho_l * wl["velocity_j"] +
+			 sqrtrho_r * wr["velocity_j"])*coef;
+    enzo_float vk_roe = (sqrtrho_l * wl["velocity_k"] +
+			 sqrtrho_r * wr["velocity_k"])*coef;
+
+    enzo_float mag_p_l = mag_pressure_(wl);
+    enzo_float mag_p_r = mag_pressure_(wr);
+
+    // enthalpy:  h = (etot + thermal pressure + magnetic pressure) / rho
+    enzo_float h_l = ((Ul["total_energy"] + wl["pressure"] + mag_p_l) /
+		      wl["density"]);
+    enzo_float h_r = ((Ur["total_energy"] + wr["pressure"] + mag_p_r) /
+		      wr["density"]);
+    enzo_float h_roe = (sqrtrho_l * h_l + sqrtrho_r * h_r) * coef;
+
+    // Magnetic Fields (formulas are different pattern from above)
+    enzo_float bi_roe = wl["bfield_i"]; // equal to wr["bfield_i"]
+    enzo_float bj_roe = (sqrtrho_l * wr["bfield_j"] +
+			 sqrtrho_r * wl["bfield_j"])*coef;
+    enzo_float bk_roe = (sqrtrho_l * wr["bfield_k"] +
+			 sqrtrho_r * wl["bfield_k"])*coef;
+
+
+    // Calculate fast magnetosonic speed for Roe-averaged quantities (eqn B18)
+    enzo_float gamma_prime = eos->get_gamma()-1.;
+    enzo_float x_prime = ((std::pow(wl["bfield_j"]-wr["bfield_j"],2) +
+			   std::pow(wl["bfield_k"]-wr["bfield_k"],2) )
+			  * 0.5 * (gamma_prime-1) * coef);
+    enzo_float y_prime = ((gamma_prime-1)*(wl["density"]+wr["density"])
+			  *0.5/rho_roe);
+
+    enzo_float v_roe2 = vi_roe*vi_roe + vj_roe*vj_roe + vk_roe*vk_roe;
+    enzo_float b_roe2 = bi_roe*bi_roe + bj_roe*bj_roe + bk_roe*bk_roe;
+
+    // Need tidle_a^2
+    enzo_float tilde_a2 = (gamma_prime * (h_roe - 0.5* v_roe2 - b_roe2/rho_roe)
+			   - x_prime);
+
+    // Need Roe averaged square Alfven speed (along ith dim and total magnitude)
+    enzo_float tilde_vai2 = bi_roe * bi_roe / rho_roe;
+    enzo_float tilde_va2 = (tilde_vai2 + (gamma_prime - y_prime) *
+			    (bj_roe * bj_roe + bk_roe * bk_roe) / rho_roe);
+    //CkPrintf("roe_cs2 = %.15lf\n",tilde_a2);
+    //CkPrintf("roe_va_i2 = %.15lf, roe_va2 = %.15lf\n",tilde_vai2, tilde_va2);
+
+    enzo_float cfast = std::sqrt(0.5 * (tilde_a2 + tilde_va2 +
+					std::sqrt(std::pow(tilde_a2 + tilde_va2,
+							   2) -
+						  4 * tilde_a2 * tilde_vai2)));
+
+    //CkPrintf("vi_roe = %.15lf, cfast = %.15lf\n",vi_roe, cfast);
+    //CkPrintf("left_speed = %.15lf, right_speed = %.15lf\n",
+    //left_speed, right_speed);
+
+  *bp = std::fmax(std::fmax(vi_roe + cfast, right_speed), 0.);
+  *bm = std::fmin(std::fmin(vi_roe - cfast, left_speed),  0.);
+  }
+
+  void calc_riemann_fluxes_(const flt_map &flux_l, const flt_map &flux_r,
+			    const flt_map &prim_l, const flt_map &prim_r,
+			    const flt_map &cons_l, const flt_map &cons_r,
+			    const std::vector<std::string> &cons_keys,
+			    const std::size_t n_keys,
+			    const EnzoEquationOfState *eos,
+			    const int iz, const int iy, const int ix,
+			    array_map &flux_arrays)
+  {
+    enzo_float bp, bm;
+    // Compute wave speeds
+    wave_speeds_ (prim_l, prim_r, cons_l, cons_r, eos, &bp, &bm);
+
+    // Compute the actual riemann fluxes
+    for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
+      std::string key = cons_keys[field_ind];
+
+      flux_arrays[key](iz,iy,ix) = ((bp*flux_l[key] - bm*flux_r[key]  +
+				     (cons_r[key] - cons_l[key])*bp*bm)
+				    / (bp - bm));
+      ASSERT("EnzoRiemannHLLE",
+	     "There is a NaN or inf\n",
+	     std::isfinite(flux_arrays[key](iz,iy,ix)));
+    }
+  }
 };
 
-#endif /* ENZO_ENZO_RIEMANN_HPP */
+#endif /* ENZO_ENZO_RIEMANN_HLLE_HPP */

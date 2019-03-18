@@ -243,6 +243,7 @@ struct fluxes
 #include "enzo_EnzoReconstructorPLM.hpp"
 #include "enzo_EnzoRiemann.hpp"
 #include "enzo_EnzoRiemannHLLE.hpp"
+#include "enzo_EnzoRiemannHLLD.hpp"
 #include "enzo_EnzoConstrainedTransport.hpp"
 #include "enzo_EnzoPermutedCoordinates.hpp"
 
