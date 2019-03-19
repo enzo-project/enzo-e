@@ -3,10 +3,6 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-#define TRACE_VLCT(MESSAGE)					  \
- CkPrintf ("%s:%d TRACE_VLCT %s %s\n",			  \
-           __FILE__,__LINE__, block->name().c_str(), MESSAGE);  \
- fflush (stdout);
 
 // helper function for debugging. Checks to see if an array contains NaNs
 bool not_all_finite_(EFlt3DArray &array)
@@ -125,12 +121,11 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   // Temporarilly use following default values
   double density_floor = 1.e-10;
   double pressure_floor = 1.e-10;
-  
+
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
   half_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
   full_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
-  riemann_solver_ = EnzoRiemann::construct_riemann(std::string("hlle"));
-
+  riemann_solver_ = EnzoRiemann::construct_riemann(std::string("hlld"));
 }
 
 //----------------------------------------------------------------------
@@ -207,7 +202,6 @@ void EnzoMethodVlct::pup (PUP::er &p)
 
 void EnzoMethodVlct::compute ( Block * block) throw()
 {
-  TRACE_VLCT("compute()");
   if (block->is_leaf()) {
 
     EnzoBlock * enzo_block = enzo::block(block);
@@ -407,70 +401,10 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
   // Calculate reconstructed conserved values
   eos_->conservative_from_primitive(block,priml_group,consl_group);
   eos_->conservative_from_primitive(block,primr_group,consr_group);
-  //CkPrintf("Checking Reconstructed conserved quantites along dim %d.\n", dim);
-  //check_fields_(block, consl_group, EnzoMethodVlct::cons_group_names);
-  //check_fields_(block, consr_group, EnzoMethodVlct::cons_group_names);
 
-  /*
-  print_array_vals_(block, consl_group, "density", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consl_group, "momentum", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consl_group, "momentum", 1, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consl_group, "momentum", 2, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consl_group, "total_energy", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consl_group, "bfield", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consl_group, "bfield", 1, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consl_group, "bfield", 2, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-
-  print_array_vals_(block, consr_group, "density", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consr_group, "momentum", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consr_group, "momentum", 1, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consr_group, "momentum", 2, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consr_group, "total_energy", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consr_group, "bfield", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consr_group, "bfield", 1, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, consr_group, "bfield", 2, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  */
-
-  
   // Next, compute the fluxes
   riemann_solver_->solve(block, priml_group, primr_group, flux_group,
 			 consl_group, consr_group, dim, eos_);
-  /*
-  print_array_vals_(block, flux_group, "density", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, flux_group, "momentum", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, flux_group, "momentum", 1, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, flux_group, "momentum", 2, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, flux_group, "total_energy", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, flux_group, "bfield", 0, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, flux_group, "bfield", 1, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  print_array_vals_(block, flux_group, "bfield", 2, 8, 8,
-		    dim != 0, dim != 1, dim != 2);
-  */
-
-  //ASSERT("EnzoMethodVlct", "This is to stop the code!",false);
   
   // Finally, need to handle weights
   //  - Currently, weight is set to 1.0 if upwind is in positive direction of
@@ -669,6 +603,8 @@ void prep_reused_temp_field_(Field &field, std::string field_name,
   }
 }
 
+//----------------------------------------------------------------------
+
 // Helper function used to prepare groupings of temporary fields
 // 
 // In short, for every group-field combination in ref_grouping, where the group
@@ -701,6 +637,8 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 // Helper function used to prepare groupings of temporary fields. These
 // groupings only contain 3 fields - corresponding to vector components
@@ -758,6 +696,8 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
   }
 }
 
+//----------------------------------------------------------------------
+
 // The temporary conserved fields have arbitrary initial values
 // The calculation at the first half timestep fills in the inner cells in of
 // the temporary fields. The outermost layer of cells on the grid are
@@ -800,6 +740,8 @@ void copy_grouping_fields_(Block *block, Grouping &conserved_group,
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 // helper function to initialize values of reconstructed primitives to floor
 // that will never be initialized by reconstruction. This is necessary to avoid
@@ -847,6 +789,8 @@ void initialize_recon_prim_to_floor_(Block *block, Grouping &grouping,
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   Grouping &priml_group,
@@ -992,6 +936,8 @@ void deallocate_grouping_fields_(Field &field,
   }
 }
 
+//----------------------------------------------------------------------
+
 void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 					     Grouping &priml_group,
 					     Grouping &primr_group,
@@ -1046,9 +992,6 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   // Implicitly assumes that "pressure" is a permanent field
   // analogous to ppm timestep calulation, probably want to require that cfast
   // is no smaller than some tiny positive number. 
-
-
-  TRACE_VLCT("timestep()");
 
   // Compute the pressure (assumes that "pressure" is a permanent field)
   eos_->compute_pressure(block, *conserved_group_, *primitive_group_);
