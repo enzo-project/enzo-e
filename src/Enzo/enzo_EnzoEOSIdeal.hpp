@@ -50,19 +50,6 @@ public: // interface
   void conservative_from_primitive(Block *block, Grouping &prim_group,
 				   Grouping &cons_group);
 
-  // Computes magnetic pressure from primitives
-  enzo_float mag_pressure_from_primitive(flt_map &prim_vals){
-    return 0.5 * (prim_vals["bfield_i"]*prim_vals["bfield_i"]+
-		  prim_vals["bfield_j"]*prim_vals["bfield_j"]+
-		  prim_vals["bfield_k"]*prim_vals["bfield_k"]);}
-
-  // Computes the thermal sound speed
-  enzo_float sound_speed(flt_map &prim_vals){
-    return std::sqrt(gamma_*prim_vals["pressure"]/prim_vals["density"]); }
-
-  // computes the fast magnetosonic speed along dimension i
-  enzo_float fast_magnetosonic_speed(flt_map &prim_vals);
-
   // returns adiabatic index
   enzo_float get_gamma(){
     return gamma_;}

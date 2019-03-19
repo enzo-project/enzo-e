@@ -46,15 +46,6 @@ public: // interface
   virtual void conservative_from_primitive(Block *block, Grouping &prim_group,
   					   Grouping &cons_group)=0;
 
-  // Computes magnetic pressure from primitives
-  virtual enzo_float mag_pressure_from_primitive(flt_map &prim_vals)=0;
-  
-  // Computes the thermal sound speed
-  virtual enzo_float sound_speed(flt_map &prim_vals)=0;
-
-  // computes the fast magnetosonic speed
-  virtual enzo_float fast_magnetosonic_speed(flt_map &prim_vals) =0;
-
   // returns adiabatic index
   virtual enzo_float get_gamma() = 0;
 

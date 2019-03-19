@@ -164,20 +164,6 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
 
 //----------------------------------------------------------------------
 
-enzo_float EnzoEOSIdeal::fast_magnetosonic_speed(flt_map &prim_vals)
-{
-  enzo_float cs2 = std::pow(sound_speed(prim_vals),2);
-  enzo_float B2 = (prim_vals["bfield_i"]*prim_vals["bfield_i"] +
-		   prim_vals["bfield_j"]*prim_vals["bfield_j"] +
-		   prim_vals["bfield_k"]*prim_vals["bfield_k"]);
-  enzo_float va2 = B2/prim_vals["density"];
-  enzo_float cos2 = prim_vals["bfield_i"]*prim_vals["bfield_i"] / B2;
-  return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
-					  4.*cs2*va2*cos2)));
-}
-
-//----------------------------------------------------------------------
-
 // Applies the pressure_floor to total_energy
 void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group)
 {

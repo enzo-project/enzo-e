@@ -81,26 +81,6 @@
 //    The number of tracked Groupings could be reduced drastically if we could
 //    track histories of a subset of fields temporarily, and if we could easily
 //    search for fields by specifying multiple group tags.
-//
-//    Mapping
-//    -------
-//    Current implementation relies on EnzoEquationOfState converting the
-//    entire grid of conserved quantities to primitives. Within the Riemann
-//    Solver and the instance methods of EnzoMethodVlct (to compute timestep and
-//    to add add flux divergence), subclasses of EnzoEquationOfState are used
-//    to compute properties of individual cells. These values are passed via a
-//    map. We alias the map of values at a single location as a flt_map. The
-//    current map implementation is an unordered_map
-//        - There is an inconsistency between the maps and groupings. Groupings
-//          for vector quantites (i.e. velocity/momentum/bfields) only have a
-//          single name, which then corresponds to collection of components. In
-//          contrast, the map has an individual key for each component.
-//          (e.g. velocity_i, velocity_j, velocity_k)
-//        - Can probably come up with a more elegant solution for Mapping and
-//          Grouping (the obvious choice is to do away with Mapping completely
-//          and just apply operations on Groupings)
-//    The Mapping is hard to debug. If you attempt to access a field that does
-//    not already exist, a default value will be returned. (0.0 for a float)
 
 #ifndef ENZO_ENZO_METHOD_VLCT_HPP
 #define ENZO_ENZO_METHOD_VLCT_HPP
@@ -112,10 +92,6 @@ class EnzoConstrainedTransport;
 
 // Frequently used Helper class:
 class EnzoPermutedCoordinates;
-
-// for brevity, and convenience (in case the choice of map is altered)
-// we define an alias for our choice of map
-typedef std::unordered_map<std::string,enzo_float> flt_map;
 
 class EnzoMethodVlct : public Method {
 

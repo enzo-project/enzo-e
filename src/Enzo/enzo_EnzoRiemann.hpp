@@ -16,7 +16,7 @@
 //
 // The code internally uses an unordered map to keep track of the hydrodynamic
 // properties at a given cell in the mesh.
-//typedef std::unordered_map<std::string,enzo_float> flt_map;
+typedef std::unordered_map<std::string,enzo_float> flt_map;
 typedef std::unordered_map<std::string,EFlt3DArray> array_map;
 // If the dynamic properties of a map slow the implementation too much, we
 // could switch to an array based system (to determine ordering of values,
@@ -32,7 +32,6 @@ typedef std::unordered_map<std::string,EFlt3DArray> array_map;
 // Current state:
 //  - support for passive scalars is not yet implemented (though there is a
 //    spot carved out for it)
-//  -
 
 class FluxFunctor : public PUP::able
 {
