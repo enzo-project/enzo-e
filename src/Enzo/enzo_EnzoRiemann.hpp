@@ -106,9 +106,12 @@ public: // interface
 protected : //methods
 
   // Compute the Riemann Fluxes (and wave_speeds)
-  virtual void calc_riemann_fluxes_(flt_map &flux_l, flt_map &flux_r,
-				    flt_map &prim_l, flt_map &prim_r,
-				    flt_map &cons_l, flt_map &cons_r,
+  virtual void calc_riemann_fluxes_(const flt_map &flux_l,
+				    const flt_map &flux_r,
+				    const flt_map &prim_l,
+				    const flt_map &prim_r,
+				    const flt_map &cons_l,
+				    const flt_map &cons_r,
 				    std::vector<std::string> &cons_keys,
 				    std::size_t n_keys,
 				    EnzoEquationOfState *eos,

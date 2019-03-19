@@ -43,24 +43,23 @@ public: // interface
     EnzoRiemann::pup(p);
   };
 
-  void calc_riemann_fluxes_(flt_map &flux_l, flt_map &flux_r,
-			    flt_map &prim_l, flt_map &prim_r,
-			    flt_map &cons_l, flt_map &cons_r,
+  void calc_riemann_fluxes_(const flt_map &flux_l, const flt_map &flux_r,
+			    const flt_map &prim_l, const flt_map &prim_r,
+			    const flt_map &cons_l, const flt_map &cons_r,
 			    std::vector<std::string> &cons_keys,
 			    std::size_t n_keys,
 			    EnzoEquationOfState *eos,
 			    const int iz, const int iy, const int ix,
 			    array_map &flux_arrays)
   {
-    // Need to edit so that we can make the flt_maps const
 
     // NEED TO DEFINE BFLOAT_EPSILON
     // I think this determines how close a value needs to be to 0 to count as 0
     // In that case, it may be worthwhile to use it to determine the upwind
     // direction
     enzo_float BFLOAT_EPSILON = 0;
-    // we should either store Us and Uss as members of the data structure OR, we
-    // should pass them in
+    // we should either store Us and Uss as members of the data structure OR,
+    // we should pass them in as arguments
     flt_map Us, Uss;
     Us.reserve(n_keys); Uss.reserve(n_keys);
 
@@ -78,99 +77,36 @@ public: // interface
     enzo_float cf_l, cf_r, sam, sap; // fast speeds
 
     enzo_float gamma = eos->get_gamma();
-    bool DualEnergyFormalism = false;
 
     // First, compute Fl and Ul
-    rho_l  = prim_l["density"];
-    if (DualEnergyFormalism){
-      //eint_l = prim_l["internal_energy"];
-      //enzo_float h, dpdrho, dpde;
-      //EOS(p_l, rho_l, eint_l, h, cs_l, dpdrho, dpde, EOSType, 2);
-    } else {
-      p_l = prim_l["pressure"];
-      //cs_l = this->sound_speed_(prim_l, eos);
-    }
-    vx_l   = prim_l["velocity_i"];
-    vy_l   = prim_l["velocity_j"];
-    vz_l   = prim_l["velocity_k"];    
-    Bx_l   = prim_l["bfield_i"];
-    By_l   = prim_l["bfield_j"];
-    Bz_l   = prim_l["bfield_k"];
+    rho_l  = prim_l.at("density");
+    p_l    = prim_l.at("pressure");
+    vx_l   = prim_l.at("velocity_i");
+    vy_l   = prim_l.at("velocity_j");
+    vz_l   = prim_l.at("velocity_k");
+    Bx_l   = prim_l.at("bfield_i");
+    By_l   = prim_l.at("bfield_j");
+    Bz_l   = prim_l.at("bfield_k");
 
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
-    etot_l = cons_l["total_energy"];
+    etot_l = cons_l.at("total_energy");
     pt_l = p_l + this->mag_pressure_(prim_l);
     cf_l = this->fast_magnetosonic_speed_(prim_l, eos);
 
-    //B2 = Bx_l * Bx_l + By_l * By_l + Bz_l * Bz_l;
-    //v2 = vx_l * vx_l + vy_l * vy_l + vz_l * vz_l;
-    //etot_l = rho_l * (eint_l + 0.5 * v2) + 0.5 * B2;
-    //cf_l = std::sqrt((gamma * p_l + B2 +
-    //		 std::sqrt((gamma * p_l + B2) * (gamma * p_l + B2)
-    //		      - 4. * gamma * p_l * Bx_l * Bx_l))/(2. * rho_l));
-    
-
-    //cons_l["density"] = rho_l;
-    //cons_l["momentum_i"] = rho_l * vx_l;
-    //cons_l["momentum_j"] = rho_l * vy_l;
-    //cons_l["momentum_k"] = rho_l * vz_l;
-    //cons_l["total_energy"] = etot_l;
-    //if (DualEnergyFormalism) {
-    //  cons_l["internal_energy"] = rho_l * eint_l;
-    //}
-    //cons_l["bfield_i"] = Bx_l;
-    //cons_l["bfield_j"] = By_l;
-    //cons_l["bfield_k"] = Bz_l;
-
-    // The following calculations are redundant (they should have been handled
-    // prior to the function call - this is for debugging)
-    flux_l["density"] = rho_l * vx_l;
-    flux_l["momentum_i"] = cons_l["momentum_i"] * vx_l + pt_l - Bx_l * Bx_l;
-    flux_l["momentum_j"] = cons_l["momentum_j"] * vx_l - Bx_l * By_l;
-    flux_l["momentum_k"] = cons_l["momentum_k"] * vx_l - Bx_l * Bz_l;
-    flux_l["total_energy"] = (etot_l + pt_l) * vx_l - Bx_l * Bv_l;
-    if (DualEnergyFormalism) {
-      flux_l["internal_energy"] = cons_l["internal_energy"] * vx_l;
-    }
-    flux_l["bfield_i"] = 0.0;
-    flux_l["bfield_j"] = vx_l*By_l - vy_l*Bx_l;
-    flux_l["bfield_k"] = -vz_l*Bx_l + vx_l*Bz_l;
-
-    //compute Ur and Fr
-    rho_r   = prim_r["density"];
-    if (DualEnergyFormalism){
-      //eint_r = prim_r["internal_energy"];
-      //enzo_float h, dpdrho, dpde;
-      //EOS(p_l, rho_l, eint_l, h, cs_l, dpdrho, dpde, EOSType, 2);
-    } else {
-      p_r = prim_r["pressure"];
-      //cs_r = this->sound_speed_(prim_r, eos);
-    }
-    vx_r    = prim_r["velocity_i"];
-    vy_r    = prim_r["velocity_j"];
-    vz_r    = prim_r["velocity_k"];
-    Bx_r    = prim_r["bfield_i"];
-    By_r    = prim_r["bfield_j"];
-    Bz_r    = prim_r["bfield_k"];
+    // load wr and compute the fast magnetosonic speed
+    rho_r   = prim_r.at("density");
+    p_r     = prim_r.at("pressure");
+    vx_r    = prim_r.at("velocity_i");
+    vy_r    = prim_r.at("velocity_j");
+    vz_r    = prim_r.at("velocity_k");
+    Bx_r    = prim_r.at("bfield_i");
+    By_r    = prim_r.at("bfield_j");
+    Bz_r    = prim_r.at("bfield_k");
 
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
-    etot_r = cons_r["total_energy"];
+    etot_r = cons_r.at("total_energy");
     pt_r = p_r + this->mag_pressure_(prim_r);
     cf_r = this->fast_magnetosonic_speed_(prim_r,eos);
-
-    // The following calculations are redundant (they should have been handled
-    // prior to the function call - this is for debugging)
-    flux_r["density"] = rho_r * vx_r;
-    flux_r["momentum_i"] = cons_r["momentum_i"] * vx_r + pt_r - Bx_r * Bx_r;
-    flux_r["momentum_j"] = cons_r["momentum_j"] * vx_r - Bx_r * By_r;
-    flux_r["momentum_k"] = cons_r["momentum_k"] * vx_r - Bx_r * Bz_r;
-    flux_r["total_energy"] = (etot_r + pt_r) * vx_r - Bx_r * Bv_r;
-    if (DualEnergyFormalism) {
-      flux_r["internal_energy"] = cons_r["internal_energy"] * vx_l;
-    }
-    flux_r["bfield_i"] = 0.0;
-    flux_r["bfield_j"] = vx_r * By_r - vy_r * Bx_r;
-    flux_r["bfield_k"] = -vz_r * Bx_r + vx_r * Bz_r;
 
     //
     //wave speeds
@@ -189,13 +125,13 @@ public: // interface
     if (S_l > 0) {
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = flux_l[key];
+	flux_arrays[key](iz,iy,ix) = flux_l.at(key);
       }
       return;
     } else if (S_r < 0) {
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = flux_r[key];
+	flux_arrays[key](iz,iy,ix) = flux_r.at(key);
       }
       return;
     } 
@@ -278,7 +214,7 @@ public: // interface
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
 	flux_arrays[key](iz,iy,ix) = \
-	  flux_l[key] + S_l*(Us[key] - cons_l[key]);
+	  flux_l.at(key) + S_l*(Us[key] - cons_l.at(key));
       }
       return;
     } else if (S_rs <= 0 && S_r >= 0) {
@@ -288,7 +224,7 @@ public: // interface
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
 	flux_arrays[key](iz,iy,ix) = \
-	  flux_r[key] + S_r*(Us[key] - cons_r[key]);
+	  flux_r.at(key) + S_r*(Us[key] - cons_r.at(key));
       }
       return;
     }
@@ -318,7 +254,8 @@ public: // interface
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
 	flux_arrays[key](iz,iy,ix) = \
-	  flux_l[key] + S_ls*Uss[key] - (S_ls - S_l)*Us[key] - S_l*cons_l[key];
+	  (flux_l.at(key) + S_ls*Uss[key] - (S_ls - S_l)*Us[key] -
+	   S_l*cons_l.at(key));
       }
       return;
     } else if (S_M <= 0 && S_rs >= 0) {
@@ -330,7 +267,8 @@ public: // interface
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
 	flux_arrays[key](iz,iy,ix) = \
-	  flux_r[key] + S_rs*Uss[key] - (S_rs - S_r)*Us[key] - S_r*cons_r[key];
+	  (flux_r.at(key) + S_rs*Uss[key] - (S_rs - S_r)*Us[key] -
+	   S_r*cons_r.at(key));
       }
       return;
     }
