@@ -2,7 +2,9 @@
 #define ENZO_ENZO_RIEMANN_HLLD_HPP
 
 // This is a quick port from Enzo's Riemann_HLLD_MHD.C, written by J. S. Oishi
-// It needs to be rewritten to avoid duplicate calculations
+// The current implementation assumes that each process will always have an
+// independent instance of this object. If that changes, then handling of the
+// private members Us and Uss will also need to change.
 
 class EnzoRiemannHLLD : public EnzoRiemann
 {
@@ -15,7 +17,11 @@ public: // interface
   /// Create a new EnzoRiemannHLLE object
   EnzoRiemannHLLD() throw()
   : EnzoRiemann()
-  { }
+  {
+    // Reserve space in the following scratch space flt_maps
+    Us.reserve(n_keys_);
+    Uss.reserve(n_keys_);
+  }
 
   EnzoRiemannHLLD(std::vector<std::string> &extra_scalar_groups,
 		  std::vector<std::string> &extra_vector_groups,
@@ -23,7 +29,11 @@ public: // interface
 		  FluxFunctor** flux_funcs, int n_funcs)
     : EnzoRiemann(extra_scalar_groups, extra_vector_groups,
 		  extra_passive_groups, flux_funcs, n_funcs)
-  { }
+  {
+    // Reserve space in the following scratch space flt_maps
+    Us.reserve(n_keys_);
+    Uss.reserve(n_keys_);
+  }
 
   /// Virtual destructor
   virtual ~EnzoRiemannHLLD()
@@ -41,6 +51,9 @@ public: // interface
   void pup (PUP::er &p)
   {
     EnzoRiemann::pup(p);
+    // Reserve space in the following scratch space flt_maps
+    Us.reserve(n_keys_);
+    Uss.reserve(n_keys_);
   };
 
   void calc_riemann_fluxes_(const flt_map &flux_l, const flt_map &flux_r,
@@ -58,10 +71,7 @@ public: // interface
     // In that case, it may be worthwhile to use it to determine the upwind
     // direction
     enzo_float BFLOAT_EPSILON = 0;
-    // we should either store Us and Uss as members of the data structure OR,
-    // we should pass them in as arguments
-    flt_map Us, Uss;
-    Us.reserve(n_keys); Uss.reserve(n_keys);
+    // This method makes use of the member variables Us and Uss
 
     enzo_float etot_l,etot_r, rho_l, rho_r;
     enzo_float vx_l, vy_l, vz_l, vx_r, vy_r, vz_r;
@@ -304,7 +314,12 @@ private:
     cons["bfield_j"] = By;
     cons["bfield_k"] = Bz;
   }
-		       
+
+
+private:
+  // Below are two float maps used in the calculation
+  flt_map Us;
+  flt_map Uss;
 };
 
 #endif /* ENZO_ENZO_RIEMANN_HLLD_HPP */
