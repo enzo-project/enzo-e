@@ -15,23 +15,28 @@ EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver)
   // determine the type of solver to construct:
   
   // convert string to lower case (https://stackoverflow.com/a/313990)
-  std::string formatted;
-  std::transform(solver.begin(), solver.end(), formatted.begin(), std::tolower);
-
-  ASSERT("EnzoRiemann", "The only allowed Solver is currently HLLE",
-	 formatted == std::string("hlle"));
-
-  EnzoRiemann* out = new EnzoRiemannHLLE();
+  std::string formatted(solver.size(), ' ');
+  std::transform(solver.begin(), solver.end(), formatted.begin(),
+		 ::tolower);
+  EnzoRiemann* out;
+  if (formatted == std::string("hlle")){
+    out = new EnzoRiemannHLLE();
+  } else if (formatted == std::string("hlld")){
+    out = new EnzoRiemannHLLD();
+  } else {
+    ASSERT("EnzoRiemann", "The only allowed solvers are HLLE & HLLD", false);
+    out = NULL;
+  }
 
   return out;
 }
 
 //----------------------------------------------------------------------
 
-EnzoRiemann::EnzoRiemann(std::vector<std::string> &extra_scalar_groups,
-			 std::vector<std::string> &extra_vector_groups,
-			 std::vector<std::string> &extra_passive_groups,
-			 FluxFunctor** flux_funcs, int n_funcs)
+void EnzoRiemann::initializer_(std::vector<std::string> &extra_scalar_groups,
+			       std::vector<std::string> &extra_vector_groups,
+			       std::vector<std::string> &extra_passive_groups,
+			       FluxFunctor** flux_funcs, int n_funcs)
 {
   // construct vectors of all cons/prim groups
   std::vector<std::string> d_cons_groups{"density", "momentum",
@@ -154,9 +159,10 @@ void EnzoRiemann::solve (Block *block, Grouping &priml_group,
 	  (*(flux_funcs_[i]))(wr, Ur, Fr);
 	}
 
+
 	// Now compute the Riemann Fluxes
 	calc_riemann_fluxes_(Fl, Fr, wl, wr, Ul, Ur, cons_keys,
-			     n_keys, eos, iz, iy, ix, flux_arrays);
+			     n_keys_, eos, iz, iy, ix, flux_arrays);
 
 	// If Dedner Fluxes are required, they get handled here
 	//   - It would probably be better to handle this separately from the
@@ -170,12 +176,13 @@ void EnzoRiemann::solve (Block *block, Grouping &priml_group,
 	  flux_arrays["phi"](iz,iy,ix) =
 	    (Ul["bfield_i"] + 0.5*(Ur["bfield_i"] - Ul["bfield_i"])
 	     - 0.5 / Dedner_Ch_ * (Ur["phi"] - Ul["phi"]));
-	  flux_arrays["phi"] *= (Dedner_Ch_*Dedner_Ch_);
+	  flux_arrays["phi"](iz,iy,ix) *= (Dedner_Ch_*Dedner_Ch_);
 	}
       }
     }
   }
-  solve_passive_advection_(block, wl, wr, flux_arrays["density"], dim);
+  solve_passive_advection_(block, priml_group, primr_group,
+			   flux_arrays["density"], dim);
 }
 
 //======================================================================
@@ -185,7 +192,7 @@ void EnzoRiemann::combine_groups_(std::vector<std::string> &default_g,
 				  std::vector<std::string> &extra_vector_g,
 				  std::vector<std::string> &combined_g)
 {
-  int n_groups = 4 + extra_scalar_groups.size() + extra_vector_groups.size();
+  int n_groups = 4 + extra_scalar_g.size() + extra_vector_g.size();
   combined_g.reserve(n_groups);
   combined_g.insert(combined_g.end(), default_g.begin(), default_g.end());
   combined_g.insert(combined_g.end(), extra_scalar_g.begin(),
@@ -206,14 +213,14 @@ void EnzoRiemann::load_fluid_fields_(Block *block, array_map &arrays,
   EnzoPermutedCoordinates coord(dim);
   EnzoFieldArrayFactory array_factory(block);
  
-  for (std::size_t i; i<group_names.size(); i++){
+  for (std::size_t i=0; i<group_names.size(); i++){
     std::string group_name = group_names[i];
     int group_size = grouping.size(group_name);
-    ASSERT("EnzoRiemannHLLBase",
+    ASSERT("EnzoRiemann",
 	   "Implementation requires non-passive groups to have 1 or 3 fields",
 	   group_size == 1 || group_size == 3);
 
-    for (int num = 0; j<group_size; j++){
+    for (int num = 0; num<group_size; num++){
       int field_ind;
       std::string key;
       if (group_size == 1){
@@ -232,7 +239,7 @@ void EnzoRiemann::load_fluid_fields_(Block *block, array_map &arrays,
       arrays[key] = array_factory.reconstructed_field(grouping, group_name,
 						      field_ind, dim);
       if (key_names != NULL){
-	key_names.push_back(key);
+	key_names->push_back(key);
       }
     }      
   }
@@ -240,14 +247,15 @@ void EnzoRiemann::load_fluid_fields_(Block *block, array_map &arrays,
 
 //----------------------------------------------------------------------
 
-enzo_float EnzoRiemann::fast_magnetosonic_speed_(const flt_map &prim_vals)
+enzo_float EnzoRiemann::fast_magnetosonic_speed_(const flt_map &prim_vals,
+						 EnzoEquationOfState *eos)
 {
-  enzo_float cs2 = std::pow(sound_speed(prim_vals),2);
-  enzo_float B2 = (prim_vals["bfield_i"]*prim_vals["bfield_i"] +
-		   prim_vals["bfield_j"]*prim_vals["bfield_j"] +
-		   prim_vals["bfield_k"]*prim_vals["bfield_k"]);
-  enzo_float va2 = B2/prim_vals["density"];
-  enzo_float cos2 = prim_vals["bfield_i"]*prim_vals["bfield_i"] / B2;
+  enzo_float cs2 = std::pow(sound_speed_(prim_vals, eos),2);
+  enzo_float B2 = (prim_vals.at("bfield_i")*prim_vals.at("bfield_i") +
+		   prim_vals.at("bfield_j")*prim_vals.at("bfield_j") +
+		   prim_vals.at("bfield_k")*prim_vals.at("bfield_k"));
+  enzo_float va2 = B2/prim_vals.at("density");
+  enzo_float cos2 = prim_vals.at("bfield_i")*prim_vals.at("bfield_i") / B2;
   return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
 					  4.*cs2*va2*cos2)));
 }
@@ -256,9 +264,9 @@ enzo_float EnzoRiemann::fast_magnetosonic_speed_(const flt_map &prim_vals)
 
 enzo_float EnzoRiemann::mag_pressure_(const flt_map &prim_vals)
 {
-  return 0.5 * (prim_vals["bfield_i"]*prim_vals["bfield_i"]+
-		prim_vals["bfield_j"]*prim_vals["bfield_j"]+
-		prim_vals["bfield_k"]*prim_vals["bfield_k"]);
+  return 0.5 * (prim_vals.at("bfield_i")*prim_vals.at("bfield_i")+
+		prim_vals.at("bfield_j")*prim_vals.at("bfield_j")+
+		prim_vals.at("bfield_k")*prim_vals.at("bfield_k"));
 }
 
 //----------------------------------------------------------------------
@@ -269,18 +277,18 @@ void EnzoRiemann::basic_mhd_fluxes_(const flt_map &prim, const flt_map &cons,
   // This assumes that MHD is included
   // This may be better handled by the EquationOfState
   enzo_float vi, vj, vk, p, Bi, Bj, Bk, etot, mag_pressure;
-  vi = prim["velocity_i"];
-  vj = prim["velocity_j"];
-  vk = prim["velocity_k"];
-  p  = prim["pressure"];
-  Bi = prim["bfield_i"];
-  Bj = prim["bfield_j"];
-  Bk = prim["bfield_k"];
+  vi = prim.at("velocity_i");
+  vj = prim.at("velocity_j");
+  vk = prim.at("velocity_k");
+  p  = prim.at("pressure");
+  Bi = prim.at("bfield_i");
+  Bj = prim.at("bfield_j");
+  Bk = prim.at("bfield_k");
 
   mag_pressure = mag_pressure_(prim);
 
   // Compute Fluxes
-  fluxes["density"] = cons["momentum_i"];
+  fluxes["density"] = cons.at("momentum_i");
 
   // Fluxes for Mx, My, Mz
   fluxes["momentum_i"] = fluxes["density"]*vi - Bi*Bi + p + mag_pressure;
@@ -288,7 +296,7 @@ void EnzoRiemann::basic_mhd_fluxes_(const flt_map &prim, const flt_map &cons,
   fluxes["momentum_k"] = fluxes["density"]*vk - Bk*Bi;
 
   // Flux for etot
-  etot = cons["total_energy"];
+  etot = cons.at("total_energy");
   fluxes["total_energy"] = ((etot + p + mag_pressure)*vi
 			    - (Bi*vi + Bj*vj + Bk*vk)*Bi);
 

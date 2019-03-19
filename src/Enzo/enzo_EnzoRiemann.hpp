@@ -36,6 +36,7 @@ typedef std::unordered_map<std::string,EFlt3DArray> array_map;
 
 class FluxFunctor : public PUP::able
 {
+public:
   FluxFunctor() throw()
   {}
 
@@ -71,14 +72,18 @@ public: // interface
   EnzoRiemann(std::vector<std::string> &extra_scalar_groups,
 	      std::vector<std::string> &extra_vector_groups,
 	      std::vector<std::string> &extra_passive_groups,
-	      FluxFunctor** flux_funcs, int n_funcs);
+	      FluxFunctor** flux_funcs, int n_funcs)
+  {
+    initializer_(extra_scalar_groups, extra_vector_groups,
+		 extra_passive_groups, flux_funcs, n_funcs);
+  }
 
   EnzoRiemann()
-    : EnzoRiemann(std::vector<std::string>(),
-		  std::vector<std::string>(),
-		  std::vector<std::string>(),
-		  NULL, 0)
-  {};
+  {
+    // Empty vector
+    std::vector<std::string> temp;
+    initializer_(temp, temp, temp, NULL,0);
+  };
 
   /// Virtual destructor
   virtual ~EnzoRiemann();
@@ -101,15 +106,12 @@ public: // interface
 protected : //methods
 
   // Compute the Riemann Fluxes (and wave_speeds)
-  virtual void calc_riemann_fluxes_(const flt_map &flux_l,
-				    const flt_map &flux_r,
-				    const flt_map &prim_l,
-				    const flt_map &prim_r,
-				    const flt_map &cons_l,
-				    const flt_map &cons_r,
-				    const std::vector<std::string> &cons_keys,
-				    const std::size_t n_keys,
-				    const EnzoEquationOfState *eos,
+  virtual void calc_riemann_fluxes_(flt_map &flux_l, flt_map &flux_r,
+				    flt_map &prim_l, flt_map &prim_r,
+				    flt_map &cons_l, flt_map &cons_r,
+				    std::vector<std::string> &cons_keys,
+				    std::size_t n_keys,
+				    EnzoEquationOfState *eos,
 				    const int iz, const int iy, const int ix,
 				    array_map &flux_arrays) =0;
 
@@ -128,19 +130,26 @@ protected : //methods
 			  std::vector<std::string> *key_names);
 
   // computes the fast magnetosonic speed along dimension i
-  enzo_float fast_magnetosonic_speed_(const flt_map &prim_vals);
+  enzo_float fast_magnetosonic_speed_(const flt_map &prim_vals,
+				      EnzoEquationOfState *eos);
 
   enzo_float mag_pressure_(const flt_map &prim_vals);
   
-  enzo_float sound_speed_(flt_map &prim_vals)
+  enzo_float sound_speed_(const flt_map &prim_vals, EnzoEquationOfState *eos)
   {
-    return std::sqrt(gamma_*prim_vals["pressure"]/prim_vals["density"]);
+    return std::sqrt(eos->get_gamma()*prim_vals.at("pressure")/
+		     prim_vals.at("density"));
   }
 
   void basic_mhd_fluxes_(const flt_map &prim, const flt_map &cons,
 			 flt_map &fluxes);
+private:
+  void initializer_(std::vector<std::string> &extra_scalar_groups,
+		    std::vector<std::string> &extra_vector_groups,
+		    std::vector<std::string> &extra_passive_groups,
+		    FluxFunctor** flux_funcs, int n_funcs);
     
-protected : //attributes
+protected: //attributes
   std::vector<std::string> cons_groups_;
   std::vector<std::string> prim_groups_;
   std::size_t n_keys_;

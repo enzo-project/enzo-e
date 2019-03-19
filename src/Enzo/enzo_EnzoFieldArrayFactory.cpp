@@ -43,7 +43,15 @@ EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
   std::string field_name = grouping.item(group_name,index);
   const int id = field.field_id(field_name);
   int mx, my, mz;
-  field.dimensions(id,&mx,&my,&mz);
+  int nx,ny,nz;
+  field.size(&nx,&ny,&nz);
+  int gx,gy,gz;
+  field.ghost_depth(id,&gx,&gy,&gz);
+
+  mx = nx + 2*gx;
+  my = ny + 2*gy;
+  mz = nz + 2*gz;
+  
 
   if (dim == 0){
     mx--;

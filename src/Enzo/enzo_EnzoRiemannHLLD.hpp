@@ -14,8 +14,7 @@ class EnzoRiemannHLLD : public EnzoRiemann
 public: // interface
   /// Create a new EnzoRiemannHLLE object
   EnzoRiemannHLLD() throw()
-  : EnzoRiemann(std::vector<std::string>(), std::vector<std::string>(),
-		std::vector<std::string>(), NULL, 0)
+  : EnzoRiemann()
   { }
 
   EnzoRiemannHLLD(std::vector<std::string> &extra_scalar_groups,
@@ -44,15 +43,16 @@ public: // interface
     EnzoRiemann::pup(p);
   };
 
-  void calc_riemann_fluxes_(const flt_map &flux_l, const flt_map &flux_r,
-			    const flt_map &prim_l, const flt_map &prim_r,
-			    const flt_map &cons_l, const flt_map &cons_r,
-			    const std::vector<std::string> &cons_keys,
-			    const std::size_t n_keys,
-			    const EnzoEquationOfState *eos,
+  void calc_riemann_fluxes_(flt_map &flux_l, flt_map &flux_r,
+			    flt_map &prim_l, flt_map &prim_r,
+			    flt_map &cons_l, flt_map &cons_r,
+			    std::vector<std::string> &cons_keys,
+			    std::size_t n_keys,
+			    EnzoEquationOfState *eos,
 			    const int iz, const int iy, const int ix,
 			    array_map &flux_arrays)
   {
+    // Need to edit so that we can make the flt_maps const
 
     // NEED TO DEFINE BFLOAT_EPSILON
     // I think this determines how close a value needs to be to 0 to count as 0
@@ -64,10 +64,10 @@ public: // interface
     flt_map Us, Uss;
     Us.reserve(n_keys); Uss.reserve(n_keys);
 
-    enzo_float etot_l,etot_r, eint_l, eint_r, rho_l, rho_r;
+    enzo_float etot_l,etot_r, rho_l, rho_r;
     enzo_float vx_l, vy_l, vz_l, vx_r, vy_r, vz_r;
     enzo_float Bx_l, Bx_r,Bx, By_l, Bz_l, By_r, Bz_r, Bv_l, Bv_r, p_l, p_r;
-    enzo_float cs_l, cs_r, pt_l, pt_r;
+    enzo_float pt_l, pt_r;
     enzo_float rho_ls, rho_rs, vy_ls, vy_rs, vz_ls, vz_rs, vv_ls, vv_rs;
     enzo_float By_ls, By_rs, Bz_ls, Bz_rs, Bv_ls, Bv_rs, bb_ls, bb_rs;
     enzo_float etot_ls, etot_rs, pt_s;
@@ -83,12 +83,12 @@ public: // interface
     // First, compute Fl and Ul
     rho_l  = prim_l["density"];
     if (DualEnergyFormalism){
-      eint_l = prim_l["internal_energy"];
-      enzo_float h, dpdrho, dpde;
+      //eint_l = prim_l["internal_energy"];
+      //enzo_float h, dpdrho, dpde;
       //EOS(p_l, rho_l, eint_l, h, cs_l, dpdrho, dpde, EOSType, 2);
     } else {
       p_l = prim_l["pressure"];
-      cs_l = this->sound_speed_(prim_l);
+      //cs_l = this->sound_speed_(prim_l, eos);
     }
     vx_l   = prim_l["velocity_i"];
     vy_l   = prim_l["velocity_j"];
@@ -100,7 +100,7 @@ public: // interface
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
     etot_l = cons_l["total_energy"];
     pt_l = p_l + this->mag_pressure_(prim_l);
-    cf_l = this->fast_magnetosonic_speed_(prim_l);
+    cf_l = this->fast_magnetosonic_speed_(prim_l, eos);
 
     //B2 = Bx_l * Bx_l + By_l * By_l + Bz_l * Bz_l;
     //v2 = vx_l * vx_l + vy_l * vy_l + vz_l * vz_l;
@@ -125,12 +125,12 @@ public: // interface
     // The following calculations are redundant (they should have been handled
     // prior to the function call - this is for debugging)
     flux_l["density"] = rho_l * vx_l;
-    flux_l["momentum_i"] = Ul["momentum_i"] * vx_l + pt_l - Bx_l * Bx_l;
-    flux_l["momentum_j"] = Ul["momentum_j"] * vx_l - Bx_l * By_l;
-    flux_l["momentum_k"] = Ul["momentum_k"] * vx_l - Bx_l * Bz_l;
+    flux_l["momentum_i"] = cons_l["momentum_i"] * vx_l + pt_l - Bx_l * Bx_l;
+    flux_l["momentum_j"] = cons_l["momentum_j"] * vx_l - Bx_l * By_l;
+    flux_l["momentum_k"] = cons_l["momentum_k"] * vx_l - Bx_l * Bz_l;
     flux_l["total_energy"] = (etot_l + pt_l) * vx_l - Bx_l * Bv_l;
     if (DualEnergyFormalism) {
-      flux_l["internal_energy"] = Ul["internal_energy"] * vx_l;
+      flux_l["internal_energy"] = cons_l["internal_energy"] * vx_l;
     }
     flux_l["bfield_i"] = 0.0;
     flux_l["bfield_j"] = vx_l*By_l - vy_l*Bx_l;
@@ -139,12 +139,12 @@ public: // interface
     //compute Ur and Fr
     rho_r   = prim_r["density"];
     if (DualEnergyFormalism){
-      eint_r = prim_r["internal_energy"];
+      //eint_r = prim_r["internal_energy"];
       //enzo_float h, dpdrho, dpde;
       //EOS(p_l, rho_l, eint_l, h, cs_l, dpdrho, dpde, EOSType, 2);
     } else {
       p_r = prim_r["pressure"];
-      cs_r = this->sound_speed_(prim_r);
+      //cs_r = this->sound_speed_(prim_r, eos);
     }
     vx_r    = prim_r["velocity_i"];
     vy_r    = prim_r["velocity_j"];
@@ -156,12 +156,12 @@ public: // interface
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
     etot_r = cons_r["total_energy"];
     pt_r = p_r + this->mag_pressure_(prim_r);
-    cf_r = this->fast_magnetosonic_speed_(prim_r);
+    cf_r = this->fast_magnetosonic_speed_(prim_r,eos);
 
     // The following calculations are redundant (they should have been handled
     // prior to the function call - this is for debugging)
     flux_r["density"] = rho_r * vx_r;
-    flux_r["momentum_i"] = cons_r["momentum_i"] * v_r + pt_r - Bx_r * Bx_r;
+    flux_r["momentum_i"] = cons_r["momentum_i"] * vx_r + pt_r - Bx_r * Bx_r;
     flux_r["momentum_j"] = cons_r["momentum_j"] * vx_r - Bx_r * By_r;
     flux_r["momentum_k"] = cons_r["momentum_k"] * vx_r - Bx_r * Bz_r;
     flux_r["total_energy"] = (etot_r + pt_r) * vx_r - Bx_r * Bv_r;
@@ -183,8 +183,8 @@ public: // interface
     }
     // first, outermost wave speeds
     // simplest choice from Miyoshi & Kusano (2005)
-    S_l = min(vx_l, vx_r) - max(cf_l, cf_r);
-    S_r = max(vx_l, vx_r) + max(cf_l, cf_r);
+    S_l = std::min(vx_l, vx_r) - std::max(cf_l, cf_r);
+    S_r = std::max(vx_l, vx_r) + std::max(cf_l, cf_r);
 
     if (S_l > 0) {
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
@@ -278,7 +278,7 @@ public: // interface
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
 	flux_arrays[key](iz,iy,ix) = \
-	  flux_l[key] + S_l*(Us[key] - cons_l[field]);
+	  flux_l[key] + S_l*(Us[key] - cons_l[key]);
       }
       return;
     } else if (S_rs <= 0 && S_r >= 0) {
@@ -288,24 +288,26 @@ public: // interface
       for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
 	std::string key = cons_keys[field_ind];
 	flux_arrays[key](iz,iy,ix) = \
-	  flux_r[key] + S_r*(Us[key] - cons_r[field]);
+	  flux_r[key] + S_r*(Us[key] - cons_r[key]);
       }
       return;
-    } 
+    }
+
+    enzo_float sign_Bx = (Bx>0) ? 1. : -1.;
 
     //do U** stuff
     rho_savg = std::sqrt(rho_ls) + std::sqrt(rho_rs);
     vy_ss = (std::sqrt(rho_ls) * vy_ls + std::sqrt(rho_rs) * vy_rs +
-	     (By_rs - By_ls) * sign(Bx))/rho_savg;
+	     (By_rs - By_ls) * sign_Bx)/rho_savg;
     vz_ss = (std::sqrt(rho_ls) * vz_ls + std::sqrt(rho_rs) * vz_rs +
-	     (Bz_rs - Bz_ls) * sign(Bx))/rho_savg;
+	     (Bz_rs - Bz_ls) * sign_Bx)/rho_savg;
     By_ss = (std::sqrt(rho_ls) * By_rs + std::sqrt(rho_rs) * By_ls +
-	     std::sqrt(rho_ls * rho_rs) * (vy_rs - vy_ls) * sign(Bx))/rho_savg;
+	     std::sqrt(rho_ls * rho_rs) * (vy_rs - vy_ls) * sign_Bx)/rho_savg;
     Bz_ss = (std::sqrt(rho_ls) * Bz_rs + std::sqrt(rho_rs) * Bz_ls +
-	     std::sqrt(rho_ls * rho_rs) * (vz_rs - vz_ls) * sign(Bx))/rho_savg;
+	     std::sqrt(rho_ls * rho_rs) * (vz_rs - vz_ls) * sign_Bx)/rho_savg;
     Bv_ss = S_M * Bx + vy_ss * By_ss + vz_ss * Bz_ss;
-    etot_lss = etot_ls - std::sqrt(rho_ls) * (Bv_ls - Bv_ss) * sign(Bx);
-    etot_rss = etot_rs + std::sqrt(rho_rs) * (Bv_rs - Bv_ss) * sign(Bx);
+    etot_lss = etot_ls - std::sqrt(rho_ls) * (Bv_ls - Bv_ss) * sign_Bx;
+    etot_rss = etot_rs + std::sqrt(rho_rs) * (Bv_rs - Bv_ss) * sign_Bx;
 
     if (S_ls <= 0 && S_M >= 0) {
       // USE F_lss

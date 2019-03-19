@@ -129,7 +129,7 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
   half_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
   full_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
-  riemann_solver_ = new EnzoRiemannHLLE;
+  riemann_solver_ = EnzoRiemann::construct_riemann(std::string("hlle"));
 
 }
 
@@ -315,6 +315,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 		      priml_group, primr_group, zflux_group, consl_group,
 		      consr_group, weight_group, *reconstructor);
       }
+
       //CkPrintf("Checking Fluxes.\n");
       //check_fields_(block, xflux_group, EnzoMethodVlct::cons_group_names);
       //check_fields_(block, yflux_group, EnzoMethodVlct::cons_group_names);
