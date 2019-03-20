@@ -34,13 +34,10 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 
   ejecta_metal_fraction_ = enzo_config->method_feedback_ejecta_metal_fraction;
 
-  stencil_             = enzo_config->method_feedback_stencil;
-  stencil_rad_                 = ( (int) (stencil_ - 1 / 2.0));
-  number_of_feedback_cells_ = stencil_ * stencil_ * stencil_;
-
-
-  mass_per_cell_   = total_ejecta_mass_   / ((double) number_of_feedback_cells_);
-  energy_per_cell_ = total_ejecta_energy_ / ((double) number_of_feedback_cells_);
+  stencil_                   = enzo_config->method_feedback_stencil;
+  stencil_rad_               = ( (int) (stencil_ - 1 / 2.0));
+  number_of_feedback_cells_  = stencil_ * stencil_ * stencil_;
+  shift_cell_center_         = enzo_config->method_feedback_shift_cell_center;
 
   // Do error checking here to make sure all required
   // fields exist..
@@ -69,8 +66,9 @@ void EnzoMethodDistributedFeedback::pup (PUP::er &p)
   p | stencil_;
   p | stencil_rad_;
   p | number_of_feedback_cells_;
-  p | mass_per_cell_;
-  p | energy_per_cell_;
+  //p | mass_per_cell;
+  //p | energy_per_cell;
+  p | shift_cell_center_;
 
   return;
 }
@@ -89,6 +87,126 @@ void EnzoMethodDistributedFeedback::compute (Block * block) throw()
 
 void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
 {
+
+  EnzoBlock * enzo_block = enzo::block(block);
+  const EnzoConfig * enzo_config = enzo::config();
+  Particle particle = enzo_block->data()->particle();
+
+  double current_time  = block->time();
+
+  // apply feedback depending on particle type
+  // for now, just do this for all star particles
+
+  int it = particle.type_index("star");
+  int count = 0;
+
+  if (particle.num_particles(it) > 0 ){
+
+    const int ia_m = particle.attribute_index (it, "mass");
+
+    const int ia_x  = particle.attribute_index (it, "x");
+    const int ia_y  = particle.attribute_index (it, "y");
+    const int ia_z  = particle.attribute_index (it, "z");
+    const int ia_vx = particle.attribute_index (it, "vx");
+    const int ia_vy = particle.attribute_index (it, "vy");
+    const int ia_vz = particle.attribute_index (it, "vz");
+
+    const int ia_l = particle.attribute_index (it, "lifetime");
+    const int ia_c = particle.attribute_index (it, "creation_time");
+
+    const int dm = particle.stride(it, ia_m);
+    const int dp = particle.stride(it, ia_x);
+    const int dv = particle.stride(it, ia_vx);
+    const int dl = particle.stride(it, ia_l);
+    const int dc = particle.stride(it, ia_c);
+
+    const int nb = particle.num_batches(it);
+
+
+    for (int ib=0; ib<nb; ib++){
+      enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
+      enzo_float *plifetime=0, *pcreation=0, *pmass=0;
+
+      pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+
+      px  = (enzo_float *) particle.attribute_array(it, ia_x, ib);
+      py  = (enzo_float *) particle.attribute_array(it, ia_y, ib);
+      pz  = (enzo_float *) particle.attribute_array(it, ia_z, ib);
+      pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
+      pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
+      pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
+
+      plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
+      pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib);
+
+      int np = particle.num_particles(it,ib);
+
+      for (int ip=0; ip<np; ip++){
+        // AE: Check and see if these differ....
+        int ipdp = ip*dp;
+        int ipdm = ip*dm;
+        int ipdv = ip*dv;
+        int ipdl = ip*dl;
+        int ipdc = ip*dc;
+
+        // negative lifetime are particles that have alreahy gone SN
+        // creation time must be > 0
+        // only go SN if age >= lifetime
+        if ( (plifetime[ipdl] <= 0.0) || (pcreation[ipdc] <= 0.0) ||
+             (current_time - pcreation[ipdc]) < plifetime[ipdl]) continue;
+
+        // Update particle properties here if needed
+        plifetime[ipdl] *= -1.0;                  // set to negative - flag for alreahy gone SNe
+        pmass[ipdm] = pmass[ipdm] - total_ejecta_mass_;
+
+        // get corresponding grid position of particle
+        // and shift it if it is too close to the grid boundaries
+        double xpos = px[ipdp];
+        double ypos = py[ipdp];
+        double zpos = pz[ipdp];
+
+        this->inject_feedback(block, xpos, ypos, zpos,
+                              enzo_config->method_feedback_ejecta_mass,
+                              enzo_config->method_feedback_supernova_energy,
+                              enzo_config->method_feedback_ke_fraction);
+
+        count++;
+      } // end loop over particles
+    } // end loop over batches
+
+    if (count > 0){
+      std::cout << "Number of feedback particles:   " << count << "\n";
+    }
+
+  } // end particle check
+
+
+
+
+  return;
+}
+
+void EnzoMethodDistributedFeedback::inject_feedback(
+                                          Block * block,
+                                          double xpos, double ypos, double zpos,
+                                          double m_eject, double E_51,
+                                          double ke_fraction,
+                                          enzo_float pvx,    //default -999
+                                          enzo_float pvy,    //default -999
+                                          enzo_float pvz){   //default -999
+  /*
+
+    Inject feedback with ejecta mass m_eject (in Msun) and total energy
+    (in units of 10^51 erg) split between thermal and kinetic energy as
+    determined by ke_fraction. Location of feedback is centered at
+    xpos,ypos,zpos, but is shifted away from grid boundaries if
+    shift_cell_center is ON.
+
+    pvx,pvy, and pvz are the local velocity of the injection source. These are only
+    needed if ke_fraction > 0. By default these are set to the local
+    gas flow
+
+  */
 
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
@@ -138,360 +256,285 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
 
   double inv_vol = 1.0 / (hx*hy*hz);
 
-  Particle particle = enzo_block->data()->particle();
 
-  // apply feedback depending on particle type
-  // for now, just do this for all star particles
-
-  int it = particle.type_index("star");
-  int count = 0;
-
-  if (particle.num_particles(it) > 0 ){
-
-    const int ia_m = particle.attribute_index (it, "mass");
-
-    const int ia_x  = particle.attribute_index (it, "x");
-    const int ia_y  = particle.attribute_index (it, "y");
-    const int ia_z  = particle.attribute_index (it, "z");
-    const int ia_vx = particle.attribute_index (it, "vx");
-    const int ia_vy = particle.attribute_index (it, "vy");
-    const int ia_vz = particle.attribute_index (it, "vz");
-
-    const int ia_l = particle.attribute_index (it, "lifetime");
-    const int ia_c = particle.attribute_index (it, "creation_time");
-
-    const int dm = particle.stride(it, ia_m);
-    const int dp = particle.stride(it, ia_x);
-    const int dv = particle.stride(it, ia_vx);
-    const int dl = particle.stride(it, ia_l);
-    const int dc = particle.stride(it, ia_c);
-
-    const int nb = particle.num_batches(it);
-
-    // allocate local fields to keep track of energy
-    // and momentum for conservation
-    double *u_local=0, *v_local=0, *w_local=0, *d_local=0, *ge_local=0, *te_local=0;
-    double *ke_before=0, *metal_local=0;
+  //
+  //
+  // Set explosion properties
+  //
+  double energy_per_cell = E_51 * 1.0E51 / enzo_units->mass() /
+                            (enzo_units->velocity() * enzo_units->velocity());
+  double mass_per_cell   = m_eject * cello::mass_solar / enzo_units->mass();
+  mass_per_cell /= ((double) number_of_feedback_cells_);
+  energy_per_cell /= ((double) number_of_feedback_cells_);
 
 
-    for (int ib=0; ib<nb; ib++){
-      enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
-      enzo_float *plifetime=0, *pcreation=0, *pmass=0;
+  //  stencil_rad_ is integer separation from cell center
+  //  and edge of injection region (i.e. 1 for 3x3 injection grid)
+  if (  shift_cell_center_ &&
+       ( ((xpos - (stencil_rad_+1)*hx) < xm) ||
+         ((xpos + (stencil_rad_+1)*hx) > xp) ||
+         ((ypos - (stencil_rad_+1)*hy) < ym) ||
+         ((ypos + (stencil_rad_+1)*hy) > yp) ||
+         ((zpos - (stencil_rad_+1)*hz) < zm) ||
+         ((zpos + (stencil_rad_+1)*hz) > zp)    )  ) {
 
-      pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+      xpos = std::min(  std::max(xpos, xm + (stencil_rad_ + 1 + 0.5)*hx),
+                       xp - (stencil_rad_ + 1 + 0.5)*hx);
+      ypos = std::min(  std::max(ypos, ym + (stencil_rad_ + 1 + 0.5)*hy),
+                       yp - (stencil_rad_ + 1 + 0.5)*hy);
+      zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
+                       zp - (stencil_rad_ + 1 + 0.5)*hz);
 
-      px  = (enzo_float *) particle.attribute_array(it, ia_x, ib);
-      py  = (enzo_float *) particle.attribute_array(it, ia_y, ib);
-      pz  = (enzo_float *) particle.attribute_array(it, ia_z, ib);
-      pvx = (enzo_float *) particle.attribute_array(it, ia_vx, ib);
-      pvy = (enzo_float *) particle.attribute_array(it, ia_vy, ib);
-      pvz = (enzo_float *) particle.attribute_array(it, ia_vz, ib);
-
-      plifetime = (enzo_float *) particle.attribute_array(it, ia_l, ib);
-      pcreation = (enzo_float *) particle.attribute_array(it, ia_c, ib);
-
-      int np = particle.num_particles(it,ib);
-
-      for (int ip=0; ip<np; ip++){
-        // AE: Check and see if these differ....
-        int ipdp = ip*dp;
-        int ipdm = ip*dm;
-        int ipdv = ip*dv;
-        int ipdl = ip*dl;
-        int ipdc = ip*dc;
-
-        // negative lifetime are particles that have alreahy gone SN
-        // creation time must be > 0
-        // only go SN if age >= lifetime
-        if ( (plifetime[ipdl] <= 0.0) || (pcreation[ipdc] <= 0.0) ||
-             (current_time - pcreation[ipdc]) < plifetime[ipdl]) continue;
-
-        // Update particle properties here if needed
-        plifetime[ipdl] *= -1.0;                  // set to negative - flag for alreahy gone SNe
-        pmass[ipdm] = pmass[ipdm] - total_ejecta_mass_;
-
-        // get corresponding grid position of particle
-        // and shift it if it is too close to the grid boundaries
-        double xpos = px[ipdp];
-        double ypos = py[ipdp];
-        double zpos = pz[ipdp];
-
-        //  stencil_rad_ is integer separation from cell center
-        //  and edge of injection region (i.e. 1 for 3x3 injection grid)
-        if (  enzo_config->method_feedback_shift_cell_center &&
-             ( ((xpos - (stencil_rad_+1)*hx) < xm) ||
-               ((xpos + (stencil_rad_+1)*hx) > xp) ||
-               ((ypos - (stencil_rad_+1)*hy) < ym) ||
-               ((ypos + (stencil_rad_+1)*hy) > yp) ||
-               ((zpos - (stencil_rad_+1)*hz) < zm) ||
-               ((zpos + (stencil_rad_+1)*hz) > zp)    )  ) {
-
-            xpos = std::min(  std::max(xpos, xm + (stencil_rad_ + 1 + 0.5)*hx),
-                             xp - (stencil_rad_ + 1 + 0.5)*hx);
-            ypos = std::min(  std::max(ypos, ym + (stencil_rad_ + 1 + 0.5)*hy),
-                             yp - (stencil_rad_ + 1 + 0.5)*hy);
-            zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
-                             zp - (stencil_rad_ + 1 + 0.5)*hz);
-
-            return;
-        }
+      return;
+  }
 
 
-        // compute coordinates of central feedback cell
-        double xcell = (xpos - xm) / hx + gx - 0.5;
-        double ycell = (ypos - ym) / hy + gy - 0.5;
-        double zcell = (zpos - zm) / hz + gz - 0.5;
+  // compute coordinates of central feedback cell
+  double xcell = (xpos - xm) / hx + gx - 0.5;
+  double ycell = (ypos - ym) / hy + gy - 0.5;
+  double zcell = (zpos - zm) / hz + gz - 0.5;
 
-        // I believe -1's are needed (added from Fortran code due to index start differences )
-        int ix       = ((int) floor(xcell + 0.5)) + gx - 1;
-        int iy       = ((int) floor(ycell + 0.5)) + gy - 1;
-        int iz       = ((int) floor(zcell + 0.5)) + gz - 1;
+  // I believe -1's are needed (added from Fortran code due to index start differences )
+  int ix       = ((int) floor(xcell + 0.5)) + gx - 1;
+  int iy       = ((int) floor(ycell + 0.5)) + gy - 1;
+  int iz       = ((int) floor(zcell + 0.5)) + gz - 1;
 
-        double dxc   = ix + 0.5 - xcell;
-        double dyc   = iy + 0.5 - ycell;
-        double dzc   = iz + 0.5 - zcell;
+  double dxc   = ix + 0.5 - xcell;
+  double dyc   = iy + 0.5 - ycell;
+  double dzc   = iz + 0.5 - zcell;
 
-        // number of feedback cells + 1 cell in each dimension
-        int num_loc = (stencil_ + 1) * (stencil_ + 1) * (stencil_ + 1);
-        if (!u_local){
-          u_local     = new double[num_loc];
-          v_local     = new double[num_loc];
-          w_local     = new double[num_loc];
-          d_local     = new double[num_loc];
-          ge_local    = new double[num_loc];
-          te_local    = new double[num_loc];
-          metal_local = new double[num_loc];
-          ke_before   = new double[num_loc];
-        }
+  //
+  // Set source velocity to local gas flow if all are left at
+  // the default values
+  //
+  if (((pvx == pvy) && (pvy == pvz)) && (pvx == -9999.0)){
+    int index = INDEX(ix,iy,iz,mx,my);
+    pvx = v3[0][index]; pvy = v3[1][index]; pvz = v3[2][index];
+  }
 
-        // assign initial values to these
-        for (int i = 0; i < num_loc; i++){
-          u_local[i] = 0.0; v_local[i] = 0.0; w_local[i] = 0.0;
-          d_local[i] = 0.0; te_local[i] = 0.0; ge_local[i] = 0.0;
-          ke_before[i] = 0.0; metal_local[i] = 0.0;
-        }
-        //
+  double *u_local=0, *v_local=0, *w_local=0, *d_local=0, *ge_local=0, *te_local=0;
+  double *ke_before=0, *metal_local=0;
 
-        // LEFT OFF HERE
-        //
-        // DO COMPUTATION HERE TO COMPUTE E_thermal, E_kin, and p_mom
-        //
-        //
-        double ke_f = 0.0;
+  // number of feedback cells + 1 cell in each dimension
+  int num_loc = (stencil_ + 1) * (stencil_ + 1) * (stencil_ + 1);
+  if (!u_local){
+    u_local     = new double[num_loc];
+    v_local     = new double[num_loc];
+    w_local     = new double[num_loc];
+    d_local     = new double[num_loc];
+    ge_local    = new double[num_loc];
+    te_local    = new double[num_loc];
+    metal_local = new double[num_loc];
+    ke_before   = new double[num_loc];
+  }
 
-        //
-        if (kinetic_fraction_ < 0){
+  // assign initial values to these
+  for (int i = 0; i < num_loc; i++){
+    u_local[i] = 0.0; v_local[i] = 0.0; w_local[i] = 0.0;
+    d_local[i] = 0.0; te_local[i] = 0.0; ge_local[i] = 0.0;
+    ke_before[i] = 0.0; metal_local[i] = 0.0;
+  }
 
-          // calculate variable kinetic energy fraction
-          double m_sn = enzo_config->method_feedback_ejecta_mass;
-          double E_51 = enzo_config->method_feedback_supernova_energy;
+  double ke_f = 0.0;
 
-          double avg_z = 0.0, avg_n = 0.0, avg_d = 0.0;
+  //
+  if (ke_fraction < 0){
 
-          for (int k = iz - stencil_rad_; k<= iz + stencil_rad_; k++){
-            for (int j = iy - stencil_rad_; j <= iy + stencil_rad_; j++){
-              for (int i = ix - stencil_rad_; i <= ix + stencil_rad_; i++){
+    // calculate variable kinetic energy fraction
+
+    double avg_z = 0.0, avg_n = 0.0, avg_d = 0.0;
+
+    for (int k = iz - stencil_rad_; k<= iz + stencil_rad_; k++){
+      for (int j = iy - stencil_rad_; j <= iy + stencil_rad_; j++){
+        for (int i = ix - stencil_rad_; i <= ix + stencil_rad_; i++){
 
 //      AE TO DO: Actually calculate number density here with species
 
-                int index = INDEX(i,j,k,mx,my);
+          int index = INDEX(i,j,k,mx,my);
 
-                // NOTE: The presence of these statements throughout this routine
-                //       is to generalize for situations where we don't have to
-                //       kick particles away from grid edges once non-local
-                //       blocks / processors know about particles that deposit
-                //       feedback on their grids (this allows the loops to be
-                //       simple - otherwise will have to continually recalc
-                //       the min / max bounds of the loops to avoid edges )
-                if ( (index < 0) || (index > nx*ny*nz)) continue;
+          // NOTE: The presence of these statements throughout this routine
+          //       is to generalize for situations where we don't have to
+          //       kick particles away from grid edges once non-local
+          //       blocks / processors know about particles that deposit
+          //       feedback on their grids (this allows the loops to be
+          //       simple - otherwise will have to continually recalc
+          //       the min / max bounds of the loops to avoid edges )
+          if ( (index < 0) || (index > nx*ny*nz)) continue;
 
-                double mu_cell  = enzo_config->ppm_mol_weight;
+          double mu_cell  = enzo_config->ppm_mol_weight;
 
-                avg_z += metal[index]; // need to divide by d_tot below
-                avg_n += d[index] / mu_cell;
-                avg_d += d[index];
+            avg_z += metal[index]; // need to divide by d_tot below
+            avg_n += d[index] / mu_cell;
+            avg_d += d[index];
 
-              }
-            }
-          } // end loop over local cells
-
-          double inv_ncell = 1.0 / ((double) number_of_feedback_cells_);
-          const double z_solar = 0.02;   // as assumed for these equations
-          avg_z =  (avg_z / avg_d) / z_solar; // mass-weighted metallicity
-          avg_n *= inv_ncell * enzo_units->density() / cello::mass_hydrogen; // in cgs
-          avg_d *= inv_ncell * enzo_units->density(); // in cgs
-
-          // Compute the time and radius of transtion to PDS phase for gas
-          // with the computed properties.
-          // t_PDS is in units of kyr  -    R_PDS is in units of pc
-
-          double t_PDS = 0.0, R_PDS = 0.0;
-          // For metal poor gas
-          if (avg_z < 0.01){
-            t_PDS = 306.0 * pow(E_51,0.125) * pow(avg_n,-0.75);
-            R_PDS =  49.3 * pow(E_51,0.250) * pow(avg_n,-0.50);
-          } else {
-            t_PDS = 26.50 * pow(E_51,3.0/14.0) * pow(avg_z,-5.0/14.0) * pow(avg_n,-4.0/7.0);
-            R_PDS = 18.50 * pow(E_51,2.0/7.0 ) * pow(avg_z,-1.0/7.0 ) * pow(avg_n,-3.0/7.0);
-          } // end metallicity check
-
-          double     R_resolve = hx*enzo_units->length() / cello::pc_cm;
-          const double  n_resolve = 4.5; // number of cells needed to resolve R
-
-          if (R_PDS > n_resolve * R_resolve){
-            ke_f = 0.0;
-
-          } else {
-
-            ke_f = 3.97133E-6 * (avg_d / cello::mass_hydrogen) *
-                         (1.0 / (R_resolve * R_resolve)) *
-                         pow(R_PDS,7) * ( 1.0 / (t_PDS*t_PDS)) *
-                         (1.0 / E_51);
-
-          } // end resolved check
-
-        } else {
-          ke_f = kinetic_fraction_;
-
-        }// end kinetic energy fraction check
-
-        // apply kinetic energy fraction floor
-        ke_f = ke_f < 1.0E-10 ? 0.0 : ke_f;
-
-        double E_therm = (1.0 - ke_f) * energy_per_cell_;
-
-        // compute kinetic energy in the localized region on the grid before
-        // the explosion
-        int loc_index = 0;
-        for (int k = iz - stencil_rad_ ; k <= iz + stencil_rad_ + 1; k++){
-          for (int j = iy - stencil_rad_ ; j <= iy + stencil_rad_ + 1; j++){
-            for (int i = ix - stencil_rad_ ; i <= ix + stencil_rad_ + 1; i++){
-
-              int index = INDEX(i,j,k,mx,my);
-
-              if ( (index < 0) || (index > nx*ny*nz)) continue;
-
-              ke_before[loc_index] = 0.5 * d[index] * ( v3[0][index] * v3[0][index] +
-                                                        v3[1][index] * v3[1][index] +
-                                                        v3[2][index] * v3[2][index] );
-              loc_index++;
-            }
-          }
         }
+      }
+    } // end loop over local cells
 
-        // Now convert velocities in affected region to momentum in the
-        // particle's reference frame
-        this->convert_momentum(v3[0], v3[1], v3[2], d,
-                               pvx[ipdv], pvy[ipdv], pvz[ipdv],
-                               nx, ny, nz,
-                               ix, iy, iz, 1);
+    double inv_ncell = 1.0 / ((double) number_of_feedback_cells_);
+    const double z_solar = 0.02;   // as assumed for these equations
+    avg_z =  (avg_z / avg_d) / z_solar; // mass-weighted metallicity
+    avg_n *= inv_ncell * enzo_units->density() / cello::mass_hydrogen; // in cgs
+    avg_d *= inv_ncell * enzo_units->density(); // in cgs
 
-        // compute the total mass and energy in the cells before the explosion
-        double sum_mass_init, sum_energy_init, sum_ke_init;
+    // Compute the time and radius of transtion to PDS phase for gas
+    // with the computed properties.
+    // t_PDS is in units of kyr  -    R_PDS is in units of pc
 
-        this->sum_mass_energy(v3[0], v3[1], v3[2], d, ge, te,
-                              nx, ny, nz, ix, iy, iz,
-                              sum_mass_init, sum_energy_init, sum_ke_init);
+    double t_PDS = 0.0, R_PDS = 0.0;
+    // For metal poor gas
+    if (avg_z < 0.01){
+      t_PDS = 306.0 * pow(E_51,0.125) * pow(avg_n,-0.75);
+      R_PDS =  49.3 * pow(E_51,0.250) * pow(avg_n,-0.50);
+    } else {
+      t_PDS = 26.50 * pow(E_51,3.0/14.0) * pow(avg_z,-5.0/14.0) * pow(avg_n,-4.0/7.0);
+      R_PDS = 18.50 * pow(E_51,2.0/7.0 ) * pow(avg_z,-1.0/7.0 ) * pow(avg_n,-3.0/7.0);
+    } // end metallicity check
 
-        // compute the mass and momentum properties of adding feedback to the
-        // psuedo-grid centered on the particle position before doing so for
-        // the real grid. this is used to compute coefficient properties below
-        // and prep for the CIC deposition
-        this->add_feedback_to_grid(u_local, v_local, w_local, d_local,
-                                   ge_local, te_local, metal_local,
-                                   stencil_+1, stencil_+1, stencil_+1,          // nx,ny,nz for local grid
-                                   stencil_rad_, stencil_rad_, stencil_rad_, // local grid cell center  - should be 1 for 3x3x3 stencil (0,1,2) - 2 for 5x5x5 stencil (0,1, 2, 3,4)
-                                   dxc, dyc, dzc,
-                                   mass_per_cell_, 1.0, 0.0);
+    double     R_resolve = hx*enzo_units->length() / cello::pc_cm;
+    const double  n_resolve = 4.5; // number of cells needed to resolve R
 
-        // momenum injection - compute coefficients for injection
-        double mom_per_cell = 0.0;
-        if (ke_f > 0){
-          double A, B, C;
-          this->compute_coefficients( v3[0], v3[1], v3[2], d, ge,
-                                      u_local, v_local, w_local, d_local,
-                                      nx, ny, nz, ix, iy, iz, A, B, C);
+    if (R_PDS > n_resolve * R_resolve){
+      ke_f = 0.0;
 
-          A            = A - (sum_ke_init + ke_f*energy_per_cell_);
-          mom_per_cell = (-B + std::sqrt(B*B - 4.0 * A * C)) / (2.0 * C);
+    } else {
 
-        } // add switch here? to do just momentum injection but no KE
+      ke_f = 3.97133E-6 * (avg_d / cello::mass_hydrogen) *
+                   (1.0 / (R_resolve * R_resolve)) *
+                   pow(R_PDS,7) * ( 1.0 / (t_PDS*t_PDS)) *
+                   (1.0 / E_51);
 
-        // Need to deposit metal(s) here
+    } // end resolved check
 
-        this->add_feedback_to_grid(v3[0], v3[1], v3[2], d, ge, te, metal,
-                                   nx, ny, nz, ix, iy, iz, dxc, dyc, dzc,
-                                   mass_per_cell_, mom_per_cell, E_therm);
+  } else {
+    ke_f = kinetic_fraction_;
 
-        double sum_mass_final, sum_energy_final, sum_ke_final;
+  }// end kinetic energy fraction check
 
-        this->sum_mass_energy(v3[0], v3[1], v3[2], d, ge, te,
-                              nx, ny, nz, ix, iy, iz,
-                              sum_mass_final, sum_energy_final, sum_ke_final);
+  // apply kinetic energy fraction floor
+  ke_f = ke_f < 1.0E-10 ? 0.0 : ke_f;
 
-        // AE NOTE:
-        //    should do some error checking here
-        //    with kinetic energy and momentum
+  double E_therm = (1.0 - ke_f) * energy_per_cell;
 
-        // Now convert momentum back to velocity
-        this->convert_momentum(v3[0], v3[1], v3[2], d,
-                               pvx[ipdv], pvy[ipdv], pvz[ipdv],
-                               nx, ny, nz, ix, iy, iz, 0);
+  // compute kinetic energy in the localized region on the grid before
+  // the explosion
+  int loc_index = 0;
+  for (int k = iz - stencil_rad_ ; k <= iz + stencil_rad_ + 1; k++){
+    for (int j = iy - stencil_rad_ ; j <= iy + stencil_rad_ + 1; j++){
+      for (int i = ix - stencil_rad_ ; i <= ix + stencil_rad_ + 1; i++){
 
-        // Adjust total energy
+        int index = INDEX(i,j,k,mx,my);
 
-        double ke_injected = 0.0;
-        double delta_ke    = 0.0;
-        double ke_after    = 0.0;
-        loc_index = 0;
-        for (int k = iz - stencil_rad_; k <= iz + stencil_rad_ + 1; k++){
-          for (int j = iy - stencil_rad_; j <= iy + stencil_rad_ + 1; j++){
-            for (int i = ix - stencil_rad_; i <= ix + stencil_rad_ + 1; i++){
+        if ( (index < 0) || (index > nx*ny*nz)) continue;
 
-              int index = (i + (j + k*ny)*nx);
-
-              if (index < 0 || index >= nx*ny*nz) continue;
-
-              ke_after = 0.5 * d[index] * ( v3[0][index] * v3[0][index] +
-                                            v3[1][index] * v3[1][index] +
-                                            v3[2][index] * v3[2][index]);
-
-              delta_ke = ke_after - ke_before[loc_index];
-
-              te[index] += delta_ke / d[index];
-
-              ke_injected += delta_ke;
-
-              loc_index++;
-            }
-          }
-        }
-
-        count++;
-      } // end loop over particles
-    } // end loop over batches
-
-    if (count > 0){
-
-      delete [] u_local;
-      delete [] v_local;
-      delete [] w_local;
-      delete [] d_local;
-      delete [] ge_local;
-      delete [] te_local;
-      delete [] metal_local;
-      delete [] ke_before;
-
-      std::cout << "Number of feedback particles:   " << count << "\n";
+        ke_before[loc_index] = 0.5 * d[index] * ( v3[0][index] * v3[0][index] +
+                                                  v3[1][index] * v3[1][index] +
+                                                  v3[2][index] * v3[2][index] );
+        loc_index++;
+      }
     }
+  }
 
-  } // end particle check
+  // Now convert velocities in affected region to momentum in the
+  // particle's reference frame
+  this->convert_momentum(v3[0], v3[1], v3[2], d,
+                         pvx, pvy, pvz,
+                         nx, ny, nz,
+                         ix, iy, iz, 1);
+
+  // compute the total mass and energy in the cells before the explosion
+  double sum_mass_init, sum_energy_init, sum_ke_init;
+  this->sum_mass_energy(v3[0], v3[1], v3[2], d, ge, te,
+                        nx, ny, nz, ix, iy, iz,
+                        sum_mass_init, sum_energy_init, sum_ke_init);
+
+  // compute the mass and momentum properties of adding feedback to the
+  // psuedo-grid centered on the particle position before doing so for
+  // the real grid. this is used to compute coefficient properties below
+  // and prep for the CIC deposition
+  this->add_feedback_to_grid(u_local, v_local, w_local, d_local,
+                             ge_local, te_local, metal_local,
+                             stencil_+1, stencil_+1, stencil_+1,          // nx,ny,nz for local grid
+                             stencil_rad_, stencil_rad_, stencil_rad_, // local grid cell center  - should be 1 for 3x3x3 stencil (0,1,2) - 2 for 5x5x5 stencil (0,1, 2, 3,4)
+                             dxc, dyc, dzc,
+                             mass_per_cell, 1.0, 0.0);
+
+  // momenum injection - compute coefficients for injection
+  double mom_per_cell = 0.0;
+  if (ke_f > 0){
+    double A, B, C;
+    this->compute_coefficients( v3[0], v3[1], v3[2], d, ge,
+                                u_local, v_local, w_local, d_local,
+                                nx, ny, nz, ix, iy, iz, A, B, C);
+
+    A            = A - (sum_ke_init + ke_f*energy_per_cell);
+    mom_per_cell = (-B + std::sqrt(B*B - 4.0 * A * C)) / (2.0 * C);
+  } // add switch here? to do just momentum injection but no KE
+
+  // Need to deposit metal(s) here
+
+  this->add_feedback_to_grid(v3[0], v3[1], v3[2], d, ge, te, metal,
+                             nx, ny, nz, ix, iy, iz, dxc, dyc, dzc,
+                             mass_per_cell, mom_per_cell, E_therm);
+
+  double sum_mass_final, sum_energy_final, sum_ke_final;
+
+  this->sum_mass_energy(v3[0], v3[1], v3[2], d, ge, te,
+                        nx, ny, nz, ix, iy, iz,
+                        sum_mass_final, sum_energy_final, sum_ke_final);
+
+  // AE NOTE:
+  //    should do some error checking here
+  //    with kinetic energy and momentum
+
+  // Now convert momentum back to velocity
+  this->convert_momentum(v3[0], v3[1], v3[2], d,
+                         pvx, pvy, pvz,
+                         nx, ny, nz, ix, iy, iz, 0);
+
+  // Adjust total energy
+
+  double ke_injected = 0.0;
+  double delta_ke    = 0.0;
+  double ke_after    = 0.0;
+  loc_index = 0;
+  for (int k = iz - stencil_rad_; k <= iz + stencil_rad_ + 1; k++){
+    for (int j = iy - stencil_rad_; j <= iy + stencil_rad_ + 1; j++){
+      for (int i = ix - stencil_rad_; i <= ix + stencil_rad_ + 1; i++){
+
+        int index = (i + (j + k*ny)*nx);
+
+        if (index < 0 || index >= nx*ny*nz) continue;
+
+        ke_after = 0.5 * d[index] * ( v3[0][index] * v3[0][index] +
+                                      v3[1][index] * v3[1][index] +
+                                      v3[2][index] * v3[2][index]);
+
+        delta_ke = ke_after - ke_before[loc_index];
+
+        te[index] += delta_ke / d[index];
+
+        ke_injected += delta_ke;
+
+        loc_index++;
+      }
+    }
+  }
 
 
+  delete [] u_local;
+  delete [] v_local;
+  delete [] w_local;
+  delete [] d_local;
+  delete [] ge_local;
+  delete [] te_local;
+  delete [] metal_local;
+  delete [] ke_before;
 
 
   return;
 }
+
 
 void EnzoMethodDistributedFeedback::convert_momentum(
                                     enzo_float * vx, enzo_float * vy, enzo_float * vz, enzo_float * d,
