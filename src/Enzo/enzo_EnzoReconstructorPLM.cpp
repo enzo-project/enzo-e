@@ -51,47 +51,46 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 //  - di{dim}, where {dim} is x,y,z indicates the amount by which i{dim}
 //    changes if we move in the i direction. For example, if the ith
 //    dimension aligns with z: i_x=0, i_y=0, i_z = 1
-void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, int i_z, int i_y,
-		       int i_x, enzo_float prim_floor)
+void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, enzo_float prim_floor,
+		       int dim)
 {
-  // Number of cells in the grid along each dimension
-  int mz = wl.shape(0) + i_z;
-  int my = wl.shape(1) + i_y;
-  int mx = wl.shape(2) + i_x;
-
-  // mk,mj equal number of grid cells along k,j directions 
-  // In both cases, iterate: k = 0  to (but not including) k = mk
-  //                         j = 0  to (but not including) j = mj 
-  // For wl, iterate:        i = 0  to (but not including) i = 1
-  for (int iz=0; iz<(mz*(1-i_z) + i_z); iz++) {
-    for (int iy=0; iy<(my*(1-i_y) + i_y); iy++) {
-      for (int ix=0; ix<(mx*(1-i_x) + i_x); ix++) {
-        wl(iz,iy,ix) = prim_floor;
-      }
-    }
-  }
-
-  // For wr, iterate:        i = (mi-2) up to (but not including) i = (mi-1)
-  for (int iz=(i_z*(mz-2)); iz<(mz-i_z); iz++) {
-    for (int iy=(i_y*(my-2)); iy<(my-i_y); iy++) {
-      for (int ix=(i_x*(mx-2)); ix<(mx-i_x); ix++) {
-        wr(iz,iy,ix) = prim_floor;
-      }
-    }
-  }
-
-
-  // The above may is missing values
-  // Once it is fixed, the following can be removed.
-  for (int iz=0; iz<wl.shape(0); iz++) {
-    for (int iy=0; iy<wl.shape(1); iy++) {
-      for (int ix=0; ix<wl.shape(2); ix++) {
-        wl(iz,iy,ix) = prim_floor;
-  	wr(iz,iy,ix) = prim_floor;
-      }
-    }
-  }
+  // Implementation would be simplified if we didn't have to specify the stop
+  // index of the slice 
   
+  if (dim == 0){
+    // reconstructed along x-axis
+    wl.subarray(ESlice( 0,wl.shape(0)),
+		ESlice( 0,wl.shape(1)),
+		ESlice( 0,          1)) = prim_floor;
+    wr.subarray(ESlice( 0,wr.shape(0)),
+		ESlice( 0,wr.shape(1)),
+		ESlice(-1,wr.shape(2))) = prim_floor;
+  } else if (dim == 1){
+    // reconstructed along y-axis
+    wl.subarray(ESlice( 0,wl.shape(0)),
+		ESlice( 0,          1),
+		ESlice( 0,wl.shape(2))) = prim_floor;
+    wr.subarray(ESlice( 0,wr.shape(0)),
+		ESlice(-1,wr.shape(1)),
+		ESlice( 0,wr.shape(2))) = prim_floor;
+  } else {
+    // reconstructed along y-axis
+    wl.subarray(ESlice( 0,          1),
+		ESlice( 0,wl.shape(1)),
+		ESlice( 0,wl.shape(2))) = prim_floor;
+    wr.subarray(ESlice(-1,wr.shape(0)),
+		ESlice( 0,wr.shape(1)),
+		ESlice( 0,wr.shape(2))) = prim_floor;
+  }
+
+  //for (int iz=0; iz<wl.shape(0); iz++) {
+  //  for (int iy=0; iy<wl.shape(1); iy++) {
+  //    for (int ix=0; ix<wl.shape(2); ix++) {
+  //      wl(iz,iy,ix) = prim_floor;
+  //	wr(iz,iy,ix) = prim_floor;
+  //    }
+  //  }
+  //}
 }
 
 //----------------------------------------------------------------------
@@ -104,11 +103,7 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 {
   std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
   EnzoFieldArrayFactory array_factory(block);
-
-  // determine components of i unit vector
   EnzoPermutedCoordinates coord(dim);
-  int i_x, i_y, i_z;
-  coord.i_unit_vector(i_x,i_y,i_z);
 
   // unecessary values are computed for the inside faces of outermost ghost zone
   for (unsigned int group_ind=0;group_ind<prim_group_names.size(); group_ind++){
@@ -156,7 +151,7 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       // last and last cell), along a given axis, set the reconstructed
       // left (right) interface value to prim_floor (or 0)
       // (the use of wl instead of wl_offset is intentional)
-      zero_edge_values_(wl, wr, i_z, i_y, i_x, prim_floor);
+      zero_edge_values_(wl, wr, prim_floor, dim);
       
       // Iteration Limits are compatible with a 2D and 3D grid
       // Need to reconstruct and compute fluxes at k=j=0 and k=kmax-1, j=jmax-1
@@ -165,9 +160,9 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       //               j = 0, 1, ..., jmax - 1
       //               i = 0, 1, ..., imax - 3
 
-      for (int iz=0; iz<wc_left.shape(0)-2*i_z; iz++) {
-	for (int iy=0; iy<wc_left.shape(1)-2*i_y; iy++) {
-	  for (int ix=0; ix<wc_left.shape(2)-2*i_x; ix++) {
+      for (int iz=0; iz<wc_right.shape(0); iz++) {
+	for (int iy=0; iy<wc_right.shape(1); iy++) {
+	  for (int ix=0; ix<wc_right.shape(2); ix++) {
 
 	    // compute monotized difference
 	    enzo_float val = wc_center(iz,iy,ix);

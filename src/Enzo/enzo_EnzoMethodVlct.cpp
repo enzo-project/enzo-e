@@ -121,11 +121,17 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   // Temporarilly use following default values
   double density_floor = 1.e-10;
   double pressure_floor = 1.e-10;
+  std::string half_recon_name = std::string("nn");
+  std::string full_recon_name = std::string("plm");
+  std::string rsolver = std::string("hlle");
+
 
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
-  half_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
-  full_dt_recon_ = new EnzoReconstructorNN; //new EnzoReconstructorPLM;
-  riemann_solver_ = EnzoRiemann::construct_riemann(std::string("hlld"));
+  half_dt_recon_ = EnzoReconstructor::construct_reconstructor(half_recon_name);
+  full_dt_recon_ = EnzoReconstructor::construct_reconstructor(full_recon_name);
+  CkPrintf("Reconstructor = %s\n", typeid(*full_dt_recon_).name());
+  
+  riemann_solver_ = EnzoRiemann::construct_riemann(rsolver);
 }
 
 //----------------------------------------------------------------------
