@@ -82,15 +82,6 @@ void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, enzo_float prim_floor,
 		ESlice( 0,wr.shape(1)),
 		ESlice( 0,wr.shape(2))) = prim_floor;
   }
-
-  //for (int iz=0; iz<wl.shape(0); iz++) {
-  //  for (int iy=0; iy<wl.shape(1); iy++) {
-  //    for (int ix=0; ix<wl.shape(2); ix++) {
-  //      wl(iz,iy,ix) = prim_floor;
-  //	wr(iz,iy,ix) = prim_floor;
-  //    }
-  //  }
-  //}
 }
 
 //----------------------------------------------------------------------
@@ -173,8 +164,8 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	    left_val = use_floor ? std::max(val+dv,prim_floor) : val+dv;
 
 	    // face centered fields: index i corresponds to the value at i-1/2
-	    wr(iz,iy,ix) = left_val;
-	    wl_offset(iz,iy,ix) = right_val;
+	    wr(iz,iy,ix) = right_val;
+	    wl_offset(iz,iy,ix) = left_val;
 	  }
 	}
       }
