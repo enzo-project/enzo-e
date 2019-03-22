@@ -146,11 +146,13 @@ public: // interface
 
   /// Compute loop limits for copy, load, or store if accumulate == false
   void loop_limits
-  (int i3[3], int n3[3], const int m3[3], const int g3[3], int refresh_type);
+  (int i3[3], int n3[3], const int m3[3], const int g3[3], const int c3[3],
+   int refresh_type);
 
   /// Compute loop limits for copy, load, or store if accumulate == true
   void loop_limits_accumulate
-  (int i3[3], int n3[3], const int m3[3], const int g3[3], int refresh_type);
+  (int i3[3], int n3[3], const int m3[3], const int g3[3], const int c3[3],
+   int refresh_type);
 
   //--------------------------------------------------
 
