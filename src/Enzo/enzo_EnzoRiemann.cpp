@@ -25,7 +25,7 @@ EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver)
     out = new EnzoRiemannHLLD();
   } else {
     ASSERT("EnzoRiemann", "The only allowed solvers are HLLE & HLLD", false);
-    out = NULL;
+    out = NULL;  // Deals with compiler warning
   }
 
   return out;

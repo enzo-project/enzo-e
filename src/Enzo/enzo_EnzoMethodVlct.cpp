@@ -123,7 +123,7 @@ EnzoMethodVlct::EnzoMethodVlct (double gamma)
   double pressure_floor = 1.e-10;
   std::string half_recon_name = std::string("nn");
   std::string full_recon_name = std::string("plm");
-  std::string rsolver = std::string("hlle");
+  std::string rsolver = std::string("hlld");
 
 
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);

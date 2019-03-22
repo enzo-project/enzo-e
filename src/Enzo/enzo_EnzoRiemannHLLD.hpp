@@ -65,13 +65,9 @@ public: // interface
 			    const int iz, const int iy, const int ix,
 			    array_map &flux_arrays)
   {
-
-    // NEED TO DEFINE BFLOAT_EPSILON
-    // I think this determines how close a value needs to be to 0 to count as 0
-    // In that case, it may be worthwhile to use it to determine the upwind
-    // direction
-    enzo_float BFLOAT_EPSILON = 0;
     // This method makes use of the member variables Us and Uss
+    // Note that ETA_TOLERANCE is bigger than the tolerance was for the
+    // original implementation.
 
     enzo_float etot_l,etot_r, rho_l, rho_r;
     enzo_float vx_l, vy_l, vz_l, vx_r, vy_r, vz_r;
@@ -166,12 +162,12 @@ public: // interface
     sam = vx_l - cf_l;
     sap = vx_l + cf_l;
       
-    if ((std::abs(S_M - vx_l) <= BFLOAT_EPSILON) and 
-        (std::abs(By_l) <= BFLOAT_EPSILON) and 
-        (std::abs(Bz_l) <= BFLOAT_EPSILON) and 
+    if ((std::abs(S_M - vx_l) <= ETA_TOLERANCE) and 
+        (std::abs(By_l) <= ETA_TOLERANCE) and 
+        (std::abs(Bz_l) <= ETA_TOLERANCE) and 
         (Bx*Bx >= gamma * p_l) and
-        ((std::abs(S_l - sam) <= BFLOAT_EPSILON) or
-	 (std::abs(S_l - sap) <= BFLOAT_EPSILON)) ) {
+        ((std::abs(S_l - sam) <= ETA_TOLERANCE) or
+	 (std::abs(S_l - sap) <= ETA_TOLERANCE)) ) {
       vy_ls = vy_l;
       vz_ls = vz_l;
       By_ls = By_l;
@@ -189,12 +185,12 @@ public: // interface
     sam = vx_r - cf_r;
     sap = vx_r + cf_r;
       
-    if ((std::abs(S_M - vx_r) <= BFLOAT_EPSILON) and 
-        (std::abs(By_r) <= BFLOAT_EPSILON) and 
-        (std::abs(Bz_r) <= BFLOAT_EPSILON) and 
+    if ((std::abs(S_M - vx_r) <= ETA_TOLERANCE) and 
+        (std::abs(By_r) <= ETA_TOLERANCE) and 
+        (std::abs(Bz_r) <= ETA_TOLERANCE) and 
         (Bx*Bx >= gamma * p_r) and
-        ((std::abs(S_r - sam) <= BFLOAT_EPSILON) or
-	 (std::abs(S_r - sap) <= BFLOAT_EPSILON)) ) {
+        ((std::abs(S_r - sam) <= ETA_TOLERANCE) or
+	 (std::abs(S_r - sap) <= ETA_TOLERANCE)) ) {
       vy_rs = vy_r;
       vz_rs = vz_r;
       By_rs = By_r;
