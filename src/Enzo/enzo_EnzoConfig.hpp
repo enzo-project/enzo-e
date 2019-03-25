@@ -210,6 +210,12 @@ public: // interface
       initial_IG_stellar_disk(false),
       initial_IG_stellar_bulge(false),
       initial_IG_analytic_velocity(false),
+      initial_IG_include_recent_SF(false),
+      initial_IG_recent_SF_start(-100.0),
+      initial_IG_recent_SF_end(0.0),
+      initial_IG_recent_SF_bin_size(5.0),
+      initial_IG_recent_SF_SFR(2.0),
+      initial_IG_recent_SF_seed(12345),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -432,7 +438,7 @@ public: // attributes
   /// EnzoInitialFeedbackTest
 
   double                     initial_feedback_test_position[3];
-  
+
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];
   double                     initial_IG_bfield[3];
@@ -452,6 +458,12 @@ public: // attributes
   bool                       initial_IG_stellar_bulge;
   bool                       initial_IG_stellar_disk;
   bool                       initial_IG_analytic_velocity;
+  bool                       initial_IG_include_recent_SF;
+  double                     initial_IG_recent_SF_start;
+  double                     initial_IG_recent_SF_end;
+  double                     initial_IG_recent_SF_bin_size;
+  double                     initial_IG_recent_SF_SFR;
+  int                        initial_IG_recent_SF_seed;
 
   /// EnzoProlong
   std::string                interpolation_method;

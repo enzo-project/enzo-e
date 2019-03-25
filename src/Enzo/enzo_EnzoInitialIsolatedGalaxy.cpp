@@ -132,6 +132,24 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   this->ndim_              = cello::rank();  //
   this->nparticles_        = 0;              // max num of IC particles per type
 
+  //
+  // Parameters for model of recent star formation
+  //    goes back to recent_SF_age and selects stars in bins up to present
+  //    where N_select_i = recent_SF_SFR * recent_SF_bin_size
+  //
+  //    grabs them randomly over galaxy with exponential decay probability
+  //    and assigns lifetimes. This allows for IMMEDIATE initial stellar feedback
+  //    in the galaxy
+  //
+  this->include_recent_SF   = config->initial_IG_include_recent_SF;
+  this->recent_SF_start     = config->initial_IG_recent_SF_start; // age of oldest newly formed star
+  this->recent_SF_end       = config->initial_IG_recent_SF_end;
+  this->recent_SF_bin_size  = config->initial_IG_recent_SF_bin_size; // time resolution
+  this->recent_SF_SFR       = config->initial_IG_recent_SF_SFR;
+  this->recent_SF_seed      = config->initial_IG_recent_SF_seed;
+
+  if (this->include_recent_SF) srand(this->recent_SF_seed);
+
   this->tiny_number_       = 1.0E-10;
 
   this->ReadInVcircData();        // circular velocity curve
@@ -179,6 +197,13 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
   p | ndim_;
   p | nparticles_;
 
+  p | include_recent_SF;
+  p | recent_SF_start;
+  p | recent_SF_end;
+  p | recent_SF_bin_size;
+  p | recent_SF_SFR;
+  p | recent_SF_seed;
+
   if (p.isUnpacking()){
     // we know aboutntype, ndim, and nparticles..
     // allocate particle IC arrays
@@ -192,6 +217,8 @@ void EnzoInitialIsolatedGalaxy::pup (PUP::er &p)
       PUParray(p, particleIcVelocity[k][j], nparticles_);
     }
     PUParray(p, particleIcMass[k], nparticles_);
+    PUParray(p, particleIcCreationTime[k], nparticles_);
+    PUParray(p, particleIcLifetime[k], nparticles_);
   }
   PUParray(p, particleIcTypes, ntypes_);
 
@@ -817,13 +844,14 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
         pmetal      = (enzo_float *) particle->attribute_array(it, ia_metal, ib);
         pmetal[ipp] = this->disk_metal_fraction_;
       }
+
       if (ia_l >= 0){
-        plifetime  = (enzo_float *) particle->attribute_array(it, ia_l, ib);
-        plifetime[ipp] = -999999.0; // flag
+        plifetime      = (enzo_float *) particle->attribute_array(it, ia_l, ib);
+        plifetime[ipp] = particleIcLifetime[ipt][i]; // flag
       }
       if (ia_to >= 0){
         pform      = (enzo_float *) particle->attribute_array(it, ia_to, ib);
-        pform[ipp] =  0.0; //
+        pform[ipp] = particleIcCreationTime[ipt][i];
       }
 
     } // end loop over particles
@@ -893,15 +921,61 @@ void EnzoInitialIsolatedGalaxy::ReadParticles(void){
   for (ipt = 0; ipt < ntypes_; ipt++){
       int num_lines = nlines(particleIcFileNames[ipt]);
 
-      ReadParticlesFromFile(num_lines, particleIcPosition[ipt],
-                                particleIcVelocity[ipt],
-                                particleIcMass[ipt],
-                                particleIcFileNames[ipt]);
+      ReadParticlesFromFile_(num_lines, ipt);
   }
 
   return;
 }
 
+
+void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile_(const int &nl,
+                                                       const int &ipt){
+
+   this->ReadParticlesFromFile(nl,
+                               particleIcPosition[ipt],
+                               particleIcVelocity[ipt],
+                               particleIcMass[ipt],
+                               particleIcFileNames[ipt]);
+
+
+   /* Set creation times and lifetimes of initial FB stars if desired */
+   if (this->include_recent_SF){
+
+     if(particleIcFileNames[ipt] == "disk.dat"){
+
+       // pick random numbers from 0 to nl
+       // assuming all stars are the same mass
+       EnzoUnits * enzo_units = enzo::units();
+
+       const double mass_conv = cello::mass_solar / enzo_units->mass();
+       const double time_conv = cello::Myr_s / enzo_units->time();
+
+       int stars_per_bin = floor((this->recent_SF_SFR * this->recent_SF_bin_size * 1.0E3)/
+                    (particleIcMass[ipt][0] / mass_conv)); // SFR in Msun/yr, bins in Myr
+
+       int num_bins = (this->recent_SF_end - this->recent_SF_start) /
+                          (this->recent_SF_bin_size);
+
+       for(int ibin = 0; ibin < num_bins; ibin++){
+
+         for (int i = 0; i < stars_per_bin; i ++){
+
+           // uniformly distributed by star number hould be distributed
+           // nicely according to surface density profile
+           int ip = ((int) (((double) rand() / (RAND_MAX))*(nl+1) -1) ) ;
+
+           particleIcLifetime[ipt][ip]     = 10.0 * time_conv;
+           particleIcCreationTime[ipt][ip] = (this->recent_SF_start +
+                                             0.5 * (i + 1) * this->recent_SF_bin_size) * time_conv;
+
+         }
+
+       }
+     }
+   }
+
+   return;
+}
 
 void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile(const int& nl,
                                                       enzo_float ** position,

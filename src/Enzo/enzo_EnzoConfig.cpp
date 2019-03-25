@@ -122,6 +122,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_stellar_disk(false),
   initial_IG_stellar_bulge(false),
   initial_IG_analytic_velocity(false),
+  initial_IG_include_recent_SF(false),
+  initial_IG_recent_SF_start(-100.0),
+  initial_IG_recent_SF_end(0.0),
+  initial_IG_recent_SF_bin_size(5.0),
+  initial_IG_recent_SF_SFR(2.0),
+  initial_IG_recent_SF_seed(12345),
   // EnzoProlong
   interpolation_method(""),
   // EnzoMethodHeat
@@ -347,6 +353,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_disk;
   p | initial_IG_stellar_bulge;
   p | initial_IG_analytic_velocity;
+  p | initial_IG_include_recent_SF;
+  p | initial_IG_recent_SF_start;
+  p | initial_IG_recent_SF_end;
+  p | initial_IG_recent_SF_bin_size;
+  p | initial_IG_recent_SF_SFR;
+  p | initial_IG_recent_SF_seed;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -746,6 +758,18 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:isolated_galaxy:stellar_bulge", false);
   initial_IG_analytic_velocity = p->value_logical
     ("Initial:isolated_galaxy:analytic_velocity", false);
+  initial_IG_include_recent_SF = p->value_logical
+    ("Initial:isolated_galaxy:include_recent_SF", false);
+  initial_IG_recent_SF_start = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_start", -100.0);
+  initial_IG_recent_SF_end = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_end", 0.0);
+  initial_IG_recent_SF_SFR = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_SFR", 2.0);
+  initial_IG_recent_SF_bin_size = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_bin_size", 5.0);
+  initial_IG_recent_SF_seed = p->value_integer
+    ("Initial:isolated_galaxy:recent_SF_seed", 12345);
 
   for (int axis=0; axis<3; axis++) {
     initial_IG_center_position[axis]  = p->list_value_float
