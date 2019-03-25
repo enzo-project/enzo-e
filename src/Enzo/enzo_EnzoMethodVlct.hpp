@@ -102,7 +102,11 @@ class EnzoMethodVlct : public Method {
 public: // interface
 
   /// Create a new EnzoMethodVlct object
-  EnzoMethodVlct(double gamma);
+  EnzoMethodVlct(std::string rsolver,
+		 std::string half_recon_name,
+		 std::string full_recon_name,
+		 double gamma, double density_floor,
+		 double pressure_floor);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodVlct);

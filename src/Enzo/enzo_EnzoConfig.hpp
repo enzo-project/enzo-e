@@ -150,6 +150,12 @@ public: // interface
       method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0),
+      // EnzoMethodVlct
+      method_vlct_riemann_solver(""),
+      method_vlct_half_dt_reconstruct_method(""),
+      method_vlct_full_dt_reconstruct_method(""),
+      method_vlct_density_floor(0.0),
+      method_vlct_pressure_floor(0.0),
       // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
@@ -333,6 +339,13 @@ public: // attributes
   /// EnzoMethodPmUpdate
 
   double                     method_pm_update_max_dt;
+
+  /// EnzoMethodVlct
+  std::string                method_vlct_riemann_solver;
+  std::string                method_vlct_half_dt_reconstruct_method;
+  std::string                method_vlct_full_dt_reconstruct_method;
+  double                     method_vlct_density_floor;
+  double                     method_vlct_pressure_floor;
 
   ///==============
   /// EnzoSolverMg0

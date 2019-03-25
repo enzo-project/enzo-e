@@ -127,6 +127,12 @@ EnzoConfig::EnzoConfig() throw ()
   method_pm_deposit_alpha(0.5),
   /// EnzoMethodPmUpdate
   method_pm_update_max_dt(std::numeric_limits<double>::max()),
+  /// EnzoMethodVlct
+  method_vlct_riemann_solver(""),
+  method_vlct_half_dt_reconstruct_method(""),
+  method_vlct_full_dt_reconstruct_method(""),
+  method_vlct_density_floor(0.0),
+  method_vlct_pressure_floor(0.0),
   /// EnzoSolverMg0
   solver_pre_smooth(),
   solver_post_smooth(),
@@ -286,6 +292,12 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_pm_deposit_alpha;
   p | method_pm_update_max_dt;
+
+  p | method_vlct_riemann_solver;
+  p | method_vlct_half_dt_reconstruct_method;
+  p | method_vlct_full_dt_reconstruct_method;
+  p | method_vlct_density_floor;
+  p | method_vlct_pressure_floor;
 
   p | solver_pre_smooth;
   p | solver_post_smooth;
@@ -608,6 +620,18 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_accumulate = p->value_logical
     ("Method:gravity:accumulate",true);
+
+
+  method_vlct_riemann_solver = p->value_string
+    ("Method:vlct:riemann_solver","hlle");
+  method_vlct_half_dt_reconstruct_method = p->value_string
+    ("Method:vlct:half_dt_reconstruct_method","nn");
+  method_vlct_full_dt_reconstruct_method = p->value_string
+    ("Method:vlct:full_dt_reconstruct_method","plm");
+  method_vlct_density_floor = p->value_float
+    ("Method:vlct:density_floor", 0.0);
+  method_vlct_pressure_floor = p->value_float
+    ("Method:vlct:pressure_floor", 0.0);
   
   //--------------------------------------------------
   // Physics
