@@ -128,6 +128,8 @@ Initial * EnzoProblem::create_initial_
   } else if (type == "grackle_test") {
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
+  } else if (type == "vlct_bfield") {
+    initial = new EnzoInitialBCenter(cycle, time);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,

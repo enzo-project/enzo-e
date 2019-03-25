@@ -380,18 +380,7 @@ void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
 // Helps compute the cell-centered B-fields
 void bfieldc_helper_(Block *block)
 {
-  EnzoConstrainedTransport ct;
-  Grouping bfieldc_group, bfieldi_group;
-  bfieldc_group.add("bfield_x","bfield");
-  bfieldc_group.add("bfield_y","bfield");
-  bfieldc_group.add("bfield_z","bfield");
-
-  bfieldi_group.add("bfieldi_x", "bfield");
-  bfieldi_group.add("bfieldi_y", "bfield");
-  bfieldi_group.add("bfieldi_z", "bfield");
-  ct.compute_center_bfield(block, 0, bfieldc_group, bfieldi_group);
-  ct.compute_center_bfield(block, 1, bfieldc_group, bfieldi_group);
-  ct.compute_center_bfield(block, 2, bfieldc_group, bfieldi_group);
+  
 }
 
 
@@ -460,7 +449,7 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
   bfieldi_helper_(bfieldi_z, Ax, Ay, 2, dx,dy);
 
   // Compute the Cell-Centered B-fields
-  bfieldc_helper_(block);
+  EnzoInitialBCenter::initialize_bfield_center(block);
 
 }
 

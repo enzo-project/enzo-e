@@ -204,6 +204,7 @@ struct fluxes
 
 #include "enzo_EnzoBoundary.hpp"
 
+#include "enzo_EnzoInitialBCenter.hpp"
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"

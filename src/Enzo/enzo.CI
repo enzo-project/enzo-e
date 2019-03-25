@@ -49,6 +49,7 @@ module enzo {
   PUPable EnzoConfig;
   PUPable EnzoFactory;
 
+  PUPable EnzoInitialBCenter;
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
   PUPable EnzoInitialImplosion2;
