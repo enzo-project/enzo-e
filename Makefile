@@ -51,12 +51,10 @@ cccc:
 .PHONY: diff
 diff:
 	echo '* TODO [/] git diff branch (' `git rev-parse --abbrev-ref HEAD` ')' > diff.org
-	echo '** TODO [/] Unstaged diff' >> diff.org
-	git diff -b |./tools/awk/diff-org.awk > diff-unstaged.org
-	cat diff-unstaged.org >> diff.org
-	echo '** TODO [/] Staged diff' >> diff.org
-	git diff --cached HEAD -b | ./tools/awk/diff-org.awk > diff-staged.org
-	cat diff-staged.org >> diff.org
+	echo '** TODO [/] Unstaged diff'                     >> diff.org
+	git diff -b |./tools/awk/diff-org.awk                >> diff.org
+	echo '** TODO [/] Staged diff'                       >> diff.org
+	git diff --cached HEAD -b | ./tools/awk/diff-org.awk >> diff.org
 #----------------------------------------------------------------------
 .PHONY: gdb
 gdb:
