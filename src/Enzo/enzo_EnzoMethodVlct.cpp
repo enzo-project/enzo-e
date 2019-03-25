@@ -110,9 +110,9 @@ EnzoMethodVlct::EnzoMethodVlct (std::string rsolver,
   refresh(ir)->add_field(field_descr->field_id("momentum_z"));
   // total energy is the energy density
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
-  refresh(ir)->add_field(field_descr->field_id("bfieldc_x"));
-  refresh(ir)->add_field(field_descr->field_id("bfieldc_y"));
-  refresh(ir)->add_field(field_descr->field_id("bfieldc_z"));
+  refresh(ir)->add_field(field_descr->field_id("bfield_x"));
+  refresh(ir)->add_field(field_descr->field_id("bfield_y"));
+  refresh(ir)->add_field(field_descr->field_id("bfield_z"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_x"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
@@ -144,9 +144,9 @@ void EnzoMethodVlct::setup_groups_()
   conserved_group_->add("momentum_y","momentum");
   conserved_group_->add("momentum_z","momentum");
   conserved_group_->add("total_energy", "total_energy");
-  conserved_group_->add("bfieldc_x", "bfield");
-  conserved_group_->add("bfieldc_y", "bfield");
-  conserved_group_->add("bfieldc_z", "bfield");
+  conserved_group_->add("bfield_x", "bfield");
+  conserved_group_->add("bfield_y", "bfield");
+  conserved_group_->add("bfield_z", "bfield");
 
   bfieldi_group_->add("bfieldi_x", "bfield");
   bfieldi_group_->add("bfieldi_y", "bfield");

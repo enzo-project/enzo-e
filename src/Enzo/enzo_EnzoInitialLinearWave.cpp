@@ -382,9 +382,9 @@ void bfieldc_helper_(Block *block)
 {
   EnzoConstrainedTransport ct;
   Grouping bfieldc_group, bfieldi_group;
-  bfieldc_group.add("bfieldc_x","bfield");
-  bfieldc_group.add("bfieldc_y","bfield");
-  bfieldc_group.add("bfieldc_z","bfield");
+  bfieldc_group.add("bfield_x","bfield");
+  bfieldc_group.add("bfield_y","bfield");
+  bfieldc_group.add("bfield_z","bfield");
 
   bfieldi_group.add("bfieldi_x", "bfield");
   bfieldi_group.add("bfieldi_y", "bfield");
