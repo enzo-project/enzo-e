@@ -24,7 +24,7 @@
 //          conserved variables each have a "momentum" group)
 //
 //    Notes about current groupings:
-//        - Currently track 14 different groupings:
+//        - Currently track 15 different groupings:
 //            1. conserved quantities
 //            2. interface b-fields (longitudinal B-fields centered at
 //               interface between cells)
@@ -39,16 +39,18 @@
 //           10. edge centered electric fields
 //           11. temp conserved quantities (to store values at the half
 //               timestep)
-//           12. temp interface b-fields (to store values at the half timestep)
-//           13. reconstructed left conserved fields
-//           14. reconstructed right conserved fields
+//           12. temp primitive quantities (to store values at the half
+//               timestep)
+//           13. temp interface b-fields (to store values at the half timestep)
+//           14. reconstructed left conserved fields
+//           15. reconstructed right conserved fields
 //        - several groups only contain 1 field (e.g. the "density" and
 //          "total_energy" groups). In effect, they serve as alias names for
 //          the fields
 //        - This implementation relies on the fact that the fields in a
 //          Grouping are sorted alphabetically (in this way the fields in the
-//          "momentum" group are always ordered "momentum_x","momentum_y",
-//          "momentum_z"
+//          "velocity" group are always ordered "velocity_x","velocity_y",
+//          "velocity_z"
 //        - The conserved quantities grouping, x/y/z flux groupings, and
 //          temp conserved quantities grouping each always contain groups
 //          called "density", "momentum", "total_energy", "bfield"
@@ -151,7 +153,7 @@ protected: // methods
 
   // not sure if I will pass field_ids and blocks or arrays
   // not sure if this should be static
-  void compute_flux_(Block *block, int dim, Grouping &cur_cons_group,
+  void compute_flux_(Block *block, int dim, Grouping &cur_prim_group,
 		     Grouping &cur_bfieldi_group, Grouping &priml_group,
 		     Grouping &primr_group, Grouping &flux_group,
 		     Grouping &consl_group, Grouping &consr_group, 
@@ -180,6 +182,7 @@ protected: // methods
 			     std::string &center_efield_name,
 			     Grouping &weight_group,
 			     Grouping &temp_conserved_group,
+			     Grouping &temp_primitive_group,
 			     Grouping &temp_bfieldi_group,
 			     Grouping &consl_group, Grouping &consr_group);
 
@@ -191,6 +194,7 @@ protected: // methods
 			       std::string center_efield_name,
 			       Grouping &weight_group,
 			       Grouping &temp_conserved_group,
+			       Grouping &temp_primitive_group,
 			       Grouping &temp_bfieldi_group,
 			       Grouping &consl_group, Grouping &consr_group);
 

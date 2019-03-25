@@ -105,14 +105,15 @@ EnzoMethodVlct::EnzoMethodVlct (std::string rsolver,
   FieldDescr * field_descr = cello::field_descr();
   
   refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("momentum_x"));
-  refresh(ir)->add_field(field_descr->field_id("momentum_y"));
-  refresh(ir)->add_field(field_descr->field_id("momentum_z"));
-  // total energy is the energy density
-  refresh(ir)->add_field(field_descr->field_id("total_energy"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
+  refresh(ir)->add_field(field_descr->field_id("pressure"));
+  // Cell-centered Bfields
   refresh(ir)->add_field(field_descr->field_id("bfield_x"));
   refresh(ir)->add_field(field_descr->field_id("bfield_y"));
   refresh(ir)->add_field(field_descr->field_id("bfield_z"));
+  // Longitudinal Bfields (primary representation)
   refresh(ir)->add_field(field_descr->field_id("bfieldi_x"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
@@ -134,36 +135,36 @@ EnzoMethodVlct::EnzoMethodVlct (std::string rsolver,
 void EnzoMethodVlct::setup_groups_()
 {
   // Fill in entries in conserved_group_ and primitive_group_
-  // conserved_group_ will be entirely permanent fields while primitive_group_
+  // primitive_group_ will be entirely permanent fields while conserved_group_
   // will be partially made of temporary fields
 
   // In the future, this may also incorporate species, colors, and CRs
 
-  conserved_group_->add("density", "density");
-  conserved_group_->add("momentum_x","momentum");
-  conserved_group_->add("momentum_y","momentum");
-  conserved_group_->add("momentum_z","momentum");
-  conserved_group_->add("total_energy", "total_energy");
-  conserved_group_->add("bfield_x", "bfield");
-  conserved_group_->add("bfield_y", "bfield");
-  conserved_group_->add("bfield_z", "bfield");
-
-  bfieldi_group_->add("bfieldi_x", "bfield");
-  bfieldi_group_->add("bfieldi_y", "bfield");
-  bfieldi_group_->add("bfieldi_z", "bfield");
-
-  // For transparency we will create secondary "primitive" density and magnetic
-  // fields
-  primitive_group_->add("prim_density", "density");
+  primitive_group_->add("density", "density");
   primitive_group_->add("velocity_x", "velocity");
   primitive_group_->add("velocity_y", "velocity");
   primitive_group_->add("velocity_z", "velocity");
   primitive_group_->add("pressure", "pressure");
   // The following are cell-centered
-  primitive_group_->add("prim_bfield_x", "bfield");
-  primitive_group_->add("prim_bfield_y", "bfield");
-  primitive_group_->add("prim_bfield_z", "bfield");
+  primitive_group_->add("bfield_x", "bfield");
+  primitive_group_->add("bfield_y", "bfield");
+  primitive_group_->add("bfield_z", "bfield");
 
+  bfieldi_group_->add("bfieldi_x", "bfield");
+  bfieldi_group_->add("bfieldi_y", "bfield");
+  bfieldi_group_->add("bfieldi_z", "bfield");
+
+  // For transparency: create secondary fields for "conserved" density and
+  // magnetic fields
+  conserved_group_->add("cons_density", "density");
+  conserved_group_->add("momentum_x","momentum");
+  conserved_group_->add("momentum_y","momentum");
+  conserved_group_->add("momentum_z","momentum");
+  // total energy is the energy density
+  conserved_group_->add("total_energy", "total_energy");
+  conserved_group_->add("cons_bfield_x", "bfield");
+  conserved_group_->add("cons_bfield_y", "bfield");
+  conserved_group_->add("cons_bfield_z", "bfield");
 }
 
 //----------------------------------------------------------------------
@@ -240,6 +241,9 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // face-centered weight fields - Track the x/y/z upwind direction
     Grouping weight_group;
 
+    // temp primitive group for storing values at the half time-step
+    Grouping temp_primitive_group;
+
     // temp conserved group for storing values at the half time-step
     Grouping temp_conserved_group;
 
@@ -254,8 +258,8 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     allocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			  yflux_group, zflux_group, efield_group,
 			  center_efield_name, weight_group,
-			  temp_conserved_group, temp_bfieldi_group,
-			  consl_group, consr_group);
+			  temp_conserved_group, temp_primitive_group,
+			  temp_bfieldi_group, consl_group, consr_group);
 
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
@@ -265,56 +269,51 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     // the following line is copied from EnzoMethodPpm & EnzoMethodHydro
     double dt = block->dt();
 
+    // Start by computing the conserved values
+    // (This does not need to be repeated for the full time step because the
+    //  conserved quantities are used to get the primitive quantities at the
+    //  half time step)
+    eos_->conservative_from_primitive (block, *primitive_group_,
+				       *conserved_group_);
+
     // Modify the following to work with groupings!
     // repeat the following twice (for half time-step and full time-step)
     for (int i=0;i<2;i++){
       double cur_dt;
-      Grouping* cur_cons_group;
-      Grouping* out_cons_group;
-      Grouping* cur_bfieldi_group;
-      Grouping* out_bfieldi_group;
+      Grouping *cur_prim_group, *out_prim_group;
+      Grouping *out_cons_group;
+      Grouping *cur_bfieldi_group, *out_bfieldi_group;
       EnzoReconstructor *reconstructor;
       if (i == 0){
 	cur_dt = dt/2.;
+	out_prim_group = &temp_primitive_group;
+	cur_prim_group = primitive_group_;
 	out_cons_group = &temp_conserved_group;
-	cur_cons_group = conserved_group_;
 	out_bfieldi_group = &temp_bfieldi_group;
 	cur_bfieldi_group = bfieldi_group_;
 	reconstructor = half_dt_recon_;
       } else {
 	cur_dt = dt;
+	out_prim_group = primitive_group_;
+	cur_prim_group = &temp_primitive_group;
 	out_cons_group = conserved_group_;
-	cur_cons_group = &temp_conserved_group;
 	out_bfieldi_group = bfieldi_group_;
 	cur_bfieldi_group = &temp_bfieldi_group;
 	reconstructor = full_dt_recon_;
       }
-
-      // Compute the primitive Quantites with Equation of State
-      eos_->primitive_from_conservative (block, *cur_cons_group,
-					 *primitive_group_);
-      //CkPrintf("\n\nChecking Primitives.\n");
-      //check_fields_(block, *primitive_group_, EnzoMethodVlct::prim_group_names);
-
-      
       
       // Compute flux along each dimension
-      compute_flux_(block, 0, *cur_cons_group, *cur_bfieldi_group, priml_group,
+      compute_flux_(block, 0, *cur_prim_group, *cur_bfieldi_group, priml_group,
 		    primr_group, xflux_group, consl_group, consr_group,
 		    weight_group, *reconstructor);
-      compute_flux_(block, 1, *cur_cons_group, *cur_bfieldi_group, priml_group,
+      compute_flux_(block, 1, *cur_prim_group, *cur_bfieldi_group, priml_group,
 		    primr_group, yflux_group, consl_group, consr_group,
 		    weight_group, *reconstructor);
       if (ndim == 3){
-	compute_flux_(block, 2, *cur_cons_group, *cur_bfieldi_group,
+	compute_flux_(block, 2, *cur_prim_group, *cur_bfieldi_group,
 		      priml_group, primr_group, zflux_group, consl_group,
 		      consr_group, weight_group, *reconstructor);
       }
-
-      //CkPrintf("Checking Fluxes.\n");
-      //check_fields_(block, xflux_group, EnzoMethodVlct::cons_group_names);
-      //check_fields_(block, yflux_group, EnzoMethodVlct::cons_group_names);
-      //check_fields_(block, zflux_group, EnzoMethodVlct::cons_group_names);
 
       // Compute_efields
       //   - The first time, this implictly use the cell-centered primitives
@@ -344,16 +343,17 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 	ct.compute_center_bfield(block, dim, *out_cons_group,
 				 *out_bfieldi_group);
       }
-    }
 
-    //ASSERT("EnzoMethodVlct","Early Exit",false);
+      eos_->primitive_from_conservative (block, *out_cons_group,
+					 *out_prim_group);
+    }
 
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
 			    yflux_group, zflux_group, efield_group,
 			    center_efield_name, weight_group,
-			    temp_conserved_group, temp_bfieldi_group,
-			    consl_group, consr_group);
+			    temp_conserved_group, temp_primitive_group,
+			    temp_bfieldi_group, consl_group, consr_group);
   }
 
   block->compute_done();
@@ -362,7 +362,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 //----------------------------------------------------------------------
 
 void EnzoMethodVlct::compute_flux_(Block *block, int dim,
-				   Grouping &cur_cons_group,
+				   Grouping &cur_prim_group,
 				   Grouping &cur_bfieldi_group,
 				   Grouping &priml_group,
 				   Grouping &primr_group,
@@ -373,11 +373,8 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 				   EnzoReconstructor &reconstructor)
 {
   // First, reconstruct the left and right interface values
-  reconstructor.reconstruct_interface(block, *primitive_group_, priml_group,
+  reconstructor.reconstruct_interface(block, cur_prim_group, priml_group,
 				      primr_group, dim, eos_);
-  //CkPrintf("Checking Reconstructed primitives along dim %d.\n", dim);
-  //check_fields_(block, priml_group, EnzoMethodVlct::prim_group_names);
-  //check_fields_(block, primr_group, EnzoMethodVlct::prim_group_names);
   
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
@@ -803,6 +800,7 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 					   std::string &center_efield_name,
 					   Grouping &weight_group,
 					   Grouping &temp_conserved_group,
+					   Grouping &temp_primitive_group,
 					   Grouping &temp_bfieldi_group,
 					   Grouping &consl_group,
 					   Grouping &consr_group)
@@ -815,6 +813,28 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
   FieldDescr * field_descr = field.field_descr();
   
   // First, reserve/allocate temporary conserved-related fields
+  // Allocate applicable temporary fields in conserved_group_
+  for (unsigned int i=0;i<cons_group_names.size();i++){
+    std::string group_name = cons_group_names[i];
+    int num_fields = conserved_group_->size(group_name);
+    if (num_fields == 0) {
+      continue; // This group is not tracked by ref_grouping
+    }
+
+    for (int j=0;j<num_fields;j++){
+      // Determine field_name
+      std::string field_name = conserved_group_->item(group_name,j);
+
+      if (field.is_field(field_name) &&
+	  field.is_permanent(field.field_id(field_name))){
+	continue;
+      }
+
+      // allocate temporary field
+      int ir_ = field_descr->insert_temporary(field_name);
+      field.allocate_temporary(ir_);
+    }
+  }
 
   // Prepare the temporary conserved fields (used to store values at half dt)
   prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
@@ -835,30 +855,9 @@ void EnzoMethodVlct::allocate_temp_fields_(Block *block,
 			    consr_group, "cright_",0,0,0);
 
   // Next, reserve/allocate temporary primitive-related fields
-  // allocate applicable temporary fields in primitive_group_
-  for (unsigned int i=0;i<prim_group_names.size();i++){
-    std::string group_name = prim_group_names[i];
-    int num_fields = primitive_group_->size(group_name);
-    if (num_fields == 0) {
-      continue; // This group is not tracked by ref_grouping
-    }
-
-    for (int j=0;j<num_fields;j++){
-      // Determine field_name
-      std::string field_name = primitive_group_->item(group_name,j);
-
-      // slightly unsure if the field_id will return -1 if the temporary field
-      // was used and deallocated in a prior timestep
-      if (field.is_field(field_name) &&
-	  field.is_permanent(field.field_id(field_name))){
-	continue;
-      }
-
-      // allocate temporary field
-      int ir_ = field_descr->insert_temporary(field_name);
-      field.allocate_temporary(ir_);
-    }
-  }
+  // Prepare the temporary primitive fields (used to store values at half dt)
+  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
+			    temp_primitive_group, "temp_",0,0,0);
 
   // Prepare temporary fields for priml and primr
   // As necessary, we pretend that these are centered along:
@@ -949,6 +948,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 					     std::string center_efield_name,
 					     Grouping &weight_group,
 					     Grouping &temp_conserved_group,
+					     Grouping &temp_primitive_group,
 					     Grouping &temp_bfieldi_group,
 					     Grouping &consl_group,
 					     Grouping &consr_group)
@@ -960,6 +960,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   Field field = enzo_block->data()->field();
 
   // deallocate cell-centered conservative quantity fields
+  deallocate_grouping_fields_(field, cons_group_names, *conserved_group_);
   deallocate_grouping_fields_(field, cons_group_names, temp_conserved_group);
   deallocate_grouping_fields_(field, cons_group_names, xflux_group);
   deallocate_grouping_fields_(field, cons_group_names, yflux_group);
@@ -968,7 +969,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
   deallocate_grouping_fields_(field, cons_group_names, consr_group);
 
   // deallocate the (relevant) primitive primitive quantity fields
-  deallocate_grouping_fields_(field, prim_group_names, *primitive_group_);
+  deallocate_grouping_fields_(field, prim_group_names, temp_primitive_group);
   deallocate_grouping_fields_(field, prim_group_names, priml_group);
   deallocate_grouping_fields_(field, prim_group_names, primr_group);
 
@@ -990,27 +991,26 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 
 double EnzoMethodVlct::timestep ( Block * block ) const throw()
 {
-  // Implicitly assumes that "pressure" is a permanent field
+
   // analogous to ppm timestep calulation, probably want to require that cfast
   // is no smaller than some tiny positive number. 
 
-  // Compute the pressure (assumes that "pressure" is a permanent field)
-  eos_->compute_pressure(block, *conserved_group_, *primitive_group_);
+  // Not necessary to compute pressure, unless we use dual energy formalism OR
+  // want to include other pressures (e.g. cosmic ray pressure)
+  //eos_->compute_pressure(block, *conserved_group_, *primitive_group_);
   enzo_float gamma = eos_->get_gamma();
 
   EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray density, momentum_x, momentum_y, momentum_z;
+  EFlt3DArray density, velocity_x, velocity_y, velocity_z, pressure;
   EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
-  density = array_factory.from_grouping(*conserved_group_, "density", 0);
-  momentum_x = array_factory.from_grouping(*conserved_group_, "momentum", 0);
-  momentum_y = array_factory.from_grouping(*conserved_group_, "momentum", 1);
-  momentum_z = array_factory.from_grouping(*conserved_group_, "momentum", 2);
-  bfieldc_x = array_factory.from_grouping(*conserved_group_, "bfield", 0);
-  bfieldc_y = array_factory.from_grouping(*conserved_group_, "bfield", 1);
-  bfieldc_z = array_factory.from_grouping(*conserved_group_, "bfield", 2);
-
-  EFlt3DArray pressure = array_factory.from_grouping(*primitive_group_,
-						     "pressure", 0);
+  density = array_factory.from_grouping(*primitive_group_, "density", 0);
+  velocity_x = array_factory.from_grouping(*primitive_group_, "velocity", 0);
+  velocity_y = array_factory.from_grouping(*primitive_group_, "velocity", 1);
+  velocity_z = array_factory.from_grouping(*primitive_group_, "velocity", 2);
+  pressure = array_factory.from_grouping(*primitive_group_, "pressure", 0);
+  bfieldc_x = array_factory.from_grouping(*primitive_group_, "bfield", 0);
+  bfieldc_y = array_factory.from_grouping(*primitive_group_, "bfield", 1);
+  bfieldc_z = array_factory.from_grouping(*primitive_group_, "bfield", 2);
 
   // Get iteration limits
   // Like ppm and ppml, access active region info from enzo_block attributes
@@ -1061,23 +1061,18 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
 				     bmag_sq * inv_dens);
  
 	dtBaryons = std::min(dtBaryons,
-			     dx/(std::fabs(inv_dens * momentum_x(iz,iy,ix)
-					   + cfast)));
+			     dx/(std::fabs(velocity_x(iz,iy,ix)) + cfast));
 	dtBaryons = std::min(dtBaryons,
-			     dy/(std::fabs(inv_dens * momentum_y(iz,iy,ix)
-					   + cfast)));
+			     dy/(std::fabs(velocity_y(iz,iy,ix)) + cfast));
 	if (ndim == 3){
 	  dtBaryons = std::min(dtBaryons,
-			       dz/(std::fabs(inv_dens * momentum_z(iz,iy,ix)
-					     + cfast)));
+			       dz/(std::fabs(velocity_z(iz,iy,ix)) + cfast));
 	}
       }
     }
   }
   /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
   dtBaryons *= courant_;
-  
-  CkPrintf("EnzoMethodVlct::timestep  -  dt = %e\n",dtBaryons);
 
   ASSERT2("EnzoMethodVlct::timestep",
 	  "Invalid timestep, %g, was calculated for %s.",

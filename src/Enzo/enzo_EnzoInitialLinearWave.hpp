@@ -63,7 +63,7 @@ private: // functions
 
   void prepare_initializers_(ScalarInit **density_init,
 			     ScalarInit **etot_init, 
-			     VectorInit **momentum_init,
+			     VectorInit **velocity_init,
 			     VectorInit **a_init);
 
 private: // attributes
