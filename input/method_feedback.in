@@ -1,0 +1,138 @@
+
+
+#
+#
+#  Feedback test problem - much hard-coded in IC routine for now
+# 
+#
+
+
+Boundary {
+  type = "outflow";
+}
+
+Domain {
+    lower = [ 0.0, 0.0, 0.0];
+    upper = [ 1.0, 1.0, 1.0];
+}
+
+Mesh {
+  root_blocks = [2, 2, 2];
+  root_rank   = 3;
+  root_size   = [64, 64, 64];
+}
+
+Units {
+  density = 1.6728219E-24;  
+  time    = 3.15576E10;    # kyr
+  length  = 7.89933461E20;  #  256 pc
+}
+
+Field {
+  alignment   = 8;
+  gamma       = 1.40;
+  ghost_depth = 3;
+
+  list = ["density", "internal_energy", "total_energy",
+          "metal_density", "velocity_x", "velocity_y", "velocity_z",
+          "pressure", "temperature"];
+
+}
+
+Group {
+  list = ["colour"];
+  
+  colour {
+    field_list = ["metal_density"];
+  }
+
+}
+
+Initial {
+  list = ["feedback_test"];
+
+}
+
+Method {
+  list = [ "ppm", "feedback"];
+
+  feedback {
+     ejecta_mass      = 4.0;      # solar masses
+     supernova_energy = 1.0;      # in 10^51 erg
+     ke_fraction      = 0.0;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently
+     ejecta_metal_fraction = 0.5;
+     feedback_stencil = 3;
+     position = [0.5, 0.5, 0.25];
+  };
+
+  ppm {
+        diffusion = true;
+        riemann_solver = "two_shock";
+        dual_energy = true;
+        flattening = 3;
+        steepening = true;
+        mol_weight = 1.2;
+        courant = 0.4;
+        density_floor = 1.0E-20;
+        number_density_floor = 1.0E-20;
+        pressure_floor = 1.0E-20;
+        temperature_floor = 1.0E-20;
+      };
+
+
+}
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "mass", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "metal_fraction", "double" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        groups = ["has_mass"];
+    }
+}
+
+
+Output {
+
+  list = ["data"];
+
+  data {
+      field_list = ["density", "internal_energy", "total_energy",
+                   "metal_density", "velocity_x", "velocity_y", "velocity_z",
+                   "pressure", "temperature"];
+
+      dir = ["FEEDBACK_TEST_%03d","count"];
+      name = ["feedback_test_%03d-%03d.h5","count","proc"];
+
+      particle_list = ["star"];
+
+      schedule {
+        var  = "cycle";
+        step =  10;
+      }
+      type = "data";
+
+  }
+}
+
+Stopping {
+  time = 100.0;
+  cycle = 100;
+}
+        
+
+
