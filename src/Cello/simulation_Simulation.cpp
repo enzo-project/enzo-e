@@ -1024,13 +1024,13 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   const double avg_proc_blocks = 1.0*num_blocks_total/CkNumPes();
   monitor()->print
     ("Performance","simulation balance-zones %f",
-     1.0*max_proc_blocks / avg_proc_blocks );
+     100.0*(max_proc_blocks / avg_proc_blocks - 1.0 ));
   
   if (num_particles > 0) {
     const double avg_proc_particles = 1.0*num_particles/CkNumPes();
     monitor()->print
       ("Performance","simulation balance-particles %f",
-       1.0*max_proc_particles / avg_proc_particles);
+       100.0*(max_proc_particles / avg_proc_particles - 1.0));
   }
   
   ASSERT3("Simulation::monitor_performance()",

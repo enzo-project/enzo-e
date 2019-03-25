@@ -56,6 +56,7 @@ if [ "$#" -ge 1 ]; then
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
       rm -rf `find test -name "*.png"`
       rm -rf `find test -name "*.h5"`
+      rm -rf src/.cccc
       printf "done\n"
       rm -rf test/out.scons
    fi
