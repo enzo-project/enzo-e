@@ -48,24 +48,15 @@ coverity:
 cccc:
 	$(MAKE) -C src cccc
 #----------------------------------------------------------------------
-.PHONE: diff
-diff: diff-unstaged diff-staged diff-full
-
-
-.PHONY: diff-unstaged
-# differences between work files and staged files
-diff-unstaged:
+.PHONY: diff
+diff:
+	echo '* TODO [/] git diff branch (' `git rev-parse --abbrev-ref HEAD` ')' > diff.org
+	echo '** TODO [/] Unstaged diff' >> diff.org
 	git diff -b |./tools/awk/diff-org.awk > diff-unstaged.org
-#----------------------------------------------------------------------
-.PHONY: diff-staged
-# differences between staged files and HEAD
-diff-staged:
+	cat diff-unstaged.org >> diff.org
+	echo '** TODO [/] Staged diff' >> diff.org
 	git diff --cached HEAD -b | ./tools/awk/diff-org.awk > diff-staged.org
-#----------------------------------------------------------------------
-.PHONY: diff-full
-# differences between work files and HEAD (unstaged + staged)
-diff-full:
-	git diff HEAD -b | ./tools/awk/diff-org.awk > diff-full.org
+	cat diff-staged.org >> diff.org
 #----------------------------------------------------------------------
 .PHONY: gdb
 gdb:
