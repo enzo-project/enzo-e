@@ -288,13 +288,15 @@ public: // virtual functions
   // Monitor
   //--------------------------------------------------
 
-  void p_monitor();
+  void monitor_output();
 
-  void p_monitor_performance()
-  { monitor_performance(); };
+   void p_monitor_performance()
+   { monitor_performance(); };
+
+  void monitor_performance();
 
   /// Reduction for performance data
-  void r_monitor_performance (CkReductionMsg * msg);
+  void r_monitor_performance_reduce (CkReductionMsg * msg);
 
   //--------------------------------------------------
   // Data
@@ -314,8 +316,6 @@ public: // virtual functions
 
   /// Remove a Particle from this local branch
   void data_delete_particles(int64_t count) ;
-
-  virtual void monitor_performance();
 
   void set_checkpoint(char * checkpoint)
   { strncpy (dir_checkpoint_,checkpoint,255);}

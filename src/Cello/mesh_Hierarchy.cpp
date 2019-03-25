@@ -19,10 +19,12 @@ Hierarchy::Hierarchy
 (
  const Factory * factory,
  int refinement,
+ int min_level,
  int max_level) throw ()
   :
   factory_((Factory *)factory),
   refinement_(refinement),
+  min_level_(min_level),
   max_level_(max_level),
   num_blocks_(0),
   num_blocks_level_(),
@@ -35,7 +37,7 @@ Hierarchy::Hierarchy
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
 				   
-  num_blocks_level_.resize(max_level+1);
+  num_blocks_level_.resize(max_level - min_level + 1);
 
   for (int i=0; i<3; i++) {
     root_size_[i] = 1;
@@ -65,6 +67,7 @@ void Hierarchy::pup (PUP::er &p)
   if (up) factory_ = new Factory;
   p | *factory_;
   p | refinement_;
+  p | min_level_;
   p | max_level_;
 
   p | num_blocks_;
@@ -239,7 +242,7 @@ void Hierarchy::create_block_array ( bool allocate_data) throw()
 //----------------------------------------------------------------------
 
 void Hierarchy::create_subblock_array
-(bool allocate_data, int min_level) throw()
+(bool allocate_data) throw()
 {
   // determine block size
 
@@ -257,7 +260,7 @@ void Hierarchy::create_subblock_array
 
   factory_->create_subblock_array
     (data_msg,
-     block_array_,min_level,
+     block_array_,min_level_,
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
      num_field_blocks);

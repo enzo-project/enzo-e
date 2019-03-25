@@ -65,8 +65,7 @@ void Block::output_exit_()
   TRACE_CONTROL("output_exit");
 
   if (index_.is_root()) {
-
-    proxy_simulation[0].p_monitor();
+    cello::simulation()->monitor_output();
   }
 
   performance_stop_(perf_output);
