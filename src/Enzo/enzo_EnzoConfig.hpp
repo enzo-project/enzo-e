@@ -151,6 +151,7 @@ public: // interface
       initial_grackle_test_maximum_temperature(1.0E8),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+      initial_feedback_test_density(),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -438,6 +439,7 @@ public: // attributes
   /// EnzoInitialFeedbackTest
 
   double                     initial_feedback_test_position[3];
+  double                     initial_feedback_test_density;
 
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];

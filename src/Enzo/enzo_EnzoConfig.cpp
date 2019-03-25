@@ -65,6 +65,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_maximum_temperature(1.0E8),
   initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+  initial_feedback_test_density(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -334,6 +335,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_pm_level;
 
   PUParray(p, initial_feedback_test_position,3);
+  p | initial_feedback_test_density;
 
   PUParray(p, initial_IG_center_position,3);
   PUParray(p, initial_IG_bfield,3);
@@ -780,8 +782,10 @@ void EnzoConfig::read(Parameters * p) throw()
 
   for (int axis=0; axis<3; axis++){
     initial_feedback_test_position[axis] = p->list_value_float
-      (axis, "Initial:feedback:position", 0.5);
+      (axis, "Initial:feedback_test:position", 0.5);
   }
+  initial_feedback_test_density = p->value_float
+    ("Initial:feedback_test:density", 1.0E-24);
 
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);

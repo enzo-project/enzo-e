@@ -35,7 +35,7 @@ public:
   /// Apply the method
   virtual void compute (Block * block) throw();
 
-  void compute_ (Block * block) throw();
+  void compute_ (Block * block);
 
   /// name
   virtual std::string name() throw()
@@ -52,12 +52,12 @@ public:
 
   void convert_momentum( enzo_float *vx, enzo_float *vy, enzo_float *vz, enzo_float *d,
                         const enzo_float &up, const enzo_float &vp, const enzo_float &wp,
-                        const int &nx, const int &ny, const int &nz,
+                        const int &mx, const int &my, const int &mz,
                         const int &ix, const int &iy, const int &iz, int idir);
 
   void sum_mass_energy( enzo_float *px, enzo_float *py, enzo_float *pz, enzo_float * d,
                         enzo_float *ge, enzo_float *te,
-                        const int &nx, const int& ny, const int &nz,
+                        const int &mx, const int& my, const int &mz,
                         const int &ix, const int& iy, const int &iz,
                         double &sum_mass, double &sum_energy, double & sum_ke);
 
@@ -82,7 +82,7 @@ public:
   //            make life easy.
   void add_feedback_to_grid( enzo_float * px, enzo_float * py, enzo_float *pz,
                              enzo_float * d, enzo_float *ge, enzo_float *te, enzo_float * metal,
-                             const int &nx, const int &ny, const int &nz,
+                             const int &mx, const int &my, const int &mz,
                              const int &ix, const int &iy, const int &iz,
                              const double &dxc, const double &dyc, const double &dzc,
                              const double & mass_per_cell, const double & mom_per_cell,
@@ -90,7 +90,7 @@ public:
 
   void compute_coefficients( enzo_float *px, enzo_float *py, enzo_float *pz, enzo_float *d,
                              enzo_float *ge, enzo_float* px_l, enzo_float* py_l, enzo_float *pz_l,
-                             enzo_float *d_l, const int &nx, const int &ny, const int &nz,
+                             enzo_float *d_l, const int &mx, const int &my, const int &mz,
                              const int &ix, const int &iy, const int &iz,
                              double &A, double &B, double &C);
 

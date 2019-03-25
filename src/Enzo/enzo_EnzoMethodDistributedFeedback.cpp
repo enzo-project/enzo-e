@@ -85,12 +85,50 @@ void EnzoMethodDistributedFeedback::compute (Block * block) throw()
   return;
 }
 
-void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
+void EnzoMethodDistributedFeedback::compute_ (Block * block)
 {
 
   EnzoBlock * enzo_block = enzo::block(block);
   const EnzoConfig * enzo_config = enzo::config();
   Particle particle = enzo_block->data()->particle();
+
+  EnzoUnits * enzo_units = enzo::units();
+
+  Field field = block->data()->field();
+  // Obtain grid sizes and ghost sizes
+
+  enzo_float * d           = (enzo_float *) field.values("density");
+  enzo_float * te          = (enzo_float *) field.values("total_energy");
+  enzo_float * ge          = (enzo_float *) field.values("internal_energy");
+
+  enzo_float * v3[3]       = { (enzo_float *) field.values("velocity_x"),
+                               (enzo_float *) field.values("velocity_y"),
+                               (enzo_float *) field.values("velocity_z")   };
+
+  enzo_float * metal = (enzo_float *) field.values("metal_density");
+
+  int mx, my, mz, gx, gy, gz, nx, ny, nz;
+  double xm, ym, zm, xp, yp, zp, hx, hy, hz;
+
+  // Block sizes (exlcuding ghost zones)
+  field.size(&nx,&ny,&nz);
+
+  field.ghost_depth(0,&gx,&gy,&gz);
+  block->data()->lower(&xm,&ym,&zm);
+  block->data()->upper(&xp,&yp,&zp);
+  field.cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+
+  mx = nx + 2*gx;
+  my = ny + 2*gy;
+  mz = nz + 2*gz;
+
+  // We will probably never be in the situation of constant acceleration
+  // and cosmology, but just in case.....
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  enzo_float cosmo_a = 1.0;
+
+  const int rank = cello::rank();
+>>>>>>> 5899fa6868f2e4610229f4614ad5e1d2e93aa24e
 
   double current_time  = block->time();
 
@@ -121,7 +159,6 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
     const int dc = particle.stride(it, ia_c);
 
     const int nb = particle.num_batches(it);
-
 
     for (int ib=0; ib<nb; ib++){
       enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
@@ -154,6 +191,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
         // only go SN if age >= lifetime
         if ( (plifetime[ipdl] <= 0.0) || (pcreation[ipdc] <= -100.0) ||
              (current_time - pcreation[ipdc]) < plifetime[ipdl]) continue;
+        count++;
 
         // Update particle properties here if needed
         plifetime[ipdl] *= -1.0;                  // set to negative - flag for alreahy gone SNe
@@ -179,9 +217,6 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
     }
 
   } // end particle check
-
-
-
 
   return;
 }
@@ -286,7 +321,6 @@ void EnzoMethodDistributedFeedback::inject_feedback(
                        zp - (stencil_rad_ + 1 + 0.5)*hz);
   }
 
-
   // compute coordinates of central feedback cell
   double xcell = (xpos - xm) / hx + gx - 0.5;
   double ycell = (ypos - ym) / hy + gy - 0.5;
@@ -361,10 +395,9 @@ void EnzoMethodDistributedFeedback::inject_feedback(
 
           double mu_cell  = enzo_config->ppm_mol_weight;
 
-            avg_z += metal[index]; // need to divide by d_tot below
-            avg_n += d[index] / mu_cell;
-            avg_d += d[index];
-
+          avg_z += metal[index]; // need to divide by d_tot below
+          avg_n += d[index] / mu_cell;
+          avg_d += d[index];
         }
       }
     } // end loop over local cells
@@ -374,6 +407,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
     avg_z =  (avg_z / avg_d) / z_solar; // mass-weighted metallicity
     avg_n *= inv_ncell * enzo_units->density() / cello::mass_hydrogen; // in cgs
     avg_d *= inv_ncell * enzo_units->density(); // in cgs
+
 
     // Compute the time and radius of transtion to PDS phase for gas
     // with the computed properties.
@@ -529,7 +563,6 @@ void EnzoMethodDistributedFeedback::inject_feedback(
   delete [] metal_local;
   delete [] ke_before;
 
-
   return;
 }
 
@@ -537,22 +570,22 @@ void EnzoMethodDistributedFeedback::inject_feedback(
 void EnzoMethodDistributedFeedback::convert_momentum(
                                     enzo_float * vx, enzo_float * vy, enzo_float * vz, enzo_float * d,
                                     const enzo_float & up, const enzo_float & vp, const enzo_float & wp,
-                                    const int &nx, const int &ny, const int &nz,
+                                    const int &mx, const int &my, const int &mz,
                                     const int &ix, const int & iy, const int & iz,
                                     int idir){
 
   int xo, yo, zo;
   xo = 1;
-  yo = nx;
-  zo = (nx * ny);
+  yo = mx;
+  zo = (mx * my);
 
   for (int k = -stencil_rad_; k <= stencil_rad_ + 1; k++){
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
 
-        int index = (ix + 1) + ( (iy + j) + (iz + k)*ny)*nx;
+        int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
 
-        if ( (index < 0) || (index > nx*ny*nz)) continue;
+        if ( (index < 0) || (index > mx*my*mz)) continue;
 
         if (idir >= 1){ // velocity -> momentum
 
@@ -579,7 +612,7 @@ void EnzoMethodDistributedFeedback::convert_momentum(
 void EnzoMethodDistributedFeedback::sum_mass_energy(
                                enzo_float * px, enzo_float * py, enzo_float * pz, enzo_float * d,
                                enzo_float * ge, enzo_float * te,
-                               const int & nx, const int & ny, const int & nz,
+                               const int & mx, const int & my, const int & mz,
                                const int & ix, const int & iy, const int & iz,
                                double & sum_mass, double & sum_energy, double & sum_ke){
 
@@ -589,9 +622,9 @@ void EnzoMethodDistributedFeedback::sum_mass_energy(
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
 
-        int index = (ix + i) + ( (iy + j) + (iz + k)*ny)*nx;
+        int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
 
-        if ( (index < 0) || (index > nx*ny*nz)) continue;
+        if ( (index < 0) || (index > mx*my*mz)) continue;
 
         double mass_term  = d[index];
         double mom_term   = px[index]*px[index] +
@@ -622,7 +655,7 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
                                 enzo_float * px, enzo_float * py, enzo_float * pz,
                                 enzo_float * d, enzo_float * ge, enzo_float * te,
                                 enzo_float * metal,
-                                const int & nx, const int & ny, const int &nz,
+                                const int & mx, const int & my, const int &mz,
                                 const int & ix, const int & iy, const int &iz,
                                 const double & dxc, const double & dyc, const double & dzc,
                                 const double & mass_per_cell, const double & mom_per_cell,
@@ -638,28 +671,28 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
 
         for (int i1 = i; i1 <= i + 1; i1++){
           double dxc1 = dxc;
-          if (i1 == i + 1) dxc1 = 1.0 - dxc;
+          if (i1 == (i + 1)) dxc1 = 1.0 - dxc;
 
           for (int j1 = j; j1 <= j + 1; j1++){
             double dyc1 = dyc;
-            if (j1 == j + 1) dyc1 = 1.0 - dyc;
+            if (j1 == (j + 1)) dyc1 = 1.0 - dyc;
 
             for (int k1 = k; k1 <= k + 1; k1++){
               double dzc1 = dzc;
-              if (k1 == k + 1) dzc1 = 1.0 - dzc;
+              if (k1 == (k + 1)) dzc1 = 1.0 - dzc;
 
               double delta_mass =    mass_per_cell * dxc1 * dyc1 * dzc1;
               // use sign of i,j,k to assign direction. No momentum in cener
               // cell
-              double delta_pu = ( (i > 0) ? 1 : (i < 0 ? -1 : 0)) * delta_mass;
-              double delta_pv = ( (j > 0) ? 1 : (j < 0 ? -1 : 0)) * delta_mass;
-              double delta_pw = ( (k > 0) ? 1 : (k < 0 ? -1 : 0)) * delta_mass;
+              double delta_pu = ( (i > 0) ? 1 : (i < 0 ? -1 : 0)) * mom_per_cell * dxc1 * dyc1 * dzc1;
+              double delta_pv = ( (j > 0) ? 1 : (j < 0 ? -1 : 0)) * mom_per_cell * dxc1 * dyc1 * dzc1;
+              double delta_pw = ( (k > 0) ? 1 : (k < 0 ? -1 : 0)) * mom_per_cell * dxc1 * dyc1 * dzc1;
 
               double delta_therm = therm_per_cell * dxc1 * dyc1 * dzc1;
 
-              int index = ( ix + i1 ) + ( (iy + j1) * (iz + k1)*ny)*nx;
+              int index = ( ix + i1 ) + ( (iy + j1) + (iz + k1)*my)*mx;
 
-              if ( (index < 0) || (index > nx*ny*nz)) continue;
+              if ( (index < 0) || (index > mx*my*mz)) continue;
 
               double inv_dens = 1.0 / (d[index] + delta_mass);
 
@@ -675,7 +708,7 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
               // but set to 1 if in center cell since delta's above are zero
               // already and we don't want to divide by zero below
               mom_norm = (mom_norm == 0) ? 1 : mom_norm;
-              double mom_scale = 1.0 / ( (double) mom_norm);
+              double mom_scale = 1.0 / ( sqrt((double) mom_norm));
 
               px[index] +=  delta_pu * mom_scale;
               py[index] +=  delta_pv * mom_scale;
@@ -688,8 +721,8 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
 
               d[index] = d[index] + delta_mass;
 
-              if(metal) metal[index] = (metal[index]*d[index] +
-                                       delta_mass * ejecta_metal_fraction_) * inv_dens;
+              if(metal) metal[index] = (metal[index] +
+                                       delta_mass * ejecta_metal_fraction_);
 
               // account for multi-species (H,He,etc.) here, along with additional
               // metal species fields if they are present
@@ -711,7 +744,7 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
                            enzo_float *px, enzo_float *py, enzo_float *pz, enzo_float *d,
                            enzo_float *ge, enzo_float *px_l, enzo_float *py_l, enzo_float *pz_l,
                            enzo_float *d_l,
-                           const int & nx, const int &ny, const int &nz,
+                           const int & mx, const int &my, const int &mz,
                            const int &ix, const int &iy, const int &iz,
                            double &A, double &B, double &C){
 
@@ -725,9 +758,12 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
 
-        int index = (ix + i) + ( (iy + j) + (iz + k)*ny)*nx;
+        int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
 
-        if ( (index < 0) || (index >= nx*ny*nz)) continue;
+        if ( (index < 0) || (index >= mx*my*mz)){
+          loc_index++;
+          continue;
+        }
 
         double mass_term = d[index];
         double mom_term  = px[index]*px[index] + py[index]*py[index] +
