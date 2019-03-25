@@ -152,7 +152,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block) throw()
         // negative lifetime are particles that have alreahy gone SN
         // creation time must be > 0
         // only go SN if age >= lifetime
-        if ( (plifetime[ipdl] <= 0.0) || (pcreation[ipdc] <= 0.0) ||
+        if ( (plifetime[ipdl] <= 0.0) || (pcreation[ipdc] <= -100.0) ||
              (current_time - pcreation[ipdc]) < plifetime[ipdl]) continue;
 
         // Update particle properties here if needed
@@ -284,8 +284,6 @@ void EnzoMethodDistributedFeedback::inject_feedback(
                        yp - (stencil_rad_ + 1 + 0.5)*hy);
       zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
                        zp - (stencil_rad_ + 1 + 0.5)*hz);
-
-      return;
   }
 
 
@@ -766,6 +764,6 @@ double EnzoMethodDistributedFeedback::timestep (Block * block) const throw()
   // important things happen throughout the star's lifetime.
   EnzoUnits * enzo_units = enzo::units();
 
-  return 1000.0 * cello::yr_s / enzo_units->time();
-  // return std::numeric_limits<double>::max();
+//  return 1000.0 * cello::yr_s / enzo_units->time();
+  return std::numeric_limits<double>::max();
 }
