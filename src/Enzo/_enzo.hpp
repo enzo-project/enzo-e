@@ -236,6 +236,7 @@ struct fluxes
 #include "enzo_EnzoMethodTurbulence.hpp"
 #include "enzo_EnzoMethodVlct.hpp"
 
+#include "enzo_EnzoPermutedCoordinates.hpp"
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoEOSIdeal.hpp"
 #include "enzo_EnzoReconstructor.hpp"
@@ -245,7 +246,6 @@ struct fluxes
 #include "enzo_EnzoRiemannHLLE.hpp"
 #include "enzo_EnzoRiemannHLLD.hpp"
 #include "enzo_EnzoConstrainedTransport.hpp"
-#include "enzo_EnzoPermutedCoordinates.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

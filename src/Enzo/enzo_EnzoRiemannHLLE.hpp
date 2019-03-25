@@ -20,16 +20,10 @@ class EnzoRiemannHLLE : public EnzoRiemann
 
 public: // interface
   /// Create a new EnzoRiemannHLLE object
-  EnzoRiemannHLLE() throw()
-  : EnzoRiemann()
-  { }
-
-  EnzoRiemannHLLE(std::vector<std::string> &extra_scalar_groups,
-		  std::vector<std::string> &extra_vector_groups,
-		  std::vector<std::string> &extra_passive_groups,
+  EnzoRiemannHLLE(EnzoFieldConditions cond,
+		  std::vector<std::string> &passive_groups,
 		  FluxFunctor** flux_funcs, int n_funcs)
-    : EnzoRiemann(extra_scalar_groups, extra_vector_groups,
-		  extra_passive_groups, flux_funcs, n_funcs)
+    : EnzoRiemann(cond, passive_groups, flux_funcs, n_funcs)
   { }
 
   /// Virtual destructor
@@ -52,11 +46,15 @@ public: // interface
 
   // This function is overwritable (it's necessary to provide cosmic ray
   // transport)
-  virtual void wave_speeds_ (const flt_map &wl, const flt_map &wr,
-			     const flt_map &Ul, const flt_map &Ur,
+  virtual void wave_speeds_ (const enzo_float wl[], const enzo_float wr[],
+			     const enzo_float Ul[], const enzo_float Ur[],
+			     const field_lut prim_lut,
+			     const field_lut cons_lut,
 			     EnzoEquationOfState *eos,
 			     enzo_float *bp, enzo_float *bm)
   {
+    field_lut plut = prim_lut;
+    field_lut clut = cons_lut;
     // Calculate wavespeeds as specified by S4.3.1 of Stone+08
     // if LM and L0 are max/min eigenvalues of Roe's matrix:
     //       bp = max(LM, vi_r + cf_r, 0) (eqn 53)
@@ -67,52 +65,52 @@ public: // interface
 
     // First, compute left and right speeds
     //    left_speed = vi_l - cf_l;      right_speed = vi_r + cf_r
-    enzo_float left_speed = wl.at("velocity_i")-fast_magnetosonic_speed_(wl,
-									 eos);
-    enzo_float right_speed = wr.at("velocity_i")+fast_magnetosonic_speed_(wr,
-									  eos);
+    enzo_float left_speed = (wl[plut.velocity_i] -
+			     fast_magnetosonic_speed_(wl, plut, eos));
+    enzo_float right_speed = (wr[plut.velocity_i] +
+			      fast_magnetosonic_speed_(wr, plut, eos));
 
     // Next, compute min max eigenvalues
     //     - per eqn B17 these are Roe averaged velocity in the ith direction
     //       minus/plus Roe averaged fast magnetosonic wavespeed
     //     - Will probably offload this to a method of EnzoEquationOfState
-    enzo_float sqrtrho_l = std::sqrt(wl.at("density"));
-    enzo_float sqrtrho_r = std::sqrt(wr.at("density"));
+    enzo_float sqrtrho_l = std::sqrt(wl[plut.density]);
+    enzo_float sqrtrho_r = std::sqrt(wr[plut.density]);
     enzo_float coef = 1.0/(sqrtrho_l + sqrtrho_r);
 
     // density and velocity
     enzo_float rho_roe = sqrtrho_l*sqrtrho_r;
-    enzo_float vi_roe = (sqrtrho_l * wl.at("velocity_i") +
-			 sqrtrho_r * wr.at("velocity_i"))*coef;
-    enzo_float vj_roe = (sqrtrho_l * wl.at("velocity_j") +
-			 sqrtrho_r * wr.at("velocity_j"))*coef;
-    enzo_float vk_roe = (sqrtrho_l * wl.at("velocity_k") +
-			 sqrtrho_r * wr.at("velocity_k"))*coef;
+    enzo_float vi_roe = (sqrtrho_l * wl[plut.velocity_i] +
+			 sqrtrho_r * wr[plut.velocity_i])*coef;
+    enzo_float vj_roe = (sqrtrho_l * wl[plut.velocity_j] +
+			 sqrtrho_r * wr[plut.velocity_j])*coef;
+    enzo_float vk_roe = (sqrtrho_l * wl[plut.velocity_k] +
+			 sqrtrho_r * wr[plut.velocity_k])*coef;
 
-    enzo_float mag_p_l = mag_pressure_(wl);
-    enzo_float mag_p_r = mag_pressure_(wr);
+    enzo_float mag_p_l = mag_pressure_(wl, plut);
+    enzo_float mag_p_r = mag_pressure_(wr, plut);
 
     // enthalpy:  h = (etot + thermal pressure + magnetic pressure) / rho
-    enzo_float h_l = ((Ul.at("total_energy") + wl.at("pressure") + mag_p_l) /
-		      wl.at("density"));
-    enzo_float h_r = ((Ur.at("total_energy") + wr.at("pressure") + mag_p_r) /
-		      wr.at("density"));
+    enzo_float h_l = ((Ul[clut.total_energy] + wl[plut.pressure] + mag_p_l) /
+		      wl[plut.density]);
+    enzo_float h_r = ((Ur[clut.total_energy] + wr[plut.pressure] + mag_p_r) /
+		      wr[plut.density]);
     enzo_float h_roe = (sqrtrho_l * h_l + sqrtrho_r * h_r) * coef;
 
     // Magnetic Fields (formulas are different pattern from above)
-    enzo_float bi_roe = wl.at("bfield_i"); // equal to wr["bfield_i"]
-    enzo_float bj_roe = (sqrtrho_l * wr.at("bfield_j") +
-			 sqrtrho_r * wl.at("bfield_j"))*coef;
-    enzo_float bk_roe = (sqrtrho_l * wr.at("bfield_k") +
-			 sqrtrho_r * wl.at("bfield_k"))*coef;
+    enzo_float bi_roe = wl[plut.bfield_i]; // equal to wr["bfield_i"]
+    enzo_float bj_roe = (sqrtrho_l * wr[plut.bfield_j] +
+			 sqrtrho_r * wl[plut.bfield_j])*coef;
+    enzo_float bk_roe = (sqrtrho_l * wr[plut.bfield_k] +
+			 sqrtrho_r * wl[plut.bfield_k])*coef;
 
 
     // Calculate fast magnetosonic speed for Roe-averaged quantities (eqn B18)
     enzo_float gamma_prime = eos->get_gamma()-1.;
-    enzo_float x_prime = ((std::pow(wl.at("bfield_j")-wr.at("bfield_j"),2) +
-			   std::pow(wl.at("bfield_k")-wr.at("bfield_k"),2) )
+    enzo_float x_prime = ((std::pow(wl[plut.bfield_j]-wr[plut.bfield_j],2) +
+			   std::pow(wl[plut.bfield_k]-wr[plut.bfield_k],2) )
 			  * 0.5 * (gamma_prime-1) * coef);
-    enzo_float y_prime = ((gamma_prime-1)*(wl.at("density")+wr.at("density"))
+    enzo_float y_prime = ((gamma_prime-1)*(wl[plut.density]+wr[plut.density])
 			  *0.5/rho_roe);
 
     enzo_float v_roe2 = vi_roe*vi_roe + vj_roe*vj_roe + vk_roe*vk_roe;
@@ -142,27 +140,29 @@ public: // interface
     *bm = std::fmin(std::fmin(vi_roe - cfast, left_speed),  0.);
   }
 
-  void calc_riemann_fluxes_(const flt_map &flux_l, const flt_map &flux_r,
-			    const flt_map &prim_l, const flt_map &prim_r,
-			    const flt_map &cons_l, const flt_map &cons_r,
-			    std::vector<std::string> &cons_keys,
-			    std::size_t n_keys,
+  void calc_riemann_fluxes_(const enzo_float flux_l[],
+			    const enzo_float flux_r[],
+			    const enzo_float prim_l[],
+			    const enzo_float prim_r[],
+			    const enzo_float cons_l[],
+			    const enzo_float cons_r[],
+			    const field_lut prim_lut,
+			    const field_lut cons_lut,
+			    const int n_keys,
 			    EnzoEquationOfState *eos,
 			    const int iz, const int iy, const int ix,
-			    array_map &flux_arrays)
+			    EFlt3DArray flux_arrays[])
   {
     enzo_float bp, bm;
     // Compute wave speeds
-    wave_speeds_ (prim_l, prim_r, cons_l, cons_r, eos, &bp, &bm);
+    wave_speeds_ (prim_l, prim_r, cons_l, cons_r, prim_lut, cons_lut, eos,
+		  &bp, &bm);
 
     // Compute the actual riemann fluxes
-    for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
-      std::string key = cons_keys[field_ind];
-
-      flux_arrays[key](iz,iy,ix) = ((bp*flux_l.at(key) - bm*flux_r.at(key)  +
-				     (cons_r.at(key) - cons_l.at(key))*bp*bm)
-				    / (bp - bm));
-      
+    for (int field = 0; field<n_keys; field++){
+      flux_arrays[field](iz,iy,ix) = ((bp*flux_l[field] - bm*flux_r[field] +
+				       (cons_r[field] - cons_l[field])*bp*bm)
+				      / (bp - bm));
     }
   }
 };

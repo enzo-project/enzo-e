@@ -14,30 +14,23 @@ class EnzoRiemannHLLD : public EnzoRiemann
   /// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver
 
 public: // interface
-  /// Create a new EnzoRiemannHLLE object
-  EnzoRiemannHLLD() throw()
-  : EnzoRiemann()
-  {
-    // Reserve space in the following scratch space flt_maps
-    Us.reserve(n_keys_);
-    Uss.reserve(n_keys_);
-  }
-
-  EnzoRiemannHLLD(std::vector<std::string> &extra_scalar_groups,
-		  std::vector<std::string> &extra_vector_groups,
-		  std::vector<std::string> &extra_passive_groups,
+  /// Create a new EnzoRiemannHLLD object
+  EnzoRiemannHLLD(EnzoFieldConditions cond,
+		  std::vector<std::string> &passive_groups,
 		  FluxFunctor** flux_funcs, int n_funcs)
-    : EnzoRiemann(extra_scalar_groups, extra_vector_groups,
-		  extra_passive_groups, flux_funcs, n_funcs)
+    : EnzoRiemann(cond, passive_groups, flux_funcs, n_funcs)
   {
-    // Reserve space in the following scratch space flt_maps
-    Us.reserve(n_keys_);
-    Uss.reserve(n_keys_);
+    // Reserve space in the following scratch space arrays
+    Us = new enzo_float[this->n_cons_keys_];
+    Uss = new enzo_float[this->n_cons_keys_];
   }
 
   /// Virtual destructor
   virtual ~EnzoRiemannHLLD()
-  {  }
+  {
+    delete[] Us;
+    delete[] Uss;
+  }
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoRiemannHLLD);
@@ -51,19 +44,23 @@ public: // interface
   void pup (PUP::er &p)
   {
     EnzoRiemann::pup(p);
-    // Reserve space in the following scratch space flt_maps
-    Us.reserve(n_keys_);
-    Uss.reserve(n_keys_);
+    // Reserve space in the following scratch space arrays
+    Us = new enzo_float[this->n_cons_keys_];
+    Uss = new enzo_float[this->n_cons_keys_];
   };
 
-  void calc_riemann_fluxes_(const flt_map &flux_l, const flt_map &flux_r,
-			    const flt_map &prim_l, const flt_map &prim_r,
-			    const flt_map &cons_l, const flt_map &cons_r,
-			    std::vector<std::string> &cons_keys,
-			    std::size_t n_keys,
+  void calc_riemann_fluxes_(const enzo_float flux_l[],
+			    const enzo_float flux_r[],
+			    const enzo_float prim_l[],
+			    const enzo_float prim_r[],
+			    const enzo_float cons_l[],
+			    const enzo_float cons_r[],
+			    const field_lut prim_lut,
+			    const field_lut cons_lut,
+			    const int n_keys,
 			    EnzoEquationOfState *eos,
 			    const int iz, const int iy, const int ix,
-			    array_map &flux_arrays)
+			    EFlt3DArray flux_arrays[])
   {
     // This method makes use of the member variables Us and Uss
     // Note that ETA_TOLERANCE is bigger than the tolerance was for the
@@ -85,34 +82,34 @@ public: // interface
     enzo_float gamma = eos->get_gamma();
 
     // First, compute Fl and Ul
-    rho_l  = prim_l.at("density");
-    p_l    = prim_l.at("pressure");
-    vx_l   = prim_l.at("velocity_i");
-    vy_l   = prim_l.at("velocity_j");
-    vz_l   = prim_l.at("velocity_k");
-    Bx_l   = prim_l.at("bfield_i");
-    By_l   = prim_l.at("bfield_j");
-    Bz_l   = prim_l.at("bfield_k");
+    rho_l  = prim_l[prim_lut.density];
+    p_l    = prim_l[prim_lut.pressure];
+    vx_l   = prim_l[prim_lut.velocity_i];
+    vy_l   = prim_l[prim_lut.velocity_j];
+    vz_l   = prim_l[prim_lut.velocity_k];
+    Bx_l   = prim_l[prim_lut.bfield_i];
+    By_l   = prim_l[prim_lut.bfield_j];
+    Bz_l   = prim_l[prim_lut.bfield_k];
 
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
-    etot_l = cons_l.at("total_energy");
-    pt_l = p_l + this->mag_pressure_(prim_l);
-    cf_l = this->fast_magnetosonic_speed_(prim_l, eos);
+    etot_l = cons_l[cons_lut.total_energy];
+    pt_l = p_l + this->mag_pressure_(prim_l, prim_lut);
+    cf_l = this->fast_magnetosonic_speed_(prim_l, prim_lut, eos);
 
     // load wr and compute the fast magnetosonic speed
-    rho_r   = prim_r.at("density");
-    p_r     = prim_r.at("pressure");
-    vx_r    = prim_r.at("velocity_i");
-    vy_r    = prim_r.at("velocity_j");
-    vz_r    = prim_r.at("velocity_k");
-    Bx_r    = prim_r.at("bfield_i");
-    By_r    = prim_r.at("bfield_j");
-    Bz_r    = prim_r.at("bfield_k");
+    rho_r   = prim_r[prim_lut.density];
+    p_r     = prim_r[prim_lut.pressure];
+    vx_r    = prim_r[prim_lut.velocity_i];
+    vy_r    = prim_r[prim_lut.velocity_j];
+    vz_r    = prim_r[prim_lut.velocity_k];
+    Bx_r    = prim_r[prim_lut.bfield_i];
+    By_r    = prim_r[prim_lut.bfield_j];
+    Bz_r    = prim_r[prim_lut.bfield_k];
 
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
-    etot_r = cons_r.at("total_energy");
-    pt_r = p_r + this->mag_pressure_(prim_r);
-    cf_r = this->fast_magnetosonic_speed_(prim_r,eos);
+    etot_r = cons_r[cons_lut.total_energy];
+    pt_r = p_r + this->mag_pressure_(prim_r, prim_lut);
+    cf_r = this->fast_magnetosonic_speed_(prim_r, prim_lut, eos);
 
     //
     //wave speeds
@@ -129,15 +126,13 @@ public: // interface
     S_r = std::max(vx_l, vx_r) + std::max(cf_l, cf_r);
 
     if (S_l > 0) {
-      for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
-	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = flux_l.at(key);
+      for (int field = 0; field<n_keys; field++){
+	flux_arrays[field](iz,iy,ix) = flux_l[field];
       }
       return;
     } else if (S_r < 0) {
-      for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
-	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = flux_r.at(key);
+      for (int field = 0; field<n_keys; field++){
+	flux_arrays[field](iz,iy,ix) = flux_r[field];
       }
       return;
     } 
@@ -215,22 +210,22 @@ public: // interface
     // compute the fluxes based on the wave speeds
     if (S_l <= 0 && S_ls >= 0) {
       // USE F_ls
-      setup_cons_ast_(Us, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx, By_ls, Bz_ls);
+      setup_cons_ast_(Us, cons_lut, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
+		      By_ls, Bz_ls);
 
-      for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
-	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = \
-	  flux_l.at(key) + S_l*(Us[key] - cons_l.at(key));
+      for (int field = 0; field<n_keys; field++){
+	flux_arrays[field](iz,iy,ix) = \
+	  flux_l[field] + S_l*(Us[field] - cons_l[field]);
       }
       return;
     } else if (S_rs <= 0 && S_r >= 0) {
       // USE F_rs
-      setup_cons_ast_(Us, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx, By_rs, Bz_rs);
+      setup_cons_ast_(Us, cons_lut, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
+		      By_rs, Bz_rs);
 
-      for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
-	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = \
-	  flux_r.at(key) + S_r*(Us[key] - cons_r.at(key));
+      for (int field = 0; field<n_keys; field++){
+	flux_arrays[field](iz,iy,ix) = \
+	  flux_r[field] + S_r*(Us[field] - cons_r[field]);
       }
       return;
     }
@@ -253,39 +248,39 @@ public: // interface
 
     if (S_ls <= 0 && S_M >= 0) {
       // USE F_lss
-      setup_cons_ast_(Us, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx, By_ls, Bz_ls);
-      setup_cons_ast_(Uss, S_M, rho_ls, vy_ss, vz_ss, etot_lss, Bx,
+      setup_cons_ast_(Us, cons_lut, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
+		      By_ls, Bz_ls);
+      setup_cons_ast_(Uss, cons_lut, S_M, rho_ls, vy_ss, vz_ss, etot_lss, Bx,
 		      By_ss, Bz_ss);
 
-      for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
-	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = \
-	  (flux_l.at(key) + S_ls*Uss[key] - (S_ls - S_l)*Us[key] -
-	   S_l*cons_l.at(key));
+      for (int field = 0; field<n_keys; field++){
+	flux_arrays[field](iz,iy,ix) = \
+	  (flux_l[field] + S_ls*Uss[field] - (S_ls - S_l)*Us[field] -
+	   S_l*cons_l[field]);
       }
       return;
     } else if (S_M <= 0 && S_rs >= 0) {
       // USE F_rss
-      setup_cons_ast_(Us, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx, By_rs, Bz_rs);
-      setup_cons_ast_(Uss, S_M, rho_rs, vy_ss, vz_ss, etot_rss, Bx,
+      setup_cons_ast_(Us, cons_lut, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
+		      By_rs, Bz_rs);
+      setup_cons_ast_(Uss, cons_lut, S_M, rho_rs, vy_ss, vz_ss, etot_rss, Bx,
 		      By_ss, Bz_ss);
 
-      for (std::size_t field_ind = 0; field_ind<n_keys; field_ind++){
-	std::string key = cons_keys[field_ind];
-	flux_arrays[key](iz,iy,ix) = \
-	  (flux_r.at(key) + S_rs*Uss[key] - (S_rs - S_r)*Us[key] -
-	   S_r*cons_r.at(key));
+      for (int field = 0; field<n_keys; field++){
+	flux_arrays[field](iz,iy,ix) = \
+	  (flux_r[field] + S_rs*Uss[field] - (S_rs - S_r)*Us[field] -
+	   S_r*cons_r[field]);
       }
       return;
     }
   }
   
 private:
-  inline void setup_cons_ast_(flt_map& cons, const enzo_float speed,
-			      const enzo_float rho, const enzo_float vy,
-			      const enzo_float vz, const enzo_float etot,
-			      const enzo_float Bx, const enzo_float By,
-			      const enzo_float Bz)
+  inline void setup_cons_ast_(enzo_float cons[], const field_lut cons_lut,
+			      const enzo_float speed, const enzo_float rho,
+			      const enzo_float vy, const enzo_float vz,
+			      const enzo_float etot, const enzo_float Bx,
+			      const enzo_float By, const enzo_float Bz)
   {
 
     // Helper function that factors out the filling of the of the asterisked
@@ -301,21 +296,21 @@ private:
     //   Although eint_ls, eint_rs, eint_lss, and eint_rss are all declared as
     //   local variables, they are never actually initialized
     // }
-    cons["density"] = rho;
-    cons["momentum_i"] = rho * speed;
-    cons["momentum_j"] = rho * vy;
-    cons["momentum_k"] = rho * vz;
-    cons["total_energy"] = etot;
-    cons["bfield_i"] = Bx;
-    cons["bfield_j"] = By;
-    cons["bfield_k"] = Bz;
+    cons[cons_lut.density] = rho;
+    cons[cons_lut.momentum_i] = rho * speed;
+    cons[cons_lut.momentum_j] = rho * vy;
+    cons[cons_lut.momentum_k] = rho * vz;
+    cons[cons_lut.total_energy] = etot;
+    cons[cons_lut.bfield_i] = Bx;
+    cons[cons_lut.bfield_j] = By;
+    cons[cons_lut.bfield_k] = Bz;
   }
 
 
 private:
   // Below are two float maps used in the calculation
-  flt_map Us;
-  flt_map Uss;
+  enzo_float *Us;
+  enzo_float *Uss;
 };
 
 #endif /* ENZO_ENZO_RIEMANN_HLLD_HPP */
