@@ -88,10 +88,12 @@ public: // interface
 
 #ifdef CONFIG_USE_GRACKLE
   static void setup_grackle_units(EnzoBlock * enzo_block,
-                                  code_units * grackle_units) throw();
+                                  code_units * grackle_units,
+                                  int i_hist = 0 ) throw();
 
   static void setup_grackle_fields(EnzoBlock * enzo_block,
-                                   grackle_field_data * grackle_fields) throw();
+                                   grackle_field_data * grackle_fields,
+                                   int i_hist = 0 ) throw();
 
   static void update_grackle_density_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields) throw();

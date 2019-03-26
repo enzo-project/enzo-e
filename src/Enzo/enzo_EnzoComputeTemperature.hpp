@@ -41,7 +41,10 @@ public: // interface
   /// Perform the computation on the block
   virtual void compute( Block * block) throw();
 
+  virtual void compute( Block * block, enzo_float * t) throw();
+
   void compute_(Block * block,
+    enzo_float * t,
     bool recompute_presure = true
 #ifdef CONFIG_USE_GRACKLE
  , code_units * grackle_units = NULL,

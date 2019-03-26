@@ -205,7 +205,18 @@ void EnzoInitialGrackleTest::enforce_block
   if (pressure){
     EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
                                           comoving_coordinates);
+
+    // Note: using compute_ method to avoid re-generating grackle_fields
+    //       struct. Otherwise, one could just do:
+    //             compute_pressure.compute(enzo_block, pressure);
+    //       OR
+    //             compute_pressure.compute(enzo_block);
+    //
+    //       The former provides ability to compute pressure into an
+    //       array that is non-static (i.e. not a field that persists).
+    //
     compute_pressure.compute_(enzo_block,
+                              pressure,
                               NULL,
                               &grackle_fields_);
   }
@@ -218,6 +229,7 @@ void EnzoInitialGrackleTest::enforce_block
        comoving_coordinates);
 
     compute_temperature.compute_(enzo_block,
+                                 temperature,
                                  false, // do not re-compute pressure field
                                  NULL, &grackle_fields_
                                  );

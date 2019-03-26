@@ -49,12 +49,34 @@ void EnzoComputeTemperature::compute ( Block * block) throw()
 
   if (!block->is_leaf()) return;
 
-  compute_(block);
+  EnzoBlock * enzo_block = enzo::block(block);
+  Field field = enzo_block->data()->field();
+
+  enzo_float * t = field.is_field("temperature") ?
+                    (enzo_float*) field.values("temperature", i_hist_) : NULL;
+
+  if (!t) {
+    ERROR("EnzoComputeTemperature::compute()",
+          " 'temperature' field is not defined as a permanent field");
+  }
+
+  compute(block, t);
+}
+
+//---------------------------------------------------------------------
+
+void EnzoComputeTemperature::compute ( Block * block, enzo_float * t) throw()
+{
+
+  if (!block->is_leaf()) return;
+
+  compute_(block, t);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoComputeTemperature::compute_(Block * block,
+                                      enzo_float * t,
                                       bool recompute_pressure /* true */
 #ifdef CONFIG_USE_GRACKLE
                                     , code_units * grackle_units /* NULL */ ,
@@ -68,11 +90,6 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   const int in = cello::index_static();
 
-  EnzoComputePressure compute_pressure(EnzoBlock::Gamma[in],
-				       comoving_coordinates_);
-
-  enzo_float * t = (enzo_float*) field.values("temperature");
-
 #ifndef CONFIG_USE_GRACKLE
 
   EnzoUnits * enzo_units = enzo::units();
@@ -82,10 +99,14 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   const int m = mx*my*mz;
 
-  enzo_float * d = (enzo_float*) field.values("density");
-  enzo_float * p = (enzo_float*) field.values("pressure");
+  enzo_float * d = (enzo_float*) field.values("density", i_hist_);
+  enzo_float * p = (enzo_float*) field.values("pressure", i_hist_);
 
-  if (recompute_pressure) compute_pressure.compute(block);
+  EnzoComputePressure compute_pressure(EnzoBlock::Gamma[in],
+                                       comoving_coordinates_);
+  compute_pressure.set_history(i_hist_);
+
+  if (recompute_pressure) compute_pressure.compute(block, p);
 
   for (int i=0; i<m; i++) {
     enzo_float density     = std::max(d[i], (enzo_float) density_floor_);
@@ -101,13 +122,13 @@ void EnzoComputeTemperature::compute_(Block * block,
   // setup grackle units if they are not already provided
   if (!grackle_units){
     grackle_units = &grackle_units_;
-    EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units);
+    EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units, i_hist_);
   }
 
   // if grackle fields are not provided, define them
   if (!grackle_fields){
     grackle_fields  = &grackle_fields_;
-    EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields);
+    EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields, i_hist_);
   }
 
 
