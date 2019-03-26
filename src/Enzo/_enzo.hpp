@@ -210,6 +210,7 @@ extern "C" {
 
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialCosmology.hpp"
+#include "enzo_EnzoInitialFeedbackTest.hpp"
 #include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
@@ -230,6 +231,7 @@ extern "C" {
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodFeedback.hpp"
+#include "enzo_EnzoMethodDistributedFeedback.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
 #include "enzo_EnzoMethodGravity.hpp"
 #include "enzo_EnzoMethodHydro.hpp"

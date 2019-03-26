@@ -151,6 +151,7 @@ public: // interface
       initial_grackle_test_maximum_temperature(1.0E8),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+      initial_feedback_test_density(),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -210,6 +211,12 @@ public: // interface
       initial_IG_stellar_disk(false),
       initial_IG_stellar_bulge(false),
       initial_IG_analytic_velocity(false),
+      initial_IG_include_recent_SF(false),
+      initial_IG_recent_SF_start(-100.0),
+      initial_IG_recent_SF_end(0.0),
+      initial_IG_recent_SF_bin_size(5.0),
+      initial_IG_recent_SF_SFR(2.0),
+      initial_IG_recent_SF_seed(12345),
       // EnzoProlong
       interpolation_method(""),
       // EnzoMethodHeat
@@ -227,6 +234,9 @@ public: // interface
       method_feedback_ejecta_mass(0.0),
       method_feedback_supernova_energy(1.0),
       method_feedback_ejecta_metal_fraction(0.0),
+      method_feedback_stencil(3),
+      method_feedback_shift_cell_center(true),
+      method_feedback_ke_fraction(0.0),
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -296,6 +306,8 @@ public: // interface
       initial_IG_bfield[axis]         = 0.0;
       method_background_acceleration_center[axis] = 0.5;
       method_background_acceleration_angular_momentum[axis] = 0;
+
+      initial_feedback_test_position[axis] = 0.5;
     }
     method_background_acceleration_angular_momentum[2] = 1;
   }
@@ -424,6 +436,11 @@ public: // attributes
   double                     initial_turbulence_pressure;
   double                     initial_turbulence_temperature;
 
+  /// EnzoInitialFeedbackTest
+
+  double                     initial_feedback_test_position[3];
+  double                     initial_feedback_test_density;
+
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];
   double                     initial_IG_bfield[3];
@@ -443,6 +460,12 @@ public: // attributes
   bool                       initial_IG_stellar_bulge;
   bool                       initial_IG_stellar_disk;
   bool                       initial_IG_analytic_velocity;
+  bool                       initial_IG_include_recent_SF;
+  double                     initial_IG_recent_SF_start;
+  double                     initial_IG_recent_SF_end;
+  double                     initial_IG_recent_SF_bin_size;
+  double                     initial_IG_recent_SF_SFR;
+  int                        initial_IG_recent_SF_seed;
 
   /// EnzoProlong
   std::string                interpolation_method;
@@ -465,6 +488,9 @@ public: // attributes
   double                    method_feedback_ejecta_mass;
   double                    method_feedback_supernova_energy;
   double                    method_feedback_ejecta_metal_fraction;
+  double                    method_feedback_ke_fraction;
+  int                       method_feedback_stencil;
+  bool                      method_feedback_shift_cell_center;
 
   /// EnzoMethodStarMaker
 

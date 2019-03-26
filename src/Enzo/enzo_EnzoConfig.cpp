@@ -65,6 +65,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_maximum_temperature(1.0E8),
   initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
+  initial_feedback_test_density(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -122,6 +123,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_stellar_disk(false),
   initial_IG_stellar_bulge(false),
   initial_IG_analytic_velocity(false),
+  initial_IG_include_recent_SF(false),
+  initial_IG_recent_SF_start(-100.0),
+  initial_IG_recent_SF_end(0.0),
+  initial_IG_recent_SF_bin_size(5.0),
+  initial_IG_recent_SF_SFR(2.0),
+  initial_IG_recent_SF_seed(12345),
   // EnzoProlong
   interpolation_method(""),
   // EnzoMethodHeat
@@ -141,6 +148,9 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ejecta_mass(0.0),
   method_feedback_supernova_energy(1.0),
   method_feedback_ejecta_metal_fraction(0.0),
+  method_feedback_stencil(3),
+  method_feedback_shift_cell_center(true),
+  method_feedback_ke_fraction(0.0),
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                             // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -205,6 +215,8 @@ EnzoConfig::EnzoConfig() throw ()
     initial_IG_bfield[i] = 0.0;
     method_background_acceleration_center[i] = 0.5;
     method_background_acceleration_angular_momentum[i] = 0;
+
+    initial_feedback_test_position[i] = 0.5;
   }
 
   method_background_acceleration_angular_momentum[2] = 1;
@@ -322,6 +334,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_pm_mpp;
   p | initial_pm_level;
 
+  PUParray(p, initial_feedback_test_position,3);
+  p | initial_feedback_test_density;
+
   PUParray(p, initial_IG_center_position,3);
   PUParray(p, initial_IG_bfield,3);
   p | initial_IG_scale_length;
@@ -340,6 +355,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_disk;
   p | initial_IG_stellar_bulge;
   p | initial_IG_analytic_velocity;
+  p | initial_IG_include_recent_SF;
+  p | initial_IG_recent_SF_start;
+  p | initial_IG_recent_SF_end;
+  p | initial_IG_recent_SF_bin_size;
+  p | initial_IG_recent_SF_SFR;
+  p | initial_IG_recent_SF_seed;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -369,6 +390,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_ejecta_mass;
   p | method_feedback_supernova_energy;
   p | method_feedback_ejecta_metal_fraction;
+  p | method_feedback_stencil;
+  p | method_feedback_shift_cell_center;
+  p | method_feedback_ke_fraction;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -736,6 +760,18 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:isolated_galaxy:stellar_bulge", false);
   initial_IG_analytic_velocity = p->value_logical
     ("Initial:isolated_galaxy:analytic_velocity", false);
+  initial_IG_include_recent_SF = p->value_logical
+    ("Initial:isolated_galaxy:include_recent_SF", false);
+  initial_IG_recent_SF_start = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_start", -100.0);
+  initial_IG_recent_SF_end = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_end", 0.0);
+  initial_IG_recent_SF_SFR = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_SFR", 2.0);
+  initial_IG_recent_SF_bin_size = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_bin_size", 5.0);
+  initial_IG_recent_SF_seed = p->value_integer
+    ("Initial:isolated_galaxy:recent_SF_seed", 12345);
 
   for (int axis=0; axis<3; axis++) {
     initial_IG_center_position[axis]  = p->list_value_float
@@ -743,6 +779,13 @@ void EnzoConfig::read(Parameters * p) throw()
     initial_IG_bfield[axis] = p->list_value_float
       (axis, "Initial:isolated_galaxy:bfield",0.0);
   }
+
+  for (int axis=0; axis<3; axis++){
+    initial_feedback_test_position[axis] = p->list_value_float
+      (axis, "Initial:feedback_test:position", 0.5);
+  }
+  initial_feedback_test_density = p->value_float
+    ("Initial:feedback_test:density", 1.0E-24);
 
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
@@ -777,6 +820,15 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_feedback_ejecta_metal_fraction = p->value_float
     ("Method:feedback:ejecta_metal_fraction",0.1);
+
+  method_feedback_stencil = p->value_integer
+    ("Method:feedback:stencil",3);
+
+  method_feedback_shift_cell_center = p->value_logical
+    ("Method:feedback:shift_cell_center", true);
+
+  method_feedback_ke_fraction = p->value_float
+    ("Method:feedback:ke_fraction", 0.0);
 
   method_star_maker_type = p->value_string
     ("Method:star_maker:type","stochastic");

@@ -51,6 +51,7 @@ module enzo {
 
   PUPable EnzoInitialCollapse;
   PUPable EnzoInitialCosmology;
+  PUPable EnzoInitialFeedbackTest;
   PUPable EnzoInitialImplosion2;
   PUPable EnzoInitialMusic;
   PUPable EnzoInitialPm;
@@ -79,6 +80,7 @@ module enzo {
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
   PUPable EnzoMethodFeedback;
+  PUPable EnzoMethodDistributedFeedback;
   PUPable EnzoMethodHeat;
   PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
