@@ -173,16 +173,6 @@ public: // interface
 
   //  enzo_float ComputeTimeStep();
 
-  /// Compute the pressure field at the given time) - dual energy
-  int ComputePressureDualEnergyFormalism
-  ( enzo_float time, 
-    enzo_float *pressure,
-    bool comoving_coordinates);
-
-  /// Compute the pressure field at the given time
-  int ComputePressure(enzo_float time, enzo_float *pressure, 
-		      bool comoving_coordinates);
-
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,
 			bool comoving_coordinates);

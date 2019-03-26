@@ -181,7 +181,9 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 
 #ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
-                                             code_units * grackle_units) throw()
+                                             code_units * grackle_units,
+                                             int i_hist /* default 0 */
+                                             ) throw()
 {
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
@@ -202,8 +204,16 @@ void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
 
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
+    enzo_float compute_time;
+    if (i_hist == 0) {
+      compute_time = enzo_block->time();
+    } else {
+      Field field = enzo_block->data()->field();
+      compute_time = field.history_time(i_hist);
+    }
+
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
-                                        enzo_block->time());
+                                        compute_time);
     grackle_units->a_units
          = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
     grackle_units->a_value = cosmo_a;
@@ -216,13 +226,14 @@ void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
 }
 
 void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
-                                             grackle_field_data * grackle_fields_)
-                                             throw()
-{
   // Setup Grackle field struct for storing field data that will be passed
   // into Grackle. Initialize fields, if true, will also assign values to
   // the fields (equal to uniform background values). This is meant to be
   // used at initialization, and is by default false.
+                                             grackle_field_data * grackle_fields_,
+                                             int i_hist /*default 0 */
+                                             ) throw()
+  {
 
   Field field = enzo_block->data()->field();
 
@@ -259,46 +270,46 @@ void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
   grackle_fields_->grid_dx = hx;
 
   // Setup all fields to be passed into grackle
-  grackle_fields_->density         = (gr_float *) field.values("density");
-  grackle_fields_->internal_energy = (gr_float *) field.values("internal_energy");
-  grackle_fields_->x_velocity      = (gr_float *) field.values("velocity_x");
-  grackle_fields_->y_velocity      = (gr_float *) field.values("velocity_y");
-  grackle_fields_->z_velocity      = (gr_float *) field.values("velocity_z");
+  grackle_fields_->density         = (gr_float *) field.values("density", i_hist);
+  grackle_fields_->internal_energy = (gr_float *) field.values("internal_energy", i_hist);
+  grackle_fields_->x_velocity      = (gr_float *) field.values("velocity_x", i_hist);
+  grackle_fields_->y_velocity      = (gr_float *) field.values("velocity_y", i_hist);
+  grackle_fields_->z_velocity      = (gr_float *) field.values("velocity_z", i_hist);
 
   // Get chemical species fields if they exist
 
   // primordial_chemistry == 0 fields
   grackle_fields_->HI_density      = field.is_field("HI_density") ?
-                       (gr_float *) field.values("HI_density")     : NULL;
+                       (gr_float *) field.values("HI_density", i_hist)     : NULL;
   grackle_fields_->HII_density     = field.is_field("HII_density") ?
-                       (gr_float *) field.values("HII_density")    : NULL;;
+                       (gr_float *) field.values("HII_density", i_hist)    : NULL;;
   grackle_fields_->HeI_density     = field.is_field("HeI_density") ?
-                       (gr_float *) field.values("HeI_density")    : NULL;
+                       (gr_float *) field.values("HeI_density", i_hist)    : NULL;
   grackle_fields_->HeII_density    = field.is_field("HeII_density") ?
-                       (gr_float *) field.values("HeII_density")   : NULL;
+                       (gr_float *) field.values("HeII_density", i_hist)   : NULL;
   grackle_fields_->HeIII_density   = field.is_field("HeIII_density") ?
-                       (gr_float *) field.values("HeIII_density")  : NULL;
+                       (gr_float *) field.values("HeIII_density", i_hist)  : NULL;
   grackle_fields_->e_density       = field.is_field("e_density") ?
-                       (gr_float *) field.values("e_density")      : NULL;
+                       (gr_float *) field.values("e_density", i_hist)      : NULL;
 
   // primordial_chemistry == 1 fields
   grackle_fields_->HM_density      = field.is_field("HM_density") ?
-                       (gr_float *) field.values("HM_density")     : NULL;
+                       (gr_float *) field.values("HM_density", i_hist)     : NULL;
   grackle_fields_->H2I_density     = field.is_field("H2I_density") ?
-                       (gr_float *) field.values("H2I_density") : NULL;
+                       (gr_float *) field.values("H2I_density", i_hist) : NULL;
   grackle_fields_->H2II_density    = field.is_field("H2II_density") ?
-                       (gr_float *) field.values("H2II_density") : NULL;
+                       (gr_float *) field.values("H2II_density", i_hist) : NULL;
 
   // primordial_chemistry == 2 fields
   grackle_fields_->DI_density      = field.is_field("DI_density") ?
-                       (gr_float *) field.values("DI_density") : NULL;
+                       (gr_float *) field.values("DI_density", i_hist) : NULL;
   grackle_fields_->DII_density     = field.is_field("DII_density") ?
-                       (gr_float *) field.values("DII_density") : NULL;
+                       (gr_float *) field.values("DII_density", i_hist) : NULL;
   grackle_fields_->HDI_density     = field.is_field("HDI_density") ?
-                       (gr_float *) field.values("HDI_density") : NULL;
+                       (gr_float *) field.values("HDI_density", i_hist) : NULL;
 
   grackle_fields_->metal_density   = field.is_field("metal_density") ?
-                       (gr_float *) field.values("metal_density") : NULL;
+                       (gr_float *) field.values("metal_density", i_hist) : NULL;
 
   /* Leave these as NULL for now and save for future development */
   gr_float * volumetric_heating_rate = NULL;
