@@ -1,5 +1,5 @@
-#ifndef ENZO_ENZO_INITIAL_LINEAR_WAVE_HPP
-#define ENZO_ENZO_INITIAL_LINEAR_WAVE_HPP
+#ifndef ENZO_ENZO_INITIAL_INCLINED_WAVE_HPP
+#define ENZO_ENZO_INITIAL_INCLINED_WAVE_HPP
 
 // classes for initializing initial conditions
 class ScalarInit;
@@ -9,24 +9,25 @@ class VectorInit;
 // This class will be slightly extended and reused for implementing cosmic rays
 class Rotation;
 
-class EnzoInitialLinearWave : public Initial {
-  /// @class    EnzoInitialLinearWave
+class EnzoInitialInclinedWave : public Initial {
+  /// @class    EnzoInitialInclinedWave
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Initializer for the Linear Wave test problem for
-  /// the VLCT method. Assumes adiabatic gas.
+  /// @brief    [\ref Enzo] Initializer for the inclined Linear Wave and
+  /// Circularly Polarized Alfven wave test problems for the VLCT method.
+  /// Assumes adiabatic gas.
 
 public: // interface
 
   /// Constructor
-  EnzoInitialLinearWave(int cycle, double time, double alpha, double beta,
+  EnzoInitialInclinedWave(int cycle, double time, double alpha, double beta,
 			double gamma, double amplitude, double lambda,
 			bool pos_vel, std::string wave_type) throw();
 
   /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoInitialLinearWave);
+  PUPable_decl(EnzoInitialInclinedWave);
 
   /// CHARM++ migration constructor
-  EnzoInitialLinearWave(CkMigrateMessage *m) 
+  EnzoInitialInclinedWave(CkMigrateMessage *m) 
     : Initial (m),
       alpha_(0.0),
       beta_(0.0),
@@ -91,4 +92,4 @@ private: // attributes
   std::string wave_type_;
 };
 
-#endif /* ENZO_ENZO_INITIAL_Linear_Wave_HPP */
+#endif /* ENZO_ENZO_INITIAL_INCLINED_WAVE_HPP */

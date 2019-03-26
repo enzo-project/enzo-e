@@ -145,16 +145,16 @@ Initial * EnzoProblem::create_initial_
        enzo_config->field_gamma,
        enzo_config->initial_cosmology_temperature
        );
-  } else if (type == "linear_wave") {
-    initial = new EnzoInitialLinearWave
+  } else if (type == "inclined_wave") {
+    initial = new EnzoInitialInclinedWave
       (cycle, time,
-       enzo_config->initial_linearwave_alpha,
-       enzo_config->initial_linearwave_beta,
+       enzo_config->initial_inclinedwave_alpha,
+       enzo_config->initial_inclinedwave_beta,
        enzo_config->field_gamma,
-       enzo_config->initial_linearwave_amplitude,
-       enzo_config->initial_linearwave_lambda,
-       enzo_config->initial_linearwave_positive_vel,
-       enzo_config->initial_linearwave_wave_type);
+       enzo_config->initial_inclinedwave_amplitude,
+       enzo_config->initial_inclinedwave_lambda,
+       enzo_config->initial_inclinedwave_positive_vel,
+       enzo_config->initial_inclinedwave_wave_type);
   } else if (type == "turbulence") {
     initial = new EnzoInitialTurbulence 
       (cycle,time, 
