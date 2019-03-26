@@ -109,15 +109,24 @@ void EnzoComputeTemperature::compute_(Block * block,
   }
 
 
-  // only compute pressure again if we need to
-  if (recompute_pressure) compute_pressure.compute_(block,
-                                                    grackle_units,
-                                                    grackle_fields);
+  // pressure is computed internally in Grackle. Do not need to
+  // recompute here.
 
   if (calculate_temperature(grackle_units, grackle_fields, t) == ENZO_FAIL){
     ERROR("EnzoComputeTemperature::compute_()",
           "Error in call to Grackle's compute_temperature routine.\n");
   }
+
+  // Convert temperature into code units from K
+  EnzoUnits * enzo_units = enzo::units();
+
+  int m = grackle_fields.grid_dimension[0] *
+          grackle_fields.grid_dimension[1] *
+          grackle_fields.grid_dimension[2];
+
+  double inv_tu = 1.0 / enzo_units->temperature_units();
+
+  for (int i = 0; i < m; i++) t[i] *= inv_tu;
 
 
 #endif // CONFIG_USE_GRACKLE
