@@ -120,11 +120,11 @@ void EnzoComputeTemperature::compute_(Block * block,
   // Convert temperature into code units from K
   EnzoUnits * enzo_units = enzo::units();
 
-  int m = grackle_fields.grid_dimension[0] *
-          grackle_fields.grid_dimension[1] *
-          grackle_fields.grid_dimension[2];
+  int m = grackle_fields->grid_dimension[0] *
+          grackle_fields->grid_dimension[1] *
+          grackle_fields->grid_dimension[2];
 
-  double inv_tu = 1.0 / enzo_units->temperature_units();
+  double inv_tu = 1.0 / enzo_units->temperature();
 
   for (int i = 0; i < m; i++) t[i] *= inv_tu;
 
