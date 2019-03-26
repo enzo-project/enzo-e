@@ -377,12 +377,6 @@ void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
   }
 }
 
-// Helps compute the cell-centered B-fields
-void bfieldc_helper_(Block *block)
-{
-  
-}
-
 
 // Components of the magnetic field from the vector potential
 // Bx(k, j, i-1/2) =
@@ -394,11 +388,6 @@ void bfieldc_helper_(Block *block)
 // Bz(k-1/2, j, i) =
 //    ( Ay(k-1/2,     j, i+1/2) - Ay(k-1/2,     j, i-1/2) )/dx -
 //    ( Ax(k-1/2, j+1/2,     i) - Ax(k-1/2, j-1/2,     i) )/dy
-//
-// NEED TO ADDRESS
-// ---------------
-// The resulting cell-centered B-fields are offset to the right from where
-// they should be, by half of a cell-length
 void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
@@ -456,13 +445,12 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 
 void setup_fluid(Block *block, ScalarInit *density_init,
 		 ScalarInit *total_energy_init, 
-		 VectorInit *velocity_init,
+		 VectorInit *momentum_init,
 		 MeshPos &pos, int mx, int my, int mz, enzo_float gamma)
 {
   EnzoArray<enzo_float,3> density, pressure;
   EnzoFieldArrayFactory array_factory(block);
   density = array_factory.from_name("density");
-  //total_energy = array_factory.from_name("total_energy");
   pressure = array_factory.from_name("pressure");
 
   EnzoArray<enzo_float,3> velocity_x, velocity_y, velocity_z;
@@ -480,22 +468,22 @@ void setup_fluid(Block *block, ScalarInit *density_init,
     for (int iy=0; iy<my; iy++){
       for (int ix=0; ix<mx; ix++){
 	enzo_float x,y,z;
-	enzo_float etot, v2, b2;
+	enzo_float rho, px, py, pz, etot, p2, b2;
 	x = pos.x(iz,iy,ix); y = pos.y(iz,iy,ix); z = pos.z(iz,iy,ix);
-
-	density(iz,iy,ix) = (*density_init)(x,y,z);
-	(*velocity_init)(x,y,z,velocity_x(iz,iy,ix), velocity_y(iz,iy,ix),
-			 velocity_z(iz,iy,ix));
+	rho = (*density_init)(x,y,z);
+	density(iz,iy,ix) = rho;
+	(*momentum_init)(x, y, z, px, py, pz);
+	velocity_x(iz,iy,ix) = px/rho;
+	velocity_y(iz,iy,ix) = py/rho;
+	velocity_z(iz,iy,ix) = pz/rho;
 
 	etot = (*total_energy_init)(x,y,z);
-	v2 = (velocity_x(iz,iy,ix)*velocity_x(iz,iy,ix) +
-	      velocity_y(iz,iy,ix)*velocity_y(iz,iy,ix) +
-	      velocity_z(iz,iy,ix)*velocity_z(iz,iy,ix));
+	p2 = (px*px + py*py + pz*pz);
 	b2 = (bfieldc_x(iz,iy,ix)*bfieldc_x(iz,iy,ix) +
 	      bfieldc_y(iz,iy,ix)*bfieldc_y(iz,iy,ix) +
 	      bfieldc_z(iz,iy,ix)*bfieldc_z(iz,iy,ix));
 
-	pressure(iz,iy,ix) = (gamma-1.)*(etot - 0.5*(density(iz,iy,ix)*v2 +
+	pressure(iz,iy,ix) = (gamma-1.)*(etot - 0.5*(p2/density(iz,iy,ix) +
 						     b2));
       }
       fflush(stdout);
@@ -544,10 +532,10 @@ void EnzoInitialLinearWave::enforce_block(Block * block,
   
   ScalarInit *density_init = NULL;
   ScalarInit *total_energy_init = NULL;
-  VectorInit *velocity_init = NULL;
+  VectorInit *momentum_init = NULL;
   VectorInit *a_init = NULL;
 
-  prepare_initializers_(&density_init, &total_energy_init, &velocity_init,
+  prepare_initializers_(&density_init, &total_energy_init, &momentum_init,
 			&a_init);
 
   // Try to load the dimensions, again
@@ -559,12 +547,12 @@ void EnzoInitialLinearWave::enforce_block(Block * block,
   MeshPos pos(block);
 
   setup_bfield(block, a_init, pos, mx, my, mz);
-  setup_fluid(block, density_init, total_energy_init, velocity_init,
+  setup_fluid(block, density_init, total_energy_init, momentum_init,
 	      pos, mx, my, mz, gamma_);
 
   delete density_init;
   delete total_energy_init;
-  delete velocity_init;
+  delete momentum_init;
   delete a_init;
 }
 
@@ -572,7 +560,7 @@ void EnzoInitialLinearWave::enforce_block(Block * block,
 
 void EnzoInitialLinearWave::prepare_initializers_(ScalarInit **density_init,
 						  ScalarInit **etot_init,
-						  VectorInit **velocity_init,
+						  VectorInit **momentum_init,
 						  VectorInit **a_init)
 {
 
@@ -586,47 +574,47 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit **density_init,
   // density = 1, pressure = 1/gamma, mom1 = 0, mom2 = 0, B0 = 1, B1=1.5, B2=0
   // For entropy wave, mom0 = 1. Otherwise, mom0 = 0.
   enzo_float density_back = 1;
-  enzo_float vel0_back = 0;
-  enzo_float vel1_back = 0;
-  enzo_float vel2_back = 0;
+  enzo_float mom0_back = 0;
+  enzo_float mom1_back = 0;
+  enzo_float mom2_back = 0;
   enzo_float b0_back = 1.;
   enzo_float b1_back = 1.5;
   enzo_float b2_back = 0.0;
   // etot = pressure/(gamma-1)+0.5*rho*v^2+.5*B^2
   enzo_float etot_back = (1./gamma_)/(gamma_-1.)+1.625;
   if (wave_type_ == "entropy"){
-    vel0_back = 1;
+    mom0_back = 1;
     etot_back += 0.5;
   }
 
 
   // Get the eigenvalues for density, velocity, and etot
-  enzo_float density_ev, vel0_ev, vel1_ev, vel2_ev, etot_ev, b1_ev, b2_ev;
+  enzo_float density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev, b1_ev, b2_ev;
   // intentionally omit b0_ev
 
   if (wave_type_ == "fast"){
     enzo_float coef = 0.5/std::sqrt(5.);
     density_ev = 2. *coef;
-    vel0_ev = wsign*2.;
-    vel1_ev = -1.*wsign;
-    vel2_ev = 0;
+    mom0_ev = wsign*4. * coef;
+    mom1_ev = -1.*wsign*2. * coef;
+    mom2_ev = 0;
     etot_ev = 9. * coef;
     b1_ev = 4. * coef;
     b2_ev = 0;
   } else if (wave_type_ == "alfven") {
     density_ev = 0;
-    vel0_ev = 0;
-    vel1_ev = 0;
-    vel2_ev = -1.*wsign*1;
+    mom0_ev = 0;
+    mom1_ev = 0;
+    mom2_ev = -1.*wsign*1;
     etot_ev = 0;
     b1_ev = 0;
     b2_ev = 1.;
   } else if (wave_type_ == "slow") {
     enzo_float coef = 0.5/std::sqrt(5.);
     density_ev = 4. *coef;
-    vel0_ev = wsign*0.5;
-    vel1_ev = wsign;
-    vel2_ev = 0;
+    mom0_ev = wsign*2. * coef;
+    mom1_ev = wsign*4. * coef;
+    mom2_ev = 0;
     etot_ev = 3. * coef;
     b1_ev = -2. * coef;
     b2_ev = 0;
@@ -634,9 +622,9 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit **density_init,
     // wave_type_ == "entropy"
     enzo_float coef = 0.5;
     density_ev = 2. *coef;
-    vel0_ev = 1.;
-    vel1_ev = 0;
-    vel2_ev = 0;
+    mom0_ev = 2. * coef;
+    mom1_ev = 0;
+    mom2_ev = 0;
     etot_ev = 1. * coef;
     b1_ev = 0;
     b2_ev = 0;
@@ -658,13 +646,13 @@ void EnzoInitialLinearWave::prepare_initializers_(ScalarInit **density_init,
 							  amplitude,
 							  lambda));
 
-  *velocity_init = new RotatedVectorInit(alpha_, beta_,
-					 new LinearVectorInit(vel0_back,
-							      vel1_back,
-							      vel2_back,
-							      vel0_ev,
-							      vel1_ev,
-							      vel2_ev,
+  *momentum_init = new RotatedVectorInit(alpha_, beta_,
+					 new LinearVectorInit(mom0_back,
+							      mom1_back,
+							      mom2_back,
+							      mom0_ev,
+							      mom1_ev,
+							      mom2_ev,
 							      amplitude,
 							      lambda));
 
