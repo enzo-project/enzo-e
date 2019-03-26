@@ -415,6 +415,20 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     this->ResetEnergies(enzo_block);
   }
 
+  enzo_float * temperature = field.is_field("temperature") ?
+                   (enzo_float*) field.values("temperature") : NULL;
+
+  if (temperature) {
+    EnzoComputeTemperature compute_temperature
+      (enzo_config->ppm_density_floor,
+       enzo_config->ppm_temperature_floor,
+       enzo_config->ppm_mol_weight,
+       enzo_config->physics_cosmology);
+
+    compute_temperature.compute(enzo_block);
+  }
+
+
   return;
 }
 #endif // config use grackle
