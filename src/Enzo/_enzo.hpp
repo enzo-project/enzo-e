@@ -235,7 +235,7 @@ struct fluxes
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
-#include "enzo_EnzoMethodVlct.hpp"
+#include "enzo_EnzoMethodMHDVlct.hpp"
 
 #include "enzo_EnzoPermutedCoordinates.hpp"
 #include "enzo_EnzoEquationOfState.hpp"

@@ -9,23 +9,26 @@
 // The following function sets up a list of cell-centered conserved groups
 // conserved_group_, temp_conserved_group, xflux_group, yflux_group, and
 // zflux_group will have the same subset of groups
-std::vector<std::string> EnzoMethodVlct::cons_group_names={"density","momentum",
-							   "total_energy",
-							   "bfield"};
+std::vector<std::string> EnzoMethodMHDVlct::cons_group_names={"density",
+							      "momentum",
+							      "total_energy",
+							      "bfield"};
 
 // The following function sets up a listof groups of primitive quantities
 // primitive_group_, priml_group, and primr_group all will have the same
 // subset of groups
-std::vector<std::string> EnzoMethodVlct::prim_group_names={"density","velocity",
-							   "pressure","bfield"};
+std::vector<std::string> EnzoMethodMHDVlct::prim_group_names={"density",
+							      "velocity",
+							      "pressure",
+							      "bfield"};
 
 //----------------------------------------------------------------------
 
-EnzoMethodVlct::EnzoMethodVlct (std::string rsolver,
-				std::string half_recon_name,
-				std::string full_recon_name,
-				double gamma, double density_floor,
-				double pressure_floor)
+EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
+				      std::string half_recon_name,
+				      std::string full_recon_name,
+				      double gamma, double density_floor,
+				      double pressure_floor)
   : Method()
 {
   // Initialize the default Refresh object - eventually may want to adjust
@@ -63,7 +66,7 @@ EnzoMethodVlct::EnzoMethodVlct (std::string rsolver,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::setup_groups_()
+void EnzoMethodMHDVlct::setup_groups_()
 {
   // Fill in entries in conserved_group_ and primitive_group_
   // conserved_group_ will be entirely permanent fields while primitive_group_
@@ -99,7 +102,7 @@ void EnzoMethodVlct::setup_groups_()
 
 //----------------------------------------------------------------------
 
-EnzoMethodVlct::~EnzoMethodVlct()
+EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
 {
   delete conserved_group_;
   delete primitive_group_;
@@ -111,7 +114,7 @@ EnzoMethodVlct::~EnzoMethodVlct()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::pup (PUP::er &p)
+void EnzoMethodMHDVlct::pup (PUP::er &p)
 {
   // NOTE: change this function whenever attributes change
 
@@ -132,7 +135,7 @@ void EnzoMethodVlct::pup (PUP::er &p)
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::compute ( Block * block) throw()
+void EnzoMethodMHDVlct::compute ( Block * block) throw()
 {
   if (block->is_leaf()) {
 
@@ -277,7 +280,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
     eos_->primitive_from_conservative (block, *conserved_group_,
 				       *primitive_group_);
 
-    //ASSERT("EnzoMethodVlct","Early Exit",false);
+    //ASSERT("EnzoMethodMHDVlct","Early Exit",false);
 
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
@@ -292,7 +295,7 @@ void EnzoMethodVlct::compute ( Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::compute_flux_(Block *block, int dim,
+void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 				   Grouping &cur_cons_group,
 				   Grouping &cur_bfieldi_group,
 				   Grouping &priml_group,
@@ -370,7 +373,7 @@ void EnzoMethodVlct::compute_flux_(Block *block, int dim,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
+void EnzoMethodMHDVlct::compute_efields_(Block *block, Grouping &xflux_group,
 				      Grouping &yflux_group,
 				      Grouping &zflux_group,
 				      std::string center_efield_name,
@@ -411,13 +414,13 @@ void EnzoMethodVlct::compute_efields_(Block *block, Grouping &xflux_group,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::update_quantities_(Block *block, Grouping &xflux_group,
-					Grouping &yflux_group,
-					Grouping &zflux_group,
-					Grouping &out_cons_group, double dt)
+void EnzoMethodMHDVlct::update_quantities_(Block *block, Grouping &xflux_group,
+					   Grouping &yflux_group,
+					   Grouping &zflux_group,
+					   Grouping &out_cons_group, double dt)
 {
   // For now, not having density floor affect momentum or total energy density
-  std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
+  std::vector<std::string> cons_group_names = EnzoMethodMHDVlct::cons_group_names;
   EnzoFieldArrayFactory array_factory(block);
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
@@ -684,7 +687,7 @@ void copy_grouping_fields_(Block *block, Grouping &conserved_group,
 void initialize_recon_prim_to_floor_(Block *block, Grouping &grouping,
 				     EnzoEquationOfState &eos){
   
-  std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
+  std::vector<std::string> prim_group_names = EnzoMethodMHDVlct::prim_group_names;
   int start = -1;
   int stop = -1;
   Field field = block->data()->field();
@@ -721,22 +724,22 @@ void initialize_recon_prim_to_floor_(Block *block, Grouping &grouping,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::allocate_temp_fields_(Block *block,
-					   Grouping &priml_group,
-					   Grouping &primr_group,
-					   Grouping &xflux_group,
-					   Grouping &yflux_group,
-					   Grouping &zflux_group,
-					   Grouping &efield_group,
-					   std::string &center_efield_name,
-					   Grouping &weight_group,
-					   Grouping &temp_conserved_group,
-					   Grouping &temp_bfieldi_group,
-					   Grouping &consl_group,
-					   Grouping &consr_group)
+void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
+					      Grouping &priml_group,
+					      Grouping &primr_group,
+					      Grouping &xflux_group,
+					      Grouping &yflux_group,
+					      Grouping &zflux_group,
+					      Grouping &efield_group,
+					      std::string &center_efield_name,
+					      Grouping &weight_group,
+					      Grouping &temp_conserved_group,
+					      Grouping &temp_bfieldi_group,
+					      Grouping &consl_group,
+					      Grouping &consr_group)
 {
-  std::vector<std::string> cons_group_names = EnzoMethodVlct::cons_group_names;
-  std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
+  std::vector<std::string> cons_group_names = EnzoMethodMHDVlct::cons_group_names;
+  std::vector<std::string> prim_group_names = EnzoMethodMHDVlct::prim_group_names;
   
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
@@ -860,22 +863,22 @@ void deallocate_grouping_fields_(Field &field,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
-					     Grouping &priml_group,
-					     Grouping &primr_group,
-					     Grouping &xflux_group,
-					     Grouping &yflux_group,
-					     Grouping &zflux_group,
-					     Grouping &efield_group,
-					     std::string center_efield_name,
-					     Grouping &weight_group,
-					     Grouping &temp_conserved_group,
-					     Grouping &temp_bfieldi_group,
-					     Grouping &consl_group,
-					     Grouping &consr_group)
+void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
+						Grouping &priml_group,
+						Grouping &primr_group,
+						Grouping &xflux_group,
+						Grouping &yflux_group,
+						Grouping &zflux_group,
+						Grouping &efield_group,
+						std::string center_efield_name,
+						Grouping &weight_group,
+						Grouping &temp_conserved_group,
+						Grouping &temp_bfieldi_group,
+						Grouping &consl_group,
+						Grouping &consr_group)
 {
-  std::vector<std::string> cons_group_names= EnzoMethodVlct::cons_group_names;
-  std::vector<std::string> prim_group_names= EnzoMethodVlct::prim_group_names;
+  std::vector<std::string> cons_group_names= EnzoMethodMHDVlct::cons_group_names;
+  std::vector<std::string> prim_group_names= EnzoMethodMHDVlct::prim_group_names;
 
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
@@ -909,7 +912,7 @@ void EnzoMethodVlct::deallocate_temp_fields_(Block *block,
 
 //----------------------------------------------------------------------
 
-double EnzoMethodVlct::timestep ( Block * block ) const throw()
+double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
 {
   // Implicitly assumes that "pressure" is a permanent field
   // analogous to ppm timestep calulation, probably want to require that cfast
@@ -997,7 +1000,7 @@ double EnzoMethodVlct::timestep ( Block * block ) const throw()
   /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
   dtBaryons *= courant_;
 
-  ASSERT2("EnzoMethodVlct::timestep",
+  ASSERT2("EnzoMethodMHDVlct::timestep",
 	  "Invalid timestep, %g, was calculated for %s.",
 	  (double)dtBaryons, block->name().c_str(),
 	  ((dtBaryons>0) && (std::isfinite(dtBaryons))));

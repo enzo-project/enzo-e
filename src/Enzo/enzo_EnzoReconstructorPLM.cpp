@@ -92,7 +92,7 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 						  int dim,
 						  EnzoEquationOfState *eos)
 {
-  std::vector<std::string> prim_group_names = EnzoMethodVlct::prim_group_names;
+  std::vector<std::string> prim_group_names = EnzoMethodMHDVlct::prim_group_names;
   EnzoFieldArrayFactory array_factory(block);
   EnzoPermutedCoordinates coord(dim);
 

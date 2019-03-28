@@ -93,26 +93,26 @@ class EnzoConstrainedTransport;
 // Frequently used Helper class:
 class EnzoPermutedCoordinates;
 
-class EnzoMethodVlct : public Method {
+class EnzoMethodMHDVlct : public Method {
 
-  /// @class    EnzoMethodVlct
+  /// @class    EnzoMethodMHDVlct
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulate VL + CT MHD method
 
 public: // interface
 
-  /// Create a new EnzoMethodVlct object
-  EnzoMethodVlct(std::string rsolver,
+  /// Create a new EnzoMethodMHDVlct object
+  EnzoMethodMHDVlct(std::string rsolver,
 		 std::string half_recon_name,
 		 std::string full_recon_name,
 		 double gamma, double density_floor,
 		 double pressure_floor);
 
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodVlct);
+  PUPable_decl(EnzoMethodMHDVlct);
 
   /// Charm++ PUP::able migration constructor
-  EnzoMethodVlct (CkMigrateMessage *m)
+  EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
       eos_(NULL),
       half_dt_recon_(NULL),
@@ -129,8 +129,8 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  /// Delete EnzoMethodVlct object
-  ~EnzoMethodVlct();
+  /// Delete EnzoMethodMHDVlct object
+  ~EnzoMethodMHDVlct();
 
   /// Apply the method to advance a block one timestep 
   virtual void compute( Block * block) throw();

@@ -150,7 +150,7 @@ public: // interface
       method_pm_deposit_alpha(0.5),
       // EnzoMethodPmUpdate
       method_pm_update_max_dt(0.0),
-      // EnzoMethodVlct
+      // EnzoMethodMHDVlct
       method_vlct_riemann_solver(""),
       method_vlct_half_dt_reconstruct_method(""),
       method_vlct_full_dt_reconstruct_method(""),
@@ -340,7 +340,7 @@ public: // attributes
 
   double                     method_pm_update_max_dt;
 
-  /// EnzoMethodVlct
+  /// EnzoMethodMHDVlct
   std::string                method_vlct_riemann_solver;
   std::string                method_vlct_half_dt_reconstruct_method;
   std::string                method_vlct_full_dt_reconstruct_method;

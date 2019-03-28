@@ -72,7 +72,7 @@ struct EnzoFieldConditions : public PUP::able
   ENTRY(    pressure,        hydro,   FieldCat::primitive, SCALAR)    \
   ENTRY(      bfield,          MHD,     FieldCat::overlap, VECTOR)
 
-// The current convention (within EnzoMethodVlct) is that the main fields
+// The current convention (within EnzoMethodMHDVlct) is that the main fields
 // associated with each quantity are: 
 //    - the same as the group name if the quantity is a scalar
 //    - the same as the group name + "_x", "_y", or "_z" if the quantity is a

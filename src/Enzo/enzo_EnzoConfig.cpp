@@ -127,7 +127,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_pm_deposit_alpha(0.5),
   /// EnzoMethodPmUpdate
   method_pm_update_max_dt(std::numeric_limits<double>::max()),
-  /// EnzoMethodVlct
+  /// EnzoMethodMHDVlct
   method_vlct_riemann_solver(""),
   method_vlct_half_dt_reconstruct_method(""),
   method_vlct_full_dt_reconstruct_method(""),
