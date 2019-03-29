@@ -9,7 +9,7 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
 						  int dim,
 						  EnzoEquationOfState *eos)
 {
-  std::vector<std::string> prim_group_names = EnzoMethodMHDVlct::prim_group_names;
+  std::vector<std::string> group_names = this->group_names_;
 
   EnzoFieldArrayFactory array_factory(block);
   // determine components of i unit vector
@@ -17,11 +17,10 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
   int i_x, i_y, i_z;
   coord.i_unit_vector(i_x,i_y,i_z);
 
-  // unecessary values are computed for the inside faces of outermost ghost zone
-  for (unsigned int group_ind=0;group_ind<prim_group_names.size(); group_ind++){
+  for (unsigned int group_ind=0; group_ind<group_names.size(); group_ind++){
 
     // load group name and number of fields in the group
-    std::string group_name = prim_group_names[group_ind];
+    std::string group_name = group_names[group_ind];
     int num_fields = prim_group.size(group_name);
 
     // Handle possibility of having a density/pressure floor:
@@ -47,8 +46,6 @@ void EnzoReconstructorNN::reconstruct_interface (Block *block,
 	  for (int ix=0; ix<wc.shape(2)-i_x; ix++) {
 	      wl(iz,iy,ix) = wc(iz,iy,ix);
 	      wr(iz,iy,ix) = wc_offset(iz,iy,ix);
-	      ASSERT("EnzoReconstructorNN", "There is a NaN or inf\n",
-		   std::isfinite(wl(iz,iy,ix)) && std::isfinite(wr(iz,iy,ix)));
 	  }
 	}
       }

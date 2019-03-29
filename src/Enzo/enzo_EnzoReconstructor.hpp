@@ -2,6 +2,8 @@
 #ifndef ENZO_ENZO_RECONSTRUCTOR_HPP
 #define ENZO_ENZO_RECONSTRUCTOR_HPP
 
+#include <pup_stl.h>
+
 class EnzoReconstructor : public PUP::able
 {
   /// @class    EnzoReconstructor
@@ -16,8 +18,9 @@ public: // interface
   static EnzoReconstructor* construct_reconstructor(std::string name);
 
   /// Create a new EnzoReconstructor
-  EnzoReconstructor() throw()
-  {}
+  EnzoReconstructor(std::vector<std::string> group_names) throw()
+    : group_names_(group_names)
+  { }
 
   /// Virtual destructor
   virtual ~EnzoReconstructor()
@@ -28,13 +31,14 @@ public: // interface
 
   /// CHARM++ migration constructor for PUP::able
   EnzoReconstructor (CkMigrateMessage *m)
-    : PUP::able(m)
+    : PUP::able(m)  
   {  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
     PUP::able::pup(p);
+    p|group_names_;
   }
 
   // Reconstructs the interface values
@@ -45,6 +49,8 @@ public: // interface
 				      Grouping &priml_group,
 				      Grouping &primr_group, int dim,
 				      EnzoEquationOfState *eos)=0;
+protected:
+  std::vector<std::string> group_names_;
 };
 
 #endif /* ENZO_ENZO_RECONSTRUCTOR_HPP */

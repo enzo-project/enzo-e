@@ -14,7 +14,9 @@ EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver)
   cond.MHD = true;
 
   // Generate vector of group names of passive advected scalars
-  std::vector<std::string> passive_groups{"species", "colors"};
+  EnzoCenteredFieldRegistry registry;
+  std::vector<std::string> passive_groups;
+  passive_groups = registry.passive_scalar_group_names(cond);
 
   // In the future, allocate array of flux functors here
   FluxFunctor** flux_funcs = NULL;

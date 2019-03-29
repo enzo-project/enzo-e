@@ -19,9 +19,9 @@
 // To allow for easily adding additional fields with non-trivial flux
 // calculations (e.g. cosmic rays or possibly internal energy), the
 // constructor will accept an array of functors, subclassed from FluxFunctor
-// - Again, if the functors are too slow, we could specify the functors as
-//   variadic template arguments (allowing operator() to be inlined within the
-//   for loop)
+// - If the functors are too slow, we could hardcode the functions into the
+//   Riemann Solver or we could specify the functors as variadic template
+//   arguments (allowing operator() to be inlined within the for loop)
 //
 // To add an additional fields, add the field to FLUX_TABLE and modify the
 // factory method

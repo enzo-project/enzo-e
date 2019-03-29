@@ -10,8 +10,8 @@ class EnzoReconstructorNN : public EnzoReconstructor
 public: // interface
 
   /// Create a new EnzoReconstructorNN
-  EnzoReconstructorNN()
-    : EnzoReconstructor()
+  EnzoReconstructorNN(std::vector<std::string> group_names)
+    : EnzoReconstructor(group_names)
   { }
 
   /// CHARM++ PUP::able declaration
@@ -25,7 +25,7 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
   {
-    PUP::able::pup(p);
+    EnzoReconstructor::pup(p);
   };
 
   // Reconstructs the interface values
