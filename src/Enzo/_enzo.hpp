@@ -225,6 +225,16 @@ struct fluxes
 #include "enzo_EnzoRefineParticleMass.hpp"
 #include "enzo_EnzoRefineMass.hpp"
 
+#include "enzo_EnzoEquationOfState.hpp"
+#include "enzo_EnzoEOSIdeal.hpp"
+#include "enzo_EnzoReconstructor.hpp"
+#include "enzo_EnzoReconstructorNN.hpp"
+#include "enzo_EnzoReconstructorPLM.hpp"
+#include "enzo_EnzoRiemann.hpp"
+#include "enzo_EnzoRiemannHLLE.hpp"
+#include "enzo_EnzoRiemannHLLD.hpp"
+#include "enzo_EnzoConstrainedTransport.hpp"
+
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
 #include "enzo_EnzoMethodGrackle.hpp"
@@ -238,16 +248,6 @@ struct fluxes
 #include "enzo_EnzoMethodPpml.hpp"
 #include "enzo_EnzoMethodTurbulence.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
-
-#include "enzo_EnzoEquationOfState.hpp"
-#include "enzo_EnzoEOSIdeal.hpp"
-#include "enzo_EnzoReconstructor.hpp"
-#include "enzo_EnzoReconstructorNN.hpp"
-#include "enzo_EnzoReconstructorPLM.hpp"
-#include "enzo_EnzoRiemann.hpp"
-#include "enzo_EnzoRiemannHLLE.hpp"
-#include "enzo_EnzoRiemannHLLD.hpp"
-#include "enzo_EnzoConstrainedTransport.hpp"
 
 #include "enzo_EnzoMatrixDiagonal.hpp"
 #include "enzo_EnzoMatrixIdentity.hpp"

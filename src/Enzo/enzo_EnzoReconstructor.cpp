@@ -3,13 +3,10 @@
 
 //----------------------------------------------------------------------
 
-EnzoReconstructor* EnzoReconstructor::construct_reconstructor(std::string name)
+EnzoReconstructor* EnzoReconstructor::construct_reconstructor
+(std::string name, const EnzoFieldConditions cond)
 {
   // some repeated code from construct_riemann
-  // Setup the EnzoFieldConditions struct
-  EnzoFieldConditions cond;
-  cond.hydro = true;
-  cond.MHD = true;
   EnzoCenteredFieldRegistry registry;
   std::vector<std::string> group_names = registry.prim_group_names(cond, true);
 

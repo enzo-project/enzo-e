@@ -5,14 +5,9 @@
 
 //----------------------------------------------------------------------
 
-EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver)
+EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver,
+					    const EnzoFieldConditions cond)
 {
-
-  // Setup the EnzoFieldConditions struct
-  EnzoFieldConditions cond;
-  cond.hydro = true;
-  cond.MHD = true;
-
   // Generate vector of group names of passive advected scalars
   EnzoCenteredFieldRegistry registry;
   std::vector<std::string> passive_groups;

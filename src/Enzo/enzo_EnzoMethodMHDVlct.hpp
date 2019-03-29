@@ -1,4 +1,4 @@
-// This class is composed of several component classses
+// This class makes use of several component classses
 // These classes include the following:
 //
 //    EnzoEquationOfState:       Equation of State for Gas
@@ -85,14 +85,6 @@
 #ifndef ENZO_ENZO_METHOD_VLCT_HPP
 #define ENZO_ENZO_METHOD_VLCT_HPP
 
-class EnzoEquationOfState;
-class EnzoReconstructor;
-class EnzoRiemann;
-class EnzoConstrainedTransport;
-
-// Frequently used Helper class:
-class EnzoPermutedCoordinates;
-
 class EnzoMethodMHDVlct : public Method {
 
   /// @class    EnzoMethodMHDVlct
@@ -103,10 +95,10 @@ public: // interface
 
   /// Create a new EnzoMethodMHDVlct object
   EnzoMethodMHDVlct(std::string rsolver,
-		 std::string half_recon_name,
-		 std::string full_recon_name,
-		 double gamma, double density_floor,
-		 double pressure_floor);
+		    std::string half_recon_name,
+		    std::string full_recon_name,
+		    double gamma, double density_floor,
+		    double pressure_floor);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodMHDVlct);
@@ -114,17 +106,17 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
+      conserved_group_(NULL),
+      bfieldi_group_(NULL),
+      primitive_group_(NULL),
       eos_(NULL),
       half_dt_recon_(NULL),
       full_dt_recon_(NULL),
-      riemann_solver_(NULL)
-  {
-    // We want to pack/unpack Groupings in the future.
-    conserved_group_ = new Grouping;
-    bfieldi_group_ = new Grouping;
-    primitive_group_ = new Grouping;
-    setup_groups_();
-  }
+      riemann_solver_(NULL),
+      cons_group_names_(),
+      prim_group_names_(),
+      cond_()
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -147,7 +139,7 @@ public: // interface
 protected: // methods
 
   // Prepare the group
-  void setup_groups_();
+  void setup_groups_(const EnzoFieldConditions cond);
 
   // not sure if I will pass field_ids and blocks or arrays
   // not sure if this should be static
@@ -206,6 +198,12 @@ protected: // attributes
   EnzoReconstructor *full_dt_recon_;
   EnzoRiemann *riemann_solver_;
 
+  std::vector<std::string> cons_group_names_;
+  std::vector<std::string> prim_group_names_;
+
+  // there is a bug with PUPing grouping objects so we need to store the
+  // following
+  EnzoFieldConditions cond_;
 };
 
 #endif /* ENZO_ENZO_METHOD_VLCT_HPP */

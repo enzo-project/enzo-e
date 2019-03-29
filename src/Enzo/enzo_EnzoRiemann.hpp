@@ -153,7 +153,8 @@ public: // interface
   // Factory method for constructing the EnzoRiemann object
   // The signature of this method must be modified as additional physics get's
   // added
-  static EnzoRiemann* construct_riemann(std::string solver);
+  static EnzoRiemann* construct_riemann(std::string solver,
+					const EnzoFieldConditions cond);
 
   EnzoRiemann(EnzoFieldConditions cond,
 	      std::vector<std::string> &extra_passive_groups,

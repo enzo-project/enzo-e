@@ -3,25 +3,6 @@
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 
-// These 2 vectors need to be updated as more physics are added (e.g. dual
-// energy formalism, CR Energy & Flux, species, colors)
-
-// The following function sets up a list of cell-centered conserved groups
-// conserved_group_, temp_conserved_group, xflux_group, yflux_group, and
-// zflux_group will have the same subset of groups
-std::vector<std::string> EnzoMethodMHDVlct::cons_group_names={"density",
-							      "momentum",
-							      "total_energy",
-							      "bfield"};
-
-// The following function sets up a listof groups of primitive quantities
-// primitive_group_, priml_group, and primr_group all will have the same
-// subset of groups
-std::vector<std::string> EnzoMethodMHDVlct::prim_group_names={"density",
-							      "velocity",
-							      "pressure",
-							      "bfield"};
-
 //----------------------------------------------------------------------
 
 EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
@@ -52,52 +33,50 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
 
-  conserved_group_ = new Grouping;
-  bfieldi_group_ = new Grouping;
-  primitive_group_ = new Grouping;
-  // need a more sophisticated way to setup groups in the future
-  setup_groups_();
+  // Setup the EnzoFieldConditions struct
+  EnzoFieldConditions cond;
+  cond.hydro = true;
+  cond.MHD = true;
 
+  cond_ = cond;
+
+  // setup primitive_group_, conserved_group_, bfieldi_group_ AND get group
+  // names
+  setup_groups_(cond);
+
+  // Initialize the component objects
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
-  half_dt_recon_ = EnzoReconstructor::construct_reconstructor(half_recon_name);
-  full_dt_recon_ = EnzoReconstructor::construct_reconstructor(full_recon_name);
-  riemann_solver_ = EnzoRiemann::construct_riemann(rsolver);
+  half_dt_recon_ = EnzoReconstructor::construct_reconstructor(half_recon_name,
+							      cond);
+  full_dt_recon_ = EnzoReconstructor::construct_reconstructor(full_recon_name,
+							      cond);
+  riemann_solver_ = EnzoRiemann::construct_riemann(rsolver, cond);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::setup_groups_()
+void EnzoMethodMHDVlct::setup_groups_(const EnzoFieldConditions cond)
 {
-  // Fill in entries in conserved_group_ and primitive_group_
-  // conserved_group_ will be entirely permanent fields while primitive_group_
-  // will be partially made of temporary fields
 
-  // In the future, this may also incorporate species, colors, and CRs
+  EnzoCenteredFieldRegistry registry;
+  // all fields in primitive_group_ are permanent fields
+  primitive_group_ = registry.build_cons_grouping(cond, "", "");
+  // most (if not all) fields in conserved_group_ are temporary
+  // For transparency, we create secondary "conserved" versions of fields that
+  // represent quantities which are both conserved and primitive (e.g. density
+  // and magnetic field). For example, primitive_group_ uses the permanent
+  // field, "density", while conserved_group_ uses the temporary field
+  // "cons_density"
+  conserved_group_ = registry.build_cons_grouping(cond, "", "cons");
 
-  primitive_group_->add("density", "density");
-  primitive_group_->add("velocity_x", "velocity");
-  primitive_group_->add("velocity_y", "velocity");
-  primitive_group_->add("velocity_z", "velocity");
-  primitive_group_->add("pressure", "pressure");
-  // The following are cell-centered
-  primitive_group_->add("bfield_x", "bfield");
-  primitive_group_->add("bfield_y", "bfield");
-  primitive_group_->add("bfield_z", "bfield");
-
+  bfieldi_group_ = new Grouping;
   bfieldi_group_->add("bfieldi_x", "bfield");
   bfieldi_group_->add("bfieldi_y", "bfield");
   bfieldi_group_->add("bfieldi_z", "bfield");
 
-  // For transparency we will create secondary "conserved" density and magnetic
-  // fields
-  conserved_group_->add("cons_density", "density");
-  conserved_group_->add("momentum_x","momentum");
-  conserved_group_->add("momentum_y","momentum");
-  conserved_group_->add("momentum_z","momentum");
-  conserved_group_->add("total_energy", "total_energy");
-  conserved_group_->add("cons_bfield_x", "bfield");
-  conserved_group_->add("cons_bfield_y", "bfield");
-  conserved_group_->add("cons_bfield_z", "bfield");
+  // Get the names of the groups
+  cons_group_names_ = registry.cons_group_names(cond, true);
+  prim_group_names_ = registry.prim_group_names(cond, true);
 }
 
 //----------------------------------------------------------------------
@@ -105,6 +84,7 @@ void EnzoMethodMHDVlct::setup_groups_()
 EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
 {
   delete conserved_group_;
+  delete bfieldi_group_;
   delete primitive_group_;
   delete half_dt_recon_;
   delete full_dt_recon_;
@@ -122,15 +102,20 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
 
   Method::pup(p);
 
-  // I think this is appropriate, but not totally sure
-  // need to initialize to NULL
+  // a bug prevents us from pupping the groupings
+  //p|conserved_group_;
+  //p|bfieldi_group_;
+  //p|primitive_group_;
+  p|cond_;
+  setup_groups_(cond_);
+
   p|eos_;
   p|half_dt_recon_;
   p|full_dt_recon_;
   p|riemann_solver_;
 
-  // Currently rebuilding the groups every time. Need to pup conserved_group
-  // and primitive_group_ in the future
+  p|cons_group_names_;
+  p|prim_group_names_;
 }
 
 //----------------------------------------------------------------------
@@ -420,7 +405,6 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					   Grouping &out_cons_group, double dt)
 {
   // For now, not having density floor affect momentum or total energy density
-  std::vector<std::string> cons_group_names = EnzoMethodMHDVlct::cons_group_names;
   EnzoFieldArrayFactory array_factory(block);
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
@@ -447,9 +431,10 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block, Grouping &xflux_group,
   enzo_float dtdy = dt/enzo_block->CellWidth[1];
   enzo_float dtdz = dt/enzo_block->CellWidth[2];
 
-  for (unsigned int group_ind=0;group_ind<cons_group_names.size();group_ind++){
+  for (unsigned int group_ind=0; group_ind<cons_group_names_.size();
+       group_ind++){
     // load group name and number of fields in the group
-    std::string group_name = cons_group_names[group_ind];
+    std::string group_name = cons_group_names_[group_ind];
     if (group_name == "bfield"){
       continue;
     }
@@ -685,9 +670,9 @@ void copy_grouping_fields_(Block *block, Grouping &conserved_group,
 // Really only need to initialize values at the end of the allocated blocks of
 // memory.
 void initialize_recon_prim_to_floor_(Block *block, Grouping &grouping,
-				     EnzoEquationOfState &eos){
-  
-  std::vector<std::string> prim_group_names = EnzoMethodMHDVlct::prim_group_names;
+				     EnzoEquationOfState &eos,
+				     std::vector<std::string> &prim_group_names)
+{
   int start = -1;
   int stop = -1;
   Field field = block->data()->field();
@@ -738,8 +723,7 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
 					      Grouping &consl_group,
 					      Grouping &consr_group)
 {
-  std::vector<std::string> cons_group_names = EnzoMethodMHDVlct::cons_group_names;
-  std::vector<std::string> prim_group_names = EnzoMethodMHDVlct::prim_group_names;
+  std::vector<std::string> prim_group_names = prim_group_names_;
   
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
@@ -747,8 +731,8 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
   
   // First, reserve/allocate temporary conserved-related fields
   // allocate applicable temporary fields in primitive_group_
-  for (unsigned int i=0;i<cons_group_names.size();i++){
-    std::string group_name = cons_group_names[i];
+  for (unsigned int i=0;i<cons_group_names_.size();i++){
+    std::string group_name = cons_group_names_[i];
     int num_fields = conserved_group_->size(group_name);
 
     for (int j=0;j<num_fields;j++){
@@ -767,21 +751,21 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
   }
 
   // Prepare the temporary conserved fields (used to store values at half dt)
-  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names_,
 			    temp_conserved_group, "temp_",0,0,0);
 
   // Prepare temporary flux fields
-  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names_,
 			    xflux_group, "xflux_",-1,0,0);
-  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names_,
 			    yflux_group, "yflux_",0,-1,0);
-  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names_,
 			    zflux_group, "zflux_",0,0,-1);
 
   // Prepare left and right reconstructed conserved fields
-  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names_,
 			    consl_group, "cleft_",0,0,0);
-  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names,
+  prep_temp_field_grouping_(field, *conserved_group_, cons_group_names_,
 			    consr_group, "cright_",0,0,0);
 
   // Prepare temporary fields for priml and primr
@@ -789,9 +773,9 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
   //   - z and have shape (mz-1,  my,  mx)
   //   - y and have shape (  mz,my-1,  mx)
   //   - x and have shape (  mz,  my,mx-1)
-  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
+  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names_,
 			    priml_group, "left_",0,0,0);
-  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
+  prep_temp_field_grouping_(field, *primitive_group_, prim_group_names_,
 			    primr_group, "right_",0,0,0);
 
   // reserve/allocate fields for weight fields
@@ -821,7 +805,7 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
   // zones to avoid NaNs during conversion to primitives  - these would
   // propogate through to the flux calculation)
   copy_grouping_fields_(block, *conserved_group_, temp_conserved_group,
-			cons_group_names);
+			cons_group_names_);
   // initialize exterior face values of the temporary interface B-field
   // (this is just to avoid NaNs while computing the cell-centered B-fields
   // out in the ghost zone - this is NOT necessary if the underlying fields
@@ -831,8 +815,8 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
 			bfieldi_group_names);
 
   // initialize values of reconstructed primitives
-  initialize_recon_prim_to_floor_(block, priml_group, *eos_);
-  initialize_recon_prim_to_floor_(block, primr_group, *eos_);
+  initialize_recon_prim_to_floor_(block, priml_group, *eos_, prim_group_names_);
+  initialize_recon_prim_to_floor_(block, primr_group, *eos_, prim_group_names_);
 }
 
 //----------------------------------------------------------------------
@@ -845,10 +829,6 @@ void deallocate_grouping_fields_(Field &field,
   for (unsigned int i=0;i<group_names.size();i++){
     std::string group_name = group_names[i];
     int num_fields = grouping.size(group_name);
-    if (num_fields == 0) {
-      continue; // This group is not tracked by grouping
-    }
-
     for (int j=0;j<num_fields;j++){
       // Determine field_name and id
       std::string field_name = (grouping.item(group_name,j));
@@ -877,24 +857,22 @@ void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
 						Grouping &consl_group,
 						Grouping &consr_group)
 {
-  std::vector<std::string> cons_group_names= EnzoMethodMHDVlct::cons_group_names;
-  std::vector<std::string> prim_group_names= EnzoMethodMHDVlct::prim_group_names;
 
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
   // deallocate cell-centered conservative quantity fields
-  deallocate_grouping_fields_(field, cons_group_names, temp_conserved_group);
-  deallocate_grouping_fields_(field, cons_group_names, xflux_group);
-  deallocate_grouping_fields_(field, cons_group_names, yflux_group);
-  deallocate_grouping_fields_(field, cons_group_names, zflux_group);
-  deallocate_grouping_fields_(field, cons_group_names, consl_group);
-  deallocate_grouping_fields_(field, cons_group_names, consr_group);
+  deallocate_grouping_fields_(field, cons_group_names_, *conserved_group_);
+  deallocate_grouping_fields_(field, cons_group_names_, temp_conserved_group);
+  deallocate_grouping_fields_(field, cons_group_names_, xflux_group);
+  deallocate_grouping_fields_(field, cons_group_names_, yflux_group);
+  deallocate_grouping_fields_(field, cons_group_names_, zflux_group);
+  deallocate_grouping_fields_(field, cons_group_names_, consl_group);
+  deallocate_grouping_fields_(field, cons_group_names_, consr_group);
 
   // deallocate the (relevant) primitive primitive quantity fields
-  deallocate_grouping_fields_(field, prim_group_names, *primitive_group_);
-  deallocate_grouping_fields_(field, prim_group_names, priml_group);
-  deallocate_grouping_fields_(field, prim_group_names, primr_group);
+  deallocate_grouping_fields_(field, prim_group_names_, priml_group);
+  deallocate_grouping_fields_(field, prim_group_names_, primr_group);
 
   // deallocate electric fields
   std::vector<std::string> efield_group_names{"efield"};

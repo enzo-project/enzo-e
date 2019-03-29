@@ -15,7 +15,8 @@ public: // interface
 
   // Factory method for constructing EnzoReconstructor
   // The signature of this method may need to be modified
-  static EnzoReconstructor* construct_reconstructor(std::string name);
+  static EnzoReconstructor* construct_reconstructor(std::string name,
+						    const EnzoFieldConditions cond);
 
   /// Create a new EnzoReconstructor
   EnzoReconstructor(std::vector<std::string> group_names) throw()
