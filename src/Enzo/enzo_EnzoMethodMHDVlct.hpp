@@ -186,6 +186,25 @@ protected: // methods
 			       Grouping &temp_bfieldi_group,
 			       Grouping &consl_group, Grouping &consr_group);
 
+  // helper function to initialize values of reconstructed primitives to floor
+  // that will never be initialized by reconstruction. This is necessary to
+  // avoid NaNs/inf because when EOS calculates reconstructed conserved
+  // quantites, EOS assumes that the reconstructed primitives are cell-centered
+  // (since they are not registered as face-centered) which means it will try
+  // to convert otherwise uninitialized values to conservatives.
+  void initialize_recon_prim_to_floor_(Block *block, Grouping &grouping,
+				       EnzoEquationOfState &eos,
+				       std::vector<std::string> &group_names);
+ 
+  // Temporary conserved fields have arbitrary initial values and the
+  // calculation at the first half timestep only does not fill the outermost
+  // layer the temporary fields. This can lead to NaNs or inf (which don't
+  // propagate to the active zone, but can impact performance). This function
+  // is used to initialize the outer zone to the appropriate 0 or floor value.
+  void outer_ghost_to_floor_(Block *block, Grouping &grouping,
+			     EnzoEquationOfState &eos,
+			     std::vector<std::string> &group_names);
+
 protected: // attributes
 
   // In a lot of senses, these will serve as aliases
