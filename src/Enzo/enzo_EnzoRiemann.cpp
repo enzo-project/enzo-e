@@ -47,8 +47,9 @@ EnzoRiemann::EnzoRiemann(EnzoFieldConditions cond,
 			 FluxFunctor** flux_funcs, int n_funcs)
 {
   conditions_ = cond;
-  cons_lut_ = prepare_conserved_lut(conditions_, &n_cons_keys_);
-  prim_lut_ = prepare_primitive_lut(conditions_, &n_prim_keys_);
+  EnzoCenteredFieldRegistry registry;
+  cons_lut_ = registry.prepare_cons_lut(conditions_, &n_cons_keys_);
+  prim_lut_ = registry.prepare_prim_lut(conditions_, &n_prim_keys_);
   
   // construct of all groups of passively advected fields
   std::vector<std::string> passive_groups_ = passive_groups;
@@ -79,8 +80,9 @@ void EnzoRiemann::pup (PUP::er &p)
   p|conditions_;
   if (p.isUnpacking()){
     // avoiding PUPing field_luts
-    cons_lut_ = prepare_conserved_lut(conditions_, &n_cons_keys_);
-    prim_lut_ = prepare_primitive_lut(conditions_, &n_prim_keys_);
+    EnzoCenteredFieldRegistry registry;
+    cons_lut_ = registry.prepare_cons_lut(conditions_, &n_cons_keys_);
+    prim_lut_ = registry.prepare_prim_lut(conditions_, &n_prim_keys_);
   }
 
   p|passive_groups_;
@@ -105,20 +107,19 @@ void EnzoRiemann::solve (Block *block, Grouping &priml_group,
 			 EnzoEquationOfState *eos)
 {
   // In the future, this stuff up here will be handled at construction
-
+  EnzoCenteredFieldRegistry registry;
   EFlt3DArray *wl_arrays, *wr_arrays, *ul_arrays, *ur_arrays, *flux_arrays;
 
-
-  wl_arrays = load_array_of_fields(block, prim_lut_, n_prim_keys_, priml_group,
-				   dim);
-  wr_arrays = load_array_of_fields(block, prim_lut_, n_prim_keys_, primr_group,
-				   dim);
-  ul_arrays = load_array_of_fields(block, cons_lut_, n_cons_keys_, consl_group,
-				   dim);
-  ur_arrays = load_array_of_fields(block, cons_lut_, n_cons_keys_, consr_group,
-				   dim);
-  flux_arrays = load_array_of_fields(block, cons_lut_, n_cons_keys_,
-				     flux_group, dim);
+  wl_arrays = registry.load_array_of_fields(block, prim_lut_, n_prim_keys_,
+					    priml_group, dim);
+  wr_arrays = registry.load_array_of_fields(block, prim_lut_, n_prim_keys_,
+					    primr_group, dim);
+  ul_arrays = registry.load_array_of_fields(block, cons_lut_, n_cons_keys_,
+					    consl_group, dim);
+  ur_arrays = registry.load_array_of_fields(block, cons_lut_, n_cons_keys_,
+					    consr_group, dim);
+  flux_arrays = registry.load_array_of_fields(block, cons_lut_, n_cons_keys_,
+					      flux_group, dim);
 
   enzo_float *wl, *wr, *Ul, *Ur, *Fl, *Fr;
   wl = new enzo_float[n_prim_keys_];  wr = new enzo_float[n_prim_keys_];

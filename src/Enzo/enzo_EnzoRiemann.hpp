@@ -3,7 +3,6 @@
 #define ENZO_ENZO_RIEMANN_HPP
 
 #include <pup_stl.h>
-#include "enzo_EnzoRiemannFields.hpp"
 
 // This class factors out the repeated code between different approximate
 // Riemann Solvers (e.g. HLLE, HLLC, HLLD and possibly LLF & Roe solvers).
@@ -30,6 +29,96 @@
 // Current state:
 //  - support for passive scalars is not yet implemented (though there is a
 //    spot carved out for it)
+
+
+// Derivatives of FIELD_TABLE used by EnzoRiemann
+//   - The Riemann Solver makes use of two sets of arrays.
+//
+//       1. The first set is made up of arrays of instances of EFlt3DArray.
+//          Within a given array, each instance of EFlt3DArray encapsulates the
+//          data for a different field. The solver uses:
+//            A. arrays of left/right reconstructed primitive fields
+//            B. arrays of left/right reconstructed conserved fields
+//            C. array of fields where the calculated Riemann Flux is stored
+//
+//       2. The second set is made up of arrays of instances of enzo_float.
+//          These arrays serve as temporary storage buffers which store 
+//          quantities for a single cell interface. The solver uses
+//            A. arrays of left/right reconstructed primitives quantities
+//            B. arrays of left/right reconstructed conserved quantities
+//            C. arrars of left/right fluxes
+//
+//     Each of the above arrays only include quantities that are required for
+//     the calculations of wave speeds or have non-trivial flux calculations.
+//     Passively advected scalars are not included in these arrays (their flux
+//     is computed separately).
+//
+//   - The general code-flow of the RiemannSolver is:
+//
+//       a For a given cell-interface on a grid, the reconstructed primitive
+//         conserved quantites from arrays 1A and 1B into the temporary arrays
+//         2A and 2B.
+//
+//       b The standard MHD fluxes are computed at that location and saved into
+//         the arrays left/right fluxes.
+//
+//       c Optional functions are also applied to compute additional left/right
+//         fluxes. Pointers to these functions are specified upon construction
+//         of the solver and are used for non-standard fluxes (e.g. cosmic ray
+//         energy/fluxes)
+//
+//       d This step is implemented in a virtual function implemented by a
+//         subclass. The wavespeeds at the current interface is computed.
+//         Then for each conserved (non-passive scalar) field, the array of
+//         Riemann Flux (1C) at the current interface, is set equal to the
+//         flux computed from the left/right reconstructed conserved values
+//         (2B) and left/right fluxes (2C). This is achieved by iterating over
+//         the indices of each array simultaneously.
+//
+//   - Use of the following field_lut struct:
+//
+//       - The calculation of fluxes and wave speeds requires random access of
+//         specific fields. We also need to be able to iterate over the entries
+//         of multiple arrays simultaneously (e.g. to accomplish part d, above)
+//         Unlike Enzo, we wanted to avoid statically declaring which indices
+//         correspond to which fields (adding additional sets of fields, like
+//         internal energy and cosmic ray energy/fluxes becomes harder)
+//
+//       - We settled on using the field_lut struct as a lookup table. The
+//         struct has members named for every quantity listed in FIELD_TABLE
+//           - For a SCALAR, the member name directly matches the name in
+//             column 1
+//           - For a VECTOR, there are 3 members: {name}_i, {name}_j, {name}_k
+//             ({name} cooresponds to the name appearing in column 1)
+//         Each struct contains members named for all quantities in the table
+//         (it includes conserved AND primitive quantites).
+//
+//       - Example: If we have an array of reconstructed primitives, wl, and
+//         an instance of field_lut, prim_lut, that stores the indices of
+//         primitives, then wl[prim_lut.density] and wl[prim_lut.pressure]
+//         indicates the entries reserved for density and pressure (an
+//         instance of field_lut storing indices for conserved quantities
+//         would also indicate the index where density - since density is BOTH
+//         conserved AND primitive)
+//
+//       - Given an instance of EnzoFieldConditions, the prepare_conserved_lut
+//         function yields an initialized instance of field_lut and the
+//         the length necessary for an array to hold values related to
+//         conserved quantities. All members of field_lut corresponding to
+//         conserved quantities are set equal to consectuive integers starting
+//         from 0 (All members that don't correspond to conserved quantites
+//         are set to -1).
+//
+//       - prepare_primitive_lut is analogous to prepare_conserved_lut except
+//         it applies to primitive quantities
+//     
+//       - load_array_of_fields constructs an array of instances of EFlt3DArray
+//         that correspond to reconstructed primitive fields, reconstructed
+//         conserved fields OR flux fields. The function requires a pointer to
+//         an instance of Block, the relevant initialized field_lut, the
+//         length of the output field, an instance of grouping (group names
+//         must match the relevant quantity names) and the direction along
+//         which we are computing fluxes
 
 class FluxFunctor : public PUP::able
 {

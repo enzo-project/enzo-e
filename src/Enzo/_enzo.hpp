@@ -201,6 +201,8 @@ struct fluxes
 
 #include "enzo_EnzoArray.hpp"
 #include "enzo_EnzoFieldArrayFactory.hpp"
+#include "enzo_EnzoPermutedCoordinates.hpp"
+#include "enzo_EnzoCenteredFieldRegistry.hpp"
 
 #include "enzo_EnzoBoundary.hpp"
 
@@ -237,7 +239,6 @@ struct fluxes
 #include "enzo_EnzoMethodTurbulence.hpp"
 #include "enzo_EnzoMethodMHDVlct.hpp"
 
-#include "enzo_EnzoPermutedCoordinates.hpp"
 #include "enzo_EnzoEquationOfState.hpp"
 #include "enzo_EnzoEOSIdeal.hpp"
 #include "enzo_EnzoReconstructor.hpp"
