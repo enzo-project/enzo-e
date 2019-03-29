@@ -966,7 +966,7 @@ void EnzoInitialIsolatedGalaxy::ReadParticlesFromFile_(const int &nl,
 
            particleIcLifetime[ipt][ip]     = 10.0 * time_conv;
            particleIcCreationTime[ipt][ip] = (this->recent_SF_start +
-                                             0.5 * (i + 1) * this->recent_SF_bin_size) * time_conv;
+                                             0.5 * (ibin + 1) * this->recent_SF_bin_size) * time_conv;
 
          }
 
