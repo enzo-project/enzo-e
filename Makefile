@@ -50,7 +50,15 @@ cccc:
 #----------------------------------------------------------------------
 .PHONY: diff
 diff:
-	./tools/diff-org.sh > diff.org
+	@echo 'Generating "diff.org"'
+	@echo '* TODO [/] git diff branch (' `git rev-parse --abbrev-ref HEAD` ')' > diff.org
+	@echo '** TODO [/] Unstaged diff'                     >> diff.org
+	@git diff -b |./tools/awk/diff-org.awk                >> diff.org
+	@echo '** TODO [/] Staged diff'                       >> diff.org
+	@git diff --cached HEAD -b | ./tools/awk/diff-org.awk >> diff.org
+	@echo '** TODO [/] Upstream (enzo-project/enzo-e [master])' >> diff.org
+	@git diff @{upstream} master | ./tools/awk/diff-org.awk      >> diff.org
+
 #----------------------------------------------------------------------
 .PHONY: gdb
 gdb:
