@@ -43,6 +43,11 @@ and ``CELLO_PREC`` environment variables must be initialized.
 system to use the ``config/gordon_gnu.py`` configuration file, which
 is used for Comet as well as Gordon.
 
+.. code-block:: bash
+
+   $ export CELLO_PREC=single
+   $ export CELLO_ARCH=gordon_gnu
+
 Secondly, the ``HDF5HOME`` environment variable should be initialized
 to tell the build system where the HDF5 library is installed.  This
 can be set to ``/home/ux452912/public``, which is a publicly readable
@@ -51,7 +56,7 @@ own home directory and set ``HDF5HOME`` accordingly.
 
 .. code-block:: bash
 
-   $ export HDF5HOME /home/ux452912/public
+   $ export HDF5HOME=/home/ux452912/public
 
 -------
 Modules
