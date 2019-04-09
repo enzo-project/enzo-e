@@ -72,35 +72,83 @@ the files ``enzo_``\ *class-name*\ ``.hpp`` and ``enzo_``\ *class-name*\ ``.cpp`
 Naming class methods
 ====================
 
-public methods thing_1()
-private methods thing_2_()
-entry methods p_blah()
-reduction entry methods r_reduce()
-Naming variables
-Array dimensions mx,my,mz
-Active region size nx,ny,nz
-Ghost zone depth gx,gy,gz
-Loop variables ix,iy,iz
+Methods (functions associated with a specific class) are generally
+named beginning with a lower-case letter, and underscores for spacing.
+Public methods end in an underscore ``_``.
+
++---------------------------------+-------------------------+
+| Method type                     | Method name             |
++=================================+=========================+
+| public methods                  | ``a_public_thing()``    |
++---------------------------------+-------------------------+
+| private methods                 | ``a_private_thing_()``  |
++---------------------------------+-------------------------+
+| Charm++ entry methods           | ``p_blah()``            |
++---------------------------------+-------------------------+
+| Charm++ reduction entry methods | ``r_reduce()``          |
++---------------------------------+-------------------------+
+
+Note that Charm entry methods have very different behavior than
+regular C++ methods--they are (usually) asynchronous, return
+immediately, and are called using a Charm++ proxy to a class typically
+residing on a different processing element in a different memory
+space.  So it's important to name entry methods in a way that they are
+obviously entry methods!  See the Charm++ manual for more details.
+
 
 ====================
 Accessing Field data
 ====================
 
-Field field = block->data()->field();
-id = field.field_id("density");
-field.dimensions(id, &mx, &my, &mz);
-field.size (&nx, &ny, &nz);
-field.ghost_depth(id &gx, &gy, &gz);
-double * d = (double *) field.values(id);
-for (int iz=gz; iz<gz+nz; iz++) {
-for (int iy=gy; iy<gy+ny; iy++) {
-for (int ix=gx; ix<gx+nx; ix++) {
-int i = ix + mx*(iy + my*iz);
-d[i] = tiny ;
-}
-}
-}
+The (current) approach to accessing Cello Field block arrays is shown
+below.  The table summarizes the suggested names for Field-related
+variables used to access the array elements, and the following code
+initializes active zones (non-ghost zones) of the ``"density"`` field
+to be equal to 0.0.
 
+A (preferred) approach would be to use a multi-dimensional array
+template, such as ``MultiArray`` in the boost library.  Direct support
+for ``MultiArray`` will at some point be directly supported in Cello,
+though for the time-being the application developer can wrap the raw
+array pointers provided by Cello using the multidimensional array
+template of their choice.  Using array templates will improve code
+clarity and safety, though may result in some performance degredation.
+
+Summary of field attributes
+---------------------------
+
++------------------------+-----------------+
+| Field-related variable | suggested names |
++========================+=================+
+| Array dimensions       | ``mx,my,mz``    |
++------------------------+-----------------+
+| Active region size     | ``nx,ny,nz``    |
++------------------------+-----------------+
+| Ghost zone depth       | ``gx,gy,gz``    |
++------------------------+-----------------+
+| Loop variables         | ``ix,iy,iz``    |
++------------------------+-----------------+
+
+Sample code for clearing active density zones
+---------------------------------------------
+
+|    ``Field field = cello::field();``
+|    ``id = field.field_id("density");``
+|    ``field.dimensions (id, &mx, &my, &mz);``
+|    ``field.ghost_depth(id, &gx, &gy, &gz);``
+|
+|    ``enzo_float * d = (enzo_float *) field.values(id);``
+|
+|    ``for (int iz=gz; iz<mz-gz; iz++) {``
+|       ``for (int iy=gy; iy<my-gy; iy++) {``
+|          ``for (int ix=gx; ix<my-gx; ix++) {``
+|             ``int i = ix + mx*(iy + my*iz);``
+|             ``d[i] = 0.0;``
+|          ``}``
+|       ``}``
+|    ``}``
+
+ 
 ===================
 Accessing Particles
 ===================

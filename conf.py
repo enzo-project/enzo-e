@@ -21,7 +21,7 @@ import sys, os
 # Breath is for including Doxygen XML source code
 
 # /usr/lib/python2.7/dist-packages/breathe
-# sys.path.append( "/usr/lib/python3/dist-packages/breathe" )
+sys.path.append( "/usr/lib/python3/dist-packages/breathe" )
 
 # -- General configuration -----------------------------------------------------
 
@@ -33,9 +33,9 @@ import sys, os
 extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.jsmath',
               'sphinx.ext.todo']  # , 'breathe'
 
-# breathe_projects = { "cello": "/home/bordner/Cello/cello-src/src-xml/" }
+breathe_projects = { "cello": "/home/bordner/Cello/enzo-e.jobordner/src-xml/" }
 
-# breathe_default_project = "cello"
+breathe_default_project = "cello"
 
 jsmath_path = '/usr/share/jsmath/easy'
 

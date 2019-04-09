@@ -9,18 +9,29 @@ This page will help you get Enzo-E and Cello up and running.  It
 covers downloading the source code, porting the code to new platforms,
 configuring and compiling the code, and running a sample test problem.
 
+Other pages are available for helping to get started on specific
+architectures, including the "Comet" supercomputer at San Diego
+Supercomputing Center (SDSC), and the NSF Petascale supercomputer "Blue
+Waters" at the National Center for Supercomputing Applications (NCSA).
+
+.. toctree::
+   :maxdepth: 1
+	   
+   getting_started_comet
+   getting_started_blue_waters
+
 Downloading
 ===========
 
-``Enzo-E / Cello`` is currently in beta-testing.  To obtain the latest
-version of the source code, you may clone it from the Bitbucket
-repository `Enzo-E / Cello bitbucket repository
-<https://bitbucket.org/cello-project/cello-src/>`_:
+``Enzo-E / Cello`` is currently hosted on github.com (previously bitbucket.com)in beta-testing.  To obtain the latest
+version of the source code, you may clone it from the
+repository `Enzo-E / Cello github repository
+<https://github.com/enzo-project/enzo-e.git>`_:
 
-   ``hg clone https://bitbucket.org/cello-project/cello-src``
+   ``git clone https://github.com/enzo-project/enzo-e.git``
 
 
-Before compiling ``Enzo-E / Cello``, you will also need to download
+Before compiling ``Enzo-E / Cello``, you may also need to download
 and install 1.``Charm++``, 2.``HDF5``, 3.``libpng``, and 3.``libboost``:
 
 1. Install ``Charm++``
@@ -95,14 +106,13 @@ following:
    ===========================  ========================================================
    ``CELLO_ARCH=linux_gnu``     *compile for a generic GNU Linux system*
    ``CELLO_ARCH=ncsa_bw``       *compile for NCSA's Blue Waters Petascale Platform*
-   ``CELLO_ARCH=gordon_gnu``    *compile for SDSC's Gordon cluster using GNU compilers*
-   ``CELLO_ARCH=gordon_pgi``    *compile for SDSC's Gordon cluster using PGI compilers*
-   ``CELLO_ARCH=gordon_intel``  *compile for SDSC's Gordon cluster using Intel compilers*
+   ``CELLO_ARCH=gordon_gnu``    *compile for SDSC's Gordon (Or Comet) cluster using GNU compilers*
    ===========================  ========================================================
 
-Note that some machines, including Blue Waters and Gordon, will
+Note that some machines, including Blue Waters and Comet, will
 additionally require certain modules to be loaded, including compilers
-and HDF5.
+and HDF5.  See the corresponding getting started pages :ref:`Comet` or
+:ref:`Blue_Waters` for architecture-specific details.
 
 See the porting_ section below for how to add your own architecture to
 the list, or how to modify the settings for these machines.
