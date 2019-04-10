@@ -631,7 +631,8 @@ void EnzoInitialIsolatedGalaxy::InitializeGasFromParticles(Block * block){
     if ( !(block->check_position_in_block(particleIcPosition[ipt][0][ip],
                                           particleIcPosition[ipt][1][ip],
                                           particleIcPosition[ipt][2][ip],
-                                          true ))){
+                                          true // include ghost zones to set properties of gas in ghosts correctly
+                                           ))){
       continue;
     }
 
@@ -814,7 +815,7 @@ void EnzoInitialIsolatedGalaxy::InitializeParticles(Block * block,
       // make sure particle exists on this grid before depositing
       //    AE:  Note, I'm not sure if this is needed (it is in Enzo),
       //         but there may be a smarter way to do this for Enzo-E
-      //   - only check for active region (no need to check ghost)
+      //   - only check for active region (particles in ghost zones belong on other grids)
       if (!(block->check_position_in_block(particleIcPosition[ipt][0][i],
                                            particleIcPosition[ipt][1][i],
                                            particleIcPosition[ipt][2][i]))){
