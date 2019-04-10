@@ -439,7 +439,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     compute_temperature.compute(enzo_block);
   }
 
-  delete_grackle_fields(&grackle_fields);
+  delete_grackle_fields(&grackle_fields_);
 
   return;
 }
