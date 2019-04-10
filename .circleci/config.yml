@@ -1,0 +1,101 @@
+version: 2.1
+
+commands:
+  set-env:
+    description: "Set environment variables."
+    steps:
+      - run: |
+          echo 'export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
+          echo 'export CELLO_ARCH=linux_gnu' >> $BASH_ENV
+          echo 'export CELLO_PREC=double' >> $BASH_ENV
+          echo 'export HDF5_INC=/usr/include/hdf5/serial' >> $BASH_ENV
+          echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV
+          echo 'export CHARM_HOME=$HOME/local/charm-6.9.0' >> $BASH_ENV
+          echo 'export GRACKLE_HOME=$HOME/local' >> $BASH_ENV
+          # tag the tip so we can go back to it
+          git tag tip
+
+  install-dependencies:
+    description: "Install dependencies."
+    steps:
+      - run: |
+          source $BASH_ENV
+          sudo apt-get update
+          sudo apt-get install -y bc csh libhdf5-serial-dev gfortran libtool-bin libpapi-dev libpng-dev libboost-all-dev
+          # apt-get installs hdf5 libraries with _serial
+          sudo ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial.so /usr/lib/x86_64-linux-gnu/libhdf5.so
+          # Install charm++
+          mkdir -p $HOME/local
+          if [ ! -f $HOME/local/charm-6.9.0/bin/charmrun ]; then
+            cd $HOME/local
+            wget http://charm.cs.illinois.edu/distrib/charm-6.9.0.tar.gz
+            tar xvfz charm-6.9.0.tar.gz
+            rm charm-6.9.0.tar.gz
+            cd charm-6.9.0
+            ./build charm++ netlrts-linux-x86_64 -j4 --with-production
+          fi
+
+  install-grackle:
+    description: "Install grackle."
+    steps:
+      - run: |
+          git clone -b master https://github.com/grackle-project/grackle $HOME/grackle
+          cd $HOME/grackle
+          ./configure
+          cd src/clib
+          make machine-linux-gnu
+          make
+          make install
+
+  build-and-test:
+    description: "Compile enzo-e and run tests."
+    parameters:
+      tag:
+        type: string
+        default: tip
+      skipfile:
+        type: string
+        default: ""
+    steps:
+      - run: |
+          source $BASH_ENV
+          if [ ! -f << parameters.skipfile >> ]; then
+            git checkout << parameters.tag >>
+            make
+          fi
+
+jobs:
+  test-suite:
+    docker:
+      - image: circleci/python:3.7.2
+
+    working_directory: ~/enzo-e
+
+    steps:
+      - checkout
+      - set-env
+
+      - restore_cache:
+          name: "Restore dependencies cache."
+          key: dependencies-v1
+
+      - install-dependencies
+
+      - save_cache:
+          name: "Save dependencies cache"
+          key: dependencies-v1
+          paths:
+            - ~/local
+
+      - install-grackle
+
+      - build-and-test:
+          tag: tip
+          skipfile: notafile
+
+workflows:
+   version: 2
+
+   tests:
+     jobs:
+       - test-suite

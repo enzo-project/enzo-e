@@ -222,7 +222,6 @@ d=`date "+%H:%M:%S"`
 
 rm -f test/STATUS
 
-
-
-
-
+if [ ! -e $target ]; then
+   exit 1
+fi
