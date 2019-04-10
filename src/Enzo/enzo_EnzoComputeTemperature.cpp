@@ -126,9 +126,11 @@ void EnzoComputeTemperature::compute_(Block * block,
   }
 
   // if grackle fields are not provided, define them
+  bool delete_grackle_fields = false;
   if (!grackle_fields){
     grackle_fields  = &grackle_fields_;
     EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields, i_hist_);
+    delete_grackle_fields = true;
   }
 
 
@@ -141,8 +143,10 @@ void EnzoComputeTemperature::compute_(Block * block,
           "Error in call to Grackle's compute_temperature routine.\n");
   }
 
-  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
-  
+  if (delete_grackle_fields){
+    EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+  }
+
 #endif // CONFIG_USE_GRACKLE
 
   return;

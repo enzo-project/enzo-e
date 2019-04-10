@@ -95,6 +95,7 @@ void EnzoComputePressure::compute_(Block * block,
   }
 
   // if grackle fields are not provided, define them
+  bool delete_grackle_fields = false;
   if (!grackle_fields){
     grackle_fields  = &grackle_fields_;
 		// NOTE: Add option here to pass history index to setup to
@@ -102,6 +103,7 @@ void EnzoComputePressure::compute_(Block * block,
 		//       this way we can facilitate computation of
 		//       interpolated (in time) fields
     EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields, i_hist_);
+    delete_grackle_fields = true;
   }
 
   // Compute pressure in Grackle
@@ -110,7 +112,9 @@ void EnzoComputePressure::compute_(Block * block,
 	        "Error in call to Grackle's calculate_pressure routine.\n");
   }
 
-  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+  if (delete_grackle_fields){
+    EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+  }
 
 #else
   const int rank = cello::rank();
