@@ -53,7 +53,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
         fields_to_define.push_back( pc1_fields[ifield] );
 
 //        WARNING("EnzoMethodGrackle: ",
-//                "Must define " + pc1_fields[ifield] + "if using primordial_chemistry = 1 with Grackle. Defining"); 
+//                "Must define " + pc1_fields[ifield] + "if using primordial_chemistry = 1 with Grackle. Defining");
       }
     }
 
@@ -426,6 +426,8 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
     this->ResetEnergies(enzo_block);
   }
 
+  delete_grackle_fields(&grackle_fields_);
+
   return;
 }
 #endif // config use grackle
@@ -480,6 +482,9 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
     if (delete_cooling_time){
       delete [] cooling_time;
     }
+
+    delete_grackle_fields(&grackle_fields_);
+
 
   }
 #endif

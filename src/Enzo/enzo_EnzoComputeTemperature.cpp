@@ -141,6 +141,8 @@ void EnzoComputeTemperature::compute_(Block * block,
           "Error in call to Grackle's compute_temperature routine.\n");
   }
 
+  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+  
 #endif // CONFIG_USE_GRACKLE
 
   return;

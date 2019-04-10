@@ -297,6 +297,10 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   Particle particle = block->data()->particle();
   InitializeParticles(block, &particle);
 
+#ifdef CONFIG_USE_GRACKLE
+  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+#endif
+
   return;
 }
 

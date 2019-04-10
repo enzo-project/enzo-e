@@ -110,6 +110,7 @@ void EnzoComputePressure::compute_(Block * block,
 	        "Error in call to Grackle's calculate_pressure routine.\n");
   }
 
+  EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
 
 #else
   const int rank = cello::rank();
