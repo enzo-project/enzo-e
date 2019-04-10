@@ -170,7 +170,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         this->inject_feedback(block, xpos, ypos, zpos,
                               enzo_config->method_feedback_ejecta_mass,
                               enzo_config->method_feedback_supernova_energy,
-                              enzo_config->method_feedback_ke_fraction);
+                              enzo_config->method_feedback_ke_fraction,
+                              pvx[ipdv], pvy[ipdv], pvz[ipdv] );
 
         count++;
       } // end loop over particles
@@ -190,9 +191,9 @@ void EnzoMethodDistributedFeedback::inject_feedback(
                                           double xpos, double ypos, double zpos,
                                           double m_eject, double E_51,
                                           double ke_fraction,
-                                          enzo_float pvx,    //default -999
-                                          enzo_float pvy,    //default -999
-                                          enzo_float pvz){   //default -999
+                                          enzo_float pvx,    //default -9999
+                                          enzo_float pvy,    //default -9999
+                                          enzo_float pvz){   //default -9999
   /*
 
     Inject feedback with ejecta mass m_eject (in Msun) and total energy
