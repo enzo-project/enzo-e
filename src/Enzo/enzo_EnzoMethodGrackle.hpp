@@ -120,9 +120,9 @@ public: // interface
       grackle_fields_->volumetric_heating_rate = NULL;
       grackle_fields_->specific_heating_rate   = NULL;
 
-      delete grackle_fields_->grid_dimension; grackle_fields_->grid_dimension = NULL;
-      delete grackle_fields_->grid_start;     grackle_fields_->grid_start      = NULL;
-      delete grackle_fields_->grid_end;       grackle_fields_->grid_end        = NULL;
+      delete [] grackle_fields_->grid_dimension; grackle_fields_->grid_dimension = NULL;
+      delete [] grackle_fields_->grid_start;     grackle_fields_->grid_start      = NULL;
+      delete [] grackle_fields_->grid_end;       grackle_fields_->grid_end        = NULL;
 
       return;
  }
