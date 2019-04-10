@@ -113,7 +113,7 @@ void EnzoComputePressure::compute_(Block * block,
   }
 
   if (delete_grackle_fields){
-    EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
+    EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
   }
 
 #else
