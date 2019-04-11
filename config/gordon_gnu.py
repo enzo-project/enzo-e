@@ -19,15 +19,20 @@ flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
 libpath_fortran = ''
 libs_fortran    = ['gfortran']
 
-home = '/home/ux452912'
+home = os.getenv('HOME')
 
 hdf5_path    = os.environ['HDF5HOME']
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
 
-charm_path   = home + '/Charm/charm.git'
+charm_path   = home + '/Charm/charm'
 papi_inc = home + '/include'
 papi_lib = home + '/lib'
 
 png_path     = '/usr/lib64'
 grackle_path = home + '/public/Grackle/src/clib'
+
+serial_run   = charm_path + '/bin/charmrun  ++runscript ./run.sh +p1 '
+parallel_run = charm_path + '/bin/charmrun  ++runscript ./run.sh +p4 '
+parallel_arg = ''
+
