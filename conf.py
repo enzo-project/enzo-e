@@ -30,8 +30,9 @@ sys.path.append( "/usr/lib/python3/dist-packages/breathe" )
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.jsmath',
-              'sphinx.ext.todo']  # , 'breathe'
+extensions = ['sphinx.ext.intersphinx',
+              'sphinx.ext.jsmath',
+              'sphinx.ext.todo', 'breathe' ]  # , 'breathe'
 
 breathe_projects = { "cello": "/home/bordner/Cello/enzo-e.jobordner/src-xml/" }
 
@@ -105,7 +106,7 @@ html_show_sphinx = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #html_theme = 'nature'
-# html_theme = 'agogo'
+#html_theme = 'agogo'
 html_theme = 'sphinx_rtd_theme'
 #html_theme = 'haiku'
 

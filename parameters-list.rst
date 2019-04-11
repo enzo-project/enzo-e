@@ -1581,7 +1581,7 @@ perform and on what schedule.
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
 :Status:    **Broken: see bug** # 13_
 
-.. _13: http://client64-249.sdsc.edu/cello/bug/show_bug.cgi?id=13
+.. _13: http://client65-90.sdsc.edu/cello/bug/show_bug.cgi?id=13
 
 :e:`This parameter allows for a strict subset of physical processors
 to output data, which is especially helpful for large process counts
@@ -1597,7 +1597,7 @@ to reduce the load on parallel file systems.`
 :Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
 :Status:    **Not implemented**
 
-.. _13: http://client64-249.sdsc.edu/cello/bug/show_bug.cgi?id=13
+.. _13: http://client65-90.sdsc.edu/cello/bug/show_bug.cgi?id=13
 
 :e:`This parameter allows for processes to write sequentially to
 prevent too many processes overloading the file system.  A good
