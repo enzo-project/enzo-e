@@ -1,4 +1,19 @@
 * cello-doc/source
+  See [[file:~/Organize/Periodic/review-documentation.org][review-documentation.org]] for updated high-level structure 
+  
+	Tutorials (index-tutorial)
+           Getting started using Enzo-E
+        User Guide (index_use)
+           Using Enzo-E
+           Parameter files
+           Parameter File Example
+        Developer Guide (index_develop)
+           Developing with Cello
+           Enzo-P / Cello Guiding Principles
+           Design
+        Reference (index_reference)
+           Enzo-P / Cello parameter reference
+
 ** TODO Files
    - [ ] [[file:index.rst][index.rst]]
      - [ ] [[file:getting_started.rst][getting_started.rst]]
