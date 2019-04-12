@@ -146,12 +146,11 @@ EnzoMethodGrackle::EnzoMethodGrackle
   }
 
   // Initialize grackle units and data
+  TRACE("Calling initialize_chemistry_data from EnzoMethodGrackle::EnzoMethodGrackle()");
   if (initialize_chemistry_data(&grackle_units_) == ENZO_FAIL) {
     ERROR("EnzoConfig::EnzoConfig()",
     "Error in initialize_chemistry_data");
   }
-
-  printf ("TRACE %s:%d calling initialize_chemistry_data\n",__FILE__,__LINE__);
 
 #endif /* CONFIG_USE_GRACKLE */
 }

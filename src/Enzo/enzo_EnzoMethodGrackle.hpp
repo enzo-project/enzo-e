@@ -127,7 +127,6 @@ public: // interface
       return;
  }
 
-
 #endif
 
 protected: // methods
