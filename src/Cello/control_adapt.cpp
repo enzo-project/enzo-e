@@ -280,28 +280,35 @@ int Block::adapt_compute_desired_level_(int level_maximum)
     }
   }
 
-  }
+  } // enclose what will be moved to a new function
 
-  int index_refine = 0;
-  while ((refine = problem->refine(index_refine++))) {
+  // ignore refinement criteria if block is in a static region
+  if (level_minimum == level_maximum){
+    level_desired = level_minimum;
 
-    Schedule * schedule = refine->schedule();
+  } else {
 
-    if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
-      adapt_ = std::max(adapt_,refine->apply(this));
+    int index_refine = 0;
+    while ((refine = problem->refine(index_refine++))) {
+
+      Schedule * schedule = refine->schedule();
+
+      if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
+        adapt_ = std::max(adapt_,refine->apply(this));
+      }
+
     }
+    const int initial_cycle = cello::config()->initial_cycle;
+    const bool is_first_cycle = (initial_cycle == cycle());
 
-  }
-  const int initial_cycle = cello::config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
-
-  if (adapt_ == adapt_coarsen && level > level_minimum && ! is_first_cycle) 
-    level_desired = level - 1;
-  else if (adapt_ == adapt_refine  && level < level_maximum) 
-    level_desired = level + 1;
-  else {
-    adapt_ = adapt_same;
-    level_desired = level;
+    if (adapt_ == adapt_coarsen && level > level_minimum && ! is_first_cycle) 
+      level_desired = level - 1;
+    else if (adapt_ == adapt_refine  && level < level_maximum) 
+      level_desired = level + 1;
+    else {
+      adapt_ = adapt_same;
+      level_desired = level;
+    }
   }
 
   return level_desired;
