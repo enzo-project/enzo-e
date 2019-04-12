@@ -478,6 +478,9 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
       delete [] cooling_time;
     }
 
+    delete_grackle_fields(&grackle_fields_);
+
+
   }
 #endif
 
