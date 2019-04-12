@@ -246,26 +246,69 @@ int Block::adapt_compute_desired_level_(int level_maximum)
   Problem * problem = cello::problem();
   Refine * refine;
 
-  int index_refine = 0;
-  while ((refine = problem->refine(index_refine++))) {
+  // below should be done in its own function AND be done
+  // in the calling function to this one. Change this function's
+  // arguments to level_minimum and level_maximum to make it generic
+  int level_minimum = 0;
+  {
 
-    Schedule * schedule = refine->schedule();
+  const std::vector<int> adapt_region_min_level = cello::config()->adapt_region_min_level;
+  const std::vector<int> adapt_region_max_level = cello::config()->adapt_region_max_level;
+  const std::vector<std::vector<double> > adapt_region_xm = cello::config()->adapt_region_xm;
+  const std::vector<std::vector<double> > adapt_region_xp = cello::config()->adapt_region_xp;
+  if (adapt_region_min_level.size() > 0){
+    int rank = cello::rank();
+    double xm[3],xp[3];
+    data()->lower(&xm[0],&xm[1],&xm[2]);
+    data()->upper(&xp[0],&xp[1],&xp[2]);
 
-    if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
-      adapt_ = std::max(adapt_,refine->apply(this));
+    for( int i = 0; i < adapt_region_min_level.size(); i ++){
+      int in_region = 1;
+
+      for (int dim = 0; dim < rank; dim++){
+        in_region *= ( (xm[dim] <= adapt_region_xp[dim][i]) && (xp[dim] > adapt_region_xm[dim][i]));
+      }
+
+      if (in_region){
+        // maybe have option to change behavior of level min to prefer min over max of all reg
+        //  but maybe this is only useful if we have an extra if statement to find blocks that
+        //  sit on boundary of two refine regions. would be useful if we want to be conservative
+        //  about where we refine
+        level_minimum = std::max(level_minimum, adapt_region_min_level[i]);
+        level_maximum = std::max(level_maximum, adapt_region_max_level[i]);
+      }
     }
-
   }
-  const int initial_cycle = cello::config()->initial_cycle;
-  const bool is_first_cycle = (initial_cycle == cycle());
 
-  if (adapt_ == adapt_coarsen && level > 0 && ! is_first_cycle) 
-    level_desired = level - 1;
-  else if (adapt_ == adapt_refine  && level < level_maximum) 
-    level_desired = level + 1;
-  else {
-    adapt_ = adapt_same;
-    level_desired = level;
+  } // enclose what will be moved to a new function
+
+  // ignore refinement criteria if block is in a static region
+  if (level_minimum == level_maximum){
+    level_desired = level_minimum;
+
+  } else {
+
+    int index_refine = 0;
+    while ((refine = problem->refine(index_refine++))) {
+
+      Schedule * schedule = refine->schedule();
+
+      if ((schedule==NULL) || schedule->write_this_cycle(cycle(),time()) ) {
+        adapt_ = std::max(adapt_,refine->apply(this));
+      }
+
+    }
+    const int initial_cycle = cello::config()->initial_cycle;
+    const bool is_first_cycle = (initial_cycle == cycle());
+
+    if (adapt_ == adapt_coarsen && level > level_minimum && ! is_first_cycle) 
+      level_desired = level - 1;
+    else if (adapt_ == adapt_refine  && level < level_maximum) 
+      level_desired = level + 1;
+    else {
+      adapt_ = adapt_same;
+      level_desired = level;
+    }
   }
 
   return level_desired;
