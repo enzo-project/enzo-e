@@ -3,12 +3,13 @@
 /// @file     parameters_Config.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-10-03
-/// @brief    Implementation of the Config class 
+/// @brief    Implementation of the Config class
 ///
-/// Last review of parameters was 2015-09-10 with revision -r 3836 
+/// Last review of parameters was 2015-09-10 with revision -r 3836
 
 #include "cello.hpp"
 #include "parameters.hpp"
+#include <fstream>
 
 Config g_config;
 
@@ -40,7 +41,11 @@ void Config::pup (PUP::er &p)
   p | adapt_include_ghosts;
   p | adapt_output;
   p | adapt_schedule_index;
-  
+  p | adapt_region_min_level;
+  p | adapt_region_max_level;
+  p | adapt_region_xm;
+  p | adapt_region_xp;
+
   // Balance
 
   p | balance_schedule_index;
@@ -182,7 +187,7 @@ void Config::pup (PUP::er &p)
   p | performance_off_schedule_index;
 
   // Physics
-  
+
   p | num_physics;
   p | physics_list;
 
@@ -191,7 +196,7 @@ void Config::pup (PUP::er &p)
   p | restart_file;
 
   // Solvers
-  
+
   p | num_solvers;
   p | solver_list;
   p | solver_index;
@@ -207,7 +212,7 @@ void Config::pup (PUP::er &p)
   p | solver_max_level;
   p | solver_field_x;
   p | solver_field_b;
-  
+
   // Stopping
 
   p | stopping_cycle;
@@ -330,13 +335,43 @@ void Config::read_adapt_ (Parameters * p) throw()
     adapt_max_level[ia] = p->value (prefix + "max_level",
 				    std::numeric_limits<int>::max());
 
+    if (adapt_list[ia] == "region"){ // AJE - figure out sizing / reading issues here
+
+      //AJE Do this for now, but maybe switch to in param file later
+      int rank = cello::rank();
+
+      adapt_region_xm.resize(rank);
+      adapt_region_xp.resize(rank);
+
+      std::fstream inFile;
+      inFile.open("refine_region.in", std::ios::in);
+
+      ASSERT("EnzoRefineRegion",
+             "Refinement region file not found", inFile.is_open());
+
+      int xm[3], xp[3], lmin, lmax;
+      while(inFile >> lmin >> lmax >>
+                   xm[0] >> xm[1] >> xm[2] >>
+                   xp[0] >> xp[1] >> xp[2]){
+
+        adapt_region_min_level.push_back(lmin);
+        adapt_region_max_level.push_back(lmax);
+        for (int dim=0; dim < 3; dim++){
+          adapt_region_xm[dim].push_back(xm[dim]);
+          adapt_region_xp[dim].push_back(xp[dim]);
+        }
+      }
+
+      inFile.close();
+    }
+
     adapt_level_exponent[ia] = p->value (prefix + "level_exponent",0.0);
 
     adapt_output[ia] = p->value_string (prefix + "output","");
 
     adapt_include_ghosts[ia] = p->value_logical (prefix + "include_ghosts",
 						 false);
-    const bool adapt_scheduled = 
+    const bool adapt_scheduled =
       (p->type(prefix+"schedule:var") != parameter_unknown);
 
     if (adapt_scheduled) {
@@ -350,7 +385,7 @@ void Config::read_adapt_ (Parameters * p) throw()
       adapt_schedule_index[ia] = -1;
     }
 
-    
+
   }
 }
 
@@ -364,7 +399,7 @@ void Config::read_balance_ (Parameters * p) throw()
 
   p->group_clear();
 
-  const bool balance_scheduled = 
+  const bool balance_scheduled =
     (p->type("Balance:schedule:var") != parameter_unknown);
 
   if (balance_scheduled) {
@@ -375,8 +410,8 @@ void Config::read_balance_ (Parameters * p) throw()
   } else {
     balance_schedule_index = -1;
   }
-  
-}  
+
+}
 
 //----------------------------------------------------------------------
 
@@ -389,9 +424,9 @@ void Config::read_boundary_ (Parameters * p) throw()
 
   const bool multi_boundary =
     (p->type("Boundary:list") == parameter_list);
-  
 
-  num_boundary = multi_boundary ? 
+
+  num_boundary = multi_boundary ?
     p->list_length("Boundary:list") : 1;
 
   boundary_list.resize(num_boundary);
@@ -432,7 +467,7 @@ void Config::read_boundary_ (Parameters * p) throw()
 	      (prefix+"face").c_str(),face_str.c_str());
     }
 
-    boundary_mask[ib] = (p->type(prefix+"mask") 
+    boundary_mask[ib] = (p->type(prefix+"mask")
 			 == parameter_logical_expr);
 
     std::string param_str = prefix+"field_list";
@@ -441,7 +476,7 @@ void Config::read_boundary_ (Parameters * p) throw()
       const int n = p->list_length(param_str);
       boundary_field_list[ib].resize(n);
       for (int index=0; index<n; index++) {
-	boundary_field_list[ib][index] = p->list_value_string 
+	boundary_field_list[ib][index] = p->list_value_string
 	  (index,param_str);
       }
     } else if (field_list_type == parameter_string) {
@@ -451,7 +486,7 @@ void Config::read_boundary_ (Parameters * p) throw()
       ERROR2 ("Config::read()", "Incorrect parameter type %d for %s",
 	      field_list_type,param_str.c_str());
     }
-	
+
   }
 
 }
@@ -479,7 +514,7 @@ void Config::read_field_ (Parameters * p) throw()
   // Field
   //--------------------------------------------------
 
-  num_fields = p->list_length("Field:list"); 
+  num_fields = p->list_length("Field:list");
 
   field_list.resize(num_fields);
 
@@ -546,7 +581,7 @@ void Config::read_field_ (Parameters * p) throw()
 
   // Add fields to groups (Group : <group_name> : field_list)
 
-  int num_groups = p->list_length("Group:list"); 
+  int num_groups = p->list_length("Group:list");
 
   for (int index_group = 0; index_group < num_groups; index_group++) {
 
@@ -609,7 +644,7 @@ void Config::read_initial_ (Parameters * p) throw()
   initial_list.resize(num_initial);
   for (int i=0; i<num_initial; i++) {
 
-    std::string name = 
+    std::string name =
       p->list_value_string(i,"Initial:list");
 
     initial_list[i] = name;
@@ -651,7 +686,7 @@ void Config::read_mesh_ (Parameters * p) throw()
   // Adjust ghost zones for unused ranks
   if (mesh_root_rank < 2) field_ghost_depth[1] = 0;
   if (mesh_root_rank < 3) field_ghost_depth[2] = 0;
-  
+
   //--------------------------------------------------
 
   int mx = mesh_root_blocks[0] = p->list_value_integer(0,"Mesh:root_blocks",1);
@@ -703,12 +738,12 @@ void Config::read_method_ (Parameters * p) throw()
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
   method_trace_name.resize(num_method);
-  
+
   method_courant_global = p->value_float ("Method:courant",1.0);
-  
+
   for (int index_method=0; index_method<num_method; index_method++) {
 
-    std::string name = 
+    std::string name =
       p->list_value_string(index_method,"Method:list");
 
     std::string full_name = std::string("Method:") + name;
@@ -716,8 +751,8 @@ void Config::read_method_ (Parameters * p) throw()
     method_list[index_method] = name;
 
     // Read schedule for the Method object if any
-      
-    const bool method_scheduled = 
+
+    const bool method_scheduled =
       (p->type(full_name + ":schedule:var") != parameter_unknown);
 
     if (method_scheduled) {
@@ -734,7 +769,7 @@ void Config::read_method_ (Parameters * p) throw()
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
 
     // Read specified timestep, if any (for MethodTrace)
-    method_timestep[index_method] = p->value_float  
+    method_timestep[index_method] = p->value_float
       (full_name + ":timestep",std::numeric_limits<double>::max());
 
     method_trace_name[index_method] = p->value_string
@@ -805,7 +840,7 @@ void Config::read_output_ (Parameters * p) throw()
 
     TRACE1 ("index = %d",index_output);
 
-    output_list[index_output] = 
+    output_list[index_output] =
       p->list_value_string (index_output,"Output:list","unknown");
 
     p->group_set(1,output_list[index_output]);
@@ -873,14 +908,14 @@ void Config::read_output_ (Parameters * p) throw()
     }
 
     // Read schedule for the Output object
-      
+
     p->group_push("schedule");
-    output_schedule_index[index_output] = 
+    output_schedule_index[index_output] =
       read_schedule_(p, output_list[index_output]);
     p->group_pop();
 
-    // Image 
-    
+    // Image
+
     if (output_type[index_output] == "image") {
 
 
@@ -899,7 +934,7 @@ void Config::read_output_ (Parameters * p) throw()
       }
 
 
-      output_image_block_size[index_output] = 
+      output_image_block_size[index_output] =
 	p->value_integer("image_block_size",1);
 
       output_image_type[index_output] = p->value_string("image_type","data");
@@ -907,25 +942,25 @@ void Config::read_output_ (Parameters * p) throw()
       output_image_log[index_output] = p->value_logical("image_log",false);
       output_image_abs[index_output] = p->value_logical("image_abs",false);
 
-      output_image_mesh_color[index_output] = 
+      output_image_mesh_color[index_output] =
 	p->value_string("image_mesh_color","level");
 
-      output_image_color_particle_attribute[index_output] = 
+      output_image_color_particle_attribute[index_output] =
 	p->value_string("image_color_particle_attribute","");
 
       output_image_size[index_output].resize(2);
-      output_image_size[index_output][0] = 
+      output_image_size[index_output][0] =
 	p->list_value_integer(0,"image_size",0);
-      output_image_size[index_output][1] = 
+      output_image_size[index_output][1] =
 	p->list_value_integer(1,"image_size",0);
 
-      output_image_reduce_type[index_output] = 
+      output_image_reduce_type[index_output] =
 	p->value_string("image_reduce_type","sum");
 
-      output_image_face_rank[index_output] = 
+      output_image_face_rank[index_output] =
 	p->value_integer("image_face_rank",3);
 
-      output_image_ghost[index_output] = 
+      output_image_ghost[index_output] =
 	p->value_logical("image_ghost",false);
 
       output_image_min[index_output] =
@@ -942,7 +977,7 @@ void Config::read_output_ (Parameters * p) throw()
 	int size = p->list_length("colormap");
 	output_colormap[index_output].resize(size);
 	for (int i=0; i<size; i++) {
-	  output_colormap[index_output][i] = 
+	  output_colormap[index_output][i] =
 	    p->list_value_float(i,"colormap",0.0);
 	}
       }
@@ -957,7 +992,7 @@ void Config::read_output_ (Parameters * p) throw()
       }
 
     }
-  }  
+  }
 
 }
 
@@ -971,7 +1006,7 @@ void Config::read_particle_ (Parameters * p) throw()
 
   particle_batch_size = p->value_integer("Particle:batch_size",1024);
 
-  num_particles = p->list_length("Particle:list"); 
+  num_particles = p->list_length("Particle:list");
 
   particle_list.resize(num_particles);
   particle_interleaved.resize(num_particles);
@@ -1004,14 +1039,14 @@ void Config::read_particle_ (Parameters * p) throw()
 
     // are attributes are interleaved?
 
-    particle_interleaved[it] = 
+    particle_interleaved[it] =
       p->value_logical(type_str+":interleaved",false);
 
     // Particle:<type>:constants list elements contain name, type, and
     // value
 
     std::string const_str = type_str + ":constants";
-    
+
     const int nc3 = p->list_length(const_str);
 
     ASSERT2 ("read_particle_",
@@ -1039,7 +1074,7 @@ void Config::read_particle_ (Parameters * p) throw()
       particle_constant_type[it][ia]  = type;
 
       if (cello::type_is_float(type_val[type])) {
-	particle_constant_value[it][ia] = 
+	particle_constant_value[it][ia] =
 	  p->list_value_float (3*ia+2,const_str,0.0);
       } else if (cello::type_is_int(type_val[type])) {
 	particle_constant_value[it][ia] =
@@ -1052,7 +1087,7 @@ void Config::read_particle_ (Parameters * p) throw()
     // name and its type (see type_enum in cello.hpp)
 
     std::string attrib_str = type_str + ":attributes";
-    
+
     const int na2 = p->list_length(attrib_str);
 
     ASSERT1 ("read_particle_",
@@ -1082,7 +1117,7 @@ void Config::read_particle_ (Parameters * p) throw()
 
       particle_attribute_name[it][ia]  = name;
       particle_attribute_type[it][ia]  = type;
-     
+
       attribute_index[name] = ia;
     }
 
@@ -1130,7 +1165,7 @@ void Config::read_particle_ (Parameters * p) throw()
 
   // Add particles to groups (Group : <group_name> : particle_list)
 
-  int num_groups = p->list_length("Group:list"); 
+  int num_groups = p->list_length("Group:list");
 
   for (int index_group = 0; index_group < num_groups; index_group++) {
 
@@ -1159,7 +1194,7 @@ void Config::read_particle_ (Parameters * p) throw()
 
 void Config::read_performance_ (Parameters * p) throw()
 {
-#ifdef CONFIG_USE_PAPI  
+#ifdef CONFIG_USE_PAPI
   if (p->type("Performance:papi:counters") == parameter_list) {
     int length = p->list_length("Performance:papi:counters");
     performance_papi_counters.resize(length);
@@ -1170,15 +1205,15 @@ void Config::read_performance_ (Parameters * p) throw()
 	     i,performance_papi_counters[i].c_str());
     }
   }
-#endif  
+#endif
 
   performance_warnings = p->value_logical("Performance:warnings",false);
 
 #ifdef CONFIG_USE_PROJECTIONS
-  
+
   int i_on = -1;
   int i_off = -1;
-  
+
   if (p->type("Performance:projections_on:schedule:var") != parameter_unknown) {
     p->group_set(0,"Performance");
     p->group_push("projections_on");
@@ -1202,7 +1237,7 @@ void Config::read_performance_ (Parameters * p) throw()
 	   "must be both defined or both undefined",
 	   i_on,i_off);
   }
-#endif    
+#endif
 
 }
 
@@ -1214,13 +1249,13 @@ void Config::read_physics_ (Parameters * p) throw()
   // Physics
   //--------------------------------------------------
 
-  num_physics = p->list_length("Physics:list"); 
+  num_physics = p->list_length("Physics:list");
 
   physics_list.resize(num_physics);
-  
+
   for (int index_physics=0; index_physics<num_physics; index_physics++) {
 
-    std::string name = 
+    std::string name =
       p->list_value_string(index_physics,"Physics:list");
 
     physics_list[index_physics] = name;
@@ -1263,7 +1298,7 @@ void Config::read_solver_ (Parameters * p) throw()
 
   for (int index_solver=0; index_solver<num_solvers; index_solver++) {
 
-    std::string name = 
+    std::string name =
       p->list_value_string(index_solver,"Solver:list");
 
     std::string full_name = std::string("Solver:") + name;
@@ -1273,7 +1308,7 @@ void Config::read_solver_ (Parameters * p) throw()
     solver_index[name] = index_solver;
 
     solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
-    
+
     solver_type[index_solver] = p->value_string (full_name + ":type","unknown");
 
     solver_solve_type[index_solver] = p->value_string
@@ -1281,13 +1316,13 @@ void Config::read_solver_ (Parameters * p) throw()
 
     solver_iter_max[index_solver] = p->value_integer
       (full_name + ":iter_max",1000);
-    
+
     solver_res_tol[index_solver] = p->value_float
       (full_name + ":res_tol",1e-6);
 
     solver_diag_precon[index_solver] = p->value_logical
       (full_name + ":diag_precon",false);
-    
+
     solver_monitor_iter[index_solver] = p->value_integer
       (full_name + ":monitor_iter",0);
 
@@ -1308,7 +1343,7 @@ void Config::read_solver_ (Parameters * p) throw()
 
     solver_field_b[index_solver] = p->value_string
       (full_name + ":field_b","unknown");
-  }  
+  }
 }
 
 //----------------------------------------------------------------------
@@ -1330,7 +1365,7 @@ void Config::read_units_ (Parameters * p) throw()
   //======================================================================
   // Units
   //======================================================================
-  
+
   units_mass    = p->value_float ("Units:mass",   1.0);
   units_density = p->value_float ("Units:density",1.0);
   units_length  = p->value_float ("Units:length", 1.0);
@@ -1368,14 +1403,14 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   schedule_start.resize(index+1);
   schedule_stop.resize(index+1);
   schedule_step.resize(index+1);
-  
+
   std::string var = p->value_string("var","none");
 
   schedule_var[index] = var;
 
   bool var_is_int = true;
 
-  // Get variable associated with the schedule 
+  // Get variable associated with the schedule
   if      (schedule_var[index] == "cycle")    var_is_int = true;
   else if (schedule_var[index] == "time")     var_is_int = false;
   else if (schedule_var[index] == "seconds")  var_is_int = false;
@@ -1432,4 +1467,3 @@ int Config::read_schedule_(Parameters * p, const std::string group)
   return index_schedule_++;
 }
 //======================================================================
-
