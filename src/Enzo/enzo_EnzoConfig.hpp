@@ -102,9 +102,6 @@ public: // interface
   EnzoConfig(CkMigrateMessage *m)
     : Config (m),
       adapt_mass_type(),
-      #ifdef CONFIG_USE_GRACKLE
-        method_grackle_chemistry(),
-      #endif
       ppm_diffusion(0),
       ppm_dual_energy(false),
       ppm_dual_energy_eta_1(0.0),
@@ -210,6 +207,8 @@ public: // interface
       method_turbulence_mach_number(0.0),
       // EnzoMethodGrackle
 #ifdef CONFIG_USE_GRACKLE
+      method_grackle_use_grackle(false),
+      method_grackle_chemistry(),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
 #endif
@@ -458,6 +457,7 @@ public: // attributes
 
 
 #ifdef CONFIG_USE_GRACKLE
+  bool             method_grackle_use_grackle;
   chemistry_data * method_grackle_chemistry;
   bool             method_grackle_use_cooling_timestep;
   double           method_grackle_radiation_redshift;
