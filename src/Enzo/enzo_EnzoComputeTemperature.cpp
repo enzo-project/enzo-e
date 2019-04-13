@@ -90,64 +90,70 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   const int in = cello::index_static();
 
-#ifndef CONFIG_USE_GRACKLE
+#ifdef CONFIG_USE_GRACKLE
 
-  EnzoUnits * enzo_units = enzo::units();
+  if (enzo::config()->method_grackle_use_grackle){
 
-  int mx,my,mz;
-  field.dimensions(0,&mx,&my,&mz);
+    code_units grackle_units_;
+    grackle_field_data grackle_fields_;
 
-  const int m = mx*my*mz;
+    // setup grackle units if they are not already provided
+    if (!grackle_units){
+      grackle_units = &grackle_units_;
+      EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units, i_hist_);
+    }
 
-  enzo_float * d = (enzo_float*) field.values("density", i_hist_);
-  enzo_float * p = (enzo_float*) field.values("pressure", i_hist_);
+    // if grackle fields are not provided, define them
+    bool delete_grackle_fields = false;
+    if (!grackle_fields){
+      grackle_fields  = &grackle_fields_;
+      EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields, i_hist_);
+      delete_grackle_fields = true;
+    }
 
-  EnzoComputePressure compute_pressure(EnzoBlock::Gamma[in],
-                                       comoving_coordinates_);
-  compute_pressure.set_history(i_hist_);
 
-  if (recompute_pressure) compute_pressure.compute(block, p);
+    // Note: compute pressure is handled internally in Grackle.
+    //       Do not need to recompute this here
 
-  for (int i=0; i<m; i++) {
-    enzo_float density     = std::max(d[i], (enzo_float) density_floor_);
-    enzo_float temperature = p[i] * mol_weight_ / density;
-    t[i] = std::max(temperature, (enzo_float)temperature_floor_) * enzo_units->temperature();
-  }
+    // temperature is returned in units of K
+    if (calculate_temperature(grackle_units, grackle_fields, t) == ENZO_FAIL){
+      ERROR("EnzoComputeTemperature::compute_()",
+            "Error in call to Grackle's compute_temperature routine.\n");
+    }
 
+    if (delete_grackle_fields){
+      EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
+    }
+
+  } else {
 #else
 
-  code_units grackle_units_;
-  grackle_field_data grackle_fields_;
+    EnzoUnits * enzo_units = enzo::units();
 
-  // setup grackle units if they are not already provided
-  if (!grackle_units){
-    grackle_units = &grackle_units_;
-    EnzoMethodGrackle::setup_grackle_units(enzo_block, grackle_units, i_hist_);
-  }
+    int mx,my,mz;
+    field.dimensions(0,&mx,&my,&mz);
 
-  // if grackle fields are not provided, define them
-  bool delete_grackle_fields = false;
-  if (!grackle_fields){
-    grackle_fields  = &grackle_fields_;
-    EnzoMethodGrackle::setup_grackle_fields(enzo_block, grackle_fields, i_hist_);
-    delete_grackle_fields = true;
-  }
+    const int m = mx*my*mz;
 
+    enzo_float * d = (enzo_float*) field.values("density", i_hist_);
+    enzo_float * p = (enzo_float*) field.values("pressure", i_hist_);
 
-  // Note: compute pressure is handled internally in Grackle.
-  //       Do not need to recompute this here
+    EnzoComputePressure compute_pressure(EnzoBlock::Gamma[in],
+                                       comoving_coordinates_);
+    compute_pressure.set_history(i_hist_);
 
-  // temperature is returned in units of K
-  if (calculate_temperature(grackle_units, grackle_fields, t) == ENZO_FAIL){
-    ERROR("EnzoComputeTemperature::compute_()",
-          "Error in call to Grackle's compute_temperature routine.\n");
-  }
+    if (recompute_pressure) compute_pressure.compute(block, p);
 
-  if (delete_grackle_fields){
-    EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
-  }
-
+    for (int i=0; i<m; i++) {
+      enzo_float density     = std::max(d[i], (enzo_float) density_floor_);
+      enzo_float temperature = p[i] * mol_weight_ / density;
+      t[i] = std::max(temperature, (enzo_float)temperature_floor_) * enzo_units->temperature();
+    }
 #endif // CONFIG_USE_GRACKLE
+
+#ifdef CONFIG_USE_GRACKLE
+  } // end if method_grackle_use_grackle
+#endif
 
   return;
 }
