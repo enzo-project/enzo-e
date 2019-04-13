@@ -12,9 +12,5 @@ physics, and units.
 
 
 .. toctree::
-   using-methods
-   using-initial
-   using-fields
-   using-particles
 
 

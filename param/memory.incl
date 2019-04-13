@@ -1,0 +1,9 @@
+----
+
+:Parameter:  :p:`Memory` : :p:`active`
+:Summary: :s:`Whether to track memory usage`
+:Type:    :t:`logical`
+:Default: :d:`true`
+:Scope:     :c:`Cello`
+
+:e:`This parameter is used to turn on or off Cello's build-in memory tracking.  By default it is on, meaning it tracks the number and size of memory allocations, including the current number of bytes allocated, the maximum over the simulation, and the maximum over the current cycle.  Cello implements this by overloading C's new, new[], delete, and delete[] operators.  This can be problematic on some systems, e.g. if an external library also redefines these operators, in which case this parameter should be set to false.  This can be turned off completely by setting "memory = 0" in the top-level "SConstruct" file.`

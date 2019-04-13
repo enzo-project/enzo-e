@@ -1,7 +1,7 @@
-Enzo-P / Cello Guiding Principles
+Enzo-E / Cello Guiding Principles
 =================================
 
-Key guiding principles in Enzo-P / Cello design and construction are
+Key guiding principles in Enzo-E / Cello design and construction are
 performance, scalability, usability, reliability, and flexibility.
 
 Performance
@@ -21,7 +21,7 @@ structure padding.  *Data alignment*---aligning array elements along
 instructions.  *Data structure padding*---separating field arrays by
 some small multiple of the cache line length---can reduce cache
 conflict and improve cache reuse.  Block size, data alignment, and
-data structure padding are all controllable through Enzo-P's parameter
+data structure padding are all controllable through Enzo-E's parameter
 file.
 
 The **Particle** class represents particles associated with blocks in
@@ -46,7 +46,7 @@ C++.  Charm++ incorporates state-of-the-art dynamic load balancing,
 its asynchronous execution model is naturally latency-tolerant, and it
 provides automatic overlap of computation and communication.  Emergent
 scalability issues such as fault-tolerance and energy efficiency are
-also being researched and incorporated into Charm++, allowing Enzo-P /
+also being researched and incorporated into Charm++, allowing Enzo-E /
 Cello to benefit automatically as the parallel programming system
 continues to improve.
 
@@ -76,7 +76,7 @@ Usability
    ===========  ===========
 
 Cello is designed to be both *user-friendly* and *developer-friendly*.
-The integrated Enzo-P / Cello structured configuration files are easy
+The integrated Enzo-E / Cello structured configuration files are easy
 to read and write, and allow for much more powerful yet
 easy-to-understand problem initialization than in Enzo.  As an
 example, the simple test problem whose output is shown above used the
@@ -101,13 +101,13 @@ Logical expressions such as :config:`x + sin(y) < 0.5` can be used in
 place of image masks, and multiple masks and logical expressions can
 be combined to generate arbitrarily complex initial conditions.  This
 capability greatly simplifies the user experience of setting up a test
-problem, making Enzo-P not only useful for researchers to run
+problem, making Enzo-E not only useful for researchers to run
 scientifically viable simulations, but also for students and educators
 to learn and experiment with concepts in computational fluid dynamics
 and astrophysics.
 
 Migrating new functionality from Enzo or other science applications
-to Enzo-P / Cello is also very developer-friendly.  Only the serial
+to Enzo-E / Cello is also very developer-friendly.  Only the serial
 code implementing a numerical method on a single grid patch in Enzo
 is required, and frequently no modifications of the method code are
 even necessary.  The bulk of the migration effort required is writing

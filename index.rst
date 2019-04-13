@@ -45,14 +45,11 @@ solver.
 .. toctree::
    :maxdepth: 1
 	   
-   getting_started
-   parameters-list
-   parameters-file
-   parameters-example
-   using      
-   devel
-   principles
-   design
+   tutorial/index
+   user/index      
+   devel/index
+   reference/index
+   project/index
 
 Getting started
 ---------------

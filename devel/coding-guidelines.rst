@@ -1,4 +1,4 @@
-.. include:: roles.incl
+.. include:: ../roles.incl
 
 ************************
 Enzo-E Coding Guidelines

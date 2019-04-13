@@ -1,5 +1,5 @@
 *************************
-Enzo-P initial conditions
+Enzo-E initial conditions
 *************************
 
 *[ This page is under development ]*

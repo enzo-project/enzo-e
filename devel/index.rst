@@ -1,6 +1,6 @@
-*********************
-Developing with Cello
-*********************
+***************
+Developer Guide
+***************
 
 *[ This page is under development ]*
 
@@ -12,7 +12,7 @@ refinement criteria, etc.
 
 
 .. toctree::
-   devel-guidelines
-   devel-methods
-   devel-initial
-   devel-refine
+   coding-guidelines
+   method
+   initial
+   adapt

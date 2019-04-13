@@ -1,17 +1,17 @@
 .. _using-methods:
 
 **************
-Enzo-P Methods
+Enzo-E Methods
 **************
 
 *[ This page is under development ]*
   
-This section decribes all Methods available in Enzo-P: what they do,
+This section decribes all Methods available in Enzo-E: what they do,
 what method-specific parameters they have, what fields / particles
 they access or update, what solvers if any used, and how different
 Methods are intended to be used with each other.
 
-Current Enzo-P methods available include those listed below.
+Current Enzo-E methods available include those listed below.
 
 ``"ppm"``: hydrodynamics
 ========================

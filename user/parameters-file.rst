@@ -11,8 +11,8 @@ application itself to be more powerful.
 This page describes how Cello parameter files are structured, which is
 similar to configuration files readable by `libconfig
 <http://www.hyperrealm.com/libconfig/libconfig.html>`_.  For
-documentation on specific parameters in Enzo-P / Cello, please see the
-`Enzo-P / Cello parameter reference
+documentation on specific parameters in Enzo-E / Cello, please see the
+`Enzo-E / Cello parameter reference
 <http://cello-project.org/doc/parameters-list.html>`_ page.
 
 Groups
@@ -204,7 +204,7 @@ to avoid it being overwritten.
 Examples
 ********
 
-Below is a list of sample input files used for developing Enzo-P
+Below is a list of sample input files used for developing Enzo-E
 parameters. Individual parameters are expected to evolve, though the
 underlying grammar and syntax are relatively fixed.
 

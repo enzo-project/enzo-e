@@ -1,13 +1,13 @@
-.. include:: roles.incl
+.. include:: ../roles.incl
 
 *************
-Enzo-P Fields
+Enzo-E Fields
 *************
 
 **[ This page is under development ]**
 
 Cello allows field data to be created and operated on in Blocks of an
-adaptive mesh hierarchy.  Enzo-P defines specific fields, as well as groups of
+adaptive mesh hierarchy.  Enzo-E defines specific fields, as well as groups of
 related fields.  This page documents what fields are accessed by different Methods,
 recommended usage of Fields when writing Methods, and a reference of the Field
 API.
@@ -378,7 +378,7 @@ Debugging
 :Return:   :t:`void`
 
 -------------
-Enzo-P Fields
+Enzo-E Fields
 -------------
 
 * acceleration_x

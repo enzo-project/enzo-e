@@ -1,0 +1,192 @@
+----
+
+:Parameter:  :p:`Particle` : :p:`list`
+:Summary: :s:`List of particle types`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`Cello allows arbitrary parameter types (dark matter particles, tracer particles, star particles, etc.), each with arbitrary attributes (position, velocity, etc.).  The` :p:`list` :e:`parameter defines which types of particles to use.`
+
+  ::
+
+    Particle {
+
+        list = ["dark", "trace"];
+
+    }
+
+----
+
+:Parameter:  :p:`Particle` : :p:`batch_size`
+:Summary: :s:`Number of particles in a "batch" of particles`
+:Type:    :t:`integer`
+:Default: :d:`1024`
+:Scope:     :c:`Cello`
+
+:e:`Particles are allocated and operated on in` *batches*.  :e:`The number of particles in a batch is set using the` :p:`batch_size` :e:`parameter.  The default batch size is 1024.`
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`attributes`
+:Summary: :s:`List of attribute names and data types`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+
+:e:`Each particle type can have multiple attributes of varying types, which are defined by the` :p:`attributes` :e:`parameter.  The` :p:`attributes` :e:`parameter is a list of strings, alternating between the name of the parameter, and its type.  Names may include` :t:`"position_x"`, :t:`"velocity_z"`, :t:`"mass"`,
+:t:`"id"`, :e:`etc.  Types may include` :t:`"single"`, :t:`"double"`, :t:`"quadruple"`, :t:`"int8"`, :t:`"int16"`, :t:`"int32"`, or :t:`"int64"`.  :e:`Ordering of attributes in memory is as in the` :p:`attributes` :e:`parameter.`
+
+   ::
+
+    Parameter {
+
+        list = ["trace", "dark"];
+
+            trace {
+
+                attributes = ["id", "int64",
+                              "x",  "single",
+                              "y",  "single",
+                              "z",  "single"];
+             }
+
+             dark {
+
+                 attributes = ["id",         "int64",
+                               "mass",       "double",
+                               "velocity_x", "single",
+                               "velocity_y", "single",
+                               "velocity_z", "single",
+                               "position_x", "int16",
+                               "position_y", "int16",
+                               "position_z", "int16"];
+           }
+      }
+
+:e:`Note that when attributes of multiple sizes are included in the same parameter type, it can be helpful to order the attributes so that larger-sized attributes are listed first, followed by smaller-sized attributes.  This can help prevent allocating more memory than necessary, since attributes may be padded with unused bytes for correct memory alignment.`
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`interleaved`
+:Summary: :s:`Format of output files`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :c:`Cello`
+
+:e:`Particle attributes within a batch of particles may be stored in memory either particle-by-particle, or "interleaved" (attribute-by-attribute).  If` |aij| :e:`represents the jth attribute of particle i, then with` :p:`interleaved = false`, :e:`attributes would be stored as` |a00| ... |am0|, |a01| ... |am1| ... |a0n| ... |amn|. :e:`If, however,` :p:`interleaved = true`, :e:`then attributes would be stored as`   |a00| ... |a0n|, |a10| ... |a1n| ... |am0| ... |amn|. :e:`Non-interleaved particle attributes have array accesses of stride 1 and minimal storage overhead, but may not utilize cache well.  Interleaved particle attributes` *may* :e:`have improved cache utilization, but will have stride > 1, and may require memory padding for correct alignment of attributes in memory.  The default is` :t:`false.`
+
+  
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`group_list`
+:Summary: :s:`Specify a list of groups that the Particle type belongs to`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[ ]`
+:Scope:     :c:`Cello`
+
+
+:e:`Different Particle types may belong to any number of different "groups", which allows simulation code to loop over multiple related particle types.`
+
+  ::
+
+    Particle {
+        list = ["trace","dark","star"];
+
+        dark { group_list = ["has_mass"]; }
+        star { group_list = ["has_mass"]; }
+    }
+
+
+:e:`This example can be rewritten as follows, which is completely equivalent:`
+
+  ::
+
+
+    Particle 
+        list = ["trace","dark","star"];
+    }
+
+    Group {
+        list = ["has_mass"];
+        has_mass {
+           particle_list = ["dark","star"];
+        }
+    }
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`position`
+:Summary: :s:`Format of output files`
+:Type:    :t:`string`
+:Default: :d:`""`
+:Scope:     :c:`Cello`
+
+:e:`Cello needs to know which particle attributes represent position, so that it can determine when particles migrate out of a Block and need to be moved to a neighboring Block.  This is done using the` :p:`position` :e:`parameter:`
+
+  ::
+
+    Particle {
+
+       list = ["trace"];
+
+       trace {
+
+          attributes = ["id",
+                        "x","single",
+	                "y","single",
+	                "z","single"];
+
+          position = ["x","y","z"];
+       }
+    }
+
+----
+
+:Parameter:  :p:`Particle` : :g:`particle_type` : :p:`velocity`
+:Summary: :s:`Format of output files`
+:Type:    :t:`string`
+:Default: :d:`""`
+:Scope:     :c:`Cello`
+
+:e:`Enzo may need to know which particle attributes represent velocity, for example for kick() or drift() operations.  This is done using the` :p:`velocity` :e:`parameter, whose usage is analogous to the` :p:`position` :e:`parameter.  While specifying position is required, specifying velocity is optional.`
+
+  ::
+
+    Particle {
+
+       list = ["dark"];
+
+       trace {
+
+          attributes = [ "x","single",   "y","single",   "z","single",
+                        "vx","single",  "vy","single",  "vz","single",
+			"mass","single"];
+
+          velocity = ["vx","vy","vz"];
+       }
+    }
+
+-----------
+Performance
+-----------
+
+:Parameter:  :p:`Performance` : :p:`warnings`
+:Summary: :s:`Whether to output performance-related warnings`
+:Type:    :t:`logical`
+:Default: :d:`true`
+:Scope:     :c:`Cello`
+
+:e:`If calls to the Performance API are incorrect, e.g. if stop_region() is called on a region that has not been started, then this parameter specifies whether or not to display warning messages`
+
+----
+
+:Parameter:  :p:`Performance` : :p:`papi` : :p:`counters`
+:Summary: :s:`List of PAPI counters`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`List of PAPI hardware performance counters to trace, e.g. 'counters = ["PAPI_FP_OPS", "PAPI_L3_TCA"];'.  For a list of available counters, use the PAPI "papi_avail" utility.`
+

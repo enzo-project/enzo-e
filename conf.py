@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Enzo-P / Cello documentation build configuration file, created by
+# Enzo-E / Cello documentation build configuration file, created by
 # sphinx-quickstart on Thu Sep  1 17:54:50 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -53,7 +53,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Enzo-P / Cello'
+project = u'Enzo-E / Cello'
 copyright = u'2019, James Bordner'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -182,7 +182,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Enzo-PCellodoc'
+htmlhelp_basename = 'Enzo-ECellodoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -196,7 +196,7 @@ htmlhelp_basename = 'Enzo-PCellodoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Enzo-PCello.tex', u'Enzo-P / Cello Documentation',
+  ('index', 'Enzo-ECello.tex', u'Enzo-E / Cello Documentation',
    u'James Bordner', 'manual'),
 ]
 
@@ -229,7 +229,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'enzo-pcello', u'Enzo-P / Cello Documentation',
+    ('index', 'enzo-pcello', u'Enzo-E / Cello Documentation',
      [u'James Bordner'], 1)
 ]
 
@@ -237,7 +237,7 @@ man_pages = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'Enzo-P / Cello'
+epub_title = u'Enzo-E / Cello'
 epub_author = u'James Bordner'
 epub_publisher = u'James Bordner'
 epub_copyright = u'2019, James Bordner'
