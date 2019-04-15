@@ -5,7 +5,7 @@
 /// @date     2012-10-02
 /// @brief    [\ref Parameters] Declaration of the Config class
 ///
-/// Last review of parameters was 2015-09-10 with revision -r 3836
+/// Last review of parameters was 2015-09-10 with revision -r 3836 
 
 #ifndef PARAMETERS_CONFIG_HPP
 #define PARAMETERS_CONFIG_HPP
@@ -16,12 +16,12 @@ class Config : public PUP::able {
 
   /// @class    Config
   /// @ingroup  Parameters
-  /// @brief    [\ref Parameters]
+  /// @brief    [\ref Parameters] 
 
 public: // interface
 
   /// empty constructor for charm++ pup()
-  Config() throw()
+  Config() throw() 
   : PUP::able(),
     num_adapt(0),
     adapt_list(),
@@ -38,10 +38,6 @@ public: // interface
     adapt_include_ghosts(),
     adapt_output(),
     adapt_schedule_index(),
-    adapt_region_min_level(),
-    adapt_region_max_level(),
-    adapt_region_xm(),
-    adapt_region_xp(),
     balance_schedule_index(0),
     num_boundary(0),
     boundary_list(),
@@ -190,10 +186,6 @@ public: // interface
       adapt_include_ghosts(),
       adapt_output(),
       adapt_schedule_index(),
-      adapt_region_min_level(),
-      adapt_region_max_level(),
-      adapt_region_xm(),
-      adapt_region_xp(),
       balance_schedule_index(-1),
       num_boundary(0),
       boundary_list(),
@@ -334,7 +326,7 @@ public: // interface
 
   /// Read values from the Parameters object
   void read (Parameters * parameters) throw();
-
+  
 public: // attributes
 
   // NOTE: change pup() function whenever attributes change
@@ -346,7 +338,7 @@ public: // attributes
   int                        adapt_interval;
   int                        adapt_min_face_rank;
   std::vector <std::string>  adapt_type;
-  std::vector
+  std::vector 
   < std::vector<std::string> > adapt_field_list;
   std::vector <double>       adapt_min_refine;
   std::vector <double>       adapt_max_coarsen;
@@ -357,11 +349,7 @@ public: // attributes
   std::vector <char>         adapt_include_ghosts;
   std::vector <std::string>  adapt_output;
   std::vector <int>          adapt_schedule_index;
-  std::vector <int>          adapt_region_min_level;
-  std::vector <int>          adapt_region_max_level;
-  std::vector <std::vector<double> >       adapt_region_xm;
-  std::vector <std::vector<double> >       adapt_region_xp;
-
+  
   // Balance (dynamic load balancing)
 
   int                        balance_schedule_index;
@@ -374,7 +362,7 @@ public: // attributes
   std::vector<int>           boundary_axis;
   std::vector<int>           boundary_face;
   std::vector<int>           boundary_mask;
-  std::vector<std::vector<std::string> >
+  std::vector<std::vector<std::string> >  
                              boundary_field_list;
 
   // Domain
@@ -508,7 +496,7 @@ public: // attributes
   int                        performance_off_schedule_index;
 
   // Physics
-
+  
   int                        num_physics;  // number of physics objects
   std::vector<std::string>   physics_list;
 
@@ -584,3 +572,4 @@ protected: // functions
 extern Config g_config;
 
 #endif /* PARAMETERS_CONFIG_HPP */
+
