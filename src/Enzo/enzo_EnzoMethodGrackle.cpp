@@ -21,27 +21,25 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   FieldDescr * field_descr = cello::field_descr();
 
-  /// Initialize default Refresh
-  int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-		       enzo_sync_id_method_grackle);
-  refresh(ir)->add_all_fields();
-
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
-  // define them:
+  // define them. In the future, maybe have this be a separate
+  // Method function that can be called to obtain a list of
+  // needed field
 
   std::vector<std::string> fields_to_define;
+  std::vector<std::string> colour_fields;
 
-  if (grackle_data->metal_cooling){
+  if (grackle_data->metal_cooling > 0){
+    std::string metal_name = "metal_density";
 
-    if (! (field_descr->is_field("metal_density"))){
-      fields_to_define.push_back("metal_density");
-
-//      WARNING("EnzoMethodGrackle: ",
-//              "Must define metal_density to use metal cooling with Grackle. Defining");
+    if (! (field_descr->is_field(metal_name))){
+      fields_to_define.push_back(metal_name);
     }
+    colour_fields.push_back(metal_name);
   }
 
+  // Define primordial chemistry fields
   if (grackle_data->primordial_chemistry > 0){
     std::string pc1_fields[6] = {"HI_density","HII_density",
                                   "HeI_density","HeII_density","HeIII_density",
@@ -51,10 +49,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
     for(int ifield = 0; ifield < numfields; ifield++){
       if (! (field_descr->is_field( pc1_fields[ifield] ))){
         fields_to_define.push_back( pc1_fields[ifield] );
-
-//        WARNING("EnzoMethodGrackle: ",
-//                "Must define " + pc1_fields[ifield] + "if using primordial_chemistry = 1 with Grackle. Defining"); 
       }
+      colour_fields.push_back( pc1_fields[ifield] );
     }
 
     if(grackle_data->primordial_chemistry > 1){
@@ -65,10 +61,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
       for (int ifield = 0; ifield < numfields; ifield++){
         if (! (field_descr->is_field( pc2_fields[ifield] ))){
           fields_to_define.push_back( pc2_fields[ifield] );
-
-//          WARNING("EnzoMethodGrackle: ",
-//                  "Must define " + pc2_fields[ifield] + "if using primordial_chemistry = 2 with Grackle. Defining");
         }
+        colour_fields.push_back( pc2_fields[ifield] );
       }
 
       if(grackle_data->primordial_chemistry > 2){
@@ -78,10 +72,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
         for(int ifield = 0; ifield < numfields; ifield++){
           if (! (field_descr->is_field( pc3_fields[ifield] ))){
             fields_to_define.push_back( pc3_fields[ifield] );
-
-//            WARNING("EnzoMethodGrackle: ",
- //                   "Must define " + pc3_fields[ifield] +  "if using primordial_chemistry = 3 with Grackle. Defining");
           }
+
+          colour_fields.push_back( pc3_fields[ifield] );
         }
 
       } // endif primordial_chemistry > 2
@@ -91,28 +84,42 @@ EnzoMethodGrackle::EnzoMethodGrackle
   } // endif primordial chemistry is on
 
   if (grackle_data->use_specific_heating_rate){
-
     if ( !(field_descr->is_field("specific_heating_rate"))){
       fields_to_define.push_back("specific_heating_rate");
-
-//      WARNING("EnzoMethodGrackle : ",
-//             " Must define specific_heating_rate if using specific heating rate with Grackle. Defining")
     }
   }
 
   if (grackle_data->use_volumetric_heating_rate){
     if ( !(field_descr->is_field("volumetric_heating_rate"))){
       fields_to_define.push_back("volumetric_heating_rate");
-
-//      WARNING("EnzoMethodGrackle: ",
-//             "Must define volumetric_heating_rate field if using volumetric heating with Grackle. Defining.");
     }
   }
 
-  // now define the fields
+  // Define fields
+
+//  WARNING("EnzoMethodGrackle: ",
+//          "Not all fields needed for current Grackle settings are defined. Attempting to define:");
+
   for (int ifield = 0; ifield < fields_to_define.size(); ifield++){
+//    WARNING(fields_to_define[ifield].c_str() );
     field_descr->insert_permanent( fields_to_define[ifield] );
   }
+
+  // Set these fields to colour if they exist
+  //    list of fields belonging to this method that are colour
+  for (int ifield=0; ifield < colour_fields.size(); ifield++){
+    if (   field_descr->is_permanent(  colour_fields[ifield] ) &&
+         !(field_descr->groups()->is_in( colour_fields[ifield], "colour")) ){
+
+
+      field_descr->groups()->add( colour_fields[ifield] ,"colour");
+    }
+  }
+
+  /// Initialize default Refresh
+  int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+                       enzo_sync_id_method_grackle);
+  refresh(ir)->add_all_fields();
 
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
