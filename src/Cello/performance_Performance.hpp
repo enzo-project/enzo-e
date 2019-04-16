@@ -58,6 +58,9 @@ enum perf_region {
   perf_stopping,
   perf_block,
   perf_exit,
+#ifdef CONFIG_USE_GRACKLE
+  perf_grackle,
+#endif
   num_perf_region
 };
 

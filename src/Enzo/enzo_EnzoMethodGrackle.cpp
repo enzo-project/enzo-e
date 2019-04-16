@@ -8,6 +8,7 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+
 //----------------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle
@@ -166,7 +167,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
 void EnzoMethodGrackle::compute ( Block * block) throw()
 {
-  if (!block->is_leaf()) return;
+
+  if (block->is_leaf()){
 
   #ifndef CONFIG_USE_GRACKLE
 
@@ -177,11 +179,21 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   #else /* CONFIG_USE_GRACKLE */
     EnzoBlock * enzo_block = enzo::block(block);
 
+    // Start timer
+    Simulation * simulation = cello::simulation();
+    if (simulation)
+      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
+
     this->compute_(enzo_block);
 
     enzo_block->compute_done();
-    return;
+
+    if (simulation)
+      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
   #endif
+  }
+
+  return;
 
 }
 
@@ -385,6 +397,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 //----------------------------------------------------------------------
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
+
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
 
