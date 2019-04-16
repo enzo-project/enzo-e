@@ -118,7 +118,7 @@ use_grackle = 1
 # Whether to run the test programs using valgrind to check for memory leaks
 #----------------------------------------------------------------------
 
-use_valgrind = 1
+use_valgrind = 0
 
 #----------------------------------------------------------------------
 # Whether to use Cello Performance class for collecting performance
