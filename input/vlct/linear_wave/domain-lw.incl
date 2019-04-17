@@ -1,0 +1,6 @@
+# domain for the linear wave vlct test problems
+
+   Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [3.0, 1.5, 1.5];
+   }

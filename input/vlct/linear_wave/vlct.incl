@@ -1,0 +1,90 @@
+# Problem VLCT rotated 3D linear wave test problem
+
+# Problem: Linear Waves test problems for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   # Domain is the 3D  box 0 < x < 3, 0 < y,z < 1.5
+   include "input/vlct/linear_wave/domain-lw.incl"
+
+   Boundary {
+      type = "periodic";
+   }
+
+   Method {
+      list = ["vlct"];
+      vlct{
+         courant = 0.4;
+  
+        # default is hlle. Options are hlle and hlld
+        riemann_solver = "hlld";
+
+        # Reconstructor algorithm for half time step. Options are:
+        #    - "nn" Nearest Neighbor (default)
+        #    - "plm" Piecewise linear
+        half_dt_reconstruct_method = "nn";
+
+        # Reconstructor algorithm for full time step. Options are:
+        #    - "nn" Nearest Neighbor
+        #    - "plm" Piecewise linear (default)
+        # Do NOT choose "plm" for both
+        full_dt_reconstruct_method = "plm";
+
+        # density floor (default = 0.0)
+        density_floor = 0.0;
+
+        # pressure floor (default = 0.0)
+        pressure_floor = 0.0;
+	};
+   }
+
+   Field {
+      # The VL+CT method tracks concerved quantities.
+      #    - velocity_x/y/z are technically momentum densities
+      #    - pressure is the total energy density
+      #    - bfieldi_x/y/z are interface magnetic fields (aka longitudinal).
+      #      The x/y/z component is the only component tracked at the faces
+      #      between cells along the x/y/z component
+      #    - bfieldc_x/y/z are the cell-centered magenetic fields. Each
+      #      component is the average value of the corresponding interface
+      #      values
+      # Pressure and velocity_x/y/z are also tracked because they are frequently
+      # computed.
+      list = ["density",
+              "velocity_x", "velocity_y", "velocity_z",
+	      "pressure",
+	      "bfieldi_x", "bfieldi_y", "bfieldi_z",
+	      "bfield_x", "bfield_y", "bfield_z",
+	      "acceleration_x", "acceleration_y", "acceleration_z"];
+
+      courant_=0.4;
+      gamma = 1.6666666666666667;
+
+      # The VL+CT method reconstructs interface values (to compute fluxes) twice
+      # per timestep. Can perform nearest-neighbor or PLM. Each time
+      # nearest-neighbor is used, 1 ghost zone is needed. Each time PLM is used
+      # 2 ghost zones are needed. Presently use PLM twice, but in future, will
+      # use nearest-neighbor followed by PLM
+      
+      ghost_depth = 3;
+      padding = 0;
+      alignment = 8;
+
+      bfieldi_x{
+         centering = [false, true, true];
+      };
+      bfieldi_y{
+         centering = [true, false, true];
+      };
+      bfieldi_z{
+         centering = [true, true, false];
+      };
+   }
+
+   Output {
+      list = ["data"];
+      data {
+	 type = "data";
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+		       "pressure", "bfield_x", "bfield_y", "bfield_z"];
+      };
+   }

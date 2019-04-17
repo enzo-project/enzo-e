@@ -1,0 +1,22 @@
+# Problem: 3D Fast LinearWave test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+# This problem is taken from Gardiner & Stone (2008).
+# Specifically this version handles a fast magnetosonic wave
+# wave speeds for fast, slow and alfven waves are 2., 1/2., and 1.
+
+   include "input/vlct/linear_wave/vlct.incl"
+   include "input/vlct/linear_wave/initial_fast.in"
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [1,1,1];
+      root_size = [64,32,32]; # number of cells per axis
+   }
+
+   Output {
+      data {
+        dir = ["method_vlct-1-fastN32_%.1f","time"];
+      	name = ["fast-data-%03d.h5", "proc"];
+      };
+   }
