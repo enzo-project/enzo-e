@@ -1,3 +1,13 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoInitialInclinedWave.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thur April 19 2019
+/// @brief    [\ref Enzo] Initialization routine for inclined linear MHD waves
+///           and inclined circularly polarized alfven waves detailed in
+///           Gardiner & Stone (2008). These are used to test the VL+CT MHD
+///           integrator.
+
 #ifndef ENZO_ENZO_INITIAL_INCLINED_WAVE_HPP
 #define ENZO_ENZO_INITIAL_INCLINED_WAVE_HPP
 
@@ -5,8 +15,8 @@
 class ScalarInit;
 class VectorInit;
 
-// Rotation is responsible for rotating axes.
-// This class will be slightly extended and reused for implementing cosmic rays
+// class for rotating axes. Will be (slightly) extended and reused for
+// implementing cosmic rays
 class Rotation;
 
 class EnzoInitialInclinedWave : public Initial {
@@ -76,7 +86,7 @@ private: // attributes
   double alpha_;
   double beta_;
 
-  /// Ideal gas law constant
+  /// adiabatic index
   double gamma_;
 
   /// Amplitude of the perturbation

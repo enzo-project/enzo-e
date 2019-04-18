@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoCenteredFieldRegistry.hpp
-/// @author   Matthew W. Abruzzo (mwa2113@columbia.edu)
-/// @date     Thurs March 28 2014
+/// @author   Matthew W. Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs March 28 2019
 /// @brief    [\ref Enzo] Implementation of the EnzoFieldConditions class,
 ///           declaration of the field_lut struct and declaration of the
 ///           EnzoCenteredFieldRegistry class.

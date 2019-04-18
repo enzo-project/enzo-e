@@ -22,13 +22,30 @@ class EnzoPermutedCoordinates
 
 public: // interface
 
-  // Construct by specifying the axis_id (0, 1, or 2) of the Cartesian axis
-  // that lies along axis i
+  /// Construct an instance of EnzoPermutedCoordinates by specifying the
+  /// axis_id (0, 1, or 2) of the Cartesian axis that lies along axis i
   EnzoPermutedCoordinates(int i_axis)
     : i_axis_(i_axis)
   {
     ASSERT("EnzoPermutedCoordinates", "Constructor arg must be 0, 1, or 2.",
 	   i_axis>-1 && i_axis<3);
+  }
+
+  /// Construct an instance of EnzoPermutedCoordinates by specifying the
+  /// axis name ("x", "z", or "z") of the Cartesian axis that lies along axis i
+  EnzoPermutedCoordinates(std::string i_ax_name)
+    : i_axis_(0)
+  {
+    ASSERT("EnzoPermutedCoordinates",
+	   "Constructor arg must be \"x\", \"y\", or \"z\"",
+	   i_ax_name == "x" || i_ax_name == "y" || i_ax_name == "z");
+    if (i_ax_name == "x"){
+      i_axis_ = 0;
+    } else if (i_ax_name == "y") {
+      i_axis_ = 1;
+    } else {
+      i_axis_ = 2;
+    }
   }
 
   // Returns the code of the axis id associated with each direction

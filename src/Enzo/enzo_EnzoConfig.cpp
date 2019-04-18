@@ -89,6 +89,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_pressure_out(0.0),
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
+  // EnzoInitialShockTube
+  initial_shock_tube_aligned_ax(""),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -522,6 +524,10 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float   ("Initial:sedov_random:density",1.0);
   initial_sedov_random_te_multiplier = 
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
+
+  // Sedov Random Initialization
+  initial_shock_tube_aligned_ax = p->value_string
+    ("Initial:shock_tube:aligned_ax","x");
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);

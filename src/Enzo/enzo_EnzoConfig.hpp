@@ -112,6 +112,8 @@ public: // interface
       initial_sedov_random_pressure_out(0.0),
       initial_sedov_random_density(0.0),
       initial_sedov_random_te_multiplier(0),
+      // EnzoInitialShockTube
+      initial_shock_tube_aligned_ax(""),
       // EnzoInitialSoup
       initial_soup_rank(0),
       initial_soup_file(""),
@@ -286,6 +288,9 @@ public: // attributes
   double                     initial_sedov_random_pressure_out;
   double                     initial_sedov_random_density;
   int                        initial_sedov_random_te_multiplier;
+
+  /// EnzoInitialShockTube
+  std::string                initial_shock_tube_aligned_ax;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;

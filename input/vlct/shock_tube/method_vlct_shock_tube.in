@@ -1,0 +1,138 @@
+# Problem: Axis aligned Shock Tube test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+# only needs to extend from -0.5 to 0.5 with 256 blocks with outflow boundary,
+# but for now we will be doing a vague test with periodic boundaries
+   Domain {
+      lower = [-1.5, -0.5, -0.5];
+      upper = [1.5, 0.5, 0.5];
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [2,2,2];
+      root_size = [768,8,8]; # number of cells per axis
+   }
+
+   Boundary {
+      list = ["one", "two", "three"];
+      one{
+         type = "periodic";
+	 axis = "x";
+      }
+      two{
+         type = "periodic";
+	 axis = "y";
+      }
+      three{
+         type = "periodic";
+	 axis = "z";
+      }
+   }
+
+   Method {
+      list = ["vlct"];
+      vlct{
+         courant = 0.4;
+  
+        # default is hlle. Options are hlle and hlld
+        riemann_solver = "hlld";
+
+        # Reconstructor algorithm for half time step. Options are:
+        #    - "nn" Nearest Neighbor (default)
+        #    - "plm" Piecewise linear
+        half_dt_reconstruct_method = "nn";
+
+        # Reconstructor algorithm for full time step. Options are:
+        #    - "nn" Nearest Neighbor
+        #    - "plm" Piecewise linear (default)
+        # Do NOT choose "plm" for both
+        full_dt_reconstruct_method = "plm";
+
+        # density floor (default = 0.0)
+        density_floor = 0.0;
+
+        # pressure floor (default = 0.0)
+        pressure_floor = 0.0;
+	};
+   }
+
+   Field {
+      # The VL+CT method tracks concerved quantities.
+      #    - velocity_x/y/z are technically momentum densities
+      #    - pressure is the total energy density
+      #    - bfieldi_x/y/z are interface magnetic fields (aka longitudinal).
+      #      The x/y/z component is the only component tracked at the faces
+      #      between cells along the x/y/z component
+      #    - bfieldc_x/y/z are the cell-centered magenetic fields. Each
+      #      component is the average value of the corresponding interface
+      #      values
+      # Pressure and velocity_x/y/z are also tracked because they are frequently
+      # computed.
+      list = ["density",
+              "velocity_x", "velocity_y", "velocity_z",
+	      "pressure",
+	      "bfieldi_x", "bfieldi_y", "bfieldi_z",
+	      "bfield_x", "bfield_y", "bfield_z",
+	      "acceleration_x", "acceleration_y", "acceleration_z"];
+
+      courant_=0.4;
+      # this gamma is required for the shock tube problem
+      gamma = 1.6666666666666667;
+
+      # The VL+CT method reconstructs interface values (to compute fluxes) twice
+      # per timestep. Can perform nearest-neighbor or PLM. Each time
+      # nearest-neighbor is used, 1 ghost zone is needed. Each time PLM is used
+      # 2 ghost zones are needed. Presently use PLM twice, but in future, will
+      # use nearest-neighbor followed by PLM
+      
+      ghost_depth = 3;
+      padding = 0;
+      alignment = 8;
+
+      bfieldi_x{
+         centering = [false, true, true];
+      };
+      bfieldi_y{
+         centering = [true, false, true];
+      };
+      bfieldi_z{
+         centering = [true, true, false];
+      };
+   }
+
+   Initial{
+      list = ["shock_tube"];
+
+      shock_tube{
+         # Intializes a shock tube based on the setup in Ryu & Jones
+	 # This initial condition assumes that gamma = 5/3
+
+	 # At the time of writing, this is required because issues arise with
+	 # setting face-centered fields by passing values
+	 # The discontinuity is setup at 0 along the axis specified by
+	 # aligned_ax ("x", "y", or "z")
+
+	 aligned_ax = "x";
+      };
+      
+   }
+
+   Stopping{
+      time = 0.2;
+   }
+
+   Output {
+      list = ["data"];
+      data {
+	 type = "data";
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+		       "pressure", "bfield_x", "bfield_y", "bfield_z"];
+	 dir = ["method_vlct-1-shock_tube_%.1f","time"];
+	 name = ["alfven-data-%03d.h5", "proc"];
+	 schedule {
+            var = "time";
+	    list = [0.0,0.2];
+         };
+      };
+   }

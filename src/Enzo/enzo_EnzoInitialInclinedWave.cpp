@@ -1,6 +1,12 @@
-#include "enzo.hpp"
-#include "charm_enzo.hpp"
-#include "cello.hpp"
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoInitialInclinedWave.cpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     2019-04-27
+/// @brief    Implementation of EnzoInitialInclinedWave for initializing
+///           inclined linear MHD waves and inclined circularly polarized
+///           alfven waves detailed in Gardiner & Stone (2008). These are used
+///           to test the VL+CT MHD integrator.
 
 // Using the coordinate systems given by eqn 68 of Gardiner & Stone (2008)
 // (except that index numbers start at 0)
@@ -23,7 +29,19 @@
 //  Note that they give transformation of x0,x1,x2 -> x,y,z while the
 //  implementation primarily use x,y,z -> x0,x1,x2 (since the the rotation is
 //  easier to visualize)
+//
+//
+//  In general, this implementation is more complicated than it needs to be.
+//  It could definitely be simplified (although the Rotation class probably
+//  shouldn't be touched since it will be reused)
 
+#include "enzo.hpp"
+#include "charm_enzo.hpp"
+#include "cello.hpp"
+
+//----------------------------------------------------------------------
+
+// This will be reused to implement Cosmic Rays
 class Rotation {
 public:
   Rotation(enzo_float a, enzo_float b)
@@ -80,6 +98,8 @@ private:
   double matrix_[3][3];
 };
 
+//----------------------------------------------------------------------
+
 // Use initializer functors to set up the grid
 //   - for scalars: density, total energy density
 //   - for vectors: momentum, magnetic vector potential
@@ -96,6 +116,8 @@ public:
 
   virtual enzo_float operator() (enzo_float x0, enzo_float x1, enzo_float x2)=0;
 };
+
+//----------------------------------------------------------------------
 
 class LinearScalarInit : public ScalarInit{
 
@@ -124,6 +146,7 @@ protected:
   enzo_float lambda_;
 };
 
+//----------------------------------------------------------------------
 
 class RotatedScalarInit : public ScalarInit {
 public:
@@ -152,8 +175,7 @@ private:
   ScalarInit *inner_;
 };
 
-
-
+//----------------------------------------------------------------------
 
 class VectorInit {
 public:
@@ -164,8 +186,9 @@ public:
 			   enzo_float &v0, enzo_float &v1, enzo_float &v2)=0;
 };
 
-class LinearVectorInit : public VectorInit {
+//----------------------------------------------------------------------
 
+class LinearVectorInit : public VectorInit {
 public:
   LinearVectorInit(enzo_float back0, enzo_float back1, enzo_float back2,
 		   enzo_float ev0, enzo_float ev1, enzo_float ev2,
@@ -196,6 +219,8 @@ protected:
   enzo_float lambda_;
 };
 
+//----------------------------------------------------------------------
+
 class RotatedVectorInit : public VectorInit {
 public:
   RotatedVectorInit(enzo_float a, enzo_float b, VectorInit *inner)
@@ -224,6 +249,8 @@ private:
   Rotation *rot_;
   VectorInit *inner_;
 };
+
+//----------------------------------------------------------------------
 
 class LinearVectorPotentialInit : public VectorInit {
 public:
@@ -259,6 +286,8 @@ protected:
   enzo_float lambda_;
 };
 
+//----------------------------------------------------------------------
+
 class CircAlfvenMomentumInit : public VectorInit {
 public:
   // The absence of ev_B0 is intentional
@@ -284,6 +313,8 @@ protected:
   enzo_float lambda_;
 };
 
+//----------------------------------------------------------------------
+
 class CircAlfvenVectorPotentialInit : public VectorInit {
 public:
   // The absence of ev_B0 is intentional
@@ -306,6 +337,7 @@ protected:
   enzo_float lambda_;
 };
 
+//----------------------------------------------------------------------
 
 class MeshPos {
 
@@ -367,7 +399,7 @@ private:
   enzo_float dx_, dy_, dz_;
 };
 
-
+//----------------------------------------------------------------------
 
 void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
 		     EnzoArray<enzo_float,3> &Aj,
@@ -424,6 +456,7 @@ void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
   }
 }
 
+//----------------------------------------------------------------------
 
 // Components of the magnetic field from the vector potential
 // Bx(k, j, i-1/2) =
@@ -489,6 +522,7 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 
 }
 
+//----------------------------------------------------------------------
 
 void setup_fluid(Block *block, ScalarInit *density_init,
 		 ScalarInit *total_energy_init, 
@@ -537,6 +571,8 @@ void setup_fluid(Block *block, ScalarInit *density_init,
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init, 
 				 VectorInit *momentum_init,
@@ -594,7 +630,7 @@ EnzoInitialInclinedWave::EnzoInitialInclinedWave(int cycle, double time,
     wave_type_(wave_type)
 {
   ASSERT("EnzoInitialInclinedWave",
-	 ("(Invalid wave_type specified (must be 'fast', 'slow', 'alfven', "
+	 ("Invalid wave_type specified (must be 'fast', 'slow', 'alfven', "
 	  "'entropy', or 'circ_alfven'"),
 	 (wave_type_ == "fast") || (wave_type_ == "alfven") ||
 	 (wave_type_ == "slow") || (wave_type_ == "entropy") ||
@@ -687,7 +723,10 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
     // etot = pressure/(gamma-1)+0.5*rho*v^2+.5*B^2
     enzo_float etot_back = (1./gamma_)/(gamma_-1.)+1.625;
     if (wave_type_ == "entropy"){
-      mom0_back = 1;
+      mom0_back = wsign;
+      b0_back*=wsign;
+      b1_back*=wsign;
+      b2_back*=wsign;
       etot_back += 0.5;
     }
 

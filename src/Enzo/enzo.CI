@@ -60,6 +60,7 @@ module enzo {
   PUPable EnzoInitialSedovArray2;
   PUPable EnzoInitialSedovArray3;
   PUPable EnzoInitialSedovRandom;
+  PUPable EnzoInitialShockTube;
   PUPable EnzoInitialSoup;  	  
   PUPable EnzoInitialTurbulence;
 

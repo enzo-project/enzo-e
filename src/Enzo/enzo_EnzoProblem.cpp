@@ -172,6 +172,9 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_pm_level);
   } else if (type == "ppml_test") {
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
+  } else if (type == "shock_tube") {
+    initial = new EnzoInitialShockTube
+      (cycle, time, enzo_config->initial_shock_tube_aligned_ax);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup
