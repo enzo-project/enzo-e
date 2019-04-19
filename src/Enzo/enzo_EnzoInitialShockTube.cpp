@@ -53,9 +53,9 @@ void EnzoInitialShockTube::enforce_block
 
   ESlice *l_slice = NULL;
   ESlice *r_slice = NULL;
-  prep_aligned_slices_(block, l_slice, r_slice);
+  prep_aligned_slices_(block, &l_slice, &r_slice);
 
-  for (int i = 0; i<1; i++){
+  for (int i = 0; i<2; i++){
     EFlt3DArray arr;
     ESlice *cur_slice = (i == 0) ? l_slice : r_slice;
     std::map<std::string, enzo_float> *cur_val_map;
@@ -81,7 +81,7 @@ void EnzoInitialShockTube::enforce_block
     arr = array_factory.from_name(bfields[coord.j_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
 
-    arr = array_factory.from_name(velocities[coord.k_axis()]);
+    arr = array_factory.from_name(bfields[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_2"), arr);
   }
   EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
@@ -96,8 +96,8 @@ void EnzoInitialShockTube::enforce_block
 
 //----------------------------------------------------------------------
 
-void EnzoInitialShockTube::prep_aligned_slices_(Block *block, ESlice *l_slice,
-						ESlice *r_slice)
+void EnzoInitialShockTube::prep_aligned_slices_(Block *block, ESlice **l_slice,
+						ESlice **r_slice)
 {
   Field field  = block->data()->field();
   
@@ -134,10 +134,10 @@ void EnzoInitialShockTube::prep_aligned_slices_(Block *block, ESlice *l_slice,
   int shock_ind = (int)ceil((-1.*left_edge/di)-0.5 + (double)gi);
   
   if (shock_ind > 0){
-    l_slice = new ESlice(0,shock_ind);
+    *l_slice = new ESlice(0,shock_ind);
   }
   if (shock_ind < mi){
-    r_slice = new ESlice(shock_ind, mi);
+    *r_slice = new ESlice(shock_ind, mi);
   }
 }
 
@@ -146,10 +146,11 @@ void EnzoInitialShockTube::prep_aligned_slices_(Block *block, ESlice *l_slice,
 void EnzoInitialShockTube::initializer_helper_(ESlice &slice, enzo_float val,
 					       EFlt3DArray &arr)
 {
-  ESlice xslice, yslice, zslice; 
-  xslice = (aligned_ax_ == "x") ? ESlice(0, arr.shape(2)) : slice;
-  yslice = (aligned_ax_ == "y") ? ESlice(0, arr.shape(1)) : slice;
-  zslice = (aligned_ax_ == "z") ? ESlice(0, arr.shape(0)) : slice;
+  ESlice xslice, yslice, zslice;
+  
+  xslice = (aligned_ax_ == "x") ? slice : ESlice(0, arr.shape(2));
+  yslice = (aligned_ax_ == "y") ? slice : ESlice(0, arr.shape(1));
+  zslice = (aligned_ax_ == "z") ? slice : ESlice(0, arr.shape(0));
 
   arr.subarray(zslice, yslice, xslice) = val;
 }
