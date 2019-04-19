@@ -108,7 +108,7 @@
 
 // #define DEBUG_FIELD_FACE
 // #define DEBUG_COPY_DENSITY
-// #define DEBUG_COPY_POTENTIAL
+#define DEBUG_COPY_POTENTIAL
 // #define DEBUG_COPY_B
 
 // #define DEBUG_METHOD

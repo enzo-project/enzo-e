@@ -243,11 +243,11 @@ void EnzoSolverJacobi::do_refresh_(Block * block)
   //  const int min_face_rank = cello::rank() - 1;
   const int min_face_rank = 0;
 
-  const int id_sync = 2*sync_id_()+(*piter_(block))%2;
+  //  const int id_sync = 2*sync_id_()+(*piter_(block))%2;
   
   Refresh refresh
     (ghost_depth,min_face_rank,neighbor_type_(),
-     sync_type_(), id_sync);
+     sync_type_(), sync_id_());
 
   refresh.set_active(is_finest_(block));
   refresh.add_field (ix_);

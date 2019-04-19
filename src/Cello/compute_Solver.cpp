@@ -95,8 +95,7 @@ void Solver::monitor_output_
 {
   Monitor * monitor = cello::monitor();
 
-  monitor->print("Solver", "%s %s %s iter %04d  err %.16g [%g %g]",
-		 block->name().c_str(),
+  monitor->print("Solver", "%s %s iter %04d  err %.16g [%g %g]",
 		 this->name().c_str(),
 		 final ? "final" : "",
 		 iter,

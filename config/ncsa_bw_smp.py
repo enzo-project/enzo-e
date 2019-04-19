@@ -16,8 +16,8 @@ node_size = 32 # for BW integer cores
 
 is_arch_valid = 1
 
-flags_arch = '-O3 -std=gnu++11 -Wall'
-flags_link = '-O3 -std=gnu++11'
+flags_arch = '-O3 -g -ffast-math -funroll-loops -std=gnu++11 -Wall'
+flags_link = '-O3 -g -ffast-math -funroll-loops -std=gnu++11'
 
 flags_prec_single = ''
 flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
