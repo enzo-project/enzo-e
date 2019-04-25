@@ -1,3 +1,4 @@
+AWK_ORG= ./tools/awk/diff-org.awk
 #----------------------------------------------------------------------
 .PHONY: bin/enzo-p
 bin/enzo-p:
@@ -52,9 +53,11 @@ cccc:
 diff:
 	echo '* TODO [/] git diff branch (' `git rev-parse --abbrev-ref HEAD` ')' > diff.org
 	echo '** TODO [/] Unstaged diff'                     >> diff.org
-	git diff -b |./tools/awk/diff-org.awk                >> diff.org
+	git diff -b |$(AWK_ORG)                >> diff.org
 	echo '** TODO [/] Staged diff'                       >> diff.org
-	git diff --cached HEAD -b | ./tools/awk/diff-org.awk >> diff.org
+	git diff --cached HEAD -b | $(AWK_ORG) >> diff.org
+	echo '** TODO [/] enzo-project/master'               >> diff.org
+	git diff remotes/upstream/master | $(AWK_ORG) >> diff.org
 #----------------------------------------------------------------------
 .PHONY: gdb
 gdb:
