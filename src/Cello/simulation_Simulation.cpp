@@ -948,8 +948,8 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   int index_region_cycle = performance_->region_index("cycle");
 
   int m = 0;
-  const int num_sum = counters_reduce[m++];
-  const int num_max = counters_reduce[m++];
+  const int num_sum = counters_reduce[m++];             // 0
+  const int num_max = counters_reduce[m++];             // 1
   const long long msg_coarsen = counters_reduce[m++];   // 2
   const long long msg_refine  = counters_reduce[m++];   // 3
   const long long msg_refresh = counters_reduce[m++];   // 4
