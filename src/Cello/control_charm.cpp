@@ -142,9 +142,10 @@ void Block::refresh_exit_()
   fflush(stdout);
       
 #endif
-  
-  delete refresh;
-  refresh_.pop_back();
+
+  // WARNING: BREAKS Charm++ with random queueing on some regression tests
+  //  delete refresh;
+  //  refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
