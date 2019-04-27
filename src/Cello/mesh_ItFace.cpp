@@ -32,7 +32,7 @@ ItFace::ItFace(int rank,
   if (ipf3) {
     ipf3_.resize(3);
     for (int i=0; i<rank; i++)  ipf3_[i] = ipf3[i];
-    for (int i=rank; i<3; i++)  ipf3_[i] = ipf3[i];
+    for (int i=rank; i<3; i++)  ipf3_[i] = 0;
   }
   for (int axis=0; axis<3; axis++) {
     n3_[axis] = n3[axis];
@@ -138,39 +138,18 @@ bool ItFace::valid_() const
   if (ic3_.size() > 0) {
     if (ipf3_.size() == 0) {
       // Face must be adjacent to child
-      if (ic3_.size() >= 1 && rank_ >= 1) {
-	if  (if3_[0] == -1 && ic3_[0] != 0) l_face = false;
-	if  (if3_[0] ==  1 && ic3_[0] != 1) l_face = false;
-      }
-      if (ic3_.size() >= 2 && rank_ >= 2) {
-	if  (if3_[1] == -1 && ic3_[1] != 0) l_face = false;
-	if  (if3_[1] ==  1 && ic3_[1] != 1) l_face = false;
-      }
-      if (ic3_.size() >= 3 && rank_ >= 3) {
-	if  (if3_[2] == -1 && ic3_[2] != 0) l_face = false;
-	if  (if3_[2] ==  1 && ic3_[2] != 1) l_face = false;
+      for (int axis=0; axis<rank_; axis++) {
+	if  (if3_[axis] == -1 && ic3_[axis] != 0) l_face = false;
+	if  (if3_[axis] ==  1 && ic3_[axis] != 1) l_face = false;
       }
     } else {
 
       // Face must be adjacent to same parent's face
-      if (ipf3_.size() >= 1) {
-	if (ipf3_[0] != 0 && (if3_[0] != ipf3_[0])) l_parent = false; 
-	if (ipf3_[0] == 0 && 
-	    ((ic3_[0] == 0 && if3_[0] == -1) ||
-	     (ic3_[0] == 1 && if3_[0] ==  1))) l_parent = false;
-      }
-      if (ipf3_.size() >= 2) {
-
-	if (ipf3_[1] != 0 && (if3_[1] != ipf3_[1])) l_parent = false; 
-	if (ipf3_[1] == 0 && 
-	    ((ic3_[1] == 0 && if3_[1] == -1) ||
-	     (ic3_[1] == 1 && if3_[1] ==  1))) l_parent = false;
-      }
-      if (ipf3_.size() >= 3) {
-	if (ipf3_[2] != 0 && (if3_[2] != ipf3_[2]))  l_parent = false; 
-	if (ipf3_[2] == 0 && 
-	    ((ic3_[2] == 0 && if3_[2] == -1) ||
-	     (ic3_[2] == 1 && if3_[2] ==  1))) l_parent = false;
+      for (int axis=0; axis<rank_; axis++) {
+	if (ipf3_[axis] != 0 && (if3_[axis] != ipf3_[axis])) l_parent = false; 
+	if (ipf3_[axis] == 0 && 
+	    ((ic3_[axis] == 0 && if3_[axis] == -1) ||
+	     (ic3_[axis] == 1 && if3_[axis] ==  1))) l_parent = false;
       }
     }
   }
@@ -178,12 +157,10 @@ bool ItFace::valid_() const
   bool l_periodic = true;
   // Return false if on boundary and not periodic
   if (index_.is_on_boundary(if3_,n3_)) {
-    if (if3_[0] == -1 && ! periodicity_[0][0]) l_periodic = false;
-    if (if3_[0] == +1 && ! periodicity_[0][1]) l_periodic = false;
-    if (if3_[1] == -1 && ! periodicity_[1][0]) l_periodic = false;
-    if (if3_[1] == +1 && ! periodicity_[1][1]) l_periodic = false;
-    if (if3_[2] == -1 && ! periodicity_[2][0]) l_periodic = false;
-    if (if3_[2] == +1 && ! periodicity_[2][1]) l_periodic = false;
+    for (int axis=0; axis<rank_; axis++) {
+      if (if3_[axis] == -1 && ! periodicity_[axis][0]) l_periodic = false;
+      if (if3_[axis] == +1 && ! periodicity_[axis][1]) l_periodic = false;
+    }
   }
   return (l_face && l_range && l_parent && l_periodic);
 }

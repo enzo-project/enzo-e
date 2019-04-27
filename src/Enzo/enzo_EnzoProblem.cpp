@@ -268,8 +268,6 @@ Solver * EnzoProblem::create_solver_
 
   Solver * solver = NULL;
   
-  int rank = config->mesh_root_rank;
-
   // Set solve type if not default "on_leaves" (solve_leaf)
 
   std::string solve_type_name=enzo_config->solver_solve_type[index_solver];

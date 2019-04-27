@@ -83,18 +83,18 @@ Index ItNeighbor::index() const
 
 void ItNeighbor::face_(int of3[3]) const
 {
-  of3[0] = (rank_ > 0) ? of3_[0] : 0;
-  of3[1] = (rank_ > 1) ? of3_[1] : 0;
-  of3[2] = (rank_ > 2) ? of3_[2] : 0;
+  of3[0] = (rank_ >= 1) ? of3_[0] : 0;
+  of3[1] = (rank_ >= 2) ? of3_[1] : 0;
+  of3[2] = (rank_ >= 3) ? of3_[2] : 0;
 } 
 
 //----------------------------------------------------------------------
 
 void ItNeighbor::child(int ic3[3]) const
 {
-  ic3[0] = (rank_ > 0) ? ic3_[0] : 0;
-  ic3[1] = (rank_ > 1) ? ic3_[1] : 0;
-  ic3[2] = (rank_ > 2) ? ic3_[2] : 0;
+  ic3[0] = (rank_ >= 1) ? ic3_[0] : 0;
+  ic3[1] = (rank_ >= 2) ? ic3_[1] : 0;
+  ic3[2] = (rank_ >= 3) ? ic3_[2] : 0;
   if ( ic3_[0]== -2) {
     ic3[0] = 0;
     ic3[1] = 0;
@@ -152,13 +152,13 @@ void ItNeighbor::increment_()
 	next_child_();
     } 
     if (is_reset_child_()) {
-      if (rank_ > 0 && of3_[0] < 1) { ++of3_[0]; }
+      if (rank_ >= 1 && of3_[0] < 1) { ++of3_[0]; }
       else {
 	of3_[0] = -1;
-	if (rank_ > 1 && of3_[1] < 1) { ++of3_[1]; }
+	if (rank_ >= 2 && of3_[1] < 1) { ++of3_[1]; }
 	else {
 	  of3_[1] = -1;
-	  if (rank_ > 2 && of3_[2] < 1) { ++of3_[2]; }
+	  if (rank_ >= 3 && of3_[2] < 1) { ++of3_[2]; }
 	  else reset();
 	}
       }
@@ -173,13 +173,13 @@ void ItNeighbor::next_child_()
   if (is_reset_child_()) {
     set_first_child_();
   } else {
-    if (rank_ > 0 && ic3_[0] < 1) { ++ic3_[0]; }
+    if (rank_ >= 1 && ic3_[0] < 1) { ++ic3_[0]; }
     else {
       ic3_[0] = 0;
-      if (rank_ > 1 && ic3_[1] < 1) { ++ic3_[1]; }
+      if (rank_ >= 2 && ic3_[1] < 1) { ++ic3_[1]; }
       else {
 	ic3_[1] = 0;
-	if (rank_ > 2 && ic3_[2] < 1) { ++ic3_[2]; }
+	if (rank_ >= 3 && ic3_[2] < 1) { ++ic3_[2]; }
 	else reset_child_();
       }
     }
@@ -190,9 +190,9 @@ void ItNeighbor::next_child_()
 
 void ItNeighbor::set_first_() 
 {
-  of3_[0] = rank_ > 0 ? -1 : 0;
-  of3_[1] = rank_ > 1 ? -1 : 0;
-  of3_[2] = rank_ > 2 ? -1 : 0;
+  of3_[0] = (rank_ >= 1) ? -1 : 0;
+  of3_[1] = (rank_ >= 2) ? -1 : 0;
+  of3_[2] = (rank_ >= 3) ? -1 : 0;
 }
 
 //----------------------------------------------------------------------
@@ -214,7 +214,7 @@ bool ItNeighbor::valid_()
   // Check that face rank is in range
 
   int face_rank = rank_;
-  for (int i=0; i<rank_; i++) face_rank -= std::abs(of3_[i]);
+  for (int axis=0; axis<rank_; axis++) face_rank -= std::abs(of3_[axis]);
 
   const bool in_range = 
     (min_face_rank_ <= face_rank && face_rank < rank_);
@@ -265,36 +265,26 @@ bool ItNeighbor::valid_()
 
     bool valid = true;
 
-    if (rank_ >= 1 && if3[0] == -1 && ic3_[0] != 0) valid = false;
-    if (rank_ >= 1 && if3[0] ==  1 && ic3_[0] != 1) valid = false;
-    if (rank_ >= 2 && if3[1] == -1 && ic3_[1] != 0) valid = false;
-    if (rank_ >= 2 && if3[1] ==  1 && ic3_[1] != 1) valid = false;
-    if (rank_ >= 3 && if3[2] == -1 && ic3_[2] != 0) valid = false;
-    if (rank_ >= 3 && if3[2] ==  1 && ic3_[2] != 1) valid = false;
+    for (int axis=0; axis<rank_; axis++) {
+      if (if3[axis] == -1 && ic3_[axis] != 0) valid = false;
+      if (if3[axis] ==  1 && ic3_[axis] != 1) valid = false;
+      if (valid == false) return false;
+    }
 
-    if (valid == false) return false;
+  } else if (face_level() < level_) {
 
-  }
-
-  // Skip coarse oblique neighbors
-
-  if (face_level() < level_) {
-
-    // Skip face if neighbor is coarser and not same as parent.
+    // Skip coarse oblique neighbors
 
     int ic3[3] = {0,0,0};
     index_.child (level_,&ic3[0],&ic3[1],&ic3[2]);
 
     bool valid = true;
 
-    if  (rank_ >= 1 && of3_[0] == +1 && ic3[0] == 0) valid = false;
-    if  (rank_ >= 1 && of3_[0] == -1 && ic3[0] == 1) valid = false;
-    if  (rank_ >= 2 && of3_[1] == +1 && ic3[1] == 0) valid = false;
-    if  (rank_ >= 2 && of3_[1] == -1 && ic3[1] == 1) valid = false;
-    if  (rank_ >= 3 && of3_[2] == +1 && ic3[2] == 0) valid = false;
-    if  (rank_ >= 3 && of3_[2] == -1 && ic3[2] == 1) valid = false;
-
-    if (valid == false) return false;
+    for (int axis=0; axis<rank_; axis++) {
+      if  (of3_[axis] == +1 && ic3[axis] == 0) valid = false;
+      if  (of3_[axis] == -1 && ic3[axis] == 1) valid = false;
+      if (valid == false) return false;
+    }
 
   }
 

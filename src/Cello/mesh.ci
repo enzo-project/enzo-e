@@ -65,7 +65,6 @@ module mesh {
   PUPable Stopping;
   PUPable Units;
 
-  // depreciated
   message FieldMsg {
       char a[];
   };
