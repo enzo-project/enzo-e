@@ -236,7 +236,7 @@ public: /// entry methods
   void r_method_gravity_continue();
 
   /// Synchronize for refresh
-  void r_method_gravity_end(CkReductionMsg * msg);
+  void r_method_gravity_end();
 
   //--------------------------------------------------
 

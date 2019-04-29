@@ -98,7 +98,9 @@ enum enzo_sync_id {
   enzo_sync_id_solver_mg0_coarse,
   enzo_sync_id_solver_mg0_last,
   enzo_sync_id_solver_mg0_post,
-  enzo_sync_id_solver_mg0_pre
+  enzo_sync_id_solver_mg0_pre,
+  enzo_sync_id_solver_jacobi_1,
+  enzo_sync_id_solver_jacobi_2
 };
   
 //----------------------------------------------------------------------

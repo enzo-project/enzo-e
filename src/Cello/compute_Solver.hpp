@@ -145,10 +145,10 @@ public: // interface
     int retval;
     switch (solve_type_) {
     case solve_leaf:
-      retval = sync_face;
+      retval = sync_neighbor;
       break;
     case solve_level:
-      retval = sync_neighbor;
+      retval = sync_face;
       break;
     case solve_tree:
       retval = sync_neighbor;
@@ -255,6 +255,7 @@ protected: // attributes
 
   /// Type of solver; see enum solve_type for supported types
   int solve_type_;
+
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

@@ -221,10 +221,14 @@ public:
     index[2] = v3[2];
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   }
-  //Not required, but convenient: cast-to-foo operators
-   operator Index &() {return index_;}
-   operator const Index &() const {return index_;}
-    Index & ind() { return index_; }
+  /// Not required, but convenient: cast-to-foo operators
+  operator Index &() {return index_;}
+  /// Return the Index
+  operator const Index &() const {return index_;}
+  /// Return the Index
+  Index & ind() { return index_; }
+  
 };
 #endif
+
 #endif /* INDEX_HPP */
