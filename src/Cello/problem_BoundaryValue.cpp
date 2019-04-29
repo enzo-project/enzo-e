@@ -47,16 +47,18 @@ void BoundaryValue::enforce
       int gx,gy,gz;
       field.ghost_depth(index_field,&gx,&gy,&gz);
 
+      int cx,cy,cz;
+      field.centering(index, &cx,&cy,&cz);
 
-      int ndx=nx+2*gx;
-      int ndy=ny+2*gy;
-      int ndz=nz+2*gz;
+      int ndx=nx+2*gx+cx;
+      int ndy=ny+2*gy+cy;
+      int ndz=nz+2*gz+cz;
 
       double * x = new double [ndx];
       double * y = new double [ndy];
       double * z = new double [ndz];
 
-      data->field_cells(x,y,z,gx,gy,gz);
+      data->field_cell_faces(x,y,z,gx,gy,gz,cx,cy,cz);
 
       void * array = field.values(index_field);
 
