@@ -42,8 +42,8 @@ public: // interface
 
   /// Create a new EnzoMethodGrackle object
   EnzoMethodGrackle(
-                    const float physics_cosmology_initial_redshift,
-                    const float time);
+                    const double physics_cosmology_initial_redshift,
+                    const double time);
 
   // Destructor
   virtual ~EnzoMethodGrackle() throw() {}
@@ -56,6 +56,7 @@ public: // interface
     : Method (m)
 #ifdef CONFIG_USE_GRACKLE
       , grackle_units_()
+      , grackle_chemistry_data_defined_(false)
 #endif
     {  }
 
@@ -73,6 +74,13 @@ public: // interface
 
     p | grackle_units_;
 
+//    DO NOT PUP THIS VARIABLE:
+//                ensures that Grackle's internal chemistry data
+//                structures are defined on each processor. This
+//                avoids having to write pup methods for all
+//                of Grackle's data structures.
+//    p | grackle_chemistry_data_defined_;
+
   #endif /* CONFIG_USE_GRACKLE */
 
   }
@@ -87,6 +95,9 @@ public: // interface
   virtual double timestep ( Block * block) throw();
 
 #ifdef CONFIG_USE_GRACKLE
+
+  void initialize_grackle_chemistry_data(const double& current_time);
+
   static void setup_grackle_units(EnzoBlock * enzo_block,
                                   code_units * grackle_units,
                                   int i_hist = 0 ) throw();
@@ -145,8 +156,8 @@ protected: // methods
 // protected: // attributes
 
   code_units grackle_units_;
-#endif /* ENZO_ENZO_METHOD_GRACKLE_HPP */
-
+  bool grackle_chemistry_data_defined_;
+#endif
 
 };
 

@@ -13,8 +13,8 @@
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
-  const float physics_cosmology_initial_redshift,
-  const float time
+  const double physics_cosmology_initial_redshift,
+  const double time
 )
   : Method()
 {
@@ -122,43 +122,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
                        enzo_sync_id_method_grackle);
   refresh(ir)->add_all_fields();
 
-  EnzoUnits * enzo_units = enzo::units();
-  const EnzoConfig * enzo_config = enzo::config();
-
-  grackle_units_.comoving_coordinates = enzo_config->physics_cosmology;
-
-  // Copy over code units to grackle units struct
-  grackle_units_.density_units = enzo_units->density();
-  grackle_units_.length_units  = enzo_units->length();
-  grackle_units_.time_units    = enzo_units->time();
-  grackle_units_.velocity_units = enzo_units->velocity();
-
-
-  grackle_units_.a_units       = 1.0;
-  grackle_units_.a_value       = 1.0;
-
-  if (grackle_units_.comoving_coordinates){
-    enzo_float cosmo_a  = 1.0;
-    enzo_float cosmo_dt = 0.0;
-
-    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-
-    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
-                                        time);
-    grackle_units_.a_units
-         = 1.0 / (1.0 + physics_cosmology_initial_redshift);
-    grackle_units_.a_value = cosmo_a;
-
-  } else if (enzo_config->method_grackle_radiation_redshift > -1){
-    grackle_units_.a_value = 1.0 / (1.0 + enzo_config->method_grackle_radiation_redshift);
-  }
-
-  // Initialize grackle units and data
-  TRACE("Calling initialize_chemistry_data from EnzoMethodGrackle::EnzoMethodGrackle()");
-  if (initialize_chemistry_data(&grackle_units_) == ENZO_FAIL) {
-    ERROR("EnzoConfig::EnzoConfig()",
-    "Error in initialize_chemistry_data");
-  }
+  /// Define Grackle's internal data structures
+  grackle_chemistry_data_defined_ = false;
+  this->initialize_grackle_chemistry_data(time);
 
 #endif /* CONFIG_USE_GRACKLE */
 }
@@ -177,12 +143,15 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
     "Grackle configuration turned off!");
 
   #else /* CONFIG_USE_GRACKLE */
+
     EnzoBlock * enzo_block = enzo::block(block);
 
     // Start timer
     Simulation * simulation = cello::simulation();
     if (simulation)
       simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
+
+    this->initialize_grackle_chemistry_data(block->time());
 
     this->compute_(enzo_block);
 
@@ -198,6 +167,61 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
 }
 
 #ifdef CONFIG_USE_GRACKLE
+
+void EnzoMethodGrackle::initialize_grackle_chemistry_data(
+                                                   const double& current_time)
+{
+
+  /* Define Grackle's chemistry data if not yet defined */
+
+  if (this->grackle_chemistry_data_defined_) return;
+
+  EnzoUnits * enzo_units = enzo::units();
+  const EnzoConfig * enzo_config = enzo::config();
+
+  grackle_units_.comoving_coordinates = enzo_config->physics_cosmology;
+
+  // Copy over code units to grackle units struct
+  grackle_units_.density_units  = enzo_units->density();
+  grackle_units_.length_units   = enzo_units->length();
+  grackle_units_.time_units     = enzo_units->time();
+  grackle_units_.velocity_units = enzo_units->velocity();
+  grackle_units_.a_units        = 1.0;
+  grackle_units_.a_value        = 1.0;
+
+  if (grackle_units_.comoving_coordinates){
+    enzo_float cosmo_a  = 1.0;
+    enzo_float cosmo_dt = 0.0;
+
+    EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+
+    cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
+                                        current_time);
+    grackle_units_.a_units
+         = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
+    grackle_units_.a_value = cosmo_a;
+
+  } else if (enzo_config->method_grackle_radiation_redshift > -1){
+    grackle_units_.a_value = 1.0 /
+                         (1.0 + enzo_config->method_grackle_radiation_redshift);
+  }
+
+  // Initialize grackle units and data
+  TRACE("Calling initialize_chemistry_data from EnzoMethodGrackle::EnzoMethodGrackle()");
+  if (initialize_chemistry_data(&grackle_units_) == ENZO_FAIL) {
+    ERROR("EnzoConfig::EnzoConfig()",
+    "Error in initialize_chemistry_data");
+  }
+
+  // This value should not be PUPed to ensure Grackle's data is always
+  // defined locally on each processor (see enzo_EnzoMethodGrackle.hpp)
+  this->grackle_chemistry_data_defined_ = true;
+
+  return;
+}
+
+//----------------------------------------------------------------------------
+
 void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
                                              code_units * grackle_units,
                                              int i_hist /* default 0 */
@@ -237,11 +261,14 @@ void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
     grackle_units->a_value = cosmo_a;
 
   } else if (enzo_config->method_grackle_radiation_redshift > -1){
-    grackle_units->a_value = 1.0 / (1.0 + enzo_config->method_grackle_radiation_redshift);
+    grackle_units->a_value = 1.0 /
+                         (1.0 + enzo_config->method_grackle_radiation_redshift);
   }
 
   return;
 }
+
+//--------------------------------------------------------------------------
 
 void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
                                              grackle_field_data * grackle_fields_,
@@ -336,6 +363,8 @@ void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
   return;
 }
 
+//----------------------------------------------------------------------------
+
 void EnzoMethodGrackle::update_grackle_density_fields(
                                EnzoBlock * enzo_block,
                                grackle_field_data * grackle_fields_
@@ -395,6 +424,7 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 }
 
 //----------------------------------------------------------------------
+
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
 
