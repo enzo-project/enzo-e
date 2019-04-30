@@ -25,8 +25,9 @@ public: // interface
   {
     ASSERT1("EnzoInitialShockTube",
 	    "Invalid aligned_ax value specified (must x, y, or z), not %s.",
+	    aligned_ax_name.c_str(),
 	    aligned_ax_name == "x" || aligned_ax_name == "y"
-	    || aligned_ax_name == "z", aligned_ax_name.c_str());
+	    || aligned_ax_name == "z");
     if (aligned_ax_name == "x"){
       aligned_ax_ = 0;
     } else if (aligned_ax_name == "y"){

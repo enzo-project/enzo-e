@@ -261,6 +261,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_pm_mpp;
   p | initial_pm_level;
 
+  p | initial_shock_tube_aligned_ax;
+
   p | initial_soup_rank;
   p | initial_soup_file;
   p | initial_soup_rotate;

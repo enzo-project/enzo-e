@@ -29,7 +29,7 @@ public: // interface
   {
     ASSERT1("EnzoPermutedCoordinates",
 	    "Constructor arg must be 0, 1, or 2. Not %d.",
-	    i_axis>-1 && i_axis<3, i_axis);
+	    i_axis, i_axis>-1 && i_axis<3);
   }
 
   // Returns the code of the axis id associated with each direction
