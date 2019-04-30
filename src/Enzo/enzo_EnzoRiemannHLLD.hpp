@@ -147,8 +147,8 @@ public: // interface
     rho_ls = rho_l * (S_l - vx_l)/(S_l - S_M);
     rho_rs = rho_r * (S_r - vx_r)/(S_r - S_M);
 
-    S_ls = S_M - std::abs(Bx)/std::sqrt(rho_ls);
-    S_rs = S_M + std::abs(Bx)/std::sqrt(rho_rs);
+    S_ls = S_M - std::fabs(Bx)/std::sqrt(rho_ls);
+    S_rs = S_M + std::fabs(Bx)/std::sqrt(rho_rs);
 
     pt_s = ((S_r -  vx_r) * rho_r*pt_l - (S_l - vx_l) * rho_l * pt_r +
 	    rho_l*rho_r*(S_r - vx_r)*(S_l - vx_l)*
@@ -157,12 +157,12 @@ public: // interface
     sam = vx_l - cf_l;
     sap = vx_l + cf_l;
       
-    if ((std::abs(S_M - vx_l) <= ETA_TOLERANCE) and 
-        (std::abs(By_l) <= ETA_TOLERANCE) and 
-        (std::abs(Bz_l) <= ETA_TOLERANCE) and 
+    if ((std::fabs(S_M - vx_l) <= ETA_TOLERANCE) and 
+        (std::fabs(By_l) <= ETA_TOLERANCE) and 
+        (std::fabs(Bz_l) <= ETA_TOLERANCE) and 
         (Bx*Bx >= gamma * p_l) and
-        ((std::abs(S_l - sam) <= ETA_TOLERANCE) or
-	 (std::abs(S_l - sap) <= ETA_TOLERANCE)) ) {
+        ((std::fabs(S_l - sam) <= ETA_TOLERANCE) or
+	 (std::fabs(S_l - sap) <= ETA_TOLERANCE)) ) {
       vy_ls = vy_l;
       vz_ls = vz_l;
       By_ls = By_l;
@@ -180,12 +180,12 @@ public: // interface
     sam = vx_r - cf_r;
     sap = vx_r + cf_r;
       
-    if ((std::abs(S_M - vx_r) <= ETA_TOLERANCE) and 
-        (std::abs(By_r) <= ETA_TOLERANCE) and 
-        (std::abs(Bz_r) <= ETA_TOLERANCE) and 
+    if ((std::fabs(S_M - vx_r) <= ETA_TOLERANCE) and 
+        (std::fabs(By_r) <= ETA_TOLERANCE) and 
+        (std::fabs(Bz_r) <= ETA_TOLERANCE) and 
         (Bx*Bx >= gamma * p_r) and
-        ((std::abs(S_r - sam) <= ETA_TOLERANCE) or
-	 (std::abs(S_r - sap) <= ETA_TOLERANCE)) ) {
+        ((std::fabs(S_r - sam) <= ETA_TOLERANCE) or
+	 (std::fabs(S_r - sap) <= ETA_TOLERANCE)) ) {
       vy_rs = vy_r;
       vz_rs = vz_r;
       By_rs = By_r;
