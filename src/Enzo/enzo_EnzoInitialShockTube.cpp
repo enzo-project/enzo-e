@@ -47,7 +47,6 @@ void EnzoInitialShockTube::enforce_block
   std::string velocities[3] = {"velocity_x", "velocity_y", "velocity_z"};
   std::string bfields[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
 
-
   EnzoPermutedCoordinates coord(aligned_ax_);
   EnzoFieldArrayFactory array_factory(block);
 
@@ -75,8 +74,8 @@ void EnzoInitialShockTube::enforce_block
     arr = array_factory.from_name(velocities[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("velocity_2"), arr);
 
-    arr = array_factory.from_name("pressure");
-    initializer_helper_(*cur_slice, cur_val_map->at("pressure"), arr);
+    //arr = array_factory.from_name("pressure");
+    //initializer_helper_(*cur_slice, cur_val_map->at("pressure"), arr);
 
     arr = array_factory.from_name(bfields[coord.j_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
@@ -86,6 +85,10 @@ void EnzoInitialShockTube::enforce_block
   }
   EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
   align_b_arr.subarray() = aligned_bfield_val;
+
+  EFlt3DArray pressure_array = array_factory.from_name("pressure");
+  pressure_array.subarray() = 0.95;
+  
 
   delete l_slice;
   delete r_slice;
@@ -120,9 +123,9 @@ void EnzoInitialShockTube::prep_aligned_slices_(Block *block, ESlice **l_slice,
   // let axis i be the aligned axis
   int mi, gi;
   double di, left_edge;
-  if (aligned_ax_ == "x"){
+  if (aligned_ax_ == 0){
     mi = mx;   gi = gx;   di = hx;   left_edge = xmb;
-  } else if (aligned_ax_ == "y"){
+  } else if (aligned_ax_ == 1){
     mi = my;   gi = gy;   di = hy;   left_edge = ymb;
   } else {
     mi = mz;   gi = gz;   di = hz;   left_edge = zmb;
@@ -131,7 +134,7 @@ void EnzoInitialShockTube::prep_aligned_slices_(Block *block, ESlice **l_slice,
   // the cell-centered position corresponding to index ind is:
   //   left_edge + di * (0.5+(double)(ind-gi))
   // The first cell with pos>=0
-  int shock_ind = (int)ceil((-1.*left_edge/di)-0.5 + (double)gi);
+  int shock_ind = (int)ceil((0.5-left_edge)/di-0.5 + (double)gi);
   
   if (shock_ind > 0){
     *l_slice = new ESlice(0,shock_ind);
@@ -148,9 +151,9 @@ void EnzoInitialShockTube::initializer_helper_(ESlice &slice, enzo_float val,
 {
   ESlice xslice, yslice, zslice;
   
-  xslice = (aligned_ax_ == "x") ? slice : ESlice(0, arr.shape(2));
-  yslice = (aligned_ax_ == "y") ? slice : ESlice(0, arr.shape(1));
-  zslice = (aligned_ax_ == "z") ? slice : ESlice(0, arr.shape(0));
+  xslice = (aligned_ax_ == 0) ? slice : ESlice(0, arr.shape(2));
+  yslice = (aligned_ax_ == 1) ? slice : ESlice(0, arr.shape(1));
+  zslice = (aligned_ax_ == 2) ? slice : ESlice(0, arr.shape(0));
 
   arr.subarray(zslice, yslice, xslice) = val;
 }

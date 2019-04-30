@@ -27,25 +27,9 @@ public: // interface
   EnzoPermutedCoordinates(int i_axis)
     : i_axis_(i_axis)
   {
-    ASSERT("EnzoPermutedCoordinates", "Constructor arg must be 0, 1, or 2.",
-	   i_axis>-1 && i_axis<3);
-  }
-
-  /// Construct an instance of EnzoPermutedCoordinates by specifying the
-  /// axis name ("x", "z", or "z") of the Cartesian axis that lies along axis i
-  EnzoPermutedCoordinates(std::string i_ax_name)
-    : i_axis_(0)
-  {
-    ASSERT("EnzoPermutedCoordinates",
-	   "Constructor arg must be \"x\", \"y\", or \"z\"",
-	   i_ax_name == "x" || i_ax_name == "y" || i_ax_name == "z");
-    if (i_ax_name == "x"){
-      i_axis_ = 0;
-    } else if (i_ax_name == "y") {
-      i_axis_ = 1;
-    } else {
-      i_axis_ = 2;
-    }
+    ASSERT1("EnzoPermutedCoordinates",
+	    "Constructor arg must be 0, 1, or 2. Not %d.",
+	    i_axis>-1 && i_axis<3, i_axis);
   }
 
   // Returns the code of the axis id associated with each direction
@@ -74,14 +58,14 @@ public: // interface
   // Examples
   // --------
   //   EnzoPermutedCoordinates(1).left_edge_offset(array, 3, 4, 1) forwards to:
-  //     array.subarray(4, array.shape(0),
-  //                    1, array.shape(1),
-  //                    3, array.shape(2))
+  //     array.subarray(ESlice(4, array.shape(0)),
+  //                    ESlice(1, array.shape(1)),
+  //                    ESlice(3, array.shape(2)))
   //
   //   EnzoPermutedCoordinates(2).left_edge_offset(array, 0, 1, 2) forwards to:
-  //     array.subarray(2, array.shape(0),
-  //                    0, array.shape(1),
-  //                    1, array.shape(2))
+  //     array.subarray(ESlice(2, array.shape(0)),
+  //                    ESlice(0, array.shape(1)),
+  //                    ESlice(1, array.shape(2)))
   EFlt3DArray left_edge_offset(EFlt3DArray &array, int kstart, int jstart,
 			       int istart) const
   {
