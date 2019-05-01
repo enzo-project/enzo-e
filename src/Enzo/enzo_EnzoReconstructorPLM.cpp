@@ -1,10 +1,21 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoReconstructor.cpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Wed May 1 2019
+/// @brief    [\ref Enzo] Implements the EnzoReconstructorPLM class
+
 #include "cello.hpp"
 #include "enzo.hpp"
+
+//----------------------------------------------------------------------
 
 inline enzo_float sign(enzo_float val){
   // implements sign function https://stackoverflow.com/questions/1903954
   return (0.0 < val) - (val < 0.0);
 }
+
+//----------------------------------------------------------------------
 
 inline enzo_float Min(enzo_float a, enzo_float b, enzo_float c)
 {
@@ -22,6 +33,8 @@ inline enzo_float Min(enzo_float a, enzo_float b, enzo_float c)
   }
 }
 
+//----------------------------------------------------------------------
+
 inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 				       enzo_float vp1)
 {
@@ -37,20 +50,17 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 
 //----------------------------------------------------------------------
 
-// helper function that sets both:
-//   - left reconstructed value at the interface between first and second
-//     cells along dimension i, and
-//   - right reconstructed value at the interface between the second-to-last
-//     and last cells along dimension i
-// to zero. Other reconstruction methods (e.g. Nearest Neighbor) may actually
-// be to reconstruct values at these locations.
-//
-// Arguments:
-//  - wl and wr are both face-centered along dimension i. These arrays do not
-//    include faces on the exterior of the grid.
-//  - di{dim}, where {dim} is x,y,z indicates the amount by which i{dim}
-//    changes if we move in the i direction. For example, if the ith
-//    dimension aligns with z: i_x=0, i_y=0, i_z = 1
+/// helper function that sets both left reconstructed value at the interface
+/// between first and second cells along dimension i, and right reconstructed
+/// value at the interface between the second-to-last and last cells along
+/// dimension i to zero (or floor). Other reconstruction methods (e.g. Nearest
+/// Neighbor) may actually be to reconstruct values at these locations.
+///
+/// @param wl,wr face-centered arrays along dimension dim. These arrays do not
+///  include faces on the exterior of the grid.
+/// @param prim_floor value to set the edges equal to
+/// @dim the dimension transverse normal to the edge (the dimension along which
+///  we reconstruct values
 void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, enzo_float prim_floor,
 		       int dim)
 {
@@ -85,6 +95,7 @@ void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, enzo_float prim_floor,
 }
 
 //----------------------------------------------------------------------
+
 void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 						  Grouping &prim_group,
 						  Grouping &priml_group,

@@ -1,4 +1,12 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoReconstructor.cpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Wed May 1 2019
+/// @brief    [\ref Enzo] Implements the EnzoReconstructor interface
+
 #include "cello.hpp"
+
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------

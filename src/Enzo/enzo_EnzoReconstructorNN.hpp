@@ -1,11 +1,20 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoReconstructor.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Wed May 1 2019
+/// @brief    [\ref Enzo] Implementation of Enzo's Nearest Neighbor
+///           Reconstruction
+
 #ifndef ENZO_ENZO_RECONSTRUCTOR_NN_HPP
 #define ENZO_ENZO_RECONSTRUCTOR_NN_HPP
+
 class EnzoReconstructorNN : public EnzoReconstructor
 {
   /// @class    EnzoReconstructorNN
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates nearest neighbor reconstruction of
-  //            primitives at interface
+  ///           primitives at cell interfaces
 
 public: // interface
 
@@ -28,13 +37,15 @@ public: // interface
     EnzoReconstructor::pup(p);
   };
 
-  // Reconstructs the interface values
-  // priml and primr are formally defined as corner-centered. However all
-  // operations assume that they are face-centered along only 1 dimension.
-  // This amounts to having some extra space at the end of the array
   void reconstruct_interface (Block *block, Grouping &prim_group,
 			      Grouping &priml_group, Grouping &primr_group,
 			      int dim, EnzoEquationOfState *eos);
+
+  int get_staling_rate()
+  {
+    return 1;
+  }
+
 };
 
 #endif /* ENZO_ENZO_RECONSTRUCTOR_NN_HPP */

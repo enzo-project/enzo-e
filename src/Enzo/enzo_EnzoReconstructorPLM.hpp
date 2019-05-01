@@ -1,23 +1,20 @@
-// Right now, the primitive left and right fields are large enough that they
-// can be treated as ordinary face-centered centered fields
-// For the face-centered quantities, the ith element corresponds to the value
-// of the face at i+1/2
-// Additionally, reconstruction is performed so that fluxes can be computed for
-// every cell (except the outermost faces)
+// See LICENSE_CELLO file for license and copyright information
 
-// If this reconstructor is used N times for a single time step, then there
-// must be at least N+1 ghost zones
-
-
+/// @file     enzo_EnzoReconstructor.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Wed May 1 2019
+/// @brief    [\ref Enzo] Implementation of Enzo's Piecewise Linear
+///           Reconstruction
 
 #ifndef ENZO_ENZO_RECONSTRUCTOR_PLM_HPP
 #define ENZO_ENZO_RECONSTRUCTOR_PLM_HPP
+
 class EnzoReconstructorPLM : public EnzoReconstructor
 {
   /// @class    EnzoReconstructorPLM
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates piecwise linear reconstruction of
-  //            primitives at interface
+  ///           primitives at interface
 
 public: // interface
 
@@ -40,13 +37,15 @@ public: // interface
     EnzoReconstructor::pup(p);
   };
 
-  // Reconstructs the interface values
-  // priml and primr are formally defined as corner-centered. However all
-  // operations assume that they are face-centered along only 1 dimension.
-  // This amounts to having some extra space at the end of the array
   void reconstruct_interface (Block *block, Grouping &prim_group,
 			      Grouping &priml_group, Grouping &primr_group,
 			      int dim, EnzoEquationOfState *eos);
+
+  int get_staling_rate()
+  {
+    return 2;
+  }
+
 };
 
 #endif /* ENZO_ENZO_RECONSTRUCTOR_PLM_HPP */
