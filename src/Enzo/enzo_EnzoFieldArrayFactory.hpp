@@ -1,15 +1,15 @@
-// This will consolidate the various creational helper functions
-// used to construct EnzoArrays that wrap field values.
-// For now, this is purely organizational. But in the future:
-//  - refactor to take a block or field in the constructor.
-//  - refactor once we allow temporary fields to be face-centered again.
-//  - Now that they are grouped under EnzoFieldArrayFactory, they can be
-//    renamed with shorter names (which are equally as descriptive
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoFieldArrayFactory.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Wed May 1 2019
+/// @brief    [\ref Enzo] Implementation of Enzo's FieldArrayFactory. It
+///           streamlines the loading of fields as arrays
 
 #ifndef ENZO_ENZO_FIELD_ARRAY_FACTORY_HPP
 #define ENZO_ENZO_FIELD_ARRAY_FACTORY_HPP
 
-// alias for EnzoArray<enzo_float,3>
+/// alias for EnzoArray<enzo_float,3>
 typedef EnzoArray<enzo_float,3> EFlt3DArray;
 
 
@@ -20,6 +20,8 @@ class EnzoFieldArrayFactory
   /// @brief    [\ref Enzo] Encapsulates construction of EnzoArrays from fields
 
 public:
+
+  /// Create a new EnzoFieldArrayFactory
   EnzoFieldArrayFactory(Block *block)
   {
     block_ = block;
@@ -28,43 +30,40 @@ public:
   ~EnzoFieldArrayFactory()
   { block_ = NULL;}
 
-  // get a field as an array
-  EFlt3DArray from_name(std::string field_name);
+  /// returns a field as an array
+  EFlt3DArray from_name(std::string field_name, int stale_depth = 0);
 
-  // read in Grouping fields
+  /// returns a field from a Grouping
   EFlt3DArray from_grouping(Grouping &grouping, std::string group_name,
-			    int index);
+			    int index, int stale_depth = 0);
 
-  // read in fields from Grouping represented reconstructed quantities
-  //
-  // Reconstructed fields are cell-centered fields that do not include faces on
-  // the exterior of the grid. Because the reconstructed fields are reused for
-  // different dimensions, they are not registerred internally as being
-  // face-centered. The dim argument indicates the direction along which the
-  // field should be face-centered.
+  /// Read in fields from Grouping that represented reconstructed quantities.
+  /// The reconstructed fields are formally cell-centered fields. However, in
+  /// reality they act as face-centered fields (that exclude faces on the
+  /// exterior of the grid) that get reused for different dimensions. This
+  /// function constructs the array such that it is face-centered along
+  /// dimension dim
   EFlt3DArray reconstructed_field(Grouping &grouping, std::string group_name,
-				  int index, int dim);
+				  int index, int dim, int stale_depth = 0);
 
-  // read in field from Grouping of face-centered interface B-fields. The
-  // resulting view does not include face-centered values on the exterior of
-  // the grid.
-  EFlt3DArray interior_bfieldi(Grouping &grouping, int dim);
+  /// Read in field from Grouping of face-centered interface B-fields. The
+  /// returned view doesn't include face-centered values on the exterior of
+  /// the grid.
+  EFlt3DArray interior_bfieldi(Grouping &grouping, int dim,
+			       int stale_depth = 0);
+protected: // methods
 
-  // Depreciated.
-  //
-  // The interface was written this way due to a misconception.
-  // Most recently this was used for debugging and for reconstructed fields.
-  //
-  // Setting cell_centered_{dim} to true indicates that values
-  // are cell-centered along {dim}
-  EFlt3DArray load_temp_interface_grouping_field(Grouping &grouping,
-						 std::string group_name,
-						 int index,
-						 bool cell_centered_x,
-						 bool cell_centered_y,
-						 bool cell_centered_z);
+  /// Helper function that checks the validity of a group_name and index
+  void check_grouping_details_(Grouping &grouping, std::string group_name,
+			       int index);
+  
+  /// Helper function that returns an instance of EFlt3DArray but without the
+  /// stale cells (stale_depth must be a positive integer)
+  EFlt3DArray exclude_stale_cells_(EFlt3DArray &arr, int stale_depth);
 
-private:
+protected: // attributes
+
+  /// Contains the relevant current data
   Block* block_;
 };
 #endif /* ENZO_ENZO_FIELD_ARRAY_FACTORY_HPP */
