@@ -1,8 +1,14 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoEOSIdeal.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs May 2 2019
+/// @brief    [\ref Enzo] Implementation of the equation of state for an ideal
+/// adiabatic gas
+
 #ifndef ENZO_ENZO_EOS_IDEAL_HPP
 #define ENZO_ENZO_EOS_IDEAL_HPP
 
-// This should almost certainly wrap an instance of ComputePressure (and
-// presumably Compute Temperature)
 class EnzoEOSIdeal : public EnzoEquationOfState
 {
 
@@ -39,30 +45,31 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  // Computes thermal pressure
+  /// Computes thermal pressure
   void compute_pressure(Block *block, Grouping &cons_group,
 			Grouping &prim_group);
 
-  // Converts the cell-centered conservative quantities to primitive quantites
+  /// Converts the cell-centered conservative quantities to primitive quantites
   void primitive_from_conservative(Block *block, Grouping &cons_group,
 				   Grouping &prim_group);
 
+  /// Converts the cell-centered primitive quantities to conservative quantites
   void conservative_from_primitive(Block *block, Grouping &prim_group,
 				   Grouping &cons_group);
 
-  // returns adiabatic index
+  /// returns adiabatic index
   enzo_float get_gamma(){
     return gamma_;}
 
-  // returns the density floor
+  /// returns the density floor
   enzo_float get_density_floor(){
     return density_floor_;}
 
-  // returns the thermal pressure floor
+  /// returns the thermal pressure floor
   enzo_float get_pressure_floor(){
     return pressure_floor_;}
 
-  // apply the pressure floor to total_energy field
+  /// apply the pressure floor to total_energy field
   void apply_floor_to_energy(Block *block, Grouping &cons_group);
 
 protected: // attributes

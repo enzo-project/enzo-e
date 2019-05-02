@@ -53,8 +53,10 @@ public: // interface
   /// @param prim_group holds field names of cell-centered primitives
   /// @param priml_group,primr_group holds field names where reconstructed
   ///  left/right face-centered primitives will be stored. The relevant fields
-  ///  should be formally defined as cell-centered (to allow for reuse) and so
-  ///  there will be some unused space at the end of the arrays.
+  ///  should be formally defined as cell-centered (to allow for reuse). During
+  ///  the calculation, they are treated as face-centered (without having
+  ///  values on the exterior faces of the block). Consequentially there will
+  ///  be some unused space at the end of the arrays.  
   /// @param dim Dimension along which to reconstruct interface values. Values
   ///  of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
   /// @param eos Instance of the fluid's EnzoEquationOfState object

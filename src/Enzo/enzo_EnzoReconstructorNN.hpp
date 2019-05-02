@@ -1,6 +1,6 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoReconstructor.hpp
+/// @file     enzo_EnzoReconstructorNN.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Wed May 1 2019
 /// @brief    [\ref Enzo] Implementation of Enzo's Nearest Neighbor

@@ -1,3 +1,10 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoRiemann.cpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs May 2 2019
+/// @brief    [\ref Enzo] Implementation of EnzoRiemann
+
 #include <string>
 #include <algorithm>
 #include "cello.hpp"

@@ -1,19 +1,28 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoRiemannHLLE.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs May 2 2019
+/// @brief    [\ref Enzo] Implementation Enzo's HLLE approximate Riemann Solver
+
 #ifndef ENZO_ENZO_RIEMANN_HLLE_HPP
 #define ENZO_ENZO_RIEMANN_HLLE_HPP
 
-// Some Notes
-// Stone+ (08) has a typo in eqn 52: (q_i-q_{i-1}) should be (q_R-q_L)
-//    The modified formula is actually used in Athena++
+#include <cfloat>
+#include <cmath>
+
 
 // Implementation Notes:
 //   - Based off of the HLLE Riemann Solver described in Stone+08
 //   - Currently only supports adiabatic fluids
 //   - This class is primarily implemented to allow for easy extension to
 //     incorporate CRs (just subclass and overwrite the wave_speeds_ method)
+// Misc Notes:
+//   - Stone+ (08) has a typo in eqn 52: (q_i-q_{i-1}) should be (q_R-q_L)
+//     The modified formula is actually used in Athena++
 
 class EnzoRiemannHLLE : public EnzoRiemann
 {
-
   /// @class    EnzoRiemannHLLE
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver
@@ -44,8 +53,8 @@ public: // interface
     EnzoRiemann::pup(p);
   };
 
-  // This function is overwritable (it's necessary to provide cosmic ray
-  // transport)
+  /// This function is overwritable (which is necessary to support cosmic ray
+  /// transport)
   virtual void wave_speeds_ (const enzo_float wl[], const enzo_float wr[],
 			     const enzo_float Ul[], const enzo_float Ur[],
 			     const field_lut prim_lut,
@@ -140,6 +149,7 @@ public: // interface
     *bm = std::fmin(std::fmin(vi_roe - cfast, left_speed),  0.);
   }
 
+  /// Compute the Riemann fluxes
   void calc_riemann_fluxes_(const enzo_float flux_l[],
 			    const enzo_float flux_r[],
 			    const enzo_float prim_l[],

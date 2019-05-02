@@ -1,3 +1,10 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoRiemann.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs May 2 2019
+/// @brief    [\ref Enzo] Implementation of the Riemann Solver abstract base
+/// class. This class should be subclassed to implement various riemann solvers.
 
 #ifndef ENZO_ENZO_RIEMANN_HPP
 #define ENZO_ENZO_RIEMANN_HPP
@@ -25,13 +32,31 @@
 //
 // To add an additional fields, add the field to FLUX_TABLE and modify the
 // factory method
-//
-// Current state:
-//  - support for passive scalars is not yet implemented (though there is a
-//    spot carved out for it)
 
+class FluxFunctor : public PUP::able
+{
+public:
+  FluxFunctor() throw()
+  {}
 
-// Derivatives of FIELD_TABLE used by EnzoRiemann
+  virtual ~FluxFunctor()
+  {}
+
+  /// CHARM++ PUP::able declaration
+  PUPable_abstract(FluxFunctor);
+
+   /// CHARM++ migration constructor for PUP::able
+  FluxFunctor (CkMigrateMessage *m)
+    : PUP::able(m)
+  {  }
+
+  virtual void operator()(const enzo_float prim[], const enzo_float cons[],
+			  enzo_float fluxes[], const field_lut prim_lut,
+			  const field_lut cons_lut)=0;
+};
+
+// Below is a brief summary of the derivatives of the FIELD_TABLE XMacro that
+// are employed by EnzoRiemann
 //   - The Riemann Solver makes use of two sets of arrays.
 //
 //       1. The first set is made up of arrays of instances of EFlt3DArray.
@@ -120,28 +145,6 @@
 //         must match the relevant quantity names) and the direction along
 //         which we are computing fluxes
 
-class FluxFunctor : public PUP::able
-{
-public:
-  FluxFunctor() throw()
-  {}
-
-  virtual ~FluxFunctor()
-  {}
-
-  /// CHARM++ PUP::able declaration
-  PUPable_abstract(FluxFunctor);
-
-   /// CHARM++ migration constructor for PUP::able
-  FluxFunctor (CkMigrateMessage *m)
-    : PUP::able(m)
-  {  }
-
-  virtual void operator()(const enzo_float prim[], const enzo_float cons[],
-			  enzo_float fluxes[], const field_lut prim_lut,
-			  const field_lut cons_lut)=0;
-};
-
 class EnzoRiemann : public PUP::able
 {
   /// @class    EnzoRiemann
@@ -150,12 +153,12 @@ class EnzoRiemann : public PUP::able
 
 public: // interface
 
-  // Factory method for constructing the EnzoRiemann object
-  // The signature of this method must be modified as additional physics get's
-  // added
+  /// Factory method for constructing the EnzoRiemann object. (The signature
+  /// this method must be modified as additional physics gets implemented
   static EnzoRiemann* construct_riemann(std::string solver,
 					const EnzoFieldConditions cond);
 
+  /// Constructor
   EnzoRiemann(EnzoFieldConditions cond,
 	      std::vector<std::string> &extra_passive_groups,
 	      FluxFunctor** flux_funcs, int n_funcs);
@@ -174,13 +177,36 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+  /// Computes the Riemann Fluxes for each conserved field along a given
+  /// dimension, dim
+  /// @param block holds data to be processed
+  /// @param priml_group,primr_group holds field names where reconstructed
+  ///  left/right face-centered primitives are stored. The relevant fields
+  ///  should be formally defined as cell-centered (to allow for reuse). During
+  ///  the calculation, they are treated as face-centered (without having
+  ///  values on the exterior faces of the block). Consequentially there will
+  ///  be some unused space at the end of the arrays.
+  /// @param flux_group holds field names where the calculated fluxes will be
+  ///  stored. The relevant fields should be face-centered along the dimension
+  ///  of the calculation (without having values on the exterior faces of the
+  ///  block)
+  /// @param cons_group,cons_group holds field names where reconstructed
+  ///  left/right face-centered conserved quantities are stored. The relevant
+  ///  fields are expected to have the same properties as priml_group and
+  ///  primr_group, respectively (with respect to the field cell-centering).
+  ///  The values in these fields should be computed from the fields in
+  ///  priml_group and primr_group ahead of time.
+  /// @param dim Dimension along which to reconstruct interface values. Values
+  ///  of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
+  /// @param eos Instance of the fluid's EnzoEquationOfState object
   void solve (Block *block, Grouping &priml_group, Grouping &primr_group,
 	      Grouping &flux_group, Grouping &consl_group,
 	      Grouping &consr_group, int dim, EnzoEquationOfState *eos);
 
 protected : //methods
 
-  // Compute the Riemann Fluxes (and wave_speeds)
+  /// Compute the Riemann Fluxes (and wave_speeds). This gets implemented by
+  /// subclasses
   virtual void calc_riemann_fluxes_(const enzo_float flux_l[],
 				    const enzo_float flux_r[],
 				    const enzo_float prim_l[],
@@ -194,19 +220,23 @@ protected : //methods
 				    const int iz, const int iy, const int ix,
 				    EFlt3DArray flux_arrays[]) =0;
 
+  /// Computes the fluxes for the passively advected quantites. (Needs to be
+  /// implemented)
   void solve_passive_advection_(Block* block,
 				Grouping &priml_group, Grouping &primr_group,
 				EFlt3DArray &density_flux, int dim)
   { /* This needs to be implemented */ }
 
-  // computes the fast magnetosonic speed along dimension i
+  /// computes the fast magnetosonic speed along dimension i
   enzo_float fast_magnetosonic_speed_(const enzo_float prim_vals[],
 				      const field_lut prim_lut,
 				      EnzoEquationOfState *eos);
 
+  /// computes the magnetic pressure
   enzo_float mag_pressure_(const enzo_float prim_vals[],
 			   const field_lut prim_lut);
 
+  /// computes the (adiabatic) sound spped
   enzo_float sound_speed_(const enzo_float prim_vals[],
 			  const field_lut prim_lut,
 			  EnzoEquationOfState *eos)
@@ -215,23 +245,39 @@ protected : //methods
 		     prim_vals[prim_lut.density]);
   }
 
+  /// computes fluxes for the basic mhd conserved quantities - density,
+  /// momentum, energy, magnetic fields  
   void basic_mhd_fluxes_(const enzo_float prim[], const enzo_float cons[],
 			 enzo_float fluxes[], const field_lut prim_lut,
 			 const field_lut cons_lut);
 
 protected: //attributes
 
+  /// Conditions of the calculation used to initialized instances of field_lut
   EnzoFieldConditions conditions_;
+
+  /// struct lookup-table that maps conserved field names to indices
   field_lut cons_lut_;
+
+  /// struct lookup-table that maps primitive field names to indices
   field_lut prim_lut_;
+
+  /// Number of conserved keys (fields) in cons_lut_
   int n_cons_keys_;
+
+  /// Number of primitive keys (fields) in prim_lut_
   int n_prim_keys_;
 
+  /// Names of the passively advected groups of fields (e.g. colors)
   std::vector<std::string> passive_groups_;
-  // number of flux functors
+
+  /// number of flux functors
   int n_funcs_;
-  // array of pointers to functors used to compute fluxes
+
+  /// array of pointers to functors used to compute fluxes
   FluxFunctor** flux_funcs_;
+
+  /// Used for Dedner Divergence Cleaning
   enzo_float Dedner_Ch_;
 };
 

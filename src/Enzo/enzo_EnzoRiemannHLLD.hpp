@@ -1,7 +1,14 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoRiemannHLLD.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs May 2 2019
+/// @brief    [\ref Enzo] Enzo's HLLD approximate Riemann Solver. Ported from
+/// the original Enzo's Riemann_HLLD_MHD.C, written by J. S. Oishi
+
 #ifndef ENZO_ENZO_RIEMANN_HLLD_HPP
 #define ENZO_ENZO_RIEMANN_HLLD_HPP
 
-// This is a quick port from Enzo's Riemann_HLLD_MHD.C, written by J. S. Oishi
 // The current implementation assumes that each process will always have an
 // independent instance of this object. If that changes, then handling of the
 // private members Us and Uss will also need to change.
@@ -49,6 +56,7 @@ public: // interface
     Uss = new enzo_float[this->n_cons_keys_];
   };
 
+  /// Compute the Riemann fluxes
   void calc_riemann_fluxes_(const enzo_float flux_l[],
 			    const enzo_float flux_r[],
 			    const enzo_float prim_l[],
@@ -308,8 +316,11 @@ private:
 
 
 private:
-  // Below are two float maps used in the calculation
+
+  /// Array that provides scratch space for the calculation
   enzo_float *Us;
+
+  /// Array that provides additional scratch space for the calculation
   enzo_float *Uss;
 };
 

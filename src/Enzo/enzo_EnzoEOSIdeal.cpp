@@ -1,3 +1,9 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoEOSIdeal.cpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs May 2 2019
+/// @brief    [\ref Enzo] Implementation of EnzoEOSIdeal
 
 #include "cello.hpp"
 #include "enzo.hpp"
@@ -132,8 +138,8 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
 
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
 
-  // It should be okay that this function is being primarily used for
-  // face-centered temporary interior fields
+  // It's okay that this function is used for computing face-centered temporary
+  // interior fields
   for (int iz=0; iz<cons_density.shape(0); iz++) {
     for (int iy=0; iy<cons_density.shape(1); iy++) {
       for (int ix=0; ix<cons_density.shape(2); ix++) {
