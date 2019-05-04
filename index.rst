@@ -47,8 +47,9 @@ solver.
 	   
    tutorial/index
    user/index      
-   devel/index
    reference/index
+   devel/index
+   design/index
    project/index
 
 Getting started

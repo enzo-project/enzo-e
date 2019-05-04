@@ -1,6 +1,6 @@
-======
-Design
-======
+================
+Cello Components
+================
 
 The software design of Enzo-E / ``Cello`` is based on object-oriented
 programming (OOP), a proven software design and implementation

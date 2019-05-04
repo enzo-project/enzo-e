@@ -1,9 +1,11 @@
-*******
-Project
-*******
+*****************
+Project documents
+*****************
 
 .. toctree::
    :maxdepth: 1
-	   
+
+   project-plan	        
    principles
-   design
+   components
+   status-1905
