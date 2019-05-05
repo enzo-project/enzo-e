@@ -31,6 +31,25 @@ BEGIN {
     num_solvers = 0;
 }
 
+/DEBUG/ { next }
+
+# Solver cg iteration rate
+/Solver / {
+    time = $2;
+    name = $4;
+    iters = $6;
+
+    if (iters == 0) {
+	time_cycle_start[name]=time;
+	iters_prev[name] = 0;
+    } else {
+	time_total[name]=time_total[name]+(time-time_cycle_start[name]);
+	iters_cycle[name] = iters - iters_prev[name]
+	iters_prev[name] = iters;
+	iters_total[name] = iters_total[name]+iters_cycle[name];
+	time_cycle_start[name]=time;
+    }
+}
 /processors/{num_processors = $6; }
 # Block size
 
@@ -77,20 +96,20 @@ BEGIN {
 }
 
 # Linear Solver
-/ iter /  {
-    # ASSUMES ONLY FIRST AND LAST ITERATIONS OUTPUT
-    # (i.e. monitor_iter = 0 for all solvers)
-    time=$2
-    name=$4;
-    iter=$6;
-    if (iter == "0000") {
-	index_solver++;
-	if (index_solver > num_solvers) num_solvers = index_solver;
-    } else {
-	index_solver--;
-    }
-    solver_time[name] = time - solver_time[name];
-}
+# / iter /  {
+#     # ASSUMES ONLY FIRST AND LAST ITERATIONS OUTPUT
+#     # (i.e. monitor_iter = 0 for all solvers)
+#     time=$2
+#     name=$4;
+#     iter=$6;
+#     if (iter == "0000") {
+# 	index_solver++;
+# 	if (index_solver > num_solvers) num_solvers = index_solver;
+#     } else {
+# 	index_solver--;
+#     }
+#     solver_time[name] = time - solver_time[name];
+# }
 
 # Linear Solver
 /final iter/ {
@@ -109,6 +128,7 @@ BEGIN {
 /num-leaf-blocks/ {
     if (num_blocks_start == 0) num_blocks_start = $6;
     if ($6 > num_blocks) num_blocks = $6;
+    num_blocks_total = num_blocks_total + $6;
 }
 
 /num-particles/ {
@@ -186,6 +206,7 @@ END {
     }
     
     format = "%25s: %8.4f\n";
+    format_ind = "   %25s: %8.4f\n";
     format_int = "%25s: %8ld\n";
     format2 = "%25s: %8.4f [%8.4f ]\n";
     format2_ind = "   %25s: %8.4f [%8.4f ]\n";
@@ -315,8 +336,15 @@ END {
 
     printf ("\nSOLVER\n");
 
-    for (name in solver_time) {
-	printf (format, "Solver " name, solver_time[name]);
+    printf ("\n   Solver time\n");
+    for (name in time_total) {
+	printf (format_ind, "solver-time-"name, time_total[name]);
+    }
+    printf ("\n   Solver rate (i/b/p)\n");
+    for (name in time_total) {
+	rate_avg[name] = iters_total[name]/time_total[name]*num_blocks_total/num_processors;
+
+	printf (format_ind, "solver-rate-" name,rate_avg[name]);
     }
 	
     
