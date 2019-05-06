@@ -35,8 +35,6 @@ void Method::pup (PUP::er &p)
   if (up) refresh_list_.resize(n);
   for (int i=0; i<n; i++) {
     p | refresh_list_[i]; // PUP::able
-    CkPrintf ("Method::pup pack %d unpack %d refresh %p\n",
-	      pk,up,refresh_list_[i]);
   }
 
   p | refresh_list_;

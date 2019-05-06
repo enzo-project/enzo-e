@@ -292,6 +292,7 @@ boost_lib = ''
 if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
+elif (arch == "comet_gnu"):    from comet_gnu    import *
 elif (arch == "linux_gnu"):    from linux_gnu    import *
 elif (arch == "linux_illium"): from linux_illium import *
 elif (arch == "linux_intel"):  from linux_intel  import *
@@ -583,6 +584,8 @@ else:
      fp_charm_version.write("unknown\n");
      fp_charm_version.close()
 
+Clean('.','test/CHARM_VERSION')
+
 cello_def.write ("#define CELLO_CHARM_PATH \"" + charm_path + "\"\n" )
 
 #----------
@@ -617,8 +620,9 @@ cello_def.write ("#define CHARM_BUILD \"" + charm_build + "\"\n")
 fp_charm_build = open ("test/CHARM_BUILD", "w")
 fp_charm_build.write(charm_build + "\n");
 fp_charm_build.close()
-
 cello_def.close()
+Clean('.','test/CHARM_BUILD')
+
 #======================================================================
 # BUILDERS
 #======================================================================
@@ -633,21 +637,32 @@ Export('parallel_run')
 Export('serial_run')
 Export('use_papi')
 
-SConscript( 'src/SConscript',variant_dir='build')
+# Build in build-<branch> directory if this is a git repository
+
+if (have_git == 1):
+   branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
+   build_dir = 'build-' + branch
+else:     
+   build_dir = 'build'
+   
+SConscript( 'src/SConscript',variant_dir=build_dir)
 SConscript('test/SConscript')
 
 #======================================================================
 # CLEANING
 #======================================================================
 
+# non-permanent directories
 Clean('.','bin')
 Clean('.','lib')
+Clean('.','src-html')
+Clean('.','src-latex')
+Clean('.','src-xml')
 
-if (use_projections == 1):
-   Clean('.',Glob('bin/*.projrc'))
-   Clean('.',Glob('bin/*.log'))
-   Clean('.',Glob('bin/*.sts'))
-   Clean('.','charmrun')
+# files left behind by enzo-p
+Clean('.','Checkpoint')
+Clean('.','parameters.out')
+Clean('.','parameters.libconfig')
 
 #======================================================================
 # PACKAGING

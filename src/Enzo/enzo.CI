@@ -126,7 +126,7 @@ module enzo {
 
     // EnzoMethodGravity synchronization entry methods
     entry void r_method_gravity_continue();
-    entry void r_method_gravity_end(CkReductionMsg * msg);
+    entry void r_method_gravity_end();
 
     // EnzoSolverCg synchronization entry methods
 
