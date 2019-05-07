@@ -121,7 +121,7 @@ void OutputData::write_hierarchy ( const Hierarchy  * hierarchy ) throw()
 
 //----------------------------------------------------------------------
 
-void OutputData::write_block (  Block * block ) throw()
+void OutputData::write_block ( const  Block * block ) throw()
 {
 #ifdef TRACE_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT OutputData::write_block()\n",CkMyPe());
@@ -192,9 +192,6 @@ void OutputData::write_block (  Block * block ) throw()
   DEBUG1 ("block name = %s",group_name.c_str());
   file_->group_chdir(group_name);
   file_->group_create();
-
-  // Check if derived fields group exists
-  block->compute_derived();
 
   // Write block meta data
 

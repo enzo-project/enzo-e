@@ -362,7 +362,11 @@ public: // methods
   /// synchronize between methods) Must be called at end of Method
   void compute_done();
 
-  void compute_derived() throw ();
+  /// Compute all derived fields in a block (default)
+  ///   if field_list is provided, loops through that list and computes
+  ///   those fields that are grouped as derived
+  void compute_derived(const std::vector< std::string >& field_list =
+                             std::vector< std::string>()) throw();
 
   //--------------------------------------------------
   // OUTPUT

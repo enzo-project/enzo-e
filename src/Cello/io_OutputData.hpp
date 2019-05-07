@@ -62,7 +62,7 @@ public: // virtual functions
   virtual void write_hierarchy ( const Hierarchy * hierarchy) throw();
 
   /// Write block data to disk
-  virtual void write_block ( Block* block) throw();
+  virtual void write_block ( const Block* block) throw();
 
 
   /// Write local field to disk

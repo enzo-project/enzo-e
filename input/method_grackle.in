@@ -78,6 +78,15 @@
               "pressure",
               "gamma" ];
     }
+
+# derived fields grouping enables Enzo-E to ensure
+#  that all derived fields are updated prior to output
+#  In order for this to work, these MUST have their own
+#  compute classes.
+    derived {
+        field_list = ["temperature",
+                      "pressure"];
+    }
  }
 
  Initial {

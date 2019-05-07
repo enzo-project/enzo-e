@@ -530,10 +530,10 @@ void Block::print () const
 
 //=====================================================================
 
-void Block::compute_derived() throw ()
+void Block::compute_derived(const std::vector< std::string>& field_list
+                            /* = std::vector< std::string>() */ ) throw ()
+/// @param      field_list     list of fields that may be derived to compute
 {
-  // AE Need to change this to pass field list
-  // from output
   TRACE("Block::compute_derived()");
 
   // compute all derived fields on this block
@@ -547,22 +547,33 @@ void Block::compute_derived() throw ()
     Problem * problem = cello::problem();
     Config   * config  = (Config *) cello::config();
 
-    // derived fields
-    for(int i = 0; i < field.field_count(); i++){
-      std::string name = field.field_name(i);
-
-      if (field.groups()->is_in(name,"derived")){
-        // call the appropriate compute object
-
-        Compute * compute = problem->create_compute(name,
-                                                    config);
-
-        compute->compute(this);
-
+    // this is not a good way of doing this...
+    //   should contruct list of fields from full list
+    //   rather than copying this loop twice...
+    if (field_list.size() > 0){
+      for (int i = 0; i < field_list.size(); i++){
+        std::string name = field_list[i];
+        if (field.groups()->is_in(name,"derived")){
+          Compute * compute = problem->create_compute(name,
+                                                      config);
+          compute->compute(this);
+          delete compute; // must be done
+        }
+      }
+    } else{ // else check full field list and compute all
+      // derived fields
+      for(int i = 0; i < field.field_count(); i++){
+        std::string name = field.field_name(i);
+        if (field.groups()->is_in(name,"derived")){
+          // call the appropriate compute object
+          Compute * compute = problem->create_compute(name,
+                                                      config);
+          compute->compute(this);
+          delete compute; // must be done
+        }
       }
     }
-
-  }
+  } // end if derived
 
   return;
 }
