@@ -43,6 +43,11 @@ public: // interface
 
   virtual void compute( Block * block, enzo_float * t) throw();
 
+  // name of derived field that this function calculates
+  std::string name () throw() {
+    return "temperature";
+  }
+
   void compute_(Block * block,
     enzo_float * t,
     bool recompute_presure = true

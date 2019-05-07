@@ -528,6 +528,45 @@ void Block::print () const
   //  CkPrintf ("index_solver_ = %d\n",index_solver());
 }
 
+//=====================================================================
+
+void Block::compute_derived() throw ()
+{
+  // AE Need to change this to pass field list
+  // from output
+  TRACE("Block::compute_derived()");
+
+  // compute all derived fields on this block
+
+  Field field = data()->field();
+
+  int nderived = field.groups()->size("derived");
+
+  if (nderived > 0){
+
+    Problem * problem = cello::problem();
+    Config   * config  = (Config *) cello::config();
+
+    // derived fields
+    for(int i = 0; i < field.field_count(); i++){
+      std::string name = field.field_name(i);
+
+      if (field.groups()->is_in(name,"derived")){
+        // call the appropriate compute object
+
+        Compute * compute = problem->create_compute(name,
+                                                    config);
+
+        compute->compute(this);
+
+      }
+    }
+
+  }
+
+  return;
+}
+
 //======================================================================
 
 void Block::apply_initial_() throw ()

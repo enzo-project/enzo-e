@@ -784,6 +784,19 @@ Physics * Problem::physics (std::string type) const throw()
 
 //----------------------------------------------------------------------
 
+Compute * Problem::create_compute
+  ( std::string name,
+    Config * config ) throw ()
+{
+  TRACE1("Problem::create_compute %s", name.c_str());
+
+  Compute * compute = NULL;
+
+  return compute;
+}
+
+//----------------------------------------------------------------------
+
 Method * Problem::create_method_ 
 ( std::string  name,
   Config * config,

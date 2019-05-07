@@ -405,6 +405,49 @@ Solver * EnzoProblem::create_solver_
 
 //----------------------------------------------------------------------
 
+Compute * EnzoProblem::create_compute
+( std::string name,
+  Config * config ) throw()
+/// @param name  Name of the compute to create
+{
+
+  Compute * compute = 0;
+
+  TRACE1("EnzoProblem::create_compute %s",name.c_str());
+
+  const EnzoConfig * enzo_config = enzo::config();
+
+  if (name == "temperature") {
+
+    compute = new EnzoComputeTemperature(
+                        enzo_config->ppm_density_floor,
+                        enzo_config->ppm_temperature_floor,
+                        enzo_config->ppm_mol_weight,
+                        enzo_config->physics_cosmology);
+
+
+  } else if (name == "pressure"){
+
+    compute = new EnzoComputePressure(enzo_config->field_gamma,
+                                      enzo_config->physics_cosmology);
+
+  } else {
+
+    // Fallback to Cello method's
+    compute = Problem::create_compute (name,config);
+
+    ASSERT2("EnzoProblem::create_compute",
+            "Compute created %s does not match compute requested %s",
+            compute->name().c_str(),name.c_str(),
+            compute->name() == name);
+  }
+
+  return compute;
+}
+
+
+//----------------------------------------------------------------------
+
 Method * EnzoProblem::create_method_
 ( std::string  name,
   Config * config,

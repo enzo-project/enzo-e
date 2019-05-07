@@ -33,6 +33,11 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+  // name of derived field that this function calculates
+  std::string name () throw() {
+    return "pressure";
+  }
+
   /// Perform the computation on the block
   void compute( Block * block) throw();
 

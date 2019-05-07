@@ -362,6 +362,8 @@ public: // methods
   /// synchronize between methods) Must be called at end of Method
   void compute_done();
 
+  void compute_derived() throw ();
+
   //--------------------------------------------------
   // OUTPUT
   //--------------------------------------------------

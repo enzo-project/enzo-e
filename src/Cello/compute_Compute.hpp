@@ -45,6 +45,12 @@ public: // virtual functions
 
   virtual void compute ( Block * block) throw() = 0; 
 
+  /// Return the name of this Compute
+  ///  used for associating derived fields when relevant
+  virtual std::string name () throw () {
+    return std::string();
+  };
+
   /// Return / set field history to use in computation
 
   virtual int  get_history(int i_hist) {return i_hist_;};
