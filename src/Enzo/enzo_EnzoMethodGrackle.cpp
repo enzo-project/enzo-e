@@ -2,7 +2,8 @@
 
 /// @file     enzo_EnzoMethodGrackle.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Fri Apr  2 17:05:23 PDT 2010
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     Tues May  7
 /// @brief    Implements the EnzoMethodGrackle class
 
 #include "cello.hpp"

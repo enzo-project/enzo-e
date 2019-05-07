@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoInitialGrackleTest.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Tue Jul  8 12:22:25 PDT 2014
+/// @author   Andrew Emerick (aemerick11@gmail.com)
+/// @date     Tue May 7 2019
 /// @brief    [\ref Enzo] Initialization routine for Grackle test problem
 
 #ifndef ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP

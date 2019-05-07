@@ -2,7 +2,8 @@
 
 /// @file     enzo_EnzoComputeTemperature.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2014-10-27 22:37:41
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputeTemperature functions
 
 #ifndef ENZO_ENZO_COMPUTE_TEMPERATURE_HPP

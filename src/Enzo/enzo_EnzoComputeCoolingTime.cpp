@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoComputeCoolingTime.cpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2014-10-27 22:37:41
+/// @author   Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    Implements the EnzoComputeCoolingTime class
 
 #ifdef CONFIG_USE_GRACKLE

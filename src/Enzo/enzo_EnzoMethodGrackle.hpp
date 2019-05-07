@@ -2,7 +2,8 @@
 
 /// @file     enzo_EnzoMethodGrackle.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu May 15 14:32:28 EDT 2014
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     Tues May 7
 /// @brief    [\ref Enzo] Declaration of EnzoMethodGrackle class
 ///
 /// This class interfaces the Grackle primordial chemistry / cooling

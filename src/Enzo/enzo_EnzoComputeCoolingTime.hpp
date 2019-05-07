@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoComputeCoolingTime.hpp
-/// @author   Andrew Emerick (emerick@astro.columbia.edu)
-/// @date     2019-5-7
+/// @author   Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputeCoolingTime functions
 
 #ifdef CONFIG_USE_GRACKLE
