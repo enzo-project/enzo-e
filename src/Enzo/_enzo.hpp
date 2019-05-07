@@ -243,6 +243,9 @@ extern "C" {
 #include "enzo_EnzoComputeCicInterp.hpp"
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
+#ifdef CONFIG_USE_GRACKLE
+  #include "enzo_EnzoComputeCoolingTime.hpp"
+#endif
 
 #include "enzo_EnzoSolverBiCgStab.hpp"
 #include "enzo_EnzoSolverCg.hpp"

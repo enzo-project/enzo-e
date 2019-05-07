@@ -38,6 +38,7 @@ module enzo {
 #ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
   PUPable EnzoMethodGrackle;
+  PUPable EnzoComputeCoolingTime;
 #endif
 
   PUPable EnzoBoundary;

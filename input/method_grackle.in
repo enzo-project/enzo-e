@@ -85,7 +85,8 @@
 #  compute classes.
     derived {
         field_list = ["temperature",
-                      "pressure"];
+                      "pressure",
+                      "cooling_time"];
     }
  }
 

@@ -794,7 +794,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   /// Grackle parameters
 
-  bool method_grackle_use_grackle = false;
+  this->method_grackle_use_grackle = false;
   for (size_t i=0; i<method_list.size(); i++) {
     if (method_list[i] == "grackle") method_grackle_use_grackle=true;
   }

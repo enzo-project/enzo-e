@@ -431,6 +431,12 @@ Compute * EnzoProblem::create_compute
     compute = new EnzoComputePressure(enzo_config->field_gamma,
                                       enzo_config->physics_cosmology);
 
+#ifdef CONFIG_USE_GRACKLE
+  } else if (name == "cooling_time"){
+
+    compute = new EnzoComputeCoolingTime();
+
+#endif
   } else {
 
     // Fallback to Cello method's
