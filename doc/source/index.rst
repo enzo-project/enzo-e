@@ -110,16 +110,16 @@ presentation, and some sections are somewhat outdated.  This document,
 while currently still useful, is being phased out in favor of the
 above online content.
 
-   :download:`Using and Developing Enzo-P/Cello <./enzo-p-cello.pdf>`
+   :download:`Using and Developing Enzo-P/Cello <http://client65-90.sdsc.edu/cello-doc/_downloads/4e523174654f2009e024ac3aa718a5d1/enzo-p-cello.pdf>`
 
 Presentations given at the 2018 Enzo Days Workshop are also available
 below.  They are more up-to-date, but are also still rather large.
 
-   :download:`Enzo-P / Cello Status and What's New? <./1805-1-status.pdf>`
+   :download:`Enzo-P / Cello Status and What's New? <http://client65-90.sdsc.edu/cello-doc/_downloads/11ba173e00a03e5688c2d351f2476881/1805-1-status.pdf>`
 
-   :download:`Introduction to Enzo-P <./1805-2-intro.pdf>`
+   :download:`Introduction to Enzo-P <http://client65-90.sdsc.edu/cello-doc/_downloads/014af2086ca3c5899855903ea7d79d78/1805-2-intro.pdf>`
 	     
-   :download:`First Steps with Enzo-P <./1805-3-using.pdf>`
+   :download:`First Steps with Enzo-P <http://client65-90.sdsc.edu/cello-doc/_downloads/0bb42a270c3e64905ffce6517df0e971/1805-3-using.pdf>`
 
 James Bordner
 jobordner@ucsd.edu
