@@ -170,9 +170,9 @@ if [ $target == "test" ]; then
    grep incomplete $dir/*unit | grep "0/" | sort > $dir/incomplete.$configure
    grep pass $dir/*unit       | grep "0/" | sort > $dir/pass.$configure
 
-   f=`wc -l $dir/fail.$configure`
-   i=`wc -l $dir/incomplete.$configure`
-   p=`wc -l $dir/pass.$configure`
+   f=`wc -l < $dir/fail.$configure`
+   i=`wc -l < $dir/incomplete.$configure`
+   p=`wc -l < $dir/pass.$configure`
 
    stop=`date +"%H:%M:%S"`
 
@@ -224,4 +224,11 @@ rm -f test/STATUS
 
 if [ ! -e $target ]; then
    exit 1
+fi
+
+# check for failures/incompletes in tests
+if [ $target == "test" ]; then
+    if [ $(($f + $i)) -gt 0 ]; then
+        exit 1
+    fi
 fi
