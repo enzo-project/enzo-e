@@ -33,6 +33,10 @@ Data::Data(int nx, int ny, int nz,
   upper_[0] = xp;
   upper_[1] = yp;
   upper_[2] = zp;
+
+  delete particle_descr;
+  delete field_descr;
+
 }
 
 //----------------------------------------------------------------------

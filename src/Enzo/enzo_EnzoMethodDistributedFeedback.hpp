@@ -44,6 +44,12 @@ public:
   // Compute the maximum timestep for this method
   virtual double timestep (Block * block) const throw();
 
+  void inject_feedback(Block * block,
+                       double xpos, double ypos, double zpos,
+                       double m_eject, double E_51, double ke_fraction,
+                       enzo_float pvx = -9999.0, enzo_float pvy = -9999.0,
+                       enzo_float pvz = -9999.0);
+
   void convert_momentum( enzo_float *vx, enzo_float *vy, enzo_float *vz, enzo_float *d,
                         const enzo_float &up, const enzo_float &vp, const enzo_float &wp,
                         const int &mx, const int &my, const int &mz,
@@ -88,20 +94,26 @@ public:
                              const int &ix, const int &iy, const int &iz,
                              double &A, double &B, double &C);
 
+
 protected:
+
+  double ejecta_metal_fraction_;
+  double kinetic_fraction_;
 
   double total_ejecta_mass_;
   double total_ejecta_energy_;
-  double ejecta_metal_fraction_;
-  double kinetic_fraction_;
 
   int stencil_;
   int stencil_rad_;
   int number_of_feedback_cells_;
   int dual_energy_;
 
-  double mass_per_cell_;
-  double energy_per_cell_;
+  bool shift_cell_center_;
+
+public:
+
+  void set_shift_cell_center (bool val){ shift_cell_center_ = val;};
+  bool get_shift_cell_center (void) {return shift_cell_center_;};
 
 };
 

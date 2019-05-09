@@ -17,9 +17,6 @@ EnzoConfig g_enzo_config;
 EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
-#ifdef CONFIG_USE_GRACKLE
-  method_grackle_chemistry(),
-#endif
   ppm_diffusion(false),
   ppm_dual_energy(false),
   ppm_dual_energy_eta_1(0.0),
@@ -123,6 +120,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_stellar_disk(false),
   initial_IG_stellar_bulge(false),
   initial_IG_analytic_velocity(false),
+  initial_IG_include_recent_SF(false),
+  initial_IG_recent_SF_start(-100.0),
+  initial_IG_recent_SF_end(0.0),
+  initial_IG_recent_SF_bin_size(5.0),
+  initial_IG_recent_SF_SFR(2.0),
+  initial_IG_recent_SF_seed(12345),
   // EnzoProlong
   interpolation_method(""),
   // EnzoMethodHeat
@@ -158,6 +161,8 @@ EnzoConfig::EnzoConfig() throw ()
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
 #ifdef CONFIG_USE_GRACKLE
+  method_grackle_use_grackle(false),
+  method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
 #endif
@@ -349,6 +354,12 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_IG_stellar_disk;
   p | initial_IG_stellar_bulge;
   p | initial_IG_analytic_velocity;
+  p | initial_IG_include_recent_SF;
+  p | initial_IG_recent_SF_start;
+  p | initial_IG_recent_SF_end;
+  p | initial_IG_recent_SF_bin_size;
+  p | initial_IG_recent_SF_SFR;
+  p | initial_IG_recent_SF_seed;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -393,11 +404,6 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | method_turbulence_edot;
 
-#ifdef CONFIG_USE_GRACKLE
- p  | method_grackle_use_cooling_timestep;
- p  | method_grackle_radiation_redshift;
-#endif
-
   p | method_gravity_grav_const;
   p | method_gravity_solver;
   p | method_gravity_order;
@@ -441,17 +447,20 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_time;
 
 #ifdef CONFIG_USE_GRACKLE
+  p  | method_grackle_use_grackle;
+  p  | method_grackle_use_cooling_timestep;
+  p  | method_grackle_radiation_redshift;
+
   p | *method_grackle_chemistry;
   int is_null = (method_grackle_chemistry==NULL);
   p | is_null;
-  int use_grackle = is_null ? 0 : method_grackle_chemistry->use_grackle;
-  p | use_grackle;
+
   if (is_null){
     method_grackle_chemistry = NULL;
   } else {
     if (p.isUnpacking()) {
       method_grackle_chemistry = new chemistry_data;
-      method_grackle_chemistry->use_grackle = use_grackle;
+      method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
       if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
         ERROR("EnzoMethodConfig::pup()",
               "Error in Grackle set_default_chemistry_parameters");
@@ -748,6 +757,18 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:isolated_galaxy:stellar_bulge", false);
   initial_IG_analytic_velocity = p->value_logical
     ("Initial:isolated_galaxy:analytic_velocity", false);
+  initial_IG_include_recent_SF = p->value_logical
+    ("Initial:isolated_galaxy:include_recent_SF", false);
+  initial_IG_recent_SF_start = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_start", -100.0);
+  initial_IG_recent_SF_end = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_end", 0.0);
+  initial_IG_recent_SF_SFR = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_SFR", 2.0);
+  initial_IG_recent_SF_bin_size = p->value_float
+    ("Initial:isolated_galaxy:recent_SF_bin_size", 5.0);
+  initial_IG_recent_SF_seed = p->value_integer
+    ("Initial:isolated_galaxy:recent_SF_seed", 12345);
 
   for (int axis=0; axis<3; axis++) {
     initial_IG_center_position[axis]  = p->list_value_float
@@ -1051,13 +1072,13 @@ void EnzoConfig::read(Parameters * p) throw()
 
   /// Grackle parameters
 
-  bool uses_grackle = false;
+  bool method_grackle_use_grackle = false;
   for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "grackle") uses_grackle=true;
+    if (method_list[i] == "grackle") method_grackle_use_grackle=true;
   }
 
   // Defaults alert PUP::er() to ignore
-  if (uses_grackle) {
+  if (method_grackle_use_grackle) {
 
     if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL) {
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
@@ -1065,7 +1086,7 @@ void EnzoConfig::read(Parameters * p) throw()
     }
 
     /* this must be set AFTER default values are set */
-    method_grackle_chemistry->use_grackle = uses_grackle;
+    method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
 
     // Copy over parameters from Enzo-P to Grackle
     grackle_data->Gamma = field_gamma;

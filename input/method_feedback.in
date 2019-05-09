@@ -1,14 +1,8 @@
-  Domain {
-     lower = [0.0, 0.0, 0.0];
-     upper = [1.0, 1.0, 1.0];
-  }
-
-  Mesh {
-    root_rank   = 3;
-    root_blocks = [4,4,4]; # [1,1,1];
-    root_size   = [64,64,64];
-  }
-
+#
+#
+#  Feedback test problem - much hard-coded in IC routine for now
+# 
+#
 
 #Adapt {
 #     list = ["mass"];
@@ -23,78 +17,99 @@
 #     max_level = 1;
 #}
 
-
 Boundary {
   type = "outflow";
- }
+}
+
+Domain {
+    lower = [ 0.0, 0.0, 0.0];
+    upper = [ 1.0, 1.0, 1.0];
+}
+
+Mesh {
+  root_blocks = [4, 4, 4];
+  root_rank   = 3;
+  root_size   = [64, 64, 64];
+}
+
 
 Field {
-  history     = 1;
   alignment   = 8;
-  gamma       = 1.4;
+  gamma       = 1.40;
   ghost_depth = 3;
-  list = ["density", "velocity_x", "velocity_y", "velocity_z", "metal_density",
-              "total_energy", "internal_energy", "pressure", "temperature"];
-  uniform_density = 1.0E-10;
+
+  list = ["density", "internal_energy", "total_energy",
+          "metal_density", "velocity_x", "velocity_y", "velocity_z",
+          "pressure", "temperature"];
+
+}
+
+Group {
+  list = ["colour"];
+  
+  colour {
+    field_list = ["metal_density"];
   }
+
+}
+
+Method {
+  list = [ "ppm", "feedback"];
+
+  feedback {
+     ejecta_mass      = 10.0;      # solar masses
+     supernova_energy = 1.0;      # in 10^51 erg
+     ke_fraction      = 0.8;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently
+     ejecta_metal_fraction = 0.5;
+     feedback_stencil = 3;
+  };
+
+  ppm {
+        diffusion = true;
+        riemann_solver = "two_shock";
+        dual_energy = true;
+        flattening = 3;
+        steepening = true;
+        mol_weight = 1.2;
+        courant = 0.4;
+        density_floor = 1.0E-20;
+        number_density_floor = 1.0E-20;
+        pressure_floor = 1.0E-20;
+        temperature_floor = 1.0E-20;
+      };
+
+
+}
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "mass", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "metal_fraction", "double" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        groups = ["has_mass"];
+    }
+}
+
 
 Units {
     length = 1.5798E21; # # 7.899E20;    # 256 pc
     time   = 3.15576E10;
     mass   = 1.9891E36;
   }
-
-Method {
-  list = ["ppm","feedback"];
-
-      ppm {
-            diffusion = true;
-            riemann_solver = "two_shock";
-            dual_energy = true;
-            flattening = 3;
-            steepening = true;
-            mol_weight = 1.2;
-            courant = 0.4;
-            density_floor = 1.0E-30;
-            number_density_floor = 1.0E-30;
-            pressure_floor = 1.0E-30;
-            temperature_floor = 1.0E-30;
-          };
-
-  feedback {
-    ejecta_mass = 10.0;
-    supernova_energy = 1.0;
-    ke_fraction = 0.8;
-    ejecta_metal_fraction = 0.5;
-    stencil = 3;
-    shift_cell_center = true;
-  };
-  
-
- }
-
-Particle{
-  list = ["star"];
-
-    star {
-         attributes = [ "x", "double",
-                        "y", "double",
-                        "z", "double",
-                        "vx", "double",
-                        "vy", "double",
-                        "vz", "double",
-                        "ax", "double",
-                        "ay", "double",
-                        "az", "double",
-                        "mass", "double",
-                        "creation_time","double",  
-                        "metal_fraction","double",
-                        "lifetime","double" ];
-         position = [ "x", "y", "z" ];
-         velocity = [ "vx", "vy", "vz" ];
-         groups = ["has_mass"];
-     }
-}
 
 Initial {
 

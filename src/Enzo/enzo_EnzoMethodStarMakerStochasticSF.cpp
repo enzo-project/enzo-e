@@ -105,11 +105,12 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     int gx,gy,gz;
     field.ghost_depth (0, &gx, &gy, &gz);
 
-    int mx, my, mz;
-    field.dimensions (0, &mx, &my, &mz);
-
     int nx, ny, nz;
     field.size ( &nx, &ny, &nz);
+
+    int mx = nx + 2*gx;
+    int my = ny + 2*gy;
+    int mz = nz + 2*gz;
 
 
     enzo_float * density     = (enzo_float *) field.values("density");
@@ -144,9 +145,9 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
     //   To Do: Allow for multi-zone star formation by adding mass in
     //          surrounding cells if needed to accumulte enough mass
     //          to hit target star particle mass ()
-    for (int iz=gz; iz<nz; iz++){
-      for (int iy=gy; iy<ny; iy++){
-        for (int ix=gx; ix<nx; ix++){
+    for (int iz=gz; iz<nz+gz; iz++){
+      for (int iy=gy; iy<ny+gy; iy++){
+        for (int ix=gx; ix<nx+gx; ix++){
 
           int i = ix + mx*(iy + my*iz);
 

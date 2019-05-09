@@ -16,6 +16,8 @@ private:
   enzo_float *** particleIcPosition;
   enzo_float *** particleIcVelocity;
   enzo_float **  particleIcMass;
+  enzo_float **  particleIcLifetime;
+  enzo_float **  particleIcCreationTime;
   int * particleIcTypes;
   std::vector<std::string> particleIcFileNames;
 
@@ -23,16 +25,20 @@ private:
   void allocateParticles(void){
 
     if (ntypes_ == 0){
-      particleIcPosition  = NULL;
-      particleIcVelocity  = NULL;
-      particleIcTypes     = NULL;
-      particleIcMass      = NULL;
+      particleIcPosition     = NULL;
+      particleIcVelocity     = NULL;
+      particleIcTypes        = NULL;
+      particleIcMass         = NULL;
+      particleIcLifetime     = NULL;
+      particleIcCreationTime = NULL;
       return;
     }
 
     particleIcPosition  = new enzo_float **[ntypes_];
     particleIcVelocity  = new enzo_float **[ntypes_];
     particleIcMass      = new enzo_float  *[ntypes_];
+    particleIcCreationTime = new enzo_float *[ntypes_];
+    particleIcLifetime     = new enzo_float *[ntypes_];
 
     if (!(particleIcTypes)) particleIcTypes = new int[ntypes_];
 
@@ -50,9 +56,13 @@ private:
         }
       }
 
-      particleIcMass[k]      = new enzo_float[nparticles_];
+      particleIcMass[k]         = new enzo_float[nparticles_];
+      particleIcCreationTime[k] = new enzo_float[nparticles_];
+      particleIcLifetime[k]     = new enzo_float[nparticles_];
       for (int i = 0; i < nparticles_; i++){
         particleIcMass[k][i] = -1.0;
+        particleIcCreationTime[k][i] = 0.0;
+        particleIcLifetime[k][i]     = -999999.0;
       }
     }
     return;
@@ -69,6 +79,8 @@ private:
       particleIcVelocity[k] = NULL;
 
       delete [] particleIcMass;
+      delete [] particleIcLifetime;
+      delete [] particleIcCreationTime;
     }
 
     delete [] particleIcTypes;
@@ -77,6 +89,8 @@ private:
     particleIcVelocity = NULL;
     particleIcMass     = NULL;
     particleIcTypes    = NULL;
+    particleIcLifetime = NULL;
+    particleIcCreationTime = NULL;
 
     return;
   }
@@ -112,6 +126,8 @@ public: // interface
   void ReadParticles(void);
 
   /// Read in particle data (DM and stars)
+  void ReadParticlesFromFile_(const int&nl, const int& ipt);
+  
   void ReadParticlesFromFile(const int& nl,
                              enzo_float *position[], enzo_float *velocity[],
                              enzo_float *mass, const std::string& filename);
@@ -169,6 +185,12 @@ private: // attributes
   double vcirc_radius[10000];
   double vcirc_velocity[10000];
 
+  bool include_recent_SF;
+  double recent_SF_start;
+  double recent_SF_end;
+  double recent_SF_bin_size;
+  double recent_SF_SFR;
+  int recent_SF_seed;
 
 };
 

@@ -34,9 +34,12 @@ public: // interface
   void pup (PUP::er &p);
 
   /// Perform the computation on the block
-  virtual void compute( Block * block) throw();
+  void compute( Block * block) throw();
 
-  void compute_(Block * block
+  void compute( Block * block, enzo_float * p) throw();
+
+  void compute_(Block * block,
+                enzo_float * p
 #ifdef CONFIG_USE_GRACKLE
                , code_units * grackle_units = NULL,
                  grackle_field_data * grackle_fields = NULL

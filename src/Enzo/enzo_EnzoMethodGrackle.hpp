@@ -88,13 +88,45 @@ public: // interface
 
 #ifdef CONFIG_USE_GRACKLE
   static void setup_grackle_units(EnzoBlock * enzo_block,
-                                  code_units * grackle_units) throw();
+                                  code_units * grackle_units,
+                                  int i_hist = 0 ) throw();
 
   static void setup_grackle_fields(EnzoBlock * enzo_block,
-                                   grackle_field_data * grackle_fields) throw();
+                                   grackle_field_data * grackle_fields,
+                                   int i_hist = 0 ) throw();
 
   static void update_grackle_density_fields(EnzoBlock * enzo_block,
                                    grackle_field_data * grackle_fields) throw();
+
+  static void delete_grackle_fields(grackle_field_data * grackle_fields_) throw() {
+      grackle_fields_->density         = NULL;
+      grackle_fields_->internal_energy = NULL;
+      grackle_fields_->x_velocity      = NULL;
+      grackle_fields_->y_velocity      = NULL;
+      grackle_fields_->z_velocity      = NULL;
+      grackle_fields_->HI_density      = NULL;
+      grackle_fields_->HII_density     = NULL;
+      grackle_fields_->HeI_density     = NULL;
+      grackle_fields_->HeII_density    = NULL;
+      grackle_fields_->HeIII_density   = NULL;
+      grackle_fields_->e_density       = NULL;
+      grackle_fields_->HM_density      = NULL;
+      grackle_fields_->H2I_density     = NULL;
+      grackle_fields_->H2II_density    = NULL;
+      grackle_fields_->DI_density      = NULL;
+      grackle_fields_->DII_density     = NULL;
+      grackle_fields_->HDI_density     = NULL;
+      grackle_fields_->metal_density   = NULL;
+      grackle_fields_->volumetric_heating_rate = NULL;
+      grackle_fields_->specific_heating_rate   = NULL;
+
+      delete [] grackle_fields_->grid_dimension; grackle_fields_->grid_dimension = NULL;
+      delete [] grackle_fields_->grid_start;     grackle_fields_->grid_start      = NULL;
+      delete [] grackle_fields_->grid_end;       grackle_fields_->grid_end        = NULL;
+
+      return;
+ }
+
 #endif
 
 protected: // methods
