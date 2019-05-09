@@ -18,11 +18,6 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-# Breath is for including Doxygen XML source code
-
-# /usr/lib/python2.7/dist-packages/breathe
-sys.path.append( "/usr/lib/python3/dist-packages/breathe" )
-
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -31,17 +26,10 @@ sys.path.append( "/usr/lib/python3/dist-packages/breathe" )
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.intersphinx',
-              'sphinx.ext.jsmath',
-              'sphinx.ext.todo', 'breathe' ]  # , 'breathe'
-
-breathe_projects = { "cello": "/home/bordner/Cello/enzo-e.jobordner/src-xml/" }
-
-breathe_default_project = "cello"
-
-jsmath_path = '/usr/share/jsmath/easy'
+              'sphinx.ext.todo',]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -105,10 +93,7 @@ html_show_sphinx = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'nature'
-#html_theme = 'agogo'
 html_theme = 'sphinx_rtd_theme'
-#html_theme = 'haiku'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -138,7 +123,7 @@ html_theme_path = ["."]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -272,7 +257,6 @@ epub_copyright = u'2019, James Bordner'
 
 # Allow duplicate toc entries.
 #epub_tocdup = True
-
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
