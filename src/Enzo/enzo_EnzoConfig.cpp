@@ -159,8 +159,7 @@ EnzoConfig::EnzoConfig() throw ()
   }
 
 #ifdef CONFIG_USE_GRACKLE
-//    method_grackle_chemistry = new chemistry_data;
-  method_grackle_chemistry = NULL;
+    method_grackle_chemistry = new chemistry_data;
 #endif
 }
 
@@ -805,8 +804,6 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Defaults alert PUP::er() to ignore
   if (method_grackle_use_grackle) {
-
-    method_grackle_chemistry = new chemistry_data;
 
     if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL) {
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
