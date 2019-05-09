@@ -348,7 +348,9 @@ void EnzoConfig::pup (PUP::er &p)
     }
   }
 
-  p | *method_grackle_chemistry;
+  if (method_grackle_use_grackle){
+    p | *method_grackle_chemistry;
+  }
 
 #endif /* CONFIG_USE_GRACKLE */
 
