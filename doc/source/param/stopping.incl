@@ -1,0 +1,37 @@
+:Parameter:  :p:`Stopping` : :p:`cycle`
+:Summary: :s:`Stopping cycle`
+:Type:    :t:`integer`
+:Default: :d:`max (` :t:`integer` :d:`)`
+:Scope:     :c:`Cello`
+
+:e:`Stopping cycle.`
+
+----
+
+:Parameter:  :p:`Stopping` : :p:`time`
+:Summary: :s:`Stopping time`
+:Type:    :t:`float`
+:Default: :d:`max (` :t:`double` :d:`)`
+:Scope:     :c:`Cello`
+
+:e:`Stopping time.`
+
+----
+
+:Parameter:  :p:`Stopping` : :p:`seconds`
+:Summary: :s:`Stop after this number of seconds (wall-clock time)`
+:Type:    :t:`float`
+:Default: :d:`max (` :t:`double` :d:`)`
+:Scope:     :c:`Cello`
+
+:e:`End the calculation after this many seconds of wall-clock time.`
+
+----
+
+:Parameter:  :p:`Stopping` : :p:`interval`
+:Summary: :s:`Stopping interval`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :c:`Cello`
+
+:e:`Number of cycles between applying the stopping criteria.`

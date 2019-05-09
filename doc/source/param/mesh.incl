@@ -1,0 +1,27 @@
+:Parameter:  :p:`Mesh` : :p:`root_blocks`
+:Summary: :s:`Number of Blocks used to tile the coarsest refinement level`
+:Type:    :t:`list` ( :t:`integer` )
+:Default: :d:`[ 1, 1, 1 ]`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the number of Blocks along each axis in the mesh "array".  The product must not be smaller than the number of processors used.`
+
+----
+
+:Parameter:  :p:`Mesh` : :p:`root_rank`
+:Summary: :s:`Physical dimensionality of the problem`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:     :c:`Cello`
+
+:e:`Number of physical dimensions in the problem, 1, 2, or 3.`
+
+----
+
+:Parameter:  :p:`Mesh` : :p:`root_size`
+:Summary: :s:`Coarsest Patch size`
+:Type:    :t:`list` ( :t:`integer` )
+:Default: :d:`[ 1, 1, 1 ]`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the total size of the root-level mesh.  For example, [400, 400] specifies a two dimensional root-level discretization of 400 x 400 zones, excluding ghost zones.`
