@@ -34,8 +34,10 @@
               "velocity_x",
               "velocity_y",
               "velocity_z",
-              "HI_density",
-              "HII_density",
+# purposefully commenting these out to test automatic
+# creation of needed fields
+#              "HI_density",
+#              "HII_density",
               "HM_density",
               "HeI_density",
               "HeII_density",
@@ -57,7 +59,12 @@
  }
 
  Group {
-   list = ["colour"];
+   list = ["colour", "derived"];
+   
+   # fields that should be advected by hydro MUST be defined
+   # as colour here. This is handled automatically in 
+   # EnzoMethodGrackle for the Grackle-specific fields (species)
+   # but not everything
     colour {
        field_list = [
               "HI_density",
@@ -148,7 +155,7 @@
      }
 
      # use this to limit maximum timestep if
-     # Grackle crashes due to iteration limit - this is not
+     # Grackle crashes due to max iteration limit - this is not
      # needed generally in a real simulation as hydro timestep will
      # be small (usually)
      null { dt = 100.0; }

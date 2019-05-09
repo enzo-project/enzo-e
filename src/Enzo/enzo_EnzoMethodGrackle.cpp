@@ -522,7 +522,7 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
       "Error in calculate_cooling_time.\n");
     }
 
-    for (int i = 0; i < size; i++) dt = std::min(dt, std::abs(cooling_time[i]));
+    for (int i = 0; i < size; i++) dt = std::min(enzo_float(dt), std::abs(cooling_time[i]));
 
     if (delete_cooling_time){
       delete [] cooling_time;
