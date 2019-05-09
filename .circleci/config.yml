@@ -81,7 +81,7 @@ commands:
     steps:
       - run: |
           source $HOME/venv/bin/activate
-          cd doc/manual/source
+          cd doc/source
           python -m sphinx -M html "." "_build" -W
 
 jobs:
