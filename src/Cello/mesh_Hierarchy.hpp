@@ -184,6 +184,7 @@ public: // interface
   size_t num_blocks(int level) const throw()
   {  return num_blocks_level_.at(level);  }
 
+  /// Return the ith block in this pe
   Block * block (int index_block)
   { return block_vec_.at(index_block); }
 

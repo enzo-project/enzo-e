@@ -10,10 +10,10 @@ help:
 	@echo "make cccc       Compute code quality metrics in src/.cccc/cccc.html"
 	@echo "make clean      Remove object and test files"
 	@echo "make coverity   Compile enzo-p using the coverity static analysis tool"
-	@echo "make diff       Generate org-mode 'diff.org' file from 'hg diff' output"
+	@echo "make diff       Generate org-mode 'diff.org' file from 'git diff' output"
 	@echo "make gdb        Generate org-mode 'gdb.org' from gdb 'where' output in gdb.out"
 	@echo "make doc        Generate doxygen documentation from source in src-html"
-	@echo "make log        Generate org-mode 'log.org' file from 'hg log' output"
+#	@echo "make log        Generate org-mode 'log.org' file from 'git log' output"
 	@echo "make reset      Clear any settings from an incomplete ./build.sh"
 	@echo "make test       Run regression tests"
 #----------------------------------------------------------------------
@@ -50,14 +50,22 @@ cccc:
 #----------------------------------------------------------------------
 .PHONY: diff
 diff:
-	./tools/diff-org.sh > diff.org
+	@echo 'Generating "diff.org"'
+	@echo '* TODO [/] git diff branch (' `git rev-parse --abbrev-ref HEAD` ')' > diff.org
+	@echo '** TODO [/] Unstaged diff'                     >> diff.org
+	@git diff -b |./tools/awk/diff-org.awk                >> diff.org
+	@echo '** TODO [/] Staged diff'                       >> diff.org
+	@git diff --cached HEAD -b | ./tools/awk/diff-org.awk >> diff.org
+	@echo '** TODO [/] Upstream (enzo-project/enzo-e [master])' >> diff.org
+	@git diff ..upstream/master | ./tools/awk/diff-org.awk      >> diff.org
+
 #----------------------------------------------------------------------
 .PHONY: gdb
 gdb:
 	awk -f ./tools/awk/gdb-org.awk <gdb.out > gdb.org
 #----------------------------------------------------------------------
-.PHONY: log
-log:
-	hg log | ./tools/log-org.sh > log.org
+#.PHONY: log
+#log:
+#	git log | ./tools/log-org.sh > log.org
 
 

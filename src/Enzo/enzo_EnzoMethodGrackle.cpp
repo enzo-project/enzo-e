@@ -2,18 +2,20 @@
 
 /// @file     enzo_EnzoMethodGrackle.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Fri Apr  2 17:05:23 PDT 2010
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     Tues May  7
 /// @brief    Implements the EnzoMethodGrackle class
 
 #include "cello.hpp"
 #include "enzo.hpp"
 
+
 //----------------------------------------------------------------------------
 
 EnzoMethodGrackle::EnzoMethodGrackle
 (
-  const float physics_cosmology_initial_redshift,
-  const float time
+  const double physics_cosmology_initial_redshift,
+  const double time
 )
   : Method()
 {
@@ -21,27 +23,25 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   FieldDescr * field_descr = cello::field_descr();
 
-  /// Initialize default Refresh
-  int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-		       enzo_sync_id_method_grackle);
-  refresh(ir)->add_all_fields();
-
   // Gather list of fields that MUST be defined for this
   // method and check that they are permanent. If not,
-  // define them:
+  // define them. In the future, maybe have this be a separate
+  // Method function that can be called to obtain a list of
+  // needed field
 
   std::vector<std::string> fields_to_define;
+  std::vector<std::string> colour_fields;
 
-  if (grackle_data->metal_cooling){
+  if (grackle_data->metal_cooling > 0){
+    std::string metal_name = "metal_density";
 
-    if (! (field_descr->is_field("metal_density"))){
-      fields_to_define.push_back("metal_density");
-
-//      WARNING("EnzoMethodGrackle: ",
-//              "Must define metal_density to use metal cooling with Grackle. Defining");
+    if (! (field_descr->is_field(metal_name))){
+      fields_to_define.push_back(metal_name);
     }
+    colour_fields.push_back(metal_name);
   }
 
+  // Define primordial chemistry fields
   if (grackle_data->primordial_chemistry > 0){
     std::string pc1_fields[6] = {"HI_density","HII_density",
                                   "HeI_density","HeII_density","HeIII_density",
@@ -51,10 +51,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
     for(int ifield = 0; ifield < numfields; ifield++){
       if (! (field_descr->is_field( pc1_fields[ifield] ))){
         fields_to_define.push_back( pc1_fields[ifield] );
-
-//        WARNING("EnzoMethodGrackle: ",
-//                "Must define " + pc1_fields[ifield] + "if using primordial_chemistry = 1 with Grackle. Defining");
       }
+      colour_fields.push_back( pc1_fields[ifield] );
     }
 
     if(grackle_data->primordial_chemistry > 1){
@@ -65,10 +63,8 @@ EnzoMethodGrackle::EnzoMethodGrackle
       for (int ifield = 0; ifield < numfields; ifield++){
         if (! (field_descr->is_field( pc2_fields[ifield] ))){
           fields_to_define.push_back( pc2_fields[ifield] );
-
-//          WARNING("EnzoMethodGrackle: ",
-//                  "Must define " + pc2_fields[ifield] + "if using primordial_chemistry = 2 with Grackle. Defining");
         }
+        colour_fields.push_back( pc2_fields[ifield] );
       }
 
       if(grackle_data->primordial_chemistry > 2){
@@ -78,10 +74,9 @@ EnzoMethodGrackle::EnzoMethodGrackle
         for(int ifield = 0; ifield < numfields; ifield++){
           if (! (field_descr->is_field( pc3_fields[ifield] ))){
             fields_to_define.push_back( pc3_fields[ifield] );
-
-//            WARNING("EnzoMethodGrackle: ",
- //                   "Must define " + pc3_fields[ifield] +  "if using primordial_chemistry = 3 with Grackle. Defining");
           }
+
+          colour_fields.push_back( pc3_fields[ifield] );
         }
 
       } // endif primordial_chemistry > 2
@@ -91,28 +86,96 @@ EnzoMethodGrackle::EnzoMethodGrackle
   } // endif primordial chemistry is on
 
   if (grackle_data->use_specific_heating_rate){
-
     if ( !(field_descr->is_field("specific_heating_rate"))){
       fields_to_define.push_back("specific_heating_rate");
-
-//      WARNING("EnzoMethodGrackle : ",
-//             " Must define specific_heating_rate if using specific heating rate with Grackle. Defining")
     }
   }
 
   if (grackle_data->use_volumetric_heating_rate){
     if ( !(field_descr->is_field("volumetric_heating_rate"))){
       fields_to_define.push_back("volumetric_heating_rate");
-
-//      WARNING("EnzoMethodGrackle: ",
-//             "Must define volumetric_heating_rate field if using volumetric heating with Grackle. Defining.");
     }
   }
 
-  // now define the fields
+  // Define fields
+
+//  WARNING("EnzoMethodGrackle: ",
+//          "Not all fields needed for current Grackle settings are defined. Attempting to define:");
+
   for (int ifield = 0; ifield < fields_to_define.size(); ifield++){
+//    WARNING(fields_to_define[ifield].c_str() );
     field_descr->insert_permanent( fields_to_define[ifield] );
   }
+
+  // Set these fields to colour if they exist
+  //    list of fields belonging to this method that are colour
+  for (int ifield=0; ifield < colour_fields.size(); ifield++){
+    if (   field_descr->is_permanent(  colour_fields[ifield] ) &&
+         !(field_descr->groups()->is_in( colour_fields[ifield], "colour")) ){
+
+
+      field_descr->groups()->add( colour_fields[ifield] ,"colour");
+    }
+  }
+
+  /// Initialize default Refresh
+  int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+                       enzo_sync_id_method_grackle);
+  refresh(ir)->add_all_fields();
+
+  /// Define Grackle's internal data structures
+  grackle_chemistry_data_defined_ = false;
+  this->initialize_grackle_chemistry_data(time);
+
+#endif /* CONFIG_USE_GRACKLE */
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodGrackle::compute ( Block * block) throw()
+{
+
+  if (block->is_leaf()){
+
+  #ifndef CONFIG_USE_GRACKLE
+
+    ERROR("EnzoMethodGrackle::compute()",
+    "Trying to use method 'grackle' with "
+    "Grackle configuration turned off!");
+
+  #else /* CONFIG_USE_GRACKLE */
+
+    EnzoBlock * enzo_block = enzo::block(block);
+
+    // Start timer
+    Simulation * simulation = cello::simulation();
+    if (simulation)
+      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
+
+    this->initialize_grackle_chemistry_data(block->time());
+
+    this->compute_(enzo_block);
+
+    enzo_block->compute_done();
+
+    if (simulation)
+      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
+  #endif
+  }
+
+  return;
+
+}
+
+#ifdef CONFIG_USE_GRACKLE
+
+void EnzoMethodGrackle::initialize_grackle_chemistry_data(
+                                                   const double& current_time)
+{
+
+  /* Define Grackle's chemistry data if not yet defined */
+
+  if (this->grackle_chemistry_data_defined_) return;
 
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
@@ -120,14 +183,12 @@ EnzoMethodGrackle::EnzoMethodGrackle
   grackle_units_.comoving_coordinates = enzo_config->physics_cosmology;
 
   // Copy over code units to grackle units struct
-  grackle_units_.density_units = enzo_units->density();
-  grackle_units_.length_units  = enzo_units->length();
-  grackle_units_.time_units    = enzo_units->time();
+  grackle_units_.density_units  = enzo_units->density();
+  grackle_units_.length_units   = enzo_units->length();
+  grackle_units_.time_units     = enzo_units->time();
   grackle_units_.velocity_units = enzo_units->velocity();
-
-
-  grackle_units_.a_units       = 1.0;
-  grackle_units_.a_value       = 1.0;
+  grackle_units_.a_units        = 1.0;
+  grackle_units_.a_value        = 1.0;
 
   if (grackle_units_.comoving_coordinates){
     enzo_float cosmo_a  = 1.0;
@@ -136,13 +197,14 @@ EnzoMethodGrackle::EnzoMethodGrackle
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
 
     cosmology->compute_expansion_factor(&cosmo_a, &cosmo_dt,
-                                        time);
+                                        current_time);
     grackle_units_.a_units
-         = 1.0 / (1.0 + physics_cosmology_initial_redshift);
+         = 1.0 / (1.0 + enzo_config->physics_cosmology_initial_redshift);
     grackle_units_.a_value = cosmo_a;
 
   } else if (enzo_config->method_grackle_radiation_redshift > -1){
-    grackle_units_.a_value = 1.0 / (1.0 + enzo_config->method_grackle_radiation_redshift);
+    grackle_units_.a_value = 1.0 /
+                         (1.0 + enzo_config->method_grackle_radiation_redshift);
   }
 
   // Initialize grackle units and data
@@ -152,33 +214,15 @@ EnzoMethodGrackle::EnzoMethodGrackle
     "Error in initialize_chemistry_data");
   }
 
-#endif /* CONFIG_USE_GRACKLE */
+  // This value should not be PUPed to ensure Grackle's data is always
+  // defined locally on each processor (see enzo_EnzoMethodGrackle.hpp)
+  this->grackle_chemistry_data_defined_ = true;
+
+  return;
 }
 
-//----------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-void EnzoMethodGrackle::compute ( Block * block) throw()
-{
-  if (!block->is_leaf()) return;
-
-  #ifndef CONFIG_USE_GRACKLE
-
-    ERROR("EnzoMethodGrackle::compute()",
-    "Trying to use method 'grackle' with "
-    "Grackle configuration turned off!");
-
-  #else /* CONFIG_USE_GRACKLE */
-    EnzoBlock * enzo_block = enzo::block(block);
-
-    this->compute_(enzo_block);
-
-    enzo_block->compute_done();
-    return;
-  #endif
-
-}
-
-#ifdef CONFIG_USE_GRACKLE
 void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
                                              code_units * grackle_units,
                                              int i_hist /* default 0 */
@@ -218,11 +262,14 @@ void EnzoMethodGrackle::setup_grackle_units (EnzoBlock * enzo_block,
     grackle_units->a_value = cosmo_a;
 
   } else if (enzo_config->method_grackle_radiation_redshift > -1){
-    grackle_units->a_value = 1.0 / (1.0 + enzo_config->method_grackle_radiation_redshift);
+    grackle_units->a_value = 1.0 /
+                         (1.0 + enzo_config->method_grackle_radiation_redshift);
   }
 
   return;
 }
+
+//--------------------------------------------------------------------------
 
 void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
   // Setup Grackle field struct for storing field data that will be passed
@@ -320,6 +367,8 @@ void EnzoMethodGrackle::setup_grackle_fields(EnzoBlock * enzo_block,
   return;
 }
 
+//----------------------------------------------------------------------------
+
 void EnzoMethodGrackle::update_grackle_density_fields(
                                EnzoBlock * enzo_block,
                                grackle_field_data * grackle_fields_
@@ -379,8 +428,10 @@ void EnzoMethodGrackle::update_grackle_density_fields(
 }
 
 //----------------------------------------------------------------------
+
 void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 {
+
   EnzoUnits * enzo_units = enzo::units();
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -476,7 +527,7 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
       "Error in calculate_cooling_time.\n");
     }
 
-    for (int i = 0; i < size; i++) dt = std::min(dt, std::abs(cooling_time[i]));
+    for (int i = 0; i < size; i++) dt = std::min(enzo_float(dt), std::abs(cooling_time[i]));
 
     if (delete_cooling_time){
       delete [] cooling_time;

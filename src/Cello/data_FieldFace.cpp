@@ -165,10 +165,11 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
     char * array_face  = &array[index_array];
 
-    int m3[3],g3[3];
+    int m3[3],g3[3],c3[3];
 
     field.field_size(index_field,&m3[0],&m3[1],&m3[2]);
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
+    field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
     int index_src = field_list_src_(field)[i_f];
     int index_dst = field_list_dst_(field)[i_f];
@@ -176,9 +177,9 @@ void FieldFace::face_to_array ( Field field,char * array) throw()
 
     int i3[3], n3[3];
     if (!accumulate) {
-      loop_limits (i3,n3,m3,g3,op_load);
+      loop_limits (i3,n3,m3,g3,c3,op_load);
     } else {
-      loop_limits_accumulate (i3,n3,m3,g3,op_load);
+      loop_limits_accumulate (i3,n3,m3,g3,c3,op_load);
     }
   
     if (refresh_type_ == refresh_coarse) {
@@ -238,10 +239,11 @@ void FieldFace::array_to_face (char * array, Field field) throw()
     
     char * array_ghost  = array + index_array;
 
-    int m3[3],g3[3];
+    int m3[3],g3[3],c3[3];
 
     field.field_size(index_field,&m3[0],&m3[1],&m3[2]);
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
+    field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
     int index_src = field_list_src_(field)[i_f];
     int index_dst = field_list_dst_(field)[i_f];
@@ -249,9 +251,9 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
     int i3[3], n3[3];
     if (!accumulate) {
-      loop_limits (i3,n3,m3,g3,op_store);
+      loop_limits (i3,n3,m3,g3,c3,op_store);
     } else {
-      loop_limits_accumulate (i3,n3,m3,g3,op_store);
+      loop_limits_accumulate (i3,n3,m3,g3,c3,op_store);
     }
 
     if (refresh_type_ == refresh_fine) {
@@ -314,26 +316,28 @@ void FieldFace::face_to_face (Field field_src, Field field_dst)
     size_t index_src = field_list_src[i_f];
     size_t index_dst = field_list_dst[i_f];
 
-    int m3[3]={0},g3[3]={0};
+    int m3[3]={0},g3[3]={0},c3[3]={3};
 
     field_src.field_size (index_src,&m3[0],&m3[1],&m3[2]);
     field_src.ghost_depth(index_src,&g3[0],&g3[1],&g3[2]);
+    field_src.centering(index_src,&c3[0],&c3[1],&c3[2]);
+    
     const bool accumulate = accumulate_(index_src,index_dst);
 
     int is3[3], ns3[3];
     if (!accumulate) {
-      loop_limits (is3,ns3,m3,g3,op_load);
+      loop_limits (is3,ns3,m3,g3,c3,op_load);
     } else {
-      loop_limits_accumulate (is3,ns3,m3,g3,op_load);
+      loop_limits_accumulate (is3,ns3,m3,g3,c3,op_load);
     }
 
     invert_face();
 
     int id3[3], nd3[3];
     if (!accumulate) {
-      loop_limits (id3,nd3,m3,g3,op_store);
+      loop_limits (id3,nd3,m3,g3,c3,op_store);
     } else {
-      loop_limits_accumulate (id3,nd3,m3,g3,op_store);
+      loop_limits_accumulate (id3,nd3,m3,g3,c3,op_store);
     }
 
     invert_face();
@@ -415,10 +419,11 @@ int FieldFace::num_bytes_array(Field field) throw()
     precision_type precision = field.precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
-    int m3[3],g3[3];
+    int m3[3],g3[3],c3[3];
 
     field.field_size (index_field,&m3[0],&m3[1],&m3[2]);
     field.ghost_depth(index_field,&g3[0],&g3[1],&g3[2]);
+    field.centering(index_field,&c3[0],&c3[1],&c3[2]);
 
     int index_src = field_list_src_(field)[i_f];
     int index_dst = field_list_dst_(field)[i_f];
@@ -427,9 +432,9 @@ int FieldFace::num_bytes_array(Field field) throw()
 
     int i3[3], n3[3];
     if (!accumulate) {
-      loop_limits (i3,n3,m3,g3,op_type);
+      loop_limits (i3,n3,m3,g3,c3,op_type);
     } else {
-      loop_limits_accumulate (i3,n3,m3,g3,op_type);
+      loop_limits_accumulate (i3,n3,m3,g3,c3,op_type);
     }
 
     array_size += n3[0]*n3[1]*n3[2]*bytes_per_element;
@@ -667,9 +672,14 @@ template<class T> void FieldFace::copy_
 //----------------------------------------------------------------------
 
 void FieldFace::loop_limits_accumulate
-( int i3[3],int n3[3], const int m3[3], const int g3[3], int op_type)
+( int i3[3],int n3[3], const int m3[3], const int g3[3], const int c3[3],
+  int op_type)
 {
   // ASSUMES accumulate == true
+
+  ASSERT("FieldFace::loop_limits_accumulate",
+	 "Face-centered fields are not supported.",
+	 c3[0] == 0 && c3[1] == 0 && c3[2] == 0)
   
   // force including ghosts on axes orthogonal to face
   // (commented out since size mismatch errors in data packing/unpacking
@@ -678,7 +688,7 @@ void FieldFace::loop_limits_accumulate
   //  ghost_[2] = (n3[2]>1);
   
   // first compute loop limits assuming accumulate == false
-  loop_limits (i3,n3,m3,g3,op_type);
+  loop_limits (i3,n3,m3,g3,c3,op_type);
   
   int i23[2][3]={}, n23[2][3]={};
   for (int axis=0; axis<3; axis++) {
@@ -757,11 +767,25 @@ void FieldFace::loop_limits_accumulate
 //----------------------------------------------------------------------
 
 void FieldFace::loop_limits
-( int i3[3],int n3[3], const int m3[3], const int g3[3], int op_type)
+( int i3[3],int n3[3], const int m3[3], const int g3[3], const int c3[3],
+  int op_type)
 // Return Field array loop limits for the FieldFace in i3[] and n3[]
 // Assumes accumulate is false--use other loop_limits() if accumulate
 // is true
 {
+
+  // Checking face-centering
+  int min_center = std::min(std::min(c3[0],c3[1]), c3[2]);
+  int max_center = std::max(std::max(c3[0],c3[1]), c3[2]);
+  bool cell_centered = max_center==0 && min_center == 0;
+  bool exterior_face_centered = min_center>=0 && max_center==1;
+
+  ASSERT("FieldFace::face_to_array",
+	 "Face-centered fields only handled for matching refinement levels.",
+	  cell_centered || refresh_type_ == refresh_same);
+  ASSERT("FieldFace::face_to_array",
+	 "Face-centered fields only handled if they include exterior faces.",
+	  cell_centered || exterior_face_centered);
   
   for (int axis=0; axis<3; axis++) {
 
@@ -778,7 +802,7 @@ void FieldFace::loop_limits
 	n3[axis] = m3[axis];
       }
       if (face_[axis] == -1 && op_type == op_load) {
-	i3[axis] = g3[axis];
+	i3[axis] = g3[axis]+c3[axis];
 	n3[axis] = g3[axis];
       }
       if (face_[axis] == -1 && op_type == op_store) {
@@ -786,7 +810,7 @@ void FieldFace::loop_limits
 	n3[axis] = g3[axis];
       }      
       if (face_[axis] == +1 && op_type == op_load) {
-	i3[axis] = m3[axis]-2*g3[axis];
+	i3[axis] = m3[axis]-2*g3[axis]-c3[axis];
 	n3[axis] = g3[axis];
       }
       if (face_[axis] == +1 && op_type == op_store) {

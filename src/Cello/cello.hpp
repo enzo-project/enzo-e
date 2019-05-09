@@ -346,26 +346,43 @@ namespace cello {
   inline int index_static()
   { return CkMyPe() % CONFIG_NODE_SIZE; }
 
-  
+  /// Return a pointer to the Simulation object on this process
   Simulation *    simulation();
+  /// Return a proxy for the Block chare array of Blocks
   CProxy_Block    block_array();
+  /// Return a pointor to the Problem object defining the problem being solved
   Problem *       problem();
+  /// Return a pointer to the Hierarchy object defining the mesh hierarchy
   Hierarchy *     hierarchy();
+  /// Return a pointer to the Config object containing user parameters values
   const Config *  config();
+  /// Return a pointer to the FieldDescr object defining fields on Blocks
   FieldDescr *    field_descr();
+  /// Return a pointer to the ParticledDescr object defining particles on Blocks
+  ParticleDescr * particle_descr();
+  /// Return a pointer to the Monitor object for writing output to stdout
   Monitor *       monitor();
+  /// Return a pointer to the Units object
   Units *         units();
-  
+
+  /// Return the ScalarDescr object defining Block long double Scalar data values
   ScalarDescr *   scalar_descr_long_double();
+  /// Return the ScalarDescr object defining Block double Scalar data values
   ScalarDescr *   scalar_descr_double();
+  /// Return the ScalarDescr object defining Block int Scalar data values
   ScalarDescr *   scalar_descr_int();
+  /// Return the ScalarDescr object defining Block Sync counter Scalar data values
   ScalarDescr *   scalar_descr_sync();
+  /// Return the ScalarDescr object defining Block pointer Scalar data values
   ScalarDescr *   scalar_descr_void();
 
-  ParticleDescr * particle_descr();
+  /// Return the ith Output object
   Output *        output (int index);
+  /// Return the ith Solver
   Solver *        solver(int index);
+  /// Return the dimensional rank of the simulation
   int             rank ();
+  /// Return the number of children each Block may have
   int             num_children();
 }
 

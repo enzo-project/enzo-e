@@ -24,7 +24,7 @@ f90 = 'gfortran'
 flags_prec_single = ''
 flags_prec_double = '-fdefault-real-8 -fdefault-double-8'
 
-libpath_fortran = '.'
+libpath_fortran = '/usr/lib/x86_64-linux-gnu'
 libs_fortran    = ['gfortran']
 
 home = os.getenv('HOME')
@@ -54,9 +54,9 @@ if charm_path is None:
 		else:
 			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
 
-use_papi=0                
-papi_inc = '/usr/include'
-papi_lib = '/usr/lib'
+use_papi = 1
+papi_inc = os.getenv('PAPI_INC', '/usr/include')
+papi_lib = os.getenv('PAPI_LIB', '/usr/lib')
 
 hdf5_inc = os.getenv('HDF5_INC')
 if hdf5_inc is None:
@@ -76,9 +76,10 @@ if hdf5_lib is None:
 	else:
 		raise Exception('HDF5 lib file was not found.  Try setting the HDF5_LIB environment variable such that $HDF5_LIB/libhdf5.a exists.')
 
-png_path = os.getenv('LIBPNG_HOME')
-if png_path is None:
-	png_path     = '/lib/x86_64-linux-gnu'
+png_path = os.getenv('LIBPNG_HOME', '/lib/x86_64-linux-gnu')
+
+boost_inc = os.getenv('BOOST_INC', '/usr/include/boost')
+boost_lib = os.getenv('BOOST_LIB', '/usr/lib/x86_64-linux-gnu')
 
 grackle_path = os.getenv('GRACKLE_HOME')
 if grackle_path is None:

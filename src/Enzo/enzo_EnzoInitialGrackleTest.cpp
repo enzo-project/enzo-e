@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoInitialGrackleTest.cpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Tue Jan  4 19:30:35 PST 2011
+/// @author   Andrew Emerick (aemerick11@gmail.com)
+/// @date     Tue May 7 2019
 /// @brief    [\ref Enzo] Grackle chemistry/cooling library initial conditions
 
 #include "cello.hpp"

@@ -2,7 +2,7 @@
 
 #----------------------------------------------------------------------
 #
-# usage: org-mode-diff.sh < <"hg diff" output > diff.org
+# usage: org-mode-diff.sh < <"git diff" output > diff.org
 #
 #----------------------------------------------------------------------
 
@@ -11,14 +11,16 @@ BEGIN{
     p=1;
     print "* TODO [/] [C-u C-c # to update stats]"
 }
-/diff -r/ {
+/^diff --git/ { # git
    file=$NF; p=0;
+   sub("b/","",file);
    n=split(file,s,"/");
    shortfile = s[n];
 }
 /^\-\-\-/ {p=0}
+/^index /{p=0}
 /^\+\+\+/ {p=0}
-/@@/ {
+/^@@/ {
     line=$3;
     line=substr(line,2,index(line,",")-2);
     print "** TODO [[file:" file"::"line"]["shortfile ":" line "]]"};

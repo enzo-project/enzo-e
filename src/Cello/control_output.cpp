@@ -232,6 +232,10 @@ void Block::p_output_write (int index_output, int step)
   ParticleDescr * particle_descr = cello::particle_descr();
   Simulation    * simulation     = cello::simulation();
   Output        * output         = cello::output(index_output);
+  Config        * config         = (Config *) cello::config();
+
+  // update derived fields (if any)
+  this->compute_derived(config->output_field_list[index_output]);
 
   output->write_block(this);
 

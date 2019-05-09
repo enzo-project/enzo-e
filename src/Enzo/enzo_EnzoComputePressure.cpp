@@ -2,7 +2,8 @@
 
 /// @file     enzo_EnzoComputePressure.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2014-10-27 22:37:41
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    Implements the EnzoComputePressure class
 
 #include "cello.hpp"
@@ -83,9 +84,9 @@ void EnzoComputePressure::compute_(Block * block,
 
   Field field = enzo_block->data()->field();
 
-#ifdef CONFIG_USE_GRACKLE
 
   if (enzo::config()->method_grackle_use_grackle){
+#ifdef CONFIG_USE_GRACKLE
     code_units grackle_units_;
     grackle_field_data grackle_fields_;
 
@@ -116,9 +117,14 @@ void EnzoComputePressure::compute_(Block * block,
     if (delete_grackle_fields){
       EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
     }
+#else
+    ERROR("EnzoComputePressure::compute_()",
+          "Attempting to compute pressure with method Grackle " 
+          "but Enzo-E has not been compiled with Grackle (set use_grackle = 1) \n");
+#endif
 
   } else {
-#else
+
     const int rank = cello::rank();
 
     enzo_float * d = (enzo_float*) field.values("density", i_hist_);
@@ -147,11 +153,7 @@ void EnzoComputePressure::compute_(Block * block,
       if (rank >= 3) e -= 0.5*v3[2][i]*v3[2][i];
       p[i] = gm1 * d[i] * e;
     }
-#endif
-
-#ifdef CONFIG_USE_GRACKLE
-  } // end method_grackle_use_grackle check
-#endif
+  }
 
   // Place any additional pressure computation here:
 	//    Note: if adding more here, may need to also change

@@ -2,7 +2,8 @@
 
 /// @file     enzo_EnzoComputeTemperature.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2014-10-27 22:37:41
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    Implements the EnzoComputeTemperature class
 
 #include "cello.hpp"
@@ -90,10 +91,9 @@ void EnzoComputeTemperature::compute_(Block * block,
 
   const int in = cello::index_static();
 
-#ifdef CONFIG_USE_GRACKLE
-
   if (enzo::config()->method_grackle_use_grackle){
 
+#ifdef CONFIG_USE_GRACKLE
     code_units grackle_units_;
     grackle_field_data grackle_fields_;
 
@@ -111,7 +111,6 @@ void EnzoComputeTemperature::compute_(Block * block,
       delete_grackle_fields = true;
     }
 
-
     // Note: compute pressure is handled internally in Grackle.
     //       Do not need to recompute this here
 
@@ -124,9 +123,13 @@ void EnzoComputeTemperature::compute_(Block * block,
     if (delete_grackle_fields){
       EnzoMethodGrackle::delete_grackle_fields(grackle_fields);
     }
+#else
+    ERROR("EnzoComputeTemperature::compute_()",
+          "Attempting to compute temperature with method Grackle "
+          "but Enzo-E has not been compiled with Grackle (set use_grackle = 1) \n");
+#endif
 
   } else {
-#else
 
     EnzoUnits * enzo_units = enzo::units();
 
@@ -149,11 +152,7 @@ void EnzoComputeTemperature::compute_(Block * block,
       enzo_float temperature = p[i] * mol_weight_ / density;
       t[i] = std::max(temperature, (enzo_float)temperature_floor_) * enzo_units->temperature();
     }
-#endif // CONFIG_USE_GRACKLE
-
-#ifdef CONFIG_USE_GRACKLE
-  } // end if method_grackle_use_grackle
-#endif
+  }
 
   return;
 }

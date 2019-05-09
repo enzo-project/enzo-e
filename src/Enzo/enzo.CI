@@ -35,14 +35,10 @@ module enzo {
   readonly int EnzoBlock::ghost_depth[CONFIG_NODE_SIZE_3];
   readonly int EnzoBlock::NumberOfBaryonFields[CONFIG_NODE_SIZE];      // active baryon fields
 
-  //==================================================
-  // WARNING: Enable the following two lines iff use_grackle = 1
-  // in top-level SConstruct file
-  // ==================================================
-
 #ifdef CONFIG_USE_GRACKLE
   PUPable EnzoInitialGrackleTest;
   PUPable EnzoMethodGrackle;
+  PUPable EnzoComputeCoolingTime;
 #endif
 
   PUPable EnzoBoundary;
@@ -138,7 +134,7 @@ module enzo {
 
     // EnzoMethodGravity synchronization entry methods
     entry void r_method_gravity_continue();
-    entry void r_method_gravity_end(CkReductionMsg * msg);
+    entry void r_method_gravity_end();
 
     // EnzoSolverCg synchronization entry methods
 

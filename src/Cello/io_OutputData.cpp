@@ -121,7 +121,7 @@ void OutputData::write_hierarchy ( const Hierarchy  * hierarchy ) throw()
 
 //----------------------------------------------------------------------
 
-void OutputData::write_block (  const Block * block ) throw()
+void OutputData::write_block ( const  Block * block ) throw()
 {
 #ifdef TRACE_OUTPUT
     CkPrintf ("%d TRACE_OUTPUT OutputData::write_block()\n",CkMyPe());

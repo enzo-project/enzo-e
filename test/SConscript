@@ -12,7 +12,7 @@ SConscript('Balance/SConscript')
 
 env['COPY'] = ''
 env['CPIN'] = 'touch parameters.out; mv parameters.out ${TARGET}.in'
-env['RMIN'] = 'rm -f parameters.out'
+env['RMIN'] = 'rm -f parameters.out parameters.libconfig'
 # env['ASAN_SYMBOLIZER_PATH'] = '/usr/bin/llvm-symbolizer-3.4'
 # env['ASAN_OPTIONS'] = 'symbolize=1'
 
@@ -144,7 +144,7 @@ env.RunSerial('test_Monitor.unit',      bin_path + '/test_Monitor')
 #----------------------------------------------------------------------
 Clean(env_mv_test.RunSerial
       ('test_Parameters.unit',  bin_path + '/test_Parameters'),
-      ['#/test.in','#/test1.out','#/test2.out'])
+      ['#/test.in','#/test/test.in','#/test/test1.out','#/test/test2.out'])
 #----------------------------------------------------------------------
 # PERFORMANCE COMPONENT   
 #----------------------------------------------------------------------
@@ -736,5 +736,5 @@ SideEffect('log.txt',
      [ 'method_ppm-1.unit',
        'method_ppm-8.unit'])
 
-
-
+env.Clean('.',Glob('test_*.in'))
+env.Clean('.',Glob('*/test_*.in'))

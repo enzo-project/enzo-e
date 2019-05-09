@@ -2,7 +2,8 @@
 
 /// @file     enzo_EnzoComputePressure.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2014-10-27 22:37:41
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputePressure functions
 
 #ifndef ENZO_ENZO_COMPUTE_PRESSURE_HPP
@@ -32,6 +33,11 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
+
+  // name of derived field that this function calculates
+  std::string name () throw() {
+    return "pressure";
+  }
 
   /// Perform the computation on the block
   void compute( Block * block) throw();

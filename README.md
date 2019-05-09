@@ -1,32 +1,37 @@
-# README #
-![counter](http://cello-project.org/counter-bitbucket-cello-project.png)
+# Enzo-E/Cello
+[![CircleCI](https://circleci.com/gh/enzo-project/enzo-e.svg?style=svg)](https://circleci.com/gh/enzo-project/enzo-e)
  
-### What is this repository for? ###
+## What is this repository for?
 
-   The purpose of the Enzo-P/Cello project is to develop an
-   astrophysics and cosmology software application "Enzo-P", which is
+   The purpose of the Enzo-E/Cello project is to develop an
+   astrophysics and cosmology software application "Enzo-E", which is
    built on a highly scalable parallel adaptive mesh refinement (AMR)
    software framework "Cello," which is being developed concurrently.
-   The Enzo-P application will be capable of running extreme scale
+   The Enzo-E application will be capable of running extreme scale
    numerical simulations to address current scientific questions in
    astrophysics and cosmology, including star formation, molecular
    cloud turbulence, interstellar medium, galaxy formation,
    interglactic medium, formation of the first stars and galaxies,
    galaxy clusters, and cosmic reionization.  The Cello AMR framework
-   can be used independently of Enzo-P, thus enabling researchers in
+   can be used independently of Enzo-E, thus enabling researchers in
    other scientific fields to develop AMR applications capable of
    running on "Petascale-and-beyond" HPC platforms.
 
-   Enzo-P/Cello is currently in V2.0beta.  It still has several known 
+   Enzo-E/Cello is currently in V2.0beta.  It still has several known 
    issues that need to be addressed before it can be used for scientific
    research, though it is still usable as a hydrodynamics solver, 
    especially in an educational setting.
 
-### How do I start using Enzo-P/Cello? ###
+## How do I start using Enzo-E/Cello?
 
-   To learn how to install and use Enzo-P, see the [Using Enzo-P](http://cello-project.org/using-enzo-p.pdf) tutorial module.  To learn to develop using the Cello AMR framework, see the [Developing with Cello](http://cello-project.org/developing-with-cello.pdf) tutorial module.
+   The [Enzo-E/Cello Documentation](http://client65-90.sdsc.edu/cello-doc/)
+   and [tutorial](http://client65-90.sdsc.edu/cello-doc/_downloads/4e523174654f2009e024ac3aa718a5d1/enzo-p-cello.pdf)
+   contain instructions for installing, using, and developing Enzo-E/Cello.
 
-### Who do I talk to? ###
+## Who do I talk to?
 
-   Please contact James at jobordner@ucsd.edu if you have any questions or
-   wish to contribute!
+   The Enzo-E project has mailing lists for users and developers for questions
+   and discussions. If you'd like to get involved, please join!
+
+   * [Users List](https://groups.google.com/forum/#!forum/enzo-e-users)
+   * [Developers List](https://groups.google.com/forum/#!forum/enzo-e-dev)

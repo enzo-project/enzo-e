@@ -74,7 +74,9 @@ enum enzo_sync_id {
   enzo_sync_id_method_background_acceleration,
   enzo_sync_id_method_cosmology,
   enzo_sync_id_method_feedback,
+#ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
+#endif
   enzo_sync_id_method_gravity,
   enzo_sync_id_method_gravity_continue,
   enzo_sync_id_method_heat,
@@ -100,7 +102,9 @@ enum enzo_sync_id {
   enzo_sync_id_solver_mg0_coarse,
   enzo_sync_id_solver_mg0_last,
   enzo_sync_id_solver_mg0_post,
-  enzo_sync_id_solver_mg0_pre
+  enzo_sync_id_solver_mg0_pre,
+  enzo_sync_id_solver_jacobi_1,
+  enzo_sync_id_solver_jacobi_2
 };
   
 //----------------------------------------------------------------------
@@ -211,7 +215,11 @@ extern "C" {
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialFeedbackTest.hpp"
-#include "enzo_EnzoInitialGrackleTest.hpp"
+
+#ifdef CONFIG_USE_GRACKLE
+  #include "enzo_EnzoInitialGrackleTest.hpp"
+#endif
+
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"
@@ -253,6 +261,9 @@ extern "C" {
 #include "enzo_EnzoComputeCicInterp.hpp"
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
+#ifdef CONFIG_USE_GRACKLE
+  #include "enzo_EnzoComputeCoolingTime.hpp"
+#endif
 
 #include "enzo_EnzoSolverBiCgStab.hpp"
 #include "enzo_EnzoSolverCg.hpp"

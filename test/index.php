@@ -26,13 +26,13 @@ printf ("%s",$dir);
     </tr>
     <tr>
     <th class=cello> <b>branch</b> </th>
-    <td class=cello align="left"> <?php system ("hg branch") ?></td> 
+    <td class=cello align="left"> <?php system ("git branch | awk '/*/{print $2}'") ?></td> 
     <th class=charm> <b>build</b> </th>
     <td class=charm><?php system ("cat CHARM_BUILD") ?> </td>
     </tr>
     <tr>
-    <th class=cello> <b>revision</b> </th>
-    <td class=cello> <?php system ("hg id -n") ?> </td>
+    <th class=cello> <b>commit</b> </th>
+    <td class=cello> <?php system ("git rev-parse --short HEAD") ?> </td>
     <th class=charm> <b>version</b> </th>
     <td class=charm> <?php system ("cat CHARM_VERSION") ?> </td>
     </tr>

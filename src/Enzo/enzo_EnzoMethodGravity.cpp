@@ -373,18 +373,16 @@ void EnzoBlock::r_method_gravity_continue()
   refresh.set_active(is_leaf());
   refresh.add_field(data()->field().field_id("potential"));
 
-  refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
+  refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(),&refresh);
 
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
+void EnzoBlock::r_method_gravity_end()
 {
   TRACE_METHOD("r_method_gravity_end()",this);
   
-  delete msg;
-
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->compute_accelerations(this);
 }

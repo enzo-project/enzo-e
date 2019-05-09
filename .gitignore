@@ -16,4 +16,6 @@ bin/enzo-p
 charmrun
 config.log
 errors.org
-
+warnings.org
+test/CHARM_BUILD
+test/CHARM_VERSION
