@@ -20,13 +20,11 @@ Data::Data(int nx, int ny, int nz,
 {
   // Initialize field_data_[]
   field_data_.resize(num_field_data);
-  FieldDescr * field_descr = new FieldDescr;
   for (size_t i=0; i<field_data_.size(); i++) {
-    field_data_[i] = new FieldData (field_descr,nx,ny,nz);
+    field_data_[i] = new FieldData (cello::field_descr(),nx,ny,nz);
   }
-  ParticleDescr * particle_descr = new ParticleDescr;
   particle_data_ = new ParticleData;
-  particle_data_->allocate(particle_descr);
+  particle_data_->allocate(cello::particle_descr());
   lower_[0] = xm;
   lower_[1] = ym;
   lower_[2] = zm;

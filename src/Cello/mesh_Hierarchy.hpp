@@ -147,7 +147,7 @@ public: // interface
     ASSERT1("Hierarchy::increment_block_count",
 	    "Block level %d exceeds block count array",
 	    level, 0 <= index && index < n);
-    num_blocks_level_[level] += count;
+    num_blocks_level_[level-min_level_] += count;
   }
 
   /// Add Block to the list of blocks (block_vec_ and block_map_)
