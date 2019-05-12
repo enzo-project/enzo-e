@@ -238,7 +238,7 @@ void EnzoInitialIsolatedGalaxy::enforce_block
   //
   // Make sure we can operate on this block
   //
-  if (!block->is_leaf()) return;  // remove once parent-to-child particle ICs working
+//  if (!block->is_leaf()) return;  // remove once parent-to-child particle ICs working
 
   Timer timer;
   timer.start();
@@ -250,12 +250,12 @@ void EnzoInitialIsolatedGalaxy::enforce_block
    EnzoBlock * enzo_block = enzo::block(block);
 
   // uncomment once parent-to-child particle ICs working
-  //  if (enzo_block->level() == 0){
-  //    Particle particle = block->data()->particle();
-  //    InitializeParticles(block, &particle);
-  //  }
+    if (enzo_block->level() == 0){
+      Particle particle = block->data()->particle();
+      InitializeParticles(block, &particle);
+    }
   //
-  // if (!block->is_leaf()) return;
+  if (!block->is_leaf()) return;
 
 
 #ifdef CONFIG_USE_GRACKLE
@@ -304,8 +304,8 @@ void EnzoInitialIsolatedGalaxy::enforce_block
 
   // now initialize particles
   // remove once parent-to-child particle ICs working
-  Particle particle = block->data()->particle();
-  InitializeParticles(block, &particle);
+//  Particle particle = block->data()->particle();
+//  InitializeParticles(block, &particle);
 
 #ifdef CONFIG_USE_GRACKLE
   EnzoMethodGrackle::delete_grackle_fields(&grackle_fields_);
