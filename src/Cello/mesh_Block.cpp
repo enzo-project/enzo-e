@@ -194,6 +194,11 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
   if (is_first_cycle) {
     apply_initial_();
+
+    if (this->level() > 0){
+      msg->update(data());
+    }
+
   } else {
     msg->update(data());
   }
