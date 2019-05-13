@@ -43,9 +43,33 @@ boost_path = os.environ["BOOST_ROOT"]
 boost_inc = boost_path + '/include'
 boost_lib = boost_path + '/lib'
 
-serial_run   = 'aprun -n 1 '
-parallel_run = 'aprun -n 4 -N 4 -d 2 '
-parallel_arg = ''
-
+node = 1
+node = os.environ["CHARM_NODE"]
 smp = os.environ["CHARM_SMP"]
+
+serial_run   = 'aprun -n 1 '
+
+if (smp == 0):
+    parallel_arg = ''
+    if (node == '1'):
+        parallel_run = 'aprun -n 4 -N 4 -d 8 '
+    elif (node == '2'):
+        parallel_run = 'aprun -n 4 -N 2 -d 4 '
+    elif (node == '4'):
+        parallel_run = 'aprun -n 4 -N 1 -d 2 '
+    else:
+        parallel_run = 'error 1'
+else:
+    if (node == '1'):
+        parallel_run = 'aprun -n 1 -N 1 -d 8 '
+        parallel_arg = '++ppn 4 +setcpuaffinity '
+    elif (node == '2'):
+        parallel_run = 'aprun -n 2 -N 2 -d 4 '
+        parallel_arg = '++ppn 2 +setcpuaffinity '
+    elif (node == '4'):
+        parallel_run = 'aprun -n 4 -N 4 -d 2 '
+        parallel_arg = '++ppn 1 +setcpuaffinity '
+    else:
+        parallel_run = 'error 2'
+
 

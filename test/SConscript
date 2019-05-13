@@ -1,5 +1,6 @@
 Import('env')
 Import('parallel_run')
+Import('parallel_arg')
 Import('serial_run')
 Import('ip_charm')
 
@@ -23,7 +24,7 @@ date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 hdf5_to_png  = Builder(action = 'test/cello-h5topng.sh $ARGS; mv *.png test');
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $CPIN; $COPY")
-run_parallel = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_parallel = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + parallel_run + " $SOURCE " + parallel_arg + " $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 png_to_gif   = Builder(action = "convert -delay 5 -loop 0 ${ARGS} $TARGET ")
 
