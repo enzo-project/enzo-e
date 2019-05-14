@@ -131,18 +131,11 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     EnzoBlock * enzo_block = enzo::block(block);
     Field field = enzo_block->data()->field();
 
+    // Check that the mesh size is appropriate
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
     // Make assertions about the size of the mesh
 	   
-    int ndim;
-    if (enzo_block->GridDimension[2] == 1){
-      ndim = 2;
-    } else {
-      ndim = 3;
-    }
-    
-
     // declaring Grouping that track temporary fields used for scratch space
     // Groupings of conserved fields and primitive fields are tracked as members
     // conserved_group_ and primitive_group_
@@ -230,12 +223,10 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       compute_flux_(block, 1, *cur_cons_group, *cur_bfieldi_group, priml_group,
 		    primr_group, yflux_group, consl_group, consr_group,
 		    weight_group, *reconstructor);
-      if (ndim == 3){
-	compute_flux_(block, 2, *cur_cons_group, *cur_bfieldi_group,
-		      priml_group, primr_group, zflux_group, consl_group,
-		      consr_group, weight_group, *reconstructor);
-      }
-
+      compute_flux_(block, 2, *cur_cons_group, *cur_bfieldi_group, priml_group,
+		    primr_group, zflux_group, consl_group, consr_group,
+		    weight_group, *reconstructor);
+      
       // Compute_efields
       //   - The first time, this implictly use the cell-centered primitives
       //     computed before the half timestep
@@ -251,7 +242,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // Add source terms - doesn't matter if done before/after adding flux
       // Update longitudinal B-field (add source terms of constrained transport)
       
-      for (int dim = 0; dim<ndim; dim++){
+      for (int dim = 0; dim<3; dim++){
 	ct.update_bfield(block, dim, efield_group, *bfieldi_group_,
 			 *out_bfieldi_group, cur_dt);
       }
@@ -260,7 +251,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 
       // Finally, update cell-centered B-field 
-      for (int dim = 0; dim<ndim; dim++){
+      for (int dim = 0; dim<3; dim++){
 	ct.compute_center_bfield(block, dim, *out_cons_group,
 				 *out_bfieldi_group);
       }
@@ -373,14 +364,8 @@ void EnzoMethodMHDVlct::compute_efields_(Block *block, Grouping &xflux_group,
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
-  int start_dim = 0;
-  if (enzo_block->GridDimension[2] == 1) {
-    // handling a 2D setup
-    start_dim = 2;
-  }
-
   // Maybe the following should be handled internally by ct?
-  for (int i = start_dim; i < 3; i++){
+  for (int i = 0; i < 3; i++){
     ct.compute_center_efield (block, i, center_efield_name, *primitive_group_);
     Grouping *jflux_group;
     Grouping *kflux_group;
@@ -418,18 +403,6 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block, Grouping &xflux_group,
   int my = enzo_block->GridDimension[1];
   int mz = enzo_block->GridDimension[2];
 
-  const bool three_dim = (mz!=1);
-  
-  // Come up with iteration limits that are generalized for 2D grids
-  int zstart, zstop;
-  if (three_dim){
-    zstart = 1;
-    zstop = mz-1;
-  } else {
-    zstart = 0;
-    zstop = mz;
-  }
-
   // widths of cells
   enzo_float dtdx = dt/enzo_block->CellWidth[0];
   enzo_float dtdy = dt/enzo_block->CellWidth[1];
@@ -462,30 +435,22 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					     field_ind);
       xflux = array_factory.from_grouping(xflux_group, group_name, field_ind);
       yflux = array_factory.from_grouping(yflux_group, group_name, field_ind);
-      if (three_dim){
-	// only load if the grid is 3D
-	zflux = array_factory.from_grouping(zflux_group, group_name, field_ind);
-      }
+      zflux = array_factory.from_grouping(zflux_group, group_name, field_ind);
 
-      for (int iz=zstart; iz<zstop; iz++) {
+      for (int iz=1; iz<mz-1; iz++) {
 	for (int iy=1; iy<my-1; iy++) {
 	  for (int ix=1; ix<mx-1; ix++) {
 
 	    enzo_float new_val;
 
-	    if (three_dim){
-	      new_val = (cur_cons(iz,iy,ix)
-			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
-			 - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix))
-			 - dtdz * (zflux(iz,iy,ix) - zflux(iz-1,iy,ix)));
-	    } else {
-	      new_val = (cur_cons(iz,iy,ix)
-			 - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
-			 - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix)));
-	    }
-	    
+	    new_val = (cur_cons(iz,iy,ix)
+		       - dtdx * (xflux(iz,iy,ix) - xflux(iz,iy,ix-1))
+		       - dtdy * (yflux(iz,iy,ix) - yflux(iz,iy-1,ix))
+		       - dtdz * (zflux(iz,iy,ix) - zflux(iz-1,iy,ix)));
+
+
 	    if (use_floor){
-	      new_val = std::max(new_val, floor_val);
+	      new_val = EnzoEquationOfState::apply_floor(new_val, floor_val);
 	    }
 
 	    out_cons(iz,iy,ix) = new_val;
@@ -912,13 +877,6 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   // Like ppm and ppml, access active region info from enzo_block attributes
   EnzoBlock * enzo_block = enzo::block(block);
 
-  int ndim;
-  if (enzo_block->GridDimension[2] == 1){
-    ndim = 2;
-  } else {
-    ndim = 3;
-  }
-
   // The start index of the active region
   int ix_start = enzo_block->GridStartIndex[0];
   int iy_start = enzo_block->GridStartIndex[1];
@@ -955,18 +913,13 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
 	enzo_float inv_dens= 1./density(iz,iy,ix);
 	enzo_float cfast = std::sqrt(gamma * pressure(iz,iy,ix) * inv_dens + 
 				     bmag_sq * inv_dens);
- 
+
 	dtBaryons = std::min(dtBaryons,
-			     dx/(std::fabs(velocity_x(iz,iy,ix))
-					   + cfast));
+			     dx/(std::fabs(velocity_x(iz,iy,ix)) + cfast));
 	dtBaryons = std::min(dtBaryons,
-			     dy/(std::fabs(velocity_y(iz,iy,ix))
-					   + cfast));
-	if (ndim == 3){
-	  dtBaryons = std::min(dtBaryons,
-			       dz/(std::fabs(velocity_z(iz,iy,ix))
-					     + cfast));
-	}
+			     dy/(std::fabs(velocity_y(iz,iy,ix)) + cfast));
+	dtBaryons = std::min(dtBaryons,
+			     dz/(std::fabs(velocity_z(iz,iy,ix)) + cfast));
       }
     }
   }

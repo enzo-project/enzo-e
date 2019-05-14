@@ -276,9 +276,6 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   // Integration limits
   //
   // If computing the edge E-field along z-direction:
-  //    - If grid is 2D (the grid only has 1 cell along z-component),
-  //      need to iterate from 0 to 1 for z. (Will never compute E-field
-  //      along any other dimension for a 2D grid).
   //    - If grid is 3D (the grid has more than 1 cell along the z-component),
   //      there is no need to compute the e-field at iz=0 or iz= mz-1 since
   //      we have E-fields on the exterior of the mesh. (This logic applies to
@@ -293,19 +290,16 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
   //    idim maps to idim+1/2
   //
   // To summarize:
-  //    2D grid with i aligned along z:  istart = 0     istop = imax - 1
-  //    3D grid:                         istart = 1     istop = imax - 1
-  //    In all cases:                    jstart = 0     jstop = jmax - 1
-  //                                     kstart = 0     kstop = kmax - 1
+  //    istart = 1     istop = imax - 1
+  //    jstart = 0     jstop = jmax - 1
+  //    kstart = 0     kstop = kmax - 1
 
   int xstart = 1 - j_x - k_x; // if dim==0: 1, otherwise: 0
-  int ystart = 1 - j_y - k_y;
-  int zstart = (Ec.shape(0) == 1) ? 0 : 1 - j_z - k_z;
-
-  int zstop = (Ec.shape(0) == 1) ? 1 : Ec.shape(0) - 1;
+  int ystart = 1 - j_y - k_y; // if dim==1: 1, otherwise: 0
+  int zstart = 1 - j_z - k_z; // if dim==2: 1, otherwise: 0
 
   compute_edge_(xstart, ystart, zstart,
-		Ec.shape(2) - 1, Ec.shape(1) - 1, zstop,
+		Ec.shape(2) - 1, Ec.shape(1) - 1, Ec.shape(0) - 1,
 		Eedge, Wj, Wj_kp1, Wk, Wk_jp1, Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
 		Ej, Ej_kp1, Ek, Ek_jp1);
 };
@@ -319,19 +313,12 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 //     dt/dk*(E_j(k+1/2,    j,i+1/2) - E_j(k-1/2,    j,i+1/2)
 // [The positioning of dt/dj with respect to E_k is correct]
 //
-// Rewrite equation (to allow for handling of 2d and 3d grids):
 // Bnew_i(k, j, i-1/2) =
 //   Bold_i(k, j, i-1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
 //
-//   if (3D mesh || (2D mesh && dim==0)):
-//     E_k_term(k,j,i+1/2) = dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
-//   else:
-//     E_k_term(k,j,i+1/2)  = 0
-//
-//   if (3D mesh || (2D mesh && dim==1)):
-//     E_j_term(k,j,i+1/2) = dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
-//   else:
-//     E_j_term= 0
+// Assuming 3D:
+//   E_k_term(k,j,i+1/2) = dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
+//   E_j_term(k,j,i+1/2) = dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
 //
 void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 					     Grouping &efield_group,
@@ -348,7 +335,6 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
   // determine if grid is 2D or 3D AND compute the ratios of dt to the 
   // widths of cells along j and k directions
   EnzoBlock *enzo_block = enzo::block(block);
-  bool three_dim = enzo_block->GridDimension[2]>1;
   enzo_float dtdj = dt/enzo_block->CellWidth[coord.j_axis()];
   enzo_float dtdk = dt/enzo_block->CellWidth[coord.k_axis()];
 
@@ -360,46 +346,20 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 
   // Load edge centered efields
   EFlt3DArray E_j, E_k;
-  // For 2D grid: only need to load E_k when dim == 1 (in that case E_j = E_z)
-  //              only need to load E_k when dim == 0 (in that case E_k = E_z)
-  const bool use_E_j = (three_dim || dim == 1);
-  const bool use_E_k = (three_dim || dim == 0);
-  if (use_E_j){
-    E_j = array_factory.from_grouping(efield_group, "efield", coord.j_axis());
-  }
-  if (use_E_k){
-    E_k = array_factory.from_grouping(efield_group, "efield", coord.k_axis());
-  }
-
-  int zstart = 0;
-  int zstop = 1;
-  if (three_dim){
-    zstart = j_z + k_z;
-    zstop = out_bfield.shape(0)-j_z-k_z;
-  }
+  E_j = array_factory.from_grouping(efield_group, "efield", coord.j_axis());
+  E_k = array_factory.from_grouping(efield_group, "efield", coord.k_axis());
 
   // We could simplify this iteration by using subarrays - However, it would be
   // more complicated
-  for (int iz=zstart; iz<zstop; iz++) {
+  for (int iz=j_z+k_z; iz<out_bfield.shape(0)-j_z-k_z; iz++) {
     for (int iy=j_y+k_y; iy<out_bfield.shape(1)-j_y-k_y; iy++) {
       for (int ix=j_x+k_x; ix<out_bfield.shape(2)-j_x-k_x; ix++) {
 
-	enzo_float E_k_term, E_j_term;
-	if (use_E_k){
-	  // E_k_term(k,j,i+1/2) =
-	  //   dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
-	  E_k_term = dtdj*(E_k(iz,iy,ix) - E_k(iz-j_z,iy-j_y,ix-j_x));
-	} else {
-	  E_k_term = 0.;
-	}
+	// E_k_term(k,j,i+1/2) = dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
+	enzo_float E_k_term = dtdj*(E_k(iz,iy,ix) - E_k(iz-j_z,iy-j_y,ix-j_x));
 
-	if (use_E_j){
-	  // E_j_term(k,j,i+1/2) =
-	  //   dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
-	  E_j_term = dtdk*(E_j(iz,iy,ix) - E_j(iz-k_z,iy-k_y,ix-k_x)); 
-	} else {
-	  E_j_term = 0.;
-	}
+	// E_j_term(k,j,i+1/2) = dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
+	enzo_float E_j_term = dtdk*(E_j(iz,iy,ix) - E_j(iz-k_z,iy-k_y,ix-k_x)); 
 
 	// Bnew_i(k, j, i-1/2) =
 	//   Bold_i(k, j, i-1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
