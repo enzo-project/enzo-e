@@ -4,8 +4,8 @@
 # only needs to extend from -0.5 to 0.5 with 256 blocks with outflow boundary,
 # but for now we will be doing a vague test with periodic boundaries
    Domain {
-      lower = [-1.5, -0.5, -0.5];
-      upper = [1.5, 0.5, 0.5];
+      lower = [-1.0, 0.0, 0.0];
+      upper = [2.0, 1.0, 1.0];
    }
 
    Mesh {

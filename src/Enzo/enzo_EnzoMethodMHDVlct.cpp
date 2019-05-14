@@ -45,6 +45,10 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   setup_groups_(cond);
 
   // Initialize the component objects
+
+  // check the validity of quantity floors
+  EnzoEquationOfState::check_floor(density_floor, true);
+  EnzoEquationOfState::check_floor(pressure_floor, false);
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor(half_recon_name,
 							      cond);
@@ -67,7 +71,7 @@ void EnzoMethodMHDVlct::setup_groups_(const EnzoFieldConditions cond)
   // and magnetic field). For example, primitive_group_ uses the permanent
   // field, "density", while conserved_group_ uses the temporary field
   // "cons_density"
-  conserved_group_ = registry.build_cons_grouping(cond, "", "cons");
+  conserved_group_ = registry.build_cons_grouping(cond, "", "cons_");
 
   bfieldi_group_ = new Grouping;
   bfieldi_group_->add("bfieldi_x", "bfield");

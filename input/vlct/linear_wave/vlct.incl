@@ -30,7 +30,7 @@
         full_dt_reconstruct_method = "plm";
 
         # density floor (default = 0.0)
-        density_floor = 0.0;
+        density_floor = 1.e-200;
 
         # pressure floor (default = 0.0)
         pressure_floor = 0.0;
