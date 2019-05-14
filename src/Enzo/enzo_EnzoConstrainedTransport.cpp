@@ -1,9 +1,17 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     enzo_EnzoConstrainedTransport.cpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Mon May 6 2019
+/// @brief    [\ref Enzo] Implementation of EnzoConstrainedTransport
+
 #include "cello.hpp"
 #include "enzo.hpp"
 
-void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
-						      std::string center_efield_name,
-						      Grouping &prim_group)
+//----------------------------------------------------------------------
+
+void EnzoConstrainedTransport::compute_center_efield
+(Block *block, int dim, std::string center_efield_name, Grouping &prim_group)
 {
   // Load the E-field
   EnzoFieldArrayFactory array_factory(block);
@@ -29,6 +37,8 @@ void EnzoConstrainedTransport::compute_center_efield (Block *block, int dim,
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 // The following is a helper function that actually computes the component of
 // the edge-centered E-field along dimension i.
@@ -183,6 +193,7 @@ void compute_edge_(int xstart, int ystart, int zstart,
   }
 }
 
+//----------------------------------------------------------------------
 
 void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
   for (int iz = 0; iz < array.shape(0); iz++){
@@ -193,6 +204,8 @@ void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 // Computes the edge-centered E-fields pointing in the ith direction
 // It uses the component of the cell-centered E-field pointing in that
@@ -297,6 +310,8 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 		Ej, Ej_kp1, Ek, Ek_jp1);
 };
 
+//----------------------------------------------------------------------
+
 // Compute the face-centered B-field component along the ith dimension
 //
 // Bnew_i(k, j, i+1/2) = Bold_i(k, j, i+1/2) -
@@ -393,6 +408,8 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 // This method also intentionally includes calculation of bfields in the
 // outermost cells so that it can be used to initially setup the bfield.
