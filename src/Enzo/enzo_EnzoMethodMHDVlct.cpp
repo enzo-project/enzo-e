@@ -134,8 +134,19 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // Check that the mesh size is appropriate
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
-    // Make assertions about the size of the mesh
-	   
+    int gx,gy,gz;
+    field.ghost_depth(field.field_id("density"),&gx,&gy,&gz);
+    ASSERT("EnzoMethodMHDVlct::compute",
+	   "Active zones on each block must be >= ghost depth.",
+	   nx >= gx && ny >= gy && nz >= gz);
+
+    // Check that the (cell-centered) ghost depth is large enough
+    // Face-centered ghost could in principle be 1 smaller
+    int min_ghost_depth = (half_dt_recon_->total_staling_rate() +
+			   full_dt_recon_->total_staling_rate());
+    ASSERT1("EnzoMethodMHDVlct::compute", "ghost depth must be at least %d.",
+	    min_ghost_depth, std::min(nx, std::min(ny, nz)) >= min_ghost_depth);
+    
     // declaring Grouping that track temporary fields used for scratch space
     // Groupings of conserved fields and primitive fields are tracked as members
     // conserved_group_ and primitive_group_
@@ -176,15 +187,15 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
 
-    EnzoFieldArrayFactory array_factory(block);
+    // not sure that the following does anything
+    //EnzoFieldArrayFactory array_factory(block);
 
-    // the following line is copied from EnzoMethodPpm & EnzoMethodHydro
     double dt = block->dt();
 
     eos_->conservative_from_primitive (block, *primitive_group_,
 				       *conserved_group_);
     
-    // Modify the following to work with groupings!
+    //test
     // repeat the following twice (for half time-step and full time-step)
     for (int i=0;i<2;i++){
       double cur_dt;
@@ -193,6 +204,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       Grouping* cur_bfieldi_group;
       Grouping* out_bfieldi_group;
       EnzoReconstructor *reconstructor;
+
       if (i == 0){
 	cur_dt = dt/2.;
 	out_cons_group = &temp_conserved_group;
@@ -208,13 +220,6 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 	cur_bfieldi_group = &temp_bfieldi_group;
 	reconstructor = full_dt_recon_;
       }
-
-      // Compute the primitive Quantites with Equation of State
-      if (i == 1){
-	eos_->primitive_from_conservative (block, *cur_cons_group,
-					   *primitive_group_);
-      }
-      
       
       // Compute flux along each dimension
       compute_flux_(block, 0, *cur_cons_group, *cur_bfieldi_group, priml_group,
@@ -235,11 +240,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
 		       center_efield_name, efield_group, weight_group, ct);
 
-      // Update quantities - add flux divergence
-      update_quantities_(block, xflux_group, yflux_group, zflux_group,
-			 *out_cons_group, cur_dt);
-
-      // Add source terms - doesn't matter if done before/after adding flux
+      // Add source terms - this can happen after adding the flux divergence,
+      // but then the code placing a floor on the total energy must be moved.
       // Update longitudinal B-field (add source terms of constrained transport)
       
       for (int dim = 0; dim<3; dim++){
@@ -255,10 +257,15 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 	ct.compute_center_bfield(block, dim, *out_cons_group,
 				 *out_bfieldi_group);
       }
-    }
 
-    eos_->primitive_from_conservative (block, *conserved_group_,
-				       *primitive_group_);
+      // Update quantities - add flux divergence
+      update_quantities_(block, xflux_group, yflux_group, zflux_group,
+			 *out_cons_group, cur_dt);
+
+      // Compute the primitive Quantites with Equation of State
+      eos_->primitive_from_conservative (block, *out_cons_group,
+					 *primitive_group_);
+    }
 
     //ASSERT("EnzoMethodMHDVlct","Early Exit",false);
 
@@ -276,15 +283,15 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
-				   Grouping &cur_cons_group,
-				   Grouping &cur_bfieldi_group,
-				   Grouping &priml_group,
-				   Grouping &primr_group,
-				   Grouping &flux_group,
-				   Grouping &consl_group,
-				   Grouping &consr_group,
-				   Grouping &weight_group,
-				   EnzoReconstructor &reconstructor)
+				      Grouping &cur_cons_group,
+				      Grouping &cur_bfieldi_group,
+				      Grouping &priml_group,
+				      Grouping &primr_group,
+				      Grouping &flux_group,
+				      Grouping &consl_group,
+				      Grouping &consr_group,
+				      Grouping &weight_group,
+				      EnzoReconstructor &reconstructor)
 {
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(block, *primitive_group_, priml_group,
@@ -354,12 +361,12 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_efields_(Block *block, Grouping &xflux_group,
-				      Grouping &yflux_group,
-				      Grouping &zflux_group,
-				      std::string center_efield_name,
-				      Grouping &efield_group,
-				      Grouping &weight_group,
-				      EnzoConstrainedTransport &ct)
+					 Grouping &yflux_group,
+					 Grouping &zflux_group,
+					 std::string center_efield_name,
+					 Grouping &efield_group,
+					 Grouping &weight_group,
+					 EnzoConstrainedTransport &ct)
 {
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();

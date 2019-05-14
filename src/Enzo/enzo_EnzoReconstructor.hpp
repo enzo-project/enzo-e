@@ -65,12 +65,41 @@ public: // interface
 				      Grouping &primr_group, int dim,
 				      EnzoEquationOfState *eos)=0;
 
-  /// Returns the number of edge cells that become "stale" (need to be
-  /// refreshed) each time the current reconstructor is used to update the fluid
-  /// (if a fluid is first evolved over a half time-step and then a full
-  /// time-step, cells become stale both times. The ghost depth must be at least
-  /// as large as the total number of staled cells after the full time-step)
-  virtual int get_staling_rate()=0;
+  /// The rate amount by which the stale_depth increases after the current
+  /// reconstructor is used to update the fluid over a (partial or full)
+  /// time-step. If the fluid is update over a partial timestep before being
+  /// updated, increases to the stale_depth are cummulative.
+  ///
+  /// stale_depth indicates the number of field entries from the outermost
+  /// field value that the region including "stale" values (need to be
+  /// refreshed) extends over. For cell-centered fields this is the number
+  /// of cells away from the edge. Along the dimension(s) of face-centering,
+  /// the region of valid (un-staled) entries for a face-centered field,
+  /// with/without values on the exterior of the grid, will ALWAYS contain 1
+  /// more/less valid field entry than the region of valid entries for a
+  /// cell-centered field
+  /// 
+  /// the staling_rate can be decomposed into 2 parts: immediate and delayed
+  /// - immediate staling rate is the amount by which stale_depth increases
+  ///   immediately after performing reconstruction.
+  /// - delayed staling rate is the amount by which stale_depth increases
+  ///   after the fluid is updated over a (partial or full) time-step using the
+  ///   fluxes computed from the reconstructed values.
+  virtual int total_staling_rate()=0;
+
+  /// immediate staling rate is the amount by which stale_depth increases
+  /// immediately after performing reconstruction. This is equal to the number
+  /// cells separating the first (last) cell interface that doesn't have both a
+  /// left AND right reconstructed values from the edge of the grid. For
+  /// interpolation like nearest neighbor, this is 0, while for interpolation
+  /// like piecewise linear, this is 1.
+  virtual int immediate_staling_rate()=0;
+
+  /// delayed staling rate is the amount by which stale_depth increases after
+  /// the fluid is updated over a (partial or full) time-step using the fluxes
+  /// computed from the reconstructed values.
+  int delayed_staling_rate()
+  { return total_staling_rate() - immediate_staling_rate(); }
 
 protected:
   /// list of the group_names which include all field names that will be

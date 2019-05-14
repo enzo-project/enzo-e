@@ -41,10 +41,11 @@ public: // interface
 			      Grouping &priml_group, Grouping &primr_group,
 			      int dim, EnzoEquationOfState *eos);
 
-  int get_staling_rate()
-  {
-    return 2;
-  }
+  int total_staling_rate()
+  { return 2; }
+
+  int immediate_staling_rate()
+  { return 1; }
 
 };
 
