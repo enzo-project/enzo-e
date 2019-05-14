@@ -172,8 +172,13 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	    enzo_float dv = monotized_difference(wc_left(iz,iy,ix), val,
 						 wc_right(iz,iy,ix));
 	    enzo_float left_val, right_val;
-	    right_val = use_floor ? std::max(val-dv,prim_floor) : val-dv;
-	    left_val = use_floor ? std::max(val+dv,prim_floor) : val+dv;
+	    if (use_floor) {
+	      right_val = EnzoEquationOfState::apply_floor(val-dv,prim_floor);
+	      left_val = EnzoEquationOfState::apply_floor(val+dv,prim_floor);
+	    } else {
+	      right_val = val-dv;
+	      left_val = val+dv;
+	    }
 
 	    // face centered fields: index i corresponds to the value at i-1/2
 	    wr(iz,iy,ix) = right_val;
