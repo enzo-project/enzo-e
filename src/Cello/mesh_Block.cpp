@@ -101,11 +101,13 @@ Block::Block ( MsgRefine * msg )
   bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
 
   if (is_first_cycle) {
+
+    // pass ICs (and particles) from parent block
+    // before re-initializing this level
+    if (this->level() > 0) msg->update(data());
+
     apply_initial_();
 
-    if (this->level() > 0){
-      msg->update(data());
-    }
   } else {
     msg->update(data());
   }
@@ -197,11 +199,13 @@ void Block::p_set_msg_refine(MsgRefine * msg)
   bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
 
   if (is_first_cycle) {
+
+    // pass ICs (and particles) from parent block
+    // before re-initializing this level
+    if (this->level() > 0) msg->update(data());
+
     apply_initial_();
 
-    if (this->level() > 0){
-      msg->update(data());
-    }
   } else {
     msg->update(data());
   }
