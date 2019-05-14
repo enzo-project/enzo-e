@@ -10,16 +10,15 @@
 
 //----------------------------------------------------------------------
 
-EFlt3DArray EnzoFieldArrayFactory::from_name(std::string field_name,
-					     int stale_depth)
+EFlt3DArray EnzoFieldArrayFactory::from_name(std::string field_name)
 {
   Field field = block_->data()->field();
   const int id = field.field_id(field_name);
   int mx, my, mz;
   field.dimensions (id,&mx,&my,&mz);
   EFlt3DArray temp((enzo_float *) field.values(field_name), mz, my, mx);
-  if (stale_depth != 0){
-    return exclude_stale_cells_(temp,stale_depth);
+  if (stale_depth_ != 0){
+    return exclude_stale_cells_(temp);
   } else {
     return temp;
   }
@@ -29,18 +28,17 @@ EFlt3DArray EnzoFieldArrayFactory::from_name(std::string field_name,
 
 EFlt3DArray EnzoFieldArrayFactory::from_grouping(Grouping &grouping,
 						 std::string group_name,
-						 int index, int stale_depth)
+						 int index)
 {
   check_grouping_details_(grouping, group_name, index);
-  return from_name(grouping.item(group_name,index),stale_depth);
+  return from_name(grouping.item(group_name,index));
 }
 
 //----------------------------------------------------------------------
 
 EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
 						       std::string group_name,
-						       int index, int dim,
-						       int stale_depth)
+						       int index, int dim)
 {
   check_grouping_details_(grouping, group_name, index);
   ASSERT("EnzoFieldArrayFactory",
@@ -70,8 +68,8 @@ EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
   }
 
   EFlt3DArray temp((enzo_float *) field.values(field_name), mz, my, mx);
-  if (stale_depth != 0){
-    return exclude_stale_cells_(temp,stale_depth);
+  if (stale_depth_ != 0){
+    return exclude_stale_cells_(temp);
   } else {
     return temp;
   }
@@ -79,22 +77,21 @@ EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
 
 //----------------------------------------------------------------------
 
-EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim,
-						    int stale_depth)
+EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
 {
   EFlt3DArray t = from_grouping(grouping,"bfield",dim);
   if (dim == 0){
-    return t.subarray(ESlice(stale_depth,     t.shape(0) - stale_depth),
-		      ESlice(stale_depth,     t.shape(1) - stale_depth),
-		      ESlice(1 + stale_depth, t.shape(2) - 1 - stale_depth));
+    return t.subarray(ESlice(stale_depth_,     t.shape(0) - stale_depth_),
+		      ESlice(stale_depth_,     t.shape(1) - stale_depth_),
+		      ESlice(1 + stale_depth_, t.shape(2) - 1 - stale_depth_));
   } else if (dim == 1){
-    return t.subarray(ESlice(stale_depth,     t.shape(0) - stale_depth),
-		      ESlice(1 + stale_depth, t.shape(1) - 1 - stale_depth),
-		      ESlice(stale_depth,     t.shape(2) - stale_depth));
+    return t.subarray(ESlice(stale_depth_,     t.shape(0) - stale_depth_),
+		      ESlice(1 + stale_depth_, t.shape(1) - 1 - stale_depth_),
+		      ESlice(stale_depth_,     t.shape(2) - stale_depth_));
   } else {
-    return t.subarray(ESlice(1 + stale_depth, t.shape(0) - 1 - stale_depth),
-		      ESlice(stale_depth,     t.shape(1) - stale_depth),
-		      ESlice(stale_depth,     t.shape(2) - stale_depth));
+    return t.subarray(ESlice(1 + stale_depth_, t.shape(0) - 1 - stale_depth_),
+		      ESlice(stale_depth_,     t.shape(1) - stale_depth_),
+		      ESlice(stale_depth_,     t.shape(2) - stale_depth_));
   }
 }
 
@@ -115,16 +112,13 @@ void EnzoFieldArrayFactory::check_grouping_details_(Grouping &grouping,
 
 //----------------------------------------------------------------------
 
-EFlt3DArray EnzoFieldArrayFactory::exclude_stale_cells_(EFlt3DArray &arr,
-							int stale_depth)
+EFlt3DArray EnzoFieldArrayFactory::exclude_stale_cells_(EFlt3DArray &arr)
 {
-  ASSERT("EnzoFieldArrayFactory", "stale_depth must be a positive int",
-	 stale_depth > 0);
-  ASSERT("EnzoFieldArrayFactory", "each axis of arr must exceed 2*stale_depth.",
-	 2*stale_depth < arr.shape(0) && 2*stale_depth < arr.shape(1) &&
-	 2*stale_depth < arr.shape(2));
+  ASSERT("EnzoFieldArrayFactory","each dim of arr must exceed 2*stale_depth_.",
+	 2*stale_depth_ < arr.shape(0) && 2*stale_depth_ < arr.shape(1) &&
+	 2*stale_depth_ < arr.shape(2));
 
-  return arr.subarray(ESlice(stale_depth, -stale_depth),
-		      ESlice(stale_depth, -stale_depth),
-		      ESlice(stale_depth, -stale_depth));
+  return arr.subarray(ESlice(stale_depth_, -stale_depth_),
+		      ESlice(stale_depth_, -stale_depth_),
+		      ESlice(stale_depth_, -stale_depth_));
 }
