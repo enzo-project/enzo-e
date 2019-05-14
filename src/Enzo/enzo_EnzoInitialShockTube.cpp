@@ -8,6 +8,22 @@
 ///           Ryu & Jones (1995). This could probably be modified to include
 ///           additional shock tubes
 
+// Note that there are a number of typos in various papers describing the
+// initial conditions for the Ryu & Jones (95) 2a shock tube However, I think I
+// have converged on the correct initial conditions from agreement between Dai
+// & Woodward (93) (which lists the expected soln) and Stone et al. (08)
+// Typos:
+//   Ryu & Jones (95)
+//     - states that the x-component of the magnetic field is of 2(4pi)^.5. It
+//       should actually be 2/(4pi)^0.5
+//     - They state that the left and right energies have values of 0.95 and 1.
+//       Per Dai & Woodward (93) and Stone et al. (08) the left and right
+//       pressures have values of 0.95 and 1.0.
+//   Gardiner & Stone (08)
+//     - states that both the left and right states have pressures of 0.95. Dai
+//       & Woodward (93) and Stone et al. (08) indicate that the left state has 
+//       a pressure of 0.95 and the right state has a pressure of 1.
+
 #include "cello.hpp"
 #include "enzo.hpp"
 #include <math.h> // ceil
@@ -38,7 +54,7 @@ void EnzoInitialShockTube::enforce_block
   };
 
   std::map<std::string, enzo_float> r_vals = {
-    {"density", 1.}, {"pressure", 0.95},
+    {"density", 1.}, {"pressure", 1.0},
     {"velocity_0", 0.0}, {"velocity_1", 0.0}, {"velocity_2", 0.0},
     {"bfield_1", 1.1283791670955126}, {"bfield_2", 0.5641895835477563}
   };
@@ -74,8 +90,8 @@ void EnzoInitialShockTube::enforce_block
     arr = array_factory.from_name(velocities[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("velocity_2"), arr);
 
-    //arr = array_factory.from_name("pressure");
-    //initializer_helper_(*cur_slice, cur_val_map->at("pressure"), arr);
+    arr = array_factory.from_name("pressure");
+    initializer_helper_(*cur_slice, cur_val_map->at("pressure"), arr);
 
     arr = array_factory.from_name(bfields[coord.j_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
@@ -85,10 +101,6 @@ void EnzoInitialShockTube::enforce_block
   }
   EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
   align_b_arr.subarray() = aligned_bfield_val;
-
-  EFlt3DArray pressure_array = array_factory.from_name("pressure");
-  pressure_array.subarray() = 0.95;
-  
 
   delete l_slice;
   delete r_slice;

@@ -50,7 +50,7 @@
         full_dt_reconstruct_method = "plm";
 
         # density floor (default = 0.0)
-        density_floor = 0.0;
+        density_floor = 1.e-200;
 
         # pressure floor (default = 0.0)
         pressure_floor = 0.0;
@@ -76,7 +76,7 @@
 	      "bfield_x", "bfield_y", "bfield_z",
 	      "acceleration_x", "acceleration_y", "acceleration_z"];
 
-      courant_=0.4;
+      courant=0.4;
       # this gamma is required for the shock tube problem
       gamma = 1.6666666666666667;
 
