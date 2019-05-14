@@ -26,10 +26,18 @@ public:
 
   // Include values from start through stop-1
   ESlice(intp start, intp stop) : start(start), stop(stop)
-  { ASSERT("ESlice", "start must be less than stop.", stop>start); }
+  {
+    if ((start >= 0 && stop >= 0) || (start < 0 && stop < 0)){
+      ASSERT("ESlice", "start must be less than stop.", stop>start);
+    }
+  }
 
   ESlice(int start, int stop) : start((intp)start), stop((intp)stop)
-  { ASSERT("ESlice", "start must be less than stop.", stop>start); }
+  {
+    if ((start >= 0 && stop >= 0) || (start < 0 && stop < 0)){
+      ASSERT("ESlice", "start must be less than stop.", stop>start);
+    }
+  }
 
 public:
   // Locations of start and stop values
