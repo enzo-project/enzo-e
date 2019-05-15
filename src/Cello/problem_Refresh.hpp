@@ -273,10 +273,6 @@ public: // interface
   int sync_exit() const
   { return 3*sync_id_+2; }
 
-  int sync_id() 
-  {  return sync_id_; }
-
-
   void print() const 
   {
     CkPrintf ("Refresh %p\n",this);

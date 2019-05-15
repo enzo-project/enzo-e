@@ -238,13 +238,16 @@ void EnzoSolverJacobi::apply_(Block * block)
 void EnzoSolverJacobi::do_refresh_(Block * block)
 {
   const int ghost_depth   = A_->ghost_depth();
-  const int min_face_rank = cello::rank() - 1;
 
-  const int id_sync = 2*sync_id_()+(*piter_(block))%2;
+  // REVERTING TO 0: addresses refresh synchronization bug
+  //  const int min_face_rank = cello::rank() - 1;
+  const int min_face_rank = 0;
+
+  //  const int id_sync = 2*sync_id_()+(*piter_(block))%2;
   
   Refresh refresh
     (ghost_depth,min_face_rank,neighbor_type_(),
-     sync_type_(), id_sync);
+     sync_type_(), sync_id_());
 
   refresh.set_active(is_finest_(block));
   refresh.add_field (ix_);

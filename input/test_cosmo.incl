@@ -1,0 +1,318 @@
+ Adapt {
+     list = [ "mass_baryon", "mass_dark" ];
+     mass_baryon {
+         field_list = [ "density" ];
+         mass_type = "baryon";
+         max_coarsen = 0.1250000000000000;
+         min_refine = 8.000000000000000;
+         type = "mass";
+     };
+     mass_dark {
+         field_list = [ "density_particle_accumulate" ];
+         mass_type = "dark";
+         max_coarsen = 0.1250000000000000;
+         min_refine = 8.000000000000000;
+         type = "mass";
+     };
+     max_initial_level = 0;
+     max_level = 4;
+     min_level = -2;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+ Domain {
+     lower = [ 0.000000000000000, 0.000000000000000, 0.000000000000000 ];
+     upper = [ 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+ }
+
+ Field {
+     alignment = 8;
+     gamma = 1.666700000000000;
+     ghost_depth = 4;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure", "density_total", "density_particle", "density_particle_accumulate", "potential", "density_gas", "X_copy", "B", "R0", "DD_po_1", "DD_B", "Y1_bcg", "Y2_bcg", "P1_bcg", "Q2_bcg", "V1_bcg", "R1_bcg", "B_COPY", "potential_copy" ];
+     padding = 0;
+ }
+
+ Initial {
+     list = [ "music", "cosmology" ];
+     music {
+         FD {
+             coords = "tzyx";
+             dataset = "GridDensity";
+             dimensions = "Dimensions";
+             file = "input/cosmo_grid_density.h5";
+             name = "density";
+             type = "field";
+         };
+         FVX {
+             coords = "tzyx";
+             dataset = "GridVelocities_x";
+             dimensions = "Dimensions";
+             file = "input/cosmo_grid_velocities_x.h5";
+             name = "velocity_x";
+             type = "field";
+         };
+         FVY {
+             coords = "tzyx";
+             dataset = "GridVelocities_y";
+             dimensions = "Dimensions";
+             file = "input/cosmo_grid_velocities_y.h5";
+             name = "velocity_y";
+             type = "field";
+         };
+         FVZ {
+             coords = "tzyx";
+             dataset = "GridVelocities_z";
+             dimensions = "Dimensions";
+             file = "input/cosmo_grid_velocities_z.h5";
+             name = "velocity_z";
+             type = "field";
+         };
+         PVX {
+             attribute = "vx";
+             coords = "tzyx";
+             dataset = "ParticleVelocities_x";
+             file = "input/cosmo_particle_velocities_x.h5";
+             name = "dark";
+             type = "particle";
+         };
+         PVY {
+             attribute = "vy";
+             coords = "tzyx";
+             dataset = "ParticleVelocities_y";
+             file = "input/cosmo_particle_velocities_y.h5";
+             name = "dark";
+             type = "particle";
+         };
+         PVZ {
+             attribute = "vz";
+             coords = "tzyx";
+             dataset = "ParticleVelocities_z";
+             file = "input/cosmo_particle_velocities_z.h5";
+             name = "dark";
+             type = "particle";
+         };
+         PX {
+             attribute = "x";
+             coords = "tzyx";
+             dataset = "ParticleDisplacements_x";
+             file = "input/cosmo_particle_displacements_x.h5";
+             name = "dark";
+             type = "particle";
+         };
+         PY {
+             attribute = "y";
+             coords = "tzyx";
+             dataset = "ParticleDisplacements_y";
+             file = "input/cosmo_particle_displacements_y.h5";
+             name = "dark";
+             type = "particle";
+         };
+         PZ {
+             attribute = "z";
+             coords = "tzyx";
+             dataset = "ParticleDisplacements_z";
+             file = "input/cosmo_particle_displacements_z.h5";
+             name = "dark";
+             type = "particle";
+         };
+         file_list = [ "FD", "FVX", "FVY", "FVZ", "PX", "PY", "PZ", "PVX", "PVY", "PVZ" ];
+     };
+ }
+
+ Memory {
+     limit_gb = 1.000000000000000;
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [ 32, 32, 32 ];
+ }
+
+ Method {
+     gravity {
+         accumulate = true;
+         grav_const = 1.000000000000000;
+         order = 2;
+         solver = "cg";
+     };
+     list = [ "pm_deposit", "gravity", "pm_update", "comoving_expansion", "cosmology" ];
+     ppm {
+         courant = 0.5000000000000000;
+         diffusion = false;
+         dual_energy = true;
+     };
+ }
+
+ Output {
+     list = [ "de", "depa", "ax", "dark", "mesh", "po"];
+     de {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "density" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "de-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     depa {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "density_particle_accumulate" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "depa-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     ax {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "acceleration_x" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "ax-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     ay {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "acceleration_y" ];
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "ay-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     az {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "acceleration_z" ];
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "az-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     dark {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 1.000000000000000 ];
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "dark-%02d.png", "count" ];
+         particle_list = [ "dark" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     mesh {
+         colormap = [ 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 1.000000000000000, 0.000000000000000, 1.000000000000000, 0.000000000000000, 0.000000000000000 ];
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         image_reduce_type = "max";
+         image_size = [ 513, 513 ];
+         image_type = "mesh";
+         name = [ "mesh-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     po {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "potential_copy" ];
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "po-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     check {
+         dir = [ "checkpoint_cosmo_cg-%02d", "count" ];
+         schedule {
+             start = 50;
+             step = 200;
+             var = "cycle";
+         };
+         type = "checkpoint";
+     };
+     dep {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "density_particle" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         image_type = "data";
+         name = [ "dep-%02d.png", "count" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     hdf5 {
+         dir = [ "COSMO_CG_%04d", "cycle" ];
+         field_list = [ "density", "velocity_x", "velocity_y", "velocity_z", "acceleration_x", "acceleration_y", "acceleration_z", "total_energy", "internal_energy", "pressure", "density" ];
+         name = [ "data-%02d-%02d.h5", "count", "proc" ];
+         particle_list = [ "dark" ];
+         schedule {
+             step = 20;
+             var = "cycle";
+         };
+         type = "data";
+     };
+ }
+
+ Particle {
+     dark {
+         attributes = [ "x", "single", "y", "single", "z", "single", "vx", "single", "vy", "single", "vz", "single", "ax", "single", "ay", "single", "az", "single" ];
+         constants = [ "mass", "single", 0.8666666666667000 ];
+         position = [ "x", "y", "z" ];
+         velocity = [ "vx", "vy", "vz" ];
+     };
+     list = [ "dark" ];
+ }
+
+ Physics {
+     cosmology {
+         comoving_box_size = 3.000000000000000;
+         final_redshift = 3.000000000000000;
+         hubble_constant_now = 0.7000000000000000;
+         initial_redshift = 99.00000000000000;
+         max_expansion_rate = 0.01500000000000000;
+         omega_baryon_now = 0.04000000000000000;
+         omega_cdm_now = 0.2600000000000000;
+         omega_lambda_now = 0.7000000000000000;
+         omega_matter_now = 0.3000000000000000;
+     };
+     list = [ "cosmology" ];
+ }
+
+ Stopping {
+     cycle = 100;
+ }

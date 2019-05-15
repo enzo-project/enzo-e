@@ -588,7 +588,7 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
 
   TRACE_BCG(block,this,"loop_0");
 
-  cello::check(S(beta_n),"BCG_beta_n",__FILE__,__LINE__);
+  if (is_finest_(block)) cello::check(S(beta_n),"BCG_beta_n",__FILE__,__LINE__);
 
   /// initialize/update current error, store error statistics
   
@@ -1292,8 +1292,10 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
 
   /// verify legal floating-point values for preceding reduction results
 
-  cello::check(S(omega_n),"BCG_omega_n_",__FILE__,__LINE__);
-  cello::check(S(omega_d),"BCG_omega_d_",__FILE__,__LINE__);
+  if (is_finest_(block)) {
+    cello::check(S(omega_n),"BCG_omega_n_",__FILE__,__LINE__);
+    cello::check(S(omega_d),"BCG_omega_d_",__FILE__,__LINE__);
+  }
 
   /// access field container on this block
 
@@ -1452,8 +1454,10 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* block,
 
   /// verify legal floating-point values for preceding reduction results
 
-  cello::check(S(rr),    "BCG_rr_",   __FILE__,__LINE__);
-  cello::check(S(beta_n),"BCG_beta_n",__FILE__,__LINE__);
+  if (is_finest_(block)) {
+    cello::check(S(rr),    "BCG_rr_",   __FILE__,__LINE__);
+    cello::check(S(beta_n),"BCG_beta_n",__FILE__,__LINE__);
+  }
 
   /// access field container on this block
 

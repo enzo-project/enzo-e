@@ -324,6 +324,7 @@ void EnzoBlock::p_solver_dd_solve_coarse()
 void EnzoBlock::r_solver_dd_barrier(CkReductionMsg * msg)
 {
   static_cast<EnzoSolverDd*> (solver())->prolong(this);
+  delete msg;
 }
 
 //----------------------------------------------------------------------
@@ -487,6 +488,7 @@ void EnzoSolverDd::continue_after_domain_solve(EnzoBlock * enzo_block) throw()
 void EnzoBlock::r_solver_dd_end(CkReductionMsg * msg)
 {
   static_cast<EnzoSolverDd*> (solver())->call_last_smoother(this);
+  delete msg;
 }
 
 //----------------------------------------------------------------------

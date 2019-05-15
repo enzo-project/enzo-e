@@ -28,9 +28,8 @@ module simulation {
     entry void r_output_barrier (CkReductionMsg * msg);
     entry void p_output_start (int index_output);
 
-    entry void p_monitor ();
+    entry void r_monitor_performance_reduce (CkReductionMsg * msg); // [SC9]
     entry void p_monitor_performance();
-    entry void r_monitor_performance (CkReductionMsg * msg); // [SC9]
 
     entry void p_set_block_array (CProxy_Block block_array);
 

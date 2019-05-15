@@ -11,14 +11,20 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 {
   if (n <= 0) return NULL;
 
-  long long length = ((long long*) (msgs[0]->getData()))[0];
+  long long num_sum = ((long long*) (msgs[0]->getData()))[0];
+  long long num_max = ((long long*) (msgs[0]->getData()))[1];
 
+  const int length = 2 + num_sum + num_max;
   std::vector<long long> accum;
-  accum.resize(length);
+  ASSERT1 ("r_reduce_performance",
+	   "Sanity check failed on expected accumulator array %d",
+	   length, (length < 500));
+  accum.resize(2 + num_sum + num_max);
   accum.clear();
 
   // save length
-  accum [0] = length;
+  accum [0] = num_sum;
+  accum [1] = num_max;
 
   // sum remaining values
   for (int i=0; i<n; i++) {
@@ -28,8 +34,14 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 	    (msgs[i]->getSize() == length*sizeof(long long)));
       
     long long * values = (long long *) msgs[i]->getData();
-    for (int j=1; j<length; j++) {
+    int j = 2;
+    for (int count=1; count <= num_sum; count++) {
       accum [j] += values[j];
+      ++j;
+    }
+    for (int count=1; count <= num_max; count++) {
+      accum [j] = std::max(accum[j],values[j]);
+      ++j;
     }
   }
 

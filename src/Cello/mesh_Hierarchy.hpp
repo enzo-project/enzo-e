@@ -27,6 +27,7 @@ public: // interface
   Hierarchy() throw()
   : factory_(NULL),
     refinement_(0),
+    min_level_(0),
     max_level_(0),
     num_blocks_(0),
     num_blocks_level_(),
@@ -50,6 +51,7 @@ public: // interface
   /// Initialize a Hierarchy object
   Hierarchy (const Factory * factory, 
 	     int refinement,
+	     int min_level,
 	     int max_level) throw ();
 
   /// Delete the Hierarchy object
@@ -73,6 +75,10 @@ public: // interface
   void set_blocking(int nbx, int nby, int nbz) throw ();
 
   //----------------------------------------------------------------------
+
+  /// Return the minimum refinement level (0 for unigrid)
+  int min_level() const
+  { return min_level_; }
 
   /// Return the maximum refinement level (0 for unigrid)
   int max_level() const
@@ -136,12 +142,12 @@ public: // interface
   void increment_block_count(int count, int level)
   {
     num_blocks_ += count;
-    int n=num_blocks_level_.size();
-    if (n < level+1) {
-      num_blocks_level_.resize(level+1);
-      for (int i=n; i<level+1; i++) num_blocks_level_[i] = 0;
-    }
-    num_blocks_level_[level] += count;
+    const int n=num_blocks_level_.size();
+    const int index = level - min_level_;
+    ASSERT1("Hierarchy::increment_block_count",
+	    "Block level %d exceeds block count array",
+	    level, 0 <= index && index < n);
+    num_blocks_level_[level-min_level_] += count;
   }
 
   /// Add Block to the list of blocks (block_vec_ and block_map_)
@@ -182,7 +188,7 @@ public: // interface
 
   /// Return the number of blocks on this process for the given level
   size_t num_blocks(int level) const throw()
-  {  return num_blocks_level_.at(level);  }
+  {  return num_blocks_level_.at(level-min_level_);  }
 
   /// Return the ith block in this pe
   Block * block (int index_block)
@@ -204,8 +210,7 @@ public: // interface
   
   void create_block_array (bool allocate_data) throw();
 
-  void create_subblock_array (bool allocate_data,
-			      int min_level) throw();
+  void create_subblock_array (bool allocate_data) throw();
 
 
   /// Return the number of root-level Blocks along each rank
@@ -223,6 +228,9 @@ protected: // attributes
 
   /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
   int refinement_;
+
+  /// Minimum mesh level (may be < 0, e.g. for multigrid)
+  int min_level_;
 
   /// Maximum mesh level
   int max_level_;

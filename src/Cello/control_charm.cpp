@@ -65,8 +65,7 @@ void Block::output_exit_()
   TRACE_CONTROL("output_exit");
 
   if (index_.is_root()) {
-
-    proxy_simulation[0].p_monitor();
+    cello::simulation()->monitor_output();
   }
 
   performance_stop_(perf_output);
@@ -128,14 +127,14 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
-  // CkCallback (refresh_.back()->callback(),thisProxy).send(NULL);
+  Refresh * refresh = refresh_.back();
 
-  control_sync (refresh_.back()->callback(),
-		refresh_.back()->sync_type(),
-		refresh_.back()->sync_exit(),
-		refresh_.back()->min_face_rank(),
-		refresh_.back()->neighbor_type(),
-		refresh_.back()->root_level());
+  control_sync (refresh->callback(),
+  		refresh->sync_type(),
+  		refresh->sync_exit(),
+  		refresh->min_face_rank(),
+  		refresh->neighbor_type(),
+  		refresh->root_level());
     
 #ifdef DEBUG_REFRESH 
  printf ("%d DEBUG_REFRESH Calling Block %s refresh_pop_back(%p)\n",
@@ -143,10 +142,10 @@ void Block::refresh_exit_()
   fflush(stdout);
       
 #endif
-  
-  //   Refresh * refresh = refresh_.back();
-  //   delete refresh;
-  //   refresh_.pop_back();
+
+  // WARNING: BREAKS Charm++ with random queueing on some regression tests
+  //  delete refresh;
+  //  refresh_.pop_back();
 }
 
 //----------------------------------------------------------------------
@@ -288,11 +287,11 @@ void Block::control_sync_face(int entry_point, int id_sync, int min_face_rank)
 
 void Block::control_sync_count (int entry_point, int id_sync, int count)
 {
-  if (id_sync >= sync_max_.size()) {
-    sync_count_.resize(id_sync+1);
-    sync_max_.resize(id_sync+1);
-    sync_count_[id_sync] = 0;
-    sync_max_[id_sync] = 0;
+  const int n_new = id_sync + 1;
+  const int n_now = sync_max_.size();
+  if (n_new  > n_now) {
+    sync_count_.resize(n_new,0);
+    sync_max_.resize(n_new,0);
   }
 #ifdef DEBUG_CONTROL
   CkPrintf ("%s DEBUG_CONTROL control_sync_count %d %d %d/%d\n",
