@@ -165,7 +165,7 @@ EnzoMethodGravity::EnzoMethodGravity
   int idebug2 = field_descr->field_id("debug_2");
 #endif  
   
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_gravity);
   
   refresh(ir)->add_field(iax);

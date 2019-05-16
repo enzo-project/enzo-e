@@ -137,10 +137,11 @@ EnzoSolverDd::EnzoSolverDd
 
   /// Initialize default Refresh
 
-  add_refresh(4,0,neighbor_leaf,sync_barrier,
-	      enzo_sync_id_solver_dd);
+  const int ir = add_refresh
+    (4,0,neighbor_leaf,sync_barrier,
+     enzo_sync_id_solver_dd);
 
-  refresh(0)->add_field (ix_);
+  refresh(ir)->add_field (ix_);
 
   ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
   i_sync_restrict_ = scalar_descr_sync->new_value(name + ":restrict");

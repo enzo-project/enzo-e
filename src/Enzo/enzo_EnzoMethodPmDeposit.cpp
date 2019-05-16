@@ -35,7 +35,8 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 {
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,cello::rank()-1,neighbor_leaf,sync_neighbor,
+  const int min_face_rank = 0; // cello::rank()-1
+  const int ir = add_refresh(4,min_face_rank,neighbor_leaf,sync_barrier,
  			     enzo_sync_id_method_pm_deposit);
  
   refresh(ir)->add_field("density");

@@ -58,6 +58,8 @@ MsgCoarsen::~MsgCoarsen()
   data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
+  CkFreeMsg (buffer_);
+  buffer_=nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -266,5 +268,6 @@ void MsgCoarsen::update (Data * data)
 
   if (!is_local_) {
       CkFreeMsg (buffer_);
+      buffer_ = nullptr;
   }
 }

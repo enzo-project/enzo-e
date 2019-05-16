@@ -52,6 +52,7 @@ Solver::Solver (std::string name,
 
 //----------------------------------------------------------------------
 
+#ifndef SHARED_PTR_REFRESH
 Solver::~Solver() throw()
 {
   for (size_t i=0; i<refresh_list_.size(); i++) {
@@ -59,7 +60,7 @@ Solver::~Solver() throw()
     refresh_list_[i] = 0;
   }
 }
-
+#endif
 //----------------------------------------------------------------------
 
 int Solver::add_refresh (int ghost_depth, 
@@ -69,18 +70,30 @@ int Solver::add_refresh (int ghost_depth,
 			 int sync_id)
 {
   int index=refresh_list_.size();
-  refresh_list_.resize(index+1);
-  refresh_list_[index] = new Refresh 
-    (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true);
+    
+#ifdef SHARED_PTR_REFRESH
+  refresh_list_.push_back
+    (std::make_shared<Refresh>
+     (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true));
+#else
+  refresh_list_.push_back
+    (new Refresh
+     (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true));
+#endif  
+     
   id_sync_ = sync_id;
   return index;
 }
 
 //----------------------------------------------------------------------
 
-Refresh * Solver::refresh(size_t index) 
+#ifdef SHARED_PTR_REFRESH
+std::shared_ptr<Refresh> Solver::refresh(size_t index)
+#else
+Refresh * Solver::refresh(size_t index)
+#endif  
 {
-  return (index < refresh_list_.size()) ? refresh_list_[index] : NULL;
+  return (index < refresh_list_.size()) ? refresh_list_[index] : nullptr;
 }
 
 //======================================================================

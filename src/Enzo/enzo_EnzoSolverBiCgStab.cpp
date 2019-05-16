@@ -249,8 +249,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   
   /// Initialize default Refresh (called before entry to compute())
 
-  const int min_face_rank = cello::rank() - 1;
-  const int ghost_depth = 3; // maximum of possible A_
+  const int ghost_depth = 4;
+  const int min_face_rank = 0;
 
   const int ir = add_refresh
     (ghost_depth, min_face_rank, neighbor_type_(),
@@ -728,7 +728,7 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
     /// Apply the preconditioner, then return to
     /// p_solver_bicgstab_loop_2()
 
-    precon->set_sync_id (8);
+    precon->set_sync_id (enzo_sync_id_solver_bicgstab_precon_1);
     precon->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_2());
 
 #ifdef DEBUG_CALLBACK    
@@ -1054,7 +1054,7 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
     /// Apply the preconditioner, then return to
     /// p_solver_bicgstab_loop_8()
     
-    precon->set_sync_id (10);
+    precon->set_sync_id (enzo_sync_id_solver_bicgstab_precon_2);
     precon->set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_8());
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",

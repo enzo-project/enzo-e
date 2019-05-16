@@ -68,10 +68,18 @@ public: // virtual functions
 		   int sync_type,
 		   int id)
   {
-    int index=refresh_list_.size();
-    refresh_list_.resize(index+1);
-    refresh_list_[index] = new Refresh 
-      (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true);
+  int index=refresh_list_.size();
+    
+#ifdef SHARED_PTR_REFRESH
+  refresh_list_.push_back
+    (std::make_shared<Refresh>
+     (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true));
+#else
+  refresh_list_.push_back
+    (new Refresh
+     (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true));
+#endif  
+     
     return index;
   }
 

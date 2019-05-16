@@ -127,7 +127,11 @@ void Block::refresh_exit_()
 
   update_boundary_();
 
+#ifdef SHARED_PTR_REFRESH  
+  std::shared_ptr<Refresh> refresh = refresh_.back();
+#else
   Refresh * refresh = refresh_.back();
+#endif  
 
   control_sync (refresh->callback(),
   		refresh->sync_type(),

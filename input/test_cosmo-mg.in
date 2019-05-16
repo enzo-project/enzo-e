@@ -25,10 +25,9 @@ Solver {
      };
      mg_coarse {
          iter_max = 100;
-         local = true;
          monitor_iter = 1;
          res_tol = 0.01000000000000000;
-         solve_type = "level";
+         solve_type = "block";
          type = "cg";
      };
      mg_post {

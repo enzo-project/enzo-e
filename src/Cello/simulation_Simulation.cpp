@@ -970,15 +970,20 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 
   // compute total blocks and leaf blocks
   long long num_total_blocks = 0;
-  long long num_leaf_blocks = counters_reduce[m];;
+  long long num_leaf_blocks = 0;
   for (int i=hierarchy_->min_level(); i<=hierarchy_->max_level(); i++) {
     const long long num_blocks_level = counters_reduce[m++]; // NL
     monitor()->print("performance","simulation num-blocks-level %d %ld",
 		     i,num_blocks_level);
     num_total_blocks += num_blocks_level;
     // compute leaf blocks given number of blocks per level
-    if (i>0) num_leaf_blocks +=
+    // (NOTE: num_blocks_level (i>0) is evenly divisible by num_children
+    if (i==0) {
+      num_leaf_blocks = num_blocks_level;
+    } else if (i>0) {
+      num_leaf_blocks +=
 	(num_blocks_level - num_blocks_level/cello::num_children());
+    }
   }
 
   monitor()->print

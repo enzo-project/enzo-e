@@ -47,8 +47,11 @@ void Block::refresh_enter (int callback, Refresh * refresh)
 
 void Block::refresh_begin_() 
 {
-
+#ifdef SHARED_PTR_REFRESH
+  std::shared_ptr<Refresh> refresh = this->refresh();
+#else
   Refresh * refresh = this->refresh();
+#endif  
   TRACE_REFRESH("refresh_begin_()",refresh);
 
   check_leaf_();
@@ -71,8 +74,11 @@ void Block::refresh_continue()
 {
 
   // Refresh if Refresh object exists and have data
-
+#ifdef SHARED_PTR_REFRESH
+  std::shared_ptr<Refresh> refresh = this->refresh();
+#else
   Refresh * refresh = this->refresh();
+#endif  
   TRACE_REFRESH("refresh_continue_()",refresh);
 
   if ( refresh && refresh->active() ) {
@@ -117,7 +123,11 @@ void Block::p_refresh_store (MsgRefresh * msg)
 
   delete msg;
 
+#ifdef SHARED_PTR_REFRESH  
+  std::shared_ptr<Refresh> refresh = this->refresh();
+#else
   Refresh * refresh = this->refresh();
+#endif  
   TRACE_REFRESH("p_refresh_store()",refresh);
 
   control_sync_count(CkIndex_Block::p_refresh_exit(),
@@ -217,7 +227,11 @@ void Block::refresh_load_field_face_
   // ... copy field ghosts to array using FieldFace object
   bool lg3[3] = {false,false,false};
 
+#ifdef SHARED_PTR_REFRESH  
+  std::shared_ptr<Refresh> refresh = this->refresh();
+#else
   Refresh * refresh = this->refresh();
+#endif  
 
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_type, refresh,false);
