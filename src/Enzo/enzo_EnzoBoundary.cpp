@@ -111,9 +111,9 @@ void EnzoBoundary::enforce_reflecting_
 
   data->field_cells(xc,yc,zc);
 
-  double * xf = new double [nx];
-  double * yf = new double [ny];
-  double * zf = new double [nz];
+  double * xf = new double [nx+1];
+  double * yf = new double [ny+1];
+  double * zf = new double [nz+1];
 
   data->field_cell_faces(xf,yf,zf);
 
