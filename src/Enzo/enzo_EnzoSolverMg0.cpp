@@ -303,8 +303,9 @@ EnzoSolverMg0::EnzoSolverMg0
 
   /// Initialize default Refresh
 
-  add_refresh(4,0,neighbor_level,sync_barrier,
-	      enzo_sync_id_solver_mg0);
+  const int ir = add_refresh
+    (4,0,neighbor_type_(),sync_barrier,
+     enzo_sync_id_solver_mg0);
 
   refresh(0)->add_field (ix_);
   refresh(0)->add_field (ir_);

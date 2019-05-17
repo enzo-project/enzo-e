@@ -78,7 +78,7 @@ public: // interface
     accumulate_(false),
     sync_type_(0),
     sync_id_ (-1),
-    active_(false),
+    active_(true),
     callback_(0),
     root_level_(0)
   {

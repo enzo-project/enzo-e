@@ -45,9 +45,6 @@ public: // interface
     solve_type_(solve_leaf)
   {}
 
-  /// Destructor
-  virtual ~Solver() throw();
-
   /// Charm++ PUP::able declarations
   PUPable_abstract(Solver);
 
@@ -65,6 +62,11 @@ public: // interface
     id_sync_(0),
     solve_type_(solve_leaf)
   { }
+
+#ifndef SHARED_PTR_REFRESH  
+  /// Destructor
+  virtual ~Solver() throw();
+#endif
   
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -76,7 +78,11 @@ public: // interface
     p | name_;
     p | ix_;
     p | ib_;
+#ifdef SHARED_PTR_REFRESH
+#    error "Implement Solver::refresh_list_ PUP for SHARED_PTR_REFRESH"
+#else    
     p | refresh_list_;
+#endif    
     p | monitor_iter_;
     p | restart_cycle_;
     p | callback_;
@@ -87,7 +93,11 @@ public: // interface
     p | solve_type_;
   }
 
+#ifdef SHARED_PTR_REFRESH  
+  std::shared_ptr<Refresh> refresh(size_t index=0) ;
+#else  
   Refresh * refresh(size_t index=0) ;
+#endif  
 
   void set_callback (int callback)
   { callback_ = callback; }
@@ -230,7 +240,11 @@ protected: // attributes
   int ib_;
   
   ///  Refresh object
+#ifdef SHARED_PTR_REFRESH  
+  std::vector<std::shared_ptr<Refresh> > refresh_list_;
+#else
   std::vector<Refresh *> refresh_list_;
+#endif  
 
   /// How often to write output
   int monitor_iter_;

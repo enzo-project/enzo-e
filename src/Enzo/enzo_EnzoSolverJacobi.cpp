@@ -82,6 +82,12 @@ EnzoSolverJacobi::EnzoSolverJacobi
   id_ = field_descr->insert_temporary();
   ir_ = field_descr->insert_temporary();
 
+  const int ghost_depth = 4; // maximum of possible A_
+  const int min_face_rank = 0;
+  const int ir = add_refresh
+    (ghost_depth,min_face_rank,neighbor_type_(),
+     sync_type_(), enzo_sync_id_solver_jacobi_1);
+
   ScalarDescr * scalar_descr_int = cello::scalar_descr_int();
   i_iter_ = scalar_descr_int->new_value(name_ + ":iter");  
 }
@@ -244,10 +250,14 @@ void EnzoSolverJacobi::do_refresh_(Block * block)
   const int min_face_rank = 0;
 
   //  const int id_sync = 2*sync_id_()+(*piter_(block))%2;
+
+  int sync_id = (*piter_(block) % 2 == 0) ?
+    enzo_sync_id_solver_jacobi_2 :
+    enzo_sync_id_solver_jacobi_3;
   
   Refresh refresh
     (ghost_depth,min_face_rank,neighbor_type_(),
-     sync_type_(), sync_id_());
+     sync_type_(),  enzo_sync_id_solver_jacobi_2);
 
   refresh.set_active(is_finest_(block));
   refresh.add_field (ix_);

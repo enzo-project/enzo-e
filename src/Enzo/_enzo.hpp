@@ -88,6 +88,8 @@ enum enzo_sync_id {
   enzo_sync_id_method_star_maker,
   enzo_sync_id_method_turbulence,
   enzo_sync_id_solver_bicgstab,
+  enzo_sync_id_solver_bicgstab_precon_1,
+  enzo_sync_id_solver_bicgstab_precon_2,
   enzo_sync_id_solver_bicgstab_loop_25,
   enzo_sync_id_solver_bicgstab_loop_85,
   enzo_sync_id_solver_cg,
@@ -104,7 +106,8 @@ enum enzo_sync_id {
   enzo_sync_id_solver_mg0_post,
   enzo_sync_id_solver_mg0_pre,
   enzo_sync_id_solver_jacobi_1,
-  enzo_sync_id_solver_jacobi_2
+  enzo_sync_id_solver_jacobi_2,
+  enzo_sync_id_solver_jacobi_3
 };
   
 //----------------------------------------------------------------------
