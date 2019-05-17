@@ -13,18 +13,25 @@ Data::Data(int nx, int ny, int nz,
 	   int num_field_data,
 	   double xm, double xp,
 	   double ym, double yp,
-	   double zm, double zp) throw ()
+	   double zm, double zp,
+	   FieldDescr * field_descr,
+	   ParticleDescr * particle_descr) throw ()
   : num_field_data_(num_field_data),
     field_data_(),
     particle_data_()
 {
+  if (field_descr == nullptr)
+    field_descr = cello::field_descr();
+  if (particle_descr == nullptr)
+    particle_descr = cello::particle_descr();
+  
   // Initialize field_data_[]
   field_data_.resize(num_field_data);
   for (size_t i=0; i<field_data_.size(); i++) {
-    field_data_[i] = new FieldData (cello::field_descr(),nx,ny,nz);
+    field_data_[i] = new FieldData (field_descr,nx,ny,nz);
   }
   particle_data_ = new ParticleData;
-  particle_data_->allocate(cello::particle_descr());
+  particle_data_->allocate(particle_descr);
   lower_[0] = xm;
   lower_[1] = ym;
   lower_[2] = zm;
