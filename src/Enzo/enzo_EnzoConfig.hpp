@@ -287,7 +287,6 @@ public: // interface
       solver_restart_cycle(),
       // EnzoSolver<Krylov>
       solver_precondition(),
-      solver_local(),
       solver_coarse_level(),
       solver_is_unigrid(),
       // EnzoStopping
@@ -578,9 +577,7 @@ public: // attributes
   /// Solver index for Krylov solver preconditioner
   std::vector<int>           solver_precondition;
 
-  /// Whether the solver is for an isolated Block, e.g. for
   /// Mg0 coarse grid solver
-  std::vector<int>           solver_local;
 
   std::vector<int>           solver_coarse_level;
   std::vector<int>           solver_is_unigrid;

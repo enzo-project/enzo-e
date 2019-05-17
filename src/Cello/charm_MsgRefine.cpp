@@ -82,6 +82,8 @@ MsgRefine::~MsgRefine()
   data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
+  CkFreeMsg (buffer_);
+  buffer_=nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -287,7 +289,6 @@ MsgRefine * MsgRefine::unpack(void * buffer)
   //  CkPrintf ("%s:%d DEBUG_MSG_REFINE CkFreeMsg (%p)\n",__FILE__,__LINE__,buffer);
 #endif  
   msg->buffer_ = buffer;
-  //  CkFreeMsg(buffer);
   
   return msg;
 }
@@ -346,5 +347,8 @@ void MsgRefine::update (Data * data)
       ff->array_to_face(fa,field_dst);
     }
   }
-  if (! is_local_) CkFreeMsg (buffer_);
+  if (! is_local_) {
+    CkFreeMsg (buffer_);
+    buffer_ = nullptr;
+  }
 }

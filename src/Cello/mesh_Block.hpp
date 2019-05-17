@@ -894,11 +894,19 @@ protected: // functions
   void set_refresh (Refresh * refresh) 
   {
     // WARNING: known memory leak (see bug # 133)
-    refresh_.push_back(new Refresh(*refresh));
+#ifdef SHARED_PTR_REFRESH    
+    refresh_.push_back(std::make_shared<Refresh>(*refresh));
+#else
+    refresh_.push_back(new Refresh (*refresh));
+#endif    
   };
 
   /// Return the currently-active Refresh object
+#ifdef SHARED_PTR_REFRESH  
+  std::shared_ptr<Refresh> refresh () throw()
+#else
   Refresh * refresh () throw()
+#endif    
   {  return refresh_.back();  }
 
 
@@ -1001,7 +1009,12 @@ protected: // attributes
   
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
+#ifdef SHARED_PTR_REFRESH  
+  std::vector<std::shared_ptr<Refresh> > refresh_;
+#else
   std::vector<Refresh*> refresh_;
+#endif  
+  
 
 };
 
