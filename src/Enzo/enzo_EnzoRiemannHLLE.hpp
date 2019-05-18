@@ -3,7 +3,7 @@
 /// @file     enzo_EnzoRiemannHLLE.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 2 2019
-/// @brief    [\ref Enzo] Implementation Enzo's HLLE approximate Riemann Solver
+/// @brief    [\ref Enzo] Implementation of HLLE approximate Riemann Solver
 
 #ifndef ENZO_ENZO_RIEMANN_HLLE_HPP
 #define ENZO_ENZO_RIEMANN_HLLE_HPP
@@ -21,46 +21,18 @@
 //   - Stone+ (08) has a typo in eqn 52: (q_i-q_{i-1}) should be (q_R-q_L)
 //     The modified formula is actually used in Athena++
 
-class EnzoRiemannHLLE : public EnzoRiemann
+
+struct AthenaHLLEWavespeed
 {
-  /// @class    EnzoRiemannHLLE
+  /// @class    AthenaHLLEWavespeed
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver
+  /// @brief    [\ref Enzo] Encapsulates the wavespeed calculation described by
+  ///           Stone+08
 
-public: // interface
-  /// Create a new EnzoRiemannHLLE object
-  EnzoRiemannHLLE(EnzoFieldConditions cond,
-		  std::vector<std::string> &passive_groups,
-		  FluxFunctor** flux_funcs, int n_funcs)
-    : EnzoRiemann(cond, passive_groups, flux_funcs, n_funcs)
-  { }
-
-  /// Virtual destructor
-  virtual ~EnzoRiemannHLLE()
-  {  }
-
-  /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoRiemannHLLE);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoRiemannHLLE (CkMigrateMessage *m)
-    : EnzoRiemann(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    EnzoRiemann::pup(p);
-  };
-
-  /// This function is overwritable (which is necessary to support cosmic ray
-  /// transport)
-  virtual void wave_speeds_ (const enzo_float wl[], const enzo_float wr[],
-			     const enzo_float Ul[], const enzo_float Ur[],
-			     const field_lut prim_lut,
-			     const field_lut cons_lut,
-			     EnzoEquationOfState *eos,
-			     enzo_float *bp, enzo_float *bm)
+  void operator()(const enzo_float wl[], const enzo_float wr[],
+		  const enzo_float Ul[], const enzo_float Ur[],
+		  const field_lut prim_lut, const field_lut cons_lut,
+		  EnzoEquationOfState *eos, enzo_float *bp, enzo_float *bm)
   {
     field_lut plut = prim_lut;
     field_lut clut = cons_lut;
@@ -75,9 +47,11 @@ public: // interface
     // First, compute left and right speeds
     //    left_speed = vi_l - cf_l;      right_speed = vi_r + cf_r
     enzo_float left_speed = (wl[plut.velocity_i] -
-			     fast_magnetosonic_speed_(wl, plut, eos));
+			     EnzoRiemann::fast_magnetosonic_speed_(wl, plut,
+								   eos));
     enzo_float right_speed = (wr[plut.velocity_i] +
-			      fast_magnetosonic_speed_(wr, plut, eos));
+			      EnzoRiemann::fast_magnetosonic_speed_(wr, plut,
+								    eos));
 
     // Next, compute min max eigenvalues
     //     - per eqn B17 these are Roe averaged velocity in the ith direction
@@ -96,8 +70,8 @@ public: // interface
     enzo_float vk_roe = (sqrtrho_l * wl[plut.velocity_k] +
 			 sqrtrho_r * wr[plut.velocity_k])*coef;
 
-    enzo_float mag_p_l = mag_pressure_(wl, plut);
-    enzo_float mag_p_r = mag_pressure_(wr, plut);
+    enzo_float mag_p_l = EnzoRiemann::mag_pressure_(wl, plut);
+    enzo_float mag_p_r = EnzoRiemann::mag_pressure_(wr, plut);
 
     // enthalpy:  h = (etot + thermal pressure + magnetic pressure) / rho
     enzo_float h_l = ((Ul[clut.total_energy] + wl[plut.pressure] + mag_p_l) /
@@ -148,25 +122,37 @@ public: // interface
     *bp = std::fmax(std::fmax(vi_roe + cfast, right_speed), 0.);
     *bm = std::fmin(std::fmin(vi_roe - cfast, left_speed),  0.);
   }
+};
 
-  /// Compute the Riemann fluxes
-  void calc_riemann_fluxes_(const enzo_float flux_l[],
-			    const enzo_float flux_r[],
-			    const enzo_float prim_l[],
-			    const enzo_float prim_r[],
-			    const enzo_float cons_l[],
-			    const enzo_float cons_r[],
-			    const field_lut prim_lut,
-			    const field_lut cons_lut,
-			    const int n_keys,
-			    EnzoEquationOfState *eos,
-			    const int iz, const int iy, const int ix,
-			    EFlt3DArray flux_arrays[])
+
+template <class WaveSpeedFunctor>
+struct HLLEImpl
+{
+  /// @class    EnzoRiemannHLLD
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Encapsulates operations of HLLE approximate Riemann
+  /// Solver. 
+public:
+  static int scratch_space_length(const int n_cons_keys){
+    return 0;
+  }
+
+  static void calc_riemann_fluxes
+  (const enzo_float flux_l[], const enzo_float flux_r[],
+   const enzo_float prim_l[], const enzo_float prim_r[],
+   const enzo_float cons_l[], const enzo_float cons_r[],
+   const field_lut prim_lut, const field_lut cons_lut, const int n_keys,
+   EnzoEquationOfState *eos, const int iz, const int iy, const int ix,
+   EFlt3DArray flux_arrays[], enzo_float scratch_space[])
   {
+    // there is no scratch_space
+    WaveSpeedFunctor wave_speeds;
+    //AthenaHLLEWavespeed wave_speeds;
     enzo_float bp, bm;
+
     // Compute wave speeds
-    wave_speeds_ (prim_l, prim_r, cons_l, cons_r, prim_lut, cons_lut, eos,
-		  &bp, &bm);
+    wave_speeds(prim_l, prim_r, cons_l, cons_r, prim_lut, cons_lut, eos,
+		&bp, &bm);
 
     // Compute the actual riemann fluxes
     for (int field = 0; field<n_keys; field++){
@@ -176,5 +162,15 @@ public: // interface
     }
   }
 };
+
+
+/// @class    EnzoRiemannHLLE
+/// @ingroup  Enzo
+/// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver
+using EnzoRiemannHLLE = EnzoRiemannImpl<HLLEImpl<AthenaHLLEWavespeed>>;
+
+// To define a Riemann Solver for cosmic ray transport, we would probably
+// define a separate WaveSpeedFunctor struct and define a separate HLLE
+// Riemann Solver (maybe EnzoRiemannCRHLLE)
 
 #endif /* ENZO_ENZO_RIEMANN_HLLE_HPP */

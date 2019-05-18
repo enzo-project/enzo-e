@@ -9,70 +9,31 @@
 #ifndef ENZO_ENZO_RIEMANN_HLLD_HPP
 #define ENZO_ENZO_RIEMANN_HLLD_HPP
 
-// The current implementation assumes that each process will always have an
-// independent instance of this object. If that changes, then handling of the
-// private members Us and Uss will also need to change.
-
-class EnzoRiemannHLLD : public EnzoRiemann
+struct HLLDImpl
 {
-
   /// @class    EnzoRiemannHLLD
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver
-
-public: // interface
-  /// Create a new EnzoRiemannHLLD object
-  EnzoRiemannHLLD(EnzoFieldConditions cond,
-		  std::vector<std::string> &passive_groups,
-		  FluxFunctor** flux_funcs, int n_funcs)
-    : EnzoRiemann(cond, passive_groups, flux_funcs, n_funcs)
-  {
-    // Reserve space in the following scratch space arrays
-    Us = new enzo_float[this->n_cons_keys_];
-    Uss = new enzo_float[this->n_cons_keys_];
+  /// @brief    [\ref Enzo] Encapsulates operations of HLLD approximate Riemann
+  /// Solver
+public:
+  static int scratch_space_length(const int n_cons_keys){
+    return 2*n_cons_keys;
   }
-
-  /// Virtual destructor
-  virtual ~EnzoRiemannHLLD()
-  {
-    delete[] Us;
-    delete[] Uss;
-  }
-
-  /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoRiemannHLLD);
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoRiemannHLLD (CkMigrateMessage *m)
-    : EnzoRiemann(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    EnzoRiemann::pup(p);
-    // Reserve space in the following scratch space arrays
-    Us = new enzo_float[this->n_cons_keys_];
-    Uss = new enzo_float[this->n_cons_keys_];
-  };
-
-  /// Compute the Riemann fluxes
-  void calc_riemann_fluxes_(const enzo_float flux_l[],
-			    const enzo_float flux_r[],
-			    const enzo_float prim_l[],
-			    const enzo_float prim_r[],
-			    const enzo_float cons_l[],
-			    const enzo_float cons_r[],
-			    const field_lut prim_lut,
-			    const field_lut cons_lut,
-			    const int n_keys,
-			    EnzoEquationOfState *eos,
-			    const int iz, const int iy, const int ix,
-			    EFlt3DArray flux_arrays[])
+  
+  static void calc_riemann_fluxes
+  (const enzo_float flux_l[], const enzo_float flux_r[],
+   const enzo_float prim_l[], const enzo_float prim_r[],
+   const enzo_float cons_l[], const enzo_float cons_r[],
+   const field_lut prim_lut, const field_lut cons_lut, const int n_keys,
+   EnzoEquationOfState *eos, const int iz, const int iy, const int ix,
+   EFlt3DArray flux_arrays[], enzo_float scratch_space[])
   {
     // This method makes use of the member variables Us and Uss
     // Note that ETA_TOLERANCE is bigger than the tolerance was for the
     // original implementation.
+
+    enzo_float* Us = scratch_space;
+    enzo_float* Uss = scratch_space+n_keys;
 
     enzo_float etot_l,etot_r, rho_l, rho_r;
     enzo_float vx_l, vy_l, vz_l, vx_r, vy_r, vz_r;
@@ -101,8 +62,8 @@ public: // interface
 
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
     etot_l = cons_l[cons_lut.total_energy];
-    pt_l = p_l + this->mag_pressure_(prim_l, prim_lut);
-    cf_l = this->fast_magnetosonic_speed_(prim_l, prim_lut, eos);
+    pt_l = p_l + EnzoRiemann::mag_pressure_(prim_l, prim_lut);
+    cf_l = EnzoRiemann::fast_magnetosonic_speed_(prim_l, prim_lut, eos);
 
     // load wr and compute the fast magnetosonic speed
     rho_r   = prim_r[prim_lut.density];
@@ -116,8 +77,8 @@ public: // interface
 
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
     etot_r = cons_r[cons_lut.total_energy];
-    pt_r = p_r + this->mag_pressure_(prim_r, prim_lut);
-    cf_r = this->fast_magnetosonic_speed_(prim_r, prim_lut, eos);
+    pt_r = p_r + EnzoRiemann::mag_pressure_(prim_r, prim_lut);
+    cf_r = EnzoRiemann::fast_magnetosonic_speed_(prim_r, prim_lut, eos);
 
     //
     //wave speeds
@@ -282,9 +243,8 @@ public: // interface
       return;
     }
   }
-  
-private:
-  inline void setup_cons_ast_(enzo_float cons[], const field_lut cons_lut,
+
+  static void setup_cons_ast_(enzo_float cons[], const field_lut cons_lut,
 			      const enzo_float speed, const enzo_float rho,
 			      const enzo_float vy, const enzo_float vz,
 			      const enzo_float etot, const enzo_float Bx,
@@ -314,14 +274,13 @@ private:
     cons[cons_lut.bfield_k] = Bz;
   }
 
-
-private:
-
-  /// Array that provides scratch space for the calculation
-  enzo_float *Us;
-
-  /// Array that provides additional scratch space for the calculation
-  enzo_float *Uss;
 };
+
+
+/// @class    EnzoRiemannHLLD
+/// @ingroup  Enzo
+/// @brief    [\ref Enzo] Encapsulates HLLD approximate Riemann Solver
+using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;
+
 
 #endif /* ENZO_ENZO_RIEMANN_HLLD_HPP */

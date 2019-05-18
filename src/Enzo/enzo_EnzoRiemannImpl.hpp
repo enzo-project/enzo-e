@@ -2,7 +2,7 @@
 
 /// @file     enzo_EnzoRiemannImpl.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
-/// @date     Wed May 15 2019
+/// @date     Thurs May 16 2019
 /// @brief    [\ref Enzo] Implementation of the Riemann Solver abstract base
 /// class. This class should be subclassed to implement various riemann solvers.
 
@@ -41,60 +41,15 @@
 //  This function determines the size of scratch space required given the
 //  number of conserved quantities.
 //
-// To help define a Riemann Solver class from the appropriate ImplStruct, we
-// define the following Macros.
-
-
-// To check that the static methods of ImplStruct are appropriately defined,
-// we follow https://stackoverflow.com/a/23133787
-#define DEFINE_HAS_SIGNATURE(traitsName, funcName, signature)               \
-  template <typename U>                                                     \
-  class traitsName                                                          \
-  {                                                                         \
-  private:                                                                  \
-    template<typename T, T> struct helper;                                  \
-    template<typename T>                                                    \
-    static std::uint8_t check(helper<signature, &funcName>*);               \
-    template<typename T> static std::uint16_t check(...);                   \
-  public:                                                                   \
-    static                                                                  \
-    constexpr bool value = sizeof(check<U>(0)) == sizeof(std::uint8_t);	    \
-  }
-
-DEFINE_HAS_SIGNATURE(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
-		     void (*)(const enzo_float[], const enzo_float[],
-			      const enzo_float[], const enzo_float[],
-			      const enzo_float[], const enzo_float[],
-			      const field_lut, const field_lut, const int,
-			      EnzoEquationOfState *, const int, const int,
-			      const int, EFlt3DArray[], enzo_float[]));
-DEFINE_HAS_SIGNATURE(has_scratch_space_length, T::scratch_space_length,
-		     void (*)(const int));
-
-// The following macro actually defines the class
-
-#define DEFINE_RIEMANN_SOLVER_CLASS(ClassName, ImplStuct)                   \
-  /* Check that ImplStruct is properly defined */                           \
-  static_assert(has_calc_riemann_fluxes<ImplStruct>::value,                 \
-		std::string(#ImplStruct) +                                  \
-                "'s calc_riemann_fluxes method is improperly defined");     \
-  static_assert(has_scratch_space_length<ImplStruct>::value,                \
-		std::string(#ImplStruct) +                                  \
-                "'s scratch_space_length method is improperly defined");    \
-                                                                            \
-  /* Now to define the class */                                             \
-  template <> class RiemannSolverImpl<ImplStruct> {                         \
-    PUPable_decl(ClassName);                                                \
-  }                                                                         \
-  using ClassName = RiemannSolverImpl<ImplStruct>
-
-// Example of how one might define EnzoRiemmannHLLE if we had defined ImplHLLE
-//   DEFINE_RIEMANN_SOLVER_CLASS(EnzoRiemmannHLLE, ImplHLLE);
-// Then the user needs to define the class in enzo.CI as PUPable.
-//
-// (NOT totally convinced this will work right now - may need to use
-//  PUPable_decl_template, instead)
-
+// To define a new RiemannSolver:
+// 1. Define a new ImplStruct (e.g. HLLDImpl).
+// 2. It might be useful to define an alias name for the specialization of
+//    EnzoRiemannImpl that uses the new ImplStruct
+//    (e.g. "using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;").
+// 3. Then add the particlular specialization to enzo.CI (e.g. add the line
+//    "PUPable EnzoRiemannImpl<HLLDImpl>;")
+// 4. Finally, update EnzoRiemann::construct_riemann to construct the Riemann
+//    Solver under the appropriate conditions
 
 
 // To allow for easily adding additional fields with non-trivial flux
@@ -104,7 +59,8 @@ DEFINE_HAS_SIGNATURE(has_scratch_space_length, T::scratch_space_length,
 //   Riemann Solver or we could specify the functors as variadic template
 //   arguments (allowing operator() to be inlined within the for loop)
 // - this should just be replaced with hard coded function within
-//   RiemannSolver::solve or some use of variadic templates
+//   RiemannSolver::solve or some use of variadic templates (maybe a tuple).
+//   Hard-coding may be the way to go 
 //
 // To add an additional field, add the field to FIELD_TABLE and modify the
 // factory method
@@ -130,6 +86,7 @@ public:
 			  enzo_float fluxes[], const field_lut prim_lut,
 			  const field_lut cons_lut)=0;
 };
+
 
 // Below is a brief summary of the derivatives of the FIELD_TABLE XMacro that
 // are employed by EnzoRiemannImpl
@@ -221,6 +178,33 @@ public:
 //         must match the relevant quantity names) and the direction along
 //         which we are computing fluxes
 
+
+// To check that the static methods of ImplStruct are appropriately defined,
+// we follow https://stackoverflow.com/a/23133787
+#define DEFINE_HAS_SIGNATURE(traitsName, funcName, signature)               \
+  template <typename U>                                                     \
+  class traitsName                                                          \
+  {                                                                         \
+  private:                                                                  \
+    template<typename T, T> struct helper;                                  \
+    template<typename T>                                                    \
+    static std::uint8_t check(helper<signature, &funcName>*);               \
+    template<typename T> static std::uint16_t check(...);                   \
+  public:                                                                   \
+    static                                                                  \
+    constexpr bool value = sizeof(check<U>(0)) == sizeof(std::uint8_t);	    \
+  }
+
+DEFINE_HAS_SIGNATURE(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
+		     void (*)(const enzo_float[], const enzo_float[],
+			      const enzo_float[], const enzo_float[],
+			      const enzo_float[], const enzo_float[],
+			      const field_lut, const field_lut, const int,
+			      EnzoEquationOfState *, const int, const int,
+			      const int, EFlt3DArray[], enzo_float[]));
+DEFINE_HAS_SIGNATURE(has_scratch_space_length, T::scratch_space_length,
+		     int (*)(const int));
+
 template <class ImplStruct>
 class EnzoRiemannImpl : public EnzoRiemann
 {
@@ -228,6 +212,15 @@ class EnzoRiemannImpl : public EnzoRiemann
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Provides implementation of approximate Riemann
   /// Solvers
+
+  // The following assertions are first checked when the appropriate .def.h
+  // (generated by charm) is included
+  static_assert(has_calc_riemann_fluxes<ImplStruct>::value,
+		"The static calc_riemann_fluxes method of ImplStruct "
+                "doesn't have the right function signature");
+  static_assert(has_scratch_space_length<ImplStruct>::value,
+		"The static scratch_space_length method of ImplStruct "
+                "doesn't have the right function signature");
 
 public: // interface
 
@@ -240,11 +233,11 @@ public: // interface
   virtual ~EnzoRiemannImpl();
 
   /// CHARM++ PUP::able declaration
-  PUPable_abstract(EnzoRiemannImpl);
+  PUPable_decl_template(EnzoRiemannImpl<ImplStruct>);
 
   /// CHARM++ migration constructor for PUP::able
   EnzoRiemannImpl (CkMigrateMessage *m)
-    : PUP::able(m)
+    : EnzoRiemann(m)
   {  }
 
   /// CHARM++ Pack / Unpack function
@@ -336,9 +329,10 @@ protected: //attributes
 //----------------------------------------------------------------------
 
 template <class ImplStruct>
-EnzoRiemannImpl::EnzoRiemannImpl(EnzoFieldConditions cond,
-				 std::vector<std::string> &passive_groups,
-				 FluxFunctor** flux_funcs, int n_funcs)
+EnzoRiemannImpl<ImplStruct>::EnzoRiemannImpl
+(EnzoFieldConditions cond, std::vector<std::string> &passive_groups,
+ FluxFunctor** flux_funcs, int n_funcs)
+  : EnzoRiemann()
 {
   conditions_ = cond;
   EnzoCenteredFieldRegistry registry;
@@ -355,7 +349,7 @@ EnzoRiemannImpl::EnzoRiemannImpl(EnzoFieldConditions cond,
 //----------------------------------------------------------------------
 
 template <class ImplStruct>
-EnzoRiemannImpl::~EnzoRiemannImpl()
+EnzoRiemannImpl<ImplStruct>::~EnzoRiemannImpl()
 {
   for (int i = 0; i < n_funcs_; i++){
     delete flux_funcs_[i];
@@ -366,9 +360,9 @@ EnzoRiemannImpl::~EnzoRiemannImpl()
 //----------------------------------------------------------------------
 
 template <class ImplStruct>
-void EnzoRiemannImpl::pup (PUP::er &p)
+void EnzoRiemannImpl<ImplStruct>::pup (PUP::er &p)
 {
-  PUP::able::pup(p);
+  EnzoRiemann::pup(p);
 
   p|conditions_;
   if (p.isUnpacking()){
@@ -393,10 +387,10 @@ void EnzoRiemannImpl::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 template <class ImplStruct>
-void EnzoRiemannImpl::solve (Block *block, Grouping &priml_group,
-			     Grouping &primr_group, Grouping &flux_group,
-			     Grouping &consl_group, Grouping &consr_group,
-			     int dim, EnzoEquationOfState *eos)
+void EnzoRiemannImpl<ImplStruct>::solve
+(Block *block, Grouping &priml_group, Grouping &primr_group,
+ Grouping &flux_group, Grouping &consl_group, Grouping &consr_group,
+ int dim, EnzoEquationOfState *eos)
 {
   // In the future, this stuff up here will be handled at construction
   EnzoCenteredFieldRegistry registry;
@@ -419,8 +413,9 @@ void EnzoRiemannImpl::solve (Block *block, Grouping &priml_group,
   Fl = new enzo_float[n_cons_keys_];  Fr = new enzo_float[n_cons_keys_];
 
   enzo_float *scratch_space = NULL;
-  if (ImplStruct::scratch_space_length(n_cons_keys_)>0){
-    scratch_space = new enzo_float[scratch_space_length(n_cons_keys_)];
+  int scratch_space_length = ImplStruct::scratch_space_length(n_cons_keys_);
+  if (scratch_space_length>0){
+    scratch_space = new enzo_float[scratch_space_length];
   }
   
 
@@ -495,12 +490,10 @@ void EnzoRiemannImpl::solve (Block *block, Grouping &priml_group,
 }
 
 //----------------------------------------------------------------------
-
-void EnzoRiemann::basic_mhd_fluxes_(const enzo_float prim[],
-				    const enzo_float cons[],
-				    enzo_float fluxes[],
-				    const field_lut prim_lut,
-				    const field_lut cons_lut)
+template <class ImplStruct>
+void EnzoRiemannImpl<ImplStruct>::basic_mhd_fluxes_
+(const enzo_float prim[], const enzo_float cons[], enzo_float fluxes[],
+ const field_lut prim_lut, const field_lut cons_lut)
 {
   // This assumes that MHD is included
   // This may be better handled by the EquationOfState

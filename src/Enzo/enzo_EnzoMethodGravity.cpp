@@ -123,10 +123,6 @@
 
 // #define READ_PARTICLES
 
-#define CK_TEMPLATES_ONLY
-#include "enzo.def.h"
-#undef CK_TEMPLATES_ONLY
-
 #ifdef DEBUG_METHOD
 #   define TRACE_METHOD(METHOD,BLOCK)					\
   CkPrintf ("%d %s:%d %s TRACE %s %p\n",CkMyPe(),__FILE__,__LINE__, \

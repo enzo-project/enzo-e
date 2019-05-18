@@ -24,16 +24,16 @@ public: // interface
   static EnzoRiemann* construct_riemann(std::string solver,
 					const EnzoFieldConditions cond);
 
-  /// Constructor
-  EnzoRiemann(EnzoFieldConditions cond,
-	      std::vector<std::string> &extra_passive_groups,
-	      FluxFunctor** flux_funcs, int n_funcs);
+  EnzoRiemann() throw()
+  {}
 
   /// Virtual destructor
-  virtual ~EnzoRiemann();
+  virtual ~EnzoRiemann()
+  {}
 
   /// CHARM++ PUP::able declaration
   PUPable_abstract(EnzoRiemann);
+  //PUPable_decl(EnzoRiemann);
 
   /// CHARM++ migration constructor for PUP::able
   EnzoRiemann (CkMigrateMessage *m)
@@ -41,7 +41,7 @@ public: // interface
   {  }
 
   /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p);
+  void pup (PUP::er &p)
   {
     PUP::able::pup(p);
   }
@@ -72,6 +72,42 @@ public: // interface
 		      Grouping &primr_group, Grouping &flux_group,
 		      Grouping &consl_group, Grouping &consr_group, int dim,
 		      EnzoEquationOfState *eos) = 0;
+
+  /// computes the fast magnetosonic speed along dimension i
+  static enzo_float fast_magnetosonic_speed_(const enzo_float prim_vals[],
+					     const field_lut prim_lut,
+					     EnzoEquationOfState *eos)
+  {
+    enzo_float bi = prim_vals[prim_lut.bfield_i];
+    enzo_float bj = prim_vals[prim_lut.bfield_j];
+    enzo_float bk = prim_vals[prim_lut.bfield_k];
+
+    enzo_float cs2 = std::pow(sound_speed_(prim_vals, prim_lut, eos),2);
+    enzo_float B2 = (bi*bi + bj*bj + bk *bk);
+    enzo_float va2 = B2/prim_vals[prim_lut.density];
+    enzo_float cos2 = bi*bi / B2;
+    return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
+					    4.*cs2*va2*cos2)));
+  }
+
+  /// computes the magnetic pressure
+  static enzo_float mag_pressure_(const enzo_float prim_vals[],
+				  const field_lut prim_lut)
+  {
+    enzo_float bi = prim_vals[prim_lut.bfield_i];
+    enzo_float bj = prim_vals[prim_lut.bfield_j];
+    enzo_float bk = prim_vals[prim_lut.bfield_k];
+    return 0.5 * (bi*bi + bj*bj + bk *bk);
+  }
+
+  /// computes the (adiabatic) sound spped
+  static enzo_float sound_speed_(const enzo_float prim_vals[],
+				 const field_lut prim_lut,
+				 EnzoEquationOfState *eos)
+  {
+    return std::sqrt(eos->get_gamma()*prim_vals[prim_lut.pressure]/
+		     prim_vals[prim_lut.density]);
+  }
 
 };
 

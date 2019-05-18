@@ -23,7 +23,6 @@ EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver,
   // In the future, allocate array of flux functors here
   FluxFunctor** flux_funcs = NULL;
   int n_funcs = 0;
-    
 
   // determine the type of solver to construct:
   // convert string to lower case (https://stackoverflow.com/a/313990)
