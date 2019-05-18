@@ -248,49 +248,11 @@ public: // interface
 	      Grouping &consr_group, int dim, EnzoEquationOfState *eos);
 
 protected : //methods
-
-  /// Computes the fluxes for the passively advected quantites. (Needs to be
-  /// implemented)
-  void solve_passive_advection_(Block* block,
-				Grouping &priml_group, Grouping &primr_group,
-				EFlt3DArray &density_flux, int dim)
-  { /* This needs to be implemented */ }
-
-  /// computes the fast magnetosonic speed along dimension i
-  enzo_float fast_magnetosonic_speed_(const enzo_float prim_vals[],
-				      const field_lut prim_lut,
-				      EnzoEquationOfState *eos)
-  {
-    enzo_float bi = prim_vals[prim_lut.bfield_i];
-    enzo_float bj = prim_vals[prim_lut.bfield_j];
-    enzo_float bk = prim_vals[prim_lut.bfield_k];
-
-    enzo_float cs2 = std::pow(sound_speed_(prim_vals, prim_lut, eos),2);
-    enzo_float B2 = (bi*bi + bj*bj + bk *bk);
-    enzo_float va2 = B2/prim_vals[prim_lut.density];
-    enzo_float cos2 = bi*bi / B2;
-    return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
-					    4.*cs2*va2*cos2)));
-  }
-
-  /// computes the magnetic pressure
-  enzo_float mag_pressure_(const enzo_float prim_vals[],
-			   const field_lut prim_lut)
-  {
-    enzo_float bi = prim_vals[prim_lut.bfield_i];
-    enzo_float bj = prim_vals[prim_lut.bfield_j];
-    enzo_float bk = prim_vals[prim_lut.bfield_k];
-    return 0.5 * (bi*bi + bj*bj + bk *bk);
-  }
-
-  /// computes the (adiabatic) sound spped
-  enzo_float sound_speed_(const enzo_float prim_vals[],
-			  const field_lut prim_lut,
-			  EnzoEquationOfState *eos)
-  {
-    return std::sqrt(eos->get_gamma()*prim_vals[prim_lut.pressure]/
-		     prim_vals[prim_lut.density]);
-  }
+  
+  /// Computes the fluxes for the passively advected quantites.
+  void solve_passive_advection_(Block* block, Grouping &priml_group,
+				Grouping &primr_group, Grouping &flux_group,
+				EFlt3DArray &density_flux, int dim);
 
   /// computes fluxes for the basic mhd conserved quantities - density,
   /// momentum, energy, magnetic fields  
@@ -475,7 +437,7 @@ void EnzoRiemannImpl<ImplStruct>::solve
     }
   }
 
-  solve_passive_advection_(block, priml_group, primr_group,
+  solve_passive_advection_(block, priml_group, primr_group, flux_group,
 			   flux_arrays[cons_lut_.density], dim);
 
   delete[] wl; delete[] wr;
@@ -489,7 +451,92 @@ void EnzoRiemannImpl<ImplStruct>::solve
   }
 }
 
+inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
+					      EFlt3DArray *flux_arrays,
+					      EFlt3DArray *reconstructed,
+					      const int num_fields,
+					      const int iz, const int iy,
+					      const int ix)
+{
+  enzo_float sum = 0.;
+  for (int field_ind=0; field_ind<num_fields; field_ind++){
+    sum += reconstructed[field_ind](iz,iy,ix);
+  }
+  for (int field_ind=0; field_ind<num_fields; field_ind++){
+    flux_arrays[field_ind](iz,iy,ix) = (reconstructed[field_ind](iz,iy,ix)
+					* dens_flux / sum);
+  }
+}
+
+
+template <class ImplStruct>
+void EnzoRiemannImpl<ImplStruct>::solve_passive_advection_
+(Block* block, Grouping &priml_group, Grouping &primr_group,
+ Grouping &flux_group, EFlt3DArray &density_flux, int dim)
+{
+  // This was basically transcribed from Enzo-E
+  std::vector<std::string> group_names = this->passive_groups_;
+
+  EnzoFieldArrayFactory array_factory(block);
+  EnzoPermutedCoordinates coord(dim);
+
+  // unecessary values are computed for the inside faces of outermost ghost zone
+  for (unsigned int group_ind=0; group_ind<group_names.size(); group_ind++){
+
+    // load group name and number of fields in the group
+    std::string group_name = group_names[group_ind];
+    int num_fields = priml_group.size(group_name);
+
+    if (num_fields == 0){
+      continue;
+    }
+
+    // If we have a group_name that we have to make sure sums to 1, we should
+    // do that now! (The easiest way to facillitate that would be to separate
+    // spieces from colours)
+    bool unity_sum = false;
+
+    // load array of fields
+    EFlt3DArray *wl_arrays = new EFlt3DArray[num_fields];
+    EFlt3DArray *wr_arrays = new EFlt3DArray[num_fields];
+    EFlt3DArray *flux_arrays = new EFlt3DArray[num_fields];
+
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      wl_arrays[field_ind] = array_factory.from_grouping(priml_group,group_name,
+							 field_ind);
+      wr_arrays[field_ind] = array_factory.from_grouping(primr_group,group_name,
+							 field_ind);
+      flux_arrays[field_ind] = array_factory.from_grouping(flux_group,
+							   group_name,
+							   field_ind);
+    }
+
+    for (int iz=0; iz<density_flux.shape(0); iz++) {
+      for (int iy=0; iy<density_flux.shape(1); iy++) {
+	for (int ix=0; ix<density_flux.shape(2); ix++) {
+
+	  enzo_float dens_flux = density_flux(iz,iy,ix);
+	  EFlt3DArray *reconstr = (dens_flux>0) ? wl_arrays : wr_arrays;
+
+	  if (unity_sum) {
+	    compute_unity_sum_passive_fluxes_(dens_flux, flux_arrays, reconstr,
+					      num_fields, iz, iy, ix);
+	  } else {
+	    for (int field_ind=0; field_ind<num_fields; field_ind++){
+	      flux_arrays[field_ind](iz,iy,ix) = (reconstr[field_ind](iz,iy,ix)
+						  * dens_flux);
+	    }
+	  }
+
+	}
+      }
+    }
+    delete[] wl_arrays; delete[] wr_arrays; delete[] flux_arrays;
+  }
+}
+
 //----------------------------------------------------------------------
+
 template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::basic_mhd_fluxes_
 (const enzo_float prim[], const enzo_float cons[], enzo_float fluxes[],
