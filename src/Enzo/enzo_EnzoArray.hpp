@@ -263,7 +263,8 @@ protected: // methods to be reused by subclasses
 
   void cleanup_helper_(){ data_ = NULL; }
 
-protected: // attributes
+public: // attributes
+  // (these are only public so that various subclasses can access these)
   std::shared_ptr<dataWrapper<T>> dataMgr_; // manages ownership of data_
   // pointer to data (copied from dataMgr to provide faster access to elements)
   T* data_;
