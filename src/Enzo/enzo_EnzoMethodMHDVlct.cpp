@@ -59,6 +59,26 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
 //----------------------------------------------------------------------
 
+void add_passive_groups_(Grouping &grouping, const std::string field_prefix)
+{
+  // Helper function that adds entries of passively advected groups (specified
+  // in the configuration file) an existing Grouping
+  EnzoCenteredFieldRegistry registry;
+  std::vector<std::string> group_names = registry.passive_scalar_group_names();
+  Grouping* ref_grouping = cello::field_descr()->groups();
+  for (unsigned int i=0;i<group_names.size();i++){
+    std::string group_name = group_names[i];
+    int num_fields = ref_grouping->size(group_name);
+    for (int j=0;j<num_fields;j++){
+      // Determine field_name
+      std::string field_name = field_prefix + ref_grouping->item(group_name,j);
+      grouping.add(field_name, group_name);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoMethodMHDVlct::setup_groups_(const EnzoFieldConditions cond)
 {
 
@@ -73,6 +93,12 @@ void EnzoMethodMHDVlct::setup_groups_(const EnzoFieldConditions cond)
   // "cons_density"
   conserved_group_ = registry.build_cons_grouping(cond, "", "cons_");
 
+  // Add passive scalars to primitive_group_ and conserved_group_
+  add_passive_groups_(*primitive_group_, "");
+  // All passive groups added to conserved_group_ are temporary. They act as
+  // "secondary" versions of the conserved fields.
+  add_passive_groups_(*conserved_group_, "cons_");
+  
   bfieldi_group_ = new Grouping;
   bfieldi_group_->add("bfieldi_x", "bfield");
   bfieldi_group_->add("bfieldi_y", "bfield");

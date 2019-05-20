@@ -184,8 +184,7 @@ public:
   }
 
   /// Returns the vector of passive scalar group names
-  std::vector<std::string> passive_scalar_group_names
-  (const EnzoFieldConditions cond)
+  std::vector<std::string> passive_scalar_group_names()
   {
     return passive_group_names;
   }

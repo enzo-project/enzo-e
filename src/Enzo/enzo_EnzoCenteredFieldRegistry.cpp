@@ -68,7 +68,7 @@ std::vector<std::string> EnzoCenteredFieldRegistry::group_names_
   #undef ENTRY
 
   if (include_passive){
-    std::vector<std::string> passive = passive_scalar_group_names(cond);
+    std::vector<std::string> passive = passive_scalar_group_names();
     out.reserve(out.size() + passive.size());
     out.insert(out.end(), passive.begin(), passive.end());
   }

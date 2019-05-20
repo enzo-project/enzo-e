@@ -72,6 +72,13 @@ public: // interface
   /// apply the pressure floor to total_energy field
   void apply_floor_to_energy(Block *block, Grouping &cons_group);
 
+private:
+  /// Copies entries of the passively advected fields included by origin_group
+  /// to the corresponding entries of the fields included in destination_group
+  void copy_passively_advected_fields_(EnzoFieldArrayFactory &array_factory,
+				       Grouping &origin_group,
+				       Grouping &destination_group);
+
 protected: // attributes
   enzo_float gamma_; // adiabatic index
   enzo_float density_floor_;

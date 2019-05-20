@@ -65,6 +65,28 @@ void EnzoEOSIdeal::compute_pressure(Block *block,
 
 //----------------------------------------------------------------------
 
+void EnzoEOSIdeal::copy_passively_advected_fields_
+(EnzoFieldArrayFactory &array_factory, Grouping &origin_group,
+ Grouping &destination_group)
+{
+  EnzoCenteredFieldRegistry registry;
+  std::vector<std::string> group_names = registry.passive_scalar_group_names();
+  for (unsigned int i=0;i<group_names.size();i++){
+    std::string group_name = group_names[i];
+    int num_fields = origin_group.size(group_name);
+    for (int j=0;j<num_fields;j++){
+
+      EFlt3DArray src = array_factory.from_grouping(origin_group,
+						    group_name, j);
+      EFlt3DArray dest = array_factory.from_grouping(destination_group,
+						     group_name, j);
+      dest.subarray() = src;
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoEOSIdeal::primitive_from_conservative(Block *block,
 					       Grouping &cons_group,
 					       Grouping &prim_group)
@@ -104,6 +126,8 @@ void EnzoEOSIdeal::primitive_from_conservative(Block *block,
       }
     }
   }
+  // Copy conserved passive fields to primitive
+  copy_passively_advected_fields_(array_factory, cons_group, prim_group);
 }
 
 //----------------------------------------------------------------------
@@ -166,6 +190,8 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
       }
     }
   }
+  // Copy primitive passive fields to conserved
+  copy_passively_advected_fields_(array_factory, prim_group, cons_group);
 }
 
 //----------------------------------------------------------------------
