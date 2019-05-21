@@ -33,6 +33,10 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
+  virtual Compute * create_compute
+  ( std::string name,
+    Config * config ) throw();
+
 private: // functions
 
   /// Create named boundary conditions object

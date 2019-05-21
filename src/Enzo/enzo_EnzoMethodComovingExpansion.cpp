@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
-( bool comoving_coordinates ) 
+( bool comoving_coordinates )
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
@@ -43,7 +43,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 
   if (block->cycle() == 0) {
     // skip first cycle
-    block->compute_done(); 
+    block->compute_done();
     return;
   }
   EnzoBlock * enzo_block = enzo::block(block);
@@ -88,7 +88,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       //      double dt = block->dt();
       enzo_float Coefficient = dt*cosmo_dadt/cosmo_a;
 
-      
+
       /* Determine the size of the block. */
 
       int mx, my, mz, m, rank;
@@ -97,25 +97,8 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       rank = cello::rank();
 
       /* If we can, compute the pressure at the mid-point.
-  	 We can, because we will always have an old baryon field now. */
+      	 We can, because we will always have an old baryon field now. */
       const int in = cello::index_static();
-      enzo_float * pressure = new enzo_float[m];
-      int rval;
-
-      if (EnzoBlock::DualEnergyFormalism[in]) {
-  	rval = enzo_block->ComputePressureDualEnergyFormalism
-	  (compute_time, pressure, comoving_coordinates_);
-      }
-      else{
-  	rval = enzo_block->ComputePressure
-	  (compute_time, pressure, comoving_coordinates_);
-      }
-      if (rval == ENZO_FAIL) {
-  	fprintf(stderr,
-  		"Error in ComputePressureDualEnergyFormalism or "
-		"ComputePressure.\n");
-  	exit(ENZO_FAIL);
-      }
 
       // hard-code hydromethod for PPM for now
       int HydroMethod = 0;
@@ -164,6 +147,35 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   	velocity_z_old = (enzo_float *) field.values("velocity_z", i_old);
       }
 
+      // Compute the pressure *now*
+      enzo_float * pressure_now     = (enzo_float *) field.values("pressure");
+      EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
+                                            comoving_coordinates_);
+      compute_pressure.compute(block, pressure_now);
+
+      // If history is present, compute time-centered pressure
+      enzo_float * pressure = NULL;
+
+      if (has_history) {
+        EnzoComputePressure compute_pressure_old (EnzoBlock::Gamma[in],
+                                                 comoving_coordinates_);
+        compute_pressure_old.set_history(i_old);
+
+        pressure = new enzo_float[m];
+
+        compute_pressure_old.compute(block, pressure);
+
+        // now compute the time-centered average of the two
+        for (int i = 0; i < m; i ++){
+          pressure[i] = 0.5*(pressure_now[i] + pressure[i]);
+        }
+
+      } else {
+
+        // if not, just use current pressure
+        *pressure = *pressure_now;
+      }
+
       /* Call fortran routine to do the real work. */
 
       FORTRAN_NAME(expand_terms)
@@ -177,11 +189,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 	 velocity_x_old, velocity_y_old, velocity_z_old,
 	 &CRModel, cr_field_new, cr_field_old);
 
-         delete [] pressure;
-         pressure = NULL;
+
+         if (has_history){
+           delete [] pressure;
+           pressure = NULL;
+         }
     }
 
-  block->compute_done(); 
+  block->compute_done();
 }
 
 //----------------------------------------------------------------------

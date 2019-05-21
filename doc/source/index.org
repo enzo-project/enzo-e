@@ -1,0 +1,510 @@
+* cello-doc/source
+  See [[file:~/Organize/Periodic/review-documentation.org][review-documentation.org]] for updated high-level structure 
+  
+	Tutorials (index-tutorial)
+           Getting started using Enzo-E
+        User Guide (index_use)
+           Using Enzo-E
+           Parameter files
+           Parameter File Example
+        Developer Guide (index_develop)
+           Developing with Cello
+           Enzo-P / Cello Guiding Principles
+           Design
+        Reference (index_reference)
+           Enzo-P / Cello parameter reference
+
+** TODO Files
+   - [ ] [[file:index.rst][index.rst]]
+     - [ ] [[file:getting_started.rst][getting_started.rst]]
+     - [ ] [[file:parameters-list.rst][parameters-list.rst]]
+     - [ ] [[file:parameters-file.rst][parameters-file.rst]]
+     - [ ] [[file:parameters-example.rst][parameters-example.rst]]
+     - [ ] [[file:using.rst][using.rst]]
+       - [ ] [[file:using-methods.rst][using-methods.rst]]
+       - [ ] [[file:using-initial.rst][using-initial]]
+       - [ ] [[file:using-fields.rst][using-fields]]
+       - [ ] [[file:using-particles.rst][using-particles]]
+     - [ ] [[file:devel.rst][devel.rst]]
+       - [ ] [[file:devel-methods.rst][devel-methods]]
+       - [ ] [[file:devel-initial.rst][devel-initial]]
+       - [ ] [[file:devel-refine.rst][devel-refine]]
+     - [ ] [[file:principles.rst][principles.rst]]
+     - [ ] [[file:design.rst][design.rst]]
+** Parameters [4/16]
+*** TODO Balance  [1/1]
+**** TODO Balance:interval
+*** TODO Boundary [7/7] 
+**** TODO Boundary:list
+**** TODO Boundary:[BOUNDARY]:type
+     std::string boundary_type[MAX_BOUNDARY];
+     default: "periodic"
+
+     The type Boundary parameter specifies the type of boundary condition.
+     Valid types include "outflow", "inflow", "periodic", and "reflecting".
+     "inflow" requires the "value" parameter to be set.
+**** TODO Boundary:[BOUNDARY]:axis
+     int boundary_axis[MAX_BOUNDARY];
+     default: "all"
+
+     The axis Boundary parameter restricts the boundary condition to be
+     only on the given axis.  Valid values for axis are "x", "y", "z",
+     or "all".
+
+**** TODO Boundary:[BOUNDARY]:face
+     int boundary_face[MAX_BOUNDARY];
+     default: "all"
+
+     The face Boundary parameter restricts the boundary condition to be
+     only on the given face.  Valid values for face are "lower", "upper",
+     or "all".
+
+**** TODO Boundary:[BOUNDARY]:mask
+     int boundary_mask[MAX_BOUNDARY];
+     
+     The mask Boundary parameter is used to restrict the boundary conditions
+     to a subset of the domain boundary.  It must be a logical expression
+     in terms of x, y, z, and t, e.g. "mask = (x >= 0.2) && (y < 0.2);"
+
+**** TODO Boundary:[BOUNDARY]:value
+     default: none
+
+     The value Boundary parameter is used by the "inflow" boundary condition
+     to specify the value of the Fields given in the list field_list.
+**** TODO Boundary:[BOUNDARY]:field_list
+     default: [] (all Fields)
+
+     std::vector<std::string> boundary_field_list[MAX_BOUNDARY];
+     default: [] The field_list parameter in the Boundary group
+     specifies a Field or list of Fields for which the boundary
+     condition is applied.  This is typically used for "inflow"
+     boundary condition types.  The default is all Fields.
+
+*** TODO Domain [2/2]
+**** TODO Domain:lower
+     double domain_lower[3];
+     default: [0.0, 0.0, 0.0]
+     The lower Domain parameter is a list of floating-point values
+     specifying the lower boundary of the computational domain.
+**** TODO Domain:upper
+     double domain_upper[3];
+     default: [1.0, 1.0, 1.0]
+     The upper Domain parameter is a list of floating-point values
+     specifying the upper boundary of the computational domain.
+*** TODO Enzo [0/1]
+**** TODO Enzo:interpolation:method
+    std::string enzo_interpolation_method;
+    [ future ]
+    The Enzo:interpolation_method specifies the type of interpolation
+    used in "enzo" interpolation, which is not implemented.  Valid
+    values are "ThirdOrderA", "SecondOrderA", "SecondOrderB",
+    "SecondOrderC", or "FirstOrderA".
+
+*** TODO Field [4/12]
+
+**** TODO Field:list
+**** TODO Field:alignment
+**** TODO Field:courant
+**** TODO Field:gamma
+**** TODO Field:ghosts
+**** TODO Field:interpolation_method
+**** TODO Field:padding
+**** TODO Field:precision
+**** TODO Field:prolong
+**** TODO Field:refresh:rank
+**** TODO Field:restrict
+**** TODO Field:<field>:centering
+
+*** TODO Initial [0/10]
+**** TODO Initial:cycle
+    int initial_cycle;
+
+    default: 0
+
+    The cycle parameter in the Initial group specifies the
+    initial value for cycle.
+
+**** TODO Initial:max_level
+    int initial_max_level;
+    default: Mesh:max_level
+
+    The max_level parameter in the Initial group specifies the
+    maximum number of mesh refinement levels for the initial
+    mesh.  The default is the Mesh group's max_level parameter.
+
+**** TODO Initial:time
+    double initial_time;
+    
+    default: 0.0
+
+    The time parameter in the Initial group specifies the initial value
+    for t.
+
+**** TODO Initial:type
+    std::string initial_type;
+    default: "value"
+
+    The type of initial conditions are specified using the type
+    parameter in the Initial group.  Valid values are "value",
+    "implosion_2d", "sedov_array_2d", and "sedov_array_3d".  The
+    "value" type requires initializing all fields using
+    Initial:FIELD:value parameters.  Other types specify
+    problem-specific initial conditions that are initialized by code,
+    as in the original Enzo application.
+    
+**** TODO Initial:FIELD:value
+     default: none
+
+     The value parameter specifies the values for the given FIELD
+     with type "value".  Odd elements of the value list are
+     floating-point expressions, which are functions of x,y,z, and t
+     that specify the field values.  Even elements of the value list
+     are masks, which can be either logical expressions (inequalities
+     involving functions of x,y,z, and t), or string specifying a PNG
+     file.  PNG files can only be used for 2D problems, and the mask is
+     defined to be true wherever the PNG file is non-black.  See
+     input/sdsc-demo.in for a PNG file mask example, and
+     input/test_implosion-value.in for a simple logical expression mask
+     example.
+     
+**** TODO Initial:sedov:array
+     int enzo_sedov_array[3];
+     The Initial:sedov:array parameter specifies the size of the array of
+     Sedov blasts for the "sedov_array_2d" and "sedov_array_3d" Initial
+     Initialation problems.
+**** TODO Initial:sedov:radius_relative
+     double enzo_sedov_radius_relative;
+     The Initial:sedov:array parameter specifies the initial radius of the
+     Sedov explosions in the "sedov_array_2d" and "sedov_array_3d" Initial
+     Initialation problems.
+**** TODO Initial:sedov:pressure_in
+     double enzo_sedov_pressure_in;
+
+     The Initial:sedov:pressure_in parameter specifies the initial internal
+     pressure of the 
+     Sedov explosions in the "sedov_array_2d" and "sedov_array_3d" Enzo
+     Initialation problems.
+**** TODO Enzo:sedov:pressure_out
+     double enzo_sedov_pressure_out;
+     The Enzo:sedov:pressure_out parameter specifies the initial external
+     pressure of the 
+     Sedov explosions in the "sedov_array_2d" and "sedov_array_3d" Enzo
+     Initialation problems.
+**** TODO Enzo:sedov:density
+     double enzo_sedov_density;
+     The Enzo:sedov:density parameter specifies the initial density
+      in the "sedov_array_2d" and "sedov_array_3d" Enzo Initialation problems.
+*** TODO Memory [0/1]
+**** TODO Memory:active
+    bool  memory_active;
+    default: true
+
+    The active parameter in Memory is used to turn on and off the
+    tracking of memory usage, which includes current number of
+    bytes, high-water number of bytes since both the beginning of
+    execution and the beginning of the current cycle.  Numbers
+    of allocations and deallocations are also tracked.  This
+    parameter only turns of tracking but not the overloading of
+    new()[] and delete()[], which is controlled by the 
+    "memory" variable in the SConstruct file.
+
+*** TODO Mesh [0/12]
+    int num_adapt;
+**** TODO "Mesh:adapt_interval"
+     int adapt_interval;
+     default 1
+     Mesh adaptation does not need to be performed every cycle.  The "Mesh:adapt_interval"
+     parameter specifies how frequently mesh adaption is performed in root-level cycles.
+**** TODO "Mesh:balance"
+     bool  adapt_balance;
+     default true
+     Mesh "balancing" refers to enforcing the 2-to-1 refinement level constraint,
+     which prohibits neighboring Blocks from being more than one refinement
+     level different.  I.e. for all blocks Bi and Bj in the mesh, 
+     adjacent (Bi, Bj) implies | level(Bi) - level(Bj) | <= 1
+**** TODO "Mesh:list"
+     std::string adapt_list[MAX_MESH];
+     default <none>
+
+     The Mesh:list parameter lists a sequence of mesh refinement
+     criteria subgroups.
+     
+     Mesh {
+
+       	list = ["SLOPE", "MASK"];
+
+       	SLOPE {
+            type = "slope";
+            field_list = ["density"];
+	    min_refine  = 3.0;
+	    max_coarsen = 1.0;
+       	};
+
+       	MASK {
+            type = "mask";
+	    value = [6.0, ((0.3 <= x && x <= 0.7) &&
+	                   (0.3 <= y && y <= 0.7)),
+                     0.0 ]
+       	}
+     }
+
+     Here, two refinement criteria are defined.  The first, which we
+     name "SLOPE", refines if the relative slope of the density is
+     greater than 3, and coarsen if it is less than 1, where the
+     relative slope of the density is defined as $| (\rho_{x+h} -
+     \rho_{x-h}) / (2 h \rho_x) |$.  The second, which we name MASK, is
+     of type "mask".  It specifies to refine to level 6 if $0.3 \le x,y
+     \le 0.7$, otherwise try to coarsen to level 0.  Both SLOPE and
+     MASK criteria are evaluated, and the maximum is used for the
+     target refinement level.  The actual refinement level of the block
+     in the next cycle will change at most one level if the target
+     level is more than one level different, and if mesh balancing is
+     set a block may refine even if the refinement criteria allows it
+     to coarsen or stay the same.
+
+**** TODO "Mesh:MESH_GROUP:type"
+     std::string adapt_type[MAX_MESH];
+
+     The mesh adapt type specifies the mesh refinement criteria.
+     Current valid types are "slope" for relative slope, and "mask" to
+     specify the target refinement level based on if-then-else list "[
+     level_1, mask_1, level_2, mask_2, level_3, ...]".  Note that level
+     must be specified as a float not an integer---this is so that
+     floating-point expressions such as "5.0+x-y" can be used.
+     A "mass" refinement criteria is partially implemented, though
+     it still requires field_list to be specified.
+     
+**** TODO "Mesh:MESH_GROUP:field_list"
+     std::vector<std::string> adapt_field_list[MAX_MESH];
+
+     The field_list Mesh parameter specifies a list of Field's for which
+     the refinement criteria are to be applied.
+
+**** TODO "Mesh:MESH_GROUP:min_refine"
+     double adapt_min_refine[MAX_MESH];
+
+     The min_refine Mesh parameter specifies the minimum value on the
+     refinement criteria value at which  refinement is required.
+
+**** TODO "Mesh:MESH_GROUP:max_coarsen"
+     double adapt_max_coarsen[MAX_MESH];
+
+     The max_coarsen Mesh parameter specifies the maximum value on the
+     refinement criteria value at which coarsening is allowed.
+
+**** TODO "Mesh:MESH_GROUP:level_exponent"
+     double adapt_level_exponent[MAX_MESH];
+
+     The level_exponent Mesh parameter specifies how the mesh refinement
+     criteria changes with mesh level.  This is only used in the "mass"
+     refinement criteria type, which is not tested.
+
+**** TODO Mesh:root_blocks
+    int mesh_root_blocks[3];
+    default: [1,1,1]
+    The root_blocks parameter specifies the size of the "octree
+    array".  If mesh refinement is used, then this specifies the
+    number of blocks in the root grid, though, depending on the
+    problem, coarser mesh layers may be fully refined.
+**** TODO Mesh:root_rank;
+    int mesh_root_rank;
+    default: 0
+
+    The root_rank Mesh parameter specifies the dimensionality of the
+    problem being solved.  This is a required parameter, and
+    must be 1, 2, or 3.
+**** TODO Mesh:root_size
+    int mesh_root_size[3];
+    default: [1,1,1]
+
+    The root_size Mesh parameter specifies the size of the root mesh
+    in terms of computational zones.  This is a required parameter, and
+    corresponding elements should be evenly divisible by root_blocks.
+
+    Example: Specify a 2D problem on a 1024 x 1024 mesh divided into 16 x
+    16 blocks, where each block has [1024/16,1024/16] = [64,64] cells:
+
+    Mesh {
+       root_rank   = 2;
+       root_size   = [1024,1024];
+       root_blocks = [16,16];
+    }
+**** TODO Mesh:max_level
+    int mesh_max_level;
+    default: 0
+
+    The max_level Mesh parameter controls the maximum mesh refinement level.
+    The default 0 means a uniform grid, i.e. no additional mesh levels.
+    
+*** TODO Method [21/21]
+**** TODO Method:list
+**** TODO Method:cosmology
+     bool  enzo_cosmology;
+     [ future ]
+**** TODO Method:cosmology:comoving_box_size
+     double enzo_cosmology_comoving_box_size;
+     [ future ]
+**** TODO Method:cosmology:hubble_constant_now
+     double enzo_cosmology_hubble_constant_now;
+     [ future ]
+**** TODO Method:cosmology:initial_redshift
+     double enzo_cosmology_initial_redshift;
+     [ future ]
+**** TODO Method:cosmology:max_expansion_rate
+     double enzo_cosmology_max_expansion_rate;
+     [ future ]
+**** TODO Method:cosmology:omega_lamda_now
+     double enzo_cosmology_omega_lamda_now;
+     [ future ]
+**** TODO Method:cosmology:omega_matter_now
+     double enzo_cosmology_omega_matter_now;
+     [ future ]
+**** TODO Method:ppm:density_floor
+     double enzo_ppm_density_floor;
+
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:diffusion
+     bool  enzo_ppm_diffusion;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:dual_energy
+     bool  enzo_ppm_dual_energy;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:dual_energy_eta_1
+     double enzo_ppm_dual_energy_eta_1;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:dual_energy_eta_2
+     double enzo_ppm_dual_energy_eta_2;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:flattening
+     int enzo_ppm_flattening;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:minimum_pressure_support_parameter
+     int enzo_ppm_minimum_pressure_support_parameter;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:number_density_floor
+     double enzo_ppm_number_density_floor;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:pressure_floor
+     double enzo_ppm_pressure_floor;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:pressure_free
+     bool  enzo_ppm_pressure_free;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:steepening
+     bool  enzo_ppm_steepening;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:temperature_floor
+     float enzo_ppm_temperature_floor;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+**** TODO Method:ppm:use_minimum_pressure_support
+     bool  enzo_ppm_use_minimum_pressure_support;
+     The density_floor PPM parameter in the Enzo parameter group corresponds
+     to the analagous parameter in Enzo.
+*** TODO Monitor [0/1]
+**** TODO Method:debug
+    bool  monitor_debug;
+
+    The debug Monitor parameter specifies whether to output DEBUG
+    monitor group messages.  This parameter is not implemented.
+
+*** TODO Output [0/19]
+    int num_file_groups;
+**** TODO Output:file_groups
+    std::vector<std::string> output_file_groups;
+**** TODO Output:FILE_GROUP:axis
+    std::string output_image_axis  [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:dir
+    std::vector<std::string> output_dir [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:field_list
+    std::vector<std::string> output_field_list  [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_block_size
+    int output_image_block_size  [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_colormap
+    std::vector<double>  output_image_colormap [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_face_rank
+    int output_image_face_rank [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_ghost
+    bool  output_image_ghost [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_log
+    bool  output_image_log [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_max
+    double output_image_max [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_mesh_color
+    std::string output_image_mesh_color  [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_min
+    double output_image_min [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_reduce_type
+    std::string output_image_reduce_type [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_size
+    std::vector<int>  output_image_size  [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_specify_bounds
+    bool  output_image_specify_bounds [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:image_type
+    std::string output_image_type  [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:name
+    std::vector<std::string> output_name  [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:stride
+    int output_stride [MAX_FILE_GROUPS];
+**** TODO Output:FILE_GROUP:type
+    std::string output_type  [MAX_FILE_GROUPS];
+*** TODO Performance [0/4]
+    std::string projections_schedule_on_var;
+    double projections_schedule_on_start;
+    double projections_schedule_on_stop;
+    double projections_schedule_on_step;
+    std::vector<double>  projections_schedule_on_list;
+    std::string projections_schedule_off_type;
+    std::string projections_schedule_off_var;
+    double projections_schedule_off_start;
+    double projections_schedule_off_stop;
+    double projections_schedule_off_step;
+    std::vector<double>  projections_schedule_off_list;
+**** TODO Performance:papi_counters
+    std::vector<std::string> performance_papi_counters;
+**** TODO Performance:name
+    std::string performance_name;
+**** TODO Performance:stride
+    int performance_stride;
+**** TODO Performance:warnings
+    bool  performance_warnings;
+*** TODO Schedule [0/6]
+**** TODO GROUP:schedule:list
+    std::vector<double>  output_schedule_list  [MAX_FILE_GROUPS];
+**** TODO GROUP:schedule:start
+    double output_schedule_start [MAX_FILE_GROUPS];
+**** TODO GROUP:schedule:step
+    double output_schedule_step  [MAX_FILE_GROUPS];
+**** TODO GROUP:schedule:stop
+    double output_schedule_stop  [MAX_FILE_GROUPS];
+**** TODO GROUP:schedule:type
+    std::string output_schedule_type  [MAX_FILE_GROUPS];
+**** TODO GROUP:schedule:var
+    std::string output_schedule_var [MAX_FILE_GROUPS];
+
+*** TODO Stopping [0/3]
+**** TODO Stopping:cycle
+    int stopping_cycle;
+**** TODO Stopping:time
+    double stopping_time;
+**** TODO Stopping:interval
+    int stopping_interval;
+*** TODO Testing [0/2]
+**** TODO Testing:cycle_final
+    int testing_cycle_final;
+**** TODO Testing:time_final
+    double testing_time_final;
+*** TODO Timestep [0/1]
+**** TODO Timestep:type
+     std::string timestep_type;

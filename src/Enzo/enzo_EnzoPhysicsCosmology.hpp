@@ -12,7 +12,7 @@ class EnzoPhysicsCosmology : public Physics {
 
   /// @class    EnzoPhysicsCosmology
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] 
+  /// @brief    [\ref Enzo]
 
 public: // interface
 
@@ -99,7 +99,7 @@ public: // interface
     TRACEPUP;
 
     Physics::pup(p);
-    
+
     p | hubble_constant_now_;
     p | omega_matter_now_;
     p | omega_baryon_now_;
@@ -145,7 +145,7 @@ public: // interface
   { initial_redshift_=value; }
   void set_final_redshift(enzo_float value)
   { final_redshift_=value; }
-  
+
   enzo_float initial_time_in_code_units() const
   { return time_from_redshift (initial_redshift_); }
   enzo_float time_from_redshift (enzo_float redshift) const;
@@ -160,25 +160,25 @@ public: // interface
   {
     update_expansion_factor (time);
     current_redshift_ = (1 + initial_redshift_)/cosmo_a_ - 1;
-    
+
   }
 
   void set_current_redshift (enzo_float redshift)
   {
     set_current_time(time_from_redshift(redshift));
   }
-  
+
   void update_expansion_factor(enzo_float time)
   {
     compute_expansion_factor(&cosmo_a_,&cosmo_dadt_,time);
   }
-      
+
   void compute_expansion_timestep
   (enzo_float *dt_expansion, enzo_float time) const;
 
   void compute_expansion_factor
   (enzo_float *cosmo_a, enzo_float *cosmo_dadt, enzo_float time) const;
-  
+
   /// Return current mass units scaling (requires set_current_time())
   double mass_units() const
   {
@@ -192,7 +192,7 @@ public: // interface
   /// Return current length units scaling (requires set_current_time())
   double length_units() const
   {
-    return 3.085678e24*comoving_box_size_/hubble_constant_now_/
+    return cello::Mpc_cm*comoving_box_size_/hubble_constant_now_/
       (1.0 + current_redshift_);
   }
 
@@ -238,7 +238,7 @@ public: // virtual methods
   virtual std::string type() const { return "cosmology"; }
 
 protected: // attributes
-  
+
   // NOTE: change pup() function whenever attributes change
 
   // Constant parameters
@@ -260,4 +260,3 @@ protected: // attributes
 };
 
 #endif /* ENZO_ENZO_PHYSICS_COSMOLOGY_HPP */
-

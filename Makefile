@@ -13,14 +13,19 @@ help:
 	@echo "make coverity   Compile enzo-p using the coverity static analysis tool"
 	@echo "make diff       Generate org-mode 'diff.org' file from 'git diff' output"
 	@echo "make gdb        Generate org-mode 'gdb.org' from gdb 'where' output in gdb.out"
-	@echo "make doc        Generate doxygen documentation from source in src-html"
+	@echo "make doc        Generate html documentation from Sphinx in doc/build/html"
+	@echo "make dox        Generate doxygen html documentation from source in doc/dox-html"
 #	@echo "make log        Generate org-mode 'log.org' file from 'git log' output"
 	@echo "make reset      Clear any settings from an incomplete ./build.sh"
 	@echo "make test       Run regression tests"
 #----------------------------------------------------------------------
 .PHONY: doc
 doc:
-	$(MAKE) -C src doc
+	$(MAKE) -C doc html
+#----------------------------------------------------------------------
+.PHONY: dox
+dox:
+	$(MAKE) -C src dox-html
 #----------------------------------------------------------------------
 .PHONY: clean
 clean:

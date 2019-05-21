@@ -26,7 +26,6 @@ class EnzoBlock : public BASE_ENZO_BLOCK
   friend class EnzoTimestep;
   friend class EnzoTimestepPpm;
   friend class EnzoTimestepPpml;
-  friend class EnzoInitialGrackleTest;
   friend class EnzoInitialImplosion2;
   friend class EnzoInitialSedovArray2;
 
@@ -173,24 +172,6 @@ public: // interface
   //----------------------------------------------------------------------
 
   //  enzo_float ComputeTimeStep();
-
-  /// Compute the ratio of specific heats
-  int ComputeGammaField(enzo_float *GammaField,
-			bool comoving_coordinates);
-
-  /// Compute the pressure field at the given time) - dual energy
-  int ComputePressureDualEnergyFormalism
-  ( enzo_float time, 
-    enzo_float *pressure,
-    bool comoving_coordinates);
-
-  /// Compute the pressure field at the given time
-  int ComputePressure(enzo_float time, enzo_float *pressure, 
-		      bool comoving_coordinates);
-
-  /// Compute the temperature field
-  int ComputeTemperatureField (enzo_float *temperature, 
-			       bool comoving_coordinates);
 
   /// Set the energy to provide minimal pressure support
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient,

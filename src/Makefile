@@ -21,15 +21,15 @@ clean:
 # DOXYGEN
 #=======================================================================
 
-.PHONY: doc doc-html doc-latex doc-xml
+.PHONY: dox dox-html dox-latex dox-xml
 
-doc: doc-html doc-latex doc-xml
+dox: dox-html dox-latex dox-xml
 
-doc-html:
+dox-html:
 	doxygen doxygen/Doxyfile-html
-doc-xml:
+dox-xml:
 	doxygen doxygen/Doxyfile-xml
-doc-latex:
+dox-latex:
 	doxygen doxygen/Doxyfile-latex
 	@echo;echo "SEE Makefile FOR MANUAL UPDATES TO latex/refman.tex"; echo
 
