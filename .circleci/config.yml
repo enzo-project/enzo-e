@@ -7,7 +7,6 @@ commands:
       - run: |
           echo 'export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH' >> $BASH_ENV
           echo 'export CELLO_ARCH=linux_gnu' >> $BASH_ENV
-          echo 'export CELLO_PREC=single' >> $BASH_ENV
           echo 'export HDF5_INC=/usr/include/hdf5/serial' >> $BASH_ENV
           echo 'export HDF5_LIB=/usr/lib/x86_64-linux-gnu' >> $BASH_ENV
           echo 'export CHARM_HOME=$HOME/local/charm-6.9.0' >> $BASH_ENV
@@ -62,17 +61,20 @@ commands:
   build-and-test:
     description: "Compile enzo-e and run tests."
     parameters:
+      prec:
+        type: string
       tag:
         type: string
         default: tip
       skipfile:
         type: string
-        default: ""
+        default: notafile
     steps:
       - run: |
           source $BASH_ENV
           if [ ! -f << parameters.skipfile >> ]; then
             git checkout << parameters.tag >>
+            export CELLO_PREC=<< parameters.prec >>
             make
             make test
           fi
@@ -87,6 +89,10 @@ commands:
 
 jobs:
   test-suite:
+    parameters:
+      prec:
+        type: string
+
     docker:
       - image: circleci/python:3.7.2
 
@@ -111,6 +117,7 @@ jobs:
       - install-grackle
 
       - build-and-test:
+          prec: << parameters.prec >>
           tag: tip
           skipfile: notafile
 
@@ -126,9 +133,10 @@ jobs:
       - build-docs
 
 workflows:
-   version: 2
-
    tests:
      jobs:
-       - test-suite
+       - test-suite:
+           prec: single
+       - test-suite:
+           prec: double
        - docs-build
