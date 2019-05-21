@@ -74,11 +74,13 @@ Data & Data::operator= (const Data & data) throw ()
 
 //----------------------------------------------------------------------
 
-void Data::field_cells (double * x, double * y, double * z,
-			 int gx, int gy, int gz) const
+void Data::field_cell_faces (double * x, double * y, double * z,
+			     int gx, int gy, int gz,
+			     int cx, int cy, int cz) const
 {
+  // cx, cy, and cz are expected to be 1 or 0. If its 0, then the
+  // position along the corresponding dimension are for cell centers
   double hx,hy,hz;
-
   field_cell_width (&hx,&hy,&hz);
 
   double xm,ym,zm;
@@ -91,13 +93,17 @@ void Data::field_cells (double * x, double * y, double * z,
   int iym = -gy;
   int izm = -gz;
 
-  int ixp = nx+gx;
-  int iyp = ny+gy;
-  int izp = nz+gz;
+  int ixp = nx+gx+cx;
+  int iyp = ny+gy+cy;
+  int izp = nz+gz+cz;
+
+  double dx = (cx == 0) ? 0.5 : 0;
+  double dy = (cy == 0) ? 0.5 : 0;
+  double dz = (cz == 0) ? 0.5 : 0;
   
-  for (int ix=ixm; ix<ixp; ix++) x[ix-ixm] = xm + (ix+0.5)*hx;
-  for (int iy=iym; iy<iyp; iy++) y[iy-iym] = ym + (iy+0.5)*hy;
-  for (int iz=izm; iz<izp; iz++) z[iz-izm] = zm + (iz+0.5)*hz;
+  for (int ix=ixm; ix<ixp; ix++) x[ix-ixm] = xm + (ix+dx)*hx;
+  for (int iy=iym; iy<iyp; iy++) y[iy-iym] = ym + (iy+dy)*hy;
+  for (int iz=izm; iz<izp; iz++) z[iz-izm] = zm + (iz+dz)*hz;
 }
 
 //----------------------------------------------------------------------

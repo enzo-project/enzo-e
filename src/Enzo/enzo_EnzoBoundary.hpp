@@ -70,11 +70,16 @@ protected: // functions
     enzo_float * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
+    int cx,int cy,int cz,
     bool vx,bool vy,bool vz,
     double * x, double * y, double * z,
     double xm, double ym, double zm,
     double xp, double yp, double zp,
     double t) const throw();
+
+  /// Checks if the field name matches one of the vector fields
+  bool has_vector_name_(std::string field_name,
+			std::string component) const throw();
 
   //--------------------------------------------------
 
@@ -92,6 +97,7 @@ protected: // functions
     enzo_float * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
+    int cx,int cy,int cz,
     double * x, double * y, double * z,
     double xm, double ym, double zm,
     double xp, double yp, double zp,
