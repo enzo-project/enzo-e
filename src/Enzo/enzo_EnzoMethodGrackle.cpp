@@ -647,6 +647,6 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
 
   return;
 }
-#endif CONFIG_USE_GRACKLE
+#endif //CONFIG_USE_GRACKLE
 
 //======================================================================
