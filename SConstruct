@@ -112,7 +112,7 @@ use_gprof = 0
 # WARNING: must update grackle-related lines in src/Enzo/enzo.ci
 #----------------------------------------------------------------------
 
-use_grackle = 0
+use_grackle = 1
 
 #----------------------------------------------------------------------
 # Whether to run the test programs using valgrind to check for memory leaks
@@ -294,6 +294,7 @@ elif (arch == "gordon_intel"): from gordon_intel import *
 elif (arch == "gordon_pgi"):   from gordon_pgi   import *
 elif (arch == "comet_gnu"):    from comet_gnu    import *
 elif (arch == "linux_gnu"):    from linux_gnu    import *
+elif (arch == "linux_illium"): from linux_illium import *
 elif (arch == "linux_intel"):  from linux_intel  import *
 elif (arch == "linux_yt"):     from linux_yt     import *
 elif (arch == "linux_gprof"):  from linux_gprof  import *
@@ -460,8 +461,8 @@ libpath = libpath + [ boost_lib ]
 #----------------------------------------------------------------------
 
 if (use_grackle != 0):
-      cpppath.append(grackle_path)
-      libpath.append(grackle_path)
+      cpppath.append(grackle_path + '/include')
+      libpath.append(grackle_path + '/lib')
 
 #----------------------------------------------------------------------
 # LIBPNG PATHS

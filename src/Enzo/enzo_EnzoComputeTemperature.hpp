@@ -1,8 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoComputeTemperature.hpp
-/// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     2014-10-27 22:37:41
+/// @author   James Bordner (jobordner@ucsd.edu)
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputeTemperature functions
 
 #ifndef ENZO_ENZO_COMPUTE_TEMPERATURE_HPP
@@ -17,7 +18,7 @@ class EnzoComputeTemperature : public Compute {
 public: // interface
 
   /// Create a new EnzoComputeTemperature object
-  EnzoComputeTemperature 
+  EnzoComputeTemperature
   (double density_floor,
    double temperature_floor,
    double mol_weight,
@@ -25,7 +26,7 @@ public: // interface
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputeTemperature);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoComputeTemperature (CkMigrateMessage *m)
     : Compute(m),
@@ -37,13 +38,28 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-  
+
   /// Perform the computation on the block
   virtual void compute( Block * block) throw();
 
+  virtual void compute( Block * block, enzo_float * t) throw();
+
+  // name of derived field that this function calculates
+  std::string name () throw() {
+    return "temperature";
+  }
+
+  void compute_(Block * block,
+    enzo_float * t,
+    bool recompute_presure = true
+#ifdef CONFIG_USE_GRACKLE
+ , code_units * grackle_units = NULL,
+   grackle_field_data * grackle_fields = NULL
+#endif
+ );
+
 private: // functions
 
-  void compute_(Block * block);
 
 private: // attributes
 

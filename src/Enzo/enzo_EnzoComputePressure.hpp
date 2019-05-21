@@ -1,8 +1,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoComputePressure.hpp
-/// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     2014-10-27 22:37:41
+/// @author   James Bordner (jobordner@ucsd.edu)
+///           Andrew Emerick (aemerick11@gmail.com)
+/// @date     2019-05-07
 /// @brief    [\ref Enzo] Implementation of Enzo's ComputePressure functions
 
 #ifndef ENZO_ENZO_COMPUTE_PRESSURE_HPP
@@ -22,7 +23,7 @@ public: // interface
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoComputePressure);
-  
+
   /// Charm++ PUP::able migration constructor
   EnzoComputePressure (CkMigrateMessage *m)
     : Compute(m),
@@ -32,13 +33,26 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
-  
+
+  // name of derived field that this function calculates
+  std::string name () throw() {
+    return "pressure";
+  }
+
   /// Perform the computation on the block
-  virtual void compute( Block * block) throw();
+  void compute( Block * block) throw();
 
-protected: // functions
+  void compute( Block * block, enzo_float * p) throw();
 
-  void compute_(Block * block);
+  void compute_(Block * block,
+                enzo_float * p
+#ifdef CONFIG_USE_GRACKLE
+               , code_units * grackle_units = NULL,
+                 grackle_field_data * grackle_fields = NULL
+#endif
+    );
+
+    
 
 protected: // attributes
 
