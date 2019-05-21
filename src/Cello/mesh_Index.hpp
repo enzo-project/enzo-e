@@ -9,10 +9,12 @@
 #define INDEX_BITS_TREE   20
 #define INDEX_BITS_LEVEL   2
 
-struct BIndex {
+class NodeBits {
 
   // original order ATL crashed in Charm++ during load balancing
 
+public:
+  
   unsigned  tree : INDEX_BITS_TREE; 
   unsigned level : INDEX_BITS_LEVEL; 
   unsigned array : INDEX_BITS_ARRAY;
@@ -186,7 +188,7 @@ private: // methods
 private: // attributes
 
     union {
-      BIndex a_[3];
+      NodeBits a_[3];
       int v_[3];
     };
 };
@@ -200,34 +202,19 @@ private: // attributes
 //   void pup(PUP::er &p) {
     
 //   }
-PUPbytes(BIndex)
+PUPbytes(NodeBits)
 #endif
 
 //----------------------------------------------------------------------
 #ifndef TEST
 class CkArrayIndexIndex:public CkArrayIndex {
-  Index index_;
+  Index * index_;
 public:
   CkArrayIndexIndex(const Index &in)
   {
-    index_=in;
-    nInts=sizeof(index_)/sizeof(int);
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    // ADDED SINCE OTHERWISE CkArrayIndex::index[] DOES NOT GET INITIALIZED
-    int v3[3];
-    in.values(v3);
-    index[0] = v3[0];
-    index[1] = v3[1];
-    index[2] = v3[2];
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    index_ = new (index) Index(in);
+    nInts=sizeof(Index)/sizeof(int);
   }
-  /// Not required, but convenient: cast-to-foo operators
-  operator Index &() {return index_;}
-  /// Return the Index
-  operator const Index &() const {return index_;}
-  /// Return the Index
-  Index & ind() { return index_; }
-  
 };
 #endif
 

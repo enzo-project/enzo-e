@@ -139,6 +139,9 @@ public: // interface
     }
   }
   
+  /// Add named fields to the list of fields to refresh
+  void add_field_src_dst(std::string field_src, std::string field_dst);
+  
   /// All fields are refreshed
   void add_all_fields() {
     all_fields_ = true;
@@ -304,7 +307,7 @@ public: // interface
 
   /// Return loop limits 0:3 for 4x4x4 particle data array indices
   /// for the given neighbor
-  void index_limits
+  void get_particle_bin_limits
   (int rank,
    int refresh_type, 
    int if3[3], int ic3[3],
@@ -329,7 +332,7 @@ public: // interface
 	  upper[axis] = 4 - ic3[axis];
 	} else {
 	  print();
-	  ERROR1 ("Refresh::index_limits()",
+	  ERROR1 ("Refresh::get_particle_bin_limits()",
 		  "unknown refresh_type %d",
 		  refresh_type);
 	}

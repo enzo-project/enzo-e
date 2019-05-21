@@ -80,7 +80,6 @@ int Solver::add_refresh (int ghost_depth,
     (new Refresh
      (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true));
 #endif  
-     
   id_sync_ = sync_id;
   return index;
 }

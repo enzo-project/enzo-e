@@ -38,7 +38,7 @@
 // #define DEBUG_CALLBACK
 
 // #define TRACE_DOT
-// #define TRACE_DOT_CYCLE 103
+// #define TRACE_DOT_CYCLE 0
 
 // #define TRACE_BCG
 
@@ -249,12 +249,14 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
   
   /// Initialize default Refresh (called before entry to compute())
 
-  const int ghost_depth = 4;
-  const int min_face_rank = 0;
+  // upper limit on A_->ghost_depth(), which isn't known yet
+  const int ghost_depth = 4; 
+  const int min_face_rank = cello::rank() - 1;
 
   const int ir = add_refresh
-    (ghost_depth, min_face_rank, neighbor_type_(),
-     sync_type_(), enzo_sync_id_solver_bicgstab);
+    (ghost_depth,min_face_rank,
+     neighbor_type_(), sync_type_(),
+     enzo_sync_id_solver_bicgstab);
 
   if (solve_type_ == solve_tree)
     refresh(ir) -> set_root_level (coarse_level_);
@@ -792,18 +794,18 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
 
   // Refresh field faces then call p_solver_bicgstab_loop_25()
   
+  const int ghost_depth = A_->ghost_depth();
   const int min_face_rank = cello::rank() - 1;
 
-  const int ghost_depth = A_->ghost_depth();
   Refresh refresh
-    (ghost_depth,min_face_rank,neighbor_type_(),
-     sync_type_(), enzo_sync_id_solver_bicgstab_loop_25);
+    (ghost_depth,min_face_rank,
+     neighbor_type_(), sync_type_(),
+     enzo_sync_id_solver_bicgstab_loop_25);
 
   if (solve_type_ == solve_tree)
     refresh.set_root_level (coarse_level_);
 
   refresh.set_active(is_finest_(block));
-  //  refresh.add_all_fields();
 
   refresh.add_field (ix_);
 
@@ -1115,10 +1117,12 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
 
   // Refresh field faces then call p_solver_bicgstab_loop_85()
 
-  const int ghost_depth = A_->ghost_depth();  
+  const int ghost_depth = A_->ghost_depth();
   const int min_face_rank = cello::rank() - 1;
+
   Refresh refresh
-    (ghost_depth,min_face_rank,neighbor_type_(), sync_type_(),
+    (ghost_depth,min_face_rank,
+     neighbor_type_(), sync_type_(),
      enzo_sync_id_solver_bicgstab_loop_85);
   
   if (solve_type_ == solve_tree)
@@ -1156,7 +1160,7 @@ void EnzoBlock::p_solver_bicgstab_loop_9() {
 //----------------------------------------------------------------------
 
 void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
-  
+
   TRACE_BCG(block,this,"loop_10");
 
   /// access field container on this block

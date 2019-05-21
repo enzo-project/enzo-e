@@ -33,14 +33,12 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
 			     enzo_sync_id_method_pm_update);
 
   FieldDescr * field_descr = cello::field_descr();
-  
-  const int ax = field_descr->field_id("acceleration_x");
-  const int ay = field_descr->field_id("acceleration_y");
-  const int az = field_descr->field_id("acceleration_z");
 
-  if (ax >= 0) refresh(ir)->add_field(ax);
-  if (ay >= 0) refresh(ir)->add_field(ay);
-  if (az >= 0) refresh(ir)->add_field(az);
+  const int rank = cello::rank();
+  
+  if (rank >= 1) refresh(ir)->add_field("acceleration_x");
+  if (rank >= 2) refresh(ir)->add_field("acceleration_y");
+  if (rank >= 3) refresh(ir)->add_field("acceleration_z");
 			     
   ParticleDescr * particle_descr = cello::particle_descr();
 

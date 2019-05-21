@@ -23,7 +23,7 @@ EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant)
 
   FieldDescr * field_descr = cello::field_descr();
   
-  refresh(ir)->add_field(field_descr->field_id("temperature"));
+  refresh(ir)->add_field("temperature");
 }
 
 //----------------------------------------------------------------------

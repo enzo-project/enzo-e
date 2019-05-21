@@ -236,6 +236,13 @@ namespace cello {
 
   //---------------------------------------------------------------------- 
 
+  const Parameters * parameters()
+  {
+    return simulation() ? simulation()->parameters() : NULL;
+  }
+
+  //---------------------------------------------------------------------- 
+
   Problem * problem()
   {
     return simulation() ? simulation()->problem() : NULL;

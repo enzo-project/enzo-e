@@ -130,8 +130,8 @@ module enzo {
     entry void p_method_turbulence_end(CkReductionMsg *msg);
 
     // EnzoMethodGravity synchronization entry methods
-    entry void r_method_gravity_continue();
-    entry void r_method_gravity_end();
+    entry void r_method_gravity_continue(CkReductionMsg *msg);
+    entry void r_method_gravity_end(CkReductionMsg *msg);
 
     // EnzoSolverCg synchronization entry methods
 
