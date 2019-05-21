@@ -1,0 +1,7 @@
+:Parameter:  :p:`Restart` : :p:`file`
+:Summary: :s:`Parameter file to read on restart`
+:Type:    :t:`string`
+:Default: :d:`""`
+:Scope:     :c:`Cello`
+
+:e:`This optional parameter is used to specify the name of a parameter file to read on restart.  Its purpose is to allow a simulation to be restarted with slightly different parameter values, e.g. with a smaller courant number.  Currently, very few parameters are supported in the restart parameter file, just` :p:`Field` : :p:`courant` :e:`and` :p:`Testing` : :p:`time_final`.

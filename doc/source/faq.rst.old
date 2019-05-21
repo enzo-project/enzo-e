@@ -1,0 +1,54 @@
+.. toctree::
+   :maxdepth: 1
+
+**************************
+Frequently Asked Questions
+**************************
+
+**This document is currently incomplete; for a PDF version of this page, please visit the** `State of Enzo-P / Cello <http://cello-project.org/faq.pdf>`_ **talk presented (in part) at the Enzo Days 2014 meeting.  It is organized as a FAQ, and contains the source material being used for this page.  It is best viewed using acroread or other PDF reader that supports hyperlinks.  Click on the
+"Home" button at the bottom right to go to the Table of Contents page.**
+
+What is the current state of Enzo-P/Cello?
+******************************************
+
+[ 2014-10-03 00:19:30 ]
+
+As of version 1.0beta, Enzo-P / Cello supports the features below.
+[Items in brackets are implemented but not thoroughly tested.]
+
++-------------------------+-------------------------------------------------------+
+| Methods                 | PPM, PPML, [turbulence, chemistry/cooling]            |
++-------------------------+-------------------------------------------------------+
+| Block data              | Field (padding, alignment, precision, centering)      |
++-------------------------+-------------------------------------------------------+
+| Initial conditions      | direct (f(x, y, z)), problems (Implosion, Sedov)      |
++-------------------------+-------------------------------------------------------+
+| Boundary conditions     | inflow (f(x, y, z, t)), outflow, reflecting, periodic |
++-------------------------+-------------------------------------------------------+
+| Refinement criteria     | slope, mass, shock, shear                             |
++-------------------------+-------------------------------------------------------+
+| Interpolation           | linear                                                |
++-------------------------+-------------------------------------------------------+
+| Time stepping           | uniform                                               |
++-------------------------+-------------------------------------------------------+
+| Checkpoint/restart      | Charm++                                               |
++-------------------------+-------------------------------------------------------+
+| Load balancing          | Charm++ (many available, some work)                   |
++-------------------------+-------------------------------------------------------+
+| I/O                     | HDF5, PNG                                             |
++-------------------------+-------------------------------------------------------+
+| Performance             | time, memory (current,highest,highest-per-cycle)      |
++-------------------------+-------------------------------------------------------+
+
+Currently particle support is being designed and implemented.  Key features planned
+include the following:
+
+   1. Block-local coordinate systems for positions
+   2. Positions stored as integers
+   3. Packed particle data to optimize memory use and allocation/deallocations
+
+Most notable limitations include but are not limited to:
+
+   1. Linear interpolation only--not conservative
+   2. 4 ghost zones required for interpolation scheme
+   3. Nagging discrepencies between serial and parallel runs
