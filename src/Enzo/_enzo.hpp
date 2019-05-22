@@ -72,7 +72,9 @@ enum enzo_sync_id {
   enzo_sync_id_cg = sync_id_last,
   enzo_sync_id_comoving_expansion,
   enzo_sync_id_method_cosmology,
+#ifdef CONFIG_USE_GRACKLE
   enzo_sync_id_method_grackle,
+#endif
   enzo_sync_id_method_gravity,
   enzo_sync_id_method_gravity_continue,
   enzo_sync_id_method_heat,
@@ -175,7 +177,10 @@ struct fluxes
 //----------------------------------------------------------------------
 
 #ifdef CONFIG_USE_GRACKLE
-#   include "grackle.h"
+#include <stdlib.h>
+extern "C" {
+  #include <grackle.h>
+}
 #endif
 
 //----------------------------------------------------------------------
@@ -240,6 +245,9 @@ struct fluxes
 #include "enzo_EnzoComputeCicInterp.hpp"
 #include "enzo_EnzoComputePressure.hpp"
 #include "enzo_EnzoComputeTemperature.hpp"
+#ifdef CONFIG_USE_GRACKLE
+  #include "enzo_EnzoComputeCoolingTime.hpp"
+#endif
 
 #include "enzo_EnzoSolverBiCgStab.hpp"
 #include "enzo_EnzoSolverCg.hpp"

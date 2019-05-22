@@ -1,0 +1,47 @@
+----
+
+:Parameter:   :p:`schedule` : :p:`var`
+:Summary: :s:`Variable associated with scheduling for the given file set`
+:Type:    :t:`string`
+:Default: :d:`"none"`
+:Scope:     :c:`Cello`
+
+:e:`The` :p:`var` :e:`parameter specifies what value is checked at each cycle, which may be` :t:`"cycle"`, :t:`"time"`, :e:`or` :t:`"seconds"` :e:`Here "time" refers to simulation time, and "seconds" to wall-clock time.  Note that when simulation "time" is specified, the simulation's time step may be reduced such that the corresponding output occurs exactly at the specified time.`
+
+---- 
+
+:Parameter:  :p:`schedule` : :p:`list`
+:Summary: :s:`List of scheduled values for the specified variable`
+:Type:    [ :t:`list` ( :t:`integer` ) | :t:`list` ( :t:`float` ) ]
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies a list of values to check against for output with respect to cycle, time, or seconds.  If the "var" parameter associated with the schedule is "cycle", then` :p:`value` :e:`must be a list of integers; otherwise,` :p:`value` :e:`must be a list of` :t:`float`:e:`'s  The default is an empty list.`
+
+----
+
+:Parameter:  :p:`schedule` : :p:`start`
+:Summary: :s:`Starting value for scheduled interval`
+:Type:    [ :t:`integer` | :t:`float` ]
+:Default: :d:`0 | 0.0`
+:Scope:     :c:`Cello`
+:Todo:    :o:`write`
+
+----
+
+:Parameter:  :p:`schedule` : :p:`stop`
+:Summary: :s:`Last value for scheduled interval`
+:Type:    [ :t:`integer` | :t:`float` ]
+:Default: :d:`max (integer) | max (double)`
+:Scope:     :c:`Cello`
+:Todo:    :o:`write`
+
+----
+
+:Parameter:  :p:`schedule` : :p:`step`
+:Summary: :s:`Stepping increment for interval`
+:Type:    [ :t:`integer` | :t:`float` ]
+:Default: :d:`1 | 1.0`
+:Scope:     :c:`Cello`
+:Todo:    :o:`write`
+

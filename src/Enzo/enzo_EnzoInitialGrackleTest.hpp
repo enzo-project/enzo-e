@@ -1,8 +1,8 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_EnzoInitialGrackleTest.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Tue Jul  8 12:22:25 PDT 2014
+/// @author   Andrew Emerick (aemerick11@gmail.com)
+/// @date     Tue May 7 2019
 /// @brief    [\ref Enzo] Initialization routine for Grackle test problem
 
 #ifndef ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP
@@ -17,17 +17,15 @@ class EnzoInitialGrackleTest : public Initial {
 public: // interface
 
   /// CHARM++ constructor
-  EnzoInitialGrackleTest() throw() { }
-  
-  /// Constructor
-  EnzoInitialGrackleTest
-  (const EnzoConfig * enzo_config) throw();
+  EnzoInitialGrackleTest(const EnzoConfig * enzo_config) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialGrackleTest);
 
   /// CHARM++ migration constructor
-  EnzoInitialGrackleTest(CkMigrateMessage *m) : Initial (m) {}
+  EnzoInitialGrackleTest(CkMigrateMessage *m)
+     : Initial (m)
+  {  }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
@@ -35,18 +33,13 @@ public: // interface
   /// Initialize the block
 
   virtual void enforce_block
-  ( Block * block, const Hierarchy * hierarchy ) throw();
+  (   Block * block, const Hierarchy * hierarchy ) throw();
+
+  // Destructor
+  virtual ~EnzoInitialGrackleTest() throw() {};
 
 private:
 
-#ifdef CONFIG_USE_GRACKLE
-
-  const code_units      * units_;
-  const chemistry_data  * chemistry_;
-
-#endif
-  
 };
 
 #endif /* ENZO_ENZO_INITIAL_GRACKLE_TEST_HPP */
-

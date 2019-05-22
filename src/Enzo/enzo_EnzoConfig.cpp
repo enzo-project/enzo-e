@@ -3,10 +3,12 @@
 /// @file     enzo_EnzoConfig.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2012-10-03
-/// @brief    Implementation of the EnzoConfig class 
+/// @brief    Implementation of the EnzoConfig class
 
 #include "cello.hpp"
 #include "enzo.hpp"
+
+extern CProxy_EnzoSimulation proxy_enzo_simulation;
 
 //----------------------------------------------------------------------
 
@@ -15,10 +17,6 @@ EnzoConfig g_enzo_config;
 EnzoConfig::EnzoConfig() throw ()
   :
   adapt_mass_type(0),
-#ifdef CONFIG_USE_GRACKLE
-  method_grackle_units(),
-  method_grackle_chemistry(),
-#endif
   ppm_diffusion(false),
   ppm_dual_energy(false),
   ppm_dual_energy_eta_1(0.0),
@@ -53,6 +51,16 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_particle_ratio(0.0),
   initial_collapse_mass(0.0),
   initial_collapse_temperature(0.0),
+  // EnzoInitialGrackleTest
+#ifdef CONFIG_USE_GRACKLE
+  initial_grackle_test_minimum_H_number_density(0.1),
+  initial_grackle_test_maximum_H_number_density(1000.0),
+  initial_grackle_test_minimum_metallicity(1.0E-4),
+  initial_grackle_test_maximum_metallicity(1.0),
+  initial_grackle_test_minimum_temperature(10.0),
+  initial_grackle_test_maximum_temperature(1.0E8),
+  initial_grackle_test_reset_energies(0),
+#endif /* CONFIG_USE_GRACKLE */
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -111,6 +119,12 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
+  method_grackle_use_grackle(false),
+#ifdef CONFIG_USE_GRACKLE
+  method_grackle_chemistry(),
+  method_grackle_use_cooling_timestep(false),
+  method_grackle_radiation_redshift(-1.0),
+#endif
   // EnzoMethodGravity
   method_gravity_grav_const(0.0),
   method_gravity_solver(""),
@@ -134,7 +148,7 @@ EnzoConfig::EnzoConfig() throw ()
   solver_coarse_level(),
   solver_is_unigrid(),
   stopping_redshift()
- 
+
 {
   for (int i=0; i<3; i++) {
     initial_sedov_array[i] = 0;
@@ -143,12 +157,19 @@ EnzoConfig::EnzoConfig() throw ()
     initial_soup_d_size[i] = 0.0;
     initial_collapse_array[i] = 0;
   }
+
+#ifdef CONFIG_USE_GRACKLE
+    method_grackle_chemistry = NULL;
+#endif
 }
 
 //----------------------------------------------------------------------
 
 EnzoConfig::~EnzoConfig() throw ()
 {
+#ifdef CONFIG_USE_GRACKLE
+  delete method_grackle_chemistry;
+#endif // CONFIG_USE_GRACKLE
 }
 
 //----------------------------------------------------------------------
@@ -163,7 +184,7 @@ void EnzoConfig::pup (PUP::er &p)
   // NOTE: change this function whenever attributes change
 
   p | adapt_mass_type;
-  
+
   p | ppm_diffusion;
   p | ppm_dual_energy;
   p | ppm_dual_energy_eta_1;
@@ -195,13 +216,23 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_gravity;
 
   p | initial_cosmology_temperature;
-  
+
   p | initial_collapse_rank;
   PUParray(p,initial_collapse_array,3);
   p | initial_collapse_radius_relative;
   p | initial_collapse_particle_ratio;
   p | initial_collapse_mass;
   p | initial_collapse_temperature;
+
+#ifdef CONFIG_USE_GRACKLE
+  p | initial_grackle_test_minimum_H_number_density;
+  p | initial_grackle_test_maximum_H_number_density;
+  p | initial_grackle_test_minimum_temperature;
+  p | initial_grackle_test_maximum_temperature;
+  p | initial_grackle_test_minimum_metallicity;
+  p | initial_grackle_test_maximum_metallicity;
+  p | initial_grackle_test_reset_energies;
+#endif /* CONFIG_USE_GRACKLE */
 
   p | initial_sedov_rank;
   PUParray(p,initial_sedov_array,3);
@@ -292,18 +323,34 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_length;
   p | units_time;
 
+  p  | method_grackle_use_grackle;
 #ifdef CONFIG_USE_GRACKLE
+  p  | method_grackle_use_cooling_timestep;
+  p  | method_grackle_radiation_redshift;
 
-  // Grackle cooling parameters
+  int is_null = (method_grackle_chemistry==NULL);
+  p | is_null;
 
-  // Units
+  if (is_null){
+    method_grackle_chemistry = NULL;
+  } else {
 
-  //  p | method_grackle_units;
-  WARNING("EnzoConfig::pup",
-	  "p|method_grackle_units not called");
-  //  p | method_grackle_chemistry;
-  WARNING("EnzoConfig::pup",
-	  "p|method_grackle_chemistry not called");
+    if (p.isUnpacking()) {
+      method_grackle_chemistry = new chemistry_data;
+      method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
+
+      if(method_grackle_chemistry->use_grackle){
+        if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
+          ERROR("EnzoMethodConfig::pup()",
+                "Error in Grackle set_default_chemistry_parameters");
+        }
+      }
+    }
+  }
+
+  if (method_grackle_use_grackle){
+    p | *method_grackle_chemistry;
+  }
 
 #endif /* CONFIG_USE_GRACKLE */
 
@@ -317,13 +364,13 @@ void EnzoConfig::read(Parameters * p) throw()
 
   // Read Cello parameters
 
-  
+
   TRACE("EnzoCharm::read calling Config::read()");
 
   ((Config*)this) -> read (p);
 
   adapt_mass_type.resize(num_adapt);
-  
+
   for (int ia=0; ia<num_adapt; ia++) {
 
     std::string prefix = "Adapt:" + adapt_list[ia] + ":";
@@ -340,7 +387,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
   ppm_diffusion = p->value_logical
     ("Method:ppm:diffusion", false);
-  ppm_dual_energy = p->value_logical 
+  ppm_dual_energy = p->value_logical
     ("Method:ppm:dual_energy",false);
   ppm_dual_energy_eta_1 = p->value_float
     ("Method:ppm:dual_energy_eta_1", 0.001);
@@ -360,7 +407,7 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:ppm:pressure_free",false);
   ppm_temperature_floor = p->value_float
     ("Method:ppm:temperature_floor", floor_default);
-  ppm_steepening = p->value_logical 
+  ppm_steepening = p->value_logical
     ("Method:ppm:steepening", false);
   ppm_use_minimum_pressure_support = p->value_logical
     ("Method:ppm:use_minimum_pressure_support",false);
@@ -407,10 +454,10 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_pm_deposit_alpha = p->value_float ("Method:pm_deposit:alpha",0.5);
 
-  method_pm_update_max_dt = p->value_float 
+  method_pm_update_max_dt = p->value_float
     ("Method:pm_update:max_dt", std::numeric_limits<double>::max());
 
-  
+
   initial_pm_field        = p->value_string  ("Initial:pm:field","density");
   initial_pm_mpp          = p->value_float   ("Initial:pm:mpp",-1.0);
   initial_pm_level        = p->value_integer ("Initial:pm:level",-1);
@@ -430,13 +477,13 @@ void EnzoConfig::read(Parameters * p) throw()
     initial_soup_d_size[axis] = p->list_value_float
       (axis,"Initial:soup:d_size",0.0);
   }
-  initial_soup_pressure_in = 
+  initial_soup_pressure_in =
     p->value_float("Initial:soup:pressure_in",1.0);
-  initial_soup_pressure_out = 
+  initial_soup_pressure_out =
     p->value_float("Initial:soup:pressure_out",1e-5);
-  initial_soup_density = 
+  initial_soup_density =
     p->value_float("Initial:soup:density",1.0);
-  
+
   // Sedov initialization
 
   TRACE1("field_gamma = %f",field_gamma);
@@ -447,44 +494,44 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_array[1] = p->list_value_integer (1,"Initial:sedov:array",1);
   initial_sedov_array[2] = p->list_value_integer (2,"Initial:sedov:array",1);
 
-  initial_sedov_radius_relative = 
+  initial_sedov_radius_relative =
     p->value_float("Initial:sedov:radius_relative",0.1);
-  initial_sedov_pressure_in = 
+  initial_sedov_pressure_in =
     p->value_float("Initial:sedov:pressure_in",1.0);
-  initial_sedov_pressure_out = 
+  initial_sedov_pressure_out =
     p->value_float("Initial:sedov:pressure_out",1e-5);
-  initial_sedov_density = 
+  initial_sedov_density =
     p->value_float("Initial:sedov:density",1.0);
 
   // Sedov Random Initialization
 
-  initial_sedov_random_array[0] = 
+  initial_sedov_random_array[0] =
     p->list_value_integer (0,"Initial:sedov_random:array",1);
-  initial_sedov_random_array[1] = 
+  initial_sedov_random_array[1] =
     p->list_value_integer (1,"Initial:sedov_random:array",1);
-  initial_sedov_random_array[2] = 
+  initial_sedov_random_array[2] =
     p->list_value_integer (2,"Initial:sedov_random:array",1);
 
-  initial_sedov_random_half_empty = 
+  initial_sedov_random_half_empty =
     p->value_logical ("Initial:sedov_random:half_empty",false);
-  initial_sedov_random_grackle_cooling = 
+  initial_sedov_random_grackle_cooling =
     p->value_logical ("Initial:sedov_random:grackle_cooling",false);
-  initial_sedov_random_max_blasts = 
+  initial_sedov_random_max_blasts =
     p->value_integer ("Initial:sedov_random:max_blasts",1);
-  initial_sedov_random_radius_relative = 
+  initial_sedov_random_radius_relative =
     p->value_float   ("Initial:sedov_random:radius_relative",0.1);
-  initial_sedov_random_pressure_in = 
+  initial_sedov_random_pressure_in =
     p->value_float   ("Initial:sedov_random:pressure_in",1.0);
   initial_sedov_random_pressure_out =
     p->value_float   ("Initial:sedov_random:pressure_out",1e-5);
-  initial_sedov_random_density = 
+  initial_sedov_random_density =
     p->value_float   ("Initial:sedov_random:density",1.0);
-  initial_sedov_random_te_multiplier = 
+  initial_sedov_random_te_multiplier =
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
-  
+
   // Collapse initialization
 
   initial_collapse_rank =  p->value_integer("Initial:collapse:rank",0);
@@ -504,15 +551,33 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_collapse_temperature =
     p->value_float("Initial:collapse:temperature",10.0);
 
+  // Grackle test initialization
+#ifdef CONFIG_USE_GRACKLE
+  initial_grackle_test_minimum_H_number_density =
+    p->value_float("Initial:grackle_test:minimum_H_number_density",0.1);
+  initial_grackle_test_maximum_H_number_density =
+    p->value_float("Initial:grackle_test:maximum_H_number_density",1000.0);
+  initial_grackle_test_minimum_temperature =
+    p->value_float("Initial:grackle_test:minimum_temperature",10.0);
+  initial_grackle_test_maximum_temperature =
+    p->value_float("Initial:grackle_test:maximum_temperature",1.0E8);
+  initial_grackle_test_minimum_metallicity =
+    p->value_float("Initial:grackle_test:minimum_metallicity", 1.0E-4);
+  initial_grackle_test_maximum_metallicity =
+    p->value_float("Initial:grackle_test:maximum_metallicity", 1.0);
+  initial_grackle_test_reset_energies =
+    p->value_integer("Initial:grackle_test:reset_energies",0);
+#endif /* CONFIG_USE_GRACKLE */
+
   // Turbulence method and initialization
 
-  initial_turbulence_density = p->value_float 
+  initial_turbulence_density = p->value_float
     ("Initial:turbulence:density",1.0);
 
   // Must specify pressure or temperature
-  initial_turbulence_pressure =    p->value_float 
+  initial_turbulence_pressure =    p->value_float
     ("Initial:turbulence:pressure",   0.0);
-  initial_turbulence_temperature = p->value_float 
+  initial_turbulence_temperature = p->value_float
     ("Initial:turbulence:temperature",0.0);
 
   bool uses_turbulence = false;
@@ -534,16 +599,16 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_turbulence_edot = p->value_float
     ("Method:turbulence:edot",-1.0);
-  method_turbulence_mach_number = p->value_float 
+  method_turbulence_mach_number = p->value_float
     ("Method:turbulence:mach_number",0.0);
 
-  interpolation_method = p->value_string 
+  interpolation_method = p->value_string
     ("Field:interpolation_method","SecondOrderA");
 
-  method_heat_alpha = p->value_float 
+  method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);
 
-  method_hydro_method = p->value_string 
+  method_hydro_method = p->value_string
     ("Method:hydro:method","ppm");
 
   method_hydro_dual_energy = p->value_logical
@@ -564,8 +629,8 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");
-  
-  method_null_dt = p->value_float 
+
+  method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());
 
   method_gravity_grav_const = p->value_float
@@ -579,16 +644,16 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_gravity_accumulate = p->value_logical
     ("Method:gravity:accumulate",true);
-  
+
   //--------------------------------------------------
   // Physics
   //--------------------------------------------------
 
-  num_physics = p->list_length("Physics:list"); 
+  num_physics = p->list_length("Physics:list");
 
   for (int index_physics=0; index_physics<num_physics; index_physics++) {
 
-    std::string name = 
+    std::string name =
       p->list_value_string(index_physics,"Physics:list");
 
     std::string full_name = std::string("Physics:") + name;
@@ -608,7 +673,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
       physics_cosmology_omega_cdm_now = p->value_float
 	(full_name + ":omega_cdm_now",   0.0);
-      
+
       physics_cosmology_omega_lamda_now = p->value_float
 	(full_name + ":omega_lambda_now",   0.721);
 
@@ -633,7 +698,7 @@ void EnzoConfig::read(Parameters * p) throw()
 
     }
   }
- 
+
   //======================================================================
   // SOLVER
   //======================================================================
@@ -672,21 +737,21 @@ void EnzoConfig::read(Parameters * p) throw()
     } else {
       solver_pre_smooth[index_solver] = -1;
     }
-    
+
     solver = p->value_string (solver_name + ":coarse_solve","unknown");
     if (solver_index.find(solver) != solver_index.end()) {
       solver_coarse_solve[index_solver] = solver_index[solver];
     } else {
       solver_coarse_solve[index_solver] = -1;
     }
-    
+
     solver = p->value_string (solver_name + ":domain_solve","unknown");
     if (solver_index.find(solver) != solver_index.end()) {
       solver_domain_solve[index_solver] = solver_index[solver];
     } else {
       solver_domain_solve[index_solver] = -1;
     }
-    
+
     solver = p->value_string (solver_name + ":post_smooth","unknown");
     if (solver_index.find(solver) != solver_index.end()) {
       solver_post_smooth[index_solver] = solver_index[solver];
@@ -710,132 +775,177 @@ void EnzoConfig::read(Parameters * p) throw()
     solver_local[index_solver] =
       p->value_logical (solver_name + ":local",false);
 
-    solver_coarse_level[index_solver] = 
+    solver_coarse_level[index_solver] =
       p->value_integer (solver_name + ":coarse_level",
 			solver_min_level[index_solver]);
 
-    solver_is_unigrid[index_solver] = 
+    solver_is_unigrid[index_solver] =
       p->value_logical (solver_name + ":is_unigrid",false);
 
-  }  
-  
+  }
+
   //======================================================================
   // STOPPING
   //======================================================================
 
   stopping_redshift = p->value_float ("Stopping:redshift",0.0);
-  
+
   //======================================================================
-  // GRACKLE
+  // GRACKLE 3.0
   //======================================================================
 
+  this->method_grackle_use_grackle = false;
 #ifdef CONFIG_USE_GRACKLE
+
 
   /// Grackle parameters
 
-  bool uses_grackle = false;
   for (size_t i=0; i<method_list.size(); i++) {
-    if (method_list[i] == "grackle") uses_grackle=true;
+    if (method_list[i] == "grackle") method_grackle_use_grackle=true;
   }
-  
+
   // Defaults alert PUP::er() to ignore
-  method_grackle_chemistry.use_grackle = uses_grackle;
+  if (method_grackle_use_grackle) {
 
-  if (uses_grackle) {
+    method_grackle_chemistry = new chemistry_data;
 
-    method_grackle_units.comoving_coordinates = false;
-
-    for (int index_physics=0; index_physics<num_physics; index_physics++) {
-      // Check if EnzoPhysicsCosmology object is present
-      if (physics_list[index_physics] == "cosmology") {
-	method_grackle_units.comoving_coordinates = true;
-	break;
-      }
-    }
-
-    method_grackle_units.density_units             // 1 m_H/cc
-      = p->value_float("Method:grackle:density_units",1.67e-24);
-
-    method_grackle_units.length_units              // 1 kpc
-      = p->value_float("Method:grackle:length_units",3.086e21);
-
-    method_grackle_units.time_units                // 1 Myr
-      = p->value_float("Method:grackle:time_units",3.15569e13);
-
-    method_grackle_units.a_units   // units for the expansion factor
-      = p->value_float("Method:grackle:a_units",1.0);
-
-    // computed
-    method_grackle_units.velocity_units 
-      = method_grackle_units.length_units / method_grackle_units.time_units;
-
-    method_grackle_units.velocity_units = 
-      method_grackle_units.length_units / method_grackle_units.time_units;
-
-  
-    //method_grackle_chemistry.set_default_chemistry_parameters();
-    chemistry_data chemistry = set_default_chemistry_parameters();
-
-    method_grackle_chemistry.Gamma = p->value_float
-      ("Method:grackle:gamma",method_grackle_chemistry.Gamma);
-  
-    method_grackle_chemistry.with_radiative_cooling =p->value_logical
-      ("Method:grackle:with_radiative_cooling",
-       method_grackle_chemistry.with_radiative_cooling);
-
-    method_grackle_chemistry.primordial_chemistry = p->value_logical
-      ("Method:grackle:primordial_chemistry",
-       method_grackle_chemistry.primordial_chemistry);
-
-    method_grackle_chemistry.metal_cooling = p->value_logical
-      ("Method:grackle:metal_cooling",method_grackle_chemistry.metal_cooling);
-
-    method_grackle_chemistry.h2_on_dust = p->value_logical
-      ("Method:grackle:h2_on_dust",method_grackle_chemistry.h2_on_dust);
-
-    method_grackle_chemistry.cmb_temperature_floor = p->value_logical
-      ("Method:grackle:cmb_temperature_floor",
-       method_grackle_chemistry.cmb_temperature_floor);
-
-    method_grackle_chemistry.grackle_data_file 
-      = strdup(p->value_string
-	       ("Method:grackle:data_file",
-		method_grackle_chemistry.grackle_data_file).c_str());
-
-    method_grackle_chemistry.cie_cooling = p->value_integer
-      ("Method:grackle:cie_cooling",method_grackle_chemistry.cie_cooling);
-
-    method_grackle_chemistry.h2_optical_depth_approximation = p->value_integer
-      ("Method:grackle:h2_optical_depth_approximation",
-       method_grackle_chemistry.h2_optical_depth_approximation);
-
-    method_grackle_chemistry.photoelectric_heating = p->value_integer
-      ("Method:grackle:photoelectric_heating",
-       method_grackle_chemistry.photoelectric_heating);
-
-    method_grackle_chemistry.photoelectric_heating_rate = p->value_float
-      ("Method:grackle:photoelectric_heating_rate",
-       method_grackle_chemistry.photoelectric_heating_rate);
-
-    method_grackle_chemistry.UVbackground = p->value_integer
-      ("Method:grackle:UVbackground",method_grackle_chemistry.UVbackground);
-
-    // initialize chemistry data: required here since EnzoMethodGrackle may not be used
-
-    const gr_float a_value = 
-      1. / (1. + physics_cosmology_initial_redshift);
-
-    if (initialize_chemistry_data
-	(method_grackle_chemistry, method_grackle_units, a_value) == 0) {
+    if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL) {
       ERROR("EnzoMethodGrackle::EnzoMethodGrackle()",
-	    "Error in initialize_chemistry_data");
+      "Error in set_default_chemistry_parameters");
     }
-  }  
+
+    /* this must be set AFTER default values are set */
+    method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
+
+    // Copy over parameters from Enzo-P to Grackle
+    grackle_data->Gamma = field_gamma;
+
+    //
+    method_grackle_use_cooling_timestep = p->value_logical
+      ("Method:grackle:use_cooling_timestep", false);
+
+    // for when not using cosmology - redshift of UVB
+    method_grackle_radiation_redshift = p->value_float
+      ("Method:grackle:radiation_redshift", -1.0);
+
+    // Set Grackle parameters from parameter file
+    grackle_data->with_radiative_cooling = p->value_integer
+      ("Method:grackle:with_radiative_cooling",
+        grackle_data->with_radiative_cooling);
+
+    grackle_data->primordial_chemistry = p->value_integer
+      ("Method:grackle:primordial_chemistry",
+        grackle_data->primordial_chemistry);
+
+    grackle_data->metal_cooling = p->value_integer
+      ("Method:grackle:metal_cooling",
+        grackle_data->metal_cooling);
+
+    grackle_data->h2_on_dust = p->value_integer
+      ("Method:grackle:h2_on_dust",
+        grackle_data->h2_on_dust);
+
+    grackle_data->three_body_rate = p->value_integer
+      ("Method:grackle:three_body_rate",
+        grackle_data->three_body_rate);
+
+    grackle_data->cmb_temperature_floor = p->value_integer
+      ("Method:grackle:cmb_temperature_floor",
+        grackle_data->cmb_temperature_floor);
+
+    grackle_data->grackle_data_file = strdup(p->value_string
+      ("Method:grackle:data_file",
+        grackle_data->grackle_data_file).c_str());
+
+    grackle_data->cie_cooling = p->value_integer
+      ("Method:grackle:cie_cooling",
+        grackle_data->cie_cooling);
+
+    grackle_data->h2_optical_depth_approximation = p->value_integer
+      ("Method:grackle:h2_optical_depth_approximation",
+        grackle_data->h2_optical_depth_approximation);
+
+    grackle_data->photoelectric_heating = p->value_integer
+      ("Method:grackle:photoelectric_heating",
+        grackle_data->photoelectric_heating);
+
+    grackle_data->photoelectric_heating_rate = p->value_float
+      ("Method:grackle:photoelectric_heating_rate",
+        grackle_data->photoelectric_heating_rate);
+
+    grackle_data->CaseBRecombination = p->value_integer
+      ("Method:grackle:CaseBRecombination",
+       grackle_data->CaseBRecombination);
+
+    grackle_data->UVbackground = p->value_integer
+      ("Method:grackle:UVbackground",
+        grackle_data->UVbackground);
+
+    grackle_data->use_volumetric_heating_rate = p->value_integer
+      ("Method:grackle:use_volumetric_heating_rate",
+      grackle_data->use_volumetric_heating_rate);
+
+    grackle_data->use_specific_heating_rate = p->value_integer
+      ("Method:grackle:use_specific_heating_rate",
+       grackle_data->use_specific_heating_rate);
+
+    grackle_data->self_shielding_method = p->value_integer
+      ("Method:grackle:self_shielding_method",
+       grackle_data->self_shielding_method);
+
+    grackle_data->H2_self_shielding = p->value_integer
+      ("Method:grackle:H2_self_shielding",
+       grackle_data->H2_self_shielding);
+
+    grackle_data->HydrogenFractionByMass = p->value_float
+      ("Method:grackle:HydrogenFractionByMass",
+        grackle_data->HydrogenFractionByMass);
+
+    grackle_data->DeuteriumToHydrogenRatio = p->value_float
+      ("Method:grackle:DeuteriumToHydrogenRatio",
+       grackle_data->DeuteriumToHydrogenRatio);
+
+    grackle_data->SolarMetalFractionByMass = p->value_float
+      ("Method:grackle:SolarMetalFractionByMass",
+       grackle_data->SolarMetalFractionByMass);
+
+    grackle_data->Compton_xray_heating = p->value_integer
+      ("Method:grackle:Compton_xray_heating",
+       grackle_data->Compton_xray_heating);
+
+    grackle_data->LWbackground_sawtooth_suppression = p->value_integer
+      ("Method:grackle:LWbackground_sawtooth_suppression",
+       grackle_data->LWbackground_sawtooth_suppression);
+
+    grackle_data->LWbackground_intensity = p->value_float
+      ("Method:grackle:LWbackground_intensity",
+       grackle_data->LWbackground_intensity);
+
+    grackle_data->UVbackground_redshift_on = p->value_float
+      ("Method:grackle:UVbackground_redshift_on",
+       grackle_data->UVbackground_redshift_on);
+
+    grackle_data->UVbackground_redshift_off = p->value_float
+      ("Method:grackle:UVbackground_redshift_off",
+       grackle_data->UVbackground_redshift_off);
+
+    grackle_data->UVbackground_redshift_fullon = p->value_float
+      ("Method:grackle:UVbackground_redshift_fullon",
+        grackle_data->UVbackground_redshift_fullon);
+
+    grackle_data->UVbackground_redshift_drop = p->value_float
+     ("Method:grackle:UVbackground_redshift_drop",
+      grackle_data->UVbackground_redshift_drop);
+
+    // When radiative transfer is eventually included, make
+    // sure to set the below parameter to match the Enzo-P
+    // parameter for turning RT on / off:
+    //   grackle_data->use_radiative_transfer = ENZO_P_PARAMETER_NAME;
+
+  }
 #endif /* CONFIG_USE_GRACKLE */
 
   TRACE("END   EnzoConfig::read()");
 }
 
 //======================================================================
-
-

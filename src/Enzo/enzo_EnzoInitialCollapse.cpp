@@ -100,8 +100,7 @@ void EnzoInitialCollapse::enforce_block
   const int in = cello::index_static();
 
   const double gamma = EnzoBlock::Gamma[in];
-  const double mu = 1.67e-24; // molecular hydrogen
-  const double energy = 1e-3*(cello::k)*temperature_ / ((gamma - 1.0) * mu);
+  const double energy = 1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen));
   
   // ...compute ellipsoid density
 
