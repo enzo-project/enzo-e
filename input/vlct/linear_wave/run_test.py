@@ -169,17 +169,17 @@ def analyze_tests():
     # These errors were all obtained from parallel runs with the domain split
     # between processes
     r = []
-    r.append(standard_l1_analyze(1,"fast", 16, 1.5988721137557783e-07))
-    r.append(standard_l1_analyze(1,"fast", 32, 3.1525662859233814e-08))
+    r.append(standard_l1_analyze(1,"fast", 16, 1.6388526155538374e-07))
+    r.append(standard_l1_analyze(1,"fast", 32, 3.3025382238175106e-08))
 
-    r.append(standard_l1_analyze(1,"alfven", 16, 1.878617625057995e-07))
-    r.append(standard_l1_analyze(1,"alfven", 32, 2.916138633106642e-08))
+    r.append(standard_l1_analyze(1,"alfven", 16, 1.9272453542097202e-07))
+    r.append(standard_l1_analyze(1,"alfven", 32, 3.005870203721324e-08))
     
-    r.append(standard_l1_analyze(1,"slow", 16, 2.1462777772515027e-07))
-    r.append(standard_l1_analyze(1,"slow", 32, 4.164876812472924e-08))
+    r.append(standard_l1_analyze(1,"slow", 16, 2.2373810031907528e-07))
+    r.append(standard_l1_analyze(1,"slow", 32, 4.437024386763274e-08))
 
-    r.append(standard_l1_analyze(1,"entropy", 16, 8.860188121086323e-08))
-    r.append(standard_l1_analyze(1,"entropy", 32, 2.616270674340842e-08))
+    r.append(standard_l1_analyze(1,"entropy", 16, 1.0021263478396943e-07))
+    r.append(standard_l1_analyze(1,"entropy", 32, 2.9194839306558322e-08))
 
     # Check error between left and right propagating waves
     r.append(identical_l1_error_comp(1, "fast", 32))

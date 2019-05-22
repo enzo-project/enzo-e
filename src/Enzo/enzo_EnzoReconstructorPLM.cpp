@@ -38,33 +38,31 @@ inline enzo_float Min(enzo_float a, enzo_float b, enzo_float c)
 inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 				       enzo_float vp1)
 {
+  // The limiter is expected to return 0.5 times the limted slope
+
   // Stone & Gardiner (2008) misleadingly mention a minmod limiter while
   // discussing this limiter but the textbook they cite (LeVeque 2002) refers
   // to it as a monotized central-difference limiter). The limiter shown in the
-  // paper differs from the one used in Athena - specifically, it handles case
-  // with different signed dv_l and dv_r differently
+  // paper differs from the one used in Athena for primitives
 
-  // 2 things worth mentioning from the c version of athena code:
-  //   - They use dv_g = dv_l*dv_r/(dv_l+dv_r) in the min operation. They would
-  //     return: sign(dv_c)*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c),fabs(dv_g));
-  //   - When sign(dv_l)!=sign(dv_r): they would return 0 (even if one of them
-  //     was equal to zero.
+  // Always return 0 if sign(dv_l) != sign(dv_r)
+  // When sign(dv_l) == sign(dv_r), there is a difference in the limter used by
+  // Enzo (which matches the description of LeVeque (2002)) and the limiter
+  // used in the c version of Athena (for reconstructing primitives).
+  //   - Enzo would return:
+  //       sign(dv_c)*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c));
+  //   - Athena would compute dv_g = dv_l*dv_r/(dv_l+dv_r) and would return:
+  //       sign(dv_c)*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c),fabs(dv_g))
+  //     If this is used and if a resulting reconstructed value exceeds the
+  //     cell-centered value of one of its direct neighbors, that reconstructed
+  //     value MUST be rounded to the closest neighboring value
 
-
-  // This implementation is adapted from Enzo's Rec_PLM.C It applies the
-  // following logic:
-  // if sign(dv_l) == sign(dv_r) == sign(dv_c):
-  //     return sign(dv_c)*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c));
-  // else if ((sign(dv_l) == sign(dv_c) && dv_r == 0) OR
-  //          (sign(dv_r) == sign(dv_c) && dv_l == 0)):
-  //     return 0.5*sign(dv_c)*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c))
-  // else:
-  //     return 0;
+  // Current implementation adapted from Enzo's Rec_PLM.C
   enzo_float dv_l = (v-vm1);
   enzo_float dv_r = (vp1-v);
   enzo_float dv_c = 0.25*(vp1-vm1);
 
-  return 0.5*fabs(sign(dv_l)+sign(dv_r))*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c));
+  return 0.5*(sign(dv_l)+sign(dv_r))*Min(fabs(dv_l),fabs(dv_r),fabs(dv_c));
 }
 
 //----------------------------------------------------------------------
@@ -195,6 +193,7 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	    // than placing floors on a few select quantites, they instead
 	    // checked that all the reconstructed quantities lied between the
 	    // left and right cell-centered quantities
+
 	    if (use_floor) {
 	      right_val = EnzoEquationOfState::apply_floor(val-dv,prim_floor);
 	      left_val = EnzoEquationOfState::apply_floor(val+dv,prim_floor);
@@ -202,6 +201,12 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	      right_val = val-dv;
 	      left_val = val+dv;
 	    }
+
+	    // If using the Athena limiter, need to also use:
+	    //right_val = std::max(std::min(val,wc_left(iz,iy,ix)),val-dv);
+	    //right_val = std::min(std::max(val,wc_left(iz,iy,ix)),right_val);
+	    //left_val = std::max(std::min(val,wc_right(iz,iy,ix)),val+dv);
+	    //left_val = std::min(std::max(val,wc_right(iz,iy,ix)),left_val);
 
 	    // face centered fields: index i corresponds to the value at i-1/2
 	    wr(iz,iy,ix) = right_val;
