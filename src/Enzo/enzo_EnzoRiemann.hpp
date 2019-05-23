@@ -84,6 +84,9 @@ public: // interface
 
     enzo_float cs2 = std::pow(sound_speed_(prim_vals, prim_lut, eos),2);
     enzo_float B2 = (bi*bi + bj*bj + bk *bk);
+    if (B2 == 0){
+      return std::sqrt(cs2);
+    }
     enzo_float va2 = B2/prim_vals[prim_lut.density];
     enzo_float cos2 = bi*bi / B2;
     return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
