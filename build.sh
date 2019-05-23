@@ -164,11 +164,11 @@ if [ $target == "test" ]; then
 
     rm -f              test/STOP
 
-   # count crashes
+   # count failures, incompletes, and passes
 
-   grep FAIL $dir/*unit       | grep "0/" | sort > $dir/fail.$configure
-   grep incomplete $dir/*unit | grep "0/" | sort > $dir/incomplete.$configure
-   grep pass $dir/*unit       | grep "0/" | sort > $dir/pass.$configure
+   grep ": FAIL"       $dir/*unit > $dir/fail.$configure
+   grep ": incomplete" $dir/*unit > $dir/incomplete.$configure
+   grep ": pass"       $dir/*unit > $dir/pass.$configure
 
    f=`wc -l < $dir/fail.$configure`
    i=`wc -l < $dir/incomplete.$configure`
@@ -226,10 +226,12 @@ if [ ! -e $target ]; then
    exit 1
 fi
 
-# check for failures/incompletes in tests
-# set to 11 now for the 5 known failures and 6 incompletes
+# check for failures 
 if [ $target == "test" ]; then
-    if [ $(($f + $i)) -gt 11 ]; then
+    if [ $f -gt 0 ]; then
+	echo "Exiting testing with failures"
         exit 1
+    else
+	echo "Exiting testing with success"
     fi
 fi

@@ -561,9 +561,9 @@ env.PngToGif ("adapt-L5-P1-density.gif", "test_adapt-L5-P1.unit", \
 # PERFORMANCE
 #----------------------------------------------------------------------
 
-env.RunParallel ('test_performance-papi.unit',
-                bin_path + '/enzo-p', 
-                ARGS='input/performance-papi.in')
+# env.RunParallel ('test_performance-papi.unit',
+#                 bin_path + '/enzo-p', 
+#                 ARGS='input/performance-papi.in')
 
 
 Clean(env_mv_out.RunParallel ('test_initial_png.unit',
