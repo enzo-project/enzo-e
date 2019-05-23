@@ -383,7 +383,6 @@ public: // interface
   { return particle_data_->velocity(particle_descr_,it,ib,vx,vy,vz); }
 
   //--------------------------------------------------
-
   /// Return the number of bytes required to serialize the data object
   int data_size () const
   { return particle_data_->data_size (particle_descr_); }

@@ -148,30 +148,16 @@ EnzoMethodGravity::EnzoMethodGravity
     grav_const_(grav_const),
     order_(order)
 {
-  FieldDescr * field_descr = cello::field_descr();
-  
-  const int id  = field_descr->field_id("density");
-  const int idt = field_descr->field_id("density_total");
-  const int ib  = field_descr->field_id("B");
-  const int iax = field_descr->field_id("acceleration_x");
-  const int iay = field_descr->field_id("acceleration_y");
-  const int iaz = field_descr->field_id("acceleration_z");
-
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
-#ifdef DEBUG_FIELD_FACE  
-  int idebug1 = field_descr->field_id("debug_1");
-  int idebug2 = field_descr->field_id("debug_2");
-#endif  
-  
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_gravity);
   
-  refresh(ir)->add_field(iax);
-  refresh(ir)->add_field(iay);
-  refresh(ir)->add_field(iaz);
-  refresh(ir)->add_field(id);
+  refresh(ir)->add_field("acceleration_x");
+  refresh(ir)->add_field("acceleration_y");
+  refresh(ir)->add_field("acceleration_z");
+  refresh(ir)->add_field("density");
 
   // Accumulate is used when particles are deposited into density_total
   
@@ -179,15 +165,11 @@ EnzoMethodGravity::EnzoMethodGravity
 
     refresh(ir)->set_accumulate(true);
 
-    const int idp = field_descr->field_id("density_particle");
-    const int idpa = field_descr->field_id("density_particle_accumulate");
+    refresh(ir)->add_field_src_dst
+      ("density_particle","density_particle_accumulate");
+    refresh(ir)->add_field_src_dst
+      ("density_total","B");
 
-    refresh(ir)->add_field_src_dst(idp,idpa);
-    refresh(ir)->add_field_src_dst(idt,ib);
-
-#ifdef DEBUG_FIELD_FACE    
-    refresh(ir)->add_field_src_dst(idebug1,idebug2);
-#endif    
   }
 }
 
@@ -342,7 +324,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   Solver * solver = enzo::problem()->solver(index_solver_);
   
   // May exit before solve is done...
-  solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue());
+  solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue(NULL));
 
   const int ix = field.field_id ("potential");
 
@@ -357,8 +339,9 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_method_gravity_continue()
+void EnzoBlock::r_method_gravity_continue(CkReductionMsg * msg)
 {
+  delete msg;
 
   TRACE_METHOD("r_method_gravity_end()",this);
 
@@ -371,16 +354,17 @@ void EnzoBlock::r_method_gravity_continue()
 		   enzo_sync_id_method_gravity_continue);
   
   refresh.set_active(is_leaf());
-  refresh.add_field(data()->field().field_id("potential"));
+  refresh.add_field("potential");
 
-  refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(),&refresh);
+  refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
 
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_method_gravity_end()
+void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
 {
+  delete msg;
   TRACE_METHOD("r_method_gravity_end()",this);
   
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());

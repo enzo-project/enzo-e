@@ -307,9 +307,9 @@ EnzoSolverMg0::EnzoSolverMg0
     (4,0,neighbor_type_(),sync_barrier,
      enzo_sync_id_solver_mg0);
 
-  refresh(0)->add_field (ix_);
-  refresh(0)->add_field (ir_);
-  refresh(0)->add_field (ic_);
+  refresh(ir)->add_field (ix_);  // NOTE: ix_ set in Solver::Solver()
+  refresh(ir)->add_field (ir_);
+  refresh(ir)->add_field (ic_);
 
   ScalarDescr * scalar_descr_int  = cello::scalar_descr_int();
   i_iter_  = scalar_descr_int ->new_value(name + ":iter");

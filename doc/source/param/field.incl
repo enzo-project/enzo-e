@@ -1,0 +1,113 @@
+
+----
+
+:Parameter:  :p:`Field` : :p:`list`
+:Summary: :s:`List of fields`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`All fields must be explicitly listed in the` :p:`list` :e:`parameter.  Field names depend on the Method(s) used; e.g., PPM uses` :t:`"density"`,  :t:`"velocity_x"`, :t:`"velocity_y"`, :t:`"total_energy"`, :e:`and`  :t:`"internal_energy"`.
+  
+
+----
+
+:Parameter:  :p:`Field` : :p:`gamma`
+:Summary: :s:`Adiabatic exponent`
+:Type:    :t:`float`
+:Default: :d:`5.0 / 3.0`
+:Scope:     :z:`Enzo`
+:Todo:  :o:`perhaps move this to a different group, e.g. Physics`
+
+:p:`gamma` :e:`specifies the ratio of specific heats for the ideal gas used by the PPM hydrodynamics solver.`
+
+
+----
+
+:Parameter:  :p:`Field` : :p:`alignment`
+:Summary: :s:`Force field data on each block to start on alignment bytes`
+:Type:    :t:`integer`
+:Default: :d:`8`
+:Scope:     :c:`Cello`
+
+:e:`Depending on the computer architecture, variables can be accessed from memory faster if they have at least 4-byte or 8-byte alignment.  This parameter forces each field block array to have an address evenly divisible by the specified number of bytes.`
+
+----
+
+:Parameter:  :p:`Field` : :g:`<field>` : :p:`centering`
+:Summary: :s:`Specify the position of the given field variable within the computational cell.`
+:Type:    :t:`list` ( :t:`logical` )
+:Default: :d:`[ true, true, true ]`
+:Scope:     :c:`Cello`
+
+:e:`By default, variables are centered within a computational cell.  Some methods expect some variable, e.g. velocity components, to be positioned on a cell face.  The effect of this parameter is to increase the dimension of the field block by one along each axis with a value of "false".  Numerical method implementations like PPML that assume (NX,NY,NZ) sized blocks even for offset variables, as opposed to e.g. (NX+1,NY,NZ), should still define the variable as centered.`
+
+----
+
+:Parameter:  :p:`Field` : :g:`<field>` : :p:`group_list`
+:Summary: :s:`Specify a list of groups that the Field belongs to`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[ ]`
+:Scope:     :c:`Cello`
+
+:e:`Different Fields may belong to any number of different "groups".  For example, Enzo uses "color fields", which Enzo-P implements as defining color fields to belong to the group "color".`
+
+----
+
+:Parameter:  :p:`Field` : :p:`ghost_depth`
+:Summary: :s:`Field ghost zone depths`
+:Type:    [ :t:`integer` | :t:`list` ( :t:`integer` ) ]
+:Default: :d:`[ 0, 0, 0 ]`
+:Scope:     :c:`Cello`
+
+:e:`The default storage patch / block ghost zone depths [gx, gy, gz] along each axis for fields.  If an integer, then the same ghost zone depth is used for each axis.  Currently this value needs to be 4 for PPM when AMR is used.`
+
+----
+
+:Parameter:  :p:`Field` : :p:`padding`
+:Summary: :s:`Add padding of the specified number of bytes between fields on each block.`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:     :c:`Cello`
+
+:e:`If block sizes are large and a power of two, and if the computer's cache has low associativity, performance can suffer due to cache thrashing.  This can be avoided by introducing padding between fields.  A value of twice the cache line width is recommended.  Since field blocks are usually small, this should not usually be an issue.`
+
+----
+
+:Parameter:  :p:`Field` : :p:`precision`
+:Summary: :s:`Default field precision`
+:Type:    :t:`string`
+:Default: :d:`"default"`
+:Scope:     :c:`Cello`
+
+:e:`Default precision for all fields.  Supported precisions include "single" (32-bit) and "double" (64-bit).  "quadruple" is accepted, but not implemented by most numerical methods (e.g. PPM).  "default" is for compatibility with Enzo, and corresponds to either "single" or "double" depending on the CELLO_PREC configuration flag setting.  This precision parameter must not conflict with the CELLO_PREC setting.`
+
+----
+
+:Parameter:  :p:`Field` : :p:`prolong`
+:Summary: :s:`Type of prolongation (interpolation)`
+:Type:    :t:`string`
+:Default: :d:`"linear"`
+:Scope:     :c:`Cello`
+
+:e:`For adaptive mesh refinement, field values may need to be transferred from coarser to finer blocks, either from coarse neighbor blocks in the refresh phase, or to fine child blocks during refinement in the adapt phase.  Valid values include` :t:`"linear"` :e:`; other values accepted but not implemented include` :t:`"enzo"` :e:`and` :t:`"MC1"` :e:` ; which are unfinished implementations of Enzo's` :t:`"InterpolationMethod"` :e:`functionality.`
+
+----
+
+:Parameter:  :p:`Field` : :p:`restrict`
+:Summary: :s:`Type of restriction (coarsening)`
+:Type:    :t:`string`
+:Default: :d:`"linear"`
+:Scope:     :c:`Cello`
+
+:e:`For adaptive mesh refinement, field values may need to be transferred from finer to coarser blocks, either from fine neighbor blocks in the refresh phase, or to the parent block during coarsening in the adapt phase.  Valid values include` :t:`"linear"` :e:`\; ;other values accepted but not implemented include` :t:`"enzo".`
+
+----
+
+:Parameter:  :p:`Field` : :p:`history`
+:Summary: :s:`How many generations of "old" fields to maintain`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:     :c:`Cello`
+
+:e:`Many problems may require field values from the previous timestep, e.g. for flux-correction, updating particles, etc.  Cello supports this by allowing one or more generations of all fields to be stored and maintained.  The default is 0, though 1 may be fairly common, and even more generations are supported if needed.`

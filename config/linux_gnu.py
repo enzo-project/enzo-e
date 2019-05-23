@@ -18,6 +18,9 @@ flags_arch = '-Wall -O0 -g'
 #flags_link_charm = '-memory paranoid'
 #flags_link_charm = '-fprofile-arcs' # gcov
 
+#optional fortran flag
+flags_arch_fortran = '-ffixed-line-length-132'
+
 cc  = 'gcc '
 f90 = 'gfortran'
 

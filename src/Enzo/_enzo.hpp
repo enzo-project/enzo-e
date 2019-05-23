@@ -218,11 +218,7 @@ extern "C" {
 #include "enzo_EnzoInitialCollapse.hpp"
 #include "enzo_EnzoInitialCosmology.hpp"
 #include "enzo_EnzoInitialFeedbackTest.hpp"
-
-#ifdef CONFIG_USE_GRACKLE
-  #include "enzo_EnzoInitialGrackleTest.hpp"
-#endif
-
+#include "enzo_EnzoInitialGrackleTest.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoInitialMusic.hpp"
 #include "enzo_EnzoInitialPm.hpp"

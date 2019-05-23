@@ -1,0 +1,36 @@
+  .. role:: p
+  .. role:: g
+  .. role:: t
+  .. role:: s
+  .. role:: d
+  .. role:: e
+  .. role:: o
+  .. role:: c
+  .. role:: z
+
+  .. |H+| replace:: H\ :sup:`+`
+  .. |D+| replace:: D\ :sup:`+`
+  .. |H++| replace:: H\ :sup:`++`
+  .. |++| replace:: \ :sup:`++`
+  .. |H-| replace:: H\ :sup:`-`
+  .. |He+| replace:: He\ :sup:`+`
+  .. |H2+| replace:: H\ :sub:`2`:sup:`+`
+  .. |H| replace:: H
+  .. |H2| replace:: H\ :sup:`2`
+  .. |He| replace:: He
+  .. |e-| replace:: e\ :sup:`-`
+  .. |aij| replace:: a\ :sub:`i,j`		    
+  .. |a00| replace:: a\ :sub:`0,0`		    
+  .. |a10| replace:: a\ :sub:`1,0`		    
+  .. |am0| replace:: a\ :sub:`m,0`		    
+  .. |a01| replace:: a\ :sub:`0,1`		    
+  .. |a0n| replace:: a\ :sub:`0,n`		    
+  .. |a0j| replace:: a\ :sub:`0,j`		    
+  .. |a1j| replace:: a\ :sub:`1,j`		    
+  .. |amj| replace:: a\ :sub:`m,j`		    
+  .. |ai0| replace:: a\ :sub:`i,0`		    
+  .. |ai1| replace:: a\ :sub:`i,1`		    
+  .. |ain| replace:: a\ :sub:`i,n`		    
+  .. |amn| replace:: a\ :sub:`m,n`		    
+  .. |am1| replace:: a\ :sub:`m,1`
+  .. |a1n| replace:: a\ :sub:`1,n`
