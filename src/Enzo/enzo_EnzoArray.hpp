@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <cstddef>
 #include <type_traits>
+#include <limits>
 #include <memory>
 
 // EnzoArray
@@ -69,12 +70,20 @@ bool check_bounds_(std::size_t *shape, T first, Rest... rest){
 
 
 // Defining the macro called CHECK_FINITE_ELEMENTS returns an error everytime a
-// NaN or inf gets retrieved from the array
+// NaN or inf gets retrieved from the array or an array is initialized by
+// wrapping an existing pointer holding a NaN or inf
+template<typename T>
+bool check_if_finite_(const T elem){
+  return (std::is_floating_point<T>::value) ? std::isfinite(elem) : true;
+}
+
 #ifdef CHECK_FINITE_ELEMENTS
 #  define CHECK_IF_FINITE(value)                                              \
-  ASSERT("FixedDimArray_","Non-Finite Value", std::isfinite(value));
+  ASSERT("FixedDimArray_","Non-Finite Value", check_if_finite_(value));
+#  define CHECK_IF_ARRAY_FINITE(value)    this->assert_all_entries_finite_();
 #else
 #  define CHECK_IF_FINITE(value)          /* ... */
+#  define CHECK_IF_ARRAY_FINITE(value)    /* ... */
 #endif
 
 
@@ -157,7 +166,6 @@ private:
   T *data_;
   bool owns_ptr_;
 };
-
 
 
 template<typename T, std::size_t D>
@@ -281,6 +289,9 @@ protected: // methods to be reused by subclasses
 
   void cleanup_helper_(){ data_ = NULL; }
 
+  // this method is for debugging only, it is not made available to users
+  void assert_all_entries_finite_();
+
 public: // attributes
   // (these are only public so that various subclasses can access these)
   std::shared_ptr<dataWrapper<T>> dataMgr_; // manages ownership of data_
@@ -324,6 +335,7 @@ FixedDimArray_<T,D>::FixedDimArray_(T* array, Args... args)
   std::shared_ptr<dataWrapper<T>> dataMgr;
   dataMgr = std::make_shared<dataWrapper<T>>(array,false);
   init_helper_(dataMgr, shape, 0);
+  CHECK_IF_ARRAY_FINITE(value)
 }
 
 
@@ -393,6 +405,34 @@ TempArray_<T,D> FixedDimArray_<T,D>::deepcopy()
   return out;
 }
 
+
+
+template<typename T, std::size_t D>
+void FixedDimArray_<T,D>::assert_all_entries_finite_()
+{
+  bool continue_outer_iter = true;
+  intp indices[D] = {}; // all elements to 0
+  while (continue_outer_iter){
+    intp index = calc_index_(D, this->offset_, this->stride_, indices);
+    for (intp i = 0; i<this->shape_[D-1]; i++){
+
+      if (!check_if_finite_(this->data_[index])){
+	//  let's get the indices as a string
+	std::string str_indices = "";
+	for (std::size_t j=0; j+1<D; j++){
+	  str_indices+= std::to_string(indices[j]) + ", ";
+	}
+	str_indices += std::to_string(i);
+
+	ASSERT1("FixedDimArray_", "The element at (%s) has a value of %s.",
+		str_indices.c_str(),false);
+
+      }
+      index++;
+    }
+    increment_outer_indices_(D, indices, this->shape_,continue_outer_iter);
+  }
+}
 
 
 template<typename T, std::size_t D>
