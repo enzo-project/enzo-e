@@ -22,7 +22,6 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
   : Method()
 {
 
-  FieldDescr * field_descr = cello::field_descr();
   const EnzoConfig * enzo_config = enzo::config();
 
   // Initialize default Refresh object
@@ -58,6 +57,7 @@ void EnzoMethodStarMaker::pup (PUP::er &p)
   p | maximum_star_fraction_;
   p | star_particle_mass_;
 
+  return;
 }
 
 //------------------------------------------------------------------
@@ -65,9 +65,10 @@ void EnzoMethodStarMaker::pup (PUP::er &p)
 //   class (Currently EnzoMethodStarMakerStochasticSF)
 void EnzoMethodStarMaker::compute ( Block *block) throw()
 {
-  EnzoBlock * enzo_block = enzo::block(block);
 
-  enzo_block->compute_done();
+  if (! block->is_leaf()) return;
+
+  block->compute_done();
 
   return;
 }
