@@ -90,6 +90,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_sedov_random_density(0.0),
   initial_sedov_random_te_multiplier(0),
   // EnzoInitialShockTube
+  initial_shock_tube_setup_name(""),
   initial_shock_tube_aligned_ax(""),
   // EnzoInitialSoup
   initial_soup_rank(0),
@@ -261,6 +262,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_pm_mpp;
   p | initial_pm_level;
 
+  p | initial_shock_tube_setup_name;
   p | initial_shock_tube_aligned_ax;
 
   p | initial_soup_rank;
@@ -527,7 +529,9 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_sedov_random_te_multiplier = 
     p->value_integer  ("Initial:sedov_random:te_multiplier",1);
 
-  // Sedov Random Initialization
+  // Shock Tube Initialization
+  initial_shock_tube_setup_name = p->value_string
+    ("Initial:shock_tube:setup_name","");
   initial_shock_tube_aligned_ax = p->value_string
     ("Initial:shock_tube:aligned_ax","x");
 

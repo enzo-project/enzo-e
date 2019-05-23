@@ -3,6 +3,8 @@
 
 # only needs to extend from -0.5 to 0.5 with 256 blocks with outflow boundary,
 # but for now we will be doing a vague test with periodic boundaries
+# performs a test on the Sod Shock Tube
+
    Domain {
       lower = [-1.0, 0.0, 0.0];
       upper = [2.0, 1.0, 1.0];
@@ -10,8 +12,8 @@
 
    Mesh {
       root_rank = 3; # 3D
-      root_blocks = [2,2,2];
-      root_size = [768,8,8]; # number of cells per axis
+      root_blocks = [1,1,1];
+      root_size = [300,8,8]; # number of cells per axis
    }
 
    Boundary {
@@ -33,10 +35,10 @@
    Method {
       list = ["vlct"];
       vlct{
-         courant = 0.4;
+         courant = 0.2;
   
         # default is hlle. Options are hlle and hlld
-        riemann_solver = "hlld";
+        riemann_solver = "hlle";
 
         # Reconstructor algorithm for half time step. Options are:
         #    - "nn" Nearest Neighbor (default)
@@ -73,12 +75,11 @@
               "velocity_x", "velocity_y", "velocity_z",
 	      "pressure",
 	      "bfieldi_x", "bfieldi_y", "bfieldi_z",
-	      "bfield_x", "bfield_y", "bfield_z",
-	      "acceleration_x", "acceleration_y", "acceleration_z"];
+	      "bfield_x", "bfield_y", "bfield_z"];
 
       courant=0.4;
-      # this gamma is required for the shock tube problem
-      gamma = 1.6666666666666667;
+      # this is the canonical gamma for the shock tube problem
+      gamma = 1.4;
 
       # The VL+CT method reconstructs interface values (to compute fluxes) twice
       # per timestep. Can perform nearest-neighbor or PLM. Each time
@@ -107,11 +108,12 @@
       shock_tube{
          # Intializes a shock tube problem.
 
-	 # setup_name = "sod" sets up the Sod Shock Tube problem
+	 # setup_name = "sod" sets up the Sod Shock Tube problem. Canonically,
+	 # gamma gets set to 1.4 
 	 # setup_name = "rj2a" sets up the MHD problem described by Ryu & Jones
 	 # and shown in their Figure 2a. This initial condition assumes that
 	 # gamma = 5/3
-	 setup_name = "rj2a";
+	 setup_name = "sod";
 
 	 
 
@@ -124,7 +126,7 @@
    }
 
    Stopping{
-      time = 0.2;
+      time = 0.25;
    }
 
    Output {
@@ -133,11 +135,11 @@
 	 type = "data";
 	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
 		       "pressure", "bfield_x", "bfield_y", "bfield_z"];
-	 dir = ["method_vlct-1-shock_tube_%.1f","time"];
+	 dir = ["method_vlct-1-sod_shock_tube_%.2f","time"];
 	 name = ["alfven-data-%03d.h5", "proc"];
 	 schedule {
             var = "time";
-	    list = [0.0,0.2];
+	    list = [0.0,0.25];
          };
       };
    }

@@ -20,29 +20,15 @@ class EnzoInitialShockTube : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialShockTube(int cycle, double time, std::string aligned_ax_name)
-    : Initial(cycle, time), aligned_ax_(0)
-  {
-    ASSERT1("EnzoInitialShockTube",
-	    "Invalid aligned_ax value specified (must x, y, or z), not %s.",
-	    aligned_ax_name.c_str(),
-	    aligned_ax_name == "x" || aligned_ax_name == "y"
-	    || aligned_ax_name == "z");
-    if (aligned_ax_name == "x"){
-      aligned_ax_ = 0;
-    } else if (aligned_ax_name == "y"){
-      aligned_ax_ = 1;
-    } else {
-      aligned_ax_ = 2;
-    }
-  }
+  EnzoInitialShockTube(int cycle, double time, std::string setup_name,
+		       std::string aligned_ax_name);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialShockTube);
 
   /// CHARM++ migration constructor
   EnzoInitialShockTube(CkMigrateMessage *m)
-    : Initial (m), aligned_ax_(0)
+    : Initial (m), setup_name_(""), aligned_ax_(0)
   {  }
 
   /// Destructor
@@ -70,9 +56,11 @@ protected: // functions
 
 private: // attributes
 
+  /// indicates the type of shock tube to set up
+  std::string setup_name_;
+
   /// indicates the axis along which the problem is initialized: "x", "y", "z"
   int aligned_ax_;
-
 };
 
 #endif /* ENZO_ENZO_INITIAL_SHOCK_TUBE_HPP */

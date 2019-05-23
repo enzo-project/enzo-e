@@ -28,6 +28,111 @@
 #include "enzo.hpp"
 #include <math.h> // ceil
 
+static std::vector<std::string> shock_tube_setups{"rj2a","sod"};
+
+
+
+// right states for various shock tubes
+static std::map<std::string, std::map<std::string, enzo_float>> shock_tube_l{
+  {"rj2a", {// Ryu & Jones (95) from 2a
+      {"density",    1.08},
+      {"pressure",   0.95},
+      {"velocity_0", 1.2},
+      {"velocity_1", 0.01},
+      {"velocity_2", 0.5},
+      {"bfield_1",   1.0155412503859613},
+      {"bfield_2",   0.5641895835477563}
+  }},
+  {"sod", {//Sod Shock Tube
+      {"density",    1.0},
+      {"pressure",   1.0},
+      {"velocity_0", 0.},
+      {"velocity_1", 0.},
+      {"velocity_2", 0.},
+      {"bfield_1",   0.},
+      {"bfield_2",   0.}
+  }}
+};
+
+// left states for different shock tubes
+static std::map<std::string, std::map<std::string, enzo_float>> shock_tube_r{
+  {"rj2a", {// Ryu & Jones (95) from 2a
+      {"density", 1.},
+      {"pressure", 1.0},
+      {"velocity_0", 0.0},
+      {"velocity_1", 0.0},
+      {"velocity_2", 0.0},
+      {"bfield_1", 1.1283791670955126},
+      {"bfield_2", 0.5641895835477563}
+  }},
+  {"sod", {//Sod Shock Tube
+      {"density",    0.125},
+      {"pressure",   0.1},
+      {"velocity_0", 0.},
+      {"velocity_1", 0.},
+      {"velocity_2", 0.},
+      {"bfield_1",   0.},
+      {"bfield_2",   0.}
+  }}
+};
+
+// values bfield_0 for various shock tubes (aligned with the direction of
+// propagation)
+static std::map<std::string, enzo_float> shock_tube_bfield_0{
+  {"rj2a", 0.5641895835477563},
+  {"sod",  0.0}
+};
+
+//----------------------------------------------------------------------
+
+std::string vector_to_string_(std::vector<std::string> &vec)
+{
+  std::string out = "";
+
+  for(std::vector<std::string>::size_type i = 0; i != vec.size(); i++) {
+    if (i != 0){
+      out += ", ";
+    }
+    out += vec[i];
+  }
+  return out;
+}
+
+//----------------------------------------------------------------------
+
+EnzoInitialShockTube::EnzoInitialShockTube(int cycle, double time,
+					   std::string setup_name,
+					   std::string aligned_ax_name)
+    : Initial(cycle, time), setup_name_(setup_name), aligned_ax_(0)
+{
+
+  if (std::find(shock_tube_setups.begin(),
+		shock_tube_setups.end(),
+		setup_name_) == shock_tube_setups.end()){
+    // the current name is not known
+    std::string allowed_names = vector_to_string_(shock_tube_setups);
+    // There is a character limit but we are probably fine (we are exiting
+    // early anyways)
+    ERROR2("EnzoInitialShockTube",
+	   "Invalid setup_name specified (must be %s), not %s.",
+	   allowed_names.c_str(), setup_name_.c_str());
+  }
+	  
+  
+  ASSERT1("EnzoInitialShockTube",
+	  "Invalid aligned_ax value specified (must be x, y, or z), not %s.",
+	  aligned_ax_name.c_str(),
+	  aligned_ax_name == "x" || aligned_ax_name == "y"
+	  || aligned_ax_name == "z");
+  if (aligned_ax_name == "x"){
+    aligned_ax_ = 0;
+  } else if (aligned_ax_name == "y"){
+    aligned_ax_ = 1;
+  } else {
+    aligned_ax_ = 2;
+  }
+}
+  
 //----------------------------------------------------------------------
 
 void EnzoInitialShockTube::pup (PUP::er &p)
@@ -45,20 +150,10 @@ void EnzoInitialShockTube::pup (PUP::er &p)
 
 void EnzoInitialShockTube::enforce_block 
 ( Block * block, const Hierarchy  * hierarchy ) throw()
-
 {
-  std::map<std::string, enzo_float> l_vals = {
-    {"density", 1.08}, {"pressure", 0.95},
-    {"velocity_0", 1.2}, {"velocity_1", 0.01}, {"velocity_2", 0.5},
-    {"bfield_1", 1.0155412503859613}, {"bfield_2", 0.5641895835477563}
-  };
-
-  std::map<std::string, enzo_float> r_vals = {
-    {"density", 1.}, {"pressure", 1.0},
-    {"velocity_0", 0.0}, {"velocity_1", 0.0}, {"velocity_2", 0.0},
-    {"bfield_1", 1.1283791670955126}, {"bfield_2", 0.5641895835477563}
-  };
-  enzo_float aligned_bfield_val = 0.5641895835477563;
+  std::map<std::string, enzo_float> l_vals = shock_tube_l[setup_name_];
+  std::map<std::string, enzo_float> r_vals = shock_tube_r[setup_name_];
+  enzo_float aligned_bfield_val = shock_tube_bfield_0[setup_name_];
 
   std::string velocities[3] = {"velocity_x", "velocity_y", "velocity_z"};
   std::string bfields[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
