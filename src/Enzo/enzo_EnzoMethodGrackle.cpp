@@ -163,6 +163,7 @@ void EnzoMethodGrackle::compute ( Block * block) throw()
   }
 
   block->compute_done();
+
   return;
 
 }
