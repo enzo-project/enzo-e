@@ -45,6 +45,7 @@ class FieldDescr;
 class Hierarchy;
 class Monitor;
 class Output;
+class Parameters;
 class ParticleDescr;
 class Problem;
 class ScalarDescr;
@@ -188,17 +189,17 @@ enum type_enum {
 
 /// Macros for sizing, saving, and restoring data from buffers
 
-#define SIZE_ARRAY(COUNT,LIST)			\
+#define SIZE_INT_ARRAY(COUNT,LIST)			\
   {						\
     (*COUNT) += sizeof(int);			\
     (*COUNT) += sizeof(int)*LIST.size();	\
   }
-#define SIZE_VALUE(COUNT,VALUE)			\
+#define SIZE_INT(COUNT,VALUE)			\
   {						\
     (*COUNT) += sizeof(int);			\
   }
 
-#define SAVE_ARRAY(PTR,LIST)				\
+#define SAVE_INT_ARRAY(PTR,LIST)				\
   {							\
     int length = LIST.size();				\
     int n;						\
@@ -207,14 +208,14 @@ enum type_enum {
     memcpy((*PTR),&LIST[0],n=length*sizeof(int));	\
     (*PTR)+=n;						\
   }
-#define SAVE_VALUE(PTR,VALUE)			\
+#define SAVE_INT(PTR,VALUE)			\
   {						\
     int n;					\
     memcpy((*PTR),&VALUE,n=sizeof(int));	\
     (*PTR)+=n;					\
   }
 
-#define LOAD_ARRAY(PTR,LIST)				\
+#define LOAD_INT_ARRAY(PTR,LIST)				\
   {							\
     int length;						\
     int n;						\
@@ -224,7 +225,7 @@ enum type_enum {
     memcpy(&LIST[0],(*PTR),n=length*sizeof(int));	\
     (*PTR)+=n;						\
   }
-#define LOAD_VALUE(PTR,VALUE)			\
+#define LOAD_INT(PTR,VALUE)			\
   {						\
     int n;					\
     memcpy(&VALUE,(*PTR),n=sizeof(int));	\
@@ -356,6 +357,8 @@ namespace cello {
   Hierarchy *     hierarchy();
   /// Return a pointer to the Config object containing user parameters values
   const Config *  config();
+  /// Return a pointer to the Parameters object
+  const Parameters *  parameters();
   /// Return a pointer to the FieldDescr object defining fields on Blocks
   FieldDescr *    field_descr();
   /// Return a pointer to the ParticledDescr object defining particles on Blocks

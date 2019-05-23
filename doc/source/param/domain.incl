@@ -1,0 +1,20 @@
+----
+
+:Parameter:  :p:`Domain` : :p:`lower`
+:Summary: :s:`Lower domain extent`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[0.0, 0.0, 0.0]`
+:Scope:     :c:`Cello`
+
+:e:`Lower extent of the computational domain,` [x\ :sub:`min`], [ x\ :sub:`min`\, y\ :sub:`min`], :e:`or` [ x\ :sub:`min`\, y\ :sub:`min`\, z\ :sub:`min`].
+
+----
+
+:Parameter:  :p:`Domain` : :p:`upper`
+:Summary: :s:`Upper domain extent`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[1.0, 1.0, 1.0]`
+:Scope:     :c:`Cello`
+
+:e:`Upper extent of the computational domain,` [x\ :sub:`max`], [ x\ :sub:`max`\, y\ :sub:`max`], :e:`or` [ x\ :sub:`max`\, y\ :sub:`max`\, z\ :sub:`max`].
+

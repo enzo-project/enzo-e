@@ -10,16 +10,16 @@ import socket
 
 
 #----------------------------------------------------------------------
+# Temporary setting for using new Refresh implementation
+#----------------------------------------------------------------------
+
+new_refresh = 0
+
+#----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
 
 new_output = 0
-
-#----------------------------------------------------------------------
-# Temporary setting for using new PPM routines from enzo-dev
-#----------------------------------------------------------------------
-
-new_ppm = 1
 
 #----------------------------------------------------------------------
 # Maximum number of procesess per shared-memory node (can be larger than needed)
@@ -191,66 +191,56 @@ define = {}
 
 # Temporary defines
 
-# Global defines
-
-define_cello =        ['CONFIG_USE_CELLO']
-
 # Precision defines
 
-define["single"] =    ['CONFIG_PRECISION_SINGLE']
-define["double"] =    ['CONFIG_PRECISION_DOUBLE']
-define_int_size  =    ['SMALL_INTS']
+define["single"] =    'CONFIG_PRECISION_SINGLE'
+define["double"] =    'CONFIG_PRECISION_DOUBLE'
+define_int_size  =    'SMALL_INTS'
 
 # Grackle defines
 
-define_grackle   = ['CONFIG_USE_GRACKLE']
+define_grackle   = 'CONFIG_USE_GRACKLE'
 grackle_path     = 'grackle_path_not_set'
 
 # Jemalloc defines
-define_jemalloc  = ['CONFIG_USE_JEMALLOC']
+define_jemalloc  = 'CONFIG_USE_JEMALLOC'
 
 # Performance defines
 
-define_memory =       ['CONFIG_USE_MEMORY']
-define_new_charm =    ['CONFIG_NEW_CHARM']
-define_projections =  ['CONFIG_USE_PROJECTIONS']
-define_performance =  ['CONFIG_USE_PERFORMANCE']
-define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
+define_memory =       'CONFIG_USE_MEMORY'
+define_new_charm =    'CONFIG_NEW_CHARM'
+define_projections =  'CONFIG_USE_PROJECTIONS'
+define_performance =  'CONFIG_USE_PERFORMANCE'
+define_papi  =        'CONFIG_USE_PAPI','PAPI3'
 
 # Experimental code defines
 
-define_new_output      = ['NEW_OUTPUT']
-define_new_ppm         = ['NEW_PPM']
+define_new_refresh  = 'NEW_REFRESH'
+define_new_output   = 'NEW_OUTPUT'
 
 # Debugging defines
 
-define_trace =        ['CELLO_TRACE']
-define_verbose =      ['CELLO_VERBOSE']
-define_trace_charm =  ['CELLO_TRACE_CHARM']
-define_debug =        ['CELLO_DEBUG']
-define_debug_field =  ['DEBUG_FIELD']
-define_debug_field_face =  ['DEBUG_FIELD_FACE']
-define_check =        ['CELLO_CHECK']
+define_trace =        'CELLO_TRACE'
+define_verbose =      'CELLO_VERBOSE'
+define_trace_charm =  'CELLO_TRACE_CHARM'
+define_debug =        'CELLO_DEBUG'
+define_debug_field =  'DEBUG_FIELD'
+define_debug_field_face =  'DEBUG_FIELD_FACE'
+define_check =        'CELLO_CHECK'
 
-define_debug_verbose = ['CELLO_DEBUG_VERBOSE']
+define_debug_verbose = 'CELLO_DEBUG_VERBOSE'
 
 # Library defines
 
-define_hdf5  =        []
-
-define_png   =        ['NO_FREETYPE']
-
-# Charm defines
-
-define_charm =        ['CONFIG_USE_CHARM']  # used for Grackle 
+define_png   =        'NO_FREETYPE'
 
 # Python version defines
 
-define_python_lt_27 = ['CONFIG_PYTHON_LT_27']
+define_python_lt_27 = 'CONFIG_PYTHON_LT_27'
 
 # Version control defines (Git or Mercurial)
 
-define_have_version_control = ['CONFIG_HAVE_VERSION_CONTROL']
+define_have_version_control = 'CONFIG_HAVE_VERSION_CONTROL'
 
 
 #======================================================================
@@ -326,12 +316,12 @@ if (not is_arch_valid):
 # ASSEMBLE DEFINES
 #----------------------------------------------------------------------
 
-defines     = []
+defines = []
 
 # Precision configuration
 
 if (prec == 'single' or prec == 'double'):
-     defines = defines + define[prec]
+     defines.append(define[prec])
 else:
      print "Unrecognized precision ",prec
      print
@@ -341,50 +331,47 @@ else:
      print "or by using 'scons prec=<precision>"
      sys.exit(1)
 
-defines = defines + define_int_size
+defines.append(define_int_size)
 
-defines = defines + [{'CONFIG_NODE_SIZE' : node_size }]
-defines = defines + [{'CONFIG_NODE_SIZE_3' : node_size*3 }]
+defines.append({'CONFIG_NODE_SIZE' : node_size })
+defines.append({'CONFIG_NODE_SIZE_3' : node_size*3 })
 
-defines = defines + define_hdf5
-defines = defines + define_png
+defines.append(define_png)
 
 charm_perf = ''
 
 if (use_projections == 1):
-     defines = defines + define_projections
+     defines.append(define_projections)
      charm_perf = '-tracemode projections'
 
 if (use_performance == 1):
-     defines = defines + define_performance
+     defines.append(define_performance)
 
 if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
 
 if (use_jemalloc == 1):
-   defines = defines + define_jemalloc
+   defines.append(define_jemalloc)
 
-if (use_papi != 0):      defines = defines + define_papi
-if (use_grackle != 0):   defines = defines + define_grackle
+if (use_papi != 0):      defines.append( define_papi )
+if (use_grackle != 0):   defines.append( define_grackle )
 
-if (new_output != 0):    defines = defines + define_new_output
-if (new_ppm != 0):       defines = defines + define_new_ppm
+if (new_refresh != 0):    defines.append( define_new_refresh )
+if (new_output != 0):    defines.append( define_new_output )
 
-if (trace != 0):         defines = defines + define_trace
-if (verbose != 0):       defines = defines + define_verbose
-if (trace_charm != 0):   defines = defines + define_trace_charm
-if (debug != 0):         defines = defines + define_debug
-if (debug_field != 0):   defines = defines + define_debug_field
-if (debug_field_face != 0): defines = defines + define_debug_field_face
-if (check != 0):         defines = defines + define_check
-if (debug_verbose != 0): defines = defines + define_debug_verbose
-if (memory != 0):        defines = defines + define_memory
-if (new_charm != 0):     defines = defines + define_new_charm
-if (python_lt_27 != 0):  defines = defines + define_python_lt_27
-if (have_git != 0 or have_mercurial != 0 ):defines = defines + define_have_version_control
-
-defines = defines + define_charm
-defines = defines + define_cello
+if (trace != 0):         defines.append( define_trace )
+if (verbose != 0):       defines.append( define_verbose )
+if (trace_charm != 0):   defines.append( define_trace_charm )
+if (debug != 0):         defines.append( define_debug )
+if (debug_field != 0):   defines.append( define_debug_field )
+if (debug_field_face != 0): defines.append( define_debug_field_face )
+if (check != 0):         defines.append( define_check )
+if (debug_verbose != 0): defines.append( define_debug_verbose )
+if (memory != 0):        defines.append( define_memory )
+if (new_charm != 0):     defines.append( define_new_charm )
+if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
+if (have_git != 0 or have_mercurial != 0 ):
+   defines.append( define_have_version_control )
 
 #======================================================================
 # FINAL CHARM SETUP

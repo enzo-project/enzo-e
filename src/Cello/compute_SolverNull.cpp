@@ -22,10 +22,6 @@ void SolverNull::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
 {
   Solver::begin_(block);
   Solver::end_(block);
-  
-  CkCallback(callback_,
-	     CkArrayIndexIndex(block->index()),
-	     cello::block_array()).send();
 }
 
 //======================================================================

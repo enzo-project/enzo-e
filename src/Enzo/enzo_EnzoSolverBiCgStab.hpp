@@ -269,28 +269,28 @@ protected: // attributes
   // NOTE: change pup() function whenever attributes change
 
   /// Corresponding ScalarData id's for solve_type == solve_tree
-  int is_alpha_;  // [*]
-  int is_beta_n_; // [*]
-  int is_beta_d_; // [*]
-  int is_rho0_;   // [*]
+  int is_alpha_;
+  int is_beta_n_;
+  int is_beta_d_;
+  int is_rho0_;
   int is_err_;
   int is_err0_;
   int is_err_min_;
   int is_err_max_;
-  int is_omega_;  // [ ]
-  int is_omega_n_;// [ ]
-  int is_omega_d_;// [ ]
-  int is_rr_;     // [ ]
-  int is_r0s_;    // [ ]
-  int is_c_;      // [ ]
-  int is_bs_;     // [ ]
-  int is_xs_;     // [ ]
-  int is_bnorm_;  // [ ]
-  int is_vr0_;    // [ ]
-  int is_ys_;     // [ ]
-  int is_vs_;     // [ ]
-  int is_us_;     // [ ]
-  int is_qs_;     // [ ]
+  int is_omega_;
+  int is_omega_n_;
+  int is_omega_d_;
+  int is_rr_;     
+  int is_r0s_;
+  int is_c_;
+  int is_bs_;
+  int is_xs_;
+  int is_bnorm_;
+  int is_vr0_;
+  int is_ys_;
+  int is_vs_;
+  int is_us_;
+  int is_qs_;
   int is_dot_sync_;
   int is_iter_;
 

@@ -16,7 +16,7 @@
 /// @def    MONITOR_LENGTH
 /// @brief  Maximum length of monitor text output
 
-#define MONITOR_LENGTH 255
+#define MONITOR_LENGTH 512
    
 //----------------------------------------------------------------------
 class Timer; 

@@ -408,7 +408,8 @@ int Block::particle_create_array_neighbors_
 
     int index_lower[3] = {0,0,0};
     int index_upper[3] = {1,1,1};
-    refresh->index_limits (rank,refresh_type,if3,ic3,index_lower,index_upper);
+    refresh->get_particle_bin_limits
+      (rank,refresh_type,if3,ic3,index_lower,index_upper);
 
     ParticleData * pd = new ParticleData;
 
@@ -512,7 +513,8 @@ void Block::particle_apply_periodic_update_
 
     int index_lower[3] = {0,0,0};
     int index_upper[3] = {1,1,1};
-    refresh->index_limits (rank,refresh_type,if3,ic3,index_lower,index_upper);
+    refresh->get_particle_bin_limits
+      (rank,refresh_type,if3,ic3,index_lower,index_upper);
 
     // ASSERT: il < nl
     particle_determine_periodic_update_

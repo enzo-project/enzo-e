@@ -1,0 +1,17 @@
+:Parameter:  :p:`Monitor` : :p:`debug`
+:Summary: :s:`Whether to display debugging output`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :c:`Cello`
+
+:e:`If true, then process DEBUG() statements, writing the output to both stderr and appending to files out.debug.<proc>, where <proc> is the (physical) process rank.  Note that out.debug.<proc> files are not erased at the start of a run. This parameter is not scalable and is inefficient since output files are continually opened and closed by each process.`
+
+----
+
+:Parameter:  :p:`Monitor` : :p:`verbose`
+:Summary: :s:`Whether to display "verbose" output`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :c:`Cello`
+
+:e:`If true, then output requests with Monitor::verbose() will be called.  This will generally produce more detailed output, such as which specific Blocks are refining and coarsening, etc.`

@@ -1,0 +1,147 @@
+----
+
+:Parameter: :p:`Adapt` : :p:`interval`
+:Summary:   :s:`Number of cycles between adapt steps`
+:Type:      :t:`integer`
+:Default:   :d:`1`
+:Scope:     :c:`Cello`
+
+:e:`The interval parameter is used to set the number of root-level cycles between mesh adaptation.  The default is 1.`
+
+----
+
+:Parameter: :p:`Adapt` : :p:`max_level`
+:Summary:   :s:`Maximum level in the adaptive mesh hierarchy`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the level of the most highly refined Block in the mesh hierarchy.  The default is 0, meaning there is no refinement past the initial root-level grid.`
+
+----
+
+:Parameter: :p:`Adapt` : :p:`min_level`
+:Summary:   :s:`Minimum level in the adaptive mesh hierarchy`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the coarsest level of "sub-root" Blocks, and must non-positive.  This is used primarily for multigrid methods, such as in the` :t:`"mg0"` :e:`solver.  The default is 0, meaning no sub-root Blocks are created.  If multigrid is used, then both` :p:`Adapt` : :p:`min_level` :e:`and` :p:`Method` : :g:`<mg-solver>` : :p:`min_level` :e:`must be set.`.
+
+----
+
+:Parameter: :p:`Adapt` : :p:`list`
+:Summary:   :s:`List of refinement criteria`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`List of mesh refinement criteria, each of which has its own associated` ``Adapt : <criteria> :`` :e:`parameters.  When multiple criteria are used, if all refinement criteria evaluate to "coarsen", then the block will be tagged to coarsen; if any refinement criteria evaluate as "refine", then the block will be tagged to refine.  (Note that a particular block will coarsen only if it and all other sibling blocks are tagged to coarsen as well.)`  
+
+:e:`The items in the list need not be the same as the (required)` :p:`Adapt` : :g:`<criterion>` : :p:`type` :e:`parameter; they are solely used to identify and distinguish between different criteria in the simulation.  This allows the user to use multiple criteria of the same type but with different parameters, e.g. "mask" with different masks:`
+
+   ::
+
+       Adapt {
+          list = ["criterion_1", "criterion_2"];
+          criterion_1 {
+             type = "shock";
+          }
+          criterion_2 {
+             type = "shear";
+          }
+       }
+
+----
+
+:Parameter:  :p:`Adapt` : :p:`min_face_rank`
+:Summary:    :s:`Minimum rank of Block faces to check for 2:1 refinement restriction`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:     :c:`Cello`
+
+:e:`Many numerical methods require a 2:1 refinement restriction on adaptive meshes, such that no Block in level i is adjacent to another Block in a level j with |i - j|>1.  This assumption may be required across corners and edges as well as 2D faces.  This parameter specifies the minimum rank (dimensionality) of Block faces across which to enforce the 2:1 refinement restriction.`
+
+----
+
+:Parameter: :p:`Adapt` : :g:`<criterion>` : :p:`field_list`
+:Summary:   :s:`List of field the refinement criterion is applied to`
+:Type:        [ :t:`string` | :t:`list` ( :t:`string` ) ]
+:Default:     :d:`[]` ( all fields )
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the fields that the refinement criteria is applied to.  For example, if type = "slope" and field_list = ["density"], then the "refine by slope" refinement criterion is applied to the density field.`
+
+
+----
+
+:Parameter: :p:`Adapt` : :g:`<criterion>` : :p:`level_exponent`
+:Summary:   :s:`Level exponent parameter`
+:Type:        :t:`float`
+:Default:     :d:`0.0`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<criterion>` is of :p:`type` :t:`"mass"`
+
+:e:`The level exponent parameter is used in the "mass" refinement criterion type only.  It is used as a scaling factor for the refinement criteria for different mesh levels.`
+
+
+----
+
+:Parameter: :p:`Adapt` : :g:`<criterion>` : :p:`max_coarsen`
+:Summary:   :s:`Cutoff value for coarsening a block`
+:Type:        [ :t:`float` | :t:`list` ( :t:`float` ) ]
+:Default:     :d:`0.5*min_refine`
+:Scope:     :c:`Cello`
+
+:e:`A block may coarsen if the refinement criterion applied to the block is smaller than this value everywhere in the block.   A list is used for the` :t:`"shock"` :e:`refinement criterion type, in which case the first value is for pressure and the second is for the energy ratio.`
+
+----
+
+:Parameter: :p:`Adapt` : :g:`<criterion>` : :p:`include_ghosts`
+:Summary:   :s:`Whether to include ghost zones when applying the refinement criterion`
+:Type:      :t:`logical`
+:Default:   :d:`false`
+:Scope:     :c:`Cello`
+
+:e:`When applying a mesh refinement criterion, this parameter specifies whether to apply it to ghost zones in the block as well as non-ghost zones.`
+
+----
+
+:Parameter: :p:`Adapt` : :g:`<criterion>` : :p:`min_refine`
+:Summary:   :s:`Cutoff value for refining a block`
+:Type:        [ :t:`float` | :t:`list` ( :t:`float` ) ]
+:Default:     :d:`0.3`
+:Scope:     :c:`Cello`
+
+:e:`A block must refine if the refinement criterion applied to the block is larger than this value anywhere in the block.  A list is used for the` :t:`"shock"` :e:`refinement criterion type, in which case the first value is for pressure and the second is for the energy ratio.`
+
+----
+
+:Parameter:  :p:`Adapt` : :g:`<criterion>` : :p:`output`
+:Summary:    :s:`Name of a field in which to store the result of the refinement criterion`
+:Type:    :t:`string`
+:Default: :d:`""`
+:Scope:     :c:`Cello`
+
+:e:`In addition to evolved field values, one may also output the refinement criteria.  This may be  useful for example for debugging or for finding appropriate values for max_coarsen and min_refine.  A value of -1 specifies coarsening, +1 for refining, and 0 for staying the same.`
+
+----
+
+:Parameter:  :p:`Adapt` : :g:`<criterion>` : :p:`max_level`
+:Summary:    :s:`Maximum level to refine using this refinement criterion`
+:Type:    :t:`integer`
+:Default: :d:`max (integer)`
+:Scope:     Cello
+
+:e:`Adapt will not refine past` :p:`max_level` :e:`when using this refinement criterion.  Note if the global` :p:`Adapt:max_level` :e:`is smaller, than that takes precidence; also, another criterion may refine past this if both` :p:`Adapt:max_level` :e:`and` :p:`Adapt` : :g:`<criterion>` : :p:`max_level` :e:`for the other criterion are both larger.`
+
+----
+
+:Parameter:  :p:`Adapt` : :g:`<criterion>` : :p:`type`
+:Summary:    :s:`Type of mesh refinement criteria`
+:Type:    :t:`string`
+:Default: :d:`"unknown"`
+:Scope:     :c:`Cello`
+
+:e:`Type of mesh refinement criteria.  This is a required parameter, and must be one of "slope", "shear", "mask", "mass", "density", "shock", "particle_mass", or "particle_count".`
+ 
