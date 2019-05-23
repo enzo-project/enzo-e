@@ -119,8 +119,8 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
-#ifdef CONFIG_USE_GRACKLE
   method_grackle_use_grackle(false),
+#ifdef CONFIG_USE_GRACKLE
   method_grackle_chemistry(),
   method_grackle_use_cooling_timestep(false),
   method_grackle_radiation_redshift(-1.0),
@@ -323,8 +323,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_length;
   p | units_time;
 
-#ifdef CONFIG_USE_GRACKLE
   p  | method_grackle_use_grackle;
+#ifdef CONFIG_USE_GRACKLE
   p  | method_grackle_use_cooling_timestep;
   p  | method_grackle_radiation_redshift;
 
@@ -794,12 +794,12 @@ void EnzoConfig::read(Parameters * p) throw()
   // GRACKLE 3.0
   //======================================================================
 
+  this->method_grackle_use_grackle = false;
 #ifdef CONFIG_USE_GRACKLE
 
 
   /// Grackle parameters
 
-  this->method_grackle_use_grackle = false;
   for (size_t i=0; i<method_list.size(); i++) {
     if (method_list[i] == "grackle") method_grackle_use_grackle=true;
   }

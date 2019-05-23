@@ -277,6 +277,7 @@ python_lt_27 = 0
 sys.path.append("./config");
 
 flags_arch_cpp = ''
+flags_arch_fortran = ''
 flags_config = ''
 flags_cxx = ''
 flags_cc = ''
@@ -495,7 +496,7 @@ cflags   = cflags + ' ' + flags_cc
 cflags   = cflags + ' ' + flags_config
 cflags   = cflags + ' ' + flags_cc_charm
 
-fortranflags = flags_arch
+fortranflags = flags_arch + ' ' + flags_arch_fortran
 fortranflags = fortranflags + ' ' + flags_fc
 fortranflags = fortranflags + ' ' + flags_config
 fortranflags = fortranflags + ' ' + flags_fc_charm

@@ -206,8 +206,8 @@ public: // interface
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
       // EnzoMethodGrackle
-#ifdef CONFIG_USE_GRACKLE
       method_grackle_use_grackle(false),
+#ifdef CONFIG_USE_GRACKLE
       method_grackle_chemistry(),
       method_grackle_use_cooling_timestep(false),
       method_grackle_radiation_redshift(-1.0),
@@ -394,6 +394,14 @@ public: // attributes
   double                     method_turbulence_edot;
   double                     method_turbulence_mach_number;
 
+  /// EnzoMethodGrackle
+  bool                       method_grackle_use_grackle;
+#ifdef CONFIG_USE_GRACKLE
+  chemistry_data *           method_grackle_chemistry;
+  bool                       method_grackle_use_cooling_timestep;
+  double                     method_grackle_radiation_redshift;
+#endif /* CONFIG_USE_GRACKLE */
+
   /// EnzoMethodGravity
   double                     method_gravity_grav_const;
   std::string                method_gravity_solver;
@@ -454,14 +462,6 @@ public: // attributes
 
   /// Stop at specified redshift for cosmology
   double                     stopping_redshift;
-
-
-#ifdef CONFIG_USE_GRACKLE
-  bool             method_grackle_use_grackle;
-  chemistry_data * method_grackle_chemistry;
-  bool             method_grackle_use_cooling_timestep;
-  double           method_grackle_radiation_redshift;
-#endif /* CONFIG_USE_GRACKLE */
 
 };
 
