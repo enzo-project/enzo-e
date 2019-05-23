@@ -45,6 +45,7 @@ public:
   intp stop;
 };
 
+
 // Defining the macro called CHECK_BOUNDS macro means that the bounds of an
 // EnzoArray, are checked everytime operator() is called
 template<typename T>
@@ -64,6 +65,19 @@ bool check_bounds_(std::size_t *shape, T first, Rest... rest){
 #  define CHECK_BOUND3D(shape, k, j, i)   /* ... */
 #  define CHECK_BOUNDND(shape, ARGS)      /* ... */
 #endif
+
+
+
+// Defining the macro called CHECK_FINITE_ELEMENTS returns an error everytime a
+// NaN or inf gets retrieved from the array
+#ifdef CHECK_FINITE_ELEMENTS
+#  define CHECK_IF_FINITE(value)                                              \
+  ASSERT("FixedDimArray_","Non-Finite Value", std::isfinite(value));
+#else
+#  define CHECK_IF_FINITE(value)          /* ... */
+#endif
+
+
 
 // To define EnzoArray to have arbitrary dimensions we need to accept a variable
 // number of arguments to indicate shape during construction, to produce a
@@ -166,6 +180,7 @@ public:
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
     CHECK_BOUNDND(shape, args)
+    CHECK_IF_FINITE(data_[offset_ + calc_index_(stride_,args...)]);
     return data_[offset_ + calc_index_(stride_,args...)];
   }
   template<typename... Args, REQUIRE_INT(Args)>
@@ -173,6 +188,7 @@ public:
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
     CHECK_BOUNDND(shape, args)
+    CHECK_IF_FINITE(data_[offset_ + calc_index_(stride_,args...)]);
     return data_[offset_ + calc_index_(stride_,args...)];
   }
 
@@ -180,11 +196,13 @@ public:
   T &operator() (const int k, const int j, const int i){
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
     CHECK_BOUND3D(shape, k, j, i)
+    CHECK_IF_FINITE(data_[offset_ + k*stride_[0] + j*stride_[1] + i])
     return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
   }
   T operator() (const int k, const int j, const int i) const{
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
     CHECK_BOUND3D(shape, k, j, i)
+    CHECK_IF_FINITE(data_[offset_ + k*stride_[0] + j*stride_[1] + i])
     return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
   }
 
