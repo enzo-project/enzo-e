@@ -1,9 +1,10 @@
 # Problem: Axis aligned Shock Tube test problem for VLCT
 # Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
 
-# only needs to extend from -0.5 to 0.5 with 256 blocks with outflow boundary,
-# but for now we will be doing a vague test with periodic boundaries
-# performs a test on the Sod Shock Tube
+# Sod Shock Tube Test Problem
+# only needs to extend from 0.0 to 1.0 with 256 blocks with outflow boundary,
+# along axis of evolution (and for other axes, a periodic boundary should be
+# used
 
    Domain {
       lower = [-1.0, 0.0, 0.0];
@@ -16,21 +17,24 @@
       root_size = [300,8,8]; # number of cells per axis
    }
 
-   Boundary {
-      list = ["one", "two", "three"];
-      one{
-         type = "periodic";
-	 axis = "x";
-      }
-      two{
-         type = "periodic";
-	 axis = "y";
-      }
-      three{
-         type = "periodic";
-	 axis = "z";
-      }
-   }
+#   Boundary {
+#      list = ["one", "two", "three"];
+#      one{
+#         type = "outflow";
+#	 axis = "x";
+#      }
+#      two{
+#         type = "periodic";
+#	 axis = "y";
+#      }
+#      three{
+#         type = "periodic";
+#	 axis = "z";
+#      }
+#   }
+    Boundary {
+       type = "periodic";
+    }
 
    Method {
       list = ["vlct"];
@@ -55,7 +59,7 @@
         density_floor = 1.e-200;
 
         # pressure floor (default = 0.0)
-        pressure_floor = 0.0;
+        pressure_floor = 1.e-200;
 	};
    }
 
@@ -77,15 +81,14 @@
 	      "bfieldi_x", "bfieldi_y", "bfieldi_z",
 	      "bfield_x", "bfield_y", "bfield_z"];
 
-      courant=0.4;
+      courant=0.2;
       # this is the canonical gamma for the shock tube problem
       gamma = 1.4;
 
       # The VL+CT method reconstructs interface values (to compute fluxes) twice
       # per timestep. Can perform nearest-neighbor or PLM. Each time
       # nearest-neighbor is used, 1 ghost zone is needed. Each time PLM is used
-      # 2 ghost zones are needed. Presently use PLM twice, but in future, will
-      # use nearest-neighbor followed by PLM
+      # 2 ghost zones are needed. use nearest-neighbor followed by PLM
       
       ghost_depth = 3;
       padding = 0;
@@ -130,7 +133,7 @@
    }
 
    Output {
-      list = ["data"];
+      list = ["data","cycled"];
       data {
 	 type = "data";
 	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
@@ -140,6 +143,17 @@
 	 schedule {
             var = "time";
 	    list = [0.0,0.25];
+         };
+      };
+      cycled {
+         type = "data";
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+		       "pressure", "bfield_x", "bfield_y", "bfield_z"];
+	 dir = ["method_vlct-1-sod_shock_tube_cycle%03d","cycle"];
+	 name = ["alfven-data-%03d.h5", "proc"];
+	 schedule {
+            var = "cycle";
+	    every = 1;
          };
       };
    }
