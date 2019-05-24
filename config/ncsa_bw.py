@@ -46,13 +46,15 @@ grackle_path = home + '/local'
 
 if (type == "mpi"):
    parallel_run = "aprun -n 8"
+
 boost_path = os.environ["BOOST_ROOT"]
 boost_inc = boost_path + '/include'
 boost_lib = boost_path + '/lib'
 
 node = 1
-node = os.environ["CHARM_NODE"]
-smp = os.environ["CHARM_SMP"]
+#node = os.environ["CHARM_NODE"]
+#smp = os.environ["CHARM_SMP"]
+smp = 0
 
 serial_run   = 'aprun -n 1 '
 
