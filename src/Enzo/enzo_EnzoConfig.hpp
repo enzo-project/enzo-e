@@ -197,10 +197,10 @@ public: // interface
       initial_IG_disk_mass(42.9661),            // Gas disk mass in code units
       initial_IG_gas_fraction(0.2),             // Gas disk M_gas / M_star
       initial_IG_disk_temperature(1e4),         // Gas disk temperature in K
-      initial_IG_disk_metal_fraction(0.0),         // Gas disk metal fraction
+      initial_IG_disk_metal_fraction(1.0E-10),         // Gas disk metal fraction
       initial_IG_gas_halo_mass(0.1),             // Gas halo total mass in code units
       initial_IG_gas_halo_temperature(1e4),      // Gas halo initial temperature
-      initial_IG_gas_halo_metal_fraction(0.0),      // Gas halo metal fraction
+      initial_IG_gas_halo_metal_fraction(1.0E-10),      // Gas halo metal fraction
       initial_IG_gas_halo_density(0.0),          // Gas halo uniform density (ignored if zero)
       initial_IG_gas_halo_radius(1.0),           // Gas halo maximum radius in code units
       initial_IG_use_gas_particles(false),       //
