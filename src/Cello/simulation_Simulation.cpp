@@ -247,6 +247,7 @@ void Simulation::pup (PUP::er &p)
   p | *particle_descr_;
 
   if (up && (phase_ == phase_restart)) {
+    monitor_->header();
     monitor_->print ("Simulation","restarting");
   }
 
