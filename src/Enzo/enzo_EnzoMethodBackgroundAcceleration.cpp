@@ -227,8 +227,8 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
                         cello::kpc_cm / enzo_units->length();
   const double * amom = enzo_config->method_background_acceleration_angular_momentum;
 
-  double G = this->G_four_pi_ *
-             enzo_units->density() * enzo_units->time() * enzo_units->time();
+//  double G = this->G_four_pi_ *
+//             enzo_units->density() * enzo_units->time() * enzo_units->time();
   double G_code = cello::grav_constant * enzo_units->density() * enzo_units->time() * enzo_units->time();
 
   double rcore = enzo_config->method_background_acceleration_core_radius *
@@ -280,16 +280,16 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
          double Rtemp     = DM_mass_radius / rcore;
 
          //double
-         accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
+         accel_sph = G_code * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
                      + 4.0 * G_code * cello::pi * DM_density * rcore *
                           (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
 
          //double
-         accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
+         accel_R   = G_code * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
                              + pow(stellar_r + sqrt( pow(zheight,2)
                             + pow(stellar_z,2)),2),3));
          //double
-         accel_z   = G * stellar_mass / sqrt(pow(zheight,2)
+         accel_z   = G_code * stellar_mass / sqrt(pow(zheight,2)
                                + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
                                + pow(stellar_r + sqrt(pow(zheight,2)
                                + pow(stellar_z,2)),2),3))
@@ -375,15 +375,15 @@ void EnzoMethodBackgroundAcceleration::GalaxyModel(enzo_float * ax,
           double Rtemp     = DM_mass_radius / rcore;
 
           //double
-          accel_sph = G * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
+          accel_sph = G_code * bulge_mass / pow(radius + bulgeradius,2) +    // bulge
                      + 4.0 * G_code * cello::pi * DM_density * rcore *
                           (log(1.0+xtemp) - (xtemp / (1.0+xtemp))) / (xtemp*xtemp);
 
-          accel_R   = G * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
+          accel_R   = G_code * stellar_mass * rcyl / sqrt( pow( pow(rcyl,2)
                               + pow(stellar_r + sqrt( pow(zheight,2)
                              + pow(stellar_z,2)),2),3));
           //double
-          accel_z   = G * stellar_mass / sqrt(pow(zheight,2)
+          accel_z   = G_code * stellar_mass / sqrt(pow(zheight,2)
                                 + pow(stellar_z,2))*zheight/sqrt(pow(pow(rcyl,2)
                                 + pow(stellar_r + sqrt(pow(zheight,2)
                                 + pow(stellar_z,2)),2),3))
