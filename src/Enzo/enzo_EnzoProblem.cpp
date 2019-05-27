@@ -130,6 +130,18 @@ Initial * EnzoProblem::create_initial_
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "vlct_bfield") {
     initial = new EnzoInitialBCenter(cycle, time);
+  } else if (type == "cloud") {
+    initial = new EnzoInitialCloud
+      (cycle,time,
+       enzo_config->initial_cloud_subsample_n,
+       enzo_config->initial_cloud_radius,
+       enzo_config->initial_cloud_center_x,
+       enzo_config->initial_cloud_center_y,
+       enzo_config->initial_cloud_center_z,
+       enzo_config->initial_cloud_density_cloud,
+       enzo_config->initial_cloud_density_wind,
+       enzo_config->initial_cloud_pressure,
+       enzo_config->initial_cloud_velocity_wind);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,

@@ -45,6 +45,16 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_initial_redshift(0.0),
   physics_cosmology_final_redshift(0.0),
   physics_gravity(false),
+  // EnzoInitialCloud
+  initial_cloud_subsample_n(0),
+  initial_cloud_radius(0.),
+  initial_cloud_center_x(0.0),
+  initial_cloud_center_y(0.0),
+  initial_cloud_center_z(0.0),
+  initial_cloud_density_cloud(0.0),
+  initial_cloud_density_wind(0.0),
+  initial_cloud_velocity_wind(0.0),
+  initial_cloud_pressure(0.0),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -209,6 +219,16 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_final_redshift;
 
   p | physics_gravity;
+
+  p | initial_cloud_subsample_n;
+  p | initial_cloud_radius;
+  p | initial_cloud_center_x;
+  p | initial_cloud_center_y;
+  p | initial_cloud_center_z;
+  p | initial_cloud_density_cloud;
+  p | initial_cloud_density_wind;
+  p | initial_cloud_velocity_wind;
+  p | initial_cloud_pressure;
 
   p | initial_cosmology_temperature;
   
@@ -534,6 +554,26 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:shock_tube:setup_name","");
   initial_shock_tube_aligned_ax = p->value_string
     ("Initial:shock_tube:aligned_ax","x");
+
+  // Cloud Crush Initialization
+  initial_cloud_subsample_n   = p->value_integer
+    ("Initial:cloud:subsample_n",0);
+  initial_cloud_radius        = p->value_float
+    ("Initial:cloud:cloud_radius",0.0);
+  initial_cloud_center_x      = p->value_float
+    ("Initial:cloud:cloud_center_x",0.0);
+  initial_cloud_center_y      = p->value_float
+    ("Initial:cloud:cloud_center_y",0.0);
+  initial_cloud_center_z      = p->value_float
+    ("Initial:cloud:cloud_center_z",0.0);
+  initial_cloud_density_cloud = p->value_float
+    ("Initial:cloud:cloud_density",0.0);
+  initial_cloud_density_wind  = p->value_float
+    ("Initial:cloud:wind_density",0.0);
+  initial_cloud_velocity_wind = p->value_float
+    ("Initial:cloud:wind_velocity",0.0);
+  initial_cloud_pressure      = p->value_float
+    ("Initial:cloud:pressure",0.0);
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);

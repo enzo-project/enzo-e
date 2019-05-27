@@ -68,6 +68,16 @@ public: // interface
       physics_cosmology_initial_redshift(0.0),
       physics_cosmology_final_redshift(0.0),
       physics_gravity(false),
+      // EnzoInitialCloud
+      initial_cloud_subsample_n(0),
+      initial_cloud_radius(0.),
+      initial_cloud_center_x(0.0),
+      initial_cloud_center_y(0.0),
+      initial_cloud_center_z(0.0),
+      initial_cloud_density_cloud(0.0),
+      initial_cloud_density_wind(0.0),
+      initial_cloud_velocity_wind(0.0),
+      initial_cloud_pressure(0.0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
       // EnzoInitialCollapse
@@ -233,6 +243,17 @@ public: // attributes
 
   /// Gravity
   bool                       physics_gravity;
+
+  /// EnzoInitialCloud;
+  int                        initial_cloud_subsample_n;
+  double                     initial_cloud_radius;
+  double                     initial_cloud_center_x;
+  double                     initial_cloud_center_y;
+  double                     initial_cloud_center_z;
+  double                     initial_cloud_density_cloud;
+  double                     initial_cloud_density_wind;
+  double                     initial_cloud_velocity_wind;
+  double                     initial_cloud_pressure;
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;
