@@ -424,7 +424,7 @@ void FixedDimArray_<T,D>::assert_all_entries_finite_()
 	}
 	str_indices += std::to_string(i);
 
-	ASSERT1("FixedDimArray_", "The element at (%s) has a value of %s.",
+	ASSERT1("FixedDimArray_", "The element at (%s) has a non_NaN value.",
 		str_indices.c_str(),false);
 
       }
