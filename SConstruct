@@ -647,7 +647,7 @@ else:
    build_dir = 'build'
    
 SConscript( 'src/SConscript',variant_dir=build_dir)
-SConscript('test/SConscript')
+#SConscript('test/SConscript')
 
 #======================================================================
 # CLEANING
