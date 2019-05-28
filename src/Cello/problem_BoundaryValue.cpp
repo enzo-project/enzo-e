@@ -48,7 +48,7 @@ void BoundaryValue::enforce
       field.ghost_depth(index_field,&gx,&gy,&gz);
 
       int cx,cy,cz;
-      field.centering(index, &cx,&cy,&cz);
+      field.centering(index_field, &cx,&cy,&cz);
 
       int ndx=nx+2*gx+cx;
       int ndy=ny+2*gy+cy;
