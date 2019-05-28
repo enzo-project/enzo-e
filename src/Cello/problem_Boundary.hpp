@@ -87,11 +87,11 @@ public: // virtual functions
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw() = 0;
 
-  /// Return which faces are periodic
+  /// Return which faces are periodic (non-periodic faces are un-altered)
   void periodicity(bool p32[3][2]) const throw() {
     for (int axis=0; axis<3; axis++) {
       for (int face=0; face<2; face++) {
-	p32[axis][face] = periodicity_[axis][face];
+	if (periodicity_[axis][face]) p32[axis][face] = true;
       }
     }
   }
