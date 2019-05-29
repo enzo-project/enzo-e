@@ -275,8 +275,8 @@ void Block::init
 
   set_state (cycle,time,dt,stop_);
 
-  sync_coarsen_.set_stop(cello::num_children());
   sync_coarsen_.reset();
+  sync_coarsen_.set_stop(cello::num_children());
 
   // Initialize neighbor face levels
 

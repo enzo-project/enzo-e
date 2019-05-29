@@ -44,11 +44,6 @@ void Block::new_refresh_start (int id_refresh, int callback)
   if ( refresh.active() ) {
 
     ASSERT1 ("Block::new_refresh_start()",
-	     "refresh[%d] msg_list is not empty",
-	     id_refresh,
-	     (new_refresh_msg_list_[id_refresh].size()==0));
-
-    ASSERT1 ("Block::new_refresh_start()",
 	     "refresh[%d] state is not inactive",
 	     id_refresh,
 	     (state == RefreshState::INACTIVE));
@@ -236,14 +231,17 @@ void Block::p_new_refresh_recv (MsgRefresh * msg)
 	      name().c_str(),sync.value(),sync.stop());
     fflush(stdout);
 #endif    
+
+    // check if it's the last message processed
+    new_refresh_check_done(id_refresh);
+  
   } else {
+
     // save message if not ready
     new_refresh_msg_list_[id_refresh].push_back(msg);
+
   }
 
-  // check if it's the last message processed
-  new_refresh_check_done(id_refresh);
-  
 }
 
 //----------------------------------------------------------------------

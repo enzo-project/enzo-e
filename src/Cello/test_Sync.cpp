@@ -49,14 +49,11 @@ PARALLEL_MAIN_BEGIN
   unit_assert(sync_1.value() == 4);
   unit_assert(sync_1.is_done() == false);
   unit_assert(sync_1.next() == true);
-  unit_assert(sync_1.value() == 5);
+  unit_assert(sync_1.value() == 0);
   unit_assert(sync_1.is_done() == true);
 
-  sync_1.clear();
-  unit_assert(sync_1.is_done() == false);
-  unit_assert(sync_1.value() == 0);
-  unit_assert(sync_1.stop() == 5);
   sync_1.reset();
+  unit_assert(sync_1.is_done() == false);
   unit_assert(sync_1.value() == 0);
   unit_assert(sync_1.stop() == 0);
   

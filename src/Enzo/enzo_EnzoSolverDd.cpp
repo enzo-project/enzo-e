@@ -24,7 +24,7 @@
 #include "enzo.hpp"
 
 // #define TRACE_DD
-// #define TRACE_DD_CYCLE 100
+// #define TRACE_DD_CYCLE 0
 
 // #define DEBUG_FIELD
 // #define DEBUG_COPY_FIELD
