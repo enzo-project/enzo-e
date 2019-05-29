@@ -771,6 +771,8 @@ test_summary("Prolong",array("prolong_linear"),
 	     array("test_ProlongLinear"),'test'); 
 test_summary("Schedule",array("Schedule"),
 	     array("test_Schedule"),'test'); 
+test_summary("Sync",array("Sync"),
+	     array("test_Sync"),'test'); 
 test_summary("Type",array("Type"),
 	     array("test_Type"),'test'); 
 test_summary("Units", 
@@ -1624,6 +1626,15 @@ test_group("Schedule");
 begin_hidden("schedule", "Schedule");
 tests("Cello","test_Schedule","test_Schedule","","");
 end_hidden("schedule");
+
+//----------------------------------------------------------------------
+
+test_group("Sync");
+
+
+begin_hidden("sync", "Sync");
+tests("Cello","test_Sync","test_Sync","","");
+end_hidden("sync");
 
 //----------------------------------------------------------------------
 

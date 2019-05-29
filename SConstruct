@@ -13,7 +13,7 @@ import socket
 # Temporary setting for using new Refresh implementation
 #----------------------------------------------------------------------
 
-new_refresh = 0
+new_refresh = 1
 
 #----------------------------------------------------------------------
 # Temporary setting for using new Output implementation

@@ -79,7 +79,6 @@ public: // virtual functions
     (new Refresh
      (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true));
 #endif  
-     
     return index;
   }
 

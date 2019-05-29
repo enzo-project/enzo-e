@@ -33,10 +33,13 @@ public: // interface
     active_(true),
     callback_(0) ,
     root_level_(0)
+#ifdef NEW_REFRESH
+    , id_refresh_(-1)
+#endif
   {
   }
 
-  /// empty constructor for charm++ pup()
+  /// Create an initialized Refresh object
   Refresh
   (int ghost_depth,
    int min_face_rank,
@@ -58,6 +61,9 @@ public: // interface
       active_(active),
       callback_(0),
       root_level_(0)
+#ifdef NEW_REFRESH
+    , id_refresh_(-1)
+#endif      
   {
   }
 
@@ -81,6 +87,9 @@ public: // interface
     active_(true),
     callback_(0),
     root_level_(0)
+#ifdef NEW_REFRESH    
+    , id_refresh_(-1)
+#endif    
   {
   }
 
@@ -104,6 +113,9 @@ public: // interface
     p | active_;
     p | callback_;
     p | root_level_;
+#ifdef NEW_REFRESH
+    p | id_refresh_;
+#endif    
   }
 
   //--------------------------------------------------
@@ -340,6 +352,16 @@ public: // interface
     }
   }
 
+#ifdef NEW_REFRESH
+  /// Set the new refresh id in new_refresh_list_[]
+  void set_id(int id_refresh)
+  { id_refresh_ = id_refresh; }
+
+  /// return the new refresh id in new_refresh_list_[]
+  int id() const
+  { return id_refresh_; }
+#endif  
+  
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object
@@ -356,9 +378,6 @@ public: // interface
   char * load_data (char * buffer);
 
   //--------------------------------------------------
-  
-private: // functions
-
 
 private: // attributes
 
@@ -385,7 +404,8 @@ private: // attributes
   /// Ghost zone depth
   int ghost_depth_;
 
-  /// minimum face rank to refresh (0 = corners, 1 = edges, etc.)
+  /// minimum face rank to refresh (2 include facets, 1 also edges, 0
+  /// also corners)
   int min_face_rank_;
 
   /// Which subset of adjacent Blocks to refresh with
@@ -408,6 +428,11 @@ private: // attributes
 
   /// Coarse level for neighbor_tree type
   int root_level_;
+
+#ifdef NEW_REFRESH  
+  /// ID in new_refresh_list_[]
+  int id_refresh_;
+#endif  
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

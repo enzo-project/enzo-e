@@ -206,6 +206,11 @@ protected: // functions
 		       double rr_min=0.0, double rr=0.0, double rr_max=0.0,
 		       bool final = false) throw();
   
+#ifdef NEW_REFRESH
+  /// Register refresh phase with Cello and return a refresh id
+  int new_register_refresh_ (Refresh refresh);
+#endif
+  
   int add_refresh (int ghost_depth, 
 		   int min_face_rank, 
 		   int neighbor_type, 

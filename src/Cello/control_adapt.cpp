@@ -193,9 +193,8 @@ void Block::adapt_end_()
   for (size_t i=0; i<face_level_last_.size(); i++)
     face_level_last_[i] = -1;
 
-  const int rank = cello::rank();
-  sync_coarsen_.set_stop(NUM_CHILDREN(rank));
   sync_coarsen_.reset();
+  sync_coarsen_.set_stop(cello::num_children());
 
   const int initial_cycle = cello::config()->initial_cycle;
   const bool is_first_cycle = (initial_cycle == cycle());
@@ -292,8 +291,6 @@ void Block::adapt_refine_()
 
   adapt_ = adapt_unknown;
 
-  const int rank = cello::rank();
-  
   int nx,ny,nz;
   data()->field_data()->size(&nx,&ny,&nz);
 
@@ -303,7 +300,7 @@ void Block::adapt_refine_()
 
   ParticleDescr * p_descr = cello::simulation()->particle_descr();
 
-  const int nc = NUM_CHILDREN(rank);
+  const int nc = cello::num_children();
 
   for (int i=0; i<nc; i++) {
     particle_list[i] = new ParticleData;
@@ -317,6 +314,8 @@ void Block::adapt_refine_()
   particle_scatter_children_ (particle_list,particle);
   
   // For each new child
+
+  const int rank = cello::rank();
 
   ItChild it_child (rank);
   int ic3[3];
@@ -412,8 +411,7 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
   CkPrintf ("DEBUG_NEW_REFRESH particle_scatter_children\n");
 #endif
 
-  const int rank = cello::rank();
-  const int npa = NUM_CHILDREN(rank);
+  const int npa = cello::num_children();
 
   // get Block bounds 
   double xm,ym,zm;
@@ -484,6 +482,7 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 	  double y = ya[ip*d];
 	  double z = za[ip*d];
 
+	  const int rank = cello::rank();
 	  int ix = (rank >= 1) ? ( (x < x0) ? 0 : 1) : 0;
 	  int iy = (rank >= 2) ? ( (y < y0) ? 0 : 1) : 0;
 	  int iz = (rank >= 3) ? ( (z < z0) ? 0 : 1) : 0;
@@ -513,7 +512,7 @@ void Block::adapt_delete_child_(Index index_child)
 #ifdef DEBUG_ADAPT
   int nb3[3] = {2,2,2};
   CkPrintf ("%s deleting child %s\n",
-	    name().c_str(), index_child.bit_string(index_child.level(),rank(),nb3).c_str());
+	    name().c_str(), index_child.bit_string(index_child.level(),cello::rank(),nb3).c_str());
   fflush(stdout);
 #endif
   thisProxy[index_child].p_adapt_delete();
@@ -590,7 +589,7 @@ void Block::p_adapt_recv_level
     CkPrintf ("%s %s <- B%s"
 	      " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d [%d] %s\n",
 	      name().c_str(),"recv",
-	      index_send.bit_string(index_send.level(),rank(),nb3).c_str(),
+	      index_send.bit_string(index_send.level(),cello::rank(),nb3).c_str(),
 	      level_face_curr,level_face_new,
 	      if3[0],if3[1],if3[2],				
 	      ic3[0],ic3[1],ic3[2], face_level_last_[ICF3(ic3,if3)],

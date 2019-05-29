@@ -133,12 +133,28 @@ void Block::refresh_exit_()
   Refresh * refresh = refresh_.back();
 #endif  
 
+#ifdef NEW_REFRESH
+  // control_sync (refresh->callback(),
+  // 		refresh->sync_type(),
+  // 		refresh->sync_exit(),
+  // 		refresh->min_face_rank(),
+  // 		refresh->neighbor_type(),
+  // 		refresh->root_level());
+  // if (index().is_root()) {
+  //   WARNING("Block::refresh_exit_()",
+  // 	    "remove sync from refresh_exit_() callback with NEW_REFRESH");
+  //   }
+  CkCallback
+    (refresh->callback(),
+     CkArrayIndexIndex(index_),thisProxy).send(NULL);
+#else
   control_sync (refresh->callback(),
   		refresh->sync_type(),
   		refresh->sync_exit(),
   		refresh->min_face_rank(),
   		refresh->neighbor_type(),
   		refresh->root_level());
+#endif  
     
 #ifdef DEBUG_REFRESH 
  printf ("%d DEBUG_REFRESH Calling Block %s refresh_pop_back(%p)\n",
@@ -243,16 +259,16 @@ void Block::control_sync_neighbor(int entry_point, int id_sync,
     Index index_neighbor = it_neighbor.index();
 
 #ifdef DEBUG_CONTROL
-    CkPrintf ("%s DEBUG_CONTROL calling p_control_sync_count (%d %d 0)\n",
-	      name().c_str(),entry_point,id_sync);
+    CkPrintf ("%s %p DEBUG_CONTROL calling p_control_sync_count (%d %d 0)\n",
+	      name().c_str(),this,entry_point,id_sync);
     fflush(stdout);
 #endif    
     thisProxy[index_neighbor].p_control_sync_count(entry_point,id_sync,0);
 
   }
 #ifdef DEBUG_CONTROL
-    CkPrintf ("%s DEBUG_CONTROL calling p_control_sync_count count %d (%d %d 0)\n",
-	      name().c_str(), num_neighbors, entry_point,id_sync);
+    CkPrintf ("%s %p DEBUG_CONTROL calling p_control_sync_count count %d (%d %d 0)\n",
+	      name().c_str(), this,num_neighbors, entry_point,id_sync);
     fflush(stdout);
 #endif    
   control_sync_count (entry_point,id_sync,num_neighbors + 1);
@@ -299,7 +315,7 @@ void Block::control_sync_count (int entry_point, int id_sync, int count)
   }
 #ifdef DEBUG_CONTROL
   CkPrintf ("%s DEBUG_CONTROL control_sync_count %d %d %d/%d\n",
-	    name().c_str(),entry_point,id_sync,sync_count[id_sync],sync_max_[id_sync]);
+	    name().c_str(),entry_point,id_sync,sync_count_[id_sync],sync_max_[id_sync]);
   fflush(stdout);
 #endif
   

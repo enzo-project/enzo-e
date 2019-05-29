@@ -179,13 +179,13 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   
   Sync * sync_restrict = psync_restrict(block);
 
-  sync_restrict->set_stop(NUM_CHILDREN(cello::rank()));
   sync_restrict->reset();
+  sync_restrict->set_stop(cello::num_children());
   
   Sync * sync_prolong = psync_prolong(block);
 
-  sync_prolong->set_stop(2); // self and parent
   sync_prolong->reset();
+  sync_prolong->set_stop(2); // self and parent
 
   int level = block->level();
 

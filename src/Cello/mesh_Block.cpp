@@ -50,37 +50,43 @@ const char * phase_name[] = {
 //----------------------------------------------------------------------
 
 Block::Block ( MsgRefine * msg )
-  :
-  data_(NULL),
-  child_data_(NULL),
-  level_next_(0),
-  cycle_(0),
-  time_(0.0),
-  dt_(0.0),
-  stop_(false),
-  index_initial_(0),
-  children_(),
-  sync_coarsen_(),
-  sync_count_(),
-  sync_max_(),
-  face_level_curr_(),
-  face_level_next_(),
-  child_face_level_curr_(),
-  child_face_level_next_(),
-  count_coarsen_(0),
-  adapt_step_(0),
-  adapt_(adapt_unknown),
-  coarsened_(false),
-  delete_(false),
-  is_leaf_(true),
-  age_(0),
-  face_level_last_(),
-  name_(""),
-  index_method_(-1),
-  index_solver_(),
-  refresh_()
+  : CBase_Block(),
+    data_(NULL),
+    child_data_(NULL),
+    level_next_(0),
+    cycle_(0),
+    time_(0.0),
+    dt_(0.0),
+    stop_(false),
+    index_initial_(0),
+    children_(),
+    sync_coarsen_(),
+    sync_count_(),
+    sync_max_(),
+    face_level_curr_(),
+    face_level_next_(),
+    child_face_level_curr_(),
+    child_face_level_next_(),
+    count_coarsen_(0),
+    adapt_step_(0),
+    adapt_(adapt_unknown),
+    coarsened_(false),
+    delete_(false),
+    is_leaf_(true),
+    age_(0),
+    face_level_last_(),
+    name_(""),
+    index_method_(-1),
+    index_solver_(),
+    refresh_()
 {
   performance_start_(perf_block);
+#ifdef NEW_REFRESH
+#ifdef DEBUG_NEW_REFRESH  
+  CkPrintf ("Block(msg)\n"); fflush(stdout);
+#endif  
+  init_new_refresh_();
+#endif  
   usesAtSync = true;
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -117,36 +123,42 @@ Block::Block ( MsgRefine * msg )
 //----------------------------------------------------------------------
 
 Block::Block ( process_type ip_source )
-  :
-  data_(NULL),
-  child_data_(NULL),
-  level_next_(0),
-  cycle_(0),
-  time_(0.0),
-  dt_(0.0),
-  stop_(false),
-  index_initial_(0),
-  children_(),
-  sync_coarsen_(),
-  sync_count_(),
-  sync_max_(),
-  face_level_curr_(),
-  face_level_next_(),
-  child_face_level_curr_(),
-  child_face_level_next_(),
-  count_coarsen_(0),
-  adapt_step_(0),
-  adapt_(adapt_unknown),
-  coarsened_(false),
-  delete_(false),
-  is_leaf_(true),
-  age_(0),
-  face_level_last_(),
-  name_(""),
-  index_method_(-1),
-  index_solver_(),
-  refresh_()
+  : CBase_Block(),
+    data_(NULL),
+    child_data_(NULL),
+    level_next_(0),
+    cycle_(0),
+    time_(0.0),
+    dt_(0.0),
+    stop_(false),
+    index_initial_(0),
+    children_(),
+    sync_coarsen_(),
+    sync_count_(),
+    sync_max_(),
+    face_level_curr_(),
+    face_level_next_(),
+    child_face_level_curr_(),
+    child_face_level_next_(),
+    count_coarsen_(0),
+    adapt_step_(0),
+    adapt_(adapt_unknown),
+    coarsened_(false),
+    delete_(false),
+    is_leaf_(true),
+    age_(0),
+    face_level_last_(),
+    name_(""),
+    index_method_(-1),
+    index_solver_(),
+    refresh_()
 {
+#ifdef NEW_REFRESH
+#ifdef DEBUG_NEW_REFRESH  
+  CkPrintf ("Block(%d)\n",ip_source); fflush(stdout);
+#endif  
+  init_new_refresh_();
+#endif
   usesAtSync = true;
 #ifdef TRACE_BLOCK
   {
@@ -423,7 +435,11 @@ void Block::pup(PUP::er &p)
     Simulation * simulation = cello::simulation();
     if (simulation != NULL) simulation->data_insert_block(this);    
   }
-  
+#ifdef NEW_REFRESH
+  p | new_refresh_sync_list_;
+  //  p | new_refresh_msg_list_;
+  p | new_refresh_state_list_;
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -549,7 +565,7 @@ void Block::compute_derived(const std::vector< std::string>& field_list
     //   should contruct list of fields from full list
     //   rather than copying this loop twice...
     if (field_list.size() > 0){
-      for (int i = 0; i < field_list.size(); i++){
+      for (auto i = 0; i < field_list.size(); i++){
         std::string name = field_list[i];
         if (field.groups()->is_in(name,"derived")){
           Compute * compute = problem->create_compute(name,
@@ -693,6 +709,47 @@ void Block::p_refresh_child
 
 //----------------------------------------------------------------------
 
+Block::Block ()
+  : CBase_Block(),
+    data_(NULL),
+    child_data_(NULL),
+    level_next_(0),
+    cycle_(0),
+    time_(0.0),
+    dt_(0.0),
+    stop_(false),
+    index_initial_(0),
+    children_(),
+    sync_coarsen_(),
+    sync_count_(),
+    sync_max_(),
+    face_level_curr_(),
+    face_level_next_(),
+    child_face_level_curr_(),
+    child_face_level_next_(),
+    count_coarsen_(0),
+    adapt_step_(0),
+    adapt_(0),
+    coarsened_(false),
+    delete_(false),
+    is_leaf_(true),
+    age_(0),
+    face_level_last_(),
+    name_(""),
+    index_method_(-1),
+    index_solver_(),
+    refresh_()
+{
+
+#ifdef NEW_REFRESH  
+  CkPrintf ("Block()\n"); fflush(stdout);
+  init_new_refresh_();
+#endif
+  
+  for (int i=0; i<3; i++) array_[i]=0;
+}
+
+
 Block::Block (CkMigrateMessage *m)
   : CBase_Block(m),
     data_(NULL),
@@ -723,7 +780,14 @@ Block::Block (CkMigrateMessage *m)
     index_method_(-1),
     index_solver_(),
     refresh_()
+    
 {
+#ifdef NEW_REFRESH
+#ifdef DEBUG_NEW_REFRESH  
+  CkPrintf ("Block(m)\n"); fflush(stdout);
+#endif  
+  init_new_refresh_();
+#endif
   
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n");
@@ -732,6 +796,32 @@ Block::Block (CkMigrateMessage *m)
   
 };
 
+//----------------------------------------------------------------------
+
+#ifdef NEW_REFRESH
+void Block::init_new_refresh_()
+{
+  const int count = cello::simulation()->new_refresh_count();
+#ifdef DEBUG_NEW_REFRESH
+  CkPrintf ("DEBUG_NEW_REFRESH init_new_refresh count = %d\n",
+	    count);
+  fflush(stdout);
+#endif  
+  new_refresh_sync_list_.resize(count);
+  new_refresh_msg_list_.resize(count);
+  new_refresh_state_list_.resize(count);
+  for (int i=0; i<count; i++) {
+    new_refresh_sync_list_[i].reset();
+    new_refresh_state_list_[i] = RefreshState::INACTIVE;
+  }
+}
+
+Refresh & Block::new_refresh(int id_refresh)
+{
+  return cello::simulation()->new_refresh_list(id_refresh);
+}
+
+#endif
 //----------------------------------------------------------------------
 
 std::string Block::name() const throw()

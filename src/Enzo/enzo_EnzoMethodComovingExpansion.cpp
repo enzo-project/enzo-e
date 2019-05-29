@@ -173,7 +173,7 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
       } else {
 
         // if not, just use current pressure
-        *pressure = *pressure_now;
+        pressure = pressure_now;
       }
 
       /* Call fortran routine to do the real work. */

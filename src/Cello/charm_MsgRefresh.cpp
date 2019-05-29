@@ -20,6 +20,9 @@ long MsgRefresh::counter[CONFIG_NODE_SIZE] = { };
 MsgRefresh::MsgRefresh()
     : CMessage_MsgRefresh(),
       is_local_(true),
+#ifdef NEW_REFRESH  
+      id_refresh_(-1),
+#endif      
       data_msg_(nullptr),
       buffer_(nullptr)
 {
@@ -59,11 +62,15 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 	    CkMyPe(),__FILE__,__LINE__,msg);
 #endif  
   if (msg->buffer_ != nullptr) return msg->buffer_;
+
   int size = 0;
 
-  size += sizeof(int); // have_data
-
+#ifdef NEW_REFRESH
+  size += sizeof(int); // id_refresh
+#endif  
+  size += sizeof(int);  // have_data
   int have_data = (msg->data_msg_ != nullptr);
+  
   if (have_data) {
     // data_msg_
     size += msg->data_msg_->data_size();
@@ -85,6 +92,13 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   };
 
   pc = buffer;
+
+#ifdef NEW_REFRESH
+  (*pi++) = msg->id_refresh_;
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
+#endif  
+#endif  
 
   have_data = (msg->data_msg_ != nullptr);
   (*pi++) = have_data;
@@ -132,6 +146,13 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
   };
 
   pc = (char *) buffer;
+
+#ifdef NEW_REFRESH
+  msg->id_refresh_ = (*pi++) ;
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
+#endif  
+#endif  
 
   int have_data = (*pi++);
   if (have_data) {

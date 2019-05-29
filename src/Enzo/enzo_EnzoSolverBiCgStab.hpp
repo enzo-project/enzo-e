@@ -52,6 +52,12 @@ public: // interface
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
       coarse_level_(0)
+#ifdef NEW_REFRESH  
+    ,
+      id_new_refresh_main_(-1),
+      id_new_refresh_loop_3_(-1),
+      id_new_refresh_loop_9_(-1)
+#endif      
   {};
 
   /// Charm++ PUP::able declarations
@@ -68,7 +74,14 @@ public: // interface
       iy_(-1), iv_(-1), iq_(-1), iu_(-1),
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
-       coarse_level_(0)
+      coarse_level_(0)
+#ifdef NEW_REFRESH  
+    ,
+      id_new_refresh_main_(-1),
+      id_new_refresh_loop_3_(-1),
+      id_new_refresh_loop_9_(-1)
+#endif      
+          
   {}
 
   /// Charm++ Pack / Unpack function
@@ -126,6 +139,12 @@ public: // interface
     p | is_dot_sync_;
     p | is_iter_;
     p | coarse_level_;
+
+#ifdef NEW_REFRESH  
+    p | id_new_refresh_main_;
+    p | id_new_refresh_loop_3_;
+    p | id_new_refresh_loop_9_;
+#endif    
   }
 
   
@@ -263,6 +282,11 @@ protected:
 
   int & s_iter_(EnzoBlock * block)
   { return *block->data()->scalar_int().value(is_iter_); }
+
+#ifdef NEW_REFRESH
+  /// Register all refresh phases
+  void new_register_refresh_();
+#endif
   
 protected: // attributes
 
@@ -327,6 +351,12 @@ protected: // attributes
   /// The level of the tree solve if solve_type == solve_tree
   int coarse_level_;
 
+#ifdef NEW_REFRESH  
+  /// Refresh id's
+  int id_new_refresh_main_;
+  int id_new_refresh_loop_3_;
+  int id_new_refresh_loop_9_;
+#endif  
 };
 
 #endif /* ENZO_ENZO_SOLVER_BICGSTAB_HPP */
