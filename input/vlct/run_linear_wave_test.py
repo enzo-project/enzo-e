@@ -228,12 +228,12 @@ def cleanup():
 if __name__ == '__main__':
 
     # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct/linear_wave
+    # the subdirectory: input/vlct
     cwd = os.getcwd()
-    if cwd[-22:] == "input/vlct/linear_wave":
-        os.chdir("../../../")
+    if cwd[-10:] == "input/vlct":
+        os.chdir("../../")
         # the following is just for a possible error message
-        orig_exec_path = os.path.join(cwd,"../../../",_executable)
+        orig_exec_path = os.path.join(cwd,"../../",_executable)
     else:
         # the following is just for a possible error message
         orig_exec_path = os.path.join(cwd,_executable)
