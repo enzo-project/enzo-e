@@ -175,6 +175,9 @@ def load_full_grid(fname):
                                        dtype = np.float64)
     load_block_fields_(block_array, data_dict, res[::-1], dir_name,
                        field_list)
+    # reorder axes order to [x,y,z] - not sure why but this seems necessary
+    for key in data_dict.keys():
+        data_dict[key] = np.moveaxis(data_dict[key],[0, 1], [-1, -2])
     return data_dict, left_edge, right_edge, time[0]
 
 def load_enzoe(fname, periodicity = (True, True, True)):
@@ -190,10 +193,11 @@ def load_enzoe(fname, periodicity = (True, True, True)):
                     ('velocity_y', 'code_velocity'),#, "cm/s"),
                     ('velocity_z', 'code_velocity'), #"cm/s"),
                     ('pressure', 'code_mass/code_length/code_time**2'),#"dyne/cm**2")
-                    ("bfield_x", "code_magnetic"), #'gauss'
-                    ("bfield_y", "code_magnetic"), #'gauss'
-                    ("bfield_z", "code_magnetic"), #'gauss'
+                    ("bfield_x", "code_magnetic"), #'gauss'/sqrt(4*pi)
+                    ("bfield_y", "code_magnetic"), #'gauss'/sqrt(4*pi)
+                    ("bfield_z", "code_magnetic"), #'gauss'/sqrt(4*pi)
                    ]
+    
     new_dict = {}
     shape = None
     for name, unit in known_fields:
