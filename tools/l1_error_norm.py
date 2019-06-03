@@ -36,10 +36,10 @@ table mode
   along the given axis). This axis must be specified as x, y, or z immediately
   after the mode is indicated. 
 
-  By default, the yielded L1 error norm uses the data from all 3D data in the 
-  active region of the problem. Specifying the --std option will yield the 
-  standard deviation of the L1 error norms computed for every 1D slice along 
-  the active axis
+  By default, the yielded L1 error norm for the all of the 3D data in the 
+  problem region (this is equivalent to taking the average of the L1-Norms of
+  for every 1D slice along the active axis. To take the median or standard 
+  deviations of these L1-Norms pass the --median OR --std options
 
   Example Usage:
     Total L1 Error Norm for a Riemann problem evolved along the y-axis:\n'
@@ -50,18 +50,8 @@ table mode
 
   Table Format: 
     The supplied table should be comma separated and header comments must be led
-    by a "#". 2 separate lines in the header file must be dedicated to 
-    specifying
-      #left_edge = ...
-      #right_edge = ...
-    to specify the the left and right grid boundaries along the active axis 
-    where the table values should be compared (The domain of the grid may 
-    extend further along the active region). (These comments can be specified 
-    in any order and can be mixed with other comments - additionally whitespace 
-    is not a concern). 
-
-    The first line following the comments should include the names of the 
-    columns (they should match the fluid fluid names in the simulation to 
+    by a "#". The first line following the comments should include the names of 
+    the columns (they should match the fluid fluid names in the simulation to 
     compare against). There must be a single column titled position, pos, x, y, 
     or z indicating the (cell-centered) position of each value and this column 
     must increase in value monotonically.
@@ -108,6 +98,11 @@ parser.add_argument('--std', action = 'store_true', default = False,
                             "this option is supplied, then the standard "
                             "deviation of the L1 error norms for all 1D slices "
                             "is returned."))
+parser.add_argument('--median', action = 'store_true', default = False,
+                    help = ("This only applies to \"table\" mode. By default, "
+                            "L1 error norm is computed for the 3D grid. If "
+                            "this option is supplied, then the median of the "
+                            "L1 error norms for all 1D slices is returned."))
 
 # should allow for specification of fields
 def get_block_list(dir_name):
@@ -146,7 +141,7 @@ def L1_error_vector(ds, ds2, comparison_fields, Nx=None, Ny=None, Nz=None,
         data = ds
 
     if isinstance(ds2,yt.data_objects.static_output.Dataset):
-        data = ds2.all_data()
+        data2 = ds2.all_data()
     else:
         data2 = ds2
 
@@ -283,7 +278,9 @@ def load_reference_table(fname):
         out_data[field] = rec[field]
     return meta_data, out_data
 
-def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, calc_std):
+def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None):
+    # if op_func is None, returns the total L1 Error Norm
+    # otherwise op_func is applied on all parallel L1 Error Norms
 
     meta_data, ref_data = load_reference_table(tab_fname)
 
@@ -296,22 +293,14 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, calc_std):
         raise ValueError("table must have only one column labelled "
                          "position, pos, x, y, or z")
     else:
+        if (np.diff(ref_data[intersect[0]])<=0).any():
+            msg = 'the {} column in table must monotonically increase'
+            raise ValueError(msg.format(intersect[0]))
         pos = ref_data.pop(intersect[0])
         ref_data["pos"] = pos
 
-    #left_edge = (pos[0] - np.diff(pos)[0]*0.5)
-    #right_edge = (pos[-1] + np.diff(pos)[0]*0.5)
-
-    if 'time' in meta_data:
-        # do a time comparison
-        assert ds.current_time == float(meta_data["time"])
-        
-    if "left_edge" in meta_data and "right_edge" in meta_data:
-        left_edge = float(meta_data["left_edge"])
-        right_edge = float(meta_data["right_edge"])
-    else:
-        raise ValueError("Reference Table must include a line "
-                         "with the comment left edge and right edge")
+    left_edge = (pos[0] - np.diff(pos)[0]*0.5)
+    right_edge = (pos[-1] + np.diff(pos)[0]*0.5)
 
     #kwargs is only used if computing standard deviation
     kwargs = {"Nx":1, "Ny":1, "Nz":1}
@@ -346,14 +335,14 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, calc_std):
 
     comparison_fields = find_common_fields(ds,ref, verbose)
 
-    if calc_std:
+    if op_func is None:
+        # just compute the L1 Error Norm normally
+        print(norm_L1_error(ad, ref, comparison_fields))
+    else:
         # compute L1_norms of axes in parallel
         L1_norms = norm_L1_error(ad, ref, comparison_fields, sum_axis = ax_ind,
                                  **kwargs)
-        print(np.std(L1_norms))
-    else:
-        # just compute the L1 Error Norm normally
-        print(norm_L1_error(ad,ref, comparison_fields))
+        print(op_func(L1_norms))
 
 # Functions used to compute L1Error Norm between simulations
 
@@ -380,6 +369,9 @@ if __name__ == '__main__':
         if args.std:
             raise ArgumentError('The --std option cannot be specified for '
                                 '"sim" reference data.')
+        if args.median:
+            raise ArgumentError('The --median option cannot be specified for '
+                                '"sim" reference data.')
         dim_length = args.n
         if (dim_length is not None) and (dim_length <= 0):
             raise ArgumentError('The -n option must be followed by a positive '
@@ -391,7 +383,16 @@ if __name__ == '__main__':
         if args.n is not None:
             raise ArgumentError('The -n option cannot be specified for '
                                 '"table" reference data')
+
+        op_func = None
+        
+        if args.std and args.median:
+            raise ArgumentError("The --std and --median options can not both "
+                                "be specified at the same time.")
+        elif args.std:
+            op_func = np.std
+        elif args.median:
+            op_func = np.median
         
         problem_ax = args.ref_type[-1]
-        compare_to_1D_reference(ds, args.ref_path, problem_ax, verbose,
-                                args.std)
+        compare_to_1D_reference(ds, args.ref_path, problem_ax, verbose, op_func)

@@ -1,10 +1,5 @@
-# Problem VLCT rotated 3D linear wave test problem
-
-# Problem: Linear Waves test problems for VLCT
+# Problem VLCT test problems
 # Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
-
-   # Domain is the 3D  box 0 < x < 3, 0 < y,z < 1.5
-   include "input/vlct/linear_wave/domain-lw.incl"
 
    Boundary {
       type = "periodic";
@@ -33,7 +28,7 @@
         density_floor = 1.e-200;
 
         # pressure floor (default = 0.0)
-        pressure_floor = 0.0;
+        pressure_floor = 1.e-200;
 	};
    }
 

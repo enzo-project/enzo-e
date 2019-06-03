@@ -390,14 +390,14 @@ inline void check_array_shape_(intp shape[], std::size_t D)
 {
   ASSERT("FixedDimArray_", "Positive dimensions are required.", shape[0]>0);
   ASSERT1("FixedDimArray_", "The array cannot exceed %ld elements.",
-	  (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[0]) < 1);
+	  (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[0]) >= 1);
   intp cur_size = 1;
 
   for (std::size_t i = 0; i+1 < D; i++){
     cur_size *= shape[i];
     ASSERT("FixedDimArray_", "Positive dimensions are required.",shape[i+1]>0);
     ASSERT1("FixedDimArray_", "The array cannot exceed %ld elements.",
-	    (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[i+1]) < cur_size);
+	    (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[i+1]) >= cur_size);
   }
 }
   

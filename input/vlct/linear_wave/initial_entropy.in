@@ -1,3 +1,9 @@
+# Initial Conditions and Stopping Condition for Linear Entropy Wave
+
+   # Domain is the 3D  box 0 < x < 3, 0 < y,z < 1.5
+   include "input/vlct/linear_wave/domain-lw.incl"
+   include "input/vlct/vlct.incl"
+
    Initial{
       list = ["inclined_wave"];
 

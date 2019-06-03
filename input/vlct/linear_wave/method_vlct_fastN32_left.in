@@ -7,7 +7,6 @@
 
 # propagates a Fast magnetosonic wave leftwards
 
-   include "input/vlct/linear_wave/vlct.incl"
    include "input/vlct/linear_wave/initial_fast.in"
 
    Mesh {

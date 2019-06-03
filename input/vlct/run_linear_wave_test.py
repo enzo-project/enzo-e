@@ -1,9 +1,8 @@
 #!/bin/python
 
-# runs VLCT Linear Wave Tests
-# - this should probably be transitioned to the SConscript file in enzo-e/test.
-#   However, I'm unclear on how to do that
-# - This script expects to be called from the root directory of the repository
+# runs VLCT MHD Linear Wave Tests
+# - This should probably be transitioned to testing framework once it's created
+# - This script expects to be called from the root level of the repository
 #   OR at the same level where its defined
 #
 # These tests draw loose inspiration from Linear Wave tests used by Athena++.
@@ -36,7 +35,7 @@ import math
 
 # this executes things in standalone mode
 _executable = 'bin/enzo-p'
-l1_norm_calc_template = "python tools/l1_error_norm.py {:s} {:s} -n {:d}"
+l1_norm_calc_template = "python tools/l1_error_norm.py sim {:s} {:s} -n {:d}"
 data_dir_template = "method_vlct-{:d}-{:s}N{:d}_{:.1f}"
 final_times = {"fast" : 0.5, "alfven" : 1.0, "entropy" : 1.0, "slow" : 2.0}
 
@@ -86,7 +85,7 @@ def isclose(a,b,abs_tol = False):
     if abs_tol:
         # slow wave requires slightly bigger tolerance (since it includes more
         # timesteps which allows the floating point errors to grow more)
-        atol = 1.e-14
+        atol = 2.e-14
     else:
         atol = 0
     return np.isclose(a,b,rtol=err,atol=atol)
@@ -225,10 +224,7 @@ def cleanup():
         if os.path.isdir(dir_name):
             shutil.rmtree(dir_name)
 
-if __name__ == '__main__':
-
-    # this script can either be called from the base repository or from
-    # the subdirectory: input/vlct
+def prep_cur_dir():
     cwd = os.getcwd()
     if cwd[-10:] == "input/vlct":
         os.chdir("../../")
@@ -240,6 +236,12 @@ if __name__ == '__main__':
 
     if not os.path.isfile(_executable):
         raise RuntimeError("Can't locate the executable: " + orig_exec_path)
+
+if __name__ == '__main__':
+
+    # this script can either be called from the base repository or from
+    # the subdirectory: input/vlct
+    prep_cur_dir()
 
     # run the tests
     run_tests()

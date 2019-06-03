@@ -1,0 +1,35 @@
+# Initial Conditions for the rj2a shock tube
+
+   include "input/vlct/vlct.incl"
+
+   Initial{
+      list = ["shock_tube"];
+
+      shock_tube{
+         # Intializes a shock tube problem.
+
+	 # setup_name = "sod" sets up the Sod Shock Tube problem
+	 # setup_name = "rj2a" sets up the MHD problem described by Ryu & Jones
+	 # and shown in their Figure 2a. This initial condition assumes that
+	 # gamma = 5/3
+	 setup_name = "rj2a";
+
+	 # The discontinuity is setup at 0.5 along the axis specified by
+	 # aligned_ax ("x", "y", or "z")
+
+	 # aligned_ax gets set in the axis-specific input files
+      };
+   }
+
+   Stopping{
+      time = 0.2;
+   }
+
+   Output {
+      data {
+         schedule {
+            var = "time";
+	    list = [0.2];
+         };
+      };
+   }
