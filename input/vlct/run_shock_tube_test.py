@@ -98,10 +98,10 @@ if __name__ == '__main__':
     prep_cur_dir()
 
     # run the tests
-    #run_tests()
+    run_tests()
 
     # analyze the tests
     analyze_tests()
 
     # cleanup the tests
-    #cleanup()
+    cleanup()
