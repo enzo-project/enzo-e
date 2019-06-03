@@ -18,7 +18,9 @@ public: // interface
 
   /// Create a new Compute
   Compute () throw()
-  {}
+  {
+    set_history(0);
+  }
 
   /// Destructor
   virtual ~Compute() throw()
@@ -33,6 +35,8 @@ public: // interface
   void pup (PUP::er &p)
   { TRACEPUP;
     PUP::able::pup(p);
+
+    p | i_hist_;
   }
 
 public: // virtual functions
@@ -41,7 +45,20 @@ public: // virtual functions
 
   virtual void compute ( Block * block) throw() = 0; 
 
-protected: // functions
+  /// Return the name of this Compute
+  ///  used for associating derived fields when relevant
+  virtual std::string name () throw () {
+    return std::string();
+  };
+
+  /// Return / set field history to use in computation
+
+  virtual int  get_history(int i_hist) {return i_hist_;};
+  virtual void set_history(int i_hist) {i_hist_ = i_hist;};
+
+protected:
+
+  int i_hist_;
 
 };
 

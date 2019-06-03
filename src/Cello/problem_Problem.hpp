@@ -40,6 +40,7 @@ class Simulation;
 class Solver;
 class Stopping;
 class Units;
+class Compute;
 
 class Problem : public PUP::able
 {
@@ -204,6 +205,11 @@ public: // interface
 
   /// Initialize the units object
   void initialize_units(Config * config ) throw();
+
+  /// Create named compute object
+  virtual Compute *  create_compute
+  (std::string type,
+   Config * config) throw();
 
 protected: // functions
 

@@ -1,0 +1,112 @@
+----
+
+:Parameter:  :p:`Boundary` : :p:`list`
+:Summary:    :s:`List of boundary condition subgroups`
+:Type:    [ :t:`string` | :t:`list` ( :t:`string` ) ]
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`For mixed boundary conditions, the` :p:`list` :e:`parameter specifies the list of names of subgroups that define boundary conditions on each portion of the domain boundary.  Boundary conditions in each subgroup are applied in the order listed.  In the example below, two subgroups` :t:`"one"` :e:`and` :t:`"two"` :e:`are defined, which specify reflecting boundary conditions along the x-axis and outflow boundary conditions along the y-axis:`
+
+  ::
+
+       Boundary {
+          list = ["one", "two"];
+          one {
+             type = "reflecting";
+             axis = "x";
+          }
+          two {
+             type = "outflow";
+             axis = "y";
+          }
+       }
+
+----
+
+:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`type`
+:Summary:    :s:`Type of boundary condition`
+:Type:    :t:`string`
+:Default: :d:`"undefined"`
+:Scope:     :c:`Cello`
+
+:e:`Boundary conditions in Enzo-P include` :t:`"reflecting"` :e:`,` :t:`"outflow"` :e:`,` :t:`"inflow"` :e:`, and` :t:`"periodic"`.  :e:`Other boundary condition types can be implemented by either a) modifying the existing` :p:`EnzoBoundary` :e:`class or b) creating a new class inherited from the` :p:`Boundary` :e:`base class.`  :t:`"inflow"` :e:`boundary conditions additionally require` :p:`value` :e:`and` :p:`field_list` :e:`parameters.`
+
+----
+
+:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`axis`
+:Summary:    :s:`Axis along which boundary conditions are to be enforced`
+:Type:    :t:`string`
+:Default: :d:`"all"`
+:Scope:     :c:`Cello`
+
+:e:`The`  :p:`axis` :e:`parameter restricts the boundary conditions to the face orthogonal to the specified axis.`  :p:`axis` :e:`must be` :t:`"x"` , :t:`"y"` , :t:`"z"` :e:`or` :t:`"all"`.  :e:`The` :p:`axis` :e:`parameter may be used in conjunction with the` :p:`face` :e:`parameter, or by itself.`
+
+
+----
+
+:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`face`
+:Summary:    :s:`Face along which boundary conditions are to be enforced`
+:Type:    :t:`string`
+:Default: :d:`"all"`
+:Scope:     :c:`Cello`
+
+:e:`The` :p:`face` :e:`parameter can restrict the boundary conditions to be applied only to the` :p:`upper` :e:`or` :p:`lower` :e:`faces.  face orthogonal to the given face.`  :p:`face` :e:`must be` :t:`"x"` , :t:`"y"` , :t:`"z"` :e:`or` :t:`"all"`.  :e:`The` :p:`face` :e:`parameter may be used in conjunction with the` :p:`axis` :e:`parameter, or by itself.`
+
+----
+
+:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`mask`
+:Summary:    :s:`Subregion in which boundary conditions are to be enforced`
+:Type:    :t:`logical-expr`
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+
+:e:`The`  :p:`mask` :e:`parameter specifies the subregion of the boundary on which to apply the boundary conditions.  The logical expression  may be a function of x, y, z, and t, and boundary conditions are restricted to where (and when) it evaluates to true`::
+
+       Boundary {
+          ...
+          OUT {
+             type = "outflow";
+             mask = (x >= 4.0) || 
+                    (y >= 1.0 && (x >= 0.744017 + 11.547* t));
+          }
+       }
+
+
+----
+
+:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`value`
+:Summary:    :s:`Value for inflow boundary conditions`
+:Type:    :t:`float`
+:Type:    :t:`float-expr`
+:Type:    :t:`list` ( :t:`float-expr` [, :t:`logical-expr`, :t:`float-expr` [, ... ] ] )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`The` :p:`value` :e:`parameter is used to specify field values for` :p:`inflow` :e:`type boundary conditions.  The` :p:`value` :e:`parameter is used in conjunction with the` :p:`field_list` :e:`parameter.` :p:`value` :e:`may be of type` :t:`float`, :t:`float-expr`, :e:`or a list of alternating` :t:`float-expr` :e:`and` :t:`logical-expr` :e:`types`.  :t:`float-expr` :e:`may be a function of x, y, z, and t.  When a list is specified, the` :t:`logical-expr` :e:`is treated as a mask, similar to an 'if-then-else' clause`
+
+   ::
+
+       Boundary {
+          ...
+          VELOCITY_Y {
+             type = "inflow";
+             field_list = "velocity_y";
+             value = [ -8.25*0.5,
+                        ((x <= 0.166667) && (y <= 0.0) ) ||
+                         (x <= 0.0) ||
+                         ((x < 0.744017 + 11.547*t) && (y >= 1.0))
+                      ];
+           }
+       }
+
+
+----
+
+:Parameter:  :p:`Boundary` : :g:`<condition>` : :p:`field_list`
+:Summary: :s:`List of fields to apply boundary conditions to`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`The` :p:`field_list` :e:`parameter is used to restrict boundary conditions to the specified fields.  An empty list, which is the default, is used to specify all fields.`

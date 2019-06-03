@@ -5,7 +5,7 @@
 /// @date     2012-03-03
 /// @brief    Implementation of EnzoProblem class
 ///
-/// 
+///
 
 #include "enzo.hpp"
 
@@ -58,7 +58,7 @@ Boundary * EnzoProblem::create_boundary_
 
   Boundary * boundary = 0;
 
-  if (       type == "reflecting") { 
+  if (       type == "reflecting") {
     boundary = new EnzoBoundary (axis,face,mask,boundary_type_reflecting);
   } else if (type == "outflow") {
     boundary = new EnzoBoundary (axis,face,mask,boundary_type_outflow);
@@ -71,7 +71,7 @@ Boundary * EnzoProblem::create_boundary_
 
 //----------------------------------------------------------------------
 
-Initial * EnzoProblem::create_initial_ 
+Initial * EnzoProblem::create_initial_
 (
  std::string  type,
  int index,
@@ -79,7 +79,7 @@ Initial * EnzoProblem::create_initial_
  Parameters * parameters
  ) throw ()
 {
-  
+
   //--------------------------------------------------
   // parameter: Initial : cycle
   // parameter: Initial : time
@@ -93,10 +93,10 @@ Initial * EnzoProblem::create_initial_
   const EnzoConfig * enzo_config = enzo::config();
 
   if (type == "music") {
-    
+
     initial = new EnzoInitialMusic
       (cycle,time,enzo_config,config->mesh_max_initial_level);
-    
+
   } else if (type == "implosion_2d") {
 
     initial = new EnzoInitialImplosion2(cycle,time);
@@ -152,7 +152,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_collapse_mass,
        enzo_config->initial_collapse_temperature);
   } else if (type == "cosmology") {
-    initial = new EnzoInitialCosmology 
+    initial = new EnzoInitialCosmology
       (cycle,time,
        enzo_config->field_gamma,
        enzo_config->initial_cosmology_temperature
@@ -168,8 +168,8 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_inclinedwave_positive_vel,
        enzo_config->initial_inclinedwave_wave_type);
   } else if (type == "turbulence") {
-    initial = new EnzoInitialTurbulence 
-      (cycle,time, 
+    initial = new EnzoInitialTurbulence
+      (cycle,time,
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_pressure,
        enzo_config->initial_turbulence_temperature,
@@ -218,7 +218,7 @@ Initial * EnzoProblem::create_initial_
 
 //----------------------------------------------------------------------
 
-Stopping * EnzoProblem::create_stopping_ 
+Stopping * EnzoProblem::create_stopping_
 ( std::string  type, Config * config ) throw ()
 /// @param type   Type of the stopping criterion to create (ignored)
 /// @param config  Configuration parameter class
@@ -239,7 +239,7 @@ Refine * EnzoProblem::create_refine_
  Parameters *       parameters,
  int                index
  ) throw ()
-{ 
+{
 
   const EnzoConfig * enzo_config = enzo::config();
 
@@ -268,7 +268,7 @@ Refine * EnzoProblem::create_refine_
 
   } else if (type == "mass") {
 
-    return new EnzoRefineMass 
+    return new EnzoRefineMass
       (config->adapt_min_refine[index],
        config->adapt_max_coarsen[index],
        config->adapt_max_level[index],
@@ -285,8 +285,8 @@ Refine * EnzoProblem::create_refine_
 
 //----------------------------------------------------------------------
 
-Solver * EnzoProblem::create_solver_ 
-( std::string  solver_type,  
+Solver * EnzoProblem::create_solver_
+( std::string  solver_type,
   Config * config,
   int index_solver) throw ()
 /// @param solver_type   Name of the solver to create
@@ -295,7 +295,7 @@ Solver * EnzoProblem::create_solver_
   const EnzoConfig * enzo_config = enzo::config();
 
   Solver * solver = NULL;
-  
+
   int rank = config->mesh_root_rank;
 
   // Set solve type if not default "on_leaves" (solve_leaf)
@@ -419,7 +419,6 @@ Solver * EnzoProblem::create_solver_
   } else {
     // Not an Enzo Solver--try base class Cello Solver
     solver = Problem::create_solver_ (solver_type,config, index_solver);
-    
   }
 
   ASSERT1 ("EnzoProblem::create_solver()",
@@ -430,12 +429,61 @@ Solver * EnzoProblem::create_solver_
   solver->set_index(index_solver);
 
   return solver;
-}    
+}
 
 //----------------------------------------------------------------------
 
-Method * EnzoProblem::create_method_ 
-( std::string  name,  
+Compute * EnzoProblem::create_compute
+( std::string name,
+  Config * config ) throw()
+/// @param name  Name of the compute to create
+{
+
+  Compute * compute = 0;
+
+  TRACE1("EnzoProblem::create_compute %s",name.c_str());
+
+  const EnzoConfig * enzo_config = enzo::config();
+
+  if (name == "temperature") {
+
+    compute = new EnzoComputeTemperature(
+                        enzo_config->ppm_density_floor,
+                        enzo_config->ppm_temperature_floor,
+                        enzo_config->ppm_mol_weight,
+                        enzo_config->physics_cosmology);
+
+
+  } else if (name == "pressure"){
+
+    compute = new EnzoComputePressure(enzo_config->field_gamma,
+                                      enzo_config->physics_cosmology);
+
+#ifdef CONFIG_USE_GRACKLE
+  } else if (name == "cooling_time"){
+
+    compute = new EnzoComputeCoolingTime();
+
+#endif
+  } else {
+
+    // Fallback to Cello method's
+    compute = Problem::create_compute (name,config);
+
+    ASSERT2("EnzoProblem::create_compute",
+            "Compute created %s does not match compute requested %s",
+            compute->name().c_str(),name.c_str(),
+            compute->name() == name);
+  }
+
+  return compute;
+}
+
+
+//----------------------------------------------------------------------
+
+Method * EnzoProblem::create_method_
+( std::string  name,
   Config * config,
   int index_method) throw ()
 /// @param name   Name of the method to create
@@ -445,9 +493,9 @@ Method * EnzoProblem::create_method_
   Method * method = 0;
 
   const EnzoConfig * enzo_config = enzo::config();
- 
+
   TRACE1("EnzoProblem::create_method %s",name.c_str());
-  
+
   if (name == "ppm") {
 
     method = new EnzoMethodPpm;
@@ -481,10 +529,10 @@ Method * EnzoProblem::create_method_
   } else if (name == "pm_deposit") {
 
     method = new EnzoMethodPmDeposit (enzo_config->method_pm_deposit_alpha);
-    
+
   } else if (name == "pm_update") {
 
-    method = new EnzoMethodPmUpdate  
+    method = new EnzoMethodPmUpdate
       (enzo_config->method_pm_update_max_dt);
 
   } else if (name == "heat") {
@@ -501,12 +549,16 @@ Method * EnzoProblem::create_method_
 #ifdef CONFIG_USE_GRACKLE
     //--------------------------------------------------
   } else if (name == "grackle") {
-    method = new EnzoMethodGrackle (enzo_config);
+
+    method = new EnzoMethodGrackle
+      (enzo_config->physics_cosmology_initial_redshift,
+       enzo_config->initial_time);
+
 #endif /* CONFIG_USE_GRACKLE */
-    
+
   } else if (name == "turbulence") {
-    
-    method = new EnzoMethodTurbulence 
+
+    method = new EnzoMethodTurbulence
       (enzo_config->method_turbulence_edot,
        enzo_config->initial_turbulence_density,
        enzo_config->initial_turbulence_temperature,
@@ -520,7 +572,7 @@ Method * EnzoProblem::create_method_
   } else if (name == "comoving_expansion") {
 
     bool comoving_coordinates = enzo_config->physics_cosmology;
-    
+
     method = new EnzoMethodComovingExpansion ( comoving_coordinates );
 
   } else if (name == "gravity") {
@@ -574,7 +626,7 @@ Method * EnzoProblem::create_method_
 
 //----------------------------------------------------------------------
 
-Prolong * EnzoProblem::create_prolong_ 
+Prolong * EnzoProblem::create_prolong_
 ( std::string  type,
   Config *     config ) throw ()
 {
@@ -584,12 +636,12 @@ Prolong * EnzoProblem::create_prolong_
   prolong = Problem::create_prolong_(type,config);
 
   return prolong;
-  
+
 }
 
 //----------------------------------------------------------------------
 
-Physics * EnzoProblem::create_physics_ 
+Physics * EnzoProblem::create_physics_
 ( std::string  type,
    int index,
    Config * config,
@@ -616,14 +668,14 @@ Physics * EnzoProblem::create_physics_
        );
 
   } else {
-    
+
     physics = Problem::create_physics_
       (type,index,config,parameters);
-    
+
   }
 
   return physics;
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -637,25 +689,25 @@ Units * EnzoProblem::create_units_ (  Config * config  ) throw ()
     units->set_using_density (config->units_length,
 			      config->units_density,
 			      config->units_time);
-    
+
   } else if (config->units_density == 1.0) {
 
     units->set_using_mass (config->units_length,
 			   config->units_mass,
 			   config->units_time);
   } else {
-    
+
     ERROR("Problem::create_units_",
-	  "Cannot set both Units:density and Units:time parameters");
+	  "Cannot set both Units:density and Units:mass parameters");
   }
 
   return units;
-  
+
 }
 
 //----------------------------------------------------------------------
 
-Restrict * EnzoProblem::create_restrict_ 
+Restrict * EnzoProblem::create_restrict_
 (
  std::string  type,
  Config * config ) throw ()
@@ -664,7 +716,6 @@ Restrict * EnzoProblem::create_restrict_
   Restrict * restrict = 0;
 
   if (type == "enzo") {
-    
     restrict = new EnzoRestrict (enzo::config()->interpolation_method);
 
   } else {
@@ -674,8 +725,7 @@ Restrict * EnzoProblem::create_restrict_
   }
 
   return restrict;
-  
+
 }
 
 //----------------------------------------------------------------------
-

@@ -47,6 +47,18 @@ commands:
           make
           make install
 
+  install-docs-dependencies:
+    description: "Install dependencies for docs build."
+    steps:
+      - run: |
+          sudo apt-get update
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          pip install --upgrade pip
+          pip install --upgrade wheel
+          pip install --upgrade setuptools
+          pip install sphinx sphinx_rtd_theme
+
   build-and-test:
     description: "Compile enzo-e and run tests."
     parameters:
@@ -63,6 +75,14 @@ commands:
             git checkout << parameters.tag >>
             make
           fi
+
+  build-docs:
+    description: "Test the docs build."
+    steps:
+      - run: |
+          source $HOME/venv/bin/activate
+          cd doc/source
+          python -m sphinx -M html "." "_build" -W
 
 jobs:
   test-suite:
@@ -93,9 +113,21 @@ jobs:
           tag: tip
           skipfile: notafile
 
+  docs-build:
+    docker:
+      - image: circleci/python:3.7.2
+
+    working_directory: ~/enzo-e
+
+    steps:
+      - checkout
+      - install-docs-dependencies
+      - build-docs
+
 workflows:
    version: 2
 
    tests:
      jobs:
        - test-suite
+       - docs-build

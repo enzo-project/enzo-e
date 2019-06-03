@@ -1,0 +1,261 @@
+----
+
+:Parameter:  :p:`Output` : :p:`list`
+:Summary: :s:`List of output file sets`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`List of active file sets, each of which has its own associated Output : <file_set> : parameters.  Any file set parameters associated with a file set not in the` `list` :e:`parameter are ignored.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`axis`
+:Summary: :s:`Axis of projections for image output`
+:Type:    :t:`string`
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`For the "image" output type, the axis along which to project the data for 3D problems.  Values are` `"x", "y", :e:`or` "z".  :e:`See the associated type parameter.` 
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`schedule`
+:Summary: :s:`Output schedule for the given file set`
+:Type:    :t:`subgroup`
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+
+:e:`See the` `schedule`_ :e:`subgroup for parameters used to define when to perform output for the given file set.` 
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`colormap`
+:Summary: :s:`Color map for image output`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`For the "image" output type, a list of the form` [r\ :sub:`0`\, g\ :sub:`0`\, b\ :sub:`0`\, r\ :sub:`1`\, g\ :sub:`1`\, b\ :sub:`1`\, ...], :e:`where` 0.0 ≤ r\ :sub:`i`\,g\ :sub:`i`\,b\ :sub:`i`\ ≤ :e:`1.0 are RGB values.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`field_list`
+:Summary: :s:`List of fields to output`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`List of fields for this output file set.  For "image" field types, the field list must contain exactly one field.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`particle_list`
+:Summary: :s:`List of particle types to output`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`[]`
+:Scope:     :c:`Cello`
+
+:e:`List of particles types for this output file set..`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`name`
+:Summary: :s:`File names`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`""`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is *not* of :p:`type` :t:`"restart"`
+
+:e:`This parameter specifies the names of files in the corresponding file_group.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), "proc" (the process rank), and "flipflop" (alternating 0 and 1, which can be useful for checkpoint directories).  The file name should include an appropriate extension, e.g. ".png" for "image" output, and ".h5" or ".h5" for "data" output.  Example: ["projection-%04d.png", "cycle"].`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`dir`
+:Summary: :s:`Name of the subdirectory for the output file`
+:Type:    :t:`list` ( :t:`string` )
+:Default: :d:`""`
+:Scope:     :c:`Cello`
+
+:e:`This parameter specifies the subdirectory for the output file.  The first element is the file name, which may contain printf-style formatting fields.  Subsequent values correspond to variables for the formatting fields, which may include "cycle", "time", "count" (a counter incremented each time output is performed), "proc" (the process rank), and "flipflop" (alternating 0 and 1, which can be useful for checkpoint directories).  Example: ["Checkpoint-%d", "flipflop"].`
+
+:e:`This parameter is required for file groups of type "checkpoint".  While optional for other file types, the behavior is different for groups of type "data".  In that case, two extra files are output: <DIR>.file_list, which contains a list of all data files output, and <DIR>.block_list, which contains a list of all names of Blocks and the corresponding data file containing each Block.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride_write`
+:Summary: :s:`Subset of processors to perform write`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
+:Status:    **Broken: see bug** # 13_
+
+.. _13: http://client65-90.sdsc.edu/cello/bug/show_bug.cgi?id=13
+
+:e:`This parameter allows for a strict subset of physical processors
+to output data, which is especially helpful for large process counts
+to reduce the load on parallel file systems.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`stride_wait`
+:Summary: :s:`Stride for sequencing processor data writes`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"data"`
+:Status:    **Not implemented**
+
+.. _13: http://client65-90.sdsc.edu/cello/bug/show_bug.cgi?id=13
+
+:e:`This parameter allows for processes to write sequentially to
+prevent too many processes overloading the file system.  A good
+starting point would be the number of processes in a shared memory
+node, in which case at most one process per node will be writing at
+any point in time.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`type`
+:Summary: :s:`Type of output files`
+:Type:    :t:`string`
+:Default: :d:`"unknown"`
+:Scope:     :c:`Cello`
+
+:e:`The type of files to output in this output file set.  Supported types include "image" (PNG file of 2D fields, or projection of 3D fields) and "data".  For "image" files, see the associated colormap and axis parameters.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_min`
+:Summary: :s:`Data value associated with the first color in the colormap`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`This parameter specifies the Field value associated with the first color in the file set's colormap.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_max`
+:Summary: :s:`Data value associated with the last color in the colormap`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`This parameter specifies the Field value associated with the last color in the file set's colormap.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_lower`
+:Summary: :s:`Lower bound on domain to be output in image`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[min (` :t:`float` :d:`), min (` :t:`float` :d:`), min (` :t:`float` :d:`)]`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+	    
+:e:`This parameter specifies the lower limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_upper`
+:Summary: :s:`Upper bound on domain to be output in image`
+:Type:    :t:`list` ( :t:`float` )
+:Default: :d:`[max (` :t:`float` :d:`), max (` :t:`float` :d:`), max (` :t:`float` :d:`)]`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`This parameter specifies the upper limit of the domain to include in the image.  This can be used for imaging "slices" of 3D data, or zeroing in on interesting region of the domain.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_ghost`
+:Summary: :s:`Whether to include ghost zones in the image`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`Setting the` :p:`image_ghost` :e:`to true will include ghost zone values in the image output.  This is typically used only when debugging.  The default is false.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_reduce_type`
+:Summary: :s:`How to handle 3D field data orthogonal to the image`
+:Type:    :t:`string`
+:Default: :d:`"sum"`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`When images are generated for 3D problems, multiple data values will be associated with each pixel in the image.  This parameter defines how to handle these multiple values, including` :t:`"sum"`, :t:`"min"`, :t:`"max"`, :e:`and`, :t:`"avg"`.  :e:`For field data the default of` :t:`"sum"` :e:`is appropriate, though for images of meshes` :t:`"max"` :e:`should be used`.
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_face_rank`
+:Summary: :s:`Whether to include neighbor markers in the mesh image output`
+:Type:    :t:`integer`
+:Default: :d:`3`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`This parameter is primarily used for debugging.  Internally, each node in the mesh keeps track of the mesh level of its neighbors.  This parameter includes a marker on each face colored according to the neighbor's level.  The value of this parameter specifies the lower limit on the face "rank" (0 for corners, 1 for edges, 2 for faces).  The default of 3 means no markers are displayed.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_size`
+:Summary: :s:`Set the size of the image`
+:Type:    :t:`list` ( :t:`integer` )
+:Default: :d:`[0,0]`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`Specify the size of the output image.  By default it is sized to be one pixel per field value at the finest mesh level.  This is useful to keep images from being to big for large problems, or too small for small problems (e.g. for mesh images which could otherwise be too small).`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_log`
+:Summary: :s:`Whether to output the log of the data`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`If true, then the natural logarithm of the field value is used for mapping values to the colormap, otherwise use the original field value.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_type`
+:Summary: :s:`Type of image to write`
+:Type:    :t:`string`
+:Default: :d:`"data"`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`This parameter is used to control whether field values are used to generate the image, whether it's an image of the mesh structure, or a combination of both.  Valid values are` :t:`"data"`, :t:`"mesh"`, :e:`or` :t:`"data+mesh"`.
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_block_size`
+:Summary: :s:`Number of pixels for fine-level blocks in a mesh image`
+:Type:    :t:`integer`
+:Default: :d:`1`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`For images of meshes, this parameter defines how many pixels wide each finest-level block is in the image.  This parameter and the image_size parameter should not both be set.`
+
+----
+
+:Parameter:  :p:`Output` : :g:`<file_set>` : :p:`image_mesh_color`
+:Summary: :s:`How to color blocks in a mesh image`
+:Type:    :t:`string`
+:Default: :d:`"level"`
+:Scope:     :c:`Cello`
+:Assumes:   :g:`<file_set>` is of :p:`type` :t:`"image"`
+
+:e:`By default, blocks in mesh images are colored according to the level of the block.  In addition to` :t:`"level"`, :e:`other possible ways to assign colors to blocks include` :t:`"process"` :e:`and` :t:`"age"`.
+

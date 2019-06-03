@@ -1,10 +1,27 @@
+#
+#  Grackle Test Problem:
+#
+#  Sets up a cooling test without hyrdodynamics to run many
+#  one-zone models in Grackle, fully sampling the density,
+#  temperature, and metallicity parameter space over which 
+#  the chemistry and cooling/heating tables are valid.
+#
+#   
+#
+
  Boundary {
      type = "reflecting";
  }
 
  Domain {
-     lower = [ 0.0, 0.0 ];
-     upper = [ 1.0, 1.0 ];
+     lower = [ 0.0, 0.0, 0.0];
+     upper = [ 1.0, 1.0, 1.0];
+ }
+
+ Units {
+    density = 1.6726219E-24;  # m_H in grams... so n = 1.0 cm^-3 for pure hydrogen
+    time    = 3.15576E13;     # 1 Myr in seconds
+    length  = 3.086E16;       # 1 pc in cm - does not actually matter
  }
 
  Field {
@@ -12,6 +29,144 @@
      gamma = 1.400;
      ghost_depth = 3;
      list = [ "density", 
+              "internal_energy",
+              "total_energy",
+              "velocity_x",
+              "velocity_y",
+              "velocity_z",
+# purposefully commenting these out to test automatic
+# creation of needed fields
+#              "HI_density",
+#              "HII_density",
+              "HM_density",
+              "HeI_density",
+              "HeII_density",
+              "HeIII_density",
+              "H2I_density",
+              "H2II_density",
+              "DI_density",
+              "DII_density",
+              "HDI_density",
+              "e_density",
+              "metal_density",
+              "cooling_time",  
+              "temperature",
+              "pressure",
+              "gamma"
+     ];
+
+     padding = 0;
+ }
+
+ Group {
+   list = ["colour", "derived"];
+   
+   # fields that should be advected by hydro MUST be defined
+   # as colour here. This is handled automatically in 
+   # EnzoMethodGrackle for the Grackle-specific fields (species)
+   # but not everything
+    colour {
+       field_list = [
+              "HI_density",
+              "HII_density",
+              "HM_density",
+              "HeI_density",
+              "HeII_density",
+              "HeIII_density",
+              "H2I_density",
+              "H2II_density",
+              "DI_density",
+              "DII_density",
+              "HDI_density",
+              "e_density",
+              "metal_density",
+              "cooling_time",
+              "temperature",
+              "pressure",
+              "gamma" ];
+    }
+
+# derived fields grouping enables Enzo-E to ensure
+#  that all derived fields are updated prior to output
+#  In order for this to work, these MUST have their own
+#  compute classes.
+    derived {
+        field_list = ["temperature",
+                      "pressure",
+                      "cooling_time"];
+    }
+ }
+
+ Initial {
+   list = ["grackle_test"];
+   grackle_test {
+      # See note in "Mesh" on running in < 3D
+
+      minimum_H_number_density = 0.0001;
+      maximum_H_number_density = 1000.0;
+      minimum_metallicity      = 1.0;
+      maximum_metallicity      = 1.0;
+      minimum_temperature      = 10.0;
+      maximum_temperature      = 1.0E8;
+
+      # Keep temperature constant with changing mu?
+      reset_energies           = 0;
+
+      dt = 100.0;
+   }
+ }
+
+ Mesh {
+     #   This test problem varies density, temperature,
+     #   and metallicity over x, y, and z dimensions 
+     #   respectively. For smaller problems you can 
+     #   run in 1 or 2 dimensions by changing the below
+     #   accordingly and setting the min/max values in
+     #   initialization to be the same. Currently cannot
+     #   pick which value goes in which dimension,
+     #   so 2D can only be density and temperature,
+     #   1D can only vary density.
+     
+     root_blocks = [ 4, 4];
+     root_rank = 2;
+     root_size = [128, 128];
+
+     # 3D test example:
+     # root_blocks = [ 4, 4, 4];
+     # root_rank = 3;
+     # root_size = [32, 32, 32];
+
+ }
+
+ Method {
+      list = [ "grackle", "null"];
+
+     grackle {
+        courant = 0.40;
+        data_file = "CloudyData_UVB=HM2012_shielded.h5";
+
+        with_radiative_cooling = 1;
+        primordial_chemistry   = 3;  # 1, 2, or 3
+        metal_cooling          = 1;  # 0 or 1 (off/on)
+        UVbackground           = 1;  # on or off
+        self_shielding_method  = 3;  # 0 - 3 (0 or 3 recommended)
+
+        HydrogenFractionByMass = 0.73;
+     }
+
+     # use this to limit maximum timestep if
+     # Grackle crashes due to max iteration limit - this is not
+     # needed generally in a real simulation as hydro timestep will
+     # be small (usually)
+     null { dt = 100.0; }
+
+ }
+
+ Output {
+     list = ["data"];
+
+     data {
+         field_list = [ "density",
               "internal_energy",
               "total_energy",
               "velocity_x",
@@ -34,100 +189,21 @@
               "temperature",
               "pressure",
               "gamma"
-     ];
+               ];
 
-     padding = 0;
- }
-
- Group {
-   list = ["colour"];
-    colour {
-       field_list = [
-              "HI_density",
-              "HII_density",
-              "HM_density",
-              "HeI_density",
-              "HeII_density",
-              "HeIII_density",
-              "H2I_density",
-              "H2II_density",
-              "DI_density",
-              "DII_density",
-              "HDI_density",
-              "e_density",
-              "metal_density",
-              "cooling_time",
-              "temperature",
-              "pressure",
-              "gamma" ];
-    }
- }
-
- Initial {
-   list = ["grackle_test"];
- }
-
- Mesh {
-     root_blocks = [ 2, 4 ];
-     root_rank = 2;
-     root_size = [ 400, 400 ];
- }
-
- Method {
-      list = [ "grackle","ppm" ];
-#     list = [ "ppm" ];
-
-     grackle {
-        courant = 0.80;
-        data_file = "input/CloudyData_UVB=HM2012.h5";
-     }
-
-     ppm {
-        courant = 0.80;
-        diffusion   = true;
-        flattening  = 3;
-        steepening  = true;
-        dual_energy = true;
-     }
- }
-
- Output {
-     list = [ "density", "check"];
-
-     check {
-        type  = "checkpoint";
-        dir   = ["method_grackle-1-%06d","cycle"];
-        schedule { var = "cycle"; start = 1000; step = 1000; }
-     }
-
-
-     data {
-         field_list = [ "density" ];
-         name = [ "method_grackle-1-%02d-%06d.h5", "proc", "cycle" ];
+         dir   = ["GRACKLE_TEST_%03d","cycle"];
+         name = [ "method_grackle-1-%03d-%03d.h5","cycle", "proc" ];
          schedule {
              var = "time";
-             step = 0.1;
+             step = 1000.0;
+             start = 0.0;
          }
          type = "data";
      }
-     density {
-         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
-         field_list = [
-            "density"
-          ];
-         name = [ "method_grackle-1-%06d.png", "cycle" ];
-         schedule {
-             var = "time";
-             step = 0.1;
-         }
-         type = "image";
-     }
+
  }
 
  Stopping {
-    time = 2.5;
+    time = 1000.0;
  }
 
- Testing {
-     time_final = 2.5;
- }

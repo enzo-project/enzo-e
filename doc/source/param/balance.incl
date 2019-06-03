@@ -1,0 +1,9 @@
+----
+
+:Parameter:  :p:`Balance` : :p:`schedule`
+:Summary:    :s:`Scheduling parameters for dynamic load balancing`
+:Type:       :t:`subgroup`
+:Default: :d:`none`
+:Scope:     :c:`Cello`
+
+:e:`See the` `schedule`_ :e:`subgroup for parameters used to define when to trigger the dynamic load balancing operation.`
