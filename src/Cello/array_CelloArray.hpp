@@ -39,7 +39,7 @@ typedef std::conditional<sizeof(int) >= sizeof(std::ptrdiff_t),
 ///
 /// If we forced intp to always be int, then we'd use min(INT_MAX,PTRDIFF_MAX)
 
-#define ARRAY_SIZE_MAX PTRDIFF_MAX;
+#define ARRAY_SIZE_MAX PTRDIFF_MAX
 
 //----------------------------------------------------------------------
 
@@ -75,8 +75,8 @@ class CSlice
 public:
   
   // ints should always be implicitly promoted
-  CSlice(intp start, intp stop)
-    : start(start), stop(stop), initialized(true)
+  CSlice(const intp start, const intp stop)
+    : start_(start), stop_(stop), initialized_(true)
   {
     if ((start >= 0 && stop > 0) || (start < 0 && stop < 0)){
       ASSERT("CSlice", "start must be less than stop.", stop>start);
@@ -87,32 +87,34 @@ public:
   // instance must be assigned a non-default constructed value before use
   CSlice() : start_(0), stop_(0), initialized_(false) {}
 
-  CSlice(intp start, std::nullptr_t stop)
+  /*
+  CSlice(const intp start, std::nullptr_t stop)
     : start_(start), stop_(0), initialized_(true)
   { }
 
-  CSlice(std::nullptr_t start, intp stop)
+  CSlice(std::nullptr_t start, const intp stop)
     : start_(0), stop_(stop), initialized_(true)
   { }
 
   CSlice(std::nullptr_t start, std::nullptr_t stop)
     : start_(0), stop_(0), initialized_(true)
   { }
+  */
 
   // Gets the start index of the slice
-  intp get_start()
+  intp get_start() const
   {
     ASSERT("CSlice", ("Default constructed CSlices cannot be used without "
-		      "explicit assignment of values."), intialized_);
+		      "explicit assignment of values."), initialized_);
     return start_;
   }
 
   /// Returns the stop index of the slice. If the stop index should be the
   /// length of sliced axis, 0 is returned.
-  intp get_stop()
+  intp get_stop() const
   {
     ASSERT("CSlice", ("Default constructed CSlices cannot be used without "
-		      "explicit assignment of values."), intialized_);
+		      "explicit assignment of values."), initialized_);
     return stop_;
   }
     
@@ -128,8 +130,25 @@ private:
 };
 
 
+// Defining the macro called CHECK_BOUNDS macro means that the bounds of an
+// EnzoArray, are checked everytime operator() is called
+template<typename T>
+bool check_bounds_(std::size_t *shape, T first) {return *shape > first;}
+template<typename T, typename... Rest>
+bool check_bounds_(std::size_t *shape, T first, Rest... rest){
+  //(get's unrolled at compile time)
+  return (*shape > first) && check_bounds_(++shape, rest...);
+}
 
-
+#ifdef CHECK_BOUNDS
+#  define CHECK_BOUND3D(shape, k, j, i)                                       \
+  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape,k,j,i));
+#  define CHECK_BOUNDND(shape, ARGS)                                          \
+  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape, ARGS...));
+#else
+#  define CHECK_BOUND3D(shape, k, j, i)   /* ... */
+#  define CHECK_BOUNDND(shape, ARGS)      /* ... */
+#endif
 
 
 // Defining the macro called CHECK_FINITE_ELEMENTS returns an error everytime a
@@ -440,14 +459,16 @@ inline void prep_slices_(const CSlice* slices, const intp shape[],
      }
 
      ASSERT3("FixedDimArray_",
-	     "slice.start of %ld doesn't lie in bound of dim %ld of size %ld.",
-	     (long)slices[i].start, (long)i, (long)shape[i], start < shape[i]);
+	     "slice start of %ld doesn't lie in bound of dim %ld of size %ld.",
+	     (long)slices[i].get_start(), (long)i, (long)shape[i],
+	     start < shape[i]);
      ASSERT3("FixedDimArray_",
-	     "slice.stop of %d doesn't lie in bound of dim %ld of size %ld.",
-	     (long)slices[i].stop, (long)i, (long)shape[i], stop <= shape[i]);
-     ASSERT4("FixedDimArray_", ("slice.stop (%ld) doesn't exceed slice.start "
+	     "slice stop of %d doesn't lie in bound of dim %ld of size %ld.",
+	     (long)slices[i].get_stop(), (long)i, (long)shape[i],
+	     stop <= shape[i]);
+     ASSERT4("FixedDimArray_", ("slice stop (%ld) doesn't exceed slice start "
 				"(%ld) must for dim %ld of size %ld."),
-	     (long)slices[i].start, (long)slices[i].stop, (long)i,
+	     (long)slices[i].get_start(), (long)slices[i].get_stop(), (long)i,
 	     (long)shape[i], stop>start);
      out_slices[i] = CSlice(start,stop);
   }
@@ -470,8 +491,8 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args){
     intp new_shape[D];
     intp new_offset = offset_;
     for (std::size_t dim=0; dim<D; dim++){
-      new_shape[dim] = slices[dim].stop - slices[dim].start;
-      new_offset += slices[dim].start * stride_[dim];
+      new_shape[dim] = slices[dim].get_stop() - slices[dim].get_start();
+      new_offset += slices[dim].get_start() * stride_[dim];
     }
 
     subarray.init_helper_(dataMgr_,new_shape,new_offset);

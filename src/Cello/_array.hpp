@@ -22,6 +22,6 @@
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "array_Array.hpp"
+#include "array_CelloArray.hpp"
 
 #endif /* _ARRAY_HPP */
