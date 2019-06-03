@@ -151,7 +151,7 @@ EnzoMethodGravity::EnzoMethodGravity
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
 			     enzo_sync_id_method_gravity);
   
   refresh(ir)->add_field("acceleration_x");

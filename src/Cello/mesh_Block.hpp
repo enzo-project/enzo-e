@@ -86,39 +86,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Initialize an empty Block
-  Block() :
-    CBase_Block(),
-    data_(NULL),
-    child_data_(NULL),
-    level_next_(0),
-    cycle_(0),
-    time_(0.0),
-    dt_(0.0),
-    stop_(false),
-    index_initial_(0),
-    children_(),
-    sync_coarsen_(),
-    sync_count_(),
-    sync_max_(),
-    face_level_curr_(),
-    face_level_next_(),
-    child_face_level_curr_(),
-    child_face_level_next_(),
-    count_coarsen_(0),
-    adapt_step_(0),
-    adapt_(0),
-    coarsened_(false),
-    delete_(false),
-    is_leaf_(true),
-    age_(0),
-    face_level_last_(),
-    name_(""),
-    index_method_(-1),
-    index_solver_(),
-    refresh_()
-  {
-    for (int i=0; i<3; i++) array_[i]=0;
-  }
+  Block();
 
   /// Initialize a migrated Block
   Block (CkMigrateMessage *m);
@@ -253,6 +221,11 @@ public: // interface
 
   /// Initialize child face levels given own face levels
   void initialize_child_face_levels_();
+
+#ifdef NEW_REFRESH  
+  /// Initialize arrays for refresh
+  void init_new_refresh_();
+#endif  
 
   /// Return an iterator over faces
 
@@ -554,6 +527,40 @@ public:
   // REFRESH
   //--------------------------------------------------
 
+#ifdef NEW_REFRESH
+  //--------------------------------------------------
+  // NEW REFRESH
+  //--------------------------------------------------
+
+  /// Begin a refresh operation, optionally waiting then invoking callback
+  void new_refresh_start (int id_refresh, int callback = 0);
+
+  /// Wait for a refresh operation to complete, then continue with the callback
+  void new_refresh_wait (int id_refresh, int callback);
+
+  /// Check whether a refresh operation is finished, and invoke the associated
+  /// callback if it is
+  void new_refresh_check_done (int id_refresh);
+
+  /// Receive a Refresh data message from an adjacent Block
+  void p_new_refresh_recv (MsgRefresh * msg);
+
+  int new_refresh_load_field_faces_ (Refresh & refresh);
+  /// Scatter particles in ghost zones to neighbors
+  int new_refresh_load_particle_faces_ (Refresh & refresh);
+  void new_refresh_load_field_face_
+  (Refresh & refresh, int refresh_type, Index index, int if3[3], int ic3[3]);
+  /// Send particles in list to corresponding indices
+  void new_particle_send_(Refresh & refresh, int nl,Index index_list[], 
+			  ParticleData * particle_list[]);
+
+  Refresh & new_refresh (int id_refresh);
+
+  void new_refresh_exit (Refresh & refresh);
+
+#endif  
+  // #else // ! NEW_REFRESH
+
   void refresh_enter (int call, Refresh * refresh);
 
   /// Enter the refresh phase after synchronizing
@@ -582,18 +589,11 @@ public:
   }
 protected:
   void refresh_exit_ ();
+  /// Pack field face data into arrays and send to neighbors
 public:
 
-  /// Synchronize at start of refresh so that neighboring Blocks have
-  /// all reached this point before exchanging data
-  //  void p_refresh_sync()
-  //  { refresh_sync_(0); }
-protected:
-  //  void refresh_sync_(int count);
-  void refresh_load_faces_();
-
-public:
-
+  // #endif // ! NEW_REFRESH
+  
   void p_refresh_store (MsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
@@ -1014,7 +1014,12 @@ protected: // attributes
 #else
   std::vector<Refresh*> refresh_;
 #endif  
-  
+
+#ifdef NEW_REFRESH  
+  std::vector < Sync > new_refresh_sync_list_;
+  std::vector < std::vector <MsgRefresh * > > new_refresh_msg_list_;
+  std::vector < RefreshState > new_refresh_state_list_;
+#endif  
 
 };
 

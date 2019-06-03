@@ -10,10 +10,10 @@ import socket
 
 
 #----------------------------------------------------------------------
-# Temporary setting for using new Output implementation
+# Temporary setting for using new Refresh implementation
 #----------------------------------------------------------------------
 
-new_output = 0
+new_refresh = 1
 
 #----------------------------------------------------------------------
 # Temporary setting for using new PPM routines from enzo-dev

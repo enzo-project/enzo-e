@@ -61,8 +61,6 @@ diff:
 	git diff -b |$(AWK_ORG)                >> diff.org
 	echo '** TODO [/] Staged diff'                       >> diff.org
 	git diff --cached HEAD -b | $(AWK_ORG) >> diff.org
-	echo '** TODO [/] enzo-project/master'               >> diff.org
-	git diff remotes/upstream/master | $(AWK_ORG) >> diff.org
 #----------------------------------------------------------------------
 .PHONY: gdb
 gdb:

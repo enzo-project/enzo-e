@@ -205,7 +205,7 @@ void DataMsg::update (Data * data, bool is_local)
     if (is_local) {
 
       Field field_src(field_descr,fd);
-      
+
       ff->face_to_face(field_src, field_dst);
 
     } else { // ! is_local

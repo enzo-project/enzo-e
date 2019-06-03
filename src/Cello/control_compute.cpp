@@ -54,19 +54,18 @@ void Block::compute_next_ ()
 
   if (method) {
 
-    Refresh * refresh = method->refresh();
+      Refresh * refresh = method->refresh();
 
-    if (refresh) {
+      if (refresh) {
 
-      refresh->set_active (is_leaf());
+	refresh->set_active (is_leaf());
 
-      refresh_enter (CkIndex_Block::r_compute_continue(), refresh );
+	refresh_enter (CkIndex_Block::r_compute_continue(), refresh );
 
-    } else {
+      } else {
+	compute_continue_();
 
-      compute_continue_();
-
-    }
+      }
 
   } else {
 

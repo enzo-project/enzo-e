@@ -9,6 +9,7 @@
 
 // #define TRACE_SOLVER
 // #define  DEBUG_SOLVER_CG
+// #define DEBUG_NEW_REFRESH  
 
 #define CYCLE 0
 
@@ -94,6 +95,21 @@ Refresh * Solver::refresh(size_t index)
 {
   return (index < refresh_list_.size()) ? refresh_list_[index] : nullptr;
 }
+
+#ifdef NEW_REFRESH
+//----------------------------------------------------------------------
+
+int Solver::new_register_refresh_ (Refresh refresh)
+{
+  const int id_refresh = cello::simulation()->new_register_refresh(refresh);
+#ifdef DEBUG_NEW_REFRESH  
+  CkPrintf ("DEBUG_NEW_REFRESH registering refresh[%d]:\n",
+	    id_refresh);
+#endif  
+  cello::simulation()->new_refresh_list(id_refresh).print();
+  return id_refresh;
+}
+#endif
 
 //======================================================================
 
