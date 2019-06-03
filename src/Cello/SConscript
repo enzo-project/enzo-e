@@ -20,6 +20,8 @@ Import('cxxflags')
 #------------------------------
 
 # Direct Dependencies
+# array -> error
+
 # disk -> error
 
 # error -> monitor
@@ -60,6 +62,7 @@ libs_monitor     = ['monitor','parallel'] + libs_boost
 libs_error       = ['error'] + libs_monitor + libs_boost
 libs_disk        = ['disk'] + libs_error + ['hdf5'] + ['cello']
 libs_performance = ['performance', 'memory','parameters'] + libs_error + libs_papi + libs_boost
+libs_array       = ['array'] + libs_error
 libs_parallel    = ['parallel'] +libs_error
 libs_data        = ['data', 'mesh', 'io'] + libs_parallel + ['cello']
 libs_main        = ['main']
@@ -71,7 +74,7 @@ libs_parameters  = ['parameters'] + libs_error + libs_boost + ['cello']
 libs_simulation  = ['simulation','problem']
 libs_test        = ['test'] + libs_parallel + ['cello', 'data', 'simulation']
 
-libs_all = ['charm','control','simulation','compute','mesh','data','problem','io','disk','memory','parallel','parameters','error','monitor','performance','test','cello','external','png','hdf5'] + libs_papi + libs_boost
+libs_all = ['charm','control','simulation','compute','mesh','data','problem','io','disk','memory','parallel','parameters','error','monitor','performance','test','array','cello','external','png','hdf5'] + libs_papi + libs_boost
 libs_data   = libs_all
 libs_io     = libs_all
 libs_mesh   = libs_all
@@ -109,6 +112,7 @@ includes_parameters =  [Glob('*parameters*hpp'),'parse.h']
 includes_performance = [Glob('*performance*hpp')]
 includes_problem     = [Glob('*problem*hpp')]
 includes_compute     = [Glob('*compute*hpp')]
+includes_array       = [Glob('*array*hpp')]
 includes_simulation =  [Glob('*simulation*hpp')]
 includes_test =        [Glob('*test*hpp')]
 
@@ -129,6 +133,7 @@ sources_parameters =  [Glob('parameters*cpp'),'parse.tab.c','lex.yy.c']
 sources_performance = [Glob('performance*cpp')]
 sources_problem =     [Glob("problem*cpp")]
 sources_compute =     [Glob("compute*cpp")]
+sources_array =       [Glob("array*cpp")]
 sources_simulation =  [Glob("simulation*cpp")]
 sources_test =        [Glob('test_Unit*cpp')]
 
@@ -210,6 +215,7 @@ objs_parameters = env.Object(sources_parameters)
 objs_performance = env.Object(sources_performance)
 objs_problem = env.Object(sources_problem)
 objs_compute = env.Object(sources_compute)
+objs_array = env.Object(sources_array)
 objs_simulation = env.Object(sources_simulation)
 objs_test = env.Object(sources_test)
 
@@ -295,6 +301,7 @@ libraries_mesh   = env.Library ('mesh',   objs_mesh)
 libraries_monitor = env.Library ('monitor', objs_monitor)
 libraries_problem = env.Library ('problem', objs_problem)
 libraries_compute = env.Library ('compute', objs_compute)
+libraries_array = env.Library('array', objs_array)
 libraries_parallel = env.Library ('parallel', objs_parallel)
 libraries_parameters = env.Library ('parameters', objs_parameters)
 libraries_performance = env.Library ('performance', objs_performance)
@@ -391,6 +398,9 @@ env.Alias('install-lib',env.Install (lib_path,libraries_problem))
 
 env.Alias('install-inc',env.Install (inc_path,includes_compute))
 env.Alias('install-lib',env.Install (lib_path,libraries_compute))
+
+env.Alias('install-inc',env.Install (inc_path,includes_array))
+env.Alias('install-lib',env.Install (lib_path,libraries_array))
 
 env.Alias('install-inc',env.Install (inc_path,includes_simulation))
 env.Alias('install-lib',env.Install (lib_path,libraries_simulation))
