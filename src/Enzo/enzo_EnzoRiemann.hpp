@@ -76,13 +76,13 @@ public: // interface
   /// computes the fast magnetosonic speed along dimension i
   static enzo_float fast_magnetosonic_speed_(const enzo_float prim_vals[],
 					     const field_lut prim_lut,
-					     EnzoEquationOfState *eos)
+					     const enzo_float gamma)
   {
     enzo_float bi = prim_vals[prim_lut.bfield_i];
     enzo_float bj = prim_vals[prim_lut.bfield_j];
     enzo_float bk = prim_vals[prim_lut.bfield_k];
 
-    enzo_float cs2 = std::pow(sound_speed_(prim_vals, prim_lut, eos),2);
+    enzo_float cs2 = std::pow(sound_speed_(prim_vals, prim_lut, gamma),2);
     enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     if (B2 == 0){
       return std::sqrt(cs2);
@@ -103,12 +103,12 @@ public: // interface
     return 0.5 * (bi*bi + bj*bj + bk *bk);
   }
 
-  /// computes the (adiabatic) sound spped
+  /// computes the (adiabatic) sound speed
   static enzo_float sound_speed_(const enzo_float prim_vals[],
 				 const field_lut prim_lut,
-				 EnzoEquationOfState *eos)
+				 const enzo_float gamma)
   {
-    return std::sqrt(eos->get_gamma()*prim_vals[prim_lut.pressure]/
+    return std::sqrt(gamma * prim_vals[prim_lut.pressure]/
 		     prim_vals[prim_lut.density]);
   }
 

@@ -57,20 +57,25 @@ public: // interface
   void conservative_from_primitive(Block *block, Grouping &prim_group,
 				   Grouping &cons_group);
 
-  /// returns adiabatic index
-  enzo_float get_gamma(){
-    return gamma_;}
-
   /// returns the density floor
-  enzo_float get_density_floor(){
-    return density_floor_;}
+  enzo_float get_density_floor() { return density_floor_; }
 
   /// returns the thermal pressure floor
-  enzo_float get_pressure_floor(){
-    return pressure_floor_;}
+  enzo_float get_pressure_floor() { return pressure_floor_; }
 
   /// apply the pressure floor to total_energy field
   void apply_floor_to_energy(Block *block, Grouping &cons_group);
+
+  /// returns whether the EOS is barotropic
+  bool is_barotropic() { return false; }
+
+  /// returns adiabatic index
+  enzo_float get_gamma() { return gamma_;}
+
+  /// returns isothermal sound speed - it shouldn't be used since an ideal gas
+  /// is not barotropic
+  enzo_float get_isothermal_sound_speed() { return 0;}
+  
 
 private:
   /// Copies entries of the passively advected fields included by origin_group

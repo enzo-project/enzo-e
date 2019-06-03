@@ -32,7 +32,7 @@ struct AthenaHLLEWavespeed
   void operator()(const enzo_float wl[], const enzo_float wr[],
 		  const enzo_float Ul[], const enzo_float Ur[],
 		  const field_lut prim_lut, const field_lut cons_lut,
-		  EnzoEquationOfState *eos, enzo_float *bp, enzo_float *bm)
+		  const enzo_float gamma, enzo_float *bp, enzo_float *bm)
   {
     field_lut plut = prim_lut;
     field_lut clut = cons_lut;
@@ -48,10 +48,10 @@ struct AthenaHLLEWavespeed
     //    left_speed = vi_l - cf_l;      right_speed = vi_r + cf_r
     enzo_float left_speed = (wl[plut.velocity_i] -
 			     EnzoRiemann::fast_magnetosonic_speed_(wl, plut,
-								   eos));
+								   gamma));
     enzo_float right_speed = (wr[plut.velocity_i] +
 			      EnzoRiemann::fast_magnetosonic_speed_(wr, plut,
-								    eos));
+								    gamma));
 
     // Next, compute min max eigenvalues
     //     - per eqn B17 these are Roe averaged velocity in the ith direction
@@ -89,7 +89,7 @@ struct AthenaHLLEWavespeed
 
 
     // Calculate fast magnetosonic speed for Roe-averaged quantities (eqn B18)
-    enzo_float gamma_prime = eos->get_gamma()-1.;
+    enzo_float gamma_prime = gamma - 1.;
     enzo_float x_prime = ((std::pow(wl[plut.bfield_j]-wr[plut.bfield_j],2) +
 			   std::pow(wl[plut.bfield_k]-wr[plut.bfield_k],2) )
 			  * 0.5 * (gamma_prime-1) * coef);
@@ -128,7 +128,7 @@ struct AthenaHLLEWavespeed
 template <class WaveSpeedFunctor>
 struct HLLEImpl
 {
-  /// @class    EnzoRiemannHLLD
+  /// @class    EnzoRiemannHLLE
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates operations of HLLE approximate Riemann
   /// Solver. 
@@ -142,16 +142,17 @@ public:
    const enzo_float prim_l[], const enzo_float prim_r[],
    const enzo_float cons_l[], const enzo_float cons_r[],
    const field_lut prim_lut, const field_lut cons_lut, const int n_keys,
-   EnzoEquationOfState *eos, const int iz, const int iy, const int ix,
+   const bool barotropic_eos, const enzo_float gamma,
+   const enzo_float isothermal_cs, const int iz, const int iy, const int ix,
    EFlt3DArray flux_arrays[], enzo_float scratch_space[])
-  {
+  { 
     // there is no scratch_space
     WaveSpeedFunctor wave_speeds;
     //AthenaHLLEWavespeed wave_speeds;
     enzo_float bp, bm;
 
     // Compute wave speeds
-    wave_speeds(prim_l, prim_r, cons_l, cons_r, prim_lut, cons_lut, eos,
+    wave_speeds(prim_l, prim_r, cons_l, cons_r, prim_lut, cons_lut, gamma,
 		&bp, &bm);
 
     // Compute the actual riemann fluxes

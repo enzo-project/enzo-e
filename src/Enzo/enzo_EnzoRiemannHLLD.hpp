@@ -25,7 +25,8 @@ public:
    const enzo_float prim_l[], const enzo_float prim_r[],
    const enzo_float cons_l[], const enzo_float cons_r[],
    const field_lut prim_lut, const field_lut cons_lut, const int n_keys,
-   EnzoEquationOfState *eos, const int iz, const int iy, const int ix,
+   const bool barotropic_eos, const enzo_float gamma,
+   const enzo_float isothermal_cs, const int iz, const int iy, const int ix,
    EFlt3DArray flux_arrays[], enzo_float scratch_space[])
   {
     // This method makes use of the member variables Us and Uss
@@ -48,8 +49,6 @@ public:
     enzo_float S_l, S_r, S_ls, S_rs, S_M; // wave speeds
     enzo_float cf_l, cf_r, sam, sap; // fast speeds
 
-    enzo_float gamma = eos->get_gamma();
-
     // First, compute Fl and Ul
     rho_l  = prim_l[prim_lut.density];
     p_l    = prim_l[prim_lut.pressure];
@@ -63,7 +62,7 @@ public:
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
     etot_l = cons_l[cons_lut.total_energy];
     pt_l = p_l + EnzoRiemann::mag_pressure_(prim_l, prim_lut);
-    cf_l = EnzoRiemann::fast_magnetosonic_speed_(prim_l, prim_lut, eos);
+    cf_l = EnzoRiemann::fast_magnetosonic_speed_(prim_l, prim_lut, gamma);
 
     // load wr and compute the fast magnetosonic speed
     rho_r   = prim_r[prim_lut.density];
@@ -78,7 +77,7 @@ public:
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
     etot_r = cons_r[cons_lut.total_energy];
     pt_r = p_r + EnzoRiemann::mag_pressure_(prim_r, prim_lut);
-    cf_r = EnzoRiemann::fast_magnetosonic_speed_(prim_r, prim_lut, eos);
+    cf_r = EnzoRiemann::fast_magnetosonic_speed_(prim_r, prim_lut, gamma);
 
     //
     //wave speeds

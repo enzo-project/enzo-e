@@ -78,9 +78,6 @@ public: // interface
   virtual void conservative_from_primitive(Block *block, Grouping &prim_group,
   					   Grouping &cons_group)=0;
 
-  /// returns adiabatic index
-  virtual enzo_float get_gamma() = 0;
-
   /// returns the density floor
   virtual enzo_float get_density_floor()=0;
 
@@ -89,6 +86,17 @@ public: // interface
 
   /// apply the pressure floor to total_energy field
   virtual void apply_floor_to_energy(Block *block, Grouping &cons_group)=0;
+
+  /// returns whether the equation of state is barotropic
+  virtual bool is_barotropic() = 0;
+
+  /// returns adiabatic index - only needs to be a reasonable number of non-
+  /// barotropic
+  virtual enzo_float get_gamma() = 0;
+
+  /// returns isothermal sound speed - only needs to be reasonable for a
+  /// barotropic EOS
+  virtual enzo_float get_isothermal_sound_speed() = 0;
 
 };
 

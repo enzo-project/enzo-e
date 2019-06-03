@@ -24,7 +24,8 @@
 //    const enzo_float prim_l[], const enzo_float prim_r[],
 //    const enzo_float cons_l[], const enzo_float cons_r[],
 //    const field_lut prim_lut, const field_lut cons_lut, const int n_keys,
-//    EnzoEquationOfState *eos, const int iz, const int iy, const int ix,
+//    const bool barotropic_eos, const enzo_float gamma,
+//    const enzo_float isothermal_cs, const int iz, const int iy, const int ix,
 //    EFlt3DArray flux_arrays[], enzo_float scratch_space[]);
 //
 //   This function computes the Riemann Flux at a given cell interface. flux_l,
@@ -34,7 +35,9 @@
 //   indicates the number of conserved quantities. The resulting Riemann flux
 //   for conserved quantity at index j get's stored at flux_arrays[j](iz,iy,ix)
 //   Finally, scratch_space serves as a place to temporarily save quantites
-//   during the calculation.
+//   during the calculation. If barotropic_eos is True, then
+//   isothermal_cs is expected to be non-zero, while if it's False, then gamma
+//   is expected to be positive.
 //
 //  static int scratch_space_length(const int n_cons_keys);
 //
@@ -200,8 +203,9 @@ DEFINE_HAS_SIGNATURE(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
 			      const enzo_float[], const enzo_float[],
 			      const enzo_float[], const enzo_float[],
 			      const field_lut, const field_lut, const int,
-			      EnzoEquationOfState *, const int, const int,
-			      const int, EFlt3DArray[], enzo_float[]));
+			      const bool, const enzo_float, const enzo_float,
+			      const int, const int, const int, EFlt3DArray[],
+			      enzo_float[]));
 DEFINE_HAS_SIGNATURE(has_scratch_space_length, T::scratch_space_length,
 		     int (*)(const int));
 
@@ -354,7 +358,19 @@ void EnzoRiemannImpl<ImplStruct>::solve
  Grouping &flux_group, Grouping &consl_group, Grouping &consr_group,
  int dim, EnzoEquationOfState *eos)
 {
-  // In the future, this stuff up here will be handled at construction
+  
+  const bool barotropic = eos->is_barotropic();
+  // if not barotropic then the following doesn't have to be reasonable
+  const enzo_float isothermal_cs = eos->get_isothermal_sound_speed();
+  // If barotropic, then the following doesn't have to be a reasonable value
+  // (this will have to be tweaked when we introduce species that modify gamma)
+  const enzo_float gamma = eos->get_gamma();
+
+  // When barotropic equations of state are eventually introduced, all eos
+  // dependencies should be moved up here
+  ASSERT("EnzoRiemannImpl", "currently no support for barotropic eos",
+	 !barotropic);
+  
   EnzoCenteredFieldRegistry registry;
   EFlt3DArray *wl_arrays, *wr_arrays, *ul_arrays, *ur_arrays, *flux_arrays;
 
@@ -414,8 +430,8 @@ void EnzoRiemannImpl<ImplStruct>::solve
 	// Now compute the Riemann Fluxes
 	ImplStruct::calc_riemann_fluxes(Fl, Fr, wl, wr, Ul, Ur,
 					prim_lut_, cons_lut_, n_cons_keys_,
-					eos, iz, iy, ix, flux_arrays,
-					scratch_space);
+					barotropic, gamma, isothermal_cs, iz,
+					iy, ix, flux_arrays, scratch_space);
 
 	/*
 	// If Dedner Fluxes are required, they get handled here
