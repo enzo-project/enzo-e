@@ -401,9 +401,9 @@ private:
 
 //----------------------------------------------------------------------
 
-void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
-		     EnzoArray<enzo_float,3> &Aj,
-		     EnzoArray<enzo_float,3> &Ak, int dim, enzo_float dj,
+void bfieldi_helper_(EFlt3DArray &bfield,
+		     EFlt3DArray &Aj,
+		     EFlt3DArray &Ak, int dim, enzo_float dj,
 		     enzo_float dk)
 {
 
@@ -417,30 +417,30 @@ void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
   int fc_my = bfield.shape(1);
   int fc_mz = bfield.shape(0);
 
-  EnzoArray<enzo_float,3> Ak_left, Ak_right,Aj_right, Aj_left;
+  EFlt3DArray Ak_left, Ak_right,Aj_right, Aj_left;
 
   if (dim == 0){
     // Aj_right = Ay(iz+1/2,iy,ix-1/2), Ak_right = Az(iz, iy+1/2,ix-1/2)
-    Aj_right = Aj.subarray(ESlice(1, fc_mz+1), ESlice(0, fc_my),
-			   ESlice(0, fc_mx));
-    Ak_right = Ak.subarray(ESlice(0, fc_mz), ESlice(1, fc_my+1),
-			   ESlice(0, fc_mx));
+    Aj_right = Aj.subarray(CSlice(1, fc_mz+1), CSlice(0, fc_my),
+			   CSlice(0, fc_mx));
+    Ak_right = Ak.subarray(CSlice(0, fc_mz), CSlice(1, fc_my+1),
+			   CSlice(0, fc_mx));
   } else if (dim == 1){
     // Aj_right = Az(iz,iy-1/2,ix+1/2), Ak_right = Ax(iz+1/2,iy-1/2,ix)
-    Aj_right = Aj.subarray(ESlice(0, fc_mz), ESlice(0, fc_my),
-			   ESlice(1, fc_mx+1));
-    Ak_right = Ak.subarray(ESlice(1, fc_mz+1), ESlice(0, fc_my),
-			   ESlice(0, fc_mx));
+    Aj_right = Aj.subarray(CSlice(0, fc_mz), CSlice(0, fc_my),
+			   CSlice(1, fc_mx+1));
+    Ak_right = Ak.subarray(CSlice(1, fc_mz+1), CSlice(0, fc_my),
+			   CSlice(0, fc_mx));
   } else {
     // Aj_right = Ax(iz-1/2,iy+1/2,ix), Ak_right = Ay(iz-1/2,iy,ix+1/2)
-    Aj_right = Aj.subarray(ESlice(0, fc_mz), ESlice(1, fc_my+1),
-			   ESlice(0, fc_mx));
-    Ak_right = Ak.subarray(ESlice(0, fc_mz), ESlice(0, fc_my),
-			   ESlice(1, fc_mx+1));
+    Aj_right = Aj.subarray(CSlice(0, fc_mz), CSlice(1, fc_my+1),
+			   CSlice(0, fc_mx));
+    Ak_right = Ak.subarray(CSlice(0, fc_mz), CSlice(0, fc_my),
+			   CSlice(1, fc_mx+1));
   }
 
-  Aj_left = Aj.subarray(ESlice(0, fc_mz), ESlice(0, fc_my), ESlice(0, fc_mx));
-  Ak_left = Ak.subarray(ESlice(0, fc_mz), ESlice(0, fc_my), ESlice(0, fc_mx));
+  Aj_left = Aj.subarray(CSlice(0, fc_mz), CSlice(0, fc_my), CSlice(0, fc_mx));
+  Ak_left = Ak.subarray(CSlice(0, fc_mz), CSlice(0, fc_my), CSlice(0, fc_mx));
 
   for (int iz=0;iz<fc_mz;iz++){
     for (int iy=0; iy<fc_my; iy++){
@@ -471,7 +471,7 @@ void bfieldi_helper_(EnzoArray<enzo_float,3> &bfield,
 void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
-  EnzoArray<enzo_float,3> bfieldi_x, bfieldi_y, bfieldi_z;
+  EFlt3DArray bfieldi_x, bfieldi_y, bfieldi_z;
   EnzoFieldArrayFactory array_factory(block);
   bfieldi_x = array_factory.from_name("bfieldi_x");
   bfieldi_y = array_factory.from_name("bfieldi_y");
@@ -485,9 +485,9 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
   // allocate corner-centered arrays for the magnetic vector potentials
   // Ax, Ay, and Az are always cell-centered along the x, y, and z dimensions,
   // respectively
-  EnzoArray<enzo_float,3> Ax(mz+1,my+1,mx);
-  EnzoArray<enzo_float,3> Ay(mz+1,my,mx+1);
-  EnzoArray<enzo_float,3> Az(mz,my+1,mx+1);
+  EFlt3DArray Ax(mz+1,my+1,mx);
+  EFlt3DArray Ay(mz+1,my,mx+1);
+  EFlt3DArray Az(mz,my+1,mx+1);
 
   // Compute the Magnetic Vector potential at all points on the grid
   for (int iz=0; iz<mz+1; iz++){
@@ -529,18 +529,18 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 		 VectorInit *momentum_init,
 		 MeshPos &pos, int mx, int my, int mz, enzo_float gamma)
 {
-  EnzoArray<enzo_float,3> density, pressure;
+  EFlt3DArray density, pressure;
   EnzoFieldArrayFactory array_factory(block);
   density = array_factory.from_name("density");
   pressure = array_factory.from_name("pressure");
 
-  EnzoArray<enzo_float,3> velocity_x, velocity_y, velocity_z;
+  EFlt3DArray velocity_x, velocity_y, velocity_z;
   velocity_x = array_factory.from_name("velocity_x");
   velocity_y = array_factory.from_name("velocity_y");
   velocity_z = array_factory.from_name("velocity_z");
 
   // Required for computing Pressure
-  EnzoArray<enzo_float,3> bfieldc_x, bfieldc_y, bfieldc_z;
+  EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
   bfieldc_x = array_factory.from_name("bfield_x");
   bfieldc_y = array_factory.from_name("bfield_y");
   bfieldc_z = array_factory.from_name("bfield_z");
@@ -582,12 +582,12 @@ void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init,
   // this function directly sets pressure = 0.1 by hand
   // Gardiner & Stone (2008) explicitly as states that the truncation error of
   // B_perp**2/P is important
-  EnzoArray<enzo_float,3> density, pressure;
+  EFlt3DArray density, pressure;
   EnzoFieldArrayFactory array_factory(block);
   density = array_factory.from_name("density");
   pressure = array_factory.from_name("pressure");
 
-  EnzoArray<enzo_float,3> velocity_x, velocity_y, velocity_z;
+  EFlt3DArray velocity_x, velocity_y, velocity_z;
   velocity_x = array_factory.from_name("velocity_x");
   velocity_y = array_factory.from_name("velocity_y");
   velocity_z = array_factory.from_name("velocity_z");

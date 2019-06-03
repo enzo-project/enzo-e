@@ -58,14 +58,14 @@ public: // interface
   // Examples
   // --------
   //   EnzoPermutedCoordinates(1).left_edge_offset(array, 3, 4, 1) forwards to:
-  //     array.subarray(ESlice(4, array.shape(0)),
-  //                    ESlice(1, array.shape(1)),
-  //                    ESlice(3, array.shape(2)))
+  //     array.subarray(CSlice(4, array.shape(0)),
+  //                    CSlice(1, array.shape(1)),
+  //                    CSlice(3, array.shape(2)))
   //
   //   EnzoPermutedCoordinates(2).left_edge_offset(array, 0, 1, 2) forwards to:
-  //     array.subarray(ESlice(2, array.shape(0)),
-  //                    ESlice(0, array.shape(1)),
-  //                    ESlice(1, array.shape(2)))
+  //     array.subarray(CSlice(2, array.shape(0)),
+  //                    CSlice(0, array.shape(1)),
+  //                    CSlice(1, array.shape(2)))
   EFlt3DArray left_edge_offset(EFlt3DArray &array, int kstart, int jstart,
 			       int istart) const
   {
@@ -83,9 +83,9 @@ public: // interface
       xstart = jstart;
       ystart = kstart;
     }
-    return array.subarray(ESlice(zstart, array.shape(0)),
-			  ESlice(ystart, array.shape(1)),
-			  ESlice(xstart, array.shape(2)));
+    return array.subarray(CSlice(zstart, array.shape(0)),
+			  CSlice(ystart, array.shape(1)),
+			  CSlice(xstart, array.shape(2)));
   }
 
 private:

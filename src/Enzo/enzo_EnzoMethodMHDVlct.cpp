@@ -869,14 +869,14 @@ void EnzoMethodMHDVlct::outer_ghost_to_floor_
       int mx = array.shape(2);
  
       // set values for the left edges
-      array.subarray(ESlice(0,1), ESlice(0,my), ESlice(0,mx)) = floor_val;
-      array.subarray(ESlice(0,mz), ESlice(0,1), ESlice(0,mx)) = floor_val;
-      array.subarray(ESlice(0,mz), ESlice(0,my), ESlice(0,1)) = floor_val;
+      array.subarray(CSlice(0,1), CSlice(0,my), CSlice(0,mx)) = floor_val;
+      array.subarray(CSlice(0,mz), CSlice(0,1), CSlice(0,mx)) = floor_val;
+      array.subarray(CSlice(0,mz), CSlice(0,my), CSlice(0,1)) = floor_val;
 
       // set values for the right edges
-      array.subarray(ESlice(-1,mz), ESlice(0,my), ESlice(0,mx)) = floor_val;
-      array.subarray(ESlice(0,mz), ESlice(-1,my), ESlice(0,mx)) = floor_val;
-      array.subarray(ESlice(0,mz), ESlice(0,my), ESlice(-1,mx)) = floor_val;
+      array.subarray(CSlice(-1,mz), CSlice(0,my), CSlice(0,mx)) = floor_val;
+      array.subarray(CSlice(0,mz), CSlice(-1,my), CSlice(0,mx)) = floor_val;
+      array.subarray(CSlice(0,mz), CSlice(0,my), CSlice(-1,mx)) = floor_val;
     }
   }
 }

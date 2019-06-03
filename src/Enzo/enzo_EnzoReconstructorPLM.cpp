@@ -86,28 +86,28 @@ void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, enzo_float prim_floor,
   
   if (dim == 0){
     // reconstructed along x-axis
-    wl.subarray(ESlice( 0,wl.shape(0)),
-		ESlice( 0,wl.shape(1)),
-		ESlice( 0,          1)) = prim_floor;
-    wr.subarray(ESlice( 0,wr.shape(0)),
-		ESlice( 0,wr.shape(1)),
-		ESlice(-1,wr.shape(2))) = prim_floor;
+    wl.subarray(CSlice( 0,wl.shape(0)),
+		CSlice( 0,wl.shape(1)),
+		CSlice( 0,          1)) = prim_floor;
+    wr.subarray(CSlice( 0,wr.shape(0)),
+		CSlice( 0,wr.shape(1)),
+		CSlice(-1,wr.shape(2))) = prim_floor;
   } else if (dim == 1){
     // reconstructed along y-axis
-    wl.subarray(ESlice( 0,wl.shape(0)),
-		ESlice( 0,          1),
-		ESlice( 0,wl.shape(2))) = prim_floor;
-    wr.subarray(ESlice( 0,wr.shape(0)),
-		ESlice(-1,wr.shape(1)),
-		ESlice( 0,wr.shape(2))) = prim_floor;
+    wl.subarray(CSlice( 0,wl.shape(0)),
+		CSlice( 0,          1),
+		CSlice( 0,wl.shape(2))) = prim_floor;
+    wr.subarray(CSlice( 0,wr.shape(0)),
+		CSlice(-1,wr.shape(1)),
+		CSlice( 0,wr.shape(2))) = prim_floor;
   } else {
     // reconstructed along y-axis
-    wl.subarray(ESlice( 0,          1),
-		ESlice( 0,wl.shape(1)),
-		ESlice( 0,wl.shape(2))) = prim_floor;
-    wr.subarray(ESlice(-1,wr.shape(0)),
-		ESlice( 0,wr.shape(1)),
-		ESlice( 0,wr.shape(2))) = prim_floor;
+    wl.subarray(CSlice( 0,          1),
+		CSlice( 0,wl.shape(1)),
+		CSlice( 0,wl.shape(2))) = prim_floor;
+    wr.subarray(CSlice(-1,wr.shape(0)),
+		CSlice( 0,wr.shape(1)),
+		CSlice( 0,wr.shape(2))) = prim_floor;
   }
 }
 

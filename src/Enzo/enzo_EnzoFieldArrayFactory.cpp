@@ -81,17 +81,17 @@ EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
 {
   EFlt3DArray t = from_grouping(grouping,"bfield",dim);
   if (dim == 0){
-    return t.subarray(ESlice(stale_depth_,     t.shape(0) - stale_depth_),
-		      ESlice(stale_depth_,     t.shape(1) - stale_depth_),
-		      ESlice(1 + stale_depth_, t.shape(2) - 1 - stale_depth_));
+    return t.subarray(CSlice(stale_depth_,     t.shape(0) - stale_depth_),
+		      CSlice(stale_depth_,     t.shape(1) - stale_depth_),
+		      CSlice(1 + stale_depth_, t.shape(2) - 1 - stale_depth_));
   } else if (dim == 1){
-    return t.subarray(ESlice(stale_depth_,     t.shape(0) - stale_depth_),
-		      ESlice(1 + stale_depth_, t.shape(1) - 1 - stale_depth_),
-		      ESlice(stale_depth_,     t.shape(2) - stale_depth_));
+    return t.subarray(CSlice(stale_depth_,     t.shape(0) - stale_depth_),
+		      CSlice(1 + stale_depth_, t.shape(1) - 1 - stale_depth_),
+		      CSlice(stale_depth_,     t.shape(2) - stale_depth_));
   } else {
-    return t.subarray(ESlice(1 + stale_depth_, t.shape(0) - 1 - stale_depth_),
-		      ESlice(stale_depth_,     t.shape(1) - stale_depth_),
-		      ESlice(stale_depth_,     t.shape(2) - stale_depth_));
+    return t.subarray(CSlice(1 + stale_depth_, t.shape(0) - 1 - stale_depth_),
+		      CSlice(stale_depth_,     t.shape(1) - stale_depth_),
+		      CSlice(stale_depth_,     t.shape(2) - stale_depth_));
   }
 }
 
@@ -118,7 +118,7 @@ EFlt3DArray EnzoFieldArrayFactory::exclude_stale_cells_(EFlt3DArray &arr)
 	 2*stale_depth_ < arr.shape(0) && 2*stale_depth_ < arr.shape(1) &&
 	 2*stale_depth_ < arr.shape(2));
 
-  return arr.subarray(ESlice(stale_depth_, -stale_depth_),
-		      ESlice(stale_depth_, -stale_depth_),
-		      ESlice(stale_depth_, -stale_depth_));
+  return arr.subarray(CSlice(stale_depth_, -stale_depth_),
+		      CSlice(stale_depth_, -stale_depth_),
+		      CSlice(stale_depth_, -stale_depth_));
 }

@@ -25,6 +25,9 @@ typedef long                gr_int;  // Grackle int
 #  error "Must define CONFIG_PRECISION_[SINGLE|DOUBLE|QUAD]"
 #endif
 
+/// alias for EFlt3DArray
+typedef CelloArray<enzo_float,3> EFlt3DArray;
+
 /* #include "enzo_typedefs_30.hpp" */
 
 #endif /* ENZO_TYPEDEFS_HPP */

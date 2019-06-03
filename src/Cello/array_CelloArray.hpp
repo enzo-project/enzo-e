@@ -1,5 +1,9 @@
-#ifndef ENZO_ENZO_ARRAY_HPP
-#define ENZO_ENZO_ARRAY_HPP
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     array_CelloArray.hpp
+/// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
+/// @date     Thurs May 30 2019
+/// @brief    Declaration and implementation of the CelloArray class template
 
 #include <stdio.h>
 #include <cstddef>
@@ -7,65 +11,124 @@
 #include <limits>
 #include <memory>
 
-// EnzoArray
+#ifndef ARRAY_CELLO_ARRAY_HPP
+#define ARRAY_CELLO_ARRAY_HPP
+
+//----------------------------------------------------------------------
+
+// CelloArray
 // Like arrays in Athena++, the indices are listed in order of increasing
 //   access speed. Imagine a 3D array with shape {mz,my,mx} array(k,j,i) is
 //   equivalent to accessing index ((k*my + j)*mx + i) of the pointer
 // Dimensions are numbered with increasing indexing speed (dim0, dim1, ...)
-// Should not be confused with the EnzoArray in the original Enzo. (Maybe it
-//   it should be renamed CelloArray?)
 
-// Going to define an indexing type (borrowing naming convention from numpy)
-using intp = std::ptrdiff_t;
+//----------------------------------------------------------------------
+/// @typedef intp
+/// @brief  Array indexing type
+///
+/// This convention is borrowed from numpy. We set it the larger precision 
+/// integer type: int OR ptrdiff_t to guarantee int promotion
+/// (Alternatively, we could define it as int)
 
-class ESlice
+typedef std::conditional<sizeof(int) >= sizeof(std::ptrdiff_t),
+			   int, std::ptrdiff_t>::type intp;
+
+//----------------------------------------------------------------------
+/// @def    ARRAY_SIZE_MAX
+/// @brief  Maximum number of array elements
+///
+/// If we forced intp to always be int, then we'd use min(INT_MAX,PTRDIFF_MAX)
+
+#define ARRAY_SIZE_MAX PTRDIFF_MAX;
+
+//----------------------------------------------------------------------
+
+
+class CSlice
 {
-  // Represents a slice
-public:
-  // Exists only to allow for construction of arrays of slices
-  ESlice() : start(0), stop(0) {}
+  /// @class    CSlice
+  /// @ingroup  Array
+  /// @brief    [\ref Array] represents a slice along a single axis of a
+  ///           CelloArray
+  ///
+  /// To specify a specify a slice including indices from start through stop-1
+  /// call CSlice(start, stop). Negative indexing is also supported.
+  ///
+  /// To indicate that the slice should extend to the end of the axis, use:
+  /// - CSlice(start, NULL) OR CSlice(start, nullptr)
+  /// To indicate that the slice should extend from the start of the axis to
+  /// some known stop index, use:
+  /// - CSlice(0, stop) OR CSlice(NULL, stop) OR CSlice(nullptr, stop)
+  /// To indicate that the slice should extend over the full axis, use:
+  /// - CSlice(0, NULL), CSlice(NULL, NULL), CSlice(0, nullptr) OR
+  ///   CSlice(0, nullptr)
+  ///
+  /// 2 important usage notes:
+  /// 1. Due to the implementation defined nature of NULL, 0 can be used in
+  ///    place of NULL or nullptr. However the convention is to avoid this
+  /// 2. The class is equipped with a default constructor to allow for
+  ///    construction of arrays of CSlice. However, all default constructed
+  ///    instances MUST be assigned the value of non-default constructed
+  ///    instances before passing them to CelloArray.subarray (This is done to
+  ///    help catch mistakes)
 
-  // Include values from start through stop-1
-  ESlice(intp start, intp stop) : start(start), stop(stop)
+public:
+  
+  // ints should always be implicitly promoted
+  CSlice(intp start, intp stop)
+    : start(start), stop(stop), initialized(true)
   {
-    if ((start >= 0 && stop >= 0) || (start < 0 && stop < 0)){
-      ASSERT("ESlice", "start must be less than stop.", stop>start);
+    if ((start >= 0 && stop > 0) || (start < 0 && stop < 0)){
+      ASSERT("CSlice", "start must be less than stop.", stop>start);
     }
   }
 
-  ESlice(int start, int stop) : start((intp)start), stop((intp)stop)
+  // Exists only to allow construction of arrays of slices. The constructed
+  // instance must be assigned a non-default constructed value before use
+  CSlice() : start_(0), stop_(0), initialized_(false) {}
+
+  CSlice(intp start, std::nullptr_t stop)
+    : start_(start), stop_(0), initialized_(true)
+  { }
+
+  CSlice(std::nullptr_t start, intp stop)
+    : start_(0), stop_(stop), initialized_(true)
+  { }
+
+  CSlice(std::nullptr_t start, std::nullptr_t stop)
+    : start_(0), stop_(0), initialized_(true)
+  { }
+
+  // Gets the start index of the slice
+  intp get_start()
   {
-    if ((start >= 0 && stop >= 0) || (start < 0 && stop < 0)){
-      ASSERT("ESlice", "start must be less than stop.", stop>start);
-    }
+    ASSERT("CSlice", ("Default constructed CSlices cannot be used without "
+		      "explicit assignment of values."), intialized_);
+    return start_;
   }
 
-public:
-  // Locations of start and stop values
-  intp start;
-  intp stop;
+  /// Returns the stop index of the slice. If the stop index should be the
+  /// length of sliced axis, 0 is returned.
+  intp get_stop()
+  {
+    ASSERT("CSlice", ("Default constructed CSlices cannot be used without "
+		      "explicit assignment of values."), intialized_);
+    return stop_;
+  }
+    
+private:
+  /// start index
+  intp start_;
+  /// stop index (Should be 0 if the full length if the dimension will be used)
+  intp stop_;
+
+  /// true if constructed with non-default constructor OR if assigned values
+  /// from a non-default constructed instance.
+  bool initialized_;
 };
 
 
-// Defining the macro called CHECK_BOUNDS macro means that the bounds of an
-// EnzoArray, are checked everytime operator() is called
-template<typename T>
-bool check_bounds_(std::size_t *shape, T first) {return *shape > first;}
-template<typename T, typename... Rest>
-bool check_bounds_(std::size_t *shape, T first, Rest... rest){
-  //(get's unrolled at compile time)
-  return (*shape > first) && check_bounds_(++shape, rest...);
-}
 
-#ifdef CHECK_BOUNDS
-#  define CHECK_BOUND3D(shape, k, j, i)                                       \
-  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape,k,j,i));
-#  define CHECK_BOUNDND(shape, ARGS)                                          \
-  ASSERT("FixedDimArray_","Invalid index", check_bounds_(shape, ARGS...));
-#else
-#  define CHECK_BOUND3D(shape, k, j, i)   /* ... */
-#  define CHECK_BOUNDND(shape, ARGS)      /* ... */
-#endif
 
 
 
@@ -88,9 +151,9 @@ bool check_if_finite_(const T elem){
 
 
 
-// To define EnzoArray to have arbitrary dimensions we need to accept a variable
-// number of arguments to indicate shape during construction, to produce a
-// subarray, and to access elements. We specify the number of dimensions of the
+// To define CelloArray to have arbitrary dimensions it needs to accept a
+// variable number of arguments to indicate shape during construction, to
+// produce a subarray, and to access elements. The number of dimensions of the
 // array as a template argument and accept values with variadic template
 // arguments to check that the appropriate the number of values are specified
 // at compile time. In each case, we need to guaruntee that all arguments
@@ -155,7 +218,7 @@ inline void increment_outer_indices_(std::size_t D, intp *indices, intp *shape,
 template<typename T>
 class dataWrapper
 {
-  // tracks the underlying EnzoArray pointer and ownership of it
+  // tracks the underlying CelloArray pointer and ownership of it
 public:
 
   dataWrapper(T* data, bool owns_ptr) : data_(data), owns_ptr_(owns_ptr) { };
@@ -169,7 +232,7 @@ private:
 
 
 template<typename T, std::size_t D>
-class EnzoArray;
+class CelloArray;
 
 template<typename T, std::size_t D>
 class TempArray_;
@@ -218,12 +281,12 @@ public:
   // Produce a copy of the array.
   TempArray_<T,D> deepcopy();
   
-  // Returns a subarray with same D. Expects an instance of ESlice for each
-  // dimension. For a 3D EnzoArray, the function declaration might look like:
-  // EnzoArray<T,3> subarray(ESlice k_slice, ESlice j_slice, ESlice i_slice);
+  // Returns a subarray with same D. Expects an instance of CSlice for each
+  // dimension. For a 3D CelloArray, the function declaration might look like:
+  // CelloArray<T,3> subarray(CSlice k_slice, CSlice j_slice, CSlice i_slice);
   //
   // The Special Case of no arguments returns the full array
-  template<typename... Args, REQUIRE_TYPE(Args,ESlice)>
+  template<typename... Args, REQUIRE_TYPE(Args,CSlice)>
   TempArray_<T,D> subarray(Args... args);
 
   int shape(unsigned int dim){
@@ -303,19 +366,39 @@ public: // attributes
 };
 
 
-// Constructor of EnzoArray by allocating new data
+// check that the array shape is allowed (all positive and not too big)
+inline void check_array_shape_(intp shape[], std::size_t D)
+{
+  ASSERT("FixedDimArray_", "Positive dimensions are required.", shape[0]>0);
+  ASSERT1("FixedDimArray_", "The array cannot exceed %ld elements.",
+	  (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[0]) < 1);
+  intp cur_size = 1;
+
+  for (std::size_t i = 0; i+1 < D; i++){
+    cur_size *= shape[i];
+    ASSERT("FixedDimArray_", "Positive dimensions are required.",shape[i+1]>0);
+    ASSERT1("FixedDimArray_", "The array cannot exceed %ld elements.",
+	    (long)ARRAY_SIZE_MAX, (ARRAY_SIZE_MAX / shape[i+1]) < cur_size);
+  }
+}
+  
+
+
+// Constructor of CelloArray by allocating new data
 template<typename T, std::size_t D>
 template<typename... Args, class>
 FixedDimArray_<T,D>::FixedDimArray_(Args... args)
 {
   static_assert(D==sizeof...(args), "Incorrect number of dimensions");
   intp shape[D] = {((intp)args)...};
+  check_array_shape_(shape, D);
+
   intp size = 1;
   for (std::size_t i=0; i < D; i++){
-    ASSERT("FixedDimArray_", "Positive dimensions are required.", shape[i]>0);
     size *= shape[i];
   }
   T* data = new T[size](); // allocate and set entries to 0
+
   std::shared_ptr<dataWrapper<T>> dataMgr;
   dataMgr = std::make_shared<dataWrapper<T>>(data,true);
   init_helper_(dataMgr, shape, 0);
@@ -329,9 +412,8 @@ FixedDimArray_<T,D>::FixedDimArray_(T* array, Args... args)
 {
   static_assert(D==sizeof...(args), "Incorrect number of dimensions");
   intp shape[D] = {((intp)args)...};
-  for (std::size_t i=0; i < D; i++){
-    ASSERT("FixedDimArray_", "Positive dimensions are required.", shape[i]>0);
-  }
+  check_array_shape_(shape, D);
+
   std::shared_ptr<dataWrapper<T>> dataMgr;
   dataMgr = std::make_shared<dataWrapper<T>>(array,false);
   init_helper_(dataMgr, shape, 0);
@@ -341,13 +423,22 @@ FixedDimArray_<T,D>::FixedDimArray_(T* array, Args... args)
 
 // Prepares an array of slices that refer to absolute start and stop values
 // along each dimension. Also checks that the slices are valid
-inline void prep_slices_(const ESlice* slices, const intp shape[],
-			 const std::size_t D, ESlice* out_slices)
+inline void prep_slices_(const CSlice* slices, const intp shape[],
+			 const std::size_t D, CSlice* out_slices)
 {
    for (std::size_t i=0; i<D; i++){
-     intp start, stop;
-     start = (slices[i].start<0) ? slices[i].start+shape[i] : slices[i].start;
-     stop  = (slices[i].stop<0 ) ? slices[i].stop+shape[i]  : slices[i].stop;
+     intp start = slices[i].get_start();
+     if (start < 0){
+       start += shape[i]; // start was negative
+     }
+
+     intp stop = slices[i].get_stop();
+     if (stop <= 0){
+       // includes negative values of stop and case when it's equal to zero
+       // (which means that the slice should stop at shape[i])
+       stop += shape[i];
+     }
+
      ASSERT3("FixedDimArray_",
 	     "slice.start of %ld doesn't lie in bound of dim %ld of size %ld.",
 	     (long)slices[i].start, (long)i, (long)shape[i], start < shape[i]);
@@ -358,7 +449,7 @@ inline void prep_slices_(const ESlice* slices, const intp shape[],
 				"(%ld) must for dim %ld of size %ld."),
 	     (long)slices[i].start, (long)slices[i].stop, (long)i,
 	     (long)shape[i], stop>start);
-     out_slices[i] = ESlice(start,stop);
+     out_slices[i] = CSlice(start,stop);
   }
 }
 
@@ -372,8 +463,8 @@ TempArray_<T,D> FixedDimArray_<T,D>::subarray(Args... args){
   if (sizeof...(args) == 0) {
     subarray.init_helper_(dataMgr_,shape_,offset_);
   } else {
-    ESlice in_slices[] = {args...};
-    ESlice slices[D];
+    CSlice in_slices[] = {args...};
+    CSlice slices[D];
     prep_slices_(in_slices, shape_, D, slices);
 
     intp new_shape[D];
@@ -439,7 +530,7 @@ template<typename T, std::size_t D>
 class TempArray_ : public FixedDimArray_<T,D>
 {
   friend class FixedDimArray_<T,D>;
-  friend class EnzoArray<T,D>;
+  friend class CelloArray<T,D>;
 
 public:
   // Assigns to each element of *this the value of val
@@ -452,7 +543,7 @@ public:
     return *this;
   }
 
-  TempArray_<T,D>& operator=(const EnzoArray<T,D>& other){
+  TempArray_<T,D>& operator=(const CelloArray<T,D>& other){
     assign_helper_(other.offset_,other.stride_, other.shape_, other.data_);
     return *this;
   }
@@ -499,34 +590,34 @@ TempArray_<T,D>& TempArray_<T,D>::operator=(const T& val)
 
 
 template<typename T, std::size_t D>
-class EnzoArray : public FixedDimArray_<T,D>
+class CelloArray : public FixedDimArray_<T,D>
 {
 public:
-  // Default constructor. Constructs an unallocated EnzoArray.
-  EnzoArray() : FixedDimArray_<T,D>() { }
+  // Default constructor. Constructs an unallocated CelloArray.
+  CelloArray() : FixedDimArray_<T,D>() { }
 
   // Construct a numeric array that allocates its own data
   // args expects an integer for each dimension
   template<typename... Args, REQUIRE_INT(Args)>
-  EnzoArray(Args... args) : FixedDimArray_<T,D>(args...) { }
+  CelloArray(Args... args) : FixedDimArray_<T,D>(args...) { }
 
   // Construct a numeric array that wraps an existing pointer
   // args expects an integer for each dimension
   template<typename... Args, REQUIRE_INT(Args)>
-  EnzoArray(T* array, Args... args) : FixedDimArray_<T,D>(array, args...) { }
+  CelloArray(T* array, Args... args) : FixedDimArray_<T,D>(array, args...) { }
 
   // Copy constructor. Constructs a shallow copy of other.
-  EnzoArray(const EnzoArray<T,D>& other){
+  CelloArray(const CelloArray<T,D>& other){
     this->init_helper_(other.dataMgr_, other.shape_, other.offset_);
   }
 
   // Move constructor. Constructs the array with the contents of other
-  EnzoArray(EnzoArray<T,D>&& other) : EnzoArray() {swap(*this,other);}
-  EnzoArray(TempArray_<T,D>&& other) : EnzoArray() {swap(*this,other);}
+  CelloArray(CelloArray<T,D>&& other) : CelloArray() {swap(*this,other);}
+  CelloArray(TempArray_<T,D>&& other) : CelloArray() {swap(*this,other);}
 
   // Copy assignment operator. Makes *this a shallow copy of other. (Contents
   // of shallow copies and subarrays of *this are unaffected)
-  EnzoArray<T,D>& operator=(const EnzoArray<T,D>& other){
+  CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
     this->cleanup_helper_();
     init_helper_(other.dataMgr_, other.shape_, other.offset_);
     return *this;
@@ -534,14 +625,14 @@ public:
 
   // Move assignment operator. Replaces the contents of *this with those of
   // other. (Contents of shallow copies and subarrays of *this are unaffected)
-  EnzoArray<T,D>& operator=(EnzoArray<T,D>&& other) {
+  CelloArray<T,D>& operator=(CelloArray<T,D>&& other) {
     swap(*this,other);
     return *this;
   }
-  EnzoArray<T,D>& operator=(TempArray_<T,D>&& other) {
+  CelloArray<T,D>& operator=(TempArray_<T,D>&& other) {
     swap(*this,other);
     return *this;
   }
 };
 
-#endif /* ENZO_ENZO_ARRAY_HPP */
+#endif /* ARRAY_CELLO_ARRAY_HPP */

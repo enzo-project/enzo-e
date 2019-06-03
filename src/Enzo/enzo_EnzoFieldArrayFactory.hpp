@@ -9,15 +9,11 @@
 #ifndef ENZO_ENZO_FIELD_ARRAY_FACTORY_HPP
 #define ENZO_ENZO_FIELD_ARRAY_FACTORY_HPP
 
-/// alias for EnzoArray<enzo_float,3>
-typedef EnzoArray<enzo_float,3> EFlt3DArray;
-
-
 class EnzoFieldArrayFactory
 {
   /// @class    EnzoFieldArrayFactory
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulates construction of EnzoArrays from fields
+  /// @brief    [\ref Enzo] Encapsulates construction of CelloArrays from fields
 
 public:
 

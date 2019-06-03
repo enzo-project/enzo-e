@@ -48,11 +48,11 @@ protected: // functions
   /// block that corresponds to the left and right states. If one of the slices
   /// is not present in the current block, then the corresponding slice is not
   /// allocated
-  void prep_aligned_slices_(Block *block, ESlice **l_slice, ESlice **r_slice);
+  void prep_aligned_slices_(Block *block, CSlice **l_slice, CSlice **r_slice);
 
   /// sets the subarray of arr given by the slice along ax_aligned_ and the
   /// full extents of the other dimensions to val.
-  void initializer_helper_(ESlice &slice, enzo_float val, EFlt3DArray &arr);
+  void initializer_helper_(CSlice &slice, enzo_float val, EFlt3DArray &arr);
 
 private: // attributes
 

@@ -201,7 +201,6 @@ struct fluxes
 
 #include "enzo_IoEnzoBlock.hpp"
 
-#include "enzo_EnzoArray.hpp"
 #include "enzo_EnzoFieldArrayFactory.hpp"
 #include "enzo_EnzoPermutedCoordinates.hpp"
 #include "enzo_EnzoCenteredFieldRegistry.hpp"
