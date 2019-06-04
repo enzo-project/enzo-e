@@ -43,6 +43,14 @@ typedef std::conditional<sizeof(int) >= sizeof(std::ptrdiff_t),
 
 //----------------------------------------------------------------------
 
+// To allow the CSlice constructor to accept accept NULL, nullptr, and
+// arguments of type intp, we need to accept template arguments and perform a
+// a typecheck (there are ambiguities associated simple function overloading)
+// The following macro that checks if an argument type is allowed: 
+#define IS_ALLOWED_SLICE_ARGUMENT_TYPE(T)                                    \
+  (std::is_same<T, std::nullptr_t>::value ||                                 \
+   (std::is_integral<T>::value && std::is_signed<T>::value                   \
+    && sizeof(T)<=sizeof(intp)))
 
 class CSlice
 {
@@ -50,6 +58,10 @@ class CSlice
   /// @ingroup  Array
   /// @brief    [\ref Array] represents a slice along a single axis of a
   ///           CelloArray
+
+public:
+
+  /// Constructor for CSlice
   ///
   /// To specify a specify a slice including indices from start through stop-1
   /// call CSlice(start, stop). Negative indexing is also supported.
@@ -71,35 +83,35 @@ class CSlice
   ///    instances MUST be assigned the value of non-default constructed
   ///    instances before passing them to CelloArray.subarray (This is done to
   ///    help catch mistakes)
-
-public:
-  
-  // ints should always be implicitly promoted
-  CSlice(const intp start, const intp stop)
-    : start_(start), stop_(stop), initialized_(true)
+  template<class T1, class T2>
+  CSlice(T1 start, T2 stop)
   {
-    if ((start >= 0 && stop > 0) || (start < 0 && stop < 0)){
-      ASSERT("CSlice", "start must be less than stop.", stop>start);
+    // Check argument types (this could be done with std::enable_if in template
+    // declaration, but it would errors harder to understand)
+    static_assert(IS_ALLOWED_SLICE_ARGUMENT_TYPE(T1),
+		  "The first argument of CSlice must be NULL, nullptr, or be "
+		  "of a signed integral type that promotes to intp (which is "
+		  "the larger of int and std::ptrdiff_t)");
+    static_assert(IS_ALLOWED_SLICE_ARGUMENT_TYPE(T2),
+		  "The second argument of CSlice must be NULL, nullptr, or be "
+		  "of a signed integral type that promotes to intp (which is "
+		  "the larger of int and std::ptrdiff_t)");
+
+    start_ = (std::is_same<T1, std::nullptr_t>::value) ? 0 : (intp)start;
+    stop_  = (std::is_same<T2, std::nullptr_t>::value) ? 0 : (intp)stop;
+
+    if ((start_ >= 0 && stop_ > 0) || (start_ < 0 && stop_ < 0)){
+      // The following will only possibly raise an error if start and stop are
+      // integers of the the same sign
+      ASSERT("CSlice", "start must be less than stop.", stop_ > start_);
     }
+    initialized_ = (true);
   }
 
-  // Exists only to allow construction of arrays of slices. The constructed
-  // instance must be assigned a non-default constructed value before use
+  /// Default constructor. This only exists to exists to allow for arrays of
+  /// slices. All instances in the array must be assigned a non-default
+  /// constructed value before use
   CSlice() : start_(0), stop_(0), initialized_(false) {}
-
-  /*
-  CSlice(const intp start, std::nullptr_t stop)
-    : start_(start), stop_(0), initialized_(true)
-  { }
-
-  CSlice(std::nullptr_t start, const intp stop)
-    : start_(0), stop_(stop), initialized_(true)
-  { }
-
-  CSlice(std::nullptr_t start, std::nullptr_t stop)
-    : start_(0), stop_(0), initialized_(true)
-  { }
-  */
 
   // Gets the start index of the slice
   intp get_start() const
@@ -175,7 +187,7 @@ bool check_if_finite_(const T elem){
 // produce a subarray, and to access elements. The number of dimensions of the
 // array as a template argument and accept values with variadic template
 // arguments to check that the appropriate the number of values are specified
-// at compile time. In each case, we need to guaruntee that all arguments
+// at compile time. In each case, we need to guarantee that all arguments
 // are a given type. The solution is based on:
 //   - https://stackoverflow.com/a/28253503
 //   - https://stackoverflow.com/a/31767710
