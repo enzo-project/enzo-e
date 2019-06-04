@@ -3,7 +3,7 @@
 c=======================================================================
 c//////////////////////////  SUBROUTINE EULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine euler_dev(
+      subroutine euler(
      &            dslice, eslice, grslice, geslice,
      &            uslice, vslice, wslice, dx, diffcoef,
      &            idim, jdim, i1, i2, j1, j2, dt, 

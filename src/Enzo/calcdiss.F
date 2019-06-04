@@ -15,7 +15,7 @@
 c=======================================================================
 c/////////////////////////  SUBROUTINE CALCDIFF  \\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine calcdiss_dev(
+      subroutine calcdiss(
      &            dslice, eslice, uslice, v, w, pslice, dx, dy, dz,
      &            idim, jdim, kdim, i1, i2, j1, j2, k, nzz, idir,
      &            dimx, dimy, dimz, dt, gamma, idiff, iflatten,

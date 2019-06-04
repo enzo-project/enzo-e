@@ -3,7 +3,7 @@
 c=======================================================================
 c///////////////////////  SUBROUTINE INTVAR  \\\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine intvar_dev(
+      subroutine intvar(
      &     qslice, idim, i1, i2, isteep, steepen,
      &     iflatten, 
      &     flatten, c1, c2, c3, c4, c5, c6, char1, char2,

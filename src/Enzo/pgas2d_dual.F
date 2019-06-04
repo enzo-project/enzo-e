@@ -3,7 +3,7 @@
 c=======================================================================
 c//////////////////////  SUBROUTINE PGAS2D_DUAL  \\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine pgas2d_dual_dev
+      subroutine pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,
      &     idim, jdim, i1, i2, j1, j2, gamma, pmin)
@@ -70,7 +70,7 @@ c=======================================================================
 c
 c  compute the pressure
 
-C      print*, 'DEBUG_PRESSURE pgas2d_dual_dev.F'
+C      print*, 'DEBUG_PRESSURE pgas2d_dual.F'
 C      print*, 'DEBUG_PRESSURE i1 i2 ',i1,i2
 C      print*, 'DEBUG_PRESSURE j1 j2 ',j1,j2
 C      print*, 'DEBUG_PRESSURE idim jdim ',idim,jdim

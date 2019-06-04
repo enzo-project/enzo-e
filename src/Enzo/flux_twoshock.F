@@ -4,7 +4,7 @@
 c=======================================================================
 c//////////////////////  SUBROUTINE FLUX_TWOSHOCK \\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine flux_twoshock_dev(
+      subroutine flux_twoshock(
      $     dslice, eslice, geslice, uslice, vslice, wslice, dx,
      $     diffcoef, idim, jdim, i1, i2, j1, j2, dt, gamma, idiff,
      $     idual, eta1, ifallback,
@@ -452,7 +452,7 @@ c     &        write (6,*) grslice(i-1,j), grslice(i,j), grslice(i+1,j)
                 write(0,*) 'Falling back to a more diffusive Riemann',
      $               'solver, HLL'
                 print*, 'WARNING_MESSAGE'
-                call flux_hll_dev(dslice, eslice, geslice, 
+                call flux_hll(dslice, eslice, geslice, 
      $               uslice, vslice, wslice,
      $               dx, diffcoef, idim, jdim, i, i, j, j, dt, gamma,
      $               idiff, idual, eta1, ifallback,

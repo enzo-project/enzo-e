@@ -3,7 +3,7 @@
 c=======================================================================
 c////////////////////////  SUBROUTINE PGAS2D  \\\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine pgas2d_dev(
+      subroutine pgas2d(
      &     dslice, eslice, pslice, uslice, vslice,
      &     wslice, idim, jdim, i1, i2, j1, j2,
      &     gamma, pmin)

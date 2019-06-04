@@ -3,7 +3,7 @@
 c=======================================================================
 c///////////////////////  SUBROUTINE TWOSHOCK  \\\\\\\\\\\\\\\\\\\\\\\\\
 
-      subroutine twoshock_dev (
+      subroutine twoshock (
      &     dls, drs, pls, prs, uls, urs, 
      &     idim, jdim, i1, i2, j1, j2, dt, gamma, pmin, ipresfree,
      &     pbar, ubar, gravity, grslice, idual, eta1

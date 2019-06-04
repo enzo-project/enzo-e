@@ -3,7 +3,7 @@
 c=======================================================================
 c///////////////////////  SUBROUTINE INTEULER  \\\\\\\\\\\\\\\\\\\\\\\\\
 c
-      subroutine inteuler_dev(
+      subroutine inteuler(
      &     dslice, pslice, gravity, grslice, geslice,
      &     uslice, vslice, wslice, dxi, flatten,
      &     idim, jdim, i1, i2, j1, j2, idual, eta1, eta2,
@@ -331,13 +331,13 @@ c     2002).
 c
       if (iconsrec .eq. 1) then
 
-         call calc_eigen_dev(dslice(1,j), cs, i1, i2, idim, lem, rem)
+         call calc_eigen(dslice(1,j), cs, i1, i2, idim, lem, rem)
 c
 c     Compute left and right states for each variable
 c       (steepening, if requested, is only applied to density)
 c
  
-         call intprim_dev(dslice(1,j), uslice(1,j), vslice(1,j), 
+         call intprim(dslice(1,j), uslice(1,j), vslice(1,j), 
      &        wslice(1,j), pslice(1,j), 
      &        idim, i1, i2, isteep, steepen, iflatten, flatten, 
      &        iposrec, c1, c2, c3, c4, c5, c6, char1, char2, c0,
@@ -350,33 +350,33 @@ c
 
       else                      ! iconsrec
 
-         call intvar_dev(dslice(1,j), idim, i1, i2, isteep, steepen, 
+         call intvar(dslice(1,j), idim, i1, i2, isteep, steepen, 
      &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
      &        char1, char2, c0,
      &        tmp1, tmp2, tmp3, tmp4, dla, dra, dl0, dr0)
 c
-         call intvar_dev(pslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+         call intvar(pslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
      &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
      &        char1, char2, c0,
      &        dp, pl, pr, p6, pla, pra, pl0, pr0)
 c
-         call intvar_dev(uslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+         call intvar(uslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
      &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
      &        char1, char2, c0,
      &        du, ul, ur, u6, ula, ura, ul0, ur0)
 c
-         call intvar_dev(vslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+         call intvar(vslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
      &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
      &        char1, char2, c0,
      &        dv, vl, vr, v6, vla, vra, vl0, vr0)
 c
-         call intvar_dev(wslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+         call intvar(wslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
      &        iflatten, flatten, c1, c2, c3, c4, c5, c6, 
      &        char1, char2, c0,
      &        dw, wl, wr, w6, wla, wra, wl0, wr0)
 
          if (iposrec .eq. 1) then
-            call intpos_dev(dslice(1,j), uslice(1,j), pslice(1,j), 
+            call intpos(dslice(1,j), uslice(1,j), pslice(1,j), 
      &           idim, i1, i2, dxdt2, gamma,
      &           tmp1, tmp2, tmp3, dla, dra, dl0, dr0,
      &           du, ul, ur, ula, ura, ul0, ur0,
@@ -386,12 +386,12 @@ c
       endif                     ! iconsrec
 c
       if (idual .eq. 1)
-     & call intvar_dev(geslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
+     & call intvar(geslice(1,j), idim, i1, i2, 0_IKIND, steepen, 
      &            iflatten, flatten, c1, c2, c3, c4, c5, c6, char1, 
      &            char2, c0,dge, gel, ger, ge6, gela, gera, gel0, ger0)
 c
       do ic=1,ncolor
-        call intvar_dev(colslice(1,j,ic), idim, i1,i2, 0_IKIND, steepen, 
+        call intvar(colslice(1,j,ic), idim, i1,i2, 0_IKIND, steepen, 
      &            iflatten, flatten, c1, c2, c3, c4, c5, c6, char1, 
      &            char2, c0,dcol(1,ic), coll(1,ic), colr(1,ic), 
      &            col6(1,ic), colla(1,ic), colra(1,ic), coll0(1,ic), 

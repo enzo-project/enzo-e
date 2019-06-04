@@ -210,12 +210,12 @@ c
 c  Compute the pressure on a slice
 c
       if (idual .eq. 1) then
-         call pgas2d_dual_dev(
+         call pgas2d_dual(
      &        dslice, eslice, geslice, pslice, 
      &        uslice, vslice, wslice, eta1, eta2,
      &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
       else
-         call pgas2d_dev(
+         call pgas2d(
      &        dslice, eslice, pslice, uslice, vslice, wslice,
      &        kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
       endif
@@ -223,7 +223,7 @@ c
 c  If requested, compute diffusion and slope flattening coefficients
 c
       if (idiff .ne. 0 .or. iflatten .ne. 0)
-     &     call calcdiss_dev(
+     &     call calcdiss(
      &     dslice, eslice, uslice, u, v, pslice, dz, dx, dy,
      &     kn, in, jn, ks, ke, i1, i2, j, nyz, zsweep,
      &     in, jn, kn, dt, gamma, idiff, iflatten,
@@ -232,7 +232,7 @@ c
 c     
 c  Compute Eulerian left and right states at zone edges via interpolation
 c
-      call inteuler_dev(
+      call inteuler(
      &     dslice, pslice, gravity, grslice, geslice,
      &     uslice, vslice, wslice, dz, flatten,
      &     kn, in, ks, ke, i1, i2, idual, eta1, eta2,
@@ -246,7 +246,7 @@ c
 c
 c  Compute (Lagrangian part of the) Riemann problem at each zone boundary
 c
-      call twoshock_dev
+      call twoshock
      &     (
      &            dls, drs, pls, prs, uls, urs, 
      &            kn, in, ks, ke+1, i1, i2, 
@@ -257,7 +257,7 @@ c
 
       iriemannfallback = 1
       
-      CALL flux_twoshock_dev (
+      CALL flux_twoshock (
      &     dslice, eslice, geslice, uslice, vslice, wslice,
      &     dz, diffcoef, 
      &     kn,in,
@@ -271,7 +271,7 @@ c
 c
 c  Compute Eulerian fluxes and update zones-centered quantities
 c
-      call euler_dev   (
+      call euler   (
      &     dslice, eslice, grslice, geslice,
      &     uslice, vslice, wslice, dz, diffcoef,
      &     kn, in, ks, ke, i1, i2, dt, 
@@ -282,7 +282,7 @@ c
 c  If necessary, recompute the pressure to correctly set ge and e
 c
       if (idual .eq. 1)
-     &     call pgas2d_dual_dev
+     &     call pgas2d_dual
      &     (dslice, eslice, geslice, pslice, 
      &     uslice, vslice, wslice, eta1, eta2,
      &     kn, in, ks-3, ke+3, i1, i2, gamma, pmin)
