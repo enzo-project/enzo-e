@@ -32,13 +32,13 @@ public: // interface
 	    i_axis, i_axis>-1 && i_axis<3);
   }
 
-  // Returns the code of the axis id associated with each direction
-  // 0 <--> x, 1 <--> y, 2 <--> z 
+  /// Returns the code of the axis id associated with each direction
+  /// 0 <--> x, 1 <--> y, 2 <--> z 
   int i_axis() const { return i_axis_; }
   int j_axis() const { return (i_axis_+1)%3; }
   int k_axis() const { return (i_axis_+2)%3; }
 
-  // calculates the components of the i, j, and k unit vectors
+  /// calculates the components of the i, j, and k unit vectors
   void i_unit_vector(int &i_x, int &i_y, int &i_z) const {
     unit_vector_comp_(i_axis(), i_x, i_y, i_z);
   }
@@ -49,43 +49,40 @@ public: // interface
     unit_vector_comp_(k_axis(), k_x, k_y, k_z);
   }
 
-  // Returns the subarray of array using the offset start values indicated
-  // using the i,j,k coordinate system represented by this instance
-  //
-  // This method assumes that spatial dimensions of array are orderred as:
-  // (z-axis, y-axis, x-axis)
-  //
-  // Examples
-  // --------
-  //   EnzoPermutedCoordinates(1).left_edge_offset(array, 3, 4, 1) forwards to:
-  //     array.subarray(CSlice(4, array.shape(0)),
-  //                    CSlice(1, array.shape(1)),
-  //                    CSlice(3, array.shape(2)))
-  //
-  //   EnzoPermutedCoordinates(2).left_edge_offset(array, 0, 1, 2) forwards to:
-  //     array.subarray(CSlice(2, array.shape(0)),
-  //                    CSlice(0, array.shape(1)),
-  //                    CSlice(1, array.shape(2)))
+  /// Returns the subarray of array using the offset start values indicated
+  /// using the i,j,k coordinate system represented by this instance
+  ///
+  /// This method assumes that spatial dimensions of array are orderred as:
+  /// (z-axis, y-axis, x-axis)
+  ///
+  /// Examples
+  /// --------
+  ///   EnzoPermutedCoordinates(1).left_edge_offset(array, 3, 4, 1) forwards to:
+  ///     array.subarray(CSlice(4, array.shape(0)),
+  ///                    CSlice(1, array.shape(1)),
+  ///                    CSlice(3, array.shape(2)))
+  ///
+  ///   EnzoPermutedCoordinates(2).left_edge_offset(array, 0, 1, 2) forwards to:
+  ///     array.subarray(CSlice(2, array.shape(0)),
+  ///                    CSlice(0, array.shape(1)),
+  ///                    CSlice(1, array.shape(2)))
   EFlt3DArray left_edge_offset(EFlt3DArray &array, int kstart, int jstart,
 			       int istart) const
   {
-    int xstart, ystart, zstart;
-    if (i_axis() == 0){
-      xstart = istart;
-      ystart = jstart;
-      zstart = kstart;
-    } else if (i_axis() == 1){
-      ystart = istart;
-      zstart = jstart;
-      xstart = kstart;
-    } else {
-      zstart = istart;
-      xstart = jstart;
-      ystart = kstart;
-    }
-    return array.subarray(CSlice(zstart, array.shape(0)),
-			  CSlice(ystart, array.shape(1)),
-			  CSlice(xstart, array.shape(2)));
+    return get_subarray(array, CSlice(kstart, nullptr), CSlice(jstart, nullptr),
+			CSlice(istart,nullptr));
+  }
+
+  /// Returns the subarray of array for slices specified along the k-, j-,
+  /// and i- axes using the i,j,k coordinate system represented by this instance
+  EFlt3DArray get_subarray(EFlt3DArray &array, CSlice k_slice, CSlice j_slice,
+			   CSlice i_slice) const
+  {
+    CSlice slices[3];
+    slices[2 - i_axis()] = i_slice;
+    slices[2 - j_axis()] = j_slice;
+    slices[2 - k_axis()] = k_slice;
+    return array.subarray(slices[0], slices[1], slices[2]);
   }
 
 private:
