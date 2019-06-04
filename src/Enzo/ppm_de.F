@@ -183,15 +183,9 @@ c$DOACROSS LOCAL(k)
      &             tmp(1+ms*16),tmp(1+ms*17),tmp(1+ms*18),tmp(1+ms*19),
      &             tmp(1+ms*20),tmp(1+ms*21),tmp(1+ms*22),tmp(1+ms*23),
      &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
-#ifdef NEW_PPM
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
      &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
-#else
-     &             tmp(1+ms*28),tmp(1+ms*29),
-     &             tmp(1+ms*(30+0*ncolor)),tmp(1+ms*(30+1*ncolor)), 
-     &             tmp(1+ms*(30+2*ncolor)),tmp(1+ms*(30+3*ncolor))
-#endif            
      &             )
            enddo
         endif
@@ -225,15 +219,9 @@ c$DOACROSS LOCAL(i)
      &             tmp(1+ms*16),tmp(1+ms*17),tmp(1+ms*18),tmp(1+ms*19),
      &             tmp(1+ms*20),tmp(1+ms*21),tmp(1+ms*22),tmp(1+ms*23),
      &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
-#ifdef NEW_PPM
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
      &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
-#else
-     &             tmp(1+ms*28),tmp(1+ms*29),
-     &             tmp(1+ms*(30+0*ncolor)),tmp(1+ms*(30+1*ncolor)), 
-     &             tmp(1+ms*(30+2*ncolor)),tmp(1+ms*(30+3*ncolor))
-#endif            
      &             )
            enddo
 c     
@@ -268,15 +256,9 @@ c$DOACROSS LOCAL(j)
      &             tmp(1+ms*16),tmp(1+ms*17),tmp(1+ms*18),tmp(1+ms*19),
      &             tmp(1+ms*20),tmp(1+ms*21),tmp(1+ms*22),tmp(1+ms*23),
      &             tmp(1+ms*24),tmp(1+ms*25),tmp(1+ms*26),tmp(1+ms*27),
-#ifdef NEW_PPM
      &             tmp(1+ms*28),tmp(1+ms*29),tmp(1+ms*30),
      &             tmp(1+ms*(31+0*ncolor)),tmp(1+ms*(31+1*ncolor)), 
      &             tmp(1+ms*(31+2*ncolor)),tmp(1+ms*(31+3*ncolor))
-#else
-     &             tmp(1+ms*28),tmp(1+ms*29),
-     &             tmp(1+ms*(30+0*ncolor)),tmp(1+ms*(30+1*ncolor)), 
-     &             tmp(1+ms*(30+2*ncolor)),tmp(1+ms*(30+3*ncolor))
-#endif            
      &             )
            enddo
         endif
