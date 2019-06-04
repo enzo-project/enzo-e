@@ -308,18 +308,27 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 
 // Compute the face-centered B-field component along the ith dimension
 //
-// Bnew_i(k, j, i+1/2) = Bold_i(k, j, i+1/2) -
-//     dt/dj*(E_k(    k,j+1/2,i+1/2) - E_k(    k,j-1/2,i+1/2) +
-//     dt/dk*(E_j(k+1/2,    j,i+1/2) - E_j(k-1/2,    j,i+1/2)
+// Bnew_i(k, j, i-1/2) = Bold_i(k, j, i-1/2) -
+//     dt/dj*(E_k(    k,j+1/2,i-1/2) - E_k(    k,j-1/2,i-1/2) +
+//     dt/dk*(E_j(k+1/2,    j,i-1/2) - E_j(k-1/2,    j,i-1/2)
 // [The positioning of dt/dj with respect to E_k is correct]
 //
-// Bnew_i(k, j, i-1/2) =
-//   Bold_i(k, j, i-1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
+// Bnew_i(k, j, i+1/2) =
+//   Bold_i(k, j, i+1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
 //
 // Assuming 3D:
 //   E_k_term(k,j,i+1/2) = dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
 //   E_j_term(k,j,i+1/2) = dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
+// 
+// We define: (notation DIFFERENT from compute_edge_efield & compute_edge_)
+//   ej_Lk(k,j,i) = E_j(k-1/2,     j, i+1/2) 
+//   ej_Rk(k,j,i) = E_j(k+1/2,     j, i+1/2)
+//   ek_Lj(k,j,i) = E_k(    k, j-1/2, i+1/2) 
+//   ek_Rj(k,j,i) = E_k(    k, j+1/2, i+1/2)
 //
+// Then:
+//   E_k_term(k,j,i+1/2) = dt/dj*(ek_Rj(k,j,i) - ek_Lj(k,j,i))
+//   E_j_term(k,j,i+1/2) = dt/dk*(ej_Rk(k,j,i) - ej_Lk(k,j,i))
 void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 					     Grouping &efield_group,
 					     Grouping &cur_bfieldi_group,
@@ -327,43 +336,74 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 					     enzo_float dt)
 {
   EnzoPermutedCoordinates coord(dim);
-  // determine components of j and k unit vectors:
-  int j_x, j_y, j_z, k_x, k_y, k_z;
-  coord.j_unit_vector(j_x, j_y, j_z);
-  coord.k_unit_vector(k_x, k_y, k_z);
 
-  // determine if grid is 2D or 3D AND compute the ratios of dt to the 
-  // widths of cells along j and k directions
+  // compute the ratios of dt to the widths of cells along j and k directions
   EnzoBlock *enzo_block = enzo::block(block);
   enzo_float dtdj = dt/enzo_block->CellWidth[coord.j_axis()];
   enzo_float dtdk = dt/enzo_block->CellWidth[coord.k_axis()];
 
-  // Load interface bfields
+  // The following comments all assume that we are talking about unstaled
+  // region (and that we have dropped all staled cells)
   EnzoFieldArrayFactory array_factory(block);
-  EFlt3DArray cur_bfield, out_bfield;
-  cur_bfield = array_factory.interior_bfieldi(cur_bfieldi_group, dim);
-  out_bfield = array_factory.interior_bfieldi(out_bfieldi_group, dim);
-
-  // Load edge centered efields
-  EFlt3DArray E_j, E_k;
+  
+  // Load edge centered efields 
+  EFlt3DArray E_j, ej_Lk, ej_Rk, E_k, ek_Lj, ek_Rj;
   E_j = array_factory.from_grouping(efield_group, "efield", coord.j_axis());
   E_k = array_factory.from_grouping(efield_group, "efield", coord.k_axis());
 
+  // Load interface bfields field (includes exterior faces)
+  EFlt3DArray cur_bfield, bcur, out_bfield, bout;
+  cur_bfield = array_factory.from_grouping(cur_bfieldi_group, "bfield", dim);
+  out_bfield = array_factory.from_grouping(out_bfieldi_group, "bfield", dim);
+
+  // Now to take slices. If the unstaled region of the grid has shape has shape
+  // (mk, mj, mi) then:
+  //   - E_j has shape (mk-1, mj, mi-1)
+  //       ej_Lk includes k=1/2 up to (but not including) k=mk-3/2
+  //       ej_Rk includes k=3/2 up to (but not including) k=mk-1/2
+  //   - E_k has shape (mk, mj-1, mi-1)
+  //       ek_Lj includes j=1/2 up to (but not including) j=mj-3/2
+  //       ek_Rj includes j=3/2 up to (but not including) j=mj-1/2
+  //   - cur_bfield and out_bfield each have shape (mk, mj, mi+1)
+  //       bnew and bout only include interior faces
+  //
+  // Also need to omit outermost layer of cell-centered vals
+  CSlice full_ax(nullptr, nullptr); // includes full axis
+  CSlice inner_cent(1,-1);          // excludes outermost cell-centered values
+
+  ej_Lk = coord.get_subarray(E_j, CSlice(0,      -1), inner_cent, full_ax);
+  ej_Rk = coord.get_subarray(E_j, CSlice(1, nullptr), inner_cent, full_ax);
+  ek_Lj = coord.get_subarray(E_k, inner_cent, CSlice(0,      -1), full_ax);
+  ek_Rj = coord.get_subarray(E_k, inner_cent, CSlice(1, nullptr), full_ax);
+  bcur = coord.get_subarray(cur_bfield, inner_cent, inner_cent, CSlice(1,-1));
+  bout = coord.get_subarray(out_bfield, inner_cent, inner_cent, CSlice(1,-1));
+  
+
+  /*// sanity check
+  for (std::size_t i = 0; i<3; i++){
+    EFlt3DArray arrs[5] = {out_bfield, ej_Lk, ej_Rk, ek_Lj, ek_Rj};
+    for (int j = 0; j<5; j++) {
+      ASSERT("EnzoConstrainedTransport",
+	     "cur_bfield, out_bfield, ej_Lk, ej_Rk, ek_Lj, ek_Rj should all "
+	     "have the same shape", cur_bfield.shape(i) == arrs[j].shape(i));
+    }
+    }*/
+
   // We could simplify this iteration by using subarrays - However, it would be
   // more complicated
-  for (int iz=j_z+k_z; iz<out_bfield.shape(0)-j_z-k_z; iz++) {
-    for (int iy=j_y+k_y; iy<out_bfield.shape(1)-j_y-k_y; iy++) {
-      for (int ix=j_x+k_x; ix<out_bfield.shape(2)-j_x-k_x; ix++) {
+  for (int iz=0; iz<bout.shape(0); iz++) {
+    for (int iy=0; iy<bout.shape(1); iy++) {
+      for (int ix=0; ix<bout.shape(2); ix++) {
 
 	// E_k_term(k,j,i+1/2) = dt/dj*(E_k(k,j+1/2,i+1/2) - E_k(k,j-1/2,i+1/2))
-	enzo_float E_k_term = dtdj*(E_k(iz,iy,ix) - E_k(iz-j_z,iy-j_y,ix-j_x));
+	enzo_float E_k_term = dtdj*(ek_Rj(iz,iy,ix) - ek_Lj(iz,iy,ix));
 
 	// E_j_term(k,j,i+1/2) = dt/dk*(E_j(k+1/2,j,i+1/2) - E_j(k-1/2,j,i+1/2))
-	enzo_float E_j_term = dtdk*(E_j(iz,iy,ix) - E_j(iz-k_z,iy-k_y,ix-k_x)); 
+	enzo_float E_j_term = dtdk*(ej_Rk(iz,iy,ix) - ej_Lk(iz,iy,ix)); 
 
-	// Bnew_i(k, j, i-1/2) =
-	//   Bold_i(k, j, i-1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
-	out_bfield(iz,iy,ix) = cur_bfield(iz,iy,ix) - E_k_term + E_j_term;
+	// Bnew_i(k, j, i+1/2) =
+	//   Bold_i(k, j, i+1/2) - E_k_term(k,j,i+1/2) + E_j_term(k,j,i+1/2)
+	bout(iz,iy,ix) = bcur(iz,iy,ix) - E_k_term + E_j_term;
       }
     }
   }
