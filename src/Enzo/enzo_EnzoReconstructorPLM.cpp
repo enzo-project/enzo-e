@@ -118,11 +118,12 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 						  Grouping &priml_group,
 						  Grouping &primr_group,
 						  int dim,
-						  EnzoEquationOfState *eos)
+						  EnzoEquationOfState *eos,
+						  int stale_depth)
 {
   std::vector<std::string> group_names = this->group_names_;
 
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EnzoPermutedCoordinates coord(dim);
 
   // unecessary values are computed for the inside faces of outermost ghost zone

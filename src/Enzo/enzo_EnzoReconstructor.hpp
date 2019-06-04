@@ -60,10 +60,13 @@ public: // interface
   /// @param dim Dimension along which to reconstruct interface values. Values
   ///  of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
   /// @param eos Instance of the fluid's EnzoEquationOfState object
+  /// @param stale_depth indicates the current stale_depth for the supplied
+  ///  cell-centered quantities
   virtual void reconstruct_interface (Block *block, Grouping &prim_group,
 				      Grouping &priml_group,
 				      Grouping &primr_group, int dim,
-				      EnzoEquationOfState *eos)=0;
+				      EnzoEquationOfState *eos,
+				      int stale_depth)=0;
 
   /// The rate amount by which the stale_depth increases after the current
   /// reconstructor is used to update the fluid over a (partial or full)

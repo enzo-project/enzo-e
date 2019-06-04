@@ -147,7 +147,8 @@ protected: // methods
 		     Grouping &cur_bfieldi_group, Grouping &priml_group,
 		     Grouping &primr_group, Grouping &flux_group,
 		     Grouping &consl_group, Grouping &consr_group, 
-		     Grouping &weight_group, EnzoReconstructor &reconstructor);
+		     Grouping &weight_group, EnzoReconstructor &reconstructor,
+		     int stale_depth);
 
   // compute the Electric fields using the fluxes and cell-centered
   // primitives
@@ -155,13 +156,14 @@ protected: // methods
 			Grouping &yflux_group, Grouping &zflux_group,
 			std::string center_efield_name, Grouping &efield_group,
 			Grouping &weight_group,
-			EnzoConstrainedTransport &ct);
+			EnzoConstrainedTransport &ct, int stale_depth);
 
   // adds flux divergence to the fields listed in conserved_group_ and stores
   // the results in out_cons_group (this can be the same as conserved_group_)
   void update_quantities_(Block *block, Grouping &xflux_group,
 			  Grouping &yflux_group, Grouping &zflux_group,
-			  Grouping &out_cons_group, double dt);
+			  Grouping &out_cons_group, double dt,
+			  int stale_depth);
 
   // allocate the temporary fields needed for scratch space and store their ids
   // efield_ids refer to efields centered on the edges of cells

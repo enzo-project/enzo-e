@@ -213,15 +213,16 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
 
-    // not sure that the following does anything
-    //EnzoFieldArrayFactory array_factory(block);
-
     double dt = block->dt();
 
     eos_->conservative_from_primitive (block, *primitive_group_,
 				       *conserved_group_);
-    
-    //test
+
+    // stale_depth indicates the number of field entries from the outermost
+    // field value that the region including "stale" values (need to be
+    // refreshed) extends over.
+    int stale_depth = 0;
+
     // repeat the following twice (for half time-step and full time-step)
     for (int i=0;i<2;i++){
       double cur_dt;
@@ -250,21 +251,24 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // Compute flux along each dimension
       compute_flux_(block, 0, *cur_cons_group, *cur_bfieldi_group, priml_group,
 		    primr_group, xflux_group, consl_group, consr_group,
-		    weight_group, *reconstructor);
+		    weight_group, *reconstructor, stale_depth);
       compute_flux_(block, 1, *cur_cons_group, *cur_bfieldi_group, priml_group,
 		    primr_group, yflux_group, consl_group, consr_group,
-		    weight_group, *reconstructor);
+		    weight_group, *reconstructor, stale_depth);
       compute_flux_(block, 2, *cur_cons_group, *cur_bfieldi_group, priml_group,
 		    primr_group, zflux_group, consl_group, consr_group,
-		    weight_group, *reconstructor);
-      
+		    weight_group, *reconstructor, stale_depth);
+      // increment the stale_depth
+      stale_depth+=reconstructor->immediate_staling_rate();
+
       // Compute_efields
       //   - The first time, this implictly use the cell-centered primitives
       //     computed before the half timestep
       //   - The second time, it uses uses the the cell-centered primitives
       //     computed after the half timestep
       compute_efields_(block, xflux_group, yflux_group, zflux_group,
-		       center_efield_name, efield_group, weight_group, ct);
+		       center_efield_name, efield_group, weight_group, ct,
+		       stale_depth);
 
       // Add source terms - this can happen after adding the flux divergence,
       // but then the code placing a floor on the total energy must be moved.
@@ -272,7 +276,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       
       for (int dim = 0; dim<3; dim++){
 	ct.update_bfield(block, dim, efield_group, *bfieldi_group_,
-			 *out_bfieldi_group, cur_dt);
+			 *out_bfieldi_group, cur_dt, stale_depth);
       }
 
       // Add other source terms?
@@ -281,19 +285,21 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // Finally, update cell-centered B-field 
       for (int dim = 0; dim<3; dim++){
 	ct.compute_center_bfield(block, dim, *out_cons_group,
-				 *out_bfieldi_group);
+				 *out_bfieldi_group, stale_depth);
       }
 
       // Update quantities - add flux divergence
       update_quantities_(block, xflux_group, yflux_group, zflux_group,
-			 *out_cons_group, cur_dt);
+			 *out_cons_group, cur_dt,stale_depth);
+
+      // increment stale_depth since the inner values have been updated
+      // but the outer values have not
+      stale_depth+=reconstructor->delayed_staling_rate();
 
       // Compute the primitive Quantites with Equation of State
       eos_->primitive_from_conservative (block, *out_cons_group,
-					 *primitive_group_);
+					 *primitive_group_, stale_depth);
     }
-
-    //ASSERT("EnzoMethodMHDVlct","Early Exit",false);
 
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
@@ -317,16 +323,22 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 				      Grouping &consl_group,
 				      Grouping &consr_group,
 				      Grouping &weight_group,
-				      EnzoReconstructor &reconstructor)
+				      EnzoReconstructor &reconstructor,
+				      int stale_depth)
 {
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(block, *primitive_group_, priml_group,
-				      primr_group, dim, eos_);
-  
+				      primr_group, dim, eos_, stale_depth);
+
+  // We temporarily increment the stale_depth for the rest of this calculation
+  // here. We can't fully increment otherwise it will screw up the
+  // reconstruction along other dimensions
+  int cur_stale_depth = stale_depth + reconstructor.immediate_staling_rate();
+
   // Need to set the component of reconstructed B-field along dim, equal to
   // the corresponding longitudinal component of the B-field tracked at cell
   // interfaces (should probably be handled internally by reconstructor)
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block, cur_stale_depth);
   EFlt3DArray temp,bfield, l_bfield,r_bfield;
   bfield = array_factory.interior_bfieldi(cur_bfieldi_group, dim);
   l_bfield = array_factory.reconstructed_field(priml_group, "bfield", dim, dim);
@@ -344,12 +356,14 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
   }
 
   // Calculate reconstructed conserved values
-  eos_->conservative_from_primitive(block,priml_group,consl_group);
-  eos_->conservative_from_primitive(block,primr_group,consr_group);
+  eos_->conservative_from_primitive(block,priml_group,consl_group,
+				    stale_depth, dim);
+  eos_->conservative_from_primitive(block,primr_group,consr_group,
+				    stale_depth, dim);
 
   // Next, compute the fluxes
   riemann_solver_->solve(block, priml_group, primr_group, flux_group,
-			 consl_group, consr_group, dim, eos_);
+			 consl_group, consr_group, dim, eos_, cur_stale_depth);
   
   // Finally, need to handle weights
   //  - Currently, weight is set to 1.0 if upwind is in positive direction of
@@ -392,14 +406,16 @@ void EnzoMethodMHDVlct::compute_efields_(Block *block, Grouping &xflux_group,
 					 std::string center_efield_name,
 					 Grouping &efield_group,
 					 Grouping &weight_group,
-					 EnzoConstrainedTransport &ct)
+					 EnzoConstrainedTransport &ct,
+					 int stale_depth)
 {
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
   // Maybe the following should be handled internally by ct?
   for (int i = 0; i < 3; i++){
-    ct.compute_center_efield (block, i, center_efield_name, *primitive_group_);
+    ct.compute_center_efield (block, i, center_efield_name, *primitive_group_,
+			      stale_depth);
     Grouping *jflux_group;
     Grouping *kflux_group;
     if (i == 0){
@@ -415,7 +431,7 @@ void EnzoMethodMHDVlct::compute_efields_(Block *block, Grouping &xflux_group,
 
     ct.compute_edge_efield (block, i, center_efield_name, efield_group,
 			    *jflux_group, *kflux_group, *primitive_group_,
-			    weight_group);
+			    weight_group, stale_depth);
   }
 }
 
@@ -424,17 +440,18 @@ void EnzoMethodMHDVlct::compute_efields_(Block *block, Grouping &xflux_group,
 void EnzoMethodMHDVlct::update_quantities_(Block *block, Grouping &xflux_group,
 					   Grouping &yflux_group,
 					   Grouping &zflux_group,
-					   Grouping &out_cons_group, double dt)
+					   Grouping &out_cons_group, double dt,
+					   int stale_depth)
 {
   // For now, not having density floor affect momentum or total energy density
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
   // cell-centered grid dimensions
-  int mx = enzo_block->GridDimension[0];
-  int my = enzo_block->GridDimension[1];
-  int mz = enzo_block->GridDimension[2];
+  int mx = enzo_block->GridDimension[0]-2*stale_depth;
+  int my = enzo_block->GridDimension[1]-2*stale_depth;
+  int mz = enzo_block->GridDimension[2]-2*stale_depth;
 
   // widths of cells
   enzo_float dtdx = dt/enzo_block->CellWidth[0];
@@ -493,7 +510,7 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block, Grouping &xflux_group,
     }
   }
   // Place floor on energy
-  eos_->apply_floor_to_energy(block, out_cons_group);
+  eos_->apply_floor_to_energy(block, out_cons_group, stale_depth+1);
 }
 
 //----------------------------------------------------------------------

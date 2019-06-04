@@ -47,15 +47,16 @@ public: // interface
 
   /// Computes thermal pressure
   void compute_pressure(Block *block, Grouping &cons_group,
-			Grouping &prim_group);
+			Grouping &prim_group, int stale_depth);
 
   /// Converts the cell-centered conservative quantities to primitive quantites
   void primitive_from_conservative(Block *block, Grouping &cons_group,
-				   Grouping &prim_group);
+				   Grouping &prim_group, int stale_depth);
 
   /// Converts the cell-centered primitive quantities to conservative quantites
   void conservative_from_primitive(Block *block, Grouping &prim_group,
-				   Grouping &cons_group);
+				   Grouping &cons_group, int stale_depth,
+				   int reconstructed_axis);
 
   /// returns the density floor
   enzo_float get_density_floor() { return density_floor_; }
@@ -64,7 +65,8 @@ public: // interface
   enzo_float get_pressure_floor() { return pressure_floor_; }
 
   /// apply the pressure floor to total_energy field
-  void apply_floor_to_energy(Block *block, Grouping &cons_group);
+  void apply_floor_to_energy(Block *block, Grouping &cons_group,
+			     int stale_depth);
 
   /// returns whether the EOS is barotropic
   bool is_barotropic() { return false; }
@@ -78,11 +80,21 @@ public: // interface
   
 
 private:
+  /// Helper function to retrieve a field array when it is possible that a
+  /// field stores reconstructed data
+  EFlt3DArray retrieve_field_(EnzoFieldArrayFactory &array_factory,
+			      Grouping &group, std::string group_name,
+			      int index, int reconstructed_axis);
+  
   /// Copies entries of the passively advected fields included by origin_group
   /// to the corresponding entries of the fields included in destination_group
+  /// reconstructed_axis = -1 means that internal field shape data can be
+  /// truested. Values of 0, 1, or 2 mean that the field stores reconstructed
+  /// values along the x, y, or z axis and that it is actually face-centered
   void copy_passively_advected_fields_(EnzoFieldArrayFactory &array_factory,
 				       Grouping &origin_group,
-				       Grouping &destination_group);
+				       Grouping &destination_group,
+				       int reconstructed_axis = -1);
 
 protected: // attributes
   enzo_float gamma_; // adiabatic index

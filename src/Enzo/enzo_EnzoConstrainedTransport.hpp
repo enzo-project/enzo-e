@@ -19,7 +19,7 @@ public: // interface
 
   void compute_center_efield (Block *block, int dim,
 			      std::string center_efield_name,
-			      Grouping &prim_group);
+			      Grouping &prim_group, int stale_depth);
   
   // Computes the edge-centered E-fields pointing in the ith direction
   // It uses the component of the cell-centered E-field pointing in that
@@ -31,14 +31,14 @@ public: // interface
 			    std::string center_efield_name,
 			    Grouping &efield_group, Grouping &jflux_group,
 			    Grouping &kflux_group, Grouping &prim_group,
-			    Grouping &weight_group);
+			    Grouping &weight_group, int stale_depth);
 
   void update_bfield(Block *block, int dim, Grouping &efield_group,
 		     Grouping &cur_bfieldi_group, Grouping &out_bfieldi_group,
-		     enzo_float dt);
+		     enzo_float dt, int stale_depth);
 
   void compute_center_bfield(Block *block, int dim, Grouping &cons_group,
-			     Grouping &bfieldi_group);
+			     Grouping &bfieldi_group, int stale_depth = 0);
 
 };
 #endif /* ENZO_ENZO_CONSTRAINEDTRANSPORT_HPP */

@@ -249,7 +249,8 @@ public: // interface
 
   void solve (Block *block, Grouping &priml_group, Grouping &primr_group,
 	      Grouping &flux_group, Grouping &consl_group,
-	      Grouping &consr_group, int dim, EnzoEquationOfState *eos);
+	      Grouping &consr_group, int dim, EnzoEquationOfState *eos,
+	      int stale_depth);
 
 protected : //methods
   
@@ -356,7 +357,7 @@ template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::solve
 (Block *block, Grouping &priml_group, Grouping &primr_group,
  Grouping &flux_group, Grouping &consl_group, Grouping &consr_group,
- int dim, EnzoEquationOfState *eos)
+ int dim, EnzoEquationOfState *eos, int stale_depth)
 {
   
   const bool barotropic = eos->is_barotropic();

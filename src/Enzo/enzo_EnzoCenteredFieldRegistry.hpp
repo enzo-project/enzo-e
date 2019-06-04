@@ -205,7 +205,7 @@ public:
   /// the field data of the corresponding field in lut.
   EFlt3DArray* load_array_of_fields(Block *block, const field_lut lut,
 				    const int nfields, Grouping &grouping,
-				    const int dim);
+				    const int dim, const int stale_depth = 0);
 
 private:
   Grouping* build_grouping_(const EnzoFieldConditions cond,

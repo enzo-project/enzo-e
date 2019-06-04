@@ -11,15 +11,16 @@
 //----------------------------------------------------------------------
 
 void EnzoReconstructorNN::reconstruct_interface (Block *block,
-						  Grouping &prim_group,
-						  Grouping &priml_group,
-						  Grouping &primr_group,
-						  int dim,
-						  EnzoEquationOfState *eos)
+						 Grouping &prim_group,
+						 Grouping &priml_group,
+						 Grouping &primr_group,
+						 int dim,
+						 EnzoEquationOfState *eos,
+						 int stale_depth)
 {
   std::vector<std::string> group_names = this->group_names_;
 
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
   // determine components of i unit vector
   EnzoPermutedCoordinates coord(dim);
   int i_x, i_y, i_z;

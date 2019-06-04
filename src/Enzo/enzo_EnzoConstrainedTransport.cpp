@@ -11,10 +11,11 @@
 //----------------------------------------------------------------------
 
 void EnzoConstrainedTransport::compute_center_efield
-(Block *block, int dim, std::string center_efield_name, Grouping &prim_group)
+(Block *block, int dim, std::string center_efield_name, Grouping &prim_group,
+ int stale_depth)
 {
   // Load the E-field
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
   EFlt3DArray efield = array_factory.from_name(center_efield_name);
 
   EnzoPermutedCoordinates coord(dim);
@@ -227,13 +228,10 @@ void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
 //     down the x, y, and z direction. Currently, it expects values of 1 and 0
 //     to indicate that the upwind direction is in positive and negative
 //     direction, or 0 to indicate no upwind direction.
-void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
-						    std::string center_efield_name,
-						    Grouping &efield_group,
-						    Grouping &jflux_group,
-						    Grouping &kflux_group,
-						    Grouping &prim_group,
-						    Grouping &weight_group)
+void EnzoConstrainedTransport::compute_edge_efield
+(Block *block, int dim, std::string center_efield_name, Grouping &efield_group,
+ Grouping &jflux_group, Grouping &kflux_group, Grouping &prim_group,
+ Grouping &weight_group,int stale_depth)
 {
 
   EnzoPermutedCoordinates coord(dim);
@@ -244,7 +242,7 @@ void EnzoConstrainedTransport::compute_edge_efield (Block *block, int dim,
 
   // Initialize Cell-Centered E-fields
   EFlt3DArray Ec, Ec_jp1, Ec_kp1, Ec_jkp1;
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
   Ec = array_factory.from_name(center_efield_name);
   Ec_jp1  = coord.left_edge_offset(Ec, 0, 1, 0);
   Ec_kp1  = coord.left_edge_offset(Ec, 1, 0, 0);
@@ -333,7 +331,7 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 					     Grouping &efield_group,
 					     Grouping &cur_bfieldi_group,
 					     Grouping &out_bfieldi_group,
-					     enzo_float dt)
+					     enzo_float dt, int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
 
@@ -344,7 +342,7 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 
   // The following comments all assume that we are talking about unstaled
   // region (and that we have dropped all staled cells)
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
   
   // Load edge centered efields 
   EFlt3DArray E_j, ej_Lk, ej_Rk, E_k, ek_Lj, ek_Rj;
@@ -371,23 +369,13 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
   CSlice full_ax(nullptr, nullptr); // includes full axis
   CSlice inner_cent(1,-1);          // excludes outermost cell-centered values
 
+  // the following arrays should all have the same shape
   ej_Lk = coord.get_subarray(E_j, CSlice(0,      -1), inner_cent, full_ax);
   ej_Rk = coord.get_subarray(E_j, CSlice(1, nullptr), inner_cent, full_ax);
   ek_Lj = coord.get_subarray(E_k, inner_cent, CSlice(0,      -1), full_ax);
   ek_Rj = coord.get_subarray(E_k, inner_cent, CSlice(1, nullptr), full_ax);
   bcur = coord.get_subarray(cur_bfield, inner_cent, inner_cent, CSlice(1,-1));
   bout = coord.get_subarray(out_bfield, inner_cent, inner_cent, CSlice(1,-1));
-  
-
-  /*// sanity check
-  for (std::size_t i = 0; i<3; i++){
-    EFlt3DArray arrs[5] = {out_bfield, ej_Lk, ej_Rk, ek_Lj, ek_Rj};
-    for (int j = 0; j<5; j++) {
-      ASSERT("EnzoConstrainedTransport",
-	     "cur_bfield, out_bfield, ej_Lk, ej_Rk, ek_Lj, ek_Rj should all "
-	     "have the same shape", cur_bfield.shape(i) == arrs[j].shape(i));
-    }
-    }*/
 
   // We could simplify this iteration by using subarrays - However, it would be
   // more complicated
@@ -424,10 +412,11 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
 						     Grouping &cons_group,
-						     Grouping &bfieldi_group)
+						     Grouping &bfieldi_group,
+						     int stale_depth)
 {
   EnzoPermutedCoordinates coord(dim);
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
 
   // Load cell-centerd field
   EFlt3DArray b_center = array_factory.from_grouping(cons_group, "bfield",

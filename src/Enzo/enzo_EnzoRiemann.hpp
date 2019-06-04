@@ -68,10 +68,13 @@ public: // interface
   /// @param dim Dimension along which to reconstruct interface values. Values
   ///  of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
   /// @param eos Instance of the fluid's EnzoEquationOfState object
+  /// @param stale_depth indicates the number of field entries from the
+  /// outermost field value that the region including "stale" values (need to
+  /// be refreshed) extends over (0 means there are no "stale" values).
   virtual void solve (Block *block, Grouping &priml_group,
 		      Grouping &primr_group, Grouping &flux_group,
 		      Grouping &consl_group, Grouping &consr_group, int dim,
-		      EnzoEquationOfState *eos) = 0;
+		      EnzoEquationOfState *eos, int stale_depth) = 0;
 
   /// computes the fast magnetosonic speed along dimension i
   static enzo_float fast_magnetosonic_speed_(const enzo_float prim_vals[],

@@ -22,11 +22,10 @@ void EnzoEOSIdeal::pup (PUP::er &p)
 //----------------------------------------------------------------------
 
 // Would eventually like this to just wrap the compute_pressure object
-void EnzoEOSIdeal::compute_pressure(Block *block,
-				    Grouping &cons_group,
-				    Grouping &prim_group)
+void EnzoEOSIdeal::compute_pressure(Block *block, Grouping &cons_group,
+				    Grouping &prim_group, int stale_depth)
 {
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EFlt3DArray density, p_x, p_y, p_z, etot, b_x, b_y, b_z;
   density = array_factory.from_grouping(cons_group, "density", 0);
   p_x = array_factory.from_grouping(cons_group, "momentum", 0);
@@ -65,34 +64,13 @@ void EnzoEOSIdeal::compute_pressure(Block *block,
 
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::copy_passively_advected_fields_
-(EnzoFieldArrayFactory &array_factory, Grouping &origin_group,
- Grouping &destination_group)
-{
-  EnzoCenteredFieldRegistry registry;
-  std::vector<std::string> group_names = registry.passive_scalar_group_names();
-  for (unsigned int i=0;i<group_names.size();i++){
-    std::string group_name = group_names[i];
-    int num_fields = origin_group.size(group_name);
-    for (int j=0;j<num_fields;j++){
-
-      EFlt3DArray src = array_factory.from_grouping(origin_group,
-						    group_name, j);
-      EFlt3DArray dest = array_factory.from_grouping(destination_group,
-						     group_name, j);
-      dest.subarray() = src;
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
 void EnzoEOSIdeal::primitive_from_conservative(Block *block,
 					       Grouping &cons_group,
-					       Grouping &prim_group)
+					       Grouping &prim_group,
+					       int stale_depth)
 {
-  compute_pressure(block, cons_group, prim_group);
-  EnzoFieldArrayFactory array_factory(block);
+  compute_pressure(block, cons_group, prim_group, stale_depth);
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EFlt3DArray cons_density, px, py, pz, cons_bx, cons_by, cons_bz;
   cons_density = array_factory.from_grouping(cons_group, "density", 0);
   px = array_factory.from_grouping(cons_group, "momentum", 0);
@@ -132,33 +110,38 @@ void EnzoEOSIdeal::primitive_from_conservative(Block *block,
 
 //----------------------------------------------------------------------
 
-
 void EnzoEOSIdeal::conservative_from_primitive(Block *block,
 					       Grouping &prim_group,
-					       Grouping &cons_group)
+					       Grouping &cons_group,
+					       int stale_depth,
+					       int reconstructed_axis)
 {
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EFlt3DArray prim_density, vx, vy, vz, pressure;
   EFlt3DArray prim_bx, prim_by, prim_bz;
-  prim_density = array_factory.from_grouping(prim_group, "density", 0);
-  vx = array_factory.from_grouping(prim_group, "velocity", 0);
-  vy = array_factory.from_grouping(prim_group, "velocity", 1);
-  vz = array_factory.from_grouping(prim_group, "velocity", 2);
-  pressure = array_factory.from_grouping(prim_group, "pressure", 0);
-  prim_bx = array_factory.from_grouping(prim_group, "bfield", 0);
-  prim_by = array_factory.from_grouping(prim_group, "bfield", 1);
-  prim_bz = array_factory.from_grouping(prim_group, "bfield", 2);
+
+  int rec_ax = reconstructed_axis;
+  prim_density = retrieve_field_(array_factory, prim_group, "density", 0,
+				 rec_ax);
+  vx = retrieve_field_(array_factory, prim_group, "velocity", 0, rec_ax);
+  vy = retrieve_field_(array_factory, prim_group, "velocity", 1, rec_ax);
+  vz = retrieve_field_(array_factory, prim_group, "velocity", 2, rec_ax);
+  pressure = retrieve_field_(array_factory, prim_group, "pressure", 0, rec_ax);
+  prim_bx = retrieve_field_(array_factory, prim_group, "bfield", 0, rec_ax);
+  prim_by = retrieve_field_(array_factory, prim_group, "bfield", 1, rec_ax);
+  prim_bz = retrieve_field_(array_factory, prim_group, "bfield", 2, rec_ax);
 
   EFlt3DArray cons_density, px, py, pz, etot;
   EFlt3DArray cons_bx, cons_by, cons_bz;
-  cons_density = array_factory.from_grouping(cons_group, "density", 0);
-  px = array_factory.from_grouping(cons_group, "momentum", 0);
-  py = array_factory.from_grouping(cons_group, "momentum", 1);
-  pz = array_factory.from_grouping(cons_group, "momentum", 2);
-  etot = array_factory.from_grouping(cons_group, "total_energy", 0);
-  cons_bx = array_factory.from_grouping(cons_group, "bfield", 0);
-  cons_by = array_factory.from_grouping(cons_group, "bfield", 1);
-  cons_bz = array_factory.from_grouping(cons_group, "bfield", 2);
+  cons_density = retrieve_field_(array_factory, cons_group, "density", 0,
+				 rec_ax);
+  px = retrieve_field_(array_factory, cons_group, "momentum", 0, rec_ax);
+  py = retrieve_field_(array_factory, cons_group, "momentum", 1, rec_ax);
+  pz = retrieve_field_(array_factory, cons_group, "momentum", 2, rec_ax);
+  etot = retrieve_field_(array_factory, cons_group, "total_energy", 0, rec_ax);
+  cons_bx = retrieve_field_(array_factory, cons_group, "bfield", 0, rec_ax);
+  cons_by = retrieve_field_(array_factory, cons_group, "bfield", 1, rec_ax);
+  cons_bz = retrieve_field_(array_factory, cons_group, "bfield", 2, rec_ax);
 
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
 
@@ -191,15 +174,17 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
     }
   }
   // Copy primitive passive fields to conserved
-  copy_passively_advected_fields_(array_factory, prim_group, cons_group);
+  copy_passively_advected_fields_(array_factory, prim_group, cons_group,
+				  reconstructed_axis);
 }
 
 //----------------------------------------------------------------------
 
 // Applies the pressure_floor to total_energy
-void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group)
+void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group,
+					 int stale_depth)
 {
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
   EFlt3DArray density, px, py, pz, etot, bx, by, bz;
   density = array_factory.from_grouping(cons_group, "density", 0);
   px = array_factory.from_grouping(cons_group, "momentum", 0);
@@ -230,3 +215,41 @@ void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group)
     }
   }
 }
+
+//----------------------------------------------------------------------
+
+EFlt3DArray EnzoEOSIdeal::retrieve_field_(EnzoFieldArrayFactory &array_factory,
+					  Grouping &group,
+					  std::string group_name, int index,
+					  int reconstructed_axis)
+{
+  if (reconstructed_axis == -1){
+    return array_factory.from_grouping(group, group_name, index);
+  } else {
+    return array_factory.reconstructed_field(group, group_name, index,
+					     reconstructed_axis);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoEOSIdeal::copy_passively_advected_fields_
+(EnzoFieldArrayFactory &array_factory, Grouping &origin_group,
+ Grouping &destination_group, int reconstruction_axis)
+{
+  EnzoCenteredFieldRegistry registry;
+  std::vector<std::string> group_names = registry.passive_scalar_group_names();
+  for (unsigned int i=0;i<group_names.size();i++){
+    std::string group_name = group_names[i];
+    int num_fields = origin_group.size(group_name);
+    for (int j=0;j<num_fields;j++){
+
+      EFlt3DArray src = retrieve_field_(array_factory, origin_group,
+					group_name, j, reconstruction_axis);
+      EFlt3DArray dest = retrieve_field_(array_factory, destination_group,
+					 group_name, j, reconstruction_axis);
+      dest.subarray() = src;
+    }
+  }
+}
+

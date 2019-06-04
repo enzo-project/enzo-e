@@ -105,12 +105,12 @@ field_lut EnzoCenteredFieldRegistry::prepare_lut_
 
 EFlt3DArray* EnzoCenteredFieldRegistry::load_array_of_fields
 (Block *block, const field_lut lut, const int nfields, Grouping &grouping,
- const int dim)
+ const int dim, const int stale_depth)
 {
   EFlt3DArray* arr = new EFlt3DArray[nfields];
   int cur_index = 0;
   EnzoPermutedCoordinates coord(dim);
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
 
   #define ENTRY(name, req_name, category, quantity_type)                      \
     if (USE_QUANTITY_##quantity_type(lut, name)) {		              \

@@ -39,7 +39,8 @@ public: // interface
 
   void reconstruct_interface (Block *block, Grouping &prim_group,
 			      Grouping &priml_group, Grouping &primr_group,
-			      int dim, EnzoEquationOfState *eos);
+			      int dim, EnzoEquationOfState *eos,
+			      int stale_depth);
 
   int total_staling_rate()
   { return 1; }

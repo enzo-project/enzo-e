@@ -107,20 +107,28 @@ struct AthenaHLLEWavespeed
     enzo_float tilde_vai2 = bi_roe * bi_roe / rho_roe;
     enzo_float tilde_va2 = (tilde_vai2 + (gamma_prime - y_prime) *
 			    (bj_roe * bj_roe + bk_roe * bk_roe) / rho_roe);
-    //CkPrintf("roe_cs2 = %.15lf\n",tilde_a2);
-    //CkPrintf("roe_va_i2 = %.15lf, roe_va2 = %.15lf\n",tilde_vai2, tilde_va2);
 
     enzo_float cfast = std::sqrt(0.5 * (tilde_a2 + tilde_va2 +
 					std::sqrt(std::pow(tilde_a2 + tilde_va2,
 							   2) -
 						  4 * tilde_a2 * tilde_vai2)));
 
-    //CkPrintf("vi_roe = %.15lf, cfast = %.15lf\n",vi_roe, cfast);
-    //CkPrintf("left_speed = %.15lf, right_speed = %.15lf\n",left_speed, right_speed);
-    //fflush(stdout);
+    
+    if ((std::fmax(vi_roe + cfast, right_speed) <= 0.) &&
+	(std::fmin(vi_roe - cfast, left_speed)  >= 0.)){
+      CkPrintf("roe_cs2 = %.15lf\n",tilde_a2);
+      CkPrintf("roe_va_i2 = %.15lf, roe_va2 = %.15lf\n",tilde_vai2, tilde_va2);
+      CkPrintf("vi_roe = %.15lf, cfast = %.15lf\n",vi_roe, cfast);
+      CkPrintf("left_speed = %.15lf, right_speed = %.15lf\n",left_speed,
+	       right_speed);
+      fflush(stdout);
+    }
 
     *bp = std::fmax(std::fmax(vi_roe + cfast, right_speed), 0.);
     *bm = std::fmin(std::fmin(vi_roe - cfast, left_speed),  0.);
+
+    //ASSERT("AthenaHLLEWavespeed", "bp and bm cannot both equal 0.",
+    //	   !((*bp == *bp)&&(*bp == 0)));
   }
 };
 
@@ -157,9 +165,18 @@ public:
 
     // Compute the actual riemann fluxes
     for (int field = 0; field<n_keys; field++){
-      flux_arrays[field](iz,iy,ix) = ((bp*flux_l[field] - bm*flux_r[field] +
+      volatile enzo_float val = ((bp*flux_l[field] - bm*flux_r[field] +
 				       (cons_r[field] - cons_l[field])*bp*bm)
 				      / (bp - bm));
+      volatile enzo_float temp_bp, temp_bm;
+      temp_bp = bp;
+      temp_bm = bm;
+      flux_arrays[field](iz,iy,ix) =val;
+      if (!std::isfinite(val)){
+	CkPrintf("(iz,iy,ix) = (%d,%d,%d)\n",iz,iy,ix);
+      }
+      ASSERT("EnzoRiemann", "yielding a NaN flux", std::isfinite(val));
+      
     }
   }
 };
