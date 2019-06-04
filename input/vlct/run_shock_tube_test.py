@@ -41,27 +41,37 @@ def run_tests():
     # can't actually run the serial vs parallel test from this script (not sure
     # how to get around request for password)
     call_test("x",256)
+    call_test("y",256)
+    call_test("z",256)
 
-    # It currently breaks when I run the following 2 tests:
-    #call_test("y",256)
-    #call_test("z",256)
-
-def calc_table_l1_norm(axis,table_path,target_path, std_dev = False):
+def calc_table_l1_norm(axis,table_path,target_path, std_dev = False,
+                       permute = False):
     command = l1_norm_table_template.format(axis, table_path, target_path)
     if std_dev:
         command = command + " --std"
+    if permute:
+        command = command + " --permute"
 
     return float(subprocess.check_output(command,shell=True))
 
-def standard_rj2a_l1_analyze(axis,res,ref_l1_norm, std_dev = False):
+def standard_rj2a_l1_analyze(axis,res,ref_l1_norm, std_dev = False,
+                             exact = False):
     ref_table = "input/vlct/shock_tube/rj2a_shock_tube_t0.2_res256.csv"
     target_path = data_dir_template.format(axis,res,0.2)
-    norm = calc_table_l1_norm(axis,ref_table,target_path,std_dev=std_dev)
+    norm = calc_table_l1_norm(axis,ref_table,target_path,std_dev=std_dev,
+                              permute = (axis != 'x'))
 
-    if not isclose(norm, ref_l1_norm, abs_tol = True):
+    if exact and std_dev and norm != ref_l1_norm:
+        message_temp = ("Standard Deviation of norm of L1 error of {}-axis "
+                        "rj2a shock tube N={:d} isn't correct\n{:s} {:s}")
+        print(message_temp.format(axis, res, repr(norm), repr(ref_l1_norm)))
+        return False
+    if exact != std_dev:
+        raise NotImplementedError()
+    if (not exact) and (not isclose(norm, ref_l1_norm, abs_tol = True)):
         message_temp = ("L1 error of {}-axis rj2a shock tube N={:d} isn't "
                         "correct\n{:s} {:s}")
-        print(_mess.format(axis, res, repr(norm), repr(ref_l1_norm)))
+        print(message_temp.format(axis, res, repr(norm), repr(ref_l1_norm)))
         return False
     return True
 
@@ -70,15 +80,19 @@ def analyze_tests():
     # the values are taken from a local run
 
     r = []
-    # check the average L1-Norm along the x-axis (averaged over multiple
-    # slices along the x-axis)
-    r.append(standard_rj2a_l1_analyze("x", 256, 0.012524558844892638))
+    # check the average L1-Norm along the active axis (averaged over multiple
+    # slices along the active axis)
     # check that the standard deviation of the L1-Norms computed along the
-    # x-axis (There should be no definitely be no differences if we only use 1
-    # block - if we use more than one block, it's unclear to me if it's ok if
-    # there is a round-off error here or there)
-    r.append(standard_rj2a_l1_analyze("x", 256, 0.0,std_dev = True))
-    
+    # active axis (There should be no definitely be no differences if we only
+    # use 1 block - if we use more than one block, it's unclear to me if it's
+    # ok to have round-off errors)
+
+    r.append(standard_rj2a_l1_analyze("x", 256, 0.012524558844892638))
+    r.append(standard_rj2a_l1_analyze("x", 256, 0.0, std_dev=True, exact=True))
+    r.append(standard_rj2a_l1_analyze("y", 256, 0.012524558844892614))
+    r.append(standard_rj2a_l1_analyze("y", 256, 0.0, std_dev=True, exact=True))
+    r.append(standard_rj2a_l1_analyze("z", 256, 0.012524558844892873))
+    r.append(standard_rj2a_l1_analyze("z", 256, 0.0, std_dev=True, exact=True))
 
     n_passed = np.sum(r)
     n_tests = len(r)
@@ -86,7 +100,9 @@ def analyze_tests():
 
 def cleanup():
 
-    dir_names = ["method_vlct-1-x_rj2a_N256_0.2"]
+    dir_names = ["method_vlct-1-x_rj2a_N256_0.2",
+                 "method_vlct-1-y_rj2a_N256_0.2",
+                 "method_vlct-1-z_rj2a_N256_0.2"]
     for dir_name in dir_names:
         if os.path.isdir(dir_name):
             shutil.rmtree(dir_name)

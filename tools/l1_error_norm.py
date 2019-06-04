@@ -92,6 +92,17 @@ parser.add_argument('-n', action = 'store', default = None, required = False,
                             "of the L1 norm. If a positive integer is "
                             "specified for this option, then the normalization "
                             "uses this value as the length of each dimension."))
+parser.add_argument('--permute', nargs = '?', action = 'store', default = None,
+                    const = '-1', type = int,
+                    help = ("This only applies to \"table\" mode. By default "
+                            "the column names from the reference table are "
+                            "assumed to match the compared simulation field "
+                            "names. A value of 1 or 2 will cyclically permute "
+                            "the axes of vector quantities (any collection of "
+                            "column names with a common prefix and suffixes of "
+                            "\"_x\", \"_y\" and \"_z\"). If the option is "
+                            "passed but no argument is used, a guess will be "
+                            "made based on the specified active axis"))
 parser.add_argument('--std', action = 'store_true', default = False,
                     help = ("This only applies to \"table\" mode. By default, "
                             "L1 error norm is computed for the 3D grid. If "
@@ -278,7 +289,39 @@ def load_reference_table(fname):
         out_data[field] = rec[field]
     return meta_data, out_data
 
-def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None):
+def permute_vector_quantites(data, verbose, permute):
+
+    if permute is None:
+        return None
+    assert permute in [0,1,2]
+
+    ax_map = {'x' : 0, 'y' : 1, 'z' : 2}
+    candidates = {}
+    # identify candidate vectors
+    for elem in data.keys():
+        temp = elem.split('_')
+        if len(temp) != 2 or (temp[1] not in ['x','y','z']):
+            continue
+        prefix, dim = temp
+        if prefix not in candidates:
+            candidates[prefix] = [None, None, None]
+        candidates[prefix][ax_map[dim]] = elem
+
+    vectors = []
+    for prefix, names in candidates.iteritems():
+        if len(filter(lambda x: x is not None, names)) != 3:
+            continue
+        vectors.append(prefix)
+        temp = [data[names[0]], data[names[1]], data[names[2]]]
+        data[names[permute]] = temp[0]
+        data[names[(permute+1)%3]] = temp[1]
+        data[names[(permute+2)%3]] = temp[2]
+
+    if verbose:
+        print("permuted the vectors {}".format(str(vectors)))
+            
+def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
+                            permute = 0):
     # if op_func is None, returns the total L1 Error Norm
     # otherwise op_func is applied on all parallel L1 Error Norms
 
@@ -328,7 +371,10 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None):
     idx = tuple(temp)
     ref = {}
     for field,arr in ref_data.items():
-        ref[field] = arr[idx]  
+        ref[field] = arr[idx]
+
+    # optionally permute some vector quantities
+    permute_vector_quantites(ref, verbose, permute)
 
     # get the fixed resolution grid of the target dataset
     ad = build_3D_grid(ds,sub_grid_edges)
@@ -366,33 +412,48 @@ if __name__ == '__main__':
 
     if args.ref_type == 'sim':
         sim_comp = True
-        if args.std:
-            raise ArgumentError('The --std option cannot be specified for '
-                                '"sim" reference data.')
-        if args.median:
-            raise ArgumentError('The --median option cannot be specified for '
-                                '"sim" reference data.')
+
+        unexpected_args = [("std",False), ("median", False), ("permute", None)]
+        for name,default_val in unexpected_args:
+            if getattr(args,name) != default_val:
+                raise ValueError(('The --{} option cannot be specified for '
+                                  '"sim" reference data.').format(name))
         dim_length = args.n
         if (dim_length is not None) and (dim_length <= 0):
-            raise ArgumentError('The -n option must be followed by a positive '
-                                'integer.')
+            raise ValueError('The -n option must be followed by a positive '
+                             'integer.')
         compare_to_sim_reference(ds, args.ref_path, verbose, dim_length)
 
     else:
         sim_comp = False
         if args.n is not None:
-            raise ArgumentError('The -n option cannot be specified for '
-                                '"table" reference data')
+            raise ValueError('The -n option cannot be specified for '
+                             '"table" reference data')
 
         op_func = None
         
         if args.std and args.median:
-            raise ArgumentError("The --std and --median options can not both "
-                                "be specified at the same time.")
+            raise ValueError("The --std and --median options can not both "
+                             "be specified at the same time.")
         elif args.std:
             op_func = np.std
         elif args.median:
             op_func = np.median
-        
+
         problem_ax = args.ref_type[-1]
-        compare_to_1D_reference(ds, args.ref_path, problem_ax, verbose, op_func)
+
+        # check the argument passed to permute
+        if args.permute is None:
+            permute = args.permute
+        elif args.permute == -1:
+            # specified the option without an argument
+            permute = {'x' : 0, 'y' : 1, 'z' : 2}[problem_ax]
+        else:
+            permute = int(args.permute)
+            if permute not in [0, 1, 2]:
+                raise ValueError(("argument --permute: invalid choice: {}"
+                                  "(don't pass an argument or choose from "
+                                  "'0', '1', '2')").format(args.permute))
+
+        compare_to_1D_reference(ds, args.ref_path, problem_ax, verbose, op_func,
+                                permute)

@@ -7,7 +7,7 @@
    # but there is a bug forcing us to use periodic boundary for all axes 
    Domain {
       lower = [0.0,-1.0, 0.0];
-      upper = [0.0, 2.0, 1.0];
+      upper = [1.0, 2.0, 1.0];
    }
 
    Mesh {
