@@ -12,11 +12,7 @@
 
 EFlt3DArray EnzoFieldArrayFactory::from_name(std::string field_name)
 {
-  Field field = block_->data()->field();
-  const int id = field.field_id(field_name);
-  int mx, my, mz;
-  field.dimensions (id,&mx,&my,&mz);
-  EFlt3DArray temp((enzo_float *) field.values(field_name), mz, my, mx);
+  EFlt3DArray temp = full_field_from_name_(field_name);
   if (stale_depth_ != 0){
     return exclude_stale_cells_(temp);
   } else {
@@ -79,7 +75,9 @@ EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
 
 EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
 {
-  EFlt3DArray t = from_grouping(grouping,"bfield",dim);
+  check_grouping_details_(grouping, "bfield", dim);
+  EFlt3DArray t = full_field_from_name_(grouping.item("bfield",dim));
+
   if (dim == 0){
     return t.subarray(CSlice(stale_depth_,     t.shape(0) - stale_depth_),
 		      CSlice(stale_depth_,     t.shape(1) - stale_depth_),
@@ -93,6 +91,18 @@ EFlt3DArray EnzoFieldArrayFactory::interior_bfieldi(Grouping &grouping, int dim)
 		      CSlice(stale_depth_,     t.shape(1) - stale_depth_),
 		      CSlice(stale_depth_,     t.shape(2) - stale_depth_));
   }
+}
+
+//----------------------------------------------------------------------
+
+EFlt3DArray EnzoFieldArrayFactory::full_field_from_name_(std::string field_name)
+{
+  Field field = block_->data()->field();
+  const int id = field.field_id(field_name);
+  int mx, my, mz;
+  field.dimensions (id,&mx,&my,&mz);
+  EFlt3DArray temp((enzo_float *) field.values(field_name), mz, my, mx);
+  return temp;
 }
 
 //----------------------------------------------------------------------

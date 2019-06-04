@@ -51,6 +51,9 @@ public:
   EFlt3DArray interior_bfieldi(Grouping &grouping, int dim);
 protected: // methods
 
+  /// Helper function that reads in the field without applying stale depth
+  EFlt3DArray full_field_from_name_(std::string field_name);
+
   /// Helper function that checks the validity of a group_name and index
   void check_grouping_details_(Grouping &grouping, std::string group_name,
 			       int index);
