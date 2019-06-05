@@ -6,24 +6,20 @@
    # only needs to extend from 0.0 to 1.0 with 256 blocks with outflow boundary
    # but there is a bug forcing us to use periodic boundary for all axes 
    Domain {
-      lower = [-1.0, 0.0, 0.0];
-      upper = [2.0, 1.0, 1.0];
+      lower = [0.0,0.0,0.0];
+      upper = [1.0,1.0,1.0];
    }
 
    Mesh {
       root_rank = 3; # 3D
       root_blocks = [1,1,1];
-      root_size = [768,4,4]; # number of cells per axis
+      root_size = [256,4,4]; # number of cells per axis
    }
 
    # there are some problems with specifying an outflow condition along 1 axis
    # and not along the other axes
    Boundary {
-      list = ["one", "two", "three"];
-      one{
-         type = "periodic";
-   	 axis = "x";
-      }
+      list = ["two", "three","one"];
       two{
          type = "periodic";
    	 axis = "y";
@@ -31,6 +27,10 @@
       three{
          type = "periodic";
    	 axis = "z";
+      }
+      one{
+         type = "outflow";
+   	 axis = "x";
       }
    }
 
