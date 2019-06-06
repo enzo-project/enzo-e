@@ -73,12 +73,12 @@
      list = [ "dark" ];
 
      dark {
-     	  attributes = ["position_x",      "single",
-	                "position_y",      "single",
-                        "position_z",      "single" ];
-     	  attributes += ["velocity_x",     "single",
-                         "velocity_y",     "single",
-                         "velocity_z",     "single" ];
+     	  attributes = ["position_x",      "default",
+	                "position_y",      "default",
+                        "position_z",      "default" ];
+     	  attributes += ["velocity_x",     "default",
+                         "velocity_y",     "default",
+                         "velocity_z",     "default" ];
 	  position = ["position_x","position_y","position_z"];
       }
   }
