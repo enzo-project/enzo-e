@@ -576,9 +576,8 @@ Boundary * Problem::create_boundary_
   } else if (type == "periodic") {
 
     axis_enum axis = (axis_enum) config->boundary_axis[index];
-    face_enum face = (face_enum) config->boundary_face[index];
 
-    return new BoundaryPeriodic(axis,face);
+    return new BoundaryPeriodic(axis);
 
   }
   return NULL;

@@ -23,9 +23,7 @@ public: // interface
   : axis_(axis_all), face_(face_all), mask_(nullptr)
   {
     for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	periodicity_[axis][face] = false;
-      }
+      periodicity_[axis] = false;
     }
   }
 
@@ -34,9 +32,7 @@ public: // interface
   : axis_(axis), face_(face), mask_(mask)
   {
     for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	periodicity_[axis][face] = false;
-      }
+      periodicity_[axis] = false;
     }
   }
 
@@ -54,9 +50,7 @@ public: // interface
        axis_(axis_all), face_(face_all), mask_(nullptr)
   {
     for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	periodicity_[axis][face] = false;
-      }
+      periodicity_[axis] = false;
     }
   }
 
@@ -76,7 +70,7 @@ public: // interface
       WARNING ("Boundary::pup()", "Skipping p | mask_");
       warn[in] = true;
     }
-    for (int axis=0; axis<3; axis++) PUParray(p,periodicity_[axis],2);
+    PUParray(p,periodicity_,3);
   };
 
 public: // virtual functions
@@ -88,11 +82,9 @@ public: // virtual functions
 			axis_enum axis = axis_all) const throw() = 0;
 
   /// Return which faces are periodic
-  void periodicity(bool p32[3][2]) const throw() {
+  void periodicity(bool p3[3]) const throw() {
     for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	p32[axis][face] = periodicity_[axis][face];
-      }
+      if (periodicity_[axis]) p3[axis] = true;
     }
   }
 
@@ -115,7 +107,7 @@ protected: // protected attributes
   std::shared_ptr<Mask> mask_;
 
   /// Periodicity of boundary condition faces
-  bool periodicity_[3][2];
+  bool periodicity_[3];
 
 };
 
