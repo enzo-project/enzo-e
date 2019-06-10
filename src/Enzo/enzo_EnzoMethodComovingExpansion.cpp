@@ -190,10 +190,10 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
 	 &CRModel, cr_field_new, cr_field_old);
 
 
-         if (has_history){
-           delete [] pressure;
-           pressure = NULL;
-         }
+      if (has_history){
+	delete [] pressure;
+	pressure = NULL;
+      }
     }
 
   block->compute_done();
