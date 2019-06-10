@@ -48,6 +48,16 @@ public: // interface
 
 protected: // functions
 
+  template <class T>
+  void copy_field_data_to_array_
+  (enzo_float * array, T * data,
+   int mx,int my,int mz,int nx,int ny,int nz,int gx,int gy,int gz,int n4[4],
+   int IX, int IY) const;
+
+  template <class T, class S>
+  void copy_particle_data_to_array_
+  (T * array, S * data,
+   Particle particle, int it, int ia, int np);
 
 protected: // attributes
 
