@@ -19,6 +19,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_class("Papi");
 
+#ifdef CONFIG_USE_PAPI
+  
   int retval = PAPI_library_init(PAPI_VER_CURRENT);
   if (retval != PAPI_VER_CURRENT && retval > 0) {
     WARNING("Papi::init","PAPI library version mismatch!");
@@ -83,7 +85,7 @@ PARALLEL_MAIN_BEGIN
   }
 
   papi.stop_events();
-
+#endif
   unit_finalize();
 
   exit_();
