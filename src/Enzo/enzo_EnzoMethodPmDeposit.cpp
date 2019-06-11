@@ -170,7 +170,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
         // Find the mass of each particle. If cosntant generate array of
         // constant values in order to simply code below
-        enzo_float * pdens = new enzo_float[np];
+        enzo_float * pdens = NULL;
         if (ia_m > 0){
           pdens = (enzo_float *) particle.attribute_array( it, ia_m, ib);
         } else {
