@@ -8,6 +8,7 @@
 #include "cello.hpp"
 
 #include "error.hpp"
+#include "test.hpp"
 
 //----------------------------------------------------------------------
 
@@ -61,6 +62,8 @@ extern void m2_
   if (strcmp(type,"ERROR") == 0)
     monitor->write(fp,"","@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
+  if (strcmp(type,"ERROR") == 0)
+    unit_assert(false);
   fflush (fp);
 }
 

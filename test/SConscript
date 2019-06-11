@@ -2,9 +2,10 @@ Import('env')
 Import('parallel_run')
 Import('serial_run')
 Import('ip_charm')
-
 Import('bin_path')
 Import('test_path')
+
+import os
 
 #----------------------------------------------------------------------
 SConscript('Balance/SConscript')
@@ -17,13 +18,15 @@ env['RMIN'] = 'rm -f parameters.out parameters.libconfig'
 # env['ASAN_OPTIONS'] = 'symbolize=1'
 
 
+charm_args = os.getenv('CHARM_ARGS','')
+
 # Define a test for running unit tests
 
 date_cmd = 'echo "-------------------"; date +"%Y-%m-%d %H:%M:%S";'
 hdf5_to_png  = Builder(action = 'test/cello-h5topng.sh $ARGS; mv *.png test');
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_serial   = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + serial_run   +  "$SOURCE $ARGS> $TARGET 2>&1; $CPIN; $COPY")
-run_parallel = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + parallel_run + " $SOURCE $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
+run_parallel = Builder(action = "$RMIN; echo $TARGET > test/STATUS;" + date_cmd + parallel_run + " $SOURCE " + charm_args + " $ARGS " + " > $TARGET 2>&1; $CPIN; $COPY")
 make_movie   = Builder(action = "png2swf -r 5 -o $TARGET ${ARGS} ")
 png_to_gif   = Builder(action = "convert -delay 5 -loop 0 ${ARGS} $TARGET ")
 
@@ -561,9 +564,9 @@ env.PngToGif ("adapt-L5-P1-density.gif", "test_adapt-L5-P1.unit", \
 # PERFORMANCE
 #----------------------------------------------------------------------
 
-env.RunParallel ('test_performance-papi.unit',
-                bin_path + '/enzo-p', 
-                ARGS='input/performance-papi.in')
+# env.RunParallel ('test_performance-papi.unit',
+#                 bin_path + '/enzo-p', 
+#                 ARGS='input/performance-papi.in')
 
 
 Clean(env_mv_out.RunParallel ('test_initial_png.unit',
