@@ -14,7 +14,3 @@ Output { d_z  { name = ["method_ppml-test-8-z-%04d.png", "cycle"]; } }
 Initial {
    list = ["ppml_test"];
 }
-
-Testing {
-   time_final = 0.00294577296105476;
-}
