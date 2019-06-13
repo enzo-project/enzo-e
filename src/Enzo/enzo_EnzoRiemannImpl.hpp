@@ -3,8 +3,8 @@
 /// @file     enzo_EnzoRiemannImpl.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 16 2019
-/// @brief    [\ref Enzo] Implementation of the Riemann Solver abstract base
-/// class. This class should be subclassed to implement various riemann solvers.
+/// @brief    [\ref Enzo] Implementation of the RiemannImpl which is a class
+/// template that can be specialized to implement various riemann solvers.
 
 #ifndef ENZO_ENZO_RIEMANN_IMPL_HPP
 #define ENZO_ENZO_RIEMANN_IMPL_HPP
@@ -23,9 +23,11 @@
 //   (const enzo_float flux_l[], const enzo_float flux_r[],
 //    const enzo_float prim_l[], const enzo_float prim_r[],
 //    const enzo_float cons_l[], const enzo_float cons_r[],
-//    const field_lut prim_lut, const field_lut cons_lut, const int n_keys,
+//    const enzo_float pressure_l, const enzo_float pressure_r,
+//    const EnzoAdvectionFieldLUT lut, const int n_keys,
 //    const bool barotropic_eos, const enzo_float gamma,
-//    const enzo_float isothermal_cs, const int iz, const int iy, const int ix,
+//    const enzo_float isothermal_cs,
+//    const int iz, const int iy, const int ix,
 //    EFlt3DArray flux_arrays[], enzo_float scratch_space[]);
 //
 //   This function computes the Riemann Flux at a given cell interface. flux_l,
@@ -55,92 +57,101 @@
 //    Solver under the appropriate conditions
 
 
-// To allow for easily adding additional fields with non-trivial flux
-// calculations (e.g. cosmic rays or possibly internal energy), the
-// constructor will accept an array of functors, subclassed from FluxFunctor
-// - If the functors are too slow, we could hardcode the functions into the
-//   Riemann Solver or we could specify the functors as variadic template
-//   arguments (allowing operator() to be inlined within the for loop)
-// - this should just be replaced with hard coded function within
-//   RiemannSolver::solve or some use of variadic templates (maybe a tuple).
-//   Hard-coding may be the way to go 
-//
-// To add an additional field, add the field to FIELD_TABLE and modify the
-// factory method
-
-class FluxFunctor : public PUP::able
+class EnzoFluxFunctor : public PUP::able
 {
+  /// @class    EnzoFluxFunctor
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Allows for easy implementation of additional
+  ///           non-passively advected (like cosmic rays). Subclasses of this
+  ///           object should be passed to RiemannImpl's constructor
+  ///
+  /// Provides an easy way to add additional fields to RiemannImpl and
+  /// derivatives. The resulting functors simply get called to compute Riemann
+  /// fluxes
+  ///
+  /// It's almost certain that these will be too slow due to the indirection.
+  /// There are 2 main alternatives:
+  ///     - could hardcode the functions into the RiemannImpl or passing some
+  ///       variadic template arguments to RiemannSolver::solve (hardcoding
+  ///       may be the way to go)
+  
 public:
-  FluxFunctor() throw()
+  EnzoFluxFunctor() throw()
   {}
 
-  virtual ~FluxFunctor()
+  virtual ~EnzoFluxFunctor()
   {}
 
   /// CHARM++ PUP::able declaration
-  PUPable_abstract(FluxFunctor);
+  PUPable_abstract(EnzoFluxFunctor);
 
    /// CHARM++ migration constructor for PUP::able
-  FluxFunctor (CkMigrateMessage *m)
+  EnzoFluxFunctor (CkMigrateMessage *m)
     : PUP::able(m)
   {  }
 
   virtual void operator()(const enzo_float prim[], const enzo_float cons[],
-			  enzo_float fluxes[], const field_lut prim_lut,
-			  const field_lut cons_lut)=0;
+			  enzo_float fluxes[], const EnzoRiemannImpl lut)=0;
 };
 
-
-// Below is a brief summary of the derivatives of the FIELD_TABLE XMacro that
-// are employed by EnzoRiemannImpl
+// This should all get moved to separate documentation page on website
+//
+// Below is a brief summary of EnzoRiemannImpl and a brief description of how
+// EnzoAdvectionFieldLUT struct, derived from the FIELD_TABLE XMacro, is used
 //   - The Riemann Solver makes use of two sets of arrays.
 //
 //       1. The first set is made up of arrays of instances of EFlt3DArray.
 //          Within a given array, each instance of EFlt3DArray encapsulates the
 //          data for a different field. The solver uses:
-//            A. arrays of left/right reconstructed primitive fields
-//            B. arrays of left/right reconstructed conserved fields
-//            C. array of fields where the calculated Riemann Flux is stored
+//            A. arrays of left/right reconstructed integrable primitive fields
+//            B. arrays of fields where the calculated Riemann Flux is stored
 //
-//       2. The second set is made up of arrays of instances of enzo_float.
-//          These arrays serve as temporary storage buffers which store 
-//          quantities for a single cell interface. The solver uses
-//            A. arrays of left/right reconstructed primitives quantities
-//            B. arrays of left/right reconstructed conserved quantities
-//            C. arrars of left/right fluxes
+//       2. The second set is made up of arrays of enzo_float. These arrays
+//          serve as temporary storage buffers which store quantities for a
+//          single cell interface. The solver uses
+//            A. arrays of left/right reconstructed integrable primitives
+//            B. arrars of left/right fluxes
+//            C. arrays of left/right reconstructed conserved quantities
+//               (these are computed from the integrable primitives, which may
+//                conserved, specific, or other)
+//
+//     The left and right pressures are also used. These are passed in
+//     separately and computed ahead of time with the equations of state
 //
 //     Each of the above arrays only include quantities that are required for
 //     the calculations of wave speeds or have non-trivial flux calculations.
 //     Passively advected scalars are not included in these arrays (their flux
 //     is computed separately).
 //
-//   - The general code-flow of the RiemannSolver is:
+//   - The general flow of the EnzoRiemannImpl::solve is:
 //
-//       a For a given cell-interface on a grid, the reconstructed primitive
-//         conserved quantites from arrays 1A and 1B into the temporary arrays
-//         2A and 2B.
+//       a For a given cell-interface on a grid, the reconstructed integrator
+//         primitives are copied from arrays 1A into the temporary array 2A.
 //
-//       b The standard MHD fluxes are computed at that location and saved into
+//       b The conserved quantities in array 2C are calculated/copied from the
+//         quantities in array 2A. (Integrable primitives are classified as
+//         conserved, specific, and other. For now, we just copy the quantities
+//         in other over to the array of quantities in conserved)
+//
+//       c The standard MHD fluxes are computed at that location and saved into
 //         the arrays left/right fluxes.
 //
-//       c Optional functions are also applied to compute additional left/right
+//       d Optional functions are also applied to compute additional left/right
 //         fluxes. Pointers to these functions are specified upon construction
 //         of the solver and are used for non-standard fluxes (e.g. cosmic ray
 //         energy/fluxes)
 //
-//       d This step is implemented in a virtual function implemented by a
-//         subclass. The wavespeeds at the current interface is computed.
-//         Then for each conserved (non-passive scalar) field, the array of
-//         Riemann Flux (1C) at the current interface, is set equal to the
-//         flux computed from the left/right reconstructed conserved values
-//         (2B) and left/right fluxes (2C). This is achieved by iterating over
-//         the indices of each array simultaneously.
+//       e This step is implemented in static functions of the ImplStruct
+//         template argument. The wavespeeds at the current interface is
+//         are computed, and the total riemann fluxes are computed at the
+//         interface. The calculation of the total fluxes are achieved by
+//         iterating over the conserved and flux quantities
 //
-//   - Use of the following field_lut struct:
+//   - Use of the following EnzoAdvectionFieldLUT struct:
 //
 //       - The calculation of fluxes and wave speeds requires random access of
 //         specific fields. We also need to be able to iterate over the entries
-//         of multiple arrays simultaneously (e.g. to accomplish part d, above)
+//         of multiple arrays simultaneously (e.g. to accomplish part e, above)
 //         Unlike Enzo, we wanted to avoid statically declaring which indices
 //         correspond to which fields (adding additional sets of fields, like
 //         internal energy and cosmic ray energy/fluxes becomes harder)
@@ -150,48 +161,52 @@ public:
 //           - For a SCALAR, the member name directly matches the name in
 //             column 1
 //           - For a VECTOR, there are 3 members: {name}_i, {name}_j, {name}_k
-//             ({name} cooresponds to the name appearing in column 1)
-//         Each struct contains members named for all quantities in the table
-//         (it includes conserved AND primitive quantites).
+//             ({name} corresponds to the name appearing in column 1)
+//         Each struct contains members named advection-related (related to
+//         reconstruction or riemann fluxes) quantities in the table.
 //
-//       - Example: If we have an array of reconstructed primitives, wl, and
-//         an instance of field_lut, prim_lut, that stores the indices of
-//         primitives, then wl[prim_lut.density] and wl[prim_lut.pressure]
-//         indicates the entries reserved for density and pressure (an
-//         instance of field_lut storing indices for conserved quantities
-//         would also indicate the index where density - since density is BOTH
-//         conserved AND primitive)
+//       - Example: If we have an array of reconstructed integrable primitives,
+//         wl, and an initialized instance of EnzoAdvectionFieldLUT, lut,
+//         then wl[prim_lut.density] and wl[prim_lut.total_energy]
+//         indicates the entries reserved for the density and (specific)
+//         total energy
 //
-//       - Given an instance of EnzoFieldConditions, the prepare_conserved_lut
-//         function yields an initialized instance of field_lut and the
-//         the length necessary for an array to hold values related to
-//         conserved quantities. All members of field_lut corresponding to
-//         conserved quantities are set equal to consectuive integers starting
-//         from 0 (All members that don't correspond to conserved quantites
-//         are set to -1).
-//
-//       - prepare_primitive_lut is analogous to prepare_conserved_lut except
-//         it applies to primitive quantities
+//       - EnzoCenteredFieldRegistry::prepare_advection_lut is used to
+//         prepare the lookup table for pre-specified quantities and determines
+//         the length of an array large enough to hold fields representing all
+//         of the quantities. The function then initializes all members of the
+//         struct to be equal to quantities from 0 through 1 less than the
+//         length of an arrays and organizes them based on whether the quanitiy
+//         is conserved, specific, or other. The function also yields the
+//         indices required to just iterate over each category of field. All
+//         members of the struct that don't correspond to a specified quantity
+//         are set to -1
 //     
 //       - load_array_of_fields constructs an array of instances of EFlt3DArray
-//         that correspond to reconstructed primitive fields, reconstructed
-//         conserved fields OR flux fields. The function requires a pointer to
-//         an instance of Block, the relevant initialized field_lut, the
-//         length of the output field, an instance of grouping (group names
-//         must match the relevant quantity names) and the direction along
-//         which we are computing fluxes
+//         that correspond to reconstructed integrable primitive fields OR flux
+//         fields. The ordering of the fields is determined by the supplied
+//         instance of EnzoAdvectionFieldLUT
 
 
-// To check that the static methods of ImplStruct are appropriately defined,
-// we follow https://stackoverflow.com/a/23133787
-#define DEFINE_HAS_SIGNATURE(traitsName, funcName, signature)               \
+//----------------------------------------------------------------------
+/// @def      DEFINE_HAS_SIGNATURE
+/// @brief    Macro that is used to define a struct (whose name is passed as
+///           the traitsName) that is used to check if a given class definition
+///           has a static function with a specified name (passed as the
+///           func_name argument of this macro) and function signature (passed
+///           as the signature arguement)
+///
+/// This macro comes from https://stackoverflow.com/a/23133787 and is used
+/// create structs to help check if the template argument of EnzoRiemannImpl
+/// has the correct functions defined.
+#define DEFINE_HAS_SIGNATURE(traitsName, func_name, signature)              \
   template <typename U>                                                     \
   class traitsName                                                          \
   {                                                                         \
   private:                                                                  \
     template<typename T, T> struct helper;                                  \
     template<typename T>                                                    \
-    static std::uint8_t check(helper<signature, &funcName>*);               \
+    static std::uint8_t check(helper<signature, &func_name>*);              \
     template<typename T> static std::uint16_t check(...);                   \
   public:                                                                   \
     static                                                                  \
@@ -202,10 +217,11 @@ DEFINE_HAS_SIGNATURE(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
 		     void (*)(const enzo_float[], const enzo_float[],
 			      const enzo_float[], const enzo_float[],
 			      const enzo_float[], const enzo_float[],
-			      const field_lut, const field_lut, const int,
+			      const enzo_float, const enzo_float,
+			      const field_lut, const int,
 			      const bool, const enzo_float, const enzo_float,
-			      const int, const int, const int, EFlt3DArray[],
-			      enzo_float[]));
+			      const int, const int, const int,
+			      EFlt3DArray[], enzo_float[]));
 DEFINE_HAS_SIGNATURE(has_scratch_space_length, T::scratch_space_length,
 		     int (*)(const int));
 
@@ -215,7 +231,10 @@ class EnzoRiemannImpl : public EnzoRiemann
   /// @class    EnzoRiemannImpl
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Provides implementation of approximate Riemann
-  /// Solvers
+  ///           Solvers
+  ///
+  /// @tparam ImplStruct The struct used to specialize EnzoRiemannImpl
+
 
   // The following assertions are first checked when the appropriate .def.h
   // (generated by charm) is included
@@ -229,9 +248,20 @@ class EnzoRiemannImpl : public EnzoRiemann
 public: // interface
 
   /// Constructor
-  EnzoRiemannImpl(EnzoFieldConditions cond,
-		  std::vector<std::string> &extra_passive_groups,
-		  FluxFunctor** flux_funcs, int n_funcs);
+  ///
+  /// @param integrable_groups A vector of integrable quantities (listed as
+  ///     advected quantities in FIELD_TABLE). These are used as group names in
+  ///     the Grouping objects that store field names. In effect this is used
+  ///     to register the quantities operated on by the Riemann Solver
+  /// @param passive_groups A vector with the names of the groups of passively
+  ///     advected scalars that may be included. (If a group is listed here but
+  ///     the Grouping object doesn't actually provide any fields in the group,
+  ///     no problems are caused
+  /// @param flux_funcs pointer to an array of instances of EnzoFluxFunctor
+  /// @param n_funcs the size of the array of flux functors
+  EnzoRiemannImpl(std::vector<std::string> integrable_groups,
+		  std::vector<std::string> passive_groups,
+		  EnzoFluxFunctor** flux_funcs, int n_funcs);
 
   /// Virtual destructor
   virtual ~EnzoRiemannImpl();
@@ -248,8 +278,8 @@ public: // interface
   void pup (PUP::er &p);
 
   void solve (Block *block, Grouping &priml_group, Grouping &primr_group,
-	      Grouping &flux_group, Grouping &consl_group,
-	      Grouping &consr_group, int dim, EnzoEquationOfState *eos,
+	      std::string pressure_name_l, std::string pressure_name_r,
+	      Grouping &flux_group, int dim, EnzoEquationOfState *eos,
 	      int stale_depth);
 
 protected : //methods
@@ -259,37 +289,60 @@ protected : //methods
 				Grouping &primr_group, Grouping &flux_group,
 				EFlt3DArray &density_flux, int dim);
 
+  /// Computes the conserved counterpart for every integrable primitive.
+  /// Integrable primitives are categorized as conserved, specific, and other
+  ///
+  /// quantities classified as conserved are copied, quantities classified as
+  /// primitive are multiplied by density, and for simplicity, quantities
+  /// classified as other are copied (There are no obvious cases where there
+  /// should ever be a quanitity classified as other
+  void compute_cons_(const enzo_float prim[], enzo_float cons[]);
+
+  
   /// computes fluxes for the basic mhd conserved quantities - density,
   /// momentum, energy, magnetic fields  
   void basic_mhd_fluxes_(const enzo_float prim[], const enzo_float cons[],
-			 enzo_float fluxes[], const field_lut prim_lut,
-			 const field_lut cons_lut);
+			 const enzo_float pressure, enzo_float fluxes[]);
+private: //methods
+
+  /// Helper function that simply sets up the lookup table
+  void setup_lut_()
+  {
+    EnzoCenteredFieldRegistry registry;
+    lut_ = registry.prepare_advection_lut(integrable_groups_,
+					  conserved_start_, conserved_stop_,
+					  specific_start_, specific_stop_,
+					  other_start_, other_stop_, n_keys);
+  }
 
 protected: //attributes
 
-  /// Conditions of the calculation used to initialized instances of field_lut
-  EnzoFieldConditions conditions_;
+  /// Names of the quantities to advect
+  std::vector<std::string> integrable_groups_;
 
-  /// struct lookup-table that maps conserved field names to indices
-  field_lut cons_lut_;
+  /// struct lookup-table that maps integrable primitive field names to indices
+  EnzoAdvectionFieldLUT lut_;
 
-  /// struct lookup-table that maps primitive field names to indices
-  field_lut prim_lut_;
+  /// Number of integrable primitive keys (fields) in lut_
+  int n_keys_;
 
-  /// Number of conserved keys (fields) in cons_lut_
-  int n_cons_keys_;
+  /// Indices used to iterate over conserved, specific, other categorized
+  /// quantities and stop
+  int conserved_start_;
+  int conserved_stop_;
+  int specific_start_;
+  int specific_stop_;
+  int other_start_;
+  int other_stop_;
 
-  /// Number of primitive keys (fields) in prim_lut_
-  int n_prim_keys_;
-
-  /// Names of the passively advected groups of fields (e.g. colors)
+  /// Names of the passively advected groups of fields (e.g. colours)
   std::vector<std::string> passive_groups_;
 
   /// number of flux functors
   int n_funcs_;
 
   /// array of pointers to functors used to compute fluxes
-  FluxFunctor** flux_funcs_;
+  EnzoFluxFunctor** flux_funcs_;
 
 };
 
@@ -297,20 +350,26 @@ protected: //attributes
 
 template <class ImplStruct>
 EnzoRiemannImpl<ImplStruct>::EnzoRiemannImpl
-(EnzoFieldConditions cond, std::vector<std::string> &passive_groups,
- FluxFunctor** flux_funcs, int n_funcs)
+(std::vector<std::string> integrable_groups,
+ std::vector<std::string> passive_groups,
+ EnzoFluxFunctor** flux_funcs, int n_funcs)
   : EnzoRiemann()
 {
-  conditions_ = cond;
-  EnzoCenteredFieldRegistry registry;
-  cons_lut_ = registry.prepare_cons_lut(conditions_, &n_cons_keys_);
-  prim_lut_ = registry.prepare_prim_lut(conditions_, &n_prim_keys_);
+  // Quick sanity check - integrable_groups must have density and velocity
+  ASSERT("EnzoRiemannImpl","integrable_groups must contain \"density\"",
+	 std::find(integrable_groups.begin(), integrable_groups.end(),
+		   "density") != integrable_groups.end());
+  ASSERT("EnzoRiemannImpl","integrable_groups must contain \"velocity\"",
+	 std::find(integrable_groups.begin(), integrable_groups.end(),
+		   "velocity") != integrable_groups.end());
 
-  // construct vector of all groups of passively advected fields
-  std::vector<std::string> passive_groups_ = passive_groups;
+  integrable_groups_ = integrable_groups;
+  passive_groups_ = passive_groups;
 
   n_funcs_ = n_funcs;
   flux_funcs_ = flux_funcs;
+
+  setup_lut_();
 }
 
 //----------------------------------------------------------------------
@@ -333,10 +392,8 @@ void EnzoRiemannImpl<ImplStruct>::pup (PUP::er &p)
 
   p|conditions_;
   if (p.isUnpacking()){
-    // avoiding PUPing field_luts
-    EnzoCenteredFieldRegistry registry;
-    cons_lut_ = registry.prepare_cons_lut(conditions_, &n_cons_keys_);
-    prim_lut_ = registry.prepare_prim_lut(conditions_, &n_prim_keys_);
+    // avoiding PUPing lookup table
+    setup_lut_();
   }
 
   p|passive_groups_;
@@ -344,7 +401,7 @@ void EnzoRiemannImpl<ImplStruct>::pup (PUP::er &p)
   p|n_funcs_;
 
   if (p.isUnpacking()){
-    flux_funcs_ = new FluxFunctor*[n_funcs_];
+    flux_funcs_ = new EnzoFluxFunctor*[n_funcs_];
   }
   for (int i = 0; i<n_funcs_;i++){
     p|flux_funcs_[i];
@@ -356,10 +413,10 @@ void EnzoRiemannImpl<ImplStruct>::pup (PUP::er &p)
 template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::solve
 (Block *block, Grouping &priml_group, Grouping &primr_group,
- Grouping &flux_group, Grouping &consl_group, Grouping &consr_group,
- int dim, EnzoEquationOfState *eos, int stale_depth)
+ std::string pressure_name_l, std::string pressure_name_r,
+ Grouping &flux_group, int dim, EnzoEquationOfState *eos, int stale_depth)
 {
-  
+
   const bool barotropic = eos->is_barotropic();
   // if not barotropic then the following doesn't have to be reasonable
   const enzo_float isothermal_cs = eos->get_isothermal_sound_speed();
@@ -369,30 +426,39 @@ void EnzoRiemannImpl<ImplStruct>::solve
 
   // When barotropic equations of state are eventually introduced, all eos
   // dependencies should be moved up here
-  ASSERT("EnzoRiemannImpl", "currently no support for barotropic eos",
+  ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
 	 !barotropic);
-  
-  EnzoCenteredFieldRegistry registry;
-  EFlt3DArray *wl_arrays, *wr_arrays, *ul_arrays, *ur_arrays, *flux_arrays;
 
-  wl_arrays = registry.load_array_of_fields(block, prim_lut_, n_prim_keys_,
+  ASSERT("EnzoRiemannImpl::solve",
+	 "currently no support for dual energy formalism",
+	 !eos->uses_dual_energy_formalism());
+
+  // Let's load in the precomputed pressure 
+  EFlt3DArray pressure_array_l, pressure_array_r;
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
+  pressure_array_l = array_factory.reconstructed_from_name(pressure_name_l,
+							   dim);
+  pressure_array_r = array_factory.reconstructed_from_name(pressure_name_r,
+							dim);
+
+  EnzoCenteredFieldRegistry registry;
+  EFlt3DArray *wl_arrays, *wr_arrays, *flux_arrays;
+
+  wl_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
 					    priml_group, dim);
-  wr_arrays = registry.load_array_of_fields(block, prim_lut_, n_prim_keys_,
+  wr_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
 					    primr_group, dim);
-  ul_arrays = registry.load_array_of_fields(block, cons_lut_, n_cons_keys_,
-					    consl_group, dim);
-  ur_arrays = registry.load_array_of_fields(block, cons_lut_, n_cons_keys_,
-					    consr_group, dim);
-  flux_arrays = registry.load_array_of_fields(block, cons_lut_, n_cons_keys_,
+  flux_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
 					      flux_group, dim);
 
   enzo_float *wl, *wr, *Ul, *Ur, *Fl, *Fr;
-  wl = new enzo_float[n_prim_keys_];  wr = new enzo_float[n_prim_keys_];
-  Ul = new enzo_float[n_cons_keys_];  Ur = new enzo_float[n_cons_keys_];
-  Fl = new enzo_float[n_cons_keys_];  Fr = new enzo_float[n_cons_keys_];
+  wl = new enzo_float[n_keys_];    wr = new enzo_float[n_keys_];
+  Ul = new enzo_float[n_keys_];    Ur = new enzo_float[n_keys_];
+  Fl = new enzo_float[n_keys_];    Fr = new enzo_float[n_keys_];
 
+  // prepare optional scratch space to be used by ImplStruct
   enzo_float *scratch_space = NULL;
-  int scratch_space_length = ImplStruct::scratch_space_length(n_cons_keys_);
+  int scratch_space_length = ImplStruct::scratch_space_length(n_keys_);
   if (scratch_space_length>0){
     scratch_space = new enzo_float[scratch_space_length];
   }
@@ -412,14 +478,18 @@ void EnzoRiemannImpl<ImplStruct>::solve
 	  wl[field_ind] = wl_arrays[field_ind](iz,iy,ix);
 	  wr[field_ind] = wr_arrays[field_ind](iz,iy,ix);
 	}
-	for (int field_ind=0; field_ind<n_cons_keys_; field_ind++){
-	  Ul[field_ind] = ul_arrays[field_ind](iz,iy,ix);
-	  Ur[field_ind] = ur_arrays[field_ind](iz,iy,ix);
-	}
+
+	// get the left/right pressure
+	enzo_float pressure_l = pressure_array_l(iz,iy,ix);
+	enzo_float pressure_r = pressure_array_r(iz,iy,ix);
+
+	// get the conserved quantities
+	compute_cons_(wl, Ul);
+	compute_cons_(wr, Ur);
 
 	// compute the interface fluxes
-	basic_mhd_fluxes_(wl, Ul, Fl, prim_lut_, cons_lut_);
-	basic_mhd_fluxes_(wr, Ur, Fr, prim_lut_, cons_lut_);
+	basic_mhd_fluxes_(wl, Ul, pressure_l, Fl);
+	basic_mhd_fluxes_(wr, Ur, pressure_r, Fr);
 
 	// iterate over the functors
 	for (int i = 0; i<n_funcs_; i++){
@@ -430,7 +500,7 @@ void EnzoRiemannImpl<ImplStruct>::solve
 
 	// Now compute the Riemann Fluxes
 	ImplStruct::calc_riemann_fluxes(Fl, Fr, wl, wr, Ul, Ur,
-					prim_lut_, cons_lut_, n_cons_keys_,
+				        pressure_l, pressure_r, lut_, n_keys_,
 					barotropic, gamma, isothermal_cs, iz,
 					iy, ix, flux_arrays, scratch_space);
 
@@ -555,41 +625,69 @@ void EnzoRiemannImpl<ImplStruct>::solve_passive_advection_
 //----------------------------------------------------------------------
 
 template <class ImplStruct>
+void EnzoRiemannImpl<ImplStruct>::compute_cons_(const enzo_float prim[],
+						enzo_float cons[])
+{
+  enzo_float density = prim[lut_.density];
+
+  // includes density, bfields, ...
+  for (int i= conserved_start_; i<conserved_stop_; i++){
+    cons[i] = prim[i];
+  }
+
+  // includes velocities, specific total energy, ...
+  for (int i= specific_start_; i<specific_stop_; i++){
+    cons[i] = density * prim[i];
+  }
+
+  // I don't think this should include anything
+  for (int i= other_start_; i<other_stop_; i++){
+    other[i] = prim[i];
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::basic_mhd_fluxes_
-(const enzo_float prim[], const enzo_float cons[], enzo_float fluxes[],
- const field_lut prim_lut, const field_lut cons_lut)
+(const enzo_float prim[], const enzo_float cons[], const enzo_float pressure,
+ enzo_float fluxes[])
 {
   // This assumes that MHD is included
+  // not currently equipped for barotropic OR dual energy formalism
+  
   // This may be better handled by the EquationOfState
   enzo_float vi, vj, vk, p, Bi, Bj, Bk, etot, mag_pressure;
-  vi = prim[prim_lut.velocity_i];
-  vj = prim[prim_lut.velocity_j];
-  vk = prim[prim_lut.velocity_k];
-  p  = prim[prim_lut.pressure];
-  Bi = prim[prim_lut.bfield_i];
-  Bj = prim[prim_lut.bfield_j];
-  Bk = prim[prim_lut.bfield_k];
+  vi = prim[lut_.velocity_i];
+  vj = prim[lut_.velocity_j];
+  vk = prim[lut_.velocity_k];
+  Bi = prim[lut_.bfield_i];
+  Bj = prim[lut_.bfield_j];
+  Bk = prim[lut_.bfield_k];
+  etot = cons[lut_.total_energy];
+
+  p  = pressure;
 
   mag_pressure = mag_pressure_(prim, prim_lut);
 
   // Compute Fluxes
-  enzo_float pi = cons[cons_lut.momentum_i];
-  fluxes[cons_lut.density] = pi;
+  enzo_float pi = cons[lut_.velocity_i];
+  fluxes[lut_.density] = pi;
 
   // Fluxes for Mx, My, Mz
-  fluxes[cons_lut.momentum_i] = pi*vi - Bi*Bi + p + mag_pressure;
-  fluxes[cons_lut.momentum_j] = pi*vj - Bj*Bi;
-  fluxes[cons_lut.momentum_k] = pi*vk - Bk*Bi;
+  fluxes[lut_.velocity_i] = pi*vi - Bi*Bi + p + mag_pressure;
+  fluxes[lut_.velocity_j] = pi*vj - Bj*Bi;
+  fluxes[lut_.velocity_k] = pi*vk - Bk*Bi;
 
   // Flux for etot
-  etot = cons[cons_lut.total_energy];
-  fluxes[cons_lut.total_energy] = ((etot + p + mag_pressure)*vi
-				  - (Bi*vi + Bj*vj + Bk*vk)*Bi);
+  fluxes[lut_.total_energy] = ((etot + p + mag_pressure)*vi
+			       - (Bi*vi + Bj*vj + Bk*vk)*Bi);
 
   // Fluxes for Bi,Bj,Bk
-  fluxes[cons_lut.bfield_i] = 0;
-  fluxes[cons_lut.bfield_j] = Bj*vi - Bi*vj;
-  fluxes[cons_lut.bfield_k] = Bk*vi - Bi*vk;
+  fluxes[lut_.bfield_i] = 0;
+  fluxes[lut_.bfield_j] = Bj*vi - Bi*vj;
+  fluxes[lut_.bfield_k] = Bk*vi - Bi*vk;
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

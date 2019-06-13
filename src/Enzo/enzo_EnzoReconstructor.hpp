@@ -21,8 +21,19 @@ public: // interface
 
   /// Factory method for constructing EnzoReconstructor
   /// (The signature of this method may need to be modified)
+  /// @param reconstructable_groups A vector of reconstructable quantities
+  ///     (that are also listed in FIELD_TABLE). These are used as group names
+  ///     in the Grouping objects that store field names. In effect this is
+  ///     used to register the quantities operated on by the Reconstructor
+  /// @param passive_groups A vector with the names of the groups of passively
+  ///     advected scalars that may be included. (If a group is listed here but
+  ///     the Grouping object doesn't actually provide any fields in the group,
+  ///     no problems are caused)
+  /// @param solver The name of the Riemann solver to use. Valid names include
+  ///     "nn" and "plm"
   static EnzoReconstructor* construct_reconstructor
-  (std::string name, const EnzoFieldConditions cond);
+    (std::vector<std::string> reconstructable_groups,
+     std::vector<std::string> passive_groups, std::string solver);
 
   /// Create a new EnzoReconstructor
   EnzoReconstructor(std::vector<std::string> group_names) throw()
@@ -49,19 +60,23 @@ public: // interface
   }
 
   /// Reconstructs the interface values
+  ///
   /// @param block holds data to be processed
-  /// @param prim_group holds field names of cell-centered primitives
-  /// @param priml_group,primr_group holds field names where reconstructed
-  ///  left/right face-centered primitives will be stored. The relevant fields
-  ///  should be formally defined as cell-centered (to allow for reuse). During
-  ///  the calculation, they are treated as face-centered (without having
-  ///  values on the exterior faces of the block). Consequentially there will
-  ///  be some unused space at the end of the arrays.  
+  /// @param prim_group holds field names of the cell-centered reconstructable
+  ///     primitives. This object is expected to have Grouping matching the
+  ///     names registerred with the factory method
+  /// @param priml_group,primr_group holds field names where the reconstructed
+  ///     left/right face-centered primitives will be stored. The relevant
+  ///     fields should be formally defined as cell-centered (to allow for
+  ///     reuse along multiple dimensions). During the calculation, they are
+  ///     treated as face-centered (without having values on the exterior faces
+  ///     of the block). Consequentially there will be some unused space at the
+  ///     end of the arrays.  
   /// @param dim Dimension along which to reconstruct interface values. Values
-  ///  of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
-  /// @param eos Instance of the fluid's EnzoEquationOfState object
+  ///     of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
+  /// @param eos Pointer to an instance of EnzoEquationOfState object
   /// @param stale_depth indicates the current stale_depth for the supplied
-  ///  cell-centered quantities
+  ///     cell-centered quantities
   virtual void reconstruct_interface (Block *block, Grouping &prim_group,
 				      Grouping &priml_group,
 				      Grouping &primr_group, int dim,

@@ -20,7 +20,7 @@ void EnzoEOSIdeal::pup (PUP::er &p)
 }
 
 //----------------------------------------------------------------------
-
+/*
 // Would eventually like this to just wrap the compute_pressure object
 void EnzoEOSIdeal::compute_pressure(Block *block, Grouping &cons_group,
 				    Grouping &prim_group, int stale_depth)
@@ -61,122 +61,286 @@ void EnzoEOSIdeal::compute_pressure(Block *block, Grouping &cons_group,
     }
   }
 }
-
+*/
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::primitive_from_conservative(Block *block,
-					       Grouping &cons_group,
-					       Grouping &prim_group,
-					       int stale_depth)
+// Helper function that performs a quick check to confirm that certain fields
+// are  by both reconstructable_group and integrable_group
+void confirm_same_fields_(Grouping &grouping_ref, Grouping &grouping_check,
+			  std::string ref_name, std::string check_name,
+			  std::vector<std::string> group_names,
+			  std::string func_name)
 {
-  compute_pressure(block, cons_group, prim_group, stale_depth);
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
-  EFlt3DArray cons_density, px, py, pz, cons_bx, cons_by, cons_bz;
-  cons_density = array_factory.from_grouping(cons_group, "density", 0);
-  px = array_factory.from_grouping(cons_group, "momentum", 0);
-  py = array_factory.from_grouping(cons_group, "momentum", 1);
-  pz = array_factory.from_grouping(cons_group, "momentum", 2);
-  cons_bx = array_factory.from_grouping(cons_group, "bfield", 0);
-  cons_by = array_factory.from_grouping(cons_group, "bfield", 1);
-  cons_bz = array_factory.from_grouping(cons_group, "bfield", 2);
+  for (std::size_t i = 0; i<group_names.size(); i++){
+    std::string group_name = group_names[i];
+    int num_ref_fields = grouping_ref.size(group_name);
+    int num_check_fields = grouping_check.size(group_name);
 
-  EFlt3DArray prim_density, vx, vy, vz, prim_bx, prim_by, prim_bz;
-  prim_density = array_factory.from_grouping(prim_group, "density", 0);
-  vx = array_factory.from_grouping(prim_group, "velocity", 0);
-  vy = array_factory.from_grouping(prim_group, "velocity", 1);
-  vz = array_factory.from_grouping(prim_group, "velocity", 2);
-  prim_bx = array_factory.from_grouping(prim_group, "bfield", 0);
-  prim_by = array_factory.from_grouping(prim_group, "bfield", 1);
-  prim_bz = array_factory.from_grouping(prim_group, "bfield", 2);
+    ASSERT3(func_name.c_str(),
+	    ("%s and %s groupings must have the same number of entries "
+	     "for the %s group"),
+	    ref_name.c_str(), check_name.c_str(), group_name.c_str(),
+	    num_ref_fields == num_check_fields);
 
-  for (int iz=0; iz<cons_density.shape(0); iz++) {
-    for (int iy=0; iy<cons_density.shape(1); iy++) {
-      for (int ix=0; ix<cons_density.shape(2); ix++) {
+    for (int j=0;j<num_fields;j++){
+      std::string ref_field = grouping_ref.item(group_name,j);
+      std::string check_field = grouping_check.item(group_name,j);
 
-	enzo_float density = cons_density(iz,iy,ix);
-	prim_density(iz,iy,ix) = density;
-	vx(iz,iy,ix) = px(iz,iy,ix)/density;
-	vy(iz,iy,ix) = py(iz,iy,ix)/density;
-	vz(iz,iy,ix) = pz(iz,iy,ix)/density;
-	prim_bx(iz,iy,ix) = cons_bx(iz,iy,ix);
-	prim_by(iz,iy,ix) = cons_by(iz,iy,ix);
-	prim_bz(iz,iy,ix) = cons_bz(iz,iy,ix);
-      }
+      ASSERT4(func_name.c_str(),
+	      ("Field %d of the %s group is expected to have the same name in "
+	       "the %s and %s groupings"),
+	      j, group_name.c_str(), ref_name.c_str(), check_name.c_str(),
+	      ref_field == check_field);
     }
   }
-  // Copy conserved passive fields to primitive
-  copy_passively_advected_fields_(array_factory, cons_group, prim_group);
+}
+
+void check_recon_integ_overlap_(Grouping &recon_grouping,
+				Grouping &integ_grouping,
+				std::string func_name)
+{
+  // We assume that the following groups are represented by the same fields in
+  // integrable and reconstructable
+  std::vector<std::string> common_groups = {"density", "velocity", "bfield"};
+
+  // we also expect overlap with the passive scalars
+  EnzoCenteredFieldRegistry reg;
+  std::vector<std::string> scalar_groups = reg.passive_scalar_group_names();
+  common_groups.insert(common_groups.end(), scalar_groups.begin(),
+		       scalar_groups.end());
+    
+  confirm_same_fields_(integrable_group, reconstructable_group,
+		       "integrable", "reconstructable", common_groups,
+		       func_name);
 }
 
 //----------------------------------------------------------------------
 
-void EnzoEOSIdeal::conservative_from_primitive(Block *block,
-					       Grouping &prim_group,
-					       Grouping &cons_group,
-					       int stale_depth,
-					       int reconstructed_axis)
+void EnzoEOSIdeal::reconstructable_from_integrable
+  (Block *block, Grouping &integrable_group, Grouping &reconstructable_group,
+   int stale_depth)
 {
+
+  if (this->uses_dual_energy_formalism()){
+    // If dual energy formalism is used then nothing should happen here
+    // Just to be safe though, we are raising this error for now
+    ERROR("EnzoEOSIdeal::reconstructable_from_integrable",
+	  "dual energy formalism is not yet implemented.");
+
+    // In this case we should confirm that the same internal energy field is
+    // tracked in both cases
+  }
+
+  // Confirm that the relevant fields overlap as expected
+  check_recon_integ_overlap_(reconstructable_group, integrable_grouping,
+			     "EnzoEOSIdeal::reconstructable_from_integrable")
+
   EnzoFieldArrayFactory array_factory(block, stale_depth);
-  EFlt3DArray prim_density, vx, vy, vz, pressure;
-  EFlt3DArray prim_bx, prim_by, prim_bz;
 
-  int rec_ax = reconstructed_axis;
-  prim_density = retrieve_field_(array_factory, prim_group, "density", 0,
-				 rec_ax);
-  vx = retrieve_field_(array_factory, prim_group, "velocity", 0, rec_ax);
-  vy = retrieve_field_(array_factory, prim_group, "velocity", 1, rec_ax);
-  vz = retrieve_field_(array_factory, prim_group, "velocity", 2, rec_ax);
-  pressure = retrieve_field_(array_factory, prim_group, "pressure", 0, rec_ax);
-  prim_bx = retrieve_field_(array_factory, prim_group, "bfield", 0, rec_ax);
-  prim_by = retrieve_field_(array_factory, prim_group, "bfield", 1, rec_ax);
-  prim_bz = retrieve_field_(array_factory, prim_group, "bfield", 2, rec_ax);
+  EFlt3DArray density, vx, vy, vz, etot, bx, by, bz;
+  density = array_factory.from_grouping(integrable_group, "density", 0);
+  vx = array_factory.from_grouping(integrable_group, "velocity", 0);
+  vy = array_factory.from_grouping(integrable_group, "velocity", 1);
+  vz = array_factory.from_grouping(integrable_group, "velocity", 2);
+  etot = array_factory.from_grouping(integrable_group, "total_energy", 0);
+  bx = array_factory.from_grouping(integrable_group, "bfield", 0);
+  by = array_factory.from_grouping(integrable_group, "bfield", 1);
+  bz = array_factory.from_grouping(integrable_group, "bfield", 2);
 
-  EFlt3DArray cons_density, px, py, pz, etot;
-  EFlt3DArray cons_bx, cons_by, cons_bz;
-  cons_density = retrieve_field_(array_factory, cons_group, "density", 0,
-				 rec_ax);
-  px = retrieve_field_(array_factory, cons_group, "momentum", 0, rec_ax);
-  py = retrieve_field_(array_factory, cons_group, "momentum", 1, rec_ax);
-  pz = retrieve_field_(array_factory, cons_group, "momentum", 2, rec_ax);
-  etot = retrieve_field_(array_factory, cons_group, "total_energy", 0, rec_ax);
-  cons_bx = retrieve_field_(array_factory, cons_group, "bfield", 0, rec_ax);
-  cons_by = retrieve_field_(array_factory, cons_group, "bfield", 1, rec_ax);
-  cons_bz = retrieve_field_(array_factory, cons_group, "bfield", 2, rec_ax);
+  EFlt3DArray eint = array_factory.from_grouping(reconstructable_group,
+						 "internal_energy", 0);
 
-  enzo_float inv_gm1 = 1./(get_gamma()-1.);
+  for (int iz=0; iz<density.shape(0); iz++) {
+    for (int iy=0; iy<density.shape(1); iy++) {
+      for (int ix=0; ix<density.shape(2); ix++) {
 
-  // It's okay that this function is used for computing face-centered temporary
-  // interior fields
-  for (int iz=0; iz<cons_density.shape(0); iz++) {
-    for (int iy=0; iy<cons_density.shape(1); iy++) {
-      for (int ix=0; ix<cons_density.shape(2); ix++) {
-
-	enzo_float density = prim_density(iz,iy,ix);
-
-	cons_density(iz,iy,ix) = density;
-	px(iz,iy,ix) = vx(iz,iy,ix)*density;
-	py(iz,iy,ix) = vy(iz,iy,ix)*density;
-	pz(iz,iy,ix) = vz(iz,iy,ix)*density;
-
+	// compute specific kinetic and magnetic energies
 	enzo_float kinetic, magnetic;
 	kinetic = 0.5*(vx(iz,iy,ix) * vx(iz,iy,ix) +
 		       vy(iz,iy,ix) * vy(iz,iy,ix) +
-		       vz(iz,iy,ix) * vz(iz,iy,ix))*density;
-	magnetic = 0.5*(prim_bx(iz,iy,ix) * prim_bx(iz,iy,ix) +
-			prim_by(iz,iy,ix) * prim_by(iz,iy,ix) +
-			prim_bz(iz,iy,ix) * prim_bz(iz,iy,ix));
-	etot(iz,iy,ix) = pressure(iz,iy,ix) * inv_gm1 + kinetic + magnetic;
-
-	cons_bx(iz,iy,ix) = prim_bx(iz,iy,ix);
-	cons_by(iz,iy,ix) = prim_by(iz,iy,ix);
-	cons_bz(iz,iy,ix) = prim_bz(iz,iy,ix);
+		       vz(iz,iy,ix) * vz(iz,iy,ix));
+	magnetic = 0.5*(bx(iz,iy,ix) * bx(iz,iy,ix) +
+			by(iz,iy,ix) * by(iz,iy,ix) +
+			bz(iz,iy,ix) * bz(iz,iy,ix)) / density(iz,iy,ix);
+	eint(iz,iy,ix) = etot(iz,iy,ix) - kinetic - magnetic;
       }
     }
   }
-  // Copy primitive passive fields to conserved
-  copy_passively_advected_fields_(array_factory, prim_group, cons_group,
-				  reconstructed_axis);
 }
+
+//----------------------------------------------------------------------
+
+void EnzoEOSIdeal::integrable_from_reconstructable
+  (Block *block, Grouping &reconstructable_group, Grouping &integrable_group,
+   int stale_depth, int reconstructed_axis)
+{
+
+  if (this->uses_dual_energy_formalism()){
+    // If dual energy formalism is used then nothing different should happen
+    // here. We still need to compute total energy from specific internal
+    // energy
+    // However, we should confirm that the internal energy field matches for
+    // both fields
+
+    // For now, we are just going to raise an error
+    ERROR("EnzoEOSIdeal::integrable_from_reconstructable",
+	  "dual energy formalism is not yet implemented.");
+  }
+
+
+  // Confirm that the relevant fields overlap as expected
+  check_recon_integ_overlap_(reconstructable_group, integrable_grouping,
+			     "EnzoEOSIdeal::integrable_from_reconstructable");
+
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
+
+  // Define 2 temporary aliases to shorten code:
+  Grouping recon_group = reconstructable_group;
+  int rec_ax = reconstructed_axis;
+
+  EFlt3DArray density, vx, vy, vz, eint, bx, by, bz;
+
+  density = retrieve_field_(array_factory, recon_group, "density", 0, rec_ax);
+  vx = retrieve_field_(array_factory, recon_group, "velocity", 0, rec_ax);
+  vy = retrieve_field_(array_factory, recon_group, "velocity", 1, rec_ax);
+  vz = retrieve_field_(array_factory, recon_group, "velocity", 2, rec_ax);
+  eint = retrieve_field_(array_factory, recon_group, "internal_energy", 0,
+			 rec_ax);
+  bx = retrieve_field_(array_factory, recon_group, "bfield", 0, rec_ax);
+  by = retrieve_field_(array_factory, recon_group, "bfield", 1, rec_ax);
+  bz = retrieve_field_(array_factory, recon_group, "bfield", 2, rec_ax);
+
+  EFlt3DArray etot = retrieve_field_(array_factory, integrable_group,
+				     "total_energy", 0, rec_ax);
+
+  for (int iz=0; iz<density.shape(0); iz++) {
+    for (int iy=0; iy<density.shape(1); iy++) {
+      for (int ix=0; ix<density.shape(2); ix++) {
+
+	// compute specific kinetic and magnetic energies
+	enzo_float kinetic, magnetic;
+	kinetic = 0.5*(vx(iz,iy,ix) * vx(iz,iy,ix) +
+		       vy(iz,iy,ix) * vy(iz,iy,ix) +
+		       vz(iz,iy,ix) * vz(iz,iy,ix));
+	magnetic = 0.5*(bx(iz,iy,ix) * bx(iz,iy,ix) +
+			by(iz,iy,ix) * by(iz,iy,ix) +
+			bz(iz,iy,ix) * bz(iz,iy,ix)) / density(iz,iy,ix);
+	etot(iz,iy,ix) = etot(iz,iy,ix) + kinetic + magnetic;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoEOSIdeal::pressure_from_integrable(Block *block,
+					    Grouping &integrable_group,
+					    std::string pressure_name,
+					    Grouping &passive_scalars_group,
+					    bool specific_passive_scalars,
+					    int stale_depth)
+{
+
+  if (specific_passive_scalars){
+    // I am currently unaware of a scenario where we might need to compute
+    // thermal pressure from specific_passive_scalars, but I wanted to add it to
+    // the function signature to be explicit
+    ERROR("EnzoEOSIdeal::pressure_from_integrable",
+	  "Not presently equipped to compute pressure with specific scalars");
+  }
+
+  if (this->uses_dual_energy_formalism()){
+    ERROR("EnzoEOSIdeal::pressure_from_integrable",
+	  "dual energy formalism is not yet implemented.");
+  }
+  
+  if (enzo::config()->method_grackle_use_grackle){
+    // I think internal energy may need to be precomputed (does that mean
+    // we should always be using with dual energy formalism?) 
+    ERROR("EnzoEOSIdeal::pressure_from_integrable",
+	  "Not presently equipped to handle grackle");
+
+    // since we are not currently allowing Grackle,  passive scalars are
+    // unimportant
+  }
+
+  // For now, this method just forwards to EnzoComputePressure without
+  // allowing Grackle. In this case EnzoComputePressure only uses the fields
+  //   "density", "velocity_x", "velocity_y", "velocity_z", "total_energy",
+  //   "bfield_x", "bfield_y", "bfield_z"
+
+  // We are going to check that these are the specified fields
+
+  ASSERT("EnzoEOSIdeal::pressure_from_integrable",
+	 "Currently, the supplied grouping must include \"density\"",
+	 integrable_group.is_in( "density", "density"));
+  ASSERT("EnzoEOSIdeal::pressure_from_integrable",
+	 "Currently, the supplied grouping must include \"total_energy\"",
+	 integrable_group.is_in( "total_energy", "total_energy"));
+
+  std::vector<std::string> vel{"velocity_x", "velocity_y", "velocity_z"};
+  std::vector<std::string> b{"bfield_x", "bfield_y", "bfield_z"};
+
+  for (std::size_t i=0; i<3; i++){
+    velocity_name = vel[i];
+    bfield_name   = b[i];
+    ASSERT1("EnzoEOSIdeal::pressure_from_integrable",
+	    "Currently, the supplied grouping must include \"%s\"",
+	    vel[i].c_str(), integrable_group.is_in( vel[i], "velocity"));
+    ASSERT1("EnzoEOSIdeal::pressure_from_integrable",
+	    "Currently, the supplied grouping must include \"%s\"",
+	    b[i].c_str(), integrable_group.is_in( b[i], "bfield"));
+  }
+
+  // assumes that we are not using comoving coordinates
+  EnzoComputePressure compute_pressure (this->get_gamma(),false);
+
+  enzo_float* pressure = (enzo_float*) field.values(pressure_name, i_hist_);
+  compute_pressure(block, pressure);
+}
+
+
+void EnzoEOSIdeal::pressure_from_reconstructable
+(Block *block, Grouping &reconstructable_group, std::string pressure_name,
+ int stale_depth, int reconstructed_axis)
+{
+  // Since the reconstructable primitives never include total_energy (just
+  // internal energy), there is no difference when the dual energy formalism is
+  // adopted
+
+  // A modification may have to be made from having a variable specific heat
+  // ratio
+
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
+  // Load the reconstructed values
+  EFlt3DArray density, eint;
+  density = retrieve_field_(array_factory, reconstructable_group, "density",
+			    0, reconstructed_axis);
+  eint = retrieve_field_(array_factory, reconstructable_group,
+			 "internal_energy",  0, reconstructed_axis);
+
+  // load the pressure - the way we do this is kind of silly (defining a
+  // temporary grouping since reconstructable_group is probably reconstructed), 
+  // but not currently worth modifying the interface of EnzoFieldArrayFactory
+  Grouping temp_group;
+  temp_group.add(pressure_name, "pressure");
+  EFlt3DArray pressure = retrieve_field_(array_factory, temp_group, "pressure",
+					 0, reconstructed_axis);
+
+  enzo_float gm1 = (get_gamma()-1.);
+
+  for (int iz=0; iz<density.shape(0); iz++) {
+    for (int iy=0; iy<density.shape(1); iy++) {
+      for (int ix=0; ix<density.shape(2); ix++) {
+
+	pressure(iz,iy,ix) = gm1 * eint(iz,iy,ix) * density(iz, iy, ix);
+
+      }
+    }
+  }
+
+}
+
 
 //----------------------------------------------------------------------
 
@@ -184,6 +348,7 @@ void EnzoEOSIdeal::conservative_from_primitive(Block *block,
 void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group,
 					 int stale_depth)
 {
+  /// NEED TO UPDATE!
   EnzoFieldArrayFactory array_factory(block,stale_depth);
   EFlt3DArray density, px, py, pz, etot, bx, by, bz;
   density = array_factory.from_grouping(cons_group, "density", 0);

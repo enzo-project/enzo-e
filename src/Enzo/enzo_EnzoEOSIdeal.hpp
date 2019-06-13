@@ -45,38 +45,42 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
 
-  /// Computes thermal pressure
-  void compute_pressure(Block *block, Grouping &cons_group,
-			Grouping &prim_group, int stale_depth);
+  void reconstructable_from_integrable(Block *block,
+				       Grouping &integrable_group,
+				       Grouping &reconstrable_group,
+				       int stale_depth);
 
-  /// Converts the cell-centered conservative quantities to primitive quantites
-  void primitive_from_conservative(Block *block, Grouping &cons_group,
-				   Grouping &prim_group, int stale_depth);
+  void integrable_from_reconstructable(Block *block,
+				       Grouping &reconstructable_group,
+				       Grouping &integrable_group,
+				       int stale_depth,
+				       int reconstructed_axis);
 
-  /// Converts the cell-centered primitive quantities to conservative quantites
-  void conservative_from_primitive(Block *block, Grouping &prim_group,
-				   Grouping &cons_group, int stale_depth,
-				   int reconstructed_axis);
+  void pressure_from_integrable(Block *block, Grouping &integrable_group,
+				std::string pressure_name,
+				Grouping &passive_scalars_group,
+				bool specific_passive_scalars,
+				int stale_depth);
 
-  /// returns the density floor
+  void pressure_from_reconstructable(Block *block,
+				     Grouping &reconstructable_group,
+				     std::string pressure_name,
+				     int reconstructed_axis, int stale_depth);
+
   enzo_float get_density_floor() { return density_floor_; }
 
-  /// returns the thermal pressure floor
   enzo_float get_pressure_floor() { return pressure_floor_; }
 
-  /// apply the pressure floor to total_energy field
   void apply_floor_to_energy(Block *block, Grouping &cons_group,
 			     int stale_depth);
 
-  /// returns whether the EOS is barotropic
   bool is_barotropic() { return false; }
 
-  /// returns adiabatic index
   enzo_float get_gamma() { return gamma_;}
 
-  /// returns isothermal sound speed - it shouldn't be used since an ideal gas
-  /// is not barotropic
   enzo_float get_isothermal_sound_speed() { return 0;}
+
+  bool uses_dual_energy_formalism() { return false };
   
 
 private:

@@ -68,43 +68,133 @@ public: // interface
     PUP::able::pup(p);
   }
 
-  /// Computes thermal pressure - will ideally wrap EnzoComputePressure
-  virtual void compute_pressure(Block *block, Grouping &cons_group,
-				Grouping &prim_group, int stale_depth)=0;
 
-  /// Converts the cell-centered conservative quantities to primitive quantites
-  virtual void primitive_from_conservative(Block *block, Grouping &cons_group,
-  					   Grouping &prim_group,
-					   int stale_depth)=0;
-
-  // Provides stale_depth with the default value of 0 
-  void primitive_from_conservative(Block *block, Grouping &cons_group,
-  				   Grouping &prim_group)
-  { primitive_from_conservative(block, cons_group, prim_group, 0); }
-
-  /// Converts the cell-centered primitive quantities to conservative quantites
+  /// Converts cell-centered integrable primitives to reconstructable primitives
+  ///
   /// @param block holds data to be processed
-  /// @param prim_group holds field names of primitives values to convert
-  /// @param cons_group holds field names of conservatives where the converted
-  /// values will be stored
+  /// @param integrable_group holds field names of integrable primitive values
+  ///     to convert
+  /// @param reconstrable_group holds field names of reconstrable primitives
+  ///     where the converted values will be stored. There is expected to be
+  ///     significant overlap with the fields stored in integrable_group
   /// @param stale_depth indicates the number of field entries from the
-  /// outermost field value that the region including "stale" values (need to
-  /// be refreshed) extends over (0 means there are no "stale" values).
-  /// @param reconstructed_axis - parameter that optionally indicates that the
-  /// primitives have been reconstructed (if the same array is used multiple
-  /// axes, then the fields are internally stored as cell-centered which is
-  /// than an array of face-centered quantites). A value of -1 means that
-  /// they are cell-centered. A value of 0, 1, or 2 means that the fields were
-  /// reconstructed and they only contain valid values at x, y, or z faces
-  virtual void conservative_from_primitive(Block *block, Grouping &prim_group,
-  					   Grouping &cons_group,
-					   int stale_depth,
-					   int reconstructed_axis)=0;
+  ///     outermost field value that the region including "stale" values (need
+  ///     to be refreshed) extends over (0 means there are no "stale" values).
+  ///
+  /// For a barotropic EOS, this nominally does nothing
+  /// For a non-barotropic EOS, this computes specific internal energy
+  /// (unless its being tracked for the dual-energy formalism) 
+  virtual void reconstructable_from_integrable(Block *block,
+					       Grouping &integrable_group,
+					       Grouping &reconstructable_group,
+					       int stale_depth)=0;
 
-  // Provides stale_depth with the default value of 0 and assumes cell-centered
-  void conservative_from_primitive(Block *block, Grouping &cons_group,
-  				   Grouping &prim_group)
-  { conservative_from_primitive(block, cons_group, prim_group, 0, -1); }
+  /// @overload
+  ///
+  /// Provides stale_depth with the default value of 0
+  void reconstructable_from_integrable(Block *block,
+				       Grouping &integrable_group,
+				       Grouping &reconstructable_group)
+  {
+    reconstructable_from_integrable(block, integrable_group,
+				    reconstructable_group, 0);
+  }
+
+  /// Converts reconstructable primitives to integrable primitives
+  ///
+  /// @param block holds data to be processed
+  /// @param reconstructable_group holds field names of reconstructable
+  ///     primitive values to convert
+  /// @param integrable_group holds field names of integrable primitives where
+  ///     the converted values will be stored. There is expected to be
+  ///     significant overlap with the fields stored in reconstructable_group
+  /// @param stale_depth indicates the number of field entries from the
+  ///     outermost field value that the region including "stale" values (need
+  ///     to be refreshed) extends over (0 means there are no "stale" values).
+  /// @param reconstructed_axis - parameter that optionally indicates that the
+  ///     reconstructable primitives have been reconstructed at face-centers (if
+  ///     the same grouping is used for multiple axes, then the fields are
+  ///     internally stored as cell-centered rather than an array of
+  ///     face-centered quantites). A value of -1 means that they are
+  ///     cell-centered. A value of 0, 1, or 2 means that the fields were
+  ///     reconstructed and they only contain valid values at x, y, or z faces
+  ///
+  /// For a barotropic EOS, this nominally does nothing
+  /// For a non-barotropic EOS, this computes specific total energy from
+  /// specific internal energy
+  virtual void integrable_from_reconstructable(Block *block,
+					       Grouping &reconstructable_group,
+					       Grouping &integrable_group,
+					       int stale_depth,
+					       int reconstructed_axis)=0;
+
+  /// @overload
+  ///
+  /// Provides stale_depth with the default value of 0 and assumes that the
+  /// fields are cell-centered
+  void integrable_from_reconstructable(Block *block,
+				       Grouping &reconstructable_group,
+				       Grouping &integrable_group)
+  { conservative_from_primitive(block, reconstr_group, integr_group, 0, -1); }
+
+  /// Computes thermal pressure from integrable quantities
+  /// 
+  /// @param block holds data to be processed
+  /// @param integrable_group holds field names of integrable primitives to be
+  ///     used to compute thermal pressure
+  /// @param pressure_name field name where the computed pressure will be
+  ///     stored
+  /// @param passive_scalars_group holds field names of specific passive
+  ///     scalars to be (possibly used) in the calculation. This can be the
+  ///     as integrable_group. These will only be used if Grackle is in use
+  /// @param specific_passive_scalars indicates whether the passive scalars are
+  ///     have been converted to be specific quantities
+  /// @param stale_depth indicates the number of field entries from the
+  ///     outermost field value that the region including "stale" values (need
+  ///     to be refreshed) extends over (0 means there are no "stale" values).
+  ///
+  /// This nominally wraps EnzoComputePressure. Currently, it is primarily used
+  /// to compute the pressure to determine the timestep for an integrator
+  /// (before the passively advected scalars are converted from conservative
+  /// quantities to primitive quantites)
+  virtual void pressure_from_integrable(Block *block,
+					Grouping &integrable_group,
+					std::string pressure_name,
+					Grouping &passive_scalars_group,
+					bool specific_passive_scalars,
+					int stale_depth)=0;
+
+  /// Computes thermal pressure from reconstructable quantities (nominally
+  /// after reconstruction)
+  /// 
+  /// @param block holds data to be processed
+  /// @param reconstructable_group holds field names of reconstructable
+  ///     primitives to be used to compute thermal pressure
+  /// @param pressure_name field name where the computed pressure will be
+  ///     stored
+  /// @param stale_depth indicates the number of field entries from the
+  ///     outermost field value that the region including "stale" values (need
+  ///     to be refreshed) extends over (0 means there are no "stale" values).
+  /// @param reconstructed_axis - parameter that optionally indicates that the
+  ///     reconstructable primitives have been reconstructed at face-centers (if
+  ///     the same grouping is used for multiple axes, then the fields are
+  ///     internally stored as cell-centered rather than an array of
+  ///     face-centered quantites). A value of -1 means that they are
+  ///     cell-centered. A value of 0, 1, or 2 means that the fields were
+  ///     reconstructed and they only contain valid values at x, y, or z faces
+  ///
+  /// This should nominally wrap EnzoComputePressure (as of now it doesn't
+  /// because there is no support for MHD fields). In doing so, it should also
+  /// provide grackle support
+  virtual void pressure_from_reconstructable(Block *block,
+					     Grouping &reconstructable_group,
+					     std::string pressure_name,
+					     int stale_depth,
+					     int reconstructed_axis)=0;
+
+
+
+  
 
   /// returns the density floor
   virtual enzo_float get_density_floor()=0;
@@ -126,6 +216,9 @@ public: // interface
   /// returns isothermal sound speed - only needs to be reasonable for a
   /// barotropic EOS
   virtual enzo_float get_isothermal_sound_speed() = 0;
+
+  /// returns true if the dual energy formalism is being used
+  virtual bool uses_dual_energy_formalism() = 0;
 
 };
 

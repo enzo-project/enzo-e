@@ -91,7 +91,10 @@ module enzo {
   PUPable EnzoEOSIdeal;
   PUPable EnzoReconstructorNN;
   PUPable EnzoReconstructorPLM;
-  PUPable EnzoRiemannImpl<HLLEImpl<AthenaHLLEWavespeed>>; // EnzoRiemannHLLE
+  // EnzoRiemannHLLEAthenaMHD
+  PUPable EnzoRiemannImpl<HLLEImpl<AthenaHLLEWavespeedMHD>>;
+  // EnzoRiemannHLLEEnzoMHD
+  PUPable EnzoRiemannImpl<HLLEImpl<EnzoHLLEWavespeedMHD>>;
   PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
   PUPable EnzoPhysicsCosmology;

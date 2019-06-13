@@ -6,6 +6,8 @@
 /// @brief    [\ref Enzo] Enzo's HLLD approximate Riemann Solver. Ported from
 /// the original Enzo's Riemann_HLLD_MHD.C, written by J. S. Oishi
 
+// this implementation returns an identical value to the one employed in Athena
+
 #ifndef ENZO_ENZO_RIEMANN_HLLD_HPP
 #define ENZO_ENZO_RIEMANN_HLLD_HPP
 
@@ -24,7 +26,8 @@ public:
   (const enzo_float flux_l[], const enzo_float flux_r[],
    const enzo_float prim_l[], const enzo_float prim_r[],
    const enzo_float cons_l[], const enzo_float cons_r[],
-   const field_lut prim_lut, const field_lut cons_lut, const int n_keys,
+   const enzo_float pressure_l, const enzo_float pressure_r,
+   const EnzoAdvectionFieldLUT lut, const int n_keys,
    const bool barotropic_eos, const enzo_float gamma,
    const enzo_float isothermal_cs, const int iz, const int iy, const int ix,
    EFlt3DArray flux_arrays[], enzo_float scratch_space[])
@@ -50,34 +53,36 @@ public:
     enzo_float cf_l, cf_r, sam, sap; // fast speeds
 
     // First, compute Fl and Ul
-    rho_l  = prim_l[prim_lut.density];
-    p_l    = prim_l[prim_lut.pressure];
-    vx_l   = prim_l[prim_lut.velocity_i];
-    vy_l   = prim_l[prim_lut.velocity_j];
-    vz_l   = prim_l[prim_lut.velocity_k];
-    Bx_l   = prim_l[prim_lut.bfield_i];
-    By_l   = prim_l[prim_lut.bfield_j];
-    Bz_l   = prim_l[prim_lut.bfield_k];
+    rho_l  = prim_l[lut.density];
+    p_l    = pressure_l;
+    vx_l   = prim_l[lut.velocity_i];
+    vy_l   = prim_l[lut.velocity_j];
+    vz_l   = prim_l[lut.velocity_k];
+    Bx_l   = prim_l[lut.bfield_i];
+    By_l   = prim_l[lut.bfield_j];
+    Bz_l   = prim_l[lut.bfield_k];
 
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
     etot_l = cons_l[cons_lut.total_energy];
-    pt_l = p_l + EnzoRiemann::mag_pressure_(prim_l, prim_lut);
-    cf_l = EnzoRiemann::fast_magnetosonic_speed_(prim_l, prim_lut, gamma);
+    pt_l = p_l + EnzoRiemann::mag_pressure_(prim_l, lut);
+    cf_l = EnzoRiemann::fast_magnetosonic_speed_(prim_l, lut, pressure_l,
+						 gamma);
 
     // load wr and compute the fast magnetosonic speed
-    rho_r   = prim_r[prim_lut.density];
-    p_r     = prim_r[prim_lut.pressure];
-    vx_r    = prim_r[prim_lut.velocity_i];
-    vy_r    = prim_r[prim_lut.velocity_j];
-    vz_r    = prim_r[prim_lut.velocity_k];
-    Bx_r    = prim_r[prim_lut.bfield_i];
-    By_r    = prim_r[prim_lut.bfield_j];
-    Bz_r    = prim_r[prim_lut.bfield_k];
+    rho_r   = prim_r[lut.density];
+    p_r     = pressure_r;
+    vx_r    = prim_r[lut.velocity_i];
+    vy_r    = prim_r[lut.velocity_j];
+    vz_r    = prim_r[lut.velocity_k];
+    Bx_r    = prim_r[lut.bfield_i];
+    By_r    = prim_r[lut.bfield_j];
+    Bz_r    = prim_r[lut.bfield_k];
 
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
     etot_r = cons_r[cons_lut.total_energy];
-    pt_r = p_r + EnzoRiemann::mag_pressure_(prim_r, prim_lut);
-    cf_r = EnzoRiemann::fast_magnetosonic_speed_(prim_r, prim_lut, gamma);
+    pt_r = p_r + EnzoRiemann::mag_pressure_(prim_r, lut);
+    cf_r = EnzoRiemann::fast_magnetosonic_speed_(prim_r, lut, pressure_r,
+						 gamma);
 
     //
     //wave speeds
@@ -178,7 +183,7 @@ public:
     // compute the fluxes based on the wave speeds
     if (S_l <= 0 && S_ls >= 0) {
       // USE F_ls
-      setup_cons_ast_(Us, cons_lut, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
+      setup_cons_ast_(Us, lut, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
 		      By_ls, Bz_ls);
 
       for (int field = 0; field<n_keys; field++){
@@ -188,7 +193,7 @@ public:
       return;
     } else if (S_rs <= 0 && S_r >= 0) {
       // USE F_rs
-      setup_cons_ast_(Us, cons_lut, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
+      setup_cons_ast_(Us, lut, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
 		      By_rs, Bz_rs);
 
       for (int field = 0; field<n_keys; field++){
@@ -216,9 +221,9 @@ public:
 
     if (S_ls <= 0 && S_M >= 0) {
       // USE F_lss
-      setup_cons_ast_(Us, cons_lut, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
+      setup_cons_ast_(Us, lut, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
 		      By_ls, Bz_ls);
-      setup_cons_ast_(Uss, cons_lut, S_M, rho_ls, vy_ss, vz_ss, etot_lss, Bx,
+      setup_cons_ast_(Uss, lut, S_M, rho_ls, vy_ss, vz_ss, etot_lss, Bx,
 		      By_ss, Bz_ss);
 
       for (int field = 0; field<n_keys; field++){
@@ -229,9 +234,9 @@ public:
       return;
     } else if (S_M <= 0 && S_rs >= 0) {
       // USE F_rss
-      setup_cons_ast_(Us, cons_lut, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
+      setup_cons_ast_(Us, lut, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
 		      By_rs, Bz_rs);
-      setup_cons_ast_(Uss, cons_lut, S_M, rho_rs, vy_ss, vz_ss, etot_rss, Bx,
+      setup_cons_ast_(Uss, lut, S_M, rho_rs, vy_ss, vz_ss, etot_rss, Bx,
 		      By_ss, Bz_ss);
 
       for (int field = 0; field<n_keys; field++){
@@ -243,7 +248,8 @@ public:
     }
   }
 
-  static void setup_cons_ast_(enzo_float cons[], const field_lut cons_lut,
+  static void setup_cons_ast_(enzo_float cons[],
+			      const EnzoAdvectionFieldLUT lut,
 			      const enzo_float speed, const enzo_float rho,
 			      const enzo_float vy, const enzo_float vz,
 			      const enzo_float etot, const enzo_float Bx,
@@ -263,14 +269,14 @@ public:
     //   Although eint_ls, eint_rs, eint_lss, and eint_rss are all declared as
     //   local variables, they are never actually initialized
     // }
-    cons[cons_lut.density] = rho;
-    cons[cons_lut.momentum_i] = rho * speed;
-    cons[cons_lut.momentum_j] = rho * vy;
-    cons[cons_lut.momentum_k] = rho * vz;
-    cons[cons_lut.total_energy] = etot;
-    cons[cons_lut.bfield_i] = Bx;
-    cons[cons_lut.bfield_j] = By;
-    cons[cons_lut.bfield_k] = Bz;
+    cons[lut.density] = rho;
+    cons[lut.velocity_i] = rho * speed;
+    cons[lut.velocity_j] = rho * vy;
+    cons[lut.velocity_k] = rho * vz;
+    cons[lut.total_energy] = etot;
+    cons[lut.bfield_i] = Bx;
+    cons[lut.bfield_j] = By;
+    cons[lut.bfield_k] = Bz;
   }
 
 };

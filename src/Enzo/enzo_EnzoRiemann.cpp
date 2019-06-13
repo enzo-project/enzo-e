@@ -12,14 +12,10 @@
 
 //----------------------------------------------------------------------
 
-EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver,
-					    const EnzoFieldConditions cond)
+EnzoRiemann* EnzoRiemann::construct_riemann
+(std::vector<std::string> integrable_groups,
+ std::vector<std::string> passive_groups, std::string solver)
 {
-  // Generate vector of group names of passive advected scalars
-  EnzoCenteredFieldRegistry registry;
-  std::vector<std::string> passive_groups;
-  passive_groups = registry.passive_scalar_group_names();
-
   // In the future, allocate array of flux functors here
   FluxFunctor** flux_funcs = NULL;
   int n_funcs = 0;
@@ -31,12 +27,23 @@ EnzoRiemann* EnzoRiemann::construct_riemann(std::string solver,
 		 ::tolower);
   EnzoRiemann* out;
 
-  if (formatted == std::string("hlle")){
-    out = new EnzoRiemannHLLE(cond, passive_groups, flux_funcs, n_funcs);
+  // Eventually we may want do some check for non-MHD Riemann solvers
+
+  if ((formatted == std::string("hlle")) ||
+       (formatted == std::string("enzo_hlle"))){
+    out = new EnzoRiemannHLLEEnzoMHD(integrable_groups, passive_groups,
+				     flux_funcs, n_funcs);
+  } else if (formatted == std::string("athena_hlle")){
+    out = new EnzoRiemannHLLEAthenaMHD(integrable_groups, passive_groups,
+				       flux_funcs, n_funcs);
   } else if (formatted == std::string("hlld")){
-    out = new EnzoRiemannHLLD(cond, passive_groups, flux_funcs, n_funcs);
+    // could possibly check that MHD fields are included
+    out = new EnzoRiemannHLLD(integrable_groups, passive_groups, flux_funcs,
+			      n_funcs);
   } else {
-    ASSERT("EnzoRiemann", "The only allowed solvers are HLLE & HLLD", false);
+    ASSERT("EnzoRiemann",
+	   "The only known solvers are HLLE (ENZO_HLLE), ATHENA_HLLE, & HLLD",
+	   false);
     out = NULL;  // Deals with compiler warning
   }
 

@@ -12,11 +12,12 @@
 //----------------------------------------------------------------------
 
 EnzoReconstructor* EnzoReconstructor::construct_reconstructor
-(std::string name, const EnzoFieldConditions cond)
+(std::vector<std::string> reconstructable_groups,
+ std::vector<std::string> passive_groups, std::string solver)
 {
   // some repeated code from construct_riemann
-  EnzoCenteredFieldRegistry registry;
-  std::vector<std::string> group_names = registry.prim_group_names(cond, true);
+  std::vector<std::string> groups = reconstructable_groups;
+  groups.insert(groups.end(), passive_groups.begin(), passive_groups.end());
 
   // convert string to lower case (https://stackoverflow.com/a/313990)
   std::string formatted(name.size(), ' ');
@@ -24,9 +25,9 @@ EnzoReconstructor* EnzoReconstructor::construct_reconstructor
 		 ::tolower);
   EnzoReconstructor* out;
   if (formatted == std::string("nn")){
-    out = new EnzoReconstructorNN(group_names);
+    out = new EnzoReconstructorNN(groups);
   } else if (formatted == std::string("plm")){
-    out = new EnzoReconstructorPLM(group_names);
+    out = new EnzoReconstructorPLM(groups);
   } else {
     ASSERT("EnzoReconstructor",
 	   "The only allowed solvers are NN & PLM", false);

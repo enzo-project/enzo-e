@@ -45,6 +45,14 @@ public:
   EFlt3DArray reconstructed_field(Grouping &grouping, std::string group_name,
 				  int index, int dim);
 
+  /// Read in field by name that represented reconstructed quantities.
+  EFlt3DArray reconstructed_from_name(std::string field_name, int dim)
+  {
+    Grouping temp_group;
+    temp_group.add(field_name, "group");
+    return reconstructed_field(temp_group, "group" 0, dim);
+  }
+
   /// Read in field from Grouping of face-centered interface B-fields. The
   /// returned view doesn't include face-centered values on the exterior of
   /// the grid.

@@ -3,234 +3,413 @@
 /// @file     enzo_EnzoCenteredFieldRegistry.hpp
 /// @author   Matthew W. Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs March 28 2019
-/// @brief    [\ref Enzo] Implementation of the EnzoFieldConditions class,
-///           declaration of the field_lut struct and declaration of the
-///           EnzoCenteredFieldRegistry class.
+/// @brief    [\ref Enzo] Implementation of the EnzoAdvectionFieldLUT and
+///           declaration of the EnzoCenteredFieldRegistry class.
 ///
 ///
-/// This class serves to track all cell-centered MHD fields that are not
-/// passively advected scalars and are not specific to a single integration
-/// method. The class also tracks the group names of passively advected
-/// scalars. The API supports constructing Groupings of conserved and primitive
-/// quantities, returning vectors of conserved, primitive, or passively
-/// advected group names, preparing instances of field_lut to serve as lookup
-/// tables in EnzoRiemann for primitive or conserved quantities, and to
-/// construct an array of Field Arrays appropriate for an instance of field_lut.
-/// of primitive
+/// This class serves to track all cell-centered MHD quantities that are not
+/// passively advected scalars. The class also tracks the group names of
+/// passively advected scalars. The API supports constructing Groupings of
+/// fields (with names matching the the names of registered names), determining
+/// which quantities are conserved, specific, or other, preparing instances of
+/// EnzoAdvectionFieldLUT to serve as lookup tables in EnzoRiemannImpl for and
+/// to construct an array of Field Arrays appropriate for a given instance of
+/// EnzoAdvectionFieldLUT
 
 #ifndef ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP
 #define ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP
 
-struct EnzoFieldConditions : public PUP::able
-{
-  /// @class    EnzoFieldConditions
-  /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] PUPable struct with members that are used to
-  ///           identify which fields are required from the registry. Additional
-  ///           should be added in the future, like dual_energy_formalism or
-  ///           cosmic rays as new physics is added.
-  
-  bool hydro;
-  bool MHD;
 
-  EnzoFieldConditions() = default;
-
-  /// CHARM++ migration constructor for PUP::able
-  EnzoFieldConditions (CkMigrateMessage *m)
-    : PUP::able(m)
-  {  }
-
-  /// CHARM++ Pack / Unpack function
-  void pup (PUP::er &p)
-  {
-    // NOTE: change this function whenever attributes change
-    PUP::able::pup(p);
-    p|hydro;
-    p|MHD;
-  }
-
-  /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoFieldConditions);
-};
+#include <type_traits> // std::is_arithmetic
+#include <string>      // std::string, std::to_string
 
 
-/// Enum that classifies a quantity as conserved, primitive, or both
-enum class FieldCat{
-  conserved = 1,
-  primitive = 2,
-  overlap = 3
-};
+//----------------------------------------------------------------------
+/// @var      passive_group_names
+/// @brief    vector of passively advected group names
+///
+/// This should be updated as new groups are added
+const std::vector<std::string> passive_group_names = {"colours", "species"};
 
-/// Checks to see if one instance of the FieldCat overlaps with the category of
-/// another instance
-inline bool category_overlap_(FieldCat a, FieldCat b){  
-  return (static_cast<int>(a) & static_cast<int>(b)) > 0;
+
+//----------------------------------------------------------------------
+/// @def      FieldCat
+/// @brief    Categorizes a field as conserved, specific, or other
+///
+/// The categories are:
+///  - conserved - the field is a conserved fluid property (e.g. density)
+///  - specific - the field is a specific primitive fluid property (multiply by
+///    density to get conserved, e.g. velocity) primitive
+///  - other - anything else (e.g. temperature, pressure)
+enum class FieldCat{conserved, specific, other};
+
+
+//----------------------------------------------------------------------
+/// @def      FIELD_TABLE
+/// @brief    xmacro table of cell-centered registered (non-passive) fields
+///
+/// Table of fluid properties represented by cell-centered fields. This table
+/// must be updated as new physics gets added. The columns of the table are:
+///   1. Quantity name.
+///   2. Mathematical classificiation (SCALAR or VECTOR)
+///   3. classification of the quantity as conserved, specific or other
+///   4. Advection classification - if T, then in some context, the quantity is
+///      directly used to solve for fluid advection (i.e. it is reconstructed or
+///      a Riemann Flux is computed for it) - otherwise it should be F
+///      (quantities that always act as source terms should not be included)
+///
+/// The entries in this table determine the name of the field to represent the
+/// quantity:
+///    - A SCALAR quantity is represented by a field with the name in column 1.
+///    - A VECTOR quantity is represented by 3 fields. The fields are named
+///      {column_1}_x, {column_1}_y, {column_2}_z
+///
+/// As additional physics are added this table should be updated (e.g.
+/// cr_energy, cr_flux).
+#define FIELD_TABLE                                                          \
+  /* Hydro & MHD Fields directly related to Advection */                     \
+  ENTRY(                density, SCALAR, FieldCat::conserved, T)             \
+  ENTRY(               velocity, VECTOR,  FieldCat::specific, T)             \
+  ENTRY(        internal_energy, SCALAR,  FieldCat::specific, T)             \
+  ENTRY(           total_energy, SCALAR,  FieldCat::specific, T)             \
+  ENTRY(                 bfield, VECTOR, FieldCat::conserved, T)             \
+  /* Derived Fields */                                                       \
+  ENTRY(               pressure, SCALAR,     FieldCat::other, F)             \
+  ENTRY(            temperature, SCALAR,     FieldCat::other, F)             \
+  ENTRY(           cooling_time, SCALAR,     FieldCat::other, F)             \
+  ENTRY(           acceleration, VECTOR,  FieldCat::specific, F)             \
+  /* Grackle Related Fields */                                               \
+  ENTRY(  specific_heating_rate, SCALAR,     FieldCat::other, F)             \
+  ENTRY(volumetric_heating_rate, SCALAR,     FieldCat::other, F)             \
+  /* Field for Gravity */                                                    \
+  ENTRY(              potential, SCALAR,  FieldCat::specific, F)
+
+
+#define COMBINE(prefix, suffix) prefix##suffix
+
+
+//----------------------------------------------------------------------
+/// @def      STRUCT_MEMBER
+/// @brief    Macro that helps define struct members based off the entries in
+///           FIELD_TABLE
+///
+/// This includes 2 macros: STRUCT_MEMBER_SCALAR and STRUCT_MEMBER_VECTOR which
+/// has specialized behavior for SCALAR and VECTOR quantities 
+#define STRUCT_MEMBER_SCALAR(name,type) type name
+#define STRUCT_MEMBER_VECTOR(name,type)                                       \
+  type COMBINE(name,_i);   type COMBINE(name,_j);  type COMBINE(name,_k)
+
+
+//----------------------------------------------------------------------
+/// @def      ADVEC_STRUCT_MEMBER
+/// @brief    Macro that helps define advection field struct members based off
+///           the entries in FIELD_TABLE
+///
+/// This includes 2 macros: ADVEC_STRUCT_MEMBER_T and ADVEC_STRUCT_MEMBER_F
+/// The former gets called when an entry of FIELD_TABLE is actually an
+/// advection related quantity while the latter gets called in other cases
+#define ADVEC_STRUCT_MEMBER_T(name, type, math_type)                          \
+  STRUCT_MEMBER##math_type(name, type)
+#define ADVEC_STRUCT_MEMBER_F(name, type, math_type) /* ... */
+
+
+//----------------------------------------------------------------------
+/// @def      STRUCT_MEMBER_UNARY_FUNC
+/// @brief    Macro that applies a unary function to a struct member named for
+///           an entry in FIELD_TABLE
+#define STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, name)                    \
+  func(#name, struc->name)
+#define STRUCT_MEMBER_UNARY_FUNC_VECTOR(func, struc, name)                    \
+  STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, COMBINE(name,_i));             \
+  STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, COMBINE(name,_j));             \
+  STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, COMBINE(name,_k))
+
+
+//----------------------------------------------------------------------
+/// @def      ADVEC_STRUCT_MEMBER_UNARY_FUNC
+/// @brief    Macro that applies a unary function to members of a struct named
+///           for advection related quantities in FIELD_TABLE
+#define ADVEC_STRUCT_UNARY_FUNC_T(func, struc, name, math_type)               \
+  STRUCT_MEMBER_UNARY_FUNC_##math_type(func, struc, name)
+#define ADVEC_STRUCT_UNARY_FUNC_F(func, struc, name, math_type) /* ... */
+
+
+//----------------------------------------------------------------------
+/// template helper function that applies unary function on the members of
+/// struct that have been named for advection related quantities in FIELD_TABLE
+/// @param obj Reference to a class/struct with members named after advection
+/// quantities in FIELD_TABLE
+/// @param fn Unary function or that accepts the name of the struct member and
+/// the value of the member as arguments
+template<class AdvectStruct, class Function>
+void unary_advec_struct_for_each_(AdvectStruct &obj, Function fn){
+  #define ENTRY(name, math_type, category, if_advection)                      \
+      ADVEC_STRUCT_UNITARY_FUNC_##if_advection(func, this, name, math_type);
+      FIELD_TABLE
+  #undef ENTRY
 }
 
+//----------------------------------------------------------------------
+/// @def      STRUCT_MEMBER_PUP
+/// @brief    Macro that pups a struct member named for an entry in FIELD_TABLE
+#define STRUCT_MEMBER_PUP_SCALAR(p, name) p|name
+#define STRUCT_MEMBER_PUP_VECTOR(p, name)			              \
+  p|COMBINE(name,_i);  p|COMBINE(name,_j);  p|COMBINE(name,_k)
 
-// list of passively advected group names
-const std::vector<std::string> passive_group_names = {"colors", "species"};
+//----------------------------------------------------------------------
+/// @def      ADVEC_STRUCT_MEMBER_PUP
+/// @brief    Macro that pups a member of a struct named for advection
+///           related quantities in FIELD_TABLE
+#define ADVEC_STRUCT_PUP_T(func, struc, name, math_type)                      \
+  STRUCT_MEMBER_UNARY_FUNC_##math_type(func, struc, name)
+#define ADVEC_STRUCT_PUP_F(func, struc, name, math_type) /* ... */
 
-// Table of fluid properties represented by cell-centered fields. This table
-// must be updated as new physics gets added. The columns of the table are:
-//   1. Quantity name.
-//   2. member of EnzoFieldConditions that indicates if the quantity is needed
-//   3. classification of the quantity as primitive, conserved, or both 
-//   4. quantity type (SCALAR or VECTOR)
-//
-// The entries in this table determine the name of the field to represent the
-// quantity:
-//    - A SCALAR quantity is represented by a field with the name in column 1.
-//    - A VECTOR quantity is represented by 3 fields. The fields are named
-//      {column_1}_x, {column_1}_y, {column_2}_z
-//
-// As additional physics are added this table should be updated (e.g.
-// internal_energy, cr_energy, cr_flux).
 
-#define FIELD_TABLE                                                   \
-  ENTRY(     density,        hydro,     FieldCat::overlap, SCALAR)    \
-  ENTRY(    momentum,        hydro,   FieldCat::conserved, VECTOR)    \
-  ENTRY(    velocity,        hydro,   FieldCat::primitive, VECTOR)    \
-  ENTRY(total_energy,        hydro,   FieldCat::conserved, SCALAR)    \
-  ENTRY(    pressure,        hydro,   FieldCat::primitive, SCALAR)    \
-  ENTRY(      bfield,          MHD,     FieldCat::overlap, VECTOR)
+class EnzoAdvectionFieldLUT : public PUP::able{
 
+  /// @class    EnzoAdvectionFieldLUT
+  /// @ingroup  Enzo
+  /// @brief    [\ref Enzo] Serves as a lookup table for fluid advection
+  ///           calculations
+  ///
+  /// This is supposed to be a bare bones class, almost like a C-struct with
+  /// members named for different advection quantites listed in FIELD_TABLE
+  /// that each hold integer values. The mathematical type of the quantity
+  /// determines the name of the member. A SCALAR simply corresponds to a
+  /// member with a name matching the value in column 1. A VECTOR corresponds
+  /// members named {column_1}_i, {column_1}_j, {column_2}_k.
+  ///
+  /// Basically instances of this object are supposed to be used in advection
+  /// based calculations (like computing Riemann fluxes) to serve as a look up
+  /// table. Basically one would use EnzoCenteredFieldRegistry to help
+  /// construct an array of fields and an instance of this class. Then the
+  /// value indicated by a given member of the instance would indicate the
+  /// index of the array where the corresponding field value would be stored.
+  /// (E.g. a density value would be stored at index obj.density).
+  ///
+  /// Members that don't have correspond to a value are set to -1.
+
+public: // interface
   
-#define VECTOR_COMPONENT(prefix, suffix) prefix##suffix
+  /// Default constructor
+  EnzoAdvectionFieldLUT() = default;
 
-#define LUT_MEMBER_SCALAR(name) int name
-#define LUT_MEMBER_VECTOR(name) int VECTOR_COMPONENT(name,_i);                \
-                                int VECTOR_COMPONENT(name,_j);                \
-				int VECTOR_COMPONENT(name,_k)
+  /// Destructor
+  ~EnzoAdvectionFieldLUT()
+  {  }
 
-// A struct that serves as a fast lookup table for EnzoRiemann. For every
-// scalar in FIELD_TABLE, field_lut has a member of the same name. For every
-// vector in FIELD_TABLE, field_lut has 3 members, named {col_1}_i, {col_1}_j,
-// and {col_1}_k.
-//
-// When in use, each relevant member get's dynamically assigned an consecutive
-// int starting from 0 which corresponds to a the quantity of the same name's
-// location in an array. All members corresponding to non-relevant quantities
-// are set to -1.
-typedef struct {
-  #define ENTRY(name, req_name, category, quantity_type)                      \
-    LUT_MEMBER_##quantity_type(name);
+  /// CHARM++ PUP::able declaration
+  PUPable_decl(EnzoAdvectionFieldLUT);
+
+  // CHARM++ migration constructor for PUP::able
+  //EnzoAdvectionFieldLUT (CkMigrateMessage *m)
+  //  : PUP::able(m)
+  //{  }
+
+  // CHARM++ Pack / Unpack function
+  //void pup (PUP::er &p)
+  //{
+  //  PUP::able::pup(p);
+  //  #define ENTRY(name, math_type, category, if_advection)	\
+  //    ADVEC_STRUCT_PUP_##if_advection(name, math_type);
+  //  FIELD_TABLE
+  //  #undef ENTRY
+  //}
+  
+public: // attributes
+
+  // Add attributes named for entries in LUT
+  #define ENTRY(name, math_type, category, if_advection)                      \
+    ADVEC_STRUCT_MEMBER_##if_advection(name, bool, math_type);
   FIELD_TABLE
   #undef ENTRY
-  } field_lut;
+};
 
-#define PRINT_SCALAR(lut,name) CkPrintf("%s: %d\n", #name, lut.name)
-#define PRINT_VECTOR(lut,name)                                                \
-  CkPrintf("%s: %d\n", (#name "_i"), lut.VECTOR_COMPONENT(name,_i));          \
-  CkPrintf("%s: %d\n", (#name "_j"), lut.VECTOR_COMPONENT(name,_j));          \
-  CkPrintf("%s: %d\n", (#name "_k"), lut.VECTOR_COMPONENT(name,_k))
 
-inline void print_lut(const field_lut lut)
+//----------------------------------------------------------------------
+/// utility function that prints the names of the members and the values of an
+/// instance of EnzoAdvectionFieldLUT.
+inline void print_lut(const EnzoAdvectionFieldLUT lut)
 {
-  #define ENTRY(name, req_name, category, quantity_type)                      \
-    PRINT_##quantity_type( lut, name);
-  FIELD_TABLE
-  #undef ENTRY
- }
+
+  std::string out = std::string("{\n");
+
+  // Define the lambda function to collect values and names
+  auto func = [&out](std::string field_name, T val)
+    {
+      std::string str_val;
+      if (std::is_same<T,bool>::value){
+	value = (val) ? std::string("true") : std::string("false");
+      } else {
+	value = std::to_string(val);
+      }
+      out = (out + std::string("  ") + field_name + std::string(" = ") +
+	     value + std::string(std::string) + std::string(";\n"));
+    };
+
+  // apply lambda function
+  unary_advec_struct_for_each_((*this), func);
+
+  out = out + std::string("}\n");
+  CkPrintf("%s", out.c_str());
+}
 
 
 class EnzoCenteredFieldRegistry
 {
   /// @class    EnzoCenteredFieldRegistry
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Serves as a registry for centered fields
-  ///           representing non-passively advected primitive or conserved
-  ///           quantities
+  /// @brief    [\ref Enzo] Serves as a registry for non-passively advected
+  ///           cell-centered fields
+  ///
+  /// Specifically, the registered fields are given by the entries of
+  /// FIELD_TABLE. The name of the field(s) that correspond to an entry in the
+  /// table are dependent on the mathematical type of the quantity and on the
+  /// name given in column 1.
+  ///  - A SCALAR simply corresponds to a field with a name given in column 1.
+  ///  - A VECTOR corresponds to 3 fields. The fields are named {column_1}_x,
+  ///    {column_1}_y, {column_2}_z
+  /// To register a new field, add a new entry to FIELD_TABLE
 
 public:
 
-  /// Constructs a Grouping of conserved quantites. The names of each group
-  /// matches the first column from FIELD_TABLE. The rules for field names are:
-  ///    - Scalar conserved quantity:
-  ///        - leading_prefix + (overlap_cat_prefix +) {col_1}
-  ///    - Vector conserved quantity:
-  ///        - leading_prefix + (overlap_cat_prefix +) {col_1} + "_x"
-  ///        - leading_prefix + (overlap_cat_prefix +) {col_1} + "_y"
-  ///        - leading_prefix + (overlap_cat_prefix +) {col_1} + "_z"
-  /// overlap_cat_prefix is only used if a quantity is both conserved and
-  /// primitive
-  Grouping* build_cons_grouping(const EnzoFieldConditions cond,
-				const std::string leading_prefix = "",
-				const std::string overlap_cat_prefix =""){
-    return build_grouping_(cond, leading_prefix, overlap_cat_prefix,
-			   FieldCat::conserved);
-  }
+  // some utility methods - some of these are called in more important methods
+  // These are not particularly well optimized
 
-  /// Constructs a Grouping of primitive quantites. The names of each group
-  /// matches the first column from FIELD_TABLE. The rules for field names are
-  /// the same as for build_cons_grouping
-  Grouping* build_prim_grouping(const EnzoFieldConditions cond,
-				const std::string leading_prefix ="",
-				const std::string overlap_cat_prefix =""){
-    return build_grouping_(cond, leading_prefix, overlap_cat_prefix,
-			   FieldCat::primitive);
-  }
+  /// Returns a vector of registered quantities
+  std::vector<std::string> get_registered_quantities() const;
 
-  /// Returns the vector of conserved group names
-  std::vector<std::string> cons_group_names(const EnzoFieldConditions cond,
-					    bool include_passive = false){
-    return group_names_(cond, include_passive, FieldCat::conserved);
-  }
+  /// Returns the vector of registered field names
+  std::vector<FieldCat> get_registered_fields() const;
+  
+  /// Checks that that the quantity names are in FIELD_TABLE. If not then,
+  /// raises an error.
+  void check_known_quantity_names(const std::vector<std::string> names) const;
 
-  /// Returns the vector of primitive group names
-  std::vector<std::string> prim_group_names(const EnzoFieldConditions cond,
-					    bool include_passive = false){
-    return group_names_(cond, include_passive, FieldCat::primitive);
-  }
+  // more important methods:
+  
+  /// Constructs a Grouping of fields and yields a pointer to it from a vector
+  /// of quantity names. The quantity names must match entries of FIELD_TABLE.
+  ///
+  /// The names of the names of the fields in each group depend on the the
+  /// leading_prefix argument and the quantity type indicated in FIELD_TABLE
+  /// The rules for determining the field names are:
+  /// - SCALAR quantity: leading_prefix + group_name
+  /// - Vector conserved quantity:
+  ///   - leading_prefix + group_name + "_x"
+  ///   - leading_prefix + group_name + "_y"
+  ///   - leading_prefix + group_name + "_z"
+  Grouping* build_grouping(const std::vector<std::string> quantity_names,
+			   const std::string leading_prefix = "") const;
 
-  /// Returns the vector of passive scalar group names
+  /// Prepares an instance of EnzoAdvectionFieldLUT for a specified set of
+  /// advection related quantities.
+  ///
+  /// It also yields the start and stop indices to iterate over all non-flagged
+  /// FieldCat::conserved quantities, FieldCat::specific quantities and
+  /// FieldCat::other quanties. Additionally, it determines the size of the
+  /// array necessary all of the relevant field values (including the flagged
+  /// quantites). Note that quantity names are used as group names in other
+  /// contexts.
+  ///
+  /// @param quantity_names Vector of the quantity names that should be
+  ///   included in the table. These names should match the names of entries
+  ///   in FIELD_TABLE. For example it might include density, velocity
+  ///   (not velocity_x), etc.
+  /// @param conserved_start,conserved_stop References values that will be
+  ///   modified to indicate the start and stop indices for iterating over all
+  ///   unflagged conserved quantities.
+  /// @param specific_start,specific_stop References values that will be
+  ///   modified to indicate the start and stop indices for iterating over all
+  ///   unflagged specific quantities.
+  /// @param other_start,other_stop References values that will be modified to
+  ///   indicate the start and stop indices for iterating over all unflagged
+  ///   other quantities.
+  /// @param nfields Number of fields that the array will have to hold all
+  ///   specified quantities
+  /// @param flagged_quantities Optional argument. Vector of flagged quantity
+  ///   names. A flagged group name will not be included in the yielded
+  ///   iteration ranges (An example of where this might be desirable that when
+  ///   applying fluxes in an integrator using Constrained Transport, we don't
+  ///   want to add the Bfield fluxes). The name of the flagged quantity must
+  ///   also be included in quantity names. If this is not passed, then no
+  ///   quantites are flagged
+  EnzoAdvectionFieldLUT prepare_advection_lut
+  (const std::vector<std::string> quantity_names,
+   int &conserved_start, int &conserved_stop, int &specific_start,
+   int &specific_stop, int &other_start, int &other_stop, int &nfields,
+   const std::vector<std::string> flagged_quantities) const;
+
+
+  EnzoAdvectionFieldLUT prepare_advection_lut
+  (const std::vector<std::string> quantity_names,
+   int &conserved_start, int &conserved_stop, int &specific_start,
+   int &specific_stop, int &other_start, int &other_stop, int &nfields) const
+  {
+    std::vector<std::string> flagged_quantities;
+    return prepare_advection_lut(quantity_names,
+				 conserved_start, conserved_stop,
+				 specific_start, specific_stop,
+				 other_start, other_stop, nfields,
+				 flagged_quantities);
+  }
+  
+  /// Returns a vector of passive scalar group names
+  ///
+  /// To register new names add entry to the static constant vector variable
+  /// called passive_group_names
   std::vector<std::string> passive_scalar_group_names()
   {
     return passive_group_names;
   }
 
-  /// Prepares an instance of field_lut for conserved quantities and determines
-  /// number of entries needed in an array to hold this information
-  field_lut prepare_cons_lut(const EnzoFieldConditions cond, int* nfields){
-    return prepare_lut_(cond, nfields, FieldCat::conserved);
-  }
-
-  /// Prepares an instance of field_lut for primitive quantities and determines
-  /// number of entries needed in an array to hold this information
-  field_lut prepare_prim_lut(const EnzoFieldConditions cond, int* nfields){
-    return prepare_lut_(cond, nfields, FieldCat::primitive);
-  }
-
   /// Constructs an array of instances of EFlt3DArray where each instance holds
   /// the field data of the corresponding field in lut.
-  EFlt3DArray* load_array_of_fields(Block *block, const field_lut lut,
+  ///
+  /// @param block The mesh block from which data will be loaded
+  /// @param lut,nfields A look up table and the size of the output array
+  ///   determined by a previous call to of the prepare_advection_lut method.
+  ///   These which fields are loaded and the indices at which the field data
+  ///   is stored.
+  /// @param grouping Reference to a grouping that with groups named after the
+  ///   relevant quantities specified in the generation of lut. The data is
+  ///   actually loaded from the fields in block with names matching the
+  ///   relevant field names specified in this object.
+  /// @param dim Optional integer specifying which dimension is the ith
+  ///   direction. This is used for mapping the i,j,k vector components listed
+  ///   in lut to the x,y,z field components. Values of 0, 1, and 2 correspond
+  ///   the ith direction pointing parallel to the x, y, and z directions,
+  ///   respectively.
+  /// @param stale_depth indicates the current stale_depth for the loaded
+  ///   quanties.
+  EFlt3DArray* load_array_of_fields(Block *block,
+				    const EnzoAdvectionFieldLUT lut,
 				    const int nfields, Grouping &grouping,
-				    const int dim, const int stale_depth = 0);
+				    const int dim = 0,
+				    const int stale_depth = 0) const;
 
 private:
-  Grouping* build_grouping_(const EnzoFieldConditions cond,
-			    const std::string leading_prefix,
-			    const std::string overlap_cat_prefix,
-			    FieldCat target_cat);
 
-  // Helper method of build_grouping_
+  /// Helper method of build_grouping. Adds a fields to the grouping
   void add_group_fields_(Grouping *grouping, const std::string group_name,
 			 const std::string quantity_type, FieldCat category,
 			 const std::string leading_prefix,
-			 const std::string overlap_cat_prefix);
+			 const std::string overlap_cat_prefix) const;
 
-  std::vector<std::string> group_names_(const EnzoFieldConditions cond,
-					bool include_passive,
-					FieldCat target_cat);
-  
-  field_lut prepare_lut_(const EnzoFieldConditions cond, int *nfields,
-			 FieldCat target_cat);
+
+  /// Helper method of prepare_lut. Determines conserved_start, conserved_stop,
+  /// specific_start, specific_stop, other_start, other_stop, nfields
+  void prepare_lut_(const std::vector<std::string> quantity_names,
+		    int &conserved_start, int &conserved_stop,
+		    int &specific_start, int &specific_stop,
+		    int &other_start, int &other_stop, int &nfields
+		    const std::vector<std::string> flagged_quantities) const;
 
   // Helper method of load_array_of_fields
   int load_array_of_fields_(EFlt3DArray* arr, int cur_index, Grouping &grouping,
 			    std::string group_name, std::string quantity_type,
 			    int dim, EnzoPermutedCoordinates coord,
-			    EnzoFieldArrayFactory array_factory);
+			    EnzoFieldArrayFactory array_factory) const;
 };
 
 #endif /* ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP */
