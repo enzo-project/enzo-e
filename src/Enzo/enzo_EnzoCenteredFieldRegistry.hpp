@@ -149,22 +149,6 @@ void unary_advec_struct_for_each_(AdvectStruct &obj, Function fn){
   #undef ENTRY
 }
 
-//----------------------------------------------------------------------
-/// @def      STRUCT_MEMBER_PUP
-/// @brief    Macro that pups a struct member named for an entry in FIELD_TABLE
-#define STRUCT_MEMBER_PUP_SCALAR(p, name) p|name
-#define STRUCT_MEMBER_PUP_VECTOR(p, name)			              \
-  p|COMBINE(name,_i);  p|COMBINE(name,_j);  p|COMBINE(name,_k)
-
-//----------------------------------------------------------------------
-/// @def      ADVEC_STRUCT_MEMBER_PUP
-/// @brief    Macro that pups a member of a struct named for advection
-///           related quantities in FIELD_TABLE
-#define ADVEC_STRUCT_PUP_T(func, struc, name, math_type)                      \
-  STRUCT_MEMBER_UNARY_FUNC_##math_type(func, struc, name)
-#define ADVEC_STRUCT_PUP_F(func, struc, name, math_type) /* ... */
-
-
 class EnzoAdvectionFieldLUT : public PUP::able{
 
   /// @class    EnzoAdvectionFieldLUT
@@ -172,7 +156,7 @@ class EnzoAdvectionFieldLUT : public PUP::able{
   /// @brief    [\ref Enzo] Serves as a lookup table for fluid advection
   ///           calculations
   ///
-  /// This is supposed to be a bare bones class, almost like a C-struct with
+  /// This is supposed to be a bare bones class - exactly like a C-struct with
   /// members named for different advection quantites listed in FIELD_TABLE
   /// that each hold integer values. The mathematical type of the quantity
   /// determines the name of the member. A SCALAR simply corresponds to a
@@ -198,23 +182,6 @@ public: // interface
   ~EnzoAdvectionFieldLUT()
   {  }
 
-  /// CHARM++ PUP::able declaration
-  PUPable_decl(EnzoAdvectionFieldLUT);
-
-  // CHARM++ migration constructor for PUP::able
-  //EnzoAdvectionFieldLUT (CkMigrateMessage *m)
-  //  : PUP::able(m)
-  //{  }
-
-  // CHARM++ Pack / Unpack function
-  //void pup (PUP::er &p)
-  //{
-  //  PUP::able::pup(p);
-  //  #define ENTRY(name, math_type, category, if_advection)	\
-  //    ADVEC_STRUCT_PUP_##if_advection(name, math_type);
-  //  FIELD_TABLE
-  //  #undef ENTRY
-  //}
   
 public: // attributes
 
