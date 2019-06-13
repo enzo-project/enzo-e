@@ -84,11 +84,15 @@ void EnzoComputePressure::compute_(Block * block,
 
   Field field = enzo_block->data()->field();
 
+  bool mhd = field.is_field("bfield_x");
 
   if (enzo::config()->method_grackle_use_grackle){
 #ifdef CONFIG_USE_GRACKLE
     code_units grackle_units_;
     grackle_field_data grackle_fields_;
+
+    ASSERT("EnzoComputePressure::compute_",
+	   "Not currently equipped to compute MHD with grackle", mhd);
 
     // setup grackle units if they are not already provided
     if (!grackle_units){
@@ -134,6 +138,14 @@ void EnzoComputePressure::compute_(Block * block,
         (enzo_float*) ((rank >= 2) ? field.values("velocity_y", i_hist_) : NULL),
         (enzo_float*) ((rank >= 3) ? field.values("velocity_z", i_hist_) : NULL) };
 
+    enzo_float * b3[3] = {NULL, NULL, NULL};
+    if (mhd) {
+      b3[0]                = (enzo_float*) field.values("bfield_x", i_hist_);
+      if (rank >= 2) b3[1] = (enzo_float*) field.values("bfield_y", i_hist_);
+      if (rank >= 3) b3[2] = (enzo_float*) field.values("bfield_z", i_hist_);
+    }
+ 
+
     enzo_float * te = (enzo_float*) field.values("total_energy", i_hist_);
 
     int nx,ny,nz;
@@ -151,6 +163,11 @@ void EnzoComputePressure::compute_(Block * block,
       e -= 0.5*v3[0][i]*v3[0][i];
       if (rank >= 2) e -= 0.5*v3[1][i]*v3[1][i];
       if (rank >= 3) e -= 0.5*v3[2][i]*v3[2][i];
+
+      if (mhd)              e -= 0.5*b3[0][i]*b3[0][i]/d[i];
+      if (mhd && rank >= 2) e -= 0.5*b3[1][i]*b3[1][i]/d[i];
+      if (mhd && rank >= 2) e -= 0.5*b3[2][i]*b3[2][i]/d[i];
+      
       p[i] = gm1 * d[i] * e;
     }
   }
