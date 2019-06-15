@@ -352,8 +352,21 @@ public:
   EFlt3DArray* load_array_of_fields(Block *block,
 				    const EnzoAdvectionFieldLUT lut,
 				    const int nfields, Grouping &grouping,
-				    const int dim = 0,
-				    const int stale_depth = 0) const;
+				    const int dim,
+				    const int stale_depth) const;
+
+  /// @overload
+  ///
+  /// The fields are not reconstructed in this case (the stored shape of the
+  /// fields is stored properly)
+  EFlt3DArray* load_array_of_fields(Block *block,
+				    const EnzoAdvectionFieldLUT lut,
+				    const int nfields, Grouping &grouping,
+				    const int stale_depth) const
+  {
+    return load_array_of_fields(block, lut, nfields, grouping,
+				-1, stale_depth);
+  }
 
 private:
 
@@ -373,6 +386,7 @@ private:
 		    const std::vector<std::string> flagged_quantities) const;
 
   // Helper method of load_array_of_fields
+  // dim == -1 means that the fields are cell-centered
   int load_array_of_fields_(EFlt3DArray* arr, int cur_index, Grouping &grouping,
 			    std::string group_name, std::string quantity_type,
 			    int dim, EnzoPermutedCoordinates coord,

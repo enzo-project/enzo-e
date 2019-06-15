@@ -27,17 +27,13 @@ public: // interface
   { }
 
   /// Checks the validity of floor values for the EquationOfState
-  static void check_floor(enzo_float floor, bool density){
-    if (density){
-      // if density = 0, NaNs will arise when converting momentum to velocity
-      ASSERT("EnzoEquationOfState::check_floor",
-	     "The density floor must be greater than 0",
-	     floor > 0);
-    } else {
-      ASSERT("EnzoEquationOfState::check_floor",
-	     "The floor must be greater than or equal to 0",
-	     floor >= 0);
-    }
+  static void check_floor(enzo_float floor){
+    // if density = 0, NaNs will arise when converting momentum to velocity
+    // if pressure = 0, then sound speed will be equal to 0 (possibly causing
+    // time-step calculation problems)
+    ASSERT("EnzoEquationOfState::check_floor",
+	   "The density and pressure floors must be greater than 0",
+	   floor > 0);
   }
 
   /// Applies primitive floor. This function has been factored out to allow for
@@ -192,19 +188,42 @@ public: // interface
 					     int stale_depth,
 					     int reconstructed_axis)=0;
 
-
-
-  
-
   /// returns the density floor
   virtual enzo_float get_density_floor()=0;
 
   /// returns the thermal pressure floor
   virtual enzo_float get_pressure_floor()=0;
 
-  /// apply the pressure floor to total_energy field
-  virtual void apply_floor_to_energy(Block *block, Grouping &cons_group,
-				     int stale_depth)=0;
+  /// apply the pressure floor to the specific total energy field. If the
+  /// equation of state is barotropic, then this does nothing
+  ///
+  /// @param block holds data to be processed
+  /// @param integrable_group holds field names of integrable primitives to be
+  ///     that will be used to apply the floor (also contains the field upon
+  ///     which the floor will be applied)
+  /// @param stale_depth indicates the number of field entries from the
+  ///     outermost field value that the region including "stale" values (need
+  ///     to be refreshed) extends over (0 means there are no "stale" values).
+  virtual void apply_floor_to_total_energy(Block *block,
+					   Grouping &integrable_group,
+					   int stale_depth)=0;
+
+  /// apply the pressure floor to the specific internal energy field. If the
+  /// equation of state is barotropic, then this does nothing
+  ///
+  /// @param block holds data to be processed
+  /// @param reconstructable_group holds field names of integrable primitives
+  ///     to be that will be used to apply the floor (also contains the field
+  ///     upon which the floor will be applied)
+  /// @param stale_depth indicates the number of field entries from the
+  ///     outermost field value that the region including "stale" values (need
+  ///     to be refreshed) extends over (0 means there are no "stale" values).
+  ///
+  /// @note If the macro RAISE_FLOOR_ERROR is defined, and a floor NEEDS to be
+  /// applied, then the this function will raise an error
+  virtual void apply_floor_to_internal_energy(Block *block,
+					      Grouping &reconstructable_group,
+					      int stale_depth)=0;
 
   /// returns whether the equation of state is barotropic
   virtual bool is_barotropic() = 0;

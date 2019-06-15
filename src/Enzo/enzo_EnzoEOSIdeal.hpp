@@ -71,8 +71,12 @@ public: // interface
 
   enzo_float get_pressure_floor() { return pressure_floor_; }
 
-  void apply_floor_to_energy(Block *block, Grouping &cons_group,
-			     int stale_depth);
+  void apply_floor_to_total_energy(Block *block, Grouping &integrable_group,
+				   int stale_depth);
+
+  void apply_floor_to_internal_energy(Block *block,
+				      Grouping &reconstructable_group,
+				      int stale_depth);
 
   bool is_barotropic() { return false; }
 

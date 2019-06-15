@@ -45,7 +45,6 @@ public: // interface
 
   /// CHARM++ PUP::able declaration
   PUPable_abstract(EnzoRiemann);
-  //PUPable_decl(EnzoRiemann);
 
   /// CHARM++ migration constructor for PUP::able
   EnzoRiemann (CkMigrateMessage *m)
@@ -62,26 +61,25 @@ public: // interface
   /// dimension, dim
   /// @param block holds data to be processed
   /// @param priml_group,primr_group holds field names where the left/right
-  ///    reconstructed face-centered integrable primitives are stored. The
-  ///    relevant fields should be formally defined as cell-centered (to allow
-  ///    for reuse). During the calculation, they are treated as face-centered
-  ///    (without having values on the exterior faces of the block). As a
-  ///    result, there is some unused space at the end of the arrays.
+  ///     reconstructed face-centered integrable primitives are stored. The
+  ///     relevant fields should be formally defined as cell-centered (to allow
+  ///     for reuse). During the calculation, they are treated as face-centered
+  ///     (without having values on the exterior faces of the block). As a
+  ///     result, there is some unused space at the end of the arrays.
   /// @param pressure_name_l,pressure_name_r are the names of the fields
-  ///    storing the left/right pressure values that have already been
-  ///    computed from the reconstructed values. The face-centering is expected
-  ///    to match fields contained by priml_group, primr_group
+  ///     storing the left/right pressure values that have already been
+  ///     computed from the reconstructed values. The face-centering is expected
+  ///     to match fields contained by priml_group, primr_group
   /// @param flux_group holds field names where the calculated fluxes will be
-  ///    stored. The relevant fields should be face-centered along the dimension
-  ///    of the calculation (without having values on the exterior faces of the
-  ///    block)
-  /// @param dim Dimension along which to reconstruct interface values. Values
-  ///  of 0, 1, and 2 correspond to the x, y, and z directions, respectively.
+  ///     stored. The relevant fields should be face-centered along the
+  ///     dimension of the calculation (without having values on the exterior
+  ///     faces of the block)
+  /// @param dim Dimension along which to compute Riemann fluxes. Values of 0,
+  ///     1, and 2 correspond to the x, y, and z directions, respectively.
   /// @param eos Instance of the fluid's EnzoEquationOfState object
   /// @param stale_depth indicates the number of field entries from the
-  /// outermost field value that the region including "stale" values (need to
-  /// be refreshed) extends over (0 means there are no "stale" values).
-
+  ///     outermost field value that the region including "stale" values (need
+  ///     to be refreshed) extends over (0 means there are no "stale" values).
   virtual void solve (Block *block,
 		      Grouping &priml_group, Grouping &primr_group, 
 		      std::string pressure_name_l, std::string pressure_name_r,

@@ -345,37 +345,81 @@ void EnzoEOSIdeal::pressure_from_reconstructable
 //----------------------------------------------------------------------
 
 // Applies the pressure_floor to total_energy
-void EnzoEOSIdeal::apply_floor_to_energy(Block *block, Grouping &cons_group,
-					 int stale_depth)
+void EnzoEOSIdeal::apply_floor_to_total_energy(Block *block,
+					       Grouping &integrable_group,
+					       int stale_depth)
 {
-  /// NEED TO UPDATE!
+
+  if (enzo::config()->method_grackle_use_grackle){
+    ERROR("EnzoEOSIdeal::apply_floor_to_total_energy",
+	  "Not presently equipped to handle grackle");
+    // since we are not currently allowing Grackle (due to possibly
+    // variable gamma)
+  }
+
   EnzoFieldArrayFactory array_factory(block,stale_depth);
-  EFlt3DArray density, px, py, pz, etot, bx, by, bz;
-  density = array_factory.from_grouping(cons_group, "density", 0);
-  px = array_factory.from_grouping(cons_group, "momentum", 0);
-  py = array_factory.from_grouping(cons_group, "momentum", 1);
-  pz = array_factory.from_grouping(cons_group, "momentum", 2);
-  etot = array_factory.from_grouping(cons_group, "total_energy", 0);
-  bx = array_factory.from_grouping(cons_group, "bfield", 0);
-  by = array_factory.from_grouping(cons_group, "bfield", 1);
-  bz = array_factory.from_grouping(cons_group, "bfield", 2);
+  EFlt3DArray density, vx, vy, vz, etot, bx, by, bz;
+  density = array_factory.from_grouping(integrable_group, "density", 0);
+  vx = array_factory.from_grouping(integrable_group, "velocity", 0);
+  vy = array_factory.from_grouping(integrable_group, "velocity", 1);
+  vz = array_factory.from_grouping(integrable_group, "velocity", 2);
+  etot = array_factory.from_grouping(integrable_group, "total_energy", 0);
+  bx = array_factory.from_grouping(integrable_group, "bfield", 0);
+  by = array_factory.from_grouping(integrable_group, "bfield", 1);
+  bz = array_factory.from_grouping(integrable_group, "bfield", 2);
 
   enzo_float pressure = get_pressure_floor();
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
-  
+
   for (int iz=0; iz<density.shape(0); iz++) {
     for (int iy=0; iy<density.shape(1); iy++) {
       for (int ix=0; ix<density.shape(2); ix++) {
 
 	enzo_float kinetic, magnetic;
-	kinetic = 0.5*(px(iz,iy,ix) * px(iz,iy,ix) +
-		       py(iz,iy,ix) * py(iz,iy,ix) +
-		       pz(iz,iy,ix) * pz(iz,iy,ix))/density(iz,iy,ix);
+	kinetic = 0.5*(vx(iz,iy,ix) * vx(iz,iy,ix) +
+		       vy(iz,iy,ix) * vy(iz,iy,ix) +
+		       vz(iz,iy,ix) * vz(iz,iy,ix));
 	magnetic = 0.5*(bx(iz,iy,ix) * bx(iz,iy,ix) +
 			by(iz,iy,ix) * by(iz,iy,ix) +
-			bz(iz,iy,ix) * bz(iz,iy,ix));
-	etot(iz,iy,ix) = std::max(pressure * inv_gm1 + kinetic + magnetic,
+			bz(iz,iy,ix) * bz(iz,iy,ix))/density(iz,iy,ix);
+	etot(iz,iy,ix) = std::max((pressure * inv_gm1/density(iz,iy,ix)
+				   + kinetic + magnetic),
 				  etot(iz,iy,ix));
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+// Applies the pressure_floor to internal_energy
+void EnzoEOSIdeal::apply_floor_to_internal_energy
+(Block *block, Grouping &reconstructable_group, int stale_depth)
+{
+
+  if (enzo::config()->method_grackle_use_grackle){
+    ERROR("EnzoEOSIdeal::apply_floor_to_internal_energy",
+	  "Not presently equipped to handle grackle");
+    // since we are not currently allowing Grackle (due to possibly
+    // variable gamma)
+  }
+  
+  EnzoFieldArrayFactory array_factory(block,stale_depth);
+  EFlt3DArray density = array_factory.from_grouping(reconstructable_group,
+						    "density", 0);
+  EFlt3DArray eint = array_factory.from_grouping(recstructable_group,
+						 "internal_energy", 0);
+  enzo_float pressure = get_pressure_floor();
+  enzo_float inv_gm1 = 1./(get_gamma()-1.);
+
+  for (int iz=0; iz<density.shape(0); iz++) {
+    for (int iy=0; iy<density.shape(1); iy++) {
+      for (int ix=0; ix<density.shape(2); ix++) {
+
+	enzo_float floor = pressure*inv_gm1/density(iz,iy,ix);
+
+	eint(iz,iy,ix) = EnzoEquationOfState::apply_floor(eint(iz,iy,ix),
+							  floor);
       }
     }
   }

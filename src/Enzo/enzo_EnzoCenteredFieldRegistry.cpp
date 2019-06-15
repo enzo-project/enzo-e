@@ -306,7 +306,7 @@ EFlt3DArray* EnzoCenteredFieldRegistry::load_array_of_fields
   EnzoPermutedCoordinates coord(dim);
   EnzoFieldArrayFactory array_factory(block, stale_depth);
   // Set this to false if the loaded field is not reconstructed
-  bool reconstructed = true;
+  bool reconstructed = (dim != -1);
 
   #define ENTRY(name, math_type, category, if_advection)                      \
     LOAD_FIELDS_T(name, math_type, lut, arr, grouping, dim, coord,            \

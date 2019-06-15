@@ -439,17 +439,17 @@ void EnzoRiemannImpl<ImplStruct>::solve
   pressure_array_l = array_factory.reconstructed_from_name(pressure_name_l,
 							   dim);
   pressure_array_r = array_factory.reconstructed_from_name(pressure_name_r,
-							dim);
+							   dim);
 
   EnzoCenteredFieldRegistry registry;
   EFlt3DArray *wl_arrays, *wr_arrays, *flux_arrays;
 
   wl_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
-					    priml_group, dim);
+					    priml_group, dim, stale_depth);
   wr_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
-					    primr_group, dim);
+					    primr_group, dim, stale_depth);
   flux_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
-					      flux_group, dim);
+					      flux_group, dim, stale_depth);
 
   enzo_float *wl, *wr, *Ul, *Ur, *Fl, *Fr;
   wl = new enzo_float[n_keys_];    wr = new enzo_float[n_keys_];
@@ -474,7 +474,7 @@ void EnzoRiemannImpl<ImplStruct>::solve
       for (int ix=0; ix<flux_arrays[0].shape(2); ix++) {
 
 	// get the fluid fields
-	for (int field_ind=0; field_ind<n_prim_keys_; field_ind++){
+	for (int field_ind=0; field_ind<n_keys_; field_ind++){
 	  wl[field_ind] = wl_arrays[field_ind](iz,iy,ix);
 	  wr[field_ind] = wr_arrays[field_ind](iz,iy,ix);
 	}
