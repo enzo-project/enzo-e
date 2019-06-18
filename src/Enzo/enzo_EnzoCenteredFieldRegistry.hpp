@@ -330,9 +330,13 @@ public:
   ///   direction. This is used for mapping the i,j,k vector components listed
   ///   in lut to the x,y,z field components. Values of 0, 1, and 2 correspond
   ///   the ith direction pointing parallel to the x, y, and z directions,
-  ///   respectively.
+  ///   respectively. Note that each of the fields in grouping are assumed to
+  ///   be face-centered along this dimension (excluding the exterior faces of
+  ///   the mesh). This allows for appropriate loading of reconstructed fields.
   /// @param stale_depth indicates the current stale_depth for the loaded
   ///   quanties.
+  ///
+  /// 
   EFlt3DArray* load_array_of_fields(Block *block,
 				    const EnzoAdvectionFieldLUT lut,
 				    const int nfields, Grouping &grouping,
@@ -341,8 +345,9 @@ public:
 
   /// @overload
   ///
-  /// The fields are not reconstructed in this case (the stored shape of the
-  /// fields is accurate)
+  /// The fields are assumed not reconstructed in this case (the stored shape
+  /// of the fields is accurate). The components i,j,k of a vector listed by
+  /// the lut always map to x,y,z
   EFlt3DArray* load_array_of_fields(Block *block,
 				    const EnzoAdvectionFieldLUT lut,
 				    const int nfields, Grouping &grouping,

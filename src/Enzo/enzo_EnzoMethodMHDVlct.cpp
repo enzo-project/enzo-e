@@ -48,22 +48,21 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   // number of ghost zones based on reconstructor choice.
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   			     enzo_sync_id_method_vlct);
-  refresh(ir)->add_all_fields();
+  //refresh(ir)->add_all_fields();
 
   // Should probably only refesh what we need
   // (using primitive_group_ and bfieldi_group_)
-  //FieldDescr * field_descr = cello::field_descr();
-  //refresh(ir)->add_field(field_descr->field_id("density"));
-  //refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  //refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  //refresh(ir)->add_field(field_descr->field_id("velocity_z"));
-  //refresh(ir)->add_field(field_descr->field_id("pressure"));
-  //refresh(ir)->add_field(field_descr->field_id("bfield_x"));
-  //refresh(ir)->add_field(field_descr->field_id("bfield_y"));
-  //refresh(ir)->add_field(field_descr->field_id("bfield_z"));
-  //refresh(ir)->add_field(field_descr->field_id("bfieldi_x"));
-  //refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
-  //refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
+  refresh(ir)->add_field(field_descr->field_id("density"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
+  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
+  refresh(ir)->add_field(field_descr->field_id("total_energy"));
+  refresh(ir)->add_field(field_descr->field_id("bfield_x"));
+  refresh(ir)->add_field(field_descr->field_id("bfield_y"));
+  refresh(ir)->add_field(field_descr->field_id("bfield_z"));
+  refresh(ir)->add_field(field_descr->field_id("bfieldi_x"));
+  refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
+  refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
 
   // Initialize the component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
@@ -144,7 +143,14 @@ std::vector<std::string> unique_combination_(std::vector<std::string> &a,
 					     std::vector<std::string> &b)
 {
   std::vector<std::string> out;
-  std::copy(a.begin(), a.end(), out.begin());
+  // copy elements from a
+  for (std::size_t i = 0; i<a.size(); i++){
+    std::string name = a[i];
+    if (std::find(out.begin(), out.end(), name) == out.end()){
+      out.push_back(name);
+    }
+  }
+  // copy elements from b
   for (std::size_t i = 0; i<b.size(); i++){
     std::string name = b[i];
     if (std::find(out.begin(), out.end(), name) == out.end()){
@@ -629,6 +635,10 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block,
 						  stale_depth);
   
   EFlt3DArray *xflux_arrays, *yflux_arrays, *zflux_arrays;
+  // Note: No need to identify x-flux, y-flux, z-flux as reconstructed
+  //       since the shape of the arrays are appropriately registerred
+  //       (Additionally, if we specified dim, then the velocities saved to
+  //        axes i, j, k would be different for each component)
   xflux_arrays = registry.load_array_of_fields(block, lut, nfields,
 					       xflux_group, stale_depth);
   yflux_arrays = registry.load_array_of_fields(block, lut, nfields,
@@ -872,7 +882,7 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
 	      "%s is integrable, it should be a permanent field.",
 	      field_name.c_str(),
 	      (std::find(integrable_group_names_.begin(),
-			 integrable_group_names_.end(), group_name) !=
+			 integrable_group_names_.end(), group_name) ==
 	       integrable_group_names_.end()));
 
       // allocate temporary field

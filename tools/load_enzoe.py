@@ -193,6 +193,7 @@ def load_enzoe(fname, periodicity = (True, True, True)):
                     ('velocity_y', 'code_velocity'),#, "cm/s"),
                     ('velocity_z', 'code_velocity'), #"cm/s"),
                     ('pressure', 'code_mass/code_length/code_time**2'),#"dyne/cm**2")
+                    ('total_energy', 'code_velocity**2'), #cm**2/s**2
                     ("bfield_x", "code_magnetic"), #'gauss'/sqrt(4*pi)
                     ("bfield_y", "code_magnetic"), #'gauss'/sqrt(4*pi)
                     ("bfield_z", "code_magnetic"), #'gauss'/sqrt(4*pi)

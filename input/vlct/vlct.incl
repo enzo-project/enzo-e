@@ -10,7 +10,7 @@
       vlct{
          courant = 0.4;
   
-        # default is hlle. Options are hlle and hlld
+        # default is hlle. Options are hlle/enzo_hlle, athena_hlle, and hlld
         riemann_solver = "hlld";
 
         # Reconstructor algorithm for half time step. Options are:
@@ -33,23 +33,27 @@
    }
 
    Field {
-      # The VL+CT method tracks concerved quantities.
-      #    - velocity_x/y/z are technically momentum densities
-      #    - pressure is the total energy density
+      # The VL+CT method uses the following fields:
+      #    - velocity_x/y/z
+      #    - (specific) total_energy
+      #    - pressure (this is a field used to temporarily write data)
       #    - bfieldi_x/y/z are interface magnetic fields (aka longitudinal).
       #      The x/y/z component is the only component tracked at the faces
       #      between cells along the x/y/z component
       #    - bfieldc_x/y/z are the cell-centered magenetic fields. Each
       #      component is the average value of the corresponding interface
       #      values
+      #    - it uses (specific) internal_energy to hold temporary values. (If
+      #      this field is not allocated then a temporary field will be
+      #      allocated)
       # Pressure and velocity_x/y/z are also tracked because they are frequently
       # computed.
       list = ["density",
               "velocity_x", "velocity_y", "velocity_z",
-	      "pressure",
+	      "total_energy",
 	      "bfieldi_x", "bfieldi_y", "bfieldi_z",
 	      "bfield_x", "bfield_y", "bfield_z",
-	      "acceleration_x", "acceleration_y", "acceleration_z"];
+	      "pressure"];
 
       courant_=0.4;
       gamma = 1.6666666666666667;
@@ -80,6 +84,6 @@
       data {
 	 type = "data";
 	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
-		       "pressure", "bfield_x", "bfield_y", "bfield_z"];
+		       "total_energy", "bfield_x", "bfield_y", "bfield_z"];
       };
    }

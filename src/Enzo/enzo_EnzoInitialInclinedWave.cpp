@@ -525,31 +525,25 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 //----------------------------------------------------------------------
 
 void setup_fluid(Block *block, ScalarInit *density_init,
-		 ScalarInit *total_energy_init, 
+		 ScalarInit *total_energy_density_init, 
 		 VectorInit *momentum_init,
 		 MeshPos &pos, int mx, int my, int mz, enzo_float gamma)
 {
-  EFlt3DArray density, pressure;
+  EFlt3DArray density, specific_total_energy;
   EnzoFieldArrayFactory array_factory(block);
   density = array_factory.from_name("density");
-  pressure = array_factory.from_name("pressure");
+  specific_total_energy = array_factory.from_name("total_energy");
 
   EFlt3DArray velocity_x, velocity_y, velocity_z;
   velocity_x = array_factory.from_name("velocity_x");
   velocity_y = array_factory.from_name("velocity_y");
   velocity_z = array_factory.from_name("velocity_z");
 
-  // Required for computing Pressure
-  EFlt3DArray bfieldc_x, bfieldc_y, bfieldc_z;
-  bfieldc_x = array_factory.from_name("bfield_x");
-  bfieldc_y = array_factory.from_name("bfield_y");
-  bfieldc_z = array_factory.from_name("bfield_z");
-
   for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
       for (int ix=0; ix<mx; ix++){
 	enzo_float x,y,z;
-	enzo_float rho, px, py, pz, etot, p2, b2;
+	enzo_float rho, px, py, pz, etot_dens;
 	x = pos.x(iz,iy,ix); y = pos.y(iz,iy,ix); z = pos.z(iz,iy,ix);
 	rho = (*density_init)(x,y,z);
 	density(iz,iy,ix) = rho;
@@ -558,14 +552,8 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 	velocity_y(iz,iy,ix) = py/rho;
 	velocity_z(iz,iy,ix) = pz/rho;
 
-	etot = (*total_energy_init)(x,y,z);
-	p2 = (px*px + py*py + pz*pz);
-	b2 = (bfieldc_x(iz,iy,ix)*bfieldc_x(iz,iy,ix) +
-	      bfieldc_y(iz,iy,ix)*bfieldc_y(iz,iy,ix) +
-	      bfieldc_z(iz,iy,ix)*bfieldc_z(iz,iy,ix));
-
-	pressure(iz,iy,ix) = (gamma-1.)*(etot - 0.5*(p2/density(iz,iy,ix) +
-						     b2));
+	etot_dens = (*total_energy_density_init)(x,y,z);
+	specific_total_energy(iz,iy,ix) = etot_dens/rho;
       }
       fflush(stdout);
     }
@@ -653,12 +641,12 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
 	 field.field_count() >= 8);
   
   ScalarInit *density_init = NULL;
-  ScalarInit *total_energy_init = NULL;
+  ScalarInit *total_energy_density_init = NULL;
   VectorInit *momentum_init = NULL;
   VectorInit *a_init = NULL;
 
-  prepare_initializers_(&density_init, &total_energy_init, &momentum_init,
-			&a_init);
+  prepare_initializers_(&density_init, &total_energy_density_init,
+			&momentum_init, &a_init);
 
   // Try to load the dimensions, again
   int mx,my,mz;
@@ -670,7 +658,7 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
 
   setup_bfield(block, a_init, pos, mx, my, mz);
   if (wave_type_ != "circ_alfven"){
-    setup_fluid(block, density_init, total_energy_init, momentum_init,
+    setup_fluid(block, density_init, total_energy_density_init, momentum_init,
 		pos, mx, my, mz, gamma_);
     
   } else {
@@ -680,24 +668,24 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
 
   delete density_init;
   delete momentum_init;
-  delete total_energy_init;
+  delete total_energy_density_init;
   delete a_init;
 }
 
 //----------------------------------------------------------------------
 
 void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
-						  ScalarInit **etot_init,
-						  VectorInit **momentum_init,
-						  VectorInit **a_init)
+						    ScalarInit **etot_dens_init,
+						    VectorInit **momentum_init,
+						    VectorInit **a_init)
 {
   enzo_float lambda = lambda_;
   
 
   if (wave_type_ == "circ_alfven"){
     *density_init = new LinearScalarInit(1.0,0.0,0.0,lambda);
-    // we don't use etot_init for circularly polarized alfven waves
-    *etot_init = new LinearScalarInit(0.66,0.0,0.0,lambda);
+    // we don't use etot_dens_init for circularly polarized alfven waves
+    *etot_dens_init = new LinearScalarInit(0.66,0.0,0.0,lambda);
     *momentum_init = new RotatedVectorInit(alpha_,beta_,
 					   new CircAlfvenMomentumInit(0.0,
 								      lambda));
@@ -782,8 +770,8 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
 							       amplitude,
 							       lambda));
       
-    *etot_init = new RotatedScalarInit(alpha_, beta_,
-				       new LinearScalarInit(etot_back,
+    *etot_dens_init = new RotatedScalarInit(alpha_, beta_,
+					    new LinearScalarInit(etot_back,
 							    etot_ev,
 							    amplitude,
 							    lambda));

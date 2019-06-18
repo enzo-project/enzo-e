@@ -295,7 +295,9 @@ EFlt3DArray* EnzoCenteredFieldRegistry::load_array_of_fields
  Grouping &grouping, const int dim, const int stale_depth) const
 {
   EFlt3DArray* arr = new EFlt3DArray[nfields];
-  EnzoPermutedCoordinates coord(dim);
+  // in the case where we don't have reconstructed values (dim = -1) we assume
+  // that the that i-axis is aligned with the x-axis
+  EnzoPermutedCoordinates coord( (dim == -1) ? 0 : dim);
   EnzoFieldArrayFactory array_factory(block, stale_depth);
 
   // define a lambda function to execute for every member of lut

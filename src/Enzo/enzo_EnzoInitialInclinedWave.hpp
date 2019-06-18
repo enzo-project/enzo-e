@@ -73,7 +73,7 @@ public: // virtual methods
 private: // functions
 
   void prepare_initializers_(ScalarInit **density_init,
-			     ScalarInit **etot_init, 
+			     ScalarInit **etot_dens_init, 
 			     VectorInit **momentum_init,
 			     VectorInit **a_init);
 
