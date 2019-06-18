@@ -63,7 +63,7 @@ public:
     Bz_l   = prim_l[lut.bfield_k];
 
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
-    etot_l = cons_l[cons_lut.total_energy];
+    etot_l = cons_l[lut.total_energy];
     pt_l = p_l + EnzoRiemann::mag_pressure_(prim_l, lut);
     cf_l = EnzoRiemann::fast_magnetosonic_speed_(prim_l, lut, pressure_l,
 						 gamma);
@@ -79,7 +79,7 @@ public:
     Bz_r    = prim_r[lut.bfield_k];
 
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
-    etot_r = cons_r[cons_lut.total_energy];
+    etot_r = cons_r[lut.total_energy];
     pt_r = p_r + EnzoRiemann::mag_pressure_(prim_r, lut);
     cf_r = EnzoRiemann::fast_magnetosonic_speed_(prim_r, lut, pressure_r,
 						 gamma);

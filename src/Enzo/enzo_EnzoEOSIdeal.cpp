@@ -20,49 +20,6 @@ void EnzoEOSIdeal::pup (PUP::er &p)
 }
 
 //----------------------------------------------------------------------
-/*
-// Would eventually like this to just wrap the compute_pressure object
-void EnzoEOSIdeal::compute_pressure(Block *block, Grouping &cons_group,
-				    Grouping &prim_group, int stale_depth)
-{
-  EnzoFieldArrayFactory array_factory(block, stale_depth);
-  EFlt3DArray density, p_x, p_y, p_z, etot, b_x, b_y, b_z;
-  density = array_factory.from_grouping(cons_group, "density", 0);
-  p_x = array_factory.from_grouping(cons_group, "momentum", 0);
-  p_y = array_factory.from_grouping(cons_group, "momentum", 1);
-  p_z = array_factory.from_grouping(cons_group, "momentum", 2);
-  etot = array_factory.from_grouping(cons_group, "total_energy", 0);
-  b_x = array_factory.from_grouping(cons_group, "bfield", 0);
-  b_y = array_factory.from_grouping(cons_group, "bfield", 1);
-  b_z = array_factory.from_grouping(cons_group, "bfield", 2);
-
-  EFlt3DArray pressure;
-  pressure = array_factory.from_grouping(prim_group, "pressure", 0);
-
-  enzo_float gm1 = get_gamma() - 1.;
-  // No good way to tell if fields are face-centered
-  // Since, fields are the same size, this just means that some unnecessary
-  // values are calculated
-  // Iteration limits compatible with both 2D and 3D grids
-  for (int iz=0; iz<density.shape(0); iz++) {
-    for (int iy=0; iy<density.shape(1); iy++) {
-      for (int ix=0; ix<density.shape(2); ix++) {
-
-	enzo_float magnetic, kinetic;
-	magnetic = 0.5*(b_x(iz,iy,ix) * b_x(iz,iy,ix) +
-			b_y(iz,iy,ix) * b_y(iz,iy,ix) +
-			b_z(iz,iy,ix) * b_z(iz,iy,ix));
-	kinetic = 0.5*(p_x(iz,iy,ix) * p_x(iz,iy,ix) +
-		       p_y(iz,iy,ix) * p_y(iz,iy,ix) +
-		       p_z(iz,iy,ix) * p_z(iz,iy,ix))/density(iz,iy,ix);
-	pressure(iz,iy,ix) = gm1 * (etot(iz,iy,ix) - magnetic - kinetic);
-
-      }
-    }
-  }
-}
-*/
-//----------------------------------------------------------------------
 
 // Helper function that performs a quick check to confirm that certain fields
 // are  by both reconstructable_group and integrable_group
@@ -82,7 +39,7 @@ void confirm_same_fields_(Grouping &grouping_ref, Grouping &grouping_check,
 	    ref_name.c_str(), check_name.c_str(), group_name.c_str(),
 	    num_ref_fields == num_check_fields);
 
-    for (int j=0;j<num_fields;j++){
+    for (int j=0;j<num_ref_fields;j++){
       std::string ref_field = grouping_ref.item(group_name,j);
       std::string check_field = grouping_check.item(group_name,j);
 
@@ -95,8 +52,8 @@ void confirm_same_fields_(Grouping &grouping_ref, Grouping &grouping_check,
   }
 }
 
-void check_recon_integ_overlap_(Grouping &recon_grouping,
-				Grouping &integ_grouping,
+void check_recon_integ_overlap_(Grouping &reconstructable_group,
+				Grouping &integrable_group,
 				std::string func_name)
 {
   // We assume that the following groups are represented by the same fields in
@@ -132,8 +89,8 @@ void EnzoEOSIdeal::reconstructable_from_integrable
   }
 
   // Confirm that the relevant fields overlap as expected
-  check_recon_integ_overlap_(reconstructable_group, integrable_grouping,
-			     "EnzoEOSIdeal::reconstructable_from_integrable")
+  check_recon_integ_overlap_(reconstructable_group, integrable_group,
+			     "EnzoEOSIdeal::reconstructable_from_integrable");
 
   EnzoFieldArrayFactory array_factory(block, stale_depth);
 
@@ -189,7 +146,7 @@ void EnzoEOSIdeal::integrable_from_reconstructable
 
 
   // Confirm that the relevant fields overlap as expected
-  check_recon_integ_overlap_(reconstructable_group, integrable_grouping,
+  check_recon_integ_overlap_(reconstructable_group, integrable_group,
 			     "EnzoEOSIdeal::integrable_from_reconstructable");
 
   EnzoFieldArrayFactory array_factory(block, stale_depth);
@@ -282,8 +239,8 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
   std::vector<std::string> b{"bfield_x", "bfield_y", "bfield_z"};
 
   for (std::size_t i=0; i<3; i++){
-    velocity_name = vel[i];
-    bfield_name   = b[i];
+    std::string velocity_name = vel[i];
+    std::string bfield_name   = b[i];
     ASSERT1("EnzoEOSIdeal::pressure_from_integrable",
 	    "Currently, the supplied grouping must include \"%s\"",
 	    vel[i].c_str(), integrable_group.is_in( vel[i], "velocity"));
@@ -294,9 +251,9 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
 
   // assumes that we are not using comoving coordinates
   EnzoComputePressure compute_pressure (this->get_gamma(),false);
-
-  enzo_float* pressure = (enzo_float*) field.values(pressure_name, i_hist_);
-  compute_pressure(block, pressure);
+  Field field = block->data()->field();
+  enzo_float* pressure = (enzo_float*) field.values(pressure_name);
+  compute_pressure.compute(block, pressure);
 }
 
 
@@ -407,7 +364,7 @@ void EnzoEOSIdeal::apply_floor_to_internal_energy
   EnzoFieldArrayFactory array_factory(block,stale_depth);
   EFlt3DArray density = array_factory.from_grouping(reconstructable_group,
 						    "density", 0);
-  EFlt3DArray eint = array_factory.from_grouping(recstructable_group,
+  EFlt3DArray eint = array_factory.from_grouping(reconstructable_group,
 						 "internal_energy", 0);
   enzo_float pressure = get_pressure_floor();
   enzo_float inv_gm1 = 1./(get_gamma()-1.);

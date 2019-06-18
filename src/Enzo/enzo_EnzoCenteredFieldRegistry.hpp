@@ -85,53 +85,42 @@ enum class FieldCat{conserved, specific, other};
   ENTRY(              potential, SCALAR,  FieldCat::specific, F)
 
 
+// Yields a combined token
 #define COMBINE(prefix, suffix) prefix##suffix
-
-
-//----------------------------------------------------------------------
-/// @def      STRUCT_MEMBER
-/// @brief    Macro that helps define struct members based off the entries in
-///           FIELD_TABLE
-///
-/// This includes 2 macros: STRUCT_MEMBER_SCALAR and STRUCT_MEMBER_VECTOR which
-/// has specialized behavior for SCALAR and VECTOR quantities 
-#define STRUCT_MEMBER_SCALAR(name,type) type name
-#define STRUCT_MEMBER_VECTOR(name,type)                                       \
-  type COMBINE(name,_i);   type COMBINE(name,_j);  type COMBINE(name,_k)
-
+// Yields a stringized version of the combined token
+#define STRINGIZE_COMBINE(prefix,suffix) STR_C_1(COMBINE(prefix,suffix))
+#define STR_C_1(s) STR_C_2(s)
+#define STR_C_2(s) #s
 
 //----------------------------------------------------------------------
 /// @def      ADVEC_STRUCT_MEMBER
 /// @brief    Macro that helps define advection field struct members based off
 ///           the entries in FIELD_TABLE
 ///
-/// This includes 2 macros: ADVEC_STRUCT_MEMBER_T and ADVEC_STRUCT_MEMBER_F
-/// The former gets called when an entry of FIELD_TABLE is actually an
-/// advection related quantity while the latter gets called in other cases
-#define ADVEC_STRUCT_MEMBER_T(name, type, math_type)                          \
-  STRUCT_MEMBER##math_type(name, type)
-#define ADVEC_STRUCT_MEMBER_F(name, type, math_type) /* ... */
+/// This includes 4 macros:
+/// STRUCT_MEMBER_T_SCALAR, STRUCT_MEMBER_T_VECTOR,
+/// STRUCT_MEMBER_F_SCALAR, STRUCT_MEMBER_F_VECTOR
+/// which have specialized behavior based on whether the quantity is advective
+/// and if its a SCALAR or VECTOR quantities 
+#define ADVEC_STRUCT_MEMBER_T_SCALAR(name,type) type name
+#define ADVEC_STRUCT_MEMBER_T_VECTOR(name,type)                               \
+  type COMBINE(name,_i);   type COMBINE(name,_j);  type COMBINE(name,_k)
+#define ADVEC_STRUCT_MEMBER_F_SCALAR(name,type) /* ... */
+#define ADVEC_STRUCT_MEMBER_F_VECTOR(name,type) /* ... */
 
 
 //----------------------------------------------------------------------
-/// @def      STRUCT_MEMBER_UNARY_FUNC
-/// @brief    Macro that applies a unary function to a struct member named for
-///           an entry in FIELD_TABLE
-#define STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, name)                    \
-  func(#name, struc->name)
-#define STRUCT_MEMBER_UNARY_FUNC_VECTOR(func, struc, name)                    \
-  STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, COMBINE(name,_i));             \
-  STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, COMBINE(name,_j));             \
-  STRUCT_MEMBER_UNARY_FUNC_SCALAR(func, struc, COMBINE(name,_k))
-
-
-//----------------------------------------------------------------------
-/// @def      ADVEC_STRUCT_MEMBER_UNARY_FUNC
+/// @def      ADVEC_STRUCT_UNARY_FUNC
 /// @brief    Macro that applies a unary function to members of a struct named
 ///           for advection related quantities in FIELD_TABLE
-#define ADVEC_STRUCT_UNARY_FUNC_T(func, struc, name, math_type)               \
-  STRUCT_MEMBER_UNARY_FUNC_##math_type(func, struc, name)
-#define ADVEC_STRUCT_UNARY_FUNC_F(func, struc, name, math_type) /* ... */
+#define ADVEC_STRUCT_UNARY_FUNC_T_SCALAR(func, struc, name)                   \
+  func(#name, struc.name)
+#define ADVEC_STRUCT_UNARY_FUNC_T_VECTOR(func, struc, name)                   \
+  func(STRINGIZE_COMBINE(name,_i), struc.COMBINE(name,_i));                 \
+  func(STRINGIZE_COMBINE(name,_j), struc.COMBINE(name,_j));                 \
+  func(STRINGIZE_COMBINE(name,_k), struc.COMBINE(name,_k))
+#define ADVEC_STRUCT_UNARY_FUNC_F_SCALAR(func, struc, name) /* ... */
+#define ADVEC_STRUCT_UNARY_FUNC_F_VECTOR(func, struc, name) /* ... */
 
 
 //----------------------------------------------------------------------
@@ -144,12 +133,12 @@ enum class FieldCat{conserved, specific, other};
 template<class AdvectStruct, class Function>
 void unary_advec_struct_for_each_(AdvectStruct &obj, Function fn){
   #define ENTRY(name, math_type, category, if_advection)                      \
-      ADVEC_STRUCT_UNITARY_FUNC_##if_advection(func, this, name, math_type);
-      FIELD_TABLE
+      ADVEC_STRUCT_UNARY_FUNC_##if_advection ## _ ## math_type (fn, obj, name);
+  FIELD_TABLE
   #undef ENTRY
 }
 
-class EnzoAdvectionFieldLUT : public PUP::able{
+class EnzoAdvectionFieldLUT{
 
   /// @class    EnzoAdvectionFieldLUT
   /// @ingroup  Enzo
@@ -187,7 +176,7 @@ public: // attributes
 
   // Add attributes named for entries in LUT
   #define ENTRY(name, math_type, category, if_advection)                      \
-    ADVEC_STRUCT_MEMBER_##if_advection(name, bool, math_type);
+    ADVEC_STRUCT_MEMBER_ ## if_advection ## _ ## math_type(name, int);
   FIELD_TABLE
   #undef ENTRY
 };
@@ -202,20 +191,15 @@ inline void print_lut(const EnzoAdvectionFieldLUT lut)
   std::string out = std::string("{\n");
 
   // Define the lambda function to collect values and names
-  auto func = [&out](std::string field_name, T val)
+  auto func = [&out](std::string field_name, int val)
     {
-      std::string str_val;
-      if (std::is_same<T,bool>::value){
-	value = (val) ? std::string("true") : std::string("false");
-      } else {
-	value = std::to_string(val);
-      }
+      std::string str_val = std::to_string(val);
       out = (out + std::string("  ") + field_name + std::string(" = ") +
-	     value + std::string(std::string) + std::string(";\n"));
+	     str_val + std::string(";\n"));
     };
 
   // apply lambda function
-  unary_advec_struct_for_each_((*this), func);
+  unary_advec_struct_for_each_(lut, func);
 
   out = out + std::string("}\n");
   CkPrintf("%s", out.c_str());
@@ -247,7 +231,7 @@ public:
   std::vector<std::string> get_registered_quantities() const;
 
   /// Returns the vector of registered field names
-  std::vector<FieldCat> get_registered_fields() const;
+  std::vector<std::string> get_registered_fields() const;
   
   /// Checks that that the quantity names are in FIELD_TABLE. If not then,
   /// raises an error.
@@ -325,7 +309,7 @@ public:
   ///
   /// To register new names add entry to the static constant vector variable
   /// called passive_group_names
-  std::vector<std::string> passive_scalar_group_names()
+  std::vector<std::string> passive_scalar_group_names() const
   {
     return passive_group_names;
   }
@@ -358,7 +342,7 @@ public:
   /// @overload
   ///
   /// The fields are not reconstructed in this case (the stored shape of the
-  /// fields is stored properly)
+  /// fields is accurate)
   EFlt3DArray* load_array_of_fields(Block *block,
 				    const EnzoAdvectionFieldLUT lut,
 				    const int nfields, Grouping &grouping,
@@ -373,8 +357,7 @@ private:
   /// Helper method of build_grouping. Adds a fields to the grouping
   void add_group_fields_(Grouping *grouping, const std::string group_name,
 			 const std::string quantity_type, FieldCat category,
-			 const std::string leading_prefix,
-			 const std::string overlap_cat_prefix) const;
+			 const std::string leading_prefix) const;
 
 
   /// Helper method of prepare_lut. Determines conserved_start, conserved_stop,
@@ -382,15 +365,8 @@ private:
   void prepare_lut_(const std::vector<std::string> quantity_names,
 		    int &conserved_start, int &conserved_stop,
 		    int &specific_start, int &specific_stop,
-		    int &other_start, int &other_stop, int &nfields
+		    int &other_start, int &other_stop, int &nfields,
 		    const std::vector<std::string> flagged_quantities) const;
-
-  // Helper method of load_array_of_fields
-  // dim == -1 means that the fields are cell-centered
-  int load_array_of_fields_(EFlt3DArray* arr, int cur_index, Grouping &grouping,
-			    std::string group_name, std::string quantity_type,
-			    int dim, EnzoPermutedCoordinates coord,
-			    EnzoFieldArrayFactory array_factory) const;
 };
 
 #endif /* ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP */

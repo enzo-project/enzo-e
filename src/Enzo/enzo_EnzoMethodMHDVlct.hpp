@@ -107,16 +107,15 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoMethodMHDVlct (CkMigrateMessage *m)
     : Method (m),
-      conserved_group_(NULL),
-      bfieldi_group_(NULL),
       primitive_group_(NULL),
+      bfieldi_group_(NULL),
       eos_(NULL),
       half_dt_recon_(NULL),
       full_dt_recon_(NULL),
       riemann_solver_(NULL),
-      cons_group_names_(),
-      prim_group_names_(),
-      cond_()
+      reconstructable_group_names_(),
+      integrable_group_names_(),
+      passive_group_names_()
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -301,7 +300,7 @@ protected: // methods
 			  Grouping &xflux_group, Grouping &yflux_group,
 			  Grouping &zflux_group,
 			  Grouping &out_integrable_group,
-			  double dt, int stale_depth)
+			  double dt, int stale_depth);
 
   /// Allocate temporary fields needed for scratch space and store their names
   /// in the corresponding groupings or return the names. Also allocates all
@@ -366,8 +365,8 @@ protected: // methods
   /// Deallocates the temporary fields used for scratch space
   void deallocate_temp_fields_(Block *block, Grouping &priml_group,
 			       Grouping &primr_group,
-			       std::string &pressure_name_l,
-			       std::string &pressure_name_r,
+			       std::string pressure_name_l,
+			       std::string pressure_name_r,
 			       Grouping &xflux_group,
 			       Grouping &yflux_group,
 			       Grouping &zflux_group,
@@ -375,8 +374,7 @@ protected: // methods
 			       std::string center_efield_name,
 			       Grouping &weight_group,
 			       Grouping &temp_primitive_group,
-			       Grouping &temp_bfieldi_group,
-			       Grouping &consl_group, Grouping &consr_group);
+			       Grouping &temp_bfieldi_group);
 
   // helper function to initialize values of reconstructed primitives to floor
   // that will never be initialized by reconstruction. This is necessary to

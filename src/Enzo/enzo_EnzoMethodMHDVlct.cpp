@@ -20,8 +20,8 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   : Method()
 {
   // Initialize equation of state (check the validity of quantity floors)
-  EnzoEquationOfState::check_floor(density_floor, true);
-  EnzoEquationOfState::check_floor(pressure_floor, false);
+  EnzoEquationOfState::check_floor(density_floor);
+  EnzoEquationOfState::check_floor(pressure_floor);
   eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
 
 
@@ -34,14 +34,15 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 		   passive_group_names_);
 
   // "pressure" is only used to compute the timestep
+  FieldDescr * field_descr = cello::field_descr();
   ASSERT("EnzoMethodMHDVlct", "\"pressure\" must be a permanent field",
-	 field.is_permanent("pressure"));
+	 field_descr->is_field("pressure"));
 
   // setup primitive_group_, and bfieldi_group_
   // (also checks that the integrable fields of primitive_group_ and all the
   // fields of bfieldi_group_ exist and are permanent)
-  setup_groups_(integrable_group_names_, reconstructable_group_names_,
-		passive_group_names_);
+  setup_groupings_(integrable_group_names_, reconstructable_group_names_,
+		   passive_group_names_);
 
   // Initialize the default Refresh object - eventually may want to adjust
   // number of ghost zones based on reconstructor choice.
@@ -155,11 +156,13 @@ std::vector<std::string> unique_combination_(std::vector<std::string> &a,
   
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::setup_groups_
+void EnzoMethodMHDVlct::setup_groupings_
 (std::vector<std::string> &integrable_groups,
  std::vector<std::string> &reconstructable_groups,
  std::vector<std::string> &passive_groups)
 {
+
+  FieldDescr * field_descr = cello::field_descr();
 
   // first come up with a vector group names that represents the union of
   // integrable_groups and reconstructable_groups
@@ -179,9 +182,9 @@ void EnzoMethodMHDVlct::setup_groups_
     for (int j = 0; j<num_fields; j++){
       std::string field_name = primitive_group_->item(group_name,j);
 
-      ASSERT1("EnzoMethodMHDVlct::setup_groups_",
+      ASSERT1("EnzoMethodMHDVlct::setup_groupings_",
 	      "\"%s\" must be the name of a permanent field",
-	      field_name.c_str(), field.is_permanent(field_name));
+	      field_name.c_str(), field_descr->is_field(field_name));
     }
   }
 
@@ -189,7 +192,7 @@ void EnzoMethodMHDVlct::setup_groups_
   // versions of the permanent fields)
   // This should be double checked
   //add_passive_groups_(*primitive_group_, "prim_specific_");
-  ASSERT("EnzoMethodMHDVlct::setup_groups_",
+  ASSERT("EnzoMethodMHDVlct::setup_groupings_",
 	 "Not quite expecting passive scalars", passive_groups.size() == 0);
 
   bfieldi_group_ = new Grouping;
@@ -197,24 +200,25 @@ void EnzoMethodMHDVlct::setup_groups_
   bfieldi_group_->add("bfieldi_y", "bfield");
   bfieldi_group_->add("bfieldi_z", "bfield");
 
-  ASSERT("EnzoMethodMHDVlct::setup_groups_",
+  ASSERT("EnzoMethodMHDVlct::setup_groupings_",
 	 ("There must be face-centered permanent fields called \"bfieldi_x\","
 	  "\"bfield_y\" and \"bfield_z\"."),
-	 (field.is_permanent("bfieldi_x") && field.is_permanent("bfieldi_y")
-	  && field.is_permanent("bfieldi_z")));
+	 (field_descr->is_field("bfieldi_x") &&
+	  field_descr->is_field("bfieldi_y") &&
+	  field_descr->is_field("bfieldi_z")));
 }
 
 //----------------------------------------------------------------------
 
 EnzoMethodMHDVlct::~EnzoMethodMHDVlct()
 {
-  delete conserved_group_;
-  delete bfieldi_group_;
   delete primitive_group_;
+  delete bfieldi_group_;
+
+  delete eos_;
   delete half_dt_recon_;
   delete full_dt_recon_;
   delete riemann_solver_;
-  delete eos_;
 }
 
 //----------------------------------------------------------------------
@@ -235,8 +239,8 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   if (p.isUnpacking()){
     // a bug prevents us from pupping the groupings
     // instead, we just set them up again
-    setup_groups_(integrable_group_names_, reconstructable_group_names_,
-		  passive_group_names_);
+    setup_groupings_(integrable_group_names_, reconstructable_group_names_,
+		     passive_group_names_);
   }
 
   p|half_dt_recon_;
@@ -297,7 +301,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // convert the passive scalars from conserved form to specific form
     // (outside the integrator, they are treated like conserved densities)
     compute_specific_passive_scalars_(block, passive_group_names_,
-				      *primitive_group_)
+				      *primitive_group_);
 
     // stale_depth indicates the number of field entries from the outermost
     // field value that the region including "stale" values (need to be
@@ -344,18 +348,18 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       // primitives since there is large overlap).
       // For an adiabatic gas, this nominally computes the specific internal
       // energy
-      eos_->reconstructable_from_integrable(block, *cur_integrable_group_,
-					    *cur_reconstructable_group_,
+      eos_->reconstructable_from_integrable(block, *cur_integrable_group,
+					    *cur_reconstructable_group,
 					    stale_depth);
       
       // Compute flux along each dimension
-      compute_flux_(block, 0, *cur_reconstructable_group_, *cur_bfieldi_group,
+      compute_flux_(block, 0, *cur_reconstructable_group, *cur_bfieldi_group,
 		    priml_group, primr_group, pressure_name_l, pressure_name_r,
 		    xflux_group, weight_group, *reconstructor, stale_depth);
-      compute_flux_(block, 1, *cur_reconstructable_group_, *cur_bfieldi_group,
+      compute_flux_(block, 1, *cur_reconstructable_group, *cur_bfieldi_group,
 		    priml_group, primr_group, pressure_name_l, pressure_name_r,
 		    yflux_group, weight_group, *reconstructor, stale_depth);
-      compute_flux_(block, 2, *cur_reconstructable_group_, *cur_bfieldi_group,
+      compute_flux_(block, 2, *cur_reconstructable_group, *cur_bfieldi_group,
 		    priml_group, primr_group, pressure_name_l, pressure_name_r,
 		    zflux_group, weight_group, *reconstructor, stale_depth);
       // increment the stale_depth
@@ -380,15 +384,16 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       // Finally, update cell-centered B-field 
       for (int dim = 0; dim<3; dim++){
-	ct.compute_center_bfield(block, dim, *out_cons_group,
+	ct.compute_center_bfield(block, dim, *out_integrable_group,
 				 *out_bfieldi_group, stale_depth);
       }
 
       // Update quantities - add flux divergence
       // (this needs to happen updating the cell-centered B-field so that the
       //  floor on the energy can be checked)
-      update_quantities_(block, xflux_group, yflux_group, zflux_group,
-			 *out_cons_group, cur_dt,stale_depth);
+      update_quantities_(block, *primitive_group_,
+			 xflux_group, yflux_group, zflux_group,
+			 *out_integrable_group, cur_dt, stale_depth);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -398,14 +403,15 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // convert the passive scalars from specific form back to conserved form
     // (outside the integrator, they are treated like conserved densities)
     compute_conserved_passive_scalars_(block, passive_group_names_,
-				       *primitive_group_, stale_depth)
+				       *primitive_group_, stale_depth);
 
     // Deallocate Temporary Fields
-    deallocate_temp_fields_(block, priml_group, primr_group, xflux_group,
-			    yflux_group, zflux_group, efield_group,
-			    center_efield_name, weight_group,
-			    temp_conserved_group, temp_bfieldi_group,
-			    consl_group, consr_group);
+    deallocate_temp_fields_(block, priml_group, primr_group,
+			    pressure_name_l, pressure_name_r,
+			    xflux_group, yflux_group, zflux_group,
+			    efield_group, center_efield_name,
+			    weight_group, temp_primitive_group,
+			    temp_bfieldi_group);
   }
 
   block->compute_done();
@@ -476,7 +482,7 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
   bfield = array_factory.interior_bfieldi(cur_bfieldi_group, dim);
   l_bfield = array_factory.reconstructed_field(*reconstructable_group_l,
 					       "bfield", dim, dim);
-  r_bfield = array_factory.reconstructed_field(reconstructable_group_r,
+  r_bfield = array_factory.reconstructed_field(*reconstructable_group_r,
 					       "bfield", dim, dim);
 
   // All 3 array objects are the same shape
@@ -498,13 +504,13 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 					*integrable_group_r, stale_depth, dim);
 
   // Calculate pressure on left and right faces:
-  pressure_from_reconstructable(block, *reconstructable_group_l,
-				pressure_name_l, stale_depth, dim);
-  pressure_from_reconstructable(block, *reconstructable_group_r,
-				pressure_name_r, stale_depth, dim);
+  eos_->pressure_from_reconstructable(block, *reconstructable_group_l,
+				      pressure_name_l, stale_depth, dim);
+  eos_->pressure_from_reconstructable(block, *reconstructable_group_r,
+				      pressure_name_r, stale_depth, dim);
 
   // Next, compute the fluxes
-  riemann_solver_->solve(block, integrable_group_l, integrable_group_r,
+  riemann_solver_->solve(block, *integrable_group_l, *integrable_group_r,
 			 pressure_name_l, pressure_name_r, flux_group,
 			 dim, eos_, cur_stale_depth);
 
@@ -604,11 +610,11 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block,
   int nfields;
 
   EnzoCenteredFieldRegistry registry;
-  registry.prepare_advection_lut(integrable_groups,
-				 conserved_start, conserved_stop,
-				 specific_start, specific_stop,
-				 other_start, other_stop, nfields,
-				 flagged_groups);
+  lut = registry.prepare_advection_lut(integrable_groups,
+				       conserved_start, conserved_stop,
+				       specific_start, specific_stop,
+				       other_start, other_stop, nfields,
+				       flagged_groups);
 
   ASSERT("EnzoMethodMHDVlct::update_quantities_",
 	 "not equipped to handle fields classified as other",
@@ -631,8 +637,8 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block,
 					       zflux_group, stale_depth);
 
   enzo_float *cur_prim, *dU;
-  cur_prim = new enzo_float[n_fields];
-  dU = new enzo_float[n_fields];
+  cur_prim = new enzo_float[nfields];
+  dU = new enzo_float[nfields];
   
   // For now, not having density floor affect momentum or total energy density
   enzo_float density_floor = eos_->get_density_floor();
@@ -653,7 +659,7 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block,
       for (int ix=1; ix<mx-1; ix++) {
 
 	// load in the fields
-	for (int field_ind=0; field_ind<n_fields; field_ind++){
+	for (int field_ind=0; field_ind<nfields; field_ind++){
 	  cur_prim[field_ind] = cur_prim_arrays[field_ind](iz,iy,ix);
 	  dU[field_ind] = (- dtdx * (xflux_arrays[field_ind](iz,iy,ix)
 				    - xflux_arrays[field_ind](iz,iy,ix-1))
@@ -971,15 +977,16 @@ void deallocate_grouping_fields_(Field &field,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::deallocate_temp_fields_(Grouping &priml_group,
+void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
+						Grouping &priml_group,
 						Grouping &primr_group,
-						std::string &pressure_name_l,
-						std::string &pressure_name_r,
+						std::string pressure_name_l,
+						std::string pressure_name_r,
 						Grouping &xflux_group,
 						Grouping &yflux_group,
 						Grouping &zflux_group,
 						Grouping &efield_group,
-						std::string &center_efield_name,
+						std::string center_efield_name,
 						Grouping &weight_group,
 						Grouping &temp_primitive_group,
 						Grouping &temp_bfieldi_group)

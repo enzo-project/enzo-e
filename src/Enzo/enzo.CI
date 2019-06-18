@@ -87,7 +87,6 @@ module enzo {
   PUPable EnzoMethodGravity;
   PUPable EnzoMethodMHDVlct;
 
-  PUPable EnzoFieldConditions;
   PUPable EnzoEOSIdeal;
   PUPable EnzoReconstructorNN;
   PUPable EnzoReconstructorPLM;

@@ -84,8 +84,9 @@ public: // interface
 
   enzo_float get_isothermal_sound_speed() { return 0;}
 
-  bool uses_dual_energy_formalism() { return false };
-  
+  // In the future, this won't be hardcoded
+  bool uses_dual_energy_formalism() { return false; };
+
 
 private:
   /// Helper function to retrieve a field array when it is possible that a

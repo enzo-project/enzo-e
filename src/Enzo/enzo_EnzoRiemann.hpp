@@ -108,7 +108,7 @@ public: // interface
     enzo_float bj = prim_vals[lut.bfield_j];
     enzo_float bk = prim_vals[lut.bfield_k];
 
-    enzo_float cs2 = std::pow(sound_speed_(prim_vals, lut, gamma),2);
+    enzo_float cs2 = std::pow(sound_speed_(prim_vals, lut, pressure, gamma),2);
     enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     if (B2 == 0){
       return std::sqrt(cs2);
@@ -133,7 +133,7 @@ public: // interface
     enzo_float bj = prim_vals[lut.bfield_j];
     enzo_float bk = prim_vals[lut.bfield_k];
 
-    enzo_float cs2 = std::pow(sound_speed_(prim_vals, lut, gamma),2);
+    enzo_float cs2 = std::pow(sound_speed_(prim_vals, lut, pressure, gamma),2);
     enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     enzo_float va2 = B2/prim_vals[lut.density];
     return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
@@ -169,13 +169,10 @@ public: // interface
   ///     considered an integrable primitive)
   /// @param gamma The adiabatic index
   static enzo_float sound_speed_(const enzo_float prim_vals[],
-				 const field_lut lut,
+				 const EnzoAdvectionFieldLUT lut,
 				 const enzo_float pressure,
 				 const enzo_float gamma)
-  {
-    return std::sqrt(gamma * prim_vals[prim_lut.pressure]/
-		     prim_vals[prim_lut.density]);
-  }
+  { return std::sqrt(gamma * pressure / prim_vals[lut.density]); }
 
 };
 

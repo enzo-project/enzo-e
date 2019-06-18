@@ -25,43 +25,46 @@ bool contains_item_(std::vector<std::string> names, std::string item)
 
 //----------------------------------------------------------------------
 
-typedef std::tuple<std::string, std::string, FieldCat, bool> FT_row;
+typedef std::tuple<std::string, FieldCat, bool> FT_row;
 // Runtime function to construct a dynamic version of FIELD_TABLE
 // It may make sense down the road to cache this
-std::vector<FT_row> get_dynamic_table_()
+std::map<std::string,FT_row> get_dynamic_table_(std::vector<std::string> &keys)
 {
-  std::vector<FT_row> out;
+  std::map<std::string,FT_row> out;
   #define ENTRY(name, math_type, category, if_advection)                      \
     if (std::string( #if_advection) == "T"){                                  \
-      out.push_back(std::make_tuple( #row , #math_type, category, true));     \
+      out[#name] = std::make_tuple( #math_type , category,  true);            \
+      keys.push_back(#name);                                                  \
     } else {                                                                  \
-      out.push_back(std::make_tuple( #row , #math_type, category, false));    \
+      out[#name] = std::make_tuple( #math_type , category, false);            \
+      keys.push_back(#name);                                                  \
     }
   FIELD_TABLE
   #undef ENTRY
+    return out;
 }
 
 //----------------------------------------------------------------------
 
-std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_quantities()
+std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_quantities
+() const
 {
-  std::vector<FT_row> table = get_dynamic_table_();
-  std::vector<std::string> out;
-  for(auto const& row: table) {
-    out.push_back(std::get<0>(row));
-  }
-  return out;
+  std::vector<std::string> keys;
+  get_dynamic_table_(keys);
+  return keys;
 }
 
 //----------------------------------------------------------------------
 
-std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_fields()
+std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_fields
+() const
 {
-  std::vector<FT_row> table = get_dynamic_table_();
+  std::vector<std::string> keys;
+  std::map<std::string,FT_row> table = get_dynamic_table_(keys);
   std::vector<std::string> out;
-  for(auto const& row: table) {
-    std::string quantity_name = std::get<0>(row);
-    if (std::get<1>(row) == "SCALAR"){
+  for(auto const& key: keys) {
+    std::string quantity_name = key;
+    if (std::get<0>(table[key]) == "SCALAR"){
       out.push_back(quantity_name);
     } else{
       out.push_back(quantity_name + std::string("_x"));
@@ -75,7 +78,7 @@ std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_fields()
 //----------------------------------------------------------------------
 
 void EnzoCenteredFieldRegistry::check_known_quantity_names
-(const std::vector<std::string> names)
+(const std::vector<std::string> names) const
 {
   std::vector<std::string> known_names = get_registered_quantities();
   for(auto const& name: names) {
@@ -90,14 +93,14 @@ void EnzoCenteredFieldRegistry::check_known_quantity_names
 
 Grouping* EnzoCenteredFieldRegistry::build_grouping
 (const std::vector<std::string> quantity_names,
- const std::string leading_prefix = "")
+ const std::string leading_prefix) const
 {
   check_known_quantity_names(quantity_names);
   Grouping *out = new Grouping;
   #define ENTRY(name, math_type, category, if_advection)                      \
-    if (contains_item_(quantity_names, std::string(name))){                   \
+    if (contains_item_(quantity_names, std::string(#name))){                  \
       add_group_fields_(out, std::string( #name ), std::string( #math_type ), \
-			leading_prefix);                                      \
+			category, leading_prefix);                            \
     }
   FIELD_TABLE
   #undef ENTRY
@@ -109,7 +112,7 @@ Grouping* EnzoCenteredFieldRegistry::build_grouping
 void EnzoCenteredFieldRegistry::add_group_fields_
 (Grouping *grouping, const std::string group_name,
  const std::string quantity_type, FieldCat category,
- const std::string leading_prefix)
+ const std::string leading_prefix) const
 {
 
   if (quantity_type == "SCALAR"){
@@ -124,10 +127,10 @@ void EnzoCenteredFieldRegistry::add_group_fields_
 //----------------------------------------------------------------------
 
 void EnzoCenteredFieldRegistry::prepare_lut_
-   const std::vector<std::string> quantity_names,
-   int &conserved_start, int &conserved_stop, int &specific_start,
-   int &specific_stop, int &other_start, int &other_stop, int &nfields
-   const std::vector<std::string> flagged_quantities)
+(const std::vector<std::string> quantity_names,
+ int &conserved_start, int &conserved_stop, int &specific_start,
+ int &specific_stop, int &other_start, int &other_stop, int &nfields,
+ const std::vector<std::string> flagged_quantities) const
 {
   // check that all entries flagged_quantities are also in quantity_names
   for(auto const& name: flagged_quantities) {
@@ -146,13 +149,14 @@ void EnzoCenteredFieldRegistry::prepare_lut_
 
   // We are going to do this without macros for simplicity
   // This is not necessarily the most efficient way to do things
-  std::vector<FT_row> table = get_dynamic_table_();
+  std::vector<std::string> keys;
+  std::map<std::string, FT_row> table = get_dynamic_table_(keys);
 
-  for(auto const& row: table) {
-    std::string name, math_type;
+  for(auto const& name: keys) {
+    std::string math_type;
     FieldCat category;
     bool if_advec;
-    std::tie(name, math_type, category, if_advec) = row;
+    std::tie(math_type, category, if_advec) = table[name];
 
     if (!contains_item_(quantity_names, name)){
       continue;
@@ -166,7 +170,7 @@ void EnzoCenteredFieldRegistry::prepare_lut_
     int update_ind = (contains_item_(flagged_quantities,name)) ? 1 : 0;
 
     // How much to increment the number of fields by
-    int increment = (math_type == "VECTOR") 3 ? 1;
+    int increment = (math_type == "VECTOR") ? 3 : 1;
     if (category == FieldCat::conserved){
       num_conserved_fields[update_ind] += increment;
     } else if (category == FieldCat::specific){
@@ -187,47 +191,54 @@ void EnzoCenteredFieldRegistry::prepare_lut_
   nfields         = other_stop      + num_other_fields[1];
 }
 
+//----------------------------------------------------------------------
+
+
+// determines the quantity name corresponding to a member of
+// EnzoAdvectionFieldLUT
+void parse_member_name_(std::string member_name, EnzoPermutedCoordinates coord,
+			std::string &group_name, int &group_index)
+{
+  group_name = member_name;
+  group_index = 0;
+  std::size_t length = member_name.length();
+  if (length >= 2){
+    std::string suffix = member_name.substr(length-2,2);
+    if (suffix == std::string("_i")){
+      group_index = coord.i_axis();
+    } else if (suffix == std::string("_j")){
+      group_index = coord.j_axis();
+    } else if (suffix == std::string("_k")){
+      group_index = coord.k_axis();
+    } else {
+      return;
+    }
+
+    group_name = member_name.substr(0,length-2);
+  }
+}
 
 //----------------------------------------------------------------------
-/// @def      PREPARE_LUT
-/// @brief    Macros that help initialize the values of the
-///           EnzoAdvectionFieldLUT class
-#define PREPARE_LUT_SCALAR(out, name, quantity_names, i)                      \
-  out.name = (contains_item_(quantity_names,#name)) ? (*i)++ : -1
-#define PREPARE_LUT_VECTOR(out, name, quantity_names, i)                      \
-  out.COMBINE(name,_i) = (contains_item_(quantity_names,#name)) ? (*i)++ : -1;\
-  out.COMBINE(name,_j) = (contains_item_(quantity_names,#name)) ? (*i)++ : -1;\
-  out.COMBINE(name,_k) = (contains_item_(quantity_names,#name)) ? (*i)++ : -1
+
+// helper function that determines the quantity name (or group name) that
+// corresponds to the name of a member of EnzoAdvectionFieldLUT
+std::string determine_quantity_name_(std::string member_name)
+{
+  EnzoPermutedCoordinates temp_coord(0);
+  int temp_index;
+  std::string quantity_name;
+  parse_member_name_(member_name, temp_coord, quantity_name, temp_index);
+  return quantity_name;
+}
 
 
 //----------------------------------------------------------------------
-/// @def      PREPARE_ADVECTION_LUT
-/// @brief    Macro that helps initialize a member of a member of the
-///           EnzoAdvectionFieldLUT class
-/// @param out the struct to be modified
-/// @param name the name of the quantity to add (this should be a macro
-///  argument taken from FIELD_TABLE)
-/// @param math_type identification of the quantity as SCALAR or VECTOR (this
-///  should be a macro argument taken from FIELD_TABLE)
-/// @param quantity_names a vector of strings of quantity names that are
-///  to have valid indices (fields not included in the table are set to -1
-/// @param i pointer to the value that will indicate the index of the member
-///  and that needs to be incremented. If the stringized version of name is not
-///  contained by quantity_names then nothing is done. This value will be
-///  different based whether the quantity is conserved, specific, or other and
-///  whether it's flagged
-#define PREPARE_ADVECTION_LUT_T(out, name, math_type, quantity_names, i)      \
-  PREPARE_LUT_##math_type(out, name, quantity_names, ind)
-#define PREPARE_ADVECTION_LUT_F(out, name, math_type, quantity_names, i)      \
-  /* ... */
 
-
-//----------------------------------------------------------------------
 EnzoAdvectionFieldLUT EnzoCenteredFieldRegistry::prepare_advection_lut
   (const std::vector<std::string> quantity_names,
    int &conserved_start, int &conserved_stop, int &specific_start,
    int &specific_stop, int &other_start, int &other_stop, int &nfields,
-   const std::vector<std::string> flagged_quantities)
+   const std::vector<std::string> flagged_quantities) const
 {
 
   // First determin the values of conserved_start, conserved_stop, ..., nfields
@@ -245,97 +256,80 @@ EnzoAdvectionFieldLUT EnzoCenteredFieldRegistry::prepare_advection_lut
 
   EnzoAdvectionFieldLUT out;
 
-  int *cur_ind;
-  bool is_flagged;
+  std::vector<std::string> keys;
+  std::map<std::string,FT_row> table = get_dynamic_table_(keys);
 
-  #define ENTRY(name, math_type, category, if_advection)                      \
-    /* first we need to set cur_ind to the appropriate value */               \
-    is_flagged = contains_item_(flagged_quantities, #name);                   \
-    if (category == FieldCat::conserved) {                                    \
-      cur_ind = (is_flagged) ? &flag_conserved_index : &conserved_index;      \
-    } else if (category == FieldCat::specific) {                              \
-      cur_ind = (is_flagged) ? &flag_specific_index : &specific_index;        \
-    } else { /* category = FieldCat::other */                                 \
-      cur_ind = (is_flagged) ? &flag_other_index : &other_index;              \
-    }                                                                         \
-                                                                              \
-    /* Now use cur_ind to set value of out's member(s) (if applicable) */     \
-    PREPARE_ADVECTION_LUT_##if_advection(out, name, math_type,                \
-					 quantity_names, cur_ind);
-  FIELD_TABLE
-  #undef ENTRY
+  // define a lambda function to use while iterating over the entries of out
+  auto fn = [quantity_names, flagged_quantities, table,
+	     &conserved_index, &flag_conserved_index,
+	     &specific_index, &flag_specific_index,
+	     &other_index, &flag_other_index](std::string name, int &val)
+    {
+      
+      std::string quantity_name = determine_quantity_name_(name);
 
+      if (!contains_item_(quantity_names, quantity_name)){
+	// if the quantity name is not within quantity_names set value to -1
+	val = -1;
+      } else {
+	bool is_flagged = contains_item_(flagged_quantities, quantity_name);
+	FieldCat category = std::get<1>(table.at(quantity_name));
+	if (category == FieldCat::conserved) {
+	  val = (is_flagged) ? flag_conserved_index++ : conserved_index++;
+	} else if (category == FieldCat::specific) {
+	  val = (is_flagged) ?  flag_specific_index++ :  specific_index++;
+	} else {
+	  val = (is_flagged) ?     flag_other_index++ :     other_index++;
+	}
+      }
+    };
+
+  unary_advec_struct_for_each_(out, fn);
   return out;
 }
 
 //----------------------------------------------------------------------
 
-#define USE_QUANTITY_SCALAR(lut, name) (lut.name > -1)
-#define USE_QUANTITY_VECTOR(lut, name) (lut.COMBINE(name,_i) > -1)
-
-#define LOAD_FIELDS_SCALAR(name, lut, arr, grouping, dim, coord, recon, arr_f)\
-  load_array_of_fields_(arr, lut.name, grouping, name, "SCALAR", dim, 0       \
-                        recon, arr_f)
-
-#define LOAD_FIELDS_VECTOR(name, lut, arr, grouping, dim, coord, recon, arr_f)\
-  load_array_of_fields_(arr, lut.COMBINE(name,_i), grouping, name, "VECTOR",  \
-                        dim, coord.i_axis(), recon, arr_f);
-  load_array_of_fields_(arr, lut.COMBINE(name,_j), grouping, name, "VECTOR",  \
-                        dim, coord.j_axis(), recon, arr_f);
-  load_array_of_fields_(arr, lut.COMBINE(name,_k), grouping, name, "VECTOR",  \
-                        dim, coord.k_axis(), recon, arr_f)
-
-// mt = math type
-#define LOAD_FIELDS_T(name, mt, lut, arr, grouping, dim, coord, recon, arr_f) \
-  if (USE_QUANTITY_##mt){                                                     \
-    LOAD_FIELDS_##mt(name, lut, arr, grouping, dim, coord, recon, arr_f)l;    \
-  }
-
-#define LOAD_FIELDS_F(name, mt, lut, arr, grouping, dim, coord, recon, arr_f) \
-  /* ... */
-
-// This function should probably be refactor to not use macros at all. Instead
-// we could just use the unary_advec_struct_for_each_ function defined in the
-// header file
-
 EFlt3DArray* EnzoCenteredFieldRegistry::load_array_of_fields
 (Block *block, const EnzoAdvectionFieldLUT lut, const int nfields,
- Grouping &grouping, const int dim, const int stale_depth)
+ Grouping &grouping, const int dim, const int stale_depth) const
 {
   EFlt3DArray* arr = new EFlt3DArray[nfields];
   EnzoPermutedCoordinates coord(dim);
   EnzoFieldArrayFactory array_factory(block, stale_depth);
-  // Set this to false if the loaded field is not reconstructed
-  bool reconstructed = (dim != -1);
 
-  #define ENTRY(name, math_type, category, if_advection)                      \
-    LOAD_FIELDS_T(name, math_type, lut, arr, grouping, dim, coord,            \
-                  reconstructed, array_factory)
-  FIELD_TABLE
-  #undef ENTRY
+  // define a lambda function to execute for every member of lut
+  auto fn = [arr, coord, dim, &array_factory, &grouping](std::string name,
+							int index)
+    {
+      // name is the name of a given member of the lut
+      // index is the value associated with the member
+      
+      if (index != -1){
+	int group_index;
+	std::string group_name;
+	parse_member_name_(name, coord, group_name, group_index);
+
+	// Sanity Check:
+	std::string quantity_type = (group_name == name) ? "SCALAR" : "VECTOR";
+	int group_size = grouping.size(group_name);
+	ASSERT("load_array_of_fields_",
+	       "Groups of fields don't have the correct number of fields.",
+	       (quantity_type == "VECTOR" && group_size == 3) ||
+	       (quantity_type == "SCALAR" && group_size == 1));
+
+	if (dim != -1){
+	  arr[index] = array_factory.reconstructed_field(grouping, group_name,
+							 group_index, dim);
+	} else {
+	  arr[index] = array_factory.from_grouping(grouping, group_name,
+						   group_index);
+	}
+
+      }
+    };
+
+  unary_advec_struct_for_each_(lut, fn);
+
   return arr;
 }
-
-//----------------------------------------------------------------------
-
-void EnzoCenteredFieldRegistry::load_array_of_fields_
-( EFlt3DArray* arr, int index, Grouping &grouping, std::string group_name,
-  std::string quantity_type, int dim, int group_ind, bool reconstructed,
-  EnzoFieldArrayFactory array_factory)
-{
-  // Sanity Check:
-  int group_size = grouping.size(group_name);
-  ASSERT("load_array_of_fields_",
-	 "Groups of fields don't have the correct number of fields.",
-	 (quantity_type == "VECTOR" && group_size == 3) ||
-	 (quantity_type == "SCALAR" && group_size == 1));
-
-  if (reconstructed){
-    arr[index] = array_factory.reconstructed_field(grouping, group_name,
-						   group_ind, dim);
-  } else {
-    arr[index] = array_factory.from_grouping(grouping, group_name, group_ind);
-  }
-}
-
-

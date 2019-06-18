@@ -17,7 +17,7 @@ EnzoRiemann* EnzoRiemann::construct_riemann
  std::vector<std::string> passive_groups, std::string solver)
 {
   // In the future, allocate array of flux functors here
-  FluxFunctor** flux_funcs = NULL;
+  EnzoFluxFunctor** flux_funcs = NULL;
   int n_funcs = 0;
 
   // determine the type of solver to construct:

@@ -33,7 +33,7 @@ struct AthenaHLLEWavespeedMHD
   void operator()(const enzo_float wl[], const enzo_float wr[],
 		  const enzo_float Ul[], const enzo_float Ur[],
 		  const enzo_float pressure_l, const enzo_float pressure_r,
-		  const EnzoAdvectionFieldLUT prim_lut,  const enzo_float gamma,
+		  const EnzoAdvectionFieldLUT lut,  const enzo_float gamma,
 		  enzo_float *bp, enzo_float *bm)
   {
     // Calculate wavespeeds as specified by S4.3.1 of Stone+08
@@ -148,8 +148,6 @@ public:
     cf_l = EnzoRiemann::fast_magnetosonic_speed_(wl, lut, pressure_l, gamma, 1);
     cf_r = EnzoRiemann::fast_magnetosonic_speed_(wr, lut, pressure_r, gamma, 1);
 
-    
-    enzo_float left_min, left_max, right_min, right_max;
     enzo_float lp_l = wl[lut.velocity_i] + cf_l;
     enzo_float lm_l = wl[lut.velocity_i] - cf_l;
     enzo_float lp_r = wr[lut.velocity_i] + cf_r;
@@ -192,8 +190,8 @@ public:
     enzo_float bp, bm;
 
     // Compute wave speeds
-    wave_speeds(prim_l, prim_r, cons_l, cons_r, lut, gamma,
-		&bp, &bm);
+    wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r, lut,
+		gamma, &bp, &bm);
 
     // Compute the actual riemann fluxes
     for (int field = 0; field<n_keys; field++){

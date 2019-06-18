@@ -91,7 +91,8 @@ public:
   {  }
 
   virtual void operator()(const enzo_float prim[], const enzo_float cons[],
-			  enzo_float fluxes[], const EnzoRiemannImpl lut)=0;
+			  enzo_float fluxes[],
+			  const EnzoAdvectionFieldLUT lut)=0;
 };
 
 // This should all get moved to separate documentation page on website
@@ -218,7 +219,7 @@ DEFINE_HAS_SIGNATURE(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
 			      const enzo_float[], const enzo_float[],
 			      const enzo_float[], const enzo_float[],
 			      const enzo_float, const enzo_float,
-			      const field_lut, const int,
+			      const EnzoAdvectionFieldLUT, const int,
 			      const bool, const enzo_float, const enzo_float,
 			      const int, const int, const int,
 			      EFlt3DArray[], enzo_float[]));
@@ -312,7 +313,11 @@ private: //methods
     lut_ = registry.prepare_advection_lut(integrable_groups_,
 					  conserved_start_, conserved_stop_,
 					  specific_start_, specific_stop_,
-					  other_start_, other_stop_, n_keys);
+					  other_start_, other_stop_, n_keys_);
+    // right now we are assuming that there are no advected fields in other
+    ASSERT("EnzoRiemannImpl::setup_lut_",
+	   ("Currently assuming that none of the advected quantites belong to "
+	    "the \"other\" category"), other_start_ == other_stop_);
   }
 
 protected: //attributes
@@ -390,7 +395,7 @@ void EnzoRiemannImpl<ImplStruct>::pup (PUP::er &p)
 {
   EnzoRiemann::pup(p);
 
-  p|conditions_;
+  p|integrable_groups_;
   if (p.isUnpacking()){
     // avoiding PUPing lookup table
     setup_lut_();
@@ -493,8 +498,8 @@ void EnzoRiemannImpl<ImplStruct>::solve
 
 	// iterate over the functors
 	for (int i = 0; i<n_funcs_; i++){
-	  (*(flux_funcs_[i]))(wl, Ul, Fl, prim_lut_, cons_lut_);
-	  (*(flux_funcs_[i]))(wr, Ur, Fr, prim_lut_, cons_lut_);
+	  (*(flux_funcs_[i]))(wl, Ul, Fl, lut_);
+	  (*(flux_funcs_[i]))(wr, Ur, Fr, lut_);
 	}
 
 
@@ -525,13 +530,12 @@ void EnzoRiemannImpl<ImplStruct>::solve
   }
 
   solve_passive_advection_(block, priml_group, primr_group, flux_group,
-			   flux_arrays[cons_lut_.density], dim);
+			   flux_arrays[lut_.density], dim);
 
   delete[] wl; delete[] wr;
   delete[] Ul; delete[] Ur;
   delete[] Fl; delete[] Fr;
   delete[] wl_arrays; delete[] wr_arrays;
-  delete[] ul_arrays; delete[] ur_arrays;
   delete[] flux_arrays;
   if (scratch_space != NULL){
     delete[] scratch_space;
@@ -642,7 +646,7 @@ void EnzoRiemannImpl<ImplStruct>::compute_cons_(const enzo_float prim[],
 
   // I don't think this should include anything
   for (int i= other_start_; i<other_stop_; i++){
-    other[i] = prim[i];
+    cons[i] = prim[i];
   }
 
 }
@@ -669,7 +673,7 @@ void EnzoRiemannImpl<ImplStruct>::basic_mhd_fluxes_
 
   p  = pressure;
 
-  mag_pressure = mag_pressure_(prim, prim_lut);
+  mag_pressure = mag_pressure_(prim, lut_);
 
   // Compute Fluxes
   enzo_float pi = cons[lut_.velocity_i];

@@ -13,7 +13,7 @@
 
 EnzoReconstructor* EnzoReconstructor::construct_reconstructor
 (std::vector<std::string> reconstructable_groups,
- std::vector<std::string> passive_groups, std::string solver)
+ std::vector<std::string> passive_groups, std::string name)
 {
   // some repeated code from construct_riemann
   std::vector<std::string> groups = reconstructable_groups;

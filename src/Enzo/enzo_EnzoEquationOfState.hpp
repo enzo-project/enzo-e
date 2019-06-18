@@ -131,7 +131,8 @@ public: // interface
   void integrable_from_reconstructable(Block *block,
 				       Grouping &reconstructable_group,
 				       Grouping &integrable_group)
-  { conservative_from_primitive(block, reconstr_group, integr_group, 0, -1); }
+  { integrable_from_reconstructable(block, reconstructable_group,
+				    integrable_group, 0, -1); }
 
   /// Computes thermal pressure from integrable quantities
   /// 

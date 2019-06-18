@@ -50,7 +50,7 @@ public:
   {
     Grouping temp_group;
     temp_group.add(field_name, "group");
-    return reconstructed_field(temp_group, "group" 0, dim);
+    return reconstructed_field(temp_group, "group", 0, dim);
   }
 
   /// Read in field from Grouping of face-centered interface B-fields. The
