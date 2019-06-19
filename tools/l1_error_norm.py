@@ -66,7 +66,7 @@ parser = argparse.ArgumentParser(description=_description,
 
 parser.add_argument('ref_type',
                     choices = ['sim','tablex', 'tabley', 'tablez'],
-                    help = ('Indicates the type of reference data being. '
+                    help = ('Indicates the type of reference data being used. '
                             '"sim" refers to 3D simulation data while "table" '
                             'refers to 1D table data. In the latter case, the '
                             'dimension of the target data along which the '
@@ -85,6 +85,31 @@ parser.add_argument('target_path', action = 'store',
 parser.add_argument('-v', action = 'store_true', default = False,
                     help = ("Indicates that messages should be verbose and "
                             "include utilized fields."))
+
+class StoreCommaListAction(argparse.Action):
+    """Stores comma a list from comma separated values (no spaces). 
+
+    It's okay if there is a trailing comma. A list of the strings are stored
+    at the destination.
+    """
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(StoreCommaListAction, self).__init__(option_strings, dest,
+                                                   **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values[-1] == ',':
+            parsed_vals = values[:-1].split(',')
+        else:
+            parsed_vals = values.split(',')
+        setattr(namespace, self.dest, parsed_vals)
+
+parser.add_argument('-f','--fields', action = StoreCommaListAction,
+                    default = None, required = False,
+                    help = ("Specify the list of fields to use to compute the "
+                            "error norm. The field names should be separated "
+                            "by commas and have no spaces."))
 parser.add_argument('-n', action = 'store', default = None, required = False,
                     type = int,
                     help = ("This only applies to \"sim\" mode. By default the "
@@ -181,7 +206,8 @@ def norm_L1_error(ds, ds2, comparison_fields, Nx=None, Ny=None, Nz=None,
                                  sum_axis)
     return np.sqrt(np.sum(np.square(err_vector),axis=0))
 
-def find_common_fields(ds1,ds2, verbose):
+def find_common_fields(ds1,ds2, verbose, fields = None):
+    # fields is a list of pre-existing fields to compare
     if isinstance(ds1,yt.data_objects.static_output.Dataset):
         field_list1 = [elem[1] for elem in ds1.field_list]
     else:
@@ -192,7 +218,15 @@ def find_common_fields(ds1,ds2, verbose):
     else:
         field_list2 = ds2.keys()
 
-    intersect = [elem for elem in field_list1 if elem in field_list2]
+    if fields is None:
+        intersect = [elem for elem in field_list1 if elem in field_list2]
+    else:
+        # check that both datasets have all of the user-specified fields
+        for field in fields:
+            if (field not in field_list1) or (field not in field_list2):
+                raise ValueError("Both datasets do not have the field "
+                                 +"\"{:s}\".".format(field))
+        intersect = fields
 
     if verbose:
         print("field_list: {:}".format(str(intersect)))
@@ -319,9 +353,11 @@ def permute_vector_quantites(data, verbose, permute):
 
     if verbose:
         print("permuted the vectors {}".format(str(vectors)))
-            
+
+
 def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
-                            permute = 0):
+                            permute = 0, specified_fields = None):
+
     # if op_func is None, returns the total L1 Error Norm
     # otherwise op_func is applied on all parallel L1 Error Norms
 
@@ -379,7 +415,7 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
     # get the fixed resolution grid of the target dataset
     ad = build_3D_grid(ds,sub_grid_edges)
 
-    comparison_fields = find_common_fields(ds,ref, verbose)
+    comparison_fields = find_common_fields(ds,ref, verbose, specified_fields)
 
     if op_func is None:
         # just compute the L1 Error Norm normally
@@ -390,11 +426,13 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
                                  **kwargs)
         print(op_func(L1_norms))
 
-# Functions used to compute L1Error Norm between simulations
 
-def compare_to_sim_reference(ds, ref_path, verbose, dim_length):
+# Functions used to compute L1Error Norm between simulations
+def compare_to_sim_reference(ds, ref_path, verbose, dim_length,
+                             specified_fields = None):
     ds_ref = load_enzoe(get_block_list(ref_path))
-    comparison_fields = find_common_fields(ds_ref, ds, verbose)
+    comparison_fields = find_common_fields(ds_ref, ds, verbose,
+                                           specified_fields)
     print(norm_L1_error(ds_ref, ds, comparison_fields, Nx = dim_length,
                         Ny = dim_length, Nz=dim_length))
 
@@ -410,6 +448,8 @@ if __name__ == '__main__':
     target_file = get_block_list(args.target_path)
     ds = load_enzoe(target_file)
 
+    specified_fields = args.fields
+
     if args.ref_type == 'sim':
         sim_comp = True
 
@@ -422,7 +462,8 @@ if __name__ == '__main__':
         if (dim_length is not None) and (dim_length <= 0):
             raise ValueError('The -n option must be followed by a positive '
                              'integer.')
-        compare_to_sim_reference(ds, args.ref_path, verbose, dim_length)
+        compare_to_sim_reference(ds, args.ref_path, verbose, dim_length,
+                                 specified_fields)
 
     else:
         sim_comp = False
@@ -456,4 +497,4 @@ if __name__ == '__main__':
                                   "'0', '1', '2')").format(args.permute))
 
         compare_to_1D_reference(ds, args.ref_path, problem_ax, verbose, op_func,
-                                permute)
+                                permute, specified_fields)

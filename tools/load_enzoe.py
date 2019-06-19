@@ -209,6 +209,18 @@ def load_enzoe(fname, periodicity = (True, True, True)):
         if key not in new_dict:
             new_dict[key] = data_dict
             shape = data_dict[name].shape
+    if "pressure" not in new_dict:
+        # add pressure (assume gamma = 5./3.
+        kinetic = (0.5*(np.square(data_dict["velocity_x"]) + 
+                        np.square(data_dict["velocity_y"]) + 
+                        np.square(data_dict["velocity_z"]))
+                   * data_dict["density"])
+        magnetic = 0.5*(np.square(data_dict["bfield_x"]) + 
+                        np.square(data_dict["bfield_y"]) + 
+                        np.square(data_dict["bfield_z"]))
+        pressure = (2./3.)*(data_dict["total_energy"] * data_dict["density"]
+                            - kinetic - magnetic)
+        new_dict["pressure"] = (pressure, 'code_mass/code_length/code_time**2')
 
     bbox = np.array(list(zip(left_edge,right_edge)))
     ds = yt.load_uniform_grid(data=new_dict,domain_dimensions=shape,

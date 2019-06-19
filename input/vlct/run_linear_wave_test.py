@@ -35,7 +35,9 @@ import math
 
 # this executes things in standalone mode
 _executable = 'bin/enzo-p'
-l1_norm_calc_template = "python tools/l1_error_norm.py sim {:s} {:s} -n {:d}"
+l1_norm_calc_template = ("python tools/l1_error_norm.py sim {:s} {:s} -n {:d}"
+                         " -f density,velocity_x,velocity_y,velocity_z,"
+                         "pressure,bfield_x,bfield_y,bfield_z")
 data_dir_template = "method_vlct-{:d}-{:s}N{:d}_{:.1f}"
 final_times = {"fast" : 0.5, "alfven" : 1.0, "entropy" : 1.0, "slow" : 2.0}
 
