@@ -20,15 +20,15 @@ class EnzoInitialShockTube : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialShockTube(int cycle, double time, std::string setup_name,
-		       std::string aligned_ax_name);
+  EnzoInitialShockTube(double gamma, int cycle, double time,
+		       std::string setup_name, std::string aligned_ax_name);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialShockTube);
 
   /// CHARM++ migration constructor
   EnzoInitialShockTube(CkMigrateMessage *m)
-    : Initial (m), setup_name_(""), aligned_ax_(0)
+    : Initial (m), gamma_(0.0), setup_name_(""), aligned_ax_(0)
   {  }
 
   /// Destructor
@@ -55,6 +55,9 @@ protected: // functions
   void initializer_helper_(CSlice &slice, enzo_float val, EFlt3DArray &arr);
 
 private: // attributes
+
+  /// adiabatic index
+  double gamma_;
 
   /// indicates the type of shock tube to set up
   std::string setup_name_;

@@ -186,7 +186,9 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialPpmlTest (cycle,time,enzo_config);
   } else if (type == "shock_tube") {
     initial = new EnzoInitialShockTube
-      (cycle, time, enzo_config->initial_shock_tube_setup_name,
+      (enzo_config->field_gamma,
+       cycle, time,
+       enzo_config->initial_shock_tube_setup_name,
        enzo_config->initial_shock_tube_aligned_ax);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;

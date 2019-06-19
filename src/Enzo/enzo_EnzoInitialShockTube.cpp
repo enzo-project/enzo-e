@@ -100,10 +100,10 @@ std::string vector_to_string_(std::vector<std::string> &vec)
 
 //----------------------------------------------------------------------
 
-EnzoInitialShockTube::EnzoInitialShockTube(int cycle, double time,
+EnzoInitialShockTube::EnzoInitialShockTube(double gamma, int cycle, double time,
 					   std::string setup_name,
 					   std::string aligned_ax_name)
-    : Initial(cycle, time), setup_name_(setup_name), aligned_ax_(0)
+  : Initial(cycle, time), gamma_(gamma), setup_name_(setup_name), aligned_ax_(0)
 {
 
   if (std::find(shock_tube_setups.begin(),
@@ -117,8 +117,8 @@ EnzoInitialShockTube::EnzoInitialShockTube(int cycle, double time,
 	   "Invalid setup_name specified (must be %s), not %s.",
 	   allowed_names.c_str(), setup_name_.c_str());
   }
-	  
-  
+
+
   ASSERT1("EnzoInitialShockTube",
 	  "Invalid aligned_ax value specified (must be x, y, or z), not %s.",
 	  aligned_ax_name.c_str(),
@@ -185,15 +185,29 @@ void EnzoInitialShockTube::enforce_block
     arr = array_factory.from_name(velocities[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("velocity_2"), arr);
 
-    arr = array_factory.from_name("pressure");
-    initializer_helper_(*cur_slice, cur_val_map->at("pressure"), arr);
-
     arr = array_factory.from_name(bfields[coord.j_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
 
     arr = array_factory.from_name(bfields[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_2"), arr);
+
+    // compute the specific total energy
+    arr = array_factory.from_name("total_energy");
+
+    enzo_float etot, v2, b2;
+    v2 = (cur_val_map->at("velocity_0") * cur_val_map->at("velocity_0") +
+	  cur_val_map->at("velocity_1") * cur_val_map->at("velocity_1") +
+	  cur_val_map->at("velocity_2") * cur_val_map->at("velocity_2"));
+    b2 = (aligned_bfield_val * aligned_bfield_val +
+	  cur_val_map->at("bfield_1") * cur_val_map->at("bfield_1") +
+	  cur_val_map->at("bfield_2") * cur_val_map->at("bfield_2"));
+    etot = ( (cur_val_map->at("pressure") /
+	      ((gamma_ - 1.) * cur_val_map->at("density"))) +
+	     0.5 * (v2 + b2 / cur_val_map->at("density")));
+
+    initializer_helper_(*cur_slice, etot, arr);
   }
+
   EFlt3DArray align_b_arr = array_factory.from_name(bfields[coord.i_axis()]);
   align_b_arr.subarray() = aligned_bfield_val;
 
