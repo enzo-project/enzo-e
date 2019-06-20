@@ -396,7 +396,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
         int explosion_flag = -1, will_explode = -1;
         double soonest_explosion = -1.0, s49_tot = -1.0, td7 = -1.0;
-        unsigned long int rand_int;
+        unsigned long long int rand_int;
 
 
         if ( (plifetime[ipdl] <= 0.0) ||
@@ -426,17 +426,24 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           // Knuth algorithm for generating a Poisson distribution
           // See http://goo.gl/sgLPcj
 
-          float L = exp(-lambda), p = 1.0;
+          float L = std::exp(-lambda), p = 1.0;
+          if (L == 0.0){
+            ERROR("EnzoMethodDistributedFeedback",
+                  "Star maker minimum mass is too large for use with stochastic model");
+          }
+
           int   k = 0;
           while (p>L){
             ++k;
-            rand_int = (double(rand())) / (double(RAND_MAX));;
-            float u      = float(rand_int%32768) / 32768.0;
-            p*u;
+            //rand_int = (rand()) / (double( RAND_MAX));;
+            float u      = double(rand()) / (double(RAND_MAX)); // float(rand_int%RAND_MAX) / RAND_MAX;
+            p*=u;
           }
 
           // Now k-1 is approx Poisson(lambda)
           int number_of_sn = k - 1;
+
+          std::cout << "Number of SN" << number_of_sn << "  " << RAND_MAX << "\n";
 
           if (number_of_sn == 0){
             explosion_flag = 0;
@@ -452,8 +459,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           // Loop over these SN
           for (int kk=0; kk<number_of_sn; kk++){
             // Draw delay time for the event
-            rand_int = (double(rand())) / (double(RAND_MAX));
-            double  x = float(rand_int%32768) / 32768.0;
+//            rand_int = (double(rand())) / (double(RAND_MAX));
+            double  x = double(rand()) / (double(RAND_MAX));
             double delay_time = p_delay[0] + p_delay[1]*x + p_delay[2]*x*x +
                                p_delay[3]*x*x*x + p_delay[4]*x*x*x*x + p_delay[5]*x*x*x*x*x; // yr
 

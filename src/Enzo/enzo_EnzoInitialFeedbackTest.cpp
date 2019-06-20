@@ -160,7 +160,7 @@ void EnzoInitialFeedbackTest::enforce_block
     plifetime  = (enzo_float *) particle.attribute_array(it, ia_l, ib);
     pform      = (enzo_float *) particle.attribute_array(it, ia_to, ib);
 
-    pmass[ipp] = 10.0 * cello::mass_solar / enzo_units->mass();
+    pmass[ipp] = 1.0E3 * cello::mass_solar / enzo_units->mass();
     px[ipp]    = enzo_config->initial_feedback_test_position[0];
     py[ipp]    = enzo_config->initial_feedback_test_position[1];
     pz[ipp]    = enzo_config->initial_feedback_test_position[2];
@@ -169,7 +169,7 @@ void EnzoInitialFeedbackTest::enforce_block
     pvz[ipp]   = 0.0;
 
     pmetal[ipp]    = 0.01;
-    plifetime[ipp] = 1.001E3 * cello::yr_s / enzo_units->time();
+    plifetime[ipp] = 1.00E8 * cello::yr_s / enzo_units->time();
     pform[ipp]     = 1.0 * cello::yr_s / enzo_units->time(); // really just needs to be non-zero
 
 
