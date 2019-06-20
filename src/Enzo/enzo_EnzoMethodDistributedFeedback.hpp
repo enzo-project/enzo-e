@@ -44,6 +44,10 @@ public:
   // Compute the maximum timestep for this method
   virtual double timestep (Block * block) const throw();
 
+  void add_ionization_feedback(Block * block,
+                               double xpos, double ypos, double zpos,
+                               const double & s49_tot, const int & willExplode);
+
   void inject_feedback(Block * block,
                        double xpos, double ypos, double zpos,
                        double m_eject, double E_51, double ke_fraction,
@@ -109,6 +113,8 @@ protected:
   int dual_energy_;
 
   bool shift_cell_center_;
+
+  bool use_ionization_feedback_;
 
 public:
 

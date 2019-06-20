@@ -148,6 +148,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_stencil(3),
   method_feedback_shift_cell_center(true),
   method_feedback_ke_fraction(0.0),
+  method_feedback_use_ionization_feedback(false),
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                             // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -391,6 +392,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_stencil;
   p | method_feedback_shift_cell_center;
   p | method_feedback_ke_fraction;
+  p | method_feedback_use_ionization_feedback;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -831,6 +833,9 @@ void EnzoConfig::read(Parameters * p) throw()
   method_feedback_ke_fraction = p->value_float
     ("Method:feedback:ke_fraction", 0.0);
 
+  method_feedback_use_ionization_feedback = p->value_logical
+    ("Method:feedback:use_ionization_feedback", false);
+
   method_star_maker_type = p->value_string
     ("Method:star_maker:type","stochastic");
 
@@ -1048,7 +1053,7 @@ void EnzoConfig::read(Parameters * p) throw()
     solver_restart_cycle[index_solver] =
       p->value_integer(solver_name + ":restart_cycle",1);
 
-    solver_coarse_level[index_solver] = 
+    solver_coarse_level[index_solver] =
       p->value_integer (solver_name + ":coarse_level",
 			solver_min_level[index_solver]);
 

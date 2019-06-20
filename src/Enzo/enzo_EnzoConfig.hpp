@@ -234,6 +234,7 @@ public: // interface
       method_feedback_stencil(3),
       method_feedback_shift_cell_center(true),
       method_feedback_ke_fraction(0.0),
+      method_feedback_use_ionization_feedback(false),
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -489,6 +490,7 @@ public: // attributes
   double                    method_feedback_ke_fraction;
   int                       method_feedback_stencil;
   bool                      method_feedback_shift_cell_center;
+  bool                      method_feedback_use_ionization_feedback;
 
   /// EnzoMethodStarMaker
 

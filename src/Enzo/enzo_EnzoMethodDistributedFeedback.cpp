@@ -8,6 +8,217 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+
+double s49Lookup(double m){
+  // Returns a broken power-law approximation to the ionizing luminosity emitted
+  // by a main sequence star of mass m, normalized to 10^49 photon/s
+  // See Parravano et al. 2003 ApJ 584 797 (doi:10.1086/345807)
+  if (m<5)
+    {
+      return 0;
+    }
+  else if (m<7)
+    {
+      return (2.23e-15*std::pow(m, 11.5));
+    }
+  else if (m<12)
+    {
+      return(3.69e-13*std::pow(m, 8.87));
+    }
+  else if (m<20)
+    {
+      return(4.8e-12*std::pow(m, 7.85));
+    }
+  else if (m<30)
+    {
+      return(3.12e-8*std::pow(m, 4.91));
+    }
+  else if (m<40)
+    {
+      return(2.8e-5*std::pow(m, 2.91));
+    }
+  else if (m<60)
+    {
+      return(3.49e-4*std::pow(m, 2.23));
+    }
+  else
+    {
+      return(2.39e-3*std::pow(m, 1.76));
+    }
+}
+
+
+double s99_wind_mass(const double & t){
+  // returns s99 wind mass in solar masses / yr per 1.0E6 Msun cluster
+  // as a function of delay time (t) in units of 10^7 years
+  //
+  double m = 0.0;
+
+  const double tp2 = t*t;
+  const double tp4 = tp2*tp2;
+
+  if (t <= 0.29) {
+    m = m- 2.72379457924;
+    m = m + 9.03549102928*t;
+    m = m - 349.073894935*tp2;
+    m = m + 6133.48804337*tp2*t;
+    m = m - 45526.5891824*tp4;
+    m = m + 160159.422053*tp4*t;
+    m = m - 254942.557778*tp4*tp2;
+    m = m + 133227.581992*tp4*tp2*t;
+  } else if (t > .29 && t <= .447) {
+    m = m + 1024395.67006;
+    m = m - 22826983.8411*t;
+    m = m + 221695566.585*tp2;
+    m = m - 1225731636.28*tp2*t;
+    m = m + 4219889881.74*tp4;
+    m = m - 9263931021.04*tp4*t;
+    m = m + 12664879027.3*tp4*tp2;
+    m = m - 9858823353.65*tp4*tp2*t;
+    m = m + 3345877714.47*tp4*tp4;
+  } else if (t>= 0.447 && t <= 3.24) {
+    m = m - 69.9540656568;
+    m = m + 540.489990705*t;
+    m = m - 1785.45996729*tp2;
+    m = m + 3267.21333796*tp2*t;
+    m = m - 3721.01017711*tp4;
+    m = m + 2776.66619261*tp4*t;
+    m = m - 1381.69750895*tp4*tp2;
+    m = m + 454.445793525*tp4*tp2*t;
+    m = m - 94.8530920783*tp4*tp4;
+    m = m + 11.3775633348*tp4*tp4*t;
+    m = m - 0.597112042033*tp4*tp4*tp2;
+  } else if (t >= 3.24 && t <= 7.28) {
+    m = m + 14.8304028947;
+    m = m - 16.0726787694*t;
+    m = m + 4.55554172673*tp2;
+    m = m - 0.522521195039*tp2*t;
+    m = m + 0.0214246750892*tp4;
+  } else if (t >= 7.28 && t <= 7.8) {
+    m = m + 3533.50268935;
+    m = m - 1430.45985176*t;
+    m = m + 192.934935096*tp2;
+    m = m - 8.67530777079*tp2*t;
+  } else if (t >= 7.8) {
+    m = m - 3.5441266853;
+    m = m - 0.0101229134154*t;
+  } // End of delay time cases
+
+  // Find mass ejection rate in solar masses per year
+  m = std::pow(10.0,m);
+
+  return m;
+}
+
+double s99_wind_energy(const double &t, const double &tsoon){
+  // computes wind energy in cm^2/s^2 of 1.0E6 Msun cluster
+  // at some time t (10^7 yr)
+  double wind_energy = 0.0;
+  const double tp2 = t*t;
+  const double tp4 = tp2*tp2;
+
+    // If the most massive star in this particle has a delay
+    // time greater than 22 Myr (i.e. it is low mass)
+    // turn on 10 km/s wind outflows.
+  if ((tsoon < 0) or (tsoon > 2.20)){
+    wind_energy = 12.6540102838;
+
+  } else {
+
+  if ( t < 0.29) {
+    wind_energy = wind_energy + 16.7458830136;
+    wind_energy = wind_energy + 2.87170884625*t;
+    wind_energy = wind_energy - 260.188160495*tp2;
+    wind_energy = wind_energy + 7588.41970548*tp2*t;
+    wind_energy = wind_energy - 109128.119673*tp4;
+    wind_energy = wind_energy + 834565.297424*tp4*t;
+    wind_energy = wind_energy - 3488638.06781*tp4*tp2;
+    wind_energy = wind_energy + 7534432.3913*tp4*tp2*t;
+    wind_energy = wind_energy - 6577304.157*tp4*tp4;
+  } else if( t >= 0.29 && t <= 0.518) {
+    wind_energy = wind_energy-8756108.90226;
+    wind_energy = wind_energy+249183578.797*t;
+    wind_energy = wind_energy-3210919258.32*tp2;
+    wind_energy = wind_energy+24729596291.2*tp2*t;
+    wind_energy = wind_energy-126485776877.0*tp4;
+    wind_energy = wind_energy+451123199767.0*tp4*t;
+    wind_energy = wind_energy-1.14486556168E12*tp4*tp2;
+    wind_energy = wind_energy+2.067395301E12*tp4*tp2*t;
+    wind_energy = wind_energy-2.60335249368E12*tp4*tp4;
+    wind_energy = wind_energy+2.17720380795E12*tp4*tp4*t;
+    wind_energy = wind_energy-1.08835588273E12*tp4*tp4*tp2;
+    wind_energy = wind_energy+246366864343.0*tp4*tp4*tp2*t;
+ } else if(t >= 0.518 && t <= 2.0) {
+    wind_energy = wind_energy+300.659606389;
+    wind_energy = wind_energy-2175.28137376*t;
+    wind_energy = wind_energy+7038.17965731*tp2;
+    wind_energy = wind_energy-12640.7809456*tp2*t;
+    wind_energy = wind_energy+13818.3936865*tp4;
+    wind_energy = wind_energy-9434.54106014*tp4*t;
+    wind_energy = wind_energy+3935.34399667*tp4*tp2;
+    wind_energy = wind_energy-918.140140181*tp4*tp2*t;
+    wind_energy = wind_energy+91.8268783049*tp4*tp4;
+  } else if(t >= 2.0 && t <= 3.23) {
+    wind_energy = wind_energy+1955.41904193;
+    wind_energy = wind_energy-4288.5933438*t;
+    wind_energy = wind_energy+3935.44109106*tp2;
+    wind_energy = wind_energy-1921.4747372*tp2*t;
+    wind_energy = wind_energy+526.42694795*tp4;
+    wind_energy = wind_energy-76.729393462*tp4*t;
+    wind_energy = wind_energy+4.64818353202*tp4*tp2;
+  } else if(t >= 3.23) {
+    wind_energy = wind_energy+12.6540102838;
+  } // End of delay time cases.
+} // end tsoon check
+
+  // in cm^2/^2
+  wind_energy = std::pow(10.0,wind_energy); // **(wind_energy -2.0*log10(v1))
+
+  return wind_energy;
+}
+
+double s99_sn_mass(const double &t){
+  // ejecta mass of supernova in Msun from s99
+
+  double m_ejSN = 0.0;
+  const double tp2 = t*t;
+  const double tp4 = tp2*tp2;
+
+  if (t < 0.513) {
+    m_ejSN = m_ejSN + 3.40965833751;
+    m_ejSN = m_ejSN - 16.0346449798*t;
+    m_ejSN = m_ejSN + 31.5091825735*tp2;
+    m_ejSN = m_ejSN - 21.3218283568*tp2*t;
+  } else if(.513 <= t && t <= .918) {
+    m_ejSN = m_ejSN - 314538.854117;
+    m_ejSN = m_ejSN + 4453582.08399*t;
+    m_ejSN = m_ejSN - 28218211.3741*tp2;
+    m_ejSN = m_ejSN + 105370186.068*tp2*t;
+    m_ejSN = m_ejSN - 256824281.305*tp4;
+    m_ejSN = m_ejSN + 426986197.681*tp4*t;
+    m_ejSN = m_ejSN - 490461521.485*tp4*tp2;
+    m_ejSN = m_ejSN + 384394390.035*tp4*tp2*t;
+    m_ejSN = m_ejSN - 196752045.251*tp4*tp4;
+    m_ejSN = m_ejSN + 59399337.5861*tp4*tp4*t;
+    m_ejSN = m_ejSN - 8033095.66643*tp4*tp4*tp2;
+  } else if (0.918 <= t && t <= 3.23) {
+    m_ejSN = m_ejSN + 1.74261906723;
+    m_ejSN = m_ejSN - 0.92589554122*t;
+    m_ejSN = m_ejSN + 0.551250718292*tp2;
+    m_ejSN = m_ejSN - 0.220085806978*tp2*t;
+    m_ejSN = m_ejSN + 0.0510662546479*tp4;
+    m_ejSN = m_ejSN - 0.00504400687495*tp4*t;
+  } else if (t >= 3.23) {
+    m_ejSN = m_ejSN + 2.67991943387;
+    m_ejSN = m_ejSN - 0.461075452846*t;
+    m_ejSN = m_ejSN - 0.0326899620754*tp2;
+  } // End of delay time cases
+
+  m_ejSN = std::pow(10.0, m_ejSN);
+
+  return m_ejSN;
+}
+
 EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 ()
   : Method()
@@ -39,10 +250,12 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   number_of_feedback_cells_  = stencil_ * stencil_ * stencil_;
   shift_cell_center_         = enzo_config->method_feedback_shift_cell_center;
 
+
+  use_ionization_feedback_   = enzo_config->method_feedback_use_ionization_feedback;
   // Do error checking here to make sure all required
   // fields exist..
   // NOTE: Good idea - make ALL method objects have a 'required fields' list
-  //       defined in the header file and then loop through this in a more general
+  //       defined in the header file and { loop through this in a more general
   //       fashion at initialization of problem instead of cluttering every
   //       method object init with this
 
@@ -102,6 +315,20 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
   int it = particle.type_index("star");
   int count = 0;
 
+  // Polynomial coefficients for the fit to the delay time distribution
+  double p_delay[6] = {
+    3505021.4516666,         16621326.48066255,        4382816.59085307,
+    46194173.14420852,      -52836941.28241706,       22967062.02780452,
+  };
+
+  // Polynomial coefficients for the fit to the stellar mass distribution
+  // as a function of delay time.
+  double p_mass[10] = {
+    4.42035634891,        -13.2890466089,        26.1103296098,        -30.1876007562,
+    21.8976126631,        -10.2544493943,        3.09621304958,        -0.581870413299,
+    0.0618795946119,      -0.00284352366041
+  };
+
   if (particle.num_particles(it) > 0 ){
 
     const int ia_m = particle.attribute_index (it, "mass");
@@ -150,6 +377,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         int ipdl = ip*dl;
         int ipdc = ip*dc;
 
+
+/*
         // negative lifetime are particles that have alreahy gone SN
         // creation time must be > 0
         // only go SN if age >= lifetime
@@ -161,17 +390,185 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         plifetime[ipdl] *= -1.0;                  // set to negative - flag for alreahy gone SNe
         pmass[ipdm] = pmass[ipdm] - total_ejecta_mass_;
 
+*/
+
+// --------------------------------------- start checking if explosion occurs ---
+
+        int explosion_flag = -1, will_explode = -1;
+        double soonest_explosion = -1.0, s49_tot = -1.0, td7 = -1.0;
+        unsigned long int rand_int;
+
+
+        if ( (plifetime[ipdl] <= 0.0) ||
+             ( (current_time - pcreation[ipdc]) < 3.7e7 * cello::yr_s / enzo_units->time() ) ) {
+
+          soonest_explosion = -1.0;
+
+          // seed random number generator
+          // using function to generate unique number:
+          //     (a,b) = { a*a + a + b, a >= b;
+          //                   a + b*b, a  < b}
+          // where b is batch number (keeps vals smaller... since np > nb usually)
+          //  WARNGING - THIS DOESN'T ACTUALLY WORK SINCE PARTICLES MOVE AROUND
+          srand(( (ip >= ib) ? (ip*ip+ip+ib) : (ip+ib*ib) ));
+
+          explosion_flag = -1;
+          will_explode   =  0;
+
+          // figure out how many explosions this particle undergoes.
+
+          // The number of SNe expected from a 10^6 mass cluster (s99)
+          const float expected_sn_s99 = 10616.955572;
+          // Number of expected SNe for the minimum star particle mass
+          const float lambda         = expected_sn_s99 * 1.0E-6 *
+                                       enzo_config->method_star_maker_minimum_star_mass;
+
+          // Knuth algorithm for generating a Poisson distribution
+          // See http://goo.gl/sgLPcj
+
+          float L = exp(-lambda), p = 1.0;
+          int   k = 0;
+          while (p>L){
+            ++k;
+            rand_int = (double(rand())) / (double(RAND_MAX));;
+            float u      = float(rand_int%32768) / 32768.0;
+            p*u;
+          }
+
+          // Now k-1 is approx Poisson(lambda)
+          int number_of_sn = k - 1;
+
+          if (number_of_sn == 0){
+            explosion_flag = 0;
+            continue;
+          } else if (number_of_sn < 0){
+            std::cout <<"Number of SN in distributed feedback is negative \n";
+          }
+
+          // If there are explosions, we need to check the ionizing luminosity
+          // of the progenitor and know whether or not it will explode
+          // right now, or at a later time
+
+          // Loop over these SN
+          for (int kk=0; kk<number_of_sn; kk++){
+            // Draw delay time for the event
+            rand_int = (double(rand())) / (double(RAND_MAX));
+            double  x = float(rand_int%32768) / 32768.0;
+            double delay_time = p_delay[0] + p_delay[1]*x + p_delay[2]*x*x +
+                               p_delay[3]*x*x*x + p_delay[4]*x*x*x*x + p_delay[5]*x*x*x*x*x; // yr
+
+            td7 = delay_time*1.0E7;
+            double progenitor_mass = p_mass[0] + pmass[1]*td7 + pmass[2]*td7*td7 +
+                                    p_mass[3]*td7*td7*td7 + p_mass[4]*td7*td7*td7*td7 +
+                                    p_mass[5]*td7*td7*td7*td7*td7 +
+                                    p_mass[6]*td7*td7*td7*td7*td7*td7 +
+                                    p_mass[7]*td7*td7*td7*td7*td7*td7*td7 +
+                                    p_mass[8]*td7*td7*td7*td7*td7*td7*td7*td7 +
+                                    p_mass[9]*td7*td7*td7*td7*td7*td7*td7*td7*td7;
+            progenitor_mass = std::pow(10.0, progenitor_mass); // in Msun
+
+            delay_time   *=  cello::yr_s / enzo_units->time(); // code units
+            double relative_time = current_time - pcreation[ipdc]; // code units
+            if ((delay_time > relative_time) && (delay_time < relative_time + enzo_block->dt  )) {
+              if (explosion_flag == -1){
+                explosion_flag = 1;
+              } else if (explosion_flag == 0){
+                // fail
+                ERROR("EnzoMethodDistributedFeedback::compute()",
+                      "There was supposed to be no explosions, but this particle is flagged");
+              } else if (explosion_flag >0){
+                explosion_flag += 1; // add to the counters - this is not implemented behavior
+              } else{
+                ERROR("EnzoMethodDistributedFeedback::compute()",
+                      "Somehow explosion_flag is below -1");
+              }
+
+            } // end check delay time
+
+            if (relative_time < delay_time){
+              // SN has not yet gone off. Get ionizing luminosity and
+              // sum for the particle
+
+              s49_tot += s49Lookup(progenitor_mass); // in 10^49 photons s^-1
+              will_explode = 1;
+              if ( (soonest_explosion < 0) || (delay_time < soonest_explosion) ){
+                soonest_explosion = delay_time;
+              }
+
+            } // end check relative_time
+
+//          Behavior not yet possible in Enzo-E
+//            if ( relative_time < delay_time + 0.1 * cello::Myr_s / enzo_units->time()){
+//              // change type to must refine
+//            } else {
+//              change back to star
+//            }
+
+          } // end loop over SN
+
+          if (explosion_flag == -1) explosion_flag = 0;
+        } // end lifetime check
+
+
+
+     // ----------------------------------------
+     // now compute ejecta mass and stuff from s99
+     //    td7 is delay time in units of 10^7 years
+
+        double wind_mass   = s99_wind_mass(td7);
+     //          This ejection rate is correct for the 10^6 solar mass 'cluster'
+     //           used to compute these rates with starburst 99.  Reduce to account
+     //           for the size of the star particle
+        wind_mass = wind_mass * enzo_config->method_star_maker_minimum_star_mass * 1.0E-6;
+        wind_mass = wind_mass / cello::yr_s; // in Msun / s
+        wind_mass = (wind_mass * enzo_units->time()) * enzo_block->dt; // Msun this timestep
+
+        double tsoon7      = soonest_explosion * enzo_units->time() / (1.0E7 * cello::yr_s);
+        double wind_energy = s99_wind_energy(td7, tsoon7); // in cm^2/s^2 (i.e. per unit mass in cgs)
+        wind_energy        = wind_energy * wind_mass * cello::mass_solar; // now total E in erg
+
+        double sn_mass = 0.0, sn_energy = 0.0;
+        if (explosion_flag > 0){
+          sn_mass = s99_sn_mass(td7) * explosion_flag; // sn mass in Msun
+          sn_energy = 1.0E51 * explosion_flag;         // sn energy in erg
+        }
+
+        double m_eject = wind_mass + sn_mass;          // total mass in Msun
+        double energy  = wind_energy + sn_energy;      // total energy in erg
+
+        if (m_eject*cello::mass_solar / enzo_units->mass() > pmass[ipdm]){
+          std::cout << "WARNING: S99 Distributed Feedback is loosing too much mass\n";
+          std::cout << "setting particle mass to zero, but continuing anyway\n";
+          std::cout << pmass[ipdm] << m_eject*cello::mass_solar/enzo_units->mass() << wind_mass << sn_mass << "\n";
+          std::cout << will_explode << explosion_flag << "\n";
+        } // mass will be removed elsewhere
+
+// ---------------------------------------- end determining explosion properties ----
+
+
         // get corresponding grid position of particle
         // and shift it if it is too close to the grid boundaries
         double xpos = px[ipdp];
         double ypos = py[ipdp];
         double zpos = pz[ipdp];
 
+        this->add_ionization_feedback(block, xpos, ypos, zpos,
+                                      s49_tot, will_explode);
+
+// -----
+
+        this->inject_feedback(block, xpos, ypos, zpos,
+                              m_eject, (energy/1.0E51), enzo_config->method_feedback_ke_fraction,
+                              pvx[ipdv], pvy[ipdv], pvz[ipdv]);
+        // remove mass - error checking on the std::max is handled above with warning
+        pmass[ipdm] = std::max( 0.0, pmass[ipdm] - m_eject*cello::mass_solar/enzo_units->mass());
+/*
         this->inject_feedback(block, xpos, ypos, zpos,
                               enzo_config->method_feedback_ejecta_mass,
                               enzo_config->method_feedback_supernova_energy,
                               enzo_config->method_feedback_ke_fraction,
                               pvx[ipdv], pvy[ipdv], pvz[ipdv] );
+*/
 
         count++;
       } // end loop over particles
@@ -186,10 +583,119 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
   return;
 }
 
+void EnzoMethodDistributedFeedback::add_ionization_feedback(
+                                                        Block * block,
+                                                        double xpos, double ypos, double zpos,
+                                                        const double & s49_tot,
+                                                        const int & will_explode){
+
+  if (!(this->use_ionization_feedback_)) return;
+
+  EnzoBlock * enzo_block = enzo::block(block);
+  const EnzoConfig * enzo_config = enzo::config();
+  EnzoUnits * enzo_units = enzo::units();
+
+  Field field = block->data()->field();
+  // Obtain grid sizes and ghost sizes
+
+  enzo_float * d           = (enzo_float *) field.values("density");
+  enzo_float * te          = (enzo_float *) field.values("total_energy");
+  enzo_float * ge          = (enzo_float *) field.values("internal_energy");
+
+  int mx, my, mz, gx, gy, gz, nx, ny, nz;
+  double xm, ym, zm, xp, yp, zp, hx, hy, hz;
+  field.size(&nx,&ny,&nz);
+  field.ghost_depth(0,&gx,&gy,&gz);
+  block->data()->lower(&xm,&ym,&zm);
+  block->data()->upper(&xp,&yp,&zp);
+  field.cell_width(xm,xp,&hx,ym,yp,&hy,zm,zp,&hz);
+
+  mx = nx + 2*gx;
+  my = ny + 2*gy;
+  mz = nz + 2*gz;
+
+  // We will probably never be in the situation of constant acceleration
+  // and cosmology, but just in case.....
+  EnzoPhysicsCosmology * cosmology = enzo::cosmology();
+  enzo_float cosmo_a = 1.0;
+
+  const int rank = cello::rank();
+
+  double current_time  = block->time();
+  if (cosmology) {
+    enzo_float cosmo_dadt = 0.0;
+    double dt    = block->dt();
+    cosmology->compute_expansion_factor(&cosmo_a,&cosmo_dadt,current_time+0.5*dt);
+    if (rank >= 1) hx *= cosmo_a;
+    if (rank >= 2) hy *= cosmo_a;
+    if (rank >= 3) hz *= cosmo_a;
+  }
+
+  double cell_volume = (hx*hy*hz);
+  double inv_volume  = 1.0 / cell_volume;
+
+  //  stencil_rad_ is integer separation from cell center
+  //  and edge of injection region (i.e. 1 for 3x3 injection grid)
+  if (  shift_cell_center_ &&
+       ( ((xpos - (stencil_rad_+1)*hx) < xm) || // note: xm/xp is min/max without including ghost
+         ((xpos + (stencil_rad_+1)*hx) > xp) || //     +1 b/c of CIC inerpolation onto grid
+         ((ypos - (stencil_rad_+1)*hy) < ym) ||
+         ((ypos + (stencil_rad_+1)*hy) > yp) ||
+         ((zpos - (stencil_rad_+1)*hz) < zm) ||
+         ((zpos + (stencil_rad_+1)*hz) > zp)    )  ) {
+
+      xpos = std::min(  std::max(xpos, xm + (stencil_rad_ + 1 + 0.5)*hx),
+                       xp - (stencil_rad_ + 1 + 0.5)*hx);
+      ypos = std::min(  std::max(ypos, ym + (stencil_rad_ + 1 + 0.5)*hy),
+                       yp - (stencil_rad_ + 1 + 0.5)*hy);
+      zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
+                       zp - (stencil_rad_ + 1 + 0.5)*hz);
+  }
+
+  // compute coordinates of central feedback cell
+  // this must account for ghost zones
+  double xcell = (xpos - xm) / hx + gx - 0.5;
+  double ycell = (ypos - ym) / hy + gy - 0.5;
+  double zcell = (zpos - zm) / hz + gz - 0.5;
+
+  int ix       = ((int) floor(xcell + 0.5));
+  int iy       = ((int) floor(ycell + 0.5));
+  int iz       = ((int) floor(zcell + 0.5));
+
+  int index =  INDEX(ix,iy,iz,mx,my);
+
+  // Case B recombination, assuming T = 10^4 K
+  const float alpha = 2.60E-13; // cm^3 / s
+
+  // AE: possibly actually compute mu from species fields
+  double ndens = d[index] / enzo_config->ppm_mol_weight / cello::mass_hydrogen;
+
+  double stromgren_radius = std::pow( (3.0 * s49_tot * 1.0E49) /
+                            (4.0 * cello::pi * alpha * ndens*ndens),1.0/3.0);
+  double stromgren_volume = (4.0/3.0)*cello::pi*stromgren_radius*stromgren_radius*stromgren_radius;
+
+  double ionized          = cello::kboltz * 1.0E4 / enzo_config->ppm_mol_weight /
+                            cello::mass_hydrogen / (enzo_units->length()*enzo_units->length()) *
+                            enzo_units->time() * enzo_units->time();
+
+  if (stromgren_volume <= cell_volume){
+    ionized = ionized * stromgren_volume * inv_volume;
+  }
+
+  if ((will_explode == 1) && (ge[index] < ionized)){
+    double diff = ionized - ge[index];
+    ge[index]   = ge[index] + diff;
+    te[index]   = te[index] + diff;
+  }
+
+  return;
+}
+
 void EnzoMethodDistributedFeedback::inject_feedback(
                                           Block * block,
                                           double xpos, double ypos, double zpos,
-                                          double m_eject, double E_51,
+                                          double m_eject,  // in Msun
+                                          double E_51, // in 10^51 erg
                                           double ke_fraction,
                                           enzo_float pvx,    //default -9999
                                           enzo_float pvy,    //default -9999
@@ -357,7 +863,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
           //       feedback on their grids (this allows the loops to be
           //       simple - otherwise will have to continually recalc
           //       the min / max bounds of the loops to avoid edges )
-          if ( (index < 0) || (index >= mx*my*mz)) continue; 
+          if ( (index < 0) || (index >= mx*my*mz)) continue;
 
           double mu_cell  = enzo_config->ppm_mol_weight;
 
