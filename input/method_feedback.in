@@ -1,7 +1,11 @@
 #
 #
-#  Feedback test problem - much hard-coded in IC routine for now
-# 
+#  Very simple feedback test problem
+#
+#     Drops a star particle of desired mass
+#     into a unigrid, uniform domain. Commented-out
+#     Adapt blocks below can be used to add in AMR
+#     (static, nested grids or adaptive).
 #
 
 #Adapt {
@@ -27,16 +31,32 @@ Domain {
 }
 
 Mesh {
-  root_blocks = [4, 4, 4];
+  root_blocks = [2, 2, 2];
   root_rank   = 3;
-  root_size   = [64, 64, 64];
+  root_size   = [64, 64, 64]; # given length units, res = 1024 pc / 64 = 16 pc
 }
+
+#Adapt {
+#    max_level = 2;
+#    list = ["mask"];
+#    mask {
+#        type = "mask";
+ #       value = [2.0, (x > 0.45) && (x < 0.55) && (y > 0.45) && (y < 0.55) && (z > 0.45) && (z < 0.55), 0.0];
+#                 1.0, (x > 0.20) && (x < 0.80) && (y > 0.20) && (y < 0.8) && (z > 0.2) && (z < 0.8), .0];
+#        value = [ 1.0, ((x - 0.5)*(x - 0.5) + (y - 0.5)*(y - 0.5) + (z - 0.5)*(z - 0.5)) < 0.25, 0];
+#        value = [1.0, x + y + z < 0.75, 0.0];
+#+ (z - 0.5)*(z - 0.5)) < 0.25, 0];       
+#        value = [1.0, y < 0.75,
+#                 1.0, y > 0.25,
+#                 0.0];
+#    };
+#}
 
 
 Field {
   alignment   = 8;
   gamma       = 1.40;
-  ghost_depth = 3;
+  ghost_depth = 4;
 
   list = ["density", "internal_energy", "total_energy",
           "metal_density", "velocity_x", "velocity_y", "velocity_z",
@@ -45,23 +65,36 @@ Field {
 }
 
 Group {
-  list = ["colour"];
+  list = ["colour","derived"];
   
   colour {
     field_list = ["metal_density"];
+  }
+  derived {
+    field_list = ["temperature","pressure"];
   }
 
 }
 
 Method {
-  list = [ "ppm", "feedback"];
+  list = [ "null", "ppm", "feedback", "star_maker"];
+
+  null {
+    dt = 10.0; # force a minimum dt - code units
+  };
+
+  star_maker {
+     type = "stochastic";
+     number_density_threshold = 1.0E10; # set arbitrarily high - just turns this off 
+     minimum_star_mass        = 1000.0; # have to set this for use with feedback routine at the moment
+  };
 
   feedback {
-     ejecta_mass      = 10.0;      # solar masses
-     supernova_energy = 1.0;      # in 10^51 erg
-     ke_fraction      = 0.8;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently
-     ejecta_metal_fraction = 0.5;
-     feedback_stencil = 3;
+     #  ejecta_mass      = 10.0;     # solar masses - OLD PARAM - NOT USED 
+     #  supernova_energy = 1.0;      # in 10^51 erg - OLD PARAM - NOT USED
+     ke_fraction      = 0.5;      # fraction of kinetic energy (otherwise thermal) - < 0 computes it self-consistently
+     # ejecta_metal_fraction = 0.5;  # OLD PARAM - NOT USED
+     feedback_stencil      = 3;      # deposit feedback in a NxN CIC stencil centered on the particle - should work with any odd ineger, but not tested for anything other than 3 
   };
 
   ppm {
@@ -78,7 +111,12 @@ Method {
         temperature_floor = 1.0E-20;
       };
 
-
+#  #grackle {
+#    data_file = "CloudyData_UVB=HM2012.h5";
+#    with_radiative_cooling = 1;
+#    primordial_chemistry = 0;
+#    UVbackground = 1;
+#  } ;
 }
 
 Particle {
@@ -106,26 +144,28 @@ Particle {
 
 
 Units {
-    length = 1.5798E21; # # 7.899E20;    # 256 pc
-    time   = 3.15576E13;
+    length = 3.1596E21; ## 1024 pc  ### 1.5798E21; # 512 pc #### 7.899E20;    # 256 pc
+    time   = 3.15576E13; # 1 Myr
     mass   = 1.9891E36;
   }
 
 Initial {
 
-  list = ["feedback_test"];
+  list = ["feedback_test"]; # name of IC problem
 
   feedback_test {
-    density  = 1.2E-25;
-    position = [0.5, 0.5, 0.5];
+    density    = 1.2E-23;             # uniform mass density for ICs
+    position   = [0.425, 0.425, 0.5];
+    star_mass  = 1000;                # particle mass in Msun
   }
 }
 
 Output {
     list = [ "data" ];
     data {
-        field_list = [ "density" , "total_energy" , "internal_energy", "metal_density",
-                       "velocity_x", "velocity_y", "velocity_z",
+        # Add more here if desired. This just outputs bare minimum needed
+        # to see if routines are working OK (i.e. velocity and energy could be cool to add)
+        field_list = [ "density" , "metal_density",
                        "pressure", "temperature"];
 
         particle_list = ["star"];
@@ -138,7 +178,7 @@ Output {
         #   step refers to the interval if 'var' to output on
         schedule {
              var   = "time";
-             step  = 1; #            time in code units (Myr)
+             step  = 0.25; #            time in code units (Myr)
         }
     };
 
@@ -147,7 +187,7 @@ Output {
 
 Stopping {
     time = 100.0;
-    cycle = 10000;
+    cycle = 100000;
     seconds = 3600.0;
     interval = 1;
 }
