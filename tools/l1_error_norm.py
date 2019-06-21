@@ -342,8 +342,8 @@ def permute_vector_quantites(data, verbose, permute):
         candidates[prefix][ax_map[dim]] = elem
 
     vectors = []
-    for prefix, names in candidates.iteritems():
-        if len(filter(lambda x: x is not None, names)) != 3:
+    for prefix, names in candidates.items():
+        if len(list(filter(lambda x: x is not None, names))) != 3:
             continue
         vectors.append(prefix)
         temp = [data[names[0]], data[names[1]], data[names[2]]]

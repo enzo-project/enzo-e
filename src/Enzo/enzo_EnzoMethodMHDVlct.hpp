@@ -248,13 +248,12 @@ protected: // methods
 		     Grouping &flux_group, Grouping &weight_group,
 		     EnzoReconstructor &reconstructor, int stale_depth);
 
-  /// Compute the edge-centered electric fields using the fluxes and
-  /// cell-centered integrable quantities (from the start of the time-step).
+  /// Compute the edge-centered electric fields using the current fluxes and
+  /// cell-centered integrable quantities .
   ///
   /// @param block holds data to be processed
-  /// @param initial_integrable_group holds the integrable quantities from the
-  ///     start of the timestep (these should be from the start of the timestep
-  ///     even if the fluxes are computed at the half timestep)
+  /// @param cur_integrable_group holds fields containing the current values
+  ///     of the integrable quantities
   /// @param xflux_group,yflux_group,zflux_group holds field names where the
   ///     fluxes along the x, y, and z directions are stored. These should
   ///     include fluxes computed for the magnetic fields

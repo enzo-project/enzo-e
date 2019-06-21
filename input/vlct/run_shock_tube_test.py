@@ -16,6 +16,7 @@
 
 import os
 import os.path
+import sys
 import numpy as np
 import shutil
 import subprocess
@@ -25,8 +26,9 @@ from run_linear_wave_test import isclose, prep_cur_dir
 
 # this executes things in standalone mode
 _executable = 'bin/enzo-p'
-l1_norm_table_template = "python tools/l1_error_norm.py table{:s} {:s} {:s}"
-
+l1_norm_table_template = ("python tools/l1_error_norm.py table{:s} {:s} {:s}"
+                          " -f density,velocity_x,velocity_y,velocity_z,"
+                          "pressure,bfield_x,bfield_y,bfield_z")
 data_dir_template = "method_vlct-1-{:s}_rj2a_N{:d}_{:.1f}"
 
 def call_test(axis,res):
@@ -87,16 +89,18 @@ def analyze_tests():
     # use 1 block - if we use more than one block, it's unclear to me if it's
     # ok to have round-off errors)
 
-    r.append(standard_rj2a_l1_analyze("x", 256, 0.012524558844892638))
+    r.append(standard_rj2a_l1_analyze("x", 256, 0.012611255359410711))
     r.append(standard_rj2a_l1_analyze("x", 256, 0.0, std_dev=True, exact=True))
-    r.append(standard_rj2a_l1_analyze("y", 256, 0.012524558844892614))
+    r.append(standard_rj2a_l1_analyze("y", 256, 0.012611255359410817))
     r.append(standard_rj2a_l1_analyze("y", 256, 0.0, std_dev=True, exact=True))
-    r.append(standard_rj2a_l1_analyze("z", 256, 0.012524558844892873))
+    r.append(standard_rj2a_l1_analyze("z", 256, 0.012611255359410802))
     r.append(standard_rj2a_l1_analyze("z", 256, 0.0, std_dev=True, exact=True))
 
     n_passed = np.sum(r)
     n_tests = len(r)
     print("{:d} Tests passed out of {:d} Tests.".format(n_passed,n_tests))
+
+    return n_passed == n_tests
 
 def cleanup():
 
@@ -117,7 +121,12 @@ if __name__ == '__main__':
     run_tests()
 
     # analyze the tests
-    analyze_tests()
+    tests_passed = analyze_tests()
 
     # cleanup the tests
     cleanup()
+
+    if tests_passed:
+        sys.exit(0)
+    else:
+        sys.exit(3)

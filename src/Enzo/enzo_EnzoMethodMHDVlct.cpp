@@ -372,9 +372,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       stale_depth+=reconstructor->immediate_staling_rate();
 
       // Compute the edge-centered Electric fields (each time, it uses the
-      // initial cell-centered integrable quantities from the start of the
-      // time-step
-      compute_efields_(block, *primitive_group_,
+      // current integrable quantities
+      compute_efields_(block, *cur_integrable_group,
 		       xflux_group, yflux_group, zflux_group,
 		       center_efield_name, efield_group,
 		       weight_group, ct, stale_depth);
@@ -505,15 +504,19 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 
   // Calculate integrable values on left and right faces:
   eos_->integrable_from_reconstructable(block, *reconstructable_group_l,
-					*integrable_group_l, stale_depth, dim);
+					*integrable_group_l,
+					cur_stale_depth, dim);
   eos_->integrable_from_reconstructable(block, *reconstructable_group_r,
-					*integrable_group_r, stale_depth, dim);
+					*integrable_group_r,
+					cur_stale_depth, dim);
 
   // Calculate pressure on left and right faces:
   eos_->pressure_from_reconstructable(block, *reconstructable_group_l,
-				      pressure_name_l, stale_depth, dim);
+				      pressure_name_l,
+				      cur_stale_depth, dim);
   eos_->pressure_from_reconstructable(block, *reconstructable_group_r,
-				      pressure_name_r, stale_depth, dim);
+				      pressure_name_r,
+				      cur_stale_depth, dim);
 
   // Next, compute the fluxes
   riemann_solver_->solve(block, *integrable_group_l, *integrable_group_r,
@@ -557,7 +560,7 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 //----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_efields_(Block *block,
-					 Grouping &initial_integrable_group,
+					 Grouping &cur_integrable_group,
 					 Grouping &xflux_group,
 					 Grouping &yflux_group,
 					 Grouping &zflux_group,
@@ -573,7 +576,7 @@ void EnzoMethodMHDVlct::compute_efields_(Block *block,
   // Maybe the following should be handled internally by ct?
   for (int i = 0; i < 3; i++){
     ct.compute_center_efield (block, i, center_efield_name,
-			      initial_integrable_group, stale_depth);
+			      cur_integrable_group, stale_depth);
     Grouping *jflux_group;
     Grouping *kflux_group;
     if (i == 0){
@@ -588,7 +591,7 @@ void EnzoMethodMHDVlct::compute_efields_(Block *block,
     }
 
     ct.compute_edge_efield (block, i, center_efield_name, efield_group,
-			    *jflux_group, *kflux_group, *primitive_group_,
+			    *jflux_group, *kflux_group, cur_integrable_group,
 			    weight_group, stale_depth);
   }
 }
