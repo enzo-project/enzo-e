@@ -63,6 +63,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
   initial_feedback_test_density(),
+  initial_feedback_test_star_mass(),
   // EnzoInitialMusic
   initial_music_field_files(),
   initial_music_field_datasets(),
@@ -335,6 +336,7 @@ void EnzoConfig::pup (PUP::er &p)
 
   PUParray(p, initial_feedback_test_position,3);
   p | initial_feedback_test_density;
+  p | initial_feedback_test_star_mass;
 
   PUParray(p, initial_IG_center_position,3);
   PUParray(p, initial_IG_bfield,3);
@@ -789,6 +791,9 @@ void EnzoConfig::read(Parameters * p) throw()
   }
   initial_feedback_test_density = p->value_float
     ("Initial:feedback_test:density", 1.0E-24);
+
+  initial_feedback_test_star_mass = p->value_float
+    ("Initial:feedback_test:star_mass", 1000.0);
 
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);

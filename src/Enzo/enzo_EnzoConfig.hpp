@@ -149,6 +149,7 @@ public: // interface
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
       initial_feedback_test_density(),
+      initial_feedback_test_star_mass(),
       // EnzoInitialMusic
       initial_music_field_files(),
       initial_music_field_datasets(),
@@ -439,6 +440,7 @@ public: // attributes
 
   double                     initial_feedback_test_position[3];
   double                     initial_feedback_test_density;
+  double                     initial_feedback_test_star_mass;
 
   /// EnzoInitialIsolatedGalaxy
   double                     initial_IG_center_position[3];
