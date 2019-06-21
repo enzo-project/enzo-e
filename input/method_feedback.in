@@ -83,10 +83,22 @@ Method {
     dt = 10.0; # force a minimum dt - code units
   };
 
+  # star maker is turned on here as a method just to list and comment the parameters,
+  # but setting number density to something stupid so no stars actually form
   star_maker {
      type = "stochastic";
      number_density_threshold = 1.0E10; # set arbitrarily high - just turns this off 
      minimum_star_mass        = 1000.0; # have to set this for use with feedback routine at the moment
+                                        #   this sets the minimum star mass, but for the sake of stochastic
+                                        #   SF routine this IS the particle mass
+     use_density_threshold    = true  ; # check number density for SF (def true)
+     use_velocity_divergence  = true  ; # converging flow criterion   (def true)
+     use_dynamical_time       = true ;  # compute t_ff / t_dyn        (def true)
+     maximum_mass_fraction    = 0.5  ;  # maximum fraction of a cell that can be converted into stars
+                                        #    can be redundant with number density threshold depending
+                                        #    on rest of SF criteria and refinement criteria (default 0.5)
+     efficiency               = 0.02 ;  # efficiency per free fall time (default 0.01)
+     
   };
 
   feedback {
