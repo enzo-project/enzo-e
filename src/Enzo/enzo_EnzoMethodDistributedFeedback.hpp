@@ -51,6 +51,7 @@ public:
   void inject_feedback(Block * block,
                        double xpos, double ypos, double zpos,
                        double m_eject, double E_51, double ke_fraction,
+                       double metal_fraction,
                        enzo_float pvx = -9999.0, enzo_float pvy = -9999.0,
                        enzo_float pvz = -9999.0);
 
@@ -90,7 +91,7 @@ public:
                              const int &ix, const int &iy, const int &iz,
                              const double &dxc, const double &dyc, const double &dzc,
                              const double & mass_per_cell, const double & mom_per_cell,
-                             const double & therm_per_cell);
+                             const double & therm_per_cell, const double & metal_fraction);
 
   void compute_coefficients( enzo_float *px, enzo_float *py, enzo_float *pz, enzo_float *d,
                              enzo_float *ge, enzo_float* px_l, enzo_float* py_l, enzo_float *pz_l,

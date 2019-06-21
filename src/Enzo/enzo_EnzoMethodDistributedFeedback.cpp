@@ -9,6 +9,21 @@
 #include "enzo.hpp"
 
 
+
+//
+// ------------------------- S99 Lookup functions -----------------------------
+//    Placed here for now, but could be nice to be in a separate "phyics"
+//    module. Might be nice to separate out "physics" from "numerics" in the
+//    feedback, such that user (at run time) can mix and match methods for
+//    deciding how much energy / momumtum / mass to deposit each timestep
+//    and routines for actually doing the deposition (i.e. the CIC distributed
+//    feedback method used in Christine's code (or related versions),
+//    single-cell injection, spherical mapping, etc.).
+//
+//
+//    S99 routines are copied over as-is from enzo-dev Fortran (star_maker_ssn.F).
+//    Errors there (if any) have been copied over.
+//
 double s49Lookup(double m){
   // Returns a broken power-law approximation to the ionizing luminosity emitted
   // by a main sequence star of mass m, normalized to 10^49 photon/s
@@ -219,6 +234,64 @@ double s99_sn_mass(const double &t){
   return m_ejSN;
 }
 
+double s99_sn_metallicity(const double & t){
+
+  double Z =0.0;
+  const double tp2 = t*t;
+  const double tp4 = tp2*tp2;
+
+
+  if (t <= 0.365){
+    Z = Z - 2.12788803787;
+    Z = Z - 3.08562080661 * t;
+    Z = Z + 83.9782331967 * tp2;
+    Z = Z - 158.867576409 * tp2*t;
+  } else if (.365 < t && t <= .442){
+    Z = Z + 0.584246828515;
+    Z = Z - 10.2313474777 * t;
+    Z = Z + 42.3869874214 * tp2;
+    Z = Z - 46.7483110349 * tp2*t;
+  } else if (.442 < t && t <= .517){
+    Z = Z - 6913398.58591;
+    Z = Z + 99253357.5895 * t;
+    Z = Z - 610064398.162 * tp2;
+    Z = Z + 2081033583.17 * tp2*t;
+    Z = Z - 4254712179.17 * tp4;
+    Z = Z + 5213617301.35 * tp4*t;
+    Z = Z - 3545287887.67 * tp4*tp2;
+    Z = Z + 1032027574.24 * tp4*tp2*t;
+  } else if (.517 < t && t <= .718){
+    Z = Z - 0.856562917033;
+    Z = Z + 2.72919708256 *t;
+    Z = Z - 1.22818002617 *tp2;
+    Z = Z - 0.536735943166 *tp2*t;
+  } else if (.718 < t && t <= 1.7){
+    Z = Z + 6.69150908774;
+    Z = Z - 51.5159032945 * t;
+    Z = Z + 172.980768687 * tp2;
+    Z = Z - 307.64633271  * tp2*t;
+    Z = Z + 311.333072359 * tp4;
+    Z = Z - 180.28789728  * tp4*t;
+    Z = Z + 55.6987751625 * tp4*tp2;
+    Z = Z - 7.12566268516 * tp4*tp2*t;
+  } else if (1.7 < t && t <= 3.2){
+    Z = Z + 0.173226556725;
+    Z = Z - 0.142758066129 * t;
+    Z = Z + 0.0568361245745 * tp2;
+    Z = Z - 0.00740131298973 *tp2*t;
+  } else {
+    Z = Z - 0.459335515363;
+    Z = Z + 0.51236004354 * t;
+    Z = Z - 0.194211146544* tp2;
+    Z = Z + 0.0264297153731 *tp2*t;
+  } // End of delaytime cases
+
+  return Z;
+}
+//
+// ------------------------------- End S99 Stuff ------------------------------
+//
+
 EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 ()
   : Method()
@@ -234,24 +307,36 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
 
   dual_energy_         = enzo_config->ppm_dual_energy;
 
+  // NO LOGER USED
   total_ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * cello::mass_solar /
                          enzo_units->mass();
 
+  // NO LONGER USED
   total_ejecta_energy_ = enzo_config->method_feedback_supernova_energy * 1.0E51 /
                          enzo_units->mass() / enzo_units->velocity() /
                          enzo_units->velocity();
 
+  // Fraction of total energy to deposit as kinetic rather than thermal energy
   kinetic_fraction_    = enzo_config->method_feedback_ke_fraction;
 
+  // NO LONGER USED
   ejecta_metal_fraction_ = enzo_config->method_feedback_ejecta_metal_fraction;
 
+  // Values related to CIC cell deposit. Stencil is the number of cells across
+  // in the stencil. stencil_rad  is the number of cells off-from-center
+  //
   stencil_                   = enzo_config->method_feedback_stencil;
   stencil_rad_               = ( (int) ((stencil_ - 1) / 2.0));
   number_of_feedback_cells_  = stencil_ * stencil_ * stencil_;
+
+  // Flag to turn on / off particle kicking from boundaries
   shift_cell_center_         = enzo_config->method_feedback_shift_cell_center;
 
 
+  // Flag to turn on / off single-zone ionization routine
   use_ionization_feedback_   = enzo_config->method_feedback_use_ionization_feedback;
+
+
   // Do error checking here to make sure all required
   // fields exist..
   // NOTE: Good idea - make ALL method objects have a 'required fields' list
@@ -279,8 +364,6 @@ void EnzoMethodDistributedFeedback::pup (PUP::er &p)
   p | stencil_;
   p | stencil_rad_;
   p | number_of_feedback_cells_;
-  //p | mass_per_cell;
-  //p | energy_per_cell;
   p | shift_cell_center_;
 
   return;
@@ -316,14 +399,14 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
   int count = 0;
 
   // Polynomial coefficients for the fit to the delay time distribution
-  double p_delay[6] = {
+  const double p_delay[6] = {
     3505021.4516666,         16621326.48066255,        4382816.59085307,
     46194173.14420852,      -52836941.28241706,       22967062.02780452,
   };
 
   // Polynomial coefficients for the fit to the stellar mass distribution
   // as a function of delay time.
-  double p_mass[10] = {
+  const double p_mass[10] = {
     4.42035634891,        -13.2890466089,        26.1103296098,        -30.1876007562,
     21.8976126631,        -10.2544493943,        3.09621304958,        -0.581870413299,
     0.0618795946119,      -0.00284352366041
@@ -342,20 +425,23 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
     const int ia_l = particle.attribute_index (it, "lifetime");
     const int ia_c = particle.attribute_index (it, "creation_time");
+    const int ia_mf = particle.attribute_index (it, "metal_fraction");
 
     const int dm = particle.stride(it, ia_m);
     const int dp = particle.stride(it, ia_x);
     const int dv = particle.stride(it, ia_vx);
     const int dl = particle.stride(it, ia_l);
     const int dc = particle.stride(it, ia_c);
+    const int dmf = particle.stride(it, ia_mf);
 
     const int nb = particle.num_batches(it);
 
     for (int ib=0; ib<nb; ib++){
       enzo_float *px=0, *py=0, *pz=0, *pvx=0, *pvy=0, *pvz=0;
-      enzo_float *plifetime=0, *pcreation=0, *pmass=0;
+      enzo_float *plifetime=0, *pcreation=0, *pmass=0, *pmetal=0;
 
       pmass = (enzo_float *) particle.attribute_array(it, ia_m, ib);
+      pmetal = (enzo_float *) particle.attribute_array(it, ia_mf, ib);
 
       px  = (enzo_float *) particle.attribute_array(it, ia_x, ib);
       py  = (enzo_float *) particle.attribute_array(it, ia_y, ib);
@@ -376,6 +462,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         int ipdv = ip*dv;
         int ipdl = ip*dl;
         int ipdc = ip*dc;
+        int ipdmf = ip*dmf;
 
 
 /*
@@ -423,8 +510,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           const float lambda         = expected_sn_s99 * 1.0E-6 *
                                        enzo_config->method_star_maker_minimum_star_mass;
 
-          // Knuth algorithm for generating a Poisson distribution
-          // See http://goo.gl/sgLPcj
+
 
           float L = std::exp(-lambda), p = 1.0;
           if (L == 0.0){
@@ -432,6 +518,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
                   "Star maker minimum mass is too large for use with stochastic model");
           }
 
+          // Knuth algorithm for generating a Poisson distribution
+          // See http://goo.gl/sgLPcj
           int   k = 0;
           while (p>L){
             ++k;
@@ -534,10 +622,11 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         double wind_energy = s99_wind_energy(td7, tsoon7); // in cm^2/s^2 (i.e. per unit mass in cgs)
         wind_energy        = wind_energy * wind_mass * cello::mass_solar; // now total E in erg
 
-        double sn_mass = 0.0, sn_energy = 0.0;
+        double sn_mass = 0.0, sn_energy = 0.0, sn_metal_fraction = 0.0;
         if (explosion_flag > 0){
           sn_mass = s99_sn_mass(td7) * explosion_flag; // sn mass in Msun
           sn_energy = 1.0E51 * explosion_flag;         // sn energy in erg
+          sn_metal_fraction = s99_sn_metallicity(td7); // sn metal fraction in fraction (not solar)
         }
 
         double m_eject = wind_mass + sn_mass;          // total mass in Msun
@@ -549,6 +638,11 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           std::cout << pmass[ipdm] << m_eject*cello::mass_solar/enzo_units->mass() << wind_mass << sn_mass << "\n";
           std::cout << will_explode << explosion_flag << "\n";
         } // mass will be removed elsewhere
+
+
+        double metal_fraction = 0.0;
+        metal_fraction = (pmetal[ipdmf] * wind_mass +
+                          sn_metal_fraction * sn_mass    ) / m_eject;
 
 // ---------------------------------------- end determining explosion properties ----
 
@@ -566,6 +660,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
 
         this->inject_feedback(block, xpos, ypos, zpos,
                               m_eject, (energy/1.0E51), enzo_config->method_feedback_ke_fraction,
+                              metal_fraction,
                               pvx[ipdv], pvy[ipdv], pvz[ipdv]);
         // remove mass - error checking on the std::max is handled above with warning
         pmass[ipdm] = std::max( 0.0, pmass[ipdm] - m_eject*cello::mass_solar/enzo_units->mass());
@@ -703,7 +798,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
                                           double xpos, double ypos, double zpos,
                                           double m_eject,  // in Msun
                                           double E_51, // in 10^51 erg
-                                          double ke_fraction,
+                                          double ke_fraction, double metal_fraction, // for now leave as single value
                                           enzo_float pvx,    //default -9999
                                           enzo_float pvy,    //default -9999
                                           enzo_float pvz){   //default -9999
@@ -971,7 +1066,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
                              stencil_+1, stencil_+1, stencil_+1,          // mx,my,mz for local grid
                              stencil_rad_, stencil_rad_, stencil_rad_, // local grid cell center  - should be 1 for 3x3x3 stencil (0,1,2) - 2 for 5x5x5 stencil (0,1, 2, 3,4)
                              dxc, dyc, dzc,
-                             density_per_cell, 1.0, 0.0);
+                             density_per_cell, 1.0, 0.0, metal_fraction);
 
   // momenum injection - compute coefficients for injection
   double mom_per_cell = 0.0;
@@ -989,7 +1084,7 @@ void EnzoMethodDistributedFeedback::inject_feedback(
 
   this->add_feedback_to_grid(v3[0], v3[1], v3[2], d, ge, te, metal,
                              mx, my, mz, ix, iy, iz, dxc, dyc, dzc,
-                             density_per_cell, mom_per_cell, E_therm);
+                             density_per_cell, mom_per_cell, E_therm, metal_fraction);
 
   double sum_mass_final, sum_energy_final, sum_ke_final;
 
@@ -1144,7 +1239,7 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
                                 const int & ix, const int & iy, const int &iz,
                                 const double & dxc, const double & dyc, const double & dzc,
                                 const double & mass_per_cell, const double & mom_per_cell,
-                                const double & therm_per_cell){
+                                const double & therm_per_cell, const double & metal_fraction){
 
 
 
@@ -1207,7 +1302,7 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
               d[index] = d[index] + delta_mass;
 
               if(metal) metal[index] = (metal[index] +
-                                       delta_mass * ejecta_metal_fraction_);
+                                       delta_mass * metal_fraction);
 
               // account for multi-species (H,He,etc.) here, along with additional
               // metal species fields if they are present
