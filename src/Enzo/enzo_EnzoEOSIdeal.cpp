@@ -182,7 +182,7 @@ void EnzoEOSIdeal::integrable_from_reconstructable
 	magnetic = 0.5*(bx(iz,iy,ix) * bx(iz,iy,ix) +
 			by(iz,iy,ix) * by(iz,iy,ix) +
 			bz(iz,iy,ix) * bz(iz,iy,ix)) / density(iz,iy,ix);
-	etot(iz,iy,ix) = etot(iz,iy,ix) + kinetic + magnetic;
+	etot(iz,iy,ix) = eint(iz,iy,ix) + kinetic + magnetic;
       }
     }
   }
