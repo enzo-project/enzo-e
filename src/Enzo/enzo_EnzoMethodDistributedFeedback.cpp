@@ -531,13 +531,14 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           // Now k-1 is approx Poisson(lambda)
           int number_of_sn = k - 1;
 
-          std::cout << "Number of SN" << number_of_sn << "  " << RAND_MAX << "\n";
+          // std::cout << "This particle has " << number_of_sn << " supernova\n";
 
           if (number_of_sn == 0){
             explosion_flag = 0;
             continue;
           } else if (number_of_sn < 0){
-            std::cout <<"Number of SN in distributed feedback is negative \n";
+            ERROR("EnzoMethodDistributedFeedback",
+                  "Number of SN in distributed feedback is negative \n");
           }
 
           // If there are explosions, we need to check the ionizing luminosity
