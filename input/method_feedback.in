@@ -155,7 +155,9 @@ Initial {
 
   feedback_test {
     density    = 1.2E-23;             # uniform mass density for ICs
-    position   = [0.425, 0.425, 0.5];
+    position   = [0.425, 0.425, 0.5]; # off-center to avoid block boundary
+                                      #   particles are still local to each block and are kicked away from
+                                      #   boundaries if NxN feedback zone crosses a block boundary
     star_mass  = 1000;                # particle mass in Msun
   }
 }
