@@ -16,3 +16,4 @@ refinement criteria, etc.
    method
    initial
    adapt
+   array

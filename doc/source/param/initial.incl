@@ -43,33 +43,132 @@ value
 	       
 :e:`is read as "Set the density field equal to` :p:`sin ( x + y )` :e:`wherever` :p:`x - y < 0.0` :e:`, otherwise set to` :p:`1.0` :e:`".`
 
+cloud
+-----
+
+The :p:`cloud` Initial subgroup is used to setup a Spherical cloud embedded in
+a hot wind. The cloud and wind are assumed to be in pressure equilibrium with one another.
+
+Currently magnetic fields are not initialized by this method. Currently, the
+cell-centered values should be initialized by another Initial subgroup (e.g.
+value) prior to call of this subgroup. If magnetic fields are initialized, they
+must be constant across the entire domain.
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`subsample_n`
+:Summary: :s:`Determines the subsampling resolution`
+:Type:    :t:`integer`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`Subsampling is used to initialize the fields in regions of overlap
+between the cloud and the wind. For cells in this region, the fraction
+of the volume enclosed by the cloud is estimated by subdividing a cell
+into` :math:`2^n` :e:`subcells along each axis (a value of 0,
+corresponds to no subsampling. The average density of the cells in
+this region are volume weighted and the average velocities are mass
+weighted. The total energy in a cell is currently computed by assuming
+constant internal energy density throughout the grid and using the
+average velocities and densities (and, if applicable, the magnetic
+fields).`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_radius`
+:Summary: :s:`Initial radius of the spherical cloud`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_x`
+:Summary: :s:`x coordinate of the cloud center`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_y`
+:Summary: :s:`y coordinate of the cloud center`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_center_z`
+:Summary: :s:`z coordinate of the cloud center`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`cloud_density`
+:Summary: :s:`initial mass density of the cloud`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_density`
+:Summary: :s:`initial mass density of the wind`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_velocity`
+:Summary: :s:`initial velocity of the wind along the x-axis`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_total_energy`
+:Summary: :s:`initial specific total energy of the wind`
+:Type:    :t:`float`
+:Default: :d:`none`
+:Scope:   Enzo
+
+:e:`This must be a positive value.`
+
 inclined_wave
 -------------
 
 The :p:`inclined_wave` Initial subgroup is used to setup a MHD wave
 at an angle inclined to the simulation domain for testing the VL
-+ CT MHD integration method. Specifically, a coordinate system "x0",
-"x1", "x2" is defined and the wave is initialized to travel along
-"x0". The transformation from "x", "y", "z" to "x0", "x1", "x2", is
-determined by the values of the :p:`alpha` and :p:`beta` parameters.
++ CT MHD integration method.
 
-  1. Rotate the "x-y" plane is about the "z"-axis by the angle given
-     by the product of negative one and :p:`beta` (per mathematical
-     convention - rotation by a negative angle is clockwise
-     rotation). The rotated "y"-axis now points along the "x1"-axis.
-  2. Rotate the "z"-axis and the rotated "x"-axis by the angle given
-     by the product of negative one and :p:`alpha`. Now the final
-     rotated "x" and "z" axes point along the "x0" and "x2" axes.
+The procedure to addopted from
+`Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
+Specifically, a coordinate system "x0", "x1", "x2" is defined and the
+wave is initialized to travel along "x0". The transformation between
+"x", "y", "z" and "x0", "x1", "x2", is determined by the values of the
+:p:`alpha` and :p:`beta` parameters. They are explicitly related by
 
-This follows the procedure outlined in
-`Gardiner and Stone (2008) <adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
+.. math::
+
+   x &= x_0\cos\alpha\cos\beta - x_1\sin\beta - x_2\sin \alpha \cos \beta \\
+   y &= x_0\cos\alpha\sin\beta + x_1\cos\beta - x_2\sin \alpha \sin \beta \\
+   z &= x_0\sin\alpha + x_2 \cos\alpha
+
 As in that paper, we initialize the magnetic fields using the vector
-potential to ensure that the resulting magnetic fields have no
-divergence.
+potential to ensure that the magnetic fields are divergence-free.
 
-**This could be easily extended to setup hydrodynamical waves and could
+*This could be easily extended to setup hydrodynamical waves and could
 be generalized to setup waves for hydrodynamic methods or MHD methods
-without face-centered B-fields**
+without face-centered B-fields*
 
 :Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`alpha`
 :Summary: :s:`Angle used to help determine wave inclination`
@@ -97,9 +196,9 @@ without face-centered B-fields**
 :Default: :d:`alfven`
 :Scope:   :z:`Enzo`
 
-:e:`All waves are described in` `Gardiner and Stone (2008)
-<adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ :e:`. Valid wave types
-include:`
+:e:`All waves are described in`
+`Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_
+:e:`. Valid wave types include:`
 
   * ``"alfven"`` :e:`A linear Alfven wave with perturbations to the
     magnetic field along the "x2"-axis.`
@@ -311,9 +410,9 @@ Generically, a shock tube get's set up to evolve along an axis given by
 the value of :p:`aligned_ax`. The discontinuity is always placed at
 0.5 along that axis (typically the domain should extend from 0.0 to 1.0).
 
-**This could be easily extended to setup additional shock tube setups,
+*This could be easily extended to setup additional shock tube setups,
 and to be used to initial conditions for hydrodynamical methods or MHD
-methods without face-centered B-fields**
+methods without face-centered B-fields*
 
 :Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`setup_name`
 :Summary: :s:`Specifies the name of the shock tube problem to setup.`
@@ -324,7 +423,7 @@ methods without face-centered B-fields**
 :e:`Valid shock tube problems include:`
 
   * ``"rj2a"`` :e:`An MHD shock tube problem illustrated in Figure 2a of`
-    `Ryu and Jones (1995) <adsabs.harvard.edu/abs/1995ApJ...442..228R>`_
+    `Ryu & Jones (1995) <http://adsabs.harvard.edu/abs/1995ApJ...442..228R>`_
     :e:`. The initialization assumes that the adiabatic index is 5/3.`
   * ``"sod"`` :e:`The hydrodynamical Sod shock tube test problem. The
     canonical adiabatic is 1.4 (although this is not required).`
@@ -337,7 +436,7 @@ methods without face-centered B-fields**
 :Default: :d:`x`
 :Scope:   :z:`Enzo`
 
-:e:`Allowed values are` ``"x"`` :e:`, ` ``"y"`` :e:`, or ` ``"z"`` :e:`.`
+:e:`Allowed values are` ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`.`
 
 turbulence
 ----------
@@ -380,6 +479,6 @@ subgroup) has already to specified the face-centered magnetic fields
 (``"bfieldi_x"``, ``"bfieldi_y"``, ``"bfieldi_z"``). The cell-centered
 value is just the average of the corresponding face-centered component.
 
-To use this, specify ``"vlct_bfield"`` in the :p:`Initial` : :p:`list`
-parameter following the name of Initial subgroup used to setup the
+To use this, specify ``"vlct_bfield"`` in the Initial:list
+parameter list following the name of Initial subgroup used to setup the
 face-centered values.

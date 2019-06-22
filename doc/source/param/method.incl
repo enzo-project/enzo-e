@@ -29,6 +29,8 @@ list is applied in the order specified.  Possible methods include:`
   * :t:`"ppml"` :e:`for the PPML ideal MHD solver.`  *This may be phased
     out in favor of using a more general "mhd" method instead, with a
     specific mhd solver specified.*
+  * :t:`"mhd_vlct"` :e:`for the VL + CT (van Leer + Constrained Transport) MHD
+    solver.`
   * :t:`"trace"` :e:`for moving tracer particles.`  **This will be phased
     out in favor of a more general "move_particles" method.**
   * :t:`"turbulence"` :e:`computes random forcing for turbulence
@@ -557,6 +559,11 @@ heat
 :Scope:     :z:`Enzo`
 
 :e:`Thermal diffusivity parameter for the heat equation.`
+
+mhd_vlct
+--------
+
+.. include:: method_mhd_vlct.incl
 
 null
 ----

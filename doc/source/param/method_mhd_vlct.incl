@@ -1,0 +1,62 @@
+:p:`Method:mhd_vlct` parameters are used to initialize parameters for
+Enzo-E's VL + CT MHD method.
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`density_floor`
+:Summary: :s:`Lower limit on density`
+:Type:   :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Density floor, which must exceed 0. This is applied during
+reconstruction and quantity updates.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`pressure_floor`
+:Summary: :s:`Lower limit on thermal pressure`
+:Type:   :t:`float`
+:Default: :d:`none`
+:Scope:     :z:`Enzo`
+
+:e:`Thermal pressure floor, which must exceed 0 This is applied during
+reconstruction and quantity updates.`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`riemann_solver`
+:Summary: :s:`name of the Riemann solver to use`
+:Type:   :t:`float`
+:Default: :d:`hlld`
+:Scope:     :z:`Enzo`
+
+:e:`Name of the Riemann solver to use. For a list of options, see`
+:ref:`using-vlct-riemann-solver`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`half_dt_reconstruct_method`
+:Summary: :s:`name of the reconstruction method to use for the full timestep`
+:Type:   :t:`float`
+:Default: :d:`nn`
+:Scope:     :z:`Enzo`
+
+:e:`Name of the interpolation method used to reconstruct face-centered
+primitives for the first half timestep.` ``"nn"`` :e:` is recommended
+for this method (problems arise if ` ``"plm"`` :e:` is used). For a
+list of options, see`
+:ref:`using-vlct-reconstruction`
+
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`full_dt_reconstruct_method`
+:Summary: :s:`name of the reconstruction method to use for the full timestep`
+:Type:   :t:`float`
+:Default: :d:`plm`
+:Scope:     :z:`Enzo`
+
+:e:`Name of the interpolation method used to reconstruct face-centered
+primitives for the full timestep. For a list of options, see`
+:ref:`using-vlct-reconstruction`
+
