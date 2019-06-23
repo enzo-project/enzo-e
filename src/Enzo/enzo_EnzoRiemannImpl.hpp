@@ -314,7 +314,6 @@ private: //methods
 					  conserved_start_, conserved_stop_,
 					  specific_start_, specific_stop_,
 					  other_start_, other_stop_, n_keys_);
-    // right now we are assuming that there are no advected fields in other
     ASSERT("EnzoRiemannImpl::setup_lut_",
 	   ("Currently assuming that none of the advected quantites belong to "
 	    "the \"other\" category"), other_start_ == other_stop_);

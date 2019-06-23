@@ -466,7 +466,6 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
   Grouping *reconstructable_group_l, *reconstructable_group_r;
   integrable_group_l = &priml_group;  reconstructable_group_l = &priml_group;
   integrable_group_r = &primr_group;  reconstructable_group_r = &primr_group;
-
   
   // First, reconstruct the left and right interface values
   reconstructor.reconstruct_interface(block, reconstructable_group,
@@ -943,27 +942,6 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
   // reserve/allocate cell-centered e-field
   center_efield_name = "center_efield";
   prep_reused_temp_field_(field, center_efield_name, 0, 0, 0);
-
-  // I'm commenting out the following. With the introduction of stale depth
-  // the following should no longer be necessary
-
-  /*
-  // Initialize Values (that would not otherwise be initialized) in order to
-  // avoid NaN/Inf during calculations.
-
-  // initialize values of the temporary conserved group (to avoid NaNs during
-  // conversion to primitives in ghost zone - these propogate to flux calc) 
-  outer_ghost_to_floor_(block, temp_conserved_group, *eos_, cons_group_names_);
-  
-  // initialize exterior face values of the temporary interface B-field
-  // (to avoid NaNs while computing cell-centered B-fields in ghost zone)
-  std::vector<std::string> bfieldi_group_names{"bfield"};
-  outer_ghost_to_floor_(block,temp_bfieldi_group, *eos_, bfieldi_group_names);
-
-  // initialize values of reconstructed primitives
-  initialize_recon_prim_to_floor_(block, priml_group, *eos_, prim_group_names_);
-  initialize_recon_prim_to_floor_(block, primr_group, *eos_, prim_group_names_);
-  */
 }
 
 //----------------------------------------------------------------------
@@ -1044,95 +1022,6 @@ void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
   // deallocate the temporary longitudinal bfields
   std::vector<std::string> bfieldi_group_names{"bfield"};
   deallocate_grouping_fields_(field, bfieldi_group_names, temp_bfieldi_group);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::initialize_recon_prim_to_floor_
-(Block *block, Grouping &grouping, EnzoEquationOfState &eos,
- std::vector<std::string> &group_names)
-{
-  int start = -1;
-  int stop = -1;
-  Field field = block->data()->field();
-
-  for (unsigned int group_ind=0;group_ind<group_names.size(); group_ind++){
-    // load group name and number of fields in the group
-    std::string group_name = group_names[group_ind];
-    int num_fields = grouping.size(group_name);
-
-    // Handle possibility of having a density/pressure floor
-    enzo_float prim_floor = 0.;
-    if (group_name == "density"){
-      prim_floor = eos.get_density_floor();
-    } else if (group_name == "pressure"){
-      prim_floor = eos.get_pressure_floor();
-    }
-
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-      std::string field_name = grouping.item(group_name,field_ind);
-      if (start == -1){
-	// Determine the indices to set to floor. Only need to initialize
-	// values at the end of the allocated blocks of memory.
-	int id = field.field_id(field_name);
-	int mx, my, mz;
-	field.dimensions(id,&mx,&my,&mz);
-	stop = mz*my*mx;
-	start = std::min(std::min(mz*my*(mx-1), mz*(my-1)*mx),(mz-1)*my*mx);
-      }
-      enzo_float* data = (enzo_float *) field.values(field_name);
-      for (int i=start; i<stop; i++) {
-	data[i] = prim_floor;
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::outer_ghost_to_floor_
-(Block *block, Grouping &grouping, EnzoEquationOfState &eos,
- std::vector<std::string> &group_names){
-
-  EnzoFieldArrayFactory array_factory(block);
-  
-  for (unsigned int group_ind=0;group_ind<group_names.size();group_ind++){
-    // load group name and number of fields in the group
-    std::string group_name = group_names[group_ind];
-    int num_fields = grouping.size(group_name);
-
-
-    // Handle possibility of having a density/pressure floor
-    enzo_float floor_val = 0.;
-    if (group_name == "density"){
-      floor_val = eos.get_density_floor();
-    } else if (group_name == "pressure"){
-      floor_val = eos.get_pressure_floor();
-    } else if (group_name == "total_energy"){
-      // We actually primarily expect to be doing this for conserved quantities
-      floor_val = eos.get_pressure_floor() / (eos.get_gamma() - 1.);
-    } 
-     // iterate over the fields in the group
-    for (int field_ind=0; field_ind<num_fields; field_ind++){
-
-      // load in the quantities
-      EFlt3DArray array;
-      array = array_factory.from_grouping(grouping, group_name, field_ind);
-      int mz = array.shape(0);
-      int my = array.shape(1);
-      int mx = array.shape(2);
- 
-      // set values for the left edges
-      array.subarray(CSlice(0,1), CSlice(0,my), CSlice(0,mx)) = floor_val;
-      array.subarray(CSlice(0,mz), CSlice(0,1), CSlice(0,mx)) = floor_val;
-      array.subarray(CSlice(0,mz), CSlice(0,my), CSlice(0,1)) = floor_val;
-
-      // set values for the right edges
-      array.subarray(CSlice(-1,mz), CSlice(0,my), CSlice(0,mx)) = floor_val;
-      array.subarray(CSlice(0,mz), CSlice(-1,my), CSlice(0,mx)) = floor_val;
-      array.subarray(CSlice(0,mz), CSlice(0,my), CSlice(-1,mx)) = floor_val;
-    }
-  }
 }
 
 //----------------------------------------------------------------------

@@ -6,8 +6,8 @@
    }
 
    Method {
-      list = ["vlct"];
-      vlct{
+      list = ["mhd_vlct"];
+      mhd_vlct{
          courant = 0.4;
   
         # default is hlle. Options are hlle/enzo_hlle, athena_hlle, and hlld

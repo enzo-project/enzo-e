@@ -595,7 +595,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_gravity_order,
        enzo_config->method_gravity_accumulate);
       
-  } else if (name == "vlct") {
+  } else if (name == "mhd_vlct") {
 
     method = new EnzoMethodMHDVlct
       (enzo_config->method_vlct_riemann_solver,

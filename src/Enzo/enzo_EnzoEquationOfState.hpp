@@ -3,7 +3,7 @@
 /// @file     enzo_EnzoEquationOfState.hpp
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 2 2019
-/// @brief    [\ref Enzo] Implementation of Enzo's Enzo Equation Of State
+/// @brief    [\ref Enzo] Implementation of Enzo's Equation Of State
 /// abstract base class. It will be subclassed to implement specific types of
 /// equations of state.
 

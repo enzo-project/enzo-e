@@ -67,52 +67,6 @@ inline enzo_float monotized_difference(enzo_float vm1, enzo_float v,
 
 //----------------------------------------------------------------------
 
-/// helper function that sets both left reconstructed value at the interface
-/// between first and second cells along dimension i, and right reconstructed
-/// value at the interface between the second-to-last and last cells along
-/// dimension i to zero (or floor). Other reconstruction methods (e.g. Nearest
-/// Neighbor) may actually be to reconstruct values at these locations.
-///
-/// @param wl,wr face-centered arrays along dimension dim. These arrays do not
-///  include faces on the exterior of the grid.
-/// @param prim_floor value to set the edges equal to
-/// @dim the dimension transverse normal to the edge (the dimension along which
-///  we reconstruct values
-void zero_edge_values_(EFlt3DArray &wl, EFlt3DArray &wr, enzo_float prim_floor,
-		       int dim)
-{
-  // Implementation would be simplified if we didn't have to specify the stop
-  // index of the slice 
-  
-  if (dim == 0){
-    // reconstructed along x-axis
-    wl.subarray(CSlice( 0,wl.shape(0)),
-		CSlice( 0,wl.shape(1)),
-		CSlice( 0,          1)) = prim_floor;
-    wr.subarray(CSlice( 0,wr.shape(0)),
-		CSlice( 0,wr.shape(1)),
-		CSlice(-1,wr.shape(2))) = prim_floor;
-  } else if (dim == 1){
-    // reconstructed along y-axis
-    wl.subarray(CSlice( 0,wl.shape(0)),
-		CSlice( 0,          1),
-		CSlice( 0,wl.shape(2))) = prim_floor;
-    wr.subarray(CSlice( 0,wr.shape(0)),
-		CSlice(-1,wr.shape(1)),
-		CSlice( 0,wr.shape(2))) = prim_floor;
-  } else {
-    // reconstructed along y-axis
-    wl.subarray(CSlice( 0,          1),
-		CSlice( 0,wl.shape(1)),
-		CSlice( 0,wl.shape(2))) = prim_floor;
-    wr.subarray(CSlice(-1,wr.shape(0)),
-		CSlice( 0,wr.shape(1)),
-		CSlice( 0,wr.shape(2))) = prim_floor;
-  }
-}
-
-//----------------------------------------------------------------------
-
 void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 						  Grouping &prim_group,
 						  Grouping &priml_group,
@@ -172,22 +126,11 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       wl = array_factory.reconstructed_field(priml_group, group_name, field_ind,
 					     dim);
       wl_offset = coord.left_edge_offset(wl, 0, 0, 1);
-
-
-      // Now that we have introduced immediate_stale depth the following should
-      // not be necessary
-      // At the interfaces between the first and second cell (second-to-
-      // last and last cell), along a given axis, set the reconstructed
-      // left (right) interface value to prim_floor (or 0)
-      // (the use of wl instead of wl_offset is intentional)
-      zero_edge_values_(wl, wr, prim_floor, dim);
       
-      // Iteration Limits are compatible with a 2D and 3D grid
-      // Need to reconstruct and compute fluxes at k=j=0 and k=kmax-1, j=jmax-1
-      // so that we can perform constrained transport
-      // Iterate over: k = 0, 1, ..., kmax - 1 
-      //               j = 0, 1, ..., jmax - 1
-      //               i = 0, 1, ..., imax - 3
+      // At the interfaces between the first and second cell (second-to-
+      // last and last cell), along a given axis, no need to worry about
+      // initializing the left (right) interface value thanks to the adoption
+      // of immediate_staling_rate
 
       for (int iz=0; iz<wc_right.shape(0); iz++) {
 	for (int iy=0; iy<wc_right.shape(1); iy++) {
@@ -198,10 +141,6 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	    enzo_float dv = monotized_difference(wc_left(iz,iy,ix), val,
 						 wc_right(iz,iy,ix));
 	    enzo_float left_val, right_val;
-	    // It's worth mentioning that in the original Athena c code, rather
-	    // than placing floors on a few select quantites, they instead
-	    // checked that all the reconstructed quantities lied between the
-	    // left and right cell-centered quantities
 
 	    if (use_floor) {
 	      right_val = EnzoEquationOfState::apply_floor(val-dv,prim_floor);
@@ -211,7 +150,10 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
 	      left_val = val+dv;
 	    }
 
-	    // If using the Athena limiter, need to also use:
+	    // If using the Athena (c version) limiter, need to also use:
+	    // (require that all the reconstructed quantities lied between the
+	    // left and right cell-centered quantities - in this case, no need
+	    // to place floors)
 	    //right_val = std::max(std::min(val,wc_left(iz,iy,ix)),val-dv);
 	    //right_val = std::min(std::max(val,wc_left(iz,iy,ix)),right_val);
 	    //left_val = std::max(std::min(val,wc_right(iz,iy,ix)),val+dv);
@@ -225,7 +167,6 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       }
     }
   }
-
 
   // apply the floor to the internal energy (increment stale_depth by 1 since
   // this has an immediate stale depth of 1)

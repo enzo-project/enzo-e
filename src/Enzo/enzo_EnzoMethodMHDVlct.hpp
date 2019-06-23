@@ -128,7 +128,7 @@ public: // interface
   virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
-  { return "vlct"; }
+  { return "mhd_vlct"; }
 
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
@@ -374,29 +374,6 @@ protected: // methods
 			       Grouping &weight_group,
 			       Grouping &temp_primitive_group,
 			       Grouping &temp_bfieldi_group);
-
-  // helper function to initialize values of reconstructed primitives to floor
-  // that will never be initialized by reconstruction. This is necessary to
-  // avoid NaNs/inf because when EOS calculates reconstructed conserved
-  // quantites, EOS assumes that the reconstructed primitives are cell-centered
-  // (since they are not registered as face-centered) which means it will try
-  // to convert otherwise uninitialized values to conservatives.
-  //
-  // deprecated
-  void initialize_recon_prim_to_floor_(Block *block, Grouping &grouping,
-				       EnzoEquationOfState &eos,
-				       std::vector<std::string> &group_names);
- 
-  // Temporary conserved fields have arbitrary initial values and the
-  // calculation at the first half timestep only does not fill the outermost
-  // layer the temporary fields. This can lead to NaNs or inf (which don't
-  // propagate to the active zone, but can impact performance). This function
-  // is used to initialize the outer zone to the appropriate 0 or floor value.
-  //
-  // deprecated
-  void outer_ghost_to_floor_(Block *block, Grouping &grouping,
-			     EnzoEquationOfState &eos,
-			     std::vector<std::string> &group_names);
 
 protected: // attributes
 

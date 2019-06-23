@@ -195,18 +195,9 @@ public:
 
     // Compute the actual riemann fluxes
     for (int field = 0; field<n_keys; field++){
-      volatile enzo_float val = ((bp*flux_l[field] - bm*flux_r[field] +
-				  (cons_r[field] - cons_l[field])*bp*bm)
-				 / (bp - bm));
-      volatile enzo_float temp_bp, temp_bm;
-      temp_bp = bp;
-      temp_bm = bm;
-      flux_arrays[field](iz,iy,ix) =val;
-      if (!std::isfinite(val)){
-	CkPrintf("(iz,iy,ix) = (%d,%d,%d)\n",iz,iy,ix);
-      }
-      ASSERT("EnzoRiemann", "yielding a NaN flux", std::isfinite(val));
-      
+      flux_arrays[field](iz,iy,ix) = ((bp*flux_l[field] - bm*flux_r[field] +
+				       (cons_r[field] - cons_l[field])*bp*bm)
+				      / (bp - bm));
     }
   }
 };
