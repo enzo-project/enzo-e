@@ -138,7 +138,7 @@ public: // interface
       initial_cloud_density_cloud(0.0),
       initial_cloud_density_wind(0.0),
       initial_cloud_velocity_wind(0.0),
-      initial_cloud_pressure(0.0),
+      initial_cloud_etot_wind(0.0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
       // EnzoInitialCollapse
@@ -331,7 +331,7 @@ public: // attributes
   double                     initial_cloud_density_cloud;
   double                     initial_cloud_density_wind;
   double                     initial_cloud_velocity_wind;
-  double                     initial_cloud_pressure;
+  double                     initial_cloud_etot_wind;
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;

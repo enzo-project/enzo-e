@@ -23,7 +23,7 @@ public: // interface
 		   double cloud_radius, double cloud_center_x,
 		   double cloud_center_y, double cloud_center_z,
 		   double density_cloud, double density_wind,
-		   double pressure, double velocity_wind)
+		   double etot_wind, double velocity_wind)
     : Initial(cycle,time),
       subsample_n_(subsample_n),
       cloud_radius_(cloud_radius),
@@ -32,7 +32,7 @@ public: // interface
       cloud_center_z_(cloud_center_z),
       density_cloud_(density_cloud),
       density_wind_(density_wind),
-      pressure_(pressure),
+      etot_wind_(etot_wind),
       velocity_wind_(velocity_wind)
   {
     ASSERT("EnzoInitialCloud", "subsample_n must be >=0", subsample_n>=0);
@@ -42,8 +42,8 @@ public: // interface
            density_wind_>0);
     ASSERT("EnzoInitialCloud", "density_cloud must be positive",
            density_cloud_>0);
-    ASSERT("EnzoInitialCloud", "pressure must be positive",
-           pressure>0);
+    ASSERT("EnzoInitialCloud", "etot_wind must exceed wind kinetic energy",
+	   etot_wind>0.5*velocity_wind_*velocity_wind_);
   }
 
   /// CHARM++ PUP::able declaration
@@ -59,7 +59,7 @@ public: // interface
       cloud_center_z_(0.),
       density_cloud_(0.),
       density_wind_(0.),
-      pressure_(0.),
+      etot_wind_(0.),
       velocity_wind_(0.)
   { }
 
@@ -78,7 +78,7 @@ public: // interface
     p | cloud_center_z_;
     p | density_cloud_;
     p | density_wind_;
-    p | pressure_;
+    p | etot_wind_;
     p | velocity_wind_;
   }
 
@@ -105,9 +105,8 @@ private: // attributes
   double density_cloud_;
   double density_wind_;
 
-  /// This should eventually be replaced with total_energy_wind_ and
-  /// total_energy_cloud_ (specific energies)
-  double pressure_;
+  /// specific internal energy of the wind
+  double etot_wind_;
 
   /// velocity of the wind
   double velocity_wind_;

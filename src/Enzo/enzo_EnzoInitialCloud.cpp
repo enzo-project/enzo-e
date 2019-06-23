@@ -206,6 +206,34 @@ public:
 
 //----------------------------------------------------------------------
 
+// Helper function that checks the assumption that the bfield is constant in
+// the active_zone
+void check_uniform_bfield_(EFlt3DArray bfield,
+			   const std::string field_name,
+			   const int gx, const int gy, const int gz)
+{
+  EFlt3DArray temp = bfield.subarray(CSlice(gz,-gz), CSlice(gy,-gy),
+				     CSlice(gx,-gx));
+  const enzo_float val = temp(0,0,0);
+
+  for (int iz = 0; iz<temp.shape(0); iz++){
+    for (int iy = 0; iy<temp.shape(1); iy++){
+      for (int ix = 0; ix<temp.shape(2); ix++){
+
+	if (temp(iz,iy,ix) != val){
+	  ERROR1("EnzoInitialCloud",
+		 ("Currently %s must have a constant value throughout the "
+		  "entire active zone"),
+		 field_name.c_str());
+	}
+
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void EnzoInitialCloud::enforce_block
 (Block * block, const Hierarchy * hierarchy) throw()
 {
@@ -214,16 +242,69 @@ void EnzoInitialCloud::enforce_block
   EFlt3DArray velocity_x = array_factory.from_name("velocity_x");
   EFlt3DArray velocity_y = array_factory.from_name("velocity_y");
   EFlt3DArray velocity_z = array_factory.from_name("velocity_z");
-  EFlt3DArray pressure = array_factory.from_name("pressure");
+  EFlt3DArray total_energy = array_factory.from_name("total_energy");
 
+  // Currently assume pressure equilibrium and pre-initialized uniform B-field
   SphereRegion sph(block->data(), subsample_n_, cloud_center_x_,
 		   cloud_center_y_, cloud_center_z_, cloud_radius_);
+
+  // Handle magnetic fields
+  bool mhd; // Whether or not we use MHD
+  EFlt3DArray bfield_x, bfield_y, bfield_z; // Cell-centered bfields
+  enzo_float magnetic_edens_wind; // magnetic energy density of the wind
+
+  Field field = block->data()->field();
+  if (field.is_field("bfield_x")){
+    mhd = true;
+    // initialize bfields
+    bfield_x = array_factory.from_name("bfield_x");
+    bfield_y = array_factory.from_name("bfield_y");
+    bfield_z = array_factory.from_name("bfield_z");
+
+    // compute the specific magnetic energy of the wind in the lower left
+    // corner of the active zone
+    int gx,gy,gz;
+    field.ghost_depth(field.field_id("bfield_x"),&gx,&gy,&gz);
+
+    // Currently bfields are assumed to be constant throughout the active zone
+    // We check this assumption below:
+    check_uniform_bfield_(bfield_x, "bfield_x", gx, gy, gz);
+    check_uniform_bfield_(bfield_y, "bfield_y", gx, gy, gz);
+    check_uniform_bfield_(bfield_z, "bfield_z", gx, gy, gz);
+
+    // now compute specific magnetic energy of the wind
+    double frac_enclosed = sph.cell_fraction_enclosed(gz, gy, gx);
+    ASSERT("EnzoInitialCloud",
+	   ("The lower left corner of the active zone is assumed to lie "
+	    "outside the cloud."), frac_enclosed == 0);
+    magnetic_edens_wind = 0.5*(bfield_x(gz,gy,gx)*bfield_x(gz,gy,gx)+
+			       bfield_y(gz,gy,gx)*bfield_y(gz,gy,gx)+
+			       bfield_z(gz,gy,gx)*bfield_z(gz,gy,gx));
+  } else {
+    mhd = false;
+    // So that we don't get yelled at by the compiler, set the bfield variables
+    // to array [[[0]]] and use them to compute magnetic_wind of 0
+    bfield_x = EFlt3DArray(1,1,1);
+    bfield_y = EFlt3DArray(1,1,1);
+    bfield_z = EFlt3DArray(1,1,1);
+    
+    magnetic_edens_wind = 0.5*(bfield_x(0,0,0)*bfield_x(0,0,0)+
+			       bfield_y(0,0,0)*bfield_y(0,0,0)+
+			       bfield_z(0,0,0)*bfield_z(0,0,0));
+  }
+
+  double eint_density = ((etot_wind_ - 0.5*velocity_wind_*velocity_wind_)
+			 * density_wind_ - magnetic_edens_wind);
+
+  ASSERT("EnzoInitialCloud", "Internal Energy Density must be positive",
+	 eint_density > 0);
+
+
   for (int iz = 0; iz<density.shape(0); iz++){
     for (int iy = 0; iy<density.shape(1); iy++){
       for (int ix = 0; ix<density.shape(2); ix++){
 	velocity_y(iz,iy,ix) = 0.;
 	velocity_z(iz,iy,ix) = 0.;
-	pressure(iz,iy,ix) = pressure_;
 
 	// In the case of overlap, we use a volume weighted average density
 	// For other primitive quantities, like velocity_x (and eventually
@@ -244,21 +325,32 @@ void EnzoInitialCloud::enforce_block
 	// cloud_mass_weight = M_wind/M_cell
 	//   = (1-f) * rho_wind / rho_cell
 
-	double cloud_mass_weight, wind_mass_weight;
+	double wind_mass_weight;
 	double frac_enclosed = sph.cell_fraction_enclosed(iz, iy, ix);
 
 	double avg_density = (frac_enclosed * density_cloud_ +
 			      (1. - frac_enclosed) * density_wind_);
 	density(iz,iy,ix) = avg_density;
-	cloud_mass_weight = frac_enclosed * density_cloud_ / avg_density;
+	//cloud_mass_weight = frac_enclosed * density_cloud_ / avg_density;
 	wind_mass_weight = (1. - frac_enclosed) * density_wind_ / avg_density;
 
 	velocity_x(iz,iy,ix) = (wind_mass_weight * velocity_wind_);
 
-	// Once we start tracking specific total_energy:
-	// total_energy(iz,iy,ix) = (cloud_mass_weight * total_energy_cloud_ +
-	//                           wind_mass_weight * total_energy_wind_);
+	if (frac_enclosed == 0){
+	  total_energy(iz,iy,ix) = etot_wind_;
+	} else {
 
+	  double magnetic_edens = 0;
+	  if (mhd){
+	    magnetic_edens = 0.5*(bfield_x(iz,iy,ix)*bfield_x(iz,iy,ix)+
+				  bfield_y(iz,iy,ix)*bfield_y(iz,iy,ix)+
+				  bfield_z(iz,iy,ix)*bfield_z(iz,iy,ix));
+	  }
+
+	  total_energy(iz,iy,ix)
+	    = ((eint_density + magnetic_edens) / avg_density +
+	       0.5 * velocity_x(iz,iy,ix) * velocity_x(iz,iy,ix));
+	}
       }
     }
   }

@@ -140,7 +140,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cloud_center_z,
        enzo_config->initial_cloud_density_cloud,
        enzo_config->initial_cloud_density_wind,
-       enzo_config->initial_cloud_pressure,
+       enzo_config->initial_cloud_etot_wind,
        enzo_config->initial_cloud_velocity_wind);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse

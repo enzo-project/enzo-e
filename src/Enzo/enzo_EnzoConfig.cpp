@@ -52,7 +52,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_cloud_density_cloud(0.0),
   initial_cloud_density_wind(0.0),
   initial_cloud_velocity_wind(0.0),
-  initial_cloud_pressure(0.0),
+  initial_cloud_etot_wind(0.0),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -249,7 +249,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_cloud_density_cloud;
   p | initial_cloud_density_wind;
   p | initial_cloud_velocity_wind;
-  p | initial_cloud_pressure;
+  p | initial_cloud_etot_wind;
 
   p | initial_cosmology_temperature;
 
@@ -619,8 +619,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:cloud:wind_density",0.0);
   initial_cloud_velocity_wind = p->value_float
     ("Initial:cloud:wind_velocity",0.0);
-  initial_cloud_pressure      = p->value_float
-    ("Initial:cloud:pressure",0.0);
+  initial_cloud_etot_wind     = p->value_float
+    ("Initial:cloud:wind_total_energy",0.0);
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
@@ -739,15 +739,15 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:gravity:accumulate",true);
 
   method_vlct_riemann_solver = p->value_string
-    ("Method:vlct:riemann_solver","hlle");
+    ("Method:mhd_vlct:riemann_solver","hlld");
   method_vlct_half_dt_reconstruct_method = p->value_string
-    ("Method:vlct:half_dt_reconstruct_method","nn");
+    ("Method:mhd_vlct:half_dt_reconstruct_method","nn");
   method_vlct_full_dt_reconstruct_method = p->value_string
-    ("Method:vlct:full_dt_reconstruct_method","plm");
+    ("Method:mhd_vlct:full_dt_reconstruct_method","plm");
   method_vlct_density_floor = p->value_float
-    ("Method:vlct:density_floor", 0.0);
+    ("Method:mhd_vlct:density_floor", 0.0);
   method_vlct_pressure_floor = p->value_float
-    ("Method:vlct:pressure_floor", 0.0);
+    ("Method:mhd_vlct:pressure_floor", 0.0);
   
   //--------------------------------------------------
   // Physics
