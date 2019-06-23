@@ -23,6 +23,8 @@
 #include <type_traits> // std::is_arithmetic
 #include <string>      // std::string, std::to_string
 
+#include <cstdio> // For help with nicely printing values
+
 
 //----------------------------------------------------------------------
 /// @var      passive_group_names
@@ -54,9 +56,9 @@ enum class FieldCat{conserved, specific, other};
 ///   2. Mathematical classificiation (SCALAR or VECTOR)
 ///   3. classification of the quantity as conserved, specific or other
 ///   4. Advection classification - if T, then in some context, the quantity is
-///      directly used to solve for fluid advection (i.e. it is reconstructed or
-///      a Riemann Flux is computed for it) - otherwise it should be F
-///      (quantities that always act as source terms should not be included)
+///      directly used to solve for fluid advection (i.e. a Riemann Flux is
+///      computed for it) - otherwise it should be F (quantities that always
+///      act as source terms should not be included)
 ///
 /// The entries in this table determine the name of the field to represent the
 /// quantity:
@@ -170,7 +172,6 @@ public: // interface
   /// Destructor
   ~EnzoAdvectionFieldLUT()
   {  }
-
   
 public: // attributes
 
@@ -185,26 +186,19 @@ public: // attributes
 //----------------------------------------------------------------------
 /// utility function that prints the names of the members and the values of an
 /// instance of EnzoAdvectionFieldLUT.
-inline void print_lut(const EnzoAdvectionFieldLUT lut)
-{
+///
+/// This is provided to assist with debugging, especially gdb encounters
+/// problems with instances of EnzoAdvectionFieldLUT (presumably, because the
+/// members are specified with macros
+void print_lut(const EnzoAdvectionFieldLUT lut);
 
-  std::string out = std::string("{\n");
+//----------------------------------------------------------------------
+/// utility function for debugging that prints the entries in array that are
+/// labelled by an instance of EnzoAdvectionFieldLUT.
+void print_looked_up_vals(const EnzoAdvectionFieldLUT lut,
+			  const enzo_float* array);
 
-  // Define the lambda function to collect values and names
-  auto func = [&out](std::string field_name, int val)
-    {
-      std::string str_val = std::to_string(val);
-      out = (out + std::string("  ") + field_name + std::string(" = ") +
-	     str_val + std::string(";\n"));
-    };
-
-  // apply lambda function
-  unary_advec_struct_for_each_(lut, func);
-
-  out = out + std::string("}\n");
-  CkPrintf("%s", out.c_str());
-}
-
+//----------------------------------------------------------------------
 
 class EnzoCenteredFieldRegistry
 {

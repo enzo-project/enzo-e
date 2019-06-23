@@ -17,6 +17,51 @@
 
 //----------------------------------------------------------------------
 
+void print_lut(const EnzoAdvectionFieldLUT lut)
+{
+
+  std::string out = std::string("{\n");
+
+  // Define the lambda function to collect values and names
+  auto func = [&out](std::string field_name, int val)
+    {
+      std::string str_val = std::to_string(val);
+      out = (out + std::string("  ") + field_name + std::string(" = ") +
+	     str_val + std::string(";\n"));
+    };
+
+  // apply lambda function
+  unary_advec_struct_for_each_(lut, func);
+  CkPrintf("%s}\n", out.c_str());
+}
+
+//----------------------------------------------------------------------
+
+void print_looked_up_vals(const EnzoAdvectionFieldLUT lut,
+			  const enzo_float* array)
+{
+
+  std::string out = std::string("{\n");
+
+  // Define the lambda function to collect values and names
+  auto func = [&out, array](std::string field_name, int index)
+    {
+      std::string str_val = std::string("N/A");
+      if (index != -1){
+	char temp[25];
+	sprintf(temp, "%.15e", array[index]);
+	str_val = std::string(temp);
+      }
+      out = (out + std::string("  ") + field_name + std::string(" = ") +
+	     str_val + std::string(";\n"));
+    };
+
+  unary_advec_struct_for_each_(lut, func);
+  CkPrintf("%s}\n", out.c_str());
+}
+
+//----------------------------------------------------------------------
+
 // Helper function used to check if a vector of strings contains an item
 bool contains_item_(std::vector<std::string> names, std::string item)
 {
