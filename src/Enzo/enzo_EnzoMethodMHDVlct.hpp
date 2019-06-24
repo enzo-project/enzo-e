@@ -248,33 +248,6 @@ protected: // methods
 		     Grouping &flux_group, Grouping &weight_group,
 		     EnzoReconstructor &reconstructor, int stale_depth);
 
-  /// Compute the edge-centered electric fields using the current fluxes and
-  /// cell-centered integrable quantities .
-  ///
-  /// @param block holds data to be processed
-  /// @param cur_integrable_group holds fields containing the current values
-  ///     of the integrable quantities
-  /// @param xflux_group,yflux_group,zflux_group holds field names where the
-  ///     fluxes along the x, y, and z directions are stored. These should
-  ///     include fluxes computed for the magnetic fields
-  /// @param center_efield_name name of the fields where cell-centered
-  ///     components of the electric field can be temporarily stored.
-  /// @param efield_group holds field names where the computed edge-centered
-  ///     electric fields will be stored.
-  /// @param weight_group holds the temporary weight fields that track the
-  ///     upwind direction for each dimension.
-  /// @param ct instance of the EnzoConstrainedTransport class from which
-  ///     relevant methods get called.
-  /// @param stale_depth the stale depth at the time of this function call
-  ///
-  /// @note Maybe this should be a method of EnzoConstrainedTransport
-  void compute_efields_(Block *block, Grouping &initial_integrable_group,
-			Grouping &xflux_group, Grouping &yflux_group,
-			Grouping &zflux_group,
-			std::string center_efield_name, Grouping &efield_group,
-			Grouping &weight_group,	EnzoConstrainedTransport &ct,
-			int stale_depth);
-
   /// adds flux divergence to the initial integrable quantities and stores the
   /// results in out_integrable_group
   ///
@@ -288,7 +261,7 @@ protected: // methods
   /// @param out_integrable_group contains the fields where the updated
   ///     integrable quantities will be stored (This can be passed the same
   ///     object as initial_integrable_group)
-  /// @param dt The time time-step overwhich to apply the fluxes
+  /// @param dt The time time-step over which to apply the fluxes
   /// @param stale_depth The stale depth at the time of the function call
   ///     (after the function call, the stale_depth will need to be
   ///     incremented)

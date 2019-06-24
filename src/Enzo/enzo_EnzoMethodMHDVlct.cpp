@@ -373,12 +373,14 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       // Compute the edge-centered Electric fields (each time, it uses the
       // current integrable quantities
-      compute_efields_(block, *cur_integrable_group,
-		       xflux_group, yflux_group, zflux_group,
-		       center_efield_name, efield_group,
-		       weight_group, ct, stale_depth);
+      ct.compute_all_edge_efields(block, *cur_integrable_group,
+				  xflux_group, yflux_group, zflux_group,
+				  center_efield_name, efield_group,
+				  weight_group, stale_depth);
 
-      // Add source terms? - this can happen after adding the flux divergence
+      // Add source terms? - this could nominally happen after adding the flux
+      // divergence, but in reality it may make more sense to consolidate
+      // source terms and flux divergence here
 
       // but then the code placing a floor on the total energy must be moved.
       // Update longitudinal B-field (add source terms of constrained transport)
@@ -394,8 +396,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
       }
 
       // Update quantities - add flux divergence
-      // (this needs to happen updating the cell-centered B-field so that the
-      //  floor on the energy can be checked)
+      // (this needs to happen after updating the cell-centered B-field so that
+      //  the pressure floor can be applied to the total energy)
       update_quantities_(block, *primitive_group_,
 			 xflux_group, yflux_group, zflux_group,
 			 *out_integrable_group, cur_dt, stale_depth);
@@ -554,45 +556,6 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
     }
   }
 
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodMHDVlct::compute_efields_(Block *block,
-					 Grouping &cur_integrable_group,
-					 Grouping &xflux_group,
-					 Grouping &yflux_group,
-					 Grouping &zflux_group,
-					 std::string center_efield_name,
-					 Grouping &efield_group,
-					 Grouping &weight_group,
-					 EnzoConstrainedTransport &ct,
-					 int stale_depth)
-{
-  EnzoBlock * enzo_block = enzo::block(block);
-  Field field = enzo_block->data()->field();
-
-  // Maybe the following should be handled internally by ct?
-  for (int i = 0; i < 3; i++){
-    ct.compute_center_efield (block, i, center_efield_name,
-			      cur_integrable_group, stale_depth);
-    Grouping *jflux_group;
-    Grouping *kflux_group;
-    if (i == 0){
-      jflux_group = &yflux_group;
-      kflux_group = &zflux_group;
-    } else if (i==1){
-      jflux_group = &zflux_group;
-      kflux_group = &xflux_group;
-    } else {
-      jflux_group = &xflux_group;
-      kflux_group = &yflux_group;
-    }
-
-    ct.compute_edge_efield (block, i, center_efield_name, efield_group,
-			    *jflux_group, *kflux_group, cur_integrable_group,
-			    weight_group, stale_depth);
-  }
 }
 
 //----------------------------------------------------------------------

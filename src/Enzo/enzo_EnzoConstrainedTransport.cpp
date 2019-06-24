@@ -230,8 +230,8 @@ void inplace_entry_multiply_(EFlt3DArray &array, enzo_float val){
 //     direction, or 0 to indicate no upwind direction.
 void EnzoConstrainedTransport::compute_edge_efield
 (Block *block, int dim, std::string center_efield_name, Grouping &efield_group,
- Grouping &jflux_group, Grouping &kflux_group, Grouping &prim_group,
- Grouping &weight_group,int stale_depth)
+ Grouping &jflux_group, Grouping &kflux_group, Grouping &weight_group,
+ int stale_depth)
 {
 
   EnzoPermutedCoordinates coord(dim);
@@ -301,6 +301,35 @@ void EnzoConstrainedTransport::compute_edge_efield
 		Eedge, Wj, Wj_kp1, Wk, Wk_jp1, Ec, Ec_jkp1, Ec_jp1, Ec_kp1,
 		Ej, Ej_kp1, Ek, Ek_jp1);
 };
+
+//----------------------------------------------------------------------
+
+void EnzoConstrainedTransport::compute_all_edge_efields
+  (Block *block, Grouping &prim_group, Grouping &xflux_group,
+   Grouping &yflux_group, Grouping &zflux_group, std::string center_efield_name,
+   Grouping &efield_group, Grouping &weight_group, int stale_depth)
+{
+
+  for (int i = 0; i < 3; i++){
+    compute_center_efield(block, i, center_efield_name, prim_group,
+			  stale_depth);
+    Grouping *jflux_group;
+    Grouping *kflux_group;
+    if (i == 0){
+      jflux_group = &yflux_group;
+      kflux_group = &zflux_group;
+    } else if (i==1){
+      jflux_group = &zflux_group;
+      kflux_group = &xflux_group;
+    } else {
+      jflux_group = &xflux_group;
+      kflux_group = &yflux_group;
+    }
+
+    compute_edge_efield(block, i, center_efield_name, efield_group,
+			*jflux_group, *kflux_group, weight_group, stale_depth);
+  }
+}
 
 //----------------------------------------------------------------------
 
@@ -411,7 +440,7 @@ void EnzoConstrainedTransport::update_bfield(Block *block, int dim,
 //   Bi_left(k,j,i)    ->  B_i(k,j,i+1/2)
 //   Bi_right(k,j,i)   ->  B_i(k,j,i+3/2)
 void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
-						     Grouping &cons_group,
+						     Grouping &bfieldc_group,
 						     Grouping &bfieldi_group,
 						     int stale_depth)
 {
@@ -419,7 +448,7 @@ void EnzoConstrainedTransport::compute_center_bfield(Block *block, int dim,
   EnzoFieldArrayFactory array_factory(block,stale_depth);
 
   // Load cell-centerd field
-  EFlt3DArray b_center = array_factory.from_grouping(cons_group, "bfield",
+  EFlt3DArray b_center = array_factory.from_grouping(bfieldc_group, "bfield",
 						     coord.i_axis());
   // Load Face-centered fields
   EFlt3DArray bi_left = array_factory.from_grouping(bfieldi_group, "bfield",

@@ -4,57 +4,13 @@
 /// @author   Matthew Abruzzo (matthewabruzzo@gmail.com)
 /// @date     Thurs May 16 2019
 /// @brief    [\ref Enzo] Implementation of the RiemannImpl which is a class
-/// template that can be specialized to implement various riemann solvers.
+/// template that can be specialized to implement various Riemann solvers.
 
 #ifndef ENZO_ENZO_RIEMANN_IMPL_HPP
 #define ENZO_ENZO_RIEMANN_IMPL_HPP
 
 #include <pup_stl.h>
 #include <cstdint> // used to check that static methods are defined
-
-// EnzoRiemannImpl class factors out the repeated code between different
-// approximate Riemann Solvers (e.g. HLLE, HLLC, HLLD and possibly LLF & Roe
-// solvers). To facilitate this, EnzoRiemannImpl is a class template.
-//
-// To implement a specific solver one needs to define an ImplStruct, a struct
-// that must have have the following 2 static methods:
-//
-//  static void calc_riemann_fluxes
-//   (const enzo_float flux_l[], const enzo_float flux_r[],
-//    const enzo_float prim_l[], const enzo_float prim_r[],
-//    const enzo_float cons_l[], const enzo_float cons_r[],
-//    const enzo_float pressure_l, const enzo_float pressure_r,
-//    const EnzoAdvectionFieldLUT lut, const int n_keys,
-//    const bool barotropic_eos, const enzo_float gamma,
-//    const enzo_float isothermal_cs,
-//    const int iz, const int iy, const int ix,
-//    EFlt3DArray flux_arrays[], enzo_float scratch_space[]);
-//
-//   This function computes the Riemann Flux at a given cell interface. flux_l,
-//   flux_r, prim_l, prim_r, cons_l, cons_r, indicate the values the left and
-//   right interface values for fluxes, conserved quantities, and primitives.
-//   prim_lut and cons_lut map quantity names to indices in these arrays. n_keys
-//   indicates the number of conserved quantities. The resulting Riemann flux
-//   for conserved quantity at index j get's stored at flux_arrays[j](iz,iy,ix)
-//   Finally, scratch_space serves as a place to temporarily save quantites
-//   during the calculation. If barotropic_eos is True, then
-//   isothermal_cs is expected to be non-zero, while if it's False, then gamma
-//   is expected to be positive.
-//
-//  static int scratch_space_length(const int n_cons_keys);
-//
-//  This function determines the size of scratch space required given the
-//  number of conserved quantities.
-//
-// To define a new RiemannSolver:
-// 1. Define a new ImplStruct (e.g. HLLDImpl).
-// 2. It might be useful to define an alias name for the specialization of
-//    EnzoRiemannImpl that uses the new ImplStruct
-//    (e.g. "using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;").
-// 3. Then add the particlular specialization to enzo.CI (e.g. add the line
-//    "PUPable EnzoRiemannImpl<HLLDImpl>;")
-// 4. Finally, update EnzoRiemann::construct_riemann to construct the Riemann
-//    Solver under the appropriate conditions
 
 
 class EnzoFluxFunctor : public PUP::able
@@ -95,107 +51,80 @@ public:
 			  const EnzoAdvectionFieldLUT lut)=0;
 };
 
-// This should all get moved to separate documentation page on website
-//
-// Below is a brief summary of EnzoRiemannImpl and a brief description of how
-// EnzoAdvectionFieldLUT struct, derived from the FIELD_TABLE XMacro, is used
-//   - The Riemann Solver makes use of two sets of arrays.
-//
-//       1. The first set is made up of arrays of instances of EFlt3DArray.
-//          Within a given array, each instance of EFlt3DArray encapsulates the
-//          data for a different field. The solver uses:
-//            A. arrays of left/right reconstructed integrable primitive fields
-//            B. arrays of fields where the calculated Riemann Flux is stored
-//
-//       2. The second set is made up of arrays of enzo_float. These arrays
-//          serve as temporary storage buffers which store quantities for a
-//          single cell interface. The solver uses
-//            A. arrays of left/right reconstructed integrable primitives
-//            B. arrars of left/right fluxes
-//            C. arrays of left/right reconstructed conserved quantities
-//               (these are computed from the integrable primitives, which may
-//                conserved, specific, or other)
-//
-//     The left and right pressures are also used. These are passed in
-//     separately and computed ahead of time with the equations of state
-//
-//     Each of the above arrays only include quantities that are required for
-//     the calculations of wave speeds or have non-trivial flux calculations.
-//     Passively advected scalars are not included in these arrays (their flux
-//     is computed separately).
-//
-//   - The general flow of the EnzoRiemannImpl::solve is:
-//
-//       a For a given cell-interface on a grid, the reconstructed integrator
-//         primitives are copied from arrays 1A into the temporary array 2A.
-//
-//       b The conserved quantities in array 2C are calculated/copied from the
-//         quantities in array 2A. (Integrable primitives are classified as
-//         conserved, specific, and other. For now, we just copy the quantities
-//         in other over to the array of quantities in conserved)
-//
-//       c The standard MHD fluxes are computed at that location and saved into
-//         the arrays left/right fluxes.
-//
-//       d Optional functions are also applied to compute additional left/right
-//         fluxes. Pointers to these functions are specified upon construction
-//         of the solver and are used for non-standard fluxes (e.g. cosmic ray
-//         energy/fluxes)
-//
-//       e This step is implemented in static functions of the ImplStruct
-//         template argument. The wavespeeds at the current interface is
-//         are computed, and the total riemann fluxes are computed at the
-//         interface. The calculation of the total fluxes are achieved by
-//         iterating over the conserved and flux quantities
-//
-//   - Use of the following EnzoAdvectionFieldLUT struct:
-//
-//       - The calculation of fluxes and wave speeds requires random access of
-//         specific fields. We also need to be able to iterate over the entries
-//         of multiple arrays simultaneously (e.g. to accomplish part e, above)
-//         Unlike Enzo, we wanted to avoid statically declaring which indices
-//         correspond to which fields (adding additional sets of fields, like
-//         internal energy and cosmic ray energy/fluxes becomes harder)
-//
-//       - We settled on using the field_lut struct as a lookup table. The
-//         struct has members named for every quantity listed in FIELD_TABLE
-//           - For a SCALAR, the member name directly matches the name in
-//             column 1
-//           - For a VECTOR, there are 3 members: {name}_i, {name}_j, {name}_k
-//             ({name} corresponds to the name appearing in column 1)
-//         Each struct contains members named advection-related (related to
-//         reconstruction or riemann fluxes) quantities in the table.
-//
-//       - Example: If we have an array of reconstructed integrable primitives,
-//         wl, and an initialized instance of EnzoAdvectionFieldLUT, lut,
-//         then wl[prim_lut.density] and wl[prim_lut.total_energy]
-//         indicates the entries reserved for the density and (specific)
-//         total energy
-//
-//       - EnzoCenteredFieldRegistry::prepare_advection_lut is used to
-//         prepare the lookup table for pre-specified quantities and determines
-//         the length of an array large enough to hold fields representing all
-//         of the quantities. The function then initializes all members of the
-//         struct to be equal to quantities from 0 through 1 less than the
-//         length of an arrays and organizes them based on whether the quanitiy
-//         is conserved, specific, or other. The function also yields the
-//         indices required to just iterate over each category of field. All
-//         members of the struct that don't correspond to a specified quantity
-//         are set to -1
-//     
-//       - load_array_of_fields constructs an array of instances of EFlt3DArray
-//         that correspond to reconstructed integrable primitive fields OR flux
-//         fields. The ordering of the fields is determined by the supplied
-//         instance of EnzoAdvectionFieldLUT
+//----------------------------------------------------------------------
+
+/// @typedef calc_riemann_fluxes_signature
+/// @brief   This is the expected function signature that we expect an
+///          `ImplStruct` (a class used to implement a Riemann Solver by
+///          specializing `EnzoRiemannImpl`) to have for its static public
+///          function, `calc_riemann_fluxes`.
+///
+/// Within the declaration of an `ImplStruct` we expect the following function:
+/// @code
+///     static void calc_riemann_fluxes
+///       (const enzo_float flux_l[], const enzo_float flux_r[],
+///        const enzo_float prim_l[], const enzo_float prim_r[],
+///        const enzo_float cons_l[], const enzo_float cons_r[],
+///        const enzo_float pressure_l, const enzo_float pressure_r,
+///        const EnzoAdvectionFieldLUT lut, const int n_keys,
+///        const bool barotropic_eos, const enzo_float gamma,
+///        const enzo_float isothermal_cs,
+///        const int iz, const int iy, const int ix,
+///        EFlt3DArray flux_arrays[], enzo_float scratch_space[]);
+/// @endcode
+/// This function should computes the Riemann Flux at a given cell interface.
+/// `flux_l`, `flux_r`, `prim_l`, `prim_r`, `cons_l`, and `cons_r` store the
+/// left and right interface values for fluxes, primitive quantities, and
+/// conserved quantities. We note that a given primitive quantities can be
+/// either specific or conserved while a conserved quantity is guaranteed to be
+/// in conserved form. The left and right reconstructed pressure values are
+/// passed as `pressure_l` and `pressure_r`. The value passed to `lut` maps
+/// quantity names to indices in each of the aforementioned arrays and `n_keys`
+/// indicates the number of elements held in each arrays. The calculated
+/// Riemann flux for a quantity stored at index `j` of the above arrays should
+/// be stored at `flux_arrays[j](iz,iy,ix)`. `scratch_space` serves as a place
+/// to temporarily save quantites during the calculation (the size which should
+/// be specified by the `ImplStruct`'s `scratch_space_length` static function).
+/// `barotropic_eos` indicates whether the fluid equation of state is
+/// barotropic. If `true`, then `isothermal_cs` is expected to be non-zero and
+/// if `false`, then `gamma` is expected to be positive.
+typedef void (*calc_riemann_fluxes_signature)
+  (const enzo_float[], const enzo_float[], const enzo_float[],
+   const enzo_float[], const enzo_float[], const enzo_float[],
+   const enzo_float,   const enzo_float, const EnzoAdvectionFieldLUT,
+   const int, const bool, const enzo_float, const enzo_float,
+   const int, const int, const int, EFlt3DArray[], enzo_float[]);
+
+//----------------------------------------------------------------------
+
+/// @typedef scratch_space_length_signature
+/// @brief   This is the expected function signature that we expect an
+///          `ImplStruct` (a class used to implement a Riemann Solver by
+///          specializing `EnzoRiemannImpl`) to have for its static public
+///          function, `scratch_space_length`.
+///
+/// Within the declaration of an `ImplStruct` we expect the following function:
+/// @code
+///     static int scratch_space_length(const int n_keys);
+/// @endcode
+/// Given `n_keys`, the number of actively advected quantities for which the
+/// Riemann Flux must be computed for, this function returns the length of the
+/// `scratch_space` array that is expected to be passed to `ImplStruct`'s
+/// `calc_riemann_fluxes` static public method.
+typedef int (*scratch_space_length_signature)(const int);
 
 
 //----------------------------------------------------------------------
+
 /// @def      DEFINE_HAS_SIGNATURE
-/// @brief    Macro that is used to define a struct (whose name is passed as
-///           the traitsName) that is used to check if a given class definition
-///           has a static function with a specified name (passed as the
-///           func_name argument of this macro) and function signature (passed
-///           as the signature arguement)
+/// @brief    Macro that is used to define a struct that is used to check if a
+///           given class definition has a public static function with a
+///           specified name and function signature
+///
+/// @param traitsName The name of the struct that will be defined
+/// @param func_name  Name of the static function to check for
+/// @param signature  The signature that the function should have (this can be
+///     a function pointer)as the
 ///
 /// This macro comes from https://stackoverflow.com/a/23133787 and is used
 /// create structs to help check if the template argument of EnzoRiemannImpl
@@ -214,17 +143,15 @@ public:
     constexpr bool value = sizeof(check<U>(0)) == sizeof(std::uint8_t);	    \
   }
 
+
+// Define the has_calc_riemann_fluxes and has_scratch_space_length to help
+// check that classes used to implement riemann solvers by specializing
+// EnzoRiemannImpl has the appropriate signatures. We explicitly check this to
+// provide more useful debugging messages.
 DEFINE_HAS_SIGNATURE(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
-		     void (*)(const enzo_float[], const enzo_float[],
-			      const enzo_float[], const enzo_float[],
-			      const enzo_float[], const enzo_float[],
-			      const enzo_float, const enzo_float,
-			      const EnzoAdvectionFieldLUT, const int,
-			      const bool, const enzo_float, const enzo_float,
-			      const int, const int, const int,
-			      EFlt3DArray[], enzo_float[]));
+		     calc_riemann_fluxes_signature);
 DEFINE_HAS_SIGNATURE(has_scratch_space_length, T::scratch_space_length,
-		     int (*)(const int));
+		     scratch_space_length_signature);
 
 template <class ImplStruct>
 class EnzoRiemannImpl : public EnzoRiemann
@@ -234,7 +161,31 @@ class EnzoRiemannImpl : public EnzoRiemann
   /// @brief    [\ref Enzo] Provides implementation of approximate Riemann
   ///           Solvers
   ///
-  /// @tparam ImplStruct The struct used to specialize EnzoRiemannImpl
+  /// @tparam ImplStruct The struct used to specialize EnzoRiemannImpl. This
+  ///     struct must have static public methods called `calc_riemann_fluxes`
+  ///     and `scratch_space_length`. See the documentation for
+  ///     `calc_riemann_fluxes_signature` and `scratch_space_length_signature`
+  ///     for details about the expected signature and role of each function
+  ///
+  /// EnzoRiemannImpl factors out the repeated code between different
+  /// approximate Riemann Solvers (e.g. HLLE, HLLC, HLLD and possibly LLF &
+  /// Roe solvers).
+  ///
+  /// To define a new RiemannSolver using `EnzoRiemann`:
+  ///   1. Define a new `ImplStruct` (e.g. `HLLDImpl`).
+  ///   2. It might be useful to define an alias name for the specialization of
+  ///      `EnzoRiemannImpl` that uses the new `ImplStruct`
+  ///      (e.g. `using EnzoRiemannHLLD = EnzoRiemannImpl<HLLDImpl>;`).
+  ///   3. Then add the particlular specialization to enzo.CI (e.g. add the
+  ///      line: `PUPable EnzoRiemannImpl<HLLDImpl>;`)
+  ///   4. Update `EnzoRiemann::construct_riemann` to construct the Riemann
+  ///      Solver when the correct name is specified.
+  ///   5. Update the documentation with the name of the newly available
+  ///      RiemannSolver
+  ///
+  /// @note We could simplify the description of `ImplStruct` by making them
+  ///     all functors and having them allocate their scratch space in their
+  ///     constructors.
 
 
   // The following assertions are first checked when the appropriate .def.h
@@ -462,16 +413,18 @@ void EnzoRiemannImpl<ImplStruct>::solve
 
   // prepare optional scratch space to be used by ImplStruct
   enzo_float *scratch_space = NULL;
+  // More efficient code might be generated if we were just to pass the maximum
+  // possible number of keys as the argument here. Then the size of scratch
+  // space could be determined at compile time (allowing scratch_space to be
+  // allocated off the stack)
   int scratch_space_length = ImplStruct::scratch_space_length(n_keys_);
   if (scratch_space_length>0){
     scratch_space = new enzo_float[scratch_space_length];
   }
-  
 
-  // For Nearest-Neighbor, we care about interfaces starting at i+1/2
-  // For PLM we only care about interfaces starting at i+3/2.
-  //    (left interface value at i+1/2 is set to 0)
-  // For consistency, always start at i+1/2
+
+  // For Nearest-Neighbor, we care about interfaces starting at i+1/2. Thanks
+  // to use of stale_depth, we can treat every case like this
 
   for (int iz=0; iz<flux_arrays[0].shape(0); iz++) {
     for (int iy=0; iy<flux_arrays[0].shape(1); iy++) {
