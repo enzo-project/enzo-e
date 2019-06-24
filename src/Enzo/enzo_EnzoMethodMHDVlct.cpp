@@ -71,6 +71,9 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
     (reconstructable_group_names_, passive_group_names_, full_recon_name);
   riemann_solver_ = EnzoRiemann::construct_riemann
     (integrable_group_names_,      passive_group_names_, rsolver);
+  integrable_updater_ = new EnzoIntegrableUpdate(integrable_group_names_,
+						 true, false,
+						 passive_group_names_);
 }
 
 //----------------------------------------------------------------------
@@ -252,6 +255,7 @@ void EnzoMethodMHDVlct::pup (PUP::er &p)
   p|half_dt_recon_;
   p|full_dt_recon_;
   p|riemann_solver_;
+  p|integrable_updater_;
 }
 
 //----------------------------------------------------------------------
@@ -262,10 +266,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // Check that the mesh size and ghost depths are appropriate
     check_mesh_and_ghost_size_(block);
     
-    // declaring Grouping that track temporary fields used for scratch space
-    // Groupings of conserved fields and primitive fields are tracked as members
-    // conserved_group_ and primitive_group_
-
+    // declaring Groupings that track temporary fields used for scratch space
     // left and right reconstructed primitives
     Grouping priml_group, primr_group;
 
@@ -299,6 +300,11 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 			  efield_group, center_efield_name, weight_group,
 			  temp_primitive_group, temp_bfieldi_group);
 
+    // conserved-form of passively advected scalars (the initial values are
+    // taken from here and converted to specific form. Intermediate and final
+    // values get written to here)
+    Grouping *conserved_passive_scalars = cello::field_descr()->groups();
+
     // allocate constrained transport object
     EnzoConstrainedTransport ct = EnzoConstrainedTransport();
 
@@ -307,6 +313,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // convert the passive scalars from conserved form to specific form
     // (outside the integrator, they are treated like conserved densities)
     compute_specific_passive_scalars_(block, passive_group_names_,
+				      *conserved_passive_scalars,
 				      *primitive_group_);
 
     // stale_depth indicates the number of field entries from the outermost
@@ -347,6 +354,13 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 	out_bfieldi_group = bfieldi_group_;
 	cur_bfieldi_group = &temp_bfieldi_group;
 	reconstructor = full_dt_recon_;
+
+	// After the fluxes were added to the passive scalar in the first half
+	// timestep, the values were stored in conserved form in the fields
+	// held by conserved_passive_scalars
+	compute_specific_passive_scalars_(block, passive_group_names_,
+					  *conserved_passive_scalars,
+					  *cur_integrable_group);
       }
 
       // Compute the reconstructable quantities from the integrable quantites
@@ -397,20 +411,22 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
       // Update quantities - add flux divergence
       // (this needs to happen after updating the cell-centered B-field so that
-      //  the pressure floor can be applied to the total energy)
-      update_quantities_(block, *primitive_group_,
-			 xflux_group, yflux_group, zflux_group,
-			 *out_integrable_group, cur_dt, stale_depth);
+      // the pressure floor can be applied to the total energy)
+      //
+      // Note: updated passive scalars are NOT saved in out_integrable_group in
+      //     specific form. Instead they are saved inconserved_passive_scalars
+      //     in conserved form.
+      integrable_updater_->update_quantities(block, *primitive_group_,
+					     xflux_group, yflux_group,
+					     zflux_group,
+					     *out_integrable_group,
+					     *conserved_passive_scalars,
+					     eos_, cur_dt, stale_depth);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
       stale_depth+=reconstructor->delayed_staling_rate();
     }
-
-    // convert the passive scalars from specific form back to conserved form
-    // (outside the integrator, they are treated like conserved densities)
-    compute_conserved_passive_scalars_(block, passive_group_names_,
-				       *primitive_group_, stale_depth);
 
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group,
@@ -559,7 +575,7 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 }
 
 //----------------------------------------------------------------------
-
+/*
 void EnzoMethodMHDVlct::update_quantities_(Block *block,
 					   Grouping &initial_integrable_group,
 					   Grouping &xflux_group,
@@ -683,6 +699,7 @@ void EnzoMethodMHDVlct::update_quantities_(Block *block,
   delete[] cur_prim_arrays;  delete[] out_prim_arrays;
   delete[] xflux_arrays;     delete[] yflux_arrays;     delete[] zflux_arrays;
 }
+*/
 
 //----------------------------------------------------------------------
 

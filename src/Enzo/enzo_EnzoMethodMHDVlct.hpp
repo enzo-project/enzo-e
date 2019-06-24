@@ -113,6 +113,7 @@ public: // interface
       half_dt_recon_(NULL),
       full_dt_recon_(NULL),
       riemann_solver_(NULL),
+      integrable_updater_(NULL),
       reconstructable_group_names_(),
       integrable_group_names_(),
       passive_group_names_()
@@ -133,9 +134,6 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) const throw();
 
-
-  static std::vector<std::string> cons_group_names;
-  static std::vector<std::string> prim_group_names;
 protected: // methods
 
   /// Determines the quantities from (FIELD_TABLE) to be reconstructed and
@@ -176,35 +174,20 @@ protected: // methods
   /// @param block holds data to be processed
   /// @param passive_groups A vector that holds the names of the groups of the
   ///     passive scalars that must be converted
+  /// @param conserved_passive_scalars A grouping which holds the group names
+  ///     found in passive_groups. The fields within each group hold the
+  ///     conserved form (density) of the passive scalars
   /// @param primitive_group A grouping which holds groups named after the
   ///     names in passive_groups. The groups holds the field name where the
-  ///     specific form of the passive scalars will be saved.
+  ///     specific form (mass fraction) of the passive scalars will be saved.
   ///
   /// @note The names of the fields that hold the conserved form of the passive
   /// scalars are stored in the grouping held by the instance of FieldDescr
   /// that can be instantiated with cello::field_descr()
   void compute_specific_passive_scalars_
   (Block *block, const std::vector<std::string> passive_groups,
+   const Grouping conserved_passive_scalars,
    const Grouping primitive_group)
-  { }
-
-  /// Converts specific passive scalars (which are used internally by the
-  /// integrator) to conserved form (basically just multiply by density)
-  ///
-  /// @param block holds data to be processed
-  /// @param passive_groups A vector that holds the names of the groups of the
-  ///     passive scalars that must be converted
-  /// @param primitive_group A grouping which holds groups named after the
-  ///     names in passive_groups. The groups holds the field name where the
-  ///     specific form of the passive scalars is stored.
-  /// @param stale_depth the stale depth at the time of this function call
-  ///
-  /// @note The names of the fields that will be used to hold the conserved
-  /// form of the passive scalars are stored in the grouping held by the
-  /// instance of FieldDescr that can be instantiated with cello::field_descr()
-  void compute_conserved_passive_scalars_
-  (Block *block, const std::vector<std::string> passive_groups,
-   const Grouping primitive_group, const int stale_depth)
   { }
 
   /// Computes the fluxes along a given dimension
@@ -247,32 +230,6 @@ protected: // methods
 		     std::string pressure_name_l,  std::string pressure_name_r,
 		     Grouping &flux_group, Grouping &weight_group,
 		     EnzoReconstructor &reconstructor, int stale_depth);
-
-  /// adds flux divergence to the initial integrable quantities and stores the
-  /// results in out_integrable_group
-  ///
-  /// @param block holds data to be processed
-  /// @param initial_integrable_group contains the fields holding the
-  ///     the integrable quantities from the start of the timestep. The fluxes
-  ///     will be added to fields held in this grouping. (This can be passed
-  ///     the object as out_integrable_group)
-  /// @param xflux_group,yflux_group,zflux_group contains the fields holding
-  ///     the fluxes computed along the x, y, and z directions, respectively.
-  /// @param out_integrable_group contains the fields where the updated
-  ///     integrable quantities will be stored (This can be passed the same
-  ///     object as initial_integrable_group)
-  /// @param dt The time time-step over which to apply the fluxes
-  /// @param stale_depth The stale depth at the time of the function call
-  ///     (after the function call, the stale_depth will need to be
-  ///     incremented)
-  ///
-  /// @note A separate class will be defined that is responsible for this
-  /// method
-  void update_quantities_(Block *block, Grouping &initial_integrable_group,
-			  Grouping &xflux_group, Grouping &yflux_group,
-			  Grouping &zflux_group,
-			  Grouping &out_integrable_group,
-			  double dt, int stale_depth);
 
   /// Allocate temporary fields needed for scratch space and store their names
   /// in the corresponding groupings or return the names. Also allocates all
@@ -376,6 +333,8 @@ protected: // attributes
   EnzoReconstructor *full_dt_recon_;
   /// Pointer to the Riemann solver
   EnzoRiemann *riemann_solver_;
+  /// Pointer to the integrable quantity updater
+  EnzoIntegrableUpdate *integrable_updater_;
 
   /// Names of the reconstructable primitive quantities
   std::vector<std::string> reconstructable_group_names_;

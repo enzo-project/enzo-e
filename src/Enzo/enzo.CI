@@ -88,6 +88,7 @@ module enzo {
   PUPable EnzoMethodMHDVlct;
 
   PUPable EnzoEOSIdeal;
+  PUPable EnzoIntegrableUpdate;
   PUPable EnzoReconstructorNN;
   PUPable EnzoReconstructorPLM;
   // EnzoRiemannHLLEAthenaMHD

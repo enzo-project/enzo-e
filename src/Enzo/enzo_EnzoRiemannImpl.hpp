@@ -239,7 +239,8 @@ protected : //methods
   /// Computes the fluxes for the passively advected quantites.
   void solve_passive_advection_(Block* block, Grouping &priml_group,
 				Grouping &primr_group, Grouping &flux_group,
-				EFlt3DArray &density_flux, int dim);
+				EFlt3DArray &density_flux, int dim,
+				int stale_depth);
 
   /// Computes the conserved counterpart for every integrable primitive.
   /// Integrable primitives are categorized as conserved, specific, and other
@@ -482,7 +483,7 @@ void EnzoRiemannImpl<ImplStruct>::solve
   }
 
   solve_passive_advection_(block, priml_group, primr_group, flux_group,
-			   flux_arrays[lut_.density], dim);
+			   flux_arrays[lut_.density], dim, stale_depth);
 
   delete[] wl; delete[] wr;
   delete[] Ul; delete[] Ur;
@@ -515,12 +516,12 @@ inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
 template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::solve_passive_advection_
 (Block* block, Grouping &priml_group, Grouping &primr_group,
- Grouping &flux_group, EFlt3DArray &density_flux, int dim)
+ Grouping &flux_group, EFlt3DArray &density_flux, int dim, int stale_depth)
 {
-  // This was basically transcribed from Enzo-E
+  // This was basically transcribed from Enzo
   std::vector<std::string> group_names = this->passive_groups_;
 
-  EnzoFieldArrayFactory array_factory(block);
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
   EnzoPermutedCoordinates coord(dim);
 
   // unecessary values are computed for the inside faces of outermost ghost zone
@@ -596,10 +597,13 @@ void EnzoRiemannImpl<ImplStruct>::compute_cons_(const enzo_float prim[],
     cons[i] = density * prim[i];
   }
 
-  // I don't think this should include anything
-  for (int i= other_start_; i<other_stop_; i++){
-    cons[i] = prim[i];
-  }
+  // As of now other_start_ should always be equal to other_stop_
+  //for (int i= other_start_; i<other_stop_; i++){
+  //  cons[i] = prim[i];
+  //}
+  ASSERT("EnzoRiemannImpl::compute_cons_",
+	 "As of now other_start_ should always be equal to other_stop_",
+	 other_start_ == other_stop_);
 
 }
 
