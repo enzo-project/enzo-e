@@ -164,6 +164,8 @@ This method can effectively function as a hydrodynamics method if
 the magnetic fields are all initialized to zero (if they start at
 zero, they will never be modified to non-zero values).
 
+Note that the courant factor should be less than 0.5.
+
 This method only support 3 dimensions.
 
 
@@ -256,10 +258,6 @@ fields
      - [rw]
      - Primary representation of z-component of bfield (lies on z-faces).
    * - ``"pressure"``
-     - ``enzo_float``
-     - [w]
-     - computed from ``total_energy``
-   * - ``"internal_energy"``
      - ``enzo_float``
      - [w]
      - computed from ``total_energy``

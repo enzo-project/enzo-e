@@ -11,6 +11,9 @@ simulation.  They can be declared in the parameter file using Cello's
 such as "implosion_2d" for the "Implosion test", or "sedov_array_3d" for
 a 3D array of Sedov blast waves.
 
+``"cloud"``
+   Initialize a spherical cloud embedded in a hot wind.
+
 ``"collapse"``
    Initialize a spherical collapse test.
 
@@ -23,6 +26,9 @@ a 3D array of Sedov blast waves.
 
 ``"implosion_2d"``
    Initialize an "implosion" test problem.
+
+``"inclined_wave``
+   Initialize an inclined wave test problem for the VL+CT MHD solver.
   
 ``"pm"``
    Initialize ``"dark"`` matter particles in either a regular uniform
@@ -52,6 +58,9 @@ a 3D array of Sedov blast waves.
    Initialize a regular 3D array of Sedov blast problems.  Used for
    parallel-scaling studies with load balancing.
 
+``"shock_tube"``
+   Initialize an axis-aligned shocktube test problem for the VL+CT MHD solver.
+
 ``"soup"``
    
    Similar to the ``"sedov"`` problem, but with letters instead of spheres.
@@ -77,5 +86,8 @@ a 3D array of Sedov blast waves.
       For technical reasons, ``"value"`` does not work reliably for
       multi-node problems.
 
+``"vlct_bfield"``
 
-
+   Initialize the cell-centered magnetic fields for use by the VL + CT method
+   from the face-centered magnetic fields that are already initialized by a
+   separate initializer.
