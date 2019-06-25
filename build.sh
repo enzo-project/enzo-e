@@ -164,15 +164,15 @@ if [ $target == "test" ]; then
 
     rm -f              test/STOP
 
-   # count crashes
+   # count failures, incompletes, and passes
 
-   grep FAIL $dir/*unit       | grep "0/" | sort > $dir/fail.$configure
-   grep incomplete $dir/*unit | grep "0/" | sort > $dir/incomplete.$configure
-   grep pass $dir/*unit       | grep "0/" | sort > $dir/pass.$configure
+   grep "^ FAIL"       $dir/*unit > $dir/fail.$configure
+   grep "^ incomplete" $dir/*unit > $dir/incomplete.$configure
+   grep "^ pass"       $dir/*unit > $dir/pass.$configure
 
-   f=`wc -l $dir/fail.$configure`
-   i=`wc -l $dir/incomplete.$configure`
-   p=`wc -l $dir/pass.$configure`
+   f=`wc -l < $dir/fail.$configure`
+   i=`wc -l < $dir/incomplete.$configure`
+   p=`wc -l < $dir/pass.$configure`
 
    stop=`date +"%H:%M:%S"`
 
@@ -225,3 +225,50 @@ rm -f test/STATUS
 if [ ! -e $target ]; then
    exit 1
 fi
+
+# check for failures 
+if [ $target == "test" ]; then
+
+    file_attempted=test/runs_attempted.$configure
+    file_started=test/runs_started.$configure
+    file_completed=test/runs_completed.$configure
+
+    ls test/test_*.unit                   > $file_attempted
+    grep -l "BEGIN" test/test_*.unit      > $file_started
+    grep -l "END CELLO"  test/test_*.unit > $file_completed
+
+
+    count_attempted=`cat $file_attempted | wc -l `
+    count_started=`cat $file_started | wc -l`
+    count_completed=`cat $file_completed | wc -l`
+    
+    echo "Test run summary"
+    echo
+    echo "   Test runs attempted: $count_attempted"
+    echo "   Test runs started:   $count_started"
+    if [ $count_attempted -gt $count_started ]; then
+	echo "   --------------------"
+	sort $file_attempted $file_started | uniq -u | awk '{print "   *** failed in startup: "$1}'
+	echo "   --------------------"
+    fi
+    echo "   Test runs completed: $count_completed"
+    if [ $count_started -gt $count_completed ]; then
+	echo "   --------------------"
+        sort $file_started $file_completed | uniq -u | awk '{print "   *** incomplete output: "$1}'
+	echo "   --------------------"
+    fi
+    echo
+
+    if [ $f -gt 0 ]; then
+	echo "Exiting testing with failures:"
+	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+	cat $dir/fail.$configure
+	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+	exit_status=1
+    else
+	echo "Exiting testing with success"
+	exit_status=0
+    fi
+fi
+echo "Done."
+exit $exit_status
