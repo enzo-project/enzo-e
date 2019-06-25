@@ -207,7 +207,7 @@ def load_enzoe(fname, periodicity = (True, True, True)):
             shape = data_dict[name].shape
     for key in data_dict.keys():
         if key not in new_dict:
-            new_dict[key] = data_dict
+            new_dict[key] = data_dict[key]
             shape = data_dict[name].shape
     if "pressure" not in new_dict:
         # add pressure (assume gamma = 5./3.

@@ -29,14 +29,12 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   determine_quantities_(eos_, integrable_group_names_,
 			reconstructable_group_names_, passive_group_names_);
 
-  // setup the groupings now
-  setup_groupings_(integrable_group_names_, reconstructable_group_names_,
-		   passive_group_names_);
+  FieldDescr * field_descr = cello::field_descr();
 
   // "pressure" is only used to compute the timestep
-  FieldDescr * field_descr = cello::field_descr();
   ASSERT("EnzoMethodMHDVlct", "\"pressure\" must be a permanent field",
 	 field_descr->is_field("pressure"));
+
 
   // setup primitive_group_, and bfieldi_group_
   // (also checks that the integrable fields of primitive_group_ and all the
@@ -44,27 +42,23 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   setup_groupings_(integrable_group_names_, reconstructable_group_names_,
 		   passive_group_names_);
 
-  // Initialize the default Refresh object - eventually may want to adjust
-  // number of ghost zones based on reconstructor choice.
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-  			     enzo_sync_id_method_vlct);
-  //refresh(ir)->add_all_fields();
 
-  // Should probably only refesh what we need
-  // (using primitive_group_ and bfieldi_group_)
-  refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
-  refresh(ir)->add_field(field_descr->field_id("total_energy"));
-  refresh(ir)->add_field(field_descr->field_id("bfield_x"));
-  refresh(ir)->add_field(field_descr->field_id("bfield_y"));
-  refresh(ir)->add_field(field_descr->field_id("bfield_z"));
+  // Initialize the default Refresh object - May want to adjust
+  // number of ghost zones based on reconstructor choice.
+  const int ir = add_refresh(4, 0, neighbor_leaf, sync_barrier,
+  			     enzo_sync_id_method_vlct);
+  // Add cell-centered fields holding actively advected integrable quantities
+  add_group_fields_to_refresh_(ir, *primitive_group_, integrable_group_names_);
+  // Add cell-centered fields holding the conserved form of the passively
+  // advected quantities
+  add_group_fields_to_refresh_(ir, *(field_descr->groups()),
+			       passive_group_names_);
+
   refresh(ir)->add_field(field_descr->field_id("bfieldi_x"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_y"));
   refresh(ir)->add_field(field_descr->field_id("bfieldi_z"));
 
-  // Initialize the component objects
+  // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
     (reconstructable_group_names_, passive_group_names_, half_recon_name);
   full_dt_recon_ = EnzoReconstructor::construct_reconstructor
@@ -72,7 +66,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   riemann_solver_ = EnzoRiemann::construct_riemann
     (integrable_group_names_,      passive_group_names_, rsolver);
   integrable_updater_ = new EnzoIntegrableUpdate(integrable_group_names_,
-						 true, false,
+						 true, eos_->is_barotropic(),
 						 passive_group_names_);
 }
 
@@ -84,12 +78,14 @@ void EnzoMethodMHDVlct::determine_quantities_
  std::vector<std::string> &passive_groups)
 {
   if (enzo::config()->method_grackle_use_grackle){
-    // This is in no way ready to use Grackle. Other things need to be dealt
-    // with first
-
-    // Need to make sure that all the passively advected Grackle fields are set
-    // up. If the grackle method were to be called after this method, then some
-    // passive fields might get setup that should be tracked by this method
+    // This is not quite way ready to use Grackle.
+    //   - The errors raised by equation of state need to be removed (since
+    //     "gamma" field seems to have been removed from the codebase)
+    //   - Need to make sure that grackle is preinitialized OR part of the
+    //     GrackleMethodInit method need to be factored out to a static so we
+    //     can guarantee that the relevant passive fields are allocated (If
+    //     this isn't done then it's possible for the Grackle method to setup
+    //     initial fields that are not advected)
     ERROR("EnzoMethodMHDVlct::determine_quantities_",
 	  "Not presently equipped to handle grackle");
   }
@@ -99,10 +95,7 @@ void EnzoMethodMHDVlct::determine_quantities_
 	  "Not presently equipped to handle dual energy formalism.");
   }
 
-  if (eos->is_barotropic()){
-    ERROR("EnzoMethodMHDVlct::determine_quantities_",
-	  "Not presently equipped to handle barotropic equations of state.");
-  }
+  
   
   std::string common[3] {"density", "velocity", "bfield"};
   for (int i = 0; i<3; i++){
@@ -110,30 +103,60 @@ void EnzoMethodMHDVlct::determine_quantities_
     reconstructable_quantities.push_back(common[i]);
   }
 
-  // add specific total energy to integrable quantities
-  integrable_quantities.push_back("total_energy");
-  // add specific internal energy to reconstructable quantities
-  reconstructable_quantities.push_back("internal_energy");
+  if (eos->is_barotropic()){
+    ERROR("EnzoMethodMHDVlct::determine_quantities_",
+	  "Not presently equipped to handle barotropic equations of state.");
+  } else {
+    // add specific total energy to integrable quantities
+    integrable_quantities.push_back("total_energy");
+    // add specific internal energy to reconstructable quantities
+    reconstructable_quantities.push_back("internal_energy");
+  }
 
-  // At a later date come back and deal with passive scalars
+  // Now to setup the list of passively advected group names
+
+  // retrieve list of all possible group names of passively advected scalars
+  EnzoCenteredFieldRegistry registry;
+  std::vector<std::string> all_passive_group_names;
+  all_passive_group_names = registry.passive_scalar_group_names();
+
+  // We'll now iterate through all known possible groups names that could
+  // contain passive scalars and check to see if any fields were labelled as
+  // being a part of these groups in the input file (if so, then add the group
+  // name to the list of passively advected group names)
+  Grouping* reference_grouping = cello::field_descr()->groups();
+  for (std::size_t i=0; i < all_passive_group_names.size(); i++){
+    std::string group_name = all_passive_group_names[i];
+
+    if (reference_grouping->size(group_name) > 0){
+      passive_groups.push_back(group_name);
+    }
+  }
 
 }
 
 //----------------------------------------------------------------------
 
-void add_passive_groups_(Grouping &grouping, const std::string field_prefix)
+void add_passive_groups_(Grouping &grouping, const std::string field_prefix,
+			 const std::vector<std::string> group_names)
 {
   // Helper function that adds entries of passively advected groups (specified
-  // in the configuration file) an existing Grouping
-  EnzoCenteredFieldRegistry registry;
-  std::vector<std::string> group_names = registry.passive_scalar_group_names();
-  Grouping* ref_grouping = cello::field_descr()->groups();
+  // in the configuration file) to an existing Grouping object
+
+  // This includes the groups specified in the parameter file
+  Grouping* reference_grouping = cello::field_descr()->groups();
+  
   for (unsigned int i=0;i<group_names.size();i++){
+
     std::string group_name = group_names[i];
-    int num_fields = ref_grouping->size(group_name);
-    for (int j=0;j<num_fields;j++){
+    int num_fields = reference_grouping->size(group_name);
+
+    for (int j=0; j < num_fields; j++){
       // Determine field_name
-      std::string field_name = field_prefix + ref_grouping->item(group_name,j);
+      std::string field_name = (field_prefix +
+				reference_grouping->item(group_name,j));
+
+      // add the field to the grouping
       grouping.add(field_name, group_name);
     }
   }
@@ -197,12 +220,11 @@ void EnzoMethodMHDVlct::setup_groupings_
     }
   }
 
-  // Add passive scalars to primitive_group_ (These are temporary specific
-  // versions of the permanent fields)
-  // This should be double checked
-  //add_passive_groups_(*primitive_group_, "prim_specific_");
-  ASSERT("EnzoMethodMHDVlct::setup_groupings_",
-	 "Not quite expecting passive scalars", passive_groups.size() == 0);
+  // Add temporary fields to primitive_group_ to hold specific forms (mass
+  // fraction) of passively advected scalars. These get are used to hold the
+  // values after they are converted from conserved form (density) which are
+  // tracked in permanent fields
+  add_passive_groups_(*primitive_group_, "specific_passive_", passive_groups);
 
   bfieldi_group_ = new Grouping;
   bfieldi_group_->add("bfieldi_x", "bfield");
@@ -215,6 +237,31 @@ void EnzoMethodMHDVlct::setup_groupings_
 	 (field_descr->is_field("bfieldi_x") &&
 	  field_descr->is_field("bfieldi_y") &&
 	  field_descr->is_field("bfieldi_z")));
+}
+
+//----------------------------------------------------------------------
+
+void EnzoMethodMHDVlct::add_group_fields_to_refresh_
+(const int ir, Grouping &grouping, std::vector<std::string> group_names)
+{
+  FieldDescr * field_descr = cello::field_descr();
+
+  for (unsigned int i=0;i<group_names.size();i++){
+
+    std::string group_name = group_names[i];
+    int num_fields = grouping.size(group_name);
+
+    for (int j=0; j < num_fields; j++){
+      // Determine field_name
+      std::string field_name = grouping.item(group_name,j);
+      ASSERT1("EnzoMethodMHDVlct::add_group_fields_to_refresh_",
+	      "%s must be a permanent field",field_name.c_str(),
+	      field_descr->is_permanent(field_name))
+
+      // add the field to the refresh object
+      refresh(ir)->add_field(field_descr->field_id(field_name));
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -310,16 +357,16 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     double dt = block->dt();
 
-    // convert the passive scalars from conserved form to specific form
-    // (outside the integrator, they are treated like conserved densities)
-    compute_specific_passive_scalars_(block, passive_group_names_,
-				      *conserved_passive_scalars,
-				      *primitive_group_);
-
     // stale_depth indicates the number of field entries from the outermost
     // field value that the region including "stale" values (need to be
     // refreshed) extends over.
     int stale_depth = 0;
+
+    // convert the passive scalars from conserved form to specific form
+    // (outside the integrator, they are treated like conserved densities)
+    compute_specific_passive_scalars_(block, passive_group_names_,
+				      *conserved_passive_scalars,
+				      *primitive_group_, stale_depth);
 
     // repeat the following loop twice (for half time-step and full time-step)
 
@@ -360,7 +407,7 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 	// held by conserved_passive_scalars
 	compute_specific_passive_scalars_(block, passive_group_names_,
 					  *conserved_passive_scalars,
-					  *cur_integrable_group);
+					  *cur_integrable_group, stale_depth);
       }
 
       // Compute the reconstructable quantities from the integrable quantites
@@ -465,6 +512,50 @@ void EnzoMethodMHDVlct::check_mesh_and_ghost_size_(Block *block)
 
 //----------------------------------------------------------------------
 
+void EnzoMethodMHDVlct::compute_specific_passive_scalars_
+  (Block *block, const std::vector<std::string> passive_groups,
+   Grouping &conserved_passive_scalars,
+   Grouping &primitive_group, int stale_depth)
+{
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
+
+  EFlt3DArray density = array_factory.from_grouping(primitive_group, "density",
+						    0);
+
+  std::vector<std::string> group_names = this->passive_group_names_;
+
+  for (std::size_t group_ind = 0; group_ind<group_names.size(); group_ind++){
+
+    // load group name and number of fields in the group
+    std::string group_name = group_names[group_ind];
+    int num_fields = conserved_passive_scalars.size(group_name);
+
+    ASSERT("EnzoMethodMHDVlct::compute_specific_passive_scalars_",
+	   "There shouldn't be any passive groups without any fields.",
+	   num_fields != 0);
+
+    // iterate over the fields in the group
+    for (int field_ind=0; field_ind<num_fields; field_ind++){
+      // load values
+      EFlt3DArray cur_conserved, out_specific;
+      cur_conserved = array_factory.from_grouping(conserved_passive_scalars,
+						  group_name, field_ind);
+      out_specific = array_factory.from_grouping(primitive_group, group_name,
+						 field_ind);
+
+      for (int iz=0; iz<density.shape(0); iz++) {
+	for (int iy=0; iy<density.shape(1); iy++) {
+	  for (int ix=0; ix<density.shape(2); ix++) {
+	    out_specific(iz,iy,ix) = cur_conserved(iz,iy,ix)/density(iz,iy,ix);
+	  }
+	}
+      }
+
+    }
+  }
+}
+
+//----------------------------------------------------------------------
 
 void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 				      Grouping &reconstructable_group,
@@ -575,133 +666,6 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
 }
 
 //----------------------------------------------------------------------
-/*
-void EnzoMethodMHDVlct::update_quantities_(Block *block,
-					   Grouping &initial_integrable_group,
-					   Grouping &xflux_group,
-					   Grouping &yflux_group,
-					   Grouping &zflux_group,
-					   Grouping &out_integrable_group,
-					   double dt, int stale_depth)
-{
-  // Going to factor this out into a separate object
-  std::vector<std::string> integrable_groups = {"density", "velocity",
-						"total_energy", "bfield"};
-  // Don't want to add fluxes to bfield since we use constrained transport
-  std::vector<std::string> flagged_groups = {"bfield"};
-
-  EnzoAdvectionFieldLUT lut;
-  int conserved_start, conserved_stop;
-  int specific_start, specific_stop;
-  int other_start, other_stop;
-  int nfields;
-
-  EnzoCenteredFieldRegistry registry;
-  lut = registry.prepare_advection_lut(integrable_groups,
-				       conserved_start, conserved_stop,
-				       specific_start, specific_stop,
-				       other_start, other_stop, nfields,
-				       flagged_groups);
-
-  ASSERT("EnzoMethodMHDVlct::update_quantities_",
-	 "not equipped to handle fields classified as other",
-	 other_start == other_stop);
-
-  EFlt3DArray *cur_prim_arrays, *out_prim_arrays;
-  cur_prim_arrays = registry.load_array_of_fields(block, lut, nfields,
-						  initial_integrable_group,
-						  stale_depth);
-  out_prim_arrays = registry.load_array_of_fields(block, lut, nfields,
-						  out_integrable_group,
-						  stale_depth);
-  
-  EFlt3DArray *xflux_arrays, *yflux_arrays, *zflux_arrays;
-  // Note: No need to identify x-flux, y-flux, z-flux as reconstructed
-  //       since the shape of the arrays are appropriately registerred
-  //       (Additionally, if we specified dim, then the velocities saved to
-  //        axes i, j, k would be different for each component)
-  xflux_arrays = registry.load_array_of_fields(block, lut, nfields,
-					       xflux_group, stale_depth);
-  yflux_arrays = registry.load_array_of_fields(block, lut, nfields,
-					       yflux_group, stale_depth);
-  zflux_arrays = registry.load_array_of_fields(block, lut, nfields,
-					       zflux_group, stale_depth);
-
-  enzo_float *cur_prim, *dU;
-  cur_prim = new enzo_float[nfields];
-  dU = new enzo_float[nfields];
-  
-  // For now, not having density floor affect momentum or total energy density
-  enzo_float density_floor = eos_->get_density_floor();
-
-  // cell-centered grid dimensions
-  int mz = cur_prim_arrays[lut.density].shape(0);
-  int my = cur_prim_arrays[lut.density].shape(1);
-  int mx = cur_prim_arrays[lut.density].shape(2);
-
-  // widths of cells
-  EnzoBlock * enzo_block = enzo::block(block);
-  enzo_float dtdx = dt/enzo_block->CellWidth[0];
-  enzo_float dtdy = dt/enzo_block->CellWidth[1];
-  enzo_float dtdz = dt/enzo_block->CellWidth[2];
-
-  for (int iz=1; iz<mz-1; iz++) {
-    for (int iy=1; iy<my-1; iy++) {
-      for (int ix=1; ix<mx-1; ix++) {
-
-	// load in the fields
-	for (int field_ind=0; field_ind<nfields; field_ind++){
-	  cur_prim[field_ind] = cur_prim_arrays[field_ind](iz,iy,ix);
-	  dU[field_ind] = (- dtdx * (xflux_arrays[field_ind](iz,iy,ix)
-				    - xflux_arrays[field_ind](iz,iy,ix-1))
-			   - dtdy * (yflux_arrays[field_ind](iz,iy,ix)
-				     - yflux_arrays[field_ind](iz,iy-1,ix))
-			   - dtdz * (zflux_arrays[field_ind](iz,iy,ix)
-				     - zflux_arrays[field_ind](iz-1,iy,ix)));
-	}
-
-	// get the initial density
-	enzo_float initial_density = cur_prim[lut.density];
-
-	// now update the integrable primitives that are conserved
-	for (int i = conserved_start; i < conserved_stop; i++){
-	  out_prim_arrays[i](iz,iy,ix) = cur_prim[i] + dU[i];
-	}
-
-	enzo_float new_density = out_prim_arrays[lut.density](iz,iy,ix);
-	// possibly place a floor on new_density.
-	new_density = EnzoEquationOfState::apply_floor(new_density,
-						       density_floor);
-	out_prim_arrays[lut.density](iz,iy,ix) = new_density;
-
-	// update the specific primitives
-	for (int i = specific_start; i < specific_stop; i++){
-	  out_prim_arrays[i](iz,iy,ix) = (cur_prim[i] * initial_density
-					  + dU[i]) /new_density;
-	}
-
-	// handle dual energy formalism ...
-
-	// We are assuming that there aren't any quantities in the other
-	// category (i.e. not classified as conserved/specific)
-
-      }
-    }
-  }
-
-  // apply floor to energy
-  eos_->apply_floor_to_total_energy(block, out_integrable_group, stale_depth+1);
-
-  // add fluxes to specific passive scalars (this could nominally be done in
-  // the main update loop (if we were
-
-  delete[] cur_prim;         delete[] dU;
-  delete[] cur_prim_arrays;  delete[] out_prim_arrays;
-  delete[] xflux_arrays;     delete[] yflux_arrays;     delete[] zflux_arrays;
-}
-*/
-
-//----------------------------------------------------------------------
 
 // Helper function to prepare temporary fields that are reused each cycle
 void prep_reused_temp_field_(Field &field, std::string field_name,
@@ -726,6 +690,21 @@ void prep_reused_temp_field_(Field &field, std::string field_name,
     field.allocate_temporary(id);
   }
 }
+//----------------------------------------------------------------------
+
+void allocate_temp_group_fields_(Field &field, Grouping &grouping,
+				 std::vector<std::string> &group_names,
+				 int cx, int cy, int cz)
+{
+  // allocate the temporary fields in grouping
+  for (std::size_t i = 0; i < group_names.size(); i++){
+    std::string group_name = group_names[i];
+    int num_fields = grouping.size(group_name);
+    for (int j = 0; j < num_fields; j++){
+      prep_reused_temp_field_(field, grouping.item(group_name,j), cx, cy, cz);
+    }
+  }
+}
 
 //----------------------------------------------------------------------
 
@@ -742,6 +721,8 @@ void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
 			       Grouping &grouping, std::string field_prefix,
 			       int cx, int cy, int cz)
 {
+  // we can totally come up with an iterator to factor out the following nested
+  // for loop (it appears a lot!)
   for (unsigned int i=0;i<group_names.size();i++){
     std::string group_name = group_names[i];
     int num_fields = ref_grouping.size(group_name);
@@ -839,54 +820,35 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
   
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
-  FieldDescr * field_descr = field.field_descr();
-
-  ASSERT("EnzoMethodMHDVlct::allocate_temp_fields_",
-	 "Need to allocate temporary fields to hold specific passive scalars.",
-	 passive_group_names_.size() == 0);
   
   // First, reserve/allocate temporary fields for any relevant reconstructable
-  // primitives that are not also integrable and have not yet been allocated
-  for (unsigned int i=0;i<reconstructable_group_names_.size();i++){
-    std::string group_name = reconstructable_group_names_[i];
-    int num_fields = primitive_group_->size(group_name);
+  // primitives that have not yet been allocated (i.e. they are not also
+  // integrable primitives)
+  allocate_temp_group_fields_(field, *primitive_group_,
+			      reconstructable_group_names_, 0, 0, 0);
+  // Next, reserve/allocate temporary fields to hold the specific form of all
+  // passively advected primitives
+  allocate_temp_group_fields_(field, *primitive_group_, passive_group_names_,
+			      0, 0, 0);
 
-    for (int j=0;j<num_fields;j++){
-      // Determine field_name
-      std::string field_name = primitive_group_->item(group_name,j);
-
-      if (field.is_field(field_name) &&
-	  field.is_permanent(field.field_id(field_name))){
-	continue;
-      }
-
-      ASSERT1("EnzoMethodMHDVlct::allocate_temp_fields_",
-	      "%s is integrable, it should be a permanent field.",
-	      field_name.c_str(),
-	      (std::find(integrable_group_names_.begin(),
-			 integrable_group_names_.end(), group_name) ==
-	       integrable_group_names_.end()));
-
-      // allocate temporary field
-      int ir_ = field_descr->insert_temporary(field_name);
-      field.allocate_temporary(ir_);
-    }
-  }
+  // Prepare temporary flux fields (it should include groups for all actively
+  // and passively advected quantities)
+  std::vector<std::string> combined_integrable_names;
+  combined_integrable_names = unique_combination_(integrable_group_names_,
+						  passive_group_names_);
+  prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
+			    xflux_group, "xflux_",-1,0,0);
+  prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
+			    yflux_group, "yflux_",0,-1,0);
+  prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
+			    zflux_group, "zflux_",0,0,-1);
 
   // Prepare the temporary primitive fields (used to store values at half dt)
   std::vector<std::string> prim_group_names;
-  prim_group_names = unique_combination_(integrable_group_names_,
+  prim_group_names = unique_combination_(combined_integrable_names,
 					 reconstructable_group_names_);
   prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
 			    temp_primitive_group, "temp_",0,0,0);
-
-  // Prepare temporary flux fields
-  prep_temp_field_grouping_(field, *primitive_group_, integrable_group_names_,
-			    xflux_group, "xflux_",-1,0,0);
-  prep_temp_field_grouping_(field, *primitive_group_, integrable_group_names_,
-			    yflux_group, "yflux_",0,-1,0);
-  prep_temp_field_grouping_(field, *primitive_group_, integrable_group_names_,
-			    zflux_group, "zflux_",0,0,-1);
 
   // Prepare temporary fields for priml and primr
   // As necessary, we pretend that these are centered along:
@@ -965,15 +927,12 @@ void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
 
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
-
-  ASSERT("EnzoMethodMHDVlct::deallocate_temp_fields_",
-	 ("Need to deallocate temporary fields holding specific passive "
-	  "scalars."),
-	 passive_group_names_.size() == 0);
   
   // Prepare the temporary primitive fields (used to store values at half dt)
-  std::vector<std::string> prim_group_names;
-  prim_group_names = unique_combination_(integrable_group_names_,
+  std::vector<std::string> combined_integrable_names, prim_group_names;
+  combined_integrable_names = unique_combination_(integrable_group_names_,
+						  passive_group_names_);
+  prim_group_names = unique_combination_(combined_integrable_names,
 					 reconstructable_group_names_);
 
   // deallocate cell-centered primitive groups
@@ -981,9 +940,11 @@ void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
   deallocate_grouping_fields_(field, prim_group_names, temp_primitive_group);
   deallocate_grouping_fields_(field, prim_group_names, priml_group);
   deallocate_grouping_fields_(field, prim_group_names, primr_group);
-  deallocate_grouping_fields_(field, integrable_group_names_, xflux_group);
-  deallocate_grouping_fields_(field, integrable_group_names_, yflux_group);
-  deallocate_grouping_fields_(field, integrable_group_names_, zflux_group);
+
+  // deallocate face-centered flux fields
+  deallocate_grouping_fields_(field, combined_integrable_names, xflux_group);
+  deallocate_grouping_fields_(field, combined_integrable_names, yflux_group);
+  deallocate_grouping_fields_(field, combined_integrable_names, zflux_group);
 
   // deallocate left/right pressure fields
   field.deallocate_temporary(field.field_id(pressure_name_l));
@@ -1052,8 +1013,6 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   // initialize
   enzo_float dtBaryons = ENZO_HUGE_VAL;
 
-  
-  
   // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+cfast) for all dimensions.
   // dr_i and v_i are the the width of the cell and velocity along dimension i.
   // cfast = fast magnetosonic speed (Convention is to use max value:
@@ -1082,7 +1041,8 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
       }
     }
   }
-  /* Multiply resulting dt by CourantSafetyNumber (for extra safety!). */
+  // Multiply resulting dt by CourantSafetyNumber (for extra safety!).
+  // This should be less than 0.5 for standard algorithm
   dtBaryons *= courant_;
 
   ASSERT2("EnzoMethodMHDVlct::timestep",

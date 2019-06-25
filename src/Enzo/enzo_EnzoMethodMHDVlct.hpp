@@ -162,6 +162,11 @@ protected: // methods
 			std::vector<std::string> &reconstructable_groups,
 			std::vector<std::string> &passive_groups);
 
+  /// Adds all of the fields in grouping (that belong to a group listed in
+  /// group names) to the refresh object
+  void add_group_fields_to_refresh_(const int ir, Grouping &grouping,
+				    std::vector<std::string> group_names);
+
   /// Checks that the mesh size is big enough given the ghost depth and checks
   /// the ghost depths given the reconstructors
   ///
@@ -180,15 +185,11 @@ protected: // methods
   /// @param primitive_group A grouping which holds groups named after the
   ///     names in passive_groups. The groups holds the field name where the
   ///     specific form (mass fraction) of the passive scalars will be saved.
-  ///
-  /// @note The names of the fields that hold the conserved form of the passive
-  /// scalars are stored in the grouping held by the instance of FieldDescr
-  /// that can be instantiated with cello::field_descr()
+  /// @param stale_depth indicates the current stale depth
   void compute_specific_passive_scalars_
   (Block *block, const std::vector<std::string> passive_groups,
-   const Grouping conserved_passive_scalars,
-   const Grouping primitive_group)
-  { }
+   Grouping &conserved_passive_scalars,
+   Grouping &primitive_group, int stale_depth);
 
   /// Computes the fluxes along a given dimension
   ///
@@ -338,7 +339,8 @@ protected: // attributes
 
   /// Names of the reconstructable primitive quantities
   std::vector<std::string> reconstructable_group_names_;
-  /// Names of the integrable primitive quantities
+  /// Names of the integrable primitive quantities (only includes the group
+  /// names for actively advected quantities)
   std::vector<std::string> integrable_group_names_;
   /// Names of the groups of passively advected scalars
   std::vector<std::string> passive_group_names_;

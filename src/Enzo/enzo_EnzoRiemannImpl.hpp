@@ -546,10 +546,12 @@ void EnzoRiemannImpl<ImplStruct>::solve_passive_advection_
     EFlt3DArray *flux_arrays = new EFlt3DArray[num_fields];
 
     for (int field_ind=0; field_ind<num_fields; field_ind++){
-      wl_arrays[field_ind] = array_factory.from_grouping(priml_group,group_name,
-							 field_ind);
-      wr_arrays[field_ind] = array_factory.from_grouping(primr_group,group_name,
-							 field_ind);
+      wl_arrays[field_ind] = array_factory.reconstructed_field(priml_group,
+							       group_name,
+							       field_ind, dim);
+      wr_arrays[field_ind] = array_factory.reconstructed_field(primr_group,
+							       group_name,
+							       field_ind, dim);
       flux_arrays[field_ind] = array_factory.from_grouping(flux_group,
 							   group_name,
 							   field_ind);
