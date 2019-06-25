@@ -248,6 +248,17 @@ void EnzoInitialCloud::enforce_block
   SphereRegion sph(block->data(), subsample_n_, cloud_center_x_,
 		   cloud_center_y_, cloud_center_z_, cloud_radius_);
 
+  // Passively advected scalar "cloud_dye" denotes the material originally
+  // located in the cloud
+  FieldDescr * field_descr = cello::field_descr();
+  const bool use_cloud_dye
+    = (field_descr->is_field("cloud_dye") &&
+       field_descr->groups()->is_in("cloud_dye", "colour"));
+  EFlt3DArray cloud_dye_density;
+  if (use_cloud_dye){
+    cloud_dye_density = array_factory.from_name("cloud_dye");
+  }
+  
   // Handle magnetic fields
   bool mhd; // Whether or not we use MHD
   EFlt3DArray bfield_x, bfield_y, bfield_z; // Cell-centered bfields
@@ -331,6 +342,10 @@ void EnzoInitialCloud::enforce_block
 	double avg_density = (frac_enclosed * density_cloud_ +
 			      (1. - frac_enclosed) * density_wind_);
 	density(iz,iy,ix) = avg_density;
+	if (use_cloud_dye){
+	  cloud_dye_density(iz,iy,ix) = frac_enclosed * density_cloud_;
+	}
+
 	//cloud_mass_weight = frac_enclosed * density_cloud_ / avg_density;
 	wind_mass_weight = (1. - frac_enclosed) * density_wind_ / avg_density;
 
