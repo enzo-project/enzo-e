@@ -149,11 +149,6 @@ Public Interface
 ----------------
 The main interface function provided by this class is:
 
-reconstruct_interface (Block *block, Grouping &prim_group,
-				      Grouping &priml_group,
-				      Grouping &primr_group, int dim,
-				      EnzoEquationOfState *eos,
-				      int stale_depth)
 
 How to extend
 -------------
@@ -291,10 +286,7 @@ sequence of operations are performed:
 A separate method is provided to compute the fluxes for the passively advected
 quantities.
      
-*Currently EnzoRiemannImpl has only been tested and known to work for 3D
- problems. Additionally, no solvers are currently implemented that explicitly
- support barotropic equations of state, but all of the machinery is in place
- to support them.*
+*Currently EnzoRiemannImpl has only been tested and known to work for 3D problems. Additionally, no solvers are currently implemented that explicitly support barotropic equations of state, but all of the machinery is in place to support them.*
 
 ImplStruct Class
 ~~~~~~~~~~~~~~~~

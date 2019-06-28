@@ -279,8 +279,7 @@ This subsection details the available interpolation methods for
 reconstructing the left and right states of the cell-centered
 interfaces. Presently, all available methods perform reconstruction
 on cell-centered primitive quantites,
-:math:`{\bf w} = (\rho, {\bf v}, e, {\bf B})`
-(where :math:`e` is specific internal energy).
+:math:`{\bf w} = (\rho, {\bf v}, p, {\bf B})`
 
 To simplify the determination of the necessary number of ghost
 zones for a given combination of reconstruction algorithms on
