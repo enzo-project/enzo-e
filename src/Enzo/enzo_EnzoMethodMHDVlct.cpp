@@ -110,7 +110,7 @@ void EnzoMethodMHDVlct::determine_quantities_
     // add specific total energy to integrable quantities
     integrable_quantities.push_back("total_energy");
     // add specific internal energy to reconstructable quantities
-    reconstructable_quantities.push_back("internal_energy");
+    reconstructable_quantities.push_back("pressure");
   }
 
   // Now to setup the list of passively advected group names
@@ -319,6 +319,12 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
     // Names of temporary fields used to store the pressure computed from the
     // reconstructed left and right primitives
+    // Note: in the case of adiabatic fluids, pressure is a reconstructable
+    //       quantity and fields are included for it in priml_group and
+    //       primr_group. In that case, those field names are also asigned to
+    //       pressure_name_l and pressure_name_r (this is not strictly,
+    //       necessary - EnzoEOSIdeal is smart enough to copy values if the
+    //       field names don't match)
     std::string pressure_name_l, pressure_name_r;
 
     // flux fields
@@ -404,21 +410,29 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 
 	// After the fluxes were added to the passive scalar in the first half
 	// timestep, the values were stored in conserved form in the fields
-	// held by conserved_passive_scalars
+	// held by conserved_passive_scalars.
+	// Need to convert them to specific form
 	compute_specific_passive_scalars_(block, passive_group_names_,
 					  *conserved_passive_scalars,
 					  *cur_integrable_group, stale_depth);
       }
 
       // Compute the reconstructable quantities from the integrable quantites
-      // (note that primitve_groups_ actually holds all of the relevant
-      // primitives since there is large overlap).
-      // For an adiabatic gas, this nominally computes the specific internal
-      // energy
+      // Although cur_integrable_group holds the passive scalars in integrable
+      // form, the conserved form of the values is required in case Grackle is
+      // being used.
+      //
+      // Note: cur_integrable_group and cur_reconstructable_group refer to the
+      // same underlying grouping since there is such a large degree of overlap
+      // between reconstructable and integrable quantities
+      //
+      // For a barotropic gas, the following nominally does nothing
+      // For a non-barotropic gas, the following nominally computes pressure
       eos_->reconstructable_from_integrable(block, *cur_integrable_group,
 					    *cur_reconstructable_group,
+					    *conserved_passive_scalars,
 					    stale_depth);
-      
+
       // Compute flux along each dimension
       compute_flux_(block, 0, *cur_reconstructable_group, *cur_bfieldi_group,
 		    priml_group, primr_group, pressure_name_l, pressure_name_r,
@@ -860,11 +874,18 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
   prep_temp_field_grouping_(field, *primitive_group_, prim_group_names,
 			    primr_group, "right_",0,0,0);
 
-  // reserve/allocate left/right pressure fields
-  pressure_name_l = "left_single_pressure";
-  pressure_name_r = "right_single_pressure";
-  prep_reused_temp_field_(field, pressure_name_l, 0, 0, 0);
-  prep_reused_temp_field_(field, pressure_name_r, 0, 0, 0);
+  // If there are pressure fields in priml_group and primr_group (depends on 
+  // the equation of state), set pressure_name_l and pressure_name_r equal to
+  // those field names. Otherwise, reserve/allocate left/right pressure fields
+  if (priml_group.size("pressure") != 0){
+    pressure_name_l = priml_group.item("pressure",0);
+    pressure_name_r = primr_group.item("pressure",0);
+  } else {
+    pressure_name_l = "left_single_pressure";
+    pressure_name_r = "right_single_pressure";
+    prep_reused_temp_field_(field, pressure_name_l, 0, 0, 0);
+    prep_reused_temp_field_(field, pressure_name_r, 0, 0, 0);
+  }
 
   // reserve/allocate fields for weight fields
   // these are face-centered fields that store the upwind/downwind direction
@@ -972,10 +993,10 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   // analogous to ppm timestep calulation, probably want to require that cfast
   // is no smaller than some tiny positive number.
 
-  // Compute the pressure (assumes that "pressure" is a permanent field)
+  // Compute the pressure (requires that "pressure" is a permanent field)
   FieldDescr * field_descr = cello::field_descr();
   eos_->pressure_from_integrable(block, *primitive_group_, "pressure",
-				 *(field_descr->groups()), false, 0);
+				 *(field_descr->groups()), 0);
   enzo_float gamma = eos_->get_gamma();
 
   EnzoFieldArrayFactory array_factory(block);

@@ -15,13 +15,12 @@
 ///
 /// Some notes on implementation
 ///    - this Method tracks specific total energy (referred to as total_energy)
-///      and uses specific internal energy (refered to as internal_energy)
 ///    - We categorize quantities as reconstructable and integrable primitives.
 ///      Nearly every field overlaps between the two cases. Examples of the
-///      primitives for an adiabatic gas (without dual energy formalism):
+///      primitives for adiabatic, ideal gas (without dual energy formalism):
 ///        - density         (both integrable and reconstructable)
 ///        - velocitiy       (both integrable and reconstructable)
-///        - internal_energy (just reconstructable)
+///        - pressure        (just reconstructable)
 ///        - total_energy    (just integrable)
 ///        - bfield          (both integrable and reconstructable)
 ///
@@ -41,7 +40,7 @@
 ///          "momentum" groups)
 ///
 ///    Notes about current groupings:
-///        - Currently track 14 different groupings:
+///        - Currently track 11 different groupings:
 ///            1. primitive quantities
 ///            2. interface b-fields (longitudinal B-fields centered at
 ///               interface between cells)
@@ -249,7 +248,10 @@ protected: // methods
   ///     that will be computed from the reconstructed values. Like the fields
   ///     within priml_group and primr_group, these fields will be registered
   ///     as face-centered so that they can be used to hold face-centered
-  ///     quantities along each dimension.
+  ///     quantities along each dimension. Note: in the case of an adiabatic,
+  ///     ideal gas, pressure is a reconstructable quantity and fields are
+  ///     included for it in priml_group and primr_group. In that case, those
+  ///     field names are also asigned to pressure_name_l and pressure_name_r.
   /// @param xflux_group,yflux_group,zflux_group The groupings of temporary
   ///     face-centered fields that will store the x, y, and z fluxes. These
   ///     fields don't include the faces on the exterior of the grid. Each

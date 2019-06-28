@@ -170,14 +170,14 @@ def analyze_tests():
     # These errors were all obtained from parallel runs with the domain split
     # between processes
     r = []
-    r.append(standard_l1_analyze(1,"fast", 16, 1.6274580015748813e-07))
-    r.append(standard_l1_analyze(1,"fast", 32, 3.288440318927747e-08))
+    r.append(standard_l1_analyze(1,"fast", 16, 1.6388526155538374e-07))
+    r.append(standard_l1_analyze(1,"fast", 32, 3.3025382238175106e-08))
 
-    r.append(standard_l1_analyze(1,"alfven", 16, 1.9268694579566842e-07))
-    r.append(standard_l1_analyze(1,"alfven", 32, 3.003042610227292e-08))
+    r.append(standard_l1_analyze(1,"alfven", 16, 1.9272453542097202e-07))
+    r.append(standard_l1_analyze(1,"alfven", 32, 3.005870203721324e-08))
     
-    r.append(standard_l1_analyze(1,"slow", 16, 2.1989278923864814e-07))
-    r.append(standard_l1_analyze(1,"slow", 32, 4.349083654024785e-08))
+    r.append(standard_l1_analyze(1,"slow", 16, 2.2373810031907528e-07))
+    r.append(standard_l1_analyze(1,"slow", 32, 4.437024386763274e-08))
 
     r.append(standard_l1_analyze(1,"entropy", 16, 1.0021263478396943e-07))
     r.append(standard_l1_analyze(1,"entropy", 32, 2.9194839306558322e-08))

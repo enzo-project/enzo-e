@@ -73,27 +73,32 @@ public: // interface
   /// @param reconstrable_group holds field names of reconstrable primitives
   ///     where the converted values will be stored. There is expected to be
   ///     significant overlap with the fields stored in integrable_group
+  /// @param conserved_passive_group contains the names of the fields holding
+  ///     the passively advected scalars in conserved form (note that while the
+  ///     integrable grouping may also contain groups of passive scalar fields,
+  ///     those fields hold the passive scalars in specific form - which are
+  ///     never used in this calculation). These are provided for Grackle's use
   /// @param stale_depth indicates the number of field entries from the
   ///     outermost field value that the region including "stale" values (need
   ///     to be refreshed) extends over (0 means there are no "stale" values).
   ///
   /// For a barotropic EOS, this nominally does nothing
-  /// For a non-barotropic EOS, this computes specific internal energy
-  /// (unless its being tracked for the dual-energy formalism) 
-  virtual void reconstructable_from_integrable(Block *block,
-					       Grouping &integrable_group,
-					       Grouping &reconstructable_group,
-					       int stale_depth)=0;
+  /// For a non-barotropic EOS, this computes pressure 
+  virtual void reconstructable_from_integrable
+  (Block *block, Grouping &integrable_group, Grouping &reconstructable_group,
+   Grouping &conserved_passive_group, int stale_depth)=0;
 
   /// @overload
   ///
   /// Provides stale_depth with the default value of 0
   void reconstructable_from_integrable(Block *block,
 				       Grouping &integrable_group,
-				       Grouping &reconstructable_group)
+				       Grouping &reconstructable_group,
+				       Grouping &conserved_passive_group)
   {
     reconstructable_from_integrable(block, integrable_group,
-				    reconstructable_group, 0);
+				    reconstructable_group,
+				    conserved_passive_group, 0);
   }
 
   /// Converts reconstructable primitives to integrable primitives
@@ -117,7 +122,7 @@ public: // interface
   ///
   /// For a barotropic EOS, this nominally does nothing
   /// For a non-barotropic EOS, this computes specific total energy from
-  /// specific internal energy
+  /// pressure
   virtual void integrable_from_reconstructable(Block *block,
 					       Grouping &reconstructable_group,
 					       Grouping &integrable_group,
@@ -141,24 +146,21 @@ public: // interface
   ///     used to compute thermal pressure
   /// @param pressure_name field name where the computed pressure will be
   ///     stored
-  /// @param passive_scalars_group holds field names of specific passive
-  ///     scalars to be (possibly used) in the calculation. This can be the
-  ///     as integrable_group. These will only be used if Grackle is in use
-  /// @param specific_passive_scalars indicates whether the passive scalars are
-  ///     have been converted to be specific quantities
+  /// @param conserved_passive_group contains the names of the fields holding
+  ///     the passively advected scalars in conserved form (note that while the
+  ///     integrable grouping may also contain groups of passive scalar fields,
+  ///     those fields hold the passive scalars in specific form - which are
+  ///     never used in this calculation). These are provided for Grackle's use
   /// @param stale_depth indicates the number of field entries from the
   ///     outermost field value that the region including "stale" values (need
   ///     to be refreshed) extends over (0 means there are no "stale" values).
   ///
-  /// This nominally wraps EnzoComputePressure. Currently, it is primarily used
-  /// to compute the pressure to determine the timestep for an integrator
-  /// (before the passively advected scalars are converted from conservative
-  /// quantities to primitive quantites)
+  /// This nominally should wrap EnzoComputePressure. At the time of writing,
+  /// (Grackle not yet supported), it doesn't actually wrap EnzoComputePressure
   virtual void pressure_from_integrable(Block *block,
 					Grouping &integrable_group,
 					std::string pressure_name,
-					Grouping &passive_scalars_group,
-					bool specific_passive_scalars,
+					Grouping &conserved_passive_group,
 					int stale_depth)=0;
 
   /// Computes thermal pressure from reconstructable quantities (nominally
@@ -180,9 +182,10 @@ public: // interface
   ///     cell-centered. A value of 0, 1, or 2 means that the fields were
   ///     reconstructed and they only contain valid values at x, y, or z faces
   ///
-  /// This should nominally wrap EnzoComputePressure (as of now it doesn't
-  /// because there is no support for MHD fields). In doing so, it should also
-  /// provide grackle support
+  /// For a non-barotropic EOS, pressure is considered a reconstructable
+  /// quantity. In that case, if the pressure field in reconstructable_group
+  /// matches pressure_name, nothing happens. If the field names do not match,
+  /// then values are simply copied
   virtual void pressure_from_reconstructable(Block *block,
 					     Grouping &reconstructable_group,
 					     std::string pressure_name,
@@ -208,23 +211,6 @@ public: // interface
   virtual void apply_floor_to_total_energy(Block *block,
 					   Grouping &integrable_group,
 					   int stale_depth)=0;
-
-  /// apply the pressure floor to the specific internal energy field. If the
-  /// equation of state is barotropic, then this does nothing
-  ///
-  /// @param block holds data to be processed
-  /// @param reconstructable_group holds field names of integrable primitives
-  ///     to be that will be used to apply the floor (also contains the field
-  ///     upon which the floor will be applied)
-  /// @param stale_depth indicates the number of field entries from the
-  ///     outermost field value that the region including "stale" values (need
-  ///     to be refreshed) extends over (0 means there are no "stale" values).
-  ///
-  /// @note If the macro RAISE_FLOOR_ERROR is defined, and a floor NEEDS to be
-  /// applied, then the this function will raise an error
-  virtual void apply_floor_to_internal_energy(Block *block,
-					      Grouping &reconstructable_group,
-					      int stale_depth)=0;
 
   /// returns whether the equation of state is barotropic
   virtual bool is_barotropic() = 0;

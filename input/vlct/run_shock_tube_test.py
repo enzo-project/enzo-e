@@ -89,11 +89,11 @@ def analyze_tests():
     # use 1 block - if we use more than one block, it's unclear to me if it's
     # ok to have round-off errors)
 
-    r.append(standard_rj2a_l1_analyze("x", 256, 0.012611255359410711))
+    r.append(standard_rj2a_l1_analyze("x", 256, 0.012524558844892638))
     r.append(standard_rj2a_l1_analyze("x", 256, 0.0, std_dev=True, exact=True))
-    r.append(standard_rj2a_l1_analyze("y", 256, 0.012611255359410817))
+    r.append(standard_rj2a_l1_analyze("y", 256, 0.012524558844892614))
     r.append(standard_rj2a_l1_analyze("y", 256, 0.0, std_dev=True, exact=True))
-    r.append(standard_rj2a_l1_analyze("z", 256, 0.012611255359410802))
+    r.append(standard_rj2a_l1_analyze("z", 256, 0.012524558844892873))
     r.append(standard_rj2a_l1_analyze("z", 256, 0.0, std_dev=True, exact=True))
 
     n_passed = np.sum(r)

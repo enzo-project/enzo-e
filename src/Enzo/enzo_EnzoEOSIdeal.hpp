@@ -48,6 +48,7 @@ public: // interface
   void reconstructable_from_integrable(Block *block,
 				       Grouping &integrable_group,
 				       Grouping &reconstrable_group,
+				       Grouping &conserved_passive_group,
 				       int stale_depth);
 
   void integrable_from_reconstructable(Block *block,
@@ -58,8 +59,7 @@ public: // interface
 
   void pressure_from_integrable(Block *block, Grouping &integrable_group,
 				std::string pressure_name,
-				Grouping &passive_scalars_group,
-				bool specific_passive_scalars,
+				Grouping &conserved_passive_group,
 				int stale_depth);
 
   void pressure_from_reconstructable(Block *block,
@@ -74,17 +74,13 @@ public: // interface
   void apply_floor_to_total_energy(Block *block, Grouping &integrable_group,
 				   int stale_depth);
 
-  void apply_floor_to_internal_energy(Block *block,
-				      Grouping &reconstructable_group,
-				      int stale_depth);
-
   bool is_barotropic() { return false; }
 
   enzo_float get_gamma() { return gamma_;}
 
   enzo_float get_isothermal_sound_speed() { return 0;}
 
-  // In the future, this won't be hardcoded
+  // In the future, this won't be hardcoded to false
   bool uses_dual_energy_formalism() { return false; };
 
 

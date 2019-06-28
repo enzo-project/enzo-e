@@ -93,14 +93,9 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
     if (group_name == "density"){
       prim_floor = eos->get_density_floor();
       use_floor=true;
-    } else if (group_name == "internal_energy"){
-      // This is just used to initialize the external values of the grid, to a
-      // known allowed internal energy. (This may not be necessary)
-      // The floor on the internal_energy is checked separately at the end of
-      // the function
-      prim_floor = (eos->get_pressure_floor() /
-		    (eos->get_density_floor() * (eos->get_gamma()-1.)));
-      use_floor = false;
+    } else if (group_name == "pressure"){
+      prim_floor = eos->get_pressure_floor();
+      use_floor=true;
     }
 
     // iterate over the fields in the group
@@ -167,9 +162,4 @@ void EnzoReconstructorPLM::reconstruct_interface (Block *block,
       }
     }
   }
-
-  // apply the floor to the internal energy (increment stale_depth by 1 since
-  // this has an immediate stale depth of 1)
-  eos->apply_floor_to_internal_energy(block, priml_group, stale_depth+1);
-  eos->apply_floor_to_internal_energy(block, primr_group, stale_depth+1);
 }

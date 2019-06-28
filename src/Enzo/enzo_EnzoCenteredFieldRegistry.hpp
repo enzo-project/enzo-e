@@ -31,7 +31,7 @@
 /// @brief    vector of passively advected group names
 ///
 /// This should be updated as new groups are added
-const std::vector<std::string> passive_group_names = {"colour", "species"};
+const std::vector<std::string> passive_group_names = {"colour"};
 
 
 //----------------------------------------------------------------------
@@ -56,8 +56,8 @@ enum class FieldCat{conserved, specific, other};
 ///   2. Mathematical classificiation (SCALAR or VECTOR)
 ///   3. classification of the quantity as conserved, specific or other
 ///   4. Advection classification - if T, then in some context, the quantity is
-///      directly used to solve for fluid advection (i.e. a Riemann Flux is
-///      computed for it) - otherwise it should be F (quantities that always
+///      an actively advected quantity (i.e. a Riemann Flux is computed for the
+///      term) - otherwise it should be F (quantities that always
 ///      act as source terms should not be included)
 ///
 /// The entries in this table determine the name of the field to represent the
