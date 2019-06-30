@@ -5,14 +5,12 @@
 # - This script expects to be called from the root level of the repository
 #   OR at the same level where its defined
 #
-# These tests draw loose inspiration from Linear Wave tests used by Athena++.
+# These tests draw loose inspiration from shock tube tests used by Athena++.
 # Specifically this script:
 #   1.) Checks that the L1-norm of the error for the from Ryu & Jones (1995)
 #       shock tube problem when the problem evolves along all 3 axes.
 #
-# After the bug get's fixed with using periodic boundary conditions alongside
-# outflow conditions, we should probably try small convergence tests like
-# Athena++
+# We should probably try small convergence tests like Athena++
 
 import os
 import os.path

@@ -24,6 +24,10 @@
 #   by calling the following command from the root directory of the repository:
 #    $ charmrun ++local bin/enzo-p input/vlct/linear_wave/method_vlct_fastN32_parallel.in
 
+try:
+  basestring
+except NameError:
+  basestring = str
 
 import os
 import os.path
@@ -40,6 +44,72 @@ l1_norm_calc_template = ("python tools/l1_error_norm.py sim {:s} {:s} -n {:d}"
                          "pressure,bfield_x,bfield_y,bfield_z")
 data_dir_template = "method_vlct-{:d}-{:s}N{:d}_{:.1f}"
 final_times = {"fast" : 0.5, "alfven" : 1.0, "entropy" : 1.0, "slow" : 2.0}
+
+class CalcSimL1Norm(object):
+    """
+    Configurable functor object that encapsulates the call to the l1_error_norm
+    script in simulation mode (where L1 norm is computed by comparing 2 
+    simulation outputs)
+    """
+
+    def __init__(self, script_path, default_fields=None):
+        self.script_path = script_path
+
+        if default_fields is not None:
+            only_contains_strings = all((isinstance(field,basestring) \
+                                         for field in default_fields))
+            if ((not isinstance(default_fields,(list,tuple))) or
+                 (not only_contains_strings)):
+                 raise ValueError("default_fields must be None or be a list of "
+                                  "strings")
+        self.default_fields = default_fields
+
+    def __call__(self, dir1, dir2, res = None, fields = None):
+        """
+        Computes the norm of the L1 error vector for one snapshot with respect 
+        to another snapshot
+
+        Parameters
+        ----------
+        dir1 : str
+            The path to the directory holding one of the twos snapshots
+        dir2 : str
+            The path to the directory holding the other snapshot
+        res : int, optional
+            If this is specified then the normalization of the norm of the l1 
+            error vector is computed assuming that the shape is (res,res,res).
+        fields : list of strings, optional
+            If this is specified then these are the names of the fields 
+            included in L1 error vector. If this is not specified, the fields
+            listed in the default_fields attribute are used. If those are not
+            specified either, then all the fields appearing in both snapshots 
+            are used.
+        """
+
+        command_list = ["python", self.script_path, "sim", dir1, dir2]
+
+        if res is not None:
+            if ((int(res) != res) or res<=0):
+                raise ValueError("res must be a positive integer")
+            command_list += ["-n", str(int(res))]
+
+        str_field_l = None
+        if fields is not None:
+            if ((not isinstance(fields,(list,tuple))) or
+                (not all((isinstance(field,basestring) for field in fields)))):
+                raise ValueError("fields must be None or be a list of strings")
+            str_field_l = ','.join(fields)
+        elif self.default_fields is not None:
+            str_field_l = ','.join(self.default_fields)
+
+        if str_field_l is not None:
+            command_list += ['-f',str_field_l]
+        command = ' '.join(command_list)
+        return float(subprocess.check_output(command,shell=True))
+
+calc_l1_norm = CalcSimL1Norm("tools/l1_error_norm.py",
+                             ["density","velocity_x","velocity_y","velocity_z",
+                              "pressure","bfield_x","bfield_y","bfield_z"])
 
 def call_test(wave,res,left=False):
 
@@ -67,10 +137,11 @@ def run_tests():
     
     call_test("entropy",16)
     call_test("entropy",32)
-
+"""
 def calc_l1_norm(dir1,dir2,res):
     command = l1_norm_calc_template.format(dir1, dir2, res)
     return float(subprocess.check_output(command,shell=True))
+"""
 
 def typical_l1_norm(num_blocks, wave_name, res, time_1, time_2):
     t1_dir = data_dir_template.format(num_blocks, wave_name, res, time_1)
