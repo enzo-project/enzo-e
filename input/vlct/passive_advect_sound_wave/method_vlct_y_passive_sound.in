@@ -8,7 +8,7 @@
 
    Domain {
       lower = [0.0, 0.0, 0.0];
-      upper = [0.125, 1.0, 0.125];
+      upper = [0.25, 1.0, 0.25];
    }
 
    Mesh {
@@ -21,8 +21,8 @@
       list = ["value"];
       value {
          density = [ 1.0 + 1.e-6 * sin( 2.0 * pi * y )];
-	 velocity_x = [ -1.e-6 * sin( 2.0 * pi * y )];
-	 velocity_y = 0.0;
+	 velocity_x = 0.0;
+	 velocity_y = [ -1.e-6 * sin( 2.0 * pi * y )];
 	 velocity_z = 0.0;
 	 total_energy = [ 1.5* (0.6 + 1.e-6 * sin( 2.0 * pi * y ))
 	                  / ( 1.0 + 1.e-6 * sin( 2.0 * pi * y ))];

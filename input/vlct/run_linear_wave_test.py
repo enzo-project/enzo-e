@@ -31,10 +31,11 @@ except NameError:
 
 import os
 import os.path
-import numpy as np
 import shutil
 import subprocess
-import math
+import sys
+
+import numpy as np
 
 
 # this executes things in standalone mode
@@ -254,11 +255,18 @@ def analyze_tests():
     r.append(standard_l1_analyze(1,"entropy", 32, 2.9194839306558322e-08))
 
     # Check error between left and right propagating waves
+    print("The following test has never passed in the history of this "
+          "implementation")
     r.append(identical_l1_error_comp(1, "fast", 32))
 
     n_passed = np.sum(r)
     n_tests = len(r)
+    success = (n_passed == n_tests)
     print("{:d} Tests passed out of {:d} Tests.".format(n_passed,n_tests))
+    if (np.sum(r[1:]) == (n_tests-1)):
+        print("All tests that the this VL+CT implementation has ever passed, "
+              "have suceeded")
+        success = True
 
     # Optionally, check error between serial and linear propagation
     # I can't quite figure out how to start the parallel test from this script
@@ -269,6 +277,7 @@ def analyze_tests():
         print("Optional serial vs. parallel test.")
         if identical_l1_error_comp(1, "fast", 32, 8):
             print("Passed")
+    return success
 
 def cleanup():
     #"method_vlct-1-fastN32_cycle55", #serial vs. parallel
@@ -317,10 +326,15 @@ if __name__ == '__main__':
     prep_cur_dir()
 
     # run the tests
-    run_tests()
+    tests_passed = run_tests()
 
     # analyze the tests
     analyze_tests()
 
     # cleanup the tests
     cleanup()
+
+    if tests_passed:
+        sys.exit(0)
+    else:
+        sys.exit(3)

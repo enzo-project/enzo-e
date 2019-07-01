@@ -12,19 +12,16 @@
 #       pi/2 radians out of phase with the rest of the quantities
 
 
-
 import os
 import os.path
-import numpy as np
 import shutil
 import subprocess
-import math
+import sys
+
+import numpy as np
 
 from run_linear_wave_test import _executable, CalcSimL1Norm, isclose, \
     prep_cur_dir
-l1_norm_calc_template = ("python tools/l1_error_norm.py sim {:s} {:s} -n {:d}"
-                         " -f density,velocity_x,velocity_y,velocity_z,"
-                         "total_energy,red")
 data_dir_template = "method_vlct-1-{:s}_passive_soundN16-{:.1f}"
 
 calc_l1_norm = CalcSimL1Norm("tools/l1_error_norm.py",
@@ -72,10 +69,11 @@ def analyze_tests():
 
     # These errors were all obtained from parallel runs with the domain split
     # between processes
+    ref_l1_error = 6.918011602177191e-08
     r = []
-    #r.append(passive_sound_l1_analyze('x', 8.110025261000999e-08))
-    r.append(passive_sound_l1_analyze('y', 0.0))
-    r.append(passive_sound_l1_analyze('z', 0.0))
+    r.append(passive_sound_l1_analyze('x', ref_l1_error))
+    r.append(passive_sound_l1_analyze('y', ref_l1_error))
+    r.append(passive_sound_l1_analyze('z', ref_l1_error))
 
     n_passed = np.sum(r)
     n_tests = len(r)
@@ -100,13 +98,18 @@ if __name__ == '__main__':
 
     # this script can either be called from the base repository or from
     # the subdirectory: input/vlct
-    #prep_cur_dir()
+    prep_cur_dir()
 
     # run the tests
-    #run_tests()
+    run_tests()
 
     # analyze the tests
-    analyze_tests()
+    tests_passed = analyze_tests()
 
     # cleanup the tests
-    #cleanup()
+    cleanup()
+
+    if tests_passed:
+        sys.exit(0)
+    else:
+        sys.exit(3)
