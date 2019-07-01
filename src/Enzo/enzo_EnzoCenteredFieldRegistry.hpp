@@ -72,9 +72,11 @@ enum class FieldCat{conserved, specific, other};
   /* Hydro & MHD Fields directly related to Advection */                     \
   ENTRY(                density, SCALAR, FieldCat::conserved, T)             \
   ENTRY(               velocity, VECTOR,  FieldCat::specific, T)             \
-  ENTRY(        internal_energy, SCALAR,  FieldCat::specific, T)             \
   ENTRY(           total_energy, SCALAR,  FieldCat::specific, T)             \
   ENTRY(                 bfield, VECTOR, FieldCat::conserved, T)             \
+  /* After the dual energy formalism has been implemented, internal */       \
+  /* energy should be updated to be an actively advected quantity   */       \ 
+  ENTRY(        internal_energy, SCALAR,  FieldCat::specific, F)             \
   /* Derived Fields */                                                       \
   ENTRY(               pressure, SCALAR,     FieldCat::other, F)             \
   ENTRY(            temperature, SCALAR,     FieldCat::other, F)             \
@@ -83,8 +85,23 @@ enum class FieldCat{conserved, specific, other};
   /* Grackle Related Fields */                                               \
   ENTRY(  specific_heating_rate, SCALAR,     FieldCat::other, F)             \
   ENTRY(volumetric_heating_rate, SCALAR,     FieldCat::other, F)             \
+  ENTRY(             HI_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(            HII_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(            HeI_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(           HeII_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(          HeIII_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(              e_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(             HM_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(            H2I_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(           H2II_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(             DI_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(            DII_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(            HDI_density, SCALAR, FieldCat::conserved, F)             \
+  ENTRY(          metal_density, SCALAR, FieldCat::conserved, F)             \
   /* Field for Gravity */                                                    \
-  ENTRY(              potential, SCALAR,  FieldCat::specific, F)
+  ENTRY(              potential, SCALAR,  FieldCat::specific, F)             \
+  /* Fields for Turbulence */                                                \
+  ENTRY(                driving, VECTOR,  FieldCat::specific, F)
 
 
 // Yields a combined token
