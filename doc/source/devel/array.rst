@@ -111,7 +111,7 @@ We can also forward declare an array and assign values to it later.
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
-   CelloArray<int,1> arr; 
+   CelloArray<int,2> arr; 
    arr = CelloArray<int,2>(data,2,3);
 
 
@@ -149,6 +149,7 @@ Simple Assignment - Shallow/Deep Copies
 ---------------------------------------
 
 Shallow copies are produced via ordinary assignment.
+
 .. code-block:: c++
 
    int data[] = {0,1,2,3,4,5};
@@ -355,7 +356,7 @@ An example is illustrated below:
    // arr now reflects: [[0,1,2,3],[7,7,6,7],[7,7,10,11]]
    arr.subarray(CSlice(0,3), 
                 CSlice(1,3)) = arr.subarray(CSlice(0,3), CSlice(2,4));
-   // arr now reflects: [[0,2,3,3],[7,6,7,7],[7,10,11,11]]
+   // arr now reflects: [[1,2,3,3],[7,6,7,7],[7,10,11,11]]
    CelloArray<int,2> arr3 = arr.subarray(CSlice(1,3), CSlice(2,4));
    // arr3 is a view of the subarray: [[7,7],[11,11]] of arr
    //arr3 = 17;   // This will not compile
