@@ -85,7 +85,7 @@ bool EnzoBoundary::has_vector_name_(std::string field_name,
 {
   return (field_name == ("bfield_"  + component) ||
 	  field_name == ("bfieldi_" + component) ||
-	  field_name == ("velocity" + component));
+	  field_name == ("velocity_" + component));
 }
 
 
