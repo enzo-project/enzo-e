@@ -1032,7 +1032,7 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   double dz = enzo_block->CellWidth[2];
 
   // initialize
-  enzo_float dtBaryons = ENZO_HUGE_VAL;
+  double dtBaryons = ENZO_HUGE_VAL;
 
   // timestep is the minimum of 0.5 * dr_i/(abs(v_i)+cfast) for all dimensions.
   // dr_i and v_i are the the width of the cell and velocity along dimension i.
@@ -1050,15 +1050,18 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
 	// is mu=1 and pressure = B^2/2)
 	// To convert B to normal Gaussian units, multiply by sqrt(4*pi)
 	enzo_float inv_dens= 1./density(iz,iy,ix);
-	enzo_float cfast = std::sqrt(gamma * pressure(iz,iy,ix) * inv_dens + 
-				     bmag_sq * inv_dens);
+	double cfast = (double) std::sqrt(gamma * pressure(iz,iy,ix) *
+					  inv_dens + bmag_sq * inv_dens);
 
 	dtBaryons = std::min(dtBaryons,
-			     dx/(std::fabs(velocity_x(iz,iy,ix)) + cfast));
+			     dx/(std::fabs((double) velocity_x(iz,iy,ix)) +
+				 cfast));
 	dtBaryons = std::min(dtBaryons,
-			     dy/(std::fabs(velocity_y(iz,iy,ix)) + cfast));
+			     dy/(std::fabs((double) velocity_y(iz,iy,ix)) +
+				 cfast));
 	dtBaryons = std::min(dtBaryons,
-			     dz/(std::fabs(velocity_z(iz,iy,ix)) + cfast));
+			     dz/(std::fabs((double) velocity_z(iz,iy,ix))
+				 + cfast));
       }
     }
   }
