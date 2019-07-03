@@ -97,20 +97,20 @@ void InitialValue::enforce_block ( Block * block,
       field.centering(index_field, &cx,&cy,&cz);
 
       if (val_array == NULL){
-	xc = new double [nx+2*gx];
-	yc = new double [ny+2*gy];
-	zc = new double [nz+2*gx];
-	data->field_cells (xc, yc, zc, gx, gy, gz);
+        xc = new double [nx+2*gx];
+        yc = new double [ny+2*gy];
+        zc = new double [nz+2*gz];
+        data->field_cells (xc, yc, zc, gx, gy, gz);
 
 	// set val_array as array of 0s big enough for corner centered fields
-	val_array = new double[(nx+2*gx+1)*(ny+2*gy+1)*(nz+2*gy+1)]();
+        val_array = new double[(nx+2*gx+1)*(ny+2*gy+1)*(nz+2*gy+1)]();
       }
 
       if (xf == NULL && (cx!=0 || cy!=0 ||cz != 0) ){
-	xf = new double [nx+2*gx+1];
-	yf = new double [ny+2*gy+1];
-	zf = new double [nz+2*gz+1]; 
-	data->field_cell_faces (xf, yf, zf, gx, gy, gz);
+        xf = new double [nx+2*gx+1];
+        yf = new double [ny+2*gy+1];
+        zf = new double [nz+2*gz+1];
+        data->field_cell_faces (xf, yf, zf, gx, gy, gz);
       }
 
       double *x = (cx == 0) ? xc : xf;
