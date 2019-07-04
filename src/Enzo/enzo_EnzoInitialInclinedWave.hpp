@@ -30,8 +30,8 @@ public: // interface
 
   /// Constructor
   EnzoInitialInclinedWave(int cycle, double time, double alpha, double beta,
-			double gamma, double amplitude, double lambda,
-			bool pos_vel, std::string wave_type) throw();
+			  double gamma, double amplitude, double lambda,
+			  bool pos_vel, std::string wave_type) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialInclinedWave);

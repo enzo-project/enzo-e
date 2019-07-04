@@ -262,12 +262,13 @@ fields
      - [w]
      - computed from ``total_energy``
        
-At initialization the face-centered magnetic fields should be divergence
-free. For non-trivial configurations, the values should be initialized
-from the magnetic vector potential and then each component of the
-cell-centered bfields should then be initialized by averaging the
-face-centered values of the corresponding component. To help facillitate
-the latter step we provide the ``vlct_bfield`` initializer.
+At initialization the face-centered magnetic fields should be
+divergence free. Trivial configurations (e.g. a constant magnetic
+field everywhere) can be provided with the ``"value"``
+initializer. For non-trivial configurations, we have provide the
+``"vlct_bfield"`` initializer which can initialize the magnetic fields
+(face-centered and cell-centered) from expression(s) given in the
+parameter file for component(s) of the magnetic vector potential.
 
 
 .. _using-vlct-reconstruction:

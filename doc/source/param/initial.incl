@@ -474,11 +474,69 @@ vlct_bfield
 -----------
 
 This is used to compute the cell-centered magnetic field for the VL +
-CT MHD method after another Initial subgroup (e.g. the :p:`value`
-subgroup) has already to specified the face-centered magnetic fields
-(``"bfieldi_x"``, ``"bfieldi_y"``, ``"bfieldi_z"``). The cell-centered
-value is just the average of the corresponding face-centered component.
+CT MHD method. This initializer can be utilized in 2 ways:
 
-To use this, specify ``"vlct_bfield"`` in the Initial:list
-parameter list following the name of Initial subgroup used to setup the
-face-centered values.
+  1. Components of the vector potential (``"Ax"``, ``"Ay"``, ``"Az"``)
+     can be specified as parameters of the subgroup (functions can be
+     specified for each component in the same way as functions are
+     specified for the :p:`value` subgroup. The initializer operates
+     in this mode as long as the values for one of the components of
+     the vector potential is specified (any unspecified components are
+     assumed to be zero everywhere). In this mode, both the
+     cell-centered and face-centered magnetic field values get
+     specified.
+
+  2. Initialize the cell-centered values of the magnetic fields after
+     after another Initial subgroup (e.g. the :p:`value` subgroup) has
+     already to specified the face-centered magnetic fields
+     (``"bfieldi_x"``, ``"bfieldi_y"``, ``"bfieldi_z"``). The
+     cell-centered value is just the average of the corresponding
+     face-centered component. The initializer operates in this mode if
+     none of the components of the vector potential have specified
+     values. (To properly specify use this mode, specify
+     ``"vlct_bfield"`` in the Initial:list parameter list following
+     the name of the Initial subgroup used to setup the face-centered
+     values.
+
+*It might be nice to eventually generalize this initializer to be able
+to initialize cell-centered B-fields from vector potentials for MHD
+integrators that don't require face-centered B-fields*
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`Ax` :
+:Summary: :s:`Expression for the x-component of the magnetic vector potential`
+:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
+:Default: :d:`[]`
+:Scope:     Enzo
+
+:e:`This parameter allows for the direct specification of the x-component of
+the magnetic vector potential (which will be used to compute magnetic fields).
+The arguements for this parameter follow the same sets of rules as the
+parameters of Initial:value. If this parameter is not specified, but the
+values of the other components of the magnetic vector potential are, then
+this component is assumed to be zero everywhere.`
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`Ay` :
+:Summary: :s:`Expression for the y-component of the magnetic vector potential`
+:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
+:Default: :d:`[]`
+:Scope:     Enzo
+
+:e:`This parameter allows for the direct specification of the y-component of
+the magnetic vector potential (which will be used to compute magnetic fields).
+The arguements for this parameter follow the same sets of rules as the
+parameters of Initial:value. If this parameter is not specified, but the
+values of the other components of the magnetic vector potential are, then
+this component is assumed to be zero everywhere.`
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`Az` :
+:Summary: :s:`Expression for the z-component of the magnetic vector potential`
+:Type:    :t:`list` ( :t:`float-expr`, [ :t:`logical-expr`, :t:`float-expr`, [ ... ] ] )
+:Default: :d:`[]`
+:Scope:     Enzo
+
+:e:`This parameter allows for the direct specification of the z-component of
+the magnetic vector potential (which will be used to compute magnetic fields).
+The arguements for this parameter follow the same sets of rules as the
+parameters of Initial:value. If this parameter is not specified, but the
+values of the other components of the magnetic vector potential are, then
+this component is assumed to be zero everywhere.`

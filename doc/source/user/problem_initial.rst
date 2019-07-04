@@ -88,6 +88,9 @@ a 3D array of Sedov blast waves.
 
 ``"vlct_bfield"``
 
-   Initialize the cell-centered magnetic fields for use by the VL + CT method
-   from the face-centered magnetic fields that are already initialized by a
-   separate initializer.
+   Initialize the cell-centered magnetic fields for use by the VL + CT
+   method.  This initialization can be performed from expressions
+   specified in the parameter file for each component of the magnetic
+   vector potential (in this case, the face-centered magnetic fields
+   are also initialized) OR from the face-centered magnetic fields that
+   have already been initialized by a separate initializer.
