@@ -26,13 +26,14 @@ public: // interface
 	       int cycle, double time) throw();
 
   /// Destructor
-  virtual ~InitialValue() throw() { }
+  virtual ~InitialValue() throw() { delete[] values_; }
 
   PUPable_decl(InitialValue);
 
   InitialValue(CkMigrateMessage *m)
     : Initial (m),
-      parameters_(NULL)
+      num_fields_(0),
+      values_(NULL)
   {}
 
   /// CHARM++ Pack / Unpack function
@@ -51,6 +52,9 @@ private: // functions
 		     double * value, int index_field,
 		     int nx, int ny, int nz) throw();
 
+  /// Helper function to initialize values_, since don't fully PUPable
+  void initialize_values_();
+
   template<class T>
   void copy_precision_
   (T * field, int offset, double * value, int nx, int ny, int nz);
@@ -62,15 +66,8 @@ private: // attributes
   /// number of fields
   int num_fields_;
 
-  /// number of masked values per field
-  int * num_masks_;
-
-  /// Masks for fields and values: mask_[index_field][index_value]
-  bool *** mask_;
-
-  /// Size of the masks
-  int **nx_;
-  int **ny_;
+  /// values for every field
+  Value ** values_;
 
 };
 
