@@ -92,5 +92,9 @@ a 3D array of Sedov blast waves.
    method.  This initialization can be performed from expressions
    specified in the parameter file for each component of the magnetic
    vector potential (in this case, the face-centered magnetic fields
-   are also initialized) OR from the face-centered magnetic fields that
-   have already been initialized by a separate initializer.
+   are also initialized) OR from the face-centered magnetic fields
+   that have already been initialized by a separate
+   initializer. Additionally, it provides the ability to update
+   partially initialized ``"total_energy"`` fields with the specific
+   magnetic energy computed from the newly computed cell-centered
+   bfields and pre-initialized ``"density"`` fields.

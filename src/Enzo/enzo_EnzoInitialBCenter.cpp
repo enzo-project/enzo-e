@@ -9,7 +9,7 @@
 //======================================================================
 
 EnzoInitialBCenter::EnzoInitialBCenter
-(Parameters * parameters,int cycle, double time) throw ()
+(Parameters * parameters,int cycle, double time, bool update_etot) throw ()
   : Initial(cycle,time)
 {
   parameters->group_set(0,"Initial");
@@ -33,6 +33,8 @@ EnzoInitialBCenter::EnzoInitialBCenter
       values_[i] = new Value(parameters, names[i]);
     }
   }
+
+  update_etot_ = update_etot;
 }
 
 //----------------------------------------------------------------------
@@ -215,6 +217,36 @@ void EnzoInitialBCenter::enforce_block( Block * block,
 
   // initialize cell-centered values from initialized face-centered values
   EnzoInitialBCenter::initialize_bfield_center(block);
+
+
+  if (update_etot_){
+    // update the specific total energy from the newly computed center bfield
+    // values assumes that:
+    //   - the total energy field has been pre-initialized to include all
+    //     contributions other than magnetic fields
+    //   - the density field is pre-initialized
+
+    EnzoFieldArrayFactory array_factory(block);
+    EFlt3DArray density, etot, bx, by, bz;
+    density = array_factory.from_name("density");
+    etot = array_factory.from_name("total_energy");
+    bx = array_factory.from_name("bfield_x");
+    by = array_factory.from_name("bfield_y");
+    bz = array_factory.from_name("bfield_z");
+
+    for (int iz= 0; iz < density.shape(0); iz++){
+      for (int iy= 0; iy < density.shape(1); iy++){
+	for (int ix= 0; ix < density.shape(2); ix++){
+	  enzo_float mag;
+	  mag = 0.5*(bx(iz,iy,ix) * bx(iz,iy,ix) +
+		     by(iz,iy,ix) * by(iz,iy,ix) +
+		     bz(iz,iy,ix) * bz(iz,iy,ix))/density(iz,iy,ix);
+	  etot(iz,iy,ix) += mag;
+	}
+      }
+    }
+
+  }
 }
 
   

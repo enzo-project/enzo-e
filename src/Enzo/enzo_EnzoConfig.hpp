@@ -129,6 +129,8 @@ public: // interface
       physics_cosmology_initial_redshift(0.0),
       physics_cosmology_final_redshift(0.0),
       physics_gravity(false),
+      // EnzoInitialBCenter
+      initial_bcenter_update_etot(false),
       // EnzoInitialCloud
       initial_cloud_subsample_n(0),
       initial_cloud_radius(0.),
@@ -321,6 +323,9 @@ public: // attributes
 
   /// Gravity
   bool                       physics_gravity;
+
+  /// EnzoInitialBCenter;
+  bool                       initial_bcenter_update_etot;
 
   /// EnzoInitialCloud;
   int                        initial_cloud_subsample_n;

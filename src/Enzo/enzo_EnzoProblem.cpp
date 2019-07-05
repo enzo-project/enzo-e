@@ -129,7 +129,8 @@ Initial * EnzoProblem::create_initial_
     initial = new EnzoInitialGrackleTest(enzo_config);
 #endif /* CONFIG_USE_GRACKLE */
   } else if (type == "vlct_bfield") {
-    initial = new EnzoInitialBCenter(parameters, cycle, time);
+    initial = new EnzoInitialBCenter(parameters, cycle, time,
+				     enzo_config->initial_bcenter_update_etot);
   } else if (type == "cloud") {
     initial = new EnzoInitialCloud
       (cycle,time,

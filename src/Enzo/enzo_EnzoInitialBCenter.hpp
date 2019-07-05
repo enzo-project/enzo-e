@@ -28,7 +28,8 @@ public: // interface
 
   /// Constructor
   EnzoInitialBCenter (Parameters * parameters,
-		      int cycle, double time) throw ();
+		      int cycle, double time,
+		      bool update_etot) throw ();
 
   /// Destructor
   ~EnzoInitialBCenter()
@@ -47,7 +48,8 @@ public: // interface
   /// CHARM++ migration constructor
   EnzoInitialBCenter(CkMigrateMessage *m)
     : Initial (m),
-      values_()
+      values_(),
+      update_etot_(false)
   {  }
 
 
@@ -74,6 +76,7 @@ public: // interface
 	values_[i] = nullptr;
       }
     }
+    p|update_etot_;
   }
 
   /// static method that initializes the cell-centered bfield from previously
@@ -105,6 +108,10 @@ protected: // attributes
 
   /// Each value will hold a pointer to a component of the vector potential
   Value* values_[3];
+
+  /// Whether or not to update the total specific energy using the new
+  /// calculated Bfield
+  bool update_etot_;
 };
 
 #endif /* ENZO_INITIAL_B_CENTER_HPP */

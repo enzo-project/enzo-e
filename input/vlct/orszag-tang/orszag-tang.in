@@ -1,0 +1,76 @@
+# Problem: Orszag-Tang vortex test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+# we adopt the initial conditions detailed in the main athena paper:
+# Stone et al. (2008). They are further described at
+
+   include "input/vlct/vlct.incl"
+
+   Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 1.0, 0.167];
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [2,2,2];
+      root_size = [192,192,6]; # number of cells per axis
+   }
+
+
+   Initial{
+      list = ["value","vlct_bfield"];
+
+      value{
+         density      = [ 25. / (36. * pi)];
+         velocity_x   = [ -1. * sin( 2. * pi * y)];
+         velocity_y   = [ sin( 2. * pi * x)];
+         velocity_z   = [0.];
+         # we initially omit the magnetic energy contribution below
+         # It will be added to "total_energy" by "vlct_bfield"
+         total_energy = [0.9 + 0.5 * (sin( 2. * pi * y) * sin( 2. * pi * y) +
+                                      sin( 2. * pi * x) * sin( 2. * pi * x))];
+         # the following initial values are all unnecessary (they are simply
+         # provided to prevent warnings about uninitialized fields)
+         pressure     = [0.];
+         bfield_x     = [0.];
+         bfield_y     = [0.];
+         bfield_z     = [0.];
+         bfieldi_x    = [0.];
+         bfieldi_y    = [0.];
+         bfieldi_z    = [0.];
+      }
+
+      vlct_bfield{
+         update_etot = true;
+         Ax = [ 0.0 ];
+         Ay = [ 0.0 ];
+         Az = [ (1. / sqrt( 4. * pi)) * ( cos( 4. * pi * x ) / (4. * pi) +
+                                          cos( 2. * pi * y ) / (2. * pi))];
+         update_etot = true;
+      };
+   }
+
+   Boundary { type = "periodic"; }
+
+   Stopping {
+      time = 0.5;
+   }
+
+   Output {
+      list = ["data"];
+      data {
+         type = "data";
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+                       "total_energy",
+                       "bfield_x", "bfield_y", "bfield_z",
+                       "bfieldi_x", "bfieldi_y", "bfieldi_z"];
+
+         schedule {
+            var = "time";
+            list = [0.0,0.5];
+         };
+	 dir = ["method_vlct-8-orszag-tangN128_%.1f","time"];
+         name = ["data-%03d.h5", "proc"];
+      };
+   }

@@ -43,6 +43,8 @@ EnzoConfig::EnzoConfig() throw ()
   physics_cosmology_initial_redshift(0.0),
   physics_cosmology_final_redshift(0.0),
   physics_gravity(false),
+  // EnzoInitialBCenter
+  initial_bcenter_update_etot(false),
   // EnzoInitialCloud
   initial_cloud_subsample_n(0),
   initial_cloud_radius(0.),
@@ -240,6 +242,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | physics_cosmology_final_redshift;
 
   p | physics_gravity;
+
+  p | initial_bcenter_update_etot;
 
   p | initial_cloud_subsample_n;
   p | initial_cloud_radius;
@@ -602,6 +606,10 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_shock_tube_aligned_ax = p->value_string
     ("Initial:shock_tube:aligned_ax","x");
 
+  // VL+CT b-field initialization
+  initial_bcenter_update_etot = p->value_logical
+    ("Initial:vlct_bfield:update_etot",false);
+  
   // Cloud Crush Initialization
   initial_cloud_subsample_n   = p->value_integer
     ("Initial:cloud:subsample_n",0);

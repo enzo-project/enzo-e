@@ -498,9 +498,27 @@ CT MHD method. This initializer can be utilized in 2 ways:
      the name of the Initial subgroup used to setup the face-centered
      values.
 
+In both modes, the option to update partially initialized
+``"total_energy"`` fields with the specific magnetic energy computed
+from the newly computed cell-centered bfields and pre-initialized
+``"density"`` fields.
+
 *It might be nice to eventually generalize this initializer to be able
 to initialize cell-centered B-fields from vector potentials for MHD
 integrators that don't require face-centered B-fields*
+
+:Parameter:  :p:`Initial` : :p:`value` : :p:`update_etot` :
+:Summary: :s:`update total energy with the initialized magnetic fields`
+:Type:    :t:`logical`
+:Default: :d:`false`
+:Scope:     Enzo
+
+:e:`If true, then the calculated cell-centered magnetic fields are
+used to update the specific total energy. This requires that the`
+``"total_energy"`` :e:`field has already been partially initialized
+(it just doesn't include the specific magnetic energy), and that the`
+``"density"`` :e:`field has been initialized.`
+
 
 :Parameter:  :p:`Initial` : :p:`value` : :p:`Ax` :
 :Summary: :s:`Expression for the x-component of the magnetic vector potential`
