@@ -48,6 +48,7 @@ public: // interface
   /// CHARM++ migration constructor
   EnzoInitialBCenter(CkMigrateMessage *m)
     : Initial (m),
+      parameters_(NULL),
       values_(),
       update_etot_(false)
   {  }
@@ -60,22 +61,13 @@ public: // interface
     Initial::pup(p);
     TRACEPUP;
 
-    // This would be simplified if Value were declared as PUPable
-    // First we pup which of the components exist
-    bool has_values[3];
-    for (int i=0; i<3; i++){
-      has_values[i] = (values_[i] != nullptr);
-      p|(has_values[i]);
-    }
-    // Now we pup the components that exist
-    for (int i=0; i<3; i++){
-      if (has_values[i]){
-	if (p.isUnpacking()) {values_[i] = new Value;}
-	p|*(values_[i]);
-      } else{
-	values_[i] = nullptr;
-      }
-    }
+    // Value has an incomplete PUP method - instead we follow the style used by
+    // InitialValue
+    bool up = p.isUnpacking();
+    if (up) parameters_ = new Parameters;
+    p | *parameters_;
+    initialize_values_();
+
     p|update_etot_;
   }
 
@@ -98,14 +90,22 @@ public: // interface
 					   CelloArray<double,3> &Ay,
 					   CelloArray<double,3> &Az);
 
-public: // virtual functions
+public:
 
   /// Initialize a Block
   virtual void enforce_block
   ( Block * block, const Hierarchy * hierarchy ) throw();
 
+private:
+
+  /// Initializes values_ from parameters_
+  void initialize_values_();
+
 protected: // attributes
 
+  /// This is tracked so that values_ can be reinitialized after PUPing
+  Parameters * parameters_;
+  
   /// Each value will hold a pointer to a component of the vector potential
   Value* values_[3];
 

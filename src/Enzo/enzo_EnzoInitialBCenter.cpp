@@ -10,31 +10,12 @@
 
 EnzoInitialBCenter::EnzoInitialBCenter
 (Parameters * parameters,int cycle, double time, bool update_etot) throw ()
-  : Initial(cycle,time)
+  : Initial(cycle,time),
+    parameters_(parameters),
+    values_(),
+    update_etot_(update_etot)
 {
-  parameters->group_set(0,"Initial");
-  parameters->group_set(1,"vlct_bfield");
-
-
-  // Check if values are specified for any component of the vector potential
-  //    - If only a subset of values are specified, than the unspecified
-  //      components are assumed to be constant.
-  //    - If none of the components are specified, then bfields are assumed to
-  //      be pre-calculated and only the cell-centered values are computed
-  std::string names[3] = {"Ax","Ay","Az"};
-  for (int i = 0; i < 3; i++){
-    if (parameters->type(names[i]) == parameter_unknown){
-      values_[i] = nullptr;
-    } else {
-      if ( (parameters->type(names[i]) == parameter_list) &&
-	   (parameters->list_length(names[i]) == 0)){
-	values_[i] = nullptr;
-      }
-      values_[i] = new Value(parameters, names[i]);
-    }
-  }
-
-  update_etot_ = update_etot;
+  initialize_values_();
 }
 
 //----------------------------------------------------------------------
@@ -249,4 +230,29 @@ void EnzoInitialBCenter::enforce_block( Block * block,
   }
 }
 
-  
+//----------------------------------------------------------------------
+
+void EnzoInitialBCenter::initialize_values_()
+{
+  parameters_->group_set(0,"Initial");
+  parameters_->group_set(1,"vlct_bfield");
+
+
+  // Check if values are specified for any component of the vector potential
+  //    - If only a subset of values are specified, than the unspecified
+  //      components are assumed to be constant.
+  //    - If none of the components are specified, then bfields are assumed to
+  //      be pre-calculated and only the cell-centered values are computed
+  std::string names[3] = {"Ax","Ay","Az"};
+  for (int i = 0; i < 3; i++){
+    if (parameters_->type(names[i]) == parameter_unknown){
+      values_[i] = nullptr;
+    } else {
+      if ( (parameters_->type(names[i]) == parameter_list) &&
+	   (parameters_->list_length(names[i]) == 0)){
+	values_[i] = nullptr;
+      }
+      values_[i] = new Value(parameters_, names[i]);
+    }
+  }
+}
