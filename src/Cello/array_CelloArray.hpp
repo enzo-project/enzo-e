@@ -169,6 +169,17 @@ private:
 
 //----------------------------------------------------------------------
 
+/// This serves as the terminating function call in the tail recursion to check
+/// the validity of the indicies passed to CelloArray
+///
+/// @param shape pointer to the final element in the cstyle array holding the
+///     shape of the array
+/// @param first The final index to check the shape of
+///
+/// @tparam T the type of the index (should be int or intp) 
+template<typename T>
+bool check_bounds_(intp *shape, T first) {return *shape > first;}
+
 /// a helper function template that helps check the validity of indices passed
 /// to CelloArray if debugger mode for checking indices has been enabled
 ///
@@ -188,20 +199,9 @@ private:
 /// validity of the index and then the remaining indices and rest of the shape
 /// are recursively passed to this function again.
 template<typename T, typename... Rest>
-bool check_bounds_(std::size_t *shape, T first, Rest... rest){
-  return (*shape > first) && check_bounds_(++shape, rest...);
+bool check_bounds_(intp *shape, T first, Rest... rest){
+  return (*shape > first) && check_bounds_(shape+1, rest...);
 }
-
-/// This serves as the terminating function call in the tail recursion to check
-/// the validity of the indicies passed to CelloArray
-///
-/// @param shape pointer to the final element in the cstyle array holding the
-///     shape of the array
-/// @param first The final index to check the shape of
-///
-/// @tparam T the type of the index (should be int or intp) 
-template<typename T>
-bool check_bounds_(std::size_t *shape, T first) {return *shape > first;}
 
 // if CHECK_BOUNDS has been defined, the CHECK_BOUND3D and CHECK_BOUNDND are
 // defined to actually check the validity of indices passed to the array
@@ -406,7 +406,7 @@ public: // interface
   T &operator() (Args... args) {
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
-    CHECK_BOUNDND(shape, args)
+    CHECK_BOUNDND(shape_, args)
     CHECK_IF_FINITE(data_[offset_ + calc_index_(stride_,args...)]);
     return data_[offset_ + calc_index_(stride_,args...)];
   }
@@ -414,7 +414,7 @@ public: // interface
   T operator() (Args... args) const {
     static_assert(D==sizeof...(args),
 		  "Number of indices don't match number of dimensions");
-    CHECK_BOUNDND(shape, args)
+    CHECK_BOUNDND(shape_, args)
     CHECK_IF_FINITE(data_[offset_ + calc_index_(stride_,args...)]);
     return data_[offset_ + calc_index_(stride_,args...)];
   }
@@ -422,13 +422,13 @@ public: // interface
   // Specialized implementation for 3D arrays (to reduce compile time)
   T &operator() (const int k, const int j, const int i){
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
-    CHECK_BOUND3D(shape, k, j, i)
+    CHECK_BOUND3D(shape_, k, j, i)
     CHECK_IF_FINITE(data_[offset_ + k*stride_[0] + j*stride_[1] + i])
     return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
   }
   T operator() (const int k, const int j, const int i) const{
     static_assert(D==3, "3 indices should only be specified for 3D arrays");
-    CHECK_BOUND3D(shape, k, j, i)
+    CHECK_BOUND3D(shape_, k, j, i)
     CHECK_IF_FINITE(data_[offset_ + k*stride_[0] + j*stride_[1] + i])
     return data_[offset_ + k*stride_[0] + j*stride_[1] + i];
   }
@@ -522,7 +522,15 @@ protected: // methods to be reused by subclasses
   /// Assists with the initialization of the FixedDimArray_ objects
   void init_helper_(const std::shared_ptr<dataWrapper<T>> &dataMgr,
 		    const intp shape[D], const intp offset){
-    data_ = dataMgr->get();
+    if (dataMgr){
+      data_ = dataMgr->get();
+    } else {
+      // If we allowed copy from an uninitialized array, then the relevant
+      // data_ objects would not be linked as expected
+      ERROR("FixedDimArray_::init_helper_",
+	    "dataMgr must own a pointer. This probably means that the current "
+	    "array is being moved/copied from an uninitialized array.");
+    }
     dataMgr_ = dataMgr;
     offset_ = offset;
 
@@ -870,7 +878,7 @@ public: // interface
   /// *this are unaffected by this method)
   CelloArray<T,D>& operator=(const CelloArray<T,D>& other){
     this->cleanup_helper_();
-    init_helper_(other.dataMgr_, other.shape_, other.offset_);
+    this->init_helper_(other.dataMgr_, other.shape_, other.offset_);
     return *this;
   }
 
