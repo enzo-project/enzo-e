@@ -6,7 +6,9 @@
 /// @brief    Implementation of EnzoInitialInclinedWave for initializing
 ///           inclined linear MHD waves and inclined circularly polarized
 ///           alfven waves detailed in Gardiner & Stone (2008). These are used
-///           to test the VL+CT MHD integrator.
+///           to test the VL+CT MHD integrator. An inclined sound wave can also
+///           be initialized (its initial conditions were inspired by the
+///           Athena test suite)
 
 // Using the coordinate systems given by eqn 68 of Gardiner & Stone (2008)
 // (except that index numbers start at 0)
@@ -552,10 +554,10 @@ EnzoInitialInclinedWave::EnzoInitialInclinedWave(int cycle, double time,
 {
   ASSERT("EnzoInitialInclinedWave",
 	 ("Invalid wave_type specified (must be 'fast', 'slow', 'alfven', "
-	  "'entropy', or 'circ_alfven'"),
+	  "'entropy', 'sound', or 'circ_alfven'"),
 	 (wave_type_ == "fast") || (wave_type_ == "alfven") ||
 	 (wave_type_ == "slow") || (wave_type_ == "entropy") ||
-	 (wave_type_ == "circ_alfven"));
+	 (wave_type_ == "sound") || (wave_type_ == "circ_alfven"));
 }
 
 //----------------------------------------------------------------------
@@ -644,9 +646,6 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
     double etot_back = (1./gamma_)/(gamma_-1.)+1.625;
     if (wave_type_ == "entropy"){
       mom0_back = wsign;
-      b0_back*=wsign;
-      b1_back*=wsign;
-      b2_back*=wsign;
       etot_back += 0.5;
     }
 
@@ -681,14 +680,26 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
       etot_ev = 3. * coef;
       b1_ev = -2. * coef;
       b2_ev = 0;
-    } else {
-      // (wave_type_ == "entropy")
+    } else if (wave_type_ == "entropy") {
       double coef = 0.5;
       density_ev = 2. *coef;
-      mom0_ev = 2. * coef;
+      mom0_ev = 2. * coef * wsign;
       mom1_ev = 0;
       mom2_ev = 0;
       etot_ev = 1. * coef;
+      b1_ev = 0;
+      b2_ev = 0;
+    } else {
+      // (wave_type_ == "sound")
+      b0_back = 0.;
+      b1_back = 0.;
+      b2_back = 0.;
+      etot_back = (1./gamma_)/(gamma_-1.);
+      density_ev = 1;
+      mom0_ev = wsign*-1;
+      mom1_ev = 0;
+      mom2_ev = 0;
+      etot_ev = 1.5;
       b1_ev = 0;
       b2_ev = 0;
     }

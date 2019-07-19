@@ -148,7 +148,8 @@ inclined_wave
 
 The :p:`inclined_wave` Initial subgroup is used to setup a MHD wave
 at an angle inclined to the simulation domain for testing the VL
-+ CT MHD integration method.
++ CT MHD integration method. This method can also be used for setting
+up an inclined sound wave (the magnetic fields are all set to zero).
 
 The procedure to addopted from
 `Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_ .
@@ -166,9 +167,9 @@ wave is initialized to travel along "x0". The transformation between
 As in that paper, we initialize the magnetic fields using the vector
 potential to ensure that the magnetic fields are divergence-free.
 
-*This could be easily extended to setup hydrodynamical waves and could
-be generalized to setup waves for hydrodynamic methods or MHD methods
-without face-centered B-fields*
+*This could be easily extended to setup other hydrodynamical waves and
+could be generalized to initialize fields for hydrodynamic methods
+(without magnetic fields) or MHD methods without face-centered B-fields*
 
 :Parameter:  :p:`Initial` : :p:`inclined_wave` : :p:`alpha`
 :Summary: :s:`Angle used to help determine wave inclination`
@@ -196,7 +197,7 @@ without face-centered B-fields*
 :Default: :d:`alfven`
 :Scope:   :z:`Enzo`
 
-:e:`All waves are described in`
+:e:`Most waves are described in`
 `Gardiner & Stone (2008) <http://adsabs.harvard.edu/abs/2008JCoPh.227.4123G>`_
 :e:`. Valid wave types include:`
 
@@ -207,6 +208,8 @@ without face-centered B-fields*
   * ``"entropy"`` :e:`A linear MHD entropy wave.`
   * ``"fast"`` :e:`A linear fast magnetosonic wave.`
   * ``"slow"`` :e:`A linear slow magnetosonic wave.`
+  * ``"sound"`` :e:`A linear sound wave (not from Gardiner & Stone
+    2008) - Currently this sets the magnetic fields to zero.`
 
 ----
 
@@ -237,8 +240,7 @@ polarized Alfven wave (for that case, amplitude is fixed at 0.1).`
 :Default: :d:`true`
 :Scope:   :z:`Enzo`
 
-:e:`This has no effect for the entropy wave or circularly polarized
-Alfven wave.`
+:e:`This has no effect for the circularly polarized Alfven wave.`
 
 
 music
