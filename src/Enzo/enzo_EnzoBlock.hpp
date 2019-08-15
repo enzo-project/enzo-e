@@ -217,7 +217,11 @@ public: /// entry methods
   void r_method_gravity_continue(CkReductionMsg * msg);
 
   /// Synchronize for refresh
+#ifdef NEW_REFRESH  
+  void p_method_gravity_end();
+#else
   void r_method_gravity_end(CkReductionMsg * msg);
+#endif  
 
   //--------------------------------------------------
 
@@ -243,7 +247,7 @@ public: /// entry methods
   /// perform the necessary reductions for shift
   CkReductionMsg * r_solver_cg_shift(int n, CkReductionMsg ** msgs);
 
-  void r_solver_cg_matvec();
+  void p_solver_cg_matvec();
 
   //--------------------------------------------------
   

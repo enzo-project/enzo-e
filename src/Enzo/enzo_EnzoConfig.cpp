@@ -114,8 +114,6 @@ EnzoConfig::EnzoConfig() throw ()
   method_hydro_reconstruct_conservative(0),
   method_hydro_reconstruct_positive(0),
   method_hydro_riemann_solver(""),
-  // EnzoMethodNull
-  method_null_dt(0.0),
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -292,7 +290,6 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_hydro_reconstruct_positive;
   p | method_hydro_riemann_solver;
 
-  p | method_null_dt;
   p | method_turbulence_edot;
 
   p | method_gravity_grav_const;
@@ -627,9 +624,6 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_hydro_riemann_solver = p->value_string
     ("Method:hydro:riemann_solver","ppm");
-
-  method_null_dt = p->value_float
-    ("Method:null:dt",std::numeric_limits<double>::max());
 
   method_gravity_grav_const = p->value_float
     ("Method:gravity:grav_const",6.67384e-8);

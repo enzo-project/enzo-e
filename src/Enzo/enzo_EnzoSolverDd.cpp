@@ -132,17 +132,25 @@ EnzoSolverDd::EnzoSolverDd
   // Initialize temporary fields
   Block * block = NULL;
 
-  FieldDescr * field_descr = cello::field_descr();
-  ixc_ = field_descr->insert_temporary();
+  ixc_ = cello::field_descr()->insert_temporary();
 
   /// Initialize default Refresh
+#ifdef NEW_REFRESH
 
+  Refresh & refresh = this->refresh_post();
+  cello::simulation()->new_refresh_set_name(ir_post_,name);
+
+#else /* OLD_REFRESH */
+  
   const int ir = add_refresh
     (4,0,neighbor_leaf,sync_barrier,
      enzo_sync_id_solver_dd);
 
-  refresh(ir)->add_field (ix_);
+  Refresh & refresh = *this->refresh(ir);
+#endif
 
+  refresh.add_field (ix_);
+  
   ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
   i_sync_restrict_ = scalar_descr_sync->new_value(name + ":restrict");
   i_sync_prolong_  = scalar_descr_sync->new_value(name + ":prolong");

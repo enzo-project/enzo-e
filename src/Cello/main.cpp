@@ -16,10 +16,18 @@
 
 CProxy_Main proxy_main;
 
+// #define DEBUG_MAIN
+
 #ifdef CHARM_ENZO
 #include "simulation.hpp"
 extern CProxy_EnzoSimulation proxy_simulation;
 #include "enzo_finalize.hpp"
+#endif
+
+#ifdef DEBUG_MAIN
+#  define TRACE_MAIN(MSG) CkPrintf ("DEBUG_MAIN %s\n",MSG); fflush(stdout);
+#else
+#  define TRACE_MAIN(MSG) /* ... */
 #endif
 
 //----------------------------------------------------------------------
@@ -60,6 +68,8 @@ void Main::exit_()
 
 void Main::p_checkpoint(int count, std::string dir_name)
 {
+  
+  TRACE_MAIN("DEBUG MAIN p_checkpoint");
   
   count_checkpoint_++;
   if (count_checkpoint_ >= count) {
@@ -216,6 +226,7 @@ void Main::p_exit()
 
 void Main::p_adapt_enter()
 {
+  TRACE_MAIN("p_adapt_enter");
 #ifdef CHARM_ENZO
   cello::block_array().p_adapt_enter();
 #endif
@@ -234,6 +245,7 @@ void Main::p_initial_exit()
 
 void Main::p_adapt_end()
 {
+  TRACE_MAIN("p_adapt_end");
 #ifdef CHARM_ENZO
   cello::block_array().p_adapt_end();
 #endif
@@ -243,6 +255,7 @@ void Main::p_adapt_end()
 
 void Main::p_adapt_next()
 {
+  TRACE_MAIN("p_adapt_next");
 #ifdef CHARM_ENZO
   cello::block_array().p_adapt_next();
 #endif
@@ -252,6 +265,7 @@ void Main::p_adapt_next()
 
 void Main::p_adapt_called()
 {
+  TRACE_MAIN("p_adapt_called");
 #ifdef CHARM_ENZO
   cello::block_array().p_adapt_called();
 #endif
@@ -261,6 +275,7 @@ void Main::p_adapt_called()
 
 void Main::p_adapt_exit()
 {
+  TRACE_MAIN("p_adapt_exit");
 #ifdef CHARM_ENZO
   cello::block_array().p_adapt_exit();
 #endif
@@ -270,6 +285,7 @@ void Main::p_adapt_exit()
 
 void Main::p_refresh_exit()
 {
+  TRACE_MAIN("p_refresh_exit");
 #ifdef CHARM_ENZO
   cello::block_array().p_refresh_exit();
 #endif

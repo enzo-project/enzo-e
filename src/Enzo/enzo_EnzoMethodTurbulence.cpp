@@ -36,14 +36,19 @@ EnzoMethodTurbulence::EnzoMethodTurbulence
     comoving_coordinates_(comoving_coordinates)
 {
   TRACE_TURBULENCE;  
-  
+
+#ifdef NEW_REFRESH
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+#else /* OLD_REFRESH */  
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_turbulence);
-
-  refresh(ir)->add_all_fields();
-
+  Refresh & refresh = *this->refresh(ir);
+#endif
+  refresh.add_all_fields();
+  
    // TURBULENCE parameters initialized in EnzoBlock::initialize()
 }
 

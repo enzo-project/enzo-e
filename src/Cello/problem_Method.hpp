@@ -20,11 +20,7 @@ class Method : public PUP::able
 public: // interface
 
   /// Create a new Method
-  Method (double courant = 1.0) throw()
-    : refresh_list_(),
-      schedule_(NULL),
-      courant_(courant)
-  { }
+  Method (double courant = 1.0) throw();
 
   /// Destructor
   virtual ~Method() throw();
@@ -34,9 +30,14 @@ public: // interface
   
   Method (CkMigrateMessage *m)
     : PUP::able(m),
-      refresh_list_(),
       schedule_(NULL),
       courant_(1.0)
+#ifdef NEW_REFRESH
+    ,ir_post_(-1)
+#else /* ! NEW_REFRESH */
+    ,refresh_list_()
+#endif      
+   
   { }
       
   /// CHARM++ Pack / Unpack function
@@ -62,30 +63,34 @@ public: // virtual functions
     /* This function intentionally empty */
   }
 
+#ifdef NEW_REFRESH
+
+  /// Add a new refresh object
+  int add_new_refresh_ ();
+
+  /// Return the specified Refresh object
+  Refresh & new_refresh(int ir);
+  
+  /// Return the index for the main post-refresh object
+  int refresh_post_id() const;
+
+  /// Return the main post-refresh object for the solver
+  Refresh & refresh_post();
+
+#else
+  
   int add_refresh (int ghost_depth, 
 		   int min_face_rank, 
 		   int neighbor_type, 
 		   int sync_type,
-		   int id)
-  {
-  int index=refresh_list_.size();
-    
-#ifdef SHARED_PTR_REFRESH
-  refresh_list_.push_back
-    (std::make_shared<Refresh>
-     (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true));
-#else
-  refresh_list_.push_back
-    (new Refresh
-     (ghost_depth,min_face_rank,neighbor_type,sync_type,id,true));
-#endif  
-    return index;
-  }
+		   int id);
 
   Refresh * refresh(size_t index=0) 
   {
+    // set Method::ir_post_
     return (index < refresh_list_.size()) ? refresh_list_[index] : NULL;
   }
+#endif  
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
@@ -119,15 +124,20 @@ public: // attributes (static)
 
 protected: // attributes
 
-  ///  Refresh object
-  std::vector<Refresh *> refresh_list_;
-
-
   /// Schedule object, if any (default is every cycle)
   Schedule * schedule_;
 
   /// Courant condition for the Method
   double courant_;
+
+#ifdef NEW_REFRESH
+  /// Index for main refresh after Method is called
+  int ir_post_;
+#else  
+  ///  Refresh object
+  std::vector<Refresh *> refresh_list_;
+#endif  
+
 
 };
 

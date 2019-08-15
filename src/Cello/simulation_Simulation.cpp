@@ -292,6 +292,7 @@ void Simulation::pup (PUP::er &p)
   
 #ifdef NEW_REFRESH
   p | new_refresh_list_;
+  p | new_refresh_name_;
 #endif  
 }
 

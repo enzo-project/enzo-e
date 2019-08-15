@@ -62,6 +62,7 @@ enum neighbor_enum {
 #include "problem_BoundaryPeriodic.hpp"
 #include "problem_Method.hpp"
 #include "problem_MethodTrace.hpp"
+#include "problem_MethodNull.hpp"
 #include "problem_Physics.hpp"
 #include "problem_Prolong.hpp"
 #include "problem_ProlongInject.hpp"

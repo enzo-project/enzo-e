@@ -200,8 +200,6 @@ public: // interface
       method_hydro_reconstruct_conservative(false),
       method_hydro_reconstruct_positive(false),
       method_hydro_riemann_solver(""),
-      // EnzoMethodNull
-      method_null_dt(0.0),
       // EnzoMethodTurbulence
       method_turbulence_edot(0.0),
       method_turbulence_mach_number(0.0),
@@ -385,9 +383,6 @@ public: // attributes
   bool                       method_hydro_reconstruct_conservative;
   bool                       method_hydro_reconstruct_positive;
   std::string                method_hydro_riemann_solver;
-
-  /// EnzoMethodNull
-  double                     method_null_dt;
 
   /// EnzoMethodTurbulence
   double                     method_turbulence_edot;

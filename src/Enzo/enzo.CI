@@ -73,7 +73,6 @@ module enzo {
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodNull;
   PUPable EnzoMethodPpm;
   PUPable EnzoMethodHydro;
   PUPable EnzoMethodPpml;
@@ -127,11 +126,15 @@ module enzo {
 
     // EnzoMethodGravity synchronization entry methods
     entry void r_method_gravity_continue(CkReductionMsg *msg);
+#ifdef NEW_REFRESH
+    entry void p_method_gravity_end();
+#else
     entry void r_method_gravity_end(CkReductionMsg *msg);
+#endif    
 
     // EnzoSolverCg synchronization entry methods
 
-    entry void r_solver_cg_matvec();
+    entry void p_solver_cg_matvec();
 
     entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
     entry void r_solver_cg_loop_0b(CkReductionMsg *msg);

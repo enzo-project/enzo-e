@@ -25,7 +25,7 @@ public: // interface
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p);
   
-  /// Convert from Enzo-E FieldFluxes object to ENZO fluxes arrays
+  /// Convert from Cello FieldFluxes object to ENZO fluxes arrays
   void save_to_arrays
   (
    Field field,
@@ -35,7 +35,7 @@ public: // interface
   {
   }
   
-  /// Convert from ENZO fluxes arrays to  Enzo-E FieldFluxes object
+  /// Convert from ENZO fluxes arrays to Cello FieldFluxes object
   void load_from_arrays
   (
    Field field,

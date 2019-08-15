@@ -1,37 +1,44 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodNull.hpp
+/// @file     problem_MethodNull.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
-/// @brief    [\ref Enzo] Declaration of EnzoMethodNull "null" solver
+/// @brief    [\ref Problem] Declaration of MethodNull "null" solver
 
-#ifndef ENZO_ENZO_METHOD_NULL_HPP
-#define ENZO_ENZO_METHOD_NULL_HPP
+#ifndef PROBLEM_METHOD_NULL_HPP
+#define PROBLEM_METHOD_NULL_HPP
 
-class EnzoMethodNull : public Method {
+class MethodNull : public Method {
 
-  /// @class    EnzoMethodNull
-  /// @ingroup  Enzo
+  /// @class    MethodNull
+  /// @ingroup  Problem
   ///
-  /// @brief [\ref Enzo] Null placeholder method, used for testing
-  /// non-method aspects of Enzo-P and Cello, such as mesh adapting
+  /// @brief [\ref Problem] Null method, used for forcing refresh
+  /// before other methods at the start of each cycle
 
 public: // interface
 
-  /// Create a new EnzoMethodNull object
-  EnzoMethodNull ( double dt ) : Method(), dt_(dt) {
-    const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			       enzo_sync_id_method_null);
-    refresh(ir)->add_all_fields();
-}
+  /// Create a new MethodNull object
+  MethodNull ( double dt )
+    : Method(), dt_(dt)
+  {
+    init_refresh_();
+  }
 
-  EnzoMethodNull() : Method(), dt_ (std::numeric_limits<double>::max()) {}
+  MethodNull()
+    : Method(), dt_ (std::numeric_limits<double>::max())
+  {
+    init_refresh_();
+  }
 
+  /// Initialize refresh
+  void init_refresh_();
+  
   /// Charm++ PUP::able declarations
-  PUPable_decl(EnzoMethodNull);
+  PUPable_decl(MethodNull);
   
   /// Charm++ PUP::able migration constructor
-  EnzoMethodNull (CkMigrateMessage *m)
+  MethodNull (CkMigrateMessage *m)
     : Method (m), dt_(0.0)
   { }
 
@@ -40,8 +47,7 @@ public: // interface
   { TRACEPUP; Method::pup(p); p | dt_; }
   
   /// Apply the method to advance a block one timestep 
-  virtual void compute( Block * block) throw()
-  { block->compute_done(); }
+  virtual void compute( Block * block) throw();
 
   virtual std::string name () throw () 
   { return "null"; }
@@ -56,4 +62,4 @@ protected: // attributes
   double dt_;
 };
 
-#endif /* ENZO_ENZO_METHOD_NULL_HPP */
+#endif /* PROBLEM_METHOD_NULL_HPP */

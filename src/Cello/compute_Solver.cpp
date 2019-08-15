@@ -36,7 +36,6 @@ Solver::Solver (std::string name,
   : PUP::able(),
   name_(name),
   ix_(-1),ib_(-1),
-  refresh_list_(),
   monitor_iter_(monitor_iter),
   restart_cycle_(restart_cycle),
   callback_(0),
@@ -45,23 +44,101 @@ Solver::Solver (std::string name,
   max_level_(max_level),
   id_sync_(0),
   solve_type_(solve_type)
+#ifdef NEW_REFRESH
+    ,ir_post_(-1)
+#else /* ! NEW_REFRESH */
+    ,refresh_list_()
+#endif      
 {
   FieldDescr * field_descr = cello::field_descr();
   ix_ = field_descr->field_id(field_x);
   ib_ = field_descr->field_id(field_b);
+#ifdef NEW_REFRESH
+    ir_post_ = add_new_refresh_();
+    new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
+#endif    
 }
 
 //----------------------------------------------------------------------
 
-#ifndef SHARED_PTR_REFRESH
+Solver::Solver () throw()
+  : PUP::able(),
+  name_(""),
+  ix_(-1),ib_(-1),
+  monitor_iter_(0),
+  restart_cycle_(1),
+  callback_(0),
+  index_(0),
+  min_level_(0),
+  max_level_(std::numeric_limits<int>::max()),
+  id_sync_(0),
+  solve_type_(solve_leaf)
+#ifdef NEW_REFRESH
+  , ir_post_(-1)
+#else /* ! NEW_REFRESH */    
+  , refresh_list_()
+#endif    
+{
+#ifdef NEW_REFRESH
+  ir_post_ = add_new_refresh_();
+  new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
+#endif    
+}
+
+//----------------------------------------------------------------------
+
 Solver::~Solver() throw()
 {
+#ifdef NEW_REFRESH
+#else /* ! NEW_REFRESH */  
   for (size_t i=0; i<refresh_list_.size(); i++) {
     delete refresh_list_[i];
     refresh_list_[i] = 0;
   }
+#endif  
 }
-#endif
+
+#ifdef NEW_REFRESH
+int Solver::add_new_refresh_ ()
+{
+  // set Solver::ir_post_
+
+  const int * g3 = cello::config()->field_ghost_depth;
+  const int ghost_depth = std::max(g3[0],std::max(g3[1],g3[2]));
+  const int min_face_rank = cello::config()->adapt_min_face_rank;
+
+  // Set default refresh object
+  Refresh refresh_default
+    (ghost_depth,min_face_rank, neighbor_type_(), sync_type_(), 0);
+
+  return cello::simulation()->new_register_refresh(refresh_default);
+}
+
+//----------------------------------------------------------------------
+
+Refresh & Solver::new_refresh(int ir)
+{
+  return cello::simulation()->new_refresh_list(ir);
+}
+
+//----------------------------------------------------------------------
+
+int Solver::refresh_post_id() const
+{
+  ASSERT("Solver::refresh_post_id()",
+	 "Accessing post-refresh object before it's registered",
+	 (ir_post_ >= 0));
+  return ir_post_;
+}
+
+//----------------------------------------------------------------------
+
+Refresh & Solver::refresh_post()
+{
+  return cello::simulation()->new_refresh_list(ir_post_);
+}
+
+#else
 //----------------------------------------------------------------------
 
 int Solver::add_refresh (int ghost_depth, 
@@ -72,43 +149,21 @@ int Solver::add_refresh (int ghost_depth,
 {
   int index=refresh_list_.size();
     
-#ifdef SHARED_PTR_REFRESH
-  refresh_list_.push_back
-    (std::make_shared<Refresh>
-     (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true));
-#else
   refresh_list_.push_back
     (new Refresh
      (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true));
-#endif  
+
   id_sync_ = sync_id;
   return index;
 }
 
 //----------------------------------------------------------------------
 
-#ifdef SHARED_PTR_REFRESH
-std::shared_ptr<Refresh> Solver::refresh(size_t index)
-#else
 Refresh * Solver::refresh(size_t index)
-#endif  
 {
   return (index < refresh_list_.size()) ? refresh_list_[index] : nullptr;
 }
 
-#ifdef NEW_REFRESH
-//----------------------------------------------------------------------
-
-int Solver::new_register_refresh_ (Refresh refresh)
-{
-  const int id_refresh = cello::simulation()->new_register_refresh(refresh);
-#ifdef DEBUG_NEW_REFRESH  
-  CkPrintf ("DEBUG_NEW_REFRESH registering refresh[%d]:\n",
-	    id_refresh);
-#endif  
-  cello::simulation()->new_refresh_list(id_refresh).print();
-  return id_refresh;
-}
 #endif
 
 //======================================================================
@@ -191,7 +246,7 @@ bool Solver::is_active_(Block * block) const
   const int level = block->level();
   const bool in_range = (min_level_ <= level && level <= max_level_);
 
-  return (in_range);
+  return (in_range || solve_type_ == solve_level);
 }
 
 //----------------------------------------------------------------------
@@ -206,7 +261,7 @@ bool Solver::is_finest_ (Block * block) const
 #ifdef DEBUG_SOLVER_CG
     CkPrintf ("DEBUG_SOLVER_CG level max_level %d %d\n",
 	      block->level() , max_level_);
-#endif    
+#endif
     return (block->level() == max_level_);
     break;
   case solve_tree:

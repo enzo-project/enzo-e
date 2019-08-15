@@ -54,9 +54,8 @@ public: // interface
       coarse_level_(0)
 #ifdef NEW_REFRESH  
     ,
-      id_new_refresh_main_(-1),
-      id_new_refresh_loop_3_(-1),
-      id_new_refresh_loop_9_(-1)
+      ir_loop_3_(-1),
+      ir_loop_9_(-1)
 #endif      
   {};
 
@@ -77,9 +76,8 @@ public: // interface
       coarse_level_(0)
 #ifdef NEW_REFRESH  
     ,
-      id_new_refresh_main_(-1),
-      id_new_refresh_loop_3_(-1),
-      id_new_refresh_loop_9_(-1)
+      ir_loop_3_(-1),
+      ir_loop_9_(-1)
 #endif      
           
   {}
@@ -141,9 +139,8 @@ public: // interface
     p | coarse_level_;
 
 #ifdef NEW_REFRESH  
-    p | id_new_refresh_main_;
-    p | id_new_refresh_loop_3_;
-    p | id_new_refresh_loop_9_;
+    p | ir_loop_3_;
+    p | ir_loop_9_;
 #endif    
   }
 
@@ -353,9 +350,8 @@ protected: // attributes
 
 #ifdef NEW_REFRESH  
   /// Refresh id's
-  int id_new_refresh_main_;
-  int id_new_refresh_loop_3_;
-  int id_new_refresh_loop_9_;
+  int ir_loop_3_;
+  int ir_loop_9_;
 #endif  
 };
 

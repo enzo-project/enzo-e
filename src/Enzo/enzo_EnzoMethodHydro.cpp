@@ -51,6 +51,8 @@ EnzoMethodHydro::EnzoMethodHydro
 {
   // Initialize default Refresh object
 
+#ifdef NEW_REFRESH
+#else  
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_ppm);
 
@@ -64,7 +66,7 @@ EnzoMethodHydro::EnzoMethodHydro
   refresh(ir)->add_field("internal_energy");
   refresh(ir)->add_field("total_energy");
   refresh(ir)->add_field("pressure");
-
+#endif
 }
 
 //----------------------------------------------------------------------

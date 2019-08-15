@@ -112,6 +112,7 @@ void Config::pup (PUP::er &p)
   p | method_courant;
   p | method_timestep;
   p | method_trace_name;
+  p | method_null_dt;
 
   // Monitor
 
@@ -740,6 +741,9 @@ void Config::read_method_ (Parameters * p) throw()
     method_trace_name[index_method] = p->value_string
       (full_name + ":name", "trace");
   }
+  method_null_dt = p->value_float
+    ("Method:null:dt",std::numeric_limits<double>::max());
+
 }
 
 //----------------------------------------------------------------------

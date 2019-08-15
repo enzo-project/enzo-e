@@ -29,10 +29,16 @@
 #   define TRACE_STATE(BLOCK,MSG) /* ... */
 #endif
 
+#define CHECK_ID(ID)				\
+  ASSERT1 ("CHECK_ID",				\
+	   "Invalid id %d",ID,			\
+	   ID>=0);				\
+
 #ifdef NEW_REFRESH
 
 void Block::new_refresh_start (int id_refresh, int callback)
 {
+  CHECK_ID(id_refresh);
   TRACE_NEW_REFRESH(this,id_refresh,"new_refresh_start()");
 
   RefreshState & state = new_refresh_state_list_[id_refresh];
@@ -41,6 +47,10 @@ void Block::new_refresh_start (int id_refresh, int callback)
   // Send field and/or particle data associated with the given refresh
   // object to corresponding neighbors
 
+#ifdef DEBUG_NEW_REFRESH  
+    CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d\n",name().c_str(),refresh.active());
+#endif  
+  
   if ( refresh.active() ) {
 
     ASSERT1 ("Block::new_refresh_start()",
@@ -51,13 +61,10 @@ void Block::new_refresh_start (int id_refresh, int callback)
     state = RefreshState::ACTIVE;
     TRACE_STATE(this,"new_refresh_start");
 
-#ifdef DEBUG_NEW_REFRESH  
-    CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d\n",name().c_str(),refresh.active());
-#endif  
-  
     int count = 0;
 
     // send Field face data
+    
     if (refresh.any_fields()) {
       count += new_refresh_load_field_faces_ (refresh);
     }
@@ -95,6 +102,7 @@ void Block::new_refresh_start (int id_refresh, int callback)
 //----------------------------------------------------------------------
 void Block::new_refresh_wait (int id_refresh, int callback)
 {
+  CHECK_ID(id_refresh);
   TRACE_NEW_REFRESH(this,id_refresh,"new_refresh_wait()");
 
   Refresh & refresh = new_refresh(id_refresh);
@@ -158,6 +166,7 @@ void Block::new_refresh_wait (int id_refresh, int callback)
 
 void Block::new_refresh_check_done (int id_refresh)
 {
+  CHECK_ID(id_refresh);
   TRACE_NEW_REFRESH(this,id_refresh,"new_refresh_check_done()");
 
   Refresh & refresh    = new_refresh(id_refresh);
@@ -175,7 +184,9 @@ void Block::new_refresh_check_done (int id_refresh)
 	    sync.value(),sync.stop());
 #endif  
   
-  if (state == RefreshState::READY && (sync.is_done())) {
+  TRACE_STATE(this,"new_refresh_check_done");
+  
+  if (sync.stop()==0 || state == RefreshState::READY && (sync.is_done())) {
 
     // Make sure incoming message queue is empty
 
@@ -211,12 +222,12 @@ void Block::p_new_refresh_recv (MsgRefresh * msg)
 {
 
   const int id_refresh = msg->id_refresh();
+  CHECK_ID(id_refresh);
   TRACE_NEW_REFRESH(this,id_refresh,"p_new_refresh_recv()");
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH p_new_refresh_recv id %d\n",id_refresh);
 #endif  
 
-  Refresh & refresh    = new_refresh(id_refresh);
   RefreshState & state = new_refresh_state_list_[id_refresh];
   Sync & sync          = new_refresh_sync_list_[id_refresh];
 
@@ -248,21 +259,25 @@ void Block::p_new_refresh_recv (MsgRefresh * msg)
 
 void Block::new_refresh_exit (Refresh & refresh)
 {
-  TRACE_NEW_REFRESH(this,-1,"calling callback");
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("%s Calling callback %d\n",name().c_str(),refresh.callback());
-  fflush(stdout);
-#endif  
-  CkCallback
-    (refresh.callback(),
-     CkArrayIndexIndex(index_),thisProxy).send(NULL);
+  TRACE_NEW_REFRESH(this,refresh.id(),"calling callback");
+  CHECK_ID(refresh.id());
+  update_boundary_();
+  control_sync (refresh.callback(),
+  		refresh.sync_type(),
+  		refresh.sync_exit(),
+  		refresh.min_face_rank(),
+  		refresh.neighbor_type(),
+  		refresh.root_level());
+  // CkCallback
+  //   (refresh.callback(),
+  //    CkArrayIndexIndex(index_),thisProxy).send(NULL);
 }
 
 //----------------------------------------------------------------------
 
 int Block::new_refresh_load_field_faces_ (Refresh & refresh)
 {
-  TRACE_NEW_REFRESH(this,-1,"new_refresh_load_field_faces_()");
+  TRACE_NEW_REFRESH(this,refresh.id(),"new_refresh_load_field_faces_()");
 
   int count = 0;
 
@@ -336,7 +351,7 @@ void Block::new_refresh_load_field_face_
   int ic3[3])
 
 {
-  TRACE_NEW_REFRESH(this,-1,"new_refresh_load_field_face_()");
+  TRACE_NEW_REFRESH(this,refresh.id(),"new_refresh_load_field_face_()");
   // ... coarse neighbor requires child index of self in parent
 
   if (refresh_type == refresh_coarse) {
@@ -358,6 +373,7 @@ void Block::new_refresh_load_field_face_
   data_msg -> set_field_data (data()->field_data(),false);
 
   const int id_refresh = refresh.id();
+  CHECK_ID(id_refresh);
   
   ASSERT1 ("Block::new_refresh_load_field_face_()",
 	  "id_refresh %d of refresh object is out of range",
@@ -375,7 +391,7 @@ void Block::new_refresh_load_field_face_
 
 int Block::new_refresh_load_particle_faces_ (Refresh & refresh)
 {
-  TRACE_NEW_REFRESH(this,-1,"new_refresh_load_particle_faces_()");
+  TRACE_NEW_REFRESH(this,refresh.id(),"new_refresh_load_particle_faces_()");
   const int rank = cello::rank();
 
   const int npa3[3] = { 4, 4*4, 4*4*4 };
@@ -421,6 +437,7 @@ void Block::new_particle_send_
     Particle particle_send (p_descr,p_data);
     
     const int id_refresh = refresh.id();
+    CHECK_ID(id_refresh);
 
     ASSERT1 ("Block::new_refresh_load_field_face_()",
 	     "id_refresh %d of refresh object is out of range",

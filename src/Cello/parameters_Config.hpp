@@ -80,6 +80,8 @@ public: // interface
     method_courant(),
     method_timestep(),
     method_trace_name(),
+  // MethodNull
+    method_null_dt(0.0),
     monitor_debug(false),
     monitor_verbose(false),
     num_output(0),
@@ -423,6 +425,8 @@ public: // attributes
   std::vector<double>        method_courant;
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;
+  double                     method_null_dt;
+
 
   // Monitor
 

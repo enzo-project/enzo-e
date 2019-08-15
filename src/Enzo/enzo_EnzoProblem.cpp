@@ -286,6 +286,10 @@ Solver * EnzoProblem::create_solver_
     solve_type = solve_unknown;
   }
 
+#ifdef DEBUG_NEW_REFRESH  
+  CkPrintf ("DEBUG_NEW_REFRESH create solver %s\n",
+	    enzo_config->solver_list[index_solver].c_str());
+#endif  
   if (solver_type == "cg") {
 
     solver = new EnzoSolverCg
@@ -510,11 +514,6 @@ Method * EnzoProblem::create_method_
     method = new EnzoMethodHeat
       (enzo_config->method_heat_alpha,
        config->method_courant[index_method]);
-
-  } else if (name == "null") {
-
-    method = new EnzoMethodNull
-      (enzo_config->method_null_dt);
 
 #ifdef CONFIG_USE_GRACKLE
     //--------------------------------------------------

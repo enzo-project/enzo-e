@@ -26,9 +26,12 @@
 
 //----------------------------------------------------------------------
 
+#ifdef NEW_REFRESH
+#else
 void Block::refresh_enter (int callback, Refresh * refresh) 
 {
 #ifdef DEBUG_REFRESH
+  CkPrintf ("DEBUG_TRACE_REFRESH refresh_enter %d\n",callback);
   CkPrintf ("%d %s:%d DEBUG REFRESH %s Block::refresh_enter(%p) callback %d refresh callback %d\n",
 	    CkMyPe(), __FILE__,__LINE__,name().c_str(),refresh,callback,refresh->callback());
   fflush(stdout);
@@ -42,16 +45,12 @@ void Block::refresh_enter (int callback, Refresh * refresh)
 
   refresh_begin_();
 }
-
+#endif
 //----------------------------------------------------------------------
 
 void Block::refresh_begin_() 
 {
-#ifdef SHARED_PTR_REFRESH
-  std::shared_ptr<Refresh> refresh = this->refresh();
-#else
   Refresh * refresh = this->refresh();
-#endif  
   TRACE_REFRESH("refresh_begin_()",refresh);
 
   check_leaf_();
@@ -60,12 +59,17 @@ void Block::refresh_begin_()
 
   cello::simulation()->set_phase(phase_refresh);
 
+#ifdef NEW_REFRESH
+  ERROR("refresh_begin_()",
+        "refresh_begin_ called with NEW_REFRESH");
+#else  
   control_sync (CkIndex_Block::p_refresh_continue(),
 		refresh->sync_type(),
 		refresh->sync_load(),
 		refresh->min_face_rank(),
 		refresh->neighbor_type(),
 		refresh->root_level());
+#endif  
 }
 
 //----------------------------------------------------------------------
@@ -74,11 +78,7 @@ void Block::refresh_continue()
 {
 
   // Refresh if Refresh object exists and have data
-#ifdef SHARED_PTR_REFRESH
-  std::shared_ptr<Refresh> refresh = this->refresh();
-#else
   Refresh * refresh = this->refresh();
-#endif  
   TRACE_REFRESH("refresh_continue_()",refresh);
 
   if ( refresh && refresh->active() ) {
@@ -99,9 +99,13 @@ void Block::refresh_continue()
     // wait for all messages to arrive (including this one)
     // before continuing to p_refresh_exit()
 
+#ifdef NEW_REFRESH
+  ERROR("refresh_continue_()",
+        "refresh_continue_ called with NEW_REFRESH");
+#else  
     control_sync_count(CkIndex_Block::p_refresh_exit(),
 			refresh->sync_store(),count);
-    
+#endif    
   } else {
 
     refresh_exit_();
@@ -123,15 +127,16 @@ void Block::p_refresh_store (MsgRefresh * msg)
 
   delete msg;
 
-#ifdef SHARED_PTR_REFRESH  
-  std::shared_ptr<Refresh> refresh = this->refresh();
-#else
   Refresh * refresh = this->refresh();
-#endif  
   TRACE_REFRESH("p_refresh_store()",refresh);
 
+#ifdef NEW_REFRESH
+  ERROR("p_refresh_store()",
+        "p_refresh_store() called with NEW_REFRESH");
+#else  
   control_sync_count(CkIndex_Block::p_refresh_exit(),
 		     refresh->sync_store(),0);
+#endif  
   
   performance_stop_(perf_refresh_store);
   performance_start_(perf_refresh_store_sync);
@@ -154,7 +159,7 @@ int Block::refresh_load_field_faces_ (Refresh *refresh)
     // Loop over neighbor leaf Blocks (not necessarily same level)
 
     const int min_level = cello::config()->mesh_min_level;
-    
+
     ItNeighbor it_neighbor =
       this->it_neighbor(min_face_rank,index_,
 			neighbor_type,min_level,refresh->root_level());
@@ -227,11 +232,7 @@ void Block::refresh_load_field_face_
   // ... copy field ghosts to array using FieldFace object
   bool lg3[3] = {false,false,false};
 
-#ifdef SHARED_PTR_REFRESH  
-  std::shared_ptr<Refresh> refresh = this->refresh();
-#else
   Refresh * refresh = this->refresh();
-#endif  
 
   FieldFace * field_face = create_face
     (if3, ic3, lg3, refresh_type, refresh,false);
@@ -381,7 +382,9 @@ int Block::particle_create_array_neighbors_
   const int level = this->level();
 
   const int min_face_rank = refresh->min_face_rank();
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,neighbor_leaf,0,0);
+
+  ItNeighbor it_neighbor =
+    this->it_neighbor(min_face_rank,index_, neighbor_leaf,0,0);
 
   int il = 0;
 
@@ -494,7 +497,8 @@ void Block::particle_apply_periodic_update_
 
   // Compute position updates for particles crossing periodic boundaries
 
-  ItNeighbor it_neighbor = this->it_neighbor(min_face_rank,index_,neighbor_leaf,0,0);
+  ItNeighbor it_neighbor =
+    this->it_neighbor(min_face_rank,index_, neighbor_leaf,0,0);
 
   int il=0;
 

@@ -6,7 +6,7 @@
 /// @brief    Implementation of the ItNeighbor class
 
 #include "mesh.hpp"
-
+// #define DEBUG_IT_NEIGHBOR
 //----------------------------------------------------------------------
 
 ItNeighbor::ItNeighbor
@@ -55,7 +55,10 @@ bool ItNeighbor::next_ ()
   do {
     increment_();
   } while ( ! valid_() );
-
+#ifdef DEBUG_IT_NEIGHBOR  
+  CkPrintf ("DEBUG_IT_NEIGHBOR %s  %d %d %d  %d\n",
+	    block_->name().c_str(),of3_[0],of3_[1],of3_[2],face_level());
+#endif    
   return (! is_reset()) ;
 }
 
@@ -238,7 +241,6 @@ bool ItNeighbor::valid_()
       const bool is_upper_face     = (of3_[axis] == +1);
       const bool is_lower_periodic = periodic_[axis][0];
       const bool is_upper_periodic = periodic_[axis][1];
-
       if (is_lower_face && (! is_lower_periodic) ) return false;
       if (is_upper_face && (! is_upper_periodic) ) return false;
 

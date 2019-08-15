@@ -13,7 +13,7 @@ import socket
 # Temporary setting for using new Refresh implementation
 #----------------------------------------------------------------------
 
-new_refresh = 1
+new_refresh = os.getenv('NEW_REFRESH')
 
 #----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
@@ -356,7 +356,9 @@ if (use_jemalloc == 1):
 if (use_papi != 0):      defines.append( define_papi )
 if (use_grackle != 0):   defines.append( define_grackle )
 
-if (new_refresh != 0):    defines.append( define_new_refresh )
+if (new_refresh != '0'):
+   defines.append( define_new_refresh )
+#   defines.append("DEBUG_NEW_REFRESH");
 if (new_output != 0):    defines.append( define_new_output )
 
 if (trace != 0):         defines.append( define_trace )
@@ -633,7 +635,10 @@ Export('use_papi')
 
 if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
-   build_dir = 'build-' + branch
+   if (new_refresh == '0'):
+      build_dir = 'build-' + branch + '-0'
+   else:	
+      build_dir = 'build-' + branch + '-1'
 else:     
    build_dir = 'build'
    

@@ -202,9 +202,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     coarse_level_(coarse_level)
 #ifdef NEW_REFRESH
   ,
-    id_new_refresh_main_(-1),
-    id_new_refresh_loop_3_(-1),
-    id_new_refresh_loop_9_(-1)
+    ir_loop_3_(-1),
+    ir_loop_9_(-1)
 #endif 
 {
 
@@ -818,13 +817,13 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
 #ifdef NEW_REFRESH
 
   TRACE_NEW_REFRESH(block,"EnzoSolverBiCgStab::loop_25");
-  block->new_refresh(id_new_refresh_loop_3_).set_active(is_finest_(block));
+  block->new_refresh(ir_loop_3_).set_active(is_finest_(block));
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d %d\n",
 	    block->name().c_str(),
-	    is_finest_(block),block->new_refresh(id_new_refresh_loop_3_).active());
+	    is_finest_(block),block->new_refresh(ir_loop_3_).active());
 #endif  
-  block->new_refresh_start(id_new_refresh_loop_3_,
+  block->new_refresh_start(ir_loop_3_,
 			   CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
 #else
   
@@ -1154,15 +1153,15 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
 #ifdef NEW_REFRESH
 
   TRACE_NEW_REFRESH(block,"EnzoSolverBiCgStab::loop_85");
-  block->new_refresh(id_new_refresh_loop_9_).set_active(is_finest_(block));
+  block->new_refresh(ir_loop_9_).set_active(is_finest_(block));
 
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d\n",block->name().c_str(),
-	    block->new_refresh(id_new_refresh_loop_9_).active());
+	    block->new_refresh(ir_loop_9_).active());
 #endif  
-  block->new_refresh_start(id_new_refresh_loop_9_,
+  block->new_refresh_start(ir_loop_9_,
 			   CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());
-#else
+#else /* ! NEW_REFRESH */
   
   // Refresh field faces then call p_solver_bicgstab_loop_85()
 
@@ -1810,34 +1809,28 @@ void EnzoSolverBiCgStab::dot_done_(EnzoBlock * block,
 
 void EnzoSolverBiCgStab::new_register_refresh_()
 {
+  Refresh & refresh_post = this->refresh_post();
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
   
-  const int ghost_depth = 4;
-  const int min_face_rank = cello::rank() - 1;
-
-  Refresh refresh_main
-    (ghost_depth,min_face_rank, neighbor_type_(), sync_type_(), 0);
-
   if (solve_type_ == solve_tree)
-    refresh_main.set_root_level (coarse_level_);
+    refresh_post.set_root_level (coarse_level_);
 
-  refresh_main.add_field (ix_);
-  refresh_main.add_field (ir_);
-  refresh_main.add_field (ir0_);
-  refresh_main.add_field (ip_);
-  refresh_main.add_field (iy_);
-  refresh_main.add_field (iv_);
-  refresh_main.add_field (iq_);
-  refresh_main.add_field (iu_);
-
-  refresh_main.set_callback(CkIndex_Block::p_refresh_exit());
-
-  id_new_refresh_main_ = Solver::new_register_refresh_(refresh_main);
+  refresh_post.add_field (ix_);
+  refresh_post.add_field (ir_);
+  refresh_post.add_field (ir0_);
+  refresh_post.add_field (ip_);
+  refresh_post.add_field (iy_);
+  refresh_post.add_field (iv_);
+  refresh_post.add_field (iq_);
+  refresh_post.add_field (iu_);
 
   //--------------------------------------------------
 
-  Refresh refresh_loop_3
-    (ghost_depth,min_face_rank, neighbor_type_(), sync_type_(), 0);
+  ir_loop_3_ = add_new_refresh_();
+  cello::simulation()->new_refresh_set_name(ir_post_,name()+":loop_3");
 
+  Refresh & refresh_loop_3 = new_refresh(ir_loop_3_);
+  
   if (solve_type_ == solve_tree)
     refresh_loop_3.set_root_level (coarse_level_);
 
@@ -1853,14 +1846,12 @@ void EnzoSolverBiCgStab::new_register_refresh_()
 
   refresh_loop_3.set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
   
-  id_new_refresh_loop_3_ = Solver::new_register_refresh_(refresh_loop_3);
-
   //--------------------------------------------------
 
-  Refresh refresh_loop_9
-    (ghost_depth,min_face_rank,
-     neighbor_type_(), sync_type_(),
-     enzo_sync_id_solver_bicgstab_loop_85);
+  ir_loop_9_ = add_new_refresh_();
+  cello::simulation()->new_refresh_set_name(ir_post_,name()+":loop_9");
+
+  Refresh & refresh_loop_9 = new_refresh(ir_loop_9_);
   
   if (solve_type_ == solve_tree)
     refresh_loop_9.set_root_level (coarse_level_);
@@ -1877,7 +1868,5 @@ void EnzoSolverBiCgStab::new_register_refresh_()
   
   refresh_loop_9.set_callback(CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());
 
-  id_new_refresh_loop_9_ = Solver::new_register_refresh_(refresh_loop_9);
-  
 }
 #endif 

@@ -25,17 +25,8 @@ public: // interface
 	      int monitor_iter,
 	      int restart_cycle,
 	      int solve_type,
-	      int min_level = 0,
-	      int max_level = std::numeric_limits<int>::max()) throw()
-    : Solver(name,
-	     field_x,
-	     field_b,
-	     monitor_iter,
-	     restart_cycle,
-	     solve_type,
-	     min_level,
-	     max_level)
-  {}
+	      int min_level = -std::numeric_limits<int>::max(),
+	      int max_level = std::numeric_limits<int>::max()) throw();
 
   /// Create an uninitialized SolverNull
   SolverNull () throw()

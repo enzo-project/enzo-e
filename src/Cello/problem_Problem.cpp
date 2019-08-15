@@ -444,6 +444,8 @@ void Problem::initialize_method ( Config * config ) throw()
   const size_t num_method = config->method_list.size();
 
   Method::courant_global = config->method_courant_global;
+
+  method_list_.push_back(new MethodNull(config->method_null_dt)); 
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
@@ -811,6 +813,10 @@ Method * Problem::create_method_
     method = new MethodTrace(config->method_courant[index_method],
 			     config->method_timestep[index_method],
 			     config->method_trace_name[index_method]);
+  } else if (name == "null") {
+
+    method = new MethodNull
+      (config->method_null_dt);
   }
   return method;
 }

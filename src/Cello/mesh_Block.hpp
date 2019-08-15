@@ -289,7 +289,9 @@ public: // interface
 
   /// Start a new solver
   void push_solver(int index_solver) throw()
-  { index_solver_.push_back(index_solver); }
+  {
+    index_solver_.push_back(index_solver);
+  }
 
   /// Return from a solver
   int pop_solver() throw()
@@ -558,10 +560,11 @@ public:
 
   void new_refresh_exit (Refresh & refresh);
 
-#endif  
-  // #else // ! NEW_REFRESH
+#else // ! NEW_REFRESH
 
   void refresh_enter (int call, Refresh * refresh);
+
+#endif  
 
   /// Enter the refresh phase after synchronizing
   void p_refresh_continue ()
@@ -890,19 +893,11 @@ protected: // functions
   void set_refresh (Refresh * refresh) 
   {
     // WARNING: known memory leak (see bug # 133)
-#ifdef SHARED_PTR_REFRESH    
-    refresh_.push_back(std::make_shared<Refresh>(*refresh));
-#else
     refresh_.push_back(new Refresh (*refresh));
-#endif    
   };
 
   /// Return the currently-active Refresh object
-#ifdef SHARED_PTR_REFRESH  
-  std::shared_ptr<Refresh> refresh () throw()
-#else
   Refresh * refresh () throw()
-#endif    
   {  return refresh_.back();  }
 
 
@@ -1005,11 +1000,7 @@ protected: // attributes
   
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
-#ifdef SHARED_PTR_REFRESH  
-  std::vector<std::shared_ptr<Refresh> > refresh_;
-#else
   std::vector<Refresh*> refresh_;
-#endif  
 
 #ifdef NEW_REFRESH  
   std::vector < Sync > new_refresh_sync_list_;

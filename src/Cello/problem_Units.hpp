@@ -10,9 +10,9 @@
 
 class Units : public PUP::able {
 
-  /// @class    EnzoUnits
-  /// @ingroup  Enzo
-  /// @brief    [\ref Enzo]
+  /// @class    Units
+  /// @ingroup  Problem
+  /// @brief    [\ref Problem]
 
 public: // interface
 

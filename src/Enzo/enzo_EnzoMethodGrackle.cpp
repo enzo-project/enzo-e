@@ -119,9 +119,15 @@ EnzoMethodGrackle::EnzoMethodGrackle
   }
 
   /// Initialize default Refresh
+#ifdef NEW_REFRESH
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+#else
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
                        enzo_sync_id_method_grackle);
-  refresh(ir)->add_all_fields();
+  Refresh & refresh = *this->refresh(ir);
+#endif  
+  refresh.add_all_fields();
 
   /// Define Grackle's internal data structures
   grackle_chemistry_data_defined_ = false;

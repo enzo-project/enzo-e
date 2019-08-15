@@ -43,6 +43,7 @@ module mesh {
   PUPable ItIndexRange;
   PUPable MaskPng;
   PUPable MaskExpr;
+  PUPable MethodNull;
   PUPable MethodTrace;
   PUPable OutputCheckpoint;
   PUPable OutputData;

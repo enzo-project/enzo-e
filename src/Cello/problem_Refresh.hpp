@@ -34,7 +34,8 @@ public: // interface
     callback_(0) ,
     root_level_(0)
 #ifdef NEW_REFRESH
-    , id_refresh_(-1)
+    , id_refresh_(-1),
+    id_solver_(-1)
 #endif
   {
   }
@@ -62,7 +63,9 @@ public: // interface
       callback_(0),
       root_level_(0)
 #ifdef NEW_REFRESH
-    , id_refresh_(-1)
+    , id_refresh_(-1),
+      id_solver_(-1)
+      
 #endif      
   {
   }
@@ -88,7 +91,8 @@ public: // interface
     callback_(0),
     root_level_(0)
 #ifdef NEW_REFRESH    
-    , id_refresh_(-1)
+    , id_refresh_(-1),
+      id_solver_(-1)
 #endif    
   {
   }
@@ -115,6 +119,7 @@ public: // interface
     p | root_level_;
 #ifdef NEW_REFRESH
     p | id_refresh_;
+    p | id_solver_;
 #endif    
   }
 
@@ -281,10 +286,13 @@ public: // interface
   int sync_type() const 
   { return sync_type_; }
 
+#ifdef NEW_REFRESH
+#else
   int sync_load() const
   { return 3*sync_id_; }
   int sync_store() const
   { return 3*sync_id_+1; }
+#endif  
   int sync_exit() const
   { return 3*sync_id_+2; }
 
@@ -360,6 +368,14 @@ public: // interface
   /// return the new refresh id in new_refresh_list_[]
   int id() const
   { return id_refresh_; }
+
+  /// Set the solver id in Problem::solver(id)
+  void set_solver_id(int id_solver)
+  { id_solver_ = id_solver; }
+
+  /// return the solver id (-1 if not initialized)
+  int solver_id() const
+  { return id_solver_; }
 #endif  
   
   //--------------------------------------------------
@@ -432,6 +448,8 @@ private: // attributes
 #ifdef NEW_REFRESH  
   /// ID in new_refresh_list_[]
   int id_refresh_;
+  /// ID of calling Solver
+  int id_solver_;
 #endif  
 };
 
