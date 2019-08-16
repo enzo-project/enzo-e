@@ -391,6 +391,7 @@ if (balance == 1):
 # UNIT TEST SETTINGS
 #======================================================================
 
+
 if (parallel_run == ''):
    if (smp == 1):
       parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
