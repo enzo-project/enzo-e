@@ -75,17 +75,21 @@ protected: // methods
                 double *vx, double *vy, double *vz,
                 const int &index, const int &dix, const int &diy,
                 const int &diz);
-  int check_minimum_mass(const double &m);
+  int check_mass(const double &m);
 
 protected: // attributes
 
   bool use_density_threshold_;
   bool use_velocity_divergence_;
   bool use_dynamical_time_;
+  bool use_self_gravitating_;
+  bool use_h2_self_shielding_;
+  bool use_jeans_mass_;
   double number_density_threshold_;
   double efficiency_;
   double maximum_star_fraction_;
-  double star_particle_mass_;
+  double star_particle_min_mass_;
+  double star_particle_max_mass_;
   // variables to be passsed here
 };
 

@@ -129,6 +129,8 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   enzo_float * metal = field.is_field("metal_density") ?
     (enzo_float *) field.values("metal_density") : NULL;
 
+  const double Zsolar = 0.02;  // TODO: Update to more accurate value
+
   // Idea for multi-metal species - group these using 'group'
   // class in IC parameter file and in SF / Feedback routines simply
   // check if this group exists, and if it does, loop over all of these
@@ -155,19 +157,27 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         int i = ix + mx*(iy + my*iz);
 
         // need to compute this better for Grackle fields (on to-do list)
-        double ndens = density[i] * enzo_units->density() /
-                       (enzo_config->ppm_mol_weight * cello::mass_hydrogen);
+        double rho_cgs = density[i] * enzo_units->density();
+        double mean_particle_mass = enzo_config->ppm_mol_weight * cello::mass_hydrogen;
+        double ndens = rho_cgs / mean_particle_mass;
 
         double mass  = density[i] *dx*dy*dz * enzo_units->mass() / cello::mass_solar;
+        double metallicity = (metal) ? metal[i]/density[i]/Zsolar : 0.0;
 
         //
         // Apply the criteria for star formation
         //
         if (! this->check_number_density_threshold(ndens)) continue;
+        if (! this->check_self_gravitating(mean_particle_mass, rho_cgs, temperature[i],
+                                           enzo_units->length(), enzo_units->density(),
+                                           velocity_x, velocity_y, velocity_z, 
+                                           i, 1, my, my*mz, dx)) continue;
+        if (! this->check_h2_self_shielding(density, metallicity, i, 1, my, my*mz, dx)) continue;
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
                                               1, my, my*mz)) continue;
-        if (! this->check_minimum_mass(mass)) continue;
+        // Check whether mass in [min_mass, max_range] range and if specified, Jeans unstable
+        if (! this->check_mass(mass)) continue;
 
         double tdyn = sqrt(3.0 * cello::pi / 32.0 / cello::grav_constant /
                       (density[i] * enzo_units->density()));
