@@ -10,7 +10,6 @@ test/STOP
 include
 build
 build-*
-.vscode
 lib
 bin/enzo-p
 charmrun
