@@ -168,11 +168,11 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         // Apply the criteria for star formation
         //
         if (! this->check_number_density_threshold(ndens)) continue;
-        if (! this->check_self_gravitating(mean_particle_mass, rho_cgs, temperature[i],
-                                           enzo_units->length(), enzo_units->density(),
-                                           velocity_x, velocity_y, velocity_z, 
-                                           i, 1, my, my*mz, dx)) continue;
-        if (! this->check_h2_self_shielding(density, metallicity, i, 1, my, my*mz, dx)) continue;
+        // if (! this->check_self_gravitating(mean_particle_mass, rho_cgs, temperature[i],
+        //                                    enzo_units->length(), enzo_units->density(),
+        //                                    velocity_x, velocity_y, velocity_z, 
+        //                                    i, 1, my, my*mz, dx)) continue;
+        // if (! this->check_h2_self_shielding(density, metallicity, i, 1, my, my*mz, dx)) continue;
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
                                               1, my, my*mz)) continue;
@@ -192,18 +192,18 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
 
         // if this is less than the mass of a single particle,
         // use a random number draw to generate the particle
-        if ( star_fraction * mass < this->star_particle_mass_){
+        if ( star_fraction * mass < this->star_particle_min_mass_){
           // get a random number
           double rnum = (double(rand())) / (double(RAND_MAX));
-          double probability = this->efficiency_*mass/this->star_particle_mass_;
+          double probability = this->efficiency_ * mass / this->star_particle_min_mass_;
           if (rnum > probability){
               continue; // do not form stars
           } else{
-            star_fraction = this->star_particle_mass_ / mass;
+            star_fraction = this->star_particle_min_mass_ / mass;
           }
         } else {
           // (else, leave star fraction alone )
-          star_fraction = this->star_particle_mass_ / mass;
+          star_fraction = this->star_particle_min_mass_ / mass;
         }
 
         count++; //

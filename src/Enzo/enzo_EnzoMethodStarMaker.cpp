@@ -188,12 +188,16 @@ int EnzoMethodStarMaker::check_number_density_threshold(
 }
 
 int EnzoMethodStarMaker::check_self_gravitating(
-                const double mean_particle_mass, const double rho_cgs, const double temperature,
-                double *vx, double *vy, double *vz,
+                const double mean_particle_mass, const double rho_cgs, const enzo_float temperature,
+                enzo_float *vx, enzo_float *vy, enzo_float *vz,
                 const double lunit, const double vunit,
                 const int &index, const int &dix, const int &diy, const int &diz,
                 const double dx, const double dy, const double dz)
 {
+
+  if (!use_self_gravitating_)
+    return 1;
+
   // Hopkins et al. (2013). Virial parameter: alpha < 1 -> self-gravitating
   
   double div_v_norm2, cs2, alpha;
@@ -217,25 +221,30 @@ int EnzoMethodStarMaker::check_self_gravitating(
   const double gamma = 5.0 / 3.0;
   cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
 
-  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * cello::grav_constant * rho_cgs)
+  alpha = (div_v_norm2 + cs2/dx2) / (8 * cello::pi * cello::grav_constant * rho_cgs);
   return (alpha < 1);
 
 }
 
 double EnzoMethodStarMaker::h2_self_shielding_factor(
-                double *rho, const double dunit, const double lunit,
+                enzo_float *rho, const double rho_cgs,
+                const double dunit, const double lunit,
                 const int &index, const int &dix, const int &diy, const int &diz,
                 const double dx, const double dy, const double dz,
                 const double metallicity)
 {
+
+  if (!use_h2_self_shielding_)
+    return 1;
+
   // Hopkins et al. (2017) and Krumholz & Gnedin (2011). Constant numbers come from their models and fits.
   // Mass fraction that is self-shielded and able to cool. f_shield > 0
 
   double tau, phi, psi, f_shield, grad_rho;
 
-  grad_rho = sqrt(pow((rho[index+dix] - rho[index-dix]]) / dx, 2) +
-                  pow((rho[index+diy] - rho[index-diy]]) / dy, 2) +
-                  pow((rho[index+diz] - rho[index-diz]]) / dz, 2));
+  grad_rho = sqrt(pow((rho[index+dix] - rho[index-dix]) / dx, 2) +
+                  pow((rho[index+diy] - rho[index-diy]) / dy, 2) +
+                  pow((rho[index+diz] - rho[index-diz]) / dz, 2));
   grad_rho *= dunit / lunit;
   tau = 434.8 * rho_cgs * (dx + rho_cgs / grad_rho);  // 434.8 cm^2 / g
   phi = 0.756 * pow(1.0 + 3.1 * metallicity, 0.365);
@@ -245,21 +254,24 @@ double EnzoMethodStarMaker::h2_self_shielding_factor(
 
 }
 
-double EnzoMethodStarMaker::check_jeans_mass(
-  const double temperature, const double mean_particle_mass, const double rho_cgs,
-  const double mass
+int EnzoMethodStarMaker::check_jeans_mass(
+  const double temperature, const double mean_particle_mass, 
+  const double rho_cgs, const double mass
 )
 {
+  if (!use_jeans_mass_)
+    return 1;
+
   const double gamma = 5.0 / 3.0;
   const double minimum_jeans_mass = 1000 * cello::mass_solar;
   double cs2 = (gamma * cello::kboltz * temperature) / mean_particle_mass;
-  double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / (pow(cello::grav_constant, 1.5) * sqrt(rho_cgs))
-  double m_jcrit = MAX(minimum_jeans_mass, m_jeans)
-  return (mass < m_jcrit)
+  double m_jeans = (cello::pi/6) * pow(cs2, 1.5) / (pow(cello::grav_constant, 1.5) * sqrt(rho_cgs));
+  double m_jcrit = MAX(minimum_jeans_mass, m_jeans);
+  return (mass < m_jcrit);
 }
 
 int EnzoMethodStarMaker::check_velocity_divergence(
-                double *vx, double *vy, double *vz,
+                enzo_float *vx, enzo_float *vy, enzo_float *vz,
                 const int &index, const int &dix, const int &diy,
                 const int &diz){
 
@@ -287,10 +299,12 @@ int EnzoMethodStarMaker::check_velocity_divergence(
     return result;
 }
 
-int EnzoMethodStarMaker::check_mass(const double & m){
+int EnzoMethodStarMaker::check_mass(const double &m){
   /// Apply the condition that the mass of gas converted into
   /// stars in a single cell cannot exceed a certain fraction
   /// of that cell's mass
-  return ((maximum_star_fraction_ * m) > star_particle_min_mass_) &&
-    ((maximum_star_fraction_ * m) < star_particle_max_mass_);
+  int minlimit = ((maximum_star_fraction_ * m) > star_particle_min_mass_);
+  int maxlimit = ((maximum_star_fraction_ * m) < star_particle_max_mass_);
+  return minlimit && maxlimit;
+
 }
