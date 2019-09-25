@@ -32,10 +32,8 @@ public: // interface
   EnzoMethodGravity()
     : index_solver_(-1),
       grav_const_(0.0),
-      order_(4)
-#ifdef NEW_REFRESH
-    , ir_exit_(-1)
-#endif      
+      order_(4),
+      ir_exit_(-1)
   {};
 
   /// Destructor
@@ -49,10 +47,8 @@ public: // interface
     : Method (m),
       index_solver_(-1),
       grav_const_(0.0),
-      order_(4)
-#ifdef NEW_REFRESH
-    , ir_exit_(-1)
-#endif      
+      order_(4),
+      ir_exit_(-1)
       
   { }
 
@@ -71,9 +67,7 @@ public: // interface
     p | index_solver_;
     p | grav_const_;
     p | order_;
-#ifdef NEW_REFRESH    
     p | ir_exit_;
-#endif    
 
   }
 
@@ -89,9 +83,7 @@ public: // interface
   /// Compute accelerations from potential and exit solver
   void compute_accelerations (EnzoBlock * enzo_block) throw();
 
-#ifdef NEW_REFRESH  
   void refresh_potential (EnzoBlock * enzo_block) throw();
-#endif    
 
   protected: // methods
 
@@ -112,10 +104,8 @@ protected: // attributes
   /// (Note EnzoMatrixLaplacian supports order=6 as well)
   int order_;
 
-#ifdef NEW_REFRESH  
   /// Refresh id's
   int ir_exit_;
-#endif  
 };
 
 

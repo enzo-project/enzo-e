@@ -35,18 +35,10 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 {
   // Initialize default Refresh object
 
-#ifdef NEW_REFRESH
 
   Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   
-#else /* OLD_REFRESH */  
-  const int min_face_rank = 0; // cello::rank()-1
-  const int ir = add_refresh(4,min_face_rank,neighbor_leaf,sync_barrier,
- 			     enzo_sync_id_method_pm_deposit);
-  Refresh &refresh = *this->refresh(ir);
-#endif  
- 
   refresh.add_field("density");
   refresh.add_field("velocity_x");
   refresh.add_field("velocity_y");

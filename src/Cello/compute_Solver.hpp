@@ -46,16 +46,13 @@ public: // interface
     min_level_(- std::numeric_limits<int>::max()),
     max_level_(  std::numeric_limits<int>::max()),
     id_sync_(0),
-    solve_type_(solve_leaf)
-#ifdef NEW_REFRESH
-    ,ir_post_(-1)
-#else /* ! NEW_REFRESH */
-    ,refresh_list_()
-#endif      
+    solve_type_(solve_leaf),
+    ir_post_(-1)
   { }
 
   /// Destructor
-  virtual ~Solver() throw();
+  virtual ~Solver() throw()
+  { }
   
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
@@ -75,11 +72,7 @@ public: // interface
     p | max_level_;
     p | id_sync_;
     p | solve_type_;
-#ifdef NEW_REFRESH
     p | ir_post_;
-#else    
-    p | refresh_list_;
-#endif    
   }
 
   Refresh * refresh(size_t index=0) ;
@@ -190,9 +183,6 @@ protected: // functions
 		       double rr0=0.0,
 		       double rr_min=0.0, double rr=0.0, double rr_max=0.0,
 		       bool final = false) throw();
-  
-#ifdef NEW_REFRESH
-
   /// Add a new refresh object
   int add_new_refresh_ ();
 
@@ -205,15 +195,6 @@ protected: // functions
   /// Return the main post-refresh object for the solver
   Refresh & refresh_post();
 
-#else
-  
-  int add_refresh (int ghost_depth, 
-		   int min_face_rank, 
-		   int neighbor_type, 
-		   int sync_type,
-		   int sync_id);
-#endif
-  
   /// Perform vector copy X <- Y
   template <class T>
   void copy_ (T * X, const T * Y,
@@ -265,14 +246,8 @@ protected: // attributes
   /// Type of solver; see enum solve_type for supported types
   int solve_type_;
 
-#ifdef NEW_REFRESH
   /// New Refresh id for after the solver
   int ir_post_;
-#else
-  ///  Refresh object
-  std::vector<Refresh *> refresh_list_;
-
-#endif  
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

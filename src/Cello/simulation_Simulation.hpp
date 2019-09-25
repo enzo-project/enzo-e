@@ -320,8 +320,6 @@ public: // virtual functions
   void set_checkpoint(char * checkpoint)
   { strncpy (dir_checkpoint_,checkpoint,255);}
 
-#ifdef NEW_REFRESH
-
   //--------------------------------------------------
   // New Refresh
   //--------------------------------------------------
@@ -363,8 +361,6 @@ public: // virtual functions
   int new_refresh_count() const
   { return new_refresh_list_.size(); }
 
-#endif  
-  
 protected: // functions
 
   /// Initialize the Config object
@@ -512,14 +508,11 @@ protected: // attributes
   Sync sync_new_output_start_;
   Sync sync_new_output_next_;
 
-#ifdef NEW_REFRESH  
   /// Refresh phase lists
 
   std::vector < Refresh >     new_refresh_list_;
   std::vector < std::string > new_refresh_name_;
 
-#endif
-  
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 

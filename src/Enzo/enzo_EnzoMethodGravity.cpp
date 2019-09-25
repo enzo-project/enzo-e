@@ -146,26 +146,17 @@ EnzoMethodGravity::EnzoMethodGravity
   : Method(),
     index_solver_(index_solver),
     grav_const_(grav_const),
-    order_(order)
-#ifdef NEW_REFRESH
-  , ir_exit_(-1)
-#endif    
+    order_(order),
+    ir_exit_(-1)
 {
 
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
 
-#ifdef NEW_REFRESH
   Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
 
-#else /* ! NEW_REFRESH */
-
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
-			     enzo_sync_id_method_gravity);
-  Refresh & refresh = *this->refresh(ir);
-#endif  
   refresh.add_field("acceleration_x");
   refresh.add_field("acceleration_y");
   refresh.add_field("acceleration_z");
@@ -184,7 +175,6 @@ EnzoMethodGravity::EnzoMethodGravity
 
   }
 
-#ifdef NEW_REFRESH
   ir_exit_ = add_new_refresh_();
   cello::simulation()->new_refresh_set_name(ir_post_,name()+":exit");
   Refresh & refresh_exit = new_refresh(ir_exit_);
@@ -192,8 +182,6 @@ EnzoMethodGravity::EnzoMethodGravity
   refresh_exit.add_field("potential");
 
   refresh_exit.set_callback(CkIndex_EnzoBlock::p_method_gravity_end());
-
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -373,42 +361,22 @@ void EnzoBlock::r_method_gravity_continue(CkReductionMsg * msg)
   // refresh ("Charm++ fatal error: mis-matched client callbacks in
   // reduction messages")
 
-#ifdef NEW_REFRESH
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->refresh_potential(this);
-
-#else
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier,
-		   enzo_sync_id_method_gravity_continue);
-  
-  refresh.set_active(is_leaf());
-  refresh.add_field("potential");
-
-  refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
-#endif
 
 }
 
 //----------------------------------------------------------------------
-#ifdef NEW_REFRESH
 void EnzoMethodGravity::refresh_potential (EnzoBlock * enzo_block) throw()
 {
   enzo_block->new_refresh(ir_exit_).set_active(enzo_block->is_leaf());
   enzo_block->new_refresh_start(ir_exit_,
 			   CkIndex_EnzoBlock::p_method_gravity_end());
 }
-#endif
 //----------------------------------------------------------------------
 
-#ifdef NEW_REFRESH
 void EnzoBlock::p_method_gravity_end()
-#else
-void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
-#endif  
 {
-#ifndef NEW_REFRESH
-  delete msg;
-#endif  
   TRACE_METHOD("[pr]_method_gravity_end()",this);
   
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());

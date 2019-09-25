@@ -18,15 +18,8 @@ EnzoMethodPpml::EnzoMethodPpml()
     comoving_coordinates_(enzo::config()->physics_cosmology)
 {
   // Initialize the default Refresh object
-#ifdef NEW_REFRESH
   Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-#else /* OLD_REFRESH */  
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     enzo_sync_id_method_ppml);
-  Refresh & refresh = *this->refresh(ir);
-
-#endif  
 
   refresh.add_all_fields();
 }

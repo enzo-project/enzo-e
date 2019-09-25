@@ -222,10 +222,8 @@ public: // interface
   /// Initialize child face levels given own face levels
   void initialize_child_face_levels_();
 
-#ifdef NEW_REFRESH  
   /// Initialize arrays for refresh
   void init_new_refresh_();
-#endif  
 
   /// Return an iterator over faces
 
@@ -529,11 +527,6 @@ public:
   // REFRESH
   //--------------------------------------------------
 
-#ifdef NEW_REFRESH
-  //--------------------------------------------------
-  // NEW REFRESH
-  //--------------------------------------------------
-
   /// Begin a refresh operation, optionally waiting then invoking callback
   void new_refresh_start (int id_refresh, int callback = 0);
 
@@ -559,12 +552,6 @@ public:
   Refresh & new_refresh (int id_refresh);
 
   void new_refresh_exit (Refresh & refresh);
-
-#else // ! NEW_REFRESH
-
-  void refresh_enter (int call, Refresh * refresh);
-
-#endif  
 
   /// Enter the refresh phase after synchronizing
   void p_refresh_continue ()
@@ -595,8 +582,6 @@ protected:
   /// Pack field face data into arrays and send to neighbors
 public:
 
-  // #endif // ! NEW_REFRESH
-  
   void p_refresh_store (MsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
@@ -1002,11 +987,9 @@ protected: // attributes
   /// (Not a pointer since must be one per Block for synchronization counters)
   std::vector<Refresh*> refresh_;
 
-#ifdef NEW_REFRESH  
   std::vector < Sync > new_refresh_sync_list_;
   std::vector < std::vector <MsgRefresh * > > new_refresh_msg_list_;
   std::vector < RefreshState > new_refresh_state_list_;
-#endif  
 
 };
 

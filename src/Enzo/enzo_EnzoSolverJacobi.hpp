@@ -37,10 +37,8 @@ public: // interface
       id_(-1),
       w_(0),
       i_iter_(-1),
-      n_(0)
-#ifdef NEW_REFRESH
-  , ir_smooth_(-1)
-#endif    
+      n_(0),
+      ir_smooth_(-1)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -55,9 +53,7 @@ public: // interface
     p | w_;
     p | i_iter_;
     p | n_;
-#ifdef NEW_REFRESH
     p | ir_smooth_;
-#endif    
   }
 
 public: // virtual methods
@@ -68,13 +64,10 @@ public: // virtual methods
   /// Type of this solver
   virtual std::string type() const { return "jacobi"; }
 
-#ifdef NEW_REFRESH  
   bool is_finest(Block * block) {return is_finest_(block); }
-#endif  
   
 protected: // virtual methods
   
-#ifdef NEW_REFRESH  
   /// Whether Block is active
   virtual bool is_active_(Block * block) const
   {
@@ -94,7 +87,6 @@ protected: // virtual methods
       return Solver::is_finest_(block);
     }
   }
-#endif
   
 public: // methods
 
@@ -152,10 +144,8 @@ protected: // attributes
   /// Number of iterations
   int n_;
 
-#ifdef NEW_REFRESH
   // Refresh after each smoothing
   int ir_smooth_;
-#endif  
 };
 
 #endif /* ENZO_ENZO_SOLVER_JACOBI_HPP */

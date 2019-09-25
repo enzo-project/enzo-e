@@ -58,10 +58,8 @@ Simulation::Simulation
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
-  index_output_(-1)
-#ifdef NEW_REFRESH
-  , new_refresh_list_()
-#endif  
+  index_output_(-1),
+  new_refresh_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -122,10 +120,8 @@ Simulation::Simulation()
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
-  index_output_(-1)
-#ifdef NEW_REFRESH
-  , new_refresh_list_()
-#endif  
+  index_output_(-1),
+  new_refresh_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -174,10 +170,8 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_write_(),
     sync_new_output_start_(),
     sync_new_output_next_(),
-    index_output_(-1)
-#ifdef NEW_REFRESH
-  , new_refresh_list_()
-#endif  
+    index_output_(-1),
+    new_refresh_list_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -290,11 +284,8 @@ void Simulation::pup (PUP::er &p)
 	  
   //  p | msg_refine_map_;
   p | index_output_;
-  
-#ifdef NEW_REFRESH
   p | new_refresh_list_;
   p | new_refresh_name_;
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -1056,14 +1047,22 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 
   const double avg_proc_blocks = 1.0*num_blocks_total/CkNumPes();
   monitor()->print
-    ("Performance","simulation balance-zones %f",
-     100.0*(max_proc_blocks / avg_proc_blocks - 1.0 ));
+    ("Performance","simulation balance-blocks %f (%ld/%ld)",
+     100.0*(max_proc_blocks / avg_proc_blocks - 1.0 ),avg_proc_blocks,max_proc_blocks);
+  monitor()->print
+    ("Performance","simulation balance-eff-blocks %f",
+     avg_proc_blocks / max_proc_blocks );
   
+
   if (num_particles > 0) {
     const double avg_proc_particles = 1.0*num_particles/CkNumPes();
     monitor()->print
-      ("Performance","simulation balance-particles %f",
-       100.0*(max_proc_particles / avg_proc_particles - 1.0));
+      ("Performance","simulation balance-particles %f (%ld/%ld)",
+       100.0*(max_proc_particles / avg_proc_particles - 1.0),
+       avg_proc_particles,max_proc_particles);
+    monitor()->print
+      ("Performance","simulation balance-eff-particles %f",
+       avg_proc_particles / max_proc_particles );
   }
   
   ASSERT3("Simulation::monitor_performance()",

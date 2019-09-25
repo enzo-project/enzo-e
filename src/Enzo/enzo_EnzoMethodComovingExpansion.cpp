@@ -16,14 +16,8 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
-#ifdef NEW_REFRESH
   Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-#else /* ! NEW_REFRESH */
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     enzo_sync_id_comoving_expansion);
-  Refresh & refresh = *this->refresh(ir);
-#endif  
 
   refresh.add_field("density");
   refresh.add_field("total_energy");

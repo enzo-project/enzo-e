@@ -32,11 +32,9 @@ public: // interface
     sync_id_ (-1),
     active_(true),
     callback_(0) ,
-    root_level_(0)
-#ifdef NEW_REFRESH
-    , id_refresh_(-1),
+    root_level_(0),
+    id_refresh_(-1),
     id_solver_(-1)
-#endif
   {
   }
 
@@ -61,12 +59,9 @@ public: // interface
       sync_id_(sync_id),
       active_(active),
       callback_(0),
-      root_level_(0)
-#ifdef NEW_REFRESH
-    , id_refresh_(-1),
+      root_level_(0),
+      id_refresh_(-1),
       id_solver_(-1)
-      
-#endif      
   {
   }
 
@@ -89,11 +84,9 @@ public: // interface
     sync_id_ (-1),
     active_(true),
     callback_(0),
-    root_level_(0)
-#ifdef NEW_REFRESH    
-    , id_refresh_(-1),
-      id_solver_(-1)
-#endif    
+    root_level_(0),
+    id_refresh_(-1),
+    id_solver_(-1)
   {
   }
 
@@ -117,10 +110,8 @@ public: // interface
     p | active_;
     p | callback_;
     p | root_level_;
-#ifdef NEW_REFRESH
     p | id_refresh_;
     p | id_solver_;
-#endif    
   }
 
   //--------------------------------------------------
@@ -286,13 +277,6 @@ public: // interface
   int sync_type() const 
   { return sync_type_; }
 
-#ifdef NEW_REFRESH
-#else
-  int sync_load() const
-  { return 3*sync_id_; }
-  int sync_store() const
-  { return 3*sync_id_+1; }
-#endif  
   int sync_exit() const
   { return 3*sync_id_+2; }
 
@@ -360,7 +344,6 @@ public: // interface
     }
   }
 
-#ifdef NEW_REFRESH
   /// Set the new refresh id in new_refresh_list_[]
   void set_id(int id_refresh)
   { id_refresh_ = id_refresh; }
@@ -376,7 +359,6 @@ public: // interface
   /// return the solver id (-1 if not initialized)
   int solver_id() const
   { return id_solver_; }
-#endif  
   
   //--------------------------------------------------
 
@@ -445,12 +427,11 @@ private: // attributes
   /// Coarse level for neighbor_tree type
   int root_level_;
 
-#ifdef NEW_REFRESH  
   /// ID in new_refresh_list_[]
   int id_refresh_;
+
   /// ID of calling Solver
   int id_solver_;
-#endif  
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

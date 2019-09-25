@@ -299,20 +299,9 @@ EnzoSolverMg0::EnzoSolverMg0
   ir_ = cello::field_descr()->insert_temporary();
   ic_ = cello::field_descr()->insert_temporary();
 
-#ifdef NEW_REFRESH
 
   Refresh & refresh = this->refresh_post();
   cello::simulation()->new_refresh_set_name(ir_post_,name);
-  
-#else /* OLD_REFRESH */
-  
-  /// Initialize default Refresh
-
-  const int ir = add_refresh  (4,0,neighbor_type_(),sync_barrier,
-			       enzo_sync_id_solver_mg0);
-
-  Refresh & refresh = *this->refresh(ir);
-#endif
 
   refresh.add_field (ix_);  // NOTE: ix_ set in Solver::Solver()
   refresh.add_field (ir_);

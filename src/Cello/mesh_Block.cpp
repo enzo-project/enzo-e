@@ -81,12 +81,11 @@ Block::Block ( MsgRefine * msg )
     refresh_()
 {
   performance_start_(perf_block);
-#ifdef NEW_REFRESH
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("Block(msg)\n"); fflush(stdout);
 #endif  
   init_new_refresh_();
-#endif  
+
   usesAtSync = true;
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -153,12 +152,12 @@ Block::Block ( process_type ip_source )
     index_solver_(),
     refresh_()
 {
-#ifdef NEW_REFRESH
+
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("Block(%d)\n",ip_source); fflush(stdout);
 #endif  
   init_new_refresh_();
-#endif
+
   usesAtSync = true;
 #ifdef TRACE_BLOCK
   {
@@ -435,11 +434,9 @@ void Block::pup(PUP::er &p)
     Simulation * simulation = cello::simulation();
     if (simulation != NULL) simulation->data_insert_block(this);    
   }
-#ifdef NEW_REFRESH
   p | new_refresh_sync_list_;
   //  p | new_refresh_msg_list_;
   p | new_refresh_state_list_;
-#endif  
 }
 
 //----------------------------------------------------------------------
@@ -741,10 +738,7 @@ Block::Block ()
     refresh_()
 {
 
-#ifdef NEW_REFRESH  
-  CkPrintf ("Block()\n"); fflush(stdout);
   init_new_refresh_();
-#endif
   
   for (int i=0; i<3; i++) array_[i]=0;
 }
@@ -782,12 +776,11 @@ Block::Block (CkMigrateMessage *m)
     refresh_()
     
 {
-#ifdef NEW_REFRESH
+
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("Block(m)\n"); fflush(stdout);
 #endif  
   init_new_refresh_();
-#endif
   
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n");
@@ -798,7 +791,6 @@ Block::Block (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
-#ifdef NEW_REFRESH
 void Block::init_new_refresh_()
 {
   const int count = cello::simulation()->new_refresh_count();
@@ -821,7 +813,6 @@ Refresh & Block::new_refresh(int id_refresh)
   return cello::simulation()->new_refresh_list(id_refresh);
 }
 
-#endif
 //----------------------------------------------------------------------
 
 std::string Block::name() const throw()

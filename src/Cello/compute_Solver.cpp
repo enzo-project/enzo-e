@@ -9,7 +9,6 @@
 
 // #define TRACE_SOLVER
 // #define  DEBUG_SOLVER_CG
-// #define DEBUG_NEW_REFRESH  
 
 #define CYCLE 0
 
@@ -43,20 +42,15 @@ Solver::Solver (std::string name,
   min_level_(min_level),
   max_level_(max_level),
   id_sync_(0),
-  solve_type_(solve_type)
-#ifdef NEW_REFRESH
-    ,ir_post_(-1)
-#else /* ! NEW_REFRESH */
-    ,refresh_list_()
-#endif      
+  solve_type_(solve_type),
+  ir_post_(-1)
 {
   FieldDescr * field_descr = cello::field_descr();
   ix_ = field_descr->field_id(field_x);
   ib_ = field_descr->field_id(field_b);
-#ifdef NEW_REFRESH
-    ir_post_ = add_new_refresh_();
-    new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
-#endif    
+  ir_post_ = add_new_refresh_();
+  new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
+
 }
 
 //----------------------------------------------------------------------
@@ -72,33 +66,15 @@ Solver::Solver () throw()
   min_level_(0),
   max_level_(std::numeric_limits<int>::max()),
   id_sync_(0),
-  solve_type_(solve_leaf)
-#ifdef NEW_REFRESH
-  , ir_post_(-1)
-#else /* ! NEW_REFRESH */    
-  , refresh_list_()
-#endif    
+  solve_type_(solve_leaf),
+  ir_post_(-1)
 {
-#ifdef NEW_REFRESH
   ir_post_ = add_new_refresh_();
   new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
-#endif    
 }
 
 //----------------------------------------------------------------------
 
-Solver::~Solver() throw()
-{
-#ifdef NEW_REFRESH
-#else /* ! NEW_REFRESH */  
-  for (size_t i=0; i<refresh_list_.size(); i++) {
-    delete refresh_list_[i];
-    refresh_list_[i] = 0;
-  }
-#endif  
-}
-
-#ifdef NEW_REFRESH
 int Solver::add_new_refresh_ ()
 {
   // set Solver::ir_post_
@@ -137,34 +113,6 @@ Refresh & Solver::refresh_post()
 {
   return cello::simulation()->new_refresh_list(ir_post_);
 }
-
-#else
-//----------------------------------------------------------------------
-
-int Solver::add_refresh (int ghost_depth, 
-			 int min_face_rank, 
-			 int neighbor_type, 
-			 int sync_type,
-			 int sync_id)
-{
-  int index=refresh_list_.size();
-    
-  refresh_list_.push_back
-    (new Refresh
-     (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true));
-
-  id_sync_ = sync_id;
-  return index;
-}
-
-//----------------------------------------------------------------------
-
-Refresh * Solver::refresh(size_t index)
-{
-  return (index < refresh_list_.size()) ? refresh_list_[index] : nullptr;
-}
-
-#endif
 
 //======================================================================
 

@@ -24,9 +24,7 @@ SolverNull::SolverNull (std::string name,
 	   min_level,
 	   max_level)
 {
-#ifdef NEW_REFRESH  
   cello::simulation()->new_refresh_set_name(ir_post_,name);
-#endif  
 }
 //----------------------------------------------------------------------
 

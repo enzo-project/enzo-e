@@ -44,11 +44,9 @@ public: // interface
     rr_min_(0),rr_max_(0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
     bc_(0.0),
-    local_(false)
-#ifdef NEW_REFRESH
-    , ir_matvec_(-1),
+    local_(false),
+    ir_matvec_(-1),
     ir_loop_2_(-1)
-#endif    
     
   {};
 
@@ -71,11 +69,9 @@ public: // interface
       rr_min_(0),rr_max_(0),
       rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
       bc_(0.0),
-      local_(false)
-#ifdef NEW_REFRESH
-    , ir_matvec_(-1),
+      local_(false),
+      ir_matvec_(-1),
       ir_loop_2_(-1)
-#endif    
       
   {}
 
@@ -246,10 +242,8 @@ protected: // attributes
   /// Whether to solve on a standalone Block, e.g. for MG coarse solver
   bool local_;
 
-#ifdef NEW_REFRESH
   int ir_matvec_;
   int ir_loop_2_;
-#endif    
 
 };
 

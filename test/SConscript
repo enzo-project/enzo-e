@@ -408,7 +408,7 @@ Clean(env_mv_out.RunSerial ('test_method_ppml-test-1.unit',bin_path + '/enzo-p',
                             ARGS='input/method_ppml-test-1.in'),
       [Glob('#/' + test_path + '/PPML1_*')])
 
-Clean(env_mv_out.RunSerial ('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
+Clean(env_mv_out.RunParallel ('test_method_ppml-test-8.unit',bin_path + '/enzo-p',
                             ARGS='input/method_ppml-test-8.in'),
       [Glob('#/' + test_path + '/PPML8_*')])
 

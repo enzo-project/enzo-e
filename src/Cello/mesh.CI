@@ -172,9 +172,7 @@ module mesh {
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
 
-#ifdef NEW_REFRESH    
     entry void p_new_refresh_recv (MsgRefresh * msg);
-#endif    
 
     entry void p_refresh_child
       (int n, char a[n], int ic3[3]);

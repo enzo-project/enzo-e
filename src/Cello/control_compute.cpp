@@ -54,8 +54,6 @@ void Block::compute_next_ ()
 
   if (method) {
 
-#ifdef NEW_REFRESH
-
 #ifdef DEBUG_COMPUTE
     CkPrintf ("DEBUG_REFRESH %s:%d calling refresh_[enter|start]\n",__FILE__,__LINE__);
 #endif
@@ -65,23 +63,6 @@ void Block::compute_next_ ()
     new_refresh_start (method->refresh_post_id(),
 		       CkIndex_Block::r_compute_continue());
     
-#else /* OLD_REFRESH */    
-      Refresh * refresh = method->refresh();
-
-      if (refresh) {
-
-	refresh->set_active (is_leaf());
-#ifdef DEBUG_COMPUTE
-	CkPrintf ("DEBUG_REFRESH %s:%d calling refresh_[enter|start]\n",__FILE__,__LINE__);
-#endif	
-
-	refresh_enter (CkIndex_Block::r_compute_continue(), refresh );
-
-      } else {
-	compute_continue_();
-
-      }
-#endif
   } else {
 
     compute_end_();

@@ -76,41 +76,27 @@ EnzoSolverJacobi::EnzoSolverJacobi
     ir_ (-1),
     id_ (-1),
     w_(weight),
-    n_(iter_max)
-#ifdef NEW_REFRESH
-  , ir_smooth_(-1)
-#endif    
+    n_(iter_max),
+    ir_smooth_(-1)
 {
   // Reserve temporary fields
 
   id_ = cello::field_descr()->insert_temporary();
   ir_ = cello::field_descr()->insert_temporary();
 
-#ifdef NEW_REFRESH
 
   Refresh & refresh = this->refresh_post();
   cello::simulation()->new_refresh_set_name(ir_post_,name);
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_post=%d\n",__FILE__,__LINE__,ir_post_);
 #endif  
-#else /* OLD_REFRESH */  
 
-  const int ghost_depth = 4; // maximum of possible A_
-  const int min_face_rank = 0;
-  const int ir = add_refresh
-    (ghost_depth,min_face_rank,neighbor_type_(),
-     sync_type_(), enzo_sync_id_solver_jacobi_1);
-  Refresh & refresh = *this->refresh(ir);
-
-#endif
-  
   refresh.add_field (ix_);
 
   ScalarDescr * scalar_descr_int = cello::scalar_descr_int();
   i_iter_ = scalar_descr_int->new_value(name_ + ":iter");  
 
 
-#ifdef NEW_REFRESH  
   ir_smooth_ = add_new_refresh_();
 
 #ifdef DEBUG_NEW_REFRESH  
@@ -126,9 +112,7 @@ EnzoSolverJacobi::EnzoSolverJacobi
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d id_solver=%d\n",__FILE__,__LINE__,index());
 #endif  
   refresh_smooth.set_callback(CkIndex_EnzoBlock::p_solver_jacobi_continue());
-#endif
 
-  refresh.print();
 }
 
 //----------------------------------------------------------------------
@@ -285,45 +269,19 @@ void EnzoSolverJacobi::apply_(Block * block)
 void EnzoSolverJacobi::do_refresh_(Block * block)
 {
   TRACE_JACOBI(block,this,"do_refresh()");
-#ifdef NEW_REFRESH
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_smooth=%d\n",__FILE__,__LINE__,ir_smooth_);
 #endif  
   Refresh & refresh = new_refresh(ir_smooth_);
-#else  
-  const int ghost_depth   = A_->ghost_depth();
-  
-  // REVERTING TO 0: addresses refresh synchronization bug
-  //  const int min_face_rank = cello::rank() - 1;
-  const int min_face_rank = 0;
-
-  //  const int id_sync = 2*sync_id_()+(*piter_(block))%2;
-
-  int sync_id = (*piter_(block) % 2 == 0) ?
-    enzo_sync_id_solver_jacobi_2 :
-    enzo_sync_id_solver_jacobi_3;
-  
-  Refresh refresh
-    (ghost_depth,min_face_rank,neighbor_type_(),
-     sync_type_(),  enzo_sync_id_solver_jacobi_2);
-
-#endif
 
   refresh.set_active(is_finest_(block));
   refresh.add_field (ix_);
   
-#ifdef NEW_REFRESH
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_smooth=%d\n",__FILE__,__LINE__,ir_smooth_);
 #endif  
   block->new_refresh_start (ir_smooth_,
 			    CkIndex_EnzoBlock::p_solver_jacobi_continue());
-#else
-  block->refresh_enter
-    (CkIndex_EnzoBlock::p_solver_jacobi_continue(),&refresh);
-#endif  
-  
-  
 }
 
 //----------------------------------------------------------------------

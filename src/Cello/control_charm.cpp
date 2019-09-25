@@ -130,7 +130,6 @@ void Block::refresh_exit_()
 
   Refresh * refresh = refresh_.back();
 
-#ifdef NEW_REFRESH
   // control_sync (refresh->callback(),
   // 		refresh->sync_type(),
   // 		refresh->sync_exit(),
@@ -147,22 +146,7 @@ void Block::refresh_exit_()
   CkCallback
     (refresh->callback(),
      CkArrayIndexIndex(index_),thisProxy).send(NULL);
-#else
-#ifdef DEBUG_REFRESH 
-  printf ("%d DEBUG_REFRESH refresh_exit calling refresh\n",
-	  CkMyPe(),name().c_str());
-  fflush(stdout);
-      
-#endif
-
-  control_sync (refresh->callback(),
-  		refresh->sync_type(),
-  		refresh->sync_exit(),
-  		refresh->min_face_rank(),
-  		refresh->neighbor_type(),
-  		refresh->root_level());
-#endif  
-    
+   
   // WARNING: BREAKS Charm++ with random queueing on some regression tests
   //  delete refresh;
   //  refresh_.pop_back();

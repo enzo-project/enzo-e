@@ -18,13 +18,9 @@ EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant)
 {
   // Initialize default Refresh object
 
-#ifdef NEW_REFRESH
-#else  
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     enzo_sync_id_method_heat);
-  refresh(ir)->add_field("temperature");
-#endif  
-
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  refresh.add_field("temperature");
 }
 
 //----------------------------------------------------------------------

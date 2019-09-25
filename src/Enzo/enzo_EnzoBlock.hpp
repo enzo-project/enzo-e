@@ -217,11 +217,7 @@ public: /// entry methods
   void r_method_gravity_continue(CkReductionMsg * msg);
 
   /// Synchronize for refresh
-#ifdef NEW_REFRESH  
   void p_method_gravity_end();
-#else
-  void r_method_gravity_end(CkReductionMsg * msg);
-#endif  
 
   //--------------------------------------------------
 

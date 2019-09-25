@@ -20,9 +20,7 @@ long MsgRefresh::counter[CONFIG_NODE_SIZE] = { };
 MsgRefresh::MsgRefresh()
     : CMessage_MsgRefresh(),
       is_local_(true),
-#ifdef NEW_REFRESH  
       id_refresh_(-1),
-#endif      
       data_msg_(nullptr),
       buffer_(nullptr)
 {
@@ -65,9 +63,7 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   int size = 0;
 
-#ifdef NEW_REFRESH
   size += sizeof(int); // id_refresh
-#endif  
   size += sizeof(int);  // have_data
   int have_data = (msg->data_msg_ != nullptr);
   
@@ -93,11 +89,9 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   pc = buffer;
 
-#ifdef NEW_REFRESH
   (*pi++) = msg->id_refresh_;
 #ifdef DEBUG_MSG_REFRESH
   CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
-#endif  
 #endif  
 
   have_data = (msg->data_msg_ != nullptr);
@@ -147,11 +141,9 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   pc = (char *) buffer;
 
-#ifdef NEW_REFRESH
   msg->id_refresh_ = (*pi++) ;
 #ifdef DEBUG_MSG_REFRESH
   CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
-#endif  
 #endif  
 
   int have_data = (*pi++);

@@ -65,7 +65,6 @@ enum phase_type {
   phase_last
 };
 
-#ifdef NEW_REFRESH
 /// @enum   RefreshState
 ///
 /// @brief  New refresh states:
@@ -74,7 +73,6 @@ enum phase_type {
 ///         RefreshState::ready    (wait() called)
 
 enum class RefreshState { INACTIVE, ACTIVE, READY };
-#endif
 
 // #define PHASE_COUNT (phase_exit + 1)
 // #define PHASE_COUNT 100

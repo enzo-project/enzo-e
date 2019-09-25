@@ -13,17 +13,9 @@ void MethodNull::compute( Block * block) throw()
 
 void MethodNull::init_refresh_()
 {
-#ifdef NEW_REFRESH
   Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
 
-#else    
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     sync_id_method_null);
-  Refresh & refresh = *(this->refresh(ir));
-
-#endif    
-  //    refresh(ir)->add_all_fields();
   refresh.add_field("density");
   refresh.add_field("velocity_x");
   refresh.add_field("velocity_y");

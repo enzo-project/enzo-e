@@ -30,13 +30,9 @@ public: // interface
   
   Method (CkMigrateMessage *m)
     : PUP::able(m),
-      schedule_(NULL),
-      courant_(1.0)
-#ifdef NEW_REFRESH
-    ,ir_post_(-1)
-#else /* ! NEW_REFRESH */
-    ,refresh_list_()
-#endif      
+    schedule_(NULL),
+    courant_(1.0),
+    ir_post_(-1)
    
   { }
       
@@ -63,8 +59,6 @@ public: // virtual functions
     /* This function intentionally empty */
   }
 
-#ifdef NEW_REFRESH
-
   /// Add a new refresh object
   int add_new_refresh_ ();
 
@@ -76,21 +70,6 @@ public: // virtual functions
 
   /// Return the main post-refresh object for the solver
   Refresh & refresh_post();
-
-#else
-  
-  int add_refresh (int ghost_depth, 
-		   int min_face_rank, 
-		   int neighbor_type, 
-		   int sync_type,
-		   int id);
-
-  Refresh * refresh(size_t index=0) 
-  {
-    // set Method::ir_post_
-    return (index < refresh_list_.size()) ? refresh_list_[index] : NULL;
-  }
-#endif  
 
   /// Return the Schedule object pointer
   Schedule * schedule() throw() 
@@ -130,14 +109,8 @@ protected: // attributes
   /// Courant condition for the Method
   double courant_;
 
-#ifdef NEW_REFRESH
   /// Index for main refresh after Method is called
   int ir_post_;
-#else  
-  ///  Refresh object
-  std::vector<Refresh *> refresh_list_;
-#endif  
-
 
 };
 
