@@ -49,9 +49,11 @@ public:
 
     double hx, hy, hz;
     data->field_cell_width(&hx,&hy,&hz);
+
     ASSERT("EnzoSphereRegion",
 	   "the cell width along each axis is assumed to be the same",
-	   hx == hy && hy == hz);
+	   (fabs((hy - hx)/hx) <= 1.e-10) && 
+           (fabs((hz - hx)/hx) <= 1.e-10));
 
     Field field = data->field();
     int nx,ny,nz;

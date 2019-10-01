@@ -1016,16 +1016,6 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   // Like ppm and ppml, access active region info from enzo_block attributes
   EnzoBlock * enzo_block = enzo::block(block);
 
-  // The start index of the active region
-  int ix_start = enzo_block->GridStartIndex[0];
-  int iy_start = enzo_block->GridStartIndex[1];
-  int iz_start = enzo_block->GridStartIndex[2];
-
-  // The end index (final valid index) of the active region
-  int ix_end = enzo_block->GridEndIndex[0];
-  int iy_end = enzo_block->GridEndIndex[1];
-  int iz_end = enzo_block->GridEndIndex[2];
-
   // widths of cells
   double dx = enzo_block->CellWidth[0];
   double dy = enzo_block->CellWidth[1];
@@ -1039,9 +1029,9 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
   // cfast = fast magnetosonic speed (Convention is to use max value:
   // cfast = (va^2+cs^2)
 
-  for (int iz=iz_start; iz<=iz_end; iz++) {
-    for (int iy=iy_start; iy<=iy_end; iy++) {
-      for (int ix=ix_start; ix<=ix_end; ix++) {
+  for (int iz=0; iz<density.shape(0); iz++) {
+    for (int iy=0; iy<density.shape(1); iy++) {
+      for (int ix=0; ix<density.shape(2); ix++) {
 	enzo_float bmag_sq = (bfieldc_x(iz,iy,ix) * bfieldc_x(iz,iy,ix) +
 			      bfieldc_y(iz,iy,ix) * bfieldc_y(iz,iy,ix) +
 			      bfieldc_z(iz,iy,ix) * bfieldc_z(iz,iy,ix));
