@@ -4,9 +4,9 @@
 Flux Correction Design
 **********************
 
-==============
-1 Requirements
-==============
+============
+Requirements
+============
 
 Flux correction involves updating field values along faces between
 neighboring blocks to ensure that conserved quantities are indeed
@@ -65,8 +65,8 @@ Cello layers.
           needed.
    
      
-1.1 Enzo-E requirements
-=======================
+Enzo-E requirements
+===================
 
 Enzo-E is responsible for storing, accessing, communicating, and
 operating with fluxes, to implement flux correction, with support
@@ -85,8 +85,8 @@ provided by Cello.  Specific requirements are listed below:
 - **RE-7.** Support MHD
 - **RE-8.** Ensure conservation is not lost through any other operation, e.g. interpolation
 
-1.2 Cello requirements
-======================
+Cello requirements
+==================
 
 Cello's primary responsibilities are to provide Enzo-E with sufficient
 support for storing fluxes, computing flux correction factors, and
@@ -111,9 +111,9 @@ Specific requirements include the following:
 - **RC-8.** Allow for dynamic allocation and deallocation of fluxes (optional)
 - **RC-9.** Ensure conservative inter-grid interpolation and coarsening
 
-========
-2 Design
-========
+======
+Design
+======
 
 Our design is developed top-down, starting with a Cello Method for
 implementing flux correction in Enzo-E, *EnzoMethodFluxCorrect*.
@@ -148,8 +148,8 @@ implementations of the higher-level classes to aid in developing the
 design of the lower-level classes.
 
 
-2.1 EnzoMethodFluxCorrect class design
-======================================
+EnzoMethodFluxCorrect class design
+==================================
 
 The :p:`EnzoMethodFluxCorrect` class is a Cello :p:`Method`, whose
 main virtual method is :p:`compute(Block)`.  This operates on some
@@ -160,9 +160,9 @@ between processes, and computes and applies appropriate
 flux-correction operations to required Fields values along block
 interfaces.
 
--------------------------------------
-2.1.1 EnzoMethodFluxCorrect interface
--------------------------------------
+-------------------------------
+EnzoMethodFluxCorrect interface
+-------------------------------
 
 Since the :p:`EnzoMethodFluxCorrect` class is inherited from the Cello
 :p:`Method` class, the public interface for this class is already
@@ -193,9 +193,9 @@ required for flux-correction.)
    
 ----
 
-------------------------------------------
-2.1.2 EnzoMethodFluxCorrect implementation
-------------------------------------------
+------------------------------------
+EnzoMethodFluxCorrect implementation
+------------------------------------
 
 Below is prototype code for various steps of flux-correction needed,
 including initializing for the communication step to refresh fluxes
@@ -352,15 +352,15 @@ perform flux correction
           be multiplied by density to get conservative form, fine-grid
           fluxes need to be weighted by relative volume, etc.
    
-2.2 FluxData class design
-=========================
+FluxData class design
+=====================
 
 The :p:`FluxData` class is used to store all flux data required by
 a Block at any given time.
 
-------------------------
-2.2.1 FluxData interface
-------------------------
+------------------
+FluxData interface
+------------------
 
 Below we develop the interface for the :p:`FluxData` object for storing
 and manipulating fluxes associated with a Block.
@@ -417,18 +417,18 @@ and manipulating fluxes associated with a Block.
      
 ----
 
------------------------------
-2.2.2 FluxData implementation
------------------------------
+-----------------------
+FluxData implementation
+-----------------------
 
-2.3 FaceFluxes class design
-===========================
+FaceFluxes class design
+=======================
 
 Create a new uninitialized FaceFluxes object
 
---------------------------
-2.3.1 FaceFluxes interface
---------------------------
+--------------------
+FaceFluxes interface
+--------------------
 
 .. glossary::
 
@@ -443,9 +443,9 @@ Create a new uninitialized FaceFluxes object
       * **cycle**: *Fine-level computational cycle of the fluxes*
       * **dt**: time step for the fluxes
   
--------------------------------
-2.3.2 FaceFluxes implementation
--------------------------------
+-------------------------
+FaceFluxes implementation
+-------------------------
 
    * **index_block**: index of the Block associated with the fluxes
    * **index_field**: index of the Field associated with the fluxes
@@ -455,9 +455,8 @@ Create a new uninitialized FaceFluxes object
    * **cycle_end**: ending cycle associated with fluxes
    * **dt**: time step for the fluxes
 
-=================
-2.4 Communication
-=================
+Communication
+=============
 
 Communicating fluxes between adjacent blocks is similar to communicating
 field face data and migrating particles, so it makes sense to
@@ -481,9 +480,24 @@ type, which by definition includes
    3. only from finer resolution to coarser resolution (temporal as
       well as spacial)
 
-===========
-2.5 Testing
-===========
+.. figure:: flux-refresh-1.png
+    :width: 400px
+    :align: center
+    :alt: figure illustrating that fine block fluxes are coarsened before being communicated
+    :figclass: align-center
+
+    Communicating fluxes assuming constant time steps.               
+      
+.. figure:: flux-refresh-2.png
+    :width: 400px
+    :align: center
+    :alt:  figure illustrating that fine block fluxes with shorter time steps are accumulated in the receiving coarse grid neighbor fluxes
+    :figclass: align-center
+
+    Communicating fluxes assuming adaptive time steps.               
+      
+Testing
+=======
 
 In Enzo-E / Cello we strive to use test-driven development, which
 helps keep development cycles short and helps keep the code base from
@@ -516,26 +530,28 @@ developed.
 - **DT-G.** Self-gravity application tests
 - **DT-C.** Cosmology application tests
 
-=================
-2.6 Documentation
-=================
+Documentation
+=============
 
 - **DD-1.** *Design*: add flux correction design to :p:`design/design-flux.rst` 
 - **DD-2.** *Method*: add :p:`EnzoMethodFluxCorrect` method documentation to :p:`user/problem_method.rst`
 - **DD-3.** *Testing*: add :p:`testing/testing_flux.rst` test documentation
    
-3 Milestones
-============
+==========
+Milestones
+==========
 
 - **M-1.** :p:`EnzoMethodFluxCorrect` demonstrated  working for hydrodynamics
 - **M-2.** :p:`EnzoMethodFluxCorrect` demonstrated  working for MHD
 
-4 Tasks
-=======
+=====
+Tasks
+=====
 
 - **T-1.** :p:`FaceFluxes` class design and implementation
 - **T-2.** :p:`FluxData` class design and implementation
 - **T-3.** :p:`EnzoMethodFluxCorrect` class design and implementation
 
-5 Notes
-=======
+=====
+Notes
+=====
