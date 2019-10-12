@@ -10,7 +10,6 @@ including adding new computational methods, initial conditions,
 refinement criteria, etc.
 
 .. toctree::
-   :numbered:
       
    coding-guidelines
    initial

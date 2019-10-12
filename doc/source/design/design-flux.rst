@@ -1,8 +1,8 @@
 .. include:: ../roles.incl
-
-**********************
-Flux Correction Design
-**********************
+  
+***********************************
+Flux Correction Design [INCOMPLETE]
+***********************************
 
 ============
 Requirements
@@ -143,13 +143,17 @@ associated with, the time interval for the fluxes, etc.  Thus, we
 introduce a lower-level class *FaceFluxes* to store the array of flux
 data for an individual face, along with its defining attributes.
 
-We develop the interfaces for these classes below, including prototype
-implementations of the higher-level classes to aid in developing the
-design of the lower-level classes.
+Interfaces
+==========
+
+We develop the interfaces for the flux-related classes below, starting
+with the top-level :p:`EnzoMethodFluxCorrect`, then the progressively
+higher-level :p:`Face`, :p:`FaceFluxes`, and :p:`FluxData` classes.
 
 
-EnzoMethodFluxCorrect class design
-==================================
+---------------------------
+EnzoMethodFluxCorrect class
+---------------------------
 
 The :p:`EnzoMethodFluxCorrect` class is a Cello :p:`Method`, whose
 main virtual method is :p:`compute(Block)`.  This operates on some
@@ -159,10 +163,6 @@ communicates fluxes between neighboring blocks to ensure consistency
 between processes, and computes and applies appropriate
 flux-correction operations to required Fields values along block
 interfaces.
-
--------------------------------
-EnzoMethodFluxCorrect interface
--------------------------------
 
 Since the :p:`EnzoMethodFluxCorrect` class is inherited from the Cello
 :p:`Method` class, the public interface for this class is already
@@ -192,10 +192,6 @@ required for flux-correction.)
       * **block**: *Block that flux correction is being applied to*
    
 ----
-
-------------------------------------
-EnzoMethodFluxCorrect implementation
-------------------------------------
 
 Below is prototype code for various steps of flux-correction needed,
 including initializing for the communication step to refresh fluxes
@@ -267,6 +263,8 @@ perform flux correction
 
 .. code-block:: C++
 
+   // WARNING: USES OUTDATED FaceFluxes and FluxData API's
+   
    void EnzoMethodFluxCorrect::update_field_faces(EnzoBlock* block) throw()
    {
        // Get this block's Field and FluxData objects
@@ -281,7 +279,7 @@ perform flux correction
           // Loop over all faces of this block
           
           for (int axis=0; axis<rank; axis++) {
-             for (int face=0; face<2; face++) {
+             for (int face=-1; face<=1; face+=2) {
 
                 // get "coarse" fluxes
                    
@@ -326,6 +324,8 @@ perform flux correction
 
 .. code-block:: C++
 
+   // WARNING: USES OUTDATED FaceFluxes and FluxData API's
+
    EnzoMethodFluxCorrect::update_field_face_
       (Block, index_field, axis,face,child,
        fluxes_coarse,fluxes_fine_sum);
@@ -351,109 +351,299 @@ perform flux correction
 .. note:: The update is over-simplified, e.g. the field will have to
           be multiplied by density to get conservative form, fine-grid
           fluxes need to be weighted by relative volume, etc.
+
+----------
+Face class
+----------
+
+A :p:`Face` is defined as the intersection of two Blocks.  For flux
+correction in hydrodynamics, it is sufficient for faces to be defined
+by two Block indices where the Blocks share a (d-1)-dimensional face
+(facet).  For MHD where area averages are used, the fluxes may
+additionally be along a strict subset of a facet, and can be specified
+using an integer tuple :p:`(fx,fy,fz)` where :p:`-1 <= fx,fy,fz <= 1`.  The
+default :p:`(fx,fy,fz) == (0,0,0)` represents the entire face.
+
+The Block indices are ordered, with the first defining on which Block
+the fluxes were computed.  For flux correction, both
+:p:`face(index_block, index_neighbor)` and :p:`face (index_neighbor,
+index_block)` fluxes are required for flux correction on the coarser
+Block.
+
+----
+
+.. glossary::
+
+   ``Face::Face (Index index_block, Index index_neighbor, int fx=0, int fy=0, int fz=0);``
+    *Create a Face object at the interface between two Blocks and     associated with the first Block.  Face must have rank d-1.  A "face     of a Face" is defined using integer tuple (fx,fy,fz) where -1 <=     fx,fy,fz <= 1.  The default (fx,fy,fz) = (0,0,0) reverts to the     entire face.*
+
+
+----
+
+.. glossary::
+
+   ``bool Face::operator == (Face f1, Face f2) const;``
+    *Compare   whether two faces are equal.  Note that face(f1,f2) == face(f2,f1),   since the face itself is defined by the unordered pair (f1,f2)--the   ordering only indicates on which Block the corresponding face is   associated with.*
+
+
+
+----
+
+.. glossary::
+
+   ``int Face::index_block () const;``
+    *Return the index of the Block for which the face is associated.*
+
+
+----
+
+.. glossary::
+
+   ``int Face::index_neighbor() const;``
+    *Return the corresponding neighbor Block index.*
+
+
+----
+
+.. glossary::
+
+   ``void Face::get_subface (int *fx, int *fy, int *fz);``
+    *Return the tuple (fx,fy,fz) identifying a subface of the intersection between two Blocks.  Default is (fx,fy,fz) = (0,0,0)*
+
+
+----
+
+.. glossary::
+
+   ``bool Face::is_facet() const;``
+    *Return whether the intersection between Blocks is a facet, that is     has rank d-1.  Must be true to be a valid face for flux correction.     WARNING: ignores domain boundary and boundary conditions.  Needs     domain array size and whether axis othogonal to the shared face is     periodic or not.*
+
+
+
+----
+
+.. glossary::
+
+   ``float Face::ratio_block_cell_width () const;``
+    *Return the ratio of cell widths between the two Blocks defining the     Face, h(block) / h(neighbor).  Expected values are 0.5, 1.0, or     2.0.*
+
+
+
+----
+
+.. glossary::
+
+   ``float Face::ratio_block_time_step () const;``
+     *Return the ratio of time steps between the two Blocks defining the     face, dt(block) / dt(neighbor).  Expected values are 0.5, 1.0, or     2.0.*
+
+
+----------------     
+FaceFluxes class
+----------------     
+
+Face fluxes represent an array of fluxes of a conserved Field through
+a Block's face or subset of a face.  Components of :p:`FaceFluxes` are
+the following:
+
+  * **face**: *The intersection between two Blocks for hydrodynamics;             for MHD, axis and direction may also be provided to             represent a "face within a face".  Defined using a pair             of Block indices, the first of which is the "owner" of             the fluxes.  See the :p:`Face` class discussion for more             details.*
+
+  * **field**: *Field for which the fluxes are associated*
+
+  * **dimensions**: *The dimensions defines how the face is discretized                   in space into surface elements.  This is :p:`(nx,ny,nz)` where one (or more) of :p:`nx,ny,nz`, equals 1.  If ghost zones are required for                   fluxes, a corresponding :p:`(gx,gy,gz)` is                   added, where the same one (or more) of :p:`gx,gy,gz` equals 0.  For non-centered zones, a                   centering offset may be needed :p:`(cx,cy,cz)`                   where one or more of :p:`cx,cy,cz` = 1 and                   others are 0.*
+
+  * **volume**: *Physical size :p:`(hx,hy,hz,dt)` defining the               volume or area element and time step through which the               flux is moving.  One (or more) of :p:`h[xyz] = 1.0`,               corresponding to :p:`n[xyz] = 1`.  Note unused :p:`h[xyz]`               are 1.0 not 0.0 so that spatial area can be computed as               :p:`hx*hy*hz`.*
+
+  * **fluxes**: *Floating-point array of fluxes.  Array size is               determined by :p:`(nx,ny,nz)` + :p:`2*(gx,gy,gz)` +               :p:`(cx,cy,cz)`.  May be extended precision to mitigate               effects of floating-point cancellation when subtracting               fluxes, though ideally should use extended precision               when computing them in the first place.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::FaceFluxes (Face face, int index_field, int nx, int ny, int nz, double hx, double hy, double hz, double dt);``
+     *Create a FaceFluxes object for the given face, field, and time     interval.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::set_ghost(int gx, int gy, int gz);``
+     *Set ghost zones if any.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::set_centering(int cx, int cy, int cz);``
+     *Set centering if non-centered.*
+
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::allocate ();``
+     *Allocate the flux array.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::deallocate();``
+     *Deallocate the flux array.*
+
+----
+
+.. glossary::
+
+   ``Face FaceFluxes::face () const;``
+     *Return the face associated with the FaceFluxes.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::get_element_size (double *hx, double *hy, double * hz) const;``
+     *Return the volume size of the fluxes.  May differ from Block cell     width if coarsening operations have been performed.*
+
+----
+
+.. glossary::
+
+   ``double FaceFluxes::time_step () const;``
+     *Return the time step dt of the accumulated fluxes.  May differ from      Block time step if multiple time steps have been accumulated.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::get_dimensions (int *mx, int *my, int *mz) const;``
+     *Return the array dimensions, including adjustments for ghost or      centering.  One or more of mx,my,mz will be 1.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::set_fluxes ( T * array, int dx, int dy, int dz);``
+     *Copy flux values from an array to the FluxFaces.  Array element     array[ix*dx + iy*dy + iz*dz] should correspond to flux value     (ix,iy,iz), where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
+
+----
+
+.. glossary::
+
+   ``T * FaceFluxes::get_fluxes (int * dx, int * dy, int *dz);``
+     *Return the array of fluxes and associated strides (dx,dy,dz) such     that the (ix,iy,iz) flux value is fluxes[ix*dx + iy*dy + iz*dz],     where (0,0,0) <= (ix,iy,iz) < (mx,my,mz).*
+
+----
+
+.. glossary::
+
+   ``friend float ratio_flux_cell_width (FaceFluxes ff_1, FaceFluxes ff_2) const;``
+     *Return the ratio of volume element resolutions h(ff_1) / h(ff_2) =     {0.5, 1.0, 2.0} along each dimension between stored fluxes in two     FaceFluxes objects.  FaceFluxes are assumed to be associated with     the same face.  Must be 1.0 to compute sum or difference.*
+
+----
+
+.. glossary::
+
+   ``friend float ratio_flux_time_step (FaceFluxes ff_1, FaceFluxes ff_2) const;``
+     *Return the ratio of time steps dt(ff_1) / dt(ff_2) = {0.5, 1.0,      2.0} of fluxes between two FaceFluxes objects.  FaceFluxes are      assumed to be associated with the same face.  Ratio must be 1.0 to      compute difference.*
+
+----
+
+.. glossary::
+
+   ``void FaceFluxes::coarsen ();``
+      *Coarsen a FaceFluxes object by reducing dimensions by two along      each face dimension, and summing fine elements contained in each      coarse flux element.  Updates volume element resolution (hx,hy,hz)      accordingly.  Used for coarsening fine-level fluxes to match coarse      level fluxes.*
+
+----
+
+.. glossary::
+
+   ``FaceFluxes & FaceFluxes::operator += (FaceFluxes face_flux);``
+     *Add FaceFluxes object to this one. FaceFluxes are assumed to be      associated with the same face.  Used for accumulating fluxes with      finer time steps until they match the coarser time step.  Updates      dt accordingly.  Assumes spacially-conforming FaceFlux objects:      FaceFluxes must be associated with the same face, and ratio of      cell_widths must be 1.0*
+
+----
+
+.. glossary::
+
+   ``FaceFluxes & FaceFluxes::operator *= (double weight);``
+     *Scale the fluxes array by a scalar constant.*
+
+
+----
+
+.. glossary::
+
+   ``friend FaceFluxes operator - (FaceFluxes ff_1, FaceFluxes ff_2);``
+     *Return a FaceFluxes object containing the difference (ff_1 - ff_2)      between the two FaceFluxes.  Used to compute flux correction      factors.  Assumes fully-conforming FaceFlux objects: FaceFluxes must be      associated with the same face, and ratios of both cell_widths and      time_steps must be 1.0.*
+
+        
    
-FluxData class design
-=====================
+--------------
+FluxData class
+--------------
 
-The :p:`FluxData` class is used to store all flux data required by
-a Block at any given time.
+The :p:`FluxData` class defines a collection of all :p:`FluxFaces` required
+by a Block to perform flux corrections.  This includes all :p:`FluxFaces`
+on :p:`Faces` whose neighboring Block differs either in either mesh
+refinement or time step.  :p:`FluxFaces` are expected to come in pairs,
+one corresponding to the Block, and one corresponding to the
+neighboring Block.  FaceFluxes in the :p:`FluxData` object may be in a
+non-conforming state, that is the volume elements may not match,
+either spatial area or time step.  Coarsening and summing over
+time-steps of :p:`FluxData` objects are used to create fully-conforming
+:p:`FluxFaces`, after which differencing is permitted for computing the
+flux-correction factors.  Support for coarsening, adding, and
+differencing fluxes is the responsibility of the :p:`FaceFluxes` class;
+:p:`FluxData` is primarily a container.
 
-------------------
-FluxData interface
-------------------
 
-Below we develop the interface for the :p:`FluxData` object for storing
-and manipulating fluxes associated with a Block.
+.. glossary::      
+
+   ``FluxData::FluxData()``
+     *Create an empty FluxData() object*
 
 ----
 
 .. glossary::      
 
-   ``FaceFluxes(index_block, index_field, axis, face, child, cycle, dt)``
-
-      * **index_block**: *Index of the Block that fluxes are associated with*
-      * **index_field**: *Index of the Field that fluxes are associated with*
-      * **axis**: *Axis (0,1,2) of the face the fluxes are associated with*
-      * **face**: *Lower (0) or upper (1) face the fluxes are associated with*
-      * **child**: *Tuple identifying which quadrant of the face neighboring fine-block fluxes are associated with*
-      * **cycle**: *Fine-level computational cycle of the fluxes*
-      * **dt**: *Time step associated with the fluxes*
-   
-     *Return an alias to the fluxes for the given field and face.  This    should be usable as an lvalue so that updates to the fluxes will    be reflected in the values stored in the :p:`FluxData` object.*
-
-----
-
-.. glossary::
-
-   ``~FluxData ()``
-
-      *Delete the FluxData object*
+   ``void FluxData::insert_fluxes(FaceFluxes * face_fluxes)``
+    *Insert the given FaceFluxes object into the FluxData.  Must be   dynamically allocated, and responsibility for deleting face_fluxes   is transfered to the FluxData object.*
 
 ----
 
 .. glossary::      
 
-   ``FaceFluxes & fluxes (index_block, index_field, axis, face, child, cycle)``
+   ``void FluxData::remove_fluxes(FaceFluxes * face_fluxes)``
+    *Remove the FaceFluxes object from the FluxData object, but do not    delete it.*
 
-     *Return an alias to the fluxes for the given field and face.  This    should be usable as an lvalue so that updates to the fluxes will    be reflected in the values stored in the :p:`FluxData` object.*
-
-     arguments:
-     
-      * **index_block**: *Index of the Block associated with the fluxes*
-      * **index_field**: *Index of the Field associated with the fluxes*
-      * **axis,face**: *Face of the Block associated with the fluxes, identified by axis (0,1,2) and face (0,1)*
-      * **child**: *Tuple identifying which quadrant of the face neighboring fine-block fluxes are associated with*
-      * **cycle**: *Fine-level computational cycle of the fluxes*
-   
 ----
 
-.. glossary::
+.. glossary::      
 
-  ``operator += (face_fluxes)``
+   ``void FluxData::delete_fluxes(FaceFluxes * face_fluxes)``
+    *Remove the FaceFluxes object from the FluxData object and delete    it.*
 
-     *Add the FaceFluxes to the existing FaceFluxes object.  Copies if uninitialized.  Cycle numbers of appended* face_fluxes *objects must be consecutive.  The resulting FaceFluxes object will internally store start and stop cycles, and flux values will be summed.*
-
-     * **face_fluxes**: *FaceFluxes object being appended*
-     
 ----
 
------------------------
-FluxData implementation
------------------------
+.. glossary::      
 
-FaceFluxes class design
-=======================
+   ``FaceFluxes FluxData::face_fluxes (Face face, Index index_block, int index_field)``
+    *Return the FaceFluxes object for the given Face, Block index, and    Field index.  Block index must match one of defining Block indices    for Face.*
 
-Create a new uninitialized FaceFluxes object
+----
 
---------------------
-FaceFluxes interface
---------------------
+.. glossary::      
 
-.. glossary::
+   ``int FluxData::num_face_fluxes()``
+    *Return the number of FaceFluxes in the FluxData object.*
 
-   ``void FaceFluxes(index_block, index_field, axis, face, child, cycle, dt)``
+----
 
-      *Create a FaceFluxes object for the given Block, Field, axis, and face.*
-   
-      * **index_block**: *Index of the Block associated with the fluxes*
-      * **index_field**: *Index of the Field associated with the fluxes*
-      * **axis,face**: *Face of the Block associated with the fluxes, identified by axis (0,1,2) and face (0,1)*
-      * **child**: *Tuple identifying which quadrant of the face neighboring fine-block fluxes are associated with*
-      * **cycle**: *Fine-level computational cycle of the fluxes*
-      * **dt**: time step for the fluxes
-  
--------------------------
-FaceFluxes implementation
--------------------------
+.. glossary::      
 
-   * **index_block**: index of the Block associated with the fluxes
-   * **index_field**: index of the Field associated with the fluxes
-   * **axis,face**: face of the Block, identified by axis (0,1,2) and face (0,1)
-   * **child**: *Tuple identifying which quadrant of the face neighboring fine-block fluxes are associated with*
-   * **cycle_begin**: starting cycle associated with fluxes
-   * **cycle_end**: ending cycle associated with fluxes
-   * **dt**: time step for the fluxes
+   ``FaceFluxes FluxData::face_fluxes (int i)``
+    *Return the ith FaceFluxes object.*
+
 
 Communication
 =============
@@ -480,16 +670,20 @@ type, which by definition includes
    3. only from finer resolution to coarser resolution (temporal as
       well as spacial)
 
+---- 
+
 .. figure:: flux-refresh-1.png
-    :width: 400px
+    :width: 500px
     :align: center
     :alt: figure illustrating that fine block fluxes are coarsened before being communicated
     :figclass: align-center
 
     Communicating fluxes assuming constant time steps.               
       
+---- 
+
 .. figure:: flux-refresh-2.png
-    :width: 400px
+    :width: 500px
     :align: center
     :alt:  figure illustrating that fine block fluxes with shorter time steps are accumulated in the receiving coarse grid neighbor fluxes
     :figclass: align-center
