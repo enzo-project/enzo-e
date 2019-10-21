@@ -214,7 +214,7 @@ public: /// entry methods
   //--------------------------------------------------
 
   /// Synchronize after potential solve and before accelerations
-  void r_method_gravity_continue(CkReductionMsg * msg);
+  void p_method_gravity_continue();
 
   /// Synchronize for refresh
   void p_method_gravity_end();

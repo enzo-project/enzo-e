@@ -335,7 +335,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   Solver * solver = enzo::problem()->solver(index_solver_);
   
   // May exit before solve is done...
-  solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue(NULL));
+  solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
 
   const int ix = field.field_id ("potential");
 
@@ -350,9 +350,8 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_method_gravity_continue(CkReductionMsg * msg)
+void EnzoBlock::p_method_gravity_continue()
 {
-  delete msg;
 
   TRACE_METHOD("r_method_gravity_end()",this);
 

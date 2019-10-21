@@ -49,6 +49,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
 
+  Monitor * monitor = cello::monitor();
+  if (block->index().is_root()) {
+    monitor->print("Method", "%s redshift %.8f",
+		   this->name().c_str(),
+		   enzo::cosmology()->current_redshift());
+  }
+
+
   /* Only do this if
      1. this is a leaf block
      2. we are using comoving coordinates
