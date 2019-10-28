@@ -27,7 +27,7 @@ reconstruction and quantity updates.`
 
 :Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`riemann_solver`
 :Summary: :s:`name of the Riemann solver to use`
-:Type:   :t:`float`
+:Type:   :t:`string`
 :Default: :d:`hlld`
 :Scope:     :z:`Enzo`
 
@@ -38,21 +38,21 @@ reconstruction and quantity updates.`
 
 :Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`half_dt_reconstruct_method`
 :Summary: :s:`name of the reconstruction method to use for the full timestep`
-:Type:   :t:`float`
+:Type:   :t:`string`
 :Default: :d:`nn`
 :Scope:     :z:`Enzo`
 
 :e:`Name of the interpolation method used to reconstruct face-centered
-primitives for the first half timestep.` ``"nn"`` :e:` is recommended
-for this method (problems arise if ` ``"plm"`` :e:` is used). For a
-list of options, see`
+primitives for the first half timestep.` ``"nn"`` :e:`is recommended
+for this method (problems arise if` ``"plm"`` :e:`or` ``"plm_athena"``
+:e:`are used). For a list of options, see`
 :ref:`using-vlct-reconstruction`
 
 ----
 
 :Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`full_dt_reconstruct_method`
 :Summary: :s:`name of the reconstruction method to use for the full timestep`
-:Type:   :t:`float`
+:Type:   :t:`string`
 :Default: :d:`plm`
 :Scope:     :z:`Enzo`
 
@@ -60,3 +60,14 @@ list of options, see`
 primitives for the full timestep. For a list of options, see`
 :ref:`using-vlct-reconstruction`
 
+----
+
+:Parameter:  :p:`Method` : :p:`mhd_vlct` : :p:`theta_limiter`
+:Summary: :s:`controls the dissipation of certain slope limiters.`
+:Type:   :t:`float`
+:Default: :d:`1.5`
+:Scope:     :z:`Enzo`
+
+:e:`Modifies the disipation of the slope limiter of the`
+``"plm"``/``plm_enzo`` :e:`piecewise linear reconstruction algorithm.
+For more details, see` :ref:`using-vlct-reconstruction`

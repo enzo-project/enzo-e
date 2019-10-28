@@ -160,6 +160,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_vlct_riemann_solver(""),
   method_vlct_half_dt_reconstruct_method(""),
   method_vlct_full_dt_reconstruct_method(""),
+  method_vlct_theta_limiter(0.0),
   method_vlct_density_floor(0.0),
   method_vlct_pressure_floor(0.0),
   /// EnzoSolverMg0
@@ -357,6 +358,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_vlct_riemann_solver;
   p | method_vlct_half_dt_reconstruct_method;
   p | method_vlct_full_dt_reconstruct_method;
+  p | method_vlct_theta_limiter;
   p | method_vlct_density_floor;
   p | method_vlct_pressure_floor;
 
@@ -752,6 +754,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Method:mhd_vlct:half_dt_reconstruct_method","nn");
   method_vlct_full_dt_reconstruct_method = p->value_string
     ("Method:mhd_vlct:full_dt_reconstruct_method","plm");
+  method_vlct_theta_limiter = p->value_float
+    ("Method:mhd_vlct:theta_limiter", 1.5);
   method_vlct_density_floor = p->value_float
     ("Method:mhd_vlct:density_floor", 0.0);
   method_vlct_pressure_floor = p->value_float

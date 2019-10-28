@@ -662,10 +662,39 @@ to return pointers to instances of the new class when the appropriate
 name is passed as an argument, and the name of the new reconstructor
 should be added to :ref:`using-vlct-reconstruction`
 
-To take an existing reconstructor and make a new slope limiter
-available, a different class should be declared. *To reduce redundant
-code, it may be worth using templates in a manner similar to the HLLE
-riemann solver for implementing multiple wavespeed calculations.*
+Currently, to add new slope limiters for existing reconstruction
+algorithms new classes are effectively defined. The piecewise linear
+reconstruction algorithm is implemented as a class template
+``EnzoReconstructorPLM<Limiter>`` where ``Limiter`` is a functor that
+implements a specific slope limiter. ``Limiter`` must be default
+constructible and provide a function call operation, `operator()`. The
+function call operation must have a signature matching:
+
+.. code-block:: c++
+
+   enzo_float Functor::operator()(enzo_float vm1, enzo_float v, enzo_float vp1,
+                                  enzo_float theta_limiter);
+
+Give three contiguous primitive values along the axis of
+interpolation, (`vm1`, `v`, and `vp1`) the method should compute the
+limited slope. The `theta_limiter` parameter that can be optionally
+used to tune the limiter (or ignored).
+
+When a new a ``Limiter`` functor is defined to be used to specialize
+``EnzoReconstructorPLM``, the new specialization must be added to
+enzo.CI. The other steps mentioned at the start of this subsection for
+implementing new reconstruction algorithms must also be followed.
+
+*The use an enum with a switch statement was considered for switching
+between different slope limiters. However we determined that the compiler
+would not pull the switch statement outside of the loop.
+Therefore templates are used to avoid executing the switch statement on
+every single iteration.*
+
+*Having multiple slope limiters available at runtime may be
+unnecessary (or not worth the larger binary size). It might be worth
+considering using preprocessor macros to allow for specification of
+the slope limiter at compile time.*
 
 ==============
 Riemann Solver

@@ -13,8 +13,14 @@
 
 EnzoReconstructor* EnzoReconstructor::construct_reconstructor
 (std::vector<std::string> reconstructable_groups,
- std::vector<std::string> passive_groups, std::string name)
+ std::vector<std::string> passive_groups, std::string name,
+ enzo_float theta_limiter)
 {
+  
+  ASSERT("EnzoReconstructor::construct_reconstructor",
+	 "theta_limiter must satisfy 1<=theta_limiter<=2",
+	 (1.<=theta_limiter) && (theta_limiter<=2));
+
   // some repeated code from construct_riemann
   std::vector<std::string> groups = reconstructable_groups;
   groups.insert(groups.end(), passive_groups.begin(), passive_groups.end());
@@ -26,11 +32,15 @@ EnzoReconstructor* EnzoReconstructor::construct_reconstructor
   EnzoReconstructor* out;
   if (formatted == std::string("nn")){
     out = new EnzoReconstructorNN(groups);
-  } else if (formatted == std::string("plm")){
-    out = new EnzoReconstructorPLM(groups);
+  } else if ((formatted == std::string("plm")) ||
+	     (formatted == std::string("plm_enzo"))){
+    out = new EnzoReconstructorPLMEnzoRKLim(groups, theta_limiter);
+  } else if (formatted == std::string("plm_athena")) {
+    out = new EnzoReconstructorPLMAthenaLim(groups, theta_limiter);
   } else {
     ASSERT("EnzoReconstructor",
-	   "The only allowed solvers are NN & PLM", false);
+	   "The only allowed solvers are NN, PLM, PLM_ENZO, & PLM_ATHENA",
+	   false);
     out = NULL; // Deals with compiler warning
   }
   return out;

@@ -116,7 +116,7 @@ typedef int (*scratch_space_length_signature)(const int);
 
 //----------------------------------------------------------------------
 
-/// @def      DEFINE_HAS_SIGNATURE
+/// @def      DEFINE_HAS_SIGNATURE_STATIC
 /// @brief    Macro that is used to define a struct that is used to check if a
 ///           given class definition has a public static function with a
 ///           specified name and function signature
@@ -124,12 +124,12 @@ typedef int (*scratch_space_length_signature)(const int);
 /// @param traitsName The name of the struct that will be defined
 /// @param func_name  Name of the static function to check for
 /// @param signature  The signature that the function should have (this can be
-///     a function pointer)as the
+///     a function pointer)
 ///
 /// This macro comes from https://stackoverflow.com/a/23133787 and is used
 /// create structs to help check if the template argument of EnzoRiemannImpl
-/// has the correct functions defined.
-#define DEFINE_HAS_SIGNATURE(traitsName, func_name, signature)              \
+/// has the correct static methods defined.
+#define DEFINE_HAS_SIGNATURE_STATIC(traitsName, func_name, signature)       \
   template <typename U>                                                     \
   class traitsName                                                          \
   {                                                                         \
@@ -148,10 +148,10 @@ typedef int (*scratch_space_length_signature)(const int);
 // check that classes used to implement riemann solvers by specializing
 // EnzoRiemannImpl has the appropriate signatures. We explicitly check this to
 // provide more useful debugging messages.
-DEFINE_HAS_SIGNATURE(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
-		     calc_riemann_fluxes_signature);
-DEFINE_HAS_SIGNATURE(has_scratch_space_length, T::scratch_space_length,
-		     scratch_space_length_signature);
+DEFINE_HAS_SIGNATURE_STATIC(has_calc_riemann_fluxes, T::calc_riemann_fluxes,
+		            calc_riemann_fluxes_signature);
+DEFINE_HAS_SIGNATURE_STATIC(has_scratch_space_length, T::scratch_space_length,
+		            scratch_space_length_signature);
 
 template <class ImplStruct>
 class EnzoRiemannImpl : public EnzoRiemann

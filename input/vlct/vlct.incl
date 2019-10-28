@@ -13,16 +13,28 @@
         # default is hlle. Options are hlle/enzo_hlle, athena_hlle, and hlld
         riemann_solver = "hlld";
 
-        # Reconstructor algorithm for half time step. Options are:
-        #    - "nn" Nearest Neighbor (default)
-        #    - "plm" Piecewise linear
+        
+	# Reconstruction algorithms choices are:
+	# for full time step. Options are:
+        #    - "nn" Nearest Neighbor
+        #    - "plm"/"plm_enzo" Piecewise Linear Method with Enzo's slope
+	#      limiter. The "theta_limiter" value affects the diffusiveness
+	#      of the limiter. 
+	#    - "plm_athena" Piecewise Linear method with Athena's slope limiter
+
+	# Reconstructor algorithm for half time step. (default is "nn")
         half_dt_reconstruct_method = "nn";
 
-        # Reconstructor algorithm for full time step. Options are:
-        #    - "nn" Nearest Neighbor
-        #    - "plm" Piecewise linear (default)
-        # Do NOT choose "plm" for both
+	# Reconstructor algorithm for full time step (default is "plm")
         full_dt_reconstruct_method = "plm";
+
+	# modifies the slope enzo slope limiter used in piecewise linear
+	# reconstruction. If "plm" or "plm_enzo" is not used, then this
+	# parameter is meainingless. This should have a value in the range
+	# [1.,2.]. A value of 1. is most dissipative and is the same as the
+	# minmod limiter. A value of 2. is least dissipative and is the same as
+	# the MC limiter. The default value is 1.5.
+	theta_limiter = 2.;
 
         # density floor (default = 0.0)
         density_floor = 1.e-200;

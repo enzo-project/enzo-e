@@ -200,6 +200,11 @@ parameters
      - `string`
      - `plm`
      - `Reconstruction method for full timestep`
+   * - ``"theta_limiter"``
+     - `float`
+     - `1.5`
+     - `controls dissipation of the "plm"/"plm_enzo" reconstruction
+       method.`
 
 
 fields
@@ -288,7 +293,7 @@ a unigrid mesh, we define the concepts of "stale depth" and
 "staling rate". We define a "stale" value as a value that needs
 to be refreshed. "Stale depth" indicates the number of field
 entries, starting from the outermost field values on a block,
-that the region including "stale" values extends over. Every
+that the region encompassing "stale" values extends over. Every
 time quantities are updated over a (partial/full) timestep,
 the stale depth increases. We define the amount by which it
 increases as the "staling rate" (which depends on the choice
@@ -302,7 +307,8 @@ We provide the names used to specify each available method in
 the input file, the associated staling depth, and a brief
 description.
 
-.. list-table:: Available ``mhd_vlct`` reconstructors
+.. list-table:: Available ``mhd_vlct`` reconstructors (and slope
+		limiters)
    :widths: 3 1 30
    :header-rows: 1
    
@@ -312,16 +318,39 @@ description.
    * - ``"nn"``
      - `1`
      - `Nearest Neighbor - (1st order) reconstruction of primitives`
-   * - ``"plm"``
+   * - ``"plm"`` or ``"plm_enzo"``
      - `2`
-     - `Piecwise Linear Method - (2nd order) reconstruction of primitives (usinga minmod limiter)`
+     - `Piecwise Linear Method - (2nd order) reconstruction of
+       primitives using the slope limiter from Enzo's Runge–Kutta
+       integrator. This is tuned by the` ``"theta_limiter"``
+       `parameter, which must satisfy` ``1 <= "theta_limiter" <=
+       2``. `As in Enzo, the default value is 1.5. A value of 1 is the
+       most dissipative and it is equivalent to the traditional minmod
+       limiter. A value of 2 is the least dissipative and it
+       corresponds to an MC limiter (monotized central-difference
+       limiter).`
+   * - ``"plm_athena"``
+     - `2`
+     - `Piecwise Linear Method - (2nd order) reconstruction of
+       primitives using the slope limiter from Athena (& Athena++).
+       For some primitive variable`, :math:`{\bf w}_{i}`, `the limited
+       slope is defined in terms of the left- and right-differences:`
+       :math:`\delta{\bf w}_{L,i}={\bf w}_{i}-{\bf w}_{i-1}` `and`
+       :math:`\delta{\bf w}_{R,i}={\bf w}_{i-1}-{\bf w}_{i+1}`.  `If
+       the signs of the differences don't match (or at least 1 is 0),
+       then the limited slope is 0. Otherwise the limited slope is the
+       harmonic mean of the differences.`
 
 We provide a few notes about the choice of interpolator for this algorithm:
 
    * The recommended choices of reconstruction algorithms are ``"nn"`` for the
-     half-timestep and then ``"plm"`` for the full-timestep. Using ``"nn"``
+     half-timestep and then piecewise-linear reconstruction for the
+     full-timestep (most test problems have been run using ``plm`` with
+     ``theta_limiter=2``, matching the integrator description in
+     `Stone & Gardiner 2009
+     <http://adsabs.harvard.edu/abs/2009NewA...14..139S>`_ ). Using ``"nn"``
      both times also works, however errors tests show that errors arise when
-     ``"plm"`` is used both times.
+     piecewise linear reconstruction is used both times.
    * It is supposed to be possible to reconstruct the characteristic quantities
      for this method or to use higher order reconstruction in place of ``"plm"``
    * Reconstruction is always performed on the cell-centered magnetic fields.
@@ -347,7 +376,7 @@ them:
   * ``"athena_hlle"`` The HLLE approximate Riemann solver with
     wavespeeds computed using the procedure from 
     `Stone et al. (2008)
-    <http://http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ 
+    <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ 
     (the minimum and maximum eigenvalues of Roe's matrix are allowed
     to be wavespeeds).
   * ``"hlld"`` The HLLD approximate Riemann solver.

@@ -15,7 +15,8 @@
 EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      std::string half_recon_name,
 				      std::string full_recon_name,
-				      double gamma, double density_floor,
+				      double gamma, double theta_limiter,
+				      double density_floor,
 				      double pressure_floor)
   : Method()
 {
@@ -60,9 +61,11 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 
   // Initialize the remaining component objects
   half_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (reconstructable_group_names_, passive_group_names_, half_recon_name);
+    (reconstructable_group_names_, passive_group_names_, half_recon_name,
+     (enzo_float)theta_limiter);
   full_dt_recon_ = EnzoReconstructor::construct_reconstructor
-    (reconstructable_group_names_, passive_group_names_, full_recon_name);
+    (reconstructable_group_names_, passive_group_names_, full_recon_name,
+     (enzo_float)theta_limiter);
   riemann_solver_ = EnzoRiemann::construct_riemann
     (integrable_group_names_,      passive_group_names_, rsolver);
   integrable_updater_ = new EnzoIntegrableUpdate(integrable_group_names_,

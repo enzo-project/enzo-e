@@ -90,7 +90,11 @@ module enzo {
   PUPable EnzoEOSIdeal;
   PUPable EnzoIntegrableUpdate;
   PUPable EnzoReconstructorNN;
-  PUPable EnzoReconstructorPLM;
+  // EnzoReconstructorPLMEnzoRKLim
+  PUPable EnzoReconstructorPLM<PLM_EnzoRKLimiter>;
+  // EnzoReconstructorPLMAthenaLim
+  PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
+
   // EnzoRiemannHLLEAthenaMHD
   PUPable EnzoRiemannImpl<HLLEImpl<AthenaHLLEWavespeedMHD>>;
   // EnzoRiemannHLLEEnzoMHD

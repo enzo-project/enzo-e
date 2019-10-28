@@ -33,7 +33,8 @@ public: // interface
   ///     "nn" and "plm"
   static EnzoReconstructor* construct_reconstructor
     (std::vector<std::string> reconstructable_groups,
-     std::vector<std::string> passive_groups, std::string name);
+     std::vector<std::string> passive_groups, std::string name,
+     enzo_float theta_limiter);
 
   /// Create a new EnzoReconstructor
   EnzoReconstructor(std::vector<std::string> group_names) throw()

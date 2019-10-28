@@ -603,6 +603,7 @@ Method * EnzoProblem::create_method_
        enzo_config->method_vlct_half_dt_reconstruct_method,
        enzo_config->method_vlct_full_dt_reconstruct_method,
        enzo_config->field_gamma,
+       enzo_config->method_vlct_theta_limiter,
        enzo_config->method_vlct_density_floor,
        enzo_config->method_vlct_pressure_floor);
 
