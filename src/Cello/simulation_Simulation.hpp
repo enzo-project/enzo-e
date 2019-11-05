@@ -340,7 +340,7 @@ public: // virtual functions
   }
   void new_refresh_set_name (int id, std::string name)
   {
-    if (id >= new_refresh_name_.size())
+    if (id >= int(new_refresh_name_.size()))
       new_refresh_name_.resize(id+1);
     new_refresh_name_[id] = name;
 #ifdef DEBUG_NEW_REFRESH  
@@ -350,7 +350,8 @@ public: // virtual functions
   
   std::string new_refresh_name (int id) const
   {
-    return (0 <= id && id < new_refresh_name_.size()) ? new_refresh_name_[id] : "UNKNOWN";
+    return (0 <= id && id < int(new_refresh_name_.size())) ?
+      new_refresh_name_[id] : "UNKNOWN";
   }
 
   /// Return the given refresh object

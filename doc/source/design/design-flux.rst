@@ -420,23 +420,6 @@ Block.
 
 
 
-----
-
-.. glossary::
-
-   ``float Face::ratio_block_cell_width () const;``
-    *Return the ratio of cell widths between the two Blocks defining the     Face, h(block) / h(neighbor).  Expected values are 0.5, 1.0, or     2.0.*
-
-
-
-----
-
-.. glossary::
-
-   ``float Face::ratio_block_time_step () const;``
-     *Return the ratio of time steps between the two Blocks defining the     face, dt(block) / dt(neighbor).  Expected values are 0.5, 1.0, or     2.0.*
-
-
 ----------------     
 FaceFluxes class
 ----------------     
@@ -537,14 +520,14 @@ the following:
 
 .. glossary::
 
-   ``friend float ratio_flux_cell_width (FaceFluxes ff_1, FaceFluxes ff_2) const;``
+   ``friend float ratio_cell_width (FaceFluxes ff_1, FaceFluxes ff_2) const;``
      *Return the ratio of volume element resolutions h(ff_1) / h(ff_2) =     {0.5, 1.0, 2.0} along each dimension between stored fluxes in two     FaceFluxes objects.  FaceFluxes are assumed to be associated with     the same face.  Must be 1.0 to compute sum or difference.*
 
 ----
 
 .. glossary::
 
-   ``friend float ratio_flux_time_step (FaceFluxes ff_1, FaceFluxes ff_2) const;``
+   ``friend float ratio_time_step (FaceFluxes ff_1, FaceFluxes ff_2) const;``
      *Return the ratio of time steps dt(ff_1) / dt(ff_2) = {0.5, 1.0,      2.0} of fluxes between two FaceFluxes objects.  FaceFluxes are      assumed to be associated with the same face.  Ratio must be 1.0 to      compute difference.*
 
 ----

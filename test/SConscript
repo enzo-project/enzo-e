@@ -56,7 +56,9 @@ env.RunSerial('test_Field.unit',     bin_path + '/test_Field')
 env.RunSerial('test_FieldFace.unit', bin_path + '/test_FieldFace')
 env.RunSerial('test_ItIndex.unit',   bin_path + '/test_ItIndex')
 env.RunSerial('test_Grouping.unit',  bin_path + '/test_Grouping')
-env.RunSerial('test_Particle.unit',      bin_path + '/test_Particle')
+env.RunSerial('test_Particle.unit',  bin_path + '/test_Particle')
+env.RunSerial('test_FaceFluxes.unit',bin_path + '/test_FaceFluxes')
+env.RunSerial('test_FluxData.unit',  bin_path + '/test_FluxData')
 #----------------------------------------------------------------------
 # DISK COMPONENT          
 #----------------------------------------------------------------------
@@ -119,7 +121,8 @@ env.RunSerial('test_Memory.unit',      bin_path + '/test_Memory')
 # MESH COMPONENT          
 #----------------------------------------------------------------------
 env.RunSerial('test_Data.unit',     bin_path + '/test_Data')
-env.RunSerial('test_Index.unit',     bin_path + '/test_Index')
+env.RunSerial('test_Index.unit',    bin_path + '/test_Index')
+env.RunSerial('test_Face.unit',     bin_path + '/test_Face')
 Clean(env_mv_out.RunSerial('test_Tree.unit', bin_path + '/test_Tree'),
       ['#/test_Tree.unit.in',
        '#/test_tree_1-initial.png',	

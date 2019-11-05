@@ -260,6 +260,12 @@ test_class_size   = env.Program (['test_class_size.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_index        = env.Program (['test_Index.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
+test_face         = env.Program (['test_Face.cpp',objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
+test_face_fluxes   = env.Program (['test_FaceFluxes.cpp',objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
+test_flux_data     = env.Program (['test_FluxData.cpp',objs_mesh],
+                                 LIBS=[libs_mesh,  libs_test])
 test_prolong_linear = env.Program (['test_ProlongLinear.cpp',objs_mesh],
                                  LIBS=[libs_mesh,  libs_test])
 test_schedule     = env.Program (['test_Schedule.cpp', objs_io],
@@ -321,7 +327,7 @@ binaries_data = [test_scalar_data,
 binaries_problem = [test_mask,test_value,test_refresh]
 binaries_io    = [test_colormap]
 binaries_memory  = [test_memory]
-binaries_mesh = [ test_data,test_tree,test_tree_density,test_sync,test_node,test_node_trace,test_it_node,test_index,test_prolong_linear,test_schedule,test_it_face,test_it_child]
+binaries_mesh = [ test_data,test_tree,test_tree_density,test_sync,test_node,test_node_trace,test_it_node,test_index,test_face,test_face_fluxes,test_flux_data,test_prolong_linear,test_schedule,test_it_face,test_it_child]
 binaries_monitor = [test_monitor]
 
 objs_parallel.append(["main.cpp"])

@@ -1034,6 +1034,10 @@ void Config::read_particle_ (Parameters * p) throw()
       std::string name = p->list_value_string (3*ia,  const_str,"unknown");
       std::string type = p->list_value_string (3*ia+1,const_str,"unknown");
 
+      if (type == "default") {
+        type = default_precision_string;
+      }
+
       ASSERT3 ("read_particle_",
 	       "Particle type %d constant %d has unknown constant name %s",
 	       it,ia,name.c_str(),

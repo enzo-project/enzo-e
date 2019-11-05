@@ -521,11 +521,11 @@ void Block::print () const
   CkPrintf ("dt_ = %f\n",dt_);
   CkPrintf ("stop_ = %d\n",stop_);
   CkPrintf ("index_initial_ = %d\n",index_initial_);
-  CkPrintf ("children_.size() = %d\n",children_.size());
-  CkPrintf ("face_level_curr_.size() = %d\n",face_level_curr_.size());
-  CkPrintf ("face_level_next_.size() = %d\n",face_level_next_.size());
-  CkPrintf ("child_face_level_curr_.size() = %d\n",child_face_level_curr_.size());
-  CkPrintf ("child_face_level_next_.size() = %d\n",child_face_level_next_.size());
+  CkPrintf ("children_.size() = %lu\n",children_.size());
+  CkPrintf ("face_level_curr_.size() = %lu\n",face_level_curr_.size());
+  CkPrintf ("face_level_next_.size() = %lu\n",face_level_next_.size());
+  CkPrintf ("child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
+  CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
   CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
   CkPrintf ("adapt_ = %d\n",adapt_);
@@ -533,7 +533,7 @@ void Block::print () const
   CkPrintf ("delete_ = %d\n",delete_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
-  CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
+  CkPrintf ("face_level_last_.size() = %lu\n",face_level_last_.size());
   CkPrintf ("name_ = %s\n",name_.c_str());
   CkPrintf ("index_method_ = %d\n",index_method_);
   //  CkPrintf ("index_solver_ = %d\n",index_solver());

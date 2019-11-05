@@ -32,9 +32,6 @@ void Method::pup (PUP::er &p)
 { TRACEPUP;
   PUP::able::pup(p);
 
-  bool pk = p.isPacking();
-  bool up = p.isUnpacking();
-
   p | schedule_; // pupable
   p | courant_;
   p | ir_post_;
@@ -47,7 +44,6 @@ int Method::add_new_refresh_ ()
 {
   // set Method::ir_post_
 
-  const int * g3 = cello::config()->field_ghost_depth;
   const int ghost_depth = 4; // std::max(g3[0],std::max(g3[1],g3[2]));
   const int min_face_rank = 0; // cello::config()->adapt_min_face_rank;
 

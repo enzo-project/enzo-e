@@ -47,6 +47,7 @@ if [ "$#" -ge 1 ]; then
       rm -f input/*.in.out >& /dev/null
       rm -rf build build-*
       rm -rf test/*.h5
+      rm -rf test/runs_*
       rm -rf template_defs.def.h template_defs.decl.h
       rm -rf .sconf_temp/conftest_0.c .sconsign.dblite 
       rm -rf config.log diff.org log.org warnings.org errors.org log.build out.scons.*

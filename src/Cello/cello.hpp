@@ -163,6 +163,7 @@ enum type_enum {
 #   define default_precision precision_single
 #   define default_type      type_single
 #   define SCALAR_DEFINED
+#   define default_precision_string "single"
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
 #   ifdef SCALAR_DEFINED
@@ -171,6 +172,7 @@ enum type_enum {
 #   define default_precision precision_double
 #   define default_type      type_double
 #   define SCALAR_DEFINED
+#   define default_precision_string "double"
 #endif
 #ifdef CONFIG_PRECISION_QUAD
 #   ifdef SCALAR_DEFINED
@@ -179,6 +181,7 @@ enum type_enum {
 #   define default_precision precision_quad
 #   define default_type      type_quad
 #   define SCALAR_DEFINED
+#   define default_precision_string "quadruple"
 #endif
 
 #ifndef SCALAR_DEFINED

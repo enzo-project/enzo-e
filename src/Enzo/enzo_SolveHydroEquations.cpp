@@ -189,7 +189,7 @@ int EnzoBlock::SolveHydroEquations
   int NumberOfSubgrids = 0;
 
   //  SubgridFluxes = new fluxes *[NumberOfSubgrids];
-  SubgridFluxes = NULL;
+  // SubgridFluxes = NULL;
 
   // for (i = 0; i < NumberOfSubgrids; i++) {
   //   SubgridFluxes[i] = new fluxes;
@@ -489,13 +489,6 @@ int EnzoBlock::SolveHydroEquations
 
   delete [] array;
 
-  if (SubgridFluxes != NULL) {    
-    for (int i=0; i<NumberOfSubgrids; i++) {
-      delete SubgridFluxes[i];
-    }
-    delete [] SubgridFluxes;
-  }
-  
   if (ncolour > 0) delete [] coloff;
 
   return ENZO_SUCCESS;
