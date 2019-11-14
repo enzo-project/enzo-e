@@ -7,6 +7,10 @@
 #ifndef ENZO_ENZO_INITIAL_CLOUD_HPP
 #define ENZO_ENZO_INITIAL_CLOUD_HPP
 
+// tolerance to be used when checking the equivalence of 2 floating point
+// numbers in EnzoInitialCloud. This is the same as ETA_TOLERANCE for doubles.
+#define INIT_CLOUD_TOLERANCE 1.0e-10
+
 // represents a spherical region
 class SphereRegion;
 
@@ -23,7 +27,8 @@ public: // interface
 		   double cloud_radius, double cloud_center_x,
 		   double cloud_center_y, double cloud_center_z,
 		   double density_cloud, double density_wind,
-		   double etot_wind, double velocity_wind)
+		   double etot_wind, double eint_wind,
+		   double velocity_wind)
     : Initial(cycle,time),
       subsample_n_(subsample_n),
       cloud_radius_(cloud_radius),
@@ -33,6 +38,7 @@ public: // interface
       density_cloud_(density_cloud),
       density_wind_(density_wind),
       etot_wind_(etot_wind),
+      eint_wind_(eint_wind),
       velocity_wind_(velocity_wind)
   {
     ASSERT("EnzoInitialCloud", "subsample_n must be >=0", subsample_n>=0);
@@ -44,6 +50,8 @@ public: // interface
            density_cloud_>0);
     ASSERT("EnzoInitialCloud", "etot_wind must exceed wind kinetic energy",
 	   etot_wind>0.5*velocity_wind_*velocity_wind_);
+    ASSERT("EnzoInitialCloud", "eint_wind must be zero or positive.",
+	   eint_wind>=0.);
   }
 
   /// CHARM++ PUP::able declaration
@@ -105,8 +113,11 @@ private: // attributes
   double density_cloud_;
   double density_wind_;
 
-  /// specific internal energy of the wind
+  /// specific total energy of the wind
   double etot_wind_;
+
+  /// specific internal energy of the wind
+  double eint_wind_;
 
   /// velocity of the wind
   double velocity_wind_;

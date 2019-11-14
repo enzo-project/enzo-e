@@ -52,8 +52,8 @@ public:
 
     ASSERT("EnzoSphereRegion",
 	   "the cell width along each axis is assumed to be the same",
-	   (fabs((hy - hx)/hx) <= 1.e-10) && 
-           (fabs((hz - hx)/hx) <= 1.e-10));
+	   (fabs((hy - hx)/hx) <= INIT_CLOUD_TOLERANCE) &&
+           (fabs((hz - hx)/hx) <= INIT_CLOUD_TOLERANCE));
 
     Field field = data->field();
     int nx,ny,nz;
@@ -260,15 +260,16 @@ void EnzoInitialCloud::enforce_block
   if (use_cloud_dye){
     cloud_dye_density = array_factory.from_name("cloud_dye");
   }
-  
-  // Handle magnetic fields
-  bool mhd; // Whether or not we use MHD
-  EFlt3DArray bfield_x, bfield_y, bfield_z; // Cell-centered bfields
-  enzo_float magnetic_edens_wind; // magnetic energy density of the wind
 
   Field field = block->data()->field();
-  if (field.is_field("bfield_x")){
-    mhd = true;
+  
+  // Handle magnetic fields (mhd indicates whether the fields are present)
+  const bool mhd = (field.is_field("bfield_x") || field.is_field("bfield_y") ||
+		    field.is_field("bfield_z")); 
+  EFlt3DArray bfield_x, bfield_y, bfield_z; // Cell-centered bfields
+  enzo_float magnetic_edens_wind = 0.0; // magnetic energy density of the wind
+
+  if (mhd){
     // initialize bfields
     bfield_x = array_factory.from_name("bfield_x");
     bfield_y = array_factory.from_name("bfield_y");
@@ -293,25 +294,38 @@ void EnzoInitialCloud::enforce_block
     magnetic_edens_wind = 0.5*(bfield_x(gz,gy,gx)*bfield_x(gz,gy,gx)+
 			       bfield_y(gz,gy,gx)*bfield_y(gz,gy,gx)+
 			       bfield_z(gz,gy,gx)*bfield_z(gz,gy,gx));
-  } else {
-    mhd = false;
-    // So that we don't get yelled at by the compiler, set the bfield variables
-    // to array [[[0]]] and use them to compute magnetic_wind of 0
-    bfield_x = EFlt3DArray(1,1,1);
-    bfield_y = EFlt3DArray(1,1,1);
-    bfield_z = EFlt3DArray(1,1,1);
-    
-    magnetic_edens_wind = 0.5*(bfield_x(0,0,0)*bfield_x(0,0,0)+
-			       bfield_y(0,0,0)*bfield_y(0,0,0)+
-			       bfield_z(0,0,0)*bfield_z(0,0,0));
   }
 
-  double eint_density = ((etot_wind_ - 0.5*velocity_wind_*velocity_wind_)
-			 * density_wind_ - magnetic_edens_wind);
+  // Handle internal_energy & compute eint_density
+  // dual_energy indicates if there is an internal_energy to initialize
+  const bool dual_energy = field.is_field("internal_energy");
+  EFlt3DArray internal_energy; // internal_energy field
+  double eint_density; // internal energy density (constant over full domain).
+                       // used to initialize total energy in cells overlapping
+                       // with the cloud
 
-  ASSERT("EnzoInitialCloud", "Internal Energy Density must be positive",
-	 eint_density > 0);
+  if (dual_energy){
+    internal_energy = array_factory.from_name("internal_energy");
+    double temp = (eint_wind_ + 0.5*velocity_wind_*velocity_wind_ +
+		   magnetic_edens_wind / density_wind_);
+    ASSERT1("EnzoInitialCloud::enforce_block",
+	    ("Relative error of the wind's specific etot computed from "
+	     "specified eint, velocity, density & preinitialized B-fields, "
+	     "w.r.t. the specified etot, has a magnitude > %e"),
+	    INIT_CLOUD_TOLERANCE,
+	    fabs((temp - etot_wind_)/etot_wind_) > INIT_CLOUD_TOLERANCE);
+    eint_density = eint_wind_ * density_wind_;
+  } else {
+    ASSERT("EnzoInitialCloud::enforce_block",
+	   ("The internal energy of the wind has been specified, but there "
+	    "is no \"internal_energy\" field."),
+	   eint_wind_ == 0);
+    eint_density = ((etot_wind_ - 0.5 * velocity_wind_ * velocity_wind_)
+		    * density_wind_ - magnetic_edens_wind);
+  }
 
+  ASSERT("EnzoInitialCloud::enforce_block",
+	 "Internal Energy Density must be positive", eint_density > 0);
 
   for (int iz = 0; iz<density.shape(0); iz++){
     for (int iy = 0; iy<density.shape(1); iy++){
@@ -338,20 +352,25 @@ void EnzoInitialCloud::enforce_block
 	// cloud_mass_weight = M_wind/M_cell
 	//   = (1-f) * rho_wind / rho_cell
 
-	double wind_mass_weight;
 	double frac_enclosed = sph.cell_fraction_enclosed(iz, iy, ix);
 
 	double avg_density = (frac_enclosed * density_cloud_ +
 			      (1. - frac_enclosed) * density_wind_);
+
 	density(iz,iy,ix) = avg_density;
 	if (use_cloud_dye){
 	  cloud_dye_density(iz,iy,ix) = frac_enclosed * density_cloud_;
 	}
 
 	//cloud_mass_weight = frac_enclosed * density_cloud_ / avg_density;
-	wind_mass_weight = (1. - frac_enclosed) * density_wind_ / avg_density;
 
+	double wind_to_average_ratio = density_wind_ / avg_density;
+	double wind_mass_weight = (1. - frac_enclosed) * wind_to_average_ratio;
 	velocity_x(iz,iy,ix) = (wind_mass_weight * velocity_wind_);
+
+	if (dual_energy) {
+	  internal_energy(iz,iy,ix) = eint_wind_ * wind_to_average_ratio;
+	}
 
 	if (frac_enclosed == 0){
 	  total_energy(iz,iy,ix) = etot_wind_;

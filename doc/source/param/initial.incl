@@ -143,6 +143,21 @@ fields).`
 
 :e:`This must be a positive value.`
 
+----
+
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_internal_energy`
+:Summary: :s:`initial specific internal energy of the wind`
+:Type:    :t:`float`
+:Default: :d:`0`
+:Scope:   Enzo
+
+:e:`If the` ``"internal_energy"`` :e:`field is defined, then this must
+be a positive value. In this case, the value is also used to help
+initialize the` ``"total_energy"`` :e:`field for cells that overlap
+with the cloud.  However, if the` ``"internal_energy"`` :e:`field is
+not defined, then this must not have a specified value (i.e. it must
+have a value of 0).`
+
 inclined_wave
 -------------
 
