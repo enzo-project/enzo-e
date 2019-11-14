@@ -308,12 +308,12 @@ void EnzoInitialCloud::enforce_block
     internal_energy = array_factory.from_name("internal_energy");
     double temp = (eint_wind_ + 0.5*velocity_wind_*velocity_wind_ +
 		   magnetic_edens_wind / density_wind_);
-    ASSERT1("EnzoInitialCloud::enforce_block",
+    ASSERT2("EnzoInitialCloud::enforce_block",
 	    ("Relative error of the wind's specific etot computed from "
 	     "specified eint, velocity, density & preinitialized B-fields, "
-	     "w.r.t. the specified etot, has a magnitude > %e"),
-	    INIT_CLOUD_TOLERANCE,
-	    fabs((temp - etot_wind_)/etot_wind_) > INIT_CLOUD_TOLERANCE);
+	     "w.r.t. the specified etot, has a magnitude of %e (exceeding %e)"),
+	    fabs((temp - etot_wind_)/etot_wind_), INIT_CLOUD_TOLERANCE,
+	    fabs((temp - etot_wind_)/etot_wind_) <= INIT_CLOUD_TOLERANCE);
     eint_density = eint_wind_ * density_wind_;
   } else {
     ASSERT("EnzoInitialCloud::enforce_block",
