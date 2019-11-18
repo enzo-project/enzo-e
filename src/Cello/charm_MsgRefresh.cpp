@@ -105,7 +105,7 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   // Return the buffer
 
   ASSERT2("MsgRefresh::pack()",
-	  "buffer size mismatch %d allocated %d packed",
+	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
 

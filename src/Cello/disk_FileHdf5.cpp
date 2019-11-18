@@ -69,7 +69,7 @@ void FileHdf5::file_open () throw()
 
   // error check file opened
 
-  ASSERT2("FileHdf5::file_open", "Return value %d opening file %s",
+  ASSERT2("FileHdf5::file_open", "Return value %ld opening file %s",
 	 file_id_,file_name.c_str(), file_id_ >= 0);
 
   // update file state
@@ -109,7 +109,7 @@ void FileHdf5::file_create () throw()
   // error check file created
 
   TRACE1("File = %s",file_name.c_str());
-  ASSERT2("FileHdf5::file_create",  "Return value %d opening file %s",
+  ASSERT2("FileHdf5::file_create",  "Return value %ld opening file %s",
 	  file_id_,file_name.c_str(), file_id_ >= 0);
 
   // update file state
@@ -260,7 +260,7 @@ void FileHdf5::data_create
 
   // error check H5Dcreate
 
-  ASSERT2("FileHdf5::data_create", "Return value %d creating dataset %s",
+  ASSERT2("FileHdf5::data_create", "Return value %ld creating dataset %s",
 	  data_id_,name.c_str(), data_id_ >= 0);
 
   // update dataset state
@@ -378,7 +378,7 @@ void FileHdf5::file_read_meta
   // error check H5Aopen_name
 
   ASSERT3("FileHdf5::file_read_meta",
-	  "H5Aopen_name() returned %d opening %s in file %s",
+	  "H5Aopen_name() returned %ld opening %s in file %s",
 	  meta_id, name.c_str(),file_name.c_str(),
 	  (meta_id >= 0));
 
@@ -433,7 +433,7 @@ void FileHdf5::data_read_meta
   hid_t meta_id = H5Aopen_name(data_id_, name.c_str());
 
   ASSERT3("FileHdf5::data_read_meta",
-	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
+	  "H5Aopen_name() returned %ld when opening attribute %s in file %s",
 	   meta_id, name.c_str(),file_name.c_str(),
 	   (meta_id >= 0));
 
@@ -522,8 +522,8 @@ void FileHdf5::group_open () throw()
 
   // error check H5Gopen()
 
-  ASSERT2("FileHdf5::group_open()", "H5Gopen(%s) returned %d", 
-	  group_id_,group_name_.c_str(),group_id_>=0);
+  ASSERT2("FileHdf5::group_open()", "H5Gopen(%s) returned %ld", 
+	  group_name_.c_str(),group_id_,group_id_>=0);
 
   // update group state
 
@@ -648,7 +648,7 @@ void FileHdf5::group_read_meta
   hid_t meta_id = H5Aopen_name(group_id_, name.c_str());
 
   ASSERT3("FileHdf5::group_read_meta",
-	  "H5Aopen_name() returned %d when opening attribute %s in file %s",
+	  "H5Aopen_name() returned %ld when opening attribute %s in file %s",
 	   meta_id, name.c_str(),file_name.c_str(),
 	   (meta_id >= 0));
 
@@ -738,7 +738,7 @@ void FileHdf5::write_meta_
 
   // error check H5Acreate
 
-  ASSERT2("FileHdf5::write_meta_","H5Acreate(%s) returned %d",
+  ASSERT2("FileHdf5::write_meta_","H5Acreate(%s) returned %ld",
 	  name.c_str(),meta_id,(meta_id>=0));
 
   // Write the attribute 
@@ -991,7 +991,7 @@ hid_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
 
   // error check rank
 
-  ASSERT1("FileHdf5::space_create_","rank %d is out of range",
+  ASSERT1("FileHdf5::space_create_","rank %llu is out of range",
 	  rank, (1 <= rank && rank <= 4));
 
   // Define the space: NOTE REVERSED AXES
@@ -1064,7 +1064,7 @@ hid_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
 
   } else {
     ERROR1 ("FileHdf5::space_create_()",
-	    "Rank %d out of bounds 1 <= rank <= 4",rank);
+	    "Rank %llu out of bounds 1 <= rank <= 4",rank);
   }
 
   hid_t space_id = H5Screate_simple (rank, dims, 0);
@@ -1078,7 +1078,7 @@ hid_t FileHdf5::space_create_(int m1, int m2, int m3, int m4,
   // error check H5Screate_simple
 
   ASSERT1("FileHdf5::space_create_",
-	  "h5Screate_simple returned %d",
+	  "h5Screate_simple returned %ld",
 	  space_id,
 	  (space_id>=0));
 
@@ -1140,7 +1140,7 @@ hid_t FileHdf5::open_dataset_ (hid_t group, std::string name) throw()
   // error check H5Dopen
 
   ASSERT3("FileHdf5::open_dataset_", 
-	  "H5Dopen() returned %d opening %s in file %s",
+	  "H5Dopen() returned %ld opening %s in file %s",
 	  dataset_id,name.c_str(),(path_ + "/" + name_).c_str(), 
 	  dataset_id >= 0);
 

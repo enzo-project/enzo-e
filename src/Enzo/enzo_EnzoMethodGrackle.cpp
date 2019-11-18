@@ -479,7 +479,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGrackle::timestep ( Block * block ) throw()
+double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 {
   const EnzoConfig * config = enzo::config();
 
@@ -555,41 +555,25 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    enzo_float * internal_energy = (enzo_float*) field.values("internal_energy");
    enzo_float * total_energy    = (enzo_float*) field.values("total_energy");
 
-   enzo_float * pressure    = field.is_field("pressure") ?
-                (enzo_float*) field.values("pressure") : NULL;
-   enzo_float * temperature = field.is_field("temperature") ?
-                (enzo_float*) field.values("temperature") : NULL;
+   enzo_float * pressure    = (enzo_float*) field.values("pressure");
+   enzo_float * temperature = (enzo_float*) field.values("temperature");
 
-   enzo_float * HI_density    = field.is_field("HI_density") ?
-                                (enzo_float*) field.values("HI_density")    : NULL;
-   enzo_float * HII_density   = field.is_field("HII_density") ?
-                                (enzo_float*) field.values("HII_density")   : NULL;
-   enzo_float * HeI_density   = field.is_field("HeI_density") ?
-                                (enzo_float*) field.values("HeI_density")   : NULL;
-   enzo_float * HeII_density  = field.is_field("HeII_density") ?
-                                (enzo_float*) field.values("HeII_density")  : NULL;
-   enzo_float * HeIII_density = field.is_field("HeIII_density") ?
-                                (enzo_float*) field.values("HeIII_density") : NULL;
-   enzo_float * e_density     = field.is_field("e_density") ?
-                                (enzo_float*) field.values("e_density")     : NULL;
+   enzo_float * HI_density    = (enzo_float*) field.values("HI_density");
+   enzo_float * HII_density   = (enzo_float*) field.values("HII_density");
+   enzo_float * HeI_density   = (enzo_float*) field.values("HeI_density");
+   enzo_float * HeII_density  = (enzo_float*) field.values("HeII_density");
+   enzo_float * HeIII_density = (enzo_float*) field.values("HeIII_density");
+   enzo_float * e_density     = (enzo_float*) field.values("e_density");
 
-   enzo_float * H2I_density   = field.is_field("H2I_density") ?
-                                (enzo_float*) field.values("H2I_density")   : NULL;
-   enzo_float * H2II_density  = field.is_field("H2II_density") ?
-                                (enzo_float*) field.values("H2II_density")  : NULL;
-   enzo_float * HM_density    = field.is_field("HM_density") ?
-                                (enzo_float*) field.values("HM_density")    : NULL;
+   enzo_float * H2I_density   = (enzo_float*) field.values("H2I_density");
+   enzo_float * H2II_density  = (enzo_float*) field.values("H2II_density");
+   enzo_float * HM_density    = (enzo_float*) field.values("HM_density");
 
-   enzo_float * DI_density    = field.is_field("DI_density") ?
-                               (enzo_float *) field.values("DI_density")    : NULL;
-   enzo_float * DII_density   = field.is_field("DII_density") ?
-                               (enzo_float *) field.values("DII_density")   : NULL;
-   enzo_float * HDI_density   = field.is_field("HDI_density") ?
-                               (enzo_float *) field.values("HDI_density")   : NULL;
+   enzo_float * DI_density    = (enzo_float *) field.values("DI_density");
+   enzo_float * DII_density   = (enzo_float *) field.values("DII_density");
+   enzo_float * HDI_density   = (enzo_float *) field.values("HDI_density");
 
-
-   enzo_float * metal_density = field.is_field("metal_density") ?
-                                (enzo_float*) field.values("metal_density") : NULL;
+   enzo_float * metal_density = (enzo_float*) field.values("metal_density");
 
    // Field size
    int nx,ny,nz;
@@ -608,20 +592,14 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    int mx,my,mz;
    field.dimensions(0,&mx,&my,&mz);
 
-   const int m = mx*my*mz;
-
-   int ngx = nx + 2*gx;
-   int ngy = ny + 2*gy;
-   int ngz = nz + 2*gz;
-
-   double temperature_slope = log10(enzo_config->initial_grackle_test_maximum_temperature/
-                                    enzo_config->initial_grackle_test_minimum_temperature)/
-                                    double(ny);
+   double temperature_slope = log10
+     (enzo_config->initial_grackle_test_maximum_temperature/
+      enzo_config->initial_grackle_test_minimum_temperature) / double(ny);
 
    for (int iz=gz; iz<nz+gz; iz++){ // Metallicity
      for (int iy=gy; iy<ny+gy; iy++) { // Temperature
        for (int ix=gx; ix<nx+gx; ix++) { // H Number Density
-         int i = INDEX(ix,iy,iz,ngx,ngy);
+         int i = INDEX(ix,iy,iz,mx,my);
 
          enzo_float mu = e_density[i] + HI_density[i] + HII_density[i] +
             (HeI_density[i] + HeII_density[i] + HeIII_density[i])*0.25;

@@ -319,32 +319,40 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_time;
 
   p  | method_grackle_use_grackle;
+
 #ifdef CONFIG_USE_GRACKLE
-  p  | method_grackle_use_cooling_timestep;
-  p  | method_grackle_radiation_redshift;
+  if (method_grackle_use_grackle) {
+    p  | method_grackle_use_cooling_timestep;
+    p  | method_grackle_radiation_redshift;
 
-  int is_null = (method_grackle_chemistry==NULL);
-  p | is_null;
+    int is_null = (method_grackle_chemistry==NULL);
 
-  if (is_null){
-    method_grackle_chemistry = NULL;
-  } else {
+    p | is_null;
 
-    if (p.isUnpacking()) {
-      method_grackle_chemistry = new chemistry_data;
-      method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
+    if (is_null) {
 
-      if(method_grackle_chemistry->use_grackle){
-        if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
-          ERROR("EnzoMethodConfig::pup()",
-                "Error in Grackle set_default_chemistry_parameters");
+      method_grackle_chemistry = NULL;
+      
+    } else {
+
+      if (p.isUnpacking()) {
+        method_grackle_chemistry = new chemistry_data;
+        method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
+
+        if(method_grackle_chemistry->use_grackle){
+          if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
+            ERROR("EnzoMethodConfig::pup()",
+                  "Error in Grackle set_default_chemistry_parameters");
+          }
         }
       }
+      ASSERT("EnzoConfig::pup",
+             "method_grackle_chemistry is expected to be non-null",
+             (method_grackle_chemistry != NULL));
+      
+      p | *method_grackle_chemistry;
     }
-  }
 
-  if (method_grackle_use_grackle){
-    p | *method_grackle_chemistry;
   }
 
 #endif /* CONFIG_USE_GRACKLE */

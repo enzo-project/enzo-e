@@ -829,7 +829,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   }
     
   ASSERT2("EnzoMethodHydro::ppm_xeuler_x",
-	  "temporary slice array actual size %d differs from expected size %d",
+	  "temporary slice array actual size %ld differs from expected size %d",
 	  (pa-slice_array), na,
 	  ((pa -slice_array) == na));
 
@@ -873,7 +873,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   colrs    = pf; pf += nc*ns;
 
   ASSERT2("EnzoMethodHydro::ppm_xeuler_x",
-	  "temporary fluxes array actual size %d differs from expected size %d",
+	  "temporary fluxes array actual size %ld differs from expected size %d",
 	  (pf-fluxes_array), nf,
 	  ((pf -fluxes_array) == nf));
 

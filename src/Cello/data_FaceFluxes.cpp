@@ -125,18 +125,18 @@ void FaceFluxes::set_fluxes ( std::vector<double> array, int dx, int dy, int dz)
   int mx,my,mz;
   get_dimensions(&mx,&my,&mz);
   ASSERT5("FaceFluxes::set_fluxes",
-          "Input array size %d is smaller than required size %d = %d * %d *%d",
+          "Input array size %lu is smaller than required size %d = %d * %d *%d",
           array.size(),mx*my*mz,mx,my,mz,
-          array.size() >= mx*my*mz );
+          (array.size() >= mx*my*mz) );
   ASSERT4("FaceFluxes::set_fluxes",
-          "Input array size %d is too small for axis strides (dx,dy,dz)=(%d,%d,%d)",
+          "Input array size %lu is too small for axis strides (dx,dy,dz)=(%d,%d,%d)",
           array.size(),dx,dy,dz,
-          array.size() >= (mx-1)*dx+(my-1)*dy+(mz-1)*dz );
+          (array.size() >= (mx-1)*dx+(my-1)*dy+(mz-1)*dz) );
 
   ASSERT5("FaceFluxes::set_fluxes",
-          "Flux array size %d is smaller than required size %d = %d * %d *%d",
+          "Flux array size %lu is smaller than required size %d = %d * %d *%d",
           fluxes_.size(),mx*my*mz,mx,my,mz,
-          fluxes_.size() >= mx*my*mz );
+          (fluxes_.size() >= mx*my*mz) );
 
     
   for (int ix=0; ix<mx; ix++) {
@@ -164,12 +164,12 @@ std::vector<double> & FaceFluxes::get_fluxes (int * dx, int * dy, int *dz)
   
 //----------------------------------------------------------------------
 
-float ratio_cell_width (FaceFluxes ff_1, FaceFluxes ff_2)
+float ratio_cell_width (const FaceFluxes & ff_1, const FaceFluxes & ff_2)
 { return 0.0;}
 
 //----------------------------------------------------------------------
 
-float ratio_time_step (FaceFluxes ff_1, FaceFluxes ff_2)
+float ratio_time_step (const FaceFluxes & ff_1, const FaceFluxes & ff_2)
 { return 0.0; }
   
 //----------------------------------------------------------------------
@@ -179,7 +179,7 @@ void FaceFluxes::coarsen ()
   
 //----------------------------------------------------------------------
 
-FaceFluxes & FaceFluxes::operator += (FaceFluxes face_fluxes)
+FaceFluxes & FaceFluxes::operator += (const FaceFluxes & face_fluxes)
 { return *this; }
   
 //----------------------------------------------------------------------
@@ -189,6 +189,6 @@ FaceFluxes & FaceFluxes::operator *= (double weight)
   
 //----------------------------------------------------------------------
 
-FaceFluxes operator - (FaceFluxes ff_1, FaceFluxes ff_2)
+FaceFluxes operator - (const FaceFluxes & ff_1, const FaceFluxes & ff_2)
 { return ff_1; }
 

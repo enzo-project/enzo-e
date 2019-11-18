@@ -325,7 +325,7 @@ public: // virtual functions
   //--------------------------------------------------
 
   /// refresh_register
-  int new_register_refresh (Refresh refresh)
+  int new_register_refresh (const Refresh & refresh)
   {
     const int id_refresh = new_refresh_list_.size();
     ASSERT("Simulation::new_register_refresh()",

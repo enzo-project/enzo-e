@@ -111,6 +111,7 @@ Simulation::Simulation()
   monitor_(NULL),
   hierarchy_(NULL),
   scalar_descr_long_double_(NULL),
+  scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
@@ -161,6 +162,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     monitor_(NULL),
     hierarchy_(NULL),
     scalar_descr_long_double_(NULL),
+    scalar_descr_double_(NULL),
     scalar_descr_int_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
@@ -278,7 +280,7 @@ void Simulation::pup (PUP::er &p)
   PUParray(p,dir_checkpoint_,256);
 
   ASSERT1("Simulation::pup()",
-	  "msg_refine_map_ is assumed to be empty but has size %d",
+	  "msg_refine_map_ is assumed to be empty but has size %lu",
 	  msg_refine_map_.size(),
 	  (msg_refine_map_.size() == 0));
 	  
@@ -306,7 +308,7 @@ void Simulation::p_get_msg_refine(Index index)
 {
   MsgRefine * msg = get_msg_refine(index);
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d DEBUG_MSG_REFINE sending %p\n",msg);
+  CkPrintf ("%d DEBUG_MSG_REFINE sending %p\n",CkMyPe(),msg);
 #endif
   hierarchy_->block_array()[index].p_set_msg_refine(msg);
 }
@@ -610,13 +612,6 @@ void Simulation::initialize_data_descr_() throw()
       c = particle_descr_->constant_value(it,ic);
       if (type == type_default) type = default_type;
       switch (type) {
-      case type_default:
-#ifdef CONFIG_PRECISION_SINGLE	
-	*f4 = config_->particle_constant_value[it][ic];
-#endif	
-#ifdef CONFIG_PRECISION_DOUBLE
-	*f8 = config_->particle_constant_value[it][ic];
-#endif	
       case type_single:     *f4 = config_->particle_constant_value[it][ic];
 	break;
       case type_double:     *f8 = config_->particle_constant_value[it][ic];
@@ -819,7 +814,7 @@ void Simulation::data_insert_block(Block * block)
 {
  
 #ifdef CELLO_DEBUG
-  PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
+  PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %lu\n",
 		   CkMyPe(),sync_output_begin_.stop(),hierarchy_->num_blocks());
 #endif
   if (hierarchy_) {
@@ -977,14 +972,14 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   const long long particle_data = counters_reduce[m++]; // 7
   const long long num_particles = counters_reduce[m++]; // 8
   
-  monitor()->print("Performance","counter num-msg-coarsen %ld", msg_coarsen);
-  monitor()->print("Performance","counter num-msg-refine %ld", msg_refine);
-  monitor()->print("Performance","counter num-msg-refresh %ld", msg_refresh);
-  monitor()->print("Performance","counter num-data-msg %ld", data_msg);
-  monitor()->print("Performance","counter num-field-face %ld", field_face);
-  monitor()->print("Performance","counter num-particle-data %ld", particle_data);
+  monitor()->print("Performance","counter num-msg-coarsen %lld", msg_coarsen);
+  monitor()->print("Performance","counter num-msg-refine %lld", msg_refine);
+  monitor()->print("Performance","counter num-msg-refresh %lld", msg_refresh);
+  monitor()->print("Performance","counter num-data-msg %lld", data_msg);
+  monitor()->print("Performance","counter num-field-face %lld", field_face);
+  monitor()->print("Performance","counter num-particle-data %lld", particle_data);
 
-  monitor()->print("Performance","simulation num-particles total %ld",
+  monitor()->print("Performance","simulation num-particles total %lld",
 		   num_particles);
 
   // compute total blocks and leaf blocks
@@ -992,7 +987,7 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   long long num_leaf_blocks = 0;
   for (int i=hierarchy_->min_level(); i<=hierarchy_->max_level(); i++) {
     const long long num_blocks_level = counters_reduce[m++]; // NL
-    monitor()->print("performance","simulation num-blocks-level %d %ld",
+    monitor()->print("performance","simulation num-blocks-level %d %lld",
 		     i,num_blocks_level);
     num_total_blocks += num_blocks_level;
     // compute leaf blocks given number of blocks per level
@@ -1006,15 +1001,15 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   }
 
   monitor()->print
-    ("Performance","simulation num-leaf-blocks %d",  num_leaf_blocks);
+    ("Performance","simulation num-leaf-blocks %lld",  num_leaf_blocks);
   monitor()->print
-    ("Performance","simulation num-total-blocks %d", num_total_blocks);
+    ("Performance","simulation num-total-blocks %lld", num_total_blocks);
 
   const long long num_blocks_total   = counters_reduce[m++]; // 9
 
   if (num_total_blocks != num_blocks_total) {
     WARNING2 ("Simulation::r_monitor_performance_reduce()",
-	      "num_blocks_total %d does not match computed value %d",
+	      "num_blocks_total %lld does not match computed value %lld",
 	      num_total_blocks,num_blocks_total);
   }
   
@@ -1028,7 +1023,7 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 	(performance_->counter_type(ic) != counter_type_abs) ||
 	(ir == index_region_cycle));
       if (do_print) {
-	monitor()->print("Performance","%s %s %ld",
+	monitor()->print("Performance","%s %s %lld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
 			 counters_reduce[m]);
@@ -1041,9 +1036,9 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   const long long max_proc_particles = counters_reduce[m++]; // 11
   
   monitor()->print
-    ("Performance","simulation max-proc-blocks %d",  max_proc_blocks);
+    ("Performance","simulation max-proc-blocks %lld",  max_proc_blocks);
   monitor()->print
-    ("Performance","simulation max-proc-particles %d", max_proc_particles);
+    ("Performance","simulation max-proc-particles %lld", max_proc_particles);
 
   const double avg_proc_blocks = 1.0*num_blocks_total/CkNumPes();
 

@@ -244,6 +244,8 @@ EnzoSolverBiCgStab::EnzoSolverBiCgStab
     ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
     is_dot_sync_ = scalar_descr_sync->new_value("solver_bicgstab_dot_sync");
 
+  } else {
+    is_dot_sync_ = -1;
   }
   
   ScalarDescr * scalar_descr_int = cello::scalar_descr_int();
@@ -431,7 +433,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* block,
   if (solve_type_ != solve_tree && msg != NULL) {
     long double* data = (long double*) msg->getData();
     ASSERT1("EnzoSolverBiCgStab::start_2",
-	    "Expecting (data[0] = %d) == 3",
+	    "Expecting (data[0] = %Lg) == 3",
 	    data[0],(data[0] == 3));
     S(c)  = data[1];
     S(bs) = data[2];
@@ -546,7 +548,7 @@ void EnzoSolverBiCgStab::loop_0a(EnzoBlock* block,
   if (solve_type_ != solve_tree && msg != NULL) {
     long double* data = (long double*) msg->getData();
     ASSERT1("EnzoSolverBiCgStab::loop_0a",
-	    "Expecting (data[0] = %d) == 3",
+	    "Expecting (data[0] = %Lg) == 3",
 	    data[0],(data[0] == 3));
     S(beta_n) = data[1];
     S(bnorm)  = data[2];
@@ -923,7 +925,7 @@ void EnzoSolverBiCgStab::loop_6(EnzoBlock* block,
   if (solve_type_ != solve_tree && msg != NULL) {
     long double* data = (long double*) msg->getData();
     ASSERT1("EnzoSolverBiCgStab::loop_6",
-	    "Expecting (data[0] = %d) == 3",
+	    "Expecting (data[0] = %Lg) == 3",
 	    data[0],(data[0] == 3));
     S(vr0) = data[1];
     S(ys)  = data[2];
@@ -1231,7 +1233,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
   if (solve_type_ != solve_tree && msg != NULL) {
     long double* data = (long double*) msg->getData();
     ASSERT1("EnzoSolverBiCgStab::loop_12",
-	    "Expecting (data[0] = %d) == 5",
+	    "Expecting (data[0] = %Lg) == 5",
 	    data[0],(data[0] == 5));
     S(omega_n) = data[1];
     S(omega_d) = data[2];
@@ -1397,7 +1399,7 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* block,
   if (solve_type_ != solve_tree && msg != NULL) {
     long double* data = (long double*) msg->getData();
     ASSERT1("EnzoSolverBiCgStab::loop_14",
-	    "Expecting (data[0] = %d) == 2",
+	    "Expecting (data[0] = %Lg) == 2",
 	    data[0],(data[0] == 2));
     S(rr)     = data[1];
     S(beta_n) = data[2];

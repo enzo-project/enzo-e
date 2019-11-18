@@ -102,7 +102,6 @@ void Block::new_refresh_wait (int id_refresh, int callback)
     // process any existing messages in the refresh message list
 
     Sync & sync = new_refresh_sync_list_[id_refresh];
-
     for (auto id_msg=0;
 	 id_msg<new_refresh_msg_list_[id_refresh].size();
 	 id_msg++) {
@@ -113,9 +112,10 @@ void Block::new_refresh_wait (int id_refresh, int callback)
       msg->update(data());
       
       delete msg;
-      sync.next();
-    }
 
+      sync.advance();
+    }
+    
     // clear the message queue
 
     new_refresh_msg_list_[id_refresh].resize(0);
@@ -146,7 +146,7 @@ void Block::new_refresh_check_done (int id_refresh)
     // Make sure incoming message queue is empty
 
     ASSERT2("Block::new_refresh_wait()",
-	   "Refresh %d message list has size %d instead of 0",
+	   "Refresh %d message list has size %lu instead of 0",
 	    id_refresh,new_refresh_msg_list_[id_refresh].size(),
 	    (new_refresh_msg_list_[id_refresh].size() == 0));
 
@@ -180,7 +180,8 @@ void Block::p_new_refresh_recv (MsgRefresh * msg)
     msg->update(data());
       
     delete msg;
-    sync.next();
+
+    sync.advance();
 
     // check if it's the last message processed
     new_refresh_check_done(id_refresh);

@@ -8,7 +8,6 @@
 mainmodule main {
 
   readonly CProxy_Main proxy_main;
-
   mainchare [migratable] Main {
 
      entry Main(CkArgMsg *m);

@@ -230,6 +230,7 @@ public: // interface
       method_courant(),
       method_timestep(),
       method_trace_name(),
+      method_null_dt(0.0),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),

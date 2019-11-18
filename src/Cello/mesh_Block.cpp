@@ -436,7 +436,11 @@ void Block::pup(PUP::er &p)
   }
   p | new_refresh_sync_list_;
   //  p | new_refresh_msg_list_;
+
+  // Skip if Charm++ version <= 60701 (for Coverity analysis only!)
+#if CHARM_VERSION > 60701
   p | new_refresh_state_list_;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -1131,7 +1135,7 @@ void Block::check_leaf_()
        (! is_leaf() && children_.size() == 0))) {
 
     WARNING3("Block::check_leaf_()",
-	     "%s: is_leaf() == %s && children_.size() == %d",
+	     "%s: is_leaf() == %s && children_.size() == %lu",
 	     name_.c_str(), is_leaf()?"true":"false",
 	     children_.size());
   }
@@ -1154,9 +1158,7 @@ void Block::check_delete_()
 
 void Block::debug_faces_(const char * mesg)
 {
-#ifndef DEBUG_ADAPT
-  return;
-#endif
+#ifdef DEBUG_ADAPT
 
 #ifdef CELLO_DEBUG
   FILE * fp_debug = simulation()->fp_debug();
@@ -1223,5 +1225,6 @@ void Block::debug_faces_(const char * mesg)
 
     }
   }
+#endif
 }
 

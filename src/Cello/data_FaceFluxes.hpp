@@ -69,13 +69,13 @@ public: // interface
   /// = {0.5, 1.0, 2.0} along each dimension between stored fluxes in
   /// two FaceFluxes objects. FaceFluxes are assumed to be associated
   /// with the same face. Must be 1.0 to compute sum or difference.
-  friend float ratio_cell_width (FaceFluxes ff_1, FaceFluxes ff_2);
+  friend float ratio_cell_width (const FaceFluxes & ff_1, const FaceFluxes & ff_2);
 
   /// Return the ratio of time steps dt(ff_1) / dt(ff_2) = {0.5, 1.0,
   /// 2.0} of fluxes between two FaceFluxes objects. FaceFluxes are
   /// assumed to be associated with the same face. Ratio must be 1.0
   /// to compute difference.
-  friend float ratio_time_step (FaceFluxes ff_1, FaceFluxes ff_2);
+  friend float ratio_time_step (const FaceFluxes & ff_1, const FaceFluxes & ff_2);
   
   /// Coarsen a FaceFluxes object by reducing dimensions by two along
   /// each face dimension, and summing fine elements contained in each
@@ -90,7 +90,7 @@ public: // interface
   /// dt accordingly. Assumes spacially-conforming FaceFlux objects:
   /// FaceFluxes must be associated with the same face, and ratio of
   /// cell_widths must be 1.0
-  FaceFluxes & operator += (FaceFluxes face_fluxes);
+  FaceFluxes & operator += (const FaceFluxes & face_fluxes);
   
   /// Scale the fluxes array by a scalar constant.
   FaceFluxes & operator *= (double weight);
@@ -100,7 +100,7 @@ public: // interface
   /// correction factors. Assumes fully-conforming FaceFlux objects:
   /// FaceFluxes must be associated with the same face, and ratios of
   /// both cell_widths and time_steps must be 1.0.
-  friend FaceFluxes operator - (FaceFluxes ff_1, FaceFluxes ff_2);
+  friend FaceFluxes operator - (const FaceFluxes & ff_1, const FaceFluxes & ff_2);
   
 private: // functions
 

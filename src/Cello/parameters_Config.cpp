@@ -891,7 +891,7 @@ void Config::read_output_ (Parameters * p) throw()
       if (p->type("axis") != parameter_unknown) {
 	std::string axis = p->value_string("axis");
 	ASSERT2("Problem::initialize_output",
-		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
+		"Output %s axis %s must be \"x\", \"y\", or \"z\"",
 		output_list[index_output].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
 	output_axis[index_output] = axis;

@@ -60,7 +60,7 @@ char * Refresh::save_data (char * buffer) const
   SAVE_INT(&p,accumulate_);
 
   ASSERT2 ("Refresh::save_data\n",
- 	   "Actual size %d does not equal computed size %d",
+ 	   "Actual size %ld does not equal computed size %d",
 	   p-buffer,data_size(),
 	   ((p-buffer)==data_size()));
 
@@ -84,7 +84,7 @@ char * Refresh::load_data (char * buffer)
   LOAD_INT(&p,accumulate_);
 
   ASSERT2 ("Refresh::load_data\n",
-	   "Actual size %d does not equal computed size %d",
+	   "Actual size %ld does not equal computed size %d",
 	   p-buffer,data_size(),
 	   ((p-buffer)==data_size()));
 

@@ -140,7 +140,7 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   (*pi++) = msg->ic3_[2];
 
   ASSERT2("MsgRefresh::pack()",
-	  "buffer size mismatch %d allocated %d packed",
+	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
 

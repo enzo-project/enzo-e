@@ -6,6 +6,7 @@
 /// @brief    Definition of the Soup class for "alphabet soup" test problem
 
 #include "enzo.hpp"
+#include <random>
 
 const int EnzoInitialSoup::position_[] = 
   {
@@ -57,16 +58,15 @@ EnzoInitialSoup::EnzoInitialSoup
 	   (nx == SOUP_IMAGE_NX) &&
 	   (ny == SOUP_IMAGE_NY));
 
-  // seed random number generator to ensure all processors generate the
-  // same letter_ array
-  srand(31415);
-  
+  std::random_device rd;
+  std::uniform_int_distribution<int> dist(0, 25);
+    
   letter_ = new char [nax*nay*naz];
   for (int kz=0; kz<naz; kz++) {
     for (int ky=0; ky<nay; ky++) {
       for (int kx=0; kx<nax; kx++) {
 	int k = kx + nax*(ky + nay*kz);
-	letter_[k] = 'A' + (rand() % 26);
+	letter_[k] = 'A' + dist(rd);
       }
     }
   }

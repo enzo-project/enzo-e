@@ -29,23 +29,42 @@ void Sync::pup(PUP::er &p)
 
 bool Sync::next () throw()
 {
+  advance_();
+  check_done_();
+  return (index_curr_ == 0 && is_done_ == true);
+}
+
+
+//----------------------------------------------------------------------
+
+void Sync::advance () throw()
+{
+  advance_();
+  check_done_();
+}
+
+//----------------------------------------------------------------------
+
+void Sync::advance_() throw()
+{
   if (index_stop_ > 0) {
     index_curr_ = (index_stop_ + (index_curr_-1) + 1) % index_stop_ + 1;  
   } else {
     // stop is not known yet
     ++ index_curr_;
   }
+}
+
+//----------------------------------------------------------------------
+
+void Sync::check_done_() throw()
+{
   if ( (index_curr_ == index_stop_) && 
        (index_stop_ > 0) ) {
     index_curr_ = 0;
     is_done_ = true;
-    return true;
-  } else {
-    return false;
   }
 }
-
-
 //----------------------------------------------------------------------
 
 bool Sync::is_done () const throw()
