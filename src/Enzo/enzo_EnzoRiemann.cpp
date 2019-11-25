@@ -16,10 +16,6 @@ EnzoRiemann* EnzoRiemann::construct_riemann
 (std::vector<std::string> integrable_groups,
  std::vector<std::string> passive_groups, std::string solver)
 {
-  // In the future, allocate array of flux functors here
-  EnzoFluxFunctor** flux_funcs = NULL;
-  int n_funcs = 0;
-
   // determine the type of solver to construct:
   // convert string to lower case (https://stackoverflow.com/a/313990)
   std::string formatted(solver.size(), ' ');
@@ -29,15 +25,12 @@ EnzoRiemann* EnzoRiemann::construct_riemann
 
   // Eventually we may want to check for non-MHD Riemann solvers
   if (formatted == std::string("hll")){
-    out = new EnzoRiemannHLLMHD(integrable_groups, passive_groups, flux_funcs,
-				n_funcs);
+    out = new EnzoRiemannHLLMHD(integrable_groups, passive_groups);
   } else if (formatted == std::string("hlle")){
-    out = new EnzoRiemannHLLEMHD(integrable_groups, passive_groups, flux_funcs,
-				 n_funcs);
+    out = new EnzoRiemannHLLEMHD(integrable_groups, passive_groups);
   } else if (formatted == std::string("hlld")){
     // could possibly check that MHD fields are included
-    out = new EnzoRiemannHLLD(integrable_groups, passive_groups, flux_funcs,
-			      n_funcs);
+    out = new EnzoRiemannHLLD(integrable_groups, passive_groups);
   } else {
     ERROR("EnzoRiemann::construct_riemann",
 	  "The only known solvers are HLL, HLLE, & HLLD");

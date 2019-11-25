@@ -12,45 +12,6 @@
 #include <pup_stl.h>
 #include <cstdint> // used to check that static methods are defined
 
-
-class EnzoFluxFunctor : public PUP::able
-{
-  /// @class    EnzoFluxFunctor
-  /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Allows for easy implementation of additional
-  ///           non-passively advected (like cosmic rays). Subclasses of this
-  ///           object should be passed to RiemannImpl's constructor
-  ///
-  /// Provides an easy way to add additional fields to RiemannImpl and
-  /// derivatives. The resulting functors simply get called to compute Riemann
-  /// fluxes
-  ///
-  /// It's almost certain that these will be too slow due to the indirection.
-  /// There are 2 main alternatives:
-  ///     - could hardcode the functions into the RiemannImpl or passing some
-  ///       variadic template arguments to RiemannSolver::solve (hardcoding
-  ///       may be the way to go)
-  
-public:
-  EnzoFluxFunctor() throw()
-  {}
-
-  virtual ~EnzoFluxFunctor()
-  {}
-
-  /// CHARM++ PUP::able declaration
-  PUPable_abstract(EnzoFluxFunctor);
-
-   /// CHARM++ migration constructor for PUP::able
-  EnzoFluxFunctor (CkMigrateMessage *m)
-    : PUP::able(m)
-  {  }
-
-  virtual void operator()(const enzo_float prim[], const enzo_float cons[],
-			  enzo_float fluxes[],
-			  const EnzoAdvectionFieldLUT lut)=0;
-};
-
 //----------------------------------------------------------------------
 
 /// @typedef calc_riemann_fluxes_signature
@@ -68,32 +29,47 @@ public:
 ///        const enzo_float pressure_l, const enzo_float pressure_r,
 ///        const EnzoAdvectionFieldLUT lut, const int n_keys,
 ///        const bool barotropic_eos, const enzo_float gamma,
-///        const enzo_float isothermal_cs,
+///        const enzo_float isothermal_cs, const bool dual_energy_formalism,
 ///        const int iz, const int iy, const int ix,
-///        EFlt3DArray flux_arrays[], enzo_float scratch_space[]);
+///        EFlt3DArray flux_arrays[], enzo_float scratch_space[],
+///        enzo_float &vi_bar);
 /// @endcode
 /// This function should computes the Riemann Flux at a given cell interface.
 /// `flux_l`, `flux_r`, `prim_l`, `prim_r`, `cons_l`, and `cons_r` store the
 /// left and right interface values for fluxes, primitive quantities, and
 /// conserved quantities. We note that a given primitive quantities can be
 /// either specific or conserved while a conserved quantity is guaranteed to be
-/// in conserved form. The left and right reconstructed pressure values are
-/// passed as `pressure_l` and `pressure_r`. The value passed to `lut` maps
-/// quantity names to indices in each of the aforementioned arrays and `n_keys`
-/// indicates the number of elements held in each arrays. The calculated
-/// Riemann flux for a quantity stored at index `j` of the above arrays should
-/// be stored at `flux_arrays[j](iz,iy,ix)`. `scratch_space` serves as a place
-/// to temporarily save quantites during the calculation (the size which should
-/// be specified by the `ImplStruct`'s `scratch_space_length` static function).
+/// in conserved form.
+///
+/// The left and right reconstructed pressure values are passed as `pressure_l`
+/// and `pressure_r`.
+///
+/// The value passed to `lut` maps quantity names to indices in each of the
+/// aforementioned arrays and `n_keys` indicates the number of elements held in
+/// each array.
+///
+/// The calculated Riemann flux for a quantity stored at index `j` of the above
+/// arrays should be stored at `flux_arrays[j](iz,iy,ix)`.
+///
+/// `scratch_space` serves as a place to temporarily save quantites during the
+/// calculation (the size which should be specified by the `ImplStruct`'s
+/// `scratch_space_length` static function).
+///
 /// `barotropic_eos` indicates whether the fluid equation of state is
 /// barotropic. If `true`, then `isothermal_cs` is expected to be non-zero and
 /// if `false`, then `gamma` is expected to be positive.
+///
+/// `dual_energy_formalism` indicates whether to compute fluxes for the
+/// internal energy.  It is expected to be `false` when `barotropic_eos==false`
+///
+/// `vi_bar` is the estimate of `velocity_i` at the cell-interface to be used
+/// in the internal energy source term (for the dual energy formalism)
 typedef void (*calc_riemann_fluxes_signature)
   (const enzo_float[], const enzo_float[], const enzo_float[],
    const enzo_float[], const enzo_float[], const enzo_float[],
    const enzo_float,   const enzo_float, const EnzoAdvectionFieldLUT,
-   const int, const bool, const enzo_float, const enzo_float,
-   const int, const int, const int, EFlt3DArray[], enzo_float[]);
+   const int, const bool, const enzo_float, const enzo_float, const bool,
+   const int, const int, const int, EFlt3DArray[], enzo_float[], enzo_float&);
 
 //----------------------------------------------------------------------
 
@@ -209,14 +185,11 @@ public: // interface
   ///     advected scalars that may be included. (If a group is listed here but
   ///     the Grouping object doesn't actually provide any fields in the group,
   ///     no problems are caused
-  /// @param flux_funcs pointer to an array of instances of EnzoFluxFunctor
-  /// @param n_funcs the size of the array of flux functors
   EnzoRiemannImpl(std::vector<std::string> integrable_groups,
-		  std::vector<std::string> passive_groups,
-		  EnzoFluxFunctor** flux_funcs, int n_funcs);
+		  std::vector<std::string> passive_groups);
 
   /// Virtual destructor
-  virtual ~EnzoRiemannImpl();
+  virtual ~EnzoRiemannImpl(){ };
 
   /// CHARM++ PUP::able declaration
   PUPable_decl_template(EnzoRiemannImpl<ImplStruct>);
@@ -232,7 +205,7 @@ public: // interface
   void solve (Block *block, Grouping &priml_group, Grouping &primr_group,
 	      std::string pressure_name_l, std::string pressure_name_r,
 	      Grouping &flux_group, int dim, EnzoEquationOfState *eos,
-	      int stale_depth);
+	      int stale_depth, std::string interface_velocity_name) const;
 
 protected : //methods
   
@@ -240,7 +213,7 @@ protected : //methods
   void solve_passive_advection_(Block* block, Grouping &priml_group,
 				Grouping &primr_group, Grouping &flux_group,
 				EFlt3DArray &density_flux, int dim,
-				int stale_depth);
+				int stale_depth) const throw();
 
   /// Computes the conserved counterpart for every integrable primitive.
   /// Integrable primitives are categorized as conserved, specific, and other
@@ -249,13 +222,22 @@ protected : //methods
   /// primitive are multiplied by density, and for simplicity, quantities
   /// classified as other are copied (There are no obvious cases where there
   /// should ever be a quanitity classified as other
-  void compute_cons_(const enzo_float prim[], enzo_float cons[]);
+  void compute_cons_(const enzo_float prim[],
+		     enzo_float cons[]) const throw();
 
-  
   /// computes fluxes for the basic mhd conserved quantities - density,
   /// momentum, energy, magnetic fields  
-  void basic_mhd_fluxes_(const enzo_float prim[], const enzo_float cons[],
-			 const enzo_float pressure, enzo_float fluxes[]);
+  void basic_mhd_fluxes_(const enzo_float prim[],
+			 const enzo_float cons[],
+			 const enzo_float pressure,
+			 enzo_float fluxes[]) const throw();
+
+  /// computes extra fluxes for additional, optional physical quantities not
+  /// handled in `basic_mhd_fluxes_` (e.g. like internal energy or cosmic rays)
+  void extra_fluxes_(const enzo_float prim[], const enzo_float cons[],
+		     enzo_float fluxes[],
+		     const bool dual_energy_formalism) const throw();
+
 private: //methods
 
   /// Helper function that simply sets up the lookup table
@@ -293,13 +275,6 @@ protected: //attributes
 
   /// Names of the passively advected groups of fields (e.g. colours)
   std::vector<std::string> passive_groups_;
-
-  /// number of flux functors
-  int n_funcs_;
-
-  /// array of pointers to functors used to compute fluxes
-  EnzoFluxFunctor** flux_funcs_;
-
 };
 
 //----------------------------------------------------------------------
@@ -307,8 +282,7 @@ protected: //attributes
 template <class ImplStruct>
 EnzoRiemannImpl<ImplStruct>::EnzoRiemannImpl
 (std::vector<std::string> integrable_groups,
- std::vector<std::string> passive_groups,
- EnzoFluxFunctor** flux_funcs, int n_funcs)
+ std::vector<std::string> passive_groups)
   : EnzoRiemann()
 {
   // Quick sanity check - integrable_groups must have density and velocity
@@ -322,21 +296,7 @@ EnzoRiemannImpl<ImplStruct>::EnzoRiemannImpl
   integrable_groups_ = integrable_groups;
   passive_groups_ = passive_groups;
 
-  n_funcs_ = n_funcs;
-  flux_funcs_ = flux_funcs;
-
   setup_lut_();
-}
-
-//----------------------------------------------------------------------
-
-template <class ImplStruct>
-EnzoRiemannImpl<ImplStruct>::~EnzoRiemannImpl()
-{
-  for (int i = 0; i < n_funcs_; i++){
-    delete flux_funcs_[i];
-  }
-  delete[] flux_funcs_;
 }
 
 //----------------------------------------------------------------------
@@ -353,15 +313,6 @@ void EnzoRiemannImpl<ImplStruct>::pup (PUP::er &p)
   }
 
   p|passive_groups_;
-
-  p|n_funcs_;
-
-  if (p.isUnpacking()){
-    flux_funcs_ = new EnzoFluxFunctor*[n_funcs_];
-  }
-  for (int i = 0; i<n_funcs_;i++){
-    p|flux_funcs_[i];
-  }
 }
 
 //----------------------------------------------------------------------
@@ -370,7 +321,8 @@ template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::solve
 (Block *block, Grouping &priml_group, Grouping &primr_group,
  std::string pressure_name_l, std::string pressure_name_r,
- Grouping &flux_group, int dim, EnzoEquationOfState *eos, int stale_depth)
+ Grouping &flux_group, int dim, EnzoEquationOfState *eos, int stale_depth,
+ std::string interface_velocity_name) const
 {
 
   const bool barotropic = eos->is_barotropic();
@@ -385,21 +337,41 @@ void EnzoRiemannImpl<ImplStruct>::solve
   ASSERT("EnzoRiemannImpl::solve", "currently no support for barotropic eos",
 	 !barotropic);
 
-  ASSERT("EnzoRiemannImpl::solve",
-	 "currently no support for dual energy formalism",
-	 !eos->uses_dual_energy_formalism());
+  const bool dual_energy_formalism = eos->uses_dual_energy_formalism();
 
-  // Let's load in the precomputed pressure 
-  EFlt3DArray pressure_array_l, pressure_array_r;
+  // sanity check:
+  ASSERT("EnzoRiemannImpl::solve",
+	 ("lut_.internal_energy must have a valid (non-negative) index when "
+	  "using the dual energy formalism. Otherwise it must be -1."),
+	 ( ( (lut_.internal_energy >= 0) &&  dual_energy_formalism ) ||
+	   ( (lut_.internal_energy ==-1) && !dual_energy_formalism ) ));
+
+  // Load arrays:
   EnzoFieldArrayFactory array_factory(block, stale_depth);
-  pressure_array_l = array_factory.reconstructed_from_name(pressure_name_l,
-							   dim);
-  pressure_array_r = array_factory.reconstructed_from_name(pressure_name_r,
-							   dim);
+  // First, load in the precomputed pressure 
+  EFlt3DArray pressure_array_l, pressure_array_r;
+  pressure_array_l = array_factory.assigned_center_from_name(pressure_name_l,
+							     dim);
+  pressure_array_r = array_factory.assigned_center_from_name(pressure_name_r,
+							     dim);
+
+  // Second, load field to store interface velocity (if applicable)
+  Field field = block->data()->field();
+  EFlt3DArray velocity_i_bar_array;
+  const bool store_interface_vel =((interface_velocity_name != "") ||
+				   (field.is_field(interface_velocity_name)));
+
+  if (store_interface_vel) {
+    velocity_i_bar_array =
+      array_factory.assigned_center_from_name(interface_velocity_name, dim);
+  } else if (dual_energy_formalism) {
+    ERROR("EnzoRiemannImpl::solve",
+	  "A valid interface_velocity_name must be provided when the dual "
+	  "energy formalism is in use");
+  }
 
   EnzoCenteredFieldRegistry registry;
   EFlt3DArray *wl_arrays, *wr_arrays, *flux_arrays;
-
   wl_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
 					    priml_group, dim, stale_depth);
   wr_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
@@ -407,6 +379,7 @@ void EnzoRiemannImpl<ImplStruct>::solve
   flux_arrays = registry.load_array_of_fields(block, lut_, n_keys_,
 					      flux_group, dim, stale_depth);
 
+  // allocate arrays to temporarily hold values at each cell interface
   enzo_float *wl, *wr, *Ul, *Ur, *Fl, *Fr;
   wl = new enzo_float[n_keys_];    wr = new enzo_float[n_keys_];
   Ul = new enzo_float[n_keys_];    Ur = new enzo_float[n_keys_];
@@ -426,7 +399,6 @@ void EnzoRiemannImpl<ImplStruct>::solve
 
   // For Nearest-Neighbor, we care about interfaces starting at i+1/2. Thanks
   // to use of stale_depth, we can treat every case like this
-
   for (int iz=0; iz<flux_arrays[0].shape(0); iz++) {
     for (int iy=0; iy<flux_arrays[0].shape(1); iy++) {
       for (int ix=0; ix<flux_arrays[0].shape(2); ix++) {
@@ -449,18 +421,22 @@ void EnzoRiemannImpl<ImplStruct>::solve
 	basic_mhd_fluxes_(wl, Ul, pressure_l, Fl);
 	basic_mhd_fluxes_(wr, Ur, pressure_r, Fr);
 
-	// iterate over the functors
-	for (int i = 0; i<n_funcs_; i++){
-	  (*(flux_funcs_[i]))(wl, Ul, Fl, lut_);
-	  (*(flux_funcs_[i]))(wr, Ur, Fr, lut_);
-	}
+	// compute the other (optional) fluxes
+	extra_fluxes_(wl, Ul, Fl, dual_energy_formalism);
+	extra_fluxes_(wr, Ur, Fr, dual_energy_formalism);
 
-
+	enzo_float interface_velocity_i;
 	// Now compute the Riemann Fluxes
 	ImplStruct::calc_riemann_fluxes(Fl, Fr, wl, wr, Ul, Ur,
 				        pressure_l, pressure_r, lut_, n_keys_,
-					barotropic, gamma, isothermal_cs, iz,
-					iy, ix, flux_arrays, scratch_space);
+					barotropic, gamma, isothermal_cs,
+					dual_energy_formalism, iz, iy, ix,
+					flux_arrays, scratch_space,
+					interface_velocity_i);
+
+	if (store_interface_vel){
+	  velocity_i_bar_array(iz,iy,ix) = interface_velocity_i;
+	}
 
 	/*
 	// If Dedner Fluxes are required, they get handled here
@@ -500,7 +476,7 @@ inline void compute_unity_sum_passive_fluxes_(const enzo_float dens_flux,
 					      EFlt3DArray *reconstructed,
 					      const int num_fields,
 					      const int iz, const int iy,
-					      const int ix)
+					      const int ix) throw()
 {
   enzo_float sum = 0.;
   for (int field_ind=0; field_ind<num_fields; field_ind++){
@@ -517,6 +493,7 @@ template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::solve_passive_advection_
 (Block* block, Grouping &priml_group, Grouping &primr_group,
  Grouping &flux_group, EFlt3DArray &density_flux, int dim, int stale_depth)
+  const throw()
 {
   // This was basically transcribed from Enzo
   std::vector<std::string> group_names = this->passive_groups_;
@@ -584,8 +561,8 @@ void EnzoRiemannImpl<ImplStruct>::solve_passive_advection_
 //----------------------------------------------------------------------
 
 template <class ImplStruct>
-void EnzoRiemannImpl<ImplStruct>::compute_cons_(const enzo_float prim[],
-						enzo_float cons[])
+void EnzoRiemannImpl<ImplStruct>::compute_cons_
+(const enzo_float prim[], enzo_float cons[]) const throw()
 {
   enzo_float density = prim[lut_.density];
 
@@ -599,14 +576,12 @@ void EnzoRiemannImpl<ImplStruct>::compute_cons_(const enzo_float prim[],
     cons[i] = density * prim[i];
   }
 
-  // As of now other_start_ should always be equal to other_stop_
-  //for (int i= other_start_; i<other_stop_; i++){
-  //  cons[i] = prim[i];
-  //}
   ASSERT("EnzoRiemannImpl::compute_cons_",
 	 "As of now other_start_ should always be equal to other_stop_",
 	 other_start_ == other_stop_);
-
+  //for (int i= other_start_; i<other_stop_; i++){
+  //  cons[i] = prim[i];
+  //}
 }
 
 //----------------------------------------------------------------------
@@ -614,12 +589,14 @@ void EnzoRiemannImpl<ImplStruct>::compute_cons_(const enzo_float prim[],
 template <class ImplStruct>
 void EnzoRiemannImpl<ImplStruct>::basic_mhd_fluxes_
 (const enzo_float prim[], const enzo_float cons[], const enzo_float pressure,
- enzo_float fluxes[])
+ enzo_float fluxes[]) const throw()
 {
-  // This assumes that MHD is included
-  // not currently equipped for barotropic OR dual energy formalism
-  
+  // Assumes that MHD is included. Not currently equipped for barotropic eos. 
   // This may be better handled by the EquationOfState
+
+  // when dual-energy formalism is in use, the internal energy fluxes are
+  // handeled by EnzoRiemannImpl<ImplStruct>::extra_fluxes_
+
   enzo_float vi, vj, vk, p, Bi, Bj, Bk, etot, mag_pressure;
   vi = prim[lut_.velocity_i];
   vj = prim[lut_.velocity_j];
@@ -650,6 +627,20 @@ void EnzoRiemannImpl<ImplStruct>::basic_mhd_fluxes_
   fluxes[lut_.bfield_i] = 0;
   fluxes[lut_.bfield_j] = Bj*vi - Bi*vj;
   fluxes[lut_.bfield_k] = Bk*vi - Bi*vk;
+}
+
+//----------------------------------------------------------------------
+
+template <class ImplStruct>
+void EnzoRiemannImpl<ImplStruct>::extra_fluxes_
+(const enzo_float prim[], const enzo_float cons[], enzo_float fluxes[],
+ const bool dual_energy_formalism) const throw()
+{
+  // as more physics get added (e.g. this will need to be extended)
+  if (dual_energy_formalism){
+    fluxes[lut_.internal_energy] =
+      cons[lut_.internal_energy] * prim[lut_.velocity_i];
+  }
 }
 
 #endif /* ENZO_ENZO_RIEMANN_IMPL_HPP */

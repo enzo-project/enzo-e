@@ -360,10 +360,12 @@ EFlt3DArray* EnzoCenteredFieldRegistry::load_array_of_fields
 	// Sanity Check:
 	std::string quantity_type = (group_name == name) ? "SCALAR" : "VECTOR";
 	int group_size = grouping.size(group_name);
-	ASSERT("load_array_of_fields_",
-	       "Groups of fields don't have the correct number of fields.",
-	       (quantity_type == "VECTOR" && group_size == 3) ||
-	       (quantity_type == "SCALAR" && group_size == 1));
+
+	int expected_size = (quantity_type == "VECTOR") ? 3 : 1;
+	ASSERT3("load_array_of_fields_",
+	        "The \"%s\" group holds %d field(s). It should hold %d.",
+		group_name.c_str(), group_size, expected_size,
+		group_size == expected_size);
 
 	if (dim != -1){
 	  arr[index] = array_factory.reconstructed_field(grouping, group_name,

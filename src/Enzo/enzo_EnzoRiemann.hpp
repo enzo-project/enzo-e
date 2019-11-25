@@ -80,11 +80,17 @@ public: // interface
   /// @param stale_depth indicates the number of field entries from the
   ///     outermost field value that the region including "stale" values (need
   ///     to be refreshed) extends over (0 means there are no "stale" values).
+  /// @param interface_velocity_name indicates the name of field where the
+  ///     value of the interface velocity along dimension `dim` should be
+  ///     stored. This quantity is used to compute the internal energy source
+  ///     term (needed under the dual energy formalism). If the value is `""`
+  ///     (the default) then the interface velocity is not stored.
   virtual void solve (Block *block,
 		      Grouping &priml_group, Grouping &primr_group, 
 		      std::string pressure_name_l, std::string pressure_name_r,
 		      Grouping &flux_group, int dim, EnzoEquationOfState *eos,
-		      int stale_depth) = 0;
+		      int stale_depth,
+		      std::string interface_velocity_name = "") const = 0;
 
   /// computes the (adiabatic) fast magnetosonic speed along dimension i at a
   /// single location (vector names in lut are denoted as being along the i, j
@@ -102,7 +108,7 @@ public: // interface
   static enzo_float fast_magnetosonic_speed_(const enzo_float prim_vals[],
 					     const EnzoAdvectionFieldLUT lut,
 					     enzo_float pressure,
-					     const enzo_float gamma)
+					     const enzo_float gamma) throw()
   {
     enzo_float bi = prim_vals[lut.bfield_i];
     enzo_float bj = prim_vals[lut.bfield_j];
@@ -129,7 +135,7 @@ public: // interface
 					     const EnzoAdvectionFieldLUT lut,
 					     enzo_float pressure,
 					     const enzo_float gamma,
-					     const enzo_float cos2)
+					     const enzo_float cos2) throw()
   {
     enzo_float bi = prim_vals[lut.bfield_i];
     enzo_float bj = prim_vals[lut.bfield_j];
@@ -151,7 +157,7 @@ public: // interface
   ///     value of a given member corresponds to the index in prim_vals where
   ///     the value of the field is stored.
   static enzo_float mag_pressure_(const enzo_float prim_vals[],
-				  const EnzoAdvectionFieldLUT lut)
+				  const EnzoAdvectionFieldLUT lut) throw()
   {
     enzo_float bi = prim_vals[lut.bfield_i];
     enzo_float bj = prim_vals[lut.bfield_j];
@@ -173,7 +179,7 @@ public: // interface
   static enzo_float sound_speed_(const enzo_float prim_vals[],
 				 const EnzoAdvectionFieldLUT lut,
 				 const enzo_float pressure,
-				 const enzo_float gamma)
+				 const enzo_float gamma) throw()
   { return std::sqrt(gamma * pressure / prim_vals[lut.density]); }
 
 };

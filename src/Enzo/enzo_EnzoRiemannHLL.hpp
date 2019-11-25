@@ -42,7 +42,7 @@ struct EinfeldtWavespeedMHD
 		  const enzo_float Ul[], const enzo_float Ur[],
 		  const enzo_float pressure_l, const enzo_float pressure_r,
 		  const EnzoAdvectionFieldLUT lut,  const enzo_float gamma,
-		  enzo_float *bp, enzo_float *bm)
+		  enzo_float *bp, enzo_float *bm) throw()
   {
     // Calculate wavespeeds as specified by S4.3.1 of Stone+08
     // if LM and L0 are max/min eigenvalues of Roe's matrix:
@@ -145,7 +145,7 @@ public:
 		  const enzo_float Ul[], const enzo_float Ur[],
 		  const enzo_float pressure_l, const enzo_float pressure_r,
 		  const EnzoAdvectionFieldLUT lut,  const enzo_float gamma,
-		  enzo_float *bp, enzo_float *bm)
+		  enzo_float *bp, enzo_float *bm) throw()
   {
     // Should be relatively easy to adapt and make compatible with barotropic
     // eos
@@ -179,7 +179,7 @@ struct HLLImpl
   /// @brief    [\ref Enzo] Encapsulates operations of HLLE approximate Riemann
   /// Solver. 
 public:
-  static int scratch_space_length(const int n_cons_keys){
+  static int scratch_space_length(const int n_cons_keys) throw(){
     return 0;
   }
 
@@ -190,8 +190,9 @@ public:
    const enzo_float pressure_l, const enzo_float pressure_r,
    const EnzoAdvectionFieldLUT lut, const int n_keys,
    const bool barotropic_eos, const enzo_float gamma,
-   const enzo_float isothermal_cs, const int iz, const int iy, const int ix,
-   EFlt3DArray flux_arrays[], enzo_float scratch_space[])
+   const enzo_float isothermal_cs, const bool dual_energy_formalism,
+   const int iz, const int iy, const int ix, EFlt3DArray flux_arrays[],
+   enzo_float scratch_space[], enzo_float &vi_bar) throw()
   { 
     // there is no scratch_space
     WaveSpeedFunctor wave_speeds;
@@ -200,13 +201,30 @@ public:
     // Compute wave speeds
     wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r, lut,
 		gamma, &bp, &bm);
+    enzo_float inv_speed_diff = 1./(bp - bm);
 
-    // Compute the actual riemann fluxes
+    // Compute the actual riemann fluxes (value of dual_energy_formalism is
+    // irrelevant)
     for (int field = 0; field<n_keys; field++){
       flux_arrays[field](iz,iy,ix) = ((bp*flux_l[field] - bm*flux_r[field] +
 				       (cons_r[field] - cons_l[field])*bp*bm)
-				      / (bp - bm));
+				      * inv_speed_diff);
     }
+
+    // Estimate the value of the vi (ith component of velocity) which is used
+    // to compute the internal energy source term. The following is adopted
+    // from Enzo's flux_hll.F. The logic reduces to:
+    //   - when bm >=0 (left speed is positive) use vi_L or wl[lut.velocity_i]
+    //   - when bp <=0 (right speed is negative) use vi_R or wr[lut.velocity_i]
+    //   - otherwise linearly interpolate between vi_L and vi_R. Let the cell
+    //     interface be at x=0. At some time t, the velocity is vi_L at x=t*bm
+    //     and vi_R at x=t*bp. The factors of t cancel.
+    vi_bar = (bp*prim_l[lut.velocity_i]
+	      - bm*prim_r[lut.velocity_i]) * inv_speed_diff;
+    // Alternatively, if vi is assumed to be constant in the intermediate zone
+    // (which is an underlying assumption of HLLC & HLLD), it can be estimated
+    // using equations for the values of rho and rho*vi in the intermediate
+    // zone. This yields the equation for the contact wave speed in HLLC & HLLD
   }
 };
 

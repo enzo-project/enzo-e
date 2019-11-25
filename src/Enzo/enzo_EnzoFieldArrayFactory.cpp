@@ -32,9 +32,8 @@ EFlt3DArray EnzoFieldArrayFactory::from_grouping(Grouping &grouping,
 
 //----------------------------------------------------------------------
 
-EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
-						       std::string group_name,
-						       int index, int dim)
+EFlt3DArray EnzoFieldArrayFactory::assigned_center_from_grouping
+(Grouping &grouping, std::string group_name, int index, int dim)
 {
   check_grouping_details_(grouping, group_name, index);
   ASSERT("EnzoFieldArrayFactory",
@@ -44,30 +43,63 @@ EFlt3DArray EnzoFieldArrayFactory::reconstructed_field(Grouping &grouping,
   Field field = block_->data()->field();
   std::string field_name = grouping.item(group_name,index);
   const int id = field.field_id(field_name);
-  int mx, my, mz;
-  int nx,ny,nz;
-  field.size(&nx,&ny,&nz);
-  int gx,gy,gz;
-  field.ghost_depth(id,&gx,&gy,&gz);
 
-  mx = nx + 2*gx;
-  my = ny + 2*gy;
-  mz = nz + 2*gz;
-  
+  int c_arr[3]; // = {cx, cy, cz}
+  field.centering(id, c_arr, c_arr+1, c_arr+2);
+  int temp_sum = c_arr[0]+c_arr[1]+c_arr[2];
+  if ((c_arr[0] > 0) || (c_arr[1] > 0) || (c_arr[2] > 0)){
 
-  if (dim == 0){
-    mx--;
-  } else if (dim == 1){
-    my--;
-  } else {
-    mz--;
+    ERROR1("EnzoFieldArrayFactory::assigned_center_from_grouping",
+	   "\"%s\" has space for face-centered values on the grid exterior",
+	   field_name.c_str());
+
+  } else if (temp_sum < -1){
+
+    ERROR1("EnzoFieldArrayFactory::assigned_center_from_grouping",
+	   "the \"%s\" field is face-centered along multiple dimensions",
+	   field_name.c_str());
+
+  } else if ((temp_sum == -1) && (c_arr[dim] != -1)){
+
+    int actual_face = -1;
+    for (int i=0; i<3; i++){ if (c_arr[i] == -1) { actual_face = i; } }
+    char axis_names[3] = {'x','y','z'};
+
+    ERROR3("EnzoFieldArrayFactory::assigned_center_from_grouping",
+	   ("the underlying \"%s\" field must be cell-centered or face-"
+	    "centered along the %c-axis; not face-centered along the %c-axis"),
+	   field_name.c_str(), axis_names[dim], axis_names[actual_face]);
   }
 
-  EFlt3DArray temp((enzo_float *) field.values(field_name), mz, my, mx);
-  if (stale_depth_ != 0){
-    return exclude_stale_cells_(temp);
+  // separate the following if-statement from the above to avoid compiler
+  // warning about the return type
+
+  if (temp_sum == -1){
+
+    // the field's underlying centering already matches the specified centering
+    return from_name(field_name);
+
   } else {
-    return temp;
+
+    // the underlying field is cell-centered. Modify it's shape to match the
+    // designated centering.
+
+    int mx,my,mz;
+    field.dimensions(id,&mx,&my,&mz);
+    if (dim == 0){
+      mx--;
+    } else if (dim == 1){
+      my--;
+    } else {
+      mz--;
+    }
+
+    EFlt3DArray temp((enzo_float *) field.values(field_name), mz, my, mx);
+    if (stale_depth_ != 0){
+      return exclude_stale_cells_(temp);
+    } else {
+      return temp;
+    }
   }
 }
 

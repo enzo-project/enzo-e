@@ -6,7 +6,13 @@
 /// @brief    [\ref Enzo] Enzo's HLLD approximate Riemann Solver. Ported from
 /// the original Enzo's Riemann_HLLD_MHD.C, written by J. S. Oishi
 
-// this implementation returns an identical value to the one employed in Athena
+// this implementation returns identical values to the implementation used in
+// Athena for most cases. In the other cases, there are small floating point
+// errors.
+
+// Currently, eint fluxes are computed by assuming that specific internal
+// energy is a passive scalar. It may be worth considering the calculation of
+// fluxes as though it's an actively advected quantity.
 
 #ifndef ENZO_ENZO_RIEMANN_HLLD_HPP
 #define ENZO_ENZO_RIEMANN_HLLD_HPP
@@ -18,7 +24,7 @@ struct HLLDImpl
   /// @brief    [\ref Enzo] Encapsulates operations of HLLD approximate Riemann
   /// Solver
 public:
-  static int scratch_space_length(const int n_cons_keys){
+  static int scratch_space_length(const int n_cons_keys) throw(){
     return 2*n_cons_keys;
   }
 
@@ -29,8 +35,9 @@ public:
    const enzo_float pressure_l, const enzo_float pressure_r,
    const EnzoAdvectionFieldLUT lut, const int n_keys,
    const bool barotropic_eos, const enzo_float gamma,
-   const enzo_float isothermal_cs, const int iz, const int iy, const int ix,
-   EFlt3DArray flux_arrays[], enzo_float scratch_space[])
+   const enzo_float isothermal_cs, const bool dual_energy,
+   const int iz, const int iy, const int ix, EFlt3DArray flux_arrays[],
+   enzo_float scratch_space[], enzo_float &vi_bar) throw()
   {
     // This method makes use of the member variables Us and Uss
     // Note that ETA_TOLERANCE is bigger than the tolerance was for the
@@ -43,11 +50,16 @@ public:
     enzo_float vx_l, vy_l, vz_l, vx_r, vy_r, vz_r;
     enzo_float Bx_l, Bx_r,Bx, By_l, Bz_l, By_r, Bz_r, Bv_l, Bv_r, p_l, p_r;
     enzo_float pt_l, pt_r;
+    enzo_float l_coef, r_coef;
     enzo_float rho_ls, rho_rs, vy_ls, vy_rs, vz_ls, vz_rs, vv_ls, vv_rs;
     enzo_float By_ls, By_rs, Bz_ls, Bz_rs, Bv_ls, Bv_rs, bb_ls, bb_rs;
     enzo_float etot_ls, etot_rs, pt_s;
     enzo_float vy_ss, vz_ss, By_ss, Bz_ss, Bv_ss;
     enzo_float etot_lss, etot_rss, rho_savg;
+    enzo_float specific_eint_l, specific_eint_r;
+    // treating eint as a passively advected scalar for now. In other words,
+    //   - specific_eint_l = specific_eint_ls = specific_eint_lss
+    //   - specific_eint_r = specific_eint_rs = specific_eint_rss
 
     enzo_float S_l, S_r, S_ls, S_rs, S_M; // wave speeds
     enzo_float cf_l, cf_r, sam, sap; // fast speeds
@@ -61,6 +73,9 @@ public:
     Bx_l   = prim_l[lut.bfield_i];
     By_l   = prim_l[lut.bfield_j];
     Bz_l   = prim_l[lut.bfield_k];
+    if (dual_energy){
+      specific_eint_l = prim_l[lut.internal_energy];
+    }
 
     Bv_l = Bx_l * vx_l + By_l * vy_l + Bz_l * vz_l;
     etot_l = cons_l[lut.total_energy];
@@ -77,6 +92,9 @@ public:
     Bx_r    = prim_r[lut.bfield_i];
     By_r    = prim_r[lut.bfield_j];
     Bz_r    = prim_r[lut.bfield_k];
+    if (dual_energy){
+      specific_eint_r = prim_l[lut.internal_energy];
+    }
 
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
     etot_r = cons_r[lut.total_energy];
@@ -98,15 +116,19 @@ public:
     S_l = std::min(vx_l, vx_r) - std::max(cf_l, cf_r);
     S_r = std::max(vx_l, vx_r) + std::max(cf_l, cf_r);
 
+    // if S_l>0 or S_r<0, no need to go further (the internal energy is also
+    // automatically handled if the dual energy formalism is in use)
     if (S_l > 0) {
       for (int field = 0; field<n_keys; field++){
 	flux_arrays[field](iz,iy,ix) = flux_l[field];
       }
+      vi_bar =  prim_l[lut.velocity_i];
       return;
     } else if (S_r < 0) {
       for (int field = 0; field<n_keys; field++){
 	flux_arrays[field](iz,iy,ix) = flux_r[field];
       }
+      vi_bar =  prim_r[lut.velocity_i];
       return;
     } 
 
@@ -115,10 +137,32 @@ public:
 	   rho_l*vx_l - pt_r + pt_l)/((S_r - vx_r)*
 				      rho_r - (S_l - vx_l)*rho_l);
 
-    // finally, the intermediate (Alfven) waves
+    // Brief segue to compute vx (velocity component normal to the interface).
+    // Following the convention from Enzo's flux_hllc.F:
+    //     - when S_l > 0 use vi_bar = vx_L [see above]
+    //     - when S_r < 0 use vi_bar = vx_R [see above]
+    //     - otherwise, linearly interpolate the velocity at x=0 (the cell
+    //       interface) at time t (which cancels out) between the (x,v) points:
+    //         (S_l*t, vx_L) and (S_M*t, S_M)  if S_l <= 0 & S_M >= 0
+    //         (S_M*t, S_M)  and (S_r*t, vx_R) if S_M <= 0 & S_r >= 0
+    //       recall that S_l <= S_M <= S_r.
+    // Note that the last case isn't completely consistent with the underlying
+    // assumption of the HLLD (and HLLC) solver that vx is constant throughout
+    // the full intermediate region between S_l and S_r and equal to S_M. To be
+    // completely consistent, we should just use S_M. This lack of consistency
+    // also explains why we don't worry about the intermediate alfven waves for
+    // computing vi_bar (they have definition of vx other than vx = S_M).
+    l_coef = (S_l - vx_l)/(S_l - S_M);
+    r_coef = (S_r - vx_r)/(S_r - S_M);
+    if (S_M >=0){
+      vi_bar = S_M * l_coef;
+    } else {
+      vi_bar = S_M * r_coef;
+    }
 
-    rho_ls = rho_l * (S_l - vx_l)/(S_l - S_M);
-    rho_rs = rho_r * (S_r - vx_r)/(S_r - S_M);
+    // finally, compute the sppeds of the intermediate (Alfven) waves
+    rho_ls = rho_l * l_coef;
+    rho_rs = rho_r * r_coef;
 
     S_ls = S_M - std::fabs(Bx)/std::sqrt(rho_ls);
     S_rs = S_M + std::fabs(Bx)/std::sqrt(rho_rs);
@@ -186,6 +230,8 @@ public:
       setup_cons_ast_(Us, lut, S_M, rho_ls, vy_ls, vz_ls, etot_ls, Bx,
 		      By_ls, Bz_ls);
 
+      if (dual_energy){ Us[lut.internal_energy] = rho_ls * specific_eint_l; }
+
       for (int field = 0; field<n_keys; field++){
 	flux_arrays[field](iz,iy,ix) = \
 	  flux_l[field] + S_l*(Us[field] - cons_l[field]);
@@ -195,6 +241,8 @@ public:
       // USE F_rs
       setup_cons_ast_(Us, lut, S_M, rho_rs, vy_rs, vz_rs, etot_rs, Bx,
 		      By_rs, Bz_rs);
+
+      if (dual_energy){ Us[lut.internal_energy] = rho_rs * specific_eint_r; }
 
       for (int field = 0; field<n_keys; field++){
 	flux_arrays[field](iz,iy,ix) = \
@@ -226,6 +274,11 @@ public:
       setup_cons_ast_(Uss, lut, S_M, rho_ls, vy_ss, vz_ss, etot_lss, Bx,
 		      By_ss, Bz_ss);
 
+      if (dual_energy){
+	Us[lut.internal_energy]  = rho_ls * specific_eint_l;
+	Uss[lut.internal_energy] = rho_ls * specific_eint_l;
+      }
+
       for (int field = 0; field<n_keys; field++){
 	flux_arrays[field](iz,iy,ix) = \
 	  (flux_l[field] + S_ls*Uss[field] - (S_ls - S_l)*Us[field] -
@@ -238,6 +291,11 @@ public:
 		      By_rs, Bz_rs);
       setup_cons_ast_(Uss, lut, S_M, rho_rs, vy_ss, vz_ss, etot_rss, Bx,
 		      By_ss, Bz_ss);
+
+      if (dual_energy){
+	Us[lut.internal_energy]  = rho_rs * specific_eint_r;
+	Uss[lut.internal_energy] = rho_rs * specific_eint_r;
+      }
 
       for (int field = 0; field<n_keys; field++){
 	flux_arrays[field](iz,iy,ix) = \
@@ -253,22 +311,12 @@ public:
 			      const enzo_float speed, const enzo_float rho,
 			      const enzo_float vy, const enzo_float vz,
 			      const enzo_float etot, const enzo_float Bx,
-			      const enzo_float By, const enzo_float Bz)
+			      const enzo_float By, const enzo_float Bz) throw()
   {
 
     // Helper function that factors out the filling of the of the asterisked
     // and double asterisked conserved quantities
-    // This function intentially omits the following:
-    // if (DualEnergyFormalism){
-    //   The value we need to assign to cons["internal_energy"] is not clear
-    //   In the original Enzo code, they set it equal to:
-    //    - rho_ls * eint_ls
-    //    - rho_rs * eint_rs
-    //    - rho_ls * eint_lss
-    //    - rho_rs * eint_rss
-    //   Although eint_ls, eint_rs, eint_lss, and eint_rss are all declared as
-    //   local variables, they are never actually initialized
-    // }
+    // The dual energy formalism is explicitly handled outside of this function
     cons[lut.density] = rho;
     cons[lut.velocity_i] = rho * speed;
     cons[lut.velocity_j] = rho * vy;

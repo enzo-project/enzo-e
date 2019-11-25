@@ -74,9 +74,8 @@ enum class FieldCat{conserved, specific, other};
   ENTRY(               velocity, VECTOR,  FieldCat::specific, T)             \
   ENTRY(           total_energy, SCALAR,  FieldCat::specific, T)             \
   ENTRY(                 bfield, VECTOR, FieldCat::conserved, T)             \
-  /* After the dual energy formalism has been implemented, internal */       \
-  /* energy should be updated to be an actively advected quantity   */       \
-  ENTRY(        internal_energy, SCALAR,  FieldCat::specific, F)             \
+  /* only an actively advected quantity under the dual energy formalism */   \
+  ENTRY(        internal_energy, SCALAR,  FieldCat::specific, T)             \
   /* Derived Fields */                                                       \
   ENTRY(               pressure, SCALAR,     FieldCat::other, F)             \
   ENTRY(            temperature, SCALAR,     FieldCat::other, F)             \
