@@ -215,6 +215,7 @@ extern "C" {
 #include "enzo_EnzoRiemannHLL.hpp"
 #include "enzo_EnzoRiemannHLLD.hpp"
 #include "enzo_EnzoConstrainedTransport.hpp"
+#include "enzo_EnzoSourceInternalEnergy.hpp"
 
 #include "enzo_EnzoMethodComovingExpansion.hpp"
 #include "enzo_EnzoMethodCosmology.hpp"
