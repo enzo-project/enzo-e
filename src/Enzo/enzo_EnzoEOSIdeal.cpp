@@ -17,6 +17,22 @@ void EnzoEOSIdeal::pup (PUP::er &p)
   p|gamma_;
   p|density_floor_;
   p|pressure_floor_;
+  p|dual_energy_formalism_;
+  p|dual_energy_formalism_eta_;
+}
+
+//----------------------------------------------------------------------
+
+// returns true if grackle is in use and if gamma can vary spatially
+bool grackle_variable_gamma_(){
+#ifdef CONFIG_USE_GRACKLE
+  if (enzo::config()->method_grackle_use_grackle){
+    if (grackle_data->primordial_chemistry > 1) {
+      return true;
+    }
+  }
+#endif
+  return false;
 }
 
 //----------------------------------------------------------------------
@@ -52,6 +68,8 @@ void confirm_same_fields_(Grouping &grouping_ref, Grouping &grouping_check,
   }
 }
 
+//----------------------------------------------------------------------
+
 void check_recon_integ_overlap_(Grouping &reconstructable_group,
 				Grouping &integrable_group,
 				std::string func_name)
@@ -75,13 +93,8 @@ void check_recon_integ_overlap_(Grouping &reconstructable_group,
 
 void EnzoEOSIdeal::reconstructable_from_integrable
   (Block *block, Grouping &integrable_group, Grouping &reconstructable_group,
-   Grouping &conserved_passive_group, int stale_depth)
+   Grouping &conserved_passive_group, int stale_depth) const
 {
-
-  if (this->uses_dual_energy_formalism()){
-    ERROR("EnzoEOSIdeal::reconstructable_from_integrable",
-	  "dual energy formalism is not yet implemented.");
-  }
 
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
   // are the same in reconstructable_group and integrable_group
@@ -98,18 +111,16 @@ void EnzoEOSIdeal::reconstructable_from_integrable
 
 void EnzoEOSIdeal::integrable_from_reconstructable
   (Block *block, Grouping &reconstructable_group, Grouping &integrable_group,
-   int stale_depth, int reconstructed_axis)
+   int stale_depth, int reconstructed_axis) const
 {
 
-  if (this->uses_dual_energy_formalism()){
-    // If dual energy formalism is used then, then we need to also compute the
-    // internal energy from the pressure
-
-    // For now, we are just going to raise an error
-    ERROR("EnzoEOSIdeal::integrable_from_reconstructable",
-	  "dual energy formalism is not yet implemented.");
+  if (grackle_variable_gamma_()){
+    // we would need to model a field with the
+    ERROR("EnzoEOSIdeal::pressure_from_integrable",
+	  "Doesn't currently support spatial variations in gamma");
   }
 
+  const bool idual = this->uses_dual_energy_formalism();
   // Confirm that the expected fields (e.g. density, vx, vy, vz, bx, by, bz)
   // are the same in reconstructable_group and integrable_group 
   check_recon_integ_overlap_(reconstructable_group, integrable_group,
@@ -132,12 +143,13 @@ void EnzoEOSIdeal::integrable_from_reconstructable
   by = retrieve_field_(array_factory, recon_group, "bfield", 1, rec_ax);
   bz = retrieve_field_(array_factory, recon_group, "bfield", 2, rec_ax);
 
-  EFlt3DArray etot = retrieve_field_(array_factory, integrable_group,
-				     "total_energy", 0, rec_ax);
-  
-  ASSERT("EnzoEOSIdeal::integrable_from_reconstructable",
-	 "Need to provide support for spatial variation in gamma",
-	 !cello::field_descr()->is_field("gamma"));
+  EFlt3DArray eint, etot;
+  if (idual){
+    eint = retrieve_field_(array_factory, integrable_group, "internal_energy",
+			   0, rec_ax);
+  }
+  etot = retrieve_field_(array_factory, integrable_group, "total_energy", 0,
+			 rec_ax);
 
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
 
@@ -151,9 +163,12 @@ void EnzoEOSIdeal::integrable_from_reconstructable
 	enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
 			 by(iz,iy,ix) * by(iz,iy,ix) +
 			 bz(iz,iy,ix) * bz(iz,iy,ix));
-	etot(iz,iy,ix) = ((pressure(iz,iy,ix) * inv_gm1
-			   + 0.5 * b2) / density(iz,iy,ix)
-			  + 0.5 * v2);
+	enzo_float inv_rho = 1./density(iz,iy,ix);
+	enzo_float eint_val = pressure(iz,iy,ix) * inv_gm1 * inv_rho;
+	if (idual){
+	  eint(iz,iy,ix) = eint_val;
+	}
+	etot(iz,iy,ix) = eint_val + (0.5 * v2) + (0.5 * b2 * inv_rho);
       }
     }
   }
@@ -165,7 +180,7 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
 					    Grouping &integrable_group,
 					    std::string pressure_name,
 					    Grouping &conserved_passive_group,
-					    int stale_depth)
+					    int stale_depth) const
 {
 
   // For now, we are not actually wrapping ComputePressure
@@ -179,49 +194,52 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
   // following fields to compute pressure 
   //   "density", "velocity_x", "velocity_y", "velocity_z", "total_energy",
   //   "bfield_x", "bfield_y", "bfield_z"
-  
-  if (enzo::config()->method_grackle_use_grackle){
-    
-    // I think internal energy may need to be precomputed (does that mean
-    // we should always be using with dual energy formalism?) 
+
+  if (grackle_variable_gamma_()){
+    // we don't actually need to have grackle compute the pressure unless
+    // gamma is allowed to vary
     ERROR("EnzoEOSIdeal::pressure_from_integrable",
-	  "Not presently equipped to handle grackle");
+	  "Not equipped to handle grackle and spatially variable gamma");
   }
 
-  if (this->uses_dual_energy_formalism()){
-    ERROR("EnzoEOSIdeal::pressure_from_integrable",
-  	  "dual energy formalism is not yet implemented.");
-  }
+  const bool idual = this->uses_dual_energy_formalism();
 
   EnzoFieldArrayFactory array_factory(block, stale_depth);
-  EFlt3DArray density, vx, vy, vz, etot, bx, by, bz, pressure;
-
-  // We are going to check that these are the specified fields
+  EFlt3DArray density, vx, vy, vz, eint, etot, bx, by, bz, pressure;
   density = array_factory.from_grouping(integrable_group, "density", 0);
-  vx = array_factory.from_grouping(integrable_group, "velocity", 0);
-  vy = array_factory.from_grouping(integrable_group, "velocity", 1);
-  vz = array_factory.from_grouping(integrable_group, "velocity", 2);
-  etot = array_factory.from_grouping(integrable_group, "total_energy", 0);
-  bx = array_factory.from_grouping(integrable_group, "bfield", 0);
-  by = array_factory.from_grouping(integrable_group, "bfield", 1);
-  bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+
+  if (idual){
+    eint = array_factory.from_grouping(integrable_group, "internal_energy", 0);
+  } else {
+    etot = array_factory.from_grouping(integrable_group, "total_energy", 0);
+    vx = array_factory.from_grouping(integrable_group, "velocity", 0);
+    vy = array_factory.from_grouping(integrable_group, "velocity", 1);
+    vz = array_factory.from_grouping(integrable_group, "velocity", 2);
+    bx = array_factory.from_grouping(integrable_group, "bfield", 0);
+    by = array_factory.from_grouping(integrable_group, "bfield", 1);
+    bz = array_factory.from_grouping(integrable_group, "bfield", 2);
+  }
 
   pressure = array_factory.from_name(pressure_name);
-
   enzo_float gm1 = get_gamma() - 1.;
 
   for (int iz=0; iz<density.shape(0); iz++) {
     for (int iy=0; iy<density.shape(1); iy++) {
       for (int ix=0; ix<density.shape(2); ix++) {
 
-	enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
-			 by(iz,iy,ix) * by(iz,iy,ix) +
-			 bz(iz,iy,ix) * bz(iz,iy,ix));
-	enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
-			 vy(iz,iy,ix) * vy(iz,iy,ix) +
-			 vz(iz,iy,ix) * vz(iz,iy,ix));
-	pressure(iz,iy,ix) = 
-	  gm1 * ((etot(iz,iy,ix) - 0.5 * v2) * density(iz,iy,ix) - 0.5 * b2);
+	if (idual){
+	  pressure(iz,iy,ix) = gm1 * density(iz,iy,ix) * eint(iz,iy,ix);
+	} else {
+	  enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
+			   by(iz,iy,ix) * by(iz,iy,ix) +
+			   bz(iz,iy,ix) * bz(iz,iy,ix));
+	  enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
+			   vy(iz,iy,ix) * vy(iz,iy,ix) +
+			   vz(iz,iy,ix) * vz(iz,iy,ix));
+	  pressure(iz,iy,ix) = 
+	    gm1 * ((etot(iz,iy,ix) - 0.5 * v2) * density(iz,iy,ix) - 0.5 * b2);
+	}
+
       }
     }
   }
@@ -230,7 +248,7 @@ void EnzoEOSIdeal::pressure_from_integrable(Block *block,
 
 void EnzoEOSIdeal::pressure_from_reconstructable
 (Block *block, Grouping &reconstructable_group, std::string pressure_name,
- int stale_depth, int reconstructed_axis)
+ int stale_depth, int reconstructed_axis) const
 {
   // This is necessary since other equations of state may not include pressure
   // as a reconstructable quantity.
@@ -263,50 +281,90 @@ void EnzoEOSIdeal::pressure_from_reconstructable
   }
 }
 
-
 //----------------------------------------------------------------------
 
-// Applies the pressure_floor to total_energy
-void EnzoEOSIdeal::apply_floor_to_total_energy(Block *block,
-					       Grouping &integrable_group,
-					       int stale_depth)
+// based on the enzo's hydro_rk implementation of synchronization (found in the
+// Grid_UpdateMHD.C file)
+void EnzoEOSIdeal::apply_floor_to_energy_and_sync(Block *block,
+						  Grouping &integrable_group,
+						  int stale_depth) const
 {
-
-  if (enzo::config()->method_grackle_use_grackle){
-    ERROR("EnzoEOSIdeal::apply_floor_to_total_energy",
-	  "Not presently equipped to handle grackle");
-    // since we are not currently allowing Grackle (due to possibly
-    // variable gamma)
+  if (grackle_variable_gamma_()){ 
+    ERROR("EnzoEOSIdeal::apply_floor_to_energy_and_sync",
+	  "Not equipped to handle grackle and spatially variable gamma");
   }
 
-  EnzoFieldArrayFactory array_factory(block,stale_depth);
-  EFlt3DArray density, vx, vy, vz, etot, bx, by, bz;
+  const bool idual = this->uses_dual_energy_formalism();
+  // in hydro_rk, eta was set equal to eta1 (it didn't use eta2 at all)
+  const double eta = dual_energy_formalism_eta_;
+
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
+  EFlt3DArray density, vx, vy, vz, etot, eint, bx, by, bz;
+
+  // We are going to check that these are the specified fields
   density = array_factory.from_grouping(integrable_group, "density", 0);
   vx = array_factory.from_grouping(integrable_group, "velocity", 0);
   vy = array_factory.from_grouping(integrable_group, "velocity", 1);
   vz = array_factory.from_grouping(integrable_group, "velocity", 2);
   etot = array_factory.from_grouping(integrable_group, "total_energy", 0);
+  if (idual){
+    eint = array_factory.from_grouping(integrable_group, "internal_energy", 0);
+  }
   bx = array_factory.from_grouping(integrable_group, "bfield", 0);
   by = array_factory.from_grouping(integrable_group, "bfield", 1);
   bz = array_factory.from_grouping(integrable_group, "bfield", 2);
 
-  enzo_float pressure = get_pressure_floor();
+  float ggm1 = get_gamma()*(get_gamma() - 1.);
+  enzo_float pressure_floor = get_pressure_floor();
   enzo_float inv_gm1 = 1./(get_gamma()-1.);
+
+  // a requirement for an element of the internal energy field, cur_eint,
+  // to be updated to the value computed from the total energy field, eint_1,
+  // is that cur_eint > half_factor * cur_eint, where half_factor is 0.5. To
+  // allow eta = 0, to specify that this update should always occur, we set
+  // half_factor = 0 when eta = 0. 
+  const double half_factor = (eta != 0.) ? 0.5 : 0.;
 
   for (int iz=0; iz<density.shape(0); iz++) {
     for (int iy=0; iy<density.shape(1); iy++) {
       for (int ix=0; ix<density.shape(2); ix++) {
 
-	enzo_float kinetic, magnetic;
-	kinetic = 0.5*(vx(iz,iy,ix) * vx(iz,iy,ix) +
-		       vy(iz,iy,ix) * vy(iz,iy,ix) +
-		       vz(iz,iy,ix) * vz(iz,iy,ix));
-	magnetic = 0.5*(bx(iz,iy,ix) * bx(iz,iy,ix) +
-			by(iz,iy,ix) * by(iz,iy,ix) +
-			bz(iz,iy,ix) * bz(iz,iy,ix))/density(iz,iy,ix);
-	etot(iz,iy,ix) = std::max((pressure * inv_gm1/density(iz,iy,ix)
-				   + kinetic + magnetic),
-				  etot(iz,iy,ix));
+	enzo_float inv_rho = 1./density(iz,iy,ix);
+	enzo_float eint_floor = pressure_floor*inv_gm1*inv_rho;
+
+	enzo_float v2 = (vx(iz,iy,ix) * vx(iz,iy,ix) +
+			 vy(iz,iy,ix) * vy(iz,iy,ix) +
+			 vz(iz,iy,ix) * vz(iz,iy,ix));
+	enzo_float b2 = (bx(iz,iy,ix) * bx(iz,iy,ix) +
+			 by(iz,iy,ix) * by(iz,iy,ix) +
+			 bz(iz,iy,ix) * bz(iz,iy,ix));
+	enzo_float kinetic = 0.5*v2;
+	enzo_float magnetic = 0.5 * b2 *inv_rho;
+
+	if (idual){
+	  enzo_float eint_1 = etot(iz,iy,ix) - kinetic - magnetic;
+	  enzo_float cur_eint = eint(iz,iy,ix);
+
+	  // compute cs^2 with estimate of eint from etot
+	  // p = rho*(gamma-1)*eint
+	  // cs^2 = gamma * p / rho = gamma*(gamma-1)*eint
+	  enzo_float cs2_1 = std::fmax(0., ggm1*eint_1);
+
+	  // half_factor = 0.5 when eta !=0. Otherwise it's 0.
+	  if ( (cs2_1 > std::fmax(eta*v2, eta*b2*inv_rho)) &&
+	       (eint_1 > half_factor*cur_eint) ){
+	    cur_eint = eint_1;
+	  }
+	  cur_eint = EnzoEquationOfState::apply_floor(cur_eint, eint_floor);
+
+	  eint(iz,iy,ix) = cur_eint;
+	  etot(iz,iy,ix) = cur_eint + kinetic + magnetic;
+	} else {
+
+	  enzo_float etot_floor = eint_floor + kinetic + magnetic;
+	  etot(iz,iy,ix) = EnzoEquationOfState::apply_floor(etot(iz,iy,ix),
+							    etot_floor);
+	}
       }
     }
   }
@@ -317,7 +375,7 @@ void EnzoEOSIdeal::apply_floor_to_total_energy(Block *block,
 EFlt3DArray EnzoEOSIdeal::retrieve_field_(EnzoFieldArrayFactory &array_factory,
 					  Grouping &group,
 					  std::string group_name, int index,
-					  int reconstructed_axis)
+					  int reconstructed_axis) const
 {
   if (reconstructed_axis == -1){
     return array_factory.from_grouping(group, group_name, index);
@@ -331,7 +389,7 @@ EFlt3DArray EnzoEOSIdeal::retrieve_field_(EnzoFieldArrayFactory &array_factory,
 
 void EnzoEOSIdeal::copy_passively_advected_fields_
 (EnzoFieldArrayFactory &array_factory, Grouping &origin_group,
- Grouping &destination_group, int reconstruction_axis)
+ Grouping &destination_group, int reconstruction_axis) const
 {
   EnzoCenteredFieldRegistry registry;
   std::vector<std::string> group_names = registry.passive_scalar_group_names();

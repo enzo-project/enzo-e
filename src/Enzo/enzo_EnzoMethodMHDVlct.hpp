@@ -23,6 +23,8 @@
 ///        - pressure        (just reconstructable)
 ///        - total_energy    (just integrable)
 ///        - bfield          (both integrable and reconstructable)
+///      When using the dual energy formalism there is also:
+///        - internal_energy (just integrable)
 ///
 ///    Grouping Objects
 ///    ----------------
@@ -31,8 +33,7 @@
 ///    around vectors of field ids, but that doesn't offer nearly as much
 ///    flexibility. In particular:
 ///        - It would make it more difficult to add new fields without altering
-///          the interface (e.g. optionally using a dual energy formalism,
-///          species, colors, Cosmic Ray energy density and flux density)
+///          the interface (e.g. Cosmic Ray energy density and flux density)
 ///        - Relatedly, by sharing common group names between different
 ///          grouping objects it is easier to load in relevant fields
 ///          representing different, but related physical quantities, (e.g.
@@ -49,12 +50,15 @@
 ///            5. fluxes in the x-direction
 ///            6. fluxes in the y-direction
 ///            7. fluxes in the z-direction
-///            8. face centered fields along x,y,z direction that identify
+///            8. fields used to accumulate the total change in the conserved
+///               versions of all integrable quantities (including flux
+///               divergence and source terms)
+///            9. face centered fields along x,y,z direction that identify
 ///               which direction is upwind. (known as weight_group)
-///            9. edge centered electric fields
-///           10. temp integrable quantities (to store values at the half
+///           10. edge centered electric fields
+///           11. temp integrable quantities (to store values at the half
 ///               timestep)
-///           11. temp interface b-fields (to store values at the half
+///           12. temp interface b-fields (to store values at the half
 ///               timestep)
 ///        - several groups only contain 1 field (e.g. the "density" and
 ///          "total_energy" groups). In effect, they serve as alias names for
@@ -62,8 +66,7 @@
 ///        - This implementation relies on the fact that the fields in a
 ///          Grouping are sorted alphabetically (e.g. fields in the "velocity"
 ///          would always be ordered "velocity_x","velocity_y", "velocity_z")  
-///        - All fields within the primitive quantites, conserved quanties, and
-///          temp conserved quantities are all cell-centered.
+///        - All fields within Groupings 1, 8, and 11 are all cell-centered.
 ///        - All face-centered fields with the exception of (temporary)
 ///          interface b-fields only include space for values on the interior
 ///          of the grid. The (temporary) interface bfields all include space
@@ -73,7 +76,7 @@
 ///          along different axes. Consequently, they are formally registerred
 ///          as cell-centered fields (to guaruntee that they have enough space).
 ///        - All reconstructable and integrable primitive quantities have
-///          groupings named for them in Groupings 1, 3, 4, 10. We don't
+///          groupings named for them in Groupings 1, 3, 4, 11. We don't
 ///          construct separate groupings due to the high degree of overlap. To
 ///          help make the control flow of the calculations more apparent,
 ///          we create the following aliases for each of the groupings for use
@@ -99,7 +102,9 @@ public: // interface
 		    std::string full_recon_name,
 		    double gamma, double theta_limiter,
 		    double density_floor,
-		    double pressure_floor);
+		    double pressure_floor,
+		    bool dual_energy_formalism,
+		    double dual_energy_formalism_eta);
 
   /// Charm++ PUP::able declarations
   PUPable_decl(EnzoMethodMHDVlct);
@@ -191,7 +196,22 @@ protected: // methods
    Grouping &conserved_passive_scalars,
    Grouping &primitive_group, int stale_depth);
 
-  /// Computes the fluxes along a given dimension
+  /// Computes the fluxes along a given dimension, `dim`, and accumulate the
+  /// changes to the integrable quantities in `dUcons_group`
+  ///
+  /// If using the dual energy formalism, this also computes a part of the
+  /// internal energy density source term,
+  ///    `dt * pressure * (dvx/dx + dvy/dy + dvz/dz)`
+  /// (`vx`, `vy`, `vz` are velocity components & scale factor dependence is
+  /// omitted), and adds it to the relevent field in `dUcons_group`. More
+  /// specifically, it handles the dimensionally split part of the term
+  /// involving the derivative along `dim`. It uses the velocity component
+  /// along `dim` at the cell-interfaces (estimated by the Riemann Solver) to
+  /// compute the derivatives.
+  ///
+  /// This function should NOT be modified to directly compute any other source
+  /// terms unless they similarly have dependence on dimensional quantites
+  /// computed in this function AND can be dimensionally split.
   ///
   /// @param block holds data to be processed
   /// @param dim Dimension along which to compute fluxes. Values of 0, 1, and 2
@@ -220,16 +240,36 @@ protected: // methods
   ///     block). The weight field corresponding to dim, is modified to
   ///     indicate the upwind direction (this is included to optionally
   ///     implement the weighting scheme used by Athena++ at a later date)
+  /// @param dUcons_group holds field names of fields used to accumulate the
+  ///     changes to the conserved forms of the integrable quantities (other
+  ///     than Bfield if CT is used) and passive scalars. The changes in the
+  ///     integrable quantities and passive scalars due to the fluxes and (any
+  ///     source terms) computed by these quantities are all ADDED to these
+  ///     fields.
+  /// @param interface_velocity_name Expected to be the name of a cell-centered
+  ///     field that is used to store temporarily store the velocity along
+  ///     `dim` at each cell interface during this function call. It is used to
+  ///     compute the internal energy source term (and is required if the dual
+  ///     energy formalism is in use). A value of "" indicates that no field
+  ///     has been allocated.
   /// @param reconstructor the instance of EnzoReconstructor to use to update
   ///     reconstruct the face centered values
   /// @param stale_depth indicates the current stale depth (before performing
   ///     reconstruction)
-  void compute_flux_(Block *block, int dim,
+  ///
+  /// @par Note
+  /// It might be worth breaking this into 2 functions (where one of them
+  /// handles the reconstruction of the fields and calculation of the flux and
+  /// the other additionally handles the accumulation of values in flux_group
+  /// and calculates any relevant source terms.
+  void compute_flux_(Block *block, int dim, double dt,
 		     Grouping &reconstructable_group,
 		     Grouping &cur_bfieldi_group,
 		     Grouping &priml_group, Grouping &primr_group,
 		     std::string pressure_name_l,  std::string pressure_name_r,
 		     Grouping &flux_group, Grouping &weight_group,
+		     Grouping &dUcons_group,
+		     std::string interface_velocity_name,
 		     EnzoReconstructor &reconstructor, int stale_depth);
 
   /// Allocate temporary fields needed for scratch space and store their names
@@ -253,11 +293,21 @@ protected: // methods
   ///     ideal gas, pressure is a reconstructable quantity and fields are
   ///     included for it in priml_group and primr_group. In that case, those
   ///     field names are also asigned to pressure_name_l and pressure_name_r.
+  /// @param interface_velocity_name This will be set equal to the name of the
+  ///     field used to temporarily store the velocity normal to the cell
+  ///     interface at the interface. Because it's used to compute the internal
+  ///     energy source term, the field is only allocated if the the dual
+  ///     energy formalism is in use. Otherwise, it will be set to "".
   /// @param xflux_group,yflux_group,zflux_group The groupings of temporary
   ///     face-centered fields that will store the x, y, and z fluxes. These
   ///     fields don't include the faces on the exterior of the grid. Each
   ///     grouping will be setup with groups named after the names stored in
   ///     integrable_group_names_.
+  /// @param dUcons_group Grouping of fields used to accumulate the changes to
+  ///     the conserved forms of the integrable quantities and passively
+  ///     advected scalars. If CT is used, this grouping won't have space to
+  ///     store changes in the magnetic fields (that update is handled
+  ///     separately).
   /// @param efield_group Grouping of temporary edge-centered fields where the
   ///     calculated electric fields get stored. Upon initialization, this will
   ///     have one group called "efield". The group will store temporary fields
@@ -286,9 +336,11 @@ protected: // methods
 			     Grouping &primr_group,
 			     std::string &pressure_name_l,
 			     std::string &pressure_name_r,
+			     std::string &interface_velocity_name,
 			     Grouping &xflux_group,
 			     Grouping &yflux_group,
 			     Grouping &zflux_group,
+			     Grouping &dUcons_group,
 			     Grouping &efield_group,
 			     std::string &center_efield_name,
 			     Grouping &weight_group,
@@ -300,9 +352,11 @@ protected: // methods
 			       Grouping &primr_group,
 			       std::string pressure_name_l,
 			       std::string pressure_name_r,
+			       std::string interface_velocity_name,
 			       Grouping &xflux_group,
 			       Grouping &yflux_group,
 			       Grouping &zflux_group,
+			       Grouping &dUcons_group,
 			       Grouping &efield_group,
 			       std::string center_efield_name,
 			       Grouping &weight_group,

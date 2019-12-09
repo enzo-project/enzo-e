@@ -607,7 +607,9 @@ Method * EnzoProblem::create_method_
        enzo_config->field_gamma,
        enzo_config->method_vlct_theta_limiter,
        enzo_config->method_vlct_density_floor,
-       enzo_config->method_vlct_pressure_floor);
+       enzo_config->method_vlct_pressure_floor,
+       enzo_config->method_vlct_dual_energy,
+       enzo_config->method_vlct_dual_energy_eta);
 
   } else {
 

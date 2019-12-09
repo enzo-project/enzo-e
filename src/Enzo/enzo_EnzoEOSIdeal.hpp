@@ -19,12 +19,15 @@ class EnzoEOSIdeal : public EnzoEquationOfState
 public: // interface
   
   /// Create a new EnzoEOSIdeal object
-  EnzoEOSIdeal(double gamma, double density_floor,
-	       double pressure_floor) throw()
+  EnzoEOSIdeal(double gamma, double density_floor, double pressure_floor,
+	       bool dual_energy_formalism,
+	       double dual_energy_formalism_eta) throw()
     : EnzoEquationOfState(),
       gamma_(gamma),
       density_floor_(density_floor),
-      pressure_floor_(pressure_floor)
+      pressure_floor_(pressure_floor),
+      dual_energy_formalism_(dual_energy_formalism),
+      dual_energy_formalism_eta_(dual_energy_formalism_eta)
   { }
 
   /// Delete EnzoEOSIdeal object
@@ -39,7 +42,9 @@ public: // interface
     : EnzoEquationOfState(m),
       gamma_(0.),
       density_floor_(0.),
-      pressure_floor_(0.)
+      pressure_floor_(0.),
+      dual_energy_formalism_(false),
+      dual_energy_formalism_eta_(0.)
   {  }
 
   /// CHARM++ Pack / Unpack function
@@ -49,39 +54,40 @@ public: // interface
 				       Grouping &integrable_group,
 				       Grouping &reconstrable_group,
 				       Grouping &conserved_passive_group,
-				       int stale_depth);
+				       int stale_depth) const;
 
   void integrable_from_reconstructable(Block *block,
 				       Grouping &reconstructable_group,
 				       Grouping &integrable_group,
 				       int stale_depth,
-				       int reconstructed_axis);
+				       int reconstructed_axis) const;
 
   void pressure_from_integrable(Block *block, Grouping &integrable_group,
 				std::string pressure_name,
 				Grouping &conserved_passive_group,
-				int stale_depth);
+				int stale_depth) const;
 
   void pressure_from_reconstructable(Block *block,
 				     Grouping &reconstructable_group,
 				     std::string pressure_name,
-				     int reconstructed_axis, int stale_depth);
+				     int reconstructed_axis,
+				     int stale_depth) const;
 
-  enzo_float get_density_floor() { return density_floor_; }
+  enzo_float get_density_floor() const { return density_floor_; }
 
-  enzo_float get_pressure_floor() { return pressure_floor_; }
+  enzo_float get_pressure_floor() const { return pressure_floor_; }
 
-  void apply_floor_to_total_energy(Block *block, Grouping &integrable_group,
-				   int stale_depth);
+  void apply_floor_to_energy_and_sync(Block *block, Grouping &integrable_group,
+				      int stale_depth) const;
 
-  bool is_barotropic() { return false; }
+  bool is_barotropic() const { return false; }
 
-  enzo_float get_gamma() { return gamma_;}
+  enzo_float get_gamma() const { return gamma_;}
 
-  enzo_float get_isothermal_sound_speed() { return 0;}
+  enzo_float get_isothermal_sound_speed() const { return 0;}
 
   // In the future, this won't be hardcoded to false
-  bool uses_dual_energy_formalism() { return false; };
+  bool uses_dual_energy_formalism() const { return dual_energy_formalism_; };
 
 
 private:
@@ -89,7 +95,7 @@ private:
   /// field stores reconstructed data
   EFlt3DArray retrieve_field_(EnzoFieldArrayFactory &array_factory,
 			      Grouping &group, std::string group_name,
-			      int index, int reconstructed_axis);
+			      int index, int reconstructed_axis) const;
   
   /// Copies entries of the passively advected fields included by origin_group
   /// to the corresponding entries of the fields included in destination_group
@@ -99,12 +105,14 @@ private:
   void copy_passively_advected_fields_(EnzoFieldArrayFactory &array_factory,
 				       Grouping &origin_group,
 				       Grouping &destination_group,
-				       int reconstructed_axis = -1);
+				       int reconstructed_axis = -1) const;
 
 protected: // attributes
   enzo_float gamma_; // adiabatic index
   enzo_float density_floor_;
   enzo_float pressure_floor_;
+  bool dual_energy_formalism_;
+  double dual_energy_formalism_eta_;
 };
 
 #endif /* ENZO_ENZO_EOS_IDEAL_HPP */

@@ -17,13 +17,16 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
 				      std::string full_recon_name,
 				      double gamma, double theta_limiter,
 				      double density_floor,
-				      double pressure_floor)
+				      double pressure_floor,
+				      bool dual_energy_formalism,
+				      double dual_energy_formalism_eta)
   : Method()
 {
   // Initialize equation of state (check the validity of quantity floors)
   EnzoEquationOfState::check_floor(density_floor);
   EnzoEquationOfState::check_floor(pressure_floor);
-  eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor);
+  eos_ = new EnzoEOSIdeal(gamma, density_floor, pressure_floor,
+			  dual_energy_formalism, dual_energy_formalism_eta);
 
 
   // determine integrable and reconstructable quantities (and passive scalars)
@@ -69,8 +72,7 @@ EnzoMethodMHDVlct::EnzoMethodMHDVlct (std::string rsolver,
   riemann_solver_ = EnzoRiemann::construct_riemann
     (integrable_group_names_,      passive_group_names_, rsolver);
   integrable_updater_ = new EnzoIntegrableUpdate(integrable_group_names_,
-						 true, eos_->is_barotropic(),
-						 passive_group_names_);
+						 true, passive_group_names_);
 }
 
 //----------------------------------------------------------------------
@@ -93,13 +95,7 @@ void EnzoMethodMHDVlct::determine_quantities_
 	  "Not presently equipped to handle grackle");
   }
 
-  if (eos->uses_dual_energy_formalism()){
-    ERROR("EnzoMethodMHDVlct::determine_quantities_",
-	  "Not presently equipped to handle dual energy formalism.");
-  }
 
-  
-  
   std::string common[3] {"density", "velocity", "bfield"};
   for (int i = 0; i<3; i++){
     integrable_quantities.push_back(common[i]);
@@ -112,8 +108,13 @@ void EnzoMethodMHDVlct::determine_quantities_
   } else {
     // add specific total energy to integrable quantities
     integrable_quantities.push_back("total_energy");
-    // add specific internal energy to reconstructable quantities
+    // add pressure to reconstructable quantities
     reconstructable_quantities.push_back("pressure");
+    // add specific internal energy to integrable quantities (if using the dual
+    // engery formalism)
+    if (eos->uses_dual_energy_formalism()){
+      integrable_quantities.push_back("internal_energy");
+    }
   }
 
   // Now to setup the list of passively advected group names
@@ -148,7 +149,7 @@ void add_passive_groups_(Grouping &grouping, const std::string field_prefix,
 
   // This includes the groups specified in the parameter file
   Grouping* reference_grouping = cello::field_descr()->groups();
-  
+
   for (unsigned int i=0;i<group_names.size();i++){
 
     std::string group_name = group_names[i];
@@ -168,8 +169,8 @@ void add_passive_groups_(Grouping &grouping, const std::string field_prefix,
 //----------------------------------------------------------------------
 
 // Returns the unique members of a combination of 2 vectors
-std::vector<std::string> unique_combination_(std::vector<std::string> &a,
-					     std::vector<std::string> &b)
+std::vector<std::string> unique_combination_(const std::vector<std::string> &a,
+					     const std::vector<std::string> &b)
 {
   std::vector<std::string> out;
   // copy elements from a
@@ -330,8 +331,20 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     //       field names don't match)
     std::string pressure_name_l, pressure_name_r;
 
+    // Name of fields use to store interface velocity field from the Riemann
+    // Solver to compute internal energy source term. It won't be allocated
+    // unless the dual energy formalism is in use
+    std::string interface_velocity_name;
+
     // flux fields
     Grouping xflux_group, yflux_group, zflux_group;
+
+    // fields used to accumulate the changes to the conserved forms of the
+    // integrable quantities and passively advected scalars (i.e. at the start
+    // of the (partial) timestep, the fields are all set to zero and are used
+    // to accumulate the flux divergence and source terms). If CT is used, it
+    // won't have space to store changes in the magnetic fields.
+    Grouping dUcons_group;
 
     // edge-centered electric fields
     Grouping efield_group;
@@ -352,7 +365,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // allocate the temporary fields (as necessary) and fill the field groupings
     allocate_temp_fields_(block, priml_group, primr_group,
 			  pressure_name_l, pressure_name_r,
-			  xflux_group, yflux_group, zflux_group,
+			  interface_velocity_name,
+			  xflux_group, yflux_group, zflux_group, dUcons_group,
 			  efield_group, center_efield_name, weight_group,
 			  temp_primitive_group, temp_bfieldi_group);
 
@@ -420,6 +434,11 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 					  *cur_integrable_group, stale_depth);
       }
 
+      // set the all values of fields in dUcons_group to 0 (throughout the rest
+      // of the current loop, flux divergence and source terms will be
+      // accumulated by these fields)
+      integrable_updater_->clear_dUcons_group(block, dUcons_group, 0.);
+
       // Compute the reconstructable quantities from the integrable quantites
       // Although cur_integrable_group holds the passive scalars in integrable
       // form, the conserved form of the values is required in case Grackle is
@@ -437,30 +456,34 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 					    stale_depth);
 
       // Compute flux along each dimension
-      compute_flux_(block, 0, *cur_reconstructable_group, *cur_bfieldi_group,
-		    priml_group, primr_group, pressure_name_l, pressure_name_r,
-		    xflux_group, weight_group, *reconstructor, stale_depth);
-      compute_flux_(block, 1, *cur_reconstructable_group, *cur_bfieldi_group,
-		    priml_group, primr_group, pressure_name_l, pressure_name_r,
-		    yflux_group, weight_group, *reconstructor, stale_depth);
-      compute_flux_(block, 2, *cur_reconstructable_group, *cur_bfieldi_group,
-		    priml_group, primr_group, pressure_name_l, pressure_name_r,
-		    zflux_group, weight_group, *reconstructor, stale_depth);
+      compute_flux_(block, 0, cur_dt, *cur_reconstructable_group,
+		    *cur_bfieldi_group, priml_group, primr_group,
+		    pressure_name_l, pressure_name_r, xflux_group,
+		    weight_group, dUcons_group, interface_velocity_name,
+		    *reconstructor, stale_depth);
+      compute_flux_(block, 1, cur_dt, *cur_reconstructable_group,
+		    *cur_bfieldi_group, priml_group, primr_group,
+		    pressure_name_l, pressure_name_r, yflux_group,
+		    weight_group, dUcons_group, interface_velocity_name,
+		    *reconstructor, stale_depth);
+      compute_flux_(block, 2, cur_dt, *cur_reconstructable_group,
+		    *cur_bfieldi_group, priml_group, primr_group,
+		    pressure_name_l, pressure_name_r, zflux_group,
+		    weight_group, dUcons_group, interface_velocity_name,
+		    *reconstructor, stale_depth);
       // increment the stale_depth
       stale_depth+=reconstructor->immediate_staling_rate();
 
-      // Compute the edge-centered Electric fields (each time, it uses the
-      // current integrable quantities
+      // This is where source terms should be computed (added to dUcons_group)
+
+      // Update Bfields (this could probably all be consolidated)
+      // First, compute the edge-centered Electric fields (each time, it uses
+      // the current integrable quantities
       ct.compute_all_edge_efields(block, *cur_integrable_group,
 				  xflux_group, yflux_group, zflux_group,
 				  center_efield_name, efield_group,
 				  weight_group, stale_depth);
 
-      // Add source terms? - this could nominally happen after adding the flux
-      // divergence, but in reality it may make more sense to consolidate
-      // source terms and flux divergence here
-
-      // but then the code placing a floor on the total energy must be moved.
       // Update longitudinal B-field (add source terms of constrained transport)
       for (int dim = 0; dim<3; dim++){
 	ct.update_bfield(block, dim, efield_group, *bfieldi_group_,
@@ -473,19 +496,19 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
 				 *out_bfieldi_group, stale_depth);
       }
 
-      // Update quantities - add flux divergence
+      // Update quantities - (includes flux divergence and source terms) 
       // (this needs to happen after updating the cell-centered B-field so that
-      // the pressure floor can be applied to the total energy)
+      // the pressure floor can be applied to the total energy (and if
+      // necessary the total energy can be synchronized with internal energy)
       //
       // Note: updated passive scalars are NOT saved in out_integrable_group in
       //     specific form. Instead they are saved inconserved_passive_scalars
       //     in conserved form.
       integrable_updater_->update_quantities(block, *primitive_group_,
-					     xflux_group, yflux_group,
-					     zflux_group,
+					     dUcons_group,
 					     *out_integrable_group,
 					     *conserved_passive_scalars,
-					     eos_, cur_dt, stale_depth);
+					     eos_, stale_depth);
 
       // increment stale_depth since the inner values have been updated
       // but the outer values have not
@@ -495,7 +518,8 @@ void EnzoMethodMHDVlct::compute ( Block * block) throw()
     // Deallocate Temporary Fields
     deallocate_temp_fields_(block, priml_group, primr_group,
 			    pressure_name_l, pressure_name_r,
-			    xflux_group, yflux_group, zflux_group,
+			    interface_velocity_name, xflux_group,
+			    yflux_group, zflux_group, dUcons_group,
 			    efield_group, center_efield_name,
 			    weight_group, temp_primitive_group,
 			    temp_bfieldi_group);
@@ -574,17 +598,13 @@ void EnzoMethodMHDVlct::compute_specific_passive_scalars_
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
-				      Grouping &reconstructable_group,
-				      Grouping &cur_bfieldi_group,
-				      Grouping &priml_group,
-				      Grouping &primr_group,
-				      std::string pressure_name_l,
-				      std::string pressure_name_r,
-				      Grouping &flux_group,
-				      Grouping &weight_group,
-				      EnzoReconstructor &reconstructor,
-				      int stale_depth)
+void EnzoMethodMHDVlct::compute_flux_
+(Block *block, int dim, double cur_dt, Grouping &reconstructable_group,
+ Grouping &cur_bfieldi_group, Grouping &priml_group, Grouping &primr_group,
+ std::string pressure_name_l, std::string pressure_name_r,
+ Grouping &flux_group, Grouping &weight_group, Grouping &dUcons_group,
+ std::string interface_velocity_name, EnzoReconstructor &reconstructor,
+ int stale_depth)
 {
   // purely for the purposes of making the caluclation more explicit, we define
   // the following aliases for priml_group/primr_group
@@ -646,7 +666,21 @@ void EnzoMethodMHDVlct::compute_flux_(Block *block, int dim,
   // Next, compute the fluxes
   riemann_solver_->solve(block, *integrable_group_l, *integrable_group_r,
 			 pressure_name_l, pressure_name_r, flux_group,
-			 dim, eos_, cur_stale_depth);
+			 dim, eos_, cur_stale_depth, interface_velocity_name);
+
+  // Accumulate the change in integrable quantities from these fluxes in
+  // dUcons_group
+  integrable_updater_->accumulate_flux_component(block, dim, cur_dt,
+						 flux_group, dUcons_group,
+						 cur_stale_depth);
+
+  // if using dual energy formalism, compute the dual energy formalism
+  if (eos_->uses_dual_energy_formalism()){
+    EnzoSourceInternalEnergy eint_src;
+    eint_src.calculate_source(block, cur_dt, reconstructable_group,
+			      dUcons_group, interface_velocity_name, dim, eos_,
+			      cur_stale_depth);
+  }
 
   // Finally, need to handle weights
   //  - Currently, weight is set to 1.0 if upwind is in positive direction of
@@ -699,7 +733,6 @@ void prep_reused_temp_field_(Field &field, std::string field_name,
     field_descr->set_centering(id,cx,cy,cz);
   }
 
-  
   // allocate temporary field
   // this last check allows us to make temporary field "permanent" for debugging
   // purposes
@@ -734,7 +767,7 @@ void allocate_temp_group_fields_(Field &field, Grouping &grouping,
 // name of the analogous field in ref_grouping. Additionally, all temporary
 // fields added to grouping are allocated with centering given by cx, cy, cz.
 void prep_temp_field_grouping_(Field &field, Grouping &ref_grouping,
-			       std::vector<std::string> &group_names,
+			       const std::vector<std::string> &group_names,
 			       Grouping &grouping, std::string field_prefix,
 			       int cx, int cy, int cz)
 {
@@ -820,19 +853,14 @@ void prep_temp_vector_grouping_(Field &field, std::string group_name,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
-					      Grouping &priml_group,
-					      Grouping &primr_group,
-					      std::string &pressure_name_l,
-					      std::string &pressure_name_r,
-					      Grouping &xflux_group,
-					      Grouping &yflux_group,
-					      Grouping &zflux_group,
-					      Grouping &efield_group,
-					      std::string &center_efield_name,
-					      Grouping &weight_group,
-					      Grouping &temp_primitive_group,
-					      Grouping &temp_bfieldi_group)
+void EnzoMethodMHDVlct::allocate_temp_fields_
+(Block *block, Grouping &priml_group, Grouping &primr_group,
+ std::string &pressure_name_l, std::string &pressure_name_r,
+ std::string &interface_velocity_name,
+ Grouping &xflux_group, Grouping &yflux_group, Grouping &zflux_group,
+ Grouping &dUcons_group, Grouping &efield_group,
+ std::string &center_efield_name, Grouping &weight_group,
+ Grouping &temp_primitive_group, Grouping &temp_bfieldi_group)
 {
   
   EnzoBlock * enzo_block = enzo::block(block);
@@ -859,6 +887,15 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
 			    yflux_group, "yflux_",0,-1,0);
   prep_temp_field_grouping_(field, *primitive_group_, combined_integrable_names,
 			    zflux_group, "zflux_",0,0,-1);
+
+  // Prepare fields used to accumulate all changes to the activel advected and
+  // passively advected quantities. If CT is in use, dUcons_group should not
+  // have storage for magnetic fields since CT independently updates magnetic
+  // fields (this exlusion is implicitly handled integrable_updater_)
+  prep_temp_field_grouping_
+    (field, *primitive_group_,
+     integrable_updater_->combined_integrable_groups(true),
+     dUcons_group, "dUcons_",0,0,0);
 
   // Prepare the temporary primitive fields (used to store values at half dt)
   std::vector<std::string> prim_group_names;
@@ -888,6 +925,16 @@ void EnzoMethodMHDVlct::allocate_temp_fields_(Block *block,
     pressure_name_r = "right_single_pressure";
     prep_reused_temp_field_(field, pressure_name_l, 0, 0, 0);
     prep_reused_temp_field_(field, pressure_name_r, 0, 0, 0);
+  }
+
+  // if the dual energy formalism is in use, allocate a fields to temporarily
+  // store velocity normal to the cell interface at the cell interface. The
+  // interface velocities are used to compute the internal energy source term.
+  if (eos_->uses_dual_energy_formalism()){
+    interface_velocity_name = "temp_cell_interface_velocity";
+    prep_reused_temp_field_(field, interface_velocity_name, 0, 0, 0);
+  } else {
+    interface_velocity_name = "";
   }
 
   // reserve/allocate fields for weight fields
@@ -934,24 +981,19 @@ void deallocate_grouping_fields_(Field &field,
 
 //----------------------------------------------------------------------
 
-void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
-						Grouping &priml_group,
-						Grouping &primr_group,
-						std::string pressure_name_l,
-						std::string pressure_name_r,
-						Grouping &xflux_group,
-						Grouping &yflux_group,
-						Grouping &zflux_group,
-						Grouping &efield_group,
-						std::string center_efield_name,
-						Grouping &weight_group,
-						Grouping &temp_primitive_group,
-						Grouping &temp_bfieldi_group)
+void EnzoMethodMHDVlct::deallocate_temp_fields_
+(Block *block, Grouping &priml_group, Grouping &primr_group,
+ std::string pressure_name_l, std::string pressure_name_r,
+ std::string interface_velocity_name,
+ Grouping &xflux_group, Grouping &yflux_group, Grouping &zflux_group,
+ Grouping &dUcons_group, Grouping &efield_group, std::string center_efield_name,
+ Grouping &weight_group, Grouping &temp_primitive_group,
+ Grouping &temp_bfieldi_group)
 {
 
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
-  
+
   // Prepare the temporary primitive fields (used to store values at half dt)
   std::vector<std::string> combined_integrable_names, prim_group_names;
   combined_integrable_names = unique_combination_(integrable_group_names_,
@@ -973,7 +1015,11 @@ void EnzoMethodMHDVlct::deallocate_temp_fields_(Block *block,
   // deallocate left/right pressure fields
   field.deallocate_temporary(field.field_id(pressure_name_l));
   field.deallocate_temporary(field.field_id(pressure_name_r));
-  
+
+  // deallocate fields used to hold interace velocities (if it was allocated)
+  if (interface_velocity_name!=""){
+    field.deallocate_temporary(field.field_id(interface_velocity_name));
+  }
 
   // deallocate electric fields
   std::vector<std::string> efield_group_names{"efield"};

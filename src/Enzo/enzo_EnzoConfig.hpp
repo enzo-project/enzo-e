@@ -252,6 +252,8 @@ public: // interface
       method_vlct_theta_limiter(0.0),
       method_vlct_density_floor(0.0),
       method_vlct_pressure_floor(0.0),
+      method_vlct_dual_energy(false),
+      method_vlct_dual_energy_eta(0.0),
       // EnzoSolverMg0
       solver_pre_smooth(),
       solver_post_smooth(),
@@ -482,6 +484,11 @@ public: // attributes
   double                     method_vlct_theta_limiter;
   double                     method_vlct_density_floor;
   double                     method_vlct_pressure_floor;
+  bool                       method_vlct_dual_energy;
+  // unlike ppm, only use a single eta value. It should have a default value
+  // closer to method_ppm_dual_energy_eta1
+  double                     method_vlct_dual_energy_eta;
+
 
   ///==============
   /// EnzoSolverMg0

@@ -11,6 +11,29 @@
 
 #ifndef ENZO_ENZO_EQUATIONOFSTATE_HPP
 #define ENZO_ENZO_EQUATIONOFSTATE_HPP
+
+// Among it's EOS-related responsbilities, EnzoEquationOfState, is responsible
+// for the application of the Dual Energy Formalism, (when specified for
+// non-barotropic equations of state). Currently, implementations of the Dual
+// Energy Formalism are expected to more closely resemble implementations in
+// Enzo's Runge-Kutta and MHD with Constrained Transport integrators. These
+// exhibit 3 main differences from the original conception (implemented in
+// Enzo's ppm integrator):
+//     1. internal energy is always used to compute pressure. In the original
+//        conception, pressure could be computed from total energy or
+//        internal energy (the decision was independent of synchronization).
+//     2. Unlike the original conception, both pressure and internal energy are
+//        not reconstructed separately. Implementations are currently expected
+//        to just reconstruct pressure and compute internal energy from the
+//        reconstructed quantities.
+//     3. Synchronization of the total and internal energies is a local
+//        operation that doesn't require knowledge cell neighbors. In the
+//        original conception, knowledge of the immediate neighbors had been
+//        required (thus, each synchronization incremented the stale depth).
+//
+// To allow synchronization to data from neigboring cells, an additional method
+// would be required that indicates the staling_rate of the synchronization.
+
 class EnzoEquationOfState : public PUP::able
 {
   /// @class    EnzoEquationOfState
@@ -87,7 +110,7 @@ public: // interface
   /// For a non-barotropic EOS, this computes pressure 
   virtual void reconstructable_from_integrable
   (Block *block, Grouping &integrable_group, Grouping &reconstructable_group,
-   Grouping &conserved_passive_group, int stale_depth)=0;
+   Grouping &conserved_passive_group, int stale_depth) const = 0;
 
   /// @overload
   ///
@@ -95,7 +118,7 @@ public: // interface
   void reconstructable_from_integrable(Block *block,
 				       Grouping &integrable_group,
 				       Grouping &reconstructable_group,
-				       Grouping &conserved_passive_group)
+				       Grouping &conserved_passive_group) const
   {
     reconstructable_from_integrable(block, integrable_group,
 				    reconstructable_group,
@@ -123,12 +146,13 @@ public: // interface
   ///
   /// For a barotropic EOS, this nominally does nothing
   /// For a non-barotropic EOS, this computes specific total energy from
-  /// pressure
+  /// pressure. If using the dual energy formalism, it will also compute the
+  /// internal energy from the pressure
   virtual void integrable_from_reconstructable(Block *block,
 					       Grouping &reconstructable_group,
 					       Grouping &integrable_group,
 					       int stale_depth,
-					       int reconstructed_axis)=0;
+					       int reconstructed_axis) const =0;
 
   /// @overload
   ///
@@ -136,7 +160,7 @@ public: // interface
   /// fields are cell-centered
   void integrable_from_reconstructable(Block *block,
 				       Grouping &reconstructable_group,
-				       Grouping &integrable_group)
+				       Grouping &integrable_group) const
   { integrable_from_reconstructable(block, reconstructable_group,
 				    integrable_group, 0, -1); }
 
@@ -162,11 +186,11 @@ public: // interface
 					Grouping &integrable_group,
 					std::string pressure_name,
 					Grouping &conserved_passive_group,
-					int stale_depth)=0;
+					int stale_depth) const =0;
 
   /// Computes thermal pressure from reconstructable quantities (nominally
   /// after reconstruction)
-  /// 
+  ///
   /// @param block holds data to be processed
   /// @param reconstructable_group holds field names of reconstructable
   ///     primitives to be used to compute thermal pressure
@@ -191,16 +215,17 @@ public: // interface
 					     Grouping &reconstructable_group,
 					     std::string pressure_name,
 					     int stale_depth,
-					     int reconstructed_axis)=0;
+					     int reconstructed_axis) const = 0;
 
   /// returns the density floor
-  virtual enzo_float get_density_floor()=0;
+  virtual enzo_float get_density_floor() const = 0;
 
   /// returns the thermal pressure floor
-  virtual enzo_float get_pressure_floor()=0;
+  virtual enzo_float get_pressure_floor() const = 0;
 
-  /// apply the pressure floor to the specific total energy field. If the
-  /// equation of state is barotropic, then this does nothing
+  /// apply the pressure floor to the specific total energy field and (if using
+  /// the dual-energy formalism) synchronize the internal energy and total
+  /// energy fields. If the EOS is barotropic, this does nothing.
   ///
   /// @param block holds data to be processed
   /// @param integrable_group holds field names of integrable primitives to be
@@ -209,23 +234,29 @@ public: // interface
   /// @param stale_depth indicates the number of field entries from the
   ///     outermost field value that the region including "stale" values (need
   ///     to be refreshed) extends over (0 means there are no "stale" values).
-  virtual void apply_floor_to_total_energy(Block *block,
-					   Grouping &integrable_group,
-					   int stale_depth)=0;
+  ///
+  /// Unlike the initial conception of the dual-energy formalism (or the
+  /// version used in Enzo's ppm integrator) this assumes that synchronization
+  /// is a local operation that doesn't require data about neighboring cells
+  /// (similar to the implementation of the dual energy formalsim in Enzo's
+  /// Runge Kutta and MHD with Constrained Transport solvers).
+  virtual void apply_floor_to_energy_and_sync(Block *block,
+					      Grouping &integrable_group,
+					      int stale_depth) const = 0;
 
   /// returns whether the equation of state is barotropic
-  virtual bool is_barotropic() = 0;
+  virtual bool is_barotropic() const = 0;
 
   /// returns adiabatic index - only needs to be a reasonable number of non-
   /// barotropic
-  virtual enzo_float get_gamma() = 0;
+  virtual enzo_float get_gamma() const = 0;
 
   /// returns isothermal sound speed - only needs to be reasonable for a
   /// barotropic EOS
-  virtual enzo_float get_isothermal_sound_speed() = 0;
+  virtual enzo_float get_isothermal_sound_speed() const = 0;
 
   /// returns true if the dual energy formalism is being used
-  virtual bool uses_dual_energy_formalism() = 0;
+  virtual bool uses_dual_energy_formalism() const = 0;
 
 };
 
