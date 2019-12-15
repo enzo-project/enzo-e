@@ -28,7 +28,7 @@ public: // interface
 		   double cloud_center_y, double cloud_center_z,
 		   double density_cloud, double density_wind,
 		   double etot_wind, double eint_wind,
-		   double velocity_wind)
+		   double velocity_wind, double metal_mass_frac)
     : Initial(cycle,time),
       subsample_n_(subsample_n),
       cloud_radius_(cloud_radius),
@@ -39,7 +39,8 @@ public: // interface
       density_wind_(density_wind),
       etot_wind_(etot_wind),
       eint_wind_(eint_wind),
-      velocity_wind_(velocity_wind)
+      velocity_wind_(velocity_wind),
+      metal_mass_frac_(metal_mass_frac)
   {
     ASSERT("EnzoInitialCloud", "subsample_n must be >=0", subsample_n>=0);
     ASSERT("EnzoInitialCloud", "cloud_radius must be positive",
@@ -52,6 +53,8 @@ public: // interface
 	   etot_wind>0.5*velocity_wind_*velocity_wind_);
     ASSERT("EnzoInitialCloud", "eint_wind must be zero or positive.",
 	   eint_wind>=0.);
+    ASSERT("EnzoInitialCloud", "metal_mass_frac must be in [0,1]",
+	   metal_mass_frac >=0 && metal_mass_frac <=1);
   }
 
   /// CHARM++ PUP::able declaration
@@ -68,7 +71,8 @@ public: // interface
       density_cloud_(0.),
       density_wind_(0.),
       etot_wind_(0.),
-      velocity_wind_(0.)
+      velocity_wind_(0.),
+      metal_mass_frac_(0.)
   { }
 
   /// CHARM++ Pack / Unpack function
@@ -88,6 +92,7 @@ public: // interface
     p | density_wind_;
     p | etot_wind_;
     p | velocity_wind_;
+    p | metal_mass_frac_;
   }
 
 public: // virtual methods
@@ -121,6 +126,8 @@ private: // attributes
 
   /// velocity of the wind
   double velocity_wind_;
+
+  double metal_mass_frac_;
 };
 
 #endif //ENZO_ENZO_INITIAL_CLOUD_HPP

@@ -261,6 +261,19 @@ void EnzoInitialCloud::enforce_block
     cloud_dye_density = array_factory.from_name("cloud_dye");
   }
 
+  const bool set_metal_density
+    = (field_descr->is_field("metal_density") &&
+       field_descr->groups()->is_in("metal_density","colour"));
+  if (metal_mass_frac_>0.){
+    ASSERT("EnzoInitialCloud::enforce_block",
+	   "metal_denisty field must be in the \"colour\" group since a metal "
+	   "mass fraction was specified.", set_metal_density);
+  }
+  EFlt3DArray metal_density;
+  if (set_metal_density){
+    metal_density = array_factory.from_name("metal_density");
+  }
+
   Field field = block->data()->field();
   
   // Handle magnetic fields (mhd indicates whether the fields are present)
@@ -360,6 +373,9 @@ void EnzoInitialCloud::enforce_block
 	density(iz,iy,ix) = avg_density;
 	if (use_cloud_dye){
 	  cloud_dye_density(iz,iy,ix) = frac_enclosed * density_cloud_;
+	}
+	if (set_metal_density){
+	  metal_density(iz,iy,ix) = metal_mass_frac_ * avg_density;
 	}
 
 	//cloud_mass_weight = frac_enclosed * density_cloud_ / avg_density;

@@ -143,7 +143,8 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_cloud_density_wind,
        enzo_config->initial_cloud_etot_wind,
        enzo_config->initial_cloud_eint_wind,
-       enzo_config->initial_cloud_velocity_wind);
+       enzo_config->initial_cloud_velocity_wind,
+       enzo_config->initial_cloud_metal_mass_frac);
   } else if (type == "collapse") {
     initial = new EnzoInitialCollapse
       (cycle,time,

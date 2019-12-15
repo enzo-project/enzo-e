@@ -56,6 +56,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_cloud_velocity_wind(0.0),
   initial_cloud_etot_wind(0.0),
   initial_cloud_eint_wind(0.0),
+  initial_cloud_metal_mass_frac(0.0),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -257,6 +258,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_cloud_velocity_wind;
   p | initial_cloud_etot_wind;
   p | initial_cloud_eint_wind;
+  p | initial_cloud_metal_mass_frac;
 
   p | initial_cosmology_temperature;
 
@@ -635,6 +637,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:cloud:wind_total_energy",0.0);
   initial_cloud_eint_wind     = p->value_float
     ("Initial:cloud:wind_internal_energy",0.0);
+  initial_cloud_metal_mass_frac     = p->value_float
+    ("Initial:cloud:metal_mass_fraction",0.0);
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);

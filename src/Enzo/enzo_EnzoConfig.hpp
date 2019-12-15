@@ -142,6 +142,7 @@ public: // interface
       initial_cloud_velocity_wind(0.0),
       initial_cloud_etot_wind(0.0),
       initial_cloud_eint_wind(0.0),
+      initial_cloud_metal_mass_frac(0.0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
       // EnzoInitialCollapse
@@ -154,10 +155,10 @@ public: // interface
 #ifdef CONFIG_USE_GRACKLE
       initial_grackle_test_minimum_H_number_density(0.1),
       initial_grackle_test_maximum_H_number_density(1000.0),
-      initial_grackle_test_minimum_metallicity(1.0E-4),
-      initial_grackle_test_maximum_metallicity(1.0),
       initial_grackle_test_minimum_temperature(10.0),
       initial_grackle_test_maximum_temperature(1.0E8),
+      initial_grackle_test_minimum_metallicity(1.0E-4),
+      initial_grackle_test_maximum_metallicity(1.0),
       initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
       // EnzoInitialInclinedWave
@@ -340,6 +341,7 @@ public: // attributes
   double                     initial_cloud_velocity_wind;
   double                     initial_cloud_etot_wind;
   double                     initial_cloud_eint_wind;
+  double                     initial_cloud_metal_mass_frac;
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;

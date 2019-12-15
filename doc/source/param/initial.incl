@@ -117,6 +117,21 @@ fields).`
 
 ----
 
+:Parameter:  :p:`Initial` : :p:`cloud` : :p:`metal_mass_frac`
+:Summary: :s:`initial fraction of the mass density contributed by metals`
+:Type:    :t:`float`
+:Default: :d:`0.0`
+:Scope:   Enzo
+
+:e:`If the ` ``"metal_density_frac"`` :e:`field exists and is
+registered as a member of the ` ``"colour"`` :e:`group, then the field
+is initialized by multiplying this value by the` ``"density"``
+:e:`field (this is done everywhere, regardless of proximity to the
+cloud center). Under these circumstances, this must have a positive
+value.`
+
+----
+
 :Parameter:  :p:`Initial` : :p:`cloud` : :p:`wind_density`
 :Summary: :s:`initial mass density of the wind`
 :Type:    :t:`float`
