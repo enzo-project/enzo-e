@@ -83,16 +83,10 @@ void EnzoMethodMHDVlct::determine_quantities_
  std::vector<std::string> &passive_groups)
 {
   if (enzo::config()->method_grackle_use_grackle){
-    // This is not quite way ready to use Grackle.
-    //   - The errors raised by equation of state need to be removed (since
-    //     "gamma" field seems to have been removed from the codebase)
-    //   - Need to make sure that grackle is preinitialized OR part of the
-    //     GrackleMethodInit method need to be factored out to a static so we
-    //     can guarantee that the relevant passive fields are allocated (If
-    //     this isn't done then it's possible for the Grackle method to setup
-    //     initial fields that are not advected)
-    ERROR("EnzoMethodMHDVlct::determine_quantities_",
-	  "Not presently equipped to handle grackle");
+    // make sure all the required fields are defined so that the group of
+    // "colour" fields is accurate (needed for identifying passive scalars)
+    EnzoMethodGrackle::define_required_grackle_fields();
+    // Not quite ready to support a variable gamma
   }
 
 

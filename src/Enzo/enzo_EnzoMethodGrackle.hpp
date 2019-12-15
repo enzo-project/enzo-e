@@ -95,6 +95,8 @@ public: // interface
   /// Compute maximum timestep for this method
   virtual double timestep ( Block * block) throw();
 
+  static void define_required_grackle_fields();
+
 #ifdef CONFIG_USE_GRACKLE
 
   void initialize_grackle_chemistry_data(const double& current_time);
