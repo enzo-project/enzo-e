@@ -14,10 +14,17 @@
 	 # gamma = 5/3
 	 setup_name = "rj2a";
 
-	 # The discontinuity is setup at 0.5 along the axis specified by
-	 # aligned_ax ("x", "y", or "z")
+         # axis_velocity & transverse_velocity each specify a value that is
+	 # added to a component of the velocity throughout the entire domain
+	 # during initialization. The former is added to the component along
+	 # aligned_ax. The latter is added to the y (z/x) velocity component
+	 # if aligned_ax is "x" ("y"/"z"). Each has a default of 0.
+	 axis_velocity = 0.;
+	 transverse_velocity = 0.;
 
-	 # aligned_ax gets set in the axis-specific input files
+	 # The discontinuity is setup at 0.5 along the axis specified by
+	 # aligned_ax ("x", "y", or "z") - this should be set in the
+	 # axis-specific input files
       };
    }
 

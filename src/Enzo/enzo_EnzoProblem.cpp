@@ -192,7 +192,9 @@ Initial * EnzoProblem::create_initial_
       (enzo_config->field_gamma,
        cycle, time,
        enzo_config->initial_shock_tube_setup_name,
-       enzo_config->initial_shock_tube_aligned_ax);
+       enzo_config->initial_shock_tube_aligned_ax,
+       enzo_config->initial_shock_tube_axis_velocity,
+       enzo_config->initial_shock_tube_trans_velocity);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup

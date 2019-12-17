@@ -102,8 +102,12 @@ std::string vector_to_string_(std::vector<std::string> &vec)
 
 EnzoInitialShockTube::EnzoInitialShockTube(double gamma, int cycle, double time,
 					   std::string setup_name,
-					   std::string aligned_ax_name)
-  : Initial(cycle, time), gamma_(gamma), setup_name_(setup_name), aligned_ax_(0)
+					   std::string aligned_ax_name,
+					   double axis_velocity,
+					   double trans_velocity)
+  : Initial(cycle, time), gamma_(gamma), setup_name_(setup_name),
+    aligned_ax_(0), axis_velocity_(axis_velocity),
+    trans_velocity_(trans_velocity)
 {
 
   if (std::find(shock_tube_setups.begin(),
@@ -143,7 +147,11 @@ void EnzoInitialShockTube::pup (PUP::er &p)
 
   Initial::pup(p);
 
+  p | gamma_;
+  p | setup_name_;
   p | aligned_ax_;
+  p | axis_velocity_;
+  p | trans_velocity_;
 }
 
 //----------------------------------------------------------------------
@@ -158,6 +166,7 @@ void EnzoInitialShockTube::enforce_block
   std::string velocities[3] = {"velocity_x", "velocity_y", "velocity_z"};
   std::string bfields[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
 
+  Field field  = block->data()->field();
   EnzoPermutedCoordinates coord(aligned_ax_);
   EnzoFieldArrayFactory array_factory(block);
 
@@ -173,17 +182,22 @@ void EnzoInitialShockTube::enforce_block
     if (cur_slice == NULL){
       continue;
     }
+
+    enzo_float velocity_0 = cur_val_map->at("velocity_0") + axis_velocity_;
+    enzo_float velocity_1 = cur_val_map->at("velocity_1") + trans_velocity_;
+    enzo_float velocity_2 = cur_val_map->at("velocity_2");
+
     arr = array_factory.from_name("density");
     initializer_helper_(*cur_slice, cur_val_map->at("density"), arr);
 
     arr = array_factory.from_name(velocities[coord.i_axis()]);
-    initializer_helper_(*cur_slice, cur_val_map->at("velocity_0"),arr);
+    initializer_helper_(*cur_slice, velocity_0, arr);
 
     arr = array_factory.from_name(velocities[coord.j_axis()]);
-    initializer_helper_(*cur_slice, cur_val_map->at("velocity_1"), arr);
+    initializer_helper_(*cur_slice, velocity_1, arr);
 
     arr = array_factory.from_name(velocities[coord.k_axis()]);
-    initializer_helper_(*cur_slice, cur_val_map->at("velocity_2"), arr);
+    initializer_helper_(*cur_slice, velocity_2, arr);
 
     arr = array_factory.from_name(bfields[coord.j_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_1"), arr);
@@ -191,19 +205,24 @@ void EnzoInitialShockTube::enforce_block
     arr = array_factory.from_name(bfields[coord.k_axis()]);
     initializer_helper_(*cur_slice, cur_val_map->at("bfield_2"), arr);
 
+    // (optionally) compute the specific internal energy
+    enzo_float eint = (cur_val_map->at("pressure") /
+		       ((gamma_ - 1.) * cur_val_map->at("density")));
+    if (field.is_field("internal_energy")){
+      arr = array_factory.from_name("internal_energy");
+      initializer_helper_(*cur_slice, eint, arr);
+    }
+
     // compute the specific total energy
     arr = array_factory.from_name("total_energy");
 
     enzo_float etot, v2, b2;
-    v2 = (cur_val_map->at("velocity_0") * cur_val_map->at("velocity_0") +
-	  cur_val_map->at("velocity_1") * cur_val_map->at("velocity_1") +
-	  cur_val_map->at("velocity_2") * cur_val_map->at("velocity_2"));
+    v2 = (velocity_0 * velocity_0 + velocity_1 * velocity_1 +
+	  velocity_2 * velocity_2);
     b2 = (aligned_bfield_val * aligned_bfield_val +
 	  cur_val_map->at("bfield_1") * cur_val_map->at("bfield_1") +
 	  cur_val_map->at("bfield_2") * cur_val_map->at("bfield_2"));
-    etot = ( (cur_val_map->at("pressure") /
-	      ((gamma_ - 1.) * cur_val_map->at("density"))) +
-	     0.5 * (v2 + b2 / cur_val_map->at("density")));
+    etot = (eint + 0.5 * (v2 + b2 / cur_val_map->at("density")));
 
     initializer_helper_(*cur_slice, etot, arr);
   }
@@ -224,7 +243,7 @@ void EnzoInitialShockTube::prep_aligned_slices_(Block *block, CSlice **l_slice,
 						CSlice **r_slice)
 {
   Field field  = block->data()->field();
-  
+
   // total size of the block (including ghost zones)
   int mx,my,mz;
   field.dimensions (field.field_id("density"),&mx,&my,&mz);
@@ -256,7 +275,8 @@ void EnzoInitialShockTube::prep_aligned_slices_(Block *block, CSlice **l_slice,
   //   left_edge + di * (0.5+(double)(ind-gi))
   // The first cell with pos>=0
   int shock_ind = (int)ceil((0.5-left_edge)/di-0.5 + (double)gi);
-  
+  shock_ind = std::max(shock_ind,0);
+
   if (shock_ind > 0){
     *l_slice = new CSlice(0,shock_ind);
   }

@@ -470,6 +470,29 @@ methods without face-centered B-fields*
 
 :e:`Allowed values are` ``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`.`
 
+----
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`axis_velocity`
+:Summary: :s:`Value to add to velocity component along aligned_ax`
+:Type:    :t:`float`
+:Default: :d:`0.`
+:Scope:   Enzo
+
+:e:`This value is added throughout the entire domain.`
+
+----
+
+:Parameter:  :p:`Initial` : :p:`shock_tube` : :p:`transverse_velocity`
+:Summary: :s:`Value to add to a velocity component perpendicular to aligned_ax`
+:Type:    :t:`float`
+:Default: :d:`0.`
+:Scope:   Enzo
+
+:e:`This value is added throughout the entire domain. If aligned_ax is`
+``"x"`` :e:`,`  ``"y"`` :e:`, or` ``"z"`` :e:`, then this value is added to
+the` ``"velocity_y"`` :e:`,`  ``"velocity_z"`` :e:`, or` ``"velocity_z"``
+:e:`field.`
+
 turbulence
 ----------
 

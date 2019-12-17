@@ -114,6 +114,8 @@ EnzoConfig::EnzoConfig() throw ()
   // EnzoInitialShockTube
   initial_shock_tube_setup_name(""),
   initial_shock_tube_aligned_ax(""),
+  initial_shock_tube_axis_velocity(0.0),
+  initial_shock_tube_trans_velocity(0.0),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -326,6 +328,8 @@ void EnzoConfig::pup (PUP::er &p)
 
   p | initial_shock_tube_setup_name;
   p | initial_shock_tube_aligned_ax;
+  p | initial_shock_tube_axis_velocity;
+  p | initial_shock_tube_trans_velocity;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -615,6 +619,10 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:shock_tube:setup_name","");
   initial_shock_tube_aligned_ax = p->value_string
     ("Initial:shock_tube:aligned_ax","x");
+  initial_shock_tube_axis_velocity = p->value_float
+    ("Initial:shock_tube:axis_velocity",0.0);
+  initial_shock_tube_trans_velocity = p->value_float
+    ("Initial:shock_tube:transverse_velocity",0.0);
 
   // VL+CT b-field initialization
   initial_bcenter_update_etot = p->value_logical

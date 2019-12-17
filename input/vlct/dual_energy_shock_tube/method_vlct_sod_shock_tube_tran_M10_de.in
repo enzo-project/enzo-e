@@ -1,0 +1,32 @@
+# Problem: Axis aligned Shock Tube Dual Energy test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+# Sod Shock Tube Test Problem along x-axis
+# tests the dual energy formalism by using a background velocity-y component
+# with a Mach number of ~10 (exact value was chosen to match the aligned_case)
+
+   include "input/vlct/vlct_de.incl"
+   include "input/vlct/dual_energy_shock_tube/initial_sod_shock_tube.incl"
+
+   Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 0.03125, 0.03125];
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [2,2,2];
+      root_size = [256,8,8]; # number of cells per axis
+   }
+
+   Initial{
+      shock_tube{
+         transverse_velocity = 11.8281;
+      };
+   }
+
+   Output {
+      data {
+	 dir = ["method_vlct-1-sod_shock_tube_trans_M10_de%.2f","time"];
+      };
+   }

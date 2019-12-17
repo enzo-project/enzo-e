@@ -1,0 +1,28 @@
+# Problem: VLCT test problems involving the dual energy formalism
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   include "input/vlct/vlct.incl"
+
+   Method {
+      mhd_vlct{
+         dual_energy = true;
+      };
+   }
+
+   Field {
+      # overwrite the list parameter to include internal energy
+      list = ["density",
+              "velocity_x", "velocity_y", "velocity_z",
+	      "total_energy", "internal_energy", "pressure",
+	      "bfieldi_x", "bfieldi_y", "bfieldi_z",
+	      "bfield_x", "bfield_y", "bfield_z"];
+   }
+
+   Output {
+      data {
+         # overwrite field_list to include "internal_energy"
+	 field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+                       "total_energy", "internal_energy",
+		       "bfield_x", "bfield_y", "bfield_z"];
+      };
+   }

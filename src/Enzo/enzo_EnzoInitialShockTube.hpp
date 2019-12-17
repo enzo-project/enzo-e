@@ -21,14 +21,16 @@ public: // interface
 
   /// Constructor
   EnzoInitialShockTube(double gamma, int cycle, double time,
-		       std::string setup_name, std::string aligned_ax_name);
+		       std::string setup_name, std::string aligned_ax_name,
+		       double axis_velocity, double trans_velocity);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialShockTube);
 
   /// CHARM++ migration constructor
   EnzoInitialShockTube(CkMigrateMessage *m)
-    : Initial (m), gamma_(0.0), setup_name_(""), aligned_ax_(0)
+    : Initial (m), gamma_(0.0), setup_name_(""), aligned_ax_(0),
+      axis_velocity_(0.), trans_velocity_(0.)
   {  }
 
   /// Destructor
@@ -64,6 +66,13 @@ private: // attributes
 
   /// indicates the axis along which the problem is initialized: "x", "y", "z"
   int aligned_ax_;
+
+  /// extra velocity added along the axis in which the problem is initialized
+  double axis_velocity_;
+
+  /// extra velocity added transverse to the axis in which the problem is
+  /// initialized
+  double trans_velocity_;
 };
 
 #endif /* ENZO_ENZO_INITIAL_SHOCK_TUBE_HPP */

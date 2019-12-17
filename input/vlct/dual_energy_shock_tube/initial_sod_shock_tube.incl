@@ -1,0 +1,68 @@
+# Initial Conditions for the sod shock tube
+
+# load vlct.incl or vlct_dual.incl in the problem-specific file
+# Make sure to load this file afterwards so that gamma and courant factors are
+# appropriately overwritten
+
+   Initial{
+      list = ["shock_tube"];
+
+      shock_tube{
+         # Intializes a shock tube problem.
+
+	 # setup_name = "sod" sets up the Sod Shock Tube problem. Canonically
+	 # uses a gamma of 1.4
+	 # setup_name = "rj2a" sets up the MHD problem described by Ryu & Jones
+	 # and shown in their Figure 2a. This initial condition assumes that
+	 # gamma = 5/3
+	 setup_name = "sod";
+
+	 # The discontinuity is setup at 0.5 along the axis specified by
+	 # aligned_ax ("x", "y", or "z")
+	 aligned_ax = "x";
+
+         # axis_velocity & transverse_velocity each specify a value that is
+	 # added to a component of the velocity throughout the entire domain
+	 # during initialization. The former is added to the component along
+	 # aligned_ax. The latter is added to the y (z/x) velocity component
+	 # if aligned_ax is "x" ("y"/"z"). Each has a default of 0.
+	 axis_velocity = 0.;
+	 transverse_velocity = 0.;
+
+         # In the problem specific file, overwrite axis_velocity and
+	 # transverse_velocity as necessary
+      };
+   }
+
+   Field {
+      courant = 0.2;
+      gamma = 1.4;
+   }
+
+   Boundary {
+      list = ["two", "three","one"];
+      two{
+         type = "periodic";
+   	 axis = "y";
+      }
+      three{
+         type = "periodic";
+   	 axis = "z";
+      }
+      one{
+         type = "outflow";
+   	 axis = "x";
+      }
+   }
+
+   Stopping{ time = 0.25; }
+
+   Output {
+      data {
+         name = ["data-%03d.h5", "proc"];
+	 schedule {
+            var = "time";
+	    list = [0.0,0.25];
+         };
+      };
+   }

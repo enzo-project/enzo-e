@@ -1,10 +1,6 @@
 # Problem VLCT test problems
 # Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
 
-   Boundary {
-      type = "periodic";
-   }
-
    Method {
       list = ["mhd_vlct"];
       mhd_vlct{
@@ -13,7 +9,6 @@
         # default is hlle. Options are hlle/enzo_hlle, athena_hlle, and hlld
         riemann_solver = "hlld";
 
-        
 	# Reconstruction algorithms choices are:
 	# for full time step. Options are:
         #    - "nn" Nearest Neighbor
@@ -52,14 +47,11 @@
       #    - bfieldi_x/y/z are interface magnetic fields (aka longitudinal).
       #      The x/y/z component is the only component tracked at the faces
       #      between cells along the x/y/z component
-      #    - bfieldc_x/y/z are the cell-centered magenetic fields. Each
+      #    - bfield_x/y/z are the cell-centered magenetic fields. Each
       #      component is the average value of the corresponding interface
       #      values
-      #    - it uses (specific) internal_energy to hold temporary values. (If
-      #      this field is not allocated then a temporary field will be
-      #      allocated)
-      # Pressure and velocity_x/y/z are also tracked because they are frequently
-      # computed.
+      #    - it uses (specific) internal_energy if the dual energy formalism is
+      #      is in use
       list = ["density",
               "velocity_x", "velocity_y", "velocity_z",
 	      "total_energy",

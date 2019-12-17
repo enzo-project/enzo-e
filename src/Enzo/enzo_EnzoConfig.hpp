@@ -200,6 +200,8 @@ public: // interface
       // EnzoInitialShockTube
       initial_shock_tube_setup_name(""),
       initial_shock_tube_aligned_ax(""),
+      initial_shock_tube_axis_velocity(0.0),
+      initial_shock_tube_trans_velocity(0.0),
       // EnzoInitialSoup
       initial_soup_rank(0),
       initial_soup_file(""),
@@ -415,6 +417,8 @@ public: // attributes
   /// EnzoInitialShockTube
   std::string                initial_shock_tube_setup_name;
   std::string                initial_shock_tube_aligned_ax;
+  double                     initial_shock_tube_axis_velocity;
+  double                     initial_shock_tube_trans_velocity;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;

@@ -1,0 +1,26 @@
+# Problem: Axis aligned Shock Tube test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+# Sod Shock Tube Test Problem along x-axis.
+# This is the default case to ensure the problem is setup right. The other two
+# cases check if the dual energy formalism works appropriately
+
+   include "input/vlct/vlct.incl"
+   include "input/vlct/dual_energy_shock_tube/initial_sod_shock_tube.incl"
+
+   Domain {
+      lower = [0.0, 0.0, 0.0];
+      upper = [1.0, 0.03125, 0.03125];
+   }
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [2,2,2];
+      root_size = [256,8,8]; # number of cells per axis
+   }
+
+   Output {
+      data {
+	 dir = ["method_vlct-1-sod_shock_tube_%.2f","time"];
+      };
+   }
