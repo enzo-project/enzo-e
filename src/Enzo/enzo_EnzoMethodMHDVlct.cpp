@@ -1038,6 +1038,14 @@ double EnzoMethodMHDVlct::timestep ( Block * block ) const throw()
 
   // Compute the pressure (requires that "pressure" is a permanent field)
   FieldDescr * field_descr = cello::field_descr();
+
+  if (eos_->uses_dual_energy_formalism()){
+    // synchronize eint and etot.
+    // This is only strictly necessary after problem initialization and when
+    // there is an inflow boundary condition
+    eos_->apply_floor_to_energy_and_sync(block, *primitive_group_, 0);
+  }
+  
   eos_->pressure_from_integrable(block, *primitive_group_, "pressure",
 				 *(field_descr->groups()), 0);
   enzo_float gamma = eos_->get_gamma();
