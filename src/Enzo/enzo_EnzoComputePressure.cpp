@@ -91,9 +91,6 @@ void EnzoComputePressure::compute_(Block * block,
     code_units grackle_units_;
     grackle_field_data grackle_fields_;
 
-    ASSERT("EnzoComputePressure::compute_",
-	   "Not currently equipped to compute MHD with grackle", mhd);
-
     // setup grackle units if they are not already provided
     if (!grackle_units){
       grackle_units = &grackle_units_;
