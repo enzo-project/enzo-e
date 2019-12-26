@@ -108,7 +108,7 @@ module mesh {
     entry void p_compute_enter();
 
     entry void p_compute_continue();
-    entry void r_compute_continue();
+    entry void r_compute_continue(CkReductionMsg *);
 
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);

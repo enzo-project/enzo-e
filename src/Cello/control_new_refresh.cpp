@@ -112,7 +112,6 @@ void Block::new_refresh_wait (int id_refresh, int callback)
       msg->update(data());
       
       delete msg;
-
       sync.advance();
     }
     

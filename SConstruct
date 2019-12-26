@@ -613,7 +613,7 @@ Clean('.','test/CHARM_BUILD')
 #======================================================================
 
 charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
-cpp_builder = Builder (action="/usr/bin/cpp -E $_CPPDEFFLAGS $SOURCE > $TARGET")
+cpp_builder = Builder (action="/usr/bin/cpp -E -P $_CPPDEFFLAGS $SOURCE > $TARGET")
 env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 env.Append(BUILDERS = { 'CppBuilder'   : cpp_builder })
 

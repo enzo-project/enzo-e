@@ -147,15 +147,19 @@ sources_test =        [Glob('test_Unit*cpp')]
 
 env.CharmBuilder(['main_enzo.decl.h','main_enzo.def.h'],
 	'main_enzo.ci',ARG = 'main_enzo')
+env.CppBuilder('main_enzo.ci','main_enzo.CI',ARG = 'main_enzo')
 
 env.CharmBuilder(['main.decl.h','main.def.h'],
 	'main.ci',ARG = 'main')
+env.CppBuilder('main.ci','main.CI',ARG = 'main')
 
 env.CharmBuilder (['main_simulation.decl.h','main_simulation.def.h'],
         'main_simulation.ci', ARG = 'main_simulation')
+env.CppBuilder('main_simulation.ci','main_simulation.CI',ARG = 'main_simulation')
 
 env.CharmBuilder(['main_mesh.decl.h','main_mesh.def.h'],
 	'main_mesh.ci',ARG = 'main_mesh')
+env.CppBuilder('main_mesh.ci','main_mesh.CI',ARG = 'main_mesh')
 
 env.CharmBuilder(['mesh.decl.h','mesh.def.h'],
 	'mesh.ci',ARG = 'mesh')
@@ -164,6 +168,7 @@ env.CppBuilder('mesh.ci','mesh.CI',ARG = 'mesh')
 env.CharmBuilder(['simulation.decl.h','simulation.def.h'],
 	'simulation.ci',ARG='simulation')
 
+includes_main.append(['main_include.h'])
 includes_main.append(['main_enzo.decl.h','main_enzo.def.h'])
 includes_main.append(['main.decl.h','main.def.h'])
 includes_main.append(['main_simulation.decl.h','main_simulation.def.h'])

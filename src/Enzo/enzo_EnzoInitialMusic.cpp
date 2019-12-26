@@ -8,6 +8,8 @@
 
 #include "enzo.hpp"
 
+#define TRACE_INPUT
+
 //----------------------------------------------------------------------
 
 EnzoInitialMusic::EnzoInitialMusic
@@ -25,7 +27,11 @@ EnzoInitialMusic::EnzoInitialMusic
     particle_datasets_  (enzo_config->initial_music_particle_datasets),
     particle_coords_    (enzo_config->initial_music_particle_coords),
     particle_types_     (enzo_config->initial_music_particle_types),
-    particle_attributes_(enzo_config->initial_music_particle_attributes)
+    particle_attributes_(enzo_config->initial_music_particle_attributes),
+    count_(0),
+    throttle_count_     (enzo_config->initial_music_throttle_count),
+    throttle_offset_    (enzo_config->initial_music_throttle_offset),
+    throttle_seconds_   (enzo_config->initial_music_throttle_seconds)
 { }
 
 //----------------------------------------------------------------------
@@ -47,6 +53,11 @@ void EnzoInitialMusic::pup (PUP::er &p)
   p | particle_coords_;
   p | particle_types_;
   p | particle_attributes_;
+
+  p | count_;
+  p | throttle_count_;
+  p | throttle_offset_;
+  p | throttle_seconds_;
 }
 
 //----------------------------------------------------------------------
@@ -57,8 +68,11 @@ void EnzoInitialMusic::enforce_block
 
   if (block->level() != level_) return;
 
+  // Optionally pause before reading if throttling enabled.  For
+  // reducing filesystem contention on large runs
+  throttle_input_();
+ 
   // Get the grid size at level_
-
   double lower_domain[3];
   double upper_domain[3];
   hierarchy->lower(lower_domain, lower_domain+1, lower_domain+2);
@@ -88,7 +102,14 @@ void EnzoInitialMusic::enforce_block
     // Open the field file
 
     FileHdf5 file("./",file_name);
+    
 
+#ifdef TRACE_INPUT
+    if (CkMyPe() < throttle_offset_) {
+      CkPrintf ("%d %g TRACE_INPUT opening %s\n",
+                CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+    }
+#endif    
     file.file_open();
 
     // Read the domain dimensions
@@ -184,6 +205,12 @@ void EnzoInitialMusic::enforce_block
     
     file.data_close();
     file.file_close();
+#ifdef TRACE_INPUT
+    if (CkMyPe() < throttle_offset_) {
+      CkPrintf ("%d %g TRACE_INPUT closed %s\n",
+                CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+    }
+#endif    
 
   }
 
@@ -412,6 +439,24 @@ void EnzoInitialMusic::enforce_block
   }  
 }
 
+//----------------------------------------------------------------------
+
+void EnzoInitialMusic::throttle_input_()
+{
+  if (throttle_offset_ != 0 && count_++ < throttle_count_) {
+    int seconds = (CkMyPe() % throttle_offset_) * throttle_seconds_;
+#ifdef TRACE_INPUT
+    CkPrintf ("TRACE_THROTTLE ip %d offset %d seconds %d count %d counter %d value %d\n",
+              CkMyPe(),throttle_offset_,throttle_seconds_,
+              throttle_count_,count_,seconds);
+#endif
+    INCOMPLETE("EnzoInitialMusic::throttle_input_()");
+    
+    
+  }
+}
+//======================================================================
+
 template <class T>
 void EnzoInitialMusic::copy_field_data_to_array_
 (enzo_float * array, T * data,
@@ -431,6 +476,9 @@ void EnzoInitialMusic::copy_field_data_to_array_
     }
   }
 }
+
+//----------------------------------------------------------------------
+
 template <class T, class S>
 void EnzoInitialMusic::copy_particle_data_to_array_
 (T * array, S * data,

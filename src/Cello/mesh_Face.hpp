@@ -97,7 +97,6 @@ public: // interface
     const bool lx = (rank_ >= 1) ? (fx_ == face.fx_) : true;
     const bool ly = (rank_ >= 2) ? (fy_ == face.fy_) : true;
     const bool lz = (rank_ >= 3) ? (fz_ == face.fz_) : true;
-
     return ((((i1==j1) && (i2==j2)) ||
              ((i1==j2) && (i2==j1))) &&
             (lx && ly && lz));
@@ -147,6 +146,13 @@ public: // interface
 
   void get_dimensions (int *p_nx, int *p_ny, int *p_nz,
                        int bx, int by, int bz);
+
+  /// Return the starting index along the face.  This is used for
+  /// neighboring blocks in different mesh levels to determine the
+  /// position of the fine block face in the coarse block face.  returns
+  ///  ( [ 0 | bx/2 ], [0 | by/2 ], [0 | bz/2] ) 
+  void get_offset (int *p_ix, int *p_iy, int *p_iz,
+                   int bx, int by, int bz);
 
   /// For periodic boundaries with a single block, faces on the
   /// boundary are not unique (e.g. single Block could be any of 6

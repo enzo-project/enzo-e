@@ -139,3 +139,28 @@ void Face::get_dimensions
   }
 }
 
+//----------------------------------------------------------------------
+
+void Face::get_offset (int *p_ix, int *p_iy, int *p_iz,
+                      int bx, int by, int bz)
+{
+  // Set default starting index (0,0,0)
+  if (p_ix) (*p_ix) = 0;
+  if (p_iy) (*p_iy) = 0;
+  if (p_iz) (*p_iz) = 0;
+
+  const int level_1 = index_block_.level();
+  const int level_2 = index_neighbor_.level();
+
+  if (level_1 < level_2) {
+    const int max_level = std::max(level_1,level_2);
+    int tx,ty,tz;
+    index_neighbor_.tree  (&tx,&ty,&tz,max_level);
+    // If block is coarse with fine neighbor, return offset of fine
+    // face in coarse face using tree bits
+    if (p_ix) (*p_ix) = (axis_ != 0) ? (tx & 1)*bx/2 : 0;
+    if (p_iy) (*p_iy) = (axis_ != 1 && rank_ >= 2) ? (ty & 1)*by/2 : 0;
+    if (p_iz) (*p_iz) = (axis_ != 2 && rank_ >= 3) ? (tz & 1)*bz/2 : 0;
+  }
+
+}

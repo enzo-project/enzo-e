@@ -16,7 +16,7 @@ Method::Method (double courant) throw()
     courant_(courant)
 {
   ir_post_ = add_new_refresh_();
-  new_refresh(ir_post_).set_callback(CkIndex_Block::r_compute_continue());
+  new_refresh(ir_post_).set_callback(CkIndex_Block::p_compute_continue());
 }
 
 //----------------------------------------------------------------------

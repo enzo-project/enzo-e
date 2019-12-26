@@ -93,7 +93,7 @@ public: // interface
     return it == face_flux_map_.end() ? nullptr : it->second;
   }
 
-  private: // functions
+private: // functions
 
 
 private: // attributes

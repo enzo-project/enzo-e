@@ -253,6 +253,17 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
+  /// Enter initial phase
+  void initial_enter_();
+  /// Initiate computing the sequence of Methods
+  void initial_begin_();
+  /// Initiate computing the next Method in the sequence
+  void initial_next_();
+  /// Return after performing any Refresh operations
+  void initial_continue_();
+  /// Cleanup after all Methods have been applied
+  void initial_end_();
+
   void r_end_initialize(CkReductionMsg * msg)
   {  initial_exit_();  delete msg;  }
   void initial_exit_();
@@ -270,13 +281,19 @@ public: // interface
 
   void p_compute_continue()
   {      compute_continue_();  }
-  void r_compute_continue()
-  {      compute_continue_();  }
+  void r_compute_continue(CkReductionMsg * msg)
+  {
+    delete msg;
+    compute_continue_();
+  }
 
   void p_compute_exit()
   {      compute_exit_();  }
   void r_compute_exit(CkReductionMsg * msg)
-  {      compute_exit_();    delete msg;  }
+  {
+    delete msg;
+    compute_exit_();
+  }
 
   /// Return the currently active Method
   int index_method() const throw()

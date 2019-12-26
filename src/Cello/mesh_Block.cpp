@@ -105,17 +105,20 @@ Block::Block ( MsgRefine * msg )
 
   bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
 
-  if (is_first_cycle) {
-    apply_initial_();
-  } else {
-    msg->update(data());
-  }
-
-  delete msg;
-
   index_.array(array_,array_+1,array_+2);
 
+
+  if (! is_first_cycle) {
+    msg->update(data());
+    delete msg;
+  } else {
+    delete msg;
+    apply_initial_();
+  }
+
+
   performance_stop_(perf_block);
+
 
 }
 
@@ -203,12 +206,13 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
   bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
 
-  if (is_first_cycle) {
-    apply_initial_();
-  } else {
+  if (! is_first_cycle) {
     msg->update(data());
-  }
-  delete msg;
+    delete msg;
+  } else {
+    delete msg;
+    apply_initial_();
+  } 
   
   performance_stop_(perf_block);
 

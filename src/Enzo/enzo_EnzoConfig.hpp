@@ -157,6 +157,9 @@ public: // interface
       initial_music_particle_coords(),
       initial_music_particle_types(),
       initial_music_particle_attributes(),
+      initial_music_throttle_count(),
+      initial_music_throttle_offset(),
+      initial_music_throttle_seconds(),
       // EnzoInitialPm
       initial_pm_field(""),
       initial_pm_mpp(0.0),
@@ -327,6 +330,9 @@ public: // attributes
   std::vector < std::string > initial_music_particle_coords;
   std::vector < std::string > initial_music_particle_types;
   std::vector < std::string > initial_music_particle_attributes;
+  int                         initial_music_throttle_count;
+  int                         initial_music_throttle_offset;
+  int                         initial_music_throttle_seconds;
 
   /// EnzoInitialPm
   std::string                initial_pm_field;

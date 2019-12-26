@@ -298,6 +298,8 @@ public: // virtual functions
   /// Reduction for performance data
   void r_monitor_performance_reduce (CkReductionMsg * msg);
 
+  float timer() { return timer_.value(); }
+  
   //--------------------------------------------------
   // Data
   //--------------------------------------------------

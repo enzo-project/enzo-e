@@ -61,7 +61,7 @@ void Block::compute_next_ ()
     method->refresh_post().set_active (is_leaf());
     
     new_refresh_start (method->refresh_post_id(),
-		       CkIndex_Block::r_compute_continue());
+		       CkIndex_Block::p_compute_continue());
     
   } else {
 

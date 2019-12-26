@@ -48,6 +48,8 @@ public: // interface
 
 protected: // functions
 
+  void throttle_input_();
+  
   template <class T>
   void copy_field_data_to_array_
   (enzo_float * array, T * data,
@@ -76,6 +78,16 @@ protected: // attributes
   std::vector < std::string > particle_coords_;
   std::vector < std::string > particle_types_;
   std::vector < std::string > particle_attributes_;
+
+  /// Counter for throttling input
+  int count_;
+
+  /// Number of reads per process to throttle
+  int throttle_count_;
+  /// Number of groups with different offsets
+  int throttle_offset_;
+  /// Number of seconds to throttle
+  int throttle_seconds_;
 
 };
 
