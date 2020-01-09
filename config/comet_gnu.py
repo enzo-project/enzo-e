@@ -25,7 +25,8 @@ hdf5_path    = os.environ['HDF5HOME']
 hdf5_inc = hdf5_path + '/include'
 hdf5_lib = hdf5_path + '/lib'
 
-charm_path   = home + '/Charm/charm'
+charm_path = os.getenv('CHARM_HOME')
+
 papi_inc = home + '/include'
 papi_lib = home + '/lib'
 
