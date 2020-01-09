@@ -82,13 +82,21 @@ protected: // attributes
   /// Counter for throttling input
   int count_;
 
+  /// Use Charm++ mutex to limit open files to one per node
+  /// REQUIRES CONFIG_SMP_MODE
+  bool throttle_intranode_;
+
+  /// Throttle output between nodes by introducing a delay before
+  /// starting reading based on node id and throttle_count_, throttle_offset,
+  /// and throttle_seconds_
+  bool throttle_internode_;
+  
   /// Number of reads per process to throttle
   int throttle_count_;
   /// Number of groups with different offsets
   int throttle_offset_;
   /// Number of seconds to throttle
-  int throttle_seconds_;
-
+  double throttle_seconds_;
 };
 
 #endif /* ENZO_ENZO_INITIAL_MUSIC_HPP */

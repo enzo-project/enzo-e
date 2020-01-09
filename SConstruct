@@ -231,6 +231,10 @@ define_png   =        'NO_FREETYPE'
 
 define_python_lt_27 = 'CONFIG_PYTHON_LT_27'
 
+# SMP mode define for safety checking against IO throttling
+
+define_smp = 'CONFIG_SMP_MODE'
+
 # Version control defines (Git or Mercurial)
 
 define_have_version_control = 'CONFIG_HAVE_VERSION_CONTROL'
@@ -366,6 +370,7 @@ if (new_charm != 0):     defines.append( define_new_charm )
 if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
 if (have_git != 0 or have_mercurial != 0 ):
    defines.append( define_have_version_control )
+if (smp != 0):           defines.append( define_smp )
 
 #======================================================================
 # FINAL CHARM SETUP

@@ -71,6 +71,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_music_particle_coords(),
   initial_music_particle_types(),
   initial_music_particle_attributes(),
+  initial_music_throttle_internode(),
+  initial_music_throttle_intranode(),
   initial_music_throttle_count(),
   initial_music_throttle_offset(),
   initial_music_throttle_seconds(),
@@ -265,6 +267,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_music_particle_coords;
   p | initial_music_particle_types;
   p | initial_music_particle_attributes;
+  p | initial_music_throttle_internode;
+  p | initial_music_throttle_intranode;
   p | initial_music_throttle_count;
   p | initial_music_throttle_offset;
   p | initial_music_throttle_seconds;
@@ -458,12 +462,17 @@ void EnzoConfig::read(Parameters * p) throw()
 	      type.c_str(),(file_id+"type").c_str());
     }
   }
+  // "sleep_by_process", "limit_per_node"
+  initial_music_throttle_internode = p->value_logical
+    ("Initial:music:throttle_internode","false");
+  initial_music_throttle_intranode = p->value_logical
+    ("Initial:music:throttle_intranode","false");
   initial_music_throttle_count = p->value_integer
     ("Initial:music:throttle_count",0);
   initial_music_throttle_offset = p->value_integer
     ("Initial:music:throttle_offset",0);
-  initial_music_throttle_seconds = p->value_integer
-    ("Initial:music:throttle_seconds",0);
+  initial_music_throttle_seconds = p->value_float
+    ("Initial:music:throttle_seconds",0.0);
 
   // PM method and initialization
 

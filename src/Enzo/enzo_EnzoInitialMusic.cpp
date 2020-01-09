@@ -5,10 +5,24 @@
 /// @date     2017-06-23
 /// @brief    Read initial conditions from HDF5
 ///           (multi-scale cosmological initial conditions)
-
 #include "enzo.hpp"
+#include <chrono>
+#include <thread>
 
-#define TRACE_INPUT
+// #define DEBUG_THROTTLE
+
+//----------------------------------------------------------------------
+
+static CmiNodeLock throttle_node_lock;
+
+//----------------------------------------------------------------------
+void mutex_init()
+{
+#ifdef DEBUG_THROTTLE  
+  CkPrintf ("DEBUG_THROTTLE mutex_init()\n");
+#endif  
+  throttle_node_lock = CmiCreateLock();
+}
 
 //----------------------------------------------------------------------
 
@@ -29,10 +43,18 @@ EnzoInitialMusic::EnzoInitialMusic
     particle_types_     (enzo_config->initial_music_particle_types),
     particle_attributes_(enzo_config->initial_music_particle_attributes),
     count_(0),
+    throttle_internode_ (enzo_config->initial_music_throttle_internode),
+    throttle_intranode_ (enzo_config->initial_music_throttle_intranode),
     throttle_count_     (enzo_config->initial_music_throttle_count),
     throttle_offset_    (enzo_config->initial_music_throttle_offset),
     throttle_seconds_   (enzo_config->initial_music_throttle_seconds)
-{ }
+{
+#ifndef CONFIG_SMP_MODE
+  ASSERT ("EnzoInitialMusic::EnzoInitialMusic",
+          "CONFIG_SMP_MODE must be enabled for intranode throttling",
+          (! throttle_intranode_));
+#endif          
+}
 
 //----------------------------------------------------------------------
 
@@ -55,6 +77,8 @@ void EnzoInitialMusic::pup (PUP::er &p)
   p | particle_attributes_;
 
   p | count_;
+  p | throttle_intranode_;
+  p | throttle_internode_;
   p | throttle_count_;
   p | throttle_offset_;
   p | throttle_seconds_;
@@ -102,14 +126,21 @@ void EnzoInitialMusic::enforce_block
     // Open the field file
 
     FileHdf5 file("./",file_name);
-    
 
-#ifdef TRACE_INPUT
-    if (CkMyPe() < throttle_offset_) {
-      CkPrintf ("%d %g TRACE_INPUT opening %s\n",
-                CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+    if (throttle_intranode_) {
+      CmiLock(throttle_node_lock);
+#ifdef DEBUG_THROTTLE      
+      CkPrintf ("DEBUG_THROTTLE %d lock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
+      fflush(stdout);
+#endif      
     }
-#endif    
+
+#ifdef DEBUG_THROTTLE
+    CkPrintf ("%d %g DEBUG_THROTTLE opening %s\n",
+              CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+    fflush(stdout);
+#endif
+      
     file.file_open();
 
     // Read the domain dimensions
@@ -205,12 +236,18 @@ void EnzoInitialMusic::enforce_block
     
     file.data_close();
     file.file_close();
-#ifdef TRACE_INPUT
-    if (CkMyPe() < throttle_offset_) {
-      CkPrintf ("%d %g TRACE_INPUT closed %s\n",
+#ifdef DEBUG_THROTTLE
+      CkPrintf ("%d %g DEBUG_THROTTLE closed %s\n",
                 CkMyPe(),cello::simulation()->timer(),file_name.c_str());
-    }
+      fflush(stdout);
 #endif    
+    if (throttle_intranode_) {
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("DEBUG_THROTTLE %d unlock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
+      fflush(stdout);
+#endif      
+      CmiUnlock(throttle_node_lock);
+    }
 
   }
 
@@ -219,6 +256,20 @@ void EnzoInitialMusic::enforce_block
     std::string file_name = particle_files_[index];
 
     // Open the particle file
+
+    if (throttle_intranode_) {
+      CmiLock(throttle_node_lock);
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("DEBUG_THROTTLE %d lock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
+      fflush(stdout);
+#endif      
+    }
+#ifdef DEBUG_THROTTLE
+    CkPrintf ("%d %g DEBUG_THROTTLE opening %s\n",
+              CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+    fflush(stdout);
+#endif
+
 
     FileHdf5 file("./",file_name);
 
@@ -298,6 +349,20 @@ void EnzoInitialMusic::enforce_block
     file.data_close();
     file.file_close();
 
+#ifdef DEBUG_THROTTLE
+    CkPrintf ("%d %g DEBUG_THROTTLE closed %s\n",
+              CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+    fflush(stdout);
+#endif    
+
+    if (throttle_intranode_) {
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("DEBUG_THROTTLE %d unlock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
+      fflush(stdout);
+#endif      
+      CmiUnlock(throttle_node_lock);
+    }
+    
     // Create particles and initialize them
 
     Particle particle = block->data()->particle();
@@ -443,16 +508,22 @@ void EnzoInitialMusic::enforce_block
 
 void EnzoInitialMusic::throttle_input_()
 {
-  if (throttle_offset_ != 0 && count_++ < throttle_count_) {
-    int seconds = (CkMyPe() % throttle_offset_) * throttle_seconds_;
-#ifdef TRACE_INPUT
-    CkPrintf ("TRACE_THROTTLE ip %d offset %d seconds %d count %d counter %d value %d\n",
-              CkMyPe(),throttle_offset_,throttle_seconds_,
-              throttle_count_,count_,seconds);
+  if (throttle_internode_) {
+    //--------------------------------------------------
+    if (throttle_offset_ != 0 && count_++ < throttle_count_) {
+      int ms = 1000*((CkMyPe() % throttle_offset_) * throttle_seconds_);
+#ifdef DEBUG_THROTTLE
+      CkPrintf ("TRACE_THROTTLE ip %d offset %g seconds %d count %d counter %d value %ld\n",
+                CkMyPe(),throttle_offset_,throttle_seconds_,
+                throttle_count_,count_,ms);
+      fflush(stdout);
 #endif
-    INCOMPLETE("EnzoInitialMusic::throttle_input_()");
-    
-    
+      std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("DEBUG_THROTTLE %d %g %d ms\n",CkMyPe(),cello::simulation()->timer(),ms);
+      fflush(stdout);
+#endif      
+    }
   }
 }
 //======================================================================

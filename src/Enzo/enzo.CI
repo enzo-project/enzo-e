@@ -8,6 +8,7 @@
 module enzo {
 
   initnode void register_method_turbulence(void);
+  initnode void mutex_init();
 
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];

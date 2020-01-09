@@ -68,7 +68,7 @@ printf ("%s",$dir);
    function test_input ($input_file) {
      $file="$input_file.in";
      if (file_exists($file)) {
-       $input_html = "<a href=\"$file\">$input.unit.in</a>";
+       $input_html = "<a href=\"$file\">$input_file.unit.in</a>";
        printf ("<td class=pass><a href='$file'>input</a></td>");
      } else {
        echo "<td></td>";
@@ -80,7 +80,7 @@ printf ("%s",$dir);
    function test_output ($output_file) {
      $file="$output_file";
      if (file_exists($file)) {
-       $output_html = "<a href=\"$file\">$output.unit</a>";
+       $output_html = "<a href=\"$file\">$output_file.unit</a>";
        system("cat $file | awk 'BEGIN{c=0}; /END CELLO/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$file'>output</a></td>\"; if (c!=0) print \"<td class=pass><a href='$file'>output</a></td>\"}'");
      } else {
        echo "<td></td>";

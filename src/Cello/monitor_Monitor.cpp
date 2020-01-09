@@ -114,11 +114,16 @@ void Monitor::header () const
 #endif
   print ("Define","CHARM_BUILD         %s",CHARM_BUILD);
 #ifdef CONFIG_NEW_CHARM
-  print ("Define","CHARM_NEW_CHARM %s","Yes");
+  print ("Define","CHARM_NEW_CHARM     %s","Yes");
 #else
-  print ("Define","CHARM_NEW_CHARM %s","no");
+  print ("Define","CHARM_NEW_CHARM     %s","no");
 #endif
   print ("Define","CONFIG_NODE_SIZE    %d",CONFIG_NODE_SIZE);
+#ifdef CONFIG_SMP_MODE
+  print ("Define","CONFIG_SMP_MODE     %s","Yes");
+#else
+  print ("Define","CONFIG_SMP_MODE     %s","no");
+#endif  
 
   print ("CHARM","CkNumPes()           %d",CkNumPes());
   print ("CHARM","CkNumNodes()         %d",CkNumNodes());

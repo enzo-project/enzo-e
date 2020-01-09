@@ -42,7 +42,7 @@
      music {
          throttle_count = 64;
          throttle_offset = 3;
-         throttle_seconds = 5;
+         throttle_seconds = 5.0;
          FD {
              coords = "tzyx";
              dataset = "GridDensity";

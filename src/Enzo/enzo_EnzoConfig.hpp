@@ -330,9 +330,11 @@ public: // attributes
   std::vector < std::string > initial_music_particle_coords;
   std::vector < std::string > initial_music_particle_types;
   std::vector < std::string > initial_music_particle_attributes;
+  bool                        initial_music_throttle_internode;
+  bool                        initial_music_throttle_intranode;
   int                         initial_music_throttle_count;
   int                         initial_music_throttle_offset;
-  int                         initial_music_throttle_seconds;
+  double                      initial_music_throttle_seconds;
 
   /// EnzoInitialPm
   std::string                initial_pm_field;
