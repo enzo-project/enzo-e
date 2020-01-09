@@ -464,9 +464,9 @@ void EnzoConfig::read(Parameters * p) throw()
   }
   // "sleep_by_process", "limit_per_node"
   initial_music_throttle_internode = p->value_logical
-    ("Initial:music:throttle_internode","false");
+    ("Initial:music:throttle_internode",false);
   initial_music_throttle_intranode = p->value_logical
-    ("Initial:music:throttle_intranode","false");
+    ("Initial:music:throttle_intranode",false);
   initial_music_throttle_count = p->value_integer
     ("Initial:music:throttle_count",0);
   initial_music_throttle_offset = p->value_integer
