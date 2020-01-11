@@ -35,3 +35,5 @@ papi_lib = home + '/lib'
 
 png_path     = '/usr/lib64'
 grackle_path = home + '/local'
+
+node_size = 56

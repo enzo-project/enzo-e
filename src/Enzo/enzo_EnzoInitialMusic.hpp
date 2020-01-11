@@ -48,7 +48,12 @@ public: // interface
 
 protected: // functions
 
-  void throttle_input_();
+  /// If internode throttling enabled, sleep (i_noden * throttle_seconds_stagger_) seconds
+  /// before first file open for each pe in node i_node
+  void throttle_stagger_();
+  /// If internode throttling enabled, sleep throttle_seconds_delay_ seconds after
+  /// each open/close pair
+  void throttle_delay_();
   
   template <class T>
   void copy_field_data_to_array_
@@ -79,24 +84,22 @@ protected: // attributes
   std::vector < std::string > particle_types_;
   std::vector < std::string > particle_attributes_;
 
-  /// Counter for throttling input
-  int count_;
-
   /// Use Charm++ mutex to limit open files to one per node
   /// REQUIRES CONFIG_SMP_MODE
   bool throttle_intranode_;
 
   /// Throttle output between nodes by introducing a delay before
-  /// starting reading based on node id and throttle_count_, throttle_offset,
-  /// and throttle_seconds_
+  /// starting reading based on node id throttle_group_size, and
+  /// throttle_seconds_delay_
   bool throttle_internode_;
   
-  /// Number of reads per process to throttle
-  int throttle_count_;
-  /// Number of groups with different offsets
-  int throttle_offset_;
-  /// Number of seconds to throttle
-  double throttle_seconds_;
+  /// Number of groups with different group_sizes
+  int throttle_group_size_;
+  /// if internode throttling, start reading only after stagger * K
+  /// seconds for pe's in node K
+  double throttle_seconds_stagger_;
+  /// if internode throttling, delay after each open/close pair
+  double throttle_seconds_delay_;
 };
 
 #endif /* ENZO_ENZO_INITIAL_MUSIC_HPP */

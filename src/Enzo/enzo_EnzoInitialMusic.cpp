@@ -18,9 +18,6 @@ static CmiNodeLock throttle_node_lock;
 //----------------------------------------------------------------------
 void mutex_init()
 {
-#ifdef DEBUG_THROTTLE  
-  CkPrintf ("DEBUG_THROTTLE mutex_init()\n");
-#endif  
   throttle_node_lock = CmiCreateLock();
 }
 
@@ -42,12 +39,11 @@ EnzoInitialMusic::EnzoInitialMusic
     particle_coords_    (enzo_config->initial_music_particle_coords),
     particle_types_     (enzo_config->initial_music_particle_types),
     particle_attributes_(enzo_config->initial_music_particle_attributes),
-    count_(0),
     throttle_internode_ (enzo_config->initial_music_throttle_internode),
     throttle_intranode_ (enzo_config->initial_music_throttle_intranode),
-    throttle_count_     (enzo_config->initial_music_throttle_count),
-    throttle_offset_    (enzo_config->initial_music_throttle_offset),
-    throttle_seconds_   (enzo_config->initial_music_throttle_seconds)
+    throttle_group_size_    (enzo_config->initial_music_throttle_group_size),
+    throttle_seconds_stagger_ (enzo_config->initial_music_throttle_seconds_stagger),
+    throttle_seconds_delay_ (enzo_config->initial_music_throttle_seconds_delay)
 {
 #ifndef CONFIG_SMP_MODE
   ASSERT ("EnzoInitialMusic::EnzoInitialMusic",
@@ -76,12 +72,11 @@ void EnzoInitialMusic::pup (PUP::er &p)
   p | particle_types_;
   p | particle_attributes_;
 
-  p | count_;
   p | throttle_intranode_;
   p | throttle_internode_;
-  p | throttle_count_;
-  p | throttle_offset_;
-  p | throttle_seconds_;
+  p | throttle_group_size_;
+  p | throttle_seconds_stagger_;
+  p | throttle_seconds_delay_;
 }
 
 //----------------------------------------------------------------------
@@ -94,7 +89,7 @@ void EnzoInitialMusic::enforce_block
 
   // Optionally pause before reading if throttling enabled.  For
   // reducing filesystem contention on large runs
-  throttle_input_();
+  throttle_stagger_();
  
   // Get the grid size at level_
   double lower_domain[3];
@@ -129,10 +124,6 @@ void EnzoInitialMusic::enforce_block
 
     if (throttle_intranode_) {
       CmiLock(throttle_node_lock);
-#ifdef DEBUG_THROTTLE      
-      CkPrintf ("DEBUG_THROTTLE %d lock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
-      fflush(stdout);
-#endif      
     }
 
 #ifdef DEBUG_THROTTLE
@@ -241,13 +232,11 @@ void EnzoInitialMusic::enforce_block
                 CkMyPe(),cello::simulation()->timer(),file_name.c_str());
       fflush(stdout);
 #endif    
-    if (throttle_intranode_) {
-#ifdef DEBUG_THROTTLE  
-      CkPrintf ("DEBUG_THROTTLE %d unlock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
-      fflush(stdout);
-#endif      
-      CmiUnlock(throttle_node_lock);
-    }
+      throttle_delay_();
+      if (throttle_intranode_) {
+	CmiUnlock(throttle_node_lock);
+      }
+
 
   }
 
@@ -259,10 +248,6 @@ void EnzoInitialMusic::enforce_block
 
     if (throttle_intranode_) {
       CmiLock(throttle_node_lock);
-#ifdef DEBUG_THROTTLE  
-      CkPrintf ("DEBUG_THROTTLE %d lock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
-      fflush(stdout);
-#endif      
     }
 #ifdef DEBUG_THROTTLE
     CkPrintf ("%d %g DEBUG_THROTTLE opening %s\n",
@@ -355,11 +340,8 @@ void EnzoInitialMusic::enforce_block
     fflush(stdout);
 #endif    
 
+    throttle_delay_();
     if (throttle_intranode_) {
-#ifdef DEBUG_THROTTLE  
-      CkPrintf ("DEBUG_THROTTLE %d unlock %p %d\n",CkMyPe(),&throttle_node_lock,CmiTryLock(throttle_node_lock));
-      fflush(stdout);
-#endif      
       CmiUnlock(throttle_node_lock);
     }
     
@@ -506,26 +488,39 @@ void EnzoInitialMusic::enforce_block
 
 //----------------------------------------------------------------------
 
-void EnzoInitialMusic::throttle_input_()
+void EnzoInitialMusic::throttle_stagger_()
 {
   if (throttle_internode_) {
     //--------------------------------------------------
-    if (throttle_offset_ != 0 && count_++ < throttle_count_) {
-      int ms = 1000*((CkMyPe() % throttle_offset_) * throttle_seconds_);
-#ifdef DEBUG_THROTTLE
-      CkPrintf ("TRACE_THROTTLE ip %d offset %g seconds %d count %d counter %d value %ld\n",
-                CkMyPe(),throttle_offset_,throttle_seconds_,
-                throttle_count_,count_,ms);
-      fflush(stdout);
-#endif
-      std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    const int in= CkMyPe()/CONFIG_NODE_SIZE;
+    static bool not_first[CONFIG_NODE_SIZE] = {false};
+    if (throttle_group_size_ != 0 && ! not_first[in]) {
+      not_first[in] = true;
+      int ms = 1000*((CkMyPe() % throttle_group_size_) * throttle_seconds_stagger_);
 #ifdef DEBUG_THROTTLE  
-      CkPrintf ("DEBUG_THROTTLE %d %g %d ms\n",CkMyPe(),cello::simulation()->timer(),ms);
+      CkPrintf ("DEBUG_THROTTLE %d %g %d ms stagger\n",CkMyPe(),cello::simulation()->timer(),ms);
       fflush(stdout);
 #endif      
+      std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     }
   }
 }
+
+//----------------------------------------------------------------------
+
+void EnzoInitialMusic::throttle_delay_()
+{
+  if (throttle_internode_) {
+    int ms = 1000*throttle_seconds_delay_;
+#ifdef DEBUG_THROTTLE  
+    CkPrintf ("DEBUG_THROTTLE %d %g %d ms delay\n",
+	      CkMyPe(),cello::simulation()->timer(),ms);
+    fflush(stdout);
+#endif      
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+  }
+}
+
 //======================================================================
 
 template <class T>
