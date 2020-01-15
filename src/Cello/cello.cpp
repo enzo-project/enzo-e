@@ -350,4 +350,13 @@ namespace cello {
   }
   
 
+  //----------------------------------------------------------------------
+
+  size_t num_blocks_process()
+  {
+    return hierarchy() ? hierarchy()->num_blocks() : 0;
+  }
+  
+  
+
 }

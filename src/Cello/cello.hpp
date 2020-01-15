@@ -393,6 +393,8 @@ namespace cello {
   int             rank ();
   /// Return the number of children each Block may have
   int             num_children();
+  /// Return the number of Blocks on this process
+  size_t          num_blocks_process();
 }
 
 #endif /* CELLO_HPP */

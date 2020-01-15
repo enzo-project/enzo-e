@@ -77,6 +77,7 @@ public: // interface
     method_courant_global(1.0),
     method_list(),
     method_schedule_index(),
+    method_close_files_seconds_delay(),
     method_courant(),
     method_timestep(),
     method_trace_name(),
@@ -227,6 +228,7 @@ public: // interface
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
+      method_close_files_seconds_delay(),
       method_courant(),
       method_timestep(),
       method_trace_name(),
@@ -423,6 +425,7 @@ public: // attributes
   double                     method_courant_global;
   std::vector<std::string>   method_list;
   std::vector<int>           method_schedule_index;
+  std::vector<double>        method_close_files_seconds_delay;
   std::vector<double>        method_courant;
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;

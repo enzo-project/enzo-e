@@ -29,6 +29,10 @@ enum neighbor_enum {
 };
   
 //----------------------------------------------------------------------
+
+extern void method_close_files_mutex_init();
+
+//----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
 
@@ -61,8 +65,9 @@ enum neighbor_enum {
 #include "problem_BoundaryValue.hpp"
 #include "problem_BoundaryPeriodic.hpp"
 #include "problem_Method.hpp"
-#include "problem_MethodTrace.hpp"
+#include "problem_MethodCloseFiles.hpp"
 #include "problem_MethodNull.hpp"
+#include "problem_MethodTrace.hpp"
 #include "problem_Physics.hpp"
 #include "problem_Prolong.hpp"
 #include "problem_ProlongInject.hpp"

@@ -84,15 +84,20 @@ protected: // attributes
   std::vector < std::string > particle_types_;
   std::vector < std::string > particle_attributes_;
 
-  /// Use Charm++ mutex to limit open files to one per node
-  /// REQUIRES CONFIG_SMP_MODE
-  bool throttle_intranode_;
-
   /// Throttle output between nodes by introducing a delay before
   /// starting reading based on node id throttle_group_size, and
   /// throttle_seconds_delay_
   bool throttle_internode_;
   
+  /// Use Charm++ mutex to limit open files to one per node
+  /// REQUIRES CONFIG_SMP_MODE
+  bool throttle_intranode_;
+
+  /// Open a file at most once per node.  NOTE: this leaves files
+  /// open, which should be called by including "close_files" to
+  /// Method : list
+  bool throttle_node_files_;
+
   /// Number of groups with different group_sizes
   int throttle_group_size_;
   /// if internode throttling, start reading only after stagger * K
@@ -100,6 +105,7 @@ protected: // attributes
   double throttle_seconds_stagger_;
   /// if internode throttling, delay after each open/close pair
   double throttle_seconds_delay_;
+
 };
 
 #endif /* ENZO_ENZO_INITIAL_MUSIC_HPP */

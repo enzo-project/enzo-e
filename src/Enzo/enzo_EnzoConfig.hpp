@@ -332,6 +332,7 @@ public: // attributes
   std::vector < std::string > initial_music_particle_attributes;
   bool                        initial_music_throttle_internode;
   bool                        initial_music_throttle_intranode;
+  bool                        initial_music_throttle_node_files;
   int                         initial_music_throttle_group_size;
   double                      initial_music_throttle_seconds_stagger;
   double                      initial_music_throttle_seconds_delay;

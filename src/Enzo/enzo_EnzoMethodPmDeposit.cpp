@@ -13,6 +13,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_COLLAPSE
+
 #define FORTRAN_NAME(NAME) NAME##_
 
 extern "C" void  FORTRAN_NAME(dep_grid_cic)
@@ -193,7 +195,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
 	enzo_float * vya = (enzo_float *)particle.attribute_array (it,ia_vy,ib);
 
-	const int dp =  particle.stride(it,ia_x);
+#ifdef DEBUG_COLLAPSE
+        CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
+#endif            
+
+        const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);
 
 	for (int ip=0; ip<np; ip++) {
@@ -252,14 +258,17 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	const int ia_vy = particle.attribute_index(it,"vy");
 	const int ia_vz = particle.attribute_index(it,"vz");
 
-	enzo_float * xa  = (enzo_float *) particle.attribute_array (it,ia_x,ib);
-	enzo_float * ya  = (enzo_float *) particle.attribute_array (it,ia_y,ib);
-	enzo_float * za  = (enzo_float *) particle.attribute_array (it,ia_z,ib);
+	enzo_float * xa = (enzo_float *)particle.attribute_array (it,ia_x,ib);
+	enzo_float * ya = (enzo_float *)particle.attribute_array (it,ia_y,ib);
+	enzo_float * za = (enzo_float *)particle.attribute_array (it,ia_z,ib);
 
 	// Particle batch velocities
-	enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
-	enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
-	enzo_float * vza = (enzo_float *) particle.attribute_array (it,ia_vz,ib);
+	enzo_float * vxa = (enzo_float *)particle.attribute_array (it,ia_vx,ib);
+	enzo_float * vya = (enzo_float *)particle.attribute_array (it,ia_vy,ib);
+	enzo_float * vza = (enzo_float *)particle.attribute_array (it,ia_vz,ib);
+#ifdef DEBUG_COLLAPSE
+        CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
+#endif            
 
 	const int dp =  particle.stride(it,ia_x);
 	const int dv =  particle.stride(it,ia_vx);

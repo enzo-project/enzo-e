@@ -819,6 +819,12 @@ Method * Problem::create_method_
 
     method = new MethodNull
       (config->method_null_dt);
+
+  } else if (name == "close_files") {
+
+    method = new MethodCloseFiles
+      (config->method_close_files_seconds_delay[index_method]);
+      
   }
   return method;
 }

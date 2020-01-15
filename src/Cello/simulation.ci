@@ -11,6 +11,8 @@ module simulation {
 
   readonly CProxy_Simulation proxy_simulation;
 
+  initnode void method_close_files_mutex_init();
+  
   group [migratable] Simulation {
 
     entry Simulation (const char filename[n], int n); // [S0]
