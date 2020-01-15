@@ -157,6 +157,10 @@ public: // interface
       initial_music_particle_coords(),
       initial_music_particle_types(),
       initial_music_particle_attributes(),
+      initial_music_throttle_internode(),
+      initial_music_throttle_intranode(),
+      initial_music_throttle_node_files(),
+      initial_music_throttle_close_count(),
       initial_music_throttle_group_size(),
       initial_music_throttle_seconds_stagger(),
       initial_music_throttle_seconds_delay(),
@@ -333,6 +337,7 @@ public: // attributes
   bool                        initial_music_throttle_internode;
   bool                        initial_music_throttle_intranode;
   bool                        initial_music_throttle_node_files;
+  int                         initial_music_throttle_close_count;
   int                         initial_music_throttle_group_size;
   double                      initial_music_throttle_seconds_stagger;
   double                      initial_music_throttle_seconds_delay;

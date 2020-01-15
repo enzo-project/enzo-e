@@ -98,6 +98,10 @@ protected: // attributes
   /// Method : list
   bool throttle_node_files_;
 
+  /// Number of blocks per node; used to close HDF5 files after
+  /// the last block reads
+  int throttle_close_count_;
+
   /// Number of groups with different group_sizes
   int throttle_group_size_;
   /// if internode throttling, start reading only after stagger * K

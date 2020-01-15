@@ -74,6 +74,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_music_throttle_internode(),
   initial_music_throttle_intranode(),
   initial_music_throttle_node_files(),
+  initial_music_throttle_close_count(),
   initial_music_throttle_group_size(),
   initial_music_throttle_seconds_stagger(),
   initial_music_throttle_seconds_delay(),
@@ -271,6 +272,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_music_throttle_internode;
   p | initial_music_throttle_intranode;
   p | initial_music_throttle_node_files;
+  p | initial_music_throttle_close_count;
   p | initial_music_throttle_group_size;
   p | initial_music_throttle_seconds_stagger;
   p | initial_music_throttle_seconds_delay;
@@ -471,6 +473,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:music:throttle_intranode",false);
   initial_music_throttle_node_files = p->value_logical
     ("Initial:music:throttle_node_files",false);
+  initial_music_throttle_close_count = p->value_integer
+    ("Initial:music:throttle_close_count",0);
   initial_music_throttle_group_size = p->value_integer
     ("Initial:music:throttle_group_size",std::numeric_limits<int>::max());
   initial_music_throttle_seconds_stagger = p->value_float

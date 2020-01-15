@@ -42,6 +42,7 @@ EnzoInitialMusic::EnzoInitialMusic
     throttle_internode_ (enzo_config->initial_music_throttle_internode),
     throttle_intranode_ (enzo_config->initial_music_throttle_intranode),
     throttle_node_files_(enzo_config->initial_music_throttle_node_files),
+    throttle_close_count_(enzo_config->initial_music_throttle_close_count),
     throttle_group_size_    (enzo_config->initial_music_throttle_group_size),
     throttle_seconds_stagger_ (enzo_config->initial_music_throttle_seconds_stagger),
     throttle_seconds_delay_ (enzo_config->initial_music_throttle_seconds_delay)
@@ -71,6 +72,7 @@ void EnzoInitialMusic::pup (PUP::er &p)
   p | throttle_internode_;
   p | throttle_intranode_;
   p | throttle_node_files_;
+  p | throttle_close_count_;
   p | throttle_group_size_;
   p | throttle_seconds_stagger_;
   p | throttle_seconds_delay_;
@@ -101,6 +103,8 @@ void EnzoInitialMusic::enforce_block
 
   Field field = block->data()->field();
 
+  static std::map<std::string,int> close_count;
+  
   for (size_t index=0; index<field_files_.size(); index++) {
 
     const std::string file_name = field_files_[index];
@@ -239,7 +243,12 @@ void EnzoInitialMusic::enforce_block
     
     file->data_close();
 
-    if ( ! throttle_node_files_ ) {
+    const bool can_close = (++close_count[file_name] == throttle_close_count_);
+    const bool do_close = (throttle_node_files_ && can_close)
+      ||                  (! throttle_node_files_);
+    
+    if ( do_close ) {
+      close_count[file_name] = 0;
       file->file_close();
       throttle_delay_();
       FileHdf5::file_list.erase(file_name);
@@ -369,7 +378,12 @@ void EnzoInitialMusic::enforce_block
 
     file->data_close();
 
-    if ( ! throttle_node_files_ ) {
+    const bool can_close = (++close_count[file_name] == throttle_close_count_);
+    const bool do_close = (throttle_node_files_ && can_close)
+      ||                  (! throttle_node_files_);
+    
+    if ( do_close ) {
+      close_count[file_name] = 0;
       file->file_close();
       throttle_delay_();
       FileHdf5::file_list.erase(file_name);
@@ -378,7 +392,7 @@ void EnzoInitialMusic::enforce_block
                 CkMyPe(),cello::simulation()->timer(),file_name.c_str());
       fflush(stdout);
 #endif    
-    }    
+    } 
 
     if (throttle_intranode_) {
       CmiUnlock(throttle_node_lock);
