@@ -22,11 +22,27 @@ void method_close_files_mutex_init()
 }
 //----------------------------------------------------------------------
 
+MethodCloseFiles::MethodCloseFiles
+(double seconds_stagger, double seconds_delay, int group_size) throw()
+  : Method(),
+    seconds_stagger_(seconds_stagger),
+    seconds_delay_(seconds_delay),
+    group_size_(group_size)
+{
+
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,"close_files");
+  refresh.add_all_fields();
+}
+
+//----------------------------------------------------------------------
+
 void MethodCloseFiles::compute( Block * block) throw()
 {
 #ifdef CONFIG_SMP_MODE
   const bool is_first_cycle = (block->cycle() == cello::config()->initial_cycle);
   if (is_first_cycle) {
+    throttle_stagger_();
     CmiLock(MethodCloseFiles::node_lock);
     for (auto it=FileHdf5::file_list.begin();
          it!=FileHdf5::file_list.end(); ++it) {
@@ -52,12 +68,39 @@ void MethodCloseFiles::compute( Block * block) throw()
 
 //----------------------------------------------------------------------
 
+void MethodCloseFiles::throttle_stagger_()
+{
+  if (seconds_stagger_ > 0.0) {
+    //--------------------------------------------------
+    static int count_threads = 0;
+    const int node_size = CkNumPes() / CkNumNodes();
+    if ((seconds_stagger_ > 0.0) &&
+	count_threads < node_size ) {
+      ++count_threads;
+      int ms = 1000*((CkMyPe() / node_size ) % group_size_) * seconds_stagger_;
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("%d %g DEBUG_THROTTLE %d ms stagger start\n",
+		CkMyPe(),cello::simulation()->timer(),ms);
+      fflush(stdout);
+#endif      
+      std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("%d %g DEBUG_THROTTLE %d ms stagger stop\n",
+		CkMyPe(),cello::simulation()->timer(),ms);
+      fflush(stdout);
+#endif      
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void MethodCloseFiles::throttle_delay_()
 {
   if (seconds_delay_ > 0.0) {
     int ms = 1000*seconds_delay_;
 #ifdef DEBUG_THROTTLE  
-    CkPrintf ("DEBUG_THROTTLE %d %g %d ms delay\n",
+    CkPrintf ("%d %g DEBUG_THROTTLE %d ms delay\n",
 	      CkMyPe(),cello::simulation()->timer(),ms);
     fflush(stdout);
 #endif      

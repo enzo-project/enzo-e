@@ -531,16 +531,23 @@ void EnzoInitialMusic::throttle_stagger_()
 {
   if (throttle_internode_) {
     //--------------------------------------------------
-    const int in= CkMyPe()/CONFIG_NODE_SIZE;
-    static bool not_first[CONFIG_NODE_SIZE] = {false};
-    if (throttle_group_size_ != 0 && ! not_first[in]) {
-      not_first[in] = true;
-      int ms = 1000*((CkMyPe() % throttle_group_size_) * throttle_seconds_stagger_);
+    static int count_threads = 0;
+    const int node_size = CkNumPes() / CkNumNodes();
+    if ((throttle_seconds_stagger_ > 0.0) &&
+	count_threads < node_size ) {
+      ++count_threads;
+      int ms = 1000*((CkMyPe() / node_size) % throttle_group_size_) * throttle_seconds_stagger_;
 #ifdef DEBUG_THROTTLE  
-      CkPrintf ("DEBUG_THROTTLE %d %g %d ms stagger\n",CkMyPe(),cello::simulation()->timer(),ms);
+      CkPrintf ("%d %g DEBUG_THROTTLE %d ms stagger start\n",
+		CkMyPe(),cello::simulation()->timer(),ms);
       fflush(stdout);
 #endif      
       std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("%d %g DEBUG_THROTTLE %d ms stagger stop\n",
+		CkMyPe(),cello::simulation()->timer(),ms);
+      fflush(stdout);
+#endif      
     }
   }
 }
@@ -552,11 +559,16 @@ void EnzoInitialMusic::throttle_delay_()
   if (throttle_internode_) {
     int ms = 1000*throttle_seconds_delay_;
 #ifdef DEBUG_THROTTLE  
-    CkPrintf ("DEBUG_THROTTLE %d %g %d ms delay\n",
+    CkPrintf ("%d %g DEBUG_THROTTLE %d ms delay start\n",
 	      CkMyPe(),cello::simulation()->timer(),ms);
     fflush(stdout);
 #endif      
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#ifdef DEBUG_THROTTLE  
+    CkPrintf ("%d %g DEBUG_THROTTLE %d ms delay stop\n",
+	      CkMyPe(),cello::simulation()->timer(),ms);
+    fflush(stdout);
+#endif      
   }
 }
 

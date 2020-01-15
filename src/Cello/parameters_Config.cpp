@@ -109,7 +109,9 @@ void Config::pup (PUP::er &p)
   p | method_courant_global;
   p | method_list;
   p | method_schedule_index;
+  p | method_close_files_seconds_stagger;
   p | method_close_files_seconds_delay;
+  p | method_close_files_group_size;
   p | method_courant;
   p | method_timestep;
   p | method_trace_name;
@@ -704,7 +706,9 @@ void Config::read_method_ (Parameters * p) throw()
   method_courant.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
+  method_close_files_seconds_stagger.resize(num_method);
   method_close_files_seconds_delay.resize(num_method);
+  method_close_files_group_size.resize(num_method);
   method_trace_name.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
@@ -733,9 +737,13 @@ void Config::read_method_ (Parameters * p) throw()
       method_schedule_index[index_method] = -1;
     }
 
-    // Read delay parameter for MethodCloseFiles
+    // Read throttling parameters for MethodCloseFiles
+    method_close_files_seconds_stagger[index_method] = p->value_float
+      (full_name + ":seconds_stagger",0.0);
     method_close_files_seconds_delay[index_method] = p->value_float
       (full_name + ":seconds_delay",0.0);
+    method_close_files_group_size[index_method] = p->value_integer
+      (full_name + ":group_size",std::numeric_limits<int>::max());
 
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);

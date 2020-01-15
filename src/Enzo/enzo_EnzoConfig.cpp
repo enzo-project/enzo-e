@@ -472,7 +472,7 @@ void EnzoConfig::read(Parameters * p) throw()
   initial_music_throttle_node_files = p->value_logical
     ("Initial:music:throttle_node_files",false);
   initial_music_throttle_group_size = p->value_integer
-    ("Initial:music:throttle_group_size",0);
+    ("Initial:music:throttle_group_size",std::numeric_limits<int>::max());
   initial_music_throttle_seconds_stagger = p->value_float
     ("Initial:music:throttle_seconds_stagger",0.0);
   initial_music_throttle_seconds_delay = p->value_float

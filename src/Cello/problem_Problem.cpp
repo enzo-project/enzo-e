@@ -823,7 +823,9 @@ Method * Problem::create_method_
   } else if (name == "close_files") {
 
     method = new MethodCloseFiles
-      (config->method_close_files_seconds_delay[index_method]);
+      (config->method_close_files_seconds_stagger[index_method],
+       config->method_close_files_seconds_delay[index_method],
+       config->method_close_files_group_size[index_method]);
       
   }
   return method;

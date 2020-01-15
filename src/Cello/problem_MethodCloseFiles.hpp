@@ -17,10 +17,9 @@ class MethodCloseFiles : public Method {
 public: // interface
 
   /// Constructor
-  MethodCloseFiles(double seconds_delay) throw()
-    : Method(),
-      seconds_delay_(seconds_delay)
-  {}
+  MethodCloseFiles(double seconds_stagger,
+		   double seconds_delay,
+		   int group_size) throw();
 
   /// Charm++ PUP::able declarations
   PUPable_decl(MethodCloseFiles);
@@ -36,7 +35,9 @@ public: // interface
     // NOTE: change this function whenever attributes change
     TRACEPUP;
     Method::pup(p);
+    p | seconds_stagger_;
     p | seconds_delay_;
+    p | group_size_;
   };
   
 public: // virtual methods
@@ -49,11 +50,14 @@ public: // virtual methods
 
 private: // functions
 
+  void throttle_stagger_();
   void throttle_delay_();
   
 private: // attributes
 
+  double seconds_stagger_;
   double seconds_delay_;
+  int group_size_;
   
 public: // static attributes
 
