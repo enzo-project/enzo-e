@@ -5,8 +5,6 @@ import numpy as np
 
 warnings.simplefilter("ignore", FutureWarning)
 import yt
-import h5py
-from load_enzoe import load_enzoe,load_full_grid
 warnings.resetwarnings()
 
 
@@ -190,9 +188,8 @@ def L1_error_vector(ds, ds2, comparison_fields, Nx=None, Ny=None, Nz=None,
         else:
             normalize = Nx*Ny*Nz
 
-        temp = np.abs(_sanitize_units(data[key]) - 
-                      _sanitize_units(data2[key]))
-
+        # sorting the absolute differences before summing them would allow for
+        # better symmetry tests
         residuals.append((np.sum(np.abs(_sanitize_units(data[key]) - 
                                         _sanitize_units(data2[key])),
                                  axis = sum_axis)/float(normalize)))
@@ -206,20 +203,45 @@ def norm_L1_error(ds, ds2, comparison_fields, Nx=None, Ny=None, Nz=None,
                                  sum_axis)
     return np.sqrt(np.sum(np.square(err_vector),axis=0))
 
-def find_common_fields(ds1,ds2, verbose, fields = None):
-    # fields is a list of pre-existing fields to compare
+_DEFAULT_COMMON_FIELDS \
+    = ["density", "total_energy", "velocity_x", "velocity_y", "velocity_z",
+       "bfield_x", "bfield_y", "bfield_z"]
+
+def find_common_fields(ds1, ds2, verbose, fields = None):
+    """
+    Returns a list of fields common to ds1 and ds2
+
+    Parameters
+    ----------
+    ds1, ds2 : `yt.data_objects.static_output.Dataset` or `dict` of `ndarray`
+        These represent the different datasets. Field names are obtained for 
+        the former type by accessing the `derived_field_list` attribute. For
+        the latter type, they are obtained by calling the `keys` method.
+    verbose : `bool`
+        If True, prints the list of common fields
+    fields : `list` of strings or `None` (optional)
+        If specified, the function checks that both datasets contain this list 
+        of fields (this is returned by the function). If `None` (default),
+        this selectively returns the subset of common fields from the 
+        `_DEFAULT_COMMON_FIELDS`.
+    """
     if isinstance(ds1,yt.data_objects.static_output.Dataset):
-        field_list1 = [elem[1] for elem in ds1.field_list]
+        field_list1 = [elem[1] for elem in ds1.derived_field_list]
     else:
         field_list1 = ds1.keys()
 
     if isinstance(ds2,yt.data_objects.static_output.Dataset):
-        field_list2 = [elem[1] for elem in ds2.field_list]
+        field_list2 = [elem[1] for elem in ds2.derived_field_list]
     else:
         field_list2 = ds2.keys()
 
     if fields is None:
-        intersect = [elem for elem in field_list1 if elem in field_list2]
+        intersect = []
+        for elem in _DEFAULT_COMMON_FIELDS:
+            if elem in field_list1 and elem in field_list2:
+                intersect.append(elem)
+        #if len(intersect) == 0:
+        #    intersect = [elem for elem in field_list1 if elem in field_list2]
     else:
         # check that both datasets have all of the user-specified fields
         for field in fields:
@@ -426,11 +448,17 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
                                  **kwargs)
         print(op_func(L1_norms))
 
+def yt_load(fname):
+    warnings.simplefilter("ignore", ResourceWarning)
+    warnings.simplefilter("ignore", UserWarning)
+    ds = yt.load(fname)
+    warnings.resetwarnings()
+    return ds
 
 # Functions used to compute L1Error Norm between simulations
 def compare_to_sim_reference(ds, ref_path, verbose, dim_length,
                              specified_fields = None):
-    ds_ref = load_enzoe(get_block_list(ref_path))
+    ds_ref = yt_load(get_block_list(ref_path))
     comparison_fields = find_common_fields(ds_ref, ds, verbose,
                                            specified_fields)
     print(norm_L1_error(ds_ref, ds, comparison_fields, Nx = dim_length,
@@ -446,7 +474,7 @@ if __name__ == '__main__':
 
     # load the target data to be analyzed
     target_file = get_block_list(args.target_path)
-    ds = load_enzoe(target_file)
+    ds = yt_load(target_file)
 
     specified_fields = args.fields
 
