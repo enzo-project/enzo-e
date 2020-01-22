@@ -40,6 +40,43 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
 //----------------------------------------------------------------------
 
+void EnzoMethodGrackle::compute ( Block * block) throw()
+{
+
+  if (block->is_leaf()){
+
+  #ifndef CONFIG_USE_GRACKLE
+
+    ERROR("EnzoMethodGrackle::compute()",
+    "Trying to use method 'grackle' with "
+    "Grackle configuration turned off!");
+
+  #else /* CONFIG_USE_GRACKLE */
+
+    EnzoBlock * enzo_block = enzo::block(block);
+
+    // Start timer
+    Simulation * simulation = cello::simulation();
+    if (simulation)
+      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
+
+    this->initialize_grackle_chemistry_data(block->time());
+
+    this->compute_(enzo_block);
+
+    enzo_block->compute_done();
+
+    if (simulation)
+      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
+  #endif
+  }
+
+  return;
+
+}
+
+#ifdef CONFIG_USE_GRACKLE
+
 void EnzoMethodGrackle::define_required_grackle_fields()
 {
   // Gather list of fields that MUST be defined for this method and
@@ -147,43 +184,6 @@ void EnzoMethodGrackle::define_required_grackle_fields()
 }
 
 //----------------------------------------------------------------------
-
-void EnzoMethodGrackle::compute ( Block * block) throw()
-{
-
-  if (block->is_leaf()){
-
-  #ifndef CONFIG_USE_GRACKLE
-
-    ERROR("EnzoMethodGrackle::compute()",
-    "Trying to use method 'grackle' with "
-    "Grackle configuration turned off!");
-
-  #else /* CONFIG_USE_GRACKLE */
-
-    EnzoBlock * enzo_block = enzo::block(block);
-
-    // Start timer
-    Simulation * simulation = cello::simulation();
-    if (simulation)
-      simulation->performance()->start_region(perf_grackle,__FILE__,__LINE__);
-
-    this->initialize_grackle_chemistry_data(block->time());
-
-    this->compute_(enzo_block);
-
-    enzo_block->compute_done();
-
-    if (simulation)
-      simulation->performance()->stop_region(perf_grackle,__FILE__,__LINE__);
-  #endif
-  }
-
-  return;
-
-}
-
-#ifdef CONFIG_USE_GRACKLE
 
 void EnzoMethodGrackle::initialize_grackle_chemistry_data(
                                                    const double& current_time)

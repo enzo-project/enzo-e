@@ -82,12 +82,14 @@ void EnzoMethodMHDVlct::determine_quantities_
  std::vector<std::string> &reconstructable_quantities,
  std::vector<std::string> &passive_groups)
 {
+#ifdef CONFIG_USE_GRACKLE
   if (enzo::config()->method_grackle_use_grackle){
     // make sure all the required fields are defined so that the group of
     // "colour" fields is accurate (needed for identifying passive scalars)
     EnzoMethodGrackle::define_required_grackle_fields();
     // Not quite ready to support a variable gamma
   }
+#endif
 
 
   std::string common[3] {"density", "velocity", "bfield"};
