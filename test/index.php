@@ -665,6 +665,10 @@ test_summary("Method: gravity",
 	     array("method_gravity_cg-1","method_gravity_cg-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
+test_summary("Problem: collapse",
+         array("collapse-bcg2d","collapse-bcg3d"),
+array("enzo-p",  "enzo-p"),'test');
+
 test_summary("Problem: cosmology",
          array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-ddmg"),
          array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p"),'test');
@@ -989,6 +993,117 @@ test_table ("-","method_gravity_cg-8",
 	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
 end_hidden("method_gravity_cg-8");
+
+//======================================================================
+
+test_group("Problem: collapse");
+
+?>
+
+Spherical collapse tests for varying dimensionality, linear solver, and mesh adaptation [in progress].
+
+</p>
+
+<?php
+
+//--------------------------------------------------
+
+    test_subgroup ("2D AMR Collapse");
+begin_hidden("collapse-bcg2d", "COLLAPSE (BiCG-STAB Solver)");
+
+tests("Enzo","enzo-p","test_collapse-bcg2d","2D AMR Collapse (BiCG-STAB Solver)","");
+
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/dark",
+            "0010/dark",
+            "0015/dark",
+            "0020/dark",
+            "0025/dark",
+            "0030/dark",
+            "0035/dark",
+            "0040/dark"),$types);
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/po",
+            "0010/po",
+            "0015/po",
+            "0020/po",
+            "0025/po",
+            "0030/po",
+            "0035/po",
+            "0040/po"),$types);
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/ax",
+            "0010/ax",
+            "0015/ax",
+            "0020/ax",
+            "0025/ax",
+            "0030/ax",
+            "0035/ax",
+            "0040/ax"),$types);
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/mesh",
+            "0010/mesh",
+            "0015/mesh",
+            "0020/mesh",
+            "0025/mesh",
+            "0030/mesh",
+            "0035/mesh",
+            "0040/mesh"),$types);
+
+end_hidden("collapse-bcg2d");
+
+//--------------------------------------------------
+
+  test_subgroup ("3D AMR Collapse");
+begin_hidden("collapse-bcg3d", "COLLAPSE (BiCG-STAB Solver)");
+
+tests("Enzo","enzo-p","test_collapse-bcg3d","3D AMR Collapse (BiCG-STAB Solver)","");
+
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/dark",
+            "0020/dark",
+            "0030/dark",
+            "0040/dark",
+            "0050/dark",
+            "0060/dark",
+            "0070/dark",
+            "0080/dark",
+            "0090/dark",
+            "0100/dark"),$types);
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/po",
+            "0020/po",
+            "0030/po",
+            "0040/po",
+            "0050/po",
+            "0060/po",
+            "0070/po",
+            "0080/po",
+            "0090/po",
+            "0100/po"),$types);
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/ax",
+            "0020/ax",
+            "0030/ax",
+            "0040/ax",
+            "0050/ax",
+            "0060/ax",
+            "0070/ax",
+            "0080/ax",
+            "0090/ax",
+            "0100/ax"),$types);
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/mesh",
+            "0020/mesh",
+            "0030/mesh",
+            "0040/mesh",
+            "0050/mesh",
+            "0060/mesh",
+            "0070/mesh",
+            "0080/mesh",
+            "0090/mesh",
+            "0100/mesh"),$types);
+end_hidden("collapse-bcg3d");
 
 //======================================================================
 

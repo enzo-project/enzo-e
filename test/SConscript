@@ -5,6 +5,7 @@ Import('serial_run')
 Import('ip_charm')
 Import('bin_path')
 Import('test_path')
+Import('prec')
 
 import os
 
@@ -289,6 +290,22 @@ Clean(env_mv_out.RunParallel ('test_cosmo-ddmg.unit',bin_path + '/enzo-p',
 		ARGS='input/test_cosmo-ddmg.in'),
       [Glob('#/' + test_path + '/Dir_COSMO_DDMG_*'),
        Glob('#/' + test_path + '/Dir_COSMO_DDMG_*')])
+
+#----------------------------------------------------------------------
+# MethodCollapse tests
+#----------------------------------------------------------------------
+
+if (prec == "double"):
+    Clean(env_mv_out.RunParallel ('test_collapse-bcg2d.unit',
+                                  bin_path + '/enzo-p', 
+		                  ARGS='input/test_collapse-bcg2d.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2D_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2D_*')])
+    Clean(env_mv_out.RunParallel ('test_collapse-bcg3d.unit',
+                                  bin_path + '/enzo-p', 
+		                  ARGS='input/test_collapse-bcg3d.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_BCG3D_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_BCG3D_*')])
 
 #----------------------------------------------------------------------
 # MethodHeat tests

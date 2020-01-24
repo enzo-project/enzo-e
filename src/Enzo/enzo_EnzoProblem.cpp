@@ -534,6 +534,11 @@ Method * EnzoProblem::create_method_
        enzo_config->method_turbulence_mach_number,
        enzo_config->physics_cosmology);
 
+  } else if (name == "check_gravity") {
+
+    method = new EnzoMethodCheckGravity
+      (enzo_config->method_check_gravity_particle_type);
+
   } else if (name == "cosmology") {
 
     method = new EnzoMethodCosmology;

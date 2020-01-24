@@ -71,16 +71,17 @@ module enzo {
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
 
+  PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
+  PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodPpm;
   PUPable EnzoMethodHydro;
-  PUPable EnzoMethodPpml;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
+  PUPable EnzoMethodPpm;
+  PUPable EnzoMethodPpml;
   PUPable EnzoMethodTurbulence;
-  PUPable EnzoMethodGravity;
 
   PUPable EnzoPhysicsCosmology;
 

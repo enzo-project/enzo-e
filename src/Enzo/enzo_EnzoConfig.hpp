@@ -196,6 +196,8 @@ public: // interface
       initial_turbulence_temperature(0.0),
       // EnzoProlong
       interpolation_method(""),
+      // EnzoMethodCheckGravity
+      method_check_gravity_particle_type(),
       // EnzoMethodHeat
       method_heat_alpha(0.0),
       // EnzoMethodHydro
@@ -388,6 +390,9 @@ public: // attributes
   /// EnzoMethodHeat
   double                     method_heat_alpha;
 
+  /// EnzoMethodCheckGravity
+  std::string                method_check_gravity_particle_type;
+  
   /// EnzoMethodHydro
   std::string                method_hydro_method;
   bool                       method_hydro_dual_energy;

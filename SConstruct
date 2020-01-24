@@ -72,7 +72,7 @@ debug_verbose = 0
 # [] ()
 #----------------------------------------------------------------------
 
-memory = 0
+memory = 1
 
 #----------------------------------------------------------------------
 # Set to 1 if Charm++ version is >= 6.7.0
@@ -419,6 +419,7 @@ Export('node_size')
 Export('test_path')
 Export('ip_charm')
 Export('smp')
+Export('prec')
 
 
 cpppath     = [inc_path]

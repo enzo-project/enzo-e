@@ -337,8 +337,14 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
   if (is_finest_(block)) {
 
     const bool reuse_x = reuse_solution_ (block->cycle());
-    
+#ifdef TRACE_SOLVER_BCG      
+      if (CkMyPe()==0) CkPrintf ("DEBUG_SOLVER_BCG reusing solution X <- X_copy \n");
+#endif    
     if ( reuse_x ) {
+#ifdef TRACE_SOLVER_BCG      
+
+      if (CkMyPe()==0) CkPrintf ("DEBUG_SOLVER_BCG reusing solution X <- X_copy \n");
+#endif      
 
       enzo_float* X_copy  = (enzo_float*) field.values("X_copy");
 
@@ -679,6 +685,9 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
 
     if (reuse_next_x) {
 
+#ifdef TRACE_SOLVER_BCG      
+      if (CkMyPe()==0) CkPrintf ("DEBUG_SOLVER_BCG saving solution X_copy <- X\n");
+#endif      
       Field field = block->data()->field();
 
       enzo_float* X       = (enzo_float*) field.values(ix_);

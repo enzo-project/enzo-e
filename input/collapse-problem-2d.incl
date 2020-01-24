@@ -1,0 +1,45 @@
+ Stopping {
+     cycle = 40;
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+ Domain {
+     lower = [ -1.600000000000000e+17, -1.600000000000000e+17];
+     upper = [ 1.600000000000000e+17, 1.600000000000000e+17];
+ }
+
+
+ Initial {
+     list = [ "pm" ];
+     pm {
+         mask = ((( x  *  x ) + ( y  *  y ))) <  1.024000000000000e+33 ;
+         mpp = 0.000000000000000;
+         rank = 2;
+     }
+ }
+
+ Mesh {
+     root_blocks = [ 2, 2 ];
+     root_rank = 2;
+     root_size = [ 32, 32 ];
+ }
+Method {
+     pm_update {
+         max_dt = 10.000000000000;
+     }
+     
+}
+
+ Particle {
+     dark {
+         attributes = [ "x", "default", "y", "default", "vx", "default", "vy", "default", "ax", "default", "ay", "default" ];
+         constants = [ "mass", "default", 10.00000000000000 ];
+         groups = [ "has_mass" ];
+         position = [ "x", "y" ];
+         velocity = [ "vx", "vy" ];
+     }
+     list = [ "dark" ];
+ }
