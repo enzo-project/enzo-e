@@ -12,31 +12,20 @@
 #
 # We should probably try small convergence tests like Athena++
 
-import os
 import os.path
 import sys
-import numpy as np
 import shutil
-import subprocess
-import math
+from functools import partial
 
-from run_linear_wave_test import isclose, prep_cur_dir
+import numpy as np
 
-# this executes things in standalone mode
-_executable = 'bin/enzo-p'
-l1_norm_table_template = ("python tools/l1_error_norm.py table{:s} {:s} {:s}"
-                          " -f density,velocity_x,velocity_y,velocity_z,"
-                          "pressure,bfield_x,bfield_y,bfield_z")
-data_dir_template = "method_vlct-1-{:s}_rj2a_N{:d}_{:.1f}"
+from testing_utils import \
+    prep_cur_dir, standard_analyze, EnzoEWrapper, CalcTableL1Norm
 
-def call_test(axis,res):
-    input_file_temp = 'input/vlct/shock_tube/method_vlct_{:s}_rj2a_N{:d}.in'
-    input_file = input_file_temp.format(axis, res)
+def run_tests(executable):
 
-    command = _executable + ' ' + input_file
-    subprocess.call(command,shell=True)
-
-def run_tests():
+    temp = 'input/vlct/shock_tube/method_vlct_{:s}_rj2a_N{:d}.in'
+    call_test = EnzoEWrapper(executable,temp)
 
     # can't actually run the serial vs parallel test from this script (not sure
     # how to get around request for password)
@@ -44,40 +33,44 @@ def run_tests():
     call_test("y",256)
     call_test("z",256)
 
-def calc_table_l1_norm(axis,table_path,target_path, std_dev = False,
-                       permute = False):
-    command = l1_norm_table_template.format(axis, table_path, target_path)
-    if std_dev:
-        command = command + " --std"
-    if permute:
-        command = command + " --permute"
+def analyze_shock(ref_val, axis, target_template, name_template,
+                  l1_functor, reverse = False, std_dev = False,
+                  offset = 0., bkg_vel=(), verbose = False):
+    """
+    Helper function for simplifying permutable axis-aligned shock tube test
+    analysis.
 
-    return float(subprocess.check_output(command,shell=True))
+    Notes
+    -----
+    The offset and bkg_vel kwargs have been introduced for test problems in
+    which shock tubes have a background velocity in the frame where the mesh is
+    motionless (used for testing dual energy).
+    """
+    axis = axis.lower()
+    assert axis in 'xyz'
+    assert len(bkg_vel) in [0,3]
+    functor_kwargs = dict(axis = axis, std_dev = std_dev, reverse = reverse,
+                          bkg_velocity = bkg_vel, permute = (axis != 'x'))
+    if offset != 0.:
+        functor_kwargs['offset_soln'] = offset
 
-def standard_rj2a_l1_analyze(axis,res,ref_l1_norm, std_dev = False,
-                             exact = False):
-    ref_table = "input/vlct/shock_tube/rj2a_shock_tube_t0.2_res256.csv"
-    target_path = data_dir_template.format(axis,res,0.2)
-    norm = calc_table_l1_norm(axis,ref_table,target_path,std_dev=std_dev,
-                              permute = (axis != 'x'))
-
-    if exact and std_dev and norm != ref_l1_norm:
-        message_temp = ("Standard Deviation of norm of L1 error of {}-axis "
-                        "rj2a shock tube N={:d} isn't correct\n{:s} {:s}")
-        print(message_temp.format(axis, res, repr(norm), repr(ref_l1_norm)))
-        return False
-    if exact != std_dev:
-        raise NotImplementedError()
-    if (not exact) and (not isclose(norm, ref_l1_norm, abs_tol = True)):
-        message_temp = ("L1 error of {}-axis rj2a shock tube N={:d} isn't "
-                        "correct\n{:s} {:s}")
-        print(message_temp.format(axis, res, repr(norm), repr(ref_l1_norm)))
-        return False
-    return True
+    return standard_analyze(ref_val, l1_functor, target_template.format(axis),
+                            name_template.format(axis),
+                            functor_kwargs = functor_kwargs,
+                            exact = std_dev, verbose = verbose)
 
 def analyze_tests():
+    # define the functor for evaluating the norm of the L1 error vector
+    ref_table = "input/vlct/shock_tube/rj2a_shock_tube_t0.2_res256.csv"
+    l1_func= CalcTableL1Norm("tools/l1_error_norm.py",
+                             ["density","velocity_x","velocity_y","velocity_z",
+                              "pressure","bfield_x","bfield_y","bfield_z"],
+                             default_ref_table = ref_table)
 
-    # the values are taken from a local run
+    err_compare = partial(analyze_shock,
+                          target_template = "method_vlct-1-{:s}_rj2a_N256_0.2",
+                          name_template = "{}-axis rj2a shock tube N=256",
+                          l1_functor = l1_func)
 
     r = []
     # check the average L1-Norm along the active axis (averaged over multiple
@@ -87,12 +80,12 @@ def analyze_tests():
     # use 1 block - if we use more than one block, it's unclear to me if it's
     # ok to have round-off errors)
 
-    r.append(standard_rj2a_l1_analyze("x", 256, 0.012524502240006008))
-    r.append(standard_rj2a_l1_analyze("x", 256, 0.0, std_dev=True, exact=True))
-    r.append(standard_rj2a_l1_analyze("y", 256, 0.012524502240006043))
-    r.append(standard_rj2a_l1_analyze("y", 256, 0.0, std_dev=True, exact=True))
-    r.append(standard_rj2a_l1_analyze("z", 256, 0.012524502240005952))
-    r.append(standard_rj2a_l1_analyze("z", 256, 0.0, std_dev=True, exact=True))
+    r.append(err_compare(0.012524502240006008,"x"))
+    r.append(err_compare(0.0, "x", std_dev=True))
+    r.append(err_compare(0.012524502240006043,"y"))
+    r.append(err_compare(0.0, "y", std_dev=True))
+    r.append(err_compare(0.012524502240005952,"z"))
+    r.append(err_compare(0.0, "z", std_dev=True))
 
     n_passed = np.sum(r)
     n_tests = len(r)
@@ -111,12 +104,14 @@ def cleanup():
 
 if __name__ == '__main__':
 
+    executable = 'bin/enzo-p'
+
     # this script can either be called from the base repository or from
     # the subdirectory: input/vlct
-    prep_cur_dir()
+    prep_cur_dir(executable)
 
     # run the tests
-    run_tests()
+    run_tests(executable)
 
     # analyze the tests
     tests_passed = analyze_tests()

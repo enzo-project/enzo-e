@@ -20,8 +20,8 @@ import sys
 
 import numpy as np
 
-from run_linear_wave_test import _executable, CalcSimL1Norm, isclose, \
-    prep_cur_dir
+from testing_utils import EnzoEWrapper, CalcSimL1Norm, isclose, prep_cur_dir
+
 data_dir_template = "method_vlct-1-{:s}_passive_soundN16-{:.1f}"
 
 calc_l1_norm = CalcSimL1Norm("tools/l1_error_norm.py",
@@ -29,16 +29,10 @@ calc_l1_norm = CalcSimL1Norm("tools/l1_error_norm.py",
                               "total_energy","bfield_x","bfield_y","bfield_z",
                               "red"])
 
-
-def call_test(axis):
-    input_file_temp = ('input/vlct/passive_advect_sound_wave/'
-                       'method_vlct_{}_passive_sound.in')
-    input_file = input_file_temp.format(axis)
-
-    command = _executable + ' ' + input_file
-    subprocess.call(command,shell=True)
-
-def run_tests():
+def run_tests(executable):
+    temp = ('input/vlct/passive_advect_sound_wave/'
+            'method_vlct_{}_passive_sound.in')
+    call_test = EnzoEWrapper(executable,temp)
 
     # calls some tests
     call_test('x')
@@ -96,12 +90,14 @@ def cleanup():
 
 if __name__ == '__main__':
 
+    executable = 'bin/enzo-p'
+
     # this script can either be called from the base repository or from
     # the subdirectory: input/vlct
-    prep_cur_dir()
+    prep_cur_dir(executable)
 
     # run the tests
-    run_tests()
+    run_tests(executable)
 
     # analyze the tests
     tests_passed = analyze_tests()

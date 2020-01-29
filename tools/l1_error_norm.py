@@ -41,12 +41,12 @@ table mode
 
   Example Usage:
     Total L1 Error Norm for a Riemann problem evolved along the y-axis:\n'
-    $ python l1_error_norm.py table y path/to/table path/to/target/data
+    $ python l1_error_norm.py tabley path/to/table path/to/target/data
 
     Standard Deviation of L1 Error Norm for all 1D y-slices
-    $ python l1_error_norm.py table y --std path/to/table path/to/target/data
+    $ python l1_error_norm.py tabley --std path/to/table path/to/target/data
 
-  Table Format: 
+  Table Format:
     The supplied table should be comma separated and header comments must be led
     by a "#". The first line following the comments should include the names of 
     the columns (they should match the fluid fluid names in the simulation to 
@@ -138,8 +138,34 @@ parser.add_argument('--median', action = 'store_true', default = False,
                             "this option is supplied, then the median of the "
                             "L1 error norms for all 1D slices is returned."))
 
+parser.add_argument('--reverse', action = 'store_true', default = False,
+                    help = ("This only applies to \"table\" mode. When "
+                            "specified, the position values in the table are "
+                            "reversed and all vector components are "
+                            "multiplied by -1."))
+
+parser.add_argument('--offset_soln', action = 'store', default = 0.0,
+                    type= float,
+                    help = ("This only applies to \"table\" mode. When "
+                            "specified, this value is added to the positions "
+                            "specified in the table along the comparison "
+                            "axis. This must be evenly divisable by the cell "
+                            "width."))
+
+parser.add_argument('--bkg_velocity', action = 'store', nargs = 3,
+                    default = [], type = float,
+                    help = ("This only applies to \"table\" mode. This "
+                            "option is used to specify constant background "
+                            "velocities that are not specified in the table."
+                            "This information is used to update the expected "
+                            "velocities and total energy. This option "
+                            "requires 3 arguments to specify x,y,z velocity "
+                            "components. This is unaffected by the --permute "
+                            "and --reverse options."))
+
 # should allow for specification of fields
 def get_block_list(dir_name):
+    orig_dir_name = dir_name
     if os.path.basename(dir_name) == '':
         # make sure that there are no slashes at the end of the dir_name
         stop_slice = len(dir_name)
@@ -149,11 +175,14 @@ def get_block_list(dir_name):
             else:
                 break
         dir_name = dir_name[:stop_slice]
-            
-            
+
     fname = os.path.join(dir_name,
                          '.'.join((os.path.basename(dir_name), 'block_list')))
-    assert os.path.isfile(fname)
+    if not os.path.isfile(fname):
+        if not os.path.isdir(dir_name):
+            raise ValueError(
+                "{:s} is not the name of a directory".format(orig_dir_name))
+        raise ValueError("a file called {:s} can't be found".format(fname))
     return fname
 
 def _sanitize_units(arr):
@@ -345,11 +374,18 @@ def load_reference_table(fname):
         out_data[field] = rec[field]
     return meta_data, out_data
 
-def permute_vector_quantites(data, verbose, permute):
+def vector_name_iterator(data):
+    """
+    Produces an iterator that yields 2-tuples of vectors given a dict of fields
 
-    if permute is None:
-        return None
-    assert permute in [0,1,2]
+    vectors are identified by identifying fields with common prefixes that all
+    end with '_x', '_y', or '_z'.
+
+    The first element of the yielded tuple holds the common prefix of the 
+    fields related to the vector, while the second element holds a list of 
+    field names corresponding to the various components (orderred as x,y,z).
+    Missing components are replaced by a None
+    """
 
     ax_map = {'x' : 0, 'y' : 1, 'z' : 2}
     candidates = {}
@@ -362,12 +398,20 @@ def permute_vector_quantites(data, verbose, permute):
         if prefix not in candidates:
             candidates[prefix] = [None, None, None]
         candidates[prefix][ax_map[dim]] = elem
+    return candidates.items()
+
+def permute_vector_quantites(data, verbose, permute):
+
+    if permute is None:
+        return None
+    assert permute in [0,1,2]
 
     vectors = []
-    for prefix, names in candidates.items():
+    for vector_name, names in vector_name_iterator(data):
         if len(list(filter(lambda x: x is not None, names))) != 3:
+            # skip this vector if all 3 components are not provided
             continue
-        vectors.append(prefix)
+        vectors.append(vector_name)
         temp = [data[names[0]], data[names[1]], data[names[2]]]
         data[names[permute]] = temp[0]
         data[names[(permute+1)%3]] = temp[1]
@@ -376,9 +420,28 @@ def permute_vector_quantites(data, verbose, permute):
     if verbose:
         print("permuted the vectors {}".format(str(vectors)))
 
+def reverse_1D_soln(data):
+    """
+    Reverses the domain of the 1D tabulated solution.
+    
+    Namely reverse the order of all fields and multiply the values of all 
+    vector components by -1.
+    """
+
+    for key,value in data.items():
+        if key != 'pos':
+            data[key] = value[::-1]
+
+    for _, vector_field_l in vector_name_iterator(data):
+        for field_name in vector_field_l:
+            if field_name is None:
+                continue
+            data[field_name] *= -1.
 
 def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
-                            permute = 0, specified_fields = None):
+                            permute = 0, specified_fields = None,
+                            reverse = False, offset_soln = 0.,
+                            bkd_velocity = []):
 
     # if op_func is None, returns the total L1 Error Norm
     # otherwise op_func is applied on all parallel L1 Error Norms
@@ -400,8 +463,35 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
         pos = ref_data.pop(intersect[0])
         ref_data["pos"] = pos
 
-    left_edge = (pos[0] - np.diff(pos)[0]*0.5)
-    right_edge = (pos[-1] + np.diff(pos)[0]*0.5)
+    # if offset_soln was specified, modify the position values
+    cell_width = np.diff(pos)[0]
+    if offset_soln != 0.:
+        if (offset_soln % np.abs(cell_width) != 0.):
+            msg = ('the offset_soln value is not an integral multitple of '
+                   'cell_width (which is {0!r}')
+            raise ValueError(msg.format(float(cell_width)))
+        ref_data["pos"] += offset_soln
+
+    # compute left_edge and right_edge
+    left_edge = (pos[0] - cell_width*0.5)
+    right_edge = (pos[-1] + cell_width*0.5)
+
+    if reverse:
+        reverse_1D_soln(ref_data)
+
+    # add in some missing vector components
+    fields_to_check = ["velocity_x", "velocity_y", "velocity_z"]
+    bfield_l = ['bfield_x', 'bfield_y', 'bfield_z']
+    if any( [ (field_name in ref_data) for field_name in bfield_l ]):
+        # only add bfield components if at least one component already existed
+        fields_to_check = fields_to_check + bfield_l
+    for field in fields_to_check:
+        if field not in ref_data:
+            ref_data[field] = np.zeros_like(pos)
+
+    # it might be nice to compute "derived fields". Namely total_energy,
+    # internal_energy, and/or pressure. We should require that gamma be
+    # specified in meta_data
 
     #kwargs is only used if computing standard deviation
     kwargs = {"Nx":1, "Ny":1, "Nz":1}
@@ -434,6 +524,19 @@ def compare_to_1D_reference(ds, tab_fname, problem_ax, verbose, op_func = None,
     # optionally permute some vector quantities
     permute_vector_quantites(ref, verbose, permute)
 
+    # optionally add some fixed background velocities
+    if bkd_velocity != []:
+        # make sure to adjust total energy
+        for i, vel_name in enumerate(['velocity_x', 'velocity_y',
+                                      'velocity_z']):
+            bkg_v = bkg_velocity[i]
+            old_varr = ref[vel_name].copy()
+            ref[vel_name] += bkg_v
+            new_varr = ref[vel_name]
+            if 'total_energy' in ref:
+                d_ke = 0.5*(np.square(new_varr) - np.square(old_varr))
+                ref['total_energy'] += d_ke
+
     # get the fixed resolution grid of the target dataset
     ad = build_3D_grid(ds,sub_grid_edges)
 
@@ -465,6 +568,7 @@ def compare_to_sim_reference(ds, ref_path, verbose, dim_length,
                         Ny = dim_length, Nz=dim_length))
 
 if __name__ == '__main__':
+    
     args = parser.parse_args()
 
     verbose = args.v
@@ -481,9 +585,11 @@ if __name__ == '__main__':
     if args.ref_type == 'sim':
         sim_comp = True
 
-        unexpected_args = [("std",False), ("median", False), ("permute", None)]
+        unexpected_args = [("std",False), ("median", False), ("permute", None),
+                           ("reverse",False), ("offset_soln", 0.),
+                           ('bkg_velocity', [])]
         for name,default_val in unexpected_args:
-            if getattr(args,name) != default_val:
+            if hasattr(args,name) and getattr(args,name) != default_val:
                 raise ValueError(('The --{} option cannot be specified for '
                                   '"sim" reference data.').format(name))
         dim_length = args.n
@@ -524,5 +630,11 @@ if __name__ == '__main__':
                                   "(don't pass an argument or choose from "
                                   "'0', '1', '2')").format(args.permute))
 
+        reverse = args.reverse
+        offset_soln = args.offset_soln
+        bkg_velocity = getattr(args,'bkg_velocity',[])
+        
+
         compare_to_1D_reference(ds, args.ref_path, problem_ax, verbose, op_func,
-                                permute, specified_fields)
+                                permute, specified_fields, reverse,
+                                offset_soln, bkg_velocity)
