@@ -293,6 +293,11 @@ flags_fc_charm = ''
 flags_link_charm = ''
 boost_inc = ''
 boost_lib = ''
+serial_run = ""
+serial_arg = ""
+parallel_run = ""
+paralell_arg = ""
+smp = 0
 
 if   (arch == "gordon_gnu"):   from gordon_gnu   import *
 elif (arch == "gordon_intel"): from gordon_intel import *
