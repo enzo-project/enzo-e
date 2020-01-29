@@ -100,26 +100,26 @@ int EnzoBlock::SolveHydroEquations
   Field field = data()->field();
 
   //------------------------------
-  // Prepare colour field parameters
+  // Prepare color field parameters
   //------------------------------
 
-  // ncolour: number of colour fields
+  // ncolor: number of color fields
 
-  int    ncolour  = field.groups()->size("colour");
+  int    ncolor  = field.groups()->size("color");
 
-  // colourpt: the color 'array' (contains all color fields)
-  enzo_float * colourpt = (enzo_float *) field.permanent();
+  // colorpt: the color 'array' (contains all color fields)
+  enzo_float * colorpt = (enzo_float *) field.permanent();
 
   // coloff: offsets into the color array (for each color field)
-  int * coloff   = (ncolour > 0) ? (new int [ncolour]) : NULL;
-  int index_colour = 0;
+  int * coloff   = (ncolor > 0) ? (new int [ncolor]) : NULL;
+  int index_color = 0;
   for (int index_field = 0;
        index_field < field.field_count();
        index_field++) {
     std::string name = field.field_name(index_field);
-    if (field.groups()->is_in(name,"colour")) {
-      coloff[index_colour++] 
-	= (enzo_float *)(field.values(index_field)) - colourpt;
+    if (field.groups()->is_in(name,"color")) {
+      coloff[index_color++] 
+	= (enzo_float *)(field.values(index_field)) - colorpt;
     }
 
   }
@@ -254,18 +254,18 @@ int EnzoBlock::SolveHydroEquations
   }
 
   /* allocate temporary space for solver (enough to fit 31 of the largest
-     possible 2d slices plus 4*ncolour). */
+     possible 2d slices plus 4*ncolor). */
 
   int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
 			 GridDimension[1]*GridDimension[2]),
 		     GridDimension[2]*GridDimension[0]);
 
-  enzo_float *temp = new enzo_float[tempsize*(32+ncolour*4)];
+  enzo_float *temp = new enzo_float[tempsize*(32+ncolor*4)];
 
   /* create and fill in arrays which are easier for the solver to
      understand. */
 
-  size = NumberOfSubgrids*3*(18+2*ncolour) + 1;
+  size = NumberOfSubgrids*3*(18+2*ncolor) + 1;
   int * array = new int[size];
   for (int i=0; i<size; i++) array[i] = 0;
 
@@ -413,7 +413,7 @@ int EnzoBlock::SolveHydroEquations
      istart, iend, jstart, jend,
      standard, dindex, Eindex, uindex, vindex, windex,
      geindex, temp,
-     &ncolour, colourpt, coloff, colindex
+     &ncolor, colorpt, coloff, colindex
      );
 
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
@@ -496,7 +496,7 @@ int EnzoBlock::SolveHydroEquations
     delete [] SubgridFluxes;
   }
   
-  if (ncolour > 0) delete [] coloff;
+  if (ncolor > 0) delete [] coloff;
 
   return ENZO_SUCCESS;
 

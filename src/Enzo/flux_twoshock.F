@@ -116,7 +116,7 @@ c             geb(i) = gers(i,j)
 c          write(24,*) i, u0(i), uls(i,j), urs(i,j), c0(i)
        enddo
 c
-c      Repeat for colour variables (now moved below)
+c      Repeat for color variables (now moved below)
 c
 #ifdef UNUSED
        do n=1,ncolor
@@ -254,7 +254,7 @@ c
           endif
        enddo
 c
-c      Repeat for colour variables
+c      Repeat for color variables
 c
        do n=1,ncolor
           do i=i1, i2+1

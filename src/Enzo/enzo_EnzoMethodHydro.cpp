@@ -123,26 +123,26 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //     for (dim = 0; dim < GridRank; dim++)
   //       size *= GridDimension[dim];
 
-  //     /* If multi-species being used, then treat them as colour variables
+  //     /* If multi-species being used, then treat them as color variables
   //        (note: the solver has been modified to treat these as density vars). */
 
-  //     int NumberOfColours = 0, ColourNum;
+  //     int NumberOfcolors = 0, colorNum;
 
   //     // use different color fields for RadiativeTransferFLD problems
   //     //   first, the standard Enzo color field advection
   //     if (MultiSpecies > 0 && RadiativeTransferFLD != 2) {
-  //       NumberOfColours = 6 + 3*(MultiSpecies-1);
+  //       NumberOfcolors = 6 + 3*(MultiSpecies-1);
 
-  //       if ((ColourNum =
+  //       if ((colorNum =
   //            FindField(ElectronDensity, FieldType, NumberOfBaryonFields)) < 0) {
   //         ENZO_FAIL("Could not find ElectronDensity.");
   //       }
 
-  //       /* Generate an array of field numbers corresponding to the colour fields
+  //       /* Generate an array of field numbers corresponding to the color fields
   // 	 (here assumed to start with ElectronDensity and continue in order). */
 
-  //       for (i = 0; i < NumberOfColours; i++)
-  //         colnum[i] = ColourNum+i;
+  //       for (i = 0; i < NumberOfcolors; i++)
+  //         colnum[i] = colorNum+i;
 
   //     }
   //     // second, the color field advection if using RadiativeTransferFLD for 
@@ -151,86 +151,86 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //       if (ImplicitProblem < 4)  {  // grey radiation problem
 	
   // 	// set the grey radiation field (required)
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(RadiationFreq0, FieldType, NumberOfBaryonFields)) < 0) 
   // 	  ENZO_FAIL("Could not find RadiationFreq0.");
-  // 	colnum[0] = ColourNum;
+  // 	colnum[0] = colorNum;
 
   // 	// check for other chemistry fields; add if they're present
   // 	//   ElectronDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(ElectronDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(HIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HIIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(HIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HeIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(HeIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HeIIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(HeIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HeIIIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(HeIIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HMDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(HMDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   H2IDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(H2IDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   H2IIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(H2IIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   DIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(DIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   DIIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(DIIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   // 	//   HDIDensity
-  // 	if ((ColourNum =
+  // 	if ((colorNum =
   // 	     FindField(HDIDensity, FieldType, NumberOfBaryonFields)) >= 0) 
-  // 	  colnum[++NumberOfColours] = ColourNum;
+  // 	  colnum[++NumberOfcolors] = colorNum;
   //       }
   //     }
 
-  //     /* Add "real" colour fields (metallicity, etc.) as colour variables. */
+  //     /* Add "real" color fields (metallicity, etc.) as color variables. */
 
-  //     int SNColourNum, MetalNum, MBHColourNum, Galaxy1ColourNum, Galaxy2ColourNum,
+  //     int SNcolorNum, MetalNum, MBHcolorNum, Galaxy1colorNum, Galaxy2colorNum,
   //       MetalIaNum, MetalIINum; 
 
-  //     if (this->IdentifyColourFields(SNColourNum, MetalNum, MetalIaNum, MetalIINum,
-  //                 MBHColourNum, Galaxy1ColourNum, Galaxy2ColourNum) == FAIL)
-  //       ENZO_FAIL("Error in grid->IdentifyColourFields.\n");
+  //     if (this->IdentifycolorFields(SNcolorNum, MetalNum, MetalIaNum, MetalIINum,
+  //                 MBHcolorNum, Galaxy1colorNum, Galaxy2colorNum) == FAIL)
+  //       ENZO_FAIL("Error in grid->IdentifycolorFields.\n");
 
   //     if (MetalNum != -1) {
-  //       colnum[NumberOfColours++] = MetalNum;
+  //       colnum[NumberOfcolors++] = MetalNum;
   //       if (MultiMetals || TestProblemData.MultiMetals) {
-  // 	colnum[NumberOfColours++] = MetalNum+1; //ExtraType0
-  // 	colnum[NumberOfColours++] = MetalNum+2; //ExtraType1
+  // 	colnum[NumberOfcolors++] = MetalNum+1; //ExtraType0
+  // 	colnum[NumberOfcolors++] = MetalNum+2; //ExtraType1
   //       }
   //     }
 
-  //     if (MetalIaNum       != -1) colnum[NumberOfColours++] = MetalIaNum;
-  //     if (MetalIINum       != -1) colnum[NumberOfColours++] = MetalIINum;
-  //     if (SNColourNum      != -1) colnum[NumberOfColours++] = SNColourNum;
-  //     if (MBHColourNum     != -1) colnum[NumberOfColours++] = MBHColourNum;
-  //     if (Galaxy1ColourNum != -1) colnum[NumberOfColours++] = Galaxy1ColourNum;
-  //     if (Galaxy2ColourNum != -1) colnum[NumberOfColours++] = Galaxy2ColourNum;
+  //     if (MetalIaNum       != -1) colnum[NumberOfcolors++] = MetalIaNum;
+  //     if (MetalIINum       != -1) colnum[NumberOfcolors++] = MetalIINum;
+  //     if (SNcolorNum      != -1) colnum[NumberOfcolors++] = SNcolorNum;
+  //     if (MBHcolorNum     != -1) colnum[NumberOfcolors++] = MBHcolorNum;
+  //     if (Galaxy1colorNum != -1) colnum[NumberOfcolors++] = Galaxy1colorNum;
+  //     if (Galaxy2colorNum != -1) colnum[NumberOfcolors++] = Galaxy2colorNum;
 
 
   //     /* Add Simon Glover's chemistry species as color fields */
@@ -254,60 +254,60 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   // 	ENZO_FAIL("Error in IdentifyGloverSpeciesFields.");
   //       }
 
-  //       colnum[NumberOfColours++] = HIINum;
-  //       colnum[NumberOfColours++] = HINum;
-  //       colnum[NumberOfColours++] = H2INum;
+  //       colnum[NumberOfcolors++] = HIINum;
+  //       colnum[NumberOfcolors++] = HINum;
+  //       colnum[NumberOfcolors++] = H2INum;
 
   //       if( (GCM==1) || (GCM==2) || (GCM==3) || (GCM==7) ){
-  // 	colnum[NumberOfColours++] = DINum;
-  // 	colnum[NumberOfColours++] = DIINum;
-  // 	colnum[NumberOfColours++] = HDINum;
-  // 	colnum[NumberOfColours++] = HeINum;
-  // 	colnum[NumberOfColours++] = HeIINum;
-  // 	colnum[NumberOfColours++] = HeIIINum;
+  // 	colnum[NumberOfcolors++] = DINum;
+  // 	colnum[NumberOfcolors++] = DIINum;
+  // 	colnum[NumberOfcolors++] = HDINum;
+  // 	colnum[NumberOfcolors++] = HeINum;
+  // 	colnum[NumberOfcolors++] = HeIINum;
+  // 	colnum[NumberOfcolors++] = HeIIINum;
   //       }
 
   //       if( (GCM==3) || (GCM==5) || (GCM==7) ){
-  // 	colnum[NumberOfColours++] = COINum;
+  // 	colnum[NumberOfcolors++] = COINum;
   //       }
 
   //       if( (GCM==2) || (GCM==3) || (GCM==7) ){
-  // 	colnum[NumberOfColours++] = CINum;
-  // 	colnum[NumberOfColours++] = CIINum;
-  // 	colnum[NumberOfColours++] = OINum;
-  // 	colnum[NumberOfColours++] = OIINum;
+  // 	colnum[NumberOfcolors++] = CINum;
+  // 	colnum[NumberOfcolors++] = CIINum;
+  // 	colnum[NumberOfcolors++] = OINum;
+  // 	colnum[NumberOfcolors++] = OIINum;
   //       }
 
   //       if( (GCM==2) || (GCM==3) ){
-  // 	colnum[NumberOfColours++] = SiINum;
-  // 	colnum[NumberOfColours++] = SiIINum;
-  // 	colnum[NumberOfColours++] = SiIIINum;
+  // 	colnum[NumberOfcolors++] = SiINum;
+  // 	colnum[NumberOfcolors++] = SiIINum;
+  // 	colnum[NumberOfcolors++] = SiIIINum;
   //       }
 
   //       if( (GCM==3) || (GCM==7) ){
-  // 	colnum[NumberOfColours++] = CHINum;
-  // 	colnum[NumberOfColours++] = CH2INum;
-  // 	colnum[NumberOfColours++] = CH3IINum;
-  // 	colnum[NumberOfColours++] = C2INum;
-  // 	colnum[NumberOfColours++] = HCOIINum;
-  // 	colnum[NumberOfColours++] = OHINum;
-  // 	colnum[NumberOfColours++] = H2OINum;
-  // 	colnum[NumberOfColours++] = O2INum;
+  // 	colnum[NumberOfcolors++] = CHINum;
+  // 	colnum[NumberOfcolors++] = CH2INum;
+  // 	colnum[NumberOfcolors++] = CH3IINum;
+  // 	colnum[NumberOfcolors++] = C2INum;
+  // 	colnum[NumberOfcolors++] = HCOIINum;
+  // 	colnum[NumberOfcolors++] = OHINum;
+  // 	colnum[NumberOfcolors++] = H2OINum;
+  // 	colnum[NumberOfcolors++] = O2INum;
   //       }
       
   //     } // if(TestProblemData.GloverChemistryModel)
 
 
-  //     /* Add Cosmic Ray Energy Density as a colour variable. */
+  //     /* Add Cosmic Ray Energy Density as a color variable. */
   //     if(CRModel){
   //       int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum, CRNum;
   //       if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
   //                        Vel3Num, TENum, CRNum ) == FAIL )
   //         ENZO_FAIL("Error in IdentifyPhysicalQuantities.\n");
-  //       colnum[NumberOfColours++] = CRNum;
+  //       colnum[NumberOfcolors++] = CRNum;
   //     } // end CR if
 
-  //     /* Add shock variables as a colour variable. */
+  //     /* Add shock variables as a color variable. */
 
   //     if(ShockMethod){
   //       int MachNum, PSTempNum,PSDenNum;
@@ -316,10 +316,10 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   // 	ENZO_FAIL("Error in IdentifyShockSpeciesFields.")
   //       }
       
-  //       colnum[NumberOfColours++] = MachNum;
+  //       colnum[NumberOfcolors++] = MachNum;
   //       if(StorePreShockFields){
-  // 	colnum[NumberOfColours++] = PSTempNum;
-  // 	colnum[NumberOfColours++] = PSDenNum;
+  // 	colnum[NumberOfcolors++] = PSTempNum;
+  // 	colnum[NumberOfcolors++] = PSDenNum;
   //       }
   //     }
   //     /* Determine if Gamma should be a scalar or a field. */
@@ -489,7 +489,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //         if (HydroMethod == MHD_Li){
   //           this->SolveMHD_Li(CycleNumber, NumberOfSubgrids, SubgridFluxes, 
   //                 CellWidthTemp, GridGlobalStart, gravity_, 
-  //                 NumberOfColours, colnum, Fluxes);
+  //                 NumberOfcolors, colnum, Fluxes);
   //         }
 
   //         if( HydroMethod != NoHydro )
@@ -561,7 +561,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   // 			istart, iend, jstart, jend,
   // 			standard, dindex, Eindex, uindex, vindex, windex,
   // 			  geindex, temp,
-  //                         &NumberOfColours, colourpt, coloff, colindex);
+  //                         &NumberOfcolors, colorpt, coloff, colindex);
   // #else /* PPM_LR */
   //       ENZO_FAIL("PPM LR is not supported.");
   // #endif /* PPM_LR */
@@ -572,7 +572,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //                hxa, CellWidthTemp[1], CellWidthTemp[2],
   //                gravity_, NumberOfSubgrids, GridGlobalStart,
   //                SubgridFluxes,
-  //                NumberOfColours, colnum, LowestLevel,
+  //                NumberOfcolors, colnum, LowestLevel,
   //                MinimumSupportEnergyCoefficient) == FAIL)
   // 	ENZO_FAIL("ZeusSolver() failed!\n");
 	
@@ -593,7 +593,7 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //         StopFirstTimeAtMetalEnrichedDensity > 0.) {
   //       int DensNum = FindField(Density, FieldType, NumberOfBaryonFields);
 
-  //       int MetalNum = 0, SNColourNum = 0;
+  //       int MetalNum = 0, SNcolorNum = 0;
   //       int MetalFieldPresent = FALSE;
   //       float *MetalPointer;
   //       float *TotalMetals = NULL;
@@ -603,8 +603,8 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //         // First see if there's a metal field (so we can conserve species in
   //         // the solver)
   //         MetalNum = FindField(Metallicity, FieldType, NumberOfBaryonFields);
-  //         SNColourNum = FindField(SNColour, FieldType, NumberOfBaryonFields);
-  //         MetalFieldPresent = (MetalNum != -1 || SNColourNum != -1);
+  //         SNcolorNum = FindField(SNcolor, FieldType, NumberOfBaryonFields);
+  //         MetalFieldPresent = (MetalNum != -1 || SNcolorNum != -1);
 
   //         // Double check if there's a metal field when we have metal cooling
   //         if (MetalFieldPresent == FALSE) {
@@ -614,17 +614,17 @@ void EnzoMethodHydro::compute ( Block * block) throw()
   //         /* If both metal fields (Pop I/II and III) exist, create a field
   //            that contains their sum */
 
-  //         if (MetalNum != -1 && SNColourNum != -1) {
+  //         if (MetalNum != -1 && SNcolorNum != -1) {
   //           TotalMetals = new float[size];
   //           for (int i = 0; i < size; i++)
-  //             TotalMetals[i] = BaryonField[MetalNum][i] + BaryonField[SNColourNum][i];
+  //             TotalMetals[i] = BaryonField[MetalNum][i] + BaryonField[SNcolorNum][i];
   //           MetalPointer = TotalMetals;
   //         } // ENDIF both metal types
   //         else {
   //           if (MetalNum != -1)
   //             MetalPointer = BaryonField[MetalNum];
-  //           else if (SNColourNum != -1)
-  //             MetalPointer = BaryonField[SNColourNum];
+  //           else if (SNcolorNum != -1)
+  //             MetalPointer = BaryonField[SNcolorNum];
   //         } // ENDELSE both metal types
  
   //       }
@@ -751,9 +751,9 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // ... add slice for gas energy if needed
   if (dual_energy_) na += 1*ns;
 
-  // ... add slices for colour fields
+  // ... add slices for color fields
   Grouping * field_groups = block->data()->field().groups();
-  int nc = field_groups->size("colour");
+  int nc = field_groups->size("color");
   na += nc*ns;
 
   // allocate array
@@ -783,7 +783,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
     geslice = pa; pa +=ns;
   }
 
-  // add slices for colour fields
+  // add slices for color fields
   enzo_float * colslice = NULL;
   if (nc > 0) {
     colslice = pa; pa += nc*ns;
@@ -835,7 +835,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
 
   for (int ic=0; ic<nc; ic++) {
     enzo_float * c = (enzo_float *)
-      field.values(field_groups->item("colour",ic));
+      field.values(field_groups->item("color",ic));
     for (int iy=0; iy<my; iy++) {
       for (int ix=0; ix<mx; ix++) {
 	int i = ix + mx*(iy + my*iz);
@@ -1139,17 +1139,17 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // 	  SubgridFluxes[n]->RightFluxes[GENum][dim][offset] = gef[rindex];
   // 	} // ENDIF dual_energy_
 
-  // 	for (ncolour = 0; ncolour < nc; ncolour++) {
-  // 	  clindex = (j + ncolour * my) * GridDimension[dim] +
+  // 	for (ncolor = 0; ncolor < nc; ncolor++) {
+  // 	  clindex = (j + ncolor * my) * GridDimension[dim] +
   // 	    lface;
-  // 	  crindex = (j + ncolour * my) * GridDimension[dim] +
+  // 	  crindex = (j + ncolor * my) * GridDimension[dim] +
   // 	    rface;
 
-  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolour]][dim][offset] = 
+  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] = 
   // 	    colf[clindex];
-  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolour]][dim][offset] = 
+  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] = 
   // 	    colf[crindex];
-  // 	} // ENDFOR ncolour
+  // 	} // ENDFOR ncolor
 
   //     } // ENDFOR J
 
@@ -1194,7 +1194,7 @@ void EnzoMethodHydro::ppm_euler_x_(Block * block, int iz)
   // 	index3 = (k*my + j) * mx + i;
   // 	BaryonField[colnum[n]][index3] = colslice[index2+i];
   //     }
-  //   } // ENDFOR colours
+  //   } // ENDFOR colors
   // } // ENDFOR j
 
   // deallocate array
@@ -1248,7 +1248,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   //   colslice = new float[nc * size];  
   // }
 
-  // int j, k, n, ncolour, index2, index3;
+  // int j, k, n, ncolor, index2, index3;
   // for (k = 0; k < mz; k++) {
 
   //   index2 = k * my;
@@ -1300,7 +1300,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // 	index3 = (k*my + j) * mx + i;
   // 	colslice[index2+j] = BaryonField[colnum[n]][index3];
   //     }
-  //   } // ENDFOR colours
+  //   } // ENDFOR colors
 
   // } // ENDFOR j
 
@@ -1533,17 +1533,17 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // 	  SubgridFluxes[n]->RightFluxes[GENum][dim][offset] = gef[rindex];
   // 	} // ENDIF dual_energy_
 
-  // 	for (ncolour = 0; ncolour < nc; ncolour++) {
-  // 	  clindex = (k + ncolour * mz) * GridDimension[dim] +
+  // 	for (ncolor = 0; ncolor < nc; ncolor++) {
+  // 	  clindex = (k + ncolor * mz) * GridDimension[dim] +
   // 	    lface;
-  // 	  crindex = (k + ncolour * mz) * GridDimension[dim] +
+  // 	  crindex = (k + ncolor * mz) * GridDimension[dim] +
   // 	    rface;
 
-  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolour]][dim][offset] = 
+  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] = 
   // 	    colf[clindex];
-  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolour]][dim][offset] = 
+  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] = 
   // 	    colf[crindex];
-  // 	} // ENDFOR ncolour
+  // 	} // ENDFOR ncolor
 
   //     } // ENDFOR J
 
@@ -1586,7 +1586,7 @@ void EnzoMethodHydro::ppm_euler_y_ (Block * block, int ix)
   // 	index3 = (k*my + j) * mx + i;
   // 	BaryonField[colnum[n]][index3] = colslice[index2+j];
   //     }
-  //   } // ENDFOR colours    
+  //   } // ENDFOR colors    
 
   // } // ENDFOR j
 
@@ -1677,11 +1677,11 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // if (dual_energy_) {
   //   geslice = new float[size];  
   // }
-  // if (NumberOfColours > 0) {
-  //   colslice = new float[NumberOfColours * size];  
+  // if (NumberOfcolors > 0) {
+  //   colslice = new float[NumberOfcolors * size];  
   // }
 
-  // int i, k, n, ncolour, index2, index3;
+  // int i, k, n, ncolor, index2, index3;
 
   // for (i = 0; i < mx; i++) {
   //   index2 = i * mz;
@@ -1726,13 +1726,13 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 	geslice[index2+k] = ei[index3];
   //     }
 
-  //   for (n = 0; n < NumberOfColours; n++) {
+  //   for (n = 0; n < NumberOfcolors; n++) {
   //     index2 = (n*mx + i) * mz;
   //     for (k = 0; k < mz; k++) {
   // 	index3 = (k*my + j) * mx + i;
   // 	colslice[index2+k] = BaryonField[colnum[n]][index3];
   //     }
-  //   } // ENDFOR colours
+  //   } // ENDFOR colors
   // } // ENDFOR j
 
   // /* Allocate memory for temporaries used in solver */
@@ -1764,9 +1764,9 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // wf = new float[size];		
   // gef = new float[size];	
   // ges = new float[size];
-  // colf = new float[NumberOfColours*size];  
-  // colls = new float[NumberOfColours*size];  
-  // colrs = new float[NumberOfColours*size];  
+  // colf = new float[NumberOfcolors*size];  
+  // colls = new float[NumberOfcolors*size];  
+  // colrs = new float[NumberOfcolors*size];  
 
   // /* Convert start and end indexes into 1-based for FORTRAN */
 
@@ -1819,7 +1819,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 			   &ConservativeReconstruction, &PositiveReconstruction,
   // 			   &dt, &gamma_, &ppm_pressure_free_, 
   // 			   dls, drs, pls, prs, gels, gers, uls, urs, vls, vrs,
-  // 			   wls, wrs, &NumberOfColours, colslice, colls, colrs);
+  // 			   wls, wrs, &NumberOfcolors, colslice, colls, colrs);
 
   // /* Compute (Lagrangian part of the) Riemann problem at each zone boundary */
 
@@ -1842,7 +1842,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 				dls, drs, pls, prs, gels, gers, uls, urs,
   // 				vls, vrs, wls, wrs, pbar, ubar,
   // 				df, ef, uf, vf, wf, gef, ges,
-  // 				&NumberOfColours, colslice, colls, colrs, colf);
+  // 				&NumberOfcolors, colslice, colls, colrs, colf);
   //   break;
 
   // case HLL:
@@ -1856,7 +1856,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 			   dls, drs, pls, prs, uls, urs,
   // 			   vls, vrs, wls, wrs, gels, gers,
   // 			   df, uf, vf, wf, ef, gef, ges,
-  // 			   &NumberOfColours, colslice, colls, colrs, colf);
+  // 			   &NumberOfcolors, colslice, colls, colrs, colf);
   //   break;
 
   // case HLLC:
@@ -1870,7 +1870,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 			    dls, drs, pls, prs, uls, urs,
   // 			    vls, vrs, wls, wrs, gels, gers,
   // 			    df, uf, vf, wf, ef, gef, ges,
-  // 			    &NumberOfColours, colslice, colls, colrs, colf);
+  // 			    &NumberOfcolors, colslice, colls, colrs, colf);
   //   break;
 
   // default:
@@ -1896,7 +1896,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 		      &ppm_diffusion_, &gravity_, &dual_energy_, 
   // 		      &dual_energy_eta1_, &dual_energy_eta2_,
   // 		      df, ef, uf, vf, wf, gef, ges,
-  // 		      &NumberOfColours, colslice, colf, &density_floor_);
+  // 		      &NumberOfcolors, colslice, colf, &density_floor_);
 
   // /* If necessary, recompute the pressure to correctly set ge and e */
 
@@ -1962,17 +1962,17 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 	  SubgridFluxes[n]->RightFluxes[GENum][dim][offset] = gef[rindex];
   // 	} // ENDIF dual_energy_
 
-  // 	for (ncolour = 0; ncolour < NumberOfColours; ncolour++) {
-  // 	  clindex = (i + ncolour * mx) * GridDimension[dim] +
+  // 	for (ncolor = 0; ncolor < NumberOfcolors; ncolor++) {
+  // 	  clindex = (i + ncolor * mx) * GridDimension[dim] +
   // 	    lface;
-  // 	  crindex = (i + ncolour * mx) * GridDimension[dim] +
+  // 	  crindex = (i + ncolor * mx) * GridDimension[dim] +
   // 	    rface;
 
-  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolour]][dim][offset] = 
+  // 	  SubgridFluxes[n]->LeftFluxes [colnum[ncolor]][dim][offset] = 
   // 	    colf[clindex];
-  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolour]][dim][offset] = 
+  // 	  SubgridFluxes[n]->RightFluxes[colnum[ncolor]][dim][offset] = 
   // 	    colf[crindex];
-  // 	} // ENDFOR ncolour
+  // 	} // ENDFOR ncolor
 
   //     } // ENDFOR J
 
@@ -2009,13 +2009,13 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   // 	ei[index3] = geslice[index2+k];
   //     }
 
-  //   for (n = 0; n < NumberOfColours; n++) {
+  //   for (n = 0; n < NumberOfcolors; n++) {
   //     index2 = (n*mx + i) * mz;
   //     for (k = 0; k < mz; k++) {
   // 	index3 = (k*my + j) * mx + i;
   // 	BaryonField[colnum[n]][index3] = colslice[index2+k];
   //     }
-  //   } // ENDFOR colours
+  //   } // ENDFOR colors
 
   // } // ENDFOR j
 
@@ -2031,7 +2031,7 @@ void EnzoMethodHydro::ppm_euler_z_ (Block * block, int iy)
   //   delete [] grslice;
   // if (dual_energy_)
   //   delete [] geslice;
-  // if (NumberOfColours > 0)
+  // if (NumberOfcolors > 0)
   //   delete [] colslice;
 
   // delete [] dls;

@@ -30,7 +30,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
   // needed field
 
   std::vector<std::string> fields_to_define;
-  std::vector<std::string> colour_fields;
+  std::vector<std::string> color_fields;
 
   if (grackle_data->metal_cooling > 0){
     std::string metal_name = "metal_density";
@@ -38,7 +38,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
     if (! (field_descr->is_field(metal_name))){
       fields_to_define.push_back(metal_name);
     }
-    colour_fields.push_back(metal_name);
+    color_fields.push_back(metal_name);
   }
 
   // Define primordial chemistry fields
@@ -52,7 +52,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
       if (! (field_descr->is_field( pc1_fields[ifield] ))){
         fields_to_define.push_back( pc1_fields[ifield] );
       }
-      colour_fields.push_back( pc1_fields[ifield] );
+      color_fields.push_back( pc1_fields[ifield] );
     }
 
     if(grackle_data->primordial_chemistry > 1){
@@ -64,7 +64,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
         if (! (field_descr->is_field( pc2_fields[ifield] ))){
           fields_to_define.push_back( pc2_fields[ifield] );
         }
-        colour_fields.push_back( pc2_fields[ifield] );
+        color_fields.push_back( pc2_fields[ifield] );
       }
 
       if(grackle_data->primordial_chemistry > 2){
@@ -76,7 +76,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
             fields_to_define.push_back( pc3_fields[ifield] );
           }
 
-          colour_fields.push_back( pc3_fields[ifield] );
+          color_fields.push_back( pc3_fields[ifield] );
         }
 
       } // endif primordial_chemistry > 2
@@ -107,14 +107,14 @@ EnzoMethodGrackle::EnzoMethodGrackle
     field_descr->insert_permanent( fields_to_define[ifield] );
   }
 
-  // Set these fields to colour if they exist
-  //    list of fields belonging to this method that are colour
-  for (int ifield=0; ifield < colour_fields.size(); ifield++){
-    if (   field_descr->is_permanent(  colour_fields[ifield] ) &&
-         !(field_descr->groups()->is_in( colour_fields[ifield], "colour")) ){
+  // Set these fields to color if they exist
+  //    list of fields belonging to this method that are color
+  for (int ifield=0; ifield < color_fields.size(); ifield++){
+    if (   field_descr->is_permanent(  color_fields[ifield] ) &&
+         !(field_descr->groups()->is_in( color_fields[ifield], "color")) ){
 
 
-      field_descr->groups()->add( colour_fields[ifield] ,"colour");
+      field_descr->groups()->add( color_fields[ifield] ,"color");
     }
   }
 
