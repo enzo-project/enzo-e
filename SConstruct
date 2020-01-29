@@ -306,11 +306,8 @@ elif (arch == "linux_gprof"):  from linux_gprof  import *
 elif (arch == "linux_mpe"):    from linux_mpe    import *
 elif (arch == "linux_tau"):    from linux_tau    import *
 elif (arch == "ncsa_bw"):      from ncsa_bw      import *
-<<<<<<< HEAD
-=======
 elif (arch == "ncsa_bw_net"):  from ncsa_bw_net  import *
 elif (arch == "ncsa_bw_smp"):  from ncsa_bw_smp  import *
->>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
 elif (arch == "faraday_gnu"):  from faraday_gnu  import *
 elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
 elif (arch == "frontera_gcc"): from frontera_gcc import *
@@ -372,36 +369,12 @@ if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
 
 if (use_jemalloc == 1):
-<<<<<<< HEAD
-   defines = defines + define_jemalloc
-
-if (use_papi != 0):      defines = defines + define_papi
-if (use_grackle != 0):   defines = defines + define_grackle
-
-if (new_output != 0):    defines = defines + define_new_output
-if (new_ppm != 0):       defines = defines + define_new_ppm
-
-if (trace != 0):         defines = defines + define_trace
-if (verbose != 0):       defines = defines + define_verbose
-if (trace_charm != 0):   defines = defines + define_trace_charm
-if (debug != 0):         defines = defines + define_debug
-if (debug_field != 0):   defines = defines + define_debug_field
-if (debug_field_face != 0): defines = defines + define_debug_field_face
-if (check != 0):         defines = defines + define_check
-if (debug_verbose != 0): defines = defines + define_debug_verbose
-if (memory != 0):        defines = defines + define_memory
-if (new_charm != 0):     defines = defines + define_new_charm
-if (python_lt_27 != 0):  defines = defines + define_python_lt_27
-if (have_git != 0 or have_mercurial != 0 ):defines = defines + define_have_version_control
-
-defines = defines + define_charm
-defines = defines + define_cello
-=======
    defines.append(define_jemalloc)
 
 if (use_papi != 0):      defines.append( define_papi )
 if (use_grackle != 0):   defines.append( define_grackle )
 
+if (new_ppm != 0):       defines.append( define_new_ppm )
 if (new_output != 0):    defines.append( define_new_output )
 
 if (trace != 0):         defines.append( define_trace )
@@ -418,7 +391,6 @@ if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
 if (have_git != 0 or have_mercurial != 0 ):
    defines.append( define_have_version_control )
 if (smp != 0):           defines.append( define_smp )
->>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
 
 #======================================================================
 # FINAL CHARM SETUP
@@ -436,18 +408,10 @@ if (balance == 1):
 # UNIT TEST SETTINGS
 #======================================================================
 
-<<<<<<< HEAD
-serial_run   = ""
-if (smp == 1):
-      parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
-else:
-=======
-
 if (parallel_run == ''):
    if (smp == 1):
       parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
    else:
->>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
       parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
@@ -473,12 +437,8 @@ Export('inc_path')
 Export('node_size')
 Export('test_path')
 Export('ip_charm')
-<<<<<<< HEAD
-=======
 Export('smp')
 Export('prec')
->>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
-
 
 cpppath     = [inc_path]
 fortranpath = [inc_path]
