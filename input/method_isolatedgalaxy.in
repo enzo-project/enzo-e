@@ -162,6 +162,7 @@
   Initial {
     list = ["isolated_galaxy"];
     IG {
+        analytic_velocity = true;   
         center_position  = [0.5, 0.5, 0.5];
         scale_length     = 0.004166666667;
         scale_height     = 0.002916666667;
