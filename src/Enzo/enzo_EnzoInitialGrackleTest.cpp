@@ -101,7 +101,6 @@ void EnzoInitialGrackleTest::enforce_block
 
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
-  int ngz = nz + 2*gz;
 
   double H_n_slope = log10(enzo_config->initial_grackle_test_maximum_H_number_density /
                            enzo_config->initial_grackle_test_minimum_H_number_density) /

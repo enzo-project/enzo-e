@@ -54,12 +54,12 @@ EnzoConfig::EnzoConfig() throw ()
   initial_collapse_temperature(0.0),
   // EnzoInitialGrackleTest
 #ifdef CONFIG_USE_GRACKLE
-  initial_grackle_test_minimum_H_number_density(0.1),
   initial_grackle_test_maximum_H_number_density(1000.0),
-  initial_grackle_test_minimum_metallicity(1.0E-4),
   initial_grackle_test_maximum_metallicity(1.0),
-  initial_grackle_test_minimum_temperature(10.0),
   initial_grackle_test_maximum_temperature(1.0E8),
+  initial_grackle_test_minimum_H_number_density(0.1),
+  initial_grackle_test_minimum_metallicity(1.0E-4),
+  initial_grackle_test_minimum_temperature(10.0),
   initial_grackle_test_reset_energies(0),
 #endif /* CONFIG_USE_GRACKLE */
   initial_feedback_test_density(),
@@ -74,6 +74,13 @@ EnzoConfig::EnzoConfig() throw ()
   initial_music_particle_coords(),
   initial_music_particle_types(),
   initial_music_particle_attributes(),
+  initial_music_throttle_internode(),
+  initial_music_throttle_intranode(),
+  initial_music_throttle_node_files(),
+  initial_music_throttle_close_count(),
+  initial_music_throttle_group_size(),
+  initial_music_throttle_seconds_stagger(),
+  initial_music_throttle_seconds_delay(),
   // EnzoInitialPm
   initial_pm_field(""),
   initial_pm_mpp(0.0),
@@ -129,6 +136,8 @@ EnzoConfig::EnzoConfig() throw ()
   initial_IG_recent_SF_seed(12345),
   // EnzoProlong
   interpolation_method(""),
+  // EnzoMethodCheckGravity
+  method_check_gravity_particle_type(),
   // EnzoMethodHeat
   method_heat_alpha(0.0),
   // EnzoMethodHydro
@@ -329,6 +338,13 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_music_particle_coords;
   p | initial_music_particle_types;
   p | initial_music_particle_attributes;
+  p | initial_music_throttle_internode;
+  p | initial_music_throttle_intranode;
+  p | initial_music_throttle_node_files;
+  p | initial_music_throttle_close_count;
+  p | initial_music_throttle_group_size;
+  p | initial_music_throttle_seconds_stagger;
+  p | initial_music_throttle_seconds_delay;
 
   p | initial_pm_field;
   p | initial_pm_mpp;
@@ -374,6 +390,8 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_soup_density;
 
   p | interpolation_method;
+
+  p | method_check_gravity_particle_type;
 
   p | method_heat_alpha;
 
@@ -449,32 +467,40 @@ void EnzoConfig::pup (PUP::er &p)
   p | units_time;
 
   p  | method_grackle_use_grackle;
+
 #ifdef CONFIG_USE_GRACKLE
-  p  | method_grackle_use_cooling_timestep;
-  p  | method_grackle_radiation_redshift;
+  if (method_grackle_use_grackle) {
+    p  | method_grackle_use_cooling_timestep;
+    p  | method_grackle_radiation_redshift;
 
-  int is_null = (method_grackle_chemistry==NULL);
-  p | is_null;
+    int is_null = (method_grackle_chemistry==NULL);
 
-  if (is_null){
-    method_grackle_chemistry = NULL;
-  } else {
+    p | is_null;
 
-    if (p.isUnpacking()) {
-      method_grackle_chemistry = new chemistry_data;
-      method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
+    if (is_null) {
 
-      if(method_grackle_chemistry->use_grackle){
-        if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
-          ERROR("EnzoMethodConfig::pup()",
-                "Error in Grackle set_default_chemistry_parameters");
+      method_grackle_chemistry = NULL;
+      
+    } else {
+
+      if (p.isUnpacking()) {
+        method_grackle_chemistry = new chemistry_data;
+        method_grackle_chemistry->use_grackle = method_grackle_use_grackle;
+
+        if(method_grackle_chemistry->use_grackle){
+          if (set_default_chemistry_parameters(method_grackle_chemistry) == ENZO_FAIL){
+            ERROR("EnzoMethodConfig::pup()",
+                  "Error in Grackle set_default_chemistry_parameters");
+          }
         }
       }
+      ASSERT("EnzoConfig::pup",
+             "method_grackle_chemistry is expected to be non-null",
+             (method_grackle_chemistry != NULL));
+      
+      p | *method_grackle_chemistry;
     }
-  }
 
-  if (method_grackle_use_grackle){
-    p | *method_grackle_chemistry;
   }
 
 #endif /* CONFIG_USE_GRACKLE */
@@ -574,6 +600,21 @@ void EnzoConfig::read(Parameters * p) throw()
 	      type.c_str(),(file_id+"type").c_str());
     }
   }
+  // "sleep_by_process", "limit_per_node"
+  initial_music_throttle_internode = p->value_logical
+    ("Initial:music:throttle_internode",false);
+  initial_music_throttle_intranode = p->value_logical
+    ("Initial:music:throttle_intranode",false);
+  initial_music_throttle_node_files = p->value_logical
+    ("Initial:music:throttle_node_files",false);
+  initial_music_throttle_close_count = p->value_integer
+    ("Initial:music:throttle_close_count",0);
+  initial_music_throttle_group_size = p->value_integer
+    ("Initial:music:throttle_group_size",std::numeric_limits<int>::max());
+  initial_music_throttle_seconds_stagger = p->value_float
+    ("Initial:music:throttle_seconds_stagger",0.0);
+  initial_music_throttle_seconds_delay = p->value_float
+    ("Initial:music:throttle_seconds_delay",0.0);
 
   // PM method and initialization
 
@@ -794,6 +835,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   initial_feedback_test_star_mass = p->value_float
     ("Initial:feedback_test:star_mass", 1000.0);
+
+  method_check_gravity_particle_type = p->value_string
+    ("Method:check_gravity:particle_type","dark");
 
   method_heat_alpha = p->value_float
     ("Method:heat:alpha",1.0);

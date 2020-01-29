@@ -2,7 +2,7 @@
 
 /// @file     test_Classname.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2010-04-02
+/// @date     yyyy-mm-dd
 /// @brief    Test program for the Classname class
 
 #include "main.hpp"

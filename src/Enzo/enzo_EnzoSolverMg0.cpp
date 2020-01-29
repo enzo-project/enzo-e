@@ -296,21 +296,17 @@ EnzoSolverMg0::EnzoSolverMg0
 {
   // Initialize temporary fields
 
-  FieldDescr * field_descr = cello::field_descr();
+  ir_ = cello::field_descr()->insert_temporary();
+  ic_ = cello::field_descr()->insert_temporary();
 
-  ir_ = field_descr->insert_temporary();
-  ic_ = field_descr->insert_temporary();
 
-  /// Initialize default Refresh
+  Refresh & refresh = this->refresh_post();
+  cello::simulation()->new_refresh_set_name(ir_post_,name);
 
-  const int ir = add_refresh
-    (4,0,neighbor_type_(),sync_barrier,
-     enzo_sync_id_solver_mg0);
-
-  refresh(ir)->add_field (ix_);  // NOTE: ix_ set in Solver::Solver()
-  refresh(ir)->add_field (ir_);
-  refresh(ir)->add_field (ic_);
-
+  refresh.add_field (ix_);  // NOTE: ix_ set in Solver::Solver()
+  refresh.add_field (ir_);
+  refresh.add_field (ic_);
+  
   ScalarDescr * scalar_descr_int  = cello::scalar_descr_int();
   i_iter_  = scalar_descr_int ->new_value(name + ":iter");
   
@@ -1286,6 +1282,9 @@ void EnzoBlock::p_solver_mg0_last_smooth()
 
 FieldMsg * EnzoSolverMg0::pack_residual_(EnzoBlock * enzo_block) throw()
 {
+#ifdef DEBUG_SOLVER_MG0  
+  CkPrintf ("%s DEBUG_SOLVER_MG0 pack_residual\n",enzo_block->name().c_str());
+#endif  
   Index index        = enzo_block->index();
   const  int level   = index.level();  
   // copy face data to FieldFace

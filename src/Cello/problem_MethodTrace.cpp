@@ -20,9 +20,10 @@ MethodTrace::MethodTrace
     timestep_(timestep),
     name_(name)
 {
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     sync_id_method_trace);
-  refresh(ir)->add_all_particles();
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name);
+  
+  refresh.add_all_particles();
 }
 
 //----------------------------------------------------------------------
@@ -259,6 +260,7 @@ void MethodTrace::compute ( Block * block) throw()
   
 }
 
+//----------------------------------------------------------------------
 
 double MethodTrace::timestep (Block * block) const throw()
 {

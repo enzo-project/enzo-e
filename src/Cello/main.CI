@@ -1,0 +1,12 @@
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     main.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2011-08-03
+/// @brief    CHARM++ mainchare for basic test programs
+
+mainmodule main {
+
+#include "main_include.h"
+
+};

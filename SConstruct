@@ -10,12 +10,6 @@ import socket
 
 
 #----------------------------------------------------------------------
-# Temporary setting for using new Refresh implementation
-#----------------------------------------------------------------------
-
-new_refresh = 1
-
-#----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
 
@@ -231,8 +225,8 @@ define_papi  =        ['CONFIG_USE_PAPI','PAPI3']
 
 # Experimental code defines
 
-define_new_output      = ['NEW_OUTPUT']
 define_new_ppm         = ['NEW_PPM']
+define_new_output   = ['NEW_OUTPUT']
 
 # Debugging defines
 
@@ -259,6 +253,10 @@ define_charm =        ['CONFIG_USE_CHARM']  # used for Grackle
 # Python version defines
 
 define_python_lt_27 = ['CONFIG_PYTHON_LT_27']
+
+# SMP mode define for safety checking against IO throttling
+
+define_smp = 'CONFIG_SMP_MODE'
 
 # Version control defines (Git or Mercurial)
 
@@ -308,8 +306,15 @@ elif (arch == "linux_gprof"):  from linux_gprof  import *
 elif (arch == "linux_mpe"):    from linux_mpe    import *
 elif (arch == "linux_tau"):    from linux_tau    import *
 elif (arch == "ncsa_bw"):      from ncsa_bw      import *
+<<<<<<< HEAD
+=======
+elif (arch == "ncsa_bw_net"):  from ncsa_bw_net  import *
+elif (arch == "ncsa_bw_smp"):  from ncsa_bw_smp  import *
+>>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
 elif (arch == "faraday_gnu"):  from faraday_gnu  import *
 elif (arch == "faraday_gnu_debug"):  from faraday_gnu_debug  import *
+elif (arch == "frontera_gcc"): from frontera_gcc import *
+elif (arch == "frontera_icc"): from frontera_icc import *
 elif (arch == "mf_gnu"):       from mf_gnu       import *
 elif (arch == "mf_gnu_debug"): from mf_gnu_debug import *
 elif (arch == "stampede_gnu"): from stampede_gnu import *
@@ -367,6 +372,7 @@ if (use_gprof == 1):
      flags_config = flags_config + ' -pg'
 
 if (use_jemalloc == 1):
+<<<<<<< HEAD
    defines = defines + define_jemalloc
 
 if (use_papi != 0):      defines = defines + define_papi
@@ -390,6 +396,29 @@ if (have_git != 0 or have_mercurial != 0 ):defines = defines + define_have_versi
 
 defines = defines + define_charm
 defines = defines + define_cello
+=======
+   defines.append(define_jemalloc)
+
+if (use_papi != 0):      defines.append( define_papi )
+if (use_grackle != 0):   defines.append( define_grackle )
+
+if (new_output != 0):    defines.append( define_new_output )
+
+if (trace != 0):         defines.append( define_trace )
+if (verbose != 0):       defines.append( define_verbose )
+if (trace_charm != 0):   defines.append( define_trace_charm )
+if (debug != 0):         defines.append( define_debug )
+if (debug_field != 0):   defines.append( define_debug_field )
+if (debug_field_face != 0): defines.append( define_debug_field_face )
+if (check != 0):         defines.append( define_check )
+if (debug_verbose != 0): defines.append( define_debug_verbose )
+if (memory != 0):        defines.append( define_memory )
+if (new_charm != 0):     defines.append( define_new_charm )
+if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
+if (have_git != 0 or have_mercurial != 0 ):
+   defines.append( define_have_version_control )
+if (smp != 0):           defines.append( define_smp )
+>>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
 
 #======================================================================
 # FINAL CHARM SETUP
@@ -407,10 +436,18 @@ if (balance == 1):
 # UNIT TEST SETTINGS
 #======================================================================
 
+<<<<<<< HEAD
 serial_run   = ""
 if (smp == 1):
       parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
 else:
+=======
+
+if (parallel_run == ''):
+   if (smp == 1):
+      parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
+   else:
+>>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
       parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
@@ -433,8 +470,14 @@ Export('use_grackle')
 Export('use_jemalloc')
 Export('lib_path')
 Export('inc_path')
+Export('node_size')
 Export('test_path')
 Export('ip_charm')
+<<<<<<< HEAD
+=======
+Export('smp')
+Export('prec')
+>>>>>>> d7cd212a0423c15d65c2c6eb5bf84d82d356c98d
 
 
 cpppath     = [inc_path]
@@ -635,7 +678,7 @@ Clean('.','test/CHARM_BUILD')
 #======================================================================
 
 charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h `dirname $SOURCE`")
-cpp_builder = Builder (action="/usr/bin/cpp -E $_CPPDEFFLAGS $SOURCE > $TARGET")
+cpp_builder = Builder (action="/usr/bin/cpp -E -P $_CPPDEFFLAGS $SOURCE > $TARGET")
 env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 env.Append(BUILDERS = { 'CppBuilder'   : cpp_builder })
 
@@ -648,9 +691,8 @@ Export('use_papi')
 
 if (have_git == 1):
    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).rstrip()
-   build_dir = 'build-' + branch
-else:     
-   build_dir = 'build'
+
+build_dir = 'build'
    
 SConscript( 'src/SConscript',variant_dir=build_dir)
 #SConscript('test/SConscript')

@@ -10,16 +10,13 @@
 /// array of octrees.
 
 //--------------------------------------------------
-// #define DEBUG_FACE
 // #define DEBUG_ADAPT
-// #define DEBUG_NEW_REFRESH
 //--------------------------------------------------
 
-#ifdef DEBUG_FACE
-#   define DEBUG_FACES(MSG) /* ... */
-#else
-#   define DEBUG_FACES(MSG) debug_faces_(MSG)
-#endif
+//#define BLOCK_A "B0:10_0:00"
+// #define TRACE_BLOCK(BLOCK) { if (BLOCK->name() == BLOCK_A) CkPrintf ("%s:%d TRACE_BLOCK %d\n",__FILE__,__LINE__,BLOCK->level_next_); }
+
+#define TRACE_BLOCK(BLOCK) /* ... */
 
 #ifdef DEBUG_ADAPT
 
@@ -31,7 +28,7 @@
     int nb3[3] = {2,2,2};						\
     CkPrintf ("%s %s -> B%s"						\
 	     " [%d => %d] if3 %2d %2d %2d  ic3 %d %d %d\n",		\
-	      name().c_str(),MSG,INDEX_RECV.bit_string(INDEX_RECV.level(),rank(),nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
+	      name().c_str(),MSG,INDEX_RECV.bit_string(INDEX_RECV.level(),cello::rank(),nb3).c_str(),LEVEL_NOW,LEVEL_NEW, \
 	     IF3[0],IF3[1],IF3[2],IC3[0],IC3[1],IC3[2]);		\
     check_child_(IC3,"PUT_LEVEL",__FILE__,__LINE__);			\
     check_face_(IF3,"PUT_LEVEL",__FILE__,__LINE__);			\
@@ -50,8 +47,8 @@
 
 #   ifdef CELLO_TRACE
 #      define trace(A) \
-  CkPrintf ("%s:%d %s DEBUG_ADAPT %s\n",				\
-	    __FILE__,__LINE__,name_.c_str(),A);				\
+  CkPrintf ("%s %s DEBUG_ADAPT %s\n",				\
+	    __FILE__,name_.c_str(),A);				\
   fflush(stdout)
 #   else
 #      define trace(A) /*  NULL */
@@ -105,6 +102,7 @@ void Block::adapt_begin_()
   const int level_maximum = cello::config()->mesh_max_level;
 
   level_next_ = adapt_compute_desired_level_(level_maximum);
+  TRACE_BLOCK(this);
 
   const int min_face_rank = cello::config()->adapt_min_face_rank;
   
@@ -141,8 +139,6 @@ void Block::adapt_called_()
 /// adapt_end_().
 void Block::adapt_next_()
 {
-  DEBUG_FACES("adapt_next");
-
   trace("adapt_next 3");
 
 #ifdef DEBUG_ADAPT
@@ -157,6 +153,7 @@ void Block::adapt_next_()
 
   update_levels_();
 
+  TRACE_BLOCK(this);
   if (is_leaf()) {
     if (level() < level_next_) adapt_refine_();
     if (level() > level_next_) adapt_coarsen_();
@@ -407,10 +404,6 @@ void Block::adapt_refine_()
 void Block::particle_scatter_children_ (ParticleData * particle_list[],
 					Particle particle)
 {
-#ifdef DEBUG_NEW_REFRESH
-  CkPrintf ("DEBUG_NEW_REFRESH particle_scatter_children\n");
-#endif
-
   const int npa = cello::num_children();
 
   // get Block bounds 
@@ -431,9 +424,6 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
   int count = 0;
   for (int it=0; it<nt; it++) {
 
-#ifdef DEBUG_NEW_REFRESH
-    CkPrintf ("DEBUG_NEW_REFRESH scatter type %d\n",it);
-#endif
     const int ia_x  = particle.attribute_position(it,0);
 
     // (...positions may use absolute coordinates (float) or
@@ -473,10 +463,6 @@ void Block::particle_scatter_children_ (ParticleData * particle_list[],
 	// absolute coordinates
 
 	for (int ip=0; ip<np; ip++) {
-
-#ifdef DEBUG_NEW_REFRESH
-    CkPrintf ("DEBUG_NEW_REFRESH scatter particle %d\n",ip);
-#endif
 
 	  double x = xa[ip*d];
 	  double y = ya[ip*d];
@@ -518,6 +504,9 @@ void Block::adapt_delete_child_(Index index_child)
   thisProxy[index_child].p_adapt_delete();
 
   if (sync_coarsen_.next()) {
+#ifdef DEBUG_ADAPT
+    CkPrintf ("%s coarsen next\n",name().c_str());
+#endif
     children_.clear();
   }
 }
@@ -527,7 +516,6 @@ void Block::adapt_delete_child_(Index index_child)
 void Block::adapt_send_level()
 {
   if (!is_leaf()) return;
-
   const int level = this->level();
   const int min_face_rank = cello::config()->adapt_min_face_rank;
   const int min_level     = cello::config()->mesh_min_level;
@@ -702,6 +690,7 @@ void Block::p_adapt_recv_level
 	  
   // notify neighbors if level_next has changed
 
+  TRACE_BLOCK(this);
   if (level_next != level_next_) {
     ASSERT2 ("Block::p_adapt_recv_level()",
 	     "level_next %d level_next_ %d\n", level_next,level_next_,
@@ -709,6 +698,7 @@ void Block::p_adapt_recv_level
     level_next_ = level_next;
     adapt_send_level();
   }
+  TRACE_BLOCK(this);
   performance_stop_(perf_adapt_update);
   performance_start_(perf_adapt_update_sync);
 }

@@ -68,7 +68,7 @@ printf ("%s",$dir);
    function test_input ($input_file) {
      $file="$input_file.in";
      if (file_exists($file)) {
-       $input_html = "<a href=\"$file\">$input.unit.in</a>";
+       $input_html = "<a href=\"$file\">$input_file.unit.in</a>";
        printf ("<td class=pass><a href='$file'>input</a></td>");
      } else {
        echo "<td></td>";
@@ -80,7 +80,7 @@ printf ("%s",$dir);
    function test_output ($output_file) {
      $file="$output_file";
      if (file_exists($file)) {
-       $output_html = "<a href=\"$file\">$output.unit</a>";
+       $output_html = "<a href=\"$file\">$output_file.unit</a>";
        system("cat $file | awk 'BEGIN{c=0}; /END CELLO/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$file'>output</a></td>\"; if (c!=0) print \"<td class=pass><a href='$file'>output</a></td>\"}'");
      } else {
        echo "<td></td>";
@@ -356,11 +356,11 @@ function summary_failed_tests ($test_output, $executables, $state, $dir,$valid)
       $output = "../$dir/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
-    if (! $valid) {
-      printf ("<td></td>");
-    } else {
+    /* if (! $valid) { */
+    /*   printf ("<td></td>"); */
+    /* } else { */
       system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
-    }
+    /* } */
   }
   return $valid;
 }
@@ -446,7 +446,7 @@ function test_summary($component,$test_output,$executables, $dir)
 function begin_hidden ($id, $title)
 {  
   
-  //  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='block'; return false;\"><h3>$title</h3></a></p> ";
+    echo "<h3>$title</h3>";
   //  echo "<div style=\"display: none;\" id=\"$id\">";
   //  echo "<a href=\"#\" onclick=\"document.getElementById('$id').style.display='none'; return false;\">[hide]</a></p>";
 }
@@ -665,6 +665,10 @@ test_summary("Method: gravity",
 	     array("method_gravity_cg-1","method_gravity_cg-8"),
 	     array("enzo-p",  "enzo-p"),'test');
 
+test_summary("Problem: collapse",
+         array("collapse-bcg2d","collapse-bcg3d"),
+array("enzo-p",  "enzo-p"),'test');
+
 test_summary("Problem: cosmology",
          array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-ddmg"),
          array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p"),'test');
@@ -739,6 +743,9 @@ test_summary("Memory",array("Memory"),
 	     array("test_Memory"),'test'); 
 test_summary("Mesh",
 	     array("Data",
+		   "Face",
+		   "FaceFluxes",
+		   "FluxData",
 		   "Index",
 		   "Tree",
 		   "ItFace",
@@ -747,6 +754,9 @@ test_summary("Mesh",
 		   "NodeTrace",
 		   "ItNode"),
 	     array("test_Data",
+		   "test_Face",
+		   "test_FaceFluxes",
+		   "test_FluxData",
 		   "test_Index",
 		   "test_Tree",
 		   "test_ItFace",
@@ -983,6 +993,117 @@ test_table ("-","method_gravity_cg-8",
 	    array("ay-000000","ay-000010","ay-000020","ay-000030","ay-000040","ay-000050"), $types);
 
 end_hidden("method_gravity_cg-8");
+
+//======================================================================
+
+test_group("Problem: collapse");
+
+?>
+
+Spherical collapse tests for varying dimensionality, linear solver, and mesh adaptation [in progress].
+
+</p>
+
+<?php
+
+//--------------------------------------------------
+
+    test_subgroup ("2D AMR Collapse");
+begin_hidden("collapse-bcg2d", "COLLAPSE (BiCG-STAB Solver)");
+
+tests("Enzo","enzo-p","test_collapse-bcg2d","2D AMR Collapse (BiCG-STAB Solver)","");
+
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/dark",
+            "0010/dark",
+            "0015/dark",
+            "0020/dark",
+            "0025/dark",
+            "0030/dark",
+            "0035/dark",
+            "0040/dark"),$types);
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/po",
+            "0010/po",
+            "0015/po",
+            "0020/po",
+            "0025/po",
+            "0030/po",
+            "0035/po",
+            "0040/po"),$types);
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/ax",
+            "0010/ax",
+            "0015/ax",
+            "0020/ax",
+            "0025/ax",
+            "0030/ax",
+            "0035/ax",
+            "0040/ax"),$types);
+test_table ("_","Dir_Collapse-BCG2D",
+      array("0005/mesh",
+            "0010/mesh",
+            "0015/mesh",
+            "0020/mesh",
+            "0025/mesh",
+            "0030/mesh",
+            "0035/mesh",
+            "0040/mesh"),$types);
+
+end_hidden("collapse-bcg2d");
+
+//--------------------------------------------------
+
+  test_subgroup ("3D AMR Collapse");
+begin_hidden("collapse-bcg3d", "COLLAPSE (BiCG-STAB Solver)");
+
+tests("Enzo","enzo-p","test_collapse-bcg3d","3D AMR Collapse (BiCG-STAB Solver)","");
+
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/dark",
+            "0020/dark",
+            "0030/dark",
+            "0040/dark",
+            "0050/dark",
+            "0060/dark",
+            "0070/dark",
+            "0080/dark",
+            "0090/dark",
+            "0100/dark"),$types);
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/po",
+            "0020/po",
+            "0030/po",
+            "0040/po",
+            "0050/po",
+            "0060/po",
+            "0070/po",
+            "0080/po",
+            "0090/po",
+            "0100/po"),$types);
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/ax",
+            "0020/ax",
+            "0030/ax",
+            "0040/ax",
+            "0050/ax",
+            "0060/ax",
+            "0070/ax",
+            "0080/ax",
+            "0090/ax",
+            "0100/ax"),$types);
+test_table ("_","Dir_Collapse-BCG3D",
+      array("0010/mesh",
+            "0020/mesh",
+            "0030/mesh",
+            "0040/mesh",
+            "0050/mesh",
+            "0060/mesh",
+            "0070/mesh",
+            "0080/mesh",
+            "0090/mesh",
+            "0100/mesh"),$types);
+end_hidden("collapse-bcg3d");
 
 //======================================================================
 
@@ -1240,9 +1361,9 @@ begin_hidden("balance_none", "None");
 
 tests("Enzo","enzo-p","test_balance_none","None","Balance");
 test_table ("-","Balance/None/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 test_table ("-","Balance/None/balance-de",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 
 end_hidden("balance_none");
 
@@ -1250,9 +1371,9 @@ begin_hidden("balance_rotate", "RotateLB");
 
 tests("Enzo","enzo-p","test_balance_rotate","Rotate","Balance");
 test_table ("-","Balance/Rotate/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 test_table ("-","Balance/Rotate/balance-de",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 
 end_hidden("balance_rotate");
 
@@ -1260,39 +1381,19 @@ begin_hidden("balance_greedy", "GreedyLB");
 
 tests("Enzo","enzo-p","test_balance_greedy","Greedy","Balance");
 test_table ("-","Balance/Greedy/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 test_table ("-","Balance/Greedy/balance-de",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 
 end_hidden("balance_greedy");
-
-// begin_hidden("balance_hybrid", "HybridLB");
-
-// tests("Enzo","enzo-p","test_balance_hybrid","Hybrid","Balance");
-// test_table ("-","Balance/Hybrid/balance-mesh",
-//	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
-//test_table ("-","Balance/Hybrid/balance-de",
-//	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
-
-// end_hidden("balance_hybrid");
-
-// begin_hidden("balance_neighbor", "NeighborLB");
-
-// tests("Enzo","enzo-p","test_balance_neighbor","Neighbor","Balance");
-// test_table ("-","Balance/Neighbor/balance-mesh",
-//	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
-//test_table ("-","Balance/Neighbor/balance-de",
-//	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
-
-//end_hidden("balance_neighbor");
 
 begin_hidden("balance_rand_cent", "RandCentLB");
 
 tests("Enzo","enzo-p","test_balance_rand_cent","RandCent","Balance");
 test_table ("-","Balance/RandCent/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 test_table ("-","Balance/RandCent/balance-de",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 
 end_hidden("balance_rand_cent");
 
@@ -1300,9 +1401,9 @@ begin_hidden("balance_refine", "RefineLB");
 
 tests("Enzo","enzo-p","test_balance_refine","Refine","Balance");
 test_table ("-","Balance/Refine/balance-mesh",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 test_table ("-","Balance/Refine/balance-de",
-	    array("00000","00002","00004","00006","00008","00010","00020"), $types);
+	    array("00020"), $types);
 
 end_hidden("balance_refine");
 
@@ -1418,34 +1519,34 @@ end_hidden("particle");
 begin_hidden("particle-x", "Particle (vx,vy) = (1,0)");
 tests("Enzo","enzo-p","test_particle-x","","");
 test_table ("-","particle-x", array("000","003","006","009"),$types);
-end_hidden("particle-x-1");
+end_hidden("particle-x");
 
 begin_hidden("particle-y", "Particle (vx,vy) = (0,1)");
 tests("Enzo","enzo-p","test_particle-y","","");
 test_table ("-","particle-y", array("000","003","006","009"),$types);
-end_hidden("particle-y-1");
+end_hidden("particle-y");
 
 begin_hidden("particle-xy", "Particle (vx,vy) = (0,1)");
 tests("Enzo","enzo-p","test_particle-xy","","");
 test_table ("-","particle-xy", array("000","003","006","009"),$types);
-end_hidden("particle-xy-1");
+end_hidden("particle-xy");
 
 begin_hidden("particle-circle", "Particle (vx,vy) = (-y,x)");
 tests("Enzo","enzo-p","test_particle-circle","","");
 test_table ("-","particle-circle", array("000","100","200","300","400","500"),$types);
-end_hidden("particle-circle-1");
+end_hidden("particle-circle");
 
 begin_hidden("particle-amr-static", "Particle (vx,vy) = (-y,x)");
 tests("Enzo","enzo-p","test_particle-amr-static","","");
-test_table ("-","particle-amr-static-mesh", array("0000","0200","0400","0600","0800","1000"),$types);
-test_table ("-","particle-amr-static", array("0000","0200","0400","0600","0800","1000"),$types);
-end_hidden("particle-amr-static-1");
+test_table ("-","particle-amr-static-mesh", array("000","032","064","096","128","160","192","224","256"),$types);
+test_table ("-","particle-amr-static", array("000","032","064","096","128","160","192","224","256"),$types);
+end_hidden("particle-amr-static");
 
 begin_hidden("particle-amr-dynamic", "Particle (vx,vy) = (-y,x)");
 tests("Enzo","enzo-p","test_particle-amr-dynamic","","");
-test_table ("-","particle-amr-dynamic-mesh", array("0000","0200","0400","0600","0800","1000"),$types);
-test_table ("-","particle-amr-dynamic", array("0000","0200","0400","0600","0800","1000"),$types);
-end_hidden("particle-amr-dynamic-1");
+test_table ("-","particle-amr-dynamic-mesh",  array("000","032","064","096","128","160","192","224","256"),$types);
+test_table ("-","particle-amr-dynamic",  array("000","032","064","096","128","160","192","224","256"),$types);
+end_hidden("particle-amr-dynamic");
 
 //======================================================================
 
@@ -1509,12 +1610,21 @@ end_hidden("data");
 begin_hidden("index", "Index");
 tests("Cello","test_Index","test_Index","",""); 
 end_hidden("index");
+begin_hidden("face", "Face");
+tests("Cello","test_Face","test_Face","",""); 
+end_hidden("face");
 begin_hidden("tree", "Tree");
 tests("Cello","test_Tree","test_Tree","",""); 
 end_hidden("tree");
 begin_hidden("it_face", "ItFace");
 tests("Cello","test_ItFace","test_ItFace","",""); 
 end_hidden("it_face");
+begin_hidden("face_fluxes", "FaceFluxes");
+tests("Cello","test_FaceFluxes","test_FaceFluxes","",""); 
+end_hidden("face_fluxes");
+begin_hidden("flux_data", "FluxData");
+tests("Cello","test_FluxData","test_FluxData","",""); 
+end_hidden("flux_data");
 
 begin_hidden("tree_initial", "Tree (initial)");
 printf ("<img width=257 src=\"test_tree_1-initial.png\"></img></br>\n");

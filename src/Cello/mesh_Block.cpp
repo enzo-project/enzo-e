@@ -81,12 +81,11 @@ Block::Block ( MsgRefine * msg )
     refresh_()
 {
   performance_start_(perf_block);
-#ifdef NEW_REFRESH
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("Block(msg)\n"); fflush(stdout);
 #endif  
   init_new_refresh_();
-#endif  
+
   usesAtSync = true;
   init (msg->index_,
 	msg->nx_, msg->ny_, msg->nz_,
@@ -106,23 +105,19 @@ Block::Block ( MsgRefine * msg )
 
   bool is_first_cycle = (cycle_ == cello::config()->initial_cycle);
 
-  if (is_first_cycle) {
-
-    // pass ICs (and particles) from parent block
-    // before re-initializing this level
-    if (this->level() > 0) msg->update(data());
-
-    apply_initial_();
-
-  } else {
-    msg->update(data());
-  }
-
-  delete msg;
-
   index_.array(array_,array_+1,array_+2);
 
+  if (! is_first_cycle) {
+    msg->update(data()); // AJE: my version of this only did this if level > 0... make sure this works with particle ICs
+    delete msg;
+  } else {
+    delete msg;
+    apply_initial_();
+  }
+
+
   performance_stop_(perf_block);
+
 
 }
 
@@ -159,12 +154,12 @@ Block::Block ( process_type ip_source )
     index_solver_(),
     refresh_()
 {
-#ifdef NEW_REFRESH
+
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("Block(%d)\n",ip_source); fflush(stdout);
 #endif  
   init_new_refresh_();
-#endif
+
   usesAtSync = true;
 #ifdef TRACE_BLOCK
   {
@@ -210,18 +205,13 @@ void Block::p_set_msg_refine(MsgRefine * msg)
 
   bool is_first_cycle =  (cycle_ == cello::config()->initial_cycle);
 
-  if (is_first_cycle) {
-
-    // pass ICs (and particles) from parent block
-    // before re-initializing this level
-    if (this->level() > 0) msg->update(data());
-
-    apply_initial_();
-
-  } else {
+  if (! is_first_cycle) {
     msg->update(data());
-  }
-  delete msg;
+    delete msg;
+  } else {
+    delete msg;
+    apply_initial_();
+  } 
   
   performance_stop_(perf_block);
 
@@ -365,7 +355,8 @@ void Block::init
 
   }
 
-  setMigratable(true);
+  // Do not migrate the root Block (0,0,0) level (0)
+  setMigratable(! index_.is_root());
 
   DEBUG_FACES("Block()");
 
@@ -447,11 +438,13 @@ void Block::pup(PUP::er &p)
     Simulation * simulation = cello::simulation();
     if (simulation != NULL) simulation->data_insert_block(this);    
   }
-#ifdef NEW_REFRESH
   p | new_refresh_sync_list_;
   //  p | new_refresh_msg_list_;
+
+  // Skip if Charm++ version <= 60701 (for Coverity analysis only!)
+#if CHARM_VERSION > 60701
   p | new_refresh_state_list_;
-#endif  
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -536,11 +529,11 @@ void Block::print () const
   CkPrintf ("dt_ = %f\n",dt_);
   CkPrintf ("stop_ = %d\n",stop_);
   CkPrintf ("index_initial_ = %d\n",index_initial_);
-  CkPrintf ("children_.size() = %d\n",children_.size());
-  CkPrintf ("face_level_curr_.size() = %d\n",face_level_curr_.size());
-  CkPrintf ("face_level_next_.size() = %d\n",face_level_next_.size());
-  CkPrintf ("child_face_level_curr_.size() = %d\n",child_face_level_curr_.size());
-  CkPrintf ("child_face_level_next_.size() = %d\n",child_face_level_next_.size());
+  CkPrintf ("children_.size() = %lu\n",children_.size());
+  CkPrintf ("face_level_curr_.size() = %lu\n",face_level_curr_.size());
+  CkPrintf ("face_level_next_.size() = %lu\n",face_level_next_.size());
+  CkPrintf ("child_face_level_curr_.size() = %lu\n",child_face_level_curr_.size());
+  CkPrintf ("child_face_level_next_.size() = %lu\n",child_face_level_next_.size());
   CkPrintf ("count_coarsen_ = %d\n",count_coarsen_);
   CkPrintf ("adapt_step_ = %d\n",adapt_step_);
   CkPrintf ("adapt_ = %d\n",adapt_);
@@ -548,7 +541,7 @@ void Block::print () const
   CkPrintf ("delete_ = %d\n",delete_);
   CkPrintf ("is_leaf_ = %d\n",is_leaf_);
   CkPrintf ("age_ = %d\n",age_);
-  CkPrintf ("face_level_last_.size() = %d\n",face_level_last_.size());
+  CkPrintf ("face_level_last_.size() = %lu\n",face_level_last_.size());
   CkPrintf ("name_ = %s\n",name_.c_str());
   CkPrintf ("index_method_ = %d\n",index_method_);
   //  CkPrintf ("index_solver_ = %d\n",index_solver());
@@ -753,10 +746,7 @@ Block::Block ()
     refresh_()
 {
 
-#ifdef NEW_REFRESH  
-  CkPrintf ("Block()\n"); fflush(stdout);
   init_new_refresh_();
-#endif
   
   for (int i=0; i<3; i++) array_[i]=0;
 }
@@ -794,12 +784,11 @@ Block::Block (CkMigrateMessage *m)
     refresh_()
     
 {
-#ifdef NEW_REFRESH
+
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("Block(m)\n"); fflush(stdout);
 #endif  
   init_new_refresh_();
-#endif
   
 #ifdef TRACE_BLOCK
   CkPrintf ("TRACE_BLOCK Block(CkMigrateMessage*)\n");
@@ -810,7 +799,6 @@ Block::Block (CkMigrateMessage *m)
 
 //----------------------------------------------------------------------
 
-#ifdef NEW_REFRESH
 void Block::init_new_refresh_()
 {
   const int count = cello::simulation()->new_refresh_count();
@@ -833,7 +821,6 @@ Refresh & Block::new_refresh(int id_refresh)
   return cello::simulation()->new_refresh_list(id_refresh);
 }
 
-#endif
 //----------------------------------------------------------------------
 
 std::string Block::name() const throw()
@@ -1152,7 +1139,7 @@ void Block::check_leaf_()
        (! is_leaf() && children_.size() == 0))) {
 
     WARNING3("Block::check_leaf_()",
-	     "%s: is_leaf() == %s && children_.size() == %d",
+	     "%s: is_leaf() == %s && children_.size() == %lu",
 	     name_.c_str(), is_leaf()?"true":"false",
 	     children_.size());
   }
@@ -1211,9 +1198,7 @@ bool Block::check_position_in_block(const double &x, const double &y,
 
 void Block::debug_faces_(const char * mesg)
 {
-#ifndef DEBUG_ADAPT
-  return;
-#endif
+#ifdef DEBUG_ADAPT
 
 #ifdef CELLO_DEBUG
   FILE * fp_debug = simulation()->fp_debug();
@@ -1280,5 +1265,6 @@ void Block::debug_faces_(const char * mesg)
 
     }
   }
+#endif
 }
 

@@ -29,7 +29,10 @@ public: // interface
   /// Charm++ PUP::able declarations
   PUPable_abstract(Compute);
 
-  Compute(CkMigrateMessage *m) : PUP::able(m) { }
+  Compute(CkMigrateMessage *m)
+    : PUP::able(m),
+    i_hist_(0)
+  { }
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)

@@ -1,0 +1,10 @@
+ Adapt {
+     list = [ "slope" ];
+     max_level = 4;
+     min_level = 0;
+     slope {
+         max_coarsen = 0.000000000000000;
+         min_refine = 0.001000000000000000;
+         type = "particle_mass";
+     };
+ }

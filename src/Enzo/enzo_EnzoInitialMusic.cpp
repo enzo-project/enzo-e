@@ -5,8 +5,21 @@
 /// @date     2017-06-23
 /// @brief    Read initial conditions from HDF5
 ///           (multi-scale cosmological initial conditions)
-
 #include "enzo.hpp"
+#include <chrono>
+#include <thread>
+
+// #define DEBUG_THROTTLE
+
+//----------------------------------------------------------------------
+
+static CmiNodeLock throttle_node_lock;
+
+//----------------------------------------------------------------------
+void mutex_init()
+{
+  throttle_node_lock = CmiCreateLock();
+}
 
 //----------------------------------------------------------------------
 
@@ -25,8 +38,16 @@ EnzoInitialMusic::EnzoInitialMusic
     particle_datasets_  (enzo_config->initial_music_particle_datasets),
     particle_coords_    (enzo_config->initial_music_particle_coords),
     particle_types_     (enzo_config->initial_music_particle_types),
-    particle_attributes_(enzo_config->initial_music_particle_attributes)
-{ }
+    particle_attributes_(enzo_config->initial_music_particle_attributes),
+    throttle_internode_ (enzo_config->initial_music_throttle_internode),
+    throttle_intranode_ (enzo_config->initial_music_throttle_intranode),
+    throttle_node_files_(enzo_config->initial_music_throttle_node_files),
+    throttle_close_count_(enzo_config->initial_music_throttle_close_count),
+    throttle_group_size_    (enzo_config->initial_music_throttle_group_size),
+    throttle_seconds_stagger_ (enzo_config->initial_music_throttle_seconds_stagger),
+    throttle_seconds_delay_ (enzo_config->initial_music_throttle_seconds_delay)
+{
+}
 
 //----------------------------------------------------------------------
 
@@ -47,6 +68,14 @@ void EnzoInitialMusic::pup (PUP::er &p)
   p | particle_coords_;
   p | particle_types_;
   p | particle_attributes_;
+
+  p | throttle_internode_;
+  p | throttle_intranode_;
+  p | throttle_node_files_;
+  p | throttle_close_count_;
+  p | throttle_group_size_;
+  p | throttle_seconds_stagger_;
+  p | throttle_seconds_delay_;
 }
 
 //----------------------------------------------------------------------
@@ -57,8 +86,11 @@ void EnzoInitialMusic::enforce_block
 
   if (block->level() != level_) return;
 
+  // Optionally pause before reading if throttling enabled.  For
+  // reducing filesystem contention on large runs
+  throttle_stagger_();
+ 
   // Get the grid size at level_
-
   double lower_domain[3];
   double upper_domain[3];
   hierarchy->lower(lower_domain, lower_domain+1, lower_domain+2);
@@ -71,9 +103,11 @@ void EnzoInitialMusic::enforce_block
 
   Field field = block->data()->field();
 
+  static std::map<std::string,int> close_count;
+  
   for (size_t index=0; index<field_files_.size(); index++) {
 
-    std::string file_name = field_files_[index];
+    const std::string file_name = field_files_[index];
 
     // Block size
 
@@ -87,9 +121,34 @@ void EnzoInitialMusic::enforce_block
 
     // Open the field file
 
-    FileHdf5 file("./",file_name);
+    if (throttle_intranode_) {
+      CmiLock(throttle_node_lock);
+    }
 
-    file.file_open();
+    FileHdf5 * file = nullptr;
+
+    if (throttle_node_files_) {
+      if (FileHdf5::file_list[file_name] == nullptr) {
+        FileHdf5::file_list[file_name] = new FileHdf5 ("./",file_name);
+#ifdef DEBUG_THROTTLE      
+        CkPrintf ("%d %g DEBUG_THROTTLE opening %s\n",
+                  CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+        fflush(stdout);
+#endif
+        FileHdf5::file_list[file_name]->file_open();
+        throttle_delay_();
+      }
+      file = FileHdf5::file_list[file_name];
+    } else {
+      file =  new FileHdf5 ("./",file_name);
+#ifdef DEBUG_THROTTLE      
+      CkPrintf ("%d %g DEBUG_THROTTLE opening %s\n",
+                CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+      fflush(stdout);
+#endif      
+      file->file_open();
+      throttle_delay_();
+    }
 
     // Read the domain dimensions
 
@@ -106,7 +165,7 @@ void EnzoInitialMusic::enforce_block
     
     int m4[4] = {0};
     int type_data = type_unknown;
-    file. data_open (field_datasets_[index], &type_data,
+    file-> data_open (field_datasets_[index], &type_data,
 		     m4,m4+1,m4+2,m4+3);
     // compute cell widths
     double h4[4] = {1};
@@ -134,13 +193,13 @@ void EnzoInitialMusic::enforce_block
     n4[IZ] = (upper_block[2] - lower_block[2]) / h4[IZ];
       
     // open the dataspace
-    file. data_slice
+    file-> data_slice
       (m4[0],m4[1],m4[2],m4[3],
        n4[0],n4[1],n4[2],n4[3],
        o4[0],o4[1],o4[2],o4[3]);
 
     // create memory space
-    file.mem_create (n4[IX],n4[IY],n4[IZ],
+    file->mem_create (n4[IX],n4[IY],n4[IZ],
 		     n4[IX],n4[IY],n4[IZ],
 		     0,0,0);
     
@@ -161,7 +220,7 @@ void EnzoInitialMusic::enforce_block
 	      type_data,file_name.c_str(),field_datasets_[index].c_str());
     }
 
-    file.data_read (data);
+    file->data_read (data);
 
     enzo_float * array = (enzo_float *) field.values(field_names_[index]);
 
@@ -182,8 +241,28 @@ void EnzoInitialMusic::enforce_block
       delete [] data_double;
     }
     
-    file.data_close();
-    file.file_close();
+    file->data_close();
+
+    const bool can_close = (++close_count[file_name] == throttle_close_count_);
+    const bool do_close = (throttle_node_files_ && can_close)
+      ||                  (! throttle_node_files_);
+    
+    if ( do_close ) {
+      close_count[file_name] = 0;
+      file->file_close();
+      throttle_delay_();
+      FileHdf5::file_list.erase(file_name);
+#ifdef DEBUG_THROTTLE
+      CkPrintf ("%d %g DEBUG_THROTTLE closed %s\n",
+                CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+      fflush(stdout);
+#endif    
+    }    
+
+    if (throttle_intranode_) {
+      CmiUnlock(throttle_node_lock);
+    }
+
 
   }
 
@@ -191,16 +270,44 @@ void EnzoInitialMusic::enforce_block
 
     std::string file_name = particle_files_[index];
 
-    // Open the particle file
+    if (throttle_intranode_) {
+      CmiLock(throttle_node_lock);
+    }
 
-    FileHdf5 file("./",file_name);
+    FileHdf5 * file = nullptr;
 
-    file.file_open();
+    if (throttle_node_files_) {
+
+      if (FileHdf5::file_list[file_name] == nullptr) {
+
+        FileHdf5::file_list[file_name] = new FileHdf5 ("./",file_name);
+#ifdef DEBUG_THROTTLE      
+        CkPrintf ("%d %g DEBUG_THROTTLE opening %s\n",
+                  CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+        fflush(stdout);
+#endif      
+        FileHdf5::file_list[file_name]->file_open();
+        throttle_delay_();
+      }
+
+      file = FileHdf5::file_list[file_name];
+        
+    } else {
+
+      file =  new FileHdf5 ("./",file_name);
+
+#ifdef DEBUG_THROTTLE      
+      CkPrintf ("%d %g DEBUG_THROTTLE opening %s\n",
+                CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+#endif      
+      file->file_open();
+      throttle_delay_();
+    }
 
     // Open the dataset
     int m4[4] = {0};
     int type_data = type_unknown;
-    file. data_open (particle_datasets_[index], &type_data,
+    file-> data_open (particle_datasets_[index], &type_data,
 		     m4,m4+1,m4+2,m4+3);
 
     // Block size
@@ -240,14 +347,14 @@ void EnzoInitialMusic::enforce_block
     n4[IZ] = (upper_block[2] - lower_block[2]) / h4[IZ];
 
     // open the dataspace
-    file. data_slice
+    file-> data_slice
       (m4[0],m4[1],m4[2],m4[3],
        n4[0],n4[1],n4[2],n4[3],
        o4[0],o4[1],o4[2],o4[3]);
 
     // create memory space
 
-    file.mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
+    file->mem_create (nx,ny,nz,nx,ny,nz,0,0,0);
 
     // input domain size
     union {
@@ -266,11 +373,31 @@ void EnzoInitialMusic::enforce_block
 	      type_data,file_name.c_str(),particle_datasets_[index].c_str());
     }
     
-    // read data and close file
-    file.data_read (data);
-    file.data_close();
-    file.file_close();
+    // read data and close file unless throttling
+    file->data_read (data);
 
+    file->data_close();
+
+    const bool can_close = (++close_count[file_name] == throttle_close_count_);
+    const bool do_close = (throttle_node_files_ && can_close)
+      ||                  (! throttle_node_files_);
+    
+    if ( do_close ) {
+      close_count[file_name] = 0;
+      file->file_close();
+      throttle_delay_();
+      FileHdf5::file_list.erase(file_name);
+#ifdef DEBUG_THROTTLE
+      CkPrintf ("%d %g DEBUG_THROTTLE closed %s\n",
+                CkMyPe(),cello::simulation()->timer(),file_name.c_str());
+      fflush(stdout);
+#endif    
+    } 
+
+    if (throttle_intranode_) {
+      CmiUnlock(throttle_node_lock);
+    }
+    
     // Create particles and initialize them
 
     Particle particle = block->data()->particle();
@@ -412,6 +539,55 @@ void EnzoInitialMusic::enforce_block
   }  
 }
 
+//----------------------------------------------------------------------
+
+void EnzoInitialMusic::throttle_stagger_()
+{
+  if (throttle_internode_) {
+    //--------------------------------------------------
+    static int count_threads = 0;
+    const int node_size = CkNumPes() / CkNumNodes();
+    if ((throttle_seconds_stagger_ > 0.0) &&
+	count_threads < node_size ) {
+      ++count_threads;
+      int ms = 1000*((CkMyPe() / node_size) % throttle_group_size_) * throttle_seconds_stagger_;
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("%d %g DEBUG_THROTTLE %d ms stagger start\n",
+		CkMyPe(),cello::simulation()->timer(),ms);
+      fflush(stdout);
+#endif      
+      std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#ifdef DEBUG_THROTTLE  
+      CkPrintf ("%d %g DEBUG_THROTTLE %d ms stagger stop\n",
+		CkMyPe(),cello::simulation()->timer(),ms);
+      fflush(stdout);
+#endif      
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoInitialMusic::throttle_delay_()
+{
+  if (throttle_internode_) {
+    int ms = 1000*throttle_seconds_delay_;
+#ifdef DEBUG_THROTTLE  
+    CkPrintf ("%d %g DEBUG_THROTTLE %d ms delay start\n",
+	      CkMyPe(),cello::simulation()->timer(),ms);
+    fflush(stdout);
+#endif      
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#ifdef DEBUG_THROTTLE  
+    CkPrintf ("%d %g DEBUG_THROTTLE %d ms delay stop\n",
+	      CkMyPe(),cello::simulation()->timer(),ms);
+    fflush(stdout);
+#endif      
+  }
+}
+
+//======================================================================
+
 template <class T>
 void EnzoInitialMusic::copy_field_data_to_array_
 (enzo_float * array, T * data,
@@ -431,6 +607,9 @@ void EnzoInitialMusic::copy_field_data_to_array_
     }
   }
 }
+
+//----------------------------------------------------------------------
+
 template <class T, class S>
 void EnzoInitialMusic::copy_particle_data_to_array_
 (T * array, S * data,

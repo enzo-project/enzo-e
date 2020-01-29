@@ -9,7 +9,7 @@ include "input/test_cosmo.incl"
  }
 
 Solver {
-     list = [ "mg", "mg_pre", "mg_coarse", "mg_coarse" ];
+     list = [ "mg", "mg_pre", "mg_coarse", "mg_post" ];
      mg {
          coarse_level = -2;
          coarse_solve = "mg_coarse";

@@ -109,9 +109,13 @@ void Config::pup (PUP::er &p)
   p | method_courant_global;
   p | method_list;
   p | method_schedule_index;
+  p | method_close_files_seconds_stagger;
+  p | method_close_files_seconds_delay;
+  p | method_close_files_group_size;
   p | method_courant;
   p | method_timestep;
   p | method_trace_name;
+  p | method_null_dt;
 
   // Monitor
 
@@ -702,6 +706,9 @@ void Config::read_method_ (Parameters * p) throw()
   method_courant.resize(num_method);
   method_timestep.resize(num_method);
   method_schedule_index.resize(num_method);
+  method_close_files_seconds_stagger.resize(num_method);
+  method_close_files_seconds_delay.resize(num_method);
+  method_close_files_group_size.resize(num_method);
   method_trace_name.resize(num_method);
   
   method_courant_global = p->value_float ("Method:courant",1.0);
@@ -730,6 +737,14 @@ void Config::read_method_ (Parameters * p) throw()
       method_schedule_index[index_method] = -1;
     }
 
+    // Read throttling parameters for MethodCloseFiles
+    method_close_files_seconds_stagger[index_method] = p->value_float
+      (full_name + ":seconds_stagger",0.0);
+    method_close_files_seconds_delay[index_method] = p->value_float
+      (full_name + ":seconds_delay",0.0);
+    method_close_files_group_size[index_method] = p->value_integer
+      (full_name + ":group_size",std::numeric_limits<int>::max());
+
     // Read courant condition if any
     method_courant[index_method] = p->value_float  (full_name + ":courant",1.0);
 
@@ -740,6 +755,9 @@ void Config::read_method_ (Parameters * p) throw()
     method_trace_name[index_method] = p->value_string
       (full_name + ":name", "trace");
   }
+  method_null_dt = p->value_float
+    ("Method:null:dt",std::numeric_limits<double>::max());
+
 }
 
 //----------------------------------------------------------------------
@@ -887,7 +905,7 @@ void Config::read_output_ (Parameters * p) throw()
       if (p->type("axis") != parameter_unknown) {
 	std::string axis = p->value_string("axis");
 	ASSERT2("Problem::initialize_output",
-		"Output %s axis %d must be \"x\", \"y\", or \"z\"",
+		"Output %s axis %s must be \"x\", \"y\", or \"z\"",
 		output_list[index_output].c_str(), axis.c_str(),
 		axis=="x" || axis=="y" || axis=="z");
 	output_axis[index_output] = axis;
@@ -1029,6 +1047,10 @@ void Config::read_particle_ (Parameters * p) throw()
 
       std::string name = p->list_value_string (3*ia,  const_str,"unknown");
       std::string type = p->list_value_string (3*ia+1,const_str,"unknown");
+
+      if (type == "default") {
+        type = default_precision_string;
+      }
 
       ASSERT3 ("read_particle_",
 	       "Particle type %d constant %d has unknown constant name %s",

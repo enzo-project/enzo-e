@@ -1,18 +1,11 @@
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     main_enzo.ci
+/// @file     main_include.incl
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2011-08-03
-/// @brief    CHARM++ mainchare for Enzo application level programs
-
-mainmodule main_enzo {
-
-  extern module simulation;
-  extern module enzo;
-  extern module mesh;
+/// @brief    Main entry method include file
 
   readonly CProxy_Main proxy_main;
-
   mainchare [migratable] Main {
 
      entry Main(CkArgMsg *m);
@@ -44,4 +37,3 @@ mainmodule main_enzo {
 
   };
 
-};

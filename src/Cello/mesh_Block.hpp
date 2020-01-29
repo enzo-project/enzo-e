@@ -222,10 +222,8 @@ public: // interface
   /// Initialize child face levels given own face levels
   void initialize_child_face_levels_();
 
-#ifdef NEW_REFRESH  
   /// Initialize arrays for refresh
   void init_new_refresh_();
-#endif  
 
   /// Return an iterator over faces
 
@@ -255,6 +253,17 @@ public: // interface
   // INITIAL
   //--------------------------------------------------
 
+  /// Enter initial phase
+  void initial_enter_();
+  /// Initiate computing the sequence of Methods
+  void initial_begin_();
+  /// Initiate computing the next Method in the sequence
+  void initial_next_();
+  /// Return after performing any Refresh operations
+  void initial_continue_();
+  /// Cleanup after all Methods have been applied
+  void initial_end_();
+
   void r_end_initialize(CkReductionMsg * msg)
   {  initial_exit_();  delete msg;  }
   void initial_exit_();
@@ -272,13 +281,19 @@ public: // interface
 
   void p_compute_continue()
   {      compute_continue_();  }
-  void r_compute_continue()
-  {      compute_continue_();  }
+  void r_compute_continue(CkReductionMsg * msg)
+  {
+    delete msg;
+    compute_continue_();
+  }
 
   void p_compute_exit()
   {      compute_exit_();  }
   void r_compute_exit(CkReductionMsg * msg)
-  {      compute_exit_();    delete msg;  }
+  {
+    delete msg;
+    compute_exit_();
+  }
 
   /// Return the currently active Method
   int index_method() const throw()
@@ -289,7 +304,9 @@ public: // interface
 
   /// Start a new solver
   void push_solver(int index_solver) throw()
-  { index_solver_.push_back(index_solver); }
+  {
+    index_solver_.push_back(index_solver);
+  }
 
   /// Return from a solver
   int pop_solver() throw()
@@ -527,11 +544,6 @@ public:
   // REFRESH
   //--------------------------------------------------
 
-#ifdef NEW_REFRESH
-  //--------------------------------------------------
-  // NEW REFRESH
-  //--------------------------------------------------
-
   /// Begin a refresh operation, optionally waiting then invoking callback
   void new_refresh_start (int id_refresh, int callback = 0);
 
@@ -557,11 +569,6 @@ public:
   Refresh & new_refresh (int id_refresh);
 
   void new_refresh_exit (Refresh & refresh);
-
-#endif  
-  // #else // ! NEW_REFRESH
-
-  void refresh_enter (int call, Refresh * refresh);
 
   /// Enter the refresh phase after synchronizing
   void p_refresh_continue ()
@@ -592,8 +599,6 @@ protected:
   /// Pack field face data into arrays and send to neighbors
 public:
 
-  // #endif // ! NEW_REFRESH
-  
   void p_refresh_store (MsgRefresh * msg);
 
   /// Get restricted data from child when it is deleted
@@ -894,19 +899,11 @@ protected: // functions
   void set_refresh (Refresh * refresh) 
   {
     // WARNING: known memory leak (see bug # 133)
-#ifdef SHARED_PTR_REFRESH    
-    refresh_.push_back(std::make_shared<Refresh>(*refresh));
-#else
     refresh_.push_back(new Refresh (*refresh));
-#endif    
   };
 
   /// Return the currently-active Refresh object
-#ifdef SHARED_PTR_REFRESH  
-  std::shared_ptr<Refresh> refresh () throw()
-#else
   Refresh * refresh () throw()
-#endif    
   {  return refresh_.back();  }
 
 
@@ -1009,17 +1006,11 @@ protected: // attributes
   
   /// Refresh object associated with current refresh operation
   /// (Not a pointer since must be one per Block for synchronization counters)
-#ifdef SHARED_PTR_REFRESH  
-  std::vector<std::shared_ptr<Refresh> > refresh_;
-#else
   std::vector<Refresh*> refresh_;
-#endif  
 
-#ifdef NEW_REFRESH  
   std::vector < Sync > new_refresh_sync_list_;
   std::vector < std::vector <MsgRefresh * > > new_refresh_msg_list_;
   std::vector < RefreshState > new_refresh_state_list_;
-#endif  
 
 };
 

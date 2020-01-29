@@ -28,9 +28,9 @@ CkReductionMsg * r_reduce_performance(int n, CkReductionMsg ** msgs)
 
   // sum remaining values
   for (int i=0; i<n; i++) {
-    ASSERT2("r_reduce_performance()",
-	    "CkReductionMsg actual size %d is different from expected %d",
-	    msgs[i]->getSize(),length*sizeof(long long),
+    ASSERT4("r_reduce_performance()",
+	    "CkReductionMsg actual size %d is different from expected %lu num_sum %d num_max %d",
+	    msgs[i]->getSize(),length*sizeof(long long),num_sum,num_max,
 	    (msgs[i]->getSize() == length*sizeof(long long)));
       
     long long * values = (long long *) msgs[i]->getData();
@@ -62,7 +62,7 @@ CkReductionMsg * sum_long_double(int n, CkReductionMsg ** msgs)
 
   for (int i=0; i<n; i++) {
     ASSERT2("sum_long_double()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),sizeof(long double),
 	    (msgs[i]->getSize() == sizeof(long double)));
     long double * values = (long double *) msgs[i]->getData();
@@ -87,7 +87,7 @@ CkReductionMsg * sum_long_double_2(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_2()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),2*sizeof(long double),
 	    (msgs[i]->getSize() == 2*sizeof(long double)));
 
@@ -115,7 +115,7 @@ CkReductionMsg * sum_long_double_3(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_3()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),3*sizeof(long double),
 	    (msgs[i]->getSize() == 3*sizeof(long double)));
 
@@ -143,7 +143,7 @@ CkReductionMsg * sum_long_double_4(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_4()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),4*sizeof(long double),
 	    (msgs[i]->getSize() == 4*sizeof(long double)));
     
@@ -172,7 +172,7 @@ CkReductionMsg * sum_long_double_5(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_5()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),5*sizeof(long double),
 	    (msgs[i]->getSize() == 5*sizeof(long double)));
     
@@ -202,7 +202,7 @@ CkReductionMsg * sum_long_double_6(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_6()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),6*sizeof(long double),
 	    (msgs[i]->getSize() == 6*sizeof(long double)));
     
@@ -233,7 +233,7 @@ CkReductionMsg * sum_long_double_7(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_7()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),7*sizeof(long double),
 	    (msgs[i]->getSize() == 7*sizeof(long double)));
     
@@ -265,7 +265,7 @@ CkReductionMsg * sum_long_double_8(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_8()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),8*sizeof(long double),
 	    (msgs[i]->getSize() == 8*sizeof(long double)));
     
@@ -300,7 +300,7 @@ CkReductionMsg * sum_long_double_n(int n, CkReductionMsg ** msgs)
   for (int i=0; i<n; i++) {
 
     ASSERT2("sum_long_double_n()",
-	    "CkReductionMsg actual size %d is different from expected %d",
+	    "CkReductionMsg actual size %d is different from expected %lu",
 	    msgs[i]->getSize(),(N+1)*sizeof(long double),
 	    (msgs[i]->getSize() == (N+1)*sizeof(long double)));
     

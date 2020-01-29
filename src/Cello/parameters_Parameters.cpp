@@ -86,6 +86,10 @@ void Parameters::pup (PUP::er &p)
       p | name;
       int lparam = (param != NULL);
       p | lparam;
+      ASSERT("Parameters::pup",
+             "param is expected to be non-null",
+             ((! lparam) && (param == NULL) ||
+              (  lparam  && (param != NULL))));
       if (lparam) p | *param;
     } 
   } else {

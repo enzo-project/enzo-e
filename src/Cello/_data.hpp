@@ -62,6 +62,9 @@ extern void png_array (const char * filename,
 class FieldData;
 class FieldFace;
 
+#include "data_FaceFluxes.hpp"
+#include "data_FluxData.hpp"
+
 #include "data_Grouping.hpp"
 
 #include "data_ScalarDescr.hpp"

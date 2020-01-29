@@ -298,6 +298,8 @@ public: // virtual functions
   /// Reduction for performance data
   void r_monitor_performance_reduce (CkReductionMsg * msg);
 
+  float timer() { return timer_.value(); }
+  
   //--------------------------------------------------
   // Data
   //--------------------------------------------------
@@ -320,14 +322,12 @@ public: // virtual functions
   void set_checkpoint(char * checkpoint)
   { strncpy (dir_checkpoint_,checkpoint,255);}
 
-#ifdef NEW_REFRESH
-
   //--------------------------------------------------
   // New Refresh
   //--------------------------------------------------
 
   /// refresh_register
-  int new_register_refresh (Refresh refresh)
+  int new_register_refresh (const Refresh & refresh)
   {
     const int id_refresh = new_refresh_list_.size();
     ASSERT("Simulation::new_register_refresh()",
@@ -335,9 +335,27 @@ public: // virtual functions
 	   (id_refresh >= 0));
     new_refresh_list_.push_back(refresh);
     new_refresh_list_[id_refresh].set_id(id_refresh);
+#ifdef DEBUG_NEW_REFRESH  
+    CkPrintf ("DEBUG_NEW_REFRESH register id %d\n",id_refresh);
+#endif    
     return id_refresh;
   }
+  void new_refresh_set_name (int id, std::string name)
+  {
+    if (id >= int(new_refresh_name_.size()))
+      new_refresh_name_.resize(id+1);
+    new_refresh_name_[id] = name;
+#ifdef DEBUG_NEW_REFRESH  
+    CkPrintf ("DEBUG_NEW_REFRESH register name %d %s\n",id,name.c_str());
+#endif    
+  }
   
+  std::string new_refresh_name (int id) const
+  {
+    return (0 <= id && id < int(new_refresh_name_.size())) ?
+      new_refresh_name_[id] : "UNKNOWN";
+  }
+
   /// Return the given refresh object
   Refresh & new_refresh_list (int id_refresh)
   { return new_refresh_list_[id_refresh]; }
@@ -346,8 +364,6 @@ public: // virtual functions
   int new_refresh_count() const
   { return new_refresh_list_.size(); }
 
-#endif  
-  
 protected: // functions
 
   /// Initialize the Config object
@@ -495,13 +511,11 @@ protected: // attributes
   Sync sync_new_output_start_;
   Sync sync_new_output_next_;
 
-#ifdef NEW_REFRESH  
   /// Refresh phase lists
 
-  std::vector < Refresh > new_refresh_list_;
+  std::vector < Refresh >     new_refresh_list_;
+  std::vector < std::string > new_refresh_name_;
 
-#endif
-  
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
 

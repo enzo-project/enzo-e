@@ -12,16 +12,16 @@ Adapt {
 
    MASK {
       type = "mask";
-      value = [ 6.0, (x - 0.5*cos(12.27*t))*(x - 0.5*cos(12.27*t)) + (y - 0.5*sin(12.27*t))*(y - 0.5*sin(12.27*t)) <= 0.25, 0.0 ];
+      value = [ 6.0, (x - 0.5*cos(3.141592*t))*(x - 0.5*cos(3.141592*t)) + (y - 0.5*sin(3.141592*t))*(y - 0.5*sin(3.141592*t)) <= 0.25, 0.0 ];
    }
    
 }
 
 Mesh {
-   root_size = [128,128];
+   root_size = [32,32];
 }
 
-Stopping { cycle = 1023; }
+Stopping { cycle = 256; }
 
  Initial {
      value {
@@ -31,13 +31,13 @@ Stopping { cycle = 1023; }
      trace { stride = [8,8];}
   }
 
-Method { trace {  timestep = 0.002; } }
+Method { trace {  timestep = .015625; } }
 
 Output {
     list = ["mesh","trace"];       
     trace {
-        name = [ "particle-amr-dynamic-%04d.png", "cycle" ];
-        include "input/schedule_cycle_10.incl"
+        name = [ "particle-amr-dynamic-%03d.png", "cycle" ];
+        schedule {  var =  "cycle";  step = 32; }
 #        image_reduce_type = "max";
         image_size = [ 512, 512 ];
     }
@@ -47,8 +47,8 @@ Output {
         image_reduce_type = "max";
 	image_type = "data+mesh";
 	field_list = ["velocity_x"];
-        include "input/schedule_cycle_10.incl"
-	name = [ "particle-amr-dynamic-mesh-%04d.png", "cycle" ];
+        schedule {  var =  "cycle";  step = 32; }
+	name = [ "particle-amr-dynamic-mesh-%03d.png", "cycle" ];
 	include "input/colormap_rainbow.incl"
     }
 }

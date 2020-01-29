@@ -77,9 +77,14 @@ public: // interface
     method_courant_global(1.0),
     method_list(),
     method_schedule_index(),
+    method_close_files_seconds_stagger(),
+    method_close_files_seconds_delay(),
+    method_close_files_group_size(),
     method_courant(),
     method_timestep(),
     method_trace_name(),
+  // MethodNull
+    method_null_dt(0.0),
     monitor_debug(false),
     monitor_verbose(false),
     num_output(0),
@@ -225,9 +230,13 @@ public: // interface
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
+      method_close_files_seconds_stagger(),
+      method_close_files_seconds_delay(),
+      method_close_files_group_size(),
       method_courant(),
       method_timestep(),
       method_trace_name(),
+      method_null_dt(0.0),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),
@@ -420,9 +429,14 @@ public: // attributes
   double                     method_courant_global;
   std::vector<std::string>   method_list;
   std::vector<int>           method_schedule_index;
+  std::vector<double>        method_close_files_seconds_stagger;
+  std::vector<double>        method_close_files_seconds_delay;
+  std::vector<int>           method_close_files_group_size;
   std::vector<double>        method_courant;
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;
+  double                     method_null_dt;
+
 
   // Monitor
 

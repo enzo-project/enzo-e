@@ -25,8 +25,13 @@ public:
   /// CHARM++ pack / unpack
   void pup(PUP::er &p);
 
-  /// Increment counter and return whether the counter reached the stopping value
+  /// Increment counter and return whether the counter reached the
+  /// stopping value
   bool next () throw();
+
+  /// Increment counter but not return whether the counter reached the
+  /// stopping value (used to bypass Coverity analysis false positive)
+  void advance () throw();
   
   /// Return whether the Sync counter has reached the stopping value
   bool is_done () const throw();
@@ -62,7 +67,15 @@ public:
   inline int operator += (int count) 
   { index_stop_ += count; return index_stop_; }
 
-private:
+private: // methods
+
+  /// Increment counter
+  void advance_() throw ();
+
+  /// Check whether stop reached
+  void check_done_() throw ();
+  
+private: // attributes
 
   int is_done_;
   

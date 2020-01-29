@@ -14,18 +14,7 @@
 
 #include "enzo.hpp"
 
-
-#include <ctime>
 #include <random>
-
-//----------------------------------------------------------------------
-
-// set the time (needed to seed random number)
-// for some reason this is the only thing that worked
-double gettime(long int* n){
-  double the_time = time(n);
-  return the_time;
-}
 
 //----------------------------------------------------------------------
 
@@ -191,8 +180,6 @@ void EnzoInitialSedovRandom::enforce_block
 
   // (kx,ky,kz) index bounds of explosions in domain
 
-  //srand((unsigned)gettime(NULL));
-
   // setup an array of random numbers to fill each block in array
   // add check for half to be zero
   // also need an array of multiple of sedov_te_in for each blast in this array
@@ -204,13 +191,19 @@ void EnzoInitialSedovRandom::enforce_block
 
   int alternate = 0;
 
+  std::random_device rd;
+  std::uniform_int_distribution<int> rand_blasts(1, max_blasts_);
+  std::uniform_int_distribution<int> rand_te_mult(-te_multiplier_,
+                                                  +te_multiplier_);
+  std::uniform_real_distribution<double> rand_radius(-sedov_radius,
+                                                     -sedov_radius+1.0);
+  
+  
   for(int iz = 0; iz<kzp; iz++){
     for(int iy = 0; iy<kyp; iy++){
       for(int ix = 0; ix<kxp; ix++){
 
-        srand((unsigned)gettime(NULL)+static_cast<size_t>(100*(iz+iy+ix)));
-
-        int rnum = (rand() % max_blasts_) + 1; // should give number in [1,max_blasts_]
+        int rnum = rand_blasts(rd); // should give number in [1,max_blasts_]
 
         if(half_empty_ && alternate%2){ // every odd one should be empty
           rnum = 0;
@@ -222,8 +215,7 @@ void EnzoInitialSedovRandom::enforce_block
         // std::cout << "rnum: " << rnum << "\n";
 
         for(int rnbeg = 1; rnbeg<=rnum; rnbeg++){
-            rn_array[ix][iy][iz][rnbeg] = 
-            (rand() % (2*te_multiplier_+1)) - te_multiplier_; // adding te multiplier
+          rn_array[ix][iy][iz][rnbeg] = rand_te_mult(rd);  // adding te multiplier
         }
 
         alternate++;
@@ -254,21 +246,18 @@ void EnzoInitialSedovRandom::enforce_block
 
         // so now (xc, yc, zc) is set to center of block
 
-        //srand((unsigned)gettime(NULL)+static_cast<size_t>(100*));
-
         int blasts_current_box = rn_array[kx][ky][kz][0];
 
         for (int blast_num = 1; blast_num <= blasts_current_box; blast_num++){
 
           //std::cout << "Executing " << blast_num << " of " << blasts_current_box << std::endl;
 
-          srand((unsigned)gettime(NULL)+static_cast<size_t>(100*blast_num*(kx+ky+kz)));
           // loops over every cell including ghost cells
           // if cell is within sedov_radius, add total energy to cell
 
-          double rz = rand() % 100 / 100.0 - sedov_radius;
-          double ry = rand() % 100 / 100.0 - sedov_radius;
-          double rx = rand() % 100 / 100.0 - sedov_radius;
+          double rz = rand_radius(rd);
+          double ry = rand_radius(rd);
+          double rx = rand_radius(rd);
 
           double snx = xc - 0.5 * hxa + sedov_radius + fabs(rx) * hxa; //xc + rx * hxa;
           double sny = yc - 0.5 * hya + sedov_radius + fabs(ry) * hya;
