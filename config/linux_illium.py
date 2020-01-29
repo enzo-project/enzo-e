@@ -63,8 +63,12 @@ if charm_path is None:
 			raise Exception('Charm++ was not found.  Try setting the CHARM_HOME environment variable.')
 
 use_papi=0
-papi_inc = '/home/aemerick/anaconda2/include' #'/usr/local/include'
-papi_lib = '/home/aemerick/anaconda2/lib' #'/usr/local/lib'
+papi_inc = '/home/aemerick/anaconda3/include' #'/usr/local/include'
+papi_lib = '/home/aemerick/anaconda3/lib' #'/usr/local/lib'
+
+boost_inc = os.getenv('BOOST_INC', '/usr/include/boost')
+boost_lib = os.getenv('BOOST_LIB', '/usr/lib/x86_64-linux-gnu')
+
 
 hdf5_inc = os.getenv('HDF5_INC')
 if hdf5_inc is None:
