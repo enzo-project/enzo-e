@@ -28,12 +28,14 @@ EnzoRiemann* EnzoRiemann::construct_riemann
     out = new EnzoRiemannHLLMHD(integrable_groups, passive_groups);
   } else if (formatted == std::string("hlle")){
     out = new EnzoRiemannHLLEMHD(integrable_groups, passive_groups);
+  } else if (formatted == std::string("hllc")){
+    out = new EnzoRiemannHLLC(integrable_groups, passive_groups);
   } else if (formatted == std::string("hlld")){
     // could possibly check that MHD fields are included
     out = new EnzoRiemannHLLD(integrable_groups, passive_groups);
   } else {
     ERROR("EnzoRiemann::construct_riemann",
-	  "The only known solvers are HLL, HLLE, & HLLD");
+	  "The only known solvers are HLL, HLLE, HLLC, & HLLD");
     out = NULL;  // Deals with compiler warning
   }
 

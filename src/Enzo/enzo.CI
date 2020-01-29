@@ -99,6 +99,7 @@ module enzo {
   PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeedMHD>>;
   // EnzoRiemannHLLEMHD
   PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeedMHD>>;
+  PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
   PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
   PUPable EnzoPhysicsCosmology;
