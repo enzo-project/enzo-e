@@ -887,8 +887,10 @@ void Simulation::monitor_performance()
   // + performance counters
   // 10 max_proc_blocks
   // 11 max_proc_particles
+  // 12 max_node_blocks
+  // 13 max_node_particles
   
-  int n = 12 + ( hierarchy_->max_level() - hierarchy_->min_level() + 1) + nr*nc;
+  int n = 14 + ( hierarchy_->max_level() - hierarchy_->min_level() + 1) + nr*nc;
 
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
@@ -896,8 +898,9 @@ void Simulation::monitor_performance()
   const int in = cello::index_static();
 
   int m=0;
-  counters_reduce[m++] = n - 4; // 0
-  counters_reduce[m++] = 2;     // 1
+  const int num_max = 4;
+  counters_reduce[m++] = n - num_max - 2;
+  counters_reduce[m++] = num_max;
   
   // accumulated metrics
   
@@ -930,6 +933,8 @@ void Simulation::monitor_performance()
   
   counters_reduce[m++] = num_blocks_total;            // 10  max_proc_blocks
   counters_reduce[m++] = hierarchy_->num_particles(); // 11  max_proc_particles
+  counters_reduce[m++] = Hierarchy::num_blocks_node;  // 12  max_node_blocks
+  counters_reduce[m++] = Hierarchy::num_particles_node;// 13 max_node_particles
 
   ASSERT2("Simulation::monitor_performance()",
 	  "Actual array length %d != expected array length %d", m,n,
@@ -1034,32 +1039,49 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 
   const long long max_proc_blocks    = counters_reduce[m++]; // 10
   const long long max_proc_particles = counters_reduce[m++]; // 11
+  const long long max_node_blocks    = counters_reduce[m++]; // 12
+  const long long max_node_particles = counters_reduce[m++]; // 13
   
   monitor()->print
     ("Performance","simulation max-proc-blocks %lld",  max_proc_blocks);
   monitor()->print
+    ("Performance","simulation max-node-blocks %lld",  max_node_blocks);
+  monitor()->print
     ("Performance","simulation max-proc-particles %lld", max_proc_particles);
+  monitor()->print
+    ("Performance","simulation max-node-particles %lld", max_node_particles);
 
   const double avg_proc_blocks = 1.0*num_blocks_total/CkNumPes();
+  const double avg_node_blocks = 1.0*num_blocks_total/CkNumNodes();
+
+  // monitor()->print
+  //   ("Performance","simulation balance-blocks-core %f",
+  //    100.0*(max_proc_blocks / avg_proc_blocks - 1.0 ));
+  // monitor()->print
+  //   ("Performance","simulation balance-blocks-node %f",
+  //    100.0*(max_node_blocks / avg_node_blocks - 1.0 ));
 
   monitor()->print
-    ("Performance","simulation balance-blocks %f",
-     100.0*(max_proc_blocks / avg_proc_blocks - 1.0 ));
-  monitor()->print
-    ("Performance","simulation balance-eff-blocks %f (%.0f/%lld)",
+    ("Performance","simulation balance-eff-blocks-core %f (%.0f/%lld)",
      avg_proc_blocks / max_proc_blocks,
      avg_proc_blocks, max_proc_blocks);
+  monitor()->print
+    ("Performance","simulation balance-eff-blocks-node %f (%.0f/%lld)",
+     avg_node_blocks / max_node_blocks,
+     avg_node_blocks, max_node_blocks);
   
 
   if (num_particles > 0) {
     const double avg_proc_particles = 1.0*num_particles/CkNumPes();
+    const double avg_node_particles = 1.0*num_particles/CkNumNodes();
     monitor()->print
-      ("Performance","simulation balance-particles %f",
-       100.0*(max_proc_particles / avg_proc_particles - 1.0));
-    monitor()->print
-      ("Performance","simulation balance-eff-particles %f (%.0f/%lld)",
+      ("Performance","simulation balance-eff-particles-core %f (%.0f/%lld)",
        avg_proc_particles / max_proc_particles,
        avg_proc_particles , max_proc_particles );
+    monitor()->print
+      ("Performance","simulation balance-eff-particles-node %f (%.0f/%lld)",
+       avg_node_particles / max_node_particles,
+       avg_node_particles , max_node_particles );
   }
   
   ASSERT3("Simulation::monitor_performance()",

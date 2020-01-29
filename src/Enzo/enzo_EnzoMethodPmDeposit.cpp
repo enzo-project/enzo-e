@@ -145,7 +145,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     int level = block->level();
 
-    dens *= std::pow(2.0,rank*level);
+    //    dens *= std::pow(2.0,rank*level);
 
     // Accumulated single velocity array for Baryon deposit
 

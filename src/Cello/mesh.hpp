@@ -25,5 +25,7 @@
 #include "_simulation.hpp"
 #include "_mesh.hpp"
 #include "_data.hpp" 
+
+extern void mutex_init_hierarchy();
 #endif /* MESH_HPP */
 

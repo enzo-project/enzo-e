@@ -1,4 +1,6 @@
- Adapt {
+Balance { var = "cycle"; value = 20; start = 10; }
+
+Adapt {
      list = [ "mass_baryon", "mass_dark" ];
      mass_baryon {
          field_list = [ "density" ];

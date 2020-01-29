@@ -356,7 +356,8 @@ void Block::init
 
   }
 
-  setMigratable(true);
+  // Do not migrate the root Block (0,0,0) level (0)
+  setMigratable(! index_.is_root());
 
   DEBUG_FACES("Block()");
 

@@ -11,7 +11,6 @@
 
 #include "auto_config.def"
 
-
 //----------------------------------------------------------------------
 Monitor Monitor::instance_[CONFIG_NODE_SIZE]; // singleton design pattern)
 //----------------------------------------------------------------------
@@ -261,6 +260,7 @@ void Monitor::write_verbatim
 
 void Monitor::print (const char * component, const char * message, ...) const
 {
+
   if (is_active(component)) {
 
     va_list fargs;

@@ -139,16 +139,7 @@ public: // interface
   { block_array_ = block_array;}
 
   /// Increment (decrement) number of mesh blocks
-  void increment_block_count(int count, int level)
-  {
-    num_blocks_ += count;
-    const int n=num_blocks_level_.size();
-    const int index = level - min_level_;
-    ASSERT1("Hierarchy::increment_block_count",
-	    "Block level %d exceeds block count array",
-	    level, 0 <= index && index < n);
-    num_blocks_level_[level-min_level_] += count;
-  }
+  void increment_block_count(int count, int level);
 
   /// Add Block to the list of blocks (block_vec_ and block_map_)
   void insert_block (Block * block)
@@ -171,8 +162,7 @@ public: // interface
   }
   
   /// Increment (decrement) number of particles
-  void increment_particle_count(int64_t count)
-  { num_particles_ += count; }
+  void increment_particle_count(int64_t count);
 
   /// Increment (decrement) number of real_zones
   void increment_real_zone_count(int64_t count)
@@ -273,7 +263,16 @@ protected: // attributes
 
   /// Periodicity of boundary conditions on faces
   bool periodicity_[3][2];
+
+public: // static attributes
+
+  /// Current number of blocks on this node
+  static int num_blocks_node;
   
+  /// Current number of particles on this node
+  static int64_t num_particles_node;
+
+
 };
 
 
