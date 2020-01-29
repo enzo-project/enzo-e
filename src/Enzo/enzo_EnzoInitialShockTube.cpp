@@ -104,10 +104,11 @@ EnzoInitialShockTube::EnzoInitialShockTube(double gamma, int cycle, double time,
 					   std::string setup_name,
 					   std::string aligned_ax_name,
 					   double axis_velocity,
-					   double trans_velocity)
+					   double trans_velocity,
+					   bool flipped_initialize)
   : Initial(cycle, time), gamma_(gamma), setup_name_(setup_name),
     aligned_ax_(0), axis_velocity_(axis_velocity),
-    trans_velocity_(trans_velocity)
+    trans_velocity_(trans_velocity), flipped_initialize_(flipped_initialize)
 {
 
   if (std::find(shock_tube_setups.begin(),
@@ -152,6 +153,24 @@ void EnzoInitialShockTube::pup (PUP::er &p)
   p | aligned_ax_;
   p | axis_velocity_;
   p | trans_velocity_;
+  p | flipped_initialize_;
+}
+
+//----------------------------------------------------------------------
+
+void setup_maps_(const std::map<std::string, enzo_float> &ref_map,
+		 bool invert_vectors,
+		 std::map<std::string, enzo_float> &target_map)
+{
+  for (std::pair<std::string, enzo_float> element : ref_map) {
+    enzo_float factor = 1.;
+    std::string name = element.first;
+    if (invert_vectors && ( name.find("bfield") != std::string::npos ||
+			    name.find("velocity") != std::string::npos )){
+	factor = -1.;
+    }
+    target_map[name] = factor * element.second;
+  }
 }
 
 //----------------------------------------------------------------------
@@ -159,9 +178,19 @@ void EnzoInitialShockTube::pup (PUP::er &p)
 void EnzoInitialShockTube::enforce_block 
 ( Block * block, const Hierarchy  * hierarchy ) throw()
 {
-  std::map<std::string, enzo_float> l_vals = shock_tube_l[setup_name_];
-  std::map<std::string, enzo_float> r_vals = shock_tube_r[setup_name_];
-  enzo_float aligned_bfield_val = shock_tube_bfield_0[setup_name_];
+  std::map<std::string, enzo_float> l_vals, r_vals;
+  if (!flipped_initialize_) {
+    setup_maps_(shock_tube_l[setup_name_], false, l_vals);
+    setup_maps_(shock_tube_r[setup_name_], false, r_vals);
+  } else {
+    setup_maps_(shock_tube_r[setup_name_], true, l_vals);
+    setup_maps_(shock_tube_l[setup_name_], true, r_vals);
+  }
+
+  enzo_float flip = (flipped_initialize_) ? -1. : 1.;
+  enzo_float aligned_bfield_val = flip * shock_tube_bfield_0[setup_name_];
+  enzo_float axis_velocity      = flip * axis_velocity_;
+  enzo_float trans_velocity     = flip * trans_velocity_;
 
   std::string velocities[3] = {"velocity_x", "velocity_y", "velocity_z"};
   std::string bfields[3] = {"bfieldi_x","bfieldi_y","bfieldi_z"};
@@ -183,8 +212,8 @@ void EnzoInitialShockTube::enforce_block
       continue;
     }
 
-    enzo_float velocity_0 = cur_val_map->at("velocity_0") + axis_velocity_;
-    enzo_float velocity_1 = cur_val_map->at("velocity_1") + trans_velocity_;
+    enzo_float velocity_0 = cur_val_map->at("velocity_0") + axis_velocity;
+    enzo_float velocity_1 = cur_val_map->at("velocity_1") + trans_velocity;
     enzo_float velocity_2 = cur_val_map->at("velocity_2");
 
     arr = array_factory.from_name("density");
@@ -275,7 +304,7 @@ void EnzoInitialShockTube::prep_aligned_slices_(Block *block, CSlice **l_slice,
   //   left_edge + di * (0.5+(double)(ind-gi))
   // The first cell with pos>=0
   int shock_ind = (int)ceil((0.5-left_edge)/di-0.5 + (double)gi);
-  shock_ind = std::max(shock_ind,0);
+  shock_ind = std::min(std::max(shock_ind,0),mi);
 
   if (shock_ind > 0){
     *l_slice = new CSlice(0,shock_ind);

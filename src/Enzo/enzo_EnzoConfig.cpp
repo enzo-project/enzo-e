@@ -80,6 +80,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_inclinedwave_beta(0.0),
   initial_inclinedwave_amplitude(0.0),
   initial_inclinedwave_lambda(0.0),
+  initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
   initial_inclinedwave_positive_vel(true),
   initial_inclinedwave_wave_type(""),
   // EnzoInitialMusic
@@ -116,6 +117,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_shock_tube_aligned_ax(""),
   initial_shock_tube_axis_velocity(0.0),
   initial_shock_tube_trans_velocity(0.0),
+  initial_shock_tube_flip_initialize(false),
   // EnzoInitialSoup
   initial_soup_rank(0),
   initial_soup_file(""),
@@ -287,6 +289,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_inclinedwave_beta;
   p | initial_inclinedwave_amplitude;
   p | initial_inclinedwave_lambda;
+  p | initial_inclinedwave_parallel_vel;
   p | initial_inclinedwave_positive_vel;
   p | initial_inclinedwave_wave_type;
 
@@ -330,6 +333,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_shock_tube_aligned_ax;
   p | initial_shock_tube_axis_velocity;
   p | initial_shock_tube_trans_velocity;
+  p | initial_shock_tube_flip_initialize;
 
   p | initial_soup_rank;
   p | initial_soup_file;
@@ -544,6 +548,10 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:inclined_wave:amplitude",1.e-6);
   initial_inclinedwave_lambda         = p->value_float
     ("Initial:inclined_wave:lambda",1.0);
+  // The default vaue for parallel_vel is known by EnzoInitialInclinedWave
+  // to mean that a value was not specified
+  initial_inclinedwave_parallel_vel   = p->value_float
+    ("Initial:inclined_wave:parallel_vel", std::numeric_limits<double>::min());
   initial_inclinedwave_positive_vel   = p->value_logical
     ("Initial:inclined_wave:positive_vel",true);
   initial_inclinedwave_wave_type      = p->value_string
@@ -623,6 +631,8 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:shock_tube:axis_velocity",0.0);
   initial_shock_tube_trans_velocity = p->value_float
     ("Initial:shock_tube:transverse_velocity",0.0);
+  initial_shock_tube_flip_initialize = p -> value_logical
+    ("Initial:shock_tube:flip_initialize", false);
 
   // VL+CT b-field initialization
   initial_bcenter_update_etot = p->value_logical

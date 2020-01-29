@@ -166,6 +166,7 @@ public: // interface
       initial_inclinedwave_beta(0.0),
       initial_inclinedwave_amplitude(0.0),
       initial_inclinedwave_lambda(0.0),
+      initial_inclinedwave_parallel_vel(std::numeric_limits<double>::min()),
       initial_inclinedwave_positive_vel(true),
       initial_inclinedwave_wave_type(""),
       // EnzoInitialMusic
@@ -202,6 +203,7 @@ public: // interface
       initial_shock_tube_aligned_ax(""),
       initial_shock_tube_axis_velocity(0.0),
       initial_shock_tube_trans_velocity(0.0),
+      initial_shock_tube_flip_initialize(false),
       // EnzoInitialSoup
       initial_soup_rank(0),
       initial_soup_file(""),
@@ -374,6 +376,7 @@ public: // attributes
   double                     initial_inclinedwave_beta;
   double                     initial_inclinedwave_amplitude;
   double                     initial_inclinedwave_lambda;
+  double                     initial_inclinedwave_parallel_vel;
   bool                       initial_inclinedwave_positive_vel;
   std::string                initial_inclinedwave_wave_type;
   
@@ -419,6 +422,7 @@ public: // attributes
   std::string                initial_shock_tube_aligned_ax;
   double                     initial_shock_tube_axis_velocity;
   double                     initial_shock_tube_trans_velocity;
+  bool                       initial_shock_tube_flip_initialize;
 
   /// EnzoInitialSoup
   int                        initial_soup_rank;

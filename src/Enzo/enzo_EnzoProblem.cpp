@@ -168,6 +168,7 @@ Initial * EnzoProblem::create_initial_
        enzo_config->field_gamma,
        enzo_config->initial_inclinedwave_amplitude,
        enzo_config->initial_inclinedwave_lambda,
+       enzo_config->initial_inclinedwave_parallel_vel,
        enzo_config->initial_inclinedwave_positive_vel,
        enzo_config->initial_inclinedwave_wave_type);
   } else if (type == "turbulence") {
@@ -194,7 +195,8 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_shock_tube_setup_name,
        enzo_config->initial_shock_tube_aligned_ax,
        enzo_config->initial_shock_tube_axis_velocity,
-       enzo_config->initial_shock_tube_trans_velocity);
+       enzo_config->initial_shock_tube_trans_velocity,
+       enzo_config->initial_shock_tube_flip_initialize);
   } else if (type == "soup") {
     const int rank = enzo_config->initial_soup_rank;
     initial = new EnzoInitialSoup

@@ -37,6 +37,8 @@
 //  It could definitely be simplified (although the Rotation class probably
 //  shouldn't be touched since it will be reused)
 
+#include <sstream> // std::stringstream
+
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 #include "cello.hpp"
@@ -398,11 +400,33 @@ private:
 void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 		  int mx, int my, int mz)
 {
-  EFlt3DArray bfieldi_x, bfieldi_y, bfieldi_z;
+  Field field = block->data()->field();
+  ASSERT("setup_bfield", ("Can only currently handle initialization of "
+			  "B-fields if interface values are used"),
+	 field.is_field("bfieldi_x") &&
+	 field.is_field("bfieldi_y") &&
+	 field.is_field("bfieldi_z"));
+
+
   EnzoFieldArrayFactory array_factory(block);
-  bfieldi_x = array_factory.from_name("bfieldi_x");
-  bfieldi_y = array_factory.from_name("bfieldi_y");
-  bfieldi_z = array_factory.from_name("bfieldi_z");
+  EFlt3DArray bfieldi_x = array_factory.from_name("bfieldi_x");
+  EFlt3DArray bfieldi_y = array_factory.from_name("bfieldi_y");
+  EFlt3DArray bfieldi_z = array_factory.from_name("bfieldi_z");
+
+  if (a == NULL){
+    for (int iz=0; iz<mz+1; iz++){
+      for (int iy=0; iy<my+1; iy++){
+	for (int ix=0; ix<mx+1; ix++){
+	  if ((iz != mz) && (iy != my)) { bfieldi_x(iz,iy,ix) = 0; }
+	  if ((iz != mz) && (ix != mx)) { bfieldi_y(iz,iy,ix) = 0; }
+	  if ((iy != my) && (ix != mx)) { bfieldi_z(iz,iy,ix) = 0; }
+	}
+      }
+    }
+    EnzoInitialBCenter::initialize_bfield_center(block);
+    return;
+  }
+
 
   // allocate corner-centered arrays for the magnetic vector potentials
   // Ax, Ay, and Az are always cell-centered along the x, y, and z dimensions,
@@ -444,6 +468,55 @@ void setup_bfield(Block * block, VectorInit *a, MeshPos &pos,
 
 //----------------------------------------------------------------------
 
+void setup_eint_(Block *block)
+{
+  // because cell-centered bfields for CT are computed in terms of enzo_float,
+  // this calculation is handled in terms of enzo_float
+  // This operation could be split off and placed in a separate initializer
+  EnzoFieldArrayFactory array_factory(block);
+  Field field = block->data()->field();
+
+  EFlt3DArray density, etot, eint;
+  density = array_factory.from_name("density");
+  etot = array_factory.from_name("total_energy");
+  eint = array_factory.from_name("internal_energy");
+
+  EFlt3DArray velocity_x, velocity_y, velocity_z;
+  velocity_x = array_factory.from_name("velocity_x");
+  velocity_y = array_factory.from_name("velocity_y");
+  velocity_z = array_factory.from_name("velocity_z");
+
+  const bool mhd = field.is_field("bfield_x");
+  EFlt3DArray bfield_x, bfield_y, bfield_z;
+  if (mhd){
+    bfield_x = array_factory.from_name("bfield_x");
+    bfield_y = array_factory.from_name("bfield_y");
+    bfield_z = array_factory.from_name("bfield_z");
+  }
+
+  for (int iz=0; iz<density.shape(0); iz++){
+    for (int iy=0; iy<density.shape(1); iy++){
+      for (int ix=0; ix<density.shape(2); ix++){
+	enzo_float kinetic, magnetic;
+	kinetic = 0.5 * (velocity_x(iz,iy,ix) * velocity_x(iz,iy,ix) +
+		         velocity_y(iz,iy,ix) * velocity_y(iz,iy,ix) +
+		         velocity_z(iz,iy,ix) * velocity_z(iz,iy,ix));
+	if (mhd){
+	  magnetic =
+	    0.5 * (bfield_x(iz,iy,ix)*bfield_x(iz,iy,ix) +
+		   bfield_y(iz,iy,ix)*bfield_y(iz,iy,ix) +
+		   bfield_z(iz,iy,ix)*bfield_z(iz,iy,ix)) / density(iz,iy,ix);
+	} else {
+	  magnetic = 0.;
+	}
+	eint(iz,iy,ix) = etot(iz,iy,ix) - kinetic - magnetic;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void setup_fluid(Block *block, ScalarInit *density_init,
 		 ScalarInit *total_energy_density_init, 
 		 VectorInit *momentum_init,
@@ -475,9 +548,12 @@ void setup_fluid(Block *block, ScalarInit *density_init,
 	etot_dens = (*total_energy_density_init)(x,y,z);
 	specific_total_energy(iz,iy,ix) = (enzo_float)(etot_dens/rho);
       }
-      fflush(stdout);
     }
   }
+
+  // If present, setup internal energy (to test dual energy formalism):
+  Field field = block->data()->field();
+  if (field.is_field("internal_energy")) { setup_eint_(block); }
 }
 
 //----------------------------------------------------------------------
@@ -505,6 +581,14 @@ void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init,
   bfield_y = array_factory.from_name("bfield_y");
   bfield_z = array_factory.from_name("bfield_z");
 
+  Field field = block->data()->field();
+  EFlt3DArray specific_internal_energy;
+  const bool dual_energy = field.is_field("internal_energy");
+  if (dual_energy){
+    specific_internal_energy = array_factory.from_name("internal_energy");
+  }
+  
+
   for (int iz=0; iz<mz; iz++){
     for (int iy=0; iy<my; iy++){
       for (int ix=0; ix<mx; ix++){
@@ -529,8 +613,8 @@ void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init,
 				velocity_z(iz,iy,ix) * velocity_z(iz,iy,ix));
 
 	specific_total_energy(iz,iy,ix) = eint + mag + kin;
+	if (dual_energy) { specific_internal_energy(iz,iy,ix) = eint;}
       }
-      fflush(stdout);
     }
   }
 }
@@ -538,26 +622,67 @@ void setup_circ_polarized_alfven(Block *block, ScalarInit *density_init,
 
 //----------------------------------------------------------------------
 
-EnzoInitialInclinedWave::EnzoInitialInclinedWave(int cycle, double time,
-					     double alpha, double beta,
-					     double gamma, double amplitude,
-					     double lambda, bool pos_vel,
-					     std::string wave_type) throw()
+EnzoInitialInclinedWave::EnzoInitialInclinedWave
+(int cycle, double time, double alpha, double beta, double gamma,
+ double amplitude, double lambda, double parallel_vel,bool pos_vel,
+ std::string wave_type) throw()
   : Initial (cycle,time),
     alpha_(alpha),
     beta_(beta),
     gamma_(gamma),
     amplitude_(amplitude),
     lambda_(lambda),
+    parallel_vel_(parallel_vel),
     pos_vel_(pos_vel),
     wave_type_(wave_type)
 {
-  ASSERT("EnzoInitialInclinedWave",
-	 ("Invalid wave_type specified (must be 'fast', 'slow', 'alfven', "
-	  "'entropy', 'sound', or 'circ_alfven'"),
-	 (wave_type_ == "fast") || (wave_type_ == "alfven") ||
-	 (wave_type_ == "slow") || (wave_type_ == "entropy") ||
-	 (wave_type_ == "sound") || (wave_type_ == "circ_alfven"));
+  std::vector<std::string> mhd_waves = mhd_waves_();
+  std::vector<std::string> hd_waves  =  hd_waves_();
+
+  if (std::find(mhd_waves.begin(), mhd_waves.end(), wave_type_)
+      != mhd_waves.end()) {
+    // specified wave is an MHD wave, make sure parallel_vel_ isn't specified
+    ASSERT1("EnzoInitialInclinedWave",
+	    "parallel_vel can't be specified for a wave_type: \"%s\"",
+	    wave_type.c_str(), !specified_parallel_vel_());
+  } else if (std::find(hd_waves.begin(), hd_waves.end(), wave_type_)
+	     == hd_waves.end()) {
+    // wave_type_ isn't a known type. Raise error with list of known
+    // wave_types (follows https://stackoverflow.com/a/1430774):
+
+    std::stringstream ss;
+    for (std::vector<std::string>::size_type i = 0; i < mhd_waves.size(); i++){
+      if (i != 0) { ss << ", "; }
+      ss << "'" << mhd_waves[i] << "'";
+    }
+    for (std::vector<std::string>::size_type i = 0; i < hd_waves.size(); i++){
+      ss << "'" << mhd_waves[i] << "'";
+    }
+
+    std::string s = ss.str();
+    ERROR1("EnzoInitialInclinedWave", "Invalid wave_type, must be %s",
+	   s.c_str());
+  }
+}
+
+//----------------------------------------------------------------------
+
+std::vector<std::string> EnzoInitialInclinedWave::mhd_waves_() const throw()
+{
+  std::vector<std::string> v = {"fast", "alfven", "slow", "mhd_entropy",
+				"circ_alfven"};
+  return v;
+}
+
+//----------------------------------------------------------------------
+
+std::vector<std::string> EnzoInitialInclinedWave::hd_waves_() const throw()
+{
+  std::vector<std::string> v = {"sound",
+				"hd_entropy",            // perturb v0
+				"hd_transv_entropy_v1",  // perturb v1
+				"hd_transv_entropy_v2"}; // perturb v2
+  return v;
 }
 
 //----------------------------------------------------------------------
@@ -566,36 +691,46 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
 					  const Hierarchy * hierarchy) throw()
 {
   // Set up the test problem
-  // This will only work for the VLCT method for an adiabatic fluid
-  // does NOT support AMR
-  // (PPML initial conditions are much more complicated)
-
-  Field field  = block->data()->field();
-  ASSERT("EnzoInitialInclinedWave",
-	 "Insufficient number of fields",
-	 field.field_count() >= 8);
+  // Only currently works on unigrid and only currently supports hydro methods
+  // and VLCT (PPML initial conditions are much more complicated)
   
   ScalarInit *density_init = NULL;
   ScalarInit *total_energy_density_init = NULL;
   VectorInit *momentum_init = NULL;
   VectorInit *a_init = NULL;
 
-  prepare_initializers_(&density_init, &total_energy_density_init,
-			&momentum_init, &a_init);
+  Field field = block->data()->field();
+  const bool mhd = field.is_field("bfield_x");
 
-  // Try to load the dimensions, again
+  std::vector<std::string> hd_waves = hd_waves_();
+
+  if (std::find(hd_waves.begin(), hd_waves.end(), wave_type_) !=
+      hd_waves.end()) {
+    prepare_HD_initializers_(&density_init, &total_energy_density_init,
+			     &momentum_init);
+  } else {
+    ASSERT("EnzoInitialInclinedWave::enforce_block",
+	   "A MHD wave requires fields to store magnetic field values.", mhd);
+    prepare_MHD_initializers_(&density_init, &total_energy_density_init,
+			      &momentum_init, &a_init);
+  }
+
+  // load the dimensions and initialize object to compute positions
   int mx,my,mz;
   const int id = field.field_id ("density");
   field.dimensions (id,&mx,&my,&mz);
-
-  // Initialize object to compute positions
   MeshPos pos(block);
 
-  setup_bfield(block, a_init, pos, mx, my, mz);
+  if (mhd) {
+    // Initialize bfields. If the wave is purely hydrodynamical, they will be
+    // all be set to 0.
+    setup_bfield(block, a_init, pos, mx, my, mz);
+  }
+
   if (wave_type_ != "circ_alfven"){
     setup_fluid(block, density_init, total_energy_density_init, momentum_init,
 		pos, mx, my, mz, gamma_);
-    
+
   } else {
     setup_circ_polarized_alfven(block, density_init, momentum_init,
 				pos, mx, my, mz, gamma_);
@@ -604,15 +739,14 @@ void EnzoInitialInclinedWave::enforce_block(Block * block,
   delete density_init;
   delete momentum_init;
   delete total_energy_density_init;
-  delete a_init;
+  if (a_init != NULL) { delete a_init; }
 }
 
 //----------------------------------------------------------------------
 
-void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
-						    ScalarInit **etot_dens_init,
-						    VectorInit **momentum_init,
-						    VectorInit **a_init)
+void EnzoInitialInclinedWave::prepare_MHD_initializers_
+(ScalarInit **density_init, ScalarInit **etot_dens_init,
+ VectorInit **momentum_init, VectorInit **a_init)
 {
   double lambda = lambda_;
 
@@ -644,11 +778,10 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
     double b2_back = 0.0;
     // etot = pressure/(gamma-1)+0.5*rho*v^2+.5*B^2
     double etot_back = (1./gamma_)/(gamma_-1.)+1.625;
-    if (wave_type_ == "entropy"){
+    if (wave_type_ == "mhd_entropy"){
       mom0_back = wsign;
       etot_back += 0.5;
     }
-
 
     // Get the eigenvalues for density, velocity, and etot
     double density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev, b1_ev, b2_ev;
@@ -680,7 +813,8 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
       etot_ev = 3. * coef;
       b1_ev = -2. * coef;
       b2_ev = 0;
-    } else if (wave_type_ == "entropy") {
+    } else {
+      // wave_type_ == "mhd_entropy"
       double coef = 0.5;
       density_ev = 2. *coef;
       mom0_ev = 2. * coef * wsign;
@@ -689,45 +823,14 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
       etot_ev = 1. * coef;
       b1_ev = 0;
       b2_ev = 0;
-    } else {
-      // (wave_type_ == "sound")
-      b0_back = 0.;
-      b1_back = 0.;
-      b2_back = 0.;
-      etot_back = (1./gamma_)/(gamma_-1.);
-      density_ev = 1;
-      mom0_ev = wsign*-1;
-      mom1_ev = 0;
-      mom2_ev = 0;
-      etot_ev = 1.5;
-      b1_ev = 0;
-      b2_ev = 0;
     }
   
     double amplitude = amplitude_;
     // Now allocate the actual Initializers
-  
-    *density_init = new RotatedScalarInit(alpha_, beta_,
-					  new LinearScalarInit(density_back,
-							       density_ev,
-							       amplitude,
-							       lambda));
-      
-    *etot_dens_init = new RotatedScalarInit(alpha_, beta_,
-					    new LinearScalarInit(etot_back,
-							    etot_ev,
-							    amplitude,
-							    lambda));
-
-    *momentum_init = new RotatedVectorInit(alpha_, beta_,
-					   new LinearVectorInit(mom0_back,
-								mom1_back,
-								mom2_back,
-								mom0_ev,
-								mom1_ev,
-								mom2_ev,
-								amplitude,
-								lambda));
+    alloc_linear_HD_initializers_(density_back, density_ev, etot_back, etot_ev,
+				  mom0_back, mom1_back, mom2_back,
+				  mom0_ev, mom1_ev, mom2_ev,
+				  density_init, etot_dens_init, momentum_init);
     *a_init = new RotatedVectorInit(alpha_, beta_,
 				    new LinearVectorPotentialInit(b0_back,
 								  b1_back,
@@ -737,4 +840,137 @@ void EnzoInitialInclinedWave::prepare_initializers_(ScalarInit **density_init,
 								  amplitude,
 								  lambda));
   }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoInitialInclinedWave::prepare_HD_initializers_
+(ScalarInit **density_init, ScalarInit **etot_dens_init,
+ VectorInit **momentum_init)
+{
+
+  // wsign indicates direction of propogation.
+  double wsign = 1.;
+  if (!pos_vel_){
+    wsign = -1;
+  }
+
+  // the values for initializing hydrodynamical equations comes from columns of
+  // the matrix in B3 of Stone+08. We assume the background values of
+  // density=1, pressure = 1/gamma
+  //
+  // Because the calculation of the perturbations is MUCH simpler for HD than
+  // for MHD, we allow the user to specify custom velocities. For completeness
+  // and easy comparision to the MHD wave initialization, we specify the values
+  // the eigenvalues, dU = (rho,rho*v0, rho*v1, rho*v2, etot_dens), under the
+  // assumptions that v1=v2=0 and gamma = 5/3 below:
+  //   - for sound wave we assume bkg v0 = 0. To propagate at +-cs (or +-1)
+  //     In this case, dU = (1,+-1,0,0,1.5)
+  //   - For all 3 entropy waves, bkg v0 = +- 1. The requirements are:
+  //       - hd_entropy needs dU = (1,+-1,0,0,0.5) where the sign of the second
+  //         element corresponds to the sign of the bkg v0
+  //       - hd_transv_entropy_v1: (0,0,1,0,0)
+  //       - hd_transv_entropy_v2: (0,0,0,1,0)
+
+  // determine the background velocity values:
+  double v0_back, v1_back, v2_back;
+  v0_back = 0;            v1_back = 0;            v2_back = 0;
+
+  if (specified_parallel_vel_()){
+    v0_back = parallel_vel_;
+  } else if (wave_type_ != "sound"){
+    // For all types of entropy waves, if parallel_vel_ is not specified ,
+    // pos_vel_ is used to initialize the wave to 1 or -1. But if parallel_vel_
+    // is specified, then parallel_vel_ is ignored
+    v0_back = wsign;
+  }
+
+  // Setup the conserved background values
+  double squared_v_back = v0_back*v0_back + v1_back*v1_back + v2_back*v2_back;
+  double density_back, mom0_back, mom1_back, mom2_back, etot_back;
+  density_back = 1;
+  mom0_back = v0_back;    mom1_back = v1_back;    mom2_back = v2_back;
+  etot_back = ((1. / gamma_) / (gamma_ - 1.) + 0.5 * squared_v_back);
+
+  // now compute eigenvalues:
+  double density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev;
+
+  if (wave_type_ == "sound") {
+    // under assumption that density_back = 1 and pressure_back = 1/gamma:
+    double h_back = 1/(gamma_ - 1.) + 0.5 * squared_v_back; // enthalpy
+    double signed_cs = wsign * 1;
+
+    density_ev = 1;
+    mom0_ev = v0_back + signed_cs;
+    mom1_ev = v1_back;
+    mom2_ev = v2_back;
+    etot_ev = h_back + v0_back * signed_cs;
+  } else if (wave_type_ == "hd_entropy") {
+    // entropy wave where v0 is perturbed
+    // Equivalent to "mhd_entropy" without bfield
+    density_ev = 1;
+    mom0_ev = v0_back;
+    mom1_ev = v1_back;
+    mom2_ev = v2_back;
+    etot_ev = 0.5*squared_v_back;
+  } else if (wave_type_ == "hd_transv_entropy_v1") {
+    // entropy wave where v1 is perturbed
+    density_ev = 0;
+    mom0_ev = 0;
+    mom1_ev = 1;
+    mom2_ev = 0;
+    etot_ev = v1_back;
+  } else { // (wave_type_ == "hd_transv_entropy_v2")
+    // entropy wave where v2 is perturbed
+    density_ev = 0;
+    mom0_ev = 0;
+    mom1_ev = 0;
+    mom2_ev = 1;
+    etot_ev = v2_back;
+  }
+
+  //CkPrintf(("U = [rho, rho*vx, rho*vy, rho*vz, etot_dens]\n"
+  //	    "bkg:[%lf, %lf, %lf, %lf, %lf]\n"
+  //	    "ev: [%lf, %lf, %lf, %lf, %lf]\n"),
+  //	   density_back, mom0_back, mom1_back, mom2_back, etot_back,
+  //       density_ev, mom0_ev, mom1_ev, mom2_ev, etot_ev);
+
+  // Now allocate the actual Initializers
+  alloc_linear_HD_initializers_(density_back, density_ev, etot_back, etot_ev,
+				mom0_back, mom1_back, mom2_back,
+				mom0_ev, mom1_ev, mom2_ev,
+				density_init, etot_dens_init, momentum_init);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoInitialInclinedWave::alloc_linear_HD_initializers_
+(double density_back, double density_ev,
+ double etot_back, double etot_ev,
+ double mom0_back, double mom1_back, double mom2_back,
+ double mom0_ev, double mom1_ev, double mom2_ev,
+ ScalarInit **density_init, ScalarInit **etot_dens_init,
+ VectorInit **momentum_init)
+{
+  *density_init = new RotatedScalarInit(alpha_, beta_,
+					  new LinearScalarInit(density_back,
+							       density_ev,
+							       amplitude_,
+							       lambda_));
+
+  *etot_dens_init = new RotatedScalarInit(alpha_, beta_,
+					  new LinearScalarInit(etot_back,
+							       etot_ev,
+							       amplitude_,
+							       lambda_));
+
+  *momentum_init = new RotatedVectorInit(alpha_, beta_,
+					 new LinearVectorInit(mom0_back,
+							      mom1_back,
+							      mom2_back,
+							      mom0_ev,
+							      mom1_ev,
+							      mom2_ev,
+							      amplitude_,
+							      lambda_));
 }

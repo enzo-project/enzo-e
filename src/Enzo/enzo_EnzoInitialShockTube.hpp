@@ -22,7 +22,8 @@ public: // interface
   /// Constructor
   EnzoInitialShockTube(double gamma, int cycle, double time,
 		       std::string setup_name, std::string aligned_ax_name,
-		       double axis_velocity, double trans_velocity);
+		       double axis_velocity, double trans_velocity,
+		       bool flipped_initialize);
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialShockTube);
@@ -30,7 +31,7 @@ public: // interface
   /// CHARM++ migration constructor
   EnzoInitialShockTube(CkMigrateMessage *m)
     : Initial (m), gamma_(0.0), setup_name_(""), aligned_ax_(0),
-      axis_velocity_(0.), trans_velocity_(0.)
+      axis_velocity_(0.), trans_velocity_(0.), flipped_initialize_(false)
   {  }
 
   /// Destructor
@@ -73,6 +74,10 @@ private: // attributes
   /// extra velocity added transverse to the axis in which the problem is
   /// initialized
   double trans_velocity_;
+
+  // whether to flip the initial conditions (swap left side with right side
+  // and flip the signs of the vector quantities
+  bool flipped_initialize_;
 };
 
 #endif /* ENZO_ENZO_INITIAL_SHOCK_TUBE_HPP */

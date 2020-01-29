@@ -31,7 +31,8 @@ public: // interface
   /// Constructor
   EnzoInitialInclinedWave(int cycle, double time, double alpha, double beta,
 			  double gamma, double amplitude, double lambda,
-			  bool pos_vel, std::string wave_type) throw();
+			  double parallel_vel, bool pos_vel,
+			  std::string wave_type) throw();
 
   /// CHARM++ PUP::able declaration
   PUPable_decl(EnzoInitialInclinedWave);
@@ -44,6 +45,7 @@ public: // interface
       gamma_(0.0),
       amplitude_(0.0),
       lambda_(0.0),
+      parallel_vel_(std::numeric_limits<double>::min()),
       pos_vel_(true),
       wave_type_("")
   {}
@@ -61,6 +63,7 @@ public: // interface
     p | gamma_;
     p | amplitude_;
     p | lambda_;
+    p | parallel_vel_;
     p | pos_vel_;
     p | wave_type_;
   }
@@ -72,10 +75,36 @@ public: // virtual methods
 
 private: // functions
 
-  void prepare_initializers_(ScalarInit **density_init,
-			     ScalarInit **etot_dens_init, 
-			     VectorInit **momentum_init,
-			     VectorInit **a_init);
+  /// prepares initializers for inclined HD waves
+  void prepare_HD_initializers_(ScalarInit **density_init,
+				ScalarInit **etot_dens_init,
+				VectorInit **momentum_init);
+
+  /// prepares initializers for inclined MHD waves
+  void prepare_MHD_initializers_(ScalarInit **density_init,
+				 ScalarInit **etot_dens_init, 
+				 VectorInit **momentum_init,
+				 VectorInit **a_init);
+
+  /// handles the allocation of initializer of HD quantities for linear waves
+  void alloc_linear_HD_initializers_(double density_back, double density_ev,
+				     double etot_back, double etot_ev,
+				     double mom0_back, double mom1_back,
+				     double mom2_back, double mom0_ev,
+				     double mom1_ev, double mom2_ev,
+				     ScalarInit **density_init,
+				     ScalarInit **etot_dens_init,
+				     VectorInit **momentum_init);
+
+  /// Return a vector of known magnetohydrodynamical waves
+  std::vector<std::string> mhd_waves_() const throw();
+
+  /// Return a vector of known hydrodynamical waves
+  std::vector<std::string> hd_waves_() const throw();
+
+  /// Returns whether parallel_vel_ has been specified
+  bool specified_parallel_vel_() const throw()
+  { return parallel_vel_ != std::numeric_limits<double>::min(); }
 
 private: // attributes
 
@@ -95,7 +124,14 @@ private: // attributes
   /// wavelength
   double lambda_;
 
-  /// If the wave speed is in the positive direction
+  /// denotes a background velocity along the direction that the wave
+  /// propagates. A value of std::numeric_limits<double>::min() means that
+  /// it hasn't been set (in which case default values are employed). This can
+  /// only be set for hydrodynamical waves
+  double parallel_vel_;
+
+  /// whether the wave speed is in the positive direction. For purely
+  /// hydrodynamic entropy waves, this has no effect if parallel_vel_ is set.
   bool pos_vel_;
 
   /// Determines initial values of the wave

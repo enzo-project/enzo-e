@@ -32,7 +32,7 @@
 	 # "fast" (fast magnetosonic wave), "slow" (slow magnetosonic wave),
 	 # "entropy" (entropy wave), or "circ_alfven" (circularly polarized
 	 # traveling Alfven wave). Default is "alfven"
-	 wave_type = "entropy";
+	 wave_type = "mhd_entropy";
       };
       
    }
