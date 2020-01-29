@@ -144,7 +144,7 @@ double ScheduleList::update_timestep ( double time, double dt) const throw()
 
   case schedule_type_time:
 
-    for (size_t i=0; i<cycle_list_.size(); i++) {
+    for (size_t i=0; i<time_list_.size(); i++) {
       time_dump = time_list_[i];
       if (time < time_dump && time_dump < time_next) {
 	new_dt = time_dump - time;

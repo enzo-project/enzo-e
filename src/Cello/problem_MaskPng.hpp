@@ -24,7 +24,9 @@ public: // interface
 
   /// Destructor
   virtual ~MaskPng() throw() 
-  { };
+  {
+    delete [] mask_;
+  };
 
   /// Copy constructor
   MaskPng(const MaskPng & mask) throw() 
