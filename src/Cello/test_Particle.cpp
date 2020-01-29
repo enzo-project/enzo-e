@@ -500,7 +500,7 @@ PARALLEL_MAIN_BEGIN
   // Block bounds are [-1,1).
   // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   unit_func("position()");
-  unit_assert(error_position == 0);
+  unit_assert(unit_incomplete);
 
   // run through again and compare values before deleting
   nb = particle.num_batches(it_trace);

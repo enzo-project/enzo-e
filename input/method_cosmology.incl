@@ -315,18 +315,18 @@
  Particle {
      list = [ "dark" ];
      dark {
-         attributes = [ "x", "single",
-	 	        "y", "single",
-			"z", "single",
-			"vx", "single",
-			"vy", "single",
-			"vz", "single",
-			"ax", "single",
-			"ay", "single",
-			"az", "single" ];
+         attributes = [ "x", "default",
+	 	        "y", "default",
+			"z", "default",
+			"vx", "default",
+			"vy", "default",
+			"vz", "default",
+			"ax", "default",
+			"ay", "default",
+			"az", "default" ];
          position = [ "x", "y", "z" ];
 	 velocity = [ "vx", "vy", "vz" ];
-         constants = [ "mass", "single", .8382456140 ];
+         constants = [ "mass", "double", .8382456140 ];
 
      }
  }
