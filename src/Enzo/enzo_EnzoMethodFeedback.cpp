@@ -16,10 +16,16 @@ EnzoMethodFeedback::EnzoMethodFeedback
   const EnzoConfig * enzo_config = enzo::config();
   EnzoUnits * enzo_units = enzo::units();
 
+  // AJE: This was the old way this was done
   // Initialize default refresh object
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-                             enzo_sync_id_method_feedback);
-  refresh(ir)->add_all_fields();
+  // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+  //                           enzo_sync_id_method_feedback);
+  // refresh(ir)->add_all_fields();
+
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+
+  refresh.add_all_fields();
 
   ejecta_mass_   = enzo_config->method_feedback_ejecta_mass * cello::mass_solar /
                       enzo_units->mass();

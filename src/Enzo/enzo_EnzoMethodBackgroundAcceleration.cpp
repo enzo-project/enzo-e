@@ -42,12 +42,12 @@ EnzoMethodBackgroundAcceleration::EnzoMethodBackgroundAcceleration
   // Do not need to refresh acceleration fields in this method
   // since we do not need to know any ghost zone information
   //
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
-                             enzo_sync_id_method_background_acceleration);
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
 
-  refresh(ir)->add_field(iax);
-  refresh(ir)->add_field(iay);
-  refresh(ir)->add_field(iaz);
+  refresh.add_field(iax);
+  refresh.add_field(iay);
+  refresh.add_field(iaz);
 
   // refresh(ir)->add_field(id);
   // iax iay and iax are used in method gravity to do

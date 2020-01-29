@@ -24,10 +24,16 @@ EnzoMethodStarMaker::EnzoMethodStarMaker
 
   const EnzoConfig * enzo_config = enzo::config();
 
+  // AJE: This was the old way this was done
   // Initialize default Refresh object
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-                             enzo_sync_id_method_star_maker);
-  refresh(ir)->add_all_fields();
+  // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
+  //                           enzo_sync_id_method_star_maker);
+  // refresh(ir)->add_all_fields();
+
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+
+  refresh.add_all_fields();
 
   // Copy over parameters from config to local names here for convenience
   use_density_threshold_     = enzo_config->method_star_maker_use_density_threshold;

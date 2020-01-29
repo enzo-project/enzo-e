@@ -248,7 +248,7 @@ bool ParticleDescr::is_attribute(int it, std::string attribute_name) const
   ASSERT1("ParticleDescr::is_attribute",
           "Trying to access unknown particle type %d",
           it,
-          check_(it));
+          (0 <= it && it < num_types()));
 
   auto iter=attribute_index_[it].find(attribute_name);
 
@@ -404,7 +404,7 @@ bool ParticleDescr::has_constant(int it, std::string constant_name) const
   ASSERT1("ParticleDescr::constant_index",
           "Trying to access unknown particle type %d",
           it,
-          check_(it));
+          (0 <= it && it < num_types()));
 
   auto iter=constant_index_[it].find(constant_name);
 
