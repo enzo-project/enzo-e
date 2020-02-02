@@ -145,7 +145,11 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     int level = block->level();
 
-    //    dens *= std::pow(2.0,rank*level);
+    // Required for Cosmology ("mass" is mass)
+    // Not for Collapse ("mass" is density)
+    if (cosmology) {
+      dens *= std::pow(2.0,rank*level);
+    }
 
     // Accumulated single velocity array for Baryon deposit
 
