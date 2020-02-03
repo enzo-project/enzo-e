@@ -40,7 +40,7 @@ Simulation::Simulation
   timer_(),
   performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-  projections_tracing_(false),
+  projections_tracing_(true),
   projections_schedule_on_(NULL),
   projections_schedule_off_(NULL),
 #endif
@@ -103,7 +103,7 @@ Simulation::Simulation()
   timer_(),
   performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-  projections_tracing_(false),
+  projections_tracing_(true),
   projections_schedule_on_(NULL),
   projections_schedule_off_(NULL),
 #endif
@@ -154,7 +154,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     timer_(),
     performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-    projections_tracing_(false),
+    projections_tracing_(true),
     projections_schedule_on_(NULL),
     projections_schedule_off_(NULL),
 #endif
@@ -269,10 +269,8 @@ void Simulation::pup (PUP::er &p)
 
 #ifdef CONFIG_USE_PROJECTIONS
   p | projections_tracing_;
-  if (projections_tracing_) {
-    p | projections_schedule_on_;
-    p | projections_schedule_off_;
-  }
+  p | projections_schedule_on_;
+  p | projections_schedule_off_;
 #endif
 
   p | schedule_balance_;
@@ -435,6 +433,11 @@ void Simulation::initialize_performance_() throw()
 
 #ifdef CONFIG_USE_PROJECTIONS
   int index_on = config_->performance_on_schedule_index;
+  int index_off = config_->performance_off_schedule_index;
+  projections_tracing_ = config_->performance_projections_on_at_start;
+  if (projections_tracing_ == false) {
+    traceEnd();
+  }    
   if (index_on >= 0) {
     projections_schedule_on_ = Schedule::create
       ( config_->schedule_var[index_on],
@@ -444,7 +447,6 @@ void Simulation::initialize_performance_() throw()
 	config_->schedule_step[index_on],
 	config_->schedule_list[index_on]);
   }
-  int index_off = config_->performance_off_schedule_index;
   if (index_off >= 0) {
     projections_schedule_off_ = Schedule::create
       ( config_->schedule_var[index_off],

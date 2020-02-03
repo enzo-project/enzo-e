@@ -135,6 +135,7 @@ public: // interface
     particle_batch_size(0),
     particle_group_list(),
     performance_papi_counters(),
+    performance_projections_on_at_start(true),
     performance_warnings(false),
     performance_on_schedule_index(-1),
     performance_off_schedule_index(-1),
@@ -287,6 +288,7 @@ public: // interface
       particle_batch_size(0),
       particle_group_list(),
       performance_papi_counters(),
+      performance_projections_on_at_start(true),
       performance_warnings(false),
       performance_on_schedule_index(-1),
       performance_off_schedule_index(-1),
@@ -505,6 +507,7 @@ public: // attributes
   // Performance
 
   std::vector<std::string>   performance_papi_counters;
+  bool                       performance_projections_on_at_start;
   bool                       performance_warnings;
   int                        performance_on_schedule_index;
   int                        performance_off_schedule_index;
