@@ -23,6 +23,7 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// #define SKIP_BARRIER
 // #define TRACE_DD
 // #define TRACE_DD_CYCLE 0
 
@@ -476,9 +477,13 @@ void EnzoSolverDd::continue_after_domain_solve(EnzoBlock * enzo_block) throw()
   TRACE_FIELD(enzo_block,"domain_solve X",ix_);
   TRACE_DD(enzo_block,this,"continue_after_domain_solve");
   COPY_FIELD(enzo_block,ix_,"X2_dd");
+#ifdef SKIP_BARRIER
+  call_last_smoother(enzo_block);  
+#else  
   CkCallback callback(CkIndex_EnzoBlock::r_solver_dd_end(NULL), 
 		      enzo::block_array());
   enzo_block->contribute(callback);
+#endif  
 
 }
 

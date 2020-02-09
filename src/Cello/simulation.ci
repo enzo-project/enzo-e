@@ -9,6 +9,7 @@ module simulation {
 
   extern module mesh;
 
+
   readonly CProxy_Simulation proxy_simulation;
 
   initnode void method_close_files_mutex_init();

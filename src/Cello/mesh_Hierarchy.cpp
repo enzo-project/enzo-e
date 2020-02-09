@@ -15,7 +15,6 @@
 
 static CmiNodeLock hierarchy_node_lock;
 
-//----------------------------------------------------------------------
 void mutex_init_hierarchy()
 {
   hierarchy_node_lock = CmiCreateLock();

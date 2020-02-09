@@ -33,7 +33,16 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_SOLVER_BCG
 // #define DEBUG_NEW_REFRESH
+
+static CmiNodeLock bcg_iter_node_lock;
+///----------------------------------------------------------------------
+void mutex_init_bcg_iter()
+{
+  bcg_iter_node_lock = CmiCreateLock();
+}
+
 
 #ifdef DEBUG_NEW_REFRESH
 #   define TRACE_NEW_REFRESH(BLOCK,MSG) \
@@ -276,29 +285,39 @@ void EnzoSolverBiCgStab::apply
   TRACE_BCG(block,this,"apply");
   
   Solver::begin_(block);
+
+  const bool is_unrefined =
+    (block->is_leaf()) && (block->level() == coarse_level_);
+
   
   EnzoBlock* enzo_block = enzo::block(block);
 
-  if (solve_type_ == solve_tree) {
-    s_dot_sync_(enzo_block) = cello::num_children();
+  if ((solve_type_ == solve_tree) &&
+      (is_unrefined || block->level() < coarse_level_)) {
+    Solver::end_(block);
+  } else {
+
+    if (solve_type_ == solve_tree) {
+      s_dot_sync_(enzo_block) = cello::num_children();
+    }
+  
+    A_ = A;
+
+    Field field = block->data()->field();
+
+    allocate_temporary_(block);
+
+    /// cast input argument to the EnzoBlock associated with this char
+
+    /// access the field infromation on this block
+  
+    field.dimensions (0, &mx_, &my_, &mz_);
+    field.ghost_depth(0, &gx_, &gy_, &gz_);
+
+    m_ = mx_*my_*mz_;
+
+    compute_ (enzo_block);
   }
-  
-  A_ = A;
-
-  Field field = block->data()->field();
-
-  allocate_temporary_(block);
-
-  /// cast input argument to the EnzoBlock associated with this char
-
-  /// access the field infromation on this block
-  
-  field.dimensions (0, &mx_, &my_, &mz_);
-  field.ghost_depth(0, &gx_, &gy_, &gz_);
-
-  m_ = mx_*my_*mz_;
-
-  compute_ (enzo_block);
 }
 
 //======================================================================
@@ -642,6 +661,20 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
   const bool is_converged = (S(err) < res_tol_);
   const bool is_diverged  = (iter >= iter_max_);
 
+  if (is_converged) {
+    if (block->level() == coarse_level_) {
+      CmiLock(bcg_iter_node_lock);
+      cello::simulation()->set_solver_iter(index_,iter);
+      CmiUnlock(bcg_iter_node_lock);
+    }
+  }
+#ifdef DEBUG_SOLVER_BCG
+  if (is_converged) CkPrintf ("DEBUG_SOLVER BCG %s\n",block->name().c_str());
+  if (is_diverged) {
+    CkPrintf ("DEBUG_SOLVER_BCG %d %s %d diverged\n",
+              __LINE__,block->name().c_str(),CkMyPe(),iter);
+  }
+#endif  
   /// monitor output solution progress (iteration, residual, etc)
 
   int a3[3];
@@ -671,9 +704,9 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
 
   /// Write final status if done
   if (block->index().is_root() && (is_converged || is_diverged) ) {
-    CkPrintf ("%s DEBUG_SOLVER bicgstab "
+    CkPrintf ("DEBUG_SOLVER %d %s bicgstab "
 	      "final iter = %d rr = %Lg  rho0 = %Lg  rr/rho0 = %Lg\n",
-	      block->name().c_str(),
+	      __LINE__,block->name().c_str(),
 	      iter,S(rr),S(rho0),sqrt(S(rr))/ S(rho0));
   }
 
@@ -1506,7 +1539,7 @@ void EnzoSolverBiCgStab::inner_product_
 {
   if (solve_type_ == solve_tree) {
     TRACE_BCG(block,this,"inner_product_A");
-    dot_compute_tree_(block,n,reduce+1,is_array,i_function);
+    dot_compute_tree_(block,n,reduce+1,is_array,i_function,s_iter_(block));
   } else {
     TRACE_BCG(block,this,"inner_product_B");
     block->contribute((n+1)*sizeof(long double), reduce, 
@@ -1520,7 +1553,8 @@ void EnzoSolverBiCgStab::dot_compute_tree_(EnzoBlock * block,
 					   int n,
 					   long double * dot_local,
 					   const std::vector<int> & is_array,
-					   int i_function)
+					   int i_function,
+                                           int iter)
 {
   TRACE_DOT(block,"dot_compute_tree",i_function);
   dot_clear_(block,n,is_array);
@@ -1530,8 +1564,9 @@ void EnzoSolverBiCgStab::dot_compute_tree_(EnzoBlock * block,
     dot_done_(block,i_function,__FILE__,__LINE__);
   } else if (is_finest_(block)) {
     if (level > coarse_level_) {
-      dot_send_parent_(block,n,dot_local,is_array,i_function);
+      dot_send_parent_(block,n,dot_local,is_array,i_function,iter);
     } else {
+      s_iter_(block)=iter;
       dot_save_(block,n, dot_local, is_array);
       dot_done_(block,i_function,__FILE__,__LINE__);
     }
@@ -1544,7 +1579,7 @@ void EnzoSolverBiCgStab::dot_send_parent_(EnzoBlock * block,
 					  int n,
 					  long double * dot_block,
 					  const std::vector<int> & is_array,
-					  int i_function)
+					  int i_function, int iter)
 {
   TRACE_DOT(block,"dot_send_parent",i_function);
   ASSERT2("EnzoSolverBiCgStab::dot_send_parent()",
@@ -1554,8 +1589,8 @@ void EnzoSolverBiCgStab::dot_send_parent_(EnzoBlock * block,
 
   Index index_parent = block->index().index_parent(min_level_);
 
-  enzo::block_array()[index_parent].p_dot_recv_parent(n,dot_block,
-						      is_array,i_function);
+  enzo::block_array()[index_parent].p_dot_recv_parent
+    (n,dot_block, is_array,i_function, iter);
 
 }
 
@@ -1563,11 +1598,11 @@ void EnzoSolverBiCgStab::dot_send_parent_(EnzoBlock * block,
 
 void EnzoBlock::p_dot_recv_parent(int n, long double * dot_block,
 				  std::vector<int> is_array,
-				  int i_function)
+				  int i_function, int iter)
 {
   auto solver = static_cast<EnzoSolverBiCgStab*> (this->solver());
 
-  solver->dot_recv_parent(this,n,dot_block,is_array,i_function);
+  solver->dot_recv_parent(this,n,dot_block,is_array,i_function, iter);
 }
 
 //----------------------------------------------------------------------
@@ -1576,7 +1611,7 @@ void EnzoSolverBiCgStab::dot_recv_parent(EnzoBlock * block,
 					 int n,
 					 long double * dot_block,
 					 const std::vector<int> & is_array,
-					 int i_function)
+					 int i_function, int iter)
 {
   
   TRACE_DOT(block,"dot_recv_parent",i_function);
@@ -1587,8 +1622,9 @@ void EnzoSolverBiCgStab::dot_recv_parent(EnzoBlock * block,
     dot_load_(block,n, dot_block, is_array);
     if (block->level() > coarse_level_) {
       //      dot_clear_(block,n,is_array);
-      dot_send_parent_(block,n,dot_block,is_array,i_function);
+      dot_send_parent_(block,n,dot_block,is_array,i_function, iter);
     } else {
+      s_iter_(block)=iter;
       dot_send_children_(block,n,dot_block,is_array,i_function);
       dot_done_(block,i_function,__FILE__,__LINE__);
     }

@@ -68,7 +68,7 @@ if [ "$#" -ge 1 ]; then
    elif [ "$1" == "compile" ]; then
       target=install-bin
    elif [ "$1" == "test" ]; then
-      ./build.sh
+#      ./build.sh
       target="test"
       proc=1
       k_switch="-k"
