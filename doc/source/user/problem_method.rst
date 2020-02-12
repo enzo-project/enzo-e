@@ -370,16 +370,24 @@ unformly 0. We provide a list of the names used to specify each
 Riemann Solver in the input file, and a brief description for each of
 them:
 
-  * ``"hlle"`` (or equivalently ``"enzo_hlle"``). The HLLE
-    approximate Riemann solver with wavespeeds in the same way as
-    Enzo. Currently this raises an error as it is not tested.
-  * ``"athena_hlle"`` The HLLE approximate Riemann solver with
-    wavespeeds computed using the procedure from 
+  * ``"hll"`` The HLL approximate Riemann solver with wavespeeds
+    bounds estimated as :math:`S_L = \min(u_L - a_L, u_R - a_R)` and
+    :math:`S_R = \max(u_L + a_L, u_R + a_R)`. This is one of the
+    proposed methods from Davis, 1988, SIAM J. Sci. and Stat. Comput.,
+    9(3), 445–473. The same wavespeed estimator was used in MHD HLL
+    solver implemented for Enzo's Runge Kutta solver. Currently this
+    raises an error as it is not tested.
+  * ``"hlle"`` The HLLE approximate Riemann solver - the HLL solver
+    with wavespeed bounds estimated according to
+    Einfeldt, 1988, SJNA, 25(2), 294–318. This method allows the
+    min/max eigenvalues of Roe's matrix to be wavespeed estimates. For a
+    description of the procedure for MHD quantities, see
     `Stone et al. (2008)
-    <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ 
-    (the minimum and maximum eigenvalues of Roe's matrix are allowed
-    to be wavespeeds).
-  * ``"hlld"`` The HLLD approximate Riemann solver.
+    <http://adsabs.harvard.edu/abs/2008ApJS..178..137S>`_ .
+    If using an HLL Riemann Solver, this is the recommended choice.
+  * ``"hlld"`` The HLLD approximate Riemann solver described in
+    Miyoshi & Kusano, 2005. JCP, 315, 344. The wavespeed bounds
+    are estimated according to eqn 67 from the paper.
 
 
 

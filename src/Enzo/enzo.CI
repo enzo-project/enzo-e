@@ -95,10 +95,10 @@ module enzo {
   // EnzoReconstructorPLMAthenaLim
   PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
 
-  // EnzoRiemannHLLEAthenaMHD
-  PUPable EnzoRiemannImpl<HLLEImpl<AthenaHLLEWavespeedMHD>>;
-  // EnzoRiemannHLLEEnzoMHD
-  PUPable EnzoRiemannImpl<HLLEImpl<EnzoHLLEWavespeedMHD>>;
+  // EnzoRiemannHLLMHD
+  PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeedMHD>>;
+  // EnzoRiemannHLLEMHD
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeedMHD>>;
   PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
   PUPable EnzoPhysicsCosmology;

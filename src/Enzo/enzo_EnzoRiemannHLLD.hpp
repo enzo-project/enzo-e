@@ -21,7 +21,7 @@ public:
   static int scratch_space_length(const int n_cons_keys){
     return 2*n_cons_keys;
   }
-  
+
   static void calc_riemann_fluxes
   (const enzo_float flux_l[], const enzo_float flux_r[],
    const enzo_float prim_l[], const enzo_float prim_r[],
@@ -152,7 +152,7 @@ public:
 
     sam = vx_r - cf_r;
     sap = vx_r + cf_r;
-      
+
     if ((std::fabs(S_M - vx_r) <= ETA_TOLERANCE) and 
         (std::fabs(By_r) <= ETA_TOLERANCE) and 
         (std::fabs(Bz_r) <= ETA_TOLERANCE) and 

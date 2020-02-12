@@ -112,11 +112,12 @@ enum class FieldCat{conserved, specific, other};
 #define STR_C_2(s) #s
 
 //----------------------------------------------------------------------
-/// @def      ADVEC_STRUCT_MEMBER
-/// @brief    Macro that helps define advection field struct members based off
-///           the entries in FIELD_TABLE
+/// @def      ADVEC_STRUCT_MEMBER_T_SCALAR
+/// @brief    Part of the ADVEC_STRUCT_MEMBER group of macros that help define
+///           advection field struct members based off the entries in
+///           FIELD_TABLE
 ///
-/// This includes 4 macros:
+/// This group includes 4 macros:
 /// STRUCT_MEMBER_T_SCALAR, STRUCT_MEMBER_T_VECTOR,
 /// STRUCT_MEMBER_F_SCALAR, STRUCT_MEMBER_F_VECTOR
 /// which have specialized behavior based on whether the quantity is advective
@@ -129,14 +130,15 @@ enum class FieldCat{conserved, specific, other};
 
 
 //----------------------------------------------------------------------
-/// @def      ADVEC_STRUCT_UNARY_FUNC
-/// @brief    Macro that applies a unary function to members of a struct named
-///           for advection related quantities in FIELD_TABLE
+/// @def      ADVEC_STRUCT_UNARY_FUNC_T_SCALAR
+/// @brief    Part of the ADVEC_STRUCT_UNARY_FUNC group of macros that apply a
+///           unary function to members of a struct named for advection related
+///           quantities in FIELD_TABLE
 #define ADVEC_STRUCT_UNARY_FUNC_T_SCALAR(func, struc, name)                   \
   func(#name, struc.name)
 #define ADVEC_STRUCT_UNARY_FUNC_T_VECTOR(func, struc, name)                   \
-  func(STRINGIZE_COMBINE(name,_i), struc.COMBINE(name,_i));                 \
-  func(STRINGIZE_COMBINE(name,_j), struc.COMBINE(name,_j));                 \
+  func(STRINGIZE_COMBINE(name,_i), struc.COMBINE(name,_i));                   \
+  func(STRINGIZE_COMBINE(name,_j), struc.COMBINE(name,_j));                   \
   func(STRINGIZE_COMBINE(name,_k), struc.COMBINE(name,_k))
 #define ADVEC_STRUCT_UNARY_FUNC_F_SCALAR(func, struc, name) /* ... */
 #define ADVEC_STRUCT_UNARY_FUNC_F_VECTOR(func, struc, name) /* ... */

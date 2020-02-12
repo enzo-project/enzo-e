@@ -70,9 +70,10 @@ public: // interface
   /// @param block holds data to be processed
   /// @param integrable_group holds field names of integrable primitive values
   ///     to convert
-  /// @param reconstrable_group holds field names of reconstrable primitives
-  ///     where the converted values will be stored. There is expected to be
-  ///     significant overlap with the fields stored in integrable_group
+  /// @param reconstructable_group holds field names of reconstructable
+  ///     primitives where the converted values will be stored. There is
+  ///     expected to be significant overlap with the fields stored in
+  ///     integrable_group
   /// @param conserved_passive_group contains the names of the fields holding
   ///     the passively advected scalars in conserved form (note that while the
   ///     integrable grouping may also contain groups of passive scalar fields,

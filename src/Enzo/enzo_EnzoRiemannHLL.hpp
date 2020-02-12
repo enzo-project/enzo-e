@@ -22,13 +22,21 @@
 //     The modified formula is actually used in Athena++
 
 
-struct AthenaHLLEWavespeedMHD
+struct EinfeldtWavespeedMHD
 {
-  /// @class    AthenaHLLEWavespeedMHD
+  /// @class    EinfeldtWavespeedMHD
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates the wavespeed calculation described by
-  ///           Stone+08. This allows the min/max eigenvalues of Roe's matrix
-  ///           to be wavespeeds.
+  ///           Stone+08. Toro attributes this scheme to Einfeldt 1988. When
+  ///           used for the HLL solver, it makes the HLLE solver. This scheme
+  ///           allows the min/max eigenvalues of Roe's matrix to be
+  ///           wavespeeds.
+  ///
+  /// This estimator provides wave speeds that bound almost all possible
+  /// physical signal speeds. According to Batten, Clarke, Lambert, & Causon
+  /// (1997), this doesn't account for the case when either of the outermost
+  /// waves in the Riemann Fan is a shock. Nevertheless, they find this is a
+  /// robust method and recommend it in most cases
 
   void operator()(const enzo_float wl[], const enzo_float wr[],
 		  const enzo_float Ul[], const enzo_float Ur[],
@@ -120,17 +128,18 @@ struct AthenaHLLEWavespeedMHD
   }
 };
 
-struct EnzoHLLEWavespeedMHD
+struct DavisWavespeedMHD
 {
-  /// @class    EnzoHLLEWavespeedMHD
+  /// @class    DavisHLLEWavespeedMHD
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Encapsulates the wavespeed calculation used for the
-  ///           Enzo's MHD HLLE Riemann solver in Riemann_HLL_MHD.C which was
-  ///           written by Peng Wang
+  /// @brief    [\ref Enzo] Encapsulates one of the wavespeed estimators
+  ///           described by Davis 1998. It was used in Enzo's Runge-Kutta MHD
+  ///           HLL Riemann solver in Riemann_HLL_MHD.C which was (written by
+  ///           Peng Wang)
   ///
   /// Toro, describes this version as the "most well-known approach." He goes
   /// on to describe it as "exceedling simple" and not recommended for
-  /// practical calculations
+  /// practical calculations. He attributes this to the scheme from Davis 1988
 public:
   void operator()(const enzo_float wl[], const enzo_float wr[],
 		  const enzo_float Ul[], const enzo_float Ur[],
@@ -155,7 +164,7 @@ public:
 
     // The following is equivalent to the enzo version except bm has been
     // multiplied by -1
-    *bp = std::fmax(std::fmax( lp_l,  lp_r), 0.);
+    *bp = std::fmax(std::fmax(lp_l, lp_r), 0.);
     *bm = std::fmin(std::fmin(lm_l, lm_r), 0.);
 
   }
@@ -163,7 +172,7 @@ public:
 
 
 template <class WaveSpeedFunctor>
-struct HLLEImpl
+struct HLLImpl
 {
   /// @class    EnzoRiemannHLLE
   /// @ingroup  Enzo
@@ -186,7 +195,6 @@ public:
   { 
     // there is no scratch_space
     WaveSpeedFunctor wave_speeds;
-    //AthenaHLLEWavespeed wave_speeds;
     enzo_float bp, bm;
 
     // Compute wave speeds
@@ -203,22 +211,22 @@ public:
 };
 
 
-/// @class    EnzoRiemannHLLEAthenaMHD
+/// @class    EnzoRiemannHLLEMHD
 /// @ingroup  Enzo
-/// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver using
-///           Athena's MHD wavespeed calculation
-using EnzoRiemannHLLEAthenaMHD =
-  EnzoRiemannImpl<HLLEImpl<AthenaHLLEWavespeedMHD>>;
+/// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver (the HLL
+///           solver using Einfeldt's wavespeed estimator). The same wavespeed
+///           estimator is used in Athena's MHD HLLE Riemann Solver
+using EnzoRiemannHLLEMHD = EnzoRiemannImpl<HLLImpl<EinfeldtWavespeedMHD>>;
 
-/// @class    EnzoRiemannHLLEEnzoMHD
+/// @class    EnzoRiemannHLLMHD
 /// @ingroup  Enzo
-/// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver using
-///           Enzo's MHD wavespeed calculation
-using EnzoRiemannHLLEEnzoMHD =
-  EnzoRiemannImpl<HLLEImpl<EnzoHLLEWavespeedMHD>>;
+/// @brief    [\ref Enzo] Encapsulates HLL approximate Riemann Solver using
+///           the Davis MHD wavespeed estimator. The same wavespeed estimator
+///           is used in Enzo's Runge-Kutta MHD HLL Riemann Solver
+using EnzoRiemannHLLMHD = EnzoRiemannImpl<HLLImpl<DavisWavespeedMHD>>;
 
 // To define a Riemann Solver for cosmic ray transport, we would probably
-// define a separate WaveSpeedFunctor struct and define a separate HLLE
-// Riemann Solver (maybe EnzoRiemannCRHLLE)
+// define a separate WaveSpeedFunctor struct and define a separate HLL
+// Riemann Solver (maybe EnzoRiemannCRHLL)
 
 #endif /* ENZO_ENZO_RIEMANN_HLLE_HPP */

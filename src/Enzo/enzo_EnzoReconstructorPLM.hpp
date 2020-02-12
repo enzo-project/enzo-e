@@ -21,6 +21,7 @@
 /// @code
 ///     enzo_float operator() (enzo_float vm1, enzo_float v, enzo_float vp1,
 ///                            enzo_float theta_limiter);
+/// @endcode
 ///
 /// The function should compute the limited slope to use in the piecewise
 /// linear reconstruction of the left and right interface values (which are

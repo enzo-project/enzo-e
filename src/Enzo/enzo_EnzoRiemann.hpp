@@ -31,7 +31,7 @@ public: // interface
   ///     the Grouping object doesn't actually provide any fields in the group,
   ///     no problems are caused)
   /// @param solver The name of the Riemann solver to use. Valid names include
-  ///     "enzo_hlle" (or just "hlle"), "athena_hlle", and "hlld"
+  ///     "hll", "hlle", and "hlld"
   static EnzoRiemann* construct_riemann
     (std::vector<std::string> integrable_groups,
      std::vector<std::string> passive_groups, std::string solver);
@@ -108,12 +108,14 @@ public: // interface
     enzo_float bj = prim_vals[lut.bfield_j];
     enzo_float bk = prim_vals[lut.bfield_k];
 
+    // TODO: optimize calc of cs2 to omit sqrt and pow
     enzo_float cs2 = std::pow(sound_speed_(prim_vals, lut, pressure, gamma),2);
     enzo_float B2 = (bi*bi + bj*bj + bk *bk);
     if (B2 == 0){
       return std::sqrt(cs2);
     }
     enzo_float va2 = B2/prim_vals[lut.density];
+    // TODO: replace va2 * cos2 with va2_cos2 = bi*bi/prim_vals[lut.density]
     enzo_float cos2 = bi*bi / B2;
     return std::sqrt(0.5*(va2+cs2+std::sqrt(std::pow(cs2+va2,2) -
 					    4.*cs2*va2*cos2)));

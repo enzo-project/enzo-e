@@ -29,8 +29,10 @@ public: // interface
   ///     advected scalars that may be included. (If a group is listed here but
   ///     the Grouping object doesn't actually provide any fields in the group,
   ///     no problems are caused)
-  /// @param solver The name of the Riemann solver to use. Valid names include
+  /// @param name The name of the Riemann solver to use. Valid names include
   ///     "nn" and "plm"
+  /// @param theta_limiter An argument that is optionally used to tune certain
+  ///     types of limiters
   static EnzoReconstructor* construct_reconstructor
     (std::vector<std::string> reconstructable_groups,
      std::vector<std::string> passive_groups, std::string name,

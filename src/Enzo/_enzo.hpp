@@ -212,7 +212,7 @@ extern "C" {
 #include "enzo_EnzoReconstructorPLM.hpp"
 #include "enzo_EnzoRiemann.hpp"
 #include "enzo_EnzoRiemannImpl.hpp"
-#include "enzo_EnzoRiemannHLLE.hpp"
+#include "enzo_EnzoRiemannHLL.hpp"
 #include "enzo_EnzoRiemannHLLD.hpp"
 #include "enzo_EnzoConstrainedTransport.hpp"
 

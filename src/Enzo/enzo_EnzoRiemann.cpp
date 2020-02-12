@@ -27,23 +27,20 @@ EnzoRiemann* EnzoRiemann::construct_riemann
 		 ::tolower);
   EnzoRiemann* out;
 
-  // Eventually we may want do some check for non-MHD Riemann solvers
-
-  if ((formatted == std::string("hlle")) ||
-       (formatted == std::string("enzo_hlle"))){
-    out = new EnzoRiemannHLLEEnzoMHD(integrable_groups, passive_groups,
-				     flux_funcs, n_funcs);
-  } else if (formatted == std::string("athena_hlle")){
-    out = new EnzoRiemannHLLEAthenaMHD(integrable_groups, passive_groups,
-				       flux_funcs, n_funcs);
+  // Eventually we may want to check for non-MHD Riemann solvers
+  if (formatted == std::string("hll")){
+    out = new EnzoRiemannHLLMHD(integrable_groups, passive_groups, flux_funcs,
+				n_funcs);
+  } else if (formatted == std::string("hlle")){
+    out = new EnzoRiemannHLLEMHD(integrable_groups, passive_groups, flux_funcs,
+				 n_funcs);
   } else if (formatted == std::string("hlld")){
     // could possibly check that MHD fields are included
     out = new EnzoRiemannHLLD(integrable_groups, passive_groups, flux_funcs,
 			      n_funcs);
   } else {
-    ASSERT("EnzoRiemann",
-	   "The only known solvers are HLLE (ENZO_HLLE), ATHENA_HLLE, & HLLD",
-	   false);
+    ERROR("EnzoRiemann::construct_riemann",
+	  "The only known solvers are HLL, HLLE, & HLLD");
     out = NULL;  // Deals with compiler warning
   }
 
