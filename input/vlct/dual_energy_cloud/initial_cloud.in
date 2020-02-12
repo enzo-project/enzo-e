@@ -1,0 +1,264 @@
+# pure hydro cloud problem
+# R_cloud = 15000 pc = 3.086e20 cm per parsec
+# cloud number density = 0.25.e-1 cm^-3 (of hydrogen)
+# cloud Temperature = 4.e4
+# gamma = 5/3.
+# denisty contrast = 180
+# wind Mach number = 1.5 (v = 1.759e7 cm/s)
+# pressure = 1.3806e-13 dyne/cm^2
+
+ include "input/vlct/vlct_de.incl"
+
+#======================================================================
+# PROBLEM DEFINITION
+#======================================================================
+
+ Domain {
+     lower = [-2., -2., -2.]; # in units of Rcl
+     upper = [ 2.,  2.,  2.]; # in units of Rcl
+ }
+
+
+ Initial {
+    list = ["value", "cloud"];
+
+    value {
+        density    = [ 0.];
+	cloud_dye =  [ 0.];
+        velocity_x = [ 0.];
+        velocity_y = [ 0.];
+	velocity_z = [ 0.];
+        pressure   = [ 0.];
+        bfield_x   = [ 0.];
+        bfield_y   = [ 0.];
+        bfield_z   = [ 0.];
+        bfieldi_x  = [ 0.];
+        bfieldi_y  = [ 0.];
+        bfieldi_z  = [ 0.];
+    }
+
+    cloud {
+      # Initializes a spherical cloud embedded in a hot gas
+
+      # radius of the cloud, must be larger than a cell width
+      #cloud_radius = 3.086e20; # cm
+      cloud_radius = 1.;
+
+      # cloud center - by default it is set to (0,0,0)
+      cloud_center_x = 0.0;
+      cloud_center_y = 0.0;
+      cloud_center_z = 0.0;
+
+      # in cells that intersect the surface of the cloud, we weight the density
+      # and then weight velocity by mass. To determine the fraction of the cell
+      # enclosed by the cloud, we subsample. The number of subsampled cells per
+      # axis is set by 2^subsample_n. A value of 0 means that there is no
+      # subsampling
+      subsample_n = 2;
+
+      # set density of cloud
+      cloud_density = 1.610075932356949e+01;
+
+      # set density of wind
+      #wind_density = cloud_density/contrast
+      wind_density = 8.944866290871940e-02;
+
+      # set velocity of wind
+      # by definition of tcc, v_wind = sqrt(contrast)*rcl/tcc
+      wind_velocity = 1.341500614584355e+01; #rcl/tcc
+
+      wind_total_energy = 1.619661509037183e+02;
+      wind_internal_energy = 7.198495595720811e+01;
+
+      # solar metal fraction by mass (used in Grackle)
+      #metal_mass_fraction = 0.01295;
+
+    }
+ }
+
+ Boundary {
+     list = ["downwind", "density_upwind", "metal_density_upwind",
+             "velocity_x_upwind", "transverse_velocity_upwind",
+             "etot_upwind", "eint_upwind", "bfield_upwind",
+             "cloud_dye_upwind", "yedge", "zedge"];
+
+     # These are the conditions used by Gronke & Oh (2018)
+     downwind {
+         type = "outflow";
+         axis = "x";
+         face = "upper";
+     };
+
+     density_upwind {
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = "density";
+	 value = 8.944866290871940e-02;
+     };
+
+     metal_density_upwind {
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = "metal_density";
+	 value = 8.944866290871940e-02 * 0.01295;
+     };
+
+     velocity_x_upwind {
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = "velocity_x";
+         value = 1.341500614584355e+01;
+     };
+
+     transverse_velocity_upwind {
+         type = "inflow";
+         axis = "x";
+	  face = "lower";
+         field_list = ["velocity_y","velocity_z"];
+         value = 0.;
+     };
+
+     etot_upwind{
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = "total_energy";
+         value = 1.619661509037183e+02;
+     };
+
+     eint_upwind{
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = "internal_energy";
+         value = 7.198495595720811e+01;
+     };
+
+     bfield_upwind{
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = ["bfield_x", "bfieldi_x",
+                       "bfield_y", "bfieldi_y",
+                       "bfield_z", "bfieldi_z"];
+         value = 0.;
+     }
+
+     cloud_dye_upwind{
+         type = "inflow";
+         axis = "x";
+         face = "lower";
+         field_list = "cloud_dye";
+         value = 0.0;
+     };
+
+     yedge {
+         type = "outflow";
+     };
+
+     zedge {
+         type = "outflow";
+     };
+ }
+
+ Stopping {
+     time =  0.0625;
+ }
+
+Units {
+     #density = 10^-3 mH/cm^3
+     density = 1.6737352238051867e-27; # g / cm^3
+     length   = 4.629e+22; # the cloud radius
+     time     = 1.055968875226116e+16; # the cloud-crushing time
+}
+
+#======================================================================
+# DISCRETIZATION
+#======================================================================
+
+ Mesh {
+     root_rank = 3;
+     # 8 cells per cloud radius
+     root_size   = [ 32, 32, 32];
+     root_blocks = [  1,  1,  1];  # number of blocks in root grid
+ }
+
+ Field {
+     # The VL+CT method tracks primitive quantities.
+     #    - bfieldi_x/y/z are interface magnetic fields (aka longitudinal).
+     #      The x/y/z component is the only component tracked at the faces
+     #      between cells along the x/y/z component
+     #    - bfield_x/y/z are the cell-centered magenetic fields. Each
+     #      component is the average value of the corresponding interface
+     #      values
+     list = ["density", "velocity_x", "velocity_y", "velocity_z",
+             "cloud_dye", "metal_density", "temperature", "pressure", 
+	     "total_energy", "internal_energy",
+             "bfieldi_x", "bfieldi_y", "bfieldi_z",
+             "bfield_x", "bfield_y", "bfield_z"];
+
+     gamma = 1.6666666666666667;
+
+     # The VL+CT method reconstructs interface values (to compute fluxes) twice
+     # per timestep. Can perform nearest-neighbor or PLM. Each time
+     # nearest-neighbor is used, 1 ghost zone is needed. Each time PLM is used
+     # 2 ghost zones are needed.
+
+     ghost_depth = 3;
+     padding = 0;
+     alignment = 8;
+
+     bfieldi_x{
+     centering = [false, true, true];
+     };
+     bfieldi_y{
+        centering = [true, false, true];
+     };
+     bfieldi_z{
+        centering = [true, true, false];
+     };
+  }
+
+#======================================================================
+# COMPUTATION
+#======================================================================
+
+ Method {
+     mhd_vlct{
+        theta_limiter = 1.5;
+
+        # density floor
+        density_floor = 1.e-15;
+
+        # pressure floor
+        pressure_floor = 1.e-30;
+     };
+
+ }
+#======================================================================
+# OUTPUT
+#======================================================================
+
+
+
+ Output {
+
+     list = [ "cycled"];
+
+     cycled {
+         type = "data";
+	  field_list = ["density", "velocity_x", "velocity_y", "velocity_z",
+                        "total_energy",
+			"cloud_dye", "metal_density", "temperature", "internal_energy"];
+         schedule {
+	     list = [0.0625];
+	     var = "time";
+         };
+
+         name = ["cloud-data-%03d.h5", "proc"];
+     };
+
+ }
