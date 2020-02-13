@@ -1,0 +1,14 @@
+# Problem: 3D LinearWave test problem for VLCT
+# Author: Matthew Abruzzo (matthewabruzzo@gmail.com)
+
+   include "input/vlct/HD_linear_wave/initial_hd_transv_entropy_v2.in"
+
+   Mesh {
+      root_rank = 3; # 3D
+      root_blocks = [2,2,2];
+      root_size = [32,16,16]; # number of cells per axis
+   }
+
+   Output {
+      data { dir = ["method_vlct-1-hd_transv_entropy_v2N16_%.1f","time"]; };
+   }

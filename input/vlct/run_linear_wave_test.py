@@ -56,10 +56,8 @@ def format_pair(template, nblocks, res, wave_name, t1=0., t2=0., direction=''):
             template.format(nblocks=nblocks, res=res, wave_name=wave_name,
                             direction=direction, time=t2))
 
-final_times = {"fast" : 0.5, "alfven" : 1.0, "entropy" : 1.0, "slow" : 2.0}
-
 def analyze_linwave(ref_l1_norm, wave_name, nblocks, res, target_template,
-                    name_template, l1_functor, verbose = False):
+                    name_template, l1_functor, final_times, verbose = False):
     """
     Both name_template and target_template are used to format strings based on 
     other arguments with the `format` method. They should each employ named 
@@ -81,7 +79,8 @@ def analyze_linwave(ref_l1_norm, wave_name, nblocks, res, target_template,
 
 # part of the following should probably be folded into standard_analyze
 def identical_l1_error_linwave(nblocks, wave_name, res, l1_functor, template,
-                               nblocks2 = None, verbose = False):
+                               final_time, nblocks2 = None, prec = None,
+                               verbose = False):
     """
     Compares linear wave l1 norms that should be identical.
 
@@ -111,17 +110,23 @@ def identical_l1_error_linwave(nblocks, wave_name, res, l1_functor, template,
         be substituted with `''` or `'-left'`. Finally, the `time` placeholder
         will be substituted by `0.0` and the value returned by 
         `final_time[wave_type]`
+    final_time : float
+        The time at which the simulation of the wave ends
     nblocks2: int, optional
         Number of blocks over which the secondary simulation's grid is divided.
         If this value is not specified, then the number of blocks are assumed
         to be the same. In this case, the wave in the primary (secondary) 
         simulation is assumed to propagate rightwards (leftwards)
+    prec: int, optional
+        Number of digits after the decimal that must match. Athena++ 
+        traditionally just compares 6. If this is passed None (default), then
+        all digits are compared.
     verbose : bool, optional
         If true, prints note about tests that have passed
     """
 
     fmt_kwargs = dict(nblocks = nblocks, res = res, wave_name = wave_name,
-                      t1 = 0., t2 = final_times[wave_name], direction = '')
+                      t1 = 0., t2 = final_time, direction = '')
     t0_dir,tf_dir = format_pair(template, **fmt_kwargs)
     ref_norm = l1_functor(t0_dir,tf_dir,res)
 
@@ -136,6 +141,9 @@ def identical_l1_error_linwave(nblocks, wave_name, res, l1_functor, template,
     comp_norm = l1_functor(t0_dir,tf_dir,res)
 
     msg = None
+    if prec is not None:
+        ref_norm  = '{:.{prec}e}'.format(ref_norm,  prec=prec)
+        comp_norm = '{:.{prec}e}'.format(comp_norm, prec=prec)
     passed = (ref_norm == comp_norm)
     if not passed:
         msg = "FAILED: L1 norms of " + insert + " don't match\n{ref} {comp}"
@@ -156,9 +164,12 @@ def analyze_tests():
     # define the template for the directory holding the simulation data
     template = "method_vlct-{nblocks}-{wave_name}N{res}{direction}_{time:.1f}"
 
+    final_times = {"fast" : 0.5, "alfven" : 1.0, "entropy" : 1.0, "slow" : 2.0}
+
     err_compare = partial(analyze_linwave, target_template = template,
                           name_template = '{wave_name} wave N={res}',
-                          l1_functor = l1_func, verbose = False)
+                          l1_functor = l1_func, final_times = final_times,
+                          verbose = False)
 
     r = []
     # first let's run the l1-norm of each value for 2 sizes to make sure we get
@@ -180,7 +191,7 @@ def analyze_tests():
     # Check error between left and right propagating waves
     print("The following test has never passed in the history of this "
           "implementation")
-    r.append(identical_l1_error_linwave(1, 'fast', 32, l1_func, template,
+    r.append(identical_l1_error_linwave(1, 'fast', 32, l1_func, template, 0.5,
                                         verbose = True))
 
     n_passed = np.sum(r)

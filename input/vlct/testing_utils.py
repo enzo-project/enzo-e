@@ -290,7 +290,7 @@ def standard_analyze(ref_val, L1Functor, target_path, test_case_name,
     if msg is not None:
         print(msg.format(case=test_case_name, norm=repr(norm),
                          ref=repr(ref_val)))
-    return True
+    return passed
 
 class EnzoEWrapper:
     def __init__(self, executable, input_file_template):

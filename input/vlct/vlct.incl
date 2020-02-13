@@ -6,7 +6,7 @@
       mhd_vlct{
          courant = 0.4;
   
-        # default is hlle. Options are hlle/enzo_hlle, athena_hlle, and hlld
+        # default is hlle. Options are hll, hlle, hllc, and hlld
         riemann_solver = "hlld";
 
 	# Reconstruction algorithms choices are:
