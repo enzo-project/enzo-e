@@ -93,7 +93,7 @@ public:
     By_r    = prim_r[lut.bfield_j];
     Bz_r    = prim_r[lut.bfield_k];
     if (dual_energy){
-      specific_eint_r = prim_l[lut.internal_energy];
+      specific_eint_r = prim_r[lut.internal_energy];
     }
 
     Bv_r = Bx_r * vx_r + By_r * vy_r + Bz_r * vz_r;
