@@ -21,10 +21,10 @@
 //   - Stone+ (08) has a typo in eqn 52: (q_i-q_{i-1}) should be (q_R-q_L)
 //     The modified formula is actually used in Athena++
 
-
-struct EinfeldtWavespeedMHD
+template<bool MHD>
+struct EinfeldtWavespeed
 {
-  /// @class    EinfeldtWavespeedMHD
+  /// @class    EinfeldtWavespeed
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Encapsulates the wavespeed calculation described by
   ///           Stone+08. Toro attributes this scheme to Einfeldt 1988. When
@@ -46,68 +46,109 @@ struct EinfeldtWavespeedMHD
   {
     // Calculate wavespeeds as specified by S4.3.1 of Stone+08
     // if LM and L0 are max/min eigenvalues of Roe's matrix:
-    //       bp = max(LM, vi_r + cf_r, 0) (eqn 53)
-    //       bm = max(L0, vi_l - cf_l, 0) (eqn 54)
+    //       bp = max(LM, vi_r + c_r, 0) (eqn 53)
+    //       bm = max(L0, vi_l - c_l, 0) (eqn 54)
     // vi_r and vi_l are velocities of left and right states along ith dimension
-    // cf_r and cf_l are the fast magnetosonic speeds in the left and right
-    // states
+    // c_r and c_l are the maximum wavespeeds (sound speeds if hydro, fast
+    // magnetosonic speed if MHD) in the left and right states
 
     // First, compute left and right speeds
-    //    left_speed = vi_l - cf_l;      right_speed = vi_r + cf_r
-    enzo_float cf_l, cf_r;
-    cf_l = EnzoRiemann::fast_magnetosonic_speed_(wl, lut, pressure_l, gamma);
-    cf_r = EnzoRiemann::fast_magnetosonic_speed_(wr, lut, pressure_r, gamma);
-    enzo_float left_speed = (wl[lut.velocity_i] - cf_l);
-    enzo_float right_speed = (wr[lut.velocity_i] + cf_r);
+    //    left_speed = vi_l - c_l;      right_speed = vi_r + c_r
+    enzo_float c_l, c_r;
+    if (MHD){
+      c_l = EnzoRiemann::fast_magnetosonic_speed_(wl, lut, pressure_l, gamma);
+      c_r = EnzoRiemann::fast_magnetosonic_speed_(wr, lut, pressure_r, gamma);
+    } else {
+      c_l = EnzoRiemann::sound_speed_(wl, lut, pressure_l, gamma);
+      c_r = EnzoRiemann::sound_speed_(wr, lut, pressure_r, gamma);
+    }
+    enzo_float left_speed = (wl[lut.velocity_i] - c_l);
+    enzo_float right_speed = (wr[lut.velocity_i] + c_r);
 
-    // Next, compute min max eigenvalues
-    //     - per eqn B17 these are Roe averaged velocity in the ith direction
-    //       minus/plus Roe averaged fast magnetosonic wavespeed
-    //     - Will probably offload this to a method of EnzoEquationOfState
+    // Next, compute min, max eigenvalues of Roe matrix. Per eqns B2 and B17
+    // these are the Roe averaged velocity in the ith direction minus/plus
+    // the maximum wavespeeds Roe averaged signal speed (sound speed for hydro
+    // and fast magnetosonic speed for MHD)
     enzo_float sqrtrho_l = std::sqrt(wl[lut.density]);
     enzo_float sqrtrho_r = std::sqrt(wr[lut.density]);
-    enzo_float coef = 1.0/(sqrtrho_l + sqrtrho_r);
+    enzo_float inv_sqrtrho_tot = 1.0/(sqrtrho_l + sqrtrho_r);
 
-    // density and velocity
-    enzo_float rho_roe = sqrtrho_l*sqrtrho_r;
+    // Compute Roe-averaged velocity:
     enzo_float vi_roe = (sqrtrho_l * wl[lut.velocity_i] +
-			 sqrtrho_r * wr[lut.velocity_i])*coef;
+			 sqrtrho_r * wr[lut.velocity_i]) * inv_sqrtrho_tot;
     enzo_float vj_roe = (sqrtrho_l * wl[lut.velocity_j] +
-			 sqrtrho_r * wr[lut.velocity_j])*coef;
+			 sqrtrho_r * wr[lut.velocity_j]) * inv_sqrtrho_tot;
     enzo_float vk_roe = (sqrtrho_l * wl[lut.velocity_k] +
-			 sqrtrho_r * wr[lut.velocity_k])*coef;
+			 sqrtrho_r * wr[lut.velocity_k]) * inv_sqrtrho_tot;
+    enzo_float v_roe2 = vi_roe*vi_roe + vj_roe*vj_roe + vk_roe*vk_roe;
 
-    enzo_float mag_p_l = EnzoRiemann::mag_pressure_(wl, lut);
-    enzo_float mag_p_r = EnzoRiemann::mag_pressure_(wr, lut);
+    // Compute Roe-averaged specific enthalpy
+    enzo_float ptot_l = pressure_l;
+    enzo_float ptot_r = pressure_r;
+
+    if (MHD){
+      ptot_l += EnzoRiemann::mag_pressure_(wl, lut);
+      ptot_r += EnzoRiemann::mag_pressure_(wr, lut);
+    }
 
     // enthalpy:  h = (etot + thermal pressure + magnetic pressure) / rho
     // here etot is total energy density.
     // (we could refactor the following to take advantage of the fact that
-    //  wl[lut.total_energy] already has pressure divided out)
-    enzo_float h_l = ((Ul[lut.total_energy] + pressure_l + mag_p_l) /
-		      wl[lut.density]);
-    enzo_float h_r = ((Ur[lut.total_energy] + pressure_r + mag_p_r) /
-		      wr[lut.density]);
-    enzo_float h_roe = (sqrtrho_l * h_l + sqrtrho_r * h_r) * coef;
+    //  wl[lut.total_energy] already has density divided out)
+    enzo_float h_l = (Ul[lut.total_energy] + ptot_l) / wl[lut.density];
+    enzo_float h_r = (Ur[lut.total_energy] + ptot_r) / wr[lut.density];
+    enzo_float h_roe = (sqrtrho_l * h_l + sqrtrho_r * h_r) * inv_sqrtrho_tot;
 
-    // Magnetic Fields (formulas are different pattern from above)
+    enzo_float c_roe;
+    if (MHD){
+      c_roe = roe_cfast_(wl, wr, sqrtrho_l, sqrtrho_r, inv_sqrtrho_tot, v_roe2,
+			 h_roe, gamma, lut);
+    } else {
+      c_roe = roe_cs_(v_roe2, h_roe, gamma);
+    }
+
+    *bp = std::fmax(vi_roe + c_roe, right_speed);
+    *bm = std::fmin(vi_roe - c_roe, left_speed);
+  }
+
+  /// Return the sound speed needed to get the max and min eigenvalues for
+  /// Roe's matrix for adiabatic Hydrodynamics
+  ///
+  /// @param v_roe2 The squared magnitude of the roe averaged velocity
+  /// @param h_roe The Roe averaged specific enthalpy.
+  /// @param gamma The adiabatic index
+  enzo_float roe_cs_(const enzo_float v_roe2, const enzo_float h_roe,
+		     const enzo_float gamma) const throw()
+  {
+    enzo_float tiny2 = 0.;
+    return std::sqrt((gamma - 1) * std::max(h_roe - 0.5 * v_roe2, tiny2));
+  }
+
+  /// Return the fast magnetosonic speed needed to get the max and min
+  /// eigenvalues for Roe's matrix for adiabatic Magnetohydrodynamics
+  enzo_float roe_cfast_(const enzo_float wl[], const enzo_float wr[],
+			const enzo_float sqrtrho_l, const enzo_float sqrtrho_r,
+			const enzo_float inv_sqrtrho_tot,
+			const enzo_float v_roe2, const enzo_float h_roe,
+			const enzo_float gamma,
+			const EnzoAdvectionFieldLUT lut) const throw()
+  {
+    // Roe-averaged density & B-field (formulas different velocity & enthalpy)
+    enzo_float rho_roe = sqrtrho_l*sqrtrho_r;
     enzo_float bi_roe = wl[lut.bfield_i]; // equal to wr["bfield_i"]
     enzo_float bj_roe = (sqrtrho_l * wr[lut.bfield_j] +
-			 sqrtrho_r * wl[lut.bfield_j])*coef;
+			 sqrtrho_r * wl[lut.bfield_j]) * inv_sqrtrho_tot;
     enzo_float bk_roe = (sqrtrho_l * wr[lut.bfield_k] +
-			 sqrtrho_r * wl[lut.bfield_k])*coef;
-
+			 sqrtrho_r * wl[lut.bfield_k]) * inv_sqrtrho_tot;
+    enzo_float b_roe2 = bi_roe*bi_roe + bj_roe*bj_roe + bk_roe*bk_roe;
 
     // Calculate fast magnetosonic speed for Roe-averaged quantities (eqn B18)
     enzo_float gamma_prime = gamma - 1.;
     enzo_float x_prime = ((std::pow(wl[lut.bfield_j]-wr[lut.bfield_j],2) +
 			   std::pow(wl[lut.bfield_k]-wr[lut.bfield_k],2) )
-			  * 0.5 * (gamma_prime-1) * coef);
+			  * 0.5 * (gamma_prime-1) * inv_sqrtrho_tot);
     enzo_float y_prime = ((gamma_prime-1)*(wl[lut.density]+wr[lut.density])
 			  *0.5/rho_roe);
-
-    enzo_float v_roe2 = vi_roe*vi_roe + vj_roe*vj_roe + vk_roe*vk_roe;
-    enzo_float b_roe2 = bi_roe*bi_roe + bj_roe*bj_roe + bk_roe*bk_roe;
 
     // Need tidle_a^2
     enzo_float tilde_a2 = (gamma_prime * (h_roe - 0.5* v_roe2 - b_roe2/rho_roe)
@@ -118,15 +159,12 @@ struct EinfeldtWavespeedMHD
     enzo_float tilde_va2 = (tilde_vai2 + (gamma_prime - y_prime) *
 			    (bj_roe * bj_roe + bk_roe * bk_roe) / rho_roe);
 
-    enzo_float cfast = std::sqrt(0.5 * (tilde_a2 + tilde_va2 +
-					std::sqrt(std::pow(tilde_a2 + tilde_va2,
-							   2) -
-						  4 * tilde_a2 * tilde_vai2)));
-
-    *bp = std::fmax(std::fmax(vi_roe + cfast, right_speed), 0.);
-    *bm = std::fmin(std::fmin(vi_roe - cfast, left_speed),  0.);
+    return std::sqrt(0.5 * (tilde_a2 + tilde_va2 +
+			    std::sqrt(std::pow(tilde_a2 + tilde_va2, 2) -
+				      4 * tilde_a2 * tilde_vai2)));
   }
 };
+
 
 struct DavisWavespeedMHD
 {
@@ -164,9 +202,8 @@ public:
 
     // The following is equivalent to the enzo version except bm has been
     // multiplied by -1
-    *bp = std::fmax(std::fmax(lp_l, lp_r), 0.);
-    *bm = std::fmin(std::fmin(lm_l, lm_r), 0.);
-
+    *bp = std::fmax(lp_l, lp_r);
+    *bm = std::fmin(lm_l, lm_r);
   }
 };
 
@@ -201,6 +238,8 @@ public:
     // Compute wave speeds
     wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r, lut,
 		gamma, &bp, &bm);
+    bp = std::fmax(bp,0.0);
+    bm = std::fmin(bm,0.0);
     enzo_float inv_speed_diff = 1./(bp - bm);
 
     // Compute the actual riemann fluxes (value of dual_energy_formalism is
@@ -234,7 +273,8 @@ public:
 /// @brief    [\ref Enzo] Encapsulates HLLE approximate Riemann Solver (the HLL
 ///           solver using Einfeldt's wavespeed estimator). The same wavespeed
 ///           estimator is used in Athena's MHD HLLE Riemann Solver
-using EnzoRiemannHLLEMHD = EnzoRiemannImpl<HLLImpl<EinfeldtWavespeedMHD>>;
+using EnzoRiemannHLLEMHD = EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<true>>>;
+using EnzoRiemannHLLE = EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<false>>>;
 
 /// @class    EnzoRiemannHLLMHD
 /// @ingroup  Enzo

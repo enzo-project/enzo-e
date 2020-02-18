@@ -97,8 +97,10 @@ module enzo {
 
   // EnzoRiemannHLLMHD
   PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeedMHD>>;
+  // EnzoRiemannHLLE
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<false>>>;
   // EnzoRiemannHLLEMHD
-  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeedMHD>>;
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<true>>>;
   PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
   PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 
