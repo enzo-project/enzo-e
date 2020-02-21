@@ -1,6 +1,6 @@
  Adapt {
      list = [ "slope" ];
-     max_level = 4;
+     max_level = 3;
      min_level = 0;
      slope {
          max_coarsen = 0.000000000000000;

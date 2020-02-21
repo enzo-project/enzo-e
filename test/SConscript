@@ -274,38 +274,56 @@ env.PngToGif ("method_gravity_cg-8.gif", "test_method_gravity_cg-8.unit", \
 # MethodCosmology tests
 #----------------------------------------------------------------------
 
-Clean(env_mv_out.RunParallel ('test_cosmo-cg.unit',bin_path + '/enzo-p', 
-		ARGS='input/test_cosmo-cg.in'),
+target_cosmo_cg = env_mv_out.RunParallel ('test_cosmo-cg.unit',bin_path + '/enzo-p', 
+		ARGS='input/test_cosmo-cg.in')
+Clean(target_cosmo_cg,
       [Glob('#/' + test_path + '/Dir_COSMO_CG_*'),
        Glob('#/' + test_path + '/Dir_COSMO_CG_*')])
-Clean(env_mv_out.RunParallel ('test_cosmo-bcg.unit',bin_path + '/enzo-p', 
-		ARGS='input/test_cosmo-bcg.in'),
+
+target_cosmo_bcg = env_mv_out.RunParallel ('test_cosmo-bcg.unit',bin_path + '/enzo-p', 
+		ARGS='input/test_cosmo-bcg.in')
+Clean(target_cosmo_bcg,
       [Glob('#/' + test_path + '/Dir_COSMO_BCG_*'),
        Glob('#/' + test_path + '/Dir_COSMO_BCG_*')])
-Clean(env_mv_out.RunParallel ('test_cosmo-mg.unit',bin_path + '/enzo-p', 
-		ARGS='input/test_cosmo-mg.in'),
+
+target_cosmo_mg = env_mv_out.RunParallel ('test_cosmo-mg.unit',bin_path + '/enzo-p', 
+		ARGS='input/test_cosmo-mg.in')
+Clean(target_cosmo_mg,
       [Glob('#/' + test_path + '/Dir_COSMO_MG_*'),
        Glob('#/' + test_path + '/Dir_COSMO_MG_*')])
-Clean(env_mv_out.RunParallel ('test_cosmo-ddmg.unit',bin_path + '/enzo-p', 
-		ARGS='input/test_cosmo-ddmg.in'),
-      [Glob('#/' + test_path + '/Dir_COSMO_DDMG_*'),
-       Glob('#/' + test_path + '/Dir_COSMO_DDMG_*')])
+
+target_cosmo_dd = env_mv_out.RunParallel ('test_cosmo-dd.unit',bin_path + '/enzo-p', 
+		ARGS='input/test_cosmo-dd.in')
+Clean(target_cosmo_dd,
+      [Glob('#/' + test_path + '/Dir_COSMO_DD_*'),
+       Glob('#/' + test_path + '/Dir_COSMO_DD_*')])
+
+target_cosmo_hg = env_mv_out.RunParallel ('test_cosmo-hg.unit',bin_path + '/enzo-p', 
+		ARGS='input/test_cosmo-hg.in')
+Clean(target_cosmo_hg,
+      [Glob('#/' + test_path + '/Dir_COSMO_HG_*'),
+       Glob('#/' + test_path + '/Dir_COSMO_HG_*')])
 
 #----------------------------------------------------------------------
 # MethodCollapse tests
 #----------------------------------------------------------------------
 
 if (prec == "double"):
-    Clean(env_mv_out.RunParallel ('test_collapse-bcg2d.unit',
+    Clean(env_mv_out.RunParallel ('test_collapse-bcg2.unit',
                                   bin_path + '/enzo-p', 
-		                  ARGS='input/test_collapse-bcg2d.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2D_*'),
-           Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2D_*')])
-    Clean(env_mv_out.RunParallel ('test_collapse-bcg3d.unit',
+		                  ARGS='input/test_collapse-bcg2.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_BCG2_*')]);
+    Clean(env_mv_out.RunParallel ('test_collapse-dd2.unit',
                                   bin_path + '/enzo-p', 
-		                  ARGS='input/test_collapse-bcg3d.in'),
-          [Glob('#/' + test_path + '/Dir_COLLAPSE_BCG3D_*'),
-           Glob('#/' + test_path + '/Dir_COLLAPSE_BCG3D_*')])
+		                  ARGS='input/test_collapse-dd2.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_DD2_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_DD2_*')]);
+    Clean(env_mv_out.RunParallel ('test_collapse-hg2.unit',
+                                  bin_path + '/enzo-p', 
+		                  ARGS='input/test_collapse-hg2.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_HG2_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_HG2_*')])
 
 #----------------------------------------------------------------------
 # MethodHeat tests
