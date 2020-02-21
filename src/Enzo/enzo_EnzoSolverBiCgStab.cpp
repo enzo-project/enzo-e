@@ -33,6 +33,14 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
+static CmiNodeLock bcg_iter_node_lock;
+///----------------------------------------------------------------------
+void mutex_init_bcg_iter()
+{
+  bcg_iter_node_lock = CmiCreateLock();
+}
+
+
 // #define DEBUG_NEW_REFRESH
 
 #ifdef DEBUG_NEW_REFRESH
