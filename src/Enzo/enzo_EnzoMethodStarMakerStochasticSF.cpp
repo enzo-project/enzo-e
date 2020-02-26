@@ -174,8 +174,14 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         if (! this->check_number_density_threshold(ndens)) continue;
         if (! this->check_self_gravitating( mean_particle_mass, rho_cgs, temperature[i],
                                             velocity_x, velocity_y, velocity_z,
-                                            enzo_units->length(), enzo_units->density(),                                            
+                                            enzo_units->length(), enzo_units->density(),
                                             i, 1, my, my*mz, dx, dy, dz)) continue;
+
+        // AJE: TO DO ---
+        //      If Grackle is used, check for this and use the H2
+        //      fraction from there instead if h2 is used. Maybe could
+        //      do this in the self shielding factor function
+
         // Only allow star formation out of the H2 shielding component (if used)
         const double f_h2 = this->h2_self_shielding_factor(density,
                                                            metallicity,
@@ -274,7 +280,7 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         pform     = (enzo_float *) particle.attribute_array(it, ia_to, ib);
 
         pform[io]     =  enzo_block->time();   // formation time
-        plifetime[io] =  10.0 * cello::Myr_s / enzo_units->time() ; // lifetime
+        plifetime[io] =  tdyn;  // 10.0 * cello::Myr_s / enzo_units->time() ; // lifetime
 
         if (metal){
           pmetal     = (enzo_float *) particle.attribute_array(it, ia_metal, ib);
@@ -284,6 +290,13 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         // Remove mass from grid and rescale fraction fields
         density[i] = (1.0 - star_fraction) * density[i];
         double scale = (1.0 - star_fraction) / 1.0;
+
+        if (density[i] < 0){
+          CkPrintf("StochasticSF: density index star_fraction mass: %g %i %g %g\n",
+                   density[i],i,star_fraction,mass);
+          ERROR("EnzoMethodStarMakerStochasticSF::compute()",
+                "Negative densities in star formation");
+        }
 
         // rescale tracer fields to maintain constant mass fraction
         // with the corresponding new density...
