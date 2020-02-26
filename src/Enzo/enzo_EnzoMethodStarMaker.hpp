@@ -77,20 +77,19 @@ protected: // methods
                 const int &diz);
   int check_mass(const double &m);
   int check_self_gravitating(
-    const double mean_particle_mass, const double rho_cgs, 
+    const double mean_particle_mass, const double rho_cgs,
     const enzo_float temperature,
-    enzo_float *vx, enzo_float *vy, enzo_float *vz, 
+    enzo_float *vx, enzo_float *vy, enzo_float *vz,
     const double lunit, const double vunit,
     const int &index, const int &dix, const int &diy, const int &diz,
     const double dx, const double dy, const double dz);
   double h2_self_shielding_factor(
-    enzo_float *rho, const double rho_cgs,
+    enzo_float *rho, const double metallicity,
     const double dunit, const double lunit,
     const int &index, const int &dix, const int &diy, const int &diz,
-    const double dx, const double dy, const double dz,
-    const double metallicity);
+    const double dx, const double dy, const double dz);
   int check_jeans_mass(
-    const double temperature, const double mean_particle_mass, 
+    const double temperature, const double mean_particle_mass,
     const double rho_cgs, const double mass);
 
 

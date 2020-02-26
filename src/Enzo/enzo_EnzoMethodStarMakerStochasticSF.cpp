@@ -12,6 +12,10 @@
 #include "enzo.hpp"
 #include <time.h>
 
+
+// #define DEBUG_SF
+
+
 //-------------------------------------------------------------------
 
 EnzoMethodStarMakerStochasticSF::EnzoMethodStarMakerStochasticSF
@@ -168,11 +172,19 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
         // Apply the criteria for star formation
         //
         if (! this->check_number_density_threshold(ndens)) continue;
-        // if (! this->check_self_gravitating(mean_particle_mass, rho_cgs, temperature[i],
-        //                                    enzo_units->length(), enzo_units->density(),
-        //                                    velocity_x, velocity_y, velocity_z, 
-        //                                    i, 1, my, my*mz, dx)) continue;
-        // if (! this->check_h2_self_shielding(density, metallicity, i, 1, my, my*mz, dx)) continue;
+        if (! this->check_self_gravitating( mean_particle_mass, rho_cgs, temperature[i],
+                                            velocity_x, velocity_y, velocity_z,
+                                            enzo_units->length(), enzo_units->density(),                                            
+                                            i, 1, my, my*mz, dx, dy, dz)) continue;
+        // Only allow star formation out of the H2 shielding component (if used)
+        const double f_h2 = this->h2_self_shielding_factor(density,
+                                                           metallicity,
+                                                           enzo_units->density(),
+                                                           enzo_units->length(),
+                                                           i, 1, my, my*mz,
+                                                           dx, dy, dz);
+        mass *= f_h2; // apply correction (f_h2 = 1 if not used)
+
         if (! this->check_velocity_divergence(velocity_x, velocity_y,
                                               velocity_z, i,
                                               1, my, my*mz)) continue;
@@ -202,8 +214,24 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
             star_fraction = this->star_particle_min_mass_ / mass;
           }
         } else {
-          // (else, leave star fraction alone )
-          star_fraction = this->star_particle_min_mass_ / mass;
+          // else allow the total mass of stars to form to be up to the
+          // maximum particle mass OR the maximum gas->stars conversion fraction.
+          // AJE: Note, this forces there to be at most one particle formed per
+          //      cell per timestep. In principle, this could be bad if
+          //      the computed gas->stars mass (above) is >> than maximum particle
+          //      mass b/c it would artificially extend the lifetime of the SF
+          //      region and presumably increase the amount of SF and burstiness
+          //      of the SF and feedback cycle. Check this!!!!
+
+          if (star_fraction * mass > this->star_particle_max_mass_){
+#ifdef DEBUG_SF
+            CkPrintf( "DEBUG_SF: StochasticSF - SF mass = %g ; max particle mass = %g\n",
+                                         star_fraction*mass, this->star_particle_max_mass_);
+#endif
+            star_fraction = this->star_particle_max_mass_ / mass;
+          }
+
+          star_fraction = std::min(star_fraction, this->maximum_star_fraction_);
         }
 
         count++; //
@@ -266,9 +294,8 @@ void EnzoMethodStarMakerStochasticSF::compute ( Block *block) throw()
   } // end loop iz
 
   if (count > 0){
-      std::cout << "Number of particles formed:   " << count << "\n";
+      CkPrintf("StochasticSF: Number of particles formed = %i \n", count);
   }
-
 
   block->compute_done();
 

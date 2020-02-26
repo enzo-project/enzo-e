@@ -15,6 +15,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_SF
+
 //-------------------------------------------------------------------
 
 EnzoMethodStarMaker::EnzoMethodStarMaker
@@ -189,8 +191,8 @@ int EnzoMethodStarMaker::check_number_density_threshold(
   ///  than the provided number density if use_density_threshold_ is
   ///  desired by the user.
 
-  return !(use_density_threshold_) +
-          (d >= number_density_threshold_);
+  return !(this->use_density_threshold_) +
+          (d >= this->number_density_threshold_);
 }
 
 int EnzoMethodStarMaker::check_self_gravitating(
@@ -201,11 +203,11 @@ int EnzoMethodStarMaker::check_self_gravitating(
                 const double dx, const double dy, const double dz)
 {
 
-  if (!use_self_gravitating_)
+  if (!this->use_self_gravitating_)
     return 1;
 
   // Hopkins et al. (2013). Virial parameter: alpha < 1 -> self-gravitating
-  
+
   double div_v_norm2, cs2, alpha;
   double dx2 = dx*dx * lunit*lunit;
   double dy2 = dy*dy * lunit*lunit;
@@ -233,20 +235,21 @@ int EnzoMethodStarMaker::check_self_gravitating(
 }
 
 double EnzoMethodStarMaker::h2_self_shielding_factor(
-                enzo_float *rho, const double rho_cgs,
+                enzo_float *rho, const double metallicity,
                 const double dunit, const double lunit,
                 const int &index, const int &dix, const int &diy, const int &diz,
-                const double dx, const double dy, const double dz,
-                const double metallicity)
+                const double dx, const double dy, const double dz)
 {
 
-  if (!use_h2_self_shielding_)
+  if (!this->use_h2_self_shielding_)
     return 1;
 
   // Hopkins et al. (2017) and Krumholz & Gnedin (2011). Constant numbers come from their models and fits.
   // Mass fraction that is self-shielded and able to cool. f_shield > 0
 
   double tau, phi, psi, f_shield, grad_rho;
+
+  const double rho_cgs = rho[index] * dunit;
 
   grad_rho = sqrt(pow((rho[index+dix] - rho[index-dix]) / dx, 2) +
                   pow((rho[index+diy] - rho[index-diy]) / dy, 2) +
@@ -261,7 +264,7 @@ double EnzoMethodStarMaker::h2_self_shielding_factor(
 }
 
 int EnzoMethodStarMaker::check_jeans_mass(
-  const double temperature, const double mean_particle_mass, 
+  const double temperature, const double mean_particle_mass,
   const double rho_cgs, const double mass
 )
 {
@@ -308,9 +311,10 @@ int EnzoMethodStarMaker::check_velocity_divergence(
 int EnzoMethodStarMaker::check_mass(const double &m){
   /// Apply the condition that the mass of gas converted into
   /// stars in a single cell cannot exceed a certain fraction
-  /// of that cell's mass
+  /// of that cell's mass. There does not need to be a check on
+  /// the maximum particle mass.
+
   int minlimit = ((maximum_star_fraction_ * m) > star_particle_min_mass_);
-  int maxlimit = ((maximum_star_fraction_ * m) < star_particle_max_mass_);
-  return minlimit && maxlimit;
+  return minlimit;
 
 }
