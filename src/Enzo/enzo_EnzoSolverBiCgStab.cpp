@@ -33,6 +33,14 @@
 #include "charm_simulation.hpp"
 #include "enzo.hpp"
 
+static CmiNodeLock bcg_iter_node_lock;
+///----------------------------------------------------------------------
+void mutex_init_bcg_iter()
+{
+  bcg_iter_node_lock = CmiCreateLock();
+}
+
+
 // #define DEBUG_NEW_REFRESH
 
 #ifdef DEBUG_NEW_REFRESH
@@ -48,7 +56,7 @@
 // #define DEBUG_CALLBACK
 
 // #define TRACE_DOT
-// #define TRACE_DOT_CYCLE 0
+#define TRACE_DOT_CYCLE 0
 
 // #define TRACE_BCG
 
@@ -65,7 +73,8 @@
 #ifdef DEBUG_SCALAR
 #   define TRACE_SCALAR(BLOCK,NAME,SCALAR)				\
   CkPrintf ("%s:%d %s TRACE_SCALAR %s = %Lg\n",				\
-	    __FILE__,__LINE__,BLOCK->name().c_str(),NAME,SCALAR);
+	    __FILE__,__LINE__,BLOCK->name().c_str(),NAME,SCALAR);       \
+    fflush(stdout);
 #else
 #   define TRACE_SCALAR(BLOCK,NAME,SCALAR) /* ... */
 #endif
@@ -110,6 +119,7 @@
     CkPrintf ("%s:%d %s TRACE_GHOST %s layer %d sum(A) sum(A*A) sum(abs(A)) " \
 	      " %Lg %Lg %Lg\n"						\
 	      ,__FILE__,__LINE__,BLOCK->name().c_str(),NAME,ig,sum_a[0],sum_aa[0],sum_abs[0]); \
+    fflush(stdout); \
   }
 #else
 #   define TRACE_GHOST(BLOCK,ID,NAME) /* ... */
@@ -135,6 +145,7 @@
     }									\
     CkPrintf ("%s:%d %s %s COPY_FIELD %d %s shift %Lg %Lg\n"		\
 	      ,__FILE__,__LINE__,BLOCK->name().c_str(),name().c_str(),ID,COPY,sum_a, sum_abs); \
+    fflush(stdout);                                                     \
     TRACE_GHOST(BLOCK,ID,COPY);						\
   }
 #else
@@ -277,28 +288,40 @@ void EnzoSolverBiCgStab::apply
   
   Solver::begin_(block);
   
+  const bool is_unrefined =
+    (block->is_leaf()) && (block->level() == coarse_level_);
+
+  
   EnzoBlock* enzo_block = enzo::block(block);
 
-  if (solve_type_ == solve_tree) {
-    s_dot_sync_(enzo_block) = cello::num_children();
+  if ((solve_type_ == solve_tree) &&
+      (is_unrefined || block->level() < coarse_level_)) {
+    // do nothing if we're doing tree solves but root block is not refined
+    Solver::end_(block);
+    
+  } else {
+
+    if (solve_type_ == solve_tree) {
+      s_dot_sync_(enzo_block) = cello::num_children();
+    }
+  
+    A_ = A;
+
+    Field field = block->data()->field();
+
+    allocate_temporary_(block);
+
+    /// cast input argument to the EnzoBlock associated with this char
+
+    /// access the field infromation on this block
+  
+    field.dimensions (0, &mx_, &my_, &mz_);
+    field.ghost_depth(0, &gx_, &gy_, &gz_);
+
+    m_ = mx_*my_*mz_;
+
+    compute_ (enzo_block);
   }
-  
-  A_ = A;
-
-  Field field = block->data()->field();
-
-  allocate_temporary_(block);
-
-  /// cast input argument to the EnzoBlock associated with this char
-
-  /// access the field infromation on this block
-  
-  field.dimensions (0, &mx_, &my_, &mz_);
-  field.ghost_depth(0, &gx_, &gy_, &gz_);
-
-  m_ = mx_*my_*mz_;
-
-  compute_ (enzo_block);
 }
 
 //======================================================================
@@ -338,12 +361,18 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
 
     const bool reuse_x = reuse_solution_ (block->cycle());
 #ifdef TRACE_SOLVER_BCG      
-      if (CkMyPe()==0) CkPrintf ("DEBUG_SOLVER_BCG reusing solution X <- X_copy \n");
+    if (CkMyPe()==0) {
+      CkPrintf ("DEBUG_SOLVER_BCG reusing solution X <- X_copy \n");
+      fflush(stdout);
+    }
 #endif    
     if ( reuse_x ) {
 #ifdef TRACE_SOLVER_BCG      
 
-      if (CkMyPe()==0) CkPrintf ("DEBUG_SOLVER_BCG reusing solution X <- X_copy \n");
+      if (CkMyPe()==0) {
+        CkPrintf ("DEBUG_SOLVER_BCG reusing solution X <- X_copy \n");
+        fflush(stdout);
+      }
 #endif      
 
       enzo_float* X_copy  = (enzo_float*) field.values("X_copy");
@@ -404,6 +433,7 @@ void EnzoSolverBiCgStab::compute_(EnzoBlock* block) throw() {
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_start_1(NULL));
+    fflush(stdout);
 #endif    
 
     TRACE_DOT(block,"start",0);
@@ -525,6 +555,7 @@ void EnzoSolverBiCgStab::start_2(EnzoBlock* block,
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_start_3(NULL));
+    fflush(stdout);
 #endif    
 
 
@@ -642,6 +673,21 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
   const bool is_converged = (S(err) < res_tol_);
   const bool is_diverged  = (iter >= iter_max_);
 
+  if (is_converged) {
+    if (block->level() == coarse_level_) {
+      CmiLock(bcg_iter_node_lock);
+      cello::simulation()->set_solver_iter(index_,iter);
+      CmiUnlock(bcg_iter_node_lock);
+    }
+  }
+#ifdef DEBUG_SOLVER_BCG
+  if (is_converged) CkPrintf ("DEBUG_SOLVER BCG %s\n",block->name().c_str());
+  if (is_diverged) {
+    CkPrintf ("DEBUG_SOLVER_BCG %d %s %d diverged\n",
+              __LINE__,block->name().c_str(),CkMyPe(),iter);
+  }
+#endif  
+
   /// monitor output solution progress (iteration, residual, etc)
 
   int a3[3];
@@ -675,6 +721,7 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
 	      "final iter = %d rr = %Lg  rho0 = %Lg  rr/rho0 = %Lg\n",
 	      block->name().c_str(),
 	      iter,S(rr),S(rho0),sqrt(S(rr))/ S(rho0));
+    fflush(stdout);
   }
 
   if (is_converged) {
@@ -686,7 +733,10 @@ void EnzoSolverBiCgStab::loop_0(EnzoBlock* block) throw() {
     if (reuse_next_x) {
 
 #ifdef TRACE_SOLVER_BCG      
-      if (CkMyPe()==0) CkPrintf ("DEBUG_SOLVER_BCG saving solution X_copy <- X\n");
+      if (CkMyPe()==0) {
+        CkPrintf ("DEBUG_SOLVER_BCG saving solution X_copy <- X\n");
+        fflush(stdout);
+      }
 #endif      
       Field field = block->data()->field();
 
@@ -740,12 +790,14 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::p_solver_bicgstab_loop_2());
+    fflush(stdout);
 #endif    
 
     /// LINE 04: Y = M \ P
 #ifdef TRACE_SOLVER_BCG    
     CkPrintf ("%s %s:%d TRACE_SOLVER_BCG calling preconditioner\n",
 	      block->name().c_str(),__FILE__,__LINE__);
+    fflush(stdout);
 #endif
 
 #ifdef DEBUG_READ
@@ -781,6 +833,7 @@ void EnzoSolverBiCgStab::loop_2(EnzoBlock* block) throw() {
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_bicgstab_loop_2() {
+  TRACE_BCG(this,static_cast<EnzoSolverBiCgStab*> (solver()),"p_loop_2");
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
@@ -803,6 +856,7 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
   CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d %d\n",
 	    block->name().c_str(),
 	    is_finest_(block),block->new_refresh(ir_loop_3_).active());
+    fflush(stdout);
 #endif  
   block->new_refresh_start(ir_loop_3_,
 			   CkIndex_EnzoBlock::p_solver_bicgstab_loop_3());
@@ -811,6 +865,7 @@ void EnzoSolverBiCgStab::loop_25 (EnzoBlock * block) throw() {
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_bicgstab_loop_3() {
+  TRACE_BCG(this,static_cast<EnzoSolverBiCgStab*> (solver()),"p_loop_3");
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
@@ -908,6 +963,7 @@ void EnzoSolverBiCgStab::loop_4(EnzoBlock* block) throw() {
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_loop_5(NULL));
+    fflush(stdout);
 #endif    
   TRACE_DOT(block,"start",2);
   inner_product_(block,3,&reduce[0],is_array,callback,2); // loop_6
@@ -1042,6 +1098,7 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::p_solver_bicgstab_loop_8());
+    fflush(stdout);
 #endif    
 
     /// LINE 10: Y = M \ Q
@@ -1049,6 +1106,7 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
 #ifdef TRACE_SOLVER_BCG    
     CkPrintf ("%s %s:%d TRACE_SOLVER_BCG calling preconditioner\n",
 	      block->name().c_str(),__FILE__,__LINE__);
+    fflush(stdout);
 #endif    
 
 #ifdef DEBUG_WRITE
@@ -1081,6 +1139,7 @@ void EnzoSolverBiCgStab::loop_8(EnzoBlock* block) throw() {
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_solver_bicgstab_loop_8() {
+  TRACE_BCG(this,static_cast<EnzoSolverBiCgStab*> (solver()),"p_loop_8");
 
   performance_start_(perf_compute,__FILE__,__LINE__);
 
@@ -1103,6 +1162,7 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
 #ifdef DEBUG_NEW_REFRESH
   CkPrintf ("DEBUG_NEW_REFRESH %s is_active %d\n",block->name().c_str(),
 	    block->new_refresh(ir_loop_9_).active());
+    fflush(stdout);
 #endif  
   block->new_refresh_start(ir_loop_9_,
 			   CkIndex_EnzoBlock::p_solver_bicgstab_loop_9());
@@ -1112,6 +1172,7 @@ void EnzoSolverBiCgStab::loop_85 (EnzoBlock * block) throw() {
 
 void EnzoBlock::p_solver_bicgstab_loop_9() {
 
+  TRACE_BCG(this,static_cast<EnzoSolverBiCgStab*> (solver()),"p_loop_9");
   performance_start_(perf_compute,__FILE__,__LINE__);
   
   static_cast<EnzoSolverBiCgStab*> (solver())->loop_10(this);
@@ -1205,6 +1266,7 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
   CkPrintf ("DEBUG_REDUCE %s %s:%d %Lg %Lg %Lg %Lg %Lg\n",
 	    block->name().c_str(),__FILE__,__LINE__,
 	    reduce[0],reduce[1],reduce[2],reduce[3],reduce[4]);
+    fflush(stdout);
 #endif
   
   CkCallback callback = CkCallback
@@ -1214,6 +1276,7 @@ void EnzoSolverBiCgStab::loop_10(EnzoBlock* block) throw() {
 #ifdef DEBUG_CALLBACK    
   CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	    __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_loop_11(NULL));
+    fflush(stdout);
 #endif    
 
   TRACE_DOT(block,"start",3);
@@ -1380,6 +1443,7 @@ void EnzoSolverBiCgStab::loop_12(EnzoBlock* block,
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_loop_13(NULL));
+    fflush(stdout);
 #endif    
 
   TRACE_DOT(block,"start",4);
@@ -1469,6 +1533,7 @@ void EnzoSolverBiCgStab::loop_14(EnzoBlock* block,
 #ifdef DEBUG_CALLBACK    
     CkPrintf ("DEBUG_CALLBACK %s:%d %d\n",
 	      __FILE__,__LINE__,CkIndex_EnzoBlock::r_solver_bicgstab_loop_15(NULL));
+    fflush(stdout);
 #endif    
 
   loop_0b(block,NULL);
@@ -1506,7 +1571,7 @@ void EnzoSolverBiCgStab::inner_product_
 {
   if (solve_type_ == solve_tree) {
     TRACE_BCG(block,this,"inner_product_A");
-    dot_compute_tree_(block,n,reduce+1,is_array,i_function);
+    dot_compute_tree_(block,n,reduce+1,is_array,i_function,s_iter_(block));
   } else {
     TRACE_BCG(block,this,"inner_product_B");
     block->contribute((n+1)*sizeof(long double), reduce, 
@@ -1520,7 +1585,8 @@ void EnzoSolverBiCgStab::dot_compute_tree_(EnzoBlock * block,
 					   int n,
 					   long double * dot_local,
 					   const std::vector<int> & is_array,
-					   int i_function)
+					   int i_function,
+                                           int iter)
 {
   TRACE_DOT(block,"dot_compute_tree",i_function);
   dot_clear_(block,n,is_array);
@@ -1530,8 +1596,9 @@ void EnzoSolverBiCgStab::dot_compute_tree_(EnzoBlock * block,
     dot_done_(block,i_function,__FILE__,__LINE__);
   } else if (is_finest_(block)) {
     if (level > coarse_level_) {
-      dot_send_parent_(block,n,dot_local,is_array,i_function);
+      dot_send_parent_(block,n,dot_local,is_array,i_function,iter);
     } else {
+      s_iter_(block)=iter;
       dot_save_(block,n, dot_local, is_array);
       dot_done_(block,i_function,__FILE__,__LINE__);
     }
@@ -1544,7 +1611,7 @@ void EnzoSolverBiCgStab::dot_send_parent_(EnzoBlock * block,
 					  int n,
 					  long double * dot_block,
 					  const std::vector<int> & is_array,
-					  int i_function)
+					  int i_function, int iter)
 {
   TRACE_DOT(block,"dot_send_parent",i_function);
   ASSERT2("EnzoSolverBiCgStab::dot_send_parent()",
@@ -1554,8 +1621,8 @@ void EnzoSolverBiCgStab::dot_send_parent_(EnzoBlock * block,
 
   Index index_parent = block->index().index_parent(min_level_);
 
-  enzo::block_array()[index_parent].p_dot_recv_parent(n,dot_block,
-						      is_array,i_function);
+  enzo::block_array()[index_parent].p_dot_recv_parent
+    (n,dot_block, is_array,i_function, iter);
 
 }
 
@@ -1563,11 +1630,11 @@ void EnzoSolverBiCgStab::dot_send_parent_(EnzoBlock * block,
 
 void EnzoBlock::p_dot_recv_parent(int n, long double * dot_block,
 				  std::vector<int> is_array,
-				  int i_function)
+				  int i_function, int iter)
 {
   auto solver = static_cast<EnzoSolverBiCgStab*> (this->solver());
 
-  solver->dot_recv_parent(this,n,dot_block,is_array,i_function);
+  solver->dot_recv_parent(this,n,dot_block,is_array,i_function, iter);
 }
 
 //----------------------------------------------------------------------
@@ -1576,7 +1643,7 @@ void EnzoSolverBiCgStab::dot_recv_parent(EnzoBlock * block,
 					 int n,
 					 long double * dot_block,
 					 const std::vector<int> & is_array,
-					 int i_function)
+					 int i_function, int iter)
 {
   
   TRACE_DOT(block,"dot_recv_parent",i_function);
@@ -1587,8 +1654,9 @@ void EnzoSolverBiCgStab::dot_recv_parent(EnzoBlock * block,
     dot_load_(block,n, dot_block, is_array);
     if (block->level() > coarse_level_) {
       //      dot_clear_(block,n,is_array);
-      dot_send_parent_(block,n,dot_block,is_array,i_function);
+      dot_send_parent_(block,n,dot_block,is_array,i_function, iter);
     } else {
+      s_iter_(block)=iter;
       dot_send_children_(block,n,dot_block,is_array,i_function);
       dot_done_(block,i_function,__FILE__,__LINE__);
     }

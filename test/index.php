@@ -663,15 +663,15 @@ test_summary("Method: heat",
 
 test_summary("Method: gravity",
 	     array("method_gravity_cg-1","method_gravity_cg-8"),
-	     array("enzo-p",  "enzo-p"),'test');
+	     array("enzo-p",             "enzo-p"),'test');
 
 test_summary("Problem: collapse",
-         array("collapse-bcg2d","collapse-bcg3d"),
-array("enzo-p",  "enzo-p"),'test');
+         array("collapse-bcg2","collapse-dd2","collapse-hg2"),
+         array("enzo-p",       "enzo-p",      "enzo-p"),'test');
 
 test_summary("Problem: cosmology",
-         array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-ddmg"),
-         array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p"),'test');
+         array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg"),
+         array("enzo-p",  "enzo-p",   "enzo-p",  "enzo-p",  "enzo-p"),'test');
 
 test_summary("Checkpoint",
 	     array("checkpoint_ppm-1","checkpoint_ppm-8","restart_ppm-1","restart_ppm-8"),
@@ -1000,110 +1000,162 @@ test_group("Problem: collapse");
 
 ?>
 
-Spherical collapse tests for varying dimensionality, linear solver, and mesh adaptation [in progress].
+Spherical collapse tests for varying linear solvers.  Currently 2D only to keep regression testing time down.
 
 </p>
 
 <?php
 
+//----------------------------------------------------------------------
+
+    test_subgroup ("2D Collapse");
+
 //--------------------------------------------------
 
-    test_subgroup ("2D AMR Collapse");
-begin_hidden("collapse-bcg2d", "COLLAPSE (BiCG-STAB Solver)");
+begin_hidden("collapse-bcg2", "COLLAPSE (BiCG-STAB Solver)");
 
-tests("Enzo","enzo-p","test_collapse-bcg2d","2D AMR Collapse (BiCG-STAB Solver)","");
+tests("Enzo","enzo-p","test_collapse-bcg2","2D AMR Collapse (BiCG-STAB Solver)","");
 
-test_table ("_","Dir_Collapse-BCG2D",
-      array("0005/dark",
-            "0010/dark",
-            "0015/dark",
-            "0020/dark",
-            "0025/dark",
-            "0030/dark",
+test_table ("_","Dir_Collapse-BCG2",
+      array("0007/dark",
+            "0014/dark",
+            "0021/dark",
+            "0028/dark",
             "0035/dark",
-            "0040/dark"),$types);
-test_table ("_","Dir_Collapse-BCG2D",
-      array("0005/po",
-            "0010/po",
-            "0015/po",
-            "0020/po",
-            "0025/po",
-            "0030/po",
+            "0042/dark",
+            "0049/dark",
+            "0056/dark",
+            "0063/dark"),$types);
+test_table ("_","Dir_Collapse-BCG2",
+      array("0007/po",
+            "0014/po",
+            "0021/po",
+            "0028/po",
             "0035/po",
-            "0040/po"),$types);
-test_table ("_","Dir_Collapse-BCG2D",
-      array("0005/ax",
-            "0010/ax",
-            "0015/ax",
-            "0020/ax",
-            "0025/ax",
-            "0030/ax",
+            "0042/po",
+            "0049/po",
+            "0056/po",
+            "0063/po"),$types);
+test_table ("_","Dir_Collapse-BCG2",
+      array("0007/ax",
+            "0014/ax",
+            "0021/ax",
+            "0028/ax",
             "0035/ax",
-            "0040/ax"),$types);
-test_table ("_","Dir_Collapse-BCG2D",
-      array("0005/mesh",
-            "0010/mesh",
-            "0015/mesh",
-            "0020/mesh",
-            "0025/mesh",
-            "0030/mesh",
+            "0042/ax",
+            "0049/ax",
+            "0056/ax",
+            "0063/ax"),$types);
+test_table ("_","Dir_Collapse-BCG2",
+      array("0007/mesh",
+            "0014/mesh",
+            "0021/mesh",
+            "0028/mesh",
             "0035/mesh",
-            "0040/mesh"),$types);
+            "0042/mesh",
+            "0049/mesh",
+            "0056/mesh",
+            "0063/mesh"),$types);
 
-end_hidden("collapse-bcg2d");
+end_hidden("collapse-bcg2");
 
 //--------------------------------------------------
 
-  test_subgroup ("3D AMR Collapse");
-begin_hidden("collapse-bcg3d", "COLLAPSE (BiCG-STAB Solver)");
+begin_hidden("collapse-dd2", "COLLAPSE (DD Solver)");
 
-tests("Enzo","enzo-p","test_collapse-bcg3d","3D AMR Collapse (BiCG-STAB Solver)","");
+tests("Enzo","enzo-p","test_collapse-dd2","2D AMR Collapse (Norman DD Solver)","");
 
-test_table ("_","Dir_Collapse-BCG3D",
-      array("0010/dark",
-            "0020/dark",
-            "0030/dark",
-            "0040/dark",
-            "0050/dark",
-            "0060/dark",
-            "0070/dark",
-            "0080/dark",
-            "0090/dark",
-            "0100/dark"),$types);
-test_table ("_","Dir_Collapse-BCG3D",
-      array("0010/po",
-            "0020/po",
-            "0030/po",
-            "0040/po",
-            "0050/po",
-            "0060/po",
-            "0070/po",
-            "0080/po",
-            "0090/po",
-            "0100/po"),$types);
-test_table ("_","Dir_Collapse-BCG3D",
-      array("0010/ax",
-            "0020/ax",
-            "0030/ax",
-            "0040/ax",
-            "0050/ax",
-            "0060/ax",
-            "0070/ax",
-            "0080/ax",
-            "0090/ax",
-            "0100/ax"),$types);
-test_table ("_","Dir_Collapse-BCG3D",
-      array("0010/mesh",
-            "0020/mesh",
-            "0030/mesh",
-            "0040/mesh",
-            "0050/mesh",
-            "0060/mesh",
-            "0070/mesh",
-            "0080/mesh",
-            "0090/mesh",
-            "0100/mesh"),$types);
-end_hidden("collapse-bcg3d");
+test_table ("_","Dir_Collapse-DD2",
+      array("0007/dark",
+            "0014/dark",
+            "0021/dark",
+            "0028/dark",
+            "0035/dark",
+            "0042/dark",
+            "0049/dark",
+            "0056/dark",
+            "0063/dark"),$types);
+test_table ("_","Dir_Collapse-DD2",
+      array("0007/po",
+            "0014/po",
+            "0021/po",
+            "0028/po",
+            "0035/po",
+            "0042/po",
+            "0049/po",
+            "0056/po",
+            "0063/po"),$types);
+test_table ("_","Dir_Collapse-DD2",
+      array("0007/ax",
+            "0014/ax",
+            "0021/ax",
+            "0028/ax",
+            "0035/ax",
+            "0042/ax",
+            "0049/ax",
+            "0056/ax",
+            "0063/ax"),$types);
+test_table ("_","Dir_Collapse-DD2",
+      array("0007/mesh",
+            "0014/mesh",
+            "0021/mesh",
+            "0028/mesh",
+            "0035/mesh",
+            "0042/mesh",
+            "0049/mesh",
+            "0056/mesh",
+            "0063/mesh"),$types);
+
+end_hidden("collapse-dd2");
+
+//--------------------------------------------------
+
+begin_hidden("collapse-hg2", "COLLAPSE (HG Solver)");
+
+tests("Enzo","enzo-p","test_collapse-hg2","2D AMR Collapse (Reynolds HG Solver)","");
+
+test_table ("_","Dir_Collapse-HG2",
+      array("0007/dark",
+            "0014/dark",
+            "0021/dark",
+            "0028/dark",
+            "0035/dark",
+            "0042/dark",
+            "0049/dark",
+            "0056/dark",
+            "0063/dark"),$types);
+test_table ("_","Dir_Collapse-HG2",
+      array("0007/po",
+            "0014/po",
+            "0021/po",
+            "0028/po",
+            "0035/po",
+            "0042/po",
+            "0049/po",
+            "0056/po",
+            "0063/po"),$types);
+test_table ("_","Dir_Collapse-HG2",
+      array("0007/ax",
+            "0014/ax",
+            "0021/ax",
+            "0028/ax",
+            "0035/ax",
+            "0042/ax",
+            "0049/ax",
+            "0056/ax",
+            "0063/ax"),$types);
+test_table ("_","Dir_Collapse-HG2",
+      array("0007/mesh",
+            "0014/mesh",
+            "0021/mesh",
+            "0028/mesh",
+            "0035/mesh",
+            "0042/mesh",
+            "0049/mesh",
+            "0056/mesh",
+            "0063/mesh"),$types);
+
+end_hidden("collapse-hg2");
 
 //======================================================================
 
@@ -1246,11 +1298,11 @@ test_table ("_","Dir_COSMO_BCG",
 
 end_hidden("cosmo-bcg");
 
-begin_hidden("cosmo-ddmg", "COSMOLOGY (DD-MG solver)");
+begin_hidden("cosmo-dd", "COSMOLOGY (DD solver)");
 
-tests("Enzo","enzo-p","test_cosmo-ddmg","COSMOLOGY_DD-MG","");
+tests("Enzo","enzo-p","test_cosmo-dd","COSMOLOGY_DD","");
 
-test_table ("_","Dir_COSMO_DDMG",
+test_table ("_","Dir_COSMO_DD",
       array("0020/dark-01",
             "0040/dark-02",
             "0060/dark-03",
@@ -1259,7 +1311,7 @@ test_table ("_","Dir_COSMO_DDMG",
             "0120/dark-06",
             "0140/dark-07",
             "0160/dark-08"),$types);
-test_table ("_","Dir_COSMO_DDMG",
+test_table ("_","Dir_COSMO_DD",
       array("0020/po-01",
             "0040/po-02",
             "0060/po-03",
@@ -1268,7 +1320,7 @@ test_table ("_","Dir_COSMO_DDMG",
             "0120/po-06",
             "0140/po-07",
             "0160/po-08"),$types);
-test_table ("_","Dir_COSMO_DDMG",
+test_table ("_","Dir_COSMO_DD",
       array("0020/ax-01",
             "0040/ax-02",
             "0060/ax-03",
@@ -1277,7 +1329,7 @@ test_table ("_","Dir_COSMO_DDMG",
             "0120/ax-06",
             "0140/ax-07",
             "0160/ax-08"),$types);
-test_table ("_","Dir_COSMO_DDMG",
+test_table ("_","Dir_COSMO_DD",
       array("0020/mesh-01",
             "0040/mesh-02",
             "0060/mesh-03",
@@ -1288,7 +1340,51 @@ test_table ("_","Dir_COSMO_DDMG",
             "0160/mesh-08"),$types);
 
 
-end_hidden("cosmo-ddmg");
+end_hidden("cosmo-dd");
+
+begin_hidden("cosmo-hg", "COSMOLOGY (HG solver)");
+
+tests("Enzo","enzo-p","test_cosmo-hg","COSMOLOGY_HG","");
+
+test_table ("_","Dir_COSMO_HG",
+      array("0020/dark-01",
+            "0040/dark-02",
+            "0060/dark-03",
+            "0080/dark-04",
+            "0100/dark-05",
+            "0120/dark-06",
+            "0140/dark-07",
+            "0160/dark-08"),$types);
+test_table ("_","Dir_COSMO_HG",
+      array("0020/po-01",
+            "0040/po-02",
+            "0060/po-03",
+            "0080/po-04",
+            "0100/po-05",
+            "0120/po-06",
+            "0140/po-07",
+            "0160/po-08"),$types);
+test_table ("_","Dir_COSMO_HG",
+      array("0020/ax-01",
+            "0040/ax-02",
+            "0060/ax-03",
+            "0080/ax-04",
+            "0100/ax-05",
+            "0120/ax-06",
+            "0140/ax-07",
+            "0160/ax-08"),$types);
+test_table ("_","Dir_COSMO_HG",
+      array("0020/mesh-01",
+            "0040/mesh-02",
+            "0060/mesh-03",
+            "0080/mesh-04",
+            "0100/mesh-05",
+            "0120/mesh-06",
+            "0140/mesh-07",
+            "0160/mesh-08"),$types);
+
+
+end_hidden("cosmo-hg");
 
 //======================================================================
 

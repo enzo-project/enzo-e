@@ -209,7 +209,7 @@ public: // interface
 
   void dot_recv_parent   (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
-			  int i_function);
+			  int i_function, int iter);
   void dot_recv_children   (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
 			  int i_function);
@@ -253,10 +253,10 @@ public: // interface
 			  int i_function);
   void dot_compute_tree_ (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
-			  int i_function);
+			  int i_function, int iter);
   void dot_send_parent_  (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
-			  int i_function);
+			  int i_function, int iter);
   void dot_send_children_(EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
 			  int i_function);

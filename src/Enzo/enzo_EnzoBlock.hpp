@@ -277,7 +277,7 @@ public: /// entry methods
 
   void p_dot_recv_parent  (int n, long double * dot_block,
 			   std::vector<int> is_array,
-			   int i_function);
+			   int i_function, int iter);
   void p_dot_recv_children(int n, long double * dot_block,
 			   std::vector<int> is_array,
 			   int i_function);

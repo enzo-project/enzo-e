@@ -40,7 +40,7 @@ Simulation::Simulation
   timer_(),
   performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-  projections_tracing_(false),
+  projections_tracing_(true),
   projections_schedule_on_(NULL),
   projections_schedule_off_(NULL),
 #endif
@@ -58,8 +58,10 @@ Simulation::Simulation
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
+  new_refresh_list_(),
   index_output_(-1),
-  new_refresh_list_()
+  num_solver_iter_(),
+  max_solver_iter_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -103,7 +105,7 @@ Simulation::Simulation()
   timer_(),
   performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-  projections_tracing_(false),
+  projections_tracing_(true),
   projections_schedule_on_(NULL),
   projections_schedule_off_(NULL),
 #endif
@@ -121,8 +123,10 @@ Simulation::Simulation()
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
+  new_refresh_list_(),
   index_output_(-1),
-  new_refresh_list_()
+  num_solver_iter_(),
+  max_solver_iter_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -154,7 +158,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     timer_(),
     performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-    projections_tracing_(false),
+    projections_tracing_(true),
     projections_schedule_on_(NULL),
     projections_schedule_off_(NULL),
 #endif
@@ -172,8 +176,10 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_write_(),
     sync_new_output_start_(),
     sync_new_output_next_(),
+    new_refresh_list_(),
     index_output_(-1),
-    new_refresh_list_()
+    num_solver_iter_(),
+    max_solver_iter_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -269,13 +275,14 @@ void Simulation::pup (PUP::er &p)
 
 #ifdef CONFIG_USE_PROJECTIONS
   p | projections_tracing_;
-  if (projections_tracing_) {
-    p | projections_schedule_on_;
-    p | projections_schedule_off_;
-  }
+  p | projections_schedule_on_;
+  p | projections_schedule_off_;
 #endif
 
   p | schedule_balance_;
+
+  p | new_refresh_list_;
+  p | new_refresh_name_;
 
   PUParray(p,dir_checkpoint_,256);
 
@@ -286,8 +293,8 @@ void Simulation::pup (PUP::er &p)
 	  
   //  p | msg_refine_map_;
   p | index_output_;
-  p | new_refresh_list_;
-  p | new_refresh_name_;
+  p | num_solver_iter_;
+  p | max_solver_iter_;
 }
 
 //----------------------------------------------------------------------
@@ -435,6 +442,11 @@ void Simulation::initialize_performance_() throw()
 
 #ifdef CONFIG_USE_PROJECTIONS
   int index_on = config_->performance_on_schedule_index;
+  int index_off = config_->performance_off_schedule_index;
+  projections_tracing_ = config_->performance_projections_on_at_start;
+  if (projections_tracing_ == false) {
+    traceEnd();
+  }    
   if (index_on >= 0) {
     projections_schedule_on_ = Schedule::create
       ( config_->schedule_var[index_on],
@@ -444,7 +456,6 @@ void Simulation::initialize_performance_() throw()
 	config_->schedule_step[index_on],
 	config_->schedule_list[index_on]);
   }
-  int index_off = config_->performance_off_schedule_index;
   if (index_off >= 0) {
     projections_schedule_off_ = Schedule::create
       ( config_->schedule_var[index_off],
@@ -882,23 +893,28 @@ void Simulation::monitor_performance()
   // 6 field_face
   // 7 particle_data
   // 8 num-particles
-  // NL num-blocks-<L>
-  // 9 num_blocks_total
-  // + performance counters
-  // 10 max_proc_blocks
-  // 11 max_proc_particles
-  // 12 max_node_blocks
-  // 13 max_node_particles
+  // 9+ num_solver_iters
+  // NL+ num-blocks-<L>
+  // 10+ num_blocks_total
+  // 11+ max_proc_blocks
+  // 12+ max_proc_particles
+  // 13+ max_node_blocks
+  // 14+ max_node_particles
+  // 15+ max_solver_iters
   
-  int n = 14 + ( hierarchy_->max_level() - hierarchy_->min_level() + 1) + nr*nc;
+  const int num_solver = problem()->num_solvers();
 
+  int n = 14 + 2*num_solver + ( hierarchy_->max_level() - hierarchy_->min_level() + 1) + nr*nc;
+
+  
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
 
   const int in = cello::index_static();
 
+  
   int m=0;
-  const int num_max = 4;
+  const int num_max = 4 + num_solver;
   counters_reduce[m++] = n - num_max - 2;
   counters_reduce[m++] = num_max;
   
@@ -911,6 +927,9 @@ void Simulation::monitor_performance()
   counters_reduce[m++] = FieldFace::counter[in];      // 6
   counters_reduce[m++] = ParticleData::counter[in];   // 7
   counters_reduce[m++] = hierarchy_->num_particles(); // 8
+  for (int i=0; i<num_solver; i++) {
+    counters_reduce[m++] = cello::simulation()->get_solver_num_iter(i); // 9
+  }
 
   const int min_level = hierarchy_->min_level();
 
@@ -919,7 +938,7 @@ void Simulation::monitor_performance()
     num_blocks_total +=  hierarchy_->num_blocks(i);
     counters_reduce[m++] = hierarchy_->num_blocks(i); // NL
   }
-  counters_reduce[m++] = num_blocks_total;            // 9  num_blocks_total
+  counters_reduce[m++] = num_blocks_total;            // 10  num_blocks_total
   
   // performance region counters
   for (int ir = 0; ir < nr; ir++) {
@@ -931,10 +950,13 @@ void Simulation::monitor_performance()
 
   // maximum metrics
   
-  counters_reduce[m++] = num_blocks_total;            // 10  max_proc_blocks
-  counters_reduce[m++] = hierarchy_->num_particles(); // 11  max_proc_particles
-  counters_reduce[m++] = Hierarchy::num_blocks_node;  // 12  max_node_blocks
-  counters_reduce[m++] = Hierarchy::num_particles_node;// 13 max_node_particles
+  counters_reduce[m++] = num_blocks_total;            // 11  max_proc_blocks
+  counters_reduce[m++] = hierarchy_->num_particles(); // 12  max_proc_particles
+  counters_reduce[m++] = Hierarchy::num_blocks_node;  // 13  max_node_blocks
+  counters_reduce[m++] = Hierarchy::num_particles_node;// 14 max_node_particles
+  for (int i=0; i<num_solver; i++) {
+    counters_reduce[m++] = cello::simulation()->get_solver_max_iter(i); // 15 max_node_particles
+  }
 
   ASSERT2("Simulation::monitor_performance()",
 	  "Actual array length %d != expected array length %d", m,n,
@@ -976,7 +998,15 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   const long long field_face  = counters_reduce[m++];   // 6
   const long long particle_data = counters_reduce[m++]; // 7
   const long long num_particles = counters_reduce[m++]; // 8
-  
+
+  const int num_solver = problem()->num_solvers();
+  for (int i=0; i<num_solver; i++) {
+    const long long num_solver_iter = counters_reduce[m++]; // 15
+    monitor()->print ("Performance","solver num-%s-iter %lld",
+                      problem()->solver(i)->name().c_str(),
+                      num_solver_iter);
+  }
+
   monitor()->print("Performance","counter num-msg-coarsen %lld", msg_coarsen);
   monitor()->print("Performance","counter num-msg-refine %lld", msg_refine);
   monitor()->print("Performance","counter num-msg-refresh %lld", msg_refresh);
@@ -1010,7 +1040,7 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
   monitor()->print
     ("Performance","simulation num-total-blocks %lld", num_total_blocks);
 
-  const long long num_blocks_total   = counters_reduce[m++]; // 9
+  const long long num_blocks_total   = counters_reduce[m++]; // 10
 
   if (num_total_blocks != num_blocks_total) {
     WARNING2 ("Simulation::r_monitor_performance_reduce()",
@@ -1037,10 +1067,19 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
     }
   }
 
-  const long long max_proc_blocks    = counters_reduce[m++]; // 10
-  const long long max_proc_particles = counters_reduce[m++]; // 11
-  const long long max_node_blocks    = counters_reduce[m++]; // 12
-  const long long max_node_particles = counters_reduce[m++]; // 13
+  const long long max_proc_blocks    = counters_reduce[m++]; // 11
+  const long long max_proc_particles = counters_reduce[m++]; // 12
+  const long long max_node_blocks    = counters_reduce[m++]; // 13
+  const long long max_node_particles = counters_reduce[m++]; // 14
+
+  for (int i=0; i<num_solver; i++) {
+    const long long max_solver_iters       = counters_reduce[m++]; // 15
+    monitor()->print ("Performance","solver max-%s-iter %lld",
+                      problem()->solver(i)->name().c_str(),
+                      max_solver_iters);
+  }
+  cello::simulation()->clear_solver_iter(); // clear it for the next solve
+
   
   monitor()->print
     ("Performance","simulation max-proc-blocks %lld",  max_proc_blocks);
@@ -1053,6 +1092,7 @@ void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 
   const double avg_proc_blocks = 1.0*num_blocks_total/CkNumPes();
   const double avg_node_blocks = 1.0*num_blocks_total/CkNumNodes();
+
 
   // monitor()->print
   //   ("Performance","simulation balance-blocks-core %f",

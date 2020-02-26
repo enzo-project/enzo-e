@@ -130,7 +130,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // Loop over all particles that have mass
     for (int ipt = 0; ipt < num_mass; ipt++){
-      // Scale mass by volume if particle value is mass instead of density
 
       int it = particle.type_index( particle_groups->item("has_mass",ipt));
 
@@ -161,7 +160,14 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
         ia_m = particle.attribute_index(it, "mass");
       }
 
-      dens *= std::pow(2.0,rank*level);
+      // AJE: Make sure this is universal for all non-cosmological runs
+      //
+      // Scale mass by volume if particle value is mass instead of density
+      // Required for Cosmology ("mass" is mass)
+      // Not for Collapse ("mass" is density)
+      if (cosmology) {
+        dens *= std::pow(2.0,rank*level);
+      }
 
       // Accumulated single velocity array for Baryon deposit
 

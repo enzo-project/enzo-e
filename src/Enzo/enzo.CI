@@ -167,7 +167,7 @@ module enzo {
 
     entry void p_dot_recv_parent(int n, long double dot[n],
 				 std::vector<int> isa,
-				 int i_function);
+				 int i_function, int iter);
     entry void p_dot_recv_children(int n, long double dot[n],
 				   std::vector<int> isa,
 				   int i_function);

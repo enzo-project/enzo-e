@@ -1,0 +1,83 @@
+include "input/test_cosmo.incl"
+
+ Stopping { cycle = 160; }
+ Method {
+     gravity {
+         solver = "dd";
+     };
+ }
+
+Solver {
+     list = [ "dd", "dd_root", "dd_domain", "dd_smooth", "root_coarse", "root_pre",
+              "root_post" ];
+     dd {
+         coarse_level = 0;
+         coarse_solve = "dd_root";
+         domain_solve = "dd_domain";
+         last_smooth = "dd_smooth";
+         max_level = 4;
+         min_level = -2;
+         monitor_iter = 1;
+         type = "dd";
+     };
+     dd_domain {
+         coarse_level = 0;
+         iter_max = 100;
+         max_level = 4;
+         min_level = -2;
+         monitor_iter = 0;
+         res_tol = 0.01000000000000000;
+         solve_type = "tree";
+         type = "bicgstab";
+     };
+     dd_root {
+         coarse_level = -2;
+         coarse_solve = "root_coarse";
+         iter_max = 2;
+         max_level = 0;
+         min_level = -2;
+         monitor_iter = 1;
+         post_smooth = "root_post";
+         pre_smooth = "root_pre";
+         res_tol = 0.05000000000000000;
+         solve_type = "level";
+         type = "mg0";
+     };
+     dd_smooth {
+         iter_max = 1;
+         monitor_iter = 1;
+         solve_type = "leaf";
+         type = "jacobi";
+     };
+     root_coarse {
+         iter_max = 100;
+         monitor_iter = 1;
+         res_tol = 0.01000000000000000;
+         solve_type = "block";
+         type = "cg";
+     };
+     root_post {
+         iter_max = 2;
+         solve_type = "level";
+         type = "jacobi";
+     };
+     root_pre {
+         iter_max = 2;
+         solve_type = "level";
+         type = "jacobi";
+     };
+ }
+
+ Output {
+     de   { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     depa { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     ax   { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     ay   { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     az   { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     dark { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     mesh { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     po   { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     hdf5 { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     dep  { dir = [ "Dir_COSMO_DDMG_%04d", "cycle" ]; }
+     check { dir = [ "Dir_COSMO_DDMG_%04d-checkpoint", "count" ]; }
+  }

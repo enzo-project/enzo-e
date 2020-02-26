@@ -322,6 +322,41 @@ public: // virtual functions
   void set_checkpoint(char * checkpoint)
   { strncpy (dir_checkpoint_,checkpoint,255);}
 
+  void set_solver_iter(int is, int iter)
+  {
+    if (num_solver_iter_.size() < size_t(is+1)) {
+      num_solver_iter_.resize(is+1);
+    }
+    num_solver_iter_[is] += iter;
+    if (max_solver_iter_.size() < size_t(is+1)) {
+      max_solver_iter_.resize(is+1);
+    }
+    max_solver_iter_[is] = std::max(max_solver_iter_[is],iter);
+  }
+
+  int get_solver_num_iter(int is)
+  {
+    if (num_solver_iter_.size() < is+1) {
+      num_solver_iter_.resize(is+1);
+    }
+    return num_solver_iter_[is];
+  }
+  int get_solver_max_iter(int is)
+  {
+    if (max_solver_iter_.size() < is+1) {
+      max_solver_iter_.resize(is+1);
+    }
+    return max_solver_iter_[is];
+  }
+
+  void clear_solver_iter()
+  {
+    for (size_t i=0; i<num_solver_iter_.size(); i++)
+      num_solver_iter_[i]=0;
+    for (size_t i=0; i<max_solver_iter_.size(); i++)
+      max_solver_iter_[i]=0;
+  }
+  
   //--------------------------------------------------
   // New Refresh
   //--------------------------------------------------
@@ -523,6 +558,11 @@ protected: // attributes
 
   /// Currently active output object
   int index_output_;
+
+  /// Sum of solver iterations over blocks for solver i
+  std::vector<int> num_solver_iter_;
+  /// Max of solver iterations over blocks for solver i
+  std::vector<int> max_solver_iter_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

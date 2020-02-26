@@ -181,6 +181,7 @@ void Config::pup (PUP::er &p)
   // Performance
 
   p | performance_papi_counters;
+  p | performance_projections_on_at_start;
   p | performance_warnings;
   p | performance_on_schedule_index;
   p | performance_off_schedule_index;
@@ -1201,26 +1202,30 @@ void Config::read_performance_ (Parameters * p) throw()
   int i_on = -1;
   int i_off = -1;
   
-  if (p->type("Performance:projections_on:schedule:var") != parameter_unknown) {
+  if (p->type("Performance:projections:schedule_on:var") != parameter_unknown) {
     p->group_set(0,"Performance");
-    p->group_push("projections_on");
-    p->group_push("schedule");
+    p->group_push("projections");
+    p->group_push("schedule_on");
     i_on = read_schedule_(p,"projections_on");
   }
-  if (p->type("Performance:projections_off:schedule:var") != parameter_unknown) {
+  if (p->type("Performance:projections:schedule_off:var") != parameter_unknown) {
     p->group_set(0,"Performance");
-    p->group_push("projections_off");
-    p->group_push("schedule");
+    p->group_push("projections");
+    p->group_push("schedule_off");
     i_off = read_schedule_(p,"projections_off");
   }
+  p->group_clear();
 
+  performance_projections_on_at_start =  p->value_logical
+    ("Performance:projections:on_at_start",true);
+  
   // Check that both projections_on and off schedules are defined or undefined together
   if ((i_on == -1 && i_off == -1) || (i_on != -1 && i_off != -1)) {
     performance_on_schedule_index  = i_on;
     performance_off_schedule_index = i_off;
   } else {
     ERROR2("Config::read_performance-()",
-	   "Performance:projections_on:schedule [%d] and Performance:projections_off:schedule [%d]\n"
+	   "Performance:projections:schedule_on [%d] and Performance:projections:schedule_off [%d]\n"
 	   "must be both defined or both undefined",
 	   i_on,i_off);
   }

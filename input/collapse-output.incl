@@ -11,7 +11,7 @@
          image_size = [ 512, 512 ];
          name = "ax.png";
          schedule {
-             step = 5;
+             step = 7;
              var = "cycle";
          };
          type = "image";
@@ -26,7 +26,7 @@
          name = "dark.png";
          particle_list = [ "dark" ];
          schedule {
-             step = 5;
+             step = 7;
              var = "cycle";
          };
          type = "image";
@@ -35,7 +35,7 @@
          field_list = [ "density", "velocity_x", "velocity_y", "acceleration_x", "acceleration_y", "temperature", "total_energy", "internal_energy", "pressure", "density_total", "potential" ];
          name = [ "data-%04d.h5", "cycle" ];
          schedule {
-             step = 5;
+             step = 7;
              var = "cycle";
          };
          type = "data";
@@ -54,7 +54,7 @@
          image_type = "mesh";
          name = "mesh.png";
          schedule {
-             step = 5;
+             step = 7;
              var = "cycle";
          };
          type = "image";
@@ -66,7 +66,7 @@
          image_size = [ 512, 512 ];
          name = "po.png";
          schedule {
-             step = 5;
+             step = 7;
              var = "cycle";
          };
          type = "image";
@@ -78,7 +78,7 @@
          image_size = [ 512, 512 ];
          name = "pmass.png";
          schedule {
-             step = 5;
+             step = 7;
              var = "cycle";
          };
          type = "image";
