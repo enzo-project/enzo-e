@@ -25,6 +25,7 @@
     root_size = [32, 32, 32];
 #
 #   AE: I had to specify this to get the data output working
+#       not sure why
     root_blocks = [4, 4, 4];
   }
 
@@ -52,14 +53,15 @@
 #
          mass_type = "baryon"; # options are currently dark and baryon
      };
-     max_level = 3;
+#    max level at zero for now until flux correction working
+     max_level = 0; 
  }
 
  Field {
       history     = 1;
-      alignment   = 8; # what?
+      alignment   = 8;
       gamma       = 1.6667; 
-      ghost_depth = 4;      # better way to set?
+      ghost_depth = 4;
       list = ["density", "velocity_x", "velocity_y", "velocity_z",
               "acceleration_x", "acceleration_y", "acceleration_z",
               "total_energy", "internal_energy", "pressure", "potential"];
@@ -74,10 +76,6 @@
      mass    = 1.9891E41;     
 #     density = 4.89746405317508E-31; do not specify if mass + length are specified
   }
-
-#  Solver {
-#    list = ["ppm"];
-#  }
 
   Method {
       list = ["background_acceleration","ppm"];
@@ -103,16 +101,16 @@
 
       background_acceleration {
           type = "GalaxyModel";
-          DM_density     = 3.07199E-25 ;   # cgs - central density for 1E10 Msu$
-          DM_mass        = -1.0 ;# 1.0E10; #
-          DM_mass_radius = 45.0;
-          core_radius    = 3.0;
-          bulge_mass     = 0.0;
-          stellar_mass   = 0.0;  # 1.0E7;
-          stellar_scale_height_r = 1.00;
-          stellar_scale_height_z = 0.70;
-          center = [0.5, 0.5, 0.5];
-          angular_momentum = [0.0, 0.0, 1.0];
+          DM_density     = 3.07199E-25 ;   # cgs - central density for 1E10 Msun NFW halo
+          DM_mass        = -1.0 ;# 1.0E10; # set < 0 to use density, > 0 uses this instead of density
+          DM_mass_radius = 45.0;           # kpc virial radius (or radius within which above mass refers to)
+          core_radius    = 3.0;            # kpc core radius
+          bulge_mass     = 0.0;            # stellar bulge mass (Msun)
+          stellar_mass   = 0.0;  # 1.0E7;  # stellar mass - Miyamoto Nagai disk (Msun)
+          stellar_scale_height_r = 1.00;   # kpc
+          stellar_scale_height_z = 0.70;   # kpc
+          center = [0.5, 0.5, 0.5];        # code units
+          angular_momentum = [0.0, 0.0, 1.0]; 
      };
 
 #     gravity_bicgstab {
@@ -121,6 +119,10 @@
 #          }
 
   }
+
+#
+# uncomment the below to use particles
+#
 
 # Particle {
 #     list = [ "dark" , "stars"];
@@ -162,11 +164,11 @@
   Initial {
     list = ["isolated_galaxy"];
     IG {
-        analytic_velocity = true;   
-        center_position  = [0.5, 0.5, 0.5];
-        scale_length     = 0.004166666667;
-        scale_height     = 0.002916666667;
-        disk_mass        = 0.79972;
+        analytic_velocity = true;           # use v_circ from background potential
+        center_position  = [0.5, 0.5, 0.5]; #  
+        scale_length     = 0.004166666667;  # gas in Mpc
+        scale_height     = 0.002916666667;  # gas in Mpc
+        disk_mass        = 0.79972;         # 
         gas_fraction     = 0.875;
         disk_temperature = 1.0E4;
         gas_halo_mass        = 0.0079972; 
