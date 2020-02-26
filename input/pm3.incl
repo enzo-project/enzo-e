@@ -49,15 +49,15 @@
       dark {
           groups = ["has_mass"];
 
-	  attributes = ["x", "double",
-                        "y", "double",
-                        "z", "double",
-			"vx", "double",
-                        "vy", "double",
-                        "vz", "double",
-			"ax", "double",
-                        "ay", "double",
-                        "az", "double"];
+	  attributes = ["x", "default",
+                        "y", "default",
+                        "z", "default",
+			"vx", "default",
+                        "vy", "default",
+                        "vz", "default",
+			"ax", "default",
+                        "ay", "default",
+                        "az", "default"];
 
           constants = ["mass", "double", 2e33];
           position = ["x","y","z"];

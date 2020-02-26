@@ -409,9 +409,9 @@ if (balance == 1):
 
 serial_run   = ""
 if (smp == 1):
-   parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
+      parallel_run = charm_path + "/bin/charmrun ++ppn " + ip_charm + " +p" + ip_charm
 else:
-   parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
+      parallel_run = charm_path + "/bin/charmrun +p" + ip_charm
 
 if (use_valgrind):
      valgrind = "valgrind --leak-check=full"

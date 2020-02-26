@@ -255,6 +255,7 @@ void Simulation::pup (PUP::er &p)
   p | *particle_descr_;
 
   if (up && (phase_ == phase_restart)) {
+    monitor_->header();
     monitor_->print ("Simulation","restarting");
   }
 
@@ -580,7 +581,12 @@ void Simulation::initialize_data_descr_() throw()
   for (int i=0; i<NUM_TYPES; i++) {
     type_val[cello::type_name[i]] = i;
   }
-
+#ifdef CONFIG_PRECISION_SINGLE	
+  type_val["default"] = type_float;
+#endif  
+#ifdef CONFIG_PRECISION_DOUBLE
+  type_val["default"] = type_double;
+#endif  
   for (size_t it=0; it<config_->particle_list.size(); it++) {
 
     particle_descr_->new_type (config_->particle_list[it]);
@@ -601,9 +607,9 @@ void Simulation::initialize_data_descr_() throw()
       union {
 	char * c;
 	long long * ill;
-	float * f;
-	double * d;
-	long double * ld;
+	float * f4;
+	double * f8;
+	long double * f16;
 	int8_t * i8;
 	int16_t * i16;
 	int32_t * i32;
@@ -612,11 +618,18 @@ void Simulation::initialize_data_descr_() throw()
       c = particle_descr_->constant_value(it,ic);
       if (type == type_default) type = default_type;
       switch (type) {
-      case type_single:     *f = config_->particle_constant_value[it][ic];
+      case type_default:
+#ifdef CONFIG_PRECISION_SINGLE	
+	*f4 = config_->particle_constant_value[it][ic];
+#endif	
+#ifdef CONFIG_PRECISION_DOUBLE
+	*f8 = config_->particle_constant_value[it][ic];
+#endif	
+      case type_single:     *f4 = config_->particle_constant_value[it][ic];
 	break;
-      case type_double:     *d = config_->particle_constant_value[it][ic];
+      case type_double:     *f8 = config_->particle_constant_value[it][ic];
 	break;
-      case type_quadruple:  *ld = config_->particle_constant_value[it][ic];
+      case type_quadruple:  *f16 = config_->particle_constant_value[it][ic];
 	break;
       case type_int8:       *i8 = config_->particle_constant_value[it][ic];
 	break;
