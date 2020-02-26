@@ -203,7 +203,7 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
   }
 
   if (count > 0){
-      std::cout << "Number of feedback particles:   " << count << "\n";
+      CkPrintf("Number of feedback particles:  %i \n",count);
   }
 
 

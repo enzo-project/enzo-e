@@ -536,7 +536,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           // Now k-1 is approx Poisson(lambda)
           int number_of_sn = k - 1;
 
-          // std::cout << "This particle has " << number_of_sn << " supernova\n";
+          // CkPrintf("This particle has %i supernova \n",number_of_sn);
 
           if (number_of_sn == 0){
             explosion_flag = 0;
@@ -639,10 +639,11 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
         double energy  = wind_energy + sn_energy;      // total energy in erg
 
         if (m_eject*cello::mass_solar / enzo_units->mass() > pmass[ipdm]){
-          std::cout << "WARNING: S99 Distributed Feedback is loosing too much mass\n";
-          std::cout << "setting particle mass to zero, but continuing anyway\n";
-          std::cout << pmass[ipdm] << m_eject*cello::mass_solar/enzo_units->mass() << wind_mass << sn_mass << "\n";
-          std::cout << will_explode << explosion_flag << "\n";
+          CkPrintf("WARNING: S99 Distributed Feedback is loosing too much mass\n");
+          CkPrintf("setting particle mass to zero, but continuing anyway\n");
+          CkPrintf(" %g %g %g %g \n",pmass[ipdm],m_eject*cello::mass_solar/enzo_units->mass(),
+                                     wind_mass, sn_mass);
+          CkPrintf(" %i %i \n",will_explode, explosion_flag);
         } // mass will be removed elsewhere
 
 
@@ -683,7 +684,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
     } // end loop over batches
 
     if (count > 0){
-      std::cout << "Number of feedback particles:   " << count << "\n";
+      CkPrintf("Number of feedback particles:   %i \n",count);
     }
 
   } // end particle check
