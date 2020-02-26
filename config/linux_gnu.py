@@ -8,7 +8,7 @@ is_arch_valid = 1
 #flags_arch = '-Wall -O3 -g -ffast-math -funroll-loops -fPIC'
 #flags_arch = '-Wall -O3 -g'
 flags_arch = '-Wall -O0 -g'
-#flags_arch = '-Wall -O0 -g'
+
 #flags_arch = '-O3 -pg -g'
 #flags_arch = '-fprofile-arcs -ftest-coverage'
 #flags_arch = '-Wall -g -fsanitize=address -fno-omit-frame-pointer'

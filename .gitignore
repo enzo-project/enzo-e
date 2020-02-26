@@ -9,6 +9,8 @@ test/START
 test/STOP
 include
 build
+build-*
+lib
 bin/enzo-p
 charmrun
 config.log

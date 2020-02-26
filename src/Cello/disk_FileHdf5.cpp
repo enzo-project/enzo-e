@@ -703,6 +703,7 @@ void FileHdf5::group_close () throw()
     CkPrintf ("%d [%d] TRACE_DISK H5Gclose(%d)\n",CkMyPe(),__LINE__,group_id_);
   fflush(stdout);
 #endif  
+
     herr_t retval = H5Gclose(group_id_);
 
     ASSERT2("FileHdf5::group_close", "Return value %d closing group %s",

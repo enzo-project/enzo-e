@@ -519,10 +519,16 @@ public: // attributes
   bool                      method_star_maker_use_density_threshold;
   bool                      method_star_maker_use_velocity_divergence;
   bool                      method_star_maker_use_dynamical_time;
+  bool                      method_star_maker_use_h2_self_shielding;
+  bool                      method_star_maker_use_jeans_mass;
+  bool                      method_star_maker_use_self_gravitating;
   double                    method_star_maker_number_density_threshold;
   double                    method_star_maker_maximum_mass_fraction;
   double                    method_star_maker_efficiency;
   double                    method_star_maker_minimum_star_mass;
+  double                    method_star_maker_maximum_star_mass;
+
+
 
   /// EnzoMethodNull
   double                     method_null_dt;

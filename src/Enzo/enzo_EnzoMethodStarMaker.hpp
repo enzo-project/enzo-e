@@ -72,20 +72,41 @@ protected: // methods
   //
   int check_number_density_threshold(const double &d);
   int check_velocity_divergence(
-                double *vx, double *vy, double *vz,
+                enzo_float *vx, enzo_float *vy, enzo_float *vz,
                 const int &index, const int &dix, const int &diy,
                 const int &diz);
-  int check_minimum_mass(const double &m);
+  int check_mass(const double &m);
+  int check_self_gravitating(
+    const double mean_particle_mass, const double rho_cgs, 
+    const enzo_float temperature,
+    enzo_float *vx, enzo_float *vy, enzo_float *vz, 
+    const double lunit, const double vunit,
+    const int &index, const int &dix, const int &diy, const int &diz,
+    const double dx, const double dy, const double dz);
+  double h2_self_shielding_factor(
+    enzo_float *rho, const double rho_cgs,
+    const double dunit, const double lunit,
+    const int &index, const int &dix, const int &diy, const int &diz,
+    const double dx, const double dy, const double dz,
+    const double metallicity);
+  int check_jeans_mass(
+    const double temperature, const double mean_particle_mass, 
+    const double rho_cgs, const double mass);
+
 
 protected: // attributes
 
   bool use_density_threshold_;
   bool use_velocity_divergence_;
   bool use_dynamical_time_;
+  bool use_self_gravitating_;
+  bool use_h2_self_shielding_;
+  bool use_jeans_mass_;
   double number_density_threshold_;
   double efficiency_;
   double maximum_star_fraction_;
-  double star_particle_mass_;
+  double star_particle_min_mass_;
+  double star_particle_max_mass_;
   // variables to be passsed here
 };
 
