@@ -160,14 +160,18 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_ke_fraction(0.0),
   method_feedback_use_ionization_feedback(false),
   // EnzoMethodStarMaker,
-  method_star_maker_type(""),                             // star maker type to use
+  method_star_maker_type(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
   method_star_maker_use_velocity_divergence(true),         // check for converging flow before SF
   method_star_maker_use_dynamical_time(true),              // compute t_ff / t_dyn. Otherwise take as 1.0
-  method_star_maker_number_density_threshold(0.0),      // Number density threshold in cgs
+  method_star_maker_use_self_gravitating(false),            //
+  method_star_maker_use_h2_self_shielding(false),
+  method_star_maker_use_jeans_mass(false),
+  method_star_maker_number_density_threshold(0.0),         // Number density threshold in cgs
   method_star_maker_maximum_mass_fraction(0.5),            // maximum cell mass fraction to convert to stars
-  method_star_maker_efficiency(0.01),            // star maker efficiency
-  method_star_maker_minimum_star_mass(1.0E4),    // star particle mass (if fixed) in solar masses
+  method_star_maker_efficiency(0.01),            // star maker efficiency per free fall time
+  method_star_maker_minimum_star_mass(1.0E4),    // minimum star particle mass in solar masses
+  method_star_maker_maximum_star_mass(1.0E4),    // maximum star particle mass in solar masses
   // EnzoMethodTurbulence
   method_turbulence_edot(0.0),
   method_turbulence_mach_number(0.0),
@@ -418,10 +422,14 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_star_maker_use_density_threshold;
   p | method_star_maker_use_velocity_divergence;
   p | method_star_maker_use_dynamical_time;
+  p | method_star_maker_use_self_gravitating;
+  p | method_star_maker_use_h2_self_shielding;
+  p | method_star_maker_use_jeans_mass;
   p | method_star_maker_number_density_threshold;
   p | method_star_maker_maximum_mass_fraction;
   p | method_star_maker_efficiency;
   p | method_star_maker_minimum_star_mass;
+  p | method_star_maker_maximum_star_mass;
 
   p | method_turbulence_edot;
 
@@ -897,6 +905,15 @@ void EnzoConfig::read(Parameters * p) throw()
   method_star_maker_use_dynamical_time = p->value_logical
     ("Method:star_maker:use_dynamical_time",true);
 
+  method_star_maker_use_self_gravitating = p->value_logical
+    ("Method:star_maker:use_self_gravitating", false);
+
+  method_star_maker_use_h2_self_shielding = p->value_logical
+    ("Method:star_maker:use_h2_self_shielding", false);
+
+  method_star_maker_use_jeans_mass = p->value_logical
+    ("Method:star_maker:use_jeans_mass", false);
+
   method_star_maker_number_density_threshold = p->value_float
     ("Method:star_maker:number_density_threshold",0.0);
 
@@ -908,6 +925,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_star_maker_minimum_star_mass = p->value_float
     ("Method:star_maker:minimum_star_mass",1.0E4);
+
+  method_star_maker_maximum_star_mass = p->value_float
+    ("Method:star_maker:maximum_star_mass",1.0E4);
 
   method_null_dt = p->value_float
     ("Method:null:dt",std::numeric_limits<double>::max());
