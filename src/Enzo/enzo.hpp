@@ -32,9 +32,9 @@
 #include "_memory.hpp"
 #include "_parameters.hpp"
 #include "_performance.hpp"
-#include "_data.hpp"
 #include "_problem.hpp"
 #include "_mesh.hpp"
+#include "_data.hpp"
 #include "_simulation.hpp"
 #include "_disk.hpp"
 #include "_io.hpp"
@@ -65,6 +65,6 @@ namespace enzo {
 };
 
 extern CProxy_EnzoSimulation proxy_enzo_simulation;
-
+extern void mutex_init();
 #endif /* ENZO_HPP */
 

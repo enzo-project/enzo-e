@@ -487,7 +487,7 @@ char * FieldFace::save_data (char * buffer) const
   p = refresh_->save_data(p);
 
   ASSERT2("FieldFace::save_data()",
-	  "Buffer has size %d but expecting size %d",
+	  "Buffer has size %ld but expecting size %d",
 	  (p-buffer),data_size(),
 	  ((p-buffer) == data_size()));
   
@@ -520,7 +520,7 @@ char * FieldFace::load_data (char * buffer)
   p = refresh_->load_data(p);
 
   ASSERT2("FieldFace::save_data()",
-	  "Buffer has size %d but expecting size %d",
+	  "Buffer has size %ld but expecting size %d",
 	  (p-buffer),data_size(),
 	  ((p-buffer) == data_size()));
 
@@ -566,8 +566,7 @@ template<class T> size_t FieldFace::store_
 #ifdef FORTRAN_STORE
 
   // This is to get around a bug on SDSC Comet where this function
-  // crashes with -O3 (See Enzo-P / Cello bug report #90)
-  // http://client64-249.sdsc.edu/cello-bug/show_bug.cgi?id=90
+  // crashes with -O3 (See bugzilla report #90)
 
   union {
     float *       ghost_4;
@@ -598,7 +597,7 @@ template<class T> size_t FieldFace::store_
 				      &iaccumulate);
   } else {
     ERROR1 ("FieldFace::store_()",
-	   "unknown float precision sizeof(T) = %d\n",sizeof(T));
+	   "unknown float precision sizeof(T) = %lu\n",sizeof(T));
   }
 
 #else
@@ -679,7 +678,7 @@ void FieldFace::loop_limits_accumulate
 
   ASSERT("FieldFace::loop_limits_accumulate",
 	 "Face-centered fields are not supported.",
-	 c3[0] == 0 && c3[1] == 0 && c3[2] == 0)
+	 c3[0] == 0 && c3[1] == 0 && c3[2] == 0);
   
   // force including ghosts on axes orthogonal to face
   // (commented out since size mismatch errors in data packing/unpacking

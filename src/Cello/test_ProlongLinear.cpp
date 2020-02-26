@@ -139,15 +139,19 @@ PARALLEL_MAIN_BEGIN
       prolong->apply (precision_double,
 		      v_f, m3_f, i3_f, n3_f,
 		      v_c, m3_c, i3_c, n3_c);
+
+      bool l_equal = true;
   
       for (int iy_f=i3_f[1]; iy_f<n3_f[1]+i3_f[1]; iy_f++) {
 	double y = p_f(iy_f-i3_f[1]);
 	for (int ix_f=i3_f[0]; ix_f<n3_f[0]+i3_f[0]; ix_f++) {
 	  int i=ix_f + m3_f[0]*iy_f;
 	  double x = p_f(ix_f-i3_f[0]);
-	  unit_assert (v_f[i] == fun(x,y));
+	  l_equal = l_equal && (v_f[i] == fun(x,y));
 	}
       }
+
+      unit_assert (l_equal);
 
       delete v_c;
       delete v_f;
@@ -196,7 +200,8 @@ PARALLEL_MAIN_BEGIN
 	prolong->apply (precision_double,
 			v_f, m3_f, i3_f, n3_f,
 			v_c, m3_c, i3_c, n3_c);
-  
+
+        bool l_equal = true;
 	for (int iz_f=i3_f[2]; iz_f<n3_f[2]+i3_f[2]; iz_f++) {
 	  double z = p_f(iz_f-i3_f[2]);
 	  for (int iy_f=i3_f[1]; iy_f<n3_f[1]+i3_f[1]; iy_f++) {
@@ -204,10 +209,11 @@ PARALLEL_MAIN_BEGIN
 	    for (int ix_f=i3_f[0]; ix_f<n3_f[0]+i3_f[0]; ix_f++) {
 	      int i=ix_f + m3_f[0]*(iy_f + m3_f[1]*iz_f);
 	      double x = p_f(ix_f-i3_f[0]);
-	      unit_assert (v_f[i] == fun(x,y,z));
+              l_equal = l_equal && (v_f[i] == fun(x,y,z));
 	    }
 	  }
 	}
+        unit_assert (l_equal);
 
 	delete v_c;
 	delete v_f;

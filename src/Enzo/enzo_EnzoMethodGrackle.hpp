@@ -93,7 +93,7 @@ public: // interface
   { return "grackle"; }
 
   /// Compute maximum timestep for this method
-  virtual double timestep ( Block * block) throw();
+  virtual double timestep ( Block * block) const throw();
 
 #ifdef CONFIG_USE_GRACKLE
 
@@ -150,7 +150,7 @@ protected: // methods
 
 // protected: // attributes
 
-  code_units grackle_units_;
+  mutable code_units grackle_units_;
   bool grackle_chemistry_data_defined_;
 #endif
 

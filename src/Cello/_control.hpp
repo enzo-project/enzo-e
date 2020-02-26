@@ -11,8 +11,9 @@
 //----------------------------------------------------------------------
 
 enum sync_id {
-  sync_id_adapt_begin,
   sync_id_method_trace,
+  sync_id_adapt_begin,
+  sync_id_method_null,
   sync_id_last,
 };
 

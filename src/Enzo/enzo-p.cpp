@@ -98,7 +98,7 @@ PARALLEL_MAIN_BEGIN
   // Print initial baseline memory usage
 
   Memory * memory = Memory::instance();
-  monitor_->print("Memory","bytes %lld bytes_high %lld",
+  monitor_->print("Memory","bytes %ld bytes_high %ld",
 		  memory->bytes(), memory->bytes_high());
 
 #ifdef CONFIG_USE_PAPI

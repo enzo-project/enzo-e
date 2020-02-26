@@ -92,7 +92,10 @@ EnzoSolverCg::EnzoSolverCg
     rr_min_(0.0),rr_max_(0.0),
     rr_(0.0), rz_(0.0), rz2_(0.0), dy_(0.0), bs_(0.0), rs_(0.0), xs_(0.0),
     bc_(0.0),
-    local_(solve_type==solve_block)
+    local_(solve_type==solve_block),
+    ir_matvec_(-1),
+    ir_loop_2_(-1)
+    
 {
   FieldDescr * field_descr = cello::field_descr();
 
@@ -107,15 +110,44 @@ EnzoSolverCg::EnzoSolverCg
 
   if (! local_) {
 
-    const int ir = add_refresh(4,0,neighbor_type_(),
-			       sync_type_(),
-			       enzo_sync_id_solver_cg);
+    Refresh & refresh = this->refresh_post();
+    cello::simulation()->new_refresh_set_name(ir_post_,name);
+    
+    refresh.add_field (ix_);
+    refresh.add_field (id_);
+    refresh.add_field (ir_);
+    refresh.add_field (iy_);
+    refresh.add_field (iz_);
 
-    refresh(ir)->add_field (ix_);
-    refresh(ir)->add_field (id_);
-    refresh(ir)->add_field (ir_);
-    refresh(ir)->add_field (iy_);
-    refresh(ir)->add_field (iz_);
+  //--------------------------------------------------
+
+    ir_matvec_ = add_new_refresh_();
+    cello::simulation()->new_refresh_set_name(ir_post_,name+":matvec");
+
+    Refresh & refresh_matvec = new_refresh(ir_matvec_);
+
+    refresh_matvec.add_field (id_);
+    refresh_matvec.add_field (ir_);
+    refresh_matvec.add_field (iy_);
+    refresh_matvec.add_field (iz_);
+
+    refresh_matvec.set_callback(CkIndex_EnzoBlock::p_solver_cg_matvec());
+    
+  //--------------------------------------------------
+
+    ir_loop_2_ = add_new_refresh_();
+    cello::simulation()->new_refresh_set_name(ir_post_,name+":loop_2");
+
+    Refresh & refresh_loop_2 = new_refresh(ir_loop_2_);
+
+    refresh_loop_2.add_field (ix_);
+    refresh_loop_2.add_field (id_);
+    refresh_loop_2.add_field (ir_);
+    refresh_loop_2.add_field (iy_);
+    refresh_loop_2.add_field (iz_);
+
+    refresh_loop_2.set_callback(CkIndex_EnzoBlock::p_solver_cg_loop_2());
+    
   }
 
 }
@@ -163,6 +195,10 @@ void EnzoSolverCg::pup (PUP::er &p)
   p | bc_;
 
   p | local_;
+
+  p | ir_matvec_;
+  p | ir_loop_2_;
+  
 }
 
 //======================================================================
@@ -287,20 +323,14 @@ void EnzoSolverCg::loop_0a
 
   delete msg;
 
-// Refresh field faces then call r_solver_cg_matvec
+// Refresh field faces then call p_solver_cg_matvec
 
-  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
-		   enzo_sync_id_solver_cg_loop_0a);
+  Refresh & refresh = new_refresh(ir_matvec_);
+  
   refresh.set_active(is_finest_(enzo_block));
 
-  //refresh.add_all_fields();
-
-  refresh.add_field (id_);
-  refresh.add_field (ir_);
-  refresh.add_field (iy_);
-  refresh.add_field (iz_);
-  
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(),&refresh);
+  enzo_block->new_refresh_start(ir_matvec_,
+				CkIndex_EnzoBlock::p_solver_cg_matvec());
 }
 
 //----------------------------------------------------------------------
@@ -329,22 +359,17 @@ void EnzoSolverCg::loop_0b
   
   // Refresh field faces then call solver_matvec
 
-  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
-		   enzo_sync_id_solver_cg_loop_0b);
-  refresh.set_active(is_finest_(enzo_block));
-  //  refresh.add_all_fields();
-  refresh.add_field (ix_);
-  refresh.add_field (id_);
-  refresh.add_field (ir_);
-  refresh.add_field (iy_);
-  refresh.add_field (iz_);
+  Refresh & refresh = new_refresh(ir_matvec_);
 
-  enzo_block->refresh_enter(CkIndex_EnzoBlock::r_solver_cg_matvec(), &refresh);
+  refresh.set_active(is_finest_(enzo_block));
+
+  enzo_block->new_refresh_start(ir_matvec_,
+				CkIndex_EnzoBlock::p_solver_cg_matvec());
 }
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_solver_cg_matvec()
+void EnzoBlock::p_solver_cg_matvec()
 {
   
   performance_start_(perf_compute,__FILE__,__LINE__);
@@ -449,18 +474,12 @@ void EnzoBlock::r_solver_cg_shift_1 (CkReductionMsg * msg)
 
 void EnzoSolverCg::loop_2a (EnzoBlock * enzo_block) throw()
 {
-  Refresh refresh (4,0,neighbor_type_(), sync_type_(),
-		   enzo_sync_id_solver_cg_loop_2a);
+  Refresh & refresh = new_refresh(ir_loop_2_);
+  
   refresh.set_active(is_finest_(enzo_block));
 
-  refresh.add_field (ix_);
-  refresh.add_field (id_);
-  refresh.add_field (ir_);
-  refresh.add_field (iy_);
-  refresh.add_field (iz_);
-
-  enzo_block->refresh_enter
-    (CkIndex_EnzoBlock::p_solver_cg_loop_2(),&refresh);
+  enzo_block->new_refresh_start(ir_loop_2_,
+				CkIndex_EnzoBlock::p_solver_cg_loop_2());
 }
 
 //----------------------------------------------------------------------

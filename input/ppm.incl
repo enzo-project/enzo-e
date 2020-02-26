@@ -76,7 +76,7 @@
 
    Testing {
       time_final  = [1.04044035614817,   # OLD_PPM
-                     1.04069746122696];  # NEW_PPM
+                     1.04058830579743];  # NEW_PPM
       time_tolerance = 1.0e-4;
    }
    

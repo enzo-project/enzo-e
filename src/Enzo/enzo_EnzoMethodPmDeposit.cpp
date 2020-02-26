@@ -13,6 +13,8 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// #define DEBUG_COLLAPSE
+
 #define FORTRAN_NAME(NAME) NAME##_
 
 extern "C" void  FORTRAN_NAME(dep_grid_cic)
@@ -35,15 +37,14 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 {
   // Initialize default Refresh object
 
-  const int min_face_rank = 0; // cello::rank()-1
-  const int ir = add_refresh(4,min_face_rank,neighbor_leaf,sync_barrier,
- 			     enzo_sync_id_method_pm_deposit);
- 
-  refresh(ir)->add_field("density");
-  refresh(ir)->add_field("velocity_x");
-  refresh(ir)->add_field("velocity_y");
-  refresh(ir)->add_field("velocity_z");
-			     
+
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+  
+  refresh.add_field("density");
+  refresh.add_field("velocity_x");
+  refresh.add_field("velocity_y");
+  refresh.add_field("velocity_z");
 }
 
 //----------------------------------------------------------------------
@@ -129,7 +130,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     // Loop over all particles that have mass
     for (int ipt = 0; ipt < num_mass; ipt++){
-      // Scale mass by volume if particle value is mass instead of density
 
       int it = particle.type_index( particle_groups->item("has_mass",ipt));
 
@@ -160,7 +160,13 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
         ia_m = particle.attribute_index(it, "mass");
       }
 
-      dens *= std::pow(2.0,rank*level);
+      // Scale mass by volume if particle value is mass instead of density
+
+      // Required for Cosmology ("mass" is mass)
+      // Not for Collapse ("mass" is density)
+      if (cosmology) {
+        dens *= std::pow(2.0,rank*level);
+      }
 
       // Accumulated single velocity array for Baryon deposit
 
@@ -189,6 +195,9 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
 	  int dp =  particle.stride(it,ia_x);
 	  int dv =  particle.stride(it,ia_vx);
+#ifdef DEBUG_COLLAPSE
+          CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
+#endif            
 
 	  for (int ip=0; ip<np; ip++) {
 
@@ -288,6 +297,10 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  enzo_float * vxa = (enzo_float *) particle.attribute_array (it,ia_vx,ib);
 	  enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
 	  enzo_float * vza = (enzo_float *) particle.attribute_array (it,ia_vz,ib);
+
+#ifdef DEBUG_COLLAPSE
+          CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
+#endif            
 
 	  int dp =  particle.stride(it,ia_x);
 	  int dv =  particle.stride(it,ia_vx);

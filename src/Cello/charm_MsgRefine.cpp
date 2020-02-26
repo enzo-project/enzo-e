@@ -201,7 +201,7 @@ void * MsgRefine::pack (MsgRefine * msg)
   }
 
   ASSERT2("MsgRefine::pack()",
-	  "buffer size mismatch %d allocated %d packed",
+	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
 

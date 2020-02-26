@@ -146,31 +146,42 @@ EnzoMethodGravity::EnzoMethodGravity
   : Method(),
     index_solver_(index_solver),
     grav_const_(grav_const),
-    order_(order)
+    order_(order),
+    ir_exit_(-1)
 {
+
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
-			     enzo_sync_id_method_gravity);
-  
-  refresh(ir)->add_field("acceleration_x");
-  refresh(ir)->add_field("acceleration_y");
-  refresh(ir)->add_field("acceleration_z");
-  refresh(ir)->add_field("density");
+
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+
+  refresh.add_field("acceleration_x");
+  refresh.add_field("acceleration_y");
+  refresh.add_field("acceleration_z");
+  refresh.add_field("density");
 
   // Accumulate is used when particles are deposited into density_total
   
   if (accumulate) {
 
-    refresh(ir)->set_accumulate(true);
+    refresh.set_accumulate(true);
 
-    refresh(ir)->add_field_src_dst
+    refresh.add_field_src_dst
       ("density_particle","density_particle_accumulate");
-    refresh(ir)->add_field_src_dst
+    refresh.add_field_src_dst
       ("density_total","B");
 
   }
+
+  ir_exit_ = add_new_refresh_();
+  cello::simulation()->new_refresh_set_name(ir_post_,name()+":exit");
+  Refresh & refresh_exit = new_refresh(ir_exit_);
+  
+  refresh_exit.add_field("potential");
+
+  refresh_exit.set_callback(CkIndex_EnzoBlock::p_method_gravity_end());
 }
 
 //----------------------------------------------------------------------
@@ -324,7 +335,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   Solver * solver = enzo::problem()->solver(index_solver_);
   
   // May exit before solve is done...
-  solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue(NULL));
+  solver->set_callback (CkIndex_EnzoBlock::p_method_gravity_continue());
 
   const int ix = field.field_id ("potential");
 
@@ -339,9 +350,8 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::r_method_gravity_continue(CkReductionMsg * msg)
+void EnzoBlock::p_method_gravity_continue()
 {
-  delete msg;
 
   TRACE_METHOD("r_method_gravity_end()",this);
 
@@ -350,22 +360,23 @@ void EnzoBlock::r_method_gravity_continue(CkReductionMsg * msg)
   // refresh ("Charm++ fatal error: mis-matched client callbacks in
   // reduction messages")
 
-  Refresh refresh (4,0,neighbor_leaf, sync_barrier,
-		   enzo_sync_id_method_gravity_continue);
-  
-  refresh.set_active(is_leaf());
-  refresh.add_field("potential");
-
-  refresh_enter(CkIndex_EnzoBlock::r_method_gravity_end(NULL),&refresh);
+  EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
+  method->refresh_potential(this);
 
 }
 
 //----------------------------------------------------------------------
-
-void EnzoBlock::r_method_gravity_end(CkReductionMsg * msg)
+void EnzoMethodGravity::refresh_potential (EnzoBlock * enzo_block) throw()
 {
-  delete msg;
-  TRACE_METHOD("r_method_gravity_end()",this);
+  enzo_block->new_refresh(ir_exit_).set_active(enzo_block->is_leaf());
+  enzo_block->new_refresh_start(ir_exit_,
+			   CkIndex_EnzoBlock::p_method_gravity_end());
+}
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_method_gravity_end()
+{
+  TRACE_METHOD("[pr]_method_gravity_end()",this);
   
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->compute_accelerations(this);

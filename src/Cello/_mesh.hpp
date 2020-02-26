@@ -65,7 +65,6 @@ enum phase_type {
   phase_last
 };
 
-#ifdef NEW_REFRESH
 /// @enum   RefreshState
 ///
 /// @brief  New refresh states:
@@ -74,7 +73,6 @@ enum phase_type {
 ///         RefreshState::ready    (wait() called)
 
 enum class RefreshState { INACTIVE, ACTIVE, READY };
-#endif
 
 // #define PHASE_COUNT (phase_exit + 1)
 // #define PHASE_COUNT 100
@@ -109,6 +107,7 @@ enum adapt_type {
 class Tree;
 
 #include "mesh_Index.hpp"
+#include "mesh_Face.hpp"
 
 #include "mesh_Block.hpp"
 #include "mesh_Hierarchy.hpp"

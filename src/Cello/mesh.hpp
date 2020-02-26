@@ -23,7 +23,12 @@
 #include "_problem.hpp"
 #include "_compute.hpp"
 #include "_simulation.hpp"
-#include "_data.hpp" 
 #include "_mesh.hpp"
+#include "_data.hpp" 
+
+//----------------------------------------------------------------------
+extern void mutex_init_hierarchy();
+//----------------------------------------------------------------------
+
 #endif /* MESH_HPP */
 

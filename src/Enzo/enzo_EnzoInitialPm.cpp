@@ -5,9 +5,8 @@
 /// @date     2016-04-29
 /// @brief    Implementation of EnzoInitialPm for initializing the PM method
 
-#include "cello.hpp"
-
 #include "enzo.hpp"
+#include <random>
 
 //----------------------------------------------------------------------
 
@@ -289,9 +288,12 @@ void EnzoInitialPm::density_placement_
 
   const int ps  = particle.stride(it,ia_x);
 
+  std::random_device rd;
+  std::uniform_real_distribution<enzo_float> rand_dist_0_1(0.0, 1.0);
+  
   for (int ip=0; ip<np; ip++) {
 
-    double r = rmax*rand()/RAND_MAX;
+    double r = rmax*rand_dist_0_1(rd);
 
     int imin=0;
     int imax=nx*ny*nz;
@@ -318,9 +320,9 @@ void EnzoInitialPm::density_placement_
     // ;
 
     // randomize within cell
-    double x = (rank >= 1) ? xs[ims] + hx*rand()/(RAND_MAX+1.0) : 0;
-    double y = (rank >= 2) ? ys[ims] + hy*rand()/(RAND_MAX+1.0) : 0;
-    double z = (rank >= 3) ? zs[ims] + hz*rand()/(RAND_MAX+1.0) : 0;
+    double x = (rank >= 1) ? xs[ims] + hx*rand_dist_0_1(rd) : 0.0;
+    double y = (rank >= 2) ? ys[ims] + hy*rand_dist_0_1(rd) : 0.0;
+    double z = (rank >= 3) ? zs[ims] + hz*rand_dist_0_1(rd) : 0.0;
     
     // ... if new batch then update position arrays
     if (ipb % npb == 0) {

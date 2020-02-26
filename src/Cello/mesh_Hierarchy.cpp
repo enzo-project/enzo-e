@@ -11,9 +11,21 @@
 
 #include "charm_mesh.hpp"
 
+//----------------------------------------------------------------------
+
+static CmiNodeLock hierarchy_node_lock;
+
+void mutex_init_hierarchy()
+{
+  hierarchy_node_lock = CmiCreateLock();
+}
+
 // #define CELLO_TRACE
 
 //----------------------------------------------------------------------
+
+int Hierarchy::num_blocks_node = 0;
+int64_t Hierarchy::num_particles_node = 0;
 
 Hierarchy::Hierarchy 
 (
@@ -181,6 +193,33 @@ void Hierarchy::root_blocks (int * nbx, int * nby, int * nbz) const throw()
 
 void Hierarchy::deallocate_blocks() throw()
 {
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::increment_block_count(int count, int level)
+{
+  num_blocks_ += count;
+  const int n=num_blocks_level_.size();
+  const int index = level - min_level_;
+  ASSERT1("Hierarchy::increment_block_count",
+          "Block level %d exceeds block count array",
+          level, 0 <= index && index < n);
+  num_blocks_level_[level-min_level_] += count;
+  CmiLock(hierarchy_node_lock);
+  Hierarchy::num_blocks_node += count;
+  CmiUnlock(hierarchy_node_lock);
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::increment_particle_count(int64_t count)
+{
+  num_particles_ += count;
+  CmiLock(hierarchy_node_lock);
+  Hierarchy::num_particles_node += count;
+  CmiUnlock(hierarchy_node_lock);
+  
 }
 
 //----------------------------------------------------------------------

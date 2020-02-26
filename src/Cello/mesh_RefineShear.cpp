@@ -82,9 +82,9 @@ int RefineShear::apply ( Block * block ) throw ()
 		    &any_refine,&all_coarsen, rank);
     break;
   default:
-    ERROR2("RefineShear::apply",
+    ERROR1("RefineShear::apply",
 	   "Unknown precision %d for velocity_x field",
-	   precision,0);
+	   precision);
     break;
   }
 

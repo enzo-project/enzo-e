@@ -1,0 +1,86 @@
+
+ Output {
+     list = [ "dark", "po", "ax", "mesh" ];
+     ax {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "acceleration_x" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "ax.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     dark {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "dark.png";
+         particle_list = [ "dark" ];
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     data {
+         field_list = [ "density", "velocity_x", "velocity_y", "acceleration_x", "acceleration_y", "temperature", "total_energy", "internal_energy", "pressure", "density_total", "potential" ];
+         name = [ "data-%04d.h5", "cycle" ];
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "data";
+     };
+     mesh {
+        colormap = [
+                     0.0, 0.0, 0.0,
+                     0.0, 0.0, 1.0,
+                     0.0, 1.0, 1.0,
+                     0.0, 1.0, 0.0,
+                     1.0, 1.0, 0.0,
+                     1.0, 0.0, 0.0
+                   ];
+         image_max = 6.0;                    
+         image_size = [ 512, 512 ];
+         image_type = "mesh";
+         name = "mesh.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     po {
+         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
+         field_list = [ "potential_copy" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "po.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     pmass {
+         colormap = [ 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0 ];
+         field_list = [ "particle_mass" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "pmass.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+ }
