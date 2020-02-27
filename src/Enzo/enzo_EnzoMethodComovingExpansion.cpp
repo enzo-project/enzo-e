@@ -23,6 +23,18 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   //  refresh(ir)->add_all_fields();
   FieldDescr * field_descr = cello::field_descr();
 
+  // Declare required fields
+  this->required_fields_ = std::vector<std::string>
+                        {"density","total_energy","internal_energy","pressure"};
+
+  if (rank >= 1) this->required_fields_.push_back("velocity_x");
+  if (rank >= 2) this->required_fields_.push_back("velocity_y");
+  if (rank >= 3) this->required_fields_.push_back("velocity_z");
+
+  // define required fields if they do not exist
+  this->define_fields();
+
+
   refresh(ir)->add_field(field_descr->field_id("density"));
   refresh(ir)->add_field(field_descr->field_id("total_energy"));
   refresh(ir)->add_field(field_descr->field_id("internal_energy"));

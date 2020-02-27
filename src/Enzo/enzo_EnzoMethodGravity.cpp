@@ -133,7 +133,7 @@
 	    BLOCK->name().c_str(),METHOD,this);			    \
   fflush(stdout);
 #else
-#   define TRACE_METHOD(METHOD,BLOCK) /*  */ 
+#   define TRACE_METHOD(METHOD,BLOCK) /*  */
 #endif
 
 //----------------------------------------------------------------------
@@ -149,7 +149,9 @@ EnzoMethodGravity::EnzoMethodGravity
     order_(order)
 {
   FieldDescr * field_descr = cello::field_descr();
-  
+
+  // Change this if fields used in this routine change
+  // declare required fields
   this->required_fields_ = std::vector<std::string>
                            {"density","density_total","B","potential",
                             "acceleration_x","acceleration_y","acceleration_z"};
@@ -157,13 +159,23 @@ EnzoMethodGravity::EnzoMethodGravity
   this->required_fields_.insert(this->required_fields_.end(),
                                 {"debug_1","debug_2"});
 #endif
+#ifdef DEBUG_COPY_B
+  this->required_fields_.push_back("B_copy");
+#endif
+#ifdef DEBUG_COPY_POTENTIAL
+  this->required_fields_.push_back("potential_copy");
+#endif
+#ifdef DEBUG_COPY_DENSITY
+  this->required_fields_.push_back("density_total_copy");
+#endif
+
 
   if (accumulate){
     this->required_fields_.insert(this->required_fields_.end(),
                                   {"density_particle","density_particle_accumulate"});
   }
 
-  // now define
+  // now define fields if they do not exist
   this->define_fields();
 
   const int id  = field_descr->field_id("density");
@@ -176,21 +188,21 @@ EnzoMethodGravity::EnzoMethodGravity
   // Refresh adds density_total field faces and one layer of ghost
   // zones to "B" field
 
-#ifdef DEBUG_FIELD_FACE  
+#ifdef DEBUG_FIELD_FACE
   int idebug1 = field_descr->field_id("debug_1");
   int idebug2 = field_descr->field_id("debug_2");
-#endif  
-  
+#endif
+
   const int ir = add_refresh(4,0,neighbor_leaf,sync_neighbor,
 			     enzo_sync_id_method_gravity);
-  
+
   refresh(ir)->add_field(iax);
   refresh(ir)->add_field(iay);
   refresh(ir)->add_field(iaz);
   refresh(ir)->add_field(id);
 
   // Accumulate is used when particles are deposited into density_total
-  
+
   if (accumulate) {
 
     refresh(ir)->set_accumulate(true);
@@ -201,9 +213,9 @@ EnzoMethodGravity::EnzoMethodGravity
     refresh(ir)->add_field_src_dst(idp,idpa);
     refresh(ir)->add_field_src_dst(idt,ib);
 
-#ifdef DEBUG_FIELD_FACE    
+#ifdef DEBUG_FIELD_FACE
     refresh(ir)->add_field_src_dst(idebug1,idebug2);
-#endif    
+#endif
   }
 }
 
@@ -222,7 +234,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   const int id  = field.field_id("density");
   const int idt = field.field_id("density_total");
   const int idensity = (idt != -1) ? idt : id;
-  
+
   // Solve the linear system
   int mx,my,mz;
   int gx,gy,gz;
@@ -232,10 +244,10 @@ void EnzoMethodGravity::compute(Block * block) throw()
   const int m = mx*my*mz;
 
   enzo_float * B = (enzo_float*) field.values (ib);
-#ifdef DEBUG_COPY_B  
+#ifdef DEBUG_COPY_B
   const int ib_copy = field.field_id ("B_copy");
   enzo_float * B_copy = (enzo_float*) field.values (ib_copy);
-#endif  
+#endif
   enzo_float * D = (enzo_float*) field.values (idensity);
 
   TRACE_FIELD("B",B,1.0);
@@ -243,7 +255,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
   for (int i=0; i<m; i++) D[i] += B[i];
 
   // Add density_particle values to density_particle_accumulate ghosts
-  
+
 #ifdef WRITE_ACCUM_DENSITY
   {
     char buffer[80];
@@ -290,11 +302,11 @@ void EnzoMethodGravity::compute(Block * block) throw()
 	  dt_enzo[i] = value;
 #ifdef USE_ENZO_DENSITY_TOTAL
 	  dt[i] = value;
-#endif	  
+#endif
   	}
       }
     }
-    
+
     fclose(fp);
     fp=NULL;
   }
@@ -308,32 +320,32 @@ void EnzoMethodGravity::compute(Block * block) throw()
       sprintf (buffer,"dt-enzop-%03d.data",block->cycle());
       printf ("DEBUG_DENSITY_TOTAL cycle=%d\n",block->cycle());
       FILE * fp = fopen(buffer,"w");
-#endif    
+#endif
       int gx,gy,gz;
       field.ghost_depth(0,&gx,&gy,&gz);
-#ifdef READ_ENZO_DENSITY    
+#ifdef READ_ENZO_DENSITY
       enzo_float * dt_diff = (enzo_float*) field.values("density_total_diff");
       enzo_float * dt_enzo = (enzo_float*) field.values("density_total_enzo");
-#endif    
+#endif
       gx=gy=gz=1;
       for (int iz=gz; iz<mz-gz; iz++) {
 	for (int iy=gy; iy<my-gy; iy++) {
 	  for (int ix=gx; ix<mx-gx; ix++) {
 	    int i = ix + mx*(iy + my*iz);
 	    D[i]=-(D[i]-1.0);
-#ifdef READ_ENZO_DENSITY    
+#ifdef READ_ENZO_DENSITY
 	    dt_diff[i] = D[i] - dt_enzo[i];
-#endif	  
+#endif
 	    B[i]  = D[i];
 #ifdef PRINT_DENSITY_TOTAL
 	    fprintf (fp,"%d %d %d %20.16g\n",ix-gx,iy-gy,iz-gz,D[i]);
-#endif	    
+#endif
 	  }
 	}
       }
 #ifdef PRINT_DENSITY_TOTAL
       fclose(fp);
-#endif      
+#endif
     } else {
 
 
@@ -346,17 +358,17 @@ void EnzoMethodGravity::compute(Block * block) throw()
     for (int i=0; i<mx*my*mz; i++) B[i] = 0.0;
 
   }
-  
+
   //  TRACE_FIELD("density-shift",D,1.0);
 
   TRACE_FIELD("density-rhs",B,-1.0);
 
 #ifdef DEBUG_COPY_B
   for (int i=0; i<m; i++) B_copy[i] = B[i];
-#endif	
+#endif
 
   Solver * solver = enzo::problem()->solver(index_solver_);
-  
+
   // May exit before solve is done...
   solver->set_callback (CkIndex_EnzoBlock::r_method_gravity_continue());
 
@@ -366,7 +378,7 @@ void EnzoMethodGravity::compute(Block * block) throw()
 
   solver->set_field_x(ix);
   solver->set_field_b(ib);
-  
+
   solver->apply (A, block);
 
 }
@@ -385,7 +397,7 @@ void EnzoBlock::r_method_gravity_continue()
 
   Refresh refresh (4,0,neighbor_leaf, sync_barrier,
 		   enzo_sync_id_method_gravity_continue);
-  
+
   refresh.set_active(is_leaf());
   refresh.add_field(data()->field().field_id("potential"));
 
@@ -398,14 +410,14 @@ void EnzoBlock::r_method_gravity_continue()
 void EnzoBlock::r_method_gravity_end()
 {
   TRACE_METHOD("r_method_gravity_end()",this);
-  
+
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->compute_accelerations(this);
 }
 
 void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 {
-  
+
   Field field = enzo_block->data()->field();
   int gx,gy,gz;
   int mx,my,mz;
@@ -416,7 +428,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
   TRACE_FIELD("potential",potential,-1.0);
 
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-  
+
   if (cosmology) {
 
     enzo_float cosmo_a = 1.0;
@@ -428,8 +440,8 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
     for (int i=0; i<m; i++) potential[i] /= cosmo_a;
   }
-  
-#ifdef READ_ENZO_POTENTIAL  
+
+#ifdef READ_ENZO_POTENTIAL
   {
     enzo_float * po = (enzo_float*) field.values("potential");
     enzo_float * po_enzo = (enzo_float*) field.values("potential_enzo");
@@ -452,7 +464,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 	  //	  printf ("%20.15g %20.15g %20.15g\n",po_diff[i],po[i],value);
 #ifdef USE_ENZO_POTENTIAL
 	  po[i] = value;
-#endif	  
+#endif
   	}
       }
     }
@@ -510,10 +522,10 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
     //   enzo_float * z = (enzo_float *) particle.attribute_array(it,ia_z,ib);
     //   CkPrintf ("B %d %g %g %g\n",i,x[i%mb],y[i%mb],z[i%mb]);
     // }
-      
+
     fclose (fp);
   }
-  
+
 #endif
 
   /// compute acceleration fields from potential
@@ -527,20 +539,20 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
 
   enzo_float * B =         (enzo_float*) field.values("B");
 
-#ifdef DEBUG_COPY_DENSITY  
+#ifdef DEBUG_COPY_DENSITY
   enzo_float * B_copy =    (enzo_float*) field.values("B_copy");
   for (int i=0; i<m; i++) B_copy[i] = B[i];
-#endif  
+#endif
 
   for (int i=0; i<m; i++) B[i] = 0.0;
 
   enzo_float * de_t =      (enzo_float*) field.values("density_total");
 
   if (de_t != NULL) {
-#ifdef DEBUG_COPY_DENSITY  
+#ifdef DEBUG_COPY_DENSITY
     enzo_float * de_t_copy = (enzo_float*) field.values("density_total_copy");
     for (int i=0; i<m; i++) de_t_copy[i] = de_t[i];
-#endif  
+#endif
     for (int i=0; i<m; i++) de_t[i] = 0.0;
   }
   if (potential) {
@@ -549,7 +561,7 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
     if (po_copy != NULL) {
       for (int i=0; i<m; i++) po_copy[i] = potential[i];
     }
-#endif  
+#endif
     for (int i=0; i<m; i++) potential[i] = 0.0;
   }
 
@@ -583,9 +595,9 @@ double EnzoMethodGravity::timestep_ (Block * block) const throw()
 
   double hx,hy,hz;
   block->cell_width(&hx,&hy,&hz);
-  
+
   EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-  
+
   if (cosmology) {
     const int rank = cello::rank();
     enzo_float cosmo_a = 1.0;

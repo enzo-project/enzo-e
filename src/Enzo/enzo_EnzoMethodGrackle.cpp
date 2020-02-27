@@ -29,77 +29,54 @@ EnzoMethodGrackle::EnzoMethodGrackle
   // Method function that can be called to obtain a list of
   // needed field
 
+  // special container for ensuring colour fields are properly grouped
+  const int rank = cello::rank();
   std::vector<std::string> colour_fields;
 
-  if (grackle_data->metal_cooling > 0){
-    std::string metal_name = "metal_density";
 
-    if (! (field_descr->is_field(metal_name))){
-      this->required_fields_.push_back(metal_name);
-    }
-    colour_fields.push_back(metal_name);
+  this->required_fields_ = std::vector<std::string> {"density","internal_energy",
+                                                     "total_energy"};
+  if (rank>=0) this->required_fields_.push_back("velocity_x");
+  if (rank>=1) this->required_fields_.push_back("velocity_y");
+  if (rank>=2) this->required_fields_.push_back("velocity_z");
+
+  if (grackle_data->metal_cooling > 0){
+    this->required_fields_.push_back("metal_density");
+    colour_fields.push_back("metal_density");
   }
 
   // Define primordial chemistry fields
   if (grackle_data->primordial_chemistry > 0){
-    std::string pc1_fields[6] = {"HI_density","HII_density",
-                                  "HeI_density","HeII_density","HeIII_density",
-                                  "e_density"};
-    int numfields = 6;
+    std::vector<std::string> pc1_fields {"HI_density","HII_density",
+                                         "HeI_density","HeII_density","HeIII_density",
+                                         "e_density"};
 
-    for(int ifield = 0; ifield < numfields; ifield++){
-      if (! (field_descr->is_field( pc1_fields[ifield] ))){
-        this->required_fields_.push_back( pc1_fields[ifield] );
-      }
-      colour_fields.push_back( pc1_fields[ifield] );
-    }
+    this->required_fields_.insert(this->required_fields_.end(), pc1_fields.begin(), pc1_fields.end());
+    colour_fields.insert(colour_fields.end(), pc1_fields.begin(), pc1_fields.end());
 
     if(grackle_data->primordial_chemistry > 1){
 
-      std::string pc2_fields[3] = {"HM_density", "H2I_density", "H2II_density"};
-      numfields = 3;
-
-      for (int ifield = 0; ifield < numfields; ifield++){
-        if (! (field_descr->is_field( pc2_fields[ifield] ))){
-          this->required_fields_.push_back( pc2_fields[ifield] );
-        }
-        colour_fields.push_back( pc2_fields[ifield] );
-      }
+      std::vector<std::string> pc2_fields {"HM_density", "H2I_density", "H2II_density"};
+      this->required_fields_.insert(this->required_fields_.end(), pc2_fields.begin(), pc2_fields.end());
+      colour_fields.insert(colour_fields.end(), pc2_fields.begin(), pc2_fields.end());
 
       if(grackle_data->primordial_chemistry > 2){
-        std::string pc3_fields[3] = {"DI_density", "DII_density", "HDI_density"};
-        numfields = 3;
-
-        for(int ifield = 0; ifield < numfields; ifield++){
-          if (! (field_descr->is_field( pc3_fields[ifield] ))){
-            this->required_fields_.push_back( pc3_fields[ifield] );
-          }
-
-          colour_fields.push_back( pc3_fields[ifield] );
-        }
-
+        std::vector<std::string> pc3_fields {"DI_density", "DII_density", "HDI_density"};
+        this->required_fields_.insert(this->required_fields_.end(), pc3_fields.begin(), pc3_fields.end());
+        colour_fields.insert(colour_fields.end(), pc3_fields.begin(), pc3_fields.end());
       } // endif primordial_chemistry > 2
-
     } // endif primordial_chemistry > 1
-
   } // endif primordial chemistry is on
 
-  if (grackle_data->use_specific_heating_rate){
-    if ( !(field_descr->is_field("specific_heating_rate"))){
+  if (grackle_data->use_specific_heating_rate)
       this->required_fields_.push_back("specific_heating_rate");
-    }
-  }
 
-  if (grackle_data->use_volumetric_heating_rate){
-    if ( !(field_descr->is_field("volumetric_heating_rate"))){
+  if (grackle_data->use_volumetric_heating_rate)
       this->required_fields_.push_back("volumetric_heating_rate");
-    }
-  }
 
-  // Define fields
-
+  // Define fields and assign fields to correct
   this->define_fields();
-  this->define_group_fields( colour_fields, "colour");
+  this->define_group_fields(colour_fields, "colour");
 
   /// Initialize default Refresh
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
@@ -537,11 +514,6 @@ void EnzoMethodGrackle::ResetEnergies ( EnzoBlock * enzo_block) throw()
    enzo_float * density     = (enzo_float*) field.values("density");
    enzo_float * internal_energy = (enzo_float*) field.values("internal_energy");
    enzo_float * total_energy    = (enzo_float*) field.values("total_energy");
-
-   enzo_float * pressure    = field.is_field("pressure") ?
-                (enzo_float*) field.values("pressure") : NULL;
-   enzo_float * temperature = field.is_field("temperature") ?
-                (enzo_float*) field.values("temperature") : NULL;
 
    enzo_float * HI_density    = field.is_field("HI_density") ?
                                 (enzo_float*) field.values("HI_density")    : NULL;

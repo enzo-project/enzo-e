@@ -11,18 +11,21 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant) 
+EnzoMethodHeat::EnzoMethodHeat (double alpha, double courant)
   : Method(),
     alpha_(alpha),
     courant_(courant)
 {
   // Initialize default Refresh object
 
+  this->required_fields_ = std::vector<std::string> {"temperature"};
+  this->define_fields();
+
   const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
 			     enzo_sync_id_method_heat);
 
   FieldDescr * field_descr = cello::field_descr();
-  
+
   refresh(ir)->add_field(field_descr->field_id("temperature"));
 }
 
@@ -143,7 +146,7 @@ void EnzoMethodHeat::compute_ (Block * block,enzo_float * Unew) const throw()
 
 	enzo_float Uxx = dxi*(U[i-idx] - 2*U[i] + U[i+idx]);
 	enzo_float Uyy = dyi*(U[i-idy] - 2*U[i] + U[i+idy]);
-	
+
 	Unew[i] = U[i] + alpha_*dt*(Uxx + Uyy);
 
       }

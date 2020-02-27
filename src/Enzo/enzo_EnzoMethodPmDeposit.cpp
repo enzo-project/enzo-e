@@ -17,7 +17,7 @@
 
 extern "C" void  FORTRAN_NAME(dep_grid_cic)
   (enzo_float * de,enzo_float * de_t,enzo_float * temp,
-   enzo_float * vx, enzo_float * vy, enzo_float * vz, 
+   enzo_float * vx, enzo_float * vy, enzo_float * vz,
    enzo_float * dt, enzo_float * rfield, int *rank,
    enzo_float * hx, enzo_float * hy, enzo_float * hz,
    int * mx,int * my,int * mz,
@@ -34,13 +34,23 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
     alpha_(alpha)
 {
 
+  this->required_fields_ = std::vector<std::string>
+                             {"density",
+                              "density_total","density_particle",
+                              "density_particle_accumulate"};
+  const int rank = cello::rank();
+                                
+  if (rank >= 0) this->required_fields_.push_back("velocity_x");
+  if (rank >= 1) this->required_fields_.push_back("velocity_y");
+  if (rank >= 2) this->required_fields_.push_back("velocity_z");
 
+  this->define_fields();
 
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,cello::rank()-1,neighbor_leaf,sync_neighbor,
  			     enzo_sync_id_method_pm_deposit);
- 
+
   refresh(ir)->add_field("density");
   refresh(ir)->add_field("velocity_x");
   refresh(ir)->add_field("velocity_y");
@@ -90,7 +100,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     // instead of here to possible race conditions with refresh.  This
     // means EnzoMethodPmDeposit ("pm_deposit") currently CANNOT be
     // used without EnzoMethodGravity ("gravity")
-    
+
     // Get block extents and cell widths
     double xm,ym,zm;
     double xp,yp,zp;
@@ -111,7 +121,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     for (int i=0; i<mx*my*mz; i++) de_pa[i] = 0.0;
 
     // check precisions match
-    
+
     int ia = particle.attribute_index(it,"x");
     int ba = particle.attribute_bytes(it,ia); // "bytes (actual)"
     int be = sizeof(enzo_float);                // "bytes (expected)"
@@ -129,18 +139,18 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float cosmo_a=1.0;
     enzo_float cosmo_dadt=0.0;
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    
+
     if (cosmology) {
 
       double time = block->time();
       double dt   = block->dt();
       cosmology->compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+alpha_*dt);
-      
+
     }
     if (rank >= 1) hx *= cosmo_a;
     if (rank >= 2) hy *= cosmo_a;
     if (rank >= 3) hz *= cosmo_a;
-    
+
     const double dt = alpha_ * block->dt() / cosmo_a;
 
     // Scale mass by volume if particle value is mass instead of density
@@ -271,7 +281,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	for (int ip=0; ip<np; ip++) {
 
 	  // Copy batch particle velocities to temporary block field velocities
-	  
+
 	  double x = xa[ip*dp] + vxa[ip*dv]*dt;
 	  double y = ya[ip*dp] + vya[ip*dv]*dt;
 	  double z = za[ip*dp] + vza[ip*dv]*dt;
@@ -344,12 +354,12 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     if (rank >= 2) for (int i=0; i<m; i++) vy[i] = vyf[i];
     else           for (int i=0; i<m; i++) vy[i] = 0.0;
-    
+
     if (rank >= 3) for (int i=0; i<m; i++) vz[i] = vzf[i];
     else           for (int i=0; i<m; i++) vz[i] = 0.0;
 
     FORTRAN_NAME(dep_grid_cic)(de,de_gas,temp,
-			       vx, vy, vz, 
+			       vx, vy, vz,
 			       &dtf, rfield, &rank,
 			       &hxf,&hyf,&hzf,
 			       &mx,&my,&mz,
@@ -380,15 +390,15 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     delete [] vz;
 
     delete [] de_gas;
-    
+
     double sum_de_p = 0.0;
     for (int i=0; i<mx*my*mz; i++) sum_de_p += de_p[i];
 
   }
 
-    
-  block->compute_done(); 
-  
+
+  block->compute_done();
+
 }
 
 //----------------------------------------------------------------------
