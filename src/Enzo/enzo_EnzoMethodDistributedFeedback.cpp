@@ -1,9 +1,14 @@
 /// See LICENSE_CELLO file for license and copyright information
 
+/// @file	enzo_EnzoMethodDistributedFeedback.cpp
+/// @author     Andrew Emerick (aemerick11@gmail.com)
+/// @date
+/// @brief  Implements the stellar feedback routines used in
+///         the Goldbaum+ isolated MW galaxy runs in Enzo coupled
+///         to the distributed kinetic+thermal energy feedback
+///         methods from Simpson+
 ///
-///
-///
-///
+
 
 #include "cello.hpp"
 #include "enzo.hpp"
