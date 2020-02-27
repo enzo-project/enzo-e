@@ -29,14 +29,13 @@ EnzoMethodGrackle::EnzoMethodGrackle
   // Method function that can be called to obtain a list of
   // needed field
 
-  std::vector<std::string> fields_to_define;
   std::vector<std::string> colour_fields;
 
   if (grackle_data->metal_cooling > 0){
     std::string metal_name = "metal_density";
 
     if (! (field_descr->is_field(metal_name))){
-      fields_to_define.push_back(metal_name);
+      this->required_fields_.push_back(metal_name);
     }
     colour_fields.push_back(metal_name);
   }
@@ -50,7 +49,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
     for(int ifield = 0; ifield < numfields; ifield++){
       if (! (field_descr->is_field( pc1_fields[ifield] ))){
-        fields_to_define.push_back( pc1_fields[ifield] );
+        this->required_fields_.push_back( pc1_fields[ifield] );
       }
       colour_fields.push_back( pc1_fields[ifield] );
     }
@@ -62,7 +61,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
       for (int ifield = 0; ifield < numfields; ifield++){
         if (! (field_descr->is_field( pc2_fields[ifield] ))){
-          fields_to_define.push_back( pc2_fields[ifield] );
+          this->required_fields_.push_back( pc2_fields[ifield] );
         }
         colour_fields.push_back( pc2_fields[ifield] );
       }
@@ -73,7 +72,7 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
         for(int ifield = 0; ifield < numfields; ifield++){
           if (! (field_descr->is_field( pc3_fields[ifield] ))){
-            fields_to_define.push_back( pc3_fields[ifield] );
+            this->required_fields_.push_back( pc3_fields[ifield] );
           }
 
           colour_fields.push_back( pc3_fields[ifield] );
@@ -87,36 +86,20 @@ EnzoMethodGrackle::EnzoMethodGrackle
 
   if (grackle_data->use_specific_heating_rate){
     if ( !(field_descr->is_field("specific_heating_rate"))){
-      fields_to_define.push_back("specific_heating_rate");
+      this->required_fields_.push_back("specific_heating_rate");
     }
   }
 
   if (grackle_data->use_volumetric_heating_rate){
     if ( !(field_descr->is_field("volumetric_heating_rate"))){
-      fields_to_define.push_back("volumetric_heating_rate");
+      this->required_fields_.push_back("volumetric_heating_rate");
     }
   }
 
   // Define fields
 
-//  WARNING("EnzoMethodGrackle: ",
-//          "Not all fields needed for current Grackle settings are defined. Attempting to define:");
-
-  for (int ifield = 0; ifield < fields_to_define.size(); ifield++){
-//    WARNING(fields_to_define[ifield].c_str() );
-    field_descr->insert_permanent( fields_to_define[ifield] );
-  }
-
-  // Set these fields to colour if they exist
-  //    list of fields belonging to this method that are colour
-  for (int ifield=0; ifield < colour_fields.size(); ifield++){
-    if (   field_descr->is_permanent(  colour_fields[ifield] ) &&
-         !(field_descr->groups()->is_in( colour_fields[ifield], "colour")) ){
-
-
-      field_descr->groups()->add( colour_fields[ifield] ,"colour");
-    }
-  }
+  this->define_fields();
+  this->define_group_fields( colour_fields, "colour");
 
   /// Initialize default Refresh
   int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,

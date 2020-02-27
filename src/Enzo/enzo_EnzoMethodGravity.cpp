@@ -150,6 +150,22 @@ EnzoMethodGravity::EnzoMethodGravity
 {
   FieldDescr * field_descr = cello::field_descr();
   
+  this->required_fields_ = std::vector<std::string>
+                           {"density","density_total","B","potential",
+                            "acceleration_x","acceleration_y","acceleration_z"};
+#ifdef DEBUG_FIELD_FACE
+  this->required_fields_.insert(this->required_fields_.end(),
+                                {"debug_1","debug_2"});
+#endif
+
+  if (accumulate){
+    this->required_fields_.insert(this->required_fields_.end(),
+                                  {"density_particle","density_particle_accumulate"});
+  }
+
+  // now define
+  this->define_fields();
+
   const int id  = field_descr->field_id("density");
   const int idt = field_descr->field_id("density_total");
   const int ib  = field_descr->field_id("B");

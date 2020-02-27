@@ -87,6 +87,13 @@ public: // virtual functions
   /// Set schedule
   void set_schedule (Schedule * schedule) throw();
 
+  /// Define required fields for method
+  void define_fields () throw();
+
+  /// Define certain field groupings if necessary
+  void define_group_fields (std::vector<std::string> group_fields,
+                            std::string groupname) throw();
+
   double courant() const throw ()
   { return courant_; }
 
@@ -121,6 +128,9 @@ protected: // attributes
 
   /// Courant condition for the Method
   double courant_;
+
+  /// List of fields required for the Method
+  std::vector<std::string> required_fields_;
 
 };
 

@@ -33,6 +33,9 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   : Method(),
     alpha_(alpha)
 {
+
+
+
   // Initialize default Refresh object
 
   const int ir = add_refresh(4,cello::rank()-1,neighbor_leaf,sync_neighbor,
@@ -42,7 +45,8 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
   refresh(ir)->add_field("velocity_x");
   refresh(ir)->add_field("velocity_y");
   refresh(ir)->add_field("velocity_z");
-			     
+
+
 }
 
 //----------------------------------------------------------------------
