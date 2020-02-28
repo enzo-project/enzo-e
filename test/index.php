@@ -479,7 +479,7 @@ function test_table ($separator,$file_root,$size_array, $types)
     //     	printf ("<th>$type</th>\n"); 
     // Show movie file if available
     if ($show_gif) {
-      echo "<td> <img width=160 src=$file_root.gif></img></td>";
+      echo "<td> <img width=120 src=$file_root.gif></img></td>";
     }
     if ($show_flash) {
       echo "<td>";
@@ -496,7 +496,7 @@ function test_table ($separator,$file_root,$size_array, $types)
       $size = $size_array[$j];
       $png_file = "$file_root$separator$size.png"; 
 
-      printf ("<td><img width=160 src=$png_file></img></td>\n");  
+      printf ("<td><a href=$png_file><img width=120 src=$png_file></img></a></td>\n");  
     }  
     echo "</tr>";  
   }
@@ -528,7 +528,7 @@ function test_table_dir ($dir,$size_array, $types)
       $size = $size_array[$j];
       $png_file = "$dir/$size.png"; 
 
-      printf ("<td><img width=160 src=$png_file></img></td>\n");  
+      printf ("<td><img width=120 src=$png_file></img></td>\n");  
     }  
     echo "</tr>";  
   }
@@ -666,8 +666,9 @@ test_summary("Method: gravity",
 	     array("enzo-p",             "enzo-p"),'test');
 
 test_summary("Problem: collapse",
-         array("collapse-bcg2","collapse-dd2","collapse-hg2"),
-         array("enzo-p",       "enzo-p",      "enzo-p"),'test');
+         array("collapse-bcg2",    "collapse-dd2",    "collapse-hg2",
+               "collapse-gas-bcg2","collapse-gas-dd2","collapse-gas-hg2"),
+         array("enzo-p","enzo-p","enzo-p","enzo-p","enzo-p","enzo-p"),'test');
 
 test_summary("Problem: cosmology",
          array("cosmo-cg","cosmo-bcg","cosmo-mg","cosmo-dd","cosmo-hg"),
@@ -1008,11 +1009,11 @@ Spherical collapse tests for varying linear solvers.  Currently 2D only to keep 
 
 //----------------------------------------------------------------------
 
-    test_subgroup ("2D Collapse");
+    test_subgroup ("2D Collapse (Particles)");
 
 //--------------------------------------------------
 
-begin_hidden("collapse-bcg2", "COLLAPSE (BiCG-STAB Solver)");
+begin_hidden("collapse-bcg2", "COLLAPSE (Particles) (BiCG-STAB Solver)");
 
 tests("Enzo","enzo-p","test_collapse-bcg2","2D AMR Collapse (BiCG-STAB Solver)","");
 
@@ -1061,7 +1062,7 @@ end_hidden("collapse-bcg2");
 
 //--------------------------------------------------
 
-begin_hidden("collapse-dd2", "COLLAPSE (DD Solver)");
+begin_hidden("collapse-dd2", "COLLAPSE (Particles) (DD Solver)");
 
 tests("Enzo","enzo-p","test_collapse-dd2","2D AMR Collapse (Norman DD Solver)","");
 
@@ -1110,7 +1111,7 @@ end_hidden("collapse-dd2");
 
 //--------------------------------------------------
 
-begin_hidden("collapse-hg2", "COLLAPSE (HG Solver)");
+begin_hidden("collapse-hg2", "COLLAPSE (Particles) (HG Solver)");
 
 tests("Enzo","enzo-p","test_collapse-hg2","2D AMR Collapse (Reynolds HG Solver)","");
 
@@ -1156,6 +1157,164 @@ test_table ("_","Dir_Collapse-HG2",
             "0063/mesh"),$types);
 
 end_hidden("collapse-hg2");
+
+//----------------------------------------------------------------------
+
+    test_subgroup ("2D Collapse (Gas)");
+
+//--------------------------------------------------
+
+begin_hidden("collapse-gas-bcg2", "GAS COLLAPSE (Gas) (BiCG-STAB Solver)");
+
+tests("Enzo","enzo-p","test_collapse-gas-bcg2","2D AMR Collapse (BiCG-STAB Solver)","");
+
+test_table ("_","Dir_Collapse-GAS-BCG2",
+      array("0010/density",
+            "0020/density",
+            "0030/density",
+            "0040/density",
+            "0050/density",
+            "0060/density",
+            "0070/density",
+            "0080/density",
+            "0090/density"),$types);
+test_table ("_","Dir_Collapse-GAS-BCG2",
+      array("0010/po",
+            "0020/po",
+            "0030/po",
+            "0040/po",
+            "0050/po",
+            "0060/po",
+            "0070/po",
+            "0080/po",
+            "0090/po"),$types);
+test_table ("_","Dir_Collapse-GAS-BCG2",
+      array("0010/ax",
+            "0020/ax",
+            "0030/ax",
+            "0040/ax",
+            "0050/ax",
+            "0060/ax",
+            "0070/ax",
+            "0080/ax",
+            "0090/ax"),$types);
+test_table ("_","Dir_Collapse-GAS-BCG2",
+      array("0010/mesh",
+            "0020/mesh",
+            "0030/mesh",
+            "0040/mesh",
+            "0050/mesh",
+            "0060/mesh",
+            "0070/mesh",
+            "0080/mesh",
+            "0090/mesh"),$types);
+
+//
+end_hidden("collapse-gas-bcg2");
+
+//--------------------------------------------------
+
+
+begin_hidden("collapse-gas-dd2", "GAS COLLAPSE (Gas) (DD Solver)");
+
+tests("Enzo","enzo-p","test_collapse-gas-dd2","2D AMR Collapse (Norman DD Solver)","");
+
+test_table ("_","Dir_Collapse-GAS-DD2",
+      array("0010/density",
+            "0020/density",
+            "0030/density",
+            "0040/density",
+            "0050/density",
+            "0060/density",
+            "0070/density",
+            "0080/density",
+            "0090/density"),$types);
+test_table ("_","Dir_Collapse-GAS-DD2",
+      array("0010/po",
+            "0020/po",
+            "0030/po",
+            "0040/po",
+            "0050/po",
+            "0060/po",
+            "0070/po",
+            "0080/po",
+            "0090/po"),$types);
+test_table ("_","Dir_Collapse-GAS-DD2",
+      array("0010/ax",
+            "0020/ax",
+            "0030/ax",
+            "0040/ax",
+            "0050/ax",
+            "0060/ax",
+            "0070/ax",
+            "0080/ax",
+            "0090/ax"),$types);
+test_table ("_","Dir_Collapse-GAS-DD2",
+      array("0010/mesh",
+            "0020/mesh",
+            "0030/mesh",
+            "0040/mesh",
+            "0050/mesh",
+            "0060/mesh",
+            "0070/mesh",
+            "0080/mesh",
+            "0090/mesh"),$types);
+
+//
+end_hidden("collapse-gas-dd2");
+
+//--------------------------------------------------
+
+
+begin_hidden("collapse-gas-hg2", "GAS COLLAPSE (Gas) (HG Solver)");
+
+tests("Enzo","enzo-p","test_collapse-gas-hg2","2D AMR Collapse (Reynolds HG Solver)","");
+
+test_table ("_","Dir_Collapse-GAS-HG2",
+      array("0010/density",
+            "0020/density",
+            "0030/density",
+            "0040/density",
+            "0050/density",
+            "0060/density",
+            "0070/density",
+            "0080/density",
+            "0090/density"),$types);
+test_table ("_","Dir_Collapse-GAS-HG2",
+      array("0010/po",
+            "0020/po",
+            "0030/po",
+            "0040/po",
+            "0050/po",
+            "0060/po",
+            "0070/po",
+            "0080/po",
+            "0090/po"),$types);
+test_table ("_","Dir_Collapse-GAS-HG2",
+      array("0010/ax",
+            "0020/ax",
+            "0030/ax",
+            "0040/ax",
+            "0050/ax",
+            "0060/ax",
+            "0070/ax",
+            "0080/ax",
+            "0090/ax"),$types);
+test_table ("_","Dir_Collapse-GAS-HG2",
+      array("0010/mesh",
+            "0020/mesh",
+            "0030/mesh",
+            "0040/mesh",
+            "0050/mesh",
+            "0060/mesh",
+            "0070/mesh",
+            "0080/mesh",
+            "0090/mesh"),$types);
+
+//
+end_hidden("collapse-gas-hg2");
+
+//--------------------------------------------------
 
 //======================================================================
 

@@ -37,9 +37,11 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   if (rank >= 1) refresh.add_field("acceleration_x");
   if (rank >= 2) refresh.add_field("acceleration_y");
   if (rank >= 3) refresh.add_field("acceleration_z");
-			     
-  refresh.add_particle(cello::particle_descr()->type_index("dark"));
-  
+
+  const ParticleDescr * p_descr = cello::particle_descr();
+  if (p_descr->type_exists("dark")) {
+    refresh.add_particle(p_descr->type_index("dark"));
+  }
   
   // PM parameters initialized in EnzoBlock::initialize()
 }
@@ -63,7 +65,9 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 {
   TRACE_PM("compute()");
 
-  if (block->is_leaf()) {
+  Particle particle = block->data()->particle();
+  
+  if (block->is_leaf() && particle.type_exists("dark")) {
 
 #ifdef DEBUG_UPDATE    
     double a3sum[3]={0.0};
@@ -101,8 +105,6 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
       EnzoComputeCicInterp interp_z ("acceleration_z", "dark", "az", dt_shift);
       interp_z.compute(block);
     }
-
-    Particle particle = block->data()->particle();
 
     const int it = particle.type_index ("dark");
 
@@ -259,7 +261,9 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 
   double dt = std::numeric_limits<double>::max();
 
-  if (block->is_leaf()) {
+  Particle particle = block->data()->particle();
+  
+  if (block->is_leaf() && particle.type_exists("dark")) {
 
     Particle particle = block->data()->particle();
     Field    field    = block->data()->field();

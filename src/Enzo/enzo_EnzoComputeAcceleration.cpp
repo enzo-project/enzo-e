@@ -207,26 +207,28 @@ void EnzoComputeAcceleration::compute_(Block * block)
 
   Particle particle = block->data()->particle();
 
-  int it_dark = particle.type_index("dark");
+  if (particle.type_exists("dark")) {
+    int it_dark = particle.type_index("dark");
 
-  if (particle.num_particles(it_dark) > 0) {
+    if (particle.num_particles(it_dark) > 0) {
 
-    double dt_shift = 0.5*block->dt() / cosmo_a;
-    //  double dt_shift = 0.0;
-    if (rank_ >= 1) {
-      EnzoComputeCicInterp interp_x
-	("acceleration_x", "dark", "ax",dt_shift);
-      interp_x.compute(block);
-    }
-    if (rank_ >= 2) {
-      EnzoComputeCicInterp interp_y
-	("acceleration_y", "dark", "ay",dt_shift);
-      interp_y.compute(block);
-    }
-    if (rank_ >= 3) {
-      EnzoComputeCicInterp interp_z
-	("acceleration_z", "dark", "az",dt_shift);
-      interp_z.compute(block);
+      double dt_shift = 0.5*block->dt() / cosmo_a;
+      //  double dt_shift = 0.0;
+      if (rank_ >= 1) {
+        EnzoComputeCicInterp interp_x
+          ("acceleration_x", "dark", "ax",dt_shift);
+        interp_x.compute(block);
+      }
+      if (rank_ >= 2) {
+        EnzoComputeCicInterp interp_y
+          ("acceleration_y", "dark", "ay",dt_shift);
+        interp_y.compute(block);
+      }
+      if (rank_ >= 3) {
+        EnzoComputeCicInterp interp_z
+          ("acceleration_z", "dark", "az",dt_shift);
+        interp_z.compute(block);
+      }
     }
   }
 }

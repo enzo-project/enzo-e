@@ -140,6 +140,16 @@ int ParticleDescr::type_index (std::string type_name) const
 
 //----------------------------------------------------------------------
 
+bool ParticleDescr::type_exists (std::string type_name) const
+{
+
+  auto it=type_index_.find(type_name);
+
+  return (it != type_index_.end());
+}
+
+//----------------------------------------------------------------------
+
 std::string ParticleDescr::type_name (int it) const
 {
   ASSERT1("ParticleDescr::type_name",

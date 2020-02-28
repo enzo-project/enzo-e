@@ -324,6 +324,21 @@ if (prec == "double"):
 		                  ARGS='input/test_collapse-hg2.in'),
           [Glob('#/' + test_path + '/Dir_COLLAPSE_HG2_*'),
            Glob('#/' + test_path + '/Dir_COLLAPSE_HG2_*')])
+    Clean(env_mv_out.RunParallel ('test_collapse-gas-bcg2.unit',
+                                  bin_path + '/enzo-p', 
+		                  ARGS='input/test_collapse-gas-bcg2.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-BCG2_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-BCG2_*')])
+    Clean(env_mv_out.RunParallel ('test_collapse-gas-dd2.unit',
+                                  bin_path + '/enzo-p', 
+		                  ARGS='input/test_collapse-gas-dd2.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-DD2_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-DD2_*')])
+    Clean(env_mv_out.RunParallel ('test_collapse-gas-hg2.unit',
+                                  bin_path + '/enzo-p', 
+		                  ARGS='input/test_collapse-gas-hg2.in'),
+          [Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-HG2_*'),
+           Glob('#/' + test_path + '/Dir_COLLAPSE_GAS-HG2_*')])
 
 #----------------------------------------------------------------------
 # MethodHeat tests

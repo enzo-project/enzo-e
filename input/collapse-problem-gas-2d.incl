@@ -1,0 +1,36 @@
+ Stopping {
+     cycle = 95; # crashes before cycle 100
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+ Domain {
+     rank = 2;
+     lower = [ -1.600000000000000e+17, -1.600000000000000e+17];
+     upper = [ 1.600000000000000e+17, 1.600000000000000e+17];
+ }
+
+
+ Initial {
+     list = [ "collapse" ];
+     # Defaults:
+     # Initial:collapse:radius_relative = 0.1
+     # Initial:collapse:particle_ratio = 0.0
+     # Initial:collapse:mass = cello::mass_solar
+     # Initial:collapse:temperature = 10.0
+}
+
+ Mesh {
+     root_blocks = [ 4, 4 ];
+     root_rank = 2;
+     root_size = [ 32, 32 ];
+ }
+Method {
+     pm_update {
+         max_dt = 10.000000000000;
+     }
+     
+}
+
