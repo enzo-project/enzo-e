@@ -541,7 +541,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           // Now k-1 is approx Poisson(lambda)
           int number_of_sn = k - 1;
 
-          // CkPrintf("This particle has %i supernova \n",number_of_sn);
+          CkPrintf("This particle has %i supernova \n",number_of_sn);
 
           if (number_of_sn == 0){
             explosion_flag = 0;
@@ -549,6 +549,8 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           } else if (number_of_sn < 0){
             ERROR("EnzoMethodDistributedFeedback",
                   "Number of SN in distributed feedback is negative \n");
+          } else {
+            CkPrintf("DistributedFeedback ========== Number of SNe %d\n", number_of_sn);
           }
 
           // If there are explosions, we need to check the ionizing luminosity
@@ -615,6 +617,7 @@ void EnzoMethodDistributedFeedback::compute_ (Block * block)
           if (explosion_flag == -1) explosion_flag = 0;
         } // end lifetime check
 
+       CkPrintf("DistributedFeedback ---- Explosion Flag = %d \n", explosion_flag);
 
 
      // ----------------------------------------
