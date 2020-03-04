@@ -27,6 +27,7 @@ public: // interface
   Hierarchy() throw()
   : factory_(NULL),
     refinement_(0),
+    min_level_(0),
     max_level_(0),
     num_blocks_(0),
     num_blocks_level_(),
@@ -50,6 +51,7 @@ public: // interface
   /// Initialize a Hierarchy object
   Hierarchy (const Factory * factory, 
 	     int refinement,
+	     int min_level,
 	     int max_level) throw ();
 
   /// Delete the Hierarchy object
@@ -73,6 +75,10 @@ public: // interface
   void set_blocking(int nbx, int nby, int nbz) throw ();
 
   //----------------------------------------------------------------------
+
+  /// Return the minimum refinement level (0 for unigrid)
+  int min_level() const
+  { return min_level_; }
 
   /// Return the maximum refinement level (0 for unigrid)
   int max_level() const
@@ -133,16 +139,7 @@ public: // interface
   { block_array_ = block_array;}
 
   /// Increment (decrement) number of mesh blocks
-  void increment_block_count(int count, int level)
-  {
-    num_blocks_ += count;
-    int n=num_blocks_level_.size();
-    if (n < level+1) {
-      num_blocks_level_.resize(level+1);
-      for (int i=n; i<level+1; i++) num_blocks_level_[i] = 0;
-    }
-    num_blocks_level_[level] += count;
-  }
+  void increment_block_count(int count, int level);
 
   /// Add Block to the list of blocks (block_vec_ and block_map_)
   void insert_block (Block * block)
@@ -165,8 +162,7 @@ public: // interface
   }
   
   /// Increment (decrement) number of particles
-  void increment_particle_count(int64_t count)
-  { num_particles_ += count; }
+  void increment_particle_count(int64_t count);
 
   /// Increment (decrement) number of real_zones
   void increment_real_zone_count(int64_t count)
@@ -182,7 +178,7 @@ public: // interface
 
   /// Return the number of blocks on this process for the given level
   size_t num_blocks(int level) const throw()
-  {  return num_blocks_level_.at(level);  }
+  {  return num_blocks_level_.at(level-min_level_);  }
 
   /// Return the ith block in this pe
   Block * block (int index_block)
@@ -204,8 +200,7 @@ public: // interface
   
   void create_block_array (bool allocate_data) throw();
 
-  void create_subblock_array (bool allocate_data,
-			      int min_level) throw();
+  void create_subblock_array (bool allocate_data) throw();
 
 
   /// Return the number of root-level Blocks along each rank
@@ -223,6 +218,9 @@ protected: // attributes
 
   /// Refinement of the hierarchy [ used for Charm++ pup() of Tree ]
   int refinement_;
+
+  /// Minimum mesh level (may be < 0, e.g. for multigrid)
+  int min_level_;
 
   /// Maximum mesh level
   int max_level_;
@@ -265,7 +263,15 @@ protected: // attributes
 
   /// Periodicity of boundary conditions on faces
   bool periodicity_[3][2];
+
+public: // static attributes
+
+  /// Current number of blocks on this node
+  static int num_blocks_node;
   
+  /// Current number of particles on this node
+  static int64_t num_particles_node;
+
 };
 
 

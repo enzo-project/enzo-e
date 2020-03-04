@@ -1028,7 +1028,7 @@ void ParticleData::resize_attribute_array_
   if (attribute_array_[it][ib].size() != new_size) {
 
     ASSERT1("ParticleData::resize_attribute_array_",
-	    "Trying to allocate negative particles: new_size = %d",
+	    "Trying to allocate negative particles: new_size = %ld",
 	    new_size, new_size >= 0);
       
     attribute_array_[it][ib].resize(new_size);
@@ -1046,17 +1046,17 @@ void ParticleData::check_arrays_ (ParticleDescr * particle_descr,
 {
   size_t nt = particle_descr->num_types();
   ASSERT4 ("ParticleData::check_arrays_",
-	  "%s:%d attribute_array_ is size %d < %d",
+	  "%s:%d attribute_array_ is size %lu < %lu",
 	   file.c_str(),line,
 	   attribute_array_.size(),nt,
 	   attribute_array_.size()>=nt);
   ASSERT4 ("ParticleData::check_arrays_",
-	  "%s:%d particle_count_ is size %d < %d",
+	  "%s:%d particle_count_ is size %lu < %lu",
 	   file.c_str(),line,
 	   particle_count_.size(),nt,
 	   particle_count_.size()>=nt);
   ASSERT4 ("ParticleData::check_arrays_",
-	  "%s:%d attribute_align_ is size %d < %d",
+	  "%s:%d attribute_align_ is size %lu < %lu",
 	   file.c_str(),line,
 	   attribute_align_.size(),nt,
 	   attribute_align_.size()>=nt);
@@ -1065,17 +1065,17 @@ void ParticleData::check_arrays_ (ParticleDescr * particle_descr,
     size_t nb = num_batches(it);
 
     ASSERT5 ("ParticleData::check_arrays_",
-	     "%s:%d attribute_array_[%d] is size %d < %d",
+	     "%s:%d attribute_array_[%lu] is size %lu < %lu",
 	     file.c_str(),line,
 	     it,attribute_array_[it].size(),nb,
 	     attribute_array_[it].size()>=nb);
     ASSERT5 ("ParticleData::check_arrays_",
-	     "%s:%d particle_count_[%d] is size %d < %d",
+	     "%s:%d particle_count_[%lu] is size %lu < %lu",
 	     file.c_str(),line,
 	     it,particle_count_[it].size(),nb,
 	     particle_count_[it].size()>=nb);
     ASSERT5 ("ParticleData::check_arrays_",
-	     "%s:%d attribute_align_[%d] is size %d < %d",
+	     "%s:%d attribute_align_[%lu] is size %lu < %lu",
 	     file.c_str(),line,
 	     it,attribute_align_[it].size(),nb,
 	     attribute_align_[it].size()>=nb);

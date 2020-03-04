@@ -18,6 +18,8 @@ module mesh {
   initnode void register_sum_long_double_8(void);
   initnode void register_sum_long_double_n(void);
 
+  initnode void mutex_init_hierarchy();
+
   readonly int MsgCoarsen::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefine::counter[CONFIG_NODE_SIZE];
   readonly int MsgRefresh::counter[CONFIG_NODE_SIZE];
@@ -43,6 +45,8 @@ module mesh {
   PUPable ItIndexRange;
   PUPable MaskPng;
   PUPable MaskExpr;
+  PUPable MethodCloseFiles;
+  PUPable MethodNull;
   PUPable MethodTrace;
   PUPable OutputCheckpoint;
   PUPable OutputData;
@@ -65,7 +69,6 @@ module mesh {
   PUPable Stopping;
   PUPable Units;
 
-  // depreciated
   message FieldMsg {
       char a[];
   };
@@ -108,7 +111,7 @@ module mesh {
     entry void p_compute_enter();
 
     entry void p_compute_continue();
-    entry void r_compute_continue();
+    entry void r_compute_continue(CkReductionMsg *);
 
     entry void p_compute_exit();
     entry void r_compute_exit(CkReductionMsg *);
@@ -171,6 +174,8 @@ module mesh {
     entry void p_refresh_continue();
     entry void p_refresh_exit();
     entry void r_refresh_exit(CkReductionMsg *);
+
+    entry void p_new_refresh_recv (MsgRefresh * msg);
 
     entry void p_refresh_child
       (int n, char a[n], int ic3[3]);

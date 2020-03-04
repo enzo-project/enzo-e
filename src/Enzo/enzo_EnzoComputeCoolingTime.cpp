@@ -73,9 +73,7 @@ void EnzoComputeCoolingTime::compute_(Block * block,
 
   Field field = enzo_block->data()->field();
 
-  const int in = cello::index_static();
   const EnzoConfig * enzo_config = enzo::config();
-
 
   ASSERT("EnzoComputeCoolingTime::compute_()",
          "Grackle must be enabled in order to compute the cooling time",

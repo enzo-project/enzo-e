@@ -43,15 +43,30 @@ public: // interface
   /// default constructor
   EnzoSolverBiCgStab()
     : Solver(),
-      res_tol_(0.0),
-      A_(NULL),
+      is_alpha_(-1),  is_beta_n_(-1),  is_beta_d_(-1),   is_rho0_(-1),
+      is_err_(-1),    is_err0_(-1),    is_err_min_(-1),  is_err_max_(-1),
+      is_omega_(-1),  is_omega_n_(-1), is_omega_d_(-1),  is_rr_(-1),     
+      is_r0s_(-1),    is_c_(-1),       is_bs_(-1),       is_xs_(-1),
+      is_bnorm_(-1),  is_vr0_(-1),     is_ys_(-1),       is_vs_(-1),
+      is_us_(-1),     is_qs_(-1),      is_dot_sync_(-1), is_iter_(-1),
+      function_(),
+      res_tol_(0),
+      A_(nullptr),
       index_precon_(-1),
-      iter_max_(0), 
-      ir_(-1), ir0_(-1), ip_(-1), 
-      iy_(-1), iv_(-1), iq_(-1), iu_(-1),
-      m_(0), mx_(0), my_(0), mz_(0),
+      iter_max_(-1),
+      ir_(-1),
+      ir0_(-1),
+      ip_(-1),
+      iy_(-1),
+      iv_(-1),
+      iq_(-1),
+      iu_(-1),
+      m_(0),
+      mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
-      coarse_level_(0)
+      coarse_level_(0),
+      ir_loop_3_(-1),
+      ir_loop_9_(-1)
   {};
 
   /// Charm++ PUP::able declarations
@@ -60,6 +75,13 @@ public: // interface
   /// Charm++ PUP::able migration constructor
   EnzoSolverBiCgStab(CkMigrateMessage* m)
     : Solver(m),
+      is_alpha_(-1),  is_beta_n_(-1),  is_beta_d_(-1),   is_rho0_(-1),
+      is_err_(-1),    is_err0_(-1),    is_err_min_(-1),  is_err_max_(-1),
+      is_omega_(-1),  is_omega_n_(-1), is_omega_d_(-1),  is_rr_(-1),     
+      is_r0s_(-1),    is_c_(-1),       is_bs_(-1),       is_xs_(-1),
+      is_bnorm_(-1),  is_vr0_(-1),     is_ys_(-1),       is_vs_(-1),
+      is_us_(-1),     is_qs_(-1),      is_dot_sync_(-1), is_iter_(-1),
+      function_(),
       res_tol_(0.0),
       A_(NULL),
       index_precon_(-1),
@@ -68,7 +90,10 @@ public: // interface
       iy_(-1), iv_(-1), iq_(-1), iu_(-1),
       m_(0), mx_(0), my_(0), mz_(0),
       gx_(0), gy_(0), gz_(0),
-       coarse_level_(0)
+      coarse_level_(0),
+      ir_loop_3_(-1),
+      ir_loop_9_(-1)
+          
   {}
 
   /// Charm++ Pack / Unpack function
@@ -126,6 +151,9 @@ public: // interface
     p | is_dot_sync_;
     p | is_iter_;
     p | coarse_level_;
+    p | ir_loop_3_;
+    p | ir_loop_9_;
+
   }
 
   
@@ -181,7 +209,7 @@ public: // interface
 
   void dot_recv_parent   (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
-			  int i_function);
+			  int i_function, int iter);
   void dot_recv_children   (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
 			  int i_function);
@@ -225,10 +253,10 @@ public: // interface
 			  int i_function);
   void dot_compute_tree_ (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
-			  int i_function);
+			  int i_function, int iter);
   void dot_send_parent_  (EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
-			  int i_function);
+			  int i_function, int iter);
   void dot_send_children_(EnzoBlock *, int, long double *,
 			  const std::vector<int> & is_array,
 			  int i_function);
@@ -263,34 +291,37 @@ protected:
 
   int & s_iter_(EnzoBlock * block)
   { return *block->data()->scalar_int().value(is_iter_); }
+
+  /// Register all refresh phases
+  void new_register_refresh_();
   
 protected: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
   /// Corresponding ScalarData id's for solve_type == solve_tree
-  int is_alpha_;  // [*]
-  int is_beta_n_; // [*]
-  int is_beta_d_; // [*]
-  int is_rho0_;   // [*]
+  int is_alpha_;
+  int is_beta_n_;
+  int is_beta_d_;
+  int is_rho0_;
   int is_err_;
   int is_err0_;
   int is_err_min_;
   int is_err_max_;
-  int is_omega_;  // [ ]
-  int is_omega_n_;// [ ]
-  int is_omega_d_;// [ ]
-  int is_rr_;     // [ ]
-  int is_r0s_;    // [ ]
-  int is_c_;      // [ ]
-  int is_bs_;     // [ ]
-  int is_xs_;     // [ ]
-  int is_bnorm_;  // [ ]
-  int is_vr0_;    // [ ]
-  int is_ys_;     // [ ]
-  int is_vs_;     // [ ]
-  int is_us_;     // [ ]
-  int is_qs_;     // [ ]
+  int is_omega_;
+  int is_omega_n_;
+  int is_omega_d_;
+  int is_rr_;     
+  int is_r0s_;
+  int is_c_;
+  int is_bs_;
+  int is_xs_;
+  int is_bnorm_;
+  int is_vr0_;
+  int is_ys_;
+  int is_vs_;
+  int is_us_;
+  int is_qs_;
   int is_dot_sync_;
   int is_iter_;
 
@@ -327,6 +358,9 @@ protected: // attributes
   /// The level of the tree solve if solve_type == solve_tree
   int coarse_level_;
 
+  /// Refresh id's
+  int ir_loop_3_;
+  int ir_loop_9_;
 };
 
 #endif /* ENZO_ENZO_SOLVER_BICGSTAB_HPP */

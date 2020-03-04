@@ -25,7 +25,10 @@ public: // interface
        int num_field_data,
        double xm, double xp,
        double ym, double yp,
-       double zm, double zp) throw();
+       double zm, double zp,
+       // specifying field_descr and particle_descr included for test code only
+       FieldDescr * field_descr = nullptr, 
+       ParticleDescr * particle_descr = nullptr) throw();
 
   /// Destructor
   ~Data() throw();

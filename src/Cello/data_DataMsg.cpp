@@ -29,7 +29,7 @@ int DataMsg::data_size () const
   Field field (field_descr, field_data_);
 
   const int n_ff = (ff) ? ff->data_size() : 0;
-  const int n_fa = (fa) ? ff->num_bytes_array(field) : 0;
+  const int n_fa = (ff) ? ff->num_bytes_array(field) : 0;
   const int n_pa = (pd) ? pd->data_size(particle_descr) : 0;
 
   int size = 0;
@@ -73,7 +73,7 @@ char * DataMsg::save_data (char * buffer) const
   ParticleData * pd = particle_data_;
 
   const int n_ff = (ff) ? ff->data_size() : 0;
-  const int n_fa = (fa) ? ff->num_bytes_array(field) : 0;
+  const int n_fa = (ff) ? ff->num_bytes_array(field) : 0;
   const int n_pa = (pd) ? pd->data_size(particle_descr) : 0;
 
   (*pi++) = n_ff;
@@ -205,7 +205,7 @@ void DataMsg::update (Data * data, bool is_local)
     if (is_local) {
 
       Field field_src(field_descr,fd);
-      
+
       ff->face_to_face(field_src, field_dst);
 
     } else { // ! is_local

@@ -32,11 +32,13 @@ public: // interface
     sync_id_ (-1),
     active_(true),
     callback_(0) ,
-    root_level_(0)
+    root_level_(0),
+    id_refresh_(-1),
+    id_solver_(-1)
   {
   }
 
-  /// empty constructor for charm++ pup()
+  /// Create an initialized Refresh object
   Refresh
   (int ghost_depth,
    int min_face_rank,
@@ -57,7 +59,9 @@ public: // interface
       sync_id_(sync_id),
       active_(active),
       callback_(0),
-      root_level_(0)
+      root_level_(0),
+      id_refresh_(-1),
+      id_solver_(-1)
   {
   }
 
@@ -78,9 +82,11 @@ public: // interface
     accumulate_(false),
     sync_type_(0),
     sync_id_ (-1),
-    active_(false),
+    active_(true),
     callback_(0),
-    root_level_(0)
+    root_level_(0),
+    id_refresh_(-1),
+    id_solver_(-1)
   {
   }
 
@@ -104,6 +110,8 @@ public: // interface
     p | active_;
     p | callback_;
     p | root_level_;
+    p | id_refresh_;
+    p | id_solver_;
   }
 
   //--------------------------------------------------
@@ -138,6 +146,9 @@ public: // interface
       field_list_dst_.push_back(id_field_dst);
     }
   }
+  
+  /// Add named fields to the list of fields to refresh
+  void add_field_src_dst(std::string field_src, std::string field_dst);
   
   /// All fields are refreshed
   void add_all_fields() {
@@ -266,16 +277,8 @@ public: // interface
   int sync_type() const 
   { return sync_type_; }
 
-  int sync_load() const
-  { return 3*sync_id_; }
-  int sync_store() const
-  { return 3*sync_id_+1; }
   int sync_exit() const
   { return 3*sync_id_+2; }
-
-  int sync_id() 
-  {  return sync_id_; }
-
 
   void print() const 
   {
@@ -308,7 +311,7 @@ public: // interface
 
   /// Return loop limits 0:3 for 4x4x4 particle data array indices
   /// for the given neighbor
-  void index_limits
+  void get_particle_bin_limits
   (int rank,
    int refresh_type, 
    int if3[3], int ic3[3],
@@ -333,7 +336,7 @@ public: // interface
 	  upper[axis] = 4 - ic3[axis];
 	} else {
 	  print();
-	  ERROR1 ("Refresh::index_limits()",
+	  ERROR1 ("Refresh::get_particle_bin_limits()",
 		  "unknown refresh_type %d",
 		  refresh_type);
 	}
@@ -341,6 +344,22 @@ public: // interface
     }
   }
 
+  /// Set the new refresh id in new_refresh_list_[]
+  void set_id(int id_refresh)
+  { id_refresh_ = id_refresh; }
+
+  /// return the new refresh id in new_refresh_list_[]
+  int id() const
+  { return id_refresh_; }
+
+  /// Set the solver id in Problem::solver(id)
+  void set_solver_id(int id_solver)
+  { id_solver_ = id_solver; }
+
+  /// return the solver id (-1 if not initialized)
+  int solver_id() const
+  { return id_solver_; }
+  
   //--------------------------------------------------
 
   /// Return the number of bytes required to serialize the data object
@@ -357,9 +376,6 @@ public: // interface
   char * load_data (char * buffer);
 
   //--------------------------------------------------
-  
-private: // functions
-
 
 private: // attributes
 
@@ -386,7 +402,8 @@ private: // attributes
   /// Ghost zone depth
   int ghost_depth_;
 
-  /// minimum face rank to refresh (0 = corners, 1 = edges, etc.)
+  /// minimum face rank to refresh (2 include facets, 1 also edges, 0
+  /// also corners)
   int min_face_rank_;
 
   /// Which subset of adjacent Blocks to refresh with
@@ -409,6 +426,12 @@ private: // attributes
 
   /// Coarse level for neighbor_tree type
   int root_level_;
+
+  /// ID in new_refresh_list_[]
+  int id_refresh_;
+
+  /// ID of calling Solver
+  int id_solver_;
 };
 
 #endif /* PROBLEM_REFRESH_HPP */

@@ -77,9 +77,14 @@ public: // interface
     method_courant_global(1.0),
     method_list(),
     method_schedule_index(),
+    method_close_files_seconds_stagger(),
+    method_close_files_seconds_delay(),
+    method_close_files_group_size(),
     method_courant(),
     method_timestep(),
     method_trace_name(),
+  // MethodNull
+    method_null_dt(0.0),
     monitor_debug(false),
     monitor_verbose(false),
     num_output(0),
@@ -130,6 +135,7 @@ public: // interface
     particle_batch_size(0),
     particle_group_list(),
     performance_papi_counters(),
+    performance_projections_on_at_start(true),
     performance_warnings(false),
     performance_on_schedule_index(-1),
     performance_off_schedule_index(-1),
@@ -225,9 +231,13 @@ public: // interface
       method_courant_global(1.0),
       method_list(),
       method_schedule_index(),
+      method_close_files_seconds_stagger(),
+      method_close_files_seconds_delay(),
+      method_close_files_group_size(),
       method_courant(),
       method_timestep(),
       method_trace_name(),
+      method_null_dt(0.0),
       monitor_debug(false),
       monitor_verbose(false),
       num_output(0),
@@ -278,6 +288,7 @@ public: // interface
       particle_batch_size(0),
       particle_group_list(),
       performance_papi_counters(),
+      performance_projections_on_at_start(true),
       performance_warnings(false),
       performance_on_schedule_index(-1),
       performance_off_schedule_index(-1),
@@ -420,9 +431,14 @@ public: // attributes
   double                     method_courant_global;
   std::vector<std::string>   method_list;
   std::vector<int>           method_schedule_index;
+  std::vector<double>        method_close_files_seconds_stagger;
+  std::vector<double>        method_close_files_seconds_delay;
+  std::vector<int>           method_close_files_group_size;
   std::vector<double>        method_courant;
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;
+  double                     method_null_dt;
+
 
   // Monitor
 
@@ -491,6 +507,7 @@ public: // attributes
   // Performance
 
   std::vector<std::string>   performance_papi_counters;
+  bool                       performance_projections_on_at_start;
   bool                       performance_warnings;
   int                        performance_on_schedule_index;
   int                        performance_off_schedule_index;

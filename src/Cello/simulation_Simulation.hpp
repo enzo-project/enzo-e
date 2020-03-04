@@ -288,14 +288,18 @@ public: // virtual functions
   // Monitor
   //--------------------------------------------------
 
-  void p_monitor();
+  void monitor_output();
 
-  void p_monitor_performance()
-  { monitor_performance(); };
+   void p_monitor_performance()
+   { monitor_performance(); };
+
+  void monitor_performance();
 
   /// Reduction for performance data
-  void r_monitor_performance (CkReductionMsg * msg);
+  void r_monitor_performance_reduce (CkReductionMsg * msg);
 
+  float timer() { return timer_.value(); }
+  
   //--------------------------------------------------
   // Data
   //--------------------------------------------------
@@ -315,10 +319,85 @@ public: // virtual functions
   /// Remove a Particle from this local branch
   void data_delete_particles(int64_t count) ;
 
-  virtual void monitor_performance();
-
   void set_checkpoint(char * checkpoint)
   { strncpy (dir_checkpoint_,checkpoint,255);}
+
+  void set_solver_iter(int is, int iter)
+  {
+    if (num_solver_iter_.size() < size_t(is+1)) {
+      num_solver_iter_.resize(is+1);
+    }
+    num_solver_iter_[is] += iter;
+    if (max_solver_iter_.size() < size_t(is+1)) {
+      max_solver_iter_.resize(is+1);
+    }
+    max_solver_iter_[is] = std::max(max_solver_iter_[is],iter);
+  }
+
+  int get_solver_num_iter(int is)
+  {
+    if (num_solver_iter_.size() < is+1) {
+      num_solver_iter_.resize(is+1);
+    }
+    return num_solver_iter_[is];
+  }
+  int get_solver_max_iter(int is)
+  {
+    if (max_solver_iter_.size() < is+1) {
+      max_solver_iter_.resize(is+1);
+    }
+    return max_solver_iter_[is];
+  }
+
+  void clear_solver_iter()
+  {
+    for (size_t i=0; i<num_solver_iter_.size(); i++)
+      num_solver_iter_[i]=0;
+    for (size_t i=0; i<max_solver_iter_.size(); i++)
+      max_solver_iter_[i]=0;
+  }
+  
+  //--------------------------------------------------
+  // New Refresh
+  //--------------------------------------------------
+
+  /// refresh_register
+  int new_register_refresh (const Refresh & refresh)
+  {
+    const int id_refresh = new_refresh_list_.size();
+    ASSERT("Simulation::new_register_refresh()",
+	   "id_refresh must be >= 0",
+	   (id_refresh >= 0));
+    new_refresh_list_.push_back(refresh);
+    new_refresh_list_[id_refresh].set_id(id_refresh);
+#ifdef DEBUG_NEW_REFRESH  
+    CkPrintf ("DEBUG_NEW_REFRESH register id %d\n",id_refresh);
+#endif    
+    return id_refresh;
+  }
+  void new_refresh_set_name (int id, std::string name)
+  {
+    if (id >= int(new_refresh_name_.size()))
+      new_refresh_name_.resize(id+1);
+    new_refresh_name_[id] = name;
+#ifdef DEBUG_NEW_REFRESH  
+    CkPrintf ("DEBUG_NEW_REFRESH register name %d %s\n",id,name.c_str());
+#endif    
+  }
+  
+  std::string new_refresh_name (int id) const
+  {
+    return (0 <= id && id < int(new_refresh_name_.size())) ?
+      new_refresh_name_[id] : "UNKNOWN";
+  }
+
+  /// Return the given refresh object
+  Refresh & new_refresh_list (int id_refresh)
+  { return new_refresh_list_[id_refresh]; }
+
+  /// Return the number of refresh objects registered
+  int new_refresh_count() const
+  { return new_refresh_list_.size(); }
 
 protected: // functions
 
@@ -373,6 +452,7 @@ protected: // functions
       }
     }
   }
+
 protected: // attributes
 
 #if defined(CELLO_DEBUG) || defined(CELLO_VERBOSE)
@@ -459,11 +539,17 @@ protected: // attributes
   /// Particle descriptor
   ParticleDescr * particle_descr_;
 
+  /// Output synchronization (depreciated)
   Sync sync_output_begin_;
   Sync sync_output_write_;
 
   Sync sync_new_output_start_;
   Sync sync_new_output_next_;
+
+  /// Refresh phase lists
+
+  std::vector < Refresh >     new_refresh_list_;
+  std::vector < std::string > new_refresh_name_;
 
   /// Saved latest checkpoint directory for creating symlink
   char dir_checkpoint_[256];
@@ -472,6 +558,11 @@ protected: // attributes
 
   /// Currently active output object
   int index_output_;
+
+  /// Sum of solver iterations over blocks for solver i
+  std::vector<int> num_solver_iter_;
+  /// Max of solver iterations over blocks for solver i
+  std::vector<int> max_solver_iter_;
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */

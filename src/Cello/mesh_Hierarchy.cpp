@@ -11,18 +11,32 @@
 
 #include "charm_mesh.hpp"
 
+//----------------------------------------------------------------------
+
+static CmiNodeLock hierarchy_node_lock;
+
+void mutex_init_hierarchy()
+{
+  hierarchy_node_lock = CmiCreateLock();
+}
+
 // #define CELLO_TRACE
 
 //----------------------------------------------------------------------
+
+int Hierarchy::num_blocks_node = 0;
+int64_t Hierarchy::num_particles_node = 0;
 
 Hierarchy::Hierarchy 
 (
  const Factory * factory,
  int refinement,
+ int min_level,
  int max_level) throw ()
   :
   factory_((Factory *)factory),
   refinement_(refinement),
+  min_level_(min_level),
   max_level_(max_level),
   num_blocks_(0),
   num_blocks_level_(),
@@ -35,7 +49,7 @@ Hierarchy::Hierarchy
   TRACE("Hierarchy::Hierarchy()");
   // Initialize extents
 				   
-  num_blocks_level_.resize(max_level+1);
+  num_blocks_level_.resize(max_level - min_level + 1);
 
   for (int i=0; i<3; i++) {
     root_size_[i] = 1;
@@ -65,6 +79,7 @@ void Hierarchy::pup (PUP::er &p)
   if (up) factory_ = new Factory;
   p | *factory_;
   p | refinement_;
+  p | min_level_;
   p | max_level_;
 
   p | num_blocks_;
@@ -182,6 +197,33 @@ void Hierarchy::deallocate_blocks() throw()
 
 //----------------------------------------------------------------------
 
+void Hierarchy::increment_block_count(int count, int level)
+{
+  num_blocks_ += count;
+  const int n=num_blocks_level_.size();
+  const int index = level - min_level_;
+  ASSERT1("Hierarchy::increment_block_count",
+          "Block level %d exceeds block count array",
+          level, 0 <= index && index < n);
+  num_blocks_level_[level-min_level_] += count;
+  CmiLock(hierarchy_node_lock);
+  Hierarchy::num_blocks_node += count;
+  CmiUnlock(hierarchy_node_lock);
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::increment_particle_count(int64_t count)
+{
+  num_particles_ += count;
+  CmiLock(hierarchy_node_lock);
+  Hierarchy::num_particles_node += count;
+  CmiUnlock(hierarchy_node_lock);
+  
+}
+
+//----------------------------------------------------------------------
+
 CProxy_Block Hierarchy::new_block_proxy ( bool allocate_data) throw()
 {
   TRACE("Creating block_array_");
@@ -239,7 +281,7 @@ void Hierarchy::create_block_array ( bool allocate_data) throw()
 //----------------------------------------------------------------------
 
 void Hierarchy::create_subblock_array
-(bool allocate_data, int min_level) throw()
+(bool allocate_data) throw()
 {
   // determine block size
 
@@ -257,7 +299,7 @@ void Hierarchy::create_subblock_array
 
   factory_->create_subblock_array
     (data_msg,
-     block_array_,min_level,
+     block_array_,min_level_,
      blocking_[0],blocking_[1],blocking_[2],
      mbx,mby,mbz,
      num_field_blocks);

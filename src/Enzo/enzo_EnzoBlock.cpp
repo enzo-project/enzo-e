@@ -167,8 +167,7 @@ EnzoBlock::EnzoBlock
 ( MsgRefine * msg )
   : BASE_ENZO_BLOCK ( msg ),
     dt(dt_),
-    redshift(0.0),
-    SubgridFluxes(NULL)
+    redshift(0.0)
 {
 #ifdef DEBUG_ENZO_BLOCK
   CkPrintf ("%d %p BEGIN TRACE_BLOCK EnzoBlock(msg)\n",CkMyPe(),this);
@@ -188,8 +187,7 @@ EnzoBlock::EnzoBlock
 ( process_type ip_source)
   : BASE_ENZO_BLOCK ( ip_source ),
     dt(dt_),
-    redshift(0.0),
-    SubgridFluxes(NULL)
+    redshift(0.0)
 {
 }
 
@@ -361,10 +359,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 
   fprintf (fp,"EnzoBlock: dt %g\n", dt);
 
-  // fluxes
-
-  fprintf (fp,"EnzoBlock: SubgridFluxes %p\n", SubgridFluxes);
-  
 }
 
 //----------------------------------------------------------------------

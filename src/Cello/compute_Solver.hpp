@@ -30,23 +30,7 @@ public: // interface
 	  int max_level = std::numeric_limits<int>::max()) throw();
 
   /// Create an uninitialized Solver
-  Solver () throw()
-  : PUP::able(),
-    name_(""),
-    ix_(-1),ib_(-1),
-    refresh_list_(),
-    monitor_iter_(0),
-    restart_cycle_(1),
-    callback_(0),
-    index_(0),
-    min_level_(0),
-    max_level_(std::numeric_limits<int>::max()),
-    id_sync_(0),
-    solve_type_(solve_leaf)
-  {}
-
-  /// Destructor
-  virtual ~Solver() throw();
+  Solver () throw();
 
   /// Charm++ PUP::able declarations
   PUPable_abstract(Solver);
@@ -55,7 +39,6 @@ public: // interface
     : PUP::able (m),
     name_(""),
     ix_(-1),ib_(-1),
-    refresh_list_(),
     monitor_iter_(0),
     restart_cycle_(1),
     callback_(0),
@@ -63,7 +46,12 @@ public: // interface
     min_level_(- std::numeric_limits<int>::max()),
     max_level_(  std::numeric_limits<int>::max()),
     id_sync_(0),
-    solve_type_(solve_leaf)
+    solve_type_(solve_leaf),
+    ir_post_(-1)
+  { }
+
+  /// Destructor
+  virtual ~Solver() throw()
   { }
   
   /// CHARM++ Pack / Unpack function
@@ -76,7 +64,6 @@ public: // interface
     p | name_;
     p | ix_;
     p | ib_;
-    p | refresh_list_;
     p | monitor_iter_;
     p | restart_cycle_;
     p | callback_;
@@ -85,6 +72,7 @@ public: // interface
     p | max_level_;
     p | id_sync_;
     p | solve_type_;
+    p | ir_post_;
   }
 
   Refresh * refresh(size_t index=0) ;
@@ -160,12 +148,6 @@ public: // interface
     return retval;
   }
 
-  /// Whether Block is active
-  bool is_active_(Block * block) const;
-
-  /// Whether solution is defined on this Block
-  bool is_finest_(Block * block) const;
-  
   /// Which subset of Blocks the solver is defined on; see enum solve_type
   /// for supported types
   int solve_type() const
@@ -183,6 +165,12 @@ public: // virtual functions
   /// Return the type of this solver
   virtual std::string type () const = 0;
 
+  /// Whether Block is active
+  virtual bool is_active_(Block * block) const;
+
+  /// Whether solution is defined on this Block
+  virtual bool is_finest_(Block * block) const;
+  
 protected: // functions
 
   /// Initialize a solve
@@ -195,12 +183,17 @@ protected: // functions
 		       double rr0=0.0,
 		       double rr_min=0.0, double rr=0.0, double rr_max=0.0,
 		       bool final = false) throw();
+  /// Add a new refresh object
+  int add_new_refresh_ ();
+
+  /// Return the specified Refresh object
+  Refresh & new_refresh(int ir);
   
-  int add_refresh (int ghost_depth, 
-		   int min_face_rank, 
-		   int neighbor_type, 
-		   int sync_type,
-		   int sync_id);
+  /// Return the index of the main post-refresh object
+  int refresh_post_id() const;
+
+  /// Return the main post-refresh object for the solver
+  Refresh & refresh_post();
 
   /// Perform vector copy X <- Y
   template <class T>
@@ -217,7 +210,7 @@ protected: // functions
   { return this->id_sync_; }
 
   bool reuse_solution_ (int cycle) const throw();
-    
+
 protected: // attributes
 
   /// Name of the solver
@@ -229,9 +222,6 @@ protected: // attributes
   /// Field id for right-hand side
   int ib_;
   
-  ///  Refresh object
-  std::vector<Refresh *> refresh_list_;
-
   /// How often to write output
   int monitor_iter_;
 
@@ -256,6 +246,8 @@ protected: // attributes
   /// Type of solver; see enum solve_type for supported types
   int solve_type_;
 
+  /// New Refresh id for after the solver
+  int ir_post_;
 };
 
 #endif /* COMPUTE_SOLVER_HPP */

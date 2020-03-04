@@ -13,15 +13,16 @@
 
 //----------------------------------------------------------------------
 
-long MsgRefresh::counter[CONFIG_NODE_SIZE] = {0};
+long MsgRefresh::counter[CONFIG_NODE_SIZE] = { };
 
 //----------------------------------------------------------------------
 
 MsgRefresh::MsgRefresh()
     : CMessage_MsgRefresh(),
       is_local_(true),
-      data_msg_(NULL),
-      buffer_(NULL)
+      id_refresh_(-1),
+      data_msg_(nullptr),
+      buffer_(nullptr)
 {
   ++counter[cello::index_static()]; 
 }
@@ -32,7 +33,10 @@ MsgRefresh::~MsgRefresh()
 {
   --counter[cello::index_static()];
   delete data_msg_;
-  data_msg_ = 0;
+  data_msg_ = nullptr;
+  CkFreeMsg (buffer_);
+  buffer_=nullptr;
+
 }
 
 //----------------------------------------------------------------------
@@ -55,12 +59,14 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH packing %p\n",
 	    CkMyPe(),__FILE__,__LINE__,msg);
 #endif  
-  if (msg->buffer_ != NULL) return msg->buffer_;
+  if (msg->buffer_ != nullptr) return msg->buffer_;
+
   int size = 0;
 
-  size += sizeof(int); // have_data
-
-  int have_data = (msg->data_msg_ != NULL);
+  size += sizeof(int); // id_refresh
+  size += sizeof(int);  // have_data
+  int have_data = (msg->data_msg_ != nullptr);
+  
   if (have_data) {
     // data_msg_
     size += msg->data_msg_->data_size();
@@ -83,7 +89,12 @@ void * MsgRefresh::pack (MsgRefresh * msg)
 
   pc = buffer;
 
-  have_data = (msg->data_msg_ != NULL);
+  (*pi++) = msg->id_refresh_;
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
+#endif  
+
+  have_data = (msg->data_msg_ != nullptr);
   (*pi++) = have_data;
   if (have_data) {
     pc = msg->data_msg_->save_data(pc);
@@ -94,7 +105,7 @@ void * MsgRefresh::pack (MsgRefresh * msg)
   // Return the buffer
 
   ASSERT2("MsgRefresh::pack()",
-	  "buffer size mismatch %d allocated %d packed",
+	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
 
@@ -130,12 +141,17 @@ MsgRefresh * MsgRefresh::unpack(void * buffer)
 
   pc = (char *) buffer;
 
+  msg->id_refresh_ = (*pi++) ;
+#ifdef DEBUG_MSG_REFRESH
+  CkPrintf ("DEBUG_MSG_REFRESH MsgRefresh::pack id_refresh=%d\n",msg->id_refresh_);
+#endif  
+
   int have_data = (*pi++);
   if (have_data) {
     msg->data_msg_ = new DataMsg;
     pc = msg->data_msg_->load_data(pc);
   } else {
-    msg->data_msg_ = NULL;
+    msg->data_msg_ = nullptr;
   }
 
   // 3. Save the input buffer for freeing later
@@ -153,11 +169,12 @@ void MsgRefresh::update (Data * data)
   CkPrintf ("%d %s:%d DEBUG_MSG_REFRESH updating %p\n",
 	    CkMyPe(),__FILE__,__LINE__,this);
 #endif  
-  if (data_msg_ == NULL) return;
+  if (data_msg_ == nullptr) return;
 
   data_msg_->update(data,is_local_);
 
   if (!is_local_) {
       CkFreeMsg (buffer_);
+      buffer_ = nullptr;
   }
 }

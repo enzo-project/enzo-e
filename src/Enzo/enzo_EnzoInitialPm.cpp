@@ -5,9 +5,8 @@
 /// @date     2016-04-29
 /// @brief    Implementation of EnzoInitialPm for initializing the PM method
 
-#include "cello.hpp"
-
 #include "enzo.hpp"
+#include <random>
 
 //----------------------------------------------------------------------
 
@@ -92,104 +91,103 @@ void EnzoInitialPm::uniform_placement_
   const double hy = yl / ny;
   const double hz = zl / nz;
 
-  const int it = particle.type_index("dark");
+  if (particle.type_exists("dark")) {
+    const int it = particle.type_index("dark");
 
-  const int ia_x = (rank >= 1) ? particle.attribute_index (it,"x") : -1;
-  const int ia_y = (rank >= 2) ? particle.attribute_index (it,"y") : -1;
-  const int ia_z = (rank >= 3) ? particle.attribute_index (it,"z") : -1;
+    const int ia_x = (rank >= 1) ? particle.attribute_index (it,"x") : -1;
+    const int ia_y = (rank >= 2) ? particle.attribute_index (it,"y") : -1;
+    const int ia_z = (rank >= 3) ? particle.attribute_index (it,"z") : -1;
 
-  double * xv = (rank >= 1) ? new double [nx] : NULL;
-  double * yv = (rank >= 2) ? new double [ny] : NULL;
-  double * zv = (rank >= 3) ? new double [nz] : NULL;
+    double * xv = (rank >= 1) ? new double [nx] : NULL;
+    double * yv = (rank >= 2) ? new double [ny] : NULL;
+    double * zv = (rank >= 3) ? new double [nz] : NULL;
 
-  bool * bitmask = new bool[nx*ny*nz];
+    bool * bitmask = new bool[nx*ny*nz];
 
-  if (rank >= 1) {
-    for (int ix=0; ix<nx; ++ix) xv[ix] = xm + (ix + 0.5)*hx;
-  }
-  if (rank >= 2) {
-    for (int iy=0; iy<ny; ++iy) yv[iy] = ym + (iy + 0.5)*hy;
-  }
-  if (rank >= 3) {
-    for (int iz=0; iz<nz; ++iz) zv[iz] = zm + (iz + 0.5)*hz;
-  }
+    if (rank >= 1) {
+      for (int ix=0; ix<nx; ++ix) xv[ix] = xm + (ix + 0.5)*hx;
+    }
+    if (rank >= 2) {
+      for (int iy=0; iy<ny; ++iy) yv[iy] = ym + (iy + 0.5)*hy;
+    }
+    if (rank >= 3) {
+      for (int iz=0; iz<nz; ++iz) zv[iz] = zm + (iz + 0.5)*hz;
+    }
 
-  double t = block->time();
+    double t = block->time();
 
-  mask_->evaluate (bitmask, t, 
-		   nx, nx, xv,
-		   ny, ny, yv,
-		   nz, nz, zv);
+    mask_->evaluate (bitmask, t, 
+                     nx, nx, xv,
+                     ny, ny, yv,
+                     nz, nz, zv);
 
-  // count particles
-  int np = 0;
-  const int rp = (rank <= 1) ? r : (rank <= 2) ? r*r : r*r*r;
+    // count particles
+    int np = 0;
+    const int rp = (rank <= 1) ? r : (rank <= 2) ? r*r : r*r*r;
 
-  for (int iz=0; iz<nz; ++iz) {
-    for (int iy=0; iy<ny; ++iy) {
-      for (int ix=0; ix<nx; ++ix) {
-	int i = ix + nx*(iy + ny*iz);
-	if (bitmask[i]) {
-	  np += rp;
-	}
+    for (int iz=0; iz<nz; ++iz) {
+      for (int iy=0; iy<ny; ++iy) {
+        for (int ix=0; ix<nx; ++ix) {
+          int i = ix + nx*(iy + ny*iz);
+          if (bitmask[i]) {
+            np += rp;
+          }
+        }
       }
     }
-  }
 
-  // ... insert uninitialized dark matter particles
+    // ... insert uninitialized dark matter particles
 
-  particle.insert_particles (it,np);
-  enzo::simulation()->data_insert_particles(np);
+    particle.insert_particles (it,np);
+    enzo::simulation()->data_insert_particles(np);
   
-  const int npb = particle.batch_size();
+    const int npb = particle.batch_size();
 
-  int ib=0;  // batch counter
-  int ipb=0;  // particle / batch counter 
+    int ib=0;  // batch counter
+    int ipb=0;  // particle / batch counter 
 
-  enzo_float * xa = 0;
-  enzo_float * ya = 0;
-  enzo_float * za = 0;
+    enzo_float * xa = 0;
+    enzo_float * ya = 0;
+    enzo_float * za = 0;
 
-  const int ps  = particle.stride(it,ia_x);
+    const int ps  = particle.stride(it,ia_x);
 
-  for (int iz=0; iz<nz; ++iz) {
-    for (int iy=0; iy<ny; ++iy) {
-      for (int ix=0; ix<nx; ++ix) {
-	int i = ix + nx*(iy + ny*iz);
-	if (bitmask[i]) {
-	  for (int kz = 0; kz<rz; kz++) {
-	    for (int ky = 0; ky<ry; ky++) {
-	      for (int kx = 0; kx<rx; kx++) {
-		if (ipb % npb == 0) {
-		  if (rank >= 1) xa = (enzo_float *) particle.attribute_array(it,ia_x,ib);
-		  if (rank >= 2) ya = (enzo_float *) particle.attribute_array(it,ia_y,ib);
-		  if (rank >= 3) za = (enzo_float *) particle.attribute_array(it,ia_z,ib);
-		}
-		if (rank >= 1) xa[ipb*ps] = xv[ix] - 0.5*hx + (kx+0.5)*hx/rx;
-		if (rank >= 2) ya[ipb*ps] = yv[iy] - 0.5*hy + (ky+0.5)*hy/ry;
-		if (rank >= 3) za[ipb*ps] = zv[iz] - 0.5*hz + (kz+0.5)*hz/rz;
+    for (int iz=0; iz<nz; ++iz) {
+      for (int iy=0; iy<ny; ++iy) {
+        for (int ix=0; ix<nx; ++ix) {
+          int i = ix + nx*(iy + ny*iz);
+          if (bitmask[i]) {
+            for (int kz = 0; kz<rz; kz++) {
+              for (int ky = 0; ky<ry; ky++) {
+                for (int kx = 0; kx<rx; kx++) {
+                  if (ipb % npb == 0) {
+                    if (rank >= 1) xa = (enzo_float *) particle.attribute_array(it,ia_x,ib);
+                    if (rank >= 2) ya = (enzo_float *) particle.attribute_array(it,ia_y,ib);
+                    if (rank >= 3) za = (enzo_float *) particle.attribute_array(it,ia_z,ib);
+                  }
+                  if (rank >= 1) xa[ipb*ps] = xv[ix] - 0.5*hx + (kx+0.5)*hx/rx;
+                  if (rank >= 2) ya[ipb*ps] = yv[iy] - 0.5*hy + (ky+0.5)*hy/ry;
+                  if (rank >= 3) za[ipb*ps] = zv[iz] - 0.5*hz + (kz+0.5)*hz/rz;
 
-		ipb++;
+                  ipb++;
 
-		if (ipb == npb) {
-		  ipb=0;
-		  ib++;
-		}
+                  if (ipb == npb) {
+                    ipb=0;
+                    ib++;
+                  }
 
-	      }
-	    }
-	  }
-	}
+                }
+              }
+            }
+          }
+        }
       }
     }
+    delete [] xv;
+    delete [] yv;
+    delete [] zv;
+    delete [] bitmask;
   }
-
-
-  delete [] xv;
-  delete [] yv;
-  delete [] zv;
-  delete [] bitmask;
-
 }
 
 //----------------------------------------------------------------------
@@ -289,9 +287,12 @@ void EnzoInitialPm::density_placement_
 
   const int ps  = particle.stride(it,ia_x);
 
+  std::random_device rd;
+  std::uniform_real_distribution<enzo_float> rand_dist_0_1(0.0, 1.0);
+  
   for (int ip=0; ip<np; ip++) {
 
-    double r = rmax*rand()/RAND_MAX;
+    double r = rmax*rand_dist_0_1(rd);
 
     int imin=0;
     int imax=nx*ny*nz;
@@ -318,9 +319,9 @@ void EnzoInitialPm::density_placement_
     // ;
 
     // randomize within cell
-    double x = (rank >= 1) ? xs[ims] + hx*rand()/(RAND_MAX+1.0) : 0;
-    double y = (rank >= 2) ? ys[ims] + hy*rand()/(RAND_MAX+1.0) : 0;
-    double z = (rank >= 3) ? zs[ims] + hz*rand()/(RAND_MAX+1.0) : 0;
+    double x = (rank >= 1) ? xs[ims] + hx*rand_dist_0_1(rd) : 0.0;
+    double y = (rank >= 2) ? ys[ims] + hy*rand_dist_0_1(rd) : 0.0;
+    double z = (rank >= 3) ? zs[ims] + hz*rand_dist_0_1(rd) : 0.0;
     
     // ... if new batch then update position arrays
     if (ipb % npb == 0) {

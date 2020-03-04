@@ -33,6 +33,13 @@ public: // interface
   MsgRefresh & operator= (const MsgRefresh & data_msg) throw()
   { return *this; }
 
+  // Set the new refresh object id
+  void set_new_refresh_id(int id_refresh)
+  { id_refresh_ = id_refresh; }
+
+  int id_refresh() const
+  { return id_refresh_; }
+  
   // Set the DataMsg object
   void set_data_msg (DataMsg * data_msg);
 
@@ -51,6 +58,9 @@ protected: // attributes
 
   /// Whether destination is local or remote
   bool is_local_;
+
+  /// New Refresh object id associated with the message
+  int id_refresh_;
 
   DataMsg * data_msg_;
 

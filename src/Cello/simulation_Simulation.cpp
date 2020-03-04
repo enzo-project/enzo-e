@@ -40,7 +40,7 @@ Simulation::Simulation
   timer_(),
   performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-  projections_tracing_(false),
+  projections_tracing_(true),
   projections_schedule_on_(NULL),
   projections_schedule_off_(NULL),
 #endif
@@ -58,7 +58,10 @@ Simulation::Simulation
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
-  index_output_(-1)
+  new_refresh_list_(),
+  index_output_(-1),
+  num_solver_iter_(),
+  max_solver_iter_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -102,7 +105,7 @@ Simulation::Simulation()
   timer_(),
   performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-  projections_tracing_(false),
+  projections_tracing_(true),
   projections_schedule_on_(NULL),
   projections_schedule_off_(NULL),
 #endif
@@ -110,6 +113,7 @@ Simulation::Simulation()
   monitor_(NULL),
   hierarchy_(NULL),
   scalar_descr_long_double_(NULL),
+  scalar_descr_double_(NULL),
   scalar_descr_int_(NULL),
   scalar_descr_sync_(NULL),
   scalar_descr_void_(NULL),
@@ -119,7 +123,10 @@ Simulation::Simulation()
   sync_output_write_(),
   sync_new_output_start_(),
   sync_new_output_next_(),
-  index_output_(-1)
+  new_refresh_list_(),
+  index_output_(-1),
+  num_solver_iter_(),
+  max_solver_iter_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -151,7 +158,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     timer_(),
     performance_(NULL),
 #ifdef CONFIG_USE_PROJECTIONS
-    projections_tracing_(false),
+    projections_tracing_(true),
     projections_schedule_on_(NULL),
     projections_schedule_off_(NULL),
 #endif
@@ -159,6 +166,7 @@ Simulation::Simulation (CkMigrateMessage *m)
     monitor_(NULL),
     hierarchy_(NULL),
     scalar_descr_long_double_(NULL),
+    scalar_descr_double_(NULL),
     scalar_descr_int_(NULL),
     scalar_descr_sync_(NULL),
     scalar_descr_void_(NULL),
@@ -168,8 +176,10 @@ Simulation::Simulation (CkMigrateMessage *m)
     sync_output_write_(),
     sync_new_output_start_(),
     sync_new_output_next_(),
-    index_output_(-1)
-
+    new_refresh_list_(),
+    index_output_(-1),
+    num_solver_iter_(),
+    max_solver_iter_()
 {
   for (int i=0; i<256; i++) dir_checkpoint_[i] = '\0';
 #ifdef DEBUG_SIMULATION
@@ -265,24 +275,26 @@ void Simulation::pup (PUP::er &p)
 
 #ifdef CONFIG_USE_PROJECTIONS
   p | projections_tracing_;
-  if (projections_tracing_) {
-    p | projections_schedule_on_;
-    p | projections_schedule_off_;
-  }
+  p | projections_schedule_on_;
+  p | projections_schedule_off_;
 #endif
 
   p | schedule_balance_;
 
+  p | new_refresh_list_;
+  p | new_refresh_name_;
+
   PUParray(p,dir_checkpoint_,256);
 
   ASSERT1("Simulation::pup()",
-	  "msg_refine_map_ is assumed to be empty but has size %d",
+	  "msg_refine_map_ is assumed to be empty but has size %lu",
 	  msg_refine_map_.size(),
 	  (msg_refine_map_.size() == 0));
 	  
   //  p | msg_refine_map_;
   p | index_output_;
-  
+  p | num_solver_iter_;
+  p | max_solver_iter_;
 }
 
 //----------------------------------------------------------------------
@@ -303,7 +315,7 @@ void Simulation::p_get_msg_refine(Index index)
 {
   MsgRefine * msg = get_msg_refine(index);
 #ifdef DEBUG_MSG_REFINE  
-  CkPrintf ("%d DEBUG_MSG_REFINE sending %p\n",msg);
+  CkPrintf ("%d DEBUG_MSG_REFINE sending %p\n",CkMyPe(),msg);
 #endif
   hierarchy_->block_array()[index].p_set_msg_refine(msg);
 }
@@ -430,6 +442,11 @@ void Simulation::initialize_performance_() throw()
 
 #ifdef CONFIG_USE_PROJECTIONS
   int index_on = config_->performance_on_schedule_index;
+  int index_off = config_->performance_off_schedule_index;
+  projections_tracing_ = config_->performance_projections_on_at_start;
+  if (projections_tracing_ == false) {
+    traceEnd();
+  }    
   if (index_on >= 0) {
     projections_schedule_on_ = Schedule::create
       ( config_->schedule_var[index_on],
@@ -439,7 +456,6 @@ void Simulation::initialize_performance_() throw()
 	config_->schedule_step[index_on],
 	config_->schedule_list[index_on]);
   }
-  int index_off = config_->performance_off_schedule_index;
   if (index_off >= 0) {
     projections_schedule_off_ = Schedule::create
       ( config_->schedule_var[index_off],
@@ -607,13 +623,6 @@ void Simulation::initialize_data_descr_() throw()
       c = particle_descr_->constant_value(it,ic);
       if (type == type_default) type = default_type;
       switch (type) {
-      case type_default:
-#ifdef CONFIG_PRECISION_SINGLE	
-	*f4 = config_->particle_constant_value[it][ic];
-#endif	
-#ifdef CONFIG_PRECISION_DOUBLE
-	*f8 = config_->particle_constant_value[it][ic];
-#endif	
       case type_single:     *f4 = config_->particle_constant_value[it][ic];
 	break;
       case type_double:     *f8 = config_->particle_constant_value[it][ic];
@@ -697,7 +706,9 @@ void Simulation::initialize_hierarchy_() throw()
   const int refinement = 2;
 
   hierarchy_ = factory()->create_hierarchy 
-    (refinement,config_->mesh_max_level);
+    (refinement,
+     config_->mesh_min_level,
+     config_->mesh_max_level);
 
   // Domain extents
 
@@ -763,10 +774,8 @@ void Simulation::initialize_block_array_() throw()
     hierarchy_->create_block_array (allocate_data);
 
     // Create the "sub-root" blocks if mesh_min_level < 0
-    if (config_->mesh_min_level < 0) {
-      hierarchy_->create_subblock_array
-	(allocate_data,
-	 config_->mesh_min_level);
+    if (hierarchy_->min_level() < 0) {
+      hierarchy_->create_subblock_array	(allocate_data);
     }
 
     hierarchy_->block_array().doneInserting();
@@ -816,7 +825,7 @@ void Simulation::data_insert_block(Block * block)
 {
  
 #ifdef CELLO_DEBUG
-  PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %d\n",
+  PARALLEL_PRINTF ("%d: ++sync_output_begin_ %d %lu\n",
 		   CkMyPe(),sync_output_begin_.stop(),hierarchy_->num_blocks());
 #endif
   if (hierarchy_) {
@@ -859,14 +868,13 @@ void Simulation::data_delete_particles(int64_t count)
 
 //----------------------------------------------------------------------
 
-void Simulation::p_monitor()
+void Simulation::monitor_output()
 {
   monitor()-> print("", "-------------------------------------");
   monitor()-> print("Simulation", "cycle %04d", cycle_);
   monitor()-> print("Simulation", "time-sim %15.12e",time_);
   monitor()-> print("Simulation", "dt %15.12e", dt_);
-
-  proxy_simulation.p_monitor_performance();
+  thisProxy.p_monitor_performance();
 }
 
 //----------------------------------------------------------------------
@@ -876,37 +884,63 @@ void Simulation::monitor_performance()
   int nr  = performance_->num_regions();
   int nc =  performance_->num_counters();
 
-  // 0 n
-  // 1 msg_coarsen
-  // 2 msg_refine
-  // 3 msg_refresh
-  // 4 data_msg
-  // 5 field_face
-  // 6 particle_data
-  // 7 num-particles
-  // NL num-blocks-<L>
-  // 
+  // 0 num_sum
+  // 1 num_max
+  // 2 msg_coarsen
+  // 3 msg_refine
+  // 4 msg_refresh
+  // 5 data_msg
+  // 6 field_face
+  // 7 particle_data
+  // 8 num-particles
+  // 9+ num_solver_iters
+  // NL+ num-blocks-<L>
+  // 10+ num_blocks_total
+  // 11+ max_proc_blocks
+  // 12+ max_proc_particles
+  // 13+ max_node_blocks
+  // 14+ max_node_particles
+  // 15+ max_solver_iters
   
-  int n = 1 + 7 + ( 1 + hierarchy_->max_level()) + nr*nc;
+  const int num_solver = problem()->num_solvers();
 
+  int n = 14 + 2*num_solver + ( hierarchy_->max_level() - hierarchy_->min_level() + 1) + nr*nc;
+
+  
   long long * counters_region = new long long [nc];
   long long * counters_reduce = new long long [n];
 
   const int in = cello::index_static();
 
-  int m=0;
-  counters_reduce[m++] = n; // 0
-  counters_reduce[m++] = MsgCoarsen::counter[in];     // 1
-  counters_reduce[m++] = MsgRefine::counter[in];      // 2
-  counters_reduce[m++] = MsgRefresh::counter[in];     // 3
-  counters_reduce[m++] = DataMsg::counter[in];        // 4
-  counters_reduce[m++] = FieldFace::counter[in];      // 5
-  counters_reduce[m++] = ParticleData::counter[in];   // 6
-  counters_reduce[m++] = hierarchy_->num_particles(); // 7
-
-  for (int i=0; i<=hierarchy_->max_level(); i++) 
-    counters_reduce[m++] = hierarchy_->num_blocks(i);
   
+  int m=0;
+  const int num_max = 4 + num_solver;
+  counters_reduce[m++] = n - num_max - 2;
+  counters_reduce[m++] = num_max;
+  
+  // accumulated metrics
+  
+  counters_reduce[m++] = MsgCoarsen::counter[in];     // 2
+  counters_reduce[m++] = MsgRefine::counter[in];      // 3
+  counters_reduce[m++] = MsgRefresh::counter[in];     // 4
+  counters_reduce[m++] = DataMsg::counter[in];        // 5
+  counters_reduce[m++] = FieldFace::counter[in];      // 6
+  counters_reduce[m++] = ParticleData::counter[in];   // 7
+  counters_reduce[m++] = hierarchy_->num_particles(); // 8
+  for (int i=0; i<num_solver; i++) {
+    counters_reduce[m++] = cello::simulation()->get_solver_num_iter(i); // 9
+  }
+
+  const int min_level = hierarchy_->min_level();
+
+  int num_blocks_total = 0;
+  for (int i=min_level; i<=hierarchy_->max_level(); i++) {
+    num_blocks_total +=  hierarchy_->num_blocks(i);
+    counters_reduce[m++] = hierarchy_->num_blocks(i); // NL
+  }
+  counters_reduce[m++] = num_blocks_total;            // 10  num_blocks_total
+  
+  // performance region counters
   for (int ir = 0; ir < nr; ir++) {
     performance_->region_counters(ir,counters_region);
     for (int ic = 0; ic < nc; ic++) {
@@ -914,20 +948,31 @@ void Simulation::monitor_performance()
     }
   }
 
+  // maximum metrics
+  
+  counters_reduce[m++] = num_blocks_total;            // 11  max_proc_blocks
+  counters_reduce[m++] = hierarchy_->num_particles(); // 12  max_proc_particles
+  counters_reduce[m++] = Hierarchy::num_blocks_node;  // 13  max_node_blocks
+  counters_reduce[m++] = Hierarchy::num_particles_node;// 14 max_node_particles
+  for (int i=0; i<num_solver; i++) {
+    counters_reduce[m++] = cello::simulation()->get_solver_max_iter(i); // 15 max_node_particles
+  }
+
   ASSERT2("Simulation::monitor_performance()",
-	  "Actual array length %d != expected array length %d",
-	  m,n, (m == n) );
+	  "Actual array length %d != expected array length %d", m,n,
+	  (m == n) );
   
   // --------------------------------------------------
-  CkCallback callback (CkIndex_Simulation::r_monitor_performance(NULL), 
-		       thisProxy);
 #ifdef TRACE_CONTRIBUTE
   CkPrintf ("%s:%d DEBUG_CONTRIBUTE\n",__FILE__,__LINE__); fflush(stdout);
 #endif  
-  contribute (n*sizeof(long long),
-	      counters_reduce,
-	      r_reduce_performance_type,
-	      callback);
+
+  contribute
+    (n*sizeof(long long),
+     counters_reduce,
+     r_reduce_performance_type,
+     CkCallback (CkIndex_Simulation::r_monitor_performance_reduce(NULL), 
+		 thisProxy));
   // --------------------------------------------------
 
   delete [] counters_reduce;
@@ -937,51 +982,72 @@ void Simulation::monitor_performance()
 
 //----------------------------------------------------------------------
 
-void Simulation::r_monitor_performance(CkReductionMsg * msg)
+void Simulation::r_monitor_performance_reduce(CkReductionMsg * msg)
 {
   long long * counters_reduce = (long long *)msg->getData();
 
   int index_region_cycle = performance_->region_index("cycle");
 
   int m = 0;
-  int n = counters_reduce[m++];
-  long long msg_coarsen = counters_reduce[m++];   // 1
-  long long msg_refine  = counters_reduce[m++];   // 2
-  long long msg_refresh = counters_reduce[m++];   // 3
-  long long data_msg    = counters_reduce[m++];   // 4
-  long long field_face  = counters_reduce[m++];   // 5
-  long long particle_data = counters_reduce[m++]; // 6
-  long long num_particles = counters_reduce[m++]; // 7
+  const int num_sum = counters_reduce[m++];             // 0
+  const int num_max = counters_reduce[m++];             // 1
+  const long long msg_coarsen = counters_reduce[m++];   // 2
+  const long long msg_refine  = counters_reduce[m++];   // 3
+  const long long msg_refresh = counters_reduce[m++];   // 4
+  const long long data_msg    = counters_reduce[m++];   // 5
+  const long long field_face  = counters_reduce[m++];   // 6
+  const long long particle_data = counters_reduce[m++]; // 7
+  const long long num_particles = counters_reduce[m++]; // 8
 
-  monitor()->print("Performance","counter num-msg-coarsen %ld", msg_coarsen);
-  monitor()->print("Performance","counter num-msg-refine %ld", msg_refine);
-  monitor()->print("Performance","counter num-msg-refresh %ld", msg_refresh);
-  monitor()->print("Performance","counter num-data-msg %ld", data_msg);
-  monitor()->print("Performance","counter num-field-face %ld", field_face);
-  monitor()->print("Performance","counter num-particle-data %ld", particle_data);
+  const int num_solver = problem()->num_solvers();
+  for (int i=0; i<num_solver; i++) {
+    const long long num_solver_iter = counters_reduce[m++]; // 15
+    monitor()->print ("Performance","solver num-%s-iter %lld",
+                      problem()->solver(i)->name().c_str(),
+                      num_solver_iter);
+  }
 
-  monitor()->print("Performance","simulation num-particles total %ld",
+  monitor()->print("Performance","counter num-msg-coarsen %lld", msg_coarsen);
+  monitor()->print("Performance","counter num-msg-refine %lld", msg_refine);
+  monitor()->print("Performance","counter num-msg-refresh %lld", msg_refresh);
+  monitor()->print("Performance","counter num-data-msg %lld", data_msg);
+  monitor()->print("Performance","counter num-field-face %lld", field_face);
+  monitor()->print("Performance","counter num-particle-data %lld", particle_data);
+
+  monitor()->print("Performance","simulation num-particles total %lld",
 		   num_particles);
 
   // compute total blocks and leaf blocks
-  int num_total_blocks = 0;
-  long long num_leaf_blocks = counters_reduce[m];;
-  int rank = cello::rank();
-  int num_child_blocks = (rank == 1) ? 2 : ( (rank == 2) ? 4 : 8);
-  for (int i=0; i<=hierarchy_->max_level(); i++) {
-    long long num_blocks_level = counters_reduce[m++];
-    monitor()->print("performance","simulation num-blocks-%d %d",
+  long long num_total_blocks = 0;
+  long long num_leaf_blocks = 0;
+  for (int i=hierarchy_->min_level(); i<=hierarchy_->max_level(); i++) {
+    const long long num_blocks_level = counters_reduce[m++]; // NL
+    monitor()->print("performance","simulation num-blocks-level %d %lld",
 		     i,num_blocks_level);
     num_total_blocks += num_blocks_level;
-    if (i>0)
-      num_leaf_blocks += (num_blocks_level - num_blocks_level/num_child_blocks);
+    // compute leaf blocks given number of blocks per level
+    // (NOTE: num_blocks_level (i>0) is evenly divisible by num_children
+    if (i==0) {
+      num_leaf_blocks = num_blocks_level;
+    } else if (i>0) {
+      num_leaf_blocks +=
+	(num_blocks_level - num_blocks_level/cello::num_children());
+    }
   }
 
   monitor()->print
-    ("Performance","simulation num-leaf-blocks %d",  num_leaf_blocks);
+    ("Performance","simulation num-leaf-blocks %lld",  num_leaf_blocks);
   monitor()->print
-    ("Performance","simulation num-total-blocks %d", num_total_blocks);
+    ("Performance","simulation num-total-blocks %lld", num_total_blocks);
 
+  const long long num_blocks_total   = counters_reduce[m++]; // 10
+
+  if (num_total_blocks != num_blocks_total) {
+    WARNING2 ("Simulation::r_monitor_performance_reduce()",
+	      "num_blocks_total %lld does not match computed value %lld",
+	      num_total_blocks,num_blocks_total);
+  }
+  
   const int num_regions  = performance_->num_regions();
   const int num_counters =  performance_->num_counters();
 
@@ -992,7 +1058,7 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
 	(performance_->counter_type(ic) != counter_type_abs) ||
 	(ir == index_region_cycle));
       if (do_print) {
-	monitor()->print("Performance","%s %s %ld",
+	monitor()->print("Performance","%s %s %lld",
 			performance_->region_name(ir).c_str(),
 			performance_->counter_name(ic).c_str(),
 			 counters_reduce[m]);
@@ -1001,9 +1067,67 @@ void Simulation::r_monitor_performance(CkReductionMsg * msg)
     }
   }
 
-  ASSERT2("Simulation::monitor_performance()",
-	  "Actual array length %d != expected array length %d",
-	  m,n, (m == n) );
+  const long long max_proc_blocks    = counters_reduce[m++]; // 11
+  const long long max_proc_particles = counters_reduce[m++]; // 12
+  const long long max_node_blocks    = counters_reduce[m++]; // 13
+  const long long max_node_particles = counters_reduce[m++]; // 14
+
+  for (int i=0; i<num_solver; i++) {
+    const long long max_solver_iters       = counters_reduce[m++]; // 15
+    monitor()->print ("Performance","solver max-%s-iter %lld",
+                      problem()->solver(i)->name().c_str(),
+                      max_solver_iters);
+  }
+  cello::simulation()->clear_solver_iter(); // clear it for the next solve
+
+  
+  monitor()->print
+    ("Performance","simulation max-proc-blocks %lld",  max_proc_blocks);
+  monitor()->print
+    ("Performance","simulation max-node-blocks %lld",  max_node_blocks);
+  monitor()->print
+    ("Performance","simulation max-proc-particles %lld", max_proc_particles);
+  monitor()->print
+    ("Performance","simulation max-node-particles %lld", max_node_particles);
+
+  const double avg_proc_blocks = 1.0*num_blocks_total/CkNumPes();
+  const double avg_node_blocks = 1.0*num_blocks_total/CkNumNodes();
+
+
+  // monitor()->print
+  //   ("Performance","simulation balance-blocks-core %f",
+  //    100.0*(max_proc_blocks / avg_proc_blocks - 1.0 ));
+  // monitor()->print
+  //   ("Performance","simulation balance-blocks-node %f",
+  //    100.0*(max_node_blocks / avg_node_blocks - 1.0 ));
+
+  monitor()->print
+    ("Performance","simulation balance-eff-blocks-core %f (%.0f/%lld)",
+     avg_proc_blocks / max_proc_blocks,
+     avg_proc_blocks, max_proc_blocks);
+  monitor()->print
+    ("Performance","simulation balance-eff-blocks-node %f (%.0f/%lld)",
+     avg_node_blocks / max_node_blocks,
+     avg_node_blocks, max_node_blocks);
+  
+
+  if (num_particles > 0) {
+    const double avg_proc_particles = 1.0*num_particles/CkNumPes();
+    const double avg_node_particles = 1.0*num_particles/CkNumNodes();
+    monitor()->print
+      ("Performance","simulation balance-eff-particles-core %f (%.0f/%lld)",
+       avg_proc_particles / max_proc_particles,
+       avg_proc_particles , max_proc_particles );
+    monitor()->print
+      ("Performance","simulation balance-eff-particles-node %f (%.0f/%lld)",
+       avg_node_particles / max_node_particles,
+       avg_node_particles , max_node_particles );
+  }
+  
+  ASSERT3("Simulation::monitor_performance()",
+	  "Actual array length %d != expected array length 2 + %d + %d",
+	  m,num_sum,num_max,
+	  (m == 2+num_sum+num_max) );
 
   delete msg;
 

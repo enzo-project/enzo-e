@@ -16,20 +16,19 @@ EnzoMethodComovingExpansion::EnzoMethodComovingExpansion
   : Method(),
     comoving_coordinates_(comoving_coordinates)
 {
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-			     enzo_sync_id_comoving_expansion);
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
+
+  refresh.add_field("density");
+  refresh.add_field("total_energy");
+  refresh.add_field("internal_energy");
 
   const int rank = cello::rank();
-  //  refresh(ir)->add_all_fields();
-  FieldDescr * field_descr = cello::field_descr();
 
-  refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("total_energy"));
-  refresh(ir)->add_field(field_descr->field_id("internal_energy"));
-  if (rank >= 1) refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  if (rank >= 2) refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  if (rank >= 3) refresh(ir)->add_field(field_descr->field_id("velocity_z"));
-
+  if (rank >= 1) refresh.add_field("velocity_x");
+  if (rank >= 2) refresh.add_field("velocity_y");
+  if (rank >= 3) refresh.add_field("velocity_z");
+					
   if ( ! comoving_coordinates_ ) {
     WARNING
       ("EnzoMethodComovingExpansion::EnzoMethodComovingExpansion()",
@@ -49,6 +48,14 @@ void EnzoMethodComovingExpansion::compute ( Block * block) throw()
   }
   EnzoBlock * enzo_block = enzo::block(block);
   Field field = enzo_block->data()->field();
+
+  Monitor * monitor = cello::monitor();
+  if (block->index().is_root()) {
+    monitor->print("Method", "%s redshift %.8f",
+		   this->name().c_str(),
+		   enzo::cosmology()->current_redshift());
+  }
+
 
   /* Only do this if
      1. this is a leaf block

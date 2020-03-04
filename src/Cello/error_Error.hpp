@@ -229,7 +229,7 @@
 
 // #ifdef CELLO_DEBUG
 
-#define ASSERT(F,M,A)							\
+#define ASSERT(F,M,A)						\
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M); t_(); } }
 #define ASSERT1(F,M,A1,A)						\
   {  if (!(A)) { m2_(stderr,"ERROR",__FILE__,__LINE__,F,M,A1); t_(); } }

@@ -27,20 +27,18 @@ EnzoMethodPpm::EnzoMethodPpm ()
 {
   // Initialize default Refresh object
 
-  const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
-  			       enzo_sync_id_method_ppm);
-
-  FieldDescr * field_descr = cello::field_descr();
+  Refresh & refresh = new_refresh(ir_post_);
+  cello::simulation()->new_refresh_set_name(ir_post_,name());
   
-  refresh(ir)->add_field(field_descr->field_id("density"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_x"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_y"));
-  refresh(ir)->add_field(field_descr->field_id("velocity_z"));
-  refresh(ir)->add_field(field_descr->field_id("total_energy"));
-  refresh(ir)->add_field(field_descr->field_id("internal_energy"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_x"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_y"));
-  refresh(ir)->add_field(field_descr->field_id("acceleration_z"));
+  refresh.add_field("density");
+  refresh.add_field("velocity_x");
+  refresh.add_field("velocity_y");
+  refresh.add_field("velocity_z");
+  refresh.add_field("total_energy");
+  refresh.add_field("internal_energy");
+  refresh.add_field("acceleration_x");
+  refresh.add_field("acceleration_y");
+  refresh.add_field("acceleration_z");
 
   // PPM parameters initialized in EnzoBlock::initialize()
 }

@@ -8,6 +8,7 @@
 module enzo {
 
   initnode void register_method_turbulence(void);
+  initnode void mutex_init();
 
   readonly EnzoConfig g_enzo_config;
   readonly int EnzoBlock::UseMinimumPressureSupport[CONFIG_NODE_SIZE];
@@ -70,17 +71,17 @@ module enzo {
   PUPable EnzoMatrixDiagonal;
   PUPable EnzoMatrixIdentity;
 
+  PUPable EnzoMethodCheckGravity;
   PUPable EnzoMethodComovingExpansion;
   PUPable EnzoMethodCosmology;
+  PUPable EnzoMethodGravity;
   PUPable EnzoMethodHeat;
-  PUPable EnzoMethodNull;
-  PUPable EnzoMethodPpm;
   PUPable EnzoMethodHydro;
-  PUPable EnzoMethodPpml;
   PUPable EnzoMethodPmDeposit;
   PUPable EnzoMethodPmUpdate;
+  PUPable EnzoMethodPpm;
+  PUPable EnzoMethodPpml;
   PUPable EnzoMethodTurbulence;
-  PUPable EnzoMethodGravity;
 
   PUPable EnzoPhysicsCosmology;
 
@@ -126,12 +127,12 @@ module enzo {
     entry void p_method_turbulence_end(CkReductionMsg *msg);
 
     // EnzoMethodGravity synchronization entry methods
-    entry void r_method_gravity_continue();
-    entry void r_method_gravity_end();
+    entry void p_method_gravity_continue();
+    entry void p_method_gravity_end();
 
     // EnzoSolverCg synchronization entry methods
 
-    entry void r_solver_cg_matvec();
+    entry void p_solver_cg_matvec();
 
     entry void r_solver_cg_loop_0a(CkReductionMsg *msg);
     entry void r_solver_cg_loop_0b(CkReductionMsg *msg);
@@ -156,7 +157,7 @@ module enzo {
 
     entry void p_dot_recv_parent(int n, long double dot[n],
 				 std::vector<int> isa,
-				 int i_function);
+				 int i_function, int iter);
     entry void p_dot_recv_children(int n, long double dot[n],
 				   std::vector<int> isa,
 				   int i_function);

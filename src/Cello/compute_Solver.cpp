@@ -35,7 +35,6 @@ Solver::Solver (std::string name,
   : PUP::able(),
   name_(name),
   ix_(-1),ib_(-1),
-  refresh_list_(),
   monitor_iter_(monitor_iter),
   restart_cycle_(restart_cycle),
   callback_(0),
@@ -43,44 +42,76 @@ Solver::Solver (std::string name,
   min_level_(min_level),
   max_level_(max_level),
   id_sync_(0),
-  solve_type_(solve_type)
+  solve_type_(solve_type),
+  ir_post_(-1)
 {
   FieldDescr * field_descr = cello::field_descr();
   ix_ = field_descr->field_id(field_x);
   ib_ = field_descr->field_id(field_b);
+  ir_post_ = add_new_refresh_();
+  new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
+
 }
 
 //----------------------------------------------------------------------
 
-Solver::~Solver() throw()
+Solver::Solver () throw()
+  : PUP::able(),
+  name_(""),
+  ix_(-1),ib_(-1),
+  monitor_iter_(0),
+  restart_cycle_(1),
+  callback_(0),
+  index_(0),
+  min_level_(0),
+  max_level_(std::numeric_limits<int>::max()),
+  id_sync_(0),
+  solve_type_(solve_leaf),
+  ir_post_(-1)
 {
-  for (size_t i=0; i<refresh_list_.size(); i++) {
-    delete refresh_list_[i];
-    refresh_list_[i] = 0;
-  }
+  ir_post_ = add_new_refresh_();
+  new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
 }
 
 //----------------------------------------------------------------------
 
-int Solver::add_refresh (int ghost_depth, 
-			 int min_face_rank, 
-			 int neighbor_type, 
-			 int sync_type,
-			 int sync_id)
+int Solver::add_new_refresh_ ()
 {
-  int index=refresh_list_.size();
-  refresh_list_.resize(index+1);
-  refresh_list_[index] = new Refresh 
-    (ghost_depth,min_face_rank,neighbor_type,sync_type,sync_id,true);
-  id_sync_ = sync_id;
-  return index;
+  // set Solver::ir_post_
+
+  const int * g3 = cello::config()->field_ghost_depth;
+  const int ghost_depth = std::max(g3[0],std::max(g3[1],g3[2]));
+  const int min_face_rank = cello::config()->adapt_min_face_rank;
+
+  // Set default refresh object
+  Refresh refresh_default
+    (ghost_depth,min_face_rank, neighbor_type_(), sync_type_(), 0);
+
+  return cello::simulation()->new_register_refresh(refresh_default);
 }
 
 //----------------------------------------------------------------------
 
-Refresh * Solver::refresh(size_t index) 
+Refresh & Solver::new_refresh(int ir)
 {
-  return (index < refresh_list_.size()) ? refresh_list_[index] : NULL;
+  return cello::simulation()->new_refresh_list(ir);
+}
+
+//----------------------------------------------------------------------
+
+int Solver::refresh_post_id() const
+{
+  ASSERT("Solver::refresh_post_id()",
+	 "Accessing post-refresh object before it's registered",
+	 (ir_post_ >= 0));
+  return ir_post_;
+}
+
+//----------------------------------------------------------------------
+
+Refresh & Solver::refresh_post()
+{
+  return cello::simulation()->new_refresh_list(ir_post_);
 }
 
 //======================================================================
@@ -95,8 +126,7 @@ void Solver::monitor_output_
 {
   Monitor * monitor = cello::monitor();
 
-  monitor->print("Solver", "%s %s %s iter %04d  err %.16g [%g %g]",
-		 block->name().c_str(),
+  monitor->print("Solver", "%s %s iter %04d  err %.16g [%g %g]",
 		 this->name().c_str(),
 		 final ? "final" : "",
 		 iter,
@@ -164,7 +194,7 @@ bool Solver::is_active_(Block * block) const
   const int level = block->level();
   const bool in_range = (min_level_ <= level && level <= max_level_);
 
-  return (in_range);
+  return (in_range || solve_type_ == solve_level);
 }
 
 //----------------------------------------------------------------------
@@ -179,7 +209,7 @@ bool Solver::is_finest_ (Block * block) const
 #ifdef DEBUG_SOLVER_CG
     CkPrintf ("DEBUG_SOLVER_CG level max_level %d %d\n",
 	      block->level() , max_level_);
-#endif    
+#endif
     return (block->level() == max_level_);
     break;
   case solve_tree:

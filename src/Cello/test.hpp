@@ -13,7 +13,6 @@
 #include "_error.hpp"
 #include "_parallel.hpp"
 #include "_monitor.hpp"
-
 #include "_test.hpp"
 
 #endif /* TEST_HPP */

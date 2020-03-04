@@ -25,7 +25,9 @@ PARALLEL_MAIN_BEGIN
     ( 3,4,5,1,
      -1.0, 2.0,
      -2.0, 4.0,
-     -3.0, 6.0);
+      -3.0, 6.0,
+      new FieldDescr,
+      new ParticleDescr);
 
   unit_func("Data");
   unit_assert (data != NULL);

@@ -271,158 +271,160 @@ void Problem::initialize_output
       ERROR2("Problem::initialize_output",
 	     "Unknown parameter type Output:%s:type = %s",
 	     config->output_list[index].c_str(),type.c_str());
-    }
+    } else {
 
-    if (config->output_name[index].size() > 0) {
-      std::string file_name = config->output_name[index][0];
+      if (config->output_name[index].size() > 0) {
+        std::string file_name = config->output_name[index][0];
 
-      std::vector<std::string> file_args;
+        std::vector<std::string> file_args;
 
-      for (size_t i=1; i<config->output_name[index].size(); i++) {
-	file_args.push_back(config->output_name[index][i]);
+        for (size_t i=1; i<config->output_name[index].size(); i++) {
+          file_args.push_back(config->output_name[index][i]);
+        }
+
+        output->set_filename (file_name,file_args);
       }
 
-      output->set_filename (file_name,file_args);
-    }
+      if (config->output_dir[index].size() > 0 ||
+          config->output_dir_global != ".") {
 
-    if (config->output_dir[index].size() > 0 ||
-	config->output_dir_global != ".") {
-
-      std::string dir_name;
-      std::vector<std::string> dir_args;
+        std::string dir_name;
+        std::vector<std::string> dir_args;
       
-      dir_name = config->output_dir_global;
+        dir_name = config->output_dir_global;
 
-      if (config->output_dir[index].size() > 0) {
-	dir_name = dir_name + "/" + config->output_dir[index][0];
+        if (config->output_dir[index].size() > 0) {
+          dir_name = dir_name + "/" + config->output_dir[index][0];
 
-	for (size_t i=1; i<config->output_dir[index].size(); i++) {
-	  dir_args.push_back(config->output_dir[index][i]);
-	}
+          for (size_t i=1; i<config->output_dir[index].size(); i++) {
+            dir_args.push_back(config->output_dir[index][i]);
+          }
+        }
+        output->set_dir (dir_name,dir_args);
       }
-      output->set_dir (dir_name,dir_args);
-    }
 
-    //--------------------------------------------------
-    // field_list
-    //--------------------------------------------------
+      //--------------------------------------------------
+      // field_list
+      //--------------------------------------------------
 
-    const int num_fields = config->output_field_list[index].size();
+      const int num_fields = config->output_field_list[index].size();
 
-    if (num_fields == 0) {
-      // field_list not initialized: assuming none
-      ItIndexList * it_field = new ItIndexList;
-      output->set_it_field_index(it_field);
-    } else {
-      // if any fields are "*", default is all fields
-      bool all_fields = false;
-      for (int i=0; i<num_fields; i++) {
-	if (config->output_field_list[index][i] == "*") {
-	  all_fields = true;
-	  int field_count = field_descr->field_count();
-	  ItIndexRange * it_field = new ItIndexRange(field_count);
-	  output->set_it_field_index(it_field);
-	  break;
-	}
-      } 
-      // if no fields are "*", create field index iterator
-      if (! all_fields) {
-	ItIndexList * it_field = new ItIndexList;
-	for (int i=0; i<num_fields; i++) {
-	  std::string field_name = config->output_field_list[index][i];
-	  int index_field = field_descr->field_id(field_name);
-	  it_field->append(index_field);
-	}
-	output->set_it_field_index(it_field);
+      if (num_fields == 0) {
+        // field_list not initialized: assuming none
+        ItIndexList * it_field = new ItIndexList;
+        output->set_it_field_index(it_field);
+      } else {
+        // if any fields are "*", default is all fields
+        bool all_fields = false;
+        for (int i=0; i<num_fields; i++) {
+          if (config->output_field_list[index][i] == "*") {
+            all_fields = true;
+            int field_count = field_descr->field_count();
+            ItIndexRange * it_field = new ItIndexRange(field_count);
+            output->set_it_field_index(it_field);
+            break;
+          }
+        } 
+        // if no fields are "*", create field index iterator
+        if (! all_fields) {
+          ItIndexList * it_field = new ItIndexList;
+          for (int i=0; i<num_fields; i++) {
+            std::string field_name = config->output_field_list[index][i];
+            int index_field = field_descr->field_id(field_name);
+            it_field->append(index_field);
+          }
+          output->set_it_field_index(it_field);
+        }
       }
-    }
 
-    //--------------------------------------------------
-    // particle_list
-    //--------------------------------------------------
+      //--------------------------------------------------
+      // particle_list
+      //--------------------------------------------------
 
-    ParticleDescr * particle_descr = cello::particle_descr();
+      ParticleDescr * particle_descr = cello::particle_descr();
 
-    const int num_particles = config->output_particle_list[index].size();
+      const int num_particles = config->output_particle_list[index].size();
 
-    if (num_particles == 0) {
-      // particle_list not initialized: assuming none
-      ItIndexList * it_particle = new ItIndexList;
-      output->set_it_particle_index(it_particle);
-    } else {
-      // if any particles are "*", default is all particles
-      bool all_particles = false;
-      for (int i=0; i<num_particles; i++) {
-	if (config->output_particle_list[index][i] == "*") {
-	  all_particles = true;
-	  int particle_count = particle_descr->num_types();
-	  ItIndexRange * it_particle = new ItIndexRange(particle_count);
-	  output->set_it_particle_index(it_particle);
-	  break;
-	}
-      } 
-      // if no particles are "*", create particle index iterator
-      if (! all_particles) {
-	ItIndexList * it_particle = new ItIndexList;
-	for (int i=0; i<num_particles; i++) {
-	  std::string particle_name = config->output_particle_list[index][i];
-	  int index_particle = particle_descr->type_index(particle_name);
-	  it_particle->append(index_particle);
-	}
-	output->set_it_particle_index(it_particle);
+      if (num_particles == 0) {
+        // particle_list not initialized: assuming none
+        ItIndexList * it_particle = new ItIndexList;
+        output->set_it_particle_index(it_particle);
+      } else {
+        // if any particles are "*", default is all particles
+        bool all_particles = false;
+        for (int i=0; i<num_particles; i++) {
+          if (config->output_particle_list[index][i] == "*") {
+            all_particles = true;
+            int particle_count = particle_descr->num_types();
+            ItIndexRange * it_particle = new ItIndexRange(particle_count);
+            output->set_it_particle_index(it_particle);
+            break;
+          }
+        } 
+        // if no particles are "*", create particle index iterator
+        if (! all_particles) {
+          ItIndexList * it_particle = new ItIndexList;
+          for (int i=0; i<num_particles; i++) {
+            std::string particle_name = config->output_particle_list[index][i];
+            int index_particle = particle_descr->type_index(particle_name);
+            it_particle->append(index_particle);
+          }
+          output->set_it_particle_index(it_particle);
+        }
       }
-    }
 
 
-    //--------------------------------------------------
-    // Scheduling parameters
-    //--------------------------------------------------
+      //--------------------------------------------------
+      // Scheduling parameters
+      //--------------------------------------------------
 
-    int index_schedule = config->output_schedule_index[index];
+      int index_schedule = config->output_schedule_index[index];
 
-    output->set_schedule
-      (Schedule::create( config->schedule_var[index_schedule],
-			 config->schedule_type[index_schedule],
-			 config->schedule_start[index_schedule],
-			 config->schedule_stop[index_schedule],
-			 config->schedule_step[index_schedule],
-			 config->schedule_list[index_schedule]));
+      output->set_schedule
+        (Schedule::create( config->schedule_var[index_schedule],
+                           config->schedule_type[index_schedule],
+                           config->schedule_start[index_schedule],
+                           config->schedule_stop[index_schedule],
+                           config->schedule_step[index_schedule],
+                           config->schedule_list[index_schedule]));
 
 
-    //--------------------------------------------------
-    // Image parameters
-    //--------------------------------------------------
+      //--------------------------------------------------
+      // Image parameters
+      //--------------------------------------------------
 
-    OutputImage * output_image = dynamic_cast<OutputImage *> (output);
+      OutputImage * output_image = dynamic_cast<OutputImage *> (output);
 
-    if (output_image != NULL) {
+      if (output_image != NULL) {
 
-      // COLORMAP
+        // COLORMAP
 
-      int n = config->output_colormap[index].size() / 3;
+        int n = config->output_colormap[index].size() / 3;
 
-      if (n > 0) {
-	double * r = new double [n];
-	double * g = new double [n];
-	double * b = new double [n];
+        if (n > 0) {
+          double * r = new double [n];
+          double * g = new double [n];
+          double * b = new double [n];
 
-	for (int i=0; i<n; i++) {
+          for (int i=0; i<n; i++) {
 
-	  int ir=3*i+0;
-	  int ig=3*i+1;
-	  int ib=3*i+2;
+            int ir=3*i+0;
+            int ig=3*i+1;
+            int ib=3*i+2;
 
-	  r[i] = config->output_colormap[index][ir];
-	  g[i] = config->output_colormap[index][ig];
-	  b[i] = config->output_colormap[index][ib];
+            r[i] = config->output_colormap[index][ir];
+            g[i] = config->output_colormap[index][ig];
+            b[i] = config->output_colormap[index][ib];
 
-	}
+          }
 
-	output_image->set_colormap(n,r,g,b);
+          output_image->set_colormap(n,r,g,b);
 
-	delete [] r;
-	delete [] g;
-	delete [] b;
+          delete [] r;
+          delete [] g;
+          delete [] b;
+
+        }
 
       }
 
@@ -444,6 +446,8 @@ void Problem::initialize_method ( Config * config ) throw()
   const size_t num_method = config->method_list.size();
 
   Method::courant_global = config->method_courant_global;
+
+  method_list_.push_back(new MethodNull(config->method_null_dt)); 
   
   for (size_t index_method=0; index_method < num_method ; index_method++) {
 
@@ -811,6 +815,18 @@ Method * Problem::create_method_
     method = new MethodTrace(config->method_courant[index_method],
 			     config->method_timestep[index_method],
 			     config->method_trace_name[index_method]);
+  } else if (name == "null") {
+
+    method = new MethodNull
+      (config->method_null_dt);
+
+  } else if (name == "close_files") {
+
+    method = new MethodCloseFiles
+      (config->method_close_files_seconds_stagger[index_method],
+       config->method_close_files_seconds_delay[index_method],
+       config->method_close_files_group_size[index_method]);
+      
   }
   return method;
 }

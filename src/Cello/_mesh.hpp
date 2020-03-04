@@ -65,6 +65,15 @@ enum phase_type {
   phase_last
 };
 
+/// @enum   RefreshState
+///
+/// @brief  New refresh states:
+///         RefreshState::inactive (done() called),
+///         RefreshState::active   (start() called),
+///         RefreshState::ready    (wait() called)
+
+enum class RefreshState { INACTIVE, ACTIVE, READY };
+
 // #define PHASE_COUNT (phase_exit + 1)
 // #define PHASE_COUNT 100
 extern const char * phase_name[];
@@ -98,6 +107,7 @@ enum adapt_type {
 class Tree;
 
 #include "mesh_Index.hpp"
+#include "mesh_Face.hpp"
 
 #include "mesh_Block.hpp"
 #include "mesh_Hierarchy.hpp"

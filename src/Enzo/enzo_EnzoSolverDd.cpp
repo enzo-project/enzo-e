@@ -23,8 +23,9 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+// #define SKIP_BARRIER
 // #define TRACE_DD
-// #define TRACE_DD_CYCLE 100
+// #define TRACE_DD_CYCLE 0
 
 // #define DEBUG_FIELD
 // #define DEBUG_COPY_FIELD
@@ -132,16 +133,15 @@ EnzoSolverDd::EnzoSolverDd
   // Initialize temporary fields
   Block * block = NULL;
 
-  FieldDescr * field_descr = cello::field_descr();
-  ixc_ = field_descr->insert_temporary();
+  ixc_ = cello::field_descr()->insert_temporary();
 
   /// Initialize default Refresh
 
-  add_refresh(4,0,neighbor_leaf,sync_barrier,
-	      enzo_sync_id_solver_dd);
+  Refresh & refresh = this->refresh_post();
+  cello::simulation()->new_refresh_set_name(ir_post_,name);
 
-  refresh(0)->add_field (ix_);
-
+  refresh.add_field (ix_);
+  
   ScalarDescr * scalar_descr_sync = cello::scalar_descr_sync();
   i_sync_restrict_ = scalar_descr_sync->new_value(name + ":restrict");
   i_sync_prolong_  = scalar_descr_sync->new_value(name + ":prolong");
@@ -178,13 +178,13 @@ void EnzoSolverDd::apply ( std::shared_ptr<Matrix> A, Block * block) throw()
   
   Sync * sync_restrict = psync_restrict(block);
 
-  sync_restrict->set_stop(NUM_CHILDREN(cello::rank()));
   sync_restrict->reset();
+  sync_restrict->set_stop(cello::num_children());
   
   Sync * sync_prolong = psync_prolong(block);
 
-  sync_prolong->set_stop(2); // self and parent
   sync_prolong->reset();
+  sync_prolong->set_stop(2); // self and parent
 
   int level = block->level();
 
@@ -324,6 +324,7 @@ void EnzoBlock::p_solver_dd_solve_coarse()
 void EnzoBlock::r_solver_dd_barrier(CkReductionMsg * msg)
 {
   static_cast<EnzoSolverDd*> (solver())->prolong(this);
+  delete msg;
 }
 
 //----------------------------------------------------------------------
@@ -476,9 +477,13 @@ void EnzoSolverDd::continue_after_domain_solve(EnzoBlock * enzo_block) throw()
   TRACE_FIELD(enzo_block,"domain_solve X",ix_);
   TRACE_DD(enzo_block,this,"continue_after_domain_solve");
   COPY_FIELD(enzo_block,ix_,"X2_dd");
+#ifdef SKIP_BARRIER
+  call_last_smoother(enzo_block);  
+#else  
   CkCallback callback(CkIndex_EnzoBlock::r_solver_dd_end(NULL), 
 		      enzo::block_array());
   enzo_block->contribute(callback);
+#endif  
 
 }
 
@@ -487,6 +492,7 @@ void EnzoSolverDd::continue_after_domain_solve(EnzoBlock * enzo_block) throw()
 void EnzoBlock::r_solver_dd_end(CkReductionMsg * msg)
 {
   static_cast<EnzoSolverDd*> (solver())->call_last_smoother(this);
+  delete msg;
 }
 
 //----------------------------------------------------------------------

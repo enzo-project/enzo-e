@@ -58,6 +58,8 @@ MsgCoarsen::~MsgCoarsen()
   data_msg_ = 0;
   delete [] face_level_;
   face_level_ = 0;
+  CkFreeMsg (buffer_);
+  buffer_=nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -138,7 +140,7 @@ void * MsgCoarsen::pack (MsgCoarsen * msg)
   (*pi++) = msg->ic3_[2];
 
   ASSERT2("MsgRefresh::pack()",
-	  "buffer size mismatch %d allocated %d packed",
+	  "buffer size mismatch %ld allocated %d packed",
 	  (pc - (char*)buffer),size,
 	  (pc - (char*)buffer) == size);
 
@@ -266,5 +268,6 @@ void MsgCoarsen::update (Data * data)
 
   if (!is_local_) {
       CkFreeMsg (buffer_);
+      buffer_ = nullptr;
   }
 }

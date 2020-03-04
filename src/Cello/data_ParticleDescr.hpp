@@ -43,6 +43,10 @@ public: // interface
 
   int type_index (std::string type) const;
 
+  /// Return whether the particle type exists
+
+  bool type_exists (std::string type) const;
+  
   /// Return the name of the given particle type given its index
 
   std::string type_name (int index) const;
@@ -136,7 +140,7 @@ public: // interface
     ASSERT1("ParticleDescr::attribute_position()",
 	    "Trying to access unknown particle type %d",
 	    it,
-	    check_(it));
+	    (0 <= it && it < num_types()));
     return attribute_position_[it][axis];
   }
 
@@ -147,7 +151,7 @@ public: // interface
     ASSERT1("ParticleDescr::attribute_velocity()",
 	    "Trying to access unknown particle type %d",
 	    it,
-	    check_(it));
+	    (0 <= it && it < num_types()));
     return attribute_velocity_[it][axis];
   }
 
@@ -185,11 +189,6 @@ public: // interface
   Grouping * groups () { return & groups_; }
 
 private: // functions
-
-  /// Return true iff it and ia are in range
-  bool check_(int it) const;
-  bool check_ia_(int it, int ia) const;
-  bool check_ic_(int it, int ic) const;
 
   /// increment value if needed so that it is a multiple of bytes
   int align_(int value, int bytes) const;

@@ -47,15 +47,17 @@ if [ "$#" -ge 1 ]; then
       rm -f input/*.in.out >& /dev/null
       rm -rf build build-*
       rm -rf test/*.h5
+      rm -rf test/runs_*
       rm -rf template_defs.def.h template_defs.decl.h
       rm -rf .sconf_temp/conftest_0.c .sconsign.dblite 
-      rm -rf config.log warnings.org errors.org log.build out.scons.*
+      rm -rf config.log diff.org log.org warnings.org errors.org log.build out.scons.*
       rm -rf config/*.pyc
       rm -rf test/fail.* test/pass.* test/incomplete.*
       rm -rf scons-local-2.2.0/SCons/*.pyc scons-local-2.2.0/SCons/*/*.pyc
       rm -rf charmrun parameters.out checkpoint_ppm* output-stride*.h5
       rm -rf `find test -name "*.png"`
       rm -rf `find test -name "*.h5"`
+      rm -rf src/.cccc
       printf "done\n"
       rm -rf test/out.scons
    fi
@@ -66,7 +68,7 @@ if [ "$#" -ge 1 ]; then
    elif [ "$1" == "compile" ]; then
       target=install-bin
    elif [ "$1" == "test" ]; then
-      ./build.sh
+#      ./build.sh
       target="test"
       proc=1
       k_switch="-k"
@@ -262,7 +264,7 @@ if [ $target == "test" ]; then
     if [ $f -gt 0 ]; then
 	echo "Exiting testing with failures:"
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-	cat $dir/fail.$configure
+	cat $dir/fail.$configure | awk '{print gensub(".*/","","g",$1),gensub(".*/","","g",$4) ":" $5,$6,$7,$8,$9,$10;}'
 	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 	exit_status=1
     else

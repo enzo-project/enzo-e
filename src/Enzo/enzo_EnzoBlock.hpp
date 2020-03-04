@@ -112,8 +112,7 @@ public: // interface
   EnzoBlock()
     :  BASE_ENZO_BLOCK(),
        dt(0.0),
-       redshift(0.0),
-       SubgridFluxes(NULL)
+       redshift(0.0)
   {
     performance_start_(perf_block);
     for (int i=0; i<MAX_DIMENSION; i++) {
@@ -130,8 +129,7 @@ public: // interface
   EnzoBlock (CkMigrateMessage *m) 
     : BASE_ENZO_BLOCK (m),
       dt(0.0),
-      redshift(0.0),
-      SubgridFluxes(NULL)
+      redshift(0.0)
   {
     performance_start_(perf_block);
     TRACE("CkMigrateMessage");
@@ -214,10 +212,10 @@ public: /// entry methods
   //--------------------------------------------------
 
   /// Synchronize after potential solve and before accelerations
-  void r_method_gravity_continue();
+  void p_method_gravity_continue();
 
   /// Synchronize for refresh
-  void r_method_gravity_end();
+  void p_method_gravity_end();
 
   //--------------------------------------------------
 
@@ -243,7 +241,7 @@ public: /// entry methods
   /// perform the necessary reductions for shift
   CkReductionMsg * r_solver_cg_shift(int n, CkReductionMsg ** msgs);
 
-  void r_solver_cg_matvec();
+  void p_solver_cg_matvec();
 
   //--------------------------------------------------
   
@@ -279,7 +277,7 @@ public: /// entry methods
 
   void p_dot_recv_parent  (int n, long double * dot_block,
 			   std::vector<int> is_array,
-			   int i_function);
+			   int i_function, int iter);
   void p_dot_recv_children(int n, long double * dot_block,
 			   std::vector<int> is_array,
 			   int i_function);
@@ -314,10 +312,9 @@ public: /// entry methods
 
   void print() {
     Block::print();
-    CkPrintf ("dt = %d\n",dt);
-    CkPrintf ("redshift = %d\n",redshift);
-    CkPrintf ("SubgridFluxes = %d\n",SubgridFluxes);
-    CkPrintf ("GridLeftEdge[] = %d %d %d\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
+    CkPrintf ("dt = %g\n",dt);
+    CkPrintf ("redshift = %g\n",redshift);
+    CkPrintf ("GridLeftEdge[] = %g %g %g\n",GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
     CkPrintf ("GridDimension[] = %d %d %d\n",GridDimension[0],GridDimension[1],GridDimension[2]);
     CkPrintf ("GridStartIndex[] = %d %d %d\n",GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
     CkPrintf ("GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
@@ -337,9 +334,6 @@ public: // attributes (YIKES!)
   /// Cosmological redshift for the current cycle
   enzo_float redshift;
   
-  /// Fluxes
-  fluxes ** SubgridFluxes;
-
   /// starting pos (active problem space)
   enzo_float GridLeftEdge[MAX_DIMENSION]; 
   /// total dimensions of all grids
