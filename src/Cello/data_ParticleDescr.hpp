@@ -43,6 +43,10 @@ public: // interface
 
   int type_index (std::string type) const;
 
+  /// Return whether the particle type exists
+
+  bool type_exists (std::string type) const;
+  
   /// Return the name of the given particle type given its index
 
   std::string type_name (int index) const;

@@ -70,7 +70,9 @@ void EnzoMethodPmUpdate::compute ( Block * block) throw()
 {
   TRACE_PM("compute()");
 
-  if (block->is_leaf()) {
+  Particle particle = block->data()->particle();
+  
+  if (block->is_leaf() && particle.type_exists("dark")) {
 
 #ifdef DEBUG_UPDATE    
     double a3sum[3]={0.0};
@@ -277,7 +279,9 @@ double EnzoMethodPmUpdate::timestep ( Block * block ) const throw()
 
   double dt = std::numeric_limits<double>::max();
 
-  if (block->is_leaf()) {
+  Particle particle = block->data()->particle();
+  
+  if (block->is_leaf() && particle.type_exists("dark")) {
 
     Particle particle = block->data()->particle();
     ParticleDescr * particle_descr = cello::particle_descr();

@@ -7,7 +7,7 @@ Method {
 Solver {
      list = [ "bcg", "diagonal" ];
      bcg {
-         iter_max = 100;
+         iter_max = 200;
          res_tol = 0.01;                  
          monitor_iter = 1;
          type = "bicgstab";

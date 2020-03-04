@@ -16,6 +16,21 @@
          };
          type = "image";
      };
+     de {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "density" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "density.png";
+         schedule {
+             step = 10;
+             var = "cycle";
+         };
+         type = "image";
+     };
      dark {
          colormap = [ 0.0, 0.0, 0.0,
                       1.0, 0.0, 0.0,
