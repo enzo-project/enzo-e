@@ -133,57 +133,65 @@ void OutputData::write_block ( const  Block * block ) throw()
 
   std::string name_dir = expand_name_(&dir_name_,&dir_args_);
 
+
   // Write blocks text file
-  
-  if (name_dir != "") {
+  std::string name_file;
+  std::string name_out_file  = expand_name_(&file_name_,&file_args_);
 
-    std::string name_file  = expand_name_(&file_name_,&file_args_);
-    const int num_blocks = cello::hierarchy()->num_blocks();
-    int count = 0;
-    
-    // Write DIR.parameters file
+  if (name_dir == "") {
+    // output block list and parameters to work directory
+    name_dir  = ".";
+    // strip extension, use this for name
+    name_file = name_out_file.substr(0, name_out_file.find("."));
+  } else {
+    // output block list and parameters to subdirectory
+    name_file = name_dir;
+  }
 
-    if (block->index().is_root()) {
-      std::string param_file_name = name_dir+"/"+name_dir+".parameters";
-      g_parameters.write(param_file_name.c_str(),param_write_cello);
-      std::string libconfig_file_name = name_dir+"/"+name_dir+".libconfig";
-      g_parameters.write(libconfig_file_name.c_str(),param_write_libconfig);
-    }
+  const int num_blocks = cello::hierarchy()->num_blocks();
+  int count = 0;
     
-    // Contribute to DIR.block_list file
+  // Write DIR.parameters file
+
+  if (block->index().is_root()) {
+    std::string param_file_name = name_dir+"/"+name_file+".parameters";
+    g_parameters.write(param_file_name.c_str(),param_write_cello);
+    std::string libconfig_file_name = name_dir+"/"+name_file+".libconfig";
+    g_parameters.write(libconfig_file_name.c_str(),param_write_libconfig);
+  }
     
-    count = (text_block_count_ == 0) ? num_blocks : 0;
+  // Contribute to DIR.block_list file
     
-    sprintf (file,"%s.block_list",name_dir.c_str());
-    sprintf (dir, "%s",           name_dir.c_str());
-    sprintf (line,"%s %s\n",      block->name().c_str(),name_file.c_str());
+  count = (text_block_count_ == 0) ? num_blocks : 0;
+
+  sprintf (file,"%s.block_list",name_file.c_str());
+  sprintf (dir, "%s",           name_dir.c_str());
+  sprintf (line,"%s %s\n",      block->name().c_str(),name_out_file.c_str());
     
-    proxy_main.p_text_file_write(strlen(dir)+1, dir,
-				 strlen(file)+1, file,
-				 strlen(line)+1,line,
-				 count);
+  proxy_main.p_text_file_write(strlen(dir)+1,  dir,
+			       strlen(file)+1, file,
+			       strlen(line)+1, line,
+			       count);
     
     // Contribute to DIR.file_list file
 
-    if (text_block_count_ == 0) {
+  if (text_block_count_ == 0) {
       
-      count = 0;
+    count = 0;
     
-      sprintf (file,"%s.file_list",name_dir.c_str());
-      sprintf (dir, "%s",          name_dir.c_str());
-      sprintf (line,"%s\n",        name_file.c_str());
+    sprintf (file,"%s.file_list",name_file.c_str());
+    sprintf (dir, "%s",          name_dir.c_str());
+    sprintf (line,"%s\n",        name_out_file.c_str());
     
-      proxy_main.p_text_file_write(strlen(dir)+1, dir,
-				   strlen(file)+1, file,
-				   strlen(line)+1,line,
-				   count);
-    }    
+    proxy_main.p_text_file_write(strlen(dir)+1,  dir,
+				 strlen(file)+1, file,
+				 strlen(line)+1, line,
+				 count);
+  }    
 
-    // Increment block counter
+  // Increment block counter
 
-    text_block_count_ = (text_block_count_ + 1) % num_blocks;
-
-  }
+  text_block_count_ = (text_block_count_ + 1) % num_blocks;
 
   // Create file group for block
 
