@@ -403,14 +403,10 @@ std::string Index::bit_string(int max_level,int rank, const int nb3[3]) const
 
   for (int axis=0; axis<rank; axis++) {
 
-    if(nb3[axis]-1 < 0){
-      bits = bits + "0";
-    } else{
-      for (int i=nb3[axis]-1; i>=0; i--) {
-        int shift = (level >= 0) ? i : i-level;
-        int bit = (a_[axis].array & ( 1 << shift));
-        bits = bits + (bit?"1":"0");
-      }
+    for (int i=nb3[axis]-1; i>=0; i--) {
+      int shift = (level >= 0) ? i : i-level;
+      int bit = (a_[axis].array & ( 1 << shift));
+      bits = bits + (bit?"1":"0");
     }
 
     for (int i=0; i<max_level; i++) {
