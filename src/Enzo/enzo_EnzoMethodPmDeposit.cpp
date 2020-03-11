@@ -40,7 +40,8 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 
   Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-  
+
+  //  refresh.add_all_fields();
   refresh.add_field("density");
   refresh.add_field("velocity_x");
   refresh.add_field("velocity_y");

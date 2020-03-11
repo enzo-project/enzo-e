@@ -37,6 +37,7 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   if (rank >= 1) refresh.add_field("acceleration_x");
   if (rank >= 2) refresh.add_field("acceleration_y");
   if (rank >= 3) refresh.add_field("acceleration_z");
+  // refresh.add_all_fields();
 
   const ParticleDescr * p_descr = cello::particle_descr();
   if (p_descr->type_exists("dark")) {

@@ -52,6 +52,7 @@ void MethodCloseFiles::compute( Block * block) throw()
       fflush(stdout);
 #endif
       it->second->file_close();
+      delete it->second;
       throttle_delay_();
       FileHdf5::file_list.erase(it);
     }

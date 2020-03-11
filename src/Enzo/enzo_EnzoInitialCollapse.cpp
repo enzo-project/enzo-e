@@ -114,7 +114,7 @@ void EnzoInitialCollapse::enforce_block
   const double ry = (dyp - dym) * radius_relative_ / array_[1] ;
   const double rz = (dzp - dzm) * radius_relative_ / array_[2] ;
 
-  const double rx2i = 1.0/(rx*rx);
+  const double rx2i = 1.0/(rx*rx); 
   const double ry2i = 1.0/(ry*ry);
   const double rz2i = 1.0/(rz*rz);
   
