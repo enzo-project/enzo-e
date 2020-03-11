@@ -5,6 +5,9 @@
 /// @brief    [\ref Enzo] Implementation of EnzoInitialCloud for initializing a
 ///           a spherical cloud in a cloudroutine for spherical cloud in a wind
 
+#include <random>
+#include <limits>
+
 #include "enzo.hpp"
 #include "charm_enzo.hpp"
 #include "cello.hpp"
@@ -208,6 +211,57 @@ public:
 
 //----------------------------------------------------------------------
 
+class TruncatedGaussianNoise
+{
+public:
+
+  TruncatedGaussianNoise(Block* block, unsigned int default_seed, double mean,
+			 double standard_deviation, double trunc_deviations)
+  {
+    // first compute the random seed for the current block
+    int ix, iy, iz, nx, ny, nz;
+    block->index_global(&ix, &iy, &iz, &nx, &ny, &nz);
+    unsigned int index = (unsigned int)(ix + nx*(iy + ny*iz));
+
+    unsigned int wraparound_diff =
+      std::numeric_limits<unsigned int>::max() - default_seed;
+    if (index > wraparound_diff){
+      gen_.seed(index - wraparound_diff - 1);
+    } else {
+      gen_.seed(default_seed + index);
+    }
+
+    ASSERT("TruncatedGaussianNoise", "trunc_deviations must be >= zero",
+	   trunc_deviations>=0);
+    truncate_ = (trunc_deviations != 0.);
+    upper_lim_ = mean + trunc_deviations * standard_deviation;
+    lower_lim_ = mean - trunc_deviations * standard_deviation;
+    dist_ = std::normal_distribution<double>{mean,standard_deviation};
+  }
+
+  double operator()(){
+    if (truncate_){
+      double out = dist_(gen_);
+      while (out > upper_lim_ || out < lower_lim_){
+	out = dist_(gen_);
+      }
+      return out;
+    } else {
+      return dist_(gen_);
+    }
+  }
+
+private:
+
+  std::mt19937 gen_;
+  std::normal_distribution<double> dist_;
+  bool truncate_;
+  double upper_lim_;
+  double lower_lim_;
+};
+
+//----------------------------------------------------------------------
+
 // Helper function that checks the assumption that the bfield is constant in
 // the active_zone
 void check_uniform_bfield_(EFlt3DArray bfield,
@@ -317,6 +371,10 @@ void EnzoInitialCloud::enforce_block
                        // used to initialize total energy in cells overlapping
                        // with the cloud
 
+  TruncatedGaussianNoise random_factor_gen(block, perturb_seed_, 1.,
+					   perturb_stddev_, truncate_dev_);
+  const bool use_random_factor = (perturb_stddev_ != 0);
+
   if (dual_energy){
     internal_energy = array_factory.from_name("internal_energy");
     double temp = (eint_wind_ + 0.5*velocity_wind_*velocity_wind_ +
@@ -367,12 +425,18 @@ void EnzoInitialCloud::enforce_block
 
 	double frac_enclosed = sph.cell_fraction_enclosed(iz, iy, ix);
 
-	double avg_density = (frac_enclosed * density_cloud_ +
+	double random_factor = 1.;
+	if (use_random_factor && frac_enclosed > 0){
+	  random_factor = random_factor_gen();
+	}
+
+	double avg_density = (frac_enclosed * density_cloud_ * random_factor +
 			      (1. - frac_enclosed) * density_wind_);
 
 	density(iz,iy,ix) = avg_density;
 	if (use_cloud_dye){
-	  cloud_dye_density(iz,iy,ix) = frac_enclosed * density_cloud_;
+	  cloud_dye_density(iz,iy,ix) = (frac_enclosed * density_cloud_ *
+					 random_factor);
 	}
 	if (set_metal_density){
 	  metal_density(iz,iy,ix) = metal_mass_frac_ * avg_density;

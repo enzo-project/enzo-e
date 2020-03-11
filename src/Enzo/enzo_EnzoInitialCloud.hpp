@@ -28,7 +28,9 @@ public: // interface
 		   double cloud_center_y, double cloud_center_z,
 		   double density_cloud, double density_wind,
 		   double etot_wind, double eint_wind,
-		   double velocity_wind, double metal_mass_frac)
+		   double velocity_wind, double metal_mass_frac,
+		   double perturb_stddev, double truncate_dev,
+		   unsigned int perturb_seed)
     : Initial(cycle,time),
       subsample_n_(subsample_n),
       cloud_radius_(cloud_radius),
@@ -40,7 +42,10 @@ public: // interface
       etot_wind_(etot_wind),
       eint_wind_(eint_wind),
       velocity_wind_(velocity_wind),
-      metal_mass_frac_(metal_mass_frac)
+      metal_mass_frac_(metal_mass_frac),
+      perturb_stddev_(perturb_stddev),
+      truncate_dev_(truncate_dev),
+      perturb_seed_(perturb_seed)
   {
     ASSERT("EnzoInitialCloud", "subsample_n must be >=0", subsample_n>=0);
     ASSERT("EnzoInitialCloud", "cloud_radius must be positive",
@@ -55,6 +60,9 @@ public: // interface
 	   eint_wind>=0.);
     ASSERT("EnzoInitialCloud", "metal_mass_frac must be in [0,1]",
 	   metal_mass_frac >=0 && metal_mass_frac <=1);
+    ASSERT("EnzoInitialCloud", "perturb_stddev must be >= 0",
+	   perturb_stddev >=0);
+    ASSERT("EnzoInitialCloud", "truncate_dev must be >= 0", truncate_dev >=0);
   }
 
   /// CHARM++ PUP::able declaration
@@ -93,6 +101,9 @@ public: // interface
     p | etot_wind_;
     p | velocity_wind_;
     p | metal_mass_frac_;
+    p | perturb_stddev_;
+    p | truncate_dev_;
+    p | perturb_seed_;
   }
 
 public: // virtual methods
@@ -128,6 +139,15 @@ private: // attributes
   double velocity_wind_;
 
   double metal_mass_frac_;
+
+  /// The stddev for normal distribution used to perturb cloud density
+  double perturb_stddev_;
+
+  /// Number of stddevs where normal distribution is truncated
+  double truncate_dev_;
+
+  /// The random seed used to seed the density perturbations
+  unsigned int perturb_seed_;
 };
 
 #endif //ENZO_ENZO_INITIAL_CLOUD_HPP

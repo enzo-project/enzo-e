@@ -143,6 +143,9 @@ public: // interface
       initial_cloud_etot_wind(0.0),
       initial_cloud_eint_wind(0.0),
       initial_cloud_metal_mass_frac(0.0),
+      initial_cloud_perturb_stddev(0.0),
+      initial_cloud_trunc_dev(0.0),
+      initial_cloud_perturb_seed(0),
       // EnzoInitialCosmology
       initial_cosmology_temperature(0.0),
       // EnzoInitialCollapse
@@ -348,6 +351,9 @@ public: // attributes
   double                     initial_cloud_etot_wind;
   double                     initial_cloud_eint_wind;
   double                     initial_cloud_metal_mass_frac;
+  double                     initial_cloud_perturb_stddev;
+  double                     initial_cloud_trunc_dev;
+  unsigned int               initial_cloud_perturb_seed;
 
   /// EnzoInitialCosmology;
   double                     initial_cosmology_temperature;

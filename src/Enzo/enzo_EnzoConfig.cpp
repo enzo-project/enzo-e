@@ -57,6 +57,9 @@ EnzoConfig::EnzoConfig() throw ()
   initial_cloud_etot_wind(0.0),
   initial_cloud_eint_wind(0.0),
   initial_cloud_metal_mass_frac(0.0),
+  initial_cloud_perturb_stddev(0.0),
+  initial_cloud_trunc_dev(0.0),
+  initial_cloud_perturb_seed(0),
   // EnzoInitialCosmology
   initial_cosmology_temperature(0.0),
   // EnzoInitialCollapse
@@ -265,6 +268,9 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_cloud_etot_wind;
   p | initial_cloud_eint_wind;
   p | initial_cloud_metal_mass_frac;
+  p | initial_cloud_perturb_stddev;
+  p | initial_cloud_trunc_dev;
+  p | initial_cloud_perturb_seed;
 
   p | initial_cosmology_temperature;
 
@@ -639,28 +645,37 @@ void EnzoConfig::read(Parameters * p) throw()
     ("Initial:vlct_bfield:update_etot",false);
   
   // Cloud Crush Initialization
-  initial_cloud_subsample_n   = p->value_integer
+  initial_cloud_subsample_n     = p->value_integer
     ("Initial:cloud:subsample_n",0);
-  initial_cloud_radius        = p->value_float
+  initial_cloud_radius          = p->value_float
     ("Initial:cloud:cloud_radius",0.0);
-  initial_cloud_center_x      = p->value_float
+  initial_cloud_center_x        = p->value_float
     ("Initial:cloud:cloud_center_x",0.0);
-  initial_cloud_center_y      = p->value_float
+  initial_cloud_center_y        = p->value_float
     ("Initial:cloud:cloud_center_y",0.0);
-  initial_cloud_center_z      = p->value_float
+  initial_cloud_center_z        = p->value_float
     ("Initial:cloud:cloud_center_z",0.0);
-  initial_cloud_density_cloud = p->value_float
+  initial_cloud_density_cloud   = p->value_float
     ("Initial:cloud:cloud_density",0.0);
-  initial_cloud_density_wind  = p->value_float
+  initial_cloud_density_wind    = p->value_float
     ("Initial:cloud:wind_density",0.0);
-  initial_cloud_velocity_wind = p->value_float
+  initial_cloud_velocity_wind   = p->value_float
     ("Initial:cloud:wind_velocity",0.0);
-  initial_cloud_etot_wind     = p->value_float
+  initial_cloud_etot_wind       = p->value_float
     ("Initial:cloud:wind_total_energy",0.0);
-  initial_cloud_eint_wind     = p->value_float
+  initial_cloud_eint_wind       = p->value_float
     ("Initial:cloud:wind_internal_energy",0.0);
-  initial_cloud_metal_mass_frac     = p->value_float
+  initial_cloud_metal_mass_frac = p->value_float
     ("Initial:cloud:metal_mass_fraction",0.0);
+  initial_cloud_perturb_stddev  = p->value_float
+    ("Initial:cloud:perturb_standard_deviation",0.0);
+  initial_cloud_trunc_dev       = p->value_float
+    ("Initial:cloud:perturb_truncation_deviation",0.0);
+  int init_cloud_perturb_seed_  = p->value_integer
+    ("Initial:cloud:perturb_seed",0);
+  ASSERT("EnzoConfig::read()", "Initial:cloud:perturb_seed must be >=0",
+	 init_cloud_perturb_seed_ >= 0);
+  initial_cloud_perturb_seed = (unsigned int) init_cloud_perturb_seed_;
 
   // Cosmology initialization
   initial_cosmology_temperature = p->value_float("Initial:cosmology:temperature",0.0);
