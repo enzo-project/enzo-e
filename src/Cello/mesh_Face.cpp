@@ -11,20 +11,8 @@
 
 //----------------------------------------------------------------------
 
-void Face::get_dimensions
-(int *p_nx, int *p_ny, int *p_nz, 
- int bx, int by, int bz)
+void Face::adjacency (bool *lx, bool *ly, bool *lz) const
 {
-  ASSERT ("Face::get_dimensions()",
-          "bx must be divisible by 2",
-          rank_ < 1 || ((bx & 1) == 0));
-  ASSERT ("Face::get_dimensions()",
-          "by must be divisible by 2",
-          rank_ < 2 || ((by & 1) == 0));
-  ASSERT ("Face::get_dimensions()",
-          "bz must be divisible by 2",
-          rank_ < 3 || ((bz & 1) == 0));
-
   int a1x,a1y,a1z;
   int a2x,a2y,a2z;
   int t1x,t1y,t1z;
@@ -36,7 +24,7 @@ void Face::get_dimensions
     const int level_1 = index_block_.level();
     const int level_2 = index_neighbor_.level();
 
-    ASSERT2 ("Face::get_dimensions()",
+    ASSERT2 ("Face::adjacency()",
              "level_1 %d must be within one level of level_2 %d",
              level_1,level_2,
              (std::abs(level_1-level_2)<=1));
@@ -50,13 +38,15 @@ void Face::get_dimensions
     index_neighbor_.array (&a2x,&a2y,&a2z);
     index_neighbor_.tree  (&t2x,&t2y,&t2z,max_level);
 
+#ifdef DEBUG_FACE    
     CkPrintf ("DEBUG block    level %d\n",level_1);
     CkPrintf ("DEBUG block    array %d %d %d\n",a1x,a1y,a1z);
     CkPrintf ("DEBUG block    tree 0x%08x  0x%08x  0x%08x\n",t1x,t1y,t1z);
     CkPrintf ("DEBUG neighbor level %d\n",level_2);
     CkPrintf ("DEBUG neighbor array %d %d %d\n",a2x,a2y,a2z);
     CkPrintf ("DEBUG block    tree 0x%08x  0x%08x  0x%08x\n",t2x,t2y,t2z);
-  
+#endif
+    
     // left face array+tree bit indices in finest level
 
     const int b1lx = (a1x*(1<<max_level) + t1x);
@@ -115,26 +105,19 @@ void Face::get_dimensions
     CkPrintf ("DEBUG interior = %d %d %d\n",inx?1:0,iny?1:0,inz?1:0);
 #endif  
 
-    // Adjust face size if block is coarse
-    if (level_1 == level_2 - 1 ) {
-      bx /= 2;
-      by /= 2;
-      bz /= 2;
-    }
+    if (lx) (*lx) = inx;
+    if (ly) (*ly) = iny;
+    if (lz) (*lz) = inz;
 
-    if (p_nx) (*p_nx) = inx ? bx : djx ? 0 : 1;
-    if (p_ny) (*p_ny) = iny ? by : djy ? 0 : 1;
-    if (p_nz) (*p_nz) = inz ? bz : djz ? 0 : 1;
+  } else { // index_block == index_neighbor
 
-  } else {
-
-    ASSERT1 ("Face::get_dimensions()", "axis = %d", axis_,
+    ASSERT1 ("Face::adjacency()", "axis = %d", axis_,
              (0 <= axis_ && axis_ < rank_));
-    ASSERT1 ("Face::get_dimensions()", "face = %d", face_,
+    ASSERT1 ("Face::adjacency()", "face = %d", face_,
              (face_ == -1 || face_ == +1));
-    if (p_nx) (*p_nx) = (axis_ == 0) ? 1 : bx;
-    if (p_ny) (*p_ny) = (axis_ == 1) ? 1 : by;
-    if (p_nz) (*p_nz) = (axis_ == 2) ? 1 : bz;
+    if (lx) (*lx) = (axis_ != 0);
+    if (ly) (*ly) = (axis_ != 1);
+    if (lz) (*lz) = (axis_ != 2);
     
   }
 }
@@ -152,12 +135,18 @@ void Face::get_offset (int *p_ix, int *p_iy, int *p_iz,
   const int level_1 = index_block_.level();
   const int level_2 = index_neighbor_.level();
 
+#ifdef DEBUG_FACE    
+  CkPrintf ("DEBUG_FACE_OFFSET levels %d %d\n",level_1,level_2);
+#endif
   if (level_1 < level_2) {
     const int max_level = std::max(level_1,level_2);
     int tx,ty,tz;
     index_neighbor_.tree  (&tx,&ty,&tz,max_level);
     // If block is coarse with fine neighbor, return offset of fine
     // face in coarse face using tree bits
+#ifdef DEBUG_FACE    
+    CkPrintf ("DEBUG_FACE_OFFSET axis %d tree %d %d %d\n",axis_,tx,ty,tz);
+#endif
     if (p_ix) (*p_ix) = (axis_ != 0) ? (tx & 1)*bx/2 : 0;
     if (p_iy) (*p_iy) = (axis_ != 1 && rank_ >= 2) ? (ty & 1)*by/2 : 0;
     if (p_iz) (*p_iz) = (axis_ != 2 && rank_ >= 3) ? (tz & 1)*bz/2 : 0;

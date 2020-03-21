@@ -25,7 +25,8 @@ enum neighbor_enum {
   neighbor_unknown, // Unknown neighbor type
   neighbor_leaf,    // neighbors that are leaves, maybe different level
   neighbor_level,   // neighbors is in same level, maybe not leaves
-  neighbor_tree     // neighbors that are leaves, but only if in same octree
+  neighbor_tree,    // neighbors that are leaves, but only if in same octree
+  neighbor_flux     // neighbors that are leaves and in a different level
 };
   
 //----------------------------------------------------------------------
@@ -66,6 +67,7 @@ extern void method_close_files_mutex_init();
 #include "problem_BoundaryPeriodic.hpp"
 #include "problem_Method.hpp"
 #include "problem_MethodCloseFiles.hpp"
+#include "problem_MethodFluxCorrect.hpp"
 #include "problem_MethodNull.hpp"
 #include "problem_MethodTrace.hpp"
 #include "problem_Physics.hpp"

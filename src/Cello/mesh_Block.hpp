@@ -566,8 +566,6 @@ public:
   void new_particle_send_(Refresh & refresh, int nl,Index index_list[], 
 			  ParticleData * particle_list[]);
 
-  Refresh & new_refresh (int id_refresh);
-
   void new_refresh_exit (Refresh & refresh);
 
   /// Enter the refresh phase after synchronizing
@@ -604,6 +602,8 @@ public:
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
 
+  void p_method_flux_correct();
+
 protected:
 
   //--------------------------------------------------
@@ -621,7 +621,7 @@ protected:
   (int refresh_type, Index index, int if3[3], int ic3[3]);
   void refresh_load_particle_face_
   (int refresh_type, Index index, int if3[3], int ic3[3]);
-
+ 
   //--------------------------------------------------
   // PARTICLES
   //--------------------------------------------------

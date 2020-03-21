@@ -23,12 +23,12 @@ void Block::new_refresh_start (int id_refresh, int callback)
   CHECK_ID(id_refresh);
 
   RefreshState & state = new_refresh_state_list_[id_refresh];
-  Refresh & refresh    = new_refresh(id_refresh);
+  Refresh * refresh    = cello::refresh(id_refresh);
 
   // Send field and/or particle data associated with the given refresh
   // object to corresponding neighbors
 
-  if ( refresh.active() ) {
+  if ( refresh->is_active() ) {
 
     ASSERT1 ("Block::new_refresh_start()",
 	     "refresh[%d] state is not inactive",
@@ -41,13 +41,13 @@ void Block::new_refresh_start (int id_refresh, int callback)
 
     // send Field face data
     
-    if (refresh.any_fields()) {
-      count += new_refresh_load_field_faces_ (refresh);
+    if (refresh->any_fields()) {
+      count += new_refresh_load_field_faces_ (*refresh);
     }
 
     // send Particle face data
-    if (refresh.any_particles()){
-      count += new_refresh_load_particle_faces_(refresh);
+    if (refresh->any_particles()){
+      count += new_refresh_load_particle_faces_(*refresh);
     }
 
     Sync & sync = new_refresh_sync_list_[id_refresh];
@@ -65,8 +65,7 @@ void Block::new_refresh_start (int id_refresh, int callback)
       new_refresh_wait(id_refresh,callback);
     }
   } else {
-    if (callback != 0) 
-      new_refresh_exit(refresh);
+    if (callback != 0) new_refresh_exit(*refresh);
   }
 }
 
@@ -75,16 +74,16 @@ void Block::new_refresh_wait (int id_refresh, int callback)
 {
   CHECK_ID(id_refresh);
 
-  Refresh & refresh = new_refresh(id_refresh);
+  Refresh * refresh = cello::refresh(id_refresh);
 
-  if (refresh.active()) {
+  if (refresh->is_active()) {
 
     // make sure the callback parameter matches that in the refresh object
 
     ASSERT3("Block::new_refresh_wait()",
 	   "Refresh[%d] mismatch between refresh callback %d and parameter callback %d",
-	    id_refresh,callback, refresh.callback(),
-	    (callback == refresh.callback()) );
+	    id_refresh,callback, refresh->callback(),
+	    (callback == refresh->callback()) );
 
     // make sure we aren't already in a "ready" state
 
@@ -131,7 +130,7 @@ void Block::new_refresh_check_done (int id_refresh)
 {
   CHECK_ID(id_refresh);
 
-  Refresh & refresh    = new_refresh(id_refresh);
+  Refresh * refresh    = cello::refresh(id_refresh);
   RefreshState & state = new_refresh_state_list_[id_refresh];
   Sync & sync          = new_refresh_sync_list_[id_refresh];
   
@@ -159,7 +158,7 @@ void Block::new_refresh_check_done (int id_refresh)
 
     // Call callback
 
-    new_refresh_exit(refresh);
+    new_refresh_exit(*refresh);
   }
 }
 

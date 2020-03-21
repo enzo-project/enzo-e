@@ -44,12 +44,14 @@
 class Config;
 class CProxy_Block;
 class FieldDescr;
+class Grouping;
 class Hierarchy;
 class Monitor;
 class Output;
 class Parameters;
 class ParticleDescr;
 class Problem;
+class Refresh;
 class ScalarDescr;
 class Simulation;
 class Solver;
@@ -367,12 +369,18 @@ namespace cello {
   const Parameters *  parameters();
   /// Return a pointer to the FieldDescr object defining fields on Blocks
   FieldDescr *    field_descr();
+  /// Return a pointer to the Groupings object defining field groups
+  Grouping *      field_groups();
   /// Return a pointer to the ParticledDescr object defining particles on Blocks
   ParticleDescr * particle_descr();
+  /// Return a pointer to the Groupings object defining particle groups
+  Grouping *      particle_groups();
   /// Return a pointer to the Monitor object for writing output to stdout
   Monitor *       monitor();
   /// Return a pointer to the Units object
   Units *         units();
+  /// Return reference to in indexed Refresh object
+  Refresh *       refresh(int ir);
 
   /// Return the ScalarDescr object defining Block long double Scalar data values
   ScalarDescr *   scalar_descr_long_double();

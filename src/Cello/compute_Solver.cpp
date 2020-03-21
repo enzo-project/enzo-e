@@ -49,8 +49,7 @@ Solver::Solver (std::string name,
   ix_ = field_descr->field_id(field_x);
   ib_ = field_descr->field_id(field_b);
   ir_post_ = add_new_refresh_();
-  new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
-
+  cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_refresh_exit());
 }
 
 //----------------------------------------------------------------------
@@ -70,7 +69,7 @@ Solver::Solver () throw()
   ir_post_(-1)
 {
   ir_post_ = add_new_refresh_();
-  new_refresh(ir_post_).set_callback(CkIndex_Block::p_refresh_exit());
+  cello::refresh(ir_post_)->set_callback(CkIndex_Block::p_refresh_exit());
 }
 
 //----------------------------------------------------------------------
@@ -88,30 +87,6 @@ int Solver::add_new_refresh_ ()
     (ghost_depth,min_face_rank, neighbor_type_(), sync_type_(), 0);
 
   return cello::simulation()->new_register_refresh(refresh_default);
-}
-
-//----------------------------------------------------------------------
-
-Refresh & Solver::new_refresh(int ir)
-{
-  return cello::simulation()->new_refresh_list(ir);
-}
-
-//----------------------------------------------------------------------
-
-int Solver::refresh_post_id() const
-{
-  ASSERT("Solver::refresh_post_id()",
-	 "Accessing post-refresh object before it's registered",
-	 (ir_post_ >= 0));
-  return ir_post_;
-}
-
-//----------------------------------------------------------------------
-
-Refresh & Solver::refresh_post()
-{
-  return cello::simulation()->new_refresh_list(ir_post_);
 }
 
 //======================================================================

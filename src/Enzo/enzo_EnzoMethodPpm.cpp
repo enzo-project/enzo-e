@@ -41,20 +41,19 @@ EnzoMethodPpm::EnzoMethodPpm ()
 {
   // Initialize default Refresh object
 
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-  
-  refresh.add_field("density");
-  refresh.add_field("velocity_x");
-  refresh.add_field("velocity_y");
-  refresh.add_field("velocity_z");
-  refresh.add_field("total_energy");
-  refresh.add_field("internal_energy");
-  refresh.add_field("acceleration_x");
-  refresh.add_field("acceleration_y");
-  refresh.add_field("acceleration_z");
-
-  // PPM parameters initialized in EnzoBlock::initialize()
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_field("density");
+  refresh->add_field("velocity_x");
+  refresh->add_field("velocity_y");
+  refresh->add_field("velocity_z");
+  refresh->add_field("total_energy");
+  refresh->add_field("internal_energy");
+  refresh->add_field("pressure");
+  refresh->add_field("acceleration_x");
+  refresh->add_field("acceleration_y");
+  refresh->add_field("acceleration_z");
+   // PPM parameters initialized in EnzoBlock::initialize()
 }
 
 //----------------------------------------------------------------------
@@ -74,8 +73,7 @@ void EnzoMethodPpm::pup (PUP::er &p)
 
 void EnzoMethodPpm::compute ( Block * block) throw()
 {
-  TRACE_PPM("compute()");
-  EnzoBlock * enzo_block = enzo::block(block);
+  TRACE_PPM("BEGIN compute()");
 
 #ifdef COPY_FIELDS_TO_OUTPUT
   const int rank = cello::rank();
@@ -91,6 +89,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_in");
 #endif  
   if (block->is_leaf()) {
+    EnzoBlock * enzo_block = enzo::block(block);
     TRACE_PPM ("BEGIN SolveHydroEquations");
     enzo_block->SolveHydroEquations 
       ( block->time(), block->dt(), comoving_coordinates_ );
@@ -110,6 +109,7 @@ void EnzoMethodPpm::compute ( Block * block) throw()
   COPY_FIELD(block,"acceleration_y","acceleration_y_out");
   if (rank >= 3) COPY_FIELD(block,"acceleration_z","acceleration_z_out");
 #endif  
+  TRACE_PPM("END compute()");
   block->compute_done(); 
   
 }
@@ -144,8 +144,8 @@ double EnzoMethodPpm::timestep ( Block * block ) const throw()
 
   const int in = cello::index_static();
 
-  EnzoComputePressure compute_pressure (EnzoBlock::Gamma[in],
-					comoving_coordinates_);
+  EnzoComputePressure compute_pressure
+    (EnzoBlock::Gamma[in],comoving_coordinates_);
   compute_pressure.compute(enzo_block);
 
   Field field = enzo_block->data()->field();

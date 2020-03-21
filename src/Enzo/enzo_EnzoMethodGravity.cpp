@@ -154,34 +154,29 @@ EnzoMethodGravity::EnzoMethodGravity
   // zones to "B" field
 
 
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-
-  refresh.add_field("acceleration_x");
-  refresh.add_field("acceleration_y");
-  refresh.add_field("acceleration_z");
-  refresh.add_field("density");
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_field("acceleration_x");
+  refresh->add_field("acceleration_y");
+  refresh->add_field("acceleration_z");
+  refresh->add_field("density");
 
   // Accumulate is used when particles are deposited into density_total
   
   if (accumulate) {
-
-    refresh.set_accumulate(true);
-
-    refresh.add_field_src_dst
+    refresh->set_accumulate(true);
+    refresh->add_field_src_dst
       ("density_particle","density_particle_accumulate");
-    refresh.add_field_src_dst
-      ("density_total","B");
-
+    refresh->add_field_src_dst("density_total","B");
   }
 
   ir_exit_ = add_new_refresh_();
   cello::simulation()->new_refresh_set_name(ir_post_,name()+":exit");
-  Refresh & refresh_exit = new_refresh(ir_exit_);
+  Refresh * refresh_exit = cello::refresh(ir_exit_);
   
-  refresh_exit.add_field("potential");
+  refresh_exit->add_field("potential");
 
-  refresh_exit.set_callback(CkIndex_EnzoBlock::p_method_gravity_end());
+  refresh_exit->set_callback(CkIndex_EnzoBlock::p_method_gravity_end());
 }
 
 //----------------------------------------------------------------------
@@ -368,7 +363,7 @@ void EnzoBlock::p_method_gravity_continue()
 //----------------------------------------------------------------------
 void EnzoMethodGravity::refresh_potential (EnzoBlock * enzo_block) throw()
 {
-  enzo_block->new_refresh(ir_exit_).set_active(enzo_block->is_leaf());
+  cello::refresh(ir_exit_)->set_active(enzo_block->is_leaf());
   enzo_block->new_refresh_start(ir_exit_,
 			   CkIndex_EnzoBlock::p_method_gravity_end());
 }
@@ -380,6 +375,8 @@ void EnzoBlock::p_method_gravity_end()
   
   EnzoMethodGravity * method = static_cast<EnzoMethodGravity*> (this->method());
   method->compute_accelerations(this);
+  // wait for all Blocks before continuing
+  compute_done();
 }
 
 void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
@@ -532,8 +529,6 @@ void EnzoMethodGravity::compute_accelerations (EnzoBlock * enzo_block) throw()
     for (int i=0; i<m; i++) potential[i] = 0.0;
   }
 
-  // wait for all Blocks before continuing
-  enzo_block->compute_done();
 }
 
 //----------------------------------------------------------------------

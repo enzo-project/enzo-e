@@ -7,6 +7,8 @@
 
 #include "data.hpp"
 
+// #define DEBUG_FACE_FLUXES
+
 FaceFluxes::FaceFluxes (Face face, int index_field,
                         int nx, int ny, int nz,
                         double hx, double hy, double hz, double dt)
@@ -18,7 +20,12 @@ FaceFluxes::FaceFluxes (Face face, int index_field,
     cx_(0),cy_(0),cz_(0),
     gx_(0),gy_(0),gz_(0)
 {
-  face_.get_dimensions(&nx_,&ny_,&nz_,nx,ny,nz);
+  bool lx,ly,lz;
+  face_.adjacency(&lx,&ly,&lz);
+  nx_ = lx ? nx : 1;
+  ny_ = ly ? ny : 1;
+  nz_ = lz ? nz : 1;
+  update_dimensions_();
   ASSERT3 ("FaceFluxes::FaceFluxes",
           "Block dimensions must be even %d %d %d",
           nx,ny,nz,
@@ -35,6 +42,10 @@ void FaceFluxes::pup (PUP::er &p)
 
   p | face_;
   p | index_field_;
+
+  p | mx_;
+  p | my_;
+  p | mz_;
 
   p | nx_;
   p | ny_;
@@ -65,10 +76,7 @@ void FaceFluxes::set_ghost(int gx, int gy, int gz)
   gx_ = gx;
   gy_ = gy;
   gz_ = gz;
-  const int rank = face_.rank();
-  if (nx_ == 1) gx_ = 0;
-  if (ny_ == 1 || rank < 2) gy_ = 0;
-  if (nz_ == 1 || rank < 3) gz_ = 0;
+  update_dimensions_();
 }
 
 //----------------------------------------------------------------------
@@ -78,10 +86,7 @@ void FaceFluxes::set_centering(int cx, int cy, int cz)
   cx_ = cx;
   cy_ = cy;
   cz_ = cz;
-  const int rank = face_.rank();
-  if (nx_ == 1) cx_ = 0;
-  if (ny_ == 1 || rank < 2) cy_ = 0;
-  if (nz_ == 1 || rank < 3) cz_ = 0;
+  update_dimensions_();
 }
   
 //----------------------------------------------------------------------
@@ -134,8 +139,7 @@ void FaceFluxes::get_element_size (double *hx, double *hy, double * hz) const
 //----------------------------------------------------------------------
 
 void FaceFluxes::get_limits
-(const FaceFluxes & face_fluxes,
- int * ixl, int * ixu,
+(int * ixl, int * ixu,
  int * iyl, int * iyu,
  int * izl, int * izu) const
 {
@@ -148,15 +152,29 @@ void FaceFluxes::get_limits
   ///
   /// (ixl,iyl,izl) == (cx*mx/2,cy*my/2,cz*mz/2)
   /// (ixu,iyu,izu) == ((2-cx)*mx/2,(2-cy)*my/2,(2-cz)*mz/2)
+  ///
+  /// o-----------o
+  /// | *-------* |
+  /// | |       | |
+  /// | |       *---*  iyu
+  /// | |       |   |
+  /// | *-------*---*  iyl
+  /// o-----------o    0
 
-  int level_block = face().index_block().level();
-  int level_neighbor = face_fluxes.face().index_block().level();
+
+  int level_block    = face().index_block().level();
+  int level_neighbor = face().index_neighbor().level();
   
-  ASSERT2("FaceFluxes::get_limits",
-          "Assumes neighbor level %d is no coarser than block level %d",
-          level_block,level_neighbor,
-          (level_block <= level_neighbor));
+  // ASSERT2("FaceFluxes::get_limits",
+  //         "Assumes neighbor level %d is no coarser than block level %d",
+  //         level_block,level_neighbor,
+  //         (level_block <= level_neighbor));
 
+#ifdef DEBUG_FACE_FLUXES
+  CkPrintf ("DEBUG_FLUX level (block neighbor) = (%d %d)\n",
+            level_block,level_neighbor);
+#endif
+  
   if (level_block == level_neighbor) {
     if (ixl != nullptr) (*ixl) = gx_;
     if (ixu != nullptr) (*ixu) = nx_+gx_;
@@ -164,8 +182,12 @@ void FaceFluxes::get_limits
     if (iyu != nullptr) (*iyu) = ny_+gy_;
     if (izl != nullptr) (*izl) = gz_;
     if (izu != nullptr) (*izu) = nz_+gz_;
-  } else if (level_block == level_neighbor + 1) {
-    INCOMPLETE ("FaceFluxes::get_limits()");
+  } else if (level_block - level_neighbor == 1) {
+    // neighbor is coarser
+    INCOMPLETE ("FaceFluxes::get_limits() coarse neighbor");
+  } else if (level_neighbor - level_block == - 1) {
+    // neighbor is finer
+    INCOMPLETE ("FaceFluxes::get_limits() fine neighbor");
   }
     
   /// (ixl,iyl,izl) == (0,0,0) and
@@ -184,18 +206,13 @@ double FaceFluxes::time_step () const
   
 //----------------------------------------------------------------------
 
-void FaceFluxes::get_dimensions (int *mx, int *my, int *mz,
-                                 int nx, int ny, int nz) const
+void FaceFluxes::get_dimensions (int *mx, int *my, int *mz) const
 {
   const int rank = face_.rank();
-  if (nx == 0) nx = nx_;
-  if (ny == 0) ny = ny_;
-  if (nz == 0) nz = nz_;
 
-  if (mx) (*mx) = (rank >= 1) ? nx + 2*gx_ + cx_ : 1;
-  if (my) (*my) = (rank >= 2) ? ny + 2*gy_ + cy_ : 1;
-  if (mz) (*mz) = (rank >= 3) ? nz + 2*gz_ + cz_ : 1;
-
+  if (mx) (*mx) = (rank >= 1 && nx_ > 1) ? nx_ + 2*gx_ + cx_ : 1;
+  if (my) (*my) = (rank >= 2 && ny_ > 1) ? ny_ + 2*gy_ + cy_ : 1;
+  if (mz) (*mz) = (rank >= 3 && nz_ > 1) ? nz_ + 2*gz_ + cz_ : 1;
 }
    
 //----------------------------------------------------------------------
@@ -277,14 +294,18 @@ void FaceFluxes::coarsen ()
   std::vector<double> fluxes_fine = fluxes_;
   int mxf,myf,mzf;
   get_dimensions(&mxf,&myf,&mzf);
-  int mxc,myc,mzc;
-  get_dimensions(&mxc,&myc,&mzc,nx_/2,ny_/2,nz_/2);
+  // not correct??  need nxf/2 for ghost and centering
+  const int rank = face_.rank();
+  // nxc + a = nx/2 + a
+  
+  const int mxc = (rank >= 1 && nx_ > 1) ? (nx_/2 + 2*gx_ + cx_) : 1;
+  const int myc = (rank >= 1 && ny_ > 1) ? (ny_/2 + 2*gy_ + cy_) : 1;
+  const int mzc = (rank >= 1 && nz_ > 1) ? (nz_/2 + 2*gz_ + cz_) : 1;
 
   fluxes_.resize(mxc*myc*mzc);
 
   std::fill(fluxes_.begin(),fluxes_.end(),0.0);
 
-  const int rank = face_.rank();
   const int dxc = 1;
   const int dyc = mxc;
   const int dzc = mxc*myc;
@@ -301,11 +322,13 @@ void FaceFluxes::coarsen ()
         fluxes_[iycm*dyc + izcp*dzc] += fluxes_fine[i_f];
         fluxes_[iycp*dyc + izcm*dzc] += fluxes_fine[i_f];
         fluxes_[iycp*dyc + izcp*dzc] += fluxes_fine[i_f];
+#ifdef DEBUG_FACE_FLUXES        
         CkPrintf ("coarsen x-face fluxes_c[%d %d %d %d] += fluxes_f[%d] \n",
                   iycm*dyc + izcm*dzc,
                   iycm*dyc + izcp*dzc,
                   iycp*dyc + izcm*dzc,
                   iycp*dyc + izcp*dzc,i_f);
+#endif        
       }
     }
   } else if (myf == 1) {
@@ -321,11 +344,13 @@ void FaceFluxes::coarsen ()
         fluxes_[izcp*dzc + ixcm*dxc] += fluxes_fine[i_f];
         fluxes_[izcm*dzc + ixcp*dxc] += fluxes_fine[i_f];
         fluxes_[izcp*dzc + ixcp*dxc] += fluxes_fine[i_f];
+#ifdef DEBUG_FACE_FLUXES        
         CkPrintf ("coarsen y-face fluxes_c[%d %d %d %d] += fluxes_f[%d] \n",
                   ixcm*dxc + izcm*dzc,
                   ixcm*dxc + izcp*dzc,
                   ixcp*dxc + izcm*dzc,
                   ixcp*dxc + izcp*dzc,i_f);
+#endif        
       }
     }
   } else if (mzf == 1) {
@@ -341,11 +366,13 @@ void FaceFluxes::coarsen ()
         fluxes_[ixcp*dxc + iycm*dyc] += fluxes_fine[i_f];
         fluxes_[ixcm*dxc + iycp*dyc] += fluxes_fine[i_f];
         fluxes_[ixcp*dxc + iycp*dyc] += fluxes_fine[i_f];
+#ifdef DEBUG_FACE_FLUXES        
         CkPrintf ("coarsen z-face fluxes_c[%d %d %d %d] += fluxes_f[%d] \n",
                   iycm*dyc + ixcm*dxc,
                   iycm*dyc + ixcp*dxc,
                   iycp*dyc + ixcm*dxc,
                   iycp*dyc + ixcp*dxc,i_f);
+#endif
       }
     }
   }
@@ -366,8 +393,6 @@ FaceFluxes & FaceFluxes::operator += (const FaceFluxes & face_fluxes_1)
   int mx1,my1,mz1;
   face_fluxes_1.get_dimensions(&mx1,&my1,&mz1);
 
-  INCOMPLETE("FaceFluxes::operator += (FaceFluxes)");
-
   ASSERT ("FaceFluxes::operator += (FaceFluxes)",
           "Faces must agree",
           (face() == face_fluxes_1.face()));
@@ -376,12 +401,13 @@ FaceFluxes & FaceFluxes::operator += (const FaceFluxes & face_fluxes_1)
   //         (mx==mx1) && (my==my1) && (mz==mz1));
 
   int ixl,ixu,iyl,iyu,izl,izu;
-  this->get_limits(face_fluxes_1,&ixl,&ixu,&iyl,&iyu,&izl,&izu);
+  get_limits(&ixl,&ixu,&iyl,&iyu,&izl,&izu);
 
   for (int iz=izl; iz<izu; iz++) {
     for (int iy=iyl; iy<iyu; iy++) {
       for (int ix=ixl; ix<ixu; ix++) {
         int i=ix+mx*(iy+my*iz);
+        fluxes_[i] += face_fluxes_1.fluxes_[i];
       }
     }
   }

@@ -12,6 +12,8 @@
 
 #include "test_setup_face.hpp"
 
+#define DEBUG_FACE_FLUXES
+
 double init_1(int ix, int iy, int iz, int mx, int my, int mz)
 {
   return 7.0+3.0*(ix+mx*(iy+my*iz));
@@ -37,6 +39,7 @@ PARALLEL_MAIN_BEGIN
 
     CkPrintf ("Running test %d\n",index_test);
 
+    const int test = test::face_test[index_test].test;
     const int level_1 = test::face_test[index_test].levels_1;
     const int level_2 = test::face_test[index_test].levels_2;
     const int rank = test::face_test[index_test].rank;
@@ -77,9 +80,9 @@ PARALLEL_MAIN_BEGIN
         test::face_test[index_test].array_1,
         test::face_test[index_test].tree_1);
     Index index_2 = test::create_index
-      ( test::face_test[index_test].levels_1,
-        test::face_test[index_test].array_1,
-        test::face_test[index_test].tree_1);
+      ( test::face_test[index_test].levels_2,
+        test::face_test[index_test].array_2,
+        test::face_test[index_test].tree_2);
     
     Face * face_1 = new Face (index_1,index_2,rank,ax,ay,az,px,py,pz,fx,fy,fz);
     Face * face_2 = new Face (index_2,index_1,rank,ax,ay,az,px,py,pz,fx,fy,fz);
@@ -93,6 +96,9 @@ PARALLEL_MAIN_BEGIN
     auto face_fluxes_2 = new FaceFluxes
       (*face_2,index_field, NX,NY,NZ, hx2,hy2,hz2,dt2);
 
+    unit_func ("test number");
+    unit_assert(index_test == test);
+
     unit_assert (face_fluxes_1 != NULL);
     unit_assert (face_fluxes_2 != NULL);
 
@@ -100,6 +106,10 @@ PARALLEL_MAIN_BEGIN
     
     int mx,my,mz;
     face_fluxes_1->get_dimensions (&mx,&my,&mz);
+
+    CkPrintf ("DEBUG_GET_DIMENSIONS (mx,my,mz) %d %d %d\n",mx,my,mz);
+    CkPrintf ("DEBUG_GET_DIMENSIONS (NX,NY,NZ) %d %d %d\n",NX,NY,NZ);
+    CkPrintf ("DEBUG_GET_DIMENSIONS axis %d\n",axis);
 
     unit_assert (mx==((axis == 0) ? 1 : NX));
     unit_assert (my==((axis == 1) ? 1 : NY));
@@ -111,10 +121,14 @@ PARALLEL_MAIN_BEGIN
     int ixu,iyu,izu;
 
     if (level_1 <= level_2) {
-      face_fluxes_1 -> get_limits (*face_fluxes_2,&ixl,&ixu,&iyl,&iyu,&izl,&izu);
-      unit_assert ( (ixu-ixl)*(iyu-iyl)*(izu-izl) == mx*my*mz);
+      face_fluxes_1 -> get_limits
+        (&ixl,&ixu,&iyl,&iyu,&izl,&izu);
+      CkPrintf ("DEBUG_LIMITS %d %d %d  %d %d %d\n",
+                (ixu-ixl),(iyu-iyl),(izu-izl) ,mx,my,mz);
+
+      //      unit_assert ( (ixu-ixl)*(iyu-iyl)*(izu-izl) == mx*my*mz);
+      unit_assert ( unit_incomplete );
     }
-                                   
                                    
     unit_func ("set_ghost()");
 
@@ -374,10 +388,20 @@ PARALLEL_MAIN_BEGIN
       auto & fluxes_2 = face_fluxes_2->get_fluxes(&dx2,&dy2,&dz2);
 
       int mx1,my1,mz1;
+      int ox1,oy1,oz1;
       face_fluxes_1->get_dimensions (&mx1,&my1,&mz1);
+      face_1->get_offset (&ox1,&oy1,&oz1,NX,NY,NZ);
       int mx2,my2,mz2;
+      int ox2,oy2,oz2;
       face_fluxes_2->get_dimensions (&mx2,&my2,&mz2);
+      face_2->get_offset (&ox2,&oy2,&oz2,NX,NY,NZ);
 
+#ifdef DEBUG_FACE_FLUXES
+      CkPrintf ("DEBUG_FACE_FLUXES dimensions %d %d %d  %d %d %d\n",
+                mx1,my1,mz1,mx2,my2,mz2);
+      CkPrintf ("DEBUG_FACE_FLUXES offset %d %d %d  %d %d %d\n",
+                ox1,oy1,oz1,ox2,oy2,oz2);
+#endif      
       long sum_1_pre = 0;
       for (int iz=0; iz<mz1; iz++) {
         for (int iy=0; iy<my1; iy++) {
@@ -410,7 +434,12 @@ PARALLEL_MAIN_BEGIN
       }
 
       //      unit_assert (sum_1_post == (sum_1_pre + sum_2_pre));
-      unit_assert (unit_incomplete);
+      unit_assert ( unit_incomplete );
+#ifdef DEBUG_FACE_FLUXES
+      CkPrintf ("sum_1 %ld =?= %ld (sum_1_pre %ld + sum_2_pre %ld)\n",
+                sum_1_post,(sum_1_pre+sum_2_pre),sum_1_pre,sum_2_pre);
+#endif        
+      //      unit_assert (unit_incomplete);
     }
 
     //--------------------------------------------------
