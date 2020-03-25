@@ -354,10 +354,6 @@ void EnzoInitialCloud::enforce_block
     check_uniform_bfield_(bfield_z, "bfield_z", gx, gy, gz);
 
     // now compute specific magnetic energy of the wind
-    double frac_enclosed = sph.cell_fraction_enclosed(gz, gy, gx);
-    ASSERT("EnzoInitialCloud",
-	   ("The lower left corner of the active zone is assumed to lie "
-	    "outside the cloud."), frac_enclosed == 0);
     magnetic_edens_wind = 0.5*(bfield_x(gz,gy,gx)*bfield_x(gz,gy,gx)+
 			       bfield_y(gz,gy,gx)*bfield_y(gz,gy,gx)+
 			       bfield_z(gz,gy,gx)*bfield_z(gz,gy,gx));
