@@ -251,7 +251,7 @@ void EnzoIntegrableUpdate::update_passive_scalars_
 	  for (int ix=1; ix<mx-1; ix++) {
 
 	    out_conserved(iz,iy,ix)
-	      = (cur_specific(iz,iy,ix) * cur_rho(iz,iy,ix) - dU(iz,iy,ix));
+	      = (cur_specific(iz,iy,ix) * cur_rho(iz,iy,ix) + dU(iz,iy,ix));
 	  }
 	}
       }
