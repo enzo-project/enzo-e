@@ -820,6 +820,11 @@ Method * Problem::create_method_
     method = new MethodNull
       (config->method_null_dt);
 
+  } else if (name == "flux_correct") {
+
+    method = new MethodFluxCorrect
+      (config->method_flux_correct_group[index_method]);
+
   } else if (name == "close_files") {
 
     method = new MethodCloseFiles

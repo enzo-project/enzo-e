@@ -50,7 +50,7 @@ void Block::refresh_continue()
   Refresh * refresh = this->refresh();
   TRACE_REFRESH("refresh_continue_()",refresh);
 
-  if ( refresh && refresh->active() ) {
+  if ( refresh && refresh->is_active() ) {
 
     // count self
     int count = 1;

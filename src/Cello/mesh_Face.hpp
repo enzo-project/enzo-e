@@ -139,13 +139,8 @@ public: // interface
     if (fz) (*fz) = (rank_ >= 3) ? fz_ : 0;
   }
 
-  /// Return the size of the array of field values (nx,ny,nz) at the
-  /// Face given the Block Field dimensions (bx,by,bz).  Does not
-  /// include adjustments for non-centering or ghost zones.  Size
-  /// is for index_block not index_neighbor
-
-  void get_dimensions (int *p_nx, int *p_ny, int *p_nz,
-                       int bx, int by, int bz);
+  /// Return whether block and neighbor are adjacent for each axis
+  void adjacency (bool *lx, bool *ly, bool *lz) const;
 
   /// Return the starting index along the face.  This is used for
   /// neighboring blocks in different mesh levels to determine the
@@ -195,9 +190,11 @@ private: // attributes
   bool px_, py_, pz_;
   /// Optional subface within a facet (used for MHD)
   int fx_,fy_,fz_;
-  /// Axis associated with face normal
+  /// Axis associated with face normal.  Used to resolve ambiguity for
+  /// periodic b.c. and single block along axis
   int axis_;
-  /// Direction associated with face normal (-1 or 1)
+  /// Direction associated with face normal (-1 or 1).  Used to
+  /// resolve ambiguity for periodic b.c. and single block along axis
   int face_;
   /// Dimensionality 1, 2, or 3
   int rank_;

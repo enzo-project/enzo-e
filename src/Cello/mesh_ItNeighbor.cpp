@@ -230,6 +230,12 @@ bool ItNeighbor::valid_()
       (! index().is_in_same_subtree(index_,min_level_,root_level_))) {
       return false;
   }
+
+  // return false if neighbor_flux and in same level
+  if ((neighbor_type_ == neighbor_flux)
+      && (face_level() == level_)) {
+    return false;
+  }
   
   // Return false if on boundary and not periodic
 

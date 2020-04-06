@@ -50,10 +50,10 @@ public: // interface
   void get_element_size (double *hx, double *hy, double * hz) const;
 
   /// Return loop limits on this face relative to neighbor face
-  void get_limits(const FaceFluxes & face_fluxes,
-                  int * ixl, int * ixu,
+  void get_limits(int * ixl, int * ixu,
                   int * iyl=0, int * iyu=0,
                   int * izl=0, int * izu=0) const;
+
   /// Return the time step dt of the accumulated fluxes. May differ
   /// from Block time step if multiple time steps have been
   /// accumulated.
@@ -62,8 +62,7 @@ public: // interface
   /// Return the array dimensions, including adjustments for ghost or
   /// centering. One or more of mx,my,mz will be 1.  Stored block size
   /// (nx_,ny_,nz_) used unless provided explicitly by (nx,ny,nz)
-  void get_dimensions (int *mx, int *my, int *mz,
-                       int nx=0, int ny=0, int nz=0) const;
+  void get_dimensions (int *mx, int *my, int *mz) const;
    
   /// Copy flux values from an array to the FluxFaces. Array element
   /// array[ix*dx + iy*dy + iz*dz] should correspond to flux value
@@ -112,17 +111,27 @@ public: // interface
   /// correction factors. Assumes fully-conforming FaceFlux objects:
   /// FaceFluxes must be associated with the same face, and ratios of
   /// both cell_widths and time_steps must be 1.0.
-  friend FaceFluxes operator - (const FaceFluxes & ff_1, const FaceFluxes & ff_2);
+  friend FaceFluxes operator -
+  ( const FaceFluxes & ff_1, const FaceFluxes & ff_2 );
   
 private: // functions
 
-
+  /// Update dimensions (mx_,my_,mz_) after any of n?_, g?_, c?_ change
+  void update_dimensions_()
+  {
+    const int rank = face_.rank();
+    mx_ = (rank >= 1 && nx_ > 1) ? (nx_ + 2*gx_ + cx_) : 1;
+    my_ = (rank >= 1 && ny_ > 1) ? (ny_ + 2*gy_ + cy_) : 1;
+    mz_ = (rank >= 1 && nz_ > 1) ? (nz_ + 2*gz_ + cz_) : 1;
+  }
+  
 private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
   Face face_;
   int index_field_;
+  int mx_,my_,mz_;
   int nx_,ny_,nz_;
   int cx_,cy_,cz_;
   int gx_,gy_,gz_;

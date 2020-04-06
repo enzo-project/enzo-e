@@ -25,6 +25,22 @@ void Refresh::add_field_src_dst(std::string field_src, std::string field_dst)
 
 //----------------------------------------------------------------------
 
+void Refresh::add_all_fields(std::string field_group)
+{
+  if (field_group == "") {
+    all_fields_ = true;
+  } else {
+    Grouping * groups = cello::field_groups();
+    int n = groups->size(field_group);
+    for (int i=0; i<n; i++) {
+      std::string field = groups->item(field_group,i);
+      add_field(field);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 int Refresh::data_size () const
 {
   int count = 0;

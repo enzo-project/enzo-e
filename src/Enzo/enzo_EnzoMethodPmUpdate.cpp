@@ -29,18 +29,17 @@ EnzoMethodPmUpdate::EnzoMethodPmUpdate
   TRACE_PM("EnzoMethodPmUpdate()");
   // Initialize default Refresh object
 
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
   
   const int rank = cello::rank();
-  
-  if (rank >= 1) refresh.add_field("acceleration_x");
-  if (rank >= 2) refresh.add_field("acceleration_y");
-  if (rank >= 3) refresh.add_field("acceleration_z");
+  Refresh * refresh = cello::refresh(ir_post_);
+  if (rank >= 1) refresh->add_field("acceleration_x");
+  if (rank >= 2) refresh->add_field("acceleration_y");
+  if (rank >= 3) refresh->add_field("acceleration_z");
 
   const ParticleDescr * p_descr = cello::particle_descr();
   if (p_descr->type_exists("dark")) {
-    refresh.add_particle(p_descr->type_index("dark"));
+    refresh->add_particle(p_descr->type_index("dark"));
   }
   
   // PM parameters initialized in EnzoBlock::initialize()

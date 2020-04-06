@@ -10,7 +10,7 @@
 
 #include "problem.hpp"
 
-#define DEBUG_THROTTLE
+// #define DEBUG_THROTTLE
 
 //----------------------------------------------------------------------
 
@@ -29,10 +29,9 @@ MethodCloseFiles::MethodCloseFiles
     seconds_delay_(seconds_delay),
     group_size_(group_size)
 {
-
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,"close_files");
-  refresh.add_all_fields();
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_fields();
 }
 
 //----------------------------------------------------------------------
@@ -52,6 +51,7 @@ void MethodCloseFiles::compute( Block * block) throw()
       fflush(stdout);
 #endif
       it->second->file_close();
+      delete it->second;
       throttle_delay_();
       FileHdf5::file_list.erase(it);
     }

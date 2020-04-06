@@ -20,10 +20,10 @@ MethodTrace::MethodTrace
     timestep_(timestep),
     name_(name)
 {
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name);
   
-  refresh.add_all_particles();
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_particles();
 }
 
 //----------------------------------------------------------------------
@@ -54,7 +54,7 @@ void MethodTrace::compute ( Block * block) throw()
     union { float * vza4; double * vza8; };
   
     // NOTE: union so v?a4 also initialized
-    
+
     vxa8 = (rank >= 1) ? (double *) field.values("velocity_x") : NULL;
     vya8 = (rank >= 2) ? (double *) field.values("velocity_y") : NULL;
     vza8 = (rank >= 3) ? (double *) field.values("velocity_z") : NULL;
@@ -77,9 +77,11 @@ void MethodTrace::compute ( Block * block) throw()
 
     double dt = block -> dt();
 
-    // Get velocity precision: ASSUMES precision same for all axes and is single or double
+    // Get velocity precision: ASSUMES precision same for all axes and
+    // is single or double
     
-    const bool is_single = (field.precision (field.field_id("velocity_x")) == precision_single);
+    const bool is_single =
+      (field.precision (field.field_id("velocity_x")) == precision_single);
 
     // declare particle position arrays
 

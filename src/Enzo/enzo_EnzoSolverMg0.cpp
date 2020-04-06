@@ -169,12 +169,12 @@ EnzoSolverMg0::EnzoSolverMg0
   ic_ = cello::field_descr()->insert_temporary();
 
 
-  Refresh & refresh = this->refresh_post();
+  Refresh * refresh = cello::refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name);
 
-  refresh.add_field (ix_);  // NOTE: ix_ set in Solver::Solver()
-  refresh.add_field (ir_);
-  refresh.add_field (ic_);
+  refresh->add_field (ix_);
+  refresh->add_field (ir_);
+  refresh->add_field (ic_);
   
   ScalarDescr * scalar_descr_int  = cello::scalar_descr_int();
   i_iter_  = scalar_descr_int ->new_value(name + ":iter");
