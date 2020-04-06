@@ -181,6 +181,16 @@ Initial * EnzoProblem::create_initial_
        enzo_config->initial_soup_density,
        enzo_config->initial_soup_pressure_in,
        enzo_config->initial_soup_pressure_out);
+  } else if (type == "burkertbodenheimer") {
+    initial = new EnzoInitialBurkertBodenheimer
+      (cycle,time,
+       enzo_config->initial_burkertbodenheimer_rank,
+       enzo_config->initial_burkertbodenheimer_array,
+       enzo_config->initial_burkertbodenheimer_radius_relative,
+       enzo_config->initial_burkertbodenheimer_particle_ratio,
+       enzo_config->initial_burkertbodenheimer_mass,
+       enzo_config->initial_burkertbodenheimer_temperature,
+       enzo_config->initial_burkertbodenheimer_densityprofile);
   } else if (type == "isolated_galaxy") {
     initial = new EnzoInitialIsolatedGalaxy (enzo_config);
   } else {

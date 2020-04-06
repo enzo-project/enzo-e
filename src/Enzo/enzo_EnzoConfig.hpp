@@ -171,6 +171,12 @@ public: // interface
       initial_pm_field(""),
       initial_pm_mpp(0.0),
       initial_pm_level(0),
+      initial_burkertbodenheimer_rank(0),
+      initial_burkertbodenheimer_radius_relative(0.0),
+      initial_burkertbodenheimer_particle_ratio(0.0),
+      initial_burkertbodenheimer_mass(0.0),
+      initial_burkertbodenheimer_temperature(0.0),
+      initial_burkertbodenheimer_densityprofile(1),
       // EnzoInitialSedovArray[23]
       initial_sedov_rank(0),
       initial_sedov_radius_relative(0.0),
@@ -420,6 +426,15 @@ public: // attributes
   std::string                initial_pm_field;
   double                     initial_pm_mpp;
   int                        initial_pm_level;
+
+   /// EnzoInitialBurkertBodenheimer
+  int                        initial_burkertbodenheimer_rank;
+  int                        initial_burkertbodenheimer_array[3];
+  double                     initial_burkertbodenheimer_radius_relative;
+  double                     initial_burkertbodenheimer_particle_ratio;
+  double                     initial_burkertbodenheimer_mass;
+  double                     initial_burkertbodenheimer_temperature;
+  int                        initial_burkertbodenheimer_densityprofile;
 
   /// EnzoInitialSedovArray[23]
   int                        initial_sedov_rank;
