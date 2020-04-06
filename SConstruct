@@ -8,6 +8,7 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
+new_ppm = 1
 
 #----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
@@ -184,6 +185,8 @@ print
 define = {}
 
 # Temporary defines
+
+define_new_ppm = 'NEW_PPM'
 
 # Precision defines
 
@@ -371,6 +374,8 @@ if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
 if (have_git != 0 or have_mercurial != 0 ):
    defines.append( define_have_version_control )
 if (smp != 0):           defines.append( define_smp )
+
+if (new_ppm != 0):       defines.append( define_new_ppm )
 
 #======================================================================
 # FINAL CHARM SETUP
