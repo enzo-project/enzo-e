@@ -310,10 +310,9 @@ EnzoMethodDistributedFeedback::EnzoMethodDistributedFeedback
   // const int ir = add_refresh(4,0,neighbor_leaf,sync_barrier,
   //                           enzo_sync_id_method_feedback);
   // refresh(ir)->add_all_fields();
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-
-  refresh.add_all_fields();
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_fields();
 
   dual_energy_         = enzo_config->ppm_dual_energy;
 

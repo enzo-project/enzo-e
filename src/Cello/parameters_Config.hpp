@@ -81,6 +81,7 @@ public: // interface
     method_close_files_seconds_delay(),
     method_close_files_group_size(),
     method_courant(),
+    method_flux_correct_group(),
     method_timestep(),
     method_trace_name(),
   // MethodNull
@@ -235,6 +236,7 @@ public: // interface
       method_close_files_seconds_delay(),
       method_close_files_group_size(),
       method_courant(),
+      method_flux_correct_group(),
       method_timestep(),
       method_trace_name(),
       method_null_dt(0.0),
@@ -435,6 +437,7 @@ public: // attributes
   std::vector<double>        method_close_files_seconds_delay;
   std::vector<int>           method_close_files_group_size;
   std::vector<double>        method_courant;
+  std::vector<std::string>   method_flux_correct_group;
   std::vector<double>        method_timestep;
   std::vector<std::string>   method_trace_name;
   double                     method_null_dt;

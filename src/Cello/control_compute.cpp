@@ -58,10 +58,11 @@ void Block::compute_next_ ()
     CkPrintf ("DEBUG_REFRESH %s:%d calling refresh_[enter|start]\n",__FILE__,__LINE__);
 #endif
 
-    method->refresh_post().set_active (is_leaf());
+    int ir_post = method->refresh_id_post();
     
-    new_refresh_start (method->refresh_post_id(),
-		       CkIndex_Block::p_compute_continue());
+    cello::refresh(ir_post)->set_active (is_leaf());
+    
+    new_refresh_start (ir_post,CkIndex_Block::p_compute_continue());
     
   } else {
 

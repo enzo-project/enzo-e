@@ -85,13 +85,13 @@ EnzoSolverJacobi::EnzoSolverJacobi
   ir_ = cello::field_descr()->insert_temporary();
 
 
-  Refresh & refresh = this->refresh_post();
+  Refresh * refresh = cello::refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name);
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_post=%d\n",__FILE__,__LINE__,ir_post_);
 #endif  
 
-  refresh.add_field (ix_);
+  refresh->add_field (ix_);
 
   ScalarDescr * scalar_descr_int = cello::scalar_descr_int();
   i_iter_ = scalar_descr_int->new_value(name_ + ":iter");  
@@ -103,15 +103,15 @@ EnzoSolverJacobi::EnzoSolverJacobi
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_smooth=%d\n",__FILE__,__LINE__,ir_smooth_);
 #endif  
 
-  Refresh & refresh_smooth = new_refresh(ir_smooth_);
+  Refresh * refresh_smooth = cello::refresh(ir_smooth_);
   cello::simulation()->new_refresh_set_name(ir_smooth_,name+":smooth");
   
-  refresh_smooth.add_field (ix_);
-  refresh_smooth.set_solver_id(index());
+  refresh_smooth->add_field (ix_);
+  refresh_smooth->set_solver_id(index());
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d id_solver=%d\n",__FILE__,__LINE__,index());
 #endif  
-  refresh_smooth.set_callback(CkIndex_EnzoBlock::p_solver_jacobi_continue());
+  refresh_smooth->set_callback(CkIndex_EnzoBlock::p_solver_jacobi_continue());
 
 }
 
@@ -272,10 +272,10 @@ void EnzoSolverJacobi::do_refresh_(Block * block)
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_smooth=%d\n",__FILE__,__LINE__,ir_smooth_);
 #endif  
-  Refresh & refresh = new_refresh(ir_smooth_);
+  Refresh * refresh = cello::refresh(ir_smooth_);
 
-  refresh.set_active(is_finest_(block));
-  refresh.add_field (ix_);
+  refresh->set_active(is_finest_(block));
+  refresh->add_field (ix_);
   
 #ifdef DEBUG_NEW_REFRESH  
   CkPrintf ("DEBUG_NEW_REFRESH %s:%d ir_smooth=%d\n",__FILE__,__LINE__,ir_smooth_);

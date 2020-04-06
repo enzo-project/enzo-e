@@ -1,0 +1,11 @@
+ Adapt {
+     list = [ "slope" ];
+     max_level = 3;
+     min_level = 0;
+     slope {
+         max_coarsen = 1e-18;
+         min_refine = 1e-16;
+         type = "slope";
+         field_list = ["density"];
+     }
+ }

@@ -37,14 +37,14 @@ EnzoMethodPmDeposit::EnzoMethodPmDeposit ( double alpha)
 {
   // Initialize default Refresh object
 
-
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-  
-  refresh.add_field("density");
-  refresh.add_field("velocity_x");
-  refresh.add_field("velocity_y");
-  refresh.add_field("velocity_z");
+
+  Refresh * refresh = cello::refresh(ir_post_);
+
+  refresh->add_field("density");
+  refresh->add_field("velocity_x");
+  refresh->add_field("velocity_y");
+  refresh->add_field("velocity_z");
 }
 
 //----------------------------------------------------------------------
@@ -72,15 +72,23 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     int rank = cello::rank();
 
-    enzo_float  * de_t = (enzo_float *) field.values("density_total");
-    enzo_float  * de_p = (enzo_float *) field.values("density_particle");
-    enzo_float  * de_pa = (enzo_float *) field.values("density_particle_accumulate");
+    enzo_float * de_t = (enzo_float *)
+      field.values("density_total");
+    enzo_float * de_p = (enzo_float *)
+      field.values("density_particle");
+    enzo_float * de_pa = (enzo_float *)
+      field.values("density_particle_accumulate");
+
     int mx,my,mz;
     field.dimensions(0,&mx,&my,&mz);
     int nx,ny,nz;
     field.size(&nx,&ny,&nz);
     int gx,gy,gz;
     field.ghost_depth(0,&gx,&gy,&gz);
+
+    const int m = mx*my*mz;
+    std::fill_n(de_p,m,0.0);
+    std::fill_n(de_pa,m,0.0);
 
     // Initialize "density_total" with gas "density"
 
@@ -104,26 +112,22 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 
     int num_mass = particle_groups->size("has_mass");
 
-    for (int i=0; i<mx*my*mz; i++) de_p[i] = 0.0;
-    for (int i=0; i<mx*my*mz; i++) de_pa[i] = 0.0;
-
     // Accumulate particle density using CIC
 
     enzo_float cosmo_a=1.0;
     enzo_float cosmo_dadt=0.0;
     EnzoPhysicsCosmology * cosmology = enzo::cosmology();
-    
+
     if (cosmology) {
 
       double time = block->time();
       double dt   = block->dt();
       cosmology->compute_expansion_factor (&cosmo_a,&cosmo_dadt,time+alpha_*dt);
-      
     }
     if (rank >= 1) hx *= cosmo_a;
     if (rank >= 2) hy *= cosmo_a;
     if (rank >= 3) hz *= cosmo_a;
-    
+
     const double dt = alpha_ * block->dt() / cosmo_a;
 
     int level = block->level();
@@ -300,6 +304,7 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
 	  enzo_float * vya = (enzo_float *) particle.attribute_array (it,ia_vy,ib);
 	  enzo_float * vza = (enzo_float *) particle.attribute_array (it,ia_vz,ib);
 
+
 #ifdef DEBUG_COLLAPSE
           CkPrintf ("DEBUG_COLLAPSE vxa[0] = %lg\n",vxa[0]);
 #endif            
@@ -354,13 +359,18 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
       } // end loop over batches
     } // end loop over particle types
 
-    enzo_float  * de   = (enzo_float *) field.values("density");
-    enzo_float  * de_gas = new enzo_float [mx*my*mz];
-    for (int i=0; i<mx*my*mz; i++) de_gas[i] = 0.0;
-    enzo_float * temp = new enzo_float [4*mx*my*mz];
-    for (int i=0; i<4*mx*my*mz; i++) temp[i] = 0.0;
-    enzo_float * rfield = new enzo_float[mx*my*mz];
-    for (int i=0; i<mx*my*mz; i++) rfield[i] = 0.0;
+    //--------------------------------------------------
+    // Add gas density
+    //--------------------------------------------------
+    enzo_float * de = (enzo_float *) field.values("density");
+
+    enzo_float * temp =   new enzo_float [4*m];
+    enzo_float * de_gas = new enzo_float [m];
+    enzo_float * rfield = new enzo_float [m];
+
+    std::fill_n(temp, 4*m, 0.0);
+    std::fill_n(de_gas, m, 0.0);
+    std::fill_n(rfield, m, 0.0);
 
     int gxi=gx;
     int gyi=gy;
@@ -378,8 +388,6 @@ void EnzoMethodPmDeposit::compute ( Block * block) throw()
     enzo_float * vxf = (enzo_float *) field.values("velocity_x");
     enzo_float * vyf = (enzo_float *) field.values("velocity_y");
     enzo_float * vzf = (enzo_float *) field.values("velocity_z");
-
-    const int m = mx*my*mz;
 
     enzo_float * vx = new enzo_float [m];
     enzo_float * vy = new enzo_float [m];

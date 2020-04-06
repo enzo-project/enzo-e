@@ -115,7 +115,6 @@ Block::Block ( MsgRefine * msg )
     apply_initial_();
   }
 
-
   performance_stop_(perf_block);
 
 
@@ -814,11 +813,6 @@ void Block::init_new_refresh_()
     new_refresh_sync_list_[i].reset();
     new_refresh_state_list_[i] = RefreshState::INACTIVE;
   }
-}
-
-Refresh & Block::new_refresh(int id_refresh)
-{
-  return cello::simulation()->new_refresh_list(id_refresh);
 }
 
 //----------------------------------------------------------------------

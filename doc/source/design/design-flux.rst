@@ -12,16 +12,16 @@ Requirements
 Flux correction involves updating field values along faces between
 neighboring blocks to ensure that conserved quantities are indeed
 conserved.  This correction step isn't required at all block faces: if
-both mesh refinement levels and time-steps are the same between two
+both mesh refinement levels and time steps are the same between two
 adjacent blocks, then fluxes along the interfaces are expected to
 already match to machine precision.  However, if neighboring blocks
 have different spacial or temporal resolution, the computed solution
 will not in general be conservative, so some type of correction due to
 the inconsistent fluxes will be required.
 
-.. note:: We will henceforth use the term "resolution jump" to include
-          a difference in time steps as well as in mesh resolution,
-          "coarse" and "fine" to include relatively long and short
+.. note:: We use the term "resolution jump" to include a difference in
+          *time steps* as well as in mesh resolution; similarly, we
+          use "coarse" and "fine" to include relatively long and short
           time steps as well as relativly large and small block cell
           widths.
 
@@ -31,7 +31,7 @@ factor is computed using the coarse and fine fluxes across the
 interface.  While the basic update is straightforward, care must be
 taken to ensure that the correction factors are computed correctly,
 especially for non-centered field variables or when adaptive
-time-stepping is used.  Additional corrections will be required for
+time stepping is used.  Additional corrections will be required for
 MHD, and expansion terms in cosmological problems may also need to be
 considered.
 
@@ -43,20 +43,19 @@ Basic operations involved include the following:
 #. computing correction factors given coarse and fine fluxes
 #. correcting coarse-level field values given correction factors
 
-.. note:: Relative to ENZO's structured AMR grids, flux correction for
-          Enzo-E / Cello is simpler due to Cello's array-of-octree
-          refinement: blocks only share fluxes at block faces (Enzo-E
-          blocks do not contain sub-blocks), and the topology of fine-
-          and coarse-level block intersections is simpler (Enzo-E
-          coarse-level block faces are adjacent to exactly four
-          fine-level block faces).  The first simplification removes
-          the need to loop over sub-grids or store fluxes internal to
-          a block (i.e. the "projection step" in ENZO), and the second
-          simplifies loop indexing.
+Relative to ENZO's structured AMR grids, flux correction for Enzo-E /
+Cello is simpler due to Cello's array-of-octree refinement: blocks
+only share fluxes at block faces (Enzo-E blocks do not contain
+sub-blocks), and the topology of fine- and coarse-level block
+intersections is simpler (Enzo-E coarse-level block faces are adjacent
+to exactly four fine-level block faces).  The first simplification
+removes the need to loop over sub-grids or store fluxes internal to a
+block (i.e. the "projection step" in ENZO), and the second removes the
+need to explicitly store loop indices for flux arrays.
 
-As a precondition we assume fluxes for all conserved fields are
-provided by the hydrodynamics solver on all required block faces at
-each time-step.
+
+We assume fluxes for all conserved fields are provided by the
+hydrodynamics solver along all required block faces at each time step.
 
 Below we discuss the software requirements specific to the Enzo-E and
 Cello layers.
@@ -70,19 +69,20 @@ Enzo-E requirements
 ===================
 
 Enzo-E is responsible for storing, accessing, communicating, and
-operating with fluxes, to implement flux correction, with support
+operating with fluxes, to implement flux correction using support
 provided by Cello.  Specific requirements are listed below:
 
 - **RE-1.** Initialize and store fluxes, provided by the hydro solver,
-  at each time-step for all conserved fields across all Block faces
-  that lie along a resolution jump
+  at each time step for all conserved fields across all coarse-fine
+  interfaces
 - **RE-2.** Request required fluxes from neighboring Blocks
-- **RE-3.** Compute correction factors for all required conserved field
-  face values given block face and neighbor block fluxes
+- **RE-3.** Compute correction factors for all required conserved
+  field face values given a block face and fluxes from both the block
+  and its face-sharing neighbor
 - **RE-4.** Correct conserved field face values given computed
   correction factors
 - **RE-5.** Identify which fields require flux correction
-- **RE-6.** Support adaptive time-stepping
+- **RE-6.** Support adaptive time stepping
 - **RE-7.** Support MHD
 - **RE-8.** Ensure conservation is not lost through any other operation, e.g. interpolation
 
@@ -103,7 +103,7 @@ Specific requirements include the following:
 - **RC-3.** Communicate fluxes between adjacent blocks when (and ideally only when) needed
 - **RC-4.** Store the time interval along with each collection of fluxes
 - **RC-5.** Allow multiple fluxes to be stored for the same field but
-  different time-steps
+  different time steps
 - **RC-6.** Provide support for a block to compute correction factors
   along a block face given the block's fluxes and the corresponding
   neighboring block fluxes
@@ -315,13 +315,13 @@ perform flux correction
        }
    }
 
-.. note:: When adaptive time-stepping is used, multiple time intervals
+.. note:: When adaptive time stepping is used, multiple time intervals
           of "fine-grid" fluxes will be required for a given face.  To
           avoid issues with comparing floating-point values, we assume
           an integer-valued "finest-grid" cycle number is available.
-          However, until adaptive time-stepping is implemented, this
+          However, until adaptive time stepping is implemented, this
           reverts to the block's current cycle for non-adaptive
-          (constant over all blocks per cycle) time-stepping.
+          (constant over all blocks per cycle) time stepping.
 
 .. code-block:: C++
 
@@ -574,7 +574,7 @@ one corresponding to the Block, and one corresponding to the
 neighboring Block.  FaceFluxes in the :p:`FluxData` object may be in a
 non-conforming state, that is the volume elements may not match,
 either spatial area or time step.  Coarsening and summing over
-time-steps of :p:`FluxData` objects are used to create fully-conforming
+time steps of :p:`FluxData` objects are used to create fully-conforming
 :p:`FluxFaces`, after which differencing is permitted for computing the
 flux-correction factors.  Support for coarsening, adding, and
 differencing fluxes is the responsibility of the :p:`FaceFluxes` class;

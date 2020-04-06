@@ -16,6 +16,81 @@
          };
          type = "image";
      };
+     de {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "density" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "density.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     te {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "total_energy" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "total_energy.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     ie {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "internal_energy" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "internal_energy.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     pr {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "pressure" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "pressure.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
+     temp {
+         colormap = [ 0.0, 0.0, 0.0,
+                      1.0, 0.0, 0.0,
+                      1.0, 1.0, 0.0,
+                      1.0, 1.0, 1.0 ];
+         field_list = [ "temperature" ];
+         image_ghost = false;
+         image_size = [ 512, 512 ];
+         name = "temperature.png";
+         schedule {
+             step = 7;
+             var = "cycle";
+         };
+         type = "image";
+     };
      dark {
          colormap = [ 0.0, 0.0, 0.0,
                       1.0, 0.0, 0.0,

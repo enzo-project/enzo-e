@@ -8,8 +8,6 @@ import socket
 # USER CONFIGURATION
 #======================================================================
 
-new_ppm = 1
-
 #----------------------------------------------------------------------
 # Temporary setting for using new Output implementation
 #----------------------------------------------------------------------
@@ -80,6 +78,8 @@ memory = 1
 #----------------------------------------------------------------------
 
 new_charm = 1
+
+new_ppm = 1
 
 #----------------------------------------------------------------------
 # Enable charm++ dynamic load balancing
@@ -206,6 +206,7 @@ define_jemalloc  = 'CONFIG_USE_JEMALLOC'
 
 define_memory =       'CONFIG_USE_MEMORY'
 define_new_charm =    'CONFIG_NEW_CHARM'
+define_new_ppm =      'NEW_PPM'
 define_projections =  'CONFIG_USE_PROJECTIONS'
 define_performance =  'CONFIG_USE_PERFORMANCE'
 define_papi  =        'CONFIG_USE_PAPI','PAPI3'
@@ -370,12 +371,11 @@ if (check != 0):         defines.append( define_check )
 if (debug_verbose != 0): defines.append( define_debug_verbose )
 if (memory != 0):        defines.append( define_memory )
 if (new_charm != 0):     defines.append( define_new_charm )
+if (new_ppm != 0):       defines.append( define_new_ppm )
 if (python_lt_27 != 0):  defines.append( define_python_lt_27 )
 if (have_git != 0 or have_mercurial != 0 ):
    defines.append( define_have_version_control )
 if (smp != 0):           defines.append( define_smp )
-
-if (new_ppm != 0):       defines.append( define_new_ppm )
 
 #======================================================================
 # FINAL CHARM SETUP

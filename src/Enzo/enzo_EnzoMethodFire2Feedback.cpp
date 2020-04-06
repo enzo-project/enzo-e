@@ -240,9 +240,9 @@ EnzoMethodFire2Feedack::EnzoMethodFire2Feedack
                            {"density","pressure","internal_energy",
                             "total_energy"};
 
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
-  refresh.add_all_fields();
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_all_fields();
 
   sf_minimum_level_ = enzo_config->method_feedback_fire2_minimum_level;
   single_sn_        = enzo_config->method_feedback_fire2_single_sn;

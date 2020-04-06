@@ -119,24 +119,14 @@ PARALLEL_MAIN_BEGIN
 
     //--------------------------------------------------
 
-    unit_func ("get_dimensions()");
+    unit_func ("get_adjacency()");
 
-    int nx,ny,nz;
-    face_A->get_dimensions(&nx,&ny,&nz,
-                          NX,NY,NZ);
-    const float * size3 = test::face_test[index_test].size;
+    bool lx,ly,lz;
+    face_A->adjacency(&lx,&ly,&lz);
 
-    CkPrintf ("DEBUG size3 %g %g %g\n",size3[0],size3[1],size3[2]);
-    int nx_exp=(NX&&size3[0]==0) ? 1 : ( (size3[0]!=-1) ? size3[0]*NX : 0);
-    int ny_exp=(NY&&size3[1]==0) ? 1 : ( (size3[1]!=-1) ? size3[1]*NY : 0);
-    int nz_exp=(NZ&&size3[2]==0) ? 1 : ( (size3[2]!=-1) ? size3[2]*NZ : 0);
-
-    CkPrintf ("DEBUG Testing %d == %d  %d == %d  %d == %d NX NY NZ %d %d %d\n",
-              nx,nx_exp,ny, ny_exp, nz, nz_exp,NX,NY,NZ);
-    
-    unit_assert (nx == nx_exp);
-    unit_assert (ny == ny_exp);
-    unit_assert (nz == nz_exp);
+    unit_assert ((lx && axis != 0) || (!lx && axis==0));
+    unit_assert ((ly && axis != 1) || (!ly && axis==1));
+    unit_assert ((lz && axis != 2) || (!lz && axis==2));
     
     //--------------------------------------------------
 

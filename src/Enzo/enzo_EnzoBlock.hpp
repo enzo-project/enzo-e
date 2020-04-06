@@ -320,7 +320,7 @@ public: /// entry methods
     CkPrintf ("GridEndIndex[] = %d %d %d\n",GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
     CkPrintf ("CellWidth[] = %g %g %g\n",CellWidth[0],CellWidth[1],CellWidth[2]);
   }
-  
+
 protected: // attributes
 
 
@@ -333,7 +333,7 @@ public: // attributes (YIKES!)
 
   /// Cosmological redshift for the current cycle
   enzo_float redshift;
-  
+
   /// starting pos (active problem space)
   enzo_float GridLeftEdge[MAX_DIMENSION]; 
   /// total dimensions of all grids

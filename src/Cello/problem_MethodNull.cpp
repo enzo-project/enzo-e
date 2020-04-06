@@ -13,17 +13,16 @@ void MethodNull::compute( Block * block) throw()
 
 void MethodNull::init_refresh_()
 {
-  Refresh & refresh = new_refresh(ir_post_);
   cello::simulation()->new_refresh_set_name(ir_post_,name());
 
-  refresh.add_field("density");
-  refresh.add_field("velocity_x");
-  refresh.add_field("velocity_y");
-  refresh.add_field("velocity_z");
-  refresh.add_field("total_energy");
-  refresh.add_field("internal_energy");
-  refresh.add_field("acceleration_x");
-  refresh.add_field("acceleration_y");
-  refresh.add_field("acceleration_z");
-  
+  Refresh * refresh = cello::refresh(ir_post_);
+  refresh->add_field("density");
+  refresh->add_field("velocity_x");
+  refresh->add_field("velocity_y");
+  refresh->add_field("velocity_z");
+  refresh->add_field("total_energy");
+  refresh->add_field("internal_energy");
+  refresh->add_field("acceleration_x");
+  refresh->add_field("acceleration_y");
+  refresh->add_field("acceleration_z");
 }

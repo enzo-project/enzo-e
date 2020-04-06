@@ -51,7 +51,6 @@ Adapt {
          FD {
              coords = "tzyx";
              dataset = "GridDensity";
-             dimensions = "Dimensions";
              file = "input/cosmo_grid_density.h5";
              name = "density";
              type = "field";
@@ -59,7 +58,6 @@ Adapt {
          FVX {
              coords = "tzyx";
              dataset = "GridVelocities_x";
-             dimensions = "Dimensions";
              file = "input/cosmo_grid_velocities_x.h5";
              name = "velocity_x";
              type = "field";
@@ -67,7 +65,6 @@ Adapt {
          FVY {
              coords = "tzyx";
              dataset = "GridVelocities_y";
-             dimensions = "Dimensions";
              file = "input/cosmo_grid_velocities_y.h5";
              name = "velocity_y";
              type = "field";
@@ -75,7 +72,6 @@ Adapt {
          FVZ {
              coords = "tzyx";
              dataset = "GridVelocities_z";
-             dimensions = "Dimensions";
              file = "input/cosmo_grid_velocities_z.h5";
              name = "velocity_z";
              type = "field";
