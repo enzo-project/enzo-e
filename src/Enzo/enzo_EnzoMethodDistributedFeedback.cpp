@@ -752,13 +752,14 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
 
   //  stencil_rad_ is integer separation from cell center
   //  and edge of injection region (i.e. 1 for 3x3 injection grid)
-  if (  shift_cell_center_ &&
-       ( ((xpos - (stencil_rad_+1)*hx) < xm) || // note: xm/xp is min/max without including ghost
+  if (  shift_cell_center_){
+
+    if ( ((xpos - (stencil_rad_+1)*hx) < xm) || // note: xm/xp is min/max without including ghost
          ((xpos + (stencil_rad_+1)*hx) > xp) || //     +1 b/c of CIC inerpolation onto grid
          ((ypos - (stencil_rad_+1)*hy) < ym) ||
          ((ypos + (stencil_rad_+1)*hy) > yp) ||
          ((zpos - (stencil_rad_+1)*hz) < zm) ||
-         ((zpos + (stencil_rad_+1)*hz) > zp)    )  ) {
+         ((zpos + (stencil_rad_+1)*hz) > zp)    ) {
 
       xpos = std::min(  std::max(xpos, xm + (stencil_rad_ + 1 + 0.5)*hx),
                        xp - (stencil_rad_ + 1 + 0.5)*hx);
@@ -766,10 +767,20 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
                        yp - (stencil_rad_ + 1 + 0.5)*hy);
       zpos = std::min(  std::max(zpos, zm + (stencil_rad_ + 1 + 0.5)*hz),
                        zp - (stencil_rad_ + 1 + 0.5)*hz);
+    }
   }
 
   // compute coordinates of central feedback cell
   // this must account for ghost zones
+  double xcell = (xpos - xm) / hx + gx;// - 0.5;
+  double ycell = (ypos - ym) / hy + gy;// - 0.5;
+  double zcell = (zpos - zm) / hz + gz;// - 0.5;
+
+  int ix       = ((int) floor(xcell));// + 0.5));
+  int iy       = ((int) floor(ycell));// + 0.5));
+  int iz       = ((int) floor(zcell));// + 0.5));
+
+/*
   double xcell = (xpos - xm) / hx + gx - 0.5;
   double ycell = (ypos - ym) / hy + gy - 0.5;
   double zcell = (zpos - zm) / hz + gz - 0.5;
@@ -777,7 +788,7 @@ void EnzoMethodDistributedFeedback::add_ionization_feedback(
   int ix       = ((int) floor(xcell + 0.5));
   int iy       = ((int) floor(ycell + 0.5));
   int iz       = ((int) floor(zcell + 0.5));
-
+*/
   int index =  INDEX(ix,iy,iz,mx,my);
 
   // Case B recombination, assuming T = 10^4 K
@@ -913,17 +924,17 @@ void EnzoMethodDistributedFeedback::inject_feedback(
 
   // compute coordinates of central feedback cell
   // this must account for ghost zones
-  double xcell = (xpos - xm) / hx + gx - 0.5;
-  double ycell = (ypos - ym) / hy + gy - 0.5;
-  double zcell = (zpos - zm) / hz + gz - 0.5;
+  double xcell = (xpos - xm) / hx + gx; //- 0.5;
+  double ycell = (ypos - ym) / hy + gy; //- 0.5;
+  double zcell = (zpos - zm) / hz + gz; //- 0.5;
 
-  int ix       = ((int) floor(xcell + 0.5));
-  int iy       = ((int) floor(ycell + 0.5));
-  int iz       = ((int) floor(zcell + 0.5));
+  int ix       = ((int) floor(xcell)); // + 0.5));
+  int iy       = ((int) floor(ycell)); // + 0.5));
+  int iz       = ((int) floor(zcell)); // + 0.5));
 
-  double dxc   = ix + 0.5 - xcell;
-  double dyc   = iy + 0.5 - ycell;
-  double dzc   = iz + 0.5 - zcell;
+  double dxc   = ix + 0.5 - (xcell - 0.5);
+  double dyc   = iy + 0.5 - (ycell - 0.5);
+  double dzc   = iz + 0.5 - (zcell - 0.5);
 
   //
   // Set source velocity to local gas flow if all are left at
@@ -965,8 +976,11 @@ void EnzoMethodDistributedFeedback::inject_feedback(
     double avg_z = 0.0, avg_n = 0.0, avg_d = 0.0;
 
     for (int k = iz - stencil_rad_; k<= iz + stencil_rad_; k++){
+      if ( (k<0) || (k>=mz) ) continue;
       for (int j = iy - stencil_rad_; j <= iy + stencil_rad_; j++){
+        if ( (j<0) || (k>=my) ) continue;
         for (int i = ix - stencil_rad_; i <= ix + stencil_rad_; i++){
+          if ( (i<0) || (i>=mx)) continue;
 
 //      AE TO DO: Actually calculate number density here with species
 
@@ -1040,8 +1054,11 @@ void EnzoMethodDistributedFeedback::inject_feedback(
   // the explosion
   int loc_index = 0;
   for (int k = iz - stencil_rad_ ; k <= iz + stencil_rad_ + 1; k++){
+    if ( (k<0) || (k>=mz)) continue;
     for (int j = iy - stencil_rad_ ; j <= iy + stencil_rad_ + 1; j++){
+      if ((j<0) || (j>=my)) continue;
       for (int i = ix - stencil_rad_ ; i <= ix + stencil_rad_ + 1; i++){
+        if ((i<0) || (i>=mx)) continue;
 
         int index = INDEX(i,j,k,mx,my);
 
@@ -1122,8 +1139,11 @@ void EnzoMethodDistributedFeedback::inject_feedback(
   double ke_after    = 0.0;
   loc_index = 0;
   for (int k = iz - stencil_rad_; k <= iz + stencil_rad_ + 1; k++){
+    if ( (k < 0) || (k >= mz)) continue;
     for (int j = iy - stencil_rad_; j <= iy + stencil_rad_ + 1; j++){
+      if ( (j < 0) || (j >= my)) continue;
       for (int i = ix - stencil_rad_; i <= ix + stencil_rad_ + 1; i++){
+        if ( (i < 0) || (i >= mx)) continue;
 
         int index =  INDEX(i,j,k,mx,my);
 
@@ -1174,8 +1194,11 @@ void EnzoMethodDistributedFeedback::convert_momentum(
   zo = (mx * my);
 
   for (int k = -stencil_rad_; k <= stencil_rad_ + 1; k++){
+    if ( (k < 0) || (k >= mz))continue;
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
+      if ((j<0) || (j >= my)) continue;
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
+        if ((i<0) || (i>=mx)) continue;
 
         int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
 
@@ -1213,8 +1236,11 @@ void EnzoMethodDistributedFeedback::sum_mass_energy(
   sum_mass = 0; sum_energy = 0; sum_ke = 0;
 
   for (int k = -stencil_rad_;  k <= stencil_rad_ + 1; k++){
+    if ((k<0) || (k>=mz)) continue;
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
+      if ((j<0) || (j>=my)) continue;
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
+        if ((i<0) || (i>=mx)) continue;
 
         int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
 
@@ -1267,13 +1293,17 @@ void EnzoMethodDistributedFeedback::add_feedback_to_grid(
           double dxc1 = dxc;
           if (i1 == (i + 1)) dxc1 = 1.0 - dxc;
 
+          if ( ((ix+i1) < 0) || ((ix+i1)>=mx)) continue;
+
           for (int j1 = j; j1 <= j + 1; j1++){
             double dyc1 = dyc;
             if (j1 == (j + 1)) dyc1 = 1.0 - dyc;
+            if ( ((iy+j1) < 0) || ((iy+j1)>=my)) continue;
 
             for (int k1 = k; k1 <= k + 1; k1++){
               double dzc1 = dzc;
               if (k1 == (k + 1)) dzc1 = 1.0 - dzc;
+              if ( ((iz+k1) < 0) || ((iz+k1)>=mz)) continue;
 
               double delta_mass =    mass_per_cell * dxc1 * dyc1 * dzc1;
               // use sign of i,j,k to assign direction. No momentum in cener
@@ -1349,8 +1379,11 @@ void EnzoMethodDistributedFeedback::compute_coefficients(
   int loc_index = 0;
 
   for (int k = -stencil_rad_; k <= stencil_rad_+ 1; k++){
+    if ((k<0) || (k>=mz)) continue;
     for (int j = -stencil_rad_; j <= stencil_rad_ + 1; j++){
+      if ((j<0) || (j>=my)) continue;
       for (int i = -stencil_rad_; i <= stencil_rad_ + 1; i++){
+        if ((i<0) || (i>=mx)) continue;
 
         int index = (ix + i) + ( (iy + j) + (iz + k)*my)*mx;
 
