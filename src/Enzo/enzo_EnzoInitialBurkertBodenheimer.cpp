@@ -28,7 +28,7 @@ void EnzoInitialBurkertBodenheimer::pup (PUP::er &p)
 
   PUParray(p,array_,3);
   p | radius_relative_;
-  
+
 }
 
 //----------------------------------------------------------------------
@@ -46,10 +46,14 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 	 "Block does not exist",
 	 block != NULL);
 
+  const EnzoUnits * enzo_units = enzo::units();
+  const EnzoConfig * enzo_config = enzo::config();
+
+
   Field field = block->data()->field();
 
   // Get Field parameters
-  
+
   int nx,ny,nz;
   field.size(&nx,&ny,&nz);
 
@@ -66,7 +70,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   block->data()->upper(&bxp,&byp,&bzp);
 
   const int rank = cello::rank();
-  
+
   double hx,hy,hz;
   field.cell_width(bxm,bxp,&hx,
 		   bym,byp,&hy,
@@ -85,7 +89,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   const int m = mx*my*mz;
 
   // Get Fields
-  bool RotatingSphere = true; 
+  bool RotatingSphere = true;
   enzo_float *  d = (enzo_float *) field.values ("density");
   enzo_float * dt = (enzo_float *) field.values ("density_total");
   enzo_float *  p = (enzo_float *) field.values ("pressure");
@@ -107,26 +111,27 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   const int in = cello::index_static();
 
   const double gamma = EnzoBlock::Gamma[in];
-  const double energy = 1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen));
-  
+  //const double energy = (1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen)))/enzo_units->energy();
+  const double energy = (temperature_/enzo_units->temperature()) / ((gamma-1.0)) / enzo_config->ppm_mol_weight;
+
   // ...compute ellipsoid density
 
   const double rx = (dxp - dxm) * radius_relative_ / array_[0] ;
   const double ry = (dyp - dym) * radius_relative_ / array_[1] ;
   const double rz = (dzp - dzm) * radius_relative_ / array_[2] ;
-  
+
   const double rx2i = 1.0/(rx*rx);
   const double ry2i = 1.0/(ry*ry);
   const double rz2i = 1.0/(rz*rz);
 
   // This is the density at the trucation radius
-  const double density = mass_ / (4.0/3.0*(cello::pi)*rx*ry*rz);
+  const double density = (mass_*cello::mass_solar/enzo_units->mass()) / (4.0/3.0*(cello::pi)*rx*ry*rz);
 
   CkPrintf("%s: Density = %e\n", __FUNCTION__, density);
   CkPrintf("%s: mass = %e\n", __FUNCTION__, mass_);
   CkPrintf("%s: rx = %e\n", __FUNCTION__, rx);
   CkPrintf("%s: calculated mass (assuming uniform density) = %e\n",
-	 __FUNCTION__, (density*(4.0/3.0*(cello::pi)*rx*ry*rz))/cello::mass_solar);
+	 __FUNCTION__, (density*(4.0/3.0*(cello::pi)*rx*ry*rz))* (enzo_units->mass())/(cello::mass_solar));
   //exit(-99);
   // bounds of possible explosions intersecting this Block
 
@@ -136,18 +141,18 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   int kxp = MIN( (int)ceil((bxp-dxm+rx)/(dxp-dxm)*array_[0])+1,array_[0]);
   int kyp = MIN( (int)ceil((byp-dym+ry)/(dyp-dym)*array_[1])+1,array_[1]);
   int kzp = MIN( (int)ceil((bzp-dzm+rz)/(dzp-dzm)*array_[2])+1,array_[2]);
-  
+
   double hxa = (dxp-dxm) / array_[0];
   double hya = (rank >= 2) ? (dyp-dym) / array_[1] : 0.0;
   double hza = (rank >= 3) ? (dzp-dzm) / array_[2] : 0.0;
 
   // (kx,ky,kz) index bounds of collapse in domain
 
-  // Initialize background 
+  // Initialize background
 
-  // ratio of density inside and outside the cloud 
+  // ratio of density inside and outside the cloud
   const double density_ratio = 228.33;
-  
+
   std::fill_n(d,m,density / density_ratio);
   std::fill_n(te,m,energy);
   std::fill_n(ie,m,energy);
@@ -199,7 +204,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		if(RotatingSphere == true) {
 		  /* Start with solid body rotation */
 		  // Find out which shell the cell is in
-		  double AngularVelocity = 7.2e-13; // [rad/s]
+		  double AngularVelocity = 0.01 * 7.2e-13 * enzo_units->time(); // [rad/s]
 		  //float SphereRotationPeriod = 8.72734;
 		  //a = Ang(SphereAng1,SphereAng2,rx,sqrt(R2));
 		  //double RotVelocityx = -2*(cello::pi)*y / SphereRotationalPeriod;
@@ -214,11 +219,11 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		  float sinphi = y/sqrt(x*x+y*y);
 		  float phi    = acos(x/sqrt(x*x+y*y));
 		  float cos2phi = cosphi*cosphi -sinphi*sinphi;
-		  // Burkert & Bodenheimer (1993) m=2 perturbation: 	      
+		  // Burkert & Bodenheimer (1993) m=2 perturbation:
 		  float m2mode = 1.0 + 0.1*cos(2.*phi);
 		  d[i] += density * m2mode;
 		}
-                t[i]  = temperature_;
+                t[i]  = temperature_ / enzo_units->temperature();
 
 
 		if(i == 20) {
@@ -235,18 +240,18 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   }
 
   static int counter = 0;
-  CkPrintf("Grand. Block done %d\n", counter++); 
-#ifdef DEBUG_PERFORMANCE  
+  CkPrintf("Grand. Block done %d\n", counter++);
+#ifdef DEBUG_PERFORMANCE
   if (CkMyPe()==0) {
     CkPrintf ("%s:%d %s DEBUG_PERFORMANCE %f\n",
 	      __FILE__,__LINE__,block->name().c_str(),
 	      timer.value());
   }
-#endif  
+#endif
   // Initialize particles
 
   Particle particle = block->data()->particle();
-  
+
 }
 
 /************************************************************************/
