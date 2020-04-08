@@ -89,7 +89,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   const int m = mx*my*mz;
 
   // Get Fields
-  bool RotatingSphere = true;
+  bool RotatingSphere = enzo_config->initial_burkertbodenheimer_rotating;
   enzo_float *  d = (enzo_float *) field.values ("density");
   enzo_float * dt = (enzo_float *) field.values ("density_total");
   enzo_float *  p = (enzo_float *) field.values ("pressure");
@@ -106,6 +106,9 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   enzo_float *  x = (enzo_float *) field.values ("X");
   enzo_float *  b = (enzo_float *) field.values ("B");
 
+  enzo_float * metal       = field.is_field("metal_density") ?
+                             (enzo_float *) field.values("metal_density") : NULL;
+
   // Initialize Fields
 
   const int in = cello::index_static();
@@ -114,6 +117,8 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   //const double energy = (1e-3*(cello::kboltz)*temperature_ / ((gamma - 1.0) * (1.0 * cello::mass_hydrogen)))/enzo_units->energy();
   const double energy = (temperature_/enzo_units->temperature()) / ((gamma-1.0)) / enzo_config->ppm_mol_weight;
 
+  // fixed for now about 1 / 10 solar
+  const double metal_fraction = 0.001;
   // ...compute ellipsoid density
 
   const double rx = (dxp - dxm) * radius_relative_ / array_[0] ;
@@ -127,12 +132,15 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   // This is the density at the trucation radius
   const double density = (mass_*cello::mass_solar/enzo_units->mass()) / (4.0/3.0*(cello::pi)*rx*ry*rz);
 
+/*
   CkPrintf("%s: Density = %e\n", __FUNCTION__, density);
   CkPrintf("%s: mass = %e\n", __FUNCTION__, mass_);
   CkPrintf("%s: rx = %e\n", __FUNCTION__, rx);
   CkPrintf("%s: calculated mass (assuming uniform density) = %e\n",
 	 __FUNCTION__, (density*(4.0/3.0*(cello::pi)*rx*ry*rz))* (enzo_units->mass())/(cello::mass_solar));
+*/
   //exit(-99);
+
   // bounds of possible explosions intersecting this Block
 
   int kxm = MAX((int)floor((bxm-dxm-rx)/(dxp-dxm)*array_[0])-1,0);
@@ -162,6 +170,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   std::fill_n(po,m,0.0);
   std::fill_n(ax,m,0.0);
   std::fill_n(vx,m,0.0);
+  if (metal) std::fill_n(metal,m,metal_fraction*density);
   if (rank >= 2) std::fill_n(ay,m,0.0);
   if (rank >= 2) std::fill_n(vy,m,0.0);
   if (rank >= 3) std::fill_n(az,m,0.0);
@@ -224,7 +233,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		  d[i] += density * m2mode;
 		}
                 t[i]  = temperature_ / enzo_units->temperature();
-
+                if (metal) metal[i] = metal_fraction * d[i];
 
 		if(i == 20) {
 		  CkPrintf("Density = %e\n", d[i]);
@@ -240,7 +249,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   }
 
   static int counter = 0;
-  CkPrintf("Grand. Block done %d\n", counter++);
+  // CkPrintf("Grand. Block done %d\n", counter++);
 #ifdef DEBUG_PERFORMANCE
   if (CkMyPe()==0) {
     CkPrintf ("%s:%d %s DEBUG_PERFORMANCE %f\n",
