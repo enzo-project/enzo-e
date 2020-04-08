@@ -65,6 +65,7 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
   }
 
   EnzoUnits * enzo_units = enzo::units();
+  FieldDescr * field_descr = cello::field_descr();
 
   // Store variables locally with code units for convenience
   //     this is not strictly necessary, but makes routine a little cleaner
@@ -123,7 +124,8 @@ EnzoInitialIsolatedGalaxy::EnzoInitialIsolatedGalaxy
 
   // gather other parameters not associated with this IC
   this->uniform_density_    = config->field_uniform_density;
-  this->dual_energy_        = config->ppm_dual_energy; // or ppm? which one?
+  this->dual_energy_        = field_descr->is_field("internal_energy") &&
+                              field_descr->is_field("total_energy");
   this->gamma_              = config->field_gamma;
   this->mu_                 = config->ppm_mol_weight;
 

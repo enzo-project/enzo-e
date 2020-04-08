@@ -192,7 +192,7 @@ void EnzoMethodFeedback::compute_ (Block * block) throw()
 
         // inject energy
         te[i] += ejecta_energy_ * inv_vol;
-        if (enzo_config->ppm_dual_energy) ge[i] += ejecta_energy_ * inv_vol;
+        if (ge) ge[i] += ejecta_energy_ * inv_vol;
 
         count++;
       } // end loop over particles
