@@ -92,6 +92,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_burkertbodenheimer_mass(0.0),
   initial_burkertbodenheimer_temperature(0.0),
   initial_burkertbodenheimer_densityprofile(1),
+  initial_burkertbodenheimer_rotating(true),
   // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
@@ -166,6 +167,7 @@ EnzoConfig::EnzoConfig() throw ()
   method_feedback_shift_cell_center(true),
   method_feedback_ke_fraction(0.0),
   method_feedback_use_ionization_feedback(false),
+  method_feedback_time_first_sn(37.7), // in Myr
   // EnzoMethodStarMaker,
   method_star_maker_type(""),                              // star maker type to use
   method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -368,6 +370,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_burkertbodenheimer_mass;
   p | initial_burkertbodenheimer_temperature;
   p | initial_burkertbodenheimer_densityprofile;
+  p | initial_burkertbodenheimer_rotating;
 
   PUParray(p, initial_feedback_test_position,3);
   p | initial_feedback_test_density;
@@ -432,6 +435,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | method_feedback_shift_cell_center;
   p | method_feedback_ke_fraction;
   p | method_feedback_use_ionization_feedback;
+  p | method_feedback_time_first_sn;
 
   p | method_star_maker_type;
   p | method_star_maker_use_density_threshold;
@@ -503,7 +507,7 @@ void EnzoConfig::pup (PUP::er &p)
     if (is_null) {
 
       method_grackle_chemistry = NULL;
-      
+
     } else {
 
       if (p.isUnpacking()) {
@@ -520,7 +524,7 @@ void EnzoConfig::pup (PUP::er &p)
       ASSERT("EnzoConfig::pup",
              "method_grackle_chemistry is expected to be non-null",
              (method_grackle_chemistry != NULL));
-      
+
       p | *method_grackle_chemistry;
     }
 
@@ -671,6 +675,8 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_float("Initial:burkertbodenheimer:temperature",10.0);
   initial_burkertbodenheimer_densityprofile =
     p->value_integer ("Initial:burkertbodenheimer:densityprofile",2);
+  initial_burkertbodenheimer_rotating =
+   p->value_logical ("Initial:burkertbodenheimer:rotating",true);
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
   field_uniform_density = p->value_float ("Field:uniform_density",1.0);
@@ -925,6 +931,9 @@ void EnzoConfig::read(Parameters * p) throw()
 
   method_feedback_ke_fraction = p->value_float
     ("Method:feedback:ke_fraction", 0.0);
+
+  method_feedback_time_first_sn = p->value_float
+    ("Method:feedback:time_first_sn", 37.7);
 
   method_feedback_use_ionization_feedback = p->value_logical
     ("Method:feedback:use_ionization_feedback", false);
