@@ -28,7 +28,13 @@ public: // interface
 
   /// CHARM++ Pack / Unpack function
   void pup (PUP::er &p)
-  { }
+  {
+    TRACEPUP;
+    // NOTE: change this function whenever attributes change
+
+    //p | face_flux_map_;
+
+  }
 
   /// Insert the FaceFluxes object indexed by face
   
@@ -92,6 +98,23 @@ public: // interface
       ;
     return it == face_flux_map_.end() ? nullptr : it->second;
   }
+
+  //--------------------------------------------------
+
+  /// Return the number of bytes required to serialize the data object
+  int data_size () const;
+
+  /// Serialize the object into the provided empty memory buffer.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * save_data (char * buffer) const;
+
+  /// Restore the object from the provided initialized memory buffer data.
+  /// Returns the next open position in the buffer to simplify
+  /// serializing multiple objects in one buffer.
+  char * load_data (char * buffer);
+
+  //--------------------------------------------------
 
 private: // functions
 
