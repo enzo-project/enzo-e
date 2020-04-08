@@ -118,7 +118,8 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   const double energy = (temperature_/enzo_units->temperature()) / ((gamma-1.0)) / enzo_config->ppm_mol_weight;
 
   // fixed for now about 1 / 10 solar
-  const double metal_fraction = 0.001;
+  const double inner_metal_fraction = 0.0010; // sub-solar
+  const double outer_metal_fraction = 1.0E-6; // basically metal free
   // ...compute ellipsoid density
 
   const double rx = (dxp - dxm) * radius_relative_ / array_[0] ;
@@ -170,7 +171,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   std::fill_n(po,m,0.0);
   std::fill_n(ax,m,0.0);
   std::fill_n(vx,m,0.0);
-  if (metal) std::fill_n(metal,m,metal_fraction*density);
+  if (metal) std::fill_n(metal,m,outer_metal_fraction*density);
   if (rank >= 2) std::fill_n(ay,m,0.0);
   if (rank >= 2) std::fill_n(vy,m,0.0);
   if (rank >= 3) std::fill_n(az,m,0.0);
@@ -213,7 +214,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		if(RotatingSphere == true) {
 		  /* Start with solid body rotation */
 		  // Find out which shell the cell is in
-		  double AngularVelocity = 0.01 * 7.2e-13 * enzo_units->time(); // [rad/s]
+		  double AngularVelocity =  7.2e-13 * enzo_units->time(); // [rad/s]
 		  //float SphereRotationPeriod = 8.72734;
 		  //a = Ang(SphereAng1,SphereAng2,rx,sqrt(R2));
 		  //double RotVelocityx = -2*(cello::pi)*y / SphereRotationalPeriod;
@@ -233,7 +234,8 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		  d[i] += density * m2mode;
 		}
                 t[i]  = temperature_ / enzo_units->temperature();
-                if (metal) metal[i] = metal_fraction * d[i];
+
+    if (metal) metal[i] = d[i]*inner_metal_fraction;
 
 		if(i == 20) {
 		  CkPrintf("Density = %e\n", d[i]);
@@ -247,6 +249,10 @@ void EnzoInitialBurkertBodenheimer::enforce_block
       }
     }
   }
+
+//  if (metal){
+//    for (int i = 0; i < mx*my*mz; i++) metal[i] = d[i]*outer_metal_fraction;
+//  }
 
   static int counter = 0;
   // CkPrintf("Grand. Block done %d\n", counter++);
