@@ -1,0 +1,269 @@
+#
+# Potentially temporary test file (4/8/20)
+#   for stress-testing star formation, feedback, hydro,
+#   Grackle, and gravity.
+#
+#   Using the Burkert-Bodenheimer ICs
+#
+#   sets up a ~10^4 Msun cloud at 100 K with a ~150 pc radius, 
+#   with initial peak density of a few cc, solid body rotation 
+#   with outer velocity of 0.1 km/s, and gamma = 1.4 EOS
+#
+#   Grackle cooling and metal cooling are on with no UVB heating. 
+#   Gravity using the DD solver.  
+#
+#
+#   Starformation with the EnzoMethodStochasticStarFormation
+#   and feedback with EnzoMethodDistributedFeedback
+#
+#
+#   Set up to be done on a 64^3, unigrid box (so 16 pc resolution)
+#
+
+ Adapt {                  # unigrid for now
+     list = [ "slope" ];
+     max_level = 0;
+     min_level = -2;
+     slope {
+         field_list = [ "density" ];
+         min_refine = 1.000000000000000e-10;
+	 
+         type = "slope";
+     };
+ }
+
+ Boundary {
+     type = "periodic";
+ }
+
+ Domain {
+     lower = [ 0.0, 0.0, 0.0 ];
+     rank = 3;
+     upper = [ 1.0, 1.0, 1.0 ];  # in length units, set by below
+ }
+
+  Units {
+    length = 3.1596E21;    # 1.023 kpc
+    time   = 3.15576E13;   # 1 Myr
+    mass   = 1.9891E36;    # 1000 Msun
+  }
+
+ Field {
+     alignment = 8;
+     gamma = 1.400000000;
+     ghost_depth = 4;
+     history = 1;
+     list = [ "density", "velocity_x", "velocity_y", "velocity_z", 
+               "acceleration_x", "acceleration_y", "acceleration_z",
+                "temperature", "total_energy", "internal_energy", "pressure",
+                 "density_gas", "density_particle", "density_total", "metal_density",
+                 "density_particle_accumulate", "potential", "potential_temp", 
+                 "potential_copy", "X", "B", "X_copy", "B_copy" ];
+     padding = 0;
+ }
+
+  Group {
+    list = ["colour","derived"];
+
+    colour {
+      field_list = ["metal_density"]; # needed for proper advection (should get auto flagged as such if not specified here)
+    }
+    
+    derived { # flag these to ensure they are computed properly on output (*should* work without having to speiciy here)
+      field_list = ["temperature","pressure"];
+    }
+
+  }
+
+ Initial {
+     burkertbodenheimer {
+         temperature = 100.0;           # initial temperture of entire box in K
+         densityprofile = 2;            # 1 : uniform  2 : 1/r^2
+         mass = 10000.0;                # approx mass of sphere (in Msun)
+         rotating = true;
+         radius_relative = 0.15000;     # outer radius in code units
+         outer_velocity  = 0.1;  # tan vel at truncation radius in km/s (< 0 defaults to prior behavior)
+     };
+     list = [ "burkertbodenheimer" ];
+ }
+
+ Mesh {
+     root_blocks = [ 4, 4, 4 ];
+     root_rank = 3;
+     root_size = [ 64, 64, 64 ];
+ }
+
+
+Particle {
+    list = ["star"];
+
+    star {
+        attributes = [ "x", "double",
+                       "y", "double",
+                       "z", "double",
+                       "vx", "double",
+                       "vy", "double",
+                       "vz", "double",
+                       "ax", "double",
+                       "ay", "double",
+                       "az", "double",
+                       "mass", "double",
+                       "creation_time", "double",
+                       "lifetime", "double",
+                       "metal_fraction", "double" ];
+        position = [ "x", "y", "z" ];
+        velocity = [ "vx", "vy", "vz" ];
+        groups = ["has_mass"];
+    }
+}
+
+
+ Method {
+
+     #
+     #check_gravity {
+     #    particle_type = "dark";
+     #};
+
+     gravity {
+         solver = "dd";
+     };
+     list = [ "null",
+              "ppm",
+              "grackle", "star_maker","feedback",
+              "pm_deposit", "gravity", "pm_update"];
+
+     null {
+       dt = 10.0; # null function to force a maximum dt (code units)
+     };
+
+     grackle {
+         data_file = "CloudyData_noUVB.h5";
+         with_radiative_cooling = 1;
+         primordial_chemistry   = 0;
+         metal_cooling          = 1;
+         UVbackground           = 0;
+         self_shielding_method  = 0;
+         HydrogenFractionByMass = 0.73;
+         use_cooling_timestep   = false;
+         radiation_redshift     = 0.0001;
+      };
+
+#     pm_update {
+#         max_dt = 0.1;
+#     };
+
+     ppm {
+         courant = 0.3;
+#         flattening = 3;    
+#         steepening = true;
+         dual_energy = true;  # this is false by default!
+#         riemann_solver = "two_shock";
+#         diffusion = true;
+     };
+
+     star_maker {
+       # run the stochastic star formation algorithm taken from star_maker_ssn in Enzo
+       type = "stochastic";                # only available option at the moment
+       number_density_threshold = 100.0;   # in 1/cm^3
+       minimum_star_mass        = 1000.0;  # for the sake of this algorithm, this IS the
+                                           # mass of the particle formed.
+       use_density_threshold    = true  ;  # check number density for SF (def true)
+       use_velocity_divergence  = false ;  # converging flow criterion   (def true)
+       use_dynamical_time       = true  ;  # compute t_ff / t_dyn        (def true)
+       maximum_mass_fraction    = 0.5  ;   # maximum fraction of a cell that can be converted into stars
+                                           # can be redundant with number density threshold depending
+                                           # on rest of SF criteria and refinement criteria
+       efficiency               = 0.02 ;   # efficiency per free fall time
+     };
+
+  feedback {
+     shift_cell_center       = false;  # kick away from edges if true (not sure if this works yet when false)
+     ke_fraction             = 0.0;    # fraction of kinetic energy (otherwise thermal) - < 0 computes it using Simpson et. al. equations
+     feedback_stencil        = 3;      # deposit feedback in a NxN CIC stencil centered on the particle (needs to be changed to physical radius eventually)
+     use_ionization_feedback = true;   # local (one zone) rad heating (not confirmed to work well yet)
+#    time_first_sn           = 0.05;   # In this FB routine, forces SNe at this age if > 0 (Myr) - debugging purposes only
+  };
+
+ }
+
+ Output {
+     data {
+         dir = [ "Dir_Collapse-GAS-DD2_%04d", "count"];
+         field_list = [ "density", "velocity_x", "velocity_y", "velocity_z", "metal_density",
+                         "temperature",
+                         "total_energy", "internal_energy", "pressure", "density_total", "potential" ];
+         name = [ "data-%04d-%04d.h5", "count", "proc"];
+         particle_list = ["star"];
+         schedule {
+             step = 0.25;   # every 0.25 Myr
+             var = "time";
+         };
+         type = "data";
+     };
+     list = [ "data" ];
+ }
+
+ Solver {
+     dd {
+         coarse_level = 0;
+         coarse_solve = "dd_root";
+         domain_solve = "dd_domain";
+         last_smooth = "dd_smooth";
+         max_level = 0;
+         min_level = -2;
+         monitor_iter = 1;
+         type = "dd";
+     };
+     dd_domain {
+         coarse_level = 0;
+         iter_max = 100;
+         max_level = 0;
+         min_level = -2;
+         monitor_iter = 0;
+         res_tol = 0.01000000000000000;
+         solve_type = "tree";
+         type = "bicgstab";
+     };
+     dd_root {
+         coarse_level = -2;
+         coarse_solve = "root_coarse";
+         iter_max = 10;
+         max_level = 0;
+         min_level = -2;
+         monitor_iter = 1;
+         post_smooth = "root_post";
+         pre_smooth = "root_pre";
+         res_tol = 0.01000000000000000;
+         solve_type = "level";
+         type = "mg0";
+     };
+     dd_smooth {
+         iter_max = 3;
+         monitor_iter = 1;
+         solve_type = "leaf";
+         type = "jacobi";
+     };
+     list = [ "dd", "dd_root", "dd_domain", "dd_smooth", "root_coarse", "root_pre", "root_post" ];
+     root_coarse {
+         iter_max = 100;
+         monitor_iter = 1;
+         res_tol = 0.01000000000000000;
+         solve_type = "block";
+         type = "cg";
+     };
+     root_post {
+         iter_max = 2;
+         solve_type = "level";
+         type = "jacobi";
+     };
+     root_pre {
+         iter_max = 2;
+         solve_type = "level";
+         type = "jacobi";
+     };
+ }
+
+ Stopping {
+     cycle = 10000;
+ }
