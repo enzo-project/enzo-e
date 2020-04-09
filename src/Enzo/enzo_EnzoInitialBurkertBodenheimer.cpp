@@ -133,6 +133,11 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   // This is the density at the trucation radius
   const double density = (mass_*cello::mass_solar/enzo_units->mass()) / (4.0/3.0*(cello::pi)*rx*ry*rz);
 
+
+  // velocity at termination radius (if provided)
+  const double outer_velocity = enzo_config->initial_burkertbodenheimer_outer_velocity * 1.0E5 /
+                                (enzo_units->length()/enzo_units->time());
+
 /*
   CkPrintf("%s: Density = %e\n", __FUNCTION__, density);
   CkPrintf("%s: mass = %e\n", __FUNCTION__, mass_);
@@ -214,7 +219,14 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 		if(RotatingSphere == true) {
 		  /* Start with solid body rotation */
 		  // Find out which shell the cell is in
-		  double AngularVelocity =  7.2e-13 * enzo_units->time(); // [rad/s]
+      double AngularVelocity = 0.0;
+
+
+      if (outer_velocity > 0){ // use user-provided value
+        AngularVelocity = outer_velocity / (radius_relative_);
+      } else { // use prior behavior
+		    AngularVelocity =  7.2e-13 * enzo_units->time(); // [rad/s]
+      }
 		  //float SphereRotationPeriod = 8.72734;
 		  //a = Ang(SphereAng1,SphereAng2,rx,sqrt(R2));
 		  //double RotVelocityx = -2*(cello::pi)*y / SphereRotationalPeriod;
@@ -239,7 +251,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
 
 		if(i == 20) {
 		  CkPrintf("Density = %e\n", d[i]);
-		  CkPrintf("Angular Velocity = %e rad/s", sqrt(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i])/radius);
+		  CkPrintf("Angular Velocity = %e rad/s", sqrt(vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i])/radius / enzo_units->time());
 		  //CkExit(-99);
 		}
 	      }

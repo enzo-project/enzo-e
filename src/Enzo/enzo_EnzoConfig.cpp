@@ -93,6 +93,7 @@ EnzoConfig::EnzoConfig() throw ()
   initial_burkertbodenheimer_temperature(0.0),
   initial_burkertbodenheimer_densityprofile(1),
   initial_burkertbodenheimer_rotating(true),
+  initial_burkertbodenheimer_outer_velocity(-1),
   // EnzoInitialSedov[23]
   initial_sedov_rank(0),
   initial_sedov_radius_relative(0.0),
@@ -371,6 +372,7 @@ void EnzoConfig::pup (PUP::er &p)
   p | initial_burkertbodenheimer_temperature;
   p | initial_burkertbodenheimer_densityprofile;
   p | initial_burkertbodenheimer_rotating;
+  p | initial_burkertbodenheimer_outer_velocity;
 
   PUParray(p, initial_feedback_test_position,3);
   p | initial_feedback_test_density;
@@ -677,6 +679,8 @@ void EnzoConfig::read(Parameters * p) throw()
     p->value_integer ("Initial:burkertbodenheimer:densityprofile",2);
   initial_burkertbodenheimer_rotating =
    p->value_logical ("Initial:burkertbodenheimer:rotating",true);
+  initial_burkertbodenheimer_outer_velocity =
+   p->value_float ("Initial:burkertbodenheimer:outer_velocity",-1.0);
 
   field_gamma = p->value_float ("Field:gamma",5.0/3.0);
   field_uniform_density = p->value_float ("Field:uniform_density",1.0);

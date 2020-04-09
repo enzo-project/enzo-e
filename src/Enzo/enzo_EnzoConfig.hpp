@@ -178,6 +178,7 @@ public: // interface
       initial_burkertbodenheimer_temperature(0.0),
       initial_burkertbodenheimer_densityprofile(1),
       initial_burkertbodenheimer_rotating(true),
+      initial_burkertbodenheimer_outer_velocity(-1),
       // EnzoInitialSedovArray[23]
       initial_sedov_rank(0),
       initial_sedov_radius_relative(0.0),
@@ -252,7 +253,7 @@ public: // interface
       method_feedback_shift_cell_center(true),
       method_feedback_ke_fraction(0.0),
       method_feedback_use_ionization_feedback(false),
-      method_feedback_time_first_sn(-1.0), // in Myr 
+      method_feedback_time_first_sn(-1.0), // in Myr
       /// EnzoMethodStarMaker
       method_star_maker_type(""),
       method_star_maker_use_density_threshold(true),           // check above density threshold before SF
@@ -438,6 +439,7 @@ public: // attributes
   double                     initial_burkertbodenheimer_temperature;
   int                        initial_burkertbodenheimer_densityprofile;
   bool                       initial_burkertbodenheimer_rotating;
+  double                     initial_burkertbodenheimer_outer_velocity;
 
   /// EnzoInitialSedovArray[23]
   int                        initial_sedov_rank;
