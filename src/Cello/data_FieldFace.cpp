@@ -8,6 +8,9 @@
 #include "cello.hpp"
 #include "data.hpp"
 
+// Whether to use Fortran files for copying
+#define FORTRAN_STORE
+
 long FieldFace::counter[CONFIG_NODE_SIZE] = {0};
 
 #define FORTRAN_NAME(NAME) NAME##_
@@ -138,7 +141,6 @@ void FieldFace::face_to_array ( Field field, int * n, char ** array) throw()
 
   *n = num_bytes_array(field);
   *array = new char [*n];
-
 
   ASSERT("FieldFace::face_to_array()",
 	 "array size must be > 0",
@@ -284,7 +286,7 @@ void FieldFace::array_to_face (char * array, Field field) throw()
 
       // Copy array to field
       union { float * as4; double * as8; long double * as16; };
-      union { float * fd4; double * fd8;long double * fd16;  };
+      union { float * fd4; double * fd8; long double * fd16; };
       as4 = (float *) array_ghost;
       fd4 = (float *) field_ghost;
       
@@ -561,9 +563,12 @@ template<class T> size_t FieldFace::store_
 ( T * ghost, const T * array,
   int m3[3], int n3[3],int i3[3], bool accumulate) throw()
 {
-#define FORTRAN_STORE
 
 #ifdef FORTRAN_STORE
+  const bool use_fortran_store = true;
+#else  
+  const bool use_fortran_store = false;
+#endif
 
   // This is to get around a bug on SDSC Comet where this function
   // crashes with -O3 (See bugzilla report #90)
@@ -586,53 +591,57 @@ template<class T> size_t FieldFace::store_
 
   int iaccumulate = accumulate ? 1 : 0;
 
-  if (sizeof(T)==sizeof(float)) {
-    FORTRAN_NAME(field_face_store_4)(ghost_4 + im,   array_4, m3,n3,
-				     &iaccumulate);
-  } else if (sizeof(T)==sizeof(double)) {
-    FORTRAN_NAME(field_face_store_8)(ghost_8 + im,   array_8, m3,n3,
-				     &iaccumulate);
-  } else if (sizeof(T)==sizeof(long double)) {
-    FORTRAN_NAME(field_face_store_16)(ghost_16 + im, array_16, m3,n3,
-				      &iaccumulate);
-  } else {
-    ERROR1 ("FieldFace::store_()",
-	   "unknown float precision sizeof(T) = %lu\n",sizeof(T));
-  }
+  if (use_fortran_store &&
+      (sizeof(T) != sizeof(long double)) ) {
 
-#else
-
-  if (accumulate) {
-    // add values
-    for (int iz=0; iz <n3[2]; iz++)  {
-      int kz = iz+i3[2];
-      for (int iy=0; iy < n3[1]; iy++) {
-	int ky = iy+i3[1];
-	for (int ix=0; ix < n3[0]; ix++) {
-	  int kx = ix+i3[0];
-	  int index_array = ix + n3[0]*(iy + n3[1] * iz);
-	  int index_field = kx + m3[0]*(ky + m3[1] * kz);
-	  ghost[index_field] += array[index_array];
-	}
-      }
+    if (sizeof(T)==sizeof(float)) {
+      FORTRAN_NAME(field_face_store_4)(ghost_4 + im,   array_4, m3,n3,
+                                       &iaccumulate);
+    } else if (sizeof(T)==sizeof(double)) {
+      FORTRAN_NAME(field_face_store_8)(ghost_8 + im,   array_8, m3,n3,
+                                       &iaccumulate);
+      // SUSPECTED ERROR IN COMPILER: seg fault for quad test in
+      // test_FieldFace
+      //
+      //  } else if (sizeof(T)==sizeof(long double)) {
+      //    FORTRAN_NAME(field_face_store_16)(ghost_16 + im, array_16, m3,n3,
+      //				      &iaccumulate);
+    } else {
+      ERROR1 ("FieldFace::store_()",
+              "unknown float precision sizeof(T) = %lu\n",sizeof(T));
     }
   } else {
-    // copy values
-    for (int iz=0; iz <n3[2]; iz++)  {
-      int kz = iz+i3[2];
-      for (int iy=0; iy < n3[1]; iy++) {
-	int ky = iy+i3[1];
-	for (int ix=0; ix < n3[0]; ix++) {
-	  int kx = ix+i3[0];
-	  int index_array = ix + n3[0]*(iy + n3[1] * iz);
-	  int index_field = kx + m3[0]*(ky + m3[1] * kz);
-	  ghost[index_field] = array[index_array];
-	}
+
+    if (accumulate) {
+      // add values
+      for (int iz=0; iz <n3[2]; iz++)  {
+        int kz = iz+i3[2];
+        for (int iy=0; iy < n3[1]; iy++) {
+          int ky = iy+i3[1];
+          for (int ix=0; ix < n3[0]; ix++) {
+            int kx = ix+i3[0];
+            int index_array = ix + n3[0]*(iy + n3[1] * iz);
+            int index_field = kx + m3[0]*(ky + m3[1] * kz);
+            ghost[index_field] += array[index_array];
+          }
+        }
+      }
+    } else {
+      // copy values
+      for (int iz=0; iz <n3[2]; iz++)  {
+        int kz = iz+i3[2];
+        for (int iy=0; iy < n3[1]; iy++) {
+          int ky = iy+i3[1];
+          for (int ix=0; ix < n3[0]; ix++) {
+            int kx = ix+i3[0];
+            int index_array = ix + n3[0]*(iy + n3[1] * iz);
+            int index_field = kx + m3[0]*(ky + m3[1] * kz);
+            ghost[index_field] = array[index_array];
+          }
+        }
       }
     }
   }
-
-#endif
 
   return (sizeof(T) * n3[0] * n3[1] * n3[2]);
 

@@ -134,7 +134,7 @@ char * FieldData::values
 (const FieldDescr * field_descr,
  int id_field, int index_history ) throw ()
 {
-  char * values = 0;
+  char * values = nullptr;
 
   if (id_field >= 0) {
 

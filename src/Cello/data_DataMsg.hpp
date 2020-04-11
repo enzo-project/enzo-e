@@ -8,6 +8,7 @@
 #ifndef DATA_DATA_MSG_HPP
 #define DATA_DATA_MSG_HPP
 
+class FluxData;
 class ParticleData;
 class FieldData;
 class FieldFace;
@@ -19,13 +20,14 @@ public: // interface
   static long counter[CONFIG_NODE_SIZE];
 
   DataMsg() 
-    : field_face_   (NULL),
-      field_data_   (NULL),
-      particle_data_(NULL),
+    : field_face_(nullptr),
       field_face_delete_   (false),
+      field_data_(nullptr),
       field_data_delete_   (false),
-      particle_data_delete_(false)
-      
+      particle_data_(nullptr),
+      particle_data_delete_(false),
+      flux_data_(nullptr),
+      flux_data_delete_(false)
   {
     ++counter[cello::index_static()]; 
   }
@@ -36,15 +38,19 @@ public: // interface
     
     if (field_face_delete_) {
       delete field_face_;
-      field_face_ = NULL;
+      field_face_ = nullptr;
     }
     if (field_data_delete_) {
       delete field_data_;
-      field_data_ = NULL;
+      field_data_ = nullptr;
     }
     if (particle_data_delete_) {
       delete particle_data_;
-      particle_data_ = NULL;
+      particle_data_ = nullptr;
+    }
+    if (flux_data_delete_) {
+      delete flux_data_;
+      flux_data_ = nullptr;
     }
   }
 
@@ -103,7 +109,24 @@ public: // interface
   /// Delete the ParticleData object
   void delete_particle_data  () 
   { 
-    delete particle_data_; particle_data_ = NULL; 
+    delete particle_data_; particle_data_ = nullptr; 
+  }
+
+  /// Return the FluxData
+  FluxData * flux_data () 
+  { return flux_data_; }
+
+  /// Set the FluxData object
+  void set_flux_data  (FluxData * flux_data, bool is_new) 
+  {
+    flux_data_ = flux_data; 
+    flux_data_delete_ = is_new;
+  }
+
+  /// Delete the FluxData object
+  void delete_flux_data  () 
+  { 
+    delete flux_data_; flux_data_ = nullptr; 
   }
 
   /// Return the FieldData
@@ -136,12 +159,17 @@ public: // interface
   /// Debugging
   void print ()
   {
-    CkPrintf ("%d %p TRACE_DATA_MSG field_face_    = %p\n",CkMyPe(),this,field_face_);
-    CkPrintf ("%d %p TRACE_DATA_MSG field_data_    = %p\n",CkMyPe(),this,field_data_);
-    CkPrintf ("%d %p TRACE_DATA_MSG particle_data_ = %p\n",CkMyPe(),this,particle_data_);
-    CkPrintf ("%d %p TRACE_DATA_MSG field_face_delete_    = %d\n",CkMyPe(),this,field_face_delete_);
-    CkPrintf ("%d %p TRACE_DATA_MSG field_data_delete_    = %d\n",CkMyPe(),this,field_data_delete_);
-    CkPrintf ("%d %p TRACE_DATA_MSG particle_data_delete_ = %d\n",CkMyPe(),this,particle_data_delete_);
+    const int ip=CkMyPe();
+    char buf[81];
+    snprintf (buf,80,"%d %p TRACE_DATA_MSG TRACE_DATA_MSG",ip,this);
+    CkPrintf ("%s field_face_    = %p\n",buf,field_face_);
+    CkPrintf ("%s field_data_    = %p\n",buf,field_data_);
+    CkPrintf ("%s particle_data_ = %p\n",buf,particle_data_);
+    CkPrintf ("%s particle_data_delete_ = %d\n",buf,particle_data_delete_);
+    CkPrintf ("%s flux_data_         = %p\n",buf,flux_data_);
+    CkPrintf ("%s flux_data_delete   = %d\n",buf,flux_data_delete_);
+    CkPrintf ("%s field_face_delete_ = %d\n",buf,field_face_delete_);
+    CkPrintf ("%s field_data_delete_ = %d\n",buf,field_data_delete_);
     fflush(stdout);
 
   }
@@ -152,6 +180,8 @@ protected: // attributes
 
   /// Field Face Data
   FieldFace * field_face_;
+  /// Whethere FieldFace data should be deleted in destructor
+  bool field_face_delete_;
 
   /// Field data
   union {
@@ -163,18 +193,18 @@ protected: // attributes
     char * field_array_;
 
   };
+  /// Whethere FieldData data should be deleted in destructor
+  bool field_data_delete_;
   
   /// Particle data
   ParticleData * particle_data_;
-
-  /// Whethere FieldFace data should be deleted in destructor
-  bool field_face_delete_;
-
-  /// Whethere FieldData data should be deleted in destructor
-  bool field_data_delete_;
-
-  /// Whethere FieldFace data should be deleted in destructor
+  /// Whethere Particle data should be deleted in destructor
   bool particle_data_delete_;
+
+  /// Flux data
+  FluxData * flux_data_;
+  /// Whether Flux data should be deleted in destructor
+  bool flux_data_delete_;
 
 };
 

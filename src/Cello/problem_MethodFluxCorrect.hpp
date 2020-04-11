@@ -40,9 +40,12 @@ public: // interface
     Method::pup(p);
     p | ir_pre_;
     p | group_;
+    p | field_sum_;
+    p | field_sum_0_;
   };
 
-  void compute_continue ( Block * block) throw();
+  void compute_continue_refresh ( Block * block) throw();
+  void compute_continue_sum_fields ( Block * block, CkReductionMsg * msg) throw();
 
 public: // virtual functions
 
@@ -62,6 +65,9 @@ protected: // attributes
   int ir_pre_;
   /// Field group to apply flux-correction to
   std::string group_;
+
+  std::vector<long double> field_sum_;
+  std::vector<long double> field_sum_0_;
 };
 
 
