@@ -70,7 +70,6 @@ bool contains_item_(std::vector<std::string> names, std::string item)
 
 //----------------------------------------------------------------------
 
-typedef std::tuple<std::string, FieldCat, bool> FT_row;
 // Runtime function to construct a dynamic version of FIELD_TABLE
 // It may make sense down the road to cache this
 std::map<std::string,FT_row> get_dynamic_table_(std::vector<std::string> &keys)
@@ -86,30 +85,25 @@ std::map<std::string,FT_row> get_dynamic_table_(std::vector<std::string> &keys)
     }
   FIELD_TABLE
   #undef ENTRY
-    return out;
+  return out;
 }
 
 //----------------------------------------------------------------------
 
-std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_quantities
-() const
+EnzoCenteredFieldRegistry::EnzoCenteredFieldRegistry()
 {
-  std::vector<std::string> keys;
-  get_dynamic_table_(keys);
-  return keys;
+  field_table_ = get_dynamic_table_(table_keys_);
 }
 
 //----------------------------------------------------------------------
 
-std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_fields
-() const
+std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_fields()
+  const
 {
-  std::vector<std::string> keys;
-  std::map<std::string,FT_row> table = get_dynamic_table_(keys);
   std::vector<std::string> out;
-  for(auto const& key: keys) {
+  for(auto const& key: table_keys_) {
     std::string quantity_name = key;
-    if (std::get<0>(table[key]) == "SCALAR"){
+    if (std::get<0>(field_table_.at(key)) == "SCALAR"){
       out.push_back(quantity_name);
     } else{
       out.push_back(quantity_name + std::string("_x"));
@@ -125,12 +119,34 @@ std::vector<std::string> EnzoCenteredFieldRegistry::get_registered_fields
 void EnzoCenteredFieldRegistry::check_known_quantity_names
 (const std::vector<std::string> names) const
 {
-  std::vector<std::string> known_names = get_registered_quantities();
   for(auto const& name: names) {
-    if (!contains_item_(known_names, name)){
+    if (!contains_item_(table_keys_, name)){
       ERROR1("EnzoCenteredFieldRegistry::check_known_names",
 	     "%s is not a registered name", name.c_str());
     }
+  }
+}
+
+//----------------------------------------------------------------------
+
+bool EnzoCenteredFieldRegistry::quantity_properties
+(std::string name, bool *vector_quantity, FieldCat *category,
+ bool *actively_advected) const
+{
+  if (contains_item_(table_keys_, name)){
+    FT_row row = field_table_.at(name);
+    if (vector_quantity){
+      *vector_quantity = ("VECTOR" == std::get<0>(row));
+    }
+    if (category){
+      *category = std::get<1>(row);
+    }
+    if (actively_advected){
+      *actively_advected = std::get<2>(row);
+    }
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -194,8 +210,8 @@ void EnzoCenteredFieldRegistry::prepare_lut_
 
   // We are going to do this without macros for simplicity
   // This is not necessarily the most efficient way to do things
-  std::vector<std::string> keys;
-  std::map<std::string, FT_row> table = get_dynamic_table_(keys);
+  std::vector<std::string> keys = table_keys_;
+  std::map<std::string, FT_row> table = field_table_;
 
   for(auto const& name: keys) {
     std::string math_type;
@@ -301,8 +317,8 @@ EnzoAdvectionFieldLUT EnzoCenteredFieldRegistry::prepare_advection_lut
 
   EnzoAdvectionFieldLUT out;
 
-  std::vector<std::string> keys;
-  std::map<std::string,FT_row> table = get_dynamic_table_(keys);
+  std::vector<std::string> keys = table_keys_;
+  std::map<std::string,FT_row> table = field_table_;
 
   // define a lambda function to use while iterating over the entries of out
   auto fn = [quantity_names, flagged_quantities, table,
@@ -310,7 +326,6 @@ EnzoAdvectionFieldLUT EnzoCenteredFieldRegistry::prepare_advection_lut
 	     &specific_index, &flag_specific_index,
 	     &other_index, &flag_other_index](std::string name, int &val)
     {
-      
       std::string quantity_name = determine_quantity_name_(name);
 
       if (!contains_item_(quantity_names, quantity_name)){

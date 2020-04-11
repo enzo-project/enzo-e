@@ -9,6 +9,8 @@
 // The main reason this is defined is to allow for easy reuse between different
 // methods. (This makes use of the EnzoAdvectionFieldLUT struct)
 
+#include <tuple>
+
 #ifndef ENZO_ENZO_INTEGRABLE_UPDATE_HPP
 #define ENZO_ENZO_INTEGRABLE_UPDATE_HPP
 class EnzoIntegrableUpdate : public PUP::able
@@ -41,12 +43,11 @@ public: // interface
   void pup (PUP::er &p)
   {
     PUP::able::pup(p);
-    p|integrable_groups_;
-    if (p.isUnpacking()){
-      // avoiding PUPing lookup table
-      setup_lut_();
-    }
+    p|integrable_grouping_items_;
+    p|first_specific_index_;
+    p|density_index_;
     p|passive_groups_;
+    p|combined_integrable_groups_;
   }
 
   /// Iterates through all fields in `dUcons_group` that are included in groups
@@ -112,17 +113,9 @@ public: // interface
 			 Grouping &out_conserved_passive_scalar,
 			 EnzoEquationOfState *eos, int stale_depth) const;
 
-  /// provides a const vector of the names of registered integrable groups
-  const std::vector<std::string> integrable_groups() const throw()
-  { return integrable_groups_; }
-
-  /// provides a const vector of the names of registered passive groups
-  const std::vector<std::string> passive_groups() const throw()
-  { return passive_groups_; }
-
   /// provides a const vector of all integrable and passively advected scalars
-  const std::vector<std::string> combined_integrable_groups
-  (bool omit_flagged = true) const throw();
+  const std::vector<std::string> combined_integrable_groups() const throw()
+  { return combined_integrable_groups_; }
 
 private:
 
@@ -136,33 +129,35 @@ private:
 			       Grouping &out_conserved_passive_scalar,
 			       int stale_depth) const;
 
-private: //methods
-
-  /// Helper function that simply sets up the lookup table
-  void setup_lut_();
+  /// Constructs an array of instances of EFlt3DArray based on the data stored
+  /// within combined_integrable_groups_
+  /// @param block The mesh block from which data will be loaded
+  /// @param grouping Reference to a grouping that includes groups named for
+  ///   all registerred quantities. The data is actually loaded from the fields
+  ///   in block with names matching the relevant field names specified in this
+  ///   object.
+  /// @param stale_depth indicates the current stale_depth for the loaded
+  ///   quanties.
+  EFlt3DArray* load_integrable_quantites_(Block *block, Grouping & grouping,
+					  int stale_depth) const;
 
 private: // attributes
-  
-  /// Names of the quantities to advect
-  std::vector<std::string> integrable_groups_;
 
-  /// struct lookup-table that maps integrable primitive field names to indices
-  EnzoAdvectionFieldLUT lut_;
-
-  /// Number of integrable primitive fields in lut_
-  int nfields_;
-
-  /// Indices used to iterate over conserved, specific, other categorized
-  /// quantities and stop
-  int conserved_start_;
-  int conserved_stop_;
-  int specific_start_;
-  int specific_stop_;
-  int other_start_;
-  int other_stop_;
+  /// Holds group-index pairs used to load each field representing
+  /// integrable quantities from a Grouping object. Conserved quantities are
+  /// always listed before the specific quantites.
+  std::vector<std::pair<std::string,int>> integrable_grouping_items_;
+  /// first index of integrable_grouping_items_ corresponding to specific
+  /// quantities 
+  std::size_t first_specific_index_;
+  /// index of integrable_grouping_items_ corresponding to density
+  std::size_t density_index_;
 
   /// Names of the passively advected groups of fields (e.g. colours)
   std::vector<std::string> passive_groups_;
+
+  /// Name of all integrable quantities and passively advected scalars
+  std::vector<std::string> combined_integrable_groups_;
 
 };
 

@@ -79,8 +79,8 @@ void check_recon_integ_overlap_(Grouping &reconstructable_group,
   std::vector<std::string> common_groups = {"density", "velocity", "bfield"};
 
   // we also expect overlap with the passive scalars
-  EnzoCenteredFieldRegistry reg;
-  std::vector<std::string> scalar_groups = reg.passive_scalar_group_names();
+  std::vector<std::string> scalar_groups =
+    EnzoCenteredFieldRegistry::passive_scalar_group_names();
   common_groups.insert(common_groups.end(), scalar_groups.begin(),
 		       scalar_groups.end());
     
@@ -391,8 +391,8 @@ void EnzoEOSIdeal::copy_passively_advected_fields_
 (EnzoFieldArrayFactory &array_factory, Grouping &origin_group,
  Grouping &destination_group, int reconstruction_axis) const
 {
-  EnzoCenteredFieldRegistry registry;
-  std::vector<std::string> group_names = registry.passive_scalar_group_names();
+  std::vector<std::string> group_names =
+    EnzoCenteredFieldRegistry::passive_scalar_group_names();
   for (unsigned int i=0;i<group_names.size();i++){
     std::string group_name = group_names[i];
     int num_fields = origin_group.size(group_name);

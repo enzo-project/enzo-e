@@ -158,6 +158,8 @@ void unary_advec_struct_for_each_(AdvectStruct &obj, Function fn){
   #undef ENTRY
 }
 
+//----------------------------------------------------------------------
+
 class EnzoAdvectionFieldLUT{
 
   /// @class    EnzoAdvectionFieldLUT
@@ -218,6 +220,12 @@ void print_looked_up_vals(const EnzoAdvectionFieldLUT lut,
 
 //----------------------------------------------------------------------
 
+/// @typedef FT_row
+/// @brief The type of the of the tuple holding the FIELD_TABLE in memory
+typedef std::tuple<std::string, FieldCat, bool> FT_row;
+
+//----------------------------------------------------------------------
+
 class EnzoCenteredFieldRegistry
 {
   /// @class    EnzoCenteredFieldRegistry
@@ -236,18 +244,28 @@ class EnzoCenteredFieldRegistry
 
 public:
 
+  EnzoCenteredFieldRegistry();
+
   // some utility methods - some of these are called in more important methods
   // These are not particularly well optimized
 
-  /// Returns a vector of registered quantities
-  std::vector<std::string> get_registered_quantities() const;
+  /// Returns a vector of registered quantities.
+  std::vector<std::string> get_registered_quantities() const
+  { return table_keys_; }
 
   /// Returns the vector of registered field names
   std::vector<std::string> get_registered_fields() const;
-  
+
   /// Checks that that the quantity names are in FIELD_TABLE. If not then,
   /// raises an error.
   void check_known_quantity_names(const std::vector<std::string> names) const;
+
+  /// provides the quantity properties listed in FIELD_TABLE (if present)
+  ///
+  /// returns true when successful (i.e. quantity is actually included in the
+  /// table) and false when unsuccesful
+  bool quantity_properties(std::string name, bool* vector_quantity,
+			   FieldCat* category, bool* actively_advected) const;
 
   // more important methods:
   
@@ -321,10 +339,8 @@ public:
   ///
   /// To register new names add entry to the static constant vector variable
   /// called passive_group_names
-  std::vector<std::string> passive_scalar_group_names() const
-  {
-    return passive_group_names;
-  }
+  static std::vector<std::string> passive_scalar_group_names()
+  { return passive_group_names; }
 
   /// Constructs an array of instances of EFlt3DArray where each instance holds
   /// the field data of the corresponding field in lut.
@@ -384,6 +400,14 @@ private:
 		    int &specific_start, int &specific_stop,
 		    int &other_start, int &other_stop, int &nfields,
 		    const std::vector<std::string> flagged_quantities) const;
+
+private: // attributes
+
+  /// representation of FIELD_TABLE in memory
+  std::map<std::string, FT_row> field_table_;
+
+  /// vector of keys for field_table_;
+  std::vector<std::string> table_keys_;
 };
 
 #endif /* ENZO_ENZO_CENTERED_FIELD_REGISTRY_HPP */

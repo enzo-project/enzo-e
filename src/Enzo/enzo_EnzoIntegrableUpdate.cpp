@@ -8,23 +8,72 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
+void append_grouping_pairs_(std::vector<std::string> integrable_groups,
+			    FieldCat target_cat, std::size_t *density_index,
+			    EnzoCenteredFieldRegistry &registry,
+			    std::vector<std::pair<std::string,int>> &pair_vec)
+{
+  int rank = cello::rank();
+  for (std::string name : integrable_groups){
+    bool vector_quantity, actively_advected;
+    FieldCat category;
+    registry.quantity_properties(name, &vector_quantity, &category,
+				 &actively_advected);
+    // Sanity Check
+    ASSERT1("append_grouping_pairs_",
+	    ("\"%s\" should not be listed as an integrable quantity because "
+	     "it is not actively advected."),
+	    name.c_str(), actively_advected);
+
+    if (category != target_cat){
+      ASSERT1("append_grouping_pairs_",
+	      ("Can't handle the integrable \"%s\" quantity because it has a "
+	       "field category of FieldCat::other"),
+	      name.c_str(), category != FieldCat::other);
+      continue;
+    } else if ((density_index != NULL) && (name == "density")){
+      *density_index = pair_vec.size();
+    }
+
+    int nfields = vector_quantity ? 3 : 1;
+    for (int i = 0; i < nfields; i++){
+      std::pair<std::string,int> pair(name,i);
+      pair_vec.push_back(pair);
+    }
+  }
+}
+
 //----------------------------------------------------------------------
 
 EnzoIntegrableUpdate::EnzoIntegrableUpdate
 (std::vector<std::string> integrable_groups, bool skip_B_update,
  std::vector<std::string> passive_groups) throw()
 {
-  integrable_groups_ = integrable_groups;
   passive_groups_ = passive_groups;
 
   if (skip_B_update){
     // remove bfield group from integrable_groups (if present)
     std::string target("bfield");
-    integrable_groups_.erase(std::remove(integrable_groups_.begin(),
-					 integrable_groups_.end(), target),
-			     integrable_groups_.end());
+    integrable_groups.erase(std::remove(integrable_groups.begin(),
+					integrable_groups.end(), target),
+			    integrable_groups.end());
   }
-  setup_lut_();
+
+  // assemble combined_integrable_groups_
+  auto contains = [](const std::vector<std::string> &vec,
+		     const std::string &value)
+  { return std::find(vec.cbegin(),vec.cend(), value) != vec.cend(); };
+
+  for (const std::string& elem : integrable_groups){
+    if (!contains(combined_integrable_groups_, elem)) {
+      combined_integrable_groups_.push_back(elem);
+    }
+  }
+  for (const std::string& elem : passive_groups_){
+    if (!contains(combined_integrable_groups_, elem)) {
+      combined_integrable_groups_.push_back(elem);
+    }
+  }
 
   // sanity check:
   std::vector<std::string>::size_type num_unique_groups;
@@ -32,41 +81,20 @@ EnzoIntegrableUpdate::EnzoIntegrableUpdate
   ASSERT("EnzoIntegrableUpdate",
 	 ("group names appear more than once in integrable_groups or "
 	  "passive_groups"),
-	 num_unique_groups == (integrable_groups_.size() +
+	 num_unique_groups == (integrable_groups.size() +
 			       passive_groups_.size()) );
-}
 
-//----------------------------------------------------------------------
-
-void EnzoIntegrableUpdate::setup_lut_(){
-  EnzoCenteredFieldRegistry registry;
-  lut_ = registry.prepare_advection_lut(integrable_groups_,
-					conserved_start_, conserved_stop_,
-					specific_start_, specific_stop_,
-				        other_start_, other_stop_, nfields_);
-
-  ASSERT("EnzoMethodMHDVlct::update_quantities_",
-	 "not equipped to handle fields classified as other",
-	 other_start_ == other_stop_);
-}
-
-//----------------------------------------------------------------------
-
-const std::vector<std::string> EnzoIntegrableUpdate::combined_integrable_groups
-(bool omit_flagged) const throw()
-{
-    auto contains = [](const std::vector<std::string> &vec,
-			const std::string &value) -> bool
-      { return std::find(vec.cbegin(),vec.cend(), value) != vec.cend(); };
-
-    std::vector<std::string> out;
-    for (const std::string& elem : integrable_groups_){
-      if (!contains(out, elem)) { out.push_back(elem); }
-    }
-    for (const std::string& elem : passive_groups_){
-      if (!contains(out, elem)) { out.push_back(elem); }
-    }
-    return out;
+  // prepare integrable_grouping_items_
+  ASSERT("EnzoIntegrableUpdate",
+	 ("\"density\" must be a registered integrable group."),
+	 contains(integrable_groups, "density"));
+  // First, add conserved quantities to integrable_grouping_items_
+  EnzoCenteredFieldRegistry reg;
+  append_grouping_pairs_(integrable_groups, FieldCat::conserved,
+			 &density_index_, reg, integrable_grouping_items_);
+  first_specific_index_ = integrable_grouping_items_.size();
+  append_grouping_pairs_(integrable_groups, FieldCat::specific,
+			 NULL, reg, integrable_grouping_items_);
 }
 
 //----------------------------------------------------------------------
@@ -75,7 +103,7 @@ void EnzoIntegrableUpdate::clear_dUcons_group(Block *block,
 					      Grouping &dUcons_group,
 					      enzo_float value) const
 {
-  const std::vector<std::string> group_names =combined_integrable_groups(true);
+  const std::vector<std::string> group_names =combined_integrable_groups();
   EnzoFieldArrayFactory array_factory(block, 0);
 
   for (const std::string& name : group_names){
@@ -104,7 +132,7 @@ void EnzoIntegrableUpdate::accumulate_flux_component(Block *block,
 						     Grouping &dUcons_group,
 						     int stale_depth) const
 {
-  const std::vector<std::string> group_names =combined_integrable_groups(true);
+  const std::vector<std::string> group_names =combined_integrable_groups();
   EnzoFieldArrayFactory array_factory(block, stale_depth);
   EnzoPermutedCoordinates coord(dim);
 
@@ -153,6 +181,21 @@ void EnzoIntegrableUpdate::accumulate_flux_component(Block *block,
 
 //----------------------------------------------------------------------
 
+EFlt3DArray* EnzoIntegrableUpdate::load_integrable_quantites_
+(Block *block, Grouping & grouping, int stale_depth) const
+{
+  std::size_t nfields = integrable_grouping_items_.size();
+  EFlt3DArray* arr = new EFlt3DArray[nfields];
+  EnzoFieldArrayFactory array_factory(block, stale_depth);
+  for (std::size_t i = 0; i<nfields; i++){
+    std::pair<std::string, int> pair = integrable_grouping_items_[i];
+    arr[i] = array_factory.from_grouping(grouping, pair.first, pair.second);
+  }
+  return arr;
+}
+
+//----------------------------------------------------------------------
+
 void EnzoIntegrableUpdate::update_quantities
 (Block *block, Grouping &initial_integrable_group, Grouping &dUcons_group,
  Grouping &out_integrable_group, Grouping &out_conserved_passive_scalar,
@@ -168,34 +211,33 @@ void EnzoIntegrableUpdate::update_quantities
 
   EnzoCenteredFieldRegistry registry;
   EFlt3DArray *cur_prim, *dU, *out_prim;
-  cur_prim = registry.load_array_of_fields(block, lut_, nfields_,
-					   initial_integrable_group,
-					   stale_depth);
-  dU       = registry.load_array_of_fields(block, lut_, nfields_,
-					   dUcons_group, stale_depth);
-  out_prim = registry.load_array_of_fields(block, lut_, nfields_,
-					   out_integrable_group, stale_depth);
+  cur_prim = load_integrable_quantites_(block, initial_integrable_group,
+					stale_depth);
+  dU       = load_integrable_quantites_(block, dUcons_group, stale_depth);
+  out_prim = load_integrable_quantites_(block, out_integrable_group,
+					stale_depth);
+  std::size_t nfields = integrable_grouping_items_.size();
 
-  for (int iz = 1; iz < (cur_prim[lut_.density].shape(0) - 1); iz++) {
-    for (int iy = 1; iy < (cur_prim[lut_.density].shape(1) - 1); iy++) {
-      for (int ix = 1; ix < (cur_prim[lut_.density].shape(2) - 1); ix++) {
+  for (int iz = 1; iz < (cur_prim[density_index_].shape(0) - 1); iz++) {
+    for (int iy = 1; iy < (cur_prim[density_index_].shape(1) - 1); iy++) {
+      for (int ix = 1; ix < (cur_prim[density_index_].shape(2) - 1); ix++) {
 
 	// get the initial density
-	enzo_float old_rho = cur_prim[lut_.density](iz,iy,ix);
+	enzo_float old_rho = cur_prim[density_index_](iz,iy,ix);
 
 	// now update the integrable primitives that are conserved
-	for (int i = conserved_start_; i < conserved_stop_; i++){
+	for (std::size_t i = 0; i < first_specific_index_; i++){
 	  out_prim[i](iz,iy,ix) = cur_prim[i](iz,iy,ix) + dU[i](iz,iy,ix);
 	}
 
 	// possibly place a floor on the updated density.
-	enzo_float new_rho = out_prim[lut_.density](iz,iy,ix);
+	enzo_float new_rho = out_prim[density_index_](iz,iy,ix);
 	new_rho = EnzoEquationOfState::apply_floor(new_rho, density_floor);
-	out_prim[lut_.density](iz,iy,ix) = new_rho;
+	out_prim[density_index_](iz,iy,ix) = new_rho;
 
 	// update the specific integrable primitives
 	enzo_float inv_new_rho = 1./new_rho;
-	for (int i = specific_start_; i < specific_stop_; i++){
+	for (std::size_t i = first_specific_index_; i < nfields; i++){
 	  out_prim[i](iz,iy,ix) =
 	    (cur_prim[i](iz,iy,ix) * old_rho + dU[i](iz,iy,ix)) * inv_new_rho;
 	}

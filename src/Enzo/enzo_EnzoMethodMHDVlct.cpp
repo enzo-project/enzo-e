@@ -114,11 +114,9 @@ void EnzoMethodMHDVlct::determine_quantities_
   }
 
   // Now to setup the list of passively advected group names
-
   // retrieve list of all possible group names of passively advected scalars
-  EnzoCenteredFieldRegistry registry;
-  std::vector<std::string> all_passive_group_names;
-  all_passive_group_names = registry.passive_scalar_group_names();
+  std::vector<std::string> all_passive_group_names =
+    EnzoCenteredFieldRegistry::passive_scalar_group_names();
 
   // We'll now iterate through all known possible groups names that could
   // contain passive scalars and check to see if any fields were labelled as
@@ -890,7 +888,7 @@ void EnzoMethodMHDVlct::allocate_temp_fields_
   // fields (this exlusion is implicitly handled integrable_updater_)
   prep_temp_field_grouping_
     (field, *primitive_group_,
-     integrable_updater_->combined_integrable_groups(true),
+     integrable_updater_->combined_integrable_groups(),
      dUcons_group, "dUcons_",0,0,0);
 
   // Prepare the temporary primitive fields (used to store values at half dt)
