@@ -176,7 +176,7 @@ void EnzoInitialBurkertBodenheimer::enforce_block
   std::fill_n(po,m,0.0);
   std::fill_n(ax,m,0.0);
   std::fill_n(vx,m,0.0);
-  if (metal) std::fill_n(metal,m,outer_metal_fraction*density);
+  if (metal) std::fill_n(metal,m,outer_metal_fraction*(density/density_ratio));
   if (rank >= 2) std::fill_n(ay,m,0.0);
   if (rank >= 2) std::fill_n(vy,m,0.0);
   if (rank >= 3) std::fill_n(az,m,0.0);
