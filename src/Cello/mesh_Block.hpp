@@ -602,7 +602,8 @@ public:
   /// Get restricted data from child when it is deleted
   void p_refresh_child (int n, char a[],int ic3[3]);
 
-  void p_method_flux_correct();
+  void p_method_flux_correct_refresh();
+  void r_method_flux_correct_sum_fields(CkReductionMsg * msg);
 
 protected:
 

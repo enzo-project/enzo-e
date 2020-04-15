@@ -18,20 +18,26 @@ Data::Data(int nx, int ny, int nz,
 	   ParticleDescr * particle_descr) throw ()
   : num_field_data_(num_field_data),
     field_data_(),
-    particle_data_()
+    particle_data_(),
+    flux_data_()
 {
   if (field_descr == nullptr)
     field_descr = cello::field_descr();
   if (particle_descr == nullptr)
     particle_descr = cello::particle_descr();
   
-  // Initialize field_data_[]
+  // Initialize field data
   field_data_.resize(num_field_data);
   for (size_t i=0; i<field_data_.size(); i++) {
     field_data_[i] = new FieldData (field_descr,nx,ny,nz);
   }
+  // Initialize particle data
   particle_data_ = new ParticleData;
   particle_data_->allocate(particle_descr);
+
+  // Initialize flux data
+  flux_data_ = new FluxData;
+  
   lower_[0] = xm;
   lower_[1] = ym;
   lower_[2] = zm;
@@ -48,13 +54,15 @@ Data::~Data() throw ()
   // Deallocate field_data_[]
   for (size_t i=0; i<field_data_.size(); i++) {
     delete field_data_[i];
-    field_data_[i] = 0;
+    field_data_[i] = nullptr;
   }
   num_field_data_ = 0;
 
   delete particle_data_;
+  particle_data_ = nullptr;
 
-  particle_data_ = 0;
+  delete flux_data_;
+  flux_data_ = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -147,4 +155,5 @@ void Data::copy_(const Data & data) throw()
     field_data_[i] = new FieldData (*(data.field_data_[i]));
   }
   particle_data_ = new ParticleData (*data.particle_data_);
+  flux_data_ = new FluxData (*data.flux_data_);
 }

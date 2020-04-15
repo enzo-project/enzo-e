@@ -129,14 +129,31 @@ private: // attributes
 
   // NOTE: change pup() function whenever attributes change
 
+  // Face for which the fluxes are defined
   Face face_;
+
+  // Index of the conserved field the fluxes are associated with
   int index_field_;
+
+  // Dimensions of the fluxes array
   int mx_,my_,mz_;
+
+  // Size of the block face
   int nx_,ny_,nz_;
+
+  // Centering adjustment to flux array; same as FieldDescr
   int cx_,cy_,cz_;
+
+  // Ghost zone adjustment to flux array
   int gx_,gy_,gz_;
+
+  // Array of fluxes
   std::vector<double> fluxes_;
+
+  // Physical cell size associated with the fluxes
   double hx_,hy_,hz_;
+
+  // Time step associated with the fluxes
   double dt_;
 };
 
