@@ -53,6 +53,17 @@ EnzoMethodPpm::EnzoMethodPpm ()
   refresh->add_field("acceleration_x");
   refresh->add_field("acceleration_y");
   refresh->add_field("acceleration_z");
+
+  FieldDescr * field_descr = cello::field_descr();
+
+  // add all colour fields to refresh
+  for (int i = 0; i < field_descr->field_count(); i++){
+    std::string name = field_descr->field_name(i);
+    if (field_descr->groups()->is_in(name,"colour")){
+      refresh->add_field(name);
+    }
+  }
+
    // PPM parameters initialized in EnzoBlock::initialize()
 }
 
