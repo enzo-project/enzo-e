@@ -96,11 +96,11 @@ module enzo {
   PUPable EnzoReconstructorPLM<PLM_AthenaLimiter>;
 
   // EnzoRiemannHLLMHD
-  PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeedMHD>>;
+  PUPable EnzoRiemannImpl<HLLImpl<DavisWavespeed<MHDLUT>>>;
   // EnzoRiemannHLLE
-  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<false>>>;
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<HydroLUT>>>;
   // EnzoRiemannHLLEMHD
-  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<true>>>;
+  PUPable EnzoRiemannImpl<HLLImpl<EinfeldtWavespeed<MHDLUT>>>;
   PUPable EnzoRiemannImpl<HLLCImpl>; //EnzoRiemannHLLC
   PUPable EnzoRiemannImpl<HLLDImpl>; //EnzoRiemannHLLD
 

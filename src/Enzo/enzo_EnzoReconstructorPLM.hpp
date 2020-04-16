@@ -12,8 +12,8 @@
 #include <type_traits>
 
 /// @typedef limiter_function_call_signature
-/// @brief   This is the expected function call signature of the function call
-///          operator, `operator()`, expected for a `Limiter` functor that is
+/// @brief   This is the function call signature of the function call operator,
+///          `operator()`, that is expected for a `Limiter` functor that is
 ///          passed to `EnzoReconstructorPLM`.
 ///
 /// We expect the `operator()` method of a `Limiter` functor to be declared as:
@@ -51,8 +51,10 @@ typedef enzo_float (*limiter_function_call_signature)
 /// This macro is modified slightly modified from the answer provided at
 /// https://stackoverflow.com/a/16824239 . The particular answer that this is
 /// adapted from allows the required instance method to be inherited. It is
-/// used to help check that the the template argument of EnzoReconstructorPLM
-/// in order to generate more helpful error messages
+/// nominally used to define structs that can be used to explicitly check
+/// expectations about template arguments so that useful error messages can
+/// be provided for debugging.
+
 #define DEFINE_HAS_INSTANCE_METHOD(traitsName, func_name, signature)        \
   template<typename T>                                                      \
   class traitsName							    \
@@ -87,8 +89,9 @@ typedef enzo_float (*limiter_function_call_signature)
 
 //----------------------------------------------------------------------
 
-// define a struct to use at compile time to help make sure that the limiter
-// functor has a sane value.
+// define the class, has_limiter_function_call_operator, to use at compile time
+// to help make sure that the limiter functor has the
+// limiter_function_call_signature
 DEFINE_HAS_INSTANCE_METHOD(has_limiter_function_call_operator, operator(),
 			   limiter_function_call_signature);
 

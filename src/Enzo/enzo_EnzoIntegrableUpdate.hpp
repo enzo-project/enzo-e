@@ -6,9 +6,6 @@
 /// @brief    [\ref Enzo] Declaration of Enzo's Integrable Update class. This 
 /// is responsible for adding flux and sources terms to integrable quantities.
 
-// The main reason this is defined is to allow for easy reuse between different
-// methods. (This makes use of the EnzoAdvectionFieldLUT struct)
-
 #include <tuple>
 
 #ifndef ENZO_ENZO_INTEGRABLE_UPDATE_HPP

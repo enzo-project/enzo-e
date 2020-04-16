@@ -21,20 +21,17 @@ struct HLLCImpl
   /// @brief    [\ref Enzo] Encapsulates operations of HLLC approximate Riemann
   /// Solver. This should not be used with isothermal equations of state.
 public:
-  static int scratch_space_length(const int n_cons_keys) { return 0; }
 
-  static bool supports_bfields() { return false; }
+  using WaveSpeedFunctor = EinfeldtWavespeed<HydroLUT>;
+  using LUT = typename WaveSpeedFunctor::LUT;
 
-  static void calc_riemann_fluxes
-  (const enzo_float flux_l[], const enzo_float flux_r[],
-   const enzo_float prim_l[], const enzo_float prim_r[],
-   const enzo_float cons_l[], const enzo_float cons_r[],
-   const enzo_float pressure_l, const enzo_float pressure_r,
-   const EnzoAdvectionFieldLUT lut, const int n_keys,
-   const bool barotropic_eos, const enzo_float gamma,
-   const enzo_float isothermal_cs, const bool dual_energy,
-   const int iz, const int iy, const int ix, EFlt3DArray flux_arrays[],
-   enzo_float scratch_space[], enzo_float &vi_bar) throw()
+  earray<LUT> operator() (const earray<LUT> flux_l, const earray<LUT> flux_r,
+			  const earray<LUT> prim_l, const earray<LUT> prim_r,
+			  const earray<LUT> cons_l, const earray<LUT> cons_r,
+			  enzo_float pressure_l, enzo_float pressure_r,
+			  bool barotropic_eos, enzo_float gamma,
+			  enzo_float isothermal_cs,
+			  enzo_float &vi_bar) const noexcept
   {
 
     ASSERT("HLLCImpl::calc_riemann_fluxes",
@@ -42,8 +39,8 @@ public:
 	   !barotropic_eos);
 
     enzo_float cs_l,cs_r;
-    EinfeldtWavespeed<false> wave_speeds;
-    wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r, lut,
+    WaveSpeedFunctor wave_speeds;
+    wave_speeds(prim_l, prim_r, cons_l, cons_r, pressure_l, pressure_r,
 		gamma, &cs_r, &cs_l);
 
     enzo_float bm = std::fmin(cs_l, 0.0);
@@ -53,10 +50,12 @@ public:
     // for all cases because we need to correct the momentum and energy
     // flux along the contact.
 
-    enzo_float tl = pressure_l - (cs_l - prim_l[lut.velocity_i]) * prim_l[lut.density] * prim_l[lut.velocity_i];
-    enzo_float tr = pressure_r - (cs_r - prim_r[lut.velocity_i]) * prim_r[lut.density] * prim_r[lut.velocity_i];
-    enzo_float dl =  prim_l[lut.density] * (cs_l - prim_l[lut.velocity_i]);
-    enzo_float dr = -prim_r[lut.density] * (cs_r - prim_r[lut.velocity_i]);
+    enzo_float tl = (pressure_l - (cs_l - prim_l[LUT::velocity_i]) *
+                     prim_l[LUT::density] * prim_l[LUT::velocity_i]);
+    enzo_float tr = (pressure_r - (cs_r - prim_r[LUT::velocity_i]) *
+                     prim_r[LUT::density] * prim_r[LUT::velocity_i]);
+    enzo_float dl =  prim_l[LUT::density] * (cs_l - prim_l[LUT::velocity_i]);
+    enzo_float dr = -prim_r[LUT::density] * (cs_r - prim_r[LUT::velocity_i]);
     enzo_float q1 = 1.0 / (dl+dr);
     // cw is given by Toro (10.37)
     enzo_float cw = (tr - tl)*q1;
@@ -87,68 +86,58 @@ public:
 
 
     // Compute the left and right fluxes along the characteristics.
-    // For dual energy formalism, treat internal energy like an advected
-    // quantity (source term is handled separately)
+    // TODO: remove redundancy with precalculation of fluxes
 
-    enzo_float momentumi_l = cons_l[lut.velocity_i];
-    enzo_float momentumi_r = cons_r[lut.velocity_i];
+    enzo_float momentumi_l = cons_l[LUT::velocity_i];
+    enzo_float momentumi_r = cons_r[LUT::velocity_i];
 
     enzo_float dfl,dfr, ufl,ufr, vfl,vfr, wfl,wfr, efl,efr;
 
-    dfl = momentumi_l - bm*prim_l[lut.density];
-    dfr = momentumi_r - bp*prim_r[lut.density];
+    dfl = momentumi_l - bm*prim_l[LUT::density];
+    dfr = momentumi_r - bp*prim_r[LUT::density];
 
-    ufl = momentumi_l * (prim_l[lut.velocity_i] - bm) + pressure_l;
-    ufr = momentumi_r * (prim_r[lut.velocity_i] - bp) + pressure_r;
+    ufl = momentumi_l * (prim_l[LUT::velocity_i] - bm) + pressure_l;
+    ufr = momentumi_r * (prim_r[LUT::velocity_i] - bp) + pressure_r;
 
-    vfl = prim_l[lut.density]*prim_l[lut.velocity_j] * (prim_l[lut.velocity_i] - bm);
-    vfr = prim_r[lut.density]*prim_r[lut.velocity_j] * (prim_r[lut.velocity_i] - bp);
+    vfl = (prim_l[LUT::density] * prim_l[LUT::velocity_j] *
+           (prim_l[LUT::velocity_i] - bm));
+    vfr = (prim_r[LUT::density] * prim_r[LUT::velocity_j] *
+           (prim_r[LUT::velocity_i] - bp));
 
-    wfl = prim_l[lut.density]*prim_l[lut.velocity_k] * (prim_l[lut.velocity_i] - bm);
-    wfr = prim_r[lut.density]*prim_r[lut.velocity_k] * (prim_r[lut.velocity_i] - bp);
+    wfl = (prim_l[LUT::density] * prim_l[LUT::velocity_k] *
+           (prim_l[LUT::velocity_i] - bm));
+    wfr = (prim_r[LUT::density] * prim_r[LUT::velocity_k] *
+           (prim_r[LUT::velocity_i] - bp));
 
-    efl = (cons_l[lut.total_energy] * (prim_l[lut.velocity_i] - bm)
-	   + pressure_l*prim_l[lut.velocity_i]);
-    efr = (cons_r[lut.total_energy] * (prim_r[lut.velocity_i] - bp)
-	   + pressure_r*prim_r[lut.velocity_i]);
+    efl = (cons_l[LUT::total_energy] * (prim_l[LUT::velocity_i] - bm)
+	   + pressure_l * prim_l[LUT::velocity_i]);
+    efr = (cons_r[LUT::total_energy] * (prim_r[LUT::velocity_i] - bp)
+	   + pressure_r * prim_r[LUT::velocity_i]);
 
-    // internal energy (Gas energy) is treated like a passively advected
-    // quantity (like transverse velocity components and color fields)
-    enzo_float eint_fl, eint_fr;
-    if (dual_energy){
-       eint_fl = ((prim_l[lut.velocity_i]-bm) * prim_l[lut.internal_energy]
-		  * prim_l[lut.density]);
-       eint_fr = ((prim_r[lut.velocity_i]-bp) * prim_r[lut.internal_energy]
-		  * prim_r[lut.density]);
-    }
+
+    // originally, internal energy flux would be dealt with here (it's treated
+    // as a passively advected scalar). Now, it's handled separately
+
     // An aside: compute the interface velocity (that might be used to compute
     // the internal energy source term)
+    vi_bar = (sl * (prim_l[LUT::velocity_i] - bm) +
+	      sr * (prim_r[LUT::velocity_i] - bp));
 
-    vi_bar = (sl * (prim_l[lut.velocity_i] - bm) +
-	      sr * (prim_r[lut.velocity_i] - bp));
-
+    earray<LUT> fluxes;
     // compute HLLC Flux at interface (without diffusion)
-    flux_arrays[lut.density](iz,iy,ix) = sl*dfl + sr*dfr;
-    flux_arrays[lut.velocity_i](iz,iy,ix) = sl*ufl + sr*ufr;
-    flux_arrays[lut.velocity_j](iz,iy,ix) = sl*vfl + sr*vfr;
-    flux_arrays[lut.velocity_k](iz,iy,ix) = sl*wfl + sr*wfr;
-    flux_arrays[lut.total_energy](iz,iy,ix) = sl*efl + sr*efr;
-
-    if (dual_energy){
-      flux_arrays[lut.internal_energy](iz,iy,ix) = sl*eint_fl + sr*eint_fr;
-    }
+    fluxes[LUT::density] = sl*dfl + sr*dfr;
+    fluxes[LUT::velocity_i] = sl*ufl + sr*ufr;
+    fluxes[LUT::velocity_j] = sl*vfl + sr*vfr;
+    fluxes[LUT::velocity_k] = sl*wfl + sr*wfr;
+    fluxes[LUT::total_energy] = sl*efl + sr*efr;
 
     // Add the weighted contribution of the flux along the contact for
     // velocity_i and total_energy
     // (if you break 10.44 into 2 fractions, we are adding the right one)
-    flux_arrays[lut.velocity_i](iz,iy,ix) += (sm * cp);
-    flux_arrays[lut.total_energy](iz,iy,ix) += (sm * cp * cw);
+    fluxes[LUT::velocity_i] += (sm * cp);
+    fluxes[LUT::total_energy] += (sm * cp * cw);
 
-    // this is a quick-and-dirty solution - need to improve on this for cases
-    // when there aren't any magnetic fields
-    flux_arrays[lut.bfield_i](iz,iy,ix) = 0;
-    flux_arrays[lut.bfield_j](iz,iy,ix) = 0;
-    flux_arrays[lut.bfield_k](iz,iy,ix) = 0;
+    return fluxes;
   }
 
 };

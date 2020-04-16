@@ -176,17 +176,17 @@ def analyze_tests():
     # convergence (originally we were looking at the slope of convergence but
     # that allows the errors to be larger)
 
-    r.append(err_compare(1.6388526153060254e-07, 'fast',    1, 16))
-    r.append(err_compare(3.302538230280083e-08,  'fast',    1, 32))
+    r.append(err_compare(1.6388526155673674e-07, 'fast',    1, 16))
+    r.append(err_compare(3.3025382271121484e-08, 'fast',    1, 32))
 
-    r.append(err_compare(1.9272453566004204e-07, 'alfven',  1, 16))
-    r.append(err_compare(3.005870226064134e-08,  'alfven',  1, 32))
+    r.append(err_compare(1.9272453563753915e-07, 'alfven',  1, 16))
+    r.append(err_compare(3.005870212742488e-08,  'alfven',  1, 32))
 
-    r.append(err_compare(2.2373809965884764e-07, 'slow',    1, 16))
-    r.append(err_compare(4.4370276987885264e-08, 'slow',    1, 32))
+    r.append(err_compare(2.2373810026747072e-07, 'slow',    1, 16))
+    r.append(err_compare(4.4370252279799805e-08, 'slow',    1, 32))
 
-    r.append(err_compare(1.0021263484796443e-07, 'entropy', 1, 16))
-    r.append(err_compare(2.9194839696504568e-08, 'entropy', 1, 32))
+    r.append(err_compare(1.0021263485338544e-07, 'entropy', 1, 16))
+    r.append(err_compare(2.919483970686889e-08,  'entropy', 1, 32))
 
     # Check error between left and right propagating waves
     print("The following test has never passed in the history of this "
