@@ -479,7 +479,7 @@ void EnzoMethodGrackle::compute_ ( EnzoBlock * enzo_block) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodGrackle::timestep ( Block * block ) throw()
+double EnzoMethodGrackle::timestep ( Block * block ) const throw()
 {
   const EnzoConfig * config = enzo::config();
 
@@ -512,17 +512,39 @@ double EnzoMethodGrackle::timestep ( Block * block ) throw()
       delete_cooling_time = true;
     }
 
+    // the grackle_units_ member can't be used here since this method MUST be
+    // const-qualified (i.e. the values of member variables can't be changed)
+    code_units temp_grackle_units;
     grackle_field_data grackle_fields_;
 
-    setup_grackle_units(enzo_block,  &grackle_units_);
+    setup_grackle_units(enzo_block,  &temp_grackle_units);
     setup_grackle_fields(enzo_block, &grackle_fields_);
 
-    if (calculate_cooling_time(&grackle_units_, &grackle_fields_, cooling_time) == ENZO_FAIL) {
+    if (calculate_cooling_time(&temp_grackle_units, &grackle_fields_, cooling_time) == ENZO_FAIL) {
       ERROR("EnzoMethodGrackle::compute()",
       "Error in calculate_cooling_time.\n");
     }
 
-    for (int i = 0; i < size; i++) dt = std::min(enzo_float(dt), std::abs(cooling_time[i]));
+    const int rank = ((ngz == 1) ? ((ngy == 1) ? 1 : 2) : 3);
+
+    int zstart = (rank == 3) ? gz    : 0;
+    int zstop  = (rank == 3) ? ngz-gz : 1;
+
+    int ystart = (rank >= 2) ? gy    : 0;
+    int ystop  = (rank >= 2) ? ngy-gy : 1;
+
+    // make sure to exclude the ghost zone. Including them can cause issues
+    // There is no refresh before this method is called (at least during the
+    // very first cycle) - this can lead to timesteps of 0 or smaller.
+
+    for (int iz = zstart; iz < zstop; iz++) {
+      for (int iy = ystart; iy < ystop; iy++) {
+        for (int ix = gx; ix < ngx - gx; ix++) {
+          dt = std::min(enzo_float(dt),
+                        std::abs(cooling_time[ix + ngx * (iy + ngy * iz)]) );
+        }
+      }
+    }
 
     if (delete_cooling_time){
       delete [] cooling_time;
