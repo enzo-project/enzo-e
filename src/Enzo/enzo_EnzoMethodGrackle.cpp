@@ -525,23 +525,14 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
       "Error in calculate_cooling_time.\n");
     }
 
-    const int rank = ((ngz == 1) ? ((ngy == 1) ? 1 : 2) : 3);
-
-    int zstart = (rank == 3) ? gz    : 0;
-    int zstop  = (rank == 3) ? ngz-gz : 1;
-
-    int ystart = (rank >= 2) ? gy    : 0;
-    int ystop  = (rank >= 2) ? ngy-gy : 1;
-
-    // make sure to exclude the ghost zone. Including them can cause issues
-    // There is no refresh before this method is called (at least during the
-    // very first cycle) - this can lead to timesteps of 0 or smaller.
-
-    for (int iz = zstart; iz < zstop; iz++) {
-      for (int iy = ystart; iy < ystop; iy++) {
+    // make sure to exclude the ghost zone. Because there is no refresh before
+    // this method is called (at least during the very first cycle) - this can
+    // including ghost zones can lead to timesteps of 0
+    for (int iz = gz; iz < ngz - gz; iz++) {   // if rank < 3: gz = 0, ngz = 1
+      for (int iy = gy; iy < ngy - gy; iy++) { // if rank < 2: gy = 0, ngy = 1
         for (int ix = gx; ix < ngx - gx; ix++) {
-          dt = std::min(enzo_float(dt),
-                        std::abs(cooling_time[ix + ngx * (iy + ngy * iz)]) );
+	  int i = INDEX(ix, iy, iz, ngx, ngy);
+          dt = std::min(enzo_float(dt), std::abs(cooling_time[i]));
         }
       }
     }
@@ -556,7 +547,7 @@ double EnzoMethodGrackle::timestep ( Block * block ) const throw()
   }
 #endif
 
-  return dt;
+  return dt * courant_;
 }
 
 //----------------------------------------------------------------------
